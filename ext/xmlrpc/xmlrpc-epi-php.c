@@ -520,28 +520,40 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
                   unsigned long num_index;
                   zval** pIter;
                   char* my_key;
+                  HashTable *ht = NULL;
 
+                  ht = HASH_OF(val);
+                  if (ht && ht->nApplyCount > 1) {
+                      php_error_docref(NULL TSRMLS_CC, E_ERROR, "XML-RPC doesn't support circular references");
+                      return NULL;
+                  }
+                  
                   convert_to_array(val);
-
                   xReturn = XMLRPC_CreateVector(key, determine_vector_type(Z_ARRVAL_P(val)));
 
                   zend_hash_internal_pointer_reset(Z_ARRVAL_P(val));
-                  while(1) {
+                  while(zend_hash_get_current_data(Z_ARRVAL_P(val), (void**)&pIter) == SUCCESS) {
                      int res = my_zend_hash_get_current_key(Z_ARRVAL_P(val), &my_key, &num_index);
-                     if(res == HASH_KEY_IS_LONG) {
-                        if(zend_hash_get_current_data(Z_ARRVAL_P(val), (void**)&pIter) == SUCCESS) {
-                           XMLRPC_AddValueToVector(xReturn, PHP_to_XMLRPC_worker(0, *pIter, depth++));
-                        }
+                    
+                     switch (res) {
+                         case HASH_KEY_NON_EXISTANT:
+                             break;
+                         default:
+                              ht = HASH_OF(*pIter);
+                             if (ht) {
+                                 ht->nApplyCount++;
+                             }
+                             if (res == HASH_KEY_IS_LONG) {
+                                 XMLRPC_AddValueToVector(xReturn, PHP_to_XMLRPC_worker(0, *pIter, depth++));
+                             }
+                             else {
+                                 XMLRPC_AddValueToVector(xReturn, PHP_to_XMLRPC_worker(my_key, *pIter, depth++));
+                             }
+                             if (ht) {
+                                 ht->nApplyCount--;
+                             }
+                             break;
                      }
-                     else if(res == HASH_KEY_NON_EXISTANT) {
-                        break;
-                     }
-                     else if(res == HASH_KEY_IS_STRING) {
-                        if(zend_hash_get_current_data(Z_ARRVAL_P(val), (void**)&pIter) == SUCCESS) {
-                           XMLRPC_AddValueToVector(xReturn, PHP_to_XMLRPC_worker(my_key, *pIter, depth++));
-                        }
-                     }
-
                      zend_hash_move_forward(Z_ARRVAL_P(val));
                   }
                }
