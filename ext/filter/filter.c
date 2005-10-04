@@ -78,6 +78,7 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 function_entry filter_functions[] = {
 	PHP_FE(input_get, NULL)
 	PHP_FE(input_filters_list, NULL)
+	PHP_FE(input_has_variable, NULL)
 	PHP_FE(filter_data, NULL)
 	{NULL, NULL, NULL}
 };
@@ -373,6 +374,50 @@ static void php_zval_filter_recursive(zval *value, long filter, long flags, zval
 }
 /* }}} */
 
+#define FIND_SOURCE(a,t)                              \
+		array_ptr = IF_G(a);                          \
+		break;
+
+/* {{{ proto mixed input_has_variable(constant type, string variable_name)
+ */
+PHP_FUNCTION(input_has_variable)
+{
+	long        arg;
+	char       *var;
+	int         var_len;
+    zval      **tmp;
+	zval       *array_ptr = NULL;
+	HashTable  *hash_ptr;
+	int         found = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &arg, &var, &var_len) == FAILURE) {
+		return;
+	}
+
+	switch(arg) {
+		case PARSE_GET:     FIND_SOURCE(get_array,     TRACK_VARS_GET)
+		case PARSE_POST:    FIND_SOURCE(post_array,    TRACK_VARS_POST)
+		case PARSE_COOKIE:  FIND_SOURCE(cookie_array,  TRACK_VARS_COOKIE)
+		case PARSE_SERVER:  FIND_SOURCE(server_array,  TRACK_VARS_SERVER)
+		case PARSE_ENV:     FIND_SOURCE(env_array,     TRACK_VARS_ENV)
+	}
+
+	if (!array_ptr) {
+		RETURN_FALSE;
+	}
+
+	if (!found) {
+		hash_ptr = HASH_OF(array_ptr);
+
+		if (hash_ptr && zend_hash_find(hash_ptr, var, var_len + 1, (void **)&tmp) == SUCCESS) {
+			RETURN_TRUE;
+		}
+	}
+
+	RETURN_FALSE;
+}
+/* }}} */
+
 /* {{{ proto mixed input_get(constant type, string variable_name [, int filter [, mixed flags [, string charset]]])
  */
 PHP_FUNCTION(input_get)
@@ -408,10 +453,6 @@ PHP_FUNCTION(input_get)
 				break;
 		}
 	}
-
-#define FIND_SOURCE(a,t)                              \
-		array_ptr = IF_G(a);                          \
-		break;
 
 	switch(arg) {
 		case PARSE_GET:     FIND_SOURCE(get_array,     TRACK_VARS_GET)

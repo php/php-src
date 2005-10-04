@@ -50,6 +50,7 @@ PHP_MINFO_FUNCTION(filter);
 
 PHP_FUNCTION(input_get);
 PHP_FUNCTION(input_filters_list);
+PHP_FUNCTION(input_has_variable);
 PHP_FUNCTION(filter_data);
 
 ZEND_BEGIN_MODULE_GLOBALS(filter)
