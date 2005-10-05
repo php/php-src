@@ -75,7 +75,7 @@ ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend
 		if (!fn_proxy || !*fn_proxy) {
 			if (zend_hash_find(function_table, function_name, function_name_len+1, (void **) &fcic.function_handler) == FAILURE) {
 				/* error at c-level */
-				zend_error(E_CORE_ERROR, "Couldn't find implementation for method %v%s%s", obj_ce ? obj_ce->name : EMPTY_STR, obj_ce ? "::" : "", function_name);
+				zend_error(E_CORE_ERROR, "Couldn't find implementation for method %v%s%s", obj_ce ? (void*)obj_ce->name : EMPTY_STR, obj_ce ? "::" : "", function_name);
 			}
 			if (fn_proxy) {
 				*fn_proxy = fcic.function_handler;
@@ -92,7 +92,7 @@ ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend
 		if (!obj_ce) {
 			obj_ce = object_pp ? Z_OBJCE_PP(object_pp) : NULL;
 		}
-		zend_error(E_CORE_ERROR, "Couldn't execute method %v%s%s", obj_ce ? obj_ce->name : EMPTY_STR, obj_ce ? "::" : "", function_name);
+		zend_error(E_CORE_ERROR, "Couldn't execute method %v%s%s", obj_ce ? (void*)obj_ce->name : EMPTY_STR, obj_ce ? "::" : "", function_name);
 	}
 	if (!retval_ptr_ptr) {
 		if (retval) {
@@ -433,7 +433,7 @@ int zend_user_serialize(zval *object, unsigned char **buffer, zend_uint *buf_len
 			result = SUCCESS;
 			break;
 		case IS_UNICODE:
-			*buffer = eustrndup(Z_USTRVAL_P(retval), Z_USTRLEN_P(retval));
+			*buffer = (char*)eustrndup(Z_USTRVAL_P(retval), Z_USTRLEN_P(retval));
 			*buf_len = Z_USTRLEN_P(retval);
 			result = SUCCESS;
 			break;
