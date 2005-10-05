@@ -793,19 +793,12 @@ zend_object_iterator *spl_ce_dir_tree_get_iterator(zend_class_entry *ce, zval *o
 /* }}} */
 
 /* {{{ spl_ce_dir_cast */
-static int spl_ce_dir_cast(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC)
+static int spl_ce_dir_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 {
-	zval free_obj;
 	spl_ce_dir_object   *dir_object = (spl_ce_dir_object*)zend_object_store_get_object(readobj TSRMLS_CC);
 
 	if (type ==IS_STRING && *dir_object->entry.d_name) {
-		if (should_free) {
-			free_obj = *writeobj;
-		}
 		ZVAL_STRING(writeobj, dir_object->entry.d_name, 1);
-		if (should_free) {
-			zval_dtor(&free_obj);
-		}
 		return SUCCESS;
 	}
 	return FAILURE;

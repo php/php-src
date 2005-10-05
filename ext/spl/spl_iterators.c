@@ -1522,46 +1522,19 @@ static INLINE void spl_caching_it_next(spl_dual_it_object *intern TSRMLS_DC)
 			zval_ptr_dtor(&retval);		
 		}
 		if (intern->u.caching.flags & CIT_CALL_TOSTRING) {
-			if (Z_TYPE_P(intern->current.data) == IS_OBJECT) {
-				zval expr_copy;
-				if (intern->current.data->value.obj.handlers->cast_object &&
-					intern->current.data->value.obj.handlers->cast_object(intern->current.data, &expr_copy, IS_STRING, 0 TSRMLS_CC) == SUCCESS)
-				{
-					ALLOC_ZVAL(intern->u.caching.zstr);
-					*intern->u.caching.zstr = expr_copy;
-					INIT_PZVAL(intern->u.caching.zstr);
-					zval_copy_ctor(intern->u.caching.zstr);
-					zval_dtor(&expr_copy);
-				} else {
-					zend_class_entry *ce_data = spl_get_class_entry(intern->current.data TSRMLS_CC);
-					if (ce_data && zend_hash_exists(&ce_data->function_table, "__tostring", sizeof("__tostring"))) {
-						zend_call_method_with_0_params(&intern->current.data, ce_data, NULL, "__tostring", &intern->u.caching.zstr);
-					} else {
-						ALLOC_ZVAL(intern->u.caching.zstr);
-						*intern->u.caching.zstr = *intern->current.data;
-						zval_copy_ctor(intern->u.caching.zstr);
-						INIT_PZVAL(intern->u.caching.zstr);
-						convert_to_string(intern->u.caching.zstr);
-					}
-				}
+			int  use_copy;
+			zval expr_copy;
+			ALLOC_ZVAL(intern->u.caching.zstr);
+			*intern->u.caching.zstr = *intern->current.data;
+			zend_make_printable_zval(intern->u.caching.zstr, &expr_copy, &use_copy);
+			if (use_copy) {
+				*intern->u.caching.zstr = expr_copy;
+				INIT_PZVAL(intern->u.caching.zstr);
+				zval_copy_ctor(intern->u.caching.zstr);
+				zval_dtor(&expr_copy);
 			} else {
-				/* This version requires zend_make_printable_zval() being able to
-				 * call __toString().
-				 */
-				int  use_copy;
-				zval expr_copy;
-				ALLOC_ZVAL(intern->u.caching.zstr);
-				*intern->u.caching.zstr = *intern->current.data;
-				zend_make_printable_zval(intern->u.caching.zstr, &expr_copy, &use_copy);
-				if (use_copy) {
-					*intern->u.caching.zstr = expr_copy;
-					INIT_PZVAL(intern->u.caching.zstr);
-					zval_copy_ctor(intern->u.caching.zstr);
-					zval_dtor(&expr_copy);
-				} else {
-					INIT_PZVAL(intern->u.caching.zstr);
-					zval_copy_ctor(intern->u.caching.zstr);
-				}
+				INIT_PZVAL(intern->u.caching.zstr);
+				zval_copy_ctor(intern->u.caching.zstr);
 			}
 		}
 		spl_dual_it_next(intern, 0 TSRMLS_CC);	
