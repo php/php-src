@@ -1128,10 +1128,15 @@ PHP_FUNCTION(curl_setopt)
 					 * must be explicitly cast to long in curl_formadd
 					 * use since curl needs a long not an int. */
 					if (*postval == '@') {
+						++postval;
+						/* safe_mode / open_basedir check */
+						if (php_check_open_basedir(postval TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(postval, "rb+", CHECKUID_CHECK_MODE_PARAM))) {
+							RETURN_FALSE;
+						}
 						error = curl_formadd(&first, &last, 
 											 CURLFORM_COPYNAME, string_key,
 											 CURLFORM_NAMELENGTH, (long)string_key_len - 1,
-											 CURLFORM_FILE, ++postval, 
+											 CURLFORM_FILE, postval, 
 											 CURLFORM_END);
 					} else {
 						error = curl_formadd(&first, &last, 
