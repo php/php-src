@@ -944,7 +944,7 @@ Sets the string that the the XMLReader will parse. */
 PHP_METHOD(xmlreader, XML)
 {
 	zval *id;
-	long source_len = 0, encoding_len = 0;
+	int source_len = 0, encoding_len = 0;
 	long options = 0;
 	xmlreader_object *intern;
 	char *source, *uri = NULL, *encoding = NULL;
