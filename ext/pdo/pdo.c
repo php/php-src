@@ -302,7 +302,7 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC)
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(pdo)
 {
-	zend_class_entry ce, *pce;
+	zend_class_entry ce;
 	
 	spl_ce_RuntimeException = NULL;
 
