@@ -1,3 +1,44 @@
+2005-10-04  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      NEWS
+      ext/standard/array.c
+      ext/standard/array.c:
+      MFH: fix #34723 (array_count_values() strips leading zeroes)
+
+    * ext/standard/array.c:
+      fix #34723 (array_count_values() strips leading zeroes)
+
+    * (PHP_5_0)
+      ext/oci8/oci8.c
+      ext/oci8/oci8.c:
+      fix #34731, patch by novicky at aarongroup dot cz
+
+    * (PHP_4_4)
+      NEWS
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xmlrpc/xmlrpc-epi-php.c:
+      MFB5.1: fix #32179 (xmlrpc_encode() segfaults with recursive references)
+
+    * (PHP_5_0)
+      NEWS
+      ext/xmlrpc/xmlrpc-epi-php.c:
+      MHB5.1: fix #32179 (xmlrpc_encode() segfaults with recursive references)
+
+    * (PHP_5_1)
+      NEWS
+      ext/xmlrpc/xmlrpc-epi-php.c:
+      fix #32179 (xmlrpc_encode() segfaults with recursive references)
+
+2005-10-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/tests/strings/bug21453.phpt:
+      Unicode support
+
+    * ext/standard/string.c:
+      Fixed compilation error (gcc-4).
+
 2005-10-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_execute.h:
