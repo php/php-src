@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE package SYSTEM "../pear/package.dtd">
+<package>
+ <name>filter</name>
+ <summary>Extension for safely dealing with input parameters</summary>
+ <maintainers>
+  <maintainer>
+   <user>derick</user>
+   <name>Derick Rethans</name>
+   <email>derick@php.net</email>
+   <role>lead</role>
+  </maintainer>
+  <maintainer>
+   <user>rasmus</user>
+   <name>Rasmus Lerdorf</name>
+   <email>rasmus@php.net</email>
+   <role>lead</role>
+  </maintainer>
+ </maintainers>
+ <description>
+The Input Filter extension is meant to address this issue by implementing a set
+of filters and mechanisms that users can use to safely access their input data.
+ </description>
+ <license>PHP</license>
+ <release>
+  <state>beta</state>
+  <version>0.9.0</version>
+  <date>2005-10-05</date>
+  <notes>
+Initial release.
+  </notes>
+  <filelist>
+   <file role="src" name="config.m4"/>
+   <file role="src" name="filter.c"/>
+   <file role="src" name="filter_private.h"/>
+   <file role="src" name="callback_filter.c"/>
+   <file role="src" name="logical_filters.c"/>
+   <file role="src" name="sanitizing_filters.c"/>
+   <file role="src" name="php_filter.h"/>
+   <file role="doc" name="CREDITS"/>
+  </filelist>
+  <deps>
+  </deps>
+ </release>
+</package>
+<!--
+vim:et:ts=1:sw=1
+-->
