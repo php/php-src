@@ -317,11 +317,17 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 	}
 
 
-#define convert_object_to_type(op, ctype, conv_func)											\
+#define convert_object_to_type(op, ctype, conv_func)										\
 	if (Z_OBJ_HT_P(op)->cast_object) {														\
-		if (Z_OBJ_HT_P(op)->cast_object(op, op, ctype, 1 TSRMLS_CC) == SUCCESS) {			\
-			op->type = ctype;																\
+		zval *org;																			\
+		ALLOC_ZVAL(org);																	\
+		*org = *op;																			\
+		if (Z_OBJ_HT_P(op)->cast_object(org, op, ctype TSRMLS_CC) == FAILURE) {				\
+			zend_error(E_RECOVERABLE_ERROR, 												\
+			"Object of class %v could not be converted to " # ctype, Z_OBJCE_P(org)->name); \
+			INIT_ZVAL(*op);																	\
 		}																					\
+		zval_dtor(org);																		\
 	} else {																				\
 		if(Z_OBJ_HT_P(op)->get) {															\
 			zval *newop = Z_OBJ_HT_P(op)->get(op TSRMLS_CC);								\
@@ -496,10 +502,16 @@ ZEND_API void convert_to_null(zval *op)
 {
 	if (op->type == IS_OBJECT) {
 		if (Z_OBJ_HT_P(op)->cast_object) {
+			zval *org;
 			TSRMLS_FETCH();
-			if (Z_OBJ_HT_P(op)->cast_object(op, op, IS_NULL, 1 TSRMLS_CC) == SUCCESS) {
+
+			ALLOC_ZVAL(org);
+			*org = *op;
+			if (Z_OBJ_HT_P(op)->cast_object(org, op, IS_NULL TSRMLS_CC) == SUCCESS) {
+				zval_dtor(org);
 				return;
 			}
+			*op = *org;
 		}
 	}
 

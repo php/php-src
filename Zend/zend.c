@@ -347,29 +347,22 @@ ZEND_API void zend_make_string_zval(zval *expr, zval *expr_copy, int *use_copy)
 		case IS_OBJECT:
 			{
 				TSRMLS_FETCH();
-				if (Z_OBJ_HANDLER_P(expr, cast_object)) {
-					if(Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_STRING, 0 TSRMLS_CC) == SUCCESS) {
-						break;
-					}
+
+				if(Z_OBJ_HT_P(expr)->cast_object && Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
+					break;
 				}
 				if (Z_OBJ_HANDLER_P(expr, get)) {
 					zval *z = Z_OBJ_HANDLER_P(expr, get)(expr TSRMLS_CC);
 					if(Z_TYPE_P(z) != IS_OBJECT) {
-						zend_make_printable_zval(z, expr_copy, use_copy);
+						zend_make_string_zval(z, expr_copy, use_copy);
 						FREE_ZVAL(z);
 						break;
 					}
 				}
-				if (EG(exception)) {
-					expr_copy->value.str.len = 0;
-					expr_copy->value.str.val = STR_EMPTY_ALLOC();
-					break;
-				}
-
+				zend_error(EG(exception) ? E_ERROR : E_RECOVERABLE_ERROR, "Object of class %v could not be converted to string", Z_OBJCE_P(expr)->name);
+				ZVAL_EMPTY_STRING(expr_copy);
+				break;
 			}
-			expr_copy->value.str.val = (char *) emalloc(sizeof("Object id #")-1 + MAX_LENGTH_OF_LONG);
-			expr_copy->value.str.len = sprintf(expr_copy->value.str.val, "Object id #%ld", (long)expr->value.obj.handle);
-			break;
 		default:
 			*expr_copy = *expr;
 			zval_copy_ctor(expr_copy);
@@ -416,10 +409,8 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 			expr_copy->value.str.val = estrndup("Array", expr_copy->value.str.len);
 			break;
 		case IS_OBJECT:
-			if (Z_OBJ_HANDLER_P(expr, cast_object)) {
-				if(Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_STRING, 0 TSRMLS_CC) == SUCCESS) {
-					break;
-				}
+			if(Z_OBJ_HT_P(expr)->cast_object && Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
+				break;
 			}
 			if (Z_OBJ_HANDLER_P(expr, get)) {
 				zval *z = Z_OBJ_HANDLER_P(expr, get)(expr TSRMLS_CC);
@@ -429,13 +420,8 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 					break;
 				}
 			}
-			if (EG(exception)) {
-				expr_copy->value.str.len = 0;
-				expr_copy->value.str.val = STR_EMPTY_ALLOC();
-				break;
-			}
-			expr_copy->value.str.val = (char *) emalloc(sizeof("Object id #")-1 + MAX_LENGTH_OF_LONG);
-			expr_copy->value.str.len = sprintf(expr_copy->value.str.val, "Object id #%ld", (long)expr->value.obj.handle);
+			zend_error(EG(exception) ? E_ERROR : E_RECOVERABLE_ERROR, "Object of class %v could not be converted to string", Z_OBJCE_P(expr)->name);
+			ZVAL_EMPTY_STRING(expr_copy);
 			break;
 		case IS_DOUBLE:
 			*expr_copy = *expr;
@@ -467,10 +453,8 @@ ZEND_API void zend_make_unicode_zval(zval *expr, zval *expr_copy, int *use_copy)
 	}
 	switch (expr->type) {
 		case IS_OBJECT:
-			if (Z_OBJ_HANDLER_P(expr, cast_object)) {
-				if(Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_UNICODE, 0 TSRMLS_CC) == SUCCESS) {
-					break;
-				}
+			if(Z_OBJ_HT_P(expr)->cast_object && Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_UNICODE TSRMLS_CC) == SUCCESS) {
+				break;
 			}
 			if (Z_OBJ_HANDLER_P(expr, get)) {
 				zval *z = Z_OBJ_HANDLER_P(expr, get)(expr TSRMLS_CC);
@@ -480,13 +464,8 @@ ZEND_API void zend_make_unicode_zval(zval *expr, zval *expr_copy, int *use_copy)
 					break;
 				}
 			}
-			if (EG(exception)) {
-				expr_copy->value.ustr.len = 0;
-				expr_copy->value.ustr.val = USTR_MAKE("");
-				break;
-			}
-			expr_copy->value.ustr.val = eumalloc(sizeof("Object id #")-1 + MAX_LENGTH_OF_LONG + 1);
-			expr_copy->value.ustr.len = u_sprintf(expr_copy->value.ustr.val, "Object id #%ld", (long)expr->value.obj.handle);
+			zend_error(EG(exception) ? E_ERROR : E_RECOVERABLE_ERROR, "Object of class %v could not be converted to string", Z_OBJCE_P(expr)->name);
+			ZVAL_EMPTY_STRING(expr_copy);
 			break;
 		default:
 			*expr_copy = *expr;
