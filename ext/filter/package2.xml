@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package packagerversion="1.4.1" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+http://pear.php.net/dtd/tasks-1.0.xsd
+http://pear.php.net/dtd/package-2.0
+http://pear.php.net/dtd/package-2.0.xsd">
+ <name>filter</name>
+ <channel>pecl.php.net</channel>
+ <summary>Extension for safely dealing with input parameters</summary>
+ <description>The Input Filter extension is meant to address this issue by implementing a set
+of filters and mechanisms that users can use to safely access their input data.
+ 
+ </description>
+ <lead>
+  <name>Derick Rethans</name>
+  <user>derick</user>
+  <email>derick@php.net</email>
+  <active>yes</active>
+ </lead>
+ <lead>
+  <name>Rasmus Lerdorf</name>
+  <user>rasmus</user>
+  <email>rasmus@php.net</email>
+  <active>yes</active>
+ </lead>
+ <date>2005-10-05</date>
+ <time>14:24:21</time>
+ <version>
+  <release>0.9.0</release>
+  <api>0.9.0</api>
+ </version>
+ <stability>
+  <release>beta</release>
+  <api>beta</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes>Initial release.
+  
+ </notes>
+ <contents>
+  <dir name="/">
+   <file name="callback_filter.c" role="src" />
+   <file name="config.m4" role="src" />
+   <file name="CREDITS" role="doc" />
+   <file name="filter.c" role="src" />
+   <file name="filter_private.h" role="src" />
+   <file name="logical_filters.c" role="src" />
+   <file name="php_filter.h" role="src" />
+   <file name="sanitizing_filters.c" role="src" />
+  </dir> <!-- / -->
+ </contents>
+ <dependencies>
+  <required>
+   <php>
+    <min>4.0.0</min>
+   </php>
+   <pearinstaller>
+    <min>1.4.0b1</min>
+   </pearinstaller>
+  </required>
+ </dependencies>
+ <providesextension>filter</providesextension>
+ <extsrcrelease />
+</package>
