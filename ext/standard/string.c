@@ -4803,8 +4803,8 @@ PHP_FUNCTION(nl2br)
    Strips HTML and PHP tags from a string */
 PHP_FUNCTION(strip_tags)
 {
-	void *str, *allow=NULL;
-	int32_t str_len, allow_len;
+	void *str, *allow = NULL;
+	int32_t str_len, allow_len = 0;
 	zend_uchar str_type, allow_type;
 	void *buf;
 	int32_t retval_len;
@@ -4982,7 +4982,8 @@ PHP_FUNCTION(parse_str)
 int php_u_tag_find(UChar *tag, int32_t len, UChar *set, int32_t set_len)
 {
 	int32_t idx = 0;
-	UChar32 ch, *norm, *n;
+	UChar32 ch;
+	UChar *norm, *n;
 	int state = 0, done = 0;
 
 	if (!len) {
@@ -5018,9 +5019,9 @@ int php_u_tag_find(UChar *tag, int32_t len, UChar *set, int32_t set_len)
 		}
 	}
 	*(n++) = '>';
-	*n = '\0';
+	*n = 0;
 
-	if (u_strFindFirst(tag, len, set, set_len) != NULL) {
+	if (u_strFindFirst(set, set_len, norm, n-norm) != NULL) {
 		done = 1;
 	} else {
 		done = 0;
@@ -5121,7 +5122,7 @@ PHPAPI int32_t php_u_strip_tags(UChar *rbuf, int32_t len, int *stateptr, UChar *
 
 	buf = eustrndup(rbuf, len);
 	rp = rbuf;
-	if (allow) {
+	if (allow_len != 0) {
 		php_u_strtolower(&allow, &allow_len, UG(default_locale));
 		tbuf = eumalloc(PHP_TAG_BUF_SIZE+1);
 		tp = tbuf;
@@ -5147,7 +5148,7 @@ PHPAPI int32_t php_u_strip_tags(UChar *rbuf, int32_t len, int *stateptr, UChar *
 			if (state == 0) {
 				last = 0x3C;
 				state = 1;
-				if (allow) {
+				if (allow_len) {
 					tp = ((tp-tbuf) >= UBYTES(PHP_TAG_BUF_SIZE) ? tbuf: tp);
 					*(tp++) = ch;
 				}
@@ -5162,7 +5163,7 @@ PHPAPI int32_t php_u_strip_tags(UChar *rbuf, int32_t len, int *stateptr, UChar *
 					last = 0x28;
 					br++;
 				}
-			} else if (allow && state == 1) {
+			} else if (allow_len && state == 1) {
 				tp = ((tp-tbuf) >= UBYTES(PHP_TAG_BUF_SIZE) ? tbuf: tp);
 				*(tp++) = ch;
 			} else if (state == 0) {
@@ -5176,7 +5177,7 @@ PHPAPI int32_t php_u_strip_tags(UChar *rbuf, int32_t len, int *stateptr, UChar *
 					last = ch;
 					br--;
 				}
-			} else if (allow && state == 1) {
+			} else if (allow_len && state == 1) {
 				tp = ((tp-tbuf) >= UBYTES(PHP_TAG_BUF_SIZE) ? tbuf: tp);
 				*(tp++) = ch;
 			} else if (state == 0) {
@@ -5194,7 +5195,7 @@ PHPAPI int32_t php_u_strip_tags(UChar *rbuf, int32_t len, int *stateptr, UChar *
 			case 1: /* HTML/XML */
 				last = ch;
 				state = 0;
-				if (allow) {
+				if (allow_len) {
 					tp = ((tp-tbuf) >= UBYTES(PHP_TAG_BUF_SIZE) ? tbuf: tp);
 					*(tp++) = ch;
 					*(tp) = 0;
@@ -5241,7 +5242,7 @@ PHPAPI int32_t php_u_strip_tags(UChar *rbuf, int32_t len, int *stateptr, UChar *
 				}
 			} else if (state == 0) {
 				*(rp++) = ch;
-			} else if (allow && state == 1) {
+			} else if (allow_len && state == 1) {
 				tp = ((tp-tbuf) >= UBYTES(PHP_TAG_BUF_SIZE) ? tbuf: tp);
 				*(tp++) = ch;
 			}
@@ -5254,10 +5255,10 @@ PHPAPI int32_t php_u_strip_tags(UChar *rbuf, int32_t len, int *stateptr, UChar *
 				last = ch;
 			} else {
 				if (state == 0) {
-					(*rp++) = 0x21;
-				} else if (allow && state == 1) {
-					tp = ((tp-tbuf) >= PHP_TAG_BUF_SIZE ? tbuf: tp);
-					*(tp++) = 0x21;
+					*(rp++) = ch;
+				} else if (allow_len && state == 1) {
+					tp = ((tp-tbuf) >= UBYTES(PHP_TAG_BUF_SIZE) ? tbuf: tp);
+					*(tp++) = ch;
 				}
 			}
 			break;
@@ -5310,7 +5311,7 @@ PHPAPI int32_t php_u_strip_tags(UChar *rbuf, int32_t len, int *stateptr, UChar *
 reg_u_char:
 			if (state == 0) {
 				rp += zend_codepoint_to_uchar(ch, rp);
-			} else if (allow && state == 1) {
+			} else if (allow_len && state == 1) {
 				tp = ((tp-tbuf) >= UBYTES(PHP_TAG_BUF_SIZE) ? tbuf: tp);
 				tp += zend_codepoint_to_uchar(ch, tp);
 			} 
@@ -5320,12 +5321,14 @@ reg_u_char:
 
 	*rp = 0;
 	efree(buf);
-	if (allow)
+	if (allow_len) {
 		efree(tbuf);
+		efree(allow);
+	}
 	if (stateptr)
 		*stateptr = state;
 
-	return (size_t)(rp-rbuf);
+	return (int32_t)(rp-rbuf);
 }
 /* }}} */
 
