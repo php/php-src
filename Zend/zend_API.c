@@ -432,7 +432,7 @@ static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec, char T_ar
 					case IS_OBJECT: {
 						if (Z_OBJ_HANDLER_PP(arg, cast_object)) {
 							SEPARATE_ZVAL_IF_NOT_REF(arg);
-							if (Z_OBJ_HANDLER_PP(arg, cast_object)(*arg, *arg, IS_STRING, 0 TSRMLS_CC) == SUCCESS) {
+							if (Z_OBJ_HANDLER_PP(arg, cast_object)(*arg, *arg, IS_STRING TSRMLS_CC) == SUCCESS) {
 								*pl = Z_STRLEN_PP(arg);
 								*p = Z_STRVAL_PP(arg);
 								break;
@@ -481,7 +481,7 @@ static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec, char T_ar
 					case IS_OBJECT: {
 						if (Z_OBJ_HANDLER_PP(arg, cast_object)) {
 							SEPARATE_ZVAL_IF_NOT_REF(arg);
-							if (Z_OBJ_HANDLER_PP(arg, cast_object)(*arg, *arg, IS_BINARY, 0 TSRMLS_CC) == SUCCESS) {
+							if (Z_OBJ_HANDLER_PP(arg, cast_object)(*arg, *arg, IS_BINARY TSRMLS_CC) == SUCCESS) {
 								*pl = Z_BINLEN_PP(arg);
 								*p = Z_BINVAL_PP(arg);
 								break;
@@ -525,7 +525,7 @@ static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec, char T_ar
 					case IS_OBJECT: {
 						if (Z_OBJ_HANDLER_PP(arg, cast_object)) {
 							SEPARATE_ZVAL_IF_NOT_REF(arg);
-							if (Z_OBJ_HANDLER_PP(arg, cast_object)(*arg, *arg, IS_UNICODE, 0 TSRMLS_CC) == SUCCESS) {
+							if (Z_OBJ_HANDLER_PP(arg, cast_object)(*arg, *arg, IS_UNICODE TSRMLS_CC) == SUCCESS) {
 								*pl = Z_USTRLEN_PP(arg);
 								*p = Z_USTRVAL_PP(arg);
 								break;
@@ -588,7 +588,7 @@ static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec, char T_ar
 					case IS_OBJECT: {
 						if (Z_OBJ_HANDLER_PP(arg, cast_object)) {
 							SEPARATE_ZVAL_IF_NOT_REF(arg);
-							if (Z_OBJ_HANDLER_PP(arg, cast_object)(*arg, *arg, T_arg_type, 0 TSRMLS_CC) == SUCCESS) {
+							if (Z_OBJ_HANDLER_PP(arg, cast_object)(*arg, *arg, T_arg_type TSRMLS_CC) == SUCCESS) {
 								*(char**)p = Z_UNIVAL_PP(arg);
 								*pl = Z_UNILEN_PP(arg);
 								*type = Z_TYPE_PP(arg);
@@ -651,12 +651,12 @@ static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec, char T_ar
 						if (Z_OBJ_HANDLER_PP(arg, cast_object)) {
 							SEPARATE_ZVAL_IF_NOT_REF(arg);
 							if (UG(unicode)) {
-								if (Z_OBJ_HANDLER_PP(arg, cast_object)(*arg, *arg, IS_UNICODE, 0 TSRMLS_CC) == SUCCESS) {
+								if (Z_OBJ_HANDLER_PP(arg, cast_object)(*arg, *arg, IS_UNICODE TSRMLS_CC) == SUCCESS) {
 									RETURN_AS_UNICODE(arg, p, pl, type);
 									break;
 								}
 							} else {
-								if (Z_OBJ_HANDLER_PP(arg, cast_object)(*arg, *arg, IS_STRING, 0 TSRMLS_CC) == SUCCESS) {
+								if (Z_OBJ_HANDLER_PP(arg, cast_object)(*arg, *arg, IS_STRING TSRMLS_CC) == SUCCESS) {
 									RETURN_AS_STRING(arg, p, pl, type);
 									break;
 								}

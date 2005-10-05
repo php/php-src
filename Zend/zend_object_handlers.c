@@ -1006,29 +1006,35 @@ int zend_std_object_get_class_name(zval *object, char **class_name, zend_uint *c
 	return SUCCESS;
 }
 
-ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC)
+ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 {
 	zval *retval;
 	zend_class_entry *ce;
-	
+
 	switch (type) {
 		case IS_STRING:
 		case IS_UNICODE:
 			ce = Z_OBJCE_P(readobj);
 			if (ce->__tostring &&
                 zend_call_method_with_0_params(&readobj, ce, &ce->__tostring, "__tostring", &retval)) {
+                if (EG(exception)) {
+                	zval_ptr_dtor(&retval);
+					zend_error(E_ERROR, "Method %v::__toString() must not throw an exception", ce->name);
+                	return FAILURE;
+                }
 				if (Z_TYPE_P(retval) == (UG(unicode)?IS_UNICODE:IS_STRING)) {
-					*writeobj = *retval;
-					zval_copy_ctor(writeobj);
-					zval_ptr_dtor(&retval);
 					INIT_PZVAL(writeobj);
+					ZVAL_ZVAL(writeobj, retval, 1, 1);
 					if (Z_TYPE_P(writeobj) != type) {
 						convert_to_explicit_type(writeobj, type);
 					}
 					return SUCCESS;
 				} else {
 					zval_ptr_dtor(&retval);
+					INIT_PZVAL(writeobj);
+					ZVAL_EMPTY_STRING(writeobj);
 					zend_error(E_RECOVERABLE_ERROR, "Method %v::__toString() must return a string value", ce->name);
+					return SUCCESS;
 				}
 			}
 			return FAILURE;
