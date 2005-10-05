@@ -40,10 +40,6 @@ extern zend_module_entry xmlreader_module_entry;
 typedef struct _xmlreader_object {
 	zend_object  std;
 	xmlTextReaderPtr ptr;
-	/* input is used to allow strings to be loaded under libxml 2.5.x
-	must manually allocate and de-allocate these - can be refactored when
-	libxml 2.6.x becomes minimum version */
-	xmlParserInputBufferPtr input;
 	void *schema;
 	HashTable *prop_handler;
 	zend_object_handle handle;
