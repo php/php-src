@@ -278,7 +278,7 @@ PHP_MINFO_FUNCTION(date)
 /* }}} */
 
 /* {{{ Timezone Cache functions */
-static timelib_tzinfo *php_date_parse_tzfile(char *tzname, timelib_tzdb *tzdb TSRMLS_CC)
+static timelib_tzinfo *php_date_parse_tzfile(char *tzname, timelib_tzdb *tzdb TSRMLS_DC)
 {
 	timelib_tzinfo *tzi, **ptzi;
 
@@ -303,7 +303,7 @@ static char* guess_timezone(TSRMLS_D)
 	}
 	/* Check environment variable */
 	env = getenv("TZ");
-	if (env && *env && strlen(env)) {
+	if (env && *env) {
 		return env;
 	}
 	/* Check config setting for default timezone */
@@ -330,6 +330,7 @@ static char* guess_timezone(TSRMLS_D)
 #endif
 #ifdef PHP_WIN32
 	{
+		char *tzid;
 		TIME_ZONE_INFORMATION tzi;
 
 		switch (GetTimeZoneInformation(&tzi))
@@ -337,23 +338,25 @@ static char* guess_timezone(TSRMLS_D)
 			case TIME_ZONE_ID_UNKNOWN:
 				/* we have no clue what it is, return UTC */
 				php_error_docref(NULL TSRMLS_CC, E_STRICT, "It is not safe to rely on the systems timezone settings, please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. We use 'UTC' instead.");
-				return "UTC";
+				break;
 
 			case TIME_ZONE_ID_STANDARD:
-				tzid = timelib_timezone_id_from_abbr(tzi->StandardName, (tzi->Bias - tzi->StandardBias) * 60, 0);
-				php_error_docref(NULL TSRMLS_CC, E_STRICT, "It is not safe to rely on the systems timezone settings, please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. We use '%s' for '%s/%.1f/no DST' instead.", tzid, tzi->StandardName, (float) ((tzi->Bias - tzi->StandardBias) / 60));
+				tzid = timelib_timezone_id_from_abbr("", (tzi.Bias + tzi.StandardBias) * -60, 0);
+				if (! tzid) {
+					tzid = "UTC";
+				}
+				php_error_docref(NULL TSRMLS_CC, E_STRICT, "It is not safe to rely on the systems timezone settings, please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. We use '%s' for '%.1f/no DST' instead.", tzid, (float) ((tzi.Bias + tzi.StandardBias) / -60));
 				break;
 
 			case TIME_ZONE_ID_DAYLIGHT:
-				tzid = timelib_timezone_id_from_abbr(tzi->DaylightName, (tzi->Bias - tzi->DaylightBias) * 60, 1);
-				php_error_docref(NULL TSRMLS_CC, E_STRICT, "It is not safe to rely on the systems timezone settings, please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. We use '%s' for '%s/%.1f/DST' instead.", tzid, tzi->StandardName, (float) ((tzi->Bias - tzi->DaylightBias) / 60));
+				tzid = timelib_timezone_id_from_abbr("", (tzi.Bias + tzi.DaylightBias) * -60, 1);
+				if (! tzid) {
+					tzid = "UTC";
+				}
+				php_error_docref(NULL TSRMLS_CC, E_STRICT, "It is not safe to rely on the systems timezone settings, please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. We use '%s' for '%.1f/DST' instead.", tzid, (float) ((tzi.Bias + tzi.DaylightBias) / -60));
 				break;
 
 		}
-
-		php_error_docref(NULL TSRMLS_CC, E_STRICT, "Extra Debug Info: bias: %d, standard bias: %d, daylight bias: %d, s. name: %s, d. name: %s",
-			tzi->Bias, tzi->StandardBias, tzi->DaylightBias, tzi->StandardName, tzi->DaylightName);
-		return tzid;
 	}
 #endif
 	/* Fallback to UTC */
@@ -366,10 +369,10 @@ static timelib_tzinfo *get_timezone_info(TSRMLS_D)
 	timelib_tzinfo *tzi;
 	
 	tz = guess_timezone(TSRMLS_C);
-	tzi = php_date_parse_tzfile(tz, DATE_TIMEZONEDB);
+	tzi = php_date_parse_tzfile(tz, DATE_TIMEZONEDB TSRMLS_CC);
 	if (! tzi) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Timezone setting (date.timezone) or TZ environment variable contains an unknown timezone.");
-		tzi = php_date_parse_tzfile("UTC", DATE_TIMEZONEDB);
+		tzi = php_date_parse_tzfile("UTC", DATE_TIMEZONEDB TSRMLS_CC);
 
 		if (! tzi) {
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Timezone database is corrupt - this should *never* happen!");
@@ -1297,12 +1300,12 @@ PHP_FUNCTION(timezone_open)
 		
 		tzid = timelib_timezone_id_from_abbr(tz, -1, 0);
 		if (tzid) {
-			tzi = php_date_parse_tzfile(tzid, DATE_TIMEZONEDB);
+			tzi = php_date_parse_tzfile(tzid, DATE_TIMEZONEDB TSRMLS_CC);
 		}
 	}
 	/* Try finding the tz information as "Timezone Identifier" */
 	if (!tzi) {
-		tzi = php_date_parse_tzfile(tz, DATE_TIMEZONEDB);
+		tzi = php_date_parse_tzfile(tz, DATE_TIMEZONEDB TSRMLS_CC);
 	}
 	/* If we find it we instantiate the object otherwise, well, we don't and return false */
 	if (tzi) {
