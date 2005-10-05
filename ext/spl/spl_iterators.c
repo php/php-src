@@ -89,6 +89,10 @@ typedef struct _spl_recursive_it_object {
 	int                      level;
 	RecursiveIteratorMode    mode;
 	int                      flags;
+	int                      max_depth;
+	zend_bool                in_iteration;
+	zend_function            *beginIteration;
+	zend_function            *endIteration;
 	zend_function            *callHasChildren;
 	zend_function            *callGetChildren;
 	zend_function            *beginChildren;
@@ -116,14 +120,14 @@ static void spl_recursive_it_dtor(zend_object_iterator *_iter TSRMLS_DC)
 		sub_iter->funcs->dtor(sub_iter TSRMLS_CC);
 		zval_ptr_dtor(&object->iterators[object->level--].zobject);
 	}
-	erealloc(object->iterators, sizeof(spl_sub_iterator));
+	object->iterators = erealloc(object->iterators, sizeof(spl_sub_iterator));
 	object->level = 0;
 
 	zval_ptr_dtor(&iter->zobject);	
 	efree(iter);
 }
 	
-static int spl_recursive_it_valid_ex(spl_recursive_it_object *object TSRMLS_DC)
+static int spl_recursive_it_valid_ex(spl_recursive_it_object *object, zval *zthis TSRMLS_DC)
 {
 	zend_object_iterator      *sub_iter;
 	int                       level = object->level;
@@ -135,6 +139,10 @@ static int spl_recursive_it_valid_ex(spl_recursive_it_object *object TSRMLS_DC)
 		}
 		level--;
 	}
+	if (object->endIteration && object->in_iteration) {
+		zend_call_method_with_0_params(&zthis, object->ce, &object->endIteration, "endIteration", NULL);
+	}
+	object->in_iteration = 0;
 	return FAILURE;
 }
 
@@ -142,7 +150,7 @@ static int spl_recursive_it_valid(zend_object_iterator *iter TSRMLS_DC)
 {
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)iter->data;
 	
-	return spl_recursive_it_valid_ex(object TSRMLS_CC);
+	return spl_recursive_it_valid_ex(object, ((spl_recursive_it_iterator*)iter)->zobject TSRMLS_CC);
 }
 
 static void spl_recursive_it_get_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC)
@@ -199,6 +207,7 @@ next_step:
 					has_children = zend_is_true(retval);
 					zval_ptr_dtor(&retval);
 					if (has_children) {
+						if (object->max_depth == -1 || object->max_depth > object->level) {
 						switch (object->mode) {
 						case RIT_LEAVES_ONLY:
 						case RIT_CHILD_FIRST:
@@ -207,6 +216,14 @@ next_step:
 						case RIT_SELF_FIRST:
 							object->iterators[object->level].state = RS_SELF;
 							goto next_step;
+						}
+						} else {
+							/* do not recurse into */
+							if (object->mode == RIT_LEAVES_ONLY) {
+								/* this is not a leave, so skip it */
+								object->iterators[object->level].state = RS_NEXT;
+								goto next_step;
+							}
 						}
 					}
 				}
@@ -306,6 +323,10 @@ static void spl_recursive_it_rewind_ex(spl_recursive_it_object *object, zval *zt
 	if (sub_iter->funcs->rewind) {
 		sub_iter->funcs->rewind(sub_iter TSRMLS_CC);
 	}
+	if (object->beginIteration && !object->in_iteration) {
+		zend_call_method_with_0_params(&zthis, object->ce, &object->beginIteration, "beginIteration", NULL);
+	}
+	object->in_iteration = 1;
 	spl_recursive_it_move_forward_ex(object, zthis TSRMLS_CC);
 }
 
@@ -371,7 +392,18 @@ SPL_METHOD(RecursiveIteratorIterator, __construct)
 	intern->level = 0;
 	intern->mode = mode;
 	intern->flags = flags;
+	intern->max_depth = -1;
+	intern->in_iteration = 0;
 	intern->ce = Z_OBJCE_P(object);
+
+	zend_hash_find(&intern->ce->function_table, "beginiteration", sizeof("beginiteration"), (void **) &intern->beginIteration);
+	if (intern->beginIteration->common.scope == spl_ce_RecursiveIteratorIterator) {
+		intern->beginIteration = NULL;
+	}
+	zend_hash_find(&intern->ce->function_table, "enditeration", sizeof("enditeration"), (void **) &intern->endIteration);
+	if (intern->endIteration->common.scope == spl_ce_RecursiveIteratorIterator) {
+		intern->endIteration = NULL;
+	}
 	zend_hash_find(&intern->ce->function_table, "callhaschildren", sizeof("callHasChildren"), (void **) &intern->callHasChildren);
 	if (intern->callHasChildren->common.scope == spl_ce_RecursiveIteratorIterator) {
 		intern->callHasChildren = NULL;
@@ -417,7 +449,7 @@ SPL_METHOD(RecursiveIteratorIterator, valid)
 {
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	RETURN_BOOL(spl_recursive_it_valid_ex(object TSRMLS_CC) == SUCCESS);
+	RETURN_BOOL(spl_recursive_it_valid_ex(object, getThis() TSRMLS_CC) == SUCCESS);
 } /* }}} */
 
 /* {{{ proto mixed RecursiveIteratorIterator::key()
@@ -497,6 +529,20 @@ SPL_METHOD(RecursiveIteratorIterator, getInnerIterator)
 	RETURN_ZVAL(object->iterators[level].zobject, 1, 0);
 } /* }}} */
 
+/* {{{ proto RecursiveIterator RecursiveIteratorIterator::beginIteration()
+   Called when iteration begins (after first rewind() call) */
+SPL_METHOD(RecursiveIteratorIterator, beginIteration)
+{
+	/* nothing to do */
+} /* }}} */
+
+/* {{{ proto RecursiveIterator RecursiveIteratorIterator::endIteration()
+   Called when iteration ends (when valid() first returns false */
+SPL_METHOD(RecursiveIteratorIterator, endIteration)
+{
+	/* nothing to do */
+} /* }}} */
+
 /* {{{ proto bool RecursiveIteratorIterator::callHasChildren()
    Called for each element to test whether it has children */
 SPL_METHOD(RecursiveIteratorIterator, callHasChildren)
@@ -554,6 +600,36 @@ SPL_METHOD(RecursiveIteratorIterator, nextElement)
 	/* nothing to do */
 } /* }}} */
 
+/* {{{ proto RecursiveIterator RecursiveIteratorIterator::setMaxDepth([$max_depth = -1])
+   Set the maximum allowed depth (or any depth if pmax_depth = -1] */
+SPL_METHOD(RecursiveIteratorIterator, setMaxDepth)
+{
+	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	long  max_depth = -1;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &max_depth) == FAILURE) {
+		return;
+	}
+	if (max_depth < -1) {
+		zend_throw_exception(spl_ce_OutOfRangeException, "Parameter max_depth must be >= -1", 0 TSRMLS_CC);
+		return;
+	}
+	object->max_depth = max_depth;
+} /* }}} */
+
+/* {{{ proto RecursiveIterator RecursiveIteratorIterator::getMaxDepth()
+   Return the maximum accepted depth or false if any depth is allowed */
+SPL_METHOD(RecursiveIteratorIterator, getMaxDepth)
+{
+	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (object->max_depth == -1) {
+		RETURN_FALSE;
+	} else {
+		RETURN_LONG(object->max_depth);
+	}
+} /* }}} */
+
 static union _zend_function *spl_recursive_it_get_method(zval **object_ptr, char *method, int method_len TSRMLS_DC)
 {
 	union _zend_function    *function_handler;
@@ -586,6 +662,7 @@ static void spl_RecursiveIteratorIterator_free_storage(void *_object TSRMLS_DC)
 			zval_ptr_dtor(&object->iterators[object->level--].zobject);
 		}
 		efree(object->iterators);
+		object->iterators = NULL;
 	}
 
 	zend_hash_destroy(object->std.properties);
@@ -627,21 +704,30 @@ ZEND_BEGIN_ARG_INFO(arginfo_recursive_it_getSubIterator, 0)
 	ZEND_ARG_INFO(0, level)
 ZEND_END_ARG_INFO();
 
+static
+ZEND_BEGIN_ARG_INFO(arginfo_recursive_it_setMaxDepth, 0) 
+	ZEND_ARG_INFO(0, max_depth)
+ZEND_END_ARG_INFO();
+
 static zend_function_entry spl_funcs_RecursiveIteratorIterator[] = {
-	SPL_ME(RecursiveIteratorIterator, __construct,   arginfo_recursive_it___construct, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, rewind,        NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, valid,         NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, key,           NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, current,       NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, next,          NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, getDepth,      NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, __construct,       arginfo_recursive_it___construct,    ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, rewind,            NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, valid,             NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, key,               NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, current,           NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, next,              NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, getDepth,          NULL,                                ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveIteratorIterator, getSubIterator,    arginfo_recursive_it_getSubIterator, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, getInnerIterator,  NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, callHasChildren,   NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, callGetChildren,   NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, beginChildren,     NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, endChildren,       NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, nextElement,       NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, getInnerIterator,  NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, beginIteration,    NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, endIteration,      NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, callHasChildren,   NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, callGetChildren,   NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, beginChildren,     NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, endChildren,       NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, nextElement,       NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, setMaxDepth,       arginfo_recursive_it_setMaxDepth,    ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, getMaxDepth,       NULL,                                ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
