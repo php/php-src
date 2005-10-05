@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2005, Version 4.4.1
+- Added missing safe_mode/open_basedir checks for file uploads. (Ilia)
 - Fixed possible INI setting leak via virtual() in Apache 2 sapi. (Ilia)
 - Fixed possible crash and/or memory corruption in import_request_variables().
   (Ilia)
