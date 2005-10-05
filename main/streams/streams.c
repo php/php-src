@@ -1258,7 +1258,7 @@ PHPAPI UChar *_php_stream_u_get_line(php_stream *stream, UChar *buf, int32_t *pm
 				count_bytes <<= 1; /* translate U16 to bytes */
 			}
 
-			memcpy(buf + num_bytes, s, count_bytes);
+			memcpy(buf + (num_bytes >> 1), s, count_bytes);
 			num_bytes += count_bytes;
 			num_chars += count_chars;
 			stream->readbuf_ofs += count_bytes >> 1;
@@ -1577,23 +1577,23 @@ PHPAPI size_t _php_stream_write(php_stream *stream, const char *buf, size_t coun
 
 PHPAPI size_t _php_stream_u_write(php_stream *stream, const UChar *buf, int32_t count TSRMLS_DC)
 {
+	int32_t ret;
+	
 	if (buf == NULL || count == 0 || stream->ops->write == NULL) {
 		return 0;
 	}
 
 	if (stream->writefilters.head) {
-		return _php_stream_write_filtered(stream, (const char*)buf, count, PSFS_FLAG_NORMAL, 1 TSRMLS_CC);
+		ret = _php_stream_write_filtered(stream, (const char*)buf, count, PSFS_FLAG_NORMAL, 1 TSRMLS_CC);
 	} else {
-		int32_t ret;
-
 		ret = _php_stream_write_buffer(stream, (const char*)buf, UBYTES(count) TSRMLS_CC);
-
-		/* Return data points, not bytes */
-		if (ret > 0) {
-			ret >>= 1;
-		}
-		return ret;
 	}
+
+	/* Return data points, not bytes */
+	if (ret > 0) {
+		ret >>= 1;
+	}
+	return ret;
 }
 
 PHPAPI size_t _php_stream_printf(php_stream *stream TSRMLS_DC, const char *fmt, ...)
