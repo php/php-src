@@ -23,7 +23,7 @@ array(2) {
 array(2) {
   ["abc"]=>
   int(1)
-  [0]=>
+  ["0000"]=>
   int(1)
 }
 array(2) {
@@ -43,7 +43,7 @@ array(2) {
 array(2) {
   [u"abc"]=>
   int(1)
-  [0]=>
+  [u"0000"]=>
   int(1)
 }
 array(2) {
