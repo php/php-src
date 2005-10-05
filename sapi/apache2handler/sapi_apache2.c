@@ -446,15 +446,18 @@ static int php_handler(request_rec *r)
 	request_rec *parent_req = NULL;
 	TSRMLS_FETCH();
 
+#define PHPAP_INI_OFF \
+	if (strcmp(r->protocol, "INCLUDED")) { \
+		zend_try { zend_ini_deactivate(TSRMLS_C); } zend_end_try(); \
+	} \
+
 	conf = ap_get_module_config(r->per_dir_config, &php5_module);
 	apply_config(conf);
 
 	if (strcmp(r->handler, PHP_MAGIC_TYPE) && strcmp(r->handler, PHP_SOURCE_MAGIC_TYPE) && strcmp(r->handler, PHP_SCRIPT)) {
 		/* Check for xbithack in this case. */
 		if (!AP2(xbithack) || strcmp(r->handler, "text/html") || !(r->finfo.protection & APR_UEXECUTE)) {
-			zend_try {
-				zend_ini_deactivate(TSRMLS_C);
-			} zend_end_try();
+			PHPAP_INI_OFF;
 			return DECLINED;
 		}
 	}
@@ -463,32 +466,24 @@ static int php_handler(request_rec *r)
 	 * the configuration; default behaviour is to accept. */ 
 	if (r->used_path_info == AP_REQ_REJECT_PATH_INFO
 		&& r->path_info && r->path_info[0]) {
-		zend_try {
-			zend_ini_deactivate(TSRMLS_C);
-		} zend_end_try();
+		PHPAP_INI_OFF;
 		return HTTP_NOT_FOUND;
 	}
 
 	/* handle situations where user turns the engine off */
 	if (!AP2(engine)) {
-		zend_try {
-			zend_ini_deactivate(TSRMLS_C);
-		} zend_end_try();
+		PHPAP_INI_OFF;
 		return DECLINED;
 	}
 
 	if (r->finfo.filetype == 0) {
 		php_apache_sapi_log_message_ex("script '%s' not found or unable to stat", r);
-		zend_try {
-				zend_ini_deactivate(TSRMLS_C);
-		} zend_end_try();
+		PHPAP_INI_OFF;
 		return HTTP_NOT_FOUND;
 	}
 	if (r->finfo.filetype == APR_DIR) {
 		php_apache_sapi_log_message_ex("attempt to invoke directory '%s' as script", r);
-		zend_try {
-			zend_ini_deactivate(TSRMLS_C);
-		} zend_end_try();
+		PHPAP_INI_OFF;
 		return HTTP_FORBIDDEN;
 	}
 
