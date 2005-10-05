@@ -33,9 +33,7 @@
 #include "php_pdo_int.h"
 #include "zend_exceptions.h"
 
-#if defined(HAVE_SPL) && ((PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1))
-extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
-#endif
+static zend_class_entry *spl_ce_RuntimeException;
 
 ZEND_DECLARE_MODULE_GLOBALS(pdo)
 
@@ -64,7 +62,16 @@ PDO_API zend_class_entry *php_pdo_get_exception_base(int root TSRMLS_DC)
 {
 #if can_handle_soft_dependency_on_SPL && defined(HAVE_SPL) && ((PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1))
 	if (!root) {
-		return spl_ce_RuntimeException;
+		if (!spl_ce_RuntimeException) {
+			zend_class_entry **pce;
+
+			if (zend_hash_find(CG(class_table), "runtimeexception", sizeof("RuntimeException"), (void **) &pce) == SUCCESS) {
+				spl_ce_RuntimeException = *pce;
+				return *pce;
+			}
+		} else {
+			return spl_ce_RuntimeException;
+		}
 	}
 #endif
 #if (PHP_MAJOR_VERSION < 6)
@@ -295,7 +302,9 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC)
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(pdo)
 {
-	zend_class_entry ce;
+	zend_class_entry ce, *pce;
+	
+	spl_ce_RuntimeException = NULL;
 
 	ZEND_INIT_MODULE_GLOBALS(pdo, php_pdo_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
@@ -310,11 +319,9 @@ PHP_MINIT_FUNCTION(pdo)
 		"PDO persistent database", module_number);
 
 	INIT_CLASS_ENTRY(ce, "PDOException", NULL);
-#if can_handle_soft_dependency_on_SPL && defined(HAVE_SPL) && ((PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1))
-	pdo_exception_ce = zend_register_internal_class_ex(&ce, spl_ce_RuntimeException, NULL TSRMLS_CC);
-#else
-	pdo_exception_ce = zend_register_internal_class_ex(&ce, zend_exception_get_default(), NULL TSRMLS_CC);
-#endif
+
+ 	pdo_exception_ce = zend_register_internal_class_ex(&ce, php_pdo_get_exception_base(0 TSRMLS_CC), NULL TSRMLS_CC);
+
 	zend_declare_property_null(pdo_exception_ce, "errorInfo", sizeof("errorInfo")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
 
 	pdo_dbh_init(TSRMLS_C);
