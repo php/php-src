@@ -75,7 +75,7 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 				"Cannot execute queries while other unbuffered queries are active.  "
 				"Consider using PDOStatement::fetchAll().  Alternatively, if your code "
 				"is only ever going to run against mysql, you may enable query "
-				"buffering by setting the PDO_MYSQL_ATTR_USE_BUFFERED_QUERY attribute.",
+				"buffering by setting the PDO::MYSQL_ATTR_USE_BUFFERED_QUERY attribute.",
 				dbh->is_persistent);
 		}
 	} else { /* no error */
