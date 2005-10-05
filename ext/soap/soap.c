@@ -110,7 +110,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 		EG(current_execute_data) = _old_current_execute_data; \
 		if (EG(exception) == NULL || \
 		    Z_TYPE_P(EG(exception)) != IS_OBJECT || \
-		    Z_OBJCE_P(EG(exception)) != soap_fault_class_entry) {\
+		    !instanceof_function(Z_OBJCE_P(EG(exception)), soap_fault_class_entry TSRMLS_CC)) {\
 			_bailout = 1;\
 		}\
 	} zend_end_try();\
@@ -1540,7 +1540,7 @@ PHP_METHOD(SoapServer, handle)
 				}
 				if (EG(exception)) {
 					if (Z_TYPE_P(EG(exception)) == IS_OBJECT &&
-					    Z_OBJCE_P(EG(exception)) == soap_fault_class_entry) {
+					    instanceof_function(Z_OBJCE_P(EG(exception)), soap_fault_class_entry TSRMLS_CC)) {
 					  soap_server_fault_ex(function, EG(exception), NULL TSRMLS_CC);
 					} else {
 						zval_dtor(&constructor);
@@ -1573,7 +1573,7 @@ PHP_METHOD(SoapServer, handle)
 #ifdef ZEND_ENGINE_2
 					if (EG(exception)) {
 						if (Z_TYPE_P(EG(exception)) == IS_OBJECT &&
-						    Z_OBJCE_P(EG(exception)) == soap_fault_class_entry) {
+						    instanceof_function(Z_OBJCE_P(EG(exception)), soap_fault_class_entry TSRMLS_CC)) {
 							soap_server_fault_ex(function, EG(exception), NULL TSRMLS_CC);
 						} else {
 							zval_dtor(&constructor);
@@ -1643,7 +1643,7 @@ PHP_METHOD(SoapServer, handle)
 					php_error_docref(NULL TSRMLS_CC, E_ERROR, "Function '%s' call failed", Z_STRVAL(h->function_name));
 				}
 				if (Z_TYPE(h->retval) == IS_OBJECT &&
-				    Z_OBJCE(h->retval) == soap_fault_class_entry) {
+				    instanceof_function(Z_OBJCE(h->retval), soap_fault_class_entry TSRMLS_CC)) {
 				  zval *headerfault = NULL, **tmp;
 
 					if (zend_hash_find(Z_OBJPROP(h->retval), "headerfault", sizeof("headerfault"), (void**)&tmp) == SUCCESS &&
@@ -1654,7 +1654,7 @@ PHP_METHOD(SoapServer, handle)
 #ifdef ZEND_ENGINE_2
 				} else if (EG(exception)) {
 					if (Z_TYPE_P(EG(exception)) == IS_OBJECT &&
-					    Z_OBJCE_P(EG(exception)) == soap_fault_class_entry) {
+					    instanceof_function(Z_OBJCE_P(EG(exception)), soap_fault_class_entry TSRMLS_CC)) {
 					  zval *headerfault = NULL, **tmp;
 
 						if (zend_hash_find(Z_OBJPROP_P(EG(exception)), "headerfault", sizeof("headerfault"), (void**)&tmp) == SUCCESS &&
@@ -1701,7 +1701,7 @@ PHP_METHOD(SoapServer, handle)
 #ifdef ZEND_ENGINE_2
 	if (EG(exception)) {
 		if (Z_TYPE_P(EG(exception)) == IS_OBJECT &&
-		    Z_OBJCE_P(EG(exception)) == soap_fault_class_entry) {
+		    instanceof_function(Z_OBJCE_P(EG(exception)), soap_fault_class_entry TSRMLS_CC)) {
 			soap_server_fault_ex(function, EG(exception), NULL TSRMLS_CC);
 		} else {
 			if (soap_obj) {zval_ptr_dtor(&soap_obj);}
@@ -1714,7 +1714,7 @@ PHP_METHOD(SoapServer, handle)
 		char *response_name;
 
 		if (Z_TYPE(retval) == IS_OBJECT &&
-		    Z_OBJCE(retval) == soap_fault_class_entry) {
+		    instanceof_function(Z_OBJCE(retval), soap_fault_class_entry TSRMLS_CC)) {
 			soap_server_fault_ex(function, &retval, NULL TSRMLS_CC);
 		}
 
@@ -2017,7 +2017,7 @@ PHP_FUNCTION(is_soap_fault)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &fault) == SUCCESS &&
 	    Z_TYPE_P(fault) == IS_OBJECT &&
-	    Z_OBJCE_P(fault) == soap_fault_class_entry) {
+	    instanceof_function(Z_OBJCE_P(fault), soap_fault_class_entry TSRMLS_CC)) {
 		RETURN_TRUE;
 	}
 	RETURN_FALSE
@@ -2439,7 +2439,7 @@ static void do_soap_call(zval* this_ptr,
 	}
 #ifdef ZEND_ENGINE_2
 	if (Z_TYPE_P(return_value) == IS_OBJECT &&
-	    Z_OBJCE_P(return_value) == soap_fault_class_entry &&
+	    instanceof_function(Z_OBJCE_P(return_value), soap_fault_class_entry TSRMLS_CC) &&
 	    (zend_hash_find(Z_OBJPROP_P(this_ptr), "_exceptions", sizeof("_exceptions"), (void **) &tmp) != SUCCESS ||
 		   Z_TYPE_PP(tmp) != IS_BOOL || Z_LVAL_PP(tmp) != 0)) {
 		zval *exception;
@@ -3436,7 +3436,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 	xmlDocSetRootElement(doc, envelope);
 
 	if (Z_TYPE_P(ret) == IS_OBJECT &&
-	    Z_OBJCE_P(ret) == soap_fault_class_entry) {
+	    instanceof_function(Z_OBJCE_P(ret), soap_fault_class_entry TSRMLS_CC)) {
 	  char *detail_name;
 		HashTable* prop;
 		zval **tmp;
