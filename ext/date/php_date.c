@@ -185,6 +185,14 @@ static void php_date_init_globals(zend_date_globals *date_globals)
 }
 /* }}} */
 
+
+static void _php_date_tzinfo_dtor(void *tzinfo)
+{
+	timelib_tzinfo **tzi = (timelib_tzinfo **)tzinfo;
+
+	timelib_tzinfo_dtor(*tzi);
+}
+
 /* {{{ PHP_RINIT_FUNCTION */
 PHP_RINIT_FUNCTION(date)
 {
@@ -192,6 +200,7 @@ PHP_RINIT_FUNCTION(date)
 		efree(DATEG(timezone));
 	}
 	DATEG(timezone) = NULL;
+	zend_hash_init(&DATEG(tzcache), 4, NULL, _php_date_tzinfo_dtor, 0);
 
 	return SUCCESS;
 }
@@ -204,6 +213,7 @@ PHP_RSHUTDOWN_FUNCTION(date)
 		efree(DATEG(timezone));
 	}
 	DATEG(timezone) = NULL;
+	zend_hash_destroy(&DATEG(tzcache));
 
 	return SUCCESS;
 }
@@ -267,6 +277,20 @@ PHP_MINFO_FUNCTION(date)
 }
 /* }}} */
 
+/* {{{ Timezone Cache functions */
+static timelib_tzinfo *php_date_parse_tzfile(char *tzname, timelib_tzdb *tzdb TSRMLS_CC)
+{
+	timelib_tzinfo *tzi, **ptzi;
+
+	if (zend_hash_find(&DATEG(tzcache), tzname, strlen(tzname) + 1, (void **) &ptzi) == SUCCESS) {
+		return *ptzi;
+	}
+
+	tzi = timelib_parse_tzfile(tzname, tzdb);
+	zend_hash_add(&DATEG(tzcache), tzname, strlen(tzname) + 1, (void *) &tzi, sizeof(timelib_tzinfo*), NULL);
+	return tzi;
+}
+/* }}} */
 
 /* {{{ Helper functions */
 static char* guess_timezone(TSRMLS_D)
@@ -304,6 +328,34 @@ static char* guess_timezone(TSRMLS_D)
 		return tzid;
 	}
 #endif
+#ifdef PHP_WIN32
+	{
+		TIME_ZONE_INFORMATION tzi;
+
+		switch (GetTimeZoneInformation(&tzi))
+		{
+			case TIME_ZONE_ID_UNKNOWN:
+				/* we have no clue what it is, return UTC */
+				php_error_docref(NULL TSRMLS_CC, E_STRICT, "It is not safe to rely on the systems timezone settings, please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. We use 'UTC' instead.");
+				return "UTC";
+
+			case TIME_ZONE_ID_STANDARD:
+				tzid = timelib_timezone_id_from_abbr(tzi->StandardName, (tzi->Bias - tzi->StandardBias) * 60, 0);
+				php_error_docref(NULL TSRMLS_CC, E_STRICT, "It is not safe to rely on the systems timezone settings, please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. We use '%s' for '%s/%.1f/no DST' instead.", tzid, tzi->StandardName, (float) ((tzi->Bias - tzi->StandardBias) / 60));
+				break;
+
+			case TIME_ZONE_ID_STANDARD:
+				tzid = timelib_timezone_id_from_abbr(tzi->DaylightName, (tzi->Bias - tzi->DaylightBias) * 60, 0);
+				php_error_docref(NULL TSRMLS_CC, E_STRICT, "It is not safe to rely on the systems timezone settings, please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. We use '%s' for '%s/%.1f/DST' instead.", tzid, tzi->StandardName, (float) ((tzi->Bias - tzi->DaylightBias) / 60));
+				break;
+
+		}
+
+		php_error_docref(NULL TSRMLS_CC, E_STRICT, "Extra Debug Info: bias: %d, standard bias: %d, daylight bias: %d, s. name: %s, d. name: %s",
+			tzi->Bias, tzi->StandardBias, tzi->DaylightBias, tzi->StandardName, tzi->DaylightName);
+		return tzid;
+	}
+#endif
 	/* Fallback to UTC */
 	return "UTC";
 }
@@ -314,10 +366,10 @@ static timelib_tzinfo *get_timezone_info(TSRMLS_D)
 	timelib_tzinfo *tzi;
 	
 	tz = guess_timezone(TSRMLS_C);
-	tzi = timelib_parse_tzfile(tz, DATE_TIMEZONEDB);
+	tzi = php_date_parse_tzfile(tz, DATE_TIMEZONEDB);
 	if (! tzi) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Timezone setting (date.timezone) or TZ environment variable contains an unknown timezone.");
-		tzi = timelib_parse_tzfile("UTC", DATE_TIMEZONEDB);
+		tzi = php_date_parse_tzfile("UTC", DATE_TIMEZONEDB);
 
 		if (! tzi) {
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Timezone database is corrupt - this should *never* happen!");
@@ -491,11 +543,14 @@ static char *date_format(char *format, int format_len, timelib_time *t, int loca
 
 static void php_date(INTERNAL_FUNCTION_PARAMETERS, int localtime)
 {
-	char *format;
-	int   format_len;
-	time_t  ts = time(NULL);
-	char           *string;
+	char   *format;
+	int     format_len;
+	time_t  ts;
+	char   *string;
 
+	if (ZEND_NUM_ARGS() == 1) {
+		ts = time(NULL);
+	}
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &format, &format_len, &ts) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -523,10 +578,6 @@ PHPAPI char *php_format_date(char *format, int format_len, time_t ts, int localt
 	}
 
 	string = date_format(format, format_len, t, localtime);
-	
-	if (localtime) {
-		timelib_tzinfo_dtor(tzi);
-	}
 	
 	timelib_time_dtor(t);
 	return string;
@@ -609,7 +660,6 @@ PHP_FUNCTION(strtotime)
 		now = timelib_time_ctor();
 		timelib_unixtime2local(now, (timelib_sll) time(NULL), tzi);
 	} else {
-		timelib_tzinfo_dtor(tzi);
 		RETURN_FALSE;
 	}
 
@@ -626,7 +676,6 @@ PHP_FUNCTION(strtotime)
 		timelib_tzinfo_dtor(t->tz_info);
 	}
 
-	timelib_tzinfo_dtor(tzi);
 	timelib_time_dtor(now);	
 	timelib_time_dtor(t);
 
@@ -720,9 +769,6 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	ts = timelib_date_to_int(now, &error);
 	ts += adjust_seconds;
 	timelib_time_dtor(now);
-	if (!gmt) {
-		timelib_tzinfo_dtor(tzi);
-	}
 
 	if (error) {
 		RETURN_FALSE;
@@ -826,10 +872,6 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 #endif
 	}
 
-	if (!gmt) {
-		timelib_tzinfo_dtor(tzi);
-	}
-	
 	buf = (char *) emalloc(buf_len);
 	while ((real_len=strftime(buf, buf_len, format, &ta))==buf_len || real_len==0) {
 		buf_len *= 2;
@@ -919,7 +961,6 @@ PHP_FUNCTION(localtime)
 		add_next_index_long(return_value, ts->dst);
 	}
 
-	timelib_tzinfo_dtor(tzi);
 	timelib_time_dtor(ts);
 }
 /* }}} */
@@ -954,7 +995,6 @@ PHP_FUNCTION(getdate)
 	add_assoc_string(return_value, "month", mon_full_names[ts->m - 1], 1);
 	add_index_long(return_value, 0, timestamp);
 
-	timelib_tzinfo_dtor(tzi);
 	timelib_time_dtor(ts);
 }
 /* }}} */
@@ -1006,8 +1046,6 @@ static void date_object_free_storage_timezone(void *object TSRMLS_DC)
 {
 	php_timezone_obj *intern = (php_timezone_obj *)object;
 
-	timelib_tzinfo_dtor(intern->tz);
-	
 	efree(object);
 }
 
@@ -1050,7 +1088,7 @@ PHP_FUNCTION(date_create)
 	timelib_time   *now;
 	timelib_tzinfo *tzi;
 	char           *time_str;
-	int             time_str_len = 0;
+	int             time_str_len = 0, free_tzi = 0;;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sO", &time_str, &time_str_len, &timezone_object, date_ce_timezone) == FAILURE) {
 		RETURN_FALSE;
@@ -1065,8 +1103,10 @@ PHP_FUNCTION(date_create)
 
 		tzobj = (php_timezone_obj *) zend_object_store_get_object(timezone_object TSRMLS_CC);
 		tzi = timelib_tzinfo_clone(tzobj->tz);
+		free_tzi = 1;
 	} else if (dateobj->time->tz_info) {
 		tzi = timelib_tzinfo_clone(dateobj->time->tz_info);
+		free_tzi = 1;
 	} else {
 		tzi = get_timezone_info(TSRMLS_C);
 	}
@@ -1080,7 +1120,9 @@ PHP_FUNCTION(date_create)
 	if (now->tz_info != tzi) {
 		timelib_tzinfo_dtor(now->tz_info);
 	}
-	timelib_tzinfo_dtor(now->tz_info);
+	if (free_tzi) {
+		timelib_tzinfo_dtor(tzi);
+	}
 	timelib_time_dtor(now);	
 }
 
@@ -1255,12 +1297,12 @@ PHP_FUNCTION(timezone_open)
 		
 		tzid = timelib_timezone_id_from_abbr(tz, -1, 0);
 		if (tzid) {
-			tzi = timelib_parse_tzfile(tzid, DATE_TIMEZONEDB);
+			tzi = php_date_parse_tzfile(tzid, DATE_TIMEZONEDB);
 		}
 	}
 	/* Try finding the tz information as "Timezone Identifier" */
 	if (!tzi) {
-		tzi = timelib_parse_tzfile(tz, DATE_TIMEZONEDB);
+		tzi = php_date_parse_tzfile(tz, DATE_TIMEZONEDB);
 	}
 	/* If we find it we instantiate the object otherwise, well, we don't and return false */
 	if (tzi) {
@@ -1406,7 +1448,6 @@ PHP_FUNCTION(date_default_timezone_get)
 
 	default_tz = get_timezone_info(TSRMLS_C);
 	RETVAL_STRING(default_tz->name, 1);
-	timelib_tzinfo_dtor(default_tz);
 }
 /* }}} */
 
