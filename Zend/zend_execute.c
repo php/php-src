@@ -3563,7 +3563,7 @@ int zend_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 	zend_op_array *new_op_array=NULL;
 	zval **original_return_value = EG(return_value_ptr_ptr);
 	int return_value_used;
-	zval **free_op1;
+	zval *free_op1;
 	zval *inc_filename = get_zval_ptr(&opline->op1, EX(Ts), &free_op1, BP_VAR_R);
 	zval tmp_inc_filename;
 	zend_bool failure_retval=0;
