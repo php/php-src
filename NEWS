@@ -30,6 +30,7 @@ PHP                                                                        NEWS
   . ext/oracle (Jani, Derick)
   . ext/ovrimos (Jani, Derick, Pierre)
   . ext/pfpro (Jani, Derick, Pierre)
+- Added missing safe_mode/open_basedir checks for file uploads. (Ilia)
 - Fixed possible INI setting leak via virtual() in Apache 2 sapi. (Ilia)
 - Fixed potential GLOBALS overwrite via import_request_variables() and
   possible crash and/or memory corruption. (Ilia)
