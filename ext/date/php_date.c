@@ -344,8 +344,8 @@ static char* guess_timezone(TSRMLS_D)
 				php_error_docref(NULL TSRMLS_CC, E_STRICT, "It is not safe to rely on the systems timezone settings, please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. We use '%s' for '%s/%.1f/no DST' instead.", tzid, tzi->StandardName, (float) ((tzi->Bias - tzi->StandardBias) / 60));
 				break;
 
-			case TIME_ZONE_ID_STANDARD:
-				tzid = timelib_timezone_id_from_abbr(tzi->DaylightName, (tzi->Bias - tzi->DaylightBias) * 60, 0);
+			case TIME_ZONE_ID_DAYLIGHT:
+				tzid = timelib_timezone_id_from_abbr(tzi->DaylightName, (tzi->Bias - tzi->DaylightBias) * 60, 1);
 				php_error_docref(NULL TSRMLS_CC, E_STRICT, "It is not safe to rely on the systems timezone settings, please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. We use '%s' for '%s/%.1f/DST' instead.", tzid, tzi->StandardName, (float) ((tzi->Bias - tzi->DaylightBias) / 60));
 				break;
 
