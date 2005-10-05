@@ -19,68 +19,62 @@
 class RecursiveTreeIterator extends RecursiveIteratorIterator
 {
 	private $callToString;
-	
-	function __construct(RecursiveIterator $it, $cit_flags = CachingIterator::CATCH_GET_CHILD)
+
+	/**
+	 * @param it         iterator to use as inner iterator
+	 * @param flags      flags passed to RecursiveIteratoIterator (parent)
+	 * @param cit_flags  flags passed to RecursiveCachingIterator (for hasNext)
+	 */
+	function __construct(RecursiveIterator $it, $flags = self::SELF_FIRST, $cit_flags = CachingIterator::CATCH_GET_CHILD)
 	{
-		parent::__construct(new RecursiveCachingIterator($it, $cit_flags), 1);
+		parent::__construct(new RecursiveCachingIterator($it, $cit_flags), $flags);
 		$this->callToString = (bool)($cit_flags & CachingIterator::CALL_TOSTRING);
 	}
 
-	/** @return prefix used if $level < depth and hasNext($level) == true
+	/**  Prefix strings used in getPrefix()
+	 *
+	 * 0: prefix used to start elements
+	 * 1: prefix used if $level < depth and hasNext($level) == true
+	 * 2: prefix used if $level < depth and hasNext($level) == false
+	 * 3: prefix used if $level == depth and hasNext($level) == true
+	 * 4: prefix used if $level == depth and hasNext($level) == false
+	 * 5: prefix used right in front of the current element
 	 */
-	function getPrefix1()
-	{
-		return '| ';
-	}
+	public $prefix = array(0=>'', 1=>'| ', 2=>'  ', 3=>'|-', 4=>'\-', 5=>'');
 
-	/** @return prefix used if $level < depth and hasNext($level) == false
+	/** @return string to place in front of current element
 	 */
-	function getPrefix2()
-	{
-		return '  ';
-	}
-
-	/** @return prefix used if $level == depth and hasNext($level) == true
-	 */
-	function getPrefix3()
-	{
-		return '|-';
-	}
-
-	/** @return prefix used if $level == depth and hasNext($level) == false
-	 */
-	function getPrefix4()
-	{
-		return '\-';
-	}
-
-	function getPrefix($level)
-	{
-		if ($level < 0 || $level > $this->getDepth())
-		{
-			throw new OutOfBoundsException('Parameter $level must be >= 0 and <= depth');
-		}
-		if ($level < $this->getDepth())
-		{
-			return $this->getSubIterator($level)->hasNext() ? $this->getPrefix1() : $this->getPrefix2();
-		}
-		else
-		{
-			return $this->getSubIterator($level)->hasNext() ? $this->getPrefix3() : $this->getPrefix4();
-		}
-	}
-
-	/** @return the current element prefixed with ASCII graphics
-	 */
-	function current()
+	function getPrefix()
 	{
 		$tree = '';
-		for ($l=0; $l <= $this->getDepth(); $l++)
+		for ($level = 0; $level < $this->getDepth(); $level++)
 		{
-			$tree .= $this->getPrefix($l);
+			$tree .= $this->getSubIterator($level)->hasNext() ? $this->prefix[1] : $this->prefix[2];
 		}
-		
-		return $tree . ($this->callToString ? $this->__toString() : parent::current());
+		$tree .= $this->getSubIterator($level)->hasNext() ? $this->prefix[3] : $this->prefix[4];
+
+		return $this->prefix[0] . $tree . $this->prefix[5];
+	}
+
+	/** @return string presentation build for current element
+	 */
+	function getEntry()
+	{
+		return $this->callToString ? $this->__toString() : parent::current();
+	}
+
+	/** @return string to place after the current element
+	 */
+	function getPostfix()
+	{
+		return '';
+	}
+
+	/** @return the current element prefixed and postfixed
+	 */
+	function current()
+	{		
+		return $this->getPrefix() . $this->getEntry() .  $this->getPostfix();
 	}
 
 	/** Aggregates the inner iterator
@@ -90,3 +84,5 @@ class RecursiveTreeIterator extends RecursiveIteratorIterator
 		return call_user_func_array(array($this->getSubIterator(), $func), $params);
 	}
 }
+
+?>
