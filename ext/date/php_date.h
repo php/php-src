@@ -22,6 +22,7 @@
 #define PHP_DATE_H
 
 #include "lib/timelib.h"
+#include "Zend/zend_hash.h"
 
 extern zend_module_entry date_module_entry;
 #define phpext_date_ptr &date_module_entry
@@ -77,8 +78,9 @@ PHP_MSHUTDOWN_FUNCTION(date);
 PHP_MINFO_FUNCTION(date);
 
 ZEND_BEGIN_MODULE_GLOBALS(date)
-	char *default_timezone;
-	char *timezone;
+	char      *default_timezone;
+	char      *timezone;
+	HashTable  tzcache;
 ZEND_END_MODULE_GLOBALS(date)
 
 #ifdef ZTS
