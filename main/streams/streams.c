@@ -855,6 +855,8 @@ PHPAPI void *_php_stream_u_read(php_stream *stream, void *buf, int32_t *pnum_byt
 	*pnum_chars = num_chars;
 	*pis_unicode = is_unicode;
 
+	stream->position += num_bytes;
+	
 	if (num_chars == 0 && grow_mode) {
 		efree(buf);
 		buf = NULL;
