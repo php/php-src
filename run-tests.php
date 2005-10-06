@@ -572,9 +572,7 @@ if (!getenv('NO_INTERACTION')) {
 		
 		if ($just_save_results || !mail_qa_team($failed_tests_data, $compression, $status)) {
 			$output_file = $CUR_DIR . '/php_test_results_' . date('Ymd_Hi') . ( $compression ? '.txt.gz' : '.txt' );
-			$fp = fopen($output_file, "wt");
-			fwrite($fp, $failed_tests_data);
-			fclose($fp);
+			file_put_contents($output_file, $failed_tests_data);
 		
 			if (!$just_save_results) {
 			    echo "\nThe test script was unable to automatically send the report to PHP's QA Team\n";
@@ -633,9 +631,7 @@ function save_text($filename,$text)
 {
 	global $DETAILED;
 
-	$fp = @fopen($filename,'wt') or error("Cannot open file '" . $filename . "' (save_text)");
-	fwrite($fp,$text);
-	fclose($fp);
+	@file_put_contents($filename, $text) or error("Cannot open file '" . $filename . "' (save_text)");
 	if (1 < $DETAILED) echo "
 FILE $filename {{{
 $text
