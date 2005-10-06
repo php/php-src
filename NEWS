@@ -54,6 +54,7 @@ PHP                                                                        NEWS
 - Fixed bug #34584 (Segfault with SPL autoload handler). (Marcus)
 - Fixed bug #34565 (mb_send_mail does not fetch mail.force_extra_parameters).
   (Marco, Ilia)
+- Fixed bug #34557 (php -m exits with "error" 1). (Johannes)
 - Fixed bug #34518 (Unset doesn't separate container in CV). (Dmitry)
 - Fixed bug #34505 (Possible memory corruption when unmangling properties 
   with empty names). (Tony)
