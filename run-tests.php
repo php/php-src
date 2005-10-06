@@ -171,6 +171,7 @@ PHP_SAPI    : " . PHP_SAPI . "
 PHP_VERSION : " . phpversion() . "
 ZEND_VERSION: " . zend_version() . "
 PHP_OS      : " . PHP_OS . " - " . php_uname() . "
+UNICODE     : " . (ini_get("unicode_semantics") ? "ON" : "OFF") . "
 INI actual  : " . realpath(get_cfg_var("cfg_file_path")) . "
 More .INIs  : " . (function_exists(\'php_ini_scanned_files\') ? str_replace("\n","", php_ini_scanned_files()) : "** not determined **"); ?>';
 	save_text($info_file, $php_info);
