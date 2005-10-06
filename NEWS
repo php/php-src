@@ -13,6 +13,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #34645 (ctype corrupts memory when validating large numbers). (Ilia)
 - Fixed bug #34565 (mb_send_mail does not fetch mail.force_extra_parameters).
   (Marco, Ilia)
+- Fixed bug #34557 (php -m exits with "error" 1). (Johannes)
 - Fixed bug #34456 (Possible crash inside pspell extension). (Nuno)
 - Fixed bug #34311 (unserialize() crashes with chars above 191 dec). (Nuno)
 - Fixed bug #34307 (on_modify handler not called to set the default value if

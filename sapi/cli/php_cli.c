@@ -623,8 +623,9 @@ int main(int argc, char *argv[])
 				php_output_activate(TSRMLS_C);
 				php_cli_usage(argv[0]);
 				php_end_ob_buffers(1 TSRMLS_CC);
-				exit_status=1;
-				goto err;
+				exit_status=0;
+				zend_ini_deactivate(TSRMLS_C);
+				goto out_err;
 
 
 			case 'i': /* php info & quit */
@@ -633,7 +634,7 @@ int main(int argc, char *argv[])
 				}
 				php_print_info(0xFFFFFFFF TSRMLS_CC);
 				php_end_ob_buffers(1 TSRMLS_CC);
-				exit_status=1;
+				exit_status=0;
 				goto out;
 
 			case 'm': /* list compiled in modules */
@@ -645,8 +646,9 @@ int main(int argc, char *argv[])
 				print_extensions(TSRMLS_C);
 				php_printf("\n");
 				php_end_ob_buffers(1 TSRMLS_CC);
-				exit_status=1;
-				goto err;
+				exit_status=0;
+				zend_ini_deactivate(TSRMLS_C);
+				goto out_err;
 
 			case 'v': /* show php version & quit */
 				if (php_request_startup(TSRMLS_C)==FAILURE) {
@@ -658,7 +660,7 @@ int main(int argc, char *argv[])
 				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2004 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 #endif
 				php_end_ob_buffers(1 TSRMLS_CC);
-				exit_status=1;
+				exit_status=0;
 				goto out;
 
 			default:
