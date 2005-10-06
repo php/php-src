@@ -3,6 +3,12 @@ Bug #32290 (calling call_user_func_array() ends in infinite loop within child cl
 --FILE--
 <?php
 
+function my_error_handler($errno, $errstr, $errfile, $errline) {
+	var_dump($errstr);
+}
+
+set_error_handler('my_error_handler');
+
 class TestA
 {
 	public function doSomething($i)
