@@ -1083,7 +1083,7 @@ static zval *sxe_get_value(zval *z TSRMLS_DC)
 
 	MAKE_STD_ZVAL(retval);
 
-	if (sxe_object_cast(z, retval, IS_STRING, 0 TSRMLS_CC)==FAILURE) {
+	if (sxe_object_cast(z, retval, IS_STRING TSRMLS_CC)==FAILURE) {
 		zend_error(E_ERROR, "Unable to cast node to string");
 		/* FIXME: Should not be fatal */
 	}
