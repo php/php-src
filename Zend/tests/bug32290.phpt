@@ -35,7 +35,9 @@ var_dump($x->doSomething(1));
 ?>
 ===DONE===
 --EXPECTF--
-TestB::doSomething(Object id #%d)
-TestA::doSomething(Object id #%d)
+string(54) "Object of class TestB could not be converted to string"
+TestB::doSomething()
+string(54) "Object of class TestB could not be converted to string"
+TestA::doSomething()
 int(1)
 ===DONE===
