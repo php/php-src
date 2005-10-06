@@ -313,7 +313,13 @@ static size_t php_stream_temp_read(php_stream *stream, char *buf, size_t count T
 	ts = stream->abstract;
 	assert(ts != NULL);
 
-	return php_stream_read(ts->innerstream, buf, count);
+	size_t got = php_stream_read(ts->innerstream, buf, count);
+	
+	if (!got) {
+		stream->eof |= ts->innerstream->eof;
+	}
+	
+	return got;
 }
 /* }}} */
 
