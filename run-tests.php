@@ -217,6 +217,7 @@ echo "
 // Determine the tests to be run.
 
 $test_files = array();
+$redir_tests = array();
 $test_results = array();
 $PHP_FAILED_TESTS = array('BORKED' => array(), 'FAILED' => array());
 
@@ -232,21 +233,29 @@ if (isset($argc) && $argc > 1) {
 				case 'r':
 				case 'l':
 					$test_list = @file($argv[++$i]);
-					if (is_array($test_list) && count($test_list)) {
-						$test_files = array_merge($test_files, $test_list);
+					if ($test_list) {
+						foreach($test_list as $test) {
+							$matches = array();
+							if (preg_match('/^#.*\[(.*)\]\:\s+(.*)$/', $test, $matches)) {
+								$redir_tests[] = array($matches[1], $matches[2]);
+							} else if (strlen($test)) {
+								$test_files[] = trim($test);
+							}
+						}
 					}
 					if ($switch != 'l') {
 						break;
 					}
 					$i--;
-				case 'v':
-					$DETAILED = true;
-					break;
+					// break left intentionally
 				case 'w':
 					$failed_tests_file = fopen($argv[++$i], 'w+t');
 					break;
 				case 'a':
 					$failed_tests_file = fopen($argv[++$i], 'a+t');
+					break;
+				case 'v':
+					$DETAILED = true;
 					break;
 				case 'n':
 					if (!$pass_option_n) {
@@ -277,7 +286,7 @@ Options:
     -l <file>   Read the testfiles to be executed from <file>. After the test 
                 has finished all failed tests are written to the same <file>. 
                 If the list is empty and no further test is specified then
-                all tests are executed.
+                all tests are executed (same as: -r <file> -w <file>).
 
     -r <file>   Read the testfiles to be executed from <file>.
 
@@ -311,9 +320,7 @@ HELP;
 		}
 	}
 	$test_files = array_unique($test_files);
-	for($i = 0; $i < count($test_files); $i++) {
-		$test_files[$i] = trim($test_files[$i]);
-	}
+	$test_files = array_merge($test_files, $redir_tests);
 
 	// Run selected tests.
 	$test_cnt = count($test_files);
@@ -324,7 +331,7 @@ HELP;
 		$start_time = time();
 		$test_idx = 0;
 		foreach($test_files AS $name) {
-			$test_results[$name] = run_test($php,$name,$test_cnt,++$test_idx);
+			$test_results[is_array($name) ? $name[0] : $name] = run_test($php,$name,$test_cnt,++$test_idx);
 			if ($failed_tests_file && ($test_results[$name] == 'FAILED' || $test_results[$name] == 'WARNED')) {
 				fwrite($failed_tests_file, "$name\n");
 			}
@@ -409,9 +416,21 @@ function find_files($dir,$is_ext_dir=FALSE,$ignore=FALSE)
 	closedir($o);
 }
 
+function test_name($name)
+{
+	if (is_array($name)) {
+		return $name[0] . ':' . $name[1];
+	} else {
+		return $name;
+	}
+}
+
 function test_sort($a, $b)
 {
 	global $cwd;
+	
+	$a = test_name($a);
+	$b = test_name($b);
 
 	$ta = strpos($a, "{$cwd}/tests")===0 ? 1 + (strpos($a, "{$cwd}/tests/run-test")===0 ? 1 : 0) : 0;
 	$tb = strpos($b, "{$cwd}/tests")===0 ? 1 + (strpos($b, "{$cwd}/tests/run-test")===0 ? 1 : 0) : 0;
@@ -695,6 +714,10 @@ function system_with_timeout($commandline)
 function run_test($php, $file, $test_cnt, $test_idx)
 {
 	global $log_format, $info_params, $ini_overwrites, $cwd, $PHP_FAILED_TESTS, $pass_options, $DETAILED, $IN_REDIRECT;
+	
+	$org_file = $file;
+	
+	if (is_array($file)) $file = $file[0];
 
 	if ($DETAILED) echo "
 =================
@@ -884,7 +907,11 @@ TEST $file
 		$IN_REDIRECT['dir'] = realpath(dirname($file));
 		$IN_REDIRECT['prefix'] = trim($section_text['TEST']);
 
-		find_files($IN_REDIRECT['TESTS']);
+		if (is_array($org_file)) {
+			$test_files[] = $org_file[1];
+		} else {
+			find_files($IN_REDIRECT['TESTS']);
+		}
 		$test_cnt += count($test_files);
 		$GLOBALS['test_cnt'] = $test_cnt;
 
@@ -901,7 +928,7 @@ TEST $file
 			$result = run_test($php, $name, $test_cnt, ++$test_idx);
 			$test_results[$tested . ': ' . $name] = $result;
 			if ($failed_tests_file && ($result == 'FAILED' || $result == 'WARNED')) {
-				fwrite($failed_tests_file, "$tested: $name\n");
+				fwrite($failed_tests_file, "# $tested: $name\n");
 			}
 		}
 
