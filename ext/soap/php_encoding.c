@@ -319,6 +319,10 @@ xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr par
 			node = encode->to_xml_after(&encode->details, node, style);
 		}
 	}
+	if(!node) {
+		node = xmlNewNode(NULL,"BOGUS");
+		xmlAddChild(parent, node);
+	}
 	return node;
 }
 
@@ -1512,7 +1516,6 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 	int i;
 	sdlTypePtr sdlType = type->sdl_type;
 	TSRMLS_FETCH();
-
 	if (!data || Z_TYPE_P(data) == IS_NULL) {
 		xmlParam = xmlNewNode(NULL,"BOGUS");
 		xmlAddChild(parent, xmlParam);
@@ -1535,6 +1538,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 
 			enc = sdlType->encode;
 			while (enc && enc->details.sdl_type &&
+			       enc->details.sdl_type->kind != XSD_TYPEKIND_COMPLEX &&
 			       enc->details.sdl_type->kind != XSD_TYPEKIND_SIMPLE &&
 			       enc->details.sdl_type->kind != XSD_TYPEKIND_LIST &&
 			       enc->details.sdl_type->kind != XSD_TYPEKIND_UNION) {
@@ -1544,12 +1548,9 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 				zval *tmp = get_zval_property(data, "_" TSRMLS_CC);
 				if (tmp) {
 					xmlParam = master_to_xml(enc, tmp, style, parent);
-				} else if (prop == NULL) {
-					xmlParam = master_to_xml(enc, data, style, parent);
 				} else {
-					xmlParam = xmlNewNode(NULL,"BOGUS");
-					xmlAddChild(parent, xmlParam);
-				}
+					xmlParam = master_to_xml(enc, data, style, parent);
+				} 
 			} else {
 				xmlParam = xmlNewNode(NULL,"BOGUS");
 				xmlAddChild(parent, xmlParam);
@@ -1557,6 +1558,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 		} else if (sdlType->kind == XSD_TYPEKIND_EXTENSION &&
 		           sdlType->encode && type != &sdlType->encode->details) {
 			if (sdlType->encode->details.sdl_type &&
+			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_COMPLEX &&
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_SIMPLE &&
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_LIST &&
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_UNION) {
@@ -1566,11 +1568,8 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 
 				if (tmp) {
 					xmlParam = master_to_xml(sdlType->encode, tmp, style, parent);
-				} else if (prop == NULL) {
-					xmlParam = master_to_xml(sdlType->encode, data, style, parent);
 				} else {
-					xmlParam = xmlNewNode(NULL,"BOGUS");
-					xmlAddChild(parent, xmlParam);
+					xmlParam = master_to_xml(sdlType->encode, data, style, parent);
 				}
 			}
 		} else {
