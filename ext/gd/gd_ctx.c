@@ -82,7 +82,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	}
 
 	if ((argc == 2) || (argc > 2 && Z_STRLEN_PP(file))) {
-		if (!fn || php_check_open_basedir(fn TSRMLS_CC)) {
+		if (!fn || php_check_open_basedir(fn TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(fn, "rb+", CHECKUID_CHECK_FILE_AND_DIR))) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid filename '%s'", fn);
 			RETURN_FALSE;
 		}
