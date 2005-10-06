@@ -1042,6 +1042,18 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 			INIT_PZVAL(writeobj);
 			ZVAL_BOOL(writeobj, 1);
 			return SUCCESS;
+		case IS_LONG:
+			ce = Z_OBJCE_P(readobj);
+			zend_error(E_NOTICE, "Object of class %v could not be converted to int", ce->name);
+			INIT_PZVAL(writeobj);
+			ZVAL_LONG(writeobj, 1);
+			return SUCCESS;
+		case IS_DOUBLE:
+			ce = Z_OBJCE_P(readobj);
+			zend_error(E_NOTICE, "Object of class %v could not be converted to double", ce->name);
+			INIT_PZVAL(writeobj);
+			ZVAL_DOUBLE(writeobj, 1);
+			return SUCCESS;
 		default:
 			break;
 	}
