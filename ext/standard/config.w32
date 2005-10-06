@@ -4,6 +4,8 @@
 ARG_WITH("config-file-scan-dir", "Dir to check for additional php ini files", "");
 AC_DEFINE("PHP_CONFIG_FILE_SCAN_DIR", PHP_CONFIG_FILE_SCAN_DIR);
 
+CHECK_HEADER_ADD_INCLUDE("timelib_config.h", "CFLAGS_STANDARD", "ext/date/lib");
+
 EXTENSION("standard", "array.c base64.c basic_functions.c browscap.c \
 	crc32.c crypt.c cyr_convert.c datetime.c dir.c dl.c dns.c exec.c \
 	file.c filestat.c formatted_print.c fsock.c head.c html.c image.c \
