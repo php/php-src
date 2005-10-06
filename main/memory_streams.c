@@ -12,10 +12,11 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author:                                                              |
-   | Marcus Boerger <helly@php.net>                                       |
+   | Author: Marcus Boerger <helly@php.net>                               |
    +----------------------------------------------------------------------+
  */
+
+/* $Id$ */
 
 #define _GNU_SOURCE
 #include "php.h"
@@ -214,7 +215,6 @@ PHPAPI php_stream *_php_stream_memory_create(int mode STREAMS_DC TSRMLS_DC)
 	php_stream *stream;
 
 	self = emalloc(sizeof(*self));
-	assert(self != NULL);
 	self->data = NULL;
 	self->fpos = 0;
 	self->fsize = 0;
@@ -313,7 +313,13 @@ static size_t php_stream_temp_read(php_stream *stream, char *buf, size_t count T
 	ts = stream->abstract;
 	assert(ts != NULL);
 
-	return php_stream_read(ts->innerstream, buf, count);
+	size_t got = php_stream_read(ts->innerstream, buf, count);
+	
+	if (!got) {
+		stream->eof |= ts->innerstream->eof;
+	}
+	
+	return got;
 }
 /* }}} */
 
@@ -423,15 +429,15 @@ php_stream_ops	php_stream_temp_ops = {
 	NULL /* set_option */
 };
 
+/* }}} */
 
-/* {{{ */
+/* {{{ _php_stream_temp_create */
 PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STREAMS_DC TSRMLS_DC)
 {
 	php_stream_temp_data *self;
 	php_stream *stream;
 
 	self = ecalloc(1, sizeof(*self));
-	assert(self != NULL);
 	self->smax = max_memory_usage;
 	self->mode = mode;
 	stream = php_stream_alloc(&php_stream_temp_ops, self, 0, "r+b");
@@ -443,7 +449,7 @@ PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STR
 /* }}} */
 
 
-/* {{{ */
+/* {{{ _php_stream_temp_open */
 PHPAPI php_stream *_php_stream_temp_open(int mode, size_t max_memory_usage, char *buf, size_t length STREAMS_DC TSRMLS_DC)
 {
 	php_stream *stream;
@@ -461,6 +467,7 @@ PHPAPI php_stream *_php_stream_temp_open(int mode, size_t max_memory_usage, char
 	return stream;
 }
 /* }}} */
+
 
 /*
  * Local variables:
