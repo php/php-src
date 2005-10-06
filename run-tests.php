@@ -330,17 +330,12 @@ HELP;
 		echo "Running selected tests.\n";
 		$start_time = time();
 		$test_idx = 0;
-		foreach($test_files AS $name) {
-			$test_results[is_array($name) ? $name[0] : $name] = run_test($php,$name,$test_cnt,++$test_idx);
-			if ($failed_tests_file && ($test_results[$name] == 'FAILED' || $test_results[$name] == 'WARNED')) {
-				fwrite($failed_tests_file, "$name\n");
-			}
-		}
+		run_all_tests($test_files);
+		$end_time = time();
 		if ($failed_tests_file) {
 			fclose($failed_tests_file);
 		}
-		$end_time = time();
-		if (count($test_files)) {
+		if (count($test_files) || count($test_results)) {
 			echo "
 =====================================================================";
 			compute_summary();
@@ -452,11 +447,11 @@ echo "TIME START " . date('Y-m-d H:i:s', $start_time) . "
 
 $test_cnt = count($test_files);
 $test_idx = 0;
-foreach ($test_files as $name) {
-	$test_results[$name] = run_test($php,$name,$test_cnt,++$test_idx);
-}
-
+run_all_tests($test_files);
 $end_time = time();
+if ($failed_tests_file) {
+	fclose($failed_tests_file);
+}
 
 // Summarize results
 
@@ -703,13 +698,34 @@ function system_with_timeout($commandline)
 	return $data;
 }
 
+function run_all_tests($test_files, $redir_tested = NULL)
+{
+	global $test_results, $failed_tests_file, $php, $test_cnt, $test_idx;
+
+	foreach($test_files AS $name) {
+		$index = is_array($name) ? $name[0] : $name;
+		$test_idx++;
+		$result = run_test($php,$name);
+		if (!is_array($name) && $result != 'REDIR') {
+			$test_results[$index] = $result;
+			if ($failed_tests_file && ($result == 'FAILED' || $result == 'WARNED')) {
+				if ($redir_tested) {
+					fwrite($failed_tests_file, "# $redir_tested: $name\n");
+				} else {
+					fwrite($failed_tests_file, "$name\n");
+				}
+			}
+		}
+	}
+}
+
 //
 //  Run an individual test case.
 //
 
-function run_test($php, $file, $test_cnt, $test_idx)
+function run_test($php, $file)
 {
-	global $log_format, $info_params, $ini_overwrites, $cwd, $PHP_FAILED_TESTS, $pass_options, $DETAILED, $IN_REDIRECT;
+	global $log_format, $info_params, $ini_overwrites, $cwd, $PHP_FAILED_TESTS, $pass_options, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx;
 	
 	$org_file = $file;
 	
@@ -894,8 +910,6 @@ TEST $file
 	}
 
 	if (@count($section_text['REDIRECTTEST']) == 1) {
-		global $test_files, $test_results, $failed_tests_file;
-		$saved_test_files = $test_files;
 		$test_files = array();
 
 		$IN_REDIRECT = eval($section_text['REDIRECTTEST']);
@@ -906,10 +920,12 @@ TEST $file
 		if (is_array($org_file)) {
 			$test_files[] = $org_file[1];
 		} else {
+			$GLOBALS['test_files'] = $test_files;
 			find_files($IN_REDIRECT['TESTS']);
+			$test_files = $GLOBALS['test_files'];
 		}
-		$test_cnt += count($test_files);
-		$GLOBALS['test_cnt'] = $test_cnt;
+		$test_cnt += count($test_files) - 1;
+		$test_idx--;
 
 		echo "---> $IN_REDIRECT[TESTS] ($tested)\n";
 
@@ -920,19 +936,9 @@ TEST $file
 		putenv("REDIR_TEST_DIR=" . realpath($IN_REDIRECT['TESTS']) . DIRECTORY_SEPARATOR);
 
 		usort($test_files, "test_sort");
-		foreach ($test_files as $name) {
-			$result = run_test($php, $name, $test_cnt, ++$test_idx);
-			$test_results[$tested . ': ' . $name] = $result;
-			if ($failed_tests_file && ($result == 'FAILED' || $result == 'WARNED')) {
-				fwrite($failed_tests_file, "# $tested: $name\n");
-			}
-		}
+		run_all_tests($test_files, $tested);
 
 		echo "---> $IN_REDIRECT[TESTS] ($tested) done\n";
-
-		$GLOBALS['test_idx'] = $test_idx;
-
-		$test_files = $saved_test_files;
 
 		// clean up environment
 		foreach ($IN_REDIRECT['ENV'] as $k => $v) {
@@ -942,7 +948,12 @@ TEST $file
 
 		// a redirected test never fails
 		$IN_REDIRECT = false;
-		return 'PASSED';
+		return 'REDIR';
+	} else if (is_array($org_file)) {
+		echo "--> Redirected test did not contain redirection info: $org_file[0]\n";
+		$test_cnt -= 1;
+		$test_idx--;
+		return 'REDIR';
 	}
 	
 
