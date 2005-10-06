@@ -1,3 +1,83 @@
+2005-10-05  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_1)
+      ext/wddx/php_wddx_api.h
+      ext/wddx/wddx.c:
+      MFH: fix buffer lengths passed to snprintf
+
+    * ext/wddx/php_wddx_api.h
+      ext/wddx/wddx.c:
+      fix buffer lengths passed to snprintf
+
+2005-10-05  Antony Dovgal  <antony@zend.com>
+
+    * main/streams/streams.c:
+      fix fwrite() and fgets() in unicode mode
+
+2005-10-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/simplexml.c:
+      - Update cast_object handlers
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_operators.c:
+      - Have __toString() be called if available in all places an object is used
+        as a string.
+
+    * ZendEngine2/zend_interfaces.c:
+      - Fix warnings
+
+2005-10-05  Antony Dovgal  <antony@zend.com>
+
+    * main/streams/streams.c:
+      fix bugs #34743 & #34118 (fseek/fread unicode related problems in HEAD)
+      patch by Alex
+
+2005-10-05  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xmlrpc/xmlrpc-epi-php.c:
+      fix ZTS build
+
+2005-10-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      ext/curl/curl.c
+      ext/curl/interface.c
+      ext/curl/interface.c:
+      MFH: Missing safe_mode/open_basedir checks for file uploads.
+
+    * ext/curl/interface.c:
+      Missing safe_mode/open_basedir checks for file uploads.
+
+2005-10-05  Rolland Santimano  <rollandsantimano@yahoo.com>
+
+    * ext/standard/string.c:
+      - strip_tags(): some fixes, still AWiP
+
+2005-10-05  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/array/bug30833.phpt:
+      fix test
+
+2005-10-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      sapi/apache2handler/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c:
+      MFH: Fixed possible INI setting leak via virtual() in Apache 2 sapi.
+
 2005-10-04  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_0)

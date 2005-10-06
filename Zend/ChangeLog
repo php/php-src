@@ -1,3 +1,17 @@
+2005-10-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend.c
+      zend_API.c
+      zend_execute.h
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_operators.c:
+      - Have __toString() be called if available in all places an object is used
+        as a string.
+
+    * zend_interfaces.c:
+      - Fix warnings
+
 2005-10-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_execute.h:
