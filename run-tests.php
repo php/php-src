@@ -163,53 +163,53 @@ function write_information()
 {
 	global $cwd, $php, $php_info, $user_tests, $ini_overwrites, $pass_options;
 
-// Get info from php
-$info_file = realpath(dirname(__FILE__)) . '/run-test-info.php';
-@unlink($info_file);
-$php_info = '<?php echo "
+	// Get info from php
+	$info_file = realpath(dirname(__FILE__)) . '/run-test-info.php';
+	@unlink($info_file);
+	$php_info = '<?php echo "
 PHP_SAPI    : " . PHP_SAPI . "
 PHP_VERSION : " . phpversion() . "
 ZEND_VERSION: " . zend_version() . "
 PHP_OS      : " . PHP_OS . " - " . php_uname() . "
 INI actual  : " . realpath(get_cfg_var("cfg_file_path")) . "
 More .INIs  : " . (function_exists(\'php_ini_scanned_files\') ? str_replace("\n","", php_ini_scanned_files()) : "** not determined **"); ?>';
-save_text($info_file, $php_info);
-$info_params = array();
-settings2array($ini_overwrites,$info_params);
-settings2params($info_params);
-$php_info = `$php $pass_options $info_params $info_file`;
-@unlink($info_file);
-define('TESTED_PHP_VERSION', `$php -r 'echo PHP_VERSION;'`);
+	save_text($info_file, $php_info);
+	$info_params = array();
+	settings2array($ini_overwrites,$info_params);
+	settings2params($info_params);
+	$php_info = `$php $pass_options $info_params $info_file`;
+	@unlink($info_file);
+	define('TESTED_PHP_VERSION', `$php -r 'echo PHP_VERSION;'`);
 
-$unicode = `$php $pass_options $info_params -r 'echo ini_get("unicode_semantics");'`;
-define('TESTED_UNICODE', strcasecmp($unicode,"on") == 0 || $unicode == 1);
+	$unicode = `$php $pass_options $info_params -r 'echo ini_get("unicode_semantics");'`;
+	define('TESTED_UNICODE', strcasecmp($unicode,"on") == 0 || $unicode == 1);
 
-// check for extensions that need special handling and regenerate
-$php_extensions = '<?php echo join(",",get_loaded_extensions()); ?>'; 
-save_text($info_file, $php_extensions);
-$php_extensions = explode(',',`$php $pass_options $info_params $info_file`);
-$info_params_ex = array(
+	// check for extensions that need special handling and regenerate
+	$php_extensions = '<?php echo join(",",get_loaded_extensions()); ?>'; 
+	save_text($info_file, $php_extensions);
+	$php_extensions = explode(',',`$php $pass_options $info_params $info_file`);
+	$info_params_ex = array(
 		'session' => array('session.auto_start=0'),
 		'zlib' => array('zlib.output_compression=Off'),
 		'xdebug' => array('xdebug.default_enable=0'),
 	);
-foreach($info_params_ex as $ext => $ini_overwrites_ex) {
-	if (in_array($ext, $php_extensions)) {
-		$ini_overwrites = array_merge($ini_overwrites, $ini_overwrites_ex);
+	foreach($info_params_ex as $ext => $ini_overwrites_ex) {
+		if (in_array($ext, $php_extensions)) {
+			$ini_overwrites = array_merge($ini_overwrites, $ini_overwrites_ex);
+		}
 	}
-}
-@unlink($info_file);
+	@unlink($info_file);
 
-// Write test context information.
-echo "
+	// Write test context information.
+	echo "
 =====================================================================
 CWD         : $cwd
 PHP         : $php $php_info
 Extra dirs  : ";
-foreach ($user_tests as $test_dir) {
-	echo "{$test_dir}\n              ";
-}
-echo "
+	foreach ($user_tests as $test_dir) {
+		echo "{$test_dir}\n              ";
+	}
+	echo "
 =====================================================================
 ";
 }
