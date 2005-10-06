@@ -32,8 +32,4 @@ catch(Exception $e)
 ?>
 ====DONE====
 --EXPECTF--
-string(5) "Damn!"
-====DONE====
---UEXPECTF--
-unicode(5) "Damn!"
-====DONE====
+Fatal error: Object of class Test could not be converted to string in %stostring_003.php on line %d
