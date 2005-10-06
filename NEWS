@@ -7,6 +7,7 @@ PHP                                                                        NEWS
 - Fixed bug #34643 (wsdl default value has no effect). (Dmitry)
 - Fixed bug #34617 (zend_deactivate: objects_store used after
   zend_objects_store_destroy is called). (Dmitry)
+- Fixed bug #34557 (php -m exits with "error" 1). (Johannes)
 - Fixed bug #34505 (Possible memory corruption when unmangling properties 
   with empty names). (Tony)
 - Fixed bug #34478 (Incorrect parsing of url's fragment (#...)). (Dmitry)
