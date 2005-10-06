@@ -1038,6 +1038,10 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 				}
 			}
 			return FAILURE;
+		case IS_BOOL:
+			INIT_PZVAL(writeobj);
+			ZVAL_BOOL(writeobj, 1);
+			return SUCCESS;
 		default:
 			break;
 	}
