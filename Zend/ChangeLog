@@ -1,3 +1,33 @@
+2005-10-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      zend_reflection_api.c:
+      - MFH ReflectionClass::isInstantiable and abstract classes
+
+    * zend_object_handlers.c:
+      - BC: php objects convert to int/double 1 with notice
+
+    * tests/bug32322.phpt:
+      - Show the test finishes/dos2unix
+
+    * tests/bug28444.phpt
+      tests/bug30791.phpt
+      tests/bug32290.phpt
+      tests/bug32290.phpt:
+      - Fix test
+
+    * tests/bug26166.phpt:
+      - Fix test
+      - Convert to unicode
+
+    * zend_object_handlers.c:
+      - Any php object converts to boolean as true
+
+2005-10-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_API.c:
+      Cleanup
+
 2005-10-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend.c
