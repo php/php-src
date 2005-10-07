@@ -280,16 +280,16 @@ PHP_MINFO_FUNCTION(date)
 /* }}} */
 
 /* {{{ Timezone Cache functions */
-static timelib_tzinfo *php_date_parse_tzfile(char *tzname, timelib_tzdb *tzdb TSRMLS_DC)
+static timelib_tzinfo *php_date_parse_tzfile(char *formal_tzname, timelib_tzdb *tzdb TSRMLS_DC)
 {
 	timelib_tzinfo *tzi, **ptzi;
 
-	if (zend_hash_find(&DATEG(tzcache), tzname, strlen(tzname) + 1, (void **) &ptzi) == SUCCESS) {
+	if (zend_hash_find(&DATEG(tzcache), formal_tzname, strlen(formal_tzname) + 1, (void **) &ptzi) == SUCCESS) {
 		return *ptzi;
 	}
 
-	tzi = timelib_parse_tzfile(tzname, tzdb);
-	zend_hash_add(&DATEG(tzcache), tzname, strlen(tzname) + 1, (void *) &tzi, sizeof(timelib_tzinfo*), NULL);
+	tzi = timelib_parse_tzfile(formal_tzname, tzdb);
+	zend_hash_add(&DATEG(tzcache), formal_tzname, strlen(formal_tzname) + 1, (void *) &tzi, sizeof(timelib_tzinfo*), NULL);
 	return tzi;
 }
 /* }}} */
