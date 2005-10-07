@@ -43,6 +43,7 @@ PHP                                                                        NEWS
 - Fixed "make test" to work for phpized extensions. (Hartmut, Jani)
 - Fixed failing queries (FALSE returned) with mysqli_query() on 64 bit systems.
   (Andrey)
+- Fixed bug #34771 (strtotime() fails with 1-12am/pm). (Derick)
 - Fixed bug #34723 (array_count_values() strips leading zeroes). (Tony)
 - Fixed bug #34678 (__call(), is_callable() and static methods). (Dmitry)
 - Fixed bug #34645 (ctype corrupts memory when validating large numbers). (Ilia)
