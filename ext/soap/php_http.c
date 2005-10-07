@@ -836,6 +836,7 @@ try_again:
 		php_stream_close(stream);
 		zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
 		zend_hash_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy"));
+		stream = NULL;
 	}
 
 	/* Process HTTP status codes */
@@ -848,13 +849,6 @@ try_again:
 			int body_size;
 
 			if (new_url != NULL) {
-				if (get_http_body(stream, !http_1_1, http_headers, &body, &body_size TSRMLS_CC)) {
-					efree(body);
-				} else {
-					php_stream_close(stream);
-					zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
-					stream = NULL;
-				}
 				efree(http_headers);
 				efree(http_body);
 				efree(loc);
