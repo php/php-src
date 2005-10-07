@@ -340,6 +340,7 @@ static char* guess_timezone(TSRMLS_D)
 			case TIME_ZONE_ID_UNKNOWN:
 				/* we have no clue what it is, return UTC */
 				php_error_docref(NULL TSRMLS_CC, E_STRICT, "It is not safe to rely on the systems timezone settings, please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. We use 'UTC' instead.");
+				tzid = "UTC";
 				break;
 
 			case TIME_ZONE_ID_STANDARD:
@@ -357,8 +358,8 @@ static char* guess_timezone(TSRMLS_D)
 				}
 				php_error_docref(NULL TSRMLS_CC, E_STRICT, "It is not safe to rely on the systems timezone settings, please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. We use '%s' for '%.1f/DST' instead.", tzid, (float) ((tzi.Bias + tzi.DaylightBias) / -60));
 				break;
-
 		}
+		return tzid;
 	}
 #endif
 	/* Fallback to UTC */
