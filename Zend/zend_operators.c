@@ -319,15 +319,15 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 
 #define convert_object_to_type(op, ctype, conv_func)										\
 	if (Z_OBJ_HT_P(op)->cast_object) {														\
-		zval *org;																			\
-		ALLOC_ZVAL(org);																	\
-		*org = *op;																			\
-		if (Z_OBJ_HT_P(op)->cast_object(org, op, ctype TSRMLS_CC) == FAILURE) {				\
+		zval dst;																			\
+		if (Z_OBJ_HT_P(op)->cast_object(op, &dst, ctype TSRMLS_CC) == FAILURE) {			\
 			zend_error(E_RECOVERABLE_ERROR, 												\
-			"Object of class %v could not be converted to " # ctype, Z_OBJCE_P(org)->name); \
-			INIT_ZVAL(*op);																	\
+			"Object of class %v could not be converted to " # ctype, Z_OBJCE_P(op)->name);	\
+		} else {																			\
+			zval_dtor(op);																	\
+			op->type = ctype;																\
+			op->value = dst.value;															\
 		}																					\
-		zval_dtor(org);																		\
 	} else {																				\
 		if(Z_OBJ_HT_P(op)->get) {															\
 			zval *newop = Z_OBJ_HT_P(op)->get(op TSRMLS_CC);								\
