@@ -1189,6 +1189,7 @@ static zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
 
 			enc = sdlType->encode;
 			while (enc && enc->details.sdl_type &&
+			       enc->details.sdl_type->kind != XSD_TYPEKIND_COMPLEX &&
 			       enc->details.sdl_type->kind != XSD_TYPEKIND_SIMPLE &&
 			       enc->details.sdl_type->kind != XSD_TYPEKIND_LIST &&
 			       enc->details.sdl_type->kind != XSD_TYPEKIND_UNION) {
@@ -1211,6 +1212,7 @@ static zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
 		           sdlType->encode &&
 		           type != &sdlType->encode->details) {
 			if (sdlType->encode->details.sdl_type &&
+			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_COMPLEX &&
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_SIMPLE &&
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_LIST &&
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_UNION) {
