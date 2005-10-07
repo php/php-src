@@ -60,7 +60,7 @@ class RecursiveTreeIterator extends RecursiveIteratorIterator
 	 */
 	function getEntry()
 	{
-		return $this->callToString ? $this->__toString() : parent::current();
+		return $this->callToString ? $this->__toString() : @(string)parent::current();
 	}
 
 	/** @return string to place after the current element
