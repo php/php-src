@@ -5,6 +5,7 @@
  * @ingroup Examples
  * @author  Marcus Boerger
  * @date    2003 - 2005
+ * @version 1.0
  *
  * Usage: php class_tree.php \<class\>
  *

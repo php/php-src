@@ -30,7 +30,7 @@ class RecursiveIteratorIterator implements OuterIterator
 
 	/** Flag: Catches exceptions during getChildren() calls and simply jumps
 	 * to the next element. */
-	const CATCH_GET_CHILD	= 2;
+	const CATCH_GET_CHILD	= 0x00000002;
 
 	private $ait = array();
 	private $count = 0;
