@@ -254,7 +254,7 @@ static zval * reflection_instanciate(zend_class_entry *pce, zval *object TSRMLS_
 }
 
 static void _const_string(string *str, char *name, zval *value, char *indent TSRMLS_DC);
-static void _function_string(string *str, zend_function *fptr, char *indent TSRMLS_DC);
+static void _function_string(string *str, zend_function *fptr, zend_class_entry *scope, char *indent TSRMLS_DC);
 static void _property_string(string *str, zend_property_info *prop, char *prop_name, char* indent TSRMLS_DC);
 static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *indent TSRMLS_DC);
 static void _extension_string(string *str, zend_module_entry *module, char *indent TSRMLS_DC);
@@ -411,7 +411,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 			while (zend_hash_get_current_data_ex(&ce->function_table, (void **) &mptr, &pos) == SUCCESS) {
 				if (mptr->common.fn_flags & ZEND_ACC_STATIC) {
 					string_printf(str, "\n");
-					_function_string(str, mptr, sub_indent.string TSRMLS_CC);
+					_function_string(str, mptr, ce, sub_indent.string TSRMLS_CC);
 				}
 				zend_hash_move_forward_ex(&ce->function_table, &pos);
 			}
@@ -488,7 +488,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 			while (zend_hash_get_current_data_ex(&ce->function_table, (void **) &mptr, &pos) == SUCCESS) {
 				if (!(mptr->common.fn_flags & ZEND_ACC_STATIC)) {
 					string_printf(str, "\n");
-					_function_string(str, mptr, sub_indent.string TSRMLS_CC);
+					_function_string(str, mptr, ce, sub_indent.string TSRMLS_CC);
 				}
 				zend_hash_move_forward_ex(&ce->function_table, &pos);
 			}
@@ -636,7 +636,7 @@ static void _function_parameter_string(string *str, zend_function *fptr, char* i
 /* }}} */
 
 /* {{{ _function_string */
-static void _function_string(string *str, zend_function *fptr, char* indent TSRMLS_DC)
+static void _function_string(string *str, zend_function *fptr, zend_class_entry *scope, char* indent TSRMLS_DC)
 {
 	string param_indent;
 
@@ -653,15 +653,20 @@ static void _function_string(string *str, zend_function *fptr, char* indent TSRM
 	if (fptr->type == ZEND_INTERNAL_FUNCTION && ((zend_internal_function*)fptr)->module) {
 		string_printf(str, ":%s", ((zend_internal_function*)fptr)->module->name);
 	}
-	string_printf(str, "> ");
-
-
+	if (scope && fptr->common.scope && fptr->common.scope != scope) {
+		string_printf(str, ", inherits %v", fptr->common.scope->name);
+	}
+	if (fptr->common.prototype && fptr->common.prototype->common.scope) {
+		string_printf(str, ", prototype %v", fptr->common.prototype->common.scope->name);
+	}
 	if (fptr->common.fn_flags & ZEND_ACC_CTOR) {
-		string_printf(str, "<ctor> ");
+		string_printf(str, ", ctor");
 	}
 	if (fptr->common.fn_flags & ZEND_ACC_DTOR) {
-		string_printf(str, "<dtor> ");
+		string_printf(str, ", dtor");
 	}
+	string_printf(str, "> ");
+
 	if (fptr->common.fn_flags & ZEND_ACC_ABSTRACT) {
 		string_printf(str, "abstract ");
 	}
@@ -868,7 +873,7 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 				continue;
 			}
 			
-			_function_string(str, fptr, "    " TSRMLS_CC);
+			_function_string(str, fptr, NULL, "    " TSRMLS_CC);
 			func++;
 		}
 		string_printf(str, "%s  }\n", indent);
@@ -1305,7 +1310,7 @@ ZEND_METHOD(reflection_function, __toString)
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	string_init(&str);
-	_function_string(&str, fptr, "" TSRMLS_CC);
+	_function_string(&str, fptr, intern->ce, "" TSRMLS_CC);
 	RETURN_STRINGL(str.string, str.len - 1, 0);
 }
 /* }}} */
@@ -1978,7 +1983,7 @@ ZEND_METHOD(reflection_method, export)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionMethod::__construct(mixed class, string name)
+/* {{{ proto public ReflectionMethod::__construct(mixed class_or_method [, string name])
    Constructor. Throws an Exception in case the given method does not exist */
 ZEND_METHOD(reflection_method, __construct)
 {
@@ -1990,12 +1995,24 @@ ZEND_METHOD(reflection_method, __construct)
 	zend_class_entry **pce;
 	zend_class_entry *ce;
 	zend_function *mptr;
-	char *name_str;
-	int name_len;
+	char *name_str, *tmp;
+	int name_len, tmp_len;
+	zval ztmp;
 	zend_uchar type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zt", &classname, &name_str, &name_len, &type) == FAILURE) {
-		return;
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "zt", &classname, &name_str, &name_len, &type) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name_str, &name_len) == FAILURE) {
+			return;
+		}
+		if ((tmp = strstr(name_str, "::")) == NULL) {
+			return;
+		}
+		type = IS_STRING;
+		classname = &ztmp;
+		tmp_len = tmp - name_str;
+		ZVAL_STRINGL(classname, name_str, tmp_len, 1);
+		name_len = name_len - (tmp_len + 2);
+		name_str = tmp + 2;
 	}
 
 	object = getThis();
@@ -2023,6 +2040,10 @@ ZEND_METHOD(reflection_method, __construct)
 		default:
 			_DO_THROW("The parameter class is expected to be either a string or an object");
 			/* returns out of this function */
+	}
+
+	if (classname == &ztmp) {
+		zval_dtor(&ztmp);
 	}
 
 	MAKE_STD_ZVAL(classname);
@@ -2060,7 +2081,7 @@ ZEND_METHOD(reflection_method, __toString)
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_method_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(mptr);
 	string_init(&str);
-	_function_string(&str, mptr, "" TSRMLS_CC);
+	_function_string(&str, mptr, intern->ce, "" TSRMLS_CC);
 	RETURN_STRINGL(str.string, str.len - 1, 0);
 }
 /* }}} */
@@ -2374,6 +2395,26 @@ ZEND_METHOD(reflection_method, getDeclaringClass)
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
 	zend_reflection_class_factory(mptr->common.scope, return_value TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ proto public ReflectionClass ReflectionMethod::getPrototype()
+   Get the prototype */
+ZEND_METHOD(reflection_method, getPrototype)
+{
+	reflection_object *intern;
+	zend_function *mptr;
+
+	METHOD_NOTSTATIC(reflection_method_ptr);
+	GET_REFLECTION_OBJECT_PTR(mptr);
+	
+	if (!mptr->common.prototype) {
+		zend_throw_exception_ex(U_CLASS_ENTRY(reflection_exception_ptr), 0 TSRMLS_CC, 
+			"Method %v::%v does not have a prototype", intern->ce->name, mptr->common.function_name);
+		return;
+	}
+
+	reflection_method_factory(mptr->common.prototype->common.scope, mptr->common.prototype, return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -3956,6 +3997,7 @@ static zend_function_entry reflection_method_functions[] = {
 	ZEND_ME(reflection_method, invoke, NULL, 0)
 	ZEND_ME(reflection_method, invokeArgs, NULL, 0)
 	ZEND_ME(reflection_method, getDeclaringClass, NULL, 0)
+	ZEND_ME(reflection_method, getPrototype, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
