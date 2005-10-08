@@ -822,9 +822,21 @@ relativetext = (reltextnumber space? reltextunit)+;
 		return TIMELIB_RELATIVE;
 	}
 
-	"today"
+	"noon"
 	{
-		DEBUG_OUTPUT("today");
+		DEBUG_OUTPUT("noon");
+		TIMELIB_INIT;
+		TIMELIB_UNHAVE_TIME();
+		TIMELIB_HAVE_TIME();
+		s->time->h = 12;
+
+		TIMELIB_DEINIT;
+		return TIMELIB_RELATIVE;
+	}
+
+	"midnight" | "today"
+	{
+		DEBUG_OUTPUT("midnight | today");
 		TIMELIB_INIT;
 		TIMELIB_UNHAVE_TIME();
 
