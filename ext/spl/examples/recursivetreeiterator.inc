@@ -18,16 +18,21 @@
  */
 class RecursiveTreeIterator extends RecursiveIteratorIterator
 {
+	const BYPASS_CURRENT = 0x00000004;
+
 	private $callToString;
+	private $rit_flags;
 
 	/**
 	 * @param it         iterator to use as inner iterator
-	 * @param flags      flags passed to RecursiveIteratoIterator (parent)
+	 * @param rit_flags  flags passed to RecursiveIteratoIterator (parent)
 	 * @param cit_flags  flags passed to RecursiveCachingIterator (for hasNext)
+	 * @param mode       mode  passed to RecursiveIteratoIterator (parent)
 	 */
-	function __construct(RecursiveIterator $it, $flags = self::SELF_FIRST, $cit_flags = CachingIterator::CATCH_GET_CHILD)
+	function __construct(RecursiveIterator $it, $rit_flags = 0, $cit_flags = CachingIterator::CATCH_GET_CHILD, $mode = self::SELF_FIRST)
 	{
-		parent::__construct(new RecursiveCachingIterator($it, $cit_flags), $flags);
+		parent::__construct(new RecursiveCachingIterator($it, $cit_flags), $mode, $rit_flags);
+		$this->rit_flags = $rit_flags;
 		$this->callToString = (bool)($cit_flags & CachingIterator::CALL_TOSTRING);
 	}
 
@@ -74,7 +79,21 @@ class RecursiveTreeIterator extends RecursiveIteratorIterator
 	 */
 	function current()
 	{		
+		if ($this->rit_flags & self::BYPASS_CURRENT)
+		{
+			return parent::current();
+		}
+		else
+		{
 		return $this->getPrefix() . $this->getEntry() .  $this->getPostfix();
+		}
+	}
+
+	/** @return the current key prefixed and postfixed
+	 */
+	function key()
+	{
+		return $this->getPrefix() . parent::key() .  $this->getPostfix();
 	}
 
 	/** Aggregates the inner iterator
