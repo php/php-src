@@ -10,6 +10,7 @@ mysqli bind_param/bind_result date
 	$link = mysqli_connect($host, $user, $passwd);
 
 	mysqli_select_db($link, "test");
+	mysqli_query($link, "SET sql_mode=''");
 		
 	mysqli_query($link,"DROP TABLE IF EXISTS test_bind_result");
   	mysqli_query($link,"CREATE TABLE test_bind_result(c1 date, c2 time, 

@@ -143,25 +143,23 @@ static void mysqli_objects_destroy_object(void *object, zend_object_handle handl
 	if (instanceof_function(intern->zo.ce, mysqli_link_class_entry TSRMLS_CC)) {
 		if (my_res && my_res->ptr) {
 			MY_MYSQL *mysql = (MY_MYSQL *)my_res->ptr;
-		
 			if (mysql->mysql) {
 				mysql_close(mysql->mysql);
 			}
-
 			php_clear_mysql(mysql);
 			efree(mysql);
-
 			my_res->ptr = NULL;
 		}
-	} else if (intern->zo.ce == mysqli_stmt_class_entry) { /* stmt object */
+	} else if (instanceof_function(intern->zo.ce, mysqli_stmt_class_entry TSRMLS_CC)) { /* stmt object */
 		if (my_res && my_res->ptr) {
-			php_clear_stmt_bind((MY_STMT *)my_res->ptr);
+			MY_STMT *stmt = (MY_STMT *)my_res->ptr;
+			php_clear_stmt_bind(stmt);
 		}
-	} else if (intern->zo.ce == mysqli_result_class_entry) { /* result object */
+	} else if (instanceof_function(intern->zo.ce, mysqli_result_class_entry TSRMLS_CC)) { /* stmt object */
 		if (my_res && my_res->ptr) {
 			mysql_free_result(my_res->ptr);
 		}
-	} else if (intern->zo.ce == mysqli_warning_class_entry) { /* warning object */
+	} else if (instanceof_function(intern->zo.ce, mysqli_warning_class_entry TSRMLS_CC)) { /* stmt object */
 		if (my_res && my_res->ptr) {
 			php_clear_warnings((MYSQLI_WARNING *)my_res->info);
 		}
