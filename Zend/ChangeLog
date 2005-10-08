@@ -1,3 +1,8 @@
+2005-10-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_operators.c:
+      Fixed memory leak
+
 2005-10-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
