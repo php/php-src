@@ -80,7 +80,6 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 			q = Z_LVAL_PP(quality);/* or colorindex for foreground of BW images (defaults to black) */
 		}
 	}
-
 	if ((argc == 2) || (argc > 2 && Z_STRLEN_PP(file))) {
 		if (!fn || php_check_open_basedir(fn TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(fn, "rb+", CHECKUID_CHECK_FILE_AND_DIR))) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid filename '%s'", fn);
@@ -117,6 +116,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid threshold value '%d'. It must be between 0 and 255", q);
 			}
 		case PHP_GDIMG_TYPE_JPG:
+		case PHP_GDIMG_TYPE_PNG:
 			(*func_p)(im, ctx, q);
 			break;
 		case PHP_GDIMG_TYPE_XBM:
