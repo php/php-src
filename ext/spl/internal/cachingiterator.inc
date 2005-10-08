@@ -27,10 +27,10 @@
  */
 class CachingIterator implements OuterIterator
 {
-	const CALL_TOSTRING        = 1;
-	const CATCH_GET_CHILD      = 2;
-	const TOSTRING_USE_KEY     = 4;
-	const TOSTRING_USE_CURRENT = 8;
+	const CALL_TOSTRING        = 0x00000001;
+	const CATCH_GET_CHILD      = 0x00000002;
+	const TOSTRING_USE_KEY     = 0x00000010;
+	const TOSTRING_USE_CURRENT = 0x00000020;
 
 	private $it;
 	private $current;

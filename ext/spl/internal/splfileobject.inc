@@ -15,7 +15,7 @@
  * @version 1.0
  * @since PHP 5.1
  */
-class SplFileObject implements RecursiveIterator, SeekableIterator
+class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIterator
 {
 	/** Flag: wheter to suppress new lines */
 	const DROP_NEW_LINE   = 0x00000001;
