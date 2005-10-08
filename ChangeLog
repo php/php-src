@@ -1,3 +1,47 @@
+2005-10-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      NEWS:
+      - BFN
+
+2005-10-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_operators.c:
+      Fixed memory leak
+
+2005-10-07  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Back to dev.
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Go with PHP 4.4.1RC1.
+
+    * (PHP_4_4)
+      Zend/zend_compile.c:
+      - Fixed uninitialized value problem when an empty file is included.
+
+    * (PHP_5_1)
+      NEWS:
+      - MFH: Fixed bug #34771 (strtotime() fails with 1-12am/pm).
+
+2005-10-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/streams/memory.c:
+      - C vs. C++ fix
+
+2005-10-07  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS:
+      maybe this month..
+
 2005-10-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
