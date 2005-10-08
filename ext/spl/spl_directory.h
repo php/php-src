@@ -44,6 +44,7 @@ typedef struct _spl_filesystem_object {
 	char               *file_name;
 	int                file_name_len; 
 	SPL_FS_OBJ_TYPE    type;
+	long               flags;
 	union {
 		struct {
 			php_stream         *dirp;
@@ -64,7 +65,6 @@ typedef struct _spl_filesystem_object {
 			size_t             current_line_len;
 			size_t             max_line_len;
 			long               current_line_num;
-			long               flags;
 			zval               zresource;
 			zend_function      *func_getCurr;
 		} file;
@@ -72,6 +72,8 @@ typedef struct _spl_filesystem_object {
 } spl_filesystem_object;
 
 #define SPL_FILE_OBJECT_DROP_NEW_LINE      0x00000001 /* drop new lines */
+#define SPL_FILE_DIR_CURRENT_AS_FILEINFO   0x00000010 /* make RecursiveDirectoryTree::current() return SplFileInfo */
+#define SPL_FILE_DIR_KEY_AS_FILENAME       0x00000020 /* make RecursiveDirectoryTree::key() return getFilename() */
 
 #endif /* SPL_DIRECTORY_H */
 
