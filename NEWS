@@ -43,6 +43,8 @@ PHP                                                                        NEWS
 - Fixed "make test" to work for phpized extensions. (Hartmut, Jani)
 - Fixed failing queries (FALSE returned) with mysqli_query() on 64 bit systems.
   (Andrey)
+- Fixed bug #34796 (missing SSL linking in ext/ftp when configured as shared).
+  (Patch by: glen at delfi dot ee)
 - Fixed bug #34788 (SOAP Client not applying correct namespace to generated
   values). (Dmitry)
 - Fixed bug #34787 (SOAP Client not handling boolean types correctly). (Dmitry)
