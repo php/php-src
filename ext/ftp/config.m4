@@ -8,4 +8,6 @@ PHP_ARG_ENABLE(ftp,whether to enable FTP support,
 if test "$PHP_FTP" = "yes"; then
   AC_DEFINE(HAVE_FTP,1,[Whether you want FTP support])
   PHP_NEW_EXTENSION(ftp, php_ftp.c ftp.c, $ext_shared)
+  PHP_SETUP_OPENSSL(FTP_SHARED_LIBADD)
+  PHP_SUBST(FTP_SHARED_LIBADD)
 fi
