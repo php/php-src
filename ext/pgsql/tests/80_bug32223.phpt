@@ -1,8 +1,17 @@
 --TEST--
-Bug #27597 pg_fetch_array not returning false 
+Bug #32223 (weird behaviour of pg_last_notice)
 --SKIPIF--
 <?php 
 require_once('skipif.inc');
+	
+@pg_query($conn, "CREATE LANGUAGE 'plpgsql' HANDLER plpgsql_call_handler LANCOMPILER 'PL/pgSQL'");
+$res = @pg_query($conn, "CREATE OR REPLACE FUNCTION test_notice() RETURNS boolean AS '
+begin
+        RAISE NOTICE ''11111'';
+        return ''f'';
+end;
+' LANGUAGE plpgsql;");
+if (!$res) die('skip PLPGSQL not available');
 ?>
 --FILE--
 <?php
@@ -14,28 +23,22 @@ if (!$dbh) {
 	die ("Could not connect to the server");
 }
 
-pg_query($dbh, "CREATE OR REPLACE FUNCTION test_notice() RETURNS boolean AS '
+//@pg_query($dbh, "CREATE LANGUAGE 'plpgsql' HANDLER plpgsql_call_handler LANCOMPILER 'PL/pgSQL'");
+$res = pg_query($dbh, "CREATE OR REPLACE FUNCTION test_notice() RETURNS boolean AS '
 begin
         RAISE NOTICE ''11111'';
         return ''f'';
 end;
 ' LANGUAGE plpgsql;");
 
-try
+
+$res = pg_query($dbh, 'SELECT test_notice()');
+$row = pg_fetch_row($res, 0);
+var_dump($row);
+pg_free_result($res);
+if ($row[0] == 'f')
 {
-	$res = pg_query($dbh, 'SELECT test_notice()');
-	$row = pg_fetch_row($res, 0);
-	var_dump($row);
-	pg_free_result($res);
-	if ($row[0] == 'f')
-	{
-		throw new Exception(pg_last_notice($dbh));
-	}
-	echo 2;
-}
-catch (Exception $e)
-{
-	var_dump($e->getMessage());
+	var_dump(pg_last_notice($dbh));
 }
 
 pg_close($dbh);
