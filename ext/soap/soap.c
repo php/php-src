@@ -1892,7 +1892,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 		     Z_TYPE_PP(tmp) != IS_BOOL || Z_LVAL_PP(tmp) != 0)) {
 			zval *fault, *exception;
 			char* code = SOAP_GLOBAL(error_code);
-			char buffer[1024];
+			char *buffer;
 			int buffer_len;
 			zval outbuf, outbuflen;
 			va_list argcopy;
@@ -1902,20 +1902,17 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			INIT_ZVAL(outbuflen);
 #ifdef va_copy
 			va_copy(argcopy, args);
-			buffer_len = vsnprintf(buffer, sizeof(buffer)-1, format, argcopy);
+			buffer_len = zend_vspprintf(&buffer, 0, format, argcopy);
 			va_end(argcopy);
 #else
-			buffer_len = vsnprintf(buffer, sizeof(buffer)-1, format, args);
+			buffer_len = zend_vspprintf(&buffer, 0, format, args);
 #endif
-			buffer[sizeof(buffer)-1]=0;
-			if (buffer_len > sizeof(buffer) - 1 || buffer_len < 0) {
-				buffer_len = sizeof(buffer) - 1;
-			}
 
 			if (code == NULL) {
 				code = "Client";
 			}
 			fault = add_soap_fault(SOAP_GLOBAL(error_object), code, buffer, NULL, NULL TSRMLS_CC);
+			efree(buffer);
 			MAKE_STD_ZVAL(exception);
 			*exception = *fault;
 			zval_copy_ctor(exception);
@@ -1951,7 +1948,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 		    error_num == E_PARSE) {
 
 			char* code = SOAP_GLOBAL(error_code);
-			char buffer[1024];
+			char *buffer;
 			int buffer_len;
 			zval *outbuf = NULL;
 			zval outbuflen;
@@ -1960,15 +1957,11 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 
 #ifdef va_copy
 			va_copy(argcopy, args);
-			buffer_len = vsnprintf(buffer, sizeof(buffer)-1, format, argcopy);
+			buffer_len = zend_vspprintf(&buffer, 0, format, argcopy);
 			va_end(argcopy);
 #else
-			buffer_len = vsnprintf(buffer, sizeof(buffer)-1, format, args);
+			buffer_len = zend_vspprintf(&buffer, 0, format, args);
 #endif
-			buffer[sizeof(buffer)-1]=0;
-			if (buffer_len > sizeof(buffer) - 1 || buffer_len < 0) {
-				buffer_len = sizeof(buffer) - 1;
-			}
 
 			if (code == NULL) {
 				code = "Server";
@@ -1982,6 +1975,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 
 			INIT_ZVAL(fault_obj);
 			set_soap_fault(&fault_obj, NULL, code, buffer, NULL, outbuf, NULL TSRMLS_CC);
+			efree(buffer);
 			fault = 1;
 		}
 
