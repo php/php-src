@@ -639,6 +639,9 @@ static void _function_parameter_string(string *str, zend_function *fptr, char* i
 static void _function_string(string *str, zend_function *fptr, zend_class_entry *scope, char* indent TSRMLS_DC)
 {
 	string param_indent;
+	zend_function *overwrites;
+	char *lc_name;
+	unsigned int lc_name_len;
 
 	/* TBD: Repair indenting of doc comment (or is this to be done in the parser?)
 	 * What's "wrong" is that any whitespace before the doc comment start is 
@@ -653,8 +656,18 @@ static void _function_string(string *str, zend_function *fptr, zend_class_entry 
 	if (fptr->type == ZEND_INTERNAL_FUNCTION && ((zend_internal_function*)fptr)->module) {
 		string_printf(str, ":%s", ((zend_internal_function*)fptr)->module->name);
 	}
-	if (scope && fptr->common.scope && fptr->common.scope != scope) {
-		string_printf(str, ", inherits %v", fptr->common.scope->name);
+	if (scope && fptr->common.scope) {
+		if (fptr->common.scope != scope) {
+			string_printf(str, ", inherits %v", fptr->common.scope->name);
+		} else if (fptr->common.scope->parent) {
+			lc_name = zend_u_str_case_fold(IS_STRING, fptr->common.function_name, strlen(fptr->common.function_name), 1, &lc_name_len);
+			if (zend_u_hash_find(&fptr->common.scope->parent->function_table, IS_STRING, lc_name, lc_name_len + 1, (void**) &overwrites) == SUCCESS) {
+				if (fptr->common.scope != overwrites->common.scope) {
+					string_printf(str, ", overwrites %v", overwrites->common.scope->name);
+				}
+			}
+			efree(lc_name);
+		}
 	}
 	if (fptr->common.prototype && fptr->common.prototype->common.scope) {
 		string_printf(str, ", prototype %v", fptr->common.prototype->common.scope->name);
