@@ -43,6 +43,8 @@ PHP                                                                        NEWS
 - Fixed "make test" to work for phpized extensions. (Hartmut, Jani)
 - Fixed failing queries (FALSE returned) with mysqli_query() on 64 bit systems.
   (Andrey)
+- Fixed bug #34788 (SOAP Client not applying correct namespace to generated
+  values). (Dmitry)
 - Fixed bug #34787 (SOAP Client not handling boolean types correctly). (Dmitry)
 - Fixed bug #34785 (subclassing of mysqli_stmt does not work). (Georg)
 - Fixed bug #34771 (strtotime() fails with 1-12am/pm). (Derick)
