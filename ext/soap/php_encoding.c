@@ -1284,7 +1284,7 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 					}
 				}
 				return 1;
-			} else if (strict && model->u.element->nillable) {
+			} else if (strict && model->u.element->nillable && model->min_occurs > 0) {
 				property = xmlNewNode(NULL,model->u.element->name);
 				xmlAddChild(node, property);
 				if (style == SOAP_ENCODED) {
@@ -1292,6 +1292,12 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 				} else {
 					xmlNsPtr xsi = encode_add_ns(property,XSI_NAMESPACE);
 					xmlSetNsProp(property, xsi, "nil", "true");
+				}
+				if (style == SOAP_LITERAL &&
+				    model->u.element->namens &&
+				    model->u.element->form == XSD_FORM_QUALIFIED) {
+					xmlNsPtr nsp = encode_add_ns(property, model->u.element->namens);
+					xmlSetNs(property, nsp);
 				}
 				return 1;
 			} else if (model->min_occurs == 0) {
