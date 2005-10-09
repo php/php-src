@@ -61,7 +61,9 @@ static int dblib_fetch_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info TSRMLS
 	add_next_index_string(info, message, 0);
 	add_next_index_long(info, einfo->oserr);
 	add_next_index_long(info, einfo->severity);
-	add_next_index_string(info, einfo->oserrstr, 1);
+	if (einfo->oserrstr) {
+		add_next_index_string(info, einfo->oserrstr, 1);
+	}
 
 	return 1;
 }
