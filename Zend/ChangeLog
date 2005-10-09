@@ -1,3 +1,11 @@
+2005-10-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      - Add ReflectionMethod::getPrototype()
+      - Add some usefull information to the method dump
+        . From where it was inherited
+        . The prototype
+
 2005-10-07  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_operators.c:

@@ -1,3 +1,55 @@
+2005-10-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Add ReflectionMethod::getPrototype()
+      - Add some usefull information to the method dump
+        . From where it was inherited
+        . The prototype
+
+2005-10-08  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/gd.c
+      ext/gd/gd_ctx.c:
+      - add compression mode argument to imagepng
+        (MFH to 5.1?)
+
+2005-10-08  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/tests/bug34785.phpt
+      ext/mysqli/tests/bug34785.phpt:
+      
+      file bug34785.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/tests/003.phpt
+      ext/mysqli/tests/006.phpt
+      ext/mysqli/tests/007.phpt
+      ext/mysqli/tests/008.phpt
+      ext/mysqli/tests/009.phpt
+      ext/mysqli/tests/010.phpt
+      ext/mysqli/tests/020.phpt
+      ext/mysqli/tests/023.phpt
+      ext/mysqli/tests/024.phpt
+      ext/mysqli/tests/025.phpt
+      ext/mysqli/tests/026.phpt
+      ext/mysqli/tests/042.phpt
+      ext/mysqli/tests/060.phpt
+      ext/mysqli/tests/065.phpt
+      ext/mysqli/tests/bug32405.phpt:
+      fix for bug 34785:
+        added support for parent::__construct (mysqli_statement and
+      mysqli_resultset)
+        fixed failed testcases when sql_mode is in effect
+
+2005-10-08  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_1)
+      NEWS:
+      - MFH: Fixed bug #34676: missing support for strtotime("midnight") and
+        strtotime("noon").
+
 2005-10-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
