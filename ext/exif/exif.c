@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2004 The PHP Group                                |
+   | Copyright (c) 1997-2005 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.0 of the PHP license,       |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -3030,6 +3030,12 @@ static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start,
 								  offset_base, IFDlength, displacement, section_index, 1, exif_get_tag_table(section_index) TSRMLS_CC)) {
 			return FALSE;
 		}
+	}
+	/*
+	 * Ignore IFD2 if it purportedly exists
+	 */
+	if (section_index == SECTION_THUMBNAIL) {
+		return FALSE;
 	}
 	/*
 	 * Hack to make it process IDF1 I hope

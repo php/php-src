@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   values). (Dmitry)
 - Fixed bug #34787 (SOAP Client not handling boolean types correctly). (Dmitry)
 - Fixed bug #34723 (array_count_values() strips leading zeroes). (Tony)
+- Fixed bug #34704 (Infinite recursion due to corrupt JPEG). (Marcus)
 - Fixed bug #34678 (__call(), is_callable() and static methods). (Dmitry)
 - Fixed bug #34643 (wsdl default value has no effect). (Dmitry)
 - Fixed bug #34617 (zend_deactivate: objects_store used after
@@ -17,6 +18,8 @@ PHP                                                                        NEWS
 - Fixed bug #34453 (parsing http://www.w3.org/2001/xml.xsd exception). (Dmitry)
 - Fixed bug #34450 (Segfault when calling mysqli_close() in destructor). (Tony)
 - Fixed bug #34449 (ext/soap: XSD_ANYXML functionality not exposed). (Dmitry)
+- Fixed Bug #34243 (ReflectionClass::getDocComment() returns no result). 
+  (Marcus)
 - Fixed bug #34199 (if($obj)/if(!$obj) inconsistency because of cast handler).
   (Dmitry, Alex)
 - Fixed bug #32179 (xmlrpc_encode() segfaults with recursive references). (Tony)
