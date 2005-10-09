@@ -836,6 +836,15 @@ SPL_METHOD(Array, __construct)
 	}
 	intern->ar_flags |= ar_flags;
 	ZVAL_ADDREF(intern->array);
+	if (Z_TYPE_P(array) == IS_OBJECT) {
+		zend_object_get_properties_t handler = Z_OBJ_HANDLER_P(array, get_properties);
+		if ((handler != std_object_handlers.get_properties && handler != spl_array_get_properties)
+		|| !spl_array_get_hash_table(intern, 0 TSRMLS_CC)) {
+			php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+			zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_InvalidArgumentException), 0 TSRMLS_CC, "Overloaded object of type %s is not compatible with %s", Z_OBJCE_P(array)->name, intern->std.ce->name);
+			return;
+		}
+	}
 	
 	spl_array_rewind(intern TSRMLS_CC);
 
