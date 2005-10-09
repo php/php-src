@@ -3032,6 +3032,12 @@ static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start,
 		}
 	}
 	/*
+	 * Ignore IFD2 if it purportedly exists
+	 */
+	if (section_index == SECTION_THUMBNAIL) {
+		return FALSE;
+	}
+	/*
 	 * Hack to make it process IDF1 I hope
 	 * There are 2 IDFs, the second one holds the keys (0x0201 and 0x0202) to the thumbnail
 	 */
