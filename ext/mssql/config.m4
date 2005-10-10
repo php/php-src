@@ -29,10 +29,10 @@ if test "$PHP_MSSQL" != "no"; then
 
     if test -f $PHP_MSSQL/include/tds.h; then
       FREETDS_INSTALLATION_DIR=$PHP_MSSQL
-      FREETDS_INCLUDE_DIR=$i/include
-    elif test -f $i/include/freetds/tds.h; then
-      FREETDS_INSTALLATION_DIR=$i
-      FREETDS_INCLUDE_DIR=$i/include/freetds
+      FREETDS_INCLUDE_DIR=$PHP_MSSQL/include
+    elif test -f $PHP_MSSQL/include/freetds/tds.h; then
+      FREETDS_INSTALLATION_DIR=$PHP_MSSQL
+      FREETDS_INCLUDE_DIR=$PHP_MSSQL/include/freetds
     else
       AC_MSG_ERROR(Directory $PHP_MSSQL is not a FreeTDS installation directory)
     fi
