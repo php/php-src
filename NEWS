@@ -45,6 +45,7 @@ PHP                                                                        NEWS
   (Andrey)
 - Fixed bug #34810 (mysqli::init() and others use wrong $this pointer
   without checks). (Tony)
+- Fixed bug #34802 (Fixed crash on object instantiation failure). (Ilia)
 - Fixed bug #34796 (missing SSL linking in ext/ftp when configured as shared).
   (Jani)
 - Fixed bug #34788 (SOAP Client not applying correct namespace to generated
