@@ -537,16 +537,16 @@ static zend_bool opline_is_fetch_this(zend_op *opline TSRMLS_DC)
 
 void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC)
 {
+	int last_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
 	if (variable->op_type == IS_VAR) {
-		int last_op_number = get_next_op_number(CG(active_op_array));
 		int n = 0;
 
 		while (last_op_number - n > 0) {
 			zend_op *last_op;
 		
-			last_op = &CG(active_op_array)->opcodes[last_op_number-n-1];
+			last_op = &CG(active_op_array)->opcodes[last_op_number-(n+1)];
 
 			if (last_op->result.op_type == IS_VAR &&
 			    last_op->result.u.var == variable->u.var) {
