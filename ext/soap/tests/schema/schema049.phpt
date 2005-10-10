@@ -9,6 +9,7 @@ $schema = <<<EOF
 	<complexType name="testType2">
 		<sequence>
 			<element name="int" type="int"/>
+			<element name="int2" type="int"/>
 		</sequence>
 	</complexType>
 	<complexType name="testType">
