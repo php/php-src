@@ -23,6 +23,10 @@
 
 #include "php.h"
 #include "php_spl.h"
+#if HAVE_PCRE || HAVE_BUNDLED_PCRE
+#include "ext/pcre/php_pcre.h"
+
+#endif
 
 #define spl_ce_Traversable   zend_ce_traversable
 #define spl_ce_Iterator      zend_ce_iterator
@@ -45,6 +49,8 @@ extern PHPAPI zend_class_entry *spl_ce_NoRewindIterator;
 extern PHPAPI zend_class_entry *spl_ce_InfiniteIterator;
 extern PHPAPI zend_class_entry *spl_ce_EmptyIterator;
 extern PHPAPI zend_class_entry *spl_ce_AppendIterator;
+extern PHPAPI zend_class_entry *spl_ce_RegExIterator;
+extern PHPAPI zend_class_entry *spl_ce_RecursiveRegExIterator;
 
 PHP_MINIT_FUNCTION(spl_iterators);
 
@@ -60,6 +66,10 @@ typedef enum {
 	DIT_NoRewindIterator,
 	DIT_InfiniteIterator,
 	DIT_AppendIterator,
+#if HAVE_PCRE || HAVE_BUNDLED_PCRE
+	DIT_RegExIterator,
+	DIT_RecursiveRegExIterator,
+#endif
 } dual_it_type;
 
 enum {
@@ -107,6 +117,14 @@ typedef struct _spl_dual_it_object {
 			zval                 *zarrayit;
 			zend_object_iterator *iterator;
 		} append;
+#if HAVE_PCRE || HAVE_BUNDLED_PCRE
+		struct {
+			int              flags;
+			pcre             *re;
+			pcre_extra		 *extra;
+			int              options;
+		} regex;
+#endif
 	} u;
 } spl_dual_it_object;
 

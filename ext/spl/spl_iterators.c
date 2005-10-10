@@ -53,6 +53,8 @@ PHPAPI zend_class_entry *spl_ce_NoRewindIterator;
 PHPAPI zend_class_entry *spl_ce_InfiniteIterator;
 PHPAPI zend_class_entry *spl_ce_EmptyIterator;
 PHPAPI zend_class_entry *spl_ce_AppendIterator;
+PHPAPI zend_class_entry *spl_ce_RegExIterator;
+PHPAPI zend_class_entry *spl_ce_RecursiveRegExIterator;
 
 function_entry spl_funcs_RecursiveIterator[] = {
 	SPL_ABSTRACT_ME(RecursiveIterator, hasChildren,  NULL)
@@ -897,6 +899,23 @@ static INLINE spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAME
 			intern->u.append.iterator = U_CLASS_ENTRY(spl_ce_ArrayIterator)->get_iterator(U_CLASS_ENTRY(spl_ce_ArrayIterator), intern->u.append.zarrayit TSRMLS_CC);
 			php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 			return intern;
+#if HAVE_PCRE || HAVE_BUNDLED_PCRE
+		case DIT_RegExIterator:
+		case DIT_RecursiveRegExIterator: {
+			char *regex;
+			int len;
+
+			intern->u.regex.flags = 0;
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Os|l", &zobject, ce_inner, &regex, &len, &intern->u.regex.flags) == FAILURE) {
+				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+				return NULL;
+			}
+			intern->u.regex.extra = NULL;
+			intern->u.regex.options = 0;
+			intern->u.regex.re = pcre_get_compiled_regex(regex, &intern->u.regex.extra, &intern->u.regex.options TSRMLS_CC);
+			break;;
+		}
+#endif
 		default:
 			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &zobject, ce_inner) == FAILURE) {
 				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
@@ -1229,6 +1248,62 @@ SPL_METHOD(ParentIterator, getChildren)
 	zval_ptr_dtor(&retval);
 } /* }}} */
 
+#if HAVE_PCRE || HAVE_BUNDLED_PCRE
+/* {{{ proto RegExIterator::__construct(Iterator it, string $regex [, int $flags]) 
+   Create an RegExIterator from another iterator and a regular expression */
+SPL_METHOD(RegExIterator, __construct)
+{
+	spl_dual_it_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, U_CLASS_ENTRY(zend_ce_iterator), DIT_RegExIterator);
+} /* }}} */
+
+/* {{{ proto bool RegExIterator::accept()
+   Match (string)current() against regular expression */
+SPL_METHOD(RegExIterator, accept)
+{
+	spl_dual_it_object   *intern;
+	int count;
+	char *subject, tmp[32];
+	int subject_len, use_copy = 0;
+	zval subject_copy;
+
+	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	
+	if (intern->u.regex.flags) {
+		if (intern->current.key_type == HASH_KEY_IS_LONG) {
+			subject_len = snprintf(tmp, sizeof(tmp), "%ld", intern->current.int_key);
+			subject = &tmp[0];
+		} else {
+			subject_len = intern->current.str_key_len;
+			subject = intern->current.str_key;
+		}
+	} else {
+		zend_make_printable_zval(intern->current.data, &subject_copy, &use_copy);
+		if (use_copy) {
+			subject = Z_STRVAL(subject_copy);
+			subject_len = Z_STRLEN(subject_copy);
+		} else {
+			subject = Z_STRVAL_P(intern->current.data);
+			subject_len = Z_STRLEN_P(intern->current.data);
+		}
+	}
+
+	count = pcre_exec(intern->u.regex.re, intern->u.regex.extra, subject, subject_len, 0, 0, NULL, 0);
+
+	if (use_copy) {
+		zval_dtor(&subject_copy);
+	}
+
+	RETURN_BOOL(count >= 0);
+} /* }}} */
+
+/* {{{ proto RecursiveRegExIterator::__construct(RecursiveIterator it, string $regex [, int $flags]) 
+   Create an RecursiveRegExIterator from another recursive iterator and a regular expression */
+SPL_METHOD(RecursiveRegExIterator, __construct)
+{
+	spl_dual_it_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, U_CLASS_ENTRY(spl_ce_RecursiveIterator), DIT_RecursiveRegExIterator);
+} /* }}} */
+#endif
+
 /* {{{ spl_dual_it_free_storage */
 static INLINE void spl_dual_it_free_storage(void *_object TSRMLS_DC)
 {
@@ -1255,6 +1330,14 @@ static INLINE void spl_dual_it_free_storage(void *_object TSRMLS_DC)
 			object->u.caching.zcache = NULL;
 		}
 	}
+
+#if MBO_0
+	if (object->dit_type == DIT_RegExIterator || object->dit_type == DIT_RecursiveRegExIterator) {
+		if (object->u.regex.re) {
+			/* actually there's no way to get rid of this early */
+		}
+	}
+#endif
 
 	zend_hash_destroy(object->std.properties);
 	FREE_HASHTABLE(object->std.properties);
@@ -1322,6 +1405,27 @@ static zend_function_entry spl_funcs_ParentIterator[] = {
 	SPL_ME(dual_it,         getInnerIterator, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
+
+#if HAVE_PCRE || HAVE_BUNDLED_PCRE
+static
+ZEND_BEGIN_ARG_INFO(arginfo_regex_it___construct, 0) 
+	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
+	ZEND_ARG_INFO(0, regex)
+ZEND_END_ARG_INFO();
+
+static zend_function_entry spl_funcs_RegExIterator[] = {
+	SPL_ME(RegExIterator,   __construct,      arginfo_regex_it___construct, ZEND_ACC_PUBLIC)
+	SPL_ME(RegExIterator,   accept,           NULL, ZEND_ACC_PUBLIC)
+	{NULL, NULL, NULL}
+};
+
+static zend_function_entry spl_funcs_RecursiveRegExIterator[] = {
+	SPL_ME(RecursiveRegExIterator, __construct,      arginfo_regex_it___construct, ZEND_ACC_PUBLIC)
+	SPL_ME(ParentIterator,         hasChildren,      NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(ParentIterator,         getChildren,      NULL, ZEND_ACC_PUBLIC)
+	{NULL, NULL, NULL}
+};
+#endif
 
 static INLINE int spl_limit_it_valid(spl_dual_it_object *intern TSRMLS_DC)
 {
@@ -2328,7 +2432,15 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	REGISTER_SPL_IMPLEMENTS(AppendIterator, OuterIterator);
 
 	REGISTER_SPL_SUB_CLASS_EX(InfiniteIterator, IteratorIterator, spl_dual_it_new, spl_funcs_InfiniteIterator);
-	
+#if HAVE_PCRE || HAVE_BUNDLED_PCRE
+	REGISTER_SPL_SUB_CLASS_EX(RegExIterator, FilterIterator, spl_dual_it_new, spl_funcs_RegExIterator);
+	REGISTER_SPL_SUB_CLASS_EX(RecursiveRegExIterator, RegExIterator, spl_dual_it_new, spl_funcs_RecursiveRegExIterator);
+	REGISTER_SPL_IMPLEMENTS(RecursiveRegExIterator, RecursiveIterator);
+#else
+	spl_ce_RegExIterator = NULL;
+	spl_ce_RecursiveRegExIterator = NULL;
+#endif
+
 	REGISTER_SPL_STD_CLASS_EX(EmptyIterator, NULL, spl_funcs_EmptyIterator);
 	REGISTER_SPL_ITERATOR(EmptyIterator);
 
