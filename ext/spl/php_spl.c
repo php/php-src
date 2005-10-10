@@ -181,6 +181,7 @@ PHP_FUNCTION(class_implements)
 	SPL_ADD_CLASS(RuntimeException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(SeekableIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(SimpleXMLIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(SplFileInfo, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(SplFileObject, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(SplObjectStorage, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(SplObserver, z_list, sub, allow, ce_flags); \
