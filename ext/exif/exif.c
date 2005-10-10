@@ -3017,7 +3017,7 @@ static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start,
 	 * Ignore IFD2 if it purportedly exists
 	 */
 	if (section_index == SECTION_THUMBNAIL) {
-		return FALSE;
+		return TRUE;
 	}
 	/*
 	 * Hack to make it process IDF1 I hope
