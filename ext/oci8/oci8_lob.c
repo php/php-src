@@ -160,6 +160,10 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long off
 	if (php_oci_lob_get_length(descriptor, &length TSRMLS_CC)) {
 		return 1;
 	}
+
+	if (length <= 0) {
+		return 0;
+	}
  	
 	if (offset > length) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset must be less than size of the LOB");
