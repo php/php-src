@@ -48,6 +48,8 @@ PHP                                                                        NEWS
 - Fixed bug #34788 (SOAP Client not applying correct namespace to generated
   values). (Dmitry)
 - Fixed bug #34787 (SOAP Client not handling boolean types correctly). (Dmitry)
+- Fixed bug #34786 (2 @ results in change to error_reporting() to random value)
+  (Dmitry, Tony)
 - Fixed bug #34785 (subclassing of mysqli_stmt does not work). (Georg)
 - Fixed bug #34777 (Crash in dblib when fetching non-existent error info). (Ilia)
 - Fixed bug #34771 (strtotime() fails with 1-12am/pm). (Derick)

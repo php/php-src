@@ -429,9 +429,9 @@ static int ZEND_BEGIN_SILENCE_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
 	
+	EX_T(opline->result.u.var).tmp_var.value.lval = EG(error_reporting);
+	EX_T(opline->result.u.var).tmp_var.type = IS_LONG;  /* shouldn't be necessary */
 	if (EX(old_error_reporting) == NULL) {
-		EX_T(opline->result.u.var).tmp_var.value.lval = EG(error_reporting);
-		EX_T(opline->result.u.var).tmp_var.type = IS_LONG;  /* shouldn't be necessary */
 		EX(old_error_reporting) = &EX_T(opline->result.u.var).tmp_var;
 	}
 	
