@@ -155,6 +155,7 @@ PHP                                                                        NEWS
   reference). (Dmitry)
 - Fixed bug #33414 (Comprehensive list of incorrect days returned after
   strtotime() / date() tests). (Derick)
+- Fixed bug #33383 (crash when retrieving empty LOBs). (Tony)
 - Fixed bug #33326 (Cannot build extensions with phpize on Macosx). (Jani)
 - Fixed bug #33125 (imagecopymergegray() produces mosaic rainbow effect).
   (Pierre)
