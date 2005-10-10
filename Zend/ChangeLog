@@ -1,3 +1,8 @@
+2005-10-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      - Add 'overwrites' info to method dump
+
 2005-10-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_reflection_api.c:
