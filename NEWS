@@ -43,6 +43,8 @@ PHP                                                                        NEWS
 - Fixed "make test" to work for phpized extensions. (Hartmut, Jani)
 - Fixed failing queries (FALSE returned) with mysqli_query() on 64 bit systems.
   (Andrey)
+- Fixed bug #34818 (several functions crash when invalid mysqli_link object 
+  is passed). (Tony)
 - Fixed bug #34810 (mysqli::init() and others use wrong $this pointer
   without checks). (Tony)
 - Fixed bug #34809 (FETCH_INTO in PDO crashes without a destination object).
