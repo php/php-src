@@ -749,9 +749,17 @@ class SplFileInfo
 	 */
 	function getFilename();	
 
+	/** @return SplFileInfo created for the file
+	 */
+	function getFileInfo();
+
 	/** @return The current entries path and file name.
 	 */
 	function getPathname();	
+
+	/** @return SplFileInfo created for the path
+	 */
+	function getPathInfo();
 
 	/** @return The current entry's permissions.
 	 */
@@ -898,6 +906,19 @@ class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveI
 	/** @return a RecursiveDirectoryIterator for the current entry.
 	 */
 	function getChildren();	
+
+	/** @return sub path only (without main path)
+	 */
+	function getSubPath();
+
+	/** @return the current sub path
+	 */
+	function getSubPathname();
+
+	/** @return SplFileInfo created for the current sub path
+	 */
+	function getSubPathInfo();
+
 }
 
 /** @ingroup SPL

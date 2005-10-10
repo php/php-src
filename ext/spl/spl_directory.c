@@ -265,7 +265,49 @@ static zend_object_value spl_filesystem_object_clone(zval *zobject TSRMLS_DC)
 }
 /* }}} */
 
-static void spl_filesystem_object_create_type(int ht, spl_filesystem_object *source, int type, zval *return_value TSRMLS_DC) /* {{{ */
+void spl_filesystem_info_set_filename(spl_filesystem_object *intern, char *path, int len, int use_copy TSRMLS_DC) /* {{{ */
+{
+	char *p1, *p2;
+
+	intern->file_name = use_copy ? estrndup(path, len) : path;
+	intern->file_name_len = len;
+
+	p1 = strrchr(path, '/');
+	p2 = strrchr(path, '\\');
+	if (p1 || p2) {
+		intern->path_len = (p1 > p2 ? p1 : p2) - path;
+	} else {
+		intern->path_len = 0;
+	}
+	intern->path = estrndup(path, intern->path_len);
+} /* }}} */
+
+static spl_filesystem_object * spl_filesystem_object_create_info(spl_filesystem_object *source, char *file_path, int file_path_len, int use_copy, zval *return_value TSRMLS_DC) /* {{{ */
+{
+	spl_filesystem_object *intern;
+	
+	if (!file_path || !file_path_len) {
+		zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_RuntimeException), 0 TSRMLS_CC, "Cannot create SplFileInfo for empty path");
+		if (file_path && !use_copy)
+		{
+			efree(file_path);
+		}
+		return NULL;
+	}
+
+	php_set_error_handling(EH_THROW, U_CLASS_ENTRY(spl_ce_RuntimeException) TSRMLS_CC);
+
+	return_value->value.obj = spl_filesystem_object_new_ex(spl_ce_SplFileInfo, &intern TSRMLS_CC);
+	Z_TYPE_P(return_value) = IS_OBJECT;
+
+	spl_filesystem_info_set_filename(intern, file_path, file_path_len, use_copy TSRMLS_CC);
+	
+	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+	
+	return intern;
+} /* }}} */
+
+static spl_filesystem_object * spl_filesystem_object_create_type(int ht, spl_filesystem_object *source, int type, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	spl_filesystem_object *intern;
 	zend_bool use_include_path = 0;
@@ -280,7 +322,7 @@ static void spl_filesystem_object_create_type(int ht, spl_filesystem_object *sou
 		if (!source->u.dir.entry.d_name[0]) {
 			zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_RuntimeException), 0 TSRMLS_CC, "Could not open file");
 			php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
-			return;
+			return NULL;
 		}
 	}
 
@@ -292,8 +334,6 @@ static void spl_filesystem_object_create_type(int ht, spl_filesystem_object *sou
 		spl_filesystem_object_get_file_name(source TSRMLS_CC);
 		intern->file_name = estrndup(source->file_name, source->file_name_len);
 		intern->file_name_len = source->file_name_len;
-	
-		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 		break;
 	case SPL_FS_FILE:
 		return_value->value.obj = spl_filesystem_object_new_ex(spl_ce_SplFileObject, &intern TSRMLS_CC);
@@ -306,27 +346,29 @@ static void spl_filesystem_object_create_type(int ht, spl_filesystem_object *sou
 		intern->u.file.open_mode = "r";
 		intern->u.file.open_mode_len = 1;
 	
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sbr", 
+		if (ht && zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sbr", 
 				&intern->u.file.open_mode, &intern->u.file.open_mode_len, 
 				&use_include_path, &intern->u.file.zcontext) == FAILURE) {
 			php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 			intern->u.file.open_mode = NULL;
 			zval_dtor(return_value);
 			Z_TYPE_P(return_value) = IS_NULL;
-			return;
+			return NULL;
 		}
 	
 		if (spl_filesystem_file_open(intern, use_include_path, 0 TSRMLS_CC) == FAILURE) {
 			php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 			zval_dtor(return_value);
 			Z_TYPE_P(return_value) = IS_NULL;
-			return;
+			return NULL;
 		}
 	case SPL_FS_DIR:	
+		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 		zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_RuntimeException), 0 TSRMLS_CC, "Operation not supported");
-		break;
+		return NULL;
 	}
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+	return NULL;
 } /* }}} */
 
 /* {{{ proto void DirectoryIterator::__construct(string path [, int flags])
@@ -532,7 +574,7 @@ SPL_METHOD(DirectoryIterator, isDot)
 SPL_METHOD(SplFileInfo, __construct)
 {
 	spl_filesystem_object *intern;
-	char *path, *p1, *p2;
+	char *path;
 	int len;
 
 	php_set_error_handling(EH_THROW, U_CLASS_ENTRY(spl_ce_RuntimeException) TSRMLS_CC);
@@ -544,18 +586,8 @@ SPL_METHOD(SplFileInfo, __construct)
 
 	intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	
-	intern->file_name = estrndup(path, len);
-	intern->file_name_len = len;
-
-	p1 = strrchr(path, '/');
-	p2 = strrchr(path, '\\');
-	if (p1 || p2) {
-		intern->path_len = (p1 > p2 ? p1 : p2) - path;
-	} else {
-		intern->path_len = 0;
-	}
-	intern->path = estrndup(path, intern->path_len);
-
+	spl_filesystem_info_set_filename(intern, path, len, 1 TSRMLS_CC);
+	
 	/* intern->type = SPL_FS_INFO; already set */
 
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
@@ -657,13 +689,22 @@ SPL_METHOD(SplFileInfo, openFile)
 	spl_filesystem_object_create_type(ht, intern, SPL_FS_FILE, return_value TSRMLS_CC);
 }
 
-/* {{{ proto SplFileObject SplFileInfo::getFileInfo()
+/* {{{ proto SplFileInfo SplFileInfo::getFileInfo()
    Get/copy file info */
 SPL_METHOD(SplFileInfo, getFileInfo)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	spl_filesystem_object_create_type(ht, intern, SPL_FS_INFO, return_value TSRMLS_CC);
+}
+
+/* {{{ proto SplFileInfo SplFileInfo::getPathInfo()
+   Get/copy file info */
+SPL_METHOD(SplFileInfo, getPathInfo)
+{
+	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	spl_filesystem_object_create_info(intern, intern->path, intern->path_len, 1, return_value TSRMLS_CC);
 }
 
 /* {{{ proto void RecursiveDirectoryIterator::rewind()
@@ -783,6 +824,23 @@ SPL_METHOD(RecursiveDirectoryIterator, getSubPathname)
 		RETURN_STRINGL(sub_name, len, 0);
 	} else {
 		RETURN_STRING(intern->u.dir.entry.d_name, 1);
+	}
+}
+/* }}} */
+
+/* {{{ proto SplFileInfo RecursiveDirectoryIterator::getSubPathInfo()
+   Create SplFileInfo for sub path */
+SPL_METHOD(RecursiveDirectoryIterator, getSubPathInfo)
+{
+	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	char *sub_name;
+	int len;
+
+	if (intern->u.dir.sub_path) {
+		len = spprintf(&sub_name, 0, "%s/%s", intern->u.dir.sub_path, intern->u.dir.entry.d_name);
+		spl_filesystem_object_create_info(intern, sub_name, len, 0, return_value TSRMLS_CC);
+	} else {
+		spl_filesystem_object_create_info(intern, intern->path, intern->path_len, 1, return_value TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -1083,6 +1141,7 @@ static zend_function_entry spl_filesystem_info_class_functions[] = {
 	SPL_ME(SplFileInfo,       isDir,         NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       isLink,        NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       getFileInfo,   NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(SplFileInfo,       getPathInfo,   NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       openFile,      arginfo_info_openFile, ZEND_ACC_PUBLIC)
 	SPL_MA(SplFileInfo,       __toString, SplFileInfo, getPathname, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
@@ -1117,6 +1176,7 @@ static zend_function_entry spl_filesystem_tree_class_functions[] = {
 	SPL_ME(RecursiveDirectoryIterator, getChildren,   NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveDirectoryIterator, getSubPath,    NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveDirectoryIterator, getSubPathname,NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveDirectoryIterator, getSubPathInfo,NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
