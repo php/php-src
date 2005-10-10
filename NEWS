@@ -2,6 +2,7 @@ PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Oct 2005, Version 4.4.1
 - Fixed bug #34704 (Infinite recursion due to corrupt JPEG). (Marcus)
+- Fixed bug #33383 (crash when retrieving empty LOBs). (Tony)
 	
 07 Oct 2005, Version 4.4.1RC1
 - Added missing safe_mode checks for image* functions and cURL. (Ilia)
