@@ -537,40 +537,53 @@ static zend_bool opline_is_fetch_this(zend_op *opline TSRMLS_DC)
 
 void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC)
 {
-	int last_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
-	if (last_op_number > 0) {
-		zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number-1];
+	if (variable->op_type == IS_VAR) {
+		int last_op_number = get_next_op_number(CG(active_op_array));
+		int n = 0;
 
-		if (variable->op_type == IS_VAR &&
-		    last_op->opcode == ZEND_FETCH_OBJ_W &&
-		    last_op->result.op_type == IS_VAR &&
-		    last_op->result.u.var == variable->u.var) {
-			last_op->opcode = ZEND_ASSIGN_OBJ;
+		while (last_op_number - n > 0) {
+			zend_op *last_op;
+		
+			last_op = &CG(active_op_array)->opcodes[last_op_number-n-1];
 
-			zend_do_op_data(opline, value TSRMLS_CC);
-			SET_UNUSED(opline->result);
-			*result = last_op->result;
-			return;
-		} else if (variable->op_type == IS_VAR &&
-		           last_op->opcode == ZEND_FETCH_DIM_W &&
-		           last_op->result.op_type == IS_VAR &&
-		           last_op->result.u.var == variable->u.var) {
-			last_op->opcode = ZEND_ASSIGN_DIM;
-
-			zend_do_op_data(opline, value TSRMLS_CC);
-			opline->op2.u.var = get_temporary_variable(CG(active_op_array));
-			opline->op2.u.EA.type = 0;
-			opline->op2.op_type = IS_VAR;
-			SET_UNUSED(opline->result);
-			*result = last_op->result;
-			return;
-		} else {
-			if (variable->op_type == IS_VAR &&
-			    opline_is_fetch_this(last_op TSRMLS_CC)) {
-				zend_error(E_COMPILE_ERROR, "Cannot re-assign $this");
+			if (last_op->result.op_type == IS_VAR &&
+			    last_op->result.u.var == variable->u.var) {
+				if (last_op->opcode == ZEND_FETCH_OBJ_W) {
+					if (n > 0) {
+						*opline = *last_op;
+						MAKE_NOP(last_op);
+						last_op = opline;
+						opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+					}
+					last_op->opcode = ZEND_ASSIGN_OBJ;
+					zend_do_op_data(opline, value TSRMLS_CC);
+					SET_UNUSED(opline->result);
+					*result = last_op->result;
+					return;
+				} else if (last_op->opcode == ZEND_FETCH_DIM_W) {
+					if (n > 0) {
+						*opline = *last_op;
+						MAKE_NOP(last_op);
+						last_op = opline;
+						opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+					}
+					last_op->opcode = ZEND_ASSIGN_DIM;
+					zend_do_op_data(opline, value TSRMLS_CC);
+					opline->op2.u.var = get_temporary_variable(CG(active_op_array));
+					opline->op2.u.EA.type = 0;
+					opline->op2.op_type = IS_VAR;
+					SET_UNUSED(opline->result);
+					*result = last_op->result;
+					return;
+				} else if (opline_is_fetch_this(last_op TSRMLS_CC)) {
+					zend_error(E_COMPILE_ERROR, "Cannot re-assign $this");
+				} else {
+					break;
+				}
 			}
+			n++;
 		}
 	}
 

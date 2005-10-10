@@ -70,6 +70,7 @@ PHP                                                                        NEWS
 - Fixed bug #34505 (Possible memory corruption when unmangling properties 
   with empty names). (Tony)
 - Fixed bug #34478 (Incorrect parsing of url's fragment (#...)). (Dmitry)
+- Fixed bug #34467 (foreach + __get + __set incosistency). (Dmitry)
 - Fixed bug #34456 (Possible crash inside pspell extension). (Nuno)
 - Fixed bug #34453 (parsing http://www.w3.org/2001/xml.xsd exception). (Dmitry)
 - Fixed bug #34450 (Segfault when calling mysqli_close() in destructor). (Tony)
