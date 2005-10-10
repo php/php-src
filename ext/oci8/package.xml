@@ -34,6 +34,7 @@
   <date>2005-??-??</date>
   <notes>
    Fixed PECL bug #5571 (oci_new_connect() not closed by oci_close())
+   Fixed bug #33383 (crash when retrieving empty BLOBs)
   </notes>
  </release>
  <filelist>
