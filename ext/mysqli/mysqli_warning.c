@@ -166,7 +166,7 @@ int mysqli_warning_errno(mysqli_object *obj, zval **retval TSRMLS_DC)
 /* {{{ mysqli_warning_construct(object obj) */
 PHP_METHOD(mysqli_warning, __construct)
 {
-	zval			**z;
+	zval			*z;
 	mysqli_object	*obj;
 	MYSQL			*hdl;
 	MYSQLI_WARNING  *w;
@@ -175,18 +175,18 @@ PHP_METHOD(mysqli_warning, __construct)
 	if (ZEND_NUM_ARGS() != 1) {
 		WRONG_PARAM_COUNT;
 	}
-	if (zend_get_parameters_ex(1, &z)==FAILURE) {
+	if (zend_parse_parameters(1, "o", &z)==FAILURE) {
 		return;
 	}
-	obj = (mysqli_object *)zend_object_store_get_object(*(z) TSRMLS_CC);\
+	obj = (mysqli_object *)zend_object_store_get_object(z TSRMLS_CC);\
 
 	if (obj->zo.ce == mysqli_link_class_entry) {
 		MY_MYSQL *mysql;
-		MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, z, "mysqli_link");
+		MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &z, "mysqli_link");
 		hdl = mysql->mysql;
 	} else if (obj->zo.ce == mysqli_stmt_class_entry) {
 		MY_STMT *stmt;
-		MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, z, "mysqli_stmt");
+		MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &z, "mysqli_stmt");
 		hdl = stmt->stmt->mysql;
 	} else {
 		RETURN_FALSE;
