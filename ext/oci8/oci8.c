@@ -1489,7 +1489,12 @@ static int _oci_make_zval(zval *value,oci_statement *statement,oci_out_column *c
 			if (oci_loadlob(statement->conn,descr,&buffer,&loblen)) {
 				ZVAL_FALSE(value);
 			} else {
-				ZVAL_STRINGL(value,buffer,loblen,0);
+				if (loblen > 0) {
+					ZVAL_STRINGL(value,buffer,loblen,0);
+				}
+				else {
+					ZVAL_EMPTY_STRING(value);
+				}
 			} 
 		} else { 
 			/* return the locator */
@@ -2248,6 +2253,10 @@ static int oci_loadlob(oci_connection *connection, oci_descriptor *mydescr, char
 		return -1;
 	}
 
+	if (readlen == 0) {
+		return 0;
+	}
+	
 	buf = emalloc(readlen + 1);
 
 	while (readlen > 0) { /* thies loop should not be entered on readlen == 0 */
@@ -2350,6 +2359,10 @@ static int oci_readlob(oci_connection *connection, oci_descriptor *mydescr, char
 	if (oci_lobgetlen(connection, mydescr, &loblen) != 0) {
 		*len = 0;
 		return -1;
+	}
+
+	if (loblen == 0) {
+		return 0;
 	}
 	
 	/* check if we're in LOB's borders */
@@ -4016,7 +4029,12 @@ PHP_FUNCTION(oci_lob_load)
 		}
 		
 		if (!oci_loadlob(descr->conn,descr,&buffer,&loblen)) {
-			RETURN_STRINGL(buffer,loblen,0);
+			if (loblen > 0) {
+				RETURN_STRINGL(buffer,loblen,0);
+			}
+			else {
+				RETURN_EMPTY_STRING();
+			}
 		} else {
 			RETURN_FALSE;
 		}
@@ -4050,7 +4068,12 @@ PHP_FUNCTION(oci_lob_read)
 
 		loblen = Z_LVAL_PP(len);
 		if (oci_readlob(descr->conn,descr,&buffer,&loblen) == 0) {
-			RETURN_STRINGL(buffer,loblen,0);
+			if (loblen > 0) {
+				RETURN_STRINGL(buffer,loblen,0);
+			}
+			else {
+				RETURN_EMPTY_STRING();
+			}
 		} else {
 			RETURN_FALSE;
 		}
