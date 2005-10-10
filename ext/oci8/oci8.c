@@ -1490,7 +1490,12 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode TSR
 				ZVAL_FALSE(value);
 				return 1;
 			} else {
-				ZVAL_STRINGL(value, lob_buffer, lob_length, 0);
+				if (lob_length > 0) {
+					ZVAL_STRINGL(value, lob_buffer, lob_length, 0);
+				}
+				else {
+					ZVAL_EMPTY_STRING(value);
+				}
 				return 0;
 			}
 		} else { 

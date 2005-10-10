@@ -243,7 +243,12 @@ PHP_FUNCTION(oci_lob_load)
 	if (php_oci_lob_read(descriptor, -1, 0, &buffer, &buffer_len TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	RETURN_STRINGL(buffer, buffer_len, 0);
+	if (buffer_len > 0) {
+		RETURN_STRINGL(buffer, buffer_len, 0);
+	}
+	else {
+		RETURN_EMPTY_STRING();
+	}
 }
 /* }}} */
 
@@ -282,8 +287,13 @@ PHP_FUNCTION(oci_lob_read)
 	
 	if (php_oci_lob_read(descriptor, length, descriptor->lob_current_position, &buffer, &buffer_len TSRMLS_CC)) {
 		RETURN_FALSE;
+	}	
+	if (buffer_len > 0) {
+		RETURN_STRINGL(buffer, buffer_len, 0);
 	}
-	RETURN_STRINGL(buffer, buffer_len, 0);
+	else {
+		RETURN_EMPTY_STRING();
+	}
 }
 /* }}} */
 
