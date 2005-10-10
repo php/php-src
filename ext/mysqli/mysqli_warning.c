@@ -201,8 +201,8 @@ PHP_METHOD(mysqli_warning, __construct)
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = mysqli_resource->info = (void *)w;
 
-	if (!getThis()) {
-		MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_link_class_entry);	
+	if (!getThis() || !instanceof_function(Z_OBJCE_P(getThis()), mysqli_warning_class_entry TSRMLS_CC)) {
+		MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_warning_class_entry);	
 	} else {
 		((mysqli_object *) zend_object_store_get_object(getThis() TSRMLS_CC))->ptr = mysqli_resource;
 		((mysqli_object *) zend_object_store_get_object(getThis() TSRMLS_CC))->valid = 1;

@@ -191,7 +191,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 #define MYSQLI_REGISTER_RESOURCE(__ptr, __ce) \
 {\
 	zval *object = getThis();\
-	if (!object) {\
+	if (!object || !instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry TSRMLS_CC)) {\
 		object = return_value;\
 		Z_TYPE_P(object) = IS_OBJECT;\
 		(object)->value.obj = mysqli_objects_new(__ce TSRMLS_CC);\
