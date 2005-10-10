@@ -75,7 +75,7 @@ PHP_FUNCTION(mysqli_connect)
 	}
 
 #ifdef HAVE_EMBEDDED_MYSQLI
-	if (hostname && strlen(hostname)) {
+	if (hostname_len && hostname) {
 		unsigned int external=1;
 		mysql_options(mysql->mysql, MYSQL_OPT_USE_REMOTE_CONNECTION, (char *)&external);
 	} else {
