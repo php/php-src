@@ -12,7 +12,7 @@ $infile = dirname(__FILE__).'/bug34704.jpg';
 var_dump(exif_read_data($infile));
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 array(7) {
   ["FileName"]=>
   string(12) "bug34704.jpg"
