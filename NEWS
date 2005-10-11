@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - Fixed bug #34788 (SOAP Client not applying correct namespace to generated
   values). (Dmitry)
 - Fixed bug #34787 (SOAP Client not handling boolean types correctly). (Dmitry)
+- Fixed bug #34757 (iconv_substr() gives "Unknown error" when offset > string 
+  length). (Tony)
 - Fixed bug #34723 (array_count_values() strips leading zeroes). (Tony)
 - Fixed bug #34704 (Infinite recursion due to corrupt JPEG). (Marcus)
 - Fixed bug #34678 (__call(), is_callable() and static methods). (Dmitry)
