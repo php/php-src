@@ -1,3 +1,169 @@
+2005-10-10  Antony Dovgal  <antony@zend.com>
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c:
+      MF51: use proper macros and vars instead of strlen()
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_warning.c:
+      MF51: fix #34818
+
+    * (PHP_5_1)
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c:
+      use proper macros and vars instead of strlen()
+
+    * (PHP_5_1)
+      NEWS
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_warning.c:
+      fix #34818 (new mysqli_stmt() and several others crash if the first
+      parameter is not a valid mysqli_link)
+
+2005-10-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      MFH: Fixed bug #34809 (FETCH_INTO in PDO crashes without a destination
+      object).
+
+    * (PHP_5_1)
+      NEWS:
+      bug fixing news
+
+    * (PHP_5_1)
+      ZendEngine2/zend_objects_API.c:
+      MFH: Fixed bug #34802 (Fixed crash on object instantiation failure).
+
+    * ZendEngine2/zend_objects_API.c:
+      Fixed bug #34802 (Fixed crash on object instantiation failure).
+
+2005-10-10  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_warning.c
+      ext/mysqli/php_mysqli.h
+      ext/mysqli/php_mysqli.h
+      ext/mysqli/tests/bug34810.phpt
+      ext/mysqli/tests/bug34810.phpt:
+      MF51: fix #34810 (mysqli::init() and others use wrong $this pointer without
+      checks)
+
+    * ext/mysqli/tests/bug34810.phpt
+      ext/mysqli/tests/bug34810.phpt
+      ext/mysqli/tests/bug34810.phpt:
+        1.1.4;
+      file bug34810.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_warning.c
+      ext/mysqli/php_mysqli.h:
+      fix #34810 (mysqli::init() and others use wrong $this pointer without
+      checks)
+
+2005-10-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug34786.phpt
+      ZendEngine2/tests/bug34786.phpt:
+      
+      file bug34786.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/tests/bug34786.phpt:
+      Fixed bug #34786 (2 @ results in change to error_reporting() to random
+      value)
+
+2005-10-10  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/package.xml:
+      update changelog
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      NEWS
+      NEWS:
+      BFN
+
+    * (PHP_5_0)
+      ext/oci8/oci8.c
+      ext/oci8/oci8.c:
+      MF44: fix #33383 (crash when retrieving empty LOBs)
+
+    * (PHP_4_4)
+      ext/oci8/oci8.c:
+      fix #33383 (crash when retrieving empty LOBs)
+
+2005-10-10  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/mssql/config.m4
+      ext/mssql/config.m4:
+      Fix copypastetypo
+
+2005-10-10  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/oci8.c
+      ext/oci8/oci8_interface.c
+      ext/oci8/oci8_lob.c:
+      fix #33383 (crash when retrieving empty BLOBs)
+
+2005-10-10  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/mssql/config.m4:
+      - Fix build for distros where the header files are under */include/freetds/
+
+2005-10-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug34467.phpt
+      ZendEngine2/tests/bug34467.phpt:
+      
+      file bug34467.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/bug34467.phpt:
+      Fixed bug #34467 (foreach + __get + __set incosistency)
+
+2005-10-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c:
+      - Fix logic
+
+2005-10-10  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/exif/tests/bug34704.phpt:
+      fix test
+
+    * (PHP_5_1)
+      ext/exif/tests/bug34704.phpt:
+      extra spaces removed
+
+2005-10-10  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_0)
+      main/main.c
+      main/main.c:
+      MFH: PHP_CONFIG_FILE_PATH needs to use strlen() due to Win build
+
+    * main/main.c:
+      PHP_CONFIG_FILE_PATH needs to use strlen() due to Win build
+
 2005-10-09  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * ext/ftp/config.m4:
