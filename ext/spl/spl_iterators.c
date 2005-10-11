@@ -1268,7 +1268,7 @@ SPL_METHOD(RegExIterator, accept)
 
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	
-	if (intern->u.regex.flags) {
+	if (intern->u.regex.flags & REGIT_USE_KEY) {
 		if (intern->current.key_type == HASH_KEY_IS_LONG) {
 			subject_len = snprintf(tmp, sizeof(tmp), "%ld", intern->current.int_key);
 			subject = &tmp[0];
@@ -2434,6 +2434,7 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	REGISTER_SPL_SUB_CLASS_EX(InfiniteIterator, IteratorIterator, spl_dual_it_new, spl_funcs_InfiniteIterator);
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 	REGISTER_SPL_SUB_CLASS_EX(RegExIterator, FilterIterator, spl_dual_it_new, spl_funcs_RegExIterator);
+	REGISTER_SPL_CLASS_CONST_LONG(RegExIterator, "USE_KEY", REGIT_USE_KEY);
 	REGISTER_SPL_SUB_CLASS_EX(RecursiveRegExIterator, RegExIterator, spl_dual_it_new, spl_funcs_RecursiveRegExIterator);
 	REGISTER_SPL_IMPLEMENTS(RecursiveRegExIterator, RecursiveIterator);
 #else
