@@ -52,6 +52,8 @@ PHP                                                                        NEWS
 - Fixed bug #34802 (Fixed crash on object instantiation failure). (Ilia)
 - Fixed bug #34796 (missing SSL linking in ext/ftp when configured as shared).
   (Jani)
+- Fixed bug #34790 (preg_match_all(), named capturing groups, variable
+  assignment/return => crash). (Dmitry)
 - Fixed bug #34788 (SOAP Client not applying correct namespace to generated
   values). (Dmitry)
 - Fixed bug #34787 (SOAP Client not handling boolean types correctly). (Dmitry)
