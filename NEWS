@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Renamed CachingRecursiveIterator to RecursiveCachingIterator. (Marcus)
 - Fixed bug #34810 (mysqli::init() and others use wrong $this pointer 
   without checks). (Tony)
+- Fixed bug #34790 (preg_match_all(), named capturing groups, variable
+  assignment/return => crash). (Dmitry)
 - Fixed bug #34788 (SOAP Client not applying correct namespace to generated
   values). (Dmitry)
 - Fixed bug #34787 (SOAP Client not handling boolean types correctly). (Dmitry)
