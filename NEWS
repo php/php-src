@@ -3,6 +3,8 @@ PHP 4                                                                      NEWS
 ?? Oct 2005, Version 4.4.1
 - Fixed bug #34790 (preg_match_all(), named capturing groups, variable
   assignment/return => crash). (Dmitry)
+- Fixed bug #34742 (ftp wrapper failures caused from segmented command 
+  transfer). (Ilia)
 - Fixed bug #34704 (Infinite recursion due to corrupt JPEG). (Marcus)
 - Fixed bug #33383 (crash when retrieving empty LOBs). (Tony)
 	

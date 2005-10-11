@@ -246,18 +246,16 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 }
 
 	/* send the user name */
-	php_stream_write_string(stream, "USER ");
 	if (resource->user != NULL) {
 		unsigned char *s, *e;
 		tmp_len = php_raw_url_decode(resource->user, strlen(resource->user));
 		
 		PHP_FTP_CNTRL_CHK(resource->user, tmp_len, "Invalid login %s")
 		
-		php_stream_write_string(stream, resource->user);
+		php_stream_printf(stream, TSRMLS_CC, "USER %s\r\n", resource->user);
 	} else {
-		php_stream_write_string(stream, "anonymous");
+		php_stream_write_string(stream, "USER anonymous\r\n");
 	}
-	php_stream_write_string(stream, "\r\n");
 	
 	/* get the response */
 	result = GET_FTP_RESULT(stream);
@@ -266,23 +264,21 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 	if (result >= 300 && result <= 399) {
 		php_stream_notify_info(context, PHP_STREAM_NOTIFY_AUTH_REQUIRED, tmp_line, 0);
 
-		php_stream_write_string(stream, "PASS ");
 		if (resource->pass != NULL) {
 			tmp_len = php_raw_url_decode(resource->pass, strlen(resource->pass));
 			
 			PHP_FTP_CNTRL_CHK(resource->pass, tmp_len, "Invalid password %s")
 			
-			php_stream_write_string(stream, resource->pass);
+			php_stream_printf(stream, TSRMLS_CC, "PASS %s\r\n", resource->pass);
 		} else {
 			/* if the user has configured who they are,
 			   send that as the password */
 			if (cfg_get_string("from", &scratch) == SUCCESS) {
-				php_stream_write_string(stream, scratch);
+				php_stream_printf(stream, TSRMLS_CC, "PASS %s\r\n", scratch);
 			} else {
-				php_stream_write_string(stream, "anonymous");
+				php_stream_write_string(stream, "PASS anonymous\r\n");
 			}
 		}
-		php_stream_write_string(stream, "\r\n");
 		
 		/* read the response */
 		result = GET_FTP_RESULT(stream);
@@ -303,9 +299,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 		goto errexit;
 	
 	/* find out the size of the file (verifying it exists) */
-	php_stream_write_string(stream, "SIZE ");
-	php_stream_write_string(stream, resource->path);
-	php_stream_write_string(stream, "\r\n");
+	php_stream_printf(stream TSRMLS_CC, "SIZE %s\r\n", resource->path);
 	
 	/* read the response */
 	result = GET_FTP_RESULT(stream);
@@ -400,19 +394,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 		goto errexit;
 	}
 	
-	if (mode[0] == 'r') {
-		/* retrieve file */
-		php_stream_write_string(stream, "RETR ");
-	} else {
-		/* store file */
-		php_stream_write_string(stream, "STOR ");
-	} 
-	if (resource->path != NULL) {
-		php_stream_write_string(stream, resource->path);
-	} else {
-		php_stream_write_string(stream, "/");
-	}
-	php_stream_write_string(stream, "\r\n");
+	php_stream_printf(stream, TSRMLS_CC, "%s %s\r\n", (mode[0] == 'r' ? "RETR" : "STOR"), (resource->path != NULL ? resource->path : "/"));
 	
 	/* open the data channel */
 	if (hoststart == NULL) {
