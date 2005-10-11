@@ -85,6 +85,11 @@ enum {
 	CIT_HAS_CHILDREN         = 0x00020000
 };
 
+enum {
+	/* public */
+	REGIT_USE_KEY            = 0x00000001,
+};
+
 typedef struct _spl_dual_it_object {
 	zend_object              std;
 	struct {
