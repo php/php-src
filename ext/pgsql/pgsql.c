@@ -1872,11 +1872,11 @@ PHP_FUNCTION(pg_fetch_result)
 /* {{{ void php_pgsql_fetch_hash */
 static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type, int into_object)
 {
-	zval                *result, *zrow;
+	zval                *result;
 	PGresult            *pgsql_result;
 	pgsql_result_handle *pg_result;
 	int             i, num_fields, pgsql_row, use_row;
-	long            row;
+	long            row = -1;
 	char            *element, *field_name;
 	uint            element_len;
 	zval            *ctor_params = NULL;
@@ -1886,9 +1886,9 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 		char *class_name;
 		int class_name_len;
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|zsz", &result, &zrow, &class_name, &class_name_len, &ctor_params) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|lsz", &result, &row, &class_name, &class_name_len, &ctor_params) == FAILURE) {
 			return;
-		}
+			}
 		if (ZEND_NUM_ARGS() < 3) {
 			ce = zend_standard_class_def;
 		} else {
@@ -1900,15 +1900,11 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 		}
 		result_type = PGSQL_ASSOC;
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|zl", &result, &zrow, &result_type) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|ll", &result, &row, &result_type) == FAILURE) {
 			return;
 		}
 	}
-	use_row = ZEND_NUM_ARGS() > 1 && Z_TYPE_P(zrow) != IS_NULL;
-	if (use_row) {
-		convert_to_long_ex(&zrow);
-		row = Z_LVAL_P(zrow);
-	}
+	use_row = ZEND_NUM_ARGS() > 1 && row != -1;
 
 	if (!(result_type & PGSQL_BOTH)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid result type");

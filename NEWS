@@ -116,6 +116,7 @@ PHP                                                                        NEWS
 - Fixed bug #34199 (if($obj)/if(!$obj) inconsistency because of cast handler).
   (Dmitry, Alex)
 - Fixed bug #34191 (ob_gzhandler does not enforce trailing \0). (Ilia)
+- Fixed bug #33167 (Possible crash inside pg_fetch_array()). (Ilia)
 - Fixed bug #34156 (memory usage remains elevated after memory limit is 
   reached). (Ilia)
 - Fixed bug #34148 (+,- and . not supported as parts of scheme). (Ilia)
