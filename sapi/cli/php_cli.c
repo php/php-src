@@ -472,7 +472,7 @@ static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file,
 	*lineno = 1;
 
 	if (!(file_handle->handle.fp = VCWD_FOPEN(script_file, "rb"))) {
-		php_printf("Could not open input file: %s.\n", script_file);
+		php_printf("Could not open input file: %s\n", script_file);
 		return FAILURE;
 	}
 	file_handle->filename = script_file;
