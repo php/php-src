@@ -583,26 +583,38 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 	size_t out_left;
 
 	unsigned int cnt;
-
+	unsigned int total_len;
+	
+	err = _php_iconv_strlen(&total_len, str, nbytes, enc);
+	if (err != PHP_ICONV_ERR_SUCCESS) {
+		return err;
+	}
+	
 	/* normalize the offset and the length */
-	if (offset < 0 || len < 0) {
-		unsigned int total_len;
-		err = _php_iconv_strlen(&total_len, str, nbytes, enc);
-		if (err != PHP_ICONV_ERR_SUCCESS) {
-			return err;
+	if (offset < 0) {
+		if ((offset += total_len) < 0) {
+			offset = 0;
 		}
-		if (offset < 0) {
-			if ((offset += total_len) < 0) {
-				offset = 0;
-			}
-		}
-		if (len < 0) {
-			if ((len += (total_len - offset)) < 0) {
-				len = 0;
-			}
+	}
+	if (len < 0) {
+		if ((len += (total_len - offset)) < 0) {
+			len = 0;
 		}
 	}
 
+	if (offset >= total_len) {
+		return PHP_ICONV_ERR_SUCCESS;
+	}
+	
+	if ((offset + len) > total_len) {
+		/* trying to compute the length */
+		len = total_len - offset;
+	}
+
+	if (len == 0) {
+		return PHP_ICONV_ERR_SUCCESS;
+	}
+	
 	cd1 = iconv_open(GENERIC_SUPERSET_NAME, enc);
 
 	if (cd1 == (iconv_t)(-1)) {

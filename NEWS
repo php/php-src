@@ -62,6 +62,8 @@ PHP                                                                        NEWS
 - Fixed bug #34785 (subclassing of mysqli_stmt does not work). (Georg)
 - Fixed bug #34777 (Crash in dblib when fetching non-existent error info). (Ilia)
 - Fixed bug #34771 (strtotime() fails with 1-12am/pm). (Derick)
+- Fixed bug #34757 (iconv_substr() gives "Unknown error" when offset > string 
+  length). (Tony)
 - Fixed bug #34723 (array_count_values() strips leading zeroes). (Tony)
 - Fixed bug #34704 (Infinite recursion due to corrupt JPEG). (Marcus)
 - Fixed bug #34678 (__call(), is_callable() and static methods). (Dmitry)
