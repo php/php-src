@@ -1,3 +1,39 @@
+2005-10-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      zend_objects_API.c:
+      MFH: Fixed bug #34802 (Fixed crash on object instantiation failure).
+
+    * zend_objects_API.c:
+      Fixed bug #34802 (Fixed crash on object instantiation failure).
+
+2005-10-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      zend_vm_opcodes.h
+      tests/bug34786.phpt:
+      Fixed bug #34786 (2 @ results in change to error_reporting() to random
+      value)
+
+    * tests/bug34786.phpt
+      tests/bug34786.phpt:
+      
+      file bug34786.phpt was initially added on branch PHP_5_1.
+
+    * zend_compile.c
+      zend_compile.c
+      tests/bug34467.phpt:
+      Fixed bug #34467 (foreach + __get + __set incosistency)
+
+    * tests/bug34467.phpt
+      tests/bug34467.phpt:
+      
+      file bug34467.phpt was initially added on branch PHP_5_1.
+
 2005-10-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_reflection_api.c:
