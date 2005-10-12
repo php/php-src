@@ -1207,8 +1207,9 @@ PHP_FUNCTION(tidy_get_opt_doc)
 		RETURN_FALSE;
 	}
 
-	if (optval = (char *) tidyOptGetDoc(obj->ptdoc->doc, opt))
+	if ( (optval = (char *) tidyOptGetDoc(obj->ptdoc->doc, opt)) ) {
 		RETURN_STRING(optval, 1);
+	}
 
 	RETURN_FALSE;
 }
