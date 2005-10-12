@@ -124,9 +124,9 @@ static int pcre_clean_cache(void *data, void *arg TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ pcre_get_compiled_regex_cache_ex
+/* {{{ pcre_get_compiled_regex_cache
  */
-static pcre_cache_entry* pcre_get_compiled_regex_cache_ex(char *regex, int regex_len, pcre_extra **extra, int *preg_options, int *compile_options TSRMLS_DC)
+PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_len, pcre_extra **extra, int *preg_options, int *compile_options TSRMLS_DC)
 {
 	pcre				*re = NULL;
 	int				 	 coptions = 0;
@@ -335,7 +335,7 @@ static pcre_cache_entry* pcre_get_compiled_regex_cache_ex(char *regex, int regex
 PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *preg_options TSRMLS_DC)
 {
 	int compile_options;
-	pcre_cache_entry * pce = pcre_get_compiled_regex_cache_ex(regex, strlen(regex), extra, preg_options, &compile_options TSRMLS_CC);
+	pcre_cache_entry * pce = pcre_get_compiled_regex_cache(regex, strlen(regex), extra, preg_options, &compile_options TSRMLS_CC);
 	
 	return pce ? pce->re : NULL;
 }
@@ -345,20 +345,9 @@ PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *preg_
  */
 PHPAPI pcre* pcre_get_compiled_regex_ex(char *regex, pcre_extra **extra, int *preg_options, int *compile_options TSRMLS_DC)
 {
-	pcre_cache_entry * pce = pcre_get_compiled_regex_cache_ex(regex, strlen(regex), extra, preg_options, compile_options TSRMLS_CC);
+	pcre_cache_entry * pce = pcre_get_compiled_regex_cache(regex, strlen(regex), extra, preg_options, compile_options TSRMLS_CC);
 	
 	return pce ? pce->re : NULL;
-}
-/* }}} */
-
-/* {{{ pcre_get_compiled_regex_cache
- */
-PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_len TSRMLS_DC)
-{
-	pcre_extra *extra;
-	int preg_options;
-	int compile_options;
-	return pcre_get_compiled_regex_cache_ex(regex, regex_len, &extra, &preg_options, &compile_options TSRMLS_CC);
 }
 /* }}} */
 
