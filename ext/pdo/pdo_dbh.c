@@ -827,7 +827,7 @@ static PHP_METHOD(PDO, getAttribute)
 
 		case PDO_ATTR_STATEMENT_CLASS:
 			array_init(return_value);
-			add_next_index_string(return_value, dbh->def_stmt_ce->name, 1);
+			add_next_index_text(return_value, dbh->def_stmt_ce->name, 1);
 			if (dbh->def_stmt_ctor_args) {
 				dbh->def_stmt_ctor_args->refcount++;
 				add_next_index_zval(return_value, dbh->def_stmt_ctor_args);
