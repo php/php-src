@@ -1,3 +1,8 @@
+2005-10-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.h:
+      Fixed compilation on Windows
+
 2005-10-10  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_1)

@@ -1,3 +1,81 @@
+2005-10-11  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * sapi/cli/php_cli.c:
+      - Removed confusing dot.
+
+    * ext/exif/tests/bug34704.phpt
+      ext/exif/tests/bug34704.phpt
+      ext/exif/tests/bug34704.phpt:
+      fix test
+
+2005-10-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS
+      ext/pgsql/pgsql.c:
+      MFH: Fixed bug #33167 (Possible crash inside pg_fetch_array()).
+
+    * ext/pgsql/pgsql.c:
+      Fixed bug #33167 (Possible crash inside pg_fetch_array()).
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/ftp_fopen_wrapper.c:
+      MFH: Fixed bug #34742 (ftp wrapper failures caused from segmented command
+      transfer).
+
+    * ext/standard/ftp_fopen_wrapper.c:
+      Fixed bug #34742 (ftp wrapper failures caused from segmented command
+      transfer).
+
+2005-10-11  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      ext/iconv/iconv.c
+      ext/iconv/iconv.c:
+      MF51: fix #34757 (iconv_substr() gives "Unknown error" when offset > string
+      length)
+
+    * (PHP_5_1)
+      NEWS
+      ext/iconv/iconv.c:
+      fix #34757 (iconv_substr() gives "Unknown error" when offset > string
+      length)
+
+2005-10-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend.h:
+      Fixed compilation on Windows
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #32455 (wrong setting property to unset value)
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      NEWS
+      ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.c
+      ext/pcre/tests/bug34790.phpt
+      ext/pcre/tests/bug34790.phpt
+      ext/pcre/tests/bug34790.phpt:
+      Fixed bug #34790 (preg_match_all(), named capturing groups, variable
+      assignment/return => crash)
+
+    * ext/pcre/tests/bug34790.phpt
+      ext/pcre/tests/bug34790.phpt
+      ext/pcre/tests/bug34790.phpt
+      ext/pcre/tests/bug34790.phpt:
+        1.1.4;  1.1.6;
+      Fixed bug #34790 (preg_match_all(), named capturing groups, variable
+      assignment/return => crash)
+
 2005-10-10  Antony Dovgal  <antony@zend.com>
 
     * ext/mysqli/mysqli_api.c
