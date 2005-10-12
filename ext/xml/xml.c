@@ -1108,12 +1108,7 @@ PHP_FUNCTION(xml_parser_create)
    Create an XML parser */
 PHP_FUNCTION(xml_parser_create_ns)
 {
-#if defined(HAVE_LIBXML) && defined(HAVE_XML) && !defined(HAVE_LIBEXPAT) && LIBXML_VERSION < 20600 
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "is broken with libxml2 %s. Please upgrade to libxml2 2.6", LIBXML_DOTTED_VERSION);
-	RETURN_FALSE;
-#else
 	php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
-#endif
 }
 /* }}} */
 
