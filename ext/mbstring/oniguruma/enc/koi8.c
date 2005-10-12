@@ -105,9 +105,9 @@ static unsigned short EncKOI8_CtypeTable[256] = {
 
 static int
 koi8_mbc_to_normalize(OnigAmbigType flag,
-                            UChar** pp, UChar* end, UChar* lower)
+                            const UChar** pp, const UChar* end, UChar* lower)
 {
-  UChar* p = *pp;
+  UChar* p = (UChar *)*pp;
 
   if (((flag & ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE) != 0 &&
        ONIGENC_IS_MBC_ASCII(p)) ||
@@ -123,9 +123,9 @@ koi8_mbc_to_normalize(OnigAmbigType flag,
 }
 
 static int
-koi8_is_mbc_ambiguous(OnigAmbigType flag, UChar** pp, UChar* end)
+koi8_is_mbc_ambiguous(OnigAmbigType flag, const UChar** pp, const UChar* end)
 {
-  UChar* p = *pp;
+  UChar* p = (UChar *)*pp;
 
   (*pp)++;
   if (((flag & ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE) != 0 &&
