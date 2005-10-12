@@ -96,6 +96,8 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 
 	ret = dbnextrow(H->link);
 
+	stmt->row_count = DBCOUNT(H->link);
+
     if (ret == NO_MORE_ROWS) {
        return 1;
     }
