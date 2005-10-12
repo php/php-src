@@ -472,6 +472,7 @@ static int php_handler(request_rec *r)
 		ctx->r = r;
 		ctx = NULL; /* May look weird to null it here, but it is to catch the right case in the first_try later on */
 	} else {
+		parent_req = ctx->r;
 		ctx->r = r;
 	}
 	apply_config(conf);
@@ -531,7 +532,15 @@ normal:
 			zend_bailout();
 		}
 	} else {
-		parent_req = ctx->r;
+		if (!parent_req) {
+			parent_req = ctx->r;
+		}
+		if (parent_req && strcmp(parent_req->handler, PHP_MAGIC_TYPE) && strcmp(parent_req->handler, PHP_SOURCE_MAGIC_TYPE) && strcmp(parent_req->handler, PHP_SCRIPT)) {
+			if (php_apache_request_ctor(r, ctx TSRMLS_CC)!=SUCCESS) {
+				zend_bailout();
+			}
+		}
+		
 		/* check if comming due to ErrorDocument */
 		if (parent_req && parent_req->status != HTTP_OK) {
 			parent_req = NULL;
