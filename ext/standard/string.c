@@ -5123,6 +5123,7 @@ PHPAPI int32_t php_u_strip_tags(UChar *rbuf, int32_t len, int *stateptr, UChar *
 	buf = eustrndup(rbuf, len);
 	rp = rbuf;
 	if (allow_len != 0) {
+		allow = eustrndup(allow, allow_len);
 		php_u_strtolower(&allow, &allow_len, UG(default_locale));
 		tbuf = eumalloc(PHP_TAG_BUF_SIZE+1);
 		tp = tbuf;
