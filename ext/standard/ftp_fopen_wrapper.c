@@ -247,12 +247,11 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 
 	/* send the user name */
 	if (resource->user != NULL) {
-		unsigned char *s, *e;
 		tmp_len = php_raw_url_decode(resource->user, strlen(resource->user));
 		
 		PHP_FTP_CNTRL_CHK(resource->user, tmp_len, "Invalid login %s")
 		
-		php_stream_printf(stream, TSRMLS_CC, "USER %s\r\n", resource->user);
+		php_stream_printf(stream TSRMLS_CC, "USER %s\r\n", resource->user);
 	} else {
 		php_stream_write_string(stream, "USER anonymous\r\n");
 	}
@@ -269,12 +268,12 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 			
 			PHP_FTP_CNTRL_CHK(resource->pass, tmp_len, "Invalid password %s")
 			
-			php_stream_printf(stream, TSRMLS_CC, "PASS %s\r\n", resource->pass);
+			php_stream_printf(stream TSRMLS_CC, "PASS %s\r\n", resource->pass);
 		} else {
 			/* if the user has configured who they are,
 			   send that as the password */
 			if (cfg_get_string("from", &scratch) == SUCCESS) {
-				php_stream_printf(stream, TSRMLS_CC, "PASS %s\r\n", scratch);
+				php_stream_printf(stream TSRMLS_CC, "PASS %s\r\n", scratch);
 			} else {
 				php_stream_write_string(stream, "PASS anonymous\r\n");
 			}
@@ -394,7 +393,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 		goto errexit;
 	}
 	
-	php_stream_printf(stream, TSRMLS_CC, "%s %s\r\n", (mode[0] == 'r' ? "RETR" : "STOR"), (resource->path != NULL ? resource->path : "/"));
+	php_stream_printf(stream TSRMLS_CC, "%s %s\r\n", (mode[0] == 'r' ? "RETR" : "STOR"), (resource->path != NULL ? resource->path : "/"));
 	
 	/* open the data channel */
 	if (hoststart == NULL) {
