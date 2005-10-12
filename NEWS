@@ -185,6 +185,7 @@ PHP                                                                        NEWS
 - Fixed bug #32010 (Memory leak in mssql_fetch_batch). (fmk)
 - Fixed bug #29334 (win32 mail() provides incorrect Date: header). (Jani)
 - Fixed bug #29253 (array_diff with $GLOBALS argument fails). (Dmitry)
+- Fixed bug #27908 (xml default_handlers not being called). (Rob)
 - Fixed bug #25359 (array_multisort() doesn't work in a function if array is
   global or reference). (Dmitry)
 - Fixed bug #21306 (ext/sesssion: catch bailouts of write handler during
