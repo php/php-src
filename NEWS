@@ -79,6 +79,7 @@ PHP                                                                        NEWS
 - Fixed bug #34590 (User defined PDOStatement class can't implement methods).
   (Marcus)
 - Fixed bug #34584 (Segfault with SPL autoload handler). (Marcus)
+- Fixed bug #34581 (crash with mod_rewrite). (Tony, Ilia)
 - Fixed bug #34565 (mb_send_mail does not fetch mail.force_extra_parameters).
   (Marco, Ilia)
 - Fixed bug #34557 (php -m exits with "error" 1). (Johannes)
