@@ -192,9 +192,7 @@ static void _php_date_tzinfo_dtor(void *tzinfo)
 {
 	timelib_tzinfo **tzi = (timelib_tzinfo **)tzinfo;
 
-	if (*tzi) {
-		timelib_tzinfo_dtor(*tzi);
-	}
+	timelib_tzinfo_dtor(*tzi);
 }
 
 /* {{{ PHP_RINIT_FUNCTION */
@@ -291,7 +289,9 @@ static timelib_tzinfo *php_date_parse_tzfile(char *formal_tzname, timelib_tzdb *
 	}
 
 	tzi = timelib_parse_tzfile(formal_tzname, tzdb);
-	zend_hash_add(&DATEG(tzcache), formal_tzname, strlen(formal_tzname) + 1, (void *) &tzi, sizeof(timelib_tzinfo*), NULL);
+	if (tzi) {
+		zend_hash_add(&DATEG(tzcache), formal_tzname, strlen(formal_tzname) + 1, (void *) &tzi, sizeof(timelib_tzinfo*), NULL);
+	}
 	return tzi;
 }
 /* }}} */
