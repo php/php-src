@@ -62,6 +62,7 @@ PHP                                                                        NEWS
 - Fixed bug #34785 (subclassing of mysqli_stmt does not work). (Georg)
 - Fixed bug #34777 (Crash in dblib when fetching non-existent error info). (Ilia)
 - Fixed bug #34771 (strtotime() fails with 1-12am/pm). (Derick)
+- Fixed bug #34758 (PDO_DBLIB did not implement rowCount()). (Ilia)
 - Fixed bug #34757 (iconv_substr() gives "Unknown error" when offset > string 
   length). (Tony)
 - Fixed bug #34742 (ftp wrapper failures caused from segmented command 
