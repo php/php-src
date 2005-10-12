@@ -903,16 +903,16 @@ static INLINE spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAME
 		case DIT_RegExIterator:
 		case DIT_RecursiveRegExIterator: {
 			char *regex;
-			int len;
+			int len, poptions, coptions;
+			pcre_extra *extra;
 
 			intern->u.regex.flags = 0;
 			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Os|l", &zobject, ce_inner, &regex, &len, &intern->u.regex.flags) == FAILURE) {
 				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 				return NULL;
 			}
-			intern->u.regex.extra = NULL;
-			intern->u.regex.options = 0;
-			intern->u.regex.re = pcre_get_compiled_regex(regex, &intern->u.regex.extra, &intern->u.regex.options TSRMLS_CC);
+			intern->u.regex.pce = pcre_get_compiled_regex_cache(regex, len, &extra, &poptions, &coptions TSRMLS_CC);
+			intern->u.regex.pce->refcount++;
 			break;;
 		}
 #endif
@@ -1265,6 +1265,7 @@ SPL_METHOD(RegExIterator, accept)
 	char *subject, tmp[32];
 	int subject_len, use_copy = 0;
 	zval subject_copy;
+	pcre_extra *extra;
 
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	
@@ -1287,7 +1288,8 @@ SPL_METHOD(RegExIterator, accept)
 		}
 	}
 
-	count = pcre_exec(intern->u.regex.re, intern->u.regex.extra, subject, subject_len, 0, 0, NULL, 0);
+	extra = intern->u.regex.pce->extra;
+	count = pcre_exec(intern->u.regex.pce->re, extra, subject, subject_len, 0, 0, NULL, 0);
 
 	if (use_copy) {
 		zval_dtor(&subject_copy);
@@ -1331,10 +1333,10 @@ static INLINE void spl_dual_it_free_storage(void *_object TSRMLS_DC)
 		}
 	}
 
-#if MBO_0
+#if HAVE_PCRE || HAVE_BUNDLED_PCRE
 	if (object->dit_type == DIT_RegExIterator || object->dit_type == DIT_RecursiveRegExIterator) {
-		if (object->u.regex.re) {
-			/* actually there's no way to get rid of this early */
+		if (object->u.regex.pce) {
+			object->u.regex.pce->refcount--;
 		}
 	}
 #endif

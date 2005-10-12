@@ -125,9 +125,7 @@ typedef struct _spl_dual_it_object {
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 		struct {
 			int              flags;
-			pcre             *re;
-			pcre_extra		 *extra;
-			int              options;
+			pcre_cache_entry *pce;
 		} regex;
 #endif
 	} u;
