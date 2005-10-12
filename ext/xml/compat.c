@@ -33,7 +33,6 @@ typedef struct _php_xml_ns {
 	((__ns) != NULL && strlen(__ns) == 5 && *(__ns) == 'x' && *((__ns)+1) == 'm' && \
 	 *((__ns)+2) == 'l' && *((__ns)+3) == 'n' && *((__ns)+4) == 's')
 
-#if LIBXML_VERSION >= 20600 
 static void 
 _qualify_namespace(XML_Parser parser, const xmlChar *name, const xmlChar *URI, xmlChar **qualified)
 {
@@ -46,7 +45,6 @@ _qualify_namespace(XML_Parser parser, const xmlChar *name, const xmlChar *URI, x
 		*qualified = xmlStrdup(name);
 	}
 }
-#endif
 
 static void
 _start_element_handler(void *user, const xmlChar *name, const xmlChar **attributes)
@@ -55,6 +53,25 @@ _start_element_handler(void *user, const xmlChar *name, const xmlChar **attribut
 	xmlChar    *qualified_name = NULL;
 
 	if (parser->h_start_element == NULL) {
+		if (parser->h_default) {
+			int attno = 0;
+
+			qualified_name = xmlStrncatNew((xmlChar *)"<", name, xmlStrlen(name));
+			if (attributes) {
+				while (attributes[attno] != NULL) {
+					qualified_name = xmlStrncat(qualified_name, (xmlChar *)" ", 1);
+					qualified_name = xmlStrcat(qualified_name, (xmlChar *)attributes[attno]);
+					qualified_name = xmlStrncat(qualified_name, (xmlChar *)"=\"", 2);
+					qualified_name = xmlStrcat(qualified_name, (xmlChar *)attributes[++attno]);
+					qualified_name = xmlStrncat(qualified_name, (xmlChar *)"\"", 1);
+					attno++;
+				}
+
+			}
+			qualified_name = xmlStrncat(qualified_name, (xmlChar *)">", 1);
+			parser->h_default(parser->user, (const XML_Char *) qualified_name, xmlStrlen(qualified_name));
+			xmlFree(qualified_name);
+		}
 		return;
 	}
 
@@ -65,7 +82,6 @@ _start_element_handler(void *user, const xmlChar *name, const xmlChar **attribut
 	xmlFree(qualified_name);
 }
 
-#if LIBXML_VERSION >= 20600 
 static void
 _start_element_handler_ns(void *user, const xmlChar *name, const xmlChar *prefix, const xmlChar *URI, int nb_namespaces, const xmlChar ** namespaces, int nb_attributes, int nb_defaulted, const xmlChar ** attributes)
 {
@@ -84,7 +100,7 @@ _start_element_handler_ns(void *user, const xmlChar *name, const xmlChar *prefix
 		y = 0;
 	}
 	
-	if (parser->h_start_element == NULL) {
+	if (parser->h_start_element == NULL && parser->h_default == NULL) {
 		return;
 	}
 	_qualify_namespace(parser, name, URI, &qualified_name);
@@ -117,7 +133,6 @@ _start_element_handler_ns(void *user, const xmlChar *name, const xmlChar *prefix
 	}
 	xmlFree(qualified_name);
 }
-#endif
 
 static void
 _namespace_handler(XML_Parser parser, xmlNsPtr nsptr)
@@ -135,6 +150,12 @@ _end_element_handler(void *user, const xmlChar *name)
 	XML_Parser  parser = (XML_Parser) user;
 
 	if (parser->h_end_element == NULL) {
+		if (parser->h_default) {
+			qualified_name = xmlStrncatNew((xmlChar *)"</", name, xmlStrlen(name));
+			qualified_name = xmlStrncat(qualified_name, (xmlChar *)">", 1);
+			parser->h_default(parser->user, (const XML_Char *) qualified_name, xmlStrlen(qualified_name));
+			xmlFree(qualified_name);
+		}
 		return;
 	}
 	
@@ -145,7 +166,6 @@ _end_element_handler(void *user, const xmlChar *name)
 	xmlFree(qualified_name);
 }
 
-#if LIBXML_VERSION >= 20600 
 static void
 _end_element_handler_ns(void *user, const xmlChar *name, const xmlChar * prefix, const xmlChar *URI)
 {
@@ -162,7 +182,6 @@ _end_element_handler_ns(void *user, const xmlChar *name, const xmlChar * prefix,
 
 	xmlFree(qualified_name);
 }
-#endif
 
 static void
 _cdata_handler(void *user, const xmlChar *cdata, int cdata_len)
@@ -170,6 +189,9 @@ _cdata_handler(void *user, const xmlChar *cdata, int cdata_len)
 	XML_Parser parser = (XML_Parser) user;
 
 	if (parser->h_cdata == NULL) {
+		if (parser->h_default) {
+			parser->h_default(parser->user, (const XML_Char *) cdata, cdata_len);
+		}
 		return;
 	}
 
@@ -182,6 +204,16 @@ _pi_handler(void *user, const xmlChar *target, const xmlChar *data)
 	XML_Parser parser = (XML_Parser) user;
 
 	if (parser->h_pi == NULL) {
+		if (parser->h_default) {
+			xmlChar    *full_pi;
+
+			full_pi = xmlStrncatNew((xmlChar *)"<?", target, xmlStrlen(target));
+			full_pi = xmlStrncat(full_pi, (xmlChar *)" ", 1);
+			full_pi = xmlStrcat(full_pi, data);
+			full_pi = xmlStrncat(full_pi, (xmlChar *)"?>", 2);
+			parser->h_default(parser->user, (const XML_Char *) full_pi, xmlStrlen(full_pi));
+			xmlFree(full_pi);
+		}
 		return;
 	}
 
@@ -335,16 +367,11 @@ php_xml_compat_handlers = {
 	NULL,  /* getParameterEntity */
 	_cdata_handler, /* cdataBlock */
 	NULL, /* externalSubset */
-#if LIBXML_VERSION < 20600
-	1,
-#else
 	XML_SAX2_MAGIC,
 	NULL,
 	_start_element_handler_ns,
 	_end_element_handler_ns,
 	NULL
-#endif
-	
 };
 
 PHPAPI XML_Parser 
@@ -390,16 +417,12 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 	parser->parser->wellFormed = 0;
 	if (sep != NULL) {
 		parser->use_namespace = 1;
-#if LIBXML_VERSION >= 20600
 		parser->parser->sax2 = 1;
-#endif
 		parser->_ns_seperator = xmlStrdup(sep);
-#if LIBXML_VERSION >= 20600
 	} else {
 		/* Reset flag as XML_SAX2_MAGIC is needed for xmlCreatePushParserCtxt 
 		so must be set in the handlers */
 		parser->parser->sax->initialized = 1;
-#endif
 	}
 	return parser;
 }
@@ -480,9 +503,7 @@ XML_SetEndNamespaceDeclHandler(XML_Parser parser, XML_EndNamespaceDeclHandler en
 PHPAPI int
 XML_Parse(XML_Parser parser, const XML_Char *data, int data_len, int is_final)
 {
-#if LIBXML_VERSION >= 20600
 	int error;
-#endif
 
 /* The following is a hack to keep BC with PHP 4 while avoiding 
 the inifite loop in libxml <= 2.6.17 which occurs when no encoding 
@@ -508,7 +529,6 @@ has been defined and none can be detected */
 	}
 #endif
 
-#if LIBXML_VERSION >= 20600
 	error = xmlParseChunk(parser->parser, data, data_len, is_final);
 	if (!error) {
 		return 1;
@@ -517,9 +537,6 @@ has been defined and none can be detected */
 	} else {
 		return 1;
 	}
-#else
-	return !xmlParseChunk(parser->parser, data, data_len, is_final);
-#endif
 }
 
 PHPAPI int
@@ -683,6 +700,10 @@ XML_ParserFree(XML_Parser parser)
 		if (parser->_ns_seperator) {
 			xmlFree(parser->_ns_seperator);
 		}
+	}
+	if (parser->parser->myDoc) {
+		xmlFreeDoc(parser->parser->myDoc);
+		parser->parser->myDoc = NULL;
 	}
 	xmlFreeParserCtxt(parser->parser);
 	efree(parser);
