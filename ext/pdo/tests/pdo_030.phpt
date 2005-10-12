@@ -137,13 +137,26 @@ array(3) {
 ===DONE===
 PDODatabase::__destruct()
 PDOStatementX::__destruct()
---UEXPECT--
+--UEXPECTF--
 unicode(11) "PDODatabase"
 unicode(12) "PDOStatement"
 ===QUERY===
+array(1) {
+  [0]=>
+  unicode(12) "PDOStatement"
+}
+array(2) {
+  [0]=>
+  unicode(13) "PDOStatementX"
+  [1]=>
+  array(1) {
+    [0]=>
+    object(PDODatabase)#%d (0) {
+    }
+  }
+}
 PDODatabase::query()
 PDOStatementX::__construct()
-PDOStatementX::execute()
 unicode(13) "PDOStatementX"
 unicode(11) "PDODatabase"
 ===FOREACH===
