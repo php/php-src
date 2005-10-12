@@ -663,7 +663,7 @@ ZEND_FUNCTION(mysqli_stmt_construct)
 	switch (ZEND_NUM_ARGS())
 	{
 		case 1:  /* mysql_stmt_init */
-	        if (zend_parse_parameters(1, "O", &mysql_link, mysqli_link_class_entry)==FAILURE) {
+	        if (zend_parse_parameters(1 TSRMLS_CC, "O", &mysql_link, mysqli_link_class_entry)==FAILURE) {
 				return;
 			}
 			MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link");
@@ -673,7 +673,7 @@ ZEND_FUNCTION(mysqli_stmt_construct)
 			stmt->stmt = mysql_stmt_init(mysql->mysql);
 		break;
 		case 2:
-	        if (zend_parse_parameters(2, "Os", &mysql_link, mysqli_link_class_entry, &statement, stmt_len)==FAILURE) {
+	        if (zend_parse_parameters(2 TSRMLS_CC, "Os", &mysql_link, mysqli_link_class_entry, &statement, stmt_len)==FAILURE) {
 				return;
 			}
 			MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link");
@@ -717,12 +717,12 @@ ZEND_FUNCTION(mysqli_result_construct)
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
-	        if (zend_parse_parameters(1, "O", &mysql_link, mysqli_link_class_entry)==FAILURE) {
+	        if (zend_parse_parameters(1 TSRMLS_CC, "O", &mysql_link, mysqli_link_class_entry)==FAILURE) {
 				return;
 			}
 		break;
 		case 2:
-	        if (zend_parse_parameters(2, "Ol", &mysql_link, mysqli_link_class_entry, &resmode)==FAILURE) {
+	        if (zend_parse_parameters(2 TSRMLS_CC, "Ol", &mysql_link, mysqli_link_class_entry, &resmode)==FAILURE) {
 				return;
 			}
 		break;
