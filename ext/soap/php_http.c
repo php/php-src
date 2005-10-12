@@ -870,8 +870,6 @@ try_again:
 
 		if ((loc = get_http_header_value(http_headers,"Location: ")) != NULL) {
 			php_url *new_url  = php_url_parse(loc);
-			char *body;
-			int body_size;
 
 			if (new_url != NULL) {
 				efree(http_headers);
