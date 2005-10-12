@@ -59,12 +59,16 @@ _start_element_handler(void *user, const xmlChar *name, const xmlChar **attribut
 			qualified_name = xmlStrncatNew((xmlChar *)"<", name, xmlStrlen(name));
 			if (attributes) {
 				while (attributes[attno] != NULL) {
-					qualified_name = xmlStrncat(qualified_name, (xmlChar *)" ", 1);
-					qualified_name = xmlStrcat(qualified_name, (xmlChar *)attributes[attno]);
-					qualified_name = xmlStrncat(qualified_name, (xmlChar *)"=\"", 2);
-					qualified_name = xmlStrcat(qualified_name, (xmlChar *)attributes[++attno]);
-					qualified_name = xmlStrncat(qualified_name, (xmlChar *)"\"", 1);
-					attno++;
+					int att_len;
+					char *att_string, *att_name, *att_value;
+
+					att_name = (char *)attributes[attno++];
+					att_value = (char *)attributes[attno++];
+
+					att_len = spprintf(&att_string, 0, " %s=\"%s\"", att_name, att_value);
+
+					qualified_name = xmlStrncat(qualified_name, (xmlChar *)att_string, att_len);
+					efree(att_string);
 				}
 
 			}
@@ -151,10 +155,11 @@ _end_element_handler(void *user, const xmlChar *name)
 
 	if (parser->h_end_element == NULL) {
 		if (parser->h_default) {
-			qualified_name = xmlStrncatNew((xmlChar *)"</", name, xmlStrlen(name));
-			qualified_name = xmlStrncat(qualified_name, (xmlChar *)">", 1);
-			parser->h_default(parser->user, (const XML_Char *) qualified_name, xmlStrlen(qualified_name));
-			xmlFree(qualified_name);
+			char *end_element;
+
+			spprintf(&end_element, 0, "</%s>", (char *)name);
+			parser->h_default(parser->user, (const XML_Char *) end_element, strlen(end_element));
+			efree(end_element);
 		}
 		return;
 	}
@@ -205,14 +210,10 @@ _pi_handler(void *user, const xmlChar *target, const xmlChar *data)
 
 	if (parser->h_pi == NULL) {
 		if (parser->h_default) {
-			xmlChar    *full_pi;
-
-			full_pi = xmlStrncatNew((xmlChar *)"<?", target, xmlStrlen(target));
-			full_pi = xmlStrncat(full_pi, (xmlChar *)" ", 1);
-			full_pi = xmlStrcat(full_pi, data);
-			full_pi = xmlStrncat(full_pi, (xmlChar *)"?>", 2);
+			char    *full_pi;
+			spprintf(&full_pi, 0, "<?%s %s?>", (char *)target, (char *)data);
 			parser->h_default(parser->user, (const XML_Char *) full_pi, xmlStrlen(full_pi));
-			xmlFree(full_pi);
+			efree(full_pi);
 		}
 		return;
 	}
