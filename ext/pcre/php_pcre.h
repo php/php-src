@@ -60,7 +60,7 @@ typedef struct {
 	int refcount;
 } pcre_cache_entry;
 
-PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_len TSRMLS_DC);
+PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_len, pcre_extra **extra, int *preg_options, int *compile_options  TSRMLS_DC);
 
 ZEND_BEGIN_MODULE_GLOBALS(pcre)
 	HashTable pcre_cache;
