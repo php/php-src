@@ -249,36 +249,6 @@ static void php_libxml_init_globals(php_libxml_globals *libxml_globals_p TSRMLS_
 /* Channel libxml file io layer through the PHP streams subsystem.
  * This allows use of ftps:// and https:// urls */
 
-int php_libxml_streams_IO_match_wrapper(const char *filename)
-{
-	char *resolved_path;
-	int retval, isescaped=0;
-	xmlURI *uri;
-
-	TSRMLS_FETCH();
-
-	if (zend_is_executing(TSRMLS_C)) {
-		uri = xmlParseURI((xmlChar *)filename);
-		if (uri && (uri->scheme == NULL || (xmlStrncmp(uri->scheme, "file", 4) == 0))) {
-			resolved_path = xmlURIUnescapeString(filename, 0, NULL);
-			isescaped = 1;
-		} else {
-			resolved_path = (char *)filename;
-		}
-
-		if (uri) {
-			xmlFreeURI(uri);
-		}
-
-		retval = php_stream_locate_url_wrapper(resolved_path, NULL, 0 TSRMLS_CC) ? 1 : 0;
-		if (resolved_path && isescaped) {
-			xmlFree(resolved_path);
-		}
-		return retval;
-	}
-	return 0;
-}
-
 void *php_libxml_streams_IO_open_wrapper(const char *filename, const char *mode, const int read_only)
 {
 	php_stream_statbuf ssbuf;
@@ -360,6 +330,78 @@ int php_libxml_streams_IO_close(void *context)
 {
 	TSRMLS_FETCH();
 	return php_stream_close((php_stream*)context);
+}
+
+xmlParserInputBufferPtr
+php_libxml_input_buffer_create_filename(const char *URI, xmlCharEncoding enc)
+{
+    xmlParserInputBufferPtr ret;
+    void *context = NULL;
+
+    if (URI == NULL)
+		return(NULL);
+
+	context = php_libxml_streams_IO_open_read_wrapper(URI);
+
+	if (context == NULL) {
+		return(NULL);
+	}
+
+	/* Allocate the Input buffer front-end. */
+	ret = xmlAllocParserInputBuffer(enc);
+	if (ret != NULL) {
+		ret->context = context;
+		ret->readcallback = php_libxml_streams_IO_read;
+		ret->closecallback = php_libxml_streams_IO_close;
+	} else
+		php_libxml_streams_IO_close(context);
+
+	return(ret);
+}
+
+xmlOutputBufferPtr
+php_libxml_output_buffer_create_filename(const char *URI,
+                              xmlCharEncodingHandlerPtr encoder,
+                              int compression ATTRIBUTE_UNUSED)
+{
+    xmlOutputBufferPtr ret;
+    xmlURIPtr puri;
+    void *context = NULL;
+    char *unescaped = NULL;
+
+	if (URI == NULL)
+		return(NULL);
+
+	puri = xmlParseURI(URI);
+	if (puri != NULL) {
+		if (puri->scheme != NULL)
+			unescaped = xmlURIUnescapeString(URI, 0, NULL);
+		xmlFreeURI(puri);
+	}
+
+	if (unescaped != NULL) {
+		context = php_libxml_streams_IO_open_write_wrapper(unescaped);
+		xmlFree(unescaped);
+	}
+
+    /* try with a non-escaped URI this may be a strange filename */
+	if (context == NULL) {
+		context = context = php_libxml_streams_IO_open_write_wrapper(URI);
+	}
+
+	if (context == NULL) {
+		return(NULL);
+	}
+
+	/* Allocate the Output buffer front-end. */
+	ret = xmlAllocOutputBuffer(encoder);
+	if (ret != NULL) {
+		ret->context = context;
+		ret->writecallback = php_libxml_streams_IO_write;
+		ret->closecallback = php_libxml_streams_IO_close;
+	}
+
+	return(ret);
 }
 
 static int _php_libxml_free_error(xmlErrorPtr error) {
@@ -501,22 +543,6 @@ PHP_LIBXML_API void php_libxml_initialize() {
 		/* we should be the only one's to ever init!! */
 		xmlInitParser();
 
-		/* Enable php stream/wrapper support for libxml 
-		   we only use php streams, so we do not enable
-		   the default io handlers in libxml.
-		*/
-		xmlRegisterInputCallbacks(
-			php_libxml_streams_IO_match_wrapper, 
-			php_libxml_streams_IO_open_read_wrapper,
-			php_libxml_streams_IO_read, 
-			php_libxml_streams_IO_close);
-
-		xmlRegisterOutputCallbacks(
-			php_libxml_streams_IO_match_wrapper, 
-			php_libxml_streams_IO_open_write_wrapper,
-			php_libxml_streams_IO_write, 
-			php_libxml_streams_IO_close);
-
 		zend_hash_init(&php_libxml_exports, 0, NULL, NULL, 1);
 
 		_php_libxml_initialized = 1;
@@ -595,6 +621,8 @@ PHP_RINIT_FUNCTION(libxml)
 {
 	/* report errors via handler rather than stderr */
 	xmlSetGenericErrorFunc(NULL, php_libxml_error_handler);
+	xmlParserInputBufferCreateFilenameDefault(php_libxml_input_buffer_create_filename);
+	xmlOutputBufferCreateFilenameDefault(php_libxml_output_buffer_create_filename);
     return SUCCESS;
 }
 
@@ -612,6 +640,9 @@ PHP_RSHUTDOWN_FUNCTION(libxml)
 	/* reset libxml generic error handling */
 	xmlSetGenericErrorFunc(NULL, NULL);
 	xmlSetStructuredErrorFunc(NULL, NULL);
+
+	xmlParserInputBufferCreateFilenameDefault(NULL);
+	xmlOutputBufferCreateFilenameDefault(NULL);
 
 	smart_str_free(&LIBXML(error_buffer));
 	if (LIBXML(error_list)) {
