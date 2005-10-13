@@ -1,3 +1,8 @@
+2005-10-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.c:
+      Unicode support
+
 2005-10-11  Dmitry Stogov  <dmitry@zend.com>
 
     * zend.h:
