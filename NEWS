@@ -5,9 +5,6 @@ PHP                                                                        NEWS
   (Edin)
 - Changed "instanceof" and "catch" operators, is_a() and is_subclass_of()
   functions to not call __autoload(). (Dmitry)
-- Added support for class constants and static members for internal classes.
-  (Dmitry, Michael Wallner)
-- Added "new_link" parameter to mssql_connect() (Bug #34369). (Frank)
 - Improved SPL extension. (Marcus)
   . Moved RecursiveArrayIterator from examples into extension
   . Moved RecursiveFilterIterator from examples into extension
@@ -30,6 +27,9 @@ PHP                                                                        NEWS
   . ext/oracle (Jani, Derick)
   . ext/ovrimos (Jani, Derick, Pierre)
   . ext/pfpro (Jani, Derick, Pierre)
+- Added support for class constants and static members for internal classes.
+  (Dmitry, Michael Wallner)
+- Added "new_link" parameter to mssql_connect() (Bug #34369). (Frank)
 - Added missing safe_mode checks for image* functions and cURL. (Ilia)
 - Added missing safe_mode/open_basedir checks for file uploads. (Ilia)
 - Fixed possible INI setting leak via virtual() in Apache 2 sapi. (Ilia)
