@@ -2,6 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 5.0.6
 - Renamed CachingRecursiveIterator to RecursiveCachingIterator. (Marcus)
+- Fixed bug #34856 (configure fails to detect libiconv's type). (Tony)
 - Fixed bug #34855 (ibase_service_attach() segfault on AMD64). 
   (irie at gmx dot de, Tony)
 - Fixed bug #34810 (mysqli::init() and others use wrong $this pointer 
