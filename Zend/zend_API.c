@@ -2005,7 +2005,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, char **
 							memcpy(ptr, "::", sizeof("::") - 1);
 							ptr += sizeof("::") - 1;
 							memcpy(ptr, Z_STRVAL_PP(method), Z_STRLEN_PP(method) + 1);
-												}
+						}
 
 						if (check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY)
 							return 1;
