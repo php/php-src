@@ -1,3 +1,90 @@
+2005-10-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.h:
+      - Drop one cache related function which is not really neccessary
+
+    * ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.h:
+      - Add/expose function to compile and access pcre_cache_entry structs
+
+2005-10-12  Antony Dovgal  <antony@zend.com>
+
+    * sapi/apache2handler/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c:
+      MF51: fix bug #34581 (crash with mod_rewrite)
+
+    * (PHP_5_1)
+      NEWS
+      sapi/apache2handler/sapi_apache2.c:
+      fix bug #34581 (crash with mod_rewrite)
+
+2005-10-12  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      pear/.cvsignore:
+      missing entry
+
+2005-10-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      MFH: Fixed bug #34758 (PDO_DBLIB did not implement rowCount()).
+
+    * (PHP_4_4)
+      ext/standard/ftp_fopen_wrapper.c:
+      Fixed compiler failure
+
+2005-10-12  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xml/compat.c:
+      use spprintf where appropriate
+
+2005-10-12  Antony Dovgal  <antony@zend.com>
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_warning.c:
+      MF51: fix TS build
+
+    * (PHP_5_1)
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_warning.c:
+      fix TS build
+
+2005-10-12  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS
+      Zend/zend_execute.c:
+      - MF50: Fixed access to an uninitialised variable.
+
+2005-10-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/string.c:
+      Fixed unicode support for strip_tags()
+
+    * ZendEngine2/zend.c:
+      Unicode support
+
+2005-10-12  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_1)
+      NEWS:
+      BFN
+
+    * (PHP_5_1)
+      ext/xml/compat.c
+      ext/xml/xml.c:
+      MFH: Fixed Bug #27908 (xml default_handlers not being called)
+      Fix memleak when entitydecls are parsed
+      remove old ifdefs
+
+    * ext/xml/compat.c
+      ext/xml/xml.c:
+      Fixed Bug #27908 (xml default_handlers not being called)
+      Fix memleak when entitydecls are parsed
+      remove old ifdefs
+
 2005-10-11  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * sapi/cli/php_cli.c:
