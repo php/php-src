@@ -43,6 +43,8 @@ PHP                                                                        NEWS
 - Fixed "make test" to work for phpized extensions. (Hartmut, Jani)
 - Fixed failing queries (FALSE returned) with mysqli_query() on 64 bit systems.
   (Andrey)
+- Fixed bug #34850 (--program-suffix and --program-prefix not included in
+  man page names). (Jani)
 - Fixed bug #34818 (several functions crash when invalid mysqli_link object 
   is passed). (Tony)
 - Fixed bug #34810 (mysqli::init() and others use wrong $this pointer
