@@ -18,9 +18,10 @@ if test "$PHP_ICONV" != "no"; then
     iconv_ldflags_save="$LDFLAGS"
 
     if test -z "$ICONV_DIR"; then
-      for i in /usr /usr/local; do
-        if test -f "$i/include/iconv.h" -o test -f "$i/include/giconv.h"; then
+      for i in /usr/local /usr; do
+        if test -f "$i/include/iconv.h" || test -f "$i/include/giconv.h"; then
           PHP_ICONV_PREFIX="$i"
+          break
         fi
       done
       if test -z "$PHP_ICONV_PREFIX"; then
@@ -33,7 +34,7 @@ if test "$PHP_ICONV" != "no"; then
     CFLAGS="-I$PHP_ICONV_PREFIX/include $CFLAGS"
     LDFLAGS="-L$PHP_ICONV_PREFIX/$PHP_LIBDIR $LDFLAGS"
 
-    if test -r $PHP_ICONV_PREFIX/include/giconv.h; then
+    if test -r "$PHP_ICONV_PREFIX/include/giconv.h"; then
       PHP_ICONV_H_PATH="$PHP_ICONV_PREFIX/include/giconv.h"
     else
       PHP_ICONV_H_PATH="$PHP_ICONV_PREFIX/include/iconv.h"
