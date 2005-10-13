@@ -43,6 +43,7 @@ PHP                                                                        NEWS
 - Fixed "make test" to work for phpized extensions. (Hartmut, Jani)
 - Fixed failing queries (FALSE returned) with mysqli_query() on 64 bit systems.
   (Andrey)
+- Fixed bug #34856 (configure fails to detect libiconv's type). (Tony)
 - Fixed bug #34855 (ibase_service_attach() segfault on AMD64). 
   (irie at gmx dot de, Tony)
 - Fixed bug #34850 (--program-suffix and --program-prefix not included in
