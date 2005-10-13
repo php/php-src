@@ -22,7 +22,7 @@ BUILD_FILES_EXEC = \
 	config.sub
 
 bin_SCRIPTS = phpize php-config
-man_PAGES = phpize.1 php-config.1
+man_PAGES = phpize php-config
 
 install-build:
 	@echo "Installing build environment:     $(INSTALL_ROOT)$(phpbuilddir)/"
@@ -53,14 +53,14 @@ install-headers:
 install-programs: $(builddir)/phpize $(builddir)/php-config
 	@echo "Installing helper programs:       $(INSTALL_ROOT)$(bindir)/"
 	@for prog in $(bin_SCRIPTS); do \
-		echo "  program: $(program_prefix)$$prog$(program_suffix)"; \
-		$(INSTALL) -m 755 $(builddir)/$$prog $(INSTALL_ROOT)$(bindir)/$(program_prefix)$$prog$(program_suffix); \
+		echo "  program: $(program_prefix)$${prog}$(program_suffix)"; \
+		$(INSTALL) -m 755 $(builddir)/$${prog} $(INSTALL_ROOT)$(bindir)/$(program_prefix)$${prog}$(program_suffix); \
 	done
 	@echo "Installing man pages:             $(INSTALL_ROOT)$(mandir)/man1/"
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(mandir)/man1
 	@for page in $(man_PAGES); do \
-		echo "  page: $$page"; \
-		$(INSTALL_DATA) $(builddir)/man1/$$page $(INSTALL_ROOT)$(mandir)/man1/$$page; \
+		echo "  page: $(program_prefix)$${page}$(program_suffix).1"; \
+		$(INSTALL_DATA) $(builddir)/man1/$${page}.1 $(INSTALL_ROOT)$(mandir)/man1/$(program_prefix)$${page}$(program_suffix).1; \
 	done
 	
 $(builddir)/phpize: $(srcdir)/phpize.in $(top_builddir)/config.status
