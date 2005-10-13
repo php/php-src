@@ -19,8 +19,8 @@
 class RecursiveTreeIterator extends RecursiveIteratorIterator
 {
 	const BYPASS_CURRENT = 0x00000004;
+	const BYPASS_KEY     = 0x00000008;
 
-	private $callToString;
 	private $rit_flags;
 
 	/**
@@ -29,11 +29,10 @@ class RecursiveTreeIterator extends RecursiveIteratorIterator
 	 * @param cit_flags  flags passed to RecursiveCachingIterator (for hasNext)
 	 * @param mode       mode  passed to RecursiveIteratoIterator (parent)
 	 */
-	function __construct(RecursiveIterator $it, $rit_flags = 0, $cit_flags = CachingIterator::CATCH_GET_CHILD, $mode = self::SELF_FIRST)
+	function __construct(RecursiveIterator $it, $rit_flags = self::BYPASS_KEY, $cit_flags = CachingIterator::CATCH_GET_CHILD, $mode = self::SELF_FIRST)
 	{
 		parent::__construct(new RecursiveCachingIterator($it, $cit_flags), $mode, $rit_flags);
 		$this->rit_flags = $rit_flags;
-		$this->callToString = (bool)($cit_flags & CachingIterator::CALL_TOSTRING);
 	}
 
 	/**  Prefix strings used in getPrefix()
@@ -65,7 +64,7 @@ class RecursiveTreeIterator extends RecursiveIteratorIterator
 	 */
 	function getEntry()
 	{
-		return $this->callToString ? $this->__toString() : parent::current();
+		return @(string)parent::current();
 	}
 
 	/** @return string to place after the current element
@@ -78,14 +77,14 @@ class RecursiveTreeIterator extends RecursiveIteratorIterator
 	/** @return the current element prefixed and postfixed
 	 */
 	function current()
-	{		
+	{
 		if ($this->rit_flags & self::BYPASS_CURRENT)
 		{
 			return parent::current();
 		}
 		else
 		{
-		return $this->getPrefix() . $this->getEntry() .  $this->getPostfix();
+			return $this->getPrefix() . $this->getEntry() .  $this->getPostfix();
 		}
 	}
 
@@ -93,7 +92,14 @@ class RecursiveTreeIterator extends RecursiveIteratorIterator
 	 */
 	function key()
 	{
-		return $this->getPrefix() . parent::key() .  $this->getPostfix();
+		if ($this->rit_flags & self::BYPASS_KEY)
+		{
+			return parent::key();
+		}
+		else
+		{
+			return $this->getPrefix() . parent::key() .  $this->getPostfix();
+		}
 	}
 
 	/** Aggregates the inner iterator
