@@ -2333,7 +2333,7 @@ AC_CACHE_CHECK([for xml2-config path], ac_cv_php_xml2_config_path,
     set $libxml_full_version
     IFS=$ac_IFS
     LIBXML_VERSION=`expr [$]1 \* 1000000 + [$]2 \* 1000 + [$]3`
-    if test "$LIBXML_VERSION" -ge "2006008"; then
+    if test "$LIBXML_VERSION" -ge "2006011"; then
       LIBXML_LIBS=`$XML2_CONFIG --libs`
       LIBXML_INCS=`$XML2_CONFIG --cflags`
       PHP_EVAL_LIBLINE($LIBXML_LIBS, $1)
@@ -2356,7 +2356,7 @@ AC_CACHE_CHECK([for xml2-config path], ac_cv_php_xml2_config_path,
       fi
       $2
     else
-      AC_MSG_ERROR([libxml2 version 2.6.8 or greater required.])
+      AC_MSG_ERROR([libxml2 version 2.6.11 or greater required.])
     fi
 ifelse([$3],[],,[else $3])
   fi
