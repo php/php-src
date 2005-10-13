@@ -15,8 +15,10 @@ class DB extends mysqli
   }
 }
 
+require_once dirname(__FILE__)."/connect.inc";
+
 // Segfault when using the DB class which extends mysqli
-$DB = new DB('localhost', 'root', '', '');
+$DB = new DB($host, $user, $passwd, '');
 $DB->query_single('SELECT DATE()');
 
 ?>
