@@ -23,8 +23,9 @@ if test "$PHP_ICONV" != "no"; then
           PHP_ICONV_PREFIX="$i"
         fi
       done
-    if test -z "$PHP_ICONV_PREFIX"; then
-      PHP_ICONV_PREFIX="/usr"
+      if test -z "$PHP_ICONV_PREFIX"; then
+        PHP_ICONV_PREFIX="/usr"
+      fi
     fi
 
     if test -z "$ICONV_DIR"; then
