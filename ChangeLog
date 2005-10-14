@@ -1,3 +1,83 @@
+2005-10-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mysqli/tests/bug33491.phpt:
+      Fixed test failure
+
+2005-10-13  Rob Richards  <rrichards@ctindustries.net>
+
+    * acinclude.m4:
+      bump libxml min version to 2.6.11
+
+2005-10-13  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/iconv/config.m4:
+      proper quoting, breaking, etc.
+
+2005-10-13  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      NEWS
+      ext/iconv/config.m4
+      ext/iconv/config.m4:
+      MFH: fix #34856 (configure fails to detect libiconv's type)
+
+    * ext/iconv/config.m4:
+      correct it one more time (grrr)
+
+    * ext/iconv/config.m4:
+      correct the fix
+
+    * ext/iconv/config.m4:
+      fix #34856 (configure fails to detect libiconv's type)
+
+    * (PHP_5_0)
+      NEWS
+      NEWS
+      ext/interbase/ibase_service.c
+      ext/interbase/ibase_service.c:
+      MFH: fix #34855 (ibase_service_attach() segfault on AMD64)
+
+    * ext/interbase/ibase_service.c:
+      fix #34855 (ibase_service_attach() segfault on AMD64)
+
+2005-10-13  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_4_4)
+      NEWS
+      sapi/cli/Makefile.frag
+      scripts/Makefile.frag:
+      MFH: - Fixed bug #34850 (--program-suffix and --program-prefix not included
+      in man page names)
+
+    * sapi/cli/Makefile.frag
+      scripts/Makefile.frag:
+      MF51:- Fixed bug #34850 (--program-suffix and --program-prefix not included
+      in man page names)
+
+    * (PHP_5_1)
+      NEWS
+      sapi/cli/Makefile.frag
+      scripts/Makefile.frag:
+      - Fixed bug #34850 (--program-suffix and --program-prefix not included in
+      man page names)
+
+    * (PHP_5_1)
+      NEWS:
+      reorder
+
+2005-10-13  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      ZendEngine2/zend_API.c:
+      ws fix
+
+2005-10-13  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      Zend/zend_execute.c:
+      - This is an integer in PHP 4, and not a zval* like in PHP 5.0.
+
 2005-10-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/pcre/php_pcre.c
