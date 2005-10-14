@@ -1,3 +1,9 @@
+2005-10-13  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      zend_API.c:
+      ws fix
+
 2005-10-12  Dmitry Stogov  <dmitry@zend.com>
 
     * zend.c:
