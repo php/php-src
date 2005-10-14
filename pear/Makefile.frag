@@ -10,10 +10,10 @@ install-pear-installer: $(top_builddir)/sapi/cli/php
 
 install-pear:
 	@echo "Installing PEAR environment:      $(INSTALL_ROOT)$(peardir)/"
-	@if test ! -f $(srcdir)/install-pear.phar; then \
-		wget http://pear.php.net/install-pear.phar -nd -P $(srcdir);  \
+	@if test ! -f $(srcdir)/install-pear-nozlib.phar; then \
+		wget http://pear.php.net/install-pear-nozlib.phar -nd -P $(srcdir);  \
 	fi
-	@if test -f $(srcdir)/install-pear.phar && $(mkinstalldirs) $(INSTALL_ROOT)$(peardir); then \
+	@if test -f $(srcdir)/install-pear-nozlib.phar && $(mkinstalldirs) $(INSTALL_ROOT)$(peardir); then \
 		$(MAKE) -s install-pear-installer; \
 	else \
 		cat $(srcdir)/install-pear.txt; \
