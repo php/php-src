@@ -271,9 +271,7 @@ PHP_MINIT_FUNCTION(mime_magic)
 	ZEND_INIT_MODULE_GLOBALS(mime_magic, php_mime_magic_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
 
-	mime_global.magicfile = MIME_MAGIC_G(magicfile);
-
-	if(mime_global.magicfile) {
+	if (MIME_MAGIC_G(magicfile)) {
 		if(apprentice()) {
 			MIME_MAGIC_G(status) = "invalid magic file, disabled";
 		} else {
