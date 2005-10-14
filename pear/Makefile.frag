@@ -6,7 +6,7 @@ peardir=$(PEAR_INSTALLDIR)
 PEAR_INSTALL_FLAGS = -n -dshort_open_tag=0 -dsafe_mode=0 -derror_reporting=E_ALL
 
 install-pear-installer: $(top_builddir)/sapi/cli/php
-	@$(top_builddir)/sapi/cli/php $(PEAR_INSTALL_FLAGS) $(srcdir)/install-pear.phar -d "$(peardir)" -b "$(bindir)"
+	@$(top_builddir)/sapi/cli/php $(PEAR_INSTALL_FLAGS) $(srcdir)/install-pear-nozlib.phar -d "$(peardir)" -b "$(bindir)"
 
 install-pear:
 	@echo "Installing PEAR environment:      $(INSTALL_ROOT)$(peardir)/"
