@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Oct 2005, PHP 5.1 Release Candidate 2
+14 Oct 2005, PHP 5.1 Release Candidate 2
 - Changed SQLite extension to be a shared module in Windows distribution.
   (Edin)
 - Changed "instanceof" and "catch" operators, is_a() and is_subclass_of()
