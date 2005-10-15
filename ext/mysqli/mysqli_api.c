@@ -740,10 +740,6 @@ PHP_FUNCTION(mysqli_fetch_fields)
 
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, &mysql_result, "mysqli_result"); 
 
-	if (!(field = mysql_fetch_field(result))) {
-		RETURN_FALSE;
-	}
-
 	array_init(return_value);
 
 	for (i = 0; i < mysql_num_fields(result); i++) {
