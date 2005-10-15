@@ -339,26 +339,29 @@ static char* guess_timezone(TSRMLS_D)
 
 		switch (GetTimeZoneInformation(&tzi))
 		{
+			/* no DST or not in effect */
 			case TIME_ZONE_ID_UNKNOWN:
-				/* we have no clue what it is, return UTC */
-				php_error_docref(NULL TSRMLS_CC, E_STRICT, "It is not safe to rely on the systems timezone settings, please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. We use 'UTC' instead.");
-				tzid = "UTC";
-				break;
-
 			case TIME_ZONE_ID_STANDARD:
+php_win_std_time:
 				tzid = timelib_timezone_id_from_abbr("", (tzi.Bias + tzi.StandardBias) * -60, 0);
 				if (! tzid) {
 					tzid = "UTC";
 				}
-				php_error_docref(NULL TSRMLS_CC, E_STRICT, "It is not safe to rely on the systems timezone settings, please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. We use '%s' for '%.1f/no DST' instead.", tzid, (float) ((tzi.Bias + tzi.StandardBias) / -60));
+				php_error_docref(NULL TSRMLS_CC, E_STRICT, "It is not safe to rely on the systems timezone settings, please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. We use '%s' for '%.1f/no DST' instead.", tzid, ((tzi.Bias + tzi.StandardBias) / -60.0));
 				break;
 
+			/* DST in effect */
 			case TIME_ZONE_ID_DAYLIGHT:
+				/* If user has disabled DST in the control panel, Windows returns 0 here */
+				if (tzi.DaylightBias == 0) {
+					goto php_win_std_time;
+				}
+				
 				tzid = timelib_timezone_id_from_abbr("", (tzi.Bias + tzi.DaylightBias) * -60, 1);
 				if (! tzid) {
 					tzid = "UTC";
 				}
-				php_error_docref(NULL TSRMLS_CC, E_STRICT, "It is not safe to rely on the systems timezone settings, please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. We use '%s' for '%.1f/DST' instead.", tzid, (float) ((tzi.Bias + tzi.DaylightBias) / -60));
+				php_error_docref(NULL TSRMLS_CC, E_STRICT, "It is not safe to rely on the systems timezone settings, please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. We use '%s' for '%.1f/DST' instead.", tzid, ((tzi.Bias + tzi.DaylightBias) / -60.0));
 				break;
 		}
 		return tzid;
