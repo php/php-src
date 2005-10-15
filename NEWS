@@ -34,6 +34,8 @@ PHP                                                                        NEWS
 - Added "new_link" parameter to mssql_connect() (Bug #34369). (Frank)
 - Added missing safe_mode checks for image* functions and cURL. (Ilia)
 - Added missing safe_mode/open_basedir checks for file uploads. (Ilia)
+- Fixed an error in mysqli_fetch_fields (returned NULL instead of an
+  array when row number > field_count). (Georg)
 - Fixed possible INI setting leak via virtual() in Apache 2 sapi. (Ilia)
 - Fixed potential GLOBALS overwrite via import_request_variables() and
   possible crash and/or memory corruption. (Ilia)
