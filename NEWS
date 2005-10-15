@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 6.0
 - Unicode support. (Andrei, Dmitriy, et al)
+- Changed type hints so that they take "= NULL" as default value. (Marcus,
+  Derick)
 - Changed __toString() behavior to call it in all necessary places
   (Marcus, Dmitry)
 - Changed "instanceof" and "catch" operators, is_a() and is_subclass_of()
