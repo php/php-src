@@ -3950,6 +3950,7 @@ PHPAPI UChar *php_u_addslashes(UChar *str, int32_t length, int32_t *new_length, 
 {
 	return php_u_addslashes_ex(str, length, new_length, should_free, 0 TSRMLS_CC);
 }
+/* }}} */
 
 /* {{{ php_u_addslashes_ex
  */
