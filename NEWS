@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 5.0.6
+- Fixed an error in mysqli_fetch_fields (returned NULL instead of an
+  array when row number > field_count). (Georg)
 - Renamed CachingRecursiveIterator to RecursiveCachingIterator. (Marcus)
 - Fixed bug #34856 (configure fails to detect libiconv's type). (Tony)
 - Fixed bug #34855 (ibase_service_attach() segfault on AMD64). 
