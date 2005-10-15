@@ -1,3 +1,11 @@
+2005-10-14  Antony Dovgal  <antony@zend.com>
+
+    * tests/bug34873.phpt
+      tests/bug34873.phpt
+      tests/bug34873.phpt:
+        1.1.4;
+      add test for bug #34873
+
 2005-10-13  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_1)
