@@ -1,3 +1,32 @@
+2005-10-15  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_1)
+      NEWS:
+      - Fixed timezone guessing on Windows. (Derick, Nuno)
+
+    * NEWS
+      ZendEngine2/zend_compile.c:
+      - Changed type hints so that they take "= NULL" as default value.
+
+    * ext/standard/string.c:
+      - Fixed folding markers.
+
+2005-10-15  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_0)
+      NEWS
+      ext/mysqli/mysqli_api.c:
+       Fixed an error in mysqli_fetch_fields (returned NULL instead of an
+        array when row number > field_count). (Georg)
+
+    * (PHP_5_1)
+      NEWS
+      ext/mysqli/mysqli_api.c:
+      fixed an error in mysqli_fetch_fields (function returns NULL instead of
+      array
+      when row_number > num_fields).
+      Thanks to Marc Deslisle and phpMyAdmin team for the report.
+
 2005-10-14  Antony Dovgal  <antony@zend.com>
 
     * ZendEngine2/tests/bug34873.phpt
