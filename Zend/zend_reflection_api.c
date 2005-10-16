@@ -2909,10 +2909,10 @@ ZEND_METHOD(reflection_class, hasProperty)
 ZEND_METHOD(reflection_class, getProperty)
 {
 	reflection_object *intern;
-	zend_class_entry *ce;
+	zend_class_entry *ce, **pce;
 	zend_property_info *property_info;
-	char *name; 
-	int name_len;
+	char *name, *tmp, *classname; 
+	int name_len, classname_len;
 	zend_uchar name_type;
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
@@ -2923,11 +2923,37 @@ ZEND_METHOD(reflection_class, getProperty)
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if (zend_u_hash_find(&ce->properties_info, name_type, name, name_len + 1, (void**) &property_info) == SUCCESS && (property_info->flags & ZEND_ACC_SHADOW) == 0) {
 		reflection_property_factory(ce, property_info, return_value TSRMLS_CC);
-	} else {
-		zend_throw_exception_ex(U_CLASS_ENTRY(reflection_exception_ptr), 0 TSRMLS_CC, 
-				"Property %R does not exist", name_type, name);
 		return;
 	}
+	if ((tmp = strstr(name, "::")) != NULL) {
+		classname_len = tmp - name;
+		classname = zend_str_tolower_dup(name, classname_len);
+		classname[classname_len] = '\0';
+		name_len = name_len - (classname_len + 2);
+		name = tmp + 2;
+
+		if (zend_u_lookup_class(name_type, classname, classname_len, &pce TSRMLS_CC) == FAILURE) {
+			if (!EG(exception)) {
+				zend_throw_exception_ex(U_CLASS_ENTRY(reflection_exception_ptr), -1 TSRMLS_CC, "Class %R does not exist", name_type, classname);
+			}
+			efree(classname);
+			return;
+		}
+		efree(classname);
+
+		if (!instanceof_function(ce, *pce TSRMLS_CC)) {
+			zend_throw_exception_ex(U_CLASS_ENTRY(reflection_exception_ptr), -1 TSRMLS_CC, "Fully qualified property name %v::%R does not specify a base class of %v", (*pce)->name, name_type, name, ce->name);
+			return;
+		}
+		ce = *pce;
+
+		if (zend_u_hash_find(&ce->properties_info, name_type, name, name_len + 1, (void**) &property_info) == SUCCESS && (property_info->flags & ZEND_ACC_SHADOW) == 0) {
+			reflection_property_factory(ce, property_info, return_value TSRMLS_CC);
+			return;
+		}		
+	}
+	zend_throw_exception_ex(U_CLASS_ENTRY(reflection_exception_ptr), 0 TSRMLS_CC, 
+			"Property %R does not exist", name_type, name);
 }
 /* }}} */
 
@@ -3213,7 +3239,7 @@ ZEND_METHOD(reflection_class, getInterfaces)
 			zval *interface;
 			ALLOC_ZVAL(interface);
 			zend_reflection_class_factory(ce->interfaces[i], interface TSRMLS_CC);
-			add_next_index_zval(return_value, interface);
+			add_assoc_zval_ex(return_value, ce->interfaces[i]->name, ce->interfaces[i]->name_length, interface);
 		}
 	}
 }
@@ -3595,10 +3621,12 @@ ZEND_METHOD(reflection_property, getValue)
 	METHOD_NOTSTATIC(reflection_property_ptr);
 	GET_REFLECTION_OBJECT_PTR(ref);
 
+#if MBO_0
 	if (!(ref->prop->flags & ZEND_ACC_PUBLIC)) {
 		_DO_THROW("Cannot access non-public member");
 		/* Returns from this function */
 	}
+#endif
 
 	if ((ref->prop->flags & ZEND_ACC_STATIC)) {
 		zend_update_class_constants(intern->ce TSRMLS_CC);
