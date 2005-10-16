@@ -1,3 +1,8 @@
+2005-10-15  Derick Rethans  <php@derickrethans.nl>
+
+    * zend_compile.c:
+      - Changed type hints so that they take "= NULL" as default value.
+
 2005-10-14  Antony Dovgal  <antony@zend.com>
 
     * tests/bug34873.phpt
