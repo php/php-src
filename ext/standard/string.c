@@ -2292,61 +2292,118 @@ PHP_FUNCTION(stripos)
    Finds position of last occurrence of a string within another string */
 PHP_FUNCTION(strrpos)
 {
-	zval *zneedle;
-	char *needle, *haystack;
-	int needle_len, haystack_len;
+	zval *zhaystack, *zneedle;
+	void *haystack, *needle;
+	int32_t haystack_len, needle_len = 0;
+	zend_uchar str_type;
 	long offset = 0;
 	char *p, *e, ord_needle[2];
+	UChar *pos, *u_p, *u_e, u_ord_needle[3];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|l", &haystack, &haystack_len, &zneedle, &offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz|l",
+							  &zhaystack, &zneedle, &offset) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if (Z_TYPE_P(zneedle) == IS_STRING) {
-		needle = Z_STRVAL_P(zneedle);
-		needle_len = Z_STRLEN_P(zneedle);
-	} else {
-		convert_to_long(zneedle);
-		ord_needle[0] = (char)(Z_LVAL_P(zneedle) & 0xFF);
-		ord_needle[1] = '\0';
-		needle = ord_needle;
-		needle_len = 1;
+	if (Z_TYPE_P(zhaystack) != IS_UNICODE && Z_TYPE_P(zhaystack) != IS_BINARY && Z_TYPE_P(zhaystack) != IS_STRING) {
+		convert_to_text(zhaystack);
 	}
+	if (Z_TYPE_P(zneedle) == IS_UNICODE || Z_TYPE_P(zneedle) == IS_BINARY || Z_TYPE_P(zneedle) == IS_STRING) {
+		if (Z_TYPE_P(zneedle) != Z_TYPE_P(zhaystack)) {
+			str_type = zend_get_unified_string_type(2 TSRMLS_CC, Z_TYPE_P(zhaystack), Z_TYPE_P(zneedle));
+			if (str_type == (zend_uchar)-1) {
+				convert_to_explicit_type(zhaystack, IS_BINARY);
+				convert_to_explicit_type(zneedle, IS_BINARY);
+			} else {
+				convert_to_explicit_type(zhaystack, str_type);
+				convert_to_explicit_type(zneedle, str_type);
+			}
+		}
+		needle = Z_UNIVAL_P(zneedle);
+		needle_len = Z_UNILEN_P(zneedle);
+	} else {
+		if (Z_TYPE_P(zhaystack) == IS_UNICODE) {
+			if (Z_LVAL_P(zneedle) < 0 || Z_LVAL_P(zneedle) > 0x10FFFF) {
+				php_error(E_WARNING, "Needle argument codepoint value out of range (0 - 0x10FFFF)");
+				RETURN_FALSE;
+			}
+			if (U_IS_BMP(Z_LVAL_P(zneedle))) {
+				u_ord_needle[needle_len++] = (UChar)Z_LVAL_P(zneedle);
+				u_ord_needle[needle_len]   = 0;
+			} else {
+				u_ord_needle[needle_len++] = (UChar)U16_LEAD(Z_LVAL_P(zneedle));
+				u_ord_needle[needle_len++] = (UChar)U16_TRAIL(Z_LVAL_P(zneedle));
+				u_ord_needle[needle_len]   = 0;
+			}
+			needle = u_ord_needle;
+		} else {
+			convert_to_long(zneedle);
+			ord_needle[0] = (char)(Z_LVAL_P(zneedle) & 0xFF);
+			ord_needle[1] = '\0';
+			needle = ord_needle;
+			needle_len = 1;
+		}
+	}
+	haystack = Z_UNIVAL_P(zhaystack);
+	haystack_len = Z_UNILEN_P(zhaystack);
 
 	if ((haystack_len == 0) || (needle_len == 0)) {
 		RETURN_FALSE;
 	}
 
-	if (offset >= 0) {
-		p = haystack + offset;
-		e = haystack + haystack_len - needle_len;
-	} else {
-		p = haystack;
-		if (-offset > haystack_len) {
-			e = haystack - needle_len;
-		} else if (needle_len > -offset) {
-			e = haystack + haystack_len - needle_len;
+	if (Z_TYPE_P(zhaystack) == IS_UNICODE) {
+		if (offset >= 0) {
+			u_p = (UChar *)haystack + offset;
+			u_e = (UChar *)haystack + haystack_len - needle_len;
 		} else {
-			e = haystack + haystack_len + offset;
+			u_p = haystack;
+			if (-offset > haystack_len) {
+				u_e = (UChar *)haystack - needle_len;
+			} else if (needle_len > -offset) {
+				u_e = (UChar *)haystack + haystack_len - needle_len;
+			} else {
+				u_e = (UChar *)haystack + haystack_len + offset;
+			}
 		}
-	}
 
-	if (needle_len == 1) {
-		/* Single character search can shortcut memcmps */
+		pos = u_strFindLast(u_p, u_e-u_p+needle_len, (UChar *)needle, needle_len);
+		if (pos) {
+			RETURN_LONG(pos - (UChar *)haystack);
+		} else {
+			RETURN_FALSE;
+		}
+	} else {
+		if (offset >= 0) {
+			p = (char *)haystack + offset;
+			e = (char *)haystack + haystack_len - needle_len;
+		} else {
+			p = haystack;
+			if (-offset > haystack_len) {
+				e = (char *)haystack - needle_len;
+			} else if (needle_len > -offset) {
+				e = (char *)haystack + haystack_len - needle_len;
+			} else {
+				e = (char *)haystack + haystack_len + offset;
+			}
+		}
+
+		if (needle_len == 1) {
+			/* Single character search can shortcut memcmps */
+			while (e >= p) {
+				if (*e == *(char *)needle) {
+					RETURN_LONG(e - p + (offset > 0 ? offset : 0));
+				}
+				e--;
+			}
+			RETURN_FALSE;
+		}
+
 		while (e >= p) {
-			if (*e == *needle) {
+			if (memcmp(e, needle, needle_len) == 0) {
 				RETURN_LONG(e - p + (offset > 0 ? offset : 0));
 			}
 			e--;
 		}
-		RETURN_FALSE;
-	}
-
-	while (e >= p) {
-		if (memcmp(e, needle, needle_len) == 0) {
-			RETURN_LONG(e - p + (offset > 0 ? offset : 0));
-		}
-		e--;
 	}
 
 	RETURN_FALSE;
