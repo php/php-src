@@ -1,3 +1,21 @@
+2005-10-16  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * Makefile.frag
+      ext/sqlite/Makefile.frag
+      ext/standard/Makefile.frag:
+      - Silence unnecessary output
+
+    * (PHP_5_1)
+      NEWS:
+      NEWS file is about changes between releases. (RCs are not releases..)
+
+2005-10-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Add ability to access private properties of base classes
+      - Add ability to specify fully qualified name for properties
+      - ReflectionClass::getInterfaces89 now returns associative array
+
 2005-10-15  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_5_1)
