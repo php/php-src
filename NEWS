@@ -3,7 +3,8 @@ PHP                                                                        NEWS
 ?? Oct 2005, PHP 5.1 Release Candidate 3
 - Fixed bug #34873 (Segmentation Fault on foreach in object). (Dmitry)
 - Fixed bug #34884 (Possible crash in ext/sqlite when sqlite.assoc_case is 
-  being used). (Tony,Ilia)
+  being used). (Tony, Ilia)
+- Fixed bug #29361 (var_export() producing invalid code). (Derick)
 
 14 Oct 2005, PHP 5.1 Release Candidate 2
 - Changed SQLite extension to be a shared module in Windows distribution.

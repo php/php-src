@@ -6,6 +6,6 @@ $a = (object) array (1, 3, "foo" => "bar");
 var_export($a);
 ?>
 --EXPECT--
-class stdClass {
-  public $foo = 'bar';
-}
+stdClass::__set_state(array(
+   'foo' => 'bar',
+))
