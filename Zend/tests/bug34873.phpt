@@ -25,3 +25,6 @@ echo "Done\n";
 --EXPECT--	
 string(7) "myvalue"
 Done
+--UEXPECT--
+unicode(7) "myvalue"
+Done
