@@ -352,18 +352,9 @@ static int php_object_element_export(zval **zv, int num_args, va_list args, zend
 	if (hash_key->nKeyLength != 0) {
 		php_printf("%*c", level + 1, ' ');
 		zend_unmangle_property_name_ex(hash_key->arKey, hash_key->nKeyLength, &class_name, &prop_name);
-		if (class_name) {
-			if (class_name[0] == '*') {
-				php_printf("protected");
-			} else {
-				php_printf("private");
-			}
-		} else {
-			php_printf("public");
-		}
-		php_printf(" $%s = ", prop_name);
+		php_printf(" '%s' => ", prop_name);
 		php_var_export(zv, level + 2 TSRMLS_CC);
-		PUTS (";\n");
+		PUTS (",\n");
 	}
 	return 0;
 }
@@ -414,7 +405,7 @@ PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC)
 			php_printf("\n%*c", level - 1, ' ');
 		}
 		Z_OBJ_HANDLER(**struc, get_class_name)(*struc, &class_name, &class_name_len, 0 TSRMLS_CC);
-		php_printf ("class %s {\n", class_name);
+		php_printf ("%s::__set_state(array(\n", class_name);
 		efree(class_name);
 		if (myht) {
 			zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_object_element_export, 1, level);
@@ -422,7 +413,7 @@ PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC)
 		if (level > 1) {
 			php_printf("%*c", level - 1, ' ');
 		}
-		PUTS("}");
+		php_printf ("))");
 		break;
 	default:
 		PUTS ("NULL");
