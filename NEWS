@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Oct 2005, PHP 5.1 Release Candidate 3
+- Fixed bug #34873 (Segmentation Fault on foreach in object). (Dmitry)
 
 14 Oct 2005, PHP 5.1 Release Candidate 2
 - Changed SQLite extension to be a shared module in Windows distribution.
