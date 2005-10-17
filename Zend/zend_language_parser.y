@@ -220,7 +220,7 @@ unticked_statement:
 		foreach_statement { zend_do_foreach_end(&$1, &$5 TSRMLS_CC); }
 	|	T_FOREACH '(' expr_without_variable { zend_do_foreach_begin(&$1, &$2, &$3, 0 TSRMLS_CC); } T_AS 
 		{ zend_do_foreach_fetch(&$1, &$2, &$5 TSRMLS_CC); } 
-		variable foreach_optional_arg ')' { zend_check_writable_variable(&$7); zend_do_foreach_cont(&$1, &$5, &$7, &$8 TSRMLS_CC); } 
+		w_variable foreach_optional_arg ')' { zend_do_foreach_cont(&$1, &$5, &$7, &$8 TSRMLS_CC); } 
 		foreach_statement { zend_do_foreach_end(&$1, &$5 TSRMLS_CC); }
 	|	T_DECLARE { $1.u.opline_num = get_next_op_number(CG(active_op_array)); zend_do_declare_begin(TSRMLS_C); } '(' declare_list ')' declare_statement { zend_do_declare_end(&$1 TSRMLS_CC); }
 	|	';'		/* empty statement */
@@ -338,8 +338,8 @@ foreach_optional_arg:
 
 
 foreach_variable:
-		variable			{ zend_check_writable_variable(&$1); $$ = $1; }
-	|	'&' variable		{ zend_check_writable_variable(&$2); $$ = $2;  $$.u.EA.type |= ZEND_PARSED_REFERENCE_VARIABLE; }
+		w_variable			{ $$ = $1; }
+	|	'&' w_variable		{ $$ = $2;  $$.u.EA.type |= ZEND_PARSED_REFERENCE_VARIABLE; }
 ;
 
 for_statement:
