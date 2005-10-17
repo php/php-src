@@ -386,7 +386,7 @@ php_libxml_output_buffer_create_filename(const char *URI,
 
     /* try with a non-escaped URI this may be a strange filename */
 	if (context == NULL) {
-		context = context = php_libxml_streams_IO_open_write_wrapper(URI);
+		context = php_libxml_streams_IO_open_write_wrapper(URI);
 	}
 
 	if (context == NULL) {
