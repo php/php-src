@@ -1,3 +1,10 @@
+2005-10-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      - Add ability to access private properties of base classes
+      - Add ability to specify fully qualified name for properties
+      - ReflectionClass::getInterfaces89 now returns associative array
+
 2005-10-15  Derick Rethans  <php@derickrethans.nl>
 
     * zend_compile.c:
