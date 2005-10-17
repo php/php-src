@@ -1332,12 +1332,20 @@ void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initia
 		if (class_type->u.constant.type == IS_STRING || class_type->u.constant.type == IS_UNICODE) {
 			cur_arg_info->class_name = Z_UNIVAL(class_type->u.constant);
 			cur_arg_info->class_name_len = Z_UNILEN(class_type->u.constant);
+
+			/* FIXME: make this work for unicode=on too */
+			if (op == ZEND_RECV_INIT) {
+				if (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL"))) {
+					cur_arg_info->allow_null = 1;
+				} else {
+					zend_error(E_COMPILE_ERROR, "Default value for parameters with a class type hint can only be NULL");
+				}
+			}
 		} else {
 			cur_arg_info->array_type_hint = 1;
 			cur_arg_info->class_name = NULL;
 			cur_arg_info->class_name_len = 0;
 		}
-		cur_arg_info->allow_null = (op == ZEND_RECV_INIT && (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL")))) ? 1 : 0;
 	} else {
 		cur_arg_info->class_name = NULL;
 		cur_arg_info->class_name_len = 0;
