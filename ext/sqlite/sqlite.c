@@ -1433,7 +1433,7 @@ static int php_sqlite_fetch(struct php_sqlite_result *rres TSRMLS_DC)
 {
 	const char **rowdata, **colnames;
 	int ret, i, base;
-	char *errtext = NULL, *colname;
+	char *errtext = NULL;
 
 next_row:
 	ret = sqlite_step(rres->vm, &rres->ncolumns, &rowdata, &colnames);
@@ -1869,7 +1869,7 @@ static void php_sqlite_fetch_array(struct php_sqlite_result *res, int mode, zend
 				zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, (char*)rowdata[j], strlen((char*)rowdata[j]), &status);
 				ZVAL_UNICODEL(decoded, u_str, u_len, 0);
 				if (!buffered) {
-					efree(rowdata[j]);
+					efree((char *)rowdata[j]);
 				}
 			} else {
 				ZVAL_STRING(decoded, (char*)rowdata[j], buffered);
@@ -1957,7 +1957,7 @@ static void php_sqlite_fetch_column(struct php_sqlite_result *res, zval *which, 
 		zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, (char*)rowdata[j], strlen((char*)rowdata[j]), &status);
 		RETVAL_UNICODEL(u_str, u_len, 0);
 		if (!res->buffered) {
-			efree(rowdata[j]);
+			efree((char *)rowdata[j]);
 			rowdata[j] = NULL;
 		}		
 	} else {
