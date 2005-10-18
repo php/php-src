@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Oct 2005, PHP 5.1 Release Candidate 4
+- Fixed bug #34902 (mysqli::character_set_name() - undefined method). (Tony)
 
 17 Oct 2005, PHP 5.1 Release Candidate 3
 - Fixed bug #34873 (Segmentation Fault on foreach in object). (Dmitry)
