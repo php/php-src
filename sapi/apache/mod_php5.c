@@ -496,6 +496,7 @@ static void init_request_info(TSRMLS_D)
 
 	SG(request_info).auth_user = NULL;
 	SG(request_info).auth_password = NULL;
+	SG(request_info).auth_digest = NULL;
 
 	if (authorization && (!PG(safe_mode) || (PG(safe_mode) && !auth_type(r)))) {
 		char *p = getword(r->pool, &authorization, ' ');
