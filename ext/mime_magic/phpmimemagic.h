@@ -343,7 +343,6 @@ typedef struct magic_rsl_s {
 
 /* per-server info */
 typedef struct {
-    char *magicfile;		/* where magic be found */
     struct magic *magic;	/* head of magic config list */
     struct magic *last;
 } magic_server_config_rec;
