@@ -434,9 +434,6 @@ static int apprentice(void)
 		/* parse it */
 		if (parse(line + ws_offset, lineno) != 0)
 			++errs;
-
-		if(errs && !MIME_MAGIC_G(debug)) 
-			break;
     }
 
     (void) fclose(f);
