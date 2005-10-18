@@ -186,6 +186,7 @@ function_entry mysqli_functions[] = {
 function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(autocommit,mysqli_autocommit,NULL)
 	PHP_FALIAS(change_user,mysqli_change_user,NULL)
+	PHP_FALIAS(character_set_name, mysqli_character_set_name,NULL)
 	PHP_FALIAS(client_encoding, mysqli_character_set_name,NULL)
 	PHP_FALIAS(close,mysqli_close,NULL)
 	PHP_FALIAS(commit,mysqli_commit,NULL)
