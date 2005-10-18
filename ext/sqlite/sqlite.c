@@ -1432,7 +1432,7 @@ static int php_sqlite_fetch(struct php_sqlite_result *rres TSRMLS_DC)
 {
 	const char **rowdata, **colnames;
 	int ret, i, base;
-	char *errtext = NULL, *colname;
+	char *errtext = NULL;
 
 next_row:
 	ret = sqlite_step(rres->vm, &rres->ncolumns, &rowdata, &colnames);
