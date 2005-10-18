@@ -1383,7 +1383,7 @@ static int php_sqlite_fetch(struct php_sqlite_result *rres TSRMLS_DC)
 {
 	const char **rowdata, **colnames;
 	int ret, i, base;
-	char *errtext = NULL, *colname;
+	char *errtext = NULL;
 
 next_row:
 	ret = sqlite_step(rres->vm, &rres->ncolumns, &rowdata, &colnames);
@@ -1391,14 +1391,13 @@ next_row:
 		/* first row - lets copy the column names */
 		rres->col_names = safe_emalloc(rres->ncolumns, sizeof(char *), 0);
 		for (i = 0; i < rres->ncolumns; i++) {
-			colname = (char*)colnames[i];
+			rres->col_names[i] = estrdup((char*)colnames[i]);
 
 			if (SQLITE_G(assoc_case) == 1) {
-				php_sqlite_strtoupper(colname);
+				php_sqlite_strtoupper(rres->col_names[i]);
 			} else if (SQLITE_G(assoc_case) == 2) {
-				php_sqlite_strtolower(colname);
+				php_sqlite_strtolower(rres->col_names[i]);
 			}
-			rres->col_names[i] = estrdup(colname);
 		}
 		if (!rres->buffered) {
 			/* non buffered mode - also fetch memory for on single row */
@@ -1627,15 +1626,14 @@ PHP_FUNCTION(sqlite_fetch_column_types)
 	array_init(return_value);
 
 	for (i = 0; i < ncols; i++) {
-		char *colname = (char *)colnames[i];
-
+		char *colname = estrdup((char *)colnames[i]);
 		if (SQLITE_G(assoc_case) == 1) {
 			php_sqlite_strtoupper(colname);
 		} else if (SQLITE_G(assoc_case) == 2) {
 			php_sqlite_strtolower(colname);
 		}
-
 		add_assoc_string(return_value, colname, colnames[ncols + i] ? (char *)colnames[ncols + i] : "", 1);
+		efree(colname);
 	}
 
 done:
