@@ -1178,7 +1178,9 @@ static struct php_sqlite_db *php_sqlite_open(char *filename, int mode, char *per
 	/* authorizer hook so we can enforce safe mode
 	 * Note: the declaration of php_sqlite_authorizer is correct for 2.8.2 of libsqlite,
 	 * and IS backwards binary compatible with earlier versions */
-	sqlite_set_authorizer(sdb, php_sqlite_authorizer, NULL);
+	if (PG(safe_mode) || (PG(open_basedir) && *PG(open_basedir))) {
+		sqlite_set_authorizer(sdb, php_sqlite_authorizer, NULL);
+	}
 	
 	db->rsrc_id = ZEND_REGISTER_RESOURCE(object ? NULL : return_value, db, persistent_id ? le_sqlite_pdb : le_sqlite_db);
 	if (object) {
