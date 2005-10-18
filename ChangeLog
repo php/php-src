@@ -1,3 +1,100 @@
+2005-10-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      configure.in
+      main/php_version.h:
+      Back to dev
+
+    * (PHP_5_1)
+      NEWS
+      configure.in
+      main/php_version.h:
+      5.1.0RC3
+
+2005-10-17  Rolland Santimano  <rollandsantimano@yahoo.com>
+
+    * ext/standard/string.c:
+      - Unicode impl of stripos()
+
+    * ext/standard/string.c:
+      - Unicode impl of strrpos()
+
+2005-10-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      ext/pspell/pspell.c
+      ext/pspell/pspell.c:
+      MFH: Properly fixed bug #34456 (original patch completely reverted).
+
+    * ext/pspell/pspell.c:
+      Properly fixed bug #34456 (original patch completely reverted).
+
+2005-10-17  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/var.c
+      ext/standard/tests/array/007.phpt
+      ext/standard/tests/array/array_intersect_1.phpt
+      ext/standard/tests/array/var_export.phpt
+      ext/standard/tests/array/var_export3.phpt:
+      - MF51: Fixed bug #29361 (var_export() producing invalid code).
+
+    * ext/standard/tests/array/var_export3.phpt
+      ext/standard/tests/array/var_export3.phpt:
+      
+      file var_export3.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/var.c
+      ext/standard/tests/array/007.phpt
+      ext/standard/tests/array/array_intersect_1.phpt
+      ext/standard/tests/array/var_export.phpt:
+      - Fixed bug #29361 (var_export() producing invalid code). (Derick)
+
+2005-10-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS
+      ext/sqlite/sqlite.c:
+      MFH: Fixed bug #34884 (Possible crash in ext/sqlite when sqlite.assoc_case
+      is being used).
+
+    * ext/sqlite/sqlite.c:
+      Fixed bug #34884 (Possible crash in ext/sqlite when sqlite.assoc_case is
+      being used).
+
+2005-10-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/tests/bug34873.phpt:
+      Fixed bug #34873 (Segmentation Fault on foreach in object)
+
+2005-10-17  Derick Rethans  <php@derickrethans.nl>
+
+    * ZendEngine2/zend_compile.c
+      tests/lang/type_hints_002.phpt
+      tests/lang/type_hints_003.phpt:
+      - Make sure that typehints for classes can only accept "= NULL" as default
+        value.
+
+2005-10-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      ext/curl/curl.c
+      ext/curl/interface.c
+      ext/curl/interface.c:
+      MFH: Further URL validations in safe_mode/open_basedir configs.
+
+    * ext/curl/interface.c:
+      Further URL validations in safe_mode/open_basedir configs.
+
 2005-10-16  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * Makefile.frag
