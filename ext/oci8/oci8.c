@@ -436,7 +436,7 @@ oci_error:
 /* {{{ php_oci_cleanup_global_handles()
  Free global handles (if they were initialized before)
 */
-static void php_oci_cleanup_global_handles(TSRMLS_C)
+static void php_oci_cleanup_global_handles(TSRMLS_D)
 {
 	if (OCI_G(err)) {
 		PHP_OCI_CALL(OCIHandleFree, ((dvoid *) OCI_G(err), OCI_HTYPE_ENV));
