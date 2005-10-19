@@ -209,14 +209,16 @@ PHP_FUNCTION(bin2hex)
 
 static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 {
-	char *s11, *s22;
-	int len1, len2;
-	long start, len;
+	void *s1, *s2;
+	int32_t len1, len2;
+	zend_uchar type1, type2;
+	long start, len; /* For UNICODE, these are codepoint units */
 	
 	start = 0;
 	len = 0;
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ll", &s11, &len1,
-				&s22, &len2, &start, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT|ll",
+							  &s1, &len1, &type1, &s2, &len2, &type2,
+							  &start, &len) == FAILURE) {
 		return;
 	}
 	
@@ -246,18 +248,40 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 		len = len1 - start;
 	}
 
-	if (behavior == STR_STRSPN) {
-		RETURN_LONG(php_strspn(s11 + start /*str1_start*/,
-						s22 /*str2_start*/,
-						s11 + start + len /*str1_end*/,
-						s22 + len2 /*str2_end*/));
-	} else if (behavior == STR_STRCSPN) {
-		RETURN_LONG(php_strcspn(s11 + start /*str1_start*/,
-						s22 /*str2_start*/,
-						s11 + start + len /*str1_end*/,
-						s22 + len2 /*str2_end*/));
+	if (type1 == IS_UNICODE) {
+		UChar *u_start, *u_end;
+		int32_t i = 0;
+
+		U16_FWD_N((UChar*)s1, i, len1, start);
+		u_start = (UChar *)s1 + i;
+		U16_FWD_N((UChar *)s1, i, len1, len);
+		u_end = (UChar *)s1 + i;
+
+		if (behavior == STR_STRSPN) {
+			RETURN_LONG(php_u_strspn(u_start /*str1_start*/,
+									 (UChar *)s2 /*str2_start*/,
+									 u_end /*str1_end*/,
+									 (UChar *)s2 + len2 /*str2_end*/));
+		} else if (behavior == STR_STRCSPN) {
+			RETURN_LONG(php_u_strcspn(u_start /*str1_start*/,
+									  (UChar *)s2 /*str2_start*/,
+									  u_end /*str1_end*/,
+									  (UChar *)s2 + len2 /*str2_end*/));
+		}
+	} else {
+		if (behavior == STR_STRSPN) {
+			RETURN_LONG(php_strspn((char *)s1 + start /*str1_start*/,
+								   (char *)s2 /*str2_start*/,
+								   (char *)s1 + start + len /*str1_end*/,
+								   (char *)s2 + len2 /*str2_end*/));
+		} else if (behavior == STR_STRCSPN) {
+			RETURN_LONG(php_strcspn((char *)s1 + start /*str1_start*/,
+									(char *)s2 /*str2_start*/,
+									(char *)s1 + start + len /*str1_end*/,
+									(char *)s2 + len2 /*str2_end*/));
+		}
 	}
-	
+
 }
 
 /* {{{ proto int strspn(string str, string mask [, start [, len]])
@@ -1901,6 +1925,25 @@ PHPAPI char *php_stristr(unsigned char *s, unsigned char *t, size_t s_len, size_
 }
 /* }}} */
 
+/* {{{ php_u_strspn
+ */
+PHPAPI int32_t php_u_strspn(UChar *s1, UChar *s2, UChar *s1_end, UChar *s2_end)
+{
+	int32_t len1 = s1_end - s1;
+	int32_t len2 = s2_end - s2;
+	int32_t i, codepts;
+	UChar32 ch;
+
+	for (i = 0, codepts = 0 ; i < len1 ; codepts++) {
+		U16_NEXT(s1, i, len1, ch);
+		if (u_memchr32(s2, ch, len2) == NULL) {
+			break;
+		}
+	}
+	return codepts;
+}
+/* }}} */
+
 /* {{{ php_strspn
  */
 PHPAPI size_t php_strspn(char *s1, char *s2, char *s1_end, char *s2_end)
@@ -1916,6 +1959,25 @@ cont:
 		}
 	}
 	return (p - s1);
+}
+/* }}} */
+
+/* {{{ php_u_strcspn
+ */
+PHPAPI int32_t php_u_strcspn(UChar *s1, UChar *s2, UChar *s1_end, UChar *s2_end)
+{
+	int32_t len1 = s1_end - s1;
+	int32_t len2 = s2_end - s2;
+	int32_t i, codepts;
+	UChar32 ch;
+
+	for (i = 0, codepts = 0 ; i < len1 ; codepts++) {
+		U16_NEXT(s1, i, len1, ch);
+		if (u_memchr32(s2, ch, len2)) {
+			break;
+		}
+	}
+	return codepts;
 }
 /* }}} */
 
