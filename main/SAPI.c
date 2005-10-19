@@ -772,6 +772,12 @@ SAPI_API int sapi_send_headers(TSRMLS_D)
 	/* Success-oriented.  We set headers_sent to 1 here to avoid an infinite loop
 	 * in case of an error situation.
 	 */
+	if (SG(sapi_headers).send_default_content_type && sapi_module.send_headers) {
+		sapi_header_struct default_header;
+		sapi_get_default_content_type_header(&default_header TSRMLS_CC);
+		sapi_add_header_ex(default_header.header, default_header.header_len, 0, 0 TSRMLS_CC);
+	}
+
 	SG(headers_sent) = 1;
 
 	if (sapi_module.send_headers) {

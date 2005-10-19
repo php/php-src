@@ -7,6 +7,7 @@ PHP                                                                        NEWS
 - Fixed bug #33829 (mime_content_type() returns text/plain for gzip and bzip 
   files). (Derick)
 - Fixed bug #34623 (Crash in pdo_mysql on longtext fields). (Ilia)
+- Fixed bug #29983 (PHP does not explicitly set mime type & charset). (Ilia)
 
 17 Oct 2005, PHP 5.1 Release Candidate 3
 - Fixed bug #34873 (Segmentation Fault on foreach in object). (Dmitry)
