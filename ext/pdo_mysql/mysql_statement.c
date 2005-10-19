@@ -71,6 +71,8 @@ static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 	return 1;
 }
 
+#define PDO_MYSQL_MAX_BUFFER 1024*1024 /* 1 megabyte */
+
 static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
@@ -141,6 +143,10 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 							S->bound_result[i].buffer_length =
 								S->fields[i].max_length? S->fields[i].max_length:
 								S->fields[i].length;
+							/* work-around for longtext and alike */
+							if (S->bound_result[i].buffer_length > PDO_MYSQL_MAX_BUFFER) {
+								S->bound_result[i].buffer_length = PDO_MYSQL_MAX_BUFFER;
+							}
 					}
 #if 0
 					printf("%d: max_length=%d length=%d buffer_length=%d type=%d\n",
