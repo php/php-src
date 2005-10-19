@@ -100,7 +100,7 @@ typedef unsigned char uchar;
 #define TIMELIB_UNHAVE_TIME() { s->time->have_time = 0; s->time->h = 0; s->time->i = 0; s->time->s = 0; s->time->f = 0; }
 #define TIMELIB_HAVE_DATE() { if (s->time->have_date) { return TIMELIB_ERROR; } else { s->time->have_date = 1; } }
 #define TIMELIB_UNHAVE_DATE() { s->time->have_date = 0; s->time->d = 0; s->time->m = 0; s->time->y = 0; }
-#define TIMELIB_HAVE_RELATIVE() { s->time->have_relative = 1; }
+#define TIMELIB_HAVE_RELATIVE() { s->time->have_relative = 1; s->time->relative.weekday_behavior = 0; }
 #define TIMELIB_HAVE_WEEKDAY_RELATIVE() { s->time->have_weekday_relative = 1; }
 #define TIMELIB_HAVE_TZ() { s->cur = cursor; if (s->time->have_zone) { return TIMELIB_ERROR; } else { s->time.have_zone = 1; } }
 
@@ -222,8 +222,8 @@ static timelib_lookup_table const timelib_reltext_lookup[] = {
 	{ "twelfth",  0, 12 },
 	{ "last",     0, -1 },
 	{ "previous", 0, -1 },
-	{ "this",     0,  0 },
-	{ NULL,       0,  0 }
+	{ "this",     1,  0 },
+	{ NULL,       1,  0 }
 };
 
 /* The month table. */
@@ -439,7 +439,7 @@ static long timelib_parse_tz_cor(char **ptr)
 	return 0;
 }
 
-static timelib_sll timelib_lookup_relative_text(char **ptr)
+static timelib_sll timelib_lookup_relative_text(char **ptr, int *behavior)
 {
 	char *word;
 	char *begin = *ptr, *end;
@@ -456,6 +456,7 @@ static timelib_sll timelib_lookup_relative_text(char **ptr)
 	for (tp = timelib_reltext_lookup; tp->name; tp++) {
 		if (strcasecmp(word, tp->name) == 0) {
 			value = tp->value;
+			*behavior = tp->type;
 		}
 	}
 
@@ -463,12 +464,12 @@ static timelib_sll timelib_lookup_relative_text(char **ptr)
 	return value;
 }
 
-static timelib_sll timelib_get_relative_text(char **ptr)
+static timelib_sll timelib_get_relative_text(char **ptr, int *behavior)
 {
 	while (**ptr == ' ' || **ptr == '-' || **ptr == '/') {
 		++*ptr;
 	}
-	return timelib_lookup_relative_text(ptr);
+	return timelib_lookup_relative_text(ptr, behavior);
 }
 
 static long timelib_lookup_month(char **ptr)
@@ -534,7 +535,7 @@ static const timelib_relunit* timelib_lookup_relunit(char **ptr)
 	return value;
 }
 
-static void timelib_set_relative(char **ptr, timelib_sll amount, Scanner *s)
+static void timelib_set_relative(char **ptr, timelib_sll amount, int behavior, Scanner *s)
 {
 	const timelib_relunit* relunit;
 
@@ -552,6 +553,7 @@ static void timelib_set_relative(char **ptr, timelib_sll amount, Scanner *s)
 			TIMELIB_UNHAVE_TIME();
 			s->time->relative.d += (amount > 0 ? amount - 1 : amount) * 7;
 			s->time->relative.weekday = relunit->multiplier;
+			s->time->relative.weekday_behavior = behavior;
 			break;
 	}
 }
@@ -1257,14 +1259,15 @@ relativetext = (reltextnumber space? reltextunit)+;
 	relativetext
 	{
 		timelib_sll i;
+		int         behavior;
 		DEBUG_OUTPUT("relativetext");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_RELATIVE();
 
 		while(*ptr) {
-			i = timelib_get_relative_text((char **) &ptr);
+			i = timelib_get_relative_text((char **) &ptr, &behavior);
 			timelib_eat_spaces((char **) &ptr);
-			timelib_set_relative((char **) &ptr, i, s);
+			timelib_set_relative((char **) &ptr, i, behavior, s);
 		}
 		TIMELIB_DEINIT;
 		return TIMELIB_RELATIVE;
@@ -1281,6 +1284,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 
 		relunit = timelib_lookup_relunit((char**) &ptr);
 		s->time->relative.weekday = relunit->multiplier;
+		s->time->relative.weekday_behavior = 1;
 		
 		TIMELIB_DEINIT;
 		return TIMELIB_RELATIVE;
@@ -1341,7 +1345,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 		while(*ptr) {
 			i = timelib_get_unsigned_nr((char **) &ptr, 24);
 			timelib_eat_spaces((char **) &ptr);
-			timelib_set_relative((char **) &ptr, i, s);
+			timelib_set_relative((char **) &ptr, i, 0, s);
 		}
 		TIMELIB_DEINIT;
 		return TIMELIB_RELATIVE;

@@ -90,7 +90,7 @@ static void do_adjust_for_weekday(timelib_time* time)
 
 	current_dow = timelib_day_of_week(time->y, time->m, time->d);
 	difference = time->relative.weekday - current_dow;
-	if ((time->relative.d < 0 && difference < 0) || (time->relative.d >= 0 && difference <= 0)) {
+	if ((time->relative.d < 0 && difference < 0) || (time->relative.d >= 0 && difference <= -time->relative.weekday_behavior)) {
 		difference += 7;
 	}
 	if (time->relative.weekday >= 0) {

@@ -114,6 +114,7 @@ typedef struct timelib_rel_time {
 	timelib_sll h, i, s; /* Hours, mInutes and Seconds */
 
 	int weekday; /* Stores the day in 'next monday' */
+	int weekday_behavior; /* 0: the current day should *not* be counted when advancing forwards; 1: the current day *should* be counted */
 } timelib_rel_time;
 
 typedef struct timelib_time_offset {
