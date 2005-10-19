@@ -180,7 +180,7 @@ void timelib_dump_date(timelib_time *d, int options)
 				d->relative.y, d->relative.m, d->relative.d, d->relative.h, d->relative.i, d->relative.s);
 		}
 		if (d->have_weekday_relative) {
-			printf(" / %d", d->relative.weekday);
+			printf(" / %d.%d", d->relative.weekday, d->relative.weekday_behavior);
 		}
 	}
 	printf("\n");
