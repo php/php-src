@@ -8,7 +8,7 @@ have a DST or timezone transition.\n";
 putenv("TZ=Africa/Bujumbura");
 $tStamp = mktime (17, 17, 17, 1, 1, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("Wednesday", $tStamp);
+$strtotime_tstamp = strtotime("next Wednesday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Wednesday            00:00:00\n\n";
 
@@ -16,7 +16,7 @@ print "TZ=Asia/Thimbu - Is it OK for this to be 0:30 AM? yes\n";
 putenv("TZ=Asia/Thimbu");
 $tStamp = mktime (17, 17, 17, 1, 6476, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("Thursday", $tStamp);
+$strtotime_tstamp = strtotime("next Thursday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Thursday            00:30:00\n\n";
 
@@ -25,7 +25,7 @@ appear to have a DST or timezone transition.\n";
 putenv("TZ=Indian/Cocos");
 $tStamp = mktime (17, 17, 17, 1, 1, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("Thursday", $tStamp);
+$strtotime_tstamp = strtotime("next Thursday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Thursday            00:00:00\n\n";
 
@@ -34,7 +34,7 @@ not appear to have a DST or timezone transition.\n";
 putenv("TZ=Africa/Lubumbashi");
 $tStamp = mktime (17, 17, 17, 1, 1, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("Saturday", $tStamp);
+$strtotime_tstamp = strtotime("next Saturday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Saturday            00:00:00\n\n";
 
@@ -42,7 +42,7 @@ print "TZ=Asia/Kashgar - Is it OK for this to be 3 AM? yes\n";
 putenv("TZ=Asia/Kashgar");
 $tStamp = mktime (17, 17, 17, 1, 3767, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("Thursday", $tStamp);
+$strtotime_tstamp = strtotime("next Thursday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Thursday            03:00:00\n\n";
 
@@ -51,7 +51,7 @@ not appear to have a DST or timezone transition.\n";
 putenv("TZ=Indian/Christmas");
 $tStamp = mktime (17, 17, 17, 1, 1, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("Sunday", $tStamp);
+$strtotime_tstamp = strtotime("next Sunday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Sunday            00:00:00\n\n";
 
@@ -59,7 +59,7 @@ print "TZ=America/Santo_Domingo - Is it OK for this to be 0:30 AM? yes\n";
 putenv("TZ=America/Santo_Domingo");
 $tStamp = mktime (17, 17, 17, 1, 291, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("Sunday", $tStamp);
+$strtotime_tstamp = strtotime("next Sunday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Sunday            00:30:00\n\n";
 
@@ -68,7 +68,7 @@ appear to have a DST or timezone transition.\n";
 putenv("TZ=Pacific/Truk");
 $tStamp = mktime (17, 17, 17, 1, 1, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("Tuesday", $tStamp);
+$strtotime_tstamp = strtotime("next Tuesday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Tuesday            00:00:00\n\n";
 
@@ -77,7 +77,7 @@ not appear to have a DST or timezone transition.\n";
 putenv("TZ=Pacific/Ponape");
 $tStamp = mktime (17, 17, 17, 1, 1, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("Monday", $tStamp);
+$strtotime_tstamp = strtotime("next Monday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Monday            00:00:00\n\n";
 
@@ -85,7 +85,7 @@ print "TZ=America/Scoresbysund - Is it OK for this to be 2 AM? yes\n";
 putenv("TZ=America/Scoresbysund");
 $tStamp = mktime (17, 17, 17, 1, 4099, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("Sunday", $tStamp);
+$strtotime_tstamp = strtotime("next Sunday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Sunday            02:00:00\n\n";
 
@@ -93,7 +93,7 @@ print "TZ=America/Guyana - Is it OK for this to be 0:45 AM? yes\n";
 putenv("TZ=America/Guyana");
 $tStamp = mktime (17, 17, 17, 1, 2031, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("Thursday", $tStamp);
+$strtotime_tstamp = strtotime("next Thursday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Thursday            00:45:00\n\n";
 
@@ -101,7 +101,7 @@ print "TZ=Asia/Tehran - Is it OK for this to be 0:30 AM? yes\n";
 putenv("TZ=Asia/Tehran");
 $tStamp = mktime (17, 17, 17, 1, 2855, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("Tuesday", $tStamp);
+$strtotime_tstamp = strtotime("next Tuesday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Tuesday            00:30:00\n\n";
 
@@ -110,7 +110,7 @@ not appear to have a DST or timezone transition.\n";
 putenv("TZ=Pacific/Tarawa");
 $tStamp = mktime (17, 17, 17, 1, 1, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("Monday", $tStamp);
+$strtotime_tstamp = strtotime("next Monday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Monday            00:00:00\n\n";
 
@@ -118,7 +118,7 @@ print "TZ=Africa/Monrovia - Is it OK for this to be 00:44:30 AM? yes\n";
 putenv("TZ=Africa/Monrovia");
 $tStamp = mktime (17, 17, 17, 1, 845, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("Monday", $tStamp);
+$strtotime_tstamp = strtotime("next Monday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Monday            00:44:30\n\n";
 
@@ -126,7 +126,7 @@ print "TZ=Asia/Katmandu - Is it OK for this to 0:15 AM?. yes\n";
 putenv("TZ=Asia/Katmandu");
 $tStamp = mktime (17, 17, 17, 1, 5838, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("Wednesday", $tStamp);
+$strtotime_tstamp = strtotime("next Wednesday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Wednesday            00:15:00\n\n";         
 
@@ -134,7 +134,7 @@ print "TZ=Pacific/Nauru - Is it OK for this to be 0:30? yes\n";
 putenv("TZ=Pacific/Nauru");
 $tStamp = mktime (17, 17, 17, 1, 3401, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("Tuesday", $tStamp);
+$strtotime_tstamp = strtotime("next Tuesday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Tuesday            00:30:00\n\n";
 
@@ -142,7 +142,7 @@ print "TZ=Pacific/Niue - Is it OK for this to be 0:30 AM? yes\n";
 putenv("TZ=Pacific/Niue");
 $tStamp = mktime (17, 17, 17, 1, 3189, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("Sunday", $tStamp);
+$strtotime_tstamp = strtotime("next Sunday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Sunday            00:30:00\n\n";            
 
@@ -151,7 +151,7 @@ or timezone transition.\n";
 putenv("TZ=Pacific/Port_Moresby");
 $tStamp = mktime (17, 17, 17, 1, 1, 1970);   
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("Thursday", $tStamp); 
+$strtotime_tstamp = strtotime("next Thursday", $tStamp); 
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Thursday            00:00:00\n\n";          
 
@@ -159,7 +159,7 @@ print "TZ=America/Miquelon - Is it OK for this to be 1 AM ? yes\n";
 putenv("TZ=America/Miquelon");
 $tStamp = mktime (17, 17, 17, 1, 3767, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("Thursday", $tStamp);
+$strtotime_tstamp = strtotime("next Thursday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Thursday            01:00:00\n\n";
 
@@ -168,7 +168,7 @@ timezone transition.\n";
 putenv("TZ=Pacific/Palau");   
 $tStamp = mktime (17, 17, 17, 1, 1, 1970);   
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("Saturday", $tStamp);
+$strtotime_tstamp = strtotime("next Saturday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Saturday            00:00:00\n\n";
 
@@ -177,7 +177,7 @@ not appear to have a DST or timezone transition.\n";
 putenv("TZ=Pacific/Funafuti");
 $tStamp = mktime (17, 17, 17, 1, 1, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("Wednesday", $tStamp);
+$strtotime_tstamp = strtotime("next Wednesday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Wednesday            00:00:00\n\n";
 
@@ -186,7 +186,7 @@ appear to have a DST or timezone transition.\n";
 putenv("TZ=Pacific/Wake");
 $tStamp = mktime (17, 17, 17, 1, 1, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("Tuesday", $tStamp);
+$strtotime_tstamp = strtotime("next Tuesday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Tuesday            00:00:00\n\n";
 
@@ -195,7 +195,7 @@ not appear to have a DST or timezone transition.\n";
 putenv("TZ=Pacific/Wallis");
 $tStamp = mktime (17, 17, 17, 1, 1, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("Tuesday", $tStamp);
+$strtotime_tstamp = strtotime("next Tuesday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Tuesday            00:00:00\n\n";
 
