@@ -27,8 +27,6 @@
 
 /* $Id$ */
 
-#undef HAVE_OCI_STMT_PREPARE2
-
 #if HAVE_OCI8
 # ifndef PHP_OCI8_INT_H
 #  define PHP_OCI8_INT_H
