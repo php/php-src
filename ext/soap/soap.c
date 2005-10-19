@@ -403,14 +403,16 @@ STD_PHP_INI_ENTRY("soap.wsdl_cache_ttl",         "86400", PHP_INI_ALL, OnUpdateI
 #endif
 PHP_INI_END()
 
-static void php_soap_init_globals(zend_soap_globals *soap_globals)
+static HashTable defEnc, defEncIndex, defEncNs;
+
+static void php_soap_prepare_globals()
 {
 	int i;
 	encodePtr enc;
 
-	zend_hash_init(&soap_globals->defEnc, 0, NULL, NULL, 1);
-	zend_hash_init(&soap_globals->defEncIndex, 0, NULL, NULL, 1);
-	zend_hash_init(&soap_globals->defEncNs, 0, NULL, NULL, 1);
+	zend_hash_init(&defEnc, 0, NULL, NULL, 1);
+	zend_hash_init(&defEncIndex, 0, NULL, NULL, 1);
+	zend_hash_init(&defEncNs, 0, NULL, NULL, 1);
 
 	i = 0;
 	do {
@@ -422,27 +424,33 @@ static void php_soap_init_globals(zend_soap_globals *soap_globals)
 				char *ns_type;
 				ns_type = emalloc(strlen(defaultEncoding[i].details.ns) + strlen(defaultEncoding[i].details.type_str) + 2);
 				sprintf(ns_type, "%s:%s", defaultEncoding[i].details.ns, defaultEncoding[i].details.type_str);
-				zend_hash_add(&soap_globals->defEnc, ns_type, strlen(ns_type) + 1, &enc, sizeof(encodePtr), NULL);
+				zend_hash_add(&defEnc, ns_type, strlen(ns_type) + 1, &enc, sizeof(encodePtr), NULL);
 				efree(ns_type);
 			} else {
-				zend_hash_add(&soap_globals->defEnc, defaultEncoding[i].details.type_str, strlen(defaultEncoding[i].details.type_str) + 1, &enc, sizeof(encodePtr), NULL);
+				zend_hash_add(&defEnc, defaultEncoding[i].details.type_str, strlen(defaultEncoding[i].details.type_str) + 1, &enc, sizeof(encodePtr), NULL);
 			}
 		}
 		/* Index everything by number */
-		if (!zend_hash_index_exists(&soap_globals->defEncIndex, defaultEncoding[i].details.type)) {
-			zend_hash_index_update(&soap_globals->defEncIndex, defaultEncoding[i].details.type, &enc, sizeof(encodePtr), NULL);
+		if (!zend_hash_index_exists(&defEncIndex, defaultEncoding[i].details.type)) {
+			zend_hash_index_update(&defEncIndex, defaultEncoding[i].details.type, &enc, sizeof(encodePtr), NULL);
 		}
 		i++;
 	} while (defaultEncoding[i].details.type != END_KNOWN_TYPES);
 
 	/* hash by namespace */
-	zend_hash_add(&soap_globals->defEncNs, XSD_1999_NAMESPACE, sizeof(XSD_1999_NAMESPACE), XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX), NULL);
-	zend_hash_add(&soap_globals->defEncNs, XSD_NAMESPACE, sizeof(XSD_NAMESPACE), XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX), NULL);
-	zend_hash_add(&soap_globals->defEncNs, XSI_NAMESPACE, sizeof(XSI_NAMESPACE), XSI_NS_PREFIX, sizeof(XSI_NS_PREFIX), NULL);
-	zend_hash_add(&soap_globals->defEncNs, XML_NAMESPACE, sizeof(XML_NAMESPACE), XML_NS_PREFIX, sizeof(XML_NS_PREFIX), NULL);
-	zend_hash_add(&soap_globals->defEncNs, SOAP_1_1_ENC_NAMESPACE, sizeof(SOAP_1_1_ENC_NAMESPACE), SOAP_1_1_ENC_NS_PREFIX, sizeof(SOAP_1_1_ENC_NS_PREFIX), NULL);
-	zend_hash_add(&soap_globals->defEncNs, SOAP_1_2_ENC_NAMESPACE, sizeof(SOAP_1_2_ENC_NAMESPACE), SOAP_1_2_ENC_NS_PREFIX, sizeof(SOAP_1_2_ENC_NS_PREFIX), NULL);
+	zend_hash_add(&defEncNs, XSD_1999_NAMESPACE, sizeof(XSD_1999_NAMESPACE), XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX), NULL);
+	zend_hash_add(&defEncNs, XSD_NAMESPACE, sizeof(XSD_NAMESPACE), XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX), NULL);
+	zend_hash_add(&defEncNs, XSI_NAMESPACE, sizeof(XSI_NAMESPACE), XSI_NS_PREFIX, sizeof(XSI_NS_PREFIX), NULL);
+	zend_hash_add(&defEncNs, XML_NAMESPACE, sizeof(XML_NAMESPACE), XML_NS_PREFIX, sizeof(XML_NS_PREFIX), NULL);
+	zend_hash_add(&defEncNs, SOAP_1_1_ENC_NAMESPACE, sizeof(SOAP_1_1_ENC_NAMESPACE), SOAP_1_1_ENC_NS_PREFIX, sizeof(SOAP_1_1_ENC_NS_PREFIX), NULL);
+	zend_hash_add(&defEncNs, SOAP_1_2_ENC_NAMESPACE, sizeof(SOAP_1_2_ENC_NAMESPACE), SOAP_1_2_ENC_NS_PREFIX, sizeof(SOAP_1_2_ENC_NS_PREFIX), NULL);
+}
 
+static void php_soap_init_globals(zend_soap_globals *soap_globals TSRMLS_DC)
+{
+	soap_globals->defEnc = defEnc;
+	soap_globals->defEncIndex = defEncIndex;
+	soap_globals->defEncNs = defEncNs;
 	soap_globals->overrides = NULL;
 	soap_globals->use_soap_error_handler = 0;
 	soap_globals->error_code = NULL;
@@ -479,6 +487,7 @@ PHP_MINIT_FUNCTION(soap)
 	zend_class_entry ce;
 
 	/* TODO: add ini entry for always use soap errors */
+	php_soap_prepare_globals();
 	ZEND_INIT_MODULE_GLOBALS(soap, php_soap_init_globals, NULL);
   REGISTER_INI_ENTRIES();
 
@@ -1902,10 +1911,10 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			INIT_ZVAL(outbuflen);
 #ifdef va_copy
 			va_copy(argcopy, args);
-			buffer_len = zend_vspprintf(&buffer, 0, format, argcopy);
+			buffer_len = vspprintf(&buffer, 0, format, argcopy);
 			va_end(argcopy);
 #else
-			buffer_len = zend_vspprintf(&buffer, 0, format, args);
+			buffer_len = vspprintf(&buffer, 0, format, args);
 #endif
 
 			if (code == NULL) {
@@ -1957,10 +1966,10 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 
 #ifdef va_copy
 			va_copy(argcopy, args);
-			buffer_len = zend_vspprintf(&buffer, 0, format, argcopy);
+			buffer_len = vspprintf(&buffer, 0, format, argcopy);
 			va_end(argcopy);
 #else
-			buffer_len = zend_vspprintf(&buffer, 0, format, args);
+			buffer_len = vspprintf(&buffer, 0, format, args);
 #endif
 
 			if (code == NULL) {
