@@ -35,6 +35,7 @@ PHP                                                                        NEWS
   (Dmitry, Alex)
 - Fixed bug #33383 (crash when retrieving empty LOBs). (Tony)
 - Fixed bug #32179 (xmlrpc_encode() segfaults with recursive references). (Tony)
+- Fixed bug #29983 (PHP does not explicitly set mime type & charset). (Ilia)
 
 05 Sep 2005, PHP 5.0.5
 - Upgraded PCRE library to version 5.0. (Andrei)
