@@ -228,6 +228,11 @@ PHP_RSHUTDOWN_FUNCTION(date)
 #define DATE_FORMAT_RFC1123  "D, d M Y H:i:s T"
 #define DATE_FORMAT_RFC2822  "D, d M Y H:i:s O"
 
+#define DATE_TZ_ERRMSG \
+	"It is not safe to rely on the system's timezone settings. Please use " \
+	"the date.timezone setting, the TZ environment variable or the " \
+	"date_default_timezone_set() function. "
+
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(date)
 {
@@ -328,7 +333,7 @@ static char* guess_timezone(TSRMLS_D)
 			tzid = "UTC";
 		}
 		
-		php_error_docref(NULL TSRMLS_CC, E_STRICT, "It is not safe to rely on the system's timezone settings, please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. We select '%s' for '%s/%.1f/%s' instead.", tzid, ta->tm_zone, (float) (ta->tm_gmtoff / 3600), ta->tm_isdst ? "DST" : "no DST");
+		php_error_docref(NULL TSRMLS_CC, E_STRICT, DATE_TZ_ERRMSG "We selected '%s' for '%s/%.1f/%s' instead", tzid, ta->tm_zone, (float) (ta->tm_gmtoff / 3600), ta->tm_isdst ? "DST" : "no DST");
 		return tzid;
 	}
 #endif
@@ -347,7 +352,7 @@ php_win_std_time:
 				if (! tzid) {
 					tzid = "UTC";
 				}
-				php_error_docref(NULL TSRMLS_CC, E_STRICT, "It is not safe to rely on the system's timezone settings, please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. We select '%s' for '%.1f/no DST' instead.", tzid, ((tzi.Bias + tzi.StandardBias) / -60.0));
+				php_error_docref(NULL TSRMLS_CC, E_STRICT, DATE_TZ_ERRMSG "We selected '%s' for '%.1f/no DST' instead", tzid, ((tzi.Bias + tzi.StandardBias) / -60.0));
 				break;
 
 			/* DST in effect */
@@ -361,14 +366,14 @@ php_win_std_time:
 				if (! tzid) {
 					tzid = "UTC";
 				}
-				php_error_docref(NULL TSRMLS_CC, E_STRICT, "It is not safe to rely on the system's timezone settings, please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. We select '%s' for '%.1f/DST' instead.", tzid, ((tzi.Bias + tzi.DaylightBias) / -60.0));
+				php_error_docref(NULL TSRMLS_CC, E_STRICT, DATE_TZ_ERRMSG "We selected '%s' for '%.1f/DST' instead", tzid, ((tzi.Bias + tzi.DaylightBias) / -60.0));
 				break;
 		}
 		return tzid;
 	}
 #endif
 	/* Fallback to UTC */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "It is not safe to rely on the system's timezone settings, please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. We have to select 'UTC' because your platform doesn't provide functionality for the guessing algorithm");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, DATE_TZ_ERRMSG "We had to select 'UTC' because your platform doesn't provide functionality for the guessing algorithm");
 	return "UTC";
 }
 
@@ -380,7 +385,7 @@ static timelib_tzinfo *get_timezone_info(TSRMLS_D)
 	tz = guess_timezone(TSRMLS_C);
 	tzi = php_date_parse_tzfile(tz, DATE_TIMEZONEDB TSRMLS_CC);
 	if (! tzi) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Timezone setting (date.timezone) or TZ environment variable contains an unknown timezone.");
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Timezone setting (date.timezone) or TZ environment variable contains an unknown timezone");
 		tzi = php_date_parse_tzfile("UTC", DATE_TIMEZONEDB TSRMLS_CC);
 
 		if (! tzi) {
@@ -860,7 +865,7 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 			now->h = hou;
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_STRICT, "You should be using the time() function instead.");
+			php_error_docref(NULL TSRMLS_CC, E_STRICT, "You should be using the time() function instead");
 	}
 	/* Update the timestamp */
 	if (gmt) {
@@ -870,7 +875,7 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	}
 	/* Support for the deprecated is_dst parameter */
 	if (dst != -1) {
-		php_error_docref(NULL TSRMLS_CC, E_STRICT, "The is_dst parameter is deprecated.");
+		php_error_docref(NULL TSRMLS_CC, E_STRICT, "The is_dst parameter is deprecated");
 		if (gmt) {
 			/* GMT never uses DST */
 			if (dst == 1) {
