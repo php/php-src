@@ -214,8 +214,6 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 			EX_T(opline->result.u.var).var.fcall_returned_reference = return_reference;
 		}
 	} else if (EX(function_state).function->type == ZEND_USER_FUNCTION) {
-		HashTable *calling_symbol_table;
-
 		EX_T(opline->result.u.var).var.ptr = NULL;
 		if (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
 			/*printf("Cache hit!  Reusing %x\n", symtable_cache[symtable_cache_ptr]);*/
@@ -225,7 +223,6 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 			zend_u_hash_init(EX(function_state).function_symbol_table, 0, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
 			/*printf("Cache miss!  Initialized %x\n", function_state.function_symbol_table);*/
 		}
-		calling_symbol_table = EG(active_symbol_table);
 		EG(active_symbol_table) = EX(function_state).function_symbol_table;
 		original_return_value = EG(return_value_ptr_ptr);
 		EG(return_value_ptr_ptr) = EX_T(opline->result.u.var).var.ptr_ptr;
@@ -255,7 +252,7 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 			zend_hash_clean(EX(function_state).function_symbol_table);
 			*(++EG(symtable_cache_ptr)) = EX(function_state).function_symbol_table;
 		}
-		EG(active_symbol_table) = calling_symbol_table;
+		EG(active_symbol_table) = EX(symbol_table);
 	} else { /* ZEND_OVERLOADED_FUNCTION */
 		ALLOC_ZVAL(EX_T(opline->result.u.var).var.ptr);
 		INIT_ZVAL(*(EX_T(opline->result.u.var).var.ptr));
