@@ -1242,7 +1242,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 	const char *encoded_word = NULL;
 	const char *spaces = NULL;
 
-	php_iconv_enc_scheme_t enc_scheme = 0;
+	php_iconv_enc_scheme_t enc_scheme = PHP_ICONV_ENC_SCHEME_BASE64;
 
 	if (next_pos != NULL) {
 		*next_pos = NULL;
@@ -1701,7 +1701,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 				if (scan_stat == 1) {
 					_php_iconv_appendc(pretval, '=', cd_pl);
 				}
-				err = 0;
+				err = PHP_ICONV_ERR_SUCCESS;
 			} else {
 				err = PHP_ICONV_ERR_MALFORMED;
 				goto out;
@@ -2076,7 +2076,7 @@ PHP_FUNCTION(iconv_mime_decode_headers)
 	int charset_len;
 	long mode = 0;
 	
-	php_iconv_err_t err = 0;
+	php_iconv_err_t err = PHP_ICONV_ERR_SUCCESS;
 
 	charset = ICONVG(internal_encoding);
 
