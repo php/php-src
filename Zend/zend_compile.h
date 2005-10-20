@@ -296,7 +296,6 @@ struct _zend_execute_data {
 	union _temp_variable *Ts;
 	zval ***CVs;
 	zend_bool original_in_execution;
-	zend_class_entry *calling_scope;
 	HashTable *symbol_table;
 	struct _zend_execute_data *prev_execute_data;
 	zval *old_error_reporting;

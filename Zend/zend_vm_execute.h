@@ -133,6 +133,7 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 	zval *current_this;
 	int return_value_used = RETURN_VALUE_USED(opline);
 	zend_bool should_change_scope;
+	zend_op *ctor_opline;
 
 	if (EX(function_state).function->common.fn_flags & ZEND_ACC_ABSTRACT) {
 		/* FIXME: output identifiers properly */
@@ -150,7 +151,7 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 		current_this = EG(This);
 		EG(This) = EX(object);
 		current_scope = EG(scope);
-		EG(scope) = EX(calling_scope);
+		EG(scope) = (EX(function_state).function->type == ZEND_USER_FUNCTION || !EX(object)) ? EX(function_state).function->common.scope : NULL;
 	} else {
 		should_change_scope = 0;
 	}
@@ -279,16 +280,18 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 		}
 	}
 
+	ctor_opline = (zend_op*)zend_ptr_stack_pop(&EG(arg_types_stack));
+
 	if (EG(This)) {
-		if (EG(exception) && EX(fbc) && EX(fbc)->common.fn_flags&ZEND_ACC_CTOR) {
-			EG(This)->refcount--;
+		if (EG(exception) && ctor_opline) {
+			if (RETURN_VALUE_USED(ctor_opline)) {
+				EG(This)->refcount--;
+			}
 			if (EG(This)->refcount == 1) {
 				zend_object_store_ctor_failed(EG(This) TSRMLS_CC);
 			}
-			if (should_change_scope && EG(This) != current_this) {
-				zval_ptr_dtor(&EG(This));
-			}
-		} else if (should_change_scope) {
+		}
+		if (should_change_scope) {
 			zval_ptr_dtor(&EG(This));
 		}
 	}
@@ -297,7 +300,7 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 		EG(This) = current_this;
 		EG(scope) = current_scope;
 	}
-	zend_ptr_stack_3_pop(&EG(arg_types_stack), (void**)&EX(calling_scope), (void**)&EX(object), (void**)&EX(fbc));
+	zend_ptr_stack_2_pop(&EG(arg_types_stack), (void**)&EX(object), (void**)&EX(fbc));
 
 	EX(function_state).function = (zend_function *) EX(op_array);
 	EG(function_state_ptr) = &EX(function_state);
@@ -419,17 +422,12 @@ static int ZEND_NEW_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
 		EX_T(opline->result.u.var).var.ptr = object_zval;
 		
-		zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+		zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), opline);
 
 		/* We are not handling overloaded classes right now */
 		EX(object) = object_zval;
 		EX(fbc) = constructor;
 
-		if (constructor->type == ZEND_USER_FUNCTION) { /* HACK!! */
-			EX(calling_scope) = constructor->common.scope;
-		} else {
-			EX(calling_scope) = NULL;
-		}
 		ZEND_VM_NEXT_OPCODE();
 	}
 }
@@ -557,10 +555,15 @@ static int ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	while (EX(fbc)) {
+		zend_op *ctor_opline = (zend_op*)zend_ptr_stack_pop(&EG(arg_types_stack));
+
 		if (EX(object)) {
+			if (ctor_opline && RETURN_VALUE_USED(ctor_opline)) {
+				EX(object)->refcount--;
+			}
 			zval_ptr_dtor(&EX(object));
 		}
-		zend_ptr_stack_n_pop(&EG(arg_types_stack), 3, &EX(calling_scope), &EX(object), &EX(fbc));
+		zend_ptr_stack_2_pop(&EG(arg_types_stack), (void**)&EX(object), (void**)&EX(fbc));
 	}
 
 	/* restore previous error_reporting value */
@@ -639,7 +642,7 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 	zval *function_name;
 	zend_class_entry *ce;
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	ce = EX_T(opline->op1.u.var).class_entry;
 	if(IS_CONST != IS_UNUSED) {
@@ -673,8 +676,6 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 		EX(fbc) = ce->constructor;
 	}
 
-	EX(calling_scope) = EX(fbc)->common.scope;
-
 	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
 		EX(object) = NULL;
 	} else {
@@ -695,7 +696,7 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	unsigned int function_name_strlen, lcname_len;
 	
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	if (IS_CONST == IS_CONST) {
 		function_name = &opline->op2.u.constant;
@@ -720,7 +721,6 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	}
 
-	EX(calling_scope) = function->common.scope;
 	EX(object) = NULL;
 
 	EX(fbc) = function;
@@ -835,7 +835,7 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	zval *function_name;
 	zend_class_entry *ce;
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	ce = EX_T(opline->op1.u.var).class_entry;
 	if(IS_TMP_VAR != IS_UNUSED) {
@@ -869,8 +869,6 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		EX(fbc) = ce->constructor;
 	}
 
-	EX(calling_scope) = EX(fbc)->common.scope;
-
 	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
 		EX(object) = NULL;
 	} else {
@@ -891,7 +889,7 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	unsigned int function_name_strlen, lcname_len;
 	zend_free_op free_op2;
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	if (IS_TMP_VAR == IS_CONST) {
 		function_name = &opline->op2.u.constant;
@@ -916,7 +914,6 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zval_dtor(free_op2.var);
 	}
 
-	EX(calling_scope) = function->common.scope;
 	EX(object) = NULL;
 
 	EX(fbc) = function;
@@ -988,7 +985,7 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	zval *function_name;
 	zend_class_entry *ce;
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	ce = EX_T(opline->op1.u.var).class_entry;
 	if(IS_VAR != IS_UNUSED) {
@@ -1022,8 +1019,6 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		EX(fbc) = ce->constructor;
 	}
 
-	EX(calling_scope) = EX(fbc)->common.scope;
-
 	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
 		EX(object) = NULL;
 	} else {
@@ -1044,7 +1039,7 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	unsigned int function_name_strlen, lcname_len;
 	zend_free_op free_op2;
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	if (IS_VAR == IS_CONST) {
 		function_name = &opline->op2.u.constant;
@@ -1069,7 +1064,6 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
 	}
 
-	EX(calling_scope) = function->common.scope;
 	EX(object) = NULL;
 
 	EX(fbc) = function;
@@ -1140,7 +1134,7 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 	zval *function_name;
 	zend_class_entry *ce;
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	ce = EX_T(opline->op1.u.var).class_entry;
 	if(IS_UNUSED != IS_UNUSED) {
@@ -1173,8 +1167,6 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 		}
 		EX(fbc) = ce->constructor;
 	}
-
-	EX(calling_scope) = EX(fbc)->common.scope;
 
 	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
 		EX(object) = NULL;
@@ -1223,7 +1215,7 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	zval *function_name;
 	zend_class_entry *ce;
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	ce = EX_T(opline->op1.u.var).class_entry;
 	if(IS_CV != IS_UNUSED) {
@@ -1257,8 +1249,6 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		EX(fbc) = ce->constructor;
 	}
 
-	EX(calling_scope) = EX(fbc)->common.scope;
-
 	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
 		EX(object) = NULL;
 	} else {
@@ -1279,7 +1269,7 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	unsigned int function_name_strlen, lcname_len;
 	
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	if (IS_CV == IS_CONST) {
 		function_name = &opline->op2.u.constant;
@@ -1304,7 +1294,6 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	}
 
-	EX(calling_scope) = function->common.scope;
 	EX(object) = NULL;
 
 	EX(fbc) = function;
@@ -1372,11 +1361,11 @@ static int ZEND_ECHO_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	/* Convert inline HTML blocks to the output encoding, but only if necessary. */
 	if (opline->extended_value &&
 		strcmp(ucnv_getName(ZEND_U_CONVERTER(UG(output_encoding_conv)), &status),
-			   EG(active_op_array)->script_encoding)) {
+			   EX(op_array)->script_encoding)) {
 		zval z_conv;
 		UConverter *script_enc_conv = NULL;
-		if (zend_set_converter_encoding(&script_enc_conv, EG(active_op_array)->script_encoding) == FAILURE) {
-			zend_error(E_ERROR, "Unsupported encoding [%d]", EG(active_op_array)->script_encoding);
+		if (zend_set_converter_encoding(&script_enc_conv, EX(op_array)->script_encoding) == FAILURE) {
+			zend_error(E_ERROR, "Unsupported encoding [%d]", EX(op_array)->script_encoding);
 		}
 		zend_convert_encodings(ZEND_U_CONVERTER(UG(output_encoding_conv)), script_enc_conv, &z_conv.value.str.val, &z_conv.value.str.len, z->value.str.val, z->value.str.len, &status);
 		z_conv.type = IS_BINARY;
@@ -1621,14 +1610,13 @@ static int ZEND_DO_FCALL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	
 	zval *fname = &opline->op1.u.constant;
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	if (zend_u_hash_find(EG(function_table), Z_TYPE_P(fname), Z_UNIVAL_P(fname), Z_UNILEN_P(fname)+1, (void **) &EX(function_state).function)==FAILURE) {
 		/* FIXME: output identifiers properly */
 		zend_error_noreturn(E_ERROR, "Unknown function:  %R()", Z_TYPE_P(fname), Z_UNIVAL_P(fname));
 	}
 	EX(object) = NULL;
-	EX(calling_scope) = EX(function_state).function->common.scope;
 
 	return zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
@@ -3878,11 +3866,11 @@ static int ZEND_ECHO_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	/* Convert inline HTML blocks to the output encoding, but only if necessary. */
 	if (opline->extended_value &&
 		strcmp(ucnv_getName(ZEND_U_CONVERTER(UG(output_encoding_conv)), &status),
-			   EG(active_op_array)->script_encoding)) {
+			   EX(op_array)->script_encoding)) {
 		zval z_conv;
 		UConverter *script_enc_conv = NULL;
-		if (zend_set_converter_encoding(&script_enc_conv, EG(active_op_array)->script_encoding) == FAILURE) {
-			zend_error(E_ERROR, "Unsupported encoding [%d]", EG(active_op_array)->script_encoding);
+		if (zend_set_converter_encoding(&script_enc_conv, EX(op_array)->script_encoding) == FAILURE) {
+			zend_error(E_ERROR, "Unsupported encoding [%d]", EX(op_array)->script_encoding);
 		}
 		zend_convert_encodings(ZEND_U_CONVERTER(UG(output_encoding_conv)), script_enc_conv, &z_conv.value.str.val, &z_conv.value.str.len, z->value.str.val, z->value.str.len, &status);
 		z_conv.type = IS_BINARY;
@@ -5146,7 +5134,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	/* FIXME: type is default */
 	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	function_name = &opline->op2.u.constant;
 
@@ -5156,8 +5144,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 	function_name_strval = Z_UNIVAL_P(function_name);
 	function_name_strlen = Z_UNILEN_P(function_name);
-
-	EX(calling_scope) = EG(scope);
 
 	EX(object) = _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 
@@ -5187,12 +5173,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 			zval_copy_ctor(this_ptr);
 			EX(object) = this_ptr;
 		}
-	}
-
-	if (EX(fbc)->type == ZEND_USER_FUNCTION) {
-		EX(calling_scope) = EX(fbc)->common.scope;
-	} else {
-		EX(calling_scope) = NULL;
 	}
 
 
@@ -5589,7 +5569,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	/* FIXME: type is default */
 	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	function_name = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
@@ -5599,8 +5579,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	function_name_strval = Z_UNIVAL_P(function_name);
 	function_name_strlen = Z_UNILEN_P(function_name);
-
-	EX(calling_scope) = EG(scope);
 
 	EX(object) = _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 
@@ -5630,12 +5608,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zval_copy_ctor(this_ptr);
 			EX(object) = this_ptr;
 		}
-	}
-
-	if (EX(fbc)->type == ZEND_USER_FUNCTION) {
-		EX(calling_scope) = EX(fbc)->common.scope;
-	} else {
-		EX(calling_scope) = NULL;
 	}
 
 	zval_dtor(free_op2.var);
@@ -6034,7 +6006,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	/* FIXME: type is default */
 	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	function_name = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
@@ -6044,8 +6016,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	function_name_strval = Z_UNIVAL_P(function_name);
 	function_name_strlen = Z_UNILEN_P(function_name);
-
-	EX(calling_scope) = EG(scope);
 
 	EX(object) = _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 
@@ -6075,12 +6045,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zval_copy_ctor(this_ptr);
 			EX(object) = this_ptr;
 		}
-	}
-
-	if (EX(fbc)->type == ZEND_USER_FUNCTION) {
-		EX(calling_scope) = EX(fbc)->common.scope;
-	} else {
-		EX(calling_scope) = NULL;
 	}
 
 	if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
@@ -6561,7 +6525,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	/* FIXME: type is default */
 	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	function_name = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
 
@@ -6571,8 +6535,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	function_name_strval = Z_UNIVAL_P(function_name);
 	function_name_strlen = Z_UNILEN_P(function_name);
-
-	EX(calling_scope) = EG(scope);
 
 	EX(object) = _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 
@@ -6602,12 +6564,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zval_copy_ctor(this_ptr);
 			EX(object) = this_ptr;
 		}
-	}
-
-	if (EX(fbc)->type == ZEND_USER_FUNCTION) {
-		EX(calling_scope) = EX(fbc)->common.scope;
-	} else {
-		EX(calling_scope) = NULL;
 	}
 
 
@@ -6923,11 +6879,11 @@ static int ZEND_ECHO_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	/* Convert inline HTML blocks to the output encoding, but only if necessary. */
 	if (opline->extended_value &&
 		strcmp(ucnv_getName(ZEND_U_CONVERTER(UG(output_encoding_conv)), &status),
-			   EG(active_op_array)->script_encoding)) {
+			   EX(op_array)->script_encoding)) {
 		zval z_conv;
 		UConverter *script_enc_conv = NULL;
-		if (zend_set_converter_encoding(&script_enc_conv, EG(active_op_array)->script_encoding) == FAILURE) {
-			zend_error(E_ERROR, "Unsupported encoding [%d]", EG(active_op_array)->script_encoding);
+		if (zend_set_converter_encoding(&script_enc_conv, EX(op_array)->script_encoding) == FAILURE) {
+			zend_error(E_ERROR, "Unsupported encoding [%d]", EX(op_array)->script_encoding);
 		}
 		zend_convert_encodings(ZEND_U_CONVERTER(UG(output_encoding_conv)), script_enc_conv, &z_conv.value.str.val, &z_conv.value.str.len, z->value.str.val, z->value.str.len, &status);
 		z_conv.type = IS_BINARY;
@@ -9140,7 +9096,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	/* FIXME: type is default */
 	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	function_name = &opline->op2.u.constant;
 
@@ -9150,8 +9106,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 	function_name_strval = Z_UNIVAL_P(function_name);
 	function_name_strlen = Z_UNILEN_P(function_name);
-
-	EX(calling_scope) = EG(scope);
 
 	EX(object) = _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 
@@ -9181,12 +9135,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 			zval_copy_ctor(this_ptr);
 			EX(object) = this_ptr;
 		}
-	}
-
-	if (EX(fbc)->type == ZEND_USER_FUNCTION) {
-		EX(calling_scope) = EX(fbc)->common.scope;
-	} else {
-		EX(calling_scope) = NULL;
 	}
 
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
@@ -10635,7 +10583,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	/* FIXME: type is default */
 	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	function_name = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
@@ -10645,8 +10593,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	function_name_strval = Z_UNIVAL_P(function_name);
 	function_name_strlen = Z_UNILEN_P(function_name);
-
-	EX(calling_scope) = EG(scope);
 
 	EX(object) = _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 
@@ -10676,12 +10622,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zval_copy_ctor(this_ptr);
 			EX(object) = this_ptr;
 		}
-	}
-
-	if (EX(fbc)->type == ZEND_USER_FUNCTION) {
-		EX(calling_scope) = EX(fbc)->common.scope;
-	} else {
-		EX(calling_scope) = NULL;
 	}
 
 	zval_dtor(free_op2.var);
@@ -12170,7 +12110,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	/* FIXME: type is default */
 	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	function_name = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
@@ -12180,8 +12120,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	function_name_strval = Z_UNIVAL_P(function_name);
 	function_name_strlen = Z_UNILEN_P(function_name);
-
-	EX(calling_scope) = EG(scope);
 
 	EX(object) = _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 
@@ -12211,12 +12149,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zval_copy_ctor(this_ptr);
 			EX(object) = this_ptr;
 		}
-	}
-
-	if (EX(fbc)->type == ZEND_USER_FUNCTION) {
-		EX(calling_scope) = EX(fbc)->common.scope;
-	} else {
-		EX(calling_scope) = NULL;
 	}
 
 	if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
@@ -14111,7 +14043,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	/* FIXME: type is default */
 	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	function_name = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
 
@@ -14121,8 +14053,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	function_name_strval = Z_UNIVAL_P(function_name);
 	function_name_strlen = Z_UNILEN_P(function_name);
-
-	EX(calling_scope) = EG(scope);
 
 	EX(object) = _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 
@@ -14152,12 +14082,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zval_copy_ctor(this_ptr);
 			EX(object) = this_ptr;
 		}
-	}
-
-	if (EX(fbc)->type == ZEND_USER_FUNCTION) {
-		EX(calling_scope) = EX(fbc)->common.scope;
-	} else {
-		EX(calling_scope) = NULL;
 	}
 
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
@@ -15326,7 +15250,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 	/* FIXME: type is default */
 	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	function_name = &opline->op2.u.constant;
 
@@ -15336,8 +15260,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 
 	function_name_strval = Z_UNIVAL_P(function_name);
 	function_name_strlen = Z_UNILEN_P(function_name);
-
-	EX(calling_scope) = EG(scope);
 
 	EX(object) = _get_obj_zval_ptr_unused(TSRMLS_C);
 
@@ -15367,12 +15289,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 			zval_copy_ctor(this_ptr);
 			EX(object) = this_ptr;
 		}
-	}
-
-	if (EX(fbc)->type == ZEND_USER_FUNCTION) {
-		EX(calling_scope) = EX(fbc)->common.scope;
-	} else {
-		EX(calling_scope) = NULL;
 	}
 
 
@@ -16476,7 +16392,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	/* FIXME: type is default */
 	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	function_name = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
@@ -16486,8 +16402,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	function_name_strval = Z_UNIVAL_P(function_name);
 	function_name_strlen = Z_UNILEN_P(function_name);
-
-	EX(calling_scope) = EG(scope);
 
 	EX(object) = _get_obj_zval_ptr_unused(TSRMLS_C);
 
@@ -16517,12 +16431,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			zval_copy_ctor(this_ptr);
 			EX(object) = this_ptr;
 		}
-	}
-
-	if (EX(fbc)->type == ZEND_USER_FUNCTION) {
-		EX(calling_scope) = EX(fbc)->common.scope;
-	} else {
-		EX(calling_scope) = NULL;
 	}
 
 	zval_dtor(free_op2.var);
@@ -17584,7 +17492,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	/* FIXME: type is default */
 	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	function_name = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
@@ -17594,8 +17502,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	function_name_strval = Z_UNIVAL_P(function_name);
 	function_name_strlen = Z_UNILEN_P(function_name);
-
-	EX(calling_scope) = EG(scope);
 
 	EX(object) = _get_obj_zval_ptr_unused(TSRMLS_C);
 
@@ -17625,12 +17531,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			zval_copy_ctor(this_ptr);
 			EX(object) = this_ptr;
 		}
-	}
-
-	if (EX(fbc)->type == ZEND_USER_FUNCTION) {
-		EX(calling_scope) = EX(fbc)->common.scope;
-	} else {
-		EX(calling_scope) = NULL;
 	}
 
 	if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
@@ -19058,7 +18958,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	/* FIXME: type is default */
 	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	function_name = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
 
@@ -19068,8 +18968,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 	function_name_strval = Z_UNIVAL_P(function_name);
 	function_name_strlen = Z_UNILEN_P(function_name);
-
-	EX(calling_scope) = EG(scope);
 
 	EX(object) = _get_obj_zval_ptr_unused(TSRMLS_C);
 
@@ -19099,12 +18997,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 			zval_copy_ctor(this_ptr);
 			EX(object) = this_ptr;
 		}
-	}
-
-	if (EX(fbc)->type == ZEND_USER_FUNCTION) {
-		EX(calling_scope) = EX(fbc)->common.scope;
-	} else {
-		EX(calling_scope) = NULL;
 	}
 
 
@@ -19696,11 +19588,11 @@ static int ZEND_ECHO_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	/* Convert inline HTML blocks to the output encoding, but only if necessary. */
 	if (opline->extended_value &&
 		strcmp(ucnv_getName(ZEND_U_CONVERTER(UG(output_encoding_conv)), &status),
-			   EG(active_op_array)->script_encoding)) {
+			   EX(op_array)->script_encoding)) {
 		zval z_conv;
 		UConverter *script_enc_conv = NULL;
-		if (zend_set_converter_encoding(&script_enc_conv, EG(active_op_array)->script_encoding) == FAILURE) {
-			zend_error(E_ERROR, "Unsupported encoding [%d]", EG(active_op_array)->script_encoding);
+		if (zend_set_converter_encoding(&script_enc_conv, EX(op_array)->script_encoding) == FAILURE) {
+			zend_error(E_ERROR, "Unsupported encoding [%d]", EX(op_array)->script_encoding);
 		}
 		zend_convert_encodings(ZEND_U_CONVERTER(UG(output_encoding_conv)), script_enc_conv, &z_conv.value.str.val, &z_conv.value.str.len, z->value.str.val, z->value.str.len, &status);
 		z_conv.type = IS_BINARY;
@@ -21737,7 +21629,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	/* FIXME: type is default */
 	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	function_name = &opline->op2.u.constant;
 
@@ -21747,8 +21639,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	function_name_strval = Z_UNIVAL_P(function_name);
 	function_name_strlen = Z_UNILEN_P(function_name);
-
-	EX(calling_scope) = EG(scope);
 
 	EX(object) = _get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
 
@@ -21778,12 +21668,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zval_copy_ctor(this_ptr);
 			EX(object) = this_ptr;
 		}
-	}
-
-	if (EX(fbc)->type == ZEND_USER_FUNCTION) {
-		EX(calling_scope) = EX(fbc)->common.scope;
-	} else {
-		EX(calling_scope) = NULL;
 	}
 
 
@@ -23224,7 +23108,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	/* FIXME: type is default */
 	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	function_name = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
@@ -23234,8 +23118,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	function_name_strval = Z_UNIVAL_P(function_name);
 	function_name_strlen = Z_UNILEN_P(function_name);
-
-	EX(calling_scope) = EG(scope);
 
 	EX(object) = _get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
 
@@ -23265,12 +23147,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zval_copy_ctor(this_ptr);
 			EX(object) = this_ptr;
 		}
-	}
-
-	if (EX(fbc)->type == ZEND_USER_FUNCTION) {
-		EX(calling_scope) = EX(fbc)->common.scope;
-	} else {
-		EX(calling_scope) = NULL;
 	}
 
 	zval_dtor(free_op2.var);
@@ -24750,7 +24626,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	/* FIXME: type is default */
 	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	function_name = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
@@ -24760,8 +24636,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	function_name_strval = Z_UNIVAL_P(function_name);
 	function_name_strlen = Z_UNILEN_P(function_name);
-
-	EX(calling_scope) = EG(scope);
 
 	EX(object) = _get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
 
@@ -24791,12 +24665,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zval_copy_ctor(this_ptr);
 			EX(object) = this_ptr;
 		}
-	}
-
-	if (EX(fbc)->type == ZEND_USER_FUNCTION) {
-		EX(calling_scope) = EX(fbc)->common.scope;
-	} else {
-		EX(calling_scope) = NULL;
 	}
 
 	if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
@@ -26681,7 +26549,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	/* FIXME: type is default */
 	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	function_name = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
 
@@ -26691,8 +26559,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	function_name_strval = Z_UNIVAL_P(function_name);
 	function_name_strlen = Z_UNILEN_P(function_name);
-
-	EX(calling_scope) = EG(scope);
 
 	EX(object) = _get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
 
@@ -26722,12 +26588,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zval_copy_ctor(this_ptr);
 			EX(object) = this_ptr;
 		}
-	}
-
-	if (EX(fbc)->type == ZEND_USER_FUNCTION) {
-		EX(calling_scope) = EX(fbc)->common.scope;
-	} else {
-		EX(calling_scope) = NULL;
 	}
 
 
