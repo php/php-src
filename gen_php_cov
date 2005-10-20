@@ -1,0 +1,70 @@
+#!/bin/sh
+
+cov_gen_clean()
+{
+   echo "Cleaning up stale gcov data"
+   find . -name \*.gcda -o -name \*.gcno | xargs rm -f
+   make cov-clean > /dev/null
+}
+
+cov_gen_check_cli()
+{
+   if test -x $php_version; then
+      check_gcov=`nm $php_version | grep '__gcov_open' | wc -l`
+      if test "$check_gcov" != "1"; then
+          echo "PHP CLI Found ($php_version) does not appear to have GCOV enabled"
+          echo "Please recompile with --enable-gcov or set PHP_EXEC"
+          exit 1
+      fi
+      echo "GCOV support in PHP confirmed"
+   else
+      echo "Could not find PHP binary (using $php_version)"
+      echo "Please compile the CLI version of PHP using the --enable-gcov flag"
+      exit 1
+   fi
+}
+
+cov_gen_usage()
+{
+    echo "$0 --[help] <cli executable>";
+}
+
+cov_gen_generate()
+{
+   echo "Confirming GCOV is available in PHP"
+   cov_gen_check_cli
+   cov_gen_clean
+   export NO_INTERACTION=1
+   export TEST_PHP_EXECUTABLE="$php_version"
+
+   echo "Running Test Suite (this is going to take awhile)"
+
+   $php_version -c ./php.ini-test run-tests.php > /dev/null
+   echo "Performing Code Coverage Analysis"
+   make cov > /dev/null
+   echo "Generating HTML report of Analysis"
+   make cov-html > /dev/null
+}
+
+while test $# != 0; do
+   case "$1" in
+      --help)
+        cov_gen_usage
+        exit 0
+        ;;
+      *)
+        if test -x $1; then
+            echo "Using PHP executable $1"
+            php_version="$1"
+            cov_gen_generate
+	    exit 0
+        fi 
+        ;;
+    esac
+    shift
+done
+
+echo "Using Default Location for PHP executable"
+php_version="sapi/cli/php"
+cov_gen_generate
+exit 0

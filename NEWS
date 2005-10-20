@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 6.0
+- C-level Code Coverage Instrumenting (John)
 - Unicode support. (Andrei, Dmitriy, et al)
 - Changed type hints so that they take "= NULL" as default value. (Marcus,
   Derick)
