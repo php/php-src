@@ -451,7 +451,7 @@ static php_conv_err_t php_conv_base64_encode_ctor(php_conv_base64_encode *inst, 
 	}
 	inst->lbchars_dup = lbchars_dup;
 	inst->persistent = persistent;
-	return SUCCESS;
+	return PHP_CONV_ERR_SUCCESS;
 }
 
 static void php_conv_base64_encode_dtor(php_conv_base64_encode *inst)
@@ -717,7 +717,7 @@ static php_conv_err_t php_conv_base64_decode_convert(php_conv_base64_decode *ins
 
 	if (in_pp == NULL || in_left_p == NULL) {
 		if (inst->eos || inst->urem_nbits == 0) { 
-			return SUCCESS;
+			return PHP_CONV_ERR_SUCCESS;
 		}
 		return PHP_CONV_ERR_UNEXPECTED_EOS;
 	}
