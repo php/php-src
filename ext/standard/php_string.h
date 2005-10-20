@@ -130,6 +130,7 @@ PHPAPI void php_u_stripslashes(UChar *str, int32_t *len TSRMLS_DC);
 PHPAPI void php_stripcslashes(char *str, int *len);
 PHPAPI void php_basename(char *s, size_t len, char *suffix, size_t sufflen, char **p_ret, size_t *p_len TSRMLS_DC);
 PHPAPI size_t php_dirname(char *str, size_t len);
+PHPAPI UChar *php_u_stristr(UChar *s, UChar *t, int32_t s_len, int32_t t_len);
 PHPAPI char *php_stristr(unsigned char *s, unsigned char *t, size_t s_len, size_t t_len);
 PHPAPI char *php_str_to_str_ex(char *haystack, int length, char *needle,
 		int needle_len, char *str, int str_len, int *_new_length, int case_sensitivity, int *replace_count);
