@@ -753,7 +753,7 @@ static int _extension_ini_string(zend_ini_entry *ini_entry, int num_args, va_lis
 			}
 		}
  
-		string_printf(str, "> ]\n", indent, ini_entry->name);
+		string_printf(str, "> ]\n");
 		string_printf(str, "    %s  Current = '%s'\n", indent, ini_entry->value ? ini_entry->value : "");
 		if (ini_entry->modified) {
 			string_printf(str, "    %s  Default = '%s'\n", indent, ini_entry->orig_value ? ini_entry->orig_value : "");
