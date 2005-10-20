@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Fixed bug #34905 (Digest authentication does not work with Apache 1). (Ilia)
 - Fixed bug #34902 (mysqli::character_set_name() - undefined method). (Tony)
 - Fixed bug #34899 (Fixed sqlite extension compile failure). (Ilia)
+- Fixed bug #34767 (Zend Engine 1 Compatibility not copying objects correctly).
+  (Dmitry)
 - Fixed bug #33829 (mime_content_type() returns text/plain for gzip and bzip 
   files). (Derick)
 - Fixed bug #34623 (Crash in pdo_mysql on longtext fields). (Ilia)
