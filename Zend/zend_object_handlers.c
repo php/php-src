@@ -482,8 +482,10 @@ static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC
 	zval tmp_member;
 	zval **retval;
 	zend_property_info *property_info;
+	zend_bool use_get;
 	
 	zobj = Z_OBJ_P(object);
+	use_get = (zobj->ce->__get && !zobj->in_get);
 
  	if (member->type != IS_STRING) {
 		tmp_member = *member;
@@ -496,12 +498,12 @@ static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC
 	fprintf(stderr, "Ptr object #%d property: %s\n", Z_OBJ_HANDLE_P(object), Z_STRVAL_P(member));
 #endif			
 
-	property_info = zend_get_property_info(zobj->ce, member, 0 TSRMLS_CC);
+	property_info = zend_get_property_info(zobj->ce, member, use_get TSRMLS_CC);
 
-	if (zend_hash_quick_find(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, (void **) &retval) == FAILURE) {
+	if (!property_info || zend_hash_quick_find(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, (void **) &retval) == FAILURE) {
 		zval *new_zval;
 
-		if (!zobj->ce->__get && !zobj->ce->__set) {
+		if (!use_get) {
 			/* we don't have access controls - will just add it */
 			new_zval = &EG(uninitialized_zval);
 
