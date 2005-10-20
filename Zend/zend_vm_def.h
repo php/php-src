@@ -1631,7 +1631,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	int function_name_strlen;
 	zend_free_op free_op1, free_op2;
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	function_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
@@ -1641,8 +1641,6 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 
 	function_name_strval = function_name->value.str.val;
 	function_name_strlen = function_name->value.str.len;
-
-	EX(calling_scope) = EG(scope);
 
 	EX(object) = GET_OP1_OBJ_ZVAL_PTR(BP_VAR_R);
 
@@ -1674,12 +1672,6 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 		}
 	}
 
-	if (EX(fbc)->type == ZEND_USER_FUNCTION) {
-		EX(calling_scope) = EX(fbc)->common.scope;
-	} else {
-		EX(calling_scope) = NULL;
-	}
-
 	FREE_OP2();
 	FREE_OP1_IF_VAR();
 
@@ -1692,7 +1684,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, ANY, CONST|TMP|VAR|UNUSED|CV)
 	zval *function_name;
 	zend_class_entry *ce;
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	ce = EX_T(opline->op1.u.var).class_entry;
 	if(OP2_TYPE != IS_UNUSED) {
@@ -1727,8 +1719,6 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, ANY, CONST|TMP|VAR|UNUSED|CV)
 		EX(fbc) = ce->constructor;
 	}
 
-	EX(calling_scope) = EX(fbc)->common.scope;
-
 	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
 		EX(object) = NULL;
 	} else {
@@ -1749,7 +1739,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 	int function_name_strlen;
 	zend_free_op free_op2;
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	if (OP2_TYPE == IS_CONST) {
 		function_name_strval = opline->op2.u.constant.value.str.val;
@@ -1775,7 +1765,6 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 		FREE_OP2();
 	}
 
-	EX(calling_scope) = function->common.scope;
 	EX(object) = NULL;
 
 	EX(fbc) = function;
@@ -1792,6 +1781,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 	zval *current_this;
 	int return_value_used = RETURN_VALUE_USED(opline);
 	zend_bool should_change_scope;
+	zend_op *ctor_opline;
 
 	if (EX(function_state).function->common.fn_flags & ZEND_ACC_ABSTRACT) {
 		zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", EX(function_state).function->common.scope->name, EX(function_state).function->common.function_name);
@@ -1808,7 +1798,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 		current_this = EG(This);
 		EG(This) = EX(object);
 		current_scope = EG(scope);
-		EG(scope) = EX(calling_scope);
+		EG(scope) = (EX(function_state).function->type == ZEND_USER_FUNCTION || !EX(object)) ? EX(function_state).function->common.scope : NULL;
 	} else {
 		should_change_scope = 0;
 	}
@@ -1936,16 +1926,18 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 		}
 	}
 
+	ctor_opline = (zend_op*)zend_ptr_stack_pop(&EG(arg_types_stack));
+
 	if (EG(This)) {
-		if (EG(exception) && EX(fbc) && EX(fbc)->common.fn_flags&ZEND_ACC_CTOR) {
-			EG(This)->refcount--;
+		if (EG(exception) && ctor_opline) {
+			if (RETURN_VALUE_USED(ctor_opline)) {
+				EG(This)->refcount--;
+			}
 			if (EG(This)->refcount == 1) {
 				zend_object_store_ctor_failed(EG(This) TSRMLS_CC);
 			}
-			if (should_change_scope && EG(This) != current_this) {
-				zval_ptr_dtor(&EG(This));
-			}
-		} else if (should_change_scope) {
+		}
+		if (should_change_scope) {
 			zval_ptr_dtor(&EG(This));
 		}
 	}
@@ -1954,7 +1946,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 		EG(This) = current_this;
 		EG(scope) = current_scope;
 	}
-	zend_ptr_stack_3_pop(&EG(arg_types_stack), (void**)&EX(calling_scope), (void**)&EX(object), (void**)&EX(fbc));
+	zend_ptr_stack_2_pop(&EG(arg_types_stack), (void**)&EX(object), (void**)&EX(fbc));
 
 	EX(function_state).function = (zend_function *) EX(op_array);
 	EG(function_state_ptr) = &EX(function_state);
@@ -1982,13 +1974,12 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, CONST, ANY)
 	zend_free_op free_op1;
 	zval *fname = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), NULL);
 
 	if (zend_hash_find(EG(function_table), fname->value.str.val, fname->value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
 		zend_error_noreturn(E_ERROR, "Unknown function:  %s()", fname->value.str.val);
 	}
 	EX(object) = NULL;
-	EX(calling_scope) = EX(function_state).function->common.scope;
 
 	FREE_OP1();
 
@@ -2445,17 +2436,12 @@ ZEND_VM_HANDLER(68, ZEND_NEW, ANY, ANY)
 		EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
 		EX_T(opline->result.u.var).var.ptr = object_zval;
 		
-		zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+		zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), opline);
 
 		/* We are not handling overloaded classes right now */
 		EX(object) = object_zval;
 		EX(fbc) = constructor;
 
-		if (constructor->type == ZEND_USER_FUNCTION) { /* HACK!! */
-			EX(calling_scope) = constructor->common.scope;
-		} else {
-			EX(calling_scope) = NULL;
-		}
 		ZEND_VM_NEXT_OPCODE();
 	}
 }
@@ -3628,10 +3614,15 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 	}
 
 	while (EX(fbc)) {
+		zend_op *ctor_opline = (zend_op*)zend_ptr_stack_pop(&EG(arg_types_stack));
+
 		if (EX(object)) {
+			if (ctor_opline && RETURN_VALUE_USED(ctor_opline)) {
+				EX(object)->refcount--;
+			}
 			zval_ptr_dtor(&EX(object));
 		}
-		zend_ptr_stack_n_pop(&EG(arg_types_stack), 3, &EX(calling_scope), &EX(object), &EX(fbc));
+		zend_ptr_stack_2_pop(&EG(arg_types_stack), (void**)&EX(object), (void**)&EX(fbc));
 	}
 
 	/* restore previous error_reporting value */

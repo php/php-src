@@ -84,7 +84,14 @@ static inline void zend_ptr_stack_3_pop(zend_ptr_stack *stack, void **a, void **
 	*a = *(--stack->top_element);
 	*b = *(--stack->top_element);
 	*c = *(--stack->top_element);
-	stack->top -= 3;;	
+	stack->top -= 3;
+}
+
+static inline void zend_ptr_stack_2_pop(zend_ptr_stack *stack, void **a, void **b)
+{
+	*a = *(--stack->top_element);
+	*b = *(--stack->top_element);
+	stack->top -= 2;
 }
 
 static inline void zend_ptr_stack_push(zend_ptr_stack *stack, void *ptr)
