@@ -3,8 +3,10 @@ compress.zlib:// wrapper
 --FILE--
 <?php
 
+$pfx = str_repeat('../', substr_count($_SERVER['PHP_SELF'], '../'));
+
 // Relative path
-$fp = fopen("compress.zlib://ext/xsl/tests/xslt.xsl.gz", "rb");
+$fp = fopen("compress.zlib://{$pfx}ext/xsl/tests/xslt.xsl.gz", "rb");
 fclose($fp);
 
 // Absolute path
