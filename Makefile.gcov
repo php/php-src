@@ -1,0 +1,18 @@
+
+.php_cov_info.ltpdata:
+	@mkdir -p .cov/; \
+	find . -name \*.gcda -o -name \*.gcno | sed -e 's/^\.\/\.cov\/.*//' | xargs --replace cp {} .cov/; \
+	find . -name \*.gcda -o -name \*.gcno | sed -e 's/^\.\/\.cov\/.*//' | sed -e 's/^\.\///' | xargs --max-args=1 dirname | sed -e 's/\/.*//' | xargs --replace ln -s `pwd`/{} `pwd`/.cov > /dev/null 2>&1; \
+	$(LTP) --directory .cov --output-file=.php_cov_info.ltpdata --capture; \
+
+cov: .php_cov_info.ltpdata
+
+cov-html: cov 
+	@$(LTP_GENHTML) -o cov_html/ .php_cov_info.ltpdata -t "PHP Code Coverage" -s;
+
+cov-clean:
+	find . -name \*.gcda -o -name \*.gcno -exec rm -f {} \;
+	rm -f .cov/*      # This is done first, since we are symlinked inside..
+	rm -Rf .cov       # Now remove the directory
+	rm -f .php_cov_info.ltpdata
+	rm -Rf cov_html
