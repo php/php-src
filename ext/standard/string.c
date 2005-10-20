@@ -1915,6 +1915,42 @@ PHP_FUNCTION(pathinfo)
 }
 /* }}} */
 
+/* {{{ php_u_stristr
+   Unicode version of case insensitve strstr */
+PHPAPI UChar *php_u_stristr(UChar *s, UChar *t, int32_t s_len, int32_t t_len)
+{
+	int32_t i,j, last;
+	UChar32 ch1, ch2;
+
+	/* Have to do this by hand since lower-casing can change lengths
+	   by changing codepoints, and an offset within the lower-case &
+	   upper-case strings might be different codepoints
+	*/
+	i = 0;
+	while (i <= (s_len-t_len)) {
+		last = i;
+		U16_NEXT(s, i, s_len, ch1);
+		U16_GET(t, 0, 0, t_len, ch2);
+		if (u_tolower(ch1) == u_tolower(ch2)) {
+			j = 0;
+			U16_FWD_1(t, j, t_len);
+			while (j < t_len) {
+				U16_NEXT(s, i, s_len, ch1);
+				U16_NEXT(t, j, t_len, ch2);
+				if (u_tolower(ch1) != u_tolower(ch2)) {
+					U16_BACK_1(s, 0, i);
+					break;
+				}
+			}
+			if (u_tolower(ch1) == u_tolower(ch2)) {
+				return s+last;
+			}
+		}
+	}
+	return NULL;
+}
+/* }}} */
+
 /* {{{ php_stristr
    case insensitve strstr */
 PHPAPI char *php_stristr(unsigned char *s, unsigned char *t, size_t s_len, size_t t_len)
@@ -2005,61 +2041,103 @@ PHPAPI size_t php_strcspn(char *s1, char *s2, char *s1_end, char *s2_end)
    Finds first occurrence of a string within another, case insensitive */
 PHP_FUNCTION(stristr)
 {
-	char *haystack;
-	long haystack_len;
-	zval *needle;
+	zval *haystack, *needle;
 	zend_bool part = 0;
-	char *found = NULL;
-	int  found_offset;
-	char *haystack_orig;
+	zend_uchar str_type;
 	char needle_char[2];
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|b", &haystack, &haystack_len, &needle, &part) == FAILURE) {
+	UChar u_needle_char[3];
+	int32_t needle_len;
+	char *haystack_copy;
+	void *target;
+	void *found = NULL;
+	int found_offset;
+	void *start, *end;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz|b", &haystack, &needle, &part) == FAILURE) {
 		return;
 	}
-
+	SEPARATE_ZVAL(&haystack);
 	SEPARATE_ZVAL(&needle);
+	if (Z_TYPE_P(haystack) != IS_UNICODE && Z_TYPE_P(haystack) != IS_BINARY && Z_TYPE_P(haystack) != IS_STRING) {
+		convert_to_text(haystack);
+	}
 
-	haystack_orig = estrndup(haystack, haystack_len);
-
-	if (Z_TYPE_P(needle) == IS_STRING) {
-		if (!Z_STRLEN_P(needle)) {
+	if (Z_TYPE_P(needle) == IS_UNICODE || Z_TYPE_P(needle) == IS_BINARY || Z_TYPE_P(needle) == IS_STRING) {
+		if (!Z_UNILEN_P(needle)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter.");
-			efree(haystack_orig);
 			RETURN_FALSE;
 		}
-
-		found = php_stristr(haystack,
-							Z_STRVAL_P(needle),
-							haystack_len,
-							Z_STRLEN_P(needle));
+		if (Z_TYPE_P(haystack) != Z_TYPE_P(needle)) {
+			str_type = zend_get_unified_string_type(2 TSRMLS_CC, Z_TYPE_P(haystack), Z_TYPE_P(needle));
+			if (str_type == (zend_uchar)-1) {
+				convert_to_explicit_type(haystack, IS_BINARY);
+				convert_to_explicit_type(needle, IS_BINARY);
+			} else {
+				convert_to_explicit_type(haystack, str_type);
+				convert_to_explicit_type(needle, str_type);
+			}
+		}
+		target = Z_UNIVAL_P(needle);
+		needle_len = Z_UNILEN_P(needle);
 	} else {
 		convert_to_long_ex(&needle);
-		needle_char[0] = (char) Z_LVAL_P(needle);
-		needle_char[1] = 0;
+		needle_len = 0;
+		if (Z_TYPE_P(haystack) == IS_UNICODE) {
+			if (Z_LVAL_P(needle) < 0 || Z_LVAL_P(needle) > 0x10FFFF) {
+				php_error(E_WARNING, "Needle argument codepoint value out of range (0 - 0x10FFFF)");
+				RETURN_FALSE;
+			}
+			if (U_IS_BMP(Z_LVAL_P(needle))) {
+				u_needle_char[needle_len++] = (UChar)Z_LVAL_P(needle);
+				u_needle_char[needle_len]   = 0;
+			} else {
+				u_needle_char[needle_len++] = (UChar)U16_LEAD(Z_LVAL_P(needle));
+				u_needle_char[needle_len++] = (UChar)U16_TRAIL(Z_LVAL_P(needle));
+				u_needle_char[needle_len]   = 0;
+			}
+			target = u_needle_char;
+		} else {
+			needle_char[needle_len++] = (char)Z_LVAL_P(needle);
+			needle_char[needle_len] = 0;
+			target = needle_char;
+		}
+	}
 
-		found = php_stristr(haystack,
-							needle_char,
-							haystack_len,
-							1);
+	if (needle_len > Z_UNILEN_P(haystack)) {
+		RETURN_FALSE;
+	}
+
+	if (Z_TYPE_P(haystack) == IS_UNICODE) {
+		found = php_u_stristr(Z_USTRVAL_P(haystack), (UChar *)target,
+							  Z_USTRLEN_P(haystack), needle_len);
+	} else {
+		haystack_copy = estrndup(Z_STRVAL_P(haystack), Z_STRLEN_P(haystack));
+		found = php_stristr(Z_STRVAL_P(haystack), (char *)target,
+							Z_STRLEN_P(haystack), needle_len);
 	}
 
 	if (found) {
-		found_offset = found - haystack;
-		if (part) {
-			char *ret;
-			ret = emalloc(found_offset + 1);
-			strncpy(ret, haystack_orig, found_offset);
-			ret[found_offset] = '\0';
-			RETVAL_STRINGL(ret , found_offset, 0);
+		if (Z_TYPE_P(haystack) == IS_UNICODE) {
+			start = part ? Z_USTRVAL_P(haystack) : found;
+			end = part ? found : (Z_USTRVAL_P(haystack) + Z_USTRLEN_P(haystack));
+			RETVAL_UNICODEL((UChar *)start, (UChar *)end-(UChar *)start, 1);
 		} else {
-			RETVAL_STRINGL(haystack_orig + found_offset, haystack_len - found_offset, 1);
+			found_offset = (char *)found - Z_STRVAL_P(haystack);
+			start = part ? haystack_copy : haystack_copy + found_offset;
+			end = part ? haystack_copy + found_offset : (haystack_copy + Z_STRLEN_P(haystack));
+			if (Z_TYPE_P(haystack) == IS_BINARY) {
+				RETVAL_BINARYL((char *)start, (char *)end-(char *)start, 1);
+			} else {
+				RETVAL_STRINGL((char *)start, (char *)end-(char *)start, 1);
+			}
 		}
 	} else {
 		RETVAL_FALSE;
 	}
 
-	efree(haystack_orig);
+	if (Z_TYPE_P(haystack) != IS_UNICODE) {
+		efree(haystack_copy);
+	}
 }
 /* }}} */
 
