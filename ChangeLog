@@ -1,3 +1,78 @@
+2005-10-19  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * (PHP_5_0)
+      main/SAPI.c
+      sapi/cli/php_cli.c:
+      MFH:
+      fixed bug #29983 (PHP does not explicitly set mime type & charset)
+      + call sapi_deactivate() when called with -m switch
+
+2005-10-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/cli/php_cli.c:
+      Fixed -m memory leak
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      main/SAPI.c
+      main/SAPI.c:
+      MFH: Fixed bug #29983 (PHP does not explicitly set mime type & charset).
+
+    * main/SAPI.c:
+      Fixed bug #29983 (PHP does not explicitly set mime type & charset).
+
+2005-10-19  Rolland Santimano  <rollandsantimano@yahoo.com>
+
+    * ext/standard/string.c:
+      - Unicode impl of str[c]spn()
+
+2005-10-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      MFH: Fixed bug #34623 (Crash in pdo_mysql on longtext fields).
+
+2005-10-19  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_0)
+      ext/standard/uniqid.c:
+      backport Ilia's last patch to 5.0
+
+2005-10-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      ext/standard/uniqid.c
+      ext/standard/uniqid.c:
+      MFH: Change E_ERROR to E_WARNING when more_entropy flag is off on Cygwin.
+
+    * ext/standard/uniqid.c:
+      Change E_ERROR to E_WARNING when more_entropy flag is off on Cygwin.
+
+2005-10-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug33257.phpt
+      ZendEngine2/tests/bug33257.phpt
+      ZendEngine2/tests/bug33257.phpt:
+      Fixed test
+
+2005-10-19  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      fix news entry
+
+    * (PHP_5_0)
+      ext/standard/tests/array/array_sum.phpt:
+      fix test (it fails on 64-bit hosts because of too low memory_limit)
+
+    * ext/oci8/php_oci8_int.h:
+      remove undef HAVE_OCI_STMT_PREPARE2
+
 2005-10-18  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_1)

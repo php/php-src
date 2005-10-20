@@ -1,3 +1,10 @@
+2005-10-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/bug33257.phpt
+      tests/bug33257.phpt
+      tests/bug33257.phpt:
+      Fixed test
+
 2005-10-17  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.c
