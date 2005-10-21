@@ -2428,6 +2428,13 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 
+<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\{$" {
+	zendlval->value.str.val = estrndup("{$", sizeof("{$")-1);
+	zendlval->value.str.len = sizeof("{$")-1;
+	zendlval->type = IS_STRING;
+	return T_STRING;
+}
+
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\"{ANY_CHAR} {
 	switch (yytext[1]) {
 		case 'n':
@@ -2443,9 +2450,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			zendlval->value.lval = (long) '\\';
 			break;
 		case '$':
-			zendlval->value.lval = (long) yytext[1];
-			break;
-		case '{':
 			zendlval->value.lval = (long) yytext[1];
 			break;
 		default:
