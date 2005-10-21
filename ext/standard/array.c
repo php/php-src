@@ -4658,6 +4658,17 @@ PHP_FUNCTION(array_key_exists)
 		RETURN_FALSE;
 	}
 
+	if (Z_TYPE_PP(array) == IS_OBJECT &&
+	    Z_OBJ_HT_PP(array)->has_dimension &&
+	    (Z_OBJ_HT_PP(array)->has_dimension != std_object_handlers.has_dimension ||
+	     instanceof_function_ex(Z_OBJCE_PP(array), U_CLASS_ENTRY(zend_ce_arrayaccess), 1 TSRMLS_CC))) {
+	  if (Z_OBJ_HT_PP(array)->has_dimension(*array, *key, 0 TSRMLS_CC)) {
+	  	RETURN_TRUE;
+	  } else {
+	  	RETURN_FALSE;
+	  }
+	}
+
 	switch (Z_TYPE_PP(key)) {
 		case IS_STRING:
 		case IS_UNICODE:
