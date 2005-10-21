@@ -1740,15 +1740,12 @@ ZEND_METHOD(reflection_parameter, getClass)
 		RETURN_NULL();
 	} else {
 		zend_class_entry **pce;
-		char *lcname = do_alloca(param->arg_info->class_name_len + 1);
-		zend_str_tolower_copy(lcname, param->arg_info->class_name, param->arg_info->class_name_len);
-		if (zend_hash_find(EG(class_table), lcname, param->arg_info->class_name_len + 1, (void **) &pce) == FAILURE) {
-			free_alloca(lcname);
+
+		if (zend_lookup_class_ex(param->arg_info->class_name, param->arg_info->class_name_len, 1, &pce TSRMLS_CC) == FAILURE) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 				"Class %s does not exist", param->arg_info->class_name);
 			return;
 		}
-		free_alloca(lcname);
 		zend_reflection_class_factory(*pce, return_value TSRMLS_CC);
 	}
 }

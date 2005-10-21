@@ -15,6 +15,8 @@ PHP                                                                        NEWS
 - Fixed bug #31177 (menory leaks and corruption because of incorrect
   refcounting). (Dmitry)
 - Fixed bug #29983 (PHP does not explicitly set mime type & charset). (Ilia)
+- Fixed bug #29268 (__autoload() not called with Reflection->getClass()).
+  (Dmitry)
 
 17 Oct 2005, PHP 5.1 Release Candidate 3
 - Fixed bug #34873 (Segmentation Fault on foreach in object). (Dmitry)
