@@ -14,6 +14,7 @@ PHP                                                                        NEWS
 - Fixed bug #33829 (mime_content_type() returns text/plain for gzip and bzip 
   files). (Derick)
 - Fixed bug #34623 (Crash in pdo_mysql on longtext fields). (Ilia)
+- Fixed bug #31341 (escape on curly inconsistent). (Dmitry)
 - Fixed bug #31177 (menory leaks and corruption because of incorrect
   refcounting). (Dmitry)
 - Fixed bug #29983 (PHP does not explicitly set mime type & charset). (Ilia)
