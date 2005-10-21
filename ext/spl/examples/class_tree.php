@@ -33,17 +33,25 @@ class SubClasses extends RecursiveArrayIterator
 	{
 		foreach(get_declared_classes() as $cname)
 		{
-			if (strcasecmp(get_parent_class($cname), $base) == 0)
+			$parent = get_parent_class($cname);
+			if (strcasecmp($parent, $base) == 0)
 			{
 				$this->offsetSet($cname, new SubClasses($cname));
 			}
 			if ($check_interfaces)
 			{
+				if ($parent)
+				{
+					$parent_imp = class_implements($parent);
+				}
 				foreach(class_implements($cname) as $iname)
 				{
 					if (strcasecmp($iname, $base) == 0)
 					{
-						$this->offsetSet($cname, new SubClasses($cname));
+						if (!$parent || !in_array($iname, $parent_imp))
+						{
+							$this->offsetSet($cname, new SubClasses($cname));
+						}
 					}
 				}
 			}
