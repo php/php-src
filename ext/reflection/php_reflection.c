@@ -1857,16 +1857,12 @@ ZEND_METHOD(reflection_parameter, getClass)
 		RETURN_NULL();
 	} else {
 		zend_class_entry **pce;
-		unsigned int lcname_len;
-		char *lcname = zend_u_str_case_fold(UG(unicode)?IS_UNICODE:IS_STRING, param->arg_info->class_name, param->arg_info->class_name_len, 0, &lcname_len);
 
-		if (zend_u_hash_find(EG(class_table), UG(unicode)?IS_UNICODE:IS_STRING, lcname, lcname_len + 1, (void **) &pce) == FAILURE) {
-			efree(lcname);
+		if (zend_u_lookup_class_ex(UG(unicode)?IS_UNICODE:IS_STRING, param->arg_info->class_name, param->arg_info->class_name_len, 1, &pce TSRMLS_CC) == FAILURE) {
 			zend_throw_exception_ex(U_CLASS_ENTRY(reflection_exception_ptr), 0 TSRMLS_CC, 
 				"Class %v does not exist", param->arg_info->class_name);
 			return;
 		}
-		efree(lcname);
 		zend_reflection_class_factory(*pce, return_value TSRMLS_CC);
 	}
 }
