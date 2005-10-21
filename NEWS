@@ -6,6 +6,7 @@ PHP                                                                        NEWS
 - Fixed bug #34893 (PHP5.1 overloading, Cannot access private property).
   (Dmitry)
 - Fixed bug #34899 (Fixed sqlite extension compile failure). (Ilia)
+- Fixed bug #34782 (token_get_all() gives wrong result). (Dmitry)
 - Fixed bug #34767 (Zend Engine 1 Compatibility not copying objects correctly).
   (Dmitry)
 - Fixed bug #34712 (zend.ze1_compatibility_mode = on segfault). (Dmitry)
