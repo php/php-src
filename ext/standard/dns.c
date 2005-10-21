@@ -381,6 +381,8 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 	char name[MAXHOSTNAMELEN];
 	int have_v6_break = 0, in_v6_break = 0;
 
+	*subarray = NULL;
+
 	n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof(name)) - 2);
 	if (n < 0) {
 		return NULL;
@@ -392,13 +394,11 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 	GETLONG(ttl, cp);
 	GETSHORT(dlen, cp);
 	if (type_to_fetch != T_ANY && type != type_to_fetch) {
-		*subarray = NULL;
 		cp += dlen;
 		return cp;
 	}
 
 	if (!store) {
-		*subarray = NULL;
 		cp += dlen;
 		return cp;
 	}
@@ -648,7 +648,7 @@ PHP_FUNCTION(dns_get_record)
 	int type_to_fetch, type_param = PHP_DNS_ANY;
 	struct __res_state res;
 	HEADER *hp;
-	querybuf buf, answer, *ans;
+	querybuf buf, answer;
 	u_char *cp = NULL, *end = NULL;
 	long n, qd, an, ns = 0, ar = 0;
 	int type, first_query = 1, store_results = 1;
@@ -663,12 +663,14 @@ PHP_FUNCTION(dns_get_record)
 			if (zend_get_parameters(ht, 2, &host, &fetch_type) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
+			convert_to_long(fetch_type);
 			type_param = Z_LVAL_P(fetch_type);
 			break;
 		case 4:
 			if (zend_get_parameters(ht, 4, &host, &fetch_type, &authns, &addtl) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
+			convert_to_long(fetch_type);
 			type_param = Z_LVAL_P(fetch_type);
 			pval_destructor(authns);
 			addtl_recs = 1;		/* We want the additional Records */
@@ -764,13 +766,12 @@ PHP_FUNCTION(dns_get_record)
 		
 			cp = answer.qb2 + HFIXEDSZ;
 			end = answer.qb2 + n;
-			ans = &answer;
-			hp = (HEADER *)ans;
+			hp = (HEADER *)&answer;
 			qd = ntohs(hp->qdcount);
 			an = ntohs(hp->ancount);
 			ns = ntohs(hp->nscount);
 			ar = ntohs(hp->arcount);
-		
+	
 			/* Skip QD entries, they're only used by dn_expand later on */
 			while (qd-- > 0) {
 				n = dn_skipname(cp, end);
