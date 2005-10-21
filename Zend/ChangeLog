@@ -1,3 +1,89 @@
+2005-10-20  Antony Dovgal  <antony@zend.com>
+
+    * zend_reflection_api.c:
+      copy/paste typo
+
+2005-10-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      zend_vm_opcodes.h:
+      Removed unnecesary local variable
+
+    * zend_object_handlers.c
+      zend_object_handlers.c
+      tests/bug34893.phpt:
+      Fixed bug #34893 (PHP5.1 overloading, Cannot access private property)
+
+    * tests/bug34893.phpt
+      tests/bug34893.phpt:
+      
+      file bug34893.phpt was initially added on branch PHP_5_1.
+
+    * tests/bug34712.phpt:
+      Fixed bug #34712 (zend.ze1_compatibility_mode = on segfault)
+
+    * tests/bug34712.phpt
+      tests/bug34712.phpt:
+      
+      file bug34712.phpt was initially added on branch PHP_5_1.
+
+    * zend_execute_API.c
+      zend_execute_API.c
+      tests/bug34767.phpt:
+      Fixed bug #34767 (Zend Engine 1 Compatibility not copying objects
+      correctly)
+
+    * tests/bug34767.phpt
+      tests/bug34767.phpt:
+      
+      file bug34767.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      zend_compile.h:
+      Fixed bug #31177 (menory leaks and corruption because of incorrect
+      refcounting).
+
+    * zend_compile.h
+      zend_extensions.h
+      zend_extensions.h
+      zend_ptr_stack.h
+      zend_ptr_stack.h
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      zend_vm_opcodes.h
+      tests/bug31177-2.phpt:
+      Fixed bug #31177 (menory leaks and corruption because of incorrect
+      refcounting)
+
+    * tests/bug31177-2.phpt
+      tests/bug31177-2.phpt:
+      
+      file bug31177-2.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_0)
+      tests/bug34062.phpt:
+      Added forgotten test
+
+    * (PHP_5_1)
+      tests/bug33512.phpt
+      tests/bug34062.phpt:
+      Added forgotten tests
+
+    * tests/bug33512.phpt
+      tests/bug33512.phpt
+      tests/bug34062.phpt
+      tests/bug34062.phpt
+      tests/bug34062.phpt:
+      
+      Added forgotten tests
+
 2005-10-19  Dmitry Stogov  <dmitry@zend.com>
 
     * tests/bug33257.phpt
