@@ -1916,7 +1916,7 @@ quit_loop:
 	return ptr;
 }
 
-#define FPUTCSV_FLD_CHK(c) php_memnstr(Z_STRVAL_PP(field), c, 1, Z_STRVAL_PP(field) + Z_STRLEN_PP(field))
+#define FPUTCSV_FLD_CHK(c) memchr(Z_STRVAL_PP(field), c, Z_STRLEN_PP(field))
 
 /* {{{ proto int fputcsv(resource fp, array fields [, string delimiter [, string enclosure]])
    Format line as CSV and write to file pointer */
@@ -1925,6 +1925,7 @@ PHP_FUNCTION(fputcsv)
 {
 	char delimiter = ',';	/* allow this to be set as parameter */
 	char enclosure = '"';	/* allow this to be set as parameter */
+	const char escape_char = '\\';
 	php_stream *stream;
 	int ret;
 	zval *fp = NULL, *fields = NULL, **field = NULL;
@@ -1932,7 +1933,6 @@ PHP_FUNCTION(fputcsv)
 	int delimiter_str_len, enclosure_str_len;
 	HashPosition pos;
 	int count, i = 0;
-	char enc_double[3];
 	smart_str csvline = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|ass",
@@ -1967,9 +1967,6 @@ PHP_FUNCTION(fputcsv)
     
 	PHP_STREAM_TO_ZVAL(stream, &fp);
 
-	enc_double[0] = enclosure;
-	enc_double[1] = enclosure;
-	enc_double[2] = '\0';
 	count = zend_hash_num_elements(Z_ARRVAL_P(fields));
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(fields), &pos);
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(fields), (void **) &field, &pos) == SUCCESS) {
@@ -1978,18 +1975,30 @@ PHP_FUNCTION(fputcsv)
 			convert_to_string(*field);
 		} 
 		/* enclose a field that contains a delimiter, an enclosure character, or a newline */
-		if (FPUTCSV_FLD_CHK(&delimiter) || FPUTCSV_FLD_CHK(&enclosure) || FPUTCSV_FLD_CHK("\n") ||
-			FPUTCSV_FLD_CHK("\r") || FPUTCSV_FLD_CHK(" ") || FPUTCSV_FLD_CHK("\t")
-		) {
-			zval enclosed_field;
-			smart_str_appendl(&csvline, &enclosure, 1);
+		if (FPUTCSV_FLD_CHK(delimiter) ||
+		    FPUTCSV_FLD_CHK(enclosure) ||
+		    FPUTCSV_FLD_CHK(escape_char) ||
+		    FPUTCSV_FLD_CHK('\n') ||
+		    FPUTCSV_FLD_CHK('\r') ||
+		    FPUTCSV_FLD_CHK('\t') ||
+		    FPUTCSV_FLD_CHK(' ')) {
+			char *ch  = Z_STRVAL_PP(field);
+			char *end = ch + Z_STRLEN_PP(field);
+			int escaped = 0;
 
-			php_char_to_str_ex(Z_STRVAL_PP(field), Z_STRLEN_PP(field),
-						enclosure, enc_double, 2, &enclosed_field, 0, NULL);
-			smart_str_appendl(&csvline, Z_STRVAL(enclosed_field), Z_STRLEN(enclosed_field));
-			zval_dtor(&enclosed_field);
-
-			smart_str_appendl(&csvline, &enclosure, 1);
+			smart_str_appendc(&csvline, enclosure);
+			while (ch < end) {
+				if (*ch == escape_char) {
+					escaped = 1;
+				} else if (!escaped && *ch == enclosure) {
+				  smart_str_appendc(&csvline, enclosure);
+				} else {
+				  escaped = 0;
+				}
+				smart_str_appendc(&csvline, *ch);
+			  ch++;
+			}
+			smart_str_appendc(&csvline, enclosure);
 		} else {
 			smart_str_appendl(&csvline, Z_STRVAL_PP(field), Z_STRLEN_PP(field));
 		}
