@@ -1005,6 +1005,7 @@ int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_
 	if (zend_prepare_string_for_scanning(str, str_name TSRMLS_CC)==FAILURE) {
 		return FAILURE;
 	}
+	BEGIN(INITIAL);
 	zend_highlight(syntax_highlighter_ini TSRMLS_CC);
 	zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
 	zval_dtor(str);
