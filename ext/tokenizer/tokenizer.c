@@ -519,6 +519,8 @@ PHP_FUNCTION(token_get_all)
 		RETURN_EMPTY_STRING();
 	}
 
+	LANG_SCNG(start) = 1;
+
 	tokenize(return_value TSRMLS_CC);
 	
 	zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
