@@ -615,6 +615,7 @@ int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_
 	if (zend_prepare_string_for_scanning(str, str_name TSRMLS_CC)==FAILURE) {
 		return FAILURE;
 	}
+	BEGIN(INITIAL);
 	zend_highlight(syntax_highlighter_ini TSRMLS_CC);
 #ifdef ZEND_MULTIBYTE
 	if (SCNG(script_org)) {
