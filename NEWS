@@ -2,6 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Oct 2005, PHP 5.1 Release Candidate 4
 - Fixed fgetcsv() and fputcsv() inconsistency. (Dmitry)
+- Fixed bug #34934 (offsetExists is not called from array_key_exists). (Dmitry)
 - Fixed bug #34905 (Digest authentication does not work with Apache 1). (Ilia)
 - Fixed bug #34902 (mysqli::character_set_name() - undefined method). (Tony)
 - Fixed bug #34893 (PHP5.1 overloading, Cannot access private property).
