@@ -543,6 +543,7 @@ PHP_FUNCTION(clearstatcache)
 #define IS_LINK_OPERATION(__t) ((__t) == FS_TYPE || (__t) == FS_IS_LINK || (__t) == FS_LSTAT)
 #define IS_EXISTS_CHECK(__t) ((__t) == FS_EXISTS  || (__t) == FS_IS_W || (__t) == FS_IS_R || (__t) == FS_IS_X || (__t) == FS_IS_FILE || (__t) == FS_IS_DIR || (__t) == FS_IS_LINK)
 #define IS_ABLE_CHECK(__t) ((__t) == FS_IS_R || (__t) == FS_IS_W || (__t) == FS_IS_X)
+#define IS_ACCESS_CHECK(__t) (IS_ABLE_CHECK(type) || (__t) == FS_EXISTS)
 
 /* {{{ php_stat
  */
@@ -558,6 +559,35 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 
 	if (!filename_length) {
 		RETURN_FALSE;
+	}
+
+	if (IS_ACCESS_CHECK(type)) {
+		char *local;
+
+		if (php_stream_locate_url_wrapper(filename, &local, 0 TSRMLS_CC) == &php_plain_files_wrapper) {
+			switch (type) {
+#ifdef F_OK
+				case FS_EXISTS:
+					RETURN_BOOL(VCWD_ACCESS(local, F_OK) == 0);
+					break;
+#endif
+#ifdef W_OK
+				case FS_IS_W:
+					RETURN_BOOL(VCWD_ACCESS(local, W_OK) == 0);
+					break;
+#endif
+#ifdef R_OK
+				case FS_IS_R:
+					RETURN_BOOL(VCWD_ACCESS(local, R_OK) == 0);
+					break;
+#endif
+#ifdef X_OK
+				case FS_IS_X:
+					RETURN_BOOL(VCWD_ACCESS(local, X_OK) == 0);
+					break;
+#endif
+			}
+		}
 	}
 
 	if (IS_LINK_OPERATION(type)) {
@@ -617,7 +647,7 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 		php_stream_wrapper *wrapper;
 
 		wrapper = php_stream_locate_url_wrapper(filename, NULL, 0 TSRMLS_CC);
-		if (wrapper && wrapper->wops && wrapper->wops->label && strcmp(wrapper->wops->label, "plainfile") == 0) {
+		if (wrapper == &php_plain_files_wrapper) {
 			if (type == FS_IS_X) {
 				xmask = S_IXROOT;
 			} else {
