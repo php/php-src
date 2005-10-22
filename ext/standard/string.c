@@ -1924,20 +1924,33 @@ PHPAPI UChar *php_u_stristr(UChar *s, UChar *t, int32_t s_len, int32_t t_len)
 
 	/* Have to do this by hand since lower-casing can change lengths
 	   by changing codepoints, and an offset within the lower-case &
-	   upper-case strings might be different codepoints
+	   upper-case strings might be different codepoints.
+
+	   Find an occurrence of the first codept of 't' in 's', and
+	   starting from this point, match the rest of the codepts of 't'
+	   with those in 's'. Comparisons are performed against lower-case
+	   equivalents of the codepoints being matched.
+
+	   'i' & 'j' are indices used for extracting codepts 'ch1' &
+	   'ch2'. 'last' is offset in 's' where the search for 't'
+	   started, and indicates beginning of 't' in 's' for a successful
+	   match.
 	*/
+
 	i = 0;
 	while (i <= (s_len-t_len)) {
 		last = i;
 		U16_NEXT(s, i, s_len, ch1);
-		U16_GET(t, 0, 0, t_len, ch2);
+		j = 0;
+		U16_NEXT(t, j, t_len, ch2);
 		if (u_tolower(ch1) == u_tolower(ch2)) {
-			j = 0;
-			U16_FWD_1(t, j, t_len);
 			while (j < t_len) {
 				U16_NEXT(s, i, s_len, ch1);
 				U16_NEXT(t, j, t_len, ch2);
 				if (u_tolower(ch1) != u_tolower(ch2)) {
+					/* U16_NEXT() incr 'i' beyond 'ch1', re-adjust to
+					   restart compare
+					*/
 					U16_BACK_1(s, 0, i);
 					break;
 				}
