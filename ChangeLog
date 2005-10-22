@@ -1,3 +1,82 @@
+2005-10-21  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/array.c
+      ext/standard/array.c:
+      fix ws
+
+2005-10-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/tests/array/bug34934.phpt
+      ext/standard/tests/array/bug34934.phpt:
+      
+      file bug34934.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/tests/array/bug34934.phpt:
+      Fixed bug #34934 (offsetExists is not called from array_key_exists)
+
+2005-10-21  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_0)
+      ext/standard/dns.c
+      ext/standard/dns.c:
+      MFH: fix possible crash in dns_get_record()
+      cleanup code a bit
+      (partly fixes #34938)
+
+    * ext/standard/dns.c:
+      fix possible crash in dns_get_record()
+      cleanup code a bit
+      (partly fixes #34938)
+
+2005-10-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug31341.phpt
+      ZendEngine2/tests/bug31341.phpt:
+      
+      file bug31341.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/tests/bug31341.phpt:
+      Fixed bug #31341 (escape on curly inconsistent)
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/file.c
+      ext/standard/file.c
+      ext/standard/tests/file/fputcsv.phpt
+      ext/standard/tests/file/fputcsv.phpt:
+      Fixed fgetcsv() and fputcsv() inconsistency.
+
+    * (PHP_5_0)
+      NEWS
+      NEWS
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner.l
+      ext/tokenizer/tokenizer.c
+      ext/tokenizer/tokenizer.c
+      ext/tokenizer/tokenizer.c:
+      Fixed bug #34782 (token_get_all() gives wrong result)
+
+    * ZendEngine2/tests/bug29268.phpt
+      ZendEngine2/tests/bug29268.phpt:
+      
+      file bug29268.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/zend_reflection_api.c
+      ZendEngine2/zend_reflection_api.c
+      ZendEngine2/tests/bug29268.phpt:
+      Fixed bug #29268 (__autoload() not called with Reflection->getClass())
+
 2005-10-20  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * NEWS:
