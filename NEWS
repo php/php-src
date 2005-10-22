@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Oct 2005, PHP 5.1 Release Candidate 4
+- Fixed bug #34957 (PHP doesn't respect ACLs for access checks). (Wez)
 - Fixed fgetcsv() and fputcsv() inconsistency. (Dmitry)
 - Fixed bug #34934 (offsetExists is not called from array_key_exists). (Dmitry)
 - Fixed bug #34905 (Digest authentication does not work with Apache 1). (Ilia)
