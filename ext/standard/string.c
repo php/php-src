@@ -1917,7 +1917,7 @@ PHP_FUNCTION(pathinfo)
 
 /* {{{ php_u_stristr
    Unicode version of case insensitve strstr */
-\PHPAPI UChar *php_u_stristr(UChar *s, UChar *t, int32_t s_len, int32_t t_len)
+PHPAPI UChar *php_u_stristr(UChar *s, UChar *t, int32_t s_len, int32_t t_len)
 {
 	int32_t i,j, last;
 	UChar32 ch1, ch2;
