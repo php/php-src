@@ -1917,7 +1917,7 @@ PHP_FUNCTION(pathinfo)
 
 /* {{{ php_u_stristr
    Unicode version of case insensitve strstr */
-PHPAPI UChar *php_u_stristr(UChar *s, UChar *t, int32_t s_len, int32_t t_len)
+\PHPAPI UChar *php_u_stristr(UChar *s, UChar *t, int32_t s_len, int32_t t_len)
 {
 	int32_t i,j, last;
 	UChar32 ch1, ch2;
@@ -1926,12 +1926,12 @@ PHPAPI UChar *php_u_stristr(UChar *s, UChar *t, int32_t s_len, int32_t t_len)
 	   by changing codepoints, and an offset within the lower-case &
 	   upper-case strings might be different codepoints.
 
-	   Find an occurrence of the first codept of 't' in 's', and
-	   starting from this point, match the rest of the codepts of 't'
-	   with those in 's'. Comparisons are performed against lower-case
-	   equivalents of the codepoints being matched.
+	   Find an occurrence of the first codepoint of 't' in 's', and
+	   starting from this point, match the rest of the codepoints of
+	   't' with those in 's'. Comparisons are performed against
+	   lower-case equivalents of the codepoints being matched.
 
-	   'i' & 'j' are indices used for extracting codepts 'ch1' &
+	   'i' & 'j' are indices used for extracting codepoints 'ch1' &
 	   'ch2'. 'last' is offset in 's' where the search for 't'
 	   started, and indicates beginning of 't' in 's' for a successful
 	   match.
