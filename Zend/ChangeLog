@@ -1,3 +1,30 @@
+2005-10-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_language_scanner.l
+      zend_language_scanner.l
+      tests/bug31341.phpt:
+      Fixed bug #31341 (escape on curly inconsistent)
+
+    * tests/bug31341.phpt
+      tests/bug31341.phpt:
+      
+      file bug31341.phpt was initially added on branch PHP_5_1.
+
+    * zend_language_scanner.l
+      zend_language_scanner.l
+      zend_language_scanner.l:
+      Fixed bug #34782 (token_get_all() gives wrong result)
+
+    * zend_reflection_api.c
+      zend_reflection_api.c
+      tests/bug29268.phpt:
+      Fixed bug #29268 (__autoload() not called with Reflection->getClass())
+
+    * tests/bug29268.phpt
+      tests/bug29268.phpt:
+      
+      file bug29268.phpt was initially added on branch PHP_5_1.
+
 2005-10-20  Antony Dovgal  <antony@zend.com>
 
     * zend_reflection_api.c:
