@@ -6585,11 +6585,14 @@ PHP_FUNCTION(str_split)
    Search a string for any of a set of characters */
 PHP_FUNCTION(strpbrk)
 {
-	char *haystack, *char_list;
-	int haystack_len, char_list_len;
-	char *p;
+	void *haystack, *char_list;
+	int32_t haystack_len, char_list_len;
+	zend_uchar haystack_type, char_list_type;
+	void *p = NULL;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &haystack, &haystack_len, &char_list, &char_list_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT",
+							  &haystack, &haystack_len, &haystack_type,
+							  &char_list, &char_list_len, &char_list_type) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -6598,8 +6601,36 @@ PHP_FUNCTION(strpbrk)
 		RETURN_FALSE;	
 	}
 
-	if ((p = strpbrk(haystack, char_list))) {
-		RETURN_STRINGL(p, (haystack + haystack_len - p), 1);
+	if (haystack_type == IS_UNICODE) {
+		int32_t i, j;
+		UChar32 ch1, ch2;
+
+		for (i = 0 ; i < haystack_len ; ) {
+			U16_NEXT((UChar *)haystack, i, haystack_len, ch1);
+			for (j = 0 ; j < char_list_len ; ) {
+				U16_NEXT((UChar *)char_list, j, char_list_len, ch2);
+				if (ch1 == ch2) {
+					U16_BACK_1((UChar *)haystack, 0, i);
+					p = (UChar *)haystack + i;
+					break;
+				}
+			}
+			if (ch1 == ch2) {
+				break;
+			}
+		}
+	} else {
+		p = strpbrk((char *)haystack, (char *)char_list);
+	}
+
+	if (p) {
+		if (haystack_type == IS_UNICODE) {
+			RETURN_UNICODEL((UChar *)p, ((UChar *)haystack + haystack_len - (UChar *)p), 1);
+		} else if (haystack_type == IS_BINARY) {
+			RETURN_BINARYL((char *)p, ((char *)haystack + haystack_len - (char *)p), 1);
+		} else {
+			RETURN_STRINGL((char *)p, ((char *)haystack + haystack_len - (char *)p), 1);
+		}
 	} else {
 		RETURN_FALSE;
 	}
