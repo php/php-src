@@ -349,9 +349,8 @@ PHP_MINIT_FUNCTION(dns) {
 #define QFIXEDSZ        4       /* fixed data in query <arpa/nameser.h> */
 #endif /* QFIXEDSZ */
 
-#ifndef MAXHOSTNAMELEN
+#undef MAXHOSTNAMELEN
 #define MAXHOSTNAMELEN  1024
-#endif /* MAXHOSTNAMELEN */
 
 #ifndef MAXRESOURCERECORDS
 #define MAXRESOURCERECORDS	64
@@ -362,10 +361,25 @@ typedef union {
 	u_char qb2[65536];
 } querybuf;
 
+/* just a hack to free resources allocated by glibc in __res_nsend() 
+ * See also: 
+ *   res_thread_freeres() in glibc/resolv/res_init.c 
+ *   __libc_res_nsend()   in resolv/res_send.c 
+ * */
+static void _php_dns_free_res(struct __res_state res) { /* {{{ */
+	int ns;
+	for (ns = 0; ns < MAXNS; ns++) {
+		if (res._u._ext.nsaddrs[ns] != NULL) {
+			free (res._u._ext.nsaddrs[ns]);
+			res._u._ext.nsaddrs[ns] = NULL;
+		}
+	}
+} /* }}} */
+
 /* {{{ php_parserr */
 static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int store, zval **subarray)
 {
-	u_short type, class, dlen;
+	u_short type, dlen;
 	u_long ttl;
 	long n, i;
 	u_short s;
@@ -375,14 +389,13 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 
 	*subarray = NULL;
 
-	n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof(name)) - 2);
+	n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, sizeof(name) - 2);
 	if (n < 0) {
 		return NULL;
 	}
 	cp += n;
 	
 	GETSHORT(type, cp);
-	GETSHORT(class, cp);
 	GETLONG(ttl, cp);
 	GETSHORT(dlen, cp);
 	if (type_to_fetch != T_ANY && type != type_to_fetch) {
@@ -642,7 +655,7 @@ PHP_FUNCTION(dns_get_record)
 	HEADER *hp;
 	querybuf buf, answer;
 	u_char *cp = NULL, *end = NULL;
-	long n, qd, an, ns = 0, ar = 0;
+	int n, qd, an, ns = 0, ar = 0;
 	int type, first_query = 1, store_results = 1;
 
 	switch (ZEND_NUM_ARGS()) {
@@ -739,6 +752,7 @@ PHP_FUNCTION(dns_get_record)
 				break;
 		}
 		if (type_to_fetch) {
+			memset(&res, 0, sizeof(res));
 			res_ninit(&res);
 			res.retrans = 5;
 			res.options &= ~RES_DEFNAMES;
@@ -748,6 +762,7 @@ PHP_FUNCTION(dns_get_record)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "res_nmkquery() failed");
 				zval_dtor(return_value);
 				res_nclose(&res);
+				_php_dns_free_res(res);
 				RETURN_FALSE;
 			}
 			n = res_nsend(&res, buf.qb2, n, answer.qb2, sizeof answer);
@@ -755,6 +770,7 @@ PHP_FUNCTION(dns_get_record)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "res_nsend() failed");
 				zval_dtor(return_value);
 				res_nclose(&res);
+				_php_dns_free_res(res);
 				RETURN_FALSE;
 			}
 		
@@ -773,6 +789,7 @@ PHP_FUNCTION(dns_get_record)
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to parse DNS data received");
 					zval_dtor(return_value);
 					res_nclose(&res);
+					_php_dns_free_res(res);
 					RETURN_FALSE;
 				}
 				cp += n + QFIXEDSZ;
@@ -788,6 +805,7 @@ PHP_FUNCTION(dns_get_record)
 				}
 			}
 			res_nclose(&res);
+			_php_dns_free_res(res);
 		}
 	}
 
