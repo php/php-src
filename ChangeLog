@@ -1,3 +1,36 @@
+2005-10-22  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS:
+      keep the order! :)
+
+2005-10-22  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/filestat.c
+      main/streams/php_stream_plain_wrapper.h:
+      merge VCWD_ACCESS bugfix to head.
+      Test suite is unusable in HEAD, so I guess it works here too.
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/filestat.c
+      main/streams/php_stream_plain_wrapper.h:
+      Fix #34957; file access checks should use VCWD_ACCESS()
+
+2005-10-22  Rolland Santimano  <rollandsantimano@yahoo.com>
+
+    * ext/standard/string.c:
+      - php_u_stristr: Remove leading back-slash ... sheesh
+
+    * ext/standard/string.c:
+      - php_u_stristr: s/codepts/codepoints/ - make Jani happy
+
+    * ext/standard/string.c:
+      - Unicode impl of strpbrk()
+
+    * ext/standard/string.c:
+      - php_u_stristr: Code comments
+
 2005-10-21  Antony Dovgal  <antony@zend.com>
 
     * ext/standard/array.c
