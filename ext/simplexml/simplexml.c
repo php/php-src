@@ -701,7 +701,14 @@ sxe_properties_get(zval *object TSRMLS_DC)
 	node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
 
 	if (node) {
-		node = node->children;
+		if (node->type == XML_ATTRIBUTE_NODE) {
+			MAKE_STD_ZVAL(value);
+			ZVAL_U_STRING(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), value, xmlNodeListGetString(node->doc, node->children, 1), 1);
+			zend_hash_next_index_insert(rv, &value, sizeof(zval *), NULL);
+			node = NULL;
+		} else {
+			node = node->children;
+		}
 
 		while (node) {
 			if (node->children != NULL || node->prev != NULL || node->next != NULL) {

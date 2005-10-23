@@ -22,11 +22,9 @@ var_dump($sxe['attr']);
 ?>
 ===DONE===
 --EXPECTF--
-object(SimpleXMLElement)#1 (1) {
-  ["attr"]=>
-  string(%d) "foo%sbar%sbaz"
+object(SimpleXMLElement)#%d (0) {
 }
-object(SimpleXMLElement)#2 (1) {
+object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(%d) "foo%sbar%sbaz"
 }
