@@ -358,7 +358,7 @@ PHP_MINIT_FUNCTION(dns) {
 #endif /* QFIXEDSZ */
 
 #ifndef MAXHOSTNAMELEN
-#define MAXHOSTNAMELEN  256
+#define MAXHOSTNAMELEN  1024
 #endif /* MAXHOSTNAMELEN */
 
 #ifndef MAXRESOURCERECORDS
@@ -755,12 +755,14 @@ PHP_FUNCTION(dns_get_record)
 			if (n<0) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "res_nmkquery() failed");
 				zval_dtor(return_value);
+				res_nclose(&res);
 				RETURN_FALSE;
 			}
 			n = res_nsend(&res, buf.qb2, n, answer.qb2, sizeof answer);
 			if (n<0) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "res_nsend() failed");
 				zval_dtor(return_value);
+				res_nclose(&res);
 				RETURN_FALSE;
 			}
 		
@@ -778,6 +780,7 @@ PHP_FUNCTION(dns_get_record)
 				if (n < 0) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to parse DNS data received");
 					zval_dtor(return_value);
+					res_nclose(&res);
 					RETURN_FALSE;
 				}
 				cp += n + QFIXEDSZ;
