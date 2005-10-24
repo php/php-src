@@ -2429,9 +2429,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\{$" {
-	zendlval->value.str.val = estrndup("{$", sizeof("{$")-1);
-	zendlval->value.str.len = sizeof("{$")-1;
-	zendlval->type = IS_STRING;
+	if (!zend_copy_string_value(zendlval, yytext+1, yyleng-1, CG(literal_type) TSRMLS_CC)) {
+		return 0;
+	}
 	return T_STRING;
 }
 
