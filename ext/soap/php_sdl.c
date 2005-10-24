@@ -2230,6 +2230,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri TSRMLS_DC)
 		smart_str_appends(&proxy,Z_STRVAL_PP(proxy_host));
 		smart_str_appends(&proxy,":");
 		smart_str_appends(&proxy,Z_STRVAL(str_port));
+		smart_str_0(&proxy);
 		zval_dtor(&str_port);
 		MAKE_STD_ZVAL(str_proxy);
 		ZVAL_STRING(str_proxy, proxy.c, 1);
@@ -2237,6 +2238,11 @@ sdlPtr get_sdl(zval *this_ptr, char *uri TSRMLS_DC)
 		
 		context = php_stream_context_alloc();
 		php_stream_context_set_option(context, "http", "proxy", str_proxy);
+		zval_ptr_dtor(&str_proxy);
+
+		MAKE_STD_ZVAL(str_proxy);
+		ZVAL_BOOL(str_proxy, 1);
+		php_stream_context_set_option(context, "http", "request_fulluri", str_proxy);
 		zval_ptr_dtor(&str_proxy);
 
 		proxy_authentication(this_ptr, &headers TSRMLS_CC);
