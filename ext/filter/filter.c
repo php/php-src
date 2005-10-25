@@ -342,8 +342,10 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 	Z_STRLEN(new_var) = val_len;
 	Z_STRVAL(new_var) = estrndup(*val, val_len + 1);
 	Z_TYPE(new_var) = IS_STRING;
-	if (! (IF_G(default_filter) == FS_UNSAFE_RAW)) {
-		php_zval_filter(&new_var, IF_G(default_filter), 0, NULL, NULL/*charset*/ TSRMLS_DC);
+	if (val_len) {
+		if (! (IF_G(default_filter) == FS_UNSAFE_RAW)) {
+			php_zval_filter(&new_var, IF_G(default_filter), 0, NULL, NULL/*charset*/ TSRMLS_DC);
+		}
 	}
 
 	php_register_variable_ex(orig_var, &new_var, orig_array_ptr TSRMLS_DC);
