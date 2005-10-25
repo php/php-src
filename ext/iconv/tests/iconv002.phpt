@@ -2,7 +2,7 @@
 iconv() test 2 (UCS4BE to ASCII)
 --SKIPIF--
 <?php
-/* include('skipif.inc'); */
+include('skipif.inc');
 if (@iconv("ascii","UCS-4LE", "abcd") == '') {
 	die("skip conversion to UCS-4LE not supported"); 
 }

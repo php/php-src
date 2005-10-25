@@ -1,7 +1,7 @@
 --TEST--
 ob_iconv_handler()
 --SKIPIF--
-<?php /* include('skipif.inc'); */ ?>
+<?php include('skipif.inc'); ?>
 --INI--
 unicode.script_encoding=ISO-8859-1
 unicode.output_encoding=ISO-8859-1
