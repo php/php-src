@@ -388,7 +388,7 @@ PHP_FUNCTION(spl_autoload_register)
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|b", &zcallable, &do_throw) == FAILURE) {
 			return;
 		}
-		if (!zend_is_callable_ex(zcallable, 0, &func_name, &func_name_len, &alfi.func_ptr, &obj_ptr TSRMLS_CC)) {
+		if (!zend_is_callable_ex(zcallable, 0, &func_name, &func_name_len, &alfi.ce, &alfi.func_ptr, &obj_ptr TSRMLS_CC)) {
 			if (do_throw) {
 				zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Passed array does not specify a callable static method");
 			}
@@ -407,10 +407,8 @@ PHP_FUNCTION(spl_autoload_register)
 		if (obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
 			alfi.obj = *obj_ptr;
 			alfi.obj->refcount++;
-			alfi.ce = Z_OBJCE_P(alfi.obj);
 		} else {
 			alfi.obj = NULL;
-			alfi.ce = NULL;
 		}
 	} else if (ZEND_NUM_ARGS()) {
 		lc_name = do_alloca(func_name_len + 1);
