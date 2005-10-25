@@ -625,7 +625,7 @@ static int php_do_deflate(uint str_length, Bytef **p_buffer, uint *p_buffer_len,
 	int start_offset = ((do_start && ZLIBG(compression_coding) == CODING_GZIP) ? 10 : 0);
 	int end_offset = (do_end ? 8 : 0);
 
-	outlen = (uint) (sizeof(char) * (str_length / PHP_ZLIB_MODIFIER + 12) + 1); /* leave some room for a trailing \0 */
+	outlen = (uint) (str_length + (str_length / PHP_ZLIB_MODIFIER) + 12 + 1); /* leave some room for a trailing \0 */
 	if ((outlen + start_offset + end_offset) > *p_buffer_len) {
 		buffer = (Bytef *) emalloc(outlen + start_offset + end_offset);
 	} else {
