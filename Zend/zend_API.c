@@ -2530,12 +2530,12 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, zval *c
 	unsigned int lcname_len;
 	char *lcname;
 	zend_bool retval = 0; 
-	zend_class_entry *ce;
+	zend_class_entry *ce_local;
 	zend_function *fptr_local;
 	zval **zobj_ptr_local;
 
 	if (ce_ptr == NULL) {
-		ce_ptr = &ce;
+		ce_ptr = &ce_local;
 	}
 	if (fptr_ptr == NULL) {
 		fptr_ptr = &fptr_local;
@@ -2568,7 +2568,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, zval *c
 
 		case IS_ARRAY:
 			{
-				zend_class_entry **pce;
+				zend_class_entry *ce = NULL, **pce;
 				zval **method;
 				zval **obj;
 				
