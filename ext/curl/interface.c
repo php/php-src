@@ -44,6 +44,45 @@
 #define HttpPost curl_httppost
 #endif
 
+/* {{{ cruft for thread safe SSL crypto locks */
+#if defined(ZTS) && defined(HAVE_CURL_SSL)
+#	ifdef PHP_WIN32
+#		define PHP_CURL_NEED_SSL_TSL
+#		define PHP_CURL_NEED_OPENSSL_TSL
+#		include <openssl/crypto.h>
+#	else /* !PHP_WIN32 */
+#		if defined(HAVE_CURL_OPENSSL)
+#			if defined(HAVE_OPENSSL_CRYPTO_H)
+#				define PHP_CURL_NEED_SSL_TSL
+#				define PHP_CURL_NEED_OPENSSL_TSL
+#				include <openssl/crypto.h>
+#			else
+#				warning \
+					"libcurl was compiled with OpenSSL support, but configure could not find " \
+					"openssl/crypto.h; thus no SSL crypto locking callbacks will be set, which may " \
+					"cause random crashes on SSL requests"
+#			endif
+#		elif defined(HAVE_CURL_GNUTLS)
+#			if defined(HAVE_GCRYPT_H)
+#				define PHP_CURL_NEED_SSL_TSL
+#				define PHP_CURL_NEED_GNUTLS_TSL
+#				include <gcrypt.h>
+#			else
+#				warning \
+					"libcurl was compiled with GnuTLS support, but configure could not find " \
+					"gcrypt.h; thus no SSL crypto locking callbacks will be set, which may " \
+					"cause random crashes on SSL requests"
+#			endif
+#		else
+#			warning \
+				"libcurl was compiled with SSL support, but configure could not determine which" \
+				"library was used; thus no SSL crypto locking callbacks will be set, which may " \
+				"cause random crashes on SSL requests"
+#		endif /* HAVE_CURL_OPENSSL || HAVE_CURL_GNUTLS */
+#	endif /* PHP_WIN32 */
+#endif /* ZTS && HAVE_CURL_SSL */
+/* }}} */
+
 #define SMART_STR_PREALLOC 4096
 
 #include "ext/standard/php_smart_str.h"
@@ -54,6 +93,11 @@
 
 int  le_curl;
 int  le_curl_multi_handle;
+
+#ifdef PHP_CURL_NEED_SSL_TSL
+static inline void php_curl_ssl_init(void);
+static inline void php_curl_ssl_cleanup(void);
+#endif
 
 static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 
@@ -403,6 +447,9 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLFTPAUTH_TLS);
 #endif
 
+#ifdef PHP_CURL_NEED_SSL_TSL
+	php_curl_ssl_init();
+#endif
 	if (curl_global_init(CURL_GLOBAL_SSL) != CURLE_OK) {
 		return FAILURE;
 	}
@@ -440,7 +487,9 @@ PHP_MSHUTDOWN_FUNCTION(curl)
 	php_unregister_url_stream_wrapper("ldap" TSRMLS_CC);
 #endif
 	curl_global_cleanup();
-
+#ifdef PHP_CURL_NEED_SSL_TSL
+	php_curl_ssl_cleanup();
+#endif
 	return SUCCESS;
 }
 /* }}} */
@@ -1545,7 +1594,106 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 }	
 /* }}} */
 
-#endif
+#ifdef PHP_CURL_NEED_OPENSSL_TSL
+/* {{{ */
+static MUTEX_T *php_curl_openssl_tsl = NULL;
+
+static void php_curl_ssl_lock(int mode, int n, const char * file, int line)
+{
+	if (mode & CRYPTO_LOCK) {
+		tsrm_mutex_lock(php_curl_openssl_tsl[n]);
+	} else {
+		tsrm_mutex_unlock(php_curl_openssl_tsl[n]);
+	}
+}
+
+static unsigned long php_curl_ssl_id(void)
+{
+	return (unsigned long) tsrm_thread_id();
+}
+
+static inline void php_curl_ssl_init(void)
+{
+	int i, c = CRYPTO_num_locks();
+	
+	php_curl_openssl_tsl = malloc(c * sizeof(MUTEX_T));
+	
+	for (i = 0; i < c; ++i) {
+		php_curl_openssl_tsl[i] = tsrm_mutex_alloc();
+	}
+	
+	CRYPTO_set_id_callback(php_curl_ssl_id);
+	CRYPTO_set_locking_callback(php_curl_ssl_lock);
+}
+
+static inline void php_curl_ssl_cleanup(void)
+{
+	if (php_curl_openssl_tsl) {
+		int i, c = CRYPTO_num_locks();
+		
+		CRYPTO_set_id_callback(NULL);
+		CRYPTO_set_locking_callback(NULL);
+		
+		for (i = 0; i < c; ++i) {
+			tsrm_mutex_free(php_curl_openssl_tsl[i]);
+		}
+		
+		free(php_curl_openssl_tsl);
+		php_curl_openssl_tsl = NULL;
+	}
+}
+#endif /* PHP_CURL_NEED_OPENSSL_TSL */
+/* }}} */
+
+#ifdef PHP_CURL_NEED_GNUTLS_TSL
+/* {{{ */
+static int php_curl_ssl_mutex_create(void **m)
+{
+	if (*((MUTEX_T *) m) = tsrm_mutex_alloc()) {
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}
+}
+
+static int php_curl_ssl_mutex_destroy(void **m)
+{
+	tsrm_mutex_free(*((MUTEX_T *) m));
+	return SUCCESS;
+}
+
+static int php_curl_ssl_mutex_lock(void **m)
+{
+	return tsrm_mutex_lock(*((MUTEX_T *) m));
+}
+
+static int php_curl_ssl_mutex_unlock(void **m)
+{
+	return tsrm_mutex_unlock(*((MUTEX_T *) m));
+}
+
+static struct gcry_thread_cbs php_curl_gnutls_tsl = {
+	GCRY_THREAD_OPTIONS_USER,
+	NULL,
+	php_curl_ssl_mutex_create,
+	php_curl_ssl_mutex_destroy,
+	php_curl_ssl_mutex_lock,
+	php_curl_ssl_mutex_unlock
+};
+
+static inline void php_curl_ssl_init(void)
+{
+	gcry_control(GCRYCTL_SET_THREAD_CBS, &php_curl_gnutls_tsl);
+}
+
+static inline void php_curl_ssl_cleanup(void)
+{
+	return;
+}
+#endif /* PHP_CURL_NEED_GNUTLS_TSL */
+/* }}} */
+
+#endif /* HAVE_CURL */
 
 /*
  * Local variables:

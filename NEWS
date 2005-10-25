@@ -17,6 +17,8 @@ PHP                                                                        NEWS
 - Fixed bug #34712 (zend.ze1_compatibility_mode = on segfault). (Dmitry)
 - Fixed bug #33829 (mime_content_type() returns text/plain for gzip and bzip 
   files). (Derick)
+- Fixed bug #33760 (cURL needs to implement CRYPTO_callback functions to prevent
+  locking). (Mike, Ilia)
 - Fixed bug #34623 (Crash in pdo_mysql on longtext fields). (Ilia)
 - Fixed bug #31341 (escape on curly inconsistent). (Dmitry)
 - Fixed bug #31177 (menory leaks and corruption because of incorrect
