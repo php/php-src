@@ -15,11 +15,11 @@ PHP                                                                        NEWS
 - Fixed bug #34767 (Zend Engine 1 Compatibility not copying objects correctly).
   (Dmitry)
 - Fixed bug #34712 (zend.ze1_compatibility_mode = on segfault). (Dmitry)
+- Fixed bug #34623 (Crash in pdo_mysql on longtext fields). (Ilia)
 - Fixed bug #33829 (mime_content_type() returns text/plain for gzip and bzip 
   files). (Derick)
 - Fixed bug #33760 (cURL needs to implement CRYPTO_callback functions to prevent
   locking). (Mike, Ilia)
-- Fixed bug #34623 (Crash in pdo_mysql on longtext fields). (Ilia)
 - Fixed bug #31341 (escape on curly inconsistent). (Dmitry)
 - Fixed bug #31177 (menory leaks and corruption because of incorrect
   refcounting). (Dmitry)
@@ -28,9 +28,9 @@ PHP                                                                        NEWS
   (Dmitry)
 
 17 Oct 2005, PHP 5.1 Release Candidate 3
-- Fixed bug #34873 (Segmentation Fault on foreach in object). (Dmitry)
 - Fixed bug #34884 (Possible crash in ext/sqlite when sqlite.assoc_case is 
   being used). (Tony, Ilia)
+- Fixed bug #34873 (Segmentation Fault on foreach in object). (Dmitry)
 - Fixed bug #29361 (var_export() producing invalid code). (Derick)
 
 14 Oct 2005, PHP 5.1 Release Candidate 2
