@@ -441,7 +441,7 @@ PHP_FUNCTION(bzdecompress)
 	char *source, *dest;
 	int source_len, error;
 	long small = 0;
-#if defined(PHP_WIN32) && _MSC_VER < 1300
+#if defined(PHP_WIN32)
 	unsigned __int64 size = 0;
 #else
 	unsigned long long size = 0;
