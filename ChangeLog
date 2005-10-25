@@ -1,3 +1,53 @@
+2005-10-24  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/ldap/config.m4:
+      fix build
+
+2005-10-24  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_0)
+      ext/ldap/config.m4
+      ext/ldap/config.m4:
+      MFH: fix #34970 (ldap configuration issues)
+
+    * ext/ldap/config.m4:
+      fix #34970 (ldap configuration issues)
+
+2005-10-24  Rolland Santimano  <rollandsantimano@yahoo.com>
+
+    * unicode-progress.txt:
+      - strip_tags(), str[c]spn(), strpbrk(), strrchr(), strrpos(), strtok()
+
+    * ext/standard/string.c:
+      - Unicode impl of strrchr()
+
+2005-10-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/023.phpt:
+      - Fix issue with entities in attributes
+
+2005-10-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      NEWS:
+      Fixed bug #34950 (Unable to get WSDL through proxy)
+
+    * ZendEngine2/zend_language_scanner.l:
+      Unicode support (bug #31341)
+
+    * ext/standard/array.c
+      ext/standard/tests/array/bug34934.phpt:
+      Reverted fix for bug #34934. The bug marked as bogus.
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/array.c
+      ext/standard/tests/array/bug34934.phpt:
+      Reverted patch for bug #34934. Bug is marked as bogus.
+
 2005-10-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/simplexml/simplexml.c
