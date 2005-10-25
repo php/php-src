@@ -1,7 +1,7 @@
 --TEST--
 EUC-JP to SJIS
 --SKIPIF--
-<?php /* include('skipif.inc'); */ ?>
+<?php include('skipif.inc'); ?>
 --INI--
 error_reporting=2039
 unicode.script_encoding=ISO-8859-1
