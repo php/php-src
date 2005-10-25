@@ -220,18 +220,17 @@ static int _php_tidy_set_tidy_opt(char *optname, zval *value TSRMLS_DC)
 	return FAILURE;
 }
 
-static char *php_tidy_file_to_mem(char *filename, zend_bool use_include_path TSRMLS_DC)
+static char *php_tidy_file_to_mem(char *filename, zend_bool use_include_path, int *len TSRMLS_DC)
 {
 	php_stream *stream;
-	int len;
 	char *data = NULL;
 
 	if (!(stream = php_stream_open_wrapper(filename, "rb", (use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL))) {
 		return NULL;
 	}
-	if ((len = php_stream_copy_to_mem(stream, &data, PHP_STREAM_COPY_ALL, 0)) > 0) {
+	if ((*len = php_stream_copy_to_mem(stream, &data, PHP_STREAM_COPY_ALL, 0)) > 0) {
 		/* noop */
-	} else if (len == 0) {
+	} else if (*len == 0) {
 		data = estrdup("");
 	}
 	php_stream_close(stream);
@@ -242,7 +241,7 @@ static char *php_tidy_file_to_mem(char *filename, zend_bool use_include_path TSR
 static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_file)
 {
 	char *data=NULL, *arg1;
-	int arg1_len;
+	int arg1_len, data_len;
 	zend_bool use_include_path = 0;
 	zval *cfg=NULL;
 
@@ -251,11 +250,12 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	}
 
 	if (is_file) {
-		if (!(data = php_tidy_file_to_mem(arg1, use_include_path TSRMLS_CC))) {
+		if (!(data = php_tidy_file_to_mem(arg1, use_include_path, &data_len TSRMLS_CC))) {
 			RETURN_FALSE;
 		}
 	} else {
 		data = arg1;
+		data_len = arg1_len;
 	}
 
 	TIDY_CLEAR_ERROR;
@@ -295,7 +295,12 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	}
 
 	if (data) {
-		if(tidyParseString(TG(tdoc)->doc, data) < 0) {
+		TidyBuffer buf = {0};
+
+		tidyBufInit(&buf);
+		tidyBufAttach(&buf, data, data_len);
+        
+		if(tidyParseBuffer(TG(tdoc)->doc, &buf) < 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "[Tidy error] %s", TG(tdoc)->errbuf->bp);
 			RETVAL_FALSE;
 		} else {
@@ -397,6 +402,7 @@ PHP_FUNCTION(tidy_parse_string)
 {
 	char *input;
 	int input_len;
+	TidyBuffer buf = {0};
 
 	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &input, &input_len) == FAILURE) {
 		RETURN_FALSE;
@@ -404,7 +410,10 @@ PHP_FUNCTION(tidy_parse_string)
 
 	TIDY_CLEAR_ERROR;
 
-	if(tidyParseString(TG(tdoc)->doc, input) < 0) {
+	tidyBufInit(&buf);
+	tidyBufAttach(&buf, input, input_len);
+
+	if(tidyParseBuffer(TG(tdoc)->doc, &buf) < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "[Tidy error] %s", TG(tdoc)->errbuf->bp);
 		RETURN_FALSE;
 	}
@@ -432,7 +441,7 @@ PHP_FUNCTION(tidy_get_error_buffer)
 	if (!TG(tdoc)->errbuf || !TG(tdoc)->errbuf->bp) {
 		RETURN_FALSE;
 	}
-	RETVAL_STRING(TG(tdoc)->errbuf->bp, 1);
+	RETVAL_STRINGL(TG(tdoc)->errbuf->bp, TG(tdoc)->errbuf->size-1, 1);
 	tidyBufClear(TG(tdoc)->errbuf); 
 }
 /* }}} */
@@ -451,7 +460,7 @@ PHP_FUNCTION(tidy_get_output)
 
 	tidySaveBuffer (TG(tdoc)->doc, &output);
 
-	RETVAL_STRING(output.bp, 1);
+	RETVAL_STRINGL(output.bp, output.size-1, 1);
 
 	tidyBufFree(&output);
 }
@@ -462,21 +471,25 @@ PHP_FUNCTION(tidy_get_output)
 PHP_FUNCTION(tidy_parse_file)
 {
 	char *inputfile;
-	int input_len;
+	int input_len, contents_len;
 	zend_bool use_include_path = 0;
 	char *contents;
+	TidyBuffer buf = {0};
 
 	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &inputfile, &input_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if (!(contents = php_tidy_file_to_mem(inputfile, use_include_path TSRMLS_CC))) {
+	if (!(contents = php_tidy_file_to_mem(inputfile, use_include_path, &contents_len TSRMLS_CC))) {
 		RETURN_FALSE;
 	}
 
 	TIDY_CLEAR_ERROR;
 
-	if(tidyParseString(TG(tdoc)->doc, contents) < 0) {
+	tidyBufInit(&buf);
+	tidyBufAttach(&buf, contents, contents_len);
+
+	if(tidyParseBuffer(TG(tdoc)->doc, &buf) < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "[Tidy error] %s", TG(tdoc)->errbuf->bp);
 		RETVAL_FALSE;
 	} else {

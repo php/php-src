@@ -25,10 +25,10 @@ but also traverse the document tree using the Zend Engine 2 OO semantics.
  <license>PHP</license>
  <release>
   <state>stable</state>
-  <version>1.0</version>
-  <date>2003-11-13</date>
+  <version>1.2</version>
+  <date>2005-10-00</date>
   <notes>
-    Fixed a few PHP5-specific bugs when working with node objects. 
+    Fixed bug #4202 tidy is not binary safe
   </notes>
   <configureoptions>
     <configureoption name="with-tidy" default="autodetect" prompt="Tidy library installation dir?"/>
@@ -42,8 +42,6 @@ but also traverse the document tree using the Zend Engine 2 OO semantics.
    <file role="doc" name="README"/>
    <file role="doc" name="TODO"/>
    <file role="doc" name="examples/cleanhtml.php"/>
-   <file role="doc" name="examples/dumpit.php"/>
-   <file role="doc" name="examples/urlgrab.php"/>
    
    <file role="test" name="tests/001.phpt"/>
    <file role="test" name="tests/002.phpt"/>
