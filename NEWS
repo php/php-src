@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Oct 2005, PHP 5.1 Release Candidate 4
 - Fixed fgetcsv() and fputcsv() inconsistency. (Dmitry)
+- Fixed bug #34968 (bz2 extension fails on to build on some win32 setups).
+  (Ilia)
 - Fixed bug #34957 (PHP doesn't respect ACLs for access checks). (Wez)
 - Fixed bug #34950 (Unable to get WSDL through proxy). (Dmitry)
 - Fixed bug #34938 (dns_get_record() doesn't resolve long hostnames and 
