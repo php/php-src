@@ -70,6 +70,13 @@
 #endif
 #endif
 
+/* Win32 needs some more memory */
+#ifdef PHP_WIN32
+#define PHP_ZLIB_MODIFIER 100
+#else
+#define PHP_ZLIB_MODIFIER 1000
+#endif
+
 #define OS_CODE			0x03 /* FIXME */
 #define GZIP_HEADER_LENGTH		10
 #define GZIP_FOOTER_LENGTH		8
@@ -386,7 +393,7 @@ PHP_FUNCTION(gzcompress)
 		RETURN_FALSE;
 	}
 
-	l2 = data_len + (data_len / 1000) + 15 + 1; /* room for \0 */
+	l2 = data_len + (data_len / PHP_ZLIB_MODIFIER) + 15 + 1; /* room for \0 */
 	s2 = (char *) emalloc(l2);
 	if (!s2) {
 		RETURN_FALSE;
@@ -482,7 +489,7 @@ PHP_FUNCTION(gzdeflate)
 	stream.next_in = (Bytef *) data;
 	stream.avail_in = data_len;
 
-	stream.avail_out = stream.avail_in + (stream.avail_in / 1000) + 15 + 1; /* room for \0 */
+	stream.avail_out = stream.avail_in + (stream.avail_in / PHP_ZLIB_MODIFIER) + 15 + 1; /* room for \0 */
 
 	s2 = (char *) emalloc(stream.avail_out);
 	if (!s2) {
@@ -618,7 +625,7 @@ static int php_do_deflate(uint str_length, Bytef **p_buffer, uint *p_buffer_len,
 	int start_offset = ((do_start && ZLIBG(compression_coding) == CODING_GZIP) ? 10 : 0);
 	int end_offset = (do_end ? 8 : 0);
 
-	outlen = (uint) (sizeof(char) * (str_length * 1.001f + 12) + 1); /* leave some room for a trailing \0 */
+	outlen = (uint) (sizeof(char) * (str_length / PHP_ZLIB_MODIFIER + 12) + 1); /* leave some room for a trailing \0 */
 	if ((outlen + start_offset + end_offset) > *p_buffer_len) {
 		buffer = (Bytef *) emalloc(outlen + start_offset + end_offset);
 	} else {
@@ -758,7 +765,7 @@ PHP_FUNCTION(gzencode)
 	stream.next_in = (Bytef *) data;
 	stream.avail_in = data_len;
 
-	stream.avail_out = stream.avail_in + (stream.avail_in / 1000) + 15 + 1; /* room for \0 */
+	stream.avail_out = stream.avail_in + (stream.avail_in / PHP_ZLIB_MODIFIER) + 15 + 1; /* room for \0 */
 	s2 = (char *) emalloc(stream.avail_out + GZIP_HEADER_LENGTH + (coding == CODING_GZIP ? GZIP_FOOTER_LENGTH : 0));
 
 	/* add gzip file header */
