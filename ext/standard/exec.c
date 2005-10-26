@@ -462,7 +462,7 @@ PHPAPI char *php_escape_shell_cmd(char *str) {
 
 /* {{{ php_escape_shell_arg
  */
-PHPAPI *php_escape_shell_arg(char *str) {
+PHPAPI char *php_escape_shell_arg(char *str) {
 	int x, y, l;
 	char *cmd;
 
