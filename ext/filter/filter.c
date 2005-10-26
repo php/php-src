@@ -298,7 +298,7 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 {
 	zval  new_var, raw_var;
 	zval *array_ptr = NULL, *orig_array_ptr = NULL;
-	int   out_len;
+	int   out_len = 0;
 	char *orig_var;
 
 	assert(*val != NULL);
@@ -546,7 +546,7 @@ PHP_FUNCTION(input_get)
 
 	if (found) {
 		zval_copy_ctor(return_value);  /* Watch out for empty strings */
-		php_zval_filter_recursive(return_value, filter, filter_flags, options, charset);
+		php_zval_filter_recursive(return_value, filter, filter_flags, options, charset TSRMLS_CC);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -618,7 +618,7 @@ PHP_FUNCTION(filter_data)
 		}
 	}
 
-	php_zval_filter_recursive(var, filter, filter_flags, options, charset);
+	php_zval_filter_recursive(var, filter, filter_flags, options, charset TSRMLS_CC);
 	RETURN_ZVAL(var, 1, 0);
 }
 /* }}} */
