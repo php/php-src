@@ -535,7 +535,10 @@ zend_first_try {
 		if (!parent_req) {
 			parent_req = ctx->r;
 		}
-		if (parent_req && strcmp(parent_req->handler, PHP_MAGIC_TYPE) && strcmp(parent_req->handler, PHP_SOURCE_MAGIC_TYPE) && strcmp(parent_req->handler, PHP_SCRIPT)) {
+		if (parent_req && parent_req->handler && 
+				strcmp(parent_req->handler, PHP_MAGIC_TYPE) && 
+				strcmp(parent_req->handler, PHP_SOURCE_MAGIC_TYPE) && 
+				strcmp(parent_req->handler, PHP_SCRIPT)) {
 			if (php_apache_request_ctor(r, ctx TSRMLS_CC)!=SUCCESS) {
 				zend_bailout();
 			}
