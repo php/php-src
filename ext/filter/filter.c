@@ -79,6 +79,7 @@ function_entry filter_functions[] = {
 	PHP_FE(input_get, NULL)
 	PHP_FE(input_filters_list, NULL)
 	PHP_FE(input_has_variable, NULL)
+	PHP_FE(input_name_to_filter, NULL)
 	PHP_FE(filter_data, NULL)
 	{NULL, NULL, NULL}
 };
@@ -334,7 +335,7 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 	Z_STRVAL(raw_var) = estrndup(*val, val_len + 1);
 	Z_TYPE(raw_var) = IS_STRING;
 
-	php_register_variable_ex(var, &raw_var, array_ptr TSRMLS_DC);
+	php_register_variable_ex(var, &raw_var, array_ptr TSRMLS_CC);
 
 	/* Register mangled variable */
 	/* FIXME: Should not use php_register_variable_ex as that also registers
@@ -342,13 +343,14 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 	Z_STRLEN(new_var) = val_len;
 	Z_STRVAL(new_var) = estrndup(*val, val_len + 1);
 	Z_TYPE(new_var) = IS_STRING;
+
 	if (val_len) {
 		if (! (IF_G(default_filter) == FS_UNSAFE_RAW)) {
-			php_zval_filter(&new_var, IF_G(default_filter), 0, NULL, NULL/*charset*/ TSRMLS_DC);
+			php_zval_filter(&new_var, IF_G(default_filter), 0, NULL, NULL/*charset*/ TSRMLS_CC);
 		}
 	}
 
-	php_register_variable_ex(orig_var, &new_var, orig_array_ptr TSRMLS_DC);
+	php_register_variable_ex(orig_var, &new_var, orig_array_ptr TSRMLS_CC);
 
 	if (new_val_len) {
 		*new_val_len = out_len;
@@ -561,6 +563,27 @@ PHP_FUNCTION(input_filters_list)
 	for (i = 0; i < size; ++i) {
 		add_next_index_string(return_value, filter_list[i].name, 1);
 	}
+}
+/* }}} */
+
+/* {{{ proto input_name_to_filter(string filtername)
+ * Returns the filter ID belonging to a named filter */
+PHP_FUNCTION(input_name_to_filter)
+{
+	int i, filter_len;
+	int size = sizeof(filter_list) / sizeof(filter_list_entry);
+	char *filter;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filter, &filter_len) == FAILURE) {
+		return;
+	}
+
+	for (i = 0; i < size; ++i) {
+		if (strcmp(filter_list[i].name, filter) == 0) {
+			RETURN_LONG(filter_list[i].id);
+		}
+	}
+	RETURN_NULL();
 }
 /* }}} */
 
