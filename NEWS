@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Oct 2005, PHP 5.1 Release Candidate 4
 - Fixed fgetcsv() and fputcsv() inconsistency. (Dmitry)
+- Fixed bug #34996 (ImageTrueColorToPalette() crashes when ncolors is 
+  zero). (Tony)
 - Fixed bug #34977 (Compile failure on MacOSX due to use of varargs.h). (Tony)
 - Fixed bug #34968 (bz2 extension fails on to build on some win32 setups).
   (Ilia)
