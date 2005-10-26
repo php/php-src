@@ -341,8 +341,8 @@ PHP_FUNCTION(spl_autoload_call)
 {
 	zval **class_name, *retval = NULL;
 	char *func_name, *lc_name;
-	int func_name_len;
-	long dummy;
+	uint func_name_len;
+	ulong dummy;
 	HashPosition function_pos;
 	autoload_func_info *alfi;
 
