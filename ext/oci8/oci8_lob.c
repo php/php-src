@@ -146,12 +146,12 @@ int php_oci_lob_get_length (php_oci_descriptor *descriptor, ub4 *length TSRMLS_D
 
 /* {{{ php_oci_lob_read() 
  Read specified portion of the LOB into the buffer */
-int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long offset, char **data, ub4 *data_len TSRMLS_DC)
+int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long initial_offset, char **data, ub4 *data_len TSRMLS_DC)
 {
 	php_oci_connection *connection = descriptor->connection;
 	ub4 length = 0;
 	ub4 block_length = PHP_OCI_LOB_BUFFER_SIZE;
-	int bytes_read;
+	int bytes_read, bytes_total = 0, offset = 0, data_len_chars = 0;
 	int requested_len = read_length; /* this is by default */
 
 	*data_len = 0;
@@ -165,7 +165,7 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long off
 		return 0;
 	}
  	
-	if (offset > length) {
+	if (initial_offset > length) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset must be less than size of the LOB");
 		return 1;
 	}
@@ -174,8 +174,8 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long off
 		requested_len = length;
 	}
 	
-	if (requested_len > (length - offset)) {
-		requested_len = length - offset;
+	if (requested_len > (length - initial_offset)) {
+		requested_len = length - initial_offset;
 	}
 	
 	if (requested_len == 0) {
@@ -196,11 +196,11 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long off
 		}
 	}
 
-	*data = emalloc(block_length + 1);
+	*data = (char *)emalloc(block_length + 1);
 	bytes_read = block_length;
-
-	while (bytes_read > 0 && *data_len < requested_len && offset < length) { 
+	offset = initial_offset;
 		
+	do {
 		connection->errcode = PHP_OCI_CALL(OCILobRead, 
 			(
 				connection->svc, 
@@ -217,18 +217,21 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long off
 			)
 		);
 
-		offset += bytes_read;
+		bytes_total += bytes_read;
+		/* 
+		 * Oracle doesn't tell use how many CHARS were read, 
+		 * so we have to count them to get the correct offset for CLOBS */
+		data_len_chars = OCIMultiByteStrnDisplayLength(connection->env, *data, bytes_total); 
+		offset = initial_offset + data_len_chars;
+		
 		*data_len += bytes_read;
 		block_length = PHP_OCI_LOB_BUFFER_SIZE;
-		descriptor->lob_current_position += bytes_read;
-
-		if (*data_len < requested_len && connection->errcode == OCI_NEED_DATA) {
-			*data = erealloc(*data, *data_len + PHP_OCI_LOB_BUFFER_SIZE + 1);	
-			continue;
-		} else {
+		
+		if (connection->errcode != OCI_NEED_DATA) {
 			break;
 		}
-	}
+		*data = erealloc(*data, *data_len + PHP_OCI_LOB_BUFFER_SIZE + 1);	
+	} while (connection->errcode == OCI_NEED_DATA);
 
 	if (connection->errcode != OCI_SUCCESS) {
 		php_oci_error(connection->err, connection->errcode TSRMLS_CC);
@@ -237,6 +240,8 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long off
 		*data = NULL;
 		return 1;
 	}
+	
+	descriptor->lob_current_position += data_len_chars; 
 
 	if (descriptor->type == OCI_DTYPE_FILE) {
 		connection->errcode = PHP_OCI_CALL(OCILobFileClose, (connection->svc, connection->err, descriptor->descriptor));
