@@ -1,3 +1,133 @@
+2005-10-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_extensions.h:
+      - MFH zend_is_callable_ex() returns zend_class_entry* if available
+
+    * ZendEngine2/zend_API.c:
+      - Make the code a bit clearer
+
+2005-10-25  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_1)
+      ext/gd/gd.c:
+      - fix #34980, divisor and offset never passed correctly (s/float/double/)
+
+2005-10-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_extensions.h:
+      - api was changed, also we are here in api 3.*, not 2 anymore
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h:
+      - Make zend_is_callable_ex() return the class netry if available
+
+2005-10-25  Michael Wallner  <mike@iworks.at>
+
+    * (PHP_5_1)
+      NEWS:
+      fix bug #34965 tidy is not binary safe
+
+2005-10-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS
+      ext/bz2/bz2.c:
+      MFH: Fixed bug #34968 (bz2 extension fails on to build on some win32
+      setups).
+
+    * ext/bz2/bz2.c:
+      Fixed bug #34968 (bz2 extension fails on to build on some win32 setups).
+
+2005-10-25  Michael Wallner  <mike@iworks.at>
+
+    * ext/zlib/zlib.c
+      ext/zlib/zlib.c:
+      - fix the fix
+
+    * ext/zlib/tests/bug_34821.phpt:
+      - add test case too
+
+    * ext/zlib/tests/bug_34821.phpt
+      ext/zlib/tests/bug_34821.phpt:
+      
+      file bug_34821.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      NEWS
+      ext/zlib/zlib.c:
+      - MFH: fix bug #34821 zlib encoders fail on widely varying binary data on
+      windows
+
+    * ext/zlib/zlib.c:
+      - fix bug #34821 zlib encoders fail on widely varying binary data on
+      windows
+
+2005-10-25  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_0)
+      ext/standard/dns.c
+      ext/standard/dns.c:
+      MFH: apply workaround for the leak only when GLIBC is used
+
+    * ext/standard/dns.c:
+      apply workaround for the leak only when GLIBC is used
+
+    * (PHP_5_1)
+      NEWS:
+      fix the order
+
+2005-10-25  Michael Wallner  <mike@iworks.at>
+
+    * (PHP_5_1)
+      NEWS
+      ext/curl/config.m4
+      ext/curl/config.w32
+      ext/curl/interface.c:
+      - MFH: thread safe SSL crypto locks, fixes bug #33760
+
+    * ext/curl/config.m4
+      ext/curl/config.w32
+      ext/curl/interface.c:
+      - thread safe SSL crypto locks, fixes bug #33760
+
+2005-10-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/iconv/tests/bug16069.phpt
+      ext/iconv/tests/eucjp2iso2022jp.phpt
+      ext/iconv/tests/eucjp2sjis.phpt
+      ext/iconv/tests/eucjp2utf8.phpt
+      ext/iconv/tests/iconv001.phpt
+      ext/iconv/tests/iconv002.phpt
+      ext/iconv/tests/ob_iconv_handler.phpt
+      ext/iconv/tests/translit-failure.phpt
+      ext/iconv/tests/translit-utf8.phpt:
+      MFB51: Do not run tests if iconv extension is unavailable.
+
+    * (PHP_5_1)
+      ext/iconv/tests/bug16069.phpt
+      ext/iconv/tests/eucjp2iso2022jp.phpt
+      ext/iconv/tests/eucjp2sjis.phpt
+      ext/iconv/tests/eucjp2utf8.phpt
+      ext/iconv/tests/iconv001.phpt
+      ext/iconv/tests/iconv002.phpt
+      ext/iconv/tests/ob_iconv_handler.phpt
+      ext/iconv/tests/translit-failure.phpt
+      ext/iconv/tests/translit-utf8.phpt:
+      Do not run tests if iconv extension is unavailable.
+
+2005-10-25  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_0)
+      ext/standard/dns.c
+      ext/standard/dns.c:
+      MFH: fix problem with garbage appearing in hostnames
+
+    * ext/standard/dns.c:
+      fix problem with garbage appearing in hostnames
+
 2005-10-24  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * ext/ldap/config.m4:

@@ -1,3 +1,21 @@
+2005-10-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      zend_API.c
+      zend_API.h
+      zend_extensions.h:
+      - MFH zend_is_callable_ex() returns zend_class_entry* if available
+
+    * zend_API.c:
+      - Make the code a bit clearer
+
+    * zend_extensions.h:
+      - api was changed, also we are here in api 3.*, not 2 anymore
+
+    * zend_API.c
+      zend_API.h:
+      - Make zend_is_callable_ex() return the class netry if available
+
 2005-10-24  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_language_scanner.l:
