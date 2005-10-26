@@ -127,8 +127,21 @@ static PHP_INI_MH(UpdateDefaultFilter)
 
 /* {{{ PHP_INI
  */
+
+static PHP_INI_MH(OnUpdateFlags)
+{
+	if (!new_value) {
+		IF_G(default_filter_flags) = 0;
+	} else {
+		IF_G(default_filter_flags) = atoi(new_value);
+	}
+	return SUCCESS;
+}
+
+
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("filter.default", "string", PHP_INI_ALL, UpdateDefaultFilter, default_filter, zend_filter_globals, filter_globals)
+    STD_PHP_INI_ENTRY("filter.default",       "string", PHP_INI_ALL, UpdateDefaultFilter, default_filter,       zend_filter_globals, filter_globals)
+    PHP_INI_ENTRY("filter.default_flags",     NULL,     PHP_INI_ALL, OnUpdateFlags)
 PHP_INI_END()
 /* }}} */
 
@@ -346,7 +359,7 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 
 	if (val_len) {
 		if (! (IF_G(default_filter) == FS_UNSAFE_RAW)) {
-			php_zval_filter(&new_var, IF_G(default_filter), 0, NULL, NULL/*charset*/ TSRMLS_CC);
+			php_zval_filter(&new_var, IF_G(default_filter), IF_G(default_filter_flags), NULL, NULL/*charset*/ TSRMLS_CC);
 		}
 	}
 

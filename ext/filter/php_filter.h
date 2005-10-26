@@ -62,6 +62,7 @@ ZEND_BEGIN_MODULE_GLOBALS(filter)
 	zval *server_array;
 	zval *session_array;
 	long  default_filter;
+	long  default_filter_flags;
 ZEND_END_MODULE_GLOBALS(filter)
 
 #ifdef ZTS
