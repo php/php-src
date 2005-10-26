@@ -14,7 +14,7 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE_
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-$db->exec('create table test (id int, name varchar(10) NULL)');
+$db->exec('create table test (id int, name varchar(10))');
 
 $stmt = $db->prepare('insert into test (id, name) values(0, :name)');
 $name = NULL;
