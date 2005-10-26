@@ -398,7 +398,7 @@ PHP_FUNCTION(passthru)
 
    *NOT* safe for binary strings
 */
-char *php_escape_shell_cmd(char *str) {
+PHPAPI char *php_escape_shell_cmd(char *str) {
 	register int x, y, l;
 	char *cmd;
 	char *p = NULL;
@@ -462,7 +462,7 @@ char *php_escape_shell_cmd(char *str) {
 
 /* {{{ php_escape_shell_arg
  */
-char *php_escape_shell_arg(char *str) {
+PHPAPI *php_escape_shell_arg(char *str) {
 	int x, y, l;
 	char *cmd;
 
