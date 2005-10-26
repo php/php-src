@@ -1,6 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Oct 2005, Version 4.4.1
+31 Oct 2005, Version 4.4.1
 - Fixed a memory corruption bug regarding included files. (Derick)
 - Fixed bug #34850 (--program-suffix and --program-prefix not included in 
   man page names). (Jani)
