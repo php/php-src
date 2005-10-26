@@ -24,10 +24,14 @@ of filters and mechanisms that users can use to safely access their input data.
  <license>PHP</license>
  <release>
   <state>beta</state>
-  <version>0.9.0</version>
-  <date>2005-10-05</date>
+  <version>0.9.1</version>
+  <date>2005-10-26</date>
   <notes>
-Initial release.
+- Fixed ZTS build.
+- Fixed a problem with parameters passed as arrays (with the [] syntax in the
+  URL).
+- Added the input_name_to_filter() function that returns the filter ID
+  belonging to a filter name.
   </notes>
   <filelist>
    <file role="src" name="config.m4"/>
