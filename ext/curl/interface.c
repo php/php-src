@@ -46,40 +46,40 @@
 
 /* {{{ cruft for thread safe SSL crypto locks */
 #if defined(ZTS) && defined(HAVE_CURL_SSL)
-#	ifdef PHP_WIN32
-#		define PHP_CURL_NEED_SSL_TSL
-#		define PHP_CURL_NEED_OPENSSL_TSL
-#		include <openssl/crypto.h>
-#	else /* !PHP_WIN32 */
-#		if defined(HAVE_CURL_OPENSSL)
-#			if defined(HAVE_OPENSSL_CRYPTO_H)
-#				define PHP_CURL_NEED_SSL_TSL
-#				define PHP_CURL_NEED_OPENSSL_TSL
-#				include <openssl/crypto.h>
-#			else
-#				warning \
-					"libcurl was compiled with OpenSSL support, but configure could not find " \
-					"openssl/crypto.h; thus no SSL crypto locking callbacks will be set, which may " \
-					"cause random crashes on SSL requests"
-#			endif
-#		elif defined(HAVE_CURL_GNUTLS)
-#			if defined(HAVE_GCRYPT_H)
-#				define PHP_CURL_NEED_SSL_TSL
-#				define PHP_CURL_NEED_GNUTLS_TSL
-#				include <gcrypt.h>
-#			else
-#				warning \
-					"libcurl was compiled with GnuTLS support, but configure could not find " \
-					"gcrypt.h; thus no SSL crypto locking callbacks will be set, which may " \
-					"cause random crashes on SSL requests"
-#			endif
-#		else
-#			warning \
-				"libcurl was compiled with SSL support, but configure could not determine which" \
-				"library was used; thus no SSL crypto locking callbacks will be set, which may " \
-				"cause random crashes on SSL requests"
-#		endif /* HAVE_CURL_OPENSSL || HAVE_CURL_GNUTLS */
-#	endif /* PHP_WIN32 */
+# ifdef PHP_WIN32
+#  define PHP_CURL_NEED_SSL_TSL
+#  define PHP_CURL_NEED_OPENSSL_TSL
+#  include <openssl/crypto.h>
+# else /* !PHP_WIN32 */
+#  if defined(HAVE_CURL_OPENSSL)
+#   if defined(HAVE_OPENSSL_CRYPTO_H)
+#    define PHP_CURL_NEED_SSL_TSL
+#    define PHP_CURL_NEED_OPENSSL_TSL
+#    include <openssl/crypto.h>
+#   else
+#    warning \
+	"libcurl was compiled with OpenSSL support, but configure could not find " \
+	"openssl/crypto.h; thus no SSL crypto locking callbacks will be set, which may " \
+	"cause random crashes on SSL requests"
+#   endif
+#  elif defined(HAVE_CURL_GNUTLS)
+#   if defined(HAVE_GCRYPT_H)
+#    define PHP_CURL_NEED_SSL_TSL
+#    define PHP_CURL_NEED_GNUTLS_TSL
+#    include <gcrypt.h>
+#   else
+#    warning \
+	"libcurl was compiled with GnuTLS support, but configure could not find " \
+	"gcrypt.h; thus no SSL crypto locking callbacks will be set, which may " \
+	"cause random crashes on SSL requests"
+#   endif
+#  else
+#   warning \
+	"libcurl was compiled with SSL support, but configure could not determine which" \
+	"library was used; thus no SSL crypto locking callbacks will be set, which may " \
+	"cause random crashes on SSL requests"
+#  endif /* HAVE_CURL_OPENSSL || HAVE_CURL_GNUTLS */
+# endif /* PHP_WIN32 */
 #endif /* ZTS && HAVE_CURL_SSL */
 /* }}} */
 
