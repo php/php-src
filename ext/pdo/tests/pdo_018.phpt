@@ -71,7 +71,7 @@ $db->exec('CREATE TABLE classtypes(id int NOT NULL PRIMARY KEY, name VARCHAR(20)
 $db->exec('INSERT INTO classtypes VALUES(0, \'stdClass\')'); 
 $db->exec('INSERT INTO classtypes VALUES(1, \'TestBase\')'); 
 $db->exec('INSERT INTO classtypes VALUES(2, \'TestDerived\')'); 
-$db->exec('CREATE TABLE test(id int NOT NULL PRIMARY KEY, classtype int NULL, val VARCHAR(255))');
+$db->exec('CREATE TABLE test(id int NOT NULL PRIMARY KEY, classtype int, val VARCHAR(255))');
 
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
