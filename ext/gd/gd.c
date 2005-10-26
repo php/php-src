@@ -889,6 +889,10 @@ PHP_FUNCTION(imagetruecolortopalette)
 	convert_to_boolean_ex(dither);
 	convert_to_long_ex(ncolors);
 
+	if (Z_LVAL_PP(ncolors) <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of colors has to be greater than zero");
+		RETURN_FALSE;
+	}
 	gdImageTrueColorToPalette(im, Z_LVAL_PP(dither), Z_LVAL_PP(ncolors));
 
 	RETURN_TRUE;
