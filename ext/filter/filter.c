@@ -326,7 +326,7 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 
 	/* Make a copy of the variable name, as php_register_variable_ex seems to
 	 * modify it */
-	orig_var = var;
+	orig_var = estrdup(var);
 
 	/* Store the RAW variable internally */
 	/* FIXME: Should not use php_register_variable_ex as that also registers
@@ -351,6 +351,7 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 	}
 
 	php_register_variable_ex(orig_var, &new_var, orig_array_ptr TSRMLS_CC);
+	efree(orig_var);
 
 	if (new_val_len) {
 		*new_val_len = out_len;
