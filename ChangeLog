@@ -1,3 +1,73 @@
+2005-10-26  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      ext/gd/gd.c
+      ext/gd/gd.c:
+      fix #34996 (ImageTrueColorToPalette() crashes when ncolors is zero)
+
+    * (PHP_5_1)
+      NEWS
+      ext/gd/gd.c:
+      MFH: fix #34996 (ImageTrueColorToPalette() crashes when ncolors is zero)
+
+    * (PHP_4_4)
+      ext/standard/exec.c
+      ext/standard/exec.h:
+      fix typo
+
+    * ext/oci8/oci8_lob.c:
+      Unicode related patchset
+      fixes two problems:
+      - wrong offset counting and ..
+      - OCI_NEED_DATA error when reading unicode CLOBs (fixes PECL bug #5719)
+
+2005-10-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/apache2handler/sapi_apache2.c:
+      MFB51: Additional tweaks to the patch for bug #34249.
+
+    * (PHP_5_1)
+      sapi/apache2handler/sapi_apache2.c:
+      Additional tweaks to the patch for bug #34249.
+
+2005-10-26  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      NEWS
+      ext/mbstring/config.m4
+      ext/mbstring/config.m4:
+      MFH: fix #34977 (Compile failure on MacOSX due to use of varargs.h)
+
+    * ext/mbstring/config.m4:
+      fix #34977 (Compile failure on MacOSX due to use of varargs.h)
+
+    * (PHP_4_4)
+      ext/standard/exec.c
+      ext/standard/exec.h:
+      export those functions and fix the build
+
+2005-10-26  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/curl/config.m4:
+      Fix configure
+
+    * ext/curl/interface.c:
+      Fix indent
+
+2005-10-26  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS:
+      - Merge 4.4.1 and 4.4.1RC1 entries.
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Go with PHP 4.4.1 - release on Monday.
+
 2005-10-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
