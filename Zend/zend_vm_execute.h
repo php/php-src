@@ -2033,12 +2033,14 @@ static int ZEND_UNSET_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			do {
 				int i;
 
-				for (i = 0; i < ex->op_array->last_var; i++) {
-					if (ex->op_array->vars[i].hash_value == hash_value &&
-					    ex->op_array->vars[i].name_len == Z_UNILEN_P(varname) &&
-					    !memcmp(ex->op_array->vars[i].name, Z_UNIVAL_P(varname), Z_TYPE_P(varname)==IS_UNICODE?UBYTES(Z_UNILEN_P(varname)):Z_UNILEN_P(varname))) {
-						ex->CVs[i] = NULL;
-						break;
+				if (ex->op_array) {
+					for (i = 0; i < ex->op_array->last_var; i++) {
+						if (ex->op_array->vars[i].hash_value == hash_value &&
+						    ex->op_array->vars[i].name_len == Z_UNILEN_P(varname) &&
+						    !memcmp(ex->op_array->vars[i].name, Z_UNIVAL_P(varname), Z_TYPE_P(varname)==IS_UNICODE?UBYTES(Z_UNILEN_P(varname)):Z_UNILEN_P(varname))) {
+							ex->CVs[i] = NULL;
+							break;
+						}
 					}
 				}
   		  ex = ex->prev_execute_data;
@@ -4540,12 +4542,14 @@ static int ZEND_UNSET_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			do {
 				int i;
 
-				for (i = 0; i < ex->op_array->last_var; i++) {
-					if (ex->op_array->vars[i].hash_value == hash_value &&
-					    ex->op_array->vars[i].name_len == Z_UNILEN_P(varname) &&
-					    !memcmp(ex->op_array->vars[i].name, Z_UNIVAL_P(varname), Z_TYPE_P(varname)==IS_UNICODE?UBYTES(Z_UNILEN_P(varname)):Z_UNILEN_P(varname))) {
-						ex->CVs[i] = NULL;
-						break;
+				if (ex->op_array) {
+					for (i = 0; i < ex->op_array->last_var; i++) {
+						if (ex->op_array->vars[i].hash_value == hash_value &&
+						    ex->op_array->vars[i].name_len == Z_UNILEN_P(varname) &&
+						    !memcmp(ex->op_array->vars[i].name, Z_UNIVAL_P(varname), Z_TYPE_P(varname)==IS_UNICODE?UBYTES(Z_UNILEN_P(varname)):Z_UNILEN_P(varname))) {
+							ex->CVs[i] = NULL;
+							break;
+						}
 					}
 				}
   		  ex = ex->prev_execute_data;
@@ -7643,12 +7647,14 @@ static int ZEND_UNSET_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			do {
 				int i;
 
-				for (i = 0; i < ex->op_array->last_var; i++) {
-					if (ex->op_array->vars[i].hash_value == hash_value &&
-					    ex->op_array->vars[i].name_len == Z_UNILEN_P(varname) &&
-					    !memcmp(ex->op_array->vars[i].name, Z_UNIVAL_P(varname), Z_TYPE_P(varname)==IS_UNICODE?UBYTES(Z_UNILEN_P(varname)):Z_UNILEN_P(varname))) {
-						ex->CVs[i] = NULL;
-						break;
+				if (ex->op_array) {
+					for (i = 0; i < ex->op_array->last_var; i++) {
+						if (ex->op_array->vars[i].hash_value == hash_value &&
+						    ex->op_array->vars[i].name_len == Z_UNILEN_P(varname) &&
+						    !memcmp(ex->op_array->vars[i].name, Z_UNIVAL_P(varname), Z_TYPE_P(varname)==IS_UNICODE?UBYTES(Z_UNILEN_P(varname)):Z_UNILEN_P(varname))) {
+							ex->CVs[i] = NULL;
+							break;
+						}
 					}
 				}
   		  ex = ex->prev_execute_data;
@@ -9310,7 +9316,7 @@ static int ZEND_UNSET_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							ulong hash_value = zend_u_inline_hash_func(Z_TYPE_P(offset), offset_key, offset_len+1);
 
 							for (ex = execute_data; ex; ex = ex->prev_execute_data) {
-								if (ex->symbol_table == ht) {
+								if (ex->op_array && ex->symbol_table == ht) {
 									int i;
 
 									for (i = 0; i < ex->op_array->last_var; i++) {
@@ -10799,7 +10805,7 @@ static int ZEND_UNSET_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							ulong hash_value = zend_u_inline_hash_func(Z_TYPE_P(offset), offset_key, offset_len+1);
 
 							for (ex = execute_data; ex; ex = ex->prev_execute_data) {
-								if (ex->symbol_table == ht) {
+								if (ex->op_array && ex->symbol_table == ht) {
 									int i;
 
 									for (i = 0; i < ex->op_array->last_var; i++) {
@@ -12326,7 +12332,7 @@ static int ZEND_UNSET_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							ulong hash_value = zend_u_inline_hash_func(Z_TYPE_P(offset), offset_key, offset_len+1);
 
 							for (ex = execute_data; ex; ex = ex->prev_execute_data) {
-								if (ex->symbol_table == ht) {
+								if (ex->op_array && ex->symbol_table == ht) {
 									int i;
 
 									for (i = 0; i < ex->op_array->last_var; i++) {
@@ -14257,7 +14263,7 @@ static int ZEND_UNSET_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							ulong hash_value = zend_u_inline_hash_func(Z_TYPE_P(offset), offset_key, offset_len+1);
 
 							for (ex = execute_data; ex; ex = ex->prev_execute_data) {
-								if (ex->symbol_table == ht) {
+								if (ex->op_array && ex->symbol_table == ht) {
 									int i;
 
 									for (i = 0; i < ex->op_array->last_var; i++) {
@@ -15475,7 +15481,7 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							ulong hash_value = zend_u_inline_hash_func(Z_TYPE_P(offset), offset_key, offset_len+1);
 
 							for (ex = execute_data; ex; ex = ex->prev_execute_data) {
-								if (ex->symbol_table == ht) {
+								if (ex->op_array && ex->symbol_table == ht) {
 									int i;
 
 									for (i = 0; i < ex->op_array->last_var; i++) {
@@ -16575,7 +16581,7 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							ulong hash_value = zend_u_inline_hash_func(Z_TYPE_P(offset), offset_key, offset_len+1);
 
 							for (ex = execute_data; ex; ex = ex->prev_execute_data) {
-								if (ex->symbol_table == ht) {
+								if (ex->op_array && ex->symbol_table == ht) {
 									int i;
 
 									for (i = 0; i < ex->op_array->last_var; i++) {
@@ -17675,7 +17681,7 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							ulong hash_value = zend_u_inline_hash_func(Z_TYPE_P(offset), offset_key, offset_len+1);
 
 							for (ex = execute_data; ex; ex = ex->prev_execute_data) {
-								if (ex->symbol_table == ht) {
+								if (ex->op_array && ex->symbol_table == ht) {
 									int i;
 
 									for (i = 0; i < ex->op_array->last_var; i++) {
@@ -19140,7 +19146,7 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							ulong hash_value = zend_u_inline_hash_func(Z_TYPE_P(offset), offset_key, offset_len+1);
 
 							for (ex = execute_data; ex; ex = ex->prev_execute_data) {
-								if (ex->symbol_table == ht) {
+								if (ex->op_array && ex->symbol_table == ht) {
 									int i;
 
 									for (i = 0; i < ex->op_array->last_var; i++) {
@@ -20338,12 +20344,14 @@ static int ZEND_UNSET_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			do {
 				int i;
 
-				for (i = 0; i < ex->op_array->last_var; i++) {
-					if (ex->op_array->vars[i].hash_value == hash_value &&
-					    ex->op_array->vars[i].name_len == Z_UNILEN_P(varname) &&
-					    !memcmp(ex->op_array->vars[i].name, Z_UNIVAL_P(varname), Z_TYPE_P(varname)==IS_UNICODE?UBYTES(Z_UNILEN_P(varname)):Z_UNILEN_P(varname))) {
-						ex->CVs[i] = NULL;
-						break;
+				if (ex->op_array) {
+					for (i = 0; i < ex->op_array->last_var; i++) {
+						if (ex->op_array->vars[i].hash_value == hash_value &&
+						    ex->op_array->vars[i].name_len == Z_UNILEN_P(varname) &&
+						    !memcmp(ex->op_array->vars[i].name, Z_UNIVAL_P(varname), Z_TYPE_P(varname)==IS_UNICODE?UBYTES(Z_UNILEN_P(varname)):Z_UNILEN_P(varname))) {
+							ex->CVs[i] = NULL;
+							break;
+						}
 					}
 				}
   		  ex = ex->prev_execute_data;
@@ -21842,7 +21850,7 @@ static int ZEND_UNSET_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							ulong hash_value = zend_u_inline_hash_func(Z_TYPE_P(offset), offset_key, offset_len+1);
 
 							for (ex = execute_data; ex; ex = ex->prev_execute_data) {
-								if (ex->symbol_table == ht) {
+								if (ex->op_array && ex->symbol_table == ht) {
 									int i;
 
 									for (i = 0; i < ex->op_array->last_var; i++) {
@@ -23323,7 +23331,7 @@ static int ZEND_UNSET_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							ulong hash_value = zend_u_inline_hash_func(Z_TYPE_P(offset), offset_key, offset_len+1);
 
 							for (ex = execute_data; ex; ex = ex->prev_execute_data) {
-								if (ex->symbol_table == ht) {
+								if (ex->op_array && ex->symbol_table == ht) {
 									int i;
 
 									for (i = 0; i < ex->op_array->last_var; i++) {
@@ -24841,7 +24849,7 @@ static int ZEND_UNSET_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							ulong hash_value = zend_u_inline_hash_func(Z_TYPE_P(offset), offset_key, offset_len+1);
 
 							for (ex = execute_data; ex; ex = ex->prev_execute_data) {
-								if (ex->symbol_table == ht) {
+								if (ex->op_array && ex->symbol_table == ht) {
 									int i;
 
 									for (i = 0; i < ex->op_array->last_var; i++) {
@@ -26762,7 +26770,7 @@ static int ZEND_UNSET_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							ulong hash_value = zend_u_inline_hash_func(Z_TYPE_P(offset), offset_key, offset_len+1);
 
 							for (ex = execute_data; ex; ex = ex->prev_execute_data) {
-								if (ex->symbol_table == ht) {
+								if (ex->op_array && ex->symbol_table == ht) {
 									int i;
 
 									for (i = 0; i < ex->op_array->last_var; i++) {
