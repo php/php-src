@@ -420,11 +420,49 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	/* handle MySQL options */
 	if (driver_options) {
 		long connect_timeout = pdo_attr_lval(driver_options, PDO_ATTR_TIMEOUT, 30 TSRMLS_CC);
+		long local_infile = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_LOCAL_INFILE, 0 TSRMLS_CC);
+		char *init_cmd = NULL, *default_file = NULL, *default_group = NULL;
+
 		H->buffered = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_USE_BUFFERED_QUERY, 0 TSRMLS_CC);
 
 		if (mysql_options(H->server, MYSQL_OPT_CONNECT_TIMEOUT, (const char *)&connect_timeout)) {
 			pdo_mysql_error(dbh);
 			goto cleanup;
+		}
+		
+		if (mysql_options(H->server, MYSQL_OPT_LOCAL_INFILE, (const char *)&local_infile)) {
+			pdo_mysql_error(dbh);
+			goto cleanup;
+		}
+
+		init_cmd = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_INIT_COMMAND, NULL TSRMLS_CC);
+		if (init_cmd) {
+			if (mysql_options(H->server, MYSQL_INIT_COMMAND, (const char *)init_cmd)) {
+				efree(init_cmd);
+				pdo_mysql_error(dbh);
+				goto cleanup;
+			}
+			efree(init_cmd);
+		}
+		
+		default_file = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_READ_DEFAULT_FILE, NULL TSRMLS_CC);
+		if (default_file) {
+			if (mysql_options(H->server, MYSQL_READ_DEFAULT_FILE, (const char *)default_file)) {
+				efree(default_file);
+				pdo_mysql_error(dbh);
+				goto cleanup;
+			}
+			efree(default_file);
+		}
+		
+		default_group= pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_READ_DEFAULT_GROUP, NULL TSRMLS_CC);
+		if (default_group) {
+			if (mysql_options(H->server, MYSQL_READ_DEFAULT_GROUP, (const char *)default_group)) {
+				efree(default_group);
+				pdo_mysql_error(dbh);
+				goto cleanup;
+			}
+			efree(default_group);
 		}
 	}
 
