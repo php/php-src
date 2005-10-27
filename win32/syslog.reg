@@ -1,5 +1,0 @@
-REGEDIT4
-
-[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Eventlog\Application\PHP-5.1.0-dev]
-"TypesSupported"=dword:00000007
-"EventMessageFile"="C:\\php5\\php5ts.dll"
