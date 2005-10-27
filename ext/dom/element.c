@@ -368,6 +368,11 @@ PHP_FUNCTION(dom_element_set_attribute_node)
 		RETURN_FALSE;
 	}
 
+	if (!(attrp->doc == NULL || attrp->doc == nodep->doc)) {
+		php_dom_throw_error(WRONG_DOCUMENT_ERR, dom_get_strict_error(intern->document) TSRMLS_CC);
+		RETURN_FALSE;
+	}
+
 	existattrp = xmlHasProp(nodep, attrp->name);
 	if (existattrp != NULL && existattrp->type != XML_ATTRIBUTE_DECL) {
 		if ((oldobj = php_dom_object_get_data((xmlNodePtr) existattrp)) != NULL && 
@@ -766,6 +771,11 @@ PHP_FUNCTION(dom_element_set_attribute_node_ns)
 
 	if (attrp->type != XML_ATTRIBUTE_NODE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attribute node is required");
+		RETURN_FALSE;
+	}
+
+	if (!(attrp->doc == NULL || attrp->doc == nodep->doc)) {
+		php_dom_throw_error(WRONG_DOCUMENT_ERR, dom_get_strict_error(intern->document) TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
