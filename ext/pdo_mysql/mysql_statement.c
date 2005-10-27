@@ -241,6 +241,12 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 	int ret;
 
 	/* ensure that we free any previous unfetched results */
+#if HAVE_MYSQL_STMT_PREPARE
+	if (S->stmt) {
+		mysql_stmt_free_result(S->stmt);
+		S->stmt = NULL;
+	}
+#endif
 	if (S->result) {
 		mysql_free_result(S->result);
 		S->result = NULL;
@@ -567,7 +573,9 @@ static int pdo_mysql_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC)
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 #if HAVE_MYSQL_STMT_PREPARE
 	if (S->stmt) {
-		return mysql_stmt_free_result(S->stmt);
+		int retval = mysql_stmt_free_result(S->stmt);
+		S->stmt = NULL;
+		return retval ? 0 : 1;
 	}
 #endif
 	if (S->result) {
