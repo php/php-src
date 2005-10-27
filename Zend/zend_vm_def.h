@@ -2813,12 +2813,14 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, ANY)
 			do {
 				int i;
 
-				for (i = 0; i < ex->op_array->last_var; i++) {
-					if (ex->op_array->vars[i].hash_value == hash_value &&
-						ex->op_array->vars[i].name_len == varname->value.str.len &&
-						!memcmp(ex->op_array->vars[i].name, varname->value.str.val, varname->value.str.len)) {
-						ex->CVs[i] = NULL;
-						break;
+				if (ex->op_array) {
+					for (i = 0; i < ex->op_array->last_var; i++) {
+						if (ex->op_array->vars[i].hash_value == hash_value &&
+							ex->op_array->vars[i].name_len == varname->value.str.len &&
+							!memcmp(ex->op_array->vars[i].name, varname->value.str.val, varname->value.str.len)) {
+							ex->CVs[i] = NULL;
+							break;
+						}
 					}
 				}
   		  ex = ex->prev_execute_data;
@@ -2869,7 +2871,7 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 							ulong hash_value = zend_inline_hash_func(offset->value.str.val, offset->value.str.len+1);
 
 							for (ex = EXECUTE_DATA; ex; ex = ex->prev_execute_data) {
-								if (ex->symbol_table == ht) {
+								if (ex->op_array && ex->symbol_table == ht) {
 									int i;
 
 									for (i = 0; i < ex->op_array->last_var; i++) {
