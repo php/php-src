@@ -1384,7 +1384,7 @@ static void pdo_dbh_free_storage(pdo_dbh_t *dbh TSRMLS_DC)
 
 	if (!dbh->is_persistent) {
 		dbh_free(dbh TSRMLS_CC);
-	} else if (dbh->methods->persistent_shutdown) {
+	} else if (dbh->methods && dbh->methods->persistent_shutdown) {
 		dbh->methods->persistent_shutdown(dbh TSRMLS_CC);
 	}
 }
