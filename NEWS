@@ -1,7 +1,11 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2006, Version 4.4.2
+
+- Fixed bug #34996 (ImageTrueColorToPalette() crashes when ncolors is 
+  zero). (Tony)
+
 31 Oct 2005, Version 4.4.1
-	
 - Added missing safe_mode checks for image* functions and cURL. (Ilia)
 - Added missing safe_mode/open_basedir checks for file uploads. (Ilia)
 - Fixed a memory corruption bug regarding included files. (Derick)
