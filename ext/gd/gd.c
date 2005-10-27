@@ -4184,7 +4184,7 @@ PHP_FUNCTION(imageconvolution)
 	zval *SIM, *hash_matrix;
 	pval **var = NULL, **var2 = NULL;
 	gdImagePtr im_src = NULL;
-	float div, offset;
+	double div, offset;
 	int nelem, i, j, res;
 	float matrix[3][3] = {{0,0,0}, {0,0,0}, {0,0,0}};
 
