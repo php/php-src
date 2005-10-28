@@ -1,3 +1,82 @@
+2005-10-27  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_1)
+      ext/dom/element.c
+      ext/dom/tests/dom_set_attr_node.phpt:
+      MFH: fix crash setting attr from foreign doc (throws exception)
+      add test
+
+    * ext/dom/tests/dom_set_attr_node.phpt
+      ext/dom/tests/dom_set_attr_node.phpt:
+      
+      fix crash setting attr from foreign doc (throws exception)
+      add test
+
+    * ext/dom/element.c:
+      fix crash setting attr from foreign doc (throws exception)
+      add test
+
+2005-10-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/unset_cv12.phpt
+      ZendEngine2/tests/unset_cv12.phpt:
+      
+      Fixed SIGSEGV
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/tests/unset_cv12.phpt:
+      Fixed SIGSEGV
+
+2005-10-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend_API.c:
+      MFB51: Fixed memory leak on error
+
+    * (PHP_5_1)
+      ZendEngine2/zend_API.c:
+      Fixed memory leak on error
+
+    * (PHP_5_1)
+      ext/calendar/tests/skipif.inc:
+      One check is enough.
+
+2005-10-27  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/gd.c:
+      - MFB #34980, divisor and offset never passed correctly (s/float/double/)
+
+2005-10-27  Rathna N  <nrathna@novell.com>
+
+    * ext/calendar/tests/cal_days_in_month.phpt
+      ext/calendar/tests/cal_days_in_month.phpt
+      ext/calendar/tests/cal_to_jd.phpt
+      ext/calendar/tests/cal_to_jd.phpt
+      ext/calendar/tests/easter_days.phpt
+      ext/calendar/tests/easter_days.phpt
+      ext/calendar/tests/frenchtojd.phpt
+      ext/calendar/tests/frenchtojd.phpt
+      ext/calendar/tests/skipif.inc
+      ext/calendar/tests/skipif.inc:
+      
+      file cal_days_in_month.phpt was initially added on branch PHP_5_1.
+
+2005-10-27  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      NEWS:
+      BFN
+
+    * (PHP_4_4)
+      ext/gd/gd.c:
+      MFH: fix #34996 (ImageTrueColorToPalette() crashes when ncolors is zero)
+
 2005-10-26  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_0)
