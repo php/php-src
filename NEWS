@@ -22,6 +22,7 @@ PHP                                                                        NEWS
 - Fixed bug #34782 (token_get_all() gives wrong result). (Dmitry)
 - Fixed bug #34767 (Zend Engine 1 Compatibility not copying objects correctly).
   (Dmitry)
+- Fixed bug #34725 (CLI segmentation faults during cleanup). (Dmitry)
 - Fixed bug #34712 (zend.ze1_compatibility_mode = on segfault). (Dmitry)
 - Fixed bug #34623 (Crash in pdo_mysql on longtext fields). (Ilia)
 - Fixed bug #33829 (mime_content_type() returns text/plain for gzip and bzip 
