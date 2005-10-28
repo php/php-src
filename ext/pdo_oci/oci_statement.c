@@ -411,6 +411,19 @@ static int oci_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{ */
 
 	/* how much room do we need to store the field */
 	switch (dtype) {
+		case SQLT_LBI:
+		case SQLT_LNG:
+			dyn = FALSE;
+			if (dtype == SQLT_LBI) {
+				dtype = SQLT_BIN;
+			} else {
+				dtype = SQLT_CHR;
+			}
+			S->cols[colno].datalen = 512; /* XXX should be INT_MAX and fetched by pieces */
+			S->cols[colno].data = emalloc(S->cols[colno].datalen + 1);
+			col->param_type = PDO_PARAM_STR;
+			break;
+																																
 		case SQLT_BIN:
 		default:
 			dyn = FALSE;
