@@ -411,18 +411,18 @@ ZEND_API int add_u_assoc_zval_ex(zval *arg, zend_uchar type, void *key, uint key
 #define add_next_index_unset(__arg) add_next_index_null(__arg)
 #define add_property_unset(__arg, __key) add_property_null(__arg, __key)
 
-ZEND_API int add_index_long(zval *arg, uint idx, long n);
-ZEND_API int add_index_null(zval *arg, uint idx);
-ZEND_API int add_index_bool(zval *arg, uint idx, int b);
-ZEND_API int add_index_resource(zval *arg, uint idx, int r);
-ZEND_API int add_index_double(zval *arg, uint idx, double d);
-ZEND_API int add_index_string(zval *arg, uint idx, char *str, int duplicate);
-ZEND_API int add_index_stringl(zval *arg, uint idx, char *str, uint length, int duplicate);
-ZEND_API int add_index_binary(zval *arg, uint idx, char *str, int duplicate TSRMLS_DC);
-ZEND_API int add_index_binaryl(zval *arg, uint idx, char *str, uint length, int duplicate TSRMLS_DC);
-ZEND_API int add_index_unicode(zval *arg, uint idx, UChar *str, int duplicate);
-ZEND_API int add_index_unicodel(zval *arg, uint idx, UChar *str, uint length, int duplicate);
-ZEND_API int add_index_zval(zval *arg, uint index, zval *value);
+ZEND_API int add_index_long(zval *arg, ulong idx, long n);
+ZEND_API int add_index_null(zval *arg, ulong idx);
+ZEND_API int add_index_bool(zval *arg, ulong idx, int b);
+ZEND_API int add_index_resource(zval *arg, ulong idx, int r);
+ZEND_API int add_index_double(zval *arg, ulong idx, double d);
+ZEND_API int add_index_string(zval *arg, ulong idx, char *str, int duplicate);
+ZEND_API int add_index_stringl(zval *arg, ulong idx, char *str, uint length, int duplicate);
+ZEND_API int add_index_binary(zval *arg, ulong idx, char *str, int duplicate TSRMLS_DC);
+ZEND_API int add_index_binaryl(zval *arg, ulong idx, char *str, uint length, int duplicate TSRMLS_DC);
+ZEND_API int add_index_unicode(zval *arg, ulong idx, UChar *str, int duplicate);
+ZEND_API int add_index_unicodel(zval *arg, ulong idx, UChar *str, uint length, int duplicate);
+ZEND_API int add_index_zval(zval *arg, ulong index, zval *value);
 
 #define add_index_text(arg, idx, str, duplicate) \
 	if (UG(unicode)) { \
@@ -528,14 +528,14 @@ ZEND_API int add_get_assoc_stringl_ex(zval *arg, char *key, uint key_len, char *
 #define add_get_assoc_string(__arg, __key, __str, __dest, __duplicate) add_get_assoc_string_ex(__arg, __key, strlen(__key)+1, __str, __dest, __duplicate)
 #define add_get_assoc_stringl(__arg, __key, __str, __length, __dest, __duplicate) add_get_assoc_stringl_ex(__arg, __key, strlen(__key)+1, __str, __length, __dest, __duplicate)
 
-ZEND_API int add_get_index_long(zval *arg, uint idx, long l, void **dest);
-ZEND_API int add_get_index_double(zval *arg, uint idx, double d, void **dest);
-ZEND_API int add_get_index_string(zval *arg, uint idx, char *str, void **dest, int duplicate);
-ZEND_API int add_get_index_stringl(zval *arg, uint idx, char *str, uint length, void **dest, int duplicate);
-ZEND_API int add_get_index_binary(zval *arg, uint idx, char *str, void **dest, int duplicate);
-ZEND_API int add_get_index_binaryl(zval *arg, uint idx, char *str, uint length, void **dest, int duplicate);
-ZEND_API int add_get_index_unicode(zval *arg, uint idx, UChar *str, void **dest, int duplicate);
-ZEND_API int add_get_index_unicodel(zval *arg, uint idx, UChar *str, uint length, void **dest, int duplicate);
+ZEND_API int add_get_index_long(zval *arg, ulong idx, long l, void **dest);
+ZEND_API int add_get_index_double(zval *arg, ulong idx, double d, void **dest);
+ZEND_API int add_get_index_string(zval *arg, ulong idx, char *str, void **dest, int duplicate);
+ZEND_API int add_get_index_stringl(zval *arg, ulong idx, char *str, uint length, void **dest, int duplicate);
+ZEND_API int add_get_index_binary(zval *arg, ulong idx, char *str, void **dest, int duplicate);
+ZEND_API int add_get_index_binaryl(zval *arg, ulong idx, char *str, uint length, void **dest, int duplicate);
+ZEND_API int add_get_index_unicode(zval *arg, ulong idx, UChar *str, void **dest, int duplicate);
+ZEND_API int add_get_index_unicodel(zval *arg, ulong idx, UChar *str, uint length, void **dest, int duplicate);
 
 ZEND_API int add_property_long_ex(zval *arg, char *key, uint key_len, long l TSRMLS_DC);
 ZEND_API int add_property_null_ex(zval *arg, char *key, uint key_len TSRMLS_DC);

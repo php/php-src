@@ -1293,7 +1293,7 @@ ZEND_API int add_u_assoc_zval_ex(zval *arg, zend_uchar type, void *key, uint key
 	return zend_u_symtable_update(Z_ARRVAL_P(arg), type, key, key_len, (void *) &value, sizeof(zval *), NULL);
 }
 
-ZEND_API int add_index_long(zval *arg, uint index, long n)
+ZEND_API int add_index_long(zval *arg, ulong index, long n)
 {
 	zval *tmp;
 
@@ -1304,7 +1304,7 @@ ZEND_API int add_index_long(zval *arg, uint index, long n)
 }
 
 
-ZEND_API int add_index_null(zval *arg, uint index)
+ZEND_API int add_index_null(zval *arg, ulong index)
 {
 	zval *tmp;
 
@@ -1314,7 +1314,7 @@ ZEND_API int add_index_null(zval *arg, uint index)
 	return zend_hash_index_update(Z_ARRVAL_P(arg), index, (void *) &tmp, sizeof(zval *), NULL);
 }
 
-ZEND_API int add_index_bool(zval *arg, uint index, int b)
+ZEND_API int add_index_bool(zval *arg, ulong index, int b)
 {
 	zval *tmp;
 	
@@ -1325,7 +1325,7 @@ ZEND_API int add_index_bool(zval *arg, uint index, int b)
 }
 
 
-ZEND_API int add_index_resource(zval *arg, uint index, int r)
+ZEND_API int add_index_resource(zval *arg, ulong index, int r)
 {
 	zval *tmp;
 	
@@ -1336,7 +1336,7 @@ ZEND_API int add_index_resource(zval *arg, uint index, int r)
 }
 
 
-ZEND_API int add_index_double(zval *arg, uint index, double d)
+ZEND_API int add_index_double(zval *arg, ulong index, double d)
 {
 	zval *tmp;
 	
@@ -1347,7 +1347,7 @@ ZEND_API int add_index_double(zval *arg, uint index, double d)
 }
 
 
-ZEND_API int add_index_string(zval *arg, uint index, char *str, int duplicate)
+ZEND_API int add_index_string(zval *arg, ulong index, char *str, int duplicate)
 {
 	zval *tmp;
 	
@@ -1358,7 +1358,7 @@ ZEND_API int add_index_string(zval *arg, uint index, char *str, int duplicate)
 }
 
 
-ZEND_API int add_index_stringl(zval *arg, uint index, char *str, uint length, int duplicate)
+ZEND_API int add_index_stringl(zval *arg, ulong index, char *str, uint length, int duplicate)
 {
 	zval *tmp;
 	
@@ -1369,7 +1369,7 @@ ZEND_API int add_index_stringl(zval *arg, uint index, char *str, uint length, in
 }
 
 
-ZEND_API int add_index_binary(zval *arg, uint index, char *str, int duplicate TSRMLS_DC)
+ZEND_API int add_index_binary(zval *arg, ulong index, char *str, int duplicate TSRMLS_DC)
 {
 	zval *tmp;
 	
@@ -1380,7 +1380,7 @@ ZEND_API int add_index_binary(zval *arg, uint index, char *str, int duplicate TS
 }
 
 
-ZEND_API int add_index_binaryl(zval *arg, uint index, char *str, uint length, int duplicate TSRMLS_DC)
+ZEND_API int add_index_binaryl(zval *arg, ulong index, char *str, uint length, int duplicate TSRMLS_DC)
 {
 	zval *tmp;
 	
@@ -1391,7 +1391,7 @@ ZEND_API int add_index_binaryl(zval *arg, uint index, char *str, uint length, in
 }
 
 
-ZEND_API int add_index_unicode(zval *arg, uint index, UChar *str, int duplicate)
+ZEND_API int add_index_unicode(zval *arg, ulong index, UChar *str, int duplicate)
 {
 	zval *tmp;
 	
@@ -1402,7 +1402,7 @@ ZEND_API int add_index_unicode(zval *arg, uint index, UChar *str, int duplicate)
 }
 
 
-ZEND_API int add_index_unicodel(zval *arg, uint index, UChar *str, uint length, int duplicate)
+ZEND_API int add_index_unicodel(zval *arg, ulong index, UChar *str, uint length, int duplicate)
 {
 	zval *tmp;
 	
@@ -1413,7 +1413,7 @@ ZEND_API int add_index_unicodel(zval *arg, uint index, UChar *str, uint length, 
 }
 
 
-ZEND_API int add_index_zval(zval *arg, uint index, zval *value)
+ZEND_API int add_index_zval(zval *arg, ulong index, zval *value)
 {
 	return zend_hash_index_update(Z_ARRVAL_P(arg), index, (void *) &value, sizeof(zval *), NULL);
 }
@@ -1569,7 +1569,7 @@ ZEND_API int add_get_assoc_stringl_ex(zval *arg, char *key, uint key_len, char *
 }
 
 
-ZEND_API int add_get_index_long(zval *arg, uint index, long l, void **dest)
+ZEND_API int add_get_index_long(zval *arg, ulong index, long l, void **dest)
 {
 	zval *tmp;
 	
@@ -1580,7 +1580,7 @@ ZEND_API int add_get_index_long(zval *arg, uint index, long l, void **dest)
 }
 
 
-ZEND_API int add_get_index_double(zval *arg, uint index, double d, void **dest)
+ZEND_API int add_get_index_double(zval *arg, ulong index, double d, void **dest)
 {
 	zval *tmp;
 	
@@ -1591,7 +1591,7 @@ ZEND_API int add_get_index_double(zval *arg, uint index, double d, void **dest)
 }
 
 
-ZEND_API int add_get_index_string(zval *arg, uint index, char *str, void **dest, int duplicate)
+ZEND_API int add_get_index_string(zval *arg, ulong index, char *str, void **dest, int duplicate)
 {
 	zval *tmp;
 	
@@ -1602,7 +1602,7 @@ ZEND_API int add_get_index_string(zval *arg, uint index, char *str, void **dest,
 }
 
 
-ZEND_API int add_get_index_stringl(zval *arg, uint index, char *str, uint length, void **dest, int duplicate)
+ZEND_API int add_get_index_stringl(zval *arg, ulong index, char *str, uint length, void **dest, int duplicate)
 {
 	zval *tmp;
 	
@@ -1612,7 +1612,7 @@ ZEND_API int add_get_index_stringl(zval *arg, uint index, char *str, uint length
 	return zend_hash_index_update(Z_ARRVAL_P(arg), index, (void *) &tmp, sizeof(zval *), dest);
 }
 
-ZEND_API int add_get_index_binary(zval *arg, uint index, char *str, void **dest, int duplicate)
+ZEND_API int add_get_index_binary(zval *arg, ulong index, char *str, void **dest, int duplicate)
 {
 	zval *tmp;
 	TSRMLS_FETCH();
@@ -1624,7 +1624,7 @@ ZEND_API int add_get_index_binary(zval *arg, uint index, char *str, void **dest,
 }
 
 
-ZEND_API int add_get_index_binaryl(zval *arg, uint index, char *str, uint length, void **dest, int duplicate)
+ZEND_API int add_get_index_binaryl(zval *arg, ulong index, char *str, uint length, void **dest, int duplicate)
 {
 	zval *tmp;
 	TSRMLS_FETCH();
@@ -1636,7 +1636,7 @@ ZEND_API int add_get_index_binaryl(zval *arg, uint index, char *str, uint length
 }
 
 
-ZEND_API int add_get_index_unicode(zval *arg, uint index, UChar *str, void **dest, int duplicate)
+ZEND_API int add_get_index_unicode(zval *arg, ulong index, UChar *str, void **dest, int duplicate)
 {
 	zval *tmp;
 	
@@ -1647,7 +1647,7 @@ ZEND_API int add_get_index_unicode(zval *arg, uint index, UChar *str, void **des
 }
 
 
-ZEND_API int add_get_index_unicodel(zval *arg, uint index, UChar *str, uint length, void **dest, int duplicate)
+ZEND_API int add_get_index_unicodel(zval *arg, ulong index, UChar *str, uint length, void **dest, int duplicate)
 {
 	zval *tmp;
 	
