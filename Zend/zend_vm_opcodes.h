@@ -13,10 +13,10 @@
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@zend.com>                                |
+   |          Zeev Suraski <zeev@zend.com>                                |
+   |          Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #define ZEND_NOP                       0
 #define ZEND_ADD                       1
