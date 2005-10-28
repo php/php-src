@@ -81,3 +81,50 @@ array(3) {
     string(1) "C"
   }
 }
+--UEXPECT--
+array(3) {
+  [0]=>
+  array(2) {
+    [u"id"]=>
+    unicode(1) "1"
+    [u"val"]=>
+    unicode(1) "A"
+  }
+  [1]=>
+  array(2) {
+    [u"id"]=>
+    unicode(1) "2"
+    [u"val"]=>
+    unicode(1) "B"
+  }
+  [2]=>
+  array(2) {
+    [u"id"]=>
+    unicode(1) "3"
+    [u"val"]=>
+    unicode(1) "C"
+  }
+}
+array(3) {
+  [0]=>
+  array(2) {
+    [u"ID"]=>
+    unicode(1) "1"
+    [u"VAL"]=>
+    unicode(1) "A"
+  }
+  [1]=>
+  array(2) {
+    [u"ID"]=>
+    unicode(1) "2"
+    [u"VAL"]=>
+    unicode(1) "B"
+  }
+  [2]=>
+  array(2) {
+    [u"ID"]=>
+    unicode(1) "3"
+    [u"VAL"]=>
+    unicode(1) "C"
+  }
+}
