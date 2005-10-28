@@ -100,7 +100,9 @@ static PHP_MINIT_FUNCTION(pcre)
 /* {{{ PHP_MSHUTDOWN_FUNCTION(pcre) */
 static PHP_MSHUTDOWN_FUNCTION(pcre)
 {
-#ifndef ZTS
+#ifdef ZTS
+	ts_free_id(pcre_globals_id);	
+#else
 	php_pcre_shutdown_globals(&pcre_globals TSRMLS_CC);
 #endif
 
