@@ -1,3 +1,30 @@
+2005-10-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/unset_cv12.phpt
+      tests/unset_cv12.phpt:
+      
+      Fixed SIGSEGV
+
+    * zend_execute_API.c
+      zend_execute_API.c
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      zend_vm_opcodes.h
+      tests/unset_cv12.phpt:
+      Fixed SIGSEGV
+
+2005-10-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_API.c:
+      MFB51: Fixed memory leak on error
+
+    * (PHP_5_1)
+      zend_API.c:
+      Fixed memory leak on error
+
 2005-10-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
