@@ -465,10 +465,22 @@ SPL_METHOD(RecursiveIteratorIterator, key)
 		char *str_key;
 		uint str_key_len;
 		ulong int_key;
-		if (iterator->funcs->get_current_key(iterator, &str_key, &str_key_len, &int_key TSRMLS_CC) == HASH_KEY_IS_LONG) {
-			RETURN_LONG(int_key);
-		} else {
-			RETURN_STRINGL(str_key, str_key_len-1, 0);
+		
+		switch (iterator->funcs->get_current_key(iterator, &str_key, &str_key_len, &int_key TSRMLS_CC)) {
+			case HASH_KEY_IS_LONG:
+				RETURN_LONG(int_key);
+				break;
+			case HASH_KEY_IS_STRING:
+				RETURN_STRINGL(str_key, str_key_len-1, 0);
+				break;
+			case HASH_KEY_IS_UNICODE:
+				RETURN_UNICODEL(str_key, str_key_len-1, 0);
+				break;
+			case HASH_KEY_IS_BINARY:
+				RETURN_BINARYL(str_key, str_key_len-1, 0);
+				break;
+			default:
+				RETURN_NULL();
 		}
 	} else {
 		RETURN_NULL();
@@ -1721,6 +1733,10 @@ SPL_METHOD(CachingIterator, __toString)
 	if (intern->u.caching.flags & CIT_TOSTRING_USE_KEY) {
 		if (intern->current.key_type == HASH_KEY_IS_STRING) {
 			RETURN_STRINGL(intern->current.str_key, intern->current.str_key_len, 1);
+		} else if (intern->current.key_type == HASH_KEY_IS_UNICODE) {
+			RETURN_UNICODEL(intern->current.str_key, intern->current.str_key_len, 1);
+		} else if (intern->current.key_type == HASH_KEY_IS_BINARY) {
+			RETURN_BINARYL(intern->current.str_key, intern->current.str_key_len, 1);
 		} else {
 			RETVAL_LONG(intern->current.int_key);
 			convert_to_string(return_value);
@@ -2029,10 +2045,21 @@ SPL_METHOD(NoRewindIterator, key)
 		char *str_key;
 		uint str_key_len;
 		ulong int_key;
-		if (intern->inner.iterator->funcs->get_current_key(intern->inner.iterator, &str_key, &str_key_len, &int_key TSRMLS_CC) == HASH_KEY_IS_LONG) {
-			RETURN_LONG(int_key);
-		} else {
-			RETURN_STRINGL(str_key, str_key_len-1, 0);
+		switch (intern->inner.iterator->funcs->get_current_key(intern->inner.iterator, &str_key, &str_key_len, &int_key TSRMLS_CC)) {
+			case HASH_KEY_IS_LONG:
+				RETURN_LONG(int_key);
+				break;	
+			case HASH_KEY_IS_STRING:
+				RETURN_STRINGL(str_key, str_key_len-1, 0);
+				break;
+			case HASH_KEY_IS_UNICODE:
+				RETURN_UNICODEL(str_key, str_key_len-1, 0);
+				break;
+			case HASH_KEY_IS_BINARY:
+				RETURN_BINARYL(str_key, str_key_len-1, 0);
+				break;
+			default:
+				RETURN_NULL();
 		}
 	} else {
 		RETURN_NULL();
