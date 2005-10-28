@@ -132,6 +132,9 @@ PHPAPI void php_basename(char *s, size_t len, char *suffix, size_t sufflen, char
 PHPAPI size_t php_dirname(char *str, size_t len);
 PHPAPI UChar *php_u_stristr(UChar *s, UChar *t, int32_t s_len, int32_t t_len);
 PHPAPI char *php_stristr(unsigned char *s, unsigned char *t, size_t s_len, size_t t_len);
+PHPAPI int32_t php_u_strspn(UChar *s1, UChar *s2, UChar *s1_end, UChar *s2_end);
+PHPAPI size_t php_strspn(char *s1, char *s2, char *s1_end, char *s2_end);
+PHPAPI int32_t php_u_strcspn(UChar *s1, UChar *s2, UChar *s1_end, UChar *s2_end);
 PHPAPI char *php_str_to_str_ex(char *haystack, int length, char *needle,
 		int needle_len, char *str, int str_len, int *_new_length, int case_sensitivity, int *replace_count);
 PHPAPI char *php_str_to_str(char *haystack, int length, char *needle,
