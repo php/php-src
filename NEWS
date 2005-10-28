@@ -19,6 +19,8 @@ PHP                                                                        NEWS
 - Fixed bug #34893 (PHP5.1 overloading, Cannot access private property).
   (Dmitry)
 - Fixed bug #34899 (Fixed sqlite extension compile failure). (Ilia)
+- Fixed bug #34879 (str_replace, array_map corrupt negative array indexes on
+  64-bit platforms). (Dmitry)
 - Fixed bug #34821 (zlib encoders fail on widely varying binary data on windows)
   (Mike, Ilia)
 - Fixed bug #34782 (token_get_all() gives wrong result). (Dmitry)
