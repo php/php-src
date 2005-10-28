@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 - Renamed CachingRecursiveIterator to RecursiveCachingIterator. (Marcus)
 - Fixed bug #34996 (ImageTrueColorToPalette() crashes when ncolors is
   zero). (Tony)
+- Fixed bug #34982 (array_walk_recursive() modifies elements outside function
+  scope). (Dmitry)
 - Fixed bug #34977 (Compile failure on MacOSX due to use of varargs.h). (Tony)
 - Fixed bug #34950 (Unable to get WSDL through proxy). (Dmitry)
 - Fixed bug #34938 (dns_get_record() doesn't resolve long hostnames and 

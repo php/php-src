@@ -1050,6 +1050,7 @@ static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive
 		if (recursive && Z_TYPE_PP(args[0]) == IS_ARRAY) {
 			HashTable *thash;
 			
+			SEPARATE_ZVAL_TO_MAKE_IS_REF(args[0]);
 			thash = HASH_OF(*(args[0]));
 			if (thash == target_hash) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
