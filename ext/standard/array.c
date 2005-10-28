@@ -1091,7 +1091,8 @@ static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive
 	while (!EG(exception) && zend_hash_get_current_data_ex(target_hash, (void **)&args[0], &pos) == SUCCESS) {
 		if (recursive && Z_TYPE_PP(args[0]) == IS_ARRAY) {
 			HashTable *thash;
-			
+
+			SEPARATE_ZVAL_TO_MAKE_IS_REF(args[0]);
 			thash = HASH_OF(*(args[0]));
 			if (thash == target_hash) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
