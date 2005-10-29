@@ -2199,7 +2199,6 @@ int spl_append_it_next_iterator(spl_dual_it_object *intern TSRMLS_DC) /* {{{*/
 		intern->inner.object = zend_object_store_get_object(*it TSRMLS_CC);
 		intern->inner.iterator = intern->inner.ce->get_iterator(intern->inner.ce, *it TSRMLS_CC);
 		spl_dual_it_rewind(intern TSRMLS_CC);
-		intern->u.append.iterator->funcs->move_forward(intern->u.append.iterator TSRMLS_CC);
 		return SUCCESS;
 	} else {
 		return FAILURE;
@@ -2209,6 +2208,7 @@ int spl_append_it_next_iterator(spl_dual_it_object *intern TSRMLS_DC) /* {{{*/
 void spl_append_it_fetch(spl_dual_it_object *intern TSRMLS_DC) /* {{{*/
 {
 	while (spl_dual_it_valid(intern TSRMLS_CC) != SUCCESS) {
+		intern->u.append.iterator->funcs->move_forward(intern->u.append.iterator TSRMLS_CC);
 		if (spl_append_it_next_iterator(intern TSRMLS_CC) != SUCCESS) {
 			return;
 		}
@@ -2292,6 +2292,28 @@ SPL_METHOD(AppendIterator, next)
 	spl_append_it_next(intern TSRMLS_CC);
 } /* }}} */
 
+/* {{{ proto AppendIterator::getIteratorIndex()
+   Get index of iterator */
+SPL_METHOD(AppendIterator, getIteratorIndex)
+{
+	spl_dual_it_object   *intern;
+
+	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	spl_array_iterator_key(intern->u.append.zarrayit, return_value TSRMLS_CC);
+} /* }}} */
+
+/* {{{ proto AppendIterator::getArrayIterator()
+   Get access to inner ArrayIterator */
+SPL_METHOD(AppendIterator, getArrayIterator)
+{
+	spl_dual_it_object   *intern;
+
+	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	RETURN_ZVAL(intern->u.append.zarrayit, 1, 0);
+} /* }}} */
+
 static
 ZEND_BEGIN_ARG_INFO(arginfo_append_it_append, 0) 
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
@@ -2306,6 +2328,8 @@ static zend_function_entry spl_funcs_AppendIterator[] = {
 	SPL_ME(dual_it,        current,          NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(AppendIterator, next,             NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(dual_it,        getInnerIterator, NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(AppendIterator, getIteratorIndex, NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(AppendIterator, getArrayIterator, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
