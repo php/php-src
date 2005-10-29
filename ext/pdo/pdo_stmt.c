@@ -368,11 +368,15 @@ static PHP_METHOD(PDOStatement, execute)
 			}
 
 			param.param_type = PDO_PARAM_STR;
-			param.parameter = *tmp;
+			MAKE_STD_ZVAL(param.parameter);
+			*param.parameter = **tmp;
+			zval_copy_ctor(param.parameter);
 
 			if (!really_register_bound_param(&param, stmt, 1 TSRMLS_CC)) {
+				zval_ptr_dtor(&param.parameter);
 				RETURN_FALSE;
 			}
+			zval_ptr_dtor(&param.parameter);
 
 			zend_hash_move_forward(Z_ARRVAL_P(input_params));
 		}
