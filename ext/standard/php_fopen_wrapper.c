@@ -163,7 +163,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 		max_memory = PHP_STREAM_MAX_MEM;
 		if (!strncasecmp(path, "/maxmemory:", 11)) {
 			path += 11;
-			sscanf(path, "%ld", &max_memory);
+			max_memory = strtol(path, NULL, 10);
 			if (max_memory < 0) {
 				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Max memory must be >= 0");
 				return NULL;
