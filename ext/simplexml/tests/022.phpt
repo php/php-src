@@ -1,5 +1,5 @@
 --TEST--
-SimpleXML and attributes inside foreach
+SimpleXML: Attributes inside foreach
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
@@ -12,6 +12,13 @@ EOF;
 
 $sxe = simplexml_load_string($xml);
 
+echo "===CONTENT===\n";
+var_dump($sxe->content);
+
+echo "===FILE===\n";
+var_dump($sxe->content->file);
+
+echo "===FOREACH===\n";
 foreach($sxe->content->file as $file)
 {
 	var_dump($file);
@@ -21,18 +28,35 @@ foreach($sxe->content->file as $file)
 ?>
 ===DONE===
 --EXPECTF--
-object(SimpleXMLElement)#%d (0) {
+===CONTENT===
+object(SimpleXMLElement)#%d (1) {
+  ["file"]=>
+  object(SimpleXMLElement)#%d (1) {
+    ["@attributes"]=>
+    array(1) {
+      ["glob"]=>
+      string(11) "slide_*.xml"
+    }
+  }
+}
+===FILE===
+object(SimpleXMLElement)#%d (1) {
+  ["@attributes"]=>
+  array(1) {
+    ["glob"]=>
+    string(11) "slide_*.xml"
+  }
+}
+===FOREACH===
+object(SimpleXMLElement)#%d (1) {
+  ["@attributes"]=>
+  array(1) {
+    ["glob"]=>
+    string(11) "slide_*.xml"
+  }
 }
 object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(11) "slide_*.xml"
-}
-===DONE===
---UEXPECTF--
-object(SimpleXMLElement)#%d (0) {
-}
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
-  unicode(11) "slide_*.xml"
 }
 ===DONE===

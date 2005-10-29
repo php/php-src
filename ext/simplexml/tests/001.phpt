@@ -5,39 +5,39 @@ SimpleXML: Simple document
 --FILE--
 <?php 
 
-$sxe = simplexml_load_file(dirname(__FILE__).'/sxe.xml');
-
-print_r($sxe);
-
-echo "---Done---\n";
+var_dump(simplexml_load_file(dirname(__FILE__).'/sxe.xml'));
 
 ?>
---EXPECT--
-SimpleXMLElement Object
-(
-    [elem1] => SimpleXMLElement Object
-        (
-            [comment] => SimpleXMLElement Object
-                (
-                )
-
-            [elem2] => SimpleXMLElement Object
-                (
-                    [elem3] => SimpleXMLElement Object
-                        (
-                            [elem4] => SimpleXMLElement Object
-                                (
-                                    [test] => SimpleXMLElement Object
-                                        (
-                                        )
-
-                                )
-
-                        )
-
-                )
-
-        )
-
-)
----Done--- 
+===DONE===
+--EXPECTF--
+object(SimpleXMLElement)#%d (2) {
+  ["@attributes"]=>
+  array(1) {
+    ["id"]=>
+    string(5) "elem1"
+  }
+  ["elem1"]=>
+  object(SimpleXMLElement)#%d (3) {
+    ["@attributes"]=>
+    array(1) {
+      ["attr1"]=>
+      string(5) "first"
+    }
+    ["comment"]=>
+    object(SimpleXMLElement)#%d (0) {
+    }
+    ["elem2"]=>
+    object(SimpleXMLElement)#%d (1) {
+      ["elem3"]=>
+      object(SimpleXMLElement)#%d (1) {
+        ["elem4"]=>
+        object(SimpleXMLElement)#%d (1) {
+          ["test"]=>
+          object(SimpleXMLElement)#%d (0) {
+          }
+        }
+      }
+    }
+  }
+}
+===DONE===

@@ -1,5 +1,5 @@
 --TEST--
-SimpleXML element check
+SimpleXML: Element check
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?> 
 --FILE--

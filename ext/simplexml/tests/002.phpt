@@ -1,5 +1,5 @@
 --TEST--
-SimpleXML and clone
+SimpleXML: clone
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
@@ -26,37 +26,39 @@ $sxe = simplexml_load_string($xml);
 
 $copy = clone $sxe;
 
-print_r($copy);
-
-echo "---Done---\n";
+var_dump($copy);
 
 ?>
---EXPECT--
-SimpleXMLElement Object
-(
-    [elem1] => SimpleXMLElement Object
-        (
-            [comment] => SimpleXMLElement Object
-                (
-                )
-
-            [elem2] => SimpleXMLElement Object
-                (
-                    [elem3] => SimpleXMLElement Object
-                        (
-                            [elem4] => SimpleXMLElement Object
-                                (
-                                    [test] => SimpleXMLElement Object
-                                        (
-                                        )
-
-                                )
-
-                        )
-
-                )
-
-        )
-
-)
----Done--- 
+===DONE===
+--EXPECTF--
+object(SimpleXMLElement)#%d (2) {
+  ["@attributes"]=>
+  array(1) {
+    ["id"]=>
+    string(5) "elem1"
+  }
+  ["elem1"]=>
+  object(SimpleXMLElement)#%d (3) {
+    ["@attributes"]=>
+    array(1) {
+      ["attr1"]=>
+      string(5) "first"
+    }
+    ["comment"]=>
+    object(SimpleXMLElement)#%d (0) {
+    }
+    ["elem2"]=>
+    object(SimpleXMLElement)#%d (1) {
+      ["elem3"]=>
+      object(SimpleXMLElement)#%d (1) {
+        ["elem4"]=>
+        object(SimpleXMLElement)#%d (1) {
+          ["test"]=>
+          object(SimpleXMLElement)#%d (0) {
+          }
+        }
+      }
+    }
+  }
+}
+===DONE===

@@ -12,15 +12,24 @@ $root = simplexml_load_string('<?xml version="1.0"?>
 </root>
 ');
 
-echo $root->children('reserved-ns')->child;
-echo "\n";
-echo $root->children('special-ns')->child;
-foreach ($root->child as $child) {
-	echo "$child\n";
-}
-echo "\n---Done---\n";
+var_dump($root->children('reserved-ns')->child);
+var_dump($root->children('special-ns')->child);
+var_dump((string)$root->children('reserved-ns')->child);
+var_dump((string)$root->children('special-ns')->child);
+var_dump($root->child);
 ?>
---EXPECT--
-Hello
-World
----Done--- 
+===DONE===
+--EXPECTF--
+object(SimpleXMLElement)#%d (1) {
+  [0]=>
+  string(5) "Hello"
+}
+object(SimpleXMLElement)#%d (1) {
+  [0]=>
+  string(5) "World"
+}
+string(5) "Hello"
+string(5) "World"
+object(SimpleXMLElement)#%d (0) {
+}
+===DONE=== 

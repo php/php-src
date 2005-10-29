@@ -1,5 +1,5 @@
 --TEST--
-SimpleXML and foreach 
+SimpleXML: foreach 
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--

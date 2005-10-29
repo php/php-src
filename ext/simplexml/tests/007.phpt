@@ -1,5 +1,5 @@
 --TEST--
-SimpleXML and attributes
+SimpleXML: Attributes
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
@@ -48,7 +48,12 @@ var_dump($a);
 ===Done===
 --EXPECTF--
 ===Property===
-object(SimpleXMLElement)#%d (2) {
+object(SimpleXMLElement)#%d (3) {
+  ["@attributes"]=>
+  array(1) {
+    ["attr1"]=>
+    string(5) "first"
+  }
   ["comment"]=>
   object(SimpleXMLElement)#%d (0) {
   }
@@ -82,50 +87,6 @@ object(SimpleXMLElement)#%d (1) {
 object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(2) "12"
-}
-===Unset===
-NULL
-NULL
-===Misc.===
-int(4)
-int(4)
-===Done===
---UEXPECTF--
-===Property===
-object(SimpleXMLElement)#%d (2) {
-  [u"comment"]=>
-  object(SimpleXMLElement)#%d (0) {
-  }
-  [u"elem2"]=>
-  object(SimpleXMLElement)#%d (1) {
-    [u"elem3"]=>
-    object(SimpleXMLElement)#%d (1) {
-      [u"elem4"]=>
-      object(SimpleXMLElement)#%d (1) {
-        [u"test"]=>
-        object(SimpleXMLElement)#%d (0) {
-        }
-      }
-    }
-  }
-}
-===Array===
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
-  unicode(5) "elem1"
-}
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
-  unicode(5) "first"
-}
-===Set===
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
-  unicode(8) "Changed1"
-}
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
-  unicode(2) "12"
 }
 ===Unset===
 NULL
