@@ -230,6 +230,7 @@ static zval * sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, 
 	xmlAttrPtr      attr;
 	zval            tmp_zv;
 	int             nodendx = 0;
+	int             test;
 
 	sxe = php_sxe_fetch_object(object TSRMLS_CC);
 
@@ -257,16 +258,21 @@ static zval * sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, 
 	if (sxe->iter.type == SXE_ITER_ATTRLIST) {
 		attribs = 1;
 		elements = 0;		
-	} else if (sxe->iter.type != SXE_ITER_CHILD && sxe->iter.type != SXE_ITER_ATTRLIST) {
 		node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
+		attr = (xmlAttrPtr)node;
+		test = sxe->iter.name != NULL;
+	} else if (sxe->iter.type != SXE_ITER_CHILD) {
+		node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
+		attr = node ? node->properties : NULL;
+		test = 0;
 	}
+
 	if (node) {
 		if (attribs) {
 			if (Z_TYPE_P(member) != IS_LONG || sxe->iter.type == SXE_ITER_ATTRLIST) {
-				attr = node->properties;
 				if (Z_TYPE_P(member) == IS_LONG) {
 					while (attr && nodendx <= Z_LVAL_P(member)) {
-						if (match_ns(sxe, (xmlNodePtr) attr, sxe->iter.nsprefix)) {
+						if ((!test || !xmlStrcmp(attr->name, sxe->iter.name)) && match_ns(sxe, (xmlNodePtr) attr, sxe->iter.nsprefix)) {
 							if (nodendx == Z_LVAL_P(member)) {
 								_node_as_zval(sxe, (xmlNodePtr) attr, return_value, SXE_ITER_NONE, NULL, sxe->iter.nsprefix TSRMLS_CC);
 								break;
@@ -277,7 +283,7 @@ static zval * sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, 
 					}
 				} else {
 					while (attr) {
-						if (!xmlStrcmp(attr->name, name) && match_ns(sxe, (xmlNodePtr) attr, sxe->iter.nsprefix)) {
+						if ((!test || !xmlStrcmp(attr->name, sxe->iter.name)) && !xmlStrcmp(attr->name, name) && match_ns(sxe, (xmlNodePtr) attr, sxe->iter.nsprefix)) {
 							_node_as_zval(sxe, (xmlNodePtr) attr, return_value, SXE_ITER_NONE, NULL, sxe->iter.nsprefix TSRMLS_CC);
 							break;
 						}
@@ -388,6 +394,7 @@ static void sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_boo
 	int             counter = 0;
 	int             is_attr = 0;
 	int				nodendx = 0;
+	int             test;
 	zval            tmp_zv, trim_zv;
 
 	if (!member) {
@@ -430,16 +437,23 @@ static void sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_boo
 
 	GET_NODE(sxe, node);
 
-	if (sxe->iter.type != SXE_ITER_ATTRLIST) {
+	if (sxe->iter.type == SXE_ITER_ATTRLIST) {
+		attribs = 1;
+		elements = 0;		
 		node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
+		attr = (xmlAttrPtr)node;
+		test = sxe->iter.name != NULL;
+	} else if (sxe->iter.type != SXE_ITER_CHILD) {
+		node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
+		attr = node ? node->properties : NULL;
+		test = 0;
 	}
 
 	if (node) {
 		if (attribs) {
-			attr = node->properties;
 			if (Z_TYPE_P(member) == IS_LONG) {
 				while (attr && nodendx <= Z_LVAL_P(member)) {
-					if (match_ns(sxe, (xmlNodePtr) attr, sxe->iter.nsprefix)) {
+					if ((!test || !xmlStrcmp(attr->name, sxe->iter.name)) && match_ns(sxe, (xmlNodePtr) attr, sxe->iter.nsprefix)) {
 						if (nodendx == Z_LVAL_P(member)) {
 							is_attr = 1;
 							++counter;
@@ -451,7 +465,7 @@ static void sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_boo
 				}
 			} else {
 				while (attr) {
-					if (!xmlStrcmp(attr->name, name) && match_ns(sxe, (xmlNodePtr) attr, sxe->iter.nsprefix)) {
+					if ((!test || !xmlStrcmp(attr->name, sxe->iter.name)) && !xmlStrcmp(attr->name, name) && match_ns(sxe, (xmlNodePtr) attr, sxe->iter.nsprefix)) {
 						is_attr = 1;
 						++counter;
 						break;
@@ -546,6 +560,7 @@ static int sxe_prop_dim_exists(zval *object, zval *member, int check_empty, zend
 	xmlNodePtr      node;
 	xmlAttrPtr      attr = NULL;
 	int				exists = 0;
+	int             test;
 
 	sxe = php_sxe_fetch_object(object TSRMLS_CC);
 
@@ -563,15 +578,22 @@ static int sxe_prop_dim_exists(zval *object, zval *member, int check_empty, zend
 		}
 	}
 
-	if (sxe->iter.type != SXE_ITER_CHILD && sxe->iter.type != SXE_ITER_ATTRLIST) {
+	if (sxe->iter.type == SXE_ITER_ATTRLIST) {
+		attribs = 1;
+		elements = 0;		
 		node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
+		attr = (xmlAttrPtr)node;
+		test = sxe->iter.name != NULL;
+	} else if (sxe->iter.type != SXE_ITER_CHILD) {
+		node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
+		attr = node ? node->properties : NULL;
+		test = 0;
 	}
 
 	if (node) {
 		if (attribs) {
-			attr = node->properties;
 			while (attr) {
-				if (!xmlStrcmp(attr->name, name) && match_ns(sxe, (xmlNodePtr) attr, sxe->iter.nsprefix)) {
+				if ((!test || !xmlStrcmp(attr->name, sxe->iter.name)) && !xmlStrcmp(attr->name, name) && match_ns(sxe, (xmlNodePtr) attr, sxe->iter.nsprefix)) {
 					exists = 1;
 					break;
 				}
@@ -645,6 +667,7 @@ static void sxe_prop_dim_delete(zval *object, zval *member, zend_bool elements, 
 	xmlAttrPtr      attr;
 	xmlAttrPtr      anext;
 	zval            tmp_zv;
+	int             test;
 
 	if (Z_TYPE_P(member) != IS_STRING) {
 		tmp_zv = *member;
@@ -656,14 +679,23 @@ static void sxe_prop_dim_delete(zval *object, zval *member, zend_bool elements, 
 	sxe = php_sxe_fetch_object(object TSRMLS_CC);
 
 	GET_NODE(sxe, node);
-	node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
+	if (sxe->iter.type == SXE_ITER_ATTRLIST) {
+		attribs = 1;
+		elements = 0;		
+		node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
+		attr = (xmlAttrPtr)node;
+		test = sxe->iter.name != NULL;
+	} else {
+		node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
+		attr = node ? node->properties : NULL;
+		test = 0;
+	}
 
 	if (node) {
 		if (attribs) {
-			attr = node->properties;
 			while (attr) {
 				anext = attr->next;
-				if (!xmlStrcmp(attr->name, Z_STRVAL_P(member)) && match_ns(sxe, (xmlNodePtr) attr, sxe->iter.nsprefix)) {
+				if ((!test || !xmlStrcmp(attr->name, sxe->iter.name)) && !xmlStrcmp(attr->name, Z_STRVAL_P(member)) && match_ns(sxe, (xmlNodePtr) attr, sxe->iter.nsprefix)) {
 					xmlUnlinkNode((xmlNodePtr) attr);
 					php_libxml_node_free_resource((xmlNodePtr) attr TSRMLS_CC);
 					break;
@@ -780,6 +812,7 @@ static HashTable * sxe_properties_get(zval *object TSRMLS_DC)
 	xmlNodePtr       node;
 	xmlAttrPtr       attr;
 	int              namelen;
+	int              test;
 
 	sxe = php_sxe_fetch_object(object TSRMLS_CC);
 
@@ -799,8 +832,9 @@ static HashTable * sxe_properties_get(zval *object TSRMLS_DC)
 		}
 		attr = node ? (xmlAttrPtr)node->properties : NULL;
 		zattr = NULL;
+		test = sxe->iter.name && sxe->iter.type == SXE_ITER_ATTRLIST;
 		while (attr) {
-			if (match_ns(sxe, (xmlNodePtr)attr, sxe->iter.nsprefix)) {
+			if ((!test || !xmlStrcmp(attr->name, sxe->iter.name)) && match_ns(sxe, (xmlNodePtr)attr, sxe->iter.nsprefix)) {
 				MAKE_STD_ZVAL(value);
 				ZVAL_STRING(value, xmlNodeListGetString((xmlDocPtr) sxe->document->ptr, attr->children, 1), 1);
 				namelen = xmlStrlen(attr->name) + 1;
@@ -906,6 +940,11 @@ SXE_METHOD(xpath)
 	}
 
 	sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
+
+	if (sxe->iter.type == SXE_ITER_ATTRLIST) {
+		return; /* attributes don't have attributes */
+	}
+
 	if (!sxe->xpath) {
 		sxe->xpath = xmlXPathNewContext((xmlDocPtr) sxe->document->ptr);
 	}
@@ -955,7 +994,9 @@ SXE_METHOD(xpath)
 			 */
 			if (nodeptr->type == XML_TEXT_NODE) {
 				_node_as_zval(sxe, nodeptr->parent, value, SXE_ITER_NONE, NULL, NULL TSRMLS_CC);
-			} else  {
+			} else if (nodeptr->type == XML_ATTRIBUTE_NODE) {
+				_node_as_zval(sxe, nodeptr->parent, value, SXE_ITER_ATTRLIST, (char*)nodeptr->name, NULL TSRMLS_CC);
+			} else {
 				_node_as_zval(sxe, nodeptr, value, SXE_ITER_NONE, NULL, NULL TSRMLS_CC);
 			}
 
@@ -1076,6 +1117,11 @@ SXE_METHOD(children)
 	}
 
 	sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
+
+	if (sxe->iter.type == SXE_ITER_ATTRLIST) {
+		return; /* attributes don't have attributes */
+	}
+
 	GET_NODE(sxe, node);
 	node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
 
@@ -1099,6 +1145,11 @@ SXE_METHOD(attributes)
 
 	sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
 	GET_NODE(sxe, node);
+	
+	if (sxe->iter.type == SXE_ITER_ATTRLIST) {
+		return; /* attributes don't have attributes */
+	}
+
 	node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
 
 	_node_as_zval(sxe, node, return_value, SXE_ITER_ATTRLIST, NULL, nsprefix TSRMLS_CC);
@@ -1554,7 +1605,11 @@ ZEND_API void php_sxe_reset_iterator(php_sxe_object *sxe TSRMLS_DC)
 			}
 		} else {
 			if (node->type == XML_ATTRIBUTE_NODE) {
-				if (match_ns(sxe, node, sxe->iter.nsprefix)) {
+				if (sxe->iter.type == SXE_ITER_ATTRLIST && sxe->iter.name) {
+					if (!xmlStrcmp(node->name, sxe->iter.name) && match_ns(sxe, node, prefix)) {
+						break;
+					}
+				} else if (match_ns(sxe, node, sxe->iter.nsprefix)) {
 					break;
 				}
 			}
@@ -1672,7 +1727,11 @@ ZEND_API void php_sxe_move_forward_iterator(php_sxe_object *sxe TSRMLS_DC)
 			}
 		} else {
 			if (node->type == XML_ATTRIBUTE_NODE) {
-				if (match_ns(sxe, node, sxe->iter.nsprefix)) {
+				if (sxe->iter.type == SXE_ITER_ATTRLIST && sxe->iter.name) {
+					if (!xmlStrcmp(node->name, sxe->iter.name) && match_ns(sxe, node, prefix)) {
+						break;
+					}
+				} else if (match_ns(sxe, node, sxe->iter.nsprefix)) {
 					break;
 				}
 			}
