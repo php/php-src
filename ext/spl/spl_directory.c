@@ -52,6 +52,7 @@ PHPAPI zend_class_entry *spl_ce_SplFileInfo;
 PHPAPI zend_class_entry *spl_ce_DirectoryIterator;
 PHPAPI zend_class_entry *spl_ce_RecursiveDirectoryIterator;
 PHPAPI zend_class_entry *spl_ce_SplFileObject;
+PHPAPI zend_class_entry *spl_ce_SplTempFileObject;
 
 static void spl_filesystem_file_free_line(spl_filesystem_object *intern TSRMLS_DC) /* {{{ */
 {
@@ -1120,7 +1121,7 @@ ZEND_END_ARG_INFO();
 
 /* the method table */
 /* each method can have its own parameters and visibility */
-static zend_function_entry spl_filesystem_info_class_functions[] = {
+static zend_function_entry spl_SplFileInfo_functions[] = {
 	SPL_ME(SplFileInfo,       __construct,   arginfo_info___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       getPath,       NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       getFilename,   NULL, ZEND_ACC_PUBLIC)
@@ -1154,7 +1155,7 @@ ZEND_END_ARG_INFO();
 
 /* the method table */
 /* each method can have its own parameters and visibility */
-static zend_function_entry spl_filesystem_dir_class_functions[] = {
+static zend_function_entry spl_DirectoryIterator_functions[] = {
 	SPL_ME(DirectoryIterator, __construct,   arginfo_dir___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(DirectoryIterator, getFilename,   NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(DirectoryIterator, isDot,         NULL, ZEND_ACC_PUBLIC)
@@ -1167,7 +1168,7 @@ static zend_function_entry spl_filesystem_dir_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-static zend_function_entry spl_filesystem_tree_class_functions[] = {
+static zend_function_entry spl_RecursiveDirectoryIterator_functions[] = {
 	SPL_ME(RecursiveDirectoryIterator, rewind,        NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveDirectoryIterator, next,          NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveDirectoryIterator, key,           NULL, ZEND_ACC_PUBLIC)
@@ -1266,7 +1267,7 @@ static void spl_filesystem_file_rewind(spl_filesystem_object *intern TSRMLS_DC) 
 } /* }}} */
 
 /* {{{ proto void SplFileObject::__construct(string filename [, string mode = 'r' [, bool use_include_path  [, resource context]]]])
-   Construct a new file reader */
+   Construct a new file object */
 SPL_METHOD(SplFileObject, __construct)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
@@ -1296,6 +1297,43 @@ SPL_METHOD(SplFileObject, __construct)
 		intern->path_len = 0;
 	}
 	intern->path = estrndup(intern->file_name, intern->path_len);
+
+	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+} /* }}} */
+
+/* {{{ proto void SplFileObject::__construct([int max_memory])
+   Construct a new temp file object */
+SPL_METHOD(SplTempFileObject, __construct)
+{
+	long max_memory = PHP_STREAM_MAX_MEM;
+	char tmp_fname[32];
+	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	php_set_error_handling(EH_THROW, U_CLASS_ENTRY(spl_ce_RuntimeException) TSRMLS_CC);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &max_memory) == FAILURE) {
+		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+		return;
+	}
+
+	if (max_memory < 0) {
+		intern->file_name = "php://memory";
+		intern->file_name_len = 12;
+	} else if (ZEND_NUM_ARGS()) {
+		intern->file_name_len = snprintf(tmp_fname, sizeof(tmp_fname), "php://temp/maxmemory:%ld", max_memory);
+		intern->file_name = tmp_fname;
+	} else {
+		intern->file_name = "php://temp";
+		intern->file_name_len = 10;
+	}
+	intern->u.file.open_mode = "wb";
+	intern->u.file.open_mode_len = 1;
+	intern->u.file.zcontext = NULL;
+	
+	spl_filesystem_file_open(intern, 0, 0 TSRMLS_CC);
+
+	intern->path_len = 0;
+	intern->path = estrndup("", 0);
 
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 } /* }}} */
@@ -1774,7 +1812,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_seek, 0, 0, 1)
 	ZEND_ARG_INFO(0, line_pos)
 ZEND_END_ARG_INFO();
 
-static zend_function_entry spl_filesystem_file_class_functions[] = {
+static zend_function_entry spl_SplFileObject_functions[] = {
 	SPL_ME(SplFileObject, __construct,    arginfo_file_object___construct,   ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, getFilename,    NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, rewind,         NULL, ZEND_ACC_PUBLIC)
@@ -1809,21 +1847,31 @@ static zend_function_entry spl_filesystem_file_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_temp_file_object___construct, 0, 0, 1)
+	ZEND_ARG_INFO(0, max_memory)
+ZEND_END_ARG_INFO();
+
+static zend_function_entry spl_SplTempFileObject_functions[] = {
+	SPL_ME(SplTempFileObject, __construct, arginfo_temp_file_object___construct,  ZEND_ACC_PUBLIC)
+	{NULL, NULL, NULL}
+};
+
 /* {{{ PHP_MINIT_FUNCTION(spl_directory)
  */
 PHP_MINIT_FUNCTION(spl_directory)
 {
-	REGISTER_SPL_STD_CLASS_EX(SplFileInfo, spl_filesystem_object_new, spl_filesystem_info_class_functions);
+	REGISTER_SPL_STD_CLASS_EX(SplFileInfo, spl_filesystem_object_new, spl_SplFileInfo_functions);
 	memcpy(&spl_filesystem_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	spl_filesystem_object_handlers.clone_obj = spl_filesystem_object_clone;
 	spl_filesystem_object_handlers.cast_object = spl_filesystem_object_cast;
 
-	REGISTER_SPL_SUB_CLASS_EX(DirectoryIterator, SplFileInfo, spl_filesystem_object_new, spl_filesystem_dir_class_functions);
+	REGISTER_SPL_SUB_CLASS_EX(DirectoryIterator, SplFileInfo, spl_filesystem_object_new, spl_DirectoryIterator_functions);
 	zend_class_implements(spl_ce_DirectoryIterator TSRMLS_CC, 1, zend_ce_iterator);
 
 	spl_ce_DirectoryIterator->get_iterator = spl_filesystem_dir_get_iterator;
 
-	REGISTER_SPL_SUB_CLASS_EX(RecursiveDirectoryIterator, DirectoryIterator, spl_filesystem_object_new, spl_filesystem_tree_class_functions);
+	REGISTER_SPL_SUB_CLASS_EX(RecursiveDirectoryIterator, DirectoryIterator, spl_filesystem_object_new, spl_RecursiveDirectoryIterator_functions);
 	REGISTER_SPL_IMPLEMENTS(RecursiveDirectoryIterator, RecursiveIterator);
 	REGISTER_SPL_CLASS_CONST_LONG(RecursiveDirectoryIterator, "CURRENT_AS_FILEINFO", SPL_FILE_DIR_CURRENT_AS_FILEINFO);
 	REGISTER_SPL_CLASS_CONST_LONG(RecursiveDirectoryIterator, "KEY_AS_FILENAME",     SPL_FILE_DIR_KEY_AS_FILENAME);
@@ -1831,9 +1879,11 @@ PHP_MINIT_FUNCTION(spl_directory)
 
 	spl_ce_RecursiveDirectoryIterator->get_iterator = spl_filesystem_tree_get_iterator;
 
-	REGISTER_SPL_SUB_CLASS_EX(SplFileObject, SplFileInfo, spl_filesystem_object_new, spl_filesystem_file_class_functions);
+	REGISTER_SPL_SUB_CLASS_EX(SplFileObject, SplFileInfo, spl_filesystem_object_new, spl_SplFileObject_functions);
 	REGISTER_SPL_IMPLEMENTS(SplFileObject, RecursiveIterator);
 	REGISTER_SPL_IMPLEMENTS(SplFileObject, SeekableIterator);
+
+	REGISTER_SPL_SUB_CLASS_EX(SplTempFileObject, SplFileObject, spl_filesystem_object_new, spl_SplTempFileObject_functions);
 
 	REGISTER_SPL_CLASS_CONST_LONG(SplFileObject, "DROP_NEW_LINE", SPL_FILE_OBJECT_DROP_NEW_LINE);
 
