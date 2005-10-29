@@ -637,6 +637,8 @@ static int make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * 
 	zval **object = NULL, **method;
 	zend_class_entry * ce = NULL, **pce;
 	zend_function *function_handler;
+	char *lcname;
+	unsigned int lcname_len;
 	
 	if (Z_TYPE_P(callable) == IS_ARRAY) {
 		if (Z_ARRVAL_P(callable)->nNumOfElements < 2) {
@@ -674,11 +676,15 @@ static int make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * 
 		return 0;
 	}
 		
+	lcname = zend_u_str_case_fold(Z_TYPE_PP(method), Z_UNIVAL_PP(method), Z_UNILEN_PP(method), 1, &lcname_len);
+
 	fci->function_table = ce ? &ce->function_table : EG(function_table);
-	if (zend_u_hash_find(fci->function_table, Z_TYPE_PP(method), Z_UNIVAL_PP(method), Z_UNILEN_PP(method)+1, (void **)&function_handler) == FAILURE) {
+	if (zend_u_hash_find(fci->function_table, Z_TYPE_PP(method), lcname, lcname_len+1, (void **)&function_handler) == FAILURE) {
+		efree(lcname);
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied function does not exist" TSRMLS_CC);
 		return 0;
 	}
+	efree(lcname);
 
 	fci->size = sizeof(zend_fcall_info);
 	fci->function_name = NULL;
