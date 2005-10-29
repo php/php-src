@@ -474,7 +474,7 @@ SPL_METHOD(RecursiveIteratorIterator, key)
 				RETURN_STRINGL(str_key, str_key_len-1, 0);
 				break;
 			case HASH_KEY_IS_UNICODE:
-				RETURN_UNICODEL(str_key, str_key_len-1, 0);
+				RETURN_UNICODEL((void*)str_key, str_key_len-1, 0);
 				break;
 			case HASH_KEY_IS_BINARY:
 				RETURN_BINARYL(str_key, str_key_len-1, 0);
@@ -1734,7 +1734,7 @@ SPL_METHOD(CachingIterator, __toString)
 		if (intern->current.key_type == HASH_KEY_IS_STRING) {
 			RETURN_STRINGL(intern->current.str_key, intern->current.str_key_len, 1);
 		} else if (intern->current.key_type == HASH_KEY_IS_UNICODE) {
-			RETURN_UNICODEL(intern->current.str_key, intern->current.str_key_len, 1);
+			RETURN_UNICODEL((void*)intern->current.str_key, intern->current.str_key_len, 1);
 		} else if (intern->current.key_type == HASH_KEY_IS_BINARY) {
 			RETURN_BINARYL(intern->current.str_key, intern->current.str_key_len, 1);
 		} else {
@@ -2053,7 +2053,7 @@ SPL_METHOD(NoRewindIterator, key)
 				RETURN_STRINGL(str_key, str_key_len-1, 0);
 				break;
 			case HASH_KEY_IS_UNICODE:
-				RETURN_UNICODEL(str_key, str_key_len-1, 0);
+				RETURN_UNICODEL((void*)str_key, str_key_len-1, 0);
 				break;
 			case HASH_KEY_IS_BINARY:
 				RETURN_BINARYL(str_key, str_key_len-1, 0);
