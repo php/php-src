@@ -1,3 +1,102 @@
+2005-10-28  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * NEWS
+      ZendEngine2/zend_builtin_functions.c:
+      Add an additional field $frame['object'] to the result array of
+      debug_backtrace() that contains a reference to the respective object when
+      the frame was called from an object. Patch has been reviewed by Andi,
+      Zeev, and Marcus. I will coordinate with Ilia on merging it to the PHP_5_1
+      branch after PHP 5.1.0 has been released.
+
+2005-10-28  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/standard/string.c:
+      Make sure haystack_len is initialized before it's used
+
+    * ext/standard/php_string.h:
+      Adding missing function declarations to fix win32 build
+
+2005-10-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      configure.in
+      main/php_version.h:
+      Back to dev
+
+    * (PHP_5_1)
+      NEWS
+      configure.in
+      main/php_version.h:
+      5.1.0RC4
+
+2005-10-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/tests/bug34879.phpt:
+      Fixed bug #34879 (str_replace, array_map corrupt negative array indexes on
+      64-bit platforms)
+
+    * ZendEngine2/tests/bug34879.phpt
+      ZendEngine2/tests/bug34879.phpt:
+      
+      Fixed bug #34879 (str_replace, array_map corrupt negative array indexes on
+      64-bit platforms)
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h:
+      Fixed bug #34879 (str_replace, array_map corrupt negative array indexes)
+
+    * ext/standard/tests/array/bug34982.phpt
+      ext/standard/tests/array/bug34982.phpt
+      ext/standard/tests/array/bug34982.phpt:
+        1.1.4;
+      file bug34982.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      NEWS
+      ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/tests/array/bug34982.phpt
+      ext/standard/tests/array/bug34982.phpt:
+      Fixed bug #34982 (array_walk_recursive() modifies elements outside function
+      scope)
+
+    * (PHP_5_1)
+      NEWS
+      ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.c:
+      Fixed bug #34725 (CLI segmentation faults during cleanup in ZTS if ext/pcre
+      is DSO)
+
+2005-10-28  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * (PHP_5_1)
+      ext/mbstring/config.m4:
+      NetWare LibC sdk has stdarg.h
+      --Kamesh
+
+    * (PHP_5_0)
+      ext/mbstring/config.m4:
+      NetWare LibC SDK has stdarg.h
+
+2005-10-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_gen.php
+      ZendEngine2/zend_vm_gen.php
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/zend_vm_opcodes.h:
+      $id:$ tatgs are removed from generated files to avoid committing of
+      Zend/zend_vm_opcodes.h without real changes.
+
 2005-10-27  Rob Richards  <rrichards@ctindustries.net>
 
     * (PHP_5_1)
