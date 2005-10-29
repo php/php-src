@@ -97,7 +97,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "IMAP_EXPORTS" /FR /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\..\\" /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /D "ZTS" /D "_DEBUG" /D "IMAP_EXPORTS" /D "COMPILE_DL_IMAP" /D HAVE_IMAP=1 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /D ZEND_DEBUG=1 /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\..\\" /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /D "ZTS" /D "_DEBUG" /D "IMAP_EXPORTS" /D "COMPILE_DL_IMAP" /D HAVE_IMAP=1 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /D ZEND_DEBUG=1 /D HAVE_IMAP2004=1 /D HAVE_IMAP_SSL=1 /FR /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "_DEBUG"
@@ -107,7 +107,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts_debug.lib wsock32.lib winmm.lib cclient.lib /nologo /dll /debug /machine:I386 /out:"..\..\Debug_TS/php_imap.dll" /pdbtype:sept /libpath:"..\..\..\\" /libpath:"..\..\Debug_TS"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts_debug.lib wsock32.lib winmm.lib cclient.lib crypt32.lib /nologo /dll /debug /machine:I386 /out:"..\..\Debug_TS/php_imap.dll" /pdbtype:sept /libpath:"..\..\..\\" /libpath:"..\..\Debug_TS"
 
 !ELSEIF  "$(CFG)" == "imap - Win32 Release_TS"
 
@@ -123,7 +123,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "IMAP_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\\" /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "..\..\..\php_build\imap\c-client" /D "ZTS" /D "NDEBUG" /D "IMAP_EXPORTS" /D "COMPILE_DL_IMAP" /D HAVE_IMAP=1 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /D ZEND_DEBUG=0 /D HAVE_IMAP2001=1 /FR /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\\" /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "..\..\..\php_build\imap\c-client" /D "ZTS" /D "NDEBUG" /D "IMAP_EXPORTS" /D "COMPILE_DL_IMAP" /D HAVE_IMAP=1 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /D ZEND_DEBUG=0 /D HAVE_IMAP2001=1 /D HAVE_IMAP2004=1 /D HAVE_IMAP_SSL=1 /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "NDEBUG"
@@ -133,7 +133,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib wsock32.lib winmm.lib cclient.lib Secur32.lib CertIdl.Lib /nologo /dll /machine:I386 /nodefaultlib:"LIBCMT" /out:"..\..\Release_TS/php_imap.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline" /libpath:"..\..\..\php_build\imap"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib wsock32.lib winmm.lib cclient.lib Secur32.lib CertIdl.Lib crypt32.lib /nologo /dll /machine:I386 /nodefaultlib:"LIBCMT" /out:"..\..\Release_TS/php_imap.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline" /libpath:"..\..\..\php_build\imap"
 # SUBTRACT LINK32 /nodefaultlib
 
 !ENDIF 
