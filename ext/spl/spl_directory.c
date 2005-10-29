@@ -1306,7 +1306,7 @@ SPL_METHOD(SplFileObject, __construct)
 SPL_METHOD(SplTempFileObject, __construct)
 {
 	long max_memory = PHP_STREAM_MAX_MEM;
-	char tmp_fname[32];
+	char tmp_fname[48];
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	php_set_error_handling(EH_THROW, U_CLASS_ENTRY(spl_ce_RuntimeException) TSRMLS_CC);
