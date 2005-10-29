@@ -106,7 +106,7 @@ SPL_METHOD(SimpleXMLIterator, hasChildren)
 	php_sxe_object *child;
 	xmlNodePtr      node;
 
-	if (!sxe->iter.data) {
+	if (!sxe->iter.data || sxe->iter.type == SXE_ITER_ATTRLIST) {
 		RETURN_FALSE;
 	}
 	child = php_sxe_fetch_object(sxe->iter.data TSRMLS_CC);
@@ -128,7 +128,7 @@ SPL_METHOD(SimpleXMLIterator, getChildren)
 {
 	php_sxe_object *sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
 
-	if (!sxe->iter.data) {
+	if (!sxe->iter.data || sxe->iter.type == SXE_ITER_ATTRLIST) {
 		return; /* return NULL */
 	}
 	return_value->type = IS_OBJECT;
