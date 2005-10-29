@@ -244,7 +244,6 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 #if HAVE_MYSQL_STMT_PREPARE
 	if (S->stmt) {
 		mysql_stmt_free_result(S->stmt);
-		S->stmt = NULL;
 	}
 #endif
 	if (S->result) {
@@ -574,7 +573,6 @@ static int pdo_mysql_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC)
 #if HAVE_MYSQL_STMT_PREPARE
 	if (S->stmt) {
 		int retval = mysql_stmt_free_result(S->stmt);
-		S->stmt = NULL;
 		return retval ? 0 : 1;
 	}
 #endif
