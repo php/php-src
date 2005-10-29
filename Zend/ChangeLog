@@ -1,3 +1,42 @@
+2005-10-28  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_builtin_functions.c:
+      Add an additional field $frame['object'] to the result array of
+      debug_backtrace() that contains a reference to the respective object when
+      the frame was called from an object. Patch has been reviewed by Andi,
+      Zeev, and Marcus. I will coordinate with Ilia on merging it to the PHP_5_1
+      branch after PHP 5.1.0 has been released.
+
+2005-10-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      zend_API.c
+      zend_API.h
+      tests/bug34879.phpt:
+      Fixed bug #34879 (str_replace, array_map corrupt negative array indexes on
+      64-bit platforms)
+
+    * tests/bug34879.phpt
+      tests/bug34879.phpt:
+      
+      Fixed bug #34879 (str_replace, array_map corrupt negative array indexes on
+      64-bit platforms)
+
+    * zend_API.c
+      zend_API.h:
+      Fixed bug #34879 (str_replace, array_map corrupt negative array indexes)
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_gen.php
+      zend_vm_gen.php
+      zend_vm_opcodes.h
+      zend_vm_opcodes.h:
+      $id:$ tatgs are removed from generated files to avoid committing of
+      Zend/zend_vm_opcodes.h without real changes.
+
 2005-10-27  Dmitry Stogov  <dmitry@zend.com>
 
     * tests/unset_cv12.phpt
