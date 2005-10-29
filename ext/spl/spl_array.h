@@ -32,6 +32,7 @@ extern PHPAPI zend_class_entry *spl_ce_Countable;
 PHP_MINIT_FUNCTION(spl_array);
 
 extern void spl_array_iterator_append(zval *object, zval *append_value TSRMLS_DC);
+extern void spl_array_iterator_key(zval *object, zval *return_value TSRMLS_DC);
 
 #endif /* SPL_ARRAY_H */
 

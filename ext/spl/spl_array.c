@@ -1151,7 +1151,11 @@ SPL_METHOD(Array, current)
    Return current array key */
 SPL_METHOD(Array, key)
 {
-	zval *object = getThis();
+	spl_array_iterator_key(getThis(), return_value TSRMLS_CC);
+}
+
+void spl_array_iterator_key(zval *object, zval *return_value TSRMLS_DC) /* {{{ */
+{
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 	char *string_key;
 	uint string_length;
