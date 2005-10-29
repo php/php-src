@@ -22,7 +22,12 @@ var_dump($sxe['attr']);
 ?>
 ===DONE===
 --EXPECTF--
-object(SimpleXMLElement)#%d (0) {
+object(SimpleXMLElement)#%d (1) {
+  ["@attributes"]=>
+  array(1) {
+    ["attr"]=>
+    string(%d) "foo%sbar%sbaz"
+  }
 }
 object(SimpleXMLElement)#%d (1) {
   [0]=>

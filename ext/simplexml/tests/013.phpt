@@ -1,5 +1,5 @@
 --TEST--
-SimpleXML and Split text content
+SimpleXML: Split text content
 --SKIPIF--
 <?php 
 	if (!extension_loaded('simplexml')) print 'skip';

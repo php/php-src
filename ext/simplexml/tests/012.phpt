@@ -1,5 +1,5 @@
 --TEST--
-SimpleXML and Attribute creation
+SimpleXML: Attribute creation
 --SKIPIF--
 <?php 
 	if (!extension_loaded('simplexml')) print 'skip';
