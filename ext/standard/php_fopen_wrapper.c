@@ -153,12 +153,23 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 	int mode_rw = 0;
 	php_stream * stream = NULL;
 	char *p, *token, *pathdup;
+	long max_memory;
 
 	if (!strncasecmp(path, "php://", 6))
 		path += 6;
 	
-	if (!strcasecmp(path, "temp")) {
-		return php_stream_temp_create(0, PHP_STREAM_MAX_MEM);
+	if (!strncasecmp(path, "temp", 4)) {
+		path += 4;
+		max_memory = PHP_STREAM_MAX_MEM;
+		if (!strncasecmp(path, "/maxmemory:", 11)) {
+			path += 11;
+			sscanf(path, "%ld", &max_memory);
+			if (max_memory < 0) {
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Max memory must be >= 0");
+				return NULL;
+			}
+		}
+		return php_stream_temp_create(0, max_memory);		
 	}
 	
 	if (!strcasecmp(path, "memory")) {
@@ -190,7 +201,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 		pathdup = estrndup(path + 6, strlen(path + 6));
 		p = strstr(pathdup, "/resource=");
 		if (!p) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "No URL resource specified.");
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "No URL resource specified");
 			efree(pathdup);
 			return NULL;
 		}
