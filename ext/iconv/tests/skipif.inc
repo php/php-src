@@ -6,7 +6,7 @@
 //  $dlext = (substr(PHP_OS, 0, 3) == "WIN") ? ".dll" : ".so";
 //  @dl("iconv$dlext");
 //}
-if (!extension_loaded("iconv")) {
-    die("skip iconv extension not available\n");
+if (!function_exists("iconv")) {
+    die("skip iconv function not available\n");
 }
 ?>
