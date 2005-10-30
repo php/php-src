@@ -1,7 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, Version 4.4.2
-
 - Fixed bug #34996 (ImageTrueColorToPalette() crashes when ncolors is 
   zero). (Tony)
 
