@@ -368,7 +368,10 @@ static PHP_METHOD(PDOStatement, execute)
 			}
 
 			param.param_type = PDO_PARAM_STR;
-			param.parameter = *tmp;
+			MAKE_STD_ZVAL(param.parameter);
+			*param.parameter = **tmp;
+			zval_copy_ctor(param.parameter);
+			INIT_PZVAL(param.parameter);
 
 			if (!really_register_bound_param(&param, stmt, 1 TSRMLS_CC)) {
 				RETURN_FALSE;
@@ -1021,6 +1024,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 					} else {
 						*return_value = *retval;
 						zval_copy_ctor(return_value);
+						INIT_PZVAL(return_value);
 						zval_ptr_dtor(&retval);
 					}
 				}
