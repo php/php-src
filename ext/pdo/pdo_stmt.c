@@ -371,6 +371,7 @@ static PHP_METHOD(PDOStatement, execute)
 			MAKE_STD_ZVAL(param.parameter);
 			*param.parameter = **tmp;
 			zval_copy_ctor(param.parameter);
+			INIT_PZVAL(param.parameter);
 
 			if (!really_register_bound_param(&param, stmt, 1 TSRMLS_CC)) {
 				zval_ptr_dtor(&param.parameter);
