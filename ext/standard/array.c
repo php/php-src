@@ -3996,8 +3996,12 @@ PHP_FUNCTION(array_product)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
 		return;
 	}
-
-	ZVAL_LONG(return_value, 0);
+	
+	if (!zend_hash_num_elements(Z_ARRVAL_PP(input))) {
+		RETURN_LONG(0);
+		return;
+	}
+	ZVAL_LONG(return_value, 1);
 
 	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(input), &pos);
 		 zend_hash_get_current_data_ex(Z_ARRVAL_PP(input), (void **)&entry, &pos) == SUCCESS;

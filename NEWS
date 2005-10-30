@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Nov 2005, PHP 5.1
+- Fixed bug #35014 (array_product() always returns 0). (Ilia)
 
 28 Oct 2005, PHP 5.1 Release Candidate 4
 - Fixed fgetcsv() and fputcsv() inconsistency. (Dmitry)
