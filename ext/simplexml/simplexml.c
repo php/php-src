@@ -1568,7 +1568,7 @@ zend_object_iterator_funcs php_sxe_iterator_funcs = {
 static void php_sxe_iterator_fetch(php_sxe_object *sxe, xmlNodePtr node TSRMLS_DC)
 {
 	char *prefix = sxe->iter.nsprefix;
-	int test_elem = sxe->iter.type == SXE_ITER_ELEMENT;
+	int test_elem = sxe->iter.type == SXE_ITER_ELEMENT  && sxe->iter.name;
 	int test_attr = sxe->iter.type == SXE_ITER_ATTRLIST && sxe->iter.name;
 
 	while (node) {
