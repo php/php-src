@@ -1205,6 +1205,13 @@ static int sxe_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 
 	sxe = php_sxe_fetch_object(readobj TSRMLS_CC);
 
+	if (type == IS_BOOL) {
+		node = php_sxe_get_first_node(sxe, NULL TSRMLS_CC);
+		INIT_PZVAL(writeobj);
+		ZVAL_BOOL(writeobj, node != NULL || zend_hash_num_elements(sxe_properties_get(readobj TSRMLS_CC)) > 0);
+		return SUCCESS;
+	}
+
 	if (sxe->iter.type != SXE_ITER_NONE) {
 		node = php_sxe_get_first_node(sxe, NULL TSRMLS_CC);
 		if (node) {
