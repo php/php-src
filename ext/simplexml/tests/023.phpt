@@ -34,3 +34,16 @@ object(SimpleXMLElement)#%d (1) {
   string(%d) "foo%sbar%sbaz"
 }
 ===DONE===
+--UEXPECTF--
+object(SimpleXMLElement)#%d (1) {
+  [u"@attributes"]=>
+  array(1) {
+    [u"attr"]=>
+    string(13) "foo bar baz"
+  }
+}
+object(SimpleXMLElement)#%d (1) {
+  [0]=>
+  unicode(%d) "foo%sbar%sbaz"
+}
+===DONE===

@@ -218,3 +218,186 @@ NULL
 bool(false)
 NULL
 ===DONE===
+--UEXPECTF--
+===sxe
+bool(true)
+object(SimpleXMLElement)#%d (3) {
+  [u"@attributes"]=>
+  array(1) {
+    [u"id"]=>
+    string(3) "123"
+  }
+  [u"elem1"]=>
+  array(2) {
+    [0]=>
+    string(36) "There is some text.Here is some more"
+    [1]=>
+    object(SimpleXMLElement)#%d (1) {
+      [u"@attributes"]=>
+      array(2) {
+        [u"attr1"]=>
+        string(2) "11"
+        [u"attr2"]=>
+        string(2) "12"
+      }
+    }
+  }
+  [u"elem11"]=>
+  object(SimpleXMLElement)#%d (1) {
+    [u"elem111"]=>
+    object(SimpleXMLElement)#%d (1) {
+      [u"elem1111"]=>
+      object(SimpleXMLElement)#%d (0) {
+      }
+    }
+  }
+}
+===sxe->elem1
+bool(true)
+object(SimpleXMLElement)#%d (3) {
+  [u"@attributes"]=>
+  array(2) {
+    [u"attr1"]=>
+    string(5) "first"
+    [u"attr2"]=>
+    string(6) "second"
+  }
+  [u"comment"]=>
+  object(SimpleXMLElement)#%d (0) {
+  }
+  [u"elem2"]=>
+  object(SimpleXMLElement)#%d (2) {
+    [u"@attributes"]=>
+    array(2) {
+      [u"att25"]=>
+      string(2) "25"
+      [u"att42"]=>
+      string(2) "42"
+    }
+    [u"elem3"]=>
+    object(SimpleXMLElement)#%d (1) {
+      [u"elem4"]=>
+      object(SimpleXMLElement)#%d (1) {
+        [u"test"]=>
+        object(SimpleXMLElement)#%d (0) {
+        }
+      }
+    }
+  }
+}
+===sxe->elem1[0]
+bool(true)
+object(SimpleXMLElement)#%d (3) {
+  [u"@attributes"]=>
+  array(2) {
+    [u"attr1"]=>
+    string(5) "first"
+    [u"attr2"]=>
+    string(6) "second"
+  }
+  [u"comment"]=>
+  object(SimpleXMLElement)#%d (0) {
+  }
+  [u"elem2"]=>
+  object(SimpleXMLElement)#%d (2) {
+    [u"@attributes"]=>
+    array(2) {
+      [u"att25"]=>
+      string(2) "25"
+      [u"att42"]=>
+      string(2) "42"
+    }
+    [u"elem3"]=>
+    object(SimpleXMLElement)#%d (1) {
+      [u"elem4"]=>
+      object(SimpleXMLElement)#%d (1) {
+        [u"test"]=>
+        object(SimpleXMLElement)#%d (0) {
+        }
+      }
+    }
+  }
+}
+===sxe->elem1[0]->elem2
+bool(true)
+object(SimpleXMLElement)#%d (2) {
+  [u"@attributes"]=>
+  array(2) {
+    [u"att25"]=>
+    string(2) "25"
+    [u"att42"]=>
+    string(2) "42"
+  }
+  [u"elem3"]=>
+  object(SimpleXMLElement)#%d (1) {
+    [u"elem4"]=>
+    object(SimpleXMLElement)#%d (1) {
+      [u"test"]=>
+      object(SimpleXMLElement)#%d (0) {
+      }
+    }
+  }
+}
+===sxe->elem1[0]->elem2->bla
+bool(false)
+object(SimpleXMLElement)#%d (0) {
+}
+===sxe->elem1[0]["attr1"]
+bool(false)
+object(SimpleXMLElement)#%d (1) {
+  [0]=>
+  unicode(5) "first"
+}
+===sxe->elem1[0]->attr1
+bool(false)
+object(SimpleXMLElement)#%d (0) {
+}
+===sxe->elem1[1]
+bool(true)
+object(SimpleXMLElement)#%d (1) {
+  [u"@attributes"]=>
+  array(2) {
+    [u"attr1"]=>
+    string(2) "11"
+    [u"attr2"]=>
+    string(2) "12"
+  }
+}
+===sxe->elem1[2]
+bool(false)
+NULL
+===sxe->elem11
+bool(true)
+object(SimpleXMLElement)#%d (1) {
+  [u"elem111"]=>
+  object(SimpleXMLElement)#%d (1) {
+    [u"elem1111"]=>
+    object(SimpleXMLElement)#%d (0) {
+    }
+  }
+}
+===sxe->elem11->elem111
+bool(true)
+object(SimpleXMLElement)#%d (1) {
+  [u"elem1111"]=>
+  object(SimpleXMLElement)#%d (0) {
+  }
+}
+===sxe->elem11->elem111->elem1111
+bool(true)
+object(SimpleXMLElement)#%d (0) {
+}
+===sxe->elem22
+bool(false)
+object(SimpleXMLElement)#%d (0) {
+}
+===sxe->elem22->elem222
+bool(false)
+NULL
+===sxe->elem22->attr22
+bool(false)
+NULL
+===sxe->elem22["attr22"]
+bool(false)
+NULL
+===DONE===

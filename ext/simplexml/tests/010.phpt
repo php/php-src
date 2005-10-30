@@ -62,3 +62,35 @@ object(simplexml_inherited)#%d (2) {
   }
 }
 ===DONE===
+--UEXPECTF--
+object(simplexml_inherited)#%d (2) {
+  [u"@attributes"]=>
+  array(1) {
+    [u"id"]=>
+    string(5) "elem1"
+  }
+  [u"elem1"]=>
+  object(simplexml_inherited)#%d (3) {
+    [u"@attributes"]=>
+    array(1) {
+      [u"attr1"]=>
+      string(5) "first"
+    }
+    [u"comment"]=>
+    object(simplexml_inherited)#%d (0) {
+    }
+    [u"elem2"]=>
+    object(simplexml_inherited)#%d (1) {
+      [u"elem3"]=>
+      object(simplexml_inherited)#%d (1) {
+        [u"elem4"]=>
+        object(simplexml_inherited)#%d (1) {
+          [u"test"]=>
+          object(simplexml_inherited)#%d (0) {
+          }
+        }
+      }
+    }
+  }
+}
+===DONE===

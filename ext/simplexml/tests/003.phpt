@@ -67,3 +67,40 @@ object(SimpleXMLElement)#%d (2) {
   }
 }
 ===DONE===
+--UEXPECTF--
+object(SimpleXMLElement)#%d (2) {
+  [u"@attributes"]=>
+  array(1) {
+    [u"id"]=>
+    string(5) "elem1"
+  }
+  [u"elem1"]=>
+  object(SimpleXMLElement)#%d (3) {
+    [u"@attributes"]=>
+    array(1) {
+      [u"attr1"]=>
+      string(5) "first"
+    }
+    [u"comment"]=>
+    object(SimpleXMLElement)#%d (0) {
+    }
+    [u"elem2"]=>
+    object(SimpleXMLElement)#%d (1) {
+      [u"elem3"]=>
+      object(SimpleXMLElement)#%d (2) {
+        [u"included-entity"]=>
+        object(SimpleXMLElement)#%d (1) {
+          [u"included-entity"]=>
+          string(36) "This is text included from an entity"
+        }
+        [u"elem4"]=>
+        object(SimpleXMLElement)#%d (1) {
+          [u"test"]=>
+          object(SimpleXMLElement)#%d (0) {
+          }
+        }
+      }
+    }
+  }
+}
+===DONE===
