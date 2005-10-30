@@ -33,3 +33,17 @@ string(5) "World"
 object(SimpleXMLElement)#%d (0) {
 }
 ===DONE=== 
+--UEXPECTF--
+object(SimpleXMLElement)#%d (1) {
+  [0]=>
+  unicode(5) "Hello"
+}
+object(SimpleXMLElement)#%d (1) {
+  [0]=>
+  unicode(5) "World"
+}
+string(5) "Hello"
+string(5) "World"
+object(SimpleXMLElement)#%d (0) {
+}
+===DONE===

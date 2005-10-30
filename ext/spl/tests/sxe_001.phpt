@@ -62,3 +62,35 @@ object(SimpleXMLIterator)#%d (2) {
   }
 }
 ===DONE===
+--UEXPECTF--
+object(SimpleXMLIterator)#%d (2) {
+  [u"@attributes"]=>
+  array(1) {
+    [u"id"]=>
+    string(5) "elem1"
+  }
+  [u"elem1"]=>
+  object(SimpleXMLIterator)#%d (3) {
+    [u"@attributes"]=>
+    array(1) {
+      [u"attr1"]=>
+      string(5) "first"
+    }
+    [u"comment"]=>
+    object(SimpleXMLIterator)#%d (0) {
+    }
+    [u"elem2"]=>
+    object(SimpleXMLIterator)#%d (1) {
+      [u"elem3"]=>
+      object(SimpleXMLIterator)#%d (1) {
+        [u"elem4"]=>
+        object(SimpleXMLIterator)#%d (1) {
+          [u"test"]=>
+          object(SimpleXMLIterator)#%d (0) {
+          }
+        }
+      }
+    }
+  }
+}
+===DONE===
