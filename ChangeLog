@@ -1,3 +1,56 @@
+2005-10-29  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_4_4)
+      ext/ming/ming.dsp:
+      Fix build with newer libming
+
+    * (PHP_4_4)
+      ext/imap/imap.dsp:
+      Fix compilation with c-client 2004
+
+2005-10-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/simplexml.c:
+      - Fix attribute handling when using xpath expressions that lead to
+      attributes
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/000.phpt
+      ext/simplexml/tests/000.xml
+      ext/simplexml/tests/001.phpt
+      ext/simplexml/tests/002.phpt
+      ext/simplexml/tests/003.phpt
+      ext/simplexml/tests/004.phpt
+      ext/simplexml/tests/005.phpt
+      ext/simplexml/tests/006.phpt
+      ext/simplexml/tests/007.phpt
+      ext/simplexml/tests/008.phpt
+      ext/simplexml/tests/009.phpt
+      ext/simplexml/tests/010.phpt
+      ext/simplexml/tests/011.phpt
+      ext/simplexml/tests/012.phpt
+      ext/simplexml/tests/013.phpt
+      ext/simplexml/tests/019.phpt
+      ext/simplexml/tests/020.phpt
+      ext/simplexml/tests/021.phpt
+      ext/simplexml/tests/022.phpt
+      ext/simplexml/tests/023.phpt
+      ext/simplexml/tests/bug27010.phpt
+      ext/simplexml/tests/profile11.phpt
+      ext/simplexml/tests/simplexml_import_dom.phpt
+      ext/simplexml/tests/sxe.dtd:
+      - Change var_dump to include all that is reachable, incl. @attributes
+      - Adapt tests and add new one
+
+    * ext/standard/php_fopen_wrapper.c:
+      - It's better to use our own strtol here
+
+    * ext/standard/php_fopen_wrapper.c:
+      - Allow to specify ma memory usage for temp stream
+
+    * ext/standard/php_fopen_wrapper.c:
+      - Register temp and memory stream here
+
 2005-10-28  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * NEWS
