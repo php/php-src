@@ -3999,7 +3999,6 @@ PHP_FUNCTION(array_product)
 	
 	if (!zend_hash_num_elements(Z_ARRVAL_PP(input))) {
 		RETURN_LONG(0);
-		return;
 	}
 	ZVAL_LONG(return_value, 1);
 
