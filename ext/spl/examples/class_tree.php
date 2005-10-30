@@ -27,8 +27,13 @@ EOF;
 
 if (!class_exists("RecursiveTreeIterator", false)) require_once("recursivetreeiterator.inc");
 
+/** \brief Collects sub classes for given class or interface
+ */
 class SubClasses extends RecursiveArrayIterator
 {
+	/** @param base  base class to collect sub classes for
+	 * @param check_interfaces whether we deal with interfaces
+	 */
 	function __construct($base, $check_interfaces = false)
 	{
 		foreach(get_declared_classes() as $cname)
@@ -72,6 +77,8 @@ class SubClasses extends RecursiveArrayIterator
 		$this->uksort('strnatcasecmp');
 	}
 	
+	/** @return key() since that is the name we need
+	 */
 	function current()
 	{
 		return parent::key();
