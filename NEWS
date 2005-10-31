@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, Version 4.4.2
+- Missing safe_mode/open_basedir check in cURL extension. (Ilia)
 - Fixed bug #34996 (ImageTrueColorToPalette() crashes when ncolors is 
   zero). (Tony)
 
