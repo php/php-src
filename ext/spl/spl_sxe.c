@@ -32,6 +32,7 @@
 #include "spl_engine.h"
 #include "spl_iterators.h"
 #include "spl_sxe.h"
+#include "spl_array.h"
 
 zend_class_entry *spl_ce_SimpleXMLIterator = NULL;
 zend_class_entry *spl_ce_SimpleXMLElement;
@@ -135,6 +136,15 @@ SPL_METHOD(SimpleXMLIterator, getChildren)
 	return_value->value.obj = zend_objects_store_clone_obj(sxe->iter.data TSRMLS_CC);
 }
 
+SPL_METHOD(SimpleXMLIterator, count) /* {{{ */
+{
+	long count = 0;
+
+	Z_OBJ_HANDLER_P(getThis(), count_elements)(getThis(), &count TSRMLS_CC);
+	
+	RETURN_LONG(count);
+}
+
 static zend_function_entry spl_funcs_SimpleXMLIterator[] = {
 	SPL_ME(SimpleXMLIterator, rewind,                 NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SimpleXMLIterator, valid,                  NULL, ZEND_ACC_PUBLIC)
@@ -143,6 +153,7 @@ static zend_function_entry spl_funcs_SimpleXMLIterator[] = {
 	SPL_ME(SimpleXMLIterator, next,                   NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SimpleXMLIterator, hasChildren,            NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SimpleXMLIterator, getChildren,            NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(SimpleXMLIterator, count,                  NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -161,6 +172,7 @@ SPL_API PHP_MINIT_FUNCTION(spl_sxe) /* {{{ */
 
 	REGISTER_SPL_SUB_CLASS_EX(SimpleXMLIterator, SimpleXMLElement, spl_ce_SimpleXMLElement->create_object, spl_funcs_SimpleXMLIterator);
 	REGISTER_SPL_IMPLEMENTS(SimpleXMLIterator, RecursiveIterator);
+	REGISTER_SPL_IMPLEMENTS(SimpleXMLIterator, Countable);
 
 	return SUCCESS;
 }
