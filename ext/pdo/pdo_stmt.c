@@ -474,8 +474,16 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 			if (value == NULL) {
 				ZVAL_NULL(dest);
 			} else if (value_len == 0) {
-				php_stream_to_zval((php_stream*)value, dest);
-			} else {
+				if (stmt->dbh->stringify) {
+					char *buf = NULL;
+					size_t len;
+					len = php_stream_copy_to_mem((php_stream*)value, &buf, PHP_STREAM_COPY_ALL, 0);
+					ZVAL_STRINGL(dest, buf, len, 0);
+					php_stream_close((php_stream*)value);
+				} else {
+					php_stream_to_zval((php_stream*)value, dest);
+				}
+			} else if (!stmt->dbh->stringify) {
 				/* they gave us a string, but LOBs are represented as streams in PDO */
 				php_stream *stm;
 #ifdef TEMP_STREAM_TAKE_BUFFER
@@ -2075,11 +2083,21 @@ static void free_statement(pdo_stmt_t *stmt TSRMLS_DC)
 	efree(stmt);
 }
 
-void pdo_dbstmt_free_storage(pdo_stmt_t *stmt TSRMLS_DC)
+PDO_API void php_pdo_stmt_addref(pdo_stmt_t *stmt TSRMLS_DC)
+{
+	stmt->refcount++;
+}
+
+PDO_API void php_pdo_stmt_delref(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	if (--stmt->refcount == 0) {
 		free_statement(stmt TSRMLS_CC);
 	}
+}
+
+void pdo_dbstmt_free_storage(pdo_stmt_t *stmt TSRMLS_DC)
+{
+	php_pdo_stmt_delref(stmt TSRMLS_CC);
 }
 
 zend_object_value pdo_dbstmt_new(zend_class_entry *ce TSRMLS_DC)
