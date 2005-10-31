@@ -13,6 +13,7 @@ function test($what)
 	echo "===$what\n";
 	eval("var_dump(isset(\$$what));");
 	eval("var_dump((bool)\$$what);");
+	eval("var_dump(count(\$$what));");
 	eval("var_dump(\$$what);");
 }
 
@@ -40,6 +41,7 @@ test('sxe->elem22["attr22"]');
 ===sxe
 bool(true)
 bool(true)
+int(3)
 object(SimpleXMLElement)#%d (3) {
   ["@attributes"]=>
   array(1) {
@@ -74,6 +76,7 @@ object(SimpleXMLElement)#%d (3) {
 ===sxe->elem1
 bool(true)
 bool(true)
+int(2)
 object(SimpleXMLElement)#%d (3) {
   ["@attributes"]=>
   array(2) {
@@ -108,6 +111,7 @@ object(SimpleXMLElement)#%d (3) {
 ===sxe->elem1[0]
 bool(true)
 bool(true)
+int(1)
 object(SimpleXMLElement)#%d (3) {
   ["@attributes"]=>
   array(2) {
@@ -142,6 +146,7 @@ object(SimpleXMLElement)#%d (3) {
 ===sxe->elem1[0]->elem2
 bool(true)
 bool(true)
+int(1)
 object(SimpleXMLElement)#%d (2) {
   ["@attributes"]=>
   array(2) {
@@ -163,11 +168,13 @@ object(SimpleXMLElement)#%d (2) {
 ===sxe->elem1[0]->elem2->bla
 bool(false)
 bool(false)
+int(0)
 object(SimpleXMLElement)#%d (0) {
 }
 ===sxe->elem1[0]["attr1"]
 bool(true)
 bool(true)
+int(0)
 object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(5) "first"
@@ -175,11 +182,13 @@ object(SimpleXMLElement)#%d (1) {
 ===sxe->elem1[0]->attr1
 bool(false)
 bool(false)
+int(0)
 object(SimpleXMLElement)#%d (0) {
 }
 ===sxe->elem1[1]
 bool(true)
 bool(true)
+int(0)
 object(SimpleXMLElement)#%d (1) {
   ["@attributes"]=>
   array(2) {
@@ -192,10 +201,12 @@ object(SimpleXMLElement)#%d (1) {
 ===sxe->elem1[2]
 bool(false)
 bool(false)
+int(0)
 NULL
 ===sxe->elem11
 bool(true)
 bool(true)
+int(1)
 object(SimpleXMLElement)#%d (1) {
   ["elem111"]=>
   object(SimpleXMLElement)#%d (1) {
@@ -207,6 +218,7 @@ object(SimpleXMLElement)#%d (1) {
 ===sxe->elem11->elem111
 bool(true)
 bool(true)
+int(1)
 object(SimpleXMLElement)#%d (1) {
   ["elem1111"]=>
   object(SimpleXMLElement)#%d (0) {
@@ -215,30 +227,36 @@ object(SimpleXMLElement)#%d (1) {
 ===sxe->elem11->elem111->elem1111
 bool(true)
 bool(true)
+int(1)
 object(SimpleXMLElement)#%d (0) {
 }
 ===sxe->elem22
 bool(false)
 bool(false)
+int(0)
 object(SimpleXMLElement)#%d (0) {
 }
 ===sxe->elem22->elem222
 bool(false)
 bool(false)
+int(0)
 NULL
 ===sxe->elem22->attr22
 bool(false)
 bool(false)
+int(0)
 NULL
 ===sxe->elem22["attr22"]
 bool(false)
 bool(false)
+int(0)
 NULL
 ===DONE===
 --UEXPECTF--
 ===sxe
 bool(true)
 bool(true)
+int(3)
 object(SimpleXMLElement)#%d (3) {
   [u"@attributes"]=>
   array(1) {
@@ -273,6 +291,7 @@ object(SimpleXMLElement)#%d (3) {
 ===sxe->elem1
 bool(true)
 bool(true)
+int(2)
 object(SimpleXMLElement)#%d (3) {
   [u"@attributes"]=>
   array(2) {
@@ -307,6 +326,7 @@ object(SimpleXMLElement)#%d (3) {
 ===sxe->elem1[0]
 bool(true)
 bool(true)
+int(1)
 object(SimpleXMLElement)#%d (3) {
   [u"@attributes"]=>
   array(2) {
@@ -341,6 +361,7 @@ object(SimpleXMLElement)#%d (3) {
 ===sxe->elem1[0]->elem2
 bool(true)
 bool(true)
+int(1)
 object(SimpleXMLElement)#%d (2) {
   [u"@attributes"]=>
   array(2) {
@@ -362,16 +383,19 @@ object(SimpleXMLElement)#%d (2) {
 ===sxe->elem1[0]->elem2->bla
 bool(false)
 bool(false)
+int(0)
 object(SimpleXMLElement)#%d (0) {
 }
 ===sxe->elem1[0]->attr1
 bool(false)
 bool(false)
+int(0)
 object(SimpleXMLElement)#%d (0) {
 }
 ===sxe->elem1[1]
 bool(true)
 bool(true)
+int(0)
 object(SimpleXMLElement)#%d (1) {
   [u"@attributes"]=>
   array(2) {
@@ -384,10 +408,12 @@ object(SimpleXMLElement)#%d (1) {
 ===sxe->elem1[2]
 bool(false)
 bool(false)
+int(0)
 NULL
 ===sxe->elem11
 bool(true)
 bool(true)
+int(1)
 object(SimpleXMLElement)#%d (1) {
   [u"elem111"]=>
   object(SimpleXMLElement)#%d (1) {
@@ -399,6 +425,7 @@ object(SimpleXMLElement)#%d (1) {
 ===sxe->elem11->elem111
 bool(true)
 bool(true)
+int(1)
 object(SimpleXMLElement)#%d (1) {
   [u"elem1111"]=>
   object(SimpleXMLElement)#%d (0) {
@@ -407,23 +434,28 @@ object(SimpleXMLElement)#%d (1) {
 ===sxe->elem11->elem111->elem1111
 bool(true)
 bool(true)
+int(1)
 object(SimpleXMLElement)#%d (0) {
 }
 ===sxe->elem22
 bool(false)
 bool(false)
+int(0)
 object(SimpleXMLElement)#%d (0) {
 }
 ===sxe->elem22->elem222
 bool(false)
 bool(false)
+int(0)
 NULL
 ===sxe->elem22->attr22
 bool(false)
 bool(false)
+int(0)
 NULL
 ===sxe->elem22["attr22"]
 bool(false)
 bool(false)
+int(0)
 NULL
 ===DONE===
