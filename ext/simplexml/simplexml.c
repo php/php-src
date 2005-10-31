@@ -896,10 +896,7 @@ next_iter:
 }
 /* }}} */
 
-/* {{{ sxe_objects_compare()
- */
-static int
-sxe_objects_compare(zval *object1, zval *object2 TSRMLS_DC)
+static int sxe_objects_compare(zval *object1, zval *object2 TSRMLS_DC) /* {{{ */
 {
 	php_sxe_object *sxe1;
 	php_sxe_object *sxe2;
@@ -1103,6 +1100,99 @@ SXE_METHOD(asXML)
 }
 /* }}} */
 
+static void sxe_add_namespaces(php_sxe_object *sxe, xmlNodePtr node, zend_bool recursive, zval *return_value TSRMLS_DC) /* {{{ */
+{
+	xmlAttrPtr  attr;
+
+	if (node->ns) {	
+		add_assoc_string(return_value, (char*)node->ns->prefix, (char*)node->ns->href, 1);
+	}
+
+	attr = node->properties;
+	while (attr) {
+		if (attr->ns) {	
+			add_assoc_string(return_value, (char*)attr->ns->prefix, (char*)attr->ns->href, 1);
+		}
+		attr = attr->next;
+	}
+
+	if (recursive) {
+		node = node->children;
+		while (node) {
+			sxe_add_namespaces(sxe, node, recursive, return_value TSRMLS_CC);
+			node = node->next;
+		}
+	}
+} /* }}} */
+
+/* {{{ proto string SimpleXMLElement::getNamespaces([bool recursve])
+   Return all namespaces in use */
+SXE_METHOD(getNamespaces)
+{
+	zend_bool           recursive = 0;
+	php_sxe_object     *sxe;
+	xmlNodePtr          node;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &recursive) == FAILURE) {
+		return;
+	}
+
+	array_init(return_value);
+
+	sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
+	GET_NODE(sxe, node);
+	node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
+
+	while (node) {
+		SKIP_TEXT(node)
+		if (node->type == XML_ELEMENT_NODE) {
+			sxe_add_namespaces(sxe, node, recursive, return_value TSRMLS_CC);
+		} else if (node->ns) {
+			add_assoc_string(return_value, (char*)node->ns->prefix, (char*)node->ns->href, 1);
+		}
+next_iter:
+		node = node->next;
+	}
+}
+/* }}} */
+
+static void sxe_add_registered_namespaces(php_sxe_object *sxe, xmlDocPtr doc, xmlNodePtr node, zend_bool recursive, zval *return_value TSRMLS_DC) /* {{{ */
+{
+	xmlNsPtr *ns = xmlGetNsList(doc, node);
+
+	while (ns && ns[0]) {
+		add_assoc_string(return_value, (char*)ns[0]->prefix, (char*)ns[0]->href, 1);
+		ns++;
+	}
+
+	if (recursive) {
+		node = node->children;
+		while (node) {
+			sxe_add_registered_namespaces(sxe, doc, node, recursive, return_value TSRMLS_CC);
+			node = node->next;
+		}
+	}
+}
+
+/* {{{ proto string SimpleXMLElement::getDocNamespaces([bool recursve])
+   Return all namespaces registered with document */
+SXE_METHOD(getDocNamespaces)
+{
+	zend_bool           recursive = 0;
+	php_sxe_object     *sxe;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &recursive) == FAILURE) {
+		return;
+	}
+
+	array_init(return_value);
+
+	sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
+
+	sxe_add_registered_namespaces(sxe, (xmlDocPtr)sxe->document->ptr, xmlDocGetRootElement((xmlDocPtr)sxe->document->ptr), recursive, return_value TSRMLS_CC);
+}
+/* }}} */
+
 /* {{{ proto object SimpleXMLElement::children()
    Finds children of given node */
 SXE_METHOD(children)
@@ -1204,7 +1294,7 @@ static int sxe_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 	int rv;
 
 	sxe = php_sxe_fetch_object(readobj TSRMLS_CC);
-
+	
 	if (type == IS_BOOL) {
 		node = php_sxe_get_first_node(sxe, NULL TSRMLS_CC);
 		INIT_PZVAL(writeobj);
@@ -1830,9 +1920,11 @@ static zend_function_entry sxe_functions[] = {
 	SXE_ME(__construct,            NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL) /* must be called */
 	SXE_ME(asXML,                  NULL, ZEND_ACC_PUBLIC)
 	SXE_ME(xpath,                  NULL, ZEND_ACC_PUBLIC)
-	SXE_ME(registerXPathNamespace,      NULL, ZEND_ACC_PUBLIC)
+	SXE_ME(registerXPathNamespace, NULL, ZEND_ACC_PUBLIC)
 	SXE_ME(attributes,             NULL, ZEND_ACC_PUBLIC)
-	SXE_ME(children,			   NULL, ZEND_ACC_PUBLIC)
+	SXE_ME(children,               NULL, ZEND_ACC_PUBLIC)
+	SXE_ME(getNamespaces,          NULL, ZEND_ACC_PUBLIC)
+	SXE_ME(getDocNamespaces,       NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
