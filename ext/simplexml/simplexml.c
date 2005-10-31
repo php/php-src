@@ -51,6 +51,8 @@ ZEND_API zend_class_entry *sxe_get_element_class_entry()
 
 static php_sxe_object* php_sxe_object_new(zend_class_entry *ce TSRMLS_DC);
 static zend_object_value php_sxe_register_object(php_sxe_object * TSRMLS_DC);
+static void php_sxe_reset_iterator(php_sxe_object *sxe TSRMLS_DC);
+static void php_sxe_move_forward_iterator(php_sxe_object *sxe TSRMLS_DC);
 
 /* {{{ _node_as_zval()
  */
@@ -1404,7 +1406,7 @@ zend_object_iterator_funcs php_sxe_iterator_funcs = {
 	php_sxe_iterator_rewind,
 };
 
-ZEND_API void php_sxe_reset_iterator(php_sxe_object *sxe TSRMLS_DC)
+static void php_sxe_reset_iterator(php_sxe_object *sxe TSRMLS_DC)
 {
 	xmlNodePtr node;
 	char *prefix;
@@ -1519,7 +1521,7 @@ static int php_sxe_iterator_current_key(zend_object_iterator *iter, char **str_k
 
 }
 
-ZEND_API void php_sxe_move_forward_iterator(php_sxe_object *sxe TSRMLS_DC)
+static void php_sxe_move_forward_iterator(php_sxe_object *sxe TSRMLS_DC)
 {
 	xmlNodePtr      node = NULL;
 	php_sxe_object  *intern;
