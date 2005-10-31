@@ -1055,6 +1055,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 					} else {
 						*return_value = *retval;
 						zval_copy_ctor(return_value);
+						INIT_PZVAL(return_value);
 						zval_ptr_dtor(&retval);
 					}
 				}
@@ -1401,7 +1402,9 @@ static PHP_METHOD(PDOStatement, fetchAll)
 		if (error != 2) {
 			RETURN_FALSE;
 		} else { /* on no results, return an empty array */
-			array_init(return_value);
+			if (Z_TYPE_P(return_value) != IS_ARRAY) {
+				array_init(return_value);
+			}
 			return;
 		}
 	}
