@@ -1,3 +1,98 @@
+2005-10-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/000.phpt:
+      - Bugfix #35028 XML object fails FALSE test
+
+2005-10-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/iconv/tests/skipif.inc
+      ext/xml/tests/bug32001.phpt:
+      MFB51: Improve iconv skip conditions
+
+    * (PHP_5_1)
+      ext/iconv/tests/skipif.inc
+      ext/xml/tests/bug32001.phpt:
+      Improve iconv skip conditions
+
+    * ext/standard/basic_functions.c
+      ext/standard/tests/array/bug35022.phpt:
+      MFB51: Fixed bug #35022, #35019 (Regression in the behavior of key/current
+      functions).
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/basic_functions.c:
+      Fixed bug #35022, #35019 (Regression in the behavior of key/current
+      functions).
+
+    * ext/standard/tests/array/bug35022.phpt
+      ext/standard/tests/array/bug35022.phpt:
+      
+      file bug35022.phpt was initially added on branch PHP_5_1.
+
+2005-10-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/streams/memory.c:
+      - Fix mode handling
+
+    * ext/simplexml/tests/000.phpt
+      ext/simplexml/tests/001.phpt
+      ext/simplexml/tests/002.phpt
+      ext/simplexml/tests/003.phpt
+      ext/simplexml/tests/004.phpt
+      ext/simplexml/tests/007.phpt
+      ext/simplexml/tests/010.phpt
+      ext/simplexml/tests/022.phpt
+      ext/simplexml/tests/023.phpt
+      ext/simplexml/tests/024.phpt
+      ext/simplexml/tests/profile11.phpt:
+      - Fix unicode expectations
+
+2005-10-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      ext/standard/array.c:
+      Simplify code.
+
+    * ext/standard/array.c
+      ext/standard/tests/array/bug35014.phpt:
+      MFB51: Fixed bug #35014 (array_product() always returns 0).
+
+    * ext/standard/tests/array/bug35014.phpt
+      ext/standard/tests/array/bug35014.phpt:
+      
+      file bug35014.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/array.c:
+      Fixed Bug #35014 (array_product() always returns 0).
+
+2005-10-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/tests/024.phpt:
+      - Add new test
+
+2005-10-30  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Back to -dev
+
+2005-10-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/simplexml.c:
+      - Protect against some edge case that is currently imossible, but will be
+
+    * ext/simplexml/simplexml.c:
+      - Simplify & speedup, once more
+
+    * ext/simplexml/simplexml.c:
+      - Simplify & speedup
+
 2005-10-29  Edin Kadribasic  <edink@emini.dk>
 
     * (PHP_4_4)
