@@ -1119,7 +1119,9 @@ static void sxe_add_namespaces(php_sxe_object *sxe, xmlNodePtr node, zend_bool r
 	if (recursive) {
 		node = node->children;
 		while (node) {
-			sxe_add_namespaces(sxe, node, recursive, return_value TSRMLS_CC);
+			if (node->type == XML_ELEMENT_NODE) {
+				sxe_add_namespaces(sxe, node, recursive, return_value TSRMLS_CC);
+			}
 			node = node->next;
 		}
 	}
@@ -1147,7 +1149,7 @@ SXE_METHOD(getNamespaces)
 		SKIP_TEXT(node)
 		if (node->type == XML_ELEMENT_NODE) {
 			sxe_add_namespaces(sxe, node, recursive, return_value TSRMLS_CC);
-		} else if (node->ns) {
+		} else if (node->type == XML_ATTRIBUTE_NODE && node->ns) {
 			add_assoc_string(return_value, (char*)node->ns->prefix, (char*)node->ns->href, 1);
 		}
 next_iter:
