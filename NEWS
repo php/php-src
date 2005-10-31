@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? Nov 2005, PHP 5.1
 - Fixed bugs #35022, #35019 (Regression in the behavior of key() and current()
   functions). (Ilia)
+- Fixed bug #35017 (Exception thrown in error handler may cause unexpected
+  behavior). (Dmitry)
 - Fixed bug #35014 (array_product() always returns 0). (Ilia)
 
 28 Oct 2005, PHP 5.1 Release Candidate 4

@@ -1438,8 +1438,7 @@ ZEND_VM_HANDLER(43, ZEND_JMPZ, CONST|TMP|VAR|CV, ANY)
 #if DEBUG_ZEND>=2
 		printf("Conditional jmp to %d\n", opline->op2.u.opline_num);
 #endif
-		ZEND_VM_SET_OPCODE(opline->op2.u.jmp_addr);
-		ZEND_VM_CONTINUE_JMP();
+		ZEND_VM_JMP(opline->op2.u.jmp_addr);
 	}
 
 	ZEND_VM_NEXT_OPCODE();
@@ -1456,8 +1455,7 @@ ZEND_VM_HANDLER(44, ZEND_JMPNZ, CONST|TMP|VAR|CV, ANY)
 #if DEBUG_ZEND>=2
 		printf("Conditional jmp to %d\n", opline->op2.u.opline_num);
 #endif
-		ZEND_VM_SET_OPCODE(opline->op2.u.jmp_addr);
-		ZEND_VM_CONTINUE_JMP();
+		ZEND_VM_JMP(opline->op2.u.jmp_addr);
 	}
 
 	ZEND_VM_NEXT_OPCODE();
@@ -1474,14 +1472,12 @@ ZEND_VM_HANDLER(45, ZEND_JMPZNZ, CONST|TMP|VAR|CV, ANY)
 #if DEBUG_ZEND>=2
 		printf("Conditional jmp on true to %d\n", opline->extended_value);
 #endif
-		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[opline->extended_value]);
-		ZEND_VM_CONTINUE(); /* CHECK_ME */
+		ZEND_VM_JMP(&EX(op_array)->opcodes[opline->extended_value]);
 	} else {
 #if DEBUG_ZEND>=2
 		printf("Conditional jmp on false to %d\n", opline->op2.u.opline_num);
 #endif
-		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[opline->op2.u.opline_num]);
-		ZEND_VM_CONTINUE_JMP();
+		ZEND_VM_JMP(&EX(op_array)->opcodes[opline->op2.u.opline_num]);
 	}
 }
 
@@ -1498,8 +1494,7 @@ ZEND_VM_HANDLER(46, ZEND_JMPZ_EX, CONST|TMP|VAR|CV, ANY)
 #if DEBUG_ZEND>=2
 		printf("Conditional jmp to %d\n", opline->op2.u.opline_num);
 #endif
-		ZEND_VM_SET_OPCODE(opline->op2.u.jmp_addr);
-		ZEND_VM_CONTINUE_JMP();
+		ZEND_VM_JMP(opline->op2.u.jmp_addr);
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -1517,8 +1512,7 @@ ZEND_VM_HANDLER(47, ZEND_JMPNZ_EX, CONST|TMP|VAR|CV, ANY)
 #if DEBUG_ZEND>=2
 		printf("Conditional jmp to %d\n", opline->op2.u.opline_num);
 #endif
-		ZEND_VM_SET_OPCODE(opline->op2.u.jmp_addr);
-		ZEND_VM_CONTINUE_JMP();
+		ZEND_VM_JMP(opline->op2.u.jmp_addr);
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -2339,26 +2333,24 @@ ZEND_VM_HANDLER(50, ZEND_BRK, ANY, CONST|TMP|VAR|CV)
 {
 	zend_op *opline = EX(opline);
 	zend_free_op free_op2;
+	zend_brk_cont_element *el;
 
-	ZEND_VM_SET_OPCODE(EX(op_array)->opcodes +
-	  zend_brk_cont(GET_OP2_ZVAL_PTR(BP_VAR_R),
-	    opline->op1.u.opline_num,
-	    EX(op_array), EX(Ts) TSRMLS_CC)->brk);
+	el = zend_brk_cont(GET_OP2_ZVAL_PTR(BP_VAR_R), opline->op1.u.opline_num,
+	                   EX(op_array), EX(Ts) TSRMLS_CC);
 	FREE_OP2();
-	ZEND_VM_CONTINUE(); /* CHECK_ME */
+	ZEND_VM_JMP(EX(op_array)->opcodes + el->brk);
 }
 
 ZEND_VM_HANDLER(51, ZEND_CONT, ANY, CONST|TMP|VAR|CV)
 {
 	zend_op *opline = EX(opline);
 	zend_free_op free_op2;
+	zend_brk_cont_element *el;
 
-	ZEND_VM_SET_OPCODE(EX(op_array)->opcodes +
-	  zend_brk_cont(GET_OP2_ZVAL_PTR(BP_VAR_R),
-	    opline->op1.u.opline_num,
-	    EX(op_array), EX(Ts) TSRMLS_CC)->cont);
+	el = zend_brk_cont(GET_OP2_ZVAL_PTR(BP_VAR_R), opline->op1.u.opline_num,
+	                   EX(op_array), EX(Ts) TSRMLS_CC);
 	FREE_OP2();
-	ZEND_VM_CONTINUE(); /* CHECK_ME */
+	ZEND_VM_JMP(EX(op_array)->opcodes + el->cont);
 }
 
 ZEND_VM_HANDLER(48, ZEND_CASE, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV)
@@ -2428,8 +2420,7 @@ ZEND_VM_HANDLER(68, ZEND_NEW, ANY, ANY)
 		} else {
 			zval_ptr_dtor(&object_zval);
 		}
-		ZEND_VM_SET_OPCODE(EX(op_array)->opcodes + opline->op2.u.opline_num);
-		ZEND_VM_CONTINUE_JMP();
+		ZEND_VM_JMP(EX(op_array)->opcodes + opline->op2.u.opline_num);
 	} else {
 		SELECTIVE_PZVAL_LOCK(object_zval, &opline->result);
 		EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
@@ -2976,8 +2967,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		} else if (Z_TYPE_PP(array_ptr_ptr) == IS_OBJECT) {
 			if(Z_OBJ_HT_PP(array_ptr_ptr)->get_class_entry == NULL) {
 				zend_error(E_WARNING, "foreach() can not iterate over objects without PHP class");
-				ZEND_VM_SET_OPCODE(EX(op_array)->opcodes+opline->op2.u.opline_num);
-				ZEND_VM_CONTINUE_JMP();
+				ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.u.opline_num);
 			}
 			
 			ce = Z_OBJCE_PP(array_ptr_ptr);
@@ -3072,8 +3062,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		FREE_OP1_IF_VAR();
 	}
 	if (is_empty) {
-		ZEND_VM_SET_OPCODE(EX(op_array)->opcodes+opline->op2.u.opline_num);
-		ZEND_VM_CONTINUE_JMP();
+		ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.u.opline_num);
 	} else {
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -3099,8 +3088,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 		default:
 		case ZEND_ITER_INVALID:
 			zend_error(E_WARNING, "Invalid argument supplied for foreach()");
-			ZEND_VM_SET_OPCODE(EX(op_array)->opcodes+opline->op2.u.opline_num);
-			ZEND_VM_CONTINUE_JMP();
+			ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.u.opline_num);
 
 		case ZEND_ITER_PLAIN_OBJECT: {
 			char *class_name, *prop_name;
@@ -3110,8 +3098,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 			do {
 				if (zend_hash_get_current_data(fe_ht, (void **) &value)==FAILURE) {
 					/* reached end of iteration */
-					ZEND_VM_SET_OPCODE(EX(op_array)->opcodes+opline->op2.u.opline_num);
-					ZEND_VM_CONTINUE_JMP();
+					ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.u.opline_num);
 				}
 				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 0, NULL);
 
@@ -3130,8 +3117,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 			fe_ht = HASH_OF(array);
 			if (zend_hash_get_current_data(fe_ht, (void **) &value)==FAILURE) {
 				/* reached end of iteration */
-				ZEND_VM_SET_OPCODE(EX(op_array)->opcodes+opline->op2.u.opline_num);
-				ZEND_VM_CONTINUE_JMP();
+				ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.u.opline_num);
 			}
 			if (use_key) {
 				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 1, NULL);
@@ -3158,8 +3144,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 					zval_ptr_dtor(&array);
 					ZEND_VM_NEXT_OPCODE();
 				}
-				ZEND_VM_SET_OPCODE(EX(op_array)->opcodes+opline->op2.u.opline_num);
-				ZEND_VM_CONTINUE_JMP();
+				ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.u.opline_num);
 			}
 			iter->funcs->get_current_data(iter, &value TSRMLS_CC);
 			if (EG(exception)) {
@@ -3169,8 +3154,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 			}
 			if (!value) {
 				/* failure in get_current_data */
-				ZEND_VM_SET_OPCODE(EX(op_array)->opcodes+opline->op2.u.opline_num);
-				ZEND_VM_CONTINUE_JMP();
+				ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.u.opline_num);
 			}
 			if (use_key) {
 				if (iter->funcs->get_current_key) {
