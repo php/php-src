@@ -932,7 +932,7 @@ class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveI
  * has subelements, hasChildren() returns true.  This will trigger a call to
  * getChildren() which returns the iterator for that sub element.
  */
-class SimpleXMLIterator extends SimpleXMLElement implements RecursiveIterator
+class SimpleXMLIterator extends SimpleXMLElement implements RecursiveIterator, Countable
 {
 	/** @return whether the current node has sub nodes.
 	 */
@@ -941,6 +941,10 @@ class SimpleXMLIterator extends SimpleXMLElement implements RecursiveIterator
 	/** @return a SimpleXMLIterator for the current node.
 	 */
 	function getChildren();	
+
+	/** @return number of elements/attributes seen with foreach()
+	 */
+	function count();
 }
 
 /** @ingroup SPL
