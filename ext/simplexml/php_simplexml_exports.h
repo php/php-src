@@ -49,9 +49,6 @@ php_sxe_fetch_object(zval *object TSRMLS_DC)
 }
 /* }}} */
 
-ZEND_API void php_sxe_reset_iterator(php_sxe_object *sxe TSRMLS_DC);
-ZEND_API void php_sxe_move_forward_iterator(php_sxe_object *sxe TSRMLS_DC);
-
 typedef struct {
 	zend_object_iterator  intern;
 	php_sxe_object        *sxe;
