@@ -1473,6 +1473,11 @@ ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, int return_v
 	CHECK_SYMBOL_TABLES() \
 	EX(opline) = new_op
 
+#define ZEND_VM_JMP(new_op) \
+     CHECK_SYMBOL_TABLES() \
+ 	   EX(opline) = EG(exception)?EX(opline)+1:new_op; \
+     ZEND_VM_CONTINUE()
+
 #define ZEND_VM_INC_OPCODE() \
 	if (!EG(exception)) { \
 		CHECK_SYMBOL_TABLES() \
@@ -1489,9 +1494,6 @@ ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, int return_v
 	EG(in_execution) = EX(original_in_execution); \
 	EG(current_execute_data) = EX(prev_execute_data); \
 	ZEND_VM_RETURN()
-
-#define ZEND_VM_CONTINUE_JMP() \
-	ZEND_VM_CONTINUE()    
 
 #include "zend_vm_execute.h"
 
