@@ -2005,9 +2005,6 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last TSRML
 					dup = zend_get_object_classname(ptr->object, &class_name, &class_name_len TSRMLS_CC);
 					add_assoc_text_ex(stack_frame, "class", sizeof("class"), class_name, dup);
 				}
-				add_assoc_zval_ex(stack_frame, "object", sizeof("object"), ptr->object);
-				ptr->object->refcount++;
-
 				add_assoc_ascii_string_ex(stack_frame, "type", sizeof("type"), "->", 1);
 			} else if (ptr->function_state.function->common.scope) {
 				add_assoc_textl_ex(stack_frame, "class", sizeof("class"), ptr->function_state.function->common.scope->name, ptr->function_state.function->common.scope->name_length, 1);
