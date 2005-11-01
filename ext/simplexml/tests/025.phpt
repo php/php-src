@@ -33,6 +33,16 @@ $sxe = simplexml_load_string($xml);
 var_dump($sxe->getNamespaces());
 var_dump($sxe->getDocNamespaces());
 
+$xml =<<<EOF
+<?xml version='1.0'?>
+<root/>
+EOF;
+
+$sxe = simplexml_load_string($xml);
+
+var_dump($sxe->getNamespaces());
+var_dump($sxe->getDocNamespaces());
+
 ?>
 ===DONE===
 <?php exit(0); ?>
@@ -73,6 +83,10 @@ array(1) {
   [""]=>
   string(28) "http://www.w3.org/1999/xhtml"
 }
+array(0) {
+}
+array(0) {
+}
 ===DONE===
 --UEXPECTF--
 array(1) {
@@ -110,5 +124,9 @@ array(1) {
 array(1) {
   [u""]=>
   string(28) "http://www.w3.org/1999/xhtml"
+}
+array(0) {
+}
+array(0) {
 }
 ===DONE===
