@@ -1110,7 +1110,7 @@ mssql.secure_connection = Off
 
 [Verisign Payflow Pro]
 ; Default Payflow Pro server.
-Apfpro.defaulthost = "test-payflow.verisign.com"
+pfpro.defaulthost = "test-payflow.verisign.com"
 
 ; Default port to connect to.
 pfpro.defaultport = 443
