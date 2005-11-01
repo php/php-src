@@ -21,16 +21,15 @@
  <license>PHP</license>
  <release>
   <state>beta</state>
-  <version>1.0RC1</version>
-  <date>2005-09-11</date>
+  <version>1.0RC2</version>
+  <date>2005-11-01</date>
 
   <notes>
-   You need to install the PDO core module before you can make use of this one.
-   You also require either IBM DB2 CLI libraries or unixODBC.
+You need to install the PDO core module before you can make use of this one.
+You also require either IBM DB2 CLI libraries or unixODBC.
 
-   If you are running on windows, you can download the binary from here:
-   http://snaps.php.net/win32/PECL_5_0/php_pdo_odbc.dll
-
+If you are running on windows, you can download the binary from here:
+http://pecl4win.php.net/ext.php/php_pdo_odbc.dll
   </notes>
 
   <filelist>
@@ -46,7 +45,7 @@
   </filelist>
   <deps>
    <dep type="php" rel="ge" version="5.0.3"/>
-   <dep type="ext" rel="ge" name="pdo" version="1.0RC1"/>
+   <dep type="ext" rel="ge" name="pdo" version="1.0RC2"/>
   </deps>
  </release>
 </package>
