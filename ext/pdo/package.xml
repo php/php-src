@@ -42,9 +42,14 @@
  <release>
   <state>beta</state>
   <version>1.0RC2</version>
-  <date>2005-09-11</date>
+  <date>2005-11-01</date>
 
   <notes>
+** NOTE WELL! **
+All the PDO_XXX constants have been renamed to PDO::XXX form for future
+compatibility with PHP namespaces.  Sorry for the inconvenience, especially
+after Release Candidate 1.
+
 You need to install a PDO database driver to make use of PDO,
 check http://pecl.php.net/package-search.php?pkg_name=PDO
 for a list of available PDO drivers.
@@ -53,34 +58,28 @@ It is highly recommended that you update to the latest stable PHP 5 snapshot
 before using PDO.
 You can obtain it from http://snaps.php.net.
 
-If you are running on Windows, you should download:
-http://snaps.php.net/win32/php5.0-win32-latest.zip
-http://snaps.php.net/win32/PECL_5_0/php_pdo.dll
+If you are running on Windows, you can find a precompiled binary at:
+http://pecl4win.php.net/ext.php/php_pdo.dll
 
 You can find additional PDO drivers at:
-http://snaps.php.net/win32/PECL_5_0/
+http://pecl4win.php.net
 
-- Fixed an issue with the installation of the pdo headers
+** Changes **
 
-- Consult the PHP 5.1b3 release notes and http://netevil.org/node.php?nid=325
-  for more recent changes.
-
-- New fetch modes:
-  PDO_FETCH_FUNC, PDO_FETCH_GROUP, PDO_FETCH_UNIQUE, PDO_FETCH_CLASSTYPE
-- New fetch mode for PHP 5.1 and higher: PDO_FETCH_SERIALIZE
-- Changed signature for PDO::lastInsertId(); it is now:
-    string PDO::lastInsertId([string name])
-  this allows arbitrary unique identifiers to be returned, and allows for 
-  better support for RDBMS with sequences.
-- Improved bound parameter emulation when using non-string types.
-- PDOStatement implements SPL Traversable interface when SPL is present.
-
-- Added PDO::quote($string).  Closes PECL Bug #3393
-- Fixed PDO::query() for drivers using bound parameter emulation.
-- Fixed PECL Bug #3434, crash when using odbc with named parameters.
-- Added PDOStatement::fetchObject(string class_name [, NULL|array ctor_args]])
-- PDO_FETCH_CLASS now passes args through to the class constructor
-- Now builds directly via "pear install PDO" (upgrade to PEAR 1.3.5 first)
+- Changed PDO_XXX constants to PDO::XXX
+- Fixed PECL Bug #5010, problem installing headers
+- renamed pdo_drivers() to PDO::getAvailableDrivers()
+- Various fixes when building with SPL
+- It is now possible to extend PDO and PDOStatement and override their constructors
+- PDO::setAttribute(PDO::ATTR_STATEMENT_CLASS) allows you to set your own
+  PDOStatement replacement when extending PDO and PDOStatement
+- Fixed Bug #34687; error information from PDO::query() was not always returned
+- Fixed PECL Bug #5750; uri: DSN was not handled correctly
+- Fixed PECL Bug #5589; segfault when persistent connection attempt fails
+- Fixed Bug #34590; User defined PDOStatement class methods are not callable
+- Fixed Bug #34908; FETCH_INTO segfaults without destination object
+- Fixed PECL Bug #5809; PDOStatement::execute(array(...)) modifies args
+- Fixed PECL Bug #5772; FETCH_FUNC cannot call functions with mixed case names
 
 ** Note **
 
