@@ -23,8 +23,19 @@ var_dump($sxe->getNamespaces(true));
 var_dump($sxe->getDocNamespaces());
 var_dump($sxe->getDocNamespaces(true));
 
+$xml =<<<EOF
+<?xml version='1.0'?>
+<html xmlns='http://www.w3.org/1999/xhtml'/>
+EOF;
+
+$sxe = simplexml_load_string($xml);
+
+var_dump($sxe->getNamespaces());
+var_dump($sxe->getDocNamespaces());
+
 ?>
 ===DONE===
+<?php exit(0); ?>
 --EXPECTF--
 array(1) {
   ["xhtml"]=>
@@ -53,6 +64,14 @@ array(4) {
   string(6) "foobar"
   ["baz"]=>
   string(9) "foobarbaz"
+}
+array(1) {
+  [""]=>
+  string(28) "http://www.w3.org/1999/xhtml"
+}
+array(1) {
+  [""]=>
+  string(28) "http://www.w3.org/1999/xhtml"
 }
 ===DONE===
 --UEXPECTF--
@@ -83,5 +102,13 @@ array(4) {
   string(6) "foobar"
   [u"baz"]=>
   string(9) "foobarbaz"
+}
+array(1) {
+  [u""]=>
+  string(28) "http://www.w3.org/1999/xhtml"
+}
+array(1) {
+  [u""]=>
+  string(28) "http://www.w3.org/1999/xhtml"
 }
 ===DONE===
