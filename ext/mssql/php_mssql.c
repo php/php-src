@@ -856,6 +856,9 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 			break;
 #ifdef SQLUNIQUE
 		case SQLUNIQUE: {
+#else
+		case 36: {			/* FreeTDS hack */
+#endif
 			char *data = charcol(offset);
 
 			/* uniqueidentifier is a 16-byte binary number */
