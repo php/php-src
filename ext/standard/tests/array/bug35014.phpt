@@ -1,24 +1,27 @@
 --TEST--
 Bug #35014 (array_product() always returns 0)
+--INI--
+precision=14
 --FILE--
 <?php
 $tests = array(
-        'foo',
-        array(),
-        array(0),
-        array(3),
-        array(3, 3),
-        array(0.5, 2),
-        array(99999999, 99999999),
-        array(8.993, 7443241,988, sprintf("%u", -1)+0.44),
+	'foo',
+	array(),
+	array(0),
+	array(3),
+	array(3, 3),
+	array(0.5, 2),
+	array(99999999, 99999999),
+	array(8.993, 7443241,988, sprintf("%u", -1)+0.44),
 	array(2,sprintf("%u", -1)),
 );
 
 foreach ($tests as $v) {
-        var_dump(array_product($v));
+	var_dump(array_product($v));
 }
 ?>
 --EXPECTF--	
+
 Warning: array_product(): The argument should be an array in %s/bug35014.php on line 15
 NULL
 int(0)
