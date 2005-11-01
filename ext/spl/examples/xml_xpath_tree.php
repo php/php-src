@@ -34,7 +34,11 @@ EOF;
 
 if (!class_exists("RecursiveTreeIterator", false)) require_once("recursivetreeiterator.inc");
 
-class SimpleXmlStructure extends AppendIterator implements RecursiveIterator
+/** @ingroup Examples
+ * @brief Generates the XML structure for SimpleXMLXPathResult elements
+ * @version 1.0
+ */
+class SimpleXpathStructure extends AppendIterator implements RecursiveIterator
 {
 	function __construct($xml)
 	{
@@ -87,8 +91,16 @@ class SimpleXmlStructure extends AppendIterator implements RecursiveIterator
 	}
 }
 
+/** @ingroup Examples
+ * @brief Generates a structure from an xpath query on a XML file
+ * @version 1.0
+ */
 class SimpleXMLXPathResult extends RecursiveArrayIterator
 {
+	/** 
+	 * @param $file XML file to open
+	 * @param $xpath query to execute
+	 */
 	function __construct($file, $xpath)
 	{
 		$xml = @simplexml_load_file($file, 'SimpleXmlIterator');
@@ -107,7 +119,7 @@ class SimpleXMLXPathResult extends RecursiveArrayIterator
 
 	function getChildren()
 	{
-		return new SimpleXmlStructure(parent::current());
+		return new SimpleXpathStructure(parent::current());
 	}
 }
 
