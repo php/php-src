@@ -25,17 +25,27 @@
 
  </maintainers>
  <description>
-  This extension provides a Mysql 3.x/4.x driver for PDO.
+  This extension provides a MySQL driver for PDO.
  </description>
  <license>PHP</license>
  <release>
   <state>beta</state>
-  <version>1.0RC1</version>
-  <date>2005-09-11</date>
+  <version>1.0RC2</version>
+  <date>2005-10-01</date>
 
   <notes>
-   Much more robust, featuring native prepared statements and multi-rowset
-   query support.
+** Changes **
+- Improved error detection for OPTIMIZE queries
+- Added PDO::MYSQL_ATTR_LOCAL_INFILE, PDO::MYSQL_ATTR_INIT_COMMAND,
+  PDO::MYSQL_ATTR_READ_DEFAULT_FILE, PDO::MYSQL_ATTR_READ_DEFAULT_GROUP
+- Improved error reporting when using native prepared statements
+- Fixed PECL Bug #5193: improved bounds checking when calling getColumnMeta()
+- Fixed Bug #34630: improved (emulated) LOB support
+- Fixed Bug #34623: crash when selecting longtext fields
+- Fixed PECL Bug #5802; is_null flag was sticking
+- Fixed PECL Bug #5645; added mysql client library version information to phpinfo() output.
+
+Windows binaries can be found at http://pecl4win.php.net/ext.php/php_pdo_mysql.dll
   </notes>
 
   <filelist>
@@ -51,7 +61,7 @@
   </filelist>
   <deps>
    <dep type="php" rel="ge" version="5.0.3"/>
-   <dep type="ext" name="pdo" rel="ge" version="1.0RC1"/>
+   <dep type="ext" name="pdo" rel="ge" version="1.0RC2"/>
   </deps>
  </release>
 </package>
