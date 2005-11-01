@@ -24,11 +24,17 @@
  <license>PHP</license>
  <release>
   <state>beta</state>
-  <version>1.0RC1</version>
-  <date>2005-09-11</date>
+  <version>1.0RC2</version>
+  <date>2005-11-01</date>
 
   <notes>
-   Update code for API changes in PDO; no actual changes have been made to this driver.
+Update code for API changes in PDO; no actual changes have been made to this driver.
+
+Windows binaries can be found at:
+http://pecl4win.php.net/ext.php/php_pdo_mssql.dll,
+
+however: you are *strongly* recommended to use PDO_ODBC instead of this driver on
+Windows platforms.
   </notes>
 
   <filelist>
@@ -44,7 +50,7 @@
   </filelist>
   <deps>
    <dep type="php" rel="ge" version="5.0.3"/>
-   <dep type="ext" name="pdo" rel="ge" version="1.0RC1"/>
+   <dep type="ext" name="pdo" rel="ge" version="1.0RC2"/>
   </deps>
  </release>
 </package>
