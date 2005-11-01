@@ -30,8 +30,14 @@ EOF;
 
 if (!class_exists("RecursiveTreeIterator", false)) require_once("recursivetreeiterator.inc");
 
+/** @ingroup Examples
+ * @brief Generates a structure for a XML file
+ * @version 1.0
+ */
 class SimpleXmlStructure extends AppendIterator implements RecursiveIterator
 {
+	/** @param xml object of class SimpleXmlStructure or XML file name to open.
+	 */
 	function __construct($xml)
 	{
 		parent::__construct();

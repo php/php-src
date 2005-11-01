@@ -144,6 +144,86 @@
  * c-code.
  */
 
+/** @ingroup SPL
+ * @brief Default implementation for __autoload()
+ * @since PHP 5.1
+ *
+ * @param class_name        name of class to load
+ * @param file_extensions   file extensions (use defaults if NULL)
+ */
+function spl_autoload(string $class_name, string $file_extensions = NULL);
+
+/** @ingroup SPL
+ * @brief Manual invocation of all registerd autoload functions
+ * @since PHP 5.1
+ *
+ * @param class_name        name of class to load
+ */
+function spl_autoload_call(string $class_name);
+
+/** @ingroup SPL 
+ * @brief Register and return default file extensions for spl_autoload
+ * @since PHP 5.1
+ *
+ * @param file_extensions optional comma separated list of extensions to use in 
+ *        default autoload function. If not given just return the current list.
+ * @return comma separated list of file extensions to use in default autoload 
+ *        function.
+ */
+function spl_autoload_extensions($file_extensions);
+
+/** @ingroup SPL
+ * @brief Return all registered autoload functionns
+ * @since PHP 5.1
+ *
+ * @return array of all registered autoload functions or false
+ */
+function spl_autoload_functions();
+
+/** @ingroup SPL
+ * @brief Register given function as autoload implementation
+ * @since PHP 5.1
+ *
+ * @param autoload_function  name of function or array of object/class and 
+ *                           function name to register as autoload function.
+ * @param throw              whether to throw or issue an error on failure.
+ */
+function spl_autoload_register(string $autoload_function = "spl_autoload", $throw = true);
+
+/** @ingroup SPL
+ * @brief Unregister given function as autoload implementation
+ * @since PHP 5.1
+ *
+ * @param autoload_function  name of function or array of object/class and 
+ *                           function name to unregister as autoload function.
+ */
+function spl_autoload_unregister(string $autoload_function = "spl_autoload");
+
+/** @ingroup SPL
+ * @brief Return an array of classes and interfaces in SPL
+ *
+ * @return array containing the names of all clsses and interfaces defined in 
+ *         extension SPL
+ */
+function spl_classes();
+
+/** @ingroup SPL
+ * @brief Count the elements in an iterator
+ * @since PHP 5.1
+ *
+ * @return number of elements in an iterator
+ */
+function iterator_count(Traversable $it);
+
+/** @ingroup SPL
+ * @brief Copy iterator elements into an array
+ * @since PHP 5.1
+ *
+ * @param it  iterator to copy
+ * @return array with elements copied from the iterator
+ */
+function iterator_to_array(Traversable $it);
+
 /** @ingroup ZendEngine
  * @brief Basic Exception class.
  * @since PHP 5.0
@@ -750,16 +830,20 @@ class SplFileInfo
 	function getFilename();	
 
 	/** @return SplFileInfo created for the file
+	 * @param class_name name of class to instantiate
+	 * @see SplFileInfo::setInfoClass()
 	 */
-	function getFileInfo();
+	function getFileInfo(string class_name = NULL);
 
 	/** @return The current entries path and file name.
 	 */
 	function getPathname();	
 
 	/** @return SplFileInfo created for the path
+	 * @param class_name name of class to instantiate
+	 * @see SplFileInfo::setInfoClass()
 	 */
-	function getPathInfo();
+	function getPathInfo(string class_name = NULL);
 
 	/** @return The current entry's permissions.
 	 */
@@ -835,9 +919,20 @@ class SplFileInfo
 	 * @return The opened file as a SplFileObject instance
 	 *
 	 * @see SplFileObject
+	 * @see SplFileInfo::setFileClass()
 	 * @see file()
 	 */
 	function openFile($mode = 'r', $use_include_path = false, $context = NULL);
+
+	/** @param class_name name of class used with openFile(). Must be derived 
+	 * from SPLFileObject.
+	 */
+	function setFileClass(string class_name = "SplFileObject");
+
+	/** @param class_name name of class used with getFileInfo(), getPathInfo(), 
+	 *                    getSubPathInfo(). Must be derived from SplFileInfo.
+	 */
+	function setInfoClass(string class_name = "SplFileInfo");
 }
 
 /** @ingroup SPL
@@ -887,7 +982,11 @@ class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveI
 
 	/** Construct a directory iterator from a path-string.
 	 *
-	 * @param $path directory to iterate.
+	 * @param $path   directory to iterate.
+	 * @param $flags  open flags
+	 * - CURRENT_AS_FILEINFO
+	 * - KEY_AS_FILENAME
+	 * - NEW_CURRENT_AND_KEY 
 	 */
 	function __construct($path, $flags = 0);
 
@@ -916,8 +1015,10 @@ class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveI
 	function getSubPathname();
 
 	/** @return SplFileInfo created for the current sub path
+	 * @param class_name name of class to instantiate
+	 * @see SplFileInfo::setInfoClass()
 	 */
-	function getSubPathInfo();
+	function getSubPathInfo(string $class_name = NULL);
 
 }
 
