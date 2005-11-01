@@ -2,7 +2,9 @@
 Bug #32001 (xml_parse*() goes into infinite loop when autodetection in effect)
 --SKIPIF--
 <?php
-	if (!function_exists('iconv')) print 'skip';
+	if (!extension_loaded('iconv')) {
+		die ("skip iconv extension not available\n");
+	}
 ?>
 --FILE--
 <?php
