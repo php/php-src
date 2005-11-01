@@ -46,6 +46,8 @@ typedef struct _spl_filesystem_object {
 	int                file_name_len; 
 	SPL_FS_OBJ_TYPE    type;
 	long               flags;
+	zend_class_entry   *file_class;
+	zend_class_entry   *info_class;
 	union {
 		struct {
 			php_stream         *dirp;
