@@ -30,17 +30,18 @@
  <license>PHP</license>
  <release>
   <state>beta</state>
-  <version>1.0RC1</version>
-  <date>2005-09-11</date>
+  <version>1.0RC2</version>
+  <date>2005-11-01</date>
 
   <notes>
-   Now features native prepared statements and numerous other improvements.
+Now features native prepared statements and numerous other improvements.
 
-   You need to install the PDO core module before you can make use of this one.
-   You also require PostgreSQL client libraries installed on the machine where you intend to build and/or use it.
-   
-   If you are running on windows, you can download the binary from here:
-   http://snaps.php.net/win32/PECL_5_0/php_pdo_pgsql.dll
+You need to install the PDO core module before you can make use of this one.
+You also require PostgreSQL client libraries installed on the machine where you
+intend to build and/or use it.
+
+If you are running on windows, you can download the binary from here:
+http://pecl4win.php.net/ext.php/php_pdo_pgsql.dll
   </notes>
 
   <filelist>
@@ -56,7 +57,7 @@
   </filelist>
   <deps>
    <dep type="php" rel="ge" version="5.0.3"/>
-   <dep type="ext" rel="ge" name="pdo" version="1.0RC1"/>
+   <dep type="ext" rel="ge" name="pdo" version="1.0RC2"/>
   </deps>
  </release>
 </package>
