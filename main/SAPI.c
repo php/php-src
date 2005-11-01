@@ -743,7 +743,7 @@ SAPI_API int sapi_send_headers(TSRMLS_D)
 	/* Add output compression headers at this late stage in order to make
 	   it possible to switch it off inside the script. */
 
-	if (zend_ini_long("zlib.output_compression", sizeof("zlib.output_compression"), 0)) {
+	if (EG(in_execution) && zend_ini_long("zlib.output_compression", sizeof("zlib.output_compression"), 0)) {
 		zval nm_zlib_get_coding_type;
 		zval *uf_result = NULL;
 
