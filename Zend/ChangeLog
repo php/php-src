@@ -1,3 +1,20 @@
+2005-10-31  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.c
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug35017.phpt:
+      Fixed bug #35017 (Exception thrown in error handler may cause unexpected
+      behavior)
+
+    * tests/bug35017.phpt
+      tests/bug35017.phpt:
+      
+      file bug35017.phpt was initially added on branch PHP_5_1.
+
 2005-10-28  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * zend_builtin_functions.c:

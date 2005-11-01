@@ -1,3 +1,77 @@
+2005-10-31  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      ext/curl/curl.c:
+      MFH: Additional open_basedir/safe_mode checks.
+
+    * ext/curl/interface.c:
+      MFB51: Additional open_basedir/safe_mode checks.
+
+    * (PHP_5_1)
+      ext/curl/interface.c:
+      Additional open_basedir/safe_mode checks.
+
+2005-10-31  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_4_4)
+      Zend/zend_compile.h:
+      MFH: Bugfix, missing symbol on certain platforms
+      Prevented (for example) building ext/session as a shared module under
+      Win32
+
+2005-10-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      ext/simplexml/php_simplexml_exports.h
+      ext/simplexml/simplexml.c:
+      - Drop unnecessary exports to prevent forward BC problems
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/000.phpt:
+      - Implement count interface
+
+2005-10-31  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/simplexml/simplexml.c:
+      check node type before accessing ns - prevent corruption under compact mode
+
+2005-10-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/php_simplexml_exports.h:
+      - We don't need those
+
+2005-10-31  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug35017.phpt
+      ZendEngine2/tests/bug35017.phpt:
+      
+      file bug35017.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug35017.phpt:
+      Fixed bug #35017 (Exception thrown in error handler may cause unexpected
+      behavior)
+
+2005-10-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/025.phpt:
+      - Add functions to check for registered/in use namespaces
+
+2005-10-31  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS:
+      bfn
+
 2005-10-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/simplexml/simplexml.c
