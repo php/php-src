@@ -452,6 +452,7 @@ static sb4 oci_define_callback(dvoid *octxp, OCIDefine *define, ub4 iter, dvoid 
 		ub4 **alenpp, ub1 *piecep, dvoid **indpp, ub2 **rcodepp)
 {
 	pdo_oci_column *col = (pdo_oci_column*)octxp;
+	TSRMLS_FETCH();
 
 	switch (col->dtype) {
 		case SQLT_BLOB:
