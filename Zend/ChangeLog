@@ -1,3 +1,34 @@
+2005-11-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_compile.h:
+      - Get rid of several wanrings
+
+    * zend_API.c:
+      - Allow parameter parsing implementation raise an error early where more
+        information is available. And add ability to prevent double errors by
+        returning "".
+      - Implement parameter parsing C which checks for a class name, if the
+      value
+        on input is not NULL then the pointer must be the zend_class_entry of
+      the
+        required base class.
+
+2005-11-01  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_builtin_functions.c
+      zend_builtin_functions.h
+      zend_exceptions.c:
+      Add an additional field $frame['object'] to the result array of
+      debug_backtrace() that contains a reference to the respective object when
+      the frame was called from an object. This revised patch has been reviewed
+      by Dmitry and Zeev.
+
+    * acinclude.m4:
+      Allow bison 2.1.
+
+    * zend_builtin_functions.c:
+      Revert.
+
 2005-10-31  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_execute.c
