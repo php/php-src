@@ -397,6 +397,13 @@ ZEND_API void _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC)
 		zval_dtor(zv);
 		safe_free_zval_ptr_rel(zv ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC);
 	} else if (zv->refcount == 1) {
+		if ((*zval_ptr)->type == IS_OBJECT) {
+			TSRMLS_FETCH();
+
+			if (EG(ze1_compatibility_mode)) {
+				return;
+			}
+		}
 		zv->is_ref = 0;
 	}
 }
