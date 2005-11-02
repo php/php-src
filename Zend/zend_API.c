@@ -1951,12 +1951,13 @@ ZEND_API int zend_disable_class(char *class_name, uint class_name_length TSRMLS_
 
 ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, char **callable_name, int *callable_name_len, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zval ***zobj_ptr_ptr TSRMLS_DC)
 {
-	char *lcname;
+	char *lcname, *lmname, *colon;
 	zend_bool retval = 0; 
-	int callable_name_len_local;
-	zend_class_entry *ce_local;
+	int callable_name_len_local, clen, mlen;
+	zend_class_entry *ce_local, **pce;
 	zend_function *fptr_local;
 	zval **zobj_ptr_local;
+	HashTable *ftable;
 
 	if (callable_name_len == NULL) {
 		callable_name_len = &callable_name_len_local;
@@ -1983,17 +1984,41 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, char **
 			if (check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY) {
 				return 1;
 			}
+			
+			if ((colon = strstr(Z_STRVAL_P(callable), "::")) != NULL) {
+				clen = colon - Z_STRVAL_P(callable);
+				mlen = Z_STRLEN_P(callable) - clen - 2;
+				lcname = estrndup(Z_STRVAL_P(callable), clen);
+				lcname[clen] = '\0';
+				lmname = zend_str_tolower_dup(Z_STRVAL_P(callable) + clen + 2, mlen);
+				if (zend_lookup_class(lcname, clen, &pce TSRMLS_CC) == FAILURE) {
+					efree(lcname);
+					efree(lmname);
+					return 0;
+				}
+				*ce_ptr = *pce;
+				ftable = &(*ce_ptr)->function_table;
+			} else {
+				mlen = Z_STRLEN_P(callable);
+				lmname = zend_str_tolower_dup(Z_STRVAL_P(callable), mlen);
+				ftable = EG(function_table);
+			}
 
-			lcname = zend_str_tolower_dup(Z_STRVAL_P(callable), Z_STRLEN_P(callable));
-			if (zend_hash_find(EG(function_table), lcname, Z_STRLEN_P(callable)+1, (void**)fptr_ptr) == SUCCESS) {
+			if (zend_hash_find(ftable, lmname, mlen+1, (void**)fptr_ptr) == SUCCESS) {
 				retval = 1;
 			}
-			efree(lcname);
+			if (*ce_ptr) {
+				efree(lcname);
+				if (!((*fptr_ptr)->common.fn_flags & ZEND_ACC_STATIC)) {
+					retval = 0;
+				}
+			}
+			efree(lmname);
 			break;
 
 		case IS_ARRAY:
 			{
-				zend_class_entry *ce = NULL, **pce;
+				zend_class_entry *ce = NULL;
 				zval **method;
 				zval **obj;
 				
@@ -2021,17 +2046,17 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, char **
 							return 1;
 						}
 
-						lcname = zend_str_tolower_dup(Z_STRVAL_PP(obj), Z_STRLEN_PP(obj));
-
-						if (EG(active_op_array) && strcmp(lcname, "self") == 0) {
-							ce = EG(active_op_array)->scope;
-						} else if (strcmp(lcname, "parent") == 0 && EG(active_op_array) && EG(active_op_array)->scope) {
-							ce = EG(active_op_array)->scope->parent;
-						} else if (zend_lookup_class(Z_STRVAL_PP(obj), Z_STRLEN_PP(obj), &pce TSRMLS_CC) == SUCCESS) {
+						if (zend_lookup_class(Z_STRVAL_PP(obj), Z_STRLEN_PP(obj), &pce TSRMLS_CC) == SUCCESS) {
 							ce = *pce;
+						} else if (EG(active_op_array)) {
+							lcname = zend_str_tolower_dup(Z_STRVAL_PP(obj), Z_STRLEN_PP(obj));
+							if (Z_STRLEN_PP(obj) == sizeof("self") - 1 && memcmp(lcname, "self", sizeof("self")) == 0) {
+								ce = EG(active_op_array)->scope;
+							} else if (Z_STRLEN_PP(obj) == sizeof("parent") - 1 && memcmp(lcname, "parent", sizeof("parent")) == 0 && EG(active_op_array)->scope) {
+								ce = EG(active_op_array)->scope->parent;
+							}
+							efree(lcname);
 						}
-						
-						efree(lcname);
 					} else {
 						ce = Z_OBJCE_PP(obj); /* TBFixed: what if it's overloaded? */
 						
@@ -2089,6 +2114,9 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, char **
 				} else if (callable_name) {
 					*callable_name = estrndup("Array", sizeof("Array")-1);
 					*callable_name_len = sizeof("Array") - 1;
+				}
+				if (!*zobj_ptr_ptr && (!*fptr_ptr || !((*fptr_ptr)->common.fn_flags & ZEND_ACC_STATIC))) {
+					retval = 0;
 				}
 				*ce_ptr = ce;
 			}
