@@ -384,23 +384,53 @@ PHP_FUNCTION(spl_autoload_register)
 	autoload_func_info alfi;
 	zval **obj_ptr;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "|sb", &func_name, &func_name_len, &do_throw) == FAILURE) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|b", &zcallable, &do_throw) == FAILURE) {
-			return;
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "|zb", &zcallable, &do_throw) == FAILURE) {
+		return;
+	}
+
+	if (ZEND_NUM_ARGS()) {
+		if (Z_TYPE_P(zcallable) == IS_STRING) {
+			if (Z_STRLEN_P(zcallable) == sizeof("spl_autoload_call") - 1) {
+				char tmp_name[sizeof("spl_autoload_call")];
+				zend_str_tolower_copy(tmp_name, Z_STRVAL_P(zcallable), Z_STRLEN_P(zcallable));
+				if (!strcmp(tmp_name, "spl_autoload_call")) {
+					if (do_throw) {
+						zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Function spl_autoload_call() cannot be registered", func_name);
+					}
+					return;
+				}
+			}
 		}
+	
 		if (!zend_is_callable_ex(zcallable, 0, &func_name, &func_name_len, &alfi.ce, &alfi.func_ptr, &obj_ptr TSRMLS_CC)) {
-			if (do_throw) {
-				zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Passed array does not specify a callable static method");
+			if (Z_TYPE_P(zcallable) == IS_ARRAY) {
+				if (!obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
+					if (do_throw) {
+						zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Passed array specifies a non static method but no object");
+					}
+					efree(func_name);
+					return;
+				}
+				else if (do_throw) {
+					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Passed array does not specify a callable %smethod", !obj_ptr ? "static " : "");
+				}
+				efree(func_name);
+				return;
+			} else if (Z_TYPE_P(zcallable) == IS_STRING) {
+				if (do_throw) {
+					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Function '%s' not found", func_name);
+				}
+				efree(func_name);
+				return;
+			} else {
+				if (do_throw) {
+					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Illegal value passed", func_name);
+				}
+				efree(func_name);
+				return;
 			}
-			efree(func_name);
-			return;
-		} else if (!obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
-			if (do_throw) {
-				zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Passed array specifies a non static method but no object");
-			}
-			efree(func_name);
-			return;
 		}
+	
 		lc_name = do_alloca(func_name_len + 1);
 		zend_str_tolower_copy(lc_name, func_name, func_name_len);
 		efree(func_name);
@@ -410,30 +440,7 @@ PHP_FUNCTION(spl_autoload_register)
 		} else {
 			alfi.obj = NULL;
 		}
-	} else if (ZEND_NUM_ARGS()) {
-		lc_name = do_alloca(func_name_len + 1);
-		zend_str_tolower_copy(lc_name, func_name, func_name_len);
 		
-		if (func_name_len == sizeof("spl_autoload_call") -1 && !strcmp(lc_name, "spl_autoload_call")) {
-			if (do_throw) {
-				zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Function spl_autoload_call() cannot be registered", func_name);
-			}
-			free_alloca(lc_name);
-			return;
-		}
-
-		if (zend_hash_find(EG(function_table), lc_name, func_name_len+1, (void **) &alfi.func_ptr) == FAILURE) {
-			if (do_throw) {
-				zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Function '%s' not found", func_name);
-			}
-			free_alloca(lc_name);
-			return;
-		}
-		alfi.obj = NULL;
-		alfi.ce = NULL;
-	}
-	
-	if (ZEND_NUM_ARGS()) {
 		if (!SPL_G(autoload_functions)) {
 			ALLOC_HASHTABLE(SPL_G(autoload_functions));
 			zend_hash_init(SPL_G(autoload_functions), 1, NULL, (dtor_func_t) autoload_func_info_dtor, 0);
