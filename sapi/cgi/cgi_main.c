@@ -335,20 +335,12 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 		PHPWRITE_H(buf, len);
 	}
 
-	if (SG(sapi_headers).send_default_content_type) {
-		char *hd;
-
-		hd = sapi_get_default_content_type(TSRMLS_C);
-		PHPWRITE_H("Content-type: ", sizeof("Content-type: ")-1);
-		PHPWRITE_H(hd, strlen(hd));
-		PHPWRITE_H("\r\n", 2);
-		efree(hd);
-	}
-	
 	h = zend_llist_get_first_ex(&sapi_headers->headers, &pos);
-    while (h) {
-		PHPWRITE_H(h->header, h->header_len);
-		PHPWRITE_H("\r\n", 2);
+	while (h) {
+		if (h->header_len) {
+			PHPWRITE_H(h->header, h->header_len);
+			PHPWRITE_H("\r\n", 2);
+		}
 		h = zend_llist_get_next_ex(&sapi_headers->headers, &pos);
 	}
 	PHPWRITE_H("\r\n", 2);
