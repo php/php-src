@@ -1,24 +1,28 @@
 <?php
-//
-// +----------------------------------------------------------------------+
-// | PHP Version 5                                                        |
-// +----------------------------------------------------------------------+
-// | Copyright (c) 1997-2004 The PHP Group                                |
-// +----------------------------------------------------------------------+
-// | This source file is subject to version 3.0 of the PHP license,       |
-// | that is bundled with this package in the file LICENSE, and is        |
-// | available through the world-wide-web at the following url:           |
-// | http://www.php.net/license/3_0.txt.                                  |
-// | If you did not receive a copy of the PHP license and are unable to   |
-// | obtain it through the world-wide-web, please send a note to          |
-// | license@php.net so we can mail you a copy immediately.               |
-// +----------------------------------------------------------------------+
-// | Authors: Tomas V.V.Cox <cox@idecnet.com>                             |
-// +----------------------------------------------------------------------+
-//
-// $Id$
-//
+/**
+ * File/Directory manipulation
+ *
+ * PHP versions 4 and 5
+ *
+ * LICENSE: This source file is subject to version 3.0 of the PHP license
+ * that is available through the world-wide-web at the following URI:
+ * http://www.php.net/license/3_0.txt.  If you did not receive a copy of
+ * the PHP License and are unable to obtain it through the web, please
+ * send a note to license@php.net so we can mail you a copy immediately.
+ *
+ * @category   pear
+ * @package    System
+ * @author     Tomas V.V.Cox <cox@idecnet.com>
+ * @copyright  1997-2005 The PHP Group
+ * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
+ * @version    CVS: $Id$
+ * @link       http://pear.php.net/package/PEAR
+ * @since      File available since Release 0.1
+ */
 
+/**
+ * base class
+ */
 require_once 'PEAR.php';
 require_once 'Console/Getopt.php';
 
@@ -46,11 +50,14 @@ $GLOBALS['_System_temp_files'] = array();
 *
 * System::rm(array('-r', $file1, $dir1));
 *
-* @package  System
-* @author   Tomas V.V.Cox <cox@idecnet.com>
-* @version  $Revision$
-* @access   public
-* @see      http://pear.php.net/manual/
+* @category   pear
+* @package    System
+* @author     Tomas V.V. Cox <cox@idecnet.com>
+* @copyright  1997-2005 The PHP Group
+* @license    http://www.php.net/license/3_0.txt  PHP License 3.0
+* @version    Release: @package_version@
+* @link       http://pear.php.net/package/PEAR
+* @since      Class available since Release 0.1
 */
 class System
 {
@@ -66,7 +73,7 @@ class System
     function _parseArgs($argv, $short_options, $long_options = null)
     {
         if (!is_array($argv) && $argv !== null) {
-            $argv = preg_split('/\s+/', $argv);
+            $argv = preg_split('/\s+/', $argv, -1, PREG_SPLIT_NO_EMPTY);
         }
         return Console_Getopt::getopt2($argv, $short_options);
     }
@@ -119,9 +126,9 @@ class System
             System::raiseError("Could not open dir $sPath");
             return $struct; // XXX could not open error
         }
-        $struct['dirs'][] = $sPath; // XXX don't add if '.' or '..' ?
+        $struct['dirs'][] = $sPath = realpath($sPath); // XXX don't add if '.' or '..' ?
         $list = array();
-        while ($file = readdir($dir)) {
+        while (false !== ($file = readdir($dir))) {
             if ($file != '.' && $file != '..') {
                 $list[] = $file;
             }
@@ -131,7 +138,7 @@ class System
         if ($aktinst < $maxinst || $maxinst == 0) {
             foreach($list as $val) {
                 $path = $sPath . DIRECTORY_SEPARATOR . $val;
-                if (is_dir($path)) {
+                if (is_dir($path) && !is_link($path)) {
                     $tmp = System::_dirToStruct($path, $maxinst, $aktinst+1);
                     $struct = array_merge_recursive($tmp, $struct);
                 } else {
@@ -154,7 +161,7 @@ class System
         $struct = array('dirs' => array(), 'files' => array());
         settype($files, 'array');
         foreach ($files as $file) {
-            if (is_dir($file)) {
+            if (is_dir($file) && !is_link($file)) {
                 $tmp = System::_dirToStruct($file, 0);
                 $struct = array_merge_recursive($tmp, $struct);
             } else {
@@ -208,9 +215,9 @@ class System
     }
 
     /**
-    * Make directories. Note that we use call_user_func('mkdir') to avoid
-    * a problem with ZE2 calling System::mkDir instead of the native PHP func.
+    * Make directories.
     *
+    * The -p option will create parent directories
     * @param    string  $args    the name of the director(y|ies) to create
     * @return   bool    True for success
     * @access   public
@@ -246,14 +253,18 @@ class System
                     $dir = dirname($dir);
                 }
                 while ($newdir = array_shift($dirstack)) {
-                    if (!call_user_func('mkdir', $newdir, $mode)) {
+                    if (!is_writeable(dirname($newdir))) {
+                        $ret = false;
+                        break;
+                    }
+                    if (!mkdir($newdir, $mode)) {
                         $ret = false;
                     }
                 }
             }
         } else {
             foreach($opts[1] as $dir) {
-                if (!@is_dir($dir) && !call_user_func('mkdir', $dir, $mode)) {
+                if (!@is_dir($dir) && !mkdir($dir, $mode)) {
                     $ret = false;
                 }
             }
@@ -280,7 +291,7 @@ class System
         $ret = null;
         $files = array();
         if (!is_array($args)) {
-            $args = preg_split('/\s+/', $args);
+            $args = preg_split('/\s+/', $args, -1, PREG_SPLIT_NO_EMPTY);
         }
         for($i=0; $i < count($args); $i++) {
             if ($args[$i] == '>') {
@@ -363,13 +374,13 @@ class System
         if (!isset($tmpdir)) {
             $tmpdir = System::tmpdir();
         }
-        if (!System::mkDir("-p $tmpdir")) {
+        if (!System::mkDir(array('-p', $tmpdir))) {
             return false;
         }
         $tmp = tempnam($tmpdir, $prefix);
         if (isset($tmp_is_dir)) {
             unlink($tmp); // be careful possible race condition here
-            if (!call_user_func('mkdir', $tmp, 0700)) {
+            if (!mkdir($tmp, 0700)) {
                 return System::raiseError("Unable to create temporary directory $tmpdir");
             }
         }
@@ -393,6 +404,7 @@ class System
             $delete = $GLOBALS['_System_temp_files'];
             array_unshift($delete, '-r');
             System::rm($delete);
+            $GLOBALS['_System_temp_files'] = array();
         }
     }
 
@@ -428,31 +440,53 @@ class System
     * The "which" command (show the full path of a command)
     *
     * @param string $program The command to search for
+    * @param mixed  $fallback Value to return if $program is not found
+    *
     * @return mixed A string with the full path or false if not found
     * @author Stig Bakken <ssb@php.net>
     */
     function which($program, $fallback = false)
     {
-        // is_executable() is not available on windows
-        if (OS_WINDOWS) {
-            $pear_is_executable = 'is_file';
+        // avaible since 4.3.0RC2
+        if (defined('PATH_SEPARATOR')) {
+            $path_delim = PATH_SEPARATOR;
         } else {
+            $path_delim = OS_WINDOWS ? ';' : ':';
+        }
+        // full path given
+        if (basename($program) != $program) {
+            $path_elements[] = dirname($program);
+            $program = basename($program);
+        } else {
+            // Honor safe mode
+            if (!ini_get('safe_mode') || !$path = ini_get('safe_mode_exec_dir')) {
+                $path = getenv('PATH');
+                if (!$path) {
+                    $path = getenv('Path'); // some OSes are just stupid enough to do this
+                }
+            }
+            $path_elements = explode($path_delim, $path);
+        }
+
+        if (OS_WINDOWS) {
+            $exe_suffixes = getenv('PATHEXT')
+                                ? explode($path_delim, getenv('PATHEXT'))
+                                : array('.exe','.bat','.cmd','.com');
+            // allow passing a command.exe param
+            if (strpos($program, '.') !== false) {
+                array_unshift($exe_suffixes, '');
+            }
+            // is_executable() is not available on windows for PHP4
+            $pear_is_executable = (function_exists('is_executable')) ? 'is_executable' : 'is_file';
+        } else {
+            $exe_suffixes = array('');
             $pear_is_executable = 'is_executable';
         }
 
-        // full path given
-        if (basename($program) != $program) {
-            return (@$pear_is_executable($program)) ? $program : $fallback;
-        }
-
-        // XXX FIXME honor safe mode
-        $path_delim = OS_WINDOWS ? ';' : ':';
-        $exe_suffixes = OS_WINDOWS ? array('.exe','.bat','.cmd','.com') : array('');
-        $path_elements = explode($path_delim, getenv('PATH'));
         foreach ($exe_suffixes as $suff) {
             foreach ($path_elements as $dir) {
                 $file = $dir . DIRECTORY_SEPARATOR . $program . $suff;
-                if (@is_file($file) && @$pear_is_executable($file)) {
+                if ($pear_is_executable($file)) {
                     return $file;
                 }
             }
@@ -497,7 +531,7 @@ class System
                 case '-type':
                     if (in_array($args[$i+1], array('d', 'f'))) {
                         if ($args[$i+1] == 'd') {
-                             $do_files = false;
+                            $do_files = false;
                         } else {
                             $do_dirs = false;
                         }
@@ -505,8 +539,14 @@ class System
                     $i++;
                     break;
                 case '-name':
+                    if (OS_WINDOWS) {
+                        if ($args[$i+1]{0} == '\\') {
+                            // prepend drive
+                            $args[$i+1] = addslashes(substr(getcwd(), 0, 2) . $args[$i + 1]);
+                        }
+                    }
                     $patterns[] = "(" . preg_replace(array('/\./', '/\*/'),
-                                                     array('\.', '.*'),
+                                                     array('\.', '.*', ),
                                                      $args[$i+1])
                                       . ")";
                     $i++;

@@ -1,0 +1,40 @@
+<commands version="1.0">
+ <pickle>
+  <summary>Build PECL Package</summary>
+  <function>doPackage</function>
+  <shortcut>pi</shortcut>
+  <options>
+   <nocompress>
+    <shortopt>Z</shortopt>
+    <doc>Do not gzip the package file</doc>
+   </nocompress>
+   <showname>
+    <shortopt>n</shortopt>
+    <doc>Print the name of the packaged file.</doc>
+   </showname>
+  </options>
+  <doc>[descfile] [descfile2]
+Creates a PECL package from its description file (usually called
+package.xml).  If a second packagefile is passed in, then
+the packager will check to make sure that one is a package.xml
+version 1.0, and the other is a package.xml version 2.0.  The
+package.xml version 1.0 will be saved as &quot;package.xml&quot; in the archive,
+and the other as &quot;package2.xml&quot; in the archive&quot;
+
+If no second file is passed in, and [descfile] is a package.xml 2.0,
+an automatic conversion will be made to a package.xml 1.0.  Note that
+only simple package.xml 2.0 will be converted.  package.xml 2.0 with:
+
+ - dependency types other than required/optional PECL package/ext/php/pearinstaller
+ - more than one extsrcrelease
+ - extbinrelease, phprelease, or bundle release type
+ - dependency groups
+ - ignore tags in release filelist
+ - tasks other than replace
+ - custom roles
+
+will cause pickle to fail, and output an error message.  If your package2.xml
+uses any of these features, you are best off using PEAR_PackageFileManager to
+generate both package.xml.</doc>
+ </pickle>
+</commands>

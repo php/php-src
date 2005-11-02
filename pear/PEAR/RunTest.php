@@ -1,58 +1,70 @@
 <?php
-//
-// +----------------------------------------------------------------------+
-// | PHP Version 5                                                        |
-// +----------------------------------------------------------------------+
-// | Copyright (c) 1997-2004 The PHP Group                                |
-// +----------------------------------------------------------------------+
-// | This source file is subject to version 3.0 of the PHP license,       |
-// | that is bundled with this package in the file LICENSE, and is        |
-// | available through the world-wide-web at the following url:           |
-// | http://www.php.net/license/3_0.txt.                                  |
-// | If you did not receive a copy of the PHP license and are unable to   |
-// | obtain it through the world-wide-web, please send a note to          |
-// | license@php.net so we can mail you a copy immediately.               |
-// +----------------------------------------------------------------------+
-// | Authors: Tomas V.V.Cox <cox@idecnet.com>                             |
-// |          Greg Beaver <cellog@php.net>                                |
-// |                                                                      |
-// +----------------------------------------------------------------------+
-//
-// $Id$
-//
-
 /**
- * Simplified version of PHP's test suite
- * -- EXPERIMENTAL --
-
- Try it with:
-
- $ php -r 'include "../PEAR/RunTest.php"; $t=new PEAR_RunTest; $o=$t->run("./pear_system.phpt");print_r($o);'
-
-
-TODO:
-
-Actually finish the development and testing
-
+ * PEAR_RunTest
+ *
+ * PHP versions 4 and 5
+ *
+ * LICENSE: This source file is subject to version 3.0 of the PHP license
+ * that is available through the world-wide-web at the following URI:
+ * http://www.php.net/license/3_0.txt.  If you did not receive a copy of
+ * the PHP License and are unable to obtain it through the web, please
+ * send a note to license@php.net so we can mail you a copy immediately.
+ *
+ * @category   pear
+ * @package    PEAR
+ * @author     Tomas V.V.Cox <cox@idecnet.com>
+ * @author     Greg Beaver <cellog@php.net>
+ * @copyright  1997-2005 The PHP Group
+ * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
+ * @version    CVS: $Id$
+ * @link       http://pear.php.net/package/PEAR
+ * @since      File available since Release 1.3.3
  */
 
+/**
+ * for error handling
+ */
 require_once 'PEAR.php';
 require_once 'PEAR/Config.php';
 
 define('DETAILED', 1);
 putenv("PHP_PEAR_RUNTESTS=1");
 
+/**
+ * Simplified version of PHP's test suite
+ *
+ * Try it with:
+ *
+ * $ php -r 'include "../PEAR/RunTest.php"; $t=new PEAR_RunTest; $o=$t->run("./pear_system.phpt");print_r($o);'
+ *
+ *
+ * @category   pear
+ * @package    PEAR
+ * @author     Tomas V.V.Cox <cox@idecnet.com>
+ * @author     Greg Beaver <cellog@php.net>
+ * @copyright  1997-2005 The PHP Group
+ * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
+ * @version    Release: @package_version@
+ * @link       http://pear.php.net/package/PEAR
+ * @since      Class available since Release 1.3.3
+ */
 class PEAR_RunTest
 {
     var $_logger;
+    var $_options;
 
     /**
      * An object that supports the PEAR_Common->log() signature, or null
      * @param PEAR_Common|null
      */
-    function PEAR_RunTest($logger = null)
+    function PEAR_RunTest($logger = null, $options = array())
     {
+        if (is_null($logger)) {
+            require_once 'PEAR/Common.php';
+            $logger = new PEAR_Common;
+        }
         $this->_logger = $logger;
+        $this->_options = $options;
     }
 
     //
@@ -78,6 +90,7 @@ class PEAR_RunTest
             'ARGS'    => '',
         );
 
+        $file = realpath($file);
         if (!is_file($file) || !$fp = fopen($file, "r")) {
             return PEAR::raiseError("Cannot open test file: $file");
         }
@@ -91,15 +104,22 @@ class PEAR_RunTest
                 $section = $r[1];
                 $section_text[$section] = '';
                 continue;
-            }
+            } elseif (empty($section)) {
+                fclose($fp);
+                return PEAR::raiseError("Invalid sections formats in test file: $file");
+			}
 
             // Add to the section text.
             $section_text[$section] .= $line;
         }
         fclose($fp);
 
-        $shortname = str_replace($cwd.'/', '', $file);
-        $tested = trim($section_text['TEST'])." [$shortname]";
+        $shortname = str_replace($cwd . DIRECTORY_SEPARATOR, '', $file);
+        if (!isset($this->_options['simple'])) {
+            $tested = trim($section_text['TEST']) . "[$shortname]";
+        } else {
+            $tested = trim($section_text['TEST']) . ' ';
+        }
 
         $tmp = realpath(dirname($file));
         $tmp_skipif = $tmp . uniqid('/phpt.');
@@ -134,7 +154,9 @@ class PEAR_RunTest
                     if ($reason) {
                         $skipreason .= " (reason: $reason)";
                     }
-                    $this->_logger->log(0, $skipreason);
+                    if (!isset($this->_options['quiet'])) {
+                        $this->_logger->log(0, $skipreason);
+                    }
                     if (isset($old_php)) {
                         $php = $old_php;
                     }
@@ -209,7 +231,9 @@ class PEAR_RunTest
     */
             if (!$returnfail && preg_match("/^$wanted_re\$/s", $output)) {
                 @unlink($tmp_file);
-                $this->_logger->log(0, "PASS $tested$info");
+                if (!isset($this->_options['quiet'])) {
+                    $this->_logger->log(0, "PASS $tested$info");
+                }
                 if (isset($old_php)) {
                     $php = $old_php;
                 }
@@ -223,7 +247,9 @@ class PEAR_RunTest
             $ok = (0 == strcmp($output,$wanted));
             if (!$returnfail && $ok) {
                 @unlink($tmp_file);
-                $this->_logger->log(0, "PASS $tested$info");
+                if (!isset($this->_options['quiet'])) {
+                    $this->_logger->log(0, "PASS $tested$info");
+                }
                 if (isset($old_php)) {
                     $php = $old_php;
                 }

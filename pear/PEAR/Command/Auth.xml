@@ -1,0 +1,25 @@
+<commands version="1.0">
+ <login>
+  <summary>Connects and authenticates to remote server</summary>
+  <shortcut>li</shortcut>
+  <function>doLogin</function>
+  <options />
+  <doc>
+Log in to the remote server.  To use remote functions in the installer
+that require any kind of privileges, you need to log in first.  The
+username and password you enter here will be stored in your per-user
+PEAR configuration (~/.pearrc on Unix-like systems).  After logging
+in, your username and password will be sent along in subsequent
+operations on the remote server.</doc>
+ </login>
+ <logout>
+  <summary>Logs out from the remote server</summary>
+  <shortcut>lo</shortcut>
+  <function>doLogout</function>
+  <options />
+  <doc>
+Logs out from the remote server.  This command does not actually
+connect to the remote server, it only deletes the stored username and
+password from your user configuration.</doc>
+ </logout>
+</commands>

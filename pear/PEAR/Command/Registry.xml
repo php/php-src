@@ -1,0 +1,54 @@
+<commands version="1.0">
+ <list>
+  <summary>List Installed Packages In The Default Channel</summary>
+  <function>doList</function>
+  <shortcut>l</shortcut>
+  <options>
+   <channel>
+    <shortopt>c</shortopt>
+    <doc>list installed packages from this channel</doc>
+    <arg>CHAN</arg>
+   </channel>
+   <allchannels>
+    <shortopt>a</shortopt>
+    <doc>list installed packages from all channels</doc>
+   </allchannels>
+  </options>
+  <doc>&lt;package&gt;
+If invoked without parameters, this command lists the PEAR packages
+installed in your php_dir ({config php_dir}).  With a parameter, it
+lists the files in a package.
+</doc>
+ </list>
+ <list-files>
+  <summary>List Files In Installed Package</summary>
+  <function>doFileList</function>
+  <shortcut>fl</shortcut>
+  <options />
+  <doc>&lt;package&gt;
+List the files in an installed package.
+</doc>
+ </list-files>
+ <shell-test>
+  <summary>Shell Script Test</summary>
+  <function>doShellTest</function>
+  <shortcut>st</shortcut>
+  <options />
+  <doc>&lt;package&gt; [[relation] version]
+Tests if a package is installed in the system. Will exit(1) if it is not.
+   &lt;relation&gt;   The version comparison operator. One of:
+                &lt;, lt, &lt;=, le, &gt;, gt, &gt;=, ge, ==, =, eq, !=, &lt;&gt;, ne
+   &lt;version&gt;    The version to compare with
+</doc>
+ </shell-test>
+ <info>
+  <summary>Display information about a package</summary>
+  <function>doInfo</function>
+  <shortcut>in</shortcut>
+  <options />
+  <doc>&lt;package&gt;
+Displays information about a package. The package argument may be a
+local package file, an URL to a package file, or the name of an
+installed package.</doc>
+ </info>
+</commands>

@@ -1,0 +1,93 @@
+<commands version="1.0">
+ <list-channels>
+  <summary>List Available Channels</summary>
+  <function>doList</function>
+  <shortcut>lc</shortcut>
+  <options />
+  <doc>
+List all available channels for installation.
+</doc>
+ </list-channels>
+ <update-channels>
+  <summary>Update the Channel List</summary>
+  <function>doUpdateAll</function>
+  <shortcut>uc</shortcut>
+  <options />
+  <doc>
+List all installed packages in all channels.
+</doc>
+ </update-channels>
+ <channel-delete>
+  <summary>Remove a Channel From the List</summary>
+  <function>doDelete</function>
+  <shortcut>cde</shortcut>
+  <options />
+  <doc>&lt;channel name&gt;
+Delete a channel from the registry.  You may not
+remove any channel that has installed packages.
+</doc>
+ </channel-delete>
+ <channel-add>
+  <summary>Add a Channel</summary>
+  <function>doAdd</function>
+  <shortcut>ca</shortcut>
+  <options />
+  <doc>&lt;channel.xml&gt;
+Add a private channel to the channel list.  Note that all
+public channels should be synced using &quot;update-channels&quot;.
+Parameter may be either a local file or remote URL to a
+channel.xml.
+</doc>
+ </channel-add>
+ <channel-update>
+  <summary>Update an Existing Channel</summary>
+  <function>doUpdate</function>
+  <shortcut>cu</shortcut>
+  <options>
+   <force>
+    <shortopt>f</shortopt>
+    <doc>will force download of new channel.xml if an existing channel name is used</doc>
+   </force>
+   <channel>
+    <shortopt>c</shortopt>
+    <arg>CHANNEL</arg>
+    <doc>will force download of new channel.xml if an existing channel name is used</doc>
+   </channel>
+  </options>
+  <doc>[&lt;channel.xml&gt;|&lt;channel name&gt;]
+Update a channel in the channel list directly.  Note that all
+public channels can be synced using &quot;update-channels&quot;.
+Parameter may be a local or remote channel.xml, or the name of
+an existing channel.
+</doc>
+ </channel-update>
+ <channel-info>
+  <summary>Retrieve Information on a Channel</summary>
+  <function>doInfo</function>
+  <shortcut>ci</shortcut>
+  <options />
+  <doc>&lt;package&gt;
+List the files in an installed package.
+</doc>
+ </channel-info>
+ <channel-alias>
+  <summary>Specify an alias to a channel name</summary>
+  <function>doAlias</function>
+  <shortcut>cha</shortcut>
+  <options />
+  <doc>&lt;channel&gt; &lt;alias&gt;
+Specify a specific alias to use for a channel name.
+The alias may not be an existing channel name or
+alias.
+</doc>
+ </channel-alias>
+ <channel-discover>
+  <summary>Initialize a Channel from its server</summary>
+  <function>doDiscover</function>
+  <shortcut>di</shortcut>
+  <options />
+  <doc>&lt;package&gt;
+List the files in an installed package.
+</doc>
+ </channel-discover>
+</commands>

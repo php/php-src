@@ -1,25 +1,32 @@
 <?php
-//
-// +----------------------------------------------------------------------+
-// | PHP Version 5                                                        |
-// +----------------------------------------------------------------------+
-// | Copyright (c) 1997-2004 The PHP Group                                |
-// +----------------------------------------------------------------------+
-// | This source file is subject to version 3.0 of the PHP license,       |
-// | that is bundled with this package in the file LICENSE, and is        |
-// | available through the world-wide-web at the following url:           |
-// | http://www.php.net/license/3_0.txt.                                  |
-// | If you did not receive a copy of the PHP license and are unable to   |
-// | obtain it through the world-wide-web, please send a note to          |
-// | license@php.net so we can mail you a copy immediately.               |
-// +----------------------------------------------------------------------+
-// | Author: Stig Bakken <ssb@php.net>                                    |
-// +----------------------------------------------------------------------+
-//
-// $Id$
+/**
+ * PEAR_Command, command pattern class
+ *
+ * PHP versions 4 and 5
+ *
+ * LICENSE: This source file is subject to version 3.0 of the PHP license
+ * that is available through the world-wide-web at the following URI:
+ * http://www.php.net/license/3_0.txt.  If you did not receive a copy of
+ * the PHP License and are unable to obtain it through the web, please
+ * send a note to license@php.net so we can mail you a copy immediately.
+ *
+ * @category   pear
+ * @package    PEAR
+ * @author     Stig Bakken <ssb@php.net>
+ * @author     Greg Beaver <cellog@php.net>
+ * @copyright  1997-2005 The PHP Group
+ * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
+ * @version    CVS: $Id$
+ * @link       http://pear.php.net/package/PEAR
+ * @since      File available since Release 0.1
+ */
 
-
-require_once "PEAR.php";
+/**
+ * Needed for error handling
+ */
+require_once 'PEAR.php';
+require_once 'PEAR/Frontend.php';
+require_once 'PEAR/XMLParser.php';
 
 /**
  * List of commands and what classes they are implemented in.
@@ -38,18 +45,6 @@ $GLOBALS['_PEAR_Command_shortcuts'] = array();
  * @var array class => object
  */
 $GLOBALS['_PEAR_Command_objects'] = array();
-
-/**
- * Which user interface class is being used.
- * @var string class name
- */
-$GLOBALS['_PEAR_Command_uiclass'] = 'PEAR_Frontend_CLI';
-
-/**
- * Instance of $_PEAR_Command_uiclass.
- * @var object
- */
-$GLOBALS['_PEAR_Command_uiobject'] = null;
 
 /**
  * PEAR command class, a simple factory class for administrative
@@ -93,6 +88,15 @@ $GLOBALS['_PEAR_Command_uiobject'] = null;
  * - DON'T USE EXIT OR DIE! Always use pear errors.  From static
  *   classes do PEAR::raiseError(), from other classes do
  *   $this->raiseError().
+ * @category   pear
+ * @package    PEAR
+ * @author     Stig Bakken <ssb@php.net>
+ * @author     Greg Beaver <cellog@php.net>
+ * @copyright  1997-2005 The PHP Group
+ * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
+ * @version    Release: @package_version@
+ * @link       http://pear.php.net/package/PEAR
+ * @since      Class available since Release 0.1
  */
 class PEAR_Command
 {
@@ -109,7 +113,7 @@ class PEAR_Command
      * @access public
      * @static
      */
-    function factory($command, &$config)
+    function &factory($command, &$config)
     {
         if (empty($GLOBALS['_PEAR_Command_commandlist'])) {
             PEAR_Command::registerCommands();
@@ -118,13 +122,35 @@ class PEAR_Command
             $command = $GLOBALS['_PEAR_Command_shortcuts'][$command];
         }
         if (!isset($GLOBALS['_PEAR_Command_commandlist'][$command])) {
-            return PEAR::raiseError("unknown command `$command'");
+            $a = PEAR::raiseError("unknown command `$command'");
+            return $a;
         }
         $class = $GLOBALS['_PEAR_Command_commandlist'][$command];
+        if (!class_exists($class)) {
+            require_once $GLOBALS['_PEAR_Command_objects'][$class];
+        }
+        if (!class_exists($class)) {
+            $a = PEAR::raiseError("unknown command `$command'");
+            return $a;
+        }
+        $ui =& PEAR_Command::getFrontendObject();
+        $obj = &new $class($ui, $config);
+        return $obj;
+    }
+
+    // }}}
+    // {{{ & getObject()
+    function &getObject($command)
+    {
+        $class = $GLOBALS['_PEAR_Command_commandlist'][$command];
+        if (!class_exists($class)) {
+            require_once $GLOBALS['_PEAR_Command_objects'][$class];
+        }
         if (!class_exists($class)) {
             return PEAR::raiseError("unknown command `$command'");
         }
         $ui =& PEAR_Command::getFrontendObject();
+        $config = &PEAR_Config::singleton();
         $obj = &new $class($ui, $config);
         return $obj;
     }
@@ -135,15 +161,13 @@ class PEAR_Command
     /**
      * Get instance of frontend object.
      *
-     * @return object
+     * @return object|PEAR_Error
      * @static
      */
     function &getFrontendObject()
     {
-        if (empty($GLOBALS['_PEAR_Command_uiobject'])) {
-            $GLOBALS['_PEAR_Command_uiobject'] = &new $GLOBALS['_PEAR_Command_uiclass'];
-        }
-        return $GLOBALS['_PEAR_Command_uiobject'];
+        $a = &PEAR_Frontend::singleton();
+        return $a;
     }
 
     // }}}
@@ -159,58 +183,12 @@ class PEAR_Command
      */
     function &setFrontendClass($uiclass)
     {
-        if (is_object($GLOBALS['_PEAR_Command_uiobject']) &&
-              is_a($GLOBALS['_PEAR_Command_uiobject'], $uiclass)) {
-            return $GLOBALS['_PEAR_Command_uiobject'];
-        }
-        if (!class_exists($uiclass)) {
-            $file = str_replace('_', '/', $uiclass) . '.php';
-            if (PEAR_Command::isIncludeable($file)) {
-                include_once $file;
-            }
-        }
-        if (class_exists($uiclass)) {
-            $obj = &new $uiclass;
-            // quick test to see if this class implements a few of the most
-            // important frontend methods
-            if (method_exists($obj, 'userConfirm')) {
-                $GLOBALS['_PEAR_Command_uiobject'] = &$obj;
-                $GLOBALS['_PEAR_Command_uiclass'] = $uiclass;
-                return $obj;
-            } else {
-                $err = PEAR::raiseError("not a frontend class: $uiclass");
-                return $err;
-            }
-        }
-        $err = PEAR::raiseError("no such class: $uiclass");
-        return $err;
+        $a = &PEAR_Frontend::setFrontendClass($uiclass);
+        return $a;
     }
 
     // }}}
     // {{{ setFrontendType()
-
-    // }}}
-    // {{{ isIncludeable()
-
-    /**
-     * @param string $path relative or absolute include path
-     * @return boolean
-     * @static
-     */
-    function isIncludeable($path)
-    {
-        if (file_exists($path) && is_readable($path)) {
-            return true;
-        }
-        $ipath = explode(PATH_SEPARATOR, ini_get('include_path'));
-        foreach ($ipath as $include) {
-            $test = realpath($include . DIRECTORY_SEPARATOR . $path);
-            if (file_exists($test) && is_readable($test)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     /**
      * Set current frontend.
@@ -249,6 +227,7 @@ class PEAR_Command
      */
     function registerCommands($merge = false, $dir = null)
     {
+        $parser = new PEAR_XMLParser;
         if ($dir === null) {
             $dir = dirname(__FILE__) . '/Command';
         }
@@ -260,26 +239,51 @@ class PEAR_Command
             $GLOBALS['_PEAR_Command_commandlist'] = array();
         }
         while ($entry = readdir($dp)) {
-            if ($entry{0} == '.' || substr($entry, -4) != '.php' || $entry == 'Common.php') {
+            if ($entry{0} == '.' || substr($entry, -4) != '.xml') {
                 continue;
             }
             $class = "PEAR_Command_".substr($entry, 0, -4);
             $file = "$dir/$entry";
-            include_once $file;
+            $parser->parse(file_get_contents($file));
+            $implements = $parser->getData();
             // List of commands
             if (empty($GLOBALS['_PEAR_Command_objects'][$class])) {
-                $GLOBALS['_PEAR_Command_objects'][$class] = &new $class($ui, $config);
+                $GLOBALS['_PEAR_Command_objects'][$class] = "$dir/" . substr($entry, 0, -4) .
+                    '.php';
             }
-            $implements = $GLOBALS['_PEAR_Command_objects'][$class]->getCommands();
             foreach ($implements as $command => $desc) {
+                if ($command == 'attribs') {
+                    continue;
+                }
+                if (isset($GLOBALS['_PEAR_Command_commandlist'][$command])) {
+                    return PEAR::raiseError('Command "' . $command . '" already registered in ' .
+                        'class "' . $GLOBALS['_PEAR_Command_commandlist'][$command] . '"');
+                }
                 $GLOBALS['_PEAR_Command_commandlist'][$command] = $class;
-                $GLOBALS['_PEAR_Command_commanddesc'][$command] = $desc;
-            }
-            $shortcuts = $GLOBALS['_PEAR_Command_objects'][$class]->getShortcuts();
-            foreach ($shortcuts as $shortcut => $command) {
-                $GLOBALS['_PEAR_Command_shortcuts'][$shortcut] = $command;
+                $GLOBALS['_PEAR_Command_commanddesc'][$command] = $desc['summary'];
+                if (isset($desc['shortcut'])) {
+                    $shortcut = $desc['shortcut'];
+                    if (isset($GLOBALS['_PEAR_Command_shortcuts'][$shortcut])) {
+                        return PEAR::raiseError('Command shortcut "' . $shortcut . '" already ' .
+                            'registered to command "' . $command . '" in class "' .
+                            $GLOBALS['_PEAR_Command_commandlist'][$command] . '"');
+                    }
+                    $GLOBALS['_PEAR_Command_shortcuts'][$shortcut] = $command;
+                }
+                if (isset($desc['options']) && $desc['options']) {
+                    foreach ($desc['options'] as $oname => $option) {
+                        if (isset($option['shortopt']) && strlen($option['shortopt']) > 1) {
+                            return PEAR::raiseError('Option "' . $oname . '" short option "' .
+                                $option['shortopt'] . '" must be ' .
+                                'only 1 character in Command "' . $command . '" in class "' .
+                                $class . '"');
+                        }
+                    }
+                }
             }
         }
+        ksort($GLOBALS['_PEAR_Command_shortcuts']);
+        ksort($GLOBALS['_PEAR_Command_commandlist']);
         @closedir($dp);
         return true;
     }
@@ -343,11 +347,13 @@ class PEAR_Command
         if (empty($GLOBALS['_PEAR_Command_commandlist'])) {
             PEAR_Command::registerCommands();
         }
+        if (isset($GLOBALS['_PEAR_Command_shortcuts'][$command])) {
+            $command = $GLOBALS['_PEAR_Command_shortcuts'][$command];
+        }
         if (!isset($GLOBALS['_PEAR_Command_commandlist'][$command])) {
             return null;
         }
-        $class = $GLOBALS['_PEAR_Command_commandlist'][$command];
-        $obj = &$GLOBALS['_PEAR_Command_objects'][$class];
+        $obj = &PEAR_Command::getObject($command);
         return $obj->getGetoptArgs($command, $short_args, $long_args);
     }
 
@@ -386,9 +392,12 @@ class PEAR_Command
     function getHelp($command)
     {
         $cmds = PEAR_Command::getCommands();
+        if (isset($GLOBALS['_PEAR_Command_shortcuts'][$command])) {
+            $command = $GLOBALS['_PEAR_Command_shortcuts'][$command];
+        }
         if (isset($cmds[$command])) {
-            $class = $cmds[$command];
-            return $GLOBALS['_PEAR_Command_objects'][$class]->getHelp($command);
+            $obj = &PEAR_Command::getObject($command);
+            return $obj->getHelp($command);
         }
         return false;
     }

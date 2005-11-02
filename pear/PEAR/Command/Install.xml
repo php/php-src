@@ -1,0 +1,254 @@
+<commands version="1.0">
+ <install>
+  <summary>Install Package</summary>
+  <function>doInstall</function>
+  <shortcut>i</shortcut>
+  <options>
+   <force>
+    <shortopt>f</shortopt>
+    <doc>will overwrite newer installed packages</doc>
+   </force>
+   <loose>
+    <shortopt>l</shortopt>
+    <doc>do not check for recommended dependency version</doc>
+   </loose>
+   <nodeps>
+    <shortopt>n</shortopt>
+    <doc>ignore dependencies, install anyway</doc>
+   </nodeps>
+   <register-only>
+    <shortopt>r</shortopt>
+    <doc>do not install files, only register the package as installed</doc>
+   </register-only>
+   <soft>
+    <shortopt>s</shortopt>
+    <doc>soft install, fail silently, or upgrade if already installed</doc>
+   </soft>
+   <nobuild>
+    <shortopt>B</shortopt>
+    <doc>don&apos;t build C extensions</doc>
+   </nobuild>
+   <nocompress>
+    <shortopt>Z</shortopt>
+    <doc>request uncompressed files when downloading</doc>
+   </nocompress>
+   <installroot>
+    <shortopt>R</shortopt>
+    <arg>DIR</arg>
+    <doc>root directory used when installing files (ala PHP&apos;s INSTALL_ROOT)</doc>
+   </installroot>
+   <ignore-errors>
+    <doc>force install even if there were errors</doc>
+   </ignore-errors>
+   <alldeps>
+    <shortopt>a</shortopt>
+    <doc>install all required and optional dependencies</doc>
+   </alldeps>
+   <onlyreqdeps>
+    <shortopt>o</shortopt>
+    <doc>install all required dependencies</doc>
+   </onlyreqdeps>
+   <offline>
+    <shortopt>O</shortopt>
+    <doc>do not attempt to download any urls or contact channels</doc>
+   </offline>
+   <pretend>
+    <shortopt>p</shortopt>
+    <doc>Only list the packages that would be downloaded</doc>
+   </pretend>
+  </options>
+  <doc>[channel/]&lt;package&gt; ...
+Installs one or more PEAR packages.  You can specify a package to
+install in four ways:
+
+&quot;Package-1.0.tgz&quot; : installs from a local file
+
+&quot;http://example.com/Package-1.0.tgz&quot; : installs from
+anywhere on the net.
+
+&quot;package.xml&quot; : installs the package described in
+package.xml.  Useful for testing, or for wrapping a PEAR package in
+another package manager such as RPM.
+
+&quot;Package[-version/state][.tar]&quot; : queries your default channel&apos;s server
+({config master_server}) and downloads the newest package with
+the preferred quality/state ({config preferred_state}).
+
+To retrieve Package version 1.1, use &quot;Package-1.1,&quot; to retrieve
+Package state beta, use &quot;Package-beta.&quot;  To retrieve an uncompressed
+file, append .tar (make sure there is no file by the same name first)
+
+To download a package from another channel, prefix with the channel name like
+&quot;channel/Package&quot;
+
+More than one package may be specified at once.  It is ok to mix these
+four ways of specifying packages.
+</doc>
+ </install>
+ <upgrade>
+  <summary>Upgrade Package</summary>
+  <function>doInstall</function>
+  <shortcut>up</shortcut>
+  <options>
+   <force>
+    <shortopt>f</shortopt>
+    <doc>overwrite newer installed packages</doc>
+   </force>
+   <loose>
+    <shortopt>l</shortopt>
+    <doc>do not check for recommended dependency version</doc>
+   </loose>
+   <nodeps>
+    <shortopt>n</shortopt>
+    <doc>ignore dependencies, upgrade anyway</doc>
+   </nodeps>
+   <register-only>
+    <shortopt>r</shortopt>
+    <doc>do not install files, only register the package as upgraded</doc>
+   </register-only>
+   <nobuild>
+    <shortopt>B</shortopt>
+    <doc>don&apos;t build C extensions</doc>
+   </nobuild>
+   <nocompress>
+    <shortopt>Z</shortopt>
+    <doc>request uncompressed files when downloading</doc>
+   </nocompress>
+   <installroot>
+    <shortopt>R</shortopt>
+    <arg>DIR</arg>
+    <doc>root directory used when installing files (ala PHP&apos;s INSTALL_ROOT)</doc>
+   </installroot>
+   <ignore-errors>
+    <doc>force install even if there were errors</doc>
+   </ignore-errors>
+   <alldeps>
+    <shortopt>a</shortopt>
+    <doc>install all required and optional dependencies</doc>
+   </alldeps>
+   <onlyreqdeps>
+    <shortopt>o</shortopt>
+    <doc>install all required dependencies</doc>
+   </onlyreqdeps>
+   <offline>
+    <shortopt>O</shortopt>
+    <doc>do not attempt to download any urls or contact channels</doc>
+   </offline>
+   <pretend>
+    <shortopt>p</shortopt>
+    <doc>Only list the packages that would be downloaded</doc>
+   </pretend>
+  </options>
+  <doc>&lt;package&gt; ...
+Upgrades one or more PEAR packages.  See documentation for the
+&quot;install&quot; command for ways to specify a package.
+
+When upgrading, your package will be updated if the provided new
+package has a higher version number (use the -f option if you need to
+upgrade anyway).
+
+More than one package may be specified at once.
+</doc>
+ </upgrade>
+ <upgrade-all>
+  <summary>Upgrade All Packages</summary>
+  <function>doInstall</function>
+  <shortcut>ua</shortcut>
+  <options>
+   <nodeps>
+    <shortopt>n</shortopt>
+    <doc>ignore dependencies, upgrade anyway</doc>
+   </nodeps>
+   <register-only>
+    <shortopt>r</shortopt>
+    <doc>do not install files, only register the package as upgraded</doc>
+   </register-only>
+   <nobuild>
+    <shortopt>B</shortopt>
+    <doc>don&apos;t build C extensions</doc>
+   </nobuild>
+   <nocompress>
+    <shortopt>Z</shortopt>
+    <doc>request uncompressed files when downloading</doc>
+   </nocompress>
+   <installroot>
+    <shortopt>R</shortopt>
+    <arg>DIR</arg>
+    <doc>root directory used when installing files (ala PHP&apos;s INSTALL_ROOT)</doc>
+   </installroot>
+   <ignore-errors>
+    <doc>force install even if there were errors</doc>
+   </ignore-errors>
+   <loose>
+    <doc>do not check for recommended dependency version</doc>
+   </loose>
+  </options>
+  <doc>
+Upgrades all packages that have a newer release available.  Upgrades are
+done only if there is a release available of the state specified in
+&quot;preferred_state&quot; (currently {config preferred_state}), or a state considered
+more stable.
+</doc>
+ </upgrade-all>
+ <uninstall>
+  <summary>Un-install Package</summary>
+  <function>doUninstall</function>
+  <shortcut>un</shortcut>
+  <options>
+   <nodeps>
+    <shortopt>n</shortopt>
+    <doc>ignore dependencies, uninstall anyway</doc>
+   </nodeps>
+   <register-only>
+    <shortopt>r</shortopt>
+    <doc>do not remove files, only register the packages as not installed</doc>
+   </register-only>
+   <installroot>
+    <shortopt>R</shortopt>
+    <arg>DIR</arg>
+    <doc>root directory used when installing files (ala PHP&apos;s INSTALL_ROOT)</doc>
+   </installroot>
+   <ignore-errors>
+    <doc>force install even if there were errors</doc>
+   </ignore-errors>
+   <offline>
+    <shortopt>O</shortopt>
+    <doc>do not attempt to uninstall remotely</doc>
+   </offline>
+  </options>
+  <doc>[channel/]&lt;package&gt; ...
+Uninstalls one or more PEAR packages.  More than one package may be
+specified at once.  Prefix with channel name to uninstall from a
+channel not in your default channel ({config default_channel})
+</doc>
+ </uninstall>
+ <bundle>
+  <summary>Unpacks a Pecl Package</summary>
+  <function>doBundle</function>
+  <shortcut>bun</shortcut>
+  <options>
+   <destination>
+    <shortopt>d</shortopt>
+    <arg>DIR</arg>
+    <doc>Optional destination directory for unpacking (defaults to current path or &quot;ext&quot; if exists)</doc>
+   </destination>
+   <force>
+    <shortopt>f</shortopt>
+    <doc>Force the unpacking even if there were errors in the package</doc>
+   </force>
+  </options>
+  <doc>&lt;package&gt;
+Unpacks a Pecl Package into the selected location. It will download the
+package if needed.
+</doc>
+ </bundle>
+ <run-scripts>
+  <summary>Run Post-Install Scripts bundled with a package</summary>
+  <function>doRunScripts</function>
+  <shortcut>rs</shortcut>
+  <options />
+  <doc>&lt;package&gt;
+Run post-installation scripts in package &lt;package&gt;, if any exist.
+</doc>
+ </run-scripts>
+</commands>

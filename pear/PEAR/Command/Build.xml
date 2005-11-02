@@ -1,0 +1,10 @@
+<commands version="1.0">
+ <build>
+  <summary>Build an Extension From C Source</summary>
+  <function>doBuild</function>
+  <shortcut>b</shortcut>
+  <options />
+  <doc>[package.xml]
+Builds one or more extensions contained in a package.</doc>
+ </build>
+</commands>

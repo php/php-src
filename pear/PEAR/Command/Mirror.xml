@@ -1,0 +1,18 @@
+<commands version="1.0">
+ <download-all>
+  <summary>Downloads each available package from the default channel</summary>
+  <function>doDownloadAll</function>
+  <shortcut>da</shortcut>
+  <options>
+   <channel>
+    <shortopt>c</shortopt>
+    <doc>specify a channel other than the default channel</doc>
+    <arg>CHAN</arg>
+   </channel>
+  </options>
+  <doc>
+Requests a list of available packages from the default channel ({config default_channel})
+and downloads them to current working directory.  Note: only
+packages within preferred_state ({config preferred_state}) will be downloaded</doc>
+ </download-all>
+</commands>

@@ -1,0 +1,92 @@
+<commands version="1.0">
+ <remote-info>
+  <summary>Information About Remote Packages</summary>
+  <function>doRemoteInfo</function>
+  <shortcut>ri</shortcut>
+  <options />
+  <doc>&lt;package&gt;
+Get details on a package from the server.</doc>
+ </remote-info>
+ <list-upgrades>
+  <summary>List Available Upgrades</summary>
+  <function>doListUpgrades</function>
+  <shortcut>lu</shortcut>
+  <options />
+  <doc>[preferred_state]
+List releases on the server of packages you have installed where
+a newer version is available with the same release state (stable etc.)
+or the state passed as the second parameter.</doc>
+ </list-upgrades>
+ <remote-list>
+  <summary>List Remote Packages</summary>
+  <function>doRemoteList</function>
+  <shortcut>rl</shortcut>
+  <options>
+   <channel>
+    <shortopt>c</shortopt>
+    <doc>specify a channel other than the default channel</doc>
+    <arg>CHAN</arg>
+   </channel>
+  </options>
+  <doc>
+Lists the packages available on the configured server along with the
+latest stable release of each package.</doc>
+ </remote-list>
+ <search>
+  <summary>Search remote package database</summary>
+  <function>doSearch</function>
+  <shortcut>sp</shortcut>
+  <options>
+   <channel>
+    <shortopt>c</shortopt>
+    <doc>specify a channel other than the default channel</doc>
+    <arg>CHAN</arg>
+   </channel>
+  </options>
+  <doc>[packagename] [packageinfo]
+Lists all packages which match the search parameters.  The first
+parameter is a fragment of a packagename.  The default channel
+will be used unless explicitly overridden.  The second parameter
+will be used to match any portion of the summary/description</doc>
+ </search>
+ <list-all>
+  <summary>List All Packages</summary>
+  <function>doListAll</function>
+  <shortcut>la</shortcut>
+  <options>
+   <channel>
+    <shortopt>c</shortopt>
+    <doc>specify a channel other than the default channel</doc>
+    <arg>CHAN</arg>
+   </channel>
+  </options>
+  <doc>
+Lists the packages available on the configured server along with the
+latest stable release of each package.</doc>
+ </list-all>
+ <download>
+  <summary>Download Package</summary>
+  <function>doDownload</function>
+  <shortcut>d</shortcut>
+  <options>
+   <nocompress>
+    <shortopt>Z</shortopt>
+    <doc>download an uncompressed (.tar) file</doc>
+   </nocompress>
+  </options>
+  <doc>&lt;package&gt;...
+Download package tarballs.  The files will be named as suggested by the
+server, for example if you download the DB package and the latest stable
+version of DB is 1.6.5, the downloaded file will be DB-1.6.5.tgz.</doc>
+ </download>
+ <clear-cache>
+  <summary>Clear Web Services Cache</summary>
+  <function>doClearCache</function>
+  <shortcut>cc</shortcut>
+  <options />
+  <doc>
+Clear the XML-RPC/REST cache.  See also the cache_ttl configuration
+parameter.
+</doc>
+ </clear-cache>
+</commands>

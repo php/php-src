@@ -1,25 +1,44 @@
 <?php
-//
-// +----------------------------------------------------------------------+
-// | PHP Version 5                                                        |
-// +----------------------------------------------------------------------+
-// | Copyright (c) 1997-2004 The PHP Group                                |
-// +----------------------------------------------------------------------+
-// | This source file is subject to version 3.0 of the PHP license,       |
-// | that is bundled with this package in the file LICENSE, and is        |
-// | available through the world-wide-web at the following url:           |
-// | http://www.php.net/license/3_0.txt.                                  |
-// | If you did not receive a copy of the PHP license and are unable to   |
-// | obtain it through the world-wide-web, please send a note to          |
-// | license@php.net so we can mail you a copy immediately.               |
-// +----------------------------------------------------------------------+
-// | Author: Stig Sæther Bakken <ssb@php.net>                             |
-// +----------------------------------------------------------------------+
-//
-// $Id$
+/**
+ * PEAR_Command_Common base class
+ *
+ * PHP versions 4 and 5
+ *
+ * LICENSE: This source file is subject to version 3.0 of the PHP license
+ * that is available through the world-wide-web at the following URI:
+ * http://www.php.net/license/3_0.txt.  If you did not receive a copy of
+ * the PHP License and are unable to obtain it through the web, please
+ * send a note to license@php.net so we can mail you a copy immediately.
+ *
+ * @category   pear
+ * @package    PEAR
+ * @author     Stig Bakken <ssb@php.net>
+ * @author     Greg Beaver <cellog@php.net>
+ * @copyright  1997-2005 The PHP Group
+ * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
+ * @version    CVS: $Id$
+ * @link       http://pear.php.net/package/PEAR
+ * @since      File available since Release 0.1
+ */
 
-require_once "PEAR.php";
+/**
+ * base class
+ */
+require_once 'PEAR.php';
 
+/**
+ * PEAR commands base class
+ *
+ * @category   pear
+ * @package    PEAR
+ * @author     Stig Bakken <ssb@php.net>
+ * @author     Greg Beaver <cellog@php.net>
+ * @copyright  1997-2005 The PHP Group
+ * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
+ * @version    Release: @package_version@
+ * @link       http://pear.php.net/package/PEAR
+ * @since      Class available since Release 0.1
+ */
 class PEAR_Command_Common extends PEAR
 {
     // {{{ properties
@@ -28,9 +47,14 @@ class PEAR_Command_Common extends PEAR
      * PEAR_Config object used to pass user system and configuration
      * on when executing commands
      *
-     * @var object
+     * @var PEAR_Config
      */
     var $config;
+    /**
+     * @var PEAR_Registry
+     * @access protected
+     */
+    var $_registry;
 
     /**
      * User Interface object, for all interaction with the user.
@@ -117,6 +141,10 @@ class PEAR_Command_Common extends PEAR
 
     function getOptions($command)
     {
+        $shortcuts = $this->getShortcuts();
+        if (isset($shortcuts[$command])) {
+            $command = $shortcuts[$command];
+        }
         return @$this->commands[$command]['options'];
     }
 
@@ -127,10 +155,10 @@ class PEAR_Command_Common extends PEAR
     {
         $short_args = "";
         $long_args = array();
-        if (empty($this->commands[$command])) {
+        if (empty($this->commands[$command]) || empty($this->commands[$command]['options'])) {
             return;
         }
-        reset($this->commands[$command]);
+        reset($this->commands[$command]['options']);
         while (list($option, $info) = each($this->commands[$command]['options'])) {
             $larg = $sarg = '';
             if (isset($info['arg'])) {

@@ -1,23 +1,29 @@
 <?php
-//
-// +----------------------------------------------------------------------+
-// | PHP Version 5                                                        |
-// +----------------------------------------------------------------------+
-// | Copyright (c) 1997-2004 The PHP Group                                |
-// +----------------------------------------------------------------------+
-// | This source file is subject to version 3.0 of the PHP license,       |
-// | that is bundled with this package in the file LICENSE, and is        |
-// | available through the world-wide-web at the following url:           |
-// | http://www.php.net/license/3_0.txt.                                  |
-// | If you did not receive a copy of the PHP license and are unable to   |
-// | obtain it through the world-wide-web, please send a note to          |
-// | license@php.net so we can mail you a copy immediately.               |
-// +----------------------------------------------------------------------+
-// | Author: Stig Bakken <ssb@php.net>                                    |
-// +----------------------------------------------------------------------+
-//
-// $Id$
+/**
+ * PEAR_Remote
+ *
+ * PHP versions 4 and 5
+ *
+ * LICENSE: This source file is subject to version 3.0 of the PHP license
+ * that is available through the world-wide-web at the following URI:
+ * http://www.php.net/license/3_0.txt.  If you did not receive a copy of
+ * the PHP License and are unable to obtain it through the web, please
+ * send a note to license@php.net so we can mail you a copy immediately.
+ *
+ * @category   pear
+ * @package    PEAR
+ * @author     Stig Bakken <ssb@php.net>
+ * @author     Greg Beaver <cellog@php.net>
+ * @copyright  1997-2005 The PHP Group
+ * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
+ * @version    CVS: $Id$
+ * @link       http://pear.php.net/package/PEAR
+ * @since      File available since Release 0.1
+ */
 
+/**
+ * needed for PEAR_Error
+ */
 require_once 'PEAR.php';
 require_once 'PEAR/Config.php';
 
@@ -28,6 +34,15 @@ require_once 'PEAR/Config.php';
  * @nodep XML_RPC_Value
  * @nodep XML_RPC_Message
  * @nodep XML_RPC_Client
+ * @category   pear
+ * @package    PEAR
+ * @author     Stig Bakken <ssb@php.net>
+ * @author     Greg Beaver <cellog@php.net>
+ * @copyright  1997-2005 The PHP Group
+ * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
+ * @version    Release: @package_version@
+ * @link       http://pear.php.net/package/PEAR
+ * @since      Class available since Release 0.1
  */
 class PEAR_Remote extends PEAR
 {
@@ -35,6 +50,11 @@ class PEAR_Remote extends PEAR
 
     var $config = null;
     var $cache  = null;
+    /**
+     * @var PEAR_Registry
+     * @access private
+     */
+    var $_registry;
 
     // }}}
 
@@ -44,10 +64,17 @@ class PEAR_Remote extends PEAR
     {
         $this->PEAR();
         $this->config = &$config;
+        $this->_registry = &$this->config->getRegistry();
     }
 
     // }}}
-
+    // {{{ setRegistry()
+    
+    function setRegistry(&$reg)
+    {
+        $this->_registry = &$reg;
+    }
+    // }}}
     // {{{ getCache()
 
 
@@ -58,14 +85,19 @@ class PEAR_Remote extends PEAR
         $filename = $cachedir . DIRECTORY_SEPARATOR . 'xmlrpc_cache_' . $id;
         if (!file_exists($filename)) {
             return null;
-        };
+        }
 
         $fp = fopen($filename, 'rb');
         if (!$fp) {
             return null;
         }
-        $content  = fread($fp, filesize($filename));
-        fclose($fp);
+        if (function_exists('file_get_contents')) {
+            fclose($fp);
+            $content = file_get_contents($filename);
+        } else {
+            $content  = fread($fp, filesize($filename));
+            fclose($fp);
+        }
         $result   = array(
             'age'        => time() - filemtime($filename),
             'lastChange' => filemtime($filename),
@@ -91,54 +123,105 @@ class PEAR_Remote extends PEAR
         if ($fp) {
             fwrite($fp, serialize($data));
             fclose($fp);
-        };
+        }
     }
 
     // }}}
 
+    // {{{ clearCache()
+
+    function clearCache($method, $args)
+    {
+        array_unshift($args, $method);
+        array_unshift($args, $this->config->get('default_channel')); // cache by channel
+        $id       = md5(serialize($args));
+        $cachedir = $this->config->get('cache_dir');
+        $filename = $cachedir.'/xmlrpc_cache_'.$id;
+        if (file_exists($filename)) {
+            @unlink($filename);
+        }
+    }
+
+    // }}}
     // {{{ call(method, [args...])
 
     function call($method)
     {
         $_args = $args = func_get_args();
 
-        $this->cache = $this->getCache($args);
+        $server_channel = $this->config->get('default_channel');
+        $channel = $this->_registry->getChannel($server_channel);
+        if ($channel) {
+            $mirror = $this->config->get('preferred_mirror');
+            if ($channel->getMirror($mirror)) {
+                if ($channel->supports('xmlrpc', $method, $mirror)) {
+                    $server_channel = $server_host = $mirror; // use the preferred mirror
+                    $server_port = $channel->getPort($mirror);
+                } elseif (!$channel->supports('xmlrpc', $method)) {
+                    return $this->raiseError("Channel $server_channel does not " .
+                        "support xml-rpc method $method");
+                }
+            }
+            if (!isset($server_host)) {
+                if (!$channel->supports('xmlrpc', $method)) {
+                    return $this->raiseError("Channel $server_channel does not support " .
+                        "xml-rpc method $method");
+                } else {
+                    $server_host = $server_channel;
+                    $server_port = $channel->getPort();
+                }
+            }
+        } else {
+            return $this->raiseError("Unknown channel '$server_channel'");
+        }
+
+        array_unshift($_args, $server_channel); // cache by channel
+        $this->cache = $this->getCache($_args);
         $cachettl = $this->config->get('cache_ttl');
         // If cache is newer than $cachettl seconds, we use the cache!
         if ($this->cache !== null && $this->cache['age'] < $cachettl) {
             return $this->cache['content'];
-        };
-
+        }
         if (extension_loaded("xmlrpc")) {
             $result = call_user_func_array(array(&$this, 'call_epi'), $args);
             if (!PEAR::isError($result)) {
                 $this->saveCache($_args, $result);
-            };
+            }
             return $result;
-        } elseif (!@include_once("XML/RPC.php")) {
-            return $this->raiseError("For this remote PEAR operation you need to install the XML_RPC package");
+        } elseif (!@include_once 'XML/RPC.php') {
+            return $this->raiseError("For this remote PEAR operation you need to load the xmlrpc extension or install XML_RPC");
         }
 
         array_shift($args);
-        $server_host = $this->config->get('master_server');
         $username = $this->config->get('username');
         $password = $this->config->get('password');
         $eargs = array();
-        foreach($args as $arg) $eargs[] = $this->_encode($arg);
+        foreach($args as $arg) {
+            $eargs[] = $this->_encode($arg);
+        }
         $f = new XML_RPC_Message($method, $eargs);
         if ($this->cache !== null) {
             $maxAge = '?maxAge='.$this->cache['lastChange'];
         } else {
             $maxAge = '';
-        };
+        }
         $proxy_host = $proxy_port = $proxy_user = $proxy_pass = '';
         if ($proxy = parse_url($this->config->get('http_proxy'))) {
             $proxy_host = @$proxy['host'];
+            if (isset($proxy['scheme']) && $proxy['scheme'] == 'https') {
+                $proxy_host = 'https://' . $proxy_host;
+            }
             $proxy_port = @$proxy['port'];
             $proxy_user = @urldecode(@$proxy['user']);
             $proxy_pass = @urldecode(@$proxy['pass']);
         }
-        $c = new XML_RPC_Client('/xmlrpc.php'.$maxAge, $server_host, 80, $proxy_host, $proxy_port, $proxy_user, $proxy_pass);
+        $shost = $server_host;
+        if ($channel->getSSL()) {
+            $shost = "https://$shost";
+        }
+        $c = new XML_RPC_Client('/' . $channel->getPath('xmlrpc')
+            . $maxAge, $shost, $server_port, $proxy_host, $proxy_port,
+            $proxy_user, $proxy_pass);
         if ($username && $password) {
             $c->setCredentials($username, $password);
         }
@@ -192,27 +275,57 @@ class PEAR_Remote extends PEAR
             }
             return $this->raiseError("unable to load xmlrpc extension");
         } while (false);
+        $server_channel = $this->config->get('default_channel');
+        $channel = $this->_registry->getChannel($server_channel);
+        if ($channel) {
+            $mirror = $this->config->get('preferred_mirror');
+            if ($channel->getMirror($mirror)) {
+                if ($channel->supports('xmlrpc', $method, $mirror)) {
+                    $server_channel = $server_host = $mirror; // use the preferred mirror
+                    $server_port = $channel->getPort($mirror);
+                } elseif (!$channel->supports('xmlrpc', $method)) {
+                    return $this->raiseError("Channel $server_channel does not " .
+                        "support xml-rpc method $method");
+                }
+            }
+            if (!isset($server_host)) {
+                if (!$channel->supports('xmlrpc', $method)) {
+                    return $this->raiseError("Channel $server_channel does not support " .
+                        "xml-rpc method $method");
+                } else {
+                    $server_host = $server_channel;
+                    $server_port = $channel->getPort();
+                }
+            }
+        } else {
+            return $this->raiseError("Unknown channel '$server_channel'");
+        }
         $params = func_get_args();
         array_shift($params);
         $method = str_replace("_", ".", $method);
         $request = xmlrpc_encode_request($method, $params);
-        $server_host = $this->config->get("master_server");
-        if (empty($server_host)) {
-            return $this->raiseError("PEAR_Remote::call: no master_server configured");
-        }
-        $server_port = 80;
         if ($http_proxy = $this->config->get('http_proxy')) {
             $proxy = parse_url($http_proxy);
             $proxy_host = $proxy_port = $proxy_user = $proxy_pass = '';
             $proxy_host = @$proxy['host'];
+            if (isset($proxy['scheme']) && $proxy['scheme'] == 'https') {
+                $proxy_host = 'ssl://' . $proxy_host;
+            }
             $proxy_port = @$proxy['port'];
             $proxy_user = @urldecode(@$proxy['user']);
             $proxy_pass = @urldecode(@$proxy['pass']);
             $fp = @fsockopen($proxy_host, $proxy_port);
             $use_proxy = true;
+            if ($channel->getSSL()) {
+                $server_host = "https://$server_host";
+            }
         } else {
             $use_proxy = false;
-            $fp = @fsockopen($server_host, $server_port);
+            $ssl = $channel->getSSL();
+            $fp = @fsockopen(($ssl ? 'ssl://' : '') . $server_host, $server_port);
+            if (!$fp) {
+                $server_host = "$ssl$server_host"; // for error-reporting
+            }
         }
         if (!$fp && $http_proxy) {
             return $this->raiseError("PEAR_Remote::call: fsockopen(`$proxy_host', $proxy_port) failed");
@@ -234,7 +347,7 @@ class PEAR_Remote extends PEAR
             $maxAge = '?maxAge='.$this->cache['lastChange'];
         } else {
             $maxAge = '';
-        };
+        }
 
         if ($use_proxy && $proxy_host != '' && $proxy_user != '') {
             $req_headers .= 'Proxy-Authorization: Basic '
@@ -258,7 +371,8 @@ class PEAR_Remote extends PEAR
             $post_string = "POST ";
         }
 
-        fwrite($fp, ($post_string."/xmlrpc.php$maxAge HTTP/1.0\r\n$req_headers\r\n$request"));
+        $path = '/' . $channel->getPath('xmlrpc');
+        fwrite($fp, ($post_string . $path . "$maxAge HTTP/1.0\r\n$req_headers\r\n$request"));
         $response = '';
         $line1 = fgets($fp, 2048);
         if (!preg_match('!^HTTP/[0-9\.]+ (\d+) (.*)!', $line1, $matches)) {
@@ -271,12 +385,16 @@ class PEAR_Remote extends PEAR
                 return $this->cache['content'];
             case "401": // Unauthorized
                 if ($username && $password) {
-                    return $this->raiseError("PEAR_Remote: authorization failed", 401);
+                    return $this->raiseError("PEAR_Remote ($server_host:$server_port) " .
+                        ": authorization failed", 401);
                 } else {
-                    return $this->raiseError("PEAR_Remote: authorization required, please log in first", 401);
+                    return $this->raiseError("PEAR_Remote ($server_host:$server_port) " .
+                        ": authorization required, please log in first", 401);
                 }
             default:
-                return $this->raiseError("PEAR_Remote: unexpected HTTP response", (int)$matches[1], null, null, "$matches[1] $matches[2]");
+                return $this->raiseError("PEAR_Remote ($server_host:$server_port) : " .
+                    "unexpected HTTP response", (int)$matches[1], null, null,
+                    "$matches[1] $matches[2]");
         }
         while (trim(fgets($fp, 2048)) != ''); // skip rest of headers
         while ($chunk = fread($fp, 10240)) {
@@ -315,6 +433,12 @@ class PEAR_Remote extends PEAR
             $faultString = "XML-RPC Server Fault: " .
                  str_replace("\n", " ", $faultString);
             return $this->raiseError($faultString, $faultCode);
+        } elseif (is_array($ret) && sizeof($ret) == 2 && !empty($ret['faultString']) &&
+              !empty($ret['faultCode'])) {
+            extract($ret);
+            $faultString = "XML-RPC Server Fault: " .
+                 str_replace("\n", " ", $faultString);
+            return $this->raiseError($faultString, $faultCode);
         }
         return $ret;
     }
@@ -338,6 +462,7 @@ class PEAR_Remote extends PEAR
                 $firstkey = key($php_val);
                 end($php_val);
                 $lastkey = key($php_val);
+                reset($php_val);
                 if ($firstkey === 0 && is_int($lastkey) &&
                     ($lastkey + 1) == count($php_val)) {
                     $is_continuous = true;
