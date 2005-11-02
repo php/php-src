@@ -48,6 +48,38 @@ if test "$PHP_CURL" != "no"; then
   else
     AC_MSG_ERROR(cURL version 7.9.8 or later is required to compile php with cURL support)
   fi
+  
+  AC_MSG_CHECKING([for SSL support in libcurl])
+  CURL_SSL=`$CURL_CONFIG --features | $EGREP SSL`
+  if test "$CURL_SSL" == "SSL"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE([HAVE_CURL_SSL], [1], [Have cURL with  SSL support])
+
+    AC_MSG_CHECKING([for SSL library used])
+    CURL_SSL_FLAVOUR=
+    for i in $CURL_LIBS; do
+      if test "$i" == "-lssl"; then
+        CURL_SSL_FLAVOUR="openssl"
+        AC_MSG_RESULT([openssl])
+        AC_DEFINE([HAVE_CURL_OPENSSL], [1], [Have cURL with OpenSSL support])
+        AC_CHECK_HEADERS([openssl/crypto.h])
+        break
+      elif test "$i" == "-lgnutls"; then
+        CURL_SSL_FLAVOUR="gnutls"
+        AC_MSG_RESULT([gnutls])
+        AC_DEFINE([HAVE_CURL_GNUTLS], [1], [Have cURL with GnuTLS support])
+        AC_CHECK_HEADERS([gcrypt.h])
+        break
+      fi
+    done
+    if test -z "$CURL_SSL_FLAVOUR"; then
+      AC_MSG_RESULT([unknown!])
+      AC_MSG_WARN([Could not determine the type of SSL library used!])
+      AC_MSG_WARN([Building will fail in ZTS mode!])
+    fi
+  else
+    AC_MSG_RESULT([no])
+  fi
 
   PHP_ADD_INCLUDE($CURL_DIR/include)
   PHP_EVAL_LIBLINE($CURL_LIBS, CURL_SHARED_LIBADD)

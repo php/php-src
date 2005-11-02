@@ -4,6 +4,8 @@ PHP 4                                                                      NEWS
 - Missing safe_mode/open_basedir check in cURL extension. (Ilia)
 - Fixed bug #34996 (ImageTrueColorToPalette() crashes when ncolors is 
   zero). (Tony)
+- Fixed bug #33760 (cURL needs to implement CRYPTO_callback functions to prevent
+  locking). (Mike)
 
 31 Oct 2005, Version 4.4.1
 - Added missing safe_mode checks for image* functions and cURL. (Ilia)
