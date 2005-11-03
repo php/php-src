@@ -404,7 +404,7 @@ PHP_FUNCTION(spl_autoload_register)
 	
 		if (!zend_is_callable_ex(zcallable, 0, &func_name, &func_name_len, &alfi.ce, &alfi.func_ptr, &obj_ptr TSRMLS_CC)) {
 			if (Z_TYPE_P(zcallable) == IS_ARRAY) {
-				if (!obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
+				if (!obj_ptr && alfi.func_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
 					if (do_throw) {
 						zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Passed array specifies a non static method but no object");
 					}
