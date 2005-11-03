@@ -6,6 +6,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #35059 (Apache2 crash with mod_rewrite). (Ilia)
 - Fixed bug #34996 (ImageTrueColorToPalette() crashes when ncolors is 
   zero). (Tony)
+- Fixed bug #34851 (SO_RECVTIMEO and SO_SNDTIMEO socket options expect integer
+  parameter on Windows). (Mike)
 - Fixed bug #33760 (cURL needs to implement CRYPTO_callback functions to prevent
   locking). (Mike)
 
