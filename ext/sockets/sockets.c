@@ -1506,6 +1506,7 @@ PHP_FUNCTION(socket_get_option)
 	zval			*arg1;
 	struct linger	linger_val;
 	struct timeval		tv;
+	int				timeout = 0;
 	socklen_t		optlen;
 	php_socket		*php_sock;
 	int				other_val;
@@ -1533,12 +1534,24 @@ PHP_FUNCTION(socket_get_option)
 			break; 
 		case SO_RCVTIMEO:
 		case SO_SNDTIMEO:
+#ifndef PHP_WIN32
 			optlen = sizeof(tv);
 
 			if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&tv, &optlen) != 0) {
 				PHP_SOCKET_ERROR(php_sock, "unable to retrieve socket option", errno);
 				RETURN_FALSE;
 			}
+#else
+			optlen = sizeof(int);
+			
+			if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&timeout, &optlen) != 0) {
+				PHP_SOCKET_ERROR(php_sock, "unable to retrieve socket option", errno);
+				RETURN_FALSE;
+			}
+			
+			tv.tv_sec = timeout ? timeout / 1000 : 0;
+			tv.tv_usec = timeout ? (timeout * 1000) % 1000000 : 0;
+#endif
 
 			array_init(return_value);
 			
@@ -1568,7 +1581,7 @@ PHP_FUNCTION(socket_set_option)
 	struct linger	lv;
 	struct timeval tv;
 	php_socket		*php_sock;
-	int				ov, optlen, retval;
+	int				ov, optlen, retval, timeout;
 	long				level, optname;
 	void 			*opt_ptr;
 	
@@ -1628,11 +1641,16 @@ PHP_FUNCTION(socket_set_option)
 			
 			convert_to_long_ex(sec);
 			convert_to_long_ex(usec);
+#ifndef PHP_WIN32
 			tv.tv_sec = Z_LVAL_PP(sec);
 			tv.tv_usec = Z_LVAL_PP(usec);
-
 			optlen = sizeof(tv);
 			opt_ptr = &tv;
+#else
+			timeout = Z_LVAL_PP(sec) * 1000 + Z_LVAL_PP(usec) / 1000;
+			optlen = sizeof(int);
+			opt_ptr = &timeout;
+#endif
 			break;
 		default:
 			convert_to_long_ex(&arg4);
