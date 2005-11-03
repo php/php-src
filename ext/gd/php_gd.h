@@ -30,6 +30,15 @@
 
 #if HAVE_LIBGD
 
+/* open_basedir and safe_mode checks */
+#define PHP_GD_CHECK_OPEN_BASEDIR(filename, errormsg)                                   \
+	if (!filename || filename == empty_string || php_check_open_basedir(filename TSRMLS_CC) || \
+		(PG(safe_mode) && !php_checkuid(filename, "rb+", CHECKUID_CHECK_FILE_AND_DIR))  \
+	) {                                                                                 \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, errormsg);                          \
+		RETURN_FALSE;                                                                   \
+	}
+
 #define PHP_GDIMG_TYPE_GIF      1
 #define PHP_GDIMG_TYPE_PNG      2
 #define PHP_GDIMG_TYPE_JPG      3
