@@ -7,6 +7,8 @@ PHP                                                                        NEWS
 - Fixed bug #35017 (Exception thrown in error handler may cause unexpected
   behavior). (Dmitry)
 - Fixed bug #35014 (array_product() always returns 0). (Ilia)
+- Fixed bug #34851 (SO_RECVTIMEO and SO_SNDTIMEO socket options expect integer
+  parameter on Windows). (Mike)
 
 28 Oct 2005, PHP 5.1 Release Candidate 4
 - Fixed fgetcsv() and fputcsv() inconsistency. (Dmitry)
