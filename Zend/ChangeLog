@@ -1,3 +1,16 @@
+2005-11-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      zend_API.c:
+      - Add missing cases and checks
+
+2005-11-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      zend_execute_API.c:
+      Fixed bug #34978 (php out of memory or segmentation fault while installing
+      sugarcrm 3.5.1a)
+
 2005-11-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_compile.h:

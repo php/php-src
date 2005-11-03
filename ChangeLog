@@ -1,3 +1,210 @@
+2005-11-02  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/gd/php_gd.h:
+      - Fix bad usage of php_checkuid()
+
+2005-11-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      ZendEngine2/zend_API.c:
+      - Add missing cases and checks
+
+2005-11-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      ext/standard/basic_functions.c:
+      Fixed bug #35067, #35063 (key(),current() need to work by reference).
+
+    * (PHP_4_4)
+      NEWS
+      sapi/apache2handler/sapi_apache2.c:
+      Fixed bug #35059 (Apache2 crash with mod_rewrite).
+
+2005-11-02  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/scripts/peardev.bat
+      pear/scripts/peardev.bat
+      pear/scripts/peardev.sh
+      pear/scripts/peardev.sh
+      pear/scripts/pearwin.php
+      pear/scripts/pecl.bat
+      pear/scripts/pecl.bat
+      pear/scripts/pecl.sh
+      pear/scripts/pecl.sh
+      pear/scripts/peclcmd.php
+      pear/scripts/peclcmd.php:
+      
+      file peardev.bat was initially added on branch PHP_4_4.
+
+    * pear/PEAR/Command/Auth.xml
+      pear/PEAR/Command/Auth.xml
+      pear/PEAR/Command/Build.xml
+      pear/PEAR/Command/Build.xml
+      pear/PEAR/Command/Channels.php
+      pear/PEAR/Command/Channels.php
+      pear/PEAR/Command/Channels.xml
+      pear/PEAR/Command/Channels.xml
+      pear/PEAR/Command/Config.xml
+      pear/PEAR/Command/Config.xml
+      pear/PEAR/Command/Install.xml
+      pear/PEAR/Command/Install.xml
+      pear/PEAR/Command/Mirror.php
+      pear/PEAR/Command/Mirror.xml
+      pear/PEAR/Command/Mirror.xml
+      pear/PEAR/Command/Package.php
+      pear/PEAR/Command/Package.xml
+      pear/PEAR/Command/Package.xml
+      pear/PEAR/Command/Pickle.php
+      pear/PEAR/Command/Pickle.php
+      pear/PEAR/Command/Pickle.xml
+      pear/PEAR/Command/Pickle.xml
+      pear/PEAR/Command/Registry.php
+      pear/PEAR/Command/Registry.xml
+      pear/PEAR/Command/Registry.xml
+      pear/PEAR/Command/Remote.php
+      pear/PEAR/Command/Remote.xml
+      pear/PEAR/Command/Remote.xml
+      pear/PEAR/Command/Test.php
+      pear/PEAR/Command/Test.php
+      pear/PEAR/Command/Test.xml
+      pear/PEAR/Command/Test.xml:
+      
+      file Auth.xml was initially added on branch PHP_4_4.
+
+    * pear/PEAR/ChannelFile.php
+      pear/PEAR/ChannelFile.php
+      pear/PEAR/Dependency2.php
+      pear/PEAR/Dependency2.php
+      pear/PEAR/DependencyDB.php
+      pear/PEAR/Frontend.php
+      pear/PEAR/Frontend.php
+      pear/PEAR/PackageFile.php
+      pear/PEAR/PackageFile.php
+      pear/PEAR/Packager.php
+      pear/PEAR/REST.php
+      pear/PEAR/REST.php
+      pear/PEAR/Registry.php
+      pear/PEAR/Remote.php
+      pear/PEAR/RunTest.php
+      pear/PEAR/Validate.php
+      pear/PEAR/Validate.php
+      pear/PEAR/XMLParser.php
+      pear/PEAR/XMLParser.php:
+      
+      file ChannelFile.php was initially added on branch PHP_4_4.
+
+    * (PHP_4_4)
+      pear/CMD.php
+      pear/PEAR.php
+      pear/System.php
+      pear/install-pear.php
+      pear/package-PEAR.xml
+      pear/package.dtd
+      pear/package2.xml
+      pear/package2.xml
+      pear/template.spec
+      pear/OS/Guess.php
+      pear/PEAR/Autoloader.php
+      pear/PEAR/Builder.php
+      pear/PEAR/Command.php
+      pear/PEAR/Common.php
+      pear/PEAR/Config.php
+      pear/PEAR/Dependency.php
+      pear/PEAR/Downloader.php
+      pear/PEAR/ErrorStack.php
+      pear/PEAR/Exception.php
+      pear/PEAR/Installer.php
+      pear/PEAR/Command/Auth.php
+      pear/PEAR/Command/Build.php
+      pear/PEAR/Command/Common.php
+      pear/PEAR/Command/Config.php
+      pear/PEAR/Command/Install.php
+      pear/PEAR/Frontend/CLI.php
+      pear/scripts/pear.bat
+      pear/scripts/pearcmd.php
+      pear/tests/.cvsignore
+      pear/tests/common_sortPkgDeps1_package.xml
+      pear/tests/common_sortPkgDeps2_package.xml
+      pear/tests/common_sortPkgDeps3_package.xml
+      pear/tests/common_sortPkgDeps4_package.xml
+      pear/tests/common_sortPkgDeps5_package.xml
+      pear/tests/common_sortPkgDeps6_package.xml
+      pear/tests/merge.input
+      pear/tests/pear1.phpt
+      pear/tests/pear2.phpt
+      pear/tests/pear_autoloader.phpt
+      pear/tests/pear_common_analyzeSC.phpt
+      pear/tests/pear_common_buildProvidesArray.phpt
+      pear/tests/pear_common_downloadHttp.phpt
+      pear/tests/pear_common_infoFromString.phpt
+      pear/tests/pear_common_sortPkgDeps.phpt
+      pear/tests/pear_common_validPackageVersion.phpt
+      pear/tests/pear_config.phpt
+      pear/tests/pear_dependency_checkExtension.phpt
+      pear/tests/pear_dependency_checkPackage.phpt
+      pear/tests/pear_dependency_checkPackageUninstall.phpt
+      pear/tests/pear_downloader_invalid.phpt
+      pear/tests/pear_downloader_new.phpt
+      pear/tests/pear_downloader_old.phpt
+      pear/tests/pear_error.phpt
+      pear/tests/pear_error2.phpt
+      pear/tests/pear_error3.phpt
+      pear/tests/pear_error4.phpt
+      pear/tests/pear_installer1.phpt
+      pear/tests/pear_installer2.phpt
+      pear/tests/pear_installer3.phpt
+      pear/tests/pear_installer4.phpt
+      pear/tests/pear_installer5.phpt
+      pear/tests/pear_packager.phpt
+      pear/tests/pear_registry.phpt
+      pear/tests/pear_system.phpt
+      pear/tests/php.ini
+      pear/tests/system.input
+      pear/tests/testdownload.tgz
+      pear/tests/toonew.conf
+      pear/tests/user.input
+      pear/tests/user2.input:
+      upgrade PEAR from 1.3.6 to new 1.4.3
+      remove unit tests - they live in pear-core/tests now
+
+2005-11-02  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_1)
+      NEWS
+      ext/posix/posix.c:
+      - MFH: Fixed initializing and argument checking for posix_mknod().
+
+    * ext/posix/posix.c:
+      - Fixed posix_mknod() checks and warnings.
+
+2005-11-02  Michael Wallner  <mike@iworks.at>
+
+    * (PHP_4_4)
+      NEWS
+      ext/curl/config.m4
+      ext/curl/curl.c:
+      - MFH: thread safe SSL crypto locks, fixes bug #33760
+
+    * main/SAPI.c
+      main/SAPI.c
+      main/SAPI.c
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      - sapi_header_op(SAPI_HEADER_(REPLACE|ADD), {NULL, 0, 0}) caused HTTP
+      response splitting
+      - sapi_send_headers() already takes care of default_content_type (left
+      over of fix for bug #29983)
+
+2005-11-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_execute_API.c:
+      Fixed bug #34978 (php out of memory or segmentation fault while installing
+      sugarcrm 3.5.1a)
+
 2005-11-01  Rob Richards  <rrichards@ctindustries.net>
 
     * ext/simplexml/simplexml.c
