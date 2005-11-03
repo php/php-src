@@ -1996,6 +1996,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, char **
 					efree(lmname);
 					return 0;
 				}
+				efree(lcname);
 				*ce_ptr = *pce;
 				ftable = &(*ce_ptr)->function_table;
 			} else {
@@ -2007,11 +2008,8 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, char **
 			if (zend_hash_find(ftable, lmname, mlen+1, (void**)fptr_ptr) == SUCCESS) {
 				retval = 1;
 			}
-			if (*ce_ptr) {
-				efree(lcname);
-				if (!((*fptr_ptr)->common.fn_flags & ZEND_ACC_STATIC)) {
-					retval = 0;
-				}
+			if (*ce_ptr && *fptr_ptr && !((*fptr_ptr)->common.fn_flags & ZEND_ACC_STATIC)) {
+				retval = 0;
 			}
 			efree(lmname);
 			break;
@@ -2097,17 +2095,12 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, char **
 									}
 								}
 							}
-							if (retval) {
-								if ((check_flags & IS_CALLABLE_CHECK_IS_STATIC) != 0 && (fbc->common.fn_flags & ZEND_ACC_STATIC) == 0) {
-									retval = 0;
-								} else {
-									*fptr_ptr = fbc;
-								}
-							}
+							*fptr_ptr = fbc;
 						}
 						/* check for __call too */
 						if (retval == 0 && *zobj_ptr_ptr && ce->__call != 0) {
 							retval = 1;
+							*fptr_ptr = ce->__call;
 						}
 						efree(lcname);
 					}
@@ -2115,7 +2108,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, char **
 					*callable_name = estrndup("Array", sizeof("Array")-1);
 					*callable_name_len = sizeof("Array") - 1;
 				}
-				if (!*zobj_ptr_ptr && (!*fptr_ptr || !((*fptr_ptr)->common.fn_flags & ZEND_ACC_STATIC))) {
+				if ((check_flags & IS_CALLABLE_CHECK_IS_STATIC) != 0 && !*zobj_ptr_ptr && (!*fptr_ptr || !((*fptr_ptr)->common.fn_flags & ZEND_ACC_STATIC))) {
 					retval = 0;
 				}
 				*ce_ptr = ce;
@@ -2149,36 +2142,20 @@ ZEND_API zend_bool zend_is_callable(zval *callable, uint check_flags, char **cal
 
 ZEND_API zend_bool zend_make_callable(zval *callable, char **callable_name TSRMLS_DC)
 {
-	char *lcname, *func, *class_name;
-	zend_bool retval = 0;
-	zend_class_entry **pce;
-	int class_name_len;
+	zend_class_entry *ce;
+	zend_function *fptr;
+	zval **zobj_ptr;
 
-	if (zend_is_callable_ex(callable, 0, callable_name, NULL, NULL, NULL, NULL TSRMLS_CC)) {
+	if (zend_is_callable_ex(callable, 0, callable_name, NULL, &ce, &fptr, &zobj_ptr TSRMLS_CC)) {
+		if (Z_TYPE_P(callable) == IS_STRING && ce) {
+			zval_dtor(callable);
+			array_init(callable);
+			add_next_index_string(callable, ce->name, 1);
+			add_next_index_string(callable, fptr->common.function_name, 1);
+		}
 		return 1;
 	}
-	switch (Z_TYPE_P(callable)) {
-		case IS_STRING:
-			lcname = zend_str_tolower_dup(Z_STRVAL_P(callable), Z_STRLEN_P(callable));
-			
-			if ((func = strstr(lcname, "::")) != NULL) {
-				*func = '\0';
-				class_name_len = func - lcname;
-				class_name = estrndup(Z_STRVAL_P(callable), class_name_len);
-				if (zend_lookup_class(class_name, class_name_len, &pce TSRMLS_CC) == SUCCESS) {
-					zval_dtor(callable);
-					array_init(callable);
-					add_next_index_stringl(callable, lcname, class_name_len, 1);
-					func += 2;
-					add_next_index_stringl(callable, func, strlen(func), 1);
-					retval = 1; 
-				}
-				efree(class_name);
-			}
-			efree(lcname);
-			break;
-	}
-	return retval;
+	return 0;
 }
 
 
