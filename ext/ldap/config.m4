@@ -110,30 +110,32 @@ if test "$PHP_LDAP" != "no"; then
   PHP_SUBST(LDAP_SHARED_LIBADD)
   AC_DEFINE(HAVE_LDAP,1,[ ])
 
-  dnl Check for 3 arg ldap_set_rebind_proc
+  dnl Save original values
   _SAVE_CPPFLAGS=$CPPFLAGS
   _SAVE_LDFLAGS=$LDFLAGS
+  LDFLAGS="$LDFLAGS $LDAP_SHARED_LIBADD"
   CPPFLAGS="$CPPFLAGS -I$LDAP_INCDIR"
+
+  dnl Check for 3 arg ldap_set_rebind_proc
   AC_CACHE_CHECK([for 3 arg ldap_set_rebind_proc], ac_cv_3arg_setrebindproc,
   [AC_TRY_COMPILE([#include <ldap.h>], [ldap_set_rebind_proc(0,0,0)],
   ac_cv_3arg_setrebindproc=yes, ac_cv_3arg_setrebindproc=no)])
   if test "$ac_cv_3arg_setrebindproc" = yes; then
     AC_DEFINE(HAVE_3ARG_SETREBINDPROC,1,[Whether 3 arg set_rebind_proc()])
   fi
-  CPPFLAGS=$_SAVE_CPPFLAGS
 
   dnl Solaris 2.8 claims to be 2004 API, but doesn't have
   dnl ldap_parse_reference() nor ldap_start_tls_s()
   AC_CHECK_FUNCS([ldap_parse_result ldap_parse_reference ldap_start_tls_s])
-  LDFLAGS=$_SAVE_LDFLAGS
   
   dnl
   dnl Sanity check
   dnl 
-  _SAVE_LDFLAGS=$LDFLAGS
-  LDFLAGS="$LDFLAGS $LDAP_SHARED_LIBADD"
   AC_CHECK_FUNC(ldap_bind_s, [], [
     AC_MSG_ERROR([LDAP build check failed. Please check config.log for more information.]) 
   ])
+
+  dnl Restore original values
+  CPPFLAGS=$_SAVE_CPPFLAGS
   LDFLAGS=$_SAVE_LDFLAGS
 fi 
