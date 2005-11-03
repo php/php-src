@@ -44,7 +44,7 @@ PHP                                                                        NEWS
 - Fixed bug #33760 (cURL needs to implement CRYPTO_callback functions to prevent
   locking). (Mike, Ilia)
 - Fixed bug #31341 (escape on curly inconsistent). (Dmitry)
-- Fixed bug #31177 (menory leaks and corruption because of incorrect
+- Fixed bug #31177 (memory leaks and corruption because of incorrect
   refcounting). (Dmitry)
 - Fixed bug #29983 (PHP does not explicitly set mime type & charset). (Ilia)
 - Fixed bug #29268 (__autoload() not called with Reflection->getClass()).
