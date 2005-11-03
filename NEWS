@@ -2,6 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Nov 2005, PHP 5.1
 - Fixed initializing and argument checking for posix_mknod(). (Derick)
+- Fixed bug #35078 (configure does not find ldap_start_tls_s). (Jani)
 - Fixed bugs #35022, #35019 (Regression in the behavior of key() and current()
   functions). (Ilia)
 - Fixed bug #35017 (Exception thrown in error handler may cause unexpected
