@@ -399,7 +399,7 @@ PHP_FUNCTION(spl_autoload_register)
 			}
 			zval_dtor(&zfunc_name);
 			return;
-		} else if (!obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
+		} else if (!obj_ptr && alfi.func_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
 			if (do_throw) {
 				zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_LogicException), 0 TSRMLS_CC, "Passed array specifies a non static method but no object");
 			}
