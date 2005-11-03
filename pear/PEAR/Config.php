@@ -1037,6 +1037,36 @@ class PEAR_Config extends PEAR
             if (!isset($var['default'])) {
                 return $this->raiseError(
                     'Configuration information must contain a default value ("default" index)');
+            } else {
+                if (is_array($var['default'])) {
+                    $real_default = '';
+                    foreach ($var['default'] as $config_var => $val) {
+                        if (strpos($config_var, 'text') === 0) {
+                            $real_default .= $val;
+                        } elseif (strpos($config_var, 'constant') === 0) {
+                            if (defined($val)) {
+                                $real_default .= constant($val);
+                            } else {
+                                return $this->raiseError(
+                                    'Unknown constant "' . $val . '" requested in ' .
+                                    'default value for configuration variable "' .
+                                    $name . '"');
+                            }
+                        } elseif (isset($this->configuration_info[$config_var])) {
+                            $real_default .=
+                                $this->configuration_info[$config_var]['default'];
+                        } else {
+                            return $this->raiseError(
+                                'Unknown request for "' . $config_var . '" value in ' .
+                                'default value for configuration variable "' .
+                                $name . '"');
+                        }
+                    }
+                    $var['default'] = $real_default;
+                }
+                if ($var['type'] == 'integer') {
+                    $var['default'] = (integer) $var['default'];
+                }
             }
             if (!isset($var['doc'])) {
                 return $this->raiseError(
@@ -1058,6 +1088,7 @@ class PEAR_Config extends PEAR
         }
         return true;
     }
+
     // {{{ _encodeOutput(&data)
 
     /**
