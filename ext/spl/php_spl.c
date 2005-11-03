@@ -449,7 +449,11 @@ PHP_FUNCTION(spl_autoload_register)
 		zend_hash_find(EG(function_table), "spl_autoload", sizeof("spl_autoload"), (void **) &spl_func_ptr);
 
 		if (EG(autoload_func) == spl_func_ptr) { /* registered already, so we insert that first */
-			autoload_func_info spl_alfi = {spl_func_ptr, NULL, NULL};
+			autoload_func_info spl_alfi;
+
+			spl_alfi.func_ptr = spl_func_ptr;
+			spl_alfi.obj = NULL;
+			spl_alfi.ce = NULL;
 			zend_hash_add(SPL_G(autoload_functions), "spl_autoload", sizeof("spl_autoload"), &spl_alfi, sizeof(autoload_func_info), NULL);
 		}
 
