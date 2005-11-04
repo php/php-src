@@ -1,3 +1,10 @@
+2005-11-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      zend_API.c:
+      - Fix static check in zend_is_callable_ex()
+      - Fix/speedup zend_make_callable()
+
 2005-11-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)

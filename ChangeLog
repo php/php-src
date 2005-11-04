@@ -1,3 +1,97 @@
+2005-11-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      ext/sqlite/tests/sqlite_oo_030.phpt:
+      - Fix test expectations - we are no detecting the error earlier
+
+    * (PHP_5_1)
+      ZendEngine2/zend_API.c:
+      - Fix static check in zend_is_callable_ex()
+      - Fix/speedup zend_make_callable()
+
+2005-11-03  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      ext/ldap/config.m4
+      ext/ldap/config.m4:
+      MFH: - Fixed bug #35078 (configure does not find ldap_start_tls_s)
+
+    * ext/ldap/config.m4:
+      - Fixed bug #35078 (configure does not find ldap_start_tls_s)
+
+    * (PHP_4_4)
+      NEWS:
+      BFN
+
+2005-11-03  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_4_4)
+      pear/package-PEAR.xml
+      pear/package2.xml:
+      solve cvs sync issue permanently: the PEAR files in php-src/pear branch
+      PHP_4_4 will *only* be used to install PEAR.  The packages, including PEAR
+      will be in packages/
+
+    * pear/packages/PEAR-1.4.3.tar
+      pear/packages/PEAR-1.4.3.tar:
+      
+      file PEAR-1.4.3.tar was initially added on branch PHP_4_4.
+
+2005-11-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      ext/imap/php_imap.c:
+      Syncornize code with CS/error handling from 5.X
+      MFH crash fixes for imap_mailcompose function.
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed typo.
+
+2005-11-03  Michael Wallner  <mike@iworks.at>
+
+    * (PHP_5_1)
+      NEWS
+      ext/sockets/sockets.c
+      ext/sockets/sockets.c:
+      - MFB44: #34851 (SO_RECVTIMEO and SO_SNDTIMEO socket options expect integer
+        parameter on Windows)
+
+    * (PHP_4_4)
+      NEWS
+      ext/sockets/sockets.c:
+      - fixed bug #34851 (SO_RECVTIMEO and SO_SNDTIMEO socket options expect
+      integer
+        parameter on Windows)
+
+2005-11-03  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_4_4)
+      pear/PEAR/Config.php:
+      merge changes from pear-core
+
+    * pear/packages/Console_Getopt-1.2.tar
+      pear/packages/Console_Getopt-1.2.tar:
+      
+      file Console_Getopt-1.2.tar was initially added on branch PHP_4_4.
+
+    * (PHP_4_4)
+      pear/package-Archive_Tar.xml
+      pear/package-Console_Getopt.xml:
+      remove unneeded xml files, will use tarballs to install
+
+    * pear/packages/Archive_Tar-1.3.1.tar
+      pear/packages/Archive_Tar-1.3.1.tar:
+      
+      file Archive_Tar-1.3.1.tar was initially added on branch PHP_4_4.
+
+    * (PHP_4_4)
+      pear/packages/XML_RPC-1.4.0.tar:
+      remove optional XML_RPC dependency from default install
+
 2005-11-02  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * ext/gd/php_gd.h:
