@@ -138,7 +138,7 @@ static int oci_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 	}
 
 	STMT_CALL(OCIStmtExecute, (S->H->svc, S->stmt, S->err,
-				(S->stmt_type == OCI_STMT_SELECT || S->have_blobs) ? 1 : 0, 0, NULL, NULL,
+				(S->stmt_type == OCI_STMT_SELECT && !S->have_blobs) ? 0 : 1, 0, NULL, NULL,
 				mode));
 
 	if (!stmt->executed) {
