@@ -13,6 +13,8 @@ PHP 4                                                                      NEWS
   parameter on Windows). (Mike)
 - Fixed bug #33760 (cURL needs CRYPTO_callback functions to prevent locking).
   (Mike)
+- Fixed bug #31971 (ftp_login fails on some SSL servers).
+  (frantisek at augusztin dot com)
 
 31 Oct 2005, Version 4.4.1
 - Added missing safe_mode checks for image* functions and cURL. (Ilia)

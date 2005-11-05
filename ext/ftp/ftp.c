@@ -262,7 +262,9 @@ ftp_login(ftpbuf_t *ftp, const char *user, const char *pass TSRMLS_DC)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "ftp_login: failed to create the SSL context");
 				return 0;
 			}
-			
+
+			SSL_CTX_set_options(ctx, SSL_OP_ALL);
+
 			ftp->ssl_handle = SSL_new(ctx);
 			if (ftp->ssl_handle == NULL) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "ftp_login: failed to create the SSL handle");
@@ -1402,7 +1404,9 @@ data_accepted:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "data_accept: failed to create the SSL context");
 			return 0;
 		}
-			
+
+		SSL_CTX_set_options(ctx, SSL_OP_ALL);
+
 		data->ssl_handle = SSL_new(ctx);
 		if (data->ssl_handle == NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "data_accept: failed to create the SSL handle");
