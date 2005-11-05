@@ -1,3 +1,9 @@
+2005-11-04  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_4_4)
+      ext/mbstring/mbstring.c:
+      removed mail.force_extra_parameters which is unsuppoted in php4.
+
 2005-11-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
