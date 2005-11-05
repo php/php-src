@@ -885,10 +885,12 @@ class PEAR_Installer extends PEAR_Downloader
         $p = &$pkg->fromAnyFile($descfile, PEAR_VALIDATE_INSTALLING);
         PEAR::staticPopErrorHandling();
         if (PEAR::isError($p)) {
-            foreach ($pkg->getValidationWarnings(true) as $err) {
-                $loglevel = $err['level'] == 'error' ? 0 : 1;
-                if (!isset($this->_options['soft'])) {
-                    $this->log($loglevel, ucfirst($err['level']) . ': ' . $err['message']);
+            if (is_array($p->getUserInfo())) {
+                foreach ($p->getUserInfo() as $err) {
+                    $loglevel = $err['level'] == 'error' ? 0 : 1;
+                    if (!isset($this->_options['soft'])) {
+                        $this->log($loglevel, ucfirst($err['level']) . ': ' . $err['message']);
+                    }
                 }
             }
             return $this->raiseError('Installation failed: invalid package file');
