@@ -1990,7 +1990,7 @@ mime_header_encoder_collector(int c, void *data)
 		break;
 
 	default:	/* ASCII */
-		if (!qp_table[(c & 0xff)]) { /* ordinary characters */
+		if (c <= 0x00ff && !qp_table[(c & 0xff)]) { /* ordinary characters */
 			mbfl_memory_device_output(c, &pe->tmpdev);
 			pe->status1 = 1;
 		} else if (pe->status1 == 0 && c == 0x20) {	/* repeat SPACE */
