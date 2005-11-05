@@ -116,7 +116,8 @@ $pkg = &new PEAR_PackageFile($config, $debug);
 foreach ($install_files as $package => $instfile) {
     $info = &$pkg->fromAnyFile($instfile, PEAR_VALIDATE_INSTALLING);
     if (PEAR::isError($info)) {
-        $ui->outputData(sprintf("[PEAR] %s: %s", $package, $info->getMessage()));
+        $ui->outputData(sprintf("[PEAR] %s: %s", $package . " ($instfile)",
+            $info->getMessage()));
         continue;
     }
     $new_ver = $info->getVersion();
