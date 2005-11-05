@@ -342,7 +342,6 @@ void *php_dom_export_node(zval *object TSRMLS_DC)
    Get a simplexml_element object from dom to allow for processing */
 PHP_FUNCTION(dom_import_simplexml)
 {
-#ifdef HAVE_SIMPLEXML
 	zval *rv = NULL;
 	zval *node;
 	xmlNodePtr nodep = NULL;
@@ -362,10 +361,6 @@ PHP_FUNCTION(dom_import_simplexml)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Nodetype to import");
 		RETURN_NULL();
 	}
-#else
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "SimpleXML support is not enabled");
-	return;
-#endif
 }
 /* }}} */
 
@@ -420,9 +415,6 @@ static zend_object_handlers* dom_get_obj_handlers(TSRMLS_D) {
 static zend_module_dep dom_deps[] = {
 	ZEND_MOD_REQUIRED("libxml")
 	ZEND_MOD_CONFLICTS("domxml")
-#ifdef HAVE_SIMPLEXML
-	ZEND_MOD_REQUIRED("simplexml")
-#endif
 	{NULL, NULL, NULL}
 };
 
