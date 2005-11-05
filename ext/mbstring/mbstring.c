@@ -3595,7 +3595,7 @@ PHP_FUNCTION(mb_send_mail)
 		extra_cmd = Z_STRVAL_PP(argv[4]);
 	}
 
-    if (extra_cmd) {
+	if (extra_cmd) {
 		extra_cmd = php_escape_shell_cmd(extra_cmd);
 	} 
 
