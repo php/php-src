@@ -309,7 +309,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 				TidyBuffer output = {0};
 
 				tidySaveBuffer (TG(tdoc)->doc, &output);
-				RETVAL_STRING(output.bp, 1);
+				RETVAL_STRINGL(output.bp, output.size-1, 1);
 				tidyBufFree(&output);
 			} else {
 				RETVAL_FALSE;
