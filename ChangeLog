@@ -1,3 +1,79 @@
+2005-11-05  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/simplexml/simplexml.c:
+      MFB - This isn't a DOM thing anymore, just libxml
+
+    * (PHP_5_1)
+      ext/simplexml/simplexml.c:
+      And simplexml doesn't need dom anymore to do the import
+
+    * ext/dom/php_dom.c:
+      MFB - We don't need the simplexml requirement here anymore
+
+    * (PHP_5_1)
+      ext/dom/php_dom.c:
+      This SimpleXML requirement is no longer needed and by removing it we
+      remove a circular dep where it was impossible to build simplexml shared
+      and not load it.
+
+2005-11-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      ext/ftp/ftp.c:
+      MFH: Fixed bug #31971 (ftp_login fails on some SSL servers).
+
+    * ext/ftp/ftp.c:
+      MFB51: Fixed bug #31971 (ftp_login fails on some SSL servers)
+
+    * (PHP_5_1)
+      NEWS
+      ext/ftp/ftp.c:
+      Fixed bug #31971 (ftp_login fails on some SSL servers).
+      Patch by: frantisek at augusztin dot com
+
+2005-11-05  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/packages/PEAR-1.4.4.tar
+      pear/packages/PEAR-1.4.4.tar:
+      
+      file PEAR-1.4.4.tar was initially added on branch PHP_4_4.
+
+    * (PHP_4_4)
+      pear/packages/PEAR-1.4.3.tar:
+      upgrade PEAR to 1.4.4
+
+    * (PHP_4_4)
+      pear/PEAR/Installer.php:
+      fix error on call to getValidationWarnings() on wrong variable
+
+    * (PHP_4_4)
+      pear/install-pear.php:
+      revert last commit - information is too verbose
+
+    * (PHP_4_4)
+      pear/Makefile.frag:
+      don't attempt to install package-*.xml
+
+    * (PHP_4_4)
+      pear/install-pear.php:
+      add further debug information in case of error
+
+    * (PHP_4_4)
+      pear/PEAR/Dependency2.php:
+      this must be a non-replacement, fixes
+      Bug #35112  	Pear Install Error - Call to undefined function: getversion()
+
+    * (PHP_4_4)
+      pear/install-pear.php:
+      getVersion() is in wrong place, should there be a PEAR_Error
+
+2005-11-05  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_4_4)
+      ext/mbstring/mbstring.c:
+      fixed white space issue.
+
 2005-11-04  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
 
     * (PHP_4_4)
