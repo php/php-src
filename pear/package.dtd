@@ -1,14 +1,14 @@
 <!--
-     $Id: package.dtd,v 1.35.4.1 2005-03-28 16:46:06 cellog Exp $
+     $Id: package.dtd,v 1.35.4.2 2005-11-06 22:27:48 cellog Exp $
 
      This is the PEAR package description, version 1.0.
      It should be used with the informal public identifier:
 
          "-//PHP Group//DTD PEAR Package 1.0//EN//XML"
 
-     Copyright (c) 1997-2004 The PHP Group
+     Copyright (c) 1997-2005 The PHP Group             
 
-     This source file is subject to version 3.0 of the PHP license, 
+     This source file is subject to version 3.00 of the PHP license,
      that is bundled with this package in the file LICENSE, and is
      available at through the world-wide-web at
      http://www.php.net/license/3_0.txt. 
@@ -17,21 +17,23 @@
      license@php.net so we can mail you a copy immediately.
 
      Authors:
-         Stig S. Bakken <ssb@php.net>
+         Stig S. Bakken <ssb@fast.no>
+         Gregory Beaver <cellog@php.net>
 
   -->
 <!ENTITY % NUMBER "CDATA">
-<!ELEMENT package (name|summary|description|license|maintainers|release|changelog)+>
+<!ELEMENT package (name,summary,description,license?,maintainers,release,changelog?)>
 <!ATTLIST package type    (source|binary|empty) "empty"
-                  version CDATA                 #REQUIRED>
+                  version CDATA                 #REQUIRED
+                  packagerversion CDATA         #IMPLIED>
 
 <!ELEMENT name (#PCDATA)>
 
 <!ELEMENT summary (#PCDATA)>
 
-<!ELEMENT description (#PCDATA)>
-
 <!ELEMENT license (#PCDATA)>
+
+<!ELEMENT description (#PCDATA)>
 
 <!ELEMENT maintainers (maintainer)+>
 
@@ -45,28 +47,47 @@
 
 <!ELEMENT changelog (release)+>
 
-<!ELEMENT release (version|license|state|date|notes|filelist|deps|provides|script|configureoptions)+>
+<!ELEMENT release (version,date,license,state,notes,warnings?,provides*,deps?,configureoptions?,filelist)>
 
 <!ELEMENT version (#PCDATA)>
 
-<!ELEMENT state (#PCDATA)>
-
 <!ELEMENT date (#PCDATA)>
+
+<!ELEMENT state (#PCDATA)>
 
 <!ELEMENT notes (#PCDATA)>
 
+<!ELEMENT warnings (#PCDATA)>
+
+<!ELEMENT deps (dep*)>
+
+<!ELEMENT dep (#PCDATA)>
+<!ATTLIST dep type    (pkg|ext|php) #REQUIRED
+	                       rel     (has|eq|lt|le|gt|ge)                          #IMPLIED
+	                       version CDATA                                     #IMPLIED
+	                       optional (yes|no)     'no'>
+
+<!ELEMENT configureoptions (configureoption)+>
+
+<!ELEMENT configureoption EMPTY>
+<!ATTLIST configureoption name CDATA #REQUIRED
+                                           default CDATA #IMPLIED
+                                           prompt CDATA #REQUIRED>
+
+<!ELEMENT provides EMPTY>
+<!ATTLIST provides type (ext|prog|class|function|feature|api) #REQUIRED
+                                name CDATA #REQUIRED
+                                extends CDATA #IMPLIED>
 <!ELEMENT filelist (dir|file)+>
 
 <!ELEMENT dir (dir|file)+>
 <!ATTLIST dir name           CDATA #REQUIRED
+              role           (php|ext|src|test|doc|data|script) 'php'
               baseinstalldir CDATA #IMPLIED>
 
 <!ELEMENT file (replace*)>
 <!ATTLIST file role           (php|ext|src|test|doc|data|script) 'php'
                debug          (na|on|off)        'na'
-               zts            (na|on|off)        'na'
-               phpapi         %NUMBER;           #IMPLIED
-               zendapi        %NUMBER;           #IMPLIED
                format         CDATA              #IMPLIED
                baseinstalldir CDATA              #IMPLIED
                platform       CDATA              #IMPLIED
@@ -75,36 +96,8 @@
                install-as     CDATA              #IMPLIED>
 
 <!ELEMENT replace EMPTY>
-<!ATTLIST replace from        CDATA              #REQUIRED
-                  to          CDATA              #REQUIRED
-                  type        CDATA              #REQUIRED>
+<!ATTLIST replace type (php-const|pear-config|package-info) #REQUIRED
+                              from CDATA #REQUIRED
+                              to CDATA #REQUIRED>
 
-<!ELEMENT deps (dep)+>
 
-<!ELEMENT dep (#PCDATA)>
-<!ATTLIST dep
-	optional    (yes|no)    'no'
-	type        (pkg|ext|php|prog|ldlib|rtlib|os|websrv|sapi|zend) #REQUIRED
-	rel         (has|eq|lt|le|gt|ge) 'has'
-	version     CDATA                #IMPLIED>
-
-<!ELEMENT provides (#PCDATA)>
-<!ATTLIST provides
-	type    (ext|prog|class|function|feature|api)  #REQUIRED
-	name    CDATA                                  #REQUIRED
-	extends CDATA                                  #IMPLIED>
-
-<!ELEMENT script (#PCDATA)>
-<!ATTLIST script
-        phase   (pre-install  |post-install  |
-                 pre-uninstall|post-uninstall|
-                 pre-build    |post-build    |
-                 pre-setup    |post-setup    )         #REQUIRED>
-
-<!ELEMENT configureoptions (configureoption*)>
-
-<!ELEMENT configureoption EMPTY>
-<!ATTLIST configureoption
-        name     CDATA      #REQUIRED
-        default  CDATA      #IMPLIED
-        prompt   CDATA      #REQUIRED>
