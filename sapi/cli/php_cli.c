@@ -719,8 +719,9 @@ int main(int argc, char *argv[])
 				goto out;
 
 			case 'm': /* list compiled in modules */
-				php_output_startup();
-				php_output_activate(TSRMLS_C);
+				if (php_request_startup(TSRMLS_C)==FAILURE) {
+					goto err;
+				}
 				php_printf("[PHP Modules]\n");
 				print_modules(TSRMLS_C);
 				php_printf("\n[Zend Modules]\n");
@@ -728,19 +729,24 @@ int main(int argc, char *argv[])
 				php_printf("\n");
 				php_end_ob_buffers(1 TSRMLS_CC);
 				exit_status=0;
-				sapi_deactivate(TSRMLS_C);
-				zend_ini_deactivate(TSRMLS_C);
-				goto out_err;
+				goto out;
 
 			case 'v': /* show php version & quit */
-				if (php_request_startup(TSRMLS_C)==FAILURE) {
+				if (php_request_startup(TSRMLS_C) == FAILURE) {
 					goto err;
 				}
-#if ZEND_DEBUG
-				php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2005 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
-#else
-				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2005 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
+
+				php_printf("PHP %s (%s) (built: %s %s) %s\nCopyright (c) 1997-2005 The PHP Group\n%s",
+					PHP_VERSION, sapi_module.name, __DATE__, __TIME__,
+#if ZEND_DEBUG && defined(HAVE_GCOV)
+					"(DEBUG GCOV)",
+#elif ZEND_DEBUG
+					"(DEBUG)",
+#elif defined(HAVE_GCOV)
+					"(GCOV)",
 #endif
+					get_zend_version()
+				);
 				php_end_ob_buffers(1 TSRMLS_CC);
 				exit_status=0;
 				goto out;
