@@ -1,0 +1,92 @@
+<commands version="1.0">
+ <config-show>
+  <summary>Show All Settings</summary>
+  <function>doConfigShow</function>
+  <shortcut>csh</shortcut>
+  <options>
+   <channel>
+    <shortopt>c</shortopt>
+    <doc>show configuration variables for another channel</doc>
+    <arg>CHAN</arg>
+   </channel>
+  </options>
+  <doc>[layer]
+Displays all configuration values.  An optional argument
+may be used to tell which configuration layer to display.  Valid
+configuration layers are &quot;user&quot;, &quot;system&quot; and &quot;default&quot;. To display
+configurations for different channels, set the default_channel
+configuration variable and run config-show again.
+</doc>
+ </config-show>
+ <config-get>
+  <summary>Show One Setting</summary>
+  <function>doConfigGet</function>
+  <shortcut>cg</shortcut>
+  <options>
+   <channel>
+    <shortopt>c</shortopt>
+    <doc>show configuration variables for another channel</doc>
+    <arg>CHAN</arg>
+   </channel>
+  </options>
+  <doc>&lt;parameter&gt; [layer]
+Displays the value of one configuration parameter.  The
+first argument is the name of the parameter, an optional second argument
+may be used to tell which configuration layer to look in.  Valid configuration
+layers are &quot;user&quot;, &quot;system&quot; and &quot;default&quot;.  If no layer is specified, a value
+will be picked from the first layer that defines the parameter, in the order
+just specified.  The configuration value will be retrieved for the channel
+specified by the default_channel configuration variable.
+</doc>
+ </config-get>
+ <config-set>
+  <summary>Change Setting</summary>
+  <function>doConfigSet</function>
+  <shortcut>cs</shortcut>
+  <options>
+   <channel>
+    <shortopt>c</shortopt>
+    <doc>show configuration variables for another channel</doc>
+    <arg>CHAN</arg>
+   </channel>
+  </options>
+  <doc>&lt;parameter&gt; &lt;value&gt; [layer]
+Sets the value of one configuration parameter.  The first argument is
+the name of the parameter, the second argument is the new value.  Some
+parameters are subject to validation, and the command will fail with
+an error message if the new value does not make sense.  An optional
+third argument may be used to specify in which layer to set the
+configuration parameter.  The default layer is &quot;user&quot;.  The
+configuration value will be set for the current channel, which
+is controlled by the default_channel configuration variable.
+</doc>
+ </config-set>
+ <config-help>
+  <summary>Show Information About Setting</summary>
+  <function>doConfigHelp</function>
+  <shortcut>ch</shortcut>
+  <options />
+  <doc>[parameter]
+Displays help for a configuration parameter.  Without arguments it
+displays help for all configuration parameters.
+</doc>
+ </config-help>
+ <config-create>
+  <summary>Create a Default configuration file</summary>
+  <function>doConfigCreate</function>
+  <shortcut>coc</shortcut>
+  <options>
+   <windows>
+    <shortopt>w</shortopt>
+    <doc>create a config file for a windows install</doc>
+   </windows>
+  </options>
+  <doc>&lt;root path&gt; &lt;filename&gt;
+Create a default configuration file with all directory configuration
+variables set to subdirectories of &lt;root path&gt;, and save it as &lt;filename&gt;.
+This is useful especially for creating a configuration file for a remote
+PEAR installation (using the --remoteconfig option of install, upgrade,
+and uninstall).
+</doc>
+ </config-create>
+</commands>

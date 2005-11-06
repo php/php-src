@@ -1,0 +1,36 @@
+<commands version="1.0">
+ <run-tests>
+  <summary>Run Regression Tests</summary>
+  <function>doRunTests</function>
+  <shortcut>rt</shortcut>
+  <options>
+   <recur>
+    <shortopt>r</shortopt>
+    <doc>Run tests in child directories, recursively.  4 dirs deep maximum</doc>
+   </recur>
+   <ini>
+    <shortopt>i</shortopt>
+    <doc>actual string of settings to pass to php in format &quot; -d setting=blah&quot;</doc>
+    <arg>SETTINGS</arg>
+   </ini>
+   <realtimelog>
+    <shortopt>l</shortopt>
+    <doc>Log test runs/results as they are run</doc>
+   </realtimelog>
+   <quiet>
+    <shortopt>q</shortopt>
+    <doc>Only display detail for failed tests</doc>
+   </quiet>
+   <simple>
+    <shortopt>s</shortopt>
+    <doc>Display simple output for all tests</doc>
+   </simple>
+   <package>
+    <shortopt>p</shortopt>
+    <doc>Treat parameters as installed packages from which to run tests</doc>
+   </package>
+  </options>
+  <doc>[testfile|dir ...]
+Run regression tests with PHP&apos;s regression testing script (run-tests.php).</doc>
+ </run-tests>
+</commands>

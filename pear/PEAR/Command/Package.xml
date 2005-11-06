@@ -1,0 +1,194 @@
+<commands version="1.0">
+ <package>
+  <summary>Build Package</summary>
+  <function>doPackage</function>
+  <shortcut>p</shortcut>
+  <options>
+   <nocompress>
+    <shortopt>Z</shortopt>
+    <doc>Do not gzip the package file</doc>
+   </nocompress>
+   <showname>
+    <shortopt>n</shortopt>
+    <doc>Print the name of the packaged file.</doc>
+   </showname>
+  </options>
+  <doc>[descfile] [descfile2]
+Creates a PEAR package from its description file (usually called
+package.xml).  If a second packagefile is passed in, then
+the packager will check to make sure that one is a package.xml
+version 1.0, and the other is a package.xml version 2.0.  The
+package.xml version 1.0 will be saved as &quot;package.xml&quot; in the archive,
+and the other as &quot;package2.xml&quot; in the archive&quot;
+</doc>
+ </package>
+ <package-validate>
+  <summary>Validate Package Consistency</summary>
+  <function>doPackageValidate</function>
+  <shortcut>pv</shortcut>
+  <options />
+  <doc>
+</doc>
+ </package-validate>
+ <cvsdiff>
+  <summary>Run a &quot;cvs diff&quot; for all files in a package</summary>
+  <function>doCvsDiff</function>
+  <shortcut>cd</shortcut>
+  <options>
+   <quiet>
+    <shortopt>q</shortopt>
+    <doc>Be quiet</doc>
+   </quiet>
+   <reallyquiet>
+    <shortopt>Q</shortopt>
+    <doc>Be really quiet</doc>
+   </reallyquiet>
+   <date>
+    <shortopt>D</shortopt>
+    <doc>Diff against revision of DATE</doc>
+    <arg>DATE</arg>
+   </date>
+   <release>
+    <shortopt>R</shortopt>
+    <doc>Diff against tag for package release REL</doc>
+    <arg>REL</arg>
+   </release>
+   <revision>
+    <shortopt>r</shortopt>
+    <doc>Diff against revision REV</doc>
+    <arg>REV</arg>
+   </revision>
+   <context>
+    <shortopt>c</shortopt>
+    <doc>Generate context diff</doc>
+   </context>
+   <unified>
+    <shortopt>u</shortopt>
+    <doc>Generate unified diff</doc>
+   </unified>
+   <ignore-case>
+    <shortopt>i</shortopt>
+    <doc>Ignore case, consider upper- and lower-case letters equivalent</doc>
+   </ignore-case>
+   <ignore-whitespace>
+    <shortopt>b</shortopt>
+    <doc>Ignore changes in amount of white space</doc>
+   </ignore-whitespace>
+   <ignore-blank-lines>
+    <shortopt>B</shortopt>
+    <doc>Ignore changes that insert or delete blank lines</doc>
+   </ignore-blank-lines>
+   <brief>
+    <doc>Report only whether the files differ, no details</doc>
+   </brief>
+   <dry-run>
+    <shortopt>n</shortopt>
+    <doc>Don&apos;t do anything, just pretend</doc>
+   </dry-run>
+  </options>
+  <doc>&lt;package.xml&gt;
+Compares all the files in a package.  Without any options, this
+command will compare the current code with the last checked-in code.
+Using the -r or -R option you may compare the current code with that
+of a specific release.
+</doc>
+ </cvsdiff>
+ <cvstag>
+  <summary>Set CVS Release Tag</summary>
+  <function>doCvsTag</function>
+  <shortcut>ct</shortcut>
+  <options>
+   <quiet>
+    <shortopt>q</shortopt>
+    <doc>Be quiet</doc>
+   </quiet>
+   <reallyquiet>
+    <shortopt>Q</shortopt>
+    <doc>Be really quiet</doc>
+   </reallyquiet>
+   <slide>
+    <shortopt>F</shortopt>
+    <doc>Move (slide) tag if it exists</doc>
+   </slide>
+   <delete>
+    <shortopt>d</shortopt>
+    <doc>Remove tag</doc>
+   </delete>
+   <dry-run>
+    <shortopt>n</shortopt>
+    <doc>Don&apos;t do anything, just pretend</doc>
+   </dry-run>
+  </options>
+  <doc>&lt;package.xml&gt;
+Sets a CVS tag on all files in a package.  Use this command after you have
+packaged a distribution tarball with the &quot;package&quot; command to tag what
+revisions of what files were in that release.  If need to fix something
+after running cvstag once, but before the tarball is released to the public,
+use the &quot;slide&quot; option to move the release tag.
+</doc>
+ </cvstag>
+ <package-dependencies>
+  <summary>Show package dependencies</summary>
+  <function>doPackageDependencies</function>
+  <shortcut>pd</shortcut>
+  <options />
+  <doc>
+List all depencies the package has.</doc>
+ </package-dependencies>
+ <sign>
+  <summary>Sign a package distribution file</summary>
+  <function>doSign</function>
+  <shortcut>si</shortcut>
+  <options />
+  <doc>&lt;package-file&gt;
+Signs a package distribution (.tar or .tgz) file with GnuPG.</doc>
+ </sign>
+ <makerpm>
+  <summary>Builds an RPM spec file from a PEAR package</summary>
+  <function>doMakeRPM</function>
+  <shortcut>rpm</shortcut>
+  <options>
+   <spec-template>
+    <shortopt>t</shortopt>
+    <arg>FILE</arg>
+    <doc>Use FILE as RPM spec file template</doc>
+   </spec-template>
+   <rpm-pkgname>
+    <shortopt>p</shortopt>
+    <arg>FORMAT</arg>
+    <doc>Use FORMAT as format string for RPM package name, %s is replaced
+by the PEAR package name, defaults to &quot;PEAR::%s&quot;.</doc>
+   </rpm-pkgname>
+  </options>
+  <doc>&lt;package-file&gt;
+
+Creates an RPM .spec file for wrapping a PEAR package inside an RPM
+package.  Intended to be used from the SPECS directory, with the PEAR
+package tarball in the SOURCES directory:
+
+$ pear makerpm ../SOURCES/Net_Socket-1.0.tgz
+Wrote RPM spec file PEAR::Net_Geo-1.0.spec
+$ rpm -bb PEAR::Net_Socket-1.0.spec
+...
+Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
+</doc>
+ </makerpm>
+ <convert>
+  <summary>Convert a package.xml 1.0 to package.xml 2.0 format</summary>
+  <function>doConvert</function>
+  <shortcut>c2</shortcut>
+  <options>
+   <flat>
+    <shortopt>f</shortopt>
+    <doc>do not beautify the filelist.</doc>
+   </flat>
+  </options>
+  <doc>[descfile] [descfile2]
+Converts a package.xml in 1.0 format into a package.xml
+in 2.0 format.  The new file will be named package2.xml by default,
+and package.xml will be used as the old file by default.
+This is not the most intelligent conversion, and should only be
+used for automated conversion or learning the format.
+</doc>
+ </convert>
+</commands>

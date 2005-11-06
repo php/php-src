@@ -1,0 +1,28 @@
+a:15:{s:8:"provides";a:12:{s:17:"class;Archive_Tar";a:3:{s:4:"type";s:5:"class";s:4:"name";s:11:"Archive_Tar";s:8:"explicit";b:1;}s:28:"function;Archive_Tar::create";a:3:{s:4:"type";s:8:"function";s:4:"name";s:19:"Archive_Tar::create";s:8:"explicit";b:1;}s:25:"function;Archive_Tar::add";a:3:{s:4:"type";s:8:"function";s:4:"name";s:16:"Archive_Tar::add";s:8:"explicit";b:1;}s:29:"function;Archive_Tar::extract";a:3:{s:4:"type";s:8:"function";s:4:"name";s:20:"Archive_Tar::extract";s:8:"explicit";b:1;}s:33:"function;Archive_Tar::listContent";a:3:{s:4:"type";s:8:"function";s:4:"name";s:24:"Archive_Tar::listContent";s:8:"explicit";b:1;}s:34:"function;Archive_Tar::createModify";a:3:{s:4:"type";s:8:"function";s:4:"name";s:25:"Archive_Tar::createModify";s:8:"explicit";b:1;}s:31:"function;Archive_Tar::addModify";a:3:{s:4:"type";s:8:"function";s:4:"name";s:22:"Archive_Tar::addModify";s:8:"explicit";b:1;}s:31:"function;Archive_Tar::addString";a:3:{s:4:"type";s:8:"function";s:4:"name";s:22:"Archive_Tar::addString";s:8:"explicit";b:1;}s:35:"function;Archive_Tar::extractModify";a:3:{s:4:"type";s:8:"function";s:4:"name";s:26:"Archive_Tar::extractModify";s:8:"explicit";b:1;}s:37:"function;Archive_Tar::extractInString";a:3:{s:4:"type";s:8:"function";s:4:"name";s:28:"Archive_Tar::extractInString";s:8:"explicit";b:1;}s:33:"function;Archive_Tar::extractList";a:3:{s:4:"type";s:8:"function";s:4:"name";s:24:"Archive_Tar::extractList";s:8:"explicit";b:1;}s:34:"function;Archive_Tar::setAttribute";a:3:{s:4:"type";s:8:"function";s:4:"name";s:25:"Archive_Tar::setAttribute";s:8:"explicit";b:1;}}s:8:"filelist";a:2:{s:15:"Archive/Tar.php";a:4:{s:4:"role";s:3:"php";s:14:"baseinstalldir";s:1:"/";s:6:"md5sum";s:32:"4b718a4f5943d3b88defb243359b2866";s:12:"installed_as";s:41:"C:\Program Files\php\pear\Archive\Tar.php";}s:20:"docs/Archive_Tar.txt";a:4:{s:4:"role";s:3:"doc";s:14:"baseinstalldir";s:1:"/";s:6:"md5sum";s:32:"ae640b797078a6542ea0d236f28efffb";s:12:"installed_as";s:58:"C:\devel\Chiara\pear\docs\Archive_Tar\docs\Archive_Tar.txt";}}s:10:"xsdversion";s:3:"1.0";s:7:"package";s:11:"Archive_Tar";s:7:"summary";s:25:"Tar file management class";s:11:"description";s:258:"This class provides handling of tar files in PHP.
+It supports creating, listing, extracting and adding to tar files.
+Gzip support is available if PHP has the zlib extension built-in or
+loaded. Bz2 compression is also supported with the bz2 extension loaded.
+";s:11:"maintainers";a:2:{i:0;a:4:{s:6:"handle";s:7:"vblavet";s:4:"name";s:14:"Vincent Blavet";s:5:"email";s:22:"vincent@phpconcept.net";s:4:"role";s:4:"lead";}i:1;a:4:{s:6:"handle";s:3:"ssb";s:4:"name";s:18:"Stig Sæther Bakken";s:5:"email";s:12:"stig@php.net";s:4:"role";s:6:"helper";}}s:7:"version";s:3:"1.2";s:12:"release_date";s:10:"2004-05-08";s:15:"release_license";s:11:"PHP License";s:13:"release_state";s:6:"stable";s:13:"release_notes";s:72:"Add support for other separator than the space char and bug
+	correction
+";s:9:"changelog";a:7:{i:0;a:4:{s:7:"version";s:3:"1.1";s:12:"release_date";s:10:"2003-05-28";s:13:"release_state";s:6:"stable";s:13:"release_notes";s:143:"* Add support for BZ2 compression
+* Add support for add and extract without using temporary files : methods addString() and extractInString()
+
+";}i:1;a:4:{s:7:"version";s:3:"1.0";s:12:"release_date";s:10:"2003-01-24";s:13:"release_state";s:6:"stable";s:13:"release_notes";s:26:"Change status to stable
+
+
+";}i:2;a:4:{s:7:"version";s:7:"0.10-b1";s:12:"release_date";s:10:"2003-01-08";s:13:"release_state";s:4:"beta";s:13:"release_notes";s:62:"Add support for long filenames (greater than 99 characters)
+
+
+";}i:3;a:4:{s:7:"version";s:3:"0.9";s:12:"release_date";s:10:"2002-05-27";s:13:"release_state";s:6:"stable";s:13:"release_notes";s:28:"Auto-detect gzip'ed files
+
+
+";}i:4;a:4:{s:7:"version";s:3:"0.4";s:12:"release_date";s:10:"2002-05-20";s:13:"release_state";s:6:"stable";s:13:"release_notes";s:54:"Windows bugfix: use forward slashes inside archives
+
+
+";}i:5;a:4:{s:7:"version";s:3:"0.2";s:12:"release_date";s:10:"2002-02-18";s:13:"release_state";s:6:"stable";s:13:"release_notes";s:32:"From initial commit to stable
+
+
+";}i:6;a:4:{s:7:"version";s:3:"0.3";s:12:"release_date";s:10:"2002-04-13";s:13:"release_state";s:6:"stable";s:13:"release_notes";s:50:"Windows bugfix: used wrong directory separators
+
+
+";}}s:7:"dirtree";a:2:{s:33:"C:\Program Files\php\pear\Archive";b:1;s:42:"C:\devel\Chiara\pear\docs\Archive_Tar\docs";b:1;}s:13:"_lastmodified";i:1094797013;}

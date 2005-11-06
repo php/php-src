@@ -1,0 +1,13 @@
+<role version="1.0">
+ <releasetypes>php</releasetypes>
+ <releasetypes>extsrc</releasetypes>
+ <releasetypes>extbin</releasetypes>
+ <installable>1</installable>
+ <locationconfig>php_dir</locationconfig>
+ <honorsbaseinstall>1</honorsbaseinstall>
+ <unusualbaseinstall />
+ <phpfile>1</phpfile>
+ <executable />
+ <phpextension />
+ <config_vars />
+</role>
