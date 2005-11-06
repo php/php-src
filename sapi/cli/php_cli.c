@@ -712,8 +712,9 @@ int main(int argc, char *argv[])
 				goto out;
 
 			case 'm': /* list compiled in modules */
-				php_output_startup();
-				php_output_activate(TSRMLS_C);
+				if (php_request_startup(TSRMLS_C)==FAILURE) {
+					goto err;
+				}
 				php_printf("[PHP Modules]\n");
 				print_modules(TSRMLS_C);
 				php_printf("\n[Zend Modules]\n");
@@ -721,9 +722,7 @@ int main(int argc, char *argv[])
 				php_printf("\n");
 				php_end_ob_buffers(1 TSRMLS_CC);
 				exit_status=0;
-				sapi_deactivate(TSRMLS_C);
-				zend_ini_deactivate(TSRMLS_C);
-				goto out_err;
+				goto out;
 
 			case 'v': /* show php version & quit */
 				if (php_request_startup(TSRMLS_C)==FAILURE) {
