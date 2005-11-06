@@ -1872,7 +1872,7 @@ PHP_FUNCTION(pg_fetch_result)
 /* {{{ void php_pgsql_fetch_hash */
 static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type, int into_object)
 {
-	zval                *result;
+	zval                *result, *zrow = NULL;
 	PGresult            *pgsql_result;
 	pgsql_result_handle *pg_result;
 	int             i, num_fields, pgsql_row, use_row;
@@ -1886,7 +1886,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 		char *class_name;
 		int class_name_len;
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|lsz", &result, &row, &class_name, &class_name_len, &ctor_params) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|z!sz", &result, &zrow, &class_name, &class_name_len, &ctor_params) == FAILURE) {
 			return;
 			}
 		if (ZEND_NUM_ARGS() < 3) {
@@ -1900,9 +1900,15 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 		}
 		result_type = PGSQL_ASSOC;
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|ll", &result, &row, &result_type) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|z!l", &result, &zrow, &result_type) == FAILURE) {
 			return;
 		}
+	}
+	if (zrow == NULL) {
+		row = -1;
+	} else {
+		convert_to_long(zrow);
+		row = Z_LVAL_P(zrow);
 	}
 	use_row = ZEND_NUM_ARGS() > 1 && row != -1;
 
