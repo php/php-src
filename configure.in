@@ -597,56 +597,65 @@ dnl -------------------------------------------------------------------------
 PHP_CONFIGURE_PART(General settings)
 
 PHP_HELP_SEPARATOR([General settings:])
+
 PHP_ARG_ENABLE(gcov,  whether to include gcov symbols,
 [  --enable-gcov           Enable GCOV code coverage (requires LTP)], no, no)
 
 if test "$PHP_GCOV" = "yes"; then
-  AC_DEFUN([PHP_PROG_LTP],[
 
-    ltp_version_list="1.4"
+  if test "$GCC" != "yes"; then
+    AC_MSG_ERROR([GCC is required to be able use --enable-gcov])
+  fi
+  
+  dnl Check if we can pass GCC the --ccache-disable option
+  PHP_CHECK_GCC_ARG([--ccache-disable], [CC="$CC --ccache-disable"])
 
-    AC_CHECK_PROG(LTP, lcov, lcov)
-    AC_CHECK_PROG(LTP_GENHTML, genhtml, genhtml)
-    if test "$LTP"; then
-      AC_CACHE_CHECK([for ltp version], php_cv_ltp_version, [
-        php_cv_ltp_version=invalid
-        ltp_version=`$LTP -v 2>/dev/null | $SED -e 's/^.* //'`
-        for ltp_check_version in $ltp_version_list; do
-          if test "$ltp_version" = "$ltp_check_version"; then
-            php_cv_ltp_version="$ltp_check_version (ok)"
-          fi
-        done
-      ])
-    else
-      ltp_msg="To enable code coverage reporting you must have one of the following LTP versions installed: $ltp_version_list"      
+  ltp_version_list="1.4"
+
+  AC_CHECK_PROG(LTP, lcov, lcov)
+  AC_CHECK_PROG(LTP_GENHTML, genhtml, genhtml)
+
+  if test "$LTP"; then
+    AC_CACHE_CHECK([for ltp version], php_cv_ltp_version, [
+      php_cv_ltp_version=invalid
+      ltp_version=`$LTP -v 2>/dev/null | $SED -e 's/^.* //'`
+      for ltp_check_version in $ltp_version_list; do
+        if test "$ltp_version" = "$ltp_check_version"; then
+          php_cv_ltp_version="$ltp_check_version (ok)"
+        fi
+      done
+    ])
+  else
+    ltp_msg="To enable code coverage reporting you must have one of the following LTP versions installed: $ltp_version_list"      
+    AC_MSG_ERROR([$ltp_msg])
+  fi
+
+  case $php_cv_ltp_version in
+    ""|invalid[)]
+      ltp_msg="You must have one of the following versions of LTP: $ltp_version_list (found: $ltp_version)."
       AC_MSG_ERROR([$ltp_msg])
-    fi
+      LTP="exit 0;"
+      ;;
+  esac
 
-    case $php_cv_ltp_version in
-      ""|invalid[)]
-        ltp_msg="You must have one of the following versions of LTP: $ltp_version_list (found: $ltp_version)."
-        AC_MSG_ERROR([$ltp_msg])
-        LTP="exit 0;"
-        ;;
-    esac
+  if test -z "$LTP_GENHTML"; then
+    AC_MSG_ERROR([Could not find genhtml from the LTP package])
+  fi
 
-    if test "$LTP_GENHTML" = ""; then
-       AC_MSG_ERROR([Could not find genhtml from the LTP package])
-    fi
+  PHP_SUBST(LTP)
+  PHP_SUBST(LTP_GENHTML)
 
-    PHP_SUBST(LTP)
-    PHP_SUBST(LTP_GENHTML)
-  ])
+  PHP_ADD_LIBRARY(gcov)
+  AC_DEFINE(HAVE_GCOV, 1, [Whether you have gcov])
+  PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/Makefile.gcov, $abs_srcdir)
 
-  PHP_PROG_LTP
-  AC_CHECK_LIB(gcov, __gcov_open, [
-    PHP_ADD_LIBRARY(gcov)
-    AC_DEFINE(HAVE_GCOV, 1, [Whether you have gcov])
-    CFLAGS="$CFLAGS -O0 -fprofile-arcs -ftest-coverage"
-    PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/Makefile.gcov,$abs_srcdir)
-  ], [
-    AC_MSG_ERROR([Problem with enabling gcov. Please check config.log for details.])
-  ])
+  dnl Remove all optimization flags from CFLAGS
+  changequote({,})
+  CFLAGS=`echo "$CFLAGS" | $SED -e 's/-O[0-9]*//g'`
+  changequote([,])
+
+  dnl Add the special gcc flags
+  CFLAGS="$CFLAGS -O0 -fprofile-arcs -ftest-coverage"
 fi
 
 PHP_ARG_ENABLE(debug, whether to include debugging symbols,
