@@ -1341,6 +1341,9 @@ void zend_shutdown(TSRMLS_D)
 #ifdef ZEND_WIN32
 	zend_shutdown_timeout_thread();
 #endif
+	if (global_persistent_list) {
+		zend_destroy_rsrc_list(global_persistent_list TSRMLS_CC);
+	}
 	zend_hash_graceful_reverse_destroy(&module_registry);
 
 	zend_hash_destroy(global_function_table);
@@ -1376,9 +1379,6 @@ void zend_shutdown(TSRMLS_D)
 	}
 	if (global_u_class_table) {
 		free(global_u_class_table);
-	}
-	if (global_persistent_list) {
-		zend_destroy_rsrc_list(global_persistent_list TSRMLS_CC);
 	}
 #ifdef ZTS
 	global_function_table = NULL;
