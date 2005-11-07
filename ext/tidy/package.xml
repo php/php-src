@@ -16,6 +16,12 @@
    <email>ilia@php.net</email>
    <role>lead</role>
   </maintainer>
+  <maintainer>
+   <user>mike</user>
+   <name>Michael Wallner</name>
+   <email>mike@php.net</email>
+   <role>lead</role>
+  </maintainer>
  </maintainers>
  <description>
 Tidy is a binding for the Tidy HTML clean and repair utility which
@@ -27,7 +33,7 @@ NOTE: This is the PHP4 version!
  <release>
   <state>stable</state>
   <version>1.2</version>
-  <date>2005-10-00</date>
+  <date>2005-11-00</date>
   <notes>
 Fixed bug #4202 tidy is not binary safe
   </notes>
