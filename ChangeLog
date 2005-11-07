@@ -1,3 +1,205 @@
+2005-11-06  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_0)
+      pear/PEAR/ChannelFile.php
+      pear/PEAR/Dependency2.php
+      pear/PEAR/Frontend.php
+      pear/PEAR/PackageFile.php
+      pear/PEAR/REST.php
+      pear/PEAR/Validate.php
+      pear/PEAR/XMLParser.php
+      pear/PEAR/Command/Auth.xml
+      pear/PEAR/Command/Build.xml
+      pear/PEAR/Command/Channels.php
+      pear/PEAR/Command/Channels.xml
+      pear/PEAR/Command/Config.xml
+      pear/PEAR/Command/Install.xml
+      pear/PEAR/Command/Mirror.xml
+      pear/PEAR/Command/Package.xml
+      pear/PEAR/Command/Pickle.php
+      pear/PEAR/Command/Pickle.xml
+      pear/PEAR/Command/Registry.xml
+      pear/PEAR/Command/Remote.xml
+      pear/PEAR/Command/Test.php
+      pear/PEAR/Command/Test.xml:
+      add files that were not cvs added by accident
+
+2005-11-06  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * configure.in:
+      - Do the LTP thing properly
+
+    * (PHP_5_1)
+      sapi/cli/php_cli.c:
+      MFH:- Fixed minor leak with -dzlib.output_compression=1 -m
+
+    * sapi/cli/php_cli.c:
+      - Fixed minor memory leak triggered by: -dzlib.output_compression=1 -m
+
+2005-11-06  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_0)
+      pear/Makefile.frag
+      pear/PEAR.php
+      pear/System.php
+      pear/install-pear.php
+      pear/package-Archive_Tar.xml
+      pear/package-Console_Getopt.xml
+      pear/package-PEAR.xml
+      pear/package.dtd
+      pear/template.spec
+      pear/OS/Guess.php
+      pear/PEAR/Autoloader.php
+      pear/PEAR/Builder.php
+      pear/PEAR/Command.php
+      pear/PEAR/Common.php
+      pear/PEAR/Config.php
+      pear/PEAR/Dependency.php
+      pear/PEAR/DependencyDB.php
+      pear/PEAR/Downloader.php
+      pear/PEAR/ErrorStack.php
+      pear/PEAR/Exception.php
+      pear/PEAR/Installer.php
+      pear/PEAR/Packager.php
+      pear/PEAR/Registry.php
+      pear/PEAR/Remote.php
+      pear/PEAR/RunTest.php
+      pear/PEAR/Command/Auth.php
+      pear/PEAR/Command/Build.php
+      pear/PEAR/Command/Common.php
+      pear/PEAR/Command/Config.php
+      pear/PEAR/Command/Install.php
+      pear/PEAR/Command/Mirror.php
+      pear/PEAR/Command/Package.php
+      pear/PEAR/Command/Registry.php
+      pear/PEAR/Command/Remote.php
+      pear/PEAR/Frontend/CLI.php
+      pear/packages/Archive_Tar-1.3.1.tar
+      pear/packages/Console_Getopt-1.2.tar
+      pear/packages/PEAR-1.4.4.tar
+      pear/packages/XML_RPC-1.4.0.tar
+      pear/scripts/pear.bat
+      pear/scripts/pearcmd.php
+      pear/tests/.cvsignore
+      pear/tests/PEAR_test_mock_pearweb.php.inc
+      pear/tests/common_sortPkgDeps1_package.xml
+      pear/tests/common_sortPkgDeps2_package.xml
+      pear/tests/common_sortPkgDeps3_package.xml
+      pear/tests/common_sortPkgDeps4_package.xml
+      pear/tests/common_sortPkgDeps5_package.xml
+      pear/tests/common_sortPkgDeps6_package.xml
+      pear/tests/depnoreleases-1.0.tgz
+      pear/tests/depunstable-1.0.tgz
+      pear/tests/download_test.config.inc
+      pear/tests/download_test_classes.php.inc
+      pear/tests/merge.input
+      pear/tests/merge2.input
+      pear/tests/package-PEARtests.xml
+      pear/tests/pear1.phpt
+      pear/tests/pear2.phpt
+      pear/tests/pear_autoloader.phpt
+      pear/tests/pear_channelfile.phpt
+      pear/tests/pear_common_analyzeSC.phpt
+      pear/tests/pear_common_buildProvidesArray.phpt
+      pear/tests/pear_common_downloadHttp.phpt
+      pear/tests/pear_common_infoFromString.phpt
+      pear/tests/pear_common_sortPkgDeps.phpt
+      pear/tests/pear_common_validPackageVersion.phpt
+      pear/tests/pear_config.phpt
+      pear/tests/pear_config_1.1.phpt
+      pear/tests/pear_dependency_checkExtension.phpt
+      pear/tests/pear_dependency_checkPackage.phpt
+      pear/tests/pear_dependency_checkPackageUninstall.phpt
+      pear/tests/pear_downloader_invalid.phpt
+      pear/tests/pear_downloader_new.phpt
+      pear/tests/pear_downloader_old.phpt
+      pear/tests/pear_error.phpt
+      pear/tests/pear_error2.phpt
+      pear/tests/pear_error3.phpt
+      pear/tests/pear_error4.phpt
+      pear/tests/pear_installer1.phpt
+      pear/tests/pear_installer2.phpt
+      pear/tests/pear_installer3.phpt
+      pear/tests/pear_installer4.phpt
+      pear/tests/pear_installer5.phpt
+      pear/tests/pear_installer_installFile_channels.phpt
+      pear/tests/pear_installer_install_channels.phpt
+      pear/tests/pear_packager.phpt
+      pear/tests/pear_registry.phpt
+      pear/tests/pear_registry_1.1.phpt
+      pear/tests/pear_registry_inc.php.inc
+      pear/tests/pear_system.phpt
+      pear/tests/php.ini
+      pear/tests/php_dump.php.inc
+      pear/tests/pkg1-1.1.tgz
+      pear/tests/pkg1-2.0b1.tgz
+      pear/tests/pkg2-1.1.tgz
+      pear/tests/pkg3-1.1.tgz
+      pear/tests/pkg3-1.4.tgz
+      pear/tests/pkg4-1.1.tgz
+      pear/tests/pkg4AndAHalf-1.3.tgz
+      pear/tests/pkg5-1.1.tgz
+      pear/tests/stabilitytoolow-0.3.tgz
+      pear/tests/stabilitytoolow-0.5.tgz
+      pear/tests/stabilitytoolow-0.6beta.tgz
+      pear/tests/stabilitytoolow-1.0b1.tgz
+      pear/tests/stabilitytoolow-2.0a1.tgz
+      pear/tests/stabilitytoolow-2.0b1.tgz
+      pear/tests/stabilitytoolow-2.0dev.tgz
+      pear/tests/stabilitytoolow-3.0dev.tgz
+      pear/tests/system.input
+      pear/tests/testdownload.tgz
+      pear/tests/toonew.conf
+      pear/tests/user.input
+      pear/tests/user2.input
+      pear/tests/user3.input:
+      merge from pear-core/ and from php-src/pear (PHP_4_4)
+
+2005-11-06  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * main/SAPI.c:
+      - Revert bad patch. This is wrong way to handle leak in "php -m"
+
+2005-11-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/calendar/tests/cal_days_in_month.phpt
+      ext/calendar/tests/cal_to_jd.phpt
+      ext/calendar/tests/easter_days.phpt
+      ext/calendar/tests/frenchtojd.phpt
+      ext/calendar/tests/skipif.inc:
+      - MFB Add tests
+
+    * (PHP_5_1)
+      ext/calendar/tests/cal_days_in_month.phpt:
+      - Remve bogus part of test
+
+    * ext/pgsql/pgsql.c:
+      -MFB Fix parameter parsing
+
+    * (PHP_5_1)
+      ext/pgsql/pgsql.c:
+      - Fix parameter parsing
+
+2005-11-06  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_1)
+      php.ini-dist
+      php.ini-recommended:
+      - MFH: E_STRICT is not part of E_ALL, so the lines were wrong here.
+
+    * php.ini-dist
+      php.ini-recommended:
+      - E_STRICT is not part of E_ALL, so the lines were wrong here.
+
+2005-11-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dom/tests/dom005.phpt:
+      - MFB Fix tests expectations
+
+    * (PHP_5_1)
+      ext/dom/tests/dom005.phpt:
+      - Fix test expectations
+
 2005-11-05  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * ext/simplexml/simplexml.c:
