@@ -395,7 +395,7 @@ PHP_FUNCTION(spl_autoload_register)
 				zend_str_tolower_copy(tmp_name, Z_STRVAL_P(zcallable), Z_STRLEN_P(zcallable));
 				if (!strcmp(tmp_name, "spl_autoload_call")) {
 					if (do_throw) {
-						zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Function spl_autoload_call() cannot be registered", func_name);
+						zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Function spl_autoload_call() cannot be registered");
 					}
 					return;
 				}
