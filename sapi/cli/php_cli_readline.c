@@ -217,8 +217,11 @@ int cli_is_valid_code(char *code, int len, char **prompt TSRMLS_DC)
 				}
 				break;
 			case heredoc:
-				if (code[i - (heredoc_len + 1)] == '\n' && !strncmp(code + i - heredoc_len, heredoc_tag, heredoc_len)) {
+				if (code[i - (heredoc_len + 1)] == '\n' && !strncmp(code + i - heredoc_len, heredoc_tag, heredoc_len) && code[i] == '\n') {
 					code_type = body;
+				} else if (code[i - (heredoc_len + 2)] == '\n' && !strncmp(code + i - heredoc_len - 1, heredoc_tag, heredoc_len) && code[i-1] == ';' && code[i] == '\n') {
+					code_type = body;
+					valid_end = 1;
 				}
 				break;
 			case outside:
