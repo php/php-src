@@ -19,8 +19,9 @@
  </maintainers>
  <description>
 Tidy is a binding for the Tidy HTML clean and repair utility which
-allows you to not only clean and otherwise manipluate HTML documents,
-but also traverse the document tree using the Zend Engine 2 OO semantics.
+allows you to clean and manipluate HTML documents.
+
+NOTE: This is the PHP4 version!
  </description>
  <license>PHP</license>
  <release>
@@ -28,7 +29,7 @@ but also traverse the document tree using the Zend Engine 2 OO semantics.
   <version>1.2</version>
   <date>2005-10-00</date>
   <notes>
-    Fixed bug #4202 tidy is not binary safe
+Fixed bug #4202 tidy is not binary safe
   </notes>
   <configureoptions>
     <configureoption name="with-tidy" default="autodetect" prompt="Tidy library installation dir?"/>
@@ -53,7 +54,7 @@ but also traverse the document tree using the Zend Engine 2 OO semantics.
    <file role="test" name="tests/007.phpt"/>
   </filelist>
   <deps>
-   <dep type="php" rel="ge">4.3.0</dep>
+   <dep type="php" rel="ge" version="4.3.0"/>
   </deps>
  </release>
 </package>
