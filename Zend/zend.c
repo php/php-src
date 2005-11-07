@@ -702,6 +702,7 @@ void zend_shutdown(TSRMLS_D)
 #ifdef ZEND_WIN32
 	zend_shutdown_timeout_thread();
 #endif
+	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
 	zend_hash_graceful_reverse_destroy(&module_registry);
 
 	zend_hash_destroy(GLOBAL_FUNCTION_TABLE);
@@ -719,7 +720,6 @@ void zend_shutdown(TSRMLS_D)
 	zend_hash_destroy(GLOBAL_CONSTANTS_TABLE);
 	free(GLOBAL_CONSTANTS_TABLE);
 
-	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
 #ifdef ZTS
 	GLOBAL_FUNCTION_TABLE = NULL;
 	GLOBAL_CLASS_TABLE = NULL;
