@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - Fixed bug #35017 (Exception thrown in error handler may cause unexpected
   behavior). (Dmitry)
 - Fixed bug #35014 (array_product() always returns 0). (Ilia)
+- Fixed bug #35009 (ZTS: Persistent resource destruct crashes when extension
+  is compiled as shared). (Dmitry)
 - Fixed bug #34851 (SO_RECVTIMEO and SO_SNDTIMEO socket options expect integer
   parameter on Windows). (Mike)
 - Fixed bug #31971 (ftp_login fails on some SSL servers). 
