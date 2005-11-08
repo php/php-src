@@ -1,3 +1,11 @@
+2005-11-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.c
+      zend.c
+      zend.c:
+      Fixed bug #35009 (ZTS: Persistent resource destruct crashes when extension
+      is compiled as shared)
+
 2005-11-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)

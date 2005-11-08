@@ -1,3 +1,52 @@
+2005-11-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cli/php_cli_readline.c:
+      - heredoc handling in -a mode
+
+2005-11-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #35135 (PDOStatment without related PDO object may crash).
+
+2005-11-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_4)
+      ext/pgsql/pgsql.c
+      ext/pgsql/tests/80_bug32223b.phpt:
+      - MFH Fix Bug #32223 weird behaviour of pg_last_notice
+
+    * (PHP_5_1)
+      ext/pgsql/pgsql.c
+      ext/pgsql/tests/80_bug32223b.phpt:
+      - MFH Bug #32223 weird behaviour of pg_last_notice
+
+    * ext/pgsql/tests/80_bug32223b.phpt
+      ext/pgsql/tests/80_bug32223b.phpt
+      ext/pgsql/tests/80_bug32223b.phpt:
+        1.1.4;
+      - Fix Bug #32223 weird behaviour of pg_last_notice
+
+    * ext/pgsql/pgsql.c:
+      - Fix Bug #32223 weird behaviour of pg_last_notice
+
+2005-11-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      NEWS
+      Zend/zend.c
+      ZendEngine2/zend.c
+      ZendEngine2/zend.c
+      ZendEngine2/zend.c:
+      Fixed bug #35009 (ZTS: Persistent resource destruct crashes when extension
+      is compiled as shared)
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #35091 (SoapClient leaks memory)
+
 2005-11-06  Greg Beaver  <greg@chiaraquartet.net>
 
     * (PHP_5_0)
