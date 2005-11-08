@@ -1,18 +1,41 @@
 
-.php_cov_info.ltpdata:
-	@mkdir -p .cov/; \
-	find . -name \*.gcda -o -name \*.gcno | sed -e 's/^\.\/\.cov\/.*//' | xargs --replace cp {} .cov/; \
-	find . -name \*.gcda -o -name \*.gcno | sed -e 's/^\.\/\.cov\/.*//' | sed -e 's/^\.\///' | xargs --max-args=1 dirname | sed -e 's/\/.*//' | xargs --replace ln -s `pwd`/{} `pwd`/.cov > /dev/null 2>&1; \
-	$(LTP) --directory .cov --output-file=.php_cov_info.ltpdata --capture; \
+#
+# LCOV
+#
 
-cov: .php_cov_info.ltpdata
+lcov: php_lcov.info 
 
-cov-html: cov 
-	@$(LTP_GENHTML) -o cov_html/ .php_cov_info.ltpdata -t "PHP Code Coverage" -s;
+php_lcov.info: 
+	@echo "Generating data for $@"
+	@rm -rf lcov_data/
+	@$(mkinstalldirs) lcov_data/
+	@echo
+	-@find . -name \*.gcda -o -name \*.gcno | sed -e 's/^\.\///' | sed -e 's/\.gcda//g' -e 's/\.gcno//g' | uniq | while read x; do \
+		echo -n . ;\
+		dir=lcov_data/`dirname $$x`; \
+		test -d "$$dir" || $(mkinstalldirs) "$$dir"; \
+		if test -f "$(top_srcdir)/$$x.c"; then \
+			ln -f -s $(top_srcdir)/$$x.c lcov_data/$$x.c; \
+		fi; \
+		if test -f "$(top_srcdir)/$$x.re"; then \
+			ln -f -s $(top_srcdir)/$$x.re lcov_data/$$x.re; \
+		fi; \
+		if test -f "$(top_builddir)/$$x.c"; then \
+			ln -f -s $(top_builddir)/$$x.c lcov_data/$$x.c; \
+		fi; \
+		test -f "$$x.gcno" && cp $$x.gcno lcov_data/ ; \
+		test -f "$$x.gcda" && cp $$x.gcda lcov_data/ ; \
+	done
+	@echo 
+	@echo "Generating $@"
+	@$(LTP) --directory lcov_data/ --capture --output-file $@ --test-name PHP_LCOV
 
-cov-clean:
-	find . -name \*.gcda -o -name \*.gcno -exec rm -f {} \;
-	rm -f .cov/*      # This is done first, since we are symlinked inside..
-	rm -Rf .cov       # Now remove the directory
-	rm -f .php_cov_info.ltpdata
-	rm -Rf cov_html
+lcov-html: php_lcov.info
+	@echo "Generating lcov HTML"
+	@$(LTP_GENHTML) --no-prefix --output-directory lcov_html/ --title "PHP Code Coverage" --show-details php_lcov.info
+
+lcov-clean:
+	rm -f php_lcov.info
+	rm -rf lcov_data/
+	rm -rf lcov_html/
+
