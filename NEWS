@@ -17,6 +17,8 @@ PHP                                                                        NEWS
   is compiled as shared). (Dmitry)
 - Fixed bug #34851 (SO_RECVTIMEO and SO_SNDTIMEO socket options expect integer
   parameter on Windows). (Mike)
+- Fixed bug #33720 (mb_encode_mimeheader does not work for multibyte
+  chars). (Rui)
 - Fixed bug #31971 (ftp_login fails on some SSL servers). 
   (frantisek at augusztin dot com)
 
