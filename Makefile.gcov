@@ -3,9 +3,28 @@
 # LCOV
 #
 
-lcov: php_lcov.info 
+lcov: lcov-html
 
-php_lcov.info: 
+lcov-test: all
+	@echo "Running test suite"
+	@find . -name \*.gcda | xargs rm -f
+	-@if test ! -z "$(PHP_EXECUTABLE)" && test -x "$(PHP_EXECUTABLE)"; then \
+		NO_INTERACTION=1 \
+		TEST_PHP_EXECUTABLE=$(PHP_EXECUTABLE) \
+		TEST_PHP_SRCDIR=$(top_srcdir) \
+		CC="$(CC)" \
+			$(PHP_EXECUTABLE) -d 'open_basedir=' -d 'safe_mode=0' -d 'output_buffering=0' -d 'memory_limit=-1' $(top_srcdir)/run-tests.php -d 'extension_dir=modules/' -d `( . $(PHP_MODULES) ; echo extension=$$dlname)` tests/; \
+	elif test ! -z "$(SAPI_CLI_PATH)" && test -x "$(SAPI_CLI_PATH)"; then \
+		NO_INTERACTION=1 \
+		TEST_PHP_EXECUTABLE=$(top_builddir)/$(SAPI_CLI_PATH) \
+		TEST_PHP_SRCDIR=$(top_srcdir) \
+		CC="$(CC)" \
+			$(top_builddir)/$(SAPI_CLI_PATH) -d 'open_basedir=' -d 'safe_mode=0' -d 'output_buffering=0' -d 'memory_limit=-1' $(top_srcdir)/run-tests.php $(TESTS); \
+	else \
+		echo "ERROR: Cannot run tests without CLI sapi."; \
+	fi
+
+php_lcov.info: lcov-test
 	@echo "Generating data for $@"
 	@rm -rf lcov_data/
 	@$(mkinstalldirs) lcov_data/
