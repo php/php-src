@@ -8,7 +8,8 @@ PHP                                                                        NEWS
   (Marcus, Dmitry)
 - Changed "instanceof" and "catch" operators, is_a() and is_subclass_of()
   functions to not call __autoload(). (Dmitry)
-- Added configure option to enable C-level Code Coverage Instrumenting. (John)
+- Added --enable-gcov configure option to enable C-level code coverage.
+  (John, Jani)
 - Added to cURL extension: (Ilia)
   . curl_setopt_array() which allows setting of multiple cURL options.
   . CURLINFO_HEADER_OUT constant to facilitate request retrieval.
