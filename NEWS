@@ -46,6 +46,8 @@ PHP                                                                        NEWS
   (Marcus)
 - Fixed bug #34199 (if($obj)/if(!$obj) inconsistency because of cast handler).
   (Dmitry, Alex)
+- Fixed bug #33720 (mb_encode_mimeheader does not work for multibyte
+  chars). (Rui)
 - Fixed bug #33383 (crash when retrieving empty LOBs). (Tony)
 - Fixed bug #32179 (xmlrpc_encode() segfaults with recursive references). (Tony)
 - Fixed bug #29983 (PHP does not explicitly set mime type & charset). (Ilia)
