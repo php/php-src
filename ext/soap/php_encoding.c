@@ -1224,6 +1224,10 @@ static zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
 				  unset_zval_property(ret, "any" TSRMLS_CC);
 					redo_any = 1;
 			  }
+				if (Z_TYPE_P(ret) == IS_OBJECT && ce != ZEND_STANDARD_CLASS_DEF_PTR) {
+					zend_object *zobj = zend_objects_get_address(ret TSRMLS_CC);
+					zobj->ce = ce;
+				}
 			} else {
 				zval *base;
 
