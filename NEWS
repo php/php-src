@@ -2,6 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Nov 2005, PHP 5.1
 - Fixed initializing and argument checking for posix_mknod(). (Derick)
+- Fixed bug #35142 (SOAP Client/Server Complex Object Support). (Dmitry)
 - Fixed bug #35135 (PDOStatment without related PDO object may crash). (Ilia)
 - Fixed bug #35091 (SoapClient leaks memory). (Dmitry)
 - Fixed bug #35078 (configure does not find ldap_start_tls_s). (Jani)

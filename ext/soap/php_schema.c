@@ -2192,9 +2192,25 @@ static void schema_content_model_fixup(sdlCtx *ctx, sdlContentModelPtr model)
 			}
 			break;
 		}
-		case XSD_CONTENT_SEQUENCE:
-		case XSD_CONTENT_ALL:
 		case XSD_CONTENT_CHOICE: {
+			if (model->max_occurs != 1) {
+				HashPosition pos;
+				sdlContentModelPtr *tmp;
+
+				zend_hash_internal_pointer_reset_ex(model->u.content, &pos);
+				while (zend_hash_get_current_data_ex(model->u.content, (void**)&tmp, &pos) == SUCCESS) {
+					(*tmp)->min_occurs = 0;
+					(*tmp)->max_occurs = model->max_occurs;
+					zend_hash_move_forward_ex(model->u.content, &pos);
+				}
+
+				model->kind = XSD_CONTENT_ALL;
+				model->min_occurs = 1;
+				model->max_occurs = 1;
+			}
+		}
+		case XSD_CONTENT_SEQUENCE:
+		case XSD_CONTENT_ALL: {
 			sdlContentModelPtr *tmp;
 
 			zend_hash_internal_pointer_reset(model->u.content);
