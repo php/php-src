@@ -3,6 +3,8 @@ PHP 4                                                                      NEWS
 ?? ??? 2006, Version 4.4.2
 - Backport missing imap_mailcompose fixes from 5.X. (Ilia)
 - Added missing safe_mode/open_basedir checks in cURL extension. (Ilia)
+- Fixed bug #34830 (the 5th arguments of mb_send_mail does not work) (Rui)
+- Fixed bug #33720 (mb_encode_mimeheader does not work) (Rui)
 - Fixed bug #35078 (configure does not find ldap_start_tls_s). (Jani)
 - Fixed bug #35071 (Wrong fopen mode used in GD safe-mode checks). (Jani)
 - Fixed bug #35067, #35063 (key(),current() need to work by reference). (Ilia)
