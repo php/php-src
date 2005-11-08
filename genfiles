@@ -6,7 +6,14 @@ STD='make -f Makefile.frag LEX="flex -L" YACC="bison -y -l" srcdir=Zend builddir
 
 set -x
 
-for f in ext/date/lib/parse_date.c ext/standard/url_scanner_ex.c ext/standard/var_unserializer.c; do
+CLEANUP_FILES=" \
+  ext/pdo/pdo_sql_parser.c \
+  ext/date/lib/parse_date.c \
+  ext/standard/url_scanner_ex.c \
+  ext/standard/var_unserializer.c \
+"
+
+for f in $CLEANUP_FILES; do
   cp $f $f.orig
   grep -v '#line ' $f.orig > $f
 done
