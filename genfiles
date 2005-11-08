@@ -6,7 +6,7 @@ STD='make -f Makefile.frag LEX="flex -L" YACC="bison -y -l" srcdir=Zend builddir
 
 set -x
 
-for f in ext/standard/url_scanner_ex.c ext/standard/var_unserializer.c; do
+for f in ext/date/lib/parse_date.c ext/standard/url_scanner_ex.c ext/standard/var_unserializer.c; do
   cp $f $f.orig
   grep -v '#line ' $f.orig > $f
 done
