@@ -1,3 +1,89 @@
+2005-11-08  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * Makefile.gcov
+      gen_php_cov:
+      - Moved gen_php_cov functionality into the Makefile. Doing 'make lcov'
+        will run the test suite and create the code coverage HTML files.
+
+    * genfiles:
+      More files to have #line directives stripped for release
+
+    * (PHP_5_1)
+      NEWS:
+      FBFN
+
+    * (PHP_4_4)
+      NEWS:
+      fix news
+
+    * .cvsignore
+      Makefile.gcov
+      NEWS:
+      - Fixed --enable-gcov to work with VPATH builds too
+
+    * genfiles:
+      - Make sure parse_date.c is free of #line directives in releases
+
+2005-11-08  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_4_4)
+      NEWS:
+      fixed the order.
+
+2005-11-08  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_1)
+      ext/mysqli/tests/009.phpt:
+      test fetching of unsigned int(11)
+
+    * (PHP_5_1)
+      NEWS:
+      BFN
+
+    * (PHP_5_1)
+      ext/mysqli/tests/009.phpt:
+      fix test - putting signed into unsigned produces 0, if not in strict mode
+      (in strict mode this will fail)
+
+2005-11-08  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      NEWS:
+      NEWS updated.
+
+2005-11-08  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_1)
+      ext/mysqli/mysqli_api.c:
+      on 32bit platform if the column is UNSIGNED INT(11) and the value
+      is greater than 2^31-1 then convert to string. on 64bit this is of no
+      problem because there long inside zval is big enough to keep unsigned
+      int(11)
+
+2005-11-08  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/var_unserializer.c:
+      - Use the source file as output filename instead of stdout
+
+    * ext/standard/Makefile.frag:
+      - use the target file name as output file instead of stdout
+
+2005-11-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #35142 (SOAP Client/Server Complex Object Support)
+
+2005-11-08  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/Makefile.frag
+      ext/standard/url_scanner_ex.c
+      ext/standard/var_unserializer.c:
+      - Make sure the generated files have relative paths in the #line directives
+
 2005-11-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * sapi/cli/php_cli_readline.c:
