@@ -604,12 +604,19 @@ PHP_ARG_ENABLE(gcov,  whether to include gcov symbols,
 if test "$PHP_GCOV" = "yes"; then
 
   if test "$GCC" != "yes"; then
-    AC_MSG_ERROR([GCC is required to be able use --enable-gcov])
+    AC_MSG_ERROR([GCC is required for --enable-gcov])
   fi
   
-  dnl Check if we can pass GCC the --ccache-disable option
-  PHP_CHECK_GCC_ARG([--ccache-disable], [CC="$CC --ccache-disable"])
-
+  dnl Check if ccache is being used
+  PHP_CHECK_GCC_ARG([--ccache-skip], [gcc_ccache=yes])
+  
+  if test "$gcc_ccache" = "yes"; then
+    if test -z "$CCACHE_DISABLE" || test "$CCACHE_DISABLE" != "1"; then
+      AC_MSG_ERROR([ccache must be disabled when --enable-gcov option is used. You can disable ccache by setting environment variable CCACHE_DISABLE=1.])
+    fi
+    lcov_target="lcov-ccache"
+  fi
+  
   ltp_version_list="1.4"
 
   AC_CHECK_PROG(LTP, lcov, lcov)
@@ -1232,7 +1239,7 @@ CFLAGS="\$(CFLAGS_CLEAN) $standard_libtool_flag"
 INLINE_CFLAGS="$INLINE_CFLAGS $standard_libtool_flag"
 CXXFLAGS="$CXXFLAGS $standard_libtool_flag"
 
-all_targets='$(OVERALL_TARGET) $(PHP_MODULES) $(PHP_CLI_TARGET)'
+all_targets="$lcov_target \$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_CLI_TARGET)"
 install_targets="$install_modules install-build install-headers install-programs"
 
 case $PHP_SAPI in
