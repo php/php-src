@@ -125,7 +125,7 @@ fi
 
 AC_MSG_CHECKING(whether to enable UCD SNMP hack)
 AC_ARG_ENABLE(ucd-snmp-hack,
-[  --enable-ucd-snmp-hack  SNMP: Enable UCD SNMP hack],[
+[  --enable-ucd-snmp-hack    SNMP: Enable UCD SNMP hack],[
   if test "$enableval" = "yes" ; then
     AC_DEFINE(UCD_SNMP_HACK, 1, [ ])
     AC_MSG_RESULT(yes)

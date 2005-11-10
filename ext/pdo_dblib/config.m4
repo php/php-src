@@ -4,9 +4,8 @@ dnl
 
 if test "$PHP_PDO" != "no"; then
 PHP_ARG_WITH(pdo-dblib, for PDO_DBLIB support via FreeTDS,
-[  --with-pdo-dblib[=DIR]      Include PDO_DBLIB-DB support.  DIR is the FreeTDS home
-                          directory])
-
+[  --with-pdo-dblib[=DIR]    Include PDO_DBLIB-DB support. DIR is the FreeTDS
+                            home directory])
 
 if test "$PHP_PDO_DBLIB" != "no"; then
 
