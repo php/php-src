@@ -1,3 +1,16 @@
+2005-11-09  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * Makefile.gcov
+      configure.in:
+      - Fix the ccache detection.
+
+    * (PHP_4_4)
+      NEWS:
+      reorder
+
+    * Makefile.global:
+      Cleanup the code coverage files
+
 2005-11-08  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * Makefile.gcov
