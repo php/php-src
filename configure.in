@@ -599,7 +599,7 @@ PHP_CONFIGURE_PART(General settings)
 PHP_HELP_SEPARATOR([General settings:])
 
 PHP_ARG_ENABLE(gcov,  whether to include gcov symbols,
-[  --enable-gcov           Enable GCOV code coverage (requires LTP)], no, no)
+[  --enable-gcov           Enable GCOV code coverage (requires LTP) - FOR DEVELOPERS ONLY!!], no, no)
 
 if test "$PHP_GCOV" = "yes"; then
 
