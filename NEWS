@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 - Fixed bug in mysqli extension with unsigned int(11) being represented as 
   signed integer in PHP instead of string in 32bit systems. (Andrey)
 - Fixed initializing and argument checking for posix_mknod(). (Derick)
+- Fixed bug #35179 (tokenizer extension needs T_HALT_COMPILER). (Greg)
 - Fixed bug #35142 (SOAP Client/Server Complex Object Support). (Dmitry)
 - Fixed bug #35135 (PDOStatment without related PDO object may crash). (Ilia)
 - Fixed bug #35091 (SoapClient leaks memory). (Dmitry)
