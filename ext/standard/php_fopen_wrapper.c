@@ -169,11 +169,11 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 				return NULL;
 			}
 		}
-		return php_stream_temp_create(0, max_memory);		
+		return php_stream_temp_create(TEMP_STREAM_DEFAULT, max_memory);		
 	}
 	
 	if (!strcasecmp(path, "memory")) {
-		return php_stream_memory_create(0);
+		return php_stream_memory_create(TEMP_STREAM_DEFAULT);
 	}
 	
 	if (!strcasecmp(path, "output")) {
