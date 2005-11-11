@@ -1,3 +1,20 @@
+2005-11-10  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * configure.in:
+      - Added note about --enable-gcov being strictly for developers only!
+
+    * ext/curl/config.m4
+      ext/snmp/config.m4:
+      fix configure help
+
+    * (PHP_5_1)
+      NEWS
+      ext/tokenizer/tokenizer.c:
+      MFH: - Fixed bug #35179 (tokenizer extension needs T_HALT_COMPILER)
+
+    * ext/tokenizer/tokenizer.c:
+      - Fixed bug #35179 (tokenizer extension needs T_HALT_COMPILER)
+
 2005-11-09  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * Makefile.gcov
