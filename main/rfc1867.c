@@ -41,7 +41,6 @@
 static void safe_php_register_variable(char *var, char *strval, zval *track_vars_array, zend_bool override_protection TSRMLS_DC);
 
 #define SAFE_RETURN { \
-    php_mb_flush_gpc_variables(num_vars, val_list, len_list, array_ptr TSRMLS_CC); \
 	if (lbuf) efree(lbuf); \
 	if (abuf) efree(abuf); \
 	if (array_index) efree(array_index); \
@@ -1045,10 +1044,6 @@ static SAPI_POST_HANDLER_FUNC(rfc1867_post_handler_unicode)
 	U_STRING_DECL(filename_key, "filename", 8);
 	U_STRING_DECL(maxfilesize_key, "MAX_FILE_SIZE", 13);
 	static zend_bool did_string_init = FALSE;
-#if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
-	int num_vars = 0, *len_list = NULL;
-	char **val_list = NULL;
-#endif
 
 	if (SG(request_info).content_length > SG(post_max_size)) {
 		sapi_module.sapi_error(E_WARNING, "POST Content-Length of %ld bytes exceeds the limit of %ld bytes", SG(request_info).content_length, SG(post_max_size));
@@ -1601,6 +1596,7 @@ static SAPI_POST_HANDLER_FUNC(rfc1867_post_handler_legacy)
 		zend_llist_clean(&header);
 
 		if (!multipart_buffer_headers(mbuff, &header TSRMLS_CC)) {
+			php_mb_flush_gpc_variables(num_vars, val_list, len_list, array_ptr TSRMLS_CC);
 			SAFE_RETURN;
 		}
 
@@ -1680,6 +1676,7 @@ static SAPI_POST_HANDLER_FUNC(rfc1867_post_handler_legacy)
 			/* Return with an error if the posted data is garbled */
 			if (!param && !filename) {
 				sapi_module.sapi_error(E_WARNING, "File Upload Mime headers garbled");
+				php_mb_flush_gpc_variables(num_vars, val_list, len_list, array_ptr TSRMLS_CC);
 				SAFE_RETURN;
 			}
 
@@ -1986,6 +1983,7 @@ filedone:
 		}
 	}
 
+	php_mb_flush_gpc_variables(num_vars, val_list, len_list, array_ptr TSRMLS_CC);
 	SAFE_RETURN;
 }
 
