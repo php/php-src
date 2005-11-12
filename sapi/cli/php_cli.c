@@ -744,6 +744,8 @@ int main(int argc, char *argv[])
 					"(DEBUG)",
 #elif defined(HAVE_GCOV)
 					"(GCOV)",
+#else
+					"",
 #endif
 					get_zend_version()
 				);
