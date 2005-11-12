@@ -1,3 +1,16 @@
+2005-11-11  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * main/rfc1867.c:
+      Re-fix Marcus's fix.
+
+2005-11-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/php_fopen_wrapper.c:
+      - Use the const instead of hard coding
+
+    * main/rfc1867.c:
+      - Fix build
+
 2005-11-10  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * configure.in:
