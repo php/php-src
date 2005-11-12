@@ -35,11 +35,6 @@
 
 #define DEBUG_FILE_UPLOAD ZEND_DEBUG
 
-#if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
-#include "ext/mbstring/mbstring.h"
-
-static void safe_php_register_variable(char *var, char *strval, zval *track_vars_array, zend_bool override_protection TSRMLS_DC);
-
 #define SAFE_RETURN { \
 	if (lbuf) efree(lbuf); \
 	if (abuf) efree(abuf); \
@@ -51,6 +46,11 @@ static void safe_php_register_variable(char *var, char *strval, zval *track_vars
 	if (mbuff->buffer) efree(mbuff->buffer); \
 	if (mbuff) efree(mbuff); \
 	return; }
+
+#if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
+#include "ext/mbstring/mbstring.h"
+
+static void safe_php_register_variable(char *var, char *strval, zval *track_vars_array, zend_bool override_protection TSRMLS_DC);
 
 void php_mb_flush_gpc_variables(int num_vars, char **val_list, int *len_list, zval *array_ptr  TSRMLS_DC)
 {
@@ -102,19 +102,6 @@ void php_mb_gpc_stack_variable(char *param, char *value, char ***pval_list, int 
 	(*num_vars)++;
 }
 
-#else
-
-#define SAFE_RETURN { \
-	if (lbuf) efree(lbuf); \
-	if (abuf) efree(abuf); \
-	if (array_index) efree(array_index); \
-	zend_hash_destroy(&PG(rfc1867_protected_variables)); \
-	zend_llist_destroy(&header); \
-	if (mbuff->boundary_next) efree(mbuff->boundary_next); \
-	if (mbuff->boundary) efree(mbuff->boundary); \
-	if (mbuff->buffer) efree(mbuff->buffer); \
-	if (mbuff) efree(mbuff); \
-	return; }
 #endif
 
 /* The longest property name we use in an uploaded file array */
@@ -1596,7 +1583,9 @@ static SAPI_POST_HANDLER_FUNC(rfc1867_post_handler_legacy)
 		zend_llist_clean(&header);
 
 		if (!multipart_buffer_headers(mbuff, &header TSRMLS_CC)) {
+#if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
 			php_mb_flush_gpc_variables(num_vars, val_list, len_list, array_ptr TSRMLS_CC);
+#endif
 			SAFE_RETURN;
 		}
 
@@ -1676,7 +1665,9 @@ static SAPI_POST_HANDLER_FUNC(rfc1867_post_handler_legacy)
 			/* Return with an error if the posted data is garbled */
 			if (!param && !filename) {
 				sapi_module.sapi_error(E_WARNING, "File Upload Mime headers garbled");
+#if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
 				php_mb_flush_gpc_variables(num_vars, val_list, len_list, array_ptr TSRMLS_CC);
+#endif
 				SAFE_RETURN;
 			}
 
@@ -1983,7 +1974,9 @@ filedone:
 		}
 	}
 
+#if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
 	php_mb_flush_gpc_variables(num_vars, val_list, len_list, array_ptr TSRMLS_CC);
+#endif
 	SAFE_RETURN;
 }
 
