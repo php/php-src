@@ -1165,7 +1165,7 @@ PHP_FUNCTION(explode)
 }
 /* }}} */
 
-/* {{{ proto string join(array src, string glue)
+/* {{{ proto string join([string glue,] array pieces)
    An alias for implode */
 /* }}} */
 
