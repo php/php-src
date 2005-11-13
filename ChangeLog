@@ -1,3 +1,19 @@
+2005-11-12  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/string.c:
+      - Fixed protos.
+
+2005-11-12  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * main/rfc1867.c:
+      Grr. Re-re-fix the fix.
+
+2005-11-12  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * sapi/cli/php_cli.c:
+      - Fix the "php -v" output when neither --enable-debug or --enable-gcov
+        is used.
+
 2005-11-11  Andrei Zmievski  <andrei@gravitonic.com>
 
     * main/rfc1867.c:
