@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Nov 2005, PHP 5.1
+- Upgraded PEAR to version 1.4.4. (Greg)
 - Fixed bug in mysqli extension with unsigned int(11) being represented as 
   signed integer in PHP instead of string in 32bit systems. (Andrey)
 - Fixed initializing and argument checking for posix_mknod(). (Derick)
