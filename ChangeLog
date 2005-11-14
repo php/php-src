@@ -1,3 +1,13 @@
+2005-11-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      PEAR news
+
+    * (PHP_5_1)
+      TODO-5.1:
+      Slated for PHP 6
+
 2005-11-12  Derick Rethans  <php@derickrethans.nl>
 
     * ext/standard/string.c:
