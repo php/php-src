@@ -1039,8 +1039,10 @@ mssql.compatability_mode = Off
 ; Use NT authentication when connecting to the server
 mssql.secure_connection = Off
 
-; Specify max number of processes. Default = 25
-;mssql.max_procs = 25
+; Specify max number of processes. -1 = library default
+; msdlib defaults to 25
+; FreeTDS defaults to 4096
+;mssql.max_procs = -1
 
 [Assertion]
 ; Assert(expr); active by default.
