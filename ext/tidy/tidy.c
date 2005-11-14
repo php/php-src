@@ -564,7 +564,7 @@ static void tidy_object_new(zend_class_entry *class_type, zend_object_handlers *
 			break;
 	}
 
-	retval->handle = zend_objects_store_put(intern, NULL, (zend_objects_free_object_storage_t) tidy_object_free_storage, NULL TSRMLS_CC);
+	retval->handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) tidy_object_free_storage, NULL TSRMLS_CC);
 	retval->handlers = handlers;
 }
 
