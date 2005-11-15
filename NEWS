@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - Fixed bug #35179 (tokenizer extension needs T_HALT_COMPILER). (Greg)
 - Fixed bug #35176 (include()/require()/*_once() produce wrong error messages
   about main()). (Dmitry)
+- Fixed bug #35147 (__HALT_COMPILER() breaks with --enable-zend-multibyte).
+  (Dmitry, Moriyoshi)
 - Fixed bug #35142 (SOAP Client/Server Complex Object Support). (Dmitry)
 - Fixed bug #35135 (PDOStatment without related PDO object may crash). (Ilia)
 - Fixed bug #35091 (SoapClient leaks memory). (Dmitry)
