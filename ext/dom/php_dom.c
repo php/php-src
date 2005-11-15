@@ -934,8 +934,7 @@ static dom_object* dom_objects_set_class(zend_class_entry *class_type, zend_bool
 
 	intern = emalloc(sizeof(dom_object));
 	intern->std.ce = class_type;
-	intern->std.in_get = 0;
-	intern->std.in_set = 0;
+	intern->std.guards = NULL;
 	intern->ptr = NULL;
 	intern->prop_handler = NULL;
 	intern->document = NULL;
