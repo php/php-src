@@ -16,6 +16,8 @@
   +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
+
 #include "php_filter.h"
 
 void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL)
@@ -34,3 +36,12 @@ void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL)
 
 	call_user_function(EG(function_table), NULL, option_array, value, 1, args TSRMLS_CC);
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */
