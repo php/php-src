@@ -460,12 +460,11 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 
 	location[0] = '\0';
 
-	if (!header_init && FAILURE == zend_hash_find(EG(active_symbol_table),
-				"http_response_header", sizeof("http_response_header"), (void **) &response_header)) {
-		header_init = 1;
-	}
-
-	if (header_init) {
+	if (!header_init) {
+		MAKE_STD_ZVAL(stream->wrapperdata);
+		array_init(stream->wrapperdata);
+		response_header = &stream->wrapperdata;
+	} else {
 		zval *tmp;
 		MAKE_STD_ZVAL(tmp);
 		array_init(tmp);
@@ -475,7 +474,6 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 				"http_response_header", sizeof("http_response_header"), (void **) &response_header);
 	}
 
-
 	if (!php_stream_eof(stream)) {
 		size_t tmp_line_len;
 		/* get response header */
@@ -483,9 +481,6 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		if (_php_stream_get_line(stream, tmp_line, sizeof(tmp_line) - 1, &tmp_line_len TSRMLS_CC) != NULL) {
 			zval *http_response;
 			int response_code;
-
-			MAKE_STD_ZVAL(http_response);
-			ZVAL_NULL(http_response);
 
 			if (tmp_line_len > 9) {
 				response_code = atoi(tmp_line + 9);
@@ -511,18 +506,14 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 					php_stream_notify_error(context, PHP_STREAM_NOTIFY_FAILURE,
 							tmp_line, response_code);
 			}
-			
-			Z_STRLEN_P(http_response) = tmp_line_len;
-			Z_STRVAL_P(http_response) = estrndup(tmp_line, Z_STRLEN_P(http_response));
-			if (Z_STRVAL_P(http_response)[Z_STRLEN_P(http_response)-1]=='\n') {
-				Z_STRVAL_P(http_response)[Z_STRLEN_P(http_response)-1]=0;
-				Z_STRLEN_P(http_response)--;
-				if (Z_STRVAL_P(http_response)[Z_STRLEN_P(http_response)-1]=='\r') {
-					Z_STRVAL_P(http_response)[Z_STRLEN_P(http_response)-1]=0;
-					Z_STRLEN_P(http_response)--;
+			if (tmp_line[tmp_line_len - 1] == '\n') {
+				--tmp_line_len;
+				if (tmp_line[tmp_line_len - 1] == '\r') {
+					--tmp_line_len;
 				}
 			}
-			Z_TYPE_P(http_response) = IS_STRING;
+			MAKE_STD_ZVAL(http_response);
+			ZVAL_STRINGL(http_response, tmp_line, tmp_line_len, 1);
 			zend_hash_next_index_insert(Z_ARRVAL_PP(response_header), &http_response, sizeof(zval *), NULL);
 		}
 	} else {
@@ -661,7 +652,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 			CHECK_FOR_CNTRL_CHARS(resource->path)
 
 			stream = php_stream_url_wrap_http_ex(wrapper, new_path, mode, options, opened_path, context, --redirect_max, 0 STREAMS_CC TSRMLS_CC);
-			if (stream && stream->wrapperdata)	{
+			if (stream && stream->wrapperdata && *response_header != stream->wrapperdata) {
 				entryp = &entry;
 				MAKE_STD_ZVAL(entry);
 				ZVAL_EMPTY_STRING(entry);
