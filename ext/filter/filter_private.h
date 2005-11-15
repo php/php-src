@@ -75,7 +75,7 @@
 
 #define FC_CALLBACK      0x0400
 
-#endif FILTER_PRIVATE_H
+#endif /* FILTER_PRIVATE_H */
 
 /*
  * Local variables:
