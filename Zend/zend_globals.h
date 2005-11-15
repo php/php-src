@@ -135,6 +135,7 @@ struct _zend_compiler_globals {
 #ifdef ZEND_MULTIBYTE
 	zend_encoding **script_encoding_list;
 	int script_encoding_list_size;
+	zend_bool detect_unicode;
 
 	zend_encoding *internal_encoding;
 

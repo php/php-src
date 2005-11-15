@@ -994,11 +994,13 @@ static zend_encoding* zend_multibyte_find_script_encoding(zend_encoding *onetime
 		return onetime_encoding;
 	}
 
-	/* check out bom(byte order mark) and see if containing wchars */
-	script_encoding = zend_multibyte_detect_unicode(TSRMLS_C);
-	if (script_encoding != NULL) {
-		/* bom or wchar detection is prior to 'script_encoding' option */
-		return script_encoding;
+	if (CG(detect_unicode)) {
+		/* check out bom(byte order mark) and see if containing wchars */
+		script_encoding = zend_multibyte_detect_unicode(TSRMLS_C);
+		if (script_encoding != NULL) {
+			/* bom or wchar detection is prior to 'script_encoding' option */
+			return script_encoding;
+		}
 	}
 
 	/* if no script_encoding specified, just leave alone */

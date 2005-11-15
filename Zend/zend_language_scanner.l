@@ -506,7 +506,9 @@ ZEND_API int zend_get_scanned_file_offset(TSRMLS_D)
 
 		return zend_stream_ftell(yyin TSRMLS_CC) - offset_from_the_end;
 	} else {
-		return -1;
+		/* The entire file is in the buffer; probably zend multibyte
+		   is enabled */
+		return (yy_c_buf_p - (YY_CURRENT_BUFFER)->yy_ch_buf);
 	}
 }
 

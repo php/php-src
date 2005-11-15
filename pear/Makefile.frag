@@ -3,7 +3,7 @@
 peardir=$(PEAR_INSTALLDIR)
 
 # Skip all php.ini files altogether
-PEAR_INSTALL_FLAGS = -n -dshort_open_tag=0 -dsafe_mode=0 -derror_reporting=E_ALL
+PEAR_INSTALL_FLAGS = -n -dshort_open_tag=0 -dsafe_mode=0 -derror_reporting=E_ALL -ddetect_unicode=0
 
 install-pear-installer: $(top_builddir)/sapi/cli/php
 	@$(top_builddir)/sapi/cli/php $(PEAR_INSTALL_FLAGS) $(srcdir)/install-pear-nozlib.phar -d "$(peardir)" -b "$(bindir)"
