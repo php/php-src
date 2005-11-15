@@ -1,3 +1,38 @@
+2005-11-14  Frank M. Kromann  <frank@kromann.info>
+
+    * php.ini-dist
+      php.ini-recommended
+      ext/mssql/php_mssql.c:
+      MFB: Change max_procs from 25 to library default. This will make FreeTDS
+      connections work a bit better
+
+    * (PHP_5_1)
+      php.ini-dist
+      php.ini-recommended
+      ext/mssql/php_mssql.c:
+      Change max_procs from 25 to library default. This will make FreeTDS
+      connections work a bit better
+
+2005-11-14  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      NEWS
+      ext/dom/php_dom.c
+      ext/dom/php_dom.c
+      ext/sqlite/sqlite.c
+      ext/sqlite/sqlite.c
+      ext/xsl/php_xsl.c
+      ext/xsl/php_xsl.c:
+      MFH: fix #35197 (Destructor is not called) and similar issues in other
+      extensions
+
+    * ext/dom/php_dom.c
+      ext/sqlite/sqlite.c
+      ext/xsl/php_xsl.c:
+      fix #35197 (Destructor is not called) and similar issues in other
+      extensions
+
 2005-11-13  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_1)
