@@ -1138,7 +1138,7 @@ static zend_object_value date_object_new_date(zend_class_entry *class_type TSRML
 	memset(intern, 0, sizeof(php_date_obj));
 	intern->std.ce = class_type;
 
-	retval.handle = zend_objects_store_put(intern, NULL, (zend_objects_free_object_storage_t) date_object_free_storage_date, NULL TSRMLS_CC);
+	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) date_object_free_storage_date, NULL TSRMLS_CC);
 	retval.handlers = &date_object_handlers_date;
 	
 	return retval;
@@ -1153,7 +1153,7 @@ static zend_object_value date_object_new_timezone(zend_class_entry *class_type T
 	memset(intern, 0, sizeof(php_timezone_obj));
 	intern->std.ce = class_type;
 
-	retval.handle = zend_objects_store_put(intern, NULL, (zend_objects_free_object_storage_t) date_object_free_storage_timezone, NULL TSRMLS_CC);
+	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) date_object_free_storage_timezone, NULL TSRMLS_CC);
 	retval.handlers = &date_object_handlers_timezone;
 	
 	return retval;
@@ -1163,10 +1163,12 @@ static void date_object_free_storage_date(void *object TSRMLS_DC)
 {
 	php_date_obj *intern = (php_date_obj *)object;
 
-	if (intern->time->tz_info) {
-		timelib_tzinfo_dtor(intern->time->tz_info);
+	if (intern->time) {
+		if (intern->time->tz_info) {
+			timelib_tzinfo_dtor(intern->time->tz_info);
+		}
+		timelib_time_dtor(intern->time);
 	}
-	timelib_time_dtor(intern->time);
 
 	efree(object);
 }
