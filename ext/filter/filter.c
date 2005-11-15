@@ -99,7 +99,7 @@ zend_module_entry filter_module_entry = {
 	NULL,
 	PHP_RSHUTDOWN(filter),
 	PHP_MINFO(filter),
-    "0.1",
+	"0.9.2",
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -128,7 +128,6 @@ static PHP_INI_MH(UpdateDefaultFilter)
 
 /* {{{ PHP_INI
  */
-
 static PHP_INI_MH(OnUpdateFlags)
 {
 	if (!new_value) {
@@ -139,15 +138,14 @@ static PHP_INI_MH(OnUpdateFlags)
 	return SUCCESS;
 }
 
-
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("filter.default",       "string", PHP_INI_ALL, UpdateDefaultFilter, default_filter,       zend_filter_globals, filter_globals)
-    PHP_INI_ENTRY("filter.default_flags",     NULL,     PHP_INI_ALL, OnUpdateFlags)
+	STD_PHP_INI_ENTRY("filter.default",   "string", PHP_INI_ALL, UpdateDefaultFilter, default_filter, zend_filter_globals, filter_globals)
+	PHP_INI_ENTRY("filter.default_flags", NULL,     PHP_INI_ALL, OnUpdateFlags)
 PHP_INI_END()
 /* }}} */
 
 /* {{{ php_filter_init_globals
- */
+*/
 static void php_filter_init_globals(zend_filter_globals *filter_globals)
 {
 	filter_globals->post_array = NULL;
@@ -404,7 +402,7 @@ PHP_FUNCTION(input_has_variable)
 	long        arg;
 	char       *var;
 	int         var_len;
-    zval      **tmp;
+	zval      **tmp;
 	zval       *array_ptr = NULL;
 	HashTable  *hash_ptr;
 	int         found = 0;
@@ -413,7 +411,7 @@ PHP_FUNCTION(input_has_variable)
 		return;
 	}
 
-	switch(arg) {
+	switch (arg) {
 		case PARSE_GET:     FIND_SOURCE(get_array,     TRACK_VARS_GET)
 		case PARSE_POST:    FIND_SOURCE(post_array,    TRACK_VARS_POST)
 		case PARSE_COOKIE:  FIND_SOURCE(cookie_array,  TRACK_VARS_COOKIE)
@@ -445,8 +443,7 @@ PHP_FUNCTION(input_get)
 	char       *var, *charset = NULL;
 	int         var_len, charset_len;
 	zval       *flags = NULL;
-
-    zval      **tmp;
+	zval      **tmp;
 	zval       *array_ptr = NULL, *array_ptr2 = NULL, *array_ptr3 = NULL;
 	HashTable  *hash_ptr;
 	int         found = 0;
