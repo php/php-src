@@ -352,8 +352,7 @@ zend_object_value xmlreader_objects_new(zend_class_entry *class_type TSRMLS_DC)
 
 	intern = emalloc(sizeof(xmlreader_object));
 	intern->std.ce = class_type;
-	intern->std.in_get = 0;
-	intern->std.in_set = 0;
+	intern->std.guards = NULL;
 	intern->ptr = NULL;
 	intern->input = NULL;
 	intern->schema = NULL;
