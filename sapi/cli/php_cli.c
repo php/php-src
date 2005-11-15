@@ -693,14 +693,13 @@ int main(int argc, char *argv[])
 
 			case 'h': /* help & quit */
 			case '?':
-				php_output_startup();
-				php_output_activate(TSRMLS_C);
+				if (php_request_startup(TSRMLS_C)==FAILURE) {
+					goto err;
+				}
 				php_cli_usage(argv[0]);
 				php_end_ob_buffers(1 TSRMLS_CC);
 				exit_status=0;
-				zend_ini_deactivate(TSRMLS_C);
-				goto out_err;
-
+				goto out;
 
 			case 'i': /* php info & quit */
 				if (php_request_startup(TSRMLS_C)==FAILURE) {
