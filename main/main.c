@@ -452,6 +452,33 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 		function = "PHP Startup";
 	} else if (php_during_module_shutdown()) {
 		function = "PHP Shutdown";
+	} else if (EG(current_execute_data) &&
+	           EG(current_execute_data)->opline &&
+	           EG(current_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL) {
+		switch (EG(current_execute_data)->opline->op2.u.constant.value.lval) {
+			case ZEND_EVAL:
+				function = "eval";
+				is_function = 1;
+				break;
+			case ZEND_INCLUDE:
+				function = "include";
+				is_function = 1;
+				break;
+			case ZEND_INCLUDE_ONCE:
+				function = "include_once";
+				is_function = 1;
+				break;
+			case ZEND_REQUIRE:
+				function = "require";
+				is_function = 1;
+				break;
+			case ZEND_REQUIRE_ONCE:
+				function = "require_once";
+				is_function = 1;
+				break;
+			default:
+				function = "Unknown";
+		}
 	} else {
 		function = get_active_function_name(TSRMLS_C);
 		if (!function || !strlen(function)) {
