@@ -111,7 +111,7 @@ ZEND_API zend_object_handle zend_objects_store_put(void *object, zend_objects_st
 
 	obj->refcount = 1;
 	obj->object = object;
-	obj->dtor = dtor;
+	obj->dtor = dtor?dtor:(zend_objects_store_dtor_t)zend_objects_destroy_object;
 	obj->free_storage = free_storage;
 
 	obj->clone = clone;
