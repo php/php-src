@@ -203,10 +203,7 @@ static void reflection_objects_clone(void *object, void **object_clone TSRMLS_DC
 
 	*intern_clone = emalloc(sizeof(reflection_object));
 	(*intern_clone)->zo.ce = intern->zo.ce;
-	(*intern_clone)->zo.in_get = 0;
-	(*intern_clone)->zo.in_set = 0;
-	(*intern_clone)->zo.in_unset = 0;
-	(*intern_clone)->zo.in_isset = 0;
+	(*intern_clone)->zo.guards = NULL;
 	ALLOC_HASHTABLE((*intern_clone)->zo.properties);
 	(*intern_clone)->ptr = intern->ptr;
 	(*intern_clone)->free_ptr = intern->free_ptr;
@@ -224,10 +221,7 @@ static zend_object_value reflection_objects_new(zend_class_entry *class_type TSR
 
 	intern = emalloc(sizeof(reflection_object));
 	intern->zo.ce = class_type;
-	intern->zo.in_get = 0;
-	intern->zo.in_set = 0;
-	intern->zo.in_unset = 0;
-	intern->zo.in_isset = 0;
+	intern->zo.guards = NULL;
 	intern->ptr = NULL;
 	intern->obj = NULL;
 	intern->free_ptr = 0;
