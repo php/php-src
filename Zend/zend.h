@@ -265,13 +265,18 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 typedef struct _zval_struct zval;
 typedef struct _zend_class_entry zend_class_entry;
 
+typedef struct _zend_guard {
+	zend_bool in_get;
+	zend_bool in_set;
+	zend_bool in_unset;
+	zend_bool in_isset;
+	zend_bool dummy; /* sizeof(zend_guard) must not be equal to sizeof(void*) */
+} zend_guard;
+
 typedef struct _zend_object {
 	zend_class_entry *ce;
 	HashTable *properties;
-	unsigned int in_get:1;
-	unsigned int in_set:1;
-	unsigned int in_unset:1;
-	unsigned int in_isset:1;
+	HashTable *guards; /* protects from __get/__set ... recursion */
 } zend_object;
 
 typedef unsigned int zend_object_handle;
