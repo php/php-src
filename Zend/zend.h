@@ -684,6 +684,7 @@ END_EXTERN_C()
 	  (!memcmp((ustr),(str),(slen))): \
 	  (!zend_cmp_unicode_and_literal(((UChar*)(ustr)), ulen, str, slen)))
 
+
 #endif /* ZEND_H */
 
 /*

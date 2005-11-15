@@ -1301,6 +1301,19 @@ void zend_do_end_function_declaration(znode *function_token TSRMLS_DC)
 }
 
 
+static inline int ZEND_U_CASE_EQUAL(zend_uchar type, void *ustr, int ulen, char *str, int slen)
+{
+	void* lcname;
+	unsigned int lcname_len;
+	int ret;
+
+	lcname = zend_u_str_case_fold(type, ustr, ulen, 0, &lcname_len);
+	ret = ZEND_U_EQUAL(type, lcname, lcname_len, str, slen);
+	efree(lcname);
+	return ret;
+}
+
+
 void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initialization, znode *class_type, znode *varname, zend_uchar pass_by_reference TSRMLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -1329,13 +1342,15 @@ void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initia
 	cur_arg_info->pass_by_reference = pass_by_reference;
 
 	if (class_type->op_type != IS_UNUSED) {
+		cur_arg_info->allow_null = 0;
 		if (class_type->u.constant.type == IS_STRING || class_type->u.constant.type == IS_UNICODE) {
 			cur_arg_info->class_name = Z_UNIVAL(class_type->u.constant);
 			cur_arg_info->class_name_len = Z_UNILEN(class_type->u.constant);
-
-			/* FIXME: make this work for unicode=on too */
 			if (op == ZEND_RECV_INIT) {
-				if (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL"))) {
+				if (Z_TYPE(initialization->u.constant) == IS_NULL ||
+				    (Z_TYPE(initialization->u.constant) == IS_CONSTANT &&
+				    Z_UNILEN(initialization->u.constant) == sizeof("null") - 1 &&
+				    ZEND_U_CASE_EQUAL(UG(unicode)?IS_UNICODE:IS_STRING, Z_UNIVAL(initialization->u.constant), Z_UNILEN(initialization->u.constant), "null", sizeof("null")-1))) {
 					cur_arg_info->allow_null = 1;
 				} else {
 					zend_error(E_COMPILE_ERROR, "Default value for parameters with a class type hint can only be NULL");
@@ -1345,6 +1360,16 @@ void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initia
 			cur_arg_info->array_type_hint = 1;
 			cur_arg_info->class_name = NULL;
 			cur_arg_info->class_name_len = 0;
+			if (op == ZEND_RECV_INIT) {
+				if (Z_TYPE(initialization->u.constant) == IS_NULL ||
+				    (Z_TYPE(initialization->u.constant) == IS_CONSTANT &&
+				    Z_UNILEN(initialization->u.constant) == sizeof("null") - 1 &&
+				    ZEND_U_CASE_EQUAL(UG(unicode)?IS_UNICODE:IS_STRING, Z_UNIVAL(initialization->u.constant), Z_UNILEN(initialization->u.constant), "null", sizeof("null")-1))) {
+					cur_arg_info->allow_null = 1;
+				} else if (Z_TYPE(initialization->u.constant) != IS_ARRAY && Z_TYPE(initialization->u.constant) != IS_CONSTANT_ARRAY) {
+					zend_error(E_COMPILE_ERROR, "Default value for parameters with array type hint can only be an array or NULL");
+				}
+			}
 		}
 	} else {
 		cur_arg_info->class_name = NULL;
