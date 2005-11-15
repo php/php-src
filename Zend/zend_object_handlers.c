@@ -238,7 +238,7 @@ ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce
 		EG(std_property_info).flags = ZEND_ACC_PUBLIC;
 		EG(std_property_info).name = Z_UNIVAL_P(member);
 		EG(std_property_info).name_length = Z_UNILEN_P(member);
-		EG(std_property_info).h = zend_u_get_hash_value(Z_TYPE_P(member), EG(std_property_info).name, EG(std_property_info).name_length+1);
+		EG(std_property_info).h = h;
 		property_info = &EG(std_property_info);
 	}
 	return property_info;
@@ -276,6 +276,30 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_uchar utype, voi
 	return zend_verify_property_access(property_info, zobj->ce TSRMLS_CC) ? SUCCESS : FAILURE;
 }
 
+static int zend_get_property_guard(zend_object *zobj, zend_property_info *property_info, zval *member, zend_guard **pguard TSRMLS_DC)
+{
+	zend_property_info info;
+	zend_guard stub;
+
+	if (!property_info) {
+		property_info = &info;
+		info.name = Z_UNIVAL_P(member);
+		info.name_length = Z_UNILEN_P(member);
+		info.h = zend_u_get_hash_value(Z_TYPE_P(member), Z_STRVAL_P(member), Z_STRLEN_P(member) + 1);
+	}
+	if (!zobj->guards) {
+		ALLOC_HASHTABLE(zobj->guards);
+		zend_u_hash_init(zobj->guards, 0, NULL, NULL, 0, UG(unicode));
+	} else if (zend_u_hash_quick_find(zobj->guards, UG(unicode)?IS_UNICODE:IS_STRING, property_info->name, property_info->name_length+1, property_info->h, (void **) pguard) == SUCCESS) {
+		return SUCCESS;
+	}
+	stub.in_get = 0;
+	stub.in_set = 0;
+	stub.in_unset = 0;
+	stub.in_isset = 0;
+	return zend_u_hash_quick_add(zobj->guards, UG(unicode)?IS_UNICODE:IS_STRING, property_info->name, property_info->name_length+1, property_info->h, (void**)&stub, sizeof(stub), (void**) pguard);
+}
+
 zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC)
 {
 	zend_object *zobj;
@@ -284,11 +308,9 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC)
 	zval *rv = NULL;
 	zend_property_info *property_info;
 	int silent;
-	zend_bool use_get;
 
 	silent = (type == BP_VAR_IS);
 	zobj = Z_OBJ_P(object);
-	use_get = (zobj->ce->__get && !zobj->in_get);
 
 	if (member->type != IS_UNICODE && (UG(unicode) || member->type != IS_STRING)) {
  		ALLOC_ZVAL(tmp_member);
@@ -304,14 +326,18 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC)
 #endif			
 
 	/* make zend_get_property_info silent if we have getter - we may want to use it */
-	property_info = zend_get_property_info(zobj->ce, member, use_get TSRMLS_CC);
+	property_info = zend_get_property_info(zobj->ce, member, (zobj->ce->__get != NULL) TSRMLS_CC);
 
 	if (!property_info || zend_u_hash_quick_find(zobj->properties, Z_TYPE_P(member), property_info->name, property_info->name_length+1, property_info->h, (void **) &retval) == FAILURE) {
-		if (use_get) {
+		zend_guard *guard;
+
+		if (zobj->ce->__get &&
+		    zend_get_property_guard(zobj, property_info, member, &guard TSRMLS_CC) == SUCCESS &&
+		    !guard->in_get) {
 			/* have getter - try with it! */
-			zobj->in_get = 1; /* prevent circular getting */
+			guard->in_get = 1; /* prevent circular getting */
 			rv = zend_std_call_getter(object, member TSRMLS_CC);
-			zobj->in_get = 0;
+			guard->in_get = 0;
 
 			if (rv) {
 				retval = &rv;
@@ -341,10 +367,8 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 	zval **variable_ptr;
 	int setter_done = 0;
 	zend_property_info *property_info;
-	zend_bool use_set;
 
 	zobj = Z_OBJ_P(object);
-	use_set = (zobj->ce->__set && !zobj->in_set);
 
 	if (member->type != IS_UNICODE && (UG(unicode) || member->type != IS_STRING)) {
  		ALLOC_ZVAL(tmp_member);
@@ -355,7 +379,7 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 		member = tmp_member;
 	}
 
-	property_info = zend_get_property_info(zobj->ce, member, use_set TSRMLS_CC);
+	property_info = zend_get_property_info(zobj->ce, member, (zobj->ce->__set != NULL) TSRMLS_CC);
 
 	if (property_info && zend_u_hash_quick_find(zobj->properties, Z_TYPE_P(member), property_info->name, property_info->name_length+1, property_info->h, (void **) &variable_ptr) == SUCCESS) {
 		if (*variable_ptr == value) {
@@ -376,13 +400,17 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 			}
 		}
 	} else {
-		if (use_set) {
-			zobj->in_set = 1; /* prevent circular setting */
+		zend_guard *guard;
+
+		if (zobj->ce->__set &&
+		    zend_get_property_guard(zobj, property_info, member, &guard TSRMLS_CC) == SUCCESS &&
+		    !guard->in_set) {
+			guard->in_set = 1; /* prevent circular setting */
 			if (zend_std_call_setter(object, member, value TSRMLS_CC) != SUCCESS) {
 				/* for now, just ignore it - __set should take care of warnings, etc. */
 			}
 			setter_done = 1;
-			zobj->in_set = 0;
+			guard->in_set = 0;
 		}
 	}
 
@@ -490,10 +518,8 @@ static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC
 	zval tmp_member;
 	zval **retval;
 	zend_property_info *property_info;
-	zend_bool use_get;
 	
 	zobj = Z_OBJ_P(object);
-	use_get = (zobj->ce->__get && !zobj->in_get);
 
 	if (member->type != IS_UNICODE && (UG(unicode) || member->type != IS_STRING)) {
 		tmp_member = *member;
@@ -506,12 +532,15 @@ static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC
 	fprintf(stderr, "Ptr object #%d property: %R\n", Z_OBJ_HANDLE_P(object), Z_TYPE_P(member), Z_STRVAL_P(member));
 #endif			
 
-	property_info = zend_get_property_info(zobj->ce, member, use_get TSRMLS_CC);
+	property_info = zend_get_property_info(zobj->ce, member, (zobj->ce->__get != NULL) TSRMLS_CC);
 
 	if (!property_info || zend_u_hash_quick_find(zobj->properties, Z_TYPE_P(member), property_info->name, property_info->name_length+1, property_info->h, (void **) &retval) == FAILURE) {
 		zval *new_zval;
+		zend_guard *guard;
 
-		if (!use_get) {
+		if (!zobj->ce->__get ||
+		    zend_get_property_guard(zobj, property_info, member, &guard TSRMLS_CC) != SUCCESS ||
+		    guard->in_get) {
 			/* we don't have access controls - will just add it */
 			new_zval = &EG(uninitialized_zval);
 
@@ -535,10 +564,8 @@ static void zend_std_unset_property(zval *object, zval *member TSRMLS_DC)
 	zend_object *zobj;
 	zval *tmp_member = NULL;
 	zend_property_info *property_info;
-	zend_bool use_unset;
 	
 	zobj = Z_OBJ_P(object);
-	use_unset = (zobj->ce->__unset && !zobj->in_unset);
 
 	if (member->type != IS_UNICODE && (UG(unicode) || member->type != IS_STRING)) {
  		ALLOC_ZVAL(tmp_member);
@@ -549,14 +576,18 @@ static void zend_std_unset_property(zval *object, zval *member TSRMLS_DC)
 		member = tmp_member;
 	}
 
-	property_info = zend_get_property_info(zobj->ce, member, 0 TSRMLS_CC);
+	property_info = zend_get_property_info(zobj->ce, member, (zobj->ce->__unset != NULL) TSRMLS_CC);
 	
 	if (!property_info || zend_u_hash_del(zobj->properties, Z_TYPE_P(member), property_info->name, property_info->name_length+1)) {
-		if (use_unset) {
+		zend_guard *guard;
+
+		if (zobj->ce->__unset &&
+		    zend_get_property_guard(zobj, property_info, member, &guard TSRMLS_CC) == SUCCESS &&
+		    !guard->in_unset) {
 			/* have unseter - try with it! */
-			zobj->in_unset = 1; /* prevent circular unsetting */
+			guard->in_unset = 1; /* prevent circular unsetting */
 			zend_std_call_unsetter(object, member TSRMLS_CC);
-			zobj->in_unset = 0;
+			guard->in_unset = 0;
 		}
 	}
 
@@ -913,10 +944,8 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists 
 	zval **value;
 	zval *tmp_member = NULL;
 	zend_property_info *property_info;
-	zend_bool use_isset;
 	
 	zobj = Z_OBJ_P(object);
-	use_isset = (zobj->ce->__isset && !zobj->in_isset);
 
 	if (member->type != IS_UNICODE && (UG(unicode) || member->type != IS_STRING)) {
  		ALLOC_ZVAL(tmp_member);
@@ -934,19 +963,25 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists 
 	property_info = zend_get_property_info(zobj->ce, member, 1 TSRMLS_CC);
 
 	if (!property_info || zend_u_hash_quick_find(zobj->properties, Z_TYPE_P(member), property_info->name, property_info->name_length+1, property_info->h, (void **) &value) == FAILURE) {
+		zend_guard *guard;
+
 		result = 0;
-		if (use_isset && (has_set_exists != 2)) {
+		if ((has_set_exists != 2) &&
+		    zobj->ce->__isset &&
+		    zend_get_property_guard(zobj, property_info, member, &guard TSRMLS_CC) == SUCCESS &&
+		    !guard->in_isset) {
 			zval *rv;
 
 			/* have issetter - try with it! */
-			zobj->in_isset = 1; /* prevent circular getting */
+			guard->in_isset = 1; /* prevent circular getting */
 			rv = zend_std_call_issetter(object, member TSRMLS_CC);
-			zobj->in_isset = 0;
 			if (rv) {
 				result = zend_is_true(rv);
 				zval_ptr_dtor(&rv);
-				if (has_set_exists && result && !EG(exception) && zobj->ce->__get && !zobj->in_get) {
+				if (has_set_exists && result && !EG(exception) && zobj->ce->__get && !guard->in_get) {
+					guard->in_get = 1;
 					rv = zend_std_call_getter(object, member TSRMLS_CC);
+					guard->in_get = 0;
 					if (rv) {
 						rv->refcount++;
 						result = i_zend_is_true(rv);
@@ -954,6 +989,7 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists 
 					}
 				}
 			}
+			guard->in_isset = 0;
 		}
 	} else {
 		switch (has_set_exists) {

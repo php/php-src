@@ -346,8 +346,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 	intern = emalloc(sizeof(mysqli_object));
 	memset(intern, 0, sizeof(mysqli_object));
 	intern->zo.ce = class_type;
-	intern->zo.in_get = 0;
-	intern->zo.in_set = 0;
+	intern->zo.guards = NULL;
 	intern->ptr = NULL;
 	intern->valid = 0;
 	intern->prop_handler = NULL;

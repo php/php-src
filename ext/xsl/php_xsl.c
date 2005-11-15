@@ -120,8 +120,7 @@ zend_object_value xsl_objects_new(zend_class_entry *class_type TSRMLS_DC)
 
 	intern = emalloc(sizeof(xsl_object));
 	intern->std.ce = class_type;
-	intern->std.in_get = 0;
-	intern->std.in_set = 0;
+	intern->std.guards = NULL;
 	intern->ptr = NULL;
 	intern->prop_handler = NULL;
 	intern->parameter = NULL;

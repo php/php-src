@@ -88,6 +88,10 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 
 ZEND_API void zend_objects_free_object_storage(zend_object *object TSRMLS_DC)
 {
+	if (object->guards) {
+		zend_hash_destroy(object->guards);
+		FREE_HASHTABLE(object->guards);		
+	}
 	zend_hash_destroy(object->properties);
 	FREE_HASHTABLE(object->properties);
 	efree(object);
@@ -101,10 +105,7 @@ ZEND_API zend_object_value zend_objects_new(zend_object **object, zend_class_ent
 	(*object)->ce = class_type;
 	retval.handle = zend_objects_store_put(*object, (zend_objects_store_dtor_t) zend_objects_destroy_object, (zend_objects_free_object_storage_t) zend_objects_free_object_storage, NULL TSRMLS_CC);
 	retval.handlers = &std_object_handlers;
-	(*object)->in_get = 0;
-	(*object)->in_set = 0;
-	(*object)->in_unset = 0;
-	(*object)->in_isset = 0;
+	(*object)->guards = NULL;
 	return retval;
 }
 
