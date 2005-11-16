@@ -9,7 +9,7 @@ iconv.internal_charset=ISO-8859-1
 function hexdump($str) {
 	$len = strlen($str);
 	for ($i = 0; $i < $len; ++$i) {
-		printf("%02x", ord($str{$i}));
+		printf("%02x", ord($str[$i]));
 	}
 	print "\n";
 }

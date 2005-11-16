@@ -6,7 +6,7 @@ Bug #26696 (string index in a switch() crashes with multiple matches)
 $str = 'asdd/?';
 $len = strlen($str);
 for ($i = 0; $i < $len; $i++) {
-	switch ($str{$i}) {
+	switch ($str[$i]) {
 		case '?':
 			echo "OK\n";
 			break;
@@ -14,7 +14,7 @@ for ($i = 0; $i < $len; $i++) {
 }
 
 $str = '*';
-switch ($str{0}) { 
+switch ($str[0]) { 
 	case '*';
 		echo "OK\n";
 		break;
