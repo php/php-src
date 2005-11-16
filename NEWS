@@ -7,6 +7,7 @@ PHP                                                                        NEWS
 - Fixed bug in mysqli extension with unsigned int(11) being represented as 
   signed integer in PHP instead of string in 32bit systems. (Andrey)
 - Fixed initializing and argument checking for posix_mknod(). (Derick)
+- Fixed bug #35239 (Objects can lose references). (Dmitry)
 - Fixed bug #35229 (call_user_func() crashes when arguement_stack is nearly
   full). (Dmitry)
 - Fixed bug #35197 (Destructor is not called). (Tony)
