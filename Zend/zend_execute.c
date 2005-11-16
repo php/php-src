@@ -1352,11 +1352,6 @@ static void zend_fetch_property_address(temp_variable *result, zval **container_
 		return;
 	}
 		
-	if ((type==BP_VAR_W || type==BP_VAR_RW) && container->refcount>1 && !PZVAL_IS_REF(container)) {
-		SEPARATE_ZVAL(container_ptr);
-		container = *container_ptr;
-	}
-
 	if (Z_OBJ_HT_P(container)->get_property_ptr_ptr) {
 		zval **ptr_ptr = Z_OBJ_HT_P(container)->get_property_ptr_ptr(container, prop_ptr TSRMLS_CC);
 		if (NULL == ptr_ptr) {
