@@ -1130,11 +1130,6 @@ static void zend_fetch_property_address(znode *result, znode *op1, znode *op2, t
 		return;
 	}
 	
-	
-	if ((type==BP_VAR_W || type==BP_VAR_RW) && container->refcount>1 && !PZVAL_IS_REF(container)) {
-		SEPARATE_ZVAL(container_ptr);
-		container = *container_ptr;
-	}
 	zend_fetch_property_address_inner(container, op2, result, Ts, type TSRMLS_CC);
 	SELECTIVE_PZVAL_LOCK(**retval, result);
 }
