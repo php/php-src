@@ -2025,7 +2025,7 @@ PHP_FUNCTION(call_user_func)
 
 	params = safe_emalloc(sizeof(zval **), argc, 0);
 
-	if (zend_get_parameters_array_ex(argc, params) == FAILURE) {
+	if (zend_get_parameters_array_ex(1, params) == FAILURE) {
 		efree(params);
 		RETURN_FALSE;
 	}
@@ -2040,6 +2040,11 @@ PHP_FUNCTION(call_user_func)
 		efree(name);
 		efree(params);
 		RETURN_NULL();
+	}
+
+	if (zend_get_parameters_array_ex(argc, params) == FAILURE) {
+		efree(params);
+		RETURN_FALSE;
 	}
 
 	if (call_user_function_ex(EG(function_table), NULL, *params[0], &retval_ptr, argc-1, params+1, 0, NULL TSRMLS_CC) == SUCCESS) {
