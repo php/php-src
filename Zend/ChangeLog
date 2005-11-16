@@ -1,3 +1,45 @@
+2005-11-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.h
+      zend_compile.c:
+      Allow "null" default value for arguments with array type hint
+      Unicode support
+
+    * (PHP_5_1)
+      zend_compile.c:
+      Allow "null" default value for arguments with array type hint
+
+2005-11-15  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_1)
+      zend_compile.c:
+      - Allow "= null" default for parameters with a class type-hint.
+
+2005-11-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.h
+      zend.h
+      zend_object_handlers.c
+      zend_object_handlers.c
+      zend_objects.c
+      zend_objects.c
+      zend_reflection_api.c
+      zend_reflection_api.c:
+      Allow recursive calls to __get/__set for different properties
+
+    * (PHP_5_1)
+      zend.c
+      zend_globals.h
+      zend_language_scanner.l
+      zend_multibyte.c:
+      Fixed bug #35147 (__HALT_COMPILER() breaks with --enable-zend-multibyte)
+
+    * zend_objects_API.c
+      zend_objects_API.c
+      zend_objects_API.c:
+      Fixed call to __destruct() for objects of classes delivered from internal
+      ones those use zend_objects_store_put(obj, NULL, ...
+
 2005-11-07  Dmitry Stogov  <dmitry@zend.com>
 
     * zend.c

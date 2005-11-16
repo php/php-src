@@ -1,3 +1,115 @@
+2005-11-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/type_hinting_003.phpt
+      tests/classes/type_hinting_003.phpt:
+      
+      - Add new test
+
+2005-11-15  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_4_4)
+      php.ini-dist
+      php.ini-recommended
+      ext/mssql/php_mssql.c:
+      MFH: Change max_procs to follow library standard.
+
+2005-11-15  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS:
+      extend the entry a bit :)
+
+    * (PHP_5_1)
+      NEWS:
+      bfp
+
+    * NEWS:
+      remove old news
+
+2005-11-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend_compile.c:
+      Allow "null" default value for arguments with array type hint
+      Unicode support
+
+    * (PHP_5_1)
+      ZendEngine2/zend_compile.c:
+      Allow "null" default value for arguments with array type hint
+
+2005-11-15  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/zend_compile.c:
+      - Allow "= null" default for parameters with a class type-hint.
+
+2005-11-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/cli/php_cli.c:
+      MFB51: Fixed memory leak on php-cli -h
+
+    * (PHP_5_1)
+      sapi/cli/php_cli.c:
+      Fixed memory leak on php-cli -h
+
+    * (PHP_5_1)
+      ext/standard/http_fopen_wrapper.c:
+      MFH: Fixed possible crash in http:// wrapper.
+
+2005-11-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/zend.h
+      ZendEngine2/zend.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_objects.c
+      ZendEngine2/zend_objects.c
+      ZendEngine2/zend_reflection_api.c
+      ZendEngine2/zend_reflection_api.c
+      ext/dom/php_dom.c
+      ext/dom/php_dom.c
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli.c
+      ext/xsl/php_xsl.c
+      ext/xsl/php_xsl.c:
+      Allow recursive calls to __get/__set for different properties
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/zend.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_multibyte.c
+      pear/Makefile.frag:
+      Fixed bug #35147 (__HALT_COMPILER() breaks with --enable-zend-multibyte)
+
+    * ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.c:
+      Fixed call to __destruct() for objects of classes delivered from internal
+      ones those use zend_objects_store_put(obj, NULL, ...
+
+    * tests/lang/bug35176.phpt
+      tests/lang/bug35176.phpt:
+      
+      file bug35176.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      NEWS
+      main/main.c
+      main/main.c
+      tests/lang/bug35176.phpt:
+      Fixed bug #35176 (include()/require()/*_once() produce wrong error messages
+      about main())
+
+2005-11-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/http_fopen_wrapper.c:
+      Fixed possible crash in http:// wrapper.
+
 2005-11-14  Frank M. Kromann  <frank@kromann.info>
 
     * php.ini-dist
