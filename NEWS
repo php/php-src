@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Nov 2005, PHP 5.1
+16 Nov 2005, PHP 5.1 Release Candidate 5
 - Changed type hints to allow "null" as default value for class and array.
   (Marcus, Derick, Dmitry)
 - Fixed __get/__set to allow recursive calls for different properties. (Dmitry)
