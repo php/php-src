@@ -841,7 +841,6 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 			ZVAL_STRINGL(result, data, 16, 1);
 			}
 			break;
-#endif
 		case SQLVARBINARY:
 		case SQLBINARY:
 		case SQLIMAGE: {
