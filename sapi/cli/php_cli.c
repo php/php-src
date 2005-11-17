@@ -28,7 +28,10 @@
 #include "zend_hash.h"
 #include "zend_modules.h"
 #include "zend_interfaces.h"
-#include "zend_reflection_api.h"
+
+#ifdef HAVE_REFLECTION
+#include "ext/reflection/php_reflection.h"
+#endif
 
 #include "SAPI.h"
 
@@ -133,8 +136,10 @@ static const opt_struct OPTIONS[] = {
 	{'?', 0, "usage"},/* help alias (both '?' and 'usage') */
 	{'v', 0, "version"},
 	{'z', 1, "zend-extension"},
+#ifdef HAVE_REFLECTION
 	{10,  1, "rclass"},
 	{11,  1, "rextension"},
+#endif
 	{'-', 0, NULL} /* end of args */
 };
 
@@ -567,7 +572,9 @@ int main(int argc, char *argv[])
 	zend_file_handle file_handle;
 /* temporary locals */
 	int behavior=PHP_MODE_STANDARD;
+#ifdef HAVE_REFLECTION
 	char *reflection_what;
+#endif
 	int orig_optind=php_optind;
 	char *orig_optarg=php_optarg;
 	char *arg_free=NULL, **arg_excp=&arg_free;
@@ -913,6 +920,7 @@ int main(int argc, char *argv[])
 				hide_argv = 1;
 				break;
 
+#ifdef HAVE_REFLECTION
 			case 10:
 				behavior=PHP_MODE_REFLECTION_CLASS;
 				reflection_what = php_optarg;
@@ -921,7 +929,7 @@ int main(int argc, char *argv[])
 				behavior=PHP_MODE_REFLECTION_EXTENSION;
 				reflection_what = php_optarg;
 				break;
-
+#endif
 			default:
 				break;
 			}
@@ -1155,6 +1163,7 @@ int main(int argc, char *argv[])
 				}
 	
 				break;
+#ifdef HAVE_REFLECTION
 			case PHP_MODE_REFLECTION_CLASS:
 			case PHP_MODE_REFLECTION_EXTENSION:
 				{
@@ -1205,6 +1214,7 @@ int main(int argc, char *argv[])
 
 					break;
 				}
+#endif /* reflection */
 			}
 		}
 
