@@ -66,6 +66,7 @@ CREDIT_LINE("PostgreSQL", "Jouni Ahto, Zeev Suraski, Yasuo Ohgaki, Chris Kings-L
 CREDIT_LINE("Pspell", "Vlad Krupin");
 CREDIT_LINE("Readline", "Thies C. Arntzen");
 CREDIT_LINE("Recode", "Kristian Köhntopp");
+CREDIT_LINE("Reflection", "Marcus Boerger, Timm Friebe, George Schlossnagle, Andrei Zmievski");
 CREDIT_LINE("Sessions", "Sascha Schumann, Andrei Zmievski");
 CREDIT_LINE("Shared Memory Operations", "Slava Poliakov, Ilia Alshanetsky");
 CREDIT_LINE("SimpleXML", "Sterling Hughes, Marcus Boerger, Rob Richards");
