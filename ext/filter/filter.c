@@ -301,6 +301,9 @@ static void php_zval_filter(zval *value, long filter, long flags, zval *options,
 		filter_func = php_find_filter(FS_DEFAULT);
 	}
 
+	/* Here be strings */
+	convert_to_string(value);
+
 	filter_func.function(value, flags, options, charset TSRMLS_CC);
 }
 
