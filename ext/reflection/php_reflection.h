@@ -18,29 +18,33 @@
 
 /* $Id$ */
 
-#ifndef ZEND_REFLECTION_API_H
-#define ZEND_REFLECTION_API_H
+#ifndef PHP_REFLECTION_H
+#define PHP_REFLECTION_H
+
+#include "php.h"
+
+extern zend_module_entry reflection_module_entry;
+#define phpext_reflection_ptr &reflection_module_entry
 
 BEGIN_EXTERN_C()
 
 /* Class entry pointers */
-extern ZEND_API zend_class_entry *reflector_ptr;
-extern ZEND_API zend_class_entry *reflection_exception_ptr;
-extern ZEND_API zend_class_entry *reflection_ptr;
-extern ZEND_API zend_class_entry *reflection_function_ptr;
-extern ZEND_API zend_class_entry *reflection_parameter_ptr;
-extern ZEND_API zend_class_entry *reflection_class_ptr;
-extern ZEND_API zend_class_entry *reflection_object_ptr;
-extern ZEND_API zend_class_entry *reflection_method_ptr;
-extern ZEND_API zend_class_entry *reflection_property_ptr;
-extern ZEND_API zend_class_entry *reflection_extension_ptr;
+extern PHPAPI zend_class_entry *reflector_ptr;
+extern PHPAPI zend_class_entry *reflection_exception_ptr;
+extern PHPAPI zend_class_entry *reflection_ptr;
+extern PHPAPI zend_class_entry *reflection_function_ptr;
+extern PHPAPI zend_class_entry *reflection_parameter_ptr;
+extern PHPAPI zend_class_entry *reflection_class_ptr;
+extern PHPAPI zend_class_entry *reflection_object_ptr;
+extern PHPAPI zend_class_entry *reflection_method_ptr;
+extern PHPAPI zend_class_entry *reflection_property_ptr;
+extern PHPAPI zend_class_entry *reflection_extension_ptr;
 
-ZEND_API void zend_register_reflection_api(TSRMLS_D);
-ZEND_API void zend_reflection_class_factory(zend_class_entry *ce, zval *object TSRMLS_DC);
+PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object TSRMLS_DC);
 	
 END_EXTERN_C()
 
-#endif
+#endif /* PHP_REFLECTION_H */
 
 /*
  * Local variables:
