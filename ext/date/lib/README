@@ -1,6 +1,6 @@
 Regenerating Parser
 ===================
 
-Make sure you use re2c 0.9.8dev or higher:
+Make sure you use re2c 0.9.10 or higher:
 
-/dat/dev/sf/re2c/re2c -d -b resource/parse_date.re > parse_date.c
+/dat/dev/sf/re2c/re2c -d -b -o ext/date/parse_date.c ext/date/parse_date.re
