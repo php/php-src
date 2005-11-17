@@ -388,7 +388,7 @@ static void php_zval_filter_recursive(zval *value, long filter, long flags, zval
 			 zend_hash_move_forward_ex(Z_ARRVAL_P(value), &pos)) {
 				php_zval_filter_recursive(*element, filter, flags, options, charset TSRMLS_CC);
 		}
-	} else if (Z_STRLEN_P(value)) {
+	} else {
 		php_zval_filter(value, filter, flags, options, charset TSRMLS_CC);
 	}
 }
