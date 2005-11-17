@@ -771,24 +771,20 @@ static int ZEND_RECV_INIT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_BRK_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
-	
 	zend_brk_cont_element *el;
 
-	el = zend_brk_cont(&opline->op2.u.constant, opline->op1.u.opline_num,
+	el = zend_brk_cont(Z_LVAL(opline->op2.u.constant), opline->op1.u.opline_num,
 	                   EX(op_array), EX(Ts) TSRMLS_CC);
-
 	ZEND_VM_JMP(EX(op_array)->opcodes + el->brk);
 }
 
 static int ZEND_CONT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
-	
 	zend_brk_cont_element *el;
 
-	el = zend_brk_cont(&opline->op2.u.constant, opline->op1.u.opline_num,
+	el = zend_brk_cont(Z_LVAL(opline->op2.u.constant), opline->op1.u.opline_num,
 	                   EX(op_array), EX(Ts) TSRMLS_CC);
-
 	ZEND_VM_JMP(EX(op_array)->opcodes + el->cont);
 }
 
@@ -916,30 +912,6 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 }
 
 
-static int ZEND_BRK_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-	zend_free_op free_op2;
-	zend_brk_cont_element *el;
-
-	el = zend_brk_cont(_get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC), opline->op1.u.opline_num,
-	                   EX(op_array), EX(Ts) TSRMLS_CC);
-	zval_dtor(free_op2.var);
-	ZEND_VM_JMP(EX(op_array)->opcodes + el->brk);
-}
-
-static int ZEND_CONT_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-	zend_free_op free_op2;
-	zend_brk_cont_element *el;
-
-	el = zend_brk_cont(_get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC), opline->op1.u.opline_num,
-	                   EX(op_array), EX(Ts) TSRMLS_CC);
-	zval_dtor(free_op2.var);
-	ZEND_VM_JMP(EX(op_array)->opcodes + el->cont);
-}
-
 static int ZEND_FETCH_CLASS_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
@@ -1063,30 +1035,6 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-
-static int ZEND_BRK_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-	zend_free_op free_op2;
-	zend_brk_cont_element *el;
-
-	el = zend_brk_cont(_get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC), opline->op1.u.opline_num,
-	                   EX(op_array), EX(Ts) TSRMLS_CC);
-	if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
-	ZEND_VM_JMP(EX(op_array)->opcodes + el->brk);
-}
-
-static int ZEND_CONT_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-	zend_free_op free_op2;
-	zend_brk_cont_element *el;
-
-	el = zend_brk_cont(_get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC), opline->op1.u.opline_num,
-	                   EX(op_array), EX(Ts) TSRMLS_CC);
-	if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
-	ZEND_VM_JMP(EX(op_array)->opcodes + el->cont);
-}
 
 static int ZEND_FETCH_CLASS_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
@@ -1291,30 +1239,6 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-
-static int ZEND_BRK_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-	
-	zend_brk_cont_element *el;
-
-	el = zend_brk_cont(_get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC), opline->op1.u.opline_num,
-	                   EX(op_array), EX(Ts) TSRMLS_CC);
-
-	ZEND_VM_JMP(EX(op_array)->opcodes + el->brk);
-}
-
-static int ZEND_CONT_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-	
-	zend_brk_cont_element *el;
-
-	el = zend_brk_cont(_get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC), opline->op1.u.opline_num,
-	                   EX(op_array), EX(Ts) TSRMLS_CC);
-
-	ZEND_VM_JMP(EX(op_array)->opcodes + el->cont);
-}
 
 static int ZEND_BW_NOT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
@@ -28239,55 +28163,55 @@ void zend_init_opcodes_handlers()
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_BRK_SPEC_CONST_HANDLER,
-  	ZEND_BRK_SPEC_TMP_HANDLER,
-  	ZEND_BRK_SPEC_VAR_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_BRK_SPEC_CV_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
   	ZEND_BRK_SPEC_CONST_HANDLER,
-  	ZEND_BRK_SPEC_TMP_HANDLER,
-  	ZEND_BRK_SPEC_VAR_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_BRK_SPEC_CV_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
   	ZEND_BRK_SPEC_CONST_HANDLER,
-  	ZEND_BRK_SPEC_TMP_HANDLER,
-  	ZEND_BRK_SPEC_VAR_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_BRK_SPEC_CV_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
   	ZEND_BRK_SPEC_CONST_HANDLER,
-  	ZEND_BRK_SPEC_TMP_HANDLER,
-  	ZEND_BRK_SPEC_VAR_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_BRK_SPEC_CV_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
   	ZEND_BRK_SPEC_CONST_HANDLER,
-  	ZEND_BRK_SPEC_TMP_HANDLER,
-  	ZEND_BRK_SPEC_VAR_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_BRK_SPEC_CV_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
   	ZEND_CONT_SPEC_CONST_HANDLER,
-  	ZEND_CONT_SPEC_TMP_HANDLER,
-  	ZEND_CONT_SPEC_VAR_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_CONT_SPEC_CV_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
   	ZEND_CONT_SPEC_CONST_HANDLER,
-  	ZEND_CONT_SPEC_TMP_HANDLER,
-  	ZEND_CONT_SPEC_VAR_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_CONT_SPEC_CV_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
   	ZEND_CONT_SPEC_CONST_HANDLER,
-  	ZEND_CONT_SPEC_TMP_HANDLER,
-  	ZEND_CONT_SPEC_VAR_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_CONT_SPEC_CV_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
   	ZEND_CONT_SPEC_CONST_HANDLER,
-  	ZEND_CONT_SPEC_TMP_HANDLER,
-  	ZEND_CONT_SPEC_VAR_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_CONT_SPEC_CV_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
   	ZEND_CONT_SPEC_CONST_HANDLER,
-  	ZEND_CONT_SPEC_TMP_HANDLER,
-  	ZEND_CONT_SPEC_VAR_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_CONT_SPEC_CV_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
   	ZEND_BOOL_SPEC_CONST_HANDLER,
   	ZEND_BOOL_SPEC_CONST_HANDLER,
   	ZEND_BOOL_SPEC_CONST_HANDLER,
