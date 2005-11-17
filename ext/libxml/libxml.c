@@ -665,7 +665,6 @@ PHP_MINFO_FUNCTION(libxml)
 }
 /* }}} */
 
-
 /* {{{ proto void libxml_set_streams_context(resource streams_context) 
    Set the streams context for the next libxml document load or write */
 PHP_FUNCTION(libxml_set_streams_context)
@@ -722,6 +721,7 @@ PHP_FUNCTION(libxml_use_internal_errors)
 	}
 	RETURN_BOOL(retval);
 }
+/* }}} */
 
 /* {{{ proto object libxml_get_last_error() 
    Retrieve last error from libxml */
