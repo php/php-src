@@ -1,3 +1,38 @@
+2005-11-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      tests/bug24884.phpt
+      tests/bug26281.phpt
+      tests/bug26801.phpt
+      tests/bug31098.phpt:
+      {} to [] test fixes
+
+    * (PHP_5_1)
+      zend_compile.c:
+      By popular demand the {} message is now an E_STRICT.
+
+    * (PHP_5_1)
+      zend_compile.c:
+      Added depreciation notice for {} string offset access.
+
+2005-11-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.c
+      zend_execute.c
+      zend_execute.c
+      zend_object_handlers.c
+      zend_object_handlers.c
+      zend_object_handlers.c
+      tests/bug35239.phpt
+      tests/bug35239.phpt:
+      Fixed bug #35239 (Objects can lose references)
+
+    * tests/bug35239.phpt
+      tests/bug35239.phpt
+      tests/bug35239.phpt:
+        1.1.4;
+      file bug35239.phpt was initially added on branch PHP_5_0.
+
 2005-11-15  Dmitry Stogov  <dmitry@zend.com>
 
     * zend.h
