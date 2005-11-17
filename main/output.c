@@ -296,7 +296,7 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 	OG(ob_nesting_level)--;
 
 	if (send_buffer) {
-		if (just_flush && strlen(final_buffer)) { /* if flush is called prior to proper end, ensure presence of NUL */
+		if (just_flush && final_buffer[0] != '\0') { /* if flush is called prior to proper end, ensure presence of NUL */
 			final_buffer[final_buffer_length] = '\0';
 		}
 		OG(php_body_write)(final_buffer, final_buffer_length TSRMLS_CC);
