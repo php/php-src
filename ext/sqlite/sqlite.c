@@ -1516,7 +1516,7 @@ next_row:
 /* }}} */
 
 /* {{{ sqlite_query */
-void sqlite_query(zval *object, struct php_sqlite_db *db, char *sql, long sql_len, int mode, int buffered, zval *return_value, struct php_sqlite_result **prres TSRMLS_DC)
+void sqlite_query(zval *object, struct php_sqlite_db *db, char *sql, long sql_len, int mode, int buffered, zval *return_value, struct php_sqlite_result **prres, zval *errmsg TSRMLS_DC)
 {
 	struct php_sqlite_result res, *rres;
 	int ret;
@@ -1532,6 +1532,9 @@ void sqlite_query(zval *object, struct php_sqlite_db *db, char *sql, long sql_le
 
 	if (ret != SQLITE_OK) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errtext);
+		if (errmsg) {
+			ZVAL_STRING(errmsg, errtext, 1);
+		}
 		sqlite_freemem(errtext);
 		goto terminate;
 	} else if (!res.vm) { /* empty query */
@@ -1632,7 +1635,7 @@ PHP_FUNCTION(sqlite_unbuffered_query)
 		return;
 	}
 
-	sqlite_query(object, db, sql, sql_len, (int)mode, 0, return_value, NULL TSRMLS_CC);
+	sqlite_query(object, db, sql, sql_len, (int)mode, 0, return_value, NULL, errmsg TSRMLS_CC);
 }
 /* }}} */
 
@@ -1757,7 +1760,7 @@ PHP_FUNCTION(sqlite_query)
 		return;
 	}
 
-	sqlite_query(object, db, sql, sql_len, (int)mode, 1, return_value, NULL TSRMLS_CC);
+	sqlite_query(object, db, sql, sql_len, (int)mode, 1, return_value, NULL, errmsg TSRMLS_CC);
 }
 /* }}} */
 
@@ -2168,7 +2171,7 @@ PHP_FUNCTION(sqlite_array_query)
 	}
 	
 	rres = (struct php_sqlite_result *)emalloc(sizeof(*rres));
-	sqlite_query(NULL, db, sql, sql_len, (int)mode, 0, NULL, &rres TSRMLS_CC);
+	sqlite_query(NULL, db, sql, sql_len, (int)mode, 0, NULL, &rres, NULL TSRMLS_CC);
  	if (db->last_err_code != SQLITE_OK) {
  		if (rres) {
 	 		efree(rres);
@@ -2284,7 +2287,7 @@ PHP_FUNCTION(sqlite_single_query)
 	}
 
 	rres = (struct php_sqlite_result *)emalloc(sizeof(*rres));
-	sqlite_query(NULL, db, sql, sql_len, PHPSQLITE_NUM, 0, NULL, &rres TSRMLS_CC);
+	sqlite_query(NULL, db, sql, sql_len, PHPSQLITE_NUM, 0, NULL, &rres, NULL TSRMLS_CC);
 	if (db->last_err_code != SQLITE_OK) {
 		if (rres) {
 			efree(rres);
