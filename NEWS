@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 6.0
 - Unicode support. (Andrei, Dmitry, et al)
+- Removed support for continue and break operators with non-constant operands.
+  (Dmitry)
 - Changed __toString() behavior to call it in all necessary places
   (Marcus, Dmitry)
 - Changed "instanceof" and "catch" operators, is_a() and is_subclass_of()

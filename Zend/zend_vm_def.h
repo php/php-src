@@ -2362,27 +2362,23 @@ ZEND_VM_HANDLER(52, ZEND_BOOL, CONST|TMP|VAR|CV, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(50, ZEND_BRK, ANY, CONST|TMP|VAR|CV)
+ZEND_VM_HANDLER(50, ZEND_BRK, ANY, CONST)
 {
 	zend_op *opline = EX(opline);
-	zend_free_op free_op2;
 	zend_brk_cont_element *el;
 
-	el = zend_brk_cont(GET_OP2_ZVAL_PTR(BP_VAR_R), opline->op1.u.opline_num,
+	el = zend_brk_cont(Z_LVAL(opline->op2.u.constant), opline->op1.u.opline_num,
 	                   EX(op_array), EX(Ts) TSRMLS_CC);
-	FREE_OP2();
 	ZEND_VM_JMP(EX(op_array)->opcodes + el->brk);
 }
 
-ZEND_VM_HANDLER(51, ZEND_CONT, ANY, CONST|TMP|VAR|CV)
+ZEND_VM_HANDLER(51, ZEND_CONT, ANY, CONST)
 {
 	zend_op *opline = EX(opline);
-	zend_free_op free_op2;
 	zend_brk_cont_element *el;
 
-	el = zend_brk_cont(GET_OP2_ZVAL_PTR(BP_VAR_R), opline->op1.u.opline_num,
+	el = zend_brk_cont(Z_LVAL(opline->op2.u.constant), opline->op1.u.opline_num,
 	                   EX(op_array), EX(Ts) TSRMLS_CC);
-	FREE_OP2();
 	ZEND_VM_JMP(EX(op_array)->opcodes + el->cont);
 }
 
