@@ -1667,7 +1667,7 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 			flags = fcntl(fd, F_GETFL, 0);
 			oldval = (flags & O_NONBLOCK) ? 0 : 1;
 			if (value)
-				flags ^= O_NONBLOCK;
+				flags &= ~O_NONBLOCK;
 			else
 				flags |= O_NONBLOCK;
 			
