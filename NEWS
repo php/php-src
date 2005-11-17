@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, Version 4.4.2
+- Resolve Apache 2 regression with sub-request handling on non-linux systems.
+  (Ilia, Tony)
 - Backport missing imap_mailcompose fixes from 5.X. (Ilia)
 - Added missing safe_mode/open_basedir checks in cURL extension. (Ilia)
 - Fixed bug #35257 (Calling ob_flush after creating an ob callback causes 

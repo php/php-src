@@ -457,6 +457,7 @@ static int php_handler(request_rec *r)
 	if (strcmp(r->protocol, "INCLUDED")) { \
 		zend_try { zend_ini_deactivate(TSRMLS_C); } zend_end_try(); \
 	} \
+	apr_pool_cleanup_run(r->pool, (void *)&SG(server_context), php_server_context_cleanup); \
 
 	conf = ap_get_module_config(r->per_dir_config, &php4_module);
 
