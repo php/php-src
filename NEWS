@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 17 Nov 2005, PHP 5.1 Release Candidate 6
+- Resolve Apache 2 regression with sub-request handling on non-linux systems.
+  (Ilia, Tony)
 - Make zend_parse_params handle integers in a non-strict fashion, but emit an 
   E_NOTICE on non well formed interger values. (Ilia)
 - Fixed bug #35249 (compile failure when ext/readline is compiled as shared).
