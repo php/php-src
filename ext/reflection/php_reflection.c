@@ -20,6 +20,16 @@
 */
 
 /* $Id$ */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "php.h"
+#include "php_ini.h"
+#include "php_reflection.h"
+#include "ext/standard/info.h"
+
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_exceptions.h"
@@ -29,16 +39,34 @@
 #include "zend_interfaces.h"
 
 /* Class entry pointers */
-ZEND_API zend_class_entry *reflector_ptr;
-ZEND_API zend_class_entry *reflection_exception_ptr;
-ZEND_API zend_class_entry *reflection_ptr;
-ZEND_API zend_class_entry *reflection_function_ptr;
-ZEND_API zend_class_entry *reflection_parameter_ptr;
-ZEND_API zend_class_entry *reflection_class_ptr;
-ZEND_API zend_class_entry *reflection_object_ptr;
-ZEND_API zend_class_entry *reflection_method_ptr;
-ZEND_API zend_class_entry *reflection_property_ptr;
-ZEND_API zend_class_entry *reflection_extension_ptr;
+PHPAPI zend_class_entry *reflector_ptr;
+PHPAPI zend_class_entry *reflection_exception_ptr;
+PHPAPI zend_class_entry *reflection_ptr;
+PHPAPI zend_class_entry *reflection_function_ptr;
+PHPAPI zend_class_entry *reflection_parameter_ptr;
+PHPAPI zend_class_entry *reflection_class_ptr;
+PHPAPI zend_class_entry *reflection_object_ptr;
+PHPAPI zend_class_entry *reflection_method_ptr;
+PHPAPI zend_class_entry *reflection_property_ptr;
+PHPAPI zend_class_entry *reflection_extension_ptr;
+
+ZEND_BEGIN_MODULE_GLOBALS(reflection)
+ZEND_END_MODULE_GLOBALS(reflection)
+
+#ifdef ZTS
+# define REFLECTION_G(v) \
+	TSRMG(reflection_globals_id, zend_reflection_globals*, v)
+extern int reflection_globals_id;
+#else
+# define REFLECTION_G(v) (reflection_globals.v)
+extern zend_reflection_globals reflectionglobals;
+#endif
+
+#ifdef COMPILE_DL_REFLECTION
+ZEND_GET_MODULE(reflection)
+#endif
+
+ZEND_DECLARE_MODULE_GLOBALS(reflection)
 
 /* Method macros */
 
@@ -921,7 +949,7 @@ static void _function_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
 /* }}} */
 
 /* {{{ zend_reflection_class_factory */
-ZEND_API void zend_reflection_class_factory(zend_class_entry *ce, zval *object TSRMLS_DC)
+PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object TSRMLS_DC)
 {
 	reflection_object *intern;
 	zval *name;
@@ -4132,6 +4160,10 @@ static zend_function_entry reflection_extension_functions[] = {
 };
 /* }}} */
 
+function_entry reflection_ext_functions[] = { /* {{{ */
+	{NULL, NULL, NULL}
+}; /* }}} */
+
 static zend_object_handlers *zend_std_obj_handlers;
 
 /* {{{ _reflection_write_property */
@@ -4152,9 +4184,16 @@ static void _reflection_write_property(zval *object, zval *member, zval *value T
 }
 /* }}} */
 
-/* {{{ zend_register_reflection_api */
-ZEND_API void zend_register_reflection_api(TSRMLS_D) {
+static void reflection_init_globals(zend_reflection_globals *globals) /* {{{ */
+{
+	/* Initialize your global struct */
+} /* }}} */
+
+PHP_MINIT_FUNCTION(reflection) /* {{{ */
+{
 	zend_class_entry _reflection_entry;
+
+	ZEND_INIT_MODULE_GLOBALS(reflection, reflection_init_globals, NULL);
 
 	zend_std_obj_handlers = zend_get_std_object_handlers();
 	memcpy(&reflection_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
@@ -4230,8 +4269,32 @@ ZEND_API void zend_register_reflection_api(TSRMLS_D) {
 	REGISTER_MAIN_LONG_CONSTANT("C_IMPLICIT_ABSTRACT", ZEND_ACC_IMPLICIT_ABSTRACT_CLASS, CONST_PERSISTENT|CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("C_EXPLICIT_ABSTRACT", ZEND_ACC_EXPLICIT_ABSTRACT_CLASS, CONST_PERSISTENT|CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("C_FINAL", ZEND_ACC_FINAL_CLASS, CONST_PERSISTENT|CONST_CS);
-}
-/* }}} */
+	
+	return SUCCESS;
+} /* }}} */
+
+PHP_MINFO_FUNCTION(reflection) /* {{{ */
+{
+	php_info_print_table_start();
+	php_info_print_table_header(2, "Reflection", "enabled");
+
+	php_info_print_table_row(2, "Version", "$Id$");
+
+	php_info_print_table_end();
+} /* }}} */
+
+zend_module_entry reflection_module_entry = { /* {{{ */
+	STANDARD_MODULE_HEADER,
+	"Reflection",
+	reflection_ext_functions,
+	PHP_MINIT(reflection),
+	NULL,
+	NULL,
+	NULL,
+	PHP_MINFO(reflection),
+	"0.1",
+	STANDARD_MODULE_PROPERTIES
+}; /* }}} */
 
 /*
  * Local variables:

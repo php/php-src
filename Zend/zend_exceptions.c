@@ -23,7 +23,6 @@
 
 #include "zend.h"
 #include "zend_API.h"
-#include "zend_reflection_api.h"
 #include "zend_builtin_functions.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"

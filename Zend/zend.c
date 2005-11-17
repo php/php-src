@@ -30,7 +30,6 @@
 #include "zend_ini.h"
 #include "zend_unicode.h"
 #include "zend_interfaces.h"
-#include "zend_reflection_api.h"
 
 #if defined(ZEND_WIN32) && ZEND_DEBUG
 BOOL WINAPI IsDebuggerPresent(VOID);
