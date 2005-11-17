@@ -134,6 +134,7 @@ static inline zend_uchar is_numeric_string(char *str, int length, long *lval, do
 		*lval = local_lval;
 		return IS_LONG;
 	}
+	return 0;
 }
 
 static inline zend_uchar is_numeric_unicode(UChar *str, int32_t length, long *lval, double *dval, zend_bool allow_errors)
