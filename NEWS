@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 - Fixed bug #35229 (call_user_func() crashes when arguement_stack is nearly
   full). (Dmitry)
 - Fixed bug #35197 (Destructor is not called). (Tony)
+- Fixed bug #35079 (stream_set_blocking(true) toggles, not enables 
+  blocking). (askalski at gmail dot com, Tony)
 - Fixed bug #35009 (ZTS: Persistent resource destruct crashes when extension
   is compiled as shared). (Dmitry)
 - Fixed bug #34996 (ImageTrueColorToPalette() crashes when ncolors is
