@@ -20,6 +20,9 @@
 /* $Id$ */
 
 #include "php.h"
+
+#if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
+
 #include "php_globals.h"
 #include "php_variables.h"
 #include "zend_hash.h"
@@ -42,19 +45,15 @@
 #include <unixlib/local.h>
 #endif
 
-#if HAVE_LIBREADLINE || HAVE_LIBEDIT
 #include <readline/readline.h>
 #if !HAVE_LIBEDIT
 #include <readline/history.h>
 #endif
-#endif /* HAVE_LIBREADLINE || HAVE_LIBEDIT */
 
 #include "zend_compile.h"
 #include "zend_execute.h"
 #include "zend_highlight.h"
 #include "zend_indent.h"
-
-#if HAVE_LIBREADLINE || HAVE_LIBEDIT
 
 /* {{{ cli_is_valid_code
  */
