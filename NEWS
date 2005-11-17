@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 17 Nov 2005, PHP 5.1 Release Candidate 6
+- Moved make ext/date constants be date class constants. (Ilia)
 - Resolve Apache 2 regression with sub-request handling on non-linux systems.
   (Ilia, Tony)
 - Make zend_parse_params handle integers in a non-strict fashion, but emit an 
