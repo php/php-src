@@ -70,11 +70,12 @@
 #include <unixlib/local.h>
 #endif
 
-#if HAVE_LIBREADLINE || HAVE_LIBEDIT
+#if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
 #include <readline/readline.h>
 #if !HAVE_LIBEDIT
 #include <readline/history.h>
 #endif
+#include "php_cli_readline.h"
 #endif /* HAVE_LIBREADLINE || HAVE_LIBEDIT */
 
 #include "zend_compile.h"
@@ -82,9 +83,7 @@
 #include "zend_highlight.h"
 #include "zend_indent.h"
 
-
 #include "php_getopt.h"
-#include "php_cli_readline.h"
 
 #ifndef O_BINARY
 #define O_BINARY 0
@@ -100,7 +99,7 @@
 
 static char *php_optarg = NULL;
 static int php_optind = 1;
-#if HAVE_LIBREADLINE || HAVE_LIBEDIT
+#if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
 static char php_last_char = '\0';
 #endif
 
@@ -212,7 +211,7 @@ static int sapi_cli_ub_write(const char *str, uint str_length TSRMLS_DC)
 	uint remaining = str_length;
 	size_t ret;
 
-#if HAVE_LIBREADLINE || HAVE_LIBEDIT
+#if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
 	if (!str_length) {
 		return 0;
 	}
@@ -390,7 +389,7 @@ static void php_cli_usage(char *argv0)
 	            "       %s [options] -- [args...]\n"
 	            "       %s [options] -a\n"
 	            "\n"
-#if HAVE_LIBREADLINE || HAVE_LIBEDIT
+#if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
 				"  -a               Run as interactive shell\n"
 #else
 				"  -a               Run interactively\n"
@@ -977,7 +976,7 @@ int main(int argc, char *argv[])
 				cli_register_file_handles(TSRMLS_C);
 			}
 
-#if HAVE_LIBREADLINE || HAVE_LIBEDIT
+#if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
 			if (interactive) {
 				char *line;
 				size_t size = 4096, pos = 0, len;
