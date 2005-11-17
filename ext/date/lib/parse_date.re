@@ -598,7 +598,7 @@ static long timelib_lookup_zone(char **ptr, int *dst, char **tz_abbr, int *found
 	long  value = 0;
 	timelib_tz_lookup_table *tp;
 
-	while (**ptr != '\0') {
+	while (**ptr != '\0' && **ptr != ')') {
 		++*ptr;
 	}
 	end = *ptr;
@@ -621,10 +621,11 @@ static long timelib_lookup_zone(char **ptr, int *dst, char **tz_abbr, int *found
 static long timelib_get_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_found, timelib_tzdb *tzdb)
 {
 	timelib_tzinfo *res;
+	long            retval = 0;
 
 	*tz_not_found = 0;
 
-	while (**ptr == ' ') {
+	while (**ptr == ' ' || **ptr == '(') {
 		++*ptr;
 	}
 	if (**ptr == '+') {
@@ -634,7 +635,7 @@ static long timelib_get_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_
 		*tz_not_found = 0;
 		t->dst = 0;
 
-		return -1 * timelib_parse_tz_cor(ptr);
+		retval = -1 * timelib_parse_tz_cor(ptr);
 	} else if (**ptr == '-') {
 		++*ptr;
 		t->is_localtime = 1;
@@ -642,7 +643,7 @@ static long timelib_get_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_
 		*tz_not_found = 0;
 		t->dst = 0;
 
-		return timelib_parse_tz_cor(ptr);
+		retval = timelib_parse_tz_cor(ptr);
 	} else {
 		int found = 0;
 		long offset;
@@ -650,6 +651,7 @@ static long timelib_get_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_
 
 		t->is_localtime = 1;
 		t->zone_type = TIMELIB_ZONETYPE_ABBR;
+
 		offset = timelib_lookup_zone(ptr, dst, &tz_abbr, &found);
 #if 0
 		/* If we found a TimeZone identifier, use it */
@@ -671,8 +673,12 @@ static long timelib_get_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_
 		}
 		free(tz_abbr);
 		*tz_not_found = (found == 0);
-		return offset;
+		retval = offset;
 	}
+	while (**ptr == ')') {
+		++*ptr;
+	}
+	return retval;
 }
 
 #define timelib_split_free(arg) {       \
@@ -709,7 +715,7 @@ minutelz = [0-5][0-9];
 second = minute | "60";
 secondlz = minutelz | "60";
 meridian = [AaPp] "."? [Mm] "."?;
-tz = [A-Za-z]{1,4} | [A-Z][a-z]+([_/][A-Z][a-z]+)+;
+tz = "("? [A-Za-z]{1,4} ")"? | [A-Z][a-z]+([_/][A-Z][a-z]+)+;
 tzcorrection = [+-] hour24 ":"? minutelz?;
 
 month = "0"? [0-9] | "1"[0-2];
@@ -1396,6 +1402,8 @@ timelib_time* timelib_strtotime(char *s, int *errors, timelib_tzdb *tzdb)
 	in.time->dst = -1;
 	in.errors = 0;
 	in.tzdb = tzdb;
+	in.time->is_localtime = 0;
+	in.time->zone_type = 0;
 
 	do {
 		t = scan(&in);

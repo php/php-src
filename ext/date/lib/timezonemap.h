@@ -1002,6 +1002,7 @@
 	{ "kdt",   1,  36000, "ROK"                           },
 	{ "kgst",  1,  21600, "Asia/Bishkek"                  },
 	{ "kgt",   0,  18000, "Asia/Bishkek"                  },
+	{ "kgt",   0,  21600, "Asia/Bishkek"                  },
 	{ "kizst", 1,  21600, "Asia/Qyzylorda"                },
 	{ "kizt",  0,  14400, "Asia/Qyzylorda"                },
 	{ "kizt",  0,  18000, "Asia/Qyzylorda"                },
