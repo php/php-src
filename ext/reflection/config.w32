@@ -4,6 +4,6 @@
 ARG_ENABLE("reflection", "disable reflection support", "yes");
 
 if (PHP_REFLECTION != "no") {
-	EXTENSION("reflectino", "php_reflection.c");
+	EXTENSION("reflection", "php_reflection.c");
 }
 
