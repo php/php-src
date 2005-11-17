@@ -65,7 +65,7 @@ ZEND_API zend_bool instanceof_function_ex(zend_class_entry *instance_ce, zend_cl
 ZEND_API zend_bool instanceof_function(zend_class_entry *instance_ce, zend_class_entry *ce TSRMLS_DC);
 END_EXTERN_C()
 
-static inline zend_bool is_numeric_string(char *str, int length, long *lval, double *dval, int allow_errors)
+static inline zend_bool is_numeric_string(char *str, int length, long *lval, double *dval, zend_bool allow_errors)
 {
 	long local_lval;
 	double local_dval;
@@ -116,20 +116,14 @@ static inline zend_bool is_numeric_string(char *str, int length, long *lval, dou
 	} else {
 		end_ptr_double=NULL;
 	}
-
-	if (!allow_errors) {
-		return 0;
-	}
-	if (allow_errors == -1) {
-		zend_error(E_NOTICE, "A non well formed numeric value encountered");
-	}
-
-	if (end_ptr_double>end_ptr_long && dval) {
-		*dval = local_dval;
-		return IS_DOUBLE;
-	} else if (end_ptr_long && lval) {
-		*lval = local_lval;
-		return IS_LONG;
+	if (allow_errors) {
+		if (end_ptr_double>end_ptr_long && dval) {
+			*dval = local_dval;
+			return IS_DOUBLE;
+		} else if (end_ptr_long && lval) {
+			*lval = local_lval;
+			return IS_LONG;
+		}
 	}
 	return 0;
 }
