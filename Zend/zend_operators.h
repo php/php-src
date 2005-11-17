@@ -131,6 +131,7 @@ static inline zend_bool is_numeric_string(char *str, int length, long *lval, dou
 		*lval = local_lval;
 		return IS_LONG;
 	}
+	return 0;
 }
 
 static inline char *
