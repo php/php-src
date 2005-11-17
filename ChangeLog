@@ -1,3 +1,90 @@
+2005-11-16  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/pcre/config.m4:
+      - Fix build problems with pecl/filter/
+
+2005-11-16  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_5_0)
+      ext/mssql/php_mssql.c:
+      Remove unused ifdef
+
+2005-11-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      ZendEngine2/tests/bug24884.phpt
+      ZendEngine2/tests/bug26281.phpt
+      ZendEngine2/tests/bug26801.phpt
+      ZendEngine2/tests/bug31098.phpt:
+      {} to [] test fixes
+
+    * (PHP_5_1)
+      configure.in
+      main/php_version.h:
+      back to dev
+
+    * (PHP_5_1)
+      ext/iconv/tests/iconv_substr.phpt
+      ext/standard/tests/file/bug24482.phpt
+      ext/standard/tests/time/idate.phpt
+      tests/lang/bug19943.phpt
+      tests/lang/bug22592.phpt
+      tests/lang/bug26696.phpt
+      tests/strings/bug22592.phpt:
+      Updated tests to use [] instead of {}
+
+    * (PHP_5_1)
+      ZendEngine2/zend_compile.c:
+      By popular demand the {} message is now an E_STRICT.
+
+    * (PHP_5_1)
+      ZendEngine2/zend_compile.c:
+      Added depreciation notice for {} string offset access.
+
+    * (PHP_5_1)
+      NEWS
+      configure.in
+      main/php_version.h:
+      5.1.0RC5
+
+2005-11-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug35239.phpt
+      ZendEngine2/tests/bug35239.phpt
+      ZendEngine2/tests/bug35239.phpt:
+        1.1.4;
+      file bug35239.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      NEWS
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/bug35239.phpt
+      ZendEngine2/tests/bug35239.phpt:
+      Fixed bug #35239 (Objects can lose references)
+
+    * ext/standard/tests/general_functions/bug35229.phpt
+      ext/standard/tests/general_functions/bug35229.phpt
+      ext/standard/tests/general_functions/bug35229.phpt:
+        1.1.4;
+      file bug35229.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.c
+      ext/standard/tests/general_functions/bug35229.phpt
+      ext/standard/tests/general_functions/bug35229.phpt:
+      Fixed bug #35229 (call_user_func() crashes when arguement_stack is nearly
+      full)
+
 2005-11-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * tests/classes/type_hinting_003.phpt
