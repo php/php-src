@@ -134,17 +134,18 @@ PHP_FUNCTION(hash_file) {
 }
 /* }}} */
 
-/* {{{ proto resource hash_init(string algo)
+/* {{{ proto resource hash_init(string algo[, int options, string key])
 Initialize a hashing context */
 PHP_FUNCTION(hash_init)
 {
-	char *algo;
-	int algo_len;
+	char *algo, *key = NULL;
+	int algo_len, key_len = 0, argc = ZEND_NUM_ARGS();
+	long options = 0;
 	void *context;
 	php_hash_ops *ops;
 	php_hash_data *hash;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &algo, &algo_len) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "s|ls", &algo, &algo_len, &options, &key, &key_len) == FAILURE) {
 		return;
 	}
 
@@ -154,12 +155,45 @@ PHP_FUNCTION(hash_init)
 		RETURN_FALSE;
 	}
 
+	if (options & PHP_HASH_HMAC &&
+		key_len <= 0) {
+		/* Note: a zero length key is no key at all */
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "HMAC requested without a key");
+		RETURN_FALSE;
+	}
+
 	context = emalloc(ops->context_size);
 	ops->hash_init(context);
 
 	hash = emalloc(sizeof(php_hash_data));
 	hash->ops = ops;
 	hash->context = context;
+	hash->options = options;
+	hash->key = NULL;
+
+	if (options & PHP_HASH_HMAC) {
+		char *K = emalloc(ops->block_size);
+		int i;
+
+		memset(K, 0, ops->block_size);
+
+		if (key_len > ops->block_size) {
+			/* Reduce the key first */
+			ops->hash_update(context, key, key_len);
+			ops->hash_final(K, context);
+			/* Make the context ready to start over */
+			ops->hash_init(context);
+		} else {
+			memcpy(K, key, key_len);
+		}
+			
+		/* XOR ipad */
+		for(i=0; i < ops->block_size; i++) {
+			K[i] ^= 0x36;
+		}
+		ops->hash_update(context, K, ops->block_size);
+		hash->key = K;
+	}
 
 	ZEND_REGISTER_RESOURCE(return_value, hash, php_hash_le_hash);
 }
@@ -206,6 +240,25 @@ PHP_FUNCTION(hash_final)
 	digest_len = hash->ops->digest_size;
 	digest = emalloc(digest_len + 1);
 	hash->ops->hash_final(digest, hash->context);
+	if (hash->options & PHP_HASH_HMAC) {
+		int i;
+
+		/* Convert K to opad -- 0x6A = 0x36 ^ 0x5C */
+		for(i=0; i < hash->ops->block_size; i++) {
+			hash->key[i] ^= 0x6A;
+		}
+
+		/* Feed this result into the outter hash */
+		hash->ops->hash_init(hash->context);
+		hash->ops->hash_update(hash->context, hash->key, hash->ops->block_size);
+		hash->ops->hash_update(hash->context, digest, hash->ops->digest_size);
+		hash->ops->hash_final(digest, hash->context);
+
+		/* Zero the key */
+		memset(hash->key, 0, hash->ops->block_size);
+		efree(hash->key);
+		hash->key = NULL;
+	}
 	digest[digest_len] = 0;
 
 	/* zend_list_REAL_delete() */
@@ -240,6 +293,10 @@ static void php_hash_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	hash->ops->hash_final(dummy, hash->context);
 	efree(dummy);
 
+	if (hash->key) {
+		memset(hash->key, 0, hash->ops->block_size);
+		efree(hash->key);
+	}
 	efree(hash->context);
 	efree(hash);
 }
@@ -259,6 +316,8 @@ PHP_MINIT_FUNCTION(hash)
 	php_hash_register_algo("sha512",		&php_hash_sha512_ops);
 	php_hash_register_algo("ripemd128",		&php_hash_ripemd128_ops);
 	php_hash_register_algo("ripemd160",		&php_hash_ripemd160_ops);
+
+	REGISTER_LONG_CONSTANT("HASH_HMAC",		PHP_HASH_HMAC,	CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }

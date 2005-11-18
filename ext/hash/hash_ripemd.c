@@ -30,6 +30,7 @@ php_hash_ops php_hash_ripemd128_ops = {
 	PHP_RIPEMD128Update,
 	PHP_RIPEMD128Final,
 	16,
+	64,
 	sizeof(PHP_RIPEMD128_CTX)
 };
 
@@ -38,6 +39,7 @@ php_hash_ops php_hash_ripemd160_ops = {
 	PHP_RIPEMD160Update,
 	PHP_RIPEMD160Final,
 	20,
+	64,
 	sizeof(PHP_RIPEMD160_CTX)
 };
 
