@@ -22,10 +22,14 @@
 #include "php_hash.h"
 #include "php_hash_sha.h"
 
-#ifdef PHP_WIN32
-#define L64(n)	(n##i64)
+#if defined(SIZEOF_LONG) && SIZEOF_LONG >= 8
+#define L64(n)	(n)
 #else
+# ifdef PHP_WIN32
+#define L64(n)	(n##i64)
+# else
 #define L64(n)	(n##LL)
+# endif
 #endif
 
 static unsigned char PADDING[128] =
