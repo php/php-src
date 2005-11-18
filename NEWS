@@ -5,6 +5,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #33153 (crash in mssql_next result). (Frank)
 - Fixed bug #32009 (crash when mssql_bind() is called more than once). (Frank)
 - Fixed bug #33963 (mssql_bind() fails on input parameters). (Frank)
+- Fixed bug #33201 (Crash when fetching some data types). (Frank)
 
 18 Nov 2005, Version 4.4.2RC1
 - Added missing safe_mode/open_basedir checks into cURL extension. (Ilia)
