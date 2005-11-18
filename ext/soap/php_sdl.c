@@ -117,24 +117,40 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 	nscat[len] = '\0';
 
 	enc = get_encoder_ex(sdl, nscat, len);
-	efree(nscat);
 
 	if (enc == NULL &&
 	    ((ns_len == sizeof(SOAP_1_1_ENC_NAMESPACE)-1 &&
 	      memcmp(ns, SOAP_1_1_ENC_NAMESPACE, sizeof(SOAP_1_1_ENC_NAMESPACE)-1) == 0) ||
 	     (ns_len == sizeof(SOAP_1_2_ENC_NAMESPACE)-1 &&
 	      memcmp(ns, SOAP_1_2_ENC_NAMESPACE, sizeof(SOAP_1_2_ENC_NAMESPACE)-1) == 0))) {
-		ns_len = sizeof(XSD_NAMESPACE)-1;
-		len = ns_len + type_len + 1;
-		nscat = emalloc(len + 1);
-		memcpy(nscat, XSD_NAMESPACE, sizeof(XSD_NAMESPACE)-1);
-		nscat[ns_len] = ':';
-		memcpy(nscat+ns_len+1, type, type_len);
-		nscat[len] = '\0';
+		char *enc_nscat;
+		int enc_ns_len;
+		int enc_len;
 
-		enc = get_encoder_ex(sdl, nscat, len);
-		efree(nscat);
+		enc_ns_len = sizeof(XSD_NAMESPACE)-1;
+		enc_len = enc_ns_len + type_len + 1;
+		enc_nscat = emalloc(enc_len + 1);
+		memcpy(enc_nscat, XSD_NAMESPACE, sizeof(XSD_NAMESPACE)-1);
+		enc_nscat[enc_ns_len] = ':';
+		memcpy(enc_nscat+enc_ns_len+1, type, type_len);
+		enc_nscat[enc_len] = '\0';
+
+		enc = get_encoder_ex(NULL, enc_nscat, enc_len);
+		efree(enc_nscat);
+		if (enc && sdl) {
+			encodePtr new_enc	= emalloc(sizeof(encode));
+			memcpy(new_enc, enc, sizeof(encode));
+			new_enc->details.ns = estrndup(ns, ns_len);
+			new_enc->details.type_str = estrdup(new_enc->details.type_str);
+			if (sdl->encoders == NULL) {
+				sdl->encoders = emalloc(sizeof(HashTable));
+				zend_hash_init(sdl->encoders, 0, NULL, delete_encoder, 0);
+			}
+			zend_hash_update(sdl->encoders, nscat, len + 1, &new_enc, sizeof(encodePtr), NULL);
+			enc = new_enc;
+		}
 	}
+	efree(nscat);
 	return enc;
 }
 
