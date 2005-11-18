@@ -2057,7 +2057,9 @@ PHP_FUNCTION(mssql_bind)
 				type=Z_LVAL_PP(yytype);
 				is_output=Z_LVAL_PP(yyis_output);
 				is_null=Z_LVAL_PP(yyis_null);
-				maxlen=Z_LVAL_PP(yymaxlen);				
+				if (is_output) {
+					maxlen=Z_LVAL_PP(yymaxlen);
+				}
 			}
 			break;	
 		
