@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 - Fixed an error in mysqli_fetch_fields (returned NULL instead of an
   array when row number > field_count). (Georg)
 - Renamed CachingRecursiveIterator to RecursiveCachingIterator. (Marcus)
+- Fixed bug #35273 (Error in mapping soap - java types). (Dmitry)
 - Fixed bug #35239 (Objects can lose references). (Dmitry)
 - Fixed bug #35229 (call_user_func() crashes when arguement_stack is nearly
   full). (Dmitry)
