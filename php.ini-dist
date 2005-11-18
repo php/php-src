@@ -529,6 +529,8 @@ upload_max_filesize = 2M
 
 ; Whether to allow the treatment of URLs (like http:// or ftp://) as files.
 allow_url_fopen = On
+; Whether to allow code execution through URL wrappers
+allow_url_include = Off
 
 ; Define the anonymous ftp password (your email address)
 ;from="john@doe.com"

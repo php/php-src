@@ -150,6 +150,7 @@ struct _php_core_globals {
 
 	char *disable_functions;
 	char *disable_classes;
+	zend_bool allow_url_include;
 };
 
 
