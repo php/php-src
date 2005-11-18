@@ -1865,6 +1865,11 @@ PHP_FUNCTION(mssql_next_result)
 
 	mssql_ptr = result->mssql_ptr;
 	retvalue = dbresults(mssql_ptr->link);
+	
+	while (dbnumcols(mssql_ptr->link) <= 0 && retvalue == SUCCEED) {
+		retvalue = dbresults(mssql_ptr->link);
+	}
+
 	if (retvalue == FAIL) {
 		RETURN_FALSE;
 	}

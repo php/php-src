@@ -26,3 +26,4 @@ PHP                                                                        NEWS
 - Added possibility to check in which extension an internal function was
   defined using reflection API. (Johannes)
 - Fixed bug #34286 (__toString() behavior is inconsistent). (Marcus)
+- Fixed bug #33153 (crash in mssql_next result). (Frank)
