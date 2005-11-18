@@ -50,7 +50,9 @@ PHPAPI zend_class_entry *reflection_method_ptr;
 PHPAPI zend_class_entry *reflection_property_ptr;
 PHPAPI zend_class_entry *reflection_extension_ptr;
 
+#if MBO_0
 ZEND_BEGIN_MODULE_GLOBALS(reflection)
+	int dummy;
 ZEND_END_MODULE_GLOBALS(reflection)
 
 #ifdef ZTS
@@ -62,11 +64,8 @@ extern int reflection_globals_id;
 extern zend_reflection_globals reflectionglobals;
 #endif
 
-#ifdef COMPILE_DL_REFLECTION
-ZEND_GET_MODULE(reflection)
-#endif
-
 ZEND_DECLARE_MODULE_GLOBALS(reflection)
+#endif /* MBO_0 */
 
 /* Method macros */
 
@@ -4184,16 +4183,9 @@ static void _reflection_write_property(zval *object, zval *member, zval *value T
 }
 /* }}} */
 
-static void reflection_init_globals(zend_reflection_globals *globals) /* {{{ */
-{
-	/* Initialize your global struct */
-} /* }}} */
-
 PHP_MINIT_FUNCTION(reflection) /* {{{ */
 {
 	zend_class_entry _reflection_entry;
-
-	ZEND_INIT_MODULE_GLOBALS(reflection, reflection_init_globals, NULL);
 
 	zend_std_obj_handlers = zend_get_std_object_handlers();
 	memcpy(&reflection_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
