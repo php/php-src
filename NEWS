@@ -1,7 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 23 Nov 2005, Version 4.4.2
-
+- Fixed bug #35278 (Multiple virtual() calls crash Apache 2 php module). (Ilia)
 
 18 Nov 2005, Version 4.4.2RC1
 - Added missing safe_mode/open_basedir checks into cURL extension. (Ilia)
