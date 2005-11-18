@@ -1,3 +1,160 @@
+2005-11-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/credits_ext.h:
+      - Reflection was moved to its own extension
+
+    * sapi/cli/php_cli.c:
+      - Reflection was moved into its own extension
+
+    * configure.in
+      ZendEngine2/Makefile.am
+      ZendEngine2/zend.c
+      ZendEngine2/zend_default_classes.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_reflection_api.c
+      ZendEngine2/zend_reflection_api.h:
+      - Move Reflection into its own extension
+
+2005-11-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      configure.in
+      main/php_version.h:
+      RC6
+
+2005-11-17  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS:
+      fix news
+
+2005-11-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      Moved date constants into the date class, they all class constants now.
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      sapi/apache2handler/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c:
+      MFH: Resolve Apache 2 regression with sub-request handling on non-linux
+      systems.
+
+    * sapi/apache2handler/sapi_apache2.c:
+      Hopefully resolve all the Apache 2 sub-request problems on non-linux
+      systems.
+
+2005-11-17  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_4_4)
+      ext/standard/php_fopen_wrapper.c
+      ext/standard/php_fopen_wrapper.c
+      ext/standard/php_fopen_wrapper.c:
+      MFH (r-1.51) #32371 php://input sometimes returns duplicate data
+
+    * ext/standard/php_fopen_wrapper.c:
+      Bugfix #32371 php://input sometimes returns duplicate data
+
+2005-11-17  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      ZendEngine2/zend_operators.h:
+      MFH: make GCC happy and suppress the warning
+
+    * ZendEngine2/zend_operators.h:
+      make GCC happy and suppress the warning
+
+2005-11-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sqlite/sqlite.c
+      ext/sqlite/tests/bug35248.phpt:
+      MFB51: Fixed bug #35248 (sqlite_query() doesnt set error_msg when return
+      value is being used).
+
+    * ext/sqlite/tests/bug35248.phpt
+      ext/sqlite/tests/bug35248.phpt:
+      
+      file bug35248.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      NEWS
+      ext/sqlite/sqlite.c:
+      Fixed bug #35248 (sqlite_query() doesnt set error_msg when return value is
+      being used).
+
+2005-11-17  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      NEWS
+      main/streams.c
+      main/streams/plain_wrapper.c
+      main/streams/plain_wrapper.c:
+      MFH: fix #35079 (stream_set_blocking(true) toggles, not enables blocking)
+      patch by askalski at gmail dot com
+
+    * main/streams/plain_wrapper.c:
+      fix #35079 (stream_set_blocking(true) toggles, not enables blocking)
+      patch by askalski at gmail dot com
+
+    * (PHP_4_4)
+      main/output.c:
+      fix #35257 in a smarter way
+
+    * (PHP_4_4)
+      NEWS
+      main/output.c:
+      fix #35257 (Calling ob_flush after creating an ob callback causes segfault)
+      ***
+      The issue is 4.x specific and cannot be reproduced in 5.x, because in 5.x
+      we
+      allocate empty strings, while in 4.x we're using empty_string macro.
+      ***
+
+2005-11-17  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      ext/pcre/config.m4:
+      MFH: Renamed config.m4 to config0.m4
+
+    * ext/pcre/config.m4:
+      - Renamed config.m4 to config0.m4
+
+    * (PHP_5_1)
+      sapi/cli/php_cli.c
+      sapi/cli/php_cli_readline.c:
+      MFH: - Fix compile failure when ext/readline is compiled as shared (bug
+      #35249)
+
+    * sapi/cli/php_cli.c
+      sapi/cli/php_cli_readline.c:
+      - Fix compile failure when ext/readline is compiled as shared
+
+2005-11-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      Removed support for continue and break operators with non-constant operands
+
+2005-11-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_operators.h:
+      MFB51: Allow zend_parse_parameters to handle non-well formed integers, but
+      raise E_NOTICE in the process.
+
+    * (PHP_5_1)
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_operators.h:
+      Allow zend_parse_parameters to handle non-well formed integers, but raise
+      E_NOTICE in the process.
+
 2005-11-16  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * ext/pcre/config.m4:

@@ -1,3 +1,43 @@
+2005-11-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * Makefile.am
+      zend.c
+      zend_default_classes.c
+      zend_exceptions.c
+      zend_reflection_api.c
+      zend_reflection_api.h:
+      - Move Reflection into its own extension
+
+2005-11-17  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      zend_operators.h:
+      MFH: make GCC happy and suppress the warning
+
+    * zend_operators.h:
+      make GCC happy and suppress the warning
+
+2005-11-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_execute.h:
+      Removed support for continue and break operators with non-constant operands
+
+2005-11-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_API.c
+      zend_operators.h:
+      MFB51: Allow zend_parse_parameters to handle non-well formed integers, but
+      raise E_NOTICE in the process.
+
+    * (PHP_5_1)
+      zend_API.c
+      zend_operators.h:
+      Allow zend_parse_parameters to handle non-well formed integers, but raise
+      E_NOTICE in the process.
+
 2005-11-16  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_1)
