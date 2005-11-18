@@ -22,6 +22,12 @@
 #include "php_hash.h"
 #include "php_hash_sha.h"
 
+#ifdef PHP_WIN32
+#define L64(n)	(n##i64)
+#else
+#define L64(n)	(n##LL)
+#endif
+
 static unsigned char PADDING[128] =
 {
 	0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -602,26 +608,26 @@ PHP_HASH_API void PHP_SHA256Final(unsigned char digest[32], PHP_SHA256_CTX * con
 #define SHA512_F5(x)			(ROTR64(19, x) ^ ROTR64(61, x) ^ SHR(6, x))
 
 static php_hash_uint64 SHA512_K[128] = {
-	0x428a2f98d728ae22LL, 0x7137449123ef65cdLL, 0xb5c0fbcfec4d3b2fLL, 0xe9b5dba58189dbbcLL,
-	0x3956c25bf348b538LL, 0x59f111f1b605d019LL, 0x923f82a4af194f9bLL, 0xab1c5ed5da6d8118LL,
-	0xd807aa98a3030242LL, 0x12835b0145706fbeLL, 0x243185be4ee4b28cLL, 0x550c7dc3d5ffb4e2LL,
-	0x72be5d74f27b896fLL, 0x80deb1fe3b1696b1LL, 0x9bdc06a725c71235LL, 0xc19bf174cf692694LL,
-	0xe49b69c19ef14ad2LL, 0xefbe4786384f25e3LL, 0x0fc19dc68b8cd5b5LL, 0x240ca1cc77ac9c65LL,
-	0x2de92c6f592b0275LL, 0x4a7484aa6ea6e483LL, 0x5cb0a9dcbd41fbd4LL, 0x76f988da831153b5LL,
-	0x983e5152ee66dfabLL, 0xa831c66d2db43210LL, 0xb00327c898fb213fLL, 0xbf597fc7beef0ee4LL,
-	0xc6e00bf33da88fc2LL, 0xd5a79147930aa725LL, 0x06ca6351e003826fLL, 0x142929670a0e6e70LL,
-	0x27b70a8546d22ffcLL, 0x2e1b21385c26c926LL, 0x4d2c6dfc5ac42aedLL, 0x53380d139d95b3dfLL,
-	0x650a73548baf63deLL, 0x766a0abb3c77b2a8LL, 0x81c2c92e47edaee6LL, 0x92722c851482353bLL,
-	0xa2bfe8a14cf10364LL, 0xa81a664bbc423001LL, 0xc24b8b70d0f89791LL, 0xc76c51a30654be30LL,
-	0xd192e819d6ef5218LL, 0xd69906245565a910LL, 0xf40e35855771202aLL, 0x106aa07032bbd1b8LL,
-	0x19a4c116b8d2d0c8LL, 0x1e376c085141ab53LL, 0x2748774cdf8eeb99LL, 0x34b0bcb5e19b48a8LL,
-	0x391c0cb3c5c95a63LL, 0x4ed8aa4ae3418acbLL, 0x5b9cca4f7763e373LL, 0x682e6ff3d6b2b8a3LL,
-	0x748f82ee5defb2fcLL, 0x78a5636f43172f60LL, 0x84c87814a1f0ab72LL, 0x8cc702081a6439ecLL,
-	0x90befffa23631e28LL, 0xa4506cebde82bde9LL, 0xbef9a3f7b2c67915LL, 0xc67178f2e372532bLL,
-	0xca273eceea26619cLL, 0xd186b8c721c0c207LL, 0xeada7dd6cde0eb1eLL, 0xf57d4f7fee6ed178LL,
-	0x06f067aa72176fbaLL, 0x0a637dc5a2c898a6LL, 0x113f9804bef90daeLL, 0x1b710b35131c471bLL,
-	0x28db77f523047d84LL, 0x32caab7b40c72493LL, 0x3c9ebe0a15c9bebcLL, 0x431d67c49c100d4cLL,
-	0x4cc5d4becb3e42b6LL, 0x597f299cfc657e2aLL, 0x5fcb6fab3ad6faecLL, 0x6c44198c4a475817LL };
+	L64(0x428a2f98d728ae22), L64(0x7137449123ef65cd), L64(0xb5c0fbcfec4d3b2f), L64(0xe9b5dba58189dbbc),
+	L64(0x3956c25bf348b538), L64(0x59f111f1b605d019), L64(0x923f82a4af194f9b), L64(0xab1c5ed5da6d8118),
+	L64(0xd807aa98a3030242), L64(0x12835b0145706fbe), L64(0x243185be4ee4b28c), L64(0x550c7dc3d5ffb4e2),
+	L64(0x72be5d74f27b896f), L64(0x80deb1fe3b1696b1), L64(0x9bdc06a725c71235), L64(0xc19bf174cf692694),
+	L64(0xe49b69c19ef14ad2), L64(0xefbe4786384f25e3), L64(0x0fc19dc68b8cd5b5), L64(0x240ca1cc77ac9c65),
+	L64(0x2de92c6f592b0275), L64(0x4a7484aa6ea6e483), L64(0x5cb0a9dcbd41fbd4), L64(0x76f988da831153b5),
+	L64(0x983e5152ee66dfab), L64(0xa831c66d2db43210), L64(0xb00327c898fb213f), L64(0xbf597fc7beef0ee4),
+	L64(0xc6e00bf33da88fc2), L64(0xd5a79147930aa725), L64(0x06ca6351e003826f), L64(0x142929670a0e6e70),
+	L64(0x27b70a8546d22ffc), L64(0x2e1b21385c26c926), L64(0x4d2c6dfc5ac42aed), L64(0x53380d139d95b3df),
+	L64(0x650a73548baf63de), L64(0x766a0abb3c77b2a8), L64(0x81c2c92e47edaee6), L64(0x92722c851482353b),
+	L64(0xa2bfe8a14cf10364), L64(0xa81a664bbc423001), L64(0xc24b8b70d0f89791), L64(0xc76c51a30654be30),
+	L64(0xd192e819d6ef5218), L64(0xd69906245565a910), L64(0xf40e35855771202a), L64(0x106aa07032bbd1b8),
+	L64(0x19a4c116b8d2d0c8), L64(0x1e376c085141ab53), L64(0x2748774cdf8eeb99), L64(0x34b0bcb5e19b48a8),
+	L64(0x391c0cb3c5c95a63), L64(0x4ed8aa4ae3418acb), L64(0x5b9cca4f7763e373), L64(0x682e6ff3d6b2b8a3),
+	L64(0x748f82ee5defb2fc), L64(0x78a5636f43172f60), L64(0x84c87814a1f0ab72), L64(0x8cc702081a6439ec),
+	L64(0x90befffa23631e28), L64(0xa4506cebde82bde9), L64(0xbef9a3f7b2c67915), L64(0xc67178f2e372532b),
+	L64(0xca273eceea26619c), L64(0xd186b8c721c0c207), L64(0xeada7dd6cde0eb1e), L64(0xf57d4f7fee6ed178),
+	L64(0x06f067aa72176fba), L64(0x0a637dc5a2c898a6), L64(0x113f9804bef90dae), L64(0x1b710b35131c471b),
+	L64(0x28db77f523047d84), L64(0x32caab7b40c72493), L64(0x3c9ebe0a15c9bebc), L64(0x431d67c49c100d4c),
+	L64(0x4cc5d4becb3e42b6), L64(0x597f299cfc657e2a), L64(0x5fcb6fab3ad6faec), L64(0x6c44198c4a475817) };
 
 /* {{{ SHAEncode64
    Encodes input (php_hash_uint64) into output (unsigned char). Assumes len is
@@ -670,14 +676,14 @@ PHP_HASH_API void PHP_SHA384Init(PHP_SHA384_CTX * context)
 	context->count[0] = context->count[1] = 0;
 	/* Load magic initialization constants.
 	 */
-	context->state[0] = 0xcbbb9d5dc1059ed8LL;
-	context->state[1] = 0x629a292a367cd507LL;
-	context->state[2] = 0x9159015a3070dd17LL;
-	context->state[3] = 0x152fecd8f70e5939LL;
-	context->state[4] = 0x67332667ffc00b31LL;
-	context->state[5] = 0x8eb44a8768581511LL;
-	context->state[6] = 0xdb0c2e0d64f98fa7LL;
-	context->state[7] = 0x47b5481dbefa4fa4LL;
+	context->state[0] = L64(0xcbbb9d5dc1059ed8);
+	context->state[1] = L64(0x629a292a367cd507);
+	context->state[2] = L64(0x9159015a3070dd17);
+	context->state[3] = L64(0x152fecd8f70e5939);
+	context->state[4] = L64(0x67332667ffc00b31);
+	context->state[5] = L64(0x8eb44a8768581511);
+	context->state[6] = L64(0xdb0c2e0d64f98fa7);
+	context->state[7] = L64(0x47b5481dbefa4fa4);
 }
 /* }}} */
 
@@ -825,14 +831,14 @@ PHP_HASH_API void PHP_SHA512Init(PHP_SHA512_CTX * context)
 	context->count[0] = context->count[1] = 0;
 	/* Load magic initialization constants.
 	 */
-	context->state[0] = 0x6a09e667f3bcc908LL;
-	context->state[1] = 0xbb67ae8584caa73bLL;
-	context->state[2] = 0x3c6ef372fe94f82bLL;
-	context->state[3] = 0xa54ff53a5f1d36f1LL;
-	context->state[4] = 0x510e527fade682d1LL;
-	context->state[5] = 0x9b05688c2b3e6c1fLL;
-	context->state[6] = 0x1f83d9abfb41bd6bLL;
-	context->state[7] = 0x5be0cd19137e2179LL;
+	context->state[0] = L64(0x6a09e667f3bcc908);
+	context->state[1] = L64(0xbb67ae8584caa73b);
+	context->state[2] = L64(0x3c6ef372fe94f82b);
+	context->state[3] = L64(0xa54ff53a5f1d36f1);
+	context->state[4] = L64(0x510e527fade682d1);
+	context->state[5] = L64(0x9b05688c2b3e6c1f);
+	context->state[6] = L64(0x1f83d9abfb41bd6b);
+	context->state[7] = L64(0x5be0cd19137e2179);
 }
 /* }}} */
 
