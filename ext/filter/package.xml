@@ -24,13 +24,14 @@ of filters and mechanisms that users can use to safely access their input data.
  <license>PHP</license>
  <release>
   <state>beta</state>
-  <version>0.9.2</version>
-  <date>2005-10-27</date>
+  <version>0.9.3</version>
+  <date>2005-11-18</date>
   <notes>
-- Implemented support for default filter flags in php.ini with the
-  filter.default_flags setting.
-- Fixed a crash when a non-array option was passed in combination with the
-  callback filter.
+- Fixed PECL bug #5960: Build with PHP's PCRE headers
+- Fixed PECL bug #5962: Postive float returned when negative float given
+- Fixed PECL bug #5963: Segmentation fault when passing anything other than strings
+
+- Added PECL FR #5961: Support other cases of "On", "Off", "True", and "False"
   </notes>
   <filelist>
    <file role="src" name="config.m4"/>
