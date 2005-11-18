@@ -28,3 +28,4 @@ PHP                                                                        NEWS
 - Fixed bug #34286 (__toString() behavior is inconsistent). (Marcus)
 - Fixed bug #33153 (crash in mssql_next result). (Frank)
 - Fixed bug #32009 (crash when mssql_bind() is called more than once). (Frank)
+- Fixed bug #33963 (mssql_bind() fails on input parameters). (Frank)
