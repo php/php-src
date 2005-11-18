@@ -1,0 +1,47 @@
+<package version="1.0">
+  <name>hash</name>
+  <summary>pHASH Message Digest Framework</summary>
+  <description>
+   Native implementations of common message digest algorithms using a generic factory method
+  </description>
+  <license>PHP</license>
+  <maintainers>
+    <maintainer>
+      <user>pollita</user>
+      <name>Sara Golemon</name>
+      <email>pollita@php.net</email>
+      <role>lead</role>
+    </maintainer>
+  </maintainers>
+
+  <release>
+   <version>0.1</version>
+   <state>beta</state>
+   <date>2005-11-18</date>
+   <notes>Initial Release - md5, sha1, sha256, sha384, sha512, ripemd128, ripemd160</notes>
+  </release>
+
+  <filelist>
+   <file role="src" name="config.m4"/>
+   <file role="src" name="config.w32"/>
+   <file role="src" name="hash.c"/>
+   <file role="src" name="php_hash.h"/>
+   <file role="src" name="hash_md.c"/>
+   <file role="src" name="php_hash_md.h"/>
+   <file role="src" name="hash_sha.c"/>
+   <file role="src" name="php_hash_sha.h"/>
+   <file role="src" name="hash_ripemd.c"/>
+   <file role="src" name="php_hash_ripemd.h"/>
+   <file role="doc" name="README"/>
+   <dir role="test" name="tests">
+    <file role="test" name="md5.phpt"/>
+    <file role="test" name="sha1.phpt"/>
+    <file role="test" name="sha256.phpt"/>
+    <file role="test" name="sha384.phpt"/>
+    <file role="test" name="sha512.phpt"/>
+    <file role="test" name="ripemd128.phpt"/>
+    <file role="test" name="ripemd160.phpt"/>
+   </dir>
+  </filelist>
+
+</package>
