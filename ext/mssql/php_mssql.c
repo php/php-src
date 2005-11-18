@@ -2083,17 +2083,22 @@ PHP_FUNCTION(mssql_bind)
 		zend_hash_init(statement->binds, 13, NULL, _mssql_bind_hash_dtor, 0);
 	}
 
-	memset((void*)&bind,0,sizeof(mssql_bind));
-	zend_hash_add(statement->binds,Z_STRVAL_PP(param_name),Z_STRLEN_PP(param_name),&bind,sizeof(mssql_bind),(void **)&bindp);
-	if( NULL == bindp ) RETURN_FALSE;
-	bindp->zval=*var;
-	zval_add_ref(var);
-
-	/* no call to dbrpcparam if RETVAL */
-	if ( strcmp("RETVAL",Z_STRVAL_PP(param_name))!=0 ) {						
-		if (dbrpcparam(mssql_ptr->link, Z_STRVAL_PP(param_name), (BYTE)status, type, maxlen, datalen, (LPBYTE)value)==FAIL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set parameter");
-			RETURN_FALSE;
+	if (zend_hash_exists(statement->binds, Z_STRVAL_PP(param_name), Z_STRLEN_PP(param_name))) {
+		RETURN_FALSE;
+	}
+	else {
+		memset((void*)&bind,0,sizeof(mssql_bind));
+		zend_hash_add(statement->binds, Z_STRVAL_PP(param_name), Z_STRLEN_PP(param_name), &bind, sizeof(mssql_bind), (void **)&bindp);
+		if( NULL == bindp ) RETURN_FALSE;
+		bindp->zval=*var;
+		zval_add_ref(var);
+	
+		/* no call to dbrpcparam if RETVAL */
+		if ( strcmp("RETVAL",Z_STRVAL_PP(param_name))!=0 ) {						
+			if (dbrpcparam(mssql_ptr->link, Z_STRVAL_PP(param_name), (BYTE)status, type, maxlen, datalen, (LPBYTE)value)==FAIL) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set parameter");
+				RETURN_FALSE;
+			}
 		}
 	}
 
