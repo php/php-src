@@ -262,8 +262,8 @@ Apache 1.3.x on Unix systems
 
 10. cd ../apache_1.3.x
 
-11. ./configure --prefix=/www --activate-module=src/modules/php4/libphp4.a
-    (The above line is correct! Yes, we know libphp4.a does not exist at this
+11. ./configure --prefix=/www --activate-module=src/modules/php5/libphp5.a
+    (The above line is correct! Yes, we know libphp5.a does not exist at this
     stage. It isn't supposed to. It will be created.)
 
 12. make
@@ -309,24 +309,24 @@ stop and start:
 
    ./configure --with-apxs --with-pgsql
 
-   This will create a libphp4.so shared library that is loaded into
+   This will create a libphp5.so shared library that is loaded into
    Apache using a LoadModule line in Apache's httpd.conf file. The
-   PostgreSQL support is embedded into this libphp4.so library.
+   PostgreSQL support is embedded into this libphp5.so library.
 
    ./configure --with-apxs --with-pgsql=shared
 
-   This will create a libphp4.so shared library for Apache, but it will
+   This will create a libphp5.so shared library for Apache, but it will
    also create a pgsql.so shared library that is loaded into PHP either
    by using the extension directive in php.ini file or by loading it
    explicitly in a script using the dl() function.
 
    ./configure --with-apache=/path/to/apache_source --with-pgsql
 
-   This will create a libmodphp4.a library, a mod_php4.c and some
-   accompanying files and copy this into the src/modules/php4 directory
+   This will create a libmodphp5.a library, a mod_php5.c and some
+   accompanying files and copy this into the src/modules/php5 directory
    in the Apache source tree. Then you compile Apache using
-   --activate-module=src/modules/php4/libphp4.a and the Apache build
-   system will create libphp4.a and link it statically into the httpd
+   --activate-module=src/modules/php5/libphp5.a and the Apache build
+   system will create libphp5.a and link it statically into the httpd
    binary. The PostgreSQL support is included directly into this httpd
    binary, so the final result here is a single httpd binary that
    includes all of Apache and all of PHP.
@@ -380,8 +380,8 @@ Apache 2.0 on Unix systems
 
      * PHP 4.3.0 or later available at http://www.php.net/downloads.php.
      * the latest stable development version. Get the source code
-       http://snaps.php.net/php4-latest.tar.gz or download binaries for
-       Windows http://snaps.php.net/win32/php4-win32-latest.zip.
+       http://snaps.php.net/php5-latest.tar.gz or download binaries for
+       Windows http://snaps.php.net/win32/php5-win32-latest.zip.
      * a prerelease version downloadable from http://qa.php.net/.
      * you have always the option to obtain PHP through anonymous CVS.
 
