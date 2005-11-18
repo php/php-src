@@ -1,5 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+23 Nov 2005, Version 4.4.2
+
+
 18 Nov 2005, Version 4.4.2RC1
 - Resolve Apache 2 regression with sub-request handling on non-linux systems.
   (Ilia, Tony)
