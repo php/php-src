@@ -1,5 +1,5 @@
 --TEST--
-sha512 algorithm
+sha384 algorithm
 --SKIPIF--
 <?php if(!extension_loaded("hash")) print "skip"; ?>
 --FILE--
