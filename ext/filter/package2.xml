@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.4.2" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+<package packagerversion="1.4.4" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
 http://pear.php.net/dtd/tasks-1.0.xsd
 http://pear.php.net/dtd/package-2.0
 http://pear.php.net/dtd/package-2.0.xsd">
@@ -22,21 +22,22 @@ of filters and mechanisms that users can use to safely access their input data.
   <email>rasmus@php.net</email>
   <active>yes</active>
  </lead>
- <date>2005-10-27</date>
- <time>11:36:19</time>
+ <date>2005-11-18</date>
+ <time>10:55:41</time>
  <version>
-  <release>0.9.2</release>
-  <api>0.9.2</api>
+  <release>0.9.3</release>
+  <api>0.9.3</api>
  </version>
  <stability>
   <release>beta</release>
   <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
- <notes>- Implemented support for default filter flags in php.ini with the
-  filter.default_flags setting.
-- Fixed a crash when a non-array option was passed in combination with the
-  callback filter.
+ <notes>- Fixed PECL bug #5960: Build with PHP&apos;s PCRE headers
+- Fixed PECL bug #5962: Postive float returned when negative float given
+- Fixed PECL bug #5963: Segmentation fault when passing anything other than strings
+
+- Added PECL FR #5961: Support other cases of &quot;On&quot;, &quot;Off&quot;, &quot;True&quot;, and &quot;False&quot;
   
  </notes>
  <contents>
