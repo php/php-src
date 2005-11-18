@@ -26,6 +26,7 @@ php_hash_ops php_hash_md5_ops = {
 	PHP_MD5Update,
 	PHP_MD5Final,
 	16,
+	64,
 	sizeof(PHP_MD5_CTX)
 };
 
