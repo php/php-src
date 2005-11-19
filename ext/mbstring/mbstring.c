@@ -2924,16 +2924,17 @@ PHP_FUNCTION(mb_detect_encoding)
 }
 /* }}} */
 
-/* {{{ proto string mb_encode_mimeheader(string str [, string charset [, string transfer-encoding [, string linefeed]]])
+/* {{{ proto string mb_encode_mimeheader(string str [, string charset [, string transfer-encoding [, string linefeed [, int indent]]]])
    Converts the string to MIME "encoded-word" in the format of =?charset?(B|Q)?encoded_string?= */
 PHP_FUNCTION(mb_encode_mimeheader)
 {
-	pval **argv[4];
+	pval **argv[5];
 	enum mbfl_no_encoding charset, transenc;
 	mbfl_string  string, result, *ret;
 	char *p, *linefeed;
+	int indent;
 
-	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 4 || zend_get_parameters_array_ex(ZEND_NUM_ARGS(), argv) == FAILURE) {
+	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 5 || zend_get_parameters_array_ex(ZEND_NUM_ARGS(), argv) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2970,6 +2971,12 @@ PHP_FUNCTION(mb_encode_mimeheader)
 		linefeed = Z_STRVAL_PP(argv[3]);
 	}
 
+	indent = 0;
+	if (ZEND_NUM_ARGS() >= 5) {
+		convert_to_long_ex(argv[4]);
+		indent = Z_LVAL_PP(argv[4]);
+	}
+
 	convert_to_string_ex(argv[0]);
 	mbfl_string_init(&string);
 	mbfl_string_init(&result);
@@ -2977,7 +2984,7 @@ PHP_FUNCTION(mb_encode_mimeheader)
 	string.no_encoding = MBSTRG(current_internal_encoding);
 	string.val = Z_STRVAL_PP(argv[0]);
 	string.len = Z_STRLEN_PP(argv[0]);
-	ret = mbfl_mime_header_encode(&string, &result, charset, transenc, linefeed, 0);
+	ret = mbfl_mime_header_encode(&string, &result, charset, transenc, linefeed, indent);
 	if (ret != NULL) {
 		RETVAL_STRINGL((char *)ret->val, ret->len, 0)	/* the string is already strdup()'ed */
 	} else {
