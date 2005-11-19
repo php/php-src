@@ -52,6 +52,7 @@
 #endif
 /* }}} */
 
+#include "ext/standard/php_string.h"
 #include <oci.h>
 
 extern int le_connection;
