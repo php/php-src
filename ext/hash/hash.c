@@ -220,6 +220,76 @@ PHP_FUNCTION(hash_update)
 }
 /* }}} */
 
+/* {{{ proto int hash_update_stream(resource context, resource handle[, integer length])
+Pump data into the hashing algorithm from an open stream */
+PHP_FUNCTION(hash_update_stream)
+{
+	zval *zhash, *zstream;
+	php_hash_data *hash;
+	php_stream *stream = NULL;
+	long length = -1, didread = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|l", &zhash, &zstream, &length) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(hash, php_hash_data*, &zhash, -1, PHP_HASH_RESNAME, php_hash_le_hash);
+	php_stream_from_zval(stream, &zstream);
+
+	while (length) {
+		char buf[1024];
+		long n, toread = 1024;
+
+		if (length > 0 && toread > length) {
+			toread = length;
+		}
+
+		if ((n = php_stream_read(stream, buf, toread)) <= 0) {
+			/* Nada mas */
+			RETURN_LONG(didread);
+		}
+		hash->ops->hash_update(hash->context, buf, n);
+		length -= n;
+		didread += n;
+	} 
+
+	RETURN_LONG(didread);
+}
+/* }}} */
+
+/* {{{ proto bool hash_update_file(resource context, string filename[, resource context])
+Pump data into the hashing algorithm from an open stream */
+PHP_FUNCTION(hash_update_file)
+{
+	zval *zhash, *zcontext = NULL;
+	php_hash_data *hash;
+	php_stream_context *context;
+	php_stream *stream;
+	char *filename, buf[1024];
+	int filename_len, n;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|r", &zhash, &filename, &filename_len, &zcontext) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(hash, php_hash_data*, &zhash, -1, PHP_HASH_RESNAME, php_hash_le_hash);
+	context = php_stream_context_from_zval(zcontext, 0);
+
+	stream = php_stream_open_wrapper_ex(filename, "rb", REPORT_ERRORS | ENFORCE_SAFE_MODE, NULL, context);
+	if (!stream) {
+		/* Stream will report errors opening file */
+		RETURN_FALSE;
+	}
+
+	while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
+		hash->ops->hash_update(hash->context, buf, n);
+	}
+	php_stream_close(stream);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
 /* {{{ proto string hash_final(resource context[, bool raw_output=false])
 Output resulting digest */
 PHP_FUNCTION(hash_final)
@@ -384,6 +454,8 @@ function_entry hash_functions[] = {
 
 	PHP_FE(hash_init,								NULL)
 	PHP_FE(hash_update,								NULL)
+	PHP_FE(hash_update_stream,						NULL)
+	PHP_FE(hash_update_file,						NULL)
 	PHP_FE(hash_final,								NULL)
 
 	PHP_FE(hash_algos,								NULL)
