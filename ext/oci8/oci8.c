@@ -944,6 +944,9 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	smart_str_append_unsigned_ex(&hashed_details, session_mode, 0);
 	smart_str_0(&hashed_details);
 
+	/* make it lowercase */
+	php_strtolower(hashed_details.c, hashed_details.len);
+	
 	/* Initialize global handles if the weren't initialized before */
 	
 	if (OCI_G(env) == NULL) {
