@@ -1,3 +1,141 @@
+2005-11-18  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      NEWS
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.c:
+      MFH: Fix #33201 Crash when fetching some data types
+
+    * NEWS
+      ext/mssql/php_mssql.c:
+      Fix #33201 Crash when fetching some data types
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      NEWS
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.c:
+      MFH Fix #33963. mssql_bind fails on input parameters
+
+    * NEWS
+      ext/mssql/php_mssql.c:
+      Fix #33963. mssql_bind fails on input parameters
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      NEWS
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.c:
+      MFH: Fix #32009 crash when mssql_bind() is called more than once
+
+    * NEWS
+      ext/mssql/php_mssql.c:
+      Fix #32009 crash when mssql_bind() is called more than once
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      NEWS
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.c:
+      MFH: Fix #33153 Crash in mssql_next_result().
+
+    * NEWS
+      ext/mssql/php_mssql.c:
+      Fix #33153 Crash in mssql_next_result().
+
+2005-11-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      sapi/apache2handler/sapi_apache2.c:
+      MFH: Fixed bug #35278 (Multiple virtual() calls crash Apache 2 php module).
+
+    * sapi/apache2handler/sapi_apache2.c:
+      MFB51: Fixed bug #35278 (Multiple virtual() calls crash Apache 2 php
+      module)
+
+    * (PHP_5_1)
+      NEWS
+      sapi/apache2handler/sapi_apache2.c:
+      Fixed bug #35278 (Multiple virtual() calls crash Apache 2 php module).
+
+2005-11-18  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * NEWS:
+      reorder
+
+2005-11-18  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * NEWS:
+      allow_url_include
+
+    * php.ini-dist
+      php.ini-recommended
+      main/main.c
+      main/php_globals.h
+      main/streams/streams.c:
+      Add allow_url_include to let people turn on allow_url_fopen without also
+      enabling remote code execution through url wrappers
+
+2005-11-18  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      INSTALL:
+      php4 -> php5
+
+    * ext/readline/config.m4:
+      MFB51: fix build when --with-libedit is used
+
+    * (PHP_4_4)
+      ext/readline/config.m4:
+      MF51: sync all changes
+
+    * (PHP_5_1)
+      ext/readline/config.m4:
+      - Make sure --with-readline is used only when --with-libedit is not used.
+
+    * (PHP_4_4)
+      NEWS:
+      fix news
+
+2005-11-18  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Back to -dev.
+
+2005-11-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      NEWS:
+      Fixed bug #35273 (Error in mapping soap - java types)
+
+2005-11-18  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Go with 4.4.2RC1.
+
+2005-11-18  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      configure.in
+      main/php_version.h:
+      back to dev
+
 2005-11-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/standard/credits_ext.h:
