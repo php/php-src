@@ -341,6 +341,8 @@ static PHP_METHOD(PDO, dbh_constructor)
 		if (pdbh) {
 			/* let's copy the emalloc bits over from the other handle */
 			pdbh->ce = dbh->ce;
+			pdbh->def_stmt_ce = dbh->def_stmt_ce;
+			pdbh->def_stmt_ctor_args = dbh->def_stmt_ctor_args;
 			pdbh->properties = dbh->properties;
 			/* kill the non-persistent thingamy */
 			efree(dbh);
