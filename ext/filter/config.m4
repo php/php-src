@@ -57,10 +57,10 @@ yes
 
       for i in $PCRE_SEARCH_DIR; do
         if test -f $i/include/pcre/pcre.h; then
-          PCRE_INCDIR=$i
+          PCRE_INCDIR=$i/include/pcre
           break
         elif test -f $i/include/pcre.h; then
-          PCRE_INCDIR=$i
+          PCRE_INCDIR=$i/include
           break
         elif test -f $i/pcre.h; then
           PCRE_INCDIR=$i
