@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Nov 2005, PHP 5.1
+- Fixed bug #35303 (PDO prepare() crashes with invalid parameters). (Ilia)
 - Fixed bug #35293 (PDO segfaults when using persistent connections). (Tony)
 - Fixed bug #35278 (Multiple virtual() calls crash Apache 2 php module). (Ilia)
 - Fixed bug #35273 (Error in mapping soap - java types). (Dmitry)
