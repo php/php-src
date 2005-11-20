@@ -7,6 +7,7 @@ PHP                                                                        NEWS
 - Fixed bug #35273 (Error in mapping soap - java types). (Dmitry)
 - Fixed bug #35243 (php_mblen() crashes when compiled with thread-safety
   on Linux). (Patch: shulmanb at il dot ibm dot com, Jani)
+- Fixed bug #35143 (gettimeofday() ignores current time zone). (Derick)
 - Fixed bug #33153 (crash in mssql_next result). (Frank)
 - Fixed bug #33963 (mssql_bind() fails on input parameters). (Frank)
 - Fixed bug #33201 (Crash when fetching some data types). (Frank)
