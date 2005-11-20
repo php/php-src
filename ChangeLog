@@ -1,3 +1,44 @@
+2005-11-19  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/oci8.c
+      ext/oci8/php_oci8_int.h:
+      fix PECL bug #5986 (connections use case sensitive hashed details)
+
+2005-11-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      ext/mssql/php_mssql.c:
+      Fixed build
+
+2005-11-19  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      MFH: fix #35293 (PDO segfaults when using persistent connections)
+
+2005-11-19  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * NEWS:
+      NOTE: Things that are fixed in version released year(s) before this one
+      really don't need any NEWS entries. People kinda expect the stuff being
+      fixed in the future version..:)
+
+2005-11-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_language_scanner.l:
+      - Fixed Bug #35286 tokenizer ext drops final comment (by greg)
+
+2005-11-19  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_4_4)
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.c:
+      MFH: fixed #35253 length of the encoded string vilolates a RFC.
+
+    * ext/mbstring/mbstring.c:
+      fixed #35253 length of the encoded string vilolates a RFC.
+
 2005-11-18  Frank M. Kromann  <frank@kromann.info>
 
     * (PHP_4_4)
