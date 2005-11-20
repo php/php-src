@@ -1576,7 +1576,8 @@ PHP_FUNCTION(simplexml_load_file)
 	int             filename_len;
 	xmlDocPtr       docp;
 	char           *classname = "";
-	int             classname_len = 0, options=0;
+	int             classname_len = 0;
+	long            options = 0;
 	zend_class_entry *ce= U_CLASS_ENTRY(sxe_class_entry);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sl", &filename, &filename_len, &classname, &classname_len, &options) == FAILURE) {
@@ -1619,7 +1620,8 @@ PHP_FUNCTION(simplexml_load_string)
 	int             data_len;
 	xmlDocPtr       docp;
 	char           *classname = "";
-	int             classname_len = 0, options=0;
+	int             classname_len = 0;
+	long            options = 0;
 	zend_class_entry *ce= U_CLASS_ENTRY(sxe_class_entry);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sl", &data, &data_len, &classname, &classname_len, &options) == FAILURE) {
@@ -1654,7 +1656,7 @@ PHP_FUNCTION(simplexml_load_string)
 /* }}} */
 
 
-/* {{{ proto SimpleXMLElement::__construct()
+/* {{{ proto SimpleXMLElement::__construct(string data [, int options [, bool data_is_url]])
    SimpleXMLElement constructor */
 SXE_METHOD(__construct)
 {
@@ -1662,15 +1664,21 @@ SXE_METHOD(__construct)
 	char           *data;
 	int             data_len;
 	xmlDocPtr       docp;
+	long            options = 0;
+	zend_bool       is_url = 0;
 
 	php_set_error_handling(EH_THROW, zend_exception_get_default(TSRMLS_C) TSRMLS_CC);
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &data, &data_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lb", &data, &data_len, &options, &is_url) == FAILURE) {
 		php_std_error_handling();
 		return;
 	}
 
 	php_std_error_handling();
-	docp = xmlParseMemory(data, data_len);
+#if LIBXML_VERSION >= 20600
+	docp = is_url ? xmlReadFile(data, NULL, options) : xmlReadMemory(data, data_len, NULL, NULL, options);
+#else
+	docp = is_url ? xmlParseFile(data) : xmlParseMemory(data, data_len);
+#endif
 	if (!docp) {
 		((php_libxml_node_object *)sxe)->document = NULL;
 		zend_throw_exception(zend_exception_get_default(TSRMLS_C), "String could not be parsed as XML", 0 TSRMLS_CC);
