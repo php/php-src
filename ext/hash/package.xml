@@ -42,6 +42,7 @@
     <file role="test" name="sha512.phpt"/>
     <file role="test" name="ripemd128.phpt"/>
     <file role="test" name="ripemd160.phpt"/>
+    <file role="test" name="haval.phpt"/>
    </dir>
   </filelist>
 

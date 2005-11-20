@@ -389,6 +389,8 @@ static void php_hash_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	efree(hash);
 }
 
+#define PHP_HASH_HAVAL_REGISTER(p,b)	php_hash_register_algo("haval" #b "," #p , &php_hash_##p##haval##b##_ops);
+
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(hash)
@@ -404,6 +406,24 @@ PHP_MINIT_FUNCTION(hash)
 	php_hash_register_algo("sha512",		&php_hash_sha512_ops);
 	php_hash_register_algo("ripemd128",		&php_hash_ripemd128_ops);
 	php_hash_register_algo("ripemd160",		&php_hash_ripemd160_ops);
+
+	PHP_HASH_HAVAL_REGISTER(3,128);
+	PHP_HASH_HAVAL_REGISTER(3,160);
+	PHP_HASH_HAVAL_REGISTER(3,192);
+	PHP_HASH_HAVAL_REGISTER(3,224);
+	PHP_HASH_HAVAL_REGISTER(3,256);
+
+	PHP_HASH_HAVAL_REGISTER(4,128);
+	PHP_HASH_HAVAL_REGISTER(4,160);
+	PHP_HASH_HAVAL_REGISTER(4,192);
+	PHP_HASH_HAVAL_REGISTER(4,224);
+	PHP_HASH_HAVAL_REGISTER(4,256);
+
+	PHP_HASH_HAVAL_REGISTER(5,128);
+	PHP_HASH_HAVAL_REGISTER(5,160);
+	PHP_HASH_HAVAL_REGISTER(5,192);
+	PHP_HASH_HAVAL_REGISTER(5,224);
+	PHP_HASH_HAVAL_REGISTER(5,256);
 
 	REGISTER_LONG_CONSTANT("HASH_HMAC",		PHP_HASH_HMAC,	CONST_CS | CONST_PERSISTENT);
 
@@ -433,10 +453,8 @@ PHP_MINFO_FUNCTION(hash)
 	for(zend_hash_internal_pointer_reset_ex(&php_hash_hashtable, &pos);
 		(type = zend_hash_get_current_key_ex(&php_hash_hashtable, &str, NULL, &idx, 0, &pos)) != HASH_KEY_NON_EXISTANT;
 		zend_hash_move_forward_ex(&php_hash_hashtable, &pos)) {
-		s += snprintf(s, e - s, "%s, ", str);
+		s += snprintf(s, e - s, "%s ", str);
 	}
-
-	while (s > buffer && *(--s) == ' ');
 	*s = 0;
 
 	php_info_print_table_start();
