@@ -11,6 +11,8 @@ Zend
     * Const'ify APIs. Right now, many functions leave parameters untouched,
       but don't declare those as const. This makes interaction with other
       interfaces difficult which pass const parameters to us.
+    * Clean up object->string conversion behavior wherever possible (switch(),
+      comparison, etc)
 
 
 global
