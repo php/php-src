@@ -77,12 +77,13 @@ DBA_OPEN_FUNC(db4)
 		info->mode == DBA_WRITER ? 0         : 
 		info->mode == DBA_TRUNC ? DB_CREATE | DB_TRUNCATE : -1;
 
-	if (info->flags & DBA_PERSISTENT) {
-		gmode |= DB_THREAD;
-	}
-
 	if (gmode == -1) {
 		return FAILURE; /* not possible */
+	}
+
+	gmode |= DB_INIT_LOCK;
+	if (info->flags & DBA_PERSISTENT) {
+		gmode |= DB_THREAD;
 	}
 
 	if (info->argc > 0) {
