@@ -363,7 +363,7 @@ php_win_std_time:
 	return "UTC";
 }
 
-static timelib_tzinfo *get_timezone_info(TSRMLS_D)
+PHPAPI timelib_tzinfo *get_timezone_info(TSRMLS_D)
 {
 	char *tz;
 	timelib_tzinfo *tzi;

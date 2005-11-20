@@ -43,6 +43,7 @@
 #include <errno.h>
 
 #include "microtime.h"
+#include "ext/date/php_date.h"
 
 #define NUL  '\0'
 #define MICRO_IN_SEC 1000000.00
@@ -68,15 +69,18 @@ static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	}
 
 	if (mode) {
+		timelib_time_offset *offset;
+
+		offset = timelib_get_time_zone_info(tp.tv_sec, get_timezone_info(TSRMLS_C));
+				
 		array_init(return_value);
 		add_assoc_long(return_value, "sec", tp.tv_sec);
 		add_assoc_long(return_value, "usec", tp.tv_usec);
-#ifdef PHP_WIN32
-		add_assoc_long(return_value, "minuteswest", tz.tz_minuteswest/SEC_IN_MIN);
-#else
-		add_assoc_long(return_value, "minuteswest", tz.tz_minuteswest);
-#endif			
-		add_assoc_long(return_value, "dsttime", tz.tz_dsttime);
+
+		add_assoc_long(return_value, "minuteswest", -offset->offset / SEC_IN_MIN);
+		add_assoc_long(return_value, "dsttime", offset->is_dst);
+
+		timelib_time_offset_dtor(offset);
 	} else {
 		char ret[100];
 

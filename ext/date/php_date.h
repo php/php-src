@@ -99,5 +99,6 @@ PHPAPI char *php_format_date(char *format, int format_len, time_t ts, int localt
 
 /* Mechanism to set new TZ database */
 PHPAPI void php_date_set_tzdb(timelib_tzdb *tzdb);
+PHPAPI timelib_tzinfo *get_timezone_info(TSRMLS_D);
 
 #endif /* PHP_DATE_H */
