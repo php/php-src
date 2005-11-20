@@ -1,3 +1,8 @@
+2005-11-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_language_scanner.l:
+      - Fixed Bug #35286 tokenizer ext drops final comment (by greg)
+
 2005-11-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * Makefile.am
