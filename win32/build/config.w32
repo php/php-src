@@ -88,12 +88,18 @@ DEFINE("CFLAGS", "/nologo /FD $(BASE_INCLUDES) /D _WINDOWS \
 if (VCVERS < 14) {
 	// Enable automatic precompiled headers
 	ADD_FLAG('CFLAGS', ' /YX ');
+
+	// Set some debug/release specific options
+	ADD_FLAG('CFLAGS', ' /GZ ');
 }
 
 if (VCVERS >= 14) {
 	// fun stuff: MS deprecated ANSI stdio and similar functions
 	// disable annoying warnings
 	ADD_FLAG('CFLAGS', ' /wd4996 ');
+
+	// Set some debug/release specific options
+	ADD_FLAG('CFLAGS', ' /RTC1 ');
 }
 
 // General link flags
@@ -112,7 +118,7 @@ DEFINE("LIBS", "kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_3
 
 // Set some debug/release specific options
 if (PHP_DEBUG == "yes") {
-	ADD_FLAG("CFLAGS", "/LDd /MDd /Gm /ZI /Od /GZ /D _DEBUG /D ZEND_DEBUG=1");
+	ADD_FLAG("CFLAGS", "/LDd /MDd /Gm /ZI /Od /D _DEBUG /D ZEND_DEBUG=1");
 	ADD_FLAG("LDFLAGS", "/debug");
 	// Avoid problems when linking to release libraries that use the release
 	// version of the libc
