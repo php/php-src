@@ -1465,6 +1465,13 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	yymore();
 }
 
+<ST_ONE_LINE_COMMENT><<EOF>> {
+	zendlval->value.str.val = yytext; /* no copying - intentional */
+	zendlval->value.str.len = yyleng;
+	zendlval->type = IS_STRING;
+	return T_COMMENT;
+}
+
 <ST_ONE_LINE_COMMENT>{NEWLINE} {
 	zendlval->value.str.val = yytext; /* no copying - intentional */
 	zendlval->value.str.len = yyleng;
