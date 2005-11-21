@@ -3467,6 +3467,22 @@ PHP_FUNCTION(mb_decode_numericentity)
  *  Sends an email message with MIME scheme
  */
 #if HAVE_SENDMAIL
+#define SKIP_LONG_HEADER_SEP_MBSTRING(str, pos)						\
+	if (str[pos] == '\r' && str[pos + 1] == '\n' && (str[pos + 2] == ' ' || str[pos + 2] == '\t')) {	\
+		pos += 3;											\
+		while (str[pos] == ' ' || str[pos] == '\t') {		\
+			pos++;											\
+		}                                               \
+		continue;											\
+	}													\
+	else if (str[pos] == '\n' && (str[pos + 1] == ' ' || str[pos + 1] == '\t')) {	\
+		pos += 2;											\
+		while (str[pos] == ' ' || str[pos] == '\t') {		\
+			pos++;											\
+		}												\
+		continue;											\
+	}													\
+
 PHP_FUNCTION(mb_send_mail)
 {
 	int argc, n;
@@ -3482,6 +3498,8 @@ PHP_FUNCTION(mb_send_mail)
 	mbfl_memory_device device;	/* automatic allocateable buffer for additional header */
 	const mbfl_language *lang;
 	int err = 0;
+	char *to_r;
+	int to_len, i;
 
 	/* initialize */
 	mbfl_memory_device_init(&device, 0, 0);
@@ -3508,6 +3526,32 @@ PHP_FUNCTION(mb_send_mail)
 	convert_to_string_ex(argv[0]);
 	if (Z_STRVAL_PP(argv[0])) {
 		to = Z_STRVAL_PP(argv[0]);
+		to_len = Z_STRLEN_PP(argv[0]);
+		if (to_len > 0) {
+			to_r = estrndup(to, to_len);
+			for (; to_len; to_len--) {
+				if (!isspace((unsigned char) to_r[to_len - 1])) {
+					break;
+				}
+				to_r[to_len - 1] = '\0';
+			}
+			for (i = 0; to_r[i]; i++) {
+				if (iscntrl((unsigned char) to_r[i])) {
+						/* According to RFC 822, section 3.1.1 long headers may be
+separated into
+					 * parts using CRLF followed at least one linear-white-space
+character ('\t' or ' ').
+					 * To prevent these separators from being replaced with a space,
+we use the
+					 * SKIP_LONG_HEADER_SEP_MBSTRING to skip over them.
+					 */
+					SKIP_LONG_HEADER_SEP_MBSTRING(to_r, i);
+					to_r[i] = ' ';
+				}
+			}
+		} else {
+			to_r = to;
+		}
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing To: field");
 		err = 1;
@@ -3606,12 +3650,15 @@ PHP_FUNCTION(mb_send_mail)
 		extra_cmd = php_escape_shell_cmd(extra_cmd);
 	} 
 
-	if (!err && php_mail(to, subject, message, headers, extra_cmd TSRMLS_CC)) {
+	if (!err && php_mail(to_r, subject, message, headers, extra_cmd TSRMLS_CC)) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
 	}
 
+	if (to_r != to) {
+		efree(to_r);
+	}
 	if (extra_cmd) {
 		efree(extra_cmd);
 	}
