@@ -250,7 +250,11 @@ static void PHP_5HAVALTransform(php_uint32 state[8], const unsigned char block[1
 /* }}} */
 
 #define PHP_HASH_HAVAL_INIT(p,b) \
-php_hash_ops php_hash_##p##haval##b##_ops = { PHP_##p##HAVAL##b##Init, PHP_HAVALUpdate, PHP_HAVAL##b##Final, ((b) / 8), 128, sizeof(PHP_HAVAL_CTX) }; \
+php_hash_ops php_hash_##p##haval##b##_ops = { \
+	(php_hash_init_func_t) PHP_##p##HAVAL##b##Init, \
+	(php_hash_update_func_t) PHP_HAVALUpdate, \
+	(php_hash_final_func_t) PHP_HAVAL##b##Final, \
+	((b) / 8), 128, sizeof(PHP_HAVAL_CTX) }; \
 PHP_HASH_API void PHP_##p##HAVAL##b##Init(PHP_HAVAL_CTX *context) \
 {	int i; context->count[0] = 	context->count[1] = 	0; \
 	for(i = 0; i < 8; i++) context->state[i] = D0[i]; \
