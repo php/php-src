@@ -336,9 +336,9 @@ AC_ARG_WITH(birdstep,
     ODBC_LFLAGS=-L$ODBC_LIBDIR
     ODBC_LIBS="-lCadm -lCdict -lCenc -lCrdm -lCrpc -lCrdbc -lCrm -lCuapi -lutil"
     
-    if test -e "$ODBC_LIBDIR/libCrdbc32.$SHLIB_SUFFIX_NAME"; then
+    if test -f "$ODBC_LIBDIR/libCrdbc32.$SHLIB_SUFFIX_NAME"; then
       ODBC_LIBS="-lCrdbc32 -lCadm32 -lCncp32 -lCrm32 -lCsql32 -lCdict32 -lCrdm32 -lCrpc32 -lutil"
-    elif test -e "$ODBC_LIBDIR/libCrdbc.$SHLIB_SUFFIX_NAME"; then
+    elif test -f "$ODBC_LIBDIR/libCrdbc.$SHLIB_SUFFIX_NAME"; then
       ODBC_LIBS="-lCrdbc -lCadm -lCncp -lCrm -lCsql -lCdict -lCrdm -lCrpc -lutil"
     fi
 
