@@ -29,10 +29,14 @@
 
 #define PHP_HASH_HMAC		0x0001
 
+typedef int (*php_hash_init_func_t)(void *context);
+typedef int (*php_hash_update_func_t)(void *context, const unsigned char *buf, unsigned int count);
+typedef int (*php_hash_final_func_t)(unsigned char *digest, void *context);
+
 typedef struct _php_hash_ops {
-	int (*hash_init)(void *context);
-	int (*hash_update)(void *context, const unsigned char *buf, unsigned int count);
-	int (*hash_final)(unsigned char *digest, void *context);
+	php_hash_init_func_t hash_init;
+	php_hash_update_func_t hash_update;
+	php_hash_final_func_t hash_final;
 
 	int digest_size;
 	int block_size;
@@ -87,6 +91,9 @@ extern zend_module_entry hash_module_entry;
 #ifdef ZTS
 #include "TSRM.h"
 #endif
+
+PHP_HASH_API php_hash_ops *php_hash_fetch_ops(const char *algo, int algo_len);
+PHP_HASH_API void php_hash_register_algo(const char *algo, php_hash_ops *ops);
 
 #endif	/* PHP_HASH_H */
 
