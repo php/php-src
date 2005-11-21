@@ -16,6 +16,7 @@ AC_DEFUN([PHP_WITH_PHP_CONFIG],[
 ])
 
   prefix=`$PHP_CONFIG --prefix 2>/dev/null`
+  phpincludedir=`$PHP_CONFIG --include-dir 2>/dev/null`
   INCLUDES=`$PHP_CONFIG --includes 2>/dev/null`
   EXTENSION_DIR=`$PHP_CONFIG --extension-dir`
   PHP_EXECUTABLE=`$PHP_CONFIG --php-binary`
@@ -33,6 +34,8 @@ AC_DEFUN([PHP_WITH_PHP_CONFIG],[
   AC_MSG_RESULT($INCLUDES)
   AC_MSG_CHECKING(for PHP extension directory)
   AC_MSG_RESULT($EXTENSION_DIR)
+  AC_MSG_CHECKING(for PHP installed headers prefix)
+  AC_MSG_RESULT($phpincludedir)
 ])
 dnl
 AC_DEFUN([PHP_EXT_BUILDDIR],[.])dnl
@@ -74,7 +77,7 @@ enable_shared=yes
 AC_PROG_LIBTOOL
 
 all_targets='$(PHP_MODULES)'
-install_targets=install-modules
+install_targets="install-modules install-headers"
 phplibdir="`pwd`/modules"
 CPPFLAGS="$CPPFLAGS -DHAVE_CONFIG_H"
 CFLAGS_CLEAN='$(CFLAGS)'
@@ -91,6 +94,7 @@ PHP_SUBST(exec_prefix)
 PHP_SUBST(libdir)
 PHP_SUBST(prefix)
 PHP_SUBST(phplibdir)
+PHP_SUBST(phpincludedir)
 
 PHP_SUBST(CC)
 PHP_SUBST(CFLAGS)
@@ -109,6 +113,7 @@ PHP_SUBST(LDFLAGS)
 PHP_SUBST(SHARED_LIBTOOL)
 PHP_SUBST(LIBTOOL)
 PHP_SUBST(SHELL)
+PHP_SUBST(INSTALL_HEADERS)
 
 PHP_GEN_BUILD_DIRS
 PHP_GEN_GLOBAL_MAKEFILE

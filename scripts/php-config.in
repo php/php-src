@@ -24,12 +24,14 @@ case "$1" in
 	echo $libs;;
 --extension-dir)
 	echo $extension_dir;;
+--include-dir)
+	echo $includedir;;
 --php-binary)
 	echo $php_binary;;
 --version)
 	echo $version;;
 *)
-	echo "Usage: $0 [--prefix|--includes|--ldflags|--libs|--extension-dir|--php-binary|--version]"
+	echo "Usage: $0 [--prefix|--includes|--ldflags|--libs|--extension-dir|--include-dir|--php-binary|--version]"
 	exit 1;;
 esac
 
