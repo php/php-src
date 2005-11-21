@@ -330,6 +330,8 @@ PHP_FUNCTION(hash_final)
 		hash->key = NULL;
 	}
 	digest[digest_len] = 0;
+	efree(hash->context);
+	hash->context = NULL;
 
 	/* zend_list_REAL_delete() */
 	if (zend_hash_index_find(&EG(regular_list), Z_RESVAL_P(zhash), (void **) &le)==SUCCESS) {
@@ -375,17 +377,19 @@ PHP_FUNCTION(hash_algos)
 static void php_hash_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	php_hash_data *hash = (php_hash_data*)rsrc->ptr;
-	char *dummy = emalloc(hash->ops->digest_size);
 
 	/* Just in case the algo has internally allocated resources */
-	hash->ops->hash_final(dummy, hash->context);
-	efree(dummy);
+	if (hash->context) {
+		char *dummy = emalloc(hash->ops->digest_size);
+		hash->ops->hash_final(dummy, hash->context);
+		efree(dummy);
+		efree(hash->context);
+	}
 
 	if (hash->key) {
 		memset(hash->key, 0, hash->ops->block_size);
 		efree(hash->key);
 	}
-	efree(hash->context);
 	efree(hash);
 }
 
