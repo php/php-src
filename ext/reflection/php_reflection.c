@@ -38,6 +38,11 @@
 #include "zend_ini.h"
 #include "zend_interfaces.h"
 
+/* Undefine "getParameters" macro defined in "main/php3_compat.h" */
+#ifdef getParameters
+# undef getParameters
+#endif
+
 /* Class entry pointers */
 PHPAPI zend_class_entry *reflector_ptr;
 PHPAPI zend_class_entry *reflection_exception_ptr;
