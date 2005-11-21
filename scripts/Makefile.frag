@@ -31,25 +31,6 @@ install-build:
 	$(INSTALL) $(BUILD_FILES_EXEC) $(INSTALL_ROOT)$(phpbuilddir) && \
 	$(INSTALL_DATA) $(BUILD_FILES) $(INSTALL_ROOT)$(phpbuilddir))
 
-install-headers:
-	-@for i in $(INSTALL_HEADERS); do \
-		i=`$(top_srcdir)/build/shtool path -d $$i`; \
-		paths="$$paths $(INSTALL_ROOT)$(phpincludedir)/$$i"; \
-	done; \
-	$(mkinstalldirs) $$paths && \
-	echo "Installing header files:          $(INSTALL_ROOT)$(phpincludedir)/" && \
-	for i in $(INSTALL_HEADERS); do \
-		if test -f "$(top_srcdir)/$$i"; then \
-			$(INSTALL_DATA) $(top_srcdir)/$$i $(INSTALL_ROOT)$(phpincludedir)/$$i; \
-		elif test -f "$(top_builddir)/$$i"; then \
-			$(INSTALL_DATA) $(top_builddir)/$$i $(INSTALL_ROOT)$(phpincludedir)/$$i; \
-		else \
-			(cd $(top_srcdir)/$$i && $(INSTALL_DATA) *.h $(INSTALL_ROOT)$(phpincludedir)/$$i; \
-			cd $(top_builddir)/$$i && $(INSTALL_DATA) *.h $(INSTALL_ROOT)$(phpincludedir)/$$i) 2>/dev/null || true; \
-		fi \
-	done; \
-	cd $(top_srcdir)/sapi/embed && $(INSTALL_DATA) *.h $(INSTALL_ROOT)$(phpincludedir)/main
-
 install-programs: $(builddir)/phpize $(builddir)/php-config
 	@echo "Installing helper programs:       $(INSTALL_ROOT)$(bindir)/"
 	@for prog in $(bin_SCRIPTS); do \
