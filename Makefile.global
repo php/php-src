@@ -5,9 +5,6 @@ INSTALL_DATA = $(INSTALL) -m 644
 DEFS = -DPHP_ATOM_INC -I$(top_builddir)/include -I$(top_builddir)/main -I$(top_srcdir)
 COMMON_FLAGS = $(DEFS) $(INCLUDES) $(EXTRA_INCLUDES) $(CPPFLAGS) $(PHP_FRAMEWORKPATH)
 
-CORE_HEADERS = Zend/ TSRM/ include/ main/ main/streams/ regex/ ext/standard/
-INSTALL_HEADERS = $(CORE_HEADERS) $(INSTALL_EXT_HEADERS)
-
 all: $(all_targets) 
 	@echo
 	@echo "Build complete."
@@ -45,6 +42,31 @@ install-modules: build-modules
 	@rm -f modules/*.la >/dev/null 2>&1
 	@$(INSTALL) modules/* $(INSTALL_ROOT)$(EXTENSION_DIR)
 
+install-headers:
+	-@if test "$(INSTALL_HEADERS)"; then
+		for i in $(INSTALL_HEADERS); do \
+			i=`$(top_srcdir)/build/shtool path -d $$i`; \
+			paths="$$paths $(INSTALL_ROOT)$(phpincludedir)/$$i"; \
+		done; \
+		$(mkinstalldirs) $$paths && \
+		echo "Installing header files:          $(INSTALL_ROOT)$(phpincludedir)/" && \
+		for i in $(INSTALL_HEADERS); do \
+			if test "$(PHP_PECL_EXTENSION)"; then \
+				src=`echo $$i | $(SED) -e "s#ext/$(PHP_PECL_EXTENSION)/##g"`; \
+			else \
+				src=$$i; \
+			fi; \
+			if test -f "$(top_srcdir)/$$src"; then \
+				$(INSTALL_DATA) $(top_srcdir)/$$src $(INSTALL_ROOT)$(phpincludedir)/$$i; \
+			elif test -f "$(top_builddir)/$$src"; then \
+				$(INSTALL_DATA) $(top_builddir)/$$src $(INSTALL_ROOT)$(phpincludedir)/$$i; \
+			else \
+				(cd $(top_srcdir)/$$src && $(INSTALL_DATA) *.h $(INSTALL_ROOT)$(phpincludedir)/$$i; \
+				cd $(top_builddir)/$$src && $(INSTALL_DATA) *.h $(INSTALL_ROOT)$(phpincludedir)/$$i) 2>/dev/null || true; \
+			fi \
+		done; \
+	fi
+	
 install-su: install-pear
 
 test: all 

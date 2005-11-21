@@ -51,6 +51,10 @@ Extra libraries which PHP was compiled with
 Directory where extensions are searched by default
 .TP
 .PD 0
+.B \-\-include-dir
+Directory prefix where header files are installed by default
+.TP
+.PD 0
 .B \-\-php-binary
 Full path to php CLI/CGI binary
 .TP
