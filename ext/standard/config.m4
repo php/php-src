@@ -492,3 +492,6 @@ PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.
                             filters.c proc_open.c sunfuncs.c streamsfuncs.c http.c)
 
 PHP_ADD_MAKEFILE_FRAGMENT
+
+PHP_INSTALL_HEADERS([ext/standard/])
+
