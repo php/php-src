@@ -1,3 +1,70 @@
+2005-11-20  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/microtime.c:
+      - MF51: Fixed bug #35143 (gettimeofday() ignores current time zone).
+      - MF51: Fixed tests due to class constants patch.
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/microtime.c:
+      - Fixed bug #35143 (gettimeofday() ignores current time zone).
+      - Fixed tests due to class constants patch.
+
+2005-11-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #35303 (PDO prepare() crashes with invalid parameters).
+
+2005-11-20  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/basic_functions.c:
+      MFH: - Fixed bug #35243 (php_mblen() crashes when compiled with
+      thread-safety on Linux)
+
+    * ext/standard/basic_functions.c:
+      - Fixed bug #35243 (php_mblen() crashes when compiled with thread-safety on
+      Linux)
+
+2005-11-20  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * (PHP_5_0)
+      regex/regerror.c:
+      Fix for MS VisualStudio 2005.
+
+    * (PHP_5_0)
+      win32/globals.c
+      win32/php_win32_globals.h:
+      Fix line endings for MS VisualStudio 2005.
+
+2005-11-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/simplexml.c:
+      - Extend SimpleXmlElement::__construct() with two parameters
+        . int options: pass options to 2.6.0+ parsing functions
+        . bool data_is_url: whether first parameter is a url rather then xml
+      data
+      - Fix parameter parsing
+
+    * ext/dba/dba.c
+      ext/dba/dba_db4.c
+      ext/dba/tests/dba_db4.phpt
+      ext/dba/tests/dba_handler.inc:
+      - Do locking in lib rather then on streams
+
+2005-11-20  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS:
+      fix news
+
+2005-11-20  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * TODO:
+      -** empty log message ***
+
 2005-11-19  Antony Dovgal  <antony@zend.com>
 
     * ext/oci8/oci8.c
