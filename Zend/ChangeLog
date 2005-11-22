@@ -1,3 +1,9 @@
+2005-11-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      zend_language_scanner.l:
+      - MFH Fixed Bug #35286 tokenizer ext drops final comment (by greg)
+
 2005-11-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_language_scanner.l:
