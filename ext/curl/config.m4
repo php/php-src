@@ -50,7 +50,7 @@ if test "$PHP_CURL" != "no"; then
   fi
   
   AC_MSG_CHECKING([for SSL support in libcurl])
-  CURL_SSL=`$CURL_CONFIG --features | $EGREP SSL`
+  CURL_SSL=`$CURL_CONFIG --feature | $EGREP SSL`
   if test "$CURL_SSL" = "SSL"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE([HAVE_CURL_SSL], [1], [Have cURL with  SSL support])
