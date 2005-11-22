@@ -88,8 +88,10 @@ if (VCVERS < 14) {
 	// Enable automatic precompiled headers
 	ADD_FLAG('CFLAGS', ' /YX ');
 
-	// Set some debug/release specific options
-	ADD_FLAG('CFLAGS', ' /GZ ');
+	if (PHP_DEBUG == "yes") {
+		// Set some debug/release specific options
+		ADD_FLAG('CFLAGS', ' /GZ ');
+	}
 }
 
 if (VCVERS >= 14) {
@@ -97,8 +99,10 @@ if (VCVERS >= 14) {
 	// disable annoying warnings
 	ADD_FLAG('CFLAGS', ' /wd4996 ');
 
-	// Set some debug/release specific options
-	ADD_FLAG('CFLAGS', ' /RTC1 ');
+	if (PHP_DEBUG == "yes") {
+		// Set some debug/release specific options
+		ADD_FLAG('CFLAGS', ' /RTC1 ');
+	}
 }
 
 // General link flags
