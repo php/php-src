@@ -73,7 +73,7 @@ static size_t php_stream_input_write(php_stream *stream, const char *buf, size_t
 
 static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
 {
-	off_t *position = (off_t*)stream->position;
+	off_t *position = (off_t*)stream->abstract;
 	size_t read_bytes = 0;
 
 	if(!stream->eof) {
