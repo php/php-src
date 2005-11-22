@@ -168,6 +168,17 @@ typedef struct { /* php_oci_bind {{{ */
 	zval *zval;				/* value */
 	dvoid *descriptor;		/* used for binding of LOBS etc */
 	OCIStmt *statement;     /* used for binding REFCURSORs */
+	php_oci_statement *parent_statement;     /* pointer to the parent statement */
+	struct {
+		void *elements;
+/*		ub2 *indicators;
+		ub2 *element_lengths;
+		ub2 *retcodes;		*/
+		long current_length;
+		long old_length;
+		long max_length;
+		long type;
+	} array;
 	sb2 indicator;			/*  */
 	ub2 retcode;			/*  */
 } php_oci_bind; /* }}} */
@@ -350,6 +361,11 @@ php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAME
 
 int php_oci_statement_get_type(php_oci_statement *, ub2 * TSRMLS_DC);
 int php_oci_statement_get_numrows(php_oci_statement *, ub4 * TSRMLS_DC);
+int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, int name_len, zval* var, long max_table_length, long maxlength, long type TSRMLS_DC);
+php_oci_bind *php_oci_bind_array_helper_number(zval* var, long max_table_length TSRMLS_DC);
+php_oci_bind *php_oci_bind_array_helper_double(zval* var, long max_table_length TSRMLS_DC);
+php_oci_bind *php_oci_bind_array_helper_string(zval* var, long max_table_length, long maxlength TSRMLS_DC);
+php_oci_bind *php_oci_bind_array_helper_date(zval* var, long max_table_length, php_oci_connection *connection TSRMLS_DC);
 
 /* }}} */
 
