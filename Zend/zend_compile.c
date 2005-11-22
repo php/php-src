@@ -465,7 +465,9 @@ void fetch_array_dim(znode *result, znode *parent, znode *dim TSRMLS_DC)
 
 void fetch_string_offset(znode *result, znode *parent, znode *offset TSRMLS_DC)
 {
+#ifdef ilia_0
 	zend_error(E_STRICT, "Usage of {} to access string offsets is deprecated and will be removed in PHP 6");
+#endif
 	fetch_array_dim(result, parent, offset TSRMLS_CC);
 }
 
