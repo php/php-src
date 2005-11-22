@@ -35,7 +35,7 @@ php_hash_ops php_hash_md5_ops = {
 PHP_HASH_API void make_digest(char *md5str, unsigned char *digest)
 {
 	php_hash_bin2hex(md5str, digest, 16);
-	md5str[16] = '\0';
+	md5str[32] = '\0';
 }
 
 /* {{{ proto string md5(string str, [ bool raw_output])

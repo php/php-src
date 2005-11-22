@@ -90,7 +90,7 @@ php_hash_ops php_hash_sha1_ops = {
 PHP_HASH_API void make_sha1_digest(char *sha1str, unsigned char *digest)
 {
 	php_hash_bin2hex(sha1str, digest, 20);
-	sha1str[20] = '\0';
+	sha1str[40] = '\0';
 }
 
 /* {{{ proto string sha1(string str [, bool raw_output])
