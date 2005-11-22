@@ -513,13 +513,13 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 		}
 
 		/* retrieve file */
-		memcpy(tmp_line, "RETR", 4);
+		memcpy(tmp_line, "RETR", sizeof("RETR"));
 	} else if (read_write == 2) {
 		/* Write new file */
-		memcpy(tmp_line, "STOR", 4);
+		memcpy(tmp_line, "STOR", sizeof("STOR"));
 	} else {
 		/* Append */
-		memcpy(tmp_line, "APPE", 4);
+		memcpy(tmp_line, "APPE", sizeof("APPE"));
 	} 
 	php_stream_printf(stream TSRMLS_CC, "%s %s\r\n", tmp_line, (resource->path != NULL ? resource->path : "/"));
 	
