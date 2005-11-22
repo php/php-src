@@ -43,7 +43,7 @@ install-modules: build-modules
 	@$(INSTALL) modules/* $(INSTALL_ROOT)$(EXTENSION_DIR)
 
 install-headers:
-	-@if test "$(INSTALL_HEADERS)"; then
+	-@if test "$(INSTALL_HEADERS)"; then \
 		for i in $(INSTALL_HEADERS); do \
 			i=`$(top_srcdir)/build/shtool path -d $$i`; \
 			paths="$$paths $(INSTALL_ROOT)$(phpincludedir)/$$i"; \
