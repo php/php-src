@@ -89,14 +89,8 @@ php_hash_ops php_hash_sha1_ops = {
 
 PHP_HASH_API void make_sha1_digest(char *sha1str, unsigned char *digest)
 {
-	int i;
-
-	for (i = 0; i < 20; i++) {
-		sprintf(sha1str, "%02x", digest[i]);
-		sha1str += 2;
-	}
-
-	*sha1str = '\0';
+	php_hash_bin2hex(sha1str, digest, 20);
+	sha1str[20] = '\0';
 }
 
 /* {{{ proto string sha1(string str [, bool raw_output])

@@ -34,31 +34,28 @@ HashTable php_hash_hashtable;
 PHP_HASH_API php_hash_ops *php_hash_fetch_ops(const char *algo, int algo_len)
 {
 	php_hash_ops *ops;
+	char *lower = estrndup(algo, algo_len);
 
-	if (zend_hash_find(&php_hash_hashtable, algo, algo_len + 1, (void**)&ops) == SUCCESS) {
-		return ops;
+	zend_str_tolower(lower, algo_len);
+	if (SUCCESS != zend_hash_find(&php_hash_hashtable, lower, algo_len + 1, (void**)&ops)) {
+		ops = NULL;
 	}
+	efree(lower);
 
-	return NULL;
+	return ops;
 }
 
 PHP_HASH_API void php_hash_register_algo(const char *algo, php_hash_ops *ops)
 {
-	zend_hash_add(&php_hash_hashtable, algo, strlen(algo) + 1, ops, sizeof(php_hash_ops), NULL);
+	int algo_len = strlen(algo);
+	char *lower = estrndup(algo, algo_len);
+	
+	zend_str_tolower(lower, algo_len);
+	zend_hash_add(&php_hash_hashtable, lower, algo_len + 1, ops, sizeof(php_hash_ops), NULL);
+	efree(lower);
 }
 
 /* Userspace */
-
-inline void php_hash_bin2hex(char *out, unsigned char *in, int in_len)
-{
-	static const char hexits[16] = "0123456789abcdef";
-	int i;
-
-	for(i = 0; i < in_len; i++) {
-		out[i * 2]       = hexits[in[i] >> 4];
-		out[(i * 2) + 1] = hexits[in[i] &  0x0F];
-	}
-}
 
 static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename)
 {
@@ -258,7 +255,7 @@ PHP_FUNCTION(hash_update_stream)
 /* }}} */
 
 /* {{{ proto bool hash_update_file(resource context, string filename[, resource context])
-Pump data into the hashing algorithm from an open stream */
+Pump data into the hashing algorithm from a file */
 PHP_FUNCTION(hash_update_file)
 {
 	zval *zhash, *zcontext = NULL;

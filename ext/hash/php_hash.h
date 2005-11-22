@@ -95,6 +95,17 @@ extern zend_module_entry hash_module_entry;
 PHP_HASH_API php_hash_ops *php_hash_fetch_ops(const char *algo, int algo_len);
 PHP_HASH_API void php_hash_register_algo(const char *algo, php_hash_ops *ops);
 
+static inline void php_hash_bin2hex(char *out, unsigned char *in, int in_len)
+{
+	static const char hexits[16] = "0123456789abcdef";
+	int i;
+
+	for(i = 0; i < in_len; i++) {
+		out[i * 2]       = hexits[in[i] >> 4];
+		out[(i * 2) + 1] = hexits[in[i] &  0x0F];
+	}
+}
+
 #endif	/* PHP_HASH_H */
 
 
