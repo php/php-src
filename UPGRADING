@@ -1,0 +1,552 @@
+$id$
+
+UPGRADE NOTES - PHP 5.1
+
+1. Changes in reference handling
+     a. Overview
+     b. Code that worked under PHP 4.3, but now fails
+     c. Code that was valid under PHP 4.3, but now throws an error
+     d. Code that failed under PHP 4.3, but now works
+     e. Code that 'should have worked' under PHP 5.0
+     f. Warnings that came and went
+2. Reading []
+3. instanceof, is_a(), is_subclass_of(), catch
+4. Integer values in function parameters
+5. Abstract private methods
+6. Access modifiers in interfaces
+7. Changes in inheritance rules
+8. Class constants
+9. Extensions
+     a. Extensions that are gone from the PHP core
+     b. Class constants in new PHP 5.1 extensions
+10. Date/time support
+11. Changes in database support
+     a. PDO overview
+     b. Changes in MySQL support
+     c. Changes in SQLite support
+12. Further migration information
+13. Checking for E_STRICT errors
+
+===============================================================================
+
+1. Changes in reference handling
+================================
+
+1a. Overview
+============
+
+>From the PHP script writer's point of view, the change most likely to impact
+legacy code is in the way that references are handled in all PHP versions
+post-dating the PHP 4.4.0 release.
+
+Until and including PHP 4.3, it was possible to send, assign or return variables
+by reference that should really be returned by value, such as a constant, a
+temporary value (e.g. the result of an expression), or the result of a function
+that had itself been returned by value, as here:
+
+<?php
+
+$foo = "123";
+
+function return_value() {
+    global $foo;
+    return $foo;
+}
+
+$bar = &return_value();
+
+?>
+
+Although this code would usually work as expected under PHP 4.3, in the general
+case the result is undefined. The Zend Engine could not act correctly on these
+values as references. This bug could and did lead to various hard-to-reproduce
+memory corruption problems, particularly where the code base was large.
+
+In PHP 4.4.0, PHP 5.0.4 and all subsequent PHP releases, the Engine was fixed
+to 'know' when the reference operation is being used on a value that should
+not be referenced. The actual value is now used in such cases, and a warning
+is emitted. The warning takes the form of an E_NOTICE in PHP 4.4.0 and up,
+and E_STRICT in PHP 5.0.4 and up.
+
+Code that could potentially produce memory corruption can no longer do so.
+However, some legacy code might work differently as a result.
+
+1b. Code that worked under PHP 4.3, but now fails
+=================================================
+
+<?php
+
+function func(&$arraykey) {
+    return $arraykey; // function returns by value!
+}
+
+$array = array('a', 'b', 'c');
+foreach (array_keys($array) as $key) {
+    $y = &func($array[$key]);
+    $z[] =& $y;
+}
+
+var_dump($z);
+
+?>
+Running the above script under any version of PHP that pre-dates the reference
+fix would produce this output:
+
+array(3) {
+  [0]=>
+  &string(1) "a"
+  [1]=>
+  &string(1) "b"
+  [2]=>
+  &string(1) "c"
+}
+
+Following the reference fix, the same code would result in:
+
+array(3) {
+  [0]=>
+  &string(1) "c"
+  [1]=>
+  &string(1) "c"
+  [2]=>
+  &string(1) "c"
+}
+
+This is because, following the changes, func() assigns by value. The value
+of $y is re-assigned, and reference-binding is preserved from $z. Prior
+to the fix, the value was assigned by reference, leading $y to be
+re-bound on each assignment. The attempt to bind to a temporary value
+by reference was the cause of the memory corruption.
+
+Such code can be made to work identically in both the pre-fix and the
+post-fix PHP versions. The signature of func() can be altered to return
+by reference, or the reference assignment can be removed from the result
+of func().
+
+<?php
+
+function func() {
+    return 'function return';
+}
+
+$x = 'original value';
+$y =& $x;
+$y = &func();
+echo $x;
+
+?>
+
+In PHP 4.3 $x would be 'original value', whereas after the changes it would
+be 'function return' - remember that where the function does not return by
+reference, the reference assignment is converted to a regular assignment.
+Again, this can be brought to a common base, either by forcing func() to
+return by reference or by eliminating the by-reference assignment.
+
+1c. Code that was valid under PHP 4.3, but now throws an error
+==============================================================
+
+<?php
+
+class Foo {
+
+    function getThis() {
+        return $this;
+    }
+
+    function destroyThis() {
+        $baz =& $this->getThis();
+    }
+}
+
+$bar = new Foo();
+$bar->destroyThis();
+var_dump($bar);
+
+?>
+
+In PHP 5.0.3, $bar evaluated to NULL instead of returning an object.
+That happened because getThis() returns by value, but the value here
+is assigned by reference. Although it now works in the expected way,
+this is actually invalid code which will throw an E_NOTICE under
+PHP 4.4 or an E_STRICT under PHP 5.0.4 and up.
+
+1d. Code that failed under PHP 4.3, but now works
+=================================================
+
+<?php
+
+function &f() {
+    $x = "foo";
+    var_dump($x);
+    print "$x\n";
+    return($a);
+}
+
+for ($i = 0; $i < 3; $i++) {
+    $h = &f();
+}
+
+?>
+
+In PHP 4.3 the third call to var_dump produces NULL, due to the memory
+corruption caused by returning an uninitialized value by reference.
+This is valid code in PHP 5.0.4 and up, but threw errors in earlier
+releases of PHP.
+
+<?php
+
+$arr = array('a1' => array('alfa' => 'ok'));
+$arr =& $arr['a1'];
+echo '-'.$arr['alfa']."-\n";
+
+?>
+
+Until PHP 5.0.5, it wasn't possible to assign an array element by
+reference in this way. It now is.
+
+1e. Code that 'should have worked' under PHP 5.0
+================================================
+
+There are a couple of instances of bugs reported under PHP 5.0 prior
+to the reference fixes which now 'work'. However, in both cases errors
+are thrown by PHP 5.1, because the code was invalid in the first place.
+Returning values by reference using self:: now works in the general
+case but throws an E_STRICT warning, and although your mileage may
+vary when assigning by reference to an overloaded object, you will
+still see an E_ERROR when you try it, even where the assignment
+itself appears to work.
+
+1f. Warnings that came and went
+===============================
+
+<?php
+
+function & foo() {
+    $var = 'ok';
+    return $var;
+}
+
+function & bar() {
+    return foo();
+}
+
+$a =& bar();
+echo "$a\n";
+
+?>
+
+Nested calls to functions returning by reference are valid code under both
+PHP 4.3 and PHP 5.1, but threw an unwarranted E_NOTICE or E_STRICT under
+the intervening PHP releases.
+
+2. Reading []
+=============
+
+<?php
+
+class XmlTest {
+
+    function test_ref(&$test) {
+        $test = "ok";
+    }
+
+    function test($test) { }
+
+    function run() {
+        $ar = array();
+        $this->test_ref($ar[]);
+        var_dump($ar);
+        $this->test($ar[]);
+    }
+}
+
+$o = new XmlTest();
+$o->run();
+
+?>
+
+This should always have thrown a fatal E_ERROR, because [] cannot be used
+for reading in PHP. It is invalid code in PHP 4.4.2 and PHP 5.0.5 upward.
+
+3. instanceof, is_a(), is_subclass_of(), catch
+==============================================
+
+In PHP 5.0, is_a() was deprecated and replaced by the "instanceof" operator.
+There were some issues with the initial implementation of "instanceof", which
+relied on __autoload() to search for missing classes. If the class was not
+present, "instanceof" would throw a fatal E_ERROR due to the failure of
+__autoload() to discover that class. The same behaviour occurred in the
+"catch" operator and the is_subclass_of() function, for the same reason.
+
+None of these functions or operators call __autoload() in PHP 5.1, and
+the class_exists() workarounds used in code written for PHP 5.0, while
+not problematic in any way, are no longer necessary.
+
+4. Integer values in function parameters
+========================================
+
+With the advent of PHP 5.0, a new parameter parsing API was introduced
+which is used by a large number of PHP functions. In all versions of
+PHP between 5.0 and 5.1, the handling of integer values was very strict
+and would reject non-well formed numeric values when a PHP function
+expected an integer. These checks have now been relaxed to support
+non-well formed numeric strings such as " 123" and "123 ", and will
+no longer fail as they did under PHP 5.0. However, to promote code
+safety and input validation, PHP functions will now emit an E_NOTICE
+when such strings are passed as integers.
+
+5. Abstract private methods
+===========================
+
+Abstract private methods were supported between PHP 5.0.0 and PHP 5.0.4,
+but were then disallowed on the grounds that the behaviours of 'private'
+and 'abstract' are mutually exclusive.
+
+6. Access modifiers in interfaces
+=================================
+
+Under PHP 5.0, function declarations in interfaces were treated in exactly
+the same way as function declarations in classes. This has not been the case
+since October 2004, at which point only the 'public' access modifier was
+allowed in interface function declarations. Since April 2005 - which pre-dates
+the PHP 5.0b1 release - the 'static' modifier has also been allowed. However,
+the 'protected' and 'private' modifiers will now throw an E_ERROR, as will
+'abstract'. Note that this change should not affect your existing code, as
+none of these modifiers makes sense in the context of interfaces anyway.
+
+7. Changes in inheritance rules
+===============================
+
+Under PHP 5.0, it was possible to have a function declaration in a derived class
+that did not match the declaration of the same function in the base class, e.g.
+
+class Base {
+    function &return_by_ref() {
+        $r = 1;
+        return $r;
+    }
+}
+
+class Derived extends Base {
+    function return_by_ref() {
+        return 1;
+    }
+}
+
+This code will cause an E_STRICT error to be emitted under PHP 5.1.
+
+8. Class constants
+==================
+
+Under PHP 5.0, the following code was valid:
+
+<?php
+
+class test {
+    const foobar = 'foo';
+    const foobar = 'bar';
+}
+
+?>
+
+Under PHP 5.1, redefinition of a class constant will throw a fatal E_ERROR.
+
+9. Extensions
+=============
+
+9a. Extensions that are gone from the PHP core
+==============================================
+
+One of the first things you're likely to notice when you download PHP 5.1 is that
+several of the older extensions have disappeared. Those extensions that are still
+actively maintained are available in the PHP Extension Community Library (PECL),
+at http://pecl.php.net. Windows binaries are built regularly, and you can obtain
+the binaries for PECL extensions built against PHP 5.1 from
+http://pecl4win.php.net/list.php/5_1.
+
+Extension           Alternative/status
+=========           ========================
+ext/cpdf            pecl/pdflib
+ext/dbx             pecl/dbx
+ext/dio             pecl/dio
+ext/fam             not actively maintained
+ext/ingres_ii       pecl/ingres
+ext/ircg            not actively maintained
+ext/mcve            pecl/mcve
+ext/mnogosearch     not actively maintained
+ext/oracle          ext/oci8 or ext/pdo_oci
+ext/ovrimos         not actively maintained
+ext/pfpro           not actively maintained
+                    - alternatives at http://pecl.php.net/packages.php?catpid=18&catname=Payment
+ext/w32api          pecl/ffi
+ext/yp              not actively maintained
+sapi/activescript   http://pecl4win.php.net/ext.php/php5activescript.dll (PECL package)
+                    or pecl/activescript (CVS)
+
+Modules in PECL that are not actively maintained (i.e. have not been supported
+for some time, have no active maintainer working on them currently, and do not
+have any PECL package releases), are still available in CVS at
+http://cvs.php.net/pecl/. However, unreleased PHP modules are by their nature
+unsupported, and your mileage may vary when attempting to install or use them.
+
+9b. Class constants in new PHP 5.1 extensions
+=============================================
+
+The Zend Engine 2.1 API allows extension developers to declare class constants
+in object oriented extensions. New extensions written for PHP 5.1, including SPL,
+PDO, ext/XMLReader and ext/date, have their constants in the format
+
+PDO::CLASS_CONSTANT
+
+rather than in the C format
+
+PDO_CLASS_CONSTANT
+
+in order to minimise pollution of the global namespace in PHP.
+
+Note that the new Date class exists at this point purely to allow the core date
+extension to adhere to the above convention, although extended functionality
+is planned for the the class in the future.
+
+10. Date/time support
+====================
+
+Date/time support has been fully rewritten in PHP 5.1, and no longer
+uses the system settings to 'know' the timezone in operation. It will
+instead utilize, in the following order:
+
+* The timezone set using the date_default_timezone_set() function (if any)
+* The TZ environment variable (if non empty)
+* The date.timezone ini option (if set)
+* "magical" guess (if the operating system supports it)
+* If none of the above options succeeds, UTC
+
+To ensure accuracy (and avoid an E_STRICT warning), you will need to define
+your timezone in your php.ini using the following format:
+
+date.timezone = Europe/London
+
+The supported timezones are listed, in this format, in the PHP manual at
+http://www.php.net/manual/en/timezones.php.
+
+11. Changes in database support
+==============================
+
+11a. PDO overview
+================
+
+PHP Data Objects (PDO) were introduced as a PECL extension under PHP 5.0,
+and became part of the core PHP distribution in PHP 5.1. The PDO extension
+provides a consistent interface for database access, and is used alongside
+database-specific PDO drivers. Each driver may also have database-specific
+functions of its own, but basic data access functionality such as issuing
+queries and fetching data is covered by PDO functions, using the driver
+named in PDO::__construct().
+
+Note that the PDO extension, and its drivers, are intended to be built as
+shared extensions. This will enable straightforward driver upgrades from
+PECL, without forcing you to rebuild all of PHP.
+
+At the point of the PHP 5.1 release, PDO is more than ready for widespread
+testing and could be adopted in most situations. However, it is important
+to understand that PDO and its drivers are comparatively young and may be
+missing certain database-specific features; evaluate PDO carefully before
+you use it in new projects.
+
+Legacy code will generally rely on the pre-existing database extensions,
+which are still maintained.
+
+There is more in-depth information about the PDO extension in the manual
+at http://www.php.net/manual/ref.pdo.php.
+
+11b. Changes in MySQL support
+============================
+
+In PHP 4, MySQL 3 support was built-in. With the release of PHP 5.0 there
+were two MySQL extensions, named 'mysql' and 'mysqli', which were designed
+to support MySQL < 4.1 and MySQL 4.1 and up, respectively. With the
+introduction of PDO, which provides a very fast interface to all the
+database APIs supported by PHP, the PDO_MYSQL driver can support any
+of the current versions (MySQL 3, 4 or 5) in PHP code written for PDO,
+depending on the MySQL library version used during compilation. The
+older MySQL extensions remain in place for reasons of back compatibility,
+but are not enabled by default.
+
+11c. Changes in SQLite support
+=============================
+
+In PHP 5.0, SQLite 2 support was provided by the built-in sqlite
+extension, which was also available as a PECL extension in PHP 4.3
+and PHP 4.4. With the introduction of PDO, the sqlite extension doubles
+up to act as a 'sqlite2' driver for PDO; it is due to this that the
+sqlite extension in PHP 5.1 has a dependency upon the PDO extension.
+
+PHP 5.1 ships with a number of alternative interfaces to sqlite:
+
+The sqlite extension provides the "classic" sqlite procedural/OO API
+that you may have used in prior versions of PHP. It also provides the
+PDO 'sqlite2' driver, which allows you to access legacy SQLite 2
+databases using the PDO API.
+
+PDO_SQLITE provides the 'sqlite' version 3 driver. SQLite version 3
+is vastly superior to SQLite version 2, but the file formats of the
+two versions are not compatible.
+
+If your SQLite-based project is already written and working against
+earlier PHP versions, then you can continue to use ext/sqlite without
+problems, but will need to explicitly enable both PDO and sqlite. New
+projects should use PDO and the 'sqlite' (version 3) driver, as this is
+faster than SQLite 2, has improved locking concurrency, and supports
+both prepared statements and binary columns natively.
+
+12. Further migration information
+================================
+
+For general information about migrating from PHP 4 to PHP 5, please refer to
+the relevant section in the PHP manual at http://www.php.net/manual/migration5.php.
+
+13. Checking for E_STRICT errors
+================================
+
+If you only have a single script to check, you can pick up E_STRICT
+errors using PHP's commandline lint facility:
+
+php -d error_reporting=4095 -l script_to_check.php
+
+For larger projects, the shell script below will achieve the same task:
+
+#!/bin/sh
+
+directory=$1
+
+shift
+
+# These extensions are checked
+extensions="php inc"
+
+check_file ()
+{
+  echo -ne "Doing PHP syntax check on $1 ..."
+
+  # Options:
+  ERRORS=`/www/php/bin/php -d display_errors=1 -d html_errors=0 -d error_prepend_string=" " -d error_append_string=" " -d error_reporting=4095 -l $1 | grep -v "No syntax errors detected"`
+
+  if test -z "$ERRORS"; then
+    echo -ne "OK."
+  else
+    echo -e "Errors found!\n$ERRORS"
+  fi
+
+  echo
+}
+
+# loop over remaining file args
+for FILE in "$@" ; do
+  for ext in $extensions; do
+     if echo $FILE | grep "\.$ext$" > /dev/null; then
+       if test -f $FILE; then
+         check_file "$FILE"
+       fi
+     fi
+  done
+done
