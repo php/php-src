@@ -103,6 +103,10 @@ ZEND_DECLARE_MODULE_GLOBALS(reflection)
 	}                                                                                                       \
 	target = intern->ptr;                                                                                   \
 
+/* Class constants */
+#define REGISTER_REFLECTION_CLASS_CONST_LONG(class_name, const_name, value)                                        \
+	zend_declare_class_constant_long(reflection_ ## class_name ## _ptr, const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);
+
 /* {{{ Smart string functions */
 typedef struct _string {
 	char *string;
@@ -4225,11 +4229,22 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	zend_declare_property_string(reflection_method_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
 	zend_declare_property_string(reflection_method_ptr, "class", sizeof("class")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
 
+	REGISTER_REFLECTION_CLASS_CONST_LONG(method, "STATIC", ZEND_ACC_STATIC);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(method, "PUBLIC", ZEND_ACC_PUBLIC);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(method, "PROTECTED", ZEND_ACC_PROTECTED);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(method, "PRIVATE", ZEND_ACC_PRIVATE);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(method, "ABSTRACT", ZEND_ACC_ABSTRACT);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(method, "FINAL", ZEND_ACC_FINAL);
+
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionClass", reflection_class_functions);
 	_reflection_entry.create_object = reflection_objects_new;
 	reflection_class_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
 	reflection_register_implement(reflection_class_ptr, reflector_ptr TSRMLS_CC);
 	zend_declare_property_string(reflection_class_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
+
+	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IMPLICIT_ABSTRACT", ZEND_ACC_IMPLICIT_ABSTRACT_CLASS);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "EXPLICIT_ABSTRACT", ZEND_ACC_EXPLICIT_ABSTRACT_CLASS);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "FINAL", ZEND_ACC_FINAL_CLASS);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionObject", reflection_object_functions);
 	_reflection_entry.create_object = reflection_objects_new;
@@ -4242,31 +4257,17 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	zend_declare_property_string(reflection_property_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
 	zend_declare_property_string(reflection_property_ptr, "class", sizeof("class")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
 
+	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "STATIC", ZEND_ACC_STATIC);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "PUBLIC", ZEND_ACC_PUBLIC);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "PROTECTED", ZEND_ACC_PROTECTED);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "PRIVATE", ZEND_ACC_PRIVATE);
+
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionExtension", reflection_extension_functions);
 	_reflection_entry.create_object = reflection_objects_new;
 	reflection_extension_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
 	reflection_register_implement(reflection_extension_ptr, reflector_ptr TSRMLS_CC);
 	zend_declare_property_string(reflection_extension_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
 
-	/* Property modifiers */
-	REGISTER_MAIN_LONG_CONSTANT("P_STATIC", ZEND_ACC_STATIC, CONST_PERSISTENT|CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("P_PUBLIC", ZEND_ACC_PUBLIC, CONST_PERSISTENT|CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("P_PROTECTED", ZEND_ACC_PROTECTED, CONST_PERSISTENT|CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("P_PRIVATE", ZEND_ACC_PRIVATE, CONST_PERSISTENT|CONST_CS);
-
-	/* Method modifiers */
-	REGISTER_MAIN_LONG_CONSTANT("M_STATIC", ZEND_ACC_STATIC, CONST_PERSISTENT|CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("M_PUBLIC", ZEND_ACC_PUBLIC, CONST_PERSISTENT|CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("M_PROTECTED", ZEND_ACC_PROTECTED, CONST_PERSISTENT|CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("M_PRIVATE", ZEND_ACC_PRIVATE, CONST_PERSISTENT|CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("M_ABSTRACT", ZEND_ACC_ABSTRACT, CONST_PERSISTENT|CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("M_FINAL", ZEND_ACC_FINAL, CONST_PERSISTENT|CONST_CS);
-
-	/* Class modifiers */
-	REGISTER_MAIN_LONG_CONSTANT("C_IMPLICIT_ABSTRACT", ZEND_ACC_IMPLICIT_ABSTRACT_CLASS, CONST_PERSISTENT|CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("C_EXPLICIT_ABSTRACT", ZEND_ACC_EXPLICIT_ABSTRACT_CLASS, CONST_PERSISTENT|CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("C_FINAL", ZEND_ACC_FINAL_CLASS, CONST_PERSISTENT|CONST_CS);
-	
 	return SUCCESS;
 } /* }}} */
 
