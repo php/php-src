@@ -43,10 +43,21 @@ typedef struct {
 	zend_llist *error_list;
 } php_libxml_globals;
 
+typedef struct _libxml_doc_props {
+	int formatoutput;
+	int validateonparse;
+	int resolveexternals;
+	int preservewhitespace;
+	int substituteentities;
+	int stricterror;
+	int recover;
+	HashTable *classmap;
+} libxml_doc_props;
+
 typedef struct _php_libxml_ref_obj {
 	void *ptr;
 	int   refcount;
-	void *doc_props;
+	libxml_doc_props *doc_props;
 } php_libxml_ref_obj;
 
 typedef struct _php_libxml_node_ptr {
