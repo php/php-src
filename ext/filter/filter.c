@@ -313,8 +313,8 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 {
 	zval  new_var, raw_var;
 	zval *array_ptr = NULL, *orig_array_ptr = NULL;
-	int   out_len = 0;
 	char *orig_var;
+	int retval = 0;
 
 	assert(*val != NULL);
 
@@ -337,20 +337,26 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 		PARSE_CASE(PARSE_COOKIE,  cookie_array,  TRACK_VARS_COOKIE)
 		PARSE_CASE(PARSE_SERVER,  server_array,  TRACK_VARS_SERVER)
 		PARSE_CASE(PARSE_ENV,     env_array,     TRACK_VARS_ENV)
+
+		case PARSE_STRING: /* PARSE_STRING is used by parse_str() function */
+			retval = 1;
+			break;
 	}
 
-	/* Make a copy of the variable name, as php_register_variable_ex seems to
-	 * modify it */
-	orig_var = estrdup(var);
+	if (array_ptr) {
+		/* Make a copy of the variable name, as php_register_variable_ex seems to
+		 * modify it */
+		orig_var = estrdup(var);
 
-	/* Store the RAW variable internally */
-	/* FIXME: Should not use php_register_variable_ex as that also registers
-	 * globals when register_globals is turned on */
-	Z_STRLEN(raw_var) = val_len;
-	Z_STRVAL(raw_var) = estrndup(*val, val_len + 1);
-	Z_TYPE(raw_var) = IS_STRING;
+		/* Store the RAW variable internally */
+		/* FIXME: Should not use php_register_variable_ex as that also registers
+		 * globals when register_globals is turned on */
+		Z_STRLEN(raw_var) = val_len;
+		Z_STRVAL(raw_var) = estrndup(*val, val_len + 1);
+		Z_TYPE(raw_var) = IS_STRING;
 
-	php_register_variable_ex(var, &raw_var, array_ptr TSRMLS_CC);
+		php_register_variable_ex(var, &raw_var, array_ptr TSRMLS_CC);
+	}
 
 	/* Register mangled variable */
 	/* FIXME: Should not use php_register_variable_ex as that also registers
@@ -365,13 +371,19 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 		}
 	}
 
-	php_register_variable_ex(orig_var, &new_var, orig_array_ptr TSRMLS_CC);
-	efree(orig_var);
-
-	if (new_val_len) {
-		*new_val_len = out_len;
+	if (orig_array_ptr) {
+		php_register_variable_ex(orig_var, &new_var, orig_array_ptr TSRMLS_CC);
+		efree(orig_var);
 	}
-	return 0;
+
+	if (new_val_len && retval) {
+		*new_val_len = Z_STRLEN(new_var);
+		efree(*val);
+		*val = estrndup(Z_STRVAL(new_var), Z_STRLEN(new_var) + 1);
+		zval_dtor(&new_var);
+	}
+
+	return retval;
 }
 /* }}} */
 
