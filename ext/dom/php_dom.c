@@ -127,12 +127,12 @@ int dom_node_children_valid(xmlNodePtr node) {
 /* {{{ dom_get_doc_props() */
 dom_doc_propsptr dom_get_doc_props(php_libxml_ref_obj *document)
 {
-	dom_doc_props *doc_props;
+	dom_doc_propsptr doc_props;
 
 	if (document && document->doc_props) {
 		return document->doc_props;
 	} else {
-		doc_props = emalloc(sizeof(dom_doc_props));
+		doc_props = emalloc(sizeof(libxml_doc_props));
 		doc_props->formatoutput = 0;
 		doc_props->validateonparse = 0;
 		doc_props->resolveexternals = 0;
@@ -140,18 +140,58 @@ dom_doc_propsptr dom_get_doc_props(php_libxml_ref_obj *document)
 		doc_props->substituteentities = 0;
 		doc_props->stricterror = 1;
 		doc_props->recover = 0;
+		doc_props->classmap = NULL;
 		if (document) {
 			document->doc_props = doc_props;
 		}
 		return doc_props;
 	}
 }
+
+int dom_set_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece, zend_class_entry *ce TSRMLS_DC)
+{
+	dom_doc_propsptr doc_props;
+
+	if (document) {
+		doc_props = dom_get_doc_props(document);
+		if (doc_props->classmap == NULL) {
+			if (ce == NULL) {
+				return SUCCESS;
+			}
+			ALLOC_HASHTABLE(doc_props->classmap);
+			zend_u_hash_init(doc_props->classmap, 0, NULL, NULL, 0, UG(unicode));
+		}
+		if (ce) {
+			return zend_u_hash_add(doc_props->classmap, UG(unicode)?IS_UNICODE:IS_STRING, basece->name, basece->name_length + 1, &ce, sizeof(ce), NULL);
+		} else {
+			return zend_u_hash_del(doc_props->classmap, UG(unicode)?IS_UNICODE:IS_STRING, basece->name, basece->name_length + 1);
+		}
+	}
+	return SUCCESS;
+}
+
+zend_class_entry *dom_get_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece TSRMLS_DC)
+{
+	dom_doc_propsptr doc_props;
+	zend_class_entry **ce = NULL;
+	
+	if (document) {
+		doc_props = dom_get_doc_props(document);
+		if (doc_props->classmap) {
+			if (zend_u_hash_find(doc_props->classmap, UG(unicode)?IS_UNICODE:IS_STRING, basece->name, basece->name_length + 1,  (void**) &ce) == SUCCESS) {
+				return *ce;
+			}
+		}
+	}
+
+	return basece;
+}
 /* }}} */
 
 /* {{{ dom_get_strict_error() */
 int dom_get_strict_error(php_libxml_ref_obj *document) {
 	int stricterror;
-	dom_doc_props *doc_props;
+	dom_doc_propsptr doc_props;
 
 	doc_props = dom_get_doc_props(document);
 	stricterror = doc_props->stricterror;
@@ -1240,6 +1280,9 @@ zval *php_dom_create_object(xmlNodePtr obj, int *found, zval *wrapper_in, zval *
 			return wrapper;
 	}
 
+	if (domobj && domobj->document) {
+		ce = dom_get_doc_classmap(domobj->document, ce TSRMLS_CC);
+	}
 	object_init_ex(wrapper, ce);
 
 	intern = (dom_object *)zend_objects_get_address(wrapper TSRMLS_CC);
