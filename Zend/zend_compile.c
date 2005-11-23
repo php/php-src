@@ -2317,10 +2317,14 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 }
 
 
-static zend_bool do_inherit_constant_check(HashTable *child_constants_table, zval *parent_constant, zend_hash_key *hash_key, zend_class_entry *iface)
+static zend_bool do_inherit_constant_check(HashTable *child_constants_table, zval **parent_constant, zend_hash_key *hash_key, zend_class_entry *iface)
 {
-	if (zend_u_hash_quick_exists(child_constants_table, hash_key->type, hash_key->u.string, hash_key->nKeyLength, hash_key->h)) {
-		zend_error(E_COMPILE_ERROR, "Cannot inherit previously-inherited constant %R from interface %v", hash_key->type, hash_key->u.string, iface->name);
+	zval **old_constant;
+
+	if (zend_u_hash_quick_find(child_constants_table, hash_key->type, hash_key->u.string, hash_key->nKeyLength, hash_key->h, (void**)&old_constant) == SUCCESS) {
+	  if (*old_constant != *parent_constant) {
+			zend_error(E_COMPILE_ERROR, "Cannot inherit previously-inherited constant %R from interface %v", hash_key->type, hash_key->u.string, iface->name);
+		}
 		return 0; 
 	}
 	return 1;
