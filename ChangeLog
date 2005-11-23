@@ -1,3 +1,82 @@
+2005-11-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * UPGRADING
+      UPGRADING:
+      
+      file UPGRADING was initially added on branch PHP_5_1.
+
+2005-11-22  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      NEWS
+      ext/curl/config.m4
+      ext/curl/config.m4:
+      MF51: fix #35341 (Fix for bug #33760 breaks build with older curl)
+
+    * (PHP_5_1)
+      NEWS
+      ext/curl/config.m4:
+      fix #35341 (Fix for bug #33760 breaks build with older curl)
+
+2005-11-22  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_4_4)
+      ext/standard/php_fopen_wrapper.c:
+      Bugfix #35315 stream->position != stream->abstract
+
+    * ext/zlib/zlib_filter.c:
+      MFB (r-1.6.2.1)
+
+    * (PHP_5_1)
+      ext/zlib/zlib_filter.c:
+      Widen allowable range of values for 'window' bits.
+      Make -MAX_WBITS default (to match gzinflate() and gzdeflate())
+
+2005-11-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      ZendEngine2/zend_compile.c:
+      Removed {} E_STRICT pending furher discussion, may be introduced later on.
+
+2005-11-22  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/oci8.c
+      ext/oci8/oci8_interface.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h:
+      Initial implementation of oci_bind_array_by_name()
+      
+      At the moment we support only these types:
+      SQLT_NUM, SQLT_INT, SQLT_LNG - integer/long
+      SQLT_FLT - float
+      SQLT_AFC, SQLT_CHR, SQLT_VCS, SQLT_AVC, SQLT_STR, SQLT_LVC - char/varchar
+      SQLT_ODT - date
+      
+      More supported types may follow.
+
+2005-11-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/ftp_fopen_wrapper.c:
+      MFB51: Fixed command error in ftp:// wrapper.
+
+    * (PHP_5_1)
+      ext/standard/ftp_fopen_wrapper.c:
+      Fixed command error in ftp:// wrapper.
+      
+
+    * (PHP_5_1)
+      ext/mysqli/tests/009.phpt:
+      Fixed test
+
+2005-11-22  Michael Wallner  <mike@iworks.at>
+
+    * Makefile.global:
+      - MF51: fix make install
+
+    * (PHP_5_1)
+      Makefile.global:
+      - fix make install
+
 2005-11-21  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
 
     * (PHP_4_4)
