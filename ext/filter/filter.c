@@ -376,11 +376,17 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 		efree(orig_var);
 	}
 
-	if (new_val_len && retval) {
-		*new_val_len = Z_STRLEN(new_var);
+	if (retval) {
+		if (new_val_len) {
+			*new_val_len = Z_STRLEN(new_var);
+		}
 		efree(*val);
-		*val = estrndup(Z_STRVAL(new_var), Z_STRLEN(new_var) + 1);
-		zval_dtor(&new_var);
+		if (Z_STRLEN(new_var)) {
+			*val = estrdup(Z_STRVAL(new_var));
+			zval_dtor(&new_var);
+		} else {
+			*val = estrdup("");
+		}
 	}
 
 	return retval;
