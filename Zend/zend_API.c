@@ -1079,6 +1079,7 @@ static int zend_merge_property(zval **value, int num_args, va_list args, zend_ha
 		zval *member;
 		TSRMLS_FETCH();
 
+		MAKE_STD_ZVAL(member);
 		if (hash_key->type == IS_STRING) {
 			ZVAL_STRINGL(member, hash_key->u.string, hash_key->nKeyLength-1, 1);
 		} else if (hash_key->type == IS_BINARY) {
@@ -1087,7 +1088,6 @@ static int zend_merge_property(zval **value, int num_args, va_list args, zend_ha
 			ZVAL_UNICODEL(member, hash_key->u.unicode, hash_key->nKeyLength-1, 1);
 		}
 
-		MAKE_STD_ZVAL(member);
 		obj_ht->write_property(obj, member, *value TSRMLS_CC);
 		zval_ptr_dtor(&member);
 	}
@@ -1891,6 +1891,7 @@ ZEND_API int add_property_zval_ex(zval *arg, char *key, uint key_len, zval *valu
 {
 	zval *z_key;
 
+	MAKE_STD_ZVAL(z_key);
 	ZVAL_STRINGL(z_key, key, key_len-1, 1);
 
 	Z_OBJ_HANDLER_P(arg, write_property)(arg, z_key, value TSRMLS_CC);
@@ -3447,7 +3448,7 @@ ZEND_API int zend_update_static_property_unicodel(zend_class_entry *scope, char 
 
 ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, char *name, int name_length, zend_bool silent TSRMLS_DC)
 {
-	zval property, *value;
+	zval *property, *value;
 	zend_class_entry *old_scope = EG(scope);
 	
 	EG(scope) = scope;
@@ -3459,8 +3460,11 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, char *n
 		zend_get_object_classname(object, &class_name, &class_name_len TSRMLS_CC);
 		zend_error(E_CORE_ERROR, "Property %s of class %v cannot be read", name, class_name);
 	}
-	ZVAL_STRINGL(&property, name, name_length, 0);
-	value = Z_OBJ_HT_P(object)->read_property(object, &property, silent TSRMLS_CC);
+
+	MAKE_STD_ZVAL(property);
+	ZVAL_STRINGL(property, name, name_length, 1);
+	value = Z_OBJ_HT_P(object)->read_property(object, property, silent TSRMLS_CC);
+	zval_ptr_dtor(&property);
 
 	EG(scope) = old_scope;
 	return value;
