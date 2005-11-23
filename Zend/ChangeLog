@@ -1,3 +1,9 @@
+2005-11-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      zend_compile.c:
+      Removed {} E_STRICT pending furher discussion, may be introduced later on.
+
 2005-11-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
