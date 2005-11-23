@@ -723,11 +723,13 @@ static int zend_merge_property(zval **value, int num_args, va_list args, zend_ha
 	if (hash_key->nKeyLength) {
 		zval *obj = va_arg(args, zval *);
 		zend_object_handlers *obj_ht = va_arg(args, zend_object_handlers *);
-		zval member;
+		zval *member;
 		TSRMLS_FETCH();
 
-		ZVAL_STRINGL(&member, hash_key->arKey, hash_key->nKeyLength-1, 0);
-		obj_ht->write_property(obj, &member, *value TSRMLS_CC);
+		MAKE_STD_ZVAL(member);
+		ZVAL_STRINGL(member, hash_key->arKey, hash_key->nKeyLength-1, 1);
+		obj_ht->write_property(obj, member, *value TSRMLS_CC);
+		zval_ptr_dtor(&member);
 	}
 	return ZEND_HASH_APPLY_KEEP;
 }
@@ -791,7 +793,7 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC
 					
 					ALLOC_ZVAL(q);
 					*q = **p;
-					INIT_PZVAL(q)
+					INIT_PZVAL(q);
 					zval_copy_ctor(q);
 					zend_hash_add(class_type->static_members, str_index, str_length, (void**)&q, sizeof(zval*), NULL);
 				}
@@ -1169,58 +1171,68 @@ ZEND_API int add_get_index_stringl(zval *arg, ulong index, char *str, uint lengt
 ZEND_API int add_property_long_ex(zval *arg, char *key, uint key_len, long n TSRMLS_DC)
 {
 	zval *tmp;
-	zval z_key;
+	zval *z_key;
 
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_LONG(tmp, n);
-	ZVAL_STRINGL(&z_key, key, key_len-1, 0);
+	
+	MAKE_STD_ZVAL(z_key);
+	ZVAL_STRINGL(z_key, key, key_len-1, 1);
 
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, tmp TSRMLS_CC);
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, z_key, tmp TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
+	zval_ptr_dtor(&z_key);
 	return SUCCESS;
 }
 
 ZEND_API int add_property_bool_ex(zval *arg, char *key, uint key_len, int b TSRMLS_DC)
 {
 	zval *tmp;
-	zval z_key;
+	zval *z_key;
 
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_BOOL(tmp, b);
 
-	ZVAL_STRINGL(&z_key, key, key_len-1, 0);
+	MAKE_STD_ZVAL(z_key);
+	ZVAL_STRINGL(z_key, key, key_len-1, 1);
 
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, tmp TSRMLS_CC);
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, z_key, tmp TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
+	zval_ptr_dtor(&z_key);
 	return SUCCESS;
 }
 
 ZEND_API int add_property_null_ex(zval *arg, char *key, uint key_len TSRMLS_DC)
 {
 	zval *tmp;
-	zval z_key;
+	zval *z_key;
 	
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_NULL(tmp);
 	
-	ZVAL_STRINGL(&z_key, key, key_len-1, 0);
+	MAKE_STD_ZVAL(z_key);
+	ZVAL_STRINGL(z_key, key, key_len-1, 1);
 
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, tmp TSRMLS_CC);
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, z_key, tmp TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
+	zval_ptr_dtor(&z_key);
 	return SUCCESS;
 }
 
 ZEND_API int add_property_resource_ex(zval *arg, char *key, uint key_len, long n TSRMLS_DC)
 {
 	zval *tmp;
-	zval z_key;
+	zval *z_key;
 	
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_RESOURCE(tmp, n);
-	ZVAL_STRINGL(&z_key, key, key_len-1, 0);
 
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, tmp TSRMLS_CC);
+	MAKE_STD_ZVAL(z_key);
+	ZVAL_STRINGL(z_key, key, key_len-1, 1);
+
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, z_key, tmp TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
+	zval_ptr_dtor(&z_key);
 	return SUCCESS;
 }
 
@@ -1228,14 +1240,17 @@ ZEND_API int add_property_resource_ex(zval *arg, char *key, uint key_len, long n
 ZEND_API int add_property_double_ex(zval *arg, char *key, uint key_len, double d TSRMLS_DC)
 {
 	zval *tmp;
-	zval z_key;
+	zval *z_key;
 
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_DOUBLE(tmp, d);
-	ZVAL_STRINGL(&z_key, key, key_len-1, 0);
+	
+	MAKE_STD_ZVAL(z_key);
+	ZVAL_STRINGL(z_key, key, key_len-1, 1);
 
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, tmp TSRMLS_CC);
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, z_key, tmp TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
+	zval_ptr_dtor(&z_key);
 	return SUCCESS;
 }
 
@@ -1243,40 +1258,46 @@ ZEND_API int add_property_double_ex(zval *arg, char *key, uint key_len, double d
 ZEND_API int add_property_string_ex(zval *arg, char *key, uint key_len, char *str, int duplicate TSRMLS_DC)
 {
 	zval *tmp;
-	zval z_key;
+	zval *z_key;
 
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_STRING(tmp, str, duplicate);
 
-	ZVAL_STRINGL(&z_key, key, key_len-1, 0);
+	MAKE_STD_ZVAL(z_key);
+	ZVAL_STRINGL(z_key, key, key_len-1, 1);
 
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, tmp TSRMLS_CC);
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, z_key, tmp TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
+	zval_ptr_dtor(&z_key);
 	return SUCCESS;
 }
 
 ZEND_API int add_property_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, int duplicate TSRMLS_DC)
 {
 	zval *tmp;
-	zval z_key;
+	zval *z_key;
 
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_STRINGL(tmp, str, length, duplicate);
 
-	ZVAL_STRINGL(&z_key, key, key_len-1, 0);
+	MAKE_STD_ZVAL(z_key);
+	ZVAL_STRINGL(z_key, key, key_len-1, 1);
 
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, tmp TSRMLS_CC);
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, z_key, tmp TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
+	zval_ptr_dtor(&z_key);
 	return SUCCESS;
 }
 
 ZEND_API int add_property_zval_ex(zval *arg, char *key, uint key_len, zval *value TSRMLS_DC)
 {
-	zval z_key;
+	zval *z_key;
 
-	ZVAL_STRINGL(&z_key, key, key_len-1, 0);
+	MAKE_STD_ZVAL(z_key);
+	ZVAL_STRINGL(z_key, key, key_len-1, 1);
 
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, value TSRMLS_CC);
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, z_key, value TSRMLS_CC);
+	zval_ptr_dtor(&z_key);
 	return SUCCESS;
 }
 
@@ -2402,7 +2423,7 @@ ZEND_API int zend_declare_class_constant_string(zend_class_entry *ce, char *name
 
 ZEND_API void zend_update_property(zend_class_entry *scope, zval *object, char *name, int name_length, zval *value TSRMLS_DC)
 {
-	zval property;
+	zval *property;
 	zend_class_entry *old_scope = EG(scope);
 	
 	EG(scope) = scope;
@@ -2415,8 +2436,10 @@ ZEND_API void zend_update_property(zend_class_entry *scope, zval *object, char *
 		
 		zend_error(E_CORE_ERROR, "Property %s of class %s cannot be updated", name, class_name);
 	}
-	ZVAL_STRINGL(&property, name, name_length, 0);
-	Z_OBJ_HT_P(object)->write_property(object, &property, value TSRMLS_CC);
+	MAKE_STD_ZVAL(property);
+	ZVAL_STRINGL(property, name, name_length, 1);
+	Z_OBJ_HT_P(object)->write_property(object, property, value TSRMLS_CC);
+	zval_ptr_dtor(&property);
 
 	EG(scope) = old_scope;
 }
