@@ -78,7 +78,6 @@
 
 #include "php_getopt.h"
 
-#if PHP_FASTCGI
 #include "fcgi_config.h"
 #include "fcgiapp.h"
 /* don't want to include fcgios.h, causes conflicts */
@@ -108,8 +107,6 @@ static int parent = 1;
  * Process group
  */
 static pid_t pgroup;
-#endif
-
 #endif
 
 #define PHP_MODE_STANDARD	1
@@ -147,10 +144,9 @@ static const opt_struct OPTIONS[] = {
 	{'-', 0, NULL} /* end of args */
 };
 
-#if ENABLE_PATHINFO_CHECK
 /* true global.  this is retreived once only, even for fastcgi */
-long fix_pathinfo = 1;
-#endif
+static long fix_pathinfo = 1;
+static long discard_path = 0;
 
 #ifdef PHP_WIN32
 #define TRANSLATE_SLASHES(path) \
@@ -227,7 +223,6 @@ static inline size_t sapi_cgibin_single_write(const char *str, uint str_length T
 	size_t ret;
 #endif
 
-#if PHP_FASTCGI
 	if (!FCGX_IsCGI()) {
 		FCGX_Request *request = (FCGX_Request *) SG(server_context);
 		long ret = FCGX_PutStr(str, str_length, request->out);
@@ -236,7 +231,7 @@ static inline size_t sapi_cgibin_single_write(const char *str, uint str_length T
 		}
 		return ret;
 	}
-#endif
+
 #ifdef PHP_WRITE_STDOUT
 	ret = write(STDOUT_FILENO, str, str_length);
 	if (ret <= 0) return 0;
@@ -269,7 +264,6 @@ static int sapi_cgibin_ub_write(const char *str, uint str_length TSRMLS_DC)
 
 static void sapi_cgibin_flush(void *server_context)
 {
-#if PHP_FASTCGI
 	if (!FCGX_IsCGI()) {
 		FCGX_Request *request = (FCGX_Request *) server_context;
 		if (
@@ -281,7 +275,6 @@ static void sapi_cgibin_flush(void *server_context)
 		}
 		return;
 	}
-#endif
 	if (fflush(stdout) == EOF) {
 		php_handle_aborted_connection();
 	}
@@ -349,13 +342,10 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 static int sapi_cgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 {
 	uint read_bytes=0, tmp_read_bytes;
-#if PHP_FASTCGI
 	char *pos = buffer;
-#endif
 
 	count_bytes = MIN(count_bytes, (uint) SG(request_info).content_length - SG(read_post_bytes));
 	while (read_bytes < count_bytes) {
-#if PHP_FASTCGI
 		if (!FCGX_IsCGI()) {
 			FCGX_Request *request = (FCGX_Request *) SG(server_context);
 			tmp_read_bytes = FCGX_GetStr(pos, count_bytes - read_bytes, request->in);
@@ -363,10 +353,6 @@ static int sapi_cgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 		} else {
 			tmp_read_bytes = read(0, buffer + read_bytes, count_bytes - read_bytes);
 		}
-#else
-		tmp_read_bytes = read(0, buffer + read_bytes, count_bytes - read_bytes);
-#endif
-
 		if (tmp_read_bytes <= 0) {
 			break;
 		}
@@ -377,7 +363,6 @@ static int sapi_cgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 
 static char *sapi_cgibin_getenv(char *name, size_t name_len TSRMLS_DC)
 {
-#if PHP_FASTCGI
 	/* when php is started by mod_fastcgi, no regular environment
 	   is provided to PHP.  It is always sent to PHP at the start
 	   of a request.  So we have to do our own lookup to get env
@@ -386,7 +371,6 @@ static char *sapi_cgibin_getenv(char *name, size_t name_len TSRMLS_DC)
 		FCGX_Request *request = (FCGX_Request *) SG(server_context);
 		return FCGX_GetParam(name,request->envp);
 	}
-#endif
 	/*  if cgi, or fastcgi and not found in fcgi env
 		check the regular environment */
 	return getenv(name);
@@ -409,7 +393,6 @@ static char *_sapi_cgibin_putenv(char *name, char *value TSRMLS_DC)
 	} else {
 		snprintf(buf, len - 1, "%s=", name);
 	}
-#if PHP_FASTCGI
 	/* when php is started by mod_fastcgi, no regular environment
 	   is provided to PHP.  It is always sent to PHP at the start
 	   of a request.  So we have to do our own lookup to get env
@@ -420,7 +403,6 @@ static char *_sapi_cgibin_putenv(char *name, char *value TSRMLS_DC)
 		free(buf);
 		return sapi_cgibin_getenv(name,0 TSRMLS_CC);
 	}
-#endif
 	/*  if cgi, or fastcgi and not found in fcgi env
 		check the regular environment 
 		this leaks, but it's only cgi anyway, we'll fix
@@ -435,7 +417,6 @@ static char *sapi_cgi_read_cookies(TSRMLS_D)
 	return sapi_cgibin_getenv((char *) "HTTP_COOKIE", 0 TSRMLS_CC);
 }
 
-#if PHP_FASTCGI
 void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 {
 	if (!FCGX_IsCGI()) {
@@ -459,7 +440,6 @@ void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 	/* call php's original import as a catch-all */
 	php_php_import_environment_variables(array_ptr TSRMLS_CC);
 }
-#endif
 
 static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 {
@@ -473,7 +453,6 @@ static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 
 static void sapi_cgi_log_message(char *message)
 {
-#if PHP_FASTCGI
 	long logging = 1;
 	TSRMLS_FETCH();
 
@@ -487,9 +466,9 @@ static void sapi_cgi_log_message(char *message)
 			FCGX_FPrintF(request->err, "%s\n", message);
 		}
 		/* ignore return code */
-	} else
-#endif /* PHP_FASTCGI */
-	fprintf(stderr, "%s\n", message);
+	} else {
+		fprintf(stderr, "%s\n", message);
+	}
 }
 
 static int sapi_cgi_deactivate(TSRMLS_D)
@@ -517,13 +496,8 @@ static int php_cgi_startup(sapi_module_struct *sapi_module)
 /* {{{ sapi_module_struct cgi_sapi_module
  */
 static sapi_module_struct cgi_sapi_module = {
-#if PHP_FASTCGI
 	"cgi-fcgi",						/* name */
 	"CGI/FastCGI",					/* pretty name */
-#else
-	"cgi",							/* name */
-	"CGI",							/* pretty name */
-#endif
 
 	php_cgi_startup,				/* startup */
 	php_module_shutdown_wrapper,	/* shutdown */
@@ -569,7 +543,7 @@ static void php_cgi_usage(char *argv0)
 	php_printf("Usage: %s [-q] [-h] [-s] [-v] [-i] [-f <file>]\n"
 			   "       %s <file> [args...]\n"
 			   "  -a               Run interactively\n"
-#if PHP_FASTCGI && !defined(PHP_WIN32)
+#if !defined(PHP_WIN32)
 			   "  -b <address:port>|<port> Bind Path for external FASTCGI Server mode\n"
 #endif
 			   "  -C               Do not chdir to the script's directory\n"
@@ -663,14 +637,12 @@ static void init_request_info(TSRMLS_D)
 	char *env_path_translated = sapi_cgibin_getenv("PATH_TRANSLATED", 0 TSRMLS_CC);
 	char *script_path_translated = env_script_filename;
 
-#if !DISCARD_PATH
 	/* some broken servers do not have script_filename or argv0
 	   an example, IIS configured in some ways.  then they do more
 	   broken stuff and set path_translated to the cgi script location */
 	if (!script_path_translated && env_path_translated) {
 		script_path_translated = env_path_translated;
 	}
-#endif
 
 	/* initialize the defaults */
 	SG(request_info).path_translated = NULL;
@@ -692,12 +664,11 @@ static void init_request_info(TSRMLS_D)
 		char *content_type = sapi_cgibin_getenv("CONTENT_TYPE", 0 TSRMLS_CC);
 		char *env_path_info = sapi_cgibin_getenv("PATH_INFO", 0 TSRMLS_CC);
 		char *env_script_name = sapi_cgibin_getenv("SCRIPT_NAME", 0 TSRMLS_CC);
-#if ENABLE_PATHINFO_CHECK
-		struct stat st;
-		char *env_redirect_url = sapi_cgibin_getenv("REDIRECT_URL", 0 TSRMLS_CC);
-		char *env_document_root = sapi_cgibin_getenv("DOCUMENT_ROOT", 0 TSRMLS_CC);
 
 		if (fix_pathinfo) {
+			struct stat st;
+			char *env_redirect_url = sapi_cgibin_getenv("REDIRECT_URL", 0 TSRMLS_CC);
+			char *env_document_root = sapi_cgibin_getenv("DOCUMENT_ROOT", 0 TSRMLS_CC);
 
 			/* save the originals first for anything we change later */
 			if (env_path_translated) {
@@ -847,20 +818,17 @@ static void init_request_info(TSRMLS_D)
 			}
 			SG(request_info).request_uri = sapi_cgibin_getenv("SCRIPT_NAME",0 TSRMLS_CC);
 		} else {
-#endif
 			/* pre 4.3 behaviour, shouldn't be used but provides BC */
 			if (env_path_info) {
 				SG(request_info).request_uri = env_path_info;
 			} else {
 				SG(request_info).request_uri = env_script_name;
 			}
-#if !DISCARD_PATH
-			if (env_path_translated)
+			if (!discard_path && env_path_translated) {
 				script_path_translated = env_path_translated;
-#endif
-#if ENABLE_PATHINFO_CHECK
+			}
 		}
-#endif
+
 		SG(request_info).request_method = sapi_cgibin_getenv("REQUEST_METHOD", 0 TSRMLS_CC);
 		/* FIXME - Work out proto_num here */
 		SG(request_info).query_string = sapi_cgibin_getenv("QUERY_STRING", 0 TSRMLS_CC);
@@ -910,7 +878,6 @@ static void php_register_command_line_global_vars(char **arg TSRMLS_DC)
 	efree(*arg);
 }
 
-#if PHP_FASTCGI
 /**
  * Clean up child processes upon exit
  */
@@ -930,7 +897,6 @@ void fastcgi_cleanup(int signal)
 	/* We should exit at this point, but MacOSX doesn't seem to */
 	exit(0);
 }
-#endif
 
 /* {{{ main
  */
@@ -948,10 +914,6 @@ int main(int argc, char *argv[])
 	char *orig_optarg = php_optarg;
 	char *script_file = NULL;
 	zend_llist global_vars;
-#if FORCE_CGI_REDIRECT
-	long force_redirect = 1;
-	char *redirect_status_env = NULL;
-#endif
 
 /* end of temporary locals */
 #ifdef ZTS
@@ -962,7 +924,6 @@ int main(int argc, char *argv[])
 	void ***tsrm_ls;
 #endif
 
-#if PHP_FASTCGI
 	int max_requests = 500;
 	int requests = 0;
 	int fastcgi = !FCGX_IsCGI();
@@ -976,7 +937,6 @@ int main(int argc, char *argv[])
 #else
 	int status = 0;
 #endif
-#endif /* PHP_FASTCGI */
 
 #if 0 && defined(PHP_DEBUG)
 	/* IIS is always making things more difficult.  This allows
@@ -1013,21 +973,16 @@ int main(int argc, char *argv[])
 	setmode(_fileno(stderr), O_BINARY);	/* make the stdio mode be binary */
 #endif
 
-#if PHP_FASTCGI
 	if (!fastcgi) {
-#endif
-	/* Make sure we detect we are a cgi - a bit redundancy here,
-	   but the default case is that we have to check only the first one. */
-	if (getenv("SERVER_SOFTWARE") ||
-		getenv("SERVER_NAME") ||
-		getenv("GATEWAY_INTERFACE") ||
-		getenv("REQUEST_METHOD")
-	) {
-		cgi = 1;
+		/* Make sure we detect we are a cgi - a bit redundancy here,
+		   but the default case is that we have to check only the first one. */
+		if (getenv("SERVER_SOFTWARE") ||
+			getenv("SERVER_NAME") ||
+			getenv("GATEWAY_INTERFACE") ||
+			getenv("REQUEST_METHOD")) {
+			cgi = 1;
+		}
 	}
-#if PHP_FASTCGI
-	}
-#endif
 
 	while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0)) != -1) {
 		switch (c) {
@@ -1037,7 +992,6 @@ int main(int argc, char *argv[])
 			case 'n':
 				cgi_sapi_module.php_ini_ignore = 1;
 				break;
-#if PHP_FASTCGI
 #ifndef PHP_WIN32
 			/* if we're started on command line, check to see if
 			   we are being started as an 'external' fastcgi
@@ -1047,7 +1001,6 @@ int main(int argc, char *argv[])
 					bindpath = strdup(php_optarg);
 				}
 				break;
-#endif
 #endif
 		}
 
@@ -1074,29 +1027,32 @@ int main(int argc, char *argv[])
 		return FAILURE;
 	}
 
-#if FORCE_CGI_REDIRECT
-	/* check force_cgi after startup, so we have proper output */
-	if (cfg_get_long("cgi.force_redirect", &force_redirect) == FAILURE) {
-		force_redirect = 1;
-	}
-	if (cgi && force_redirect) {
-		if (cfg_get_string("cgi.redirect_status_env", &redirect_status_env) == FAILURE) {
-			redirect_status_env = NULL;
+	if (cgi) {
+		long force_redirect;
+		char *redirect_status_env;
+	
+		/* check force_cgi after startup, so we have proper output */
+		if (cfg_get_long("cgi.force_redirect", &force_redirect) == FAILURE) {
+			force_redirect = 1;
 		}
-		/* Apache will generate REDIRECT_STATUS,
-		 * Netscape and redirect.so will generate HTTP_REDIRECT_STATUS.
-		 * redirect.so and installation instructions available from
-		 * http://www.koehntopp.de/php.
-		 *   -- kk@netuse.de
-		 */
-		if (!getenv("REDIRECT_STATUS")
-			&& !getenv ("HTTP_REDIRECT_STATUS")
-			/* this is to allow a different env var to be configured
-			   in case some server does something different than above */
-			&& (!redirect_status_env || !getenv(redirect_status_env))
-			) {
-			SG(sapi_headers).http_response_code = 400;
-			PUTS("<b>Security Alert!</b> The PHP CGI cannot be accessed directly.\n\n\
+		if (force_redirect) {
+			if (cfg_get_string("cgi.redirect_status_env", &redirect_status_env) == FAILURE) {
+				redirect_status_env = NULL;
+			}
+			/* Apache will generate REDIRECT_STATUS,
+			 * Netscape and redirect.so will generate HTTP_REDIRECT_STATUS.
+			 * redirect.so and installation instructions available from
+			 * http://www.koehntopp.de/php.
+			 *   -- kk@netuse.de
+			 */
+			if (!getenv("REDIRECT_STATUS")
+				&& !getenv ("HTTP_REDIRECT_STATUS")
+				/* this is to allow a different env var to be configured
+				   in case some server does something different than above */
+				&& (!redirect_status_env || !getenv(redirect_status_env))
+				) {
+				SG(sapi_headers).http_response_code = 400;
+				PUTS("<b>Security Alert!</b> The PHP CGI cannot be accessed directly.\n\n\
 <p>This PHP CGI binary was compiled with force-cgi-redirect enabled.  This\n\
 means that a page will only be served up if the REDIRECT_STATUS CGI variable is\n\
 set, e.g. via an Apache Action directive.</p>\n\
@@ -1107,26 +1063,27 @@ consult the installation file that came with this distribution, or visit \n\
 <a href=\"http://php.net/install.windows\">the manual page</a>.</p>\n");
 
 #if defined(ZTS) && !defined(PHP_DEBUG)
-			/* XXX we're crashing here in msvc6 debug builds at
-			   php_message_handler_for_zend:839 because
-			   SG(request_info).path_translated is an invalid pointer.
-			   It still happens even though I set it to null, so something
-			   weird is going on.
-			*/
-			tsrm_shutdown();
+				/* XXX we're crashing here in msvc6 debug builds at
+				   php_message_handler_for_zend:839 because
+				   SG(request_info).path_translated is an invalid pointer.
+				   It still happens even though I set it to null, so something
+				   weird is going on.
+				*/
+				tsrm_shutdown();
 #endif
-			return FAILURE;
+				return FAILURE;
+			}
 		}
 	}
-#endif	/* FORCE_CGI_REDIRECT */
 
-#if ENABLE_PATHINFO_CHECK
 	if (cfg_get_long("cgi.fix_pathinfo", &fix_pathinfo) == FAILURE) {
 		fix_pathinfo = 1;
 	}
-#endif
 
-#if PHP_FASTCGI
+	if (cfg_get_long("cgi.discard_path", &discard_path) == FAILURE) {
+		discard_path = 0;
+	}
+
 #ifndef PHP_WIN32
 	/* for windows, socket listening is broken in the fastcgi library itself
 	   so dissabling this feature on windows till time is available to fix it */
@@ -1252,7 +1209,6 @@ consult the installation file that came with this distribution, or visit \n\
 
 #endif /* WIN32 */
 	}
-#endif /* FASTCGI */
 
 	zend_first_try {
 		while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 1)) != -1) {
@@ -1272,7 +1228,6 @@ consult the installation file that came with this distribution, or visit \n\
 		php_optind = orig_optind;
 		php_optarg = orig_optarg;
 
-#if PHP_FASTCGI
 		/* start of FAST CGI loop */
 		/* Initialise FastCGI request structure */
 #ifdef PHP_WIN32
@@ -1286,353 +1241,331 @@ consult the installation file that came with this distribution, or visit \n\
 		}
 #endif
 		while (!fastcgi || FCGX_Accept_r(&request) >= 0) {
-#endif
+			SG(server_context) = (void *) &request;
+			init_request_info(TSRMLS_C);
+			zend_llist_init(&global_vars, sizeof(char *), NULL, 0);
+			CG(interactive) = 0;
 
-#if PHP_FASTCGI
-		SG(server_context) = (void *) &request;
-#else
-		SG(server_context) = (void *) 1; /* avoid server_context==NULL checks */
-#endif
-		init_request_info(TSRMLS_C);
-		zend_llist_init(&global_vars, sizeof(char *), NULL, 0);
-		CG(interactive) = 0;
-
-		if (!cgi
-#if PHP_FASTCGI
-			&& !fastcgi
-#endif
-		) {
-			if (cgi_sapi_module.php_ini_path_override && cgi_sapi_module.php_ini_ignore) {
-				no_headers = 1;
-				php_output_startup();
-				php_output_activate(TSRMLS_C);
-				SG(headers_sent) = 1;
-				php_printf("You cannot use both -n and -c switch. Use -h for help.\n");
-				php_end_ob_buffers(1 TSRMLS_CC);
-				exit(1);
-			}
-
-			while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0)) != -1) {
-				switch (c) {
-
-  				case 'a':	/* interactive mode */
-						printf("Interactive mode enabled\n\n");
-						CG(interactive) = 1;
-						break;
-
-				case 'C': /* don't chdir to the script directory */
-						SG(options) |= SAPI_OPTION_NO_CHDIR;
-						break;
-				case 'd': /* define ini entries on command line */
-						define_command_line_ini_entry(php_optarg);
-						break;
-
-  				case 'e': /* enable extended info output */
-						CG(extended_info) = 1;
-						break;
-
-  				case 'f': /* parse file */
-						script_file = estrdup(php_optarg);
-						no_headers = 1;
-						/* arguments after the file are considered script args */
-						SG(request_info).argc = argc - (php_optind - 1);
-						SG(request_info).argv = &argv[php_optind - 1];
-						break;
-
-  				case 'g': /* define global variables on command line */
-						{
-							char *arg = estrdup(php_optarg);
-
-							zend_llist_add_element(&global_vars, &arg);
-						}
-						break;
-
-				case 'i': /* php info & quit */
-						if (php_request_startup(TSRMLS_C) == FAILURE) {
-							php_module_shutdown(TSRMLS_C);
-							return FAILURE;
-						}
-						if (no_headers) {
-							SG(headers_sent) = 1;
-							SG(request_info).no_headers = 1;
-						}
-						php_print_info(0xFFFFFFFF TSRMLS_CC);
-						php_end_ob_buffers(1 TSRMLS_CC);
-						exit(0);
-						break;
-
-  				case 'l': /* syntax check mode */
-						no_headers = 1;
-						behavior = PHP_MODE_LINT;
-						break;
-
-				case 'm': /* list compiled in modules */
+			if (!cgi && !fastcgi) {
+				if (cgi_sapi_module.php_ini_path_override && cgi_sapi_module.php_ini_ignore) {
+					no_headers = 1;
 					php_output_startup();
 					php_output_activate(TSRMLS_C);
 					SG(headers_sent) = 1;
-					php_printf("[PHP Modules]\n");
-					print_modules(TSRMLS_C);
-					php_printf("\n[Zend Modules]\n");
-					print_extensions(TSRMLS_C);
-					php_printf("\n");
+					php_printf("You cannot use both -n and -c switch. Use -h for help.\n");
 					php_end_ob_buffers(1 TSRMLS_CC);
-					exit(0);
-					break;
+					exit(1);
+				}
+
+				while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0)) != -1) {
+					switch (c) {
+
+	  				case 'a':	/* interactive mode */
+							printf("Interactive mode enabled\n\n");
+							CG(interactive) = 1;
+							break;
+
+						case 'C': /* don't chdir to the script directory */
+							SG(options) |= SAPI_OPTION_NO_CHDIR;
+							break;
+						case 'd': /* define ini entries on command line */
+							define_command_line_ini_entry(php_optarg);
+							break;
+
+	  				case 'e': /* enable extended info output */
+							CG(extended_info) = 1;
+							break;
+
+  					case 'f': /* parse file */
+							script_file = estrdup(php_optarg);
+							no_headers = 1;
+							/* arguments after the file are considered script args */
+							SG(request_info).argc = argc - (php_optind - 1);
+							SG(request_info).argv = &argv[php_optind - 1];
+							break;
+
+	  				case 'g': /* define global variables on command line */
+							{
+								char *arg = estrdup(php_optarg);
+
+								zend_llist_add_element(&global_vars, &arg);
+							}
+							break;
+
+						case 'i': /* php info & quit */
+							if (php_request_startup(TSRMLS_C) == FAILURE) {
+								php_module_shutdown(TSRMLS_C);
+								return FAILURE;
+							}
+							if (no_headers) {
+								SG(headers_sent) = 1;
+								SG(request_info).no_headers = 1;
+							}
+							php_print_info(0xFFFFFFFF TSRMLS_CC);
+							php_end_ob_buffers(1 TSRMLS_CC);
+							exit(0);
+							break;
+
+	  				case 'l': /* syntax check mode */
+							no_headers = 1;
+							behavior = PHP_MODE_LINT;
+							break;
+
+						case 'm': /* list compiled in modules */
+							php_output_startup();
+							php_output_activate(TSRMLS_C);
+							SG(headers_sent) = 1;
+							php_printf("[PHP Modules]\n");
+							print_modules(TSRMLS_C);
+							php_printf("\n[Zend Modules]\n");
+							print_extensions(TSRMLS_C);
+							php_printf("\n");
+							php_end_ob_buffers(1 TSRMLS_CC);
+							exit(0);
+							break;
 
 #if 0 /* not yet operational, see also below ... */
-  				case '': /* generate indented source mode*/
-						behavior=PHP_MODE_INDENT;
-						break;
+	  				case '': /* generate indented source mode*/
+							behavior=PHP_MODE_INDENT;
+							break;
 #endif
 
-  				case 'q': /* do not generate HTTP headers */
-						no_headers = 1;
-						break;
+	  				case 'q': /* do not generate HTTP headers */
+							no_headers = 1;
+							break;
 
-  				case 's': /* generate highlighted HTML from source */
-						behavior = PHP_MODE_HIGHLIGHT;
-						break;
+	  				case 's': /* generate highlighted HTML from source */
+							behavior = PHP_MODE_HIGHLIGHT;
+							break;
 
-				case 'v': /* show php version & quit */
-						no_headers = 1;
-						if (php_request_startup(TSRMLS_C) == FAILURE) {
-							php_module_shutdown(TSRMLS_C);
-							return FAILURE;
-						}
-						if (no_headers) {
-							SG(headers_sent) = 1;
-							SG(request_info).no_headers = 1;
-						}
+						case 'v': /* show php version & quit */
+							no_headers = 1;
+							if (php_request_startup(TSRMLS_C) == FAILURE) {
+								php_module_shutdown(TSRMLS_C);
+								return FAILURE;
+							}
+							if (no_headers) {
+								SG(headers_sent) = 1;
+								SG(request_info).no_headers = 1;
+							}
 #if ZEND_DEBUG
-						php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2005 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
+							php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2005 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 #else
-						php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2005 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
+							php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2005 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 #endif
-						php_end_ob_buffers(1 TSRMLS_CC);
-						exit(0);
-						break;
+							php_end_ob_buffers(1 TSRMLS_CC);
+							exit(0);
+							break;
 
-  				case 'w':
-						behavior = PHP_MODE_STRIP;
-						break;
+	  				case 'w':
+							behavior = PHP_MODE_STRIP;
+							break;
 
-				case 'z': /* load extension file */
-						zend_load_extension(php_optarg);
-						break;
+						case 'z': /* load extension file */
+							zend_load_extension(php_optarg);
+							break;
 
-					default:
-						break;
+						default:
+							break;
+					}
 				}
+
+				if (script_file) {
+					/* override path_translated if -f on command line */
+					SG(request_info).path_translated = script_file;
+				}
+
+				if (no_headers) {
+					SG(headers_sent) = 1;
+					SG(request_info).no_headers = 1;
+				}
+
+				if (!SG(request_info).path_translated && argc > php_optind) {
+					/* arguments after the file are considered script args */
+					SG(request_info).argc = argc - php_optind;
+					SG(request_info).argv = &argv[php_optind];
+					/* file is on command line, but not in -f opt */
+					SG(request_info).path_translated = estrdup(argv[php_optind++]);
+				}
+
+				/* all remaining arguments are part of the query string
+				   this section of code concatenates all remaining arguments
+				   into a single string, seperating args with a &
+				   this allows command lines like:
+
+				   test.php v1=test v2=hello+world!
+				   test.php "v1=test&v2=hello world!"
+				   test.php v1=test "v2=hello world!"
+				*/
+				if (!SG(request_info).query_string && argc > php_optind) {
+					len = 0;
+					for (i = php_optind; i < argc; i++) {
+						len += strlen(argv[i]) + 1;
+					}
+
+					s = malloc(len + 1);	/* leak - but only for command line version, so ok */
+					*s = '\0';			/* we are pretending it came from the environment  */
+					for (i = php_optind, len = 0; i < argc; i++) {
+						strcat(s, argv[i]);
+						if (i < (argc - 1)) {
+							strcat(s, PG(arg_separator).input);
+						}
+					}
+					SG(request_info).query_string = s;
+				}
+			} /* end !cgi && !fastcgi */
+
+			/* 
+				we never take stdin if we're (f)cgi, always
+				rely on the web server giving us the info
+				we need in the environment. 
+			*/
+			if (SG(request_info).path_translated || cgi || fastcgi) {
+				file_handle.type = ZEND_HANDLE_FILENAME;
+				file_handle.filename = SG(request_info).path_translated;
+				file_handle.handle.fp = NULL;
+			} else {
+				file_handle.filename = "-";
+				file_handle.type = ZEND_HANDLE_FP;
+				file_handle.handle.fp = stdin;
 			}
 
-			if (script_file) {
-				/* override path_translated if -f on command line */
-				SG(request_info).path_translated = script_file;
-			}
+			file_handle.opened_path = NULL;
+			file_handle.free_filename = 0;
 
+			/* request startup only after we've done all we can to
+			   get path_translated */
+			if (php_request_startup(TSRMLS_C) == FAILURE) {
+				if (fastcgi) {
+					FCGX_Finish_r(&request);
+				}
+				php_module_shutdown(TSRMLS_C);
+				return FAILURE;
+			}
 			if (no_headers) {
 				SG(headers_sent) = 1;
 				SG(request_info).no_headers = 1;
 			}
 
-			if (!SG(request_info).path_translated && argc > php_optind) {
-				/* arguments after the file are considered script args */
-				SG(request_info).argc = argc - php_optind;
-				SG(request_info).argv = &argv[php_optind];
-				/* file is on command line, but not in -f opt */
-				SG(request_info).path_translated = estrdup(argv[php_optind++]);
-			}
+			/* This actually destructs the elements of the list - ugly hack */
+			zend_llist_apply(&global_vars, (llist_apply_func_t) php_register_command_line_global_vars TSRMLS_CC);
+			zend_llist_destroy(&global_vars);
 
-			/* all remaining arguments are part of the query string
-			   this section of code concatenates all remaining arguments
-			   into a single string, seperating args with a &
-			   this allows command lines like:
-
-			   test.php v1=test v2=hello+world!
-			   test.php "v1=test&v2=hello world!"
-			   test.php v1=test "v2=hello world!"
+			/* 
+				at this point path_translated will be set if:
+				1. we are running from shell and got filename was there
+				2. we are running as cgi or fastcgi
 			*/
-			if (!SG(request_info).query_string && argc > php_optind) {
-				len = 0;
-				for (i = php_optind; i < argc; i++) {
-					len += strlen(argv[i]) + 1;
+			if (cgi || SG(request_info).path_translated) {
+				retval = php_fopen_primary_script(&file_handle TSRMLS_CC);
+			}
+			/* 
+				if we are unable to open path_translated and we are not
+				running from shell (so fp == NULL), then fail.
+			*/
+			if (retval == FAILURE && file_handle.handle.fp == NULL) {
+				SG(sapi_headers).http_response_code = 404;
+				PUTS("No input file specified.\n");
+				/* we want to serve more requests if this is fastcgi
+				   so cleanup and continue, request shutdown is
+				   handled later */
+				if (fastcgi) {
+					goto fastcgi_request_done;
 				}
+				php_request_shutdown((void *) 0);
+				php_module_shutdown(TSRMLS_C);
+				return FAILURE;
+			}
 
-				s = malloc(len + 1);	/* leak - but only for command line version, so ok */
-				*s = '\0';			/* we are pretending it came from the environment  */
-				for (i = php_optind, len = 0; i < argc; i++) {
-					strcat(s, argv[i]);
-					if (i < (argc - 1)) {
-						strcat(s, PG(arg_separator).input);
+			if (file_handle.handle.fp && (file_handle.handle.fp != stdin)) {
+				/* #!php support */
+				c = fgetc(file_handle.handle.fp);
+				if (c == '#') {
+					while (c != 10 && c != 13) {
+						c = fgetc(file_handle.handle.fp);	/* skip to end of line */
 					}
-				}
-				SG(request_info).query_string = s;
-			}
-		} /* end !cgi && !fastcgi */
-
-		/* 
-			we never take stdin if we're (f)cgi, always
-			rely on the web server giving us the info
-			we need in the environment. 
-		*/
-		if (SG(request_info).path_translated || cgi 
-#if PHP_FASTCGI
-			|| fastcgi
-#endif
-		)
-		{
-			file_handle.type = ZEND_HANDLE_FILENAME;
-			file_handle.filename = SG(request_info).path_translated;
-			file_handle.handle.fp = NULL;
-		} else {
-			file_handle.filename = "-";
-			file_handle.type = ZEND_HANDLE_FP;
-			file_handle.handle.fp = stdin;
-		}
-
-		file_handle.opened_path = NULL;
-		file_handle.free_filename = 0;
-
-		/* request startup only after we've done all we can to
-		   get path_translated */
-		if (php_request_startup(TSRMLS_C) == FAILURE) {
-#if PHP_FASTCGI
-			if (fastcgi) {
-				FCGX_Finish_r(&request);
-			}
-#endif
-			php_module_shutdown(TSRMLS_C);
-			return FAILURE;
-		}
-		if (no_headers) {
-			SG(headers_sent) = 1;
-			SG(request_info).no_headers = 1;
-		}
-
-		/* This actually destructs the elements of the list - ugly hack */
-		zend_llist_apply(&global_vars, (llist_apply_func_t) php_register_command_line_global_vars TSRMLS_CC);
-		zend_llist_destroy(&global_vars);
-
-		/* 
-			at this point path_translated will be set if:
-			1. we are running from shell and got filename was there
-			2. we are running as cgi or fastcgi
-		*/
-		if (cgi || SG(request_info).path_translated) {
-			retval = php_fopen_primary_script(&file_handle TSRMLS_CC);
-		}
-		/* 
-			if we are unable to open path_translated and we are not
-			running from shell (so fp == NULL), then fail.
-		*/
-		if (retval == FAILURE && file_handle.handle.fp == NULL) {
-			SG(sapi_headers).http_response_code = 404;
-			PUTS("No input file specified.\n");
-#if PHP_FASTCGI
-			/* we want to serve more requests if this is fastcgi
-			   so cleanup and continue, request shutdown is
-			   handled later */
-			if (fastcgi) {
-				goto fastcgi_request_done;
-			}
-#endif
-			php_request_shutdown((void *) 0);
-			php_module_shutdown(TSRMLS_C);
-			return FAILURE;
-		}
-
-		if (file_handle.handle.fp && (file_handle.handle.fp != stdin)) {
-			/* #!php support */
-			c = fgetc(file_handle.handle.fp);
-			if (c == '#') {
-				while (c != 10 && c != 13) {
-					c = fgetc(file_handle.handle.fp);	/* skip to end of line */
-				}
-				/* handle situations where line is terminated by \r\n */
-				if (c == 13) {
-					if (fgetc(file_handle.handle.fp) != 10) {
-						long pos = ftell(file_handle.handle.fp);
-						fseek(file_handle.handle.fp, pos - 1, SEEK_SET);
+					/* handle situations where line is terminated by \r\n */
+					if (c == 13) {
+						if (fgetc(file_handle.handle.fp) != 10) {
+							long pos = ftell(file_handle.handle.fp);
+							fseek(file_handle.handle.fp, pos - 1, SEEK_SET);
+						}
 					}
-				}
-				CG(start_lineno) = 2;
-			} else {
-				rewind(file_handle.handle.fp);
-			}
-		}
-
-		switch (behavior) {
-			case PHP_MODE_STANDARD:
-				php_execute_script(&file_handle TSRMLS_CC);
-				break;
-			case PHP_MODE_LINT:
-				PG(during_request_startup) = 0;
-				exit_status = php_lint_script(&file_handle TSRMLS_CC);
-				if (exit_status == SUCCESS) {
-					zend_printf("No syntax errors detected in %s\n", file_handle.filename);
+					CG(start_lineno) = 2;
 				} else {
-					zend_printf("Errors parsing %s\n", file_handle.filename);
+					rewind(file_handle.handle.fp);
 				}
-				break;
-			case PHP_MODE_STRIP:
-				if (open_file_for_scanning(&file_handle TSRMLS_CC) == SUCCESS) {
-					zend_strip(TSRMLS_C);
-					fclose(file_handle.handle.fp);
-					php_end_ob_buffers(1 TSRMLS_CC);
-				}
-				return SUCCESS;
-				break;
-			case PHP_MODE_HIGHLIGHT:
-				{
-					zend_syntax_highlighter_ini syntax_highlighter_ini;
+			}
 
+			switch (behavior) {
+				case PHP_MODE_STANDARD:
+					php_execute_script(&file_handle TSRMLS_CC);
+					break;
+				case PHP_MODE_LINT:
+					PG(during_request_startup) = 0;
+					exit_status = php_lint_script(&file_handle TSRMLS_CC);
+					if (exit_status == SUCCESS) {
+						zend_printf("No syntax errors detected in %s\n", file_handle.filename);
+					} else {
+						zend_printf("Errors parsing %s\n", file_handle.filename);
+					}
+					break;
+				case PHP_MODE_STRIP:
 					if (open_file_for_scanning(&file_handle TSRMLS_CC) == SUCCESS) {
-						php_get_highlight_struct(&syntax_highlighter_ini);
-						zend_highlight(&syntax_highlighter_ini TSRMLS_CC);
+						zend_strip(TSRMLS_C);
 						fclose(file_handle.handle.fp);
 						php_end_ob_buffers(1 TSRMLS_CC);
 					}
 					return SUCCESS;
-				}
-				break;
+					break;
+				case PHP_MODE_HIGHLIGHT:
+					{
+						zend_syntax_highlighter_ini syntax_highlighter_ini;
+
+						if (open_file_for_scanning(&file_handle TSRMLS_CC) == SUCCESS) {
+							php_get_highlight_struct(&syntax_highlighter_ini);
+							zend_highlight(&syntax_highlighter_ini TSRMLS_CC);
+							fclose(file_handle.handle.fp);
+							php_end_ob_buffers(1 TSRMLS_CC);
+						}
+						return SUCCESS;
+					}
+					break;
 #if 0
-			/* Zeev might want to do something with this one day */
-			case PHP_MODE_INDENT:
-				open_file_for_scanning(&file_handle TSRMLS_CC);
-				zend_indent();
-				fclose(file_handle.handle.fp);
-				return SUCCESS;
-				break;
+				/* Zeev might want to do something with this one day */
+				case PHP_MODE_INDENT:
+					open_file_for_scanning(&file_handle TSRMLS_CC);
+					zend_indent();
+					fclose(file_handle.handle.fp);
+					return SUCCESS;
+					break;
 #endif
-		}
+			}
 
-#if PHP_FASTCGI
 fastcgi_request_done:
-#endif
-		{
-			char *path_translated;
+			{
+				char *path_translated;
 
-			/*	Go through this trouble so that the memory manager doesn't warn
-			 *	about SG(request_info).path_translated leaking
-			 */
-			if (SG(request_info).path_translated) {
-				path_translated = strdup(SG(request_info).path_translated);
-				STR_FREE(SG(request_info).path_translated);
-				SG(request_info).path_translated = path_translated;
+				/*	Go through this trouble so that the memory manager doesn't warn
+				 *	about SG(request_info).path_translated leaking
+				 */
+				if (SG(request_info).path_translated) {
+					path_translated = strdup(SG(request_info).path_translated);
+					STR_FREE(SG(request_info).path_translated);
+					SG(request_info).path_translated = path_translated;
+				}
+
+				php_request_shutdown((void *) 0);
+				if (exit_status == 0) {
+					exit_status = EG(exit_status);
+				}
+
+				if (SG(request_info).path_translated) {
+					free(SG(request_info).path_translated);
+					SG(request_info).path_translated = NULL;
+				}
 			}
 
-			php_request_shutdown((void *) 0);
-			if (exit_status == 0) {
-				exit_status = EG(exit_status);
-			}
-
-			if (SG(request_info).path_translated) {
-				free(SG(request_info).path_translated);
-				SG(request_info).path_translated = NULL;
-			}
-		}
-
-#if PHP_FASTCGI
 			if (!fastcgi) break;
 			/* only fastcgi will get here */
 			requests++;
@@ -1647,7 +1580,6 @@ fastcgi_request_done:
 			}
 			/* end of fastcgi loop */
 		}
-#endif
 
 		if (cgi_sapi_module.php_ini_path_override) {
 			free(cgi_sapi_module.php_ini_path_override);
