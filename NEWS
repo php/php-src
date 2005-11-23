@@ -10,6 +10,7 @@ PHP                                                                        NEWS
   (Marcus, Dmitry)
 - Changed "instanceof" and "catch" operators, is_a() and is_subclass_of()
   functions to not call __autoload(). (Dmitry)
+- Changed reflection constants to class constants. (Johannes)
 - Added "allow_url_include" ini directive to be able to turn off remote url
   code execution separately from the "allow_url_fopen" setting. (Rasmus)
 - Added --enable-gcov configure option to enable C-level code coverage.
