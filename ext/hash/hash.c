@@ -106,7 +106,7 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename)
 		digest[ops->digest_size] = 0;
 		RETURN_STRINGL(digest, ops->digest_size, 0);
 	} else {
-		char *hex_digest = emalloc((ops->digest_size * 2) + 1);
+		char *hex_digest = safe_emalloc(ops->digest_size, 2, 1);
 
 		php_hash_bin2hex(hex_digest, digest, ops->digest_size);
 		hex_digest[2 * ops->digest_size] = 0;
@@ -341,7 +341,7 @@ PHP_FUNCTION(hash_final)
 	if (raw_output) {
 		RETURN_STRINGL(digest, digest_len, 0);
 	} else {
-		char *hex_digest = emalloc((digest_len * 2) + 1);
+		char *hex_digest = safe_emalloc(digest_len,2,1);
 
 		php_hash_bin2hex(hex_digest, digest, digest_len);
 		hex_digest[2 * digest_len] = 0;
