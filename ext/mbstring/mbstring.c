@@ -2798,6 +2798,15 @@ PHP_FUNCTION(mb_decode_numericentity)
  */
 #if HAVE_SENDMAIL
 
+#define SKIP_LONG_HEADER_SEP_MBSTRING(str, pos)										\
+	if (str[pos] == '\r' && str[pos + 1] == '\n' && (str[pos + 2] == ' ' || str[pos + 2] == '\t')) {	\
+		pos += 3;											\
+		while (str[pos] == ' ' || str[pos] == '\t') {							\
+			pos++;											\
+		}												\
+		continue;											\
+	}
+
 #define APPEND_ONE_CHAR(ch) do { \
 	if (token.a > 0) { \
 		smart_str_appendc(&token, ch); \
@@ -3009,6 +3018,8 @@ PHP_FUNCTION(mb_send_mail)
 	int subject_len;
 	char *extra_cmd=NULL;
 	int extra_cmd_len;
+	int i;
+	char *to_r;
 	char *force_extra_parameters = INI_STR("mail.force_extra_parameters");
 	struct {
 		int cnt_type:1;
@@ -3115,7 +3126,30 @@ PHP_FUNCTION(mb_send_mail)
 	}
 
 	/* To: */
-	if (to == NULL || to_len <= 0) {
+	if (to != NULL) {
+        if (to_len > 0) {
+            to_r = estrndup(to, to_len);
+            for (; to_len; to_len--) {
+                if (!isspace((unsigned char) to_r[to_len - 1])) {
+                    break;
+                }
+                to_r[to_len - 1] = '\0';
+            }
+            for (i = 0; to_r[i]; i++) {
+			if (iscntrl((unsigned char) to_r[i])) {
+				/* According to RFC 822, section 3.1.1 long headers may be separated into
+				 * parts using CRLF followed at least one linear-white-space character ('\t' or ' ').
+				 * To prevent these separators from being replaced with a space, we use the
+				 * SKIP_LONG_HEADER_SEP_MBSTRING to skip over them.
+				 */
+				SKIP_LONG_HEADER_SEP_MBSTRING(to_r, i);
+				to_r[i] = ' ';
+			}
+            }
+        } else {
+            to_r = to;
+        }
+    } else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing To: field");
 		err = 1;
 	}
@@ -3217,7 +3251,7 @@ PHP_FUNCTION(mb_send_mail)
 		extra_cmd = php_escape_shell_cmd(extra_cmd);
 	} 
 
-	if (!err && php_mail(to, subject, message, headers, extra_cmd TSRMLS_CC)) {
+	if (!err && php_mail(to_r, subject, message, headers, extra_cmd TSRMLS_CC)) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
@@ -3225,6 +3259,9 @@ PHP_FUNCTION(mb_send_mail)
 
 	if (extra_cmd) {
 		efree(extra_cmd);
+	}
+	if (to_r != to) {
+		efree(to_r);
 	}
 	if (subject_buf) {
 		efree((void *)subject_buf);
@@ -3236,6 +3273,7 @@ PHP_FUNCTION(mb_send_mail)
 	zend_hash_destroy(&ht_headers);
 }
 
+#undef SKIP_LONG_HEADER_SEP_MBSTRING
 #undef APPEND_ONE_CHAR
 #undef SEPARATE_SMART_STR
 #undef PHP_MBSTR_MAIL_MIME_HEADER1
