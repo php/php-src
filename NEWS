@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Nov 2005, PHP 5.1
+- Fixed bug #35342 (isset(DOMNodeList->length) returns false). (Rob)
 - Fixed bug #35341 (Fix for bug #33760 breaks build with older curl). (Tony)
 - Fixed bug #35303 (PDO prepare() crashes with invalid parameters). (Ilia)
 - Fixed bug #35293 (PDO segfaults when using persistent connections). (Tony)
