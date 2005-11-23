@@ -346,6 +346,41 @@ void dom_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ dom_property_exists */
+static int dom_property_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
+{
+	dom_object *obj;
+	zval tmp_member;
+	dom_prop_handler *hnd;
+	zend_object_handlers *std_hnd;
+	int ret, retval=0;
+
+ 	if (member->type != IS_STRING) {
+		tmp_member = *member;
+		zval_copy_ctor(&tmp_member);
+		convert_to_string(&tmp_member);
+		member = &tmp_member;
+	}
+
+	ret = FAILURE;
+	obj = (dom_object *)zend_objects_get_address(object TSRMLS_CC);
+
+	if (obj->prop_handler != NULL) {
+		ret = zend_hash_find((HashTable *)obj->prop_handler, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &hnd);
+	}
+	if (ret == SUCCESS) {
+		retval = 1;
+	} else {
+		std_hnd = zend_get_std_object_handlers();
+		retval = std_hnd->has_property(object, member, check_empty TSRMLS_CC);
+	}
+
+	if (member == &tmp_member) {
+		zval_dtor(member);
+	}
+	return retval;
+}
+/* }}} */
 
 void *php_dom_export_node(zval *object TSRMLS_DC)
 {
@@ -468,12 +503,14 @@ PHP_MINIT_FUNCTION(dom)
 	dom_object_handlers.write_property = dom_write_property;
 	dom_object_handlers.get_property_ptr_ptr = dom_get_property_ptr_ptr;
 	dom_object_handlers.clone_obj = dom_objects_store_clone_obj;
+	dom_object_handlers.has_property = dom_property_exists;
 
 	memcpy(&dom_ze1_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	dom_ze1_object_handlers.read_property = dom_read_property;
 	dom_ze1_object_handlers.write_property = dom_write_property;
 	dom_object_handlers.get_property_ptr_ptr = dom_get_property_ptr_ptr;
 	dom_ze1_object_handlers.clone_obj = dom_objects_ze1_clone_obj;
+	dom_ze1_object_handlers.has_property = dom_property_exists;
 
 	zend_hash_init(&classes, 0, NULL, NULL, 1);
 
