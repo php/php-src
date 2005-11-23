@@ -12,7 +12,7 @@ echo hash('sha1', '012345678901234567890123456789012345678901234567890123456789'
 echo hash('sha1', 'abc') . "\n";
 echo hash('sha1', 'abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq') . "\n";
 echo hash('sha1', str_repeat('a', 1000000)) . "\n";
---EXPECTF--
+--EXPECT--
 da39a3ee5e6b4b0d3255bfef95601890afd80709
 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8
 f52e3c2732de7bea28f216d877d78dae1aa1ac6a

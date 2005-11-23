@@ -25,7 +25,7 @@ for($pass=3; $pass<=5; $pass++)
 		echo $algo . ': ' . hash($algo,'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMOPQRSTUVWXYZ0123456789') . "\n";
 	}
 
---EXPECTF--
+--EXPECT--
 Empty String
 haval128,3: c68f39913f901f3ddf44c707357a7d70
 haval160,3: d353c3ae22a25401d257643836d7231a9a95f953

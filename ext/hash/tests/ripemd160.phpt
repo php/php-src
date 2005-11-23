@@ -13,7 +13,7 @@ echo hash('ripemd160', 'abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq
 echo hash('ripemd160', 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789') . "\n";
 echo hash('ripemd160', '12345678901234567890123456789012345678901234567890123456789012345678901234567890') . "\n";
 echo hash('ripemd160', str_repeat('a', 1000000)) . "\n";
---EXPECTF--
+--EXPECT--
 9c1185a5c5e9fc54612808977ee8f548b2258d31
 0bdc9d2d256b3ee9daae347be6f4dc835a467ffe
 8eb208f7e05d987a9b044a8e98c6b087f15a0bfc
