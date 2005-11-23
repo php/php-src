@@ -1,5 +1,5 @@
 -------------------------------------------------------------------- 
-                  The PHP License, Version 3.0
+                  The PHP License, version 3.01
 Copyright (c) 1999 - 2005 The PHP Group. All rights reserved.
 -------------------------------------------------------------------- 
 
@@ -38,8 +38,8 @@ are met:
 
   6. Redistributions of any form whatsoever must retain the following
      acknowledgment:
-     "This product includes PHP, freely available from
-     <http://www.php.net/>".
+     "This product includes PHP software, freely available from
+     <http://www.php.net/software/>".
 
 THIS SOFTWARE IS PROVIDED BY THE PHP DEVELOPMENT TEAM ``AS IS'' AND 
 ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
@@ -64,5 +64,5 @@ The PHP Group can be contacted via Email at group@php.net.
 For more information on the PHP Group and the PHP project, 
 please see <http://www.php.net>.
 
-This product includes the Zend Engine, freely available at
+PHP includes the Zend Engine, freely available at
 <http://www.zend.com>.
