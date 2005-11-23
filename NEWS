@@ -53,6 +53,8 @@ PHP                                                                        NEWS
   (Marcus)
 - Fixed bug #34199 (if($obj)/if(!$obj) inconsistency because of cast handler).
   (Dmitry, Alex)
+- Fixed bug #33732 (Wrong behavior of constants in class and interface
+  extending). (Dmitry)
 - Fixed bug #33720 (mb_encode_mimeheader does not work for multibyte
   chars). (Rui)
 - Fixed bug #33383 (crash when retrieving empty LOBs). (Tony)
