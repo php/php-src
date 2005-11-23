@@ -364,7 +364,7 @@ PHP_FUNCTION(hash_algos)
 	for(zend_hash_internal_pointer_reset_ex(&php_hash_hashtable, &pos);
 		(type = zend_hash_get_current_key_ex(&php_hash_hashtable, &str, &str_len, &idx, 0, &pos)) != HASH_KEY_NON_EXISTANT;
 		zend_hash_move_forward_ex(&php_hash_hashtable, &pos)) {
-		add_next_index_stringl(return_value, str, str_len, 1);
+		add_next_index_stringl(return_value, str, str_len-1, 1);
 	}
 }
 /* }}} */
