@@ -195,9 +195,9 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
  */
 void php_info_print_style()
 {
-	php_printf("<style type=\"text/css\"><!--\n");
+	php_printf("<style type=\"text/css\">\n");
 	php_info_print_css();
-	php_printf("//--></style>\n");
+	php_printf("</style>\n");
 }
 /* }}} */
 
