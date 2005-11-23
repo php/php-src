@@ -11,6 +11,8 @@ PHP                                                                        NEWS
   on Linux). (Patch: shulmanb at il dot ibm dot com, Jani)
 - Fixed bug #35143 (gettimeofday() ignores current time zone). (Derick)
 - Fixed bug #35046 (phpinfo() uses improper css enclosure). (Ilia)
+- Fixed bug #33732 (Wrong behavior of constants in class and interface
+  extending). (Dmitry)
 - Fixed bug #33153 (crash in mssql_next result). (Frank)
 - Fixed bug #33963 (mssql_bind() fails on input parameters). (Frank)
 - Fixed bug #33201 (Crash when fetching some data types). (Frank)
