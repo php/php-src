@@ -4,7 +4,7 @@ zlib.inflate (with convert.base64-decode)
 <?php if (!extension_loaded("zlib")) print "skip"; ?>
 --FILE--
 <?php /* $Id$ */
-$text = 'eJwdy0EOgCAMRNGrzM6N8R4co4YBMbRNGkLi7VV2f/FfgijGRUzGA/XMDi+QlWFQuT1QaQzpO9I2iWbFQ2U0t49VDjk7d4g1/R+xDG0LHC8+diGh';
+$text = 'HctBDoAgDETRq8zOjfEeHKOGATG0TRpC4u1Vdn/xX4IoxkVMxgP1zA4vkJVhULk9UGkM6TvSNolmxUNlNLePVQ45O3eINf0fsQxtCxwv';
 
 $fp = fopen('php://stdout', 'w');
 stream_filter_append($fp, 'convert.base64-decode', STREAM_FILTER_WRITE);
