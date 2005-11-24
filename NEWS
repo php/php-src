@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, PHP 5.1.1
+- Changed reflection constants to class constants. (Johannes)
 - Added an additional field $frame['object'] to the result array of
   debug_backtrace() that contains a reference to the respective object when the
   frame was called from an object. (Sebastian)
