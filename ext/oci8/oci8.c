@@ -991,7 +991,15 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 		}
 		else if (!persistent && zend_hash_find(&EG(regular_list), hashed_details.c, hashed_details.len+1, (void **) &le) == SUCCESS) {
 			if (le->type == le_index_ptr) {
-				connection = (php_oci_connection *)le->ptr;
+				int type;
+				long link;
+				void *ptr;
+
+				link = (long) le->ptr;
+				ptr = zend_list_find(link,&type);
+				if (ptr && (type == le_connection)) {
+					connection = (php_oci_connection *)ptr;
+				}
 			}
 		}
 
@@ -1279,12 +1287,9 @@ open:
 	/* mark it as open */
 	connection->is_open = 1;
 
-	/* register resource and return it */
-
-	new_le.ptr = connection;
-
 	/* add to the appropriate hash */
 	if (connection->is_persistent) {
+		new_le.ptr = connection;
 		new_le.type = le_pconnection;
 		connection->used_this_request = 1;
 		connection->rsrc_id = zend_list_insert(connection, le_pconnection);
@@ -1292,8 +1297,9 @@ open:
 		OCI_G(num_persistent)++;
 	}
 	else if (!exclusive) {
-		new_le.type = le_index_ptr;
 		connection->rsrc_id = zend_list_insert(connection, le_connection);
+		new_le.ptr = (void *)connection->rsrc_id;
+		new_le.type = le_index_ptr;
 		zend_hash_update(&EG(regular_list), connection->hash_key, strlen(connection->hash_key)+1, (void *)&new_le, sizeof(list_entry), NULL);
 		OCI_G(num_links)++;
 	}
