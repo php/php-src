@@ -1217,6 +1217,8 @@ void execute_new_code(TSRMLS_D)
 	INIT_ZVAL(ret_opline->op1.u.constant);
 	SET_UNUSED(ret_opline->op2);
 
+	zend_do_handle_exception(TSRMLS_C);
+
 	if (!CG(active_op_array)->start_op) {
 		CG(active_op_array)->start_op = CG(active_op_array)->opcodes;
 	}
@@ -1254,8 +1256,12 @@ void execute_new_code(TSRMLS_D)
 	if (local_retval) {
 		zval_ptr_dtor(&local_retval);
 	}
+	
+	if (EG(exception)) {
+		zend_exception_error(EG(exception) TSRMLS_CC);
+	}
 
-	CG(active_op_array)->last--;	/* get rid of that ZEND_RETURN */
+	CG(active_op_array)->last -= 2;	/* get rid of that ZEND_RETURN and ZEND_HANDLE_EXCEPTION */
 	CG(active_op_array)->start_op = CG(active_op_array)->opcodes+CG(active_op_array)->last;
 }
 
