@@ -47,7 +47,7 @@ typedef struct {
 
 PHP_HASH_API void PHP_3TIGERInit(PHP_TIGER_CTX *context);
 PHP_HASH_API void PHP_4TIGERInit(PHP_TIGER_CTX *context);
-PHP_HASH_API void PHP_TIGERUpdate(PHP_TIGER_CTX *context, unsigned char *input, size_t len);
+PHP_HASH_API void PHP_TIGERUpdate(PHP_TIGER_CTX *context, const unsigned char *input, size_t len);
 PHP_HASH_API void PHP_TIGER128Final(unsigned char digest[16], PHP_TIGER_CTX *context);
 PHP_HASH_API void PHP_TIGER160Final(unsigned char digest[20], PHP_TIGER_CTX *context);
 PHP_HASH_API void PHP_TIGER192Final(unsigned char digest[24], PHP_TIGER_CTX *context);

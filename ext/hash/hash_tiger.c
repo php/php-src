@@ -109,19 +109,6 @@
 }
 /* }}} */
 
-static inline void TigerTransform(PHP_TIGER_CTX *context, const unsigned char *input, size_t length)
-{
-	php_hash_uint64 i = (php_hash_uint64) length << 3;
-	const php_hash_uint64 *ptr = (const php_hash_uint64 *) input;
-	
-	context->passed += i;
-
-	for (; i >= 64; i -= 64) {
-		tiger_compress(context->passes, ptr, context->state);
-		ptr += 8;
-	}
-}
-
 static inline void TigerFinalize(PHP_TIGER_CTX *context)
 {
 	context->passed += (php_hash_uint64) context->length << 3;
@@ -161,7 +148,7 @@ PHP_HASH_API void PHP_4TIGERInit(PHP_TIGER_CTX *context)
 	context->state[2] = L64(0xF096A5B4C3B2E187);
 }
 
-PHP_HASH_API void PHP_TIGERUpdate(PHP_TIGER_CTX *context, unsigned char *input, size_t len)
+PHP_HASH_API void PHP_TIGERUpdate(PHP_TIGER_CTX *context, const unsigned char *input, size_t len)
 {
 	if (context->length + len < 64) {
 		memcpy(&context->buffer[context->length], input, len);
@@ -172,12 +159,14 @@ PHP_HASH_API void PHP_TIGERUpdate(PHP_TIGER_CTX *context, unsigned char *input, 
 		if (context->length) {
 			i = 64 - context->length;
 			memcpy(&context->buffer[context->length], input, i);
-			TigerTransform(context, context->buffer, 64);
+			tiger_compress(context->passes, ((const php_hash_uint64 *) context->buffer), context->state);
 			memset(context->buffer, 0, 64);
+			context->passed += 512;
 		}
 		
 		for (; i + 64 <= len; i += 64) {
-			TigerTransform(context, input + i, 64);
+			tiger_compress(context->passes, ((const php_hash_uint64 *) (input + i)), context->state);
+			context->passed += 512;
 		}
 		
 		memcpy(context->buffer, input + i, r);
