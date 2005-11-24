@@ -1827,12 +1827,14 @@ void zend_do_mark_last_catch(znode *first_catch, znode *last_additional_catch TS
 	} else {
 		CG(active_op_array)->opcodes[last_additional_catch->u.opline_num].op1.u.EA.type = 1;
 	}
+	DEC_BPC(CG(active_op_array));
 }
 
 
 void zend_do_try(znode *try_token TSRMLS_DC)
 {
 	try_token->u.opline_num = zend_add_try_element(get_next_op_number(CG(active_op_array)) TSRMLS_CC);
+	INC_BPC(CG(active_op_array));
 }
 
 
