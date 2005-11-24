@@ -23,6 +23,7 @@
 #include "php_hash_tiger.h"
 #include "php_hash_tiger_tables.h"
 
+/* {{{ */
 #define save_abc \
 	aa = a; \
 	bb = b; \
@@ -80,7 +81,7 @@
 	pass(c,a,b,7) \
 	key_schedule \
 	pass(b,c,a,9) \
-	for(pass_no=3; pass_no<passes; pass_no++) { \
+	for(pass_no=0; pass_no<passes; pass_no++) { \
 		key_schedule \
 		pass(a,b,c,9) \
 		tmpa=a; a=c; c=b; b=tmpa; \
@@ -106,6 +107,7 @@
 	state[1] = b; \
 	state[2] = c; \
 }
+/* }}} */
 
 static inline void TigerTransform(PHP_TIGER_CTX *context, const unsigned char *input, size_t length)
 {
@@ -113,7 +115,7 @@ static inline void TigerTransform(PHP_TIGER_CTX *context, const unsigned char *i
 	const php_hash_uint64 *ptr = (const php_hash_uint64 *) input;
 	
 	context->passed += i;
-	
+
 	for (; i >= 64; i -= 64) {
 		tiger_compress(context->passes, ptr, context->state);
 		ptr += 8;
@@ -125,9 +127,11 @@ static inline void TigerFinalize(PHP_TIGER_CTX *context)
 	context->passed += (php_hash_uint64) context->length << 3;
 	
 	context->buffer[context->length++] = 0x1;
-	memset(&context->buffer[context->length], 0, context->length%8);
-	context->length += context->length%8;
-	
+	if (context->length % 8) {
+		memset(&context->buffer[context->length], 0, 8-context->length%8);
+		context->length += 8-context->length%8;
+	}
+    
 	if (context->length > 56) {
 		memset(&context->buffer[context->length], 0, 64 - context->length);
 		tiger_compress(context->passes, ((php_hash_uint64 *) context->buffer), context->state);
@@ -142,27 +146,26 @@ static inline void TigerFinalize(PHP_TIGER_CTX *context)
 
 PHP_HASH_API void PHP_3TIGERInit(PHP_TIGER_CTX *context)
 {
-	context->passes = 3;
+	memset(context, 0, sizeof(*context));
 	context->state[0] = L64(0x0123456789ABCDEF);
 	context->state[1] = L64(0xFEDCBA9876543210);
 	context->state[2] = L64(0xF096A5B4C3B2E187);
-	memset(context->buffer, 0, sizeof(context->buffer));
 }
 
 PHP_HASH_API void PHP_4TIGERInit(PHP_TIGER_CTX *context)
 {
-	context->passes = 4;
+	memset(context, 0, sizeof(*context));
+	context->passes = 1;
 	context->state[0] = L64(0x0123456789ABCDEF);
 	context->state[1] = L64(0xFEDCBA9876543210);
 	context->state[2] = L64(0xF096A5B4C3B2E187);
-	memset(context->buffer, 0, sizeof(context->buffer));
 }
 
 PHP_HASH_API void PHP_TIGERUpdate(PHP_TIGER_CTX *context, unsigned char *input, size_t len)
 {
 	if (context->length + len < 64) {
 		memcpy(&context->buffer[context->length], input, len);
-		context->length = len;
+		context->length += len;
 	} else {
 		size_t i = 0, r = (context->length + len) % 64;
 		
