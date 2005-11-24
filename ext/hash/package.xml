@@ -32,6 +32,12 @@
    <file role="src" name="php_hash_sha.h"/>
    <file role="src" name="hash_ripemd.c"/>
    <file role="src" name="php_hash_ripemd.h"/>
+   <file role="src" name="hash_whirlpool.c"/>
+   <file role="src" name="php_hash_whirlpool.h"/>
+   <file role="src" name="php_hash_whirlpool_tables.h"/>
+   <file role="src" name="hash_tiger.c"/>
+   <file role="src" name="php_hash_tiger.h"/>
+   <file role="src" name="php_hash_tiger_tables.h"/>
    <file role="doc" name="README"/>
    <dir role="test" name="tests">
     <file role="test" name="hmac-md5.phpt"/>
