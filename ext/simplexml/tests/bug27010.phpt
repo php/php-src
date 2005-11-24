@@ -1,5 +1,5 @@
 --TEST--
-Bug #27010: segfault and node text not displayed when returned from children()
+Bug #27010 (segfault and node text not displayed when returned from children())
 --FILE--
 <?php
 
