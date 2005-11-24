@@ -1119,7 +1119,7 @@ static int pdo_stmt_verify_mode(pdo_stmt_t *stmt, int mode, int fetch_all TSRMLS
 
 #if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 1
 	if ((flags & PDO_FETCH_SERIALIZE) == PDO_FETCH_SERIALIZE) {
-		pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "PDO_FETCH_SERIALIZE is not supported in this PHP version" TSRMLS_CC);
+		pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "PDO::FETCH_SERIALIZE is not supported in this PHP version" TSRMLS_CC);
 		return 0;
 	}
 #endif
@@ -1127,18 +1127,18 @@ static int pdo_stmt_verify_mode(pdo_stmt_t *stmt, int mode, int fetch_all TSRMLS
 	switch(mode) {
 	case PDO_FETCH_FUNC:
 		if (!fetch_all) {
-			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_FETCH_FUNC is only allowed in PDOStatement::fetchAll()" TSRMLS_CC);
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO::FETCH_FUNC is only allowed in PDOStatement::fetchAll()" TSRMLS_CC);
 			return 0;
 		}
 		return 1;
 	
 	default:
 		if ((flags & PDO_FETCH_SERIALIZE) == PDO_FETCH_SERIALIZE) {
-			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_FETCH_SERIALIZE can only be used together with PDO_FETCH_CLASS" TSRMLS_CC);
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO::FETCH_SERIALIZE can only be used together with PDO::FETCH_CLASS" TSRMLS_CC);
 			return 0;
 		}
 		if ((flags & PDO_FETCH_CLASSTYPE) == PDO_FETCH_CLASSTYPE) {
-			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_FETCH_CLASSTYPE can only be used together with PDO_FETCH_CLASS" TSRMLS_CC);
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO::FETCH_CLASSTYPE can only be used together with PDO::FETCH_CLASS" TSRMLS_CC);
 			return 0;
 		}
 		if (mode >= PDO_FETCH__MAX) {
@@ -1366,7 +1366,7 @@ static PHP_METHOD(PDOStatement, fetchAll)
 			stmt->fetch.column = Z_LVAL_P(arg2);
 			break;
 		case 3:
-			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Third parameter not allowed for PDO_FETCH_COLUMN" TSRMLS_CC);
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Third parameter not allowed for PDO::FETCH_COLUMN" TSRMLS_CC);
 			error = 1;
 		}
 		break;

@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   frame was called from an object. (Sebastian)
 - Fixed bug #35360 (exceptions in interactive mode (php -a) may cause crash).
   (Dmitry)
+- Fixed bug #35358 (Incorrect error messages for PDO class constants). (Ilia)
 
 24 Nov 2005, PHP 5.1
 - Added support for class constants and static members for internal classes. 
