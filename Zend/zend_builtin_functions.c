@@ -1813,7 +1813,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 
 /* }}} */
 
-ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last TSRMLS_DC)
+ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int provide_object TSRMLS_DC)
 {
 	zend_execute_data *ptr, *skip;
 	int lineno;
@@ -1913,6 +1913,11 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last TSRML
 					add_assoc_string_ex(stack_frame, "class", sizeof("class"), class_name, dup);
 					
 				}
+				if (provide_object) {
+					add_assoc_zval_ex(stack_frame, "object", sizeof("object"), ptr->object);
+					ptr->object->refcount++;
+				}
+
 				add_assoc_string_ex(stack_frame, "type", sizeof("type"), "->", 1);
 			} else if (ptr->function_state.function->common.scope) {
 				add_assoc_string_ex(stack_frame, "class", sizeof("class"), ptr->function_state.function->common.scope->name, 1);
@@ -1994,7 +1999,7 @@ ZEND_FUNCTION(debug_backtrace)
 		ZEND_WRONG_PARAM_COUNT();
 	}
 	
-	zend_fetch_debug_backtrace(return_value, 1 TSRMLS_CC);
+	zend_fetch_debug_backtrace(return_value, 1, 1 TSRMLS_CC);
 }
 /* }}} */
 

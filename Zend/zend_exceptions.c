@@ -92,7 +92,7 @@ static zend_object_value zend_default_exception_new_ex(zend_class_entry *class_t
 	ALLOC_ZVAL(trace);
 	trace->is_ref = 0;
 	trace->refcount = 0;
-	zend_fetch_debug_backtrace(trace, skip_top_traces TSRMLS_CC);
+	zend_fetch_debug_backtrace(trace, skip_top_traces, 0 TSRMLS_CC);
 
 	zend_update_property_string(default_exception_ce, &obj, "file", sizeof("file")-1, zend_get_executed_filename(TSRMLS_C) TSRMLS_CC);
 	zend_update_property_long(default_exception_ce, &obj, "line", sizeof("line")-1, zend_get_executed_lineno(TSRMLS_C) TSRMLS_CC);
