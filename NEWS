@@ -4,6 +4,9 @@ PHP                                                                        NEWS
 - Added an additional field $frame['object'] to the result array of
   debug_backtrace() that contains a reference to the respective object when the
   frame was called from an object. (Sebastian)
+- Fixed bug #35360 (exceptions in interactive mode (php -a) may cause crash).
+  (Dmitry)
+
 24 Nov 2005, PHP 5.1
 - Added support for class constants and static members for internal classes. 
   (Dmitry, Michael Wallner)
