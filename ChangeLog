@@ -1,3 +1,146 @@
+2005-11-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      configure.in
+      main/php_version.h:
+      Back to dev
+
+    * (PHP_5_1)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Rolling 5.1.0
+
+2005-11-23  Johannes Schlüter  <schlueter@phpbar.de>
+
+    * NEWS:
+      Changed reflection constants to class constants
+
+2005-11-23  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      ZendEngine2/zend_API.c:
+      change zend_read_property() to allocate property zval too
+
+2005-11-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      sapi/cgi/CHANGES
+      sapi/cgi/cgi_main.c
+      sapi/cgi/config.w32
+      sapi/cgi/config9.m4:
+      Cleaned CGI code. Now FastCGI can not be disabled. See into
+      sapi/cgi/CHANGES for more details.
+
+2005-11-23  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_5_0)
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.c:
+      MFH: fixed 5307 unexpected header can be injected to mb_send_mail().
+
+    * ext/mbstring/mbstring.c:
+      fixed 5307 unexpected header can be injected to mb_send_mail().
+
+2005-11-23  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      UPGRADING:
+      fix tag
+
+2005-11-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_API.c:
+      Additional fix for fix #35536
+
+2005-11-23  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_API.c:
+      forgotten part of the fix
+
+    * ZendEngine2/zend_API.c:
+      MF51: fix #35336 (crash on PDO::FETCH_CLASS + __set())
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/zend_API.c:
+      fix #35336 (crash on PDO::FETCH_CLASS + __set())
+
+2005-11-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/bug33732.phpt
+      ZendEngine2/tests/bug33732.phpt:
+      Bug #33732 (Wrong behavior of constants in class and interface extending)
+
+    * ZendEngine2/tests/bug33732.phpt
+      ZendEngine2/tests/bug33732.phpt
+      ZendEngine2/tests/bug33732.phpt:
+        1.1.4;
+      file bug33732.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_compile.c:
+      Fixed bug #33732 (Wrong behavior of constants in class and interface
+      extending)
+
+2005-11-23  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_1)
+      NEWS:
+      BFN
+
+    * (PHP_5_1)
+      ext/dom/php_dom.c
+      ext/dom/tests/bug35342.phpt:
+      Fixed bug #35342 (isset(DOMNodeList->length) returns false)
+      add test
+
+    * ext/dom/tests/bug35342.phpt
+      ext/dom/tests/bug35342.phpt:
+      
+      add test
+
+    * ext/dom/document.c
+      ext/dom/dom_fe.h
+      ext/dom/php_dom.c
+      ext/dom/php_dom.h
+      ext/dom/xml_common.h:
+      add registerNodeClass() method
+       - methods can now natively return user classes registered with document
+
+    * ext/dom/attr.c
+      ext/dom/element.c:
+      implement setIDAttributeXXX functionality
+
+    * ext/dom/php_dom.c:
+      Fixed bug #35342 (isset(DOMNodeList->length) returns false).
+
+2005-11-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      ext/standard/info.c:
+      MFH: Fixed bug #35046 (phpinfo() uses improper css enclosure).
+
+    * ext/standard/info.c:
+      MFB51: Fixed bug #35046 (phpinfo() uses improper css enclosure).
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/info.c:
+      Fixed bug #35046 (phpinfo() uses improper css enclosure).
+
+2005-11-23  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * LICENSE:
+      3.01 license - we technically don't need to switch the PHP sources to this
+      one, it is more for pear/pecl, but to be consistent we probably should.
+      Anybody want to do the sed magic to fix all the headers?
+
 2005-11-22  Ilia Alshanetsky  <ilia@prohost.org>
 
     * UPGRADING
