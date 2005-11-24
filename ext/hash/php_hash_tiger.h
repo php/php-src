@@ -18,26 +18,39 @@
 
 /* $Id$ */
 
-#ifndef PHP_HASH_SALSA_H
-#define PHP_HASH_SALSA_H
+#ifndef PHP_HASH_TIGER_H
+#define PHP_HASH_TIGER_H
 
 #include "ext/standard/basic_functions.h"
 
-/* SALSA context */
+#if defined(SIZEOF_LONG) && (SIZEOF_LONG >= 8)
+#	define L64(n)	(n##L)
+typedef unsigned long php_hash_uint64;
+#else
+#	ifdef PHP_WIN32
+#		define L64(n)	(n##i64)
+typedef unsigned __int64 php_hash_uint64;
+#	else
+#		define L64(n)	(n##LL)
+typedef unsigned long long php_hash_uint64;
+#	endif
+#endif
+
+/* TIGER context */
 typedef struct {
-	php_uint32 state[16];
-	unsigned char init:1;
-	unsigned char count:7;
+	php_hash_uint64 state[3];
+	php_hash_uint64 passed;
+	unsigned char passes:1;
+	unsigned char length:7;
 	unsigned char buffer[64];
-	void (*Transform)(php_uint32 state[16], php_uint32 data[16]);
-} PHP_SALSA_CTX;
+} PHP_TIGER_CTX;
 
-#define PHP_SALSAInit PHP_SALSA20Init
-PHP_HASH_API void PHP_SALSA10Init(PHP_SALSA_CTX *);
-PHP_HASH_API void PHP_SALSA20Init(PHP_SALSA_CTX *);
-
-PHP_HASH_API void PHP_SALSAUpdate(PHP_SALSA_CTX *, const unsigned char *, uint);
-PHP_HASH_API void PHP_SALSAFinal(unsigned char[64], PHP_SALSA_CTX *);
+PHP_HASH_API void PHP_3TIGERInit(PHP_TIGER_CTX *context);
+PHP_HASH_API void PHP_4TIGERInit(PHP_TIGER_CTX *context);
+PHP_HASH_API void PHP_TIGERUpdate(PHP_TIGER_CTX *context, unsigned char *input, size_t len);
+PHP_HASH_API void PHP_TIGER128Final(unsigned char digest[16], PHP_TIGER_CTX *context);
+PHP_HASH_API void PHP_TIGER160Final(unsigned char digest[20], PHP_TIGER_CTX *context);
+PHP_HASH_API void PHP_TIGER192Final(unsigned char digest[24], PHP_TIGER_CTX *context);
 
 #endif
 

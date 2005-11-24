@@ -59,6 +59,12 @@ extern php_hash_ops php_hash_sha512_ops;
 extern php_hash_ops php_hash_ripemd128_ops;
 extern php_hash_ops php_hash_ripemd160_ops;
 extern php_hash_ops php_hash_whirlpool_ops;
+extern php_hash_ops php_hash_3tiger128_ops;
+extern php_hash_ops php_hash_3tiger160_ops;
+extern php_hash_ops php_hash_3tiger192_ops;
+extern php_hash_ops php_hash_4tiger128_ops;
+extern php_hash_ops php_hash_4tiger160_ops;
+extern php_hash_ops php_hash_4tiger192_ops;
 
 #define PHP_HASH_HAVAL_OPS(p,b)	extern php_hash_ops php_hash_##p##haval##b##_ops;
 
