@@ -513,7 +513,7 @@ static PHP_METHOD(PDO, prepare)
 			|| zend_u_lookup_class(Z_TYPE_PP(item), Z_UNIVAL_PP(item), Z_UNILEN_PP(item), &pce TSRMLS_CC) == FAILURE
 		) {
 			pdo_raise_impl_error(dbh, NULL, "HY000", 
-				"PDO_ATTR_STATEMENT_CLASS requires format array(classname, array(ctor_args)); "
+				"PDO::ATTR_STATEMENT_CLASS requires format array(classname, array(ctor_args)); "
 				"the classname must be a string specifying an existing class"
 				TSRMLS_CC);
 			PDO_HANDLE_DBH_ERR();
@@ -535,7 +535,7 @@ static PHP_METHOD(PDO, prepare)
 		if (zend_hash_index_find(Z_ARRVAL_PP(opt), 1, (void**)&item) == SUCCESS) {
 			if (Z_TYPE_PP(item) != IS_ARRAY) {
 				pdo_raise_impl_error(dbh, NULL, "HY000", 
-					"PDO_ATTR_STATEMENT_CLASS requires format array(classname, ctor_args); "
+					"PDO::ATTR_STATEMENT_CLASS requires format array(classname, ctor_args); "
 					"ctor_args must be an array"
 				TSRMLS_CC);
 				PDO_HANDLE_DBH_ERR();
@@ -722,7 +722,7 @@ static PHP_METHOD(PDO, setAttribute)
 
 			if (dbh->is_persistent) {
 				pdo_raise_impl_error(dbh, NULL, "HY000", 
-					"PDO_ATTR_STATEMENT_CLASS cannot be used with persistent PDO instances"
+					"PDO::ATTR_STATEMENT_CLASS cannot be used with persistent PDO instances"
 					TSRMLS_CC);
 				PDO_HANDLE_DBH_ERR();
 				RETURN_FALSE;
@@ -733,7 +733,7 @@ static PHP_METHOD(PDO, setAttribute)
 				|| zend_u_lookup_class(Z_TYPE_PP(item), Z_UNIVAL_PP(item), Z_UNILEN_PP(item), &pce TSRMLS_CC) == FAILURE
 			) {
 				pdo_raise_impl_error(dbh, NULL, "HY000", 
-					"PDO_ATTR_STATEMENT_CLASS requires format array(classname, array(ctor_args)); "
+					"PDO::ATTR_STATEMENT_CLASS requires format array(classname, array(ctor_args)); "
 					"the classname must be a string specifying an existing class"
 					TSRMLS_CC);
 				PDO_HANDLE_DBH_ERR();
@@ -759,7 +759,7 @@ static PHP_METHOD(PDO, setAttribute)
 			if (zend_hash_index_find(Z_ARRVAL_P(value), 1, (void**)&item) == SUCCESS) {
 				if (Z_TYPE_PP(item) != IS_ARRAY) {
 					pdo_raise_impl_error(dbh, NULL, "HY000", 
-						"PDO_ATTR_STATEMENT_CLASS requires format array(classname, array(ctor_args)); "
+						"PDO::ATTR_STATEMENT_CLASS requires format array(classname, array(ctor_args)); "
 						"ctor_args must be an array"
 					TSRMLS_CC);
 					PDO_HANDLE_DBH_ERR();

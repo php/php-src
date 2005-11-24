@@ -69,6 +69,12 @@ ZEND_END_ARG_INFO();
 /* }}} */
 #endif
 
+#define PHP_STMT_GET_OBJ	\
+  pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);	\
+  if (!stmt->dbh) {	\
+    RETURN_FALSE;	\
+  }	\
+
 static PHP_FUNCTION(dbstmt_constructor) /* {{{ */
 {
 	php_error_docref(NULL TSRMLS_CC, E_ERROR, "You should not create a PDOStatement manually");
@@ -333,9 +339,9 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
    Execute a prepared statement, optionally binding parameters */
 static PHP_METHOD(PDOStatement, execute)
 {
-	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	zval *input_params = NULL;
 	int ret = 1;
+	PHP_STMT_GET_OBJ;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|a!", &input_params)) {
 		RETURN_FALSE;
@@ -1072,7 +1078,7 @@ static int pdo_stmt_verify_mode(pdo_stmt_t *stmt, int mode, int fetch_all TSRMLS
 
 #if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 1
 	if ((flags & PDO_FETCH_SERIALIZE) == PDO_FETCH_SERIALIZE) {
-		pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "PDO_FETCH_SERIALIZE is not supported in this PHP version" TSRMLS_CC);
+		pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "PDO::FETCH_SERIALIZE is not supported in this PHP version" TSRMLS_CC);
 		return 0;
 	}
 #endif
@@ -1080,18 +1086,18 @@ static int pdo_stmt_verify_mode(pdo_stmt_t *stmt, int mode, int fetch_all TSRMLS
 	switch(mode) {
 	case PDO_FETCH_FUNC:
 		if (!fetch_all) {
-			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_FETCH_FUNC is only allowed in PDOStatement::fetchAll()" TSRMLS_CC);
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO::FETCH_FUNC is only allowed in PDOStatement::fetchAll()" TSRMLS_CC);
 			return 0;
 		}
 		return 1;
 	
 	default:
 		if ((flags & PDO_FETCH_SERIALIZE) == PDO_FETCH_SERIALIZE) {
-			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_FETCH_SERIALIZE can only be used together with PDO_FETCH_CLASS" TSRMLS_CC);
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO::FETCH_SERIALIZE can only be used together with PDO::FETCH_CLASS" TSRMLS_CC);
 			return 0;
 		}
 		if ((flags & PDO_FETCH_CLASSTYPE) == PDO_FETCH_CLASSTYPE) {
-			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_FETCH_CLASSTYPE can only be used together with PDO_FETCH_CLASS" TSRMLS_CC);
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO::FETCH_CLASSTYPE can only be used together with PDO::FETCH_CLASS" TSRMLS_CC);
 			return 0;
 		}
 		if (mode >= PDO_FETCH__MAX) {
@@ -1113,7 +1119,7 @@ static PHP_METHOD(PDOStatement, fetch)
 	long how = PDO_FETCH_USE_DEFAULT;
 	long ori = PDO_FETCH_ORI_NEXT;
 	long off = 0;
-	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
+        PHP_STMT_GET_OBJ;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|lll", &how,
 			&ori, &off)) {
@@ -1146,8 +1152,8 @@ static PHP_METHOD(PDOStatement, fetchObject)
 	zval *old_ctor_args, *ctor_args;
 	int error = 0, old_arg_count;
 
-	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	
+	PHP_STMT_GET_OBJ;
+
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sz", 
 		&class_name, &class_name_len, &ctor_args)) {
 		RETURN_FALSE;
@@ -1214,8 +1220,8 @@ static PHP_METHOD(PDOStatement, fetchObject)
    Returns a data of the specified column in the result set. */
 static PHP_METHOD(PDOStatement, fetchColumn)
 {
-	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	long col_n = 0;
+	PHP_STMT_GET_OBJ;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &col_n)) {
 		RETURN_FALSE;
@@ -1236,13 +1242,13 @@ static PHP_METHOD(PDOStatement, fetchColumn)
    Returns an array of all of the results. */
 static PHP_METHOD(PDOStatement, fetchAll)
 {
-	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	long how = PDO_FETCH_USE_DEFAULT;
 	zval *data, *return_all;
 	zval *arg2;
 	zend_class_entry *old_ce;
 	zval *old_ctor_args, *ctor_args = NULL;
 	int error = 0, old_arg_count;
+	PHP_STMT_GET_OBJ;    	  
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|lzz", &how, &arg2, &ctor_args)) {
 		RETURN_FALSE;
@@ -1319,7 +1325,7 @@ static PHP_METHOD(PDOStatement, fetchAll)
 			stmt->fetch.column = Z_LVAL_P(arg2);
 			break;
 		case 3:
-			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Third parameter not allowed for PDO_FETCH_COLUMN" TSRMLS_CC);
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Third parameter not allowed for PDO::FETCH_COLUMN" TSRMLS_CC);
 			error = 1;
 		}
 		break;
@@ -1439,7 +1445,7 @@ static PHP_METHOD(PDOStatement, bindValue)
    bind a parameter to a PHP variable.  $paramno is the 1-based position of the placeholder in the SQL statement (but can be the parameter name for drivers that support named placeholders).  This isn't supported by all drivers.  It should be called prior to execute(). */
 static PHP_METHOD(PDOStatement, bindParam)
 {
-	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	PHP_STMT_GET_OBJ;
 	RETURN_BOOL(register_bound_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, stmt, TRUE));
 }
 /* }}} */
@@ -1448,7 +1454,7 @@ static PHP_METHOD(PDOStatement, bindParam)
    bind a column to a PHP variable.  On each row fetch $param will contain the value of the corresponding column.  $column is the 1-based offset of the column, or the column name.  For portability, don't call this before execute(). */
 static PHP_METHOD(PDOStatement, bindColumn)
 {
-	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	PHP_STMT_GET_OBJ;
 	RETURN_BOOL(register_bound_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, stmt, FALSE));
 }
 /* }}} */
@@ -1457,7 +1463,7 @@ static PHP_METHOD(PDOStatement, bindColumn)
    Returns the number of rows in a result set, or the number of rows affected by the last execute().  It is not always meaningful. */
 static PHP_METHOD(PDOStatement, rowCount)
 {
-	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	PHP_STMT_GET_OBJ;
 
 	RETURN_LONG(stmt->row_count);
 }
@@ -1467,7 +1473,7 @@ static PHP_METHOD(PDOStatement, rowCount)
    Fetch the error code associated with the last operation on the statement handle */
 static PHP_METHOD(PDOStatement, errorCode)
 {
-	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	PHP_STMT_GET_OBJ;
 
 	if (ZEND_NUM_ARGS()) {
 		RETURN_FALSE;
@@ -1481,7 +1487,7 @@ static PHP_METHOD(PDOStatement, errorCode)
    Fetch extended error information associated with the last operation on the statement handle */
 static PHP_METHOD(PDOStatement, errorInfo)
 {
-	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	PHP_STMT_GET_OBJ;
 
 	if (ZEND_NUM_ARGS()) {
 		RETURN_FALSE;
@@ -1500,9 +1506,9 @@ static PHP_METHOD(PDOStatement, errorInfo)
    Set an attribute */
 static PHP_METHOD(PDOStatement, setAttribute)
 {
-	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	long attr;
 	zval *value = NULL;
+	PHP_STMT_GET_OBJ;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lz!", &attr, &value)) {
 		RETURN_FALSE;
@@ -1531,8 +1537,8 @@ fail:
    Get an attribute */
 static PHP_METHOD(PDOStatement, getAttribute)
 {
-	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	long attr;
+	PHP_STMT_GET_OBJ;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &attr)) {
 		RETURN_FALSE;
@@ -1564,7 +1570,7 @@ static PHP_METHOD(PDOStatement, getAttribute)
    Returns the number of columns in the result set */
 static PHP_METHOD(PDOStatement, columnCount)
 {
-	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	PHP_STMT_GET_OBJ;
 	if (ZEND_NUM_ARGS()) {
 		RETURN_FALSE;
 	}
@@ -1576,9 +1582,9 @@ static PHP_METHOD(PDOStatement, columnCount)
    Returns meta data for a numbered column */
 static PHP_METHOD(PDOStatement, getColumnMeta)
 {
-	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	long colno;
 	struct pdo_column_data *col;
+	PHP_STMT_GET_OBJ;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &colno)) {
 		RETURN_FALSE;
@@ -1743,7 +1749,7 @@ fail_out:
    
 static PHP_METHOD(PDOStatement, setFetchMode)
 {
-	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	PHP_STMT_GET_OBJ;
 
 	RETVAL_BOOL(
 		pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAM_PASSTHRU,
@@ -1781,7 +1787,7 @@ static int pdo_stmt_do_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 
 static PHP_METHOD(PDOStatement, nextRowset)
 {
-	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	PHP_STMT_GET_OBJ;
 
 	if (!stmt->methods->next_rowset) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "driver does not support multiple rowsets" TSRMLS_CC);
@@ -1805,7 +1811,7 @@ static PHP_METHOD(PDOStatement, nextRowset)
    Closes the cursor, leaving the statement ready for re-execution. */
 static PHP_METHOD(PDOStatement, closeCursor)
 {
-	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	PHP_STMT_GET_OBJ;
 
 	if (!stmt->methods->cursor_closer) {
 		/* emulate it by fetching and discarding rows */
@@ -1839,10 +1845,10 @@ static PHP_METHOD(PDOStatement, closeCursor)
    A utility for internals hackers to debug parameter internals */
 static PHP_METHOD(PDOStatement, debugDumpParams)
 {
-	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	php_stream *out = php_stream_open_wrapper("php://output", "w", 0, NULL);
 	HashPosition pos;
 	struct pdo_bound_param_data *param;
+	PHP_STMT_GET_OBJ;
 
 	php_stream_printf(out TSRMLS_CC, "SQL: [%d] %.*s\n",
 		stmt->query_stringlen,
