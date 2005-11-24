@@ -1,3 +1,45 @@
+2005-11-23  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      zend_API.c:
+      change zend_read_property() to allocate property zval too
+
+2005-11-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_API.c:
+      Additional fix for fix #35536
+
+2005-11-23  Antony Dovgal  <antony@zend.com>
+
+    * zend_API.c:
+      forgotten part of the fix
+
+    * zend_API.c:
+      MF51: fix #35336 (crash on PDO::FETCH_CLASS + __set())
+
+    * (PHP_5_1)
+      zend_API.c:
+      fix #35336 (crash on PDO::FETCH_CLASS + __set())
+
+2005-11-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c
+      tests/bug33732.phpt
+      tests/bug33732.phpt:
+      Bug #33732 (Wrong behavior of constants in class and interface extending)
+
+    * tests/bug33732.phpt
+      tests/bug33732.phpt
+      tests/bug33732.phpt:
+        1.1.4;
+      file bug33732.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      zend_compile.c:
+      Fixed bug #33732 (Wrong behavior of constants in class and interface
+      extending)
+
 2005-11-22  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_1)
