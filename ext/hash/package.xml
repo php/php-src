@@ -30,7 +30,7 @@ Initial Release
  * sha1, sha256, sha384, sha512
  * ripemd128, ripemd160
  * tiger128, tiger160, tiger192
- * gost, snefru, whirlpool
+ * adler32, gost, snefru, whirlpool
    </notes>
   </release>
 
@@ -57,6 +57,8 @@ Initial Release
    <file role="src" name="hash_gost.c"/>
    <file role="src" name="php_hash_gost.h"/>
    <file role="src" name="php_hash_gost_tables.h"/>
+   <file role="src" name="hash_adler32.c"/>
+   <file role="src" name="php_hash_adler32.h"/>
    <file role="doc" name="README"/>
    <dir role="test" name="tests">
     <file role="test" name="hmac-md5.phpt"/>

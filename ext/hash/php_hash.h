@@ -67,6 +67,7 @@ extern php_hash_ops php_hash_4tiger160_ops;
 extern php_hash_ops php_hash_4tiger192_ops;
 extern php_hash_ops php_hash_snefru_ops;
 extern php_hash_ops php_hash_gost_ops;
+extern php_hash_ops php_hash_adler32_ops;
 
 #define PHP_HASH_HAVAL_OPS(p,b)	extern php_hash_ops php_hash_##p##haval##b##_ops;
 
@@ -104,7 +105,7 @@ extern zend_module_entry hash_module_entry;
 PHP_HASH_API php_hash_ops *php_hash_fetch_ops(const char *algo, int algo_len);
 PHP_HASH_API void php_hash_register_algo(const char *algo, php_hash_ops *ops);
 
-static inline void php_hash_bin2hex(char *out, unsigned char *in, int in_len)
+static inline void php_hash_bin2hex(char *out, const unsigned char *in, int in_len)
 {
 	static const char hexits[16] = "0123456789abcdef";
 	int i;
