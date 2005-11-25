@@ -1,3 +1,30 @@
+2005-11-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      zend_reflection_api.c:
+      - MFH Reflection class consts (not removing globals consts in 5.1*) (by
+      Johannes)
+
+2005-11-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c
+      zend_compile.c
+      zend_execute_API.c
+      zend_execute_API.c
+      zend_execute_API.c:
+      Fixed bug #35360 (exceptions in interactive mode (php -a) may cause crash)
+
+2005-11-24  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * (PHP_5_1)
+      zend_builtin_functions.c
+      zend_builtin_functions.h
+      zend_exceptions.c:
+      MFH: Add an additional field $frame['object'] to the result array of
+      debug_backtrace() that contains a reference to the respective object when
+      the frame was called from an object.
+
 2005-11-23  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_1)
