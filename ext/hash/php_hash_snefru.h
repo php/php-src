@@ -18,26 +18,26 @@
 
 /* $Id$ */
 
-#ifndef PHP_HASH_SALSA_H
-#define PHP_HASH_SALSA_H
+#ifndef PHP_HASH_SNEFRU_H
+#define PHP_HASH_SNEFRU_H
+
+/* SNEFRU-2.5a with 8 passes and 256 bit hash output
+ * AKA "Xerox Secure Hash Function" 
+ */
 
 #include "ext/standard/basic_functions.h"
 
-/* SALSA context */
+/* SNEFRU context */
 typedef struct {
 	php_uint32 state[16];
-	unsigned char init:1;
-	unsigned char length:7;
-	unsigned char buffer[64];
-	void (*Transform)(php_uint32 state[16], php_uint32 data[16]);
-} PHP_SALSA_CTX;
+	php_uint32 count[2];
+	unsigned char length;
+	unsigned char buffer[32];
+} PHP_SNEFRU_CTX;
 
-#define PHP_SALSAInit PHP_SALSA20Init
-PHP_HASH_API void PHP_SALSA10Init(PHP_SALSA_CTX *);
-PHP_HASH_API void PHP_SALSA20Init(PHP_SALSA_CTX *);
-
-PHP_HASH_API void PHP_SALSAUpdate(PHP_SALSA_CTX *, const unsigned char *, uint);
-PHP_HASH_API void PHP_SALSAFinal(unsigned char[64], PHP_SALSA_CTX *);
+PHP_HASH_API void PHP_SNEFRUInit(PHP_SNEFRU_CTX *);
+PHP_HASH_API void PHP_SNEFRUUpdate(PHP_SNEFRU_CTX *, const unsigned char *, uint);
+PHP_HASH_API void PHP_SNEFRUFinal(unsigned char[32], PHP_SNEFRU_CTX *);
 
 #endif
 
