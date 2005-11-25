@@ -14,10 +14,13 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE_
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-$is_oci = $db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'oci';
+$driver = $db->getAttribute(PDO::ATTR_DRIVER_NAME);
+$is_oci = $driver == 'oci';
 
 if ($is_oci) {
 	$db->exec('CREATE TABLE test (id int NOT NULL PRIMARY KEY, val BLOB)');
+} else if ($driver == 'pgsql') {
+	$db->exec('CREATE TABLE test (id int NOT NULL PRIMARY KEY, val bytea)');
 } else {
 	$db->exec('CREATE TABLE test (id int NOT NULL PRIMARY KEY, val VARCHAR(256))');
 }
