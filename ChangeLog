@@ -1,3 +1,70 @@
+2005-11-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/tests/bug27010.phpt:
+      - Synch test name
+
+    * (PHP_5_1)
+      NEWS:
+      - NEWS, NEWS, NEWS
+
+    * (PHP_5_1)
+      ZendEngine2/zend_reflection_api.c:
+      - MFH Reflection class consts (not removing globals consts in 5.1*) (by
+      Johannes)
+
+2005-11-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #35358 (Incorrect error messages for PDO class constants).
+
+2005-11-24  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/oci8.c:
+      fix #35322 (oci_connect() after oci_close() gives unknown resource)
+
+2005-11-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c:
+      Fixed bug #35360 (exceptions in interactive mode (php -a) may cause crash)
+
+2005-11-24  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.h
+      ZendEngine2/zend_exceptions.c:
+      MFH: Add an additional field $frame['object'] to the result array of
+      debug_backtrace() that contains a reference to the respective object when
+      the frame was called from an object.
+
+2005-11-24  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_5_1)
+      ext/zlib/tests/zlib_filter_deflate.phpt
+      ext/zlib/tests/zlib_filter_inflate.phpt:
+      MFH (r-1.2) Sync tests with new defaults
+
+    * ext/zlib/tests/zlib_filter_deflate.phpt
+      ext/zlib/tests/zlib_filter_inflate.phpt:
+      Sync tests with new defaults
+
+2005-11-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      ext/ming/config.m4
+      ext/ming/ming.c:
+      - Fix build for new ming versions
+
 2005-11-23  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_1)
