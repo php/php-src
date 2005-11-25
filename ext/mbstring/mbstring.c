@@ -2312,7 +2312,7 @@ PHP_FUNCTION(mb_encode_mimeheader)
 	string.no_language = MBSTRG(current_language);
 	string.no_encoding = MBSTRG(current_internal_encoding);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sss", (char **)&string.val, &string.len, &charset_name, &charset_name_len, &trans_enc_name, &trans_enc_name_len, &linefeed, &linefeed_len, &indent) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sssl", (char **)&string.val, &string.len, &charset_name, &charset_name_len, &trans_enc_name, &trans_enc_name_len, &linefeed, &linefeed_len, &indent) == FAILURE) {
 		return;
 	}
 
