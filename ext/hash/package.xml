@@ -18,7 +18,7 @@
    <version>0.1</version>
    <state>beta</state>
    <date>2005-11-18</date>
-   <notes>Initial Release - md5, sha1, sha256, sha384, sha512, ripemd128, ripemd160</notes>
+   <notes>Initial Release - md5, sha1, sha256, sha384, sha512, ripemd128, ripemd160, tiger, gost, snefru, whirlpool</notes>
   </release>
 
   <filelist>
@@ -41,6 +41,9 @@
    <file role="src" name="hash_snefru.c"/>
    <file role="src" name="php_hash_snefru.c"/>
    <file role="src" name="php_hash_snefru_tables.h"/>
+   <file role="src" name="hash_gost.c"/>
+   <file role="src" name="php_hash_gost.h"/>
+   <file role="src" name="php_hash_gost_tables.h"/>
    <file role="doc" name="README"/>
    <dir role="test" name="tests">
     <file role="test" name="hmac-md5.phpt"/>
