@@ -154,15 +154,15 @@ PHP_HASH_API void PHP_SALSA20Init(PHP_SALSA_CTX *context)
 
 PHP_HASH_API void PHP_SALSAUpdate(PHP_SALSA_CTX *context, const unsigned char *input, size_t len)
 {
-	if (context->count + len < 64) {
-		memcpy(&context->buffer[context->count], input, len);
-		context->count = len;
+	if (context->length + len < 64) {
+		memcpy(&context->buffer[context->length], input, len);
+		context->length += len;
 	} else {
-		size_t i = 0, r = (context->count + len) % 64;
+		size_t i = 0, r = (context->length + len) % 64;
 		
-		if (context->count) {
-			i = 64 - context->count;
-			memcpy(&context->buffer[context->count], input, i);
+		if (context->length) {
+			i = 64 - context->length;
+			memcpy(&context->buffer[context->length], input, i);
 			SalsaTransform(context, context->buffer);
 			memset(context->buffer, 0, 64);
 		}
@@ -172,7 +172,7 @@ PHP_HASH_API void PHP_SALSAUpdate(PHP_SALSA_CTX *context, const unsigned char *i
 		}
 		
 		memcpy(context->buffer, input + i, r);
-		context->count = r;
+		context->length = r;
 	}
 }
 
@@ -180,7 +180,7 @@ PHP_HASH_API void PHP_SALSAFinal(unsigned char digest[64], PHP_SALSA_CTX *contex
 {
 	php_uint32 i, j;
 	
-	if (context->count) {
+	if (context->length) {
 		SalsaTransform(context, context->buffer);
 	}
 	

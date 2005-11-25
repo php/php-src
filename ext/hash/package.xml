@@ -38,6 +38,9 @@
    <file role="src" name="hash_tiger.c"/>
    <file role="src" name="php_hash_tiger.h"/>
    <file role="src" name="php_hash_tiger_tables.h"/>
+   <file role="src" name="hash_snefru.c"/>
+   <file role="src" name="php_hash_snefru.c"/>
+   <file role="src" name="php_hash_snefru_tables.h"/>
    <file role="doc" name="README"/>
    <dir role="test" name="tests">
     <file role="test" name="hmac-md5.phpt"/>
@@ -49,6 +52,8 @@
     <file role="test" name="ripemd128.phpt"/>
     <file role="test" name="ripemd160.phpt"/>
     <file role="test" name="haval.phpt"/>
+    <file role="test" name="tiger.phpt"/>
+    <file role="test" name="whirlpool.phpt"/>
    </dir>
   </filelist>
 
