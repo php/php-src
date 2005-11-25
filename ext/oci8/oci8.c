@@ -441,7 +441,7 @@ oci_error:
 static void php_oci_cleanup_global_handles(TSRMLS_D)
 {
 	if (OCI_G(err)) {
-		PHP_OCI_CALL(OCIHandleFree, ((dvoid *) OCI_G(err), OCI_HTYPE_ENV));
+		PHP_OCI_CALL(OCIHandleFree, ((dvoid *) OCI_G(err), OCI_HTYPE_ERROR));
 		OCI_G(err) = NULL;
 	}
 	
@@ -1408,30 +1408,30 @@ static int php_oci_connection_close(php_oci_connection *connection TSRMLS_DC)
 		}
 	}
 
+	if (connection->svc && connection->session && connection->is_open) {
+		PHP_OCI_CALL(OCISessionEnd, (connection->svc, OCI_G(err), connection->session, (ub4) 0));
+	}
+	
+	if (connection->session) {
+		PHP_OCI_CALL(OCIHandleFree, ((dvoid *) connection->session, OCI_HTYPE_SESSION));
+	}
+	
 	if (connection->is_attached) {
 		PHP_OCI_CALL(OCIServerDetach, (connection->server, OCI_G(err), OCI_DEFAULT));
 	}
 	
+	if (connection->svc) {
+		PHP_OCI_CALL(OCIHandleFree, ((dvoid *) connection->svc,	(ub4) OCI_HTYPE_SVCCTX));
+	}
+	
 	if (connection->err) {
 		PHP_OCI_CALL(OCIHandleFree, ((dvoid *) connection->err, (ub4) OCI_HTYPE_ERROR));
-	}
-
-	if (connection->session) {
-		PHP_OCI_CALL(OCIHandleFree, ((dvoid *) connection->session, OCI_HTYPE_SESSION));
 	}
 	
 	if (connection->server) {
 		PHP_OCI_CALL(OCIHandleFree, ((dvoid *) connection->server, (ub4) OCI_HTYPE_SERVER));
 	}
 	
-	if (connection->svc) {
-		if (connection->session && connection->is_open) {
-			PHP_OCI_CALL(OCISessionEnd, (connection->svc, OCI_G(err), connection->session, (ub4) 0));
-		}
-	
-		PHP_OCI_CALL(OCIHandleFree, ((dvoid *) connection->svc,	(ub4) OCI_HTYPE_SVCCTX));
-	}
-		
 	if (connection->env) {
 		PHP_OCI_CALL(OCIHandleFree, ((dvoid *) connection->env, OCI_HTYPE_ENV));
 	}
