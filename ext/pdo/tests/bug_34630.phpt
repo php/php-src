@@ -19,8 +19,6 @@ $is_oci = $driver == 'oci';
 
 if ($is_oci) {
 	$db->exec('CREATE TABLE test (id int NOT NULL PRIMARY KEY, val BLOB)');
-} else if ($driver == 'pgsql') {
-	$db->exec('CREATE TABLE test (id int NOT NULL PRIMARY KEY, val bytea)');
 } else {
 	$db->exec('CREATE TABLE test (id int NOT NULL PRIMARY KEY, val VARCHAR(256))');
 }
