@@ -38,7 +38,7 @@ function_entry pdo_pgsql_functions[] = {
 
 /* {{{ pdo_sqlite_deps
  */
-#if ZEND_EXTENSION_API_NO >= 220050617
+#if ZEND_MODULE_API_NO >= 20050922
 static zend_module_dep pdo_pgsql_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	{NULL, NULL, NULL}
@@ -48,7 +48,7 @@ static zend_module_dep pdo_pgsql_deps[] = {
 
 /* {{{ pdo_pgsql_module_entry */
 zend_module_entry pdo_pgsql_module_entry = {
-#if ZEND_EXTENSION_API_NO >= 220050617
+#if ZEND_MODULE_API_NO >= 20050922
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_pgsql_deps,
 #else

@@ -38,7 +38,7 @@ function_entry pdo_dblib_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-#if ZEND_EXTENSION_API_NO >= 220050617
+#if ZEND_MODULE_API_NO >= 20050922
 static zend_module_dep pdo_dblib_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	{NULL, NULL, NULL}
@@ -46,7 +46,7 @@ static zend_module_dep pdo_dblib_deps[] = {
 #endif
 
 zend_module_entry pdo_dblib_module_entry = {
-#if ZEND_EXTENSION_API_NO >= 220050617
+#if ZEND_MODULE_API_NO >= 20050922
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_dblib_deps,
 #else

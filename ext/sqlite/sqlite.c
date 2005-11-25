@@ -282,7 +282,7 @@ static zend_module_dep sqlite_deps[] = {
 };
 
 zend_module_entry sqlite_module_entry = {
-#if ZEND_MODULE_API_NO >= 20050608
+#if ZEND_MODULE_API_NO >= 20050922
 	STANDARD_MODULE_HEADER_EX, NULL,
 	sqlite_deps,
 #elif ZEND_MODULE_API_NO >= 20010901
