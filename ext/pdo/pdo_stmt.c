@@ -288,7 +288,7 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 		ZVAL_ADDREF(param->driver_params);
 	}
 
-	if (param->name && stmt->columns) {
+	if (!is_param && param->name && stmt->columns) {
 		/* try to map the name to the column */
 		int i;
 
@@ -299,13 +299,15 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 			}
 		}
 
-#if 0
 		/* if you prepare and then execute passing an array of params keyed by names,
 		 * then this will trigger, and we don't want that */
 		if (param->paramno == -1) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Did not found column name '%s' in the defined columns; it will not be bound", param->name);
 		}
-#endif
+	}
+
+	if (is_param && !rewrite_name_to_position(stmt, param TSRMLS_CC)) {
+		return 0;
 	}
 
 	if (param->name) {
@@ -317,28 +319,24 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 		} else {
 			param->name = estrndup(param->name, param->namelen);
 		}
-		zend_hash_update(hash, param->name, param->namelen, param, sizeof(*param), (void**)&pparam);
-	} else {
-		zend_hash_index_update(hash, param->paramno, param, sizeof(*param), (void**)&pparam);
-	}
-
-	if (is_param && !rewrite_name_to_position(stmt, pparam TSRMLS_CC)) {
-		return 0;
 	}
 	
 	/* tell the driver we just created a parameter */
 	if (stmt->methods->param_hook) {
-		if (!stmt->methods->param_hook(stmt, pparam,
+		if (!stmt->methods->param_hook(stmt, param,
 				PDO_PARAM_EVT_ALLOC TSRMLS_CC)) {
-			/* driver indicates that the parameter doesn't exist.
-			 * remove it from our hash */
-			if (pparam->name) {
-				zend_hash_del(hash, pparam->name, pparam->namelen);
-			} else {
-				zend_hash_index_del(hash, pparam->paramno);
-			}
 			return 0;
 		}
+	}
+
+	if (param->paramno >= 0) {
+		zend_hash_index_del(hash, param->paramno);
+	}
+	
+	if (param->name) {
+		zend_hash_update(hash, param->name, param->namelen, param, sizeof(*param), (void**)&pparam);
+	} else {
+		zend_hash_index_update(hash, param->paramno, param, sizeof(*param), (void**)&pparam);
 	}
 
 	return 1;
