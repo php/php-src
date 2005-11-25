@@ -244,7 +244,7 @@ static long mysql_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRM
 		return -1;
 	} else {
 		my_ulonglong c = mysql_affected_rows(H->server);
-		if (c != (my_ulonglong) -1) {
+		if (c == (my_ulonglong) -1) {
 			pdo_mysql_error(dbh);
 			return (H->einfo.errcode ? -1 : 0);
 		} else {
