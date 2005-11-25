@@ -57,9 +57,11 @@ typedef struct {
 	char *cursor_name;
 #if HAVE_PQPREPARE
 	char *stmt_name;
+	char *query;
 	char **param_values;
 	int *param_lengths;
 	int *param_formats;
+	Oid *param_types;
 #endif
 } pdo_pgsql_stmt;
 
