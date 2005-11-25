@@ -777,22 +777,22 @@ PHP_HASH_API void PHP_SHA384Final(unsigned char digest[48], PHP_SHA384_CTX * con
 	unsigned int index, padLen;
 
 	/* Save number of bits */
-	bits[15] = context->count[0] & 0xFF;
-	bits[14] = (context->count[0] >> 8) & 0xFF;
-	bits[13] = (context->count[0] >> 16) & 0xFF;
-	bits[12] = (context->count[0] >> 24) & 0xFF;
-	bits[11] = (context->count[0] >> 32) & 0xFF;
-	bits[10] = (context->count[0] >> 40) & 0xFF;
-	bits[9]  = (context->count[0] >> 48) & 0xFF;
-	bits[8]  = (context->count[0] >> 56) & 0xFF;
-	bits[7]  = context->count[1] & 0xFF;
-	bits[6]  = (context->count[1] >> 8) & 0xFF;
-	bits[5]  = (context->count[1] >> 16) & 0xFF;
-	bits[4]  = (context->count[1] >> 24) & 0xFF;
-	bits[3]  = (context->count[1] >> 32) & 0xFF;
-	bits[2]  = (context->count[1] >> 40) & 0xFF;
-	bits[1]  = (context->count[1] >> 48) & 0xFF;
-	bits[0]  = (context->count[1] >> 56) & 0xFF;
+	bits[15] = (unsigned char) (context->count[0] & 0xFF);
+	bits[14] = (unsigned char) ((context->count[0] >> 8) & 0xFF);
+	bits[13] = (unsigned char) ((context->count[0] >> 16) & 0xFF);
+	bits[12] = (unsigned char) ((context->count[0] >> 24) & 0xFF);
+	bits[11] = (unsigned char) ((context->count[0] >> 32) & 0xFF);
+	bits[10] = (unsigned char) ((context->count[0] >> 40) & 0xFF);
+	bits[9]  = (unsigned char) ((context->count[0] >> 48) & 0xFF);
+	bits[8]  = (unsigned char) ((context->count[0] >> 56) & 0xFF);
+	bits[7]  = (unsigned char) (context->count[1] & 0xFF);
+	bits[6]  = (unsigned char) ((context->count[1] >> 8) & 0xFF);
+	bits[5]  = (unsigned char) ((context->count[1] >> 16) & 0xFF);
+	bits[4]  = (unsigned char) ((context->count[1] >> 24) & 0xFF);
+	bits[3]  = (unsigned char) ((context->count[1] >> 32) & 0xFF);
+	bits[2]  = (unsigned char) ((context->count[1] >> 40) & 0xFF);
+	bits[1]  = (unsigned char) ((context->count[1] >> 48) & 0xFF);
+	bits[0]  = (unsigned char) ((context->count[1] >> 56) & 0xFF);
 	
 	/* Pad out to 112 mod 128.
 	 */
@@ -890,22 +890,22 @@ PHP_HASH_API void PHP_SHA512Final(unsigned char digest[48], PHP_SHA512_CTX * con
 	unsigned int index, padLen;
 
 	/* Save number of bits */
-	bits[15] = context->count[0] & 0xFF;
-	bits[14] = (context->count[0] >> 8) & 0xFF;
-	bits[13] = (context->count[0] >> 16) & 0xFF;
-	bits[12] = (context->count[0] >> 24) & 0xFF;
-	bits[11] = (context->count[0] >> 32) & 0xFF;
-	bits[10] = (context->count[0] >> 40) & 0xFF;
-	bits[9]  = (context->count[0] >> 48) & 0xFF;
-	bits[8]  = (context->count[0] >> 56) & 0xFF;
-	bits[7]  = context->count[1] & 0xFF;
-	bits[6]  = (context->count[1] >> 8) & 0xFF;
-	bits[5]  = (context->count[1] >> 16) & 0xFF;
-	bits[4]  = (context->count[1] >> 24) & 0xFF;
-	bits[3]  = (context->count[1] >> 32) & 0xFF;
-	bits[2]  = (context->count[1] >> 40) & 0xFF;
-	bits[1]  = (context->count[1] >> 48) & 0xFF;
-	bits[0]  = (context->count[1] >> 56) & 0xFF;
+	bits[15] = (unsigned char) (context->count[0] & 0xFF);
+	bits[14] = (unsigned char) ((context->count[0] >> 8) & 0xFF);
+	bits[13] = (unsigned char) ((context->count[0] >> 16) & 0xFF);
+	bits[12] = (unsigned char) ((context->count[0] >> 24) & 0xFF);
+	bits[11] = (unsigned char) ((context->count[0] >> 32) & 0xFF);
+	bits[10] = (unsigned char) ((context->count[0] >> 40) & 0xFF);
+	bits[9]  = (unsigned char) ((context->count[0] >> 48) & 0xFF);
+	bits[8]  = (unsigned char) ((context->count[0] >> 56) & 0xFF);
+	bits[7]  = (unsigned char) (context->count[1] & 0xFF);
+	bits[6]  = (unsigned char) ((context->count[1] >> 8) & 0xFF);
+	bits[5]  = (unsigned char) ((context->count[1] >> 16) & 0xFF);
+	bits[4]  = (unsigned char) ((context->count[1] >> 24) & 0xFF);
+	bits[3]  = (unsigned char) ((context->count[1] >> 32) & 0xFF);
+	bits[2]  = (unsigned char) ((context->count[1] >> 40) & 0xFF);
+	bits[1]  = (unsigned char) ((context->count[1] >> 48) & 0xFF);
+	bits[0]  = (unsigned char) ((context->count[1] >> 56) & 0xFF);
 
 	/* Pad out to 112 mod 128.
 	 */
