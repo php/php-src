@@ -398,7 +398,7 @@ PHP_MINIT_FUNCTION(hash)
 {
 	php_hash_le_hash = zend_register_list_destructors_ex(php_hash_dtor, NULL, PHP_HASH_RESNAME, module_number);
 
-	zend_hash_init(&php_hash_hashtable, 30, NULL, NULL, 1);
+	zend_hash_init(&php_hash_hashtable, 35, NULL, NULL, 1);
 
 	php_hash_register_algo("md5",			&php_hash_md5_ops);
 	php_hash_register_algo("sha1",			&php_hash_sha1_ops);
@@ -416,6 +416,7 @@ PHP_MINIT_FUNCTION(hash)
 	php_hash_register_algo("tiger192,4",	&php_hash_4tiger192_ops);
 	php_hash_register_algo("snefru",		&php_hash_snefru_ops);
 	php_hash_register_algo("gost",			&php_hash_gost_ops);
+	php_hash_register_algo("adler32",		&php_hash_adler32_ops);
 
 	PHP_HASH_HAVAL_REGISTER(3,128);
 	PHP_HASH_HAVAL_REGISTER(3,160);
