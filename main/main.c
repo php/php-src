@@ -1804,7 +1804,7 @@ PHPAPI int php_handle_auth_data(const char *auth TSRMLS_DC)
 	}
 	
 	if (ret == -1 && auth && auth[0] != '\0' && strncmp(auth, "Digest ", 7) == 0) {
-		SG(request_info).auth_digest = estrdup(auth);
+		SG(request_info).auth_digest = estrdup(auth + 7);
 		ret = 0;
 	}
 
