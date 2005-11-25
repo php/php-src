@@ -517,6 +517,11 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 				} else {
 					ZVAL_NULL(dest);
 				}
+			} else {
+				ZVAL_STRINGL(dest, value, value_len, !caller_frees);
+				if (caller_frees) {
+					caller_frees = 0;
+				}
 			}
 			break;
 		
