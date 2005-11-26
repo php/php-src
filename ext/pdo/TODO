@@ -5,6 +5,10 @@ Roadmap for PDO
 Core, version 1.1:
 ==================
 
+ - Add PDO::queryParams(), similar to PDO::query(), but accepts
+   an array of parameters as the second argument, pushing the remaining
+   args (which are args to setFetchMode()) up by one.
+
  - Separate the handle factory call into two phases:
    - handle creation
    - connecting
