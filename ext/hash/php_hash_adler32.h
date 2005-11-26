@@ -27,9 +27,9 @@ typedef struct {
 	php_uint32 state;
 } PHP_ADLER32_CTX;
 
-PHP_HASH_API PHP_ADLER32Init(PHP_ADLER32_CTX *context);
-PHP_HASH_API PHP_ADLER32Update(PHP_ADLER32_CTX *context, const unsigned char *input, size_t len);
-PHP_HASH_API PHP_ADLER32Final(unsigned char digest[4], PHP_ADLER32_CTX *context);
+PHP_HASH_API void PHP_ADLER32Init(PHP_ADLER32_CTX *context);
+PHP_HASH_API void PHP_ADLER32Update(PHP_ADLER32_CTX *context, const unsigned char *input, size_t len);
+PHP_HASH_API void PHP_ADLER32Final(unsigned char digest[4], PHP_ADLER32_CTX *context);
 
 #endif
 

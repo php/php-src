@@ -22,12 +22,12 @@
 #include "php_hash.h"
 #include "php_hash_adler32.h"
 
-PHP_HASH_API PHP_ADLER32Init(PHP_ADLER32_CTX *context)
+PHP_HASH_API void PHP_ADLER32Init(PHP_ADLER32_CTX *context)
 {
 	context->state = 1;
 }
 
-PHP_HASH_API PHP_ADLER32Update(PHP_ADLER32_CTX *context, const unsigned char *input, size_t len)
+PHP_HASH_API void PHP_ADLER32Update(PHP_ADLER32_CTX *context, const unsigned char *input, size_t len)
 {
 	php_uint32 i, s[2] = { context->state & 0xffff, (context->state >> 16) & 0xffff };
 	
@@ -38,7 +38,7 @@ PHP_HASH_API PHP_ADLER32Update(PHP_ADLER32_CTX *context, const unsigned char *in
 	context->state = s[0] + (s[1] << 16);
 }
 
-PHP_HASH_API PHP_ADLER32Final(unsigned char digest[4], PHP_ADLER32_CTX *context)
+PHP_HASH_API void PHP_ADLER32Final(unsigned char digest[4], PHP_ADLER32_CTX *context)
 {
 	digest[3] = (unsigned char) ((context->state >> 24) & 0xff);
 	digest[2] = (unsigned char) ((context->state >> 16) & 0xff);
