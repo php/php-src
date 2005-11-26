@@ -22,16 +22,6 @@
 #include "php_hash.h"
 #include "php_hash_sha.h"
 
-#if defined(SIZEOF_LONG) && SIZEOF_LONG >= 8
-#define L64(n)	(n)
-#else
-# ifdef PHP_WIN32
-#define L64(n)	(n##i64)
-# else
-#define L64(n)	(n##LL)
-# endif
-#endif
-
 static unsigned char PADDING[128] =
 {
 	0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -45,10 +35,10 @@ static unsigned char PADDING[128] =
 };
 
 /* {{{ SHAEncode32
-   Encodes input (php_uint32) into output (unsigned char). Assumes len is
+   Encodes input (php_hash_uint32) into output (unsigned char). Assumes len is
    a multiple of 4.
  */
-static void SHAEncode32(unsigned char *output, php_uint32 *input, unsigned int len)
+static void SHAEncode32(unsigned char *output, php_hash_uint32 *input, unsigned int len)
 {
 	unsigned int i, j;
 
@@ -63,16 +53,16 @@ static void SHAEncode32(unsigned char *output, php_uint32 *input, unsigned int l
 
 
 /* {{{ SHADecode32
-   Decodes input (unsigned char) into output (php_uint32). Assumes len is
+   Decodes input (unsigned char) into output (php_hash_uint32). Assumes len is
    a multiple of 4.
  */
-static void SHADecode32(php_uint32 *output, const unsigned char *input, unsigned int len)
+static void SHADecode32(php_hash_uint32 *output, const unsigned char *input, unsigned int len)
 {
 	unsigned int i, j;
 
 	for (i = 0, j = 0; j < len; i++, j += 4)
-		output[i] = ((php_uint32) input[j + 3]) | (((php_uint32) input[j + 2]) << 8) |
-			(((php_uint32) input[j + 1]) << 16) | (((php_uint32) input[j]) << 24);
+		output[i] = ((php_hash_uint32) input[j + 3]) | (((php_hash_uint32) input[j + 2]) << 8) |
+			(((php_hash_uint32) input[j + 1]) << 16) | (((php_hash_uint32) input[j]) << 24);
 }
 /* }}} */
 
@@ -188,22 +178,22 @@ PHP_FUNCTION(sha1_file)
 /* FF, GG, HH, and II transformations for rounds 1, 2, 3, and 4.
  */
 #define FF(a, b, c, d, e, w) { \
- (e) += F ((b), (c), (d)) + (w) + (php_uint32)(0x5A827999); \
+ (e) += F ((b), (c), (d)) + (w) + (php_hash_uint32)(0x5A827999); \
  (e) += ROTATE_LEFT ((a), 5); \
  (b) = ROTATE_LEFT((b), 30); \
   }
 #define GG(a, b, c, d, e, w) { \
- (e) += G ((b), (c), (d)) + (w) + (php_uint32)(0x6ED9EBA1); \
+ (e) += G ((b), (c), (d)) + (w) + (php_hash_uint32)(0x6ED9EBA1); \
  (e) += ROTATE_LEFT ((a), 5); \
  (b) = ROTATE_LEFT((b), 30); \
   }
 #define HH(a, b, c, d, e, w) { \
- (e) += H ((b), (c), (d)) + (w) + (php_uint32)(0x8F1BBCDC); \
+ (e) += H ((b), (c), (d)) + (w) + (php_hash_uint32)(0x8F1BBCDC); \
  (e) += ROTATE_LEFT ((a), 5); \
  (b) = ROTATE_LEFT((b), 30); \
   }
 #define II(a, b, c, d, e, w) { \
- (e) += I ((b), (c), (d)) + (w) + (php_uint32)(0xCA62C1D6); \
+ (e) += I ((b), (c), (d)) + (w) + (php_hash_uint32)(0xCA62C1D6); \
  (e) += ROTATE_LEFT ((a), 5); \
  (b) = ROTATE_LEFT((b), 30); \
   }
@@ -228,10 +218,10 @@ PHP_HASH_API void PHP_SHA1Init(PHP_SHA1_CTX * context)
 /* {{{ SHA1Transform
  * SHA1 basic transformation. Transforms state based on block.
  */
-static void SHA1Transform(php_uint32 state[5], const unsigned char block[64])
+static void SHA1Transform(php_hash_uint32 state[5], const unsigned char block[64])
 {
-	php_uint32 a = state[0], b = state[1], c = state[2];
-	php_uint32 d = state[3], e = state[4], x[16], tmp;
+	php_hash_uint32 a = state[0], b = state[1], c = state[2];
+	php_hash_uint32 d = state[3], e = state[4], x[16], tmp;
 
 	SHADecode32(x, block, 64);
 
@@ -348,10 +338,10 @@ PHP_HASH_API void PHP_SHA1Update(PHP_SHA1_CTX * context, const unsigned char *in
 	index = (unsigned int) ((context->count[0] >> 3) & 0x3F);
 
 	/* Update number of bits */
-	if ((context->count[0] += ((php_uint32) inputLen << 3))
-		< ((php_uint32) inputLen << 3))
+	if ((context->count[0] += ((php_hash_uint32) inputLen << 3))
+		< ((php_hash_uint32) inputLen << 3))
 		context->count[1]++;
-	context->count[1] += ((php_uint32) inputLen >> 29);
+	context->count[1] += ((php_hash_uint32) inputLen >> 29);
 
 	partLen = 64 - index;
 
@@ -443,7 +433,7 @@ php_hash_ops php_hash_sha256_ops = {
 /* OM1 */
 #define SHA256_F5(x)		(ROTR32(17,(x)) ^ ROTR32(19,(x)) ^ SHR(10,(x)))
 
-static php_uint32 SHA256_K[64] = {
+static php_hash_uint32 SHA256_K[64] = {
 	0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
 	0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
 	0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
@@ -475,11 +465,11 @@ PHP_HASH_API void PHP_SHA256Init(PHP_SHA256_CTX * context)
 /* {{{ SHA256Transform
  * SHA256 basic transformation. Transforms state based on block.
  */
-static void SHA256Transform(php_uint32 state[8], const unsigned char block[64])
+static void SHA256Transform(php_hash_uint32 state[8], const unsigned char block[64])
 {
-	php_uint32 a = state[0], b = state[1], c = state[2], d = state[3];
-	php_uint32 e = state[4], f = state[5], g = state[6], h = state[7];
-	php_uint32 x[16], T1, T2, W[64];
+	php_hash_uint32 a = state[0], b = state[1], c = state[2], d = state[3];
+	php_hash_uint32 e = state[4], f = state[5], g = state[6], h = state[7];
+	php_hash_uint32 x[16], T1, T2, W[64];
 	int i;
 
 	SHADecode32(x, block, 64);
@@ -526,10 +516,10 @@ PHP_HASH_API void PHP_SHA256Update(PHP_SHA256_CTX * context, const unsigned char
 	index = (unsigned int) ((context->count[0] >> 3) & 0x3F);
 
 	/* Update number of bits */
-	if ((context->count[0] += ((php_uint32) inputLen << 3)) < ((php_uint32) inputLen << 3)) {
+	if ((context->count[0] += ((php_hash_uint32) inputLen << 3)) < ((php_hash_uint32) inputLen << 3)) {
 		context->count[1]++;
 	}
-	context->count[1] += ((php_uint32) inputLen >> 29);
+	context->count[1] += ((php_hash_uint32) inputLen >> 29);
 
 	partLen = 64 - index;
 

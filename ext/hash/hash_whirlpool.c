@@ -283,7 +283,7 @@ PHP_HASH_API void PHP_WHIRLPOOLUpdate(PHP_WHIRLPOOL_CTX *context, const unsigned
     unsigned char *bitLength    = context->bitlength;
     int bufferBits   = context->buffer.bits;
     int bufferPos    = context->buffer.pos;
-    php_uint32 b, carry;
+    php_hash_uint32 b, carry;
     int i;
 
     /*
@@ -291,7 +291,7 @@ PHP_HASH_API void PHP_WHIRLPOOLUpdate(PHP_WHIRLPOOL_CTX *context, const unsigned
      */
     php_hash_uint64 value = sourceBits;
     for (i = 31, carry = 0; i >= 0 && (carry != 0 || value != L64(0)); i--) {
-        carry += bitLength[i] + ((php_uint32)value & 0xff);
+        carry += bitLength[i] + ((php_hash_uint32)value & 0xff);
         bitLength[i] = (unsigned char)carry;
         carry >>= 8;
         value >>= 8;

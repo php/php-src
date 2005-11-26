@@ -18,7 +18,7 @@
 
 /* $Id$ */
 
-static const php_uint32 tables[16][256]= {
+static const php_hash_uint32 tables[16][256]= {
 
  {  /* Start of S Box 0  */
 

@@ -22,6 +22,7 @@
 #define PHP_HASH_H
 
 #include "php.h"
+#include "php_hash_types.h"
 
 #define PHP_HASH_EXTNAME	"hash"
 #define PHP_HASH_EXTVER		"0.1"

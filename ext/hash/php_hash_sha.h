@@ -36,8 +36,8 @@
 
 /* SHA1 context. */
 typedef struct {
-	php_uint32 state[5];		/* state (ABCD) */
-	php_uint32 count[2];		/* number of bits, modulo 2^64 */
+	php_hash_uint32 state[5];		/* state (ABCD) */
+	php_hash_uint32 count[2];		/* number of bits, modulo 2^64 */
 	unsigned char buffer[64];	/* input buffer */
 } PHP_SHA1_CTX;
 
@@ -52,24 +52,14 @@ PHP_FUNCTION(sha1_file);
 
 /* SHA256 context. */
 typedef struct {
-	php_uint32 state[8];		/* state */
-	php_uint32 count[2];		/* number of bits, modulo 2^64 */
+	php_hash_uint32 state[8];		/* state */
+	php_hash_uint32 count[2];		/* number of bits, modulo 2^64 */
 	unsigned char buffer[64];	/* input buffer */
 } PHP_SHA256_CTX;
 
 PHP_HASH_API void PHP_SHA256Init(PHP_SHA256_CTX *);
 PHP_HASH_API void PHP_SHA256Update(PHP_SHA256_CTX *, const unsigned char *, unsigned int);
 PHP_HASH_API void PHP_SHA256Final(unsigned char[32], PHP_SHA256_CTX *);
-
-#if defined(SIZEOF_LONG) && SIZEOF_LONG >= 8
-typedef unsigned long php_hash_uint64;
-#else
-# ifdef PHP_WIN32
-typedef unsigned __int64 php_hash_uint64;
-# else
-typedef unsigned long long php_hash_uint64;
-# endif
-#endif
 
 /* SHA384 context */
 typedef struct {
