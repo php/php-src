@@ -23,9 +23,9 @@
  </description>
  <license>PHP</license>
  <release>
-  <state>beta</state>
-  <version>1.0RC2</version>
-  <date>2005-11-01</date>
+  <state>stable</state>
+  <version>1.0</version>
+  <date>2005-11-26</date>
 
   <notes>
 Update code for API changes in PDO; no actual changes have been made to this driver.
@@ -37,6 +37,7 @@ however: you are *strongly* recommended to use PDO_ODBC instead of this driver o
 Windows platforms.
 
 ** Changes **
+- Fix Bug #34777; segfault when retrieving non-existent error info
 - Fix Bug #35032; didn't find FreeTDS includes on some systems
   </notes>
 
@@ -53,7 +54,7 @@ Windows platforms.
   </filelist>
   <deps>
    <dep type="php" rel="ge" version="5.0.3"/>
-   <dep type="ext" name="pdo" rel="ge" version="1.0RC2"/>
+   <dep type="ext" name="pdo" rel="ge" version="1.0"/>
   </deps>
  </release>
 </package>
