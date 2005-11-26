@@ -21,21 +21,6 @@
 #ifndef PHP_HASH_WHIRLPOOL_H
 #define PHP_HASH_WHIRLPOOL_H
 
-#include "ext/standard/basic_functions.h"
-
-#if defined(SIZEOF_LONG) && (SIZEOF_LONG >= 8)
-#	define L64(n)	(n##L)
-typedef unsigned long php_hash_uint64;
-#else
-#	ifdef PHP_WIN32
-#		define L64(n)	(n##i64)
-typedef unsigned __int64 php_hash_uint64;
-#	else
-#		define L64(n)	(n##LL)
-typedef unsigned long long php_hash_uint64;
-#	endif
-#endif
-
 /* WHIRLPOOL context */
 typedef struct {
 	php_hash_uint64 state[8];

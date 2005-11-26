@@ -24,7 +24,7 @@
 #include "ext/standard/basic_functions.h"
 
 typedef struct {
-	php_uint32 state;
+	php_hash_uint32 state;
 } PHP_CRC32_CTX;
 
 PHP_HASH_API void PHP_CRC32Init(PHP_CRC32_CTX *context);

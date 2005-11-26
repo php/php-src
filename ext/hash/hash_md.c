@@ -162,9 +162,9 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 #define S43 15
 #define S44 21
 
-static void MD5Transform(php_uint32[4], const unsigned char[64]);
-static void Encode(unsigned char *, php_uint32 *, unsigned int);
-static void Decode(php_uint32 *, const unsigned char *, unsigned int);
+static void MD5Transform(php_hash_uint32[4], const unsigned char[64]);
+static void Encode(unsigned char *, php_hash_uint32 *, unsigned int);
+static void Decode(php_hash_uint32 *, const unsigned char *, unsigned int);
 
 static unsigned char PADDING[64] =
 {
@@ -188,22 +188,22 @@ static unsigned char PADDING[64] =
    Rotation is separate from addition to prevent recomputation.
  */
 #define FF(a, b, c, d, x, s, ac) { \
- (a) += F ((b), (c), (d)) + (x) + (php_uint32)(ac); \
+ (a) += F ((b), (c), (d)) + (x) + (php_hash_uint32)(ac); \
  (a) = ROTATE_LEFT ((a), (s)); \
  (a) += (b); \
   }
 #define GG(a, b, c, d, x, s, ac) { \
- (a) += G ((b), (c), (d)) + (x) + (php_uint32)(ac); \
+ (a) += G ((b), (c), (d)) + (x) + (php_hash_uint32)(ac); \
  (a) = ROTATE_LEFT ((a), (s)); \
  (a) += (b); \
   }
 #define HH(a, b, c, d, x, s, ac) { \
- (a) += H ((b), (c), (d)) + (x) + (php_uint32)(ac); \
+ (a) += H ((b), (c), (d)) + (x) + (php_hash_uint32)(ac); \
  (a) = ROTATE_LEFT ((a), (s)); \
  (a) += (b); \
   }
 #define II(a, b, c, d, x, s, ac) { \
- (a) += I ((b), (c), (d)) + (x) + (php_uint32)(ac); \
+ (a) += I ((b), (c), (d)) + (x) + (php_hash_uint32)(ac); \
  (a) = ROTATE_LEFT ((a), (s)); \
  (a) += (b); \
   }
@@ -237,10 +237,10 @@ PHP_HASH_API void PHP_MD5Update(PHP_MD5_CTX * context, const unsigned char *inpu
 	index = (unsigned int) ((context->count[0] >> 3) & 0x3F);
 
 	/* Update number of bits */
-	if ((context->count[0] += ((php_uint32) inputLen << 3))
-		< ((php_uint32) inputLen << 3))
+	if ((context->count[0] += ((php_hash_uint32) inputLen << 3))
+		< ((php_hash_uint32) inputLen << 3))
 		context->count[1]++;
-	context->count[1] += ((php_uint32) inputLen >> 29);
+	context->count[1] += ((php_hash_uint32) inputLen >> 29);
 
 	partLen = 64 - index;
 
@@ -299,10 +299,10 @@ PHP_HASH_API void PHP_MD5Final(unsigned char digest[16], PHP_MD5_CTX * context)
  * MD5 basic transformation. Transforms state based on block.
  */
 static void MD5Transform(state, block)
-php_uint32 state[4];
+php_hash_uint32 state[4];
 const unsigned char block[64];
 {
-	php_uint32 a = state[0], b = state[1], c = state[2], d = state[3], x[16];
+	php_hash_uint32 a = state[0], b = state[1], c = state[2], d = state[3], x[16];
 
 	Decode(x, block, 64);
 
@@ -389,12 +389,12 @@ const unsigned char block[64];
 /* }}} */
 
 /* {{{ Encode
-   Encodes input (php_uint32) into output (unsigned char). Assumes len is
+   Encodes input (php_hash_uint32) into output (unsigned char). Assumes len is
    a multiple of 4.
  */
 static void Encode(output, input, len)
 unsigned char *output;
-php_uint32 *input;
+php_hash_uint32 *input;
 unsigned int len;
 {
 	unsigned int i, j;
@@ -409,19 +409,19 @@ unsigned int len;
 /* }}} */
 
 /* {{{ Decode
-   Decodes input (unsigned char) into output (php_uint32). Assumes len is
+   Decodes input (unsigned char) into output (php_hash_uint32). Assumes len is
    a multiple of 4.
  */
 static void Decode(output, input, len)
-php_uint32 *output;
+php_hash_uint32 *output;
 const unsigned char *input;
 unsigned int len;
 {
 	unsigned int i, j;
 
 	for (i = 0, j = 0; j < len; i++, j += 4)
-		output[i] = ((php_uint32) input[j]) | (((php_uint32) input[j + 1]) << 8) |
-			(((php_uint32) input[j + 2]) << 16) | (((php_uint32) input[j + 3]) << 24);
+		output[i] = ((php_hash_uint32) input[j]) | (((php_hash_uint32) input[j + 1]) << 8) |
+			(((php_hash_uint32) input[j + 2]) << 16) | (((php_hash_uint32) input[j + 3]) << 24);
 }
 /* }}} */
 

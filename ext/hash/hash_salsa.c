@@ -43,7 +43,7 @@
  
  D.J.Bernstein
 */
-static void Salsa10(php_uint32 x[16], php_uint32 in[16])
+static void Salsa10(php_hash_uint32 x[16], php_hash_uint32 in[16])
 {
 	int i;
 	
@@ -90,7 +90,7 @@ static void Salsa10(php_uint32 x[16], php_uint32 in[16])
  
  D.J.Bernstein
 */
-static void Salsa20(php_uint32 x[16], php_uint32 in[16])
+static void Salsa20(php_hash_uint32 x[16], php_hash_uint32 in[16])
 {
 	int i;
 	
@@ -120,15 +120,15 @@ static void Salsa20(php_uint32 x[16], php_uint32 in[16])
 
 static inline void SalsaTransform(PHP_SALSA_CTX *context, const unsigned char input[64])
 {
-	php_uint32 i, j, a[16];
+	php_hash_uint32 i, j, a[16];
 
 #if 0
 	fprintf(stderr, "> INPUT: %.*s\n", 64, input);
 #endif
 	
 	for (i = 0, j = 0; j < 64; i++, j += 4) {
-		a[i] = ((php_uint32) input[j + 3]) | (((php_uint32) input[j + 2]) << 8) |
-			(((php_uint32) input[j + 1]) << 16) | (((php_uint32) input[j]) << 24);
+		a[i] = ((php_hash_uint32) input[j + 3]) | (((php_hash_uint32) input[j + 2]) << 8) |
+			(((php_hash_uint32) input[j + 1]) << 16) | (((php_hash_uint32) input[j]) << 24);
 	}
 	
 	if (!context->init) {
@@ -178,7 +178,7 @@ PHP_HASH_API void PHP_SALSAUpdate(PHP_SALSA_CTX *context, const unsigned char *i
 
 PHP_HASH_API void PHP_SALSAFinal(unsigned char digest[64], PHP_SALSA_CTX *context)
 {
-	php_uint32 i, j;
+	php_hash_uint32 i, j;
 	
 	if (context->length) {
 		SalsaTransform(context, context->buffer);

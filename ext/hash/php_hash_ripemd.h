@@ -24,14 +24,14 @@
 
 /* RIPEMD context. */
 typedef struct {
-	php_uint32 state[4];		/* state (ABCD) */
-	php_uint32 count[2];		/* number of bits, modulo 2^64 (lsb first) */
+	php_hash_uint32 state[4];		/* state (ABCD) */
+	php_hash_uint32 count[2];		/* number of bits, modulo 2^64 (lsb first) */
 	unsigned char buffer[64];	/* input buffer */
 } PHP_RIPEMD128_CTX;
 
 typedef struct {
-	php_uint32 state[5];		/* state (ABCD) */
-	php_uint32 count[2];		/* number of bits, modulo 2^64 (lsb first) */
+	php_hash_uint32 state[5];		/* state (ABCD) */
+	php_hash_uint32 count[2];		/* number of bits, modulo 2^64 (lsb first) */
 	unsigned char buffer[64];	/* input buffer */
 } PHP_RIPEMD160_CTX;
 

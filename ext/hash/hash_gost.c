@@ -207,10 +207,10 @@
 		AA(v, l, r); \
 	}
 
-static inline void Gost(php_uint32 state[8], php_uint32 data[8])
+static inline void Gost(php_hash_uint32 state[8], php_hash_uint32 data[8])
 {
 	int i;
-	php_uint32 l, r, t, key[8], u[8], v[8], w[8], s[8], *h = state, *m = data;
+	php_hash_uint32 l, r, t, key[8], u[8], v[8], w[8], s[8], *h = state, *m = data;
 	
 	memcpy(u, state, sizeof(u));
 	memcpy(v, data, sizeof(v));
@@ -227,11 +227,11 @@ static inline void Gost(php_uint32 state[8], php_uint32 data[8])
 static inline void GostTransform(PHP_GOST_CTX *context, const unsigned char input[32])
 {
 	int i, j;
-	php_uint32 data[8], temp = 0, save = 0;
+	php_hash_uint32 data[8], temp = 0, save = 0;
 	
 	for (i = 0, j = 0; i < 8; ++i, j += 4) {
-		data[i] =	((php_uint32) input[j]) | (((php_uint32) input[j + 1]) << 8) | 
-					(((php_uint32) input[j + 2]) << 16) | (((php_uint32) input[j + 3]) << 24);
+		data[i] =	((php_hash_uint32) input[j]) | (((php_hash_uint32) input[j + 1]) << 8) | 
+					(((php_hash_uint32) input[j + 2]) << 16) | (((php_hash_uint32) input[j + 3]) << 24);
 		save = context->state[i + 8];
 		context->state[i + 8] += data[i] + temp;
 		temp = ((context->state[i + 8] < data[i]) || (context->state[i + 8] < save)) ? 1 : 0;     
@@ -245,7 +245,7 @@ PHP_HASH_API void PHP_GOSTInit(PHP_GOST_CTX *context)
 	memset(context, 0, sizeof(*context));
 }
 
-static const php_uint32 MAX32 = 0xffffffffLU;
+static const php_hash_uint32 MAX32 = 0xffffffffLU;
 
 PHP_HASH_API void PHP_GOSTUpdate(PHP_GOST_CTX *context, const unsigned char *input, size_t len)
 {
@@ -281,7 +281,7 @@ PHP_HASH_API void PHP_GOSTUpdate(PHP_GOST_CTX *context, const unsigned char *inp
 
 PHP_HASH_API void PHP_GOSTFinal(unsigned char digest[32], PHP_GOST_CTX *context)
 {
-	php_uint32 i, j, l[8] = {0};
+	php_hash_uint32 i, j, l[8] = {0};
 	
 	if (context->length) {
 		GostTransform(context, context->buffer);
