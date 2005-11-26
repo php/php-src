@@ -1,3 +1,53 @@
+2005-11-25  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_5_0)
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.c:
+      5th argument of mb_encode_mimeheader() was not acceptable.
+
+2005-11-25  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      ext/sqlite/sqlite.c:
+      MFH: Fixed wrong usage of ZEND_EXTENSION_API_NO (these are not Zend exts :)
+
+    * ext/sqlite/sqlite.c:
+      - Use right define: ZEND_MODULE_API_NO as these are PHP modules, not Zend
+      extensions
+
+2005-11-25  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      MFH: fix #35391 (pdo_mysql::exec does not return number of affected rows)
+
+    * ZendEngine2/zend.h:
+      ICC doesn't support __attribute__ for pointers
+
+    * (PHP_5_1)
+      ZendEngine2/zend.h:
+      MFH: ICC doesn't support __attribute__ for pointers
+
+    * ext/oci8/oci8.c:
+      change handles destruction order (based on the patch by Chris Jones) and
+      fix typo
+
+2005-11-25  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_1)
+      ext/mysqli/tests/009.phpt:
+      fix test - unsigned it is casted to 0 in mysql sql_mode
+
+2005-11-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/main.c:
+      MFB51: Fixed bug #35170 (PHP_AUTH_DIGEST differs under Apache 1.x and 2.x)
+
+    * (PHP_5_1)
+      NEWS
+      main/main.c:
+      Fixed bug #35170 (PHP_AUTH_DIGEST differs under Apache 1.x and 2.x).
+
 2005-11-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/simplexml/tests/bug27010.phpt:
