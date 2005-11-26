@@ -337,8 +337,7 @@ HELP;
 			fclose($failed_tests_file);
 		}
 		if (count($test_files) || count($test_results)) {
-			echo "
-=====================================================================";
+			echo "=====================================================================";
 			compute_summary();
 			echo get_summary(false);
 		}
@@ -463,8 +462,7 @@ if (0 == count($test_results)) {
 
 compute_summary();
 
-echo "
-=====================================================================
+echo "=====================================================================
 TIME END " . date('Y-m-d H:i:s', $end_time);
 
 $summary = get_summary(true);
@@ -720,10 +718,30 @@ function run_all_tests($test_files, $redir_tested = NULL)
 	}
 }
 
+function show_redirect_start($tests, $tested)
+{
+	echo "---> $tests ($tested)\n";
+}
+
+function show_redirect_ends($tests, $tested)
+{
+	echo "---> $tests ($tested) done\n";
+}
+
+function show_test($test_idx, $test_cnt, $shortname)
+{
+	echo "TEST $test_idx/$test_cnt [$shortname]\r";
+	flush();
+}
+
+function show_result($result, $tested, $file, $extra = '')
+{
+	echo "$result $tested $extra\n";
+}
+
 //
 //  Run an individual test case.
 //
-
 function run_test($php, $file)
 {
 	global $log_format, $info_params, $ini_overwrites, $cwd, $PHP_FAILED_TESTS, $pass_options, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx;
@@ -780,7 +798,7 @@ TEST $file
 	if (@count($section_text['REDIRECTTEST']) == 1) {
 		if ($IN_REDIRECT) {
 			$borked = true;
-			$bork_info = "Can't redirect a test from within a redirected test";
+			$bork_info = "Can't redirect a test from within a redirected test [$file]";
 		} else {
 			$borked = false;
 		}
@@ -796,18 +814,16 @@ TEST $file
 		if ((@count($section_text['EXPECT']) + @count($section_text['EXPECTF']) + @count($section_text['EXPECTREGEX'])) != 1) {
 			$bork_info = "missing section --EXPECT--, --EXPECTF-- or --EXPECTREGEX-- [$file]";
 			$borked = true;
-			print_r($section_text);
 		}
 		if ((@count($section_text['UEXPECT']) + @count($section_text['UEXPECTF']) + @count($section_text['UEXPECTREGEX'])) > 1) {
 			$bork_info = "missing section --UEXPECT--, --UEXPECTF-- or --UEXPECTREGEX-- [$file]";
 			$borked = true;
-			print_r($section_text);
 		}
 	}
 	fclose($fp);
 
 	if ($borked) {
-		echo "BORK $bork_info [$file]\n";
+		show_result("BORK", $bork_info, $file);
 		$PHP_FAILED_TESTS['BORKED'][] = array (
 								'name' => $file,
 								'test_name' => '',
@@ -829,8 +845,7 @@ TEST $file
 	$shortname = str_replace($cwd.'/', '', $file);
 	$tested = trim($section_text['TEST'])." [$shortname]";
 
-	echo "TEST $test_idx/$test_cnt [$shortname]\r";
-	flush();
+	show_test($test_idx, $test_cnt, $shortname);
 
 	if (is_array($IN_REDIRECT)) {
 		$tmp = $IN_REDIRECT['dir'];
@@ -886,12 +901,11 @@ TEST $file
 			$output = system_with_timeout("$extra $php -q $skipif_params $tmp_skipif");
 			@unlink($tmp_skipif);
 			if (eregi("^skip", trim($output))) {
-				echo "SKIP $tested";
 				$reason = (eregi("^skip[[:space:]]*(.+)\$", trim($output))) ? eregi_replace("^skip[[:space:]]*(.+)\$", "\\1", trim($output)) : FALSE;
 				if ($reason) {
-					echo " (reason: $reason)\n";
+					show_result("SKIP", $tested, $file, "reason: $reason");
 				} else {
-					echo "\n";
+					show_result("SKIP", $tested, $file);
 				}
 				if (isset($old_php)) {
 					$php = $old_php;
@@ -922,43 +936,55 @@ TEST $file
 		$IN_REDIRECT['dir'] = realpath(dirname($file));
 		$IN_REDIRECT['prefix'] = trim($section_text['TEST']);
 
-		if (is_array($org_file)) {
-			$test_files[] = $org_file[1];
-		} else {
-			$GLOBALS['test_files'] = $test_files;
-			find_files($IN_REDIRECT['TESTS']);
-			$test_files = $GLOBALS['test_files'];
+		if (@count($IN_REDIRECT['TESTS']) == 1) {
+			if (is_array($org_file)) {
+				$test_files[] = $org_file[1];
+			} else {
+				$GLOBALS['test_files'] = $test_files;
+				find_files($IN_REDIRECT['TESTS']);
+				$test_files = $GLOBALS['test_files'];
+			}
+			$test_cnt += count($test_files) - 1;
+			$test_idx--;
+	
+			show_redirect_start($IN_REDIRECT['TESTS'], $tested);
+	
+			// set up environment
+			foreach ($IN_REDIRECT['ENV'] as $k => $v) {
+				putenv("$k=$v");
+			}
+			putenv("REDIR_TEST_DIR=" . realpath($IN_REDIRECT['TESTS']) . DIRECTORY_SEPARATOR);
+	
+			usort($test_files, "test_sort");
+			run_all_tests($test_files, $tested);
+	
+			show_redirect_ends($IN_REDIRECT['TESTS'], $tested);
+	
+			// clean up environment
+			foreach ($IN_REDIRECT['ENV'] as $k => $v) {
+				putenv("$k=");
+			}
+			putenv("REDIR_TEST_DIR=");
+	
+			// a redirected test never fails
+			$IN_REDIRECT = false;
+			return 'REDIR';
 		}
-		$test_cnt += count($test_files) - 1;
-		$test_idx--;
-
-		echo "---> $IN_REDIRECT[TESTS] ($tested)\n";
-
-		// set up environment
-		foreach ($IN_REDIRECT['ENV'] as $k => $v) {
-			putenv("$k=$v");
-		}
-		putenv("REDIR_TEST_DIR=" . realpath($IN_REDIRECT['TESTS']) . DIRECTORY_SEPARATOR);
-
-		usort($test_files, "test_sort");
-		run_all_tests($test_files, $tested);
-
-		echo "---> $IN_REDIRECT[TESTS] ($tested) done\n";
-
-		// clean up environment
-		foreach ($IN_REDIRECT['ENV'] as $k => $v) {
-			putenv("$k=");
-		}
-		putenv("REDIR_TEST_DIR=");
-
-		// a redirected test never fails
-		$IN_REDIRECT = false;
-		return 'REDIR';
-	} else if (is_array($org_file)) {
-		echo "--> Redirected test did not contain redirection info: $org_file[0]\n";
-		$test_cnt -= 1;
-		$test_idx--;
-		return 'REDIR';
+	}
+	if (is_array($org_file) || @count($section_text['REDIRECTTEST']) == 1) {
+		if (is_array($org_file)) $file = $org_file[0];
+		$bork_info = "Redirected test did not contain redirection info: [$file]";
+		show_result("BORK", $bork_info, $file);
+		$PHP_FAILED_TESTS['BORKED'][] = array (
+								'name' => $file,
+								'test_name' => '',
+								'output' => '',
+								'diff'   => '',
+								'info'   => $bork_info,
+		);
+		//$test_cnt -= 1;
+		//$test_idx--;
+		return 'BORKED';
 	}
 	
 
@@ -1109,7 +1135,7 @@ COMMAND $cmd
 */
 		if (preg_match("/^$wanted_re\$/s", $output)) {
 			@unlink($tmp_file);
-			echo "PASS $tested\n";
+			show_result("PASS", $tested, $file);
 			if (isset($old_php)) {
 				$php = $old_php;
 			}
@@ -1123,7 +1149,7 @@ COMMAND $cmd
 		$ok = (0 == strcmp($output,$wanted));
 		if ($ok) {
 			@unlink($tmp_file);
-			echo "PASS $tested\n";
+			show_result("PASS", $tested, $file);
 			if (isset($old_php)) {
 				$php = $old_php;
 			}
@@ -1134,9 +1160,9 @@ COMMAND $cmd
 
 	// Test failed so we need to report details.
 	if ($warn) {
-		echo "WARN $tested$info\n";
+		show_result("WARN", $tested, $file, $info);
 	} else {
-		echo "FAIL $tested$info\n";
+		show_result("FAIL", $tested, $file, $info);
 	}
 
 	$PHP_FAILED_TESTS['FAILED'][] = array (
