@@ -30,9 +30,9 @@
 
 #define PHP_HASH_HMAC		0x0001
 
-typedef int (*php_hash_init_func_t)(void *context);
-typedef int (*php_hash_update_func_t)(void *context, const unsigned char *buf, unsigned int count);
-typedef int (*php_hash_final_func_t)(unsigned char *digest, void *context);
+typedef void (*php_hash_init_func_t)(void *context);
+typedef void (*php_hash_update_func_t)(void *context, const unsigned char *buf, unsigned int count);
+typedef void (*php_hash_final_func_t)(unsigned char *digest, void *context);
 
 typedef struct _php_hash_ops {
 	php_hash_init_func_t hash_init;
