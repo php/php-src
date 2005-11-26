@@ -2114,6 +2114,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	zendlval->value.str.val = yytext; /* no copying - intentional */
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
+	BEGIN(ST_IN_SCRIPTING);
 	return T_COMMENT;
 }
 
