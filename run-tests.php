@@ -785,9 +785,13 @@ TEST $file
 			$borked = false;
 		}
 	} else {
-		if (@count($section_text['FILE']) != 1) {
+		if (@count($section_text['FILE']) + @count($section_text['FILEEOF']) != 1) {
 			$bork_info = "missing section --FILE-- [$file]";
 			$borked = true;
+		}
+		if (@count($section_text['FILEEOF']) == 1) {
+			$section_text['FILE'] = preg_replace('/[\r\n]+$/', '', $section_text['FILEEOF']);
+			unset($section_text['FILEEOF']);
 		}
 		if ((@count($section_text['EXPECT']) + @count($section_text['EXPECTF']) + @count($section_text['EXPECTREGEX'])) != 1) {
 			$bork_info = "missing section --EXPECT--, --EXPECTF-- or --EXPECTREGEX-- [$file]";
