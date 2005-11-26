@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Added an additional field $frame['object'] to the result array of
   debug_backtrace() that contains a reference to the respective object when the
   frame was called from an object. (Sebastian)
+- Fixed bug #35402 (New date class causes crash in get_object_vars()). (Tony)
 - Fixed bug #35391 (pdo_mysql::exec does not return number of affected rows). 
   (Tony)
 - Fixed bug #35360 (exceptions in interactive mode (php -a) may cause crash).
