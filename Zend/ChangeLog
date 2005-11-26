@@ -1,3 +1,12 @@
+2005-11-25  Antony Dovgal  <antony@zend.com>
+
+    * zend.h:
+      ICC doesn't support __attribute__ for pointers
+
+    * (PHP_5_1)
+      zend.h:
+      MFH: ICC doesn't support __attribute__ for pointers
+
 2005-11-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
