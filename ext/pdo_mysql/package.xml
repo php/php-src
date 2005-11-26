@@ -2,7 +2,7 @@
 <!DOCTYPE package SYSTEM "../pear/package.dtd">
 <package version="1.0">
  <name>PDO_MYSQL</name>
- <summary>Mysql 3.x/4.0 driver for PDO</summary>
+ <summary>MySQL driver for PDO</summary>
  <maintainers>
   <maintainer>
    <user>gschlossnagle</user>
@@ -29,9 +29,9 @@
  </description>
  <license>PHP</license>
  <release>
-  <state>beta</state>
-  <version>1.0RC2</version>
-  <date>2005-10-01</date>
+  <state>stable</state>
+  <version>1.0</version>
+  <date>2005-11-26</date>
 
   <notes>
 ** Changes **
@@ -61,7 +61,7 @@ Windows binaries can be found at http://pecl4win.php.net/ext.php/php_pdo_mysql.d
   </filelist>
   <deps>
    <dep type="php" rel="ge" version="5.0.3"/>
-   <dep type="ext" name="pdo" rel="ge" version="1.0RC2"/>
+   <dep type="ext" name="pdo" rel="ge" version="1.0"/>
   </deps>
  </release>
 </package>

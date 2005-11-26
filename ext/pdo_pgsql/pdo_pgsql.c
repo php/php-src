@@ -61,7 +61,7 @@ zend_module_entry pdo_pgsql_module_entry = {
 	PHP_RINIT(pdo_pgsql),
 	PHP_RSHUTDOWN(pdo_pgsql),
 	PHP_MINFO(pdo_pgsql),
-	"1.0RC1",
+	"1.0",
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
