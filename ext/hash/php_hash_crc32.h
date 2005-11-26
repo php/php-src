@@ -27,10 +27,10 @@ typedef struct {
 	php_uint32 state;
 } PHP_CRC32_CTX;
 
-PHP_HASH_API PHP_CRC32Init(PHP_CRC32_CTX *context);
-PHP_HASH_API PHP_CRC32Update(PHP_CRC32_CTX *context, const unsigned char *input, size_t len);
-PHP_HASH_API PHP_CRC32BUpdate(PHP_CRC32_CTX *context, const unsigned char *input, size_t len);
-PHP_HASH_API PHP_CRC32Final(unsigned char digest[4], PHP_CRC32_CTX *context);
+PHP_HASH_API void PHP_CRC32Init(PHP_CRC32_CTX *context);
+PHP_HASH_API void PHP_CRC32Update(PHP_CRC32_CTX *context, const unsigned char *input, size_t len);
+PHP_HASH_API void PHP_CRC32BUpdate(PHP_CRC32_CTX *context, const unsigned char *input, size_t len);
+PHP_HASH_API void PHP_CRC32Final(unsigned char digest[4], PHP_CRC32_CTX *context);
 
 #endif
 
