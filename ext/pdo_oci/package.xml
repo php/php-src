@@ -16,9 +16,9 @@
  </description>
  <license>PHP</license>
  <release>
-  <state>beta</state>
-  <version>1.0RC2</version>
-  <date>2005-11-01</date>
+  <state>stable</state>
+  <version>1.0</version>
+  <date>2005-11-26</date>
 
   <notes>
 You need to install the PDO core module before you can make use of this one.
@@ -47,7 +47,7 @@ http://pecl4win.php.net/ext.php/php_pdo_oci.dll
   </filelist>
   <deps>
    <dep type="php" rel="ge" version="5.0.3"/>
-   <dep type="ext" rel="ge" name="pdo" version="1.0RC2"/>
+   <dep type="ext" rel="ge" name="pdo" version="1.0"/>
   </deps>
  </release>
 </package>
