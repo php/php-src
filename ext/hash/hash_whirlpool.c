@@ -321,7 +321,7 @@ PHP_HASH_API void PHP_WHIRLPOOLUpdate(PHP_WHIRLPOOL_CTX *context, const unsigned
              */
             bufferBits = bufferPos = 0;
         }
-        buffer[bufferPos] = b << (8 - bufferRem);
+        buffer[bufferPos] = (unsigned char) (b << (8 - bufferRem));
         bufferBits += bufferRem;
         /*
          * proceed to remaining data:
@@ -346,7 +346,7 @@ PHP_HASH_API void PHP_WHIRLPOOLUpdate(PHP_WHIRLPOOL_CTX *context, const unsigned
          * all remaining data fits on buffer[bufferPos],
          * and there still remains some space.
          */
-        bufferBits += sourceBits;
+        bufferBits += (int) sourceBits;
     } else {
         /*
          * buffer[bufferPos] is full:
@@ -367,7 +367,7 @@ PHP_HASH_API void PHP_WHIRLPOOLUpdate(PHP_WHIRLPOOL_CTX *context, const unsigned
              */
             bufferBits = bufferPos = 0;
         }
-        buffer[bufferPos] = b << (8 - bufferRem);
+        buffer[bufferPos] = (unsigned char) (b << (8 - bufferRem));
         bufferBits += (int)sourceBits;
     }
     context->buffer.bits   = bufferBits;
