@@ -323,7 +323,7 @@ static HashTable *saproxy_properties_get(zval *object TSRMLS_DC)
 	return NULL;
 }
 
-static union _zend_function *saproxy_method_get(zval *object, char *name, int len TSRMLS_DC)
+static union _zend_function *saproxy_method_get(zval **object, char *name, int len TSRMLS_DC)
 {
 	/* no methods */
 	return NULL;

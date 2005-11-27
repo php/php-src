@@ -33,6 +33,8 @@
 #undef php_win_err
 
 typedef struct _php_com_dotnet_object {
+	zend_object zo;
+
 	VARIANT v;
 
 	ITypeInfo *typeinfo;
