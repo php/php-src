@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2006, PHP 5.1.1
+29 Nov 2006, PHP 5.1.1
 - Disabled native date class to prevent pear::date conflict. (Ilia)
 - Changed reflection constants be both PHP and class constants. (Johannes)
 - Added an additional field $frame['object'] to the result array of
@@ -19,6 +19,7 @@ PHP                                                                        NEWS
 - Fixed bug #35360 (exceptions in interactive mode (php -a) may cause crash).
   (Dmitry)
 - Fixed bug #35358 (Incorrect error messages for PDO class constants). (Ilia)
+- Fixed bug #35338 (pdo_pgsql does not handle binary bound params). (Wez)
 - Fixed bug #35316 (Application exception trying to create COM object). (Rob)
 - Fixed bug #35170 (PHP_AUTH_DIGEST differs under Apache 1.x and 2.x). (Ilia)
 
