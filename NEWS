@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-28 Nov 2006, PHP 5.1.1
+28 Nov 2005, PHP 5.1.1
 - Disabled native date class to prevent pear::date conflict. (Ilia)
 - Changed reflection constants be both PHP and class constants. (Johannes)
 - Added an additional field $frame['object'] to the result array of
