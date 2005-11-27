@@ -1803,8 +1803,9 @@ SPL_METHOD(SplFileObject, seek)
 	while(intern->u.file.current_line_num < line_pos) {
 		spl_filesystem_file_read_line(getThis(), intern, 1 TSRMLS_CC);
 	}
-}
+} /* }}} */
 
+/* {{{ Function/Class/Method definitions */
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, file_name)
@@ -1911,6 +1912,7 @@ static zend_function_entry spl_SplTempFileObject_functions[] = {
 	SPL_ME(SplTempFileObject, __construct, arginfo_temp_file_object___construct,  ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
+/* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION(spl_directory)
  */
