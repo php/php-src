@@ -74,9 +74,8 @@ function_entry date_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-
-function_entry date_funcs_date[] = {
 #ifdef EXPERIMENTAL_DATE_SUPPORT
+function_entry date_funcs_date[] = {
 	ZEND_NAMED_FE(format, ZEND_FN(date_format), NULL)
 	ZEND_NAMED_FE(modify, ZEND_FN(date_modify), NULL)
 	ZEND_NAMED_FE(getTimezone, ZEND_FN(date_timezone_get), NULL)
@@ -85,23 +84,21 @@ function_entry date_funcs_date[] = {
 	ZEND_NAMED_FE(setTime, ZEND_FN(date_time_set), NULL)
 	ZEND_NAMED_FE(setDate, ZEND_FN(date_date_set), NULL)
 	ZEND_NAMED_FE(setISODate, ZEND_FN(date_isodate_set), NULL)
-#endif	
 	{NULL, NULL, NULL}
 };
 
 function_entry date_funcs_timezone[] = {
-#ifdef EXPERIMENTAL_DATE_SUPPORT
 	ZEND_NAMED_FE(getName, ZEND_FN(timezone_name_get), NULL)
 	ZEND_NAMED_FE(getOffset, ZEND_FN(timezone_offset_get), NULL)
 	ZEND_NAMED_FE(getTransistions, ZEND_FN(timezone_transistions_get), NULL)
 	ZEND_MALIAS(timezone, listAbbreviations, abbreviations_list, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_MALIAS(timezone, listIdentifiers, identifiers_list, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-#endif
 	{NULL, NULL, NULL}
 };
 
-static char* guess_timezone(TSRMLS_D);
 static void date_register_classes(TSRMLS_D);
+#endif
+static char* guess_timezone(TSRMLS_D);
 /* }}} */
 
 ZEND_DECLARE_MODULE_GLOBALS(date)
@@ -116,6 +113,7 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
+#ifdef EXPERIMENTAL_DATE_SUPPORT
 zend_class_entry *date_ce_date, *date_ce_timezone;
 
 static zend_object_handlers date_object_handlers_date;
@@ -134,7 +132,6 @@ struct _php_timezone_obj {
 	timelib_tzinfo *tz;
 };
 
-#ifdef EXPERIMENTAL_DATE_SUPPORT
 #define DATE_SET_CONTEXT \
 	zval *object; \
 	object = getThis(); \
@@ -153,12 +150,11 @@ struct _php_timezone_obj {
 	}	\
 	obj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);	\
 
-#endif
-
 static void date_object_free_storage_date(void *object TSRMLS_DC);
 static void date_object_free_storage_timezone(void *object TSRMLS_DC);
 static zend_object_value date_object_new_date(zend_class_entry *class_type TSRMLS_DC);
 static zend_object_value date_object_new_timezone(zend_class_entry *class_type TSRMLS_DC);
+#endif
 
 /* {{{ Module struct */
 zend_module_entry date_module_entry = {
@@ -235,8 +231,19 @@ PHP_MINIT_FUNCTION(date)
 {
 	ZEND_INIT_MODULE_GLOBALS(date, php_date_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
-
+#ifdef EXPERIMENTAL_DATE_SUPPORT
 	date_register_classes(TSRMLS_C);
+#endif
+	REGISTER_STRING_CONSTANT("DATE_ATOM",    DATE_FORMAT_ISO8601, CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("DATE_COOKIE",  DATE_FORMAT_RFC1123, CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("DATE_ISO8601", DATE_FORMAT_ISO8601, CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("DATE_RFC822",  DATE_FORMAT_RFC1123, CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("DATE_RFC850",  DATE_FORMAT_RFC1036, CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("DATE_RFC1036", DATE_FORMAT_RFC1036, CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("DATE_RFC1123", DATE_FORMAT_RFC1123, CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("DATE_RFC2822", DATE_FORMAT_RFC2822, CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("DATE_RSS",     DATE_FORMAT_RFC1123, CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("DATE_W3C",     DATE_FORMAT_ISO8601, CONST_CS | CONST_PERSISTENT);
 
 	php_date_global_timezone_db = NULL;
 	php_date_global_timezone_db_enabled = 0;
@@ -1002,6 +1009,7 @@ PHP_FUNCTION(getdate)
 }
 /* }}} */
 
+#ifdef EXPERIMENTAL_DATE_SUPPORT
 static void date_register_classes(TSRMLS_D)
 {
 	zend_class_entry ce_date, ce_timezone;
@@ -1107,7 +1115,6 @@ static void date_object_free_storage_timezone(void *object TSRMLS_DC)
 	efree(object);
 }
 
-#ifdef EXPERIMENTAL_DATE_SUPPORT
 /* Advanced Interface */
 static zval * date_instanciate(zend_class_entry *pce, zval *object TSRMLS_DC)
 {
