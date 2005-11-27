@@ -1138,6 +1138,13 @@ static int pdo_stmt_verify_mode(pdo_stmt_t *stmt, int mode, int fetch_all TSRMLS
 			return 0;
 		}
 		return 1;
+
+	case PDO_FETCH_LAZY:
+		if (fetch_all) {
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO::FETCH_LAZY can't be used with PDOStatement::fetchAll()" TSRMLS_CC);
+			return 0;
+		}
+		/* fall through */
 	
 	default:
 		if ((flags & PDO_FETCH_SERIALIZE) == PDO_FETCH_SERIALIZE) {
