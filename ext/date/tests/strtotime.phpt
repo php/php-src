@@ -8,7 +8,7 @@ $d[] = strtotime("2005-07-14 22:30:41");
 $d[] = strtotime("2005-07-14 22:30:41 GMT");
 
 foreach($d as $date) {
-	echo date(date::ISO8601, $date), "\n";
+	echo date(DATE_ISO8601, $date), "\n";
 }
 ?>
 --EXPECT--

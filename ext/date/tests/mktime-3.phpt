@@ -16,7 +16,7 @@ foreach ($tzs as $tz) {
 		if ($ret == FALSE) {
 			echo "out of range\n";
 		} else {
-			echo date("F ".date::ISO8601, $ret), "\n";
+			echo date("F ".DATE_ISO8601, $ret), "\n";
 		}
 	}
 	echo "\n";
