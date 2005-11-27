@@ -1,3 +1,81 @@
+2005-11-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      Bug fixing news
+
+    * (PHP_5_1)
+      ZendEngine2/zend.h:
+      No longer dev
+
+2005-11-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      - Output modularization, 1st step
+
+2005-11-26  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/oci8.c:
+      show OIC version in phpinfo(); if possible
+      fix build with older versions: SQLT_BDOUBLE & SQLT_BFLOAT first appeared
+      in Oracle 10
+
+2005-11-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/lang/bug35382.phpt:
+      - Really test the issue here
+
+    * run-tests.php:
+      - Bug 35382 was nit fixed but the test system was not capable for this kind
+        of tests
+
+2005-11-26  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * tests/lang/bug35382.phpt
+      tests/lang/bug35382.phpt:
+      fix test
+
+2005-11-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/lang/bug35382.phpt:
+      - Scew short open tags
+
+    * tests/lang/bug35382.phpt
+      tests/lang/bug35382.phpt:
+      
+      - Add new test
+
+    * (PHP_5_1)
+      NEWS:
+      - BFN
+
+    * (PHP_5_1)
+      ZendEngine2/zend_language_scanner.l:
+      - MFH Fix bug #35406 eval hangs when evall'ed code ends with comment w/o
+      newline
+
+    * ZendEngine2/zend_language_scanner.l:
+      - Fix bug #35406 eval hangs when evall'ed code ends with comment w/o
+      newline
+
+    * CODING_STANDARDS:
+      - Oversight
+
+    * CODING_STANDARDS:
+      - Synch with what we decided for 5 and what we are practicing since 5
+
+2005-11-26  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      MFH: fix #35402 (New date class causes crash in get_object_vars())
+
+2005-11-26  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_1)
+      ZendEngine2/zend_vm_gen.php:
+      Typo
+
 2005-11-25  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
 
     * (PHP_5_0)
