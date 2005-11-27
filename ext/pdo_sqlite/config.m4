@@ -94,7 +94,7 @@ if test "$PHP_PDO_SQLITE" != "no"; then
 
       touch $ext_srcdir/sqlite/src/parse.c $ext_srcdir/sqlite/src/parse.h
 
-      if test "$ext_shared" = "no" -o "$ext_srcdir" != "$abs_srcdir"; then
+      if test "$ext_shared" = "no" || test "$ext_srcdir" != "$abs_srcdir"; then
         echo '#include <php_config.h>' > $ext_srcdir/sqlite/src/config.h
       else
         echo "#include \"$abs_builddir/config.h\"" > $ext_srcdir/sqlite/src/config.h
