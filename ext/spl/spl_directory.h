@@ -75,8 +75,13 @@ typedef struct _spl_filesystem_object {
 } spl_filesystem_object;
 
 #define SPL_FILE_OBJECT_DROP_NEW_LINE      0x00000001 /* drop new lines */
+
 #define SPL_FILE_DIR_CURRENT_AS_FILEINFO   0x00000010 /* make RecursiveDirectoryTree::current() return SplFileInfo */
-#define SPL_FILE_DIR_KEY_AS_FILENAME       0x00000020 /* make RecursiveDirectoryTree::key() return getFilename() */
+#define SPL_FILE_DIR_CURRENT_AS_PATHNAME   0x00000020 /* make RecursiveDirectoryTree::current() return getPathname() */
+#define SPL_FILE_DIR_CURRENT_MODE_MASK     0x000000F0 /* make RecursiveDirectoryTree::key() return getFilename() */
+
+#define SPL_FILE_DIR_KEY_AS_FILENAME       0x00000100 /* make RecursiveDirectoryTree::key() return getFilename() */
+#define SPL_FILE_DIR_KEY_MODE_MASK         0x00000F00 /* make RecursiveDirectoryTree::key() return getFilename() */
 
 #endif /* SPL_DIRECTORY_H */
 
