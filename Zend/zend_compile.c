@@ -3998,6 +3998,8 @@ again:
 		case T_END_HEREDOC:
 			efree(zendlval->u.constant.value.str.val);
 			break;
+		case EOF:
+			return EOF;
 	}
 		
 	INIT_PZVAL(&zendlval->u.constant);

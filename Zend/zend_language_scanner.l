@@ -1469,8 +1469,8 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	zendlval->value.str.val = yytext; /* no copying - intentional */
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
-	BEGIN(ST_IN_SCRIPTING);
-	return T_COMMENT;
+	BEGIN(INITIAL);
+	return EOF;
 }
 
 <ST_ONE_LINE_COMMENT>{NEWLINE} {
@@ -1806,6 +1806,13 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return yytext[0];
 }
 
+<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\{" {
+	zendlval->value.str.val = estrndup("\\{", sizeof("\\{") - 1);
+	zendlval->value.str.len = sizeof("\\{") - 1;
+	zendlval->type = IS_STRING;
+	return T_STRING;
+}
+
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"{$" {
 	zendlval->value.lval = (long) yytext[0];
 	yy_push_state(ST_IN_SCRIPTING TSRMLS_CC);
@@ -1842,13 +1849,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\x"[0-9A-Fa-f]{1,2} {
 	zendlval->value.lval = strtol (yytext+2, NULL, 16);
 	return T_CHARACTER;
-}
-
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\{$" {
-	zendlval->value.str.val = estrndup("{$", sizeof("{$")-1);
-	zendlval->value.str.len = sizeof("{$")-1;
-	zendlval->type = IS_STRING;
-	return T_STRING;
 }
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\"{ANY_CHAR} {
