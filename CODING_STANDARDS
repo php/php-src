@@ -148,20 +148,19 @@ Naming Conventions
     'buildsomewidget'
     'getI()'
 
-[7] Classes should be given descriptive names. Avoid using abbreviations
-    where possible. Each word in the class name should start with a capital
-    letter, with words underscore delimited. The class name should be prefixed
-    with the name of the 'parent set'.
+[7] Classes should be given descriptive names. Avoid using abbreviations where
+    possible. Each word in the class name should start with a capital letter, 
+    without underscore delimiters (CampelCaps starting with a capital letter). 
+    The class name should be prefixed with the name of the 'parent set' (e.g. 
+    the name of the extension).
 
     Good:
     'Curl'
-    'Foo_Bar'
+    'FooBar'
 
     Bad:
     'foobar'
     'foo_bar'
-    'FooBar'
-
 
 Syntax and indentation
 ----------------------
