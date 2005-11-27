@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 - Added an additional field $frame['object'] to the result array of
   debug_backtrace() that contains a reference to the respective object when the
   frame was called from an object. (Sebastian)
+- Fixed bug #35423 (RecursiveDirectoryIterator doesnt appear to recurse with 
+  RecursiveFilterIterator). (Marcus)
 - Fixed bug #35413 (Removed -dev flag from Zend Engine version). (Ilia)
 - Fixed bug #35411 (Regression with \{$ handling). (Ilia)
 - Fixed bug #35406 (eval hangs when evall'ed code ends with comment w/o 
