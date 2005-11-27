@@ -36,7 +36,7 @@ void php_com_throw_exception(HRESULT code, char *message TSRMLS_DC)
 		message = php_win_err(code);
 		free_msg = 1;
 	}
-	zend_throw_exception(php_com_exception_class_entry, message, (long)code TSRMLS_CC);
+	zend_throw_exception(U_CLASS_ENTRY(php_com_exception_class_entry), message, (long)code TSRMLS_CC);
 	if (free_msg) {
 		LocalFree(message);
 	}
@@ -51,6 +51,7 @@ PHPAPI void php_com_wrap_dispatch(zval *z, IDispatch *disp,
 	memset(obj, 0, sizeof(*obj));
 	obj->code_page = codepage;
 	obj->ce = php_com_variant_class_entry;
+	obj->zo.ce = php_com_variant_class_entry;
 
 	VariantInit(&obj->v);
 	V_VT(&obj->v) = VT_DISPATCH;
@@ -73,6 +74,7 @@ PHPAPI void php_com_wrap_variant(zval *z, VARIANT *v,
 	memset(obj, 0, sizeof(*obj));
 	obj->code_page = codepage;
 	obj->ce = php_com_variant_class_entry;
+	obj->zo.ce = php_com_variant_class_entry;
 
 	VariantInit(&obj->v);
 	VariantCopyInd(&obj->v, v);

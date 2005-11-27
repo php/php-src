@@ -323,7 +323,7 @@ static HashTable *saproxy_properties_get(zval *object TSRMLS_DC)
 	return NULL;
 }
 
-static union _zend_function *saproxy_method_get(zval *object, char *name, int len TSRMLS_DC)
+static union _zend_function *saproxy_method_get(zval **object, char *name, int len TSRMLS_DC)
 {
 	/* no methods */
 	return NULL;
@@ -357,7 +357,7 @@ static int saproxy_objects_compare(zval *object1, zval *object2 TSRMLS_DC)
 	return -1;
 }
 
-static int saproxy_object_cast(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC)
+static int saproxy_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 {
 	return FAILURE;
 }

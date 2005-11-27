@@ -486,17 +486,13 @@ static int com_objects_compare(zval *object1, zval *object2 TSRMLS_DC)
 	return ret;
 }
 
-static int com_object_cast(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC)
+static int com_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 {
 	php_com_dotnet_object *obj;
 	VARIANT v;
 	VARTYPE vt = VT_EMPTY;
 	zval free_obj;
 	HRESULT res = S_OK;
-	
-	if (should_free) {
-		free_obj = *writeobj;
-	}
 
 	obj = CDNO_FETCH(readobj);
 	ZVAL_NULL(writeobj);
@@ -538,10 +534,6 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type, int should_f
 	}
 
 	VariantClear(&v);
-
-	if (should_free) {
-		zval_dtor(&free_obj);
-	}
 
 	if (SUCCEEDED(res)) {
 		return SUCCESS;
@@ -678,6 +670,7 @@ zend_object_value php_com_object_new(zend_class_entry *ce TSRMLS_DC)
 	VariantInit(&obj->v);
 	obj->code_page = CP_ACP;
 	obj->ce = ce;
+	obj->zo.ce = ce;
 
 	retval.handle = zend_objects_store_put(obj, NULL, php_com_object_free_storage, php_com_object_clone TSRMLS_CC);
 	retval.handlers = &php_com_object_handlers;
