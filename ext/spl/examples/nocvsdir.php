@@ -28,13 +28,23 @@ if (!class_exists("RecursiveFilterIterator")) require_once("recursivefilteritera
 
 class NoCvsDirectory extends RecursiveFilterIterator
 {
+	function __construct($path)
+	{
+		parent::__construct(new RecursiveDirectoryIterator($path));
+	}
+
 	function accept()
 	{
 		return $this->getInnerIterator()->getFilename() != 'CVS';
 	}
+	
+	function getChildren()
+	{
+		return new NoCvsDirectory($this->current()->getPathName());
+	}
 }
 
-$it = new RecursiveIteratorIterator(new NoCvsDirectory(new RecursiveDirectoryIterator($argv[1])));
+$it = new RecursiveIteratorIterator(new NoCvsDirectory($argv[1]));
 
 foreach($it as $pathname => $file)
 {
