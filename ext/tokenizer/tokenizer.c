@@ -344,6 +344,8 @@ static void tokenize(zval *return_value TSRMLS_DC)
 	while ((token_type = lex_scan(&token TSRMLS_CC))) {
 		destroy = 1;
 		switch (token_type) {
+			case EOF:
+				zendleng--; /* don't count EOF */
 			case T_OPEN_TAG:
 			case T_OPEN_TAG_WITH_ECHO:
 			case T_WHITESPACE:
