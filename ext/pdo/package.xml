@@ -41,7 +41,7 @@
  <license>PHP</license>
  <release>
   <state>stable</state>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <date>2005-11-26</date>
 
   <notes>
@@ -63,6 +63,9 @@ You can find additional PDO drivers at:
 http://pecl4win.php.net
 
 ** Changes **
+- Fixed bug #35431 (PDO crashes when using LAZY fetch with fetchAll). (Wez)
+- Fixed bug #35430 (PDO crashes on incorrect FETCH_FUNC use). (Tony)
+
 - Changed PDO_XXX constants to PDO::XXX
 - It is now possible to extend PDO and PDOStatement and override their constructors
 
