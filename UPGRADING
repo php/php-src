@@ -404,10 +404,6 @@ PDO_CLASS_CONSTANT
 
 in order to minimise pollution of the global namespace in PHP.
 
-Note that the new Date class exists at this point purely to allow the core date
-extension to adhere to the above convention, although extended functionality
-is planned for the the class in the future.
-
 10. Date/time support
 ====================
 
