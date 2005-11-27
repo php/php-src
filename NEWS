@@ -1,5 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 200?, PHP 5.1.2
+- Fixed bug #35430 (PDO crashes on incorrect FETCH_FUNC use). (Tony)
+
 28 Nov 2005, PHP 5.1.1
 - Disabled native date class to prevent pear::date conflict. (Ilia)
 - Changed reflection constants be both PHP and class constants. (Johannes)
