@@ -149,10 +149,10 @@ ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, swor
 		 * so that we can catch the error information when execute
 		 * is called via query.  See Bug #33707 */
 		if (H->einfo.errmsg) {
-			efree(H->einfo.errmsg);
+			pefree(H->einfo.errmsg, dbh->is_persistent);
 		}
 		H->einfo = *einfo;
-		H->einfo.errmsg = einfo->errmsg ? estrdup(einfo->errmsg) : NULL;
+		H->einfo.errmsg = einfo->errmsg ? pestrdup(einfo->errmsg, dbh->is_persistent) : NULL;
 		strcpy(dbh->error_code, stmt->error_code);
 	}
 
