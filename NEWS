@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-29 Nov 2006, PHP 5.1.1
+28 Nov 2006, PHP 5.1.1
 - Disabled native date class to prevent pear::date conflict. (Ilia)
 - Changed reflection constants be both PHP and class constants. (Johannes)
 - Added an additional field $frame['object'] to the result array of
@@ -12,7 +12,6 @@ PHP                                                                        NEWS
 - Fixed bug #35411 (Regression with \{$ handling). (Ilia)
 - Fixed bug #35406 (eval hangs when evall'ed code ends with comment w/o 
   newline). (Marcus)
-- Fixed bug #35402 (New date class causes crash in get_object_vars()). (Tony)
 - Fixed bug #35391 (pdo_mysql::exec does not return number of affected rows). 
   (Tony)
 - Fixed bug #35382 (Comment in end of file produces fatal error). (Ilia)
