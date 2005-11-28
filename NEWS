@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Fixed an error in mysqli_fetch_fields (returned NULL instead of an
   array when row number > field_count). (Georg)
 - Renamed CachingRecursiveIterator to RecursiveCachingIterator. (Marcus)
+- Fixed bug #35399 (Since fix of bug #35273 SOAP decoding of
+  soapenc:base64binary fails). (Dmitry)
 - Fixed bug #35360 (exceptions in interactive mode (php -a) may cause crash).
   (Dmitry)
 - Fixed bug #35273 (Error in mapping soap - java types). (Dmitry)
