@@ -30,7 +30,9 @@ for ($left = strlen($test_string); $left > 0;) {
 	  break;
 	}
 	$read_fds = array($pipes[1]);
-	$retval = stream_select($read_fds, $write_fds = NULL, $exp_fds = NULL, 1);
+	$write_fds = NULL;
+	$exp_fds = NULL;
+	$retval = stream_select($read_fds, $write_fds, $exp_fds, 1);
 	if ($retval === false) {
 		print "select() failed\n";
 		break;

@@ -7201,7 +7201,8 @@ static int ZEND_SEND_VAR_NO_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if ((!(opline->extended_value & ZEND_ARG_SEND_FUNCTION) ||
 	     EX_T(opline->op1.u.var).var.fcall_returned_reference) &&
 	    varptr != &EG(uninitialized_zval) && 
-	    (PZVAL_IS_REF(varptr) || varptr->refcount == 1)) {
+	    (PZVAL_IS_REF(varptr) || 
+	     (varptr->refcount == 1 && (IS_VAR == IS_CV || free_op1.var)))) {
 		varptr->is_ref = 1;
 		varptr->refcount++;
 		zend_ptr_stack_push(&EG(argument_stack), varptr);
@@ -19878,7 +19879,7 @@ static int zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_SEND_VAR_NO_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
-	
+	zend_free_op free_op1;
 	zval *varptr;
 
 	if (opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) { /* Had function_ptr at compile_time */
@@ -19893,7 +19894,8 @@ static int ZEND_SEND_VAR_NO_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if ((!(opline->extended_value & ZEND_ARG_SEND_FUNCTION) ||
 	     EX_T(opline->op1.u.var).var.fcall_returned_reference) &&
 	    varptr != &EG(uninitialized_zval) && 
-	    (PZVAL_IS_REF(varptr) || varptr->refcount == 1)) {
+	    (PZVAL_IS_REF(varptr) || 
+	     (varptr->refcount == 1 && (IS_CV == IS_CV || free_op1.var)))) {
 		varptr->is_ref = 1;
 		varptr->refcount++;
 		zend_ptr_stack_push(&EG(argument_stack), varptr);
