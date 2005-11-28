@@ -59,8 +59,6 @@ if test "$PHP_READLINE" != "no"; then
     -L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS
   ])
 
-  PHP_NEW_EXTENSION(readline, readline.c, $ext_shared, cli)
-  PHP_SUBST(READLINE_SHARED_LIBADD)
   AC_DEFINE(HAVE_LIBREADLINE, 1, [ ])
 
 elif test "$PHP_LIBEDIT" != "no"; then
@@ -94,7 +92,11 @@ elif test "$PHP_LIBEDIT" != "no"; then
     -L$READLINE_DIR/$PHP_LIBDIR 
   ])
 
+  AC_DEFINE(HAVE_LIBEDIT, 1, [ ])
+fi
+
+if test "$PHP_READLINE" != "no" || test "$PHP_LIBEDIT" != "no"; then
+  AC_CHECK_FUNCS([rl_completion_matches])
   PHP_NEW_EXTENSION(readline, readline.c, $ext_shared, cli)
   PHP_SUBST(READLINE_SHARED_LIBADD)
-  AC_DEFINE(HAVE_LIBEDIT, 1, [ ])
 fi
