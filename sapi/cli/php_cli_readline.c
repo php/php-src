@@ -23,6 +23,10 @@
 
 #if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
 
+#ifndef HAVE_RL_COMPLETION_MATCHES
+#define rl_completion_matches completion_matches
+#endif
+
 #include "php_globals.h"
 #include "php_variables.h"
 #include "zend_hash.h"
