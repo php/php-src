@@ -1,5 +1,5 @@
 --TEST--
-mysqli fetch bigint values
+mysqli fetch bigint values (ok to fail with 4.1.x)
 --SKIPIF--
 <?php
 	if (PHP_INT_SIZE == 8) {
