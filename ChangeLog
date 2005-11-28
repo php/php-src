@@ -1,3 +1,124 @@
+2005-11-27  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      ext/ming/config.m4:
+      - Fixed wrong usage of AC_TRY_COMPILE() macro
+
+2005-11-27  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_5_1)
+      NEWS:
+      BFN
+
+2005-11-27  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      MFH: fix #35430 (PDO crashes on incorrect FETCH_FUNC use)
+
+2005-11-27  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/curl/interface.c:
+      MF51: improve open_basedir check
+
+2005-11-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      ext/curl/interface.c:
+      Improved safe_mode/open_basedir check.
+
+    * (PHP_5_1)
+      configure.in
+      main/php_version.h:
+      Back to dev
+
+2005-11-27  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS:
+      Back from future
+
+2005-11-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      UPGRADING:
+      removed no longer relevant portion.
+
+    * (PHP_5_1)
+      NEWS:
+      Adjust news
+
+    * (PHP_5_1)
+      NEWS
+      configure.in
+      main/php_version.h:
+      5.1.1
+
+2005-11-27  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS:
+      fix news
+
+2005-11-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      NEWS:
+      - BFN
+
+2005-11-27  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_1)
+      NEWS:
+      BFN
+
+    * ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_misc.c
+      ext/com_dotnet/com_saproxy.c
+      ext/com_dotnet/com_variant.c
+      ext/com_dotnet/php_com_dotnet_internal.h:
+      Fixed bug #35316 (Application exception trying to create COM object)
+      Fix some handler signatures causing memory corruption
+      Various unicode fixes
+
+    * (PHP_5_1)
+      ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_misc.c
+      ext/com_dotnet/com_saproxy.c
+      ext/com_dotnet/php_com_dotnet_internal.h:
+      Fixed bug #35316 (Application exception trying to create COM object)
+
+2005-11-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      CODING_STANDARDS:
+      - MFH Synch with what we decided for 5 and what we are practicing since 5
+
+2005-11-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      Disabled native date class, to prevent pear::date conflict.
+
+    * (PHP_5_1)
+      NEWS
+      ext/tokenizer/tokenizer.c:
+      tokenizer fixes for bug #35382
+      Bug fixing news
+
+    * ZendEngine2/tests/bug35411.phpt
+      ZendEngine2/tests/bug35411.phpt:
+      
+      file bug35411.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_highlight.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/tests/bug31341.phpt:
+      Fixed bug #35411 (Regression with \{$ handling).
+      Fixed bug #35382 (Comment in end of file produces fatal error).
+
 2005-11-26  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_1)
