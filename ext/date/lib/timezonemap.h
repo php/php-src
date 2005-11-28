@@ -885,6 +885,7 @@
 	{ "gmt",   0,      0, "GB"                            },
 	{ "gmt",   0,      0, "GB-Eire"                       },
 	{ "gmt",   0,      0, "GMT"                           },
+	{ "utc",   0,      0, "UTC"                           },
 	{ "gmt",   0,      0, "Iceland"                       },
 	{ "gst",   0,  14400, "Asia/Dubai"                    },
 	{ "gst",   0,  14400, "Asia/Bahrain"                  },

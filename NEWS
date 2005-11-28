@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Fixed bug #35456 (+ 1 [time unit] format did not work). (Ilia)
 - Fixed bug #35431 (PDO crashes when using LAZY fetch with fetchAll). (Wez)
 - Fixed bug #35430 (PDO crashes on incorrect FETCH_FUNC use). (Tony)
+- Fixed bug #35422 (strtotime() does not parse times with UTC as timezone).
+  (Ilia)
 - Fixed bug #35409 (undefined reference to 'rl_completion_matches'). (Jani)
 - Fixed bug #35399 (Since fix of bug #35273 SOAP decoding of
   soapenc:base64binary fails). (Dmitry)
