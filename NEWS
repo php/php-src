@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Fixed bug #35430 (PDO crashes on incorrect FETCH_FUNC use). (Tony)
 - Fixed bug #35399 (Since fix of bug #35273 SOAP decoding of
   soapenc:base64binary fails). (Dmitry)
+- Fixed bug #35381 (ssl library is not initialized properly). (Alan)
 
 28 Nov 2005, PHP 5.1.1
 - Disabled native date class to prevent pear::date conflict. (Ilia)
