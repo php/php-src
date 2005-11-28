@@ -1,3 +1,18 @@
+2005-11-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * tests/bug35411.phpt
+      tests/bug35411.phpt:
+      
+      file bug35411.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      zend_compile.c
+      zend_highlight.c
+      zend_language_scanner.l
+      tests/bug31341.phpt:
+      Fixed bug #35411 (Regression with \{$ handling).
+      Fixed bug #35382 (Comment in end of file produces fatal error).
+
 2005-11-26  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_1)
