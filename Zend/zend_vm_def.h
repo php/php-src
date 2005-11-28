@@ -2186,7 +2186,8 @@ ZEND_VM_HANDLER(106, ZEND_SEND_VAR_NO_REF, VAR|CV, ANY)
 	if ((!(opline->extended_value & ZEND_ARG_SEND_FUNCTION) ||
 	     EX_T(opline->op1.u.var).var.fcall_returned_reference) &&
 	    varptr != &EG(uninitialized_zval) && 
-	    (PZVAL_IS_REF(varptr) || varptr->refcount == 1)) {
+	    (PZVAL_IS_REF(varptr) || 
+	     (varptr->refcount == 1 && (OP1_TYPE == IS_CV || free_op1.var)))) {
 		varptr->is_ref = 1;
 		varptr->refcount++;
 		zend_ptr_stack_push(&EG(argument_stack), varptr);
