@@ -44,7 +44,7 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC);
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20051031
+#define PDO_DRIVER_API	20051128
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -644,6 +644,9 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 
 PDO_API void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt,
 	const char *sqlstate, const char *supp TSRMLS_DC);
+
+PDO_API void php_pdo_dbh_addref(pdo_dbh_t *dbh TSRMLS_DC);
+PDO_API void php_pdo_dbh_delref(pdo_dbh_t *dbh TSRMLS_DC);
 
 PDO_API void php_pdo_stmt_addref(pdo_stmt_t *stmt TSRMLS_DC);
 PDO_API void php_pdo_stmt_delref(pdo_stmt_t *stmt TSRMLS_DC);
