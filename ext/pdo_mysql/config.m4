@@ -33,7 +33,7 @@ if test "$PHP_PDO_MYSQL" != "no"; then
       fi
     else
       AC_MSG_RESULT([$PHP_PDO_MYSQL is not a directory])
-      AC_MSG_ERROR([can't find mysql under the "$PHP_PDO_MYSQL" that you specified])
+      AC_MSG_ERROR([can not find mysql under the "$PHP_PDO_MYSQL" that you specified])
     fi
   else
     for i in /usr/local /usr ; do
@@ -50,10 +50,9 @@ if test "$PHP_PDO_MYSQL" != "no"; then
 
   if test -n "$PDO_MYSQL_CONFIG" && test -x "$PDO_MYSQL_CONFIG" ; then
     AC_MSG_RESULT($PDO_MYSQL_CONFIG)
-    PDO_MYSQL_INCLUDE=`$PDO_MYSQL_CONFIG --cflags`
-    PDO_MYSQL_LIBS=`$PDO_MYSQL_CONFIG --libs`
-	  PDO_MYSQL_SOCKET=`$PDO_MYSQL_CONFIG --socket` 
-    PHP_SUBST_OLD(PDO_MYSQL_LIBS)
+    PDO_MYSQL_INCLUDE=`$PDO_MYSQL_CONFIG --cflags | $SED -e "s/'//g"`
+    PDO_MYSQL_LIBS=`$PDO_MYSQL_CONFIG --libs | $SED -e "s/'//g"`
+    PDO_MYSQL_SOCKET=`$PDO_MYSQL_CONFIG --socket` 
   elif test -z "$PDO_MYSQL_DIR"; then
     AC_MSG_RESULT([not found])
     AC_MSG_ERROR([Cannot find MySQL header files under $PDO_MYSQL_DIR])
@@ -74,7 +73,7 @@ if test "$PHP_PDO_MYSQL" != "no"; then
     if test -r "$PDO_MYSQL_LIB_DIR"; then
       AC_MSG_RESULT([libs under $PDO_MYSQL_LIB_DIR; seems promising])
     else
-      AC_MSG_RESULT([can't find it])
+      AC_MSG_RESULT([can not find it])
       AC_MSG_ERROR([Unable to find your mysql installation])
     fi
 
@@ -118,7 +117,7 @@ if test "$PHP_PDO_MYSQL" != "no"; then
   PHP_NEW_EXTENSION(pdo_mysql, pdo_mysql.c mysql_driver.c mysql_statement.c, $ext_shared,,-I$pdo_inc_path $PDO_MYSQL_INCLUDE)
   ifdef([PHP_ADD_EXTENSION_DEP],
   [
-  	PHP_ADD_EXTENSION_DEP(pdo_mysql, pdo)
+    PHP_ADD_EXTENSION_DEP(pdo_mysql, pdo)
   ])
   PDO_MYSQL_MODULE_TYPE=external
  
