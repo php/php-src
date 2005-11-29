@@ -55,7 +55,7 @@ AC_DEFUN([AC_DBA_STD_RESULT],[
   if test -n "$3"; then
     AC_MSG_ERROR($3)
   fi
-  if test "$THIS_RESULT" = "yes" -o "$THIS_RESULT" = "builtin"; then
+  if test "$THIS_RESULT" = "yes" || test "$THIS_RESULT" = "builtin"; then
     HAVE_DBA=1
     eval HAVE_$THIS_NAME=1
     AC_MSG_RESULT($THIS_RESULT)
@@ -171,7 +171,7 @@ dnl Berkeley specific (library and version test)
 dnl parameters(version, library list, function)
 AC_DEFUN([PHP_DBA_DB_CHECK],[
   for LIB in $2; do
-    if test -f $THIS_PREFIX/$PHP_LIBDIR/lib$LIB.a -o -f $THIS_PREFIX/$PHP_LIBDIR/lib$LIB.$SHLIB_SUFFIX_NAME; then
+    if test -f $THIS_PREFIX/$PHP_LIBDIR/lib$LIB.a || test -f $THIS_PREFIX/$PHP_LIBDIR/lib$LIB.$SHLIB_SUFFIX_NAME; then
       PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/$PHP_LIBDIR, -l$LIB,[
         AC_TRY_LINK([
 #include "$THIS_INCLUDE"
@@ -306,7 +306,7 @@ AC_ARG_WITH(db2,
 [  --with-db2[=DIR]          DBA: Include Berkeley DB2 support],[
   if test "$withval" != "no"; then
     PHP_DBA_STD_BEGIN
-    if test "$HAVE_DB3" = "1" -o "$HAVE_DB4" = "1"; then
+    if test "$HAVE_DB3" = "1" || test "$HAVE_DB4" = "1"; then
       AC_DBA_STD_RESULT(db2,Berkeley DB2,You cannot combine --with-db2 with --with-db3 or --with-db4)
     fi
     for i in $withval $withval/BerkeleyDB /usr/BerkeleyDB /usr/local /usr; do
@@ -354,7 +354,7 @@ AC_ARG_WITH(db1,
       THIS_LIBS=$DB2_LIBS
       THIS_PREFIX=$DB2_PREFIX
     fi
-    if test "$HAVE_DB4" = "1" -o "$HAVE_DB3" = "1" -o "$HAVE_DB2" = "1"; then
+    if test "$HAVE_DB4" = "1" || test "$HAVE_DB3" = "1" || test "$HAVE_DB2" = "1"; then
       AC_DEFINE_UNQUOTED(DB1_VERSION, "Berkeley DB 1.85 emulation in DB$THIS_VERSION", [ ])
       for i in db$THIS_VERSION/db_185.h include/db$THIS_VERSION/db_185.h include/db/db_185.h; do
         if test -f "$THIS_PREFIX/$i"; then
@@ -463,7 +463,7 @@ AC_DEFUN([PHP_DBA_BUILTIN_CDB],[
 
 AC_ARG_WITH(cdb,
 [  --with-cdb[=DIR]          DBA: Include CDB support],[
-  if test "$withval" = "yes" -o "$HAVE_DBA" = "1"; then
+  if test "$withval" = "yes" || test "$HAVE_DBA" = "1"; then
     PHP_DBA_BUILTIN_CDB
   elif test "$withval" != "no"; then
     PHP_DBA_STD_BEGIN
@@ -493,7 +493,7 @@ AC_ARG_WITH(cdb,
     PHP_DBA_STD_ATTACH
   fi
 ],[
-  if test "$PHP_DBA" != "no" -o "$HAVE_DBA" = "1"; then
+  if test "$PHP_DBA" != "no" || test "$HAVE_DBA" = "1"; then
     PHP_DBA_BUILTIN_CDB
   fi
 ])
@@ -511,7 +511,7 @@ AC_ARG_WITH(inifile,
     PHP_DBA_BUILTIN_INI
   fi
 ],[
-  if test "$PHP_DBA" != "no" -o "$HAVE_DBA" = "1"; then
+  if test "$PHP_DBA" != "no" || test "$HAVE_DBA" = "1"; then
     PHP_DBA_BUILTIN_INI
   fi
 ])
@@ -532,7 +532,7 @@ AC_ARG_WITH(flatfile,
     PHP_DBA_BUILTIN_FLATFILE
   fi
 ],[
-  if test "$PHP_DBA" != "no" -o "$HAVE_DBA" = "1"; then
+  if test "$PHP_DBA" != "no" || test "$HAVE_DBA" = "1"; then
     PHP_DBA_BUILTIN_FLATFILE
   fi
 ])

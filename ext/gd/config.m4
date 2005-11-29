@@ -51,7 +51,7 @@ AC_DEFUN([PHP_GD_JPEG],[
   if test "$PHP_JPEG_DIR" != "no"; then
 
     for i in $PHP_JPEG_DIR /usr/local /usr; do
-      test -f $i/$PHP_LIBDIR/libjpeg.$SHLIB_SUFFIX_NAME -o -f $i/$PHP_LIBDIR/libjpeg.a && GD_JPEG_DIR=$i && break
+      test -f $i/$PHP_LIBDIR/libjpeg.$SHLIB_SUFFIX_NAME || test -f $i/$PHP_LIBDIR/libjpeg.a && GD_JPEG_DIR=$i && break
     done
 
     if test -z "$GD_JPEG_DIR"; then
@@ -76,7 +76,7 @@ AC_DEFUN([PHP_GD_PNG],[
   if test "$PHP_PNG_DIR" != "no"; then
 
     for i in $PHP_PNG_DIR /usr/local /usr; do
-      test -f $i/$PHP_LIBDIR/libpng.$SHLIB_SUFFIX_NAME -o -f $i/$PHP_LIBDIR/libpng.a && GD_PNG_DIR=$i && break
+      test -f $i/$PHP_LIBDIR/libpng.$SHLIB_SUFFIX_NAME || test -f $i/$PHP_LIBDIR/libpng.a && GD_PNG_DIR=$i && break
     done
 
     if test -z "$GD_PNG_DIR"; then
@@ -111,7 +111,7 @@ AC_DEFUN([PHP_GD_XPM],[
   if test "$PHP_XPM_DIR" != "no"; then
 
     for i in $PHP_XPM_DIR /usr/local /usr/X11R6 /usr; do
-      test -f $i/$PHP_LIBDIR/libXpm.$SHLIB_SUFFIX_NAME -o -f $i/$PHP_LIBDIR/libXpm.a && GD_XPM_DIR=$i && break
+      test -f $i/$PHP_LIBDIR/libXpm.$SHLIB_SUFFIX_NAME || test -f $i/$PHP_LIBDIR/libXpm.a && GD_XPM_DIR=$i && break
     done
 
     if test -z "$GD_XPM_DIR"; then
@@ -143,7 +143,7 @@ AC_DEFUN([PHP_GD_XPM],[
 
 AC_DEFUN([PHP_GD_FREETYPE1],[
   if test "$PHP_TTF" != "no"; then
-    if test "$PHP_FREETYPE_DIR" = "no" -o "$PHP_FREETYPE_DIR" = ""; then
+    if test "$PHP_FREETYPE_DIR" = "no" || test "$PHP_FREETYPE_DIR" = ""; then
       if test -n "$PHP_TTF"; then
         for i in $PHP_TTF /usr/local /usr; do
           if test -f "$i/include/freetype.h"; then
@@ -367,7 +367,7 @@ dnl Header path
 
 dnl Library path
   for i in $PHP_LIBDIR/gd1.3 $PHP_LIBDIR/gd $PHP_LIBDIR gd1.3 gd ""; do
-    test -f "$PHP_GD/$i/libgd.$SHLIB_SUFFIX_NAME" -o -f "$PHP_GD/$i/libgd.a" && GD_LIB="$PHP_GD/$i"
+    test -f "$PHP_GD/$i/libgd.$SHLIB_SUFFIX_NAME" || test -f "$PHP_GD/$i/libgd.a" && GD_LIB="$PHP_GD/$i"
   done
 
   if test -n "$GD_INCLUDE" && test -n "$GD_LIB"; then
