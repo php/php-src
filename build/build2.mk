@@ -23,9 +23,6 @@ TOUCH_FILES = mkinstalldirs install-sh missing
 
 LT_TARGETS = ltmain.sh config.guess config.sub
 
-makefile_in_files = $(makefile_am_files:.am=.in)
-makefile_files    = $(makefile_am_files:e.am=e)
-
 config_h_in = main/php_config.h.in
 
 acconfig_h_SOURCES = acconfig.h.in $(config_h_files)
