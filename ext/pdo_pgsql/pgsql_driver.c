@@ -12,7 +12,9 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author: Edin Kadribasic <edink@emini.dk>                             |
+  | Authors: Edin Kadribasic <edink@emini.dk>                            |
+  |          Ilia Alshanestsky <ilia@prohost.org>                        |
+  |          Wez Furlong <wez@php.net>                                   |
   +----------------------------------------------------------------------+
 */
 
@@ -105,6 +107,81 @@ static int pdo_pgsql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *in
 	}
 
 	return 1;
+}
+/* }}} */
+
+/* {{{ pdo_pgsql_create_lob_stream */
+static size_t pgsql_lob_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
+{
+	struct pdo_pgsql_lob_self *self = (struct pdo_pgsql_lob_self*)stream->abstract;
+	return lo_write(self->conn, self->lfd, (char*)buf, count);
+}
+
+static size_t pgsql_lob_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
+{
+	struct pdo_pgsql_lob_self *self = (struct pdo_pgsql_lob_self*)stream->abstract;
+	return lo_read(self->conn, self->lfd, buf, count);
+}
+
+static int pgsql_lob_close(php_stream *stream, int close_handle TSRMLS_DC)
+{
+	struct pdo_pgsql_lob_self *self = (struct pdo_pgsql_lob_self*)stream->abstract;
+	pdo_dbh_t *dbh = self->dbh;
+
+	if (close_handle) {
+		lo_close(self->conn, self->lfd);
+	}
+	efree(self);
+	php_pdo_dbh_delref(dbh TSRMLS_DC);
+	return 0;
+}
+
+static int pgsql_lob_flush(php_stream *stream TSRMLS_DC)
+{
+	return 0;
+}
+
+static int pgsql_lob_seek(php_stream *stream, off_t offset, int whence,
+		off_t *newoffset TSRMLS_DC)
+{
+	struct pdo_pgsql_lob_self *self = (struct pdo_pgsql_lob_self*)stream->abstract;
+	int pos = lo_lseek(self->conn, self->lfd, offset, whence);
+	*newoffset = pos;
+	return pos >= 0 ? 0 : -1;
+}
+
+php_stream_ops pdo_pgsql_lob_stream_ops = {
+	pgsql_lob_write,
+	pgsql_lob_read,
+	pgsql_lob_close,
+	pgsql_lob_flush,
+	"pdo_pgsql lob stream",
+	pgsql_lob_seek,
+	NULL,
+	NULL,
+	NULL
+};
+
+php_stream *pdo_pgsql_create_lob_stream(pdo_dbh_t *dbh, int lfd, Oid oid TSRMLS_DC)
+{
+	php_stream *stm;
+	struct pdo_pgsql_lob_self *self = ecalloc(1, sizeof(*self));
+	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
+
+	self->dbh = dbh;
+	self->lfd = lfd;
+	self->oid = oid;
+	self->conn = H->server;
+
+	stm = php_stream_alloc(&pdo_pgsql_lob_stream_ops, self, 0, "r+b");
+
+	if (stm) {
+		php_pdo_dbh_addref(dbh TSRMLS_CC);
+		return stm;
+	}
+
+	efree(self);
+	return NULL;
 }
 /* }}} */
 
@@ -397,6 +474,124 @@ static int pgsql_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
 	return pdo_pgsql_transaction_cmd("ROLLBACK", dbh TSRMLS_CC);
 }
 
+/* {{{ string pgSQL::pgsqlLOBCreate()
+   Creates a new large object, returning its identifier.  Must be called inside a transaction. */
+static PHP_METHOD(pgSQL, pgsqlLOBCreate)
+{
+	pdo_dbh_t *dbh;
+	pdo_pgsql_db_handle *H;
+	Oid lfd;
+
+	dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
+	PDO_CONSTRUCT_CHECK;
+
+	H = (pdo_pgsql_db_handle *)dbh->driver_data;
+	lfd = lo_creat(H->server, INV_READ|INV_WRITE);
+
+	if (lfd != InvalidOid) {
+		char *buf;
+		spprintf(&buf, 0, "%lu", lfd);
+		RETURN_STRING(buf, 0);
+	}
+	
+	pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, "HY000");
+	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ resource pgSQL::pgsqlLOBOpen(string oid [, string mode = 'rb'])
+   Opens an existing large object stream.  Must be called inside a transaction. */
+static PHP_METHOD(pgSQL, pgsqlLOBOpen)
+{
+	pdo_dbh_t *dbh;
+	pdo_pgsql_db_handle *H;
+	Oid oid;
+	int lfd;
+	char *oidstr;
+	int oidstrlen;
+	char *modestr = "rb";
+	int modestrlen;
+	int mode = INV_READ;
+	char *end_ptr;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s",
+				&oidstr, &oidstrlen, &modestr, &modestrlen)) {
+		RETURN_FALSE;
+	}
+
+	oid = (Oid)strtoul(oidstr, &end_ptr, 10);
+	if (oid == 0 && (errno == ERANGE || errno == EINVAL)) {
+		RETURN_FALSE;
+	}
+
+	if (strpbrk(modestr, "+w")) {
+		mode = INV_READ|INV_WRITE;
+	}
+	
+	dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
+	PDO_CONSTRUCT_CHECK;
+
+	H = (pdo_pgsql_db_handle *)dbh->driver_data;
+
+	lfd = lo_open(H->server, oid, mode);
+
+	if (lfd >= 0) {
+		php_stream *stream = pdo_pgsql_create_lob_stream(dbh, lfd, oid TSRMLS_CC);
+		if (stream) {
+			php_stream_to_zval(stream, return_value);
+			return;
+		}
+	} else {
+		pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, "HY000");
+	}
+	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ bool pgSQL::pgsqlLOBUnlink(int oid)
+   Deletes the large object identified by oid.  Must be called inside a transaction. */
+static PHP_METHOD(pgSQL, pgsqlLOBUnlink)
+{
+	pdo_dbh_t *dbh;
+	pdo_pgsql_db_handle *H;
+	long lfd;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",
+				&lfd)) {
+		RETURN_FALSE;
+	}
+
+	dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
+	PDO_CONSTRUCT_CHECK;
+
+	H = (pdo_pgsql_db_handle *)dbh->driver_data;
+	
+	if (1 == lo_unlink(H->server, lfd)) {
+		RETURN_TRUE;
+	}
+	pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, "HY000");
+	RETURN_FALSE;
+}
+
+
+
+static function_entry dbh_methods[] = {
+	PHP_ME(pgSQL, pgsqlLOBCreate, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(pgSQL, pgsqlLOBOpen, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(pgSQL, pgsqlLOBUnlink, NULL, ZEND_ACC_PUBLIC)
+	{NULL, NULL, NULL}
+};
+
+static function_entry *pdo_pgsql_get_driver_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
+{
+	switch (kind) {
+		case PDO_DBH_DRIVER_METHOD_KIND_DBH:
+			return dbh_methods;
+		default:
+			return NULL;
+	}
+}
+
 static struct pdo_dbh_methods pgsql_methods = {
 	pgsql_handle_closer,
 	pgsql_handle_preparer,
@@ -410,7 +605,7 @@ static struct pdo_dbh_methods pgsql_methods = {
 	pdo_pgsql_fetch_error_func,
 	pdo_pgsql_get_attribute,
 	NULL,	/* check_liveness */
-	NULL  /* get_driver_methods */
+	pdo_pgsql_get_driver_methods  /* get_driver_methods */
 };
 
 static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC) /* {{{ */
@@ -462,7 +657,7 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	H->pgoid = -1;
 
 	dbh->methods = &pgsql_methods;
-	dbh->alloc_own_columns = 1;
+	dbh->alloc_own_columns = 0;
 	dbh->max_escaped_char_length = 2;
 
 	ret = 1;
