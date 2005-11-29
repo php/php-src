@@ -1,5 +1,5 @@
 --TEST--
-SimpleXML and attributes
+SimpleXML: Attributes
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
@@ -48,7 +48,12 @@ var_dump($a);
 ===Done===
 --EXPECTF--
 ===Property===
-object(SimpleXMLElement)#%d (2) {
+object(SimpleXMLElement)#%d (3) {
+  ["@attributes"]=>
+  array(1) {
+    ["attr1"]=>
+    string(5) "first"
+  }
   ["comment"]=>
   object(SimpleXMLElement)#%d (0) {
   }

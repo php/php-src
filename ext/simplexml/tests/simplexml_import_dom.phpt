@@ -1,5 +1,5 @@
 --TEST--
-Interop: simplexml_import_dom
+SimpleXML [interop]: simplexml_import_dom
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 <?php if (!extension_loaded("dom")) print "skip. dom extension not loaded"; ?>

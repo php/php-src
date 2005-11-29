@@ -1,5 +1,5 @@
 --TEST--
-SimpleXML and CDATA
+SimpleXML: CDATA
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
@@ -25,7 +25,7 @@ $sxe = simplexml_load_string(<<<EOF
 EOF
 );
 
-print_r($sxe);
+var_dump($sxe);
 
 $elem1 = $sxe->elem1;
 $elem2 = $elem1->elem2;
@@ -33,33 +33,36 @@ var_dump(trim((string)$elem2));
 
 ?>
 ===DONE===
---EXPECT--
-SimpleXMLElement Object
-(
-    [elem1] => SimpleXMLElement Object
-        (
-            [comment] => SimpleXMLElement Object
-                (
-                )
-
-            [elem2] => SimpleXMLElement Object
-                (
-                    [elem3] => SimpleXMLElement Object
-                        (
-                            [elem4] => SimpleXMLElement Object
-                                (
-                                    [test] => SimpleXMLElement Object
-                                        (
-                                        )
-
-                                )
-
-                        )
-
-                )
-
-        )
-
-)
+--EXPECTF--
+object(SimpleXMLElement)#%d (2) {
+  ["@attributes"]=>
+  array(1) {
+    ["id"]=>
+    string(5) "elem1"
+  }
+  ["elem1"]=>
+  object(SimpleXMLElement)#%d (3) {
+    ["@attributes"]=>
+    array(1) {
+      ["attr1"]=>
+      string(5) "first"
+    }
+    ["comment"]=>
+    object(SimpleXMLElement)#%d (0) {
+    }
+    ["elem2"]=>
+    object(SimpleXMLElement)#%d (1) {
+      ["elem3"]=>
+      object(SimpleXMLElement)#%d (1) {
+        ["elem4"]=>
+        object(SimpleXMLElement)#%d (1) {
+          ["test"]=>
+          object(SimpleXMLElement)#%d (0) {
+          }
+        }
+      }
+    }
+  }
+}
 string(11) "CDATA block"
 ===DONE===

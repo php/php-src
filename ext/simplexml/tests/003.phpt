@@ -1,5 +1,5 @@
 --TEST--
-SimpleXML and Entities
+SimpleXML: Entities
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
@@ -26,44 +26,44 @@ $xml =<<<EOF
 </sxe>
 EOF;
 
-$sxe = simplexml_load_string($xml);
-
-print_r($sxe);
-
-echo "---Done---\n";
+var_dump(simplexml_load_string($xml));
 
 ?>
---EXPECT--
-SimpleXMLElement Object
-(
-    [elem1] => SimpleXMLElement Object
-        (
-            [comment] => SimpleXMLElement Object
-                (
-                )
-
-            [elem2] => SimpleXMLElement Object
-                (
-                    [elem3] => SimpleXMLElement Object
-                        (
-                            [included-entity] => SimpleXMLElement Object
-                                (
-                                    [included-entity] => This is text included from an entity
-                                )
-
-                            [elem4] => SimpleXMLElement Object
-                                (
-                                    [test] => SimpleXMLElement Object
-                                        (
-                                        )
-
-                                )
-
-                        )
-
-                )
-
-        )
-
-)
----Done--- 
+===DONE===
+--EXPECTF--
+object(SimpleXMLElement)#%d (2) {
+  ["@attributes"]=>
+  array(1) {
+    ["id"]=>
+    string(5) "elem1"
+  }
+  ["elem1"]=>
+  object(SimpleXMLElement)#%d (3) {
+    ["@attributes"]=>
+    array(1) {
+      ["attr1"]=>
+      string(5) "first"
+    }
+    ["comment"]=>
+    object(SimpleXMLElement)#%d (0) {
+    }
+    ["elem2"]=>
+    object(SimpleXMLElement)#%d (1) {
+      ["elem3"]=>
+      object(SimpleXMLElement)#%d (2) {
+        ["included-entity"]=>
+        object(SimpleXMLElement)#%d (1) {
+          ["included-entity"]=>
+          string(36) "This is text included from an entity"
+        }
+        ["elem4"]=>
+        object(SimpleXMLElement)#%d (1) {
+          ["test"]=>
+          object(SimpleXMLElement)#%d (0) {
+          }
+        }
+      }
+    }
+  }
+}
+===DONE===
