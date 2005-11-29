@@ -608,6 +608,7 @@ if test "$PHP_GCOV" = "yes"; then
   fi
   
   dnl Check if ccache is being used
+  dnl FIXME: Need a check for ccache usage, the one below does not work!
   PHP_CHECK_GCC_ARG([--ccache-skip], [gcc_ccache=yes])
   
   if test "$gcc_ccache" = "yes"; then
@@ -621,6 +622,8 @@ if test "$PHP_GCOV" = "yes"; then
 
   AC_CHECK_PROG(LTP, lcov, lcov)
   AC_CHECK_PROG(LTP_GENHTML, genhtml, genhtml)
+  PHP_SUBST(LTP)
+  PHP_SUBST(LTP_GENHTML)
 
   if test "$LTP"; then
     AC_CACHE_CHECK([for ltp version], php_cv_ltp_version, [
@@ -649,10 +652,6 @@ if test "$PHP_GCOV" = "yes"; then
     AC_MSG_ERROR([Could not find genhtml from the LTP package])
   fi
 
-  PHP_SUBST(LTP)
-  PHP_SUBST(LTP_GENHTML)
-
-  PHP_ADD_LIBRARY(gcov)
   AC_DEFINE(HAVE_GCOV, 1, [Whether you have gcov])
   PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/Makefile.gcov, $abs_srcdir)
 
