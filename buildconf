@@ -15,10 +15,6 @@ devok=0
 debug=no
 
 while test $# -gt 0; do
-  if test "$1" = "--copy"; then
-    automake_flags=--copy
-  fi
-
   if test "$1" = "--force"; then
     devok=1
     echo "Forcing buildconf"
@@ -67,7 +63,7 @@ fi
 rm -f generated_lists
 
 if test "$debug" = "yes"; then
-  ${MAKE:-make} -s -f build/build.mk AMFLAGS="$automake_flags" ZENDDIR="$ZENDDIR" SUPPRESS_WARNINGS=""
+  ${MAKE:-make} -s -f build/build.mk ZENDDIR="$ZENDDIR" SUPPRESS_WARNINGS=""
 else
-  ${MAKE:-make} -s -f build/build.mk AMFLAGS="$automake_flags" ZENDDIR="$ZENDDIR"
+  ${MAKE:-make} -s -f build/build.mk ZENDDIR="$ZENDDIR"
 fi
