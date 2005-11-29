@@ -210,11 +210,9 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 	pdo_pgsql_stmt *S = ecalloc(1, sizeof(pdo_pgsql_stmt));
 	int scrollable;
 #if HAVE_PQPREPARE
-	PGresult *res;
 	int ret;
 	char *nsql = NULL;
 	int nsql_len = 0;
-	ExecStatusType status;
 #endif
 
 	S->H = H;
@@ -490,7 +488,7 @@ static PHP_METHOD(PDO, pgsqlLOBCreate)
 
 	if (lfd != InvalidOid) {
 		char *buf;
-		spprintf(&buf, 0, "%lu", lfd);
+		spprintf(&buf, 0, "%lu", (long) lfd);
 		RETURN_STRING(buf, 0);
 	}
 	
