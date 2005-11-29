@@ -27,7 +27,7 @@ if test "$PHP_PCRE_REGEX" != "no"; then
     fi
 
     for j in $PHP_PCRE_REGEX $PHP_PCRE_REGEX/$PHP_LIBDIR; do
-      test -f $j/libpcre.a -o -f $j/libpcre.$SHLIB_SUFFIX_NAME && PCRE_LIBDIR=$j
+      test -f $j/libpcre.a || test -f $j/libpcre.$SHLIB_SUFFIX_NAME && PCRE_LIBDIR=$j
     done
     
     if test -z "$PCRE_LIBDIR" ; then
