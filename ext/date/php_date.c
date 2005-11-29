@@ -494,7 +494,15 @@ static char *date_format(char *format, int format_len, timelib_time *t, int loca
 			/* time */
 			case 'a': snprintf(buffer, 32, "%s", t->h >= 12 ? "pm" : "am"); break;
 			case 'A': snprintf(buffer, 32, "%s", t->h >= 12 ? "PM" : "AM"); break;
-			case 'B': snprintf(buffer, 32, "[B unimplemented]"); break;
+			case 'B': {
+				int retval = (((((long)t->sse)-(((long)t->sse) - ((((long)t->sse) % 86400) + 3600))) * 10) / 864);			
+				while (retval < 0) {
+					retval += 1000;
+				}
+				retval = retval % 1000;
+				snprintf(buffer, 32, "%03d", retval); break;
+				break;
+			}
 			case 'g': snprintf(buffer, 32, "%d", (t->h % 12) ? (int) t->h % 12 : 12); break;
 			case 'G': snprintf(buffer, 32, "%d", (int) t->h); break;
 			case 'h': snprintf(buffer, 32, "%02d", (t->h % 12) ? (int) t->h % 12 : 12); break;
