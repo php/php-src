@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, PHP 5.1.2
+- Added --enable-gcov configure option to enable C-level code coverage.
+  (John, Jani)
 - Added missing support for 'B' format identifier to date() function. (Ilia)
 - Improved SPL: (Marcus)
   . Added class SplFileInfo as root class for DirectoryIterator and 
