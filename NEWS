@@ -22,7 +22,7 @@ PHP                                                                        NEWS
 - Fixed bug #35393 (changing static protected members from outside the class,
   one more reference issue). (Dmitry)
 - Fixed bug #35381 (ssl library is not initialized properly). (Alan)
-- Fixed bug #35028 (XML object fails FALSE test). (Marcus)
+- Fixed bug #35028 (SimpleXML object fails FALSE test). (Marcus)
 
 28 Nov 2005, PHP 5.1.1
 - Disabled native date class to prevent pear::date conflict. (Ilia)
