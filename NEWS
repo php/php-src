@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, PHP 5.1.2
+- Improved SPL: (Marcus)
+  . Added class SplFileInfo as root class for DirectoryIterator and 
+    SplFileObject
 - Improved SimpleXML extension: (Marcus)
   . Fixed memleaks
   . Fixed var_dump()
