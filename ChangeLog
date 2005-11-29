@@ -1,3 +1,80 @@
+2005-11-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #35422 (strtotime() does not parse times with UTC as timezone).
+
+2005-11-28  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/readline/config.m4:
+      fix build with libedit
+
+2005-11-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #35456 (+ 1 [time unit] format did not work).
+
+2005-11-28  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS
+      ext/readline/config.m4
+      ext/readline/readline.c
+      sapi/cli/php_cli_readline.c:
+      MFH: - Fixed bug #35409 (undefined reference to 'rl_completion_matches').
+
+    * ext/readline/config.m4
+      ext/readline/readline.c
+      sapi/cli/php_cli_readline.c:
+      - Fixed bug #35409 (undefined reference to 'rl_completion_matches')
+
+2005-11-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug35393.phpt
+      ZendEngine2/tests/bug35393.phpt:
+      
+      file bug35393.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug35393.phpt
+      ext/standard/tests/file/proc_open01.phpt
+      ext/standard/tests/file/proc_open01.phpt:
+      Fixed bug #35393 (changing static protected members from outside the class,
+      one more reference issue)
+
+2005-11-28  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_1)
+      ext/mysqli/tests/009.phpt:
+      mysql 4.1.x gives strange result. the result in the test is generated with
+      5.0.16 (valid for 5.1.3).
+
+2005-11-28  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS
+      ext/openssl/openssl.c:
+      MFH: - Fixed bug #35381 (ssl library is not initialized properly)
+
+2005-11-28  Alan Knowles  <alan@akbkhome.com>
+
+    * ext/openssl/openssl.c:
+      fix bug #35381 - ensure library is initialized before use
+
+2005-11-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      NEWS:
+      Fixed bug #35399 (Since fix of bug #35273 SOAP decoding of
+      soapenc:base64binary fails)
+
 2005-11-27  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * (PHP_5_1)

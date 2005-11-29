@@ -1,3 +1,18 @@
+2005-11-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug35393.phpt:
+      Fixed bug #35393 (changing static protected members from outside the class,
+      one more reference issue)
+
+    * tests/bug35393.phpt
+      tests/bug35393.phpt:
+      
+      file bug35393.phpt was initially added on branch PHP_5_1.
+
 2005-11-27  Ilia Alshanetsky  <ilia@prohost.org>
 
     * tests/bug35411.phpt
