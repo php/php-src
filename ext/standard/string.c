@@ -6531,33 +6531,38 @@ PHP_FUNCTION(str_word_count)
 	if (type == 1 || type == 2) {
 		array_init(return_value);
 	}
-	
+
+	/* first character cannot be ' or -, unless explicitly allowed by the user */
+	if ((*p == '\'' && (!char_list || !ch['\''])) || (*p == '-' && (!char_list || !ch['-']))) {
+		p++;
+	}
+	/* last character cannot be -, unless explicitly allowed by the user */
+	if (*(e - 1) == '-' && (!char_list || !ch['-'])) {
+		e--;
+	}
+
 	while (p < e) {
-		if (isalpha(*p) || (char_list && ch[(unsigned char)*p])) {
-			s = ++p - 1;
-			while (isalpha(*p) || *p == '\'' || (*p == '-' && isalpha(*(p+1))) || (char_list && ch[(unsigned char)*p])) {
-				p++;
-			}
-			
+		s = p;
+		while (p < e && (isalpha(*p) || (char_list && ch[(unsigned char)*p]) || *p == '\'' || *p == '-')) {
+			p++;
+		}
+		if (p > s) {
 			switch (type)
 			{
 				case 1:
 					buf = estrndup(s, (p-s));
-					add_next_index_stringl(return_value, buf, (p-s), 1);
-					efree(buf);
+					add_next_index_stringl(return_value, buf, (p-s), 0);
 					break;
 				case 2:
 					buf = estrndup(s, (p-s));
-					add_index_stringl(return_value, (s - str), buf, p-s, 1);
-					efree(buf);
+					add_index_stringl(return_value, (s - str), buf, p-s, 0);
 					break;
 				default:
 					word_count++;
 					break;		
 			}
-		} else {
-			p++;
 		}
+		p++;
 	}
 	
 	if (!type) {

@@ -36,7 +36,11 @@ var_dump(str_word_count($str2, 2, "014"));
 var_dump(str_word_count($str2, 2, array()));
 var_dump(str_word_count($str2, 2, new stdClass));
 var_dump(str_word_count($str2, 2, ""));
-
+var_dump(str_word_count("foo'0 bar-0var", 2, "0"));
+var_dump(str_word_count("'foo'", 2));
+var_dump(str_word_count("'foo'", 2, "'"));
+var_dump(str_word_count("-foo-", 2));
+var_dump(str_word_count("-foo-", 2, "-"));
 ?>
 --EXPECTF--
 array(6) {
@@ -225,4 +229,26 @@ array(7) {
   string(3) "bar"
   [15]=>
   string(3) "foo"
+}
+array(2) {
+  [0]=>
+  string(5) "foo'0"
+  [6]=>
+  string(8) "bar-0var"
+}
+array(1) {
+  [1]=>
+  string(4) "foo'"
+}
+array(1) {
+  [0]=>
+  string(5) "'foo'"
+}
+array(1) {
+  [1]=>
+  string(3) "foo"
+}
+array(1) {
+  [0]=>
+  string(5) "-foo-"
 }
