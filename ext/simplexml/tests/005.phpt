@@ -1,5 +1,5 @@
 --TEST--
-SimpleXML and text data
+SimpleXML: Text data
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--

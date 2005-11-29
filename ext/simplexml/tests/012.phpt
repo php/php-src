@@ -1,5 +1,5 @@
 --TEST--
-SimpleXML and Attribute creation
+SimpleXML: Attribute creation
 --SKIPIF--
 <?php 
 	if (!extension_loaded('simplexml')) print 'skip';
@@ -26,6 +26,7 @@ echo $sxe->asXML();
 
 $sxe[] = "error";
 
+__HALT_COMPILER();
 ?>
 ===DONE===
 --EXPECTF--

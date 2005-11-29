@@ -1,5 +1,5 @@
 --TEST--
-SimpleXML and echo/print
+SimpleXML: echo/print
 --SKIPIF--
 <?php 
 	if (!extension_loaded('simplexml')) print 'skip';
