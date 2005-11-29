@@ -587,7 +587,15 @@ static char *date_format(char *format, int format_len, int *return_len, timelib_
 			/* time */
 			case 'a': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%R", localized ? IS_UNICODE : IS_STRING, am_pm_lower_full(t->h >= 12 ? 1 : 0, localized)); break;
 			case 'A': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%R", localized ? IS_UNICODE : IS_STRING, am_pm_upper_full(t->h >= 12 ? 1 : 0, localized)); break;
-			case 'B': length = date_spprintf(&buffer, 32 TSRMLS_CC, "[B unimplemented]"); break;
+			case 'B': {
+				int retval = (((((long)t->sse)-(((long)t->sse) - ((((long)t->sse) % 86400) + 3600))) * 10) / 864);
+				while (retval < 0) {
+					retval += 1000;
+				}
+				retval = retval % 1000;
+				date_spprintf(&buffer, 32 TSRMLS_CC, "%03d", retval);
+				break;
+			}
 			case 'g': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", (t->h % 12) ? (int) t->h % 12 : 12); break;
 			case 'G': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", (int) t->h); break;
 			case 'h': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%02d", (t->h % 12) ? (int) t->h % 12 : 12); break;
