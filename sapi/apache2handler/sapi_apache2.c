@@ -451,6 +451,8 @@ static int php_handler(request_rec *r)
 		zend_try { zend_ini_deactivate(TSRMLS_C); } zend_end_try(); \
 	} \
 
+	arp_pool_clenup_run(r->pool, (void*) &SG(server_context), php_server_context_cleanup);
+
 	conf = ap_get_module_config(r->per_dir_config, &php5_module);
 
 	/* apply_config() needs r in some cases, so allocate server_context early */
