@@ -26,6 +26,7 @@ echo $sxe->asXML();
 
 $sxe[] = "error";
 
+__HALT_COMPILER();
 ?>
 ===DONE===
 --EXPECTF--
