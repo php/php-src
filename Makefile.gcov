@@ -1,0 +1,66 @@
+
+#
+# LCOV
+#
+
+lcov: lcov-html
+
+lcov-ccache:
+	@if test -z "$(CCACHE_DISABLE)" || test "$(CCACHE_DISABLE)" != "1"; then \
+		echo "ccache is not disabled. Set environment variable CCACHE_DISABLE=1 to disable ccache."; \
+		exit 123; \
+	fi
+
+lcov-test: all
+	@echo "Running test suite"
+	@find . -name \*.gcda | xargs rm -f
+	-@if test ! -z "$(PHP_EXECUTABLE)" && test -x "$(PHP_EXECUTABLE)"; then \
+		NO_INTERACTION=1 \
+		TEST_PHP_EXECUTABLE=$(PHP_EXECUTABLE) \
+		TEST_PHP_SRCDIR=$(top_srcdir) \
+		CC="$(CC)" \
+			$(PHP_EXECUTABLE) -d 'open_basedir=' -d 'safe_mode=0' -d 'output_buffering=0' -d 'memory_limit=-1' $(top_srcdir)/run-tests.php -d 'extension_dir=modules/' -d `( . $(PHP_MODULES) ; echo extension=$$dlname)` tests/; \
+	elif test ! -z "$(SAPI_CLI_PATH)" && test -x "$(SAPI_CLI_PATH)"; then \
+		NO_INTERACTION=1 \
+		TEST_PHP_EXECUTABLE=$(top_builddir)/$(SAPI_CLI_PATH) \
+		TEST_PHP_SRCDIR=$(top_srcdir) \
+		CC="$(CC)" \
+			$(top_builddir)/$(SAPI_CLI_PATH) -d 'open_basedir=' -d 'safe_mode=0' -d 'output_buffering=0' -d 'memory_limit=-1' $(top_srcdir)/run-tests.php $(TESTS); \
+	else \
+		echo "ERROR: Cannot run tests without CLI sapi."; \
+	fi
+
+php_lcov.info: lcov-test
+	@echo "Generating data for $@"
+	@rm -rf lcov_data/
+	@$(mkinstalldirs) lcov_data/
+	@echo
+	-@find . -name \*.gcda -o -name \*.gcno | sed -e 's/^\.\///' | sed -e 's/\.gcda//g' -e 's/\.gcno//g' | uniq | while read x; do \
+		echo -n . ;\
+		dir=lcov_data/`dirname $$x`; \
+		test -d "$$dir" || $(mkinstalldirs) "$$dir"; \
+		if test -f "$(top_srcdir)/$$x.c"; then \
+			ln -f -s $(top_srcdir)/$$x.c lcov_data/$$x.c; \
+		fi; \
+		if test -f "$(top_srcdir)/$$x.re"; then \
+			ln -f -s $(top_srcdir)/$$x.re lcov_data/$$x.re; \
+		fi; \
+		if test -f "$(top_builddir)/$$x.c"; then \
+			ln -f -s $(top_builddir)/$$x.c lcov_data/$$x.c; \
+		fi; \
+		test -f "$$x.gcno" && cp $$x.gcno lcov_data/ ; \
+		test -f "$$x.gcda" && cp $$x.gcda lcov_data/ ; \
+	done
+	@echo 
+	@echo "Generating $@"
+	@$(LTP) --directory lcov_data/ --capture --output-file $@ --test-name PHP_LCOV
+
+lcov-html: php_lcov.info
+	@echo "Generating lcov HTML"
+	@$(LTP_GENHTML) --no-prefix --output-directory lcov_html/ --title "PHP Code Coverage" --show-details php_lcov.info
+
+lcov-clean:
+	rm -f php_lcov.info
+	rm -rf lcov_data/
+	rm -rf lcov_html/
+
