@@ -30,17 +30,12 @@ class NoCvsDirectory extends RecursiveFilterIterator
 {
 	function __construct($path)
 	{
-		parent::__construct(new RecursiveDirectoryIterator($path));
+		parent::__construct(new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::CURRENT_AS_PATHNAME));
 	}
 
 	function accept()
 	{
 		return $this->getInnerIterator()->getFilename() != 'CVS';
-	}
-	
-	function getChildren()
-	{
-		return new NoCvsDirectory($this->current()->getPathName());
 	}
 }
 

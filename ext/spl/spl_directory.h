@@ -24,44 +24,64 @@
 #include "php.h"
 #include "php_spl.h"
 
+extern PHPAPI zend_class_entry *spl_ce_SplFileInfo;
 extern PHPAPI zend_class_entry *spl_ce_DirectoryIterator;
 extern PHPAPI zend_class_entry *spl_ce_RecursiveDirectoryIterator;
 extern PHPAPI zend_class_entry *spl_ce_SplFileObject;
+extern PHPAPI zend_class_entry *spl_ce_SplTempFileObject;
 
 PHP_MINIT_FUNCTION(spl_directory);
 
-typedef struct _spl_ce_dir_object {
-	zend_object       std;
-	php_stream        *dirp;
-	php_stream_dirent entry;
-	char              *path;
-	char              *path_name;
-	int               path_name_len;
-	char              *sub_path;
-	int               sub_path_len;
-	int               index;
-} spl_ce_dir_object;
+typedef enum {
+	SPL_FS_INFO,
+	SPL_FS_DIR,
+	SPL_FS_FILE,
+} SPL_FS_OBJ_TYPE;
 
-typedef struct _spl_file_object {
+typedef struct _spl_filesystem_object {
 	zend_object        std;
-	php_stream         *stream;
-	php_stream_context *context;
-	zval               *zcontext;
+	char               *path;
+	int                path_len;
 	char               *file_name;
-	int                file_name_len;
-	char               *open_mode;
-	int                open_mode_len;
-	zval               *current_zval;
-	char               *current_line;
-	size_t             current_line_len;
-	size_t             max_line_len;
-	long               current_line_num;
+	int                file_name_len; 
+	SPL_FS_OBJ_TYPE    type;
 	long               flags;
-	zval               zresource;
-	zend_function      *func_getCurr;
-} spl_file_object;
+	zend_class_entry   *file_class;
+	zend_class_entry   *info_class;
+	union {
+		struct {
+			php_stream         *dirp;
+			php_stream_dirent  entry;
+			char               *sub_path;
+			int                sub_path_len;
+			int                index;
+			int                is_recursive;
+		} dir;
+		struct {
+			php_stream         *stream;
+			php_stream_context *context;
+			zval               *zcontext;
+			char               *open_mode;
+			int                open_mode_len;
+			zval               *current_zval;
+			char               *current_line;
+			size_t             current_line_len;
+			size_t             max_line_len;
+			long               current_line_num;
+			zval               zresource;
+			zend_function      *func_getCurr;
+		} file;
+	} u;
+} spl_filesystem_object;
 
 #define SPL_FILE_OBJECT_DROP_NEW_LINE      0x00000001 /* drop new lines */
+
+#define SPL_FILE_DIR_CURRENT_AS_FILEINFO   0x00000010 /* make RecursiveDirectoryTree::current() return SplFileInfo */
+#define SPL_FILE_DIR_CURRENT_AS_PATHNAME   0x00000020 /* make RecursiveDirectoryTree::current() return getPathname() */
+#define SPL_FILE_DIR_CURRENT_MODE_MASK     0x000000F0 /* make RecursiveDirectoryTree::key() return getFilename() */
+
+#define SPL_FILE_DIR_KEY_AS_FILENAME       0x00000100 /* make RecursiveDirectoryTree::key() return getFilename() */
+#define SPL_FILE_DIR_KEY_MODE_MASK         0x00000F00 /* make RecursiveDirectoryTree::key() return getFilename() */
 
 #endif /* SPL_DIRECTORY_H */
 

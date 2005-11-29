@@ -26,38 +26,39 @@ $xml =<<<EOF
 </sxe>
 EOF;
 
-$sxe = simplexml_load_string($xml, 'SimpleXMLIterator');
-
-print_r($sxe);
+var_dump(simplexml_load_string($xml, 'SimpleXMLIterator'));
 
 ?>
 ===DONE===
---EXPECT--
-SimpleXMLIterator Object
-(
-    [elem1] => SimpleXMLIterator Object
-        (
-            [comment] => SimpleXMLIterator Object
-                (
-                )
-
-            [elem2] => SimpleXMLIterator Object
-                (
-                    [elem3] => SimpleXMLIterator Object
-                        (
-                            [elem4] => SimpleXMLIterator Object
-                                (
-                                    [test] => SimpleXMLIterator Object
-                                        (
-                                        )
-
-                                )
-
-                        )
-
-                )
-
-        )
-
-)
+--EXPECTF--
+object(SimpleXMLIterator)#%d (2) {
+  ["@attributes"]=>
+  array(1) {
+    ["id"]=>
+    string(5) "elem1"
+  }
+  ["elem1"]=>
+  object(SimpleXMLIterator)#%d (3) {
+    ["@attributes"]=>
+    array(1) {
+      ["attr1"]=>
+      string(5) "first"
+    }
+    ["comment"]=>
+    object(SimpleXMLIterator)#%d (0) {
+    }
+    ["elem2"]=>
+    object(SimpleXMLIterator)#%d (1) {
+      ["elem3"]=>
+      object(SimpleXMLIterator)#%d (1) {
+        ["elem4"]=>
+        object(SimpleXMLIterator)#%d (1) {
+          ["test"]=>
+          object(SimpleXMLIterator)#%d (0) {
+          }
+        }
+      }
+    }
+  }
+}
 ===DONE===
