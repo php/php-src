@@ -1,16 +1,4 @@
---TEST--
-Postgres
---SKIPIF--
-<?php # vim:ft=php
-if (!extension_loaded('pdo_pgsql')) print 'skip'; ?>
---REDIRECTTEST--
-# magic auto-configuration
-# Also update config.inc if you make changes here... 
-
-$config = array(
-	'TESTS' => 'ext/pdo/tests'
-);
-
+<?php # vim:se ft=php:
 if (false !== getenv('PDO_PGSQL_TEST_DSN')) {
 	# user set them from their shell
 	$config['ENV']['PDOTEST_DSN'] = getenv('PDO_PGSQL_TEST_DSN');
@@ -20,5 +8,7 @@ if (false !== getenv('PDO_PGSQL_TEST_DSN')) {
 } else {
 	$config['ENV']['PDOTEST_DSN'] = 'pgsql:host=localhost port=5432 dbname=test user=root password=';
 }
-	
-return $config;
+
+foreach ($config['ENV'] as $k => $v) {
+	putenv("$k=$v");
+}

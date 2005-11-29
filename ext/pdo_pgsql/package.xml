@@ -30,8 +30,8 @@
  <license>PHP</license>
  <release>
   <state>stable</state>
-  <version>1.0</version>
-  <date>2005-11-26</date>
+  <version>1.0.1</version>
+  <date>2005-11-28</date>
 
   <notes>
 Now features native prepared statements and numerous other improvements.
@@ -42,6 +42,8 @@ intend to build and/or use it.
 
 If you are running on windows, you can download the binary from here:
 http://pecl4win.php.net/ext.php/php_pdo_pgsql.dll
+
+Added PDO::pgsqlLOBCreate(), PDO::pgsqlLOBOpen() and PDO::pgsqlLOBUnlink().
   </notes>
 
   <filelist>
@@ -57,7 +59,7 @@ http://pecl4win.php.net/ext.php/php_pdo_pgsql.dll
   </filelist>
   <deps>
    <dep type="php" rel="ge" version="5.0.3"/>
-   <dep type="ext" rel="ge" name="pdo" version="1.0"/>
+   <dep type="ext" rel="ge" name="pdo" version="1.0.2"/>
   </deps>
  </release>
 </package>
