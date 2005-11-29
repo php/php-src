@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, PHP 5.1.2
+- Improved SimpleXML extension: (Marcus)
+  . Fixed memleaks
+  . Added methods getNamespaces(), getDocNamespaces()
+  . Fixed var_dump()
 - Fixed bug #35456 (+ 1 [time unit] format did not work). (Ilia)
 - Fixed bug #35431 (PDO crashes when using LAZY fetch with fetchAll). (Wez)
 - Fixed bug #35430 (PDO crashes on incorrect FETCH_FUNC use). (Tony)
@@ -13,6 +17,7 @@ PHP                                                                        NEWS
 - Fixed bug #35393 (changing static protected members from outside the class,
   one more reference issue). (Dmitry)
 - Fixed bug #35381 (ssl library is not initialized properly). (Alan)
+- Fixed bug #35028 (XML object fails FALSE test). (Marcus)
 
 28 Nov 2005, PHP 5.1.1
 - Disabled native date class to prevent pear::date conflict. (Ilia)
@@ -132,7 +137,7 @@ PHP                                                                        NEWS
 - Added support of parameter=>value arrays to 
   xsl_xsltprocessor_set_parameter(). (Tony)
 
-- Improved PHP extension loading mechanism with support for module 
+- PHP extension loading mechanism with support for module 
   dependencies and conflicts. (Jani, Dmitry) 
 - Improved interactive mode of PHP CLI (php -a). (Johannes, Marcus)
 - Improved performance of:
