@@ -474,9 +474,9 @@ static int pgsql_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
 	return pdo_pgsql_transaction_cmd("ROLLBACK", dbh TSRMLS_CC);
 }
 
-/* {{{ string pgSQL::pgsqlLOBCreate()
+/* {{{ proto string PDO::pgsqlLOBCreate()
    Creates a new large object, returning its identifier.  Must be called inside a transaction. */
-static PHP_METHOD(pgSQL, pgsqlLOBCreate)
+static PHP_METHOD(PDO, pgsqlLOBCreate)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -499,9 +499,9 @@ static PHP_METHOD(pgSQL, pgsqlLOBCreate)
 }
 /* }}} */
 
-/* {{{ resource pgSQL::pgsqlLOBOpen(string oid [, string mode = 'rb'])
+/* {{{ proto resource PDO::pgsqlLOBOpen(string oid [, string mode = 'rb'])
    Opens an existing large object stream.  Must be called inside a transaction. */
-static PHP_METHOD(pgSQL, pgsqlLOBOpen)
+static PHP_METHOD(PDO, pgsqlLOBOpen)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -548,16 +548,23 @@ static PHP_METHOD(pgSQL, pgsqlLOBOpen)
 }
 /* }}} */
 
-/* {{{ bool pgSQL::pgsqlLOBUnlink(int oid)
+/* {{{ proto bool PDO::pgsqlLOBUnlink(string oid)
    Deletes the large object identified by oid.  Must be called inside a transaction. */
-static PHP_METHOD(pgSQL, pgsqlLOBUnlink)
+static PHP_METHOD(PDO, pgsqlLOBUnlink)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
-	long lfd;
+	Oid oid;
+	char *oidstr, *end_ptr;
+	int oidlen;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",
-				&lfd)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
+				&oidstr, &oidlen)) {
+		RETURN_FALSE;
+	}
+
+	oid = (Oid)strtoul(oidstr, &end_ptr, 10);
+	if (oid == 0 && (errno == ERANGE || errno == EINVAL)) {
 		RETURN_FALSE;
 	}
 
@@ -566,19 +573,19 @@ static PHP_METHOD(pgSQL, pgsqlLOBUnlink)
 
 	H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	
-	if (1 == lo_unlink(H->server, lfd)) {
+	if (1 == lo_unlink(H->server, oid)) {
 		RETURN_TRUE;
 	}
 	pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, "HY000");
 	RETURN_FALSE;
 }
-
+/* }}} */
 
 
 static function_entry dbh_methods[] = {
-	PHP_ME(pgSQL, pgsqlLOBCreate, NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(pgSQL, pgsqlLOBOpen, NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(pgSQL, pgsqlLOBUnlink, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, pgsqlLOBCreate, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, pgsqlLOBOpen, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, pgsqlLOBUnlink, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
