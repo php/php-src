@@ -177,8 +177,6 @@ function_entry basic_functions[] = {
 	PHP_FE(strptime,														NULL)
 #endif
 
-	PHP_FE(idate,															NULL)
-
 	PHP_FE(flush,															NULL)
 	PHP_FE(wordwrap,														NULL)
 	PHP_FE(htmlspecialchars,												NULL)
