@@ -13,6 +13,7 @@ PHP                                                                        NEWS
 - Fixed bug #35456 (+ 1 [time unit] format did not work). (Ilia)
 - Fixed bug #35431 (PDO crashes when using LAZY fetch with fetchAll). (Wez)
 - Fixed bug #35430 (PDO crashes on incorrect FETCH_FUNC use). (Tony)
+- Fixed bug #35427 (str_word_count() handles '-' incorrectly). (Ilia)
 - Fixed bug #35422 (strtotime() does not parse times with UTC as timezone).
   (Ilia)
 - Fixed bug #35414 (strtotime() no longer works with ordinal suffix). (Ilia)
