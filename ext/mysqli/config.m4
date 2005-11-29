@@ -30,8 +30,8 @@ dnl  fi
   fi
   
   if test -x "$MYSQL_CONFIG" && $MYSQL_CONFIG $MYSQL_LIB_CFG > /dev/null 2>&1; then
-    MYSQLI_INCLINE=`$MYSQL_CONFIG --cflags | sed -e "s/'//g"`
-    MYSQLI_LIBLINE=`$MYSQL_CONFIG $MYSQL_LIB_CFG | sed -e "s/'//g"`
+    MYSQLI_INCLINE=`$MYSQL_CONFIG --cflags | $SED -e "s/'//g"`
+    MYSQLI_LIBLINE=`$MYSQL_CONFIG $MYSQL_LIB_CFG | $SED -e "s/'//g"`
   else
     AC_MSG_RESULT([mysql_config not found])
     AC_MSG_ERROR([Please reinstall the mysql distribution])
