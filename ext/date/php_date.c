@@ -594,6 +594,104 @@ PHPAPI char *php_format_date(char *format, int format_len, time_t ts, int localt
 }
 /* }}} */
 
+/* {{{ php_idate
+ */
+PHPAPI int php_idate(char format, time_t ts, int localtime)
+{
+	timelib_time   *t;
+	timelib_tzinfo *tzi;
+	int retval = -1;
+	timelib_time_offset *offset;
+	timelib_sll isoweek, isoyear;
+
+	t = timelib_time_ctor();
+
+	if (!localtime) {
+		TSRMLS_FETCH();
+		tzi = get_timezone_info(TSRMLS_C);
+		timelib_unixtime2local(t, ts, tzi);
+	} else {
+		tzi = NULL;
+		timelib_unixtime2gmt(t, ts);
+	}
+
+	if (!localtime) {
+		if (t->zone_type == TIMELIB_ZONETYPE_ABBR) {
+			offset = timelib_time_offset_ctor();
+			offset->offset = (t->z - (t->dst * 60)) * -60;
+			offset->leap_secs = 0;
+			offset->is_dst = t->dst;
+			offset->abbr = strdup(t->tz_abbr);
+		} else if (t->zone_type == TIMELIB_ZONETYPE_OFFSET) {
+			offset = timelib_time_offset_ctor();
+			offset->offset = (t->z - (t->dst * 60)) * -60;
+			offset->leap_secs = 0;
+			offset->is_dst = t->dst;
+			offset->abbr = malloc(9); /* GMT±xxxx\0 */
+			snprintf(offset->abbr, 9, "GMT%c%02d%02d", 
+			                          !localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
+			                          !localtime ? abs(offset->offset / 3600) : 0,
+			                          !localtime ? abs((offset->offset % 3600) / 60) : 0 );
+		} else {
+			offset = timelib_get_time_zone_info(t->sse, t->tz_info);
+		}
+	}
+
+	timelib_isoweek_from_date(t->y, t->m, t->d, &isoweek, &isoyear);
+
+	switch (format) {
+		/* day */
+		case 'd': case 'j': retval = (int) t->d; break;
+
+		case 'w': retval = (int) timelib_day_of_week(t->y, t->m, t->d); break;
+		case 'z': retval = (int) timelib_day_of_year(t->y, t->m, t->d); break;
+
+		/* week */
+		case 'W': retval = (int) isoweek; break; /* iso weeknr */
+
+		/* month */
+		case 'm': case 'n': retval = (int) t->m; break;
+		case 't': retval = (int) timelib_days_in_month(t->y, t->m); break;
+
+		/* year */
+		case 'L': retval = (int) timelib_is_leap((int) t->y); break;
+		case 'y': retval = (int) (t->y % 100); break;
+		case 'Y': retval = (int) t->y; break;
+
+		/* Swatch Beat a.k.a. Internet Time */
+		case 'B':
+			retval = (((((long)t->sse)-(((long)t->sse) - ((((long)t->sse) % 86400) + 3600))) * 10) / 864);			
+			while (retval < 0) {
+				retval += 1000;
+			}
+			retval = retval % 1000;
+			break;
+
+		/* time */
+		case 'g': case 'h': retval = (int) ((t->h % 12) ? (int) t->h % 12 : 12); break;
+		case 'H': case 'G': retval = (int) t->h; break;
+		case 'i': retval = (int) t->i; break;
+		case 's': retval = (int) t->s; break;
+
+		/* timezone */
+		case 'I': retval = (int) (!localtime ? offset->is_dst : 0); break;
+		case 'Z': retval = (int) (!localtime ? offset->offset : 0); break;
+
+		case 'U': retval = (int) t->sse; break;
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unrecognized date format token.");
+			break;
+	}
+
+	if (!localtime) {
+		timelib_time_offset_dtor(offset);
+	}
+	timelib_time_dtor(t);
+
+	return retval;
+}
+/* }}} */
+
 /* {{{ proto string date(string format [, long timestamp])
    Format a local date/time */
 PHP_FUNCTION(date)
@@ -607,6 +705,31 @@ PHP_FUNCTION(date)
 PHP_FUNCTION(gmdate)
 {
 	php_date(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+/* {{{ proto int idate(string format [, int timestamp])
+   Format a local time/date as integer */
+PHP_FUNCTION(idate)
+{
+	char   *format;
+	int     format_len;
+	time_t  ts;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &format, &format_len, &ts) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (format_len != 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "idate format is one char");
+		RETURN_FALSE;
+	}
+
+	if (ZEND_NUM_ARGS() == 1) {
+		ts = time(NULL);
+	}
+
+	RETURN_LONG(php_idate(format[0], ts, 0));
 }
 /* }}} */
 
