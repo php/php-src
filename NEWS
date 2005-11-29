@@ -2,10 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 6.0
 - Unicode support. (Andrei, Dmitry, et al)
-- Cleaned CGI code. Now FastCGI can not be disabled. See into sapi/cgi/CHANGES
+- Cleaned CGI code. Now FastCGI can not be disabled. See sapi/cgi/CHANGES
   for more details. (Dmitry)
-- Removed support for continue and break operators with non-constant operands.
-  (Dmitry)
+- Removed support for "continue" and "break" operators with non-constant
+  operands. (Dmitry)
 - Changed __toString() behavior to call it in all necessary places
   (Marcus, Dmitry)
 - Changed "instanceof" and "catch" operators, is_a() and is_subclass_of()
@@ -13,13 +13,11 @@ PHP                                                                        NEWS
 - Changed reflection constants to class constants. (Johannes)
 - Added "allow_url_include" ini directive to be able to turn off remote url
   code execution separately from the "allow_url_fopen" setting. (Rasmus)
-- Added --enable-gcov configure option to enable C-level code coverage.
-  (John, Jani)
 - Added to cURL extension: (Ilia)
   . curl_setopt_array() which allows setting of multiple cURL options.
   . CURLINFO_HEADER_OUT constant to facilitate request retrieval.
-- Added --rclass and --rextension CLI parameters to reflect internal classes and
-  loaded extensions. (Johannes)
+- Added --rclass and --rextension CLI parameters to reflect internal classes
+  and loaded extensions. (Johannes)
 - Added optional parameter to http_build_query() to allow specification of 
   string separator. (Ilia)
 - Added an optional parameter to parse_url() to allow retrieval of distinct URL
