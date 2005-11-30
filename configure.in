@@ -1304,7 +1304,7 @@ PHP_ADD_SOURCES(Zend, \
 
 if test -r "$abs_srcdir/Zend/zend_objects.c"; then
   PHP_ADD_SOURCES(Zend, zend_objects.c zend_object_handlers.c zend_objects_API.c zend_mm.c \
-    zend_default_classes.c zend_reflection_api.c)
+    zend_default_classes.c)
 fi
 
 dnl Selectively disable optimization due to high RAM usage during
