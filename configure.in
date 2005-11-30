@@ -608,14 +608,13 @@ if test "$PHP_GCOV" = "yes"; then
   fi
   
   dnl Check if ccache is being used
-  dnl FIXME: Need a check for ccache usage, the one below does not work!
-  PHP_CHECK_GCC_ARG([--ccache-skip], [gcc_ccache=yes])
-  
-  if test "$gcc_ccache" = "yes"; then
-    if test -z "$CCACHE_DISABLE" || test "$CCACHE_DISABLE" != "1"; then
-      AC_MSG_ERROR([ccache must be disabled when --enable-gcov option is used. You can disable ccache by setting environment variable CCACHE_DISABLE=1.])
-    fi
-    lcov_target="lcov-ccache"
+  case `$php_shtool path $CC` in
+    *ccache*[)] gcc_ccache=yes;;
+    *[)] gcc_ccache=no;;
+  esac
+
+  if test "$gcc_ccache" = "yes" && (test -z "$CCACHE_DISABLE" || test "$CCACHE_DISABLE" != "1"); then
+    AC_MSG_ERROR([ccache must be disabled when --enable-gcov option is used. You can disable ccache by setting environment variable CCACHE_DISABLE=1.])
   fi
   
   ltp_version_list="1.4"
