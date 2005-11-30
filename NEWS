@@ -25,6 +25,8 @@ PHP                                                                        NEWS
 - Fixed bug #35422 (strtotime() does not parse times with UTC as timezone).
   (Ilia)
 - Fixed bug #35414 (strtotime() no longer works with ordinal suffix). (Ilia)
+- Fixed bug #35410 (wddx_deserialize() doesn't handle large ints as keys 
+  properly). (Ilia)
 - Fixed bug #35409 (undefined reference to 'rl_completion_matches'). (Jani)
 - Fixed bug #35399 (Since fix of bug #35273 SOAP decoding of
   soapenc:base64binary fails). (Dmitry)
