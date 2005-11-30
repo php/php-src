@@ -7,7 +7,7 @@ lcov: lcov-html
 
 lcov-test: all
 	@echo "Running test suite"
-	@find . -name \*.gcda | xargs rm -f
+	@find . -name \*.gcda -o -name \*.da -o -name \*.bbg? | xargs rm -f
 	-@if test ! -z "$(PHP_EXECUTABLE)" && test -x "$(PHP_EXECUTABLE)"; then \
 		NO_INTERACTION=1 \
 		TEST_PHP_EXECUTABLE=$(PHP_EXECUTABLE) \
@@ -29,7 +29,7 @@ php_lcov.info: lcov-test
 	@rm -rf lcov_data/
 	@$(mkinstalldirs) lcov_data/
 	@echo
-	-@find . -name \*.gcda -o -name \*.gcno | sed -e 's/^\.\///' | sed -e 's/\.gcda//g' -e 's/\.gcno//g' | uniq | while read x; do \
+	-@find . -name \*.gcda -o -name \*.gcno -o -name \*.da | sed -e 's/^\.\///' | sed -e 's/\.gcda//g' -e 's/\.gcno//g' -e 's/\.da//g' | uniq | while read x; do \
 		echo -n . ;\
 		dir=lcov_data/`dirname $$x`; \
 		test -d "$$dir" || $(mkinstalldirs) "$$dir"; \
@@ -39,11 +39,20 @@ php_lcov.info: lcov-test
 		if test -f "$(top_srcdir)/$$x.re"; then \
 			ln -f -s $(top_srcdir)/$$x.re lcov_data/$$x.re; \
 		fi; \
+		if test -f "$(top_srcdir)/$$x.y"; then \
+		        ln -f -s $(top_srcdir)/$$x.y lcov_data/$$x.y; \
+		fi; \
+		if test -f "$(top_srcdir)/$$x.l"; then \
+		        ln -f -s $(top_srcdir)/$$x.l lcov_data/$$x.l; \
+		fi; \
 		if test -f "$(top_builddir)/$$x.c"; then \
 			ln -f -s $(top_builddir)/$$x.c lcov_data/$$x.c; \
 		fi; \
 		test -f "$$x.gcno" && cp $$x.gcno lcov_data/ ; \
 		test -f "$$x.gcda" && cp $$x.gcda lcov_data/ ; \
+		test -f "$$x.da"   && cp $$x.da   lcov_data/ ; \
+		test -f "$$x.bb"   && cp $$x.bb   lcov_data/ ; \
+		test -f "$$x.bbg"  && cp $$x.bbg  lcov_data/ ; \
 	done
 	@echo 
 	@echo "Generating $@"
