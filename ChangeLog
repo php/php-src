@@ -1,3 +1,198 @@
+2005-11-29  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * NEWS:
+      fn
+
+    * (PHP_5_1)
+      Makefile.gcov
+      NEWS
+      configure.in:
+      MFH: - Added --enable-gcov configure option to enable C-level code
+      coverage.
+
+    * build/buildcheck.sh:
+      MFB: automake dependancy was removed long time ago
+
+    * (PHP_5_1)
+      build/buildcheck.sh:
+      - automake is not needed
+
+    * configure.in:
+      - Remove unnecessary libgcov entry (the gcc options handle it)
+
+    * buildconf
+      build/build.mk
+      build/build2.mk:
+      - Remove unused lines
+
+2005-11-29  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/config.m4:
+      make use of $SED if possible
+
+2005-11-29  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * config.guess
+      config.sub
+      ltmain.sh
+      build/libtool.m4:
+      MFB51: Update bundled libtool to version 1.5.20
+
+    * ext/mysqli/config.m4:
+      MFB51: Always use $SED instead of sed
+
+2005-11-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      Added missing support for 'B' format identifier to date() function.
+
+    * ext/standard/basic_functions.c
+      ext/standard/datetime.c
+      ext/standard/datetime.h:
+      MFB51: Fixed bug #35425 (idate() function ignores timezone settings).
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/datetime.c
+      ext/standard/datetime.h:
+      Fixed bug #35425 (idate() function ignores timezone settings).
+
+2005-11-29  Antony Dovgal  <antony@zend.com>
+
+    * ext/pcre/config0.m4
+      ext/zlib/config0.m4:
+      MF51: change "-o" to "||" to support weird systems with broken `test`
+
+    * (PHP_5_1)
+      ext/ming/config.m4
+      ext/pcre/config0.m4
+      ext/zlib/config0.m4:
+      remaining part of the fix (-o -> ||)
+
+    * (PHP_5_1)
+      ext/dba/config.m4
+      ext/gd/config.m4
+      ext/snmp/config.m4
+      ext/standard/config.m4
+      ext/xmlrpc/config.m4
+      sapi/caudium/config.m4
+      sapi/roxen/config.m4:
+      change "-o" to "||" (fixes potential problems on weird systems where test
+      doesn't support -o)
+
+2005-11-29  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      ext/mysqli/config.m4:
+      - Always use the right sed
+
+2005-11-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/str_word_count.phpt:
+      MFB51: Fixed bug #35427 (str_word_count() handles '-' incorrectly).
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/string.c
+      ext/standard/tests/strings/str_word_count.phpt:
+      Fixed bug #35427 (str_word_count() handles '-' incorrectly).
+
+2005-11-29  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      config.guess
+      config.sub
+      ltmain.sh
+      build/libtool.m4:
+      - Update bundled libtool to 1.5.20
+
+2005-11-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      sapi/apache2handler/sapi_apache2.c:
+      typo
+
+    * (PHP_5_0)
+      sapi/apache2handler/sapi_apache2.c:
+      MFH: Resolve Apache2 subrequest problems (Ilia)
+
+    * (PHP_5_0)
+      ext/curl/interface.c
+      ext/curl/interface.c:
+      MFH: Improved safe_mode/open_basedir check (Ilia)
+
+2005-11-29  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS:
+      be very clear what you fixed
+
+2005-11-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      NEWS
+      NEWS:
+      - BFN
+
+    * (PHP_5_1)
+      NEWS:
+      - BFN (reorder + missed another one)
+
+    * (PHP_5_1)
+      NEWS:
+      - BFN (not to forget this one)
+
+    * (PHP_5_1)
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/000.phpt
+      ext/simplexml/tests/000.xml
+      ext/simplexml/tests/001.phpt
+      ext/simplexml/tests/002.phpt
+      ext/simplexml/tests/003.phpt
+      ext/simplexml/tests/004.phpt
+      ext/simplexml/tests/005.phpt
+      ext/simplexml/tests/006.phpt
+      ext/simplexml/tests/007.phpt
+      ext/simplexml/tests/008.phpt
+      ext/simplexml/tests/009.phpt
+      ext/simplexml/tests/010.phpt
+      ext/simplexml/tests/011.phpt
+      ext/simplexml/tests/012.phpt
+      ext/simplexml/tests/013.phpt
+      ext/simplexml/tests/014a.phpt
+      ext/simplexml/tests/014b.phpt
+      ext/simplexml/tests/019.phpt
+      ext/simplexml/tests/020.phpt
+      ext/simplexml/tests/021.phpt
+      ext/simplexml/tests/022.phpt
+      ext/simplexml/tests/023.phpt
+      ext/simplexml/tests/024.phpt
+      ext/simplexml/tests/025.phpt
+      ext/simplexml/tests/bug27010.phpt
+      ext/simplexml/tests/profile11.phpt
+      ext/simplexml/tests/simplexml_import_dom.phpt:
+      - MFH
+        . Fix memleaks
+        . Add tests
+        . Add functions: getNamespaces(), getDocNamespaces()
+        . Fixed var_dump()
+        . Fixed bugs: #35028 XML object fails FALSE test
+
+    * ext/simplexml/simplexml.c:
+      - Fix some memleaks
+
+    * ext/simplexml/tests/012.phpt:
+      - Allow test to be used w/o run-tests.php
+
+2005-11-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #35414 (strtotime() no longer works with ordinal suffix).
+
 2005-11-28  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_1)
