@@ -200,29 +200,60 @@ AC_DEFUN([PHP_GD_JISX0208],[
 ])
 
 AC_DEFUN([PHP_GD_CHECK_VERSION],[
-  PHP_CHECK_LIBRARY(gd, gdImageString16,        [AC_DEFINE(HAVE_LIBGD13,             1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImagePaletteCopy,     [AC_DEFINE(HAVE_LIBGD15,             1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageCreateFromPng,   [AC_DEFINE(HAVE_GD_PNG,              1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageCreateFromGif,   [AC_DEFINE(HAVE_GD_GIF_READ,         1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageGif,             [AC_DEFINE(HAVE_GD_GIF_CREATE,       1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageWBMP,            [AC_DEFINE(HAVE_GD_WBMP,             1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageCreateFromJpeg,  [AC_DEFINE(HAVE_GD_JPG,              1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageCreateFromXpm,   [AC_DEFINE(HAVE_GD_XPM,              1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageCreateFromGd2,   [AC_DEFINE(HAVE_GD_GD2,              1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageCreateTrueColor, [AC_DEFINE(HAVE_LIBGD20,             1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageSetTile,         [AC_DEFINE(HAVE_GD_IMAGESETTILE,     1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageEllipse,         [AC_DEFINE(HAVE_GD_IMAGEELLIPSE,     1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageSetBrush,        [AC_DEFINE(HAVE_GD_IMAGESETBRUSH,    1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageStringTTF,       [AC_DEFINE(HAVE_GD_STRINGTTF,        1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageStringFT,        [AC_DEFINE(HAVE_GD_STRINGFT,         1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageStringFTEx,      [AC_DEFINE(HAVE_GD_STRINGFTEX,       1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageColorClosestHWB, [AC_DEFINE(HAVE_COLORCLOSESTHWB,     1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageColorResolve,    [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE, 1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageGifCtx,          [AC_DEFINE(HAVE_GD_GIF_CTX,          1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdCacheCreate,          [AC_DEFINE(HAVE_GD_CACHE_CREATE,     1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdFontCacheShutdown,    [AC_DEFINE(HAVE_GD_FONTCACHESHUTDOWN,1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdFreeFontCache,        [AC_DEFINE(HAVE_GD_FREEFONTCACHE,    1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdNewDynamicCtxEx,      [AC_DEFINE(HAVE_GD_DYNAMIC_CTX_EX,   1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+  GD_VERSION_MAJOR=`gdlib-config --majorversion`
+  GD_VERSION_MINOR=`gdlib-config --minorversion`
+  GD_VERSION_REVISION=`gdlib-config --revision`
+
+  if test 2 -gt $GD_VERSION_MAJOR; then
+    AC_MSG_ERROR("No GD 2.x found")
+  fi
+
+  if test 1 -le $GD_VERSION_MINOR; then
+    AC_MSG_ERROR("No GD 2.x found")
+  fi
+
+  if test 33 -gt $GD_VERSION_REVISION; then
+    AC_MSG_ERROR("the minimum version required for GD is 2.0.33")
+  fi
+
+  GD_FEATURES=`gdlib-config --features`
+  for i in $GD_FEATURES; do
+    if test "$i" = "GD_PNG"; then
+      AC_DEFINE(HAVE_GD_PNG, 1, [ ])
+    fi
+    if test "$i" = "GD_JPEG"; then
+      AC_DEFINE(HAVE_GD_JPG, 1, [ ])
+    fi
+    if test "$i" = "GD_XPM"; then
+      AC_DEFINE(HAVE_GD_XPM, 1, [ ])
+    fi
+    if test "$i" = "GD_GIF"; then
+      AC_DEFINE(HAVE_GD_GIF_CTX,    1, [ ])
+      AC_DEFINE(HAVE_GD_GIF_READ,   1, [ ])
+      AC_DEFINE(HAVE_GD_GIF_CREATE, 1, [ ])
+    fi
+    if test "$i" = "GD_FREETYPE"; then
+      AC_DEFINE(HAVE_GD_STRINGTTF,        1, [ ])
+      AC_DEFINE(HAVE_GD_STRINGFT,         1, [ ])
+      AC_DEFINE(HAVE_GD_STRINGFTEX,       1, [ ])
+      AC_DEFINE(HAVE_GD_CACHE_CREATE,     1, [ ])
+      AC_DEFINE(HAVE_GD_FONTCACHESHUTDOWN,1, [ ])
+      AC_DEFINE(HAVE_GD_FREEFONTCACHE,    1, [ ])
+    fi
+  done
+
+  AC_DEFINE(HAVE_GD_GD2,              1, [ ])
+  AC_DEFINE(HAVE_GD_WBMP,             1, [ ])
+  AC_DEFINE(HAVE_LIBGD20,             1, [ ])
+  AC_DEFINE(HAVE_GD_IMAGESETTILE,     1, [ ])
+  AC_DEFINE(HAVE_GD_IMAGEELLIPSE,     1, [ ])
+  AC_DEFINE(HAVE_GD_IMAGESETBRUSH,    1, [ ])
+  AC_DEFINE(HAVE_COLORCLOSESTHWB,     1, [ ])
+  AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE, 1, [ ])
+  AC_DEFINE(HAVE_GD_DYNAMIC_CTX_EX,   1, [ ])
+  AC_DEFINE(HAVE_LIBGD13,             1, [ ])
+  AC_DEFINE(HAVE_LIBGD15,             1, [ ])
+  AC_DEFINE(HAVE_LIBGD204,             1, [ ])
 ])
 
 dnl
@@ -275,6 +306,7 @@ dnl These are always available with bundled library
   AC_DEFINE(HAVE_GD_DYNAMIC_CTX_EX,   1, [ ])
   AC_DEFINE(HAVE_GD_GIF_CTX,          1, [ ])
 
+
 dnl Make sure the libgd/ is first in the include path
   GDLIB_CFLAGS="-DHAVE_LIBPNG"
 
@@ -309,20 +341,18 @@ else
   extra_sources="gdcache.c"
 
 dnl Various checks for GD features
-  PHP_GD_TTSTR
-  PHP_GD_JPEG
-  PHP_GD_PNG
-  PHP_GD_XPM
-  PHP_GD_FREETYPE2
+
+dnl T1LIB support is gdlib independent
   PHP_GD_T1LIB
 
 dnl Header path
-  for i in include/gd1.3 include/gd include gd1.3 gd ""; do
+  for i in  include/gd include gd ""; do
     test -f "$PHP_GD/$i/gd.h" && GD_INCLUDE="$PHP_GD/$i"
   done
+  GD_INCLUDE=`gdlib-config --includedir`
 
 dnl Library path
-  for i in $PHP_LIBDIR/gd1.3 $PHP_LIBDIR/gd $PHP_LIBDIR gd1.3 gd ""; do
+  for i in  $PHP_LIBDIR/gd $PHP_LIBDIR gd ""; do
     test -f "$PHP_GD/$i/libgd.$SHLIB_SUFFIX_NAME" -o -f "$PHP_GD/$i/libgd.a" && GD_LIB="$PHP_GD/$i"
   done
 
@@ -337,23 +367,6 @@ dnl Library path
   fi 
 
   PHP_EXPAND_PATH($GD_INCLUDE, GD_INCLUDE)
-
-  dnl
-  dnl Check for gd 2.0.4 greater availability
-  dnl
-  old_CPPFLAGS=$CPPFLAGS
-  CPPFLAGS=-I$GD_INCLUDE
-  AC_TRY_COMPILE([
-#include <gd.h>
-#include <stdlib.h>
-  ], [
-gdIOCtx *ctx;
-ctx = malloc(sizeof(gdIOCtx));
-ctx->gd_free = 1;
-  ], [
-    AC_DEFINE(HAVE_LIBGD204, 1, [ ])
-  ])
-  CPPFLAGS=$old_CPPFLAGS
 
  fi
 fi
@@ -370,7 +383,10 @@ if test "$PHP_GD" != "no"; then
     GD_HEADER_DIRS="ext/gd/ ext/gd/libgd/"
   else
     GD_HEADER_DIRS="ext/gd/"
-    GDLIB_CFLAGS="-I$GD_INCLUDE $GDLIB_CFLAGS"
+    GD_INCLUDE=`gdlib-config --includedir`
+    GDLIB_CFLAGS=`gdlib-config --cflags`
+    GDLIB_LIBS=`gdlib-config --libs`
+    GDLIB_CFLAGS="-I$GD_INCLUDE $GDLIB_CFLAGS $GDLIB_LIBS"
     PHP_ADD_INCLUDE($GD_INCLUDE)
   
     PHP_CHECK_LIBRARY(gd, gdImageCreate, [], [
