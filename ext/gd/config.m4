@@ -208,7 +208,7 @@ AC_DEFUN([PHP_GD_CHECK_VERSION],[
     AC_MSG_ERROR("No GD 2.x found")
   fi
 
-  if test 1 -le $GD_VERSION_MINOR; then
+  if test 0 -le $GD_VERSION_MINOR; then
     AC_MSG_ERROR("No GD 2.x found")
   fi
 
