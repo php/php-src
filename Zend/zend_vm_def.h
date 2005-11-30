@@ -964,6 +964,11 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, ANY, int type
 			case ZEND_FETCH_STATIC:
 				zval_update_constant(retval, (void*) 1 TSRMLS_CC);
 				break;
+			case ZEND_FETCH_GLOBAL_LOCK:
+				if (OP1_TYPE == IS_VAR && !free_op1.var) {
+					PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
+				}
+				break;
 		}
 	}
 
