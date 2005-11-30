@@ -5,12 +5,6 @@
 
 lcov: lcov-html
 
-lcov-ccache:
-	@if test -z "$(CCACHE_DISABLE)" || test "$(CCACHE_DISABLE)" != "1"; then \
-		echo "ccache is not disabled. Set environment variable CCACHE_DISABLE=1 to disable ccache."; \
-		exit 123; \
-	fi
-
 lcov-test: all
 	@echo "Running test suite"
 	@find . -name \*.gcda | xargs rm -f
