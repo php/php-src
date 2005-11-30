@@ -345,6 +345,9 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 				bind[ofs].buffer_length = stmt->result.buf[ofs].buflen;
 				bind[ofs].length = &stmt->result.buf[ofs].buflen;
 				break;
+			default:
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Server returned unknown type %ld. Probably your client library is incompatible with the server version you use!", col_type);
+				break;
 		}
 	}
 
@@ -354,9 +357,13 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 	if (rc) {
 		efree(bind);
 		efree(args);
-                /* dont close the statement or subsequent usage (for example ->execute()) will lead to crash */
-                efree(stmt->result.buf);
-                efree(stmt->result.is_null);
+		/* dont close the statement or subsequent usage (for example ->execute()) will lead to crash */
+		for (i=0; i < var_cnt ; i++) {
+			if (stmt->result.buf[i].val)        
+				efree(stmt->result.buf[i].val);
+		}
+		efree(stmt->result.buf);
+		efree(stmt->result.is_null);
 		RETURN_FALSE;
 	}
 
