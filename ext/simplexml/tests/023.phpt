@@ -39,7 +39,7 @@ object(SimpleXMLElement)#%d (1) {
   [u"@attributes"]=>
   array(1) {
     [u"attr"]=>
-    string(13) "foo bar baz"
+    string(%d) "foo%sbar%sbaz"
   }
 }
 object(SimpleXMLElement)#%d (1) {
