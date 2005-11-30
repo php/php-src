@@ -1364,7 +1364,7 @@ static int ZEND_PRINT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int zend_fetch_var_address_helper_SPEC_CONST(int type, ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
-	
+	zend_free_op free_op1;
 	zval *varname = &opline->op1.u.constant;
 	zval **retval;
 	zval tmp_varname;
@@ -1415,6 +1415,11 @@ static int zend_fetch_var_address_helper_SPEC_CONST(int type, ZEND_OPCODE_HANDLE
 				break;
 			case ZEND_FETCH_STATIC:
 				zval_update_constant(retval, (void*) 1 TSRMLS_CC);
+				break;
+			case ZEND_FETCH_GLOBAL_LOCK:
+				if (IS_CONST == IS_VAR && !free_op1.var) {
+					PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
+				}
 				break;
 		}
 	}
@@ -3824,6 +3829,11 @@ static int zend_fetch_var_address_helper_SPEC_TMP(int type, ZEND_OPCODE_HANDLER_
 				break;
 			case ZEND_FETCH_STATIC:
 				zval_update_constant(retval, (void*) 1 TSRMLS_CC);
+				break;
+			case ZEND_FETCH_GLOBAL_LOCK:
+				if (IS_TMP_VAR == IS_VAR && !free_op1.var) {
+					PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
+				}
 				break;
 		}
 	}
@@ -6726,6 +6736,11 @@ static int zend_fetch_var_address_helper_SPEC_VAR(int type, ZEND_OPCODE_HANDLER_
 				break;
 			case ZEND_FETCH_STATIC:
 				zval_update_constant(retval, (void*) 1 TSRMLS_CC);
+				break;
+			case ZEND_FETCH_GLOBAL_LOCK:
+				if (IS_VAR == IS_VAR && !free_op1.var) {
+					PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
+				}
 				break;
 		}
 	}
@@ -18778,7 +18793,7 @@ static int ZEND_PRINT_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int zend_fetch_var_address_helper_SPEC_CV(int type, ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
-	
+	zend_free_op free_op1;
 	zval *varname = _get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
 	zval **retval;
 	zval tmp_varname;
@@ -18829,6 +18844,11 @@ static int zend_fetch_var_address_helper_SPEC_CV(int type, ZEND_OPCODE_HANDLER_A
 				break;
 			case ZEND_FETCH_STATIC:
 				zval_update_constant(retval, (void*) 1 TSRMLS_CC);
+				break;
+			case ZEND_FETCH_GLOBAL_LOCK:
+				if (IS_CV == IS_VAR && !free_op1.var) {
+					PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
+				}
 				break;
 		}
 	}
