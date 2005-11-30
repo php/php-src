@@ -29,6 +29,12 @@
 static int php_hash_le_hash;
 HashTable php_hash_hashtable;
 
+#if (PHP_MAJOR_VERSION >= 5)
+# define DEFAULT_CONTEXT FG(default_context)
+#else
+# define DEFAULT_CONTEXT NULL
+#endif
+
 /* Hash Registry Access */
 
 PHP_HASH_API php_hash_ops *php_hash_fetch_ops(const char *algo, int algo_len)
@@ -76,7 +82,7 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename)
 		RETURN_FALSE;
 	}
 	if (isfilename) {
-		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS | ENFORCE_SAFE_MODE, NULL, FG(default_context));
+		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS | ENFORCE_SAFE_MODE, NULL, DEFAULT_CONTEXT);
 		if (!stream) {
 			/* Stream will report errors opening file */
 			RETURN_FALSE;
