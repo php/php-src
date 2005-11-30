@@ -617,8 +617,7 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 	zval 			*mysql_stmt;
 	unsigned int 	i;
 	ulong 			ret;
-	int				lval;
-	unsigned int    ulval;
+	unsigned int    uval;
 	double			dval;
 	my_ulonglong	llval;
 	
@@ -653,19 +652,24 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 						    && (stmt->stmt->fields[i].flags & UNSIGNED_FLAG)) 
 						{
 							/* unsigned int (11) */
-							char tmp[12];
-							memcpy (&ulval, stmt->result.buf[i].val, sizeof(lval));
-							if (ulval > INT_MAX) {
-								sprintf((char *)&tmp, "%u", ulval);
-								ZVAL_STRING(stmt->result.vars[i], tmp, 1);
-							} else {
-								memcpy(&lval, stmt->result.buf[i].val, sizeof(lval));
-								ZVAL_LONG(stmt->result.vars[i], lval);					
+							uval= *(unsigned int *) stmt->result.buf[i].val;
+
+							if (uval > INT_MAX) {
+								char *tmp, *p;
+								int j=10;
+								tmp= emalloc(11);
+								p= &tmp[9];
+								do { 
+									*p-- = (uval % 10) + 48;
+									uval = uval / 10;							
+								} while (--j > 0);
+								tmp[10]= '\0';
+								/* unsigned int > INT_MAX is 10 digis - ALWAYS */
+								ZVAL_STRINGL(stmt->result.vars[i], tmp, 10, 0);
+								break;
 							}
-						} else {
-							memcpy(&lval, stmt->result.buf[i].val, sizeof(lval));
-							ZVAL_LONG(stmt->result.vars[i], lval);
 						}
+						ZVAL_LONG(stmt->result.vars[i], *(int *)stmt->result.buf[i].val);
 						break;
 					case IS_DOUBLE:
 						memcpy(&dval, stmt->result.buf[i].val, sizeof(dval));
@@ -673,14 +677,21 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 						break;
 					case IS_STRING:
 						if (stmt->stmt->bind[i].buffer_type == MYSQL_TYPE_LONGLONG) {
-							char tmp[50];
-							memcpy (&llval, stmt->result.buf[i].val, sizeof(my_ulonglong));
-							if (llval != (long)llval) {
+							my_bool uns= (stmt->stmt->fields[i].flags & UNSIGNED_FLAG)? 1:0;
+							llval= *(my_ulonglong *) stmt->result.buf[i].val;
+#if SIZEOF_LONG==8  
+							if (uns && llval > 9223372036854775807L) {
+#elif SIZEOF_LONG==4
+							if ((uns && llval > 2147483647LL) || 
+							    (!uns && (( 2147483647LL < (long long) llval) || (-2147483648LL > (long long) llval))))
+							{
+#endif
+								char tmp[22];
 								/* even though lval is declared as unsigned, the value
 								 * may be negative. Therefor we cannot use %llu and must
 								 * use %lld.
 								 */
-								sprintf((char *)&tmp, "%lld", llval);
+								sprintf((char *)&tmp, (stmt->stmt->fields[i].flags & UNSIGNED_FLAG)? "%llu":"%lld", llval);
 								ZVAL_STRING(stmt->result.vars[i], tmp, 1);
 							} else {
 								ZVAL_LONG(stmt->result.vars[i], llval);
