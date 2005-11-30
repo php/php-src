@@ -21,7 +21,6 @@
 
 #include "zend.h"
 #include "zend_API.h"
-#include "zend_reflection_api.h"
 #include "zend_builtin_functions.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
@@ -31,7 +30,6 @@ ZEND_API void zend_register_default_classes(TSRMLS_D)
 {
 	zend_register_interfaces(TSRMLS_C);
 	zend_register_default_exception(TSRMLS_C);
-	zend_register_reflection_api(TSRMLS_C);
 	zend_register_iterator_wrapper(TSRMLS_C);
 }
 
