@@ -354,7 +354,9 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 	if (rc) {
 		efree(bind);
 		efree(args);
-		php_clear_stmt_bind(stmt);
+                /* dont close the statement or subsequent usage (for example ->execute()) will lead to crash */
+                efree(stmt->result.buf);
+                efree(stmt->result.is_null);
 		RETURN_FALSE;
 	}
 
