@@ -865,7 +865,7 @@ static HashTable * sxe_properties_get(zval *object TSRMLS_DC)
 	if (node && sxe->iter.type != SXE_ITER_ATTRLIST) {
 		if (node->type == XML_ATTRIBUTE_NODE) {
 			MAKE_STD_ZVAL(value);
-			ZVAL_STRING(value, sxe_xmlNodeListGetString(node->doc, node->children, 1), 0);
+			ZVAL_U_STRING(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), value, sxe_xmlNodeListGetString(node->doc, node->children, 1), 0);
 			zend_hash_next_index_insert(rv, &value, sizeof(zval *), NULL);
 			node = NULL;
 		} else {
@@ -878,7 +878,7 @@ static HashTable * sxe_properties_get(zval *object TSRMLS_DC)
 			} else {
 				if (node->type == XML_TEXT_NODE) {
 					MAKE_STD_ZVAL(value);
-					ZVAL_STRING(value, sxe_xmlNodeListGetString(node->doc, node, 1), 0);
+					ZVAL_U_STRING(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), value, sxe_xmlNodeListGetString(node->doc, node, 1), 0);
 					zend_hash_next_index_insert(rv, &value, sizeof(zval *), NULL);
 					goto next_iter;
 				}
