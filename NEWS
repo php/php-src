@@ -17,6 +17,8 @@ PHP                                                                        NEWS
   . Added methods getNamespaces(), getDocNamespaces()
 - Fixed crash and leak in mysqli when using 4.1.x client libraries and
   connecting to 5.x server. (Andrey)
+- Fixed bug #35496 (Crash in mcrypt_generic()/mdecrypt_generic() without 
+  proper init). (Ilia)
 - Fixed bug #35470 (Assigning global using variable name from array doesn't
   function). (Dmitry)
 - Fixed bug #35456 (+ 1 [time unit] format did not work). (Ilia)
