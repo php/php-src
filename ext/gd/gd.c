@@ -466,16 +466,8 @@ PHP_RSHUTDOWN_FUNCTION(gd)
 #endif
 /* }}} */
 
-#if HAVE_GD_BUNDLED
+#ifdef HAVE_GD_BUNDLED
 #define PHP_GD_VERSION_STRING "bundled (2.0.28 compatible)"
-#elif HAVE_LIBGD20
-#define PHP_GD_VERSION_STRING "2.0 or higher"
-#elif HAVE_GDIMAGECOLORRESOLVE
-#define PHP_GD_VERSION_STRING "1.6.2 or higher"
-#elif HAVE_LIBGD13
-#define PHP_GD_VERSION_STRING "between 1.3 and 1.6.1"
-#else
-#define PHP_GD_VERSION_STRING "1.2"
 #endif
 
 /* {{{ PHP_MINFO_FUNCTION
