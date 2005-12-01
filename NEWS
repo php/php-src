@@ -18,6 +18,7 @@ PHP                                                                        NEWS
 - Fixed many bugs in OCI8. (Tony)
 - Fixed crash and leak in mysqli when using 4.1.x client libraries and
   connecting to 5.x server. (Andrey)
+- Fixed bug #35508 (PDO fails when unknown fetch mode specified). (Tony)
 - Fixed bug #35499 (strtotime() does not handle whitespace around the date 
   string). (Ilia)
 - Fixed bug #35496 (Crash in mcrypt_generic()/mdecrypt_generic() without 
