@@ -36,6 +36,10 @@ ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 	zend_execute_data execute_data;
 
 
+	if (EG(exception)) {
+		return;
+	}
+
 	/* Initialize execute_data */
 	EX(fbc) = NULL;
 	EX(object) = NULL;
