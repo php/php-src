@@ -1,0 +1,3 @@
+EXPORTS
+php_pcre_compile
+php_pcre_exec
