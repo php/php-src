@@ -1482,7 +1482,7 @@ PHP_FUNCTION(socket_sendto)
 				RETURN_FALSE;
 			}
 			
-			retval = sendto(php_sock->bsd_socket, buf, (len > buf_len) ? buf_len : len, flags, (struct sockaddr *) &sin, sizeof(sin));
+			retval = sendto(php_sock->bsd_socket, buf, (len > buf_len) ? buf_len : len, flags, (struct sockaddr *) &sin6, sizeof(sin6));
 			break;
 #endif
 		default:
