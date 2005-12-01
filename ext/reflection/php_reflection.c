@@ -2541,7 +2541,7 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 	zend_update_class_constants(ce TSRMLS_CC);
 
 	array_init(return_value);
-	zend_hash_copy(Z_ARRVAL_P(return_value), ce->static_members, (copy_ctor_func_t) zval_add_ref, (void *) &tmp_copy, sizeof(zval *));
+	zend_hash_copy(Z_ARRVAL_P(return_value), CE_STATIC_MEMBERS(ce), (copy_ctor_func_t) zval_add_ref, (void *) &tmp_copy, sizeof(zval *));
 }
 /* }}} */
 
@@ -3657,7 +3657,7 @@ ZEND_METHOD(reflection_property, getValue)
 
 	if ((ref->prop->flags & ZEND_ACC_STATIC)) {
 		zend_update_class_constants(intern->ce TSRMLS_CC);
-		if (zend_u_hash_quick_find(intern->ce->static_members, utype, ref->prop->name, ref->prop->name_length + 1, ref->prop->h, (void **) &member) == FAILURE) {
+		if (zend_u_hash_quick_find(CE_STATIC_MEMBERS(intern->ce), utype, ref->prop->name, ref->prop->name_length + 1, ref->prop->h, (void **) &member) == FAILURE) {
 			zend_error(E_ERROR, "Internal error: Could not find the property %v", ref->prop->name);
 			/* Bails out */
 		}
@@ -3706,7 +3706,7 @@ ZEND_METHOD(reflection_property, setValue)
 			}
 		}
 		zend_update_class_constants(intern->ce TSRMLS_CC);
-		prop_table = intern->ce->static_members;
+		prop_table = CE_STATIC_MEMBERS(intern->ce);
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "oz", &object, &value) == FAILURE) {
 			return;
