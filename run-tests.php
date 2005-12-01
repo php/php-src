@@ -297,7 +297,7 @@ if (isset($argc) && $argc > 1) {
 					$just_save_results = true;
 					break;
 				case 'q':
-					putenv('NO_INTERACTION', 1);
+					putenv('NO_INTERACTION=1');
 					break;
 				default:
 					echo "Illegal switch specified!\n";
