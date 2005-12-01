@@ -1,4 +1,3 @@
-
 Installing PHP
      _________________________________________________________________
 
@@ -17,6 +16,7 @@ Installing PHP
         OpenBSD installation notes
         Solaris specific installation tips
         Gentoo installation notes
+        Debian GNU/Linux installation notes
 
    3. Installation on Mac OS X
 
@@ -43,6 +43,8 @@ Installing PHP
 
         The configuration file
         How to change configuration settings
+
+   7. Installation FAQ
      _________________________________________________________________
 
 Preface
@@ -164,7 +166,7 @@ Apache 1.3.x on Unix systems
    your files.
 
    Example 2-1. Installation Instructions (Apache Shared Module Version)
-   for PHP 
+   for PHP
 1.  gunzip apache_xxx.tar.gz
 2.  tar -xvf apache_xxx.tar
 3.  gunzip php-xxx.tar.gz
@@ -248,14 +250,14 @@ Apache 1.3.x on Unix systems
    Alternatively, to install PHP as a static object:
 
    Example 2-2. Installation Instructions (Static Module Installation for
-   Apache) for PHP 
+   Apache) for PHP
 1.  gunzip -c apache_1.3.x.tar.gz | tar xf -
 2.  cd apache_1.3.x
 3.  ./configure
 4.  cd ..
 
-5.  gunzip -c php-4.x.y.tar.gz | tar xf -
-6.  cd php-4.x.y
+5.  gunzip -c php-5.x.y.tar.gz | tar xf -
+6.  cd php-5.x.y
 7.  ./configure --with-mysql --with-apache=../apache_1.3.x
 8.  make
 9.  make install
@@ -269,14 +271,16 @@ Apache 1.3.x on Unix systems
 12. make
     (you should now have an httpd binary which you can copy to your Apache bin
 dir if
-    is is your first install then you need to "make install" as well)
+    it is your first install then you need to "make install" as well)
 
-13. cd ../php-4.x.y
+13. cd ../php-5.x.y
 14. cp php.ini-dist /usr/local/lib/php.ini
 
 15. You can edit /usr/local/lib/php.ini file to set PHP options.
     Edit your httpd.conf or srm.conf file and add:
     AddType application/x-httpd-php .php
+
+     Note: Replace php-5 by php-4 and php5 by php4 in PHP 4.
 
    Depending on your Apache install and Unix variant, there are many
    possible ways to stop and restart the server. Below are some typical
@@ -309,13 +313,13 @@ stop and start:
 
    ./configure --with-apxs --with-pgsql
 
-   This will create a libphp5.so shared library that is loaded into
-   Apache using a LoadModule line in Apache's httpd.conf file. The
-   PostgreSQL support is embedded into this libphp5.so library.
+   This will create a libphp5.so (or libphp4.so in PHP 4) shared library
+   that is loaded into Apache using a LoadModule line in Apache's
+   httpd.conf file. The PostgreSQL support is embedded into this library.
 
    ./configure --with-apxs --with-pgsql=shared
 
-   This will create a libphp5.so shared library for Apache, but it will
+   This will create a libphp4.so shared library for Apache, but it will
    also create a pgsql.so shared library that is loaded into PHP either
    by using the extension directive in php.ini file or by loading it
    explicitly in a script using the dl() function.
@@ -327,9 +331,9 @@ stop and start:
    in the Apache source tree. Then you compile Apache using
    --activate-module=src/modules/php5/libphp5.a and the Apache build
    system will create libphp5.a and link it statically into the httpd
-   binary. The PostgreSQL support is included directly into this httpd
-   binary, so the final result here is a single httpd binary that
-   includes all of Apache and all of PHP.
+   binary (replace php5 by php4 in PHP 4). The PostgreSQL support is
+   included directly into this httpd binary, so the final result here is
+   a single httpd binary that includes all of Apache and all of PHP.
 
    ./configure --with-apache=/path/to/apache_source --with-pgsql=shared
 
@@ -403,7 +407,7 @@ Apache 2.0 on Unix systems
    files.
 
    Example 2-4. Installation Instructions (Apache 2 Shared Module
-   Version) 
+   Version)
 1.  gzip -d httpd-2_0_NN.tar.gz
 2.  tar xvf httpd-2_0_NN.tar
 3.  gunzip php-NN.tar.gz
@@ -461,11 +465,11 @@ Apache 2.0 on Unix systems
 
     For PHP 4:
 
-      LoadModule php4_module libexec/libphp4.so
+      LoadModule php4_module modules/libphp4.so
 
     For PHP 5:
 
-      LoadModule php5_module libexec/libphp5.so
+      LoadModule php5_module modules/libphp5.so
 
 15. Tell Apache to parse certain extensions as PHP.  For example,
     let's have Apache parse the .php extension as PHP.  You could
@@ -1097,6 +1101,121 @@ Common Problems
        "Apache PHP".
      _________________________________________________________________
 
+Debian GNU/Linux installation notes
+
+   This section contains notes and hints specific to installing PHP on
+   Debian GNU/Linux.
+     _________________________________________________________________
+
+Using APT
+
+   While you can just download the PHP source and compile it yourself,
+   using Debian's packaging system is the simplest and cleanest method of
+   installing PHP. If you are not familiar with building software on
+   Linux, this is the way to go.
+
+   The first decision you need to make is whether you want to install
+   Apache 1.3.x or Apache 2.x. The corresponding PHP packages are
+   respectively named libapache-mod-php* and libapache2-mod-php*. The
+   steps given below will use Apache 1.3.x. Please note that, as of this
+   writing, there is no official Debian packages of PHP 5. Then the steps
+   given below will install PHP 4.
+
+   PHP is available in Debian as CGI or CLI flavour too, named
+   respectively php4-cgi and php4-cli. If you need them, you'll just have
+   to reproduce the following steps with the good package names. Another
+   special package you'd want to install is php4-pear. It contains a
+   minimal PEAR installation and the pear commandline utility.
+
+   If you need more recent packages of PHP than the Debian's stable ones
+   or if some PHP modules lacks the Debian official repository, perhaps
+   you should take a look at http://www.apt-get.org/. One of the results
+   found should be Dotdeb. This unofficial repository is maintained by
+   Guillaume Plessis and contains Debian packages of the most recent
+   versions of PHP 4 and PHP 5. To use it, just add the to following two
+   lines to your /etc/apt/sources.lists and run apt-get update :
+
+   Example 2-10. The two Dotdeb related lines
+deb http://packages.dotdeb.org stable all
+deb-src http://packages.dotdeb.org stable all
+
+   The last thing to consider is whether your list of packages is up to
+   date. If you have not updated it recently, you need to run apt-get
+   update before anything else. This way, you will be using the most
+   recent stable version of the Apache and PHP packages.
+
+   Now that everything is in place, you can use the following example to
+   install Apache and PHP:
+
+   Example 2-11. Debian Install Example with Apache 1.3
+   # apt-get install libapache-mod-php4
+
+   APT will automatically install the PHP 4 module for Apache 1.3, and
+   all its dependencies and then activate it. If you're not asked to
+   restart Apache during the install process, you'll have to do it
+   manually :
+
+   Example 2-12. Stopping and starting Apache once PHP 4 is installed
+# /etc/init.d/apache stop
+# /etc/init.d/apache start
+     _________________________________________________________________
+
+Better control on configuration
+
+   In the last section, PHP was installed with only core modules. This
+   may not be what you want and you will soon discover that you need more
+   activated modules, like MySQL, cURL, GD, etc.
+
+   When you compile PHP from source yourself, you need to activate
+   modules via the configure command. With APT, you just have to install
+   additional packages. They're all named 'php4-*' (or 'php5-*' if you
+   installed PHP 5 from a third party repository).
+
+   Example 2-13. Getting the list of PHP additional packages
+   # dpkg -l 'php4-*'
+
+   As you can see from the last output, there's a lot of PHP modules that
+   you can install (excluding the php4-cgi, php4-cli or php4-pear special
+   packages). Look at them closely and choose what you need. If you
+   choose a module and you do not have the proper libraries, APT will
+   automatically install all the dependencies for you.
+
+   If you choose to add the MySQL, cURL and GD support to PHP the command
+   will look something like this:
+
+   Example 2-14. Install PHP with MySQL, cURL and GD
+   # apt-get install php4-mysql php4-curl php4-gd
+
+   APT will automatically add the appropriate lines to your different
+   php.ini (/etc/php4/apache/php.ini, /etc/php4/cgi/php.ini, etc).
+
+   Example 2-15. These lines activate MySQL, cURL and GD into PHP
+extension=mysql.so
+extension=curl.so
+extension=gd.so
+
+   You'll only have to stop/start Apache as previously to activate the
+   modules.
+     _________________________________________________________________
+
+Common Problems
+
+     * If you see the PHP source instead of the result the script should
+       produce, APT has probably not included /etc/apache/conf.d/php4 in
+       your Apache 1.3 configuration. Please ensure that the following
+       line is present in your /etc/apache/httpd.conf file then
+       stop/start Apache:
+
+   Example 2-16. This line activates PHP 4 into Apache
+# Include /etc/apache/conf.d/
+
+     * If you installed an additional module and if its functions are not
+       available in your scripts, please ensure that the appropriate line
+       is present in your php.ini, as seen before. APT may fail during
+       the installation of the additional module, due to a confusing
+       debconf configuration.
+     _________________________________________________________________
+
 Chapter 3. Installation on Mac OS X
 
    This section contains notes and hints specific to installing PHP on
@@ -1119,7 +1238,7 @@ Using Packages
 
 Compiling for OS X Server
 
-   Mac OS X Server install. 
+   Mac OS X Server install.
 
     1. Get the latest distributions of Apache and PHP.
     2. Untar them, and run the configure program on Apache like so.
@@ -1221,24 +1340,24 @@ Chapter 4. Installation of PECL extensions
 
 Introduction to PECL Installations
 
-   PHP extensions may be installed in a variety of ways. PECL is a
-   repository of PHP extensions living within the PEAR structure, and the
-   following demonstrates how to install these extensions.
+   PECL is a repository of PHP extensions that are made available to you
+   via the PEAR packaging system. This section of the manual is intended
+   to demonstrate how to obtain and install PECL extensions.
 
    These instructions assume /your/phpsrcdir/ is the path to the PHP
-   source, and extname is the name of the PECL extension. Adjust
-   accordingly. These instructions also assume a familiarity with the
-   pear command.
+   source distribution, and that extname is the name of the PECL
+   extension. Adjust accordingly. These instructions also assume a
+   familiarity with the pear command.
 
-   Shared extensions may be installed by including them inside of php.ini
-   using the extension PHP directive. See also the extensions_dir
-   directive, and dl(). The installation methods described below do not
-   automatically configure PHP to include these extensions, this step
-   must be done manually.
+   To be useful, a shared extension must be built, installed, and loaded.
+   The methods described below provide you with various instructions on
+   how to build and install the extensions, but they do not automatically
+   load them. Extensions can be loaded by adding an extension directive.
+   To this php.ini file, or through the use of the dl() function.
 
-   When building PHP modules, it's important to have the appropriate
-   versions of the required tools (autoconf, automake, libtool, etc.) See
-   the Anonymous CVS Instructions for details on the required tools, and
+   When building PHP modules, it's important to have known-good versions
+   of the required tools (autoconf, automake, libtool, etc.) See the
+   Anonymous CVS Instructions for details on the required tools, and
    required versions.
      _________________________________________________________________
 
@@ -1247,16 +1366,19 @@ Downloading PECL extensions
    There are several options for downloading PECL extensions, such as:
 
      * http://pecl.php.net
-       Listed here is information like the ChangeLog, release
-       information, requirements, revisions, etc. Although not every PECL
-       extension has a webpage, most do.
+       The PECL web site contains information about the different
+       extensions that are offered by the PHP Development Team. The
+       information available here includes: ChangeLog, release notes,
+       requirements and other similar details.
      * pear download extname
-       The pear command may also be used to download source files.
+       PECL extensions that have releases listed on the PECL web site are
+       available for download and installation using the pear command.
        Specific revisions may also be specified.
      * CVS
-       All PECL files reside in CVS. A web-based view may be seen at
-       http://cvs.php.net/pecl/. To download straight from CVS, consider
-       the following where phpfi is the password for user cvsread:
+       Most PECL extensions also reside in CVS. A web-based view may be
+       seen at http://cvs.php.net/pecl/. To download straight from CVS,
+       the following sequence of commands may be used. Note that phpfi is
+       the password for user cvsread:
 
 $ cvs -d:pserver:cvsread@cvs.php.net:/repository login
 $ cvs -d:pserver:cvsread@cvs.php.net:/repository co pecl/extname
@@ -1270,9 +1392,10 @@ $ cvs -d:pserver:cvsread@cvs.php.net:/repository co pecl/extname
 
 PECL for Windows users
 
-   Like with any other PHP extension DLL, to install move the PECL
-   extension DLLs into the extension_dir folder and include them within
-   php.ini. For example:
+   As with any other PHP extension DLL, installation is as simple as
+   copying the PECL extension DLLs into the extension_dir folder and
+   loading them from php.ini. For example, add the following line to your
+   php.ini:
 
    extension=php_extname.dll
 
@@ -1286,66 +1409,75 @@ Compiling shared PECL extensions with PEAR
 
    $ pear install extname
 
-   That will download the source for extname, and compile it on the
-   system. This results in an extname.so file that may then be included
-   in php.ini
+   This will download the source for extname, compile, and install
+   extname.so into your extension_dir. extname.so may then be loaded via
+   php.ini
 
-   In case the systems preferred_state is set higher than an available
-   extname version, like it's set to stable and the extension is still in
-   beta, either alter the preferred_state via pear config-set or specify
-   a specific version of the PECL extension. For example:
+   By default, the pear command will not install packages that are marked
+   with the alpha or beta state. If no stable packages are available, you
+   may install a beta package using the following command:
 
-   $ pear install extname-0.1.1
+   $ pear install extname-beta
 
-   Regardless, pear will copy this extname.so into the extensions
-   directory. Adjust php.ini accordingly.
+   You may also install a specific version using this variant:
+
+   $ pear install extname-0.1
      _________________________________________________________________
 
 Compiling shared PECL extensions with phpize
 
-   If using pear is not an option, like for building shared PECL
-   extensions from CVS, or for unreleased PECL packages, then creating a
-   shared extension may also be done by manually using the phpize
-   command. The pear command essentially does this but it may also be
-   done manually. Assuming the source file is named extname.tgz, and that
-   it was downloaded into the current directory, consider the following:
+   Sometimes, using the pear installer is not an option. This could be
+   because you're behind a firewall, or it could be because the extension
+   you want to install is not available as a PEAR compatible package,
+   such as unreleased extensions from CVS. If you need to build such an
+   extension, you can use the lower-level build tools to perform the
+   build manually.
 
-$ pear download extname
-$ gzip -d < extname.tgz | tar -xvf -
+   The phpize command is used to prepare the build environment for a PHP
+   extension. In the following sample, the sources for an extension are
+   in a directory named extname:
+
 $ cd extname
 $ phpize
-$ ./configure && make
+$ ./configure
+$ make
+# make install
 
-   Upon success, this will create extname.so and put it into the modules/
-   and/or .libs/ directory within the extname/ source. Move this shared
-   extension (extname.so) into the PHP extensions directory, and adjust
-   php.ini accordingly.
+   A successful install will have created extname.so and put it into the
+   PHP extensions directory. You'll need to and adjust php.ini and add an
+   extension=extname.so line before you can use the extension.
      _________________________________________________________________
 
 Compiling PECL extensions statically into PHP
 
-   To statically include the extension within the PHP build, put the
-   extensions source into the ext/ directory found in the PHP source. For
-   example:
+   You might find that you need to build a PECL extension statically into
+   your PHP binary. To do this, you'll need to place the extension source
+   under the php-src/ext/ directory and tell the PHP build system to
+   regenerate its configure script.
 
 $ cd /your/phpsrcdir/ext
 $ pear download extname
 $ gzip -d < extname.tgz | tar -xvf -
 $ mv extname-x.x.x extname
-$ rm package.xml
 
    This will result in the following directory:
 
    /your/phpsrcdir/ext/extname
 
-   From here, build PHP as normal:
+   From here, force PHP to rebuild the configure script, and then build
+   PHP as normal:
 
 $ cd /your/phpsrcdir
-$ ./buildconf
+$ rm configure
+$ ./buildconf --force
 $ ./configure --help
 $ ./configure --with-extname --enable-someotherext --with-foobar
 $ make
 $ make install
+
+     Note: To run the 'buildconf' script you need autoconf 2.13 and
+     automake 1.4+ (newer versions of autoconf may work, but are not
+     supported).
 
    Whether --enable-extname or --with-extname is used depends on the
    extension. Typically an extension that does not require external
@@ -1403,14 +1535,23 @@ The configuration file
    versions of PHP, this happens only once when the web server is
    started. For the CGI and CLI version, it happens on every invocation.
 
-   The default location of php.ini is a compile time option (see the FAQ
-   entry), but can be changed for the CGI and CLI version with the -c
-   command line switch, see the chapter about using PHP from the command
-   line. You can also use the environment variable PHPRC for an
-   additional path to search for a php.ini file.
+   php.ini is searched in these locations (in order):
+
+     * SAPI module specific location (PHPIniDir directive in Apache 2, -c
+       command line option in CGI and CLI, php_ini parameter in NSAPI,
+       PHP_INI_PATH environment variable in THTTPD)
+     * HKEY_LOCAL_MACHINE\SOFTWARE\PHP\IniFilePath (Windows Registry
+       location)
+     * The PHPRC environment variable
+     * Current working directory (for CLI)
+     * The web server's directory (for SAPI modules), or directory of PHP
+       (otherwise in Windows)
+     * Windows directory (C:\windows or C:\winnt) (for Windows), or
+       --with-config-file-path compile time option
 
    If php-SAPI.ini exists (where SAPI is used SAPI, so the filename is
    e.g. php-cli.ini or php-apache.ini), it's used instead of php.ini.
+   SAPI name can be determined by php_sapi_name().
 
      Note: The Apache web server changes the directory to root at
      startup causing PHP to attempt to read php.ini from the root
@@ -1418,11 +1559,11 @@ The configuration file
 
    The php.ini directives handled by extensions are documented
    respectively on the pages of the extensions themselves. The list of
-   the core directives is available in the appendix. Probably not all the
-   PHP directives are documented in the manual though. For a completel
-   list of directives available in your PHP version, please read your
-   well commented php.ini file. Alternatively, you may find the the
-   latest php.ini from CVS helpful too.
+   the core directives is available in the appendix. Probably not all PHP
+   directives are documented in the manual though. For a complete list of
+   directives available in your PHP version, please read your well
+   commented php.ini file. Alternatively, you may find the the latest
+   php.ini from CVS helpful too.
 
    Example 6-1. php.ini example
 ; any text on a line after an unquoted semicolon (;) is ignored
@@ -1438,6 +1579,10 @@ include_path = ".:/usr/local/lib/php"
 
 ; backslashes are treated the same as any other character
 include_path = ".;c:\php\lib"
+
+   Since PHP 5.1.0, it is possible to refer to existing .ini variables
+   from within .ini files. Example: open_basedir = ${open_basedir}
+   ":/new/dir".
      _________________________________________________________________
 
 How to change configuration settings
@@ -1533,3 +1678,420 @@ Other interfaces to PHP
    function, and review the resulting page. You can also access the
    values of individual configuration directives at runtime using
    ini_get() or get_cfg_var().
+     _________________________________________________________________
+
+Chapter 7. Installation FAQ
+
+   This section holds common questions about the way to install PHP. PHP
+   is available for almost any OS (except maybe for MacOS before OSX),
+   and almost any web server.
+
+   To install PHP, follow the instructions in the INSTALL file located in
+   the distribution. Windows users should also read the install.txt file.
+   There are also some helpful hints for Windows users here.
+
+   1. Why shouldn't I use Apache2 with a threaded MPM in a production
+          environment?
+
+   2. Unix/Windows: Where should my php.ini file be located?
+   3. Unix: I installed PHP, but every time I load a document, I get the
+          message 'Document Contains No Data'! What's going on here?
+
+   4. Unix: I installed PHP using RPMS, but Apache isn't processing the
+          PHP pages! What's going on here?
+
+   5. Unix: I installed PHP 3 using RPMS, but it doesn't compile with the
+          database support I need! What's going on here?
+
+   6. Unix: I patched Apache with the FrontPage extensions patch, and
+          suddenly PHP stopped working. Is PHP incompatible with the
+          Apache FrontPage extensions?
+
+   7. Unix/Windows: I have installed PHP, but when I try to access a PHP
+          script file via my browser, I get a blank screen.
+
+   8. Unix/Windows: I have installed PHP, but when try to access a PHP
+          script file via my browser, I get a server 500 error.
+
+   9. Some operating systems: I have installed PHP without errors, but
+          when I try to start apache I get undefined symbol errors:
+
+[mybox:user /src/php4] root# apachectl configtest
+ apachectl: /usr/local/apache/bin/httpd Undefined symbols:
+  _compress
+  _uncompress
+
+   10. Windows: I have installed PHP, but when I to access a PHP script
+          file via my browser, I get the error:
+
+cgi error:
+ The specified CGI application misbehaved by not
+ returning a complete set of HTTP headers.
+ The headers it did return are:
+
+   11. Windows: I've followed all the instructions, but still can't get
+          PHP and IIS to work together!
+
+   12. When running PHP as CGI with IIS, PWS, OmniHTTPD or Xitami, I get
+          the following error: Security Alert! PHP CGI cannot be accessed
+          directly..
+
+   13. How do I know if my php.ini is being found and read? It seems like
+          it isn't as my changes aren't being implemented.
+
+   14. How do I add my PHP directory to the PATH on Windows?
+   15. How do I make the php.ini file available to PHP on windows?
+   16. Is it possible to use Apache content negotiation (MultiViews
+          option) with PHP?
+
+   17. Is PHP limited to process GET and POST request methods only?
+
+   1. Why shouldn't I use Apache2 with a threaded MPM in a production
+   environment?
+
+   PHP is glue. It is the glue used to build cool web applications by
+   sticking dozens of 3rd-party libraries together and making it all
+   appear as one coherent entity through an intuitive and easy to learn
+   language interface. The flexibility and power of PHP relies on the
+   stability and robustness of the underlying platform. It needs a
+   working OS, a working web server and working 3rd-party libraries to
+   glue together. When any of these stop working PHP needs ways to
+   identify the problems and fix them quickly. When you make the
+   underlying framework more complex by not having completely separate
+   execution threads, completely separate memory segments and a strong
+   sandbox for each request to play in, feet of clay are introduced into
+   PHP's system.
+
+   If you feel you have to use a threaded MPM, look at a FastCGI
+   configuration where PHP is running in its own memory space.
+
+   And finally, this warning against using a threaded MPM is not as
+   strong for Windows systems because most libraries on that platform
+   tend to be threadsafe.
+
+   2. Unix/Windows: Where should my php.ini file be located?
+
+   By default on Unix it should be in /usr/local/lib which is
+   <install-path>/lib. Most people will want to change this at
+   compile-time with the --with-config-file-path flag. You would, for
+   example, set it with something like:
+   --with-config-file-path=/etc
+
+   And then you would copy php.ini-dist from the distribution to
+   /etc/php.ini and edit it to make any local changes you want.
+   --with-config-file-scan-dir=PATH
+
+   On Windows the default path for the php.ini file is the Windows
+   directory. If you're using the Apache webserver, php.ini is first
+   searched in the Apaches install directory, e.g. c:\program
+   files\apache group\apache. This way you can have different php.ini
+   files for different versions of Apache on the same machine.
+
+   See also the chapter about the configuration file.
+
+   3. Unix: I installed PHP, but every time I load a document, I get the
+   message 'Document Contains No Data'! What's going on here?
+
+   This probably means that PHP is having some sort of problem and is
+   core-dumping. Look in your server error log to see if this is the
+   case, and then try to reproduce the problem with a small test case. If
+   you know how to use 'gdb', it is very helpful when you can provide a
+   backtrace with your bug report to help the developers pinpoint the
+   problem. If you are using PHP as an Apache module try something like:
+
+     * Stop your httpd processes
+     * gdb httpd
+     * Stop your httpd processes
+     * > run -X -f /path/to/httpd.conf
+     * Then fetch the URL causing the problem with your browser
+     * > run -X -f /path/to/httpd.conf
+     * If you are getting a core dump, gdb should inform you of this now
+     * type: bt
+     * You should include your backtrace in your bug report. This should
+       be submitted to http://bugs.php.net/
+
+   If your script uses the regular expression functions (ereg() and
+   friends), you should make sure that you compiled PHP and Apache with
+   the same regular expression package. This should happen automatically
+   with PHP and Apache 1.3.x
+
+   4. Unix: I installed PHP using RPMS, but Apache isn't processing the
+   PHP pages! What's going on here?
+
+   Assuming you installed both Apache and PHP from RPM packages, you need
+   to uncomment or add some or all of the following lines in your
+   httpd.conf file:
+# Extra Modules
+AddModule mod_php.c
+AddModule mod_php3.c
+AddModule mod_perl.c
+
+# Extra Modules
+LoadModule php_module         modules/mod_php.so
+LoadModule php3_module        modules/libphp3.so     # for PHP 3
+LoadModule php4_module        modules/libphp4.so     # for PHP 4
+LoadModule perl_module        modules/libperl.so
+
+   And add:
+AddType application/x-httpd-php3 .php3    # for PHP 3
+AddType application/x-httpd-php .php      # for PHP 4
+
+   ... to the global properties, or to the properties of the
+   VirtualDomain you want to have PHP support added to.
+
+   5. Unix: I installed PHP 3 using RPMS, but it doesn't compile with the
+   database support I need! What's going on here?
+
+   Due to the way PHP 3 built, it is not easy to build a complete
+   flexible PHP RPM. This issue is addressed in PHP 4. For PHP 3, we
+   currently suggest you use the mechanism described in the
+   INSTALL.REDHAT file in the PHP distribution. If you insist on using an
+   RPM version of PHP 3, read on...
+
+   The RPM packagers are setting up the RPMS to install without database
+   support to simplify installations and because RPMS use /usr/ instead
+   of the standard /usr/local/ directory for files. You need to tell the
+   RPM spec file which databases to support and the location of the
+   top-level of your database server.
+
+   This example will explain the process of adding support for the
+   popular MySQL database server, using the mod installation for Apache.
+
+   Of course all of this information can be adjusted for any database
+   server that PHP supports. We will assume you installed MySQL and
+   Apache completely with RPMS for this example as well.
+
+     * First remove mod_php3 :
+
+rpm -e mod_php3
+
+     * Then get the source rpm and INSTALL it, NOT --rebuild
+
+rpm -Uvh mod_php3-3.0.5-2.src.rpm
+
+     * Then edit the /usr/src/redhat/SPECS/mod_php3.spec file
+       In the %build section add the database support you want, and the
+       path.
+       For MySQL you would add --with-mysql=/usr The %build section will
+       look something like this:
+
+./configure --prefix=/usr \
+--with-apxs=/usr/sbin/apxs \
+--with-config-file-path=/usr/lib \
+--enable-debug=no \
+--enable-safe-mode \
+--with-exec-dir=/usr/bin \
+--with-mysql=/usr \
+--with-system-regex
+
+     * Once this modification is made then build the binary rpm as
+       follows:
+
+rpm -bb /usr/src/redhat/SPECS/mod_php3.spec
+
+     * Then install the rpm
+
+rpm -ivh /usr/src/redhat/RPMS/i386/mod_php3-3.0.5-2.i386.rpm
+
+   Make sure you restart Apache, and you now have PHP 3 with MySQL
+   support using RPM's. Note that it is probably much easier to just
+   build from the distribution tarball of PHP 3 and follow the
+   instructions in INSTALL.REDHAT found in that distribution.
+
+   6. Unix: I patched Apache with the FrontPage extensions patch, and
+   suddenly PHP stopped working. Is PHP incompatible with the Apache
+   FrontPage extensions?
+
+   No, PHP works fine with the FrontPage extensions. The problem is that
+   the FrontPage patch modifies several Apache structures, that PHP
+   relies on. Recompiling PHP (using 'make clean ; make') after the FP
+   patch is applied would solve the problem.
+
+   7. Unix/Windows: I have installed PHP, but when I try to access a PHP
+   script file via my browser, I get a blank screen.
+
+   Do a 'view source' in the web browser and you will probably find that
+   you can see the source code of your PHP script. This means that the
+   web server did not send the script to PHP for interpretation.
+   Something is wrong with the server configuration - double check the
+   server configuration against the PHP installation instructions.
+
+   8. Unix/Windows: I have installed PHP, but when try to access a PHP
+   script file via my browser, I get a server 500 error.
+
+   Something went wrong when the server tried to run PHP. To get to see a
+   sensible error message, from the command line, change to the directory
+   containing the PHP executable (php.exe on Windows) and run php -i. If
+   PHP has any problems running, then a suitable error message will be
+   displayed which will give you a clue as to what needs to be done next.
+   If you get a screen full of HTML codes (the output of the phpinfo()
+   function) then PHP is working, and your problem may be related to your
+   server configuration which you should double check.
+
+   9. Some operating systems: I have installed PHP without errors, but
+   when I try to start apache I get undefined symbol errors:
+[mybox:user /src/php4] root# apachectl configtest
+ apachectl: /usr/local/apache/bin/httpd Undefined symbols:
+  _compress
+  _uncompress
+
+   This has actually nothing to do with PHP, but with the MySQL client
+   libraries. Some need --with-zlib, others do not. This is also covered
+   in the MySQL FAQ.
+
+   10. Windows: I have installed PHP, but when I to access a PHP script
+   file via my browser, I get the error:
+cgi error:
+ The specified CGI application misbehaved by not
+ returning a complete set of HTTP headers.
+ The headers it did return are:
+
+   This error message means that PHP failed to output anything at all. To
+   get to see a sensible error message, from the command line, change to
+   the directory containing the PHP executable (php.exe on Windows) and
+   run php -i. If PHP has any problems running, then a suitable error
+   message will be displayed which will give you a clue as to what needs
+   to be done next. If you get a screen full of HTML codes (the output of
+   the phpinfo() function) then PHP is working.
+
+   Once PHP is working at the command line, try accessing the script via
+   the browser again. If it still fails then it could be one of the
+   following:
+
+     * File permissions on your PHP script, php.exe, php4ts.dll, php.ini
+       or any PHP extensions you are trying to load are such that the
+       anonymous internet user ISUR_<machinename> cannot access them.
+     * The script file does not exist (or possibly isn't where you think
+       it is relative to your web root directory). Note that for IIS you
+       can trap this error by ticking the 'check file exists' box when
+       setting up the script mappings in the Internet Services Manager.
+       If a script file does not exist then the server will return a 404
+       error instead. There is also the additional benefit that IIS will
+       do any authentication required for you based on the NTLanMan
+       permissions on your script file.
+
+   11. Windows: I've followed all the instructions, but still can't get
+   PHP and IIS to work together!
+
+   Make sure any user who needs to run a PHP script has the rights to run
+   php.exe! IIS uses an anonymous user which is added at the time IIS is
+   installed. This user needs rights to php.exe. Also, any authenticated
+   user will also need rights to execute php.exe. And for IIS4 you need
+   to tell it that PHP is a script engine. Also, you will want to read
+   this faq.
+
+   12. When running PHP as CGI with IIS, PWS, OmniHTTPD or Xitami, I get
+   the following error: Security Alert! PHP CGI cannot be accessed
+   directly..
+
+   You must set the cgi.force_redirect directive to 0. It defaults to 1
+   so be sure the directive isn't commented out (with a ;). Like all
+   directives, this is set in php.ini
+
+   Because the default is 1, it's critical that you're 100% sure that the
+   correct php.ini file is being read. Read this faq for details.
+
+   13. How do I know if my php.ini is being found and read? It seems like
+   it isn't as my changes aren't being implemented.
+
+   To be sure your php.ini is being read by PHP, make a call to phpinfo()
+   and near the top will be a listing called Configuration File
+   (php.ini). This will tell you where PHP is looking for php.ini and
+   whether or not it's being read. If just a directory PATH exists than
+   it's not being read and you should put your php.ini in that directory.
+   If php.ini is included within the PATH than it is being read.
+
+   If php.ini is being read and you're running PHP as a module, then be
+   sure to restart your web server after making changes to php.ini
+
+   14. How do I add my PHP directory to the PATH on Windows?
+
+   On Windows NT, 2000, XP and 2003:
+
+     * Go to Control Panel and open the System icon (Start -> Settings ->
+       Control Panel -> System, or just Start -> Control Panel -> System
+       for Windows XP/2003)
+     * Go to the Advanced tab
+     * Click on the 'Environment Variables' button
+     * Look into the 'System Variables' pane
+     * Find the Path entry (you may need to scroll to find it)
+     * Double click on the Path entry
+     * Enter your PHP directory ant the end, including ';' before (e.g.
+       ;C:\php)
+     * Press OK and restart your computer
+
+   On Windows 98/Me you need to edit the autoexec.bat file:
+
+     * Open the Notepad (Start -> Run and enter notepad)
+     * Open the C:\autoexec.bat file
+     * Locate the line with PATH=C:\WINDOWS;C:\WINDOWS\COMMAND;..... and
+       add: ;C:\php to the end of the line
+     * Save the file and restart your computer
+
+     Note: Be sure to reboot after following the steps above to ensure
+     that the PATH changes are applied.
+
+   The PHP manual used to promote the copying of files into the Windows
+   system directory, this is because this directory (C:\Windows,
+   C:\WINNT, etc.) is by default in the systems PATH. Copying files into
+   the Windows system directory has long since been deprecated and may
+   cause problems.
+
+   15. How do I make the php.ini file available to PHP on windows?
+
+   There are several ways of doing this. If you are using Apache, read
+   their installation specific instructions (Apache 1, Apache 2),
+   otherwise you must set the PHPRC environment variable:
+
+   On Windows NT, 2000, XP and 2003:
+
+     * Go to Control Panel and open the System icon (Start -> Settings ->
+       Control Panel -> System, or just Start -> Control Panel -> System
+       for Windows XP/2003)
+     * Go to the Advanced tab
+     * Click on the 'Environment Variables' button
+     * Look into the 'System variables' pane
+     * Click on 'New' and enter 'PHPRC' as the variable name and the
+       directory where php.ini is located as the variable value (e.g.
+       C:\php)
+     * Press OK and restart your computer
+
+   On Windows 98/Me you need to edit the autoexec.bat file:
+
+     * Open the Notepad (Start -> Run and enter notepad)
+     * Open the C:\autoexec.bat file
+     * Add a new line to the end of the file: set PHPRC=C:\php (replace
+       C:\php with the directory where php.ini is located). Please note
+       that the path cannot contain spaces. For instance, if you have
+       installed PHP in C:\Program Files\PHP, you would enter
+       C:\PROGRA~1\PHP instead.
+     * Save the file and restart your computer
+
+   16. Is it possible to use Apache content negotiation (MultiViews
+   option) with PHP?
+
+   If links to PHP files include extension, everything works perfect.
+   This FAQ is only for the case when links to PHP files don't include
+   extension and you want to use content negotiation to choose PHP files
+   from URL with no extension. In this case, replace the line AddType
+   application/x-httpd-php .php with:
+# PHP 4
+AddHandler php-script php
+AddType text/html php
+
+# PHP 5
+AddHandler php5-script php
+AddType text/html php
+
+   This solution doesn't work for Apache 1 as PHP module doesn't catch
+   php-script.
+
+   17. Is PHP limited to process GET and POST request methods only?
+
+   No, it is possible to handle any request method, e.g. CONNECT. Proper
+   response status can be sent with header(). If only GET and POST
+   methods should be handled, it can be achieved with this Apache
+   configuration:
+<LimitExcept GET POST>
+Deny from all
+</LimitExcept>
