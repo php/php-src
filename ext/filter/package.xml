@@ -35,6 +35,7 @@ of filters and mechanisms that users can use to safely access their input data.
   </notes>
   <filelist>
    <file role="src" name="config.m4"/>
+   <file role="src" name="config.w32"/>
    <file role="src" name="filter.c"/>
    <file role="src" name="filter_private.h"/>
    <file role="src" name="callback_filter.c"/>

@@ -44,6 +44,7 @@ of filters and mechanisms that users can use to safely access their input data.
   <dir name="/">
    <file name="callback_filter.c" role="src" />
    <file name="config.m4" role="src" />
+   <file name="config.w32" role="src" />
    <file name="CREDITS" role="doc" />
    <file name="filter.c" role="src" />
    <file name="filter_private.h" role="src" />
