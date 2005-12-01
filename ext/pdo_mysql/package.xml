@@ -30,11 +30,12 @@
  <license>PHP</license>
  <release>
   <state>stable</state>
-  <version>1.0</version>
-  <date>2005-11-26</date>
+  <version>1.0.1</version>
+  <date>2005-12-01</date>
 
   <notes>
 ** Changes **
+- Fixed Bug #35480 and #35415, crash when using persistent connections.
 - Improved error detection for OPTIMIZE queries
 - Added PDO::MYSQL_ATTR_LOCAL_INFILE, PDO::MYSQL_ATTR_INIT_COMMAND,
   PDO::MYSQL_ATTR_READ_DEFAULT_FILE, PDO::MYSQL_ATTR_READ_DEFAULT_GROUP
