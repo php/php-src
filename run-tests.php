@@ -1135,63 +1135,63 @@ COMMAND $cmd
 
 	} else { // normal testing
 
-	// Does the output match what is expected?
-	$output = trim($out);
-	$output = preg_replace('/\r\n/',"\n",$output);
+		// Does the output match what is expected?
+		$output = trim($out);
+		$output = preg_replace('/\r\n/',"\n",$output);
 
-	/* when using CGI, strip the headers from the output */
-	if (isset($old_php) && ($pos = strpos($output, "\n\n")) !== FALSE) {
-		$output = substr($output, ($pos + 2));
-	}
+		/* when using CGI, strip the headers from the output */
+		if (isset($old_php) && ($pos = strpos($output, "\n\n")) !== FALSE) {
+			$output = substr($output, ($pos + 2));
+		}
 
-	if (isset($section_text['EXPECTF']) || isset($section_text['EXPECTREGEX'])) {
-		if (isset($section_text['EXPECTF'])) {
-			$wanted = trim($section_text['EXPECTF']);
-		} else {
-			$wanted = trim($section_text['EXPECTREGEX']);
-		}
-		$wanted_re = preg_replace('/\r\n/',"\n",$wanted);
-		if (isset($section_text['EXPECTF'])) {
-			$wanted_re = preg_quote($wanted_re, '/');
-			// Stick to basics
-			$wanted_re = str_replace("%e", '\\' . DIRECTORY_SEPARATOR, $wanted_re);
-			$wanted_re = str_replace("%s", ".+?", $wanted_re); //not greedy
-			$wanted_re = str_replace("%i", "[+\-]?[0-9]+", $wanted_re);
-			$wanted_re = str_replace("%d", "[0-9]+", $wanted_re);
-			$wanted_re = str_replace("%x", "[0-9a-fA-F]+", $wanted_re);
-			$wanted_re = str_replace("%f", "[+\-]?\.?[0-9]+\.?[0-9]*(E-?[0-9]+)?", $wanted_re);
-			$wanted_re = str_replace("%c", ".", $wanted_re);
-			// %f allows two points "-.0.0" but that is the best *simple* expression
-		}
+		if (isset($section_text['EXPECTF']) || isset($section_text['EXPECTREGEX'])) {
+			if (isset($section_text['EXPECTF'])) {
+				$wanted = trim($section_text['EXPECTF']);
+			} else {
+				$wanted = trim($section_text['EXPECTREGEX']);
+			}
+			$wanted_re = preg_replace('/\r\n/',"\n",$wanted);
+			if (isset($section_text['EXPECTF'])) {
+				$wanted_re = preg_quote($wanted_re, '/');
+				// Stick to basics
+				$wanted_re = str_replace("%e", '\\' . DIRECTORY_SEPARATOR, $wanted_re);
+				$wanted_re = str_replace("%s", ".+?", $wanted_re); //not greedy
+				$wanted_re = str_replace("%i", "[+\-]?[0-9]+", $wanted_re);
+				$wanted_re = str_replace("%d", "[0-9]+", $wanted_re);
+				$wanted_re = str_replace("%x", "[0-9a-fA-F]+", $wanted_re);
+				$wanted_re = str_replace("%f", "[+\-]?\.?[0-9]+\.?[0-9]*(E-?[0-9]+)?", $wanted_re);
+				$wanted_re = str_replace("%c", ".", $wanted_re);
+				// %f allows two points "-.0.0" but that is the best *simple* expression
+			}
 /* DEBUG YOUR REGEX HERE
 		var_dump($wanted_re);
 		print(str_repeat('=', 80) . "\n");
 		var_dump($output);
 */
-		if (preg_match("/^$wanted_re\$/s", $output)) {
-			@unlink($tmp_file);
-			show_result("PASS", $tested, $file);
-			if (isset($old_php)) {
-				$php = $old_php;
+			if (preg_match("/^$wanted_re\$/s", $output)) {
+				@unlink($tmp_file);
+				show_result("PASS", $tested, $file);
+				if (isset($old_php)) {
+					$php = $old_php;
+				}
+				return 'PASSED';
 			}
-			return 'PASSED';
-		}
 
-	} else {
-		$wanted = trim($section_text['EXPECT']);
-		$wanted = preg_replace('/\r\n/',"\n",$wanted);
-		// compare and leave on success
-		$ok = (0 == strcmp($output,$wanted));
-		if ($ok) {
-			@unlink($tmp_file);
-			show_result("PASS", $tested, $file);
-			if (isset($old_php)) {
-				$php = $old_php;
+		} else {
+			$wanted = trim($section_text['EXPECT']);
+			$wanted = preg_replace('/\r\n/',"\n",$wanted);
+			// compare and leave on success
+			$ok = (0 == strcmp($output,$wanted));
+			if ($ok) {
+				@unlink($tmp_file);
+				show_result("PASS", $tested, $file);
+				if (isset($old_php)) {
+					$php = $old_php;
+				}
+				return 'PASSED';
 			}
-			return 'PASSED';
+			$wanted_re = NULL;
 		}
-		$wanted_re = NULL;
-	}
 
 	} //end of non-valgrind testing
 
