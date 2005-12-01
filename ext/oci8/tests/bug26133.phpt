@@ -1,36 +1,39 @@
 --TEST--
 Bug #26133 (ocifreedesc() segfault)
 --SKIPIF--
-<?php
-    require 'skipif.inc'; 
-?>
+<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+--ENV--
+return "
+ORACLE_HOME=".(isset($_ENV['ORACLE_HOME']) ? $_ENV['ORACLE_HOME'] : '')."
+NLS_LANG=".(isset($_ENV['NLS_LANG']) ? $_ENV['NLS_LANG'] : '')."
+";
 --FILE--
 <?php
-    require 'connect.inc';
-    require 'create_table.inc';
-   
-    if ($connection) {
+
+    require dirname(__FILE__).'/connect.inc';
+    require dirname(__FILE__).'/create_table.inc';
+
+    if ($c) {
         $ora_sql = "INSERT INTO 
-                               ".$schema."php_test_table (id, value) 
+                               ".$schema.$table_name." (id, value) 
                          VALUES ('1','1')
                       RETURNING 
                                ROWID 
                            INTO :v_rowid ";
                       
-        $statement = OCIParse($connection,$ora_sql);
-        $rowid = OCINewDescriptor($connection,OCI_D_ROWID);
+        $statement = OCIParse($c,$ora_sql);
+        $rowid = OCINewDescriptor($c,OCI_D_ROWID);
         OCIBindByName($statement,":v_rowid", $rowid,-1,OCI_B_ROWID);
         if (OCIExecute($statement)) {
-            OCICommit($connection);
+            OCICommit($c);
         }
         OCIFreeStatement($statement);
         $rowid->free();
     }
 
-    require 'drop_table.inc';
+    require dirname(__FILE__).'/drop_table.inc';
     
     echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 Done
-

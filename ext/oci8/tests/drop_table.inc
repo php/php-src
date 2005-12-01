@@ -1,11 +1,11 @@
 <?php
 
-    if ($connection) {
+    if ($c) {
         $ora_sql = "DROP TABLE
-                                ".$schema."php_test_table
+                                ".$schema.$table_name."
                    ";
                       
-        $statement = OCIParse($connection,$ora_sql);
+        $statement = OCIParse($c,$ora_sql);
         OCIExecute($statement);
     }
 
