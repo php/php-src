@@ -764,7 +764,7 @@ signed long php_parse_date(char *string, signed long *now)
 	int           error1, error2;
 	signed long   retval;
 
-	parsed_time = timelib_strtotime(string, &error1, DATE_TIMEZONEDB);
+	parsed_time = timelib_strtotime(string, strlen(string), &error1, DATE_TIMEZONEDB);
 	timelib_update_ts(parsed_time, NULL);
 	retval = timelib_date_to_int(parsed_time, &error2);
 	timelib_time_dtor(parsed_time);
@@ -795,7 +795,7 @@ PHP_FUNCTION(strtotime)
 
 		initial_ts = emalloc(25);
 		snprintf(initial_ts, 24, "@%lu", preset_ts);
-		t = timelib_strtotime(initial_ts, &error1, DATE_TIMEZONEDB); /* we ignore the error here, as this should never fail */
+		t = timelib_strtotime(initial_ts, strlen(initial_ts), &error1, DATE_TIMEZONEDB); /* we ignore the error here, as this should never fail */
 		timelib_update_ts(t, tzi);
 		timelib_unixtime2local(now, t->sse, tzi);
 		timelib_time_dtor(t);
@@ -808,7 +808,7 @@ PHP_FUNCTION(strtotime)
 		RETURN_FALSE;
 	}
 
-	t = timelib_strtotime(times, &error1, DATE_TIMEZONEDB);
+	t = timelib_strtotime(times, time_len, &error1, DATE_TIMEZONEDB);
 	timelib_fill_holes(t, now, 0);
 	timelib_update_ts(t, tzi);
 	ts = timelib_date_to_int(t, &error2);
@@ -1280,7 +1280,7 @@ PHP_FUNCTION(date_create)
 
 	date_instanciate(date_ce_date, return_value TSRMLS_CC);
 	dateobj = (php_date_obj *) zend_object_store_get_object(return_value TSRMLS_CC);
-	dateobj->time = timelib_strtotime(time_str_len ? time_str : "now", &error, DATE_TIMEZONEDB);
+	dateobj->time = timelib_strtotime(time_str_len ? time_str : "now", time_str_len ? time_str_len : sizeof("now") -1, &error, DATE_TIMEZONEDB);
 
 	if (timezone_object) {
 		php_timezone_obj *tzobj;
@@ -1338,7 +1338,7 @@ PHP_FUNCTION(date_modify)
 	}
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
 
-	tmp_time = timelib_strtotime(modify, &error, DATE_TIMEZONEDB);
+	tmp_time = timelib_strtotime(modify, modify_len, &error, DATE_TIMEZONEDB);
 	dateobj->time->relative.y = tmp_time->relative.y;
 	dateobj->time->relative.m = tmp_time->relative.m;
 	dateobj->time->relative.d = tmp_time->relative.d;
