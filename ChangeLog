@@ -1,3 +1,189 @@
+2005-11-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mcrypt/mcrypt.c
+      ext/mcrypt/tests/bug35496.phpt:
+      MFB51: Fixed bug #35496 (Crash in mcrypt_generic()/mdecrypt_generic()
+      without proper init).
+
+    * ext/mcrypt/tests/bug35496.phpt
+      ext/mcrypt/tests/bug35496.phpt:
+      
+      file bug35496.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      NEWS
+      ext/mcrypt/mcrypt.c:
+      Fixed bug #35496 (Crash in mcrypt_generic()/mdecrypt_generic() without
+      proper init).
+
+2005-11-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * Makefile.gcov:
+      - Make gcov targets work with debian (http://gcov.php.net)
+
+    * (PHP_5_1)
+      ZendEngine2/zend_reflection_api.c
+      ZendEngine2/zend_reflection_api.h:
+      - Reflection was moved into its own extension
+
+    * (PHP_5_1)
+      NEWS
+      configure.in:
+      - Moved reflection into its own extension
+
+    * (PHP_5_1)
+      ZendEngine2/Makefile.am
+      ZendEngine2/Zend.dsp
+      ZendEngine2/ZendTS.dsp
+      ZendEngine2/zend_default_classes.c
+      ZendEngine2/zend_exceptions.c:
+      - MFH Move reflection to its own extension
+
+2005-11-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/wddx/wddx.c
+      ext/wddx/tests/bug35410.phpt:
+      MFB51: Fixed bug #35410 (wddx_deserialize() doesn't handle large ints as
+      keys
+      properly).
+
+    * (PHP_4_4)
+      NEWS
+      ext/wddx/wddx.c
+      ext/wddx/tests/bug35410.phpt:
+      MFH: Fixed bug #35410 (wddx_deserialize() doesn't handle large ints as keys
+      properly).
+
+    * (PHP_5_1)
+      NEWS
+      ext/wddx/wddx.c:
+      Fixed bug #35410 (wddx_deserialize() doesn't handle large ints as keys
+      properly).
+
+    * ext/wddx/tests/bug35410.phpt
+      ext/wddx/tests/bug35410.phpt
+      ext/wddx/tests/bug35410.phpt:
+        1.1.4;
+      file bug35410.phpt was initially added on branch PHP_5_1.
+
+2005-11-30  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/config.m4:
+      - minor version is 0
+
+2005-11-30  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_1)
+      NEWS
+      NEWS:
+      BFN
+
+    * ext/mysqli/tests/bug35103.phpt
+      ext/mysqli/tests/bug35103.phpt:
+      
+      file bug35103.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      ext/mysqli/mysqli_api.c:
+      add a test case
+      fix incorrect handling of unsigned bigint.
+      optimize handling of unsigned int
+
+2005-11-30  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/config.m4:
+      - use gdlib-config
+      - bump to 2.0.33 for now, most stable release and closer from the phpgd
+        this is only about config.m4, sources cleanup will follow the additions
+        of various tests.
+
+2005-11-30  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_1)
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/tests/013.phpt:
+      fix more leaks. handle better unknown type (4.1.x connected to 5.0.x
+      incompatibility)
+
+2005-11-30  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * Makefile.gcov
+      configure.in:
+      - Fix the ccache detection
+
+    * (PHP_5_1)
+      NEWS:
+      bfn
+
+2005-11-30  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_1)
+      ext/mysqli/mysqli_api.c:
+      fix a crash and a leak.
+      4.1.15 (client) -> 5.x (server) because of the incompatibility because of
+      decimal in the protocol binding may fail. Don't close the statement in
+      that case because subsequent ->execute() will crash or any other function
+      that will try to use already freed (and in debug mode thrashed) pointer.
+
+2005-11-30  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      -** empty log message ***
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend.h:
+      Fixed bug #35373 (HP-UX "alias not allowed in this configuration")
+
+    * ZendEngine2/tests/bug35470.phpt
+      ZendEngine2/tests/bug35470.phpt:
+      
+      file bug35470.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug35470.phpt:
+      Fixed bug #35470 (Assigning global using variable name from array doesn't
+      function)
+
+2005-11-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/023.phpt:
+      - Fix tests
+
+2005-11-30  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_5_1)
+      ext/sqlite/config.m4:
+      Fix dep usage; it must appear after the PHP_NEW_EXTENSION line.
+      pdo and spl are both optional dependencies.
+
+    * (PHP_5_1)
+      acinclude.m4:
+      Fix bugs #35379 and #35432 by erroring out when the user configures PHP
+      extensions with conflicting options.
+      
+      Jani, feel free to refine the way that extensions are detected as shared
+      :)
+      
+      For this to be foolproof, we either need to guarantee that the extensions
+      have
+      their PHP_NEW_EXTENSION invoked in the right sequence.  Eg: PDO should be
+      handled in the configure script before any of the extensions that depend
+      on it
+      are handled... tricky.
+      
+      By happy coincidence, the alphabet ensures that pdo is configured before
+      all
+      the pdo_ extensions, and also before sqlite, so this works for now.
+
 2005-11-29  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * NEWS:
