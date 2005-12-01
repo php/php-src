@@ -152,6 +152,12 @@ typedef struct _zend_function_entry {
 #define INIT_OVERLOADED_CLASS_ENTRY(class_container, class_name, functions, handle_fcall, handle_propget, handle_propset) \
 	INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, class_name, functions, handle_fcall, handle_propget, handle_propset, NULL, NULL)
 
+#ifdef ZTS
+#	define CE_STATIC_MEMBERS(ce) (((ce)->type==ZEND_USER_CLASS)?(ce)->static_members:CG(static_members)[(long)(ce)->static_members])
+#else
+#	define CE_STATIC_MEMBERS(ce) ((ce)->static_members)
+#endif
+
 int zend_next_free_module(void);
 
 BEGIN_EXTERN_C()

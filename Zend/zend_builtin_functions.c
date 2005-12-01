@@ -789,7 +789,7 @@ ZEND_FUNCTION(get_class_vars)
 		array_init(return_value);
 		add_class_vars(*pce, &(*pce)->default_properties, return_value TSRMLS_CC);
 		zend_update_class_constants(*pce TSRMLS_CC);
-		add_class_vars(*pce, (*pce)->static_members, return_value TSRMLS_CC);
+		add_class_vars(*pce, CE_STATIC_MEMBERS(*pce), return_value TSRMLS_CC);
 	}
 }
 /* }}} */

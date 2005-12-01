@@ -143,6 +143,9 @@ struct _zend_compiler_globals {
 	HashTable *global_u_function_table;
 	HashTable *global_u_class_table;
 	HashTable *global_u_auto_globals_table;
+
+	HashTable **static_members;
+	int last_static_member;
 #endif
 };
 
