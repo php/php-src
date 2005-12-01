@@ -178,7 +178,12 @@ void php_filter_string(PHP_INPUT_FILTER_PARAM_DECL)
 	/* strip tags, implicitly also removes \0 chars */
 	new_len = php_strip_tags(Z_STRVAL_P(value), Z_STRLEN_P(value), NULL, NULL, 0);
 	Z_STRLEN_P(value) = new_len;
-	
+
+	if (new_len == 0) {
+		Z_TYPE_P(value) = IS_NULL;
+		return;
+	}
+
 	if (! (flags & FILTER_FLAG_NO_ENCODE_QUOTES)) {
 		/* encode ' and " to numerical entity */
 		php_filter_encode_html(value, "'\"", 0);
