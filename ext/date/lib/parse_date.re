@@ -1379,16 +1379,32 @@ relativetext = (reltextnumber space? reltextunit)+;
 
 /*!max:re2c */
 
-timelib_time* timelib_strtotime(char *s, int *errors, timelib_tzdb *tzdb)
+timelib_time* timelib_strtotime(char *s, int len, int *errors, timelib_tzdb *tzdb)
 {
 	Scanner in;
 	int t;
+	char *e = s + len - 1;
+
+	while (isspace(*s) && s < e) {
+		s++;
+	}
+	while (isspace(*e) && e > s) {
+		e--;
+	}
+	if (e - s < 1) {
+		*errors = 1;
+		in.time = timelib_time_ctor();
+		in.time->y = in.time->d = in.time->m = in.time->h = in.time->i = in.time->s = in.time->f = in.time->z = in.time->dst = -1;
+		in.time->is_localtime = in.time->zone_type = 0;
+		return in.time;
+	}
+	e++;
 
 	memset(&in, 0, sizeof(in));
-	in.str = malloc(strlen(s) + YYMAXFILL);
-	memset(in.str, 0, strlen(s) + YYMAXFILL);
-	memcpy(in.str, s, strlen(s));
-	in.lim = in.str + strlen(s) + YYMAXFILL;
+	in.str = malloc((e - s) + YYMAXFILL);
+	memset(in.str, 0, (e - s) + YYMAXFILL);
+	memcpy(in.str, s, (e - s));
+	in.lim = in.str + (e - s) + YYMAXFILL;
 	in.cur = in.str;
 	in.time = timelib_time_ctor();
 	in.time->y = -1;
