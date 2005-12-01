@@ -1068,6 +1068,11 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 static int pdo_stmt_verify_mode(pdo_stmt_t *stmt, int mode, int fetch_all TSRMLS_DC) /* {{{ */
 {
 	int flags = mode & PDO_FETCH_FLAGS;
+
+	if (mode < 0 || mode > PDO_FETCH__MAX) {
+		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "invalid fetch mode" TSRMLS_CC);
+		return 0;
+	}
 	
 	mode = mode & ~PDO_FETCH_FLAGS;
 
@@ -1657,10 +1662,12 @@ fail_out:
 	mode = Z_LVAL_PP(args[skip]);
 	
 	if (!pdo_stmt_verify_mode(stmt, mode, 0 TSRMLS_CC)) {
+		efree(args);
 		return FAILURE;
 	}
 
 	switch (mode & ~PDO_FETCH_FLAGS) {
+		case PDO_FETCH_USE_DEFAULT:
 		case PDO_FETCH_LAZY:
 		case PDO_FETCH_ASSOC:
 		case PDO_FETCH_NUM:
@@ -1740,6 +1747,7 @@ fail_out:
 			} else {
 			   	pdo_raise_impl_error(stmt->dbh, stmt, "22003", "mode is out of range" TSRMLS_CC);
 			}
+			efree(args);
 			return FAILURE;
 	}
 
