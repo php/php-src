@@ -1117,13 +1117,13 @@ static int pdo_stmt_verify_mode(pdo_stmt_t *stmt, int mode, int fetch_all TSRMLS
 {
 	int flags = mode & PDO_FETCH_FLAGS;
 
+	mode = mode & ~PDO_FETCH_FLAGS;
+
 	if (mode < 0 || mode > PDO_FETCH__MAX) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "invalid fetch mode" TSRMLS_CC);
 		return 0;
 	}
 	
-	mode = mode & ~PDO_FETCH_FLAGS;
-
 	if (mode == PDO_FETCH_USE_DEFAULT) {
 		flags = stmt->default_fetch_type & PDO_FETCH_FLAGS;
 		mode = stmt->default_fetch_type & ~PDO_FETCH_FLAGS;
