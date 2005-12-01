@@ -521,7 +521,10 @@ if ($just_save_results || !getenv('NO_INTERACTION')) {
 		 * Make an archive of all the failed tests
 		 * Send an email
 		 */
-		
+		if ($just_save_results)
+		{
+			$user_input = 's';
+		}
 		/* Ask the user to provide an email address, so that QA team can contact the user */
 		if (!strncasecmp($user_input, 'y', 1) || strlen(trim($user_input)) == 0) {
 			echo "\nPlease enter your email address.\n(Your address will be mangled so that it will not go out on any\nmailinglist in plain text): ";
