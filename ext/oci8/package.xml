@@ -2,84 +2,200 @@
 <!DOCTYPE package SYSTEM "../pear/package.dtd">
 <package>
  <name>oci8</name>
- <summary>Oracle 8 call interface functions</summary>
+ <summary>OCI8 functions</summary>
  <maintainers>
   <maintainer>
    <user>tony2001</user>
    <name>Antony Dovgal</name>
    <email>tony2001@php.net</email>
-   <role>developer</role>
+   <role>lead</role>
   </maintainer>
   <maintainer>
-   <user>ssb</user>
-   <name>Stig Bakken</name>
-   <email>ssb@php.net</email>
-   <role>developer</role>
+   <user>wez</user>
+   <name>Wez Furlong</name>
+   <email>wez@php.net</email>
+   <role>lead</role>
   </maintainer>
   <maintainer>
-   <user>thies</user>
-   <name>Thies C. Arntzen</name>
-   <email>thies@php.net</email>
-   <role>developer</role>
-  </maintainer>
-  <maintainer>
-   <user>asautins</user>
-   <name>Andy Sautins</name>
-   <email>asautins@php.net</email>
-   <role>developer</role>
-  </maintainer>
-  <maintainer>
-   <user>dbenson</user>
-   <name>David Benson</name>
-   <email>dbenson@php.net</email>
-   <role>developer</role>
-  </maintainer>
-  <maintainer>
-   <user>maxim</user>
-   <name>Maxim Maletsky</name>
-   <email>maxim@php.net</email>
-   <role>developer</role>
-  </maintainer>
-  <maintainer>
-   <user>phanto</user>
-   <name>Harald Radi</name>
-   <email>phanto@php.net</email>
-   <role>developer</role>
+   <user>andi</user>
+   <name>Andi Gutmans</name>
+   <email>andi@zend.com</email>
+   <role>lead</role>
   </maintainer>
  </maintainers>
  <description>
-These functions allow you to access Oracle database servers using 
-the Oracle 8 call interface.
+  These functions allow you to access Oracle database servers using 
+  the Oracle Call Interface (OCI8).
  </description>
  <license>PHP</license>
  <release>
   <state>beta</state>
-  <version>5.0.0rc1</version>
-  <date>2004-03-19</date>
+  <version>1.2</version>
+  <date>2005-??-??</date>
   <notes>
-package.xml added to support intallation using pear installer
+   Fixed PECL bug #5571 (oci_new_connect() not closed by oci_close())
+   Fixed bug #33383 (crash when retrieving empty BLOBs)
   </notes>
-  <configureoptions>
-    <configureoption name="with-oci8" default="autodetect" prompt="ORACLE_HOME directory?"/>
-  </configureoptions>
-  <filelist>
-   <file role="doc" name="CREDITS"/>
-   <file role="src" name="config.m4"/>
-   <file role="src" name="config.w32"/>
-   <file role="src" name="oci8.dsp"/>
-   <file role="src" name="oci8.c"/>
-   <file role="src" name="php_oci8.h"/>
-   <file role="test" name="tests/bug26133.phpt"/>
-   <file role="test" name="tests/connect.inc"/>
-   <file role="test" name="tests/create_table.inc"/>
-   <file role="test" name="tests/drop_table.inc"/>
-   <file role="test" name="tests/skipif.inc"/>
-  </filelist>
-  <deps>
-   <dep type="php" rel="ge" version="5" />
-  </deps>
  </release>
-</package>
+ <filelist>
+  <file role="doc" name="CREDITS"/>
+  <file role="doc" name="README"/>
+  <file role="src" name="config.m4"/>
+  <file role="src" name="config.w32"/>
+  <file role="src" name="oci8.dsp"/>
+  <file role="src" name="oci8.c"/>
+  <file role="src" name="oci8_interface.c"/>
+  <file role="src" name="oci8_lob.c"/>
+  <file role="src" name="oci8_statement.c"/>
+  <file role="src" name="oci8_collection.c"/>
+  <file role="src" name="php_oci8.h"/>
+  <file role="src" name="php_oci8_int.h"/>
+  <file role="test" name="tests/bug26133.phpt"/>
+  <file role="test" name="tests/bug27303_2.phpt"/>
+  <file role="test" name="tests/bug27303_3.phpt"/>
+  <file role="test" name="tests/bug27303_4.phpt"/>
+  <file role="test" name="tests/bug27303.phpt"/>
+  <file role="test" name="tests/bug32325.phpt"/>
+  <file role="test" name="tests/close.phpt"/>
+  <file role="test" name="tests/coll_001.phpt"/>
+  <file role="test" name="tests/coll_002_func.phpt"/>
+  <file role="test" name="tests/coll_002.phpt"/>
+  <file role="test" name="tests/coll_003_func.phpt"/>
+  <file role="test" name="tests/coll_003.phpt"/>
+  <file role="test" name="tests/coll_004_func.phpt"/>
+  <file role="test" name="tests/coll_004.phpt"/>
+  <file role="test" name="tests/coll_005.phpt"/>
+  <file role="test" name="tests/coll_006_func.phpt"/>
+  <file role="test" name="tests/coll_006.phpt"/>
+  <file role="test" name="tests/coll_007.phpt"/>
+  <file role="test" name="tests/coll_008.phpt"/>
+  <file role="test" name="tests/coll_009_func.phpt"/>
+  <file role="test" name="tests/coll_009.phpt"/>
+  <file role="test" name="tests/coll_010_func.phpt"/>
+  <file role="test" name="tests/coll_010.phpt"/>
+  <file role="test" name="tests/coll_011_func.phpt"/>
+  <file role="test" name="tests/coll_011.phpt"/>
+  <file role="test" name="tests/coll_012_func.phpt"/>
+  <file role="test" name="tests/coll_012.phpt"/>
+  <file role="test" name="tests/coll_013_func.phpt"/>
+  <file role="test" name="tests/coll_013.phpt"/>
+  <file role="test" name="tests/coll_014_func.phpt"/>
+  <file role="test" name="tests/coll_014.phpt"/>
+  <file role="test" name="tests/coll_015_func.phpt"/>
+  <file role="test" name="tests/coll_015.phpt"/>
+  <file role="test" name="tests/coll_016_func.phpt"/>
+  <file role="test" name="tests/coll_016.phpt"/>
+  <file role="test" name="tests/coll_017_func.phpt"/>
+  <file role="test" name="tests/coll_017.phpt"/>
+  <file role="test" name="tests/commit_old.phpt"/>
+  <file role="test" name="tests/commit.phpt"/>
+  <file role="test" name="tests/connect_1_old.phpt"/>
+  <file role="test" name="tests/connect_1.phpt"/>
+  <file role="test" name="tests/connect.inc"/>
+  <file role="test" name="tests/connect_old.phpt"/>
+  <file role="test" name="tests/connect.phpt"/>
+  <file role="test" name="tests/connect_without_oracle_home_old.phpt"/>
+  <file role="test" name="tests/connect_without_oracle_home.phpt"/>
+  <file role="test" name="tests/create_table.inc"/>
+  <file role="test" name="tests/create_type.inc"/>
+  <file role="test" name="tests/cursor_bind_err.phpt"/>
+  <file role="test" name="tests/cursors_old.phpt"/>
+  <file role="test" name="tests/cursors.phpt"/>
+  <file role="test" name="tests/debug.phpt"/>
+  <file role="test" name="tests/default_prefetch1.phpt"/>
+  <file role="test" name="tests/default_prefetch2.phpt"/>
+  <file role="test" name="tests/default_prefetch.phpt"/>
+  <file role="test" name="tests/define_old.phpt"/>
+  <file role="test" name="tests/define.phpt"/>
+  <file role="test" name="tests/drop_table.inc"/>
+  <file role="test" name="tests/drop_type.inc"/>
+  <file role="test" name="tests/error_old.phpt"/>
+  <file role="test" name="tests/error.phpt"/>
+  <file role="test" name="tests/exec_fetch.phpt"/>
+  <file role="test" name="tests/fetch_all.phpt"/>
+  <file role="test" name="tests/fetch_array.phpt"/>
+  <file role="test" name="tests/fetch_assoc.phpt"/>
+  <file role="test" name="tests/fetch_into1.phpt"/>
+  <file role="test" name="tests/fetch_into2.phpt"/>
+  <file role="test" name="tests/fetch_into.phpt"/>
+  <file role="test" name="tests/fetch_object.phpt"/>
+  <file role="test" name="tests/fetch.phpt"/>
+  <file role="test" name="tests/fetch_row.phpt"/>
+  <file role="test" name="tests/field_funcs_old.phpt"/>
+  <file role="test" name="tests/field_funcs.phpt"/>
+  <file role="test" name="tests/lob_001.phpt"/>
+  <file role="test" name="tests/lob_002.phpt"/>
+  <file role="test" name="tests/lob_003.phpt"/>
+  <file role="test" name="tests/lob_004.phpt"/>
+  <file role="test" name="tests/lob_005.phpt"/>
+  <file role="test" name="tests/lob_006.phpt"/>
+  <file role="test" name="tests/lob_007.phpt"/>
+  <file role="test" name="tests/lob_008.phpt"/>
+  <file role="test" name="tests/lob_009.phpt"/>
+  <file role="test" name="tests/lob_009.txt"/>
+  <file role="test" name="tests/lob_010.phpt"/>
+  <file role="test" name="tests/lob_011.phpt"/>
+  <file role="test" name="tests/lob_012.phpt"/>
+  <file role="test" name="tests/lob_013.phpt"/>
+  <file role="test" name="tests/lob_014.phpt"/>
+  <file role="test" name="tests/lob_015.phpt"/>
+  <file role="test" name="tests/lob_016.phpt"/>
+  <file role="test" name="tests/lob_017.phpt"/>
+  <file role="test" name="tests/lob_018.phpt"/>
+  <file role="test" name="tests/lob_temp1.phpt"/>
+  <file role="test" name="tests/lob_temp.phpt"/>
+  <file role="test" name="tests/num.phpt"/>
+  <file role="test" name="tests/oci_execute_segfault.phpt"/>
+  <file role="test" name="tests/old_oci_close1.phpt"/>
+  <file role="test" name="tests/old_oci_close.phpt"/>
+  <file role="test" name="tests/password_new.phpt"/>
+  <file role="test" name="tests/password_old.phpt"/>
+  <file role="test" name="tests/password.phpt"/>
+  <file role="test" name="tests/persistent.phpt"/>
+  <file role="test" name="tests/prefetch_old.phpt"/>
+  <file role="test" name="tests/prefetch.phpt"/>
+  <file role="test" name="tests/privileged_connect1.phpt"/>
+  <file role="test" name="tests/privileged_connect.phpt"/>
+  <file role="test" name="tests/serverversion.phpt"/>
+  <file role="test" name="tests/skipif.inc"/>
+  <file role="test" name="tests/statement_cache.phpt"/>
+  <file role="test" name="tests/statement_type_old.phpt"/>
+  <file role="test" name="tests/statement_type.phpt"/>
+  <file role="test" name="tests/uncommitted.phpt"/>
+ </filelist>
+ <configureoptions>
+  <configureoption name="with-oci8" default="autodetect" prompt="Please provide the path to ORACLE_HOME dir. Use 'instantclient,/path/to/instant/client/lib' if you're compiling against Oracle Instant Client"/>
+ </configureoptions>
+ <changelog>
+  <release>
+   <state>beta</state>
+   <version>1.1.1</version>
+   <date>2005-09-22</date>
+   <notes>
+    Fixed segfault when binding empty values.
+    Fixed problem with oci_error() without arguments.
+   </notes>
+  </release>
+  <release>
+   <state>beta</state>
+   <version>1.1</version>
+   <date>2005-09-07</date>
+   <notes>
+    This release fixes a huge amount of bugs and adds support of 
+    statement caching, external credentials etc.
+    See official announce for details.
+   </notes>
+  </release>
+  <release>
+   <state>beta</state>
+   <version>1.0</version>
+   <date>2004-03-19</date>
+   <notes>
+    package.xml added to support installation using pear installer
+   </notes>
+  </release>
+  </changelog>
+ </package>
 <!--
 vim:et:ts=1:sw=1
 -->

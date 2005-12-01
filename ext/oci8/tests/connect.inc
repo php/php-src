@@ -4,29 +4,27 @@
  * Please, change user, password and dbase to match your configuration.
  * 
  * */
-
-$user       = "user";
-$password   = "pass";
-$dbase      = "base";
+ 
+$user       = "system";
+$password   = "system";
+$dbase      = "oracle";
 
 /* 
  * You should have privileges to create tables in this schema 
  * 
  * */
-
-$schema     = "system"; 
-
 /*
- * Remove the last line in skipif.inc to run tests
- *
- * */
+$schema     = "system"; 
+*/
 
-
+$table_name = "tb".substr(str_replace(Array(".", "-"), "_", php_uname("n")), 0, 5);
+$type_name = strtoupper("tp".substr(str_replace(Array(".", "-"), "_", php_uname("n")), 0, 5));
+ 
     if (!empty($dbase)) {
-        $connection = ocilogon($user,$password,$dbase);
+        $c = ocilogon($user,$password,$dbase);
     }
     else {
-        $connection = ocilogon($user,$password);
+        $c = ocilogon($user,$password);
     }
 
     if (!empty($schema)) {
