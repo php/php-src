@@ -220,12 +220,27 @@ Extra dirs  : ";
 $test_files = array();
 $redir_tests = array();
 $test_results = array();
-$PHP_FAILED_TESTS = array('BORKED' => array(), 'FAILED' => array());
+$PHP_FAILED_TESTS = array('BORKED' => array(), 'FAILED' => array(), 'WARNED' => array());
 
 // If parameters given assume they represent selected tests to run.
 $failed_tests_file= false;
 $pass_option_n = false;
 $pass_options = '';
+
+$compression = 0;		
+$output_file = $CUR_DIR . '/php_test_results_' . date('Ymd_Hi') . ( $compression ? '.txt.gz' : '.txt' );
+$just_save_results = false;
+
+if (getenv('TEST_PHP_ARGS'))
+{
+	if (!isset($argc) || !$argc || !isset($argv))
+	{
+		$argv = array(__FILE__);
+	}
+	$argv = array_merge($argv, split(' ', getenv('TEST_PHP_ARGS')));
+	$argc = count($argv);
+}
+
 if (isset($argc) && $argc > 1) {
 	for ($i=1; $i<$argc; $i++) {
 		if (substr($argv[$i],0,1) == '-') {   
@@ -277,6 +292,13 @@ if (isset($argc) && $argc > 1) {
 				case 'm':
 					$GLOBALS['leak_check'] = 1;
 					break;
+				case 's':
+					$output_file = $argv[++$i];
+					$just_save_results = true;
+					break;
+				case 'q':
+					putenv('NO_INTERACTION', 1);
+					break;
 				default:
 					echo "Illegal switch specified!\n";
 				case "h":
@@ -306,6 +328,10 @@ Options:
     -u          Test with unicode_semantics set on.
 
     -m          Test for memory leaks with Valgrind
+    
+    -s <file>   Write output to <file>.
+
+    -q          Quite, no user interaction (same as environment NO_INTERACTION)
 
     -v          Verbose mode.
 
@@ -486,7 +512,8 @@ if (!getenv('NO_INTERACTION')) {
 	flush();
 	$user_input = fgets($fp, 10);
 	$just_save_results = (strtolower($user_input[0]) == 's');
-	
+}
+if ($just_save_results || !getenv('NO_INTERACTION')) {	
 	if ($just_save_results || strlen(trim($user_input)) == 0 || strtolower($user_input[0]) == 'y') {
 		/*  
 		 * Collect information about the host system for our report
@@ -567,10 +594,7 @@ if (!getenv('NO_INTERACTION')) {
 		$failed_tests_data .= $sep . "PHPINFO" . $sep;
 		$failed_tests_data .= shell_exec($php.' -dhtml_errors=0 -i');
 		
-		$compression = 0;
-		
 		if ($just_save_results || !mail_qa_team($failed_tests_data, $compression, $status)) {
-			$output_file = $CUR_DIR . '/php_test_results_' . date('Ymd_Hi') . ( $compression ? '.txt.gz' : '.txt' );
 			file_put_contents($output_file, $failed_tests_data);
 		
 			if (!$just_save_results) {
