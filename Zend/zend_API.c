@@ -755,22 +755,26 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties, int destro
 
 ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC)
 {
-	if (!class_type->constants_updated || !class_type->static_members) {
+	if (!class_type->constants_updated || !CE_STATIC_MEMBERS(class_type)) {
 		zend_class_entry **scope = EG(in_execution)?&EG(scope):&CG(active_class_entry);
 		zend_class_entry *old_scope = *scope;
 
 		*scope = class_type;
 		zend_hash_apply_with_argument(&class_type->default_properties, (apply_func_arg_t) zval_update_constant, (void *) 1 TSRMLS_CC);
 
-		if (!class_type->static_members) {
+		if (!CE_STATIC_MEMBERS(class_type)) {
 			HashPosition pos;
 			zval **p;
 
 			if (class_type->parent) {
 				zend_update_class_constants(class_type->parent TSRMLS_CC);
 			}
+#if ZTS
+			ALLOC_HASHTABLE(CG(static_members)[(long)(class_type->static_members)]);
+#else
 			ALLOC_HASHTABLE(class_type->static_members);
-			zend_hash_init(class_type->static_members, 0, NULL, ZVAL_PTR_DTOR, 0);
+#endif
+			zend_hash_init(CE_STATIC_MEMBERS(class_type), 0, NULL, ZVAL_PTR_DTOR, 0);
 
 			zend_hash_internal_pointer_reset_ex(&class_type->default_static_members, &pos);
 			while (zend_hash_get_current_data_ex(&class_type->default_static_members, (void**)&p, &pos) == SUCCESS) {
@@ -784,10 +788,10 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC
 				    class_type->parent &&
 				    zend_hash_find(&class_type->parent->default_static_members, str_index, str_length, (void**)&q) == SUCCESS &&
 				    *p == *q &&
-				    zend_hash_find(class_type->parent->static_members, str_index, str_length, (void**)&q) == SUCCESS) {
+				    zend_hash_find(CE_STATIC_MEMBERS(class_type->parent), str_index, str_length, (void**)&q) == SUCCESS) {
 					(*q)->refcount++;
 					(*q)->is_ref = 1;
-					zend_hash_add(class_type->static_members, str_index, str_length, (void**)q, sizeof(zval*), NULL);
+					zend_hash_add(CE_STATIC_MEMBERS(class_type), str_index, str_length, (void**)q, sizeof(zval*), NULL);
 				} else {
 					zval *q;
 					
@@ -795,12 +799,12 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC
 					*q = **p;
 					INIT_PZVAL(q);
 					zval_copy_ctor(q);
-					zend_hash_add(class_type->static_members, str_index, str_length, (void**)&q, sizeof(zval*), NULL);
+					zend_hash_add(CE_STATIC_MEMBERS(class_type), str_index, str_length, (void**)&q, sizeof(zval*), NULL);
 				}
 				zend_hash_move_forward_ex(&class_type->default_static_members, &pos);
 			}
 		}
-		zend_hash_apply_with_argument(class_type->static_members, (apply_func_arg_t) zval_update_constant, (void *) 1 TSRMLS_CC);
+		zend_hash_apply_with_argument(CE_STATIC_MEMBERS(class_type), (apply_func_arg_t) zval_update_constant, (void *) 1 TSRMLS_CC);
 
 		*scope = old_scope;
 		class_type->constants_updated = 1;

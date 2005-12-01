@@ -144,6 +144,11 @@ struct _zend_compiler_globals {
 	zend_encoding_converter encoding_converter;
 	zend_encoding_oddlen encoding_oddlen;
 #endif /* ZEND_MULTIBYTE */
+
+#ifdef ZTS
+	HashTable **static_members;
+	int last_static_member;
+#endif
 };
 
 
