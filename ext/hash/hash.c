@@ -137,6 +137,116 @@ PHP_FUNCTION(hash_file) {
 }
 /* }}} */
 
+static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename)
+{
+	char *algo, *data, *digest, *key, *K;
+	int algo_len, data_len, key_len, i;
+	zend_bool raw_output = 0;
+	php_hash_ops *ops;
+	void *context;
+	php_stream *stream = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|b", &algo, &algo_len, &data, &data_len, 
+																  &key, &key_len, &raw_output) == FAILURE) {
+		return;
+	}
+
+	ops = php_hash_fetch_ops(algo, algo_len);
+	if (!ops) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown hashing algorithm: %s", algo);
+		RETURN_FALSE;
+	}
+	if (isfilename) {
+		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS | ENFORCE_SAFE_MODE, NULL, DEFAULT_CONTEXT);
+		if (!stream) {
+			/* Stream will report errors opening file */
+			RETURN_FALSE;
+		}
+	}
+
+	context = emalloc(ops->context_size);
+	ops->hash_init(context);
+
+	K = emalloc(ops->block_size);
+	memset(K, 0, ops->block_size);
+
+	if (key_len > ops->block_size) {
+		/* Reduce the key first */
+		ops->hash_update(context, key, key_len);
+		ops->hash_final(K, context);
+		/* Make the context ready to start over */
+		ops->hash_init(context);
+	} else {
+		memcpy(K, key, key_len);
+	}
+			
+	/* XOR ipad */
+	for(i=0; i < ops->block_size; i++) {
+		K[i] ^= 0x36;
+	}
+	ops->hash_update(context, K, ops->block_size);
+
+	if (isfilename) {
+		char buf[1024];
+		int n;
+
+		while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
+			ops->hash_update(context, buf, n);
+		}
+		php_stream_close(stream);
+	} else {
+		ops->hash_update(context, data, data_len);
+	}
+
+	digest = emalloc(ops->digest_size + 1);
+	ops->hash_final(digest, context);
+
+	/* Convert K to opad -- 0x6A = 0x36 ^ 0x5C */
+	for(i=0; i < ops->block_size; i++) {
+		K[i] ^= 0x6A;
+	}
+
+	/* Feed this result into the outter hash */
+	ops->hash_init(context);
+	ops->hash_update(context, K, ops->block_size);
+	ops->hash_update(context, digest, ops->digest_size);
+	ops->hash_final(digest, context);
+
+	/* Zero the key */
+	memset(K, 0, ops->block_size);
+	efree(K);
+	efree(context);
+
+	if (raw_output) {
+		digest[ops->digest_size] = 0;
+		RETURN_STRINGL(digest, ops->digest_size, 0);
+	} else {
+		char *hex_digest = safe_emalloc(ops->digest_size, 2, 1);
+
+		php_hash_bin2hex(hex_digest, digest, ops->digest_size);
+		hex_digest[2 * ops->digest_size] = 0;
+		efree(digest);
+		RETURN_STRINGL(hex_digest, 2 * ops->digest_size, 0);
+	}
+}
+
+/* {{{ proto string hash_hmac(string algo, string data, string key[, bool raw_output = false])
+Generate a hash of a given input string with a key using HMAC
+Returns lowercase hexits by default */
+PHP_FUNCTION(hash_hmac) {
+	php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+/* {{{ proto string hash_hmac_file(string algo, string filename, string key[, bool raw_output = false])
+Generate a hash of a given file with a key using HMAC
+Returns lowercase hexits by default */
+PHP_FUNCTION(hash_hmac_file) {
+	php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
+/* }}} */
+
+
 /* {{{ proto resource hash_init(string algo[, int options, string key])
 Initialize a hashing context */
 PHP_FUNCTION(hash_init)
@@ -488,6 +598,9 @@ PHP_MINFO_FUNCTION(hash)
 function_entry hash_functions[] = {
 	PHP_FE(hash,									NULL)
 	PHP_FE(hash_file,								NULL)
+
+	PHP_FE(hash_hmac,								NULL)
+	PHP_FE(hash_hmac_file,							NULL)
 
 	PHP_FE(hash_init,								NULL)
 	PHP_FE(hash_update,								NULL)
