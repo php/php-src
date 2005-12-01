@@ -47,7 +47,7 @@ timelib_sll timelib_days_in_month(timelib_sll y, timelib_sll m);
 void timelib_isoweek_from_date(timelib_sll y, timelib_sll m, timelib_sll d, timelib_sll *iw, timelib_sll *iy);
 
 /* From parse_date.re */
-timelib_time *timelib_strtotime(char *s, int *errors, timelib_tzdb *tzdb);
+timelib_time *timelib_strtotime(char *s, int len, int *errors, timelib_tzdb *tzdb);
 void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options);
 char *timelib_timezone_id_from_abbr(const char *abbr, long gmtoffset, int isdst);
 timelib_tz_lookup_table *timelib_timezone_abbreviations_list(void);
