@@ -446,6 +446,15 @@ MYSQLI_PROPERTY(my_prop_link_host);
 #define my_estrdup(x) (x) ? estrdup(x) : NULL
 #define my_efree(x) if (x) efree(x)
 
+#ifdef PHP_WIN32
+#define L64(x) x##i64
+typedef __int64 my_longlong;
+#else
+#define L64(x) x##LL
+typedef long long my_longlong;
+#endif
+
+
 ZEND_EXTERN_MODULE_GLOBALS(mysqli)
 
 #endif	/* PHP_MYSQLI.H */
