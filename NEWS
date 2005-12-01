@@ -15,7 +15,7 @@ PHP                                                                        NEWS
   . Fixed isset/empty/(bool) behavior
   . Fixed iterator edge cases
   . Added methods getNamespaces(), getDocNamespaces()
-- Upgraded bundled OCI8 to v.1.1.1. (Tony)
+- Fixed many bugs in OCI8. (Tony)
 - Fixed crash and leak in mysqli when using 4.1.x client libraries and
   connecting to 5.x server. (Andrey)
 - Fixed bug #35496 (Crash in mcrypt_generic()/mdecrypt_generic() without 
