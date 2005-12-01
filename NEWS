@@ -19,6 +19,7 @@ PHP                                                                        NEWS
   connecting to 5.x server. (Andrey)
 - Fixed bug #35496 (Crash in mcrypt_generic()/mdecrypt_generic() without 
   proper init). (Ilia)
+- Fixed bug #35437 (Segfault or Invalid Opcode 137/1/4). (Dmitry)
 - Fixed bug #34729 (Crash in ZTS mode under Apache). (Dmitry, Zeev) 
 - Fixed bug #35470 (Assigning global using variable name from array doesn't
   function). (Dmitry)
