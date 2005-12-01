@@ -274,6 +274,9 @@ if (isset($argc) && $argc > 1) {
 					$ini_overwrites[] = 'unicode.output_encoding=utf-8';
 					$ini_overwrites[] = 'unicode.from_error_mode=U_INVALID_SUBSTITUTE';
 					break;
+				case 'm':
+					$GLOBALS['leak_check'] = 1;
+					break;
 				default:
 					echo "Illegal switch specified!\n";
 				case "h":
@@ -301,6 +304,8 @@ Options:
                 with value 'bar').
 
     -u          Test with unicode_semantics set on.
+
+    -m          Test for memory leaks with Valgrind
 
     -v          Verbose mode.
 
@@ -682,7 +687,7 @@ function system_with_timeout($commandline)
 			return $data;
 		} else if ($n > 0) {
 			$line = fread($pipes[1], 8192);
-			if (strlen($line) == 0) {
+			if ($line === false) {
 				/* EOF */
 				break;
 			}
@@ -861,9 +866,10 @@ TEST $file
 	$tmp_skipif = $tmp . DIRECTORY_SEPARATOR . uniqid('/phpt.');
 	$tmp_file   = $tmp . DIRECTORY_SEPARATOR . preg_replace('/\.phpt$/','.php',basename($file));
 	$tmp_post   = $tmp . DIRECTORY_SEPARATOR . uniqid('/phpt.');
+	$tmp_relative_file = str_replace(dirname(__FILE__).DIRECTORY_SEPARATOR, '', $tmp_file) . 't';
 
 	if (is_array($IN_REDIRECT)) {
-		$tested = $IN_REDIRECT['prefix'] . ' ' . trim($section_text['TEST']) . " [$tmp_file]";
+		$tested = $IN_REDIRECT['prefix'] . ' ' . trim($section_text['TEST']) . " [$tmp_relative_file]";
 		$section_text['FILE'] = "# original source file: $shortname\n" . $section_text['FILE'];
 	}
 
@@ -1077,6 +1083,10 @@ TEST $file
 		}
 	}
 
+	if (isset($GLOBALS['leak_check'])) {
+		$cmd = 'valgrind --tool=memcheck ' . $cmd;
+	}
+
 	if ($DETAILED) echo "
 CONTENT_LENGTH  = " . getenv("CONTENT_LENGTH") . "
 CONTENT_TYPE    = " . getenv("CONTENT_TYPE") . "
@@ -1099,6 +1109,31 @@ COMMAND $cmd
 	}
 
 	@unlink($tmp_post);
+
+	if (isset($GLOBALS['leak_check'])) { // leak check
+		preg_match_all('/==\d+== +\w+ lost: (\d+) bytes/S', $out, $matches);
+		$leak = false;
+
+		foreach ($matches[1] as $m) {
+			if ($m) { // we got a leak
+				$leak = true;
+				break;
+			}
+		}
+
+		if (!$leak && !preg_match('/==\d+== ERROR SUMMARY: [1-9]\d* errors/', $out)) {
+			if (isset($old_php)) {
+				$php = $old_php;
+			}
+			echo "PASS $tested\n";
+			return 'PASSED';
+		}
+
+		$output = $out;
+		$wanted = '';
+		$warn = false;
+
+	} else { // normal testing
 
 	// Does the output match what is expected?
 	$output = trim($out);
@@ -1158,6 +1193,8 @@ COMMAND $cmd
 		$wanted_re = NULL;
 	}
 
+	} //end of non-valgrind testing
+
 	// Test failed so we need to report details.
 	if ($warn) {
 		show_result("WARN", $tested, $file, $info);
@@ -1190,7 +1227,7 @@ COMMAND $cmd
 	// write .diff
 	if (strpos($log_format,'D') !== FALSE) {
 		$log = fopen($diff_filename,'wt') or error("Cannot create test log - $diff_filename");
-		fwrite($log,generate_diff($wanted,$wanted_re,$output));
+		fwrite($log, isset($GLOBALS['leak_check']) ? '' : generate_diff($wanted,$wanted_re,$output));
 		fclose($log);
 	}
 
