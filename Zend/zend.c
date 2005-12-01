@@ -453,6 +453,13 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS
 	compiler_globals->auto_globals = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init_ex(compiler_globals->auto_globals, 8, NULL, NULL, 1, 0);
 	zend_hash_copy(compiler_globals->auto_globals, global_auto_globals_table, NULL, NULL, sizeof(zend_auto_global) /* empty element */);
+
+	compiler_globals->last_static_member = zend_hash_num_elements(compiler_globals->class_table);
+	if (compiler_globals->last_static_member) {
+		compiler_globals->static_members = (HashTable**)calloc(compiler_globals->last_static_member, sizeof(HashTable*));
+	} else {
+		compiler_globals->static_members = NULL;
+	}
 }
 
 
@@ -470,6 +477,10 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals TSRMLS
 		zend_hash_destroy(compiler_globals->auto_globals);
 		free(compiler_globals->auto_globals);
 	}
+	if (compiler_globals->static_members) {
+		free(compiler_globals->static_members);
+	}
+	compiler_globals->last_static_member = 0;
 }
 
 

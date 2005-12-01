@@ -2090,7 +2090,9 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 
 				if (parent_ce->type != ce->type) {
 					/* User class extends internal class */
-					ht = parent_ce->static_members;
+					TSRMLS_FETCH();
+
+					ht = CE_STATIC_MEMBERS(parent_ce);
 				} else {
 					ht = &parent_ce->default_static_members;
 				}
@@ -2196,7 +2198,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 	if (parent_ce->type != ce->type) {
 		/* User class extends internal class */
 		zend_update_class_constants(parent_ce  TSRMLS_CC);
-		zend_hash_merge(&ce->default_static_members, parent_ce->static_members, (void (*)(void *)) inherit_static_prop, NULL, sizeof(zval *), 0);
+		zend_hash_merge(&ce->default_static_members, CE_STATIC_MEMBERS(parent_ce), (void (*)(void *)) inherit_static_prop, NULL, sizeof(zval *), 0);
 	} else {
 		zend_hash_merge(&ce->default_static_members, &parent_ce->default_static_members, (void (*)(void *)) inherit_static_prop, NULL, sizeof(zval *), 0);
 	}
@@ -4026,7 +4028,23 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 	zend_hash_init_ex(&ce->constants_table, 0, NULL, zval_ptr_dtor_func, persistent_hashes, 0);
 	zend_hash_init_ex(&ce->function_table, 0, NULL, ZEND_FUNCTION_DTOR, persistent_hashes, 0);
 
-	ce->static_members = (ce->type == ZEND_INTERNAL_CLASS) ? NULL : &ce->default_static_members;
+	if (ce->type == ZEND_INTERNAL_CLASS) {
+#ifdef ZTS
+		int n = zend_hash_num_elements(CG(class_table));
+
+		if (CG(static_members) && n >= CG(last_static_member)) {
+			/* Support for run-time declaration: dl() */
+			CG(last_static_member) = n+1;
+			CG(static_members) = realloc(CG(static_members), (n+1)*sizeof(HashTable*));
+			CG(static_members)[n] = NULL;
+		}
+		ce->static_members = (HashTable*)n;
+#else
+		ce->static_members = NULL;
+#endif
+	} else {
+		ce->static_members = &ce->default_static_members;
+	}
 
 	if (nullify_handlers) {
 		ce->constructor = NULL;

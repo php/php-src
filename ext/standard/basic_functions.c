@@ -107,6 +107,8 @@ php_basic_globals basic_globals;
 #include "php_fopen_wrappers.h"
 #include "streamsfuncs.h"
 
+static zend_class_entry *incomplete_class_entry = NULL;
+
 static
 	ZEND_BEGIN_ARG_INFO(first_and_second__args_force_ref, 0)
 		ZEND_ARG_PASS_INFO(1)
@@ -956,7 +958,7 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p TSRMLS_DC)
 	memset(&BG(mblen_state), 0, sizeof(BG(mblen_state)));
 #endif
 
-	BG(incomplete_class) = php_create_incomplete_class(TSRMLS_C);
+	BG(incomplete_class) = incomplete_class_entry;
 }
 
 
@@ -1021,6 +1023,8 @@ PHP_MINIT_FUNCTION(basic)
 	php_win32_core_globals_ctor(&the_php_win32_core_globals TSRMLS_CC);
 #endif
 #endif
+
+	BG(incomplete_class) = incomplete_class_entry = php_create_incomplete_class(TSRMLS_C);
 
 	REGISTER_LONG_CONSTANT("CONNECTION_ABORTED", PHP_CONNECTION_ABORTED, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CONNECTION_NORMAL",  PHP_CONNECTION_NORMAL,  CONST_CS | CONST_PERSISTENT);
