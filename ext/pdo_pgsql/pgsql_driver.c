@@ -248,7 +248,7 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 		/* that's all for now; we'll defer the actual prepare until the first execute call */
 	
 		if (nsql) {
-			S->query = estrdup(nsql);
+			S->query = nsql;
 		} else {
 			S->query = estrdup(sql);
 		}
