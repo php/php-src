@@ -19,8 +19,8 @@ AC_DEFUN([PHP_XMLWRITER_CHECK_VERSION],[
   CPPFLAGS=$old_CPPFLAGS
 ])
 
-PHP_ARG_WITH(xmlwriter, for XMLWriter support,
-[  --with-xmlwriter        Include XMLWriter support.])
+PHP_ARG_ENABLE(xmlwriter, whether to enable XMLWriter support,
+[  --disable-xmlwriter        Disable XMLWriter support.], yes)
 
 if test "$PHP_XMLWRITER" != "no"; then
 
