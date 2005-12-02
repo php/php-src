@@ -17,22 +17,22 @@
   <email>pajoye@php.net</email>
   <active>yes</active>
  </developer>
- <date>2005-11-15</date>
+ <date>2005-12-01</date>
  <version>
-  <release>2.0.1</release>
+  <release>2.0.2</release>
   <api>2.0.0</api>
  </version>
  <stability>
   <release>stable</release>
   <api>stable</api>
  </stability>
- <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD</license>
- <notes>- Switch from PHP License to BSD-like license
-- Allow recursive calls to __get/__set for different properties (ilia)
- </notes>
+ <license uri="http://www.php.net/license/3_01.txt">PHP</license>
+ <notes>- fix build under 5.0
+- fix crash when XMLWriter is instantiated but not used
+- Switch from BSD-like license to PHP License 3.01
+</notes>
  <contents>
   <dir name="/">
-  <file role="doc" name="LICENSE" />
   <file role="src" name="config.m4"/>
   <file role="src" name="config.w32"/>
   <file role="src" name="php_xmlwriter.c"/>
@@ -62,6 +62,20 @@
  <providesextension>xmlwriter</providesextension>
  <extsrcrelease />
  <changelog>
+ <release>
+ <version>
+  <release>2.0.1</release>
+  <api>2.0.0</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD</license>
+ <notes>- Switch from PHP License to BSD-like license
+- Allow recursive calls to __get/__set for different properties (ilia)
+ </notes>
+ </release>
  <release>
  <date>2005-08-07</date>
  <time>01:20:00</time>
