@@ -1,5 +1,5 @@
 --TEST--
-Bug 30346 (arrayAcces & using $this)
+Bug #30346 (arrayAcces & using $this)
 --FILE--
 <?php
 
