@@ -895,8 +895,8 @@ session.save_handler = files
 session.use_cookies = 1
 
 ; This option enables administrators to make their users invulnerable to
-; attacks which involve passing session ids in URLs; defaults to 0.
-; session.use_only_cookies = 1
+; attacks which involve passing session ids in URLs; defaults to 1.
+session.use_only_cookies = 1
 
 ; Name of the session (used as cookie name).
 session.name = PHPSESSID
