@@ -1,3 +1,182 @@
+2005-12-01  Michael Wallner  <mike@iworks.at>
+
+    * ext/pcre/php_pcre.def
+      ext/pcre/php_pcre.def:
+      - export everything we've got aliases for
+
+    * ext/pcre/config.w32
+      ext/pcre/config.w32
+      ext/pcre/php_pcre.def
+      ext/pcre/php_pcre.def
+      ext/pcre/php_pcre.def:
+      - use php_pcre aliases
+
+    * (PHP_5_1)
+      ext/pcre/config.w32:
+      MFH: ext/filter will need those exports
+
+    * ext/pcre/config.w32:
+      - ext/filter will need those exports
+
+2005-12-01  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      BFN
+
+    * ext/oci8/oci8_statement.c:
+      MF51: fix Win32 compile failure
+
+    * (PHP_5_1)
+      ext/oci8/oci8_statement.c:
+      fix Win32 compile failure
+
+2005-12-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #35499 (strtotime() does not handle whitespace around the date
+      string).
+
+2005-12-01  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS:
+      fix news
+
+2005-12-01  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_1)
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/php_mysqli.h:
+      fix compile failure on Windows - Microsoft hasn't heard of long long :)
+
+2005-12-01  Antony Dovgal  <antony@zend.com>
+
+    * ext/sockets/sockets.c
+      ext/sockets/sockets.c:
+      MF51: fix #35490 (socket_sendto() unable to handle IPv6 addresses)
+
+    * (PHP_5_1)
+      NEWS
+      ext/sockets/sockets.c:
+      fix #35490 (socket_sendto() unable to handle IPv6 addresses)
+
+    * (PHP_5_1)
+      ext/oci8/oci8_statement.c:
+      MFH: fix potential problem in php_oci_bind_post_exec() when OCIDateToText()
+      fails
+
+    * ext/oci8/oci8_statement.c:
+      fix potential problem in php_oci_bind_post_exec() when OCIDateToText()
+      fails
+
+    * (PHP_5_1)
+      NEWS:
+      announce the OCI8 upgrade in the news entry
+
+    * (PHP_5_1)
+      ext/oci8/CREDITS
+      ext/oci8/README
+      ext/oci8/config.m4
+      ext/oci8/config.w32
+      ext/oci8/oci8.c
+      ext/oci8/oci8.dsp
+      ext/oci8/oci8_collection.c
+      ext/oci8/oci8_interface.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/package.xml
+      ext/oci8/php_oci8.h
+      ext/oci8/php_oci8_int.h:
+      upgrade bundled OCI8 to v.1.1
+
+2005-12-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      NEWS
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.skl
+      ZendEngine2/zend_vm_execute.skl
+      ZendEngine2/tests/bug35437.phpt:
+      Fixed bug #35437 (Segfault or Invalid Opcode 137/1/4)
+
+    * ZendEngine2/tests/bug35437.phpt
+      ZendEngine2/tests/bug35437.phpt:
+      
+      Fixed bug #35437 (Segfault or Invalid Opcode 137/1/4)
+
+    * ZendEngine2/tests/bug35437.phpt
+      ZendEngine2/tests/bug35437.phpt:
+      
+      file bug35437.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/zend.c
+      ZendEngine2/zend.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_opcode.c
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.c:
+      Fixed bug #34729 (Crash in ZTS mode under Apache)
+
+2005-12-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      - Use putenv() correct
+
+2005-12-01  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_1)
+      EXTENSIONS:
+      mysqli is since many months not experimental
+      add myself as maintainer. discussed with georg.
+
+2005-12-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      - Fix warnings
+
+    * run-tests.php:
+      - New environment TEST_PHP_ARGS to allow appending args to run-tests.php
+      - New mode -q (quiet)
+      - New mode -s <file> (save output to a file)
+
+    * run-tests.php:
+      - White space fixes
+
+2005-12-01  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      INSTALL
+      win32/install.txt:
+      sync with docs (?)
+
+    * ext/gd/config.m4
+      ext/gd/gd.c:
+      - More cleanups.
+
+2005-12-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      - Add support for valgrind testing (Nuno)
+
 2005-11-30  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/mcrypt/mcrypt.c
