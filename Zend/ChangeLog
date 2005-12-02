@@ -1,3 +1,42 @@
+2005-12-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      zend_execute.c
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_execute.skl
+      zend_vm_execute.skl
+      tests/bug35437.phpt:
+      Fixed bug #35437 (Segfault or Invalid Opcode 137/1/4)
+
+    * tests/bug35437.phpt
+      tests/bug35437.phpt:
+      
+      Fixed bug #35437 (Segfault or Invalid Opcode 137/1/4)
+
+    * tests/bug35437.phpt
+      tests/bug35437.phpt:
+      
+      file bug35437.phpt was initially added on branch PHP_5_1.
+
+    * zend.c
+      zend.c
+      zend_API.c
+      zend_API.c
+      zend_API.h
+      zend_API.h
+      zend_builtin_functions.c
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_compile.c
+      zend_globals.h
+      zend_globals.h
+      zend_object_handlers.c
+      zend_object_handlers.c
+      zend_opcode.c
+      zend_opcode.c:
+      Fixed bug #34729 (Crash in ZTS mode under Apache)
+
 2005-11-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
