@@ -5,7 +5,7 @@
  <summary>Provides fast, non-cached, forward-only means to write XML data.</summary>
  <description>This extension wraps the libxml xmlWriter API. Represents a writer that provides a non-cached, forward-only means of generating streams or files containing XML data.
 </description>
- <license>BSD</license>
+ <license>PHP</license>
  <maintainers>
   <maintainer>
    <user>rrichards</user>
@@ -21,12 +21,13 @@
    <role>developer</role>
   </maintainer>
  <release>
-  <version>2.0.1</version>
-  <date>2005-11-15</date>
+  <version>2.0.2</version>
+  <date>2005-12-01</date>
   <state>stable</state>
- <notes>- Switch from PHP License to BSD-like license
-- Allow recursive calls to __get/__set for different properties (ilia)
- </notes>
+ <notes>- fix build under 5.0
+- fix crash when XMLWriter is instantiated but not used
+- Switch from BSD-like license to PHP License 3.01
+</notes>
  </release>
  <changelog>
  <release>
@@ -49,6 +50,14 @@
   </notes>
  </release>
  <release>
+ <release>
+  <version>2.0.1</version>
+  <date>2005-11-15</date>
+  <state>stable</state>
+ <notes>- Switch from PHP License to BSD-like license
+- Allow recursive calls to __get/__set for different properties (ilia)
+ </notes>
+ </release>
   <version>1.0</version>
   <date>2005-05-02</date>
   <state>stable</state>
@@ -81,7 +90,6 @@
   <file role="src" name="config.w32"/>
   <file role="src" name="php_xmlwriter.c"/>
   <file role="src" name="php_xmlwriter.h"/>
-  <file role="doc" name="LICENSE" />
   <dir name="tests" role="test">
     <file name="001.phpt"/>
     <file name="002.phpt"/>
