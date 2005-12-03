@@ -31,6 +31,9 @@
 
 zend_class_entry *xmlwriter_class_entry;
 
+static void xmlwriter_free_resource_ptr(xmlwriter_object *intern TSRMLS_DC);
+static void xmlwriter_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC);
+
 /* {{{ xmlwriter_object_free_storage */
 static void xmlwriter_free_resource_ptr(xmlwriter_object *intern TSRMLS_DC) 
 {
