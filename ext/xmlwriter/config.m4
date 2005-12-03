@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_ENABLE(xmlwriter, whether to enable XMLWriter support,
-[  --disable-xmlwriter        Disable XMLWriter support.], yes)
+[  --disable-xmlwriter     Disable XMLWriter support], yes)
 
 if test -z "$PHP_LIBXML_DIR"; then
   PHP_ARG_WITH(libxml-dir, libxml2 install dir,
