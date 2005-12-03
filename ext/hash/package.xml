@@ -80,6 +80,7 @@ Initial Release
     <file role="test" name="whirlpool.phpt"/>
     <file role="test" name="gost.phpt"/>
     <file role="test" name="snefru.phpt"/>
+	<file role="test" name="crc32.phpt"/>
    </dir>
   </filelist>
 
