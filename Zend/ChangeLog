@@ -1,3 +1,8 @@
+2005-12-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/bug30346.phpt:
+      - Be picky about names
+
 2005-12-01  Dmitry Stogov  <dmitry@zend.com>
 
     * (PHP_5_0)

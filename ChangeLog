@@ -1,3 +1,21 @@
+2005-12-02  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * php.ini-dist
+      php.ini-recommended
+      ext/session/session.c:
+      - Changed "session.use_only_cookies" to be on by default.
+
+2005-12-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/tests/bug30346.phpt:
+      - Be picky about names
+
+2005-12-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      Enable hash & xmlwriter by default
+
 2005-12-01  Michael Wallner  <mike@iworks.at>
 
     * ext/pcre/php_pcre.def
