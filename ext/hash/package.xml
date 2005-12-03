@@ -80,8 +80,11 @@ Initial Release
     <file role="test" name="whirlpool.phpt"/>
     <file role="test" name="gost.phpt"/>
     <file role="test" name="snefru.phpt"/>
-	<file role="test" name="crc32.phpt"/>
+    <file role="test" name="crc32.phpt"/>
    </dir>
   </filelist>
 
 </package>
+<!-- 
+vim: et ts=1 sw=1
+-->
