@@ -1663,7 +1663,7 @@ fastcgi_request_done:
 	/*tsrm_shutdown();*/
 #endif
 
-#if PHP_WIN32 && ZEND_DEBUG && 0
+#if defined(PHP_WIN32) && ZEND_DEBUG && 0
 	_CrtDumpMemoryLeaks();
 #endif
 
