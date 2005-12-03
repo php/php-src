@@ -1504,7 +1504,9 @@ PHP_FUNCTION(socket_get_option)
 	zval			*arg1;
 	struct linger	linger_val;
 	struct timeval		tv;
+#ifdef PHP_WIN32
 	int				timeout = 0;
+#endif
 	socklen_t		optlen;
 	php_socket		*php_sock;
 	int				other_val;
@@ -1579,7 +1581,10 @@ PHP_FUNCTION(socket_set_option)
 	struct linger	lv;
 	struct timeval tv;
 	php_socket		*php_sock;
-	int				ov, optlen, retval, timeout;
+	int				ov, optlen, retval; 
+#ifdef PHP_WIN32
+	int				timeout;
+#endif
 	long				level, optname;
 	void 			*opt_ptr;
 	
