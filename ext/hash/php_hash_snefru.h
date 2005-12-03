@@ -36,7 +36,7 @@ typedef struct {
 } PHP_SNEFRU_CTX;
 
 PHP_HASH_API void PHP_SNEFRUInit(PHP_SNEFRU_CTX *);
-PHP_HASH_API void PHP_SNEFRUUpdate(PHP_SNEFRU_CTX *, const unsigned char *, uint);
+PHP_HASH_API void PHP_SNEFRUUpdate(PHP_SNEFRU_CTX *, const unsigned char *, size_t);
 PHP_HASH_API void PHP_SNEFRUFinal(unsigned char[32], PHP_SNEFRU_CTX *);
 
 #endif
