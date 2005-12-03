@@ -55,9 +55,6 @@ typedef struct _ze_xmlwriter_object {
 	xmlwriter_object *xmlwriter_ptr;
 } ze_xmlwriter_object;
 
-static void xmlwriter_free_resource_ptr(xmlwriter_object *intern TSRMLS_DC);
-static void xmlwriter_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC);
-
 zend_class_entry *xmlwriter_class_entry_ce;
 
 #if LIBXML_VERSION >= 20605
