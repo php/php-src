@@ -52,6 +52,7 @@ typedef struct _php_hash_data {
 	unsigned char *key;
 } php_hash_data;
 
+extern php_hash_ops php_hash_md4_ops;
 extern php_hash_ops php_hash_md5_ops;
 extern php_hash_ops php_hash_sha1_ops;
 extern php_hash_ops php_hash_sha256_ops;
