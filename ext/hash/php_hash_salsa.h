@@ -36,7 +36,7 @@ typedef struct {
 PHP_HASH_API void PHP_SALSA10Init(PHP_SALSA_CTX *);
 PHP_HASH_API void PHP_SALSA20Init(PHP_SALSA_CTX *);
 
-PHP_HASH_API void PHP_SALSAUpdate(PHP_SALSA_CTX *, const unsigned char *, uint);
+PHP_HASH_API void PHP_SALSAUpdate(PHP_SALSA_CTX *, const unsigned char *, size_t);
 PHP_HASH_API void PHP_SALSAFinal(unsigned char[64], PHP_SALSA_CTX *);
 
 #endif
