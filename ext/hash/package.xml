@@ -16,7 +16,7 @@
       <user>mike</user>
       <name>Michael Wallner</name>
       <email>mike@php.net</email>
-      <role>developer</role>
+      <role>lead</role>
     </maintainer>
   </maintainers>
 
@@ -26,7 +26,7 @@
    <date>2005-11-00</date>
    <notes>
 Initial Release
- * md5
+ * md4, md5
  * sha1, sha256, sha384, sha512
  * ripemd128, ripemd160
  * tiger128, tiger160, tiger192 (3 and 4 passes)
@@ -67,6 +67,7 @@ Initial Release
    <file role="doc" name="README"/>
    <dir role="test" name="tests">
     <file role="test" name="hmac-md5.phpt"/>
+    <file role="test" name="md4.phpt"/>
     <file role="test" name="md5.phpt"/>
     <file role="test" name="sha1.phpt"/>
     <file role="test" name="sha256.phpt"/>

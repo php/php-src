@@ -30,7 +30,58 @@ php_hash_ops php_hash_md5_ops = {
 	sizeof(PHP_MD5_CTX)
 };
 
+php_hash_ops php_hash_md4_ops = {
+	(php_hash_init_func_t) PHP_MD4Init,
+	(php_hash_update_func_t) PHP_MD4Update,
+	(php_hash_final_func_t) PHP_MD4Final,
+	16,
+	64,
+	sizeof(PHP_MD4_CTX)
+};
+
+/* MD common stuff */
+
+static unsigned char PADDING[64] =
+{
+	0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
+/* {{{ Encode
+   Encodes input (php_hash_uint32) into output (unsigned char). Assumes len is
+   a multiple of 4.
+ */
+static void Encode(unsigned char *output, php_hash_uint32 *input, unsigned int len)
+{
+	unsigned int i, j;
+
+	for (i = 0, j = 0; j < len; i++, j += 4) {
+		output[j] = (unsigned char) (input[i] & 0xff);
+		output[j + 1] = (unsigned char) ((input[i] >> 8) & 0xff);
+		output[j + 2] = (unsigned char) ((input[i] >> 16) & 0xff);
+		output[j + 3] = (unsigned char) ((input[i] >> 24) & 0xff);
+	}
+}
+/* }}} */
+
+/* {{{ Decode
+   Decodes input (unsigned char) into output (php_hash_uint32). Assumes len is
+   a multiple of 4.
+ */
+static void Decode(php_hash_uint32 *output, const unsigned char *input, unsigned int len)
+{
+	unsigned int i, j;
+
+	for (i = 0, j = 0; j < len; i++, j += 4)
+		output[i] = ((php_hash_uint32) input[j]) | (((php_hash_uint32) input[j + 1]) << 8) |
+			(((php_hash_uint32) input[j + 2]) << 16) | (((php_hash_uint32) input[j + 3]) << 24);
+}
+/* }}} */
+
 #ifdef PHP_HASH_MD5_NOT_IN_CORE
+
+/* MD5 */
 
 PHP_HASH_API void make_digest(char *md5str, unsigned char *digest)
 {
@@ -144,7 +195,6 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 /* Constants for MD5Transform routine.
  */
 
-
 #define S11 7
 #define S12 12
 #define S13 17
@@ -163,15 +213,6 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 #define S44 21
 
 static void MD5Transform(php_hash_uint32[4], const unsigned char[64]);
-static void Encode(unsigned char *, php_hash_uint32 *, unsigned int);
-static void Decode(php_hash_uint32 *, const unsigned char *, unsigned int);
-
-static unsigned char PADDING[64] =
-{
-	0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
 
 /* F, G, H and I are basic MD5 functions.
  */
@@ -388,44 +429,155 @@ const unsigned char block[64];
 }
 /* }}} */
 
-/* {{{ Encode
-   Encodes input (php_hash_uint32) into output (unsigned char). Assumes len is
-   a multiple of 4.
- */
-static void Encode(output, input, len)
-unsigned char *output;
-php_hash_uint32 *input;
-unsigned int len;
-{
-	unsigned int i, j;
-
-	for (i = 0, j = 0; j < len; i++, j += 4) {
-		output[j] = (unsigned char) (input[i] & 0xff);
-		output[j + 1] = (unsigned char) ((input[i] >> 8) & 0xff);
-		output[j + 2] = (unsigned char) ((input[i] >> 16) & 0xff);
-		output[j + 3] = (unsigned char) ((input[i] >> 24) & 0xff);
-	}
-}
-/* }}} */
-
-/* {{{ Decode
-   Decodes input (unsigned char) into output (php_hash_uint32). Assumes len is
-   a multiple of 4.
- */
-static void Decode(output, input, len)
-php_hash_uint32 *output;
-const unsigned char *input;
-unsigned int len;
-{
-	unsigned int i, j;
-
-	for (i = 0, j = 0; j < len; i++, j += 4)
-		output[i] = ((php_hash_uint32) input[j]) | (((php_hash_uint32) input[j + 1]) << 8) |
-			(((php_hash_uint32) input[j + 2]) << 16) | (((php_hash_uint32) input[j + 3]) << 24);
-}
-/* }}} */
-
 #endif /* PHP_HASH_MD5_NOT_IN_CORE */
+
+/* MD4 */
+
+#define MD4_F(x,y,z)			(((x) & (y)) | ((~(x)) & (z)))
+#define MD4_G(x,y,z)			(((x) & (y)) | ((x) & (z)) | ((y) & (z)))
+#define MD4_H(x,y,z)			((x) ^ (y) ^ (z))
+
+#define ROTL32(s,v)				(((v) << (s)) | ((v) >> (32 - (s))))
+
+#define MD4_R1(a,b,c,d,k,s)		a = ROTL32(s, a + MD4_F(b,c,d) + x[k])
+#define MD4_R2(a,b,c,d,k,s)		a = ROTL32(s, a + MD4_G(b,c,d) + x[k] + 0x5A827999)
+#define MD4_R3(a,b,c,d,k,s)		a = ROTL32(s, a + MD4_H(b,c,d) + x[k] + 0x6ED9EBA1)
+
+static void MD4Transform(php_hash_uint32 state[4], const unsigned char block[64])
+{
+	php_hash_uint32 a = state[0], b = state[1], c = state[2], d = state[3], x[16];
+
+	Decode(x, block, 64);
+
+	/* Round 1 */
+	MD4_R1(a,b,c,d, 0, 3);
+	MD4_R1(d,a,b,c, 1, 7);
+	MD4_R1(c,d,a,b, 2,11);
+	MD4_R1(b,c,d,a, 3,19);
+	MD4_R1(a,b,c,d, 4, 3);
+	MD4_R1(d,a,b,c, 5, 7);
+	MD4_R1(c,d,a,b, 6,11);
+	MD4_R1(b,c,d,a, 7,19);
+	MD4_R1(a,b,c,d, 8, 3);
+	MD4_R1(d,a,b,c, 9, 7);
+	MD4_R1(c,d,a,b,10,11);
+	MD4_R1(b,c,d,a,11,19);
+	MD4_R1(a,b,c,d,12, 3);
+	MD4_R1(d,a,b,c,13, 7);
+	MD4_R1(c,d,a,b,14,11);
+	MD4_R1(b,c,d,a,15,19);
+
+	/* Round 2 */
+	MD4_R2(a,b,c,d, 0, 3);
+	MD4_R2(d,a,b,c, 4, 5);
+	MD4_R2(c,d,a,b, 8, 9);
+	MD4_R2(b,c,d,a,12,13);
+	MD4_R2(a,b,c,d, 1, 3);
+	MD4_R2(d,a,b,c, 5, 5);
+	MD4_R2(c,d,a,b, 9, 9);
+	MD4_R2(b,c,d,a,13,13);
+	MD4_R2(a,b,c,d, 2, 3);
+	MD4_R2(d,a,b,c, 6, 5);
+	MD4_R2(c,d,a,b,10, 9);
+	MD4_R2(b,c,d,a,14,13);
+	MD4_R2(a,b,c,d, 3, 3);
+	MD4_R2(d,a,b,c, 7, 5);
+	MD4_R2(c,d,a,b,11, 9);
+	MD4_R2(b,c,d,a,15,13);
+
+	/* Round 3 */
+	MD4_R3(a,b,c,d, 0, 3);
+	MD4_R3(d,a,b,c, 8, 9);
+	MD4_R3(c,d,a,b, 4,11);
+	MD4_R3(b,c,d,a,12,15);
+	MD4_R3(a,b,c,d, 2, 3);
+	MD4_R3(d,a,b,c,10, 9);
+	MD4_R3(c,d,a,b, 6,11);
+	MD4_R3(b,c,d,a,14,15);
+	MD4_R3(a,b,c,d, 1, 3);
+	MD4_R3(d,a,b,c, 9, 9);
+	MD4_R3(c,d,a,b, 5,11);
+	MD4_R3(b,c,d,a,13,15);
+	MD4_R3(a,b,c,d, 3, 3);
+	MD4_R3(d,a,b,c,11, 9);
+	MD4_R3(c,d,a,b, 7,11);
+	MD4_R3(b,c,d,a,15,15);
+
+	state[0] += a;
+	state[1] += b;
+	state[2] += c;
+	state[3] += d;
+}
+
+/* {{{ PHP_MD4Update
+   MD4 block update operation. Continues an MD5 message-digest
+   operation, processing another message block, and updating the
+   context.
+ */
+PHP_HASH_API void PHP_MD4Update(PHP_MD4_CTX * context, const unsigned char *input, unsigned int inputLen)
+{
+	unsigned int i, index, partLen;
+
+	/* Compute number of bytes mod 64 */
+	index = (unsigned int) ((context->count[0] >> 3) & 0x3F);
+
+	/* Update number of bits */
+	if ((context->count[0] += ((php_hash_uint32) inputLen << 3))
+		< ((php_hash_uint32) inputLen << 3))
+		context->count[1]++;
+	context->count[1] += ((php_hash_uint32) inputLen >> 29);
+
+	partLen = 64 - index;
+
+	/* Transform as many times as possible.
+	 */
+	if (inputLen >= partLen) {
+		memcpy((unsigned char*) & context->buffer[index], (unsigned char*) input, partLen);
+		MD4Transform(context->state, context->buffer);
+
+		for (i = partLen; i + 63 < inputLen; i += 64) {
+			MD4Transform(context->state, &input[i]);
+		}
+
+		index = 0;
+	} else {
+		i = 0;
+	}
+
+	/* Buffer remaining input */
+	memcpy((unsigned char*) & context->buffer[index], (unsigned char*) & input[i], inputLen - i);
+}
+/* }}} */
+
+/* {{{ PHP_MD4Final
+   MD4 finalization. Ends an MD4 message-digest operation, writing the
+   the message digest and zeroizing the context.
+ */
+PHP_HASH_API void PHP_MD4Final(unsigned char digest[16], PHP_MD4_CTX * context)
+{
+	unsigned char bits[8];
+	unsigned int index, padLen;
+
+	/* Save number of bits */
+	Encode(bits, context->count, 8);
+
+	/* Pad out to 56 mod 64.
+	 */
+	index = (unsigned int) ((context->count[0] >> 3) & 0x3f);
+	padLen = (index < 56) ? (56 - index) : (120 - index);
+	PHP_MD4Update(context, PADDING, padLen);
+
+	/* Append length (before padding) */
+	PHP_MD4Update(context, bits, 8);
+
+	/* Store state in digest */
+	Encode(digest, context->state, 16);
+
+	/* Zeroize sensitive information.
+	 */
+	memset((unsigned char*) context, 0, sizeof(*context));
+}
+/* }}} */
 
 /*
  * Local variables:

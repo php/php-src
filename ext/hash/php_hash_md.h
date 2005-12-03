@@ -58,7 +58,6 @@
    documentation and/or software.
  */
 
-#include "ext/standard/basic_functions.h"
 /* MD5 context. */
 typedef struct {
 	php_hash_uint32 state[4];				/* state (ABCD) */
@@ -75,5 +74,15 @@ PHP_NAMED_FUNCTION(php_if_md5);
 PHP_NAMED_FUNCTION(php_if_md5_file);
 #endif /* PHP_HASH_MD5_NOT_IN_CORE */
 
+/* MD4 context */
+typedef struct {
+	php_hash_uint32 state[4];
+	php_hash_uint32 count[2];
+	unsigned char buffer[64];
+} PHP_MD4_CTX;
+
+#define PHP_MD4Init			PHP_MD5Init
+PHP_HASH_API void PHP_MD4Update(PHP_MD4_CTX *context, const unsigned char *, unsigned int);
+PHP_HASH_API void PHP_MD4Final(unsigned char[16], PHP_MD4_CTX *);
 
 #endif
