@@ -54,7 +54,6 @@ for suExec and stand alone php scripts too.
 
 %prep
 %setup -q -n TARDIR
-#mkdir manual; cd manual && tar xzf $RPM_SOURCE_DIR/php3-manual.tar.gz
 ./buildconf
 
 %build
