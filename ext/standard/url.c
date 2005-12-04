@@ -328,15 +328,16 @@ end:
 }
 /* }}} */
 
-/* {{{ proto array parse_url(string url)
+/* {{{ proto mixed parse_url(string url, [int url_component])
    Parse a URL and return its components */
 PHP_FUNCTION(parse_url)
 {
 	char *str;
 	int str_len;
 	php_url *resource;
+	long key = -1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &str_len, &key) == FAILURE) {
 		return;
 	}
 
@@ -344,6 +345,39 @@ PHP_FUNCTION(parse_url)
 	if (resource == NULL) {
 		php_error_docref1(NULL TSRMLS_CC, str, E_WARNING, "Unable to parse url");
 		RETURN_FALSE;
+	}
+
+	if (key > -1) {
+		switch (key) {
+			case PHP_URL_SCHEME:
+				if (resource->scheme != NULL) RETVAL_STRING(resource->scheme, 1);
+				break;
+			case PHP_URL_HOST:
+				if (resource->host != NULL) RETVAL_STRING(resource->host, 1);
+				break;
+			case PHP_URL_PORT:
+				if (resource->port != 0) RETVAL_LONG(resource->port);
+				break;
+			case PHP_URL_USER:
+				if (resource->user != NULL) RETVAL_STRING(resource->user, 1);
+				break;
+			case PHP_URL_PASS:
+				if (resource->pass != NULL) RETVAL_STRING(resource->pass, 1);
+				break;
+			case PHP_URL_PATH:
+				if (resource->path != NULL) RETVAL_STRING(resource->path, 1);
+				break;
+			case PHP_URL_QUERY:
+				if (resource->query != NULL) RETVAL_STRING(resource->query, 1);
+				break;
+			case PHP_URL_FRAGMENT:
+				if (resource->fragment != NULL) RETVAL_STRING(resource->fragment, 1);
+				break;
+			default:
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid url component identifier %ld.", key);
+				RETVAL_FALSE;
+		}
+		goto done;
 	}
 
 	/* allocate an array for return */
@@ -366,8 +400,8 @@ PHP_FUNCTION(parse_url)
 		add_assoc_string(return_value, "query", resource->query, 1);
 	if (resource->fragment != NULL)
 		add_assoc_string(return_value, "fragment", resource->fragment, 1);
-	
-    php_url_free(resource);
+done:	
+	php_url_free(resource);
 }
 /* }}} */
 
