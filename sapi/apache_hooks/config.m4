@@ -135,20 +135,8 @@ AC_ARG_WITH(apache-hooks-static,
     AC_DEFINE(HAVE_APACHE_HOOKS,1,[ ])
     APACHE_HOOKS_MODULE=yes
     PHP_EXPAND_PATH($withval, withval)
-    # For Apache 1.2.x
-    if test -f $withval/src/httpd.h; then 
-      APACHE_INCLUDE=-I$withval/src
-      APACHE_TARGET=$withval/src
-      PHP_SELECT_SAPI(apache_hooks, static, sapi_apache.c mod_php5.c php_apache.c, $APACHE_INCLUDE)
-      APACHE_HOOKS_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_INSTALL_FILES $APACHE_TARGET"
-      PHP_LIBS="-L. -lphp3"
-      AC_MSG_RESULT(yes - Apache 1.2.x)
-      STRONGHOLD=
-      if test -f $withval/src/ap_config.h; then
-        AC_DEFINE(HAVE_AP_CONFIG_H,1,[ ])
-      fi
     # For Apache 2.0.x
-    elif test -f $withval/include/httpd.h &&
+    if test -f $withval/include/httpd.h &&
          test -f $withval/srclib/apr/include/apr_general.h ; then
       AC_MSG_ERROR([Use --with-apxs2 with Apache 2.x!])
     # For Apache 1.3.x
