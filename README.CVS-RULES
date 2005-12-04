@@ -31,11 +31,11 @@ Having said that, here are the organizational rules:
    6. Test your changes before committing them. We mean it. Really.
 
 Currently we have the following branches in use:
-HEAD     Will become PHP 5.1. This CVS branch is for active development.
-PHP_5_0  Is used to release the PHP 5.0.x series. Only minor feature
+HEAD     Will become PHP 6.0. This CVS branch is for active development.
+PHP_5_1  Is used to release the PHP 5.1.x series. Only minor feature
 		 enhancements may go in here, but please keep that as infrequent as
 		 possible.
-PHP_4_3  Is used to release the PHP 4.3.x series. Only bugfixes are permitted
+PHP_4_4  Is used to release the PHP 4.4.x series. Only bugfixes are permitted
          on this branch.
 
 The next few rules are more of a technical nature.
