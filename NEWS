@@ -1,14 +1,14 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, PHP 5.1.2
-- Added new extensions (Ilia,Wez)
-  . XmlWriter
+- Added new extensions: (Ilia, Wez)
+  . XMLWriter
   . Hash
-- Moved reflection into its own extension. (Marcus)
 - Added reflection constants as class constants. (Johannes)
 - Added --enable-gcov configure option to enable C-level code coverage.
   (John, Jani)
 - Added missing support for 'B' format identifier to date() function. (Ilia)
+- Changed reflection to be an extension. (Marcus)
 - Improved SPL: (Marcus)
   . Added class SplFileInfo as root class for DirectoryIterator and 
     SplFileObject
