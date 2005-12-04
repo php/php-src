@@ -1,3 +1,8 @@
+2005-12-03  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * tests/bug30346.phpt:
+      Nuked dos EOLs and fixed typo
+
 2005-12-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * tests/bug30346.phpt:
