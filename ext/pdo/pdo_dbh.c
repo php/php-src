@@ -1110,7 +1110,7 @@ int pdo_hash_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 	int namelen;
 	char *lc_name;
 
-	if (!dbh->methods->get_driver_methods) {
+	if (!dbh || !dbh->methods || !dbh->methods->get_driver_methods) {
 		return 0;
 	}
 	funcs =	dbh->methods->get_driver_methods(dbh,
