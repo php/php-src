@@ -31,22 +31,23 @@ php_lcov.info: lcov-test
 	@echo
 	-@find . -name \*.gcda -o -name \*.gcno -o -name \*.da | sed -e 's/^\.\///' | sed -e 's/\.gcda//g' -e 's/\.gcno//g' -e 's/\.da//g' | uniq | while read x; do \
 		echo -n . ;\
+		y=`echo $$x | sed -e 's!\.libs/!!'`; \
 		dir=lcov_data/`dirname $$x`; \
 		test -d "$$dir" || $(mkinstalldirs) "$$dir"; \
-		if test -f "$(top_srcdir)/$$x.c"; then \
-			ln -f -s $(top_srcdir)/$$x.c lcov_data/$$x.c; \
+		if test -f "$(top_srcdir)/$$y.c"; then \
+			ln -f -s $(top_srcdir)/$$y.c lcov_data/$$y.c; \
 		fi; \
-		if test -f "$(top_srcdir)/$$x.re"; then \
-			ln -f -s $(top_srcdir)/$$x.re lcov_data/$$x.re; \
+		if test -f "$(top_srcdir)/$$y.re"; then \
+			ln -f -s $(top_srcdir)/$$y.re lcov_data/$$y.re; \
 		fi; \
-		if test -f "$(top_srcdir)/$$x.y"; then \
-		        ln -f -s $(top_srcdir)/$$x.y lcov_data/$$x.y; \
+		if test -f "$(top_srcdir)/$$y.y"; then \
+		        ln -f -s $(top_srcdir)/$$y.y lcov_data/$$y.y; \
 		fi; \
-		if test -f "$(top_srcdir)/$$x.l"; then \
-		        ln -f -s $(top_srcdir)/$$x.l lcov_data/$$x.l; \
+		if test -f "$(top_srcdir)/$$y.l"; then \
+		        ln -f -s $(top_srcdir)/$$y.l lcov_data/$$y.l; \
 		fi; \
-		if test -f "$(top_builddir)/$$x.c"; then \
-			ln -f -s $(top_builddir)/$$x.c lcov_data/$$x.c; \
+		if test -f "$(top_builddir)/$$y.c"; then \
+			ln -f -s $(top_builddir)/$$y.c lcov_data/$$y.c; \
 		fi; \
 		test -f "$$x.gcno" && cp $$x.gcno lcov_data/ ; \
 		test -f "$$x.gcda" && cp $$x.gcda lcov_data/ ; \
