@@ -52,6 +52,8 @@ PHP                                                                        NEWS
 - Fixed bug #35381 (ssl library is not initialized properly). (Alan)
 - Fixed bug #35373 (HP-UX "alias not allowed in this configuration"). (Dmitry)
 - Fixed bug #35103 (mysqli handles bad unsigned (big)int incorrectly).(Andrey)
+- Fixed bug #35062 (socket_read() produces warnings on non blocking sockets).
+  (Nuno, Ilia)
 - Fixed bug #35028 (SimpleXML object fails FALSE test). (Marcus)
 
 28 Nov 2005, PHP 5.1.1
