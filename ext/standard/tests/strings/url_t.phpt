@@ -75,6 +75,11 @@ $sample_urls = array (
     foreach ($sample_urls as $url) {
         var_dump(@parse_url($url));
     }
+
+    $url = 'http://secret:hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123';
+    foreach (array(PHP_URL_SCHEME,PHP_URL_HOST,PHP_URL_PORT,PHP_URL_USER,PHP_URL_PASS,PHP_URL_PATH,PHP_URL_QUERY,PHP_URL_FRAGMENT) as $v) {
+	var_dump(parse_url($url, $v));
+    }
 ?>
 --EXPECT--
 array(1) {
@@ -673,3 +678,11 @@ array(4) {
   ["path"]=>
   string(4) "/bla"
 }
+string(4) "http"
+string(11) "www.php.net"
+int(80)
+string(6) "secret"
+string(7) "hideout"
+string(10) "/index.php"
+string(31) "test=1&test2=char&test3=mixesCI"
+string(16) "some_page_ref123"
