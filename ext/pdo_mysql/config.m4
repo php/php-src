@@ -50,6 +50,9 @@ if test "$PHP_PDO_MYSQL" != "no"; then
 
   if test -n "$PDO_MYSQL_CONFIG" && test -x "$PDO_MYSQL_CONFIG" ; then
     AC_MSG_RESULT($PDO_MYSQL_CONFIG)
+    if test "x$SED" = "x"; then
+      AC_PATH_PROG(SED, sed)
+    fi
     PDO_MYSQL_INCLUDE=`$PDO_MYSQL_CONFIG --cflags | $SED -e "s/'//g"`
     PDO_MYSQL_LIBS=`$PDO_MYSQL_CONFIG --libs | $SED -e "s/'//g"`
     PDO_MYSQL_SOCKET=`$PDO_MYSQL_CONFIG --socket` 
