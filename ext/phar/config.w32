@@ -1,0 +1,9 @@
+// $Id$
+// vim:ft=javascript
+
+ARG_ENABLE("phar", "enable phar support", "no");
+
+if (PHP_PHAR != "no") {
+	EXTENSION("phar", "phar.c");
+}
+
