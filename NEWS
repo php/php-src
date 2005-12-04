@@ -5,6 +5,8 @@ PHP 4                                                                      NEWS
   properly). (Ilia)
 - Fixed bug #35341 (Fix for bug #33760 breaks build with older curl). (Tony)
 - Fixed bug #35278 (Multiple virtual() calls crash Apache 2 php module). (Ilia)
+- Fixed bug #35062 (socket_read() produces warnings on non blocking sockets).
+  (Nuno, Ilia)
 - Fixed bug #33153 (crash in mssql_next result). (Frank)
 - Fixed bug #32009 (crash when mssql_bind() is called more than once). (Frank)
 - Fixed bug #33963 (mssql_bind() fails on input parameters). (Frank)
