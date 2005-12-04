@@ -13,10 +13,10 @@ fi
 if test "$PHP_XMLWRITER" != "no"; then
 
   if test "$PHP_LIBXML" = "no"; then
-    AC_MSG_ERROR([XMLReader extension requires LIBXML extension, add --enable-libxml])
+    AC_MSG_ERROR([XMLWriter extension requires LIBXML extension, add --enable-libxml])
   fi
 
-  PHP_SETUP_LIBXML(XMLREADER_SHARED_LIBADD, [
+  PHP_SETUP_LIBXML(XMLWRITER_SHARED_LIBADD, [
     AC_DEFINE(HAVE_XMLWRITER,1,[ ])
     PHP_NEW_EXTENSION(xmlwriter, php_xmlwriter.c, $ext_shared)
     PHP_SUBST(XMLWRITER_SHARED_LIBADD)
