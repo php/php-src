@@ -1,3 +1,12 @@
+2005-12-04  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      zend_exceptions.c:
+      MFH: fix #35539 (typo in error message for ErrorException)
+
+    * zend_exceptions.c:
+      fix #35539 (typo in error message for ErrorException)
+
 2005-12-03  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * tests/bug30346.phpt:
