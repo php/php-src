@@ -132,7 +132,7 @@ ZEND_METHOD(exception, __construct)
 	zend_uchar message_type;
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC, "|tl", &message, &message_len, &message_type, &code) == FAILURE) {
-		zend_error(E_ERROR, "Wrong parameter count for Exception([string $exception [, long $code ]])");
+		zend_error(E_ERROR, "Wrong parameters for Exception([string $exception [, long $code ]])");
 	}
 
 	object = getThis();
@@ -171,7 +171,7 @@ ZEND_METHOD(error_exception, __construct)
 	zend_uchar message_type, file_type;
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC, "|tlltl", &message, &message_len, &message_type, &code, &severity, &filename, &filename_len, &file_type, &lineno) == FAILURE) {
-		zend_error(E_ERROR, "Wrong parameter count for ErrorException([string $exception [, long $code ]])");
+		zend_error(E_ERROR, "Wrong parameters for ErrorException([string $exception [, long $code, [ long $severity, [ string $filename, [ long $lineno ]]]]])");
 	}
 
 	object = getThis();
