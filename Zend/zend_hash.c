@@ -1694,6 +1694,24 @@ ZEND_API int zend_u_symtable_exists(HashTable *ht, zend_uchar type, void *arKey,
 	return zend_u_hash_exists(ht, type, arKey, nKeyLength);
 }
 
+
+ZEND_API int zend_u_symtable_update_current_key(HashTable *ht, zend_uchar type, void *arKey, uint nKeyLength)
+{
+	zend_uchar key_type;
+
+	if (type == IS_STRING) {
+		key_type = HASH_KEY_IS_STRING;	
+		HANDLE_NUMERIC((char*)arKey, nKeyLength, zend_hash_update_current_key(ht, HASH_KEY_IS_LONG, NULL, 0, idx));
+	} else if (type == IS_UNICODE) {
+		key_type = HASH_KEY_IS_UNICODE;	
+		HANDLE_U_NUMERIC((UChar*)arKey, nKeyLength, zend_hash_update_current_key(ht, HASH_KEY_IS_LONG, NULL, 0, idx));
+	} else {
+		key_type = HASH_KEY_IS_BINARY;	
+	}
+	return zend_hash_update_current_key(ht, key_type, arKey, nKeyLength, 0);
+}
+
+
 ZEND_API int zend_symtable_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest)
 {
 	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_update(ht, idx, pData, nDataSize, pDest));
@@ -1719,6 +1737,13 @@ ZEND_API int zend_symtable_exists(HashTable *ht, char *arKey, uint nKeyLength)
 {
 	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_exists(ht, idx));
 	return zend_hash_exists(ht, arKey, nKeyLength);
+}
+
+
+ZEND_API int zend_symtable_update_current_key(HashTable *ht, char *arKey, uint nKeyLength)
+{
+	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_update_current_key(ht, HASH_KEY_IS_LONG, NULL, 0, idx));
+	return zend_hash_update_current_key(ht, HASH_KEY_IS_STRING, arKey, nKeyLength, 0);
 }
 
 #if ZEND_DEBUG

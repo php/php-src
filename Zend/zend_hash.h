@@ -339,11 +339,13 @@ ZEND_API int zend_symtable_update(HashTable *ht, char *arKey, uint nKeyLength, v
 ZEND_API int zend_symtable_del(HashTable *ht, char *arKey, uint nKeyLength);
 ZEND_API int zend_symtable_find(HashTable *ht, char *arKey, uint nKeyLength, void **pData);
 ZEND_API int zend_symtable_exists(HashTable *ht, char *arKey, uint nKeyLength);
+ZEND_API int zend_symtable_update_current_key(HashTable *ht, char *arKey, uint nKeyLength);
 
 ZEND_API int zend_u_symtable_update(HashTable *ht, zend_uchar type, void *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest);
 ZEND_API int zend_u_symtable_del(HashTable *ht, zend_uchar type, void *arKey, uint nKeyLength);
 ZEND_API int zend_u_symtable_find(HashTable *ht, zend_uchar type, void *arKey, uint nKeyLength, void **pData);
 ZEND_API int zend_u_symtable_exists(HashTable *ht, zend_uchar type, void *arKey, uint nKeyLength);
+ZEND_API int zend_u_symtable_update_current_key(HashTable *ht, zend_uchar type, void *arKey, uint nKeyLength);
 
 #endif							/* ZEND_HASH_H */
 
