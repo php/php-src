@@ -616,7 +616,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 	int i, len[] = { 0, 0, 0, 0, 0 };
 	long largs[] = { 0, 0, 0 };
 	PHP_MD5_CTX hash_context;
-	list_entry new_index_ptr, *le;
+	zend_rsrc_list_entry new_index_ptr, *le;
 	isc_db_handle db_handle = NULL;
 	ibase_db_link *ib_link;
 
@@ -715,7 +715,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 			ib_link = (ibase_db_link *) emalloc(sizeof(ibase_db_link));
 			ZEND_REGISTER_RESOURCE(return_value, ib_link, le_link);
 		} else {
-			list_entry new_le;
+			zend_rsrc_list_entry new_le;
 			
 			ib_link = (ibase_db_link *) malloc(sizeof(ibase_db_link));
 	
@@ -723,7 +723,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 			Z_TYPE(new_le) = le_plink;
 			new_le.ptr = ib_link;
 			if (FAILURE == zend_hash_update(&EG(persistent_list), hash, sizeof(hash),
-					(void *) &new_le, sizeof(list_entry), NULL)) {
+					(void *) &new_le, sizeof(zend_rsrc_list_entry), NULL)) {
 				free(ib_link);
 				RETURN_FALSE;
 			}
@@ -742,7 +742,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 	new_index_ptr.ptr = (void *) Z_LVAL_P(return_value);
 	Z_TYPE(new_index_ptr) = le_index_ptr;
 	if (FAILURE == zend_hash_update(&EG(regular_list), hash, sizeof(hash),
-			(void *) &new_index_ptr, sizeof(list_entry), NULL)) {
+			(void *) &new_index_ptr, sizeof(zend_rsrc_list_entry), NULL)) {
 		RETURN_FALSE;
 	}
 	zend_list_addref(IBG(default_link) = Z_LVAL_P(return_value));

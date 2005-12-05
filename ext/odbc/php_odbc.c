@@ -716,7 +716,7 @@ void odbc_transact(INTERNAL_FUNCTION_PARAMETERS, int type)
 /* }}} */
 
 /* {{{ _close_pconn_with_id */
-static int _close_pconn_with_id(list_entry *le, int *id TSRMLS_DC)
+static int _close_pconn_with_id(zend_rsrc_list_entry *le, int *id TSRMLS_DC)
 {
 	if(Z_TYPE_P(le) == le_pconn && (((odbc_connection *)(le->ptr))->id == *id)){
 		return 1;
@@ -2274,11 +2274,11 @@ void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 try_and_get_another_connection:
 
 	if (persistent) {
-		list_entry *le;
+		zend_rsrc_list_entry *le;
 		
 		if (zend_hash_find(&EG(persistent_list), hashed_details, hashed_len + 1, (void **) &le)
 		  					== FAILURE) { /* the link is not in the persistent list */
-			list_entry new_le;
+			zend_rsrc_list_entry new_le;
 			
 			if (ODBCG(max_links) != -1 && ODBCG(num_links) >= ODBCG(max_links)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%ld)", ODBCG(num_links));
@@ -2299,7 +2299,7 @@ try_and_get_another_connection:
 			Z_TYPE(new_le) = le_pconn;
 			new_le.ptr = db_conn;
 			if (zend_hash_update(&EG(persistent_list), hashed_details, hashed_len + 1, &new_le,
-						sizeof(list_entry), NULL) == FAILURE) {
+						sizeof(zend_rsrc_list_entry), NULL) == FAILURE) {
 				free(db_conn);
 				efree(hashed_details);
 				RETURN_FALSE;
@@ -2343,7 +2343,7 @@ try_and_get_another_connection:
 		}
 		db_conn->id = ZEND_REGISTER_RESOURCE(return_value, db_conn, le_pconn);
 	} else { /* non persistent */
-		list_entry *index_ptr, new_index_ptr;
+		zend_rsrc_list_entry *index_ptr, new_index_ptr;
 		
 		if (zend_hash_find(&EG(regular_list), hashed_details, hashed_len + 1, 
 					(void **) &index_ptr) == SUCCESS) {
@@ -2378,7 +2378,7 @@ try_and_get_another_connection:
 		new_index_ptr.ptr = (void *) Z_LVAL_P(return_value);
 		Z_TYPE(new_index_ptr) = le_index_ptr;
 		if (zend_hash_update(&EG(regular_list), hashed_details, hashed_len + 1, (void *) &new_index_ptr,
-				   sizeof(list_entry), NULL) == FAILURE) {
+				   sizeof(zend_rsrc_list_entry), NULL) == FAILURE) {
 			efree(hashed_details);
 			RETURN_FALSE;
 			/* XXX Free Connection */
