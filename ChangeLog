@@ -1,3 +1,96 @@
+2005-12-04  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * sapi/apache/config.m4
+      sapi/apache_hooks/config.m4:
+      - Nuke non-working part
+
+    * makerpm
+      ext/gd/gd.c
+      ext/gd/gd_ctx.c:
+      php3 is dead
+
+    * (PHP_5_1)
+      README.CVS-RULES:
+      fix branches
+
+2005-12-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/strings/http_build_query.phpt
+      ext/standard/tests/strings/url_t.phpt:
+      MFB51: Added tests for new parse_url() and http_build_query()
+      functionality.
+
+    * ext/standard/tests/strings/http_build_query.phpt
+      ext/standard/tests/strings/http_build_query.phpt
+      ext/standard/tests/strings/url_t.phpt:
+      
+      file http_build_query.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      ext/standard/basic_functions.c
+      ext/standard/http.c
+      ext/standard/php_http.h
+      ext/standard/url.c
+      ext/standard/url.h:
+      MFH:
+      Added 2nd optional parameter to parse_url() that allows retrieval of
+      individual URL components.
+      Added 3rd optional parameter to http_build_query() that allows custom
+      param
+      separator.
+
+    * (PHP_5_1)
+      ext/standard/sunfuncs.c:
+      load proper header file
+
+    * (PHP_4_4)
+      NEWS
+      ext/sockets/sockets.c:
+      MFH: Fixed bug #35062 (socket_read() produces warnings on non blocking
+      sockets).
+
+    * ext/sockets/sockets.c:
+      MFB51: Fixed bug #35062 (socket_read() produces warnings on non blocking
+      sockets).
+
+    * (PHP_5_1)
+      NEWS
+      ext/sockets/sockets.c:
+      Fixed bug #35062 (socket_read() produces warnings on non blocking sockets).
+
+    * Makefile.gcov:
+      MFB51: Fixed gcov for generated files
+
+    * (PHP_5_1)
+      Makefile.gcov:
+      Fixed gcov for generated files
+
+    * ext/sqlite/libsqlite/src/parse.c:
+      MFB51: Regen files so they work properly with gcov.
+
+    * (PHP_5_1)
+      ext/sqlite/libsqlite/src/parse.c:
+      Regen files so they work properly with gcov.
+
+2005-12-04  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS:
+      reorder,reword
+
+2005-12-04  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      BFN
+
+    * (PHP_5_1)
+      ZendEngine2/zend_exceptions.c:
+      MFH: fix #35539 (typo in error message for ErrorException)
+
+    * ZendEngine2/zend_exceptions.c:
+      fix #35539 (typo in error message for ErrorException)
+
 2005-12-03  Antony Dovgal  <antony@zend.com>
 
     * ext/sockets/sockets.c:
