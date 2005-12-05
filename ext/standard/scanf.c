@@ -126,7 +126,7 @@ typedef struct CharSet {
 static char *BuildCharSet(CharSet *cset, char *format);
 static int	CharInSet(CharSet *cset, int ch);
 static void	ReleaseCharSet(CharSet *cset);
-static inline void scan_set_error_return(int numVars, pval **return_value);
+static inline void scan_set_error_return(int numVars, zval **return_value);
 
 
 /* {{{ BuildCharSet
@@ -594,7 +594,7 @@ error:
 
 PHPAPI int php_sscanf_internal(	char *string, char *format,
 				int argCount, zval ***args,
-				int varStart, pval **return_value TSRMLS_DC)
+				int varStart, zval **return_value TSRMLS_DC)
 {
 	int  numVars, nconversions, totalVars = -1;
 	int  i, value, result;
@@ -1238,13 +1238,13 @@ done:
 /* }}} */
 
 /* the compiler choked when i tried to make this a macro    */
-static inline void scan_set_error_return(int numVars, pval **return_value)
+static inline void scan_set_error_return(int numVars, zval **return_value)
 {
 	if (numVars) {
 		Z_TYPE_PP(return_value) = IS_LONG;
 		Z_LVAL_PP(return_value) = SCAN_ERROR_EOF;  /* EOF marker */
 	} else {	
-	  /* pval_destructor( *return_value ); */ 
+	  /* zval_dtor( *return_value ); */ 
 	  /* convert_to_null calls destructor */
    		convert_to_null( *return_value );
 	}	

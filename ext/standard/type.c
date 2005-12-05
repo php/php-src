@@ -25,7 +25,7 @@
    Returns the type of the variable */
 PHP_FUNCTION(gettype)
 {
-	pval **arg;
+	zval **arg;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -91,7 +91,7 @@ PHP_FUNCTION(gettype)
    Set the type of the variable */
 PHP_FUNCTION(settype)
 {
-	pval **var, **type;
+	zval **var, **type;
 	char *new_type;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &var, &type) == FAILURE) {
@@ -136,7 +136,7 @@ PHP_FUNCTION(settype)
    Get the integer value of a variable using the optional base for the conversion */
 PHP_FUNCTION(intval)
 {
-	pval **num, **arg_base;
+	zval **num, **arg_base;
 	int base;
 
 	switch (ZEND_NUM_ARGS()) {
@@ -168,7 +168,7 @@ PHP_FUNCTION(intval)
    Get the float value of a variable */
 PHP_FUNCTION(floatval)
 {
-	pval **num;
+	zval **num;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -203,7 +203,7 @@ PHP_FUNCTION(strval)
 
 static void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
-	pval **arg;
+	zval **arg;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only one argument expected");
