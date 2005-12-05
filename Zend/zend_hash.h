@@ -353,6 +353,12 @@ static inline int zend_symtable_exists(HashTable *ht, char *arKey, uint nKeyLeng
 	return zend_hash_exists(ht, arKey, nKeyLength);
 }
 
+static inline int zend_symtable_update_current_key(HashTable *ht, char *arKey, uint nKeyLength)
+{
+	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_update_current_key(ht, HASH_KEY_IS_LONG, NULL, 0, idx));
+	return zend_hash_update_current_key(ht, HASH_KEY_IS_STRING, arKey, nKeyLength, 0);
+}
+
 #endif							/* ZEND_HASH_H */
 
 /*
