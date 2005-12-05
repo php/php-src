@@ -646,11 +646,11 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 	
 	if (persistent && PGG(allow_persistent)) {
-		list_entry *le;
+		zend_rsrc_list_entry *le;
 		
 		/* try to find if we already have this link in our persistent list */
 		if (zend_hash_find(&EG(persistent_list), str.c, str.len+1, (void **) &le)==FAILURE) {  /* we don't */
-			list_entry new_le;
+			zend_rsrc_list_entry new_le;
 			
 			if (PGG(max_links)!=-1 && PGG(num_links)>=PGG(max_links)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING,
@@ -680,7 +680,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			/* hash it up */
 			Z_TYPE(new_le) = le_plink;
 			new_le.ptr = pgsql;
-			if (zend_hash_update(&EG(persistent_list), str.c, str.len+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
+			if (zend_hash_update(&EG(persistent_list), str.c, str.len+1, (void *) &new_le, sizeof(zend_rsrc_list_entry), NULL)==FAILURE) {
 				goto err;
 			}
 			PGG(num_links)++;
@@ -726,7 +726,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 		ZEND_REGISTER_RESOURCE(return_value, pgsql, le_plink);
 	} else { /* Non persistent connection */
-		list_entry *index_ptr,new_index_ptr;
+		zend_rsrc_list_entry *index_ptr,new_index_ptr;
 		
 		/* first we check the hash for the hashed_details key.  if it exists,
 		 * it should point us to the right offset where the actual pgsql link sits.
@@ -776,7 +776,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		/* add it to the hash */
 		new_index_ptr.ptr = (void *) Z_LVAL_P(return_value);
 		Z_TYPE(new_index_ptr) = le_index_ptr;
-		if (zend_hash_update(&EG(regular_list),str.c,str.len+1,(void *) &new_index_ptr, sizeof(list_entry), NULL)==FAILURE) {
+		if (zend_hash_update(&EG(regular_list),str.c,str.len+1,(void *) &new_index_ptr, sizeof(zend_rsrc_list_entry), NULL)==FAILURE) {
 			goto err;
 		}
 		PGG(num_links)++;
@@ -1633,7 +1633,7 @@ static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list TSRMLS_DC)
 {
 	PGresult *result;
 	smart_str str = {0};
-	list_entry *field_type;
+	zend_rsrc_list_entry *field_type;
 	char *ret=NULL;
 
 	/* try to lookup the type in the resource list */
@@ -1647,7 +1647,7 @@ static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list TSRMLS_DC)
 		int i,num_rows;
 		int oid_offset,name_offset;
 		char *tmp_oid, *end_ptr, *tmp_name;
-		list_entry new_oid_entry;
+		zend_rsrc_list_entry new_oid_entry;
 
 		if ((result = PQexec(pgsql,"select oid,typname from pg_type")) == NULL || PQresultStatus(result) != PGRES_TUPLES_OK) {
 			if (result) {
@@ -1675,7 +1675,7 @@ static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list TSRMLS_DC)
 			}
 			Z_TYPE(new_oid_entry) = le_string;
 			new_oid_entry.ptr = estrdup(tmp_name);
-			zend_hash_update(list,str.c,str.len+1,(void *) &new_oid_entry, sizeof(list_entry), NULL);
+			zend_hash_update(list,str.c,str.len+1,(void *) &new_oid_entry, sizeof(zend_rsrc_list_entry), NULL);
 			if (!ret && strtoul(tmp_oid, &end_ptr, 10)==oid) {
 				ret = estrdup(tmp_name);
 			}

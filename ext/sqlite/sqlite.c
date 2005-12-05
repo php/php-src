@@ -793,7 +793,7 @@ typedef struct _sqlite_object {
 	} u;
 } sqlite_object;
 
-static int sqlite_free_persistent(list_entry *le, void *ptr TSRMLS_DC)
+static int sqlite_free_persistent(zend_rsrc_list_entry *le, void *ptr TSRMLS_DC)
 {
 	return le->ptr == ptr ? ZEND_HASH_APPLY_REMOVE : ZEND_HASH_APPLY_KEEP;
 }
@@ -1194,7 +1194,7 @@ static struct php_sqlite_db *php_sqlite_open(char *filename, int mode, char *per
 	}
 
 	if (persistent_id) {
-		list_entry le;
+		zend_rsrc_list_entry le;
 
 		Z_TYPE(le) = le_sqlite_pdb;
 		le.ptr = db;
@@ -1218,7 +1218,7 @@ PHP_FUNCTION(sqlite_popen)
 	int filename_len, hashkeylen;
 	zval *errmsg = NULL;
 	struct php_sqlite_db *db = NULL;
-	list_entry *le;
+	zend_rsrc_list_entry *le;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz/",
 				&filename, &filename_len, &mode, &errmsg)) {
