@@ -24,6 +24,8 @@ PHP                                                                        NEWS
 - Fixed bug #35543 (php crash when calling non existing method of a class
   that extends PDO). (Tony)
 - Fixed bug #35539 (typo in error message for ErrorException). (Tony)
+- Fixed bug #35509 (string constant as array key has different behavior inside
+  object). (Dmitry)
 - Fixed bug #35508 (PDO fails when unknown fetch mode specified). (Tony)
 - Fixed bug #35499 (strtotime() does not handle whitespace around the date 
   string). (Ilia)

@@ -501,17 +501,9 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 			*element = new_val;
 
 			switch (const_value.type) {
-				case IS_STRING: {
-					long lval;
-					double dval;
-
-					if (is_numeric_string(const_value.value.str.val, const_value.value.str.len, &lval, &dval, 0) == IS_LONG) {
-						zend_hash_update_current_key(p->value.ht, HASH_KEY_IS_LONG, NULL, 0, lval);
-					} else {
-						zend_hash_update_current_key(p->value.ht, HASH_KEY_IS_STRING, const_value.value.str.val, const_value.value.str.len+1, 0);
-					}
+				case IS_STRING:
+					zend_symtable_update_current_key(p->value.ht, const_value.value.str.val, const_value.value.str.len+1);
 					break;
-				}
 				case IS_BOOL:
 				case IS_LONG:
 					zend_hash_update_current_key(p->value.ht, HASH_KEY_IS_LONG, NULL, 0, const_value.value.lval);
