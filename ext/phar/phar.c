@@ -58,6 +58,7 @@ static void destroy_phar_data(void *pDest)
 {
 	phar_file_data *data = (phar_file_data *) pDest;
 	zend_hash_destroy(data->manifest);
+	FREE_HASHTABLE(data->manifest);
 }
 
 static void destroy_phar_manifest(void *pDest)
@@ -99,9 +100,9 @@ function_entry phar_functions[] = {
 PHP_METHOD(PHP_Archive, mapPhar)
 {
 	char *fname, *alias, *buffer, *endbuffer, *unpack_var, *savebuf;
-	phar_file_data *mydata;
+	phar_file_data mydata;
 	zend_bool compressed;
-	phar_manifest_entry *entry;
+	phar_manifest_entry entry;
 	HashTable	*manifest;
 	int alias_len, i;
 	long halt_offset;
@@ -127,6 +128,7 @@ PHP_METHOD(PHP_Archive, mapPhar)
 	zend_get_constant("__COMPILER_HALT_OFFSET__", 24, halt_constant);
 	halt_offset = Z_LVAL(*halt_constant);
 	zval_dtor(halt_constant);
+	FREE_ZVAL(halt_constant);
 
 	// IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS
 	fp = VCWD_FOPEN(fname, "rb");
@@ -190,34 +192,32 @@ MAPPHAR_ALLOC_FAILURE:
 	// extract the number of entries
 	PHAR_GET_VAL(manifest_count)
 	// set up our manifest
-	manifest = (HashTable *) emalloc(sizeof(HashTable));
+	ALLOC_HASHTABLE(manifest);
 	zend_hash_init(manifest, sizeof(phar_manifest_entry),
 		zend_get_hash_value, destroy_phar_manifest, 0);
 	for (manifest_index = 0; manifest_index < manifest_count; manifest_index++) {
 		if (buffer > endbuffer) goto MAPPHAR_FAILURE;
-		entry = (phar_manifest_entry *) emalloc(sizeof(phar_manifest_entry));
-		PHAR_GET_VAL(entry->filename_len)
-		entry->filename = (char *) emalloc(entry->filename_len + 1);
-		memcpy(entry->filename, buffer, entry->filename_len);
-		*(entry->filename + entry->filename_len) = '\0';
-		buffer += entry->filename_len;
-		PHAR_GET_VAL(entry->uncompressed_filesize)
-		PHAR_GET_VAL(entry->timestamp)
-		PHAR_GET_VAL(entry->offset_within_phar)
-		PHAR_GET_VAL(entry->compressed_filesize)
-		zend_hash_add(manifest, entry->filename, entry->filename_len, entry,
+		PHAR_GET_VAL(entry.filename_len)
+		entry.filename = (char *) emalloc(entry.filename_len + 1);
+		memcpy(entry.filename, buffer, entry.filename_len);
+		entry.filename[entry.filename_len] = '\0';
+		buffer += entry.filename_len;
+		PHAR_GET_VAL(entry.uncompressed_filesize)
+		PHAR_GET_VAL(entry.timestamp)
+		PHAR_GET_VAL(entry.offset_within_phar)
+		PHAR_GET_VAL(entry.compressed_filesize)
+		zend_hash_add(manifest, entry.filename, entry.filename_len, &entry,
 			sizeof(phar_manifest_entry), NULL);
 	}
 #undef PHAR_GET_VAL
 
-	mydata = (phar_file_data *) emalloc(sizeof(phar_file_data));
-	mydata->file = fname;
-	mydata->alias = alias;
-	mydata->alias_len = alias_len;
-	mydata->internal_file_start = manifest_len + halt_offset + 4;
-	mydata->is_compressed = compressed;
-	mydata->manifest = manifest;
-	zend_hash_add(&(PHAR_G(phar_data)), alias, alias_len, mydata,
+	mydata.file = fname;
+	mydata.alias = alias;
+	mydata.alias_len = alias_len;
+	mydata.internal_file_start = manifest_len + halt_offset + 4;
+	mydata.is_compressed = compressed;
+	mydata.manifest = manifest;
+	zend_hash_add(&(PHAR_G(phar_data)), alias, alias_len, &mydata,
 		sizeof(phar_file_data), NULL);
 	efree(savebuf);
 	fclose(fp);
@@ -572,6 +572,7 @@ PHAR_ZLIB_ERROR:
 			efree(idata);
 			return NULL;
 		}
+		efree(savebuf);
 		// check length
 		if (actual_length != idata->internal_file->uncompressed_filesize) {
 			goto PHAR_ZLIB_ERROR;
