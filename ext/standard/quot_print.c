@@ -151,7 +151,7 @@ PHPAPI unsigned char *php_quot_print_decode(const unsigned char *str, size_t len
    Convert a quoted-printable string to an 8 bit string */
 PHP_FUNCTION(quoted_printable_decode)
 {
-	pval **arg1;
+	zval **arg1;
 	char *str_in, *str_out;
 	int i = 0, j = 0, k;
 

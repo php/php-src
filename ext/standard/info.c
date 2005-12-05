@@ -708,7 +708,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 	}
 
 	if (flag & PHP_INFO_VARIABLES) {
-		pval **data;
+		zval **data;
 
 		SECTION("PHP Variables");
 

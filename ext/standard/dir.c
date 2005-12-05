@@ -231,7 +231,7 @@ PHP_FUNCTION(getdir)
    Close directory connection identified by the dir_handle */
 PHP_FUNCTION(closedir)
 {
-	pval **id, **tmp, *myself;
+	zval **id, **tmp, *myself;
 	php_stream *dirp;
 
 	FETCH_DIRP();
@@ -329,7 +329,7 @@ PHP_FUNCTION(getcwd)
    Rewind dir_handle back to the start */
 PHP_FUNCTION(rewinddir)
 {
-	pval **id, **tmp, *myself;
+	zval **id, **tmp, *myself;
 	php_stream *dirp;
 	
 	FETCH_DIRP();
@@ -342,7 +342,7 @@ PHP_FUNCTION(rewinddir)
    Read directory entry from dir_handle */
 PHP_NAMED_FUNCTION(php_if_readdir)
 {
-	pval **id, **tmp, *myself;
+	zval **id, **tmp, *myself;
 	php_stream *dirp;
 	php_stream_dirent entry;
 

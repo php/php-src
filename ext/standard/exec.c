@@ -57,7 +57,7 @@
  * If type==3, output will be printed binary, no lines will be saved or returned (passthru)
  *
  */
-int php_exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
+int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
 {
 	FILE *fp;
 	char *buf, *tmp=NULL;
@@ -372,7 +372,7 @@ char *php_escape_shell_arg(char *str) {
    Escape shell metacharacters */
 PHP_FUNCTION(escapeshellcmd)
 {
-	pval **arg1;
+	zval **arg1;
 	char *cmd = NULL;
 
 	if (zend_get_parameters_ex(1, &arg1) == FAILURE) {
@@ -392,7 +392,7 @@ PHP_FUNCTION(escapeshellcmd)
    Quote and escape an argument for use in a shell command */
 PHP_FUNCTION(escapeshellarg)
 {
-	pval **arg1;
+	zval **arg1;
 	char *cmd = NULL;
 
 	if (zend_get_parameters_ex(1, &arg1) == FAILURE) {
@@ -414,7 +414,7 @@ PHP_FUNCTION(shell_exec)
 {
 	FILE *in;
 	size_t total_readbytes;
-	pval **cmd;
+	zval **cmd;
 	char *ret;
 	php_stream *stream;
 

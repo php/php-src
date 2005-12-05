@@ -142,8 +142,8 @@ PHPAPI char *php_str_to_str(char *haystack, int length, char *needle,
 PHPAPI char *php_trim(char *c, int len, char *what, int what_len, zend_uchar str_type, zval *return_value, int mode TSRMLS_DC);
 PHPAPI int32_t php_u_strip_tags(UChar *rbuf, int32_t len, int *stateptr, UChar *allow, int32_t allow_len TSRMLS_DC);
 PHPAPI size_t php_strip_tags(char *rbuf, int len, int *state, char *allow, int allow_len);
-PHPAPI int php_char_to_str_ex(char *str, uint len, char from, char *to, int to_len, pval *result, int case_sensitivity, int *replace_count);
-PHPAPI int php_char_to_str(char *str, uint len, char from, char *to, int to_len, pval *result);
+PHPAPI int php_char_to_str_ex(char *str, uint len, char from, char *to, int to_len, zval *result, int case_sensitivity, int *replace_count);
+PHPAPI int php_char_to_str(char *str, uint len, char from, char *to, int to_len, zval *result);
 PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value);
 PHPAPI void php_explode(char *delim, uint delim_len, char *str, uint str_len, zend_uchar str_type, zval *return_value, int limit);
 

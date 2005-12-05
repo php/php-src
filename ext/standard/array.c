@@ -361,15 +361,15 @@ static int array_data_compare(const void *a, const void *b TSRMLS_DC)
 {
 	Bucket *f;
 	Bucket *s;
-	pval result;
-	pval *first;
-	pval *second;
+	zval result;
+	zval *first;
+	zval *second;
  
 	f = *((Bucket **) a);
 	s = *((Bucket **) b);
  
-	first = *((pval **) f->pData);
-	second = *((pval **) s->pData);
+	first = *((zval **) f->pData);
+	second = *((zval **) s->pData);
 
 	if (ARRAYG(compare_func)(&result, first, second TSRMLS_CC) == FAILURE) {
 		return 0;
@@ -411,8 +411,8 @@ static int array_natural_general_compare(const void *a, const void *b, int fold_
 	f = *((Bucket **) a);
 	s = *((Bucket **) b);
  
-	fval = *((pval **) f->pData);
-	sval = *((pval **) s->pData);
+	fval = *((zval **) f->pData);
+	sval = *((zval **) s->pData);
 	first = *fval;
 	second = *sval;
 	if (Z_TYPE_P(fval) != IS_STRING) {
@@ -717,9 +717,9 @@ static int array_user_key_compare(const void *a, const void *b TSRMLS_DC)
 {
 	Bucket *f;
 	Bucket *s;
-	pval key1, key2;
-	pval *args[2];
-	pval retval;
+	zval key1, key2;
+	zval *args[2];
+	zval retval;
 	int status;
 
 	args[0] = &key1;
@@ -808,7 +808,7 @@ PHP_FUNCTION(uksort)
    Advances array argument's internal pointer to the last element and return it */
 PHP_FUNCTION(end)
 {
-	pval **array, **entry;
+	zval **array, **entry;
 	HashTable *target_hash;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
@@ -835,7 +835,7 @@ PHP_FUNCTION(end)
    Move array argument's internal pointer to the previous element and return it */
 PHP_FUNCTION(prev)
 {
-	pval **array, **entry;
+	zval **array, **entry;
 	HashTable *target_hash;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
@@ -862,7 +862,7 @@ PHP_FUNCTION(prev)
    Move array argument's internal pointer to the next element and return it */
 PHP_FUNCTION(next)
 {
-	pval **array, **entry;
+	zval **array, **entry;
 	HashTable *target_hash;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
@@ -889,7 +889,7 @@ PHP_FUNCTION(next)
    Set array argument's internal pointer to the first element and return it */	
 PHP_FUNCTION(reset)
 {
-	pval **array, **entry;
+	zval **array, **entry;
 	HashTable *target_hash;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
@@ -916,7 +916,7 @@ PHP_FUNCTION(reset)
    Return the element currently pointed to by the internal array pointer */
 PHP_FUNCTION(current)
 {
-	pval **array, **entry;
+	zval **array, **entry;
 	HashTable *target_hash;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
@@ -938,7 +938,7 @@ PHP_FUNCTION(current)
    Return the key of the element currently pointed to by the internal array pointer */
 PHP_FUNCTION(key)
 {
-	pval **array;
+	zval **array;
 	char *string_key;
 	uint string_length;
 	ulong num_key;
@@ -976,7 +976,7 @@ PHP_FUNCTION(key)
 PHP_FUNCTION(min)
 {
 	int argc=ZEND_NUM_ARGS();
-	pval **result;
+	zval **result;
 
 	if (argc<=0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Atleast one value should be passed");
@@ -984,7 +984,7 @@ PHP_FUNCTION(min)
 	}
 	set_compare_func(SORT_REGULAR TSRMLS_CC);
 	if (argc == 1) {
-		pval **arr;
+		zval **arr;
 
 		if (zend_get_parameters_ex(1, &arr) == FAILURE || Z_TYPE_PP(arr) != IS_ARRAY) {
 			WRONG_PARAM_COUNT;
@@ -996,8 +996,8 @@ PHP_FUNCTION(min)
 			RETURN_FALSE;
 		}
 	} else {
-		pval ***args = (pval ***) safe_emalloc(sizeof(pval **), ZEND_NUM_ARGS(), 0);
-		pval **min, result;
+		zval ***args = (zval ***) safe_emalloc(sizeof(zval **), ZEND_NUM_ARGS(), 0);
+		zval **min, result;
 		int i;
 
 		if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args)==FAILURE) {
@@ -1026,7 +1026,7 @@ PHP_FUNCTION(min)
 PHP_FUNCTION(max)
 {
 	int argc=ZEND_NUM_ARGS();
-	pval **result;
+	zval **result;
 
 	if (argc<=0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Atleast one value should be passed");
@@ -1034,7 +1034,7 @@ PHP_FUNCTION(max)
 	}
 	set_compare_func(SORT_REGULAR TSRMLS_CC);
 	if (argc == 1) {
-		pval **arr;
+		zval **arr;
 
 		if (zend_get_parameters_ex(1, &arr) == FAILURE || Z_TYPE_PP(arr) != IS_ARRAY) {
 			WRONG_PARAM_COUNT;
@@ -1046,8 +1046,8 @@ PHP_FUNCTION(max)
 			RETURN_FALSE;
 		}
 	} else {
-		pval ***args = (pval ***) safe_emalloc(sizeof(pval **), ZEND_NUM_ARGS(), 0);
-		pval **max, result;
+		zval ***args = (zval ***) safe_emalloc(sizeof(zval **), ZEND_NUM_ARGS(), 0);
+		zval **max, result;
 		int i;
 
 		if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
