@@ -20,7 +20,7 @@ static int le_extname;
  *
  * Every user visible function must have an entry in extname_functions[].
  */
-function_entry extname_functions[] = {
+zend_function_entry extname_functions[] = {
 	PHP_FE(confirm_extname_compiled,	NULL)		/* For testing, remove later. */
 	/* __function_entries_here__ */
 	{NULL, NULL, NULL}	/* Must be the last line in extname_functions[] */
