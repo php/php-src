@@ -27,8 +27,8 @@
 
 #include "php.h"
 #include "php_sunfuncs.h"
-#include "datetime.h"
 #include "php_ini.h"
+#include "ext/date/php_date.h"
 
 #include <assert.h>
 #include <math.h>
