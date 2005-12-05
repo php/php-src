@@ -502,7 +502,7 @@ PHP_MINFO_FUNCTION(fbsql)
 static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	PHPFBLink* phpLink;
-	list_entry *lep;
+	zend_rsrc_list_entry *lep;
 	char name[1024];
 	char *hostName = NULL, *userName = NULL, *userPassword = NULL;
 	int argc = ZEND_NUM_ARGS(), create_new = 0;
@@ -543,7 +543,7 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			phpLink = (PHPFBLink*)lep->ptr;
 		}
 		else {
-			list_entry le;
+			zend_rsrc_list_entry le;
 
 			if ((FB_SQL_G(maxLinks) != -1 && FB_SQL_G(linkCount) == FB_SQL_G(maxLinks)))
 			{
@@ -592,7 +592,7 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 	else
 	{
-		list_entry le;
+		zend_rsrc_list_entry le;
 
 		if ((FB_SQL_G(maxLinks) != -1 && FB_SQL_G(linkCount) == FB_SQL_G(maxLinks)))
 		{
