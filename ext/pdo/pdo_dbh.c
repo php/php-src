@@ -283,7 +283,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 		zval **v;
 		int plen;
 		char *hashkey = NULL;
-		list_entry *le;
+		zend_list_entry *le;
 		pdo_dbh_t *pdbh = NULL;
 
 		if (SUCCESS == zend_hash_index_find(Z_ARRVAL_P(options), PDO_ATTR_PERSISTENT, (void**)&v)) {
@@ -377,7 +377,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 		/* all set */
 
 		if (is_persistent) {
-			list_entry le;
+			zend_list_entry le;
 
 			/* register in the persistent list etc. */
 			/* we should also need to replace the object store entry,
