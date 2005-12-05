@@ -217,7 +217,7 @@ PHP_FUNCTION(assert)
 
 PHP_FUNCTION(assert_options)
 {
-	pval **what, **value;
+	zval **what, **value;
 	int oldint;
 	int ac = ZEND_NUM_ARGS();
 	

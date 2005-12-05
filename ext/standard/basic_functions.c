@@ -163,7 +163,7 @@ static void user_tick_function_dtor(user_tick_function_entry *tick_function_entr
 
 #undef sprintf
 
-function_entry basic_functions[] = {
+zend_function_entry basic_functions[] = {
 	PHP_FE(constant,														NULL)
 	PHP_FE(bin2hex,															NULL)
 	PHP_FE(sleep,															NULL)
@@ -1430,7 +1430,7 @@ PHP_FUNCTION(getenv)
    Set the value of an environment variable */
 PHP_FUNCTION(putenv)
 {
-	pval **str;
+	zval **str;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1726,7 +1726,7 @@ PHP_FUNCTION(flush)
    Delay for a given number of seconds */
 PHP_FUNCTION(sleep)
 {
-	pval **num;
+	zval **num;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1747,7 +1747,7 @@ PHP_FUNCTION(sleep)
 PHP_FUNCTION(usleep)
 {
 #if HAVE_USLEEP
-	pval **num;
+	zval **num;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1846,7 +1846,7 @@ PHP_FUNCTION(get_current_user)
    Get the value of a PHP configuration option */
 PHP_FUNCTION(get_cfg_var)
 {
-	pval **varname;
+	zval **varname;
 	char *value;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &varname) == FAILURE) {
@@ -1866,7 +1866,7 @@ PHP_FUNCTION(get_cfg_var)
    Set the current active configuration setting of magic_quotes_runtime and return previous */
 PHP_FUNCTION(set_magic_quotes_runtime)
 {
-	pval **new_setting;
+	zval **new_setting;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &new_setting) == FAILURE) {
 		RETURN_FALSE;
@@ -1912,7 +1912,7 @@ error options:
    Send an error message somewhere */
 PHP_FUNCTION(error_log)
 {
-	pval **string, **erropt = NULL, **option = NULL, **emailhead = NULL;
+	zval **string, **erropt = NULL, **option = NULL, **emailhead = NULL;
 	int opt_err = 0;
 	char *message, *opt = NULL, *headers = NULL;
 
@@ -2527,7 +2527,7 @@ PHP_FUNCTION(highlight_string)
    Get a configuration option */
 PHP_FUNCTION(ini_get)
 {
-	pval **varname;
+	zval **varname;
 	char *str;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &varname) == FAILURE) {
@@ -2623,7 +2623,7 @@ static int php_ini_check_path(char *option_name, int option_len, char *new_optio
    Set a configuration option, returns false on error and the old value of the configuration option on success */
 PHP_FUNCTION(ini_set)
 {
-	pval **varname, **new_value;
+	zval **varname, **new_value;
 	char *old_value;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &varname, &new_value) == FAILURE) {
@@ -2686,7 +2686,7 @@ PHP_FUNCTION(ini_set)
    Restore the value of a configuration option specified by varname */
 PHP_FUNCTION(ini_restore)
 {
-	pval **varname;
+	zval **varname;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &varname) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2703,7 +2703,7 @@ PHP_FUNCTION(ini_restore)
 
 PHP_FUNCTION(set_include_path)
 {
-	pval **new_value;
+	zval **new_value;
 	char *old_value;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &new_value) == FAILURE) {
@@ -2808,7 +2808,7 @@ PHP_FUNCTION(connection_status)
    Set whether we want to ignore a user abort event or not */
 PHP_FUNCTION(ignore_user_abort)
 {
-	pval **arg;
+	zval **arg;
 	int old_setting;
 
 	old_setting = PG(ignore_user_abort);
@@ -2838,7 +2838,7 @@ PHP_FUNCTION(ignore_user_abort)
    Returns port associated with service. Protocol must be "tcp" or "udp" */
 PHP_FUNCTION(getservbyname)
 {
-	pval **name, **proto;
+	zval **name, **proto;
 	struct servent *serv;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &name, &proto) == FAILURE) {
@@ -2863,7 +2863,7 @@ PHP_FUNCTION(getservbyname)
    Returns service name associated with port. Protocol must be "tcp" or "udp" */
 PHP_FUNCTION(getservbyport)
 {
-	pval **port, **proto;
+	zval **port, **proto;
 	struct servent *serv;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &port, &proto) == FAILURE) {
@@ -2888,7 +2888,7 @@ PHP_FUNCTION(getservbyport)
    Returns protocol number associated with name as per /etc/protocols */
 PHP_FUNCTION(getprotobyname)
 {
-	pval **name;
+	zval **name;
 	struct protoent *ent;
 
 	if (ZEND_NUM_ARGS() != 1
@@ -2916,7 +2916,7 @@ PHP_FUNCTION(getprotobyname)
    Returns protocol name associated with protocol number proto */
 PHP_FUNCTION(getprotobynumber)
 {
-	pval **proto;
+	zval **proto;
 	struct protoent *ent;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &proto) == FAILURE) {

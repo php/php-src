@@ -360,7 +360,7 @@ PHP_FUNCTION(iptcparse)
 			INIT_PZVAL(values);
 			array_init(values);
 			
-			zend_hash_update(Z_ARRVAL_P(return_value), key, strlen(key)+1, (void *) &values, sizeof(pval*), (void **) &element);
+			zend_hash_update(Z_ARRVAL_P(return_value), key, strlen(key)+1, (void *) &values, sizeof(zval*), (void **) &element);
 		} 
 			
 		add_next_index_stringl(*element, buffer+inx, len, 1);
