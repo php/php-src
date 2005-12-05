@@ -523,28 +523,10 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 			*element = new_val;
 
 			switch (const_value.type) {
-				case IS_STRING: {
-					long lval;
-					double dval;
-
-					if (is_numeric_string(Z_STRVAL(const_value), Z_STRLEN(const_value), &lval, &dval, 0) == IS_LONG) {
-						zend_hash_update_current_key(p->value.ht, HASH_KEY_IS_LONG, NULL, 0, lval);
-					} else {
-						zend_hash_update_current_key(p->value.ht, HASH_KEY_IS_STRING, Z_STRVAL(const_value), Z_STRLEN(const_value)+1, 0);
-					}
+				case IS_STRING:
+				case IS_UNICODE:
+					zend_u_symtable_update_current_key(p->value.ht, Z_TYPE(const_value), Z_UNIVAL(const_value), Z_UNILEN(const_value)+1);
 					break;
-				}
-				case IS_UNICODE: {
-					long lval;
-					double dval;
-
-					if (is_numeric_unicode(Z_USTRVAL(const_value), Z_USTRLEN(const_value), &lval, &dval, 0) == IS_LONG) {
-						zend_hash_update_current_key(p->value.ht, HASH_KEY_IS_LONG, NULL, 0, lval);
-					} else {
-						zend_hash_update_current_key(p->value.ht, HASH_KEY_IS_UNICODE, Z_USTRVAL(const_value), Z_USTRLEN(const_value)+1, 0);
-					}
-					break;
-				}
 				case IS_BINARY:
 					zend_hash_update_current_key(p->value.ht, HASH_KEY_IS_BINARY, Z_STRVAL(const_value), Z_STRLEN(const_value)+1, 0);
 					break;
