@@ -64,15 +64,6 @@ typedef struct _phar_file_data {
 	zend_bool	is_compressed;
 } phar_file_data;
 
-typedef struct _phar_dir_entry {
-	char		*entry;
-	struct _phar_dir_entry	*next;
-} phar_dir_entry;
-
-typedef struct _phar_dir_data {
-	phar_dir_entry *current;
-} phar_dir_data;
-
 ZEND_BEGIN_MODULE_GLOBALS(phar)
 	HashTable	phar_data;
 ZEND_END_MODULE_GLOBALS(phar)
