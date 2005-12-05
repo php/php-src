@@ -81,7 +81,7 @@ typedef unsigned int php_stat_len;
 typedef int php_stat_len;
 #endif
 
-PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int type, pval *return_value TSRMLS_DC);
+PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int type, zval *return_value TSRMLS_DC);
 
 /* Switches for various filestat functions: */
 #define FS_PERMS    0

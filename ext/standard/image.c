@@ -468,7 +468,7 @@ static int php_read_APP(php_stream * stream, unsigned int marker, zval *info TSR
 
 /* {{{ php_handle_jpeg
    main loop to parse JPEG structure */
-static struct gfxinfo *php_handle_jpeg (php_stream * stream, pval *info TSRMLS_DC) 
+static struct gfxinfo *php_handle_jpeg (php_stream * stream, zval *info TSRMLS_DC) 
 {
 	struct gfxinfo *result = NULL;
 	unsigned int marker = M_PSEUDO;
@@ -796,7 +796,7 @@ static unsigned php_ifd_get32u(void *Long, int motorola_intel)
 
 /* {{{ php_handle_tiff
    main loop to parse TIFF structure */
-static struct gfxinfo *php_handle_tiff (php_stream * stream, pval *info, int motorola_intel TSRMLS_DC)
+static struct gfxinfo *php_handle_tiff (php_stream * stream, zval *info, int motorola_intel TSRMLS_DC)
 {
 	struct gfxinfo *result = NULL;
 	int i, num_entries;

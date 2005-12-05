@@ -5159,7 +5159,7 @@ PHP_FUNCTION(strip_tags)
    Set locale information */
 PHP_FUNCTION(setlocale)
 {
-	pval ***args = (pval ***) safe_emalloc(sizeof(pval **), ZEND_NUM_ARGS(), 0);
+	zval ***args = (zval ***) safe_emalloc(sizeof(zval **), ZEND_NUM_ARGS(), 0);
 	zval **pcategory, **plocale;
 	int i, cat, n_args=ZEND_NUM_ARGS();
 	char *loc, *retval;

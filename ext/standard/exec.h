@@ -36,6 +36,6 @@ PHP_MINIT_FUNCTION(proc_open);
 
 PHPAPI char *php_escape_shell_cmd(char *);
 PHPAPI char *php_escape_shell_arg(char *);
-int php_exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC);
+int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC);
 
 #endif /* EXEC_H */

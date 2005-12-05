@@ -271,7 +271,7 @@ static char * php_convert_cyr_string(unsigned char *str, int length, char from, 
    Convert from one Cyrillic character set to another */
 PHP_FUNCTION(convert_cyr_string)
 {
-    pval **str_arg, **fr_cs, **to_cs;
+    zval **str_arg, **fr_cs, **to_cs;
 	unsigned char *str;
 
     if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3,&str_arg,&fr_cs, &to_cs)==FAILURE)

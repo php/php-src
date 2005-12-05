@@ -823,7 +823,7 @@ parse_eol:
    Create a unique filename in a directory */
 PHP_FUNCTION(tempnam)
 {
-	pval **arg1, **arg2;
+	zval **arg1, **arg2;
 	char *d;
 	char *opened_path;
 	char p[64];
@@ -1501,7 +1501,7 @@ PHP_FUNCTION(readfile)
    Return or change the umask */
 PHP_FUNCTION(umask)
 {
-	pval **arg1;
+	zval **arg1;
 	int oldumask;
 	int arg_count = ZEND_NUM_ARGS();
 
