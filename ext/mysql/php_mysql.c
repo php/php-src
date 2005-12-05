@@ -661,11 +661,11 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		persistent=0;
 	}
 	if (persistent) {
-		list_entry *le;
+		zend_rsrc_list_entry *le;
 
 		/* try to find if we already have this link in our persistent list */
 		if (zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {  /* we don't */
-			list_entry new_le;
+			zend_rsrc_list_entry new_le;
 
 			if (MySG(max_links)!=-1 && MySG(num_links)>=MySG(max_links)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%ld)", MySG(num_links));
@@ -705,7 +705,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			/* hash it up */
 			Z_TYPE(new_le) = le_plink;
 			new_le.ptr = mysql;
-			if (zend_hash_update(&EG(persistent_list), hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
+			if (zend_hash_update(&EG(persistent_list), hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(zend_rsrc_list_entry), NULL)==FAILURE) {
 				free(mysql);
 				efree(hashed_details);
 				MYSQL_DO_CONNECT_RETURN_FALSE();
@@ -748,7 +748,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 		ZEND_REGISTER_RESOURCE(return_value, mysql, le_plink);
 	} else { /* non persistent */
-		list_entry *index_ptr, new_index_ptr;
+		zend_rsrc_list_entry *index_ptr, new_index_ptr;
 		
 		/* first we check the hash for the hashed_details key.  if it exists,
 		 * it should point us to the right offset where the actual mysql link sits.
@@ -813,7 +813,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		/* add it to the hash */
 		new_index_ptr.ptr = (void *) Z_LVAL_P(return_value);
 		Z_TYPE(new_index_ptr) = le_index_ptr;
-		if (zend_hash_update(&EG(regular_list), hashed_details, hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry), NULL)==FAILURE) {
+		if (zend_hash_update(&EG(regular_list), hashed_details, hashed_details_length+1,(void *) &new_index_ptr, sizeof(zend_rsrc_list_entry), NULL)==FAILURE) {
 			efree(hashed_details);
 			MYSQL_DO_CONNECT_RETURN_FALSE();
 		}
