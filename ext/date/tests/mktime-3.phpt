@@ -5,7 +5,7 @@ error_reporting=2047
 --FILE--
 <?php
 $tzs = array("America/Toronto", "Europe/Oslo");
-$years = array(0, 69, 70, 71, 99, 100, 1900, 1901, 1902, 1999, 2000, 2001);
+$years = array(0, 69, 70, 71, 99, 100, 105, 1900, 1901, 1902, 1999, 2000, 2001);
 
 foreach ($tzs as $tz) {
 	echo $tz, "\n";
@@ -30,6 +30,7 @@ Y:   70 - January 1970-01-01T01:01:01-0500
 Y:   71 - January 1971-01-01T01:01:01-0500
 Y:   99 - January 1999-01-01T01:01:01-0500
 Y:  100 - January 2000-01-01T01:01:01-0500
+Y:  105 - January 2005-01-01T01:01:01-0500
 Y: 1900 - out of range
 Y: 1901 - out of range
 Y: 1902 - January 1902-01-01T01:01:01-0500
@@ -44,6 +45,7 @@ Y:   70 - January 1970-01-01T01:01:01+0100
 Y:   71 - January 1971-01-01T01:01:01+0100
 Y:   99 - January 1999-01-01T01:01:01+0100
 Y:  100 - January 2000-01-01T01:01:01+0100
+Y:  105 - January 2005-01-01T01:01:01+0100
 Y: 1900 - out of range
 Y: 1901 - out of range
 Y: 1902 - January 1902-01-01T01:01:01+0100
