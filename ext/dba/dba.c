@@ -365,7 +365,7 @@ static void dba_close_rsrc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 /* }}} */
 
 /* {{{ dba_close_pe_rsrc_deleter */
-int dba_close_pe_rsrc_deleter(list_entry *le, void *pDba TSRMLS_DC)
+int dba_close_pe_rsrc_deleter(zend_rsrc_list_entry *le, void *pDba TSRMLS_DC)
 {
 	return le->ptr == pDba;
 }
@@ -502,7 +502,7 @@ static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
  */
 dba_info *php_dba_find(const char* path TSRMLS_DC)
 {
-	list_entry *le;
+	zend_rsrc_list_entry *le;
 	dba_info *info;
 	int numitems, i;
 
@@ -559,7 +559,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 
 	if (persistent) {
-		list_entry *le;
+		zend_rsrc_list_entry *le;
 		
 		/* calculate hash */
 		key = safe_emalloc(keylen, 1, 1);
@@ -845,11 +845,11 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	info->argv = NULL;
 
 	if (persistent) {
-		list_entry new_le;
+		zend_rsrc_list_entry new_le;
 
 		Z_TYPE(new_le) = le_pdb;
 		new_le.ptr = info;
-		if (zend_hash_update(&EG(persistent_list), key, keylen+1, &new_le, sizeof(list_entry), NULL) == FAILURE) {
+		if (zend_hash_update(&EG(persistent_list), key, keylen+1, &new_le, sizeof(zend_rsrc_list_entry), NULL) == FAILURE) {
 			dba_close(info TSRMLS_CC);
 			php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Could not register persistent resource");
 			FREENOW;
