@@ -31,6 +31,7 @@
 #include "zend_execute.h"
 #include "zend_constants.h"
 #include "php_phar.h"
+#include "main/php_streams.h"
 #ifndef TRUE
  #       define TRUE 1
  #       define FALSE 0
@@ -108,8 +109,7 @@ PHP_METHOD(PHP_Archive, mapPhar)
 	long halt_offset;
 	php_uint32 manifest_len, manifest_count, manifest_index;
 	zval *halt_constant, **unused1, **unused2;
-	FILE *fp;
-	struct stat st;
+	php_stream *fp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zsb|z", &unused1, &alias, &alias_len, &compressed, &unused2) == FAILURE) {
 		return;
@@ -130,34 +130,36 @@ PHP_METHOD(PHP_Archive, mapPhar)
 	zval_dtor(halt_constant);
 	FREE_ZVAL(halt_constant);
 
-	// IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS
-	fp = VCWD_FOPEN(fname, "rb");
-
-	/* refuse to open anything that is not a regular file */
-	if (fp && (0 > fstat(fileno(fp), &st) || !S_ISREG(st.st_mode))) {
-		fclose(fp);
-		fp = NULL;
+	if (PG(safe_mode) && (!php_checkuid(fname, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
+		return;
 	}
+
+	if (php_check_open_basedir(fname TSRMLS_CC)) {
+		return;
+	}
+
+	fp = php_stream_open_wrapper(fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
+
 	if (!fp) {
 		return;
 	}
 
 	// check for ?>\n and increment accordingly
-	fseek(fp, halt_offset, SEEK_SET);
+	php_stream_seek(fp, halt_offset, SEEK_SET);
 	if (FALSE == (buffer = (char *) emalloc(4))) goto MAPPHAR_ALLOC_FAILURE;
-	if (3 != fread(buffer, 1, 3, fp)) {
+	if (3 != php_stream_read(fp, buffer, 3)) {
 MAPPHAR_FAILURE:
 		efree(buffer);
 MAPPHAR_ALLOC_FAILURE:
-		fclose(fp);
+		php_stream_close(fp);
 		return;
 	}
 	if (*buffer == ' ' && *(buffer + 1) == '?' && *(buffer + 2) == '>') {
 		halt_offset += 3;
 		int nextchar;
-		if (EOF == (nextchar = fgetc(fp))) goto MAPPHAR_FAILURE;
+		if (EOF == (nextchar = php_stream_getc(fp))) goto MAPPHAR_FAILURE;
 		if ((char) nextchar == '\r') {
-			if (EOF == (nextchar = fgetc(fp))) goto MAPPHAR_FAILURE;
+			if (EOF == (nextchar = php_stream_getc(fp))) goto MAPPHAR_FAILURE;
 			halt_offset++;
 		}
 		if ((char) nextchar == '\n') {
@@ -165,7 +167,7 @@ MAPPHAR_ALLOC_FAILURE:
 		}
 	}
 	// make sure we are at the right location to read the manifest
-	fseek(fp, halt_offset, SEEK_SET);
+	php_stream_seek(fp, halt_offset, SEEK_SET);
 
 	// read in manifest
 
@@ -178,7 +180,7 @@ MAPPHAR_ALLOC_FAILURE:
 		unpack_var[little_endian_long_map[i]] = *buffer++;\
 	}
 
-	if (4 != fread(buffer, 1, 4, fp)) goto MAPPHAR_FAILURE;
+	if (4 != php_stream_read(fp, buffer, 4)) goto MAPPHAR_FAILURE;
 	endbuffer = buffer;
 	PHAR_GET_VAL(manifest_len)
 	buffer -= 4;
@@ -188,7 +190,7 @@ MAPPHAR_ALLOC_FAILURE:
 	// set the test pointer
 	endbuffer = buffer + manifest_len;
 	// retrieve manifest
-	if (manifest_len != fread(buffer, 1, manifest_len, fp)) goto MAPPHAR_FAILURE;
+	if (manifest_len != php_stream_read(fp, buffer, manifest_len)) goto MAPPHAR_FAILURE;
 	// extract the number of entries
 	PHAR_GET_VAL(manifest_count)
 	// set up our manifest
@@ -220,7 +222,7 @@ MAPPHAR_ALLOC_FAILURE:
 	zend_hash_add(&(PHAR_G(phar_data)), alias, alias_len, &mydata,
 		sizeof(phar_file_data), NULL);
 	efree(savebuf);
-	fclose(fp);
+	php_stream_close(fp);
 }
 
 PHP_METHOD(PHP_Archive, apiVersion)
@@ -457,8 +459,7 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 	char *internal_file;
 	char *buffer;
 	php_url *resource = NULL;
-	FILE *fp;
-	struct stat st;
+	php_stream *fp;
 #ifdef HAVE_PHAR_ZLIB
 	/* borrowed from zlib.c gzinflate() function */
 	int status;
@@ -484,14 +485,16 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 
 	php_url_free(resource);
 
-	// IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS
-	fp = VCWD_FOPEN(idata->data->file, "rb");
-
-	/* refuse to open anything that is not a regular file */
-	if (fp && (0 > fstat(fileno(fp), &st) || !S_ISREG(st.st_mode))) {
-		fclose(fp);
-		fp = NULL;
+	if (PG(safe_mode) && (!php_checkuid(idata->data->file, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
+		return NULL;
 	}
+
+	if (php_check_open_basedir(idata->data->file TSRMLS_CC)) {
+		return NULL;
+	}
+
+	fp = php_stream_open_wrapper(idata->data->file, "rb", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
+
 	if (!fp) {
 		efree(idata->file);
 		efree(idata);
@@ -499,18 +502,18 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 	}
 
 	/* seek to start of internal file and read it */
-	fseek(fp, idata->data->internal_file_start + idata->internal_file->offset_within_phar, SEEK_SET);
+	php_stream_seek(fp, idata->data->internal_file_start + idata->internal_file->offset_within_phar, SEEK_SET);
 	if (idata->data->is_compressed) {
 #ifdef HAVE_PHAR_ZLIB
 		buffer = (char *) emalloc(idata->internal_file->compressed_filesize);
 		if (idata->internal_file->compressed_filesize !=
-				fread(buffer, 1, idata->internal_file->compressed_filesize, fp)) {
-			fclose(fp);
+				php_stream_read(fp, buffer, idata->internal_file->compressed_filesize)) {
+			php_stream_close(fp);
 			efree(buffer);
 			efree(idata);
 			return NULL;
 		}
-		fclose(fp);
+		php_stream_close(fp);
 		unsigned long crc32;
 		php_uint32 actual_length, i;
 		char *unpack_var, *savebuf;
@@ -587,13 +590,13 @@ PHAR_ZLIB_ERROR:
 	} else {
 		idata->file = (char *) emalloc(idata->internal_file->compressed_filesize);
 		if (idata->internal_file->compressed_filesize !=
-				fread(idata->file, 1, idata->internal_file->compressed_filesize, fp)) {
-			fclose(fp);
+				php_stream_read(fp, idata->file, idata->internal_file->compressed_filesize)) {
+			php_stream_close(fp);
 			efree(idata->file);
 			efree(idata);
 			return NULL;
 		}
-		fclose(fp);
+		php_stream_close(fp);
 		// check length, crc32
 		if (-1 == phar_postprocess_file(idata->file, idata->internal_file->uncompressed_filesize, 0, 1)) {
 			efree(idata->file);
