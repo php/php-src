@@ -75,7 +75,7 @@ static phar_internal_file_data *phar_get_filedata(char *alias, char *path)
 	phar_manifest_entry *file_data;
 	
 	ret = NULL;
-	if (SUCCESS == zend_hash_find(&PHAR_G(phar_data), alias, strlen(alias), (void **) &data)) {
+	if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_data), alias, strlen(alias), (void **) &data)) {
 		if (SUCCESS == zend_hash_find(data->manifest, path, strlen(path), (void **) &file_data)) {
 			ret = (phar_internal_file_data *) emalloc(sizeof(phar_internal_file_data));
 			ret->data = data;
@@ -219,7 +219,7 @@ MAPPHAR_ALLOC_FAILURE:
 	mydata.internal_file_start = manifest_len + halt_offset + 4;
 	mydata.is_compressed = compressed;
 	mydata.manifest = manifest;
-	zend_hash_add(&(PHAR_G(phar_data)), alias, alias_len, &mydata,
+	zend_hash_add(&(PHAR_GLOBALS->phar_data), alias, alias_len, &mydata,
 		sizeof(phar_file_data), NULL);
 	efree(savebuf);
 	php_stream_close(fp);
@@ -283,6 +283,7 @@ static void php_phar_init_globals_module(zend_phar_globals *phar_globals)
 
 PHP_PHAR_API php_stream *php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 PHP_PHAR_API int phar_close(php_stream *stream, int close_handle TSRMLS_DC);
+PHP_PHAR_API int phar_closedir(php_stream *stream, int close_handle TSRMLS_DC);
 PHP_PHAR_API size_t phar_read(php_stream *stream, char *buf, size_t count TSRMLS_DC);
 PHP_PHAR_API size_t phar_readdir(php_stream *stream, char *buf, size_t count TSRMLS_DC);
 PHP_PHAR_API int phar_seek(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC);
@@ -310,7 +311,7 @@ static php_stream_ops phar_ops = {
 static php_stream_ops phar_dir_ops = {
 	phar_write, // write (does nothing)
 	phar_readdir, //read
-	phar_close, //close
+	phar_closedir, //close
 	phar_flush, //flush (does nothing)
 	"phar stream",
 	NULL, // seek
@@ -626,6 +627,15 @@ PHP_PHAR_API int phar_close(php_stream *stream, int close_handle TSRMLS_DC)
 	return 0;
 }
 
+PHP_PHAR_API int phar_closedir(php_stream *stream, int close_handle TSRMLS_DC)
+{
+	HashTable *data = (HashTable *)stream->abstract;
+
+	zend_hash_destroy(data);
+	FREE_HASHTABLE(data);
+	return 0;
+}
+
 PHP_PHAR_API size_t phar_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
 {
 	size_t to_read;
@@ -644,19 +654,27 @@ PHP_PHAR_API size_t phar_read(php_stream *stream, char *buf, size_t count TSRMLS
 PHP_PHAR_API size_t phar_readdir(php_stream *stream, char *buf, size_t count TSRMLS_DC)
 {
 	size_t to_read;
-	phar_dir_data *data = (phar_dir_data *)stream->abstract;
+	HashTable *data = (HashTable *)stream->abstract;
+	char *key;
+	uint keylen;
+	ulong unused;
 
-	phar_dir_entry *ptr;
-	to_read = MIN(strlen(data->current->entry), count);
-	if (to_read == 0) {
+	if (FAILURE == zend_hash_has_more_elements(data)) {
 		return 0;
 	}
-	ptr = data->current;
-	data->current = data->current->next;
-	memcpy(buf, ptr->entry, to_read);
-	efree(ptr);
+	if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(data, &key, &keylen, &unused, 0, NULL)) {
+		return 0;
+	}
+	zend_hash_move_forward(data);
+	to_read = MIN(keylen, count);
+	if (to_read == 0 || count < keylen) {
+		return 0;
+	}
+	memset(buf, 0, sizeof(php_stream_dirent));
+	memcpy(((php_stream_dirent *) buf)->d_name, key, to_read);
+	((php_stream_dirent *) buf)->d_name[to_read + 1] = '\0';
 
-	return to_read;
+	return sizeof(php_stream_dirent);
 }
 
 PHP_PHAR_API int phar_seek(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC)
@@ -778,7 +796,7 @@ errexit:
 	}
 
 	internal_file = resource->path + 1; /* strip leading "/" */
-	if (SUCCESS == zend_hash_find(&PHAR_G(phar_data), resource->host, strlen(resource->host), (void **) &data)) {
+	if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_data), resource->host, strlen(resource->host), (void **) &data)) {
 		if (*internal_file == '\0') {
 			// root directory requested
 			phar_dostat(NULL, ssb, 1);
@@ -791,7 +809,9 @@ errexit:
 			// search for directory
 			zend_hash_internal_pointer_reset(data->manifest);
 			while (zend_hash_has_more_elements(data->manifest)) {
-				if (zend_hash_get_current_key_ex(data->manifest, &key, &keylen, &unused, 0, NULL)) {
+				if (HASH_KEY_NON_EXISTANT !=
+						zend_hash_get_current_key_ex(
+							data->manifest, &key, &keylen, &unused, 0, NULL)) {
 					if (0 == memcmp(key, internal_file, keylen)) {
 						// directory found
 						phar_dostat(NULL, ssb, 1);
@@ -807,28 +827,37 @@ errexit:
 	return 0;
 }
 
+static int phar_add_empty(HashTable *ht, char *arKey, uint nKeyLength)
+{
+	void *dummy = (void *) 1;
+
+	return zend_hash_update(ht, arKey, nKeyLength, &dummy, sizeof(void *), NULL);
+}
+
 static php_stream *phar_make_dirstream(char *dir, HashTable *manifest)
 {
-	phar_dir_data *data;
+	HashTable *data;
 	int dirlen = strlen(dir);
 	char *save, *found, *key;
 	uint keylen;
 	ulong unused;
-	phar_dir_entry *entry = NULL, *prev = NULL;
-	data = (phar_dir_data *) emalloc(sizeof(phar_dir_data));
+	char *entry;
+	ALLOC_HASHTABLE(data);
+	zend_hash_init(data, 64, zend_get_hash_value, NULL, 0);
 
 	zend_hash_internal_pointer_reset(manifest);
-	while (zend_hash_has_more_elements(manifest)) {
-		if (!zend_hash_get_current_key_ex(manifest, &key, &keylen, &unused, 0, NULL)) {
+	while (SUCCESS == zend_hash_has_more_elements(manifest)) {
+		if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(manifest, &key, &keylen, &unused, 0, NULL)) {
 			return NULL;
 		}
 		if (*dir == '/') {
-			// root directory
-			if (memchr(key, '/', keylen)) {
-				// the entry has a path separator and is not in /
-				zend_hash_move_forward(manifest);
-				continue;
+			// not root directory
+			if (NULL != (found = (char *) memchr(key, '/', keylen))) {
+				// the entry has a path separator and is a subdirectory
+				save = key;
+				goto PHAR_DIR_SUBDIR;
 			}
+			dirlen = 0;
 		} else {
 			if (0 != memcmp(key, dir, dirlen)) {
 				// entry in directory not found
@@ -836,26 +865,26 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest)
 				continue;
 			}
 		}
-		entry = (phar_dir_entry *) emalloc(sizeof(phar_dir_entry));
 		save = key;
 		save += dirlen + 1; // seek to just past the path separator
 		if (NULL != (found = (char *) memchr(save, '/', keylen - dirlen - 1))) {
 			// is subdirectory
-			entry->entry = (char *) emalloc (found - save + 1);
-			memcpy(entry->entry, save, found - save);
-			entry->entry[found - save + 1] = '\0';
+			save -= dirlen + 1;
+PHAR_DIR_SUBDIR:
+			entry = (char *) emalloc (found - save + 2);
+			memcpy(entry, save, found - save);
+			keylen = found - save;
+			entry[found - save + 1] = '\0';
 		} else {
 			// is file
-			entry->entry = (char *) emalloc (keylen - dirlen - 1);
-			memcpy(entry->entry, save, keylen - dirlen - 1);
-			entry->entry[keylen - dirlen - 1] = '\0';
+			save -= dirlen + 1;
+			entry = (char *) emalloc (keylen - dirlen + 1);
+			memcpy(entry, save, keylen - dirlen);
+			entry[keylen - dirlen] = '\0';
+			keylen = keylen - dirlen;
 		}
-		if (prev) {
-			prev->next = entry;
-		} else {
-			data->current = entry;
-		}
-		prev = entry;
+		phar_add_empty(data, entry, keylen);
+		efree(entry);
 		zend_hash_move_forward(manifest);
 	}
 	return php_stream_alloc(&phar_dir_ops, data, NULL, "r");
@@ -883,7 +912,7 @@ PHP_PHAR_API php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filenam
 	}
 
 	internal_file = resource->path + 1; /* strip leading "/" */
-	if (SUCCESS == zend_hash_find(&PHAR_G(phar_data), resource->host, strlen(resource->host), (void **) &data)) {
+	if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_data), resource->host, strlen(resource->host), (void **) &data)) {
 		if (*internal_file == '\0') {
 			// root directory requested
 			ret = phar_make_dirstream("/", data->manifest);
@@ -898,7 +927,9 @@ PHAR_DIR_ERROR:
 			// search for directory
 			zend_hash_internal_pointer_reset(data->manifest);
 			while (zend_hash_has_more_elements(data->manifest)) {
-				if (zend_hash_get_current_key_ex(data->manifest, &key, &keylen, &unused, 0, NULL)) {
+				if (HASH_KEY_NON_EXISTANT != 
+						zend_hash_get_current_key_ex(
+							data->manifest, &key, &keylen, &unused, 0, NULL)) {
 					if (0 == memcmp(key, internal_file, keylen)) {
 						// directory found
 						php_url_free(resource);
