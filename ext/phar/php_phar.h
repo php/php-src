@@ -21,7 +21,7 @@
 #ifndef PHP_PHAR_H
 #define PHP_PHAR_H
 
-#ifdef HAVE_ZLIB
+#ifdef HAVE_PHAR_ZLIB
 #include <zlib.h>
 #endif
 
