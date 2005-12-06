@@ -14,8 +14,10 @@
   +----------------------------------------------------------------------+
   | Author: Georg Richter <georg@php.net>                                |
   +----------------------------------------------------------------------+
-
 */
+
+/* $Id$ */
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -145,7 +147,7 @@ mysqli_property_entry mysqli_driver_property_entries[] = {
 
 /* {{{ mysqli_driver_methods[]
  */
-function_entry mysqli_driver_methods[] = {
+zend_function_entry mysqli_driver_methods[] = {
 	PHP_FALIAS(embedded_server_start, mysqli_embedded_server_start, NULL)
 	PHP_FALIAS(embedded_server_end, mysqli_embedded_server_end, NULL)
 	{NULL, NULL, NULL}
