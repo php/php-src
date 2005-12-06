@@ -21,10 +21,10 @@ file and for text files proper language encoding.
  <license>PHP</license>
  <release>
   <state>stable</state>
-  <version>1.0.1</version>
-  <date>2005-11-24</date>
+  <version>1.0.2</version>
+  <date>2005-12-05</date>
   <notes>
-	1) PHP 5.1.0 Compatibility
+	1) Allow build against 5.1 and 5.0 versions of PHP
   </notes>
   <filelist>
    <file role="src" name="config.m4"/>
