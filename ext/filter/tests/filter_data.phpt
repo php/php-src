@@ -1,5 +1,7 @@
 --TEST--
 Simple filter_data() tests
+--GET--
+
 --FILE--
 <?php
 

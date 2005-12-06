@@ -5,7 +5,7 @@ foo=<b>abc</b>
 --GET--
 --FILE--
 <?php 
-echo filter(FILTER_POST, 'foo', FILTER_HTML);
+echo input_get(INPUT_POST, 'foo', FS_STRIPPED);
 ?>
 --EXPECT--
 abc
