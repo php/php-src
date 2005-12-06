@@ -96,7 +96,7 @@ typedef struct {
 } sybase_field;
 
 typedef struct {
-	pval **data;
+	zval **data;
 	sybase_field *fields;
 	sybase_link *sybase_ptr;
 	int cur_row,cur_field;
