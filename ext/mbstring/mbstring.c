@@ -180,7 +180,7 @@ static const struct mb_overload_def mb_ovld[] = {
 }; 
 /* }}} */
 
-/* {{{ function_entry mbstring_functions[] */
+/* {{{ zend_function_entry mbstring_functions[] */
 zend_function_entry mbstring_functions[] = {
 	PHP_FE(mb_convert_case,			NULL)
 	PHP_FE(mb_strtoupper,			NULL)
