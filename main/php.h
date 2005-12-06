@@ -170,11 +170,13 @@ typedef unsigned int socklen_t;
 # endif
 #endif
 
-
 #include "zend_hash.h"
-#include "php3_compat.h"
 #include "zend_alloc.h"
 #include "zend_stack.h"
+
+/* PHP3 Legacy */
+typedef zval pval;
+#define function_entry          zend_function_entry
 
 #if STDC_HEADERS
 # include <string.h>
