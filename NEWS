@@ -37,7 +37,6 @@ PHP                                                                        NEWS
   proper init). (Ilia)
 - Fixed bug #35490 (socket_sendto() unable to handle IPv6 addresses). (Tony)
 - Fixed bug #35437 (Segfault or Invalid Opcode 137/1/4). (Dmitry)
-- Fixed bug #34729 (Crash in ZTS mode under Apache). (Dmitry, Zeev) 
 - Fixed bug #35470 (Assigning global using variable name from array doesn't
   function). (Dmitry)
 - Fixed bug #35456 (+ 1 [time unit] format did not work). (Ilia)
@@ -61,6 +60,9 @@ PHP                                                                        NEWS
 - Fixed bug #35062 (socket_read() produces warnings on non blocking sockets).
   (Nuno, Ilia)
 - Fixed bug #35028 (SimpleXML object fails FALSE test). (Marcus)
+- Fixed bug #34729 (Crash in ZTS mode under Apache). (Dmitry, Zeev) 
+- Fixed bug #30760 (Remove MessageBox on win32 for E_CORE errors if 
+  display_startup_error is off). (Ilia)
 
 28 Nov 2005, PHP 5.1.1
 - Disabled native date class to prevent pear::date conflict. (Ilia)
