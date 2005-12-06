@@ -2597,7 +2597,7 @@ PHP_FUNCTION(imageinterlace)
 static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 {
 	zval **IM, **POINTS, **NPOINTS, **COL;
-	pval **var = NULL;
+	zval **var = NULL;
 	gdImagePtr im;
 	gdPointPtr points;
 	int npoints, col, nelem, i;
@@ -4190,7 +4190,7 @@ PHP_FUNCTION(imagefilter)
 PHP_FUNCTION(imageconvolution)
 {
 	zval *SIM, *hash_matrix;
-	pval **var = NULL, **var2 = NULL;
+	zval **var = NULL, **var2 = NULL;
 	gdImagePtr im_src = NULL;
 	double div, offset;
 	int nelem, i, j, res;
