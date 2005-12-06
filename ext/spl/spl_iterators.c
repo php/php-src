@@ -56,7 +56,7 @@ PHPAPI zend_class_entry *spl_ce_AppendIterator;
 PHPAPI zend_class_entry *spl_ce_RegExIterator;
 PHPAPI zend_class_entry *spl_ce_RecursiveRegExIterator;
 
-function_entry spl_funcs_RecursiveIterator[] = {
+zend_function_entry spl_funcs_RecursiveIterator[] = {
 	SPL_ABSTRACT_ME(RecursiveIterator, hasChildren,  NULL)
 	SPL_ABSTRACT_ME(RecursiveIterator, getChildren,  NULL)
 	{NULL, NULL, NULL}
