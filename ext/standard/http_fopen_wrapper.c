@@ -305,7 +305,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 
 	if (context &&
 		php_stream_context_get_option(context, "http", "header", &tmpzval) == SUCCESS &&
-		Z_STRLEN_PP(tmpzval)) {
+		Z_TYPE_PP(tmpzval) == IS_STRING && Z_STRLEN_PP(tmpzval)) {
 		/* Remove newlines and spaces from start and end,
 		   php_trim will estrndup() */
 		tmp = php_trim(Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval), NULL, 0, IS_STRING, NULL, 3 TSRMLS_CC);
@@ -409,7 +409,8 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	}
 
 	if (context && 
-	    php_stream_context_get_option(context, "http", "user_agent", &ua_zval) == SUCCESS) {
+	    php_stream_context_get_option(context, "http", "user_agent", &ua_zval) == SUCCESS &&
+		Z_TYPE_PP(ua_zval) == IS_STRING) {
 		ua_str = Z_STRVAL_PP(ua_zval);
 	} else if (FG(user_agent)) {
 		ua_str = FG(user_agent);
@@ -441,7 +442,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	/* Request content, such as for POST requests */
 	if (header_init && context &&
 		php_stream_context_get_option(context, "http", "content", &tmpzval) == SUCCESS &&
-		Z_STRLEN_PP(tmpzval) > 0) {
+		Z_TYPE_PP(tmpzval) == IS_STRING && Z_STRLEN_PP(tmpzval) > 0) {
 		if (!(have_header & HTTP_HEADER_CONTENT_LENGTH)) {
 			scratch_len = snprintf(scratch, scratch_len, "Content-Length: %d\r\n", Z_STRLEN_PP(tmpzval));
 			php_stream_write(stream, scratch, scratch_len);
