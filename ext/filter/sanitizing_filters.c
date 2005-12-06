@@ -34,6 +34,10 @@ static void php_filter_encode_html(zval *value, char* chars, int encode_nul)
 	int len = Z_STRLEN_P(value);
 	char *s = Z_STRVAL_P(value);
 
+	if (Z_STRLEN_P(value) == 0) {
+		return;
+	}
+
 	for (x = 0, y = 0; len--; x++, y++) {
 		if (strchr(chars, s[x]) || (encode_nul && s[x] == 0)) {
 			smart_str_appendl(&str, "&#", 2);
@@ -56,6 +60,10 @@ static void php_filter_encode_html_high_low(zval *value, long flags)
 	int len = Z_STRLEN_P(value);
 	unsigned char *s = Z_STRVAL_P(value);
 
+	if (Z_STRLEN_P(value) == 0) {
+		return;
+	}
+	
 	for (x = 0, y = 0; len--; x++, y++) {
 		if (((flags & FILTER_FLAG_ENCODE_LOW) && (s[x] < 32)) || ((flags & FILTER_FLAG_ENCODE_HIGH) && (s[x] > 127))) {
 			smart_str_appendl(&str, "&#", 2);
@@ -227,7 +235,7 @@ void php_filter_special_chars(PHP_INPUT_FILTER_PARAM_DECL)
 void php_filter_unsafe_raw(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	/* Only if no flags are set (optimization) */
-	if (flags != 0) {
+	if (flags != 0 && Z_STRLEN_P(value) > 0) {
 		php_filter_strip(value, flags);
 		if (flags & FILTER_FLAG_ENCODE_AMP) {
 			php_filter_encode_html(value, "&", 0);
