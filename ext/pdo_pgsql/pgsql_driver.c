@@ -132,7 +132,7 @@ static int pgsql_lob_close(php_stream *stream, int close_handle TSRMLS_DC)
 		lo_close(self->conn, self->lfd);
 	}
 	efree(self);
-	php_pdo_dbh_delref(dbh TSRMLS_DC);
+	php_pdo_dbh_delref(dbh TSRMLS_CC);
 	return 0;
 }
 
