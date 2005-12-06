@@ -310,7 +310,7 @@ static void print_hwapi_stringarray(const HW_API_StringArray& strings) {
 	}
 }
 
-static int stringArray2indexArray(pval **return_value, HW_API_StringArray *values) {
+static int stringArray2indexArray(zval **return_value, HW_API_StringArray *values) {
 	array_init(*return_value);
 	for (int i=0; i<values->count(); i++) {
 		HW_API_String str;
@@ -321,7 +321,7 @@ static int stringArray2indexArray(pval **return_value, HW_API_StringArray *value
 	return 1;
 }
 
-static int objectArray2indexArray(pval **return_value, HW_API_ObjectArray *objarr) {
+static int objectArray2indexArray(zval **return_value, HW_API_ObjectArray *objarr) {
 	array_init(*return_value);
 
 	for(int i=0; i<objarr->count(); i++) {
@@ -2233,7 +2233,7 @@ PHP_MINFO_FUNCTION(hwapi) {
 /* {{{ proto bool hwapi_dummy(int link, int id, int msgid)
    Hyperwave dummy function */
 PHP_FUNCTION(hwapi_dummy) {
-	pval **arg1, **arg2, **arg3;
+	zval **arg1, **arg2, **arg3;
 	int link, id, type, msgid;
 
 	RETURN_TRUE;
@@ -2323,7 +2323,7 @@ PHP_FUNCTION(hwapi_hgcsp) {
 /* {{{ proto object hwapi_object(array object_in)
     */
 PHP_FUNCTION(hwapi_object) {
-	pval **arg1, *rv, *id;
+	zval **arg1, *rv, *id;
 	HW_API_Object *newobj;
 	HW_API_object_In *in;
 	HW_API_object_Out out;
@@ -2562,7 +2562,7 @@ PHP_FUNCTION(hwapi_find) {
 /* {{{ proto bool hwapi_identify(array parameters)
    Hyperwave dummy function */
 PHP_FUNCTION(hwapi_identify) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_identify_In *in;
 	HW_API_identify_Out out;
 	HW_API_HGCSP *db;
@@ -2600,7 +2600,7 @@ PHP_FUNCTION(hwapi_identify) {
 /* {{{ proto bool hwapi_remove(array parameters)
    Remove an object */
 PHP_FUNCTION(hwapi_remove) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_remove_In *in;
 	HW_API_remove_Out out;
 	HW_API_HGCSP *db;
@@ -2638,7 +2638,7 @@ PHP_FUNCTION(hwapi_remove) {
 /* {{{ proto object hwapi_content(array parameters)
    Retrieve content of object */
 PHP_FUNCTION(hwapi_content) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_content_In *in;
 	HW_API_content_Out out;
 	HW_API_HGCSP *db;
@@ -2675,7 +2675,7 @@ PHP_FUNCTION(hwapi_content) {
 /* {{{ proto object hwapi_copy(array parameters)
     */
 PHP_FUNCTION(hwapi_copy) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_copy_In *in;
 	HW_API_copy_Out out;
 	HW_API_HGCSP *db;
@@ -2714,7 +2714,7 @@ PHP_FUNCTION(hwapi_copy) {
 /* {{{ proto bool hwapi_link(array parameters)
    Hyperwave dummy function */
 PHP_FUNCTION(hwapi_link) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_link_In *in;
 	HW_API_link_Out out;
 	HW_API_HGCSP *db;
@@ -2752,7 +2752,7 @@ PHP_FUNCTION(hwapi_link) {
 /* {{{ proto bool hwapi_move(array parameters)
     */
 PHP_FUNCTION(hwapi_move) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_move_In *in;
 	HW_API_move_Out out;
 	HW_API_HGCSP *db;
@@ -2790,7 +2790,7 @@ PHP_FUNCTION(hwapi_move) {
 /* {{{ proto bool hwapi_lock(array parameters)
     */
 PHP_FUNCTION(hwapi_lock) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_lock_In *in;
 	HW_API_lock_Out out;
 	HW_API_HGCSP *db;
@@ -2828,7 +2828,7 @@ PHP_FUNCTION(hwapi_lock) {
 /* {{{ proto bool hwapi_unlock(array parameters)
     */
 PHP_FUNCTION(hwapi_unlock) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_unlock_In *in;
 	HW_API_unlock_Out out;
 	HW_API_HGCSP *db;
@@ -2866,7 +2866,7 @@ PHP_FUNCTION(hwapi_unlock) {
 /* {{{ proto object hwapi_replace(array parameters)
     */
 PHP_FUNCTION(hwapi_replace) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_replace_In *in;
 	HW_API_replace_Out out;
 	HW_API_HGCSP *db;
@@ -2903,7 +2903,7 @@ PHP_FUNCTION(hwapi_replace) {
 /* {{{ proto object hwapi_insert(array parameters)
     */
 PHP_FUNCTION(hwapi_insert) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_insert_In *in;
 	HW_API_insert_Out out;
 	HW_API_HGCSP *db;
@@ -2940,7 +2940,7 @@ PHP_FUNCTION(hwapi_insert) {
 /* {{{ proto object hwapi_insertdocument(array parameters)
     */
 PHP_FUNCTION(hwapi_insertdocument) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_insertDocument_In *in;
 	HW_API_insertDocument_Out out;
 	HW_API_HGCSP *db;
@@ -2979,7 +2979,7 @@ PHP_FUNCTION(hwapi_insertdocument) {
 /* {{{ proto object hwapi_insertcollection(array parameters)
     */
 PHP_FUNCTION(hwapi_insertcollection) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_insertCollection_In *in;
 	HW_API_insertCollection_Out out;
 	HW_API_HGCSP *db;
@@ -3018,7 +3018,7 @@ PHP_FUNCTION(hwapi_insertcollection) {
 /* {{{ proto object hwapi_insertanchor(array parameters)
     */
 PHP_FUNCTION(hwapi_insertanchor) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_insertAnchor_In *in;
 	HW_API_insertAnchor_Out out;
 	HW_API_HGCSP *db;
@@ -3057,7 +3057,7 @@ PHP_FUNCTION(hwapi_insertanchor) {
 /* {{{ proto array hwapi_srcanchors(array parameters)
     */
 PHP_FUNCTION(hwapi_srcanchors) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_ObjectArray objarr;
 	HW_API_srcAnchors_In *in;
 	HW_API_srcAnchors_Out out;
@@ -3098,7 +3098,7 @@ PHP_FUNCTION(hwapi_srcanchors) {
 /* {{{ proto array hwapi_dstanchors(array parameters)
     */
 PHP_FUNCTION(hwapi_dstanchors) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_ObjectArray objarr;
 	HW_API_dstAnchors_In *in;
 	HW_API_dstAnchors_Out out;
@@ -3139,7 +3139,7 @@ PHP_FUNCTION(hwapi_dstanchors) {
 /* {{{ proto object hwapi_objectbyanchor(array parameters)
     */
 PHP_FUNCTION(hwapi_objectbyanchor) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_objectByAnchor_In *in;
 	HW_API_objectByAnchor_Out out;
 	HW_API_HGCSP *db;
@@ -3181,7 +3181,7 @@ PHP_FUNCTION(hwapi_objectbyanchor) {
 /* {{{ proto object hwapi_dstofsrcanchor(array parameters)
     */
 PHP_FUNCTION(hwapi_dstofsrcanchor) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_dstOfSrcAnchor_In *in;
 	HW_API_dstOfSrcAnchor_Out out;
 	HW_API_HGCSP *db;
@@ -3220,7 +3220,7 @@ PHP_FUNCTION(hwapi_dstofsrcanchor) {
 /* {{{ proto array hwapi_srcsofdst(array parameters)
     */
 PHP_FUNCTION(hwapi_srcsofdst) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_ObjectArray objarr;
 	HW_API_srcsOfDst_In *in;
 	HW_API_srcsOfDst_Out out;
@@ -3261,7 +3261,7 @@ PHP_FUNCTION(hwapi_srcsofdst) {
 /* {{{ proto object hwapi_checkin(array parameters)
    Checking in a document */
 PHP_FUNCTION(hwapi_checkin) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_ObjectArray objarr;
 	HW_API_checkIn_In *in;
 	HW_API_checkIn_Out out;
@@ -3302,7 +3302,7 @@ PHP_FUNCTION(hwapi_checkin) {
 /* {{{ proto object hwapi_checkout(array parameters)
    Checking out a document */
 PHP_FUNCTION(hwapi_checkout) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_ObjectArray objarr;
 	HW_API_checkOut_In *in;
 	HW_API_checkOut_Out out;
@@ -3343,7 +3343,7 @@ PHP_FUNCTION(hwapi_checkout) {
 /* {{{ proto object hwapi_setcommittedversion(array parameters)
    setcommittedversion */
 PHP_FUNCTION(hwapi_setcommittedversion) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_ObjectArray objarr;
 	HW_API_setCommittedVersion_In *in;
 	HW_API_setCommittedVersion_Out out;
@@ -3384,7 +3384,7 @@ PHP_FUNCTION(hwapi_setcommittedversion) {
 /* {{{ proto object hwapi_revert(array parameters)
    Reverting to a former document */
 PHP_FUNCTION(hwapi_revert) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_ObjectArray objarr;
 	HW_API_revert_In *in;
 	HW_API_revert_Out out;
@@ -3425,7 +3425,7 @@ PHP_FUNCTION(hwapi_revert) {
 /* {{{ proto array hwapi_history(array parameters)
    history */
 PHP_FUNCTION(hwapi_history) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_ObjectArray objarr;
 	HW_API_history_In *in;
 	HW_API_history_Out out;
@@ -3466,7 +3466,7 @@ PHP_FUNCTION(hwapi_history) {
 /* {{{ proto object hwapi_removeversion(array parameters)
    Reverting to a former document */
 PHP_FUNCTION(hwapi_removeversion) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_ObjectArray objarr;
 	HW_API_removeVersion_In *in;
 	HW_API_removeVersion_Out out;
@@ -3507,7 +3507,7 @@ PHP_FUNCTION(hwapi_removeversion) {
 /* {{{ proto object hwapi_freeversion(array parameters)
    freeversion */
 PHP_FUNCTION(hwapi_freeversion) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_ObjectArray objarr;
 	HW_API_freeVersion_In *in;
 	HW_API_freeVersion_Out out;
@@ -3589,7 +3589,7 @@ PHP_FUNCTION(hwapi_configurationhistory) {
 /* {{{ proto object hwapi_saveconfiguration(array parameters)
    Save configuration for an object */
 PHP_FUNCTION(hwapi_saveconfiguration) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_ObjectArray objarr;
 	HW_API_saveConfiguration_In *in;
 	HW_API_saveConfiguration_Out out;
@@ -3630,7 +3630,7 @@ PHP_FUNCTION(hwapi_saveconfiguration) {
 /* {{{ proto object hwapi_restoreconfiguration(array parameters)
    Restore configuration for an object */
 PHP_FUNCTION(hwapi_restoreconfiguration) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_ObjectArray objarr;
 	HW_API_restoreConfiguration_In *in;
 	HW_API_restoreConfiguration_Out out;
@@ -3670,7 +3670,7 @@ PHP_FUNCTION(hwapi_restoreconfiguration) {
 /* {{{ proto object hwapi_mergeconfiguration(array parameters)
    Merge configuration for an object */
 PHP_FUNCTION(hwapi_mergeconfiguration) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_ObjectArray objarr;
 	HW_API_mergeConfiguration_In *in;
 	HW_API_mergeConfiguration_Out out;
@@ -3710,7 +3710,7 @@ PHP_FUNCTION(hwapi_mergeconfiguration) {
 /* {{{ proto object hwapi_removeconfiguration(array parameters)
    Removes configuration */
 PHP_FUNCTION(hwapi_removeconfiguration) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_ObjectArray objarr;
 	HW_API_removeConfiguration_In *in;
 	HW_API_removeConfiguration_Out out;
@@ -3751,7 +3751,7 @@ PHP_FUNCTION(hwapi_removeconfiguration) {
 /* {{{ proto object hwapi_user(array parameters)
    Returns information about user */
 PHP_FUNCTION(hwapi_user) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_user_In *in;
 	HW_API_user_Out out;
 	HW_API_HGCSP *db;
@@ -3856,7 +3856,7 @@ PHP_FUNCTION(hwapi_userlist) {
 /* {{{ proto object hwapi_hwstat(array parameters)
    Returns information about hgserver */
 PHP_FUNCTION(hwapi_hwstat) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_hwStat_In *in;
 	HW_API_hwStat_Out out;
 	HW_API_HGCSP *db;
@@ -3906,7 +3906,7 @@ PHP_FUNCTION(hwapi_hwstat) {
 /* {{{ proto object hwapi_dcstat(array parameters)
    Returns information about hgserver */
 PHP_FUNCTION(hwapi_dcstat) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_dcStat_In *in;
 	HW_API_dcStat_Out out;
 	HW_API_HGCSP *db;
@@ -3956,7 +3956,7 @@ PHP_FUNCTION(hwapi_dcstat) {
 /* {{{ proto object hwapi_dbstat(array parameters)
    Returns information about hgserver */
 PHP_FUNCTION(hwapi_dbstat) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_dbStat_In *in;
 	HW_API_dbStat_Out out;
 	HW_API_HGCSP *db;
@@ -4006,7 +4006,7 @@ PHP_FUNCTION(hwapi_dbstat) {
 /* {{{ proto object hwapi_ftstat(array parameters)
    Returns information about ftserver */
 PHP_FUNCTION(hwapi_ftstat) {
-	pval **arg1, *id, *rv;
+	zval **arg1, *id, *rv;
 	HW_API_ftStat_In *in;
 	HW_API_ftStat_Out out;
 	HW_API_HGCSP *db;
@@ -4056,7 +4056,7 @@ PHP_FUNCTION(hwapi_ftstat) {
 /* {{{ proto array hwapi_info(array parameters)
    Returns information about server */
 PHP_FUNCTION(hwapi_info) {
-	pval **arg1, *id, *rv, *rv1, *rv2, *rv3;
+	zval **arg1, *id, *rv, *rv1, *rv2, *rv3;
 	HW_API_info_In *in;
 	HW_API_info_Out out;
 	HW_API_HGCSP *db;
@@ -4124,7 +4124,7 @@ PHP_FUNCTION(hwapi_info) {
 /* {{{ proto object hwapi_object_new()
    Creates new HW_API_Object */
 PHP_FUNCTION(hwapi_object_new) {
-	pval **arg1, **arg2, *rv;
+	zval **arg1, **arg2, *rv;
 	HW_API_Object *obj;
 	const HW_API_Object *srcobj;
 	int ret;
@@ -4144,7 +4144,7 @@ PHP_FUNCTION(hwapi_object_new) {
 	}
 
 	rv = php_hwapi_object_new(obj, le_hwapi_objectp);
-//zend_print_pval_r(rv, 0);
+//zend_print_zval_r(rv, 0);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
@@ -4710,8 +4710,8 @@ PHP_FUNCTION(hwapi_reason_description) {
 /* hw_api_class_get_property(zend_property_reference *property_reference) {{{
  *
  */
-pval hw_api_class_get_property(zend_property_reference *property_reference) {
-	pval result;
+zval hw_api_class_get_property(zend_property_reference *property_reference) {
+	zval result;
 	zend_overloaded_element *overloaded_property;
 	zend_llist_element *element;
 
@@ -4736,7 +4736,7 @@ pval hw_api_class_get_property(zend_property_reference *property_reference) {
 				printf("'%s'\n", Z_STRVAL(overloaded_property->element));
 				break;
 		}
-		pval_destructor(&overloaded_property->element);
+		zval_dtor(&overloaded_property->element);
 	}
 
 	Z_STRVAL(result) = estrndup("testing", 7);
@@ -4746,9 +4746,9 @@ pval hw_api_class_get_property(zend_property_reference *property_reference) {
 }
 /* }}} */
 
-/* hw_api_class_set_property(zend_property_reference *property_reference, pval *value) {{{
+/* hw_api_class_set_property(zend_property_reference *property_reference, zval *value) {{{
  */
-int hw_api_class_set_property(zend_property_reference *property_reference, pval *value) {
+int hw_api_class_set_property(zend_property_reference *property_reference, zval *value) {
 	zend_overloaded_element *overloaded_property;
 	zend_llist_element *element;
 
@@ -4775,7 +4775,7 @@ int hw_api_class_set_property(zend_property_reference *property_reference, pval 
 				printf("'%s'\n", Z_STRVAL(overloaded_property->element));
 				break;
 		}
-		pval_destructor(&overloaded_property->element);
+		zval_dtor(&overloaded_property->element);
 	}
 
 	return 0;
@@ -4798,8 +4798,8 @@ void hw_api_class_startup() {
 
 /* hw_api_object_class_get_property(zend_property_reference *property_reference) {{{
  */
-pval hw_api_object_class_get_property(zend_property_reference *property_reference) {
-	pval result;
+zval hw_api_object_class_get_property(zend_property_reference *property_reference) {
+	zval result;
 	zend_overloaded_element *overloaded_property;
 	zend_llist_element *element;
 
@@ -4824,7 +4824,7 @@ pval hw_api_object_class_get_property(zend_property_reference *property_referenc
 				printf("'%s'\n", Z_STRVAL(overloaded_property->element));
 				break;
 		}
-		pval_destructor(&overloaded_property->element);
+		zval_dtor(&overloaded_property->element);
 	}
 
 	Z_STRVAL(result) = estrndup("testing", 7);
@@ -4834,9 +4834,9 @@ pval hw_api_object_class_get_property(zend_property_reference *property_referenc
 }
 /* }}} */
 
-/* hw_api_object_class_set_property(zend_property_reference *property_reference, pval *value) {{{
+/* hw_api_object_class_set_property(zend_property_reference *property_reference, zval *value) {{{
  */
-int hw_api_object_class_set_property(zend_property_reference *property_reference, pval *value) {
+int hw_api_object_class_set_property(zend_property_reference *property_reference, zval *value) {
 	zend_overloaded_element *overloaded_property;
 	zend_llist_element *element;
 
@@ -4863,7 +4863,7 @@ int hw_api_object_class_set_property(zend_property_reference *property_reference
 				printf("'%s'\n", Z_STRVAL(overloaded_property->element));
 				break;
 		}
-		pval_destructor(&overloaded_property->element);
+		zval_dtor(&overloaded_property->element);
 	}
 
 	return 0;
@@ -4886,8 +4886,8 @@ void hw_api_object_class_startup() {
 
 /* hw_api_attribute_class_get_property(zend_property_reference *property_reference) {{{
  */
-pval hw_api_attribute_class_get_property(zend_property_reference *property_reference) {
-	pval result;
+zval hw_api_attribute_class_get_property(zend_property_reference *property_reference) {
+	zval result;
 	zend_overloaded_element *overloaded_property;
 	zend_llist_element *element;
 
@@ -4911,7 +4911,7 @@ pval hw_api_attribute_class_get_property(zend_property_reference *property_refer
 				printf("'%s'\n", Z_STRVAL(overloaded_property->element));
 				break;
 		}
-		pval_destructor(&overloaded_property->element);
+		zval_dtor(&overloaded_property->element);
 	}
 
 	Z_STRVAL(result) = estrndup("testing", 7);
@@ -4921,9 +4921,9 @@ pval hw_api_attribute_class_get_property(zend_property_reference *property_refer
 }
 /* }}} */
 
-/* hw_api_attribute_class_set_property(zend_property_reference *property_reference, pval *value) {{{
+/* hw_api_attribute_class_set_property(zend_property_reference *property_reference, zval *value) {{{
  */
-int hw_api_attribute_class_set_property(zend_property_reference *property_reference, pval *value) {
+int hw_api_attribute_class_set_property(zend_property_reference *property_reference, zval *value) {
 	zend_overloaded_element *overloaded_property;
 	zend_llist_element *element;
 
@@ -4950,7 +4950,7 @@ int hw_api_attribute_class_set_property(zend_property_reference *property_refere
 				printf("'%s'\n", Z_STRVAL(overloaded_property->element));
 				break;
 		}
-		pval_destructor(&overloaded_property->element);
+		zval_dtor(&overloaded_property->element);
 	}
 
 	return 0;
