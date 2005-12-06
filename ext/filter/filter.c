@@ -76,7 +76,7 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 
 /* {{{ filter_functions[]
  */
-function_entry filter_functions[] = {
+zend_function_entry filter_functions[] = {
 	PHP_FE(input_get, NULL)
 	PHP_FE(input_filters_list, NULL)
 	PHP_FE(input_has_variable, NULL)
