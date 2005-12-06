@@ -1824,7 +1824,7 @@ PHP_FUNCTION(ncurses_getmouse)
 	}
 	IS_NCURSES_INITIALIZED();
 
-	pval_destructor(arg);
+	zval_dtor(arg);
 	array_init(arg);
 
 	retval = getmouse(&mevent);
@@ -1843,7 +1843,7 @@ PHP_FUNCTION(ncurses_getmouse)
    Pushes mouse event to queue */
 PHP_FUNCTION(ncurses_ungetmouse)
 {
-	zval *arg, **pvalue;
+	zval *arg, **zvalue;
 	MEVENT mevent;
 	ulong retval;
 
@@ -1852,29 +1852,29 @@ PHP_FUNCTION(ncurses_ungetmouse)
 	}
 	IS_NCURSES_INITIALIZED();
 
-	if (zend_hash_find(Z_ARRVAL_P(arg), "id", sizeof("id"), (void **) &pvalue) == SUCCESS) {
-		convert_to_long_ex(pvalue);
-		mevent.id = Z_LVAL_PP(pvalue);
+	if (zend_hash_find(Z_ARRVAL_P(arg), "id", sizeof("id"), (void **) &zvalue) == SUCCESS) {
+		convert_to_long_ex(zvalue);
+		mevent.id = Z_LVAL_PP(zvalue);
 	}
 
-	if (zend_hash_find(Z_ARRVAL_P(arg), "x", sizeof("x"), (void **) &pvalue) == SUCCESS) {
-		convert_to_long_ex(pvalue);
-		mevent.x = Z_LVAL_PP(pvalue);
+	if (zend_hash_find(Z_ARRVAL_P(arg), "x", sizeof("x"), (void **) &zvalue) == SUCCESS) {
+		convert_to_long_ex(zvalue);
+		mevent.x = Z_LVAL_PP(zvalue);
 	}
 
-	if (zend_hash_find(Z_ARRVAL_P(arg), "y", sizeof("y"), (void **) &pvalue) == SUCCESS) {
-		convert_to_long_ex(pvalue);
-		mevent.y = Z_LVAL_PP(pvalue);
+	if (zend_hash_find(Z_ARRVAL_P(arg), "y", sizeof("y"), (void **) &zvalue) == SUCCESS) {
+		convert_to_long_ex(zvalue);
+		mevent.y = Z_LVAL_PP(zvalue);
 	}
 
-	if (zend_hash_find(Z_ARRVAL_P(arg), "z", sizeof("z"), (void **) &pvalue) == SUCCESS) {
-		convert_to_long_ex(pvalue);
-		mevent.z = Z_LVAL_PP(pvalue);
+	if (zend_hash_find(Z_ARRVAL_P(arg), "z", sizeof("z"), (void **) &zvalue) == SUCCESS) {
+		convert_to_long_ex(zvalue);
+		mevent.z = Z_LVAL_PP(zvalue);
 	}
 
-	if (zend_hash_find(Z_ARRVAL_P(arg), "mmask", sizeof("mmask"), (void **) &pvalue) == SUCCESS) {
-		convert_to_long_ex(pvalue);
-		mevent.bstate = Z_LVAL_PP(pvalue);
+	if (zend_hash_find(Z_ARRVAL_P(arg), "mmask", sizeof("mmask"), (void **) &zvalue) == SUCCESS) {
+		convert_to_long_ex(zvalue);
+		mevent.bstate = Z_LVAL_PP(zvalue);
 	}
 
 	retval = ungetmouse(&mevent);
