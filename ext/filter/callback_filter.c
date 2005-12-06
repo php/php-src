@@ -47,8 +47,7 @@ void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL)
 		zval_dtor(value);
 		*value = *retval_ptr;
 		zval_copy_ctor(value);
-	}
-	else {
+	} else {
 		zval_dtor(value);
 		Z_TYPE_P(value) = IS_NULL;
 	}

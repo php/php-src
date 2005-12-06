@@ -651,8 +651,7 @@ PHP_FUNCTION(filter_data)
 					break;
 			}
 		}
-	}
-	else {
+	} else {
 		if (flags) {
 			switch (Z_TYPE_P(flags)) {
 				case IS_ARRAY:
