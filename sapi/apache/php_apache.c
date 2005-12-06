@@ -135,7 +135,7 @@ PHP_FUNCTION(apache_child_terminate)
    Get and set Apache request notes */
 PHP_FUNCTION(apache_note)
 {
-	pval **arg_name, **arg_val;
+	zval **arg_name, **arg_val;
 	char *note_val;
 	int arg_count = ZEND_NUM_ARGS();
 
@@ -304,7 +304,7 @@ PHP_MINFO_FUNCTION(apache)
  */
 PHP_FUNCTION(virtual)
 {
-	pval **filename;
+	zval **filename;
 	request_rec *rr = NULL;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
@@ -411,7 +411,7 @@ PHP_FUNCTION(apache_setenv)
    Perform a partial request of the given URI to obtain information about it */
 PHP_FUNCTION(apache_lookup_uri)
 {
-	pval **filename;
+	zval **filename;
 	request_rec *rr=NULL;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
@@ -485,7 +485,7 @@ This function is most likely a bad idea.  Just playing with it for now.
 
 PHP_FUNCTION(apache_exec_uri)
 {
-	pval **filename;
+	zval **filename;
 	request_rec *rr=NULL;
 	TSRMLS_FETCH();
 

@@ -512,19 +512,19 @@ static sapi_module_struct roxen_sapi_module = {
  * the HTTP header data, so that a script can access these.
  */
 #define ADD_STRING(name)										\
-	MAKE_STD_ZVAL(pval);										\
-	pval->type = IS_STRING;										\
-	pval->value.str.len = strlen(buf);							\
-	pval->value.str.val = estrndup(buf, pval->value.str.len);	\
+	MAKE_STD_ZVAL(zvalue);										\
+	zvalue->type = IS_STRING;										\
+	zvalue->value.str.len = strlen(buf);							\
+	zvalue->value.str.val = estrndup(buf, zvalue->value.str.len);	\
 	zend_hash_update(&EG(symbol_table), name, sizeof(name), 	\
-			&pval, sizeof(zval *), NULL)
+			&zvalue, sizeof(zval *), NULL)
 
 static void
 php_roxen_hash_environment(TSRMLS_D)
 {
   int i;
   char buf[512];
-  zval *pval;
+  zval *zvalue;
   struct svalue *headers;
   struct pike_string *sind;
   struct array *indices;
@@ -546,22 +546,22 @@ php_roxen_hash_environment(TSRMLS_D)
 	buf_len = MIN(511, ind->u.string->len);
 	strncpy(buf, ind->u.string->str, buf_len);
 	buf[buf_len] = '\0'; /* Terminate correctly */
-	MAKE_STD_ZVAL(pval);
-	pval->type = IS_STRING;
-	pval->value.str.len = val->u.string->len;
-	pval->value.str.val = estrndup(val->u.string->str, pval->value.str.len);
+	MAKE_STD_ZVAL(zvalue);
+	zvalue->type = IS_STRING;
+	zvalue->value.str.len = val->u.string->len;
+	zvalue->value.str.val = estrndup(val->u.string->str, zvalue->value.str.len);
 	
-	zend_hash_update(&EG(symbol_table), buf, buf_len + 1, &pval, sizeof(zval *), NULL);
+	zend_hash_update(&EG(symbol_table), buf, buf_len + 1, &zvalue, sizeof(zval *), NULL);
       }
     }
     free_array(indices);
   }
   
   /*
-    MAKE_STD_ZVAL(pval);
-    pval->type = IS_LONG;
-    pval->value.lval = Ns_InfoBootTime();
-    zend_hash_update(&EG(symbol_table), "SERVER_BOOTTIME", sizeof("SERVER_BOOTTIME"), &pval, sizeof(zval *), NULL);
+    MAKE_STD_ZVAL(zvalue);
+    zvalue->type = IS_LONG;
+    zvalue->value.lval = Ns_InfoBootTime();
+    zend_hash_update(&EG(symbol_table), "SERVER_BOOTTIME", sizeof("SERVER_BOOTTIME"), &zvalue, sizeof(zval *), NULL);
   */
 }
 
