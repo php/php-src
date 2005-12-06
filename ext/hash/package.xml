@@ -21,9 +21,9 @@
   </maintainers>
 
   <release>
-   <version>0.1</version>
-   <state>beta</state>
-   <date>2005-11-00</date>
+   <version>1.0</version>
+   <state>stable</state>
+   <date>2005-12-06</date>
    <notes>
 Initial Release
  * md4, md5
