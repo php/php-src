@@ -162,7 +162,7 @@ PHP_MSHUTDOWN_FUNCTION(filepro)
 }
 /* }}} */
 
-function_entry filepro_functions[] = {
+zend_function_entry filepro_functions[] = {
 	PHP_FE(filepro,									NULL)
 	PHP_FE(filepro_rowcount,						NULL)
 	PHP_FE(filepro_fieldname,						NULL)

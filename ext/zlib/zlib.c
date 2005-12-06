@@ -86,7 +86,7 @@ static int gz_magic[2] = {0x1f, 0x8b};	/* gzip magic header */
 
 /* {{{ php_zlib_functions[]
  */
-function_entry php_zlib_functions[] = {
+zend_function_entry php_zlib_functions[] = {
 	PHP_FE(readgzfile,						NULL)
 	PHP_FALIAS(gzrewind,	rewind,			NULL)
 	PHP_FALIAS(gzclose,		fclose,			NULL)

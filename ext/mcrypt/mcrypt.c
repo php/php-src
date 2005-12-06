@@ -43,7 +43,7 @@ typedef struct _php_mcrypt {
 	zend_bool init;
 } php_mcrypt;
 
-function_entry mcrypt_functions[] = {
+zend_function_entry mcrypt_functions[] = {
 	PHP_FE(mcrypt_ecb, NULL)
 	PHP_FE(mcrypt_cbc, NULL)
 	PHP_FE(mcrypt_cfb, NULL)

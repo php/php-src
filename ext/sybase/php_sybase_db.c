@@ -80,7 +80,7 @@ typedef struct {
 } sybase_result;
 
 
-function_entry sybase_functions[] = {
+zend_function_entry sybase_functions[] = {
 	PHP_FE(sybase_connect,			NULL)
 	PHP_FE(sybase_pconnect,			NULL)
 	PHP_FE(sybase_close,			NULL)

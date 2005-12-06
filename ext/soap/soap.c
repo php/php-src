@@ -2834,7 +2834,7 @@ PHP_METHOD(SoapClient, __setLocation)
 #ifndef ZEND_ENGINE_2
 static void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference)
 {
-	pval *object = property_reference->object;
+	zval *object = property_reference->object;
 	zend_overloaded_element *function_name = (zend_overloaded_element *)property_reference->elements_list->tail->data;
 	char *function = Z_STRVAL(function_name->element);
 	zend_function *builtin_function;

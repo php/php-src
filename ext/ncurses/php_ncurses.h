@@ -36,7 +36,7 @@ extern int le_ncurses_panels;
 extern zend_module_entry ncurses_module_entry;
 #define phpext_ncurses_ptr &ncurses_module_entry
 
-extern function_entry ncurses_functions[];
+extern zend_function_entry ncurses_functions[];
 #include "php_ncurses_fe.h"
 
 #ifdef PHP_WIN32

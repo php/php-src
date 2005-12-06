@@ -50,7 +50,7 @@ static
  *
  * Every user visible function must have an entry in ncurses_functions[].
  */
-function_entry ncurses_functions[] = {
+zend_function_entry ncurses_functions[] = {
 	PHP_FE(ncurses_addch,			NULL)
 #ifdef HAVE_NCURSES_COLOR_SET
 	PHP_FE(ncurses_color_set,		NULL)

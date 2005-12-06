@@ -32,7 +32,7 @@
 
 /* {{{ php_gettext_functions[]
  */
-function_entry php_gettext_functions[] = {
+zend_function_entry php_gettext_functions[] = {
 	PHP_NAMED_FE(textdomain,		zif_textdomain,		NULL)
 	PHP_NAMED_FE(gettext,			zif_gettext,		NULL)
 	/* Alias for gettext() */

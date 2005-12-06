@@ -31,7 +31,7 @@
 #include "php_pdo_oci_int.h"
 
 /* {{{ pdo_oci_functions[] */
-function_entry pdo_oci_functions[] = {
+zend_function_entry pdo_oci_functions[] = {
 	{NULL, NULL, NULL}
 };
 /* }}} */

@@ -43,7 +43,7 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(pcntl)
 
-function_entry pcntl_functions[] = {
+zend_function_entry pcntl_functions[] = {
 	PHP_FE(pcntl_fork,			NULL)
 	PHP_FE(pcntl_waitpid,		second_arg_force_ref)
 	PHP_FE(pcntl_wait,		first_arg_force_ref)

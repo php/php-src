@@ -33,7 +33,7 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(bcmath);
 
-function_entry bcmath_functions[] = {
+zend_function_entry bcmath_functions[] = {
 	PHP_FE(bcadd,									NULL)
 	PHP_FE(bcsub,									NULL)
 	PHP_FE(bcmul,									NULL)

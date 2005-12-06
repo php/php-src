@@ -37,7 +37,7 @@ zend_class_entry
    	*php_com_exception_class_entry,
 	*php_com_saproxy_class_entry;
 
-function_entry com_dotnet_functions[] = {
+zend_function_entry com_dotnet_functions[] = {
 	PHP_FE(variant_set, NULL)
 	PHP_FE(variant_add, NULL)
 	PHP_FE(variant_cat, NULL)

@@ -49,7 +49,7 @@ SAPI_POST_HANDLER_FUNC(fdf_post_handler);
 
 /* {{{ fdf_functions[]
  */
-function_entry fdf_functions[] = {
+zend_function_entry fdf_functions[] = {
 	PHP_FE(fdf_add_template,						NULL)
 	PHP_FE(fdf_close,								NULL)
 	PHP_FE(fdf_create,								NULL)

@@ -80,7 +80,7 @@ ZEND_DECLARE_MODULE_GLOBALS(xmlrpc)
 
 static int le_xmlrpc_server;
 
-function_entry xmlrpc_functions[] = {
+zend_function_entry xmlrpc_functions[] = {
 	PHP_FE(xmlrpc_encode,									NULL) 
 	PHP_FE(xmlrpc_decode,									NULL)
 	PHP_FE(xmlrpc_decode_request,							second_arg_force_ref)
@@ -1329,7 +1329,7 @@ int set_zval_xmlrpc_type(zval* value, XMLRPC_VALUE_TYPE newtype)
             if(v) {
                time_t timestamp = XMLRPC_GetValueDateTime(v);
                if(timestamp) {
-                  pval* ztimestamp;
+                  zval* ztimestamp;
 
                   MAKE_STD_ZVAL(ztimestamp);
 

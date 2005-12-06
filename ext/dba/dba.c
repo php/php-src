@@ -53,7 +53,7 @@
 
 /* {{{ dba_functions[]
  */
-function_entry dba_functions[] = {
+zend_function_entry dba_functions[] = {
 	PHP_FE(dba_open, NULL)
 	PHP_FE(dba_popen, NULL)
 	PHP_FE(dba_close, NULL)

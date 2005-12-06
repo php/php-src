@@ -237,7 +237,7 @@ STD_PHP_INI_ENTRY("tidy.default_config",	"",	PHP_INI_SYSTEM,		OnUpdateString,		d
 PHP_INI_ENTRY("tidy.clean_output",     "0",    PHP_INI_PERDIR,         NULL)
 PHP_INI_END()
 
-function_entry tidy_functions[] = {
+zend_function_entry tidy_functions[] = {
 	PHP_FE(tidy_getopt,             NULL)
 	PHP_FE(tidy_parse_string,       NULL)
 	PHP_FE(tidy_parse_file,         NULL)
@@ -268,7 +268,7 @@ function_entry tidy_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-function_entry tidy_funcs_doc[] = {
+zend_function_entry tidy_funcs_doc[] = {
 	TIDY_METHOD_MAP(getOpt, tidy_getopt, NULL)
 	TIDY_METHOD_MAP(cleanRepair, tidy_clean_repair, NULL)
 	TIDY_DOC_ME(parseFile, NULL)
@@ -293,7 +293,7 @@ function_entry tidy_funcs_doc[] = {
 	{NULL, NULL, NULL}
 };
 
-function_entry tidy_funcs_node[] = {
+zend_function_entry tidy_funcs_node[] = {
 	TIDY_NODE_ME(__construct, NULL)
 	TIDY_NODE_ME(hasChildren, NULL)
 	TIDY_NODE_ME(hasSiblings, NULL)
@@ -306,7 +306,7 @@ function_entry tidy_funcs_node[] = {
 	{NULL, NULL, NULL}
 };
 
-function_entry tidy_funcs_exception[] = {
+zend_function_entry tidy_funcs_exception[] = {
 	{NULL, NULL, NULL}
 };
 
