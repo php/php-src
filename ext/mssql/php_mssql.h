@@ -162,7 +162,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mssql)
 	long cfg_min_error_severity, cfg_min_message_severity;
 	long connect_timeout, timeout;
 	zend_bool compatability_mode;
-	void (*get_column_content)(mssql_link *mssql_ptr,int offset,pval *result,int column_type  TSRMLS_DC);
+	void (*get_column_content)(mssql_link *mssql_ptr,int offset,zval *result,int column_type  TSRMLS_DC);
 	long textsize, textlimit, batchsize;
 	zend_bool datetimeconvert;
 	HashTable *resource_list, *resource_plist;
@@ -180,7 +180,7 @@ typedef struct mssql_field {
 } mssql_field;
 
 typedef struct mssql_result {
-	pval **data;
+	zval **data;
 	mssql_field *fields;
 	mssql_link *mssql_ptr;
 	mssql_statement * statement;
