@@ -34,12 +34,12 @@ BEGIN_EXTERN_C()
 void php_treat_data(int arg, char *str, zval* destArray TSRMLS_DC);
 void php_startup_auto_globals(TSRMLS_D);
 extern PHPAPI void (*php_import_environment_variables)(zval *array_ptr TSRMLS_DC);
-PHPAPI void php_register_variable(char *var, char *val, pval *track_vars_array TSRMLS_DC);
+PHPAPI void php_register_variable(char *var, char *val, zval *track_vars_array TSRMLS_DC);
 /* binary-safe version */
-PHPAPI void php_register_variable_safe(char *var, char *val, int val_len, pval *track_vars_array TSRMLS_DC);
-PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_array TSRMLS_DC);
+PHPAPI void php_register_variable_safe(char *var, char *val, int val_len, zval *track_vars_array TSRMLS_DC);
+PHPAPI void php_register_variable_ex(char *var, zval *val, zval *track_vars_array TSRMLS_DC);
 PHPAPI void php_u_register_variable_safe(UChar *var, UChar *strval, int32_t str_len, zval *track_vars_array TSRMLS_DC);
-PHPAPI void php_u_register_variable_ex(UChar *var, zval *val, pval *track_vars_array TSRMLS_DC);
+PHPAPI void php_u_register_variable_ex(UChar *var, zval *val, zval *track_vars_array TSRMLS_DC);
 
 int php_hash_environment(TSRMLS_D);
 END_EXTERN_C()
