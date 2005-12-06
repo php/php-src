@@ -1117,7 +1117,7 @@ int main(int argc, char *argv[])
 			{
 				char *input;
 				size_t len, index = 0;
-				pval *argn, *argi;
+				zval *argn, *argi;
 
 				cli_register_file_handles(TSRMLS_C);
 	
@@ -1128,7 +1128,7 @@ int main(int argc, char *argv[])
 				Z_TYPE_P(argi) = IS_LONG;
 				Z_LVAL_P(argi) = index;
 				INIT_PZVAL(argi);
-				zend_hash_update(&EG(symbol_table), "argi", sizeof("argi"), &argi, sizeof(pval *), NULL);
+				zend_hash_update(&EG(symbol_table), "argi", sizeof("argi"), &argi, sizeof(zval *), NULL);
 				while (exit_status == SUCCESS && (input=php_stream_gets(s_in_process, NULL, 0)) != NULL) {
 					len = strlen(input);
 					while (len-- && (input[len]=='\n' || input[len]=='\r')) {
@@ -1139,7 +1139,7 @@ int main(int argc, char *argv[])
 					Z_STRLEN_P(argn) = ++len;
 					Z_STRVAL_P(argn) = estrndup(input, len);
 					INIT_PZVAL(argn);
-					zend_hash_update(&EG(symbol_table), "argn", sizeof("argn"), &argn, sizeof(pval *), NULL);
+					zend_hash_update(&EG(symbol_table), "argn", sizeof("argn"), &argn, sizeof(zval *), NULL);
 					Z_LVAL_P(argi) = ++index;
 					if (exec_run) {
 						if (zend_eval_string_ex(exec_run, NULL, "Command line run code", 1 TSRMLS_CC) == FAILURE) {
