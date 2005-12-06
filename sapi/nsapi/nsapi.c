@@ -329,7 +329,7 @@ PHP_MINFO_FUNCTION(nsapi)
  */
 PHP_FUNCTION(nsapi_virtual)
 {
-	pval **uri;
+	zval **uri;
 	int rv;
 	char *value;
 	Request *rq;
