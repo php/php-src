@@ -551,6 +551,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	int buffer_len = 0;
 	char *space;
 	char *class_name = get_active_class_name(&space TSRMLS_CC);
+	int origin_len;
 	char *function = NULL;
 	char *origin;
 	char *message;
@@ -607,6 +608,13 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	} else {
 		spprintf(&origin, 0, "%s", stage);	
 	}
+
+	if (PG(html_errors)) {
+		int len;
+		char *replace = php_escape_html_entities(origin, origin_len, &len, 0, ENT_COMPAT, NULL TSRMLS_CC);
+		efree(origin);
+		origin = replace;
+  	}
 
 	/* origin and buffer available, so lets come up with the error message */
 	if (docref && docref[0] == '#') {
@@ -877,10 +885,17 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			} else {
 				char *prepend_string = INI_STR("error_prepend_string");
 				char *append_string = INI_STR("error_append_string");
-				char *error_format = PG(html_errors) ?
-					"%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s"
-					: "%s\n%s: %s in %s on line %d\n%s";    
-				php_printf(error_format, STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
+
+				if (PG(html_errors)) {
+					char *buf, *buf2;
+					int len2, len = spprintf(&buf, 0, "%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
+					buf2 = php_escape_html_entities(buf, len, &len2, 0, ENT_COMPAT, NULL TSRMLS_CC);
+					php_printf("%s", buf2);
+					efree(buf);
+					efree(buf2);
+				} else {
+					php_printf("%s\n%s: %s in %s on line %d\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
+				}
 			}
 		}
 #if ZEND_DEBUG
