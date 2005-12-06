@@ -30,7 +30,7 @@
 
 /* {{{ mysqli_exception_methods[]
  */
-function_entry mysqli_exception_methods[] = {
+zend_function_entry mysqli_exception_methods[] = {
 	{NULL, NULL, NULL}
 };
 /* }}} */

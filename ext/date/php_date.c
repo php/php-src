@@ -31,7 +31,7 @@
 #include <unicode/udat.h>
 
 /* {{{ Function table */
-function_entry date_functions[] = {
+zend_function_entry date_functions[] = {
 	PHP_FE(strtotime, NULL)
 	PHP_FE(date, NULL)
 	PHP_FE(idate, NULL)
@@ -78,7 +78,7 @@ function_entry date_functions[] = {
 };
 
 
-function_entry date_funcs_date[] = {
+zend_function_entry date_funcs_date[] = {
 #ifdef EXPERIMENTAL_DATE_SUPPORT
 	ZEND_NAMED_FE(format, ZEND_FN(date_format), NULL)
 	ZEND_NAMED_FE(modify, ZEND_FN(date_modify), NULL)
@@ -92,7 +92,7 @@ function_entry date_funcs_date[] = {
 	{NULL, NULL, NULL}
 };
 
-function_entry date_funcs_timezone[] = {
+zend_function_entry date_funcs_timezone[] = {
 #ifdef EXPERIMENTAL_DATE_SUPPORT
 	ZEND_NAMED_FE(getName, ZEND_FN(timezone_name_get), NULL)
 	ZEND_NAMED_FE(getOffset, ZEND_FN(timezone_offset_get), NULL)
