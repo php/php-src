@@ -1,3 +1,35 @@
+2005-12-05  Antony Dovgal  <antony@zend.com>
+
+    * zend_vm_gen.php:
+      MF51: more typos fixed (thanks to Mike Naberezny for noticing these)
+
+    * (PHP_5_1)
+      zend_vm_gen.php:
+      more typos fixed (thanks to Mike Naberezny for noticing these)
+
+    * zend_exceptions.c:
+      MF51: improve error messages
+
+    * (PHP_5_1)
+      zend_exceptions.c:
+      improve error messages
+
+2005-12-05  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute_API.c
+      zend_execute_API.c
+      zend_hash.c
+      zend_hash.h
+      zend_hash.h
+      tests/bug35509.phpt:
+      Fixed bug #35509 (string constant as array key has different behavior
+      inside object)
+
+    * tests/bug35509.phpt
+      tests/bug35509.phpt:
+      
+      file bug35509.phpt was initially added on branch PHP_5_1.
+
 2005-12-04  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_1)
