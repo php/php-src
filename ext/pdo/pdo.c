@@ -101,7 +101,7 @@ PHP_FUNCTION(pdo_drivers)
 /* }}} */
 
 /* {{{ pdo_functions[] */
-function_entry pdo_functions[] = {
+zend_function_entry pdo_functions[] = {
 	PHP_FE(pdo_drivers,             NULL)
 	{NULL, NULL, NULL}
 };

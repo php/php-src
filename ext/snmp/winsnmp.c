@@ -21,7 +21,7 @@ Created from the snmputil sample in the Microsoft SDK for NT
 
 /* {{{ snmp_functions[]
  */
-function_entry snmp_functions[] = {
+zend_function_entry snmp_functions[] = {
     {"snmpget", php3_snmpget, NULL},
     {"snmpwalk", php3_snmpwalk, NULL},
     {NULL,NULL,NULL}
@@ -58,7 +58,7 @@ DLEXPORT zend_module_entry *get_module() { return &snmp_module_entry; }
 /* {{{ _php_snmp
  */
 void _php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
-	pval *a1, *a2, *a3;
+	zval *a1, *a2, *a3;
 	INT	operation;
     LPSTR              agent;
     LPSTR              community;

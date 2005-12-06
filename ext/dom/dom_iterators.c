@@ -189,7 +189,7 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC)
 	dom_nnodemap_object *objmap;
 	int ret, previndex=1;
 	HashTable *nodeht;
-	pval **entry;
+	zval **entry;
 
 	php_dom_iterator *iterator = (php_dom_iterator *)iter;
 
@@ -258,7 +258,7 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object TS
 	zval *curattr = NULL;
 	int ret, curindex = 0;
 	HashTable *nodeht;
-	pval **entry;
+	zval **entry;
 
 	php_dom_iterator *iterator = emalloc(sizeof(php_dom_iterator));
 

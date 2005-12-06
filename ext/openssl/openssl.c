@@ -79,7 +79,7 @@ enum php_openssl_cipher_type {
 
 /* {{{ openssl_functions[]
  */
-function_entry openssl_functions[] = {
+zend_function_entry openssl_functions[] = {
 /* public/private key functions */
 	PHP_FE(openssl_pkey_free,			NULL)
 	PHP_FE(openssl_pkey_new,			NULL)

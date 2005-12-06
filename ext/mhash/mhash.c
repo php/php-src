@@ -33,7 +33,7 @@
 #include "php_globals.h"
 #include "ext/standard/info.h"
 
-function_entry mhash_functions[] = {
+zend_function_entry mhash_functions[] = {
 	PHP_FE(mhash_get_block_size, NULL)
 	PHP_FE(mhash_get_hash_name, NULL)
 	PHP_FE(mhash_keygen_s2k, NULL)

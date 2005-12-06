@@ -240,7 +240,7 @@ static void php_info_aolserver(ZEND_MODULE_INFO_FUNC_ARGS)
 
 PHP_FUNCTION(getallheaders);
 
-static function_entry aolserver_functions[] = {
+static zend_function_entry aolserver_functions[] = {
 	PHP_FE(getallheaders, NULL)
 	{NULL, NULL, NULL}
 };

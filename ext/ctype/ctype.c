@@ -43,7 +43,7 @@ ZEND_DECLARE_MODULE_GLOBALS(ctype)
 /* {{{ ctype_functions[]
  * Every user visible function must have an entry in ctype_functions[].
  */
-function_entry ctype_functions[] = {
+zend_function_entry ctype_functions[] = {
 	PHP_FE(ctype_alnum,	NULL)
 	PHP_FE(ctype_alpha,	NULL)
 	PHP_FE(ctype_cntrl,	NULL)

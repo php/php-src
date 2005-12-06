@@ -79,7 +79,7 @@ void *fs_get(size_t size);
 
 /* {{{ imap_functions[]
  */
-function_entry imap_functions[] = {
+zend_function_entry imap_functions[] = {
 	PHP_FE(imap_open,								NULL)
 	PHP_FE(imap_reopen,								NULL)
 	PHP_FE(imap_close,								NULL)

@@ -120,7 +120,7 @@ static int	s_port=8086;
 static void *	s_conn=NULL;
 static REQB *	s_reqb=NULL;
 
-function_entry msession_functions[] = {
+zend_function_entry msession_functions[] = {
 	PHP_FE(msession_connect,NULL)
 	PHP_FE(msession_disconnect,NULL)
 	PHP_FE(msession_lock,NULL)

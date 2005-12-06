@@ -52,7 +52,7 @@ ZEND_DECLARE_MODULE_GLOBALS(posix)
 
 /* {{{ posix_functions[]
  */
-function_entry posix_functions[] = {
+zend_function_entry posix_functions[] = {
     /* POSIX.1, 3.3 */
 	PHP_FE(posix_kill,		NULL)
 

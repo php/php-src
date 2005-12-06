@@ -111,7 +111,7 @@ static
 		ZEND_ARG_PASS_INFO(1)
 	ZEND_END_ARG_INFO();
 
-function_entry xml_functions[] = {
+zend_function_entry xml_functions[] = {
 	PHP_FE(xml_parser_create, NULL)
 	PHP_FE(xml_parser_create_ns, NULL)
 	PHP_FE(xml_set_object, second_arg_force_ref)

@@ -51,7 +51,7 @@ PHP_FUNCTION(apache_reset_timeout);
 
 PHP_MINFO_FUNCTION(apache);
 
-function_entry apache_functions[] = {
+zend_function_entry apache_functions[] = {
 	PHP_FE(virtual,									NULL)
 	PHP_FE(apache_request_headers,					NULL)
 	PHP_FE(apache_note,								NULL)

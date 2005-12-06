@@ -284,7 +284,7 @@ enum {
 	PDO_DBH_DRIVER_METHOD_KIND__MAX
 };
 
-typedef function_entry *(*pdo_dbh_get_driver_methods_func)(pdo_dbh_t *dbh, int kind TSRMLS_DC);
+typedef zend_function_entry *(*pdo_dbh_get_driver_methods_func)(pdo_dbh_t *dbh, int kind TSRMLS_DC);
 
 struct pdo_dbh_methods {
 	pdo_dbh_close_func		closer;

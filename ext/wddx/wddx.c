@@ -99,7 +99,7 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len);
 
 /* {{{ wddx_functions[]
  */
-function_entry wddx_functions[] = {
+zend_function_entry wddx_functions[] = {
 	PHP_FE(wddx_serialize_value, NULL)
 	PHP_FE(wddx_serialize_vars, NULL)
 	PHP_FE(wddx_packet_start, NULL)

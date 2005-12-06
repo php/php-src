@@ -1925,7 +1925,7 @@ PHP_FUNCTION(simplexml_import_dom)
 }
 /* }}} */
 
-function_entry simplexml_functions[] = {
+zend_function_entry simplexml_functions[] = {
 	PHP_FE(simplexml_load_file, NULL)
 	PHP_FE(simplexml_load_string, NULL)
 	PHP_FE(simplexml_import_dom, NULL)

@@ -31,7 +31,7 @@
 #include "php_pdo_mysql_int.h"
 
 /* {{{ pdo_mysql_functions[] */
-function_entry pdo_mysql_functions[] = {
+zend_function_entry pdo_mysql_functions[] = {
 	{NULL, NULL, NULL}
 };
 /* }}} */
