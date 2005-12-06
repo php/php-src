@@ -1,7 +1,7 @@
 --TEST--
 GET/POST/REQUEST Test with filtered data
 --INI--
-filter.default=notags
+filter.default=special_chars
 --POST--
 d="quotes"&e=\slash
 --GET--

@@ -1,7 +1,7 @@
 --TEST--
 GET/REQUEST Test with fifa example data
 --INI--
-filter.default=notags
+filter.default=stripped
 --POST--
 --GET--
 id=f03_photos&pgurl=http%3A//fifaworldcup.yahoo.com/03/en/photozone/index.html
