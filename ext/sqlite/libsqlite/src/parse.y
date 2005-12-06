@@ -23,11 +23,13 @@
 %syntax_error {
   if( pParse->zErrMsg==0 ){
     if( TOKEN.z[0] ){
-      sqliteErrorMsg(pParse, "near \"%T\": syntax error", &TOKEN);
+      sqliteSetNString(&pParse->zErrMsg, 
+          "near \"", -1, TOKEN.z, TOKEN.n, "\": syntax error", -1, 0);
     }else{
-      sqliteErrorMsg(pParse, "incomplete SQL statement");
+      sqliteSetString(&pParse->zErrMsg, "incomplete SQL statement", 0);
     }
   }
+  pParse->nErr++;
 }
 %name sqliteParser
 %include {
@@ -63,10 +65,13 @@ struct TrigEvent { int a; IdList * b; };
 %nonassoc END_OF_FILE ILLEGAL SPACE UNCLOSED_STRING COMMENT FUNCTION
           COLUMN AGG_FUNCTION.
 
-// Input is a single SQL command
+// Input is zero or more commands.
 input ::= cmdlist.
-cmdlist ::= cmdlist ecmd.
+
+// A list of commands is zero or more commands
+//
 cmdlist ::= ecmd.
+cmdlist ::= cmdlist ecmd.
 ecmd ::= explain cmdx SEMI.
 ecmd ::= SEMI.
 cmdx ::= cmd.           { sqliteExec(pParse); }
@@ -120,28 +125,12 @@ id(A) ::= ID(X).         {A = X;}
 // fallback to ID if they will not parse as their original value.
 // This obviates the need for the "id" nonterminal.
 //
-%fallback ID
+%fallback ID 
   ABORT AFTER ASC ATTACH BEFORE BEGIN CASCADE CLUSTER CONFLICT
   COPY DATABASE DEFERRED DELIMITERS DESC DETACH EACH END EXPLAIN FAIL FOR
-  GLOB IGNORE IMMEDIATE INITIALLY INSTEAD LIKE MATCH KEY
+  IGNORE IMMEDIATE INITIALLY INSTEAD MATCH KEY
   OF OFFSET PRAGMA RAISE REPLACE RESTRICT ROW STATEMENT
   TEMP TRIGGER VACUUM VIEW.
-
-// Define operator precedence early so that this is the first occurance
-// of the operator tokens in the grammer.  Keeping the operators together
-// causes them to be assigned integer values that are close together,
-// which keeps parser tables smaller.
-//
-%left OR.
-%left AND.
-%right NOT.
-%left EQ NE ISNULL NOTNULL IS LIKE GLOB BETWEEN IN.
-%left GT GE LT LE.
-%left BITAND BITOR LSHIFT RSHIFT.
-%left PLUS MINUS.
-%left STAR SLASH REM.
-%left CONCAT.
-%right UMINUS UPLUS BITNOT.
 
 // And "ids" is an identifer-or-string.
 //
@@ -164,10 +153,9 @@ type ::= typename(X) LP signed COMMA signed RP(Y).
 %type typename {Token}
 typename(A) ::= ids(X).           {A = X;}
 typename(A) ::= typename(X) ids.  {A = X;}
-%type signed {int}
-signed(A) ::= INTEGER(X).         { A = atoi(X.z); }
-signed(A) ::= PLUS INTEGER(X).    { A = atoi(X.z); }
-signed(A) ::= MINUS INTEGER(X).   { A = -atoi(X.z); }
+signed ::= INTEGER.
+signed ::= PLUS INTEGER.
+signed ::= MINUS INTEGER.
 carglist ::= carglist carg.
 carglist ::= .
 carg ::= CONSTRAINT nm ccons.
@@ -188,7 +176,7 @@ carg ::= DEFAULT NULL.
 ccons ::= NULL onconf.
 ccons ::= NOT NULL onconf(R).               {sqliteAddNotNull(pParse, R);}
 ccons ::= PRIMARY KEY sortorder onconf(R).  {sqliteAddPrimaryKey(pParse,0,R);}
-ccons ::= UNIQUE onconf(R).           {sqliteCreateIndex(pParse,0,0,0,R,0,0);}
+ccons ::= UNIQUE onconf(R).           {sqliteCreateIndex(pParse,0,0,0,R,0,0,0);}
 ccons ::= CHECK LP expr RP onconf.
 ccons ::= REFERENCES nm(T) idxlist_opt(TA) refargs(R).
                                 {sqliteCreateForeignKey(pParse,0,&T,TA,R);}
@@ -235,7 +223,7 @@ tcons ::= CONSTRAINT nm.
 tcons ::= PRIMARY KEY LP idxlist(X) RP onconf(R).
                                              {sqliteAddPrimaryKey(pParse,X,R);}
 tcons ::= UNIQUE LP idxlist(X) RP onconf(R).
-                                       {sqliteCreateIndex(pParse,0,0,X,R,0,0);}
+                                     {sqliteCreateIndex(pParse,0,0,X,R,0,0,0);}
 tcons ::= CHECK expr onconf.
 tcons ::= FOREIGN KEY LP idxlist(FA) RP
           REFERENCES nm(T) idxlist_opt(TA) refargs(R) defer_subclause_opt(D). {
@@ -377,8 +365,7 @@ seltablist(A) ::= stl_prefix(X) nm(Y) dbnm(D) as(Z) on_opt(N) using_opt(U). {
     else { sqliteIdListDelete(U); }
   }
 }
-seltablist(A) ::= stl_prefix(X) LP seltablist_paren(S) RP
-                  as(Z) on_opt(N) using_opt(U). {
+seltablist(A) ::= stl_prefix(X) LP select(S) RP as(Z) on_opt(N) using_opt(U). {
   A = sqliteSrcListAppend(X,0,0);
   A->a[A->nSrc-1].pSelect = S;
   if( Z.n ) sqliteSrcListAddAlias(A,&Z);
@@ -390,17 +377,6 @@ seltablist(A) ::= stl_prefix(X) LP seltablist_paren(S) RP
     if( A && A->nSrc>1 ){ A->a[A->nSrc-2].pUsing = U; }
     else { sqliteIdListDelete(U); }
   }
-}
-
-// A seltablist_paren nonterminal represents anything in a FROM that
-// is contained inside parentheses.  This can be either a subquery or
-// a grouping of table and subqueries.
-//
-%type seltablist_paren {Select*}
-%destructor seltablist_paren {sqliteSelectDelete($$);}
-seltablist_paren(A) ::= select(S).      {A = S;}
-seltablist_paren(A) ::= seltablist(F).  {
-   A = sqliteSelectNew(0,F,0,0,0,0,0,-1,0);
 }
 
 %type dbnm {Token}
@@ -466,12 +442,12 @@ having_opt(A) ::= .                {A = 0;}
 having_opt(A) ::= HAVING expr(X).  {A = X;}
 
 %type limit_opt {struct LimitVal}
-limit_opt(A) ::= .                     {A.limit = -1; A.offset = 0;}
-limit_opt(A) ::= LIMIT signed(X).      {A.limit = X; A.offset = 0;}
-limit_opt(A) ::= LIMIT signed(X) OFFSET signed(Y). 
-                                       {A.limit = X; A.offset = Y;}
-limit_opt(A) ::= LIMIT signed(X) COMMA signed(Y). 
-                                       {A.limit = Y; A.offset = X;}
+limit_opt(A) ::= .                  {A.limit = -1; A.offset = 0;}
+limit_opt(A) ::= LIMIT INTEGER(X).  {A.limit = atoi(X.z); A.offset = 0;}
+limit_opt(A) ::= LIMIT INTEGER(X) OFFSET INTEGER(Y). 
+                                    {A.limit = atoi(X.z); A.offset = atoi(Y.z);}
+limit_opt(A) ::= LIMIT INTEGER(X) COMMA INTEGER(Y). 
+                                    {A.limit = atoi(Y.z); A.offset = atoi(X.z);}
 
 /////////////////////////// The DELETE statement /////////////////////////////
 //
@@ -528,6 +504,17 @@ inscollist(A) ::= nm(Y).                      {A = sqliteIdListAppend(0,&Y);}
 
 /////////////////////////// Expression Processing /////////////////////////////
 //
+%left OR.
+%left AND.
+%right NOT.
+%left EQ NE ISNULL NOTNULL IS LIKE GLOB BETWEEN IN.
+%left GT GE LT LE.
+%left BITAND BITOR LSHIFT RSHIFT.
+%left PLUS MINUS.
+%left STAR SLASH REM.
+%left CONCAT.
+%right UMINUS UPLUS BITNOT.
+%right ORACLE_OUTER_JOIN.
 
 %type expr {Expr*}
 %destructor expr {sqliteExprDelete($$);}
@@ -548,13 +535,11 @@ expr(A) ::= nm(X) DOT nm(Y) DOT nm(Z). {
   Expr *temp4 = sqliteExpr(TK_DOT, temp2, temp3, 0);
   A = sqliteExpr(TK_DOT, temp1, temp4, 0);
 }
+expr(A) ::= expr(B) ORACLE_OUTER_JOIN. 
+                             {A = B; ExprSetProperty(A,EP_Oracle8Join);}
 expr(A) ::= INTEGER(X).      {A = sqliteExpr(TK_INTEGER, 0, 0, &X);}
 expr(A) ::= FLOAT(X).        {A = sqliteExpr(TK_FLOAT, 0, 0, &X);}
 expr(A) ::= STRING(X).       {A = sqliteExpr(TK_STRING, 0, 0, &X);}
-expr(A) ::= VARIABLE(X).     {
-  A = sqliteExpr(TK_VARIABLE, 0, 0, &X);
-  if( A ) A->iTable = ++pParse->nVar;
-}
 expr(A) ::= ID(X) LP exprlist(Y) RP(E). {
   A = sqliteExprFunction(Y, &X);
   sqliteExprSpan(A,&X,&E);
@@ -677,20 +662,6 @@ expr(A) ::= expr(X) NOT IN LP select(Y) RP(E).  {
   A = sqliteExpr(TK_NOT, A, 0, 0);
   sqliteExprSpan(A,&X->span,&E);
 }
-expr(A) ::= expr(X) IN nm(Y) dbnm(D). {
-  SrcList *pSrc = sqliteSrcListAppend(0, &Y, &D);
-  A = sqliteExpr(TK_IN, X, 0, 0);
-  if( A ) A->pSelect = sqliteSelectNew(0,pSrc,0,0,0,0,0,-1,0);
-  sqliteExprSpan(A,&X->span,D.z?&D:&Y);
-}
-expr(A) ::= expr(X) NOT IN nm(Y) dbnm(D). {
-  SrcList *pSrc = sqliteSrcListAppend(0, &Y, &D);
-  A = sqliteExpr(TK_IN, X, 0, 0);
-  if( A ) A->pSelect = sqliteSelectNew(0,pSrc,0,0,0,0,0,-1,0);
-  A = sqliteExpr(TK_NOT, A, 0, 0);
-  sqliteExprSpan(A,&X->span,D.z?&D:&Y);
-}
-
 
 /* CASE expressions */
 expr(A) ::= CASE(C) case_operand(X) case_exprlist(Y) case_else(Z) END(E). {
@@ -728,12 +699,12 @@ expritem(A) ::= .                       {A = 0;}
 
 ///////////////////////////// The CREATE INDEX command ///////////////////////
 //
-cmd ::= CREATE(S) uniqueflag(U) INDEX nm(X)
+cmd ::= CREATE(S) temp(T) uniqueflag(U) INDEX nm(X)
         ON nm(Y) dbnm(D) LP idxlist(Z) RP(E) onconf(R). {
   SrcList *pSrc = sqliteSrcListAppend(0, &Y, &D);
   if( U!=OE_None ) U = R;
   if( U==OE_Default) U = OE_Abort;
-  sqliteCreateIndex(pParse, &X, pSrc, Z, U, &S, &E);
+  sqliteCreateIndex(pParse, &X, pSrc, Z, U, T, &S, &E);
 }
 
 %type uniqueflag {int}
@@ -839,11 +810,11 @@ trigger_cmd(A) ::= UPDATE orconf(R) nm(X) SET setlist(Y) where_opt(Z).
                { A = sqliteTriggerUpdateStep(&X, Y, Z, R); }
 
 // INSERT
-trigger_cmd(A) ::= insert_cmd(R) INTO nm(X) inscollist_opt(F) 
+trigger_cmd(A) ::= INSERT orconf(R) INTO nm(X) inscollist_opt(F) 
   VALUES LP itemlist(Y) RP.  
 {A = sqliteTriggerInsertStep(&X, F, Y, 0, R);}
 
-trigger_cmd(A) ::= insert_cmd(R) INTO nm(X) inscollist_opt(F) select(S).
+trigger_cmd(A) ::= INSERT orconf(R) INTO nm(X) inscollist_opt(F) select(S).
                {A = sqliteTriggerInsertStep(&X, F, 0, S, R);}
 
 // DELETE
@@ -881,12 +852,9 @@ cmd ::= DROP TRIGGER nm(X) dbnm(D). {
 }
 
 //////////////////////// ATTACH DATABASE file AS name /////////////////////////
-cmd ::= ATTACH database_kw_opt ids(F) AS nm(D) key_opt(K). {
-  sqliteAttach(pParse, &F, &D, &K);
+cmd ::= ATTACH database_kw_opt ids(F) AS nm(D). {
+  sqliteAttach(pParse, &F, &D);
 }
-%type key_opt {Token}
-key_opt(A) ::= USING ids(X).  { A = X; }
-key_opt(A) ::= .              { A.z = 0; A.n = 0; }
 
 database_kw_opt ::= DATABASE.
 database_kw_opt ::= .

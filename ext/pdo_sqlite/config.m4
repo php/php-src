@@ -83,18 +83,18 @@ if test "$PHP_PDO_SQLITE" != "no"; then
 
       PHP_NEW_EXTENSION(pdo_sqlite,
         $php_pdo_sqlite_sources_core $pdo_sqlite_sources,
-        $ext_shared,,-I@ext_builddir@/sqlite/src -DPDO_SQLITE_BUNDLED=1 -DSQLITE_OMIT_CURSOR -I$pdo_inc_path)
+        $ext_shared,,-I$ext_srcdir/sqlite/src -DPDO_SQLITE_BUNDLED=1 -DSQLITE_OMIT_CURSOR -I$pdo_inc_path)
 
       PHP_ADD_BUILD_DIR($ext_builddir/sqlite/src, 1)
       AC_CHECK_SIZEOF(char *,4)
       AC_DEFINE(SQLITE_PTR_SZ, SIZEOF_CHAR_P, [Size of a pointer])
       PDO_SQLITE_VERSION=`cat $ext_srcdir/sqlite/VERSION`
       PDO_SQLITE_VERSION_NUMBER=`echo $PDO_SQLITE_VERSION | $AWK -F. '{printf("%d%03d%03d", $1, $2, $3)}'`
-      sed -e s/--VERS--/$PDO_SQLITE_VERSION/ -e s/--VERSION-NUMBER--/$PDO_SQLITE_VERSION_NUMBER/ $ext_srcdir/sqlite/src/sqlite.h.in > $ext_builddir/sqlite/src/sqlite3.h
+      sed -e s/--VERS--/$PDO_SQLITE_VERSION/ -e s/--VERSION-NUMBER--/$PDO_SQLITE_VERSION_NUMBER/ $ext_srcdir/sqlite/src/sqlite.h.in > $ext_srcdir/sqlite/src/sqlite3.h
 
       touch $ext_srcdir/sqlite/src/parse.c $ext_srcdir/sqlite/src/parse.h
 
-      if test "$ext_shared" = "no" || test "$ext_srcdir" != "$abs_srcdir"; then
+      if test "$ext_shared" = "no" -o "$ext_srcdir" != "$abs_srcdir"; then
         echo '#include <php_config.h>' > $ext_srcdir/sqlite/src/config.h
       else
         echo "#include \"$abs_builddir/config.h\"" > $ext_srcdir/sqlite/src/config.h

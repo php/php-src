@@ -93,6 +93,11 @@ Note that the MySQL client library is not bundled anymore!])
       ;;
   esac
 
+  dnl for compat with PHP 4 build system
+  if test -z "$PHP_LIBDIR"; then
+    PHP_LIBDIR=lib
+  fi
+
   for i in $PHP_LIBDIR $PHP_LIBDIR/mysql; do
     MYSQL_LIB_CHK($i)
   done

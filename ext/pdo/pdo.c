@@ -53,16 +53,9 @@ int php_pdo_list_entry(void)
 /* for exceptional circumstances */
 zend_class_entry *pdo_exception_ce;
 
-PDO_API zend_class_entry *php_pdo_get_exception(TSRMLS_D)
+PDO_API zend_class_entry *php_pdo_get_exception(void)
 {
-	return U_CLASS_ENTRY(pdo_exception_ce);
-}
-
-PDO_API char *php_pdo_str_tolower_dup(const char *src, int len)
-{
-	char *dest = emalloc(len + 1);
-	zend_str_tolower_copy(dest, src, len);
-	return dest;
+	return pdo_exception_ce;
 }
 
 PDO_API zend_class_entry *php_pdo_get_exception_base(int root TSRMLS_DC)
@@ -108,7 +101,7 @@ PHP_FUNCTION(pdo_drivers)
 /* }}} */
 
 /* {{{ pdo_functions[] */
-zend_function_entry pdo_functions[] = {
+function_entry pdo_functions[] = {
 	PHP_FE(pdo_drivers,             NULL)
 	{NULL, NULL, NULL}
 };
@@ -140,7 +133,7 @@ zend_module_entry pdo_module_entry = {
 	PHP_RINIT(pdo),
 	PHP_RSHUTDOWN(pdo),
 	PHP_MINFO(pdo),
-	"1.1dev",
+	"1.0",
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -310,7 +303,7 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC)
 PHP_MINIT_FUNCTION(pdo)
 {
 	zend_class_entry ce;
-
+	
 	spl_ce_RuntimeException = NULL;
 
 	ZEND_INIT_MODULE_GLOBALS(pdo, php_pdo_init_globals, NULL);

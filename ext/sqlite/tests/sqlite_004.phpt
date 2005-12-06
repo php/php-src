@@ -35,9 +35,6 @@ while ($row = sqlite_fetch_array($r, SQLITE_NUM)) {
 	}
 	$i++;
 }
-
-sqlite_close($db);
-
 echo "DONE!\n";
 ?>
 --EXPECT--

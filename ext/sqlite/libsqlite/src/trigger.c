@@ -65,8 +65,8 @@ void sqliteBeginTrigger(
   */
   if( sqlite_malloc_failed ) goto trigger_cleanup;
   assert( pTableName->nSrc==1 );
-  if( db->init.busy
-   && sqliteFixInit(&sFix, pParse, db->init.iDb, "trigger", pName)
+  if( pParse->initFlag 
+   && sqliteFixInit(&sFix, pParse, pParse->iDb, "trigger", pName)
    && sqliteFixSrcList(&sFix, pTableName)
   ){
     goto trigger_cleanup;
@@ -76,14 +76,13 @@ void sqliteBeginTrigger(
     goto trigger_cleanup;
   }
   iDb = isTemp ? 1 : tab->iDb;
-  if( iDb>=2 && !db->init.busy ){
+  if( iDb>=2 && !pParse->initFlag ){
     sqliteErrorMsg(pParse, "triggers may not be added to auxiliary "
        "database %s", db->aDb[tab->iDb].zName);
     goto trigger_cleanup;
   }
 
   zName = sqliteStrNDup(pName->z, pName->n);
-  sqliteDequote(zName);
   if( sqliteHashFind(&(db->aDb[iDb].trigHash), zName,pName->n+1) ){
     sqliteErrorMsg(pParse, "trigger %T already exists", pName);
     goto trigger_cleanup;
@@ -181,8 +180,8 @@ void sqliteFinishTrigger(
   /* if we are not initializing, and this trigger is not on a TEMP table, 
   ** build the sqlite_master entry
   */
-  if( !db->init.busy ){
-    static VdbeOpList insertTrig[] = {
+  if( !pParse->initFlag ){
+    static VdbeOp insertTrig[] = {
       { OP_NewRecno,   0, 0,  0          },
       { OP_String,     0, 0,  "trigger"  },
       { OP_String,     0, 0,  0          },  /* 2: trigger name */
@@ -450,16 +449,15 @@ void sqliteDropTriggerPtr(Parse *pParse, Trigger *pTrigger, int nested){
   */
   if( pTable!=0 && !nested && (v = sqliteGetVdbe(pParse))!=0 ){
     int base;
-    static VdbeOpList dropTrigger[] = {
-      { OP_Rewind,     0, ADDR(9),  0},
+    static VdbeOp dropTrigger[] = {
+      { OP_Rewind,     0, ADDR(8),  0},
       { OP_String,     0, 0,        0}, /* 1 */
+      { OP_MemStore,   1, 1,        0},
+      { OP_MemLoad,    1, 0,        0}, /* 3 */
       { OP_Column,     0, 1,        0},
-      { OP_Ne,         0, ADDR(8),  0},
-      { OP_String,     0, 0,        "trigger"},
-      { OP_Column,     0, 0,        0},
-      { OP_Ne,         0, ADDR(8),  0},
+      { OP_Ne,         0, ADDR(7),  0},
       { OP_Delete,     0, 0,        0},
-      { OP_Next,       0, ADDR(1),  0}, /* 8 */
+      { OP_Next,       0, ADDR(3),  0}, /* 7 */
     };
 
     sqliteBeginWriteOperation(pParse, 0, 0);
@@ -746,9 +744,7 @@ int sqliteCodeRowTrigger(
       sqliteExprIfFalse(pParse, whenExpr, endTrigger, 1);
       sqliteExprDelete(whenExpr);
 
-      sqliteVdbeAddOp(pParse->pVdbe, OP_ContextPush, 0, 0);
       codeTriggerProgram(pParse, pTrigger->step_list, orconf); 
-      sqliteVdbeAddOp(pParse->pVdbe, OP_ContextPop, 0, 0);
 
       /* Pop the entry off the trigger stack */
       pParse->trigStack = pParse->trigStack->pNext;

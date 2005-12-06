@@ -22,7 +22,7 @@ foreach ($data as $str) {
 
 echo "====BUFFERED====\n";
 $r = sqlite_query("SELECT a, b from strings", $db);
-while (sqlite_valid($r)) {
+while (sqlite_has_more($r)) {
 	var_dump(sqlite_current($r, SQLITE_NUM));
 	var_dump(sqlite_column($r, 0));
 	var_dump(sqlite_column($r, 1));
@@ -32,16 +32,13 @@ while (sqlite_valid($r)) {
 }
 echo "====UNBUFFERED====\n";
 $r = sqlite_unbuffered_query("SELECT a, b from strings", $db);
-while (sqlite_valid($r)) {
+while (sqlite_has_more($r)) {
 	var_dump(sqlite_column($r, 0));
 	var_dump(sqlite_column($r, 'b'));
 	var_dump(sqlite_column($r, 1));
 	var_dump(sqlite_column($r, 'a'));
 	sqlite_next($r);
 }
-
-sqlite_close($db);
-
 echo "DONE!\n";
 ?>
 --EXPECT--
@@ -73,38 +70,6 @@ NULL
 NULL
 string(5) "three"
 string(4) "four"
-NULL
-NULL
-DONE!
---UEXPECT--
-====BUFFERED====
-array(2) {
-  [0]=>
-  unicode(3) "one"
-  [1]=>
-  unicode(3) "two"
-}
-unicode(3) "one"
-unicode(3) "two"
-unicode(3) "one"
-unicode(3) "two"
-array(2) {
-  [0]=>
-  unicode(5) "three"
-  [1]=>
-  unicode(4) "four"
-}
-unicode(5) "three"
-unicode(4) "four"
-unicode(5) "three"
-unicode(4) "four"
-====UNBUFFERED====
-unicode(3) "one"
-unicode(3) "two"
-NULL
-NULL
-unicode(5) "three"
-unicode(4) "four"
 NULL
 NULL
 DONE!

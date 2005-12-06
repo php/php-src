@@ -14,7 +14,7 @@
    <user>iliaa</user>
    <name>Ilia Alshanetsky</name>
    <email>ilia@php.net</email>
-   <role>developer</role>
+   <role>lead</role>
   </maintainer>
  </maintainers>
  <description>
@@ -24,12 +24,11 @@ but also traverse the document tree using the Zend Engine 2 OO semantics.
  </description>
  <license>PHP</license>
  <release>
-  <state>beta</state>
-  <version>2.0dev</version>
+  <state>stable</state>
+  <version>1.0</version>
   <date>2003-11-13</date>
   <notes>
-    Major API changes for PHP 5.0, including the re-introduction of resources, output buffering support,
-    dual-nature syntax (tidy_clean_repair($tidy_res) or $tidy->clean_repair()) and more. 
+    Fixed a few PHP5-specific bugs when working with node objects. 
   </notes>
   <configureoptions>
     <configureoption name="with-tidy" default="autodetect" prompt="Tidy library installation dir?"/>
@@ -40,11 +39,11 @@ but also traverse the document tree using the Zend Engine 2 OO semantics.
    <file role="src" name="php_tidy.h"/>
    
    <file role="doc" name="CREDITS"/>
+   <file role="doc" name="README"/>
    <file role="doc" name="TODO"/>
    <file role="doc" name="examples/cleanhtml.php"/>
    <file role="doc" name="examples/dumpit.php"/>
    <file role="doc" name="examples/urlgrab.php"/>
-   <file role="doc" name="libtidy.txt"/>
    
    <file role="test" name="tests/001.phpt"/>
    <file role="test" name="tests/002.phpt"/>
@@ -56,7 +55,7 @@ but also traverse the document tree using the Zend Engine 2 OO semantics.
    <file role="test" name="tests/007.phpt"/>
   </filelist>
   <deps>
-   <dep type="php" rel="ge" version="5" />
+   <dep type="php" rel="ge">4.3.0</dep>
   </deps>
  </release>
 </package>

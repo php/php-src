@@ -58,7 +58,16 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 		einfo   = &H->einfo;
 	}
 
-	einfo->errcode = mysql_errno(H->server);
+#if HAVE_MYSQL_STMT_PREPARE
+	if (S && S->stmt) {
+		einfo->errcode = mysql_stmt_errno(S->stmt);
+	}
+	else
+#endif
+	{
+		einfo->errcode = mysql_errno(H->server);
+	}
+
 	einfo->file = file;
 	einfo->line = line;
 
@@ -75,7 +84,7 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 				"Cannot execute queries while other unbuffered queries are active.  "
 				"Consider using PDOStatement::fetchAll().  Alternatively, if your code "
 				"is only ever going to run against mysql, you may enable query "
-				"buffering by setting the PDO_MYSQL_ATTR_USE_BUFFERED_QUERY attribute.",
+				"buffering by setting the PDO::MYSQL_ATTR_USE_BUFFERED_QUERY attribute.",
 				dbh->is_persistent);
 		}
 	} else { /* no error */
@@ -97,7 +106,7 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 #endif
 
 	if (!dbh->methods) {
-		zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC, "SQLSTATE[%s] [%d] %s",
+		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "SQLSTATE[%s] [%d] %s",
 				*pdo_err, einfo->errcode, einfo->errmsg);
 	}
 /* printf("** [%s:%d] %s %s\n", file, line, *pdo_err, einfo->errmsg); */

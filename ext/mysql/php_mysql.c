@@ -33,7 +33,14 @@
 #include "php_globals.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
-#include "zend_exceptions.h"
+
+#ifdef ZEND_ENGINE_2
+# include "zend_exceptions.h"
+#else
+  /* PHP 4 compat */
+# define OnUpdateLong	OnUpdateInt
+# define E_STRICT		E_NOTICE
+#endif
 
 #if HAVE_MYSQL
 
@@ -116,7 +123,7 @@ typedef struct _php_mysql_conn {
 
 /* {{{ mysql_functions[]
  */
-zend_function_entry mysql_functions[] = {
+function_entry mysql_functions[] = {
 	PHP_FE(mysql_connect,								NULL)
 	PHP_FE(mysql_pconnect,								NULL)
 	PHP_FE(mysql_close,									NULL)
@@ -211,7 +218,7 @@ zend_module_entry mysql_module_entry = {
 	PHP_RINIT(mysql),
 	PHP_RSHUTDOWN(mysql),
 	PHP_MINFO(mysql),
-	NO_VERSION_YET,
+	"1.0",
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -654,11 +661,11 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		persistent=0;
 	}
 	if (persistent) {
-		zend_rsrc_list_entry *le;
+		list_entry *le;
 
 		/* try to find if we already have this link in our persistent list */
 		if (zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {  /* we don't */
-			zend_rsrc_list_entry new_le;
+			list_entry new_le;
 
 			if (MySG(max_links)!=-1 && MySG(num_links)>=MySG(max_links)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%ld)", MySG(num_links));
@@ -698,7 +705,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			/* hash it up */
 			Z_TYPE(new_le) = le_plink;
 			new_le.ptr = mysql;
-			if (zend_hash_update(&EG(persistent_list), hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(zend_rsrc_list_entry), NULL)==FAILURE) {
+			if (zend_hash_update(&EG(persistent_list), hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
 				free(mysql);
 				efree(hashed_details);
 				MYSQL_DO_CONNECT_RETURN_FALSE();
@@ -741,7 +748,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 		ZEND_REGISTER_RESOURCE(return_value, mysql, le_plink);
 	} else { /* non persistent */
-		zend_rsrc_list_entry *index_ptr, new_index_ptr;
+		list_entry *index_ptr, new_index_ptr;
 		
 		/* first we check the hash for the hashed_details key.  if it exists,
 		 * it should point us to the right offset where the actual mysql link sits.
@@ -806,7 +813,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		/* add it to the hash */
 		new_index_ptr.ptr = (void *) Z_LVAL_P(return_value);
 		Z_TYPE(new_index_ptr) = le_index_ptr;
-		if (zend_hash_update(&EG(regular_list), hashed_details, hashed_details_length+1,(void *) &new_index_ptr, sizeof(zend_rsrc_list_entry), NULL)==FAILURE) {
+		if (zend_hash_update(&EG(regular_list), hashed_details, hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry), NULL)==FAILURE) {
 			efree(hashed_details);
 			MYSQL_DO_CONNECT_RETURN_FALSE();
 		}
@@ -1904,6 +1911,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 	zval            *res, *ctor_params = NULL;
 	zend_class_entry *ce;
 
+#ifdef ZEND_ENGINE_2
 	if (into_object) {
 		char *class_name;
 		int class_name_len;
@@ -1922,7 +1930,9 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 			return;
 		}
 		result_type = MYSQL_ASSOC;
-	} else {
+	} else
+#endif
+	{
 		if (ZEND_NUM_ARGS() > expected_args) {
 			WRONG_PARAM_COUNT;
 		}
@@ -1997,6 +2007,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 		}
 	}
 
+#ifdef ZEND_ENGINE_2
 	if (into_object) {
 		zval dataset = *return_value;
 		zend_fcall_info fci;
@@ -2032,7 +2043,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 					 * single value is an array. Also we'd have to make that one
 					 * argument passed by reference.
 					 */
-					zend_throw_exception(zend_exception_get_default(TSRMLS_C), "Parameter ctor_params must be an array", 0 TSRMLS_CC);
+					zend_throw_exception(zend_exception_get_default(), "Parameter ctor_params must be an array", 0 TSRMLS_CC);
 					return;
 				}
 			} else {
@@ -2047,7 +2058,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 			fcc.object_pp = &return_value;
 		
 			if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
-				zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "Could not execute %v::%v()", ce->name, ce->constructor->common.function_name);
+				zend_throw_exception_ex(zend_exception_get_default(), 0 TSRMLS_CC, "Could not execute %s::%s()", ce->name, ce->constructor->common.function_name);
 			} else {
 				if (retval_ptr) {
 					zval_ptr_dtor(&retval_ptr);
@@ -2057,9 +2068,11 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 				efree(fci.params);
 			}
 		} else if (ctor_params) {
-			zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "Class %v does not have a constructor hence you cannot use ctor_params", ce->name);
+			zend_throw_exception_ex(zend_exception_get_default(), 0 TSRMLS_CC, "Class %s does not have a constructor hence you cannot use ctor_params", ce->name);
 		}
 	}
+#endif
+
 }
 /* }}} */
 
@@ -2175,9 +2188,6 @@ static char *php_mysql_get_field_name(int field_type)
 		case FIELD_TYPE_FLOAT:
 		case FIELD_TYPE_DOUBLE:
 		case FIELD_TYPE_DECIMAL:
-#ifdef FIELD_TYPE_NEWDECIMAL
-		case FIELD_TYPE_NEWDECIMAL:
-#endif
 			return "real";
 			break;
 		case FIELD_TYPE_TIMESTAMP:
@@ -2189,25 +2199,11 @@ static char *php_mysql_get_field_name(int field_type)
 			break;
 #endif
 		case FIELD_TYPE_DATE:
-#ifdef FIELD_TYPE_NEWDATE
-		case FIELD_TYPE_NEWDATE:
-#endif
 			return "date";
 			break;
 		case FIELD_TYPE_TIME:
 			return "time";
 			break;
-		case FIELD_TYPE_SET:
-			return "set";
-			break;
-		case FIELD_TYPE_ENUM:
-			return "enum";
-			break;
-#ifdef FIELD_TYPE_GEOMETRY
-		case FIELD_TYPE_GEOMETRY:
-			return "geometry";
-			break;
-#endif
 		case FIELD_TYPE_DATETIME:
 			return "datetime";
 			break;

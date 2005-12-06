@@ -23,15 +23,12 @@
 ** The pFilename and pDbname arguments are the tokens that define the
 ** filename and dbname in the ATTACH statement.
 */
-void sqliteAttach(Parse *pParse, Token *pFilename, Token *pDbname, Token *pKey){
+void sqliteAttach(Parse *pParse, Token *pFilename, Token *pDbname){
   Db *aNew;
   int rc, i;
   char *zFile, *zName;
   sqlite *db;
-  Vdbe *v;
 
-  v = sqliteGetVdbe(pParse);
-  sqliteVdbeAddOp(v, OP_Halt, 0, 0);
   if( pParse->explain ) return;
   db = pParse->db;
   if( db->file_format<4 ){
@@ -67,6 +64,7 @@ void sqliteAttach(Parse *pParse, Token *pFilename, Token *pDbname, Token *pKey){
       sqliteErrorMsg(pParse, "database %z is already in use", zName);
       pParse->rc = SQLITE_ERROR;
       sqliteFree(zFile);
+      sqliteFree(zName);
       return;
     }
   }
@@ -91,35 +89,11 @@ void sqliteAttach(Parse *pParse, Token *pFilename, Token *pDbname, Token *pKey){
   if( rc ){
     sqliteErrorMsg(pParse, "unable to open database: %s", zFile);
   }
-#if SQLITE_HAS_CODEC
-  {
-    extern int sqliteCodecAttach(sqlite*, int, void*, int);
-    char *zKey = 0;
-    int nKey;
-    if( pKey && pKey->z && pKey->n ){
-      sqliteSetNString(&zKey, pKey->z, pKey->n, 0);
-      sqliteDequote(zKey);
-      nKey = strlen(zKey);
-    }else{
-      zKey = 0;
-      nKey = 0;
-    }
-    sqliteCodecAttach(db, db->nDb-1, zKey, nKey);
-  }
-#endif
   sqliteFree(zFile);
   db->flags &= ~SQLITE_Initialized;
   if( pParse->nErr ) return;
-  if( rc==SQLITE_OK ){
-    rc = sqliteInit(pParse->db, &pParse->zErrMsg);
-  }
+  rc = sqliteInit(pParse->db, &pParse->zErrMsg);
   if( rc ){
-    int i = db->nDb - 1;
-    assert( i>=2 );
-    if( db->aDb[i].pBt ){
-      sqliteBtreeClose(db->aDb[i].pBt);
-      db->aDb[i].pBt = 0;
-    }
     sqliteResetInternalSchema(db, 0);
     pParse->nErr++;
     pParse->rc = SQLITE_ERROR;
@@ -136,18 +110,13 @@ void sqliteAttach(Parse *pParse, Token *pFilename, Token *pDbname, Token *pKey){
 void sqliteDetach(Parse *pParse, Token *pDbname){
   int i;
   sqlite *db;
-  Vdbe *v;
-  Db *pDb;
 
-  v = sqliteGetVdbe(pParse);
-  sqliteVdbeAddOp(v, OP_Halt, 0, 0);
   if( pParse->explain ) return;
   db = pParse->db;
   for(i=0; i<db->nDb; i++){
-    pDb = &db->aDb[i];
-    if( pDb->pBt==0 || pDb->zName==0 ) continue;
-    if( strlen(pDb->zName)!=pDbname->n ) continue;
-    if( sqliteStrNICmp(pDb->zName, pDbname->z, pDbname->n)==0 ) break;
+    if( db->aDb[i].pBt==0 || db->aDb[i].zName==0 ) continue;
+    if( strlen(db->aDb[i].zName)!=pDbname->n ) continue;
+    if( sqliteStrNICmp(db->aDb[i].zName, pDbname->z, pDbname->n)==0 ) break;
   }
   if( i>=db->nDb ){
     sqliteErrorMsg(pParse, "no such database: %T", pDbname);
@@ -162,11 +131,10 @@ void sqliteDetach(Parse *pParse, Token *pDbname){
     return;
   }
 #endif /* SQLITE_OMIT_AUTHORIZATION */
-  sqliteBtreeClose(pDb->pBt);
-  pDb->pBt = 0;
-  sqliteFree(pDb->zName);
+  sqliteBtreeClose(db->aDb[i].pBt);
+  db->aDb[i].pBt = 0;
+  sqliteFree(db->aDb[i].zName);
   sqliteResetInternalSchema(db, i);
-  if( pDb->pAux && pDb->xFreeAux ) pDb->xFreeAux(pDb->pAux);
   db->nDb--;
   if( i<db->nDb ){
     db->aDb[i] = db->aDb[db->nDb];

@@ -18,7 +18,6 @@
 ** $Id$
 */
 #include <string.h>
-#include <assert.h>
 
 /*
 ** How This Encoder Works
@@ -27,7 +26,7 @@
 ** 0x00.  This is accomplished by using an escape character to encode
 ** 0x27 and 0x00 as a two-byte sequence.  The escape character is always
 ** 0x01.  An 0x00 is encoded as the two byte sequence 0x01 0x01.  The
-** 0x27 character is encoded as the two byte sequence 0x01 0x28.  Finally,
+** 0x27 character is encoded as the two byte sequence 0x01 0x03.  Finally,
 ** the escape character itself is encoded as the two-character sequence
 ** 0x01 0x02.
 **
@@ -35,17 +34,17 @@
 **
 **       0x00  ->  0x01 0x01
 **       0x01  ->  0x01 0x02
-**       0x27  ->  0x01 0x28
+**       0x27  ->  0x01 0x03
 **
 ** If that were all the encoder did, it would work, but in certain cases
 ** it could double the size of the encoded string.  For example, to
-** encode a string of 100 0x27 characters would require 100 instances of
+** encode a string of 100 0x27 character would require 100 instances of
 ** the 0x01 0x03 escape sequence resulting in a 200-character output.
 ** We would prefer to keep the size of the encoded string smaller than
 ** this.
 **
 ** To minimize the encoding size, we first add a fixed offset value to each 
-** byte in the sequence.  The addition is modulo 256.  (That is to say, if
+** byte in the sequence.  The addition is module 256.  (That is to say, if
 ** the sum of the original character value and the offset exceeds 256, then
 ** the higher order bits are truncated.)  The offset is chosen to minimize
 ** the number of characters in the string that need to be escaped.  For
@@ -81,18 +80,18 @@
 **           the offset in step 7 below.
 **
 **     (6)   Convert each 0x01 0x01 sequence into a single character 0x00.
-**           Convert 0x01 0x02 into 0x01.  Convert 0x01 0x28 into 0x27.
+**           Convert 0x01 0x02 into 0x01.  Convert 0x01 0x03 into 0x27.
 **
 **     (7)   Subtract the offset value that was the first character of
 **           the encoded buffer from all characters in the output buffer.
 **
 ** The only tricky part is step (1) - how to compute an offset value to
-** minimize the size of the output buffer.  This is accomplished by testing
+** minimize the size of the output buffer.  This is accomplished to testing
 ** all offset values and picking the one that results in the fewest number
 ** of escapes.  To do that, we first scan the entire input and count the
 ** number of occurances of each character value in the input.  Suppose
 ** the number of 0x00 characters is N(0), the number of occurances of 0x01
-** is N(1), and so forth up to the number of occurances of 0xff is N(255).
+** is N(1), and so forth up to the number of occurances of 0xff is N(256).
 ** An offset of 0 is not allowed so we don't have to test it.  The number
 ** of escapes required for an offset of 1 is N(1)+N(2)+N(40).  The number
 ** of escapes required for an offset of 2 is N(2)+N(3)+N(41).  And so forth.
@@ -108,27 +107,20 @@
 ** string back into its original binary.
 **
 ** The result is written into a preallocated output buffer "out".
-** "out" must be able to hold at least 2 +(257*n)/254 bytes.
+** "out" must be able to hold at least (256*n + 1262)/253 bytes.
 ** In other words, the output will be expanded by as much as 3
-** bytes for every 254 bytes of input plus 2 bytes of fixed overhead.
-** (This is approximately 2 + 1.0118*n or about a 1.2% size increase.)
+** bytes for every 253 bytes of input plus 2 bytes of fixed overhead.
+** (This is approximately 2 + 1.019*n or about a 2% size increase.)
 **
 ** The return value is the number of characters in the encoded
 ** string, excluding the "\000" terminator.
-**
-** If out==NULL then no output is generated but the routine still returns
-** the number of characters that would have been generated if out had
-** not been NULL.
 */
 int sqlite_encode_binary(const unsigned char *in, int n, unsigned char *out){
   int i, j, e, m;
-  unsigned char x;
   int cnt[256];
   if( n<=0 ){
-    if( out ){
-      out[0] = 'x';
-      out[1] = 0;
-    }
+    out[0] = 'x';
+    out[1] = 0;
     return 1;
   }
   memset(cnt, 0, sizeof(cnt));
@@ -144,27 +136,30 @@ int sqlite_encode_binary(const unsigned char *in, int n, unsigned char *out){
       if( m==0 ) break;
     }
   }
-  if( out==0 ){
-    return n+m+1;
-  }
   out[0] = e;
   j = 1;
   for(i=0; i<n; i++){
-    x = in[i] - e;
-    if( x==0 || x==1 || x=='\''){
+    int c = (in[i] - e)&0xff;
+    if( c==0 ){
       out[j++] = 1;
-      x++;
+      out[j++] = 1;
+    }else if( c==1 ){
+      out[j++] = 1;
+      out[j++] = 2;
+    }else if( c=='\'' ){
+      out[j++] = 1;
+      out[j++] = 3;
+    }else{
+      out[j++] = c;
     }
-    out[j++] = x;
   }
   out[j] = 0;
-  assert( j==n+m+1 );
   return j;
 }
 
 /*
 ** Decode the string "in" into binary data and write it into "out".
-** This routine reverses the encoding created by sqlite_encode_binary().
+** This routine reverses the encoded created by sqlite_encode_binary().
 ** The output will always be a few bytes less than the input.  The number
 ** of bytes of output is returned.  If the input is not a well-formed
 ** encoding, -1 is returned.
@@ -173,32 +168,38 @@ int sqlite_encode_binary(const unsigned char *in, int n, unsigned char *out){
 ** to decode a string in place.
 */
 int sqlite_decode_binary(const unsigned char *in, unsigned char *out){
-  int i, e;
-  unsigned char c;
+  int i, c, e;
   e = *(in++);
   i = 0;
   while( (c = *(in++))!=0 ){
     if( c==1 ){
-      c = *(in++) - 1;
+      c = *(in++);
+      if( c==1 ){
+        c = 0;
+      }else if( c==2 ){
+        c = 1;
+      }else if( c==3 ){
+        c = '\'';
+      }else{
+        return -1;
+      }
     }
-    out[i++] = c + e;
+    out[i++] = (c + e)&0xff;
   }
   return i;
 }
 
 #ifdef ENCODER_TEST
-#include <stdio.h>
 /*
 ** The subroutines above are not tested by the usual test suite.  To test
 ** these routines, compile just this one file with a -DENCODER_TEST=1 option
 ** and run the result.
 */
 int main(int argc, char **argv){
-  int i, j, n, m, nOut, nByteIn, nByteOut;
+  int i, j, n, m, nOut;
   unsigned char in[30000];
   unsigned char out[33000];
 
-  nByteIn = nByteOut = 0;
   for(i=0; i<sizeof(in); i++){
     printf("Test %d: ", i+1);
     n = rand() % (i+1);
@@ -212,15 +213,9 @@ int main(int argc, char **argv){
     }else{
       for(j=0; j<n; j++) in[j] = rand() & 0xff;
     }
-    nByteIn += n;
     nOut = sqlite_encode_binary(in, n, out);
-    nByteOut += nOut;
     if( nOut!=strlen(out) ){
       printf(" ERROR return value is %d instead of %d\n", nOut, strlen(out));
-      exit(1);
-    }
-    if( nOut!=sqlite_encode_binary(in, n, 0) ){
-      printf(" ERROR actual output size disagrees with predicted size\n");
       exit(1);
     }
     m = (256*n + 1262)/253;
@@ -246,9 +241,5 @@ int main(int argc, char **argv){
     }
     printf(" OK\n");
   }
-  fprintf(stderr,"Finished.  Total encoding: %d->%d bytes\n",
-          nByteIn, nByteOut);
-  fprintf(stderr,"Avg size increase: %.3f%%\n",
-    (nByteOut-nByteIn)*100.0/(double)nByteIn);
 }
 #endif /* ENCODER_TEST */

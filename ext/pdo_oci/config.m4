@@ -35,7 +35,7 @@ PHP_ARG_WITH(pdo-oci, Oracle OCI support for PDO,
 
 if test "$PHP_PDO_OCI" != "no"; then
   AC_MSG_CHECKING([Oracle Install-Dir])
-  if test "$PHP_PDO_OCI" = "yes" || test -z "$PHP_PDO_OCI"; then
+  if test "$PHP_PDO_OCI" = "yes" -o -z "$PHP_PDO_OCI"; then
     PDO_OCI_DIR=$ORACLE_HOME
   else
     PDO_OCI_DIR=$PHP_PDO_OCI

@@ -36,6 +36,7 @@
 #define INT8OID     20
 #define INT2OID     21
 #define INT4OID     23
+#define TEXTOID     25
 #define OIDOID      26
 
 
@@ -105,12 +106,10 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	pdo_pgsql_db_handle *H = S->H;
 	ExecStatusType status;
 
-	if (stmt->executed) {
-		/* ensure that we free any previous unfetched results */
-		if(S->result) {
-			PQclear(S->result);
-			S->result = NULL;
-		}
+	/* ensure that we free any previous unfetched results */
+	if(S->result) {
+		PQclear(S->result);
+		S->result = NULL;
 	}
 	
 	S->current_row = 0;
@@ -119,13 +118,32 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	if (S->stmt_name) {
 		/* using a prepared statement */
 
+		if (!stmt->executed) {
+			/* we deferred the prepare until now, because we didn't
+			 * know anything about the parameter types; now we do */
+			S->result = PQprepare(H->server, S->stmt_name, S->query, 
+						stmt->bound_params ? zend_hash_num_elements(stmt->bound_params) : 0,
+						S->param_types);
+			status = PQresultStatus(S->result);
+			switch (status) {
+				case PGRES_COMMAND_OK:
+				case PGRES_TUPLES_OK:
+					/* it worked */
+					PQclear(S->result);
+					break;
+				default:
+					pdo_pgsql_error_stmt(stmt, status,
+							pdo_pgsql_sqlstate(S->result));
+					return 0;
+			}
+		}
 		S->result = PQexecPrepared(H->server, S->stmt_name,
 				stmt->bound_params ?
 					zend_hash_num_elements(stmt->bound_params) :
 					0,
 				(const char**)S->param_values,
 				S->param_lengths,
-				NULL,
+				S->param_formats,
 				0);
 	} else
 #endif
@@ -196,9 +214,27 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 					S->param_formats = ecalloc(
 							zend_hash_num_elements(stmt->bound_params),
 							sizeof(int));
-
+					S->param_types = ecalloc(
+							zend_hash_num_elements(stmt->bound_params),
+							sizeof(Oid));
 				}
 				if (param->paramno >= 0) {
+					if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB &&
+							Z_TYPE_P(param->parameter) == IS_RESOURCE) {
+						php_stream *stm;
+						php_stream_from_zval_no_verify(stm, &param->parameter);
+						if (stm) {
+							SEPARATE_ZVAL_IF_NOT_REF(&param->parameter);
+							Z_TYPE_P(param->parameter) = IS_STRING;
+							Z_STRLEN_P(param->parameter) = php_stream_copy_to_mem(stm,
+									&Z_STRVAL_P(param->parameter), PHP_STREAM_COPY_ALL, 0);
+						} else {
+							/* expected a stream resource */
+							pdo_pgsql_error_stmt(stmt, PGRES_FATAL_ERROR, "HY105");
+							return 0;
+						}
+					}
+
 					if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL ||
 							Z_TYPE_P(param->parameter) == IS_NULL) {
 						S->param_values[param->paramno] = NULL;
@@ -206,12 +242,19 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 					} else if (Z_TYPE_P(param->parameter) == IS_BOOL) {
 						S->param_values[param->paramno] = Z_BVAL_P(param->parameter) ? "t" : "f";
 						S->param_lengths[param->paramno] = 1;
-						S->param_formats[param->paramno] = 1;
+						S->param_formats[param->paramno] = 0;
 					} else {
 						convert_to_string(param->parameter);
 						S->param_values[param->paramno] = Z_STRVAL_P(param->parameter);
 						S->param_lengths[param->paramno] = Z_STRLEN_P(param->parameter);
+						S->param_formats[param->paramno] = 0;
+					}
+
+					if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB) {
+						S->param_types[param->paramno] = 0;
 						S->param_formats[param->paramno] = 1;
+					} else {
+						S->param_types[param->paramno] = 0;
 					}
 				}
 				break;
@@ -506,9 +549,7 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, long colno, zval *return
 
 static int pdo_pgsql_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC)
 {
-#if HAVE_PQPREPARE
 	return 1;
-#endif
 }
 
 struct pdo_stmt_methods pgsql_stmt_methods = {

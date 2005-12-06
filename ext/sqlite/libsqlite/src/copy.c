@@ -37,6 +37,7 @@ void sqliteCopy(
   int i;
   Vdbe *v;
   int addr, end;
+  Index *pIdx;
   char *zFile = 0;
   const char *zDb;
   sqlite *db = pParse->db;
@@ -57,9 +58,18 @@ void sqliteCopy(
   v = sqliteGetVdbe(pParse);
   if( v ){
     sqliteBeginWriteOperation(pParse, 1, pTab->iDb);
-    addr = sqliteVdbeOp3(v, OP_FileOpen, 0, 0, pFilename->z, pFilename->n);
+    addr = sqliteVdbeAddOp(v, OP_FileOpen, 0, 0);
+    sqliteVdbeChangeP3(v, addr, pFilename->z, pFilename->n);
     sqliteVdbeDequoteP3(v, addr);
-    sqliteOpenTableAndIndices(pParse, pTab, 0);
+    sqliteVdbeAddOp(v, OP_Integer, pTab->iDb, 0);
+    sqliteVdbeAddOp(v, OP_OpenWrite, 0, pTab->tnum);
+    sqliteVdbeChangeP3(v, -1, pTab->zName, P3_STATIC);
+    for(i=1, pIdx=pTab->pIndex; pIdx; pIdx=pIdx->pNext, i++){
+      assert( pIdx->iDb==1 || pIdx->iDb==pTab->iDb );
+      sqliteVdbeAddOp(v, OP_Integer, pIdx->iDb, 0);
+      sqliteVdbeAddOp(v, OP_OpenWrite, i, pIdx->tnum);
+      sqliteVdbeChangeP3(v, -1, pIdx->zName, P3_STATIC);
+    }
     if( db->flags & SQLITE_CountRows ){
       sqliteVdbeAddOp(v, OP_Integer, 0, 0);  /* Initialize the row count */
     }
@@ -97,7 +107,7 @@ void sqliteCopy(
     sqliteVdbeAddOp(v, OP_Noop, 0, 0);
     sqliteEndWriteOperation(pParse);
     if( db->flags & SQLITE_CountRows ){
-      sqliteVdbeAddOp(v, OP_ColumnName, 0, 1);
+      sqliteVdbeAddOp(v, OP_ColumnName, 0, 0);
       sqliteVdbeChangeP3(v, -1, "rows inserted", P3_STATIC);
       sqliteVdbeAddOp(v, OP_Callback, 1, 0);
     }

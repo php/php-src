@@ -80,7 +80,7 @@ int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *
 	}
 
 	if (!dbh->methods) {
-		zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC, "SQLSTATE[%s] [%d] %s",
+		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "SQLSTATE[%s] [%d] %s",
 				*pdo_err, einfo->errcode, einfo->errmsg);
 	}
 	
@@ -153,8 +153,9 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 	}
 
 #if HAVE_PQPREPARE
-	if (!driver_options || pdo_attr_lval(driver_options,
-			PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT, 0 TSRMLS_CC) == 0) {
+	if ((!driver_options || pdo_attr_lval(driver_options,
+			PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT, 0 TSRMLS_CC) == 0)
+			&& PQprotocolVersion(H->server) > 2) {
 		stmt->supports_placeholders = PDO_PLACEHOLDER_NAMED;
 		stmt->named_rewrite_template = "$%d";
 		ret = pdo_parse_params(stmt, (char*)sql, sql_len, &nsql, &nsql_len TSRMLS_CC);
@@ -169,41 +170,15 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 		}
 
 		spprintf(&S->stmt_name, 0, "pdo_pgsql_stmt_%08x", (unsigned int)stmt);
-		res = PQprepare(H->server, S->stmt_name, sql, 0, NULL);
+		/* that's all for now; we'll defer the actual prepare until the first execute call */
+	
 		if (nsql) {
-			efree(nsql);
-		}
-		if (!res) {
-			pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, NULL);
-			return 0;
+			S->query = nsql;
+		} else {
+			S->query = estrdup(sql);
 		}
 
-		/* check if the connection is using protocol version 2.0.
-		 * if that is the reason that the prepare failed, we want to fall
-		 * through and let PDO emulate it for us */
-		status = PQresultStatus(res);
-		switch (status) {
-			case PGRES_COMMAND_OK:
-			case PGRES_TUPLES_OK:
-				/* it worked */
-				PQclear(res);
-				return 1;
-
-			case PGRES_BAD_RESPONSE:
-				/* server is probably too old; fall through and let
-				 * PDO emulate it */
-				efree(S->stmt_name);
-				S->stmt_name = NULL;
-				PQclear(res);
-				break;
-
-			default:
-				/* protocol 3.0 and above; hard error */
-				pdo_pgsql_error(dbh, status, pdo_pgsql_sqlstate(res));
-				PQclear(res);
-				return 0;
-		}
-		/* fall through */
+		return 1;
 	}
 #endif
 

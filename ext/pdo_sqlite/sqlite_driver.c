@@ -75,7 +75,7 @@ int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int li
 	}
 
 	if (!dbh->methods) {
-		zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC, "SQLSTATE[%s] [%d] %s",
+		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "SQLSTATE[%s] [%d] %s",
 				*pdo_err, einfo->errcode, einfo->errmsg);
 	}
 	
@@ -457,11 +457,7 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 	char *func_name;
 	int func_name_len;
 	long argc = -1;
-#ifdef IS_UNICODE
-	zval cbname;
-#else
-	char *cbname;
-#endif
+	char *cbname = NULL;
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *H;
 	int ret;
@@ -475,20 +471,11 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 	PDO_CONSTRUCT_CHECK;
 
 	if (!zend_is_callable(callback, 0, &cbname)) {
-#ifdef IS_UNICODE
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%R' is not callable", Z_TYPE(cbname), Z_UNIVAL(cbname));
-		zval_dtor(&cbname);
-#else
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%s' is not callable", cbname);
 		efree(cbname);
-#endif
 		RETURN_FALSE;
 	}
-#ifdef IS_UNICODE
-	zval_dtor(&cbname);
-#else
 	efree(cbname);
-#endif
 	
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
@@ -542,11 +529,7 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 	char *func_name;
 	int func_name_len;
 	long argc = -1;
-#ifdef IS_UNICODE
-	zval cbname;
-#else
-	char *cbname;
-#endif
+	char *cbname = NULL;
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *H;
 	int ret;
@@ -560,35 +543,17 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 	PDO_CONSTRUCT_CHECK;
 
 	if (!zend_is_callable(step_callback, 0, &cbname)) {
-#ifdef IS_UNICODE
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%R' is not callable", Z_TYPE(cbname), Z_UNIVAL(cbname));
-		zval_dtor(&cbname);
-#else
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%s' is not callable", cbname);
 		efree(cbname);
-#endif
 		RETURN_FALSE;
 	}
-#ifdef IS_UNICODE
-	zval_dtor(&cbname);
-#else
 	efree(cbname);
-#endif
 	if (!zend_is_callable(fini_callback, 0, &cbname)) {
-#ifdef IS_UNICODE
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%R' is not callable", Z_TYPE(cbname), Z_UNIVAL(cbname));
-		zval_dtor(&cbname);
-#else
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%s' is not callable", cbname);
 		efree(cbname);
-#endif
 		RETURN_FALSE;
 	}
-#ifdef IS_UNICODE
-	zval_dtor(&cbname);
-#else
 	efree(cbname);
-#endif
 	
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
@@ -619,13 +584,13 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 	RETURN_FALSE;
 }
 /* }}} */
-static zend_function_entry dbh_methods[] = {
+static function_entry dbh_methods[] = {
 	PHP_ME(SQLite, sqliteCreateFunction, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(SQLite, sqliteCreateAggregate, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
-static zend_function_entry *get_driver_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
+static function_entry *get_driver_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 {
 	switch (kind) {
 		case PDO_DBH_DRIVER_METHOD_KIND_DBH:
@@ -729,7 +694,7 @@ static int pdo_sqlite_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS
 	filename = make_filename_safe(dbh->data_source TSRMLS_CC);
 
 	if (!filename) {
-		zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC,
+		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC,
 			"safe_mode/open_basedir prohibits opening %s",
 			dbh->data_source);
 		goto cleanup;

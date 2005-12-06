@@ -31,7 +31,7 @@
 #include "php_pdo_pgsql_int.h"
 
 /* {{{ pdo_pgsql_functions[] */
-zend_function_entry pdo_pgsql_functions[] = {
+function_entry pdo_pgsql_functions[] = {
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -61,7 +61,7 @@ zend_module_entry pdo_pgsql_module_entry = {
 	PHP_RINIT(pdo_pgsql),
 	PHP_RSHUTDOWN(pdo_pgsql),
 	PHP_MINFO(pdo_pgsql),
-	"0.9",
+	"1.0",
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -77,7 +77,7 @@ ZEND_GET_MODULE(pdo_pgsql)
 PHP_MINIT_FUNCTION(pdo_pgsql)
 {
 	php_pdo_register_driver(&pdo_pgsql_driver);
-	REGISTER_PDO_CONST_LONG("PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT", PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT);
+	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT", PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT);
 	return SUCCESS;
 }
 /* }}} */

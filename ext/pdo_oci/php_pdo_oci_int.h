@@ -51,7 +51,9 @@ typedef struct {
 	sb2			indicator;
 
 	char *data;
-	unsigned long datalen;
+	ub4 datalen;
+
+	ub2 dtype;
 
 } pdo_oci_column;
 
@@ -64,6 +66,7 @@ typedef struct {
 	ub4		exec_type;
 	pdo_oci_column *cols;
 	pdo_oci_error_info einfo;
+	unsigned int have_blobs:1;
 } pdo_oci_stmt;
 
 typedef struct {

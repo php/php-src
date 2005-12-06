@@ -37,8 +37,7 @@ typedef struct vacuumStruct vacuumStruct;
 struct vacuumStruct {
   sqlite *dbOld;       /* Original database */
   sqlite *dbNew;       /* New database */
-  char **pzErrMsg;     /* Write errors here */
-  int rc;              /* Set to non-zero on an error */
+  Parse *pParse;       /* The parser context */
   const char *zTable;  /* Name of a table being copied */
   const char *zPragma; /* Pragma to execute with results */
   dynStr s1, s2;       /* Two dynamic strings */
@@ -86,16 +85,16 @@ static void appendQuoted(dynStr *p, const char *zText){
 
 /*
 ** Execute statements of SQL.  If an error occurs, write the error
-** message into *pzErrMsg and return non-zero.
+** message into pParse->zErrMsg and return non-zero.
 */
-static int execsql(char **pzErrMsg, sqlite *db, const char *zSql){ 
-  char *zErrMsg = 0;
+static int execsql(Parse *pParse, sqlite *db, const char *zSql){ 
   int rc;
+  char *zErrMsg = 0;
 
   /* printf("***** executing *****\n%s\n", zSql); */
   rc = sqlite_exec(db, zSql, 0, 0, &zErrMsg);
-  if( zErrMsg ){
-    sqliteSetString(pzErrMsg, zErrMsg, (char*)0);
+  if( rc ){
+    sqliteErrorMsg(pParse, "%s", zErrMsg);
     sqlite_freemem(zErrMsg);
   }
   return rc;
@@ -108,10 +107,10 @@ static int execsql(char **pzErrMsg, sqlite *db, const char *zSql){
 */
 static int vacuumCallback2(void *pArg, int argc, char **argv, char **NotUsed){
   vacuumStruct *p = (vacuumStruct*)pArg;
+  int rc = 0;
   const char *zSep = "(";
   int i;
 
-  if( argv==0 ) return 0;
   p->s2.nUsed = 0;
   appendText(&p->s2, "INSERT INTO ", -1);
   appendQuoted(&p->s2, p->zTable);
@@ -126,8 +125,8 @@ static int vacuumCallback2(void *pArg, int argc, char **argv, char **NotUsed){
     }
   }
   appendText(&p->s2,")", 1);
-  p->rc = execsql(p->pzErrMsg, p->dbNew, p->s2.z);
-  return p->rc;
+  rc = execsql(p->pParse, p->dbNew, p->s2.z);
+  return rc;
 }
 
 /*
@@ -142,11 +141,10 @@ static int vacuumCallback1(void *pArg, int argc, char **argv, char **NotUsed){
   vacuumStruct *p = (vacuumStruct*)pArg;
   int rc = 0;
   assert( argc==3 );
-  if( argv==0 ) return 0;
   assert( argv[0]!=0 );
   assert( argv[1]!=0 );
   assert( argv[2]!=0 );
-  rc = execsql(p->pzErrMsg, p->dbNew, argv[2]);
+  rc = execsql(p->pParse, p->dbNew, argv[2]);
   if( rc==SQLITE_OK && strcmp(argv[0],"table")==0 ){
     char *zErrMsg = 0;
     p->s1.nUsed = 0;
@@ -154,26 +152,42 @@ static int vacuumCallback1(void *pArg, int argc, char **argv, char **NotUsed){
     appendQuoted(&p->s1, argv[1]);
     p->zTable = argv[1];
     rc = sqlite_exec(p->dbOld, p->s1.z, vacuumCallback2, p, &zErrMsg);
-    if( zErrMsg ){
-      sqliteSetString(p->pzErrMsg, zErrMsg, (char*)0);
-      sqlite_freemem(zErrMsg);
+    if( rc && p->pParse->zErrMsg==0 ){
+      sqliteErrorMsg(p->pParse, "%s", zErrMsg);
     }
   }
-  if( rc!=SQLITE_ABORT ) p->rc = rc;
+  return rc;
+}
+
+/*
+** This callback is used to transfer PRAGMA settings from one database
+** to the other.  The value in argv[0] should be passed to a pragma
+** identified by ((vacuumStruct*)pArg)->zPragma.
+*/
+static int vacuumCallback3(void *pArg, int argc, char **argv, char **NotUsed){
+  vacuumStruct *p = (vacuumStruct*)pArg;
+  int rc = 0;
+  char zBuf[200];
+  assert( argc==1 );
+  assert( argv[0]!=0 );
+  assert( strlen(p->zPragma)<100 );
+  assert( strlen(argv[0])<30 );
+  sprintf(zBuf,"PRAGMA %s=%s;", p->zPragma, argv[0]);
+  rc = execsql(p->pParse, p->dbNew, zBuf);
   return rc;
 }
 
 /*
 ** Generate a random name of 20 character in length.
 */
-static void randomName(unsigned char *zBuf){
-  static const unsigned char zChars[] =
+static void randomName(char *zBuf){
+  static const char zChars[] =
     "abcdefghijklmnopqrstuvwxyz"
     "0123456789";
   int i;
-  sqliteRandomness(20, zBuf);
   for(i=0; i<20; i++){
-    zBuf[i] = zChars[ zBuf[i]%(sizeof(zChars)-1) ];
+    int n = sqliteRandomByte() % (sizeof(zChars)-1);
+    zBuf[i] = zChars[n];
   }
 }
 #endif
@@ -189,32 +203,35 @@ static void randomName(unsigned char *zBuf){
 ** become a no-op.
 */
 void sqliteVacuum(Parse *pParse, Token *pTableName){
-  Vdbe *v = sqliteGetVdbe(pParse);
-  sqliteVdbeAddOp(v, OP_Vacuum, 0, 0);
-  return;
-}
-
-/*
-** This routine implements the OP_Vacuum opcode of the VDBE.
-*/
-int sqliteRunVacuum(char **pzErrMsg, sqlite *db){
 #if !defined(SQLITE_OMIT_VACUUM) || SQLITE_OMIT_VACUUM
   const char *zFilename;  /* full pathname of the database file */
   int nFilename;          /* number of characters  in zFilename[] */
   char *zTemp = 0;        /* a temporary file in same directory as zFilename */
   sqlite *dbNew = 0;      /* The new vacuumed database */
+  sqlite *db;             /* The original database */
   int rc = SQLITE_OK;     /* Return code from service routines */
   int i;                  /* Loop counter */
-  char *zErrMsg;          /* Error message */
+  char *zErrMsg = 0;      /* Error messages stored here */
+  int safety = 0;         /* TRUE if safety is off */
   vacuumStruct sVac;      /* Information passed to callbacks */
 
-  if( db->flags & SQLITE_InTrans ){
-    sqliteSetString(pzErrMsg, "cannot VACUUM from within a transaction", 
-       (char*)0);
-    return SQLITE_ERROR;
+  /* These are all of the pragmas that need to be transferred over
+  ** to the new database */
+  static const char *zPragma[] = {
+     "default_synchronous",
+     "default_cache_size",
+     /* "default_temp_store", */
+  };
+
+  /* Initial error checks
+  */
+  if( pParse->explain ){
+    return;
   }
-  if( db->flags & SQLITE_Interrupt ){
-    return SQLITE_INTERRUPT;
+  db = pParse->db;
+  if( db->flags & SQLITE_InTrans ){
+    sqliteErrorMsg(pParse, "cannot VACUUM from within a transaction");
+    return;
   }
   memset(&sVac, 0, sizeof(sVac));
 
@@ -225,73 +242,68 @@ int sqliteRunVacuum(char **pzErrMsg, sqlite *db){
   if( zFilename==0 ){
     /* This only happens with the in-memory database.  VACUUM is a no-op
     ** there, so just return */
-    return SQLITE_OK;
+    return;
   }
   nFilename = strlen(zFilename);
   zTemp = sqliteMalloc( nFilename+100 );
-  if( zTemp==0 ) return SQLITE_NOMEM;
+  if( zTemp==0 ) return;
   strcpy(zTemp, zFilename);
   for(i=0; i<10; i++){
     zTemp[nFilename] = '-';
-    randomName((unsigned char*)&zTemp[nFilename+1]);
+    randomName(&zTemp[nFilename+1]);
     if( !sqliteOsFileExists(zTemp) ) break;
   }
   if( i>=10 ){
-    sqliteSetString(pzErrMsg, "unable to create a temporary database file "
-       "in the same directory as the original database", (char*)0);
+    sqliteErrorMsg(pParse, "unable to create a temporary database file "
+       "in the same directory as the original database");
     goto end_of_vacuum;
   }
 
   
   dbNew = sqlite_open(zTemp, 0, &zErrMsg);
   if( dbNew==0 ){
-    sqliteSetString(pzErrMsg, "unable to open a temporary database at ",
-       zTemp, " - ", zErrMsg, (char*)0);
+    sqliteErrorMsg(pParse, "unable to open a temporary database at %s - %s",
+       zTemp, zErrMsg);
     goto end_of_vacuum;
   }
-  if( (rc = execsql(pzErrMsg, db, "BEGIN"))!=0 ) goto end_of_vacuum;
-  if( (rc = execsql(pzErrMsg, dbNew, "PRAGMA synchronous=off; BEGIN"))!=0 ){
+  if( sqliteSafetyOff(db) ){
+    sqliteErrorMsg(pParse, "library routines called out of sequence");
     goto end_of_vacuum;
   }
-  
+  safety = 1;
+  if( execsql(pParse, db, "BEGIN") ) goto end_of_vacuum;
+  if( execsql(pParse, dbNew, "PRAGMA synchronous=off; BEGIN") ){
+    goto end_of_vacuum;
+  }
   sVac.dbOld = db;
   sVac.dbNew = dbNew;
-  sVac.pzErrMsg = pzErrMsg;
-  if( rc==SQLITE_OK ){
-    rc = sqlite_exec(db, 
-      "SELECT type, name, sql FROM sqlite_master "
-      "WHERE sql NOT NULL AND type!='view' "
-      "UNION ALL "
-      "SELECT type, name, sql FROM sqlite_master "
-      "WHERE sql NOT NULL AND type=='view'",
-      vacuumCallback1, &sVac, &zErrMsg);
+  sVac.pParse = pParse;
+  for(i=0; rc==SQLITE_OK && i<sizeof(zPragma)/sizeof(zPragma[0]); i++){
+    char zBuf[200];
+    assert( strlen(zPragma[i])<100 );
+    sprintf(zBuf, "PRAGMA %s;", zPragma[i]);
+    sVac.zPragma = zPragma[i];
+    rc = sqlite_exec(db, zBuf, vacuumCallback3, &sVac, &zErrMsg);
   }
-  if( rc==SQLITE_OK ){
-    int meta1[SQLITE_N_BTREE_META];
-    int meta2[SQLITE_N_BTREE_META];
-    sqliteBtreeGetMeta(db->aDb[0].pBt, meta1);
-    sqliteBtreeGetMeta(dbNew->aDb[0].pBt, meta2);
-    meta2[1] = meta1[1]+1;
-    meta2[3] = meta1[3];
-    meta2[4] = meta1[4];
-    meta2[6] = meta1[6];
-    rc = sqliteBtreeUpdateMeta(dbNew->aDb[0].pBt, meta2);
+  if( !rc ){
+    rc = sqlite_exec(db, "SELECT type, name, sql FROM sqlite_master "
+             "WHERE sql NOT NULL", vacuumCallback1, &sVac, &zErrMsg);
   }
-  if( rc==SQLITE_OK ){
+  if( !rc ){
     rc = sqliteBtreeCopyFile(db->aDb[0].pBt, dbNew->aDb[0].pBt);
     sqlite_exec(db, "COMMIT", 0, 0, 0);
+    sqlite_exec(db, "ROLLBACK", 0, 0, 0);  /* In case the COMMIT failed */
     sqliteResetInternalSchema(db, 0);
   }
 
 end_of_vacuum:
-  if( rc && zErrMsg!=0 ){
-    sqliteSetString(pzErrMsg, "unable to vacuum database - ", 
-       zErrMsg, (char*)0);
+  if( rc && pParse->zErrMsg==0 && zErrMsg!=0 ){
+    sqliteErrorMsg(pParse, "unable to vacuum database - %s", zErrMsg);
   }
-  sqlite_exec(db, "ROLLBACK", 0, 0, 0);
-  if( (dbNew && (dbNew->flags & SQLITE_Interrupt)) 
-         || (db->flags & SQLITE_Interrupt) ){
-    rc = SQLITE_INTERRUPT;
+  if( safety ) {
+    sqlite_exec(db, "COMMIT", 0, 0, 0);
+    sqlite_exec(db, "ROLLBACK", 0, 0, 0);  /* In case the COMMIT failed */
+    sqliteSafetyOn(db);
   }
   if( dbNew ) sqlite_close(dbNew);
   sqliteOsDelete(zTemp);
@@ -299,7 +311,6 @@ end_of_vacuum:
   sqliteFree(sVac.s1.z);
   sqliteFree(sVac.s2.z);
   if( zErrMsg ) sqlite_freemem(zErrMsg);
-  if( rc==SQLITE_ABORT && sVac.rc!=SQLITE_INTERRUPT ) sVac.rc = SQLITE_ERROR;
-  return sVac.rc;
+  return;
 #endif
 }

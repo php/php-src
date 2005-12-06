@@ -85,9 +85,12 @@ int sqlite_set_authorizer(
 ** user-supplied authorization function returned an illegal value.
 */
 static void sqliteAuthBadReturnCode(Parse *pParse, int rc){
-  sqliteErrorMsg(pParse, "illegal return value (%d) from the "
-    "authorization function - should be SQLITE_OK, SQLITE_IGNORE, "
-    "or SQLITE_DENY", rc);
+  char zBuf[20];
+  sprintf(zBuf, "(%d)", rc);
+  sqliteSetString(&pParse->zErrMsg, "illegal return value ", zBuf,
+    " from the authorization function - should be SQLITE_OK, "
+    "SQLITE_IGNORE, or SQLITE_DENY", 0);
+  pParse->nErr++;
   pParse->rc = SQLITE_MISUSE;
 }
 
@@ -111,7 +114,6 @@ void sqliteAuthRead(
   const char *zCol;     /* Name of the column of the table */
   int iSrc;             /* Index in pTabList->a[] of table being read */
   const char *zDBase;   /* Name of database being accessed */
-  TriggerStack *pStack; /* The stack of current triggers */
 
   if( db->xAuth==0 ) return;
   assert( pExpr->op==TK_COLUMN );
@@ -120,14 +122,15 @@ void sqliteAuthRead(
   }
   if( iSrc>=0 && iSrc<pTabList->nSrc ){
     pTab = pTabList->a[iSrc].pTab;
-  }else if( (pStack = pParse->trigStack)!=0 ){
+  }else{
     /* This must be an attempt to read the NEW or OLD pseudo-tables
     ** of a trigger.
     */
+    TriggerStack *pStack; /* The stack of current triggers */
+    pStack = pParse->trigStack;
+    assert( pStack!=0 );
     assert( pExpr->iTable==pStack->newIdx || pExpr->iTable==pStack->oldIdx );
     pTab = pStack->pTab;
-  }else{
-    return;
   }
   if( pTab==0 ) return;
   if( pExpr->iColumn>=0 ){
@@ -147,11 +150,13 @@ void sqliteAuthRead(
     pExpr->op = TK_NULL;
   }else if( rc==SQLITE_DENY ){
     if( db->nDb>2 || pExpr->iDb!=0 ){
-      sqliteErrorMsg(pParse, "access to %s.%s.%s is prohibited", 
-         zDBase, pTab->zName, zCol);
+      sqliteSetString(&pParse->zErrMsg,"access to ", zDBase, ".",
+          pTab->zName, ".", zCol, " is prohibited", 0);
     }else{
-      sqliteErrorMsg(pParse, "access to %s.%s is prohibited", pTab->zName,zCol);
+      sqliteSetString(&pParse->zErrMsg,"access to ", pTab->zName, ".",
+                      zCol, " is prohibited", 0);
     }
+    pParse->nErr++;
     pParse->rc = SQLITE_AUTH;
   }else if( rc!=SQLITE_OK ){
     sqliteAuthBadReturnCode(pParse, rc);
@@ -174,13 +179,14 @@ int sqliteAuthCheck(
   sqlite *db = pParse->db;
   int rc;
 
-  if( db->init.busy || db->xAuth==0 ){
+  if( db->xAuth==0 ){
     return SQLITE_OK;
   }
   rc = db->xAuth(db->pAuthArg, code, zArg1, zArg2, zArg3, pParse->zAuthContext);
   if( rc==SQLITE_DENY ){
-    sqliteErrorMsg(pParse, "not authorized");
+    sqliteSetString(&pParse->zErrMsg, "not authorized", 0);
     pParse->rc = SQLITE_AUTH;
+    pParse->nErr++;
   }else if( rc!=SQLITE_OK && rc!=SQLITE_IGNORE ){
     rc = SQLITE_DENY;
     sqliteAuthBadReturnCode(pParse, rc);

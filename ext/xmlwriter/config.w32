@@ -1,7 +1,7 @@
 // $Id$
 // vim:ft=javascript
 
-ARG_ENABLE("xmlwriter", "XMLWriter support", "yes");
+ARG_WITH("xmlwriter", "XMLWriter support", "no");
 
 if (PHP_XMLWRITER == "yes" && PHP_LIBXML == "yes") {
 	if (CHECK_HEADER_ADD_INCLUDE('libxml/xmlwriter.h', 'CFLAGS_XMLWRITER', PHP_XMLWRITER)) {

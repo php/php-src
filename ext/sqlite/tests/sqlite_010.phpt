@@ -22,23 +22,20 @@ foreach ($data as $str) {
 }
 
 $r = sqlite_unbuffered_query("SELECT a from strings", $db);
-while (sqlite_valid($r)) {
+while (sqlite_has_more($r)) {
 	var_dump(sqlite_current($r, SQLITE_NUM));
 	sqlite_next($r);
 }
 $r = sqlite_query("SELECT a from strings", $db);
-while (sqlite_valid($r)) {
+while (sqlite_has_more($r)) {
 	var_dump(sqlite_current($r, SQLITE_NUM));
 	sqlite_next($r);
 }
 sqlite_rewind($r);
-while (sqlite_valid($r)) {
+while (sqlite_has_more($r)) {
 	var_dump(sqlite_current($r, SQLITE_NUM));
 	sqlite_next($r);
 }
-
-sqlite_close($db);
-
 echo "DONE!\n";
 ?>
 --EXPECT--
@@ -77,43 +74,5 @@ array(1) {
 array(1) {
   [0]=>
   string(5) "three"
-}
-DONE!
---UEXPECT--
-array(1) {
-  [0]=>
-  unicode(3) "one"
-}
-array(1) {
-  [0]=>
-  unicode(3) "two"
-}
-array(1) {
-  [0]=>
-  unicode(5) "three"
-}
-array(1) {
-  [0]=>
-  unicode(3) "one"
-}
-array(1) {
-  [0]=>
-  unicode(3) "two"
-}
-array(1) {
-  [0]=>
-  unicode(5) "three"
-}
-array(1) {
-  [0]=>
-  unicode(3) "one"
-}
-array(1) {
-  [0]=>
-  unicode(3) "two"
-}
-array(1) {
-  [0]=>
-  unicode(5) "three"
 }
 DONE!

@@ -31,7 +31,7 @@
 #include "php_pdo_oci_int.h"
 
 /* {{{ pdo_oci_functions[] */
-zend_function_entry pdo_oci_functions[] = {
+function_entry pdo_oci_functions[] = {
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -59,7 +59,7 @@ zend_module_entry pdo_oci_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(pdo_oci),
-	"0.9",
+	"1.0",
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

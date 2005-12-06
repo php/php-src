@@ -69,6 +69,7 @@ static int odbc_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	RETCODE rc;
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 	char *buf = NULL;
+	long row_count = -1;
 
 	if (stmt->executed) {
 		SQLCloseCursor(S->stmt);
@@ -132,6 +133,9 @@ static int odbc_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 			pdo_odbc_stmt_error("SQLExecute");
 			return 0;
 	}
+
+	SQLRowCount(S->stmt, &row_count);
+	stmt->row_count = row_count;
 
 	if (!stmt->executed) {
 		/* do first-time-only definition of bind/mapping stuff */

@@ -24,8 +24,6 @@ foreach ($data as $str) {
 $res = sqlite_array_query("SELECT a from strings", $db, SQLITE_NUM);
 var_dump($res);
 
-$db = null;
-
 echo "DONE!\n";
 ?>
 --EXPECTF--
@@ -44,25 +42,6 @@ array(3) {
   array(1) {
     [0]=>
     string(5) "three"
-  }
-}
-DONE!
---UEXPECTF--
-array(3) {
-  [0]=>
-  array(1) {
-    [0]=>
-    unicode(3) "one"
-  }
-  [1]=>
-  array(1) {
-    [0]=>
-    unicode(3) "two"
-  }
-  [2]=>
-  array(1) {
-    [0]=>
-    unicode(5) "three"
   }
 }
 DONE!

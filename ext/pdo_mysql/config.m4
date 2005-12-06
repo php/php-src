@@ -20,46 +20,83 @@ PHP_ARG_WITH(pdo-mysql, for MySQL support for PDO,
 if test "$PHP_PDO_MYSQL" != "no"; then
   AC_DEFINE(HAVE_MYSQL, 1, [Whether you have MySQL])
 
-  for i in $PHP_PDO_MYSQL /usr/local /usr ; do
-    PDO_MYSQL_DIR=$i
-    PDO_MYSQL_CONFIG=$PDO_MYSQL_DIR/bin/mysql_config
-    if test -r $i/include/mysql; then
-      PDO_MYSQL_INC_DIR=$i/include/mysql
-    else
-      PDO_MYSQL_INC_DIR=$i/include
-    fi      
-    if test -r $i/lib/mysql; then
-      PDO_MYSQL_LIB_DIR=$i/lib/mysql
-    else
-      PDO_MYSQL_LIB_DIR=$i/lib
-    fi
-    if test -x $PDO_MYSQL_CONFIG; then
-      break
-    fi
-  done
+  AC_MSG_CHECKING([for mysql_config])
 
-  if test -z "$PDO_MYSQL_DIR"; then
-    AC_MSG_ERROR([Cannot find MySQL header files under $PHP_MYSQL.
-Note that the MySQL client library is not bundled anymore!])
+  if test -f $PHP_PDO_MYSQL && test -x $PHP_PDO_MYSQL ; then
+    PDO_MYSQL_CONFIG=$PHP_PDO_MYSQL
+  elif test "$PHP_PDO_MYSQL" != "yes"; then
+    if test -d "$PHP_PDO_MYSQL" ; then
+      if test -x "$PHP_PDO_MYSQL/bin/mysql_config" ; then
+        PDO_MYSQL_CONFIG="$PHP_PDO_MYSQL/bin/mysql_config"
+      else
+        PDO_MYSQL_DIR="$PHP_PDO_MYSQL"
+      fi
+    else
+      AC_MSG_RESULT([$PHP_PDO_MYSQL is not a directory])
+      AC_MSG_ERROR([can't find mysql under the "$PHP_PDO_MYSQL" that you specified])
+    fi
+  else
+    for i in /usr/local /usr ; do
+      if test -x "$i/bin/mysql_config" ; then
+        PDO_MYSQL_CONFIG="$i/bin/mysql_config"
+        break;
+      fi
+      if test -r $i/include/mysql/mysql.h || test -r $i/include/mysql.h ; then
+        PDO_MYSQL_DIR="$i"
+        break;
+      fi
+    done
   fi
 
-  if test -x $PDO_MYSQL_CONFIG; then
-	PDO_MYSQL_SOCKET=`$PDO_MYSQL_CONFIG --socket` 
+  if test -n "$PDO_MYSQL_CONFIG" && test -x "$PDO_MYSQL_CONFIG" ; then
+    AC_MSG_RESULT($PDO_MYSQL_CONFIG)
+    PDO_MYSQL_INCLUDE=`$PDO_MYSQL_CONFIG --cflags`
+    PDO_MYSQL_LIBS=`$PDO_MYSQL_CONFIG --libs`
+	  PDO_MYSQL_SOCKET=`$PDO_MYSQL_CONFIG --socket` 
+    PHP_SUBST_OLD(PDO_MYSQL_LIBS)
+  elif test -z "$PDO_MYSQL_DIR"; then
+    AC_MSG_RESULT([not found])
+    AC_MSG_ERROR([Cannot find MySQL header files under $PDO_MYSQL_DIR])
+  else
+    AC_MSG_RESULT([not found])
+    AC_MSG_CHECKING([for mysql install under $PDO_MYSQL_DIR])
+    if test -r $PDO_MYSQL_DIR/include/mysql; then
+      PDO_MYSQL_INC_DIR=$PDO_MYSQL_DIR/include/mysql
+    else
+      PDO_MYSQL_INC_DIR=$PDO_MYSQL_DIR/include
+    fi      
+    if test -r $PDO_MYSQL_DIR/lib/mysql; then
+      PDO_MYSQL_LIB_DIR=$PDO_MYSQL_DIR/lib/mysql
+    else
+      PDO_MYSQL_LIB_DIR=$PDO_MYSQL_DIR/lib
+    fi
+
+    if test -r "$PDO_MYSQL_LIB_DIR"; then
+      AC_MSG_RESULT([libs under $PDO_MYSQL_LIB_DIR; seems promising])
+    else
+      AC_MSG_RESULT([can't find it])
+      AC_MSG_ERROR([Unable to find your mysql installation])
+    fi
+
+    PHP_ADD_LIBRARY_WITH_PATH(mysqlclient, $PDO_MYSQL_LIB_DIR, PDO_MYSQL_SHARED_LIBADD)
+    PHP_ADD_INCLUDE($PDO_MYSQL_INC_DIR)
+    PDO_MYSQL_INCLUDE=-I$PDO_MYSQL_INC_DIR
   fi
 
   AC_DEFINE_UNQUOTED(PDO_MYSQL_UNIX_ADDR, "$PDO_MYSQL_SOCKET", [ ])
 
-  PHP_ADD_LIBRARY_WITH_PATH(mysqlclient, $PDO_MYSQL_LIB_DIR, PDO_MYSQL_SHARED_LIBADD)
-  PHP_ADD_INCLUDE($PDO_MYSQL_INC_DIR)
-  if test -x $PDO_MYSQL_CONFIG; then
-    PDO_MYSQL_LIBS=`$PDO_MYSQL_CONFIG --libs`
-    PHP_SUBST_OLD(PDO_MYSQL_LIBS)
-  fi
-
-  _SAVE_LDFLAGS=$LDFLAGS
-  LDFLAGS="$LDFLAGS $PDO_MYSQL_LIBS"
+  PHP_CHECK_LIBRARY(mysqlclient, mysql_query,
+  [
+    PHP_EVAL_LIBLINE($PDO_MYSQL_LIBS, PDO_MYSQL_SHARED_LIBADD)
+  ],[
+    AC_MSG_ERROR([mysql_query missing!?])
+  ],[
+    $PDO_MYSQL_LIBS
+  ])
+  _SAVE_LIBS=$LIBS
+  LIBS="$LIBS $PDO_MYSQL_LIBS"
   AC_CHECK_FUNCS([mysql_commit mysql_stmt_prepare mysql_next_result mysql_sqlstate]) 
-  LDFLAGS=$_SAVE_LDFLAGS
+  LIBS=$_SAVE_LIBS
 
   ifdef([PHP_CHECK_PDO_INCLUDES],
   [
@@ -78,18 +115,17 @@ Note that the MySQL client library is not bundled anymore!])
     AC_MSG_RESULT($pdo_inc_path)
   ])
 
-  PHP_NEW_EXTENSION(pdo_mysql, pdo_mysql.c mysql_driver.c mysql_statement.c, $ext_shared,,-I$pdo_inc_path)
+  PHP_NEW_EXTENSION(pdo_mysql, pdo_mysql.c mysql_driver.c mysql_statement.c, $ext_shared,,-I$pdo_inc_path $PDO_MYSQL_INCLUDE)
   ifdef([PHP_ADD_EXTENSION_DEP],
   [
   	PHP_ADD_EXTENSION_DEP(pdo_mysql, pdo)
   ])
   PDO_MYSQL_MODULE_TYPE=external
-  PDO_MYSQL_INCLUDE=-I$PDO_MYSQL_INC_DIR
  
+  PDO_MYSQL_SHARED_LIBADD=$PDO_MYSQL_LIBS
   PHP_SUBST(PDO_MYSQL_SHARED_LIBADD)
   PHP_SUBST_OLD(PDO_MYSQL_MODULE_TYPE)
-  PHP_SUBST_OLD(PDO_MYSQL_LIBS)
-  PHP_SUBST_OLD(PDO_MYSQL_INCLUDE)
 fi
 
 fi
+dnl vim: se ts=2 sw=2 et:

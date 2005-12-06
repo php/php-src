@@ -44,7 +44,7 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC);
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20050711
+#define PDO_DRIVER_API	20051031
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -284,7 +284,7 @@ enum {
 	PDO_DBH_DRIVER_METHOD_KIND__MAX
 };
 
-typedef zend_function_entry *(*pdo_dbh_get_driver_methods_func)(pdo_dbh_t *dbh, int kind TSRMLS_DC);
+typedef function_entry *(*pdo_dbh_get_driver_methods_func)(pdo_dbh_t *dbh, int kind TSRMLS_DC);
 
 struct pdo_dbh_methods {
 	pdo_dbh_close_func		closer;
@@ -487,8 +487,14 @@ struct _pdo_dbh_t {
 	pdo_driver_t *driver;
 	
 	zend_class_entry *def_stmt_ce;
-	
 	zval *def_stmt_ctor_args;
+
+	/* when calling PDO::query(), we need to keep the error
+	 * context from the statement around until we next clear it.
+	 * This will allow us to report the correct error message
+	 * when PDO::query() fails */
+	pdo_stmt_t *query_stmt;
+	zval query_stmt_zval;
 };
 
 /* describes a column */
@@ -631,13 +637,17 @@ PDO_API int php_pdo_parse_data_source(const char *data_source,
 		unsigned long data_source_len, struct pdo_data_src_parser *parsed,
 		int nparams);
 
-PDO_API zend_class_entry *php_pdo_get_exception(TSRMLS_D);
+PDO_API zend_class_entry *php_pdo_get_exception(void);
 
 PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, 
 	char **outquery, int *outquery_len TSRMLS_DC);
 
 PDO_API void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt,
 	const char *sqlstate, const char *supp TSRMLS_DC);
+
+PDO_API void php_pdo_stmt_addref(pdo_stmt_t *stmt TSRMLS_DC);
+PDO_API void php_pdo_stmt_delref(pdo_stmt_t *stmt TSRMLS_DC);
+
 
 #endif /* PHP_PDO_DRIVER_H */
 /*

@@ -15,35 +15,13 @@ sqlite_query("INSERT INTO foo VALUES ('1', '2', '3')", $db);
 sqlite_query("INSERT INTO bar VALUES ('4', '5', '6')", $db);
 $r = sqlite_query("SELECT * from foo, bar", $db, SQLITE_ASSOC);
 var_dump(sqlite_fetch_array($r));
-sqlite_close($db);
 ?>
 --EXPECT--
-array(6) {
-  ["foo.c1"]=>
-  string(1) "1"
-  ["foo.c2"]=>
-  string(1) "2"
-  ["foo.c3"]=>
-  string(1) "3"
-  ["bar.c1"]=>
+array(3) {
+  ["c1"]=>
   string(1) "4"
-  ["bar.c2"]=>
+  ["c2"]=>
   string(1) "5"
-  ["bar.c3"]=>
+  ["c3"]=>
   string(1) "6"
-}
---UEXPECT--
-array(6) {
-  [u"foo.c1"]=>
-  unicode(1) "1"
-  [u"foo.c2"]=>
-  unicode(1) "2"
-  [u"foo.c3"]=>
-  unicode(1) "3"
-  [u"bar.c1"]=>
-  unicode(1) "4"
-  [u"bar.c2"]=>
-  unicode(1) "5"
-  [u"bar.c3"]=>
-  unicode(1) "6"
 }

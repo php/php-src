@@ -23,9 +23,6 @@ Bz2 is an extension to create and parse bzip2 compressed data.
 			Initial Release in PECL
 		</notes>
     </release>
-    <configureoptions>
-      <configureoption name="with-bz2" default="autodetect" prompt="path to bz2 installation?"/>
-    </configureoptions>
     <filelist>
         <dir role="src" name="/">
             <file role="doc">CREDITS</file>

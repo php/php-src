@@ -34,7 +34,7 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(dblib)
 
-zend_function_entry pdo_dblib_functions[] = {
+function_entry pdo_dblib_functions[] = {
 	{NULL, NULL, NULL}
 };
 
@@ -65,7 +65,7 @@ zend_module_entry pdo_dblib_module_entry = {
 	NULL,
 	PHP_RSHUTDOWN(pdo_dblib),
 	PHP_MINFO(pdo_dblib),
-	"0.9",
+	"1.0",
 	STANDARD_MODULE_PROPERTIES
 };
 

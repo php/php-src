@@ -45,6 +45,7 @@
 		return 0; \
 	}
 
+static php_stream *oci_create_lob_stream(pdo_stmt_t *stmt, OCILobLocator *lob TSRMLS_DC);
 
 static int oci_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 {
@@ -89,7 +90,14 @@ static int oci_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 	if (S->cols) {
 		for (i = 0; i < stmt->column_count; i++) {
 			if (S->cols[i].data) {
-				efree(S->cols[i].data);
+				switch (S->cols[i].dtype) {
+					case SQLT_BLOB:
+					case SQLT_CLOB:
+						/* do nothing */
+						break;
+					default:
+						efree(S->cols[i].data);
+				}
 			}
 		}
 		efree(S->cols);
@@ -130,7 +138,7 @@ static int oci_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 	}
 
 	STMT_CALL(OCIStmtExecute, (S->H->svc, S->stmt, S->err,
-				S->stmt_type == OCI_STMT_SELECT ? 0 : 1, 0, NULL, NULL,
+				(S->stmt_type == OCI_STMT_SELECT && !S->have_blobs) ? 0 : 1, 0, NULL, NULL,
 				mode));
 
 	if (!stmt->executed) {
@@ -166,7 +174,10 @@ static sb4 oci_bind_input_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, dv
 	
 	*indpp = &P->indicator;
 
-	if (ZVAL_IS_NULL(param->parameter)) {
+	if (P->thing) {
+		*bufpp = P->thing;
+		*alenp = sizeof(void*);
+	} else if (ZVAL_IS_NULL(param->parameter)) {
 		/* insert a NULL value into the column */
 		P->indicator = -1; /* NULL */
 		*bufpp = 0;
@@ -176,9 +187,6 @@ static sb4 oci_bind_input_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, dv
 		convert_to_string(param->parameter);
 		*bufpp = Z_STRVAL_P(param->parameter);
 		*alenp = Z_STRLEN_P(param->parameter);
-	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "P->thing should not be set??");
-		return OCI_ERROR;
 	}
 
 	*piecep = OCI_ONE_PIECE;
@@ -195,6 +203,16 @@ static sb4 oci_bind_output_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, d
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "param is NULL in oci_bind_output_cb; this should not happen");
 		return OCI_ERROR;
 	}
+
+	if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB) {
+		P->actual_len = sizeof(OCILobLocator*);
+		*bufpp = P->thing;
+		*alenpp = &P->actual_len;
+		*piecep = OCI_ONE_PIECE;
+		*rcodepp = &P->retcode;
+		*indpp = &P->indicator;
+		return OCI_CONTINUE;
+	} 
 	
 	if (Z_TYPE_P(param->parameter) == IS_OBJECT || Z_TYPE_P(param->parameter) == IS_RESOURCE) {
 		return OCI_CONTINUE;
@@ -242,9 +260,14 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 			
 				/* figure out what we're doing */
 				switch (PDO_PARAM_TYPE(param->param_type)) {
-					case PDO_PARAM_LOB:
 					case PDO_PARAM_STMT:
 						return 0;
+
+					case PDO_PARAM_LOB:
+						/* P->thing is now an OCILobLocator * */
+						P->oci_type = SQLT_BLOB;
+						value_sz = sizeof(OCILobLocator*);
+						break;
 
 					case PDO_PARAM_STR:
 					default:
@@ -280,6 +303,12 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 			case PDO_PARAM_EVT_EXEC_PRE:
 				P->indicator = 0;
 				P->used_for_output = 0;
+				if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB) {
+					ub4 empty = 0;
+					STMT_CALL(OCIDescriptorAlloc, (S->H->env, &P->thing, OCI_DTYPE_LOB, 0, NULL));
+					STMT_CALL(OCIAttrSet, (P->thing, OCI_DTYPE_LOB, &empty, 0, OCI_ATTR_LOBEMPTY, S->err));
+					S->have_blobs = 1;
+				}
 				return 1;
 
 			case PDO_PARAM_EVT_EXEC_POST:
@@ -305,6 +334,70 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 						Z_STRLEN_P(param->parameter) = P->actual_len;
 						Z_STRVAL_P(param->parameter) = erealloc(Z_STRVAL_P(param->parameter), P->actual_len+1);
 						Z_STRVAL_P(param->parameter)[P->actual_len] = '\0';
+					}
+				} else if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB && P->thing) {
+					php_stream *stm;
+
+					if (Z_TYPE_P(param->parameter) == IS_NULL) {
+						/* if the param is NULL, then we assume that they
+						 * wanted to bind a lob locator into it from the query
+						 * */
+
+						stm = oci_create_lob_stream(stmt, (OCILobLocator*)P->thing TSRMLS_CC);
+						if (stm) {
+							OCILobOpen(S->H->svc, S->err, (OCILobLocator*)P->thing, OCI_LOB_READWRITE);
+							php_stream_to_zval(stm, param->parameter);
+							P->thing = NULL;
+						}
+					} else {
+						/* we're a LOB being used for insert; transfer the data now */
+						size_t n;
+						ub4 amt, offset = 1;
+						char *consume;
+
+						php_stream_from_zval_no_verify(stm, &param->parameter);
+						if (stm) {
+							OCILobOpen(S->H->svc, S->err, (OCILobLocator*)P->thing, OCI_LOB_READWRITE);
+							do {
+								char buf[8192];
+								n = php_stream_read(stm, buf, sizeof(buf));
+								if ((int)n <= 0) {
+									break;
+								}
+								consume = buf;
+								do {
+									amt = n;
+									OCILobWrite(S->H->svc, S->err, (OCILobLocator*)P->thing,
+											&amt, offset, consume, n,
+											OCI_ONE_PIECE,
+											NULL, NULL, 0, SQLCS_IMPLICIT);
+									offset += amt;
+									n -= amt;
+									consume += amt;
+								} while (n);
+							} while (1);
+							OCILobClose(S->H->svc, S->err, (OCILobLocator*)P->thing);
+							OCILobFlushBuffer(S->H->svc, S->err, (OCILobLocator*)P->thing, 0);
+						} else if (Z_TYPE_P(param->parameter) == IS_STRING) {
+							/* stick the string into the LOB */
+							consume = Z_STRVAL_P(param->parameter);
+							n = Z_STRLEN_P(param->parameter);
+							if (n) {
+								OCILobOpen(S->H->svc, S->err, (OCILobLocator*)P->thing, OCI_LOB_READWRITE);
+								while (n) {
+									amt = n;
+									OCILobWrite(S->H->svc, S->err, (OCILobLocator*)P->thing,
+											&amt, offset, consume, n,
+											OCI_ONE_PIECE,
+											NULL, NULL, 0, SQLCS_IMPLICIT);
+									consume += amt;
+									n -= amt;
+								}
+								OCILobClose(S->H->svc, S->err, (OCILobLocator*)P->thing);
+							}
+						}
+						OCIDescriptorFree(P->thing, OCI_DTYPE_LOB);
+						P->thing = NULL;
 					}
 				}
 
@@ -355,6 +448,29 @@ static int oci_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori,	long
 	return 0;
 } /* }}} */
 
+static sb4 oci_define_callback(dvoid *octxp, OCIDefine *define, ub4 iter, dvoid **bufpp,
+		ub4 **alenpp, ub1 *piecep, dvoid **indpp, ub2 **rcodepp)
+{
+	pdo_oci_column *col = (pdo_oci_column*)octxp;
+	TSRMLS_FETCH();
+
+	switch (col->dtype) {
+		case SQLT_BLOB:
+		case SQLT_CLOB:
+			*piecep = OCI_ONE_PIECE;
+			*bufpp = col->data;
+			*alenpp = &col->datalen;
+			break;
+
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,
+				"unhandled datatype in oci_define_callback; this should not happen");
+			return OCI_ERROR;
+	}
+
+	return OCI_CONTINUE;
+}
+
 static int oci_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{ */
 {
 	pdo_oci_stmt *S = (pdo_oci_stmt*)stmt->driver_data;
@@ -393,11 +509,12 @@ static int oci_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{ */
 	col->namelen = namelen;
 	col->name = estrndup(colname, namelen);
 
+	S->cols[colno].dtype = dtype;
+	
 	/* how much room do we need to store the field */
 	switch (dtype) {
 		case SQLT_LBI:
 		case SQLT_LNG:
-			dyn = FALSE;
 			if (dtype == SQLT_LBI) {
 				dtype = SQLT_BIN;
 			} else {
@@ -407,10 +524,17 @@ static int oci_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{ */
 			S->cols[colno].data = emalloc(S->cols[colno].datalen + 1);
 			col->param_type = PDO_PARAM_STR;
 			break;
+
+		case SQLT_BLOB:
+		case SQLT_CLOB:
+			col->param_type = PDO_PARAM_LOB;
+			STMT_CALL(OCIDescriptorAlloc, (S->H->env, (dvoid**)&S->cols[colno].data, OCI_DTYPE_LOB, 0, NULL));
+			S->cols[colno].datalen = sizeof(OCILobLocator*);
+			dyn = TRUE;
+			break;
 																																
 		case SQLT_BIN:
 		default:
-			dyn = FALSE;
 			if (dtype == SQLT_DAT || dtype == SQLT_NUM
 #ifdef SQLT_TIMESTAMP
 					|| dtype == SQLT_TIMESTAMP
@@ -434,14 +558,124 @@ static int oci_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{ */
 			col->param_type = PDO_PARAM_STR;
 	}
 
-	if (!dyn) {
-		STMT_CALL(OCIDefineByPos, (S->stmt, &S->cols[colno].def, S->err, colno+1,
-					S->cols[colno].data, S->cols[colno].datalen, dtype, &S->cols[colno].indicator,
-					&S->cols[colno].fetched_len, &S->cols[colno].retcode, OCI_DEFAULT));
+	STMT_CALL(OCIDefineByPos, (S->stmt, &S->cols[colno].def, S->err, colno+1,
+				S->cols[colno].data, S->cols[colno].datalen, dtype, &S->cols[colno].indicator,
+				&S->cols[colno].fetched_len, &S->cols[colno].retcode, dyn ? OCI_DYNAMIC_FETCH : OCI_DEFAULT));
+
+	if (dyn) {
+		STMT_CALL(OCIDefineDynamic, (S->cols[colno].def, S->err, &S->cols[colno],
+				oci_define_callback));
 	}
 	
 	return 1;
 } /* }}} */
+
+struct oci_lob_self {
+	pdo_stmt_t *stmt;
+	pdo_oci_stmt *S;
+	OCILobLocator *lob;
+	ub4 offset;
+};
+
+static size_t oci_blob_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
+{
+	struct oci_lob_self *self = (struct oci_lob_self*)stream->abstract;
+	ub4 amt;
+	sword r;
+
+	amt = count;
+	r = OCILobWrite(self->S->H->svc, self->S->err, self->lob,
+		&amt, self->offset, (char*)buf, count,
+		OCI_ONE_PIECE,
+		NULL, NULL, 0, SQLCS_IMPLICIT);
+
+	if (r != OCI_SUCCESS) {
+		return (size_t)-1;
+	}
+	
+	self->offset += amt;
+	return amt;
+}
+
+static size_t oci_blob_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
+{
+	struct oci_lob_self *self = (struct oci_lob_self*)stream->abstract;
+	ub4 amt;
+	sword r;
+
+	amt = count;
+	r = OCILobRead(self->S->H->svc, self->S->err, self->lob,
+		&amt, self->offset, buf, count,
+		NULL, NULL, 0, SQLCS_IMPLICIT);
+
+	if (r != OCI_SUCCESS) {
+		return (size_t)-1;
+	}
+
+	self->offset += amt;
+	return amt;
+}
+
+static int oci_blob_close(php_stream *stream, int close_handle TSRMLS_DC)
+{
+	struct oci_lob_self *self = (struct oci_lob_self*)stream->abstract;
+	pdo_stmt_t *stmt = self->stmt;
+
+	if (close_handle) {
+		OCILobClose(self->S->H->svc, self->S->err, self->lob);
+		OCIDescriptorFree(self->lob, OCI_DTYPE_LOB);
+		efree(self);
+	}
+
+	php_pdo_stmt_delref(stmt TSRMLS_CC);
+	return 0;
+}
+
+static int oci_blob_flush(php_stream *stream TSRMLS_DC)
+{
+	struct oci_lob_self *self = (struct oci_lob_self*)stream->abstract;
+	OCILobFlushBuffer(self->S->H->svc, self->S->err, self->lob, 0);
+	return 0;
+}
+
+static int oci_blob_seek(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC)
+{
+	struct oci_lob_self *self = (struct oci_lob_self*)stream->abstract;
+	/* TODO: implement */
+	return -1;	
+}
+
+static php_stream_ops oci_blob_stream_ops = {
+	oci_blob_write,
+	oci_blob_read,
+	oci_blob_close,
+	oci_blob_flush,
+	"pdo_oci blob stream",
+	NULL, /*oci_blob_seek,*/
+	NULL,
+	NULL,
+	NULL
+};
+
+static php_stream *oci_create_lob_stream(pdo_stmt_t *stmt, OCILobLocator *lob TSRMLS_DC)
+{
+	php_stream *stm;
+	struct oci_lob_self *self = ecalloc(1, sizeof(*self));
+	self->lob = lob;
+	self->offset = 1; /* 1-based */
+	self->stmt = stmt;
+	self->S = (pdo_oci_stmt*)stmt->driver_data;
+
+	stm = php_stream_alloc(&oci_blob_stream_ops, self, 0, "r+b");
+
+	if (stm) {
+		php_pdo_stmt_addref(stmt TSRMLS_CC);
+		return stm;
+	}
+
+	efree(self);
+	return NULL;
+}
 
 static int oci_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned long *len, int *caller_frees TSRMLS_DC) /* {{{ */
 {
@@ -456,6 +690,16 @@ static int oci_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned lo
 		return 1;
 	} else if (C->indicator == 0) {
 		/* it was stored perfectly */
+
+		if (C->dtype == SQLT_BLOB || C->dtype == SQLT_CLOB) {
+			if (C->data) {
+				*ptr = (char*)oci_create_lob_stream(stmt, (OCILobLocator*)C->data TSRMLS_CC);
+				OCILobOpen(S->H->svc, S->err, (OCILobLocator*)C->data, OCI_LOB_READONLY);
+			}
+			*len = 0;
+			return *ptr ? 1 : 0;
+		}
+		
 		*ptr = C->data;
 		*len = C->fetched_len;
 		return 1;

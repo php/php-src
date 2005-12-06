@@ -34,9 +34,6 @@ $r = sqlite_query("SELECT implode('-', a, b) from strings", $db);
 while ($row = sqlite_fetch_array($r, SQLITE_NUM)) {
 	var_dump($row);
 }
-
-sqlite_close($db);
-
 echo "DONE!\n";
 ?>
 --EXPECT--
@@ -51,19 +48,5 @@ array(1) {
 array(1) {
   [0]=>
   string(10) "three-tres"
-}
-DONE!
---UEXPECT--
-array(1) {
-  [0]=>
-  unicode(7) "one-uno"
-}
-array(1) {
-  [0]=>
-  unicode(7) "two-dos"
-}
-array(1) {
-  [0]=>
-  unicode(10) "three-tres"
 }
 DONE!

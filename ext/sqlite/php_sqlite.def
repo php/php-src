@@ -35,9 +35,3 @@ sqlite_trace
 sqlite_compile
 sqlite_step
 sqlite_finalize
-; some experimental stuff
-sqlite_last_statement_changes
-sqlite_reset
-sqlite_bind
-sqlite_progress_handler
-sqlite_commit_hook
