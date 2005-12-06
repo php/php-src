@@ -18,6 +18,7 @@ PHP                                                                        NEWS
   . Fixed isset/empty/(bool) behavior
   . Fixed iterator edge cases
   . Added methods getNamespaces(), getDocNamespaces()
+- Prevent header injection by limiting each header to a single line. (Ilia)
 - Fixed possible XSS inside error reporting functionality. (Ilia)
 - Fixed many bugs in OCI8. (Tony)
 - Fixed crash and leak in mysqli when using 4.1.x client libraries and
