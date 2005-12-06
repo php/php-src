@@ -1,14 +1,9 @@
 --TEST--
 oci8.old_oci_close_semantics Off
---SKIPIF--
+---SKIPIF--
 <?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
 --INI--
 oci8.old_oci_close_semantics=0
---ENV--
-return "
-ORACLE_HOME=".(isset($_ENV['ORACLE_HOME']) ? $_ENV['ORACLE_HOME'] : '')."
-NLS_LANG=".(isset($_ENV['NLS_LANG']) ? $_ENV['NLS_LANG'] : '')."
-";
 --FILE--
 <?php
 
