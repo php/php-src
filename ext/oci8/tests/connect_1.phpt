@@ -1,6 +1,6 @@
 --TEST--
 oci_pconnect() & oci_new_connect()
----SKIPIF--
+--SKIPIF--
 <?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
 --FILE--
 <?php

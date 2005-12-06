@@ -1,6 +1,6 @@
 --TEST--
 oci_connect() without ORACLE_HOME set (OCIServerAttach() segfaults)
----SKIPIF--
+--SKIPIF--
 <?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
 --FILE--
 <?php
