@@ -1486,7 +1486,7 @@ function compute_summary()
 
 function get_summary($show_ext_summary, $show_html)
 {
-	global $exts_skipped, $exts_tested, $n_total, $sum_results, $percent_results, $end_time, $start_time, $failed_test_summary, $PHP_FAILED_TESTS;
+	global $exts_skipped, $exts_tested, $n_total, $sum_results, $percent_results, $end_time, $start_time, $failed_test_summary, $PHP_FAILED_TESTS, $leak_check;
 
 	$x_total = $n_total - $sum_results['SKIPPED'] - $sum_results['BORKED'];
 	if ($x_total) {
@@ -1519,8 +1519,12 @@ Tests borked    : " . sprintf("%4d (%5.1f%%)",$sum_results['BORKED'],$percent_re
 	$summary .= "
 Tests skipped   : " . sprintf("%4d (%5.1f%%)",$sum_results['SKIPPED'],$percent_results['SKIPPED']) . " --------
 Tests warned    : " . sprintf("%4d (%5.1f%%)",$sum_results['WARNED'], $percent_results['WARNED']) . " " . sprintf("(%5.1f%%)",$x_warned) . "
-Tests failed    : " . sprintf("%4d (%5.1f%%)",$sum_results['FAILED'], $percent_results['FAILED']) . " " . sprintf("(%5.1f%%)",$x_failed) . "
-Tests leaked    : " . sprintf("%4d (%5.1f%%)",$sum_results['LEAKED'], $percent_results['LEAKED']) . " " . sprintf("(%5.1f%%)",$x_leaked) . "
+Tests failed    : " . sprintf("%4d (%5.1f%%)",$sum_results['FAILED'], $percent_results['FAILED']) . " " . sprintf("(%5.1f%%)",$x_failed);
+	if ($leak_check) {
+		$summary .= "
+Tests leaked    : " . sprintf("%4d (%5.1f%%)",$sum_results['LEAKED'], $percent_results['LEAKED']) . " " . sprintf("(%5.1f%%)",$x_leaked);
+	}
+	$summary .= "
 Tests passed    : " . sprintf("%4d (%5.1f%%)",$sum_results['PASSED'], $percent_results['PASSED']) . " " . sprintf("(%5.1f%%)",$x_passed) . "
 ---------------------------------------------------------------------
 Time taken      : " . sprintf("%4d seconds", $end_time - $start_time) . "
