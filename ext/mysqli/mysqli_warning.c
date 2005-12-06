@@ -211,7 +211,7 @@ PHP_METHOD(mysqli_warning, __construct)
 }
 /* }}} */
 
-function_entry mysqli_warning_methods[] = {
+zend_function_entry mysqli_warning_methods[] = {
 	PHP_ME(mysqli_warning, __construct,		NULL, ZEND_ACC_PROTECTED)
 	PHP_ME(mysqli_warning, next, 			NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
