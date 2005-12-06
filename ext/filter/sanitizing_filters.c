@@ -180,6 +180,7 @@ void php_filter_string(PHP_INPUT_FILTER_PARAM_DECL)
 	Z_STRLEN_P(value) = new_len;
 
 	if (new_len == 0) {
+		zval_dtor(value);
 		Z_TYPE_P(value) = IS_NULL;
 		return;
 	}
