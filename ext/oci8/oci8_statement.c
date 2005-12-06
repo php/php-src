@@ -722,14 +722,14 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 			case SQLT_STR:
 			case SQLT_LVC:
 				for (i = 0; i < bind->array.current_length; i++) {
+					int curr_element_length = strlen(((text *)bind->array.elements)+i*bind->array.max_length);
 					if ((i < bind->array.old_length) && (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE)) {
 						zval_dtor(*entry);
-						ZVAL_STRINGL(*entry, ((text *)bind->array.elements)+i*bind->array.max_length, bind->array.max_length, 1);
-						Z_STRVAL_PP(entry)[ bind->array.max_length ] = '\0';
+						ZVAL_STRINGL(*entry, ((text *)bind->array.elements)+i*bind->array.max_length, curr_element_length, 1);
 						zend_hash_move_forward(hash);
 					}
 					else {
-						add_next_index_stringl(bind->zval, ((text *)bind->array.elements)+i*bind->array.max_length, bind->array.max_length, 1);
+						add_next_index_stringl(bind->zval, ((text *)bind->array.elements)+i*bind->array.max_length, curr_element_length, 1);
 					}
 				}
 				break;
@@ -1200,7 +1200,7 @@ php_oci_bind *php_oci_bind_array_helper_string(zval* var, long max_table_length,
 	}
 	
 	bind = emalloc(sizeof(php_oci_bind));
-	bind->array.elements		= (text *)emalloc(max_table_length * sizeof(text) * (maxlength + 1));
+	bind->array.elements		= (text *)ecalloc(1, max_table_length * sizeof(text) * (maxlength + 1));
 	bind->array.current_length	= zend_hash_num_elements(Z_ARRVAL_P(var));
 	bind->array.old_length		= bind->array.current_length;
 	bind->array.max_length		= maxlength;
