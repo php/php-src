@@ -1,7 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2005, Version 4.4.2
-- FIxed bug #35536 (mysql_field_type() doesn't handle NEWDECIMAL). (Tony)
+- Fixed possible XSS inside error reporting functionality. (Ilia)
+- Fixed bug #35536 (mysql_field_type() doesn't handle NEWDECIMAL). (Tony)
 - Fixed bug #35410 (wddx_deserialize() doesn't handle large ints as keys 
   properly). (Ilia)
 - Fixed bug #35341 (Fix for bug #33760 breaks build with older curl). (Tony)
