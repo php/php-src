@@ -39,7 +39,7 @@ static int le_gmp;
 
 /* {{{ gmp_functions[]
  */
-function_entry gmp_functions[] = {
+zend_function_entry gmp_functions[] = {
 	ZEND_FE(gmp_init,	NULL)
 	ZEND_FE(gmp_intval,	NULL)
 	ZEND_FE(gmp_strval,	NULL)

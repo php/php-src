@@ -159,7 +159,7 @@ static void _php_image_bw_convert(gdImagePtr im_org, gdIOCtx *out, int threshold
 
 /* {{{ gd_functions[]
  */
-function_entry gd_functions[] = {
+zend_function_entry gd_functions[] = {
 	PHP_FE(gd_info,                                 NULL)
 	PHP_FE(imagearc,								NULL)
 	PHP_FE(imageellipse,							NULL)

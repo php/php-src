@@ -101,7 +101,7 @@ static PHP_FUNCTION(unicode_encode)
 	ucnv_close(conv);	
 }
 /* {{{ unicode_functions[] */
-function_entry unicode_functions[] = {
+zend_function_entry unicode_functions[] = {
 	PHP_FE(i18n_loc_get_default, NULL)
 	PHP_FE(i18n_loc_set_default, NULL)
 	PHP_FE(unicode_decode, NULL)

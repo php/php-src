@@ -218,7 +218,7 @@ ZEND_DECLARE_MODULE_GLOBALS(mime_magic)
 static magic_server_config_rec mime_global;
 
 /* {{{ mime_magic_functions[] */
-function_entry mime_magic_functions[] = {
+zend_function_entry mime_magic_functions[] = {
 	PHP_FE(mime_content_type,	NULL)	   
 	{NULL, NULL, NULL}	
 };

@@ -1621,7 +1621,7 @@ PHP_FUNCTION(preg_grep)
 
 /* {{{ module definition structures */
 
-function_entry pcre_functions[] = {
+zend_function_entry pcre_functions[] = {
 	PHP_FE(preg_match,				third_arg_force_ref)
 	PHP_FE(preg_match_all,			third_arg_force_ref)
 	PHP_FE(preg_replace,			NULL)

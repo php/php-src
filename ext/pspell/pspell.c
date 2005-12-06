@@ -52,7 +52,7 @@
 
 /* {{{ pspell_functions[]
  */
-function_entry pspell_functions[] = {
+zend_function_entry pspell_functions[] = {
 	PHP_FE(pspell_new,		NULL)
 	PHP_FE(pspell_new_personal,		NULL)
 	PHP_FE(pspell_new_config,		NULL)

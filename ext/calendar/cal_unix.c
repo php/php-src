@@ -28,7 +28,7 @@
    Convert UNIX timestamp to Julian Day */
 PHP_FUNCTION(unixtojd)
 {
-  pval *timestamp;
+  zval *timestamp;
   long jdate; 
   time_t t;
   struct tm *ta, tmbuf;
@@ -60,7 +60,7 @@ PHP_FUNCTION(unixtojd)
    Convert Julian Day to UNIX timestamp */
 PHP_FUNCTION(jdtounix)
 {
-  pval *jday;
+  zval *jday;
   long uday;
 
   if ((ZEND_NUM_ARGS()!= 1) || (zend_get_parameters(ht, 1, &jday) != SUCCESS)) {

@@ -34,7 +34,7 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(dblib)
 
-function_entry pdo_dblib_functions[] = {
+zend_function_entry pdo_dblib_functions[] = {
 	{NULL, NULL, NULL}
 };
 

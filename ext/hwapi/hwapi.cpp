@@ -67,7 +67,7 @@ static zend_class_entry *hw_api_reason_class_entry_ptr;
 //}
 //#endif
 
-function_entry hwapi_functions[] = {
+zend_function_entry hwapi_functions[] = {
 	PHP_FE(hwapi_dummy,								NULL)
 	PHP_FE(hwapi_init,								NULL)
 	PHP_FE(hwapi_hgcsp,								NULL)
@@ -102,7 +102,7 @@ function_entry hwapi_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-static function_entry php_hw_api_functions[] = {
+static zend_function_entry php_hw_api_functions[] = {
 	{"hgcsp", PHP_FN(hwapi_hgcsp), NULL},
 	{"object", PHP_FN(hwapi_object), NULL},
 	{"children", PHP_FN(hwapi_children), NULL},
@@ -148,7 +148,7 @@ static function_entry php_hw_api_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-static function_entry php_hw_api_object_functions[] = {
+static zend_function_entry php_hw_api_object_functions[] = {
 	{"hw_api_object", PHP_FN(hwapi_object_new), NULL},
 	{"count", PHP_FN(hwapi_object_count), NULL},
 	{"title", PHP_FN(hwapi_object_title), NULL},
@@ -161,7 +161,7 @@ static function_entry php_hw_api_object_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-static function_entry php_hw_api_attribute_functions[] = {
+static zend_function_entry php_hw_api_attribute_functions[] = {
 	{"hw_api_attribute", PHP_FN(hwapi_attribute_new), NULL},
 	{"key", PHP_FN(hwapi_attribute_key), NULL},
 	{"value", PHP_FN(hwapi_attribute_value), NULL},
@@ -170,20 +170,20 @@ static function_entry php_hw_api_attribute_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-static function_entry php_hw_api_error_functions[] = {
+static zend_function_entry php_hw_api_error_functions[] = {
 	{"count", PHP_FN(hwapi_error_count), NULL},
 	{"reason", PHP_FN(hwapi_error_reason), NULL},
 	{NULL, NULL, NULL}
 };
 
-static function_entry php_hw_api_content_functions[] = {
+static zend_function_entry php_hw_api_content_functions[] = {
 	{"hw_api_content", PHP_FN(hwapi_content_new), NULL},
 	{"read", PHP_FN(hwapi_content_read), NULL},
 	{"mimetype", PHP_FN(hwapi_content_mimetype), NULL},
 	{NULL, NULL, NULL}
 };
 
-static function_entry php_hw_api_reason_functions[] = {
+static zend_function_entry php_hw_api_reason_functions[] = {
 	{"type", PHP_FN(hwapi_reason_type), NULL},
 	{"description", PHP_FN(hwapi_reason_description), NULL},
 	{NULL, NULL, NULL}

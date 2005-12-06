@@ -596,7 +596,7 @@ PHP_MINFO_FUNCTION(hash)
 
 /* {{{ hash_functions[]
  */
-function_entry hash_functions[] = {
+zend_function_entry hash_functions[] = {
 	PHP_FE(hash,									NULL)
 	PHP_FE(hash_file,								NULL)
 
