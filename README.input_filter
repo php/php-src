@@ -34,7 +34,7 @@ ZEND_END_MODULE_GLOBALS(my_input_filter)
 
 ZEND_DECLARE_MODULE_GLOBALS(my_input_filter)
 
-function_entry my_input_filter_functions[] = {
+zend_function_entry my_input_filter_functions[] = {
     PHP_FE(my_get_raw,   NULL)
     {NULL, NULL, NULL}
 };
