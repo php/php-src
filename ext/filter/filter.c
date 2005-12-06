@@ -635,22 +635,38 @@ PHP_FUNCTION(filter_data)
 		return;
 	}
 
-	if (flags) {
-		switch (Z_TYPE_P(flags)) {
-			case IS_ARRAY:
-				options = flags;
-				break;
+	if (filter != FC_CALLBACK) {
+		if (flags) {
+			switch (Z_TYPE_P(flags)) {
+				case IS_ARRAY:
+					options = flags;
+					break;
 
-			case IS_STRING:
-			case IS_BOOL:
-			case IS_LONG:
-				convert_to_long(flags);
-				filter_flags = Z_LVAL_P(flags);
-				options = NULL;
-				break;
+				case IS_STRING:
+				case IS_BOOL:
+				case IS_LONG:
+					convert_to_long(flags);
+					filter_flags = Z_LVAL_P(flags);
+					options = NULL;
+					break;
+			}
 		}
 	}
+	else {
+		if (flags) {
+			switch (Z_TYPE_P(flags)) {
+				case IS_ARRAY:
+				case IS_STRING:
+					options = flags;
+					break;
 
+				default:
+					convert_to_string(flags);
+					options = flags;
+					break;
+			}
+		}
+	}
 	php_zval_filter_recursive(var, filter, filter_flags, options, charset TSRMLS_CC);
 	RETURN_ZVAL(var, 1, 0);
 }
