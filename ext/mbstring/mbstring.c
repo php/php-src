@@ -181,7 +181,7 @@ static const struct mb_overload_def mb_ovld[] = {
 /* }}} */
 
 /* {{{ function_entry mbstring_functions[] */
-function_entry mbstring_functions[] = {
+zend_function_entry mbstring_functions[] = {
 	PHP_FE(mb_convert_case,			NULL)
 	PHP_FE(mb_strtoupper,			NULL)
 	PHP_FE(mb_strtolower,			NULL)
@@ -1776,7 +1776,7 @@ PHP_FUNCTION(mb_substr)
    Returns part of a string */
 PHP_FUNCTION(mb_strcut)
 {
-	pval **arg1, **arg2, **arg3, **arg4;
+	zval **arg1, **arg2, **arg3, **arg4;
 	int argc, from, len;
 	mbfl_string string, result, *ret;
 
@@ -1892,7 +1892,7 @@ PHP_FUNCTION(mb_strwidth)
    Trim the string in terminal width */
 PHP_FUNCTION(mb_strimwidth)
 {
-	pval **arg1, **arg2, **arg3, **arg4, **arg5;
+	zval **arg1, **arg2, **arg3, **arg4, **arg5;
 	int from, width;
 	mbfl_string string, result, marker, *ret;
 
@@ -2054,7 +2054,7 @@ MBSTRING_API char * php_mb_convert_encoding(char *input, size_t length, char *_t
    Returns converted string in desired encoding */
 PHP_FUNCTION(mb_convert_encoding)
 {
-	pval **arg_str, **arg_new, **arg_old;
+	zval **arg_str, **arg_new, **arg_old;
 	int i;
 	size_t size, l, n;
 	char *_from_encodings, *ret, *s_free = NULL;
@@ -2198,7 +2198,7 @@ PHP_FUNCTION(mb_strtolower)
    Encodings of the given string is returned (as a string) */
 PHP_FUNCTION(mb_detect_encoding)
 {
-	pval **arg_str, **arg_list, **arg_strict;
+	zval **arg_str, **arg_list, **arg_strict;
 	mbfl_string string;
 	const char *ret;
 	enum mbfl_no_encoding *elist;
@@ -2484,7 +2484,7 @@ PHP_FUNCTION(mb_convert_kana)
    Converts the string resource in variables to desired encoding */
 PHP_FUNCTION(mb_convert_variables)
 {
-	pval ***args, ***stack, **var, **hash_entry;
+	zval ***args, ***stack, **var, **hash_entry;
 	HashTable *target_hash;
 	mbfl_string string, result, *ret;
 	enum mbfl_no_encoding from_encoding, to_encoding;
@@ -2499,7 +2499,7 @@ PHP_FUNCTION(mb_convert_variables)
 	if (argc < 3) {
 		WRONG_PARAM_COUNT;
 	}
-	args = (pval ***)ecalloc(argc, sizeof(pval **));
+	args = (zval ***)ecalloc(argc, sizeof(zval **));
 	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree((void *)args);
 		WRONG_PARAM_COUNT;
@@ -2541,7 +2541,7 @@ PHP_FUNCTION(mb_convert_variables)
 		/* auto detect */
 		from_encoding = mbfl_no_encoding_invalid;
 		stack_max = PHP_MBSTR_STACK_BLOCK_SIZE;
-		stack = (pval ***)safe_emalloc(stack_max, sizeof(pval **), 0);
+		stack = (zval ***)safe_emalloc(stack_max, sizeof(zval **), 0);
 		stack_level = 0;
 		identd = mbfl_encoding_detector_new(elist, elistsz);
 		if (identd != NULL) {
@@ -2567,8 +2567,8 @@ PHP_FUNCTION(mb_convert_variables)
 							if (Z_TYPE_PP(hash_entry) == IS_ARRAY || Z_TYPE_PP(hash_entry) == IS_OBJECT) {
 								if (stack_level >= stack_max) {
 									stack_max += PHP_MBSTR_STACK_BLOCK_SIZE;
-									ptmp = erealloc(stack, sizeof(pval **)*stack_max);
-									stack = (pval ***)ptmp;
+									ptmp = erealloc(stack, sizeof(zval **)*stack_max);
+									stack = (zval ***)ptmp;
 								}
 								stack[stack_level] = var;
 								stack_level++;
@@ -2624,7 +2624,7 @@ detect_end:
 	/* convert */
 	if (convd != NULL) {
 		stack_max = PHP_MBSTR_STACK_BLOCK_SIZE;
-		stack = (pval ***)safe_emalloc(stack_max, sizeof(pval **), 0);
+		stack = (zval ***)safe_emalloc(stack_max, sizeof(zval **), 0);
 		stack_level = 0;
 		n = 2;
 		while (n < argc || stack_level > 0) {
@@ -2648,8 +2648,8 @@ detect_end:
 						if (Z_TYPE_PP(hash_entry) == IS_ARRAY || Z_TYPE_PP(hash_entry) == IS_OBJECT) {
 							if (stack_level >= stack_max) {
 								stack_max += PHP_MBSTR_STACK_BLOCK_SIZE;
-								ptmp = erealloc(stack, sizeof(pval **)*stack_max);
-								stack = (pval ***)ptmp;
+								ptmp = erealloc(stack, sizeof(zval **)*stack_max);
+								stack = (zval ***)ptmp;
 							}
 							stack[stack_level] = var;
 							stack_level++;
@@ -2707,7 +2707,7 @@ detect_end:
 static void
 php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
-	pval **arg1, **arg2, **arg3, **hash_entry;
+	zval **arg1, **arg2, **arg3, **hash_entry;
 	HashTable *target_hash;
 	int argc, i, *convmap, *mapelm, mapsize=0;
 	mbfl_string string, result, *ret;
