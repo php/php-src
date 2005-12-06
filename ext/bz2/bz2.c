@@ -40,7 +40,7 @@
 #define PHP_BZ_ERRSTR  1
 #define PHP_BZ_ERRBOTH 2
 
-function_entry bz2_functions[] = {
+zend_function_entry bz2_functions[] = {
 	PHP_FE(bzopen,       NULL)
 	PHP_FE(bzread,       NULL)
 	PHP_FALIAS(bzwrite,   fwrite,		NULL)

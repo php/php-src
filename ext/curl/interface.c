@@ -130,7 +130,7 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 
 /* {{{ curl_functions[]
  */
-function_entry curl_functions[] = {
+zend_function_entry curl_functions[] = {
 	PHP_FE(curl_init,                NULL)
 	PHP_FE(curl_copy_handle,         NULL)
 	PHP_FE(curl_version,             NULL)

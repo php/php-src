@@ -77,7 +77,7 @@
 
 /* {{{ pgsql_functions[]
  */
-function_entry pgsql_functions[] = {
+zend_function_entry pgsql_functions[] = {
 	/* connection functions */
 	PHP_FE(pg_connect,		NULL)
 	PHP_FE(pg_pconnect,		NULL)

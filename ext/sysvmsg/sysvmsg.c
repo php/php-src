@@ -66,7 +66,7 @@ static
  *
  * Every user visible function must have an entry in sysvmsg_functions[].
  */
-function_entry sysvmsg_functions[] = {
+zend_function_entry sysvmsg_functions[] = {
 	PHP_FE(msg_get_queue,				NULL)
 	PHP_FE(msg_send,					sixth_arg_force_ref)
 	PHP_FE(msg_receive,					msg_receive_args_force_ref)

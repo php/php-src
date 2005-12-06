@@ -31,7 +31,7 @@
 #include "php_pdo_pgsql_int.h"
 
 /* {{{ pdo_pgsql_functions[] */
-function_entry pdo_pgsql_functions[] = {
+zend_function_entry pdo_pgsql_functions[] = {
 	{NULL, NULL, NULL}
 };
 /* }}} */

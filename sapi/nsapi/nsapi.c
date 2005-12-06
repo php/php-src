@@ -174,7 +174,7 @@ ZEND_DECLARE_MODULE_GLOBALS(nsapi)
  *
  * Every user visible function must have an entry in nsapi_functions[].
  */
-function_entry nsapi_functions[] = {
+zend_function_entry nsapi_functions[] = {
 	PHP_FE(nsapi_virtual,	NULL)										/* Make subrequest */
 	PHP_FALIAS(virtual, nsapi_virtual, NULL)							/* compatibility */
 	PHP_FE(nsapi_request_headers, NULL)									/* get request headers */

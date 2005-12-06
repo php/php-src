@@ -730,7 +730,7 @@ PHP_FUNCTION(dbase_create)
 
 /* {{{ dbase_functions[]
  */
-function_entry dbase_functions[] = {
+zend_function_entry dbase_functions[] = {
 	PHP_FE(dbase_open,								NULL)
 	PHP_FE(dbase_create,							NULL)
 	PHP_FE(dbase_close,								NULL)

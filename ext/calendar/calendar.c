@@ -35,7 +35,7 @@
 
 #include <stdio.h>
 
-function_entry calendar_functions[] = {
+zend_function_entry calendar_functions[] = {
 	PHP_FE(jdtogregorian, NULL)
 	PHP_FE(gregoriantojd, NULL)
 	PHP_FE(jdtojulian, NULL)

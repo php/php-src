@@ -48,7 +48,7 @@
 #include "php_birdstep.h"
 #include "ext/standard/info.h"
 
-function_entry birdstep_functions[] = {
+zend_function_entry birdstep_functions[] = {
 	PHP_FE(birdstep_connect,        NULL)
 	PHP_FE(birdstep_close,          NULL)
 	PHP_FE(birdstep_exec,           NULL)

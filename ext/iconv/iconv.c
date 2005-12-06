@@ -64,7 +64,7 @@
 
 /* {{{ iconv_functions[]
  */
-function_entry iconv_functions[] = {
+zend_function_entry iconv_functions[] = {
 	PHP_NAMED_FE(iconv,php_if_iconv,				NULL)
 	PHP_FE(ob_iconv_handler,						NULL)
 	PHP_FE(iconv_get_encoding,						NULL)

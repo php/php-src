@@ -4146,7 +4146,7 @@ static zend_function_entry reflection_extension_functions[] = {
 };
 /* }}} */
 
-function_entry reflection_ext_functions[] = { /* {{{ */
+zend_function_entry reflection_ext_functions[] = { /* {{{ */
 	{NULL, NULL, NULL}
 }; /* }}} */
 

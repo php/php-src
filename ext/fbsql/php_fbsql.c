@@ -183,7 +183,7 @@ char *DigestPassword(char *user, char *password)
 
 /* {{{ fbsql_functions[]
  */
-function_entry fbsql_functions[] = {
+zend_function_entry fbsql_functions[] = {
 	PHP_FE(fbsql_connect,			NULL)
 	PHP_FE(fbsql_pconnect,			NULL)
 	PHP_FE(fbsql_close,				NULL)

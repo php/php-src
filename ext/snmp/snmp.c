@@ -113,7 +113,7 @@ static oid objid_mib[] = {1, 3, 6, 1, 2, 1};
 
 /* {{{ snmp_functions[]
  */
-function_entry snmp_functions[] = {
+zend_function_entry snmp_functions[] = {
 	PHP_FE(snmpget, NULL)
 	PHP_FE(snmpgetnext, NULL)
 	PHP_FE(snmpwalk, NULL)

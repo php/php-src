@@ -140,7 +140,7 @@ typedef char IFX[128];
 		} \
 	} while (0)
 
-function_entry ifx_functions[] = {
+zend_function_entry ifx_functions[] = {
 	PHP_FE(ifx_connect,            NULL)
 	PHP_FE(ifx_pconnect,           NULL)
 	PHP_FE(ifx_close,              NULL)

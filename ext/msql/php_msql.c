@@ -46,7 +46,7 @@ static php_msql_globals msql_globals;
 
 /* {{{ msql_functions[]
  */
-function_entry msql_functions[] = {
+zend_function_entry msql_functions[] = {
 	PHP_FE(msql_connect,							NULL)
 	PHP_FE(msql_pconnect,							NULL)
 	PHP_FE(msql_close,								NULL)

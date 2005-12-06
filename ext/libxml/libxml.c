@@ -87,7 +87,7 @@ PHP_MINFO_FUNCTION(libxml);
 /* }}} */
 
 /* {{{ extension definition structures */
-function_entry libxml_functions[] = {
+zend_function_entry libxml_functions[] = {
 	PHP_FE(libxml_set_streams_context, NULL)
 	PHP_FE(libxml_use_internal_errors, NULL)
 	PHP_FE(libxml_get_last_error, NULL)
