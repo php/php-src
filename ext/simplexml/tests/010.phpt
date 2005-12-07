@@ -67,14 +67,14 @@ object(simplexml_inherited)#%d (2) {
   [u"@attributes"]=>
   array(1) {
     [u"id"]=>
-    string(5) "elem1"
+    unicode(5) "elem1"
   }
   [u"elem1"]=>
   object(simplexml_inherited)#%d (3) {
     [u"@attributes"]=>
     array(1) {
       [u"attr1"]=>
-      string(5) "first"
+      unicode(5) "first"
     }
     [u"comment"]=>
     object(simplexml_inherited)#%d (0) {

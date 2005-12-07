@@ -68,7 +68,7 @@ object(SimpleXMLElement)#%d (1) {
     [u"@attributes"]=>
     array(1) {
       [u"glob"]=>
-      string(11) "slide_*.xml"
+      unicode(11) "slide_*.xml"
     }
   }
 }
@@ -77,7 +77,7 @@ object(SimpleXMLElement)#%d (1) {
   [u"@attributes"]=>
   array(1) {
     [u"glob"]=>
-    string(11) "slide_*.xml"
+    unicode(11) "slide_*.xml"
   }
 }
 ===FOREACH===
@@ -85,7 +85,7 @@ object(SimpleXMLElement)#%d (1) {
   [u"@attributes"]=>
   array(1) {
     [u"glob"]=>
-    string(11) "slide_*.xml"
+    unicode(11) "slide_*.xml"
   }
 }
 object(SimpleXMLElement)#%d (1) {

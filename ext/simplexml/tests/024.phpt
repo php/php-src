@@ -181,7 +181,7 @@ array(3) {
     [u"@attributes"]=>
     array(1) {
       [u"attr2"]=>
-      string(2) "12"
+      unicode(2) "12"
     }
   }
   [1]=>
@@ -189,7 +189,7 @@ array(3) {
     [u"@attributes"]=>
     array(1) {
       [u"attr2"]=>
-      string(2) "22"
+      unicode(2) "22"
     }
   }
   [2]=>
@@ -197,7 +197,7 @@ array(3) {
     [u"@attributes"]=>
     array(1) {
       [u"attr2"]=>
-      string(2) "32"
+      unicode(2) "32"
     }
   }
 }
@@ -208,7 +208,7 @@ array(3) {
     [u"@attributes"]=>
     array(1) {
       [u"attr2"]=>
-      string(2) "12"
+      unicode(2) "12"
     }
   }
   [1]=>
@@ -216,7 +216,7 @@ array(3) {
     [u"@attributes"]=>
     array(1) {
       [u"attr2"]=>
-      string(2) "22"
+      unicode(2) "22"
     }
   }
   [2]=>
@@ -224,7 +224,7 @@ array(3) {
     [u"@attributes"]=>
     array(1) {
       [u"attr2"]=>
-      string(2) "32"
+      unicode(2) "32"
     }
   }
 }
@@ -235,7 +235,7 @@ array(9) {
     [u"@attributes"]=>
     array(1) {
       [u"attr1"]=>
-      string(2) "11"
+      unicode(2) "11"
     }
   }
   [1]=>
@@ -243,7 +243,7 @@ array(9) {
     [u"@attributes"]=>
     array(1) {
       [u"attr2"]=>
-      string(2) "12"
+      unicode(2) "12"
     }
   }
   [2]=>
@@ -251,7 +251,7 @@ array(9) {
     [u"@attributes"]=>
     array(1) {
       [u"attr3"]=>
-      string(2) "13"
+      unicode(2) "13"
     }
   }
   [3]=>
@@ -259,7 +259,7 @@ array(9) {
     [u"@attributes"]=>
     array(1) {
       [u"attr1"]=>
-      string(2) "21"
+      unicode(2) "21"
     }
   }
   [4]=>
@@ -267,7 +267,7 @@ array(9) {
     [u"@attributes"]=>
     array(1) {
       [u"attr2"]=>
-      string(2) "22"
+      unicode(2) "22"
     }
   }
   [5]=>
@@ -275,7 +275,7 @@ array(9) {
     [u"@attributes"]=>
     array(1) {
       [u"attr3"]=>
-      string(2) "23"
+      unicode(2) "23"
     }
   }
   [6]=>
@@ -283,7 +283,7 @@ array(9) {
     [u"@attributes"]=>
     array(1) {
       [u"attr1"]=>
-      string(2) "31"
+      unicode(2) "31"
     }
   }
   [7]=>
@@ -291,7 +291,7 @@ array(9) {
     [u"@attributes"]=>
     array(1) {
       [u"attr2"]=>
-      string(2) "32"
+      unicode(2) "32"
     }
   }
   [8]=>
@@ -299,7 +299,7 @@ array(9) {
     [u"@attributes"]=>
     array(1) {
       [u"attr3"]=>
-      string(2) "33"
+      unicode(2) "33"
     }
   }
 }
@@ -310,7 +310,7 @@ array(1) {
     [u"@attributes"]=>
     array(1) {
       [u"attr2"]=>
-      string(2) "22"
+      unicode(2) "22"
     }
   }
 }

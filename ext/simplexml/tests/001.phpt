@@ -46,14 +46,14 @@ object(SimpleXMLElement)#%d (2) {
   [u"@attributes"]=>
   array(1) {
     [u"id"]=>
-    string(5) "elem1"
+    unicode(5) "elem1"
   }
   [u"elem1"]=>
   object(SimpleXMLElement)#%d (3) {
     [u"@attributes"]=>
     array(1) {
       [u"attr1"]=>
-      string(5) "first"
+      unicode(5) "first"
     }
     [u"comment"]=>
     object(SimpleXMLElement)#%d (0) {
