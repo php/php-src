@@ -24,6 +24,9 @@
 #include "zend.h"
 #include "zend_llist.h"
 #include "zend_operators.h"
+#ifdef PHP_WIN32
+#include "win95nt.h"
+#endif
 #include <sys/stat.h>
 
 #define SAPI_OPTION_NO_CHDIR 1
