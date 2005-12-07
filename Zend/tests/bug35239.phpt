@@ -39,3 +39,30 @@ object(stdClass)#1 (1) {
   }
 }
 ok
+--UEXPECT--
+object(stdClass)#1 (1) {
+  [u"x0"]=>
+  &object(stdClass)#2 (3) {
+    [u"y0"]=>
+    unicode(1) "b"
+    [u"y1"]=>
+    &object(stdClass)#2 (3) {
+      [u"y0"]=>
+      unicode(1) "b"
+      [u"y1"]=>
+      *RECURSION*
+      [u"y2"]=>
+      *RECURSION*
+    }
+    [u"y2"]=>
+    &object(stdClass)#2 (3) {
+      [u"y0"]=>
+      unicode(1) "b"
+      [u"y1"]=>
+      *RECURSION*
+      [u"y2"]=>
+      *RECURSION*
+    }
+  }
+}
+ok
