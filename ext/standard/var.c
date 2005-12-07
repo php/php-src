@@ -777,11 +777,11 @@ static void php_var_serialize_class(smart_str *buf, zval **struc, zval *retval_p
 					do {
 						zend_u_mangle_property_name(&priv_name, &prop_name_length, Z_TYPE_PP(name), ce->name, ce->name_length, 
 									Z_STRVAL_PP(name), Z_STRLEN_PP(name), ce->type & ZEND_INTERNAL_CLASS);
-						if (zend_u_hash_find(Z_OBJPROP_PP(struc), Z_TYPE_PP(name), priv_name, prop_name_length, (void *) &d) == SUCCESS) {
+						if (zend_u_hash_find(Z_OBJPROP_PP(struc), Z_TYPE_PP(name), priv_name, prop_name_length+1, (void *) &d) == SUCCESS) {
 							if (Z_TYPE_PP(name) == IS_UNICODE) {
-								php_var_serialize_unicode(buf, (UChar *)priv_name, prop_name_length-1);
+								php_var_serialize_unicode(buf, (UChar *)priv_name, prop_name_length);
 							} else {
-								php_var_serialize_string(buf, priv_name, prop_name_length-1);
+								php_var_serialize_string(buf, priv_name, prop_name_length);
 							}
 							efree(priv_name);
 							php_var_serialize_intern(buf, d, var_hash TSRMLS_CC);
@@ -790,11 +790,11 @@ static void php_var_serialize_class(smart_str *buf, zval **struc, zval *retval_p
 						efree(priv_name);
 						zend_u_mangle_property_name(&prot_name, &prop_name_length,  Z_TYPE_PP(name), "*", 1, 
 									Z_STRVAL_PP(name), Z_STRLEN_PP(name), ce->type & ZEND_INTERNAL_CLASS);
-						if (zend_u_hash_find(Z_OBJPROP_PP(struc), Z_TYPE_PP(name), prot_name, prop_name_length, (void *) &d) == SUCCESS) {
+						if (zend_u_hash_find(Z_OBJPROP_PP(struc), Z_TYPE_PP(name), prot_name, prop_name_length+1, (void *) &d) == SUCCESS) {
 							if (Z_TYPE_PP(name) == IS_UNICODE) {
-								php_var_serialize_unicode(buf, (UChar *)prot_name, prop_name_length-1);
+								php_var_serialize_unicode(buf, (UChar *)prot_name, prop_name_length);
 							} else {
-								php_var_serialize_string(buf, prot_name, prop_name_length-1);
+								php_var_serialize_string(buf, prot_name, prop_name_length);
 							}
 							efree(prot_name);
 							php_var_serialize_intern(buf, d, var_hash TSRMLS_CC);
