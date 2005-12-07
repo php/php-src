@@ -28,3 +28,16 @@ bool(false)
 string(32) "6ec19f52f0766c463f3bb240f4396913"
 string(7) " sTrInG"
 string(4) "tEsT"
+--UEXPECT--
+unicode(11) "tEsT sTrInG"
+unicode(6) "sTrInG"
+unicode(6) "sTrInG"
+unicode(8) "T sTrInG"
+unicode(1) "G"
+unicode(32) "7272696018bdeb2c9a3f8d01fc2a9273"
+bool(false)
+bool(false)
+bool(false)
+unicode(32) "6ec19f52f0766c463f3bb240f4396913"
+unicode(7) " sTrInG"
+unicode(4) "tEsT"
