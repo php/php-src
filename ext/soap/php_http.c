@@ -192,7 +192,9 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, in
 				php_stream_close(stream);
 				stream = NULL;
 			}
-			efree(http_headers);
+			if (http_headers) { 
+				efree(http_headers);
+			}
 		}
 #ifdef ZEND_ENGINE_2
 		/* enable SSL transport layer */
