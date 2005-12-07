@@ -823,7 +823,7 @@ PHP_FUNCTION(xmlwriter_write_element_ns)
 	zval *this = getThis();
 	
 	if (this) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rssss", 
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssss", 
 			&prefix, &prefix_len, &name, &name_len, &uri, &uri_len, &content, &content_len) == FAILURE) {
 			return;
 		}
