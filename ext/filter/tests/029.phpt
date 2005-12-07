@@ -1,7 +1,5 @@
 --TEST--
 filter_data() and FC_CALLBACK
---GET--
-
 --FILE--
 <?php
 
@@ -79,15 +77,12 @@ echo "Done\n";
 string(4) "DATA"
 string(46) "~!@#$%^&*()_QWERTYUIOPASDFGHJKLZXCVBNM<>>?"}{:"
 string(0) ""
-PHP Warning:  filter_data(): First argument is expected to be a valid callback in %s on line %d
 
 Warning: filter_data(): First argument is expected to be a valid callback in %s on line %d
 NULL
-PHP Warning:  filter_data(): First argument is expected to be a valid callback in %s on line %d
 
 Warning: filter_data(): First argument is expected to be a valid callback in %s on line %d
 NULL
-PHP Warning:  filter_data(): First argument is expected to be a valid callback in %s on line %d
 
 Warning: filter_data(): First argument is expected to be a valid callback in %s on line %d
 NULL

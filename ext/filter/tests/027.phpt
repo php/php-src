@@ -1,7 +1,5 @@
 --TEST--
 filter_data() and FS_ENCODED
---GET--
-
 --FILE--
 <?php
 

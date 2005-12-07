@@ -1,7 +1,5 @@
 --TEST--
 input_get()
---GET--
-
 --FILE--
 <?php
 

@@ -1,7 +1,5 @@
 --TEST--
 filter_data() and FS_EMAIL
---GET--
-
 --FILE--
 <?php
 

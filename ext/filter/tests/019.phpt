@@ -1,7 +1,5 @@
 --TEST--
 filter_data() & FL_IP and weird data
---GET--
-
 --FILE--
 <?php
 

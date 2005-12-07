@@ -1,7 +1,5 @@
 --TEST--
 filter_data() and FL_URL
---GET--
-
 --FILE--
 <?php
 

@@ -1,7 +1,5 @@
 --TEST--
 input_name_to_filter()
---GET--
-
 --FILE--
 <?php
 
@@ -22,12 +20,10 @@ int(513)
 int(518)
 int(257)
 NULL
-PHP Warning:  input_name_to_filter() expects parameter 1 to be string, array given in %s on line %d
 
 Warning: input_name_to_filter() expects parameter 1 to be string, array given in %s on line %d
 NULL
 NULL
-PHP Warning:  input_name_to_filter() expects exactly 1 parameter, 3 given in %s on line %d
 
 Warning: input_name_to_filter() expects exactly 1 parameter, 3 given in %s on line %d
 NULL
