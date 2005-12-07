@@ -1286,21 +1286,21 @@ COMMAND $cmd
 	if (!$passed) {
 		// write .exp
 		if (strpos($log_format,'E') !== FALSE) {
-			$log = fopen($exp_filename,'wt') or error("Cannot create test log - $exp_filename");
+			$log = fopen($exp_filename,'wt') or error("Cannot create expected test output - $exp_filename");
 			fwrite($log,$wanted);
 			fclose($log);
 		}
 
 		// write .out
 		if (strpos($log_format,'O') !== FALSE) {
-			$log = fopen($output_filename,'wt') or error("Cannot create test log - $output_filename");
+			$log = fopen($output_filename,'wt') or error("Cannot create test output - $output_filename");
 			fwrite($log,$output);
 			fclose($log);
 		}
 
 		// write .diff
 		if (strpos($log_format,'D') !== FALSE) {
-			$log = fopen($diff_filename,'wt') or error("Cannot create test log - $diff_filename");
+			$log = fopen($diff_filename,'wt') or error("Cannot create test diff - $diff_filename");
 			fwrite($log, generate_diff($wanted,$wanted_re,$output));
 			fclose($log);
 		}
