@@ -939,13 +939,13 @@ TEST $file
 
 	$pu = $unicode_semantics ? 'u.' : '';
 
-	$diff_filename     = $tmp . DIRECTORY_SEPARATOR . basename($file).$pu.'diff';
-	$log_filename      = $tmp . DIRECTORY_SEPARATOR . basename($file).$pu.'log';
-	$exp_filename      = $tmp . DIRECTORY_SEPARATOR . basename($file).$pu.'exp';
-	$output_filename   = $tmp . DIRECTORY_SEPARATOR . basename($file).$pu.'out';
-	$memcheck_filename = $tmp . DIRECTORY_SEPARATOR . basename($file).$pu.'mem';
-	$tmp_file          = $tmp . DIRECTORY_SEPARATOR . basename($file).$pu.'php';
-	$tmp_skipif        = $tmp . DIRECTORY_SEPARATOR . basename($file).$pu.'skip';
+	$diff_filename     = $tmp . DIRECTORY_SEPARATOR . basename($file,"phpt").$pu.'diff';
+	$log_filename      = $tmp . DIRECTORY_SEPARATOR . basename($file,"phpt").$pu.'log';
+	$exp_filename      = $tmp . DIRECTORY_SEPARATOR . basename($file,"phpt").$pu.'exp';
+	$output_filename   = $tmp . DIRECTORY_SEPARATOR . basename($file,"phpt").$pu.'out';
+	$memcheck_filename = $tmp . DIRECTORY_SEPARATOR . basename($file,"phpt").$pu.'mem';
+	$tmp_file          = $tmp . DIRECTORY_SEPARATOR . basename($file,"phpt").'php';
+	$tmp_skipif        = $tmp . DIRECTORY_SEPARATOR . basename($file,"phpt").$pu.'skip';
 	$tmp_post          = $tmp . DIRECTORY_SEPARATOR . uniqid('/phpt.');
 	$tmp_relative_file = str_replace(dirname(__FILE__).DIRECTORY_SEPARATOR, '', $tmp_file) . 't';
 
