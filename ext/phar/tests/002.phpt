@@ -20,4 +20,4 @@ Warning: PHP_Archive::mapPhar() expects at least 3 parameters, 2 given in %s on 
 
 Warning: PHP_Archive::mapPhar() expects at least 3 parameters, 2 given in %s on line %d
 
-Warning: PHP_Archive::mapPhar() expects at most 4 parameters, 5 given in %s on line %d
+Fatal error: PHP_Archive::mapPhar(): internal corruption of phar "%s" (truncated manifest) in %s on line %d
