@@ -33,10 +33,6 @@ extern zend_module_entry json_module_entry;
 #include "TSRM.h"
 #endif
 
-PHP_MINIT_FUNCTION(json);
-PHP_MSHUTDOWN_FUNCTION(json);
-PHP_RINIT_FUNCTION(json);
-PHP_RSHUTDOWN_FUNCTION(json);
 PHP_MINFO_FUNCTION(json);
 
 PHP_FUNCTION(json_encode);

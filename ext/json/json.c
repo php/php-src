@@ -51,10 +51,10 @@ zend_module_entry json_module_entry = {
 #endif
 	"json",
 	json_functions,
-	PHP_MINIT(json),
-	PHP_MSHUTDOWN(json),
-	PHP_RINIT(json),
-	PHP_RSHUTDOWN(json),
+	NULL,
+	NULL,
+	NULL,
+	NULL,
 	PHP_MINFO(json),
 #if ZEND_MODULE_API_NO >= 20010901
 	PHP_JSON_VERSION,
@@ -66,38 +66,6 @@ zend_module_entry json_module_entry = {
 #ifdef COMPILE_DL_JSON
 ZEND_GET_MODULE(json)
 #endif
-
-/* {{{ PHP_MINIT_FUNCTION
- */
-PHP_MINIT_FUNCTION(json)
-{
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
-PHP_MSHUTDOWN_FUNCTION(json)
-{
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ PHP_RINIT_FUNCTION
- */
-PHP_RINIT_FUNCTION(json)
-{
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ PHP_RSHUTDOWN_FUNCTION
- */
-PHP_RSHUTDOWN_FUNCTION(json)
-{
-	return SUCCESS;
-}
-/* }}} */
 
 /* {{{ PHP_MINFO_FUNCTION
  */
@@ -113,10 +81,9 @@ PHP_MINFO_FUNCTION(json)
 
 static struct json_object *json_encode_r(zval *val);
 
-static int json_determine_array_type(zval **val) {
+static int json_determine_array_type(zval **val TSRMLS_DC) {
     int i;
     HashTable *myht;
-    TSRMLS_FETCH();
   
     if (Z_TYPE_PP(val) == IS_ARRAY) {
         myht = HASH_OF(*val);
@@ -153,15 +120,14 @@ static int json_determine_array_type(zval **val) {
     return 0;
 }
 
-static struct json_object *json_encode_array(zval **val) {
+static struct json_object *json_encode_array(zval **val TSRMLS_DC) {
     int i, r;
     HashTable *myht;
     struct json_object *obj;
-    TSRMLS_FETCH();
   
     if (Z_TYPE_PP(val) == IS_ARRAY) {
         myht = HASH_OF(*val);
-        r = json_determine_array_type(val);
+        r = json_determine_array_type(val TSRMLS_CC);
     } else {
         myht = Z_OBJPROP_PP(val);
         r = 1;
@@ -236,10 +202,10 @@ static struct json_object *json_encode_r(zval *val) {
             jo = json_object_new_string_len(Z_STRVAL_P(val), Z_STRLEN_P(val));
             break;
         case IS_ARRAY:
-            jo = json_encode_array(&val);
+            jo = json_encode_array(&val TSRMLS_CC);
             break;
         case IS_OBJECT:
-            jo = json_encode_array(&val);
+            jo = json_encode_array(&val TSRMLS_CC);
             break;
         default:
             zend_error(E_WARNING, "[json] (json_encode) type is unsupported\n");
@@ -250,7 +216,7 @@ static struct json_object *json_encode_r(zval *val) {
     return jo;
 }
 
-ZEND_FUNCTION(json_encode)
+PHP_FUNCTION(json_encode)
 {
     zval *parameter;
     struct json_object *jo;
@@ -269,9 +235,8 @@ ZEND_FUNCTION(json_encode)
     RETURN_STRING(s, 0);
 }
 
-static zval *json_decode_r(struct json_object *jo, zend_bool assoc) {
+static zval *json_decode_r(struct json_object *jo, zend_bool assoc TSRMLS_DC) {
     zval *return_value;
-    TSRMLS_FETCH();
 
     MAKE_STD_ZVAL(return_value);
 
@@ -297,7 +262,7 @@ static zval *json_decode_r(struct json_object *jo, zend_bool assoc) {
 		
         json_object_object_foreachC(jo, iter) {
           if (iter.val) {
-            mval = json_decode_r(iter.val, assoc);
+            mval = json_decode_r(iter.val, assoc TSRMLS_CC);
           } else {
             MAKE_STD_ZVAL(mval);
             ZVAL_NULL(mval);
@@ -324,7 +289,7 @@ static zval *json_decode_r(struct json_object *jo, zend_bool assoc) {
         for (i = 0; i < l; i++) {
           val = json_object_array_get_idx(jo, i);
           if (val) {
-            mval = json_decode_r(val, assoc);
+            mval = json_decode_r(val, assoc TSRMLS_CC);
           } else {
             MAKE_STD_ZVAL(mval);
             ZVAL_NULL(mval);
@@ -347,7 +312,7 @@ static zval *json_decode_r(struct json_object *jo, zend_bool assoc) {
     return return_value;
 }
 
-ZEND_FUNCTION(json_decode)
+PHP_FUNCTION(json_decode)
 {
     char *parameter;
     int parameter_len;
@@ -364,7 +329,7 @@ ZEND_FUNCTION(json_decode)
       RETURN_NULL();
     }
 
-    z = json_decode_r(jo, assoc);
+    z = json_decode_r(jo, assoc TSRMLS_CC);
     if (!z) {
         RETURN_NULL();
     }
