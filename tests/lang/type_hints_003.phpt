@@ -11,4 +11,4 @@ class T {
 ?>
 --EXPECTF--
 
-Fatal error: Default value for parameters with a class type hint can only be NULL in %stest.php on line 3
+Fatal error: Default value for parameters with a class type hint can only be NULL in %stype_hints_003.php on line 3
