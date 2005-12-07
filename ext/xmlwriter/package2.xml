@@ -17,9 +17,9 @@
   <email>pajoye@php.net</email>
   <active>yes</active>
  </developer>
- <date>2005-12-01</date>
+ <date>2005-12-10</date>
  <version>
-  <release>2.0.2</release>
+  <release>2.0.3</release>
   <api>2.0.0</api>
  </version>
  <stability>
@@ -27,9 +27,8 @@
   <api>stable</api>
  </stability>
  <license uri="http://www.php.net/license/3_01.txt">PHP</license>
- <notes>- fix build under 5.0
-- fix crash when XMLWriter is instantiated but not used
-- Switch from BSD-like license to PHP License 3.01
+ <notes>- fix ::startDtd and ::startElementNs arguments
+- Add tests for both methods
 </notes>
  <contents>
   <dir name="/">
@@ -42,10 +41,13 @@
     <file role="test" name="002.phpt"/>
     <file role="test" name="003.phpt"/>
     <file role="test" name="004.phpt"/>
+    <file role="test" name="005.phpt"/>
     <file role="test" name="OO_001.phpt"/>
     <file role="test" name="OO_002.phpt"/>
     <file role="test" name="OO_003.phpt"/>
     <file role="test" name="OO_004.phpt"/>
+    <file role="test" name="OO_005.phpt"/>
+    <file role="test" name="OO_006.phpt"/>
   </dir>
   </dir>
  </contents>
@@ -62,6 +64,22 @@
  <providesextension>xmlwriter</providesextension>
  <extsrcrelease />
  <changelog>
+ <release>
+ <date>2005-12-01</date>
+ <version>
+  <release>2.0.2</release>
+  <api>2.0.0</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.php.net/license/3_01.txt">PHP</license>
+ <notes>- fix build under 5.0
+- fix crash when XMLWriter is instantiated but not used
+- Switch from BSD-like license to PHP License 3.01
+</notes>
+ </release>
  <release>
  <version>
   <release>2.0.1</release>

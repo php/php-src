@@ -21,6 +21,15 @@
    <role>developer</role>
   </maintainer>
  <release>
+  <version>2.0.3</version>
+  <date>2005-12-10</date>
+  <state>stable</state>
+  <notes>- fix ::startDtd and ::startElementNs arguments
+- Add tests for both methods 
+  </notes>
+ </release>
+ <changelog>
+ <release>
   <version>2.0.2</version>
   <date>2005-12-01</date>
   <state>stable</state>
@@ -29,7 +38,6 @@
 - Switch from BSD-like license to PHP License 3.01
 </notes>
  </release>
- <changelog>
  <release>
   <version>2.0.0</version>
   <date>2005-08-07</date>
@@ -39,7 +47,6 @@
    move to stable state
   </notes>
  </release>
-
  <release>
   <version>1.1.0</version>
   <date>2005-05-24</date>
@@ -95,10 +102,13 @@
     <file name="002.phpt"/>
     <file name="003.phpt"/>
     <file name="004.phpt"/>
+    <file name="005.phpt"/>
     <file name="OO_001.phpt"/>
     <file name="OO_002.phpt"/>
     <file name="OO_003.phpt"/>
     <file name="OO_004.phpt"/>
+    <file name="OO_005.phpt"/>
+    <file name="OO_006.phpt"/>
   </dir>
  </filelist>
  <deps>
