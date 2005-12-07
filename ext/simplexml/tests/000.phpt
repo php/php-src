@@ -261,20 +261,20 @@ object(SimpleXMLElement)#%d (3) {
   [u"@attributes"]=>
   array(1) {
     [u"id"]=>
-    string(3) "123"
+    unicode(3) "123"
   }
   [u"elem1"]=>
   array(2) {
     [0]=>
-    string(36) "There is some text.Here is some more"
+    unicode(36) "There is some text.Here is some more"
     [1]=>
     object(SimpleXMLElement)#%d (1) {
       [u"@attributes"]=>
       array(2) {
         [u"attr1"]=>
-        string(2) "11"
+        unicode(2) "11"
         [u"attr2"]=>
-        string(2) "12"
+        unicode(2) "12"
       }
     }
   }
@@ -296,9 +296,9 @@ object(SimpleXMLElement)#%d (3) {
   [u"@attributes"]=>
   array(2) {
     [u"attr1"]=>
-    string(5) "first"
+    unicode(5) "first"
     [u"attr2"]=>
-    string(6) "second"
+    unicode(6) "second"
   }
   [u"comment"]=>
   object(SimpleXMLElement)#%d (0) {
@@ -308,9 +308,9 @@ object(SimpleXMLElement)#%d (3) {
     [u"@attributes"]=>
     array(2) {
       [u"att25"]=>
-      string(2) "25"
+      unicode(2) "25"
       [u"att42"]=>
-      string(2) "42"
+      unicode(2) "42"
     }
     [u"elem3"]=>
     object(SimpleXMLElement)#%d (1) {
@@ -331,9 +331,9 @@ object(SimpleXMLElement)#%d (3) {
   [u"@attributes"]=>
   array(2) {
     [u"attr1"]=>
-    string(5) "first"
+    unicode(5) "first"
     [u"attr2"]=>
-    string(6) "second"
+    unicode(6) "second"
   }
   [u"comment"]=>
   object(SimpleXMLElement)#%d (0) {
@@ -343,9 +343,9 @@ object(SimpleXMLElement)#%d (3) {
     [u"@attributes"]=>
     array(2) {
       [u"att25"]=>
-      string(2) "25"
+      unicode(2) "25"
       [u"att42"]=>
-      string(2) "42"
+      unicode(2) "42"
     }
     [u"elem3"]=>
     object(SimpleXMLElement)#%d (1) {
@@ -366,9 +366,9 @@ object(SimpleXMLElement)#%d (2) {
   [u"@attributes"]=>
   array(2) {
     [u"att25"]=>
-    string(2) "25"
+    unicode(2) "25"
     [u"att42"]=>
-    string(2) "42"
+    unicode(2) "42"
   }
   [u"elem3"]=>
   object(SimpleXMLElement)#%d (1) {
@@ -400,9 +400,9 @@ object(SimpleXMLElement)#%d (1) {
   [u"@attributes"]=>
   array(2) {
     [u"attr1"]=>
-    string(2) "11"
+    unicode(2) "11"
     [u"attr2"]=>
-    string(2) "12"
+    unicode(2) "12"
   }
 }
 ===sxe->elem1[2]

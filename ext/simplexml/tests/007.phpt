@@ -101,7 +101,7 @@ object(SimpleXMLElement)#%d (3) {
   [u"@attributes"]=>
   array(1) {
     [u"attr1"]=>
-    string(5) "first"
+    unicode(5) "first"
   }
   [u"comment"]=>
   object(SimpleXMLElement)#%d (0) {
