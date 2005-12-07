@@ -1,3 +1,204 @@
+2005-12-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      main/main.c:
+      MFH: Fixed bug #30760 (Remove MessageBox on win32 for E_CORE errors if
+      display_startup_error is off).
+
+    * main/main.c:
+      MFB51: Fixed bug #30760 (Remove MessageBox on win32 for E_CORE errors if
+      display_startup_error is off).
+
+    * (PHP_5_1)
+      NEWS
+      main/main.c:
+      Fixed bug #30760 (Remove MessageBox on win32 for E_CORE errors if
+      display_startup_error is off).
+
+2005-12-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      - Do not show leak summary if not tested
+
+2005-12-06  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/http_fopen_wrapper.c:
+      Block potential segfault.
+      Context option type not checked for "user_agent","header", and "content"
+
+2005-12-06  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/oci8_statement.c:
+      MF51: use strlen() to get correct element length
+
+    * (PHP_5_1)
+      ext/oci8/oci8_statement.c:
+      use strlen() to get correct element length
+
+2005-12-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      ext/mssql/php_mssql.c:
+      Fixed build of mssql extension.
+
+2005-12-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      - Fix summaries again
+
+2005-12-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      main/SAPI.c
+      main/SAPI.c:
+      MFH: Prevent header injection by limiting each header to a single line.
+
+    * main/SAPI.c:
+      Prevent header injection by limiting each header to a single line.
+
+    * (PHP_4_4)
+      NEWS
+      main/main.c:
+      MFH: Fixed possible XSS inside error reporting functionality.
+
+    * main/main.c:
+      MFB51: Fixed possible XSS inside error reporting functionality.
+
+    * (PHP_5_1)
+      NEWS
+      main/main.c:
+      Fixed possible XSS inside error reporting functionality.
+
+2005-12-06  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * README.input_filter:
+      - Fix docs
+
+    * ext/bcmath/bcmath.c
+      ext/bz2/bz2.c
+      ext/calendar/cal_unix.c
+      ext/calendar/calendar.c
+      ext/com_dotnet/com_extension.c
+      ext/ctype/ctype.c
+      ext/curl/interface.c
+      ext/dba/dba.c
+      ext/dbase/dbase.c
+      ext/dom/dom_iterators.c
+      ext/dom/nodelist.c
+      ext/exif/exif.c
+      ext/fbsql/php_fbsql.c
+      ext/fdf/fdf.c
+      ext/filepro/filepro.c
+      ext/ftp/php_ftp.c
+      ext/gd/gd.c
+      ext/gettext/gettext.c
+      ext/gmp/gmp.c
+      ext/hwapi/hwapi.cpp
+      ext/iconv/iconv.c
+      ext/imap/php_imap.c
+      ext/informix/ifx.ec
+      ext/interbase/interbase.c
+      ext/ldap/ldap.c
+      ext/mcrypt/mcrypt.c
+      ext/mhash/mhash.c
+      ext/mime_magic/mime_magic.c
+      ext/msession/msession.c
+      ext/msql/php_msql.c
+      ext/mysql/php_mysql.c
+      ext/ncurses/ncurses_fe.c
+      ext/ncurses/php_ncurses.h
+      ext/odbc/birdstep.c
+      ext/openssl/openssl.c
+      ext/pcntl/pcntl.c
+      ext/pcre/php_pcre.c
+      ext/pgsql/pgsql.c
+      ext/posix/posix.c
+      ext/pspell/pspell.c
+      ext/readline/readline.c
+      ext/session/session.c
+      ext/shmop/shmop.c
+      ext/simplexml/simplexml.c
+      ext/snmp/snmp.c
+      ext/snmp/winsnmp.c
+      ext/sockets/sockets.c
+      ext/sqlite/pdo_sqlite2.c
+      ext/sqlite/sqlite.c
+      ext/sybase/php_sybase_db.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/sysvmsg/sysvmsg.c
+      ext/sysvsem/sysvsem.c
+      ext/sysvshm/sysvshm.c
+      ext/tokenizer/tokenizer.c
+      ext/wddx/wddx.c
+      ext/xml/xml.c
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xsl/php_xsl.c
+      ext/zlib/zlib.c
+      sapi/aolserver/aolserver.c
+      sapi/apache/php_apache.c
+      sapi/apache2filter/php_functions.c
+      sapi/apache2handler/php_functions.c
+      sapi/apache_hooks/php_apache.c
+      sapi/milter/php_milter.c
+      sapi/nsapi/nsapi.c:
+      - Nuke php3 legacy
+
+    * (PHP_5_1)
+      ext/mbstring/mbstring.c:
+      sync with HEAD
+
+    * ext/mbstring/mbstring.c
+      ext/sybase/php_sybase_db.c:
+      fix build
+
+2005-12-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      - Support for '--' style switches
+      - Modularize output
+      - Better valgrind integration (valgrind 3.0.0+ required now) (-m)
+      - Ability to generate an additional html style output log (--html)
+      - Ability to test unicode + native tests in one go (-U)
+
+2005-12-06  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/gd/gd.c
+      ext/mbstring/mbstring.c
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.h
+      ext/mysqli/mysqli_driver.c
+      ext/mysqli/mysqli_exception.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_warning.c
+      ext/mysqli/php_mysqli.h
+      ext/odbc/php_odbc.c
+      ext/sybase/php_sybase_db.c
+      ext/sybase_ct/php_sybase_ct.h
+      sapi/apache/php_apache.c
+      sapi/apache_hooks/php_apache.c
+      sapi/cli/php_cli.c
+      sapi/nsapi/nsapi.c
+      sapi/roxen/roxen.c:
+      nuke php3 legacy
+
+    * ext/xml/php_xml.h:
+      nuke php3 legacy (and be consistent)
+
+    * ext/hwapi/hwapi.cpp
+      ext/ncurses/ncurses_functions.c
+      main/main.c
+      main/php_variables.h:
+      - nuke php3 legacy
+
+    * main/php.h
+      main/php3_compat.h
+      win32/php5dll.dsp
+      win32/php5dllts.dsp:
+      - Nuke php3_compat.h
+
 2005-12-05  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * ext/skeleton/skeleton.c:
