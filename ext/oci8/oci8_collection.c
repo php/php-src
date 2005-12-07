@@ -44,7 +44,7 @@
 
 /* {{{ php_oci_collection_create() 
  Create and return connection handle */
-php_oci_collection * php_oci_collection_create(php_oci_connection* connection, char *tdo, int tdo_len, char *schema, int schema_len TSRMLS_DC)
+php_oci_collection * php_oci_collection_create(php_oci_connection* connection, char *tdo, long tdo_len, char *schema, long schema_len TSRMLS_DC)
 {	
 	dvoid *dschp1;
 	dvoid *parmp1;
@@ -218,7 +218,7 @@ int php_oci_collection_append_null(php_oci_collection *collection TSRMLS_DC)
 
 /* {{{ php_oci_collection_append_date() 
  Append DATE element to the end of the collection (use "DD-MON-YY" format) */
-int php_oci_collection_append_date(php_oci_collection *collection, char *date, int date_len TSRMLS_DC)
+int php_oci_collection_append_date(php_oci_collection *collection, char *date, long date_len TSRMLS_DC)
 {
 	OCIInd new_index = OCI_IND_NOTNULL;
 	OCIDate oci_date;
@@ -245,7 +245,7 @@ int php_oci_collection_append_date(php_oci_collection *collection, char *date, i
 
 /* {{{ php_oci_collection_append_number()
  Append NUMBER to the end of the collection */
-int php_oci_collection_append_number(php_oci_collection *collection, char *number, int number_len TSRMLS_DC)
+int php_oci_collection_append_number(php_oci_collection *collection, char *number, long number_len TSRMLS_DC)
 {
 	OCIInd new_index = OCI_IND_NOTNULL;
 	double element_double;
@@ -273,7 +273,7 @@ int php_oci_collection_append_number(php_oci_collection *collection, char *numbe
 
 /* {{{ php_oci_collection_append_string() 
  Append STRING to the end of the collection */
-int php_oci_collection_append_string(php_oci_collection *collection, char *element, int element_len TSRMLS_DC)
+int php_oci_collection_append_string(php_oci_collection *collection, char *element, long element_len TSRMLS_DC)
 {
 	OCIInd new_index = OCI_IND_NOTNULL;
 	OCIString *ocistr = (OCIString *)0;
@@ -298,7 +298,7 @@ int php_oci_collection_append_string(php_oci_collection *collection, char *eleme
 
 /* {{{ php_oci_collection_append() 
  Append wrapper. Appends any supported element to the end of the collection */
-int php_oci_collection_append(php_oci_collection *collection, char *element, int element_len TSRMLS_DC)
+int php_oci_collection_append(php_oci_collection *collection, char *element, long element_len TSRMLS_DC)
 {
 	if (element_len == 0) {
 		return php_oci_collection_append_null(collection TSRMLS_CC);
@@ -455,7 +455,7 @@ int php_oci_collection_element_set_null(php_oci_collection *collection, long ind
 
 /* {{{ php_oci_collection_element_set_date() 
  Change element's value to the given DATE */
-int php_oci_collection_element_set_date(php_oci_collection *collection, long index, char *date, int date_len TSRMLS_DC)
+int php_oci_collection_element_set_date(php_oci_collection *collection, long index, char *date, long date_len TSRMLS_DC)
 {
 	OCIInd new_index = OCI_IND_NOTNULL;
 	OCIDate oci_date;
@@ -482,7 +482,7 @@ int php_oci_collection_element_set_date(php_oci_collection *collection, long ind
 
 /* {{{ php_oci_collection_element_set_number()
  Change element's value to the given NUMBER */
-int php_oci_collection_element_set_number(php_oci_collection *collection, long index, char *number, int number_len TSRMLS_DC)
+int php_oci_collection_element_set_number(php_oci_collection *collection, long index, char *number, long number_len TSRMLS_DC)
 {
 	OCIInd new_index = OCI_IND_NOTNULL;
 	double element_double;
@@ -510,7 +510,7 @@ int php_oci_collection_element_set_number(php_oci_collection *collection, long i
 
 /* {{{ php_oci_collection_element_set_string()
  Change element's value to the given string */
-int php_oci_collection_element_set_string(php_oci_collection *collection, long index, char *element, int element_len TSRMLS_DC)
+int php_oci_collection_element_set_string(php_oci_collection *collection, long index, char *element, long element_len TSRMLS_DC)
 {
 	OCIInd new_index = OCI_IND_NOTNULL;
 	OCIString *ocistr = (OCIString *)0;
@@ -535,7 +535,7 @@ int php_oci_collection_element_set_string(php_oci_collection *collection, long i
 
 /* {{{ php_oci_collection_element_set()
  Collection element setter */
-int php_oci_collection_element_set(php_oci_collection *collection, long index, char *value, int value_len TSRMLS_DC)
+int php_oci_collection_element_set(php_oci_collection *collection, long index, char *value, long value_len TSRMLS_DC)
 {
 	if (value_len == 0) {
 		return php_oci_collection_element_set_null(collection, index TSRMLS_CC);
@@ -601,9 +601,7 @@ void php_oci_collection_close(php_oci_collection *collection TSRMLS_DC)
 			php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 		}
 	}
-	
-	zend_list_delete(collection->connection->rsrc_id);
-	
+
 	efree(collection);
 	return;
 } /* }}} */

@@ -1,6 +1,0 @@
-
-Doing a for loop to iterate over a string character-by-character may be
-slow, since accessing a character at offset n requires us to scan the string
-from the beginning until the required codepoint is accessed.
-
-strlen() will return the number of codepoints which have to be calculated.

@@ -47,8 +47,7 @@ PHP_FUNCTION(oci_define_by_name)
 {
 	zval *stmt, *var;
 	char *name;
-	int name_len;
-	long type = SQLT_CHR;
+	long name_len, type = SQLT_CHR;
 	php_oci_statement *statement;
 	php_oci_define *define, *tmp_define;
 
@@ -94,8 +93,7 @@ PHP_FUNCTION(oci_define_by_name)
 PHP_FUNCTION(oci_bind_by_name)
 {
 	ub2	bind_type = SQLT_CHR; /* unterminated string */
-	int name_len;
-	long maxlen = -1, type = 0;
+	long name_len, maxlen = -1, type = 0;
 	char *name;
 	zval *z_statement;
 	zval *bind_var = NULL;
@@ -112,41 +110,6 @@ PHP_FUNCTION(oci_bind_by_name)
 	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
 
 	if (php_oci_bind_by_name(statement, name, name_len, bind_var, maxlen, bind_type TSRMLS_CC)) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
-}
-/* }}} */
-
-/* {{{ proto bool oci_bind_array_by_name(resource stmt, string name, array &var, int max_table_length [, int max_item_length [, int type ]])
-   Bind a PHP array to an Oracle PL/SQL type by name */
-PHP_FUNCTION(oci_bind_array_by_name)
-{
-	int name_len;
-	long max_item_len = -1;
-	long max_array_len = 0;
-	long type = SQLT_AFC;
-	char *name;
-	zval *z_statement;
-	zval *bind_var = NULL;
-	php_oci_statement *statement;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsz/l|ll", &z_statement, &name, &name_len, &bind_var, &max_array_len, &max_item_len, &type) == FAILURE) {
-		return;
-	}
-
-	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
-
-	if (ZEND_NUM_ARGS() == 5 && max_item_len <= 0) {
-		max_item_len = -1;
-	}
-	
-	if (max_array_len <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Maximum array length must be greater than zero");
-		RETURN_FALSE;
-	}
-	
-	if (php_oci_bind_array_by_name(statement, name, name_len, bind_var, max_array_len, max_item_len, type TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -185,7 +148,7 @@ PHP_FUNCTION(oci_lob_save)
 	zval **tmp, *z_descriptor = getThis();
 	php_oci_descriptor *descriptor;
 	char *data;
-	int data_len;
+	long data_len;
 	long offset = 0;
 	ub4 bytes_written;
 
@@ -226,7 +189,7 @@ PHP_FUNCTION(oci_lob_import)
 	zval **tmp, *z_descriptor = getThis();
 	php_oci_descriptor *descriptor;
 	char *filename;
-	int filename_len;
+	long filename_len;
 
 	if (getThis()) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
@@ -278,12 +241,7 @@ PHP_FUNCTION(oci_lob_load)
 	if (php_oci_lob_read(descriptor, -1, 0, &buffer, &buffer_len TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	if (buffer_len > 0) {
-		RETURN_STRINGL(buffer, buffer_len, 0);
-	}
-	else {
-		RETURN_EMPTY_STRING();
-	}
+	RETURN_STRINGL(buffer, buffer_len, 0);
 }
 /* }}} */
 
@@ -322,13 +280,8 @@ PHP_FUNCTION(oci_lob_read)
 	
 	if (php_oci_lob_read(descriptor, length, descriptor->lob_current_position, &buffer, &buffer_len TSRMLS_CC)) {
 		RETURN_FALSE;
-	}	
-	if (buffer_len > 0) {
-		RETURN_STRINGL(buffer, buffer_len, 0);
 	}
-	else {
-		RETURN_EMPTY_STRING();
-	}
+	RETURN_STRINGL(buffer, buffer_len, 0);
 }
 /* }}} */
 
@@ -500,8 +453,7 @@ PHP_FUNCTION(oci_lob_write)
 {
 	zval **tmp, *z_descriptor = getThis();
 	php_oci_descriptor *descriptor;
-	int data_len;
-	long write_len = 0; 
+	long data_len, write_len = 0; 
 	ub4 bytes_written;
 	char *data;
 	
@@ -851,8 +803,7 @@ PHP_FUNCTION(oci_lob_export)
 	zval **tmp, *z_descriptor = getThis();
 	php_oci_descriptor *descriptor;
 	char *filename, *buffer;
-	int filename_len;
-	long start = -1, length = -1, block_length;
+	long filename_len, start = -1, length = -1, block_length;
 	php_stream *stream;
 	ub4 lob_length;
 
@@ -961,8 +912,7 @@ PHP_FUNCTION(oci_lob_write_temporary)
 	zval **tmp, *z_descriptor = getThis();
 	php_oci_descriptor *descriptor;
 	char *data;
-	int data_len;
-	long type = OCI_TEMP_CLOB;
+	long data_len, type = OCI_TEMP_CLOB;
 
 	if (getThis()) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &data, &data_len, &type) == FAILURE) {
@@ -1261,7 +1211,7 @@ PHP_FUNCTION(oci_execute)
 {
 	zval *z_statement;
 	php_oci_statement *statement;
-	long mode = OCI_COMMIT_ON_SUCCESS;
+	ub4 mode = OCI_COMMIT_ON_SUCCESS;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &z_statement, &mode) == FAILURE) {
 		return;
@@ -1628,7 +1578,7 @@ PHP_FUNCTION(oci_parse)
 	php_oci_connection *connection;
 	php_oci_statement *statement;
 	char *query;
-	int query_len;
+	long query_len;
 	zend_bool cached = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|b", &z_connection, &query, &query_len, &cached) == FAILURE) {
@@ -1673,7 +1623,7 @@ PHP_FUNCTION(oci_password_change)
 {
 	zval *z_connection;
 	text *user, *pass_old, *pass_new, *dbname;
-	int user_len, pass_old_len, pass_new_len, dbname_len;
+	long user_len, pass_old_len, pass_new_len, dbname_len;
 	php_oci_connection *connection;
 
 	/*  Disable in Safe Mode  */
@@ -1868,7 +1818,7 @@ PHP_FUNCTION(oci_collection_append)
 	zval **tmp, *z_collection = getThis();
 	php_oci_collection *collection;
 	char *value;
-	int value_len;
+	long value_len;
 
 	if (getThis()) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &value, &value_len) == FAILURE) {
@@ -1976,8 +1926,7 @@ PHP_FUNCTION(oci_collection_element_assign)
 {
 	zval **tmp, *z_collection = getThis();
 	php_oci_collection *collection;
-	int value_len;
-	long element_index;
+	long element_index, value_len;
 	char *value;
 
 	if (getThis()) {
@@ -2102,7 +2051,7 @@ PHP_FUNCTION(oci_new_collection)
 	php_oci_connection *connection;
 	php_oci_collection *collection;
 	char *tdo, *schema = NULL;
-	int tdo_len, schema_len = 0;
+	long tdo_len, schema_len = 0;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|s", &z_connection, &tdo, &tdo_len, &schema, &schema_len) == FAILURE) {
 		return;

@@ -21,11 +21,13 @@
   </maintainers>
 
   <release>
-   <version>1.0</version>
+   <version>1.1</version>
    <state>stable</state>
-   <date>2005-12-06</date>
+   <date>2005-12-00</date>
    <notes>
-Initial Release
+Fixed PECL bug #6183 - haval source file entries missing in package.xml
+
+Supported Algorithms:
  * md4, md5
  * sha1, sha256, sha384, sha512
  * ripemd128, ripemd160
@@ -64,6 +66,8 @@ Initial Release
    <file role="src" name="hash_crc32.c"/>
    <file role="src" name="php_hash_crc32.h"/>
    <file role="src" name="php_hash_crc32_tables.h"/>
+   <file role="src" name="hash_haval.c"/>
+   <file role="src" name="php_hash_haval.h"/>
    <file role="doc" name="README"/>
    <dir role="test" name="tests">
     <file role="test" name="hmac-md5.phpt"/>

@@ -2,11 +2,16 @@
 Verbose tidy_get_error_buffer()
 --SKIPIF--
 <?php if (!extension_loaded("tidy")) print "skip"; ?>
+--POST--
+--GET--
+--INI--
 --FILE--
 <?php 
-	$a = tidy_parse_string("<HTML><asd asdf></HTML>");
-	echo tidy_get_error_buffer($a);
-	
+
+    tidy_parse_string("<HTML><asd asdf></HTML>");
+    
+    echo tidy_get_error_buffer(true);
+
 ?>
 --EXPECT--
 line 1 column 1 - Warning: missing <!DOCTYPE> declaration
