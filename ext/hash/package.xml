@@ -25,7 +25,9 @@
    <state>stable</state>
    <date>2005-12-00</date>
    <notes>
-Initial Release
+Fixed PECL bug #6183 - haval source file entries missing in package.xml
+
+Supported Algorithms:
  * md4, md5
  * sha1, sha256, sha384, sha512
  * ripemd128, ripemd160
