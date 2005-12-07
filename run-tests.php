@@ -708,11 +708,13 @@ function mail_qa_team($data, $compression, $status = FALSE)
 //  Write the given text to a temporary file, and return the filename.
 //
 
-function save_text($filename,$text)
+function save_text($filename, $text)
 {
 	global $DETAILED;
 
-	@file_put_contents($filename, $text) or error("Cannot open file '" . $filename . "' (save_text)");
+	if (@file_put_contents($filename, $text) === FALSE) {
+		error("Cannot open file '" . $filename . "' (save_text)");
+	}
 	if (1 < $DETAILED) echo "
 FILE $filename {{{
 $text
@@ -724,7 +726,7 @@ $text
 //  Write an error in a format recognizable to Emacs or MSVC.
 //
 
-function error_report($testname,$logname,$tested) 
+function error_report($testname, $logname, $tested) 
 {
 	$testname = realpath($testname);
 	$logname  = realpath($logname);
