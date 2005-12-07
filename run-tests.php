@@ -223,8 +223,11 @@ $failed_tests_file= false;
 $pass_option_n = false;
 $pass_options = '';
 
-$compression = 0;		
-$output_file = $CUR_DIR . '/php_test_results_' . date('Ymd_Hi') . ( $compression ? '.txt.gz' : '.txt' );
+$compression = 0;
+$output_file = $CUR_DIR . '/php_test_results_' . date('Ymd_Hi') . '.txt';
+if ($compression) {
+	$output_file = 'compress.zlib://' . $output_file . '.gz';
+}
 $just_save_results = false;
 $leak_check = false;
 $html_output = false;
@@ -831,7 +834,6 @@ TEST $file
 		$line = fgets($fp);
 
 		// Match the beginning of a section.
-		// UTODO changed to use preg, because ereg was crapping out
 		if (preg_match('/^--([A-Z]+)--/',$line,$r)) {
 			$section = $r[1];
 			$section_text[$section] = '';
@@ -857,7 +859,7 @@ TEST $file
 			$borked = true;
 		}
 		if (@count($section_text['FILEEOF']) == 1) {
-			$section_text['FILE'] = preg_replace('/[\r\n]+$/', '', $section_text['FILEEOF']);
+			$section_text['FILE'] = preg_replace("/[\r\n]+$/", '', $section_text['FILEEOF']);
 			unset($section_text['FILEEOF']);
 		}
 		if ((@count($section_text['EXPECT']) + @count($section_text['EXPECTF']) + @count($section_text['EXPECTREGEX'])) != 1) {
@@ -898,13 +900,13 @@ TEST $file
 		$tmp = realpath(dirname($file));
 	}
 
-	$diff_filename     = $tmp . DIRECTORY_SEPARATOR . basename($file).'diff';
-	$log_filename      = $tmp . DIRECTORY_SEPARATOR . basename($file).'log';
-	$exp_filename      = $tmp . DIRECTORY_SEPARATOR . basename($file).'exp';
-	$output_filename   = $tmp . DIRECTORY_SEPARATOR . basename($file).'out';
-	$memcheck_filename = $tmp . DIRECTORY_SEPARATOR . basename($file).'mem';
-	$tmp_file          = $tmp . DIRECTORY_SEPARATOR . basename($file).'php';
-	$tmp_skipif        = $tmp . DIRECTORY_SEPARATOR . basename($file).'skip';
+	$diff_filename     = $tmp . DIRECTORY_SEPARATOR . basename($file,'phpt').'diff';
+	$log_filename      = $tmp . DIRECTORY_SEPARATOR . basename($file,'phpt').'log';
+	$exp_filename      = $tmp . DIRECTORY_SEPARATOR . basename($file,'phpt').'exp';
+	$output_filename   = $tmp . DIRECTORY_SEPARATOR . basename($file,'phpt').'out';
+	$memcheck_filename = $tmp . DIRECTORY_SEPARATOR . basename($file,'phpt').'mem';
+	$tmp_file          = $tmp . DIRECTORY_SEPARATOR . basename($file,'phpt').'php';
+	$tmp_skipif        = $tmp . DIRECTORY_SEPARATOR . basename($file,'phpt').'skip';
 	$tmp_post          = $tmp . DIRECTORY_SEPARATOR . uniqid('/phpt.');
 	$tmp_relative_file = str_replace(dirname(__FILE__).DIRECTORY_SEPARATOR, '', $tmp_file) . 't';
 
@@ -946,7 +948,7 @@ TEST $file
 				"unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;": "";
 			$output = system_with_timeout("$extra $php -q $skipif_params $tmp_skipif");
 			@unlink($tmp_skipif);
-			if (eregi("^skip", trim($output))) {
+			if (!strncasecmp('skip', trim($output), 4)) {
 				$reason = (eregi("^skip[[:space:]]*(.+)\$", trim($output))) ? eregi_replace("^skip[[:space:]]*(.+)\$", "\\1", trim($output)) : FALSE;
 				if ($reason) {
 					show_result("SKIP", $tested, $file, "reason: $reason");
@@ -959,13 +961,13 @@ TEST $file
 				@unlink($tmp_skipif);
 				return 'SKIPPED';
 			}
-			if (eregi("^info", trim($output))) {
+			if (!strncasecmp('info', trim($output), 4)) {
 				$reason = (ereg("^info[[:space:]]*(.+)\$", trim($output))) ? ereg_replace("^info[[:space:]]*(.+)\$", "\\1", trim($output)) : FALSE;
 				if ($reason) {
 					$info = " (info: $reason)";
 				}
 			}
-			if (eregi("^warn", trim($output))) {
+			if (!strncasecmp('warn', trim($output), 4)) {
 				$reason = (ereg("^warn[[:space:]]*(.+)\$", trim($output))) ? ereg_replace("^warn[[:space:]]*(.+)\$", "\\1", trim($output)) : FALSE;
 				if ($reason) {
 					$warn = true; /* only if there is a reason */
@@ -1044,6 +1046,9 @@ TEST $file
 	// Any special ini settings
 	// these may overwrite the test defaults...
 	if (array_key_exists('INI', $section_text)) {
+		if (strpos($section_text['INI'], '{PWD}') !== false) {
+			$section_text['INI'] = str_replace('{PWD}', dirname($file), $section_text['INI']);
+		}
 		settings2array(preg_split( "/[\n\r]+/", $section_text['INI']), $ini_settings);
 	}
 	settings2params($ini_settings);
@@ -1132,8 +1137,7 @@ COMMAND $cmd
 	}
 
 	// Does the output match what is expected?
-	$output = trim($out);
-	$output = preg_replace('/\r\n/',"\n",$output);
+	$output = str_replace("\r\n", "\n", trim($out));
 
 	/* when using CGI, strip the headers from the output */
 	if (isset($old_php) && ($pos = strpos($output, "\n\n")) !== FALSE) {
@@ -1215,36 +1219,28 @@ COMMAND $cmd
 	if (!$passed) {
 		// write .exp
 		if (strpos($log_format,'E') !== FALSE) {
-			$log = fopen($exp_filename,'wt') or error("Cannot create test log - $exp_filename");
-			fwrite($log,$wanted);
-			fclose($log);
+			file_put_contents($exp_filename, $wanted) or error("Cannot create test log - $exp_filename");
 		}
 	
 		// write .out
 		if (strpos($log_format,'O') !== FALSE) {
-			$log = fopen($output_filename,'wt') or error("Cannot create test log - $output_filename");
-			fwrite($log,$output);
-			fclose($log);
+			file_put_contents($output_filename, $output) or error("Cannot create test log - $output_filename");
 		}
 	
 		// write .diff
 		if (strpos($log_format,'D') !== FALSE) {
-			$log = fopen($diff_filename,'wt') or error("Cannot create test log - $diff_filename");
-				fwrite($log, generate_diff($wanted,$wanted_re,$output));
-			fclose($log);
+			file_put_contents($diff_filename, generate_diff($wanted,$wanted_re,$output)) or error("Cannot create test log - $diff_filename");	
 		}
 	
 		// write .log
 		if (strpos($log_format,'L') !== FALSE) {
-			$log = fopen($log_filename,'wt') or error("Cannot create test log - $log_filename");
-			fwrite($log,"
+			file_put_contents($log_filename, "
 ---- EXPECTED OUTPUT
 $wanted
 ---- ACTUAL OUTPUT
 $output
 ---- FAILED
-");
-			fclose($log);
+") or error("Cannot create test log - $log_filename");
 			error_report($file,$log_filename,$tested);
 		}
 	}
