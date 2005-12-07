@@ -654,12 +654,14 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			char *prepend_string = INI_STR("error_prepend_string");
 			char *append_string = INI_STR("error_append_string");
 			if (PG(html_errors)) {
-				char *buf, *buf2;
-				int len2, len = spprintf(&buf, 0, "%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
-				buf2 = php_escape_html_entities(buf, len, &len2, 0, ENT_COMPAT, NULL TSRMLS_CC);
-				php_printf("%s", buf2);
-				efree(buf);
-				efree(buf2);
+				if (type == E_ERROR) {
+					int len;
+					char *buf = php_escape_html_entities(buffer, buffer_len, &len, 0, ENT_COMPAT, NULL TSRMLS_CC);
+					php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buf, error_filename, error_lineno, STR_PRINT(append_string));
+					efree(buf);
+				} else {
+					php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
+				}
 			} else {
 				php_printf("%s\n%s: %s in %s on line %d\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
 			}
