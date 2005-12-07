@@ -556,6 +556,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	char *origin;
 	char *message;
 	char *stage;
+	int function_name_is_string = 1;
 
 	/* get error text into buffer and escape for html if necessary */
 	buffer_len = vspprintf(&buffer, 0, format, args);
@@ -595,6 +596,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 				stage = "Unknown";
 		}
 	} else {
+		function_name_is_string = 0;
 		function = get_active_function_name(TSRMLS_C);
 		if (!function || !USTR_LEN(function)) {
 			stage = "Unknown";
@@ -604,9 +606,13 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 
 	/* if we still have memory then format the origin */
 	if (function) {
-		spprintf(&origin, 0, "%v%s%v(%s)", class_name, space, function, params);	
+		if (function_name_is_string) {
+			origin_len = spprintf(&origin, 0, "%v%s%s(%s)", class_name, space, function, params);	
+		} else {
+			origin_len = spprintf(&origin, 0, "%v%s%v(%s)", class_name, space, function, params);	
+		}
 	} else {
-		spprintf(&origin, 0, "%s", stage);	
+		origin_len = spprintf(&origin, 0, "%s", stage);	
 	}
 
 	if (PG(html_errors)) {
@@ -614,7 +620,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 		char *replace = php_escape_html_entities(origin, origin_len, &len, 0, ENT_COMPAT, NULL TSRMLS_CC);
 		efree(origin);
 		origin = replace;
-  	}
+	}
 
 	/* origin and buffer available, so lets come up with the error message */
 	if (docref && docref[0] == '#') {
@@ -624,7 +630,11 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 
 	/* no docref given but function is known (the default) */
 	if (!docref && function) {
-		spprintf(&docref_buf, 0, "function.%v", function);
+		if (function_name_is_string) {
+			spprintf(&docref_buf, 0, "function.%s", function);
+		} else {
+			spprintf(&docref_buf, 0, "function.%v", function);
+		}
 		while((p = strchr(docref_buf, '_')) != NULL) {
 			*p = '-';
 		}
