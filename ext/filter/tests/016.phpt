@@ -1,7 +1,5 @@
 --TEST--
 filter_data() and FL_EMAIL
---GET--
-
 --FILE--
 <?php
 $values = Array(

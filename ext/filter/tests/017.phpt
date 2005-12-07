@@ -1,7 +1,5 @@
 --TEST--
 filter_data() and FL_REGEXP
---GET--
-
 --FILE--
 <?php
 
@@ -20,7 +18,6 @@ NULL
 string(4) "data"
 NULL
 NULL
-PHP Warning:  filter_data(): 'regexp' option missing in %s on line %d
 
 Warning: filter_data(): 'regexp' option missing in %s on line %d
 NULL

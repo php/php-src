@@ -1,7 +1,5 @@
 --TEST--
 filter_data()
---GET--
-
 --FILE--
 <?php
 
@@ -51,7 +49,6 @@ array(7) {
   array(0) {
   }
 }
-PHP Warning:  filter_data() expects parameter 2 to be long, array given in %s on line %d
 
 Warning: filter_data() expects parameter 2 to be long, array given in %s on line %d
 NULL

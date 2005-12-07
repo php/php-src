@@ -1,7 +1,5 @@
 --TEST--
 filter_data() and FS_NUMBER_*
---GET--
-
 --FILE--
 <?php
 

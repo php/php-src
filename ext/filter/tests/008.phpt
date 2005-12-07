@@ -1,7 +1,5 @@
 --TEST--
 input_filters_list()
---GET--
-
 --FILE--
 <?php
 

@@ -1,7 +1,5 @@
 --TEST--
 filter_data() and FS_SPECIAL_CHARS
---GET--
-
 --FILE--
 <?php
 

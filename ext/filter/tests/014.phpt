@@ -1,7 +1,5 @@
 --TEST--
 filter_data() and FL_BOOLEAN
---GET--
-
 --FILE--
 <?php
 
@@ -25,7 +23,6 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 bool(false)
-PHP Notice:  Object of class stdClass to string conversion in %s on line %d
 
 Notice: Object of class stdClass to string conversion in %s on line %d
 NULL

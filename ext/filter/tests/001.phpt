@@ -1,6 +1,5 @@
 --TEST--
 Simple GET test
---POST--
 --GET--
 a=1
 --FILE--

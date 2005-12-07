@@ -1,7 +1,5 @@
 --TEST--
 filter_data() and FS_UNSAFE_RAW
---GET--
-
 --FILE--
 <?php
 

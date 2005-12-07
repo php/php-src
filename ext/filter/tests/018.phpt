@@ -1,10 +1,7 @@
 --TEST--
 filter_data() and FL_IP
---GET--
-
 --FILE--
 <?php
-
 var_dump(filter_data("192.168.0.1", FL_IP));
 var_dump(filter_data("192.168.0.1.1", FL_IP));
 var_dump(filter_data("::1", FL_IP));
@@ -22,14 +19,10 @@ var_dump(filter_data("255.255.255.255", FL_IP));
 var_dump(filter_data("255.255.255.255", FL_IP, FILTER_FLAG_NO_RES_RANGE));
 var_dump(filter_data("", FL_IP));
 var_dump(filter_data(-1, FL_IP));
-
-
 var_dump(filter_data("::1", FL_IP, FILTER_FLAG_IPV4));
 var_dump(filter_data("127.0.0.1", FL_IP, FILTER_FLAG_IPV6));
-
 var_dump(filter_data("::1", FL_IP, FILTER_FLAG_IPV6));
 var_dump(filter_data("127.0.0.1", FL_IP, FILTER_FLAG_IPV4));
-
 echo "Done\n";
 ?>
 --EXPECT--	

@@ -1,7 +1,5 @@
 --TEST--
 filter_data() and flags
---GET--
-
 --FILE--
 <?php
 
