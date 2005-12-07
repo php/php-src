@@ -19,3 +19,9 @@ two => 2
 one => 1
 string(3) "one"
 int(1)
+--UEXPECT--	
+three => 3
+two => 2
+one => 1
+unicode(3) "one"
+int(1)
