@@ -846,6 +846,7 @@ TEST $file
 		'TEST'   => '',
 		'SKIPIF' => '',
 		'GET'    => '',
+		'POST'   => '',
 		'ARGS'   => '',
 	);
 
@@ -920,16 +921,19 @@ TEST $file
 		return 'BORKED';
 	}
 
+	$shortname = str_replace($cwd.'/', '', $file);
+	$tested = trim($section_text['TEST'])." [$shortname]";
+
  	/* For GET/POST tests, check if cgi sapi is available and if it is, use it. */
  	if ((!empty($section_text['GET']) || !empty($section_text['POST']))) {
  		if (file_exists("./sapi/cgi/php")) {
  			$old_php = $php;
  			$php = realpath("./sapi/cgi/php") . ' -C ';
- 		}
+ 		} else {
+			show_result("SKIP", $tested, $file, "reason: CGI not available");
+			return 'SKIPPED';
+		}
  	}
-
-	$shortname = str_replace($cwd.'/', '', $file);
-	$tested = trim($section_text['TEST'])." [$shortname]";
 
 	show_test($test_idx, $shortname);
 
