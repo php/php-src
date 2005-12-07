@@ -690,11 +690,13 @@ function mail_qa_team($data, $compression, $status = FALSE)
 //  Write the given text to a temporary file, and return the filename.
 //
 
-function save_text($filename,$text)
+function save_text($filename, $text)
 {
 	global $DETAILED;
 
-	@file_put_contents($filename, $text) or error("Cannot open file '" . $filename . "' (save_text)");
+	if (@file_put_contents($filename, $text) === FALSE) {
+		error("Cannot open file '" . $filename . "' (save_text)");
+	}
 	if (1 < $DETAILED) echo "
 FILE $filename {{{
 $text
@@ -706,7 +708,7 @@ $text
 //  Write an error in a format recognizable to Emacs or MSVC.
 //
 
-function error_report($testname,$logname,$tested) 
+function error_report($testname, $logname, $tested) 
 {
 	$testname = realpath($testname);
 	$logname  = realpath($logname);
@@ -1218,30 +1220,30 @@ COMMAND $cmd
 
 	if (!$passed) {
 		// write .exp
-		if (strpos($log_format,'E') !== FALSE) {
-			file_put_contents($exp_filename, $wanted) or error("Cannot create expected test output - $exp_filename");
+		if (strpos($log_format,'E') !== FALSE && file_put_contents($exp_filename, $wanted) === FALSE) {
+			error("Cannot create expected test output - $exp_filename");
 		}
 	
 		// write .out
-		if (strpos($log_format,'O') !== FALSE) {
-			file_put_contents($output_filename, $output) or error("Cannot create test output - $output_filename");
+		if (strpos($log_format,'O') !== FALSE && file_put_contents($output_filename, $output) === FALSE) {
+			error("Cannot create test output - $output_filename");
 		}
 	
 		// write .diff
-		if (strpos($log_format,'D') !== FALSE) {
-			file_put_contents($diff_filename, generate_diff($wanted,$wanted_re,$output)) or error("Cannot create test diff - $diff_filename");
+		if (strpos($log_format,'D') !== FALSE && file_put_contents($diff_filename, generate_diff($wanted,$wanted_re,$output)) === FALSE) {
+			error("Cannot create test diff - $diff_filename");
 		}
 	
 		// write .log
-		if (strpos($log_format,'L') !== FALSE) {
-			file_put_contents($log_filename, "
+		if (strpos($log_format,'L') !== FALSE && file_put_contents($log_filename, "
 ---- EXPECTED OUTPUT
 $wanted
 ---- ACTUAL OUTPUT
 $output
 ---- FAILED
-") or error("Cannot create test log - $log_filename");
-			error_report($file,$log_filename,$tested);
+") === FALSE) {
+			error("Cannot create test log - $log_filename");
+			error_report($file, $log_filename, $tested);
 		}
 	}
 
