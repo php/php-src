@@ -1219,17 +1219,17 @@ COMMAND $cmd
 	if (!$passed) {
 		// write .exp
 		if (strpos($log_format,'E') !== FALSE) {
-			file_put_contents($exp_filename, $wanted) or error("Cannot create test log - $exp_filename");
+			file_put_contents($exp_filename, $wanted) or error("Cannot create expected test output - $exp_filename");
 		}
 	
 		// write .out
 		if (strpos($log_format,'O') !== FALSE) {
-			file_put_contents($output_filename, $output) or error("Cannot create test log - $output_filename");
+			file_put_contents($output_filename, $output) or error("Cannot create test output - $output_filename");
 		}
 	
 		// write .diff
 		if (strpos($log_format,'D') !== FALSE) {
-			file_put_contents($diff_filename, generate_diff($wanted,$wanted_re,$output)) or error("Cannot create test log - $diff_filename");	
+			file_put_contents($diff_filename, generate_diff($wanted,$wanted_re,$output)) or error("Cannot create test diff - $diff_filename");
 		}
 	
 		// write .log
