@@ -2,6 +2,7 @@
 Formatted print functions
 --INI--
 unicode.script_encoding=ISO-8859-1
+unicode.output_encoding=ISO-8859-1
 --FILE--
 <?php 
 error_reporting(0);
