@@ -68,7 +68,7 @@ static void destroy_phar_manifest(void *pDest)
 	efree(data->filename);
 }
 
-static phar_internal_file_data *phar_get_filedata(char *alias, char *path)
+static phar_internal_file_data *phar_get_filedata(char *alias, char *path TSRMLS_DC)
 {
 	phar_file_data *data;
 	phar_internal_file_data *ret;
@@ -125,7 +125,7 @@ PHP_METHOD(PHP_Archive, mapPhar)
 	}
 
 	MAKE_STD_ZVAL(halt_constant);
-	zend_get_constant("__COMPILER_HALT_OFFSET__", 24, halt_constant);
+	zend_get_constant("__COMPILER_HALT_OFFSET__", 24, halt_constant TSRMLS_CC);
 	halt_offset = Z_LVAL(*halt_constant);
 	zval_dtor(halt_constant);
 	FREE_ZVAL(halt_constant);
@@ -155,8 +155,8 @@ MAPPHAR_ALLOC_FAILURE:
 		return;
 	}
 	if (*buffer == ' ' && *(buffer + 1) == '?' && *(buffer + 2) == '>') {
-		halt_offset += 3;
 		int nextchar;
+		halt_offset += 3;
 		if (EOF == (nextchar = php_stream_getc(fp))) goto MAPPHAR_FAILURE;
 		if ((char) nextchar == '\r') {
 			if (EOF == (nextchar = php_stream_getc(fp))) goto MAPPHAR_FAILURE;
@@ -343,9 +343,9 @@ php_stream_wrapper php_stream_phar_wrapper =  {
  */
 PHP_MINIT_FUNCTION(phar)
 {
-	ZEND_INIT_MODULE_GLOBALS(phar, php_phar_init_globals_module, NULL);
 	zend_class_entry php_archive_entry;
 	int machine_endian_check = 1;
+	ZEND_INIT_MODULE_GLOBALS(phar, php_phar_init_globals_module, NULL);
 
 	machine_little_endian = ((char *)&machine_endian_check)[0];
 
@@ -480,7 +480,7 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 	}
 
 	internal_file = resource->path + 1; /* strip leading "/" */
-	if (NULL == (idata = phar_get_filedata(resource->host, internal_file))) {
+	if (NULL == (idata = phar_get_filedata(resource->host, internal_file TSRMLS_CC))) {
 		return NULL;
 	}
 
@@ -726,11 +726,12 @@ static void phar_dostat(phar_manifest_entry *data, php_stream_statbuf *ssb, zend
 
 PHP_PHAR_API int phar_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC)
 {
+	phar_internal_file_data *data;
 	/* If ssb is NULL then someone is misbehaving */
 	if (!ssb) return -1;
 
-	phar_internal_file_data *data = (phar_internal_file_data *)stream->abstract;
-	phar_dostat(data->internal_file, ssb, 0);
+	data = (phar_internal_file_data *)stream->abstract;
+	phar_dostat(data->internal_file, ssb, 0 TSRMLS_CC);
 	return 0;
 }
 
@@ -768,8 +769,10 @@ static void phar_dostat(phar_manifest_entry *data, php_stream_statbuf *ssb, zend
 
 	ssb->sb.st_nlink = 1;
 	ssb->sb.st_rdev = -1;
+#ifndef PHP_WIN32
 	ssb->sb.st_blksize = -1;
 	ssb->sb.st_blocks = -1;
+#endif
 }
 
 PHP_PHAR_API int phar_stream_stat(php_stream_wrapper *wrapper, char *url, int flags,
@@ -799,12 +802,12 @@ errexit:
 	if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_data), resource->host, strlen(resource->host), (void **) &data)) {
 		if (*internal_file == '\0') {
 			// root directory requested
-			phar_dostat(NULL, ssb, 1);
+			phar_dostat(NULL, ssb, 1 TSRMLS_CC);
 			php_url_free(resource);
 			return 0;
 		}
 		if (SUCCESS == zend_hash_find(data->manifest, internal_file, strlen(internal_file), (void **) &file_data)) {
-			phar_dostat(file_data, ssb, 0);
+			phar_dostat(file_data, ssb, 0 TSRMLS_CC);
 		} else {
 			// search for directory
 			zend_hash_internal_pointer_reset(data->manifest);
@@ -814,7 +817,7 @@ errexit:
 							data->manifest, &key, &keylen, &unused, 0, NULL)) {
 					if (0 == memcmp(key, internal_file, keylen)) {
 						// directory found
-						phar_dostat(NULL, ssb, 1);
+						phar_dostat(NULL, ssb, 1 TSRMLS_CC);
 						break;
 					}
 				}
@@ -834,7 +837,7 @@ static int phar_add_empty(HashTable *ht, char *arKey, uint nKeyLength)
 	return zend_hash_update(ht, arKey, nKeyLength, &dummy, sizeof(void *), NULL);
 }
 
-static php_stream *phar_make_dirstream(char *dir, HashTable *manifest)
+static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
 {
 	HashTable *data;
 	int dirlen = strlen(dir);
@@ -915,7 +918,7 @@ PHP_PHAR_API php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filenam
 	if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_data), resource->host, strlen(resource->host), (void **) &data)) {
 		if (*internal_file == '\0') {
 			// root directory requested
-			ret = phar_make_dirstream("/", data->manifest);
+			ret = phar_make_dirstream("/", data->manifest TSRMLS_CC);
 			php_url_free(resource);
 			return ret;
 		}
@@ -933,7 +936,7 @@ PHAR_DIR_ERROR:
 					if (0 == memcmp(key, internal_file, keylen)) {
 						// directory found
 						php_url_free(resource);
-						return phar_make_dirstream(internal_file, data->manifest);
+						return phar_make_dirstream(internal_file, data->manifest TSRMLS_CC);
 					}
 				}
 				zend_hash_move_forward(data->manifest);
