@@ -937,15 +937,15 @@ TEST $file
 		$tmp = realpath(dirname($file));
 	}
 
-	$pu = $unicode_semantics ? '.u' : '';
+	$pu = $unicode_semantics ? 'u.' : '';
 
-	$diff_filename     = $tmp . DIRECTORY_SEPARATOR . preg_replace('/\.phpt$/', $pu.'.diff', basename($file));
-	$log_filename      = $tmp . DIRECTORY_SEPARATOR . preg_replace('/\.phpt$/', $pu.'.log',  basename($file));
-	$exp_filename      = $tmp . DIRECTORY_SEPARATOR . preg_replace('/\.phpt$/', $pu.'.exp',  basename($file));
-	$output_filename   = $tmp . DIRECTORY_SEPARATOR . preg_replace('/\.phpt$/', $pu.'.out',  basename($file));
-	$memcheck_filename = $tmp . DIRECTORY_SEPARATOR . preg_replace('/\.phpt$/', $pu.'.mem',  basename($file));
-	$tmp_file          = $tmp . DIRECTORY_SEPARATOR . preg_replace('/\.phpt$/', $pu.'.php',  basename($file));
-	$tmp_skipif        = $tmp . DIRECTORY_SEPARATOR . preg_replace('/\.phpt$/', $pu.'.skip', basename($file));
+	$diff_filename     = $tmp . DIRECTORY_SEPARATOR . basename($file).$pu.'diff';
+	$log_filename      = $tmp . DIRECTORY_SEPARATOR . basename($file).$pu.'log';
+	$exp_filename      = $tmp . DIRECTORY_SEPARATOR . basename($file).$pu.'exp';
+	$output_filename   = $tmp . DIRECTORY_SEPARATOR . basename($file).$pu.'out';
+	$memcheck_filename = $tmp . DIRECTORY_SEPARATOR . basename($file).$pu.'mem';
+	$tmp_file          = $tmp . DIRECTORY_SEPARATOR . basename($file).$pu.'php';
+	$tmp_skipif        = $tmp . DIRECTORY_SEPARATOR . basename($file).$pu.'skip';
 	$tmp_post          = $tmp . DIRECTORY_SEPARATOR . uniqid('/phpt.');
 	$tmp_relative_file = str_replace(dirname(__FILE__).DIRECTORY_SEPARATOR, '', $tmp_file) . 't';
 
@@ -1550,6 +1550,18 @@ FAILED TEST SUMMARY
 ---------------------------------------------------------------------
 ";
 		foreach ($PHP_FAILED_TESTS['FAILED'] as $failed_test_data) {
+			$failed_test_summary .= $failed_test_data['test_name'] . $failed_test_data['info'] . "\n";
+		}
+		$failed_test_summary .=  "=====================================================================\n";
+	}
+	
+	if (count($PHP_FAILED_TESTS['LEAKED'])) {
+		$failed_test_summary .= "
+=====================================================================
+LEAKED TEST SUMMARY
+---------------------------------------------------------------------
+";
+		foreach ($PHP_FAILED_TESTS['LEAKED'] as $failed_test_data) {
 			$failed_test_summary .= $failed_test_data['test_name'] . $failed_test_data['info'] . "\n";
 		}
 		$failed_test_summary .=  "=====================================================================\n";
