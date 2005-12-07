@@ -95,6 +95,14 @@ function_entry phar_functions[] = {
 };
 /* }}} */
 
+PHP_METHOD(PHP_Archive, canCompress)
+{
+#ifdef HAVE_PHAR_ZLIB
+	RETURN_TRUE;
+#else
+	RETURN_FALSE;
+#endif
+}
 
 /* {{{ php_archive_methods
  */
@@ -116,11 +124,13 @@ PHP_METHOD(PHP_Archive, mapPhar)
 	}
 #ifndef HAVE_PHAR_ZLIB
 	if (compressed) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error: zlib extension is required for compressed .phar files");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "zlib extension is required for compressed .phar files");
+		return;
 	}
 #endif
 	fname = zend_get_executed_filename(TSRMLS_C);
 	if (!strcmp(fname, "[no active file]")) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "cannot initialize a phar outside of PHP execution");
 		return;
 	}
 
@@ -141,25 +151,34 @@ PHP_METHOD(PHP_Archive, mapPhar)
 	fp = php_stream_open_wrapper(fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
 
 	if (!fp) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "unable to open phar for reading \"%s\"", fname);
 		return;
 	}
 
 	// check for ?>\n and increment accordingly
 	php_stream_seek(fp, halt_offset, SEEK_SET);
-	if (FALSE == (buffer = (char *) emalloc(4))) goto MAPPHAR_ALLOC_FAILURE;
-	if (3 != php_stream_read(fp, buffer, 3)) {
-MAPPHAR_FAILURE:
-		efree(buffer);
-MAPPHAR_ALLOC_FAILURE:
-		php_stream_close(fp);
+#define MAPPHAR_ALLOC_FAIL(msg) php_stream_close(fp);\
+		php_stream_close(fp);\
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, msg, fname);\
 		return;
+#define MAPPHAR_FAIL(msg) efree(buffer);\
+		MAPPHAR_ALLOC_FAIL(msg)
+	if (FALSE == (buffer = (char *) emalloc(4))) {
+		MAPPHAR_ALLOC_FAIL("memory allocation failed in phar \"%s\"")
+	}
+	if (3 != php_stream_read(fp, buffer, 3)) {
+		MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest)")
 	}
 	if (*buffer == ' ' && *(buffer + 1) == '?' && *(buffer + 2) == '>') {
 		int nextchar;
 		halt_offset += 3;
-		if (EOF == (nextchar = php_stream_getc(fp))) goto MAPPHAR_FAILURE;
+		if (EOF == (nextchar = php_stream_getc(fp))) {
+			MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest)")
+		}
 		if ((char) nextchar == '\r') {
-			if (EOF == (nextchar = php_stream_getc(fp))) goto MAPPHAR_FAILURE;
+			if (EOF == (nextchar = php_stream_getc(fp))) {
+				MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest)")
+			}
 			halt_offset++;
 		}
 		if ((char) nextchar == '\n') {
@@ -173,24 +192,31 @@ MAPPHAR_ALLOC_FAILURE:
 
 	i = 0;
 #define PHAR_GET_VAL(var)			\
-	if (buffer > endbuffer) goto MAPPHAR_FAILURE;\
+	if (buffer > endbuffer) {\
+		MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest)")\
+	}\
 	unpack_var = (char *) &var;		\
 	var = 0;				\
 	for (i = 0; i < 4; i++) {		\
 		unpack_var[little_endian_long_map[i]] = *buffer++;\
 	}
 
-	if (4 != php_stream_read(fp, buffer, 4)) goto MAPPHAR_FAILURE;
+	if (4 != php_stream_read(fp, buffer, 4)) {
+		MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest)")
+	}
 	endbuffer = buffer;
 	PHAR_GET_VAL(manifest_len)
 	buffer -= 4;
-	if (FALSE == (buffer = (char *) erealloc(buffer, manifest_len)))
-		goto MAPPHAR_ALLOC_FAILURE;
+	if (FALSE == (buffer = (char *) erealloc(buffer, manifest_len))) {
+		MAPPHAR_ALLOC_FAIL("memory allocation failed in phar \"%s\"")
+	}
 	savebuf = buffer;
 	// set the test pointer
 	endbuffer = buffer + manifest_len;
 	// retrieve manifest
-	if (manifest_len != php_stream_read(fp, buffer, manifest_len)) goto MAPPHAR_FAILURE;
+	if (manifest_len != php_stream_read(fp, buffer, manifest_len)) {
+		MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest)")
+	}
 	// extract the number of entries
 	PHAR_GET_VAL(manifest_count)
 	// set up our manifest
@@ -198,7 +224,9 @@ MAPPHAR_ALLOC_FAILURE:
 	zend_hash_init(manifest, sizeof(phar_manifest_entry),
 		zend_get_hash_value, destroy_phar_manifest, 0);
 	for (manifest_index = 0; manifest_index < manifest_count; manifest_index++) {
-		if (buffer > endbuffer) goto MAPPHAR_FAILURE;
+		if (buffer > endbuffer) {
+			MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest)")
+		}
 		PHAR_GET_VAL(entry.filename_len)
 		entry.filename = (char *) emalloc(entry.filename_len + 1);
 		memcpy(entry.filename, buffer, entry.filename_len);
@@ -233,6 +261,7 @@ PHP_METHOD(PHP_Archive, apiVersion)
 zend_function_entry php_archive_methods[] = {
 	PHP_ME(PHP_Archive, mapPhar, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(PHP_Archive, apiVersion, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	PHP_ME(PHP_Archive, canCompress, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -469,14 +498,22 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 	z_stream zstream;
 #endif
 
-	resource = php_url_parse((char *) path);
+	resource = php_url_parse(path);
 	// we must have at the very least phar://alias.phar/internalfile.php
 	if (!resource || !resource->scheme || !resource->host || !resource->path) {
-		goto connect_errexit;
+		if (resource) {
+			php_url_free(resource);
+		}
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: invalid url \"%s\"", path);
+		return NULL;
 	}
 
 	if (strcasecmp("phar", resource->scheme)) {
-		goto connect_errexit;
+		if (resource) {
+			php_url_free(resource);
+		}
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: not a phar stream url \"%s\"", path);
+		return NULL;
 	}
 
 	internal_file = resource->path + 1; /* strip leading "/" */
@@ -499,6 +536,7 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 	if (!fp) {
 		efree(idata->file);
 		efree(idata);
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: cannot open phar \"%s\"", idata->data->file);
 		return NULL;
 	}
 
@@ -512,6 +550,7 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 			php_stream_close(fp);
 			efree(buffer);
 			efree(idata);
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: internal corruption of phar \"%s\" (filesize mismatch on file \"%s\")", idata->data->file, internal_file);
 			return NULL;
 		}
 		php_stream_close(fp);
@@ -542,6 +581,7 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 				efree(savebuf);
 				efree(idata->file);
 				efree(idata);
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: internal corruption of phar \"%s\" (corrupted zlib compression of file \"%s\")", idata->data->file, internal_file);
 				return NULL;
 			}
 
@@ -569,24 +609,31 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 		} while (status == Z_BUF_ERROR);
 
 		if (status != Z_OK) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", zError(status));
-PHAR_ZLIB_ERROR:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: %s", zError(status));
 			efree(savebuf);
 			efree(idata->file);
 			efree(idata);
 			return NULL;
 		}
+#define PHAR_ZLIB_ERROR efree(savebuf);\
+			efree(idata->file);\
+			efree(idata);\
+			return NULL;
+
 		efree(savebuf);
 		// check length
 		if (actual_length != idata->internal_file->uncompressed_filesize) {
-			goto PHAR_ZLIB_ERROR;
+			PHAR_ZLIB_ERROR
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: internal corruption of phar \"%s\" (filesize mismatch on file \"%s\")", idata->data->file, internal_file);
 		}
 		// check crc32
 		if (-1 == phar_postprocess_file(idata->file, idata->internal_file->uncompressed_filesize, crc32, 0)) {
-			goto PHAR_ZLIB_ERROR;
+			PHAR_ZLIB_ERROR
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: internal corruption of phar \"%s\" (crc32 mismatch on file \"%s\")", idata->data->file, internal_file);
 		}
 #else
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "zlib extension must be enabled for compressed .phar files");
+		return NULL;
 #endif
 	} else {
 		idata->file = (char *) emalloc(idata->internal_file->compressed_filesize);
@@ -595,6 +642,7 @@ PHAR_ZLIB_ERROR:
 			php_stream_close(fp);
 			efree(idata->file);
 			efree(idata);
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: internal corruption of phar \"%s\" (filesize mismatch on file \"%s\")", idata->data->file, internal_file);
 			return NULL;
 		}
 		php_stream_close(fp);
@@ -602,6 +650,7 @@ PHAR_ZLIB_ERROR:
 		if (-1 == phar_postprocess_file(idata->file, idata->internal_file->uncompressed_filesize, 0, 1)) {
 			efree(idata->file);
 			efree(idata);
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: internal corruption of phar \"%s\" (crc32 mismatch on file \"%s\")", idata->data->file, internal_file);
 			return NULL;
 		}
 		memmove(idata->file, idata->file + 8, idata->internal_file->uncompressed_filesize);
@@ -610,7 +659,6 @@ PHAR_ZLIB_ERROR:
 	stream = php_stream_alloc(&phar_ops, idata, NULL, mode);
 	return stream;
 
- connect_errexit:
 	if (resource) {
 		php_url_free(resource);
 	}
@@ -789,13 +837,16 @@ PHP_PHAR_API int phar_stream_stat(php_stream_wrapper *wrapper, char *url, int fl
 	resource = php_url_parse(url);
 	// we must have at the very least phar://alias.phar/internalfile.php
 	if (!resource || !resource->scheme || !resource->host || !resource->path) {
-errexit:
+		php_url_free(resource);
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: invalid url \"%s\"", url);
 		php_url_free(resource);
 		return -1;
 	}
 
 	if (strcasecmp("phar", resource->scheme)) {
-		goto errexit;
+		php_url_free(resource);
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: not a phar url \"%s\"", url);
+		return -1;
 	}
 
 	internal_file = resource->path + 1; /* strip leading "/" */
@@ -907,11 +958,15 @@ PHP_PHAR_API php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filenam
 	resource = php_url_parse(filename);
 	// we must have at the very least phar://alias.phar/internalfile.php
 	if (!resource || !resource->scheme || !resource->host || !resource->path) {
-		goto PHAR_DIR_ERROR;
+		php_url_free(resource);
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: invalid url \"%s\"", filename);
+		return NULL;
 	}
 
 	if (strcasecmp("phar", resource->scheme)) {
-		goto PHAR_DIR_ERROR;
+		php_url_free(resource);
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: not a phar url \"%s\"", filename);
+		return NULL;
 	}
 
 	internal_file = resource->path + 1; /* strip leading "/" */
@@ -923,7 +978,6 @@ PHP_PHAR_API php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filenam
 			return ret;
 		}
 		if (SUCCESS == zend_hash_find(data->manifest, internal_file, strlen(internal_file), (void **) &file_data)) {
-PHAR_DIR_ERROR:
 			php_url_free(resource);
 			return NULL;
 		} else {
