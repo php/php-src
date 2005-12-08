@@ -11,6 +11,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #35062 (socket_read() produces warnings on non blocking sockets).
   (Nuno, Ilia)
 - Fixed bug #34359 (Possible crash inside fopen http wrapper). (Ilia,Nuno,Sara)
+- Fixed bug #33523 (Memory leak in xmlrpc_encode_request()). (Ilia)
 - Fixed bug #33153 (crash in mssql_next result). (Frank)
 - Fixed bug #32009 (crash when mssql_bind() is called more than once). (Frank)
 - Fixed bug #33963 (mssql_bind() fails on input parameters). (Frank)

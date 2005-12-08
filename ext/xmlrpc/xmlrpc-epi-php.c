@@ -684,8 +684,13 @@ PHP_FUNCTION(xmlrpc_encode_request)
             free(outBuf);
          }
          XMLRPC_RequestFree(xRequest, 1);
+
+	
       }
    }
+	if (out.xmlrpc_out.xml_elem_opts.encoding != ENCODING_DEFAULT) {
+		efree(out.xmlrpc_out.xml_elem_opts.encoding);
+	}
 }
 /* }}} */
 
