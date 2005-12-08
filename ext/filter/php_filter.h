@@ -23,6 +23,7 @@
 #define PHP_FILTER_H
 
 #include "SAPI.h"
+#include "zend_API.h"
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"

@@ -24,7 +24,6 @@
 #endif
 
 #include "php_filter.h"
-#include "Zend/zend_API.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(filter)
 
