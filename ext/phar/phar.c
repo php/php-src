@@ -159,15 +159,18 @@ PHP_METHOD(PHP_Archive, mapPhar)
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "unable to open phar for reading \"%s\"", fname);
 		return;
 	}
-
-	// check for ?>\n and increment accordingly
-	php_stream_seek(fp, halt_offset, SEEK_SET);
 #define MAPPHAR_ALLOC_FAIL(msg) php_stream_close(fp);\
 		php_stream_close(fp);\
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, msg, fname);\
 		return;
 #define MAPPHAR_FAIL(msg) efree(buffer);\
 		MAPPHAR_ALLOC_FAIL(msg)
+
+	// check for ?>\n and increment accordingly
+	if (0 == php_stream_seek(fp, halt_offset, SEEK_SET)) {
+		MAPPHAR_FAIL("cannot seek to __HALT_COMPILER() location in phar \"%s\"")
+	}
+
 	if (FALSE == (buffer = (char *) emalloc(4))) {
 		MAPPHAR_ALLOC_FAIL("memory allocation failed in phar \"%s\"")
 	}
