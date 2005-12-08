@@ -1,3 +1,8 @@
+2005-12-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/bug35239.phpt:
+      Fixed test
+
 2005-12-05  Antony Dovgal  <antony@zend.com>
 
     * zend_vm_gen.php:
