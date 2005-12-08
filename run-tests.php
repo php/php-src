@@ -228,13 +228,19 @@ $pass_option_n = false;
 $pass_options = '';
 
 $compression = 0;		
-$output_file = $CUR_DIR . '/php_test_results_' . date('Ymd_Hi') . ( $compression ? '.txt.gz' : '.txt' );
+$output_file = $CUR_DIR . '/php_test_results_' . date('Ymd_Hi') . '.txt';
+if ($compression) {
+	$output_file = 'compress.zlib://' . $output_file . '.gz';
+}
 $just_save_results = false;
 $leak_check = false;
 $unicode_and_native = false;
 $unicode_testing = false;
 $html_output = false;
 $html_file = null;
+$temp_source = null;
+$temp_target = null;
+$temp_urlbase = null;
 
 if (getenv('TEST_PHP_ARGS'))
 {
@@ -304,16 +310,17 @@ if (isset($argc) && $argc > 1) {
 					$output_file = $argv[++$i];
 					$just_save_results = true;
 					break;
-				case 'U':
-					$unicode_and_native = true;
-					// break;
-				case 'u':
-					$unicode_testing = true;
-					$ini_overwrites[] = 'unicode_semantics=1';
-					$ini_overwrites[] = 'unicode.runtime_encoding=iso-8859-1';
-					$ini_overwrites[] = 'unicode.script_encoding=utf-8';
-					$ini_overwrites[] = 'unicode.output_encoding=utf-8';
-					$ini_overwrites[] = 'unicode.from_error_mode=U_INVALID_SUBSTITUTE';
+				case '--temp-source':
+					$temp_source = $argv[++$i];
+					break;
+				case '--temp-target':
+					$temp_target = $argv[++$i];
+					if ($temp_urlbase) {
+						$temp_urlbase = $temp_target;
+					}
+					break;
+				case '--temp-urlbase':
+					$temp_urlbase = $argv[++$i];
 					break;
 				case 'v':
 				case '--verbose':
@@ -363,7 +370,7 @@ Options:
 
     -u          Test with unicode_semantics set on.
 
-	-U          Test in unicode and non unicde mode.
+    -U          Test in unicode and non unicde mode.
 
     -m          Test for memory leaks with Valgrind.
     
@@ -377,7 +384,15 @@ Options:
 	--help
     -h          This Help.
 
-	--html      Generate HTML output.
+    --html <file> Generate HTML output.
+	
+    --temp-source <sdir>  --temp-target <tdir> [--temp-urlbase <url>]
+                Write temporary files to <tdir> by replacing <sdir> from the 
+                filenames to generate with <tdir>. If --html is being used and 
+                <url> given then the generated links are relative and prefixed
+                with the given url. In general you want to make <sdir> the path
+                to your source files and <tdir> some pach in your web page 
+                hierarchy with <url> pointing to <tdir>.
 
 HELP;
 					exit(1);
@@ -708,11 +723,16 @@ function mail_qa_team($data, $compression, $status = FALSE)
 //  Write the given text to a temporary file, and return the filename.
 //
 
-function save_text($filename, $text)
+function save_text($filename, $text, $filename_copy = null)
 {
 	global $DETAILED;
 
-	if (@file_put_contents($filename, $text) === FALSE) {
+	if ($filename_copy && $filename_copy != $filename) {
+		if (@file_put_contents($filename_copy, $text) === false) {
+			error("Cannot open file '" . $filename_copy . "' (save_text)");
+		}
+	}
+	if (@file_put_contents($filename, $text) === false) {
 		error("Cannot open file '" . $filename . "' (save_text)");
 	}
 	if (1 < $DETAILED) echo "
@@ -829,9 +849,9 @@ function run_all_tests($test_files, $redir_tested = NULL)
 //
 function run_test($php, $file, $unicode_semantics)
 {
-	global $log_format, $info_params, $ini_overwrites, $cwd, $PHP_FAILED_TESTS, $pass_options, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx, $unicode_and_native, $leak_check;
+	global $log_format, $info_params, $ini_overwrites, $cwd, $PHP_FAILED_TESTS, $pass_options, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx, $leak_check, $temp_source, $temp_target;
 
-	$ini_overwrites[] = 'unicode_semantics=' . $unicode_semantics;
+	$temp_filenames = null;
 	$org_file = $file;
 	
 	if (is_array($file)) $file = $file[0];
@@ -869,7 +889,6 @@ TEST $file
 		$line = fgets($fp);
 
 		// Match the beginning of a section.
-		// UTODO changed to use preg, because ereg was crapping out
 		if (preg_match('/^--([A-Z]+)--/',$line,$r)) {
 			$section = $r[1];
 			$section_text[$section] = '';
@@ -885,44 +904,45 @@ TEST $file
 	if (@count($section_text['REDIRECTTEST']) == 1) {
 		if ($IN_REDIRECT) {
 			$borked = true;
-			$bork_info = "Can't redirect a test from within a redirected test [$file]";
+			$bork_info = "Can't redirect a test from within a redirected test";
 		} else {
 			$borked = false;
 		}
 	} else {
 		if (@count($section_text['FILE']) + @count($section_text['FILEEOF']) != 1) {
-			$bork_info = "missing section --FILE-- [$file]";
+			$bork_info = "missing section --FILE--";
 			$borked = true;
 		}
 		if (@count($section_text['FILEEOF']) == 1) {
-			$section_text['FILE'] = preg_replace('/[\r\n]+$/', '', $section_text['FILEEOF']);
+			$section_text['FILE'] = preg_replace("/[\r\n]+$/", '', $section_text['FILEEOF']);
 			unset($section_text['FILEEOF']);
 		}
 		if ((@count($section_text['EXPECT']) + @count($section_text['EXPECTF']) + @count($section_text['EXPECTREGEX'])) != 1) {
-			$bork_info = "missing section --EXPECT--, --EXPECTF-- or --EXPECTREGEX-- [$file]";
+			$bork_info = "missing section --EXPECT--, --EXPECTF-- or --EXPECTREGEX--";
 			$borked = true;
 		}
 		if ((@count($section_text['UEXPECT']) + @count($section_text['UEXPECTF']) + @count($section_text['UEXPECTREGEX'])) > 1) {
-			$bork_info = "missing section --UEXPECT--, --UEXPECTF-- or --UEXPECTREGEX-- [$file]";
+			$bork_info = "missing section --UEXPECT--, --UEXPECTF-- or --UEXPECTREGEX--";
 			$borked = true;
 		}
 	}
 	fclose($fp);
 
 	if ($borked) {
-		show_result("BORK", $bork_info, $file);
+		show_result("BORK", $bork_info);
 		$PHP_FAILED_TESTS['BORKED'][] = array (
 								'name' => $file,
 								'test_name' => '',
 								'output' => '',
 								'diff'   => '',
-								'info'   => $bork_info,
+								'info'   => "$bork_info [$file]",
 		);
 		return 'BORKED';
 	}
 
 	$shortname = str_replace($cwd.'/', '', $file);
-	$tested = trim($section_text['TEST'])." [$shortname]";
+	$tested = trim($section_text['TEST']);
+	$tested_file = $shortname;
 
  	/* For GET/POST tests, check if cgi sapi is available and if it is, use it. */
  	if ((!empty($section_text['GET']) || !empty($section_text['POST']))) {
@@ -930,33 +950,58 @@ TEST $file
  			$old_php = $php;
  			$php = realpath("./sapi/cgi/php") . ' -C ';
  		} else {
-			show_result("SKIP", $tested, $file, "reason: CGI not available");
-			return 'SKIPPED';
-		}
+			show_result("SKIP", $tested, $tested_file, "reason: CGI not available");
+ 			return 'SKIPPED';
+ 		}
  	}
 
 	show_test($test_idx, $shortname);
 
 	if (is_array($IN_REDIRECT)) {
-		$tmp = $IN_REDIRECT['dir'];
+		$temp_dir = $test_dir = $IN_REDIRECT['dir'];
 	} else {
-		$tmp = realpath(dirname($file));
+		$temp_dir = $test_dir = realpath(dirname($file));
+	}
+	if ($temp_source && $temp_target) {
+		$temp_dir = str_replace($temp_source, $temp_target, $temp_dir);
 	}
 
 	$pu = $unicode_semantics ? 'u.' : '';
 
-	$diff_filename     = $tmp . DIRECTORY_SEPARATOR . basename($file,"phpt").$pu.'diff';
-	$log_filename      = $tmp . DIRECTORY_SEPARATOR . basename($file,"phpt").$pu.'log';
-	$exp_filename      = $tmp . DIRECTORY_SEPARATOR . basename($file,"phpt").$pu.'exp';
-	$output_filename   = $tmp . DIRECTORY_SEPARATOR . basename($file,"phpt").$pu.'out';
-	$memcheck_filename = $tmp . DIRECTORY_SEPARATOR . basename($file,"phpt").$pu.'mem';
-	$tmp_file          = $tmp . DIRECTORY_SEPARATOR . basename($file,"phpt").'php';
-	$tmp_skipif        = $tmp . DIRECTORY_SEPARATOR . basename($file,"phpt").$pu.'skip';
-	$tmp_post          = $tmp . DIRECTORY_SEPARATOR . uniqid('/phpt.');
-	$tmp_relative_file = str_replace(dirname(__FILE__).DIRECTORY_SEPARATOR, '', $tmp_file) . 't';
+	$diff_filename     = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').$pu.'diff';
+	$log_filename      = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').$pu.'log';
+	$exp_filename      = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').$pu.'exp';
+	$output_filename   = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').$pu.'out';
+	$memcheck_filename = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').$pu.'mem';
+	$temp_file         = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').$pu.'php';
+	$test_file         = $test_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').$pu.'php';
+	$temp_skipif       = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').$pu.'skip';
+	$test_skipif       = $test_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').$pu.'skip';
+	$tmp_post          = $temp_dir . DIRECTORY_SEPARATOR . uniqid('/phpt.');
+	$tmp_relative_file = str_replace(dirname(__FILE__).DIRECTORY_SEPARATOR, '', $test_file) . 't';
+
+	if ($temp_source && $temp_target) {
+		$temp_skipif  .= '.phps';
+		$temp_file    .= '.phps';
+		$copy_file     = $temp_dir . DIRECTORY_SEPARATOR . basename(is_array($file) ? $file[1] : $file).'.phps';
+		if (!is_dir(dirname($copy_file))) {
+			@mkdir(dirname($copy_file), 0777, true) or error("Cannot create output directory - " . dirname($copy_file));
+		}
+		save_text($copy_file, $section_text['FILE']);
+		$temp_filenames = array(
+			'file' => $copy_file,
+			'diff' => $diff_filename, 
+			'log'  => $log_filename,
+			'exp'  => $exp_filename,
+			'out'  => $output_filename,
+			'mem'  => $memcheck_filename,
+			'php'  => $temp_file,
+			'skip' => $temp_skipif);
+	}
 
 	if (is_array($IN_REDIRECT)) {
-		$tested = $IN_REDIRECT['prefix'] . ' ' . trim($section_text['TEST']) . " [$tmp_relative_file]";
+		$tested = $IN_REDIRECT['prefix'] . ' ' . trim($section_text['TEST']);
+		$tested_file = $tmp_relative_file;
 		$section_text['FILE'] = "# original source file: $shortname\n" . $section_text['FILE'];
 	}
 
@@ -966,8 +1011,10 @@ TEST $file
 	@unlink($exp_filename);
 	@unlink($output_filename);
 	@unlink($memcheck_filename);
-	@unlink($tmp_file);
-	@unlink($tmp_skipif);
+	@unlink($temp_file);
+	@unlink($test_file);
+	@unlink($temp_skipif);
+	@unlink($test_skipif);
 	@unlink($tmp_post);
 
 	// Reset environment from any previous test.
@@ -988,31 +1035,31 @@ TEST $file
 			settings2array($ini_overwrites,$skipif_params);
 			settings2params($skipif_params);
 
-			save_text($tmp_skipif, $section_text['SKIPIF']);
+			save_text($test_skipif, $section_text['SKIPIF'], $temp_skipif);
 			$extra = substr(PHP_OS, 0, 3) !== "WIN" ?
 				"unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;": "";
-			$output = system_with_timeout("$extra $php -q $skipif_params $tmp_skipif");
-			@unlink($tmp_skipif);
-			if (eregi("^skip", trim($output))) {
+			$output = system_with_timeout("$extra $php -q $skipif_params $test_skipif");
+			@unlink($test_skipif);
+			if (!strncasecmp('skip', trim($output), 4)) {
 				$reason = (eregi("^skip[[:space:]]*(.+)\$", trim($output))) ? eregi_replace("^skip[[:space:]]*(.+)\$", "\\1", trim($output)) : FALSE;
 				if ($reason) {
-					show_result("SKIP", $tested, $file, "reason: $reason");
+					show_result("SKIP", $tested, $tested_file, "reason: $reason", $temp_filenames);
 				} else {
-					show_result("SKIP", $tested, $file);
+					show_result("SKIP", $tested, $tested_file, '', $temp_filenames);
 				}
 				if (isset($old_php)) {
 					$php = $old_php;
 				}
-				@unlink($tmp_skipif);
+				@unlink($test_skipif);
 				return 'SKIPPED';
 			}
-			if (eregi("^info", trim($output))) {
+			if (!strncasecmp('info', trim($output), 4)) {
 				$reason = (ereg("^info[[:space:]]*(.+)\$", trim($output))) ? ereg_replace("^info[[:space:]]*(.+)\$", "\\1", trim($output)) : FALSE;
 				if ($reason) {
 					$info = " (info: $reason)";
 				}
 			}
-			if (eregi("^warn", trim($output))) {
+			if (!strncasecmp('warn', trim($output), 4)) {
 				$reason = (ereg("^warn[[:space:]]*(.+)\$", trim($output))) ? ereg_replace("^warn[[:space:]]*(.+)\$", "\\1", trim($output)) : FALSE;
 				if ($reason) {
 					$warn = true; /* only if there is a reason */
@@ -1041,7 +1088,7 @@ TEST $file
 			$test_cnt += (count($test_files) - 1) * ($unicode_and_native ? 2 : 1);
 			$test_idx--;
 	
-			show_redirect_start($IN_REDIRECT['TESTS'], $tested);
+			show_redirect_start($IN_REDIRECT['TESTS'], $tested, $tested_file);
 	
 			// set up environment
 			foreach ($IN_REDIRECT['ENV'] as $k => $v) {
@@ -1052,7 +1099,7 @@ TEST $file
 			usort($test_files, "test_sort");
 			run_all_tests($test_files, $tested);
 	
-			show_redirect_ends($IN_REDIRECT['TESTS'], $tested);
+			show_redirect_ends($IN_REDIRECT['TESTS'], $tested, $tested_file);
 	
 			// clean up environment
 			foreach ($IN_REDIRECT['ENV'] as $k => $v) {
@@ -1067,16 +1114,16 @@ TEST $file
 	}
 	if (is_array($org_file) || @count($section_text['REDIRECTTEST']) == 1) {
 		if (is_array($org_file)) $file = $org_file[0];
-		$bork_info = "Redirected test did not contain redirection info: [$file]";
-		show_result("BORK", $bork_info, $file);
+		$bork_info = "Redirected test did not contain redirection info";
+		show_result("BORK", $bork_info, '', $temp_filenames);
 		$PHP_FAILED_TESTS['BORKED'][] = array (
 								'name' => $file,
 								'test_name' => '',
 								'output' => '',
 								'diff'   => '',
-								'info'   => $bork_info,
+								'info'   => "$bork_info [$file]",
 		);
-		//$test_cnt -= 1;
+		//$test_cnt -= 1;  // Only if is_array($org_file) ?
 		//$test_idx--;
 		return 'BORKED';
 	}
@@ -1091,6 +1138,9 @@ TEST $file
 	// Any special ini settings 
 	// these may overwrite the test defaults...
 	if (array_key_exists('INI', $section_text)) {
+		if (strpos($section_text['INI'], '{PWD}') !== false) {
+			$section_text['INI'] = str_replace('{PWD}', dirname($file), $section_text['INI']);
+		}
 		settings2array(preg_split( "/[\n\r]+/", $section_text['INI']), $ini_settings);
 		if (isset($ini_settings["unicode_semantics"])) {
 			$unicode_test = strcasecmp($ini_settings["unicode_semantics"],"on") == 0 || $ini_settings["unicode_semantics"] == 1;
@@ -1126,7 +1176,7 @@ TEST $file
 	settings2params($ini_settings);
 
 	// We've satisfied the preconditions - run the test!
-	save_text($tmp_file,$section_text['FILE']);
+	save_text($test_file, $section_text['FILE'], $temp_file);
 	if (array_key_exists('GET', $section_text)) {
 		$query_string = trim($section_text['GET']);
 	} else {
@@ -1141,22 +1191,22 @@ TEST $file
 
 	putenv("REDIRECT_STATUS=1");
 	putenv("QUERY_STRING=$query_string");
-	putenv("PATH_TRANSLATED=$tmp_file");
-	putenv("SCRIPT_FILENAME=$tmp_file");
+	putenv("PATH_TRANSLATED=$test_file");
+	putenv("SCRIPT_FILENAME=$test_file");
 
 	$args = $section_text['ARGS'] ? ' -- '.$section_text['ARGS'] : '';
 
 	if (array_key_exists('POST', $section_text) && !empty($section_text['POST'])) {
 
 		$post = trim($section_text['POST']);
-		save_text($tmp_post,$post);
+		save_text($tmp_post, $post);
 		$content_length = strlen($post);
 
 		putenv("REQUEST_METHOD=POST");
 		putenv("CONTENT_TYPE=application/x-www-form-urlencoded");
 		putenv("CONTENT_LENGTH=$content_length");
 
-		$cmd = "$php$pass_options$ini_settings -f \"$tmp_file\" 2>&1 < $tmp_post";
+		$cmd = "$php$pass_options$ini_settings -f \"$test_file\" 2>&1 < $tmp_post";
 
 	} else {
 
@@ -1165,9 +1215,9 @@ TEST $file
 		putenv("CONTENT_LENGTH=");
 
 		if (empty($section_text['ENV'])) {
-			$cmd = "$php$pass_options$ini_settings -f \"$tmp_file\" $args 2>&1";
+			$cmd = "$php$pass_options$ini_settings -f \"$test_file\" $args 2>&1";
 		} else {
-			$cmd = "$php$pass_options$ini_settings < \"$tmp_file\" $args 2>&1";
+			$cmd = "$php$pass_options$ini_settings < \"$test_file\" $args 2>&1";
 		}
 	}
 
@@ -1209,8 +1259,7 @@ COMMAND $cmd
 	}
 
 	// Does the output match what is expected?
-	$output = trim($out);
-	$output = preg_replace('/\r\n/',"\n",$output);
+	$output = str_replace("\r\n", "\n", trim($out));
 
 	/* when using CGI, strip the headers from the output */
 	if (isset($old_php) && ($pos = strpos($output, "\n\n")) !== FALSE) {
@@ -1243,12 +1292,12 @@ COMMAND $cmd
 */
 		if (preg_match("/^$wanted_re\$/s", $output)) {
 			$passed = true;
-			@unlink($tmp_file);
+			@unlink($test_file);
 			if (isset($old_php)) {
 				$php = $old_php;
 			}
 			if (!$leaked) {
-			    show_result("PASS", $tested, $file);
+			    show_result("PASS", $tested, $tested_file, '', $temp_filenames);
 				return 'PASSED';
 			}
 		}
@@ -1258,12 +1307,12 @@ COMMAND $cmd
 		// compare and leave on success
 		if (!strcmp($output, $wanted)) {
 			$passed = true;
-			@unlink($tmp_file);
+			@unlink($test_file);
 			if (isset($old_php)) {
 				$php = $old_php;
 			}
 			if (!$leaked) {
-				show_result("PASS", $tested, $file);
+				show_result("PASS", $tested, $tested_file, '', $temp_filenames);
 				return 'PASSED';
 			}
 		}
@@ -1279,52 +1328,45 @@ COMMAND $cmd
 	} else {
 		$restype = 'FAIL';
 	}
-	show_result($restype, $tested, $file, $info);
-
-	$PHP_FAILED_TESTS[$restype.'ED'][] = array (
-						'name' => $file,
-						'test_name' => (is_array($IN_REDIRECT) ? $IN_REDIRECT['via'] : '') . $tested,
-						'output' => $output_filename,
-						'diff'   => $diff_filename,
-						'info'   => $info
-						);
 
 	if (!$passed) {
 		// write .exp
-		if (strpos($log_format,'E') !== FALSE) {
-			$log = fopen($exp_filename,'wt') or error("Cannot create expected test output - $exp_filename");
-			fwrite($log,$wanted);
-			fclose($log);
+		if (strpos($log_format,'E') !== FALSE && file_put_contents($exp_filename, $wanted) === FALSE) {
+			error("Cannot create expected test output - $exp_filename");
 		}
 
 		// write .out
-		if (strpos($log_format,'O') !== FALSE) {
-			$log = fopen($output_filename,'wt') or error("Cannot create test output - $output_filename");
-			fwrite($log,$output);
-			fclose($log);
+		if (strpos($log_format,'O') !== FALSE && file_put_contents($output_filename, $output) === FALSE) {
+			error("Cannot create test output - $output_filename");
 		}
 
 		// write .diff
-		if (strpos($log_format,'D') !== FALSE) {
-			$log = fopen($diff_filename,'wt') or error("Cannot create test diff - $diff_filename");
-			fwrite($log, generate_diff($wanted,$wanted_re,$output));
-			fclose($log);
+		if (strpos($log_format,'D') !== FALSE && file_put_contents($diff_filename, generate_diff($wanted,$wanted_re,$output)) === FALSE) {
+			error("Cannot create test diff - $diff_filename");
 		}
 
 		// write .log
-		if (strpos($log_format,'L') !== FALSE) {
-			$log = fopen($log_filename,'wt') or error("Cannot create test log - $log_filename");
-			fwrite($log,"
+		if (strpos($log_format,'L') !== FALSE && file_put_contents($log_filename, "
 ---- EXPECTED OUTPUT
 $wanted
 ---- ACTUAL OUTPUT
 $output
 ---- FAILED
-");
-			fclose($log);
-			error_report($file,$log_filename,$tested);
+") === FALSE) {
+			error("Cannot create test log - $log_filename");
+			error_report($file, $log_filename, $tested);
 		}
 	}
+
+	show_result($restype, $tested, $tested_file, $info, $temp_filenames);
+
+	$PHP_FAILED_TESTS[$restype.'ED'][] = array (
+						'name' => $file,
+						'test_name' => (is_array($IN_REDIRECT) ? $IN_REDIRECT['via'] : '') . $tested . " [$tested_file]",
+						'output' => $output_filename,
+						'diff'   => $diff_filename,
+						'info'   => $info
+						);
 
 	if (isset($old_php)) {
 		$php = $old_php;
@@ -1617,26 +1659,26 @@ function show_summary()
 	echo get_summary(true, false);
 }
 
-function show_redirect_start($tests, $tested)
+function show_redirect_start($tests, $tested, $tested_file)
 {
 	global $html_output, $html_file;
 
 	if ($html_output)
 	{
-		fwrite($html_file, "<tr><td colspan='3'>---&gt; $tests ($tested) begin</td></tr>\n");
+		fwrite($html_file, "<tr><td colspan='3'>---&gt; $tests ($tested [$tested_file]) begin</td></tr>\n");
 	}
-	echo "---> $tests ($tested) begin\n";
+	echo "---> $tests ($tested [$tested_file]) begin\n";
 }
 
-function show_redirect_ends($tests, $tested)
+function show_redirect_ends($tests, $tested, $tested_file)
 {
 	global $html_output, $html_file;
 
 	if ($html_output)
 	{
-		fwrite($html_file, "<tr><td colspan='3'>---&gt; $tests ($tested) done</td></tr>\n");
+		fwrite($html_file, "<tr><td colspan='3'>---&gt; $tests ($tested [$tested_file]) done</td></tr>\n");
 	}
-	echo "---> $tests ($tested) done\n";
+	echo "---> $tests ($tested [$tested_file]) done\n";
 }
 
 function show_test($test_idx, $shortname)
@@ -1647,20 +1689,48 @@ function show_test($test_idx, $shortname)
 	flush();
 }
 
-function show_result($result, $tested, $file, $extra = '')
+function show_result($result, $tested, $tested_file, $extra = '', $temp_filenames = null)
 {
-	global $html_output, $html_file;
+	global $html_output, $html_file, $temp_target, $temp_urlbase;
+
+	echo "$result $tested [$tested_file] $extra\n";
 
 	if ($html_output)
 	{
+		if (isset($temp_filenames['file'])) {
+			$url = str_replace($temp_target, $temp_urlbase, $temp_filenames['file']);
+			$tested = "<a href='$url'>$tested</a>";
+		}
+		if (isset($temp_filenames['skip']) && @file_exists($temp_filenames['skip'])) {
+			if (empty($extra)) {
+				$extra = "skipif";
+			}
+			$url = str_replace($temp_target, $temp_urlbase, $temp_filenames['skip']);
+			$extra = "<a href='$url'>$extra</a>";
+		} else if (empty($extra)) {
+			$extra = "&nbsp;";
+		}
+		if (isset($temp_filenames['diff']) && @file_exists($temp_filenames['diff'])) {
+			$url = str_replace($temp_target, $temp_urlbase, $temp_filenames['diff']);
+			$diff = "<a href='$url'>diff</a>";
+		} else {
+			$diff = "&nbsp;";
+		}
+		if (isset($temp_filenames['mem']) && @file_exists($temp_filenames['mem'])) {
+			$url = str_replace($temp_target, $temp_urlbase, $temp_filenames['mem']);
+			$mem = "<a href='$url'>leaks</a>";
+		} else {
+			$mem = "&nbsp;";
+		}
 		fwrite($html_file, 
 			"<tr>" .
 			"<td>$result</td>" .
 			"<td>$tested</td>" .
-			"<td>" . (empty($extra) ? "&nbsp;" : $extra) . "</td>" .
+			"<td>$extra</td>" .
+			"<td>$diff</td>" . 
+			"<td>$mem</td>" .
 			"</tr>\n");
 	}
-	echo "$result $tested $extra\n";
 }
 
 /*
