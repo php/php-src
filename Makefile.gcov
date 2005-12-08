@@ -57,7 +57,7 @@ php_lcov.info: lcov-test
 	done
 	@echo 
 	@echo "Generating $@"
-	@$(LTP) --directory lcov_data/ --capture --output-file $@ --test-name PHP_LCOV
+	@$(LTP) --directory lcov_data/ --capture --base-directory=lcov_data --output-file $@
 
 lcov-html: php_lcov.info
 	@echo "Generating lcov HTML"
