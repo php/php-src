@@ -1,3 +1,108 @@
+2005-12-07  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_5_0)
+      main/SAPI.h:
+      Fix win32 build
+
+2005-12-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      ext/pcre/config0.m4:
+      - Readd the file in this branch
+
+2005-12-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      ext/standard/basic_functions.c:
+      Undo accidental revert of patch for bug #34729
+
+2005-12-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/000.phpt
+      ext/simplexml/tests/001.phpt
+      ext/simplexml/tests/002.phpt
+      ext/simplexml/tests/003.phpt
+      ext/simplexml/tests/004.phpt
+      ext/simplexml/tests/007.phpt
+      ext/simplexml/tests/010.phpt
+      ext/simplexml/tests/022.phpt
+      ext/simplexml/tests/023.phpt
+      ext/simplexml/tests/024.phpt:
+      Unicode support
+
+    * ext/standard/tests/strings/stristr.phpt
+      ext/standard/tests/strings/strrev.phpt:
+      Fixed tests
+
+    * ZendEngine2/tests/bug35239.phpt
+      ext/standard/tests/array/bug35022.phpt
+      tests/lang/type_hints_003.phpt
+      tests/strings/002.phpt:
+      Fixed test
+
+2005-12-07  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      run-tests.php:
+      MFH:- Made tests that require CGI skipped if it is not available
+
+    * run-tests.php:
+      - Made tests that require CGI skipped if it is not available
+
+    * run-tests.php:
+      - Fix file_put_contents() usage: it returns bytes written and it can be 0.
+
+    * run-tests.php:
+      - Fixed error messages
+
+2005-12-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/var.c:
+      Fixed sleep() magic method with private and protected members
+
+    * run-tests.php:
+      Fixed incorrect basename() usage
+
+    * main/main.c:
+      Fixed memory overflow, because usage of initialized value
+
+2005-12-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      main/main.c:
+      MFH: Better critical error handling (fix for previous html encoding patch).
+
+    * main/main.c:
+      MFB51: Better critical error handling (fix for previous html encoding
+      patch).
+
+    * (PHP_5_1)
+      main/main.c:
+      Better critical error handling (fix for previous html encoding patch).
+
+    * (PHP_5_1)
+      run-tests.php:
+      Fixed filename picker.
+      Various modernizations of the script.
+
+2005-12-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      run-tests.php:
+      - MFH
+        . Support for '--' style switches
+        . Modularize output
+        . Better valgrind integration (valgrind 3.0.0+ required now) (-m)
+        . Ability to generate an additional html style output log (--html)
+        . Ability to test unicode + native tests in one go (-U)
+        . Show list of leaked files in summary if any
+        . Use basename correct
+
+    * run-tests.php:
+      - Show list of leaked files in summary if any
+      - Use basename correct
+
 2005-12-06  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_4)
