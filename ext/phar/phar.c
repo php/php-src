@@ -204,18 +204,21 @@ PHP_METHOD(PHP_Archive, mapPhar)
 	i = 0;
 #define PHAR_GET_VAL(var)			\
 	if (buffer > endbuffer) {		\
-		MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest)")\
+		MAPPHAR_FAIL("internal corruption of phar \"%s\" (buffer overrun)")\
 	}					\
 	unpack_var = (char *) &var;		\
 	var = 0;				\
 	for (i = 0; i < 4; i++) {		\
 		unpack_var[little_endian_long_map[i]] = *buffer++;\
+		if (buffer > endbuffer) {	\
+			MAPPHAR_FAIL("internal corruption of phar \"%s\" (buffer overrun)")\
+		}				\
 	}
 
 	if (4 != php_stream_read(fp, buffer, 4)) {
 		MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest)")
 	}
-	endbuffer = buffer;
+	endbuffer = buffer + 5;
 	PHAR_GET_VAL(manifest_len)
 	buffer -= 4;
 	if (manifest_len > 1048576) {
