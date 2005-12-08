@@ -1461,16 +1461,22 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	yymore();
 }
 
-<ST_ONE_LINE_COMMENT>[^\n\r?%>]+ {
-	yymore();
-}
-
-<ST_ONE_LINE_COMMENT><<EOF>> {
-	zendlval->value.str.val = yytext; /* no copying - intentional */
-	zendlval->value.str.len = yyleng;
-	zendlval->type = IS_STRING;
-	BEGIN(INITIAL);
-	return EOF;
+<ST_ONE_LINE_COMMENT>[^\n\r?%>]+{ANY_CHAR} {
+	switch (yytext[yyleng-1]) {
+		case '?': case '%': case '>':
+			yyless(yyleng-1);
+			yymore();
+			break;
+		case '\n':
+			CG(zend_lineno)++;
+			/* intentional fall through */
+		default:
+			zendlval->value.str.val = yytext; /* no copying - intentional */
+			zendlval->value.str.len = yyleng;
+			zendlval->type = IS_STRING;
+			BEGIN(ST_IN_SCRIPTING);
+			return T_COMMENT;
+	}
 }
 
 <ST_ONE_LINE_COMMENT>{NEWLINE} {
