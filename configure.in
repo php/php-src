@@ -617,7 +617,7 @@ if test "$PHP_GCOV" = "yes"; then
     AC_MSG_ERROR([ccache must be disabled when --enable-gcov option is used. You can disable ccache by setting environment variable CCACHE_DISABLE=1.])
   fi
   
-  ltp_version_list="1.4"
+  ltp_version_list="1.5"
 
   AC_CHECK_PROG(LTP, lcov, lcov)
   AC_CHECK_PROG(LTP_GENHTML, genhtml, genhtml)
