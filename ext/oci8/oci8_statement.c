@@ -1193,7 +1193,7 @@ php_oci_bind *php_oci_bind_array_helper_string(zval* var, long max_table_length,
 		while (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE) {
 			convert_to_string_ex(entry);
 			if (Z_STRLEN_PP(entry) > maxlength) {
-				maxlength = Z_STRLEN_PP(entry);
+				maxlength = Z_STRLEN_PP(entry) + 1;
 			}
 			zend_hash_move_forward(hash);
 		}
