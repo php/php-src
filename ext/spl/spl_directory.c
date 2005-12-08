@@ -1353,16 +1353,16 @@ SPL_METHOD(SplFileObject, __construct)
 		return;
 	}
 	
-	spl_filesystem_file_open(intern, use_include_path, 0 TSRMLS_CC);
-
-	p1 = strrchr(intern->file_name, '/');
-	p2 = strrchr(intern->file_name, '\\');
-	if (p1 || p2) {
-		intern->path_len = (p1 > p2 ? p1 : p2) - intern->file_name;
-	} else {
-		intern->path_len = 0;
+	if (spl_filesystem_file_open(intern, use_include_path, 0 TSRMLS_CC) == SUCCESS) {
+		p1 = strrchr(intern->file_name, '/');
+		p2 = strrchr(intern->file_name, '\\');
+		if (p1 || p2) {
+			intern->path_len = (p1 > p2 ? p1 : p2) - intern->file_name;
+		} else {
+			intern->path_len = 0;
+		}
+		intern->path = estrndup(intern->file_name, intern->path_len);
 	}
-	intern->path = estrndup(intern->file_name, intern->path_len);
 
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 } /* }}} */
@@ -1396,10 +1396,10 @@ SPL_METHOD(SplTempFileObject, __construct)
 	intern->u.file.open_mode_len = 1;
 	intern->u.file.zcontext = NULL;
 	
-	spl_filesystem_file_open(intern, 0, 0 TSRMLS_CC);
-
-	intern->path_len = 0;
-	intern->path = estrndup("", 0);
+	if (spl_filesystem_file_open(intern, 0, 0 TSRMLS_CC) == SUCCESS) {
+		intern->path_len = 0;
+		intern->path = estrndup("", 0);
+	}
 
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 } /* }}} */
