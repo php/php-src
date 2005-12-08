@@ -61,6 +61,7 @@ PHP                                                                        NEWS
   (Nuno, Ilia)
 - Fixed bug #35028 (SimpleXML object fails FALSE test). (Marcus)
 - Fixed bug #34729 (Crash in ZTS mode under Apache). (Dmitry, Zeev) 
+- Fixed bug #34359 (Possible crash inside fopen http wrapper). (Ilia,Sara,Nuno)
 - Fixed bug #30760 (Remove MessageBox on win32 for E_CORE errors if 
   display_startup_error is off). (Ilia)
 
