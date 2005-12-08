@@ -526,28 +526,16 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	
 	http_header_line = emalloc(HTTP_HEADER_BLOCK_SIZE);
 
-	while (!body && !php_stream_eof(stream))	{
-		
-		if (php_stream_gets(stream, http_header_line, HTTP_HEADER_BLOCK_SIZE-1) != NULL)	{
-			char *p;
-			int found_eol = 0;
-			int http_header_line_length;
-			
-			http_header_line[HTTP_HEADER_BLOCK_SIZE-1] = '\0';
-
-			p = http_header_line;
-			while(*p) {
-				while(*p == '\n' || *p == '\r')	{
-					*p = '\0';
-					p--;
-					found_eol = 1;
-				}
-				if (found_eol)
-					break;
-				p++;
+	while (!body && !php_stream_eof(stream)) {
+		size_t http_header_line_length;
+		if (php_stream_get_line(stream, http_header_line, HTTP_HEADER_BLOCK_SIZE, &http_header_line_length TSRMLS_CC) && *http_header_line != '\n' && *http_header_line != '\r') {
+			char *e = http_header_line + http_header_line_length - 1;
+			while (*e == '\n' || *e == '\r') {
+				e--;
 			}
-			http_header_line_length = p-http_header_line+1;
-		
+			http_header_line_length = e - http_header_line + 1;
+			http_header_line[http_header_line_length] = '\0';
+
 			if (!strncasecmp(http_header_line, "Location: ", 10)) {
 				strlcpy(location, http_header_line + 10, sizeof(location));
 			} else if (!strncasecmp(http_header_line, "Content-Type: ", 14)) {
