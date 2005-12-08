@@ -2106,16 +2106,22 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	yymore();
 }
 
-<ST_ONE_LINE_COMMENT>[^\n\r?%>]+ {
-	yymore();
-}
-
-<ST_ONE_LINE_COMMENT><<EOF>> {
-	zendlval->value.str.val = yytext; /* no copying - intentional */
-	zendlval->value.str.len = yyleng;
-	zendlval->type = IS_STRING;
-	BEGIN(ST_IN_SCRIPTING);
-	return T_COMMENT;
+<ST_ONE_LINE_COMMENT>[^\n\r?%>]+{ANY_CHAR} {
+	switch (yytext[yyleng-1]) {
+		case '?': case '%': case '>':
+			yyless(yyleng-1);
+			yymore();
+			break;
+		case '\n':
+			CG(zend_lineno)++;
+			/* intentional fall through */
+		default:
+			zendlval->value.str.val = yytext; /* no copying - intentional */
+			zendlval->value.str.len = yyleng;
+			zendlval->type = IS_STRING;
+			BEGIN(ST_IN_SCRIPTING);
+			return T_COMMENT;
+	}
 }
 
 <ST_ONE_LINE_COMMENT>{NEWLINE} {
@@ -2435,9 +2441,8 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	}
 }
 
-
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\{$" {
-	if (!zend_copy_string_value(zendlval, yytext+1, yyleng-1, CG(literal_type) TSRMLS_CC)) {
+<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\{" {
+	if (!zend_copy_string_value(zendlval, yytext, yyleng, CG(literal_type) TSRMLS_CC)) {
 		return 0;
 	}
 	return T_STRING;
