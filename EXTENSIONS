@@ -45,9 +45,9 @@ MAINTENANCE:         Maintained
 STATUS:              Experimental
 -------------------------------------------------------------------------------
 EXTENSION:           apache2handler
-PRIMARY MAINTAINER:  Aaron Bannert <aaron@php.net>
+PRIMARY MAINTAINER:  Aaron Bannert <aaron@php.net>, Ilia Alshanetsky <iliaa@php.net>
 MAINTENANCE:         Maintained
-STATUS:              Experimental
+STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           caudium
 MAINTENANCE:         Unknown
@@ -238,7 +238,7 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           curl
-PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
+PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>,Ilia Alshanetsky <iliaa@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               4.0.2
@@ -315,8 +315,8 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           imap
-PRIMARY MAINTAINER:  Chuck Hagenbuch <chagenbu@php.net>
-MAINTENANCE:         Odd Fixes
+PRIMARY MAINTAINER:  Chuck Hagenbuch <chagenbu@php.net>, Ilia Alshanetsky <iliaa@php.net>
+MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           ircg
@@ -442,7 +442,7 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           session
-PRIMARY MAINTAINER:  Sascha Schumann <sas@php.net>
+PRIMARY MAINTAINER:  Sascha Schumann <sas@php.net>, Ilia Alshanetsky <iliaa@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
