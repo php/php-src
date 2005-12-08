@@ -61,7 +61,7 @@ php_lcov.info: lcov-test
 
 lcov-html: php_lcov.info
 	@echo "Generating lcov HTML"
-	@$(LTP_GENHTML) --no-prefix --output-directory lcov_html/ --title "PHP Code Coverage" --show-details php_lcov.info
+	@$(LTP_GENHTML) --legend --no-prefix --output-directory lcov_html/ --title "PHP Code Coverage" --show-details php_lcov.infoz
 
 lcov-clean:
 	rm -f php_lcov.info
