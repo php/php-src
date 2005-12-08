@@ -163,17 +163,18 @@ PHP_METHOD(PHP_Archive, mapPhar)
 		php_stream_close(fp);\
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, msg, fname);\
 		return;
-#define MAPPHAR_FAIL(msg) efree(buffer);\
+#define MAPPHAR_FAIL(msg) efree(savebuf);\
 		MAPPHAR_ALLOC_FAIL(msg)
 
 	// check for ?>\n and increment accordingly
 	if (-1 == php_stream_seek(fp, halt_offset, SEEK_SET)) {
-		MAPPHAR_FAIL("cannot seek to __HALT_COMPILER(); location in phar \"%s\"")
+		MAPPHAR_ALLOC_FAIL("cannot seek to __HALT_COMPILER(); location in phar \"%s\"")
 	}
 
 	if (FALSE == (buffer = (char *) emalloc(4))) {
 		MAPPHAR_ALLOC_FAIL("memory allocation failed in phar \"%s\"")
 	}
+	savebuf = buffer;
 	if (3 != php_stream_read(fp, buffer, 3)) {
 		MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest)")
 	}
@@ -202,9 +203,9 @@ PHP_METHOD(PHP_Archive, mapPhar)
 
 	i = 0;
 #define PHAR_GET_VAL(var)			\
-	if (buffer > endbuffer) {\
+	if (buffer > endbuffer) {		\
 		MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest)")\
-	}\
+	}					\
 	unpack_var = (char *) &var;		\
 	var = 0;				\
 	for (i = 0; i < 4; i++) {		\
@@ -217,8 +218,12 @@ PHP_METHOD(PHP_Archive, mapPhar)
 	endbuffer = buffer;
 	PHAR_GET_VAL(manifest_len)
 	buffer -= 4;
+	if (manifest_len > 1048576) {
+		/* prevent serious memory issues by limiting manifest to at most 1 MB in length */
+		MAPPHAR_FAIL("manifest cannot be larger than 1 MB in phar \"%s\"")
+	}
 	if (FALSE == (buffer = (char *) erealloc(buffer, manifest_len))) {
-		MAPPHAR_ALLOC_FAIL("memory allocation failed in phar \"%s\"")
+		MAPPHAR_FAIL("memory allocation failed in phar \"%s\"")
 	}
 	savebuf = buffer;
 	// set the test pointer
