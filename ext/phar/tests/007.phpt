@@ -5,6 +5,6 @@ PHP_Archive::mapPhar improper parameters
 --FILE--
 <?php
 PHP_Archive::mapPhar(5, 'hio', false);
-__HALT_COMPILER(); ?>
+__HALT_COMPILER(); ?>~~~~
 --EXPECTF--
-Fatal error: PHP_Archive::mapPhar(): internal corruption of phar "%s" (truncated manifest) in %s on line %d
+Fatal error: PHP_Archive::mapPhar(): manifest cannot be larger than 1 MB in phar "%s" in %s on line %d
