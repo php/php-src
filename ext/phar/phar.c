@@ -41,7 +41,7 @@ ZEND_DECLARE_MODULE_GLOBALS(phar)
 
 typedef struct _internal_phar_stream_data {
 	phar_file_data *data;
-	long	pointer; // relative position within file data
+	long	pointer; /* relative position within file data */
 	char	*file;
 	phar_manifest_entry	*internal_file;
 } phar_internal_file_data;
@@ -166,7 +166,7 @@ PHP_METHOD(PHP_Archive, mapPhar)
 #define MAPPHAR_FAIL(msg) efree(savebuf);\
 		MAPPHAR_ALLOC_FAIL(msg)
 
-	// check for ?>\n and increment accordingly
+	/* check for ?>\n and increment accordingly */
 	if (-1 == php_stream_seek(fp, halt_offset, SEEK_SET)) {
 		MAPPHAR_ALLOC_FAIL("cannot seek to __HALT_COMPILER(); location in phar \"%s\"")
 	}
@@ -194,12 +194,12 @@ PHP_METHOD(PHP_Archive, mapPhar)
 			halt_offset++;
 		}
 	}
-	// make sure we are at the right location to read the manifest
+	/* make sure we are at the right location to read the manifest */
 	if (-1 == php_stream_seek(fp, halt_offset, SEEK_SET)) {
 		MAPPHAR_FAIL("cannot seek to __HALT_COMPILER(); location in phar \"%s\"")
 	}
 
-	// read in manifest
+	/* read in manifest */
 
 	i = 0;
 #define PHAR_GET_VAL(var)			\
@@ -226,15 +226,15 @@ PHP_METHOD(PHP_Archive, mapPhar)
 		MAPPHAR_FAIL("memory allocation failed in phar \"%s\"")
 	}
 	savebuf = buffer;
-	// set the test pointer
+	/* set the test pointer */
 	endbuffer = buffer + manifest_len;
-	// retrieve manifest
+	/* retrieve manifest */
 	if (manifest_len != php_stream_read(fp, buffer, manifest_len)) {
 		MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest)")
 	}
-	// extract the number of entries
+	/* extract the number of entries */
 	PHAR_GET_VAL(manifest_count)
-	// set up our manifest
+	/* set up our manifest */
 	ALLOC_HASHTABLE(manifest);
 	zend_hash_init(manifest, sizeof(phar_manifest_entry),
 		zend_get_hash_value, destroy_phar_manifest, 0);
@@ -341,33 +341,33 @@ PHP_PHAR_API php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filenam
 			int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 
 static php_stream_ops phar_ops = {
-	phar_write, // write (does nothing)
-	phar_read, //read
-	phar_close, //close
-	phar_flush, //flush (does nothing)
+	phar_write, /* write (does nothing) */
+	phar_read, /* read */
+	phar_close, /* close */
+	phar_flush, /* flush (does nothing) */
 	"phar stream",
-	NULL, // seek
-	NULL, // cast
-	phar_stat, // stat
-	NULL, // set option
+	NULL, /* seek */
+	NULL, /* cast */
+	phar_stat, /* stat */
+	NULL, /* set option */
 };
 
 static php_stream_ops phar_dir_ops = {
-	phar_write, // write (does nothing)
-	phar_readdir, //read
-	phar_closedir, //close
-	phar_flush, //flush (does nothing)
+	phar_write, /* write (does nothing) */
+	phar_readdir, /* read */
+	phar_closedir, /* close */
+	phar_flush, /* flush (does nothing) */
 	"phar stream",
-	NULL, // seek
-	NULL, // cast
-	NULL, // stat
-	NULL, // set option
+	NULL, /* seek */
+	NULL, /* cast */
+	NULL, /* stat */
+	NULL, /* set option */
 };
 
 static php_stream_wrapper_ops phar_stream_wops = {
     php_stream_phar_url_wrapper,
     NULL, /* stream_close */
-    NULL, //php_stream_phar_stat,
+    NULL, /* php_stream_phar_stat, */
     phar_stream_stat, /* stat_url */
     phar_opendir, /* opendir */
     "phar",
@@ -514,7 +514,7 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 #endif
 
 	resource = php_url_parse(path);
-	// we must have at the very least phar://alias.phar/internalfile.php
+	/* we must have at the very least phar://alias.phar/internalfile.php */
 	if (!resource || !resource->scheme || !resource->host || !resource->path) {
 		if (resource) {
 			php_url_free(resource);
@@ -636,12 +636,12 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 			return NULL;
 
 		efree(savebuf);
-		// check length
+		/* check length */
 		if (actual_length != idata->internal_file->uncompressed_filesize) {
 			PHAR_ZLIB_ERROR
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: internal corruption of phar \"%s\" (filesize mismatch on file \"%s\")", idata->data->file, internal_file);
 		}
-		// check crc32
+		/* check crc32 */
 		if (-1 == phar_postprocess_file(idata->file, idata->internal_file->uncompressed_filesize, crc32, 0)) {
 			PHAR_ZLIB_ERROR
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: internal corruption of phar \"%s\" (crc32 mismatch on file \"%s\")", idata->data->file, internal_file);
@@ -661,7 +661,7 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 			return NULL;
 		}
 		php_stream_close(fp);
-		// check length, crc32
+		/* check length, crc32 */
 		if (-1 == phar_postprocess_file(idata->file, idata->internal_file->uncompressed_filesize, 0, 1)) {
 			efree(idata->file);
 			efree(idata);
@@ -850,7 +850,7 @@ PHP_PHAR_API int phar_stream_stat(php_stream_wrapper *wrapper, char *url, int fl
 	phar_manifest_entry *file_data;
 
 	resource = php_url_parse(url);
-	// we must have at the very least phar://alias.phar/internalfile.php
+	/* we must have at the very least phar://alias.phar/internalfile.php */
 	if (!resource || !resource->scheme || !resource->host || !resource->path) {
 		php_url_free(resource);
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: invalid url \"%s\"", url);
@@ -867,7 +867,7 @@ PHP_PHAR_API int phar_stream_stat(php_stream_wrapper *wrapper, char *url, int fl
 	internal_file = resource->path + 1; /* strip leading "/" */
 	if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_data), resource->host, strlen(resource->host), (void **) &data)) {
 		if (*internal_file == '\0') {
-			// root directory requested
+			/* root directory requested */
 			phar_dostat(NULL, ssb, 1 TSRMLS_CC);
 			php_url_free(resource);
 			return 0;
@@ -875,14 +875,14 @@ PHP_PHAR_API int phar_stream_stat(php_stream_wrapper *wrapper, char *url, int fl
 		if (SUCCESS == zend_hash_find(data->manifest, internal_file, strlen(internal_file), (void **) &file_data)) {
 			phar_dostat(file_data, ssb, 0 TSRMLS_CC);
 		} else {
-			// search for directory
+			/* search for directory */
 			zend_hash_internal_pointer_reset(data->manifest);
 			while (zend_hash_has_more_elements(data->manifest)) {
 				if (HASH_KEY_NON_EXISTANT !=
 						zend_hash_get_current_key_ex(
 							data->manifest, &key, &keylen, &unused, 0, NULL)) {
 					if (0 == memcmp(key, internal_file, keylen)) {
-						// directory found
+						/* directory found */
 						phar_dostat(NULL, ssb, 1 TSRMLS_CC);
 						break;
 					}
@@ -920,24 +920,24 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
 			return NULL;
 		}
 		if (*dir == '/') {
-			// not root directory
+			/* not root directory */
 			if (NULL != (found = (char *) memchr(key, '/', keylen))) {
-				// the entry has a path separator and is a subdirectory
+				/* the entry has a path separator and is a subdirectory */
 				save = key;
 				goto PHAR_DIR_SUBDIR;
 			}
 			dirlen = 0;
 		} else {
 			if (0 != memcmp(key, dir, dirlen)) {
-				// entry in directory not found
+				/* entry in directory not found */
 				zend_hash_move_forward(manifest);
 				continue;
 			}
 		}
 		save = key;
-		save += dirlen + 1; // seek to just past the path separator
+		save += dirlen + 1; /* seek to just past the path separator */
 		if (NULL != (found = (char *) memchr(save, '/', keylen - dirlen - 1))) {
-			// is subdirectory
+			/* is subdirectory */
 			save -= dirlen + 1;
 PHAR_DIR_SUBDIR:
 			entry = (char *) emalloc (found - save + 2);
@@ -945,7 +945,7 @@ PHAR_DIR_SUBDIR:
 			keylen = found - save;
 			entry[found - save + 1] = '\0';
 		} else {
-			// is file
+			/* is file */
 			save -= dirlen + 1;
 			entry = (char *) emalloc (keylen - dirlen + 1);
 			memcpy(entry, save, keylen - dirlen);
@@ -971,7 +971,7 @@ PHP_PHAR_API php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filenam
 	phar_manifest_entry *file_data;
 
 	resource = php_url_parse(filename);
-	// we must have at the very least phar://alias.phar/internalfile.php
+	/* we must have at the very least phar://alias.phar/internalfile.php */
 	if (!resource || !resource->scheme || !resource->host || !resource->path) {
 		php_url_free(resource);
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: invalid url \"%s\"", filename);
@@ -987,7 +987,7 @@ PHP_PHAR_API php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filenam
 	internal_file = resource->path + 1; /* strip leading "/" */
 	if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_data), resource->host, strlen(resource->host), (void **) &data)) {
 		if (*internal_file == '\0') {
-			// root directory requested
+			/* root directory requested */
 			ret = phar_make_dirstream("/", data->manifest TSRMLS_CC);
 			php_url_free(resource);
 			return ret;
@@ -996,14 +996,14 @@ PHP_PHAR_API php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filenam
 			php_url_free(resource);
 			return NULL;
 		} else {
-			// search for directory
+			/* search for directory */
 			zend_hash_internal_pointer_reset(data->manifest);
 			while (zend_hash_has_more_elements(data->manifest)) {
 				if (HASH_KEY_NON_EXISTANT != 
 						zend_hash_get_current_key_ex(
 							data->manifest, &key, &keylen, &unused, 0, NULL)) {
 					if (0 == memcmp(key, internal_file, keylen)) {
-						// directory found
+						/* directory found */
 						php_url_free(resource);
 						return phar_make_dirstream(internal_file, data->manifest TSRMLS_CC);
 					}
