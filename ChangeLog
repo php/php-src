@@ -1,3 +1,116 @@
+2005-12-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      run-tests.php:
+      - MFH
+        . Add ability to create temp files in separate dir and keep them.
+        . Add ability to create links in html results as table.
+
+    * run-tests.php:
+      - MFH (Ilia's changes)
+      - Add ability to create temp files in separate dir and keep them.
+      - Add ability to generate html file with results as table and links to
+        generated files.
+
+2005-12-08  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/oci8_statement.c:
+      improve error message
+
+    * (PHP_5_1)
+      ext/oci8/oci8_statement.c:
+      MFH: add 1 to the max_length to keep \0 at its place
+
+    * ext/oci8/oci8_statement.c:
+      add 1 to the max_length to keep \0 at its place
+
+2005-12-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * Makefile.gcov:
+      MFB51: Include a legend in the gcov report
+
+    * (PHP_5_1)
+      Makefile.gcov:
+      Include a legend in the gcov report (suggestion by Tony).
+
+2005-12-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      ext/dba/dba.c
+      ext/dba/dba_db4.c
+      ext/dba/tests/dba_db4.phpt
+      ext/dba/tests/dba_handler.inc:
+      - MFH Change dba/db4 to use its own locking
+
+2005-12-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      EXTENSIONS:
+      MFH: Added myself to a list of extensions/sapis I try to maintain.
+
+    * EXTENSIONS:
+      MFB51: Added myself to a list of extensions/sapis I try to maintain.
+
+    * (PHP_5_1)
+      EXTENSIONS:
+      Added myself to a list of extensions/sapis I try to maintain.
+
+    * Makefile.gcov
+      configure.in:
+      MFB51: Final fix for gcov generation.
+
+    * (PHP_5_1)
+      Makefile.gcov
+      configure.in:
+      Final fix for gcov generation.
+
+2005-12-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug31341.phpt:
+      Fixed test
+
+2005-12-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      ext/standard/basic_functions.c:
+      MFH: Fixed bug #35594 (Multiple calls to getopt() may result in a crash).
+
+    * ext/standard/basic_functions.c:
+      MFB51: Fixed bug #35594 (Multiple calls to getopt() may result in a crash).
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/basic_functions.c:
+      Fixed bug #35594 (Multiple calls to getopt() may result in a crash).
+
+    * ZendEngine2/zend_language_scanner.l:
+      MFB51:
+      	fix for bug #35382
+      	fix for bug #35411
+
+    * (PHP_5_1)
+      ZendEngine2/zend_language_scanner.l:
+      Improve fix for bug #35382
+
+    * (PHP_4_4)
+      NEWS
+      ext/xmlrpc/xmlrpc-epi-php.c:
+      MFH: Fixed bug #33523 (Memory leak in xmlrpc_encode_request()).
+
+    * (PHP_4_4)
+      NEWS
+      ext/standard/http_fopen_wrapper.c:
+      MFH: Fixed bug #34359 (Possible crash inside fopen http wrapper).
+
+    * ext/standard/http_fopen_wrapper.c:
+      MFB51: Fixed bug #34359 (Possible crash inside fopen http wrapper).
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/http_fopen_wrapper.c:
+      Fixed bug #34359 (Possible crash inside fopen http wrapper).
+
 2005-12-07  Frank M. Kromann  <frank@kromann.info>
 
     * (PHP_5_0)
