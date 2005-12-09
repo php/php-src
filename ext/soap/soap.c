@@ -1797,8 +1797,8 @@ fail:
 /* }}} */
 
 
-/* {{{ proto SoapServer::fault
-   SoapServer::fault */
+/* {{{ proto SoapServer::fault ( staring code, string string [, string actor [, mixed details [, string name]]] )
+   Issue SoapFault indicating an error */
 PHP_METHOD(SoapServer, fault)
 {
 	char *code, *string, *actor=NULL, *name=NULL;

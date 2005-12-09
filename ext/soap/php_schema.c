@@ -232,7 +232,11 @@ int load_schema(sdlCtx *ctx,xmlNodePtr schema)
 			location = get_attribute(trav->properties, "schemaLocation");
 
 			if (ns != NULL && tns != NULL && strcmp(ns->children->content,tns->children->content) == 0) {
-				soap_error1(E_ERROR, "Parsing Schema: can't import schema from '%s', namespace must not match the enclosing schema 'targetNamespace'", location->children->content);
+				if (location) {
+					soap_error1(E_ERROR, "Parsing Schema: can't import schema from '%s', namespace must not match the enclosing schema 'targetNamespace'", location->children->content);
+				} else {
+					soap_error0(E_ERROR, "Parsing Schema: can't import schema. Namespace must not match the enclosing schema 'targetNamespace'");
+				}
 			}
 			if (location) {
 				xmlChar *base = xmlNodeGetBase(trav->doc, trav);
