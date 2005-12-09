@@ -784,7 +784,7 @@ function system_with_timeout($commandline)
 			return $data;
 		} else if ($n > 0) {
 			$line = fread($pipes[1], 8192);
-			if ($line === false) {
+			if (strlen($line) == 0) {
 				/* EOF */
 				break;
 			}
