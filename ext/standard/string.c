@@ -2069,8 +2069,7 @@ PHP_FUNCTION(stristr)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz|b", &haystack, &needle, &part) == FAILURE) {
 		return;
 	}
-	SEPARATE_ZVAL(&haystack);
-	SEPARATE_ZVAL(&needle);
+
 	if (Z_TYPE_P(haystack) != IS_UNICODE && Z_TYPE_P(haystack) != IS_BINARY && Z_TYPE_P(haystack) != IS_STRING) {
 		convert_to_text(haystack);
 	}
