@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 - Fixed an error in mysqli_fetch_fields (returned NULL instead of an
   array when row number > field_count). (Georg)
 - Renamed CachingRecursiveIterator to RecursiveCachingIterator. (Marcus)
+- Fixed bug #35612 (iis6 Access Violation crash). (Dmitry, alacn.uhahaa)
 - FIxed bug #35536 (mysql_field_type() doesn't handle NEWDECIMAL). (Tony)
 - Fixed bug #35437 (Segfault or Invalid Opcode 137/1/4). (Dmitry)
 - Fixed bug #35399 (Since fix of bug #35273 SOAP decoding of

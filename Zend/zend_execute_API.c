@@ -45,6 +45,7 @@ ZEND_API zend_fcall_info_cache empty_fcall_info_cache = { 0, NULL, NULL, NULL };
 static WNDCLASS wc;
 static HWND timeout_window;
 static HANDLE timeout_thread_event;
+static HANDLE timeout_thread_handle;
 static DWORD timeout_thread_id;
 static int timeout_thread_initialized=0;
 #endif
@@ -1253,7 +1254,7 @@ static unsigned __stdcall timeout_thread_proc(void *pArgs)
 void zend_init_timeout_thread()
 {
 	timeout_thread_event = CreateEvent(NULL, FALSE, FALSE, NULL);
-	_beginthreadex(NULL, 0, timeout_thread_proc, NULL, 0, &timeout_thread_id);
+	timeout_thread_handle = _beginthreadex(NULL, 0, timeout_thread_proc, NULL, 0, &timeout_thread_id);
 	WaitForSingleObject(timeout_thread_event, INFINITE);
 }
 
@@ -1264,6 +1265,10 @@ void zend_shutdown_timeout_thread()
 		return;
 	}
 	PostThreadMessage(timeout_thread_id, WM_QUIT, 0, 0);
+
+	/* Wait for thread termination */
+	WaitForSingleObject(timeout_thread_handle, 5000);
+	CloseHandle(timeout_thread_handle);
 }
 
 #endif
