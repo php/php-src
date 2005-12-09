@@ -410,10 +410,10 @@ static sdlSoapBindingFunctionHeaderPtr wsdl_soap_binding_header(sdlCtx* ctx, xml
 				if (!h->ns && h->element->namens) {
 					h->ns = estrdup(h->element->namens);
 				}
-			}
-			if (h->element->name) {
-				efree(h->name);
-				h->name = estrdup(h->element->name);
+				if (h->element->name) {
+					efree(h->name);
+					h->name = estrdup(h->element->name);
+				}
 			}
 		}
 	}
