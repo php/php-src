@@ -1,5 +1,5 @@
 --TEST--
-PHP_Archive::mapPhar improper parameters
+PHP_Archive::mapPhar zlib not loaded
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip";
 if (PHP_Archive::canCompress()) print "skip";?>

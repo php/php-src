@@ -1,5 +1,5 @@
 --TEST--
-PHP_Archive::mapPhar improper parameters
+PHP_Archive::mapPhar no __HALT_COMPILER();
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip";?>
 --FILE--
