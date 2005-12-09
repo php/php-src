@@ -1,3 +1,19 @@
+2005-12-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/bug31341.phpt:
+      Fixed test
+
+2005-12-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_language_scanner.l:
+      MFB51:
+      	fix for bug #35382
+      	fix for bug #35411
+
+    * (PHP_5_1)
+      zend_language_scanner.l:
+      Improve fix for bug #35382
+
 2005-12-07  Dmitry Stogov  <dmitry@zend.com>
 
     * tests/bug35239.phpt:
