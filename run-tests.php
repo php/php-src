@@ -1589,7 +1589,7 @@ function show_end($end_time)
 		fwrite($html_file, "</table>\n");
 		fwrite($html_file, "<h2>Time End: " . date('Y-m-d H:i:s', $end_time) . "</h2>\n");
 	}
-	echo "=====================================================================\nTIME END " . date('Y-m-d H:i:s', $end_time);
+	echo "=====================================================================\nTIME END " . date('Y-m-d H:i:s', $end_time) . "\n";
 }
 
 function show_summary()
