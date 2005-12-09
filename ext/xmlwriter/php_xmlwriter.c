@@ -139,6 +139,7 @@ static zend_function_entry xmlwriter_functions[] = {
 	PHP_FE(xmlwriter_write_attribute,	NULL)
 #if LIBXML_VERSION > 20617
 	PHP_FE(xmlwriter_start_attribute_ns,NULL)
+	PHP_FE(xmlwriter_write_attribute_ns,NULL)
 #endif
 	PHP_FE(xmlwriter_start_element,		NULL)
 	PHP_FE(xmlwriter_end_element,		NULL)
@@ -160,6 +161,12 @@ static zend_function_entry xmlwriter_functions[] = {
 	PHP_FE(xmlwriter_write_dtd,			NULL)
 	PHP_FE(xmlwriter_start_dtd_element,	NULL)
 	PHP_FE(xmlwriter_end_dtd_element,	NULL)
+	PHP_FE(xmlwriter_write_dtd_element,	NULL)
+#if LIBXML_VERSION > 20608
+	PHP_FE(xmlwriter_start_dtd_attlist,	NULL)
+	PHP_FE(xmlwriter_end_dtd_attlist,	NULL)
+	PHP_FE(xmlwriter_write_dtd_attlist,	NULL)
+#endif
 	PHP_FE(xmlwriter_output_memory,		NULL)
 	PHP_FE(xmlwriter_flush,				NULL)
 	{NULL, NULL, NULL}
@@ -184,6 +191,7 @@ static zend_function_entry xmlwriter_class_functions[] = {
 	PHP_ME_MAPPING(writeAttribute,	xmlwriter_write_attribute,	NULL)
 #if LIBXML_VERSION > 20617
 	PHP_ME_MAPPING(startAttributeNs,	xmlwriter_start_attribute_ns,NULL)
+	PHP_ME_MAPPING(writeAttributeNs,	xmlwriter_write_attribute_ns,NULL)
 #endif
 	PHP_ME_MAPPING(startElement,	xmlwriter_start_element,	NULL)
 	PHP_ME_MAPPING(endElement,		xmlwriter_end_element,		NULL)
@@ -205,6 +213,12 @@ static zend_function_entry xmlwriter_class_functions[] = {
 	PHP_ME_MAPPING(writeDtd,		xmlwriter_write_dtd,		NULL)
 	PHP_ME_MAPPING(startDtdElement,	xmlwriter_start_dtd_element,	NULL)
 	PHP_ME_MAPPING(endDtdElement,	xmlwriter_end_dtd_element,	NULL)
+	PHP_ME_MAPPING(writeDtdElement,	xmlwriter_write_dtd_element,	NULL)
+#if LIBXML_VERSION > 20608
+	PHP_ME_MAPPING(startDtdAttlist,	xmlwriter_start_dtd_attlist,	NULL)
+	PHP_ME_MAPPING(endDtdAttlist,	xmlwriter_end_dtd_attlist,	NULL)
+	PHP_ME_MAPPING(writeDtdAttlist,	xmlwriter_write_dtd_attlist,	NULL)
+#endif
 	PHP_ME_MAPPING(outputMemory,	xmlwriter_output_memory,	NULL)
 	PHP_ME_MAPPING(flush,			xmlwriter_flush,			NULL)
 	{NULL, NULL, NULL}
@@ -338,7 +352,7 @@ static void xmlwriter_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC) {
 /* }}} */
 
 #if LIBXML_VERSION >= 20605
-/* {{{ proto bool xmlwriter_set_indent(resource xmlwriter, bool)
+/* {{{ proto bool xmlwriter_set_indent(resource xmlwriter, bool indent)
 Toggle indentation on/off - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_set_indent)
 {
@@ -628,6 +642,7 @@ PHP_FUNCTION(xmlwriter_write_attribute)
 }
 /* }}} */
 
+#if LIBXML_VERSION > 20617
 /* {{{ proto bool xmlwriter_write_attribute_ns(resource xmlwriter, string prefix, string name, string uri, string content)
 Write full namespaced attribute - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_write_attribute_ns)
@@ -671,6 +686,7 @@ PHP_FUNCTION(xmlwriter_write_attribute_ns)
 	RETURN_FALSE;
 }
 /* }}} */
+#endif
 
 /* {{{ proto bool xmlwriter_start_element(resource xmlwriter, string name)
 Create start element tag - returns FALSE on error */
@@ -1364,7 +1380,7 @@ PHP_FUNCTION(xmlwriter_write_dtd_element)
 	zval *this = getThis();
 
 	if (this) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &name, &name_len, &content, &content_len) == FAILURE) {
 			return;
 		}
 		XMLWRITER_FROM_OBJECT(intern, this);
@@ -1393,6 +1409,7 @@ PHP_FUNCTION(xmlwriter_write_dtd_element)
 }
 /* }}} */
 
+#if LIBXML_VERSION > 20608
 /* {{{ proto bool xmlwriter_start_dtd_attlist(resource xmlwriter, string name)
 Create start DTD AttList - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_start_dtd_attlist)
@@ -1583,6 +1600,7 @@ PHP_FUNCTION(xmlwriter_write_dtd_entity)
 	RETURN_FALSE;
 }
 /* }}} */
+#endif
 
 /* {{{ proto resource xmlwriter_open_uri(resource xmlwriter, string source)
 Create new xmlwriter using source uri for output */
