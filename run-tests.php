@@ -961,7 +961,9 @@ TEST $file
 		if (!is_dir(dirname($copy_file))) {
 			@mkdir(dirname($copy_file), 0777, true) or error("Cannot create output directory - " . dirname($copy_file));
 		}
-		save_text($copy_file, $section_text['FILE']);
+		if (isset($section_text['FILE'])) {
+			save_text($copy_file, $section_text['FILE']);
+		}
 		$temp_filenames = array(
 			'file' => $copy_file,
 			'diff' => $diff_filename, 
@@ -1641,7 +1643,7 @@ function show_result($result, $tested, $tested_file, $extra = '', $temp_filename
 
 	if ($html_output)
 	{
-		if (isset($temp_filenames['file'])) {
+		if (isset($temp_filenames['file']) && @file_exists($temp_filenames['file'])) {
 			$url = str_replace($temp_target, $temp_urlbase, $temp_filenames['file']);
 			$tested = "<a href='$url'>$tested</a>";
 		}
