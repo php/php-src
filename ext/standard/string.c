@@ -210,7 +210,7 @@ PHP_FUNCTION(bin2hex)
 static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 {
 	void *s1, *s2;
-	int32_t len1, len2;
+	int len1, len2;
 	zend_uchar type1, type2;
 	long start, len; /* For UNICODE, these are codepoint units */
 	
@@ -1108,7 +1108,7 @@ static void php_u_explode_negative_limit(UChar *delim, uint delim_len, UChar *st
 PHP_FUNCTION(explode)
 {
 	void		*str, *delim;
-	int32_t		str_len, delim_len;
+	int			str_len, delim_len;
 	zend_uchar	str_type, delim_type;
 	int			limit = -1;
 	int			argc = ZEND_NUM_ARGS();
@@ -1340,7 +1340,7 @@ PHP_FUNCTION(implode)
 PHP_FUNCTION(strtok)
 {
 	void *tok, *str;
-	int32_t tok_len, str_len;
+	int tok_len, str_len;
 	zend_uchar tok_type, str_type;
 	zval *zv;
 	char *token, *token_end, *p, *pe;
@@ -2159,7 +2159,7 @@ PHP_FUNCTION(stristr)
 PHP_FUNCTION(strstr)
 {
 	void *haystack;
-	int32_t haystack_len;
+	int haystack_len;
 	zend_uchar haystack_type;
 	zval **needle;
 	void *found = NULL;
@@ -2281,7 +2281,7 @@ PHP_FUNCTION(strstr)
 PHP_FUNCTION(strpos)
 {
 	void *haystack;
-	int32_t haystack_len;
+	int haystack_len;
 	zend_uchar haystack_type;
 	zval **needle;
 	int   offset = 0;
@@ -2897,7 +2897,8 @@ PHP_FUNCTION(chunk_split)
 PHP_FUNCTION(substr)
 {
 	void *str;
-	int32_t str_len, cp_len;
+	int str_len;
+	int32_t cp_len;
 	zend_uchar str_type;
 	int l = -1;
 	int f;
@@ -5129,7 +5130,7 @@ PHP_FUNCTION(nl2br)
 PHP_FUNCTION(strip_tags)
 {
 	void *str, *allow = NULL;
-	int32_t str_len, allow_len = 0;
+	int str_len, allow_len = 0;
 	zend_uchar str_type, allow_type;
 	void *buf;
 	int32_t retval_len;
@@ -5883,7 +5884,7 @@ reg_char:
 PHP_FUNCTION(str_repeat)
 {
 	void		*input_str;		/* Input string */
-	int32_t		input_str_len;
+	int		input_str_len;
 	int32_t		input_str_chars;
 	zend_uchar	input_str_type;
 	long		mult;			/* Multiplier */
@@ -6170,7 +6171,7 @@ PHP_FUNCTION(strnatcasecmp)
 PHP_FUNCTION(substr_count)
 {
 	void *haystack, *needle;
-	int32_t haystack_len, needle_len;
+	int haystack_len, needle_len;
 	zend_uchar haystack_type, needle_type;
 	long offset = 0, length = 0;
 	int ac = ZEND_NUM_ARGS();
@@ -6272,7 +6273,7 @@ PHP_FUNCTION(str_pad)
 	int32_t pad_length;	/* Length to pad to, in codepoints for Unicode */
 	void   *padstr;		/* Padding string */
 	int32_t	pad_type;	/* Padding type (left/right/both) */
-	int32_t input_len, padstr_len; /* Lengths in code units for Unicode */
+	int input_len, padstr_len; /* Lengths in code units for Unicode */
 	zend_uchar input_type, padstr_type;
 	
 	/* Helper variables */
@@ -6643,7 +6644,7 @@ PHP_FUNCTION(str_split)
 PHP_FUNCTION(strpbrk)
 {
 	void *haystack, *char_list;
-	int32_t haystack_len, char_list_len;
+	int haystack_len, char_list_len;
 	zend_uchar haystack_type, char_list_type;
 	void *p = NULL;
 	
