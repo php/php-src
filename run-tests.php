@@ -322,6 +322,17 @@ if (isset($argc) && $argc > 1) {
 				case '--temp-urlbase':
 					$temp_urlbase = $argv[++$i];
 					break;
+				case 'U':
+					$unicode_and_native = true;
+					// break;
+				case 'u':
+					$unicode_testing = true;
+					$ini_overwrites[] = 'unicode_semantics=1';
+					$ini_overwrites[] = 'unicode.runtime_encoding=iso-8859-1';
+					$ini_overwrites[] = 'unicode.script_encoding=utf-8';
+					$ini_overwrites[] = 'unicode.output_encoding=utf-8';
+					$ini_overwrites[] = 'unicode.from_error_mode=U_INVALID_SUBSTITUTE';
+					break;
 				case 'v':
 				case '--verbose':
 					$DETAILED = true;
