@@ -1257,6 +1257,8 @@ consult the installation file that came with this distribution, or visit \n\
 				running--;
 			}
 		}
+	} else {
+		parent = 0;
 	}
 
 #endif /* WIN32 */

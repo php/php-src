@@ -55,6 +55,8 @@ PHP                                                                        NEWS
 - Fixed bug #34453 (parsing http://www.w3.org/2001/xml.xsd exception). (Dmitry)
 - Fixed bug #34450 (Segfault when calling mysqli_close() in destructor). (Tony)
 - Fixed bug #34449 (ext/soap: XSD_ANYXML functionality not exposed). (Dmitry)
+- Fixed bug #34429 (Output buffering cannot be turned off with FastCGI).
+  (Dmitry, Ilya)
 - Fixed Bug #34243 (ReflectionClass::getDocComment() returns no result). 
   (Marcus)
 - Fixed bug #34199 (if($obj)/if(!$obj) inconsistency because of cast handler).
