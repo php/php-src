@@ -24,6 +24,7 @@ PHP                                                                        NEWS
 - Fixed many bugs in OCI8. (Tony)
 - Fixed crash and leak in mysqli when using 4.1.x client libraries and
   connecting to 5.x server. (Andrey)
+- Fixed bug #35612 (iis6 Access Violation crash). (Dmitry, alacn.uhahaa)
 - Fixed bug #35594 (Multiple calls to getopt() may result in a crash).
   (rabbitt at gmail dot com, Ilia)
 - Fixed bug #35558 (mktime() interpreting 3 digit years incorrectly). (Ilia)
