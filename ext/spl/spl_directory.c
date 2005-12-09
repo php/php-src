@@ -1908,7 +1908,7 @@ static zend_function_entry spl_SplFileObject_functions[] = {
 	SPL_ME(SplFileObject, hasChildren,    NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, getChildren,    NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, seek,           arginfo_file_object_seek,          ZEND_ACC_PUBLIC)
-	// mappings
+	/* mappings */
 	SPL_MA(SplFileObject, getCurrentLine, SplFileObject, fgets,      NULL, ZEND_ACC_PUBLIC)
 	SPL_MA(SplFileObject, __toString,     SplFileObject, current,    NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
