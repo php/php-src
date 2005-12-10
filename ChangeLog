@@ -1,3 +1,92 @@
+2005-12-09  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/string.c:
+      fix #35617
+      no need to separate zvals twice
+
+2005-12-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * Makefile.gcov:
+      MFB51: Fixed typo in gcov output filename
+
+    * (PHP_5_1)
+      Makefile.gcov:
+      Fixed typo in gcov output filename
+
+2005-12-09  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/http_fopen_wrapper.c:
+      MF51: fix wrong macro usage
+
+    * (PHP_5_1)
+      ext/standard/http_fopen_wrapper.c:
+      php_stream_get_line() is a macro and it already has TSRMLS_CC
+
+2005-12-09  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_1)
+      ext/gd/tests/pngcomp.phpt:
+      - MFH: no need to test if jpeg support exists
+
+    * ext/gd/tests/pngcomp.phpt:
+      - no need to test if jpeg support exists
+
+    * ext/gd/tests/pngcomp.phpt:
+      - MFB: test for compression mode in imagepng
+
+2005-12-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      NEWS
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c:
+      Fixed bug #35612 (iis6 Access Violation crash)
+
+2005-12-09  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/tests/pngcomp.phpt:
+      
+      file pngcomp.phpt was initially added on branch PHP_5_1.
+
+2005-12-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      - Readd -u and -U
+
+2005-12-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      NEWS
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      Fixed bug #34429 (Output buffering cannot be turned off with FastCGI)
+
+    * sapi/cgi/cgi_main.c:
+      Bug #34429 (Output buffering cannot be turned off with FastCGI)
+
+    * ext/standard/string.c:
+      Support for 64-bit platforms
+
+2005-12-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      run-tests.php:
+      - MFH Section FILE does not exist for redirection tests
+
+    * run-tests.php:
+      - Section FILE does not exist for redirection tests
+
+    * run-tests.php:
+      - Add missing newline
+
+    * (PHP_5_1)
+      run-tests.php:
+      - Revert piece of MFH that shows an inconsistency - actually we should fix
+        this fread() issue.
+
 2005-12-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
