@@ -350,7 +350,7 @@ if (isset($argc) && $argc > 1) {
 					$html_output = is_resource($html_file);
 					break;
 				case '--version':
-					echo "$Id$\n";
+					echo "$Revision$\n";
 					exit(1);
 				default:
 					echo "Illegal switch specified!\n";
