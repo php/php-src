@@ -1,10 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, PHP 5.1.2
-- Addes PNG compression support (Pierre)
 - Added new extensions: (Ilia, Wez)
   . XMLWriter
   . Hash
+- Added PNG compression support to GD extension. (Pierre)
 - Added reflection constants as class constants. (Johannes)
 - Added --enable-gcov configure option to enable C-level code coverage.
   (John, Jani)
