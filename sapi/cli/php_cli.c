@@ -87,6 +87,7 @@
 #include "zend_execute.h"
 #include "zend_highlight.h"
 #include "zend_indent.h"
+#include "zend_exceptions.h"
 
 #include "php_getopt.h"
 
@@ -101,8 +102,9 @@
 #define PHP_MODE_STRIP         5
 #define PHP_MODE_CLI_DIRECT    6
 #define PHP_MODE_PROCESS_STDIN 7
-#define PHP_MODE_REFLECTION_CLASS       8
-#define PHP_MODE_REFLECTION_EXTENSION   9
+#define PHP_MODE_REFLECTION_FUNCTION    8
+#define PHP_MODE_REFLECTION_CLASS       9
+#define PHP_MODE_REFLECTION_EXTENSION   10
 
 static char *php_optarg = NULL;
 static int php_optind = 1;
@@ -137,8 +139,9 @@ static const opt_struct OPTIONS[] = {
 	{'v', 0, "version"},
 	{'z', 1, "zend-extension"},
 #ifdef HAVE_REFLECTION
-	{10,  1, "rclass"},
-	{11,  1, "rextension"},
+	{10,  1, "rfunction"},
+	{11,  1, "rclass"},
+	{12,  1, "rextension"},
 #endif
 	{'-', 0, NULL} /* end of args */
 };
@@ -922,10 +925,14 @@ int main(int argc, char *argv[])
 
 #ifdef HAVE_REFLECTION
 			case 10:
-				behavior=PHP_MODE_REFLECTION_CLASS;
+				behavior=PHP_MODE_REFLECTION_FUNCTION;
 				reflection_what = php_optarg;
 				break;
 			case 11:
+				behavior=PHP_MODE_REFLECTION_CLASS;
+				reflection_what = php_optarg;
+				break;
+			case 12:
 				behavior=PHP_MODE_REFLECTION_EXTENSION;
 				reflection_what = php_optarg;
 				break;
@@ -1164,53 +1171,47 @@ int main(int argc, char *argv[])
 	
 				break;
 #ifdef HAVE_REFLECTION
+			case PHP_MODE_REFLECTION_FUNCTION:
 			case PHP_MODE_REFLECTION_CLASS:
 			case PHP_MODE_REFLECTION_EXTENSION:
 				{
-					zend_class_entry *reflection_ce;
-					zval *arg;
-					
-					if (behavior == PHP_MODE_REFLECTION_CLASS) {
-						zend_class_entry **ppce;
+					zend_class_entry *pce;
+					zval *arg, *ref;
+					zend_execute_data execute_data;
 
-						if (zend_lookup_class(reflection_what, strlen(reflection_what), &ppce TSRMLS_CC) == FAILURE) {
-							zend_printf("Class %s not found\n", reflection_what);
-							exit_status=254;
-
+					switch (behavior) {
+						case PHP_MODE_REFLECTION_FUNCTION:
+							pce = reflection_function_ptr;
 							break;
-						}
-
-						reflection_ce = reflection_class_ptr;
-					} else if (behavior == PHP_MODE_REFLECTION_EXTENSION) {
-						char *lcname = do_alloca(strlen(reflection_what) + 1);
-						struct _zend_module_entry *module;
-
-						zend_str_tolower_copy(lcname, reflection_what, strlen(reflection_what));
-						if (zend_hash_find(&module_registry, lcname,  strlen(reflection_what) + 1, (void **)&module) == FAILURE) {
-							zend_printf("Extension %s not found\n", reflection_what);
-
-							free_alloca(lcname);
-
-							exit_status=254;
+						case PHP_MODE_REFLECTION_CLASS:
+							pce = reflection_class_ptr;
 							break;
-						}
-						free_alloca(lcname);
-
-						reflection_ce = reflection_extension_ptr;
-					} else {
-						// Can't happen
-						assert(0);
-						break;
+						case PHP_MODE_REFLECTION_EXTENSION:
+							pce = reflection_extension_ptr;
+							break;
 					}
 					
-					arg = emalloc(sizeof(zval));
-					INIT_PZVAL(arg);
+					MAKE_STD_ZVAL(arg);
 					ZVAL_STRING(arg, reflection_what, 1);
+					ALLOC_ZVAL(ref);
+					object_init_ex(ref, pce);
+					INIT_PZVAL(ref);
 
-					zend_call_method_with_1_params(NULL, reflection_ce, NULL, "export", NULL, arg);
+					memset(&execute_data, 0, sizeof(zend_execute_data));
+					EG(current_execute_data) = &execute_data;
+					EX(function_state).function = pce->constructor;
+					zend_call_method_with_1_params(&ref, pce, &pce->constructor, "__construct", NULL, arg);
 
-					zval_dtor(arg);
-					FREE_ZVAL(arg);
+					if (EG(exception)) {
+						zval *msg = zend_read_property(zend_exception_get_default(TSRMLS_C), EG(exception), "message", sizeof("message")-1, 0 TSRMLS_CC);
+						zend_printf("Exception: %R\n", Z_TYPE_P(msg), Z_UNIVAL_P(msg));
+						zval_ptr_dtor(&EG(exception));
+						EG(exception) = NULL;
+					} else {
+						zend_call_method_with_1_params(NULL, reflection_ptr, NULL, "export", NULL, ref);
+					}
+					zval_ptr_dtor(&ref);
+					zval_ptr_dtor(&arg);
 
 					break;
 				}
