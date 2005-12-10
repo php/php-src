@@ -1148,6 +1148,10 @@ TEST $file
 	//$ini_overwrites[] = 'setting=value';
 	settings2array($ini_overwrites, $ini_settings);
 
+	if ($unicode_and_native) {
+		$ini_settings["unicode_semantics"] = $unicode_semantics ? '1' : '0';
+	}
+
 	// Any special ini settings 
 	// these may overwrite the test defaults...
 	if (array_key_exists('INI', $section_text)) {
@@ -1161,7 +1165,7 @@ TEST $file
 			$unicode_test = TESTED_UNICODE;
 		}
 	} else {
-		$unicode_test = TESTED_UNICODE;
+		$unicode_test = $unicode_and_native ? $unicode_semantics : TESTED_UNICODE;
 	}
 
 	if ($unicode_test) {
