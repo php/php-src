@@ -53,6 +53,7 @@ typedef struct _phar_manifest_entry {
 	php_uint32	timestamp;
 	php_uint32	offset_within_phar;
 	php_uint32	compressed_filesize;
+	zend_bool	crc_checked;
 } phar_manifest_entry;
 
 typedef struct _phar_file_data {
