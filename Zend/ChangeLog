@@ -1,3 +1,10 @@
+2005-12-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute_API.c
+      zend_execute_API.c
+      zend_execute_API.c:
+      Fixed bug #35612 (iis6 Access Violation crash)
+
 2005-12-08  Dmitry Stogov  <dmitry@zend.com>
 
     * tests/bug31341.phpt:
