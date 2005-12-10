@@ -860,7 +860,7 @@ function run_all_tests($test_files, $redir_tested = NULL)
 //
 function run_test($php, $file, $unicode_semantics)
 {
-	global $log_format, $info_params, $ini_overwrites, $cwd, $PHP_FAILED_TESTS, $pass_options, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx, $leak_check, $temp_source, $temp_target;
+	global $log_format, $info_params, $ini_overwrites, $cwd, $PHP_FAILED_TESTS, $pass_options, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx, $leak_check, $temp_source, $temp_target, $unicode_and_native;
 
 	$temp_filenames = null;
 	$org_file = $file;
