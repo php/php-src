@@ -2,12 +2,6 @@ dnl
 dnl $Id$
 dnl
 
-if test -z "$SED"; then
-  PHP_OCI8_SED="sed";
-else
-  PHP_OCI8_SED="$SED";
-fi
-
 AC_DEFUN([PHP_OCI_IF_DEFINED],[
   old_CPPFLAGS=$CPPFLAGS
   CPPFLAGS=$3
@@ -69,7 +63,7 @@ AC_DEFUN([AC_OCI8IC_VERSION],[
 AC_DEFUN([AC_OCI8_VERSION],[
   AC_MSG_CHECKING([Oracle version])
   if test -s "$OCI8_DIR/orainst/unix.rgs"; then
-    OCI8_VERSION=`grep '"ocommon"' $OCI8_DIR/orainst/unix.rgs | $PHP_OCI_SED 's/[ ][ ]*/:/g' | cut -d: -f 6 | cut -c 2-4`
+    OCI8_VERSION=`grep '"ocommon"' $OCI8_DIR/orainst/unix.rgs | sed 's/[ ][ ]*/:/g' | cut -d: -f 6 | cut -c 2-4`
     test -z "$OCI8_VERSION" && OCI8_VERSION=7.3
   elif test -f $OCI8_DIR/$OCI8_LIB_DIR/libclntsh.$SHLIB_SUFFIX_NAME.10.1; then
     OCI8_VERSION=10.1    
@@ -308,13 +302,13 @@ dnl version in /usr/lib
   AC_MSG_CHECKING([Oracle Instant Client SDK header directory])
 
 dnl Header directory for Instant Client SDK RPM install
-  OCISDKRPMINC=`echo "$PHP_OCI8_INSTANT_CLIENT" | $PHP_OCI8_SED -e 's!^/usr/lib/oracle/\(.*\)/client/lib[[/]]*$!/usr/include/oracle/\1/client!'`
+  OCISDKRPMINC=`echo "$PHP_OCI8_INSTANT_CLIENT" | sed -e 's!^/usr/lib/oracle/\(.*\)/client/lib[[/]]*$!/usr/include/oracle/\1/client!'`
 
 dnl Header directory for Instant Client SDK zip file install
   OCISDKZIPINC=$PHP_OCI8_INSTANT_CLIENT/sdk/include
 
 dnl Header directory for manual installation
-  OCISDKMANINC=`echo "$PHP_OCI8_INSTANT_CLIENT" | $PHP_OCI8_SED -e 's!\(.*\)/lib[[/]]*$!\1/include!'`
+  OCISDKMANINC=`echo "$PHP_OCI8_INSTANT_CLIENT" | sed -e 's!\(.*\)/lib[[/]]*$!\1/include!'`
   
   if test -f "$OCISDKRPMINC/oci.h"; then
     AC_MSG_RESULT($OCISDKRPMINC)
@@ -332,7 +326,7 @@ dnl Header directory for manual installation
     AC_MSG_ERROR([Oracle Instant Client SDK header files not found])
   fi
 
-  OCISYSLIBLIST=`echo "$OCI8INCDIR" | $PHP_OCI_SED -e 's!\(.*\)/include$!\1/demo/sysliblist!'`
+  OCISYSLIBLIST=`echo "$OCI8INCDIR" | sed -e 's!\(.*\)/include$!\1/demo/sysliblist!'`
   if test -f "$OCISYSLIBLIST"; then
     PHP_EVAL_LIBLINE(`cat $OCISYSLIBLIST`, OCI8_SYSLIB)
   fi

@@ -1,9 +1,0 @@
-!include ..\rules.mak.bcc32
-INCLUDES=$(INCLUDES) -I../mbfl
-OBJS=mbfilter_cp936.obj mbfilter_hz.obj mbfilter_euc_tw.obj mbfilter_big5.obj mbfilter_euc_jp.obj mbfilter_jis.obj mbfilter_iso8859_1.obj mbfilter_iso8859_2.obj mbfilter_cp1252.obj mbfilter_cp1251.obj mbfilter_ascii.obj mbfilter_iso8859_3.obj mbfilter_iso8859_4.obj mbfilter_iso8859_5.obj mbfilter_iso8859_6.obj mbfilter_iso8859_7.obj mbfilter_iso8859_8.obj mbfilter_iso8859_9.obj mbfilter_iso8859_10.obj mbfilter_iso8859_13.obj mbfilter_iso8859_14.obj mbfilter_iso8859_15.obj mbfilter_iso8859_16.obj mbfilter_htmlent.obj mbfilter_byte2.obj mbfilter_byte4.obj mbfilter_uuencode.obj mbfilter_base64.obj mbfilter_sjis.obj mbfilter_7bit.obj mbfilter_qprint.obj mbfilter_ucs4.obj mbfilter_ucs2.obj mbfilter_utf32.obj mbfilter_utf16.obj mbfilter_utf8.obj mbfilter_utf7.obj mbfilter_utf7imap.obj mbfilter_euc_jp_win.obj mbfilter_cp932.obj mbfilter_euc_cn.obj mbfilter_euc_kr.obj mbfilter_uhc.obj mbfilter_iso2022_kr.obj mbfilter_cp866.obj mbfilter_koi8r.obj html_entities.obj mbfilter_armscii8.obj
-
-all: $(OBJS)
-
-clean:
-	@for %i in ($(OBJS)) do @if exist %i del %i
-

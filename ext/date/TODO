@@ -1,6 +1,0 @@
-- Port over my 200 test cases to .phpt format.
-- Write an error handler for unexpected characters while parsing dates.
-- Cache lookups for timezone information.
-- Optimize parsing @ with a negative timestamp.
-- Make sure that date_default_timezone_set() validates the passed timezone
-  identifier.
