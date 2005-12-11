@@ -79,7 +79,7 @@ PHP_MINFO_FUNCTION(json)
 }
 /* }}} */
 
-static struct json_object *json_encode_r(zval *val);
+static struct json_object *json_encode_r(zval *val TSRMLS_DC);
 
 static int json_determine_array_type(zval **val TSRMLS_DC) {
     int i;
@@ -156,7 +156,7 @@ static struct json_object *json_encode_array(zval **val TSRMLS_DC) {
                 break;
 
             if (zend_hash_get_current_data_ex(myht, (void **) &data, &pos) == SUCCESS) {
-                member = json_encode_r(*data);
+                member = json_encode_r(*data TSRMLS_CC);
                 if (r == 0) {
                     json_object_array_add(obj, member);
                 } else if (r == 1) {
@@ -182,7 +182,7 @@ static struct json_object *json_encode_array(zval **val TSRMLS_DC) {
     return obj;
 }
 
-static struct json_object *json_encode_r(zval *val) {
+static struct json_object *json_encode_r(zval *val TSRMLS_DC) {
     struct json_object *jo;
 
     switch (Z_TYPE_P(val)) {
@@ -226,7 +226,7 @@ PHP_FUNCTION(json_encode)
         return;
     }
 
-    jo = json_encode_r(parameter);
+    jo = json_encode_r(parameter TSRMLS_CC);
 
     s = estrdup(json_object_to_json_string(jo));
 
