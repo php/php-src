@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, PHP 5.1.2
+- Updated to libxml2-2.6.22 and libxslt-1.1.15 in the win32 bundle. (Rob)
 - Added new extensions: (Ilia, Wez)
   . XMLWriter
   . Hash
