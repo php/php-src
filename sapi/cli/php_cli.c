@@ -27,6 +27,11 @@
 #include "php_variables.h"
 #include "zend_hash.h"
 #include "zend_modules.h"
+#include "zend_interfaces.h"
+
+#ifdef HAVE_REFLECTION
+#include "ext/reflection/php_reflection.h"
+#endif
 
 #include "SAPI.h"
 
@@ -82,6 +87,7 @@
 #include "zend_execute.h"
 #include "zend_highlight.h"
 #include "zend_indent.h"
+#include "zend_exceptions.h"
 
 #include "php_getopt.h"
 
@@ -96,6 +102,9 @@
 #define PHP_MODE_STRIP         5
 #define PHP_MODE_CLI_DIRECT    6
 #define PHP_MODE_PROCESS_STDIN 7
+#define PHP_MODE_REFLECTION_FUNCTION    8
+#define PHP_MODE_REFLECTION_CLASS       9
+#define PHP_MODE_REFLECTION_EXTENSION   10
 
 static char *php_optarg = NULL;
 static int php_optind = 1;
@@ -129,6 +138,14 @@ static const opt_struct OPTIONS[] = {
 	{'?', 0, "usage"},/* help alias (both '?' and 'usage') */
 	{'v', 0, "version"},
 	{'z', 1, "zend-extension"},
+#ifdef HAVE_REFLECTION
+	{10,  1, "rf"},
+	{10,  1, "rfunction"},
+	{11,  1, "rc"},
+	{11,  1, "rclass"},
+	{12,  1, "re"},
+	{12,  1, "rextension"},
+#endif
 	{'-', 0, NULL} /* end of args */
 };
 
@@ -417,6 +434,10 @@ static void php_cli_usage(char *argv0)
 				"  args...          Arguments passed to script. Use -- args when first argument\n"
 				"                   starts with - or script is read from stdin\n"
 				"\n"
+				"  --rf <name>      Show information about function <name>.\n"
+				"  --rc <name>      Show information about class <name>.\n"
+				"  --re <name>      Show information about extension <name>.\n"
+				"\n"
 				, prog, prog, prog, prog, prog, prog);
 }
 /* }}} */
@@ -561,6 +582,9 @@ int main(int argc, char *argv[])
 	zend_file_handle file_handle;
 /* temporary locals */
 	int behavior=PHP_MODE_STANDARD;
+#ifdef HAVE_REFLECTION
+	char *reflection_what;
+#endif
 	int orig_optind=php_optind;
 	char *orig_optarg=php_optarg;
 	char *arg_free=NULL, **arg_excp=&arg_free;
@@ -897,6 +921,20 @@ int main(int argc, char *argv[])
 				hide_argv = 1;
 				break;
 
+#ifdef HAVE_REFLECTION
+			case 10:
+				behavior=PHP_MODE_REFLECTION_FUNCTION;
+				reflection_what = php_optarg;
+				break;
+			case 11:
+				behavior=PHP_MODE_REFLECTION_CLASS;
+				reflection_what = php_optarg;
+				break;
+			case 12:
+				behavior=PHP_MODE_REFLECTION_EXTENSION;
+				reflection_what = php_optarg;
+				break;
+#endif
 			default:
 				break;
 			}
@@ -1130,6 +1168,52 @@ int main(int argc, char *argv[])
 				}
 	
 				break;
+#ifdef HAVE_REFLECTION
+			case PHP_MODE_REFLECTION_FUNCTION:
+			case PHP_MODE_REFLECTION_CLASS:
+			case PHP_MODE_REFLECTION_EXTENSION:
+				{
+					zend_class_entry *pce;
+					zval *arg, *ref;
+					zend_execute_data execute_data;
+
+					switch (behavior) {
+						case PHP_MODE_REFLECTION_FUNCTION:
+							pce = reflection_function_ptr;
+							break;
+						case PHP_MODE_REFLECTION_CLASS:
+							pce = reflection_class_ptr;
+							break;
+						case PHP_MODE_REFLECTION_EXTENSION:
+							pce = reflection_extension_ptr;
+							break;
+					}
+					
+					MAKE_STD_ZVAL(arg);
+					ZVAL_STRING(arg, reflection_what, 1);
+					ALLOC_ZVAL(ref);
+					object_init_ex(ref, pce);
+					INIT_PZVAL(ref);
+
+					memset(&execute_data, 0, sizeof(zend_execute_data));
+					EG(current_execute_data) = &execute_data;
+					EX(function_state).function = pce->constructor;
+					zend_call_method_with_1_params(&ref, pce, &pce->constructor, "__construct", NULL, arg);
+
+					if (EG(exception)) {
+						zval *msg = zend_read_property(zend_exception_get_default(), EG(exception), "message", sizeof("message")-1, 0 TSRMLS_CC);
+						zend_printf("Exception: %s\n", Z_STRVAL_P(msg));
+						zval_ptr_dtor(&EG(exception));
+						EG(exception) = NULL;
+					} else {
+						zend_call_method_with_1_params(NULL, reflection_ptr, NULL, "export", NULL, ref);
+					}
+					zval_ptr_dtor(&ref);
+					zval_ptr_dtor(&arg);
+
+					break;
+				}
+#endif /* reflection */
 			}
 		}
 
