@@ -196,12 +196,19 @@ static timelib_relunit const timelib_relunit_lookup[] = {
 	{ "years",       TIMELIB_YEAR,    1 },
 
 	{ "monday",      TIMELIB_WEEKDAY, 1 },
+	{ "mon",         TIMELIB_WEEKDAY, 1 },
 	{ "tuesday",     TIMELIB_WEEKDAY, 2 },
+	{ "tue",         TIMELIB_WEEKDAY, 2 },
 	{ "wednesday",   TIMELIB_WEEKDAY, 3 },
+	{ "wed",         TIMELIB_WEEKDAY, 3 },
 	{ "thursday",    TIMELIB_WEEKDAY, 4 },
+	{ "thu",         TIMELIB_WEEKDAY, 4 },
 	{ "friday",      TIMELIB_WEEKDAY, 5 },
+	{ "fri",         TIMELIB_WEEKDAY, 5 },
 	{ "saturday",    TIMELIB_WEEKDAY, 6 },
+	{ "sat",         TIMELIB_WEEKDAY, 6 },
 	{ "sunday",      TIMELIB_WEEKDAY, 0 },
+	{ "sun",         TIMELIB_WEEKDAY, 0 },
 
 	{ NULL,          0,          0 }
 };
@@ -368,6 +375,16 @@ static timelib_sll timelib_get_nr(char **ptr, int max_length)
 	tmp_nr = strtoll(str, NULL, 10);
 	free(str);
 	return tmp_nr;
+}
+
+static void timelib_skip_day_suffix(char **ptr)
+{
+	if (isspace(**ptr)) {
+		return;
+	}
+	if (!strncasecmp(*ptr, "nd", 2) || !strncasecmp(*ptr, "rd", 2) ||!strncasecmp(*ptr, "st", 2) || !strncasecmp(*ptr, "th", 2)) {
+		*ptr += 2;
+	}
 }
 
 static double timelib_get_frac_nr(char **ptr, int max_length)
@@ -719,8 +736,10 @@ meridian = [AaPp] "."? [Mm] "."?;
 tz = "("? [A-Za-z]{1,4} ")"? | [A-Z][a-z]+([_/][A-Z][a-z]+)+;
 tzcorrection = [+-] hour24 ":"? minutelz?;
 
+daysuf = 'st' | 'nd' | 'rd' | 'th';
+
 month = "0"? [0-9] | "1"[0-2];
-day   = ([0-2]?[0-9] | "3"[01])([a-z][a-z])?;
+day   = ([0-2]?[0-9] | "3"[01]) daysuf?;
 year  = [0-9]{1,4};
 year2 = [0-9]{2};
 year4 = [0-9]{4};
@@ -769,7 +788,7 @@ pointeddate      = day "." month "." year;
 datefull         = day ([ -.])* monthtext ([ -.])* year;
 datenoday        = monthtext ([ -.])* year4;
 datenodayrev     = year4 ([ -.])* monthtext;
-datetextual      = monthtext ([ -.])* day [,.stndrh ]* year;
+datetextual	 = monthtext ([ -.])* day [,.stndrh ]* year;
 datenoyear       = monthtext ([ -.])* day [,.stndrh ]*;
 datenoyearrev    = day ([ -.])* monthtext;
 datenocolon      = year4 monthlz daylz;
@@ -800,7 +819,7 @@ dateshortwithtimelongtz = datenoyear iso8601normtz;
  * Relative regexps
  */
 reltextnumber = 'first'|'next'|'second'|'third'|'fourth'|'fifth'|'sixth'|'seventh'|'eight'|'ninth'|'tenth'|'eleventh'|'twelfth'|'last'|'previous'|'this';
-reltextunit = (('sec'|'second'|'min'|'minute'|'hour'|'day'|'week'|'fortnight'|'forthnight'|'month'|'year') 's'?) | dayfull;
+reltextunit = (('sec'|'second'|'min'|'minute'|'hour'|'day'|'week'|'fortnight'|'forthnight'|'month'|'year') 's'?) | daytext;
 
 relnumber = ([+-]?[ ]*[0-9]+);
 relative = (relnumber space? reltextunit)+;
@@ -1039,6 +1058,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
 		s->time->d = timelib_get_nr((char **) &ptr, 2);
+		timelib_skip_day_suffix((char **) &ptr);
 		s->time->m = timelib_get_month((char **) &ptr);
 		s->time->y = timelib_get_nr((char **) &ptr, 4);
 		TIMELIB_PROCESS_YEAR(s->time->y);
@@ -1104,6 +1124,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
 		s->time->d = timelib_get_nr((char **) &ptr, 2);
+		timelib_skip_day_suffix((char **) &ptr);
 		s->time->m = timelib_get_month((char **) &ptr);
 		TIMELIB_DEINIT;
 		return TIMELIB_DATE_TEXT;
@@ -1263,6 +1284,22 @@ relativetext = (reltextnumber space? reltextunit)+;
 		return TIMELIB_AGO;
 	}
 
+	daytext
+	{
+		const timelib_relunit* relunit;
+		DEBUG_OUTPUT("daytext");
+		TIMELIB_INIT;
+		TIMELIB_HAVE_RELATIVE();
+		TIMELIB_HAVE_WEEKDAY_RELATIVE();
+		TIMELIB_UNHAVE_TIME();
+		relunit = timelib_lookup_relunit((char**) &ptr);
+		s->time->relative.weekday = relunit->multiplier;
+		s->time->relative.weekday_behavior = 1;
+		
+		TIMELIB_DEINIT;
+		return TIMELIB_WEEKDAY;
+	}
+
 	relativetext
 	{
 		timelib_sll i;
@@ -1278,29 +1315,6 @@ relativetext = (reltextnumber space? reltextunit)+;
 		}
 		TIMELIB_DEINIT;
 		return TIMELIB_RELATIVE;
-	}
-
-	dayfull
-	{
-		const timelib_relunit* relunit;
-		DEBUG_OUTPUT("dayfull");
-		TIMELIB_INIT;
-		TIMELIB_HAVE_RELATIVE();
-		TIMELIB_HAVE_WEEKDAY_RELATIVE();
-		TIMELIB_UNHAVE_TIME();
-
-		relunit = timelib_lookup_relunit((char**) &ptr);
-		s->time->relative.weekday = relunit->multiplier;
-		s->time->relative.weekday_behavior = 1;
-		
-		TIMELIB_DEINIT;
-		return TIMELIB_RELATIVE;
-	}
-
-	dayabbr
-	{
-		DEBUG_OUTPUT("dayabbr");
-		goto std;
 	}
 
 	tzcorrection | tz
