@@ -949,8 +949,10 @@ PHP_PHAR_API int phar_stream_stat(php_stream_wrapper *wrapper, char *url, int fl
 							data->manifest, &key, &keylen, &unused, 0, NULL)) {
 					if (0 == memcmp(internal_file, key, strlen(internal_file))) {
 						/* directory found, all dirs have the same stat */
-						phar_dostat(NULL, ssb, 1 TSRMLS_CC);
-						break;
+						if (key[strlen(internal_file)] == '/') {
+							phar_dostat(NULL, ssb, 1 TSRMLS_CC);
+							break;
+						}
 					}
 				}
 				if (SUCCESS != zend_hash_move_forward(data->manifest)) {
@@ -984,23 +986,38 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
 	zend_hash_init(data, 64, zend_get_hash_value, NULL, 0);
 
 	zend_hash_internal_pointer_reset(manifest);
-	while (SUCCESS == zend_hash_has_more_elements(manifest)) {
+	while (HASH_KEY_NON_EXISTANT != zend_hash_has_more_elements(manifest)) {
 		if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(manifest, &key, &keylen, &unused, 0, NULL)) {
-			return NULL;
+			break;
 		}
 		if (*dir == '/') {
-			/* not root directory */
+			/* root directory */
 			if (NULL != (found = (char *) memchr(key, '/', keylen))) {
 				/* the entry has a path separator and is a subdirectory */
-				save = key;
-				goto PHAR_DIR_SUBDIR;
+				entry = (char *) emalloc (found - key + 1);
+				memcpy(entry, key, found - key);
+				keylen = found - key;
+				entry[keylen] = '\0';
+			} else {
+				entry = (char *) emalloc (keylen + 1);
+				memcpy(entry, key, keylen);
+				entry[keylen] = '\0';
 			}
-			dirlen = 0;
+			goto PHAR_ADD_ENTRY;
 		} else {
 			if (0 != memcmp(key, dir, dirlen)) {
 				/* entry in directory not found */
-				zend_hash_move_forward(manifest);
+				if (SUCCESS != zend_hash_move_forward(manifest)) {
+					break;
+				}
 				continue;
+			} else {
+				if (key[dirlen] != '/') {
+					if (SUCCESS != zend_hash_move_forward(manifest)) {
+						break;
+					}
+					continue;
+				}
 			}
 		}
 		save = key;
@@ -1008,24 +1025,33 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
 		if (NULL != (found = (char *) memchr(save, '/', keylen - dirlen - 1))) {
 			/* is subdirectory */
 			save -= dirlen + 1;
-PHAR_DIR_SUBDIR:
-			entry = (char *) emalloc (found - save + 2);
-			memcpy(entry, save, found - save);
-			keylen = found - save;
-			entry[found - save + 1] = '\0';
+			entry = (char *) emalloc (found - save + dirlen + 1);
+			memcpy(entry, save + dirlen + 1, found - save - dirlen - 1);
+			keylen = found - save - dirlen - 1;
+			entry[keylen] = '\0';
 		} else {
 			/* is file */
 			save -= dirlen + 1;
 			entry = (char *) emalloc (keylen - dirlen + 1);
-			memcpy(entry, save, keylen - dirlen);
-			entry[keylen - dirlen] = '\0';
-			keylen = keylen - dirlen;
+			memcpy(entry, save + dirlen + 1, keylen - dirlen - 1);
+			entry[keylen - dirlen - 1] = '\0';
+			keylen = keylen - dirlen - 1;
 		}
+PHAR_ADD_ENTRY:
 		phar_add_empty(data, entry, keylen);
 		efree(entry);
-		zend_hash_move_forward(manifest);
+		if (SUCCESS != zend_hash_move_forward(manifest)) {
+			break;
+		}
 	}
-	return php_stream_alloc(&phar_dir_ops, data, NULL, "r");
+	if (HASH_KEY_NON_EXISTANT != zend_hash_has_more_elements(data)) {
+		efree(dir);
+		return php_stream_alloc(&phar_dir_ops, data, NULL, "r");
+	} else {
+		efree(dir);
+		FREE_HASHTABLE(data);
+		return NULL;
+	}
 }
 
 PHP_PHAR_API php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filename, char *mode,
@@ -1062,7 +1088,8 @@ PHP_PHAR_API php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filenam
 	if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_data), resource->host, strlen(resource->host), (void **) &data)) {
 		if (*internal_file == '\0') {
 			/* root directory requested */
-			ret = phar_make_dirstream("/", data->manifest TSRMLS_CC);
+			internal_file = estrndup(internal_file - 1, 1);
+			ret = phar_make_dirstream(internal_file, data->manifest TSRMLS_CC);
 			php_url_free(resource);
 			return ret;
 		}
@@ -1072,17 +1099,21 @@ PHP_PHAR_API php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filenam
 		} else {
 			/* search for directory */
 			zend_hash_internal_pointer_reset(data->manifest);
-			while (zend_hash_has_more_elements(data->manifest)) {
+			while (HASH_KEY_NON_EXISTANT != zend_hash_has_more_elements(data->manifest)) {
 				if (HASH_KEY_NON_EXISTANT != 
 						zend_hash_get_current_key_ex(
 							data->manifest, &key, &keylen, &unused, 0, NULL)) {
-					if (0 == memcmp(key, internal_file, keylen)) {
+					if (0 == memcmp(key, internal_file, strlen(internal_file))) {
 						/* directory found */
+						internal_file = estrndup(internal_file,
+								strlen(internal_file));
 						php_url_free(resource);
 						return phar_make_dirstream(internal_file, data->manifest TSRMLS_CC);
 					}
 				}
-				zend_hash_move_forward(data->manifest);
+				if (SUCCESS != zend_hash_move_forward(data->manifest)) {
+					break;
+				}
 			}
 		}
 	}
