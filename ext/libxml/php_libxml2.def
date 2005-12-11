@@ -27,7 +27,9 @@ __xmlLoadExtDtdDefaultValue
 xmlMalloc DATA
 xmlMallocAtomic DATA
 xmlMemStrdup DATA
+xmlOutputBufferCreateFilenameValue DATA
 __xmlParserDebugEntities
+xmlParserInputBufferCreateFilenameValue DATA
 xmlParserMaxDepth DATA
 __xmlParserVersion
 __xmlPedanticParserDefaultValue
@@ -187,11 +189,13 @@ xmlAutomataGetInitState
 xmlAutomataIsDeterminist
 xmlAutomataNewAllTrans
 xmlAutomataNewCountTrans
+xmlAutomataNewCountTrans2
 xmlAutomataNewCountedTrans
 xmlAutomataNewCounter
 xmlAutomataNewCounterTrans
 xmlAutomataNewEpsilon
 xmlAutomataNewOnceTrans
+xmlAutomataNewOnceTrans2
 xmlAutomataNewState
 xmlAutomataNewTransition
 xmlAutomataNewTransition2
@@ -217,6 +221,7 @@ xmlBufferWriteCHAR
 xmlBufferWriteChar
 xmlBufferWriteQuotedString
 xmlBuildQName
+xmlBuildRelativeURI
 xmlBuildURI
 xmlByteConsumed
 xmlC14NDocDumpMemory
@@ -307,14 +312,7 @@ xmlCtxtResetLastError
 xmlCtxtResetPush
 xmlCtxtUseOptions
 xmlCurrentChar
-xmlDictCreate
-xmlDictCreateSub
-xmlDictFree
-xmlDictLookup
-xmlDictOwns
-xmlDictQLookup
-xmlDictReference
-xmlDictSize
+xmlDebugCheckDocument
 xmlDebugDumpAttr
 xmlDebugDumpAttrList
 xmlDebugDumpDTD
@@ -339,6 +337,7 @@ xmlDictQLookup
 xmlDictReference
 xmlDictSize
 xmlDocCopyNode
+xmlDocCopyNodeList
 xmlDocDump
 xmlDocDumpFormatMemory
 xmlDocDumpFormatMemoryEnc
@@ -489,12 +488,6 @@ xmlIsMixedElement
 xmlIsPubidChar
 xmlIsRef
 xmlIsXHTML
-xmlIsBaseCharGroup DATA
-xmlIsCharGroup DATA
-xmlIsCombiningGroup DATA
-xmlIsDigitGroup DATA
-xmlIsExtenderGroup DATA
-xmlIsIdeographicGroup DATA
 xmlKeepBlanksDefault
 xmlLineNumbersDefault
 xmlLinkGetData
@@ -533,6 +526,7 @@ xmlLsCountNode
 xmlLsOneNode
 xmlMallocAtomicLoc
 xmlMallocLoc
+xmlMemBlocks
 xmlMemDisplay
 xmlMemFree
 xmlMemGet
@@ -544,6 +538,10 @@ xmlMemStrdupLoc
 xmlMemUsed
 xmlMemoryDump
 xmlMemoryStrdup
+xmlModuleClose
+xmlModuleFree
+xmlModuleOpen
+xmlModuleSymbol
 xmlMutexLock
 xmlMutexUnlock
 xmlNamespaceParseNCName
@@ -574,6 +572,7 @@ xmlNanoFTPUpdateURL
 xmlNanoHTTPAuthHeader
 xmlNanoHTTPCleanup
 xmlNanoHTTPClose
+xmlNanoHTTPContentLength
 xmlNanoHTTPEncoding
 xmlNanoHTTPFetch
 xmlNanoHTTPInit
@@ -599,6 +598,7 @@ xmlNewDocComment
 xmlNewDocFragment
 xmlNewDocNode
 xmlNewDocNodeEatName
+xmlNewDocPI
 xmlNewDocProp
 xmlNewDocRawNode
 xmlNewDocText
@@ -660,9 +660,11 @@ xmlOutputBufferClose
 xmlOutputBufferCreateFd
 xmlOutputBufferCreateFile
 xmlOutputBufferCreateFilename
+xmlOutputBufferCreateFilenameDefault
 xmlOutputBufferCreateIO
 xmlOutputBufferFlush
 xmlOutputBufferWrite
+xmlOutputBufferWriteEscape
 xmlOutputBufferWriteString
 xmlParseAttValue
 xmlParseAttribute
@@ -703,6 +705,7 @@ xmlParseExternalEntity
 xmlParseExternalID
 xmlParseExternalSubset
 xmlParseFile
+xmlParseInNodeContext
 xmlParseMarkupDecl
 xmlParseMemory
 xmlParseMisc
@@ -736,6 +739,7 @@ xmlParserHandleReference
 xmlParserInputBufferCreateFd
 xmlParserInputBufferCreateFile
 xmlParserInputBufferCreateFilename
+xmlParserInputBufferCreateFilenameDefault
 xmlParserInputBufferCreateIO
 xmlParserInputBufferCreateMem
 xmlParserInputBufferCreateStatic
@@ -754,6 +758,7 @@ xmlPatternMatch
 xmlPatterncompile
 xmlPedanticParserDefault
 xmlPopInput
+xmlPopInputCallbacks
 xmlPrintURI
 xmlPushInput
 xmlRMutexLock
@@ -804,6 +809,7 @@ xmlRelaxNGFreeParserCtxt
 xmlRelaxNGFreeValidCtxt
 xmlRelaxNGGetParserErrors
 xmlRelaxNGGetValidErrors
+xmlRelaxNGInitTypes
 xmlRelaxNGNewDocParserCtxt
 xmlRelaxNGNewMemParserCtxt
 xmlRelaxNGNewParserCtxt
@@ -867,16 +873,26 @@ xmlSAXParseMemoryWithData
 xmlSAXUserParseFile
 xmlSAXUserParseMemory
 xmlSAXVersion
+xmlSaveClose
+xmlSaveDoc
 xmlSaveFile
 xmlSaveFileEnc
 xmlSaveFileTo
+xmlSaveFlush
 xmlSaveFormatFile
 xmlSaveFormatFileEnc
 xmlSaveFormatFileTo
+xmlSaveSetAttrEscape
+xmlSaveSetEscape
+xmlSaveToFd
+xmlSaveToFilename
+xmlSaveToIO
+xmlSaveTree
 xmlSaveUri
 xmlScanName
 xmlSchemaCheckFacet
 xmlSchemaCleanupTypes
+xmlSchemaCollapseString
 xmlSchemaCompareValues
 xmlSchemaDump
 xmlSchemaFree
@@ -885,8 +901,15 @@ xmlSchemaFreeParserCtxt
 xmlSchemaFreeType
 xmlSchemaFreeValidCtxt
 xmlSchemaFreeValue
+xmlSchemaFreeWildcard
+xmlSchemaGetBuiltInListSimpleTypeItemType
+xmlSchemaGetBuiltInType
+xmlSchemaGetFacetValueAsULong
+xmlSchemaGetParserErrors
 xmlSchemaGetPredefinedType
+xmlSchemaGetValidErrors
 xmlSchemaInitTypes
+xmlSchemaIsBuiltInTypeFacet
 xmlSchemaNewDocParserCtxt
 xmlSchemaNewFacet
 xmlSchemaNewMemParserCtxt
@@ -895,9 +918,15 @@ xmlSchemaNewValidCtxt
 xmlSchemaParse
 xmlSchemaSetParserErrors
 xmlSchemaSetValidErrors
+xmlSchemaSetValidOptions
 xmlSchemaValPredefTypeNode
+xmlSchemaValPredefTypeNodeNoNorm
+xmlSchemaValidCtxtGetOptions
 xmlSchemaValidateDoc
 xmlSchemaValidateFacet
+xmlSchemaValidateLengthFacet
+xmlSchemaValidateListSimpleTypeFacet
+xmlSchemaValidateOneElement
 xmlSchemaValidatePredefinedType
 xmlSchemaValidateStream
 xmlSearchNs
@@ -970,6 +999,7 @@ xmlTextReaderAttributeCount
 xmlTextReaderBaseUri
 xmlTextReaderClose
 xmlTextReaderConstBaseUri
+xmlTextReaderConstEncoding
 xmlTextReaderConstLocalName
 xmlTextReaderConstName
 xmlTextReaderConstNamespaceUri
@@ -977,6 +1007,7 @@ xmlTextReaderConstPrefix
 xmlTextReaderConstString
 xmlTextReaderConstValue
 xmlTextReaderConstXmlLang
+xmlTextReaderConstXmlVersion
 xmlTextReaderCurrentDoc
 xmlTextReaderCurrentNode
 xmlTextReaderDepth
@@ -991,6 +1022,7 @@ xmlTextReaderHasAttributes
 xmlTextReaderHasValue
 xmlTextReaderIsDefault
 xmlTextReaderIsEmptyElement
+xmlTextReaderIsNamespaceDecl
 xmlTextReaderIsValid
 xmlTextReaderLocalName
 xmlTextReaderLocatorBaseURI
@@ -1023,12 +1055,16 @@ xmlTextReaderRelaxNGValidate
 xmlTextReaderSetErrorHandler
 xmlTextReaderSetParserProp
 xmlTextReaderSetStructuredErrorHandler
+xmlTextReaderStandalone
 xmlTextReaderValue
 xmlTextReaderXmlLang
 xmlTextWriterEndAttribute
 xmlTextWriterEndCDATA
 xmlTextWriterEndComment
 xmlTextWriterEndDTD
+xmlTextWriterEndDTDAttlist
+xmlTextWriterEndDTDElement
+xmlTextWriterEndDTDEntity
 xmlTextWriterEndDocument
 xmlTextWriterEndElement
 xmlTextWriterEndPI
@@ -1059,6 +1095,7 @@ xmlTextWriterWriteDTDAttlist
 xmlTextWriterWriteDTDElement
 xmlTextWriterWriteDTDEntity
 xmlTextWriterWriteDTDExternalEntity
+xmlTextWriterWriteDTDExternalEntityContents
 xmlTextWriterWriteDTDInternalEntity
 xmlTextWriterWriteDTDNotation
 xmlTextWriterWriteElement
@@ -1102,7 +1139,9 @@ xmlThrDefIndentTreeOutput
 xmlThrDefKeepBlanksDefaultValue
 xmlThrDefLineNumbersDefaultValue
 xmlThrDefLoadExtDtdDefaultValue
+xmlThrDefOutputBufferCreateFilenameDefault
 xmlThrDefParserDebugEntities
+xmlThrDefParserInputBufferCreateFilenameDefault
 xmlThrDefPedanticParserDefaultValue
 xmlThrDefRegisterNodeDefault
 xmlThrDefSaveNoEmptyTags
@@ -1347,7 +1386,6 @@ xmlXPathCastToNumber
 xmlXPathCastToString
 xmlXPathCeilingFunction
 xmlXPathCmpNodes
-xmlXPathCtxtCompile
 xmlXPathCompareValues
 xmlXPathCompile
 xmlXPathCompiledEval
@@ -1480,7 +1518,6 @@ xmlXPathWrapCString
 xmlXPathWrapExternal
 xmlXPathWrapNodeSet
 xmlXPathWrapString
-xmlXPathErr
 xmlXPatherror
 xmlXPtrBuildNodeList
 xmlXPtrEval
@@ -1503,69 +1540,3 @@ xmlXPtrNewRangePointNode
 xmlXPtrNewRangePoints
 xmlXPtrRangeToFunction
 xmlXPtrWrapLocationSet
-xmlNewTextWriter
-xmlNewTextWriterDoc
-xmlNewTextWriterFilename
-xmlNewTextWriterMemory
-xmlNewTextWriterPushParser
-xmlNewTextWriterTree
-xmlFreeTextWriter
-xmlTextWriterEndAttribute
-xmlTextWriterEndCDATA
-xmlTextWriterEndComment
-xmlTextWriterEndDTD
-xmlTextWriterEndDTDAttlist
-xmlTextWriterEndDTDElement
-xmlTextWriterEndDTDEntity
-xmlTextWriterEndDocument
-xmlTextWriterEndElement
-xmlTextWriterEndPI
-xmlTextWriterFlush
-xmlTextWriterFullEndElement
-xmlTextWriterSetIndent
-xmlTextWriterSetIndentString
-xmlTextWriterStartAttribute
-xmlTextWriterStartAttributeNS
-xmlTextWriterStartCDATA
-xmlTextWriterStartComment
-xmlTextWriterStartDTD
-xmlTextWriterStartDTDAttlist
-xmlTextWriterStartDTDElement
-xmlTextWriterStartDTDEntity
-xmlTextWriterStartDocument
-xmlTextWriterStartElement
-xmlTextWriterStartElementNS
-xmlTextWriterStartPI
-xmlTextWriterWriteAttribute
-xmlTextWriterWriteAttributeNS
-xmlTextWriterWriteBase64
-xmlTextWriterWriteBinHex
-xmlTextWriterWriteCDATA
-xmlTextWriterWriteComment
-xmlTextWriterWriteDTD
-xmlTextWriterWriteDTDAttlist
-xmlTextWriterWriteDTDElement
-xmlTextWriterWriteDTDEntity
-xmlTextWriterWriteDTDExternalEntity
-xmlTextWriterWriteDTDExternalEntityContents
-xmlTextWriterWriteDTDInternalEntity
-xmlTextWriterWriteDTDNotation
-xmlTextWriterWriteElement
-xmlTextWriterWriteElementNS
-xmlTextWriterWriteFormatAttribute
-xmlTextWriterWriteFormatAttributeNS
-xmlTextWriterWriteFormatCDATA
-xmlTextWriterWriteFormatComment
-xmlTextWriterWriteFormatDTD
-xmlTextWriterWriteFormatDTDAttlist
-xmlTextWriterWriteFormatDTDElement
-xmlTextWriterWriteFormatDTDInternalEntity
-xmlTextWriterWriteFormatElement
-xmlTextWriterWriteFormatElementNS
-xmlTextWriterWriteFormatPI
-xmlTextWriterWriteFormatRaw
-xmlTextWriterWriteFormatString
-xmlTextWriterWritePI
-xmlTextWriterWriteRaw
-xmlTextWriterWriteRawLen
-xmlTextWriterWriteString
