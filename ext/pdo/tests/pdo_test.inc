@@ -43,6 +43,7 @@ class PDOTest {
 		// on a previous run
 		static $test_tables = array(
 			'test',
+			'test2',
 			'classtypes'
 			);
 		foreach ($test_tables as $table) {
