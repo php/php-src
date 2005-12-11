@@ -17,4 +17,4 @@ include dirname(__FILE__) . '/008_phar.php';
 echo file_get_contents('phar://hio/a');
 ?>
 --EXPECTF--
-Fatal error: file_get_contents(): phar error: internal corruption of phar "%s" (filesize mismatch on file "a") in %s on line 12
+Warning: file_get_contents(phar://hio/a): failed to open stream: phar error: internal corruption of phar "%s" (filesize mismatch on file "a") in %s on line 12

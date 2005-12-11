@@ -537,7 +537,7 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 		if (resource) {
 			php_url_free(resource);
 		}
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: invalid url \"%s\"", path);
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\"", path);
 		return NULL;
 	}
 
@@ -545,7 +545,7 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 		if (resource) {
 			php_url_free(resource);
 		}
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: not a phar stream url \"%s\"", path);
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: not a phar stream url \"%s\"", path);
 		return NULL;
 	}
 
@@ -574,7 +574,7 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 		buffer = idata->data->file;
 		efree(idata);
 		efree(internal_file);
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: cannot open phar \"%s\"", buffer);
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot open phar \"%s\"", buffer);
 		return NULL;
 	}
 
@@ -584,9 +584,10 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 		buffer = idata->data->file;
 		offset = idata->data->internal_file_start + idata->internal_file->offset_within_phar;
 		efree(idata);
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: internal corruption of phar \"%s\" (cannot seek to start of file \"%s\" at offset \"%d\")",
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (cannot seek to start of file \"%s\" at offset \"%d\")",
 			buffer, internal_file,
 			offset);
+		efree(internal_file);
 		return NULL;
 	}
 	if (idata->data->is_compressed) {
@@ -597,7 +598,8 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 			php_stream_close(fp);
 			buffer = idata->data->file;
 			efree(idata);
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: internal corruption of phar \"%s\" (filesize mismatch on file \"%s\")", buffer, internal_file);
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (filesize mismatch on file \"%s\")", buffer, internal_file);
+			efree(internal_file);
 			return NULL;
 		}
 		php_stream_close(fp);
@@ -626,7 +628,8 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 				buffer = idata->data->file;
 				efree(idata->file);
 				efree(idata);
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: internal corruption of phar \"%s\" (corrupted zlib compression of file \"%s\")", buffer, internal_file);
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (corrupted zlib compression of file \"%s\")", buffer, internal_file);
+				efree(internal_file);
 				return NULL;
 			}
 
@@ -658,7 +661,7 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 			efree(idata->file);
 			efree(idata);
 			efree(internal_file);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: %s", zError(status));
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: %s", zError(status));
 			return NULL;
 		}
 #define PHAR_ZLIB_ERROR efree(savebuf);\
@@ -671,25 +674,30 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 		/* check length */
 		if (actual_length != idata->internal_file->uncompressed_filesize) {
 			PHAR_ZLIB_ERROR
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: internal corruption of phar \"%s\" (filesize mismatch on file \"%s\")", buffer, internal_file);
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (filesize mismatch on file \"%s\")", buffer, internal_file);
+			efree(internal_file);
+			return NULL;
 		}
 		/* check crc32/filesize */
 		if (!idata->internal_file->crc_checked) {
 			status = phar_postprocess_file(idata->file, idata->internal_file->uncompressed_filesize, crc32, 0);
 			if (-1 == status) {
 				PHAR_ZLIB_ERROR
-						php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: internal corruption of phar \"%s\" (crc32 mismatch on file \"%s\")", buffer, internal_file);
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (crc32 mismatch on file \"%s\")", buffer, internal_file);
+				efree(internal_file);
 				return NULL;
 			}
 			if (-2 == status) {
 				PHAR_ZLIB_ERROR
-						php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: internal corruption of phar \"%s\" (filesize mismatch on file \"%s\")", buffer, internal_file);
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (filesize mismatch on file \"%s\")", buffer, internal_file);
+				efree(internal_file);
 				return NULL;
 			}
 			idata->internal_file->crc_checked = 1;
 		}
 #else
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "zlib extension must be enabled for compressed .phar files");
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "zlib extension must be enabled for compressed .phar files");
+		efree(internal_file);
 		return NULL;
 #endif
 	} else {
@@ -700,7 +708,8 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 			efree(idata->file);
 			buffer = idata->data->file;
 			efree(idata);
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: internal corruption of phar \"%s\" (filesize mismatch on file \"%s\")", buffer, internal_file);
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (filesize mismatch on file \"%s\")", buffer, internal_file);
+			efree(internal_file);
 			return NULL;
 		}
 		php_stream_close(fp);
@@ -711,14 +720,16 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 				efree(idata->file);
 				buffer = idata->data->file;
 				efree(idata);
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: internal corruption of phar \"%s\" (crc32 mismatch on file \"%s\")", buffer, internal_file);
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (crc32 mismatch on file \"%s\")", buffer, internal_file);
+				efree(internal_file);
 				return NULL;
 			}
 			if (-2 == status) {
 				efree(idata->file);
 				buffer = idata->data->file;
 				efree(idata);
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: internal corruption of phar \"%s\" (filesize mismatch on file \"%s\")", buffer, internal_file);
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (filesize mismatch on file \"%s\")", buffer, internal_file);
+				efree(internal_file);
 				return NULL;
 			}
 			idata->internal_file->crc_checked = 1;
@@ -904,14 +915,14 @@ PHP_PHAR_API int phar_stream_stat(php_stream_wrapper *wrapper, char *url, int fl
 	/* we must have at the very least phar://alias.phar/internalfile.php */
 	if (!resource || !resource->scheme || !resource->host || !resource->path) {
 		php_url_free(resource);
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: invalid url \"%s\"", url);
+		php_stream_wrapper_log_error(wrapper, flags TSRMLS_CC, "phar error: invalid url \"%s\"", url);
 		php_url_free(resource);
 		return -1;
 	}
 
 	if (strcasecmp("phar", resource->scheme)) {
 		php_url_free(resource);
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: not a phar url \"%s\"", url);
+		php_stream_wrapper_log_error(wrapper, flags TSRMLS_CC, "phar error: not a phar url \"%s\"", url);
 		return -1;
 	}
 
@@ -1025,13 +1036,13 @@ PHP_PHAR_API php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filenam
 	/* we must have at the very least phar://alias.phar/internalfile.php */
 	if (!resource || !resource->scheme || !resource->host || !resource->path) {
 		php_url_free(resource);
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: invalid url \"%s\"", filename);
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\"", filename);
 		return NULL;
 	}
 
 	if (strcasecmp("phar", resource->scheme)) {
 		php_url_free(resource);
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "phar error: not a phar url \"%s\"", filename);
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: not a phar url \"%s\"", filename);
 		return NULL;
 	}
 
