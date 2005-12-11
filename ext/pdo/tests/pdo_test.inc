@@ -35,6 +35,10 @@ class PDOTest {
 		
 		$db = new $classname($dsn, $user, $pass, $attr);
 
+		if (!$db) {
+			die("Could not create PDO object (DSN=$dsn, user=$user)\n");
+		}
+
 		// clean up any crufty test tables we might have left behind
 		// on a previous run
 		static $test_tables = array(
