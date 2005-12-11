@@ -661,7 +661,7 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 			efree(idata->file);
 			efree(idata);
 			efree(internal_file);
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar compression error");
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: decompression failed");
 			return NULL;
 		}
 #define PHAR_ZLIB_ERROR efree(savebuf);\
