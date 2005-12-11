@@ -525,8 +525,9 @@ static php_ldap_bictx *_php_sasl_setdefs(LDAP *ld, char *sasl_mech, char *sasl_r
 
 	return ctx;
 }
+/* }}} */
 
-/* {{{ _php_sasl_setdefs
+/* {{{ _php_sasl_freedefs
  */
 static void _php_sasl_freedefs(php_ldap_bictx *ctx)
 {
@@ -537,6 +538,7 @@ static void _php_sasl_freedefs(php_ldap_bictx *ctx)
 	if (ctx->authzid) ber_memfree(ctx->authzid);
 	ber_memfree(ctx);
 }
+/* }}} */
 
 /* {{{ _php_sasl_interact
    Internal interact function for SASL */
@@ -569,6 +571,7 @@ static int _php_sasl_interact(LDAP *ld, unsigned flags, void *defaults, void *in
 	}
 	return LDAP_SUCCESS;
 }
+/* }}} */
 
 /* {{{ proto bool ldap_sasl_bind(resource link [, string binddn, string password, string sasl_mech, string sasl_realm, string sasl_authz_id, string props])
    Bind to LDAP directory using SASL */
