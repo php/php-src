@@ -1179,7 +1179,11 @@ int main(int argc, char *argv[])
 
 					switch (behavior) {
 						case PHP_MODE_REFLECTION_FUNCTION:
-							pce = reflection_function_ptr;
+							if (strstr(reflection_what, "::")) {
+								pce = reflection_method_ptr;
+							} else {
+								pce = reflection_function_ptr;
+							}
 							break;
 						case PHP_MODE_REFLECTION_CLASS:
 							pce = reflection_class_ptr;
