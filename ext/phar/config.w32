@@ -6,6 +6,9 @@ ARG_ENABLE("phar", "enable phar support", "no");
 if (PHP_PHAR != "no") {
 	if (PHP_ZLIB != "no") {
 		EXTENSION("phar", "phar.c");
+		if (!PHP_ZLIB_SHARED) {
+			AC_DEFINE("HAVE_PHAR_ZLIB", 1, "ZLIB support in phar");
+		}
 	} else {
 		EXTENSION("phar", "phar.c", null, "/D ZLIB_EXPORTS");
 		AC_DEFINE("HAVE_PHAR_ZLIB", 1, "ZLIB support in phar");
