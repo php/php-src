@@ -36,7 +36,7 @@
 #include "php_interbase.h"
 #include "php_ibase_includes.h"
 #include "SAPI.h"
-5B
+
 #include <time.h>
 
 #define ROLLBACK		0
