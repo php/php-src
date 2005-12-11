@@ -374,7 +374,7 @@ static php_stream_ops phar_dir_ops = {
 	"phar stream",
 	NULL, /* seek */
 	NULL, /* cast */
-	NULL, /* stat */
+	phar_stat, /* stat */
 	NULL, /* set option */
 };
 
@@ -863,11 +863,13 @@ PHP_PHAR_API int phar_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC
 static void phar_dostat(phar_manifest_entry *data, php_stream_statbuf *ssb, zend_bool is_dir TSRMLS_DC)
 {
 	memset(ssb, 0, sizeof(php_stream_statbuf));
+	/* read-only across the board */
 	ssb->sb.st_mode = 0444;
 
 	if (!is_dir) {
 		ssb->sb.st_size = data->uncompressed_filesize;
-		ssb->sb.st_mode |= S_IFREG;
+		ssb->sb.st_mode |= S_IFREG; /* regular file */
+		/* timestamp is just the timestamp when this was added to the phar */
 #ifdef NETWARE
 		ssb->sb.st_mtime.tv_sec = data->timestamp;
 		ssb->sb.st_atime.tv_sec = data->timestamp;
@@ -879,7 +881,7 @@ static void phar_dostat(phar_manifest_entry *data, php_stream_statbuf *ssb, zend
 #endif
 	} else {
 		ssb->sb.st_size = 0;
-		ssb->sb.st_mode |= S_IFDIR;
+		ssb->sb.st_mode |= S_IFDIR; /* regular directory */
 #ifdef NETWARE
 		ssb->sb.st_mtime.tv_sec = 0;
 		ssb->sb.st_atime.tv_sec = 0;
@@ -927,6 +929,7 @@ PHP_PHAR_API int phar_stream_stat(php_stream_wrapper *wrapper, char *url, int fl
 	}
 
 	internal_file = resource->path + 1; /* strip leading "/" */
+	/* find the phar in our trusty global hash indexed by alias (host of phar://blah.phar/file.whatever) */
 	if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_data), resource->host, strlen(resource->host), (void **) &data)) {
 		if (*internal_file == '\0') {
 			/* root directory requested */
@@ -934,22 +937,25 @@ PHP_PHAR_API int phar_stream_stat(php_stream_wrapper *wrapper, char *url, int fl
 			php_url_free(resource);
 			return 0;
 		}
+		/* search through the manifest of files, and if we have an exact match, it's a file */
 		if (SUCCESS == zend_hash_find(data->manifest, internal_file, strlen(internal_file), (void **) &file_data)) {
 			phar_dostat(file_data, ssb, 0 TSRMLS_CC);
 		} else {
-			/* search for directory */
+			/* search for directory (partial match of a file) */
 			zend_hash_internal_pointer_reset(data->manifest);
-			while (zend_hash_has_more_elements(data->manifest)) {
+			while (HASH_KEY_NON_EXISTANT != zend_hash_has_more_elements(data->manifest)) {
 				if (HASH_KEY_NON_EXISTANT !=
 						zend_hash_get_current_key_ex(
 							data->manifest, &key, &keylen, &unused, 0, NULL)) {
-					if (0 == memcmp(key, internal_file, keylen)) {
-						/* directory found */
+					if (0 == memcmp(internal_file, key, strlen(internal_file))) {
+						/* directory found, all dirs have the same stat */
 						phar_dostat(NULL, ssb, 1 TSRMLS_CC);
 						break;
 					}
 				}
-				zend_hash_move_forward(data->manifest);
+				if (SUCCESS != zend_hash_move_forward(data->manifest)) {
+					break;
+				}
 			}
 		}
 	}
@@ -958,6 +964,7 @@ PHP_PHAR_API int phar_stream_stat(php_stream_wrapper *wrapper, char *url, int fl
 	return 0;
 }
 
+/* add an empty element with a char * key to a hash table, avoiding duplicates */
 static int phar_add_empty(HashTable *ht, char *arKey, uint nKeyLength)
 {
 	void *dummy = (void *) 1;
@@ -1033,10 +1040,15 @@ PHP_PHAR_API php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filenam
 	phar_manifest_entry *file_data;
 
 	resource = php_url_parse(filename);
-	/* we must have at the very least phar://alias.phar/internalfile.php */
+	/* we must have at the very least phar://alias.phar/ */
 	if (!resource || !resource->scheme || !resource->host || !resource->path) {
+		if (resource->host && !resource->path) {
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: no directory in \"%s\", must have at least phar://%s/ for root directory", filename, resource->host);
+			php_url_free(resource);
+			return NULL;
+		}
 		php_url_free(resource);
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\"", filename);
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\", must have at least phar://%s/", filename, filename);
 		return NULL;
 	}
 
