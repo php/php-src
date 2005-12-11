@@ -139,8 +139,11 @@ static const opt_struct OPTIONS[] = {
 	{'v', 0, "version"},
 	{'z', 1, "zend-extension"},
 #ifdef HAVE_REFLECTION
+	{10,  1, "rf"},
 	{10,  1, "rfunction"},
+	{11,  1, "rc"},
 	{11,  1, "rclass"},
+	{12,  1, "re"},
 	{12,  1, "rextension"},
 #endif
 	{'-', 0, NULL} /* end of args */
@@ -430,6 +433,10 @@ static void php_cli_usage(char *argv0)
 				"\n"
 				"  args...          Arguments passed to script. Use -- args when first argument\n"
 				"                   starts with - or script is read from stdin\n"
+				"\n"
+				"  --rf <name>      Show information about function <name>.\n"
+				"  --rc <name>      Show information about class <name>.\n"
+				"  --re <name>      Show information about extension <name>.\n"
 				"\n"
 				, prog, prog, prog, prog, prog, prog);
 }

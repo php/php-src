@@ -283,6 +283,36 @@ Arguments passed to script. Use
 when first argument starts with 
 .B '\-'
 or script is read from stdin
+.TP
+.PD 0
+.B \-\-rfunction
+.IR name
+.TP
+.PD 1
+.B \-\-rf
+.IR name
+Shows information about function
+.B name
+.TP
+.PD 0
+.B \-\-rclass
+.IR name
+.TP
+.PD 1
+.B \-\-rc
+.IR name
+Shows information about class
+.B name
+.TP
+.PD 0
+.B \-\-rextension
+.IR name
+.TP
+.PD 1
+.B \-\-re
+.IR name
+Shows information about extension
+.B name
 .SH FILES
 .TP 15
 .B php\-cli.ini
