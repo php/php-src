@@ -377,25 +377,17 @@ static spl_filesystem_object * spl_filesystem_object_create_type(int ht, spl_fil
 	return NULL;
 } /* }}} */
 
-/* {{{ proto void DirectoryIterator::__construct(string path [, int flags])
+/* {{{ proto void DirectoryIterator::__construct(string path)
  Cronstructs a new dir iterator from a path. */
-/* php_set_error_handling() is used to throw exceptions in case
-   the constructor fails. Here we use this to ensure the object
-   has a valid directory resource.
-   
-   When the constructor gets called the object is already created 
-   by the engine, so we must only call 'additional' initializations.
- */
 SPL_METHOD(DirectoryIterator, __construct)
 {
 	spl_filesystem_object *intern;
 	char *path;
 	int len;
-	long flags = 0;
 
 	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &path, &len, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &path, &len) == FAILURE) {
 		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 		return;
 	}
@@ -403,7 +395,7 @@ SPL_METHOD(DirectoryIterator, __construct)
 	intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	spl_filesystem_dir_open(intern, path TSRMLS_CC);
 	intern->u.dir.is_recursive = instanceof_function(intern->std.ce, spl_ce_RecursiveDirectoryIterator TSRMLS_CC) ? 1 : 0;
-	intern->flags = flags;
+	intern->flags = 0;
 
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 }
@@ -544,7 +536,7 @@ SPL_METHOD(RecursiveDirectoryIterator, key)
 /* }}} */
 
 /* {{{ proto string RecursiveDirectoryIterator::current()
-   Return getFilename() or getFileInfo() depending on flags */
+   Return getFilename(), getFileInfo() or $this depending on flags */
 SPL_METHOD(RecursiveDirectoryIterator, current)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
@@ -754,6 +746,31 @@ SPL_METHOD(SplFileInfo, getPathInfo)
 
 	spl_filesystem_object_create_info(intern, intern->path, intern->path_len, 1, ce, return_value TSRMLS_CC);
 }
+
+/* {{{ proto void RecursiveDirectoryIterator::__construct(string path [, int flags])
+ Cronstructs a new dir iterator from a path. */
+SPL_METHOD(RecursiveDirectoryIterator, __construct)
+{
+	spl_filesystem_object *intern;
+	char *path;
+	int len;
+	long flags = SPL_FILE_DIR_CURRENT_AS_FILEINFO;
+
+	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &path, &len, &flags) == FAILURE) {
+		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+		return;
+	}
+
+	intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	spl_filesystem_dir_open(intern, path TSRMLS_CC);
+	intern->u.dir.is_recursive = instanceof_function(intern->std.ce, spl_ce_RecursiveDirectoryIterator TSRMLS_CC) ? 1 : 0;
+	intern->flags = flags;
+
+	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+}
+/* }}} */
 
 /* {{{ proto void RecursiveDirectoryIterator::rewind()
    Rewind dir back to the start */
@@ -1238,7 +1255,14 @@ static zend_function_entry spl_DirectoryIterator_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+static
+ZEND_BEGIN_ARG_INFO(arginfo_r_dir___construct, 0) 
+	ZEND_ARG_INFO(0, path)
+	ZEND_ARG_INFO(0, flags)
+ZEND_END_ARG_INFO();
+
 static zend_function_entry spl_RecursiveDirectoryIterator_functions[] = {
+	SPL_ME(RecursiveDirectoryIterator, __construct,   arginfo_r_dir___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveDirectoryIterator, rewind,        NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveDirectoryIterator, next,          NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveDirectoryIterator, key,           NULL, ZEND_ACC_PUBLIC)
