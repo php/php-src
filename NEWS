@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 200?, PHP 5.1.2
+?? Jan 2006, PHP 5.1.2
 - Updated to libxml2-2.6.22 and libxslt-1.1.15 in the win32 bundle. (Rob)
 - Added new extensions: (Ilia, Wez)
   . XMLWriter
@@ -8,10 +8,10 @@ PHP                                                                        NEWS
 - Added PNG compression support to GD extension. (Pierre)
 - Added reflection constants as class constants. (Johannes)
 - Added --enable-gcov configure option to enable C-level code coverage.
-  (John, Jani)
+  (John, Jani, Ilia, Marcus)
 - Added missing support for 'B' format identifier to date() function. (Ilia)
 - Changed reflection to be an extension. (Marcus)
-- Improved SPL: (Marcus)
+- Improved SPL extension: (Marcus)
   . Added class SplFileInfo as root class for DirectoryIterator and 
     SplFileObject
 - Improved SimpleXML extension: (Marcus)
@@ -20,7 +20,8 @@ PHP                                                                        NEWS
   . Fixed isset/empty/(bool) behavior
   . Fixed iterator edge cases
   . Added methods getNamespaces(), getDocNamespaces()
-- Prevent header injection by limiting each header to a single line. (Ilia)
+- Fixed possible header injection by limiting each header to a single line.
+  (Ilia)
 - Fixed possible XSS inside error reporting functionality. (Ilia)
 - Fixed many bugs in OCI8. (Tony)
 - Fixed crash and leak in mysqli when using 4.1.x client libraries and
