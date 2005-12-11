@@ -2,7 +2,7 @@
 FIREBIRD
 --SKIPIF--
 <?php # vim:ft=php
-if (!extension_loaded('pdo_odbc')) print 'skip'; ?>
+if (!extension_loaded('pdo_firebird')) print 'skip'; ?>
 --REDIRECTTEST--
 # magic auto-configuration
 
