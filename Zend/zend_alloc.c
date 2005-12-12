@@ -558,6 +558,7 @@ ZEND_API void shutdown_memory_manager(int silent, int full_shutdown TSRMLS_DC)
 
 			grand_total_leaks++;
 			if (!silent) {
+				zend_message_dispatcher(ZMSG_LOG_SCRIPT_NAME, NULL);
 				zend_message_dispatcher(ZMSG_MEMORY_LEAK_DETECTED, t);
 			}
 			t->reported = 1;
