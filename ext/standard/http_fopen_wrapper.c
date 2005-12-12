@@ -94,7 +94,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	int scratch_len = 0;
 	int body = 0;
 	char location[HTTP_HEADER_BLOCK_SIZE];
-	zval **response_header = NULL;
+	zval *response_header = NULL;
 	int reqok = 0;
 	char *http_header_line = NULL;
 	char tmp_line[128];
@@ -461,18 +461,17 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 
 	location[0] = '\0';
 
-	if (!header_init) {
-		MAKE_STD_ZVAL(stream->wrapperdata);
-		array_init(stream->wrapperdata);
-		response_header = &stream->wrapperdata;
-	} else {
+	if (header_init) {
 		zval *tmp;
 		MAKE_STD_ZVAL(tmp);
 		array_init(tmp);
 		ZEND_SET_SYMBOL(EG(active_symbol_table), "http_response_header", tmp);
-	
-		zend_hash_find(EG(active_symbol_table),
-				"http_response_header", sizeof("http_response_header"), (void **) &response_header);
+	}
+
+	{
+		zval **rh;
+		zend_hash_find(EG(active_symbol_table), "http_response_header", sizeof("http_response_header"), (void **) &rh);
+		response_header = *rh;
 	}
 
 	if (!php_stream_eof(stream)) {
@@ -515,7 +514,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 			}
 			MAKE_STD_ZVAL(http_response);
 			ZVAL_STRINGL(http_response, tmp_line, tmp_line_len, 1);
-			zend_hash_next_index_insert(Z_ARRVAL_PP(response_header), &http_response, sizeof(zval *), NULL);
+			zend_hash_next_index_insert(Z_ARRVAL_P(response_header), &http_response, sizeof(zval *), NULL);
 		}
 	} else {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "HTTP request failed, unexpected end of socket!");
@@ -554,7 +553,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 
 				ZVAL_STRINGL(http_header, http_header_line, http_header_line_length, 1);
 				
-				zend_hash_next_index_insert(Z_ARRVAL_PP(response_header), &http_header, sizeof(zval *), NULL);
+				zend_hash_next_index_insert(Z_ARRVAL_P(response_header), &http_header, sizeof(zval *), NULL);
 			}
 		} else {
 			break;
@@ -570,7 +569,6 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 
 		if (location[0] != '\0')	{
 
-			zval *entry, **entryp;
 			char new_path[HTTP_HEADER_BLOCK_SIZE];
 			char loc_path[HTTP_HEADER_BLOCK_SIZE];
 
@@ -641,20 +639,6 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 			CHECK_FOR_CNTRL_CHARS(resource->path)
 
 			stream = php_stream_url_wrap_http_ex(wrapper, new_path, mode, options, opened_path, context, --redirect_max, 0 STREAMS_CC TSRMLS_CC);
-			if (stream && stream->wrapperdata && *response_header != stream->wrapperdata) {
-				entryp = &entry;
-				MAKE_STD_ZVAL(entry);
-				ZVAL_EMPTY_STRING(entry);
-				zend_hash_next_index_insert(Z_ARRVAL_PP(response_header), entryp, sizeof(zval *), NULL);
-				zend_hash_internal_pointer_reset(Z_ARRVAL_P(stream->wrapperdata));
-				while (zend_hash_get_current_data(Z_ARRVAL_P(stream->wrapperdata), (void **)&entryp) == SUCCESS) {
-					zval_add_ref(entryp);
-					zend_hash_next_index_insert(Z_ARRVAL_PP(response_header), entryp, sizeof(zval *), NULL);
-					zend_hash_move_forward(Z_ARRVAL_P(stream->wrapperdata));
-				}
-				zval_dtor(stream->wrapperdata);
-				FREE_ZVAL(stream->wrapperdata);
-			}
 		} else {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "HTTP request failed! %s", tmp_line);
 		}
@@ -678,8 +662,8 @@ out:
 
 	if (stream) {
 		if (header_init) {
-			stream->wrapperdata = *response_header;
-			zval_add_ref(response_header);
+			zval_add_ref(&response_header);
+			stream->wrapperdata = response_header;
 		}
 		php_stream_notify_progress_init(context, 0, file_size);
 		/* Restore original chunk size now that we're done with headers */
