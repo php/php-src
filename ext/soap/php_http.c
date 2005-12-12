@@ -32,7 +32,7 @@ static int get_http_headers(php_stream *socketd,char **response, int *out_size T
 
 static int stream_alive(php_stream *stream  TSRMLS_DC)
 {
-	int socket;
+	long socket;
 	char buf;
 
 	/* maybe better to use:
