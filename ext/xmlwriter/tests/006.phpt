@@ -3,7 +3,6 @@ XMLWriter: libxml2 XML Writer, startDTD/writeElementNS
 --SKIPIF--
 <?php 
 if (!extension_loaded("xmlwriter")) die("skip"); 
-if (!function_exists("xmlwriter_start_comment")) die("skip: libxml2 2.6.7+ required");
 ?>
 --FILE--
 <?php 
