@@ -1,0 +1,4 @@
+TODO:
+
+features:
+- stream context option for cleaning crap paths like phar://blah.phar/file//to\\here.php

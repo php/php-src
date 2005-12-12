@@ -360,7 +360,7 @@ static php_stream_ops phar_ops = {
 	phar_close, /* close */
 	phar_flush, /* flush (does nothing) */
 	"phar stream",
-	NULL, /* seek */
+	phar_seek, /* seek */
 	NULL, /* cast */
 	phar_stat, /* stat */
 	NULL, /* set option */
@@ -708,7 +708,7 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 			efree(idata->file);
 			buffer = idata->data->file;
 			efree(idata);
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (filesize mismatch on file \"%s\")", buffer, internal_file);
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", buffer, internal_file);
 			efree(internal_file);
 			return NULL;
 		}

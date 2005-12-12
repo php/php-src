@@ -18,4 +18,4 @@ include dirname(__FILE__) . '/008_phar.php';
 echo file_get_contents('phar://hio/a');
 ?>
 --EXPECTF--
-Warning: file_get_contents(phar://hio/a): failed to open stream: phar error: data error in %s on line %d
+Warning: file_get_contents(phar://hio/a): failed to open stream: phar error: decompression failed in %s on line %d
