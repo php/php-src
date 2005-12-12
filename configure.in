@@ -703,8 +703,9 @@ if test "$PHP_CONFIG_FILE_PATH" = "DEFAULT"; then
   esac
 fi
 
-PHP_ARG_WITH(config-file-scan-dir,[directory to be scanned for configuration files],
-[  --with-config-file-scan-dir=PATH ], DEFAULT, no) 
+PHP_ARG_WITH(config-file-scan-dir,[where to scan for configuration files], 
+[  --with-config-file-scan-dir=PATH
+                          Set the path where to scan for configuration files], DEFAULT, no) 
 if test "$PHP_CONFIG_FILE_SCAN_DIR" = "DEFAULT"; then
   PHP_CONFIG_FILE_SCAN_DIR=
 fi
