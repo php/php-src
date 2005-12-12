@@ -38,6 +38,10 @@
 #define strcasecmp stricmp
 #endif
 
+#if defined(_MSC_VER) && !defined(strncasecmp)
+#define strncasecmp strnicmp
+#endif
+
 /* From dow.c */
 timelib_sll timelib_day_of_week(timelib_sll y, timelib_sll m, timelib_sll d);
 timelib_sll timelib_iso_day_of_week(timelib_sll y, timelib_sll m, timelib_sll d);
