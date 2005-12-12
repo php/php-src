@@ -13,7 +13,7 @@ CLEAN_FILES="$FILES *.o *.lo *.la .deps .libs/ build/ include/ modules/ install-
 	mkinstalldirs missing config.nice config.sub config.guess configure configure.in \
 	aclocal.m4 config.h config.h.in conftest* ltmain.sh libtool config.cache autom4te.cache/ \
 	config.log config.status Makefile Makefile.fragments Makefile.objects confdefs.h \
-	run-tests*.php tests/*.diff tests/*.exp tests/*.log tests/*.out"
+	run-tests*.php tests/*.diff tests/*.exp tests/*.log tests/*.out tests/*.php"
 
 # function declaration
 phpize_usage()
