@@ -2285,7 +2285,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_HEREDOC>^{LABEL}(";")?{NEWLINE} {
 	int label_len;
-	unsigned char unput_semicolon;
 
 	CG(zend_lineno)++;
 	if (yytext[yyleng-2]=='\r') {
@@ -2296,17 +2295,12 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 	if (yytext[label_len-1]==';') {
 		label_len--;
-		unput_semicolon=1;
-	} else{
-		unput_semicolon=0;
 	}
 
 	if (label_len==CG(heredoc_len) && !memcmp(yytext, CG(heredoc), label_len)) {
 		zendlval->value.str.val = estrndup(yytext, label_len); /* unput destroys yytext */
 		zendlval->value.str.len = label_len;
-		if (unput_semicolon) {
-			unput(';');
-		}
+		yyless(yyleng - (yyleng - label_len));
 		efree(CG(heredoc));
 		CG(heredoc)=NULL;
 		CG(heredoc_len)=0;
