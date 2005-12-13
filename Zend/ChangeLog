@@ -1,3 +1,20 @@
+2005-12-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      zend_operators.c:
+      - Enforce termination to prevent possible SEGVs
+
+2005-12-12  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      zend_alloc.c:
+      MFH:- Include timestamp for the leaks. (to make possible matching leaks
+      with access_log entries)
+
+    * zend_alloc.c:
+      - Include timestamp for the leaks. (to make possible matching leaks with
+      access_log entries)
+
 2005-12-09  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_execute_API.c
