@@ -2118,7 +2118,7 @@ ZEND_API char *zend_str_tolower_copy(char *dest, const char *source, unsigned in
 	while (str < end) {
 		*result++ = tolower((int)*str++);
 	}
-	*result = *end;
+	*result = '\0';
 
 	return dest;
 }
@@ -2138,7 +2138,7 @@ ZEND_API void *zend_u_str_tolower_copy(zend_uchar type, void *dest, const void *
 		while (str < end) {
 			*result++ = u_tolower((int)*str++);
 		}
-		*result = *end;
+		*result = '\0';
 
 		return dest;
 	} else {
