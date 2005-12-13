@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+http://pear.php.net/dtd/tasks-1.0.xsd
+http://pear.php.net/dtd/package-2.0
+http://pear.php.net/dtd/package-2.0.xsd">
+ <name>phar</name>
+ <channel>pecl.php.net</channel>
+ <summary>allows running of complete applications out of .phar files (like Java .jar files)</summary>
+ <description>
+This is the extension version of PEAR's PHP_Archive package. Support for zlib and crc32 is achieved without any dependency other than the external libz. The zlib extension need not be enabled to take advantage of compressed .phar files.
+
+.phar files should be created using pear.php.net/PHP_Archive
+ </description>
+ <lead>
+  <name>Greg Beaver</name>
+  <user>cellog</user>
+  <email>cellog@php.net</email>
+  <active>yes</active>
+ </lead>
+ <date>2005-12-12</date>
+ <version>
+  <release>0.1.0</release>
+  <api>0.1.0</api>
+ </version>
+ <stability>
+  <release>alpha</release>
+  <api>alpha</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP License</license>
+ <notes>
+  Initial release.  This release is fully regression-tested and works on
+  both windows and unix with existing phars go-pear.phar/install-pear-nozlib.phar
+ </notes>
+ <contents>
+  <dir name="/">
+   <dir name="tests">
+    <file name="001.phpt" role="test"/>
+    <file name="002.phpt" role="test"/>
+    <file name="003.phpt" role="test"/>
+    <file name="004.phpt" role="test"/>
+    <file name="005.phpt" role="test"/>
+    <file name="006.phpt" role="test"/>
+    <file name="007.phpt" role="test"/>
+    <file name="008.phpt" role="test"/>
+    <file name="009.phpt" role="test"/>
+    <file name="010.phpt" role="test"/>
+    <file name="011.phpt" role="test"/>
+    <file name="012.phpt" role="test"/>
+    <file name="013.phpt" role="test"/>
+    <file name="014.phpt" role="test"/>
+    <file name="015.phpt" role="test"/>
+    <file name="016.phpt" role="test"/>
+    <file name="017.phpt" role="test"/>
+    <file name="018.phpt" role="test"/>
+    <file name="019.phpt" role="test"/>
+    <file name="020.phpt" role="test"/>
+    <file name="021.phpt" role="test"/>
+    <file name="022.phpt" role="test"/>
+   </dir> <!-- /tests -->
+   <file name="config.m4" role="src"/>
+   <file name="config.w32" role="src"/>
+   <file name="CREDITS" role="doc"/>
+   <file name="EXPERIMENTAL" role="src"/>
+   <file name="phar.c" role="src"/>
+   <file name="php_phar.h" role="src"/>
+  </dir> <!-- / -->
+ </contents>
+ <dependencies>
+  <required>
+   <php>
+    <min>5.1.0</min>
+   </php>
+   <pearinstaller>
+    <min>1.4.3</min>
+   </pearinstaller>
+  </required>
+ </dependencies>
+ <providesextension>phar</providesextension>
+ <extsrcrelease/>
+</package>
