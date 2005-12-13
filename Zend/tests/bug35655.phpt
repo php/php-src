@@ -1,0 +1,18 @@
+--TEST--
+Bug #35655 (whitespace following end of heredoc is lost)
+--FILE--
+<?php
+$code = '
+<? 
+  $x = <<<EOT
+some string    
+EOT
+  $y = 2;
+?>';
+highlight_string($code);
+?>
+--EXPECT--
+<code><span style="color: #000000">
+<br /><span style="color: #0000BB">&lt;?&nbsp;<br />&nbsp;&nbsp;$x&nbsp;</span><span style="color: #007700">=&nbsp;&lt;&lt;&lt;EOT<br /></span><span style="color: #0000BB">some&nbsp;string&nbsp;&nbsp;&nbsp;&nbsp;<br /></span><span style="color: #007700">EOT<br />&nbsp;&nbsp;</span><span style="color: #0000BB">$y&nbsp;</span><span style="color: #007700">=&nbsp;</span><span style="color: #0000BB">2</span><span style="color: #007700">;<br /></span><span style="color: #0000BB">?&gt;</span>
+</span>
+</code>
