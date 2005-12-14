@@ -5918,7 +5918,7 @@ PHP_FUNCTION(str_repeat)
 		input_str_len = UBYTES(input_str_chars);
 		result_len = UBYTES(result_chars);
 		if ( result_chars < 1 || result_chars > (2147483647/UBYTES(1)) ) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "You may not create strings longer then %ld characters", 2147483647/UBYTES(1));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "You may not create strings longer than %ld characters", 2147483647/UBYTES(1));
 			RETURN_FALSE;
 		}
 	} else {
@@ -5926,9 +5926,9 @@ PHP_FUNCTION(str_repeat)
 		result_len = result_chars;
 		if ( result_chars < 1 || result_chars > 2147483647 ) {
 			if ( input_str_type == IS_STRING ) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "You may not create strings longer then 2147483647 characters");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "You may not create strings longer than 2147483647 characters");
 			} else {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "You may not create strings longer then 2147483647 bytes");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "You may not create strings longer than 2147483647 bytes");
 			}
 			RETURN_FALSE;
 		}
