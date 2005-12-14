@@ -120,7 +120,7 @@ PHP_METHOD(PHP_Archive, mapPhar)
 	zval *halt_constant, **unused1, **unused2;
 	php_stream *fp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zsb|z", &unused1, &alias, &alias_len, &compressed, &unused2) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sb|zz", &alias, &alias_len, &compressed, &unused1, &unused2) == FAILURE) {
 		return;
 	}
 #ifndef HAVE_PHAR_ZLIB
@@ -282,10 +282,7 @@ PHP_METHOD(PHP_Archive, mapPhar)
 	php_stream_close(fp);
 }
 
-PHP_METHOD(PHP_Archive, apiVersion)
-{
-	RETURN_STRING("0.7", 3);
-}
+PHP_METHOD(PHP_Archive, apiVersion);
 
 zend_function_entry php_archive_methods[] = {
 	PHP_ME(PHP_Archive, mapPhar, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
@@ -319,16 +316,6 @@ zend_module_entry phar_module_entry = {
 #ifdef COMPILE_DL_PHAR
 ZEND_GET_MODULE(phar)
 #endif
-
-/* {{{ PHP_INI
- */
-/* Remove comments and fill if you need to have entries in php.ini
-PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("phar.global_value",      "42", PHP_INI_ALL, OnUpdateLong, global_value, zend_phar_globals, phar_globals)
-    STD_PHP_INI_ENTRY("phar.global_string", "foobar", PHP_INI_ALL, OnUpdateString, global_string, zend_phar_globals, phar_globals)
-PHP_INI_END()
-*/
-/* }}} */
 
 /* {{{ php_phar_init_globals
  */
@@ -433,9 +420,6 @@ PHP_MINIT_FUNCTION(phar)
  */
 PHP_MSHUTDOWN_FUNCTION(phar)
 {
-	/* uncomment this line if you have INI entries
-	UNREGISTER_INI_ENTRIES();
-	*/
 	return php_unregister_url_stream_wrapper("phar" TSRMLS_CC);
 }
 /* }}} */
@@ -461,17 +445,25 @@ PHP_RSHUTDOWN_FUNCTION(phar)
 }
 /* }}} */
 
+PHP_METHOD(PHP_Archive, apiVersion)
+{
+	RETURN_STRING("0.7.1", 3);
+}
+
 /* {{{ PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(phar)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "phar PHP Archive support", "enabled");
+	php_info_print_table_row(2, "phar API version", "0.7.1");
+	php_info_print_table_row(2, "CVS revision", "$Id$");
+#ifdef HAVE_PHAR_ZLIB
+	php_info_print_table_row(2, "compressed phar support", "enabled");
+#else
+	php_info_print_table_row(2, "compressed phar support", "disabled");
+#endif
 	php_info_print_table_end();
-
-	/* Remove comments if you have entries in php.ini
-	DISPLAY_INI_ENTRIES();
-	*/
 }
 /* }}} */
 
