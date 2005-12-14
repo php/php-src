@@ -327,7 +327,6 @@ if test "$PHP_GD" != "no"; then
 
 dnl These defines are always available
 dnl FIXME: Cleanup the sources so that these are not needed!
-  AC_DEFINE(HAVE_GD_GD2,              1, [ ])
   AC_DEFINE(HAVE_GD_WBMP,             1, [ ])
   AC_DEFINE(HAVE_LIBGD13,             1, [ ])
   AC_DEFINE(HAVE_LIBGD15,             1, [ ])
