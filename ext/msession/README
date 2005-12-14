@@ -2,7 +2,7 @@ This is msession, it is an interface to a stand-alone session
 management system. The msession daemon can be found at 
 Mohawk Software's web site.
 
-http://www.mohawksoft.com
+http://www.mohawksoft.org
 
 Requirements:
 Mohawk Software's Phoenix library.
@@ -30,4 +30,7 @@ msessiond.
 12/22/2001
 Changed msession_getdata(...) to msession_get_data(...)
 Changed msession_setdata(...) to msession_set_data(...)
-(docs to follow)
+
+12/14/2005
+MSession will be renamed and reworked to MCache
+
