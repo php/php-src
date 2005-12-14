@@ -1,5 +1,5 @@
 --TEST--
-Bug #27582 (ImageFillToBorder() on alphablending image looses alpha on fill color)
+imagecreatefromgd2
 --SKIPIF--
 <?php
         if (!function_exists('imagecreatefromgd2')) die("skip gd extension not available\n");
