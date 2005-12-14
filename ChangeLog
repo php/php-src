@@ -1,3 +1,58 @@
+2005-12-13  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      ZendEngine2/tests/bug35655.phpt:
+      MFH: use default colors to prevent any problems with existing php.ini
+
+    * ZendEngine2/tests/bug35655.phpt:
+      use default colors to prevent any problems with existing php.ini
+
+2005-12-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      Zend/zend_highlight.c
+      Zend/zend_language_scanner.l:
+      MFH: Fixed bug #35655 (whitespace following end of heredoc is lost).
+
+2005-12-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_operators.c:
+      - MFB Fix zend*_str_tolower_copy()
+
+2005-12-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend_highlight.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/tests/bug35411.phpt
+      ZendEngine2/tests/bug35655.phpt:
+      MFB51: Fixed bug #35655 (whitespace following end of heredoc is lost).
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/zend_highlight.c
+      ZendEngine2/zend_language_scanner.l:
+      Fixed bug #35655 (whitespace following end of heredoc is lost).
+
+    * ZendEngine2/tests/bug35655.phpt
+      ZendEngine2/tests/bug35655.phpt:
+      
+      file bug35655.phpt was initially added on branch PHP_5_1.
+
+2005-12-13  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      NEWS
+      Zend/zend_alloc.c:
+      fix #35646 (%{mod_php_memory_usage}n is not reset after exit)
+      patch by vovik at getart dot ru
+
+2005-12-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #35630 (strtotime() crashes on certain relative identifiers).
+
 2005-12-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
