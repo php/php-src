@@ -46,7 +46,9 @@ typedef char * caddr_t;
 #define rmdir(a)	_rmdir(a)
 #define getpid		_getpid
 #define php_sleep(t)	Sleep(t*1000)
-#define getcwd(a, b)		_getcwd(a, b)
+#ifndef getcwd
+# define getcwd(a, b)		_getcwd(a, b)
+#endif
 #define off_t		_off_t
 typedef unsigned int uint;
 typedef unsigned long ulong;
