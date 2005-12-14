@@ -64,9 +64,8 @@ static void php_free_ps_enc(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 #include <gdfontmb.h> /* 3 Medium bold font */
 #include <gdfontl.h>  /* 4 Large font */
 #include <gdfontg.h>  /* 5 Giant font */
-#ifdef HAVE_GD_WBMP
 #include "libgd/wbmp.h"
-#endif
+
 #ifdef ENABLE_GD_TTF
 # ifdef HAVE_LIBFREETYPE
 #  include <ft2build.h>
@@ -229,9 +228,7 @@ zend_function_entry gd_functions[] = {
 #ifdef HAVE_GD_JPG
 	PHP_FE(imagecreatefromjpeg,						NULL)
 #endif
-#ifdef HAVE_GD_WBMP
 	PHP_FE(imagecreatefromwbmp,						NULL)
-#endif
 #ifdef HAVE_GD_XBM
 	PHP_FE(imagecreatefromxbm,						NULL)
 #endif
@@ -250,9 +247,7 @@ zend_function_entry gd_functions[] = {
 #ifdef HAVE_GD_JPG
 	PHP_FE(imagejpeg,								NULL)
 #endif
-#ifdef HAVE_GD_WBMP
 	PHP_FE(imagewbmp,                               NULL)
-#endif
 	PHP_FE(imagegd,									NULL)
 	PHP_FE(imagegd2,								NULL)
 
@@ -299,15 +294,13 @@ zend_function_entry gd_functions[] = {
 #endif
 	PHP_FE(imagetypes,								NULL)
 
-#if defined(HAVE_GD_JPG) && defined(HAVE_GD_WBMP)
+#if defined(HAVE_GD_JPG)
 	PHP_FE(jpeg2wbmp,								NULL)
 #endif
-#if defined(HAVE_GD_PNG) && defined(HAVE_GD_WBMP)
+#if defined(HAVE_GD_PNG)
 	PHP_FE(png2wbmp,								NULL)
 #endif
-#ifdef HAVE_GD_WBMP
 	PHP_FE(image2wbmp,								NULL)
-#endif
 #if HAVE_GD_BUNDLED
 	PHP_FE(imagelayereffect,						NULL)
 	PHP_FE(imagecolormatch,							NULL)
@@ -512,9 +505,7 @@ PHP_MINFO_FUNCTION(gd)
 #ifdef HAVE_GD_PNG
 	php_info_print_table_row(2, "PNG Support", "enabled");
 #endif
-#ifdef HAVE_GD_WBMP
 	php_info_print_table_row(2, "WBMP Support", "enabled");
-#endif
 #if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
 	php_info_print_table_row(2, "XPM Support", "enabled");
 #endif
@@ -577,11 +568,7 @@ PHP_FUNCTION(gd_info)
 #else
 	add_assoc_bool(return_value, "PNG Support", 0);
 #endif
-#ifdef HAVE_GD_WBMP
 	add_assoc_bool(return_value, "WBMP Support", 1);
-#else
-	add_assoc_bool(return_value, "WBMP Support", 0);
-#endif
 #if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
 	add_assoc_bool(return_value, "XPM Support", 1);
 #else
@@ -1293,9 +1280,7 @@ PHP_FUNCTION(imagetypes)
 #ifdef HAVE_GD_PNG
 	ret |= 4;
 #endif
-#ifdef HAVE_GD_WBMP
 	ret |= 8;
-#endif
 #if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
 	ret |= 16;
 #endif
@@ -1332,7 +1317,6 @@ static int _php_image_type (char data[8])
 	} else if (!memcmp(data, php_sig_gif, 3)) {
 		return PHP_GDIMG_TYPE_GIF;
 	}
-#ifdef HAVE_GD_WBMP
 	else {
 		gdIOCtx *io_ctx;
 		io_ctx = gdNewDynamicCtxEx(8, data, 0);
@@ -1353,7 +1337,6 @@ static int _php_image_type (char data[8])
 			}
 		}
 	}
-#endif
 	return -1;
 #endif
 }
@@ -1436,12 +1419,7 @@ PHP_FUNCTION(imagecreatefromstring)
 			break;
 
 		case PHP_GDIMG_TYPE_WBM:
-#ifdef HAVE_GD_WBMP
 			im = _php_image_create_from_string(data, "WBMP", gdImageCreateFromWBMPCtx TSRMLS_CC);
-#else
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "No WBMP support in this PHP build");
-			RETURN_FALSE;
-#endif
 			break;
 
 		case PHP_GDIMG_TYPE_GD2:
@@ -1625,7 +1603,6 @@ PHP_FUNCTION(imagecreatefromxpm)
 /* }}} */
 #endif
 
-#ifdef HAVE_GD_WBMP
 /* {{{ proto resource imagecreatefromwbmp(string filename)
    Create a new image from WBMP file or URL */
 PHP_FUNCTION(imagecreatefromwbmp)
@@ -1633,7 +1610,6 @@ PHP_FUNCTION(imagecreatefromwbmp)
 	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WBM, "WBMP", gdImageCreateFromWBMP, gdImageCreateFromWBMPCtx);
 }
 /* }}} */
-#endif /* HAVE_GD_WBMP */
 
 /* {{{ proto resource imagecreatefromgd(string filename)
    Create a new image from GD file or URL */
@@ -1703,7 +1679,6 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 		}
 
 		switch (image_type) {
-#ifdef HAVE_GD_WBMP
 			case PHP_GDIMG_CONVERT_WBM:
 				if (q == -1) {
 					q = 0;
@@ -1713,7 +1688,6 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 				}
 				gdImageWBMP(im, q, fp);
 				break;
-#endif
 			case PHP_GDIMG_TYPE_JPG:
 				(*func_p)(im, fp, q);
 				break;
@@ -1753,7 +1727,6 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 		}
 
 		switch (image_type) {
-#ifdef HAVE_GD_WBMP
 			case PHP_GDIMG_CONVERT_WBM:
  				if (q == -1) {
   					q = 0;
@@ -1763,7 +1736,6 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
   				}
 				gdImageWBMP(im, q, tmp);
 				break;
-#endif
 			case PHP_GDIMG_TYPE_JPG:
 				(*func_p)(im, tmp, q);
 				break;
@@ -1854,7 +1826,6 @@ PHP_FUNCTION(imagejpeg)
 /* }}} */
 #endif /* HAVE_GD_JPG */
 
-#ifdef HAVE_GD_WBMP
 /* {{{ proto bool imagewbmp(resource im [, string filename, [, int foreground]])
    Output WBMP image to browser or file */
 PHP_FUNCTION(imagewbmp)
@@ -1866,7 +1837,6 @@ PHP_FUNCTION(imagewbmp)
 #endif
 }
 /* }}} */
-#endif /* HAVE_GD_WBMP */
 
 /* {{{ proto bool imagegd(resource im [, string filename])
    Output GD image to browser or file */
@@ -3649,7 +3619,6 @@ PHP_FUNCTION(imagepsbbox)
 /* }}} */
 #endif
 
-#ifdef HAVE_GD_WBMP
 /* {{{ proto bool image2wbmp(resource im [, string filename [, int threshold]])
    Output WBMP image to browser or file */
 PHP_FUNCTION(image2wbmp)
@@ -3657,9 +3626,8 @@ PHP_FUNCTION(image2wbmp)
 	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_CONVERT_WBM, "WBMP", _php_image_bw_convert);
 }
 /* }}} */
-#endif /* HAVE_GD_WBMP */
 
-#if defined(HAVE_GD_JPG) && defined(HAVE_GD_WBMP)
+#if defined(HAVE_GD_JPG)
 /* {{{ proto bool jpeg2wbmp (string f_org, string f_dest, int d_height, int d_width, int threshold)
    Convert JPEG image to WBMP image */
 PHP_FUNCTION(jpeg2wbmp)
@@ -3669,7 +3637,7 @@ PHP_FUNCTION(jpeg2wbmp)
 /* }}} */
 #endif
 
-#if defined(HAVE_GD_PNG) && defined(HAVE_GD_WBMP)
+#if defined(HAVE_GD_PNG)
 /* {{{ proto bool png2wbmp (string f_org, string f_dest, int d_height, int d_width, int threshold)
    Convert PNG image to WBMP image */
 PHP_FUNCTION(png2wbmp)
@@ -3679,7 +3647,6 @@ PHP_FUNCTION(png2wbmp)
 /* }}} */
 #endif
 
-#ifdef HAVE_GD_WBMP
 /* {{{ _php_image_bw_convert
  * It converts a gd Image to bw using a threshold value */
 static void _php_image_bw_convert(gdImagePtr im_org, gdIOCtx *out, int threshold)
@@ -3920,7 +3887,6 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 	RETURN_TRUE;
 }
 /* }}} */
-#endif /* HAVE_GD_WBMP */
 
 #endif	/* HAVE_LIBGD */
 
