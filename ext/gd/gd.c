@@ -239,10 +239,8 @@ zend_function_entry gd_functions[] = {
 	PHP_FE(imagecreatefromxpm,						NULL)
 #endif
 	PHP_FE(imagecreatefromgd,						NULL)
-#ifdef HAVE_GD_GD2
 	PHP_FE(imagecreatefromgd2,						NULL)
 	PHP_FE(imagecreatefromgd2part,					NULL)
-#endif
 #ifdef HAVE_GD_PNG
 	PHP_FE(imagepng,								NULL)
 #endif
@@ -256,9 +254,7 @@ zend_function_entry gd_functions[] = {
 	PHP_FE(imagewbmp,                               NULL)
 #endif
 	PHP_FE(imagegd,									NULL)
-#ifdef HAVE_GD_GD2
 	PHP_FE(imagegd2,								NULL)
-#endif
 
 	PHP_FE(imagedestroy,							NULL)
 	PHP_FE(imagegammacorrect,						NULL)
@@ -1449,12 +1445,7 @@ PHP_FUNCTION(imagecreatefromstring)
 			break;
 
 		case PHP_GDIMG_TYPE_GD2:
-#ifdef HAVE_GD_GD2
 			im = _php_image_create_from_string(data, "GD2", gdImageCreateFromGd2Ctx TSRMLS_CC);
-#else
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "No GD2 support in this PHP build");
-			RETURN_FALSE;
-#endif
 			break;
 
 		default:
@@ -1652,7 +1643,6 @@ PHP_FUNCTION(imagecreatefromgd)
 }
 /* }}} */
 
-#ifdef HAVE_GD_GD2
 /* {{{ proto resource imagecreatefromgd2(string filename)
    Create a new image from GD2 file or URL */
 PHP_FUNCTION(imagecreatefromgd2)
@@ -1668,7 +1658,6 @@ PHP_FUNCTION(imagecreatefromgd2part)
 	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD2PART, "GD2", gdImageCreateFromGd2Part, gdImageCreateFromGd2PartCtx);
 }
 /* }}} */
-#endif /* HAVE_GD_GD2 */
 
 /* {{{ _php_image_output
  */
@@ -1887,7 +1876,6 @@ PHP_FUNCTION(imagegd)
 }
 /* }}} */
 
-#ifdef HAVE_GD_GD2
 /* {{{ proto bool imagegd2(resource im [, string filename, [, int chunk_size, [, int type]]])
    Output GD2 image to browser or file */
 PHP_FUNCTION(imagegd2)
@@ -1895,7 +1883,6 @@ PHP_FUNCTION(imagegd2)
 	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD2, "GD2", gdImageGd2);
 }
 /* }}} */
-#endif /* HAVE_GD_GD2 */
 
 /* {{{ proto bool imagedestroy(resource im)
    Destroy an image */
