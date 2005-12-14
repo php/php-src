@@ -1,3 +1,32 @@
+2005-12-13  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      tests/bug35655.phpt:
+      MFH: use default colors to prevent any problems with existing php.ini
+
+    * tests/bug35655.phpt:
+      use default colors to prevent any problems with existing php.ini
+
+2005-12-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_operators.c:
+      - MFB Fix zend*_str_tolower_copy()
+
+2005-12-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_highlight.c
+      zend_language_scanner.l
+      tests/bug35411.phpt
+      tests/bug35655.phpt:
+      MFB51: Fixed bug #35655 (whitespace following end of heredoc is lost).
+
+    * (PHP_5_1)
+      zend_highlight.c
+      zend_language_scanner.l
+      tests/bug35655.phpt
+      tests/bug35655.phpt:
+      Fixed bug #35655 (whitespace following end of heredoc is lost).
+
 2005-12-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
