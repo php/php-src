@@ -34,6 +34,8 @@ PHP                                                                        NEWS
 - Fixed bug #35612 (iis6 Access Violation crash). (Dmitry, alacn.uhahaa)
 - Fixed bug #35594 (Multiple calls to getopt() may result in a crash).
   (rabbitt at gmail dot com, Ilia)
+- Fixed bug #35571 (Fixed crash in Apache 2 SAPI when more then one php 
+  script is loaded via SSI include). (Ilia)
 - Fixed bug #35570 (segfault when re-using soap client object). (Dmitry)
 - Fixed bug #35558 (mktime() interpreting 3 digit years incorrectly). (Ilia)
 - Fixed bug #35543 (php crash when calling non existing method of a class
