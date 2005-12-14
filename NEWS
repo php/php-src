@@ -8,6 +8,8 @@ PHP 4                                                                      NEWS
   (vovik at getart dot ru, Tony)
 - Fixed bug #35594 (Multiple calls to getopt() may result in a crash).
   (rabbitt at gmail dot com, Ilia)
+- Fixed bug #35571 (Fixed crash in Apache 2 SAPI when more then one php 
+  script is loaded via SSI include). (Ilia)
 - Fixed bug #35536 (mysql_field_type() doesn't handle NEWDECIMAL). (Tony)
 - Fixed bug #35410 (wddx_deserialize() doesn't handle large ints as keys 
   properly). (Ilia)
