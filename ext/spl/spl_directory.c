@@ -303,7 +303,7 @@ static spl_filesystem_object * spl_filesystem_object_create_info(spl_filesystem_
 
 	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
 
-	return_value->value.obj = spl_filesystem_object_new_ex(ce ? ce : intern->info_class, &intern TSRMLS_CC);
+	return_value->value.obj = spl_filesystem_object_new_ex(ce ? ce : source->info_class, &intern TSRMLS_CC);
 	Z_TYPE_P(return_value) = IS_OBJECT;
 
 	spl_filesystem_info_set_filename(intern, file_path, file_path_len, use_copy TSRMLS_CC);
