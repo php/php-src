@@ -593,7 +593,7 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 
 		/* Apache 1.2 has a more complex mechanism for reading POST data */
 #if MODULE_MAGIC_NUMBER > 19961007
-		if ((retval = setup_client_block(r, REQUEST_CHUNKED_ERROR))) {
+		if ((retval = setup_client_block(r, REQUEST_CHUNKED_DECHUNK))) {
 			zend_try {
 				zend_ini_deactivate(TSRMLS_C);
 			} zend_end_try();
