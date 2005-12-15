@@ -169,17 +169,11 @@ PHP_MINIT_FUNCTION(sysvsem)
    Return an id for the semaphore with the given key, and allow max_acquire (default 1) processes to acquire it simultaneously */
 PHP_FUNCTION(sem_get)
 {
-	long key, max_acquire, perm, auto_release = 1;
+	long key, max_acquire = 1, perm = 0666, auto_release = 1;
 	int semid;
 	struct sembuf sop[3];
 	int count;
 	sysvsem_sem *sem_ptr;
-#if HAVE_SEMUN
-	union semun un;
-#endif
-
-	max_acquire = 1;
-	perm = 0666;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|lll", &key, &max_acquire, &perm, &auto_release)) {
 		RETURN_FALSE;
@@ -231,11 +225,7 @@ PHP_FUNCTION(sem_get)
 	}
 
 	/* Get the usage count. */
-#if HAVE_SEMUN
-	count = semctl(semid, SYSVSEM_USAGE, GETVAL, un);
-#else
 	count = semctl(semid, SYSVSEM_USAGE, GETVAL, NULL);
-#endif
 	if (count == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%lx: %s", key, strerror(errno));
 	}
