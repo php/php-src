@@ -13,3 +13,6 @@ EXPORTS
 	crc32
 	inflateReset
 	deflateReset
+	zlibVersion
+	zError
+	
