@@ -184,6 +184,7 @@ PHP_FUNCTION(pack)
 				}
 
 				if (arg < 0) {
+					convert_to_string_ex(argv[currentarg]);
 					arg = Z_STRLEN_PP(argv[currentarg]);
 				}
 
