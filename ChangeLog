@@ -1,3 +1,72 @@
+2005-12-14  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/config.m4
+      ext/gd/config.w32
+      ext/gd/gd.c
+      ext/gd/gd.dsp
+      ext/gd/tests/createfromwbmp.phpt
+      ext/gd/tests/imagewbmp.phpt
+      ext/gd/tests/src.wbmp:
+      - add wbmp read/write tests
+      - remove HAVE_GD_WBMP, always available
+
+    * ext/gd/tests/createfromgd2.phpt:
+      - correct title
+
+    * ext/gd/config.w32
+      ext/gd/gd.dsp:
+      - remove HAVE_GD_GD2 on windows as well
+
+    * ext/gd/config.m4
+      ext/gd/gd.c:
+      - remove HAVE_GD_GD2, always valid now (2.0.33 or bundled)
+
+    * ext/gd/tests/createfromgd2.phpt
+      ext/gd/tests/src.gd2:
+      - tests for imagecreatefromgd2 and gd2part
+
+2005-12-14  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
+
+    * (PHP_5_0)
+      ext/msession/README:
+      Updated README
+
+2005-12-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      sapi/apache2handler/sapi_apache2.c:
+      MFH: Fixed bug #35571 (Fixed crash in Apache 2 SAPI when more then one php
+      script is loaded via SSI include).
+
+    * sapi/apache2handler/sapi_apache2.c:
+      MFB51: Fixed bug #35571 (Fixed crash in Apache 2 SAPI when more then one
+      php
+      script is loaded via SSI include). (Ilia)
+
+    * (PHP_5_1)
+      NEWS
+      sapi/apache2handler/sapi_apache2.c:
+      Fixed bug #35571 (Fixed crash in Apache 2 SAPI when more then one php
+      script is loaded via SSI include).
+
+2005-12-14  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_5_1)
+      main/win95nt.h:
+      Fixes for building with vs.net 2005.
+
+2005-12-14  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/string.c:
+      fix spelling and #35665
+
+2005-12-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      main/streams/memory.c:
+      - Fix temp/memory stream modes
+
 2005-12-13  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_1)
