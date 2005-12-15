@@ -26,6 +26,8 @@ PHP                                                                        NEWS
 - Fixed many bugs in OCI8. (Tony)
 - Fixed crash and leak in mysqli when using 4.1.x client libraries and
   connecting to 5.x server. (Andrey)
+- Fixed bug #35690 (pack() tries to allocate huge memory block when packing 
+  float values to strings). (Tony)
 - Fixed bug #35655 (whitespace following end of heredoc is lost). (Ilia)
 - Fixed bug #35630 (strtotime() crashes on certain relative identifiers).
   (Ilia)
