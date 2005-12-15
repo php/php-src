@@ -1630,7 +1630,7 @@ PHP_FUNCTION(xmlwriter_open_uri)
 	
 #ifdef ZEND_ENGINE_2
 	if (this) {
-		// We do not use XMLWRITER_FROM_OBJECT, xmlwriter init function here
+		/* We do not use XMLWRITER_FROM_OBJECT, xmlwriter init function here */
 		ze_obj = (ze_xmlwriter_object*) zend_object_store_get_object(this TSRMLS_CC); 
 	}
 #endif
@@ -1699,7 +1699,7 @@ PHP_FUNCTION(xmlwriter_open_memory)
 
 #ifdef ZEND_ENGINE_2
 	if (this) {
-		// We do not use XMLWRITER_FROM_OBJECT, xmlwriter init function here
+		/* We do not use XMLWRITER_FROM_OBJECT, xmlwriter init function here */
 		ze_obj = (ze_xmlwriter_object*) zend_object_store_get_object(this TSRMLS_CC); 
 	}
 #endif
