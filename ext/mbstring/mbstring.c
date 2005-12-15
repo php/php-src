@@ -2485,6 +2485,13 @@ PHP_FUNCTION(mb_strcut)
 		}
 	}
 
+	if (from > Z_STRLEN_PP(arg1)) {
+		RETURN_FALSE;
+	}
+	if (((unsigned) from + (unsigned) len) > Z_STRLEN_PP(arg1)) {
+		len = Z_STRLEN_PP(arg1) - from;
+	}
+
 	ret = mbfl_strcut(&string, &result, from, len);
 	if (ret != NULL) {
 		RETVAL_STRINGL(ret->val, ret->len, 0);		/* the string is already strdup()'ed */
