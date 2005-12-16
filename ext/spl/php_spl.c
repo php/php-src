@@ -426,7 +426,7 @@ PHP_FUNCTION(spl_autoload_register)
 				return;
 			} else {
 				if (do_throw) {
-					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Illegal value passed", func_name);
+					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Illegal value passed");
 				}
 				efree(func_name);
 				return;
