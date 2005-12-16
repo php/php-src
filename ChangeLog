@@ -1,3 +1,62 @@
+2005-12-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sysvsem/sysvsem.c:
+      MFB51: Cleanup code and prevent usage of uninitialized variable.
+
+    * (PHP_5_1)
+      ext/sysvsem/sysvsem.c:
+      Cleanup code and prevent usage of uninitialized variable.
+
+2005-12-15  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      NEWS
+      ext/iconv/iconv.c:
+      MFH: fix #35692(iconv_mime_decode() segfault, with libiconv only)
+
+    * ext/iconv/iconv.c:
+      fix #35692(iconv_mime_decode() segfault, with libiconv only)
+
+2005-12-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #35694 (Improved error message for invalid fetch mode).
+
+2005-12-15  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/pack.c:
+      MFH: fix #35690 (pack() tries to allocate huge memory block when packing
+      float values to strings)
+
+    * ext/standard/pack.c:
+      fix #35690 (pack() tries to allocate huge memory block when packing float
+      values to strings)
+
+2005-12-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      ext/mbstring/mbstring.c:
+      MFH: Fixed possible memory corruption inside mb_strcut().
+
+    * (PHP_5_1)
+      ext/mbstring/mbstring.c:
+      Fixed possible memory corruption inside mb_strcut().
+
+2005-12-15  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/zlib/php_zlib.def
+      ext/zlib/php_zlib.def:
+      Export symbols needed by pecl/http
+
+2005-12-15  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * sapi/apache/mod_php5.c:
+      I see no reason no reason to not support chunked encoding requests.
+      Let's ask Apache to decode these requests for us.
+
 2005-12-14  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * ext/gd/config.m4
