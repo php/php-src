@@ -1942,11 +1942,7 @@ PHP_FUNCTION(imagecolorat)
 	} else {
 #endif
 		if (im->pixels && gdImageBoundsSafe(im, Z_LVAL_PP(x), Z_LVAL_PP(y))) {
-#if HAVE_LIBGD13
 			RETURN_LONG(im->pixels[Z_LVAL_PP(y)][Z_LVAL_PP(x)]);
-#else
-			RETURN_LONG(im->pixels[Z_LVAL_PP(x)][Z_LVAL_PP(y)]);
-#endif
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%ld,%ld is out of bounds", Z_LVAL_PP(x), Z_LVAL_PP(y));
 			RETURN_FALSE;
