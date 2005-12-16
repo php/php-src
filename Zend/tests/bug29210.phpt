@@ -89,10 +89,14 @@ if (is_callable(array('test_class','test_func4'))) {
 $object = new foo();
 $object->test();
 ?>
---EXPECT--
+--EXPECTF--
 test_func1
 test_func2
+
+Strict Standards: Non-static method test_class::test_func3() canot be called statically, assuming $this from compatible context test_class in %sbug29210.php on line %d
 test_func3
+
+Strict Standards: Non-static method test_class::test_func4() canot be called statically, assuming $this from compatible context test_class in %sbug29210.php on line %d
 test_func4
 test_func1 isn't callable from outside
 test_func2 isn't callable from outside
@@ -100,5 +104,9 @@ test_func3 isn't callable from outside
 test_func4 isn't callable from outside
 test_func1 isn't callable from child
 test_func2
+
+Strict Standards: Non-static method test_class::test_func3() canot be called statically, assuming $this from compatible context foo in %sbug29210.php on line %d
 test_func3 isn't callable from child
+
+Strict Standards: Non-static method test_class::test_func4() canot be called statically, assuming $this from compatible context foo in %sbug29210.php on line %d
 test_func4
