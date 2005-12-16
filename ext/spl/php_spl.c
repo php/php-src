@@ -393,9 +393,7 @@ PHP_FUNCTION(spl_autoload_register)
 	if (ZEND_NUM_ARGS()) {
 		if (Z_TYPE_P(zcallable) == IS_STRING) {
 			if (Z_STRLEN_P(zcallable) == sizeof("spl_autoload_call") - 1) {
-				char tmp_name[sizeof("spl_autoload_call")];
-				zend_str_tolower_copy(tmp_name, Z_STRVAL_P(zcallable), Z_STRLEN_P(zcallable));
-				if (!strcmp(tmp_name, "spl_autoload_call")) {
+				if (!zend_binary_strcasecmp(Z_STRVAL_P(zcallable), sizeof("spl_autoload_call"), "spl_autoload_call", sizeof("spl_autoload_call"))) {
 					if (do_throw) {
 						zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Function spl_autoload_call() cannot be registered");
 					}
