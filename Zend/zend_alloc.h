@@ -125,6 +125,7 @@ ZEND_API char *_estrndup(const char *s, unsigned int length ZEND_FILE_LINE_DC ZE
 
 #else
 
+#undef _GNU_SOURCE
 #define _GNU_SOURCE
 #include <string.h>
 #undef _GNU_SOURCE
