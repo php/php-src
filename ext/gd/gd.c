@@ -82,12 +82,7 @@ static void php_free_ps_enc(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int, int);
 #endif
 
-#if HAVE_LIBGD15
-/* it's >= 1.5, i.e. has IOCtx */
 #define USE_GD_IOCTX 1
-#else
-#undef USE_GD_IOCTX
-#endif
 
 #ifdef USE_GD_IOCTX
 #include "gd_ctx.c"
@@ -166,10 +161,8 @@ zend_function_entry gd_functions[] = {
 	PHP_FE(imagecharup,								NULL)
 	PHP_FE(imagecolorat,							NULL)
 	PHP_FE(imagecolorallocate,						NULL)
-#if HAVE_LIBGD15
 	PHP_FE(imagepalettecopy,						NULL)
 	PHP_FE(imagecreatefromstring,					NULL)
-#endif
 	PHP_FE(imagecolorclosest,						NULL)
 #if HAVE_COLORCLOSESTHWB
 	PHP_FE(imagecolorclosesthwb,					NULL)
@@ -182,10 +175,8 @@ zend_function_entry gd_functions[] = {
 	PHP_FE(imagecolorstotal,						NULL)
 	PHP_FE(imagecolorsforindex,						NULL)
 	PHP_FE(imagecopy,								NULL)
-#if HAVE_LIBGD15
 	PHP_FE(imagecopymerge,							NULL)
 	PHP_FE(imagecopymergegray,						NULL)
-#endif
 	PHP_FE(imagecopyresized,						NULL)
 	PHP_FE(imagecreate,								NULL)
 #if HAVE_LIBGD20
@@ -1299,7 +1290,6 @@ static const char php_sig_gd2[3] = {'g', 'd', '2'};
 
 static int _php_image_type (char data[8])
 {
-#ifdef HAVE_LIBGD15
 	/* Based on ext/standard/image.c */
 
 	if (data == NULL) {
@@ -1338,11 +1328,9 @@ static int _php_image_type (char data[8])
 		}
 	}
 	return -1;
-#endif
 }
 /* }}} */
 
-#ifdef HAVE_LIBGD15
 /* {{{ _php_image_create_from_string
  */
 gdImagePtr _php_image_create_from_string(zval **data, char *tn, gdImagePtr (*ioctx_func_p)() TSRMLS_DC)
@@ -1444,7 +1432,6 @@ PHP_FUNCTION(imagecreatefromstring)
 	ZEND_REGISTER_RESOURCE(return_value, im, le_gd);
 }
 /* }}} */
-#endif
 
 /* {{{ _php_image_create_from
  */
@@ -1900,7 +1887,6 @@ PHP_FUNCTION(imagecolorallocate)
 }
 /* }}} */
 
-#if HAVE_LIBGD15
 /* {{{ proto void imagepalettecopy(resource dst, resource src)
    Copy the palette from the src image onto the dst image */
 PHP_FUNCTION(imagepalettecopy)
@@ -1918,7 +1904,6 @@ PHP_FUNCTION(imagepalettecopy)
 	gdImagePaletteCopy(dst, src);
 }
 /* }}} */
-#endif
 
 /* {{{ proto int imagecolorat(resource im, int x, int y)
    Get the index of the color of a pixel */
@@ -2839,7 +2824,6 @@ PHP_FUNCTION(imagecopy)
 }
 /* }}} */
 
-#if HAVE_LIBGD15
 /* {{{ proto bool imagecopymerge(resource src_im, resource dst_im, int dst_x, int dst_y, int src_x, int src_y, int src_w, int src_h, int pct)
    Merge one part of an image with another */
 PHP_FUNCTION(imagecopymerge)
@@ -2911,7 +2895,6 @@ PHP_FUNCTION(imagecopymergegray)
 	RETURN_TRUE;
 }
 /* }}} */
-#endif
 
 /* {{{ proto bool imagecopyresized(resource dst_im, resource src_im, int dst_x, int dst_y, int src_x, int src_y, int dst_w, int dst_h, int src_w, int src_h)
    Copy and resize part of an image */
