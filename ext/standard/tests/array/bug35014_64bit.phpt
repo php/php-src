@@ -1,7 +1,7 @@
 --TEST--
-Bug #35014 (array_product() always returns 0) (32bit)
+Bug #35014 (array_product() always returns 0) (64bit)
 --SKIPIF--
-<?php if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only"); ?>
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
 --INI--
 precision=14
 --FILE--
@@ -31,6 +31,6 @@ int(0)
 int(3)
 int(9)
 float(1)
-float(9.9999998E+15)
+int(9999999800000001)
 float(2.8404260053903E+20)
-float(8589934590)
+int(8589934590)
