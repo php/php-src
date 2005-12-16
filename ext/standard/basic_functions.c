@@ -2067,7 +2067,7 @@ PHP_FUNCTION(call_user_func)
 		convert_to_string_ex(params[0]);
 	}
 
-	if (!zend_is_callable(*params[0], IS_CALLABLE_CHECK_NO_ACCESS, &name)) {
+	if (!zend_is_callable(*params[0], 0, &name)) {
 		php_error_docref1(NULL TSRMLS_CC, name, E_WARNING, "First argument is expected to be a valid callback");
 		efree(name);
 		efree(params);
@@ -2127,7 +2127,7 @@ PHP_FUNCTION(call_user_func_array)
 		convert_to_string_ex(func);
 	}
 
-	if (!zend_is_callable(*func, IS_CALLABLE_CHECK_NO_ACCESS, &name)) {
+	if (!zend_is_callable(*func, 0, &name)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "First argument is expected to be a valid callback, '%s' was given", name);
 		efree(name);
 		RETURN_NULL();
@@ -2395,7 +2395,7 @@ PHP_FUNCTION(register_shutdown_function)
 	}
 	
 	/* Prevent entering of anything but valid callback (syntax check only!) */
-	if (!zend_is_callable(shutdown_function_entry.arguments[0], 1, &function_name)) {
+	if (!zend_is_callable(shutdown_function_entry.arguments[0], 0, &function_name)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid shutdown callback '%s' passed", function_name);
 		efree(shutdown_function_entry.arguments);
 		RETVAL_FALSE;
