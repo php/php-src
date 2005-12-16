@@ -1568,6 +1568,7 @@ PHP_FUNCTION(getopt)
 	char *optname;
 	int argc = 0, options_len = 0, o;
 	zval *val, **args = NULL, *p_longopts = NULL;
+	int optname_len = 0;
 #ifdef HARTMUT_0
 	struct option *longopts = NULL;
 	int longindex = 0;
@@ -1701,14 +1702,28 @@ PHP_FUNCTION(getopt)
 		}
 
 		/* Add this option / argument pair to the result hash. */
-		if(zend_hash_find(HASH_OF(return_value), optname, strlen(optname)+1, (void **)&args) != FAILURE) {
-			if(Z_TYPE_PP(args) != IS_ARRAY) {
-				convert_to_array_ex(args);
-			} 
- 			zend_hash_next_index_insert(HASH_OF(*args),  (void *)&val, sizeof(zval *), NULL);
+		optname_len = strlen(optname);
+		if (!(optname_len > 1 && optname[0] == '0') && is_numeric_string(optname, optname_len, NULL, NULL, 0) == IS_LONG) {
+			/* numeric string */
+			int optname_int = atoi(optname);
+			if(zend_hash_index_find(HASH_OF(return_value), optname_int, (void **)&args) != FAILURE) {
+				if(Z_TYPE_PP(args) != IS_ARRAY) {
+					convert_to_array_ex(args);
+				} 
+				zend_hash_next_index_insert(HASH_OF(*args),  (void *)&val, sizeof(zval *), NULL);
+			} else {
+				zend_hash_index_update(HASH_OF(return_value), optname_int, &val, sizeof(zval *), NULL);
+			}
 		} else {
-			zend_hash_add(HASH_OF(return_value), optname, strlen(optname)+1, (void *)&val,
-						  sizeof(zval *), NULL);
+			/* other strings */
+			if(zend_hash_find(HASH_OF(return_value), optname, strlen(optname)+1, (void **)&args) != FAILURE) {
+				if(Z_TYPE_PP(args) != IS_ARRAY) {
+					convert_to_array_ex(args);
+				} 
+				zend_hash_next_index_insert(HASH_OF(*args),  (void *)&val, sizeof(zval *), NULL);
+			} else {
+				zend_hash_add(HASH_OF(return_value), optname, strlen(optname)+1, (void *)&val, sizeof(zval *), NULL);
+			}
 		}
 	}
 
