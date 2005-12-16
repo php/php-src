@@ -28,6 +28,8 @@ PHP                                                                        NEWS
   connecting to 5.x server. (Andrey)
 - Fixed bug #35713 (getopt() returns array with numeric strings when passed 
   options like '-1'). (Tony)
+- Fixed bug #35705 (strtotime() fails to parse soap date format without TZ).
+  (Ilia)
 - Fixed bug #35694 (Improved error message for invalid fetch mode). (Ilia)
 - Fixed bug #35692 (iconv_mime_decode() segmentation fault; with libiconv 
   only). (Tony)

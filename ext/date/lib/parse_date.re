@@ -794,7 +794,7 @@ datenoyearrev    = day ([ -.])* monthtext;
 datenocolon      = year4 monthlz daylz;
 
 /* Special formats */
-soap             = year4 "-" monthlz "-" daylz "T" hour24lz ":" minutelz ":" secondlz frac tzcorrection;
+soap             = year4 "-" monthlz "-" daylz "T" hour24lz ":" minutelz ":" secondlz frac tzcorrection?;
 xmlrpc           = year4 monthlz daylz "T" hour24 ":" minutelz ":" secondlz;
 xmlrpcnocolon    = year4 monthlz daylz 't' hour24 minutelz secondlz;
 wddx             = year4 "-" monthlz "-" daylz "T" hour24 ":" minutelz ":" secondlz;
@@ -1157,8 +1157,10 @@ relativetext = reltextnumber space? reltextunit;
 		s->time->s = timelib_get_nr((char **) &ptr, 2);
 		if (*ptr == '.') {
 			s->time->f = timelib_get_frac_nr((char **) &ptr, 9);
-			s->time->z = timelib_get_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb);
-			s->errors += tz_not_found;
+			if (*ptr) { /* timezone is optional */
+				s->time->z = timelib_get_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb);
+				s->errors += tz_not_found;
+			}
 		}
 		TIMELIB_DEINIT;
 		return TIMELIB_XMLRPC_SOAP;
