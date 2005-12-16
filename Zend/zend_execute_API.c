@@ -587,6 +587,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	zval *method_name;
 	zval *params_array;
 	int call_via_handler = 0;
+	char *fname, *colon;
+	int fname_len;
 
 	if (EG(exception)) {
 		return FAILURE; /* we would result in an instable executor otherwise */
@@ -706,30 +708,62 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			return FAILURE;
 		}
 
+		fname = Z_STRVAL_P(fci->function_name);
+		fname_len = Z_STRLEN_P(fci->function_name);
+		if (calling_scope && (colon = strstr(fname, "::")) != NULL) {
+			int clen = colon - fname;
+			int mlen = fname_len - clen - 2;
+			zend_class_entry **pce, *ce_child;
+			if (zend_lookup_class(fname, clen, &pce TSRMLS_CC) == SUCCESS) {
+				ce_child = *pce;
+			} else {
+				char *lcname = zend_str_tolower_dup(fname, clen);
+				/* caution: lcname is not '\0' terminated */
+				if (clen == sizeof("self") - 1 && memcmp(lcname, "self", sizeof("self") - 1) == 0) {
+					ce_child = EG(active_op_array) ? EG(active_op_array)->scope : NULL;
+				} else if (clen == sizeof("parent") - 1 && memcmp(lcname, "parent", sizeof("parent") - 1) == 0 && EG(active_op_array)->scope) {
+					ce_child = EG(active_op_array) && EG(active_op_array)->scope ? EG(scope)->parent : NULL;
+				}
+				efree(lcname);
+			}
+			if (!ce_child) {
+				zend_error(E_ERROR, "Cannot call method %s() or method does not exist", fname);
+				return FAILURE;
+			}
+			if (!instanceof_function(calling_scope, ce_child TSRMLS_CC)) {
+				zend_error(E_ERROR, "Cannot call method %s() of class %s which is not a derived from %s", fname, ce_child->name, calling_scope->name);
+				return 0;
+			}
+			fci->function_table = &ce_child->function_table;
+			calling_scope = ce_child;
+			fname = fname + clen + 2;
+			fname_len = mlen;
+		}
+
 		if (fci->object_pp) {
 			if (Z_OBJ_HT_PP(fci->object_pp)->get_method == NULL) {
 				zend_error(E_ERROR, "Object does not support method calls");
 			}
 			EX(function_state).function = 
-			  Z_OBJ_HT_PP(fci->object_pp)->get_method(fci->object_pp, Z_STRVAL_P(fci->function_name), Z_STRLEN_P(fci->function_name) TSRMLS_CC);
+			  Z_OBJ_HT_PP(fci->object_pp)->get_method(fci->object_pp, fname, fname_len TSRMLS_CC);
 			if (EX(function_state).function && calling_scope != EX(function_state).function->common.scope) {
-				char *function_name_lc = zend_str_tolower_dup(Z_STRVAL_P(fci->function_name), Z_STRLEN_P(fci->function_name));
-				if (zend_hash_find(&calling_scope->function_table, function_name_lc, fci->function_name->value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
+				char *function_name_lc = zend_str_tolower_dup(fname, fname_len);
+				if (zend_hash_find(&calling_scope->function_table, function_name_lc, fname_len+1, (void **) &EX(function_state).function)==FAILURE) {
 					efree(function_name_lc);
-					zend_error(E_ERROR, "Cannot call method %s::%s() or method does not exist", calling_scope->name, Z_STRVAL_P(fci->function_name));
+					zend_error(E_ERROR, "Cannot call method %s::%s() or method does not exist", calling_scope->name, fname);
 				}
 				efree(function_name_lc);
 			}
 		} else if (calling_scope) {
-			char *function_name_lc = zend_str_tolower_dup(Z_STRVAL_P(fci->function_name), Z_STRLEN_P(fci->function_name));
+			char *function_name_lc = zend_str_tolower_dup(fname, fname_len);
 
 			EX(function_state).function = 
-				zend_std_get_static_method(calling_scope, function_name_lc, Z_STRLEN_P(fci->function_name) TSRMLS_CC);
+				zend_std_get_static_method(calling_scope, function_name_lc, fname_len TSRMLS_CC);
 			efree(function_name_lc);
 		} else {
-			char *function_name_lc = zend_str_tolower_dup(Z_STRVAL_P(fci->function_name), Z_STRLEN_P(fci->function_name));
+			char *function_name_lc = zend_str_tolower_dup(fname, fname_len);
 
-			if (zend_hash_find(fci->function_table, function_name_lc, fci->function_name->value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
+			if (zend_hash_find(fci->function_table, function_name_lc, fname_len+1, (void **) &EX(function_state).function)==FAILURE) {
 			  EX(function_state).function = NULL;
 			}
 			efree(function_name_lc);
