@@ -39,7 +39,7 @@ object(DOMException)#%d (6) {
   ["file":protected]=>
   string(%d) "%sdom_set_attr_node.php"
   ["line":protected]=>
-  int(22)
+  int(%d)
   ["trace":"Exception":private]=>
   array(1) {
     [0]=>
@@ -47,7 +47,7 @@ object(DOMException)#%d (6) {
       ["file"]=>
       string(%d) "%sdom_set_attr_node.php"
       ["line"]=>
-      int(22)
+      int(%d)
       ["function"]=>
       string(16) "setAttributeNode"
       ["class"]=>
