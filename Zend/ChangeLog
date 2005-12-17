@@ -1,3 +1,37 @@
+2005-12-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.h:
+      - Add new const
+
+    * zend_language_parser.y:
+      - WS
+
+    * tests/bug29210.phpt
+      tests/bug32290.phpt:
+      - MFB
+
+2005-12-16  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      zend_alloc.h:
+      fix compile warning with Apache2 and Zend VM disabled
+      (someone forgot to do MFH)
+
+2005-12-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      tests/bug29210.phpt
+      tests/bug32290.phpt:
+      - Add/fix tests
+
+    * (PHP_5_1)
+      zend_API.c
+      zend_API.h
+      zend_execute_API.c:
+      - Simplify and synch is_callable_ex() with actual execution code
+        . Allow array($this, 'parent::method') for function 'pointers'
+        . Spit out E_STRICT in case of erroneous use of function 'pointers'
+
 2005-12-13  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_1)
