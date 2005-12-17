@@ -255,14 +255,14 @@ dnl append to the array which has been dynamically chosen at m4 time
 
 dnl choose the right compiler/flags/etc. for the source-file
       case $ac_src in
-	  *.c[)] ac_comp="$b_c_pre $3 $ac_inc $b_c_meta -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $6$b_c_post" ;;
-	  *.s[)] ac_comp="$b_c_pre $3 $ac_inc $b_c_meta -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $6$b_c_post" ;;
-	  *.S[)] ac_comp="$b_c_pre $3 $ac_inc $b_c_meta -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $6$b_c_post" ;;
-	  *.cpp|*.cc|*.cxx[)] ac_comp="$b_cxx_pre $3 $ac_inc $b_cxx_meta -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $6$b_cxx_post" ;;
+        *.c[)] ac_comp="$b_c_pre $3 $ac_inc $b_c_meta -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $6$b_c_post" ;;
+        *.s[)] ac_comp="$b_c_pre $3 $ac_inc $b_c_meta -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $6$b_c_post" ;;
+        *.S[)] ac_comp="$b_c_pre $3 $ac_inc $b_c_meta -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $6$b_c_post" ;;
+        *.cpp|*.cc|*.cxx[)] ac_comp="$b_cxx_pre $3 $ac_inc $b_cxx_meta -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $6$b_cxx_post" ;;
       esac
 
 dnl create a rule for the object/source combo
-	  cat >>Makefile.objects<<EOF
+    cat >>Makefile.objects<<EOF
 $ac_bdir[$]ac_obj.lo: $ac_srcdir[$]ac_src
 	$ac_comp
 EOF
@@ -301,27 +301,27 @@ dnl
 AC_DEFUN([PHP_RUNPATH_SWITCH],[
 AC_MSG_CHECKING([if compiler supports -R])
 AC_CACHE_VAL(php_cv_cc_dashr,[
-	SAVE_LIBS=$LIBS
-	LIBS="-R /usr/$PHP_LIBDIR $LIBS"
-	AC_TRY_LINK([], [], php_cv_cc_dashr=yes, php_cv_cc_dashr=no)
-	LIBS=$SAVE_LIBS])
+  SAVE_LIBS=$LIBS
+  LIBS="-R /usr/$PHP_LIBDIR $LIBS"
+  AC_TRY_LINK([], [], php_cv_cc_dashr=yes, php_cv_cc_dashr=no)
+  LIBS=$SAVE_LIBS])
 AC_MSG_RESULT([$php_cv_cc_dashr])
 if test $php_cv_cc_dashr = "yes"; then
-	ld_runpath_switch=-R
+  ld_runpath_switch=-R
 else
-	AC_MSG_CHECKING([if compiler supports -Wl,-rpath,])
-	AC_CACHE_VAL(php_cv_cc_rpath,[
-		SAVE_LIBS=$LIBS
-		LIBS="-Wl,-rpath,/usr/$PHP_LIBDIR $LIBS"
-		AC_TRY_LINK([], [], php_cv_cc_rpath=yes, php_cv_cc_rpath=no)
-		LIBS=$SAVE_LIBS])
-	AC_MSG_RESULT([$php_cv_cc_rpath])
-	if test $php_cv_cc_rpath = "yes"; then
-		ld_runpath_switch=-Wl,-rpath,
-	else
-		dnl something innocuous
-		ld_runpath_switch=-L
-	fi
+  AC_MSG_CHECKING([if compiler supports -Wl,-rpath,])
+  AC_CACHE_VAL(php_cv_cc_rpath,[
+    SAVE_LIBS=$LIBS
+    LIBS="-Wl,-rpath,/usr/$PHP_LIBDIR $LIBS"
+    AC_TRY_LINK([], [], php_cv_cc_rpath=yes, php_cv_cc_rpath=no)
+    LIBS=$SAVE_LIBS])
+  AC_MSG_RESULT([$php_cv_cc_rpath])
+  if test $php_cv_cc_rpath = "yes"; then
+    ld_runpath_switch=-Wl,-rpath,
+  else
+    dnl something innocuous
+    ld_runpath_switch=-L
+  fi
 fi
 ])
 
@@ -856,7 +856,7 @@ AC_DEFUN([PHP_SHARED_MODULE],[
       ;;
     *netware*[)]
       suffix=nlm
-      link_cmd='$(LIBTOOL) --mode=link ifelse($4,,[$(CC)],[$(CXX)]) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -o [$]@ -shared -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $($2) $(translit($1,a-z_-,A-Z__)_SHARED_LIBADD)'
+      link_cmd='$(LIBTOOL) --mode=link ifelse($4,,[$(CC)],[$(CXX)]) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -o [$]@ -shared -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $($2) ifelse($1, php5lib, , -L$(top_builddir)/netware -lphp5lib) $(translit(ifelse($1, php5lib, $1, m4_substr($1, 3)),a-z_-,A-Z__)_SHARED_LIBADD)'
       ;;
     *[)]
       suffix=la
@@ -940,7 +940,7 @@ AC_DEFUN([PHP_NEW_EXTENSION],[
 
   if test "$3" != "shared" && test "$3" != "yes" && test "$4" != "cli"; then
 dnl ---------------------------------------------- Static module
-
+    [PHP_]translit($1,a-z_-,A-Z__)[_SHARED]=no
     PHP_ADD_SOURCES(PHP_EXT_DIR($1),$2,$ac_extra,)
     EXT_STATIC="$EXT_STATIC $1"
     if test "$3" != "nocli"; then
@@ -949,19 +949,23 @@ dnl ---------------------------------------------- Static module
   else
     if test "$3" = "shared" || test "$3" = "yes"; then
 dnl ---------------------------------------------- Shared module
+      [PHP_]translit($1,a-z_-,A-Z__)[_SHARED]=yes
       PHP_ADD_SOURCES_X(PHP_EXT_DIR($1),$2,$ac_extra,shared_objects_$1,yes)
       case $host_alias in
-      *netware*)
-        PHP_ADD_LIBRARY_WITH_PATH(php5lib, netware, translit($1,a-z_-,A-Z__)_SHARED_LIBADD)
-      ;;
+        *netware*[)]
+          PHP_SHARED_MODULE(php$1,shared_objects_$1, $ext_builddir, $6)
+          ;;
+        *[)]
+          PHP_SHARED_MODULE($1,shared_objects_$1, $ext_builddir, $6)
+          ;;
       esac
-      PHP_SHARED_MODULE($1,shared_objects_$1, $ext_builddir, $6)
       AC_DEFINE_UNQUOTED([COMPILE_DL_]translit($1,a-z_-,A-Z__), 1, Whether to build $1 as dynamic module)
     fi
   fi
 
   if test "$3" != "shared" && test "$3" != "yes" && test "$4" = "cli"; then
 dnl ---------------------------------------------- CLI static module
+    [PHP_]translit($1,a-z_-,A-Z__)[_SHARED]=no
     if test "$PHP_SAPI" = "cgi"; then
       PHP_ADD_SOURCES(PHP_EXT_DIR($1),$2,$ac_extra,)
       EXT_STATIC="$EXT_STATIC $1"
@@ -1002,9 +1006,29 @@ dnl list, so that modules can be init'd in the correct order
 dnl $1 = name of extension, $2 = extension upon which it depends
 dnl $3 = optional: if true, it's ok for $2 to have not been configured
 dnl default is false and should halt the build.
+dnl To be effective, this macro must be invoked *after* PHP_NEW_EXTENSION.
+dnl The extension on which it depends must also have been configured.
 dnl See ADD_EXTENSION_DEP in win32 build 
 dnl
-AC_DEFUN([PHP_ADD_EXTENSION_DEP], [])
+AC_DEFUN([PHP_ADD_EXTENSION_DEP], [
+  am_i_shared=$[PHP_]translit($1,a-z_-,A-Z__)[_SHARED]
+  is_it_shared=$[PHP_]translit($2,a-z_-,A-Z__)[_SHARED]
+  if test "$am_i_shared" = "no" && test "$is_it_shared" = "yes" ; then
+    AC_MSG_ERROR([
+You've configured extension $1 to build statically, but it
+depends on extension $2, which you've configured to build shared.
+You either need to build $1 shared or build $2 statically for the
+build to be successful.
+])
+  fi
+  if test "x$is_it_shared" = "x" && test "x$3" != "xtrue"; then
+    AC_MSG_ERROR([
+You've configured extension $1, which depends on extension $2,
+but you've either not enabled $2, or have disabled it.
+])
+  fi
+  dnl Some systems require that we link $2 to $1 when building
+])
 
 dnl -------------------------------------------------------------------------
 dnl Checks for structures, typedefs, broken functions, etc.
@@ -1243,16 +1267,16 @@ AC_DEFUN([PHP_READDIR_R_TYPE],[
 #endif
 
 main() {
-	DIR *dir;
-	char entry[sizeof(struct dirent)+PATH_MAX];
-	struct dirent *pentry = (struct dirent *) &entry;
+  DIR *dir;
+  char entry[sizeof(struct dirent)+PATH_MAX];
+  struct dirent *pentry = (struct dirent *) &entry;
 
-	dir = opendir("/");
-	if (!dir) 
-		exit(1);
-	if (readdir_r(dir, (struct dirent *) entry, &pentry) == 0)
-		exit(0);
-	exit(1);
+  dir = opendir("/");
+  if (!dir) 
+    exit(1);
+  if (readdir_r(dir, (struct dirent *) entry, &pentry) == 0)
+    exit(0);
+  exit(1);
 }
     ],[
       ac_cv_what_readdir_r=POSIX
@@ -1383,17 +1407,17 @@ AC_DEFUN([PHP_AC_BROKEN_SNPRINTF],[
     AC_TRY_RUN([
 #define NULL (0L)
 main() {
-	char buf[20];
-	int res = 0;
-	res = res || (snprintf(buf, 2, "marcus") != 6); 
-	res = res || (buf[1] != '\0');
-	/* Implementations may consider this as an encoding error */
-	snprintf(buf, 0, "boerger");
-	/* However, they MUST ignore the pointer */
-	res = res || (buf[0] != 'm');
-	res = res || (snprintf(NULL, 0, "boerger") != 7);
-	res = res || (snprintf(buf, sizeof(buf), "%f", 0.12345678) != 8);
-	exit(res); 
+  char buf[20];
+  int res = 0;
+  res = res || (snprintf(buf, 2, "marcus") != 6); 
+  res = res || (buf[1] != '\0');
+  /* Implementations may consider this as an encoding error */
+  snprintf(buf, 0, "boerger");
+  /* However, they MUST ignore the pointer */
+  res = res || (buf[0] != 'm');
+  res = res || (snprintf(NULL, 0, "boerger") != 7);
+  res = res || (snprintf(buf, sizeof(buf), "%f", 0.12345678) != 8);
+  exit(res); 
 }
     ],[
       ac_cv_broken_snprintf=no
@@ -1424,14 +1448,16 @@ AC_DEFUN([PHP_SOLARIS_PIC_WEIRDNESS],[
   if test -n "$EXT_SHARED"; then
     os=`uname -sr 2>/dev/null`
     case $os in
-        "SunOS 5.6"|"SunOS 5.7"[)]
-          case $CC in
-	    gcc*|egcs*) CFLAGS="$CFLAGS -fPIC";;
-	    *[)] CFLAGS="$CFLAGS -fpic";;
-	  esac
-	  AC_MSG_RESULT([yes]);;
-	*[)]
-	  AC_MSG_RESULT([no]);;
+      "SunOS 5.6"|"SunOS 5.7"[)]
+        case $CC in
+          gcc*|egcs*)
+            CFLAGS="$CFLAGS -fPIC";;
+          *[)]
+            CFLAGS="$CFLAGS -fpic";;
+        esac
+        AC_MSG_RESULT([yes]);;
+      *[)]
+        AC_MSG_RESULT([no]);;
     esac
   else
     AC_MSG_RESULT([no])
@@ -1565,10 +1591,10 @@ AC_DEFUN([PHP_BROKEN_GETCWD],[
   os=`uname -sr 2>/dev/null`
   case $os in
     SunOS*[)]
-	  AC_DEFINE(HAVE_BROKEN_GETCWD,1, [Define if system has broken getcwd])
-	  AC_MSG_RESULT([yes]);;
-	*[)]
-	  AC_MSG_RESULT([no]);;
+      AC_DEFINE(HAVE_BROKEN_GETCWD,1, [Define if system has broken getcwd])
+      AC_MSG_RESULT([yes]);;
+    *[)]
+      AC_MSG_RESULT([no]);;
   esac
 ])
 
@@ -1588,8 +1614,8 @@ int main(int argc, char *argv[])
   
   fp = fopen(filename, "w");
   if (fp == NULL) {
-	  perror("fopen");
-	  exit(2);
+    perror("fopen");
+    exit(2);
   }
   fputs("foobar", fp);
   fclose(fp);
@@ -1599,7 +1625,7 @@ int main(int argc, char *argv[])
   fclose(fp);
   unlink(filename);
   if (position == 0)
-	return 1;
+  return 1;
   return 0;
 }
 ],
@@ -1617,10 +1643,10 @@ choke me
 )])
 
   if test "$have_broken_glibc_fopen_append" = "yes"; then
-	AC_MSG_RESULT(yes)
-	AC_DEFINE(HAVE_BROKEN_GLIBC_FOPEN_APPEND,1, [Define if your glibc borks on fopen with mode a+])
+    AC_MSG_RESULT(yes)
+    AC_DEFINE(HAVE_BROKEN_GLIBC_FOPEN_APPEND,1, [Define if your glibc borks on fopen with mode a+])
   else
-	AC_MSG_RESULT(no)
+    AC_MSG_RESULT(no)
   fi
 ])
 
@@ -1649,7 +1675,7 @@ AC_TRY_RUN([
 #include <stdio.h>
 
 struct cookiedata {
-	__off64_t pos;
+  __off64_t pos;
 };
 
 __ssize_t reader(void *cookie, char *buffer, size_t size)
@@ -1668,7 +1694,7 @@ main() {
   FILE *fp = fopencookie(&g, "r", funcs);
 
   if (fp && fseek(fp, 8192, SEEK_SET) == 0 && g.pos == 8192)
-	  exit(0);
+    exit(0);
   exit(1);
 }
 
@@ -1902,14 +1928,14 @@ AC_DEFUN([PHP_C_BIGENDIAN],
   [
 int main(void)
 {
-	short one = 1;
-	char *cp = (char *)&one;
+  short one = 1;
+  char *cp = (char *)&one;
 
-	if (*cp == 0) {
-		return(0);
-	} else {
-		return(1);
-	}
+  if (*cp == 0) {
+    return(0);
+  } else {
+    return(1);
+  }
 }
   ], [ac_cv_c_bigendian_php=yes], [ac_cv_c_bigendian_php=no], [ac_cv_c_bigendian_php=unknown])
  ])
