@@ -366,7 +366,7 @@ PHP_FUNCTION(xmlwriter_set_indent)
 	zval *this = getThis();
 	
 	if (this) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "b", &pind, &indent) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "b", &indent) == FAILURE) {
 			return;
 		}
 		XMLWRITER_FROM_OBJECT(intern, this);
