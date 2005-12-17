@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Added new extensions: (Ilia, Wez)
   . XMLWriter
   . Hash
+- Fixed possible leaks in imagecreatefromstring with invalid data (Pierre)
 - Added PNG compression support to GD extension. (Pierre)
 - Added reflection constants as class constants. (Johannes)
 - Added --enable-gcov configure option to enable C-level code coverage.
