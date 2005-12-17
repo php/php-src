@@ -1295,6 +1295,7 @@ COMMAND $cmd
 			// Stick to basics
 			$wanted_re = str_replace("%e", '\\' . DIRECTORY_SEPARATOR, $wanted_re);
 			$wanted_re = str_replace("%s", ".+?", $wanted_re); //not greedy
+			$wanted_re = str_replace("%w", "\s*", $wanted_re);
 			$wanted_re = str_replace("%i", "[+\-]?[0-9]+", $wanted_re);
 			$wanted_re = str_replace("%d", "[0-9]+", $wanted_re);
 			$wanted_re = str_replace("%x", "[0-9a-fA-F]+", $wanted_re);
