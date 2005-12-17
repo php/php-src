@@ -1429,6 +1429,11 @@ PHP_FUNCTION(imagecreatefromstring)
 	}
 
 	convert_to_string_ex(data);
+	if (Z_STRLEN_PP(data) < 8) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty string or invalid image");
+		RETURN_FALSE;
+	}
+
 	memcpy(sig, Z_STRVAL_PP(data), 8);
 
 	imtype = _php_image_type(sig);
@@ -1480,7 +1485,7 @@ PHP_FUNCTION(imagecreatefromstring)
 			break;
 
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Data is not in a recognized format.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Data is not in a recognized format");
 			RETURN_FALSE;
 	}
 
