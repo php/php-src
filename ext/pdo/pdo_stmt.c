@@ -228,7 +228,7 @@ static void get_lazy_object(pdo_stmt_t *stmt, zval *return_value TSRMLS_DC) /* {
 		Z_TYPE(stmt->lazy_object_ref) = IS_OBJECT;
 		Z_OBJ_HANDLE(stmt->lazy_object_ref) = zend_objects_store_put(stmt, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t)pdo_row_free_storage, NULL TSRMLS_CC);
 		Z_OBJ_HT(stmt->lazy_object_ref) = &pdo_row_object_handlers;
-		/* stmt->refcount++; */
+		stmt->refcount++;
 	}
 	Z_TYPE_P(return_value) = IS_OBJECT;
 	Z_OBJ_HANDLE_P(return_value) = Z_OBJ_HANDLE(stmt->lazy_object_ref);
@@ -2408,13 +2408,11 @@ zend_object_handlers pdo_row_object_handlers = {
 
 void pdo_row_free_storage(pdo_stmt_t *stmt TSRMLS_DC)
 {
-#if 0
 	ZVAL_NULL(&stmt->lazy_object_ref);
 	
 	if (--stmt->refcount == 0) {
 		free_statement(stmt TSRMLS_CC);
 	}
-#endif
 }
 
 zend_object_value pdo_row_new(zend_class_entry *ce TSRMLS_DC)
