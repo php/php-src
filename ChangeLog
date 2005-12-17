@@ -1,3 +1,121 @@
+2005-12-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.h:
+      - Add new const
+
+    * ZendEngine2/zend_language_parser.y:
+      - WS
+
+    * ZendEngine2/tests/bug29210.phpt
+      ZendEngine2/tests/bug32290.phpt
+      ext/standard/tests/general_functions/bug32647.phpt
+      tests/classes/bug27504.phpt:
+      - MFB
+
+2005-12-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #35705 (strtotime() fails to parse soap date format without TZ).
+
+2005-12-16  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      ZendEngine2/zend_alloc.h:
+      fix compile warning with Apache2 and Zend VM disabled
+      (someone forgot to do MFH)
+
+2005-12-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/basic_functions.c:
+      - MFB Fix zend_is_callable() usage
+
+    * (PHP_5_1)
+      ZendEngine2/tests/bug29210.phpt
+      ZendEngine2/tests/bug32290.phpt
+      ext/standard/tests/general_functions/bug32647.phpt
+      tests/classes/bug27504.phpt:
+      - Add/fix tests
+
+    * (PHP_5_1)
+      ext/standard/basic_functions.c:
+      - Fix is_callable usage
+
+    * (PHP_5_1)
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_execute_API.c:
+      - Simplify and synch is_callable_ex() with actual execution code
+        . Allow array($this, 'parent::method') for function 'pointers'
+        . Spit out E_STRICT in case of erroneous use of function 'pointers'
+
+2005-12-16  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/basic_functions.c:
+      MF51: fix #35713 (getopt() returns array with numeric strings when passed
+      options like '-1')
+      
+      TODO:
+      make getopt() unicode aware
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/basic_functions.c:
+      fix #35713 (getopt() returns array with numeric strings when passed options
+      like '-1')
+
+2005-12-16  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/config.m4
+      ext/gd/config.w32
+      ext/gd/gd.c
+      ext/gd/gd.dsp:
+      - remove HAVE_LIBGD15, always set
+
+    * ext/gd/gd.c
+      ext/gd/tests/copypalette.phpt
+      ext/gd/tests/createfromstring.phpt
+      ext/gd/tests/src.png:
+      - fix leaks and wrong error when invalid/empty string are given to
+        imagecreatefromstring
+      - add test for imagecreatefromstring
+      - add test for palettecopy
+
+    * ext/gd/config.m4
+      ext/gd/config.w32
+      ext/gd/gd.c
+      ext/gd/gd.dsp
+      ext/gd/tests/colorat.phpt:
+      - adieu HAVE_LIBGD13
+      - add imagecolorat tests (truecolor and palette)
+
+2005-12-16  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/array/bug35014.phpt
+      ext/standard/tests/array/bug35014_64bit.phpt:
+      MF51: fix test, add new one
+
+    * (PHP_5_1)
+      ext/standard/tests/array/bug35014.phpt
+      ext/standard/tests/array/bug35014_64bit.phpt
+      ext/standard/tests/array/bug35014_64bit.phpt:
+      fix test
+      add new one for 64bit only
+
+    * (PHP_5_1)
+      ext/dom/tests/dom_set_attr_node.phpt
+      ext/mbstring/tests/mb_strcut.phpt:
+      fix test
+
+    * ext/dom/tests/dom_set_attr_node.phpt:
+      fix test
+      this linenumber may vary
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/tests/mb_strcut.phpt:
+      MF51 Ilia's last fix
+      fix the test appropriately
+
 2005-12-15  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/sysvsem/sysvsem.c:
