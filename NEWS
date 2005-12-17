@@ -5,8 +5,11 @@ PHP                                                                        NEWS
 - Added new extensions: (Ilia, Wez)
   . XMLWriter
   . Hash
+- Fixed memory corruption when FETCH_LAZY mode is being used. (Ilia)
+- Safely handle prepared statement name conflicts in PDO_PGSQL. (Thies, Ilia)
 - Fixed possible leaks in imagecreatefromstring with invalid data (Pierre)
 - Added PNG compression support to GD extension. (Pierre)
+- Fixed possible memory corruption inside mb_strcut(). (Ilia)
 - Added reflection constants as class constants. (Johannes)
 - Added --enable-gcov configure option to enable C-level code coverage.
   (John, Jani, Ilia, Marcus)
