@@ -186,7 +186,7 @@ int dom_get_strict_error(php_libxml_ref_obj *document) {
 /* }}} */
 
 /* {{{ xmlNodePtr dom_object_get_node(dom_object *obj) */
-xmlNodePtr dom_object_get_node(dom_object *obj)
+PHP_DOM_EXPORT xmlNodePtr dom_object_get_node(dom_object *obj)
 {
 	if (obj->ptr != NULL) {
 		return ((php_libxml_node_ptr *)obj->ptr)->node;
@@ -197,7 +197,7 @@ xmlNodePtr dom_object_get_node(dom_object *obj)
 /* }}} end dom_object_get_node */
 
 /* {{{ dom_object *php_dom_object_get_data(xmlNodePtr obj) */
-dom_object *php_dom_object_get_data(xmlNodePtr obj)
+PHP_DOM_EXPORT dom_object *php_dom_object_get_data(xmlNodePtr obj)
 {
 	if (obj->_private != NULL) {
 		return (dom_object *) ((php_libxml_node_ptr *) obj->_private)->_private;
@@ -1132,7 +1132,7 @@ void php_dom_create_interator(zval *return_value, int ce_type TSRMLS_DC)
 }
 
 /* {{{ php_dom_create_object */
-zval *php_dom_create_object(xmlNodePtr obj, int *found, zval *wrapper_in, zval *return_value, dom_object *domobj TSRMLS_DC)
+PHP_DOM_EXPORT zval *php_dom_create_object(xmlNodePtr obj, int *found, zval *wrapper_in, zval *return_value, dom_object *domobj TSRMLS_DC)
 {
 	zval *wrapper;
 	zend_class_entry *ce;
