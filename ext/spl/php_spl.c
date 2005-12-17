@@ -378,68 +378,79 @@ PHP_FUNCTION(spl_autoload_call)
  Register given function as __autoload() implementation */
 PHP_FUNCTION(spl_autoload_register)
 {
-	zval zfunc_name;
-	char *func_name;
-	uint func_name_len;
-	char *lc_name = NULL;
+	zval zfunc_name, ztmp;
 	zval *zcallable = NULL;
 	zend_bool do_throw = 1;
 	zend_function *spl_func_ptr;
 	autoload_func_info alfi;
 	zval **obj_ptr;
-	zend_uchar func_name_type;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "|tb", &func_name, &func_name_len, &func_name_type, &do_throw) == FAILURE) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|b", &zcallable, &do_throw) == FAILURE) {
-			return;
-		}
-		if (!zend_is_callable_ex(zcallable, IS_CALLABLE_CHECK_IS_STATIC, &zfunc_name, &alfi.ce, &alfi.func_ptr, &obj_ptr TSRMLS_CC)) {
-			if (do_throw) {
-				zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_LogicException), 0 TSRMLS_CC, "Passed array does not specify a callable static method");
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "|zb", &zcallable, &do_throw) == FAILURE) {
+		return;
+	}
+
+	if (ZEND_NUM_ARGS()) {
+		if (Z_TYPE_P(zcallable) == IS_STRING) {
+			if (Z_STRLEN_P(zcallable) == sizeof("spl_autoload_call") - 1) {
+				if (!zend_binary_strcasecmp(Z_STRVAL_P(zcallable), sizeof("spl_autoload_call"), "spl_autoload_call", sizeof("spl_autoload_call"))) {
+					if (do_throw) {
+						zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Function spl_autoload_call() cannot be registered");
+					}
+					return;
+				}
 			}
-			zval_dtor(&zfunc_name);
-			return;
-		} else if (!obj_ptr && alfi.func_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
-			if (do_throw) {
-				zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_LogicException), 0 TSRMLS_CC, "Passed array specifies a non static method but no object");
+		} else if (Z_TYPE_P(zcallable) == IS_UNICODE) {
+			ZVAL_STRINGL(&ztmp, "spl_autoload_call", sizeof("spl_autoload_call"), 1);
+			convert_to_unicode(&ztmp);
+			if (zend_u_binary_zval_strcmp(&ztmp, zcallable)) {
+				if (!zend_binary_strcasecmp(Z_STRVAL_P(zcallable), sizeof("spl_autoload_call"), "spl_autoload_call", sizeof("spl_autoload_call"))) {
+					if (do_throw) {
+						zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Function spl_autoload_call() cannot be registered");
+					}
+					zval_dtor(&ztmp);
+					return;
+				}
 			}
-			zval_dtor(&zfunc_name);
-			return;
+			zval_dtor(&ztmp);
 		}
-		func_name_type = Z_TYPE(zfunc_name);
-		func_name_len = Z_UNILEN(zfunc_name);
-		lc_name = zend_u_str_tolower_dup(func_name_type, Z_UNIVAL(zfunc_name), func_name_len);
-		zval_dtor(&zfunc_name);
+	
+		if (!zend_is_callable_ex(zcallable, IS_CALLABLE_STRICT, &zfunc_name, &alfi.ce, &alfi.func_ptr, &obj_ptr TSRMLS_CC)) {
+			if (Z_TYPE_P(zcallable) == IS_ARRAY) {
+				if (!obj_ptr && alfi.func_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
+					if (do_throw) {
+						zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_LogicException), 0 TSRMLS_CC, "Passed array specifies a non static method but no object");
+					}
+					zval_dtor(&zfunc_name);
+					return;
+				}
+				else if (do_throw) {
+					zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_LogicException), 0 TSRMLS_CC, "Passed array does not specify %s %smethod", alfi.func_ptr ? "a callable" : "an existing", !obj_ptr ? "static " : "");
+				}
+				zval_dtor(&zfunc_name);
+				return;
+			} else if (Z_TYPE_P(zcallable) == IS_STRING || Z_TYPE_P(zcallable) == IS_UNICODE) {
+				if (do_throw) {
+					zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_LogicException), 0 TSRMLS_CC, "Function '%R' not %s", Z_TYPE_P(zcallable), Z_UNIVAL_P(zcallable), alfi.func_ptr ? "callable" : "found");
+				}
+				zval_dtor(&zfunc_name);
+				return;
+			} else {
+				if (do_throw) {
+					zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_LogicException), 0 TSRMLS_CC, "Illegal value passed");
+				}
+				zval_dtor(&zfunc_name);
+				return;
+			}
+		}
+	
+		zend_u_str_tolower(Z_TYPE(zfunc_name), Z_UNIVAL(zfunc_name), Z_UNILEN(zfunc_name));
 		if (obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
 			alfi.obj = *obj_ptr;
 			alfi.obj->refcount++;
 		} else {
 			alfi.obj = NULL;
 		}
-	} else if (ZEND_NUM_ARGS()) {
-		lc_name = zend_u_str_tolower_dup(func_name_type, func_name, func_name_len);
-		
-		if ((func_name_len == sizeof("spl_autoload_call")-1) &&
-		    (ZEND_U_EQUAL(func_name_type, lc_name, func_name_len, "spl_autoload_call", sizeof("spl_autoload_call")-1))) {
-			if (do_throw) {
-				zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_LogicException), 0 TSRMLS_CC, "Function spl_autoload_call() cannot be registered");
-			}
-			efree(lc_name);
-			return;
-		}
 
-		if (zend_u_hash_find(EG(function_table), func_name_type, lc_name, func_name_len+1, (void **) &alfi.func_ptr) == FAILURE) {
-			if (do_throw) {
-				zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_LogicException), 0 TSRMLS_CC, "Function '%R' not found", func_name_type, func_name);
-			}
-			efree(lc_name);
-			return;
-		}
-		alfi.obj = NULL;
-		alfi.ce = NULL;
-	}
-	
-	if (ZEND_NUM_ARGS()) {
 		if (!SPL_G(autoload_functions)) {
 			ALLOC_HASHTABLE(SPL_G(autoload_functions));
 			zend_u_hash_init(SPL_G(autoload_functions), 1, NULL, (dtor_func_t) autoload_func_info_dtor, 0, UG(unicode));
@@ -456,9 +467,9 @@ PHP_FUNCTION(spl_autoload_register)
 			zend_hash_add(SPL_G(autoload_functions), "spl_autoload", sizeof("spl_autoload"), &spl_alfi, sizeof(autoload_func_info), NULL);
 		}
 
-		zend_u_hash_add(SPL_G(autoload_functions), func_name_type, lc_name, func_name_len+1, &alfi, sizeof(autoload_func_info), NULL);
+		zend_u_hash_add(SPL_G(autoload_functions), Z_TYPE(zfunc_name), Z_UNIVAL(zfunc_name), Z_UNILEN(zfunc_name)+1, &alfi, sizeof(autoload_func_info), NULL);
 
-		efree(lc_name);
+		zval_dtor(&zfunc_name);
 	}
 
 	if (SPL_G(autoload_functions)) {
