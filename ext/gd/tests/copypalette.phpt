@@ -6,6 +6,7 @@ imagepalettecopy
 ?>
 --FILE--
 <?php
+$failed = false;
 $im = imagecreate(1,1);
 for ($i=0; $i<256; $i++) {
 	imagecolorallocate($im, $i, $i, $i);
