@@ -31,6 +31,9 @@
 #include "pdo/php_pdo_driver.h"
 #include "php_pdo_pgsql.h"
 #include "php_pdo_pgsql_int.h"
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 
 /* from postgresql/src/include/catalog/pg_type.h */
 #define BOOLOID     16
