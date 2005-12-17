@@ -1941,6 +1941,12 @@ static void do_inherit_parent_constructor(zend_class_entry *ce TSRMLS_DC)
 		ce->destructor   = ce->parent->destructor;
 	}
 	if (ce->constructor) {
+		if (ce->parent->constructor && ce->parent->constructor->common.fn_flags & ZEND_ACC_FINAL) {
+			zend_error(E_ERROR, "Cannot override final %v::%v() with %v::%v()",
+				ce->parent->name, ce->parent->constructor->common.function_name,
+				ce->name, ce->constructor->common.function_name
+				);
+		}
 		return;
 	}
 	
