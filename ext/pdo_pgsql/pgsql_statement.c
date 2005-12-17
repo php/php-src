@@ -126,7 +126,8 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	if (S->stmt_name) {
 		/* using a prepared statement */
 
-		if (!stmt->executed) {
+		if (!S->is_prepared) {
+stmt_retry:
 			/* we deferred the prepare until now, because we didn't
 			 * know anything about the parameter types; now we do */
 			S->result = PQprepare(H->server, S->stmt_name, S->query, 
@@ -137,12 +138,31 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 				case PGRES_COMMAND_OK:
 				case PGRES_TUPLES_OK:
 					/* it worked */
+					S->is_prepared = 1;
 					PQclear(S->result);
 					break;
-				default:
-					pdo_pgsql_error_stmt(stmt, status,
-							pdo_pgsql_sqlstate(S->result));
-					return 0;
+				default: {
+					char *sqlstate = pdo_pgsql_sqlstate(S->result);
+					/* 42P05 means that the prepared statement already existed. this can happen if you use 
+					 * a connection pooling software line pgpool which doesn't close the db-connection once 
+					 * php disconnects. if php dies (no chanche to run RSHUTDOWN) during execution it has no 
+					 * chance to DEALLOCATE the prepared statements it has created. so, if we hit a 42P05 we 
+					 * deallocate it and retry ONCE (thies 2005.12.15)
+					 */
+					if (!strcmp(sqlstate, "42P05")) {
+						char buf[100]; /* stmt_name == "pdo_pgsql_cursor_%08x" */
+						PGresult *res;
+						snprintf(buf, sizeof(buf), "DEALLOCATE %s", S->stmt_name);
+						res = PQexec(H->server, buf);
+						if (res) {
+							PQclear(res);
+						}
+						goto stmt_retry;
+					} else {
+						pdo_pgsql_error_stmt(stmt, status, sqlstate);
+						return 0;
+					}
+				}
 			}
 		}
 		S->result = PQexecPrepared(H->server, S->stmt_name,
