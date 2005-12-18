@@ -736,7 +736,7 @@ meridian = [AaPp] "."? [Mm] "."?;
 tz = "("? [A-Za-z]{1,4} ")"? | [A-Z][a-z]+([_/][A-Z][a-z]+)+;
 tzcorrection = [+-] hour24 ":"? minutelz?;
 
-daysuf = 'st' | 'nd' | 'rd' | 'th';
+daysuf = "st" | "nd" | "rd" | "th";
 
 month = "0"? [0-9] | "1"[0-2];
 day   = ([0-2]?[0-9] | "3"[01]) daysuf?;
