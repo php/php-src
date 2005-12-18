@@ -1563,8 +1563,8 @@ SPL_METHOD(SplFileObject, getMaxLineLen)
 	RETURN_LONG((long)intern->u.file.max_line_len);
 } /* }}} */
 
-/* {{{ proto bool SplFileObject>>hasChildren()
-   Rturn false */
+/* {{{ proto bool SplFileObject::hasChildren()
+   Return false */
 SPL_METHOD(SplFileObject, hasChildren)
 {
 	RETURN_FALSE;
