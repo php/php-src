@@ -56,7 +56,7 @@ class IteratorIterator implements OuterIterator
 		}
 		else
 		{
-			throw new Exception("Classes that only implement Traversable can be wrapped only after converting class IteratorItaerator into c code");
+			throw new Exception("Classes that only implement Traversable can be wrapped only after converting class IteratorIterator into c code");
 		}
 	}
 
