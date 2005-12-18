@@ -81,7 +81,7 @@ static zend_class_entry * spl_find_ce_by_name(zend_uchar ztype, void *name, int 
 	return *ce;
 }
 
-/* {{{ array class_parents(object instance)
+/* {{{ proto array class_parents(object instance)
  Return an array containing the names of all parent classes */
 PHP_FUNCTION(class_parents)
 {
@@ -246,7 +246,7 @@ int spl_autoload(const char *class_name, const char * lc_name, int class_name_le
 	return 0;
 } /* }}} */
 
-/* {{{ void spl_autoload(string class_name [, string file_extensions])
+/* {{{ proto void spl_autoload(string class_name [, string file_extensions])
  Default implementation for __autoload() */
 PHP_FUNCTION(spl_autoload)
 {
@@ -302,7 +302,7 @@ PHP_FUNCTION(spl_autoload)
 	}
 } /* }}} */
 
-/* {{{ void string spl_autoload_extensions([string file_extensions])
+/* {{{ proto void string spl_autoload_extensions([string file_extensions])
  Register and return default file extensions for spl_autoload */
 PHP_FUNCTION(spl_autoload_extensions)
 {
@@ -336,7 +336,7 @@ static void autoload_func_info_dtor(autoload_func_info *alfi)
 	}
 }
 
-/* {{{ void spl_autoload_call(string class_name)
+/* {{{ proto void spl_autoload_call(string class_name)
  Try all registerd autoload function to load the requested class */
 PHP_FUNCTION(spl_autoload_call)
 {
@@ -374,7 +374,7 @@ PHP_FUNCTION(spl_autoload_call)
 	}
 } /* }}} */
 
-/* {{{ void spl_autoload_register([string autoload_function = "spl_autoload" [, throw = true]])
+/* {{{ proto void spl_autoload_register([string autoload_function = "spl_autoload" [, throw = true]])
  Register given function as __autoload() implementation */
 PHP_FUNCTION(spl_autoload_register)
 {
@@ -479,7 +479,7 @@ PHP_FUNCTION(spl_autoload_register)
 	}
 } /* }}} */
 
-/* {{{ bool spl_autoload_unregister(string autoload_function)
+/* {{{ proto bool spl_autoload_unregister(string autoload_function)
  Unregister given function as __autoload() implementation */
 PHP_FUNCTION(spl_autoload_unregister)
 {
@@ -523,7 +523,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 	RETURN_BOOL(success == SUCCESS);
 } /* }}} */
 
-/* {{{ false|array spl_autoload_functions()
+/* {{{ proto false|array spl_autoload_functions()
  Return all registered __autoload() functionns */
 PHP_FUNCTION(spl_autoload_functions)
 {
