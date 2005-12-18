@@ -1,3 +1,91 @@
+2005-12-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      bug fixing news
+
+    * ext/gd/tests/copypalette.phpt:
+      MFB51: Fixed uninitialized variable in a test.
+
+    * (PHP_5_1)
+      ext/gd/tests/copypalette.phpt:
+      Fixed uninitialized variable in a test.
+
+2005-12-17  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_1)
+      NEWS:
+      - add leaks fix in imagecreatefromstring
+
+    * (PHP_5_1)
+      ext/gd/gd.c
+      ext/gd/tests/copypalette.phpt
+      ext/gd/tests/createfromstring.phpt
+      ext/gd/tests/src.png:
+      - MFH:
+      - fix leaks and wrong error when invalid/empty string are given to
+        imagecreatefromstring
+      - add test for imagecreatefromstring
+      - add test for palettecopy
+
+2005-12-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * run-tests.php:
+      MFB51: Added token for capturing arbitrary whitespace blocks inside text.
+
+    * (PHP_5_1)
+      run-tests.php:
+      Added token for capturing arbitrary whitespace blocks inside text.
+
+2005-12-17  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * acinclude.m4:
+      MFB51: Extension dependancy improvements during configure
+
+2005-12-17  Antony Dovgal  <antony@zend.com>
+
+    * ext/sqlite/php_sqlite.h:
+      MFB: int -> long
+
+    * (PHP_5_1)
+      ext/sqlite/php_sqlite.h:
+      change int to long and fix valgrind warnings
+
+2005-12-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      NEWS:
+      - BFN
+
+    * (PHP_5_1)
+      ZendEngine2/zend_compile.c
+      tests/classes/final_ctor1.phpt
+      tests/classes/final_ctor2.phpt:
+      - MFH  Fix Bug #35720 A final constructor can be overwritten
+
+    * ZendEngine2/zend_compile.c
+      tests/classes/final_ctor1.phpt
+      tests/classes/final_ctor1.phpt
+      tests/classes/final_ctor2.phpt
+      tests/classes/final_ctor2.phpt:
+      - Fix Bug #35720 A final constructor can be overwritten
+
+    * ext/dom/php_dom.c:
+      - MFB Fix export
+
+    * (PHP_5_1)
+      ext/dom/php_dom.c:
+      - Fix export
+
+2005-12-17  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ZendEngine2/tests/bug35655.phpt:
+      fix test
+
+    * (PHP_5_1)
+      ZendEngine2/tests/bug35655.phpt:
+      - Fix test
+
 2005-12-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_API.h:
