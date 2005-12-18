@@ -7,7 +7,7 @@ require_once('skipif.inc');
 --FILE--
 <?php
 
-require_once('config.inc');
+require_once(dirname(__FILE__) . '/config.inc');
 	
 $dbh = @pg_connect($conn_str);
 if (!$dbh) {
