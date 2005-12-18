@@ -342,7 +342,7 @@ PHP_FUNCTION(msg_receive)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "message corrupted");
 				RETVAL_FALSE;
 			} else {
-				REPLACE_ZVAL_VALUE(&out_message, tmp, 1);
+				REPLACE_ZVAL_VALUE(&out_message, tmp, 0);
 			}
 			FREE_ZVAL(tmp);
 			PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
