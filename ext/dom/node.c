@@ -1113,7 +1113,7 @@ PHP_FUNCTION(dom_node_replace_child)
 		RETURN_FALSE;
 	}
 
-	/* check for the old child and wether the new child is already a child */
+	/* check for the old child and whether the new child is already a child */
 	while (children) {
 		if (children == oldchild) {
 			foundoldchild = 1;

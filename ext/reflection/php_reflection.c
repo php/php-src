@@ -2781,7 +2781,7 @@ ZEND_METHOD(reflection_class, getConstructor)
 /* }}} */
 
 /* {{{ proto public bool ReflectionClass::hasMethod(string name)
-   Returns wether a method exists or not */
+   Returns whether a method exists or not */
 ZEND_METHOD(reflection_class, hasMethod)
 {
 	reflection_object *intern;
@@ -2880,7 +2880,7 @@ ZEND_METHOD(reflection_class, getMethods)
 /* }}} */
 
 /* {{{ proto public bool ReflectionClass::hasProperty(string name)
-   Returns wether a property exists or not */
+   Returns whether a property exists or not */
 ZEND_METHOD(reflection_class, hasProperty)
 {
 	reflection_object *intern;
@@ -3014,7 +3014,7 @@ ZEND_METHOD(reflection_class, getProperties)
 /* }}} */
 
 /* {{{ proto public bool ReflectionClass::hasConstant(string name)
-   Returns wether a constant exists or not */
+   Returns whether a constant exists or not */
 ZEND_METHOD(reflection_class, hasConstant)
 {
 	reflection_object *intern;
