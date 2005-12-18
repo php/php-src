@@ -29,6 +29,9 @@
  <license uri="http://www.php.net/license/3_01.txt">PHP</license>
  <notes>- fix ::startDtd and ::startElementNs arguments
 - Add tests for both methods
+- fix ::setIndent() parameter parsing (Ilia)
+- Fix compile warnings
+- update tests suite
 </notes>
  <contents>
   <dir name="/">
