@@ -1,5 +1,5 @@
 --TEST--
-Destructors and echo
+ZE2 Destructors and echo
 --FILE--
 <?php
 
