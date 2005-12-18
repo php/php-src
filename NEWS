@@ -21,7 +21,7 @@ PHP                                                                        NEWS
   . Fixed iterator edge cases
   . Added methods getNamespaces(), getDocNamespaces()
 - Fixed prepared statement name conflict handling in PDO_PGSQL. (Thies, Ilia)
-- Fixed memory corruption when FETCH_LAZY mode is being used. (Ilia)
+- Fixed memory corruption when PDO::FETCH_LAZY mode is being used. (Ilia)
 - Fixed possible leaks in imagecreatefromstring() with invalid data. (Pierre)
 - Fixed possible memory corruption inside mb_strcut(). (Ilia)
 - Fixed possible header injection by limiting each header to a single line.
