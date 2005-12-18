@@ -165,7 +165,7 @@ static const char* get_array_soap_type(XMLRPC_VALUE node) {
 	return soapType;
 }
 
-/* determines wether a node is a fault or not, and of which type:
+/* determines whether a node is a fault or not, and of which type:
  * 0 = not a fault,
  * 1 = xmlrpc style fault
  * 2 = soap style fault.
