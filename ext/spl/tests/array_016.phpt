@@ -1,5 +1,5 @@
 --TEST--
-SPL: ArrayItaerator/Object and IteratorIterator
+SPL: ArrayIterator/Object and IteratorIterator
 --SKIPIF--
 <?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
