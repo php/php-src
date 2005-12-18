@@ -227,7 +227,7 @@ $failed_tests_file= false;
 $pass_option_n = false;
 $pass_options = '';
 
-$compression = 0;		
+$compression = 0;
 $output_file = $CUR_DIR . '/php_test_results_' . date('Ymd_Hi') . '.txt';
 if ($compression) {
 	$output_file = 'compress.zlib://' . $output_file . '.gz';
@@ -389,10 +389,10 @@ Options:
 
     -q          Quite, no user interaction (same as environment NO_INTERACTION).
 
-	--verbose
+    --verbose
     -v          Verbose mode.
 
-	--help
+    --help
     -h          This Help.
 
     --html <file> Generate HTML output.
@@ -679,9 +679,9 @@ if ($just_save_results || !getenv('NO_INTERACTION')) {
 		
 		if ($just_save_results || !mail_qa_team($failed_tests_data, $compression, $status)) {
 			file_put_contents($output_file, $failed_tests_data);
-		
+
 			if (!$just_save_results) {
-			    echo "\nThe test script was unable to automatically send the report to PHP's QA Team\n";
+				echo "\nThe test script was unable to automatically send the report to PHP's QA Team\n";
 			}
 
 			echo "Please send ".$output_file." to ".PHP_QA_EMAIL." manually, thank you.\n";
@@ -898,18 +898,29 @@ TEST $file
 		$borked = true;
 	}
 	$section = 'TEST';
+	$secfile = false;
+	$secdone = false;
 	while (!feof($fp)) {
 		$line = fgets($fp);
 
 		// Match the beginning of a section.
-		if (preg_match('/^--([A-Z]+)--/',$line,$r)) {
+		if (preg_match('/^--([A-Z]+)--/', $line, $r)) {
 			$section = $r[1];
 			$section_text[$section] = '';
+			$secfile = $section == 'FILE' || $section == 'FILEEOF';
+			$secdone = false;
 			continue;
 		}
 		
 		// Add to the section text.
-		$section_text[$section] .= $line;
+		if (!$secdone) {
+			$section_text[$section] .= $line;
+		}
+
+		// End of actual test?
+		if ($secfile && preg_match('/^===DONE===/', $line, $r)) {
+			$secdone = true;
+		}
 	}
 
 	// the redirect section allows a set of tests to be reused outside of
@@ -1102,9 +1113,9 @@ TEST $file
 			}
 			$test_cnt += (count($test_files) - 1) * ($unicode_and_native ? 2 : 1);
 			$test_idx--;
-	
+
 			show_redirect_start($IN_REDIRECT['TESTS'], $tested, $tested_file);
-	
+
 			// set up environment
 			foreach ($IN_REDIRECT['ENV'] as $k => $v) {
 				putenv("$k=$v");
@@ -1191,7 +1202,6 @@ TEST $file
 			unset($section_text['UEXPECTREGEX']);
 		}
 	}
-
 	settings2params($ini_settings);
 
 	// We've satisfied the preconditions - run the test!
@@ -1354,17 +1364,17 @@ COMMAND $cmd
 		if (strpos($log_format,'E') !== FALSE && file_put_contents($exp_filename, $wanted) === FALSE) {
 			error("Cannot create expected test output - $exp_filename");
 		}
-
+	
 		// write .out
 		if (strpos($log_format,'O') !== FALSE && file_put_contents($output_filename, $output) === FALSE) {
 			error("Cannot create test output - $output_filename");
 		}
-
+	
 		// write .diff
 		if (strpos($log_format,'D') !== FALSE && file_put_contents($diff_filename, generate_diff($wanted,$wanted_re,$output)) === FALSE) {
 			error("Cannot create test diff - $diff_filename");
 		}
-
+	
 		// write .log
 		if (strpos($log_format,'L') !== FALSE && file_put_contents($log_filename, "
 ---- EXPECTED OUTPUT
