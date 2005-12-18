@@ -1,5 +1,5 @@
 --TEST--
-$this can be an argument to a static function
+ZE2 $this can be an argument to a static function
 --FILE--
 <?php
 
