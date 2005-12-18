@@ -582,6 +582,9 @@ static timelib_tz_lookup_table* zone_search(const char *word, long gmtoffset, in
 	timelib_tz_lookup_table  *tp, *first_found_elem;
 	timelib_tz_lookup_table  *fmp;
 	
+	if (gmtoffset == -1 && !strcmp(word, "UTC")) {
+		goto skip_name_match;
+	}
 	for (tp = timelib_timezone_lookup; tp->name; tp++) {
 		if (strcasecmp(word, tp->name) == 0) {
 			if (!first_found) {
@@ -599,6 +602,7 @@ static timelib_tz_lookup_table* zone_search(const char *word, long gmtoffset, in
 	if (first_found) {
 		return first_found_elem;
 	}
+skip_name_match:
 	/* Still didn't find anything, let's find the zone solely based on
 	 * offset/isdst then */
 	for (fmp = timelib_timezone_fallbackmap; fmp->name; fmp++) {
