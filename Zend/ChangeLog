@@ -1,3 +1,21 @@
+2005-12-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      zend_compile.c:
+      - MFH  Fix Bug #35720 A final constructor can be overwritten
+
+    * zend_compile.c:
+      - Fix Bug #35720 A final constructor can be overwritten
+
+2005-12-17  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * tests/bug35655.phpt:
+      fix test
+
+    * (PHP_5_1)
+      tests/bug35655.phpt:
+      - Fix test
+
 2005-12-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.h:
