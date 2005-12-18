@@ -828,7 +828,7 @@ static INLINE int spl_dual_it_fetch(spl_dual_it_object *intern, int check_more T
 
 static INLINE spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce_inner, dual_it_type dit_type)
 {
-	zval                 *zobject;
+	zval                 *zobject, *retval = NULL;
 	spl_dual_it_object   *intern;
 	zend_class_entry     *ce;
 
@@ -898,7 +898,6 @@ static INLINE spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAME
 					ce = *pce_cast;
 				}
 				if (instanceof_function(ce, U_CLASS_ENTRY(zend_ce_aggregate) TSRMLS_CC)) {
-					zval *retval;
 					zobject = zend_call_method_with_0_params(&zobject, ce, &ce->iterator_funcs.zf_new_iterator, "getiterator", &retval);
 					ce = Z_OBJCE_P(zobject);
 				}
@@ -944,6 +943,10 @@ static INLINE spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAME
 	intern->inner.object = zend_object_store_get_object(zobject TSRMLS_CC);
 	intern->inner.iterator = intern->inner.ce->get_iterator(intern->inner.ce, zobject TSRMLS_CC);
 
+	if (retval) {
+		zval_ptr_dtor(&retval);
+	}
+	
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 	return intern;
 }
