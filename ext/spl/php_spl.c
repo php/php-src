@@ -302,7 +302,7 @@ PHP_FUNCTION(spl_autoload)
 	}
 } /* }}} */
 
-/* {{{ proto void string spl_autoload_extensions([string file_extensions])
+/* {{{ proto string spl_autoload_extensions([string file_extensions])
  Register and return default file extensions for spl_autoload */
 PHP_FUNCTION(spl_autoload_extensions)
 {
