@@ -1,5 +1,5 @@
 --TEST--
-ZE2 arrayAcces & exceptions
+ZE2 ArrayAccess and exceptions
 --FILE--
 <?php
 
