@@ -36,6 +36,9 @@
  *   Dan Libby, aka danda  (dan@libby.com)
  * HISTORY
  *   $Log$
+ *   Revision 1.4  2003/12/16 21:00:21  sniper
+ *   Fix some compile warnings (patch by Joe Orton)
+ *
  *   Revision 1.3  2002/07/05 04:43:53  danda
  *   merged in updates from SF project.  bring php repository up to date with xmlrpc-epi version 0.51
  *
@@ -74,7 +77,7 @@ static XMLRPC_VALUE xi_system_method_help_cb(XMLRPC_SERVER server, XMLRPC_REQUES
 /* iterates through a list of structs and finds the one with key "name" matching
  * needle.  slow, would benefit from a struct key hash.
  */
-inline XMLRPC_VALUE find_named_value(XMLRPC_VALUE list, const char* needle) {
+static inline XMLRPC_VALUE find_named_value(XMLRPC_VALUE list, const char* needle) {
    XMLRPC_VALUE xIter = XMLRPC_VectorRewind(list);
    while(xIter) {
       const char* name = XMLRPC_VectorGetStringWithID(xIter, xi_token_name);
@@ -104,7 +107,7 @@ static void check_docs_loaded(XMLRPC_SERVER server, void* userData) {
 
 
 /* utility function for xi_system_describe_methods_cb */
-inline void describe_method(XMLRPC_SERVER server, XMLRPC_VALUE vector, const char* method) {
+static inline void describe_method(XMLRPC_SERVER server, XMLRPC_VALUE vector, const char* method) {
    if(method) {
       server_method* sm = find_method(server, method);
       if(sm) {
