@@ -578,7 +578,7 @@ PHP_METHOD(xmlreader, getAttributeNs)
 /* }}} */
 
 /* {{{ proto boolean XMLReader::getParserProperty(int property)
-Indicates wether given property (one of the parser option constants) is set or not on parser */
+Indicates whether given property (one of the parser option constants) is set or not on parser */
 PHP_METHOD(xmlreader, getParserProperty)
 {
 	zval *id;
