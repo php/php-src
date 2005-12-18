@@ -757,6 +757,8 @@ function error_report($testname, $logname, $tested)
 
 function system_with_timeout($commandline)
 {
+	global $leak_check;
+
 	$data = "";
 	
 	$proc = proc_open($commandline, array(
@@ -775,7 +777,7 @@ function system_with_timeout($commandline)
 		$r = $pipes;
 		$w = null;
 		$e = null;
-		$n = @stream_select($r, $w, $e, 60);
+		$n = @stream_select($r, $w, $e, $leak_check ? 300 : 60);
 
 		if ($n === 0) {
 			/* timed out */
