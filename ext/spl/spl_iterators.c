@@ -817,6 +817,7 @@ static INLINE spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAME
 	zval                 *zobject, *retval = NULL;
 	spl_dual_it_object   *intern;
 	zend_class_entry     *ce;
+	int                   inc_refcount = 1;
 
 	php_set_error_handling(EH_THROW, spl_ce_InvalidArgumentException TSRMLS_CC);
 
@@ -884,6 +885,7 @@ static INLINE spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAME
 				if (instanceof_function(ce, zend_ce_aggregate TSRMLS_CC)) {
 					zobject = zend_call_method_with_0_params(&zobject, ce, &ce->iterator_funcs.zf_new_iterator, "getiterator", &retval);
 					ce = Z_OBJCE_P(zobject);
+					inc_refcount = 0;
 				}
 			}
 			break;
@@ -904,16 +906,14 @@ static INLINE spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAME
 
 	php_set_error_handling(EH_THROW, zend_exception_get_default() TSRMLS_CC);
 
-	zobject->refcount++;
+	if (inc_refcount) {
+		zobject->refcount++;
+	}
 	intern->inner.zobject = zobject;
 	intern->inner.ce = dit_type == DIT_IteratorIterator ? ce : Z_OBJCE_P(zobject);
 	intern->inner.object = zend_object_store_get_object(zobject TSRMLS_CC);
 	intern->inner.iterator = intern->inner.ce->get_iterator(intern->inner.ce, zobject TSRMLS_CC);
 
-	if (retval) {
-		zval_ptr_dtor(&retval);
-	}
-	
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 	return intern;
 }
