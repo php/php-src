@@ -814,7 +814,7 @@ static INLINE int spl_dual_it_fetch(spl_dual_it_object *intern, int check_more T
 
 static INLINE spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce_inner, dual_it_type dit_type)
 {
-	zval                 *zobject, *retval = NULL;
+	zval                 *zobject, *retval;
 	spl_dual_it_object   *intern;
 	zend_class_entry     *ce;
 	int                   inc_refcount = 1;
@@ -883,7 +883,13 @@ static INLINE spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAME
 					ce = *pce_cast;
 				}
 				if (instanceof_function(ce, zend_ce_aggregate TSRMLS_CC)) {
-					zobject = zend_call_method_with_0_params(&zobject, ce, &ce->iterator_funcs.zf_new_iterator, "getiterator", &retval);
+					zend_call_method_with_0_params(&zobject, ce, &ce->iterator_funcs.zf_new_iterator, "getiterator", &retval);
+					if (!retval || Z_TYPE_P(retval) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(retval), zend_ce_traversable TSRMLS_CC)) {
+						zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "%s::getIterator() must return an object that implememnts Traversable", ce->name);
+						php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+						return NULL;
+					}
+					zobject = retval;
 					ce = Z_OBJCE_P(zobject);
 					inc_refcount = 0;
 				}
