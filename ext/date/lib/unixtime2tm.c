@@ -121,7 +121,6 @@ void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts)
 	tm->sse_uptodate = 1;
 	tm->tim_uptodate = 1;
 	tm->is_localtime = 0;
-	tm->have_zone = 0;
 }
 
 void timelib_update_from_sse(timelib_time *tm)
@@ -138,8 +137,6 @@ void timelib_update_from_sse(timelib_time *tm)
 			
 			timelib_unixtime2gmt(tm, tm->sse - (tm->z * 60));
 
-			tm->is_localtime = 1;
-			tm->have_zone = 1;
 			tm->z = z;
 			tm->dst = dst;
 			goto cleanup;
@@ -165,25 +162,45 @@ cleanup:
 	tm->have_zone = 1;
 }
 
-void timelib_unixtime2local(timelib_time *tm, timelib_sll ts, timelib_tzinfo* tz)
+void timelib_unixtime2local(timelib_time *tm, timelib_sll ts)
 {
 	timelib_time_offset *gmt_offset;
-
-	gmt_offset = timelib_get_time_zone_info(ts, tz);
-	timelib_unixtime2gmt(tm, ts + gmt_offset->offset);
-
-	/* we need to reset the sse here as unixtime2gmt modifies it */
-	tm->sse = ts; 
-	tm->dst = gmt_offset->is_dst;
-	tm->z = gmt_offset->offset;
-	tm->tz_info = tz;
-
-	timelib_time_tz_abbr_update(tm, gmt_offset->abbr);
-	timelib_time_offset_dtor(gmt_offset);
+	timelib_tzinfo      *tz = tm->tz_info;
 
 	tm->is_localtime = 1;
 	tm->have_zone = 1;
-	tm->zone_type = TIMELIB_ZONETYPE_ID;
+
+	switch (tm->zone_type) {
+		case TIMELIB_ZONETYPE_ABBR:
+		case TIMELIB_ZONETYPE_OFFSET: {
+			int z = tm->z;
+			signed int dst = tm->dst;
+			
+			timelib_unixtime2gmt(tm, ts - (tm->z * 60));
+
+			tm->z = z;
+			tm->dst = dst;
+			break;
+		}
+
+		case TIMELIB_ZONETYPE_ID:
+			gmt_offset = timelib_get_time_zone_info(ts, tz);
+			timelib_unixtime2gmt(tm, ts + gmt_offset->offset);
+
+			/* we need to reset the sse here as unixtime2gmt modifies it */
+			tm->sse = ts; 
+			tm->dst = gmt_offset->is_dst;
+			tm->z = gmt_offset->offset;
+			tm->tz_info = tz;
+
+			timelib_time_tz_abbr_update(tm, gmt_offset->abbr);
+			timelib_time_offset_dtor(gmt_offset);
+			break;
+
+		default:
+			tm->is_localtime = 0;
+			tm->have_zone = 0;
+	}
 }
 
 void timelib_set_timezone(timelib_time *t, timelib_tzinfo *tz)
@@ -225,7 +242,7 @@ int timelib_apply_localtime(timelib_time *t, unsigned int localtime)
 			return -1;
 		}
 
-		timelib_unixtime2local(t, t->sse, t->tz_info);
+		timelib_unixtime2local(t, t->sse);
 	} else {
 		/* Converting from local time to GMT time */
 		DEBUG(printf("Converting from local time to GMT time\n"););

@@ -590,7 +590,9 @@ PHPAPI char *php_format_date(char *format, int format_len, time_t ts, int localt
 
 	if (localtime) {
 		tzi = get_timezone_info(TSRMLS_C);
-		timelib_unixtime2local(t, ts, tzi);
+		t->tz_info = tzi;
+		t->zone_type = TIMELIB_ZONETYPE_ID;
+		timelib_unixtime2local(t, ts);
 	} else {
 		tzi = NULL;
 		timelib_unixtime2gmt(t, ts);
@@ -618,7 +620,9 @@ PHPAPI int php_idate(char format, time_t ts, int localtime)
 	if (!localtime) {
 		TSRMLS_FETCH();
 		tzi = get_timezone_info(TSRMLS_C);
-		timelib_unixtime2local(t, ts, tzi);
+		t->tz_info = tzi;
+		t->zone_type = TIMELIB_ZONETYPE_ID;
+		timelib_unixtime2local(t, ts);
 	} else {
 		tzi = NULL;
 		timelib_unixtime2gmt(t, ts);
@@ -797,13 +801,17 @@ PHP_FUNCTION(strtotime)
 		snprintf(initial_ts, 24, "@%lu", preset_ts);
 		t = timelib_strtotime(initial_ts, strlen(initial_ts), &error1, DATE_TIMEZONEDB); /* we ignore the error here, as this should never fail */
 		timelib_update_ts(t, tzi);
-		timelib_unixtime2local(now, t->sse, tzi);
+		now->tz_info = tzi;
+		now->zone_type = TIMELIB_ZONETYPE_ID;
+		timelib_unixtime2local(now, t->sse);
 		timelib_time_dtor(t);
 		efree(initial_ts);
 	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s", &times, &time_len) != FAILURE) {
 		/* We have no initial timestamp */
 		now = timelib_time_ctor();
-		timelib_unixtime2local(now, (timelib_sll) time(NULL), tzi);
+		now->tz_info = tzi;
+		now->zone_type = TIMELIB_ZONETYPE_ID;
+		timelib_unixtime2local(now, (timelib_sll) time(NULL));
 	} else {
 		RETURN_FALSE;
 	}
@@ -814,7 +822,7 @@ PHP_FUNCTION(strtotime)
 	ts = timelib_date_to_int(t, &error2);
 
 	/* if tz_info is not a copy, avoid double free */
-	if (now->tz_info != tzi) {
+	if (now->tz_info != tzi && now->tz_info) {
 		timelib_tzinfo_dtor(now->tz_info);
 	}
 	if (t->tz_info != tzi) {
@@ -851,7 +859,9 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 		timelib_unixtime2gmt(now, (timelib_sll) time(NULL));
 	} else {
 		tzi = get_timezone_info(TSRMLS_C);
-		timelib_unixtime2local(now, (timelib_sll) time(NULL), tzi);
+		now->tz_info = tzi;
+		now->zone_type = TIMELIB_ZONETYPE_ID;
+		timelib_unixtime2local(now, (timelib_sll) time(NULL));
 	}
 	/* Fill in the new data */
 	switch (ZEND_NUM_ARGS()) {
@@ -987,7 +997,9 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 		timelib_unixtime2gmt(ts, (timelib_sll) timestamp);
 	} else {
 		tzi = get_timezone_info(TSRMLS_C);
-		timelib_unixtime2local(ts, (timelib_sll) timestamp, tzi);
+		ts->tz_info = tzi;
+		ts->zone_type = TIMELIB_ZONETYPE_ID;
+		timelib_unixtime2local(ts, (timelib_sll) timestamp);
 	}
 	ta.tm_sec   = ts->s;
 	ta.tm_min   = ts->i;
@@ -1080,7 +1092,9 @@ PHP_FUNCTION(localtime)
 
 	tzi = get_timezone_info(TSRMLS_C);
 	ts = timelib_time_ctor();
-	timelib_unixtime2local(ts, (timelib_sll) timestamp, tzi);
+	ts->tz_info = tzi;
+	ts->zone_type = TIMELIB_ZONETYPE_ID;
+	timelib_unixtime2local(ts, (timelib_sll) timestamp);
 
 	array_init(return_value);
 
@@ -1124,7 +1138,9 @@ PHP_FUNCTION(getdate)
 
 	tzi = get_timezone_info(TSRMLS_C);
 	ts = timelib_time_ctor();
-	timelib_unixtime2local(ts, (timelib_sll) timestamp, tzi);
+	ts->tz_info = tzi;
+	ts->zone_type = TIMELIB_ZONETYPE_ID;
+	timelib_unixtime2local(ts, (timelib_sll) timestamp);
 
 	array_init(return_value);
 
@@ -1239,14 +1255,14 @@ static void date_object_free_storage_date(void *object TSRMLS_DC)
 
 static void date_object_free_storage_timezone(void *object TSRMLS_DC)
 {
-	php_date_obj *intern = (php_date_obj *)object;
-	
+	php_timezone_obj *intern = (php_timezone_obj *)object;
+
 	if (intern->std.properties) {
 		zend_hash_destroy(intern->std.properties);
 		efree(intern->std.properties);
 		intern->std.properties = NULL;
 	}
-	
+
 	efree(object);
 }
 
@@ -1296,7 +1312,9 @@ PHP_FUNCTION(date_create)
 	}
 
 	now = timelib_time_ctor();
-	timelib_unixtime2local(now, (timelib_sll) time(NULL), tzi);
+	now->tz_info = tzi;
+	now->zone_type = TIMELIB_ZONETYPE_ID;
+	timelib_unixtime2local(now, (timelib_sll) time(NULL));
 
 	timelib_fill_holes(dateobj->time, now, 0);
 	timelib_update_ts(dateobj->time, tzi);
@@ -1390,7 +1408,7 @@ PHP_FUNCTION(date_timezone_set)
 		timelib_tzinfo_dtor(dateobj->time->tz_info);
 	}
 	timelib_set_timezone(dateobj->time, timelib_tzinfo_clone(tzobj->tz));
-	timelib_unixtime2local(dateobj->time, dateobj->time->sse, dateobj->time->tz_info);
+	timelib_unixtime2local(dateobj->time, dateobj->time->sse);
 }
 
 PHP_FUNCTION(date_offset_get)

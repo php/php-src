@@ -62,7 +62,7 @@ void timelib_update_ts(timelib_time* time, timelib_tzinfo* tzi);
 /* From unixtime2tm.c */
 int timelib_apply_localtime(timelib_time *t, unsigned int localtime);
 void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts);
-void timelib_unixtime2local(timelib_time *tm, timelib_sll ts, timelib_tzinfo* tz);
+void timelib_unixtime2local(timelib_time *tm, timelib_sll ts);
 void timelib_update_from_sse(timelib_time *tm);
 void timelib_set_timezone(timelib_time *t, timelib_tzinfo *tz);
 
@@ -90,5 +90,11 @@ void timelib_time_offset_dtor(timelib_time_offset* t);
 
 signed long timelib_date_to_int(timelib_time *d, int *error);
 void timelib_dump_date(timelib_time *d, int options);
+
+void timelib_decimal_hour_to_hms(double h, int *hour, int *min, int *sec);
+
+/* from astro.c */
+double timelib_ts_to_juliandate(timelib_sll ts);
+int timelib_astro_rise_set_altitude(timelib_time *time, double lon, double lat, double altit, int upper_limb, double *h_rise, double *h_set, timelib_sll *ts_rise, timelib_sll *ts_set);
 
 #endif
