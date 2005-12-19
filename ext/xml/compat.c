@@ -405,15 +405,12 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 		efree(parser);
 		return NULL;
 	}
-	if (encoding != NULL) {
-		parser->parser->encoding = xmlStrdup(encoding);
 #if LIBXML_VERSION <= 20617
 	/* for older versions of libxml2, allow correct detection of
 	 * charset in documents with a BOM: */
-	} else {
-		parser->parser->charset = XML_CHAR_ENCODING_NONE;
+	parser->parser->charset = XML_CHAR_ENCODING_NONE;
 #endif
-	}
+
 	parser->parser->replaceEntities = 1;
 	parser->parser->wellFormed = 0;
 	if (sep != NULL) {
