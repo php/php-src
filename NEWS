@@ -69,6 +69,7 @@ PHP                                                                        NEWS
 - Fixed bug #35470 (Assigning global using variable name from array doesn't
   function). (Dmitry)
 - Fixed bug #35456 (+ 1 [time unit] format did not work). (Ilia)
+- Fixed bug #35447 (xml_parse_into_struct() chokes on the UTF-8 BOM). (Rob)
 - Fixed bug #35431 (PDO crashes when using LAZY fetch with fetchAll). (Wez)
 - Fixed bug #35430 (PDO crashes on incorrect FETCH_FUNC use). (Tony)
 - Fixed bug #35427 (str_word_count() handles '-' incorrectly). (Ilia)
