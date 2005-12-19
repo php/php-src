@@ -1,3 +1,102 @@
+2005-12-18  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS
+      ext/xmlrpc/libxmlrpc/xmlrpc_introspection.c:
+      MFH: - Fixed bug #35723 (xmlrpc_introspection.c fails compile per C99 std)
+
+    * ext/xmlrpc/libxmlrpc/xmlrpc_introspection.c:
+      - Fixed bug #35723 (xmlrpc_introspection.c fails compile per C99 std)
+
+2005-12-18  Antony Dovgal  <antony@zend.com>
+
+    * ext/dom/node.c
+      ext/xmlrpc/libxmlrpc/xml_to_soap.c:
+      MFB: fix typo
+
+    * (PHP_5_1)
+      ext/dom/node.c
+      ext/xmlrpc/libxmlrpc/xml_to_soap.c:
+      tix fypo
+
+2005-12-18  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.c:
+      touch with re2c 0.9.11
+
+2005-12-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      - Fix --version
+
+2005-12-18  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_5_1)
+      main/streams/userspace.c:
+      Fix prototype
+
+2005-12-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      run-tests.php:
+      - MFH End test script when detecting '===DONE===' that way showing memleaks
+
+    * run-tests.php:
+      - WS
+      - End test script when detecting '===DONE===' that way showing memleaks
+
+2005-12-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      ext/pgsql/tests/80_bug27597.phpt:
+      fixed test for ZTS
+
+    * (PHP_5_1)
+      tests/lang/bug32924.phpt
+      tests/lang/bug35382.phpt:
+      Test fixes
+
+2005-12-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/__set_data_corrupt.phpt
+      tests/classes/destructor_and_echo.phpt
+      tests/classes/destructor_and_references.phpt
+      tests/classes/static_this.phpt:
+      - Add missing prefixes
+
+    * tests/classes/array_access_013.phpt:
+      - Speling
+
+2005-12-18  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      ext/sysvmsg/sysvmsg.c:
+      MFH: fix possible usage of uninitialized variable
+
+    * ext/sysvmsg/sysvmsg.c:
+      that's not what I was going to commit..
+
+    * ext/sysvmsg/sysvmsg.c:
+      fix possible usage of uninitialized variable
+
+2005-12-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      - Increase timeut for -m testing
+
+2005-12-18  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS:
+      it is easier to spot fixes when you know what and where something was fixed
+
+    * (PHP_5_1)
+      NEWS:
+      fix news
+
 2005-12-17  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_1)
