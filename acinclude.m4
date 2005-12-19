@@ -548,6 +548,10 @@ AC_DEFUN([PHP_MODULE_PTR],[
 ])
  
 AC_DEFUN([PHP_CONFIG_NICE],[
+  AC_REQUIRE([AC_PROG_EGREP])
+  AC_REQUIRE([LT_AC_PROG_SED])
+  PHP_SUBST(EGREP)
+  PHP_SUBST(SED)
   test -f $1 && mv $1 $1.old
   rm -f $1.old
   cat >$1<<EOF
