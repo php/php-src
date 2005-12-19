@@ -171,6 +171,10 @@ static timelib_tz_lookup_table timelib_timezone_fallbackmap[] = {
 	{ NULL, 0, 0, NULL },
 };
 
+static timelib_tz_lookup_table timelib_timezone_utc[] = {
+	{ "utc", 0, 0, "UTC" },
+};
+
 static timelib_relunit const timelib_relunit_lookup[] = {
 	{ "sec",         TIMELIB_SECOND,  1 },
 	{ "secs",        TIMELIB_SECOND,  1 },
@@ -581,10 +585,11 @@ static timelib_tz_lookup_table* zone_search(const char *word, long gmtoffset, in
 	int first_found = 0;
 	timelib_tz_lookup_table  *tp, *first_found_elem;
 	timelib_tz_lookup_table  *fmp;
-	
-	if (gmtoffset == -1 && !strcmp(word, "UTC")) {
-		goto skip_name_match;
+
+	if (strcasecmp("utc", word) == 0) {
+		return timelib_timezone_utc;
 	}
+	
 	for (tp = timelib_timezone_lookup; tp->name; tp++) {
 		if (strcasecmp(word, tp->name) == 0) {
 			if (!first_found) {
@@ -602,7 +607,7 @@ static timelib_tz_lookup_table* zone_search(const char *word, long gmtoffset, in
 	if (first_found) {
 		return first_found_elem;
 	}
-skip_name_match:
+
 	/* Still didn't find anything, let's find the zone solely based on
 	 * offset/isdst then */
 	for (fmp = timelib_timezone_fallbackmap; fmp->name; fmp++) {
@@ -792,7 +797,7 @@ pointeddate      = day "." month "." year;
 datefull         = day ([ -.])* monthtext ([ -.])* year;
 datenoday        = monthtext ([ -.])* year4;
 datenodayrev     = year4 ([ -.])* monthtext;
-datetextual	 = monthtext ([ -.])* day [,.stndrh ]* year;
+datetextual      = monthtext ([ -.])* day [,.stndrh ]* year;
 datenoyear       = monthtext ([ -.])* day [,.stndrh ]*;
 datenoyearrev    = day ([ -.])* monthtext;
 datenocolon      = year4 monthlz daylz;
