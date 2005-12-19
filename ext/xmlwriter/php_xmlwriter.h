@@ -70,6 +70,7 @@ PHP_FUNCTION(xmlwriter_write_attribute_ns);
 #endif
 PHP_FUNCTION(xmlwriter_start_element);
 PHP_FUNCTION(xmlwriter_end_element);
+PHP_FUNCTION(xmlwriter_full_end_element);
 PHP_FUNCTION(xmlwriter_start_element_ns);
 PHP_FUNCTION(xmlwriter_write_element);
 PHP_FUNCTION(xmlwriter_write_element_ns);
@@ -80,6 +81,7 @@ PHP_FUNCTION(xmlwriter_start_cdata);
 PHP_FUNCTION(xmlwriter_end_cdata);
 PHP_FUNCTION(xmlwriter_write_cdata);
 PHP_FUNCTION(xmlwriter_text);
+PHP_FUNCTION(xmlwriter_write_raw);
 PHP_FUNCTION(xmlwriter_start_document);
 PHP_FUNCTION(xmlwriter_end_document);
 #if LIBXML_VERSION >= 20607

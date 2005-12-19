@@ -34,6 +34,9 @@ zend_class_entry *xmlwriter_class_entry;
 static void xmlwriter_free_resource_ptr(xmlwriter_object *intern TSRMLS_DC);
 static void xmlwriter_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 
+typedef int (*xmlwriter_read_one_char_t)(xmlTextWriterPtr writer, const xmlChar *content);
+typedef int (*xmlwriter_read_int_t)(xmlTextWriterPtr writer);
+
 /* {{{ xmlwriter_object_free_storage */
 static void xmlwriter_free_resource_ptr(xmlwriter_object *intern TSRMLS_DC) 
 {
@@ -143,6 +146,7 @@ static zend_function_entry xmlwriter_functions[] = {
 #endif
 	PHP_FE(xmlwriter_start_element,		NULL)
 	PHP_FE(xmlwriter_end_element,		NULL)
+	PHP_FE(xmlwriter_full_end_element,	NULL)
 	PHP_FE(xmlwriter_start_element_ns,	NULL)
 	PHP_FE(xmlwriter_write_element,		NULL)
 	PHP_FE(xmlwriter_write_element_ns,	NULL)
@@ -153,6 +157,7 @@ static zend_function_entry xmlwriter_functions[] = {
 	PHP_FE(xmlwriter_end_cdata,			NULL)
 	PHP_FE(xmlwriter_write_cdata,		NULL)
 	PHP_FE(xmlwriter_text,				NULL)
+	PHP_FE(xmlwriter_write_raw,			NULL)
 	PHP_FE(xmlwriter_start_document,	NULL)
 	PHP_FE(xmlwriter_end_document,		NULL)
 	PHP_FE(xmlwriter_write_comment,		NULL)
@@ -195,6 +200,7 @@ static zend_function_entry xmlwriter_class_functions[] = {
 #endif
 	PHP_ME_MAPPING(startElement,	xmlwriter_start_element,	NULL)
 	PHP_ME_MAPPING(endElement,		xmlwriter_end_element,		NULL)
+	PHP_ME_MAPPING(fullEndElement,	xmlwriter_full_end_element,	NULL)
 	PHP_ME_MAPPING(startElementNs,	xmlwriter_start_element_ns,	NULL)
 	PHP_ME_MAPPING(writeElement,	xmlwriter_write_element,	NULL)
 	PHP_ME_MAPPING(writeElementNs,	xmlwriter_write_element_ns,	NULL)
@@ -205,6 +211,7 @@ static zend_function_entry xmlwriter_class_functions[] = {
 	PHP_ME_MAPPING(endCdata,		xmlwriter_end_cdata,		NULL)
 	PHP_ME_MAPPING(writeCdata,		xmlwriter_write_cdata,		NULL)
 	PHP_ME_MAPPING(text,			xmlwriter_text,				NULL)
+	PHP_ME_MAPPING(writeRaw,		xmlwriter_write_raw,		NULL)
 	PHP_ME_MAPPING(startDocument,	xmlwriter_start_document,	NULL)
 	PHP_ME_MAPPING(endDocument,		xmlwriter_end_document,		NULL)
 	PHP_ME_MAPPING(writeComment,	xmlwriter_write_comment,	NULL)
@@ -351,6 +358,80 @@ static void xmlwriter_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC) {
 }
 /* }}} */
 
+static void php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAMETERS, xmlwriter_read_one_char_t internal_function, char *err_string)
+{
+	zval *pind;
+	xmlwriter_object *intern;
+	xmlTextWriterPtr ptr;
+	char *name;
+	int name_len, retval;
+
+#ifdef ZEND_ENGINE_2
+	zval *this = getThis();
+	
+	if (this) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
+			return;
+		}
+		XMLWRITER_FROM_OBJECT(intern, this);
+	} else
+#endif
+	{
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &pind, &name, &name_len) == FAILURE) {
+			return;
+		}
+	
+		ZEND_FETCH_RESOURCE(intern,xmlwriter_object *, &pind, -1, "XMLWriter", le_xmlwriter);
+	}
+
+	if (err_string != NULL) {
+		XMLW_NAME_CHK(err_string);
+	}
+
+	ptr = intern->ptr;
+
+	if (ptr) {
+		retval = internal_function(ptr, name);
+		if (retval != -1) {
+			RETURN_TRUE;
+		}
+	}
+	
+	RETURN_FALSE;
+}
+
+static void php_xmlwriter_end(INTERNAL_FUNCTION_PARAMETERS, xmlwriter_read_int_t internal_function)
+{
+	zval *pind;
+	xmlwriter_object *intern;
+	xmlTextWriterPtr ptr;
+	int retval;
+#ifdef ZEND_ENGINE_2
+	zval *this = getThis();
+	
+	if (this) {
+		XMLWRITER_FROM_OBJECT(intern, this);
+	} else 
+#endif
+	{
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &pind) == FAILURE) {
+			return;
+		}
+		ZEND_FETCH_RESOURCE(intern,xmlwriter_object *, &pind, -1, "XMLWriter", le_xmlwriter);
+	}
+
+	ptr = intern->ptr;
+
+	if (ptr) {
+		retval = internal_function(ptr);
+		if (retval != -1) {
+			RETURN_TRUE;
+		}
+	}
+	
+	RETURN_FALSE;
+}
+
 #if LIBXML_VERSION >= 20605
 /* {{{ proto bool xmlwriter_set_indent(resource xmlwriter, bool indent)
 Toggle indentation on/off - returns FALSE on error */
@@ -396,41 +477,7 @@ PHP_FUNCTION(xmlwriter_set_indent)
 Set string used for indenting - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_set_indent_string)
 {
-	zval *pind;
-	xmlwriter_object *intern;
-	xmlTextWriterPtr ptr;
-	char *indent;
-	int indent_len, retval;
-
-#ifdef ZEND_ENGINE_2
-	zval *this = getThis();
-	
-	if (this) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &indent, &indent_len) == FAILURE) {
-			return;
-		}
-		XMLWRITER_FROM_OBJECT(intern, this);
-	} else
-#endif
-	{
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &pind, &indent, &indent_len) == FAILURE) {
-			return;
-		}
-	
-		ZEND_FETCH_RESOURCE(intern,xmlwriter_object *, &pind, -1, "XMLWriter", le_xmlwriter);
-	}
-
-
-	ptr = intern->ptr;
-
-	if (ptr) {
-		retval = xmlTextWriterSetIndentString(ptr, indent);
-		if (retval == 0) {
-			RETURN_TRUE;
-		}
-	}
-	
-	RETURN_FALSE;
+	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterSetIndentString, NULL);
 }
 /* }}} */
 
@@ -440,116 +487,15 @@ PHP_FUNCTION(xmlwriter_set_indent_string)
 Create start attribute - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_start_attribute)
 {
-	zval *pind;
-	xmlwriter_object *intern;
-	xmlTextWriterPtr ptr;
-	char *name;
-	int name_len, retval;
-#ifdef ZEND_ENGINE_2
-	zval *this = getThis();
-	
-	if (this) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
-			return;
-		}
-		XMLWRITER_FROM_OBJECT(intern, this);
-	} else
-#endif
-	{
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &pind, &name, &name_len) == FAILURE) {
-			return;
-		}
-		ZEND_FETCH_RESOURCE(intern,xmlwriter_object *, &pind, -1, "XMLWriter", le_xmlwriter);
-	}
-
-
-	XMLW_NAME_CHK("Invalid Element Name");
-
-	ptr = intern->ptr;
-
-	if (ptr) {
-		retval = xmlTextWriterStartAttribute(ptr, name);
-		if (retval != -1) {
-			RETURN_TRUE;
-		}
-	}
-
-	RETURN_FALSE;
+	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterStartAttribute, "Invalid Attribute Name");
 }
 /* }}} */
-
-static void php_xmlwriter_end(INTERNAL_FUNCTION_PARAMETERS, int type)
-{
-	zval *pind;
-	xmlwriter_object *intern;
-	xmlTextWriterPtr ptr;
-	int retval;
-#ifdef ZEND_ENGINE_2
-	zval *this = getThis();
-	
-	if (this) {
-		XMLWRITER_FROM_OBJECT(intern, this);
-	} else 
-#endif
-	{
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &pind) == FAILURE) {
-			return;
-		}
-		ZEND_FETCH_RESOURCE(intern,xmlwriter_object *, &pind, -1, "XMLWriter", le_xmlwriter);
-	}
-
-	ptr = intern->ptr;
-
-	if (ptr) {
-		switch (type) {
-			case 0:
-				retval = xmlTextWriterEndAttribute(ptr);
-				break;
-			case 1:
-				retval = xmlTextWriterEndElement(ptr);
-				break;
-			case 2:
-				retval = xmlTextWriterEndPI(ptr);
-				break;
-			case 3:
-				retval = xmlTextWriterEndCDATA(ptr);
-				break;
-			case 4:
-				retval = xmlTextWriterEndComment(ptr);
-				break;
-			case 5:
-				retval = xmlTextWriterEndDocument(ptr);
-				break;
-			case 6:
-				retval = xmlTextWriterEndDTD(ptr);
-				break;
-			case 7:
-				retval = xmlTextWriterEndDTDElement(ptr);
-				break;
-			case 8:
-				retval = xmlTextWriterEndDTDAttlist(ptr);
-				break;
-			case 9:
-				retval = xmlTextWriterEndDTDEntity(ptr);
-				break;
-			default:
-				retval = -1;
-				break;
-		}
-		if (retval != -1) {
-			RETURN_TRUE;
-		}
-	}
-	
-	RETURN_FALSE;
-}
-
 
 /* {{{ proto bool xmlwriter_end_attribute(resource xmlwriter)
 End attribute - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_end_attribute)
 {
-	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndAttribute);
 }
 /* }}} */
 
@@ -692,40 +638,7 @@ PHP_FUNCTION(xmlwriter_write_attribute_ns)
 Create start element tag - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_start_element)
 {
-	zval *pind;
-	xmlwriter_object *intern;
-	xmlTextWriterPtr ptr;
-	char *name;
-	int name_len, retval;
-#ifdef ZEND_ENGINE_2
-	zval *this = getThis();
-	
-	if (this) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
-			return;
-		}
-		XMLWRITER_FROM_OBJECT(intern, this);
-	} else
-#endif
-	{
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &pind, &name, &name_len) == FAILURE) {
-			return;
-		}
-		ZEND_FETCH_RESOURCE(intern,xmlwriter_object *, &pind, -1, "XMLWriter", le_xmlwriter);
-	}
-
-	XMLW_NAME_CHK("Invalid Element Name");
-
-	ptr = intern->ptr;
-
-	if (ptr) {
-		retval = xmlTextWriterStartElement(ptr, name);
-		if (retval != -1) {
-			RETURN_TRUE;
-		}
-	}
-	
-	RETURN_FALSE;
+	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterStartElement, "Invalid Element Name");
 }
 /* }}} */
 
@@ -778,7 +691,15 @@ PHP_FUNCTION(xmlwriter_start_element_ns)
 End current element - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_end_element)
 {
-	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndElement);
+}
+/* }}} */
+
+/* {{{ proto bool xmlwriter_full_end_element(resource xmlwriter)
+End current element - returns FALSE on error */
+PHP_FUNCTION(xmlwriter_full_end_element)
+{
+	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterFullEndElement);
 }
 /* }}} */
 
@@ -873,41 +794,7 @@ PHP_FUNCTION(xmlwriter_write_element_ns)
 Create start PI tag - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_start_pi)
 {
-	zval *pind;
-	xmlwriter_object *intern;
-	xmlTextWriterPtr ptr;
-	char *name;
-	int name_len, retval;
-
-#ifdef ZEND_ENGINE_2
-	zval *this = getThis();
-	
-	if (this) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
-			return;
-		}
-		XMLWRITER_FROM_OBJECT(intern, this);
-	} else
-#endif
-	{
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &pind, &name, &name_len) == FAILURE) {
-			return;
-		}
-		ZEND_FETCH_RESOURCE(intern,xmlwriter_object *, &pind, -1, "XMLWriter", le_xmlwriter);
-	}
-
-	XMLW_NAME_CHK("Invalid PI Target");
-
-	ptr = intern->ptr;
-
-	if (ptr) {
-		retval = xmlTextWriterStartPI(ptr, name);
-		if (retval != -1) {
-			RETURN_TRUE;
-		}
-	}
-	
-	RETURN_FALSE;
+	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterStartPI, "Invalid PI Target");
 }
 /* }}} */
 
@@ -915,7 +802,7 @@ PHP_FUNCTION(xmlwriter_start_pi)
 End current PI - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_end_pi)
 {
-	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, 2);
+	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndPI);
 }
 /* }}} */
 
@@ -1002,7 +889,7 @@ PHP_FUNCTION(xmlwriter_start_cdata)
 End current CDATA - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_end_cdata)
 {
-	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, 3);
+	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndCDATA);
 }
 /* }}} */
 
@@ -1010,40 +897,15 @@ PHP_FUNCTION(xmlwriter_end_cdata)
 Write full CDATA tag - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_write_cdata)
 {
-	zval *pind;
-	xmlwriter_object *intern;
-	xmlTextWriterPtr ptr;
-	char *content;
-	int content_len, retval;
+	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterWriteCDATA, NULL);
+}
+/* }}} */
 
-#ifdef ZEND_ENGINE_2
-	zval *this = getThis();
-	
-	if (this) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &content, &content_len) == FAILURE) {
-			return;
-		}
-		XMLWRITER_FROM_OBJECT(intern, this);
-	} else
-#endif
-	{
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &pind, 
-			&content, &content_len) == FAILURE) {
-			return;
-		}
-		ZEND_FETCH_RESOURCE(intern,xmlwriter_object *, &pind, -1, "XMLWriter", le_xmlwriter);
-	}
-
-	ptr = intern->ptr;
-
-	if (ptr) {
-		retval = xmlTextWriterWriteCDATA(ptr, content);
-		if (retval != -1) {
-			RETURN_TRUE;
-		}
-	}
-	
-	RETURN_FALSE;
+/* {{{ proto bool xmlwriter_write_raw(resource xmlwriter, string content)
+Write text - returns FALSE on error */
+PHP_FUNCTION(xmlwriter_write_raw)
+{
+	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterWriteRaw, NULL);
 }
 /* }}} */
 
@@ -1051,40 +913,7 @@ PHP_FUNCTION(xmlwriter_write_cdata)
 Write text - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_text)
 {
-	zval *pind;
-	xmlwriter_object *intern;
-	xmlTextWriterPtr ptr;
-	char *content;
-	int content_len, retval;
-
-#ifdef ZEND_ENGINE_2
-	zval *this = getThis();
-	
-	if (this) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &content, &content_len) == FAILURE) {
-			return;
-		}
-		XMLWRITER_FROM_OBJECT(intern, this);
-	} else
-#endif
-	{
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &pind, &content, &content_len) == FAILURE) {
-			return;
-		}
-	
-		ZEND_FETCH_RESOURCE(intern,xmlwriter_object *, &pind, -1, "XMLWriter", le_xmlwriter);
-	}
-
-	ptr = intern->ptr;
-
-	if (ptr) {
-		retval = xmlTextWriterWriteString(ptr, content);
-		if (retval) {
-			RETURN_TRUE;
-		}
-	}
-	
-	RETURN_FALSE;
+	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterWriteString, NULL);
 }
 /* }}} */
 
@@ -1128,7 +957,7 @@ PHP_FUNCTION(xmlwriter_start_comment)
 Create end comment - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_end_comment)
 {
-	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, 4);
+	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndComment);
 }
 /* }}} */
 #endif  /* LIBXML_VERSION >= 20607 */
@@ -1138,42 +967,7 @@ PHP_FUNCTION(xmlwriter_end_comment)
 Write full comment tag - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_write_comment)
 {
-	zval *pind;
-	xmlwriter_object *intern;
-	xmlTextWriterPtr ptr;
-	char *content;
-	int content_len, retval;
-
-	
-#ifdef ZEND_ENGINE_2
-	zval *this = getThis();
-
-	if (this) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
-			&content, &content_len) == FAILURE) {
-			return;
-		}
-		XMLWRITER_FROM_OBJECT(intern, this);
-	} else
-#endif
-	{
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &pind, 
-			&content, &content_len) == FAILURE) {
-			return;
-		}
-		ZEND_FETCH_RESOURCE(intern,xmlwriter_object *, &pind, -1, "XMLWriter", le_xmlwriter);
-	}
-
-	ptr = intern->ptr;
-
-	if (ptr) {
-		retval = xmlTextWriterWriteComment(ptr, content);
-		if (retval != -1) {
-			RETURN_TRUE;
-		}
-	}
-	
-	RETURN_FALSE;
+	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterWriteComment, NULL);
 }
 /* }}} */
 
@@ -1221,7 +1015,7 @@ PHP_FUNCTION(xmlwriter_start_document)
 End current document - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_end_document)
 {
-	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, 5);
+	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndDocument);
 }
 /* }}} */
 
@@ -1270,7 +1064,7 @@ PHP_FUNCTION(xmlwriter_start_dtd)
 End current DTD - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_end_dtd)
 {
-	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, 6);
+	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndDTD);
 }
 /* }}} */
 
@@ -1320,41 +1114,7 @@ PHP_FUNCTION(xmlwriter_write_dtd)
 Create start DTD element - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_start_dtd_element)
 {
-	zval *pind;
-	xmlwriter_object *intern;
-	xmlTextWriterPtr ptr;
-	char *name;
-	int name_len, retval;
-
-#ifdef ZEND_ENGINE_2
-	zval *this = getThis();
-
-	if (this) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
-			return;
-		}
-		XMLWRITER_FROM_OBJECT(intern, this);
-	} else
-#endif
-	{
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &pind, &name, &name_len) == FAILURE) {
-			return;
-		}
-		ZEND_FETCH_RESOURCE(intern,xmlwriter_object *, &pind, -1, "XMLWriter", le_xmlwriter);
-	}
-
-	XMLW_NAME_CHK("Invalid Attribute Name");
-
-	ptr = intern->ptr;
-
-	if (ptr) {
-		retval = xmlTextWriterStartDTDElement(ptr, name);
-		if (retval != -1) {
-			RETURN_TRUE;
-		}
-	}
-	
-	RETURN_FALSE;
+	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterStartDTDElement, "Invalid Element Name");
 }
 /* }}} */
 
@@ -1362,7 +1122,7 @@ PHP_FUNCTION(xmlwriter_start_dtd_element)
 End current DTD element - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_end_dtd_element)
 {
-	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, 7);
+	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndDTDElement);
 }
 /* }}} */
 
@@ -1414,41 +1174,7 @@ PHP_FUNCTION(xmlwriter_write_dtd_element)
 Create start DTD AttList - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_start_dtd_attlist)
 {
-	zval *pind;
-	xmlwriter_object *intern;
-	xmlTextWriterPtr ptr;
-	char *name;
-	int name_len, retval;
-
-#ifdef ZEND_ENGINE_2
-	zval *this = getThis();
-
-	if (this) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
-			return;
-		}
-		XMLWRITER_FROM_OBJECT(intern, this);
-	} else
-#endif
-	{
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &pind, &name, &name_len) == FAILURE) {
-			return;
-		}
-		ZEND_FETCH_RESOURCE(intern,xmlwriter_object *, &pind, -1, "XMLWriter", le_xmlwriter);
-	}
-
-	XMLW_NAME_CHK("Invalid Attribute Name");
-
-	ptr = intern->ptr;
-
-	if (ptr) {
-		retval = xmlTextWriterStartDTDAttlist(ptr, name);
-		if (retval != -1) {
-			RETURN_TRUE;
-		}
-	}
-	
-	RETURN_FALSE;
+	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterStartDTDAttlist, "Invalid Element Name");
 }
 /* }}} */
 
@@ -1456,7 +1182,7 @@ PHP_FUNCTION(xmlwriter_start_dtd_attlist)
 End current DTD AttList - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_end_dtd_attlist)
 {
-	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, 8);
+	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndDTDAttlist);
 }
 /* }}} */
 
@@ -1553,7 +1279,7 @@ PHP_FUNCTION(xmlwriter_start_dtd_entity)
 End current DTD Entity - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_end_dtd_entity)
 {
-	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, 9);
+	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndDTDEntity);
 }
 /* }}} */
 
