@@ -93,6 +93,9 @@ void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts)
 	DEBUG(printf("tmp_days=%lld, year=%lld\n", tmp_days, cur_year););
 
 	months = timelib_is_leap(cur_year) ? month_tab_leap : month_tab;
+	if (timelib_is_leap(cur_year) && cur_year < 1970) {
+		tmp_days--;
+	}
 	i = 11;
 	while (i > 0) {
 		DEBUG(printf("month=%lld (%d)\n", i, months[i]););
