@@ -478,13 +478,14 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 #endif
 #if defined(TSRM_WIN32)
 	{
-		char *dummy = NULL;
 		int new_path_length;
   
-		new_path_length = GetLongPathName(path, dummy, 0) + 1;
+		new_path_length = GetLongPathName(path, NULL, 0);
 		if (new_path_length == 0) {
 			return 1;
 		}
+
+		/* GetLongPathName already counts the \0 */
 		new_path = (char *) malloc(new_path_length);
 		if (!new_path) {
 			return 1;
@@ -856,7 +857,9 @@ CWD_API int virtual_stat(const char *path, struct stat *buf TSRMLS_DC)
 	int retval;
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	virtual_file_ex(&new_state, path, NULL, 1);
+	if (virtual_file_ex(&new_state, path, NULL, 1)) {
+		return -1;
+	}
 
 	retval = stat(new_state.cwd, buf);
 
