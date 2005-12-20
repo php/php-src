@@ -352,8 +352,8 @@ zend_object_value xmlreader_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	zval *tmp;
 
 	intern = emalloc(sizeof(xmlreader_object));
+	memset(&intern->std, 0, sizeof(zend_object));
 	intern->std.ce = class_type;
-	intern->std.guards = NULL;
 	intern->ptr = NULL;
 	intern->schema = NULL;
 	intern->prop_handler = &xmlreader_prop_handlers;
@@ -842,7 +842,6 @@ PHP_METHOD(xmlreader, open)
 	valid_file = _xmlreader_get_valid_file_path(source, resolved_path, MAXPATHLEN  TSRMLS_CC);
 
 	if (valid_file) {
-		xmlNewTextReaderFilename(valid_file);
 		reader = xmlReaderForFile(valid_file, encoding, options);
 	}
 
@@ -1034,7 +1033,12 @@ PHP_METHOD(xmlreader, expand)
 			RETURN_FALSE;
 		} else {
 			nodec = xmlCopyNode(node, 1);
-			DOM_RET_OBJ(rv, nodec, &ret, NULL);
+			if (nodec == NULL) {
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Cannot expand this node type");
+				RETURN_FALSE;
+			} else {
+				DOM_RET_OBJ(rv, nodec, &ret, NULL);
+			}
 		}
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Load Data before trying to expand");
