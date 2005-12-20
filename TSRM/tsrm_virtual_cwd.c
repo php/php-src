@@ -700,7 +700,9 @@ CWD_API int virtual_stat(const char *path, struct stat *buf TSRMLS_DC)
 	int retval;
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	virtual_file_ex(&new_state, path, NULL, 1);
+	if (virtual_file_ex(&new_state, path, NULL, 1)) {
+		return -1;
+	}
 
 	retval = stat(new_state.cwd, buf);
 
