@@ -99,7 +99,7 @@ zend_function_entry date_funcs_timezone[] = {
 
 static void date_register_classes(TSRMLS_D);
 #endif
-static char* guess_timezone(TSRMLS_D);
+static char* guess_timezone(timelib_tzdb *tzdb TSRMLS_DC);
 /* }}} */
 
 ZEND_DECLARE_MODULE_GLOBALS(date)
@@ -225,7 +225,9 @@ PHP_RSHUTDOWN_FUNCTION(date)
 #define DATE_TZ_ERRMSG \
 	"It is not safe to rely on the system's timezone settings. Please use " \
 	"the date.timezone setting, the TZ environment variable or the " \
-	"date_default_timezone_set() function. "
+	"date_default_timezone_set() function. In case you used any of those " \
+	"methods and you are still getting this warning, you most likely " \
+	"misspelled the timezone identifier. "
 
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(date)
@@ -271,7 +273,7 @@ PHP_MINFO_FUNCTION(date)
 	php_info_print_table_row(2, "date/time support", "enabled");
 	php_info_print_table_row(2, "Timezone Database Version", tzdb->version);
 	php_info_print_table_row(2, "Timezone Database", php_date_global_timezone_db_enabled ? "external" : "internal");
-	php_info_print_table_row(2, "Default timezone", guess_timezone(TSRMLS_C));
+	php_info_print_table_row(2, "Default timezone", guess_timezone(tzdb TSRMLS_CC));
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
@@ -296,21 +298,21 @@ static timelib_tzinfo *php_date_parse_tzfile(char *formal_tzname, timelib_tzdb *
 /* }}} */
 
 /* {{{ Helper functions */
-static char* guess_timezone(TSRMLS_D)
+static char* guess_timezone(timelib_tzdb *tzdb TSRMLS_DC)
 {
 	char *env;
 
 	/* Checking configure timezone */
-	if (DATEG(timezone) && (strlen(DATEG(timezone)) > 0)) {
+	if (DATEG(timezone) && (strlen(DATEG(timezone)) > 0) && timelib_timezone_id_is_valid(DATEG(timezone), tzdb)) {
 		return DATEG(timezone);
 	}
 	/* Check environment variable */
 	env = getenv("TZ");
-	if (env && *env) {
+	if (env && *env && timelib_timezone_id_is_valid(env, tzdb)) {
 		return env;
 	}
 	/* Check config setting for default timezone */
-	if (DATEG(default_timezone) && (strlen(DATEG(default_timezone)) > 0)) {
+	if (DATEG(default_timezone) && (strlen(DATEG(default_timezone)) > 0) && timelib_timezone_id_is_valid(DATEG(default_timezone), tzdb)) {
 		return DATEG(default_timezone);
 	}
 #if HAVE_TM_ZONE
@@ -376,15 +378,10 @@ PHPAPI timelib_tzinfo *get_timezone_info(TSRMLS_D)
 	char *tz;
 	timelib_tzinfo *tzi;
 	
-	tz = guess_timezone(TSRMLS_C);
+	tz = guess_timezone(DATE_TIMEZONEDB TSRMLS_CC);
 	tzi = php_date_parse_tzfile(tz, DATE_TIMEZONEDB TSRMLS_CC);
 	if (! tzi) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Timezone setting (date.timezone) or TZ environment variable contains an unknown timezone");
-		tzi = php_date_parse_tzfile("UTC", DATE_TIMEZONEDB TSRMLS_CC);
-
-		if (! tzi) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Timezone database is corrupt - this should *never* happen!");
-		}
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Timezone database is corrupt - this should *never* happen!");
 	}
 	return tzi;
 }
@@ -1631,6 +1628,10 @@ PHP_FUNCTION(date_default_timezone_set)
 	int   zone_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &zone, &zone_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+	if (!timelib_timezone_id_is_valid(zone, DATE_TIMEZONEDB)) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Timezone ID '%s' is invalid", zone);
 		RETURN_FALSE;
 	}
 	if (DATEG(timezone)) {

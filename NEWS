@@ -45,6 +45,8 @@ PHP                                                                        NEWS
   only). (Tony)
 - Fixed bug #35690 (pack() tries to allocate huge memory block when packing 
   float values to strings). (Tony)
+- Fixed bug #35660 (AIX TZ variable format not understood, yields UTC
+  timezone). (Derick)
 - Fixed bug #35655 (whitespace following end of heredoc is lost). (Ilia)
 - Fixed bug #35630 (strtotime() crashes on certain relative identifiers).
   (Ilia)
