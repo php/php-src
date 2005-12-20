@@ -103,7 +103,7 @@ PHP_FILEINFO_API zend_object_value finfo_objects_new(zend_class_entry *class_typ
 	intern = ecalloc(1, sizeof(struct finfo_object));
 	intern->zo.ce = class_type;
 	intern->zo.properties = NULL;
-#if ZEND_EXTENSION_API_NO > 220050000
+#if ZEND_MODULE_API_NO >= 20050922
 	intern->zo.guards = NULL;
 #else
 	intern->zo.in_get = 0;
