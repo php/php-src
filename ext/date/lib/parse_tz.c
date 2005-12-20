@@ -238,6 +238,12 @@ timelib_tzdb_index_entry *timelib_timezone_builtin_identifiers_list(int *count)
 	return timezonedb_idx_builtin;
 }
 
+int timelib_timezone_id_is_valid(char *timezone, timelib_tzdb *tzdb)
+{
+	char *tzf;
+	return (seek_to_tz_position((char**) &tzf, timezone, tzdb));
+}
+
 timelib_tzinfo *timelib_parse_tzfile(char *timezone, timelib_tzdb *tzdb)
 {
 	char *tzf;
