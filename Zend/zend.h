@@ -279,15 +279,7 @@ typedef struct _zend_object {
 	HashTable *guards; /* protects from __get/__set ... recursion */
 } zend_object;
 
-typedef unsigned int zend_object_handle;
-typedef	struct _zend_object_value zend_object_value;
-
 #include "zend_object_handlers.h"
-
-struct _zend_object_value {
-	zend_object_handle handle;
-	zend_object_handlers *handlers;
-};
 
 typedef union _zvalue_value {
 	long lval;					/* long value */
