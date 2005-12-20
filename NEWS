@@ -2,6 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jan 2006, PHP 5.1.2
 - Updated libsqlite in ext/sqlite to 2.8.17. (Ilia)
+- Updated libsqlite in ext/pdo_sqlite to 3.2.8. (Ilia)
 - Updated to libxml2-2.6.22 and libxslt-1.1.15 in the win32 bundle. (Rob)
 - Added new extensions: (Ilia, Wez)
   . XMLWriter
