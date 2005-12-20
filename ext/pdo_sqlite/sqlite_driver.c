@@ -43,9 +43,9 @@ int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int li
 
 	if (einfo->errcode != SQLITE_OK) {
 		if (einfo->errmsg) {
-			efree(einfo->errmsg);
+			pefree(einfo->errmsg, dbh->is_persistent);
 		}
-		einfo->errmsg = estrdup((char*)sqlite3_errmsg(H->db));
+		einfo->errmsg = pestrdup((char*)sqlite3_errmsg(H->db), dbh->is_persistent);
 	} else { /* no error */
 		strcpy(*pdo_err, PDO_ERR_NONE);
 		return 0;
@@ -144,7 +144,7 @@ static int sqlite_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 			H->db = NULL;
 		}
 		if (einfo->errmsg) {
-			efree(einfo->errmsg);
+			pefree(einfo->errmsg, dbh->is_persistent);
 			einfo->errmsg = NULL;
 		}
 		pefree(H, dbh->is_persistent);
