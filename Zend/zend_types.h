@@ -28,6 +28,14 @@ typedef unsigned int zend_uint;
 typedef unsigned long zend_ulong;
 typedef unsigned short zend_ushort;
 
+typedef unsigned int zend_object_handle;
+typedef struct _zend_object_handlers zend_object_handlers;
+
+typedef struct _zend_object_value {
+	zend_object_handle handle;
+	zend_object_handlers *handlers;
+} zend_object_value;
+
 #endif /* ZEND_TYPES_H */
 
 /*
