@@ -1,3 +1,33 @@
+2005-12-19  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_4_4)
+      ext/mcve/config.m4:
+      - Remove bad egrep check (done in configure.in already)
+
+    * (PHP_4_4)
+      NEWS
+      acinclude.m4
+      build/libtool.m4:
+      - Fixed bug #35735 ($EGREP and $SED are not defined in configure)
+
+2005-12-19  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_1)
+      NEWS:
+      BFN
+
+    * (PHP_5_1)
+      ext/xml/compat.c
+      ext/xml/tests/bug35447.phpt:
+      MFH: Fixed bug #35447 (xml_parse_into_struct() chokes on the UTF-8 BOM)
+      add test
+
+    * ext/xml/compat.c
+      ext/xml/tests/bug35447.phpt
+      ext/xml/tests/bug35447.phpt:
+      Fixed bug #35447 (xml_parse_into_struct() chokes on the UTF-8 BOM)
+      add test
+
 2005-12-18  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * (PHP_5_1)
