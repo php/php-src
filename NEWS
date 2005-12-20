@@ -95,6 +95,8 @@ PHP                                                                        NEWS
 - Fixed bug #34429 (Output buffering cannot be turned off with FastCGI).
   (Dmitry, Ilya)
 - Fixed bug #34359 (Possible crash inside fopen http wrapper). (Ilia,Sara,Nuno)
+- Fixed bug #31347 (is_dir and is_file (incorrectly) return true for any string 
+  greater then 255 characters). (Nuno,Ilia)
 - Fixed bug #30760 (Remove MessageBox on win32 for E_CORE errors if 
   display_startup_error is off). (Ilia)
 
