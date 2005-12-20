@@ -309,7 +309,7 @@ static char* guess_timezone(timelib_tzdb *tzdb TSRMLS_DC)
 	char *env;
 
 	/* Checking configure timezone */
-	if (DATEG(timezone) && (strlen(DATEG(timezone)) > 0) && timelib_timezone_id_is_valid(DATEG(timezone), tzdb)) {
+	if (DATEG(timezone) && (strlen(DATEG(timezone)) > 0)) {
 		return DATEG(timezone);
 	}
 	/* Check environment variable */
