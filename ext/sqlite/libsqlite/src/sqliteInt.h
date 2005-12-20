@@ -1120,7 +1120,7 @@ void sqliteRealToSortable(double r, char *);
 #endif
 char *sqliteMPrintf(const char*, ...);
 char *sqliteVMPrintf(const char*, va_list);
-void sqliteSetString(char **, const char *, ...);
+void sqliteSetString(char **, ...);
 void sqliteSetNString(char **, ...);
 void sqliteErrorMsg(Parse*, const char*, ...);
 void sqliteDequote(char*);

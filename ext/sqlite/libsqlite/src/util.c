@@ -330,15 +330,15 @@ char *sqliteStrNDup(const char *z, int n){
 ** point to that string.  The 1st argument must either be NULL or 
 ** point to memory obtained from sqliteMalloc().
 */
-void sqliteSetString(char **pz, const char *zFirst, ...){
+void sqliteSetString(char **pz, ...){
   va_list ap;
   int nByte;
   const char *z;
   char *zResult;
 
   if( pz==0 ) return;
-  nByte = strlen(zFirst) + 1;
-  va_start(ap, zFirst);
+  nByte = 1;
+  va_start(ap, pz);
   while( (z = va_arg(ap, const char*))!=0 ){
     nByte += strlen(z);
   }
@@ -348,9 +348,8 @@ void sqliteSetString(char **pz, const char *zFirst, ...){
   if( zResult==0 ){
     return;
   }
-  strcpy(zResult, zFirst);
-  zResult += strlen(zResult);
-  va_start(ap, zFirst);
+  *zResult = 0;
+  va_start(ap, pz);
   while( (z = va_arg(ap, const char*))!=0 ){
     strcpy(zResult, z);
     zResult += strlen(zResult);
