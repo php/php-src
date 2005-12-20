@@ -370,6 +370,7 @@ SPL_METHOD(RecursiveIteratorIterator, __construct)
 	zval                      *iterator;
 	zend_class_entry          *ce_iterator;
 	long                       mode = RIT_LEAVES_ONLY, flags = 0;
+	int                        inc_refcount = 1;
 
 	php_set_error_handling(EH_THROW, spl_ce_InvalidArgumentException TSRMLS_CC);
 
@@ -377,6 +378,7 @@ SPL_METHOD(RecursiveIteratorIterator, __construct)
 		if (instanceof_function(Z_OBJCE_P(iterator), zend_ce_aggregate TSRMLS_CC)) {
 			zval *aggregate = iterator;
 			zend_call_method_with_0_params(&aggregate, Z_OBJCE_P(aggregate), &Z_OBJCE_P(aggregate)->iterator_funcs.zf_new_iterator, "getiterator", &iterator);
+			inc_refcount = 0;
 		}
 	} else {
 		iterator = NULL;
@@ -426,7 +428,9 @@ SPL_METHOD(RecursiveIteratorIterator, __construct)
 	}
 	ce_iterator = Z_OBJCE_P(iterator); /* respect inheritance, don't use spl_ce_RecursiveIterator */
 	intern->iterators[0].iterator = ce_iterator->get_iterator(ce_iterator, iterator TSRMLS_CC);
-	iterator->refcount++;
+	if (inc_refcount) {
+		iterator->refcount++;
+	}
 	intern->iterators[0].zobject = iterator;
 	intern->iterators[0].ce = ce_iterator;
 	intern->iterators[0].state = RS_START;
