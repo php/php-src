@@ -1573,7 +1573,7 @@ function get_summary($show_ext_summary, $show_html)
 		$x_leaked = (100.0 * $sum_results['LEAKED']) / $x_total;
 		$x_passed = (100.0 * $sum_results['PASSED']) / $x_total;
 	} else {
-		$x_warned = $x_failed = $x_passed = 0;
+		$x_warned = $x_failed = $x_passed = $x_leaked = 0;
 	}
 
 	$summary = "";
