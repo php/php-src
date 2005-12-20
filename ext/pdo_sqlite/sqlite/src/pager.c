@@ -2981,7 +2981,7 @@ void sqlite3pager_dont_write(Pager *pPager, Pgno pgno){
 
   pPg = pager_lookup(pPager, pgno);
   pPg->alwaysRollback = 1;
-  if( pPg && pPg->dirty ){
+  if( pPg && pPg->dirty && !pPager->stmtInUse ){
     if( pPager->dbSize==(int)pPg->pgno && pPager->origDbSize<pPager->dbSize ){
       /* If this pages is the last page in the file and the file has grown
       ** during the current transaction, then do NOT mark the page as clean.
