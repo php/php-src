@@ -970,7 +970,7 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, void *name, int name_length
 	zval **args[1];
 	zval autoload_function;
 	zval *class_name_ptr;
-	zval *retval_ptr;
+	zval *retval_ptr = NULL;
 	int retval;
 	unsigned int lc_name_len;
 	char *lc_name;
@@ -1057,6 +1057,8 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, void *name, int name_length
 	}
 	if (!EG(exception)) {
 		EG(exception) = exception;
+	}
+	if (retval_ptr) {
 		zval_ptr_dtor(&retval_ptr);
 	}
 
