@@ -1,5 +1,7 @@
 --TEST--
 SPL: iterator_to_array() and iterator_count()
+--SKIPIF--
+<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

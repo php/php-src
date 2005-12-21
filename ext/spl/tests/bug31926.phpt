@@ -1,5 +1,7 @@
 --TEST--
 Bug #31926 (php in free() error with RecursiveArrayIterator)
+--SKIPIF--
+<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

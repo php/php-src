@@ -1,5 +1,7 @@
 --TEST--
 Bug #32134 (Overloading offsetGet/offsetSet)
+--SKIPIF--
+<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 	
