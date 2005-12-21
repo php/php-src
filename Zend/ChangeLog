@@ -1,3 +1,35 @@
+2005-12-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      zend.h
+      zend_object_handlers.h
+      zend_types.h:
+      - MFH move zend_object_Value definition to zend_types.h
+
+    * zend.h
+      zend_object_handlers.h
+      zend_types.h:
+      - Move zend_object_value definition to zend_type.h
+
+    * zend_operators.h:
+      - Add Z_OBJVAL*() macros
+
+2005-12-20  Antony Dovgal  <antony@zend.com>
+
+    * tests/bug26077.phpt:
+      MFB: fix test decription
+
+    * (PHP_5_1)
+      tests/bug26077.phpt:
+      fix test description
+
+    * zend_execute_API.c:
+      MFB: fix leak appearing when __autoload() throws an exception
+
+    * (PHP_5_1)
+      zend_execute_API.c:
+      fix leak appearing when __autoload() throws an exception
+
 2005-12-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
