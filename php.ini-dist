@@ -1035,6 +1035,11 @@ mssql.secure_connection = Off
 ; FreeTDS defaults to 4096
 ;mssql.max_procs = -1
 
+; Specify client character set. 
+; If empty or not set the client charset from freetds.comf is used
+; This is only used when compiled with FreeTDS
+;mssql.charset = "ISO-8859-1"
+
 [Assertion]
 ; Assert(expr); active by default.
 ;assert.active = On
