@@ -1,5 +1,7 @@
 --TEST--
 Bug #28112 (sqlite_query() crashing apache on malformed query)
+--SKIPIF--
+<?php if (!extension_loaded("sqlite")) print "skip"; ?>
 --FILE--
 <?php
 

@@ -1,6 +1,6 @@
 --TEST--
 iconv_mime_decode_headers()
---SKIP--
+--SKIPIF--
 <?php extension_loaded('iconv') or die('skip iconv extension is not available'); ?>
 --INI--
 unicode.script_encoding=ISO-8859-1

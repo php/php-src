@@ -1,5 +1,7 @@
 --TEST--
 #35410 (wddx_deserialize() doesn't handle large ints as keys properly)
+--SKIPIF--
+<?php if (!extension_loaded("wddx")) print "skip"; ?>
 --FILE--
 <?php
 $wddx = <<<WDX
