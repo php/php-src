@@ -1,7 +1,10 @@
 --TEST--
 XMLReader: libxml2 XML Reader, string data 
 --SKIPIF--
-<?php if (!extension_loaded("xmlreader")) print "skip"; ?>
+<?php if (!extension_loaded("xmlreader")) print "skip";
+$reader = new XMLReader();
+if (!method_exists($reader, 'readInnerXml')) print "skip";
+?>
 --FILE--
 <?php 
 /* $Id$ */
