@@ -1,5 +1,7 @@
 --TEST--
 SPL: SplFileObject::seek'ing
+--SKIPIF--
+<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

@@ -1,5 +1,7 @@
 --TEST--
 Bug #32394 (offsetUnset() segfaults in a foreach)
+--SKIPIF--
+<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

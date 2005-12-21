@@ -1,5 +1,7 @@
 --TEST--
 SPL: SplObjectStorage
+--SKIPIF--
+<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

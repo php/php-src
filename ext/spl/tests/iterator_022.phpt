@@ -1,5 +1,7 @@
 --TEST--
 SPL: RecursiveIteratorIterator and callHasChildren/callGetChildren
+--SKIPIF--
+<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 
