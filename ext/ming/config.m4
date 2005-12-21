@@ -9,7 +9,7 @@ if test "$PHP_MING" != "no"; then
   AC_CHECK_LIB(m, sin)
 
   for i in $PHP_MING /usr/local /usr; do
-    if test -f $i/$PHP_LIBDIR/libming.$SHLIB_SUFFIX_NAME -o -f $i/$PHP_LIBDIR/libming.a; then
+    if test -f $i/$PHP_LIBDIR/libming.$SHLIB_SUFFIX_NAME || test -f $i/$PHP_LIBDIR/libming.a; then
       MING_DIR=$i
       break
     fi
