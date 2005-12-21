@@ -1,5 +1,7 @@
 --TEST--
 bug #34548 (Method append() in class extended from ArrayObject crashes PHP)
+--SKIPIF--
+<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

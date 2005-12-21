@@ -1,5 +1,7 @@
 --TEST--
 Bug #31185 (Crash when exceptions thrown from ArrayAccess::offsetUnset())
+--SKIPIF--
+<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 
