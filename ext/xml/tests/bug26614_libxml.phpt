@@ -1,7 +1,10 @@
 --TEST--
 Bug #26614 (CDATA sections skipped on line count)
 --SKIPIF--
-<?php if (!defined("LIBXML_VERSION")) die('skip libxml2 test'); ?>
+<?php 
+require_once("skipif.inc");
+if (!defined("LIBXML_VERSION")) die('skip libxml2 test'); 
+?>
 --FILE--
 <?php
 /*
