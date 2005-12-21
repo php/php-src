@@ -467,8 +467,8 @@ PHP_RSHUTDOWN_FUNCTION(sybase)
 static int php_sybase_do_connect_internal(sybase_link *sybase, char *host, char *user, char *passwd, char *charset, char *appname)
 {
 	CS_LOCALE *tmp_locale;
-	TSRMLS_FETCH();
 	long packetsize;
+	TSRMLS_FETCH();
 
 	/* set a CS_CONNECTION record */
 	if (ct_con_alloc(SybCtG(context), &sybase->connection)!=CS_SUCCEED) {
