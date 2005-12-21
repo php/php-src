@@ -158,6 +158,9 @@ ZEND_BEGIN_MODULE_GLOBALS(mssql)
 	zend_bool allow_persistent;
 	char *appname;
 	char *server_message;
+#ifdef HAVE_FREETDS
+	char *charset;
+#endif
 	long min_error_severity, min_message_severity;
 	long cfg_min_error_severity, cfg_min_message_severity;
 	long connect_timeout, timeout;
