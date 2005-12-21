@@ -26,4 +26,5 @@ PHP                                                                        NEWS
   the part of haystack before or after first occurence of needle. (Johannes)
 - Added possibility to check in which extension an internal function was
   defined using reflection API. (Johannes)
+- Fixed bug #35730 (Use correct character encoding, and allow setting it) (Frank)
 - Fixed bug #34286 (__toString() behavior is inconsistent). (Marcus)
