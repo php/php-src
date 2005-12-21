@@ -32,6 +32,7 @@ PHP                                                                        NEWS
 - Fixed many bugs in OCI8. (Tony)
 - Fixed crash and leak in mysqli when using 4.1.x client libraries and
   connecting to 5.x server. (Andrey)
+- Fixed bug #35760 (sybase_ct doesn't compile on Solaris using old gcc). (Tony)
 - Fixed bug #35740 (memory leak when including a directory). (Tony)
 - Fixed bug #35723 (xmlrpc_introspection.c fails compile per C99 std). (Jani)
 - Fixed bug #35720 (A final constructor can be overwritten). (Marcus)
