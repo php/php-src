@@ -72,6 +72,7 @@ PHP                                                                        NEWS
 - Fixed bug #35496 (Crash in mcrypt_generic()/mdecrypt_generic() without 
   proper init). (Ilia)
 - Fixed bug #35490 (socket_sendto() unable to handle IPv6 addresses). (Tony)
+- Fixed bug #35461 (Ming extension fails to compile with ming 0.3beta1). (Jani)
 - Fixed bug #35437 (Segfault or Invalid Opcode 137/1/4). (Dmitry)
 - Fixed bug #35470 (Assigning global using variable name from array doesn't
   function). (Dmitry)
