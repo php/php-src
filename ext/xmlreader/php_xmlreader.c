@@ -54,7 +54,7 @@ typedef struct _xmlreader_prop_handler {
 
 #define XMLREADER_LOAD_STRING 0
 #define XMLREADER_LOAD_FILE 1
-
+/* {{{ xmlreader_register_prop_handler */
 static void xmlreader_register_prop_handler(HashTable *prop_handler, char *name, xmlreader_read_int_t read_int_func, xmlreader_read_const_char_t read_char_func, int rettype TSRMLS_DC)
 {
 	xmlreader_prop_handler hnd;
@@ -64,7 +64,8 @@ static void xmlreader_register_prop_handler(HashTable *prop_handler, char *name,
 	hnd.type = rettype;
 	zend_hash_add(prop_handler, name, strlen(name)+1, &hnd, sizeof(xmlreader_prop_handler), NULL);
 }
-
+/* }}} */
+/* {{{ xmlreader_property_reader */
 static int xmlreader_property_reader(xmlreader_object *obj, xmlreader_prop_handler *hnd, zval **retval TSRMLS_DC)
 {
 	const xmlChar *retchar = NULL;
@@ -106,6 +107,7 @@ static int xmlreader_property_reader(xmlreader_object *obj, xmlreader_prop_handl
 
 	return SUCCESS;
 }
+/* }}} */
 
 /* {{{ xmlreader_read_property */
 zval *xmlreader_read_property(zval *object, zval *member, int type TSRMLS_DC)
@@ -185,6 +187,7 @@ void xmlreader_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ _xmlreader_get_valid_file_path */
 /* _xmlreader_get_valid_file_path and _xmlreader_get_relaxNG should be made a 
 	common function in libxml extension as code is common to a few xml extensions */
 char *_xmlreader_get_valid_file_path(char *source, char *resolved_path, int resolved_path_len  TSRMLS_DC) {
@@ -232,7 +235,10 @@ char *_xmlreader_get_valid_file_path(char *source, char *resolved_path, int reso
 	return file_dest;
 }
 
+/* }}} */
+
 #ifdef LIBXML_SCHEMAS_ENABLED
+/* {{{ _xmlreader_get_relaxNG */
 static xmlRelaxNGPtr _xmlreader_get_relaxNG(char *source, int source_len, int type, 
 											xmlRelaxNGValidityErrorFunc error_func, 
 											xmlRelaxNGValidityWarningFunc warn_func TSRMLS_DC)
@@ -274,6 +280,7 @@ static xmlRelaxNGPtr _xmlreader_get_relaxNG(char *source, int source_len, int ty
 
 	return sptr;
 }
+/* }}} */
 #endif
 
 #if ZEND_MODULE_API_NO >= 20050922
@@ -315,6 +322,7 @@ void xmlreader_objects_clone(void *object, void **object_clone TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ xmlreader_free_resources */
 static void xmlreader_free_resources(xmlreader_object *intern) {
 	if (intern) {
 		if (intern->ptr) {
@@ -329,6 +337,7 @@ static void xmlreader_free_resources(xmlreader_object *intern) {
 #endif
 	}
 }
+/* }}} */
 
 /* {{{ xmlreader_objects_free_storage */
 void xmlreader_objects_free_storage(void *object TSRMLS_DC)
@@ -368,6 +377,7 @@ zend_object_value xmlreader_objects_new(zend_class_entry *class_type TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ php_xmlreader_string_arg */
 static void php_xmlreader_string_arg(INTERNAL_FUNCTION_PARAMETERS, xmlreader_read_one_char_t internal_function) {
 	zval *id;
 	int name_len = 0;
@@ -398,7 +408,9 @@ static void php_xmlreader_string_arg(INTERNAL_FUNCTION_PARAMETERS, xmlreader_rea
 		RETVAL_EMPTY_STRING();
 	}
 }
+/* }}} */
 
+/* {{{ php_xmlreader_no_arg */
 static void php_xmlreader_no_arg(INTERNAL_FUNCTION_PARAMETERS, xmlreader_read_int_t internal_function) {
 	zval *id;
 	int retval;
@@ -416,7 +428,9 @@ static void php_xmlreader_no_arg(INTERNAL_FUNCTION_PARAMETERS, xmlreader_read_in
 
 	RETURN_FALSE;
 }
+/* }}} */
 
+/* {{{ php_xmlreader_no_arg_string */
 static void php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAMETERS, xmlreader_read_char_t internal_function) {
 	zval *id;
 	char *retchar = NULL;
@@ -436,7 +450,9 @@ static void php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAMETERS, xmlreader_
 		RETVAL_EMPTY_STRING();
 	}
 }
+/* }}} */
 
+/* {{{ php_xmlreader_set_relaxng_schema */
 static void php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAMETERS, int type) {
 #ifdef LIBXML_SCHEMAS_ENABLED
 	zval *id;
@@ -488,6 +504,7 @@ static void php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAMETERS, int t
 	RETURN_FALSE;
 #endif
 }
+/* }}} */
 
 /* {{{ proto boolean XMLReader::close()
 Closes xmlreader - current frees resources until xmlTextReaderClose is fixed in libxml */
@@ -505,6 +522,7 @@ PHP_METHOD(xmlreader, close)
 	
 	RETURN_TRUE;
 }
+/* }}} */
 
 /* {{{ proto string XMLReader::getAttribute(string name)
 Get value of an attribute from current element */
@@ -872,20 +890,29 @@ PHP_METHOD(xmlreader, resetState)
 */
 
 #if LIBXML_VERSION >= 20620
+/* {{{ proto boolean XMLReader::readInnerXml()
+Reads the contents of the current node, including child nodes and markup. */
 PHP_METHOD(xmlreader, readInnerXml)
 {
 	php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextReaderReadInnerXml);
 }
+/* }}} */
 
+/* {{{ proto boolean XMLReader::readOuterXml()
+Reads the contents of the current node, including child nodes and markup. */
 PHP_METHOD(xmlreader, readOuterXml)
 {
 	php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextReaderReadOuterXml);
 }
+/* }}} */
 
+/* {{{ proto boolean XMLReader::readString()
+Reads the contents of an element or a text node as a string. */
 PHP_METHOD(xmlreader, readString)
 {
 	php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextReaderReadString);
 }
+/* }}} */
 #endif
 
 /* {{{ proto boolean XMLReader::setParserProperty(int property, boolean value)
