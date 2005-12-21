@@ -326,6 +326,10 @@ static int sqlite2_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 			sqlite_close(H->db);
 			H->db = NULL;
 		}
+		if (H->einfo.errmsg) {
+			pefree(H->einfo.errmsg, dbh->is_persistent);
+			H->einfo.errmsg = NULL;
+		}
 		pefree(H, dbh->is_persistent);
 		dbh->driver_data = NULL;
 	}
@@ -357,7 +361,7 @@ static long sqlite2_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TS
 	pdo_sqlite2_db_handle *H = (pdo_sqlite2_db_handle *)dbh->driver_data;
 	char *errmsg = NULL;
 
-	if (sqlite_exec(H->db, sql, NULL, NULL, &errmsg) != SQLITE_OK) {
+	if ((H->einfo.errcode = sqlite_exec(H->db, sql, NULL, NULL, &errmsg)) != SQLITE_OK) {
 		pdo_sqlite2_error(errmsg, dbh);
 		return -1;
 	} else {
