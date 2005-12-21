@@ -466,7 +466,7 @@ static void php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAMETERS, int t
 	}
 
 	if (source != NULL && !source_len) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Schema data source is requried");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Schema data source is required");
 		RETURN_FALSE;
 	}
 
