@@ -1,5 +1,7 @@
 --TEST--
 Bug #31486 (ArrayIterator::next segfaults)
+--SKIPIF--
+<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 $obj = new stdClass;
