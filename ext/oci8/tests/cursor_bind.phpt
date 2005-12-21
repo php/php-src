@@ -1,5 +1,7 @@
 --TEST--
 bind and fetch cursor from a statement
+--SKIPIF--
+<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
 --FILE--
 <?php
 

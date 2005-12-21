@@ -1,5 +1,7 @@
 --TEST--
 token_name()
+--SKIPIF--
+<?php if (!extension_loaded("tokenizer")) print "skip"; ?>
 --FILE--
 <?php
 
