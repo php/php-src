@@ -1,5 +1,9 @@
 --TEST--
 Bug #26528 (HTML entities are not being decoded)
+--SKIPIF--
+<?php 
+require_once("skipif.inc");
+?>
 --FILE--
 <?php
 	$sample = "<?xml version=\"1.0\"?><test attr=\"angle&lt;bracket\"/>";

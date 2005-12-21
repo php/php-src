@@ -2,6 +2,7 @@
 Bug #35447 (xml_parse_into_struct() chokes on the UTF-8 BOM)
 --SKIPIF--
 <?php
+require_once("skipif.inc");
 if (! @xml_parser_create_ns('ISO-8859-1')) { die("skip xml_parser_create_ns is not supported on this plattform");}
 ?>
 --FILE--
