@@ -40,6 +40,8 @@ if test "$PHP_MING" != "no"; then
   PHP_ADD_LIBRARY_WITH_PATH(ming, $MING_DIR/lib, MING_SHARED_LIBADD)
 
   AC_MSG_CHECKING([for destroySWFBlock])
+  old_CPPFLAGS=$CPPFLAGS
+  CPPFLAGS=-I$MING_INC_DIR
   AC_TRY_RUN([
 #include "ming.h"
 int destroySWFBlock(int a, int b) {
@@ -58,8 +60,6 @@ int main() {
   ]) 
 
   dnl Check Ming version (FIXME: if/when ming has some better way to detect the version..)
-  old_CPPFLAGS=$CPPFLAGS
-  CPPFLAGS=-I$MING_INC_DIR
   AC_EGREP_CPP(yes, [
 #include <ming.h>
 #ifdef SWF_SOUND_COMPRESSION
