@@ -1,5 +1,7 @@
 --TEST--
 #34306 (wddx_serialize_value() crashes with long array keys)
+--SKIPIF--
+<?php if (!extension_loaded("wddx")) print "skip"; ?>
 --FILE--
 <?php
 

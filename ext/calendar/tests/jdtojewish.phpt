@@ -1,5 +1,7 @@
 --TEST--
 jdtojewish() function
+--SKIPIF--
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 

@@ -1,5 +1,7 @@
 --TEST--
 Bug #28220 (mb_strwidth() returns wrong width values for some Hangul characters)
+--SKIPIF--
+<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --FILE--
 <?php
 $coderange = array(
