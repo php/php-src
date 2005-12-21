@@ -242,6 +242,16 @@ $temp_source = null;
 $temp_target = null;
 $temp_urlbase = null;
 
+$cfgtypes = array('show', 'keep');
+$cfgfiles = array('skip', 'php');
+$cfg = array();
+foreach($cfgtypes as $type) {
+	$cfg[$type] = array();
+	foreach($cfgfiles as $file) {
+		$cfg[$type][$file] = false;
+	}
+}
+
 if (getenv('TEST_PHP_ARGS'))
 {
 	if (!isset($argc) || !$argc || !isset($argv))
@@ -292,6 +302,17 @@ if (isset($argc) && $argc > 1) {
 					$ini_overwrites[] = $argv[++$i];
 					break;
 				//case 'h'
+				case '--keep-all':
+					foreach($cfgfiles as $file) {
+						$cfg['keep'][$file] = true;
+					}
+					break;
+				case '--keep-skip':
+					$cfg['keep']['skip'] = true;
+					break;
+				case '--keep-php':
+					$cfg['keep']['php'] = true;
+					break;
 				//case 'l'
 				case 'm':
 					$leak_check = true;
@@ -309,6 +330,17 @@ if (isset($argc) && $argc > 1) {
 				case 's':
 					$output_file = $argv[++$i];
 					$just_save_results = true;
+					break;
+				case '--show-all':
+					foreach($cfgfiles as $file) {
+						$cfg['show'][$file] = true;
+					}
+					break;
+				case '--show-skip':
+					$cfg['show']['skip'] = true;
+					break;
+				case '--show-php':
+					$cfg['show']['php'] = true;
 					break;
 				case '--temp-source':
 					$temp_source = $argv[++$i];
@@ -404,6 +436,12 @@ Options:
                 with the given url. In general you want to make <sdir> the path
                 to your source files and <tdir> some pach in your web page 
                 hierarchy with <url> pointing to <tdir>.
+
+    --keep-[all|php|skip]
+                Do not delete 'all' files, 'php' test file, 'skip' file.
+
+    --show-[all|php|skip]
+                Show 'all' files, 'php' test file, 'skip' file.
 
 HELP;
 					exit(1);
@@ -862,7 +900,7 @@ function run_all_tests($test_files, $redir_tested = NULL)
 //
 function run_test($php, $file, $unicode_semantics)
 {
-	global $log_format, $info_params, $ini_overwrites, $cwd, $PHP_FAILED_TESTS, $pass_options, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx, $leak_check, $temp_source, $temp_target, $unicode_and_native;
+	global $log_format, $info_params, $ini_overwrites, $cwd, $PHP_FAILED_TESTS, $pass_options, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx, $leak_check, $temp_source, $temp_target, $cfg, $unicode_and_native;
 
 	$temp_filenames = null;
 	$org_file = $file;
@@ -1061,6 +1099,11 @@ TEST $file
 			settings2array($ini_overwrites,$skipif_params);
 			settings2params($skipif_params);
 
+			if ($cfg['show']['skip']) {
+				echo "\n========SKIP========\n";
+				echo $section_text['SKIPIF'];
+				echo "========DONE========\n";
+			}
 			save_text($test_skipif, $section_text['SKIPIF'], $temp_skipif);
 			$extra = substr(PHP_OS, 0, 3) !== "WIN" ?
 				"unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;": "";
@@ -1076,7 +1119,9 @@ TEST $file
 				if (isset($old_php)) {
 					$php = $old_php;
 				}
-				@unlink($test_skipif);
+				if (!$cfg['keep']['skip']) {
+					@unlink($test_skipif);
+				}
 				return 'SKIPPED';
 			}
 			if (!strncasecmp('info', trim($output), 4)) {
@@ -1205,6 +1250,11 @@ TEST $file
 	settings2params($ini_settings);
 
 	// We've satisfied the preconditions - run the test!
+	if ($cfg['show']['php']) {
+		echo "\n========TEST========\n";
+		echo $section_text['FILE'];
+		echo "========DONE========\n";
+	}
 	save_text($test_file, $section_text['FILE'], $temp_file);
 	if (array_key_exists('GET', $section_text)) {
 		$query_string = trim($section_text['GET']);
@@ -1322,7 +1372,9 @@ COMMAND $cmd
 */
 		if (preg_match("/^$wanted_re\$/s", $output)) {
 			$passed = true;
-			@unlink($test_file);
+			if (!$cfg['keep']['php']) {
+				@unlink($test_file);
+			}
 			if (isset($old_php)) {
 				$php = $old_php;
 			}
@@ -1337,7 +1389,9 @@ COMMAND $cmd
 		// compare and leave on success
 		if (!strcmp($output, $wanted)) {
 			$passed = true;
-			@unlink($test_file);
+			if (!$cfg['keep']['php']) {
+				@unlink($test_file);
+			}
 			if (isset($old_php)) {
 				$php = $old_php;
 			}
