@@ -341,6 +341,7 @@ static void autoload_func_info_dtor(autoload_func_info *alfi)
 PHP_FUNCTION(spl_autoload_call)
 {
 	zval **class_name, *retval = NULL;
+	int class_name_len;
 	char *func_name, *lc_name;
 	uint func_name_len;
 	ulong dummy;
@@ -352,7 +353,8 @@ PHP_FUNCTION(spl_autoload_call)
 	}
 
 	if (SPL_G(autoload_functions)) {
-		lc_name = zend_str_tolower_dup(Z_STRVAL_PP(class_name), Z_STRLEN_PP(class_name));
+		class_name_len = Z_STRLEN_PP(class_name);
+		lc_name = zend_str_tolower_dup(Z_STRVAL_PP(class_name), class_name_len);
 		zend_hash_internal_pointer_reset_ex(SPL_G(autoload_functions), &function_pos);
 		while(zend_hash_has_more_elements_ex(SPL_G(autoload_functions), &function_pos) == SUCCESS && !EG(exception)) {
 			zend_hash_get_current_key_ex(SPL_G(autoload_functions), &func_name, &func_name_len, &dummy, 0, &function_pos);
@@ -361,7 +363,7 @@ PHP_FUNCTION(spl_autoload_call)
 			if (retval) {
 				zval_ptr_dtor(&retval);					
 			}
-			if (zend_hash_exists(EG(class_table), lc_name, Z_STRLEN_PP(class_name)+1)) {
+			if (zend_hash_exists(EG(class_table), lc_name, class_name_len + 1)) {
 				break;
 			}
 			zend_hash_move_forward_ex(SPL_G(autoload_functions), &function_pos);
