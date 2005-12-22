@@ -458,12 +458,13 @@ static inline void make_real_object(zval **object_ptr TSRMLS_DC)
 /* this should modify object only if it's empty */
 	if ((*object_ptr)->type == IS_NULL
 		|| ((*object_ptr)->type == IS_BOOL && (*object_ptr)->value.lval==0)
-		|| (((*object_ptr)->type == IS_STRING && (*object_ptr)->type == IS_BINARY) && (*object_ptr)->value.str.len == 0)
+		|| (((*object_ptr)->type == IS_STRING || (*object_ptr)->type == IS_BINARY) && (*object_ptr)->value.str.len == 0)
 		|| ((*object_ptr)->type == IS_UNICODE && (*object_ptr)->value.ustr.len == 0)) {
 		if (!PZVAL_IS_REF(*object_ptr)) {
 			SEPARATE_ZVAL(object_ptr);
 		}
 		zend_error(E_STRICT, "Creating default object from empty value");
+		zval_dtor(*object_ptr);
 		object_init(*object_ptr);
 	}
 }
