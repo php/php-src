@@ -207,6 +207,12 @@ Syntax and indentation
     indent preprocessor directives you should put the # at the beginning
     of a line, followed by any number of whitespace.
 
+Testing
+-------
+
+[1] Extensions should be well tested using *.phpt tests. REad about that
+    in README.TESTING.
+
 Documentation and Folding Hooks
 -------------------------------
 
