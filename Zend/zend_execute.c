@@ -440,6 +440,7 @@ static inline void make_real_object(zval **object_ptr TSRMLS_DC)
 			SEPARATE_ZVAL(object_ptr);
 		}
 		zend_error(E_STRICT, "Creating default object from empty value");
+		zval_dtor(*object_ptr);
 		object_init(*object_ptr);
 	}
 }
