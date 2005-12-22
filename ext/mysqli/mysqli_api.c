@@ -323,20 +323,26 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 #ifdef FIELD_TYPE_NEWDECIMAL
 			case MYSQL_TYPE_NEWDECIMAL:
 #endif
+			{
+				ulong tmp;
 				stmt->result.buf[ofs].type = IS_STRING;
 				/*
 					If the user has called $stmt->store_result() then we have asked
 					max_length to be updated. this is done only for BLOBS because we don't want to allocate
 					big chunkgs of memory 2^16 or 2^24 
 				*/
-				if (stmt->stmt->fields[ofs].max_length == 0) {
+				if (stmt->stmt->fields[ofs].max_length == 0 &&
+					!mysql_stmt_attr_get(stmt->stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &tmp) && !tmp)
+				{
 					stmt->result.buf[ofs].buflen =
 						(stmt->stmt->fields) ? (stmt->stmt->fields[ofs].length) ? stmt->stmt->fields[ofs].length + 1: 256: 256;
 				} else {
 					/*
 						the user has called store_result(). if he does not there is no way to determine the
+						libmysql does not allow us to allocate 0 bytes for a buffer so we try 1
 					*/
-					stmt->result.buf[ofs].buflen = stmt->stmt->fields[ofs].max_length;
+					if (!(stmt->result.buf[ofs].buflen = stmt->stmt->fields[ofs].max_length))
+						++stmt->result.buf[ofs].buflen;
 				}
 				stmt->result.buf[ofs].val = (char *)emalloc(stmt->result.buf[ofs].buflen);
 				bind[ofs].buffer_type = MYSQL_TYPE_STRING;
@@ -345,6 +351,7 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 				bind[ofs].buffer_length = stmt->result.buf[ofs].buflen;
 				bind[ofs].length = &stmt->result.buf[ofs].buflen;
 				break;
+			}
 			default:
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Server returned unknown type %ld. Probably your client library is incompatible with the server version you use!", col_type);
 				break;
