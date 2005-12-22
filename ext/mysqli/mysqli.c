@@ -155,11 +155,11 @@ static void mysqli_objects_destroy_object(void *object, zend_object_handle handl
 			MY_STMT *stmt = (MY_STMT *)my_res->ptr;
 			php_clear_stmt_bind(stmt);
 		}
-	} else if (instanceof_function(intern->zo.ce, mysqli_result_class_entry TSRMLS_CC)) { /* stmt object */
+	} else if (instanceof_function(intern->zo.ce, mysqli_result_class_entry TSRMLS_CC)) { /* result object */
 		if (my_res && my_res->ptr) {
 			mysql_free_result(my_res->ptr);
 		}
-	} else if (instanceof_function(intern->zo.ce, mysqli_warning_class_entry TSRMLS_CC)) { /* stmt object */
+	} else if (instanceof_function(intern->zo.ce, mysqli_warning_class_entry TSRMLS_CC)) { /* warning object */
 		if (my_res && my_res->ptr) {
 			php_clear_warnings((MYSQLI_WARNING *)my_res->info);
 		}
@@ -459,7 +459,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	zend_hash_init(&mysqli_driver_properties, 0, NULL, NULL, 1);
 	MYSQLI_ADD_PROPERTIES(&mysqli_driver_properties, mysqli_driver_property_entries);
 	zend_hash_add(&classes, ce->name, ce->name_length+1, &mysqli_driver_properties, sizeof(mysqli_driver_properties), NULL);
-    ce->ce_flags |= ZEND_ACC_FINAL_CLASS;
+	ce->ce_flags |= ZEND_ACC_FINAL_CLASS;
 
 	REGISTER_MYSQLI_CLASS_ENTRY("mysqli", mysqli_link_class_entry, mysqli_link_methods);
 	ce = mysqli_link_class_entry;
@@ -469,7 +469,7 @@ PHP_MINIT_FUNCTION(mysqli)
 
 	REGISTER_MYSQLI_CLASS_ENTRY("mysqli_warning", mysqli_warning_class_entry, mysqli_warning_methods);
 	ce = mysqli_warning_class_entry;
-    ce->ce_flags |= ZEND_ACC_FINAL_CLASS | ZEND_ACC_PROTECTED;
+	ce->ce_flags |= ZEND_ACC_FINAL_CLASS | ZEND_ACC_PROTECTED;
 	zend_hash_init(&mysqli_warning_properties, 0, NULL, NULL, 1);
 	MYSQLI_ADD_PROPERTIES(&mysqli_warning_properties, mysqli_warning_property_entries);
 	zend_hash_add(&classes, ce->name, ce->name_length+1, &mysqli_warning_properties, sizeof(mysqli_warning_properties), NULL);
