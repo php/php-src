@@ -304,7 +304,7 @@ dnl AC_CHECK_FUNCS(getopt_long getopt_long_only)
 
 AC_CHECK_FUNCS(glob strfmon nice)
 
-if test "$PHP_SAPI" = "cgi" -o "$PHP_SAPI" = "cli" -o "$PHP_SAPI" = "embed"; then
+if test "$PHP_SAPI" = "cgi" || test "$PHP_SAPI" = "cli" || test "$PHP_SAPI" = "embed"; then
   AC_DEFINE(ENABLE_CHROOT_FUNC, 1, [Whether to enable chroot() function])
 fi
 
