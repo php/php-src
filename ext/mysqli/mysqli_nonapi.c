@@ -335,7 +335,7 @@ PHP_FUNCTION(mysqli_set_charset)
 #endif
 
 #ifdef HAVE_MYSQLI_GET_CHARSET 
-/* {{{ object mysqli_get_charset(object link) 
+/* {{{ proto object mysqli_get_charset(object link) 
    returns a character set object */
 PHP_FUNCTION(mysqli_get_charset)
 {
