@@ -1,9 +1,10 @@
 --TEST--
 SPL: spl_autoloadfunctions()
 --SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
---SKIPIF--
-<?php if (spl_autoload_functions() !== false) die('skip __autoload() registered by php.ini'); ?>
+<?php 
+	if (!extension_loaded("spl")) die ("skip");
+	if (spl_autoload_functions() !== false) die('skip __autoload() registered by php.ini'); 
+?>
 --FILE--
 <?php
 
