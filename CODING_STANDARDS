@@ -161,7 +161,7 @@ Naming Conventions
     Bad:
     'foobar'
     'foo_bar'
-    
+
 Syntax and indentation
 ----------------------
 
@@ -206,6 +206,12 @@ Syntax and indentation
 [5] Preprocessor statements (#if and such) MUST start at column one. To
     indent preprocessor directives you should put the # at the beginning
     of a line, followed by any number of whitespace.
+
+Testing
+-------
+
+[1] Extensions should be well tested using *.phpt tests. REad about that
+    in README.TESTING.
 
 Documentation and Folding Hooks
 -------------------------------
