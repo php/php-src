@@ -210,7 +210,7 @@ Syntax and indentation
 Testing
 -------
 
-[1] Extensions should be well tested using *.phpt tests. REad about that
+[1] Extensions should be well tested using *.phpt tests. Read about that
     in README.TESTING.
 
 Documentation and Folding Hooks
