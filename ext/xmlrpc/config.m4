@@ -47,7 +47,7 @@ if test "$PHP_XMLRPC" != "no"; then
   else
     testval=no
     for i in $PHP_LIBEXPAT_DIR $XMLRPC_DIR /usr/local /usr; do
-      if test -f $i/$PHP_LIBDIR/libexpat.a -o -f $i/$PHP_LIBDIR/libexpat.$SHLIB_SUFFIX_NAME; then
+      if test -f $i/$PHP_LIBDIR/libexpat.a || test -f $i/$PHP_LIBDIR/libexpat.$SHLIB_SUFFIX_NAME; then
         AC_DEFINE(HAVE_LIBEXPAT,1,[ ])
         PHP_ADD_LIBRARY_WITH_PATH(expat, $i/$PHP_LIBDIR, XMLRPC_SHARED_LIBADD)
         PHP_ADD_INCLUDE($i/include)
