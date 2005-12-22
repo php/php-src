@@ -1,3 +1,163 @@
+2005-12-21  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS:
+      Better be a bit more verbose
+
+    * NEWS:
+      No need to mention it here as it is fixed before 6 is out..
+
+2005-12-21  Frank M. Kromann  <frank@kromann.info>
+
+    * NEWS
+      NEWS
+      php.ini-dist
+      php.ini-dist
+      php.ini-recommended
+      php.ini-recommended
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.h
+      ext/mssql/php_mssql.h:
+      Fix #35730 Use correct character encoding with FreeTDS
+
+2005-12-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      run-tests.php:
+      - MFH Add --[keep|show]-[all|skip|php] switches
+
+    * run-tests.php:
+      - Add --[keep|show]-[all|skip|php] switches
+
+2005-12-21  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_4_4)
+      ext/ming/config.m4:
+      - Fix possible problem in not finding ming.h
+
+    * (PHP_5_1)
+      NEWS
+      ext/ming/config.m4:
+      MFH:- Fixed bug #35461 (Ming extension fails to compile with ming 0.3beta1)
+
+    * ext/ming/config.m4
+      ext/ming/ming.c:
+      - Fixed bug #35461 (Ming extension fails to compile with ming 0.3beta1)
+
+    * ext/ming/config.m4:
+      use more portable || here
+
+2005-12-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sqlite/pdo_sqlite2.c:
+      MFB51: Don't lose track of exec() errors in pdo_sqlite2
+
+    * (PHP_5_1)
+      ext/sqlite/pdo_sqlite2.c:
+      Don't lose track of exec() errors in pdo_sqlite2
+
+2005-12-21  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      ext/wddx/config.m4:
+      MFH: prevent compile failure with --disable-all
+
+    * ext/wddx/config.m4:
+      - Fix possible compile failure if configuring with --disable-all
+
+2005-12-21  Antony Dovgal  <antony@zend.com>
+
+    * ext/wddx/tests/bug35410.phpt
+      ext/wddx/tests/bug35410_64bit.phpt:
+      MFB: fix test, add test for 64bit platform
+
+    * (PHP_5_1)
+      ext/wddx/tests/bug35410.phpt
+      ext/wddx/tests/bug35410_64bit.phpt
+      ext/wddx/tests/bug35410_64bit.phpt:
+      fix test, add test for 64bit platform
+
+    * ext/wddx/tests/bug35410.phpt:
+      MFB: fix test
+
+    * (PHP_5_1)
+      ext/wddx/tests/bug35410.phpt:
+      fix test
+
+    * ext/calendar/tests/jdtojewish.phpt
+      ext/ctype/tests/bug25745.phpt
+      ext/ctype/tests/bug34645.phpt
+      ext/iconv/tests/iconv003.phpt
+      ext/iconv/tests/iconv004.phpt
+      ext/iconv/tests/iconv_mime_decode_headers.phpt
+      ext/mbstring/tests/bug28220.phpt
+      ext/mbstring/tests/bug30549.phpt
+      ext/mbstring/tests/bug31911.phpt
+      ext/simplexml/tests/bug27010.phpt
+      ext/sqlite/tests/bug28112.phpt
+      ext/wddx/tests/001.phpt
+      ext/wddx/tests/bug27287.phpt
+      ext/wddx/tests/bug34306.phpt
+      ext/wddx/tests/bug35410.phpt:
+      MFB: add missing skipif conditions, fix existing ones
+      add one missing test
+
+    * (PHP_5_1)
+      ext/calendar/tests/jdtojewish.phpt
+      ext/ctype/tests/bug25745.phpt
+      ext/ctype/tests/bug34645.phpt
+      ext/iconv/tests/iconv003.phpt
+      ext/iconv/tests/iconv004.phpt
+      ext/iconv/tests/iconv_mime_decode_headers.phpt
+      ext/mbstring/tests/bug28220.phpt
+      ext/mbstring/tests/bug30549.phpt
+      ext/mbstring/tests/bug31911.phpt
+      ext/simplexml/tests/bug27010.phpt
+      ext/sqlite/tests/bug28112.phpt
+      ext/wddx/tests/001.phpt
+      ext/wddx/tests/bug27287.phpt
+      ext/wddx/tests/bug34306.phpt
+      ext/wddx/tests/bug35410.phpt:
+      add missing skipif conditions
+      fix existing ones
+
+    * ext/xml/tests/bug25666.phpt
+      ext/xml/tests/bug26528.phpt
+      ext/xml/tests/bug26614.phpt
+      ext/xml/tests/bug26614_libxml.phpt
+      ext/xml/tests/bug27908.phpt
+      ext/xml/tests/bug30266.phpt
+      ext/xml/tests/bug32001.phpt
+      ext/xml/tests/bug35447.phpt
+      ext/xml/tests/xml009.phpt
+      ext/xml/tests/xml010.phpt:
+      MFB: add missing skipif conditions
+
+    * (PHP_5_1)
+      ext/xml/tests/bug25666.phpt
+      ext/xml/tests/bug26528.phpt
+      ext/xml/tests/bug26614.phpt
+      ext/xml/tests/bug26614_libxml.phpt
+      ext/xml/tests/bug27908.phpt
+      ext/xml/tests/bug30266.phpt
+      ext/xml/tests/bug32001.phpt
+      ext/xml/tests/bug35447.phpt
+      ext/xml/tests/xml009.phpt
+      ext/xml/tests/xml010.phpt:
+      add skipif conditions
+
+    * (PHP_5_1)
+      NEWS:
+      BFN
+
+    * ext/sybase_ct/php_sybase_ct.c:
+      MFB: fix #35760 (sybase_ct doesn't compile on Solaris)
+
+    * (PHP_5_1)
+      ext/sybase_ct/php_sybase_ct.c:
+      fix #35760 (sybase_ct doesn't compile on Solaris)
+
 2005-12-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
