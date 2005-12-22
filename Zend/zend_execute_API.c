@@ -1284,6 +1284,7 @@ static unsigned __stdcall timeout_thread_proc(void *pArgs)
 	}
 	DestroyWindow(timeout_window);
 	UnregisterClass(wc.lpszClassName, NULL);
+	SetEvent(timeout_thread_handle);
 	return 0;
 }
 
@@ -1291,7 +1292,8 @@ static unsigned __stdcall timeout_thread_proc(void *pArgs)
 void zend_init_timeout_thread()
 {
 	timeout_thread_event = CreateEvent(NULL, FALSE, FALSE, NULL);
-	timeout_thread_handle = _beginthreadex(NULL, 0, timeout_thread_proc, NULL, 0, &timeout_thread_id);
+	timeout_thread_handle = CreateEvent(NULL, FALSE, FALSE, NULL);
+	_beginthreadex(NULL, 0, timeout_thread_proc, NULL, 0, &timeout_thread_id);
 	WaitForSingleObject(timeout_thread_event, INFINITE);
 }
 
