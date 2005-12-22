@@ -384,6 +384,9 @@ SPL_METHOD(RecursiveIteratorIterator, __construct)
 		iterator = NULL;
 	}
 	if (!iterator || !instanceof_function(Z_OBJCE_P(iterator), spl_ce_RecursiveIterator TSRMLS_CC)) {
+		if (iterator && !inc_refcount) {
+			zval_ptr_dtor(&iterator);
+		}
 		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 		zend_throw_exception(spl_ce_InvalidArgumentException, "An instance of RecursiveIterator or IteratorAggregate creating it is required", 0 TSRMLS_CC);
 		return;
