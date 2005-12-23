@@ -1,11 +1,9 @@
 --TEST--
-Bug #32001 (xml_parse*() goes into infinite loop when autodetection in effect)
+Bug #32001 (xml_parse*() goes into infinite loop when autodetection in effect), using UTF-*
 --SKIPIF--
 <?php
 require_once("skipif.inc");
-	if (!extension_loaded('iconv')) {
-		die ("skip iconv extension not available\n");
-	}
+if (!extension_loaded('iconv')) die ("skip iconv extension not available");
 ?>
 --FILE--
 <?php
@@ -150,12 +148,6 @@ $suite = array(
 	new testcase("UTF-16LE",  1, 0, 0),
 	new testcase("UTF-16LE",  1, 1, 0),
 	new testcase("UTF-16LE",  1, 1, 1),
-	new testcase("EUC-JP"  ,  0),
-	new testcase("EUC-JP"  ,  1),
-	new testcase("Shift_JIS", 0),
-	new testcase("Shift_JIS", 1),
-	new testcase("GB2312",    0),
-	new testcase("GB2312",    1),
 );
 
 if (XML_SAX_IMPL == 'libxml') {
@@ -406,78 +398,6 @@ Encoding: UTF-16LE
 XML Prologue: not present
 Chunk size: 1 byte(s)
 BOM: prepended
-array(3) {
-  [0]=>
-  string(128) "e38386e382b9e383883ae38386e382b9e3838831: 687474703a2f2f7777772e6578616d706c652e636f6d2fe38386e382b9e383882f, e38386e382b9e38388"
-  [1]=>
-  string(60) "e38386e382b9e383883ae38386e382b9e3838832: e38386e382b9e38388"
-  [2]=>
-  string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
-}
-Encoding: EUC-JP
-XML Prologue: present
-Chunk size: all data at once
-BOM: not prepended
-array(3) {
-  [0]=>
-  string(128) "e38386e382b9e383883ae38386e382b9e3838831: 687474703a2f2f7777772e6578616d706c652e636f6d2fe38386e382b9e383882f, e38386e382b9e38388"
-  [1]=>
-  string(60) "e38386e382b9e383883ae38386e382b9e3838832: e38386e382b9e38388"
-  [2]=>
-  string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
-}
-Encoding: EUC-JP
-XML Prologue: present
-Chunk size: 1 byte(s)
-BOM: not prepended
-array(3) {
-  [0]=>
-  string(128) "e38386e382b9e383883ae38386e382b9e3838831: 687474703a2f2f7777772e6578616d706c652e636f6d2fe38386e382b9e383882f, e38386e382b9e38388"
-  [1]=>
-  string(60) "e38386e382b9e383883ae38386e382b9e3838832: e38386e382b9e38388"
-  [2]=>
-  string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
-}
-Encoding: Shift_JIS
-XML Prologue: present
-Chunk size: all data at once
-BOM: not prepended
-array(3) {
-  [0]=>
-  string(128) "e38386e382b9e383883ae38386e382b9e3838831: 687474703a2f2f7777772e6578616d706c652e636f6d2fe38386e382b9e383882f, e38386e382b9e38388"
-  [1]=>
-  string(60) "e38386e382b9e383883ae38386e382b9e3838832: e38386e382b9e38388"
-  [2]=>
-  string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
-}
-Encoding: Shift_JIS
-XML Prologue: present
-Chunk size: 1 byte(s)
-BOM: not prepended
-array(3) {
-  [0]=>
-  string(128) "e38386e382b9e383883ae38386e382b9e3838831: 687474703a2f2f7777772e6578616d706c652e636f6d2fe38386e382b9e383882f, e38386e382b9e38388"
-  [1]=>
-  string(60) "e38386e382b9e383883ae38386e382b9e3838832: e38386e382b9e38388"
-  [2]=>
-  string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
-}
-Encoding: GB2312
-XML Prologue: present
-Chunk size: all data at once
-BOM: not prepended
-array(3) {
-  [0]=>
-  string(128) "e38386e382b9e383883ae38386e382b9e3838831: 687474703a2f2f7777772e6578616d706c652e636f6d2fe38386e382b9e383882f, e38386e382b9e38388"
-  [1]=>
-  string(60) "e38386e382b9e383883ae38386e382b9e3838832: e38386e382b9e38388"
-  [2]=>
-  string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
-}
-Encoding: GB2312
-XML Prologue: present
-Chunk size: 1 byte(s)
-BOM: not prepended
 array(3) {
   [0]=>
   string(128) "e38386e382b9e383883ae38386e382b9e3838831: 687474703a2f2f7777772e6578616d706c652e636f6d2fe38386e382b9e383882f, e38386e382b9e38388"
