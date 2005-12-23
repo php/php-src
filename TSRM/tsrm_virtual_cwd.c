@@ -480,9 +480,9 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	{
 		int new_path_length;
   
-		new_path_length = GetLongPathName(path, NULL, 0) + 1;
+		new_path_length = GetLongPathName(path, NULL, 0);
 		if (new_path_length == 0) {
-			return 1;
+			goto php_failed_getlongpath;
 		}
 
 		/* GetLongPathName already counts the \0 */
@@ -496,6 +496,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 			path_length = new_path_length;
 		} else {
 			free(new_path);
+php_failed_getlongpath:
 			new_path = NULL;
 		}
 	}
