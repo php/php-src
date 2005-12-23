@@ -13,10 +13,11 @@ echo $xml->asXML();
 <?php exit(0); __halt_compiler(); ?>
 --EXPECTF--
 
-Notice: Undefined index:  name in %sbug35785.phpt on line %d
+Notice: Undefined index:  name in %sbug35785.php on line %d
 
-Strict Standards: Creating default object from empty value in %sbug35785.phpt on line %d
+Strict Standards: Creating default object from empty value in %sbug35785.php on line %d
 
-Warning: Attempt to assign property of non-object in %sbug35785.phpt on line %d
+Warning: Attempt to assign property of non-object in %sbug35785.php on line %d
 <?xml version="1.0"?>
 <root/>
+===DONE===
