@@ -60,7 +60,6 @@
 #include "ext/standard/url.h"
 #include "main/php_output.h"
 #include "ext/standard/info.h"
-
 #include "libmbfl/mbfl/mbfl_allocators.h"
 
 #include "php_variables.h"
@@ -1761,6 +1760,11 @@ PHP_FUNCTION(mb_substr)
 		if (len < 0) {
 			len = 0;
 		}
+	}
+
+	if (((MBSTRG(func_overload) & MB_OVERLOAD_STRING) == MB_OVERLOAD_STRING)
+		&& (from >= mbfl_strlen(&string))) {
+		RETURN_FALSE;
 	}
 
 	ret = mbfl_substr(&string, &result, from, len);
