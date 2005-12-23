@@ -1313,6 +1313,8 @@ void pdo_dbh_init(TSRMLS_D)
 
 static void dbh_free(pdo_dbh_t *dbh TSRMLS_DC)
 {
+	int i;
+
 	if (--dbh->refcount)
 		return;
 
@@ -1333,6 +1335,13 @@ static void dbh_free(pdo_dbh_t *dbh TSRMLS_DC)
 	if (dbh->def_stmt_ctor_args) {
 		zval_ptr_dtor(&dbh->def_stmt_ctor_args);
 	}
+	
+	for (i = 0; i < PDO_DBH_DRIVER_METHOD_KIND__MAX; i++) {
+		if (dbh->cls_methods[i]) {
+			zend_hash_destroy(dbh->cls_methods[i]);
+			pefree(dbh->cls_methods[i], dbh->is_persistent);
+		}
+	}
 
 	pefree(dbh, dbh->is_persistent);
 }
@@ -1348,9 +1357,6 @@ static void pdo_dbh_free_storage(pdo_dbh_t *dbh TSRMLS_DC)
 		zend_hash_destroy(dbh->properties);
 		efree(dbh->properties);
 		dbh->properties = NULL;
-	}
-	if (dbh->cls_methods) {
-		zend_hash_destroy(&dbh->cls_methods);
 	}
 
 	if (!dbh->is_persistent) {
