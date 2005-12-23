@@ -59,6 +59,7 @@
 #include "nls/nls_ru.h"
 #include "nls/nls_en.h"
 #include "nls/nls_hy.h"
+#include "nls/nls_tr.h"
 #include "nls/nls_neutral.h"
 
 #ifndef HAVE_STRCASECMP
@@ -77,6 +78,7 @@ static const mbfl_language *mbfl_language_ptr_table[] = {
 	&mbfl_language_german,
 	&mbfl_language_russian,
 	&mbfl_language_armenian,
+	&mbfl_language_turkish,
 	&mbfl_language_neutral,
 	NULL
 };

@@ -58,6 +58,7 @@ enum mbfl_no_language {
 	mbfl_no_language_traditional_chinese,		/* zh-tw */
 	mbfl_no_language_russian,		/* ru */
 	mbfl_no_language_armenian,		/* hy */
+	mbfl_no_language_turkish,		/* tr */
 	mbfl_no_language_max
 };
 
