@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Fixed bug #35781 (stream_filter_append() can cause segfault). (Tony)
 - Fixed bug #35759 (mysqli_stmt_bind_result() makes huge allocation when
   column empty). (Andrey)
+- Fixed #28899 (mb_substr() and substr() work differently when 
+  mbstring.func_overload is enabled). (Rui)
 
 22 Dec 2005, PHP 5.1.2RC1
 - Updated libsqlite in ext/sqlite to 2.8.17. (Ilia)
