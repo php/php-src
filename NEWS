@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jan 2006, PHP 5.1.2RC2
+- Fixed small leak in mysqli_stmt_fetch() when bound variable was empty
+  string. (Andrey)
 - Fixed bug #35785 (SimpleXML causes memory read error zend engine). (Marcus)
 - Fixed bug #35781 (stream_filter_append() can cause segfault). (Tony)
 - Fixed bug #35759 (mysqli_stmt_bind_result() makes huge allocation when
@@ -43,8 +45,6 @@ PHP                                                                        NEWS
 - Fixed many bugs in OCI8. (Tony)
 - Fixed crash and leak in mysqli when using 4.1.x client libraries and
   connecting to 5.x server. (Andrey)
-- Fixed small leak in mysqli_stmt_fetch() when bound variable was empty
-  string. (Andrey)
 - Fixed bug #35760 (sybase_ct doesn't compile on Solaris using old gcc). (Tony)
 - Fixed bug #35740 (memory leak when including a directory). (Tony)
 - Fixed bug #35730 (ext/mssql + freetds: Use correct character encoding
