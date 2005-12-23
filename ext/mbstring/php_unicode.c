@@ -44,6 +44,8 @@
 #include "php_unicode.h"
 #include "unicode_data.h"
 
+ZEND_EXTERN_MODULE_GLOBALS(mbstring)
+
 /*
  * A simple array of 32-bit masks for lookup.
  */
@@ -96,6 +98,7 @@ static int prop_lookup(unsigned long code, unsigned long n)
 
 }
 
+
 MBSTRING_API int php_unicode_is_prop(unsigned long code, unsigned long mask1,
 		unsigned long mask2)
 {
@@ -142,7 +145,23 @@ static unsigned long case_lookup(unsigned long code, long l, long r, int field)
 	return code;
 }
 
-MBSTRING_API unsigned long php_unicode_toupper(unsigned long code)
+MBSTRING_API unsigned long php_turkish_toupper(unsigned long code, long l, long r, int field)
+{
+	if (code == 0x0069L) {
+		return 0x0130L;
+	}
+	return case_lookup(code, l, r, field);
+}
+
+MBSTRING_API unsigned long php_turkish_tolower(unsigned long code, long l, long r, int field)
+{
+	if (code == 0x0049L) {
+		return 0x0131L;
+	}	
+	return case_lookup(code, l, r, field);
+}
+
+MBSTRING_API unsigned long php_unicode_toupper(unsigned long code, enum mbfl_no_encoding enc TSRMLS_DC)
 {
 	int field;
 	long l, r;
@@ -157,6 +176,12 @@ MBSTRING_API unsigned long php_unicode_toupper(unsigned long code)
 		field = 2;
 		l = _uccase_len[0];
 		r = (l + _uccase_len[1]) - 3;
+
+		if (MBSTRG(current_language) == mbfl_no_language_turkish && 
+			enc == mbfl_no_encoding_8859_9) {
+			return php_turkish_toupper(code, l, r, field);
+		}
+
 	} else {
 		/*
 		 * The character is title case.
@@ -168,7 +193,7 @@ MBSTRING_API unsigned long php_unicode_toupper(unsigned long code)
 	return case_lookup(code, l, r, field);
 }
 
-MBSTRING_API unsigned long php_unicode_tolower(unsigned long code)
+MBSTRING_API unsigned long php_unicode_tolower(unsigned long code, enum mbfl_no_encoding enc TSRMLS_DC)
 {
 	int field;
 	long l, r;
@@ -183,6 +208,12 @@ MBSTRING_API unsigned long php_unicode_tolower(unsigned long code)
 		field = 1;
 		l = 0;
 		r = _uccase_len[0] - 3;
+
+		if (MBSTRG(current_language) == mbfl_no_language_turkish && 
+			enc == mbfl_no_encoding_8859_9) {
+			return php_turkish_tolower(code, l, r, field);
+		}
+
 	} else {
 		/*
 		 * The character is title case.
@@ -194,7 +225,7 @@ MBSTRING_API unsigned long php_unicode_tolower(unsigned long code)
 	return case_lookup(code, l, r, field);
 }
 
-MBSTRING_API unsigned long php_unicode_totitle(unsigned long code)
+MBSTRING_API unsigned long php_unicode_totitle(unsigned long code, enum mbfl_no_encoding enc TSRMLS_DC)
 {
 	int field;
 	long l, r;
@@ -246,25 +277,26 @@ MBSTRING_API char *php_unicode_convert_case(int case_mode, char *srcstr, size_t 
 	size_t unicode_len;
 	unsigned char *unicode_ptr;
 	size_t i;
+	enum mbfl_no_encoding _src_encoding = mbfl_name2no_encoding(src_encoding);
 
 	unicode = php_mb_convert_encoding(srcstr, srclen, "UCS-4BE", src_encoding, &unicode_len TSRMLS_CC);
 	if (unicode == NULL)
 		return NULL;
 	
-	unicode_ptr = unicode;
+	unicode_ptr = (unsigned char *)unicode;
 
 	switch(case_mode) {
 		case PHP_UNICODE_CASE_UPPER:
 			for (i = 0; i < unicode_len; i+=4) {
 				UINT32_TO_BE_ARY(&unicode_ptr[i],
-					php_unicode_toupper(BE_ARY_TO_UINT32(&unicode_ptr[i])));
+						php_unicode_toupper(BE_ARY_TO_UINT32(&unicode_ptr[i]), _src_encoding TSRMLS_CC));
 			}
 			break;
 
 		case PHP_UNICODE_CASE_LOWER:
 			for (i = 0; i < unicode_len; i+=4) {
 				UINT32_TO_BE_ARY(&unicode_ptr[i],
-					php_unicode_tolower(BE_ARY_TO_UINT32(&unicode_ptr[i])));
+						php_unicode_tolower(BE_ARY_TO_UINT32(&unicode_ptr[i]), _src_encoding TSRMLS_CC));
 			}
 			break;
 
@@ -278,7 +310,7 @@ MBSTRING_API char *php_unicode_convert_case(int case_mode, char *srcstr, size_t 
 				if (mode) {
 					if (res) {
 						UINT32_TO_BE_ARY(&unicode_ptr[i],
-							php_unicode_tolower(BE_ARY_TO_UINT32(&unicode_ptr[i])));
+							php_unicode_tolower(BE_ARY_TO_UINT32(&unicode_ptr[i]), _src_encoding TSRMLS_CC));
 					} else {
 						mode = 0;
 					}	
@@ -286,7 +318,7 @@ MBSTRING_API char *php_unicode_convert_case(int case_mode, char *srcstr, size_t 
 					if (res) {
 						mode = 1;
 						UINT32_TO_BE_ARY(&unicode_ptr[i],
-							php_unicode_totitle(BE_ARY_TO_UINT32(&unicode_ptr[i])));
+							 php_unicode_totitle(BE_ARY_TO_UINT32(&unicode_ptr[i]), _src_encoding TSRMLS_CC));
 					}
 				}
 			}
