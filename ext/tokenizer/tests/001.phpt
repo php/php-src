@@ -255,7 +255,7 @@ T_HALT_COMPILER
 UNKNOWN
 UNKNOWN
 
-Warning: token_name() expects parameter 1 to be long, string given in %s on line %d
+Warning: token_name() expects parameter 1 to be long, %s string given in %s on line %d
 
 
 Warning: token_name() expects parameter 1 to be long, array given in %s on line %d
