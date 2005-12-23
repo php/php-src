@@ -46,7 +46,7 @@ PHP_FUNCTION(mysqli_report)
 
 /* {{{ void php_mysqli_report_error(char *sqlstate, int errorno, char *error) */ 
 void php_mysqli_report_error(char *sqlstate, int errorno, char *error TSRMLS_DC) {
-	php_mysqli_throw_sql_exception(sqlstate, errorno TSRMLS_CC, error);
+	php_mysqli_throw_sql_exception(sqlstate, errorno TSRMLS_CC, "%s", error);
 }
 /* }}} */
 
