@@ -955,8 +955,11 @@ TEST $file
 	}
 	fclose($fp);
 
+	$shortname = str_replace($cwd.'/', '', $file);
+	$tested_file = $shortname;
+
 	if ($borked) {
-		show_result("BORK", $bork_info);
+		show_result("BORK", $bork_info, $tested_file);
 		$PHP_FAILED_TESTS['BORKED'][] = array (
 								'name' => $file,
 								'test_name' => '',
@@ -967,9 +970,7 @@ TEST $file
 		return 'BORKED';
 	}
 
-	$shortname = str_replace($cwd.'/', '', $file);
 	$tested = trim($section_text['TEST']);
-	$tested_file = $shortname;
 
  	/* For GET/POST tests, check if cgi sapi is available and if it is, use it. */
  	if ((!empty($section_text['GET']) || !empty($section_text['POST']))) {
