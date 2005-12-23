@@ -1,3 +1,112 @@
+2005-12-22  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/config.w32
+      ext/gd/gd.dsp:
+      - remove HAVE_GDIMAGECOLORRESOLVE here too (w32)
+
+    * ext/gd/config.m4
+      ext/gd/gd.c
+      ext/gd/tests/colorclosest.phpt
+      ext/gd/tests/colorresolve.phpt
+      ext/gd/tests/copy.phpt
+      ext/gd/tests/dashedlines.phpt
+      ext/gd/tests/lines.phpt:
+      - add tests for:
+       - imagecolorclosest
+       - imagecolorresolve
+       - imagecopy
+       - imageline
+       -imagesetstyle and dashed line
+      - remove HAVE_GDIMAGECOLORRESOLVE, always present
+
+2005-12-22  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_5_1)
+      TSRM/tsrm_virtual_cwd.c:
+      MFH: Back out a portion of the previous patch which broke win32 file
+      functions
+
+    * TSRM/tsrm_virtual_cwd.c:
+      Back out a portion of the previous patch which broke win32 file functions
+
+2005-12-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * CODING_STANDARDS
+      CODING_STANDARDS:
+      \# Damn !
+
+    * CODING_STANDARDS:
+      - Point to README.TESTING
+
+2005-12-22  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_1)
+      NEWS:
+      BFN
+
+    * (PHP_5_1)
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/tests/bug35759.phpt
+      ext/mysqli/tests/bug35759.phpt:
+      fix for bug# 35759
+      (mysqli_stmt_bind_result() makes huge allocation when column empty)
+
+2005-12-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c:
+      Fixed bug #35612 (iis6 Access Violation crash). (alacn dot uhahaa at gmail
+      dot com)
+
+2005-12-22  Zeev Suraski  <zeev@zend.com>
+
+    * ext/mysqli/mysqli_nonapi.c:
+      Fix prototype (MFB)
+
+    * (PHP_5_1)
+      ext/mysqli/mysqli_nonapi.c:
+      Fix prototype
+
+2005-12-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS
+      configure.in
+      main/php_version.h:
+      5.1.2RC1
+
+2005-12-22  Antony Dovgal  <antony@zend.com>
+
+    * ext/ldap/config.m4
+      ext/snmp/config.m4
+      ext/standard/config.m4
+      ext/xmlrpc/config.m4
+      sapi/caudium/config.m4
+      sapi/roxen/config.m4:
+      change -o to || to be more portable
+
+2005-12-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      Fixed memory leak and typo
+
+    * (PHP_5_1)
+      ZendEngine2/zend_execute.c:
+      Fixed memory leak
+
+2005-12-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/xml/config.m4
+      ext/xml/config.m4:
+      - Find lib in default locations, too
+
+2005-12-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/ctype/ctype.c:
+      Fixed memory corruption
+
 2005-12-21  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * (PHP_5_1)
