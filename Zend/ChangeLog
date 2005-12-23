@@ -1,3 +1,18 @@
+2005-12-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute_API.c
+      zend_execute_API.c
+      zend_execute_API.c:
+      Fixed bug #35612 (iis6 Access Violation crash). (alacn dot uhahaa at gmail
+      dot com)
+
+    * zend_execute.c:
+      Fixed memory leak and typo
+
+    * (PHP_5_1)
+      zend_execute.c:
+      Fixed memory leak
+
 2005-12-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
