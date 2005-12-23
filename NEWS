@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jan 2006, PHP 5.1.2RC2
+- Fixed bug #35785 (SimpleXML causes memory read error zend engine). (Marcus)
 - Fixed bug #35781 (stream_filter_append() can cause segfault). (Tony)
 - Fixed bug #35759 (mysqli_stmt_bind_result() makes huge allocation when
   column empty). (Andrey)
@@ -25,6 +26,7 @@ PHP                                                                        NEWS
 - Improved SPL extension: (Marcus)
   . Added class SplFileInfo as root class for DirectoryIterator and 
     SplFileObject
+  . Added SplTempFileObject
 - Improved SimpleXML extension: (Marcus)
   . Fixed memleaks
   . Fixed var_dump()
