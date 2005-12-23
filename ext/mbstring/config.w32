@@ -40,7 +40,7 @@ if (PHP_MBSTRING == "yes") {
 
 	ADD_SOURCES("ext/mbstring/libmbfl/nls", "nls_de.c nls_en.c nls_ja.c \
 		nls_kr.c nls_neutral.c nls_ru.c nls_uni.c nls_zh.c nls_hy.c \
-		", "mbstring");
+		nls_tr.c", "mbstring");
 
 	AC_DEFINE('HAVE_MBSTRING', 1, 'Have mbstring support');
 	AC_DEFINE('HAVE_MBSTR_CN', 1, 'CN');
