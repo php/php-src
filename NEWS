@@ -1,6 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-22 Dec 2006, PHP 5.1.2RC1
+?? Jan 2006, PHP 5.1.2RC2
+- Fixed bug #35781 (stream_filter_append() can cause segfault). (Tony)
+- Fixed bug #35759 (mysqli_stmt_bind_result() makes huge allocation when
+  column empty). (Andrey)
+
+22 Dec 2005, PHP 5.1.2RC1
 - Updated libsqlite in ext/sqlite to 2.8.17. (Ilia)
 - Updated libsqlite in ext/pdo_sqlite to 3.2.8. (Ilia)
 - Updated to libxml2-2.6.22 and libxslt-1.1.15 in the win32 bundle. (Rob)
@@ -33,8 +38,6 @@ PHP                                                                        NEWS
 - Fixed crash and leak in mysqli when using 4.1.x client libraries and
   connecting to 5.x server. (Andrey)
 - Fixed bug #35760 (sybase_ct doesn't compile on Solaris using old gcc). (Tony)
-- Fixed bug #35759 (mysqli_stmt_bind_result() makes huge allocation when
-  column empty). (Andrey)
 - Fixed bug #35740 (memory leak when including a directory). (Tony)
 - Fixed bug #35730 (ext/mssql + freetds: Use correct character encoding
   and allow setting it). (Frank)
