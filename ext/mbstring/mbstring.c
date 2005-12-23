@@ -1763,6 +1763,11 @@ PHP_FUNCTION(mb_substr)
 		}
 	}
 
+	if (((MBSTRG(func_overload) & MB_OVERLOAD_STRING) == MB_OVERLOAD_STRING)
+		&& (from >= mbfl_strlen(&string))) {
+		RETURN_FALSE;
+	}
+
 	ret = mbfl_substr(&string, &result, from, len);
 	if (ret != NULL) {
 		RETVAL_STRINGL((char *)ret->val, ret->len, 0);		/* the string is already strdup()'ed */
