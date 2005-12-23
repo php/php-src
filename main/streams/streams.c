@@ -442,7 +442,7 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 
 			/* read a chunk into a bucket */
 			justread = stream->ops->read(stream, chunk_buf, stream->chunk_size TSRMLS_CC);
-			if (justread > 0) {
+			if (justread != (size_t)-1) {
 				bucket = php_stream_bucket_new(stream, chunk_buf, justread, 0, 0 TSRMLS_CC);
 
 				/* after this call, bucket is owned by the brigade */
@@ -527,7 +527,7 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 					break;
 			}
 
-			if (justread == 0) {
+			if (justread == 0 || justread == (size_t)-1) {
 				break;
 			}
 		}
