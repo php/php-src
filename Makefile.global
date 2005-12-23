@@ -77,7 +77,7 @@ test: all
 		TEST_PHP_EXECUTABLE=$(top_builddir)/$(SAPI_CLI_PATH) \
 		TEST_PHP_SRCDIR=$(top_srcdir) \
 		CC="$(CC)" \
-			$(top_builddir)/$(SAPI_CLI_PATH) -d 'open_basedir=' -d 'safe_mode=0' -d 'output_buffering=0' -d 'memory_limit=-1' $(top_srcdir)/run-tests.php $(TESTS); \
+			$(top_builddir)/$(SAPI_CLI_PATH) -d 'open_basedir=' -d 'safe_mode=0' -d 'output_buffering=0' -d 'memory_limit=-1' $(top_srcdir)/run-tests.php -U $(TESTS); \
 	else \
 		echo "ERROR: Cannot run tests without CLI sapi."; \
 	fi
@@ -88,6 +88,16 @@ utest: all
 		TEST_PHP_SRCDIR=$(top_srcdir) \
 		CC="$(CC)" \
 			$(top_builddir)/$(SAPI_CLI_PATH) -d 'open_basedir=' -d 'safe_mode=0' -d 'output_buffering=0' -d 'memory_limit=-1' $(top_srcdir)/run-tests.php -u $(TESTS); \
+	else \
+		echo "ERROR: Cannot run tests without CLI sapi."; \
+	fi
+
+ntest: all
+	-@if test -x $(SAPI_CLI_PATH) && test ! -z $(SAPI_CLI_PATH); then \
+		TEST_PHP_EXECUTABLE=$(top_builddir)/$(SAPI_CLI_PATH) \
+		TEST_PHP_SRCDIR=$(top_srcdir) \
+		CC="$(CC)" \
+			$(top_builddir)/$(SAPI_CLI_PATH) -d 'open_basedir=' -d 'safe_mode=0' -d 'output_buffering=0' -d 'memory_limit=-1' $(top_srcdir)/run-tests.php -N $(TESTS); \
 	else \
 		echo "ERROR: Cannot run tests without CLI sapi."; \
 	fi

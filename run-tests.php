@@ -323,6 +323,10 @@ if (isset($argc) && $argc > 1) {
 					}
 					$pass_option_n = true;
 					break;
+				case 'N':
+					$unicode_and_native = false;
+					$unicode_testing = false;
+					break;
 				case 'q':
 					putenv('NO_INTERACTION=1');
 					break;
@@ -416,6 +420,8 @@ Options:
     -U          Test in unicode and non unicde mode.
 
     -m          Test for memory leaks with Valgrind.
+    
+    -N          Test with unicode_semantics set off.
     
     -s <file>   Write output to <file>.
 
