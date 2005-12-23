@@ -1370,7 +1370,7 @@ PHP_FUNCTION(mysqli_real_connect)
 		
 		php_mysqli_set_error(mysql_errno(mysql->mysql), (char *) mysql_error(mysql->mysql) TSRMLS_CC);
 		php_mysqli_throw_sql_exception( mysql->mysql->net.sqlstate, mysql->mysql->net.last_errno TSRMLS_CC,
-										mysql->mysql->net.last_error);
+										"%s", mysql->mysql->net.last_error);
 
 		RETURN_FALSE;
 	}
