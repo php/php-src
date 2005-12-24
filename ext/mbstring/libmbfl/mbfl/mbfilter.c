@@ -576,8 +576,22 @@ mbfl_identify_encoding(mbfl_string *string, enum mbfl_no_encoding *elist, int el
 	for (i = 0; i < num; i++) {
 		filter = &flist[i];
 		if (!filter->flag) {
+			if (strict && filter->status) {
+				continue;
+			}
 			encoding = filter->encoding;
 			break;
+		}
+	}
+
+	/* fall-back judge */
+	if (!encoding) {
+		for (i = 0; i < num; i++) {
+			filter = &flist[i];
+			if (!filter->flag) {
+				encoding = filter->encoding;
+				break;
+			}
 		}
 	}
 
