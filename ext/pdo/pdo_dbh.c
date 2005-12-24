@@ -1344,6 +1344,11 @@ static void dbh_free(pdo_dbh_t *dbh TSRMLS_DC)
 	if (--dbh->refcount)
 		return;
 
+	if (dbh->query_stmt) {
+		zval_dtor(&dbh->query_stmt_zval);
+		dbh->query_stmt = NULL;
+	}
+
 	if (dbh->methods) {
 		dbh->methods->closer(dbh TSRMLS_CC);
 	}
