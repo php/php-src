@@ -1,3 +1,12 @@
+2005-12-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      zend_execute.c:
+      - MFH Fixed Bug #35785 (SimpleXML memory read error)
+
+    * zend_execute.c:
+      - Fixed Bug #35785 (SimpleXML memory read error)
+
 2005-12-22  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_execute_API.c
