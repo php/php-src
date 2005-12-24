@@ -2058,7 +2058,7 @@ AC_DEFUN([PHP_PROG_RE2C],[
   if test -n "$RE2C"; then
     AC_CACHE_CHECK([for re2c version], php_cv_re2c_version, [
       re2c_vernum=`echo "" | re2c --vernum 2>/dev/null`
-      if test -z "$re2c_vernum" || test "$re2c_vernum" -lt "908"; then
+      if test -z "$re2c_vernum" || test "$re2c_vernum" -lt "911"; then
         php_cv_re2c_version=invalid
       else
         php_cv_re2c_version="`echo "" | re2c --version | cut -d ' ' -f 2  2>/dev/null` (ok)"
@@ -2067,7 +2067,7 @@ AC_DEFUN([PHP_PROG_RE2C],[
   fi
   case $php_cv_re2c_version in
     ""|invalid[)]
-      AC_MSG_WARN([You will need re2c 0.98 or later if you want to regenerate PHP parsers.])
+      AC_MSG_WARN([You will need re2c 0.9.11 or later if you want to regenerate PHP parsers.])
       RE2C="exit 0;"
       ;;
   esac
