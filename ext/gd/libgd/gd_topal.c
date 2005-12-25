@@ -2086,6 +2086,9 @@ int gdImageColorMatch (gdImagePtr im1, gdImagePtr im2)
 	if( (im1->sx != im2->sx) || (im1->sy != im2->sy) ) {
 		return -3; /* the images are meant to be the same dimensions */
 	}
+	if (im2->colorsTotal<1) {
+		return -4; /* At least 1 color must be allocated */
+	}
 
 	buf = (unsigned long *)safe_emalloc(sizeof(unsigned long), 5 * im2->colorsTotal, 0);
 	memset( buf, 0, sizeof(unsigned long) * 5 * im2->colorsTotal );

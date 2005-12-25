@@ -822,6 +822,10 @@ PHP_FUNCTION(imagecolormatch)
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Image1 and Image2 must be the same size" );
 			RETURN_FALSE;
 			break;
+		case -4:
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Image2 must have at least one color" );
+			RETURN_FALSE;
+			break;
 	}
 
 	RETURN_TRUE;
