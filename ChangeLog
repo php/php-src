@@ -1,3 +1,28 @@
+2005-12-24  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/tests/colorclosest.phpt
+      ext/gd/tests/colorresolve.phpt
+      ext/gd/tests/truecolor.phpt:
+      - add truecolortopallete and istruecolor test
+      - titles for colorclosest/resolve...
+
+    * ext/gd/tests/colorclosest.phpt
+      ext/gd/tests/colorresolve.phpt:
+      - fix titles
+      - function check
+
+2005-12-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      acinclude.m4:
+      - MFH Require re2c 0.9.11 and use correct version notation
+
+    * acinclude.m4:
+      - Require re2c 0.9.11 and use correct version notation
+
+    * NEWS:
+      - Update
+
 2005-12-23  Andrey Hristov  <php@hristov.com>
 
     * (PHP_5_1)
