@@ -336,7 +336,7 @@ mbfl_buffer_converter_feed_result(mbfl_buffer_converter *convd, mbfl_string *str
  * encoding detector
  */
 mbfl_encoding_detector *
-mbfl_encoding_detector_new(enum mbfl_no_encoding *elist, int elistsz)
+mbfl_encoding_detector_new(enum mbfl_no_encoding *elist, int elistsz, int strict)
 {
 	mbfl_encoding_detector *identd;
 
@@ -370,6 +370,9 @@ mbfl_encoding_detector_new(enum mbfl_no_encoding *elist, int elistsz)
 		i++;
 	}
 	identd->filter_list_size = num;
+
+	/* set strict flag */
+	identd->strict = strict;
 
 	return identd;
 }
@@ -441,9 +444,24 @@ enum mbfl_no_encoding mbfl_encoding_detector_judge(mbfl_encoding_detector *ident
 		while (n >= 0) {
 			filter = identd->filter_list[n];
 			if (!filter->flag) {
+				if (identd->strict && filter->status) {
+					continue;
+				}
 				encoding = filter->encoding->no_encoding;
 			}
 			n--;
+		}
+
+		/* fallback judge */
+		if (encoding ==	mbfl_no_encoding_invalid) {
+			n = identd->filter_list_size - 1;
+			while (n >= 0) {
+				filter = identd->filter_list[n];
+				if (!filter->flag) {
+					encoding = filter->encoding->no_encoding;
+				}
+				n--;
+			}
 		}
 	}
 
@@ -623,11 +641,11 @@ mbfl_identify_encoding_name(mbfl_string *string, enum mbfl_no_encoding *elist, i
 }
 
 enum mbfl_no_encoding
-mbfl_identify_encoding_no(mbfl_string *string, enum mbfl_no_encoding *elist, int elistsz)
+mbfl_identify_encoding_no(mbfl_string *string, enum mbfl_no_encoding *elist, int elistsz, int strict)
 {
 	const mbfl_encoding *encoding;
 
-	encoding = mbfl_identify_encoding(string, elist, elistsz, 0);
+	encoding = mbfl_identify_encoding(string, elist, elistsz, strict);
 	if (encoding != NULL &&
 	    encoding->no_encoding > mbfl_no_encoding_charset_min &&
 	    encoding->no_encoding < mbfl_no_encoding_charset_max) {
