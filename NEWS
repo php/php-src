@@ -11,7 +11,8 @@ PHP                                                                        NEWS
   "mbstring.func_overload" is enabled). (Rui)
 - Fixed bug #29955 (mb_strtoupper() / lower() broken with Turkish encoding).
   (Rui)
-
+- Fixed segfault/leak in imagecolormatch (Pierre)
+- Raise warnings instead of errors in imagecolormatch (Pierre)
 22 Dec 2005, PHP 5.1.2RC1
 - Updated libsqlite in ext/sqlite to 2.8.17. (Ilia)
 - Updated libsqlite in ext/pdo_sqlite to 3.2.8. (Ilia)
