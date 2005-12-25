@@ -45,6 +45,32 @@ if test "$PHP_SAPI" = "default"; then
   if test "$PHP_SAPI_CGI" != "no"; then
     AC_MSG_RESULT(yes)
 
+    AC_MSG_CHECKING([for socklen_t in sys/socket.h])
+    AC_EGREP_HEADER([socklen_t], [sys/socket.h],
+      [AC_MSG_RESULT([yes])
+       AC_DEFINE([HAVE_SOCKLEN_T], [1],
+        [Define if the socklen_t typedef is in sys/socket.h])],
+      AC_MSG_RESULT([no]))
+
+    AC_MSG_CHECKING([for sun_len in sys/un.h])
+    AC_EGREP_HEADER([sun_len], [sys/un.h],
+      [AC_MSG_RESULT([yes])
+       AC_DEFINE([HAVE_SOCKADDR_UN_SUN_LEN], [1],
+        [Define if sockaddr_un in sys/un.h contains a sun_len component])],
+      AC_MSG_RESULT([no]))
+
+    AC_MSG_CHECKING([whether cross-process locking is required by accept()])
+    case "`uname -sr`" in
+      IRIX\ 5.* | SunOS\ 5.* | UNIX_System_V\ 4.0)	
+        AC_MSG_RESULT([yes])
+        AC_DEFINE([USE_LOCKING], [1], 
+          [Define if cross-process locking is required by accept()])
+      ;;
+      *)
+        AC_MSG_RESULT([no])
+      ;;
+    esac
+
     PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/sapi/cgi/Makefile.frag)
     case $host_alias in
       *cygwin* )
@@ -58,11 +84,8 @@ if test "$PHP_SAPI" = "default"; then
 
     PHP_TEST_WRITE_STDOUT
 
-    PHP_ADD_BUILD_DIR($abs_builddir/sapi/cgi/libfcgi)
-    PHP_FCGI_INCLUDE="-I$abs_srcdir/sapi/cgi/libfcgi/include"
-
     INSTALL_IT="@echo \"Installing PHP CGI into: \$(INSTALL_ROOT)\$(bindir)/\"; \$(INSTALL) -m 0755 \$(SAPI_CGI_PATH) \$(INSTALL_ROOT)\$(bindir)/\$(program_prefix)php\$(program_suffix)\$(EXEEXT)"
-    PHP_SELECT_SAPI(cgi, program, libfcgi/fcgi_stdio.c libfcgi/fcgiapp.c libfcgi/os_unix.c cgi_main.c getopt.c, $PHP_FCGI_INCLUDE, '$(SAPI_CGI_PATH)')
+    PHP_SELECT_SAPI(cgi, program, fastcgi.c cgi_main.c getopt.c, '', '$(SAPI_CGI_PATH)')
 
     case $host_alias in
       *aix*)
