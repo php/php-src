@@ -36,8 +36,6 @@
 #include "spl_array.h"
 #include "spl_exceptions.h"
 
-#define INLINE inline
-
 PHPAPI zend_class_entry *spl_ce_RecursiveIterator;
 PHPAPI zend_class_entry *spl_ce_RecursiveIteratorIterator;
 PHPAPI zend_class_entry *spl_ce_FilterIterator;
@@ -817,9 +815,9 @@ int spl_dual_it_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 }
 #endif
 
-static INLINE int spl_dual_it_fetch(spl_dual_it_object *intern, int check_more TSRMLS_DC);
+static inline int spl_dual_it_fetch(spl_dual_it_object *intern, int check_more TSRMLS_DC);
 
-static INLINE spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce_inner, dual_it_type dit_type)
+static inline spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce_inner, dual_it_type dit_type)
 {
 	zval                 *zobject, *retval;
 	spl_dual_it_object   *intern;
@@ -956,14 +954,14 @@ SPL_METHOD(dual_it, getInnerIterator)
 	}
 } /* }}} */
 
-static INLINE void spl_dual_it_require(spl_dual_it_object *intern TSRMLS_DC)
+static inline void spl_dual_it_require(spl_dual_it_object *intern TSRMLS_DC)
 {
 	if (!intern->inner.iterator) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "The inner constructor wasn't initialized with an iterator instance");
 	}
 }
 
-static INLINE void spl_dual_it_free(spl_dual_it_object *intern TSRMLS_DC)
+static inline void spl_dual_it_free(spl_dual_it_object *intern TSRMLS_DC)
 {
 	if (intern->inner.iterator && intern->inner.iterator->funcs->invalidate_current) {
 		intern->inner.iterator->funcs->invalidate_current(intern->inner.iterator TSRMLS_CC);
@@ -988,7 +986,7 @@ static INLINE void spl_dual_it_free(spl_dual_it_object *intern TSRMLS_DC)
 	}
 }
 
-static INLINE void spl_dual_it_rewind(spl_dual_it_object *intern TSRMLS_DC)
+static inline void spl_dual_it_rewind(spl_dual_it_object *intern TSRMLS_DC)
 {
 	spl_dual_it_free(intern TSRMLS_CC);
 	intern->current.pos = 0;
@@ -997,13 +995,13 @@ static INLINE void spl_dual_it_rewind(spl_dual_it_object *intern TSRMLS_DC)
 	}
 }
 
-static INLINE int spl_dual_it_valid(spl_dual_it_object *intern TSRMLS_DC)
+static inline int spl_dual_it_valid(spl_dual_it_object *intern TSRMLS_DC)
 {
 	/* FAILURE / SUCCESS */
 	return intern->inner.iterator->funcs->valid(intern->inner.iterator TSRMLS_CC);
 }
 
-static INLINE int spl_dual_it_fetch(spl_dual_it_object *intern, int check_more TSRMLS_DC)
+static inline int spl_dual_it_fetch(spl_dual_it_object *intern, int check_more TSRMLS_DC)
 {
 	zval **data;
 
@@ -1023,7 +1021,7 @@ static INLINE int spl_dual_it_fetch(spl_dual_it_object *intern, int check_more T
 	return FAILURE;
 }
 
-static INLINE void spl_dual_it_next(spl_dual_it_object *intern, int do_free TSRMLS_DC)
+static inline void spl_dual_it_next(spl_dual_it_object *intern, int do_free TSRMLS_DC)
 {
 	if (do_free) {
 		spl_dual_it_free(intern TSRMLS_CC);
@@ -1120,7 +1118,7 @@ SPL_METHOD(dual_it, next)
 	spl_dual_it_fetch(intern, 1 TSRMLS_CC);
 } /* }}} */
 
-static INLINE void spl_filter_it_fetch(zval *zthis, spl_dual_it_object *intern TSRMLS_DC)
+static inline void spl_filter_it_fetch(zval *zthis, spl_dual_it_object *intern TSRMLS_DC)
 {
 	zval *retval;
 
@@ -1139,13 +1137,13 @@ static INLINE void spl_filter_it_fetch(zval *zthis, spl_dual_it_object *intern T
 	spl_dual_it_free(intern TSRMLS_CC);
 }
 
-static INLINE void spl_filter_it_rewind(zval *zthis, spl_dual_it_object *intern TSRMLS_DC)
+static inline void spl_filter_it_rewind(zval *zthis, spl_dual_it_object *intern TSRMLS_DC)
 {
 	spl_dual_it_rewind(intern TSRMLS_CC);
 	spl_filter_it_fetch(zthis, intern TSRMLS_CC);
 }
 
-static INLINE void spl_filter_it_next(zval *zthis, spl_dual_it_object *intern TSRMLS_DC)
+static inline void spl_filter_it_next(zval *zthis, spl_dual_it_object *intern TSRMLS_DC)
 {
 	spl_dual_it_next(intern, 1 TSRMLS_CC);
 	spl_filter_it_fetch(zthis, intern TSRMLS_CC);
@@ -1240,7 +1238,7 @@ SPL_METHOD(ParentIterator, getChildren)
 } /* }}} */
 
 /* {{{ spl_dual_it_free_storage */
-static INLINE void spl_dual_it_free_storage(void *_object TSRMLS_DC)
+static inline void spl_dual_it_free_storage(void *_object TSRMLS_DC)
 {
 	spl_dual_it_object        *object = (spl_dual_it_object *)_object;
 
@@ -1326,7 +1324,7 @@ static zend_function_entry spl_funcs_ParentIterator[] = {
 	{NULL, NULL, NULL}
 };
 
-static INLINE int spl_limit_it_valid(spl_dual_it_object *intern TSRMLS_DC)
+static inline int spl_limit_it_valid(spl_dual_it_object *intern TSRMLS_DC)
 {
 	/* FAILURE / SUCCESS */
 	if (intern->u.limit.count != -1 && intern->current.pos >= intern->u.limit.offset + intern->u.limit.count) {
@@ -1336,7 +1334,7 @@ static INLINE int spl_limit_it_valid(spl_dual_it_object *intern TSRMLS_DC)
 	}
 }
 
-static INLINE void spl_limit_it_seek(spl_dual_it_object *intern, long pos TSRMLS_DC)
+static inline void spl_limit_it_seek(spl_dual_it_object *intern, long pos TSRMLS_DC)
 {
 	zval  *zpos;
 
@@ -1478,17 +1476,17 @@ static zend_function_entry spl_funcs_LimitIterator[] = {
 	{NULL, NULL, NULL}
 };
 
-static INLINE int spl_caching_it_valid(spl_dual_it_object *intern TSRMLS_DC)
+static inline int spl_caching_it_valid(spl_dual_it_object *intern TSRMLS_DC)
 {
 	return intern->u.caching.flags & CIT_VALID ? SUCCESS : FAILURE;
 }
 
-static INLINE int spl_caching_it_has_next(spl_dual_it_object *intern TSRMLS_DC)
+static inline int spl_caching_it_has_next(spl_dual_it_object *intern TSRMLS_DC)
 {
 	return spl_dual_it_valid(intern TSRMLS_CC);
 }
 
-static INLINE void spl_caching_it_next(spl_dual_it_object *intern TSRMLS_DC)
+static inline void spl_caching_it_next(spl_dual_it_object *intern TSRMLS_DC)
 {
 	if (spl_dual_it_fetch(intern, 1 TSRMLS_CC) == SUCCESS) {
 		intern->u.caching.flags |= CIT_VALID;
@@ -1560,7 +1558,7 @@ static INLINE void spl_caching_it_next(spl_dual_it_object *intern TSRMLS_DC)
 	}
 }
 
-static INLINE void spl_caching_it_rewind(spl_dual_it_object *intern TSRMLS_DC)
+static inline void spl_caching_it_rewind(spl_dual_it_object *intern TSRMLS_DC)
 {
 	spl_dual_it_rewind(intern TSRMLS_CC);
 	spl_caching_it_next(intern TSRMLS_CC);
