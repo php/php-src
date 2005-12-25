@@ -811,19 +811,19 @@ PHP_FUNCTION(imagecolormatch)
 	result = gdImageColorMatch(im1, im2);
 	switch (result) {
 		case -1:
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Image1 must be TrueColor" );
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Image1 must be TrueColor" );
 			RETURN_FALSE;
 			break;
 		case -2:
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Image2 must be Palette" );
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Image2 must be Palette" );
 			RETURN_FALSE;
 			break;
 		case -3:
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Image1 and Image2 must be the same size" );
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Image1 and Image2 must be the same size" );
 			RETURN_FALSE;
 			break;
 		case -4:
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Image2 must have at least one color" );
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Image2 must have at least one color" );
 			RETURN_FALSE;
 			break;
 	}
