@@ -1,5 +1,7 @@
 --TEST--
 compress.zlib:// wrapper
+--SKIPIF--
+<?php if (!extension_loaded("zlib")) die("skip"); ?>
 --FILE--
 <?php
 
