@@ -88,9 +88,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int, int);
 int gdImageColorClosestHWB(gdImagePtr im, int r, int g, int b);
 #endif
 
-#ifndef HAVE_GD_DYNAMIC_CTX_EX
 #define gdNewDynamicCtxEx(len, data, val) gdNewDynamicCtx(len, data)
-#endif
 
 /* Section Filters Declarations */
 /* IMPORTANT NOTE FOR NEW FILTER
