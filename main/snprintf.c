@@ -199,8 +199,13 @@ char * ap_php_conv_fp(register char format, register double num,
 				*s++ = '.';
 			}
 		} else {
+			int addz = decimal_point >= NDIG ? decimal_point - NDIG + 1 : 0;
+			decimal_point -= addz;
 			while (decimal_point-- > 0) {
 				*s++ = *p++;
+			}
+			while (addz-- > 0) {
+				*s++ = '0';
 			}
 			if (precision > 0 || add_dp) {
 				*s++ = '.';
@@ -312,19 +317,21 @@ char * ap_php_cvt(double arg, int ndigits, int *decpt, int *sign, int eflag, cha
 	 * Do integer part
 	 */
 	if (fi != 0) {
-		p1 = &buf[NDIG];
 		while (fi != 0) {
 			fj = modf(fi / 10, &fi);
 			if (p1 <= &buf[0]) {
 				mvl = NDIG - ndigits;
-				memmove(&buf[mvl], &buf[0], NDIG-mvl-1);
+				if (ndigits > 0) {
+					memmove(&buf[mvl], &buf[0], NDIG-mvl-1);
+				}
 				p1 += mvl;
 			}
 			*--p1 = (int) ((fj + .03) * 10) + '0';
 			r2++;
 		}
-		while (p1 < &buf[NDIG])
+		while (p1 < &buf[NDIG]) {
 			*p++ = *p1++;
+		}
 	} else if (arg > 0) {
 		while ((fj = arg * 10) < 1) {
 			if (!eflag && (r2 * -1) < ndigits) {
