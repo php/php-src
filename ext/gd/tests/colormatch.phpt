@@ -12,8 +12,10 @@ $im2 = imagecreate(5,5);
 
 imagecolormatch($im, $im2);
 
+echo "ok\n";
+
 imagedestroy($im);
 ?>
 --EXPECTF--
 Warning: imagecolormatch(): Image2 must have at least one color in %s on line %d
-
+ok
