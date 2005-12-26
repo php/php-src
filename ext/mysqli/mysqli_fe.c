@@ -158,22 +158,15 @@ zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_warning_count,						NULL)
 
 	/* Aliases */
-	PHP_FALIAS(mysqli_bind_param,
-				mysqli_stmt_bind_param,					third_arg_force_by_ref_rest)
-	PHP_FALIAS(mysqli_bind_result,
-				mysqli_stmt_bind_result,				second_arg_force_by_ref_rest)
-	PHP_FALIAS(mysqli_client_encoding, 
-			   mysqli_character_set_name,				NULL)
-	PHP_FALIAS(mysqli_escape_string, 
-				mysqli_real_escape_string,				NULL)
-	PHP_FALIAS(mysqli_fetch, mysqli_stmt_fetch,			NULL)
-	PHP_FALIAS(mysqli_param_count,
-				mysqli_stmt_param_count,				NULL)
-	PHP_FALIAS(mysqli_get_metadata,
-				mysqli_stmt_result_metadata,			NULL)
-	PHP_FALIAS(mysqli_send_long_data,
-				mysqli_stmt_send_long_data,				NULL)
-	PHP_FALIAS(mysqli_set_opt, 		mysqli_options, 	NULL)
+	PHP_FALIAS(mysqli_bind_param,		mysqli_stmt_bind_param,		third_arg_force_by_ref_rest)
+	PHP_FALIAS(mysqli_bind_result,		mysqli_stmt_bind_result,	second_arg_force_by_ref_rest)
+	PHP_FALIAS(mysqli_client_encoding,	mysqli_character_set_name,	NULL)
+	PHP_FALIAS(mysqli_escape_string,	mysqli_real_escape_string,	NULL)
+	PHP_FALIAS(mysqli_fetch,			mysqli_stmt_fetch,			NULL)
+	PHP_FALIAS(mysqli_param_count,		mysqli_stmt_param_count,	NULL)
+	PHP_FALIAS(mysqli_get_metadata,		mysqli_stmt_result_metadata,	NULL)
+	PHP_FALIAS(mysqli_send_long_data,	mysqli_stmt_send_long_data,	NULL)
+	PHP_FALIAS(mysqli_set_opt,			mysqli_options,				NULL)
 
 	{NULL, NULL, NULL}	/* Must be the last line in mysqli_functions[] */
 };
