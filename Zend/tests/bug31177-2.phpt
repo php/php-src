@@ -1,5 +1,5 @@
 --TEST--
-Bug #31177 (menory corruption because of incorrect refcounting)
+Bug #31177 (memory corruption because of incorrect refcounting)
 --FILE--
 <?php
 class foo {
