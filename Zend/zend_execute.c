@@ -548,7 +548,7 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
 	
-	if (!object || object->type != IS_OBJECT || (opcode == ZEND_ASSIGN_OBJ && !Z_OBJ_HT_P(object)->write_property)) {
+	if (object->type != IS_OBJECT || (opcode == ZEND_ASSIGN_OBJ && !Z_OBJ_HT_P(object)->write_property)) {
 		zend_error(E_WARNING, "Attempt to assign property of non-object");
 		FREE_OP(free_op2);
 		if (!RETURN_VALUE_UNUSED(result)) {
