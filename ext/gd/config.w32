@@ -32,7 +32,6 @@ if (PHP_GD != "no") {
 			gdtables.c gd_topal.c gd_wbmp.c gdxpm.c wbmp.c xbm.c", "gd");
 		AC_DEFINE('HAVE_LIBGD', 1, 'GD support');
 		ADD_FLAG("CFLAGS_GD", " \
-/D HAVE_GD_DYNAMIC_CTX_EX=1 \
 /D HAVE_GD_BUNDLED=1  \
 /D HAVE_GD_GIF_READ=1  \
 /D HAVE_GD_GIF_CREATE=1  \
