@@ -82,21 +82,7 @@ static void php_free_ps_enc(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int, int);
 #endif
 
-#define USE_GD_IOCTX 1
-
-#ifdef USE_GD_IOCTX
 #include "gd_ctx.c"
-#else
-#define gdImageCreateFromGdCtx      NULL
-#define gdImageCreateFromGd2Ctx     NULL
-#define gdImageCreateFromGd2partCtx NULL
-#define gdImageCreateFromGifCtx     NULL
-#define gdImageCreateFromJpegCtx    NULL
-#define gdImageCreateFromPngCtx     NULL
-#define gdImageCreateFromWBMPCtx    NULL
-typedef FILE gdIOCtx;
-#define CTX_PUTC(c, fp) fputc(c, fp)
-#endif
 
 #if HAVE_COLORCLOSESTHWB
 int gdImageColorClosestHWB(gdImagePtr im, int r, int g, int b);
@@ -1407,17 +1393,13 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		RETURN_FALSE;
 	}
 
-#ifndef USE_GD_IOCTX
-	ioctx_func_p = NULL; /* don't allow sockets without IOCtx */
-#endif
-
 	/* try and avoid allocating a FILE* if the stream is not naturally a FILE* */
 	if (php_stream_is(stream, PHP_STREAM_IS_STDIO))	{
 		if (FAILURE == php_stream_cast(stream, PHP_STREAM_AS_STDIO, (void**)&fp, REPORT_ERRORS)) {
 			goto out_err;
 		}
 	} else if (ioctx_func_p) {
-#ifdef USE_GD_IOCTX
+
 		/* we can create an io context */
 		gdIOCtx* io_ctx;
 		size_t buff_size;
@@ -1447,10 +1429,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 #else
 		io_ctx->free(io_ctx);
 #endif
-
-#endif
-	}
-	else {
+	} else {
 		/* try and force the stream to be FILE* */
 		if (FAILURE == php_stream_cast(stream, PHP_STREAM_AS_STDIO | PHP_STREAM_CAST_TRY_HARD, (void **) &fp, REPORT_ERRORS)) {
 			goto out_err;
@@ -1739,11 +1718,7 @@ PHP_FUNCTION(imagegif)
    Output PNG image to browser or file */
 PHP_FUNCTION(imagepng)
 {
-#ifdef USE_GD_IOCTX
 	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_PNG, "PNG", gdImagePngCtxEx);
-#else
-	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_PNG, "PNG", gdImagePng);
-#endif
 }
 /* }}} */
 #endif /* HAVE_GD_PNG */
@@ -1753,11 +1728,7 @@ PHP_FUNCTION(imagepng)
    Output JPEG image to browser or file */
 PHP_FUNCTION(imagejpeg)
 {
-#ifdef USE_GD_IOCTX
 	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_JPG, "JPEG", gdImageJpegCtx);
-#else
-	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_JPG, "JPEG", gdImageJpeg);
-#endif
 }
 /* }}} */
 #endif /* HAVE_GD_JPG */
@@ -1766,11 +1737,7 @@ PHP_FUNCTION(imagejpeg)
    Output WBMP image to browser or file */
 PHP_FUNCTION(imagewbmp)
 {
-#ifdef USE_GD_IOCTX
 	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WBM, "WBMP", gdImageWBMPCtx);
-#else
-	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WBM, "WBMP", gdImageWBMP);
-#endif
 }
 /* }}} */
 
@@ -3623,12 +3590,7 @@ static void _php_image_bw_convert(gdImagePtr im_org, gdIOCtx *out, int threshold
 			gdImageSetPixel (im_dest, x, y, color);
 		}
 	}
-#ifdef USE_GD_IOCTX
 	gdImageWBMPCtx (im_dest, black, out);
-#else
-	gdImageWBMP (im_dest, black, out);
-#endif
-
 }
 /* }}} */
 

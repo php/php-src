@@ -49,7 +49,6 @@ if (PHP_GD != "no") {
 /D HAVE_LIBJPEG  \
 /D HAVE_LIBPNG  \
 /D USE_GD_IMGSTRTTF  \
-/D USE_GD_IOCTX \
 /D MSWIN32 \
 		");
 		} else {
