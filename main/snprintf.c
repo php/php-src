@@ -158,7 +158,7 @@ char * ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
 /* If you change this value then also change bug24640.phpt.
  * Also NDIG must be reasonable smaller than NUM_BUF_SIZE.
  */
-#define	NDIG	80
+#define	NDIG	320
 
 
 /*
