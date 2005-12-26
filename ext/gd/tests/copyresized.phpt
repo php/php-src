@@ -1,8 +1,8 @@
 --TEST--
-imagecopy
+imagecopyresized
 --SKIPIF--
 <?php
-        if (!function_exists('imagecopy')) die("skip gd extension not available\n");
+        if (!function_exists('imagecopyresized')) die("skip gd extension not available\n");
 ?>
 --FILE--
 <?php
