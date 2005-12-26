@@ -26,6 +26,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #33201 (Crash when fetching some data types). (Frank)
 - Fixed bug #30760 (Remove MessageBox on win32 for E_CORE errors if 
   display_startup_error is off). (Ilia)
+- Fixed bug #27678 (number_format() crashes with large numbers). (Marcus)
 
 18 Nov 2005, Version 4.4.2RC1
 - Added missing safe_mode/open_basedir checks into cURL extension. (Ilia)
