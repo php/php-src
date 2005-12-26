@@ -95,12 +95,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 		ctx = emalloc(sizeof(gdIOCtx));
 		ctx->putC = _php_image_output_putc;
 		ctx->putBuf = _php_image_output_putbuf;
-#if HAVE_LIBGD204
 		ctx->gd_free = _php_image_output_ctxfree;
-#else
-		ctx->free = _php_image_output_ctxfree;
-#endif
-
 	}
 
 	switch(image_type) {
@@ -131,11 +126,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 			break;
 	}
 
-#if HAVE_LIBGD204
 	ctx->gd_free(ctx);
-#else
-	ctx->free(ctx);
-#endif
 
 	if(fp) {
 		fflush(fp);

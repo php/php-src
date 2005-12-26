@@ -1242,18 +1242,10 @@ static int _php_image_type (char data[8])
 		io_ctx = gdNewDynamicCtxEx(8, data, 0);
 		if (io_ctx) {
 			if (getmbi((int(*)(void *)) gdGetC, io_ctx) == 0 && skipheader((int(*)(void *)) gdGetC, io_ctx) == 0 ) {
-#if HAVE_LIBGD204
 				io_ctx->gd_free(io_ctx);
-#else
-				io_ctx->free(io_ctx);
-#endif
 				return PHP_GDIMG_TYPE_WBM;
 			} else {
-#if HAVE_LIBGD204
 				io_ctx->gd_free(io_ctx);
-#else
-				io_ctx->free(io_ctx);
-#endif
 			}
 		}
 	}
@@ -1280,11 +1272,7 @@ gdImagePtr _php_image_create_from_string(zval **data, char *tn, gdImagePtr (*ioc
 		return NULL;
 	}
 
-#if HAVE_LIBGD204
 	io_ctx->gd_free(io_ctx);
-#else
-	io_ctx->free(io_ctx);
-#endif
 
 	return im;
 }
@@ -1424,11 +1412,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		} else {
 			im = (*ioctx_func_p)(io_ctx);
 		}
-#if HAVE_LIBGD204
 		io_ctx->gd_free(io_ctx);
-#else
-		io_ctx->free(io_ctx);
-#endif
 	} else {
 		/* try and force the stream to be FILE* */
 		if (FAILURE == php_stream_cast(stream, PHP_STREAM_AS_STDIO | PHP_STREAM_CAST_TRY_HARD, (void **) &fp, REPORT_ERRORS)) {
