@@ -1,8 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jan 2006, PHP 5.1.2RC2
-- Fixed small leak in mysqli_stmt_fetch() when bound variable was empty
-  string. (Andrey)
+- Added constants for libxslt and libexslt versions: LIBXSLT_VERSION,
+  LIBXSLT_DOTTED_VERSION, LIBEXSLT_VERSION and LIBEXSLT_DOTTED_VERSION. (Pierre)
+- Changed errors to warnings in imagecolormatch(). (Pierre)
+- Fixed small leak in mysqli_stmt_fetch() when bound variable was empty string.
+  (Andrey)
 - Fixed bug #35781 (stream_filter_append() can cause segfault). (Tony)
 - Fixed bug #35759 (mysqli_stmt_bind_result() makes huge allocation when
   column empty). (Andrey)
@@ -10,11 +13,8 @@ PHP                                                                        NEWS
   "mbstring.func_overload" is enabled). (Rui)
 - Fixed bug #29955 (mb_strtoupper() / lower() broken with Turkish encoding).
   (Rui)
-- Fixed segfault/leak in imagecolormatch (Pierre)
-- Raise warnings instead of errors in imagecolormatch (Pierre)
-- add constants to determine the libxslt and libexslt version
-  LIBXSLT_VERSION, LIBXSLT_DOTTED_VERSION, LIBEXSLT_VERSION
-  LIBEXSLT_DOTTED_VERSION (Pierre)
+- Fixed segfault/leak in imagecolormatch(). (Pierre)
+
 22 Dec 2005, PHP 5.1.2RC1
 - Updated libsqlite in ext/sqlite to 2.8.17. (Ilia)
 - Updated libsqlite in ext/pdo_sqlite to 3.2.8. (Ilia)
