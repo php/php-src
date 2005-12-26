@@ -111,8 +111,7 @@
  * which is a pointer to the END of the buffer + 1 (i.e. if the buffer
  * is declared as buf[ 100 ], buf_end should be &buf[ 100 ])
  */
-char *
-ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
+char * ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
 	   register bool_int * is_negative, char *buf_end, register int *len)
 {
 	register char *p = buf_end;
@@ -157,6 +156,7 @@ ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
 }
 
 /* If you change this value then also change bug24640.phpt.
+ * Also NDIG must be reasonable smaller than NUM_BUF_SIZE.
  */
 #define	NDIG	80
 
@@ -167,8 +167,7 @@ ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
  * The sign is returned in the is_negative argument (and is not placed
  * in buf).
  */
-char *
- ap_php_conv_fp(register char format, register double num,
+char * ap_php_conv_fp(register char format, register double num,
 		 boolean_e add_dp, int precision, bool_int * is_negative, char *buf, int *len)
 {
 	register char *s = buf;
@@ -201,8 +200,13 @@ char *
 				*s++ = '.';
 			}
 		} else {
+			int addz = decimal_point >= NDIG ? decimal_point - NDIG + 1 : 0;
+			decimal_point -= addz;
 			while (decimal_point-- > 0) {
 				*s++ = *p++;
+			}
+			while (addz-- > 0) {
+				*s++ = '0';
 			}
 			if (precision > 0 || add_dp) {
 				*s++ = '.';
@@ -260,8 +264,7 @@ char *
  * which is a pointer to the END of the buffer + 1 (i.e. if the buffer
  * is declared as buf[ 100 ], buf_end should be &buf[ 100 ])
  */
-char *
- ap_php_conv_p2(register u_wide_int num, register int nbits,
+char * ap_php_conv_p2(register u_wide_int num, register int nbits,
 		 char format, char *buf_end, register int *len)
 {
 	register int mask = (1 << nbits) - 1;
@@ -293,8 +296,7 @@ char *
  */
 
 
-char *
-ap_php_cvt(double arg, int ndigits, int *decpt, int *sign, int eflag, char *buf)
+char * ap_php_cvt(double arg, int ndigits, int *decpt, int *sign, int eflag, char *buf)
 {
 	register int r2;
 	int mvl;
@@ -316,19 +318,21 @@ ap_php_cvt(double arg, int ndigits, int *decpt, int *sign, int eflag, char *buf)
 	 * Do integer part
 	 */
 	if (fi != 0) {
-		p1 = &buf[NDIG];
 		while (fi != 0) {
 			fj = modf(fi / 10, &fi);
 			if (p1 <= &buf[0]) {
 				mvl = NDIG - ndigits;
-				memmove(&buf[mvl], &buf[0], NDIG-mvl-1);
+				if (ndigits > 0) {
+					memmove(&buf[mvl], &buf[0], NDIG-mvl-1);
+				}
 				p1 += mvl;
 			}
 			*--p1 = (int) ((fj + .03) * 10) + '0';
 			r2++;
 		}
-		while (p1 < &buf[NDIG])
+		while (p1 < &buf[NDIG]) {
 			*p++ = *p1++;
+		}
 	} else if (arg > 0) {
 		while ((fj = arg * 10) < 1) {
 			if (!eflag && (r2 * -1) < ndigits) {
@@ -382,14 +386,12 @@ ap_php_cvt(double arg, int ndigits, int *decpt, int *sign, int eflag, char *buf)
 	return (buf);
 }
 
-char *
-ap_php_ecvt(double arg, int ndigits, int *decpt, int *sign, char *buf)
+char * ap_php_ecvt(double arg, int ndigits, int *decpt, int *sign, char *buf)
 {
 	return (ap_php_cvt(arg, ndigits, decpt, sign, 1, buf));
 }
 
-char *
-ap_php_fcvt(double arg, int ndigits, int *decpt, int *sign, char *buf)
+char * ap_php_fcvt(double arg, int ndigits, int *decpt, int *sign, char *buf)
 {
 	return (ap_php_cvt(arg, ndigits, decpt, sign, 0, buf));
 }
@@ -399,8 +401,7 @@ ap_php_fcvt(double arg, int ndigits, int *decpt, int *sign, char *buf)
  * minimal length string
  */
 
-char *
-ap_php_gcvt(double number, int ndigit, char *buf, boolean_e altform)
+char * ap_php_gcvt(double number, int ndigit, char *buf, boolean_e altform)
 {
 	int sign, decpt;
 	register char *p1, *p2;
