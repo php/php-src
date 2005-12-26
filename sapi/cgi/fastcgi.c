@@ -18,7 +18,6 @@
 
 /* $Id$ */
 
-#include "php_config.h"
 #include "fastcgi.h"
 
 #include <string.h>
@@ -73,6 +72,7 @@
 
 #else
 
+# include "php_config.h"
 # include <sys/types.h>
 # include <sys/stat.h>
 # include <unistd.h>
