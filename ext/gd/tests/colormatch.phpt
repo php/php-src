@@ -17,5 +17,5 @@ echo "ok\n";
 imagedestroy($im);
 ?>
 --EXPECTF--
-Fatal error: imagecolormatch(): Image2 must have at least one color in %s on line %d
-
+Warning: imagecolormatch(): Image2 must have at least one color in %s on line %d
+ok
