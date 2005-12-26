@@ -124,6 +124,7 @@ PHP                                                                        NEWS
   greater then 255 characters). (Nuno,Ilia)
 - Fixed bug #30760 (Remove MessageBox on win32 for E_CORE errors if 
   display_startup_error is off). (Ilia)
+- Fixed bug #27678 (number_format() crashes with large numbers). (Marcus)
 
 28 Nov 2005, PHP 5.1.1
 - Disabled native date class to prevent pear::date conflict. (Ilia)
