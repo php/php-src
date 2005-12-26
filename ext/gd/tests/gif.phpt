@@ -6,7 +6,7 @@ gif in/out
 	if (!extension_loaded('gd')) {
 		die("skip gd extension not available.");
 	}
-	if (!function_exists("imagegif") || !function_exists("imagecreatefromgif")) {
+	if (!function_exists("imagegif") || !function_exists("imagecreatefromgif") || !function_exists('imagecreatefromjpeg')) {
 		die("skip gif support unavailable");
 	}
 ?>
