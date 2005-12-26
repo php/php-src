@@ -3,7 +3,6 @@ PHP                                                                        NEWS
 ?? Jan 2006, PHP 5.1.2RC2
 - Fixed small leak in mysqli_stmt_fetch() when bound variable was empty
   string. (Andrey)
-- Fixed bug #35785 (SimpleXML causes memory read error zend engine). (Marcus)
 - Fixed bug #35781 (stream_filter_append() can cause segfault). (Tony)
 - Fixed bug #35759 (mysqli_stmt_bind_result() makes huge allocation when
   column empty). (Andrey)
