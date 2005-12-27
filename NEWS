@@ -7,6 +7,8 @@ PHP                                                                        NEWS
 - Fixed segfault/leak in imagecolormatch(). (Pierre)
 - Fixed small leak in mysqli_stmt_fetch() when bound variable was empty string.
   (Andrey)
+- Fixed bug #35821 (array_map() segfaults when exception is throwed from 
+  the callback). (Tony)
 - Fixed bug #35781 (stream_filter_append() can cause segfault). (Tony)
 - Fixed bug #35759 (mysqli_stmt_bind_result() makes huge allocation when
   column empty). (Andrey)
