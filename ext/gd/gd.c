@@ -3235,20 +3235,12 @@ PHP_FUNCTION(imagepstext)
 	ZEND_FETCH_RESOURCE(f_ind, int *, &fnt, -1, "Type 1 font", le_ps_font);
 
 	/* Ensure that the provided colors are valid */
-#if HAVE_LIBGD20
 	if (_fg < 0 || (!gdImageTrueColor(bg_img) && _fg > gdImageColorsTotal(bg_img))) {
-#else
-	if (_fg < 0 || _fg > gdImageColorsTotal(bg_img)) {
-#endif
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Foreground color index %ld out of range", _fg);
 		RETURN_FALSE;
 	}
 
-#if HAVE_LIBGD20
 	if (_bg < 0 || (!gdImageTrueColor(bg_img) && _fg > gdImageColorsTotal(bg_img))) {
-#else
-	if (_bg < 0 || _bg > gdImageColorsTotal(bg_img)) {
-#endif
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Background color index %ld out of range", _bg);
 		RETURN_FALSE;
 	}
@@ -3256,27 +3248,19 @@ PHP_FUNCTION(imagepstext)
 	fg_rd = gdImageRed  (bg_img, _fg);
 	fg_gr = gdImageGreen(bg_img, _fg);
 	fg_bl = gdImageBlue (bg_img, _fg);
-#if HAVE_LIBGD20
 	fg_al = gdImageAlpha(bg_img, _fg);
-#endif
 
 	bg_rd = gdImageRed  (bg_img, _bg);
 	bg_gr = gdImageGreen(bg_img, _bg);
 	bg_bl = gdImageBlue (bg_img, _bg);
-#if HAVE_LIBGD20
 	bg_al = gdImageAlpha(bg_img, _bg);
-#endif
 
 	for (i = 0; i < aa_steps; i++) {
 		rd = bg_rd + (double) (fg_rd - bg_rd) / aa_steps * (i + 1);
 		gr = bg_gr + (double) (fg_gr - bg_gr) / aa_steps * (i + 1);
 		bl = bg_bl + (double) (fg_bl - bg_bl) / aa_steps * (i + 1);
-#if HAVE_LIBGD20
 		al = bg_al + (double) (fg_al - bg_al) / aa_steps * (i + 1);
 		aa[i] = gdImageColorResolveAlpha(bg_img, rd, gr, bl, al);
-#else
-		aa[i] = gdImageColorResolve(bg_img, rd, gr, bl);
-#endif
 	}
 
 	T1_AASetBitsPerPixel(8);
@@ -3521,11 +3505,9 @@ static void _php_image_bw_convert(gdImagePtr im_org, gdIOCtx *out, int threshold
 		return;
 	}
 
-#if HAVE_LIBGD20
 	if (im_org->trueColor) {
 		gdImageTrueColorToPalette(im_org, 1, 256);
 	}
-#endif
 
 	for (y = 0; y < dest_height; y++) {
 		for (x = 0; x < dest_width; x++) {
