@@ -786,7 +786,6 @@
 	{ "est",   0, -18000, "America/Thunder_Bay"           },
 	{ "est",   0, -18000, "America/Toronto"               },
 	{ "est",   0, -18000, "Canada/Eastern"                },
-	{ "est",   0, -18000, "CST6CDT"                       },
 	{ "est",   0, -18000, "EST"                           },
 	{ "est",   0, -18000, "EST5EDT"                       },
 	{ "est",   0, -18000, "Jamaica"                       },
