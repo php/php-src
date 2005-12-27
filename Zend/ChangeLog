@@ -1,3 +1,18 @@
+2005-12-26  Antony Dovgal  <antony@zend.com>
+
+    * tests/bug31177-2.phpt:
+      MFB: typofix
+
+    * (PHP_5_1)
+      tests/bug31177-2.phpt:
+      typofix
+
+2005-12-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.c
+      zend_execute.c:
+      Reverted invalid fix for bug #35785
+
 2005-12-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
