@@ -4603,7 +4603,7 @@ PHP_FUNCTION(array_map)
 			fci.params = &params[1];
 			fci.no_separation = 0;
 
-			if (!zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && result) {
+			if (!zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS || !result) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred while invoking the map callback");
 				efree(array_len);
 				efree(args);
