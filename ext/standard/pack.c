@@ -245,7 +245,7 @@ PHP_FUNCTION(pack)
 		switch ((int) code) {
 			case 'h': 
 			case 'H': 
-				INC_OUTPUTPOS((arg + 1) / 2,1)	/* 4 bit per arg */
+				INC_OUTPUTPOS((arg + (arg % 2)) / 2,1)	/* 4 bit per arg */
 				break;
 
 			case 'a': 
@@ -538,7 +538,7 @@ PHP_FUNCTION(unpack)
 	while (formatlen-- > 0) {
 		char type = *(format++);
 		char c;
-		int arg = 1;
+		int arg = 1, argb;
 		char *name;
 		int namelen;
 		int size=0;
@@ -563,6 +563,7 @@ PHP_FUNCTION(unpack)
 
 		/* Get of new value in array */
 		name = format;
+		argb = arg;
 
 		while (formatlen > 0 && *format != '/') {
 			formatlen--;
@@ -592,7 +593,7 @@ PHP_FUNCTION(unpack)
 
 			case 'h': 
 			case 'H': 
-				size = (arg > 0) ? arg / 2 : arg;
+				size = (arg > 0) ? (arg + (arg % 2)) / 2 : arg;
 				arg = 1;
 				break;
 
@@ -690,6 +691,8 @@ PHP_FUNCTION(unpack)
 						if (size >= 0 && len > (size * 2)) {
 							len = size * 2;
 						} 
+
+						len -= argb % 2;
 
 						buf = emalloc(len + 1);
 
