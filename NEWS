@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   (Andrey)
 - Fixed bug #35821 (array_map() segfaults when exception is throwed from 
   the callback). (Tony)
+- Fixed bug #35817 (unpack() does not decode odd number of hexadecimal values).
+  (Ilia)
 - Fixed bug #35781 (stream_filter_append() can cause segfault). (Tony)
 - Fixed bug #35759 (mysqli_stmt_bind_result() makes huge allocation when
   column empty). (Andrey)
