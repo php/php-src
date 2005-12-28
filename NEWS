@@ -3,6 +3,8 @@ PHP 4                                                                      NEWS
 ?? ??? 2005, Version 4.4.2
 - Prevent header injection by limiting each header to a single line. (Ilia)
 - Fixed possible XSS inside error reporting functionality. (Ilia)
+- Fixed bug #35817 (unpack() does not decode odd number of hexadecimal values).
+  (Ilia)
 - Fixed bug #35735 ($EGREP not defined in configure). (Jani)
 - Fixed bug #35655 (whitespace following end of heredoc is lost). (Ilia)
 - Fixed bug #35646 (%{mod_php_memory_usage}n is not reset after exit). 
