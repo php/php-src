@@ -1,3 +1,50 @@
+2005-12-27  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/array.c
+      ext/standard/array.c:
+      tweak the fix
+
+    * ext/standard/tests/array/bug35821.phpt:
+      add test for #35821
+
+    * ext/standard/array.c:
+      MF51: fix #35821 (array_map() segfaults when exception is throwed from the
+      callback)
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/array.c
+      ext/standard/tests/array/bug35821.phpt
+      ext/standard/tests/array/bug35821.phpt:
+      fix #35821 (array_map() segfaults when exception is throwed from the
+      callback)
+
+2005-12-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/openssl/tests/001.phpt
+      ext/openssl/tests/bug25614.phpt
+      ext/openssl/tests/skipif.inc:
+      MFB51: Improve "skip" checks
+
+    * (PHP_5_1)
+      ext/openssl/tests/001.phpt
+      ext/openssl/tests/bug25614.phpt
+      ext/openssl/tests/skipif.inc:
+      Improve "skip" checks
+
+2005-12-27  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/config.m4
+      ext/gd/config.w32
+      ext/gd/gd.c
+      ext/gd/gd.dsp
+      ext/gd/php_gd.h:
+      - remove HAVE_LIBGD20, we support only 2.0+ now
+        (some were removed by my previous commit)
+
+    * ext/gd/gd.c:
+      - silent compile warning introduced by previous commit
+
 2005-12-26  Antony Dovgal  <antony@zend.com>
 
     * ZendEngine2/tests/bug31177-2.phpt:
