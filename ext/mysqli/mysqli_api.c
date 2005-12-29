@@ -299,6 +299,7 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 				bind[ofs].buffer_type = MYSQL_TYPE_LONG;
 				bind[ofs].buffer = stmt->result.buf[ofs].val;
 				bind[ofs].is_null = &stmt->result.is_null[ofs];
+				bind[ofs].is_unsigned = (stmt->stmt->fields[ofs].flags & UNSIGNED_FLAG) ? 1 : 0;
 				break;
 
 			case MYSQL_TYPE_LONGLONG:
@@ -309,6 +310,7 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 				bind[ofs].buffer = stmt->result.buf[ofs].val;
 				bind[ofs].is_null = &stmt->result.is_null[ofs];
 				bind[ofs].buffer_length = stmt->result.buf[ofs].buflen;
+				bind[ofs].is_unsigned = (stmt->stmt->fields[ofs].flags & UNSIGNED_FLAG) ? 1 : 0;
 				break;
 
 			case MYSQL_TYPE_DATE:
@@ -721,6 +723,13 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 
 	switch (ret) {
 		case 0:
+#ifdef MYSQL_DATA_TRUNCATED
+		/* according to SQL standard truncation (e.g. loss of precision is
+		   not an error) - for detecting possible truncation you have to 
+		   check mysqli_stmt_warning
+		*/
+		case MYSQL_DATA_TRUNCATED:
+#endif
 			RETURN_TRUE;
 		break;
 		case 1:
