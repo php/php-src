@@ -14,6 +14,7 @@ PHP                                                                        NEWS
 - Fixed bug #35781 (stream_filter_append() can cause segfault). (Tony)
 - Fixed bug #35759 (mysqli_stmt_bind_result() makes huge allocation when
   column empty). (Andrey)
+- Fixed bug #35517 (mysql_stmt_fetch returns NULL on data truncation). (Georg)
 - Fixed bug #29955 (mb_strtoupper() / lower() broken with Turkish encoding).
   (Rui)
 - Fixed bug #28899 (mb_substr() and substr() behave differently when
