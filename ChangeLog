@@ -1,3 +1,29 @@
+2005-12-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      ext/standard/pack.c
+      ext/standard/tests/strings/bug35817.phpt:
+      MFH: Fixed bug #35817 (unpack() does not decode odd number of hexadecimal
+      values)
+
+    * ext/standard/pack.c
+      ext/standard/tests/strings/bug35817.phpt
+      ext/standard/tests/strings/bug35817.phpt:
+      MFB51: Fixed bug #35817 (unpack() does not decode odd number of hexadecimal
+       values)
+
+    * ext/standard/tests/strings/bug35817.phpt
+      ext/standard/tests/strings/bug35817.phpt:
+      
+      file bug35817.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/pack.c:
+      Fixed bug #35817 (unpack() does not decode odd number of hexadecimal
+      values)
+
 2005-12-27  Antony Dovgal  <antony@zend.com>
 
     * ext/standard/array.c
