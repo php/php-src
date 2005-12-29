@@ -85,7 +85,7 @@ if test "$PHP_SAPI" = "default"; then
     PHP_TEST_WRITE_STDOUT
 
     INSTALL_IT="@echo \"Installing PHP CGI into: \$(INSTALL_ROOT)\$(bindir)/\"; \$(INSTALL) -m 0755 \$(SAPI_CGI_PATH) \$(INSTALL_ROOT)\$(bindir)/\$(program_prefix)php\$(program_suffix)\$(EXEEXT)"
-    PHP_SELECT_SAPI(cgi, program, fastcgi.c cgi_main.c getopt.c, '', '$(SAPI_CGI_PATH)')
+    PHP_SELECT_SAPI(cgi, program, fastcgi.c cgi_main.c getopt.c, , '$(SAPI_CGI_PATH)')
 
     case $host_alias in
       *aix*)
