@@ -1029,6 +1029,22 @@ void gdImageLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 		return;
 	}
 
+	/* Vertical */
+	if (x1==x2) {
+		for (;y1 <= y2; y1++) {
+			gdImageSetPixel(im, x1,y1, color);
+		}
+		return;
+	}
+
+	/* Horizontal */
+	if (y1==y2) {
+		for (;x1 <= x2; x1++) {
+			gdImageSetPixel(im, x1,y1, color);
+		}
+		return;
+	}
+
 	/* gdAntiAliased passed as color: set anti-aliased line (AAL) global vars. */
 	if (color == gdAntiAliased) {
 		im->AAL_x1 = x1;
