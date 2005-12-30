@@ -197,7 +197,7 @@ implicit_flush = Off
 
 ; The unserialize callback function will be called (with the undefined class'
 ; name as parameter), if the unserializer finds an undefined class
-; which should be instanciated.
+; which should be instantiated.
 ; A warning appears if the specified function is not defined, or if the
 ; function doesn't include/implement the missing class.
 ; So only set this entry, if you really want to implement such a
