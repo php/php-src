@@ -1555,7 +1555,7 @@ php_mbstr_encoding_handler(const php_mb_encoding_handler_info_t *info, zval *arg
 		from_encoding = mbfl_no_encoding_invalid;
 		identd = mbfl_encoding_detector_new(
 				(enum mbfl_no_encoding *)info->from_encodings,
-				info->num_from_encodings);
+				info->num_from_encodings, 0);
 		if (identd) {
 			n = 0;
 			while (n < num) {
@@ -1902,7 +1902,7 @@ PHP_FUNCTION(mb_parse_str)
 	} else {
 		/* auto detect */
 		from_encoding = mbfl_no_encoding_invalid;
-		identd = mbfl_encoding_detector_new(elist, elistsz);
+		identd = mbfl_encoding_detector_new(elist, elistsz, 0);
 		if (identd != NULL) {
 			n = 0;
 			while (n < num) {
@@ -2404,6 +2404,11 @@ PHP_FUNCTION(mb_substr)
 		}
 	}
 
+	if (((MBSTRG(func_overload) & MB_OVERLOAD_STRING) == MB_OVERLOAD_STRING)
+		&& (from >= mbfl_strlen(&string))) {
+		RETURN_FALSE;
+	}
+
 	ret = mbfl_substr(&string, &result, from, len);
 	if (ret != NULL) {
 		RETVAL_STRINGL((char *)ret->val, ret->len, 0);		/* the string is already strdup()'ed */
@@ -2663,7 +2668,7 @@ MBSTRING_API char * php_mb_convert_encoding(char *input, size_t length, char *_t
 			string.no_encoding = from_encoding;
 		} else if (size > 1) {
 			/* auto detect */
-			from_encoding = mbfl_identify_encoding_no(&string, list, size);
+			from_encoding = mbfl_identify_encoding_no(&string, list, size, 0);
 			if (from_encoding != mbfl_no_encoding_invalid) {
 				string.no_encoding = from_encoding;
 			} else {
@@ -3209,7 +3214,7 @@ PHP_FUNCTION(mb_convert_variables)
 		stack = (pval ***)safe_emalloc(stack_max, sizeof(pval **), 0);
 		if (stack != NULL) {
 			stack_level = 0;
-			identd = mbfl_encoding_detector_new(elist, elistsz);
+			identd = mbfl_encoding_detector_new(elist, elistsz, 0);
 			if (identd != NULL) {
 				n = 2;
 				while (n < argc || stack_level > 0) {
@@ -3573,7 +3578,7 @@ we use the
 		orig_str.no_encoding = MBSTRG(current_internal_encoding);
 		if (orig_str.no_encoding == mbfl_no_encoding_invalid
 		    || orig_str.no_encoding == mbfl_no_encoding_pass) {
-			orig_str.no_encoding = mbfl_identify_encoding_no(&orig_str, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size));
+			orig_str.no_encoding = mbfl_identify_encoding_no(&orig_str, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size), 0);
 		}
 		pstr = mbfl_mime_header_encode(&orig_str, &conv_str, tran_cs, head_enc, "\n", sizeof("Subject: [PHP-jp nnnnnnnn]"));
 		if (pstr != NULL) {
@@ -3596,7 +3601,7 @@ we use the
 
 		if (orig_str.no_encoding == mbfl_no_encoding_invalid
 		    || orig_str.no_encoding == mbfl_no_encoding_pass) {
-			orig_str.no_encoding = mbfl_identify_encoding_no(&orig_str, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size));
+			orig_str.no_encoding = mbfl_identify_encoding_no(&orig_str, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size), 0);
 		}
 
 		pstr = NULL;
@@ -3959,7 +3964,7 @@ MBSTRING_API int php_mb_gpc_encoding_detector(char **arg_string, int *arg_length
 	mbfl_string_init(&string);
 	string.no_language = MBSTRG(current_language);
 
-	identd = mbfl_encoding_detector_new(elist, size);
+	identd = mbfl_encoding_detector_new(elist, size, 0);
 
 	if (identd) {
 		int n = 0;

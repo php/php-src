@@ -5,28 +5,6 @@
 # Description: a script to generate east asian width table.
 #
 
-function conv(str) {
-	if (!match(str, "^0[xX]")) {
-		return 0 + str
-	}
-
-	retval = 0
-
-	for (i = 3; i <= length(str); i++) {
-		n = index("0123456789abcdefABCDEF", substr(str, i, 1)) - 1
-
-		if (n < 0) {
-			return 0 + str;
-		} else if (n >= 16) {
-			n -= 6;
-		}
-
-		retval = retval * 16 + n
-	}
-
-	return retval
-}
-
 BEGIN {
 	prev = -1
 	comma = 0
@@ -40,7 +18,7 @@ BEGIN {
 
 /^[0-9a-fA-F]+;/ {
 	if ($2 == "W" || $2 == "F") {
-		v = conv("0x" $1)
+		v = ( "0x" $1 ) + 0
 		if (prev < 0) {
 			first = v
 		} else if (v - prev > 1) {
@@ -66,8 +44,8 @@ BEGIN {
 
 /^[0-9a-fA-F]+\.\./ {
 	if ($4 == "W" || $4 == "F") {
-		vs = conv("0x" $1)
-		ve = conv("0x" $3)
+		vs = ( "0x" $1 ) + 0
+		ve = ( "0x" $3 ) + 0
 		if (prev < 0) {
 			first = vs
 		} else if (vs - prev > 1) {

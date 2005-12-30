@@ -243,6 +243,10 @@ SOURCE=.\filters\mbfilter_koi8r.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\filters\mbfilter_armscii8.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\mbfl\mbfilter_pass.c
 # End Source File
 # Begin Source File
@@ -336,6 +340,10 @@ SOURCE=.\nls\nls_en.c
 # Begin Source File
 
 SOURCE=.\nls\nls_ja.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\nls\nls_hy.c
 # End Source File
 # Begin Source File
 
@@ -548,6 +556,10 @@ SOURCE=.\filters\mbfilter_koi8r.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\filters\mbfilter_armscii8.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\mbfl\mbfilter_pass.h
 # End Source File
 # Begin Source File
@@ -645,6 +657,10 @@ SOURCE=.\nls\nls_en.h
 # Begin Source File
 
 SOURCE=.\nls\nls_ja.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\nls\nls_hy.h
 # End Source File
 # Begin Source File
 
@@ -757,6 +773,10 @@ SOURCE=.\filters\unicode_table_jis.h
 # Begin Source File
 
 SOURCE=.\filters\unicode_table_koi8r.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\filters\unicode_table_armscii8.h
 # End Source File
 # Begin Source File
 
