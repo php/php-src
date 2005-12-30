@@ -984,16 +984,16 @@ TEST $file
 
 	$tested = trim($section_text['TEST']);
 
- 	/* For GET/POST tests, check if cgi sapi is available and if it is, use it. */
- 	if ((!empty($section_text['GET']) || !empty($section_text['POST']))) {
- 		if (file_exists("./sapi/cgi/php")) {
- 			$old_php = $php;
- 			$php = realpath("./sapi/cgi/php") . ' -C ';
- 		} else {
+	/* For GET/POST tests, check if cgi sapi is available and if it is, use it. */
+	if ((!empty($section_text['GET']) || !empty($section_text['POST']))) {
+		if (file_exists("./sapi/cgi/php")) {
+			$old_php = $php;
+			$php = realpath("./sapi/cgi/php") . ' -C ';
+		} else {
 			show_result("SKIP", $tested, $tested_file, "reason: CGI not available");
- 			return 'SKIPPED';
- 		}
- 	}
+			return 'SKIPPED';
+		}
+	}
 
 	show_test($test_idx, $shortname);
 
@@ -1322,7 +1322,7 @@ COMMAND $cmd
 				$php = $old_php;
 			}
 			if (!$leaked) {
-			    show_result("PASS", $tested, $tested_file, '', $temp_filenames);
+				show_result("PASS", $tested, $tested_file, '', $temp_filenames);
 				return 'PASSED';
 			}
 		}
