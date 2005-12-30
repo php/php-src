@@ -1019,6 +1019,7 @@ void gdImageAABlend (gdImagePtr im)
 /* Bresenham as presented in Foley & Van Dam */
 void gdImageLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 {
+	int t;
 	int dx, dy, incr1, incr2, d, x, y, xend, yend, xdirflag, ydirflag;
 	int wid;
 	int w, wstart;
@@ -1031,6 +1032,12 @@ void gdImageLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 
 	/* Vertical */
 	if (x1==x2) {
+		if (y2 < y1) {
+			t = y2;
+			y2 = y1;
+			y1 = t;
+		}
+
 		for (;y1 <= y2; y1++) {
 			gdImageSetPixel(im, x1,y1, color);
 		}
@@ -1039,6 +1046,12 @@ void gdImageLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 
 	/* Horizontal */
 	if (y1==y2) {
+		if (x2 < x1) {
+			t = x2;
+			x2 = x1;
+			x1 = t;
+		}
+
 		for (;x1 <= x2; x1++) {
 			gdImageSetPixel(im, x1,y1, color);
 		}
