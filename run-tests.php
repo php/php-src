@@ -33,7 +33,7 @@
 
 /*
  * TODO:
- * - do not test PEAR components if base class and/or component class cannot be instanciated
+ * - do not test PEAR components if base class and/or component class cannot be instantiated
  */
 
 
