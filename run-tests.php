@@ -109,18 +109,20 @@ if (getenv('TEST_PHP_EXECUTABLE')) {
 	}
 }
 
-if (empty($php) || !file_exists($php)) {
-	error("environment variable TEST_PHP_EXECUTABLE must be set to specify PHP executable!");
+if ($argc !=2 || ($argv[1] != '-h' && $argv[1] != '-help' && $argv != '--help'))
+{
+	if (empty($php) || !file_exists($php)) {
+		error("environment variable TEST_PHP_EXECUTABLE must be set to specify PHP executable!");
+	}
+	if (function_exists('is_executable') && !@is_executable($php)) {
+		error("invalid PHP executable specified by TEST_PHP_EXECUTABLE  = " . $php);
+	}
 }
 
 if (getenv('TEST_PHP_LOG_FORMAT')) {
 	$log_format = strtoupper(getenv('TEST_PHP_LOG_FORMAT'));
 } else {
 	$log_format = 'LEOD';
-}
-
-if (function_exists('is_executable') && !@is_executable($php)) {
-	error("invalid PHP executable specified by TEST_PHP_EXECUTABLE  = " . $php);
 }
 
 // Check whether a detailed log is wanted.
