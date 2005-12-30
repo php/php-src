@@ -1,3 +1,48 @@
+2005-12-29  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbstring.c:
+      added Turkish language definition (related to bug #29955)
+
+2005-12-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/gd.c:
+      MFB51: Not a fatal error.
+
+    * (PHP_5_1)
+      ext/gd/gd.c:
+      Not a fatal error.
+
+2005-12-29  Antony Dovgal  <antony@zend.com>
+
+    * sapi/cgi/config9.m4:
+      fix CGI build (patch by Pierangelo Masarati)
+
+2005-12-29  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_1)
+      NEWS:
+      - Fixed bug #35751 (using date with a timestamp makes httpd segfault).
+
+2005-12-29  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_1)
+      NEWS
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/tests/bug35517.phpt
+      ext/mysqli/tests/bug35517.phpt:
+      Fix for bug #35517:
+      	added missing unsigned flag for result buffer
+      	fixed returncode in mysql_stmt_fetch for data truncation
+
+2005-12-29  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_5_1)
+      sapi/embed/php_embed.h:
+      MFH(r-1.7) Silence compiler warning: unused variable
+
+    * sapi/embed/php_embed.h:
+      Silence compiler warning: unused variable
+
 2005-12-28  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_4)
