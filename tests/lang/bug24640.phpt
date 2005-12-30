@@ -1,5 +1,7 @@
 --TEST--
 Bug #24640 (var_export and var_dump can't output large float)
+--INI--
+precision=12
 --FILE--
 <?php
 function test($v)
