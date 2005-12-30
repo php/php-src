@@ -109,18 +109,20 @@ if (getenv('TEST_PHP_EXECUTABLE')) {
 	}
 }
 
-if (empty($php) || !file_exists($php)) {
-	error("environment variable TEST_PHP_EXECUTABLE must be set to specify PHP executable!");
+if ($argc !=2 || ($argv[1] != '-h' && $argv[1] != '-help' && $argv != '--help'))
+{
+	if (empty($php) || !file_exists($php)) {
+		error("environment variable TEST_PHP_EXECUTABLE must be set to specify PHP executable!");
+	}
+	if (function_exists('is_executable') && !@is_executable($php)) {
+		error("invalid PHP executable specified by TEST_PHP_EXECUTABLE  = " . $php);
+	}
 }
 
 if (getenv('TEST_PHP_LOG_FORMAT')) {
 	$log_format = strtoupper(getenv('TEST_PHP_LOG_FORMAT'));
 } else {
 	$log_format = 'LEOD';
-}
-
-if (function_exists('is_executable') && !@is_executable($php)) {
-	error("invalid PHP executable specified by TEST_PHP_EXECUTABLE  = " . $php);
 }
 
 // Check whether a detailed log is wanted.
@@ -241,6 +243,7 @@ $html_file = null;
 $temp_source = null;
 $temp_target = null;
 $temp_urlbase = null;
+$conf_passed = null;
 
 $cfgtypes = array('show', 'keep');
 $cfgfiles = array('skip', 'php');
@@ -297,6 +300,9 @@ if (isset($argc) && $argc > 1) {
 					break;
 				case 'a':
 					$failed_tests_file = fopen($argv[++$i], 'a+t');
+					break;
+				case 'c':
+					$conf_passed = $argv[++$i];
 					break;
 				case 'd':
 					$ini_overwrites[] = $argv[++$i];
@@ -410,6 +416,8 @@ Options:
 
     -a <file>   Same as -w but append rather then truncating <file>.
 
+    -c <file>   Look for php.ini in directory <file> or use <file> as ini.
+
     -n          Pass -n option to the php binary (Do not use a php.ini).
 
     -d foo=bar  Pass -d option to the php binary (Define INI entry foo
@@ -463,6 +471,10 @@ HELP;
 				die("bogus test name " . $argv[$i] . "\n");
 			}
 		}
+	}
+	if (strlen($conf_passed))
+	{
+		$pass_options .= " -c '$conf_passed'";
 	}
 	$test_files = array_unique($test_files);
 	$test_files = array_merge($test_files, $redir_tests);
