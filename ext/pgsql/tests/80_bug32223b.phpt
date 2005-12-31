@@ -1,5 +1,5 @@
 --TEST--
-Bug #32223 (weird behaviour of pg_last_notice using notice)
+Bug #32223 (weird behaviour of pg_last_notice using define)
 --SKIPIF--
 <?php 
 require_once('skipif.inc');
@@ -16,13 +16,13 @@ if (!$res) die('skip PLPGSQL not available');
 --FILE--
 <?php
 
-require('config.inc');
+require_once('config.inc');
 
-define ('dbh', pg_connect($conn_str));
-//$dbh = @pg_connect($conn_str);
+define('dbh', pg_connect($conn_str));
 if (!dbh) {
         die ("Could not connect to the server");
 }
+pg_exec(dbh, "SET LC_MESSAGES='C';");
 
 //@pg_query(dbh, "CREATE LANGUAGE 'plpgsql' HANDLER plpgsql_call_handler LANCOMPILER 'PL/pgSQL'");
 $res = pg_query(dbh, "CREATE OR REPLACE FUNCTION test_notice() RETURNS boolean AS '

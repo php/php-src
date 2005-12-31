@@ -10,6 +10,7 @@ pgsql.ignore_notices=0
 include 'config.inc';
 
 $db = pg_connect($conn_str);
+pg_exec($db, "SET LC_MESSAGES='C';");
 pg_query($db, "BEGIN;");
 pg_query($db, "BEGIN;");
 
