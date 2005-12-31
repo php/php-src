@@ -97,6 +97,8 @@ if (ini_get('safe_mode')) {
 SAFE_MODE_WARNING;
 }
 
+$environment = isset($_ENV) ? $_ENV : array();
+
 // Don't ever guess at the PHP executable location.
 // Require the explicit specification.
 // Otherwise we could end up testing the wrong file!
@@ -107,6 +109,7 @@ if (getenv('TEST_PHP_EXECUTABLE')) {
 		$php = $cwd.'/sapi/cli/php';
 		putenv("TEST_PHP_EXECUTABLE=$php");
 	}
+	$environment['TEST_PHP_EXECUTABLE'] = $php;
 }
 
 if ($argc !=2 || ($argv[1] != '-h' && $argv[1] != '-help' && $argv != '--help'))
@@ -491,7 +494,7 @@ HELP;
 			show_start($start_time);
 		}
 		$test_idx = 0;
-		run_all_tests($test_files);
+		run_all_tests($test_files, $environment);
 		$end_time = time();
 		if ($html_output) {
 			show_end($end_time);
@@ -613,7 +616,7 @@ show_start($start_time);
 
 $test_cnt = count($test_files);
 $test_idx = 0;
-run_all_tests($test_files);
+run_all_tests($test_files, $environment);
 $end_time = time();
 if ($failed_tests_file) {
 	fclose($failed_tests_file);
@@ -829,7 +832,7 @@ function error_report($testname, $logname, $tested)
 	}
 }
 
-function system_with_timeout($commandline)
+function system_with_timeout($commandline, $env = null)
 {
 	global $leak_check;
 
@@ -839,7 +842,7 @@ function system_with_timeout($commandline)
 		0 => array('pipe', 'r'),
 		1 => array('pipe', 'w'),
 		2 => array('pipe', 'w')
-		), $pipes, null, null, array("suppress_errors" => true));
+		), $pipes, null, $env, array("suppress_errors" => true));
 
 	if (!$proc)
 		return false;
@@ -875,7 +878,7 @@ function system_with_timeout($commandline)
 	return $data;
 }
 
-function run_all_tests($test_files, $redir_tested = NULL)
+function run_all_tests($test_files, $env, $redir_tested = NULL)
 {
 	global $test_results, $failed_tests_file, $php, $test_cnt, $test_idx, $unicode_and_native, $unicode_testing;
 
@@ -890,7 +893,7 @@ function run_all_tests($test_files, $redir_tested = NULL)
 		for(; $unicode_semantics < ($unicode_testing ? 2 : 1); $unicode_semantics++)
 		{
 			$test_idx++;
-			$result = run_test($php, $name, $unicode_semantics);
+			$result = run_test($php, $name, $rnv, $unicode_semantics);
 			if (!is_array($name) && $result != 'REDIR')
 			{
 				$pu = $unicode_and_native && $unicode_semantics ? '.u' : '';
@@ -916,9 +919,12 @@ function run_all_tests($test_files, $redir_tested = NULL)
 //
 //  Run an individual test case.
 //
-function run_test($php, $file, $unicode_semantics)
+function run_test($php, $file, $env, $unicode_semantics)
 {
-	global $log_format, $info_params, $ini_overwrites, $cwd, $PHP_FAILED_TESTS, $pass_options, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx, $leak_check, $temp_source, $temp_target, $cfg, $unicode_and_native;
+	global $log_format, $info_params, $ini_overwrites, $cwd, $PHP_FAILED_TESTS;
+	global $pass_options, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx;
+	global $leak_check, $temp_source, $temp_target, $cfg, $environment;
+	global $unicode_and_native;
 
 	$temp_filenames = null;
 	$org_file = $file;
@@ -1025,16 +1031,16 @@ TEST $file
 
 	$tested = trim($section_text['TEST']);
 
- 	/* For GET/POST tests, check if cgi sapi is available and if it is, use it. */
- 	if ((!empty($section_text['GET']) || !empty($section_text['POST']))) {
- 		if (file_exists("./sapi/cgi/php")) {
- 			$old_php = $php;
- 			$php = realpath("./sapi/cgi/php") . ' -C ';
- 		} else {
+	/* For GET/POST tests, check if cgi sapi is available and if it is, use it. */
+	if ((!empty($section_text['GET']) || !empty($section_text['POST']))) {
+		if (file_exists("./sapi/cgi/php")) {
+			$old_php = $php;
+			$php = realpath("./sapi/cgi/php") . ' -C ';
+		} else {
 			show_result("SKIP", $tested, $tested_file, "reason: CGI not available");
- 			return 'SKIPPED';
- 		}
- 	}
+			return 'SKIPPED';
+		}
+	}
 
 	show_test($test_idx, $shortname);
 
@@ -1101,13 +1107,21 @@ TEST $file
 	@unlink($tmp_post);
 
 	// Reset environment from any previous test.
-	putenv("REDIRECT_STATUS=");
-	putenv("QUERY_STRING=");
-	putenv("PATH_TRANSLATED=");
-	putenv("SCRIPT_FILENAME=");
-	putenv("REQUEST_METHOD=");
-	putenv("CONTENT_TYPE=");
-	putenv("CONTENT_LENGTH=");
+	$env['REDIRECT_STATUS']='';
+	$env['QUERY_STRING']='';
+	$env['PATH_TRANSLATED']='';
+	$env['SCRIPT_FILENAME']='';
+	$env['REQUEST_METHOD']='';
+	$env['CONTENT_TYPE']='';
+	$env['CONTENT_LENGTH']='';
+	if (!empty($section_text['ENV'])) {
+		foreach(explode("\n", $section_text['ENV']) as $e) {
+			$e = explode('=',trim($e));
+			if (count($e) == 2) {
+				$env[$e[0]] = $e[1];
+			}
+		}
+	}
 
 	// Check if test should be skipped.
 	$info = '';
@@ -1126,7 +1140,7 @@ TEST $file
 			save_text($test_skipif, $section_text['SKIPIF'], $temp_skipif);
 			$extra = substr(PHP_OS, 0, 3) !== "WIN" ?
 				"unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;": "";
-			$output = system_with_timeout("$extra $php -q $skipif_params $test_skipif");
+			$output = system_with_timeout("$extra $php -q $skipif_params $test_skipif", $env);
 			@unlink($test_skipif);
 			if (!strncasecmp('skip', trim($output), 4)) {
 				$reason = (eregi("^skip[[:space:]]*(.+)\$", trim($output))) ? eregi_replace("^skip[[:space:]]*(.+)\$", "\\1", trim($output)) : FALSE;
@@ -1181,21 +1195,13 @@ TEST $file
 			show_redirect_start($IN_REDIRECT['TESTS'], $tested, $tested_file);
 
 			// set up environment
-			foreach ($IN_REDIRECT['ENV'] as $k => $v) {
-				putenv("$k=$v");
-			}
-			putenv("REDIR_TEST_DIR=" . realpath($IN_REDIRECT['TESTS']) . DIRECTORY_SEPARATOR);
+			$redirenv = array_merge($environment, $IN_REDIRECT['ENV']);
+			$redirenv['REDIR_TEST_DIR'] = realpath($IN_REDIRECT['TESTS']) . DIRECTORY_SEPARATOR;
 	
 			usort($test_files, "test_sort");
-			run_all_tests($test_files, $tested);
+			run_all_tests($test_files, $redirenv, $tested);
 	
 			show_redirect_ends($IN_REDIRECT['TESTS'], $tested, $tested_file);
-	
-			// clean up environment
-			foreach ($IN_REDIRECT['ENV'] as $k => $v) {
-				putenv("$k=");
-			}
-			putenv("REDIR_TEST_DIR=");
 	
 			// a redirected test never fails
 			$IN_REDIRECT = false;
@@ -1281,16 +1287,10 @@ TEST $file
 		$query_string = '';
 	}
 
-	if (!empty($section_text['ENV'])) {
-		foreach (explode("\n", $section_text['ENV']) as $env) {
-			($env = trim($env)) and putenv($env);
-		}
-	}
-
-	putenv("REDIRECT_STATUS=1");
-	putenv("QUERY_STRING=$query_string");
-	putenv("PATH_TRANSLATED=$test_file");
-	putenv("SCRIPT_FILENAME=$test_file");
+	$env['REDIRECT_STATUS'] = '1';
+	$env['QUERY_STRING']    = $query_string;
+	$env['PATH_TRANSLATED'] = $test_file;
+	$env['SCRIPT_FILENAME'] = $test_file;
 
 	$args = $section_text['ARGS'] ? ' -- '.$section_text['ARGS'] : '';
 
@@ -1300,23 +1300,19 @@ TEST $file
 		save_text($tmp_post, $post);
 		$content_length = strlen($post);
 
-		putenv("REQUEST_METHOD=POST");
-		putenv("CONTENT_TYPE=application/x-www-form-urlencoded");
-		putenv("CONTENT_LENGTH=$content_length");
+		$env['REQUEST_METHOD'] = 'POST';
+		$env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded';
+		$env['CONTENT_LENGTH'] = $content_length;
 
 		$cmd = "$php$pass_options$ini_settings -f \"$test_file\" 2>&1 < $tmp_post";
 
 	} else {
 
-		putenv("REQUEST_METHOD=GET");
-		putenv("CONTENT_TYPE=");
-		putenv("CONTENT_LENGTH=");
+		$env['REQUEST_METHOD'] = 'GET';
+		$env['CONTENT_TYPE']   = '';
+		$env['CONTENT_LENGTH'] = '';
 
-		if (empty($section_text['ENV'])) {
-			$cmd = "$php$pass_options$ini_settings -f \"$test_file\" $args 2>&1";
-		} else {
-			$cmd = "$php$pass_options$ini_settings < \"$test_file\" $args 2>&1";
-		}
+		$cmd = "$php$pass_options$ini_settings -f \"$test_file\" $args 2>&1";
 	}
 
 	if ($leak_check) {
@@ -1324,25 +1320,17 @@ TEST $file
 	}
 
 	if ($DETAILED) echo "
-CONTENT_LENGTH  = " . getenv("CONTENT_LENGTH") . "
-CONTENT_TYPE    = " . getenv("CONTENT_TYPE") . "
-PATH_TRANSLATED = " . getenv("PATH_TRANSLATED") . "
-QUERY_STRING    = " . getenv("QUERY_STRING") . "
-REDIRECT_STATUS = " . getenv("REDIRECT_STATUS") . "
-REQUEST_METHOD  = " . getenv("REQUEST_METHOD") . "
-SCRIPT_FILENAME = " . getenv("SCRIPT_FILENAME") . "
+CONTENT_LENGTH  = " . $env['CONTENT_LENGTH'] . "
+CONTENT_TYPE    = " . $env['CONTENT_TYPE'] . "
+PATH_TRANSLATED = " . $env['PATH_TRANSLATED'] . "
+QUERY_STRING    = " . $env['QUERY_STRING'] . "
+REDIRECT_STATUS = " . $env['REDIRECT_STATUS'] . "
+REQUEST_METHOD  = " . $env['REQUEST_METHOD'] . "
+SCRIPT_FILENAME = " . $env['SCRIPT_FILENAME'] . "
 COMMAND $cmd
 ";
 
-//	$out = `$cmd`;
-	$out = system_with_timeout($cmd);
-
-	if (!empty($section_text['ENV'])) {
-		foreach (explode("\n", $section_text['ENV']) as $env) {
-			$env = explode('=', $env);
-			putenv($env[0] .'=');
-		}
-	}
+	$out = system_with_timeout($cmd, $env);
 
 	@unlink($tmp_post);
 
@@ -1398,7 +1386,7 @@ COMMAND $cmd
 				$php = $old_php;
 			}
 			if (!$leaked) {
-			    show_result("PASS", $tested, $tested_file, '', $temp_filenames);
+				show_result("PASS", $tested, $tested_file, '', $temp_filenames);
 				return 'PASSED';
 			}
 		}
