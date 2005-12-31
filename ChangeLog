@@ -1,3 +1,75 @@
+2005-12-30  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * php.ini-dist
+      php.ini-recommended:
+      instantiated was correct
+
+2005-12-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      run-tests.php:
+      - WS
+
+    * run-tests.php:
+      - MFB
+
+    * (PHP_5_1)
+      run-tests.php:
+      - Allow to specify ini to use for test executeable
+
+    * (PHP_5_1)
+      run-tests.php:
+      - If user wnats help, don't complain about missing environment
+
+    * tests/lang/bug24640.phpt
+      tests/lang/bug24640.phpt:
+      - MF51
+
+    * (PHP_5_1)
+      tests/lang/bug24640.phpt:
+      - Need to set precision in ini
+
+2005-12-30  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * php.ini-dist
+      php.ini-recommended:
+      typofixes
+
+2005-12-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      tests/lang/bug24640.phpt:
+      - Fix test
+
+2005-12-30  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/libgd/gd.c:
+      - ensure that x1<x2 or y1<y2
+
+2005-12-30  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * main/SAPI.c:
+      fix typo
+
+2005-12-30  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_4_4)
+      ext/mbstring/config.m4
+      ext/mbstring/mbstring.c:
+      MFH: update libmbfl for the newest version.
+
+2005-12-30  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/libgd/gd.c:
+      - add some basic optimisations, usefull when you draw many horizontal or
+        vertical lines like in charts
+
+2005-12-30  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_5_1)
+      ext/mbstring/mbstring.c:
+      MFH:added Turkish language definition (related to bug #29955)
+
 2005-12-29  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
 
     * ext/mbstring/mbstring.c:
