@@ -1,5 +1,5 @@
 --TEST--
-PHP_Archive::mapPhar too many manifest entries
+Phar::mapPhar too many manifest entries
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip";?>
 --FILE--

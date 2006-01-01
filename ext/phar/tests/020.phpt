@@ -1,5 +1,5 @@
 --TEST--
-url stat
+Phar: url stat
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 --FILE--

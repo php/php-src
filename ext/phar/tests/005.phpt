@@ -1,5 +1,5 @@
 --TEST--
-PHP_Archive::mapPhar truncated manifest (none)
+Phar::mapPhar truncated manifest (none)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip";?>
 --FILE--

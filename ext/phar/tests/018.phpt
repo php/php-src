@@ -1,5 +1,5 @@
 --TEST--
-opendir test, root directory
+Phar: opendir test, root directory
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 --FILE--

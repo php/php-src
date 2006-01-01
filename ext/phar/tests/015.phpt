@@ -1,5 +1,5 @@
 --TEST--
-PHP_Archive::mapPhar valid file (gzipped)
+Phar::mapPhar valid file (gzipped)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip";
 if (!PHP_Archive::canCompress()) print "skip"; ?>
