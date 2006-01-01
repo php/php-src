@@ -2045,7 +2045,9 @@ PHP_FUNCTION(iterator_to_array)
 	
 	iter = Z_OBJCE_P(obj)->get_iterator(Z_OBJCE_P(obj), obj TSRMLS_CC);
 
-	iter->funcs->rewind(iter TSRMLS_CC);
+	if (iter->funcs->rewind) {
+		iter->funcs->rewind(iter TSRMLS_CC);
+	}
 	while (iter->funcs->valid(iter TSRMLS_CC) == SUCCESS) {
 		key_type = iter->funcs->get_current_key(iter, &str_key, &str_key_len, &int_key TSRMLS_CC);
 		iter->funcs->get_current_data(iter, &data TSRMLS_CC);
