@@ -7,7 +7,7 @@ PHP_Archive::mapPhar valid file
 function cleanup() { unlink(dirname(__FILE__) . '/008_phar.php'); }
 register_shutdown_function('cleanup');
 $file = "<?php
-PHP_Archive::mapPhar('hio', false);
+Phar::mapPhar('hio', false);
 __HALT_COMPILER(); ?>";
 $manifest = pack('V', 1) . 'a' . pack('VVVV', 1, time(), 0, 9);
 $file .= pack('VV', strlen($manifest) + 4, 1) . $manifest . pack('VV', crc32('a'), 1) . 'a';

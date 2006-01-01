@@ -4,7 +4,7 @@ PHP_Archive::apiVersion
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 --FILE--
 <?php
-echo PHP_Archive::apiVersion();
+echo Phar::apiVersion();
 ?>
 --EXPECT--
 0.7.1
