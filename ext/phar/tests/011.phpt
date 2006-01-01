@@ -7,7 +7,7 @@ PHP_Archive::mapPhar filesize too small in manifest
 function cleanup() { unlink(dirname(__FILE__) . '/008_phar.php'); }
 register_shutdown_function('cleanup');
 $file = "<?php
-PHP_Archive::mapPhar(5, 'hio', false);
+Phar::mapPhar(5, 'hio', false);
 __HALT_COMPILER(); ?>";
 // compressed file length does not include 8 bytes for crc/file length and should
 $manifest = pack('V', 1) . 'a' . pack('VVVV', 1, time(), 0, 1);
@@ -17,4 +17,4 @@ include dirname(__FILE__) . '/008_phar.php';
 echo file_get_contents('phar://hio/a');
 ?>
 --EXPECTF--
-Fatal error: PHP_Archive::mapPhar(): internal corruption of phar "%s" (file size in phar is not large enough) in %s on line %d
+Fatal error: Phar::mapPhar(): internal corruption of phar "%s" (file size in phar is not large enough) in %s on line %d

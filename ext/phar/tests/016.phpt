@@ -8,7 +8,7 @@ if (!PHP_Archive::canCompress()) print "skip"; ?>
 function cleanup() { unlink(dirname(__FILE__) . '/008_phar.php'); }
 register_shutdown_function('cleanup');
 $file = "<?php
-PHP_Archive::mapPhar('hio', true);
+Phar::mapPhar('hio', true);
 __HALT_COMPILER(); ?>";
 // file length is too short
 $manifest = pack('V', 1) . 'a' . pack('VVVV', 1, time(), 0, 9);

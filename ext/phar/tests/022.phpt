@@ -7,7 +7,7 @@ stream stat
 function cleanup() { unlink(dirname(__FILE__) . '/008_phar.php'); }
 register_shutdown_function('cleanup');
 $file = "<?php
-PHP_Archive::mapPhar('hio', false);
+Phar::mapPhar('hio', false);
 __HALT_COMPILER(); ?>";
 $contents = 'abcdefg';
 $manifest = pack('V', 1) . 'a' . pack('VVVV', strlen($contents), time(), 0, 8 + strlen($contents));

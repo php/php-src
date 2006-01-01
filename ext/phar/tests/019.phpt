@@ -7,7 +7,7 @@ opendir test, subdirectory
 function cleanup() { unlink(dirname(__FILE__) . '/008_phar.php'); }
 register_shutdown_function('cleanup');
 $file = "<?php
-PHP_Archive::mapPhar('hio', true);
+Phar::mapPhar('hio', true);
 __HALT_COMPILER(); ?>";
 $manifest = '';
 $manifest .= pack('V', 1) . 'a' . pack('VVVV', 1, time(), 0, 9);

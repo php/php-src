@@ -7,7 +7,7 @@ url stat
 function cleanup() { unlink(dirname(__FILE__) . '/008_phar.php'); }
 register_shutdown_function('cleanup');
 $file = "<?php
-PHP_Archive::mapPhar('hio', false);
+Phar::mapPhar('hio', false);
 __HALT_COMPILER(); ?>";
 $manifest = '';
 $manifest .= pack('V', 1) . 'a' . pack('VVVV', 1, time(), 0, 9);
