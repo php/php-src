@@ -544,6 +544,7 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 	/* strip leading "/" */
 	internal_file = estrndup(resource->path + 1, strlen(resource->path) - 1);
 	if (NULL == (idata = phar_get_filedata(resource->host, internal_file TSRMLS_CC))) {
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: \"%s\" is not a file in phar \"%s\"", internal_file, resource->host);
 		efree(internal_file);
 		return NULL;
 	}
@@ -760,6 +761,9 @@ PHP_PHAR_API size_t phar_read(php_stream *stream, char *buf, size_t count TSRMLS
 
 	to_read = MIN(data->internal_file->uncompressed_filesize - data->pointer, count);
 	if (to_read == 0) {
+		if (count != 0) {
+			stream->eof = 1;
+		}
 		return 0;
 	}
 
@@ -839,7 +843,8 @@ PHP_PHAR_API int phar_flush(php_stream *stream TSRMLS_DC)
 	return EOF;
 }
 
-static void phar_dostat(phar_manifest_entry *data, php_stream_statbuf *ssb, zend_bool is_dir TSRMLS_DC);
+static void phar_dostat(phar_manifest_entry *data, php_stream_statbuf *ssb, zend_bool is_dir, char *alias,
+			int alias_len TSRMLS_DC);
 
 PHP_PHAR_API int phar_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC)
 {
@@ -848,12 +853,15 @@ PHP_PHAR_API int phar_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC
 	if (!ssb) return -1;
 
 	data = (phar_internal_file_data *)stream->abstract;
-	phar_dostat(data->internal_file, ssb, 0 TSRMLS_CC);
+	phar_dostat(data->internal_file, ssb, 0, data->data->alias, data->data->alias_len TSRMLS_CC);
 	return 0;
 }
 
-static void phar_dostat(phar_manifest_entry *data, php_stream_statbuf *ssb, zend_bool is_dir TSRMLS_DC)
+static void phar_dostat(phar_manifest_entry *data, php_stream_statbuf *ssb, zend_bool is_dir, char *alias,
+			int alias_len TSRMLS_DC)
 {
+	char *tmp;
+	int tmp_len;
 	memset(ssb, 0, sizeof(php_stream_statbuf));
 	/* read-only across the board */
 	ssb->sb.st_mode = 0444;
@@ -888,6 +896,23 @@ static void phar_dostat(phar_manifest_entry *data, php_stream_statbuf *ssb, zend
 
 	ssb->sb.st_nlink = 1;
 	ssb->sb.st_rdev = -1;
+	if (data) {
+		tmp_len = data->filename_len + alias_len;
+	} else {
+		tmp_len = alias_len + 1;
+	}
+	tmp = (char *) emalloc(tmp_len);
+	memcpy(tmp, alias, alias_len);
+	if (data) {
+		memcpy(tmp + alias_len, data->filename, data->filename_len);
+	} else {
+		*(tmp+alias_len) = '/';
+	}
+	/* this is only for APC, so use /dev/null device - no chance of conflict there! */
+	ssb->sb.st_dev = 0xc;
+	/* generate unique inode number for alias/filename, so no phars will conflict */
+	ssb->sb.st_ino = zend_get_hash_value(tmp, tmp_len);
+	efree(tmp);
 #ifndef PHP_WIN32
 	ssb->sb.st_blksize = -1;
 	ssb->sb.st_blocks = -1;
@@ -925,13 +950,13 @@ PHP_PHAR_API int phar_stream_stat(php_stream_wrapper *wrapper, char *url, int fl
 	if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_data), resource->host, strlen(resource->host), (void **) &data)) {
 		if (*internal_file == '\0') {
 			/* root directory requested */
-			phar_dostat(NULL, ssb, 1 TSRMLS_CC);
+			phar_dostat(NULL, ssb, 1, data->alias, data->alias_len TSRMLS_CC);
 			php_url_free(resource);
 			return 0;
 		}
 		/* search through the manifest of files, and if we have an exact match, it's a file */
 		if (SUCCESS == zend_hash_find(data->manifest, internal_file, strlen(internal_file), (void **) &file_data)) {
-			phar_dostat(file_data, ssb, 0 TSRMLS_CC);
+			phar_dostat(file_data, ssb, 0, data->alias, data->alias_len TSRMLS_CC);
 		} else {
 			/* search for directory (partial match of a file) */
 			zend_hash_internal_pointer_reset(data->manifest);
@@ -942,7 +967,7 @@ PHP_PHAR_API int phar_stream_stat(php_stream_wrapper *wrapper, char *url, int fl
 					if (0 == memcmp(internal_file, key, strlen(internal_file))) {
 						/* directory found, all dirs have the same stat */
 						if (key[strlen(internal_file)] == '/') {
-							phar_dostat(NULL, ssb, 1 TSRMLS_CC);
+							phar_dostat(NULL, ssb, 1, data->alias, data->alias_len TSRMLS_CC);
 							break;
 						}
 					}
