@@ -1003,8 +1003,8 @@ static int compare_dir_name(const void *a, const void *b TSRMLS_DC)
 	f = *((Bucket **) a);
 	s = *((Bucket **) b);
 
-	result = zend_binary_strcmp(f->arKey, f->nKeyLength - 1,
-				    s->arKey, s->nKeyLength - 1);
+	result = zend_binary_strcmp(f->arKey, f->nKeyLength,
+				    s->arKey, s->nKeyLength);
 
 	if (result == 0) {
 		return 0;
