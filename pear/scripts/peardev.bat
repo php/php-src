@@ -3,7 +3,7 @@
 REM ----------------------------------------------------------------------
 REM PHP version 5
 REM ----------------------------------------------------------------------
-REM Copyright (c) 1997-2004 The PHP Group
+REM Copyright (c) 1997-2006 The PHP Group
 REM ----------------------------------------------------------------------
 REM  This source file is subject to version 3.0 of the PHP license, 
 REM  that is bundled with this package in the file LICENSE, and is
@@ -16,7 +16,7 @@ REM ----------------------------------------------------------------------
 REM  Authors:     Alexander Merz (alexmerz@php.net)
 REM ----------------------------------------------------------------------
 REM
-REM  $Id: peardev.bat,v 1.1.2.1 2005-11-02 16:57:24 cellog Exp $
+REM  $Id: peardev.bat,v 1.1.2.2 2006-01-01 13:47:01 sniper Exp $
 
 REM change this lines to match the paths of your system
 REM -------------------

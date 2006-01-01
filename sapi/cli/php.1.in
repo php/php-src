@@ -1,26 +1,7 @@
-./"    +----------------------------------------------------------------------+
-./"    | PHP Version 4                                                        |
-./"    +----------------------------------------------------------------------+
-./"    | Copyright (c) 1997-2003 The PHP Group                                |
-./"    +----------------------------------------------------------------------+
-./"    | This source file is subject to version 2.02 of the PHP license,      |
-./"    | that is bundled with this package in the file LICENSE, and is        |
-./"    | available at through the world-wide-web at                           |
-./"    | http://www.php.net/license/2_02.txt.                                 |
-./"    | If you did not receive a copy of the PHP license and are unable to   |
-./"    | obtain it through the world-wide-web, please send a note to          |
-./"    | license@php.net so we can mail you a copy immediately.               |
-./"    +----------------------------------------------------------------------+
-./"    | Author: Marcus Boerger <helly@php.net>                               |
-./"    +----------------------------------------------------------------------+
-./" 
-./" $Id$
-./" 
-.TH PHP 1 "Feb 2003" "The PHP Group" "Scripting Language"
+.TH PHP 1 "2006" "The PHP Group" "Scripting Language"
 .SH NAME
 .TP 15
-.B php
-PHP Command Line Interface 'CLI'
+php - PHP Command Line Interface 'CLI'
 .SH SYNOPSIS
 .B php
 [options] [
@@ -182,7 +163,7 @@ A nice introduction to PHP by Stig Bakken can be found here:
 .B http://www.zend.com/zend/art/intro.php
 .PD 1
 .SH BUGS
-You can view the list of known bugs or add any new bug you
+You can view the list of known bugs or report any new bug you
 found here:
 .PD 0
 .P
@@ -204,14 +185,14 @@ contributors all around the world.
 .SH VERSION INFORMATION
 This manpage describes \fBphp\fP, version @PHP_VERSION@.
 .SH COPYRIGHT
-Copyright \(co 1997\-2003 The PHP Group
+Copyright \(co 1997\-2006 The PHP Group
 .LP
-This source file is subject to version 3.0 of the PHP license,
+This source file is subject to version 3.01 of the PHP license,
 that is bundled with this package in the file LICENSE, and is
-available at through the world-wide-web at
+available through the world-wide-web at the following url:
 .PD 0
 .P
-.B http://www.php.net/license/3_0.txt
+.B http://www.php.net/license/3_01.txt
 .PD 1
 .P
 If you did not receive a copy of the PHP license and are unable to

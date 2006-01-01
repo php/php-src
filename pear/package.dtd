@@ -1,12 +1,12 @@
 <!--
-     $Id: package.dtd,v 1.27.4.12.2.1 2005-11-02 16:57:19 cellog Exp $
+     $Id: package.dtd,v 1.27.4.12.2.2 2006-01-01 13:47:00 sniper Exp $
 
      This is the PEAR package description, version 1.0.
      It should be used with the informal public identifier:
 
          "-//PHP Group//DTD PEAR Package 1.0//EN//XML"
 
-     Copyright (c) 1997-2005 The PHP Group             
+     Copyright (c) 1997-2006 The PHP Group             
 
      This source file is subject to version 3.00 of the PHP license,
      that is bundled with this package in the file LICENSE, and is
