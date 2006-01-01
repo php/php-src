@@ -7,4 +7,4 @@ PHP_Archive::apiVersion
 echo PHP_Archive::apiVersion();
 ?>
 --EXPECT--
-0.7
+0.7.1

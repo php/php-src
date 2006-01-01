@@ -7,7 +7,7 @@ url stat
 function cleanup() { unlink(dirname(__FILE__) . '/008_phar.php'); }
 register_shutdown_function('cleanup');
 $file = "<?php
-PHP_Archive::mapPhar(5, 'hio', false);
+PHP_Archive::mapPhar('hio', false);
 __HALT_COMPILER(); ?>";
 $manifest = '';
 $manifest .= pack('V', 1) . 'a' . pack('VVVV', 1, time(), 0, 9);
@@ -27,9 +27,9 @@ var_dump(stat('phar://hio/a'), stat('phar://hio/b'));
 --EXPECTF--
 array(26) {
   [0]=>
-  int(0)
+  int(12)
   [1]=>
-  int(0)
+  int(2090329158)
   [2]=>
   int(33060)
   [3]=>
@@ -53,9 +53,9 @@ array(26) {
   [12]=>
   int(-1)
   ["dev"]=>
-  int(0)
+  int(12)
   ["ino"]=>
-  int(0)
+  int(2090329158)
   ["mode"]=>
   int(33060)
   ["nlink"]=>
@@ -81,9 +81,9 @@ array(26) {
 }
 array(26) {
   [0]=>
-  int(0)
+  int(12)
   [1]=>
-  int(0)
+  int(2090329108)
   [2]=>
   int(16676)
   [3]=>
@@ -107,9 +107,9 @@ array(26) {
   [12]=>
   int(-1)
   ["dev"]=>
-  int(0)
+  int(12)
   ["ino"]=>
-  int(0)
+  int(2090329108)
   ["mode"]=>
   int(16676)
   ["nlink"]=>

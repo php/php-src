@@ -7,7 +7,7 @@ opendir test - no dir specified at all
 function cleanup() { unlink(dirname(__FILE__) . '/008_phar.php'); }
 register_shutdown_function('cleanup');
 $file = "<?php
-PHP_Archive::mapPhar(5, 'hio', true);
+PHP_Archive::mapPhar('hio', true);
 __HALT_COMPILER(); ?>";
 // file length is too short
 $manifest = pack('V', 1) . 'a' . pack('VVVV', 1, time(), 0, 9);

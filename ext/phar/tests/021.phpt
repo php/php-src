@@ -7,7 +7,7 @@ stream stat
 function cleanup() { unlink(dirname(__FILE__) . '/008_phar.php'); }
 register_shutdown_function('cleanup');
 $file = "<?php
-PHP_Archive::mapPhar(5, 'hio', false);
+PHP_Archive::mapPhar('hio', false);
 __HALT_COMPILER(); ?>";
 $manifest = '';
 $manifest .= pack('V', 1) . 'a' . pack('VVVV', 1, time(), 0, 9);
@@ -29,9 +29,9 @@ fclose($fp);
 --EXPECTF--
 array(26) {
   [0]=>
-  int(0)
+  int(12)
   [1]=>
-  int(0)
+  int(2090329158)
   [2]=>
   int(33060)
   [3]=>
@@ -55,9 +55,9 @@ array(26) {
   [12]=>
   int(-1)
   ["dev"]=>
-  int(0)
+  int(12)
   ["ino"]=>
-  int(0)
+  int(2090329158)
   ["mode"]=>
   int(33060)
   ["nlink"]=>
