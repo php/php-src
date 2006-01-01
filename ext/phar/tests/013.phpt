@@ -7,7 +7,7 @@ PHP_Archive::mapPhar filesize mismatch
 function cleanup() { unlink(dirname(__FILE__) . '/008_phar.php'); }
 register_shutdown_function('cleanup');
 $file = "<?php
-PHP_Archive::mapPhar(5, 'hio', false);
+PHP_Archive::mapPhar('hio', false);
 __HALT_COMPILER(); ?>";
 // filesize should be 1, and is 2
 $manifest = pack('V', 1) . 'a' . pack('VVVV', 1, time(), 0, 9);
