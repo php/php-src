@@ -1,26 +1,7 @@
-./"    +----------------------------------------------------------------------+
-./"    | PHP Version 5                                                        |
-./"    +----------------------------------------------------------------------+
-./"    | Copyright (c) 1997-2005 The PHP Group                                |
-./"    +----------------------------------------------------------------------+
-./"    | This source file is subject to version 3.0 of the PHP license,       |
-./"    | that is bundled with this package in the file LICENSE, and is        |
-./"    | available through the world-wide-web at the following url:           |
-./"    | http://www.php.net/license/3_0.txt.                                  |
-./"    | If you did not receive a copy of the PHP license and are unable to   |
-./"    | obtain it through the world-wide-web, please send a note to          |
-./"    | license@php.net so we can mail you a copy immediately.               |
-./"    +----------------------------------------------------------------------+
-./"    | Author: Jakub Vrana <vrana@php.net>                                  |
-./"    +----------------------------------------------------------------------+
-./" 
-./" $Id$
-./" 
-.TH php\-config 1 "Apr 2005" "The PHP Group" "Scripting Language"
+.TH php\-config 1 "2006" "The PHP Group" "Scripting Language"
 .SH NAME
 .TP 15
-.B php\-config
-Get information about PHP configuration
+php\-config \- get information about PHP configuration
 .SH SYNOPSIS
 .B php\-config
 [options]
@@ -69,17 +50,17 @@ PHP version
 .SH VERSION INFORMATION
 This manpage describes \fBphp\fP, version @PHP_VERSION@.
 .SH COPYRIGHT
-Copyright \(co 1997\-2005 The PHP Group
+Copyright \(co 1997\-2006 The PHP Group
 .LP
-This source file is subject to version 3.0 of the PHP license,
+This source file is subject to version 3.01 of the PHP license,
 that is bundled with this package in the file LICENSE, and is
-available through the world-wide-web at
+available through the world-wide-web at the following url:
 .PD 0
 .P
-.B http://www.php.net/license/3_0.txt
+.B http://www.php.net/license/3_01.txt
 .PD 1
 .P
 If you did not receive a copy of the PHP license and are unable to
 obtain it through the world-wide-web, please send a note to
-.B license@php.net 
+.B license@php.net
 so we can mail you a copy immediately.

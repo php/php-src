@@ -40,7 +40,7 @@ BEGIN
             VALUE "FileDescription", "PHP Script Interpreter\0"
             VALUE "FileVersion", STRVER4(PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION, PHP_RELEASE_VERSION)
             VALUE "InternalName", "php-cgi\0"
-            VALUE "LegalCopyright", "Copyright © 1997-2005 The PHP Group\0"
+            VALUE "LegalCopyright", "Copyright © 1997-2006 The PHP Group\0"
             VALUE "LegalTrademarks", "php\0"
             VALUE "OriginalFilename", "php.exe\0"
             VALUE "PrivateBuild", "\0"
