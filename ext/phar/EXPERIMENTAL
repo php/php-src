@@ -1,6 +1,8 @@
 TODO:
-- implement openSSL signing of phars
-- implement strnatcasecmp sorting of opendir directory listings like PHP_Archive
+
+bugs:
+no known bugs
 
 features:
 - stream context option for cleaning crap paths like phar://blah.phar/file//to\\here.php
+- implement openSSL signing of phars
