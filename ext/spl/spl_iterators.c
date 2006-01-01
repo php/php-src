@@ -2049,17 +2049,21 @@ PHP_FUNCTION(iterator_to_array)
 		iter->funcs->rewind(iter TSRMLS_CC);
 	}
 	while (iter->funcs->valid(iter TSRMLS_CC) == SUCCESS) {
-		key_type = iter->funcs->get_current_key(iter, &str_key, &str_key_len, &int_key TSRMLS_CC);
 		iter->funcs->get_current_data(iter, &data TSRMLS_CC);
 		(*data)->refcount++;
-		switch(key_type) {
-			case HASH_KEY_IS_STRING:
-				add_assoc_zval_ex(return_value, str_key, str_key_len, *data);
-				efree(str_key);
-				break;
-			case HASH_KEY_IS_LONG:
-				add_index_zval(return_value, int_key, *data);
-				break;
+		if (iter->funcs->get_current_key) {
+			key_type = iter->funcs->get_current_key(iter, &str_key, &str_key_len, &int_key TSRMLS_CC);
+			switch(key_type) {
+				case HASH_KEY_IS_STRING:
+					add_assoc_zval_ex(return_value, str_key, str_key_len, *data);
+					efree(str_key);
+					break;
+				case HASH_KEY_IS_LONG:
+					add_index_zval(return_value, int_key, *data);
+					break;
+			}
+		} else {
+			add_next_index_zval(return_value, *data);
 		}
 		iter->funcs->move_forward(iter TSRMLS_CC);
 	}
