@@ -5,7 +5,7 @@ REM PHP version 5
 REM ----------------------------------------------------------------------
 REM Copyright (c) 1997-2006 The PHP Group
 REM ----------------------------------------------------------------------
-REM  This source file is subject to version 3.0 of the PHP license, 
+REM  This source file is subject to version 3.01 of the PHP license,
 REM  that is bundled with this package in the file LICENSE, and is
 REM  available at through the world-wide-web at
 REM  http://www.php.net/license/3_0.txt. 
