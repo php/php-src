@@ -17,10 +17,10 @@ This is the extension version of PEAR's PHP_Archive package. Support for zlib an
   <email>cellog@php.net</email>
   <active>yes</active>
  </lead>
- <date>2005-12-12</date>
+ <date>2006-01-01</date>
  <version>
   <release>0.1.0</release>
-  <api>0.1.0</api>
+  <api>0.7.1</api>
  </version>
  <stability>
   <release>alpha</release>
@@ -28,8 +28,10 @@ This is the extension version of PEAR's PHP_Archive package. Support for zlib an
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
  <notes>
-  Initial release.  This release is fully regression-tested and works on
-  both windows and unix with existing phars go-pear.phar/install-pear-nozlib.phar
+  Initial release.  This release is fully regression-tested
+
+  This extension is only compatible with phar archives compliant with PHP_Archive
+  0.8.0 (api Version 0.7.1)
  </notes>
  <contents>
   <dir name="/">
