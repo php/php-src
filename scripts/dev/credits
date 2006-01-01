@@ -1,6 +1,6 @@
 #!/bin/sh
 awkprog='
-BEGIN { FS = "\n"; RS = "" }
+BEGIN { FS = "\n|\r\n|\r"; RS = "" }
 { print "CREDIT_LINE(\""$1"\", \""$2"\");" }'
 
 for what in ext sapi
