@@ -1,3 +1,19 @@
+2005-12-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      - Fix environment handling
+
+    * ext/pgsql/tests/09notice.phpt
+      ext/pgsql/tests/80_bug32223.phpt
+      ext/pgsql/tests/80_bug32223b.phpt:
+      - Fix tests
+
+2005-12-31  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS:
+      BFN
+
 2005-12-30  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * php.ini-dist
