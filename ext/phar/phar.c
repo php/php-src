@@ -29,7 +29,9 @@
 #include "ext/standard/url.h"
 #include "ext/standard/crc32.h"
 #include "zend_execute.h"
+#include "zend_qsort.h"
 #include "zend_constants.h"
+#include "zend_operators.h"
 #include "php_phar.h"
 #include "main/php_streams.h"
 #ifndef TRUE
@@ -991,6 +993,33 @@ static int phar_add_empty(HashTable *ht, char *arKey, uint nKeyLength)
 	return zend_hash_update(ht, arKey, nKeyLength, &dummy, sizeof(void *), NULL);
 }
 
+static int compare_dir_name(const void *a, const void *b TSRMLS_DC)
+{
+	Bucket *f;
+	Bucket *s;
+	int result;
+ 
+	f = *((Bucket **) a);
+	s = *((Bucket **) b);
+
+	result = zend_binary_strcmp(f->arKey, f->nKeyLength - 1,
+				    s->arKey, s->nKeyLength - 1);
+
+	if (result == 0) {
+		return 0;
+	} 
+
+	if (result < 0) {
+		return -1;
+	} else if (result > 0) {
+		return 1;
+	} else {
+		return 0;
+	}
+
+	return 0;
+}
+
 static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
 {
 	HashTable *data;
@@ -1063,6 +1092,10 @@ PHAR_ADD_ENTRY:
 	}
 	if (HASH_KEY_NON_EXISTANT != zend_hash_has_more_elements(data)) {
 		efree(dir);
+		if (zend_hash_sort(data, zend_qsort, compare_dir_name, 0 TSRMLS_CC) == FAILURE) {
+			FREE_HASHTABLE(data);
+			return NULL;
+		}
 		return php_stream_alloc(&phar_dir_ops, data, NULL, "r");
 	} else {
 		efree(dir);
