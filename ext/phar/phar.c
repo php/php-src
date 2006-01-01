@@ -590,10 +590,9 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 		buffer = (char *) emalloc(idata->internal_file->compressed_filesize);
 		if (idata->internal_file->compressed_filesize !=
 				php_stream_read(fp, buffer, idata->internal_file->compressed_filesize)) {
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (filesize mismatch on file \"%s\")", idata->data->file, internal_file);
 			php_stream_close(fp);
-			buffer = idata->data->file;
 			efree(idata);
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (filesize mismatch on file \"%s\")", buffer, internal_file);
 			efree(internal_file);
 			return NULL;
 		}
@@ -659,32 +658,30 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: decompression failed");
 			return NULL;
 		}
-#define PHAR_ZLIB_ERROR efree(savebuf);\
-			buffer = idata->data->file;\
-			efree(idata->file);\
-			efree(idata);\
-			return NULL;
 
 		efree(savebuf);
 		/* check length */
 		if (actual_length != idata->internal_file->uncompressed_filesize) {
-			PHAR_ZLIB_ERROR
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (filesize mismatch on file \"%s\")", buffer, internal_file);
 			efree(internal_file);
+			efree(idata->file);
+			efree(idata);
 			return NULL;
 		}
 		/* check crc32/filesize */
 		if (!idata->internal_file->crc_checked) {
 			status = phar_postprocess_file(idata->file, idata->internal_file->uncompressed_filesize, crc32, 0);
 			if (-1 == status) {
-				PHAR_ZLIB_ERROR
 				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (crc32 mismatch on file \"%s\")", buffer, internal_file);
+				efree(idata->file);
+				efree(idata);
 				efree(internal_file);
 				return NULL;
 			}
 			if (-2 == status) {
-				PHAR_ZLIB_ERROR
 				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (filesize mismatch on file \"%s\")", buffer, internal_file);
+				efree(idata->file);
+				efree(idata);
 				efree(internal_file);
 				return NULL;
 			}
@@ -695,7 +692,7 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 		efree(internal_file);
 		return NULL;
 #endif
-	} else {
+	} else { /* from here is for non-compressed */
 		idata->file = (char *) emalloc(idata->internal_file->compressed_filesize);
 		if (idata->internal_file->compressed_filesize !=
 				php_stream_read(fp, idata->file, idata->internal_file->compressed_filesize)) {
