@@ -1,5 +1,5 @@
 --TEST--
-stream stat
+Phar: stream stat
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 --FILE--

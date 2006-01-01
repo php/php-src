@@ -1,5 +1,5 @@
 --TEST--
-opendir test - no dir specified at all
+Phar: opendir test - no dir specified at all
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 --FILE--

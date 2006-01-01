@@ -1,5 +1,5 @@
 --TEST--
-PHP_Archive::mapPhar filesize too small in manifest
+Phar::mapPhar filesize too small in manifest
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip";?>
 --FILE--

@@ -1,5 +1,5 @@
 --TEST--
-PHP_Archive::mapPhar invalid file (gzipped file length is too short)
+Phar::mapPhar invalid file (gzipped file length is too short)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip";
 if (!PHP_Archive::canCompress()) print "skip"; ?>

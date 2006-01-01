@@ -1,5 +1,5 @@
 --TEST--
-PHP_Archive::mapPhar filesize mismatch
+Phar::mapPhar filesize mismatch
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip";?>
 --FILE--

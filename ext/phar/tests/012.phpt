@@ -1,5 +1,5 @@
 --TEST--
-PHP_Archive::mapPhar valid file
+Phar::mapPhar valid file
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip";?>
 --FILE--

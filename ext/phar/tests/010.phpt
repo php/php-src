@@ -1,5 +1,5 @@
 --TEST--
-PHP_Archive::mapPhar buffer overrun
+Phar::mapPhar buffer overrun
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip";?>
 --FILE--

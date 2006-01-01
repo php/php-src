@@ -1,5 +1,5 @@
 --TEST--
-PHP_Archive::apiVersion
+Phar::apiVersion
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 --FILE--
