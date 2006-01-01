@@ -11,6 +11,8 @@ PHP                                                                        NEWS
   the callback). (Tony)
 - Fixed bug #35817 (unpack() does not decode odd number of hexadecimal values).
   (Ilia)
+- Fixed bug #35797 (segfault on PDOStatement::execute() with 
+  zend.ze1_compatibility_mode = On). (Tony, Ilia)
 - Fixed bug #35781 (stream_filter_append() can cause segfault). (Tony)
 - Fixed bug #35759 (mysqli_stmt_bind_result() makes huge allocation when
   column empty). (Andrey)
