@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? Jan 2006, PHP 5.1.2RC2
 - Added constants for libxslt and libexslt versions: LIBXSLT_VERSION,
   LIBXSLT_DOTTED_VERSION, LIBEXSLT_VERSION and LIBEXSLT_DOTTED_VERSION. (Pierre)
+- Fixed possible crash in apache_getenv()/apache_setenv() on invalid parameters.
+  (Ilia)
 - Changed errors to warnings in imagecolormatch(). (Pierre)
 - Fixed segfault/leak in imagecolormatch(). (Pierre)
 - Fixed small leak in mysqli_stmt_fetch() when bound variable was empty string.
