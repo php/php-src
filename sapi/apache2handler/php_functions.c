@@ -255,7 +255,7 @@ PHP_FUNCTION(apache_setenv)
 	int arg_count = ZEND_NUM_ARGS();
 	request_rec *r;
 
-	if (arg_count<1 || arg_count>3 ||
+	if (arg_count < 2 || arg_count > 3 ||
 		zend_get_parameters_ex(arg_count, &variable, &string_val, &walk_to_top) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
