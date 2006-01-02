@@ -1,3 +1,18 @@
+2006-01-01  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * zend_unicode.c
+      zend_unicode.h:
+      oops
+
+    * (PHP_5_1)
+      zend_multibyte.c
+      zend_multibyte.h:
+      fix typo
+
+    * zend_unicode.c
+      zend_unicode.h:
+      - fix typo
+
 2005-12-26  Antony Dovgal  <antony@zend.com>
 
     * tests/bug31177-2.phpt:
