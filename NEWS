@@ -22,6 +22,7 @@ PHP                                                                        NEWS
 - Fixed bug #35517 (mysql_stmt_fetch returns NULL on data truncation). (Georg)
 - Fixed bug #35377 (PDO_SQLITE: undefined reference to "fdatasync").
   (Nuno, Jani)
+- Fixed bug 35288 (iconv() function defined as libiconv()). (Nuno)
 - Fixed bug #29955 (mb_strtoupper() / lower() broken with Turkish encoding).
   (Rui)
 - Fixed bug #28899 (mb_substr() and substr() behave differently when
