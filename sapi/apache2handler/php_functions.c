@@ -179,6 +179,10 @@ PHP_FUNCTION(apache_request_headers)
 	const apr_array_header_t *arr;
 	char *key, *val;
 
+	if (ZEND_NUM_ARGS()) {
+		WRONG_PARAM_COUNT;
+	}
+
 	array_init(return_value);
 	
 	ctx = SG(server_context);
@@ -198,6 +202,10 @@ PHP_FUNCTION(apache_response_headers)
 	php_struct *ctx;
 	const apr_array_header_t *arr;
 	char *key, *val;
+
+	if (ZEND_NUM_ARGS()) {
+		WRONG_PARAM_COUNT;
+	}
 
 	array_init(return_value);
 	
