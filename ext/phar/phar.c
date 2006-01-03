@@ -89,15 +89,16 @@ static phar_internal_file_data *phar_get_filedata(char *alias, char *path TSRMLS
 	return ret;
 }
 
-/* {{{ phar_functions[]
- *
- * Every user visible function must have an entry in phar_functions[].
- */
-function_entry phar_functions[] = {
-	{NULL, NULL, NULL}	/* Must be the last line in phar_functions[] */
-};
-/* }}} */
+/* {{{ proto string apiVersion()
+ * Returns the api version */
+PHP_METHOD(Phar, apiVersion)
+{
+	RETURN_STRING("0.7.1", 3);
+}
+/* }}}*/
 
+/* {{{ proto bool canCompress()
+ * Returns whether phar extension supports compression using zlib */
 PHP_METHOD(Phar, canCompress)
 {
 #ifdef HAVE_PHAR_ZLIB
@@ -106,9 +107,10 @@ PHP_METHOD(Phar, canCompress)
 	RETURN_FALSE;
 #endif
 }
+/* }}} */
 
-/* {{{ php_archive_methods
- */
+/* {{{ proto mixed Phar::mapPhar(string alias, mixed compressed, [mixed unused [, mixed unused]])
+ * Maps the curretnly executed file (a phar) with the given alias */
 PHP_METHOD(Phar, mapPhar)
 {
 	char *fname, *alias, *buffer, *endbuffer, *unpack_var, *savebuf;
@@ -283,49 +285,6 @@ PHP_METHOD(Phar, mapPhar)
 	efree(savebuf);
 	php_stream_close(fp);
 }
-
-PHP_METHOD(Phar, apiVersion);
-
-zend_function_entry php_archive_methods[] = {
-	PHP_ME(Phar, mapPhar, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, apiVersion, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, canCompress, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	{NULL, NULL, NULL}
-};
-/* }}} */
-
-
-/* {{{ phar_module_entry
- */
-zend_module_entry phar_module_entry = {
-#if ZEND_MODULE_API_NO >= 20010901
-	STANDARD_MODULE_HEADER,
-#endif
-	"phar",
-	phar_functions,
-	PHP_MINIT(phar),
-	PHP_MSHUTDOWN(phar),
-	PHP_RINIT(phar),
-	PHP_RSHUTDOWN(phar),
-	PHP_MINFO(phar),
-#if ZEND_MODULE_API_NO >= 20010901
-	"0.1.0", /* Replace with version number for your extension */
-#endif
-	STANDARD_MODULE_PROPERTIES
-};
-/* }}} */
-
-#ifdef COMPILE_DL_PHAR
-ZEND_GET_MODULE(phar)
-#endif
-
-/* {{{ php_phar_init_globals
- */
-static void php_phar_init_globals_module(zend_phar_globals *phar_globals)
-{
-	memset(phar_globals, 0, sizeof(zend_phar_globals));
-}
-
 /* }}} */
 
 PHP_PHAR_API php_stream *php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
@@ -385,90 +344,6 @@ php_stream_wrapper php_stream_phar_wrapper =  {
     NULL,
     0 /* is_url */
 };
-
-/* {{{ PHP_MINIT_FUNCTION
- */
-PHP_MINIT_FUNCTION(phar)
-{
-	zend_class_entry php_archive_entry;
-	int machine_endian_check = 1;
-	ZEND_INIT_MODULE_GLOBALS(phar, php_phar_init_globals_module, NULL);
-
-	machine_little_endian = ((char *)&machine_endian_check)[0];
-
-	if (machine_little_endian) {
-		little_endian_long_map[0] = 0;
-		little_endian_long_map[1] = 1;
-		little_endian_long_map[2] = 2;
-		little_endian_long_map[3] = 3;
-	}
-	else {
-		zval val;
-		int size = sizeof(Z_LVAL(val));
-		Z_LVAL(val)=0; /*silence a warning*/
-
-		little_endian_long_map[0] = size - 1;
-		little_endian_long_map[1] = size - 2;
-		little_endian_long_map[2] = size - 3;
-		little_endian_long_map[3] = size - 4;
-	}
-	INIT_CLASS_ENTRY(php_archive_entry, "Phar", php_archive_methods);
-	php_archive_entry_ptr = zend_register_internal_class(&php_archive_entry TSRMLS_CC);
-	return php_register_url_stream_wrapper("phar", &php_stream_phar_wrapper TSRMLS_CC);
-}
-/* }}} */
-
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
-PHP_MSHUTDOWN_FUNCTION(phar)
-{
-	return php_unregister_url_stream_wrapper("phar" TSRMLS_CC);
-}
-/* }}} */
-
-/* Remove if there's nothing to do at request start */
-/* {{{ PHP_RINIT_FUNCTION
- */
-PHP_RINIT_FUNCTION(phar)
-{
-	zend_hash_init(&(PHAR_GLOBALS->phar_data), sizeof(phar_file_data),
-		 zend_get_hash_value, destroy_phar_data, 0);
-	return SUCCESS;
-}
-/* }}} */
-
-/* Remove if there's nothing to do at request end */
-/* {{{ PHP_RSHUTDOWN_FUNCTION
- */
-PHP_RSHUTDOWN_FUNCTION(phar)
-{
-	zend_hash_destroy(&(PHAR_GLOBALS->phar_data));
-	return SUCCESS;
-}
-/* }}} */
-
-PHP_METHOD(Phar, apiVersion)
-{
-	RETURN_STRING("0.7.1", 3);
-}
-
-/* {{{ PHP_MINFO_FUNCTION
- */
-PHP_MINFO_FUNCTION(phar)
-{
-	php_info_print_table_start();
-	php_info_print_table_header(2, "phar PHP Archive support", "enabled");
-	php_info_print_table_row(2, "phar API version", "0.7.1");
-	php_info_print_table_row(2, "CVS revision", "$Revision$");
-	php_info_print_table_row(2, "compressed phar support", 
-#ifdef HAVE_PHAR_ZLIB
-		"enabled");
-#else
-		"disabled");
-#endif
-	php_info_print_table_end();
-}
-/* }}} */
 
 /*
 */
@@ -1172,6 +1047,132 @@ PHP_PHAR_API php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filenam
 	php_url_free(resource);
 	return NULL;
 }
+
+#ifdef COMPILE_DL_PHAR
+ZEND_GET_MODULE(phar)
+#endif
+
+/* {{{ phar_functions[]
+ *
+ * Every user visible function must have an entry in phar_functions[].
+ */
+function_entry phar_functions[] = {
+	{NULL, NULL, NULL}	/* Must be the last line in phar_functions[] */
+};
+
+zend_function_entry php_archive_methods[] = {
+	PHP_ME(Phar, mapPhar, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	PHP_ME(Phar, apiVersion, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	PHP_ME(Phar, canCompress, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	{NULL, NULL, NULL}
+};
+/* }}} */
+
+/* {{{ php_phar_init_globals
+ */
+static void php_phar_init_globals_module(zend_phar_globals *phar_globals)
+{
+	memset(phar_globals, 0, sizeof(zend_phar_globals));
+}
+/* }}} */
+
+/* {{{ PHP_MINIT_FUNCTION
+ */
+PHP_MINIT_FUNCTION(phar)
+{
+	zend_class_entry php_archive_entry;
+	int machine_endian_check = 1;
+	ZEND_INIT_MODULE_GLOBALS(phar, php_phar_init_globals_module, NULL);
+
+	machine_little_endian = ((char *)&machine_endian_check)[0];
+
+	if (machine_little_endian) {
+		little_endian_long_map[0] = 0;
+		little_endian_long_map[1] = 1;
+		little_endian_long_map[2] = 2;
+		little_endian_long_map[3] = 3;
+	}
+	else {
+		zval val;
+		int size = sizeof(Z_LVAL(val));
+		Z_LVAL(val)=0; /*silence a warning*/
+
+		little_endian_long_map[0] = size - 1;
+		little_endian_long_map[1] = size - 2;
+		little_endian_long_map[2] = size - 3;
+		little_endian_long_map[3] = size - 4;
+	}
+	INIT_CLASS_ENTRY(php_archive_entry, "Phar", php_archive_methods);
+	php_archive_entry_ptr = zend_register_internal_class(&php_archive_entry TSRMLS_CC);
+	return php_register_url_stream_wrapper("phar", &php_stream_phar_wrapper TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ PHP_MSHUTDOWN_FUNCTION
+ */
+PHP_MSHUTDOWN_FUNCTION(phar)
+{
+	return php_unregister_url_stream_wrapper("phar" TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ PHP_RINIT_FUNCTION
+ */
+PHP_RINIT_FUNCTION(phar)
+{
+	zend_hash_init(&(PHAR_GLOBALS->phar_data), sizeof(phar_file_data),
+		 zend_get_hash_value, destroy_phar_data, 0);
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_RSHUTDOWN_FUNCTION
+ */
+PHP_RSHUTDOWN_FUNCTION(phar)
+{
+	zend_hash_destroy(&(PHAR_GLOBALS->phar_data));
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_MINFO_FUNCTION
+ */
+PHP_MINFO_FUNCTION(phar)
+{
+	php_info_print_table_start();
+	php_info_print_table_header(2, "phar PHP Archive support", "enabled");
+	php_info_print_table_row(2, "phar API version", "0.7.1");
+	php_info_print_table_row(2, "CVS revision", "$Revision$");
+	php_info_print_table_row(2, "compressed phar support", 
+#ifdef HAVE_PHAR_ZLIB
+		"enabled");
+#else
+		"disabled");
+#endif
+	php_info_print_table_end();
+}
+/* }}} */
+
+/* {{{ phar_module_entry
+ */
+zend_module_entry phar_module_entry = {
+#if ZEND_MODULE_API_NO >= 20010901
+	STANDARD_MODULE_HEADER,
+#endif
+	"phar",
+	phar_functions,
+	PHP_MINIT(phar),
+	PHP_MSHUTDOWN(phar),
+	PHP_RINIT(phar),
+	PHP_RSHUTDOWN(phar),
+	PHP_MINFO(phar),
+#if ZEND_MODULE_API_NO >= 20010901
+	"0.1.0", /* Replace with version number for your extension */
+#endif
+	STANDARD_MODULE_PROPERTIES
+};
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4
