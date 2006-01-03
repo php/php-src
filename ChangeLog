@@ -1,3 +1,43 @@
+2006-01-02  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * sapi/apache2handler/php_functions.c:
+      - Fixed apache_setenv() which requires 2 parameters
+
+2006-01-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      sapi/apache2handler/php_functions.c:
+      MFH: Fixed possible crash in apache_getenv()/apache_setenv() on invalid
+      parameters.
+
+    * sapi/apache2handler/php_functions.c:
+      MFB51: Fixed possible crash in apache_getenv()/apache_setenv() on invalid
+      parameters.
+
+    * (PHP_5_1)
+      NEWS
+      sapi/apache2handler/php_functions.c:
+      Fixed possible crash in apache_getenv()/apache_setenv() on invalid
+      parameters.
+
+2006-01-02  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      sapi/apache2handler/php_functions.c:
+      MFH: fixed apache_setenv(): at least 2 parameters are required
+
+2006-01-02  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_4_4)
+      pear/install-pear.php:
+      make sure mbstring doesn't screw stuff
+
+    * (PHP_4_4)
+      pear/packages/PEAR-1.4.4.tar
+      pear/packages/PEAR-1.4.5.tar
+      pear/packages/PEAR-1.4.5.tar:
+      upgrade to PEAR 1.4.5
+
 2006-01-01  Ilia Alshanetsky  <ilia@prohost.org>
 
     * sapi/apache2handler/php_functions.c:
