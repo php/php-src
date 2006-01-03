@@ -345,9 +345,7 @@ php_stream_wrapper php_stream_phar_wrapper =  {
     0 /* is_url */
 };
 
-/*
-*/
-static int phar_postprocess_file(char *contents, php_uint32 nr, unsigned long crc32, zend_bool read)
+static int phar_postprocess_file(char *contents, php_uint32 nr, unsigned long crc32, zend_bool read) /* {{{ */
 {
 	unsigned int crc = ~0;
 	php_uint32 i, actual_length;
@@ -378,10 +376,9 @@ static int phar_postprocess_file(char *contents, php_uint32 nr, unsigned long cr
 	}
 #undef PHAR_GET_VAL	
 }
+/* }}} */
 
-/* {{{ php_stream_phar_url_wrapper
- */
-PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
+PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
 {
 	phar_internal_file_data *idata;
 	php_stream *stream = NULL;
@@ -608,7 +605,7 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 }
 /* }}} */
 
-PHP_PHAR_API int phar_close(php_stream *stream, int close_handle TSRMLS_DC)
+PHP_PHAR_API int phar_close(php_stream *stream, int close_handle TSRMLS_DC) /* {{{ */
 {
 	phar_internal_file_data *data = (phar_internal_file_data *)stream->abstract;
 
@@ -618,8 +615,9 @@ PHP_PHAR_API int phar_close(php_stream *stream, int close_handle TSRMLS_DC)
 	efree(data);
 	return 0;
 }
+/* }}} */
 
-PHP_PHAR_API int phar_closedir(php_stream *stream, int close_handle TSRMLS_DC)
+PHP_PHAR_API int phar_closedir(php_stream *stream, int close_handle TSRMLS_DC)  /* {{{ */
 {
 	HashTable *data = (HashTable *)stream->abstract;
 
@@ -631,8 +629,9 @@ PHP_PHAR_API int phar_closedir(php_stream *stream, int close_handle TSRMLS_DC)
 	}
 	return 0;
 }
+/* }}} */
 
-PHP_PHAR_API size_t phar_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
+PHP_PHAR_API size_t phar_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
 	size_t to_read;
 	phar_internal_file_data *data = (phar_internal_file_data *)stream->abstract;
@@ -649,8 +648,9 @@ PHP_PHAR_API size_t phar_read(php_stream *stream, char *buf, size_t count TSRMLS
 	data->pointer += to_read;
 	return to_read;
 }
+/* }}} */
 
-PHP_PHAR_API size_t phar_readdir(php_stream *stream, char *buf, size_t count TSRMLS_DC)
+PHP_PHAR_API size_t phar_readdir(php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
 	size_t to_read;
 	HashTable *data = (HashTable *)stream->abstract;
@@ -675,8 +675,9 @@ PHP_PHAR_API size_t phar_readdir(php_stream *stream, char *buf, size_t count TSR
 
 	return sizeof(php_stream_dirent);
 }
+/* }}} */
 
-PHP_PHAR_API int phar_seek(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC)
+PHP_PHAR_API int phar_seek(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC) /* {{{ */
 {
 	phar_internal_file_data *data = (phar_internal_file_data *)stream->abstract;
 	switch (whence) {
@@ -710,21 +711,24 @@ PHP_PHAR_API int phar_seek(php_stream *stream, off_t offset, int whence, off_t *
 			return -1;
 	}
 }
+/* }}} */
 
-PHP_PHAR_API size_t phar_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
+PHP_PHAR_API size_t phar_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
 	return 0;
 }
+/* }}} */
 
-PHP_PHAR_API int phar_flush(php_stream *stream TSRMLS_DC)
+PHP_PHAR_API int phar_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 {
 	return EOF;
 }
+/* }}} */
 
 static void phar_dostat(phar_manifest_entry *data, php_stream_statbuf *ssb, zend_bool is_dir, char *alias,
 			int alias_len TSRMLS_DC);
 
-PHP_PHAR_API int phar_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC)
+PHP_PHAR_API int phar_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC) /* {{{ */
 {
 	phar_internal_file_data *data;
 	/* If ssb is NULL then someone is misbehaving */
@@ -734,9 +738,10 @@ PHP_PHAR_API int phar_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC
 	phar_dostat(data->internal_file, ssb, 0, data->data->alias, data->data->alias_len TSRMLS_CC);
 	return 0;
 }
+/* }}} */
 
 static void phar_dostat(phar_manifest_entry *data, php_stream_statbuf *ssb, zend_bool is_dir, char *alias,
-			int alias_len TSRMLS_DC)
+			int alias_len TSRMLS_DC) /* {{{ */
 {
 	char *tmp;
 	int tmp_len;
@@ -771,7 +776,6 @@ static void phar_dostat(phar_manifest_entry *data, php_stream_statbuf *ssb, zend
 #endif
 	}
 
-
 	ssb->sb.st_nlink = 1;
 	ssb->sb.st_rdev = -1;
 	if (data) {
@@ -796,10 +800,10 @@ static void phar_dostat(phar_manifest_entry *data, php_stream_statbuf *ssb, zend
 	ssb->sb.st_blocks = -1;
 #endif
 }
+/* }}}*/
 
 PHP_PHAR_API int phar_stream_stat(php_stream_wrapper *wrapper, char *url, int flags,
-				  php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC)
-
+				  php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC) /* {{{ */
 {
 	php_url *resource = NULL;
 	char *internal_file, *key;
@@ -860,16 +864,18 @@ PHP_PHAR_API int phar_stream_stat(php_stream_wrapper *wrapper, char *url, int fl
 	php_url_free(resource);
 	return 0;
 }
+/* }}} */
 
 /* add an empty element with a char * key to a hash table, avoiding duplicates */
-static int phar_add_empty(HashTable *ht, char *arKey, uint nKeyLength)
+static int phar_add_empty(HashTable *ht, char *arKey, uint nKeyLength)  /* {{{ */
 {
 	void *dummy = (void *) 1;
 
 	return zend_hash_update(ht, arKey, nKeyLength, &dummy, sizeof(void *), NULL);
 }
+/* }}} */
 
-static int compare_dir_name(const void *a, const void *b TSRMLS_DC)
+static int compare_dir_name(const void *a, const void *b TSRMLS_DC)  /* {{{ */
 {
 	Bucket *f;
 	Bucket *s;
@@ -895,8 +901,9 @@ static int compare_dir_name(const void *a, const void *b TSRMLS_DC)
 
 	return 0;
 }
+/* }}} */
 
-static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
+static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC) /* {{{ */
 {
 	HashTable *data;
 	int dirlen = strlen(dir);
@@ -979,9 +986,10 @@ PHAR_ADD_ENTRY:
 		return NULL;
 	}
 }
+/* }}}*/
 
 PHP_PHAR_API php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filename, char *mode,
-			int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
+			int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
 {
 	php_url *resource = NULL;
 	php_stream *ret;
@@ -1047,6 +1055,7 @@ PHP_PHAR_API php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filenam
 	php_url_free(resource);
 	return NULL;
 }
+/* }}} */
 
 #ifdef COMPILE_DL_PHAR
 ZEND_GET_MODULE(phar)
@@ -1060,8 +1069,14 @@ function_entry phar_functions[] = {
 	{NULL, NULL, NULL}	/* Must be the last line in phar_functions[] */
 };
 
+static
+ZEND_BEGIN_ARG_INFO(arginfo_phar_mapPhar, 0)
+	ZEND_ARG_INFO(0, alias)
+	ZEND_ARG_INFO(0, compressed)
+ZEND_END_ARG_INFO();
+
 zend_function_entry php_archive_methods[] = {
-	PHP_ME(Phar, mapPhar, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	PHP_ME(Phar, mapPhar, arginfo_phar_mapPhar, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, apiVersion, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, canCompress, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	{NULL, NULL, NULL}
