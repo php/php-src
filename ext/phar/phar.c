@@ -1002,12 +1002,14 @@ PHP_PHAR_API php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filenam
 	resource = php_url_parse(filename);
 	/* we must have at the very least phar://alias.phar/ */
 	if (!resource || !resource->scheme || !resource->host || !resource->path) {
-		if (resource->host && !resource->path) {
+		if (resource && resource->host && !resource->path) {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: no directory in \"%s\", must have at least phar://%s/ for root directory", filename, resource->host);
 			php_url_free(resource);
 			return NULL;
 		}
-		php_url_free(resource);
+		if (resource) {
+			php_url_free(resource);
+		}
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\", must have at least phar://%s/", filename, filename);
 		return NULL;
 	}
