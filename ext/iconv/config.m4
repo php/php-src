@@ -14,9 +14,6 @@ if test "$PHP_ICONV" != "no"; then
   ])
 
   if test "$iconv_avail" != "no"; then
-    iconv_cflags_save="$CFLAGS"
-    iconv_ldflags_save="$LDFLAGS"
-
     if test -z "$ICONV_DIR"; then
       for i in /usr/local /usr; do
         if test -f "$i/include/iconv.h" || test -f "$i/include/giconv.h"; then
@@ -40,46 +37,55 @@ if test "$PHP_ICONV" != "no"; then
       PHP_ICONV_H_PATH="$PHP_ICONV_PREFIX/include/iconv.h"
     fi 
 
-    if test -z "$iconv_lib_name"; then
-      AC_MSG_CHECKING([if iconv is glibc's])
-      AC_TRY_LINK([#include <gnu/libc-version.h>],[gnu_get_libc_version();],
+    AC_MSG_CHECKING([if iconv is glibc's])
+    AC_TRY_LINK([#include <gnu/libc-version.h>],[gnu_get_libc_version();],
+    [
+      AC_MSG_RESULT(yes)
+      iconv_impl_name="glibc"
+    ],[
+      AC_MSG_RESULT(no)
+    ])
+
+    if test -z "$iconv_impl_name"; then
+      AC_MSG_CHECKING([if using GNU libiconv])
+      php_iconv_old_ld="$LDFLAGS"
+      LDFLAGS="-liconv $LDFLAGS"
+      AC_TRY_RUN([
+        #include <$PHP_ICONV_H_PATH>
+	int main() {
+            printf("%d", _libiconv_version);
+            return 0;
+	}
+      ],[
+        AC_MSG_RESULT(yes)
+        iconv_impl_name="gnu_libiconv"
+      ],[
+        AC_MSG_RESULT(no)
+        LDFLAGS="$php_iconv_old_ld"
+      ])
+    fi
+
+    if test -z "$iconv_impl_name"; then
+      AC_MSG_CHECKING([if iconv is Konstantin Chuguev's])
+      AC_TRY_LINK([#include <iconv.h>],[iconv_ccs_init(NULL, NULL);],
       [
         AC_MSG_RESULT(yes)
-        iconv_impl_name="glibc"
+        iconv_impl_name="bsd"
       ],[
         AC_MSG_RESULT(no)
       ])
-    else
-      case "$iconv_lib_name" in
-        iconv [)]
-          AC_MSG_CHECKING([if iconv is Konstantin Chuguev's])
-          AC_TRY_LINK([#include <iconv.h>],[iconv_ccs_init(NULL, NULL);],
-          [
-            AC_MSG_RESULT(yes)
-            iconv_impl_name="bsd"
-          ],[
-            AC_MSG_RESULT(no)
-            iconv_impl_name="gnu_libiconv"
-          ])
-          ;;
-
-        giconv [)]
-          iconv_impl_name="gnu_libiconv"
-          ;;
-
-        biconv [)]
-          iconv_impl_name="bsd"
-          ;;
-      esac
-    fi 
+    fi
 
     echo > ext/iconv/php_have_bsd_iconv.h
     echo > ext/iconv/php_have_glibc_iconv.h
+    echo > ext/iconv/php_have_libiconv.h
 
     case "$iconv_impl_name" in
       gnu_libiconv [)]
         PHP_DEFINE([PHP_ICONV_IMPL],[\"libiconv\"],[ext/iconv])
         AC_DEFINE([PHP_ICONV_IMPL],["libiconv"],[Which iconv implementation to use])
+        PHP_DEFINE([HAVE_LIBICONV],1,[ext/iconv])
+        PHP_ADD_LIBRARY_WITH_PATH(iconv, "$PHP_ICONV_PREFIX/$PHP_LIBDIR", ICONV_SHARED_LIBADD)
         ;;
 
       bsd [)]
@@ -140,9 +146,6 @@ int main() {
     ], [
       AC_MSG_RESULT([no])
     ])
-
-    CFLAGS="$iconv_cflags_save"
-    LDFLAGS="$iconv_ldflags_save"
 
     PHP_NEW_EXTENSION(iconv, iconv.c, $ext_shared,, [-I\"$PHP_ICONV_PREFIX/include\"])
     PHP_SUBST(ICONV_SHARED_LIBADD)
