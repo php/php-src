@@ -51,11 +51,11 @@ if test "$PHP_ICONV" != "no"; then
       php_iconv_old_ld="$LDFLAGS"
       LDFLAGS="-liconv $LDFLAGS"
       AC_TRY_RUN([
-        #include <$PHP_ICONV_H_PATH>
-	int main() {
-            printf("%d", _libiconv_version);
-            return 0;
-	}
+#include <$PHP_ICONV_H_PATH>
+int main() {
+	printf("%d", _libiconv_version);
+	return 0;
+}
       ],[
         AC_MSG_RESULT(yes)
         iconv_impl_name="gnu_libiconv"
