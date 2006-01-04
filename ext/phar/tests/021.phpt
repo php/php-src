@@ -4,8 +4,6 @@ Phar: stream stat
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 --FILE--
 <?php
-function cleanup() { unlink(dirname(__FILE__) . '/008_phar.php'); }
-register_shutdown_function('cleanup');
 $file = "<?php
 Phar::mapPhar('hio', false);
 __HALT_COMPILER(); ?>";
@@ -20,12 +18,14 @@ $file .= pack('VV', strlen($manifest) + 4, 4) .
 	 pack('VV', crc32('b'), 1) . 'b';
 	 pack('VV', crc32('c'), 1) . 'c';
 	 pack('VV', crc32('d'), 1) . 'd';
-file_put_contents(dirname(__FILE__) . '/008_phar.php', $file);
-include dirname(__FILE__) . '/008_phar.php';
+file_put_contents(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php', $file);
+include dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $fp = fopen('phar://hio/a', 'r');
 var_dump(fstat($fp));
 fclose($fp);
 ?>
+--CLEAN--
+<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 array(26) {
   [0]=>
