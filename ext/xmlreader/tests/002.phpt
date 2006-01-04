@@ -23,10 +23,12 @@ if (!$reader->open($filename)) {
 while ($reader->read()) {
 	echo $reader->name."\n";
 }
+$reader->close();
 unlink($filename);
 touch($filename);
 $reader = new XMLReader();
 $reader->open($filename);
+$reader->close();
 unlink($filename);
 
 ?>
