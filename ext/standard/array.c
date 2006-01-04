@@ -1415,7 +1415,7 @@ PHP_FUNCTION(extract)
 
 		ZVAL_NULL(&final_name);
 
-		key_type = zend_hash_get_current_key_ex(Z_ARRVAL_PP(var_array), &var_name, &var_name_len, &num_key, 0, &pos);
+		key_type = zend_hash_get_current_key_ex(Z_ARRVAL_PP(var_array), (char **)&var_name, &var_name_len, &num_key, 0, &pos);
 		var_exists = 0;
 
 		if (key_type == HASH_KEY_IS_STRING ||
