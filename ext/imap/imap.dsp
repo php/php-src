@@ -123,7 +123,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "IMAP_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\\" /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "..\..\..\php_build\imap\c-client" /D "ZTS" /D "NDEBUG" /D "IMAP_EXPORTS" /D "COMPILE_DL_IMAP" /D HAVE_IMAP=1 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /D ZEND_DEBUG=0 /D HAVE_IMAP2001=1 /D HAVE_IMAP2004=1 /D HAVE_IMAP_SSL=1 /FR /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\\" /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "..\..\..\php_build\imap\c-client" /I "..\..\..\php_build\include\c-client" /D "ZTS" /D "NDEBUG" /D "IMAP_EXPORTS" /D "COMPILE_DL_IMAP" /D HAVE_IMAP=1 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /D ZEND_DEBUG=0 /D HAVE_IMAP2001=1 /D HAVE_IMAP2004=1 /D HAVE_IMAP_SSL=1 /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "NDEBUG"
