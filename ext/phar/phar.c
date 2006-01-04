@@ -109,67 +109,38 @@ PHP_METHOD(Phar, canCompress)
 }
 /* }}} */
 
-/* {{{ proto mixed Phar::mapPhar(string alias, mixed compressed, [mixed unused [, mixed unused]])
- * Maps the curretnly executed file (a phar) with the given alias */
-PHP_METHOD(Phar, mapPhar)
+#define MAPPHAR_ALLOC_FAIL(msg) \
+	php_stream_close(fp);\
+	php_error_docref(NULL TSRMLS_CC, E_ERROR, msg, fname);\
+	return FAILURE;
+
+#define MAPPHAR_FAIL(msg) \
+	efree(savebuf);\
+	MAPPHAR_ALLOC_FAIL(msg)
+
+static int phar_open_file(php_stream *fp, char *fname, char *alias, int alias_len, zend_bool compressed, long halt_offset) /* {{{ */
 {
-	char *fname, *alias, *buffer, *endbuffer, *unpack_var, *savebuf;
+	char *buffer, *endbuffer, *unpack_var, *savebuf;
 	phar_file_data mydata;
-	zend_bool compressed;
 	phar_manifest_entry entry;
 	HashTable	*manifest;
-	int alias_len, i;
-	long halt_offset;
+	int i;
 	php_uint32 manifest_len, manifest_count, manifest_index;
-	zval *halt_constant, **unused1, **unused2;
-	php_stream *fp;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sb|zz", &alias, &alias_len, &compressed, &unused1, &unused2) == FAILURE) {
-		return;
-	}
-#ifndef HAVE_PHAR_ZLIB
-	if (compressed) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "zlib extension is required for compressed .phar files");
-		return;
-	}
-#endif
-	fname = zend_get_executed_filename(TSRMLS_C);
-	if (!strcmp(fname, "[no active file]")) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "cannot initialize a phar outside of PHP execution");
-		return;
-	}
-
-	MAKE_STD_ZVAL(halt_constant);
-	if (0 == zend_get_constant("__COMPILER_HALT_OFFSET__", 24, halt_constant TSRMLS_CC)) {
-		zval_dtor(halt_constant);
-		FREE_ZVAL(halt_constant);
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "__HALT_COMPILER(); must be declared in a phar");
-		return;
-	}
-	halt_offset = Z_LVAL(*halt_constant);
-	zval_dtor(halt_constant);
-	FREE_ZVAL(halt_constant);
 
 	if (PG(safe_mode) && (!php_checkuid(fname, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
-		return;
+		return FAILURE;
 	}
 
 	if (php_check_open_basedir(fname TSRMLS_CC)) {
-		return;
+		return FAILURE;
 	}
 
 	fp = php_stream_open_wrapper(fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
 
 	if (!fp) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "unable to open phar for reading \"%s\"", fname);
-		return;
+		return FAILURE;
 	}
-#define MAPPHAR_ALLOC_FAIL(msg) php_stream_close(fp);\
-		php_stream_close(fp);\
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, msg, fname);\
-		return;
-#define MAPPHAR_FAIL(msg) efree(savebuf);\
-		MAPPHAR_ALLOC_FAIL(msg)
 
 	/* check for ?>\n and increment accordingly */
 	if (-1 == php_stream_seek(fp, halt_offset, SEEK_SET)) {
@@ -283,13 +254,185 @@ PHP_METHOD(Phar, mapPhar)
 	zend_hash_add(&(PHAR_GLOBALS->phar_data), alias, alias_len, &mydata,
 		sizeof(phar_file_data), NULL);
 	efree(savebuf);
-	php_stream_close(fp);
+	
+	return SUCCESS;
 }
 /* }}} */
+
+static int phar_open_filename(char *fname, char *alias, int alias_len, zend_bool compressed) /* {{{ */
+{
+	const char token[] = "__HALT_COMPILER();";
+	char *pos, buffer[1024 + sizeof(token)];
+	const long readsize = sizeof(buffer) - sizeof(token);
+	const long tokenlen = sizeof(token) - 1;
+	int result;
+	long halt_offset;
+	php_stream *fp;
+
+	fp = php_stream_open_wrapper(fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
+
+	if (!fp) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "unable to open phar for reading \"%s\"", fname);
+		return FAILURE;
+	}
+
+	/* Maybe it's better to compile the file instead of just searching,  */
+	/* but we only want the offset. So we want a .re scanner to find it. */
+
+	if (-1 == php_stream_seek(fp, 0, SEEK_SET)) {
+		MAPPHAR_ALLOC_FAIL("cannot seek to __HALT_COMPILER(); location in phar \"%s\"")
+	}
+
+	buffer[sizeof(buffer)-1] = '\0';
+	memset(buffer, 32, sizeof(token));
+	halt_offset = 0;
+	while(!php_stream_eof(fp)) {
+		if (php_stream_read(fp, buffer+tokenlen, readsize) < 0) {
+			MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (truncated manifest)")
+		}
+
+		if ((pos = strstr(buffer, token)) != NULL) {
+			halt_offset = (pos - buffer); /* no -tokenlen+tokenlen here */
+			result = phar_open_file(fp, fname, alias, alias_len, compressed, halt_offset);
+			php_stream_close(fp);
+			return result;
+		}
+
+		halt_offset += readsize;
+		memmove(buffer, buffer + tokenlen, readsize + 1);
+	}
+	
+	MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (__HALT_COMPILER(); not found)")
+	php_stream_close(fp);
+	return FAILURE;
+}
+/* }}} */
+
+static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char *mode, int options) /* {{{ */
+{
+	php_url *resource;
+	char *pos_p, *pos_z, *ext_str, *alias;
+	int len, ext_len;
+
+	if (!strncasecmp(filename, "phar://", 7)) {
+		filename += 7;
+		pos_p = strstr(filename, ".phar.php");
+		pos_z = strstr(filename, ".phar.gz");
+		if (pos_p) {
+			if (pos_z) {
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\" (cannot contain .phar.php and .phar.gz)", filename);
+				return NULL;
+			}
+			ext_str = pos_p;
+			ext_len = 9;
+		} else if (pos_z) {
+			ext_str = pos_z;
+			ext_len = 8;
+		} else {
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\" (filename extension must be either .phar.php or .phar.gz)", filename);
+			return NULL;
+		}
+		resource = emalloc(sizeof(php_url));
+		resource->scheme = estrndup("phar", 4);
+		len = ext_str - filename + ext_len;
+		alias = resource->host = estrndup(filename, len);
+		if (ext_str[ext_len]) {
+			resource->path = estrdup(ext_str+ext_len);
+		} else {
+			resource->path = estrndup("/", 1);
+		}
+#if MBO_0
+		if (resource) {
+			fprintf(stderr, "Alias:     %s\n", alias);
+			fprintf(stderr, "Compressed:%s\n", pos_z ? "yes" : "no");
+			fprintf(stderr, "Scheme:    %s\n", resource->scheme);
+/*			fprintf(stderr, "User:      %s\n", resource->user);*/
+/*			fprintf(stderr, "Pass:      %s\n", resource->pass ? "***" : NULL);*/
+			fprintf(stderr, "Host:      %s\n", resource->host);
+/*			fprintf(stderr, "Port:      %d\n", resource->port);*/
+			fprintf(stderr, "Path:      %s\n", resource->path);
+/*			fprintf(stderr, "Query:     %s\n", resource->query);*/
+/*			fprintf(stderr, "Fragment:  %s\n", resource->fragment);*/
+		}
+#endif
+		if (phar_open_filename(resource->host, alias, len, pos_z ? 1 : 0) == FAILURE)
+		{
+			php_url_free(resource);
+			return NULL;
+		}
+		
+		return resource;
+	}
+
+	return NULL;
+}
+/* }}} */
+
+static int phar_open_compiled_file(char *alias, int alias_len, zend_bool compressed) /* {{{ */
+{
+	char *fname;
+	int result;
+	long halt_offset;
+	zval *halt_constant;
+	php_stream *fp;
+
+	fname = zend_get_executed_filename(TSRMLS_C);
+
+	if (!strcmp(fname, "[no active file]")) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "cannot initialize a phar outside of PHP execution");
+		return FAILURE;
+	}
+
+	MAKE_STD_ZVAL(halt_constant);
+	if (0 == zend_get_constant("__COMPILER_HALT_OFFSET__", 24, halt_constant TSRMLS_CC)) {
+		zval_dtor(halt_constant);
+		FREE_ZVAL(halt_constant);
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "__HALT_COMPILER(); must be declared in a phar");
+		return FAILURE;
+	}
+	halt_offset = Z_LVAL(*halt_constant);
+	zval_dtor(halt_constant);
+	FREE_ZVAL(halt_constant);
+	
+	fp = php_stream_open_wrapper(fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
+
+	if (!fp) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "unable to open phar for reading \"%s\"", fname);
+		return FAILURE;
+	}
+
+	result = phar_open_file(fp, fname, alias, alias_len, compressed, halt_offset);
+	php_stream_close(fp);
+	return result;
+}
+/* }}} */
+
+/* {{{ proto mixed Phar::mapPhar(string alias, mixed compressed, [mixed unused [, mixed unused]])
+ * Maps the curretnly executed file (a phar) with the given alias */
+PHP_METHOD(Phar, mapPhar)
+{
+	char *alias;
+	zend_bool compressed;
+	int alias_len;
+	zval **unused1, **unused2;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sb|zz", &alias, &alias_len, &compressed, &unused1, &unused2) == FAILURE) {
+		return;
+	}
+#ifndef HAVE_PHAR_ZLIB
+	if (compressed) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "zlib extension is required for compressed .phar files");
+		return;
+	}
+#endif
+
+	RETURN_BOOL(phar_open_compiled_file(alias, alias_len, compressed) == SUCCESS);
+} /* }}} */
 
 PHP_PHAR_API php_stream *php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 PHP_PHAR_API int phar_close(php_stream *stream, int close_handle TSRMLS_DC);
 PHP_PHAR_API int phar_closedir(php_stream *stream, int close_handle TSRMLS_DC);
+PHP_PHAR_API int phar_seekdir(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC);
 PHP_PHAR_API size_t phar_read(php_stream *stream, char *buf, size_t count TSRMLS_DC);
 PHP_PHAR_API size_t phar_readdir(php_stream *stream, char *buf, size_t count TSRMLS_DC);
 PHP_PHAR_API int phar_seek(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC);
@@ -320,7 +463,7 @@ static php_stream_ops phar_dir_ops = {
 	phar_closedir, /* close */
 	phar_flush, /* flush (does nothing) */
 	"phar stream",
-	NULL, /* seek */
+	phar_seekdir, /* seek */
 	NULL, /* cast */
 	phar_stat, /* stat */
 	NULL, /* set option */
@@ -399,6 +542,11 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 #endif
 
 	resource = php_url_parse(path);
+
+	if (!resource && (resource = phar_open_url(wrapper, path, mode, options)) == NULL) {
+		return NULL;
+	}
+
 	/* we must have at the very least phar://alias.phar/internalfile.php */
 	if (!resource || !resource->scheme || !resource->host || !resource->path) {
 		if (resource) {
@@ -631,6 +779,35 @@ PHP_PHAR_API int phar_closedir(php_stream *stream, int close_handle TSRMLS_DC)  
 }
 /* }}} */
 
+PHP_PHAR_API int phar_seekdir(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC) /* {{{ */
+{
+	HashTable *data = (HashTable *)stream->abstract;
+
+	if (data)
+	{
+		if (whence == SEEK_END) {
+			whence = SEEK_SET;
+			offset = zend_hash_num_elements(data) + offset;
+		}
+		if (whence == SEEK_SET) {
+			zend_hash_internal_pointer_reset(data);
+		}
+
+		if (offset < 0) {
+			php_stream_wrapper_log_error(stream->wrapper, stream->flags TSRMLS_CC, "phar error: cannot seek because the resulting seek is negative");
+			return -1;
+		} else {
+			*newoffset = 0;
+			while (*newoffset < offset && zend_hash_move_forward(data) == SUCCESS) {
+				(*newoffset)++;
+			}
+			return 0;
+		}
+	}
+	return -1;
+}
+/* }}} */
+
 PHP_PHAR_API size_t phar_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
 	size_t to_read;
@@ -813,11 +990,17 @@ PHP_PHAR_API int phar_stream_stat(php_stream_wrapper *wrapper, char *url, int fl
 	phar_manifest_entry *file_data;
 
 	resource = php_url_parse(url);
+
+	if (!resource && (resource = phar_open_url(wrapper, url, "r", 0)) == NULL) {
+		return -1;
+	}
+
 	/* we must have at the very least phar://alias.phar/internalfile.php */
 	if (!resource || !resource->scheme || !resource->host || !resource->path) {
-		php_url_free(resource);
+		if (resource) {
+			php_url_free(resource);
+		}
 		php_stream_wrapper_log_error(wrapper, flags TSRMLS_CC, "phar error: invalid url \"%s\"", url);
-		php_url_free(resource);
 		return -1;
 	}
 
@@ -1000,6 +1183,11 @@ PHP_PHAR_API php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filenam
 	phar_manifest_entry *file_data;
 
 	resource = php_url_parse(filename);
+
+	if (!resource && (resource = phar_open_url(wrapper, filename, mode, options)) == NULL) {
+		return NULL;
+	}
+
 	/* we must have at the very least phar://alias.phar/ */
 	if (!resource || !resource->scheme || !resource->host || !resource->path) {
 		if (resource && resource->host && !resource->path) {
@@ -1119,8 +1307,10 @@ PHP_MINIT_FUNCTION(phar)
 		little_endian_long_map[2] = size - 3;
 		little_endian_long_map[3] = size - 4;
 	}
+
 	INIT_CLASS_ENTRY(php_archive_entry, "Phar", php_archive_methods);
 	php_archive_entry_ptr = zend_register_internal_class(&php_archive_entry TSRMLS_CC);
+
 	return php_register_url_stream_wrapper("phar", &php_stream_phar_wrapper TSRMLS_CC);
 }
 /* }}} */
@@ -1176,7 +1366,7 @@ zend_module_entry phar_module_entry = {
 #if ZEND_MODULE_API_NO >= 20010901
 	STANDARD_MODULE_HEADER,
 #endif
-	"phar",
+	"Phar",
 	phar_functions,
 	PHP_MINIT(phar),
 	PHP_MSHUTDOWN(phar),
