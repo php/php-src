@@ -102,6 +102,8 @@ static zend_class_entry *php_archive_entry_ptr;
 
 static void destroy_phar_data(void *pDest) /* {{{ */
 {
+	TSRMLS_FETCH();
+
 	phar_file_data *data = (phar_file_data *) pDest;
 	efree(data->alias);
 	zend_hash_destroy(data->manifest);
