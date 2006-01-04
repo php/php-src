@@ -41,34 +41,6 @@ extern zend_module_entry phar_module_entry;
 #include "TSRM.h"
 #endif
 
-PHP_MINIT_FUNCTION(phar);
-PHP_MSHUTDOWN_FUNCTION(phar);
-PHP_RINIT_FUNCTION(phar);
-PHP_RSHUTDOWN_FUNCTION(phar);
-PHP_MINFO_FUNCTION(phar);
-
-typedef struct _phar_manifest_entry {
-	php_uint32	filename_len;
-	char		*filename;
-	php_uint32	uncompressed_filesize;
-	php_uint32	timestamp;
-	php_uint32	offset_within_phar;
-	php_uint32	compressed_filesize;
-	zend_bool	crc_checked;
-	char        *filedata;
-} phar_manifest_entry;
-
-typedef struct _phar_file_data {
-	char		*filename;
-	int			filename_len;
-	char		*alias;
-	int			alias_len;
-	size_t		internal_file_start;
-	zend_bool	is_compressed;
-	HashTable	*manifest;
-	php_stream	*fp;
-} phar_file_data;
-
 ZEND_BEGIN_MODULE_GLOBALS(phar)
 	HashTable	phar_data;
 ZEND_END_MODULE_GLOBALS(phar)
