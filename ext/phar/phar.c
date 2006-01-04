@@ -118,7 +118,7 @@ PHP_METHOD(Phar, canCompress)
 	efree(savebuf);\
 	MAPPHAR_ALLOC_FAIL(msg)
 
-static int phar_open_file(php_stream *fp, char *fname, char *alias, int alias_len, zend_bool compressed, long halt_offset) /* {{{ */
+static int phar_open_file(php_stream *fp, char *fname, char *alias, int alias_len, zend_bool compressed, long halt_offset TSRMLS_DC) /* {{{ */
 {
 	char *buffer, *endbuffer, *unpack_var, *savebuf;
 	phar_file_data mydata;
@@ -259,7 +259,7 @@ static int phar_open_file(php_stream *fp, char *fname, char *alias, int alias_le
 }
 /* }}} */
 
-static int phar_open_filename(char *fname, char *alias, int alias_len, zend_bool compressed) /* {{{ */
+static int phar_open_filename(char *fname, char *alias, int alias_len, zend_bool compressed TSRMLS_DC) /* {{{ */
 {
 	const char token[] = "__HALT_COMPILER();";
 	char *pos, buffer[1024 + sizeof(token)];
@@ -293,7 +293,7 @@ static int phar_open_filename(char *fname, char *alias, int alias_len, zend_bool
 
 		if ((pos = strstr(buffer, token)) != NULL) {
 			halt_offset = (pos - buffer); /* no -tokenlen+tokenlen here */
-			result = phar_open_file(fp, fname, alias, alias_len, compressed, halt_offset);
+			result = phar_open_file(fp, fname, alias, alias_len, compressed, halt_offset TSRMLS_CC);
 			php_stream_close(fp);
 			return result;
 		}
@@ -308,7 +308,7 @@ static int phar_open_filename(char *fname, char *alias, int alias_len, zend_bool
 }
 /* }}} */
 
-static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char *mode, int options) /* {{{ */
+static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char *mode, int options TSRMLS_DC) /* {{{ */
 {
 	php_url *resource;
 	char *pos_p, *pos_z, *ext_str, *alias;
@@ -355,7 +355,7 @@ static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char 
 /*			fprintf(stderr, "Fragment:  %s\n", resource->fragment);*/
 		}
 #endif
-		if (phar_open_filename(resource->host, alias, len, pos_z ? 1 : 0) == FAILURE)
+		if (phar_open_filename(resource->host, alias, len, pos_z ? 1 : 0 TSRMLS_CC) == FAILURE)
 		{
 			php_url_free(resource);
 			return NULL;
@@ -368,7 +368,7 @@ static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char 
 }
 /* }}} */
 
-static int phar_open_compiled_file(char *alias, int alias_len, zend_bool compressed) /* {{{ */
+static int phar_open_compiled_file(char *alias, int alias_len, zend_bool compressed TSRMLS_DC) /* {{{ */
 {
 	char *fname;
 	int result;
@@ -401,7 +401,7 @@ static int phar_open_compiled_file(char *alias, int alias_len, zend_bool compres
 		return FAILURE;
 	}
 
-	result = phar_open_file(fp, fname, alias, alias_len, compressed, halt_offset);
+	result = phar_open_file(fp, fname, alias, alias_len, compressed, halt_offset TSRMLS_CC);
 	php_stream_close(fp);
 	return result;
 }
@@ -426,7 +426,7 @@ PHP_METHOD(Phar, mapPhar)
 	}
 #endif
 
-	RETURN_BOOL(phar_open_compiled_file(alias, alias_len, compressed) == SUCCESS);
+	RETURN_BOOL(phar_open_compiled_file(alias, alias_len, compressed TSRMLS_CC) == SUCCESS);
 } /* }}} */
 
 PHP_PHAR_API php_stream *php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
@@ -543,7 +543,7 @@ PHP_PHAR_API php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrappe
 
 	resource = php_url_parse(path);
 
-	if (!resource && (resource = phar_open_url(wrapper, path, mode, options)) == NULL) {
+	if (!resource && (resource = phar_open_url(wrapper, path, mode, options TSRMLS_CC)) == NULL) {
 		return NULL;
 	}
 
@@ -991,7 +991,7 @@ PHP_PHAR_API int phar_stream_stat(php_stream_wrapper *wrapper, char *url, int fl
 
 	resource = php_url_parse(url);
 
-	if (!resource && (resource = phar_open_url(wrapper, url, "r", 0)) == NULL) {
+	if (!resource && (resource = phar_open_url(wrapper, url, "r", 0 TSRMLS_CC)) == NULL) {
 		return -1;
 	}
 
@@ -1184,7 +1184,7 @@ PHP_PHAR_API php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filenam
 
 	resource = php_url_parse(filename);
 
-	if (!resource && (resource = phar_open_url(wrapper, filename, mode, options)) == NULL) {
+	if (!resource && (resource = phar_open_url(wrapper, filename, mode, options TSRMLS_CC)) == NULL) {
 		return NULL;
 	}
 
