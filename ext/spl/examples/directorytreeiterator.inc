@@ -12,7 +12,7 @@
 /** @ingroup Examples
  * @brief   DirectoryIterator to generate ASCII graphic directory trees
  * @author  Marcus Boerger
- * @version 1.0
+ * @version 1.1
  */
 class DirectoryTreeIterator extends RecursiveIteratorIterator
 {
@@ -21,7 +21,7 @@ class DirectoryTreeIterator extends RecursiveIteratorIterator
 	 */
 	function __construct($path)
 	{
-		parent::__construct(new RecursiveCachingIterator(new RecursiveDirectoryIterator($path), CachingIterator::CALL_TOSTRING|CachingIterator::CATCH_GET_CHILD), 1);
+		parent::__construct(new RecursiveCachingIterator(new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::KEY_AS_FILENAME), CachingIterator::CALL_TOSTRING|CachingIterator::CATCH_GET_CHILD), 1);
 	}
 
 	/** @return the current element prefixed with ASCII graphics
