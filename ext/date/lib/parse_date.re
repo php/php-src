@@ -451,11 +451,18 @@ static long timelib_parse_tz_cor(char **ptr)
 			break;
 		case 3:
 		case 4:
-			tmp = strtol(begin, NULL, 10);
-			return HOUR(tmp / 100) + tmp % 100;
+			if (begin[1] == ':') {
+				tmp = HOUR(strtol(begin, NULL, 10)) + strtol(begin + 2, NULL, 10);
+				return tmp;
+			} else if (begin[2] == ':') {
+				tmp = HOUR(strtol(begin, NULL, 10)) + strtol(begin + 3, NULL, 10);
+				return tmp;
+			} else {
+				tmp = strtol(begin, NULL, 10);
+				return HOUR(tmp / 100) + tmp % 100;
+			}
 		case 5:
-			tmp = HOUR(strtol(begin, NULL, 10)) +
-				strtol(begin + 3, NULL, 10);
+			tmp = HOUR(strtol(begin, NULL, 10)) + strtol(begin + 3, NULL, 10);
 			return tmp;
 	}
 	return 0;
@@ -743,7 +750,7 @@ second = minute | "60";
 secondlz = minutelz | "60";
 meridian = [AaPp] "."? [Mm] "."?;
 tz = "("? [A-Za-z]{1,4} ")"? | [A-Z][a-z]+([_/][A-Z][a-z]+)+;
-tzcorrection = [+-] hour24 ":"? minutelz?;
+tzcorrection = [+-] hour24 ":"? minute?;
 
 daysuf = "st" | "nd" | "rd" | "th";
 
@@ -806,7 +813,7 @@ datenocolon      = year4 monthlz daylz;
 soap             = year4 "-" monthlz "-" daylz "T" hour24lz ":" minutelz ":" secondlz frac tzcorrection?;
 xmlrpc           = year4 monthlz daylz "T" hour24 ":" minutelz ":" secondlz;
 xmlrpcnocolon    = year4 monthlz daylz 't' hour24 minutelz secondlz;
-wddx             = year4 "-" monthlz "-" daylz "T" hour24 ":" minutelz ":" secondlz;
+wddx             = year4 "-" month "-" day "T" hour24 ":" minute ":" second;
 pgydotd          = year4 "."? dayofyear;
 pgtextshort      = monthabbr "-" daylz "-" year;
 pgtextreverse    = year "-" monthabbr "-" daylz;
@@ -838,7 +845,7 @@ relativetext = reltextnumber space? reltextunit;
 
 /*!re2c
 	/* so that vim highlights correctly */
-	"yesterday"
+	'yesterday'
 	{
 		DEBUG_OUTPUT("yesterday");
 		TIMELIB_INIT;
@@ -850,7 +857,7 @@ relativetext = reltextnumber space? reltextunit;
 		return TIMELIB_RELATIVE;
 	}
 
-	"now"
+	'now'
 	{
 		DEBUG_OUTPUT("now");
 		TIMELIB_INIT;
@@ -859,7 +866,7 @@ relativetext = reltextnumber space? reltextunit;
 		return TIMELIB_RELATIVE;
 	}
 
-	"noon"
+	'noon'
 	{
 		DEBUG_OUTPUT("noon");
 		TIMELIB_INIT;
@@ -871,7 +878,7 @@ relativetext = reltextnumber space? reltextunit;
 		return TIMELIB_RELATIVE;
 	}
 
-	"midnight" | "today"
+	'midnight' | 'today'
 	{
 		DEBUG_OUTPUT("midnight | today");
 		TIMELIB_INIT;
@@ -881,7 +888,7 @@ relativetext = reltextnumber space? reltextunit;
 		return TIMELIB_RELATIVE;
 	}
 
-	"tomorrow"
+	'tomorrow'
 	{
 		DEBUG_OUTPUT("tomorrow");
 		TIMELIB_INIT;
