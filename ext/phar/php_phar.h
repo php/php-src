@@ -12,7 +12,8 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author: Gregory Beaver <cellog@php.net>                              |
+  | Authors: Gregory Beaver <cellog@php.net>                             |
+  |          Marcus Boerger <helly@php.net>                              |
   +----------------------------------------------------------------------+
 */
 
@@ -54,15 +55,18 @@ typedef struct _phar_manifest_entry {
 	php_uint32	offset_within_phar;
 	php_uint32	compressed_filesize;
 	zend_bool	crc_checked;
+	char        *filedata;
 } phar_manifest_entry;
 
 typedef struct _phar_file_data {
-	char		*file;
-	HashTable	*manifest;
+	char		*filename;
+	int			filename_len;
 	char		*alias;
-	int		alias_len;
+	int			alias_len;
 	size_t		internal_file_start;
 	zend_bool	is_compressed;
+	HashTable	*manifest;
+	php_stream	*fp;
 } phar_file_data;
 
 ZEND_BEGIN_MODULE_GLOBALS(phar)
