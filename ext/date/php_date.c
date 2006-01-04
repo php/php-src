@@ -74,6 +74,11 @@ zend_function_entry date_functions[] = {
 	/* Options and Configuration */
 	PHP_FE(date_default_timezone_set, NULL)
 	PHP_FE(date_default_timezone_get, NULL)
+
+	/* Astronomical functions */
+	PHP_FE(date_sunrise, NULL)
+	PHP_FE(date_sunset, NULL)
+	PHP_FE(date_sun_info, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -113,9 +118,22 @@ ZEND_DECLARE_MODULE_GLOBALS(date)
 timelib_tzdb *php_date_global_timezone_db;
 int php_date_global_timezone_db_enabled;
 
+#define DATE_DEFAULT_LATITUDE "31.7667"
+#define DATE_DEFAULT_LONGITUDE "35.2333"
+
+/* on 90'35; common sunset declaration (start of sun body appear) */
+#define DATE_SUNSET_ZENITH "90.583333"
+
+/* on 90'35; common sunrise declaration (sun body disappeared) */
+#define DATE_SUNRISE_ZENITH "90.583333"
+
 /* {{{ INI Settings */
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("date.timezone", "", PHP_INI_ALL, OnUpdateString, default_timezone, zend_date_globals, date_globals)
+	PHP_INI_ENTRY("date.default_latitude",           DATE_DEFAULT_LATITUDE,        PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("date.default_longitude",          DATE_DEFAULT_LONGITUDE,       PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("date.sunset_zenith",              DATE_SUNSET_ZENITH,           PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("date.sunrise_zenith",             DATE_SUNRISE_ZENITH,          PHP_INI_ALL, NULL)
 PHP_INI_END()
 /* }}} */
 
@@ -235,6 +253,11 @@ PHP_RSHUTDOWN_FUNCTION(date)
 	"methods and you are still getting this warning, you most likely " \
 	"misspelled the timezone identifier. "
 
+#define SUNFUNCS_RET_TIMESTAMP 0
+#define SUNFUNCS_RET_STRING    1
+#define SUNFUNCS_RET_DOUBLE    2
+
+
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(date)
 {
@@ -253,6 +276,10 @@ PHP_MINIT_FUNCTION(date)
 	REGISTER_STRING_CONSTANT("DATE_RFC2822", DATE_FORMAT_RFC2822, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_RSS",     DATE_FORMAT_RFC1123, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_W3C",     DATE_FORMAT_ISO8601, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("SUNFUNCS_RET_TIMESTAMP", SUNFUNCS_RET_TIMESTAMP, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SUNFUNCS_RET_STRING", SUNFUNCS_RET_STRING, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SUNFUNCS_RET_DOUBLE", SUNFUNCS_RET_DOUBLE, CONST_CS | CONST_PERSISTENT);
 
 	php_date_global_timezone_db = NULL;
 	php_date_global_timezone_db_enabled = 0;
@@ -1797,6 +1824,211 @@ PHP_FUNCTION(date_default_timezone_get)
 }
 /* }}} */
 
+/* {{{ php_do_date_sunrise_sunset
+ *  Common for date_sunrise() and date_sunset() functions
+ */
+static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_sunset)
+{
+	double latitude, longitude, zenith, gmt_offset = 0, altitude;
+	double h_rise, h_set, N;
+	timelib_sll rise, set, transit;
+	long time, retformat;
+	int             rs;
+	timelib_time   *t;
+	timelib_tzinfo *tzi;
+	char            retstr[6];
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|ldddd", &time, &retformat, &latitude, &longitude, &zenith, &gmt_offset) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+	switch (ZEND_NUM_ARGS()) {
+		case 1:
+			retformat = SUNFUNCS_RET_STRING;
+		case 2:
+			latitude = INI_FLT("date.default_latitude");
+		case 3:
+			longitude = INI_FLT("date.default_longitude");
+		case 4:
+			if (calc_sunset) {
+				zenith = INI_FLT("date.sunset_zenith");
+			} else {
+				zenith = INI_FLT("date.sunrise_zenith");
+			}
+		case 5:
+		case 6:
+			break;
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid format");
+			RETURN_FALSE;
+			break;
+	}
+	if (retformat != SUNFUNCS_RET_TIMESTAMP &&
+		retformat != SUNFUNCS_RET_STRING &&
+		retformat != SUNFUNCS_RET_DOUBLE)
+	{
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Wrong return format given, pick one of SUNFUNCS_RET_TIMESTAMP, SUNFUNCS_RET_STRING or SUNFUNCS_RET_DOUBLE");
+		RETURN_FALSE;
+	}
+	altitude = 90 - zenith;
+
+	/* Initialize time struct */
+	t = timelib_time_ctor();
+	tzi = get_timezone_info(TSRMLS_C);
+	t->tz_info = tzi;
+	t->zone_type = TIMELIB_ZONETYPE_ID;
+
+	if (ZEND_NUM_ARGS() <= 5) {
+		gmt_offset = timelib_get_current_offset(t) / 3600;
+	}
+
+	timelib_unixtime2local(t, time);
+	rs = timelib_astro_rise_set_altitude(t, longitude, latitude, altitude, altitude > -1 ? 1 : 0, &h_rise, &h_set, &rise, &set, &transit);
+
+	if (rs != 0) {
+		RETURN_FALSE;
+	}
+
+	if (retformat == SUNFUNCS_RET_TIMESTAMP) {
+		RETURN_LONG(calc_sunset ? set : rise);
+	}
+	N = (calc_sunset ? h_set : h_rise) + gmt_offset;
+	while (N > 24) {
+		N -= 24;
+	}
+	while (N < 0) {
+		N += 24;
+	}
+	switch (retformat) {
+		case SUNFUNCS_RET_STRING:
+			sprintf(retstr, "%02d:%02d", (int) N, (int) (60 * (N - (int) N)));
+			RETURN_STRINGL(retstr, 5, 1);
+			break;
+		case SUNFUNCS_RET_DOUBLE:
+			RETURN_DOUBLE(N);
+			break;
+	}
+}
+/* }}} */
+
+/* {{{ proto mixed date_sunrise(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]])
+   Returns time of sunrise for a given day and location */
+PHP_FUNCTION(date_sunrise)
+{
+	php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+/* {{{ proto mixed date_sunset(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]])
+   Returns time of sunset for a given day and location */
+PHP_FUNCTION(date_sunset)
+{
+	php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
+/* }}} */
+
+/* {{{ proto array date_sun_info(long time, float latitude, float longitude)
+   Returns an array with information about sun set/rise and twilight begin/end */
+PHP_FUNCTION(date_sun_info)
+{
+	long            time;
+	double          latitude, longitude;
+	timelib_time   *t, *t2;
+	timelib_tzinfo *tzi;
+	int             rs;
+	timelib_sll     rise, set, transit;
+	int             dummy;
+	double          ddummy;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ldd", &time, &latitude, &longitude) == FAILURE) {
+		RETURN_FALSE;
+	}
+	/* Initialize time struct */
+	t = timelib_time_ctor();
+	tzi = get_timezone_info(TSRMLS_C);
+	t->tz_info = tzi;
+	t->zone_type = TIMELIB_ZONETYPE_ID;
+	timelib_unixtime2local(t, time);
+
+	/* Setup */
+	t2 = timelib_time_ctor();
+	array_init(return_value);
+	
+	/* Get sun up/down and transit */
+	rs = timelib_astro_rise_set_altitude(t, latitude, longitude, -35.0/60, 1, &ddummy, &ddummy, &rise, &set, &transit);
+	switch (rs) {
+		case -1: /* always below */
+			add_assoc_bool(return_value, "sunrise", 0);
+			add_assoc_bool(return_value, "sunset", 0);
+			break;
+		case 1: /* always above */
+			add_assoc_bool(return_value, "sunrise", 1);
+			add_assoc_bool(return_value, "sunset", 1);
+			break;
+		default:
+			t2->sse = rise;
+			add_assoc_long(return_value, "sunrise", timelib_date_to_int(t2, &dummy));
+			t2->sse = set;
+			add_assoc_long(return_value, "sunset", timelib_date_to_int(t2, &dummy));
+	}
+	t2->sse = transit;
+	add_assoc_long(return_value, "transit", timelib_date_to_int(t2, &dummy));
+
+	/* Get civil twilight */
+	rs = timelib_astro_rise_set_altitude(t, latitude, longitude, -6.0, 0, &ddummy, &ddummy, &rise, &set, &transit);
+	switch (rs) {
+		case -1: /* always below */
+			add_assoc_bool(return_value, "civil_twilight_begin", 0);
+			add_assoc_bool(return_value, "civil_twilight_end", 0);
+			break;
+		case 1: /* always above */
+			add_assoc_bool(return_value, "civil_twilight_begin", 1);
+			add_assoc_bool(return_value, "civil_twilight_end", 1);
+			break;
+		default:
+			t2->sse = rise;
+			add_assoc_long(return_value, "civil_twilight_begin", timelib_date_to_int(t2, &dummy));
+			t2->sse = set;
+			add_assoc_long(return_value, "civil_twilight_end", timelib_date_to_int(t2, &dummy));
+	}
+
+	/* Get nautical twilight */
+	rs = timelib_astro_rise_set_altitude(t, latitude, longitude, -12.0, 0, &ddummy, &ddummy, &rise, &set, &transit);
+	switch (rs) {
+		case -1: /* always below */
+			add_assoc_bool(return_value, "nautical_twilight_begin", 0);
+			add_assoc_bool(return_value, "nautical_twilight_end", 0);
+			break;
+		case 1: /* always above */
+			add_assoc_bool(return_value, "nautical_twilight_begin", 1);
+			add_assoc_bool(return_value, "nautical_twilight_end", 1);
+			break;
+		default:
+			t2->sse = rise;
+			add_assoc_long(return_value, "nautical_twilight_begin", timelib_date_to_int(t2, &dummy));
+			t2->sse = set;
+			add_assoc_long(return_value, "nautical_twilight_end", timelib_date_to_int(t2, &dummy));
+	}
+
+	/* Get astronomical twilight */
+	rs = timelib_astro_rise_set_altitude(t, latitude, longitude, -18.0, 0, &ddummy, &ddummy, &rise, &set, &transit);
+	switch (rs) {
+		case -1: /* always below */
+			add_assoc_bool(return_value, "astronomical_twilight_begin", 0);
+			add_assoc_bool(return_value, "astronomical_twilight_end", 0);
+			break;
+		case 1: /* always above */
+			add_assoc_bool(return_value, "astronomical_twilight_begin", 1);
+			add_assoc_bool(return_value, "astronomical_twilight_end", 1);
+			break;
+		default:
+			t2->sse = rise;
+			add_assoc_long(return_value, "astronomical_twilight_begin", timelib_date_to_int(t2, &dummy));
+			t2->sse = set;
+			add_assoc_long(return_value, "astronomical_twilight_end", timelib_date_to_int(t2, &dummy));
+	}
+}
+/* }}} */
 /*
  * Local variables:
  * tab-width: 4
