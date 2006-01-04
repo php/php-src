@@ -12,13 +12,13 @@
 /** @ingroup Examples
  * @brief   A tree iterator that only shows directories.
  * @author  Marcus Boerger
- * @version 1.0
+ * @version 1.1
  */
 class DirectoryGraphIterator extends DirectoryTreeIterator
 {
 	function __construct($path)
 	{
-		RecursiveIteratorIterator::__construct(new RecursiveCachingIterator(new ParentIterator(new RecursiveDirectoryIterator($path)), CachingIterator::CALL_TOSTRING|CachingIterator::CATCH_GET_CHILD), 1);
+		RecursiveIteratorIterator::__construct(new RecursiveCachingIterator(new ParentIterator(new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::KEY_AS_FILENAME)), CachingIterator::CALL_TOSTRING|CachingIterator::CATCH_GET_CHILD), 1);
 	}
 }
 
