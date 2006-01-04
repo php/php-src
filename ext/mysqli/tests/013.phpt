@@ -25,7 +25,7 @@ mysqli fetch mixed / mysql_query
 	$stmt = mysqli_prepare($link, "SELECT * FROM test_bind_result");
 
 	$c = array(0,0,0,0,0,0,0,0);
-	mysqli_bind_result($stmt, $c[0], $c[1], $c[2], $c[3], $c[4], $c[5], $c[6], $c[7]);
+	$b_res= mysqli_bind_result($stmt, $c[0], $c[1], $c[2], $c[3], $c[4], $c[5], $c[6], $c[7]);
 	mysqli_execute($stmt);
 	mysqli_fetch($stmt); 
 	mysqli_fetch($stmt);  
@@ -38,10 +38,15 @@ mysqli fetch mixed / mysql_query
 	$test = "";
 	for ($i=0; $i < count($c); $i++)
 		$test .= ($c[0] == $d[0]) ? "1" : "0";
-
-	var_dump($test);
+	if ($test == "11111111")
+		echo "ok";
+	else if ($b_res == FALSE && mysqli_get_client_version() > 40100 && mysqli_get_client_version() < 50000 &&
+                 mysqli_get_server_version($link) > 50000)
+		echo "error (4.1 library with 5.x server)";
+	else
+		echo "error";
 
 	mysqli_close($link);
 ?>
---EXPECT--
-string(8) "11111111"
+--EXPECTF--
+ok

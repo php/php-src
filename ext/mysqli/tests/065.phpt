@@ -12,6 +12,7 @@ if (!function_exists('mysqli_set_charset')) {
 	include "connect.inc";
 
 	$mysql = new mysqli($host, $user, $passwd);
+	mysqli_query($mysql, "SET sql_mode=''");
 
 	$esc_str = chr(0xbf) . chr(0x5c);
 

@@ -12,6 +12,7 @@ precision=12
 	$link = mysqli_connect($host, $user, $passwd);
 
 	mysqli_select_db($link, "test");
+	mysqli_query($link, "SET sql_mode=''");
 
   	mysqli_query($link,"DROP TABLE IF EXISTS test_bind_fetch");
 
