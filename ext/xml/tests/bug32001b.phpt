@@ -108,8 +108,6 @@ foreach ($suite as $testcase) {
 
 // vim600: sts=4 sw=4 ts=4 encoding=UTF-8
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 libxml2 Version => %s
 Encoding: EUC-JP
