@@ -17,6 +17,12 @@ This is the extension version of PEAR's PHP_Archive package. Support for zlib an
   <email>cellog@php.net</email>
   <active>yes</active>
  </lead>
+ <lead>
+  <name>Marcus Boerger</name>
+  <user>helly</user>
+  <email>helly@php.net</email>
+  <active>yes</active>
+ </lead>
  <date>2006-01-01</date>
  <version>
   <release>0.1.0</release>
