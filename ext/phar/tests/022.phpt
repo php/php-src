@@ -4,8 +4,6 @@ Phar: stream stat
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 --FILE--
 <?php
-function cleanup() { unlink(dirname(__FILE__) . '/008_phar.php'); }
-register_shutdown_function('cleanup');
 $file = "<?php
 Phar::mapPhar('hio', false);
 __HALT_COMPILER(); ?>";
@@ -14,8 +12,8 @@ $manifest = pack('V', 1) . 'a' . pack('VVVV', strlen($contents), time(), 0, 8 + 
 $file .= pack('VV', strlen($manifest) + 4, 1) .
 	 $manifest .
 	 pack('VV', crc32($contents), strlen($contents)) . $contents;
-file_put_contents(dirname(__FILE__) . '/008_phar.php', $file);
-include dirname(__FILE__) . '/008_phar.php';
+file_put_contents(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php', $file);
+include dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $fp = fopen('phar://hio/a', 'r');
 var_dump(ftell($fp));
 echo 'fseek($fp, 1)';var_dump(fseek($fp, 1));
@@ -61,6 +59,8 @@ echo 'fseek($fp, 3, SEEK_CUR)';var_dump(fseek($fp, 3, SEEK_CUR));
 var_dump(ftell($fp));
 fclose($fp);
 ?>
+--CLEAN--
+<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECT--
 int(0)
 fseek($fp, 1)int(0)
@@ -100,13 +100,3 @@ int(0)
 int(4)
 fseek($fp, 3, SEEK_CUR)int(0)
 int(7)
-
-
-
-
-
-
-
-
-
-

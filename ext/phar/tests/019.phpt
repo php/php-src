@@ -4,8 +4,6 @@ Phar: opendir test, subdirectory
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 --FILE--
 <?php
-function cleanup() { unlink(dirname(__FILE__) . '/008_phar.php'); }
-register_shutdown_function('cleanup');
 $file = "<?php
 Phar::mapPhar('hio', true);
 __HALT_COMPILER(); ?>";
@@ -20,14 +18,16 @@ $file .= pack('VV', strlen($manifest) + 4, 4) .
 	 pack('VV', crc32('b'), 1) . 'b';
 	 pack('VV', crc32('c'), 1) . 'c';
 	 pack('VV', crc32('d'), 1) . 'd';
-file_put_contents(dirname(__FILE__) . '/008_phar.php', $file);
-include dirname(__FILE__) . '/008_phar.php';
+file_put_contents(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php', $file);
+include dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $dir = opendir('phar://hio/b');
 while (false !== ($a = readdir($dir))) {
 	var_dump($a);
 	var_dump(is_dir('phar://hio/b/' . $a));
 }
 ?>
+--CLEAN--
+<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECT--
 string(1) "a"
 bool(false)
