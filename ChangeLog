@@ -1,3 +1,31 @@
+2006-01-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/apache2handler/php_functions.c:
+      MFB51: Added param checks for ap2 fetch respose/request header functions.
+
+    * (PHP_5_1)
+      sapi/apache2handler/php_functions.c:
+      Added param checks for ap2 fetch respose/request header functions.
+
+2006-01-03  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/iconv/config.m4:
+      MFB
+
+    * (PHP_5_1)
+      ext/iconv/config.m4:
+      - prevent pontential failure with stupid compilers
+
+    * (PHP_5_1)
+      NEWS:
+      typofix
+
+    * (PHP_5_1)
+      NEWS
+      ext/iconv/config.m4
+      ext/iconv/config.m4:
+      - Fixed bug #35288 (iconv() function defined as libiconv())
+
 2006-01-02  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * sapi/apache2handler/php_functions.c:
