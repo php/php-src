@@ -48,7 +48,7 @@ dump('phar://hio', '/');
 
 ?>
 --CLEAN--
-<?php function cleanup() { unlink(dirname(__FILE__) . '/019c.phar.php'); } ?>
+<?php unlink(dirname(__FILE__) . '/019c.phar.php'); ?>
 --EXPECT--
 string(11) "phar://hio/"
 string(2) "/a"
