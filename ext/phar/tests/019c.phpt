@@ -4,24 +4,22 @@ Phar: opendir test, recurse into
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 --FILE--
 <?php
-function cleanup() { unlink(dirname(__FILE__) . '/008_phar.php'); }
-register_shutdown_function('cleanup');
 $file = "<?php
 Phar::mapPhar('hio', false);
 __HALT_COMPILER(); ?>";
 $manifest = '';
-$manifest .= pack('V', 1) . 'a' . pack('VVVV', 1, time(), 0, 9);
-$manifest .= pack('V', 3) . 'b/a' . pack('VVVV', 1, time(), 0, 9);
-$manifest .= pack('V', 5) . 'b/c/d' . pack('VVVV', 1, time(), 0, 9);
-$manifest .= pack('V', 5) . 'bad/c' . pack('VVVV', 1, time(), 0, 9);
+$manifest .= pack('V', 1) . 'a' .     pack('VVVV', 1, time(),  0, 9);
+$manifest .= pack('V', 3) . 'b/a' .   pack('VVVV', 1, time(),  9, 9);
+$manifest .= pack('V', 5) . 'b/c/d' . pack('VVVV', 1, time(), 18, 9);
+$manifest .= pack('V', 5) . 'bad/c' . pack('VVVV', 1, time(), 27, 9);
 $file .= pack('VV', strlen($manifest) + 4, 4) .
 	 $manifest .
 	 pack('VV', crc32('a'), 1) . 'a' .
-	 pack('VV', crc32('b'), 1) . 'b';
-	 pack('VV', crc32('c'), 1) . 'c';
+	 pack('VV', crc32('b'), 1) . 'b' .
+	 pack('VV', crc32('c'), 1) . 'c' .
 	 pack('VV', crc32('d'), 1) . 'd';
-file_put_contents(dirname(__FILE__) . '/008_phar.php', $file);
-include dirname(__FILE__) . '/008_phar.php';
+file_put_contents(dirname(__FILE__) . '/019c.phar.php', $file);
+include dirname(__FILE__) . '/019c.phar.php';
 
 function dump($phar, $base)
 {
@@ -49,6 +47,8 @@ function dump($phar, $base)
 dump('phar://hio', '/');
 
 ?>
+--CLEAN--
+<?php function cleanup() { unlink(dirname(__FILE__) . '/019c.phar.php'); } ?>
 --EXPECT--
 string(11) "phar://hio/"
 string(2) "/a"
