@@ -204,7 +204,7 @@ static void astro_sun_RA_dec(double d, double *RA, double *dec, double *r)
  *                    both set to the time when the sun is at south.  
  *                                                                    
  */
-int timelib_astro_rise_set_altitude(timelib_time *t_loc, double lon, double lat, double altit, int upper_limb, double *h_rise, double *h_set, timelib_sll *ts_rise, timelib_sll *ts_set)
+int timelib_astro_rise_set_altitude(timelib_time *t_loc, double lon, double lat, double altit, int upper_limb, double *h_rise, double *h_set, timelib_sll *ts_rise, timelib_sll *ts_set, timelib_sll *ts_transit)
 {
 	double  d,  /* Days since 2000 Jan 0.0 (negative before) */
 	sr,         /* Solar distance, astronomical units */
@@ -215,11 +215,12 @@ int timelib_astro_rise_set_altitude(timelib_time *t_loc, double lon, double lat,
 	tsouth,     /* Time when Sun is at south */
 	sidtime;    /* Local sidereal time */
 	timelib_time *t_utc;
-	timelib_sll   timestamp;
+	timelib_sll   timestamp, old_sse;
 
 	int rc = 0; /* Return cde from function - usually 0 */
 
 	/* Normalize time */
+	old_sse = t_loc->sse;
 	t_loc->h = 12;
 	t_loc->i = t_loc->s = 0;
 	timelib_update_ts(t_loc, NULL);
@@ -258,6 +259,7 @@ int timelib_astro_rise_set_altitude(timelib_time *t_loc, double lon, double lat,
 	{
 		double cost;
 		cost = (sind(altit) - sind(lat) * sind(sdec)) / (cosd(lat) * cosd(sdec));
+		*ts_transit = t_utc->sse + (tsouth * 3600);
 		if (cost >= 1.0) {
 			rc = -1;
 			t = 0.0;       /* Sun always below altit */
@@ -281,9 +283,9 @@ int timelib_astro_rise_set_altitude(timelib_time *t_loc, double lon, double lat,
 		}
 	}
 
-
-	/* Kill temporary time */
+	/* Kill temporary time and restore original sse */
 	timelib_time_dtor(t_utc);
+	t_loc->sse = old_sse;
 
 	return rc;
 }

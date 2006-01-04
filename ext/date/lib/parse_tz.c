@@ -364,3 +364,21 @@ timelib_time_offset *timelib_get_time_zone_info(timelib_sll ts, timelib_tzinfo *
 
 	return tmp;
 }
+
+timelib_sll timelib_get_current_offset(timelib_time *t)
+{
+	timelib_time_offset *gmt_offset;
+			
+	switch (t->zone_type) {
+		case TIMELIB_ZONETYPE_ABBR:
+		case TIMELIB_ZONETYPE_OFFSET:
+			return t->z * 60;
+			
+		case TIMELIB_ZONETYPE_ID:
+			gmt_offset = timelib_get_time_zone_info(t->sse, t->tz_info);
+			return gmt_offset->offset;
+
+		default:
+			return 0;
+	}
+}

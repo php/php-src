@@ -71,6 +71,11 @@ PHP_FUNCTION(timezone_abbreviations_list);
 PHP_FUNCTION(date_default_timezone_set);
 PHP_FUNCTION(date_default_timezone_get);
 
+/* Astro functions */
+PHP_FUNCTION(date_sunrise);
+PHP_FUNCTION(date_sunset);
+PHP_FUNCTION(date_sun_info);
+
 PHP_RINIT_FUNCTION(date);
 PHP_RSHUTDOWN_FUNCTION(date);
 PHP_MINIT_FUNCTION(date);

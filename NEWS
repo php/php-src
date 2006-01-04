@@ -9,7 +9,10 @@ PHP                                                                        NEWS
 - Fixed segfault/leak in imagecolormatch(). (Pierre)
 - Fixed small leak in mysqli_stmt_fetch() when bound variable was empty string.
   (Andrey)
-- Fixed bug #35821 (array_map() segfaults when exception is throwed from 
+- Fixed bug #35887 (wddx_deserialize not parsing dateTime fields properly).
+  (Derick)
+- Fixed bug #35885 (strtotime("NOW") no longer works). (Derick)
+- Fixed bug #35821 (array_map() segfaults when exception is throwed from
   the callback). (Tony)
 - Fixed bug #35817 (unpack() does not decode odd number of hexadecimal values).
   (Ilia)
@@ -23,6 +26,13 @@ PHP                                                                        NEWS
 - Fixed bug #35377 (PDO_SQLITE: undefined reference to "fdatasync").
   (Nuno, Jani)
 - Fixed bug #35288 (iconv() function defined as libiconv()). (Nuno)
+- Fixed bug #33789 (Many Problems with SunFuncs). (Derick)
+- Fixed bug #33671 (sun_rise and sun_set don't return a GMT timestamp if one
+  passes an offset). (Derick)
+- Fixed bug #32820 (date_sunrise and date_sunset don't handle GMT offset
+  well). (Derick)
+- Fixed bug #30937 (date_sunrise() & date_sunset() don't handle endless
+  day/night at high latitudes). (Derick)
 - Fixed bug #29955 (mb_strtoupper() / lower() broken with Turkish encoding).
   (Rui)
 - Fixed bug #28899 (mb_substr() and substr() behave differently when
