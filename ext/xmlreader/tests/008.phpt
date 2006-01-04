@@ -22,7 +22,7 @@ $xmlstring = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 </MOVIE>
 </LIST>';
 
-$dtdfile = dirname(__FILE__) . '/dtdexample.dtd'; 
+$dtdfile = rawurlencode(dirname(__FILE__)) . '/dtdexample.dtd'; 
 $file = dirname(__FILE__) . '/__008.xml';
 file_put_contents($file, $xmlstring);
 
@@ -35,10 +35,11 @@ while($reader->read());
 if ($reader->isValid()) {
 	echo "file DTD: ok\n";
 }
+$reader->close();
 unlink($file);
 
 $xmlstring = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE LIST SYSTEM "file:///' . dirname(__FILE__). '/dtdexample.dtd">
+<!DOCTYPE LIST SYSTEM "file:///' . $dtdfile. '">
 <LIST>
 <MOVIE ID="x200338360">
 <TITLE>Move Title 1</TITLE>
