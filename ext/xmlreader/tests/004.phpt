@@ -29,6 +29,7 @@ while ($reader->read()) {
 		}
 	}
 }
+$reader->close();
 unlink($filename);
 ?>
 ===DONE===
