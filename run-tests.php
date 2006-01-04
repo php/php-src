@@ -241,9 +241,10 @@ $temp_source = null;
 $temp_target = null;
 $temp_urlbase = null;
 $conf_passed = null;
+$no_clean = false;
 
 $cfgtypes = array('show', 'keep');
-$cfgfiles = array('skip', 'php');
+$cfgfiles = array('skip', 'php', 'clean');
 $cfg = array();
 foreach($cfgtypes as $type) {
 	$cfg[$type] = array();
@@ -316,6 +317,9 @@ if (isset($argc) && $argc > 1) {
 				case '--keep-php':
 					$cfg['keep']['php'] = true;
 					break;
+				case '--keep-clean':
+					$cfg['keep']['clean'] = true;
+					break;
 				//case 'l'
 				case 'm':
 					$leak_check = true;
@@ -325,6 +329,9 @@ if (isset($argc) && $argc > 1) {
 						$pass_options .= ' -n';
 					}
 					$pass_option_n = true;
+					break;
+				case '--no-clean':
+					$no_clean = true;
 					break;
 				case 'q':
 					putenv('NO_INTERACTION=1');
@@ -344,6 +351,9 @@ if (isset($argc) && $argc > 1) {
 					break;
 				case '--show-php':
 					$cfg['show']['php'] = true;
+					break;
+				case '--show-clean':
+					$cfg['show']['clean'] = true;
 					break;
 				case '--temp-source':
 					$temp_source = $argv[++$i];
@@ -430,11 +440,14 @@ Options:
                 to your source files and <tdir> some pach in your web page 
                 hierarchy with <url> pointing to <tdir>.
 
-    --keep-[all|php|skip]
-                Do not delete 'all' files, 'php' test file, 'skip' file.
+    --keep-[all|php|skip|clean]
+                Do not delete 'all' files, 'php' test file, 'skip' or 'clean' 
+                file.
 
-    --show-[all|php|skip]
-                Show 'all' files, 'php' test file, 'skip' file.
+    --show-[all|php|skip|clean]
+                Show 'all' files, 'php' test file, 'skip' or 'clean' file.
+
+    --no-clean  Do not execute clean section if any.
 
 HELP;
 					exit(1);
@@ -887,6 +900,7 @@ function run_test($php, $file, $env)
 	global $log_format, $info_params, $ini_overwrites, $cwd, $PHP_FAILED_TESTS;
 	global $pass_options, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx;
 	global $leak_check, $temp_source, $temp_target, $cfg, $environment;
+	global $no_clean;
 
 	$temp_filenames = null;
 	$org_file = $file;
@@ -1018,14 +1032,17 @@ TEST $file
 	$memcheck_filename = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').'mem';
 	$temp_file         = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').'php';
 	$test_file         = $test_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').'php';
-	$temp_skipif       = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').'skip';
-	$test_skipif       = $test_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').'skip';
+	$temp_skipif       = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').'skip.php';
+	$test_skipif       = $test_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').'skip.php';
+	$temp_clean        = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').'clean.php';
+	$test_clean        = $test_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').'clean.php';
 	$tmp_post          = $temp_dir . DIRECTORY_SEPARATOR . uniqid('/phpt.');
 	$tmp_relative_file = str_replace(dirname(__FILE__).DIRECTORY_SEPARATOR, '', $test_file) . 't';
 
 	if ($temp_source && $temp_target) {
-		$temp_skipif  .= '.phps';
-		$temp_file    .= '.phps';
+		$temp_skipif  .= 's';
+		$temp_file    .= 's';
+		$temp_clean   .= 's';
 		$copy_file     = $temp_dir . DIRECTORY_SEPARATOR . basename(is_array($file) ? $file[1] : $file).'.phps';
 		if (!is_dir(dirname($copy_file))) {
 			@mkdir(dirname($copy_file), 0777, true) or error("Cannot create output directory - " . dirname($copy_file));
@@ -1041,7 +1058,8 @@ TEST $file
 			'out'  => $output_filename,
 			'mem'  => $memcheck_filename,
 			'php'  => $temp_file,
-			'skip' => $temp_skipif);
+			'skip' => $temp_skipif,
+			'clean'=> $temp_clean);
 	}
 
 	if (is_array($IN_REDIRECT)) {
@@ -1061,6 +1079,8 @@ TEST $file
 	@unlink($temp_skipif);
 	@unlink($test_skipif);
 	@unlink($tmp_post);
+	@unlink($temp_clean);
+	@unlink($test_clean);
 
 	// Reset environment from any previous test.
 	$env['REDIRECT_STATUS']='';
@@ -1097,7 +1117,9 @@ TEST $file
 			$extra = substr(PHP_OS, 0, 3) !== "WIN" ?
 				"unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;": "";
 			$output = system_with_timeout("$extra $php -q $skipif_params $test_skipif", $env);
-			@unlink($test_skipif);
+			if (!$cfg['keep']['skip']) {
+				@unlink($test_skipif);
+			}
 			if (!strncasecmp('skip', trim($output), 4)) {
 				$reason = (eregi("^skip[[:space:]]*(.+)\$", trim($output))) ? eregi_replace("^skip[[:space:]]*(.+)\$", "\\1", trim($output)) : FALSE;
 				if ($reason) {
@@ -1254,6 +1276,28 @@ COMMAND $cmd
 ";
 
 	$out = system_with_timeout($cmd, $env);
+
+	if (array_key_exists('CLEAN', $section_text) && (!$no_clean || $cfg['keep']['clean'])) {
+		if (trim($section_text['CLEAN'])) {
+			if ($cfg['show']['clean']) {
+				echo "\n========CLEAN=======\n";
+				echo $section_text['CLEAN'];
+				echo "========DONE========\n";
+			}
+			save_text($test_clean, trim($section_text['CLEAN']), $temp_clean);
+			if (!$no_clean) {
+				$clean_params = array();
+				settings2array($ini_overwrites,$clean_params);
+				settings2params($clean_params);
+				$extra = substr(PHP_OS, 0, 3) !== "WIN" ?
+					"unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;": "";
+				system_with_timeout("$extra $php -q $clean_params $clean_skipif", $env);
+			}
+			if (!$cfg['keep']['clean']) {
+				@unlink($test_clean);
+			}
+		}
+	}
 
 	@unlink($tmp_post);
 
