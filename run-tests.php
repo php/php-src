@@ -906,7 +906,7 @@ function run_all_tests($test_files, $env, $redir_tested = NULL)
 		for(; $unicode_semantics < ($unicode_testing ? 2 : 1); $unicode_semantics++)
 		{
 			$test_idx++;
-			$result = run_test($php, $name, $rnv, $unicode_semantics);
+			$result = run_test($php, $name, $env, $unicode_semantics);
 			if (!is_array($name) && $result != 'REDIR')
 			{
 				$pu = $unicode_and_native && $unicode_semantics ? '.u' : '';
