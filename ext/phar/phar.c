@@ -12,7 +12,8 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author: Gregory Beaver <cellog@php.net>                              |
+  | Authors: Gregory Beaver <cellog@php.net>                             |
+  |          Marcus Boerger <helly@php.net>                              |
   +----------------------------------------------------------------------+
 */
 
