@@ -9,6 +9,7 @@ Bug #32405
 	/*** test mysqli_connect 127.0.0.1 ***/
 	$link = mysqli_connect($host, $user, $passwd);
 	mysqli_select_db($link, "test");
+	mysqli_query($link, "SET sql_mode=''");
 	
 	/* two fields are needed. the problem does not occur with 1 field only selected. */
 	$link->query("CREATE TABLE test_users(user_id int(10) unsigned NOT NULL auto_increment, login varchar(50) default '', PRIMARY KEY (user_id))");
