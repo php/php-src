@@ -71,6 +71,7 @@ int timelib_timezone_id_is_valid(char *timezone, timelib_tzdb *tzdb);
 timelib_tzinfo *timelib_parse_tzfile(char *timezone, timelib_tzdb *tzdb);
 int timelib_timestamp_is_in_dst(timelib_sll ts, timelib_tzinfo *tz);
 timelib_time_offset *timelib_get_time_zone_info(timelib_sll ts, timelib_tzinfo *tz);
+timelib_sll timelib_get_current_offset(timelib_time *t);
 void timelib_dump_tzinfo(timelib_tzinfo *tz);
 timelib_tzdb *timelib_builtin_db(void);
 timelib_tzdb_index_entry *timelib_timezone_builtin_identifiers_list(int *count);
@@ -96,6 +97,6 @@ void timelib_decimal_hour_to_hms(double h, int *hour, int *min, int *sec);
 
 /* from astro.c */
 double timelib_ts_to_juliandate(timelib_sll ts);
-int timelib_astro_rise_set_altitude(timelib_time *time, double lon, double lat, double altit, int upper_limb, double *h_rise, double *h_set, timelib_sll *ts_rise, timelib_sll *ts_set);
+int timelib_astro_rise_set_altitude(timelib_time *time, double lon, double lat, double altit, int upper_limb, double *h_rise, double *h_set, timelib_sll *ts_rise, timelib_sll *ts_set, timelib_sll *ts_transit);
 
 #endif
