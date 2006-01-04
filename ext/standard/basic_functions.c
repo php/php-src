@@ -696,6 +696,12 @@ zend_function_entry basic_functions[] = {
 	PHP_FE(chown,															NULL)
 	PHP_FE(chgrp,															NULL)
 #endif
+#if HAVE_LCHOWN
+	PHP_FE(lchown,															NULL)
+#endif
+#if HAVE_LCHOWN
+	PHP_FE(lchgrp,															NULL)
+#endif
 	PHP_FE(chmod,															NULL)
 #if HAVE_UTIME
 	PHP_FE(touch,															NULL)

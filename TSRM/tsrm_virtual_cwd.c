@@ -777,7 +777,7 @@ CWD_API int virtual_chmod(const char *filename, mode_t mode TSRMLS_DC)
 }
 
 #if !defined(TSRM_WIN32) && !defined(NETWARE)
-CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group TSRMLS_DC)
+CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int link TSRMLS_DC)
 {
 	cwd_state new_state;
 	int ret;
@@ -785,7 +785,15 @@ CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group TSRMLS_
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	virtual_file_ex(&new_state, filename, NULL, 0);
 
-	ret = chown(new_state.cwd, owner, group);
+	if (link) {
+#if HAVE_LCHOWN
+		ret = lchown(new_state.cwd, owner, group);
+#else
+		ret = -1;
+#endif
+	} else {
+		ret = chown(new_state.cwd, owner, group);
+	}
 
 	CWD_STATE_FREE(&new_state);
 	return ret;
