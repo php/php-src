@@ -323,12 +323,9 @@ PHP_FUNCTION(disk_free_space)
 }
 /* }}} */
 
-/* {{{ proto bool chgrp(string filename, mixed group)
-   Change file group */
-#ifndef NETWARE
-PHP_FUNCTION(chgrp)
+
+static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp)
 {
-#if !defined(WINDOWS)
 	zval **filename, **group;
 	gid_t gid;
 	struct group *gr=NULL;
@@ -360,25 +357,48 @@ PHP_FUNCTION(chgrp)
 		RETURN_FALSE;
 	}
 
-	ret = VCWD_CHOWN(Z_STRVAL_PP(filename), -1, gid);
+	if (do_lchgrp) {
+		ret = VCWD_LCHOWN(Z_STRVAL_PP(filename), -1, gid);
+	} else {
+		ret = VCWD_CHOWN(Z_STRVAL_PP(filename), -1, gid);
+	}
 	if (ret == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
+}
+
+#ifndef NETWARE
+/* {{{ proto bool chgrp(string filename, mixed group)
+   Change file group */
+PHP_FUNCTION(chgrp)
+{
+#if !defined(WINDOWS)
+	php_do_chgrp(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 #else
 	RETURN_FALSE;
 #endif
 }
-#endif
 /* }}} */
 
-/* {{{ proto bool chown (string filename, mixed user)
-   Change file owner */
-#ifndef NETWARE
-PHP_FUNCTION(chown)
+/* {{{ proto bool lchgrp(string filename, mixed group)
+   Change symlink group */
+#if HAVE_LCHOWN
+PHP_FUNCTION(lchgrp)
 {
-#if !defined(WINDOWS)
+# if !defined(WINDOWS)
+	php_do_chgrp(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+# else
+	RETURN_FALSE;
+# endif
+}
+#endif
+/* }}} */
+#endif
+
+static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown)
+{
 	zval **filename, **user;
 	int ret;
 	uid_t uid;
@@ -410,16 +430,46 @@ PHP_FUNCTION(chown)
 		RETURN_FALSE;
 	}
 
-	ret = VCWD_CHOWN(Z_STRVAL_PP(filename), uid, -1);
+	if (do_lchown) {
+		ret = VCWD_LCHOWN(Z_STRVAL_PP(filename), uid, -1);
+	} else {
+		ret = VCWD_CHOWN(Z_STRVAL_PP(filename), uid, -1);
+	}
 	if (ret == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
+}
+
+#ifndef NETWARE
+/* {{{ proto bool chown (string filename, mixed user)
+   Change file owner */
+PHP_FUNCTION(chown)
+{
+#if !defined(WINDOWS)
+	RETVAL_TRUE;
+	php_do_chown(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+#else
+	RETURN_FALSE;
 #endif
-	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool chown (string filename, mixed user)
+   Change file owner */
+#if HAVE_LCHOWN
+PHP_FUNCTION(lchown)
+{
+# if !defined(WINDOWS)
+	RETVAL_TRUE;
+	php_do_chown(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+# else
+	RETURN_FALSE;
+# endif
 }
 #endif
 /* }}} */
+#endif
 
 /* {{{ proto bool chmod(string filename, int mode)
    Change file mode */
