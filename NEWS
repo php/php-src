@@ -1,6 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2005, Version 4.4.2
+05 Jan 2006, Version 4.4.2RC2
 - Prevent header injection by limiting each header to a single line. (Ilia)
 - Fixed possible XSS inside error reporting functionality. (Ilia)
 - Fixed bug #35817 (unpack() does not decode odd number of hexadecimal values).
