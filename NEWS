@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - Fixed segfault/leak in imagecolormatch(). (Pierre)
 - Fixed small leak in mysqli_stmt_fetch() when bound variable was empty string.
   (Andrey)
+- Fixed bug #35908 (curl extension uses undefined GCRY_THREAD_OPTIONS_USER).
+  (Ilia)
 - Fixed bug #35887 (wddx_deserialize not parsing dateTime fields properly).
   (Derick)
 - Fixed bug #35885 (strtotime("NOW") no longer works). (Derick)
