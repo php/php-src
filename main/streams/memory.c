@@ -39,6 +39,7 @@ typedef struct {
 	size_t      fsize;
 	size_t      smax;
 	int			mode;
+	php_stream  **owner_ptr;
 } php_stream_memory_data;
 
 
@@ -118,6 +119,9 @@ static int php_stream_memory_close(php_stream *stream, int close_handle TSRMLS_D
 	if (ms->data && close_handle && ms->mode != TEMP_STREAM_READONLY) {
 		efree(ms->data);
 	}
+	if (ms->owner_ptr) {
+		*ms->owner_ptr = NULL;
+	}
 	efree(ms);
 	return 0;
 }
@@ -147,44 +151,51 @@ static int php_stream_memory_seek(php_stream *stream, off_t offset, int whence, 
 			if (offset < 0) {
 				if (ms->fpos < (size_t)(-offset)) {
 					ms->fpos = 0;
-					/*return EINVAL;*/
+					*newoffs = -1;
+					return -1;
 				} else {
 					ms->fpos = ms->fpos + offset;
+					*newoffs = ms->fpos;
+					return 0;
 				}
 			} else {
 				if (ms->fpos < (size_t)(offset)) {
 					ms->fpos = ms->fsize;
-					/*return EINVAL;*/
+					*newoffs = -1;
+					return -1;
 				} else {
 					ms->fpos = ms->fpos + offset;
+					*newoffs = ms->fpos;
+					return 0;
 				}
 			}
-			*newoffs = ms->fpos;
-			return 0;
 		case SEEK_SET:
 			if (ms->fsize < (size_t)(offset)) {
 				ms->fpos = ms->fsize;
-				/*return EINVAL;*/
+				*newoffs = -1;
+				return -1;
 			} else {
 				ms->fpos = offset;
+				*newoffs = ms->fpos;
+				return 0;
 			}
-			*newoffs = ms->fpos;
-			return 0;
 		case SEEK_END:
 			if (offset > 0) {
 				ms->fpos = ms->fsize;
-				/*return EINVAL;*/
-			} else if (ms->fpos < (size_t)(-offset)) {
+				*newoffs = -1;
+				return -1;
+			} else if (ms->fsize < (size_t)(-offset)) {
 				ms->fpos = 0;
-				/*return EINVAL;*/
+				*newoffs = -1;
+				return -1;
 			} else {
 				ms->fpos = ms->fsize + offset;
+				*newoffs = ms->fpos;
+				return 0;
 			}
-			*newoffs = ms->fpos;
-			return 0;
 		default:
-			return 0;
-			/*return EINVAL;*/
+			*newoffs = ms->fpos;
+			return -1;
 	}
 }
 /* }}} */
@@ -220,6 +231,7 @@ PHPAPI php_stream *_php_stream_memory_create(int mode STREAMS_DC TSRMLS_DC)
 	self->fsize = 0;
 	self->smax = -1;
 	self->mode = mode;
+	self->owner_ptr = NULL;
 	
 	stream = php_stream_alloc(&php_stream_memory_ops, self, 0, mode & TEMP_STREAM_READONLY ? "r+b" : "w+b");
 	stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;
@@ -288,6 +300,9 @@ static size_t php_stream_temp_write(php_stream *stream, const char *buf, size_t 
 	ts = stream->abstract;
 	assert(ts != NULL);
 
+	if (!ts->innerstream) {
+		return -1;
+	}
 	if (php_stream_is(ts->innerstream, PHP_STREAM_IS_MEMORY)) {
 		size_t memsize;
 		char *membuf = php_stream_memory_get_buffer(ts->innerstream, &memsize);
@@ -314,6 +329,10 @@ static size_t php_stream_temp_read(php_stream *stream, char *buf, size_t count T
 	ts = stream->abstract;
 	assert(ts != NULL);
 
+	if (!ts->innerstream) {
+		return -1;
+	}
+	
 	got = php_stream_read(ts->innerstream, buf, count);
 	
 	if (!got) {
@@ -335,7 +354,11 @@ static int php_stream_temp_close(php_stream *stream, int close_handle TSRMLS_DC)
 	ts = stream->abstract;
 	assert(ts != NULL);
 
-	ret = php_stream_free(ts->innerstream, PHP_STREAM_FREE_CLOSE | (close_handle ? 0 : PHP_STREAM_FREE_PRESERVE_HANDLE));
+	if (ts->innerstream) {
+		ret = php_stream_free(ts->innerstream, PHP_STREAM_FREE_CLOSE | (close_handle ? 0 : PHP_STREAM_FREE_PRESERVE_HANDLE));
+	} else {
+		ret = 0;
+	}
 
 	efree(ts);
 
@@ -353,7 +376,7 @@ static int php_stream_temp_flush(php_stream *stream TSRMLS_DC)
 	ts = stream->abstract;
 	assert(ts != NULL);
 
-	return php_stream_flush(ts->innerstream);
+	return ts->innerstream ? php_stream_flush(ts->innerstream) : -1;
 }
 /* }}} */
 
@@ -368,6 +391,10 @@ static int php_stream_temp_seek(php_stream *stream, off_t offset, int whence, of
 	ts = stream->abstract;
 	assert(ts != NULL);
 
+	if (!ts->innerstream) {
+		*newoffs = -1;
+		return -1;
+	}
 	ret = php_stream_seek(ts->innerstream, offset, whence);
 	*newoffs = php_stream_tell(ts->innerstream);
 	
@@ -388,6 +415,9 @@ static int php_stream_temp_cast(php_stream *stream, int castas, void **ret TSRML
 	ts = stream->abstract;
 	assert(ts != NULL);
 
+	if (!ts->innerstream) {
+		return FAILURE;
+	}
 	if (php_stream_is(ts->innerstream, PHP_STREAM_IS_STDIO)) {
 		return php_stream_cast(ts->innerstream, castas, ret, 0);
 	}
@@ -444,6 +474,7 @@ PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STR
 	stream = php_stream_alloc(&php_stream_temp_ops, self, 0, mode & TEMP_STREAM_READONLY ? "r+b" : "w+b");
 	stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;
 	self->innerstream = php_stream_memory_create(mode);
+	((php_stream_memory_data*)self->innerstream->abstract)->owner_ptr = &self->innerstream;
 
 	return stream;
 }
