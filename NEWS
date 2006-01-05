@@ -1,5 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? Jan 2005, Version 4.4.0
+
+
 05 Jan 2006, Version 4.4.2RC2
 - Prevent header injection by limiting each header to a single line. (Ilia)
 - Fixed possible XSS inside error reporting functionality. (Ilia)
