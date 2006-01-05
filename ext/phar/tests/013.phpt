@@ -17,4 +17,4 @@ echo file_get_contents('phar://hio/a');
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
-Warning: file_get_contents(phar://hio/a): failed to open stream: phar error: internal corruption of phar "%s" (filesize mismatch on file "a") in %s on line %d
+Warning: file_get_contents(phar://hio/a): failed to open stream: phar error: internal corruption of phar "%s" (actual filesize mismatch on file "a") in %s on line %d
