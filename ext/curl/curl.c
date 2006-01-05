@@ -1517,7 +1517,7 @@ static int php_curl_ssl_mutex_unlock(void **m)
 }
 
 static struct gcry_thread_cbs php_curl_gnutls_tsl = {
-	GCRY_THREAD_OPTIONS_USER,
+	GCRY_THREAD_OPTION_USER,
 	NULL,
 	php_curl_ssl_mutex_create,
 	php_curl_ssl_mutex_destroy,
