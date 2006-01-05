@@ -6,6 +6,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #35817 (unpack() does not decode odd number of hexadecimal values).
   (Ilia)
 - Fixed bug #35735 ($EGREP not defined in configure). (Jani)
+- Fixed bug #35669 (imap_mail_compose() crashes with 
+  multipart-multiboundary-email).  (Ilia)
 - Fixed bug #35655 (whitespace following end of heredoc is lost). (Ilia)
 - Fixed bug #35646 (%{mod_php_memory_usage}n is not reset after exit). 
   (vovik at getart dot ru, Tony)
