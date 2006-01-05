@@ -24,7 +24,9 @@ if test "$PHP_PGSQL" != "no"; then
     AC_MSG_RESULT([$PG_CONFIG])
     PGSQL_INCLUDE=`$PG_CONFIG --includedir`
     PGSQL_LIBDIR=`$PG_CONFIG --libdir`
-    AC_DEFINE(HAVE_PG_CONFIG_H,1,[Whether to have pg_config.h])
+    if test -r "$PGSQL_INCLUDE/pg_config.h"; then
+      AC_DEFINE(HAVE_PG_CONFIG_H,1,[Whether to have pg_config.h])
+    fi
   else
     AC_MSG_RESULT(not found)
     if test "$PHP_PGSQL" = "yes"; then
