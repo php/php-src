@@ -1,3 +1,309 @@
+2006-01-04  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_1)
+      TSRM/LICENSE
+      TSRM/TSRM.c
+      TSRM/TSRM.h:
+      - Update to 2006
+
+    * TSRM/LICENSE:
+      - One more update
+
+    * TSRM/TSRM.c
+      TSRM/TSRM.h
+      ZendEngine2/acconfig.h
+      ZendEngine2/acconfig.h
+      ZendEngine2/header
+      ZendEngine2/header
+      ZendEngine2/zend.c
+      ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h
+      ZendEngine2/zend_alloc.h
+      ZendEngine2/zend_arg_defs.c
+      ZendEngine2/zend_arg_defs.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.h
+      ZendEngine2/zend_builtin_functions.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_config.nw.h
+      ZendEngine2/zend_config.nw.h
+      ZendEngine2/zend_config.w32.h
+      ZendEngine2/zend_config.w32.h
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_constants.h
+      ZendEngine2/zend_constants.h
+      ZendEngine2/zend_default_classes.c
+      ZendEngine2/zend_default_classes.c
+      ZendEngine2/zend_dynamic_array.c
+      ZendEngine2/zend_dynamic_array.c
+      ZendEngine2/zend_dynamic_array.h
+      ZendEngine2/zend_dynamic_array.h
+      ZendEngine2/zend_errors.h
+      ZendEngine2/zend_errors.h
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_exceptions.h
+      ZendEngine2/zend_exceptions.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_extensions.c
+      ZendEngine2/zend_extensions.c
+      ZendEngine2/zend_extensions.h
+      ZendEngine2/zend_extensions.h
+      ZendEngine2/zend_fast_cache.h
+      ZendEngine2/zend_fast_cache.h
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_globals_macros.h
+      ZendEngine2/zend_globals_macros.h
+      ZendEngine2/zend_hash.c
+      ZendEngine2/zend_hash.c
+      ZendEngine2/zend_hash.h
+      ZendEngine2/zend_hash.h
+      ZendEngine2/zend_highlight.c
+      ZendEngine2/zend_highlight.c
+      ZendEngine2/zend_highlight.h
+      ZendEngine2/zend_highlight.h
+      ZendEngine2/zend_indent.c
+      ZendEngine2/zend_indent.c
+      ZendEngine2/zend_indent.h
+      ZendEngine2/zend_indent.h
+      ZendEngine2/zend_ini.c
+      ZendEngine2/zend_ini.c
+      ZendEngine2/zend_ini.h
+      ZendEngine2/zend_ini.h
+      ZendEngine2/zend_ini_parser.y
+      ZendEngine2/zend_ini_parser.y
+      ZendEngine2/zend_ini_scanner.h
+      ZendEngine2/zend_ini_scanner.h
+      ZendEngine2/zend_ini_scanner.l
+      ZendEngine2/zend_ini_scanner.l
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_interfaces.h
+      ZendEngine2/zend_interfaces.h
+      ZendEngine2/zend_istdiostream.h
+      ZendEngine2/zend_istdiostream.h
+      ZendEngine2/zend_iterators.c
+      ZendEngine2/zend_iterators.c
+      ZendEngine2/zend_iterators.h
+      ZendEngine2/zend_iterators.h
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_scanner.h
+      ZendEngine2/zend_language_scanner.h
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_list.c
+      ZendEngine2/zend_list.c
+      ZendEngine2/zend_list.h
+      ZendEngine2/zend_list.h
+      ZendEngine2/zend_llist.c
+      ZendEngine2/zend_llist.c
+      ZendEngine2/zend_llist.h
+      ZendEngine2/zend_llist.h
+      ZendEngine2/zend_mm.c
+      ZendEngine2/zend_mm.c
+      ZendEngine2/zend_mm.h
+      ZendEngine2/zend_mm.h
+      ZendEngine2/zend_modules.h
+      ZendEngine2/zend_modules.h
+      ZendEngine2/zend_multibyte.c
+      ZendEngine2/zend_multibyte.h
+      ZendEngine2/zend_multiply.h
+      ZendEngine2/zend_multiply.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_objects.c
+      ZendEngine2/zend_objects.c
+      ZendEngine2/zend_objects.h
+      ZendEngine2/zend_objects.h
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.h
+      ZendEngine2/zend_objects_API.h
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h
+      ZendEngine2/zend_operators.h
+      ZendEngine2/zend_ptr_stack.c
+      ZendEngine2/zend_ptr_stack.c
+      ZendEngine2/zend_ptr_stack.h
+      ZendEngine2/zend_ptr_stack.h
+      ZendEngine2/zend_qsort.c
+      ZendEngine2/zend_qsort.c
+      ZendEngine2/zend_qsort.h
+      ZendEngine2/zend_qsort.h
+      ZendEngine2/zend_sprintf.c
+      ZendEngine2/zend_sprintf.c
+      ZendEngine2/zend_stack.c
+      ZendEngine2/zend_stack.c
+      ZendEngine2/zend_stack.h
+      ZendEngine2/zend_stack.h
+      ZendEngine2/zend_static_allocator.c
+      ZendEngine2/zend_static_allocator.c
+      ZendEngine2/zend_static_allocator.h
+      ZendEngine2/zend_static_allocator.h
+      ZendEngine2/zend_stream.c
+      ZendEngine2/zend_stream.c
+      ZendEngine2/zend_stream.h
+      ZendEngine2/zend_stream.h
+      ZendEngine2/zend_strtod.h
+      ZendEngine2/zend_strtod.h
+      ZendEngine2/zend_ts_hash.c
+      ZendEngine2/zend_ts_hash.c
+      ZendEngine2/zend_ts_hash.h
+      ZendEngine2/zend_ts_hash.h
+      ZendEngine2/zend_types.h
+      ZendEngine2/zend_types.h
+      ZendEngine2/zend_variables.c
+      ZendEngine2/zend_variables.c
+      ZendEngine2/zend_variables.h
+      ZendEngine2/zend_variables.h
+      ZendEngine2/zend_vm.h
+      ZendEngine2/zend_vm.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_gen.php
+      ZendEngine2/zend_vm_gen.php
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/zend_vm_opcodes.h:
+      - Update copyright notices to 2006
+
+2006-01-04  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqli/tests/003.phpt
+      ext/mysqli/tests/004.phpt
+      ext/mysqli/tests/006.phpt
+      ext/mysqli/tests/007.phpt
+      ext/mysqli/tests/008.phpt
+      ext/mysqli/tests/009.phpt
+      ext/mysqli/tests/010.phpt
+      ext/mysqli/tests/013.phpt
+      ext/mysqli/tests/020.phpt
+      ext/mysqli/tests/023.phpt
+      ext/mysqli/tests/024.phpt
+      ext/mysqli/tests/025.phpt
+      ext/mysqli/tests/026.phpt
+      ext/mysqli/tests/042.phpt
+      ext/mysqli/tests/060.phpt
+      ext/mysqli/tests/065.phpt
+      ext/mysqli/tests/bug32405.phpt
+      ext/mysqli/tests/bug35103.phpt
+      ext/mysqli/tests/bug35517.phpt
+      ext/mysqli/tests/bug35759.phpt:
+      bring tests up-to-date with 5_1 branch
+
+    * ext/standard/array.c:
+      cast and fix a warning
+
+2006-01-04  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_1)
+      ext/standard/php_sunfuncs.h
+      ext/standard/sunfuncs.c:
+      - Removed the files which are no longer necessary.
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/config.m4
+      ext/standard/config.w32
+      ext/standard/php_standard.h
+      ext/standard/tests/general_functions/sunfuncts.phpt:
+      - MFH: Fixed bug #35887 (wddx_deserialize not parsing dateTime fields
+      properly).
+      - MFH: Fixed bug #35885 (strtotime("NOW") no longer works).
+      - MFH: Fixed bug #33789 (Many Problems with SunFuncs).
+      - MFH: Fixed bug #33671 (sun_rise and sun_set don't return a GMT timestamp
+      if one
+        passes an offset).
+      - MFH: Fixed bug #32820 (date_sunrise and date_sunset don't handle GMT
+      offset
+        well).
+      - MFH: Fixed bug #30937 (date_sunrise() & date_sunset() don't handle
+      endless
+        day/night at high latitudes).
+
+2006-01-04  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xml/tests/bug32001b.phpt:
+      fix test
+
+    * ext/standard/filestat.c:
+      fix win build
+
+2006-01-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      -Typo
+
+    * run-tests.php:
+      - Typo
+
+    * run-tests.php:
+      - Add CLEAN section which contains optional cleanup code executed even when
+        the test fails and which can be prevented by --no-clean switch
+
+2006-01-04  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/basic_functions.c
+      ext/standard/config.m4
+      ext/standard/config.w32
+      ext/standard/php_standard.h
+      ext/standard/php_sunfuncs.h
+      ext/standard/sunfuncs.c
+      ext/standard/tests/general_functions/sunfuncts.phpt:
+      - New implementation of the sunset algorithm. Fixes bugs #33789, #33671,
+      #32820
+        and #30937.
+
+2006-01-04  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_4_4)
+      ext/imap/imap.dsp
+      ext/imap/php_imap.c:
+      Fix win32 build
+
+2006-01-04  Derick Rethans  <php@derickrethans.nl>
+
+    * configure.in
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.h
+      ext/standard/basic_functions.c
+      ext/standard/filestat.c
+      ext/standard/php_filestat.h:
+      - Added the lchown() and lchgrp() functions which change permissions and
+      group
+        permissions on symbolic links.
+
+    * (PHP_4_4)
+      ext/mbstring/mbstring.dsp:
+      - Hopefully fix windows build here.
+
 2006-01-03  Ilia Alshanetsky  <ilia@prohost.org>
 
     * sapi/apache2handler/php_functions.c:
