@@ -286,6 +286,9 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 		PHAR_GET_VAL(buffer, entry.timestamp);
 		PHAR_GET_VAL(buffer, entry.offset_within_phar);
 		PHAR_GET_VAL(buffer, entry.compressed_filesize);
+		if (entry.uncompressed_filesize != entry.compressed_filesize) {
+			compressed = 1;
+		}
 		entry.crc_checked = 0;
 		entry.filedata = NULL;
 		if (entry.compressed_filesize < 9) {
