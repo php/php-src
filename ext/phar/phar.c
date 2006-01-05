@@ -91,13 +91,6 @@ static php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filename, cha
 			int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 /* }}} */
 
-/* True global resources - no need for thread safety here */
-
-/* borrowed from ext/standard/pack.c */
-static int machine_little_endian;
-static int little_endian_long_map[4];
-/* end borrowing */
-
 static zend_class_entry *php_archive_entry_ptr;
 
 static void destroy_phar_data(void *pDest) /* {{{ */
@@ -171,9 +164,22 @@ PHP_METHOD(Phar, canCompress)
 	efree(savebuf);\
 	MAPPHAR_ALLOC_FAIL(msg)
 
+#ifdef WORDS_BIGENDIAN
+# define PHAR_GET_VAL(buffer, var) \
+	var = ((unsigned char)buffer[3]) << 12 \
+		+ ((unsigned char)buffer[2]) <<  8 \
+		+ ((unsigned char)buffer[1]) <<  4 \
+		+ ((unsigned char)buffer[0]); \
+	buffer += 4
+#else
+# define PHAR_GET_VAL(buffer, var) \
+	var = *(unsigned int*)(buffer); \
+	buffer += 4
+#endif
+
 static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int alias_len, zend_bool compressed, long halt_offset TSRMLS_DC) /* {{{ */
 {
-	char *buffer, *endbuffer, *unpack_var, *savebuf;
+	char *buffer, *endbuffer, *savebuf;
 	phar_file_data mydata;
 	phar_manifest_entry entry;
 	HashTable	*manifest;
@@ -231,24 +237,12 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 	/* read in manifest */
 
 	i = 0;
-#define PHAR_GET_VAL(var)			\
-	if (buffer > endbuffer) {		\
-		MAPPHAR_FAIL("internal corruption of phar \"%s\" (buffer overrun)")\
-	}					\
-	unpack_var = (char *) &var;		\
-	var = 0;				\
-	for (i = 0; i < 4; i++) {		\
-		unpack_var[little_endian_long_map[i]] = *buffer++;\
-		if (buffer > endbuffer) {	\
-			MAPPHAR_FAIL("internal corruption of phar \"%s\" (buffer overrun)")\
-		}				\
-	}
 
 	if (4 != php_stream_read(fp, buffer, 4)) {
 		MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest)")
 	}
 	endbuffer = buffer + 5;
-	PHAR_GET_VAL(manifest_len)
+	PHAR_GET_VAL(buffer, manifest_len);
 	buffer -= 4;
 	if (manifest_len > 1048576) {
 		/* prevent serious memory issues by limiting manifest to at most 1 MB in length */
@@ -265,7 +259,10 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 		MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest)")
 	}
 	/* extract the number of entries */
-	PHAR_GET_VAL(manifest_count)
+	if (buffer + 4 > endbuffer) {
+		MAPPHAR_FAIL("internal corruption of phar \"%s\" (buffer overrun)");
+	}
+	PHAR_GET_VAL(buffer, manifest_count);
 	/* we have 5 32-bit items at least */
 	if (manifest_count > (manifest_len / (4 * 5))) {
 		/* prevent serious memory issues */
@@ -276,16 +273,19 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 	zend_hash_init(manifest, sizeof(phar_manifest_entry),
 		zend_get_hash_value, destroy_phar_manifest, 0);
 	for (manifest_index = 0; manifest_index < manifest_count; manifest_index++) {
-		if (buffer > endbuffer) {
+		if (buffer + 4 > endbuffer) {
 			MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest)")
 		}
-		PHAR_GET_VAL(entry.filename_len)
+		PHAR_GET_VAL(buffer, entry.filename_len);
+		if (buffer + entry.filename_len + 16 > endbuffer) {
+			MAPPHAR_FAIL("internal corruption of phar \"%s\" (buffer overrun)");
+		}
 		entry.filename = estrndup(buffer, entry.filename_len);
 		buffer += entry.filename_len;
-		PHAR_GET_VAL(entry.uncompressed_filesize)
-		PHAR_GET_VAL(entry.timestamp)
-		PHAR_GET_VAL(entry.offset_within_phar)
-		PHAR_GET_VAL(entry.compressed_filesize)
+		PHAR_GET_VAL(buffer, entry.uncompressed_filesize);
+		PHAR_GET_VAL(buffer, entry.timestamp);
+		PHAR_GET_VAL(buffer, entry.offset_within_phar);
+		PHAR_GET_VAL(buffer, entry.compressed_filesize);
 		entry.crc_checked = 0;
 		entry.filedata = NULL;
 		if (entry.compressed_filesize < 9) {
@@ -294,7 +294,6 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 		zend_hash_add(manifest, entry.filename, entry.filename_len, &entry,
 			sizeof(phar_manifest_entry), NULL);
 	}
-#undef PHAR_GET_VAL
 
 	mydata.filename = estrndup(fname, fname_len);
 	mydata.filename_len = fname_len;
@@ -334,7 +333,7 @@ static int phar_open_filename(char *fname, int fname_len, char *alias, int alias
 	/* but we only want the offset. So we want a .re scanner to find it. */
 
 	if (-1 == php_stream_seek(fp, 0, SEEK_SET)) {
-		MAPPHAR_ALLOC_FAIL("cannot seek to __HALT_COMPILER(); location in phar \"%s\"")
+		MAPPHAR_ALLOC_FAIL("cannot rewind phar \"%s\"")
 	}
 
 	buffer[sizeof(buffer)-1] = '\0';
@@ -344,9 +343,8 @@ static int phar_open_filename(char *fname, int fname_len, char *alias, int alias
 		if (php_stream_read(fp, buffer+tokenlen, readsize) < 0) {
 			MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (truncated manifest)")
 		}
-
 		if ((pos = strstr(buffer, token)) != NULL) {
-			halt_offset = (pos - buffer); /* no -tokenlen+tokenlen here */
+			halt_offset += (pos - buffer); /* no -tokenlen+tokenlen here */
 			result = phar_open_file(fp, fname, fname_len, alias, alias_len, compressed, halt_offset TSRMLS_CC);
 			if (result == FAILURE) {
 				php_stream_close(fp);
@@ -530,36 +528,27 @@ php_stream_wrapper php_stream_phar_wrapper =  {
     0 /* is_url */
 };
 
-static int phar_postprocess_file(char *contents, php_uint32 nr, unsigned long crc32, zend_bool read) /* {{{ */
+static int phar_postprocess_file(char *buffer, php_uint32 nr, unsigned long crc32, zend_bool read) /* {{{ */
 {
 	unsigned int crc = ~0;
-	php_uint32 i, actual_length;
-	char *unpack_var;
+	php_uint32 actual_length;
 	int len = 0;
+
 	if (read) {
-	#define PHAR_GET_VAL(var)			\
-		unpack_var = (char *) &var;		\
-		var = 0;				\
-		for (i = 0; i < 4; i++) {		\
-			unpack_var[little_endian_long_map[i]] = *contents++;\
-		}
-		PHAR_GET_VAL(crc32)
-		PHAR_GET_VAL(actual_length)
+		PHAR_GET_VAL(buffer, crc32);
+		PHAR_GET_VAL(buffer, actual_length);
 		if (actual_length != nr) {
 			return -2;
 		}
 	}
-
-
-	for (len += nr; nr--; ++contents) {
-	    CRC32(crc, *contents);
+	for (len += nr; nr--; ++buffer) {
+	    CRC32(crc, *buffer);
 	}
 	if (~crc == crc32) {
 		return 0;
 	} else {
 		return -1;
 	}
-#undef PHAR_GET_VAL	
 }
 /* }}} */
 
@@ -575,8 +564,8 @@ static php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, cha
 	int status;
 #ifdef HAVE_PHAR_ZLIB
 	unsigned long crc32;
-	php_uint32 actual_length, i;
-	char *unpack_var, *savebuf;
+	php_uint32 actual_length;
+	char *savebuf;
 	/* borrowed from zlib.c gzinflate() function */
 	php_uint32 offset;
 	unsigned long length;
@@ -675,15 +664,8 @@ static php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, cha
 			return NULL;
 		}
 		savebuf = buffer;
-		#define PHAR_GET_VAL(var)			\
-			unpack_var = (char *) &var;		\
-			var = 0;				\
-			for (i = 0; i < 4; i++) {		\
-				unpack_var[little_endian_long_map[i]] = *buffer++;\
-			}
-		PHAR_GET_VAL(crc32)
-		PHAR_GET_VAL(actual_length)
-		#undef PHAR_GET_VAL
+		PHAR_GET_VAL(buffer, crc32);
+		PHAR_GET_VAL(buffer, actual_length);
 
 		/* borrowed from zlib.c gzinflate() function */
 		zstream.zalloc = (alloc_func) Z_NULL;
@@ -1337,27 +1319,7 @@ static void php_phar_init_globals_module(zend_phar_globals *phar_globals)
 PHP_MINIT_FUNCTION(phar)
 {
 	zend_class_entry php_archive_entry;
-	int machine_endian_check = 1;
 	ZEND_INIT_MODULE_GLOBALS(phar, php_phar_init_globals_module, NULL);
-
-	machine_little_endian = ((char *)&machine_endian_check)[0];
-
-	if (machine_little_endian) {
-		little_endian_long_map[0] = 0;
-		little_endian_long_map[1] = 1;
-		little_endian_long_map[2] = 2;
-		little_endian_long_map[3] = 3;
-	}
-	else {
-		zval val;
-		int size = sizeof(Z_LVAL(val));
-		Z_LVAL(val)=0; /*silence a warning*/
-
-		little_endian_long_map[0] = size - 1;
-		little_endian_long_map[1] = size - 2;
-		little_endian_long_map[2] = size - 3;
-		little_endian_long_map[3] = size - 4;
-	}
 
 	INIT_CLASS_ENTRY(php_archive_entry, "Phar", php_archive_methods);
 	php_archive_entry_ptr = zend_register_internal_class(&php_archive_entry TSRMLS_CC);
