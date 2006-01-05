@@ -67,7 +67,7 @@ php_oci_descriptor *php_oci_lob_create (php_oci_connection *connection, long typ
 			break;
 	}
 
-	descriptor = emalloc(sizeof(php_oci_descriptor));
+	descriptor = ecalloc(1, sizeof(php_oci_descriptor));
 	descriptor->type = type;
 
 	OCI_G(errcode) = PHP_OCI_CALL(OCIDescriptorAlloc, (connection->env, (dvoid*)&(descriptor->descriptor), descriptor->type, (size_t) 0, (dvoid **) 0));
@@ -91,7 +91,7 @@ php_oci_descriptor *php_oci_lob_create (php_oci_connection *connection, long typ
 		/* add Lobs & Files to hash. we'll flush them at the end */
 		if (!connection->descriptors) {
 			ALLOC_HASHTABLE(connection->descriptors);
-			zend_hash_init(connection->descriptors, 13, NULL, php_oci_descriptor_flush_hash_dtor, 0);
+			zend_hash_init(connection->descriptors, 0, NULL, php_oci_descriptor_flush_hash_dtor, 0);
 		}
 
 		zend_hash_next_index_insert(connection->descriptors,&descriptor,sizeof(php_oci_descriptor *),NULL);
@@ -473,6 +473,16 @@ int php_oci_lob_flush(php_oci_descriptor *descriptor, int flush_flag TSRMLS_DC)
  Close LOB descriptor and free associated resources */
 void php_oci_lob_free (php_oci_descriptor *descriptor TSRMLS_DC)
 {
+
+	if (!descriptor || !descriptor->connection) {
+		return;
+	}
+
+	if (descriptor->connection->descriptors) {
+		/* delete descriptor from the hash */
+		zend_hash_apply_with_argument(descriptor->connection->descriptors, php_oci_descriptor_delete_from_hash, (void *)&descriptor->id TSRMLS_CC);
+	}
+	
 	/* flushing Lobs & Files with buffering enabled */
 	if ((descriptor->type == OCI_DTYPE_FILE || descriptor->type == OCI_DTYPE_LOB) && descriptor->buffering == PHP_OCI_LOB_BUFFER_USED) {
 		php_oci_lob_flush(descriptor, OCI_LOB_BUFFER_FREE TSRMLS_CC);
@@ -639,7 +649,7 @@ int php_oci_lob_erase (php_oci_descriptor *descriptor, long offset, long length,
 } /* }}} */
 
 /* {{{ php_oci_lob_is_equal() 
- Compare to LOB descriptors and figure out if they are pointing to the same LOB */
+ Compare two LOB descriptors and figure out if they are pointing to the same LOB */
 int php_oci_lob_is_equal (php_oci_descriptor *descriptor_first, php_oci_descriptor *descriptor_second, boolean *result TSRMLS_DC)
 {
 	php_oci_connection *connection = descriptor_first->connection;
