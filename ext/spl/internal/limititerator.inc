@@ -32,7 +32,7 @@ class LimitIterator implements OuterIterator
 	 *
 	 * @param it     Iterator to limit
 	 * @param offset Offset to first element
-	 * @param count  Maximum number of elements to show or NULL for all
+	 * @param count  Maximum number of elements to show or -1 for all
 	 */
 	function __construct(Iterator $it, $offset = 0, $count = -1)
 	{
