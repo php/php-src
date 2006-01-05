@@ -485,7 +485,7 @@ PHP_FUNCTION(strcoll)
 /* {{{ php_charmask
  * Fills a 256-byte bytemask with input. You can specify a range like 'a..z',
  * it needs to be incrementing.  
- * Returns: FAILURE/SUCCESS wether the input was correct (i.e. no range errors)
+ * Returns: FAILURE/SUCCESS whether the input was correct (i.e. no range errors)
  */
 static inline int php_charmask(unsigned char *input, int len, char *mask TSRMLS_DC)
 {
