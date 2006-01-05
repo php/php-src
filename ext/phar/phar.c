@@ -382,8 +382,11 @@ static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char 
 		} else if (pos_z) {
 			ext_str = pos_z;
 			ext_len = 8;
+		} else if ((pos_p = strstr(filename, ".phar")) != NULL) {
+			ext_str = pos_p;
+			ext_len = 5;
 		} else {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\" (filename extension must be either .phar.php or .phar.gz)", filename);
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\" (filename extension must be .phar.php, .phar.gz or .phar)", filename);
 			return NULL;
 		}
 		resource = emalloc(sizeof(php_url));
