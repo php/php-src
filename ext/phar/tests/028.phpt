@@ -1,5 +1,5 @@
 --TEST--
-Phar: loadPhar
+Phar::loadPhar
 --INI--
 magic_quotes_runtime=0
 --SKIPIF--
