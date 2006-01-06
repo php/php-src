@@ -42,10 +42,6 @@
 
 #include "ext/standard/php_string.h"
 
-/*
-   extern int _daylight;
-   extern long _timezone;
- */
 /*enum
    {
    DO_CONNECT = WM_USER +1
@@ -95,9 +91,6 @@ char *php_mailer = "PHP 4 WIN32";
 #else
 char *php_mailer = "PHP 4 NetWare";
 #endif  /* NETWARE */
-
-
-char *get_header(char *h, char *headers);
 
 /* Error messages */
 static char *ErrorMessages[] =
@@ -215,7 +208,7 @@ static char *php_win32_mail_trim_header(char *header TSRMLS_DC)
 //
 //  See SendText() for additional args!
 //********************************************************************/
-int TSendMail(char *host, int *error, char **error_message,
+PHPAPI int TSendMail(char *host, int *error, char **error_message,
 			  char *headers, char *Subject, char *mailTo, char *data,
 			  char *mailCc, char *mailBcc, char *mailRPath)
 {
@@ -228,7 +221,6 @@ int TSendMail(char *host, int *error, char **error_message,
 #ifndef NETWARE
 	WinsockStarted = FALSE;
 #endif
-
 
 	if (host == NULL) {
 		*error = BAD_MAIL_HOST;
@@ -309,7 +301,7 @@ int TSendMail(char *host, int *error, char **error_message,
 			MailHost, !INI_INT("smtp_port") ? 25 : INI_INT("smtp_port"));
 		return FAILURE;
 	} else {
-		ret = SendText(RPath, Subject, mailTo, mailCc, mailBcc, data, headers, headers_lc, error_message);
+		ret = SendText(RPath, Subject, mailTo, mailCc, mailBcc, data, headers, headers_lc, error_message TSRMLS_CC);
 		TSMClose();
 		if (RPath) {
 			efree(RPath);
@@ -334,7 +326,7 @@ int TSendMail(char *host, int *error, char **error_message,
 // Author/Date:  jcar 20/9/96
 // History:
 //********************************************************************/
-void TSMClose()
+PHPAPI void TSMClose()
 {
 	Post("QUIT\r\n");
 	Ack(NULL);
@@ -356,7 +348,7 @@ void TSMClose()
 // Author/Date:  jcar 20/9/96
 // History:
 //*******************************************************************/
-char *GetSMErrorText(int index)
+PHPAPI char *GetSMErrorText(int index)
 {
 	if (MIN_ERROR_INDEX <= index && index < MAX_ERROR_INDEX) {
 		return (ErrorMessages[index]);
@@ -386,8 +378,8 @@ char *GetSMErrorText(int index)
 // Author/Date:  jcar 20/9/96
 // History:
 //*******************************************************************/
-int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailBcc, char *data, 
-			 char *headers, char *headers_lc, char **error_message)
+static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailBcc, char *data, 
+			 char *headers, char *headers_lc, char **error_message TSRMLS_DC)
 {
 	int res;
 	char *p;
@@ -607,9 +599,9 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailB
 
 	/* send message header */
 	if (Subject == NULL) {
-		res = PostHeader(RPath, "No Subject", mailTo, stripped_header);
+		res = PostHeader(RPath, "No Subject", mailTo, stripped_header TSRMLS_CC);
 	} else {
-		res = PostHeader(RPath, Subject, mailTo, stripped_header);
+		res = PostHeader(RPath, Subject, mailTo, stripped_header TSRMLS_CC);
 	}
 	if (stripped_header) {
 		efree(stripped_header);
@@ -663,7 +655,8 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailB
 	return (SUCCESS);
 }
 
-int addToHeader(char **header_buffer, const char *specifier, char *string) {
+static int addToHeader(char **header_buffer, const char *specifier, char *string)
+{
 	if (NULL == (*header_buffer = erealloc(*header_buffer, strlen(*header_buffer) + strlen(specifier) + strlen(string) + 1))) {
 		return 0;
 	}
@@ -682,7 +675,7 @@ int addToHeader(char **header_buffer, const char *specifier, char *string) {
 // Author/Date:  jcar 20/9/96
 // History:
 //********************************************************************/
-int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders)
+static int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders TSRMLS_DC)
 {
 
 	/* Print message header according to RFC 822 */
@@ -779,7 +772,7 @@ PostHeader_outofmem:
 // Author/Date:  jcar 20/9/96
 // History:
 //********************************************************************/
-int MailConnect()
+static int MailConnect()
 {
 
 	int res;
@@ -820,10 +813,6 @@ int MailConnect()
 }
 
 
-
-
-
-
 /*********************************************************************
 // Name:  Post
 // Input:
@@ -832,7 +821,7 @@ int MailConnect()
 // Author/Date:  jcar 20/9/96
 // History:
 //********************************************************************/
-int Post(LPCSTR msg)
+static int Post(LPCSTR msg)
 {
 	int len = strlen(msg);
 	int slen;
@@ -859,7 +848,7 @@ int Post(LPCSTR msg)
 // Author/Date:  jcar 20/9/96
 // History:
 //********************************************************************/
-int Ack(char **server_response)
+static int Ack(char **server_response)
 {
 	static char buf[MAIL_BUFFER_SIZE];
 	int rlen;
@@ -919,7 +908,7 @@ int Ack(char **server_response)
 // Author/Date:  jcar 20/9/96
 // History:
 //********************************************************************/
-unsigned long GetAddr(LPSTR szHost)
+static unsigned long GetAddr(LPSTR szHost)
 {
 	LPHOSTENT lpstHost;
 	u_long lAddr = INADDR_ANY;
