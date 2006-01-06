@@ -452,14 +452,12 @@ static int phar_open_compiled_file(char *alias, int alias_len, zend_bool compres
 
 	MAKE_STD_ZVAL(halt_constant);
 	if (0 == zend_get_constant("__COMPILER_HALT_OFFSET__", 24, halt_constant TSRMLS_CC)) {
-		zval_dtor(halt_constant);
-		FREE_ZVAL(halt_constant);
+	FREE_ZVAL(halt_constant);
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "__HALT_COMPILER(); must be declared in a phar");
 		return FAILURE;
 	}
 	halt_offset = Z_LVAL(*halt_constant);
-	zval_dtor(halt_constant);
-	FREE_ZVAL(halt_constant);
+	zval_ptr_dtor(&halt_constant);
 	
 	fp = php_stream_open_wrapper(fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
 
