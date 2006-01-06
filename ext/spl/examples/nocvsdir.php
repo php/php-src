@@ -4,7 +4,8 @@
  * @brief   Program Dir without CVS subdirs
  * @ingroup Examples
  * @author  Marcus Boerger
- * @date    2003 - 2005
+ * @date    2003 - 2006
+ * @version 1.1
  *
  * Usage: php nocvsdir.php \<path\>
  *
@@ -30,12 +31,17 @@ class NoCvsDirectory extends RecursiveFilterIterator
 {
 	function __construct($path)
 	{
-		parent::__construct(new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::CURRENT_AS_PATHNAME));
+		parent::__construct(new RecursiveDirectoryIterator($path));
 	}
 
 	function accept()
 	{
 		return $this->getInnerIterator()->getFilename() != 'CVS';
+	}
+
+	function getChildren()
+	{
+		return new NoCvsDirectory($this->key());
 	}
 }
 
