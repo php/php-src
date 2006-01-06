@@ -458,7 +458,7 @@ static int phar_open_compiled_file(char *alias, int alias_len, zend_bool compres
 /* }}} */
 
 /* {{{ proto mixed Phar::mapPhar(string alias, mixed compressed, [mixed unused [, mixed unused]])
- * Maps the curretnly executed file (a phar) with the given alias */
+ * Maps the currently executed file (a phar) with the given alias */
 PHP_METHOD(Phar, mapPhar)
 {
 	char *alias;
