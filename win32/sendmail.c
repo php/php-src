@@ -713,7 +713,7 @@ int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders)
 	zonem = (abs(_timezone) / 60) - (zoneh * 60);
 
 	if(!xheaders || !strstr(headers_lc, "date:")){
-		sprintf(header_buffer, "Date: %s, %02d %s %04d %02d:%02d:%02d %s%02d%02d\r\n",
+		sprintf(header_buffer, "Date: %3s, %02d %3s %04d %02d:%02d:%02d %c%02d%02d\r\n",
 					 days[tm->tm_wday],
 					 tm->tm_mday,
 					 months[tm->tm_mon],
