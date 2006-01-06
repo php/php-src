@@ -30,14 +30,6 @@ function comp_func_cr($a, $b) {
 $a = array("0.1" => new cr(9), "0.5" => new cr(12), 0 => new cr(23), 1=> new cr(4), 2 => new cr(-15),);
 $b = array("0.2" => new cr(9), "0.5" => new cr(22), 0 => new cr( 3), 1=> new cr(4), 2 => new cr(-15),);
 
-/* array_intersect() */
-echo "begin ------------ array_intersect() ----------------------------\n";
-echo '$a='.var_export($a,TRUE).";\n";
-echo '$b='.var_export($b,TRUE).";\n";
-echo 'var_dump(array_intersect($a, $b);'."\n";
-var_dump(array_intersect($a, $b));
-echo "end   ------------ array_intersect() ----------------------------\n";
-
 /* array_uintersect() */
 echo "begin ------------ array_uintersect() ---------------------------\n";
 echo '$a='.var_export($a,TRUE).";\n";
@@ -46,14 +38,6 @@ echo 'var_dump(array_uintersect($a, $b, "comp_func_cr"));'."\n";
 var_dump(array_uintersect($a, $b, "comp_func_cr"));
 echo "end   ------------ array_uintersect() ---------------------------\n";
 
-/* array_intersect_assoc() */
-echo "begin ------------ array_intersect_assoc() ----------------------\n";
-echo '$a='.var_export($a,TRUE).";\n";
-echo '$b='.var_export($b,TRUE).";\n";
-echo 'var_dump(array_intersect_assoc($a, $b));'."\n";
-var_dump(array_intersect_assoc($a, $b));
-echo "end   ------------ array_intersect_assoc() ----------------------\n";
-
 /* array_uintersect_assoc() */
 echo "begin ------------ array_uintersect_assoc() ---------------------\n";
 echo '$a='.var_export($a,TRUE).";\n";
@@ -61,14 +45,6 @@ echo '$b='.var_export($b,TRUE).";\n";
 echo 'var_dump(array_uintersect_assoc($a, $b, "comp_func_cr"));'."\n";
 var_dump(array_uintersect_assoc($a, $b, "comp_func_cr"));
 echo "end   ------------ array_uintersect_assoc() ---------------------\n";
-
-/* array_intersect_uassoc() */
-echo "begin ------------ array_intersect_uassoc() ---------------------\n";
-echo '$a='.var_export($a,TRUE).";\n";
-echo '$b='.var_export($b,TRUE).";\n";
-echo 'var_dump(array_intersect_uassoc($a, $b, "comp_func"));'."\n";
-var_dump(array_intersect_uassoc($a, $b, "comp_func"));
-echo "end   ------------ array_intersect_uassoc() ---------------------\n";
 
 /* array_uintersect_uassoc() - with ordinary function */
 echo "begin ------------ array_uintersect_uassoc() with ordinary func -\n";
@@ -87,65 +63,6 @@ var_dump(array_uintersect_uassoc($a, $b, array("cr", "comp_func_cr"), "comp_func
 echo "end   ------------ array_uintersect_uassoc() with method --------\n";
 ?>
 --EXPECTF--
-begin ------------ array_intersect() ----------------------------
-$a=array (
-  '0.1' => 
-  cr::__set_state(array(
-     'priv_member' => 9,
-     'public_member' => 9,
-  )),
-  '0.5' => 
-  cr::__set_state(array(
-     'priv_member' => 12,
-     'public_member' => 12,
-  )),
-  0 => 
-  cr::__set_state(array(
-     'priv_member' => 23,
-     'public_member' => 23,
-  )),
-  1 => 
-  cr::__set_state(array(
-     'priv_member' => 4,
-     'public_member' => 4,
-  )),
-  2 => 
-  cr::__set_state(array(
-     'priv_member' => -15,
-     'public_member' => -15,
-  )),
-);
-$b=array (
-  '0.2' => 
-  cr::__set_state(array(
-     'priv_member' => 9,
-     'public_member' => 9,
-  )),
-  '0.5' => 
-  cr::__set_state(array(
-     'priv_member' => 22,
-     'public_member' => 22,
-  )),
-  0 => 
-  cr::__set_state(array(
-     'priv_member' => 3,
-     'public_member' => 3,
-  )),
-  1 => 
-  cr::__set_state(array(
-     'priv_member' => 4,
-     'public_member' => 4,
-  )),
-  2 => 
-  cr::__set_state(array(
-     'priv_member' => -15,
-     'public_member' => -15,
-  )),
-);
-var_dump(array_intersect($a, $b);
-array(0) {
-}
-end   ------------ array_intersect() ----------------------------
 begin ------------ array_uintersect() ---------------------------
 $a=array (
   '0.1' => 
@@ -204,21 +121,21 @@ $b=array (
 var_dump(array_uintersect($a, $b, "comp_func_cr"));
 array(3) {
   ["0.1"]=>
-  object(cr)#1 (2) {
+  object(cr)#%d (2) {
     ["priv_member":"cr":private]=>
     int(9)
     ["public_member"]=>
     int(9)
   }
   [1]=>
-  object(cr)#4 (2) {
+  object(cr)#%d (2) {
     ["priv_member":"cr":private]=>
     int(4)
     ["public_member"]=>
     int(4)
   }
   [2]=>
-  object(cr)#5 (2) {
+  object(cr)#%d (2) {
     ["priv_member":"cr":private]=>
     int(-15)
     ["public_member"]=>
@@ -226,65 +143,6 @@ array(3) {
   }
 }
 end   ------------ array_uintersect() ---------------------------
-begin ------------ array_intersect_assoc() ----------------------
-$a=array (
-  '0.1' => 
-  cr::__set_state(array(
-     'priv_member' => 9,
-     'public_member' => 9,
-  )),
-  '0.5' => 
-  cr::__set_state(array(
-     'priv_member' => 12,
-     'public_member' => 12,
-  )),
-  0 => 
-  cr::__set_state(array(
-     'priv_member' => 23,
-     'public_member' => 23,
-  )),
-  1 => 
-  cr::__set_state(array(
-     'priv_member' => 4,
-     'public_member' => 4,
-  )),
-  2 => 
-  cr::__set_state(array(
-     'priv_member' => -15,
-     'public_member' => -15,
-  )),
-);
-$b=array (
-  '0.2' => 
-  cr::__set_state(array(
-     'priv_member' => 9,
-     'public_member' => 9,
-  )),
-  '0.5' => 
-  cr::__set_state(array(
-     'priv_member' => 22,
-     'public_member' => 22,
-  )),
-  0 => 
-  cr::__set_state(array(
-     'priv_member' => 3,
-     'public_member' => 3,
-  )),
-  1 => 
-  cr::__set_state(array(
-     'priv_member' => 4,
-     'public_member' => 4,
-  )),
-  2 => 
-  cr::__set_state(array(
-     'priv_member' => -15,
-     'public_member' => -15,
-  )),
-);
-var_dump(array_intersect_assoc($a, $b));
-array(0) {
-}
-end   ------------ array_intersect_assoc() ----------------------
 begin ------------ array_uintersect_assoc() ---------------------
 $a=array (
   '0.1' => 
@@ -343,14 +201,14 @@ $b=array (
 var_dump(array_uintersect_assoc($a, $b, "comp_func_cr"));
 array(2) {
   [1]=>
-  object(cr)#4 (2) {
+  object(cr)#%d (2) {
     ["priv_member":"cr":private]=>
     int(4)
     ["public_member"]=>
     int(4)
   }
   [2]=>
-  object(cr)#5 (2) {
+  object(cr)#%d (2) {
     ["priv_member":"cr":private]=>
     int(-15)
     ["public_member"]=>
@@ -358,65 +216,6 @@ array(2) {
   }
 }
 end   ------------ array_uintersect_assoc() ---------------------
-begin ------------ array_intersect_uassoc() ---------------------
-$a=array (
-  '0.1' => 
-  cr::__set_state(array(
-     'priv_member' => 9,
-     'public_member' => 9,
-  )),
-  '0.5' => 
-  cr::__set_state(array(
-     'priv_member' => 12,
-     'public_member' => 12,
-  )),
-  0 => 
-  cr::__set_state(array(
-     'priv_member' => 23,
-     'public_member' => 23,
-  )),
-  1 => 
-  cr::__set_state(array(
-     'priv_member' => 4,
-     'public_member' => 4,
-  )),
-  2 => 
-  cr::__set_state(array(
-     'priv_member' => -15,
-     'public_member' => -15,
-  )),
-);
-$b=array (
-  '0.2' => 
-  cr::__set_state(array(
-     'priv_member' => 9,
-     'public_member' => 9,
-  )),
-  '0.5' => 
-  cr::__set_state(array(
-     'priv_member' => 22,
-     'public_member' => 22,
-  )),
-  0 => 
-  cr::__set_state(array(
-     'priv_member' => 3,
-     'public_member' => 3,
-  )),
-  1 => 
-  cr::__set_state(array(
-     'priv_member' => 4,
-     'public_member' => 4,
-  )),
-  2 => 
-  cr::__set_state(array(
-     'priv_member' => -15,
-     'public_member' => -15,
-  )),
-);
-var_dump(array_intersect_uassoc($a, $b, "comp_func"));
-array(0) {
-}
-end   ------------ array_intersect_uassoc() ---------------------
 begin ------------ array_uintersect_uassoc() with ordinary func -
 $a=array (
   '0.1' => 
@@ -475,14 +274,14 @@ $b=array (
 var_dump(array_uintersect_uassoc($a, $b, "comp_func_cr", "comp_func"));
 array(2) {
   [1]=>
-  object(cr)#4 (2) {
+  object(cr)#%d (2) {
     ["priv_member":"cr":private]=>
     int(4)
     ["public_member"]=>
     int(4)
   }
   [2]=>
-  object(cr)#5 (2) {
+  object(cr)#%d (2) {
     ["priv_member":"cr":private]=>
     int(-15)
     ["public_member"]=>
@@ -548,494 +347,17 @@ $b=array (
 var_dump(array_uintersect_uassoc($a, $b, array("cr", "comp_func_cr"), "comp_func"));
 array(2) {
   [1]=>
-  object(cr)#4 (2) {
+  object(cr)#%d (2) {
     ["priv_member":"cr":private]=>
     int(4)
     ["public_member"]=>
     int(4)
   }
   [2]=>
-  object(cr)#5 (2) {
+  object(cr)#%d (2) {
     ["priv_member":"cr":private]=>
     int(-15)
     ["public_member"]=>
-    int(-15)
-  }
-}
-end   ------------ array_uintersect_uassoc() with method --------
---UEXPECTF--
-begin ------------ array_intersect() ----------------------------
-$a=array (
-  '0.1' => 
-  cr::__set_state(array(
-     'priv_member' => 9,
-     'public_member' => 9,
-  )),
-  '0.5' => 
-  cr::__set_state(array(
-     'priv_member' => 12,
-     'public_member' => 12,
-  )),
-  0 => 
-  cr::__set_state(array(
-     'priv_member' => 23,
-     'public_member' => 23,
-  )),
-  1 => 
-  cr::__set_state(array(
-     'priv_member' => 4,
-     'public_member' => 4,
-  )),
-  2 => 
-  cr::__set_state(array(
-     'priv_member' => -15,
-     'public_member' => -15,
-  )),
-);
-$b=array (
-  '0.2' => 
-  cr::__set_state(array(
-     'priv_member' => 9,
-     'public_member' => 9,
-  )),
-  '0.5' => 
-  cr::__set_state(array(
-     'priv_member' => 22,
-     'public_member' => 22,
-  )),
-  0 => 
-  cr::__set_state(array(
-     'priv_member' => 3,
-     'public_member' => 3,
-  )),
-  1 => 
-  cr::__set_state(array(
-     'priv_member' => 4,
-     'public_member' => 4,
-  )),
-  2 => 
-  cr::__set_state(array(
-     'priv_member' => -15,
-     'public_member' => -15,
-  )),
-);
-var_dump(array_intersect($a, $b);
-array(0) {
-}
-end   ------------ array_intersect() ----------------------------
-begin ------------ array_uintersect() ---------------------------
-$a=array (
-  '0.1' => 
-  cr::__set_state(array(
-     'priv_member' => 9,
-     'public_member' => 9,
-  )),
-  '0.5' => 
-  cr::__set_state(array(
-     'priv_member' => 12,
-     'public_member' => 12,
-  )),
-  0 => 
-  cr::__set_state(array(
-     'priv_member' => 23,
-     'public_member' => 23,
-  )),
-  1 => 
-  cr::__set_state(array(
-     'priv_member' => 4,
-     'public_member' => 4,
-  )),
-  2 => 
-  cr::__set_state(array(
-     'priv_member' => -15,
-     'public_member' => -15,
-  )),
-);
-$b=array (
-  '0.2' => 
-  cr::__set_state(array(
-     'priv_member' => 9,
-     'public_member' => 9,
-  )),
-  '0.5' => 
-  cr::__set_state(array(
-     'priv_member' => 22,
-     'public_member' => 22,
-  )),
-  0 => 
-  cr::__set_state(array(
-     'priv_member' => 3,
-     'public_member' => 3,
-  )),
-  1 => 
-  cr::__set_state(array(
-     'priv_member' => 4,
-     'public_member' => 4,
-  )),
-  2 => 
-  cr::__set_state(array(
-     'priv_member' => -15,
-     'public_member' => -15,
-  )),
-);
-var_dump(array_uintersect($a, $b, "comp_func_cr"));
-array(3) {
-  [u"0.1"]=>
-  object(cr)#1 (2) {
-    [u"priv_member":u"cr":private]=>
-    int(9)
-    [u"public_member"]=>
-    int(9)
-  }
-  [1]=>
-  object(cr)#4 (2) {
-    [u"priv_member":u"cr":private]=>
-    int(4)
-    [u"public_member"]=>
-    int(4)
-  }
-  [2]=>
-  object(cr)#5 (2) {
-    [u"priv_member":u"cr":private]=>
-    int(-15)
-    [u"public_member"]=>
-    int(-15)
-  }
-}
-end   ------------ array_uintersect() ---------------------------
-begin ------------ array_intersect_assoc() ----------------------
-$a=array (
-  '0.1' => 
-  cr::__set_state(array(
-     'priv_member' => 9,
-     'public_member' => 9,
-  )),
-  '0.5' => 
-  cr::__set_state(array(
-     'priv_member' => 12,
-     'public_member' => 12,
-  )),
-  0 => 
-  cr::__set_state(array(
-     'priv_member' => 23,
-     'public_member' => 23,
-  )),
-  1 => 
-  cr::__set_state(array(
-     'priv_member' => 4,
-     'public_member' => 4,
-  )),
-  2 => 
-  cr::__set_state(array(
-     'priv_member' => -15,
-     'public_member' => -15,
-  )),
-);
-$b=array (
-  '0.2' => 
-  cr::__set_state(array(
-     'priv_member' => 9,
-     'public_member' => 9,
-  )),
-  '0.5' => 
-  cr::__set_state(array(
-     'priv_member' => 22,
-     'public_member' => 22,
-  )),
-  0 => 
-  cr::__set_state(array(
-     'priv_member' => 3,
-     'public_member' => 3,
-  )),
-  1 => 
-  cr::__set_state(array(
-     'priv_member' => 4,
-     'public_member' => 4,
-  )),
-  2 => 
-  cr::__set_state(array(
-     'priv_member' => -15,
-     'public_member' => -15,
-  )),
-);
-var_dump(array_intersect_assoc($a, $b));
-array(0) {
-}
-end   ------------ array_intersect_assoc() ----------------------
-begin ------------ array_uintersect_assoc() ---------------------
-$a=array (
-  '0.1' => 
-  cr::__set_state(array(
-     'priv_member' => 9,
-     'public_member' => 9,
-  )),
-  '0.5' => 
-  cr::__set_state(array(
-     'priv_member' => 12,
-     'public_member' => 12,
-  )),
-  0 => 
-  cr::__set_state(array(
-     'priv_member' => 23,
-     'public_member' => 23,
-  )),
-  1 => 
-  cr::__set_state(array(
-     'priv_member' => 4,
-     'public_member' => 4,
-  )),
-  2 => 
-  cr::__set_state(array(
-     'priv_member' => -15,
-     'public_member' => -15,
-  )),
-);
-$b=array (
-  '0.2' => 
-  cr::__set_state(array(
-     'priv_member' => 9,
-     'public_member' => 9,
-  )),
-  '0.5' => 
-  cr::__set_state(array(
-     'priv_member' => 22,
-     'public_member' => 22,
-  )),
-  0 => 
-  cr::__set_state(array(
-     'priv_member' => 3,
-     'public_member' => 3,
-  )),
-  1 => 
-  cr::__set_state(array(
-     'priv_member' => 4,
-     'public_member' => 4,
-  )),
-  2 => 
-  cr::__set_state(array(
-     'priv_member' => -15,
-     'public_member' => -15,
-  )),
-);
-var_dump(array_uintersect_assoc($a, $b, "comp_func_cr"));
-array(2) {
-  [1]=>
-  object(cr)#4 (2) {
-    [u"priv_member":u"cr":private]=>
-    int(4)
-    [u"public_member"]=>
-    int(4)
-  }
-  [2]=>
-  object(cr)#5 (2) {
-    [u"priv_member":u"cr":private]=>
-    int(-15)
-    [u"public_member"]=>
-    int(-15)
-  }
-}
-end   ------------ array_uintersect_assoc() ---------------------
-begin ------------ array_intersect_uassoc() ---------------------
-$a=array (
-  '0.1' => 
-  cr::__set_state(array(
-     'priv_member' => 9,
-     'public_member' => 9,
-  )),
-  '0.5' => 
-  cr::__set_state(array(
-     'priv_member' => 12,
-     'public_member' => 12,
-  )),
-  0 => 
-  cr::__set_state(array(
-     'priv_member' => 23,
-     'public_member' => 23,
-  )),
-  1 => 
-  cr::__set_state(array(
-     'priv_member' => 4,
-     'public_member' => 4,
-  )),
-  2 => 
-  cr::__set_state(array(
-     'priv_member' => -15,
-     'public_member' => -15,
-  )),
-);
-$b=array (
-  '0.2' => 
-  cr::__set_state(array(
-     'priv_member' => 9,
-     'public_member' => 9,
-  )),
-  '0.5' => 
-  cr::__set_state(array(
-     'priv_member' => 22,
-     'public_member' => 22,
-  )),
-  0 => 
-  cr::__set_state(array(
-     'priv_member' => 3,
-     'public_member' => 3,
-  )),
-  1 => 
-  cr::__set_state(array(
-     'priv_member' => 4,
-     'public_member' => 4,
-  )),
-  2 => 
-  cr::__set_state(array(
-     'priv_member' => -15,
-     'public_member' => -15,
-  )),
-);
-var_dump(array_intersect_uassoc($a, $b, "comp_func"));
-array(0) {
-}
-end   ------------ array_intersect_uassoc() ---------------------
-begin ------------ array_uintersect_uassoc() with ordinary func -
-$a=array (
-  '0.1' => 
-  cr::__set_state(array(
-     'priv_member' => 9,
-     'public_member' => 9,
-  )),
-  '0.5' => 
-  cr::__set_state(array(
-     'priv_member' => 12,
-     'public_member' => 12,
-  )),
-  0 => 
-  cr::__set_state(array(
-     'priv_member' => 23,
-     'public_member' => 23,
-  )),
-  1 => 
-  cr::__set_state(array(
-     'priv_member' => 4,
-     'public_member' => 4,
-  )),
-  2 => 
-  cr::__set_state(array(
-     'priv_member' => -15,
-     'public_member' => -15,
-  )),
-);
-$b=array (
-  '0.2' => 
-  cr::__set_state(array(
-     'priv_member' => 9,
-     'public_member' => 9,
-  )),
-  '0.5' => 
-  cr::__set_state(array(
-     'priv_member' => 22,
-     'public_member' => 22,
-  )),
-  0 => 
-  cr::__set_state(array(
-     'priv_member' => 3,
-     'public_member' => 3,
-  )),
-  1 => 
-  cr::__set_state(array(
-     'priv_member' => 4,
-     'public_member' => 4,
-  )),
-  2 => 
-  cr::__set_state(array(
-     'priv_member' => -15,
-     'public_member' => -15,
-  )),
-);
-var_dump(array_uintersect_uassoc($a, $b, "comp_func_cr", "comp_func"));
-array(2) {
-  [1]=>
-  object(cr)#4 (2) {
-    [u"priv_member":u"cr":private]=>
-    int(4)
-    [u"public_member"]=>
-    int(4)
-  }
-  [2]=>
-  object(cr)#5 (2) {
-    [u"priv_member":u"cr":private]=>
-    int(-15)
-    [u"public_member"]=>
-    int(-15)
-  }
-}
-end   ------------ array_uintersect_uassoc() with ordinary func -
-begin ------------ array_uintersect_uassoc() with method --------
-$a=array (
-  '0.1' => 
-  cr::__set_state(array(
-     'priv_member' => 9,
-     'public_member' => 9,
-  )),
-  '0.5' => 
-  cr::__set_state(array(
-     'priv_member' => 12,
-     'public_member' => 12,
-  )),
-  0 => 
-  cr::__set_state(array(
-     'priv_member' => 23,
-     'public_member' => 23,
-  )),
-  1 => 
-  cr::__set_state(array(
-     'priv_member' => 4,
-     'public_member' => 4,
-  )),
-  2 => 
-  cr::__set_state(array(
-     'priv_member' => -15,
-     'public_member' => -15,
-  )),
-);
-$b=array (
-  '0.2' => 
-  cr::__set_state(array(
-     'priv_member' => 9,
-     'public_member' => 9,
-  )),
-  '0.5' => 
-  cr::__set_state(array(
-     'priv_member' => 22,
-     'public_member' => 22,
-  )),
-  0 => 
-  cr::__set_state(array(
-     'priv_member' => 3,
-     'public_member' => 3,
-  )),
-  1 => 
-  cr::__set_state(array(
-     'priv_member' => 4,
-     'public_member' => 4,
-  )),
-  2 => 
-  cr::__set_state(array(
-     'priv_member' => -15,
-     'public_member' => -15,
-  )),
-);
-var_dump(array_uintersect_uassoc($a, $b, array("cr", "comp_func_cr"), "comp_func"));
-array(2) {
-  [1]=>
-  object(cr)#4 (2) {
-    [u"priv_member":u"cr":private]=>
-    int(4)
-    [u"public_member"]=>
-    int(4)
-  }
-  [2]=>
-  object(cr)#5 (2) {
-    [u"priv_member":u"cr":private]=>
-    int(-15)
-    [u"public_member"]=>
     int(-15)
   }
 }

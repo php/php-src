@@ -5,6 +5,9 @@ Sort with SORT_LOCALE_STRING
 if ("fr_FR" != setlocale(LC_CTYPE, "fr_FR")) {
   die("skip setlocale() failed\n");
 }
+if (!function_exists("i18n_loc_set_default")) {
+  die("skip no i18n_loc_set_default() function\n");
+}
 ?>
 --INI--
 unicode.script_encoding=UTF-8
