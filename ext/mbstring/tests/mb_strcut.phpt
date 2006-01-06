@@ -17,7 +17,7 @@ print  mb_strcut($euc_jp,  6,   5,'EUC-JP') . "\n";
 print  mb_strcut($euc_jp,  0, 100,'EUC-JP') . "\n";
 
 $str = mb_strcut($euc_jp, 100, 10,'EUC-JP');
-($str === "") ? print "OK\n" : print "NG: $str\n";
+($str === false) ? print "OK\n" : print "NG: $str\n";
 
 $str = mb_strcut($euc_jp, -100, 10,'EUC-JP');
 ($str !== "") ?	print "OK: $str\n" : print "NG:\n";
