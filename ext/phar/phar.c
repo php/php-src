@@ -142,7 +142,7 @@ static phar_internal_file_data *phar_get_filedata(char *alias, char *path TSRMLS
  * Returns the api version */
 PHP_METHOD(Phar, apiVersion)
 {
-	RETURN_STRING("0.7.1", 3);
+	RETURN_STRINGL("0.7.1", sizeof("0.7.1")-1, 1);
 }
 /* }}}*/
 
