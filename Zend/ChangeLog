@@ -1,3 +1,11 @@
+2006-01-05  Andi Gutmans  <andi@zend.com>
+
+    * LICENSE
+      LICENSE
+      zend_unicode.c
+      zend_unicode.h:
+      - More -> 2006 changes
+
 2006-01-04  Andi Gutmans  <andi@zend.com>
 
     * acconfig.h

@@ -1,3 +1,131 @@
+2006-01-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/streams/memory.c
+      main/streams/memory.c:
+      - Fix issue with memset seeking
+      - Fix issue with shutdown order of temp/memory stream
+
+2006-01-05  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_4_4)
+      ext/pgsql/config.m4
+      ext/pgsql/config.m4:
+      MFH: - Fixed bug #35911 (HAVE_PG_CONFIG_H set incorrectly)
+
+    * ext/pgsql/config.m4:
+      - Fixed bug #35911 (HAVE_PG_CONFIG_H set incorrectly)
+
+2006-01-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      configure.in
+      main/php_version.h:
+      Back to dev
+
+2006-01-05  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/string.c:
+      fix typo
+
+2006-01-05  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ext/ncurses/.cvsignore
+      ext/ncurses/CREDITS
+      ext/ncurses/EXPERIMENTAL
+      ext/ncurses/c-prototypes
+      ext/ncurses/config.m4
+      ext/ncurses/example1.php
+      ext/ncurses/ncurses.c
+      ext/ncurses/ncurses.php
+      ext/ncurses/ncurses_fe.c
+      ext/ncurses/ncurses_functions.c
+      ext/ncurses/package.xml
+      ext/ncurses/php_ncurses.h
+      ext/ncurses/php_ncurses_fe.h
+      ext/ncurses/tests/.cvsignore
+      ext/ncurses/tests/001.phpt:
+      ncurses goes sibiria^Wpecl
+
+2006-01-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      configure.in
+      main/php_version.h:
+      Go with 5.1.2RC2
+
+    * (PHP_5_1)
+      ext/curl/interface.c:
+      Revert unrelated parts of the previous patch.
+
+    * ext/curl/interface.c:
+      MFB4: Fixed bug #35908 (curl extension uses undefined
+      GCRY_THREAD_OPTIONS_USER).
+
+    * (PHP_5_1)
+      NEWS
+      ext/curl/interface.c:
+      MFH4: Fixed bug #35908 (curl extension uses undefined
+      GCRY_THREAD_OPTIONS_USER).
+
+    * (PHP_4_4)
+      ext/curl/curl.c:
+      Fixed bug #35908 (curl extension uses undefined GCRY_THREAD_OPTIONS_USER).
+
+2006-01-05  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      ext/oci8/oci8.c
+      ext/oci8/oci8_interface.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/php_oci8_int.h:
+      MFH: delete descriptor from the hash and avoid crashes on commit/rollback
+
+    * ext/oci8/oci8.c
+      ext/oci8/oci8_interface.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/php_oci8_int.h:
+      delete descriptor from the hash and avoid crashes on commit/rollback
+
+2006-01-05  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Back to devel.
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Go with RC2.
+
+2006-01-05  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/LICENSE
+      ZendEngine2/LICENSE
+      ZendEngine2/zend_unicode.c
+      ZendEngine2/zend_unicode.h:
+      - More -> 2006 changes
+
+2006-01-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/imap/php_imap.c:
+      MFB51: Fixed bug #35669 (imap_mail_compose() crashes with
+      multipart-multiboundary-email).
+
+    * (PHP_4_4)
+      NEWS
+      ext/imap/php_imap.c:
+      MFH: Fixed bug #35669 (imap_mail_compose() crashes with
+      multipart-multiboundary-email).
+
+    * (PHP_5_1)
+      NEWS
+      ext/imap/php_imap.c:
+      Fixed bug #35669 (imap_mail_compose() crashes with
+      multipart-multiboundary-email).
+
 2006-01-04  Andi Gutmans  <andi@zend.com>
 
     * (PHP_5_1)
