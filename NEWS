@@ -11,6 +11,7 @@ PHP                                                                        NEWS
   (Andrey)
 - Fixed bug #35908 (curl extension uses undefined GCRY_THREAD_OPTIONS_USER).
   (Ilia)
+- Fixed bug #35907 (PDO_OCI uses hardcoded lib path $ORACLE_HOME/lib). (Tony)
 - Fixed bug #35887 (wddx_deserialize not parsing dateTime fields properly).
   (Derick)
 - Fixed bug #35885 (strtotime("NOW") no longer works). (Derick)
