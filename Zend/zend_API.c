@@ -2135,7 +2135,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, char **
 						if (EG(This)) {
 							if (instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
 								*zobj_ptr_ptr = &EG(This);
-								zend_error(E_STRICT, "Non-static method %s::%s() canot be called statically, assuming $this from compatible context %s", ce->name, Z_STRVAL_PP(method), Z_OBJCE_P(EG(This))->name);
+								zend_error(E_STRICT, "Non-static method %s::%s() cannot be called statically, assuming $this from compatible context %s", ce->name, Z_STRVAL_PP(method), Z_OBJCE_P(EG(This))->name);
 							}
 						}
 					} else {
