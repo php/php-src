@@ -98,7 +98,7 @@ var_dump($x->doSomethingStatic(1));
 ===A===
 TestB::doSomething(1)
 
-Strict Standards: Non-static method TestA::doSomething() canot be called statically, assuming $this from compatible context TestB in %sbug32290.php on line %d
+Strict Standards: Non-static method TestA::doSomething() cannot be called statically, assuming $this from compatible context TestB in %sbug32290.php on line %d
 TestA::doSomething(2)
 int(1)
 
@@ -110,7 +110,7 @@ int(1)
 ===C===
 TestB::doSomethingParent(1)
 
-Strict Standards: Non-static method TestA::doSomethingParent() canot be called statically, assuming $this from compatible context TestB in %sbug32290.php on line %d
+Strict Standards: Non-static method TestA::doSomethingParent() cannot be called statically, assuming $this from compatible context TestB in %sbug32290.php on line %d
 TestA::doSomethingParent(2)
 int(1)
 
