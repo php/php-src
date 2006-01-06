@@ -269,7 +269,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 		if (NULL == (pos2 = strstr(pos1, "\r\n"))) {
 			RPath = estrndup(pos1, strlen(pos1));
 		} else {
-			RPath = estrndup(pos1, pos2-pos1);
+			RPath = estrndup(pos1, pos2 - pos1);
 		}
 	} else {
 		if (headers) {
@@ -360,7 +360,7 @@ PHPAPI char *GetSMErrorText(int index)
 
 
 /*********************************************************************
-// Name:  TSendText
+// Name:  SendText
 // Input:       1) RPath:   return path of the message
 //                                  Is used to fill the "Return-Path" and the
 //                                  "X-Sender" fields of the message.
@@ -411,17 +411,20 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 	/* attempt reconnect if the first Post fail */
 	if ((res = Post(Buffer)) != SUCCESS) {
 		MailConnect();
-		if ((res = Post(Buffer)) != SUCCESS)
+		if ((res = Post(Buffer)) != SUCCESS) {
 			return (res);
+		}
 	}
 	if ((res = Ack(&server_response)) != SUCCESS) {
 		SMTP_ERROR_RESPONSE(server_response);
 		return (res);
 	}
 
+	SMTP_SKIP_SPACE(RPath);
 	snprintf(Buffer, MAIL_BUFFER_SIZE, "MAIL FROM:<%s>\r\n", RPath);
-	if ((res = Post(Buffer)) != SUCCESS)
+	if ((res = Post(Buffer)) != SUCCESS) {
 		return (res);
+	}
 	if ((res = Ack(&server_response)) != SUCCESS) {
 		SMTP_ERROR_RESPONSE(server_response);
 		return W32_SM_SENDMAIL_FROM_MALFORMED;
@@ -430,8 +433,9 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 	tempMailTo = estrdup(mailTo);
 	/* Send mail to all rcpt's */
 	token = strtok(tempMailTo, ",");
-	while(token != NULL)
+	while (token != NULL)
 	{
+		SMTP_SKIP_SPACE(token);
 		snprintf(Buffer, MAIL_BUFFER_SIZE, "RCPT TO:<%s>\r\n", token);
 		if ((res = Post(Buffer)) != SUCCESS) {
 			efree(tempMailTo);
@@ -450,8 +454,9 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 		tempMailTo = estrdup(mailCc);
 		/* Send mail to all rcpt's */
 		token = strtok(tempMailTo, ",");
-		while(token != NULL)
+		while (token != NULL)
 		{
+			SMTP_SKIP_SPACE(token);
 			snprintf(Buffer, MAIL_BUFFER_SIZE, "RCPT TO:<%s>\r\n", token);
 			if ((res = Post(Buffer)) != SUCCESS) {
 				efree(tempMailTo);
@@ -473,23 +478,23 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 		 * the cc: */
 		pos1 = headers + (pos1 - headers_lc) + 3;
 		if (NULL == (pos2 = strstr(pos1, "\r\n"))) {
-
 			tempMailTo = estrndup(pos1, strlen(pos1));
-
 		} else {
-			tempMailTo = estrndup(pos1, pos2-pos1);
-
+			tempMailTo = estrndup(pos1, pos2 - pos1);
 		}
 
 		token = strtok(tempMailTo, ",");
-		while(token != NULL)
+		while (token != NULL)
 		{
 			SMTP_SKIP_SPACE(token);
-			sprintf(Buffer, "RCPT TO:<%s>\r\n", token);
-			if ((res = Post(Buffer)) != SUCCESS)
+			snprintf(Buffer, MAIL_BUFFER_SIZE, "RCPT TO:<%s>\r\n", token);
+			if ((res = Post(Buffer)) != SUCCESS) {
+				efree(tempMailTo);
 				return (res);
+			}
 			if ((res = Ack(&server_response)) != SUCCESS) {
 				SMTP_ERROR_RESPONSE(server_response);
+				efree(tempMailTo);
 				return (res);
 			}
 			token = strtok(NULL, ",");
@@ -504,7 +509,7 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 		tempMailTo = estrdup(mailBcc);
 		/* Send mail to all rcpt's */
 		token = strtok(tempMailTo, ",");
-		while(token != NULL)
+		while (token != NULL)
 		{
 			SMTP_SKIP_SPACE(token);
 			snprintf(Buffer, MAIL_BUFFER_SIZE, "RCPT TO:<%s>\r\n", token);
@@ -528,7 +533,6 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 			 * the bcc: */
 			pos1 = headers + (pos1 - headers_lc) + 4;
 			if (NULL == (pos2 = strstr(pos1, "\r\n"))) {
-				int foo = strlen(pos1);
 				tempMailTo = estrndup(pos1, strlen(pos1));
 				/* Later, when we remove the Bcc: out of the
 				   header we know it was the last thing. */
@@ -538,15 +542,17 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 			}
 
 			token = strtok(tempMailTo, ",");
-			while(token != NULL)
+			while (token != NULL)
 			{
 				SMTP_SKIP_SPACE(token);
-				sprintf(Buffer, "RCPT TO:<%s>\r\n", token);
+				snprintf(Buffer, MAIL_BUFFER_SIZE, "RCPT TO:<%s>\r\n", token);
 				if ((res = Post(Buffer)) != SUCCESS) {
+					efree(tempMailTo);
 					return (res);
 				}
 				if ((res = Ack(&server_response)) != SUCCESS) {
 					SMTP_ERROR_RESPONSE(server_response);
+					efree(tempMailTo);
 					return (res);
 				}
 				token = strtok(NULL, ",");
@@ -721,7 +727,7 @@ static int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders T
 			goto PostHeader_outofmem;
 		}
 	}
-	if(xheaders){
+	if (xheaders) {
 		if (!addToHeader(&header_buffer, "%s\r\n", xheaders)) {
 			goto PostHeader_outofmem;
 		}
@@ -779,7 +785,7 @@ static int MailConnect()
 	{
 		return (FAILED_TO_RESOLVE_HOST);
 	}
-        */
+	*/
 
 	portnum = (short) INI_INT("smtp_port");
 	if (!portnum) {
@@ -842,11 +848,11 @@ static int Ack(char **server_response)
 	int Index = 0;
 	int Received = 0;
 
-  again:
+again:
 
-	if ((rlen = recv(sc, buf + Index, ((MAIL_BUFFER_SIZE) - 1) - Received, 0)) < 1)
+	if ((rlen = recv(sc, buf + Index, ((MAIL_BUFFER_SIZE) - 1) - Received, 0)) < 1) {
 		return (FAILED_TO_RECEIVE);
-
+	}
 	Received += rlen;
 	buf[Received] = 0;
 	/*err_msg   fprintf(stderr,"Received: (%d bytes) %s", rlen, buf + Index); */
@@ -918,4 +924,4 @@ static unsigned long GetAddr(LPSTR szHost)
 		}
 	}
 	return (lAddr);
-}								/* end GetAddr() */
+} /* end GetAddr() */
