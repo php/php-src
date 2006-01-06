@@ -452,7 +452,7 @@ static int phar_open_compiled_file(char *alias, int alias_len, zend_bool compres
 
 	MAKE_STD_ZVAL(halt_constant);
 	if (0 == zend_get_constant("__COMPILER_HALT_OFFSET__", 24, halt_constant TSRMLS_CC)) {
-	FREE_ZVAL(halt_constant);
+		FREE_ZVAL(halt_constant);
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "__HALT_COMPILER(); must be declared in a phar");
 		return FAILURE;
 	}
