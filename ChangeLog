@@ -1,3 +1,84 @@
+2006-01-06  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/array/007.phpt
+      ext/standard/tests/array/array_intersect_1.phpt
+      ext/standard/tests/array/locale_sort.phpt:
+      fix tests
+
+2006-01-06  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * sapi/cgi/libfcgi/.cvsignore
+      sapi/cgi/libfcgi/LICENSE.TERMS
+      sapi/cgi/libfcgi/acinclude.m4
+      sapi/cgi/libfcgi/fcgi_stdio.c
+      sapi/cgi/libfcgi/fcgiapp.c
+      sapi/cgi/libfcgi/libfcgi.m4
+      sapi/cgi/libfcgi/os_unix.c
+      sapi/cgi/libfcgi/os_win32.c
+      sapi/cgi/libfcgi/strerror.c
+      sapi/cgi/libfcgi/include/fastcgi.h
+      sapi/cgi/libfcgi/include/fcgi_config.h
+      sapi/cgi/libfcgi/include/fcgi_config_win32.h
+      sapi/cgi/libfcgi/include/fcgi_config_x86.h
+      sapi/cgi/libfcgi/include/fcgi_stdio.h
+      sapi/cgi/libfcgi/include/fcgiapp.h
+      sapi/cgi/libfcgi/include/fcgiappmisc.h
+      sapi/cgi/libfcgi/include/fcgimisc.h
+      sapi/cgi/libfcgi/include/fcgio.h
+      sapi/cgi/libfcgi/include/fcgios.h:
+      Nuke unused files
+
+    * sapi/cgi/CREDITS:
+      credits for Dmitry
+
+2006-01-06  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      ZendEngine2/zend_API.c
+      ZendEngine2/tests/bug29210.phpt
+      ZendEngine2/tests/bug32290.phpt:
+      fix typo in the code and related tests
+
+    * ZendEngine2/tests/bug29210.phpt
+      ZendEngine2/tests/bug32290.phpt:
+      typo
+
+    * sapi/cgi/libfcgi/.cvsignore
+      sapi/cgi/libfcgi/.cvsignore:
+      
+      add missing .cvsignore
+
+2006-01-06  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_1)
+      sapi/apache/mod_php5.c:
+      MFH: I don't recall the reason for messing with r->allowed here, so let's
+      get rid of it (and see who screams).  This should fix bug #32561
+
+    * sapi/apache/mod_php5.c:
+      Let's not mess with r->allowed here - this should fix bug #32561
+
+2006-01-06  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      ext/mbstring/tests/mb_strcut.phpt:
+      fix test
+
+    * (PHP_5_1)
+      NEWS:
+      BFN
+
+2006-01-06  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * win32/sendmail.c:
+      - Cleanups:
+        * unify the address handling to always strip leading whitespace
+        * ws fixes
+
+    * (PHP_4_4)
+      win32/sendmail.c:
+      - Fixed bug #35906 (win32: mail() Date: header is not RFC compliant)
+
 2006-01-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * main/streams/memory.c
