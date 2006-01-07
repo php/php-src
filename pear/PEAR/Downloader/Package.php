@@ -63,6 +63,11 @@ class PEAR_Downloader_Package
      */
     var $_registry;
     /**
+     * Used to implement packagingroot properly
+     * @var PEAR_Registry
+     */
+    var $_installRegistry;
+    /**
      * @var PEAR_PackageFile_v1|PEAR_PackageFile|v2
      */
     var $_packagefile;
@@ -117,13 +122,21 @@ class PEAR_Downloader_Package
     var $_validated = false;
 
     /**
-     * @param PEAR_Config
+     * @param PEAR_Downloader
      */
     function PEAR_Downloader_Package(&$downloader)
     {
         $this->_downloader = &$downloader;
         $this->_config = &$this->_downloader->config;
         $this->_registry = &$this->_config->getRegistry();
+        $options = $downloader->getOptions();
+        if (isset($options['packagingroot'])) {
+            $this->_config->setInstallRoot($options['packagingroot']);
+            $this->_installRegistry = &$this->_config->getRegistry();
+            $this->_config->setInstallRoot(false);
+        } else {
+            $this->_installRegistry = &$this->_registry;
+        }
         $this->_valid = $this->_analyzed = false;
     }
 
@@ -345,8 +358,8 @@ class PEAR_Downloader_Package
             foreach ($params as $i => $param) {
                 // remove self if already installed with this version
                 // this does not need any pecl magic - we only remove exact matches
-                if ($param->_registry->packageExists($param->getPackage(), $param->getChannel())) {
-                    if (version_compare($param->_registry->packageInfo($param->getPackage(), 'version',
+                if ($param->_installRegistry->packageExists($param->getPackage(), $param->getChannel())) {
+                    if (version_compare($param->_installRegistry->packageInfo($param->getPackage(), 'version',
                           $param->getChannel()), $param->getVersion(), '==')) {
                         if (!isset($options['force'])) {
                             $info = $param->getParsedPackage();
@@ -356,7 +369,7 @@ class PEAR_Downloader_Package
                                 $param->_downloader->log(1, 'Skipping package "' .
                                     $param->getShortName() .
                                     '", already installed as version ' .
-                                    $param->_registry->packageInfo($param->getPackage(),
+                                    $param->_installRegistry->packageInfo($param->getPackage(),
                                         'version', $param->getChannel()));
                             }
                             $params[$i] = false;
@@ -367,7 +380,7 @@ class PEAR_Downloader_Package
                         $param->_downloader->log(1, 'Skipping package "' .
                             $param->getShortName() .
                             '", already installed as version ' .
-                            $param->_registry->packageInfo($param->getPackage(), 'version',
+                            $param->_installRegistry->packageInfo($param->getPackage(), 'version',
                                 $param->getChannel()));
                         $params[$i] = false;
                     }
@@ -569,7 +582,7 @@ class PEAR_Downloader_Package
             // we can't determine whether upgrade is necessary until we know what
             // version would be downloaded
             if (!isset($options['force']) && $this->isInstalled($ret, $oper)) {
-                $version = $this->_registry->packageInfo($dep['name'], 'version',
+                $version = $this->_installRegistry->packageInfo($dep['name'], 'version',
                     $dep['channel']);
                 $dep['package'] = $dep['name'];
                 if (!isset($options['soft'])) {
@@ -645,7 +658,7 @@ class PEAR_Downloader_Package
                     $chan = 'pecl.php.net';
                     $url =
                         $this->_downloader->_getDepPackageDownloadUrl($newdep, $pname);
-                    $obj = &$this->_registry->getPackage($dep['name']);
+                    $obj = &$this->_installRegistry->getPackage($dep['name']);
                     if (PEAR::isError($url)) {
                         PEAR::popErrorHandling();
                         if ($obj !== null && $this->isInstalled($obj, $dep['rel'])) {
@@ -724,10 +737,10 @@ class PEAR_Downloader_Package
                         'optional';
                     $dep['package'] = $dep['name'];
                     if (isset($newdep)) {
-                        $version = $this->_registry->packageInfo($newdep['name'], 'version',
+                        $version = $this->_installRegistry->packageInfo($newdep['name'], 'version',
                             $newdep['channel']);
                     } else {
-                        $version = $this->_registry->packageInfo($dep['name'], 'version');
+                        $version = $this->_installRegistry->packageInfo($dep['name'], 'version');
                     }
                     $dep['version'] = $url['version'];
                     if (!isset($options['soft'])) {
@@ -1075,21 +1088,21 @@ class PEAR_Downloader_Package
             }
         }
         $options = $this->_downloader->getOptions();
-        $test = $this->_registry->packageExists($package, $channel);
+        $test = $this->_installRegistry->packageExists($package, $channel);
         if (!$test && $channel == 'pecl.php.net') {
             // do magic to allow upgrading from old pecl packages to new ones
-            $test = $this->_registry->packageExists($package, 'pear.php.net');
+            $test = $this->_installRegistry->packageExists($package, 'pear.php.net');
             $channel = 'pear.php.net';
         }
         if ($test) {
             if (isset($dep['uri'])) {
-                if ($this->_registry->packageInfo($package, 'uri', '__uri') == $dep['uri']) {
+                if ($this->_installRegistry->packageInfo($package, 'uri', '__uri') == $dep['uri']) {
                     return true;
                 }
             }
             if (isset($options['upgrade'])) {
                 if ($oper == 'has') {
-                    if (version_compare($this->_registry->packageInfo(
+                    if (version_compare($this->_installRegistry->packageInfo(
                           $package, 'version', $channel),
                           $dep['version'], '>=')) {
                         return true;
@@ -1097,7 +1110,7 @@ class PEAR_Downloader_Package
                         return false;
                     }
                 } else {
-                    if (version_compare($this->_registry->packageInfo(
+                    if (version_compare($this->_installRegistry->packageInfo(
                           $package, 'version', $channel),
                           $dep['version'], '>=')) {
                         return true;

@@ -85,11 +85,18 @@ class PEAR_Dependency2
                               $state = PEAR_VALIDATE_INSTALLING)
     {
         $this->_config = &$config;
-        $this->_registry = &$config->getRegistry();
         if (!class_exists('PEAR_DependencyDB')) {
             require_once 'PEAR/DependencyDB.php';
         }
+        if (isset($installoptions['packagingroot'])) {
+            // make sure depdb is in the right location
+            $config->setInstallRoot($installoptions['packagingroot']);
+        }
+        $this->_registry = &$config->getRegistry();
         $this->_dependencydb = &PEAR_DependencyDB::singleton($config);
+        if (isset($installoptions['packagingroot'])) {
+            $config->setInstallRoot(false);
+        }
         $this->_options = $installoptions;
         $this->_state = $state;
         if (!class_exists('OS_Guess')) {
