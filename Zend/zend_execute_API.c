@@ -314,7 +314,7 @@ ZEND_API char *get_active_class_name(char **space TSRMLS_DC)
 		if (space) {
 			*space = "";
 		}
-		return EMPTY_STR;
+		return (char*)EMPTY_STR;
 	}
 	switch (EG(function_state_ptr)->function->type) {
 		case ZEND_USER_FUNCTION:
@@ -325,13 +325,13 @@ ZEND_API char *get_active_class_name(char **space TSRMLS_DC)
 			if (space) {
 				*space = ce ? "::" : "";
 			}
-			return ce ? ce->name : EMPTY_STR;
+			return ce ? ce->name : (char*)EMPTY_STR;
 		}
 		default:
 			if (space) {
 				*space = "";
 			}
-			return EMPTY_STR;
+			return (char*)EMPTY_STR;
 	}
 }
 
@@ -614,6 +614,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	zval *params_array;
 	int call_via_handler = 0;
 	char *old_func_name = NULL;
+	int clen , mlen, fname_len;
+	char *mname, *colon, *fname, *lcname;
 
 	if (EG(exception)) {
 		return FAILURE; /* we would result in an instable executor otherwise */
@@ -746,30 +748,74 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			convert_to_unicode(fci->function_name);
 		}
 
+		if (Z_TYPE_P(fci->function_name) == IS_UNICODE) {
+			if ((colon = (char*)u_strstr((UChar*)Z_UNIVAL_P(fci->function_name), (UChar*)":\0:\0")) != NULL) {
+				mlen = u_strlen((UChar*)(colon+4));
+				clen = Z_UNILEN_P(fci->function_name) - mlen - 2;
+				mname = colon + 4;
+			}
+		} else {
+			if ((colon = strstr(Z_STRVAL_P(fci->function_name), "::")) != NULL) {
+				clen = colon - Z_STRVAL_P(fci->function_name);
+				mlen = Z_STRLEN_P(fci->function_name) - clen - 2;
+				mname = colon + 2;
+			}
+		}
+		if (calling_scope && colon != NULL) {
+			zend_class_entry **pce, *ce_child;
+			if (zend_u_lookup_class(Z_TYPE_P(fci->function_name), Z_STRVAL_P(fci->function_name), clen, &pce TSRMLS_CC) == SUCCESS) {
+				ce_child = *pce;
+			} else {
+				lcname = zend_u_str_case_fold(Z_TYPE_P(fci->function_name), Z_UNIVAL_P(fci->function_name), clen, 0, &clen);
+				/* caution: lcname is not '\0' terminated */
+				if (clen == sizeof("self") - 1 && memcmp(lcname, "self", sizeof("self") - 1) == 0) {
+					ce_child = EG(active_op_array) ? EG(active_op_array)->scope : NULL;
+				} else if (clen == sizeof("parent") - 1 && memcmp(lcname, "parent", sizeof("parent") - 1) == 0 && EG(active_op_array)->scope) {
+					ce_child = EG(active_op_array) && EG(active_op_array)->scope ? EG(scope)->parent : NULL;
+				}
+				efree(lcname);
+			}
+			if (!ce_child) {
+				zend_error(E_ERROR, "Cannot call method %R() or method does not exist", Z_TYPE_P(fci->function_name), Z_UNIVAL_P(fci->function_name));
+				return FAILURE;
+			}
+			if (!instanceof_function(calling_scope, ce_child TSRMLS_CC)) {
+				zend_error(E_ERROR, "Cannot call method %R() of class %v which is not a derived from %v", Z_TYPE_P(fci->function_name), Z_UNIVAL_P(fci->function_name), ce_child->name, calling_scope->name);
+				return 0;
+			}
+			fci->function_table = &ce_child->function_table;
+			calling_scope = ce_child;
+			fname = colon + (Z_TYPE_P(fci->function_name) == IS_UNICODE ? 4 : 2);
+			fname_len = mlen;
+		} else {
+			fname = Z_STRVAL_P(fci->function_name);
+			fname_len = Z_STRLEN_P(fci->function_name);
+		}
+
 		if (fci->object_pp) {
 			if (Z_OBJ_HT_PP(fci->object_pp)->get_method == NULL) {
 				zend_error(E_ERROR, "Object does not support method calls");
 			}
 			EX(function_state).function = 
-				Z_OBJ_HT_PP(fci->object_pp)->get_method(fci->object_pp, Z_UNIVAL_P(fci->function_name), Z_UNILEN_P(fci->function_name) TSRMLS_CC);
+				Z_OBJ_HT_PP(fci->object_pp)->get_method(fci->object_pp, fname, fname_len TSRMLS_CC);
 			if (EX(function_state).function && calling_scope != EX(function_state).function->common.scope) {
-				void *function_name_lc = zend_u_str_tolower_dup(Z_TYPE_P(fci->function_name), Z_UNIVAL_P(fci->function_name), Z_UNILEN_P(fci->function_name));
-				if (zend_u_hash_find(&calling_scope->function_table, Z_TYPE_P(fci->function_name), function_name_lc, fci->function_name->value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
+				void *function_name_lc = zend_u_str_tolower_dup(Z_TYPE_P(fci->function_name), fname, fname_len);
+				if (zend_u_hash_find(&calling_scope->function_table, Z_TYPE_P(fci->function_name), function_name_lc, fname_len+1, (void **) &EX(function_state).function)==FAILURE) {
 					efree(function_name_lc);
-					zend_error(E_ERROR, "Cannot call method %v::%R() or method does not exist", calling_scope->name, Z_TYPE_P(fci->function_name), Z_UNIVAL_P(fci->function_name));
+					zend_error(E_ERROR, "Cannot call method %v::%R() or method does not exist", calling_scope->name, Z_TYPE_P(fci->function_name), fname);
 				}
 				efree(function_name_lc);
 			}
 		} else if (calling_scope) {
 			unsigned int lcname_len;
-			char *lcname = zend_u_str_case_fold(Z_TYPE_P(fci->function_name), Z_UNIVAL_P(fci->function_name), Z_UNILEN_P(fci->function_name), 1, &lcname_len);
+			char *lcname = zend_u_str_case_fold(Z_TYPE_P(fci->function_name), fname, fname_len, 1, &lcname_len);
 
 			EX(function_state).function = 
 				zend_std_get_static_method(calling_scope, lcname, lcname_len TSRMLS_CC);
 			efree(lcname);
 		} else {
 			unsigned int lcname_len;
-			char *lcname = zend_u_str_case_fold(Z_TYPE_P(fci->function_name), Z_UNIVAL_P(fci->function_name), Z_UNILEN_P(fci->function_name), 1, &lcname_len);
+			char *lcname = zend_u_str_case_fold(Z_TYPE_P(fci->function_name), fname, fname_len, 1, &lcname_len);
 
 			if (zend_u_hash_find(fci->function_table, Z_TYPE_P(fci->function_name), lcname, lcname_len+1, (void **) &EX(function_state).function)==FAILURE) {
 			  EX(function_state).function = NULL;
@@ -783,7 +829,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 				EX(function_state).function = calling_scope->__call;
 				/* prepare params */
 				ALLOC_INIT_ZVAL(method_name);
-				ZVAL_STRINGL(method_name, Z_STRVAL_P(fci->function_name), Z_STRLEN_P(fci->function_name), 0);
+				ZVAL_STRINGL(method_name, fname, fname_len, 0);
 
 				ALLOC_INIT_ZVAL(params_array);
 				array_init(params_array);
@@ -1490,9 +1536,9 @@ zend_class_entry *zend_fetch_class(char *class_name, uint class_name_len, int fe
 #define MAX_ABSTRACT_INFO_CNT 3
 #define MAX_ABSTRACT_INFO_FMT "%v%s%v%s"
 #define DISPLAY_ABSTRACT_FN(idx) \
-	ai.afn[idx] ? ZEND_FN_SCOPE_NAME(ai.afn[idx]) : EMPTY_STR, \
+	ai.afn[idx] ? ZEND_FN_SCOPE_NAME(ai.afn[idx]) : (char*)EMPTY_STR, \
 	ai.afn[idx] ? "::" : "", \
-	ai.afn[idx] ? ai.afn[idx]->common.function_name : EMPTY_STR, \
+	ai.afn[idx] ? ai.afn[idx]->common.function_name : (char*)EMPTY_STR, \
 	ai.afn[idx] && ai.afn[idx+1] ? ", " : (ai.afn[idx] && ai.cnt > MAX_ABSTRACT_INFO_CNT ? ", ..." : "")
 
 typedef struct _zend_abstract_info {
