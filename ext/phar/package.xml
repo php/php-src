@@ -76,7 +76,7 @@ This is the extension version of PEAR's PHP_Archive package. Support for zlib an
  <dependencies>
   <required>
    <php>
-    <min>5.1.0</min>
+    <min>5.1.2</min>
    </php>
    <pearinstaller>
     <min>1.4.3</min>
