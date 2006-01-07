@@ -2815,6 +2815,12 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, zval *c
 						} else if (zend_u_lookup_class(Z_TYPE_PP(obj), Z_UNIVAL_PP(obj), Z_UNILEN_PP(obj), &pce TSRMLS_CC) == SUCCESS) {
 							ce = *pce;
 						}
+						if (EG(This)) {
+							if (instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
+								*zobj_ptr_ptr = &EG(This);
+								zend_error(E_STRICT, "Non-static method %v::%R() cannot be called statically, assuming $this from compatible context %s", ce->name, Z_TYPE_PP(method), Z_STRVAL_PP(method), Z_OBJCE_P(EG(This))->name);
+							}
+						}
 						
 						efree(lcname);
 					} else {
