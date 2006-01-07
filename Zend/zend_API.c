@@ -2601,12 +2601,101 @@ ZEND_API int zend_disable_class(char *class_name, uint class_name_length TSRMLS_
 	return 1;
 }
 
+static int zend_is_callable_check_func(int check_flags, zval **zobj_ptr, zend_class_entry *ce_org, zval *callable, zend_class_entry **ce_ptr, zend_function **fptr_ptr TSRMLS_DC)
+{
+	int retval;
+	char *lcname, *lmname, *mname, *colon;
+	int clen, mlen;
+	zend_function *fptr;
+	zend_class_entry **pce;
+	HashTable *ftable;
+	
+	*ce_ptr = NULL;
+	*fptr_ptr = NULL;
+
+	if (Z_TYPE_P(callable) == IS_UNICODE) {
+		if ((colon = (char*)u_strstr((UChar*)Z_UNIVAL_P(callable), (UChar*)":\0:\0")) != NULL) {
+			mlen = u_strlen((UChar*)(colon+4));
+			clen = Z_UNILEN_P(callable) - mlen - 2;
+			mname = colon + 4;
+		}
+	} else {
+		if ((colon = strstr(Z_STRVAL_P(callable), "::")) != NULL) {
+			clen = colon - Z_STRVAL_P(callable);
+			mlen = Z_STRLEN_P(callable) - clen - 2;
+			mname = colon + 2;
+		}
+	}
+	if (colon != NULL) {
+		if (zend_u_lookup_class(Z_TYPE_P(callable), Z_STRVAL_P(callable), clen, &pce TSRMLS_CC) == SUCCESS) {
+			*ce_ptr = *pce;
+		} else {
+			lcname = zend_u_str_case_fold(Z_TYPE_P(callable), Z_UNIVAL_P(callable), clen, 0, &clen);
+			/* caution: lcname is not '\0' terminated */
+			if (clen == sizeof("self") - 1 && memcmp(lcname, "self", sizeof("self") - 1) == 0) {
+				*ce_ptr = EG(scope);
+			} else if (clen == sizeof("parent") - 1 && memcmp(lcname, "parent", sizeof("parent") - 1) == 0 && EG(active_op_array)->scope) {
+				*ce_ptr = EG(scope) ? EG(scope)->parent : NULL;
+			}
+			efree(lcname);
+		}
+		if (!*ce_ptr) {
+			return 0;
+		}
+		ftable = &(*ce_ptr)->function_table;
+		if (ce_org && !instanceof_function(ce_org, *ce_ptr TSRMLS_CC)) {
+			return 0;
+		}
+		lmname = zend_u_str_case_fold(Z_TYPE_P(callable), mname, mlen, 0, &mlen);
+	} else {
+		lmname = zend_u_str_case_fold(Z_TYPE_P(callable), Z_STRVAL_P(callable), Z_STRLEN_P(callable), 0, &mlen);
+		if (ce_org) {
+			ftable = &ce_org->function_table;
+			*ce_ptr = ce_org;
+		} else {
+			ftable = EG(function_table);
+		}
+	}
+
+	retval = zend_hash_find(ftable, lmname, mlen+1, (void**)&fptr) == SUCCESS ? 1 : 0;
+
+	if (!retval) {
+		if (zobj_ptr && *ce_ptr && (*ce_ptr)->__call != 0) {
+			retval = (*ce_ptr)->__call != NULL;
+			*fptr_ptr = (*ce_ptr)->__call;
+		}
+	} else {
+		*fptr_ptr = fptr;
+		if (*ce_ptr) {
+			if (!zobj_ptr && !(fptr->common.fn_flags & ZEND_ACC_STATIC)) {
+				if ((check_flags & IS_CALLABLE_CHECK_IS_STATIC) != 0) {
+					retval = 0;
+				} else {
+					zend_error(E_STRICT, "Non-static method %s::%s() cannot be called statically", (*ce_ptr)->name, fptr->common.function_name);
+				}
+			}
+			if (retval && (check_flags & IS_CALLABLE_CHECK_NO_ACCESS) == 0) {
+				if (fptr->op_array.fn_flags & ZEND_ACC_PRIVATE) {
+					if (!zend_check_private(fptr, zobj_ptr ? Z_OBJCE_PP(zobj_ptr) : EG(scope), lmname, mlen TSRMLS_CC)) {
+						retval = 0;
+					}
+				} else if ((fptr->common.fn_flags & ZEND_ACC_PROTECTED)) {
+					if (!zend_check_protected(fptr->common.scope, EG(scope))) {
+						retval = 0;
+					}
+				}
+			}
+		}
+	}
+	efree(lmname);
+	return retval;
+}
+
 ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, zval *callable_name, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zval ***zobj_ptr_ptr TSRMLS_DC)
 {
-	unsigned int lcname_len;
 	char *lcname;
-	zend_bool retval = 0; 
-	zend_class_entry *ce_local;
+	int lcname_len;
+	zend_class_entry *ce_local, **pce;
 	zend_function *fptr_local;
 	zval **zobj_ptr_local;
 
@@ -2634,17 +2723,12 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, zval *c
 			if (check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY) {
 				return 1;
 			}
-
-			lcname = zend_u_str_case_fold(Z_TYPE_P(callable), Z_UNIVAL_P(callable), Z_UNILEN_P(callable), 1, &lcname_len);
-			if (zend_u_hash_find(EG(function_table), Z_TYPE_P(callable), lcname, lcname_len+1, (void**)fptr_ptr) == SUCCESS) {
-				retval = 1;
-			}
-			efree(lcname);
-			break;
+			
+			return zend_is_callable_check_func(check_flags|IS_CALLABLE_CHECK_IS_STATIC, NULL, NULL, callable, ce_ptr, fptr_ptr TSRMLS_CC);
 
 		case IS_ARRAY:
 			{
-				zend_class_entry *ce = NULL, **pce;
+				zend_class_entry *ce = NULL;
 				zval **method;
 				zval **obj;
 				
@@ -2715,19 +2799,18 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, zval *c
 						}
 
 						if (check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY) {
-							*ce_ptr = ce;
 							return 1;
 						}
 
 						lcname = zend_u_str_case_fold(Z_TYPE_PP(obj), Z_UNIVAL_PP(obj), Z_UNILEN_PP(obj), 1, &lcname_len);
 
 						if (EG(active_op_array) &&
-						    lcname_len == sizeof("self")-1 &&
-						    ZEND_U_EQUAL(Z_TYPE_PP(obj), lcname, lcname_len, "self", sizeof("self")-1)) {
+							lcname_len == sizeof("self")-1 &&
+							ZEND_U_EQUAL(Z_TYPE_PP(obj), lcname, lcname_len, "self", sizeof("self")-1)) {
 							ce = EG(active_op_array)->scope;
 						} else if (EG(active_op_array) && EG(active_op_array)->scope &&
-						    lcname_len == sizeof("parent")-1 &&
-						    ZEND_U_EQUAL(Z_TYPE_PP(obj), lcname, lcname_len, "parent", sizeof("parent")-1)) {
+							lcname_len == sizeof("parent")-1 &&
+							ZEND_U_EQUAL(Z_TYPE_PP(obj), lcname, lcname_len, "parent", sizeof("parent")-1)) {
 							ce = EG(active_op_array)->scope->parent;
 						} else if (zend_u_lookup_class(Z_TYPE_PP(obj), Z_UNIVAL_PP(obj), Z_UNILEN_PP(obj), &pce TSRMLS_CC) == SUCCESS) {
 							ce = *pce;
@@ -2784,42 +2867,14 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, zval *c
 					}
 
 					if (ce) {
-						zend_function *fbc;
-
-						lcname = zend_u_str_case_fold(Z_TYPE_PP(method), Z_UNIVAL_PP(method), Z_UNILEN_PP(method), 1, &lcname_len);
-						if (zend_u_hash_find(&ce->function_table, Z_TYPE_PP(method), lcname, lcname_len+1, (void **)&fbc) == SUCCESS) {
- 							retval = 1;
-							if ((check_flags & IS_CALLABLE_CHECK_NO_ACCESS) == 0) {
-								if (fbc->op_array.fn_flags & ZEND_ACC_PRIVATE) {
-									if (!zend_check_private(fbc, (Z_TYPE_PP(obj) != IS_OBJECT)?EG(scope):(*obj)->value.obj.handlers->get_class_entry(*obj TSRMLS_CC), lcname, Z_UNILEN_PP(method) TSRMLS_CC)) {
-										retval = 0;
-									}
-								} else if ((fbc->common.fn_flags & ZEND_ACC_PROTECTED)) {
-									if (!zend_check_protected(fbc->common.scope, EG(scope))) {
-										retval = 0;
-									}
-								}
-							}
-							if (retval) {
-								if ((check_flags & IS_CALLABLE_CHECK_IS_STATIC) != 0 && (fbc->common.fn_flags & ZEND_ACC_STATIC) == 0) {
-									retval = 0;
-								} else {
-									*fptr_ptr = fbc;
-								}
-							}
-						}
-						/* check for __call too */
-						if (retval == 0 && *zobj_ptr_ptr && ce->__call != 0) {
-							retval = 1;
-						}
-						efree(lcname);
+						return zend_is_callable_check_func(check_flags, *zobj_ptr_ptr, ce, *method, ce_ptr, fptr_ptr TSRMLS_CC);
 					}
 				} else if (callable_name) {
 					ZVAL_ASCII_STRINGL(callable_name, "Array", sizeof("Array")-1, 1);
 				}
 				*ce_ptr = ce;
 			}
-			break;
+			return 0;
 
 		default:
 			if (callable_name) {
@@ -2827,10 +2882,8 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, zval *c
 				zval_copy_ctor(callable_name);
 				convert_to_text(callable_name);
 			}
-			break;
+			return 0;
 	}
-
-	return retval;
 }
 
 
