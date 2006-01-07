@@ -1,3 +1,15 @@
+2006-01-06  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      zend_API.c
+      tests/bug29210.phpt
+      tests/bug32290.phpt:
+      fix typo in the code and related tests
+
+    * tests/bug29210.phpt
+      tests/bug32290.phpt:
+      typo
+
 2006-01-05  Andi Gutmans  <andi@zend.com>
 
     * LICENSE
