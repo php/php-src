@@ -1,3 +1,37 @@
+2006-01-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute_API.c:
+      - MFB Second part of is_callable/call_user_func
+      - Clean a few warnings
+
+    * ZendEngine2/zend_API.c:
+      - MFB missing E_STRICT
+
+    * ZendEngine2/zend_API.c:
+      - MFB zend_is_callable() fixes
+
+2006-01-07  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/packages/PEAR-1.4.6.tar
+      pear/packages/PEAR-1.4.6.tar:
+      
+      file PEAR-1.4.6.tar was initially added on branch PHP_4_4.
+
+    * (PHP_4_4)
+      pear/install-pear.php
+      pear/PEAR/Dependency2.php
+      pear/PEAR/Installer.php
+      pear/PEAR/Registry.php
+      pear/PEAR/Command/Install.php
+      pear/packages/PEAR-1.4.5.tar:
+      update to PEAR 1.4.6, add support for --packagingroot to local PEAR
+      installer (needed for INSTALL_ROOT)
+
+2006-01-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cli/php_cli.c:
+      - Show whether this is the shell or just the starnge mode
+
 2006-01-06  Antony Dovgal  <antony@zend.com>
 
     * ext/standard/tests/array/007.phpt
