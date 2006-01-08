@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Jan 2006, PHP 5.1.2RC2
+05 Jan 2006, PHP 5.1.2RC2
+- Upgraded pear to version 1.4.6. (Greg)
 - Added constants for libxslt and libexslt versions: LIBXSLT_VERSION,
   LIBXSLT_DOTTED_VERSION, LIBEXSLT_VERSION and LIBEXSLT_DOTTED_VERSION. (Pierre)
 - Fixed possible crash in apache_getenv()/apache_setenv() on invalid parameters.
