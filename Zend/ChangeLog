@@ -1,3 +1,15 @@
+2006-01-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute_API.c:
+      - MFB Second part of is_callable/call_user_func
+      - Clean a few warnings
+
+    * zend_API.c:
+      - MFB missing E_STRICT
+
+    * zend_API.c:
+      - MFB zend_is_callable() fixes
+
 2006-01-06  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_1)
