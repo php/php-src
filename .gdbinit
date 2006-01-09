@@ -165,7 +165,7 @@ define ____print_const_table
 		end
 
 		if $p->nKeyLength > 0 
-			printf "\"%s\" => ", $p->arKey
+			printf "\"%s\" => ", $p->key.u.string
 		else
 			printf "%d => ", $p->h
 		end
@@ -196,7 +196,7 @@ define ____print_ht
 		end
 
 		if $p->nKeyLength > 0 
-			printf "\"%s\" => ", $p->arKey
+			printf "\"%s\" => ", (char*)$p->key.u.string
 		else
 			printf "%d => ", $p->h
 		end
@@ -215,6 +215,41 @@ end
 
 document print_ht
 	dumps elements of HashTable made of zval
+end
+
+define ____print_ft
+	set $ht = $arg0
+	set $p = $ht->pListHead
+
+	while $p != 0
+		set $func = (zend_function*)$p->pData
+
+		set $i = $ind
+		while $i > 0
+			printf "  "
+			set $i = $i - 1
+		end
+
+		if $p->nKeyLength > 0 
+			printf "\"%s\" => ", (char*)$p->key.u.string
+		else
+			printf "%d => ", $p->h
+		end
+
+		printf "\"%s\"\n", $func->common.function_name
+		set $p = $p->pListNext
+	end
+end
+
+define print_ft
+	set $ind = 1
+	printf "[0x%08x] {\n", $arg0
+	____print_ft $arg0
+	printf "}\n"
+end
+
+document print_ft
+	dumps a function table (HashTable)
 end
 
 define printzn
