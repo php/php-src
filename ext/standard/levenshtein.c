@@ -106,7 +106,7 @@ PHP_FUNCTION(levenshtein)
 	void *str1, *str2;
 	int32_t str1_len, str2_len;
 	zend_uchar str1_type, str2_type;
-	int cost_ins, cost_rep, cost_del;
+	long cost_ins, cost_rep, cost_del;
 	char *callback_name;
 	int distance = -1;
 
