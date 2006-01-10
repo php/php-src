@@ -22,11 +22,6 @@
 #ifndef PHP_PHAR_H
 #define PHP_PHAR_H
 
-#ifdef HAVE_PHAR_ZLIB
-#include <zlib.h>
-#endif
-
-#include "zend_hash.h"
 #include "ext/standard/basic_functions.h"
 extern zend_module_entry phar_module_entry;
 #define phpext_phar_ptr &phar_module_entry
@@ -36,14 +31,6 @@ extern zend_module_entry phar_module_entry;
 #else
 #define PHP_PHAR_API
 #endif
-
-#ifdef ZTS
-#include "TSRM.h"
-#endif
-
-ZEND_BEGIN_MODULE_GLOBALS(phar)
-	HashTable	phar_data;
-ZEND_END_MODULE_GLOBALS(phar)
 
 /* In every utility function you add that needs to use variables 
    in php_phar_globals, call TSRMLS_FETCH(); after declaring other 
