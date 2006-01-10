@@ -10,6 +10,8 @@ PHP                                                                        NEWS
 - Fixed segfault/leak in imagecolormatch(). (Pierre)
 - Fixed small leak in mysqli_stmt_fetch() when bound variable was empty string.
   (Andrey)
+- Fixed bug #35916 (Duplicate calls to stream_bucket_append() lead to a crash).
+  (Ilia)
 - Fixed bug #35908 (curl extension uses undefined GCRY_THREAD_OPTIONS_USER).
   (Ilia)
 - Fixed bug #35907 (PDO_OCI uses hardcoded lib path $ORACLE_HOME/lib). (Tony)
