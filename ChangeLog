@@ -1,3 +1,8 @@
+2006-01-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * .gdbinit:
+      Add print_ft to dump function tables (lists the names)
+
 2006-01-08  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_1)
