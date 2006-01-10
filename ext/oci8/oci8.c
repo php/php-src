@@ -88,7 +88,9 @@ static void php_oci_descriptor_list_dtor (zend_rsrc_list_entry * TSRMLS_DC);
 static void php_oci_collection_list_dtor (zend_rsrc_list_entry * TSRMLS_DC);
 
 static int php_oci_persistent_helper(zend_rsrc_list_entry *le TSRMLS_DC);
+#ifdef ZTS
 static int php_oci_regular_helper(zend_rsrc_list_entry *le TSRMLS_DC);
+#endif
 static int php_oci_connection_ping(php_oci_connection * TSRMLS_DC);
 static int php_oci_connection_status(php_oci_connection * TSRMLS_DC);
 static int php_oci_connection_close(php_oci_connection * TSRMLS_DC);
@@ -1728,6 +1730,7 @@ static int php_oci_persistent_helper(zend_rsrc_list_entry *le TSRMLS_DC)
 	return 0;
 } /* }}} */
 
+#ifdef ZTS
 /* {{{ php_oci_regular_helper() 
  Helper function to close non-persistent connections at the end of request in ZTS mode */
 static int php_oci_regular_helper(zend_rsrc_list_entry *le TSRMLS_DC)
@@ -1742,5 +1745,6 @@ static int php_oci_regular_helper(zend_rsrc_list_entry *le TSRMLS_DC)
 	}
 	return 0;
 } /* }}} */
+#endif
 
 #endif /* HAVE_OCI8 */
