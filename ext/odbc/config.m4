@@ -546,7 +546,7 @@ if test -n "$ODBC_TYPE"; then
   if test "$ODBC_TYPE" != "dbmaker"; then
     ext_shared=$shared
     PHP_EVAL_LIBLINE([$ODBC_LFLAGS $ODBC_LIBS], ODBC_SHARED_LIBADD)
-    if test "$ODBC_TYPE" != "birdstep"; then
+    if test "$ODBC_TYPE" != "birdstep" && test "$ODBC_TYPE" != "solid"; then
       AC_DEFINE(HAVE_SQLDATASOURCES,1,[ ])
     fi
   fi
