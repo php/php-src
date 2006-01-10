@@ -273,6 +273,10 @@ PHPAPI void php_stream_bucket_prepend(php_stream_bucket_brigade *brigade, php_st
 
 PHPAPI void php_stream_bucket_append(php_stream_bucket_brigade *brigade, php_stream_bucket *bucket TSRMLS_DC)
 {
+	if (brigade->tail == bucket) {
+		return;
+	}
+
 	bucket->prev = brigade->tail;
 	bucket->next = NULL;
 
