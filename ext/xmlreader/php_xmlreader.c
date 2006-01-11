@@ -537,7 +537,7 @@ Get value of an attribute at index from current element */
 PHP_METHOD(xmlreader, getAttributeNo)
 {
 	zval *id;
-	int attr_pos;
+	long attr_pos;
 	char *retchar = NULL;
 	xmlreader_object *intern;
 
@@ -600,7 +600,8 @@ Indicates whether given property (one of the parser option constants) is set or 
 PHP_METHOD(xmlreader, getParserProperty)
 {
 	zval *id;
-	int property, retval = -1;
+	long property;
+	int retval = -1;
 	xmlreader_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &property) == FAILURE) {
@@ -678,7 +679,8 @@ Returns TRUE on success and FALSE on failure */
 PHP_METHOD(xmlreader, moveToAttributeNo)
 {
 	zval *id;
-	int attr_pos, retval;
+	long attr_pos;
+	int retval;
 	xmlreader_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &attr_pos) == FAILURE) {
