@@ -157,29 +157,60 @@ static void destroy_phar_manifest(void *pDest) /* {{{ */
 }
 /* }}} */
 
-static phar_internal_file_data *phar_get_filedata(char *alias, char *path TSRMLS_DC) /* {{{ */
+static phar_file_data * phar_get_file_data(char *fname, int fname_len, char *alias, int alias_len TSRMLS_DC) /* {{{ */
 {
-	union {
-		phar_file_data *p;
-		void *fake;
-	} phar;
+	phar_file_data *fd;
+
+	if (alias && alias_len) {
+		if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_data), alias, alias_len, (void**)&fd)) {
+			return fd;
+		}
+	}
+	if (fname && fname_len) {
+		if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_data), fname, fname_len, (void**)&fd)) {
+			return fd;
+		}
+	}
+	
+	zend_hash_internal_pointer_reset(&(PHAR_GLOBALS->phar_data));
+	while(zend_hash_has_more_elements(&(PHAR_GLOBALS->phar_data)) == SUCCESS) {
+		if (zend_hash_get_current_data(&(PHAR_GLOBALS->phar_data), (void**)&fd) == SUCCESS) {
+			if (fname && fname_len && fname_len == fd->filename_len && !strncmp(fname, fd->filename, fname_len)) {
+				if (alias && alias_len && fd->alias && fd->alias_len && (alias_len != fd->alias_len || strncmp(alias, fd->alias, alias_len))) {
+					/* An implicit alias cannot be changed and will always be */
+					/* the key. Finding it not as key but having the alias */
+					/* here means we do something wrong. */
+					return NULL;
+				}
+				return fd;
+			}
+			if (alias && alias_len && alias_len == fd->alias_len && !strncmp(alias, fd->alias, alias_len)) {
+				return fd;
+			}
+		}
+		zend_hash_move_forward(&(PHAR_GLOBALS->phar_data));
+	}
+	return NULL;
+}
+/* }}} */
+
+static phar_internal_file_data *phar_get_file_entry(char *alias, char *path TSRMLS_DC) /* {{{ */
+{
+	phar_file_data *phar;
+	phar_manifest_entry *entry;
 	phar_internal_file_data *ret;
-	union {
-		phar_manifest_entry *i;
-		void *fake;
-	} internal_file;
 	
 	ret = NULL;
-	if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_data), alias, strlen(alias), &phar.fake)) {
-		if (SUCCESS == zend_hash_find(&phar.p->manifest, path, strlen(path), &internal_file.fake)) {
+	if ((phar = phar_get_file_data(NULL, 0, alias, strlen(alias) TSRMLS_CC)) != NULL) {
+		if (SUCCESS == zend_hash_find(&phar->manifest, path, strlen(path), (void**)&entry)) {
 			ret = (phar_internal_file_data *) emalloc(sizeof(phar_internal_file_data));
-			ret->phar = phar.p;
-			ret->internal_file = internal_file.i;
-			if (internal_file.i->fp) {
+			ret->phar = phar;
+			ret->internal_file = entry;
+			if (entry->fp) {
 				/* transfer ownership */
-				ret->fp = internal_file.i->fp;
+				ret->fp = entry->fp;
 				php_stream_seek(ret->fp, 0, SEEK_SET);
-				internal_file.i->fp = 0;
+				entry->fp = 0;
 			} else {
 				ret->fp = 0;
 			}
@@ -235,23 +266,20 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 {
 	char b32[4], *buffer, *endbuffer, *savebuf;
 	phar_file_data mydata;
-	union {
-		phar_file_data *p;
-		void *fake;
-	} phar_data;
+	phar_file_data *phar;
 	phar_manifest_entry entry;
 	php_uint32 manifest_len, manifest_count, manifest_index, tmp_len;
 	php_uint16 manifest_tag;
 	long offset;
 	int compressed = 0;
 
-	if (alias && alias_len && SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_data), alias, alias_len, &phar_data.fake)) {
+	if ((phar = phar_get_file_data(fname, fname_len, alias, alias_len TSRMLS_CC)) != NULL) {
 		/* Overloading or reloading an archive would only be possible if we  */
 		/* refcount everything to be sure no stream for any file in the */
 		/* archive is open. */
-		if (fname_len != phar_data.p->filename_len || strncmp(fname, phar_data.p->filename, fname_len)) {
+		if (fname_len != phar->filename_len || strncmp(fname, phar->filename, fname_len)) {
 			php_stream_close(fp);
-			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, phar_data.p->filename, fname);
+			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, phar->filename, fname);
 			return FAILURE;
 		} else {
 			php_stream_close(fp);
@@ -471,7 +499,7 @@ static int phar_open_filename(char *fname, int fname_len, char *alias, int alias
 static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char *mode, int options TSRMLS_DC) /* {{{ */
 {
 	php_url *resource;
-	char *pos_p, *pos_z, *ext_str, *alias;
+	char *pos_p, *pos_z, *ext_str;
 	int len, ext_len;
 
 	if (!strncasecmp(filename, "phar://", 7)) {
@@ -498,7 +526,7 @@ static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char 
 		resource = emalloc(sizeof(php_url));
 		resource->scheme = estrndup("phar", 4);
 		len = ext_str - filename + ext_len;
-		alias = resource->host = estrndup(filename, len);
+		resource->host = estrndup(filename, len);
 		if (ext_str[ext_len]) {
 			resource->path = estrdup(ext_str+ext_len);
 		} else {
@@ -518,7 +546,7 @@ static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char 
 /*			fprintf(stderr, "Fragment:  %s\n", resource->fragment);*/
 		}
 #endif
-		if (phar_open_filename(resource->host, strlen(resource->host), NULL, 0 TSRMLS_CC) == FAILURE)
+		if (phar_open_filename(resource->host, len, NULL, 0 TSRMLS_CC) == FAILURE)
 		{
 			php_url_free(resource);
 			return NULL;
@@ -700,7 +728,7 @@ static php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, cha
 
 	/* strip leading "/" */
 	internal_file = estrdup(resource->path + 1);
-	if (NULL == (idata = phar_get_filedata(resource->host, internal_file TSRMLS_CC))) {
+	if (NULL == (idata = phar_get_file_entry(resource->host, internal_file TSRMLS_CC))) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: \"%s\" is not a file in phar \"%s\"", internal_file, resource->host);
 		efree(internal_file);
 		php_url_free(resource);
@@ -1063,14 +1091,8 @@ static int phar_stream_stat(php_stream_wrapper *wrapper, char *url, int flags,
 	char *internal_file, *key;
 	uint keylen;
 	ulong unused;
-	union {
-		phar_file_data *d;
-		void *fake;
-	} data;
-	union {
-		phar_manifest_entry *f;
-		void *fake;
-	} file_data;
+	phar_file_data *phar;
+	phar_manifest_entry *entry;
 
 	resource = php_url_parse(url);
 
@@ -1095,32 +1117,32 @@ static int phar_stream_stat(php_stream_wrapper *wrapper, char *url, int flags,
 
 	internal_file = resource->path + 1; /* strip leading "/" */
 	/* find the phar in our trusty global hash indexed by alias (host of phar://blah.phar/file.whatever) */
-	if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_data), resource->host, strlen(resource->host), &data.fake)) {
+	if ((phar = phar_get_file_data(resource->host, strlen(resource->host), NULL, 0 TSRMLS_CC)) != NULL) {
 		if (*internal_file == '\0') {
 			/* root directory requested */
-			phar_dostat(NULL, ssb, 1, data.d->alias, data.d->alias_len TSRMLS_CC);
+			phar_dostat(NULL, ssb, 1, phar->alias, phar->alias_len TSRMLS_CC);
 			php_url_free(resource);
 			return 0;
 		}
 		/* search through the manifest of files, and if we have an exact match, it's a file */
-		if (SUCCESS == zend_hash_find(&data.d->manifest, internal_file, strlen(internal_file), &file_data.fake)) {
-			phar_dostat(file_data.f, ssb, 0, data.d->alias, data.d->alias_len TSRMLS_CC);
+		if (SUCCESS == zend_hash_find(&phar->manifest, internal_file, strlen(internal_file), (void**)&entry)) {
+			phar_dostat(entry, ssb, 0, phar->alias, phar->alias_len TSRMLS_CC);
 		} else {
 			/* search for directory (partial match of a file) */
-			zend_hash_internal_pointer_reset(&data.d->manifest);
-			while (HASH_KEY_NON_EXISTANT != zend_hash_has_more_elements(&data.d->manifest)) {
+			zend_hash_internal_pointer_reset(&phar->manifest);
+			while (FAILURE != zend_hash_has_more_elements(&phar->manifest)) {
 				if (HASH_KEY_NON_EXISTANT !=
 						zend_hash_get_current_key_ex(
-							&data.d->manifest, &key, &keylen, &unused, 0, NULL)) {
+							&phar->manifest, &key, &keylen, &unused, 0, NULL)) {
 					if (0 == memcmp(internal_file, key, strlen(internal_file))) {
 						/* directory found, all dirs have the same stat */
 						if (key[strlen(internal_file)] == '/') {
-							phar_dostat(NULL, ssb, 1, data.d->alias, data.d->alias_len TSRMLS_CC);
+							phar_dostat(NULL, ssb, 1, phar->alias, phar->alias_len TSRMLS_CC);
 							break;
 						}
 					}
 				}
-				if (SUCCESS != zend_hash_move_forward(&data.d->manifest)) {
+				if (SUCCESS != zend_hash_move_forward(&phar->manifest)) {
 					break;
 				}
 			}
@@ -1181,7 +1203,7 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
 	zend_hash_init(data, 64, zend_get_hash_value, NULL, 0);
 
 	zend_hash_internal_pointer_reset(manifest);
-	while (HASH_KEY_NON_EXISTANT != zend_hash_has_more_elements(manifest)) {
+	while (FAILURE != zend_hash_has_more_elements(manifest)) {
 		if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(manifest, &key, &keylen, &unused, 0, NULL)) {
 			break;
 		}
@@ -1239,7 +1261,7 @@ PHAR_ADD_ENTRY:
 			break;
 		}
 	}
-	if (HASH_KEY_NON_EXISTANT != zend_hash_has_more_elements(data)) {
+	if (FAILURE != zend_hash_has_more_elements(data)) {
 		efree(dir);
 		if (zend_hash_sort(data, zend_qsort, compare_dir_name, 0 TSRMLS_CC) == FAILURE) {
 			FREE_HASHTABLE(data);
@@ -1262,14 +1284,8 @@ static php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filename, cha
 	char *internal_file, *key;
 	uint keylen;
 	ulong unused;
-	union {
-		phar_file_data *d;
-		void *fake;
-	} data;
-	union {
-		phar_manifest_entry *f;
-		void *fake;
-	} file_data;
+	phar_file_data *phar;
+	phar_manifest_entry *entry;
 
 	resource = php_url_parse(filename);
 
@@ -1298,33 +1314,33 @@ static php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filename, cha
 	}
 
 	internal_file = resource->path + 1; /* strip leading "/" */
-	if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_data), resource->host, strlen(resource->host), &data.fake)) {
+	if ((phar = phar_get_file_data(resource->host, strlen(resource->host), NULL, 0 TSRMLS_CC)) != NULL) {
 		if (*internal_file == '\0') {
 			/* root directory requested */
 			internal_file = estrndup(internal_file - 1, 1);
-			ret = phar_make_dirstream(internal_file, &data.d->manifest TSRMLS_CC);
+			ret = phar_make_dirstream(internal_file, &phar->manifest TSRMLS_CC);
 			php_url_free(resource);
 			return ret;
 		}
-		if (SUCCESS == zend_hash_find(&data.d->manifest, internal_file, strlen(internal_file), &file_data.fake)) {
+		if (SUCCESS == zend_hash_find(&phar->manifest, internal_file, strlen(internal_file), (void**)&entry)) {
 			php_url_free(resource);
 			return NULL;
 		} else {
 			/* search for directory */
-			zend_hash_internal_pointer_reset(&data.d->manifest);
-			while (HASH_KEY_NON_EXISTANT != zend_hash_has_more_elements(&data.d->manifest)) {
+			zend_hash_internal_pointer_reset(&phar->manifest);
+			while (FAILURE != zend_hash_has_more_elements(&phar->manifest)) {
 				if (HASH_KEY_NON_EXISTANT != 
 						zend_hash_get_current_key_ex(
-							&data.d->manifest, &key, &keylen, &unused, 0, NULL)) {
+							&phar->manifest, &key, &keylen, &unused, 0, NULL)) {
 					if (0 == memcmp(key, internal_file, strlen(internal_file))) {
 						/* directory found */
 						internal_file = estrndup(internal_file,
 								strlen(internal_file));
 						php_url_free(resource);
-						return phar_make_dirstream(internal_file, &data.d->manifest TSRMLS_CC);
+						return phar_make_dirstream(internal_file, &phar->manifest TSRMLS_CC);
 					}
 				}
-				if (SUCCESS != zend_hash_move_forward(&data.d->manifest)) {
+				if (SUCCESS != zend_hash_move_forward(&phar->manifest)) {
 					break;
 				}
 			}

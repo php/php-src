@@ -1,7 +1,5 @@
 --TEST--
 Phar: phar:// require from within
---INI--
-magic_quotes_runtime=0
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 --FILE--
@@ -22,7 +20,7 @@ foreach($files as $name => $cont) {
 	$len = strlen($cont);
 	$manifest .= pack('V', strlen($name)) . $name . pack('VVVVC', $len, time(), $len, crc32($cont), 0x00);
 }
-$alias = 'hio';
+$alias = '';
 $manifest = pack('VnV', count($files), 0x0800, strlen($alias)) . $alias . $manifest;
 $file .= pack('V', strlen($manifest)) . $manifest;
 foreach($files as $cont)
