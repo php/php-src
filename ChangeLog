@@ -1,3 +1,57 @@
+2006-01-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/filters/bug35916.phpt
+      main/streams/filter.c:
+      MFB51: Fixed bug #35916 (Duplicate calls to stream_bucket_append() lead to
+      a crash).
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/tests/filters/bug35916.phpt
+      ext/standard/tests/filters/bug35916.phpt
+      main/streams/filter.c:
+      Fixed bug #35916 (Duplicate calls to stream_bucket_append() lead to a
+      crash).
+
+2006-01-10  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      ext/odbc/config.m4
+      ext/odbc/config.m4
+      ext/odbc/config.m4:
+      MFH: fix #35959 (Cannot build with Solid 2.3)
+
+    * ext/odbc/config.m4:
+      fix #35959 (Cannot build with Solid 2.3)
+
+    * ext/standard/levenshtein.c:
+      fix memory corruption (HEAD only)
+
+    * (PHP_5_1)
+      ext/oci8/oci8.c:
+      MFH: destroy regular connections in RSHUTDOWN if ZTS is used
+      this fixes problem with Oracle9 (not Oracle10) and Apache2/worker -
+      connections are not being closed correctly
+      see #35205 and similar issues
+
+    * ext/oci8/oci8.c:
+      silence compile warning in non-ZTS mode
+
+    * ext/oci8/oci8.c:
+      destroy regular connections in RSHUTDOWN if ZTS is used
+      this fixes problem with Oracle9 (not Oracle10) and Apache2/worker -
+      connections are not being closed correctly
+      see #35205 and similar issues
+
+2006-01-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/general_functions/sunfuncts.phpt:
+      MFB51: Fixed test
+
+    * (PHP_5_1)
+      ext/standard/tests/general_functions/sunfuncts.phpt:
+      Fixed test.
+
 2006-01-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * .gdbinit:
