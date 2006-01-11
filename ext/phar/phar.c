@@ -42,10 +42,6 @@
  #       define FALSE 0
 #endif
 
-#ifdef HAVE_PHAR_ZLIB
-#include <zlib.h>
-#endif
-
 #ifndef E_RECOVERABLE_ERROR
 #define E_RECOVERABLE_ERROR E_ERROR
 #endif
@@ -227,7 +223,7 @@ PHP_METHOD(Phar, apiVersion)
  * Returns whether phar extension supports compression using zlib */
 PHP_METHOD(Phar, canCompress)
 {
-#ifdef HAVE_PHAR_ZLIB
+#if HAVE_ZLIB
 	RETURN_TRUE;
 #else
 	RETURN_FALSE;
@@ -413,7 +409,7 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 		offset += entry.compressed_filesize;
 		entry.flags = *buffer++;
 		if (entry.flags & PHAR_COMPRESSED_GZ) {
-#ifndef HAVE_PHAR_ZLIB
+#if !HAVE_ZLIB
 			if (!compressed) {
 				MAPPHAR_FAIL("zlib extension is required for gz compressed .phar file \"%s\"");
 			}
@@ -688,21 +684,13 @@ static int phar_postprocess_file(php_stream_wrapper *wrapper, int options, phar_
 static php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
 {
 	phar_internal_file_data *idata;
-	php_stream *stream = NULL;
 	char *internal_file;
 	char *buffer;
-	char *filedata;
 	char tmpbuf[8];
 	php_url *resource = NULL;
-	php_stream *fp;
-	int status;
-#ifdef HAVE_PHAR_ZLIB
-	char *savebuf;
-	/* borrowed from zlib.c gzinflate() function */
+	php_stream *fp, *fpf;
+	php_stream_filter *filter;
 	php_uint32 offset;
-	char *s1=NULL;
-	z_stream zstream;
-#endif
 
 	resource = php_url_parse(path);
 
@@ -748,9 +736,9 @@ static php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, cha
 
 	/* do we have the data already? */
 	if (idata->fp) {
-		stream = php_stream_alloc(&phar_ops, idata, NULL, mode);
+		fpf = php_stream_alloc(&phar_ops, idata, NULL, mode);
 		efree(internal_file);
-		return stream;
+		return fpf;
 	}
 
 	if (PG(safe_mode) && (!php_checkuid(idata->phar->fname, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
@@ -785,82 +773,30 @@ static php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, cha
 	}
 
 	if (idata->internal_file->flags & PHAR_COMPRESSED_GZ) {
-#ifdef HAVE_PHAR_ZLIB
-		buffer = (char *) emalloc(idata->internal_file->compressed_filesize);
-		if (idata->internal_file->compressed_filesize !=
-				php_stream_read(fp, buffer, idata->internal_file->compressed_filesize)) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (filesize mismatch on file \"%s\")", idata->phar->fname, internal_file);
+		filter = php_stream_filter_create("zlib.inflate", NULL, php_stream_is_persistent(fp) TSRMLS_CC);
+		if (!filter) {
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: unable to read phar \"%s\" (cannot create zlib.inflate filter while decompressing file \"%s\")", idata->phar->fname, internal_file);
 			efree(idata);
 			efree(internal_file);
-			efree(buffer);
+			return NULL;			
+		}
+		php_stream_filter_append(&fp->readfilters, filter);
+
+		idata->fp = php_stream_temp_new();
+		if (php_stream_copy_to_stream(fp, idata->fp, idata->internal_file->uncompressed_filesize) != idata->internal_file->uncompressed_filesize) {
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", idata->phar->fname, internal_file);
+			php_stream_close(idata->fp);
+			efree(idata);
+			efree(internal_file);
 			return NULL;
 		}
-		savebuf = buffer;
-
-		/* borrowed from zlib.c gzinflate() function */
-		zstream.zalloc = (alloc_func) Z_NULL;
-		zstream.zfree = (free_func) Z_NULL;
-
-		do {
-			filedata = (char *) erealloc(s1, idata->internal_file->uncompressed_filesize);
-
-			if (!filedata && s1) {
-				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (corrupted zlib compression of file \"%s\")", idata->phar->fname, internal_file);
-				efree(s1);
-				efree(savebuf);
-				efree(idata);
-				efree(internal_file);
-				return NULL;
-			}
-
-			zstream.next_in = (Bytef *) buffer;
-			zstream.avail_in = (uInt) idata->internal_file->compressed_filesize;
-
-			zstream.next_out = filedata;
-			zstream.avail_out = (uInt) idata->internal_file->uncompressed_filesize;
-
-			/* init with -MAX_WBITS disables the zlib internal headers */
-			status = inflateInit2(&zstream, -MAX_WBITS);
-			if (status == Z_OK) {
-				status = inflate(&zstream, Z_FINISH);
-				if (status != Z_STREAM_END) {
-					inflateEnd(&zstream);
-					if (status == Z_OK) {
-						status = Z_BUF_ERROR;
-					}
-				} else {
-					status = inflateEnd(&zstream);
-				}
-			}
-			s1 = filedata;
-			
-		} while (status == Z_BUF_ERROR);
-
-		if (status != Z_OK) {
-			efree(savebuf);
-			efree(filedata);
-			efree(idata);
-			efree(internal_file);
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: decompression failed");
-			return NULL;
-		}
-
-		efree(savebuf);
-		/* need to copy filedata to stream now */
-		idata->fp = php_stream_temp_open(0, PHP_STREAM_MAX_MEM, filedata, idata->internal_file->uncompressed_filesize);
-		efree(filedata);
-		/* check crc32/filesize */
-		if (!idata->internal_file->crc_checked 
-		&& phar_postprocess_file(wrapper, options, idata, idata->internal_file->crc32 TSRMLS_CC) != SUCCESS) {
-			efree(idata);
-			efree(internal_file);
-		}
-		idata->internal_file->crc_checked = 1;
-#else
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "zlib extension must be enabled for compressed .phar files");
-		efree(internal_file);
-		return NULL;
-#endif
+		php_stream_filter_flush(filter, 1);
+		php_stream_filter_remove(filter, 1 TSRMLS_CC);
+		/* Nnfortunatley we cannot check the read position of fp after getting */
+		/* uncompressed data because the new stream posiition is being changed */
+		/* by the number of bytes read throughthe filter not by the raw number */
+		/* bytes being consumed on the stream. Correct the stream pos anyway. */ 
+		php_stream_seek(fp, offset + idata->internal_file->compressed_filesize, SEEK_SET);
 	} else { /* from here is for non-compressed */
 		buffer = &tmpbuf[0];
 		/* bypass to temp stream */
@@ -872,20 +808,20 @@ static php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, cha
 			efree(internal_file);
 			return NULL;
 		}
-		/* check length, crc32 */
-		if (!idata->internal_file->crc_checked
-				   && phar_postprocess_file(wrapper, options, idata, idata->internal_file->crc32 TSRMLS_CC) != SUCCESS) {
-			php_stream_close(idata->fp);
-			efree(idata);
-			efree(internal_file);
-			return NULL;
-		}
-		idata->internal_file->crc_checked = 1;
 	}
 
-	stream = php_stream_alloc(&phar_ops, idata, NULL, mode);
+	/* check length, crc32 */
+	if (phar_postprocess_file(wrapper, options, idata, idata->internal_file->crc32 TSRMLS_CC) != SUCCESS) {
+		php_stream_close(idata->fp);
+		efree(idata);
+		efree(internal_file);
+		return NULL;
+	}
+	idata->internal_file->crc_checked = 1;
+
+	fpf = php_stream_alloc(&phar_ops, idata, NULL, mode);
 	efree(internal_file);
-	return stream;
+	return fpf;
 }
 /* }}} */
 
@@ -1445,7 +1381,7 @@ PHP_MINFO_FUNCTION(phar)
 	php_info_print_table_row(2, "phar API version", "0.8.0");
 	php_info_print_table_row(2, "CVS revision", "$Revision$");
 	php_info_print_table_row(2, "compressed phar support", 
-#ifdef HAVE_PHAR_ZLIB
+#if HAVE_ZLIB
 		"enabled");
 #else
 		"disabled");
