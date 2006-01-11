@@ -1,5 +1,5 @@
 --TEST--
-Phar: phar:// require (repeated names)
+Phar: phar:// include (repeated names)
 --INI--
 magic_quotes_runtime=0
 --SKIPIF--
@@ -7,19 +7,23 @@ magic_quotes_runtime=0
 --FILE--
 <?php
 $file = "<?php __HALT_COMPILER(); ?>";
-$a = '<?php echo "This is a\n"; ?>';
-$b = '<?php echo "This is b\n"; ?>';
-$bb= '<?php echo "This is b/b\n"; ?>';
 
+$files = array();
+$files['a.php'] = '<?php echo "This is a\n"; ?>';
+$files['b.php'] = '<?php echo "This is b\n"; ?>';
+$files['b/b.php'] = '<?php echo "This is b/c\n"; ?>';
 $manifest = '';
-$manifest .= pack('V', 1) . 'a' .   pack('VVVV', strlen($a),  time(),                  0, strlen($a)  + 8);
-$manifest .= pack('V', 1) . 'b' .   pack('VVVV', strlen($b),  time(), strlen($a)    +  8, strlen($b)  + 8);
-$manifest .= pack('V', 3) . 'b/b' . pack('VVVV', strlen($bb), time(), strlen($a.$b) + 16, strlen($bb) + 8);
-$file .= pack('VV', strlen($manifest) + 4, 3) .
-	 $manifest .
-	 pack('VV', crc32($a),  strlen($a)) . $a .
-	 pack('VV', crc32($b),  strlen($b)) . $b .
-	 pack('VV', crc32($bb), strlen($bb)) . $bb;
+foreach($files as $name => $cont) {
+	$len = strlen($cont);
+	$manifest .= pack('V', strlen($name)) . $name . pack('VVVVC', $len, time(), $len, crc32($cont), 0x00);
+}
+$alias = 'hio';
+$manifest = pack('VnV', count($files), 0x0800, strlen($alias)) . $alias . $manifest;
+$file .= pack('V', strlen($manifest)) . $manifest;
+foreach($files as $cont)
+{
+	$file .= $cont;
+}
 
 file_put_contents(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php', $file);
 

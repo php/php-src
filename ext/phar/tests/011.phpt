@@ -5,11 +5,26 @@ Phar::mapPhar filesize too small in manifest
 --FILE--
 <?php
 $file = "<?php
-Phar::mapPhar(5, 'hio', false);
+Phar::mapPhar('hio');
 __HALT_COMPILER(); ?>";
-// compressed file length does not include 8 bytes for crc/file length and should
-$manifest = pack('V', 1) . 'a' . pack('VVVV', 1, time(), 0, 1);
-$file .= pack('VV', strlen($manifest) + 4, 1) . $manifest . pack('VV', crc32('a'), 1) . 'a';
+
+// compressed file length does not match incompressed lentgh for an uncompressed file
+
+$files = array();
+$files['a'] = 'a';
+$manifest = '';
+foreach($files as $name => $cont) {
+	$len = strlen($cont);
+	$manifest .= pack('V', strlen($name)) . $name . pack('VVVVC', $len, time(), $len+1, crc32($cont), 0);
+}
+$alias = 'hio';
+$manifest = pack('VnV', count($files), 0x0800, strlen($alias)) . $alias . $manifest;
+$file .= pack('V', strlen($manifest)) . $manifest;
+foreach($files as $cont)
+{
+	$file .= $cont;
+}
+
 file_put_contents(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php', $file);
 include dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 echo file_get_contents('phar://hio/a');
@@ -17,4 +32,4 @@ echo file_get_contents('phar://hio/a');
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
-Fatal error: Phar::mapPhar(): internal corruption of phar "%s" (file size in phar is not large enough) in %s on line %d
+Fatal error: Phar::mapPhar(): internal corruption of phar "%s" (compressed and uncompressed size does not match for uncompressed entry) in %s on line %d

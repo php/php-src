@@ -5,11 +5,25 @@ Phar::mapPhar filesize mismatch
 --FILE--
 <?php
 $file = "<?php
-Phar::mapPhar('hio', false);
+Phar::mapPhar('hio');
 __HALT_COMPILER(); ?>";
 // wrong crc32
-$manifest = pack('V', 1) . 'a' . pack('VVVV', 1, time(), 0, 9);
-$file .= pack('VV', strlen($manifest) + 4, 1) . $manifest . pack('VV', crc32('b'), 1) . 'a';
+
+$files = array();
+$files['a'] = 'a';
+$manifest = '';
+foreach($files as $name => $cont) {
+	$len = strlen($cont);
+	$manifest .= pack('V', strlen($name)) . $name . pack('VVVVC', $len, time(), $len, crc32($cont.'X'), 0);
+}
+$alias = 'hio';
+$manifest = pack('VnV', count($files), 0x0800, strlen($alias)) . $alias . $manifest;
+$file .= pack('V', strlen($manifest)) . $manifest;
+foreach($files as $cont)
+{
+	$file .= $cont;
+}
+
 file_put_contents(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php', $file);
 include dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 echo file_get_contents('phar://hio/a');

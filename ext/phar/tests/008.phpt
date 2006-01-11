@@ -5,7 +5,7 @@ Phar::mapPhar truncated manifest (not enough for manifest length)
 --FILE--
 <?php
 $file = "<?php
-Phar::mapPhar(5, 'hio', false);
+Phar::mapPhar('hio');
 __HALT_COMPILER(); ?>";
 $file .= pack('V', 500) . 'notenough';
 file_put_contents(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php', $file);

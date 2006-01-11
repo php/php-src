@@ -1,11 +1,10 @@
 --TEST--
-Phar::mapPhar zlib not loaded
+Phar::mapPhar zlib is loaded
 --SKIPIF--
-<?php if (!extension_loaded("phar")) print "skip zlib is present";
-if (Phar::canCompress()) print "skip";?>
+<?php if (!extension_loaded("phar")) print "skip zlib is present"; ?>
 --FILE--
 <?php
-Phar::mapPhar(5, 'hio', true);
+var_dump(Phar::canCompress());
 ?>
 --EXPECTF--
-Fatal error: Phar::mapPhar(): zlib extension is required for compressed .phar files
+bool(true)
