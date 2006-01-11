@@ -1,7 +1,5 @@
 --TEST--
 Phar: phar:// opendir
---INI--
-magic_quotes_runtime=0
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 --FILE--
