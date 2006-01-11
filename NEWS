@@ -1,52 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-05 Jan 2006, PHP 5.1.2RC2
-- Upgraded pear to version 1.4.6. (Greg)
-- Added constants for libxslt and libexslt versions: LIBXSLT_VERSION,
-  LIBXSLT_DOTTED_VERSION, LIBEXSLT_VERSION and LIBEXSLT_DOTTED_VERSION. (Pierre)
-- Fixed possible crash in apache_getenv()/apache_setenv() on invalid parameters.
-  (Ilia)
-- Changed errors to warnings in imagecolormatch(). (Pierre)
-- Fixed segfault/leak in imagecolormatch(). (Pierre)
-- Fixed small leak in mysqli_stmt_fetch() when bound variable was empty string.
-  (Andrey)
-- Fixed bug #35916 (Duplicate calls to stream_bucket_append() lead to a crash).
-  (Ilia)
-- Fixed bug #35908 (curl extension uses undefined GCRY_THREAD_OPTIONS_USER).
-  (Ilia)
-- Fixed bug #35907 (PDO_OCI uses hardcoded lib path $ORACLE_HOME/lib). (Tony)
-- Fixed bug #35887 (wddx_deserialize not parsing dateTime fields properly).
-  (Derick)
-- Fixed bug #35885 (strtotime("NOW") no longer works). (Derick)
-- Fixed bug #35821 (array_map() segfaults when exception is throwed from
-  the callback). (Tony)
-- Fixed bug #35817 (unpack() does not decode odd number of hexadecimal values).
-  (Ilia)
-- Fixed bug #35797 (segfault on PDOStatement::execute() with 
-  zend.ze1_compatibility_mode = On). (Tony, Ilia)
-- Fixed bug #35781 (stream_filter_append() can cause segfault). (Tony)
-- Fixed bug #35759 (mysqli_stmt_bind_result() makes huge allocation when
-  column empty). (Andrey)
-- Fixed bug #35751 (using date with a timestamp makes httpd segfault). (Derick)
-- Fixed bug #35669 (imap_mail_compose() crashes with 
-  multipart-multiboundary-email). (Ilia)
-- Fixed bug #35517 (mysql_stmt_fetch returns NULL on data truncation). (Georg)
-- Fixed bug #35377 (PDO_SQLITE: undefined reference to "fdatasync").
-  (Nuno, Jani)
-- Fixed bug #35288 (iconv() function defined as libiconv()). (Nuno)
-- Fixed bug #33789 (Many Problems with SunFuncs). (Derick)
-- Fixed bug #33671 (sun_rise and sun_set don't return a GMT timestamp if one
-  passes an offset). (Derick)
-- Fixed bug #32820 (date_sunrise and date_sunset don't handle GMT offset
-  well). (Derick)
-- Fixed bug #30937 (date_sunrise() & date_sunset() don't handle endless
-  day/night at high latitudes). (Derick)
-- Fixed bug #29955 (mb_strtoupper() / lower() broken with Turkish encoding).
-  (Rui)
-- Fixed bug #28899 (mb_substr() and substr() behave differently when
-  "mbstring.func_overload" is enabled). (Rui)
-
-22 Dec 2005, PHP 5.1.2RC1
+12 Jan 2006, PHP 5.1.2
 - Updated libsqlite in ext/sqlite to 2.8.17. (Ilia)
 - Updated libsqlite in ext/pdo_sqlite to 3.2.8. (Ilia)
 - Updated to libxml2-2.6.22 and libxslt-1.1.15 in the win32 bundle. (Rob)
@@ -69,6 +23,15 @@ PHP                                                                        NEWS
   . Fixed isset/empty/(bool) behavior
   . Fixed iterator edge cases
   . Added methods getNamespaces(), getDocNamespaces()
+- Upgraded pear to version 1.4.6. (Greg)
+- Added constants for libxslt and libexslt versions: LIBXSLT_VERSION,
+  LIBXSLT_DOTTED_VERSION, LIBEXSLT_VERSION and LIBEXSLT_DOTTED_VERSION. (Pierre)
+- Fixed possible crash in apache_getenv()/apache_setenv() on invalid parameters.
+  (Ilia)
+- Changed errors to warnings in imagecolormatch(). (Pierre)
+- Fixed segfault/leak in imagecolormatch(). (Pierre)
+- Fixed small leak in mysqli_stmt_fetch() when bound variable was empty string.
+  (Andrey)
 - Fixed prepared statement name conflict handling in PDO_PGSQL. (Thies, Ilia)
 - Fixed memory corruption when PDO::FETCH_LAZY mode is being used. (Ilia)
 - Fixed possible leaks in imagecreatefromstring() with invalid data. (Pierre)
@@ -79,7 +42,25 @@ PHP                                                                        NEWS
 - Fixed many bugs in OCI8. (Tony)
 - Fixed crash and leak in mysqli when using 4.1.x client libraries and
   connecting to 5.x server. (Andrey)
+- Fixed bug #35916 (Duplicate calls to stream_bucket_append() lead to a crash).
+  (Ilia)
+- Fixed bug #35908 (curl extension uses undefined GCRY_THREAD_OPTIONS_USER).
+  (Ilia)
+- Fixed bug #35907 (PDO_OCI uses hardcoded lib path $ORACLE_HOME/lib). (Tony)
+- Fixed bug #35887 (wddx_deserialize not parsing dateTime fields properly).
+  (Derick)
+- Fixed bug #35885 (strtotime("NOW") no longer works). (Derick)
+- Fixed bug #35821 (array_map() segfaults when exception is throwed from
+  the callback). (Tony)
+- Fixed bug #35817 (unpack() does not decode odd number of hexadecimal values).
+  (Ilia)
+- Fixed bug #35797 (segfault on PDOStatement::execute() with 
+  zend.ze1_compatibility_mode = On). (Tony, Ilia)
+- Fixed bug #35781 (stream_filter_append() can cause segfault). (Tony)
 - Fixed bug #35760 (sybase_ct doesn't compile on Solaris using old gcc). (Tony)
+- Fixed bug #35759 (mysqli_stmt_bind_result() makes huge allocation when
+  column empty). (Andrey)
+- Fixed bug #35751 (using date with a timestamp makes httpd segfault). (Derick)
 - Fixed bug #35740 (memory leak when including a directory). (Tony)
 - Fixed bug #35730 (ext/mssql + freetds: Use correct character encoding
   and allow setting it). (Frank)
@@ -95,6 +76,8 @@ PHP                                                                        NEWS
   only). (Tony)
 - Fixed bug #35690 (pack() tries to allocate huge memory block when packing 
   float values to strings). (Tony)
+- Fixed bug #35669 (imap_mail_compose() crashes with 
+  multipart-multiboundary-email). (Ilia)
 - Fixed bug #35660 (AIX TZ variable format not understood, yields UTC
   timezone). (Derick)
 - Fixed bug #35655 (whitespace following end of heredoc is lost). (Ilia)
@@ -113,6 +96,7 @@ PHP                                                                        NEWS
   that extends PDO). (Tony)
 - Fixed bug #35539 (typo in error message for ErrorException). (Tony)
 - FIxed bug #35536 (mysql_field_type() doesn't handle NEWDECIMAL). (Tony)
+- Fixed bug #35517 (mysql_stmt_fetch returns NULL on data truncation). (Georg)
 - Fixed bug #35509 (string constant as array key has different behavior inside
   object). (Dmitry)
 - Fixed bug #35508 (PDO fails when unknown fetch mode specified). (Tony)
@@ -142,7 +126,10 @@ PHP                                                                        NEWS
 - Fixed bug #35393 (changing static protected members from outside the class,
   one more reference issue). (Dmitry)
 - Fixed bug #35381 (ssl library is not initialized properly). (Alan)
+- Fixed bug #35377 (PDO_SQLITE: undefined reference to "fdatasync").
+  (Nuno, Jani)
 - Fixed bug #35373 (HP-UX "alias not allowed in this configuration"). (Dmitry)
+- Fixed bug #35288 (iconv() function defined as libiconv()). (Nuno)
 - Fixed bug #35103 (mysqli handles bad unsigned (big)int incorrectly).(Andrey)
 - Fixed bug #35062 (socket_read() produces warnings on non blocking sockets).
   (Nuno, Ilia)
@@ -151,10 +138,21 @@ PHP                                                                        NEWS
 - Fixed bug #34429 (Output buffering cannot be turned off with FastCGI).
   (Dmitry, Ilya)
 - Fixed bug #34359 (Possible crash inside fopen http wrapper). (Ilia,Sara,Nuno)
+- Fixed bug #33789 (Many Problems with SunFuncs). (Derick)
+- Fixed bug #33671 (sun_rise and sun_set don't return a GMT timestamp if one
+  passes an offset). (Derick)
+- Fixed bug #32820 (date_sunrise and date_sunset don't handle GMT offset
+  well). (Derick)
 - Fixed bug #31347 (is_dir and is_file (incorrectly) return true for any string 
   greater then 255 characters). (Nuno,Ilia)
+- Fixed bug #30937 (date_sunrise() & date_sunset() don't handle endless
+  day/night at high latitudes). (Derick)
 - Fixed bug #30760 (Remove MessageBox on win32 for E_CORE errors if 
   display_startup_error is off). (Ilia)
+- Fixed bug #29955 (mb_strtoupper() / lower() broken with Turkish encoding).
+  (Rui)
+- Fixed bug #28899 (mb_substr() and substr() behave differently when
+  "mbstring.func_overload" is enabled). (Rui)
 - Fixed bug #27678 (number_format() crashes with large numbers). (Marcus)
 
 28 Nov 2005, PHP 5.1.1
