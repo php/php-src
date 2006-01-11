@@ -92,14 +92,14 @@ typedef struct _phar_manifest_entry {
 
 /* information about a phar file */
 typedef struct _phar_file_data {
-	char		*filename;
-	int		filename_len;
-	char		*alias;
-	int		alias_len;
-	size_t		internal_file_start;
-	zend_bool	has_compressed_files;
-	HashTable	manifest;
-	php_stream	*fp;
+	char        *filename;
+	int         filename_len;
+	char        *alias;
+	int         alias_len;
+	size_t      internal_file_start;
+	zend_bool   has_compressed_files;
+	HashTable   manifest;
+	php_stream  *fp;
 } phar_file_data;
 
 /* stream access data for one file entry in a phar file */
