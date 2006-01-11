@@ -1005,7 +1005,10 @@ TEST $file
 
 	/* For GET/POST tests, check if cgi sapi is available and if it is, use it. */
 	if ((!empty($section_text['GET']) || !empty($section_text['POST']))) {
-		if (file_exists("./sapi/cgi/php")) {
+		if (!strncasecmp(PHP_OS, "win", 3) && file_exists(dirname($php) ."/php-cgi.exe")) {
+			$old_php = $php;
+			$php = realpath(dirname($php) ."/php-cgi.exe") .' -C ';
+		} elseif (file_exists("./sapi/cgi/php")) {
 			$old_php = $php;
 			$php = realpath("./sapi/cgi/php") . ' -C ';
 		} else {
