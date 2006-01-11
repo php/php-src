@@ -148,6 +148,8 @@ static void destroy_phar_manifest(void *pDest) /* {{{ */
 	phar_manifest_entry *entry = (phar_manifest_entry *)pDest;
 
 	if (entry->fp) {
+		TSRMLS_FETCH();
+
 		php_stream_close(entry->fp);
 	}
 	entry->fp = 0;
@@ -303,16 +305,14 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 	if (manifest_len != php_stream_read(fp, buffer, manifest_len)) {
 		MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest)")
 	}
+	if (manifest_len < 10) {
+		MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest header)")
+	}
 
 	/* extract the number of entries */
 	PHAR_GET_32(buffer, manifest_count);
 	if (manifest_count == 0) {
 		MAPPHAR_FAIL("in phar \"%s\", manifest claims to have zero entries.  Phars must have at least 1 entry");
-	}
-	/* we have 5 32-bit items at least */
-	if (manifest_count > (manifest_len / (4 * 4 + 1))) {
-		/* prevent serious memory issues */
-		MAPPHAR_FAIL("too many manifest entries for size of manifest in phar \"%s\"")
 	}
 
 	/* extract API version and global compressed flag */
@@ -329,11 +329,13 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 
 	/* extract alias */
 	PHAR_GET_32(buffer, tmp_len);
-	if (buffer + tmp_len + 4 > endbuffer) {
+	if (buffer + tmp_len > endbuffer) {
 		MAPPHAR_FAIL("internal corruption of phar \"%s\" (buffer overrun)");
 	}
-	/* tmp_len = 0 says alias length is 0, which means the alias is not stored
-	   in the phar */
+	if (manifest_len < 10 + tmp_len) {
+		MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest header)")
+	}
+	/* tmp_len = 0 says alias length is 0, which means the alias is not stored in the phar */
 	if (tmp_len) {
 		/* if the alias is stored we enforce it (implicit overrides explicit) */
 		if (alias && alias_len && (alias_len != tmp_len || strncmp(alias, buffer, tmp_len)))
@@ -352,20 +354,26 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 		alias_len = fname_len;
 	}
 	
+	/* we have 5 32-bit items plus 1 byte at least */
+	if (manifest_count > ((manifest_len - 10 - tmp_len) / (5 * 4 + 1))) {
+		/* prevent serious memory issues */
+		MAPPHAR_FAIL("internal corruption of phar \"%s\" (too many manifest entries for size of manifest)")
+	}
+
 	/* set up our manifest */
 	zend_hash_init(&mydata.manifest, sizeof(phar_manifest_entry),
 		zend_get_hash_value, destroy_phar_manifest, 0);
 	offset = 0;
 	for (manifest_index = 0; manifest_index < manifest_count; manifest_index++) {
 		if (buffer + 4 > endbuffer) {
-			MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest)")
+			MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest entry)")
 		}
 		PHAR_GET_32(buffer, entry.filename_len);
 		if (entry.filename_len == 0) {
 			MAPPHAR_FAIL("zero-length filename encountered in phar \"%s\"");
 		}
 		if (buffer + entry.filename_len + 16 + 1 > endbuffer) {
-			MAPPHAR_FAIL("internal corruption of phar \"%s\" (buffer overrun)");
+			MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest entry)");
 		}
 		entry.filename = estrndup(buffer, entry.filename_len);
 		buffer += entry.filename_len;
@@ -383,6 +391,8 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 			}
 #endif
 			compressed = 1;
+		} else if (entry.uncompressed_filesize != entry.compressed_filesize) {
+			MAPPHAR_FAIL("internal corruption of phar \"%s\" (compressed and uncompressed size does not match for uncompressed entry)");
 		}
 		entry.crc_checked = 0;
 		entry.fp = NULL;
