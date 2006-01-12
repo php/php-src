@@ -595,7 +595,7 @@ PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish TSRMLS
 			int datalen;
 
 			if (bucket->is_unicode) {
-				data = bucket->buf.ustr.val;
+				data = (char*)bucket->buf.ustr.val;
 				datalen = bucket->buf.ustr.len * sizeof(UChar);
 			} else {
 				data = bucket->buf.str.val;
