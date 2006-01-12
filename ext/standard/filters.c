@@ -14,6 +14,9 @@
    +----------------------------------------------------------------------+
    | Authors:                                                             |
    | Wez Furlong (wez@thebrainroom.com)                                   |
+   | Sara Golemon (pollita@php.net)                                       |
+   | Moriyoshi Koizumi (moriyoshi@php.net)                                |
+   | Marcus Boerger (helly@php.net)                                       |
    +----------------------------------------------------------------------+
 */
 
@@ -1875,6 +1878,89 @@ static php_stream_filter_factory strfilter_convert_factory = {
 };
 /* }}} */
 
+/* {{{ consumed filter implementation */
+typedef struct _php_consumed_filter_data {
+	int persistent;
+	size_t consumed;
+	off_t offset;
+} php_consumed_filter_data;
+
+static php_stream_filter_status_t consumed_filter_filter(
+	php_stream *stream,
+	php_stream_filter *thisfilter,
+	php_stream_bucket_brigade *buckets_in,
+	php_stream_bucket_brigade *buckets_out,
+	size_t *bytes_consumed,
+	int flags
+	TSRMLS_DC)
+{
+	php_consumed_filter_data *data = (php_consumed_filter_data *)(thisfilter->abstract);
+	php_stream_bucket *bucket;
+	size_t consumed = 0;
+
+	if (data->offset == ~0) {
+		data->offset = php_stream_tell(stream);
+	}
+	while ((bucket = buckets_in->head) != NULL) {
+		php_stream_bucket_unlink(bucket TSRMLS_CC);
+		consumed += bucket->buf.str.len;
+		php_stream_bucket_append(buckets_out, bucket TSRMLS_CC);
+	}
+	if (bytes_consumed) {
+		*bytes_consumed = consumed;
+	}
+	if (flags & PSFS_FLAG_FLUSH_CLOSE) {
+		php_stream_seek(stream, data->offset + data->consumed, SEEK_SET);
+	}
+	data->consumed += consumed;
+	
+	return PSFS_PASS_ON;
+}
+
+static void consumed_filter_dtor(php_stream_filter *thisfilter TSRMLS_DC)
+{
+	if (thisfilter && thisfilter->abstract) {
+		php_consumed_filter_data *data = (php_consumed_filter_data*)thisfilter->abstract;
+		pefree(data, data->persistent);
+	}
+}
+
+static php_stream_filter_ops consumed_filter_ops = {
+	consumed_filter_filter,
+	consumed_filter_dtor,
+	"consumed",
+	PSFO_FLAG_OUTPUTS_SAME
+};
+
+static php_stream_filter *consumed_filter_create(const char *filtername, zval *filterparams, int persistent TSRMLS_DC)
+{
+	php_stream_filter_ops *fops = NULL;
+	php_consumed_filter_data *data;
+
+	if (strcasecmp(filtername, "consumed")) {
+		return NULL;
+	}
+
+	/* Create this filter */
+	data = pecalloc(1, sizeof(php_consumed_filter_data), persistent);
+	if (!data) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed allocating %d bytes.", sizeof(php_consumed_filter_data));
+		return NULL;
+	}
+	data->persistent = persistent;
+	data->consumed = 0;
+	data->offset = ~0;
+	fops = &consumed_filter_ops;
+
+	return php_stream_filter_alloc(fops, data, persistent);
+}
+
+php_stream_filter_factory consumed_filter_factory = {
+	consumed_filter_create
+};
+
+/* }}} */
+
 static const struct {
 	php_stream_filter_ops *ops;
 	php_stream_filter_factory *factory;
@@ -1884,6 +1970,7 @@ static const struct {
 	{ &strfilter_tolower_ops, &strfilter_tolower_factory },
 	{ &strfilter_strip_tags_ops, &strfilter_strip_tags_factory },
 	{ &strfilter_convert_ops, &strfilter_convert_factory },
+	{ &consumed_filter_ops, &consumed_filter_factory },
 	/* additional filters to go here */
 	{ NULL, NULL }
 };
