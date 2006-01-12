@@ -23,7 +23,7 @@
 #include <ctype.h>
 #include "php_string.h"
 
-#define LEVENSHTEIN_MAX_LENTH 255
+#define LEVENSHTEIN_MAX_LENGTH 255
 
 /* {{{ reference_levdist
  * reference implementation, only optimized for memory usage, not speed */
@@ -40,7 +40,7 @@ static int reference_levdist(void *s1, int32_t l1, void *s2, int32_t l2, zend_uc
 
 		if (cp1 == 0) return cp2*cost_ins;
 		if (cp2 == 0) return cp1*cost_del;
-		if ((cp1>LEVENSHTEIN_MAX_LENTH)||(cp2>LEVENSHTEIN_MAX_LENTH)) {
+		if ((cp1>LEVENSHTEIN_MAX_LENGTH)||(cp2>LEVENSHTEIN_MAX_LENGTH)) {
 			return -1;
 		}
 
@@ -49,7 +49,7 @@ static int reference_levdist(void *s1, int32_t l1, void *s2, int32_t l2, zend_uc
 	} else {
 		if (l1 == 0) return l2*cost_ins;
 		if (l2 == 0) return l1*cost_del;
-		if ((l1>LEVENSHTEIN_MAX_LENTH)||(l2>LEVENSHTEIN_MAX_LENTH)) {
+		if ((l1>LEVENSHTEIN_MAX_LENGTH)||(l2>LEVENSHTEIN_MAX_LENGTH)) {
 			return -1;
 		}
 
