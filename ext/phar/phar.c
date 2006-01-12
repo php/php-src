@@ -689,7 +689,7 @@ static php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, cha
 	char tmpbuf[8];
 	php_url *resource = NULL;
 	php_stream *fp, *fpf;
-	php_stream_filter *filter;
+	php_stream_filter *filter, *consumed;
 	php_uint32 offset;
 
 	resource = php_url_parse(path);
@@ -780,6 +780,12 @@ static php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, cha
 			efree(internal_file);
 			return NULL;			
 		}
+		/* Nnfortunatley we cannot check the read position of fp after getting */
+		/* uncompressed data because the new stream posiition is being changed */
+		/* by the number of bytes read throughthe filter not by the raw number */
+		/* bytes being consumed on the stream. Therefor use a consumed filter. */ 
+		consumed = php_stream_filter_create("consumed", NULL, php_stream_is_persistent(fp) TSRMLS_CC);
+		php_stream_filter_append(&fp->readfilters, consumed);
 		php_stream_filter_append(&fp->readfilters, filter);
 
 		idata->fp = php_stream_temp_new();
@@ -792,10 +798,15 @@ static php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, cha
 		}
 		php_stream_filter_flush(filter, 1);
 		php_stream_filter_remove(filter, 1 TSRMLS_CC);
-		/* Nnfortunatley we cannot check the read position of fp after getting */
-		/* uncompressed data because the new stream posiition is being changed */
-		/* by the number of bytes read throughthe filter not by the raw number */
-		/* bytes being consumed on the stream. Correct the stream pos anyway. */ 
+		php_stream_filter_flush(consumed, 1);
+		php_stream_filter_remove(consumed, 1 TSRMLS_CC);
+		if (offset + idata->internal_file->compressed_filesize != php_stream_tell(fp)) {
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", idata->phar->fname, internal_file);
+			php_stream_close(idata->fp);
+			efree(idata);
+			efree(internal_file);
+			return NULL;
+		}
 		php_stream_seek(fp, offset + idata->internal_file->compressed_filesize, SEEK_SET);
 	} else { /* from here is for non-compressed */
 		buffer = &tmpbuf[0];

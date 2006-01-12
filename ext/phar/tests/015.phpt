@@ -2,7 +2,7 @@
 Phar::mapPhar valid file (gzipped)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip";
-if (!PHP_Archive::canCompress()) print "skip"; ?>
+if (!Phar::canCompress()) print "skip"; ?>
 --FILE--
 <?php
 $file = "<?php
