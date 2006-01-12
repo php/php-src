@@ -1,11 +1,12 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Jan 2005, Version 4.4.0
-
-
-05 Jan 2006, Version 4.4.2RC2
+13 Jan 2005, Version 4.4.2
+- Added missing safe_mode/open_basedir checks into cURL extension. (Ilia)
+- Backported missing imap_mailcompose() fixes from PHP 5.x. (Ilia)
 - Prevent header injection by limiting each header to a single line. (Ilia)
 - Fixed possible XSS inside error reporting functionality. (Ilia)
+- Fixed Apache 2 regression with sub-request handling on non-linux systems.
+  (Ilia, Tony)
 - Fixed bug #35817 (unpack() does not decode odd number of hexadecimal values).
   (Ilia)
 - Fixed bug #35735 ($EGREP not defined in configure). (Jani)
@@ -23,23 +24,6 @@ PHP 4                                                                      NEWS
   properly). (Ilia)
 - Fixed bug #35341 (Fix for bug #33760 breaks build with older curl). (Tony)
 - Fixed bug #35278 (Multiple virtual() calls crash Apache 2 php module). (Ilia)
-- Fixed bug #35062 (socket_read() produces warnings on non blocking sockets).
-  (Nuno, Ilia)
-- Fixed bug #34359 (Possible crash inside fopen http wrapper). (Ilia,Nuno,Sara)
-- Fixed bug #33523 (Memory leak in xmlrpc_encode_request()). (Ilia)
-- Fixed bug #33153 (crash in mssql_next result). (Frank)
-- Fixed bug #32009 (crash when mssql_bind() is called more than once). (Frank)
-- Fixed bug #33963 (mssql_bind() fails on input parameters). (Frank)
-- Fixed bug #33201 (Crash when fetching some data types). (Frank)
-- Fixed bug #30760 (Remove MessageBox on win32 for E_CORE errors if 
-  display_startup_error is off). (Ilia)
-- Fixed bug #27678 (number_format() crashes with large numbers). (Marcus)
-
-18 Nov 2005, Version 4.4.2RC1
-- Added missing safe_mode/open_basedir checks into cURL extension. (Ilia)
-- Backported missing imap_mailcompose() fixes from PHP 5.x. (Ilia)
-- Fixed Apache 2 regression with sub-request handling on non-linux systems.
-  (Ilia, Tony)
 - Fixed bug #35257 (Calling ob_flush after creating an ob callback causes 
   segfault). (Tony)
 - Fixed bug #35079 (stream_set_blocking(true) toggles, not enables 
@@ -47,6 +31,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #35078 (configure does not find ldap_start_tls_s). (Jani)
 - Fixed bug #35071 (Wrong fopen mode used in GD safe-mode checks). (Jani)
 - Fixed bug #35067, #35063 (key(),current() need to work by reference). (Ilia)
+- Fixed bug #35062 (socket_read() produces warnings on non blocking sockets).
+  (Nuno, Ilia)
 - Fixed bug #35059 (Apache2 crash with mod_rewrite). (Ilia)
 - Fixed bug #35009 (ZTS: Persistent resource destruct crashes when extension
   is compiled as shared). (Dmitry)
@@ -55,12 +41,21 @@ PHP 4                                                                      NEWS
 - Fixed bug #34851 (SO_RECVTIMEO and SO_SNDTIMEO socket options expect integer
   parameter on Windows). (Mike)
 - Fixed bug #34830 (the 5th argument of mb_send_mail does not work). (Rui)
+- Fixed bug #34359 (Possible crash inside fopen http wrapper). (Ilia,Nuno,Sara)
+- Fixed bug #33963 (mssql_bind() fails on input parameters). (Frank)
 - Fixed bug #33760 (cURL needs CRYPTO_callback functions to prevent locking).
   (Mike)
 - Fixed bug #33720 (mb_encode_mimeheader does not work for multibyte chars).
   (Rui)
-- Fixed bug #31971 (ftp_login fails on some SSL servers).
+- Fixed bug #33523 (Memory leak in xmlrpc_encode_request()). (Ilia)
+- Fixed bug #33201 (Crash when fetching some data types). (Frank)
   (frantisek at augusztin dot com)
+- Fixed bug #33153 (crash in mssql_next result). (Frank)
+- Fixed bug #32009 (crash when mssql_bind() is called more than once). (Frank)
+- Fixed bug #31971 (ftp_login fails on some SSL servers).
+- Fixed bug #30760 (Remove MessageBox on win32 for E_CORE errors if 
+  display_startup_error is off). (Ilia)
+- Fixed bug #27678 (number_format() crashes with large numbers). (Marcus)
 
 31 Oct 2005, Version 4.4.1
 - Added missing safe_mode checks for image* functions and cURL. (Ilia)
