@@ -46,16 +46,22 @@
 #define E_RECOVERABLE_ERROR E_ERROR
 #endif
 
+#define PHAR_VERSION_STR          "0.8.0"
 /* x.y.z maps to 0xyz0 */
-#define PHAR_API_VERSION	0x0800
-#define PHAR_API_MAJORVERSION	0x0000
-#define PHAR_API_MAJORVER_MASK	0xF000
-#define PHAR_API_VER_MASK	0xFFF0
+#define PHAR_API_VERSION          0x0800
+#define PHAR_API_MAJORVERSION     0x0000
+#define PHAR_API_MAJORVER_MASK    0xF000
+#define PHAR_API_VER_MASK         0xFFF0
+
+#define PHAR_HDR_ANY_COMPRESSED   0x0001
+#define PHAR_HDR_SIGNATURE        0x0008
 
 /* flags byte for each file adheres to these bitmasks.
    All unused values are reserved */
-#define PHAR_COMPRESSED_GZ	0x0001
-#define PHAR_SIGNATURE		0x0002
+#define PHAR_ENT_COMPRESSION_MASK 0x0F
+#define PHAR_ENT_COMPRESSED_NONE  0x00
+#define PHAR_ENT_COMPRESSED_GZ    0x01
+#define PHAR_ENT_COMPRESSED_BZ2   0x02
 
 
 ZEND_BEGIN_MODULE_GLOBALS(phar)
@@ -215,7 +221,7 @@ static phar_internal_file_data *phar_get_file_entry(char *fname, char *path TSRM
  * Returns the api version */
 PHP_METHOD(Phar, apiVersion)
 {
-	RETURN_STRINGL("0.8.0", sizeof("0.8.0")-1, 1);
+	RETURN_STRINGL(PHAR_VERSION_STR, sizeof(PHAR_VERSION_STR)-1, 1);
 }
 /* }}}*/
 
@@ -223,7 +229,7 @@ PHP_METHOD(Phar, apiVersion)
  * Returns whether phar extension supports compression using zlib */
 PHP_METHOD(Phar, canCompress)
 {
-#if HAVE_ZLIB
+#if HAVE_ZLIB || HAVE_BZ2
 	RETURN_TRUE;
 #else
 	RETURN_FALSE;
@@ -346,6 +352,8 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 		efree(savebuf);
 		return FAILURE;
 	}
+	/* The lowest nibble contains the phar wide flags. The any compressed can */
+	/* be ignored on reading because it is being generated anyways. */
 
 	/* extract alias */
 	PHAR_GET_32(buffer, tmp_len);
@@ -408,15 +416,28 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 		entry.offset_within_phar = offset;
 		offset += entry.compressed_filesize;
 		entry.flags = *buffer++;
-		if (entry.flags & PHAR_COMPRESSED_GZ) {
+		switch (entry.flags & PHAR_ENT_COMPRESSION_MASK) {
+		case PHAR_ENT_COMPRESSED_GZ:
 #if !HAVE_ZLIB
 			if (!compressed) {
 				MAPPHAR_FAIL("zlib extension is required for gz compressed .phar file \"%s\"");
 			}
 #endif
 			compressed = 1;
-		} else if (entry.uncompressed_filesize != entry.compressed_filesize) {
-			MAPPHAR_FAIL("internal corruption of phar \"%s\" (compressed and uncompressed size does not match for uncompressed entry)");
+			break;
+		case PHAR_ENT_COMPRESSED_BZ2:
+#if !HAVE_BZ2
+			if (!compressed) {
+				MAPPHAR_FAIL("bz2 extension is required for bzip2 compressed .phar file \"%s\"");
+			}
+#endif
+			compressed = 1;
+			break;
+		default:
+			if (entry.uncompressed_filesize != entry.compressed_filesize) {
+				MAPPHAR_FAIL("internal corruption of phar \"%s\" (compressed and uncompressed size does not match for uncompressed entry)");
+			}
+			break;
 		}
 		entry.crc_checked = 0;
 		entry.fp = NULL;
@@ -681,11 +702,25 @@ static int phar_postprocess_file(php_stream_wrapper *wrapper, int options, phar_
 }
 /* }}} */
 
+static char * phar_decompress_filter(phar_manifest_entry * entry, int return_unknow) /* {{{ */
+{
+	switch (entry->flags & PHAR_ENT_COMPRESSION_MASK) {
+	case PHAR_ENT_COMPRESSED_GZ:
+		return "zlib.inflate";
+	case PHAR_ENT_COMPRESSED_BZ2:
+		return "bzip2.decompress";
+	default:
+		return return_unknow ? "unknown" : NULL;
+	}
+}
+/* }}} */
+
 static php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
 {
 	phar_internal_file_data *idata;
 	char *internal_file;
 	char *buffer;
+	char *filter_name;
 	char tmpbuf[8];
 	php_url *resource = NULL;
 	php_stream *fp, *fpf;
@@ -772,15 +807,20 @@ static php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, cha
 		return NULL;
 	}
 
-	if (idata->internal_file->flags & PHAR_COMPRESSED_GZ) {
-		filter = php_stream_filter_create("zlib.inflate", NULL, php_stream_is_persistent(fp) TSRMLS_CC);
+	if ((idata->internal_file->flags & PHAR_ENT_COMPRESSION_MASK) != 0) {
+		;
+		if ((filter_name = phar_decompress_filter(idata->internal_file, 0)) != NULL) {
+			filter = php_stream_filter_create(phar_decompress_filter(idata->internal_file, 0), NULL, php_stream_is_persistent(fp) TSRMLS_CC);
+		} else {
+			filter = NULL;
+		}
 		if (!filter) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: unable to read phar \"%s\" (cannot create zlib.inflate filter while decompressing file \"%s\")", idata->phar->fname, internal_file);
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: unable to read phar \"%s\" (cannot create %s filter while decompressing file \"%s\")", idata->phar->fname, phar_decompress_filter(idata->internal_file, 1), internal_file);
 			efree(idata);
 			efree(internal_file);
 			return NULL;			
 		}
-		/* Nnfortunatley we cannot check the read position of fp after getting */
+		/* Unfortunatley we cannot check the read position of fp after getting */
 		/* uncompressed data because the new stream posiition is being changed */
 		/* by the number of bytes read throughthe filter not by the raw number */
 		/* bytes being consumed on the stream. Therefor use a consumed filter. */ 
@@ -1388,11 +1428,17 @@ PHP_RSHUTDOWN_FUNCTION(phar)
 PHP_MINFO_FUNCTION(phar)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "phar PHP Archive support", "enabled");
-	php_info_print_table_row(2, "phar API version", "0.8.0");
+	php_info_print_table_header(2, "Phar: PHP Archive support", "enabled");
+	php_info_print_table_row(2, "Phar API version", PHAR_VERSION_STR);
 	php_info_print_table_row(2, "CVS revision", "$Revision$");
-	php_info_print_table_row(2, "compressed phar support", 
+	php_info_print_table_row(2, "gzip compression", 
 #if HAVE_ZLIB
+		"enabled");
+#else
+		"disabled");
+#endif
+	php_info_print_table_row(2, "bzip2 compression", 
+#if HAVE_BZ2
 		"enabled");
 #else
 		"disabled");
@@ -1403,10 +1449,19 @@ PHP_MINFO_FUNCTION(phar)
 
 /* {{{ phar_module_entry
  */
-zend_module_entry phar_module_entry = {
-#if ZEND_MODULE_API_NO >= 20010901
-	STANDARD_MODULE_HEADER,
+static zend_module_dep phar_deps[] = {
+#if HAVE_ZLIB
+	ZEND_MOD_REQUIRED("zlib")
 #endif
+#if HAVE_BZ2
+	ZEND_MOD_REQUIRED("bz2")
+#endif
+	{NULL, NULL, NULL}
+};
+
+zend_module_entry phar_module_entry = {
+	STANDARD_MODULE_HEADER_EX, NULL,
+	phar_deps,
 	"Phar",
 	phar_functions,
 	PHP_MINIT(phar),
@@ -1414,9 +1469,7 @@ zend_module_entry phar_module_entry = {
 	PHP_RINIT(phar),
 	PHP_RSHUTDOWN(phar),
 	PHP_MINFO(phar),
-#if ZEND_MODULE_API_NO >= 20010901
-	"0.1.0", /* Replace with version number for your extension */
-#endif
+	PHAR_VERSION_STR,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

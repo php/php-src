@@ -1,11 +1,13 @@
 --TEST--
-Phar::mapPhar zlib is loaded
+Phar::canCompress
 --SKIPIF--
-<?php if (!extension_loaded("phar")) print "skip zlib is present"; ?>
+<?php if (!extension_loaded("phar")) print "skip"; ?>
 --FILE--
 <?php
-/* check this works and actually returns a boolean value */
-var_dump(Phar::canCompress());
+/* check this works and actually returns the boolean value */
+var_dump(Phar::canCompress() == (
+	extension_loaded("zlib") || extension_loaded("bz2")
+	));
 ?>
---EXPECTF--
-bool(%s)
+--EXPECT--
+bool(true)

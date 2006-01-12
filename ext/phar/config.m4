@@ -7,4 +7,5 @@ PHP_ARG_ENABLE(phar, for phar support/phar zlib support,
 if test "$PHP_PHAR" != "no"; then
   PHP_NEW_EXTENSION(phar, phar.c, $ext_shared)
   PHP_ADD_EXTENSION_DEP(phar, zlib, true)
+  PHP_ADD_EXTENSION_DEP(phar, bz2, true)
 fi
