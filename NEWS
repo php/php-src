@@ -1,6 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-13 Jan 2005, Version 4.4.2
+13 Jan 2006, Version 4.4.2
 - Added missing safe_mode/open_basedir checks into cURL extension. (Ilia)
 - Backported missing imap_mailcompose() fixes from PHP 5.x. (Ilia)
 - Prevent header injection by limiting each header to a single line. (Ilia)
