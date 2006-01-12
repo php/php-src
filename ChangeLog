@@ -1,3 +1,19 @@
+2006-01-11  Michael Wallner  <mike@iworks.at>
+
+    * run-tests.php:
+      - ws
+
+    * run-tests.php:
+      - fix CGI SAPI check on Windows
+
+2006-01-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS
+      configure.in
+      main/php_version.h:
+      5.1.2
+
 2006-01-10  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/tests/filters/bug35916.phpt
