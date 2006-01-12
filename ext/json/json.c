@@ -331,6 +331,7 @@ PHP_FUNCTION(json_decode)
 
     z = json_decode_r(jo, assoc TSRMLS_CC);
     if (!z) {
+    	json_object_put(jo);
         RETURN_NULL();
     }
  
