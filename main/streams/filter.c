@@ -251,7 +251,7 @@ PHPAPI void php_stream_bucket_delref(php_stream_bucket *bucket TSRMLS_DC)
 {
 	if (--bucket->refcount == 0) {
 		if (bucket->own_buf) {
-			pefree(bucket->is_unicode ? bucket->buf.ustr.val : bucket->buf.str.val, bucket->is_persistent);
+			pefree(bucket->is_unicode ? (char*)bucket->buf.ustr.val : bucket->buf.str.val, bucket->is_persistent);
 		}
 		pefree(bucket, bucket->is_persistent);
 	}
@@ -496,7 +496,7 @@ PHPAPI int _php_stream_filter_output_prefer_unicode(php_stream_filter *filter TS
 	php_stream_filter_chain *chain = filter->chain;
 	php_stream_filter *f;
 	int inverted = 0;
-	int preferred = (chain = &chain->stream->readfilters ? 1 : 0);
+	int preferred = (chain == &chain->stream->readfilters ? 1 : 0);
 
 	for (f = filter->next; f ; f = f->next) {
 		if ((f->fops->flags & PSFO_FLAG_ACCEPTS_STRING) == 0) {
