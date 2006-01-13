@@ -162,7 +162,7 @@ static inline void spl_filesystem_object_get_file_name(spl_filesystem_object *in
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Object not initialized");
 			break;
 		case SPL_FS_DIR:
-			intern->file_name_len = spprintf(&intern->file_name, 0, "%s/%s", intern->path, intern->u.dir.entry.d_name);
+			intern->file_name_len = spprintf(&intern->file_name, 0, "%s%c%s", intern->path, DEFAULT_SLASH, intern->u.dir.entry.d_name);
 			break;
 		}
 	}
@@ -852,7 +852,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 	subdir = (spl_filesystem_object*)zend_object_store_get_object(return_value TSRMLS_CC);
 	if (subdir) {
 		if (intern->u.dir.sub_path && intern->u.dir.sub_path[0]) {
-			subdir->u.dir.sub_path_len = spprintf(&subdir->u.dir.sub_path, 0, "%s/%s", intern->u.dir.sub_path, intern->u.dir.entry.d_name);
+			subdir->u.dir.sub_path_len = spprintf(&subdir->u.dir.sub_path, 0, "%s%c%s", intern->u.dir.sub_path, DEFAULT_SLASH, intern->u.dir.entry.d_name);
 		} else {
 			subdir->u.dir.sub_path_len = strlen(intern->u.dir.entry.d_name);
 			subdir->u.dir.sub_path = estrndup(intern->u.dir.entry.d_name, subdir->u.dir.sub_path_len);
@@ -885,7 +885,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getSubPathname)
 	int len;
 
 	if (intern->u.dir.sub_path) {
-		len = spprintf(&sub_name, 0, "%s/%s", intern->u.dir.sub_path, intern->u.dir.entry.d_name);
+		len = spprintf(&sub_name, 0, "%s%c%s", intern->u.dir.sub_path, DEFAULT_SLASH, intern->u.dir.entry.d_name);
 		RETURN_STRINGL(sub_name, len, 0);
 	} else {
 		RETURN_STRING(intern->u.dir.entry.d_name, 1);
@@ -907,7 +907,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getSubPathInfo)
 	}
 
 	if (intern->u.dir.sub_path) {
-		len = spprintf(&sub_name, 0, "%s/%s", intern->u.dir.sub_path, intern->u.dir.entry.d_name);
+		len = spprintf(&sub_name, 0, "%s%c%s", intern->u.dir.sub_path, DEFAULT_SLASH, intern->u.dir.entry.d_name);
 		spl_filesystem_object_create_info(intern, sub_name, len, 0, ce, return_value TSRMLS_CC);
 	} else {
 		spl_filesystem_object_create_info(intern, intern->path, intern->path_len, 1, ce, return_value TSRMLS_CC);
