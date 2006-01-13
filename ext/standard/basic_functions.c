@@ -382,7 +382,9 @@ zend_function_entry basic_functions[] = {
 #endif
 #if !defined(PHP_WIN32) && !defined(NETWARE)
 	PHP_FE(expm1,															NULL)
+# ifdef HAVE_LOG1P
 	PHP_FE(log1p,															NULL)
+# endif
 #endif
 
 	PHP_FE(pi,																NULL)
