@@ -1,3 +1,50 @@
+2006-01-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      ext/standard/filters.c:
+      - Add stream filter 'consumed'
+
+    * ext/standard/filters.c:
+      - Add stream filter 'consumed' which can restore the stream position when
+        a stream was read or written through a size changing filter.
+
+    * main/streams/filter.c:
+      - Fix two warnings
+
+    * main/streams/filter.c:
+      - Fix warning
+
+2006-01-12  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Back to dev.
+
+    * (PHP_4_4)
+      NEWS:
+      - Fixed year.
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Go with 4.4.2.
+
+2006-01-12  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ext/standard/levenshtein.c:
+      typo fix
+
+2006-01-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Back to dev
+
 2006-01-11  Michael Wallner  <mike@iworks.at>
 
     * run-tests.php:
