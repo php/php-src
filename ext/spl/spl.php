@@ -51,9 +51,10 @@
  * 
  * SPL offers two advanced directory and file handling classes:
  * 
- * - class DirectoryIterator implements Iterator
+ * - class SplFileInfo
+ * - class DirectoryIterator extends SplFileInfo implements Iterator
  * - class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveIterator
- * - class SplFileObject implements RecursiveIterator, SeekableIterator
+ * - class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIterator
  * 
  * 3) XML
  * 
@@ -582,7 +583,7 @@ interface Serializable
 /** @ingroup SPL
  * @brief An Array wrapper
  * @since PHP 5.0
- * @version 1.1
+ * @version 1.2
  *
  * This array wrapper allows to recursively iterate over Arrays and public 
  * Object properties.
@@ -712,7 +713,7 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Countable
 	 *        1 set: array indices can be accessed as properties in read/write
 	 */
 	function setFlags($flags);
-	                    
+
 	/**
 	 * @ return current flags
 	 */
@@ -761,28 +762,40 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Countable
 }
 
 /** @ingroup SPL
- * @brief Directory iterator
- * @since PHP 5.0
+ * @brief File info class
+ * @since PHP 5.1.3
  */
-class DirectoryIterator implements Iterator
+class SplFileInfo 
 {
-	/** Construct a directory iterator from a path-string.
+	/** Construct a file info object
 	 *
-	 * @param $path directory to iterate.
+	 * @param $file_name path or file name
 	 */
-	function __construct($path);
+	function __construct($file_name);
 
-	/** @return The opened path.
+	/** @return the path part only.
 	 */
 	function getPath();	
 
-	/** @return The current file name.
+	/** @return the filename only.
 	 */
 	function getFilename();	
+
+	/** @return SplFileInfo created for the file
+	 * @param class_name name of class to instantiate
+	 * @see SplFileInfo::setInfoClass()
+	 */
+	function getFileInfo(string class_name = NULL);
 
 	/** @return The current entries path and file name.
 	 */
 	function getPathname();	
+
+	/** @return SplFileInfo created for the path
+	 * @param class_name name of class to instantiate
+	 * @see SplFileInfo::setInfoClass()
+	 */
+	function getPathInfo(string class_name = NULL);
 
 	/** @return The current entry's permissions.
 	 */
@@ -840,15 +853,11 @@ class DirectoryIterator implements Iterator
 	 */
 	function isDir();	
 
-	/** @return Whether the current entry is either '.' or '..'.
-	 */
-	function isDot();	
-
 	/** @return whether the current entry is a link.
 	 */
 	function isLink();
 
-	/** @return getFilename()
+	/** @return getPathname()
 	 */
 	function __toString();
 
@@ -862,17 +871,85 @@ class DirectoryIterator implements Iterator
 	 * @return The opened file as a SplFileObject instance
 	 *
 	 * @see SplFileObject
+	 * @see SplFileInfo::setFileClass()
 	 * @see file()
 	 */
-	function DirectoryIterator::openFile($mode = 'r', $use_include_path = false, $context = NULL);
+	function openFile($mode = 'r', $use_include_path = false, $context = NULL);
+
+	/** @param class_name name of class used with openFile(). Must be derived 
+	 * from SPLFileObject.
+	 */
+	function setFileClass(string class_name = "SplFileObject");
+
+	/** @param class_name name of class used with getFileInfo(), getPathInfo(), 
+	 *                    getSubPathInfo(). Must be derived from SplFileInfo.
+	 */
+	function setInfoClass(string class_name = "SplFileInfo");
+}
+
+/** @ingroup SPL
+ * @brief Directory iterator
+ * @version 1.1
+ * @since PHP 5.0
+ */
+class DirectoryIterator extends SplFileInfo implements Iterator
+{
+	/** Construct a directory iterator from a path-string.
+	 *
+	 * @param $path directory to iterate.
+	 */
+	function __construct($path);
+
+	/** @return index of entry
+	 */
+	function key();
+
+	/** @return $this
+	 */
+	function current();
+
+	/** @return Whether the current entry is either '.' or '..'.
+	 */
+	function isDot();	
+
+	/** @return whether the current entry is a link.
+	 */
+	function isLink();
+
+	/** @return getFilename()
+	 */
+	function __toString();
 }
 
 /** @ingroup SPL
  * @brief recursive directory iterator
+ * @version 1.1
  * @since PHP 5.0
  */
 class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveIterator
 {
+	const CURRENT_AS_FILEINFO   0x00000010; /* make RecursiveDirectoryTree::current() return SplFileInfo */
+	const KEY_AS_FILENAME       0x00000020; /* make RecursiveDirectoryTree::key() return getFilename() */
+	const NEW_CURRENT_AND_KEY   0x00000030; /* CURRENT_AS_FILEINFO + KEY_AS_FILENAME */
+
+	/** Construct a directory iterator from a path-string.
+	 *
+	 * @param $path   directory to iterate.
+	 * @param $flags  open flags
+	 * - CURRENT_AS_FILEINFO
+	 * - KEY_AS_FILENAME
+	 * - NEW_CURRENT_AND_KEY 
+	 */
+	function __construct($path, $flags = 0);
+
+	/** @return getPathname() or getFilename() depending on flags
+	 */
+	function key();
+
+	/** @return getFilename() or getFileInfo() depending on flags
+	 */
+	function current();
+
 	/** @return whether the current is a directory (not '.' or '..').
 	 */
 	function hasChildren();	
@@ -880,6 +957,21 @@ class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveI
 	/** @return a RecursiveDirectoryIterator for the current entry.
 	 */
 	function getChildren();	
+
+	/** @return sub path only (without main path)
+	 */
+	function getSubPath();
+
+	/** @return the current sub path
+	 */
+	function getSubPathname();
+
+	/** @return SplFileInfo created for the current sub path
+	 * @param class_name name of class to instantiate
+	 * @see SplFileInfo::setInfoClass()
+	 */
+	function getSubPathInfo(string $class_name = NULL);
+
 }
 
 /** @ingroup SPL
