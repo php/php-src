@@ -1974,7 +1974,7 @@ ZEND_API int zend_disable_class(char *class_name, uint class_name_length TSRMLS_
 	return 1;
 }
 
-static int zend_is_callable_check_func(int check_flags, zval **zobj_ptr, zend_class_entry *ce_org, zval *callable, zend_class_entry **ce_ptr, zend_function **fptr_ptr TSRMLS_DC)
+static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, zend_class_entry *ce_org, zval *callable, zend_class_entry **ce_ptr, zend_function **fptr_ptr TSRMLS_DC)
 {
 	int retval;
 	char *lcname, *lmname, *colon;
@@ -2023,23 +2023,28 @@ static int zend_is_callable_check_func(int check_flags, zval **zobj_ptr, zend_cl
 	retval = zend_hash_find(ftable, lmname, mlen+1, (void**)&fptr) == SUCCESS ? 1 : 0;
 
 	if (!retval) {
-		if (zobj_ptr && *ce_ptr && (*ce_ptr)->__call != 0) {
+		if (*zobj_ptr_ptr && *ce_ptr && (*ce_ptr)->__call != 0) {
 			retval = (*ce_ptr)->__call != NULL;
 			*fptr_ptr = (*ce_ptr)->__call;
 		}
 	} else {
 		*fptr_ptr = fptr;
 		if (*ce_ptr) {
-			if (!zobj_ptr && !(fptr->common.fn_flags & ZEND_ACC_STATIC)) {
+			if (!*zobj_ptr_ptr && !(fptr->common.fn_flags & ZEND_ACC_STATIC)) {
 				if ((check_flags & IS_CALLABLE_CHECK_IS_STATIC) != 0) {
 					retval = 0;
 				} else {
-					zend_error(E_STRICT, "Non-static method %s::%s() cannot be called statically", (*ce_ptr)->name, fptr->common.function_name);
+					if (EG(This) && instanceof_function(Z_OBJCE_P(EG(This)), *ce_ptr TSRMLS_CC)) {
+						*zobj_ptr_ptr = &EG(This);
+						zend_error(E_STRICT, "Non-static method %s::%s() cannot be called statically, assuming $this from compatible context %s", (*ce_ptr)->name, fptr->common.function_name, Z_OBJCE_P(EG(This))->name);
+					} else {
+						zend_error(E_STRICT, "Non-static method %s::%s() cannot be called statically", (*ce_ptr)->name, fptr->common.function_name);
+					}
 				}
 			}
 			if (retval && (check_flags & IS_CALLABLE_CHECK_NO_ACCESS) == 0) {
 				if (fptr->op_array.fn_flags & ZEND_ACC_PRIVATE) {
-					if (!zend_check_private(fptr, zobj_ptr ? Z_OBJCE_PP(zobj_ptr) : EG(scope), lmname, mlen TSRMLS_CC)) {
+					if (!zend_check_private(fptr, *zobj_ptr_ptr ? Z_OBJCE_PP(*zobj_ptr_ptr) : EG(scope), lmname, mlen TSRMLS_CC)) {
 						retval = 0;
 					}
 				} else if ((fptr->common.fn_flags & ZEND_ACC_PROTECTED)) {
@@ -2089,7 +2094,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, char **
 				return 1;
 			}
 			
-			retval = zend_is_callable_check_func(check_flags|IS_CALLABLE_CHECK_IS_STATIC, NULL, NULL, callable, ce_ptr, fptr_ptr TSRMLS_CC);
+			retval = zend_is_callable_check_func(check_flags|IS_CALLABLE_CHECK_IS_STATIC, zobj_ptr_ptr, NULL, callable, ce_ptr, fptr_ptr TSRMLS_CC);
 			break;
 
 		case IS_ARRAY:
@@ -2132,12 +2137,6 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, char **
 							}
 							efree(lcname);
 						}
-						if (EG(This)) {
-							if (instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
-								*zobj_ptr_ptr = &EG(This);
-								zend_error(E_STRICT, "Non-static method %s::%s() cannot be called statically, assuming $this from compatible context %s", ce->name, Z_STRVAL_PP(method), Z_OBJCE_P(EG(This))->name);
-							}
-						}
 					} else {
 						ce = Z_OBJCE_PP(obj); /* TBFixed: what if it's overloaded? */
 						
@@ -2162,7 +2161,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, char **
 					}
 
 					if (ce) {
-						retval = zend_is_callable_check_func(check_flags, *zobj_ptr_ptr, ce, *method, ce_ptr, fptr_ptr TSRMLS_CC);
+						retval = zend_is_callable_check_func(check_flags, zobj_ptr_ptr, ce, *method, ce_ptr, fptr_ptr TSRMLS_CC);
 					}
 				} else if (callable_name) {
 					*callable_name = estrndup("Array", sizeof("Array")-1);
