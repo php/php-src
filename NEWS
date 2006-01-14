@@ -1,9 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, PHP 5.1.3
-- Added stream filter 'consumed'. (Marcus)
-- Fixed bug #35998 (getPathname() method always returns unix style filenames).
-  (Marcus)
+- Added "consumed" stream filter. (Marcus)
+- Fixed bug #35998 (SplFileInfo::getPathname() returns unix style filenames
+  in win32). (Marcus)
 
 12 Jan 2006, PHP 5.1.2
 - Updated libsqlite in ext/sqlite to 2.8.17. (Ilia)
