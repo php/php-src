@@ -2,8 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, PHP 5.1.3
 - Added "consumed" stream filter. (Marcus)
-- Implemented feature request #36007 (support for BIT and NEWDECIMAL in mysqli
-  (Georg)
 - Fixed bug #35998 (SplFileInfo::getPathname() returns unix style filenames
   in win32). (Marcus)
 
