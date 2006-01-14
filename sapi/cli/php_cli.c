@@ -774,7 +774,11 @@ int main(int argc, char *argv[])
 
 			case 'a':	/* interactive mode */
 				if (!interactive) {
+#if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
+					printf("Interactive shell\n\n");
+#else
 					printf("Interactive mode enabled\n\n");
+#endif
 					fflush(stdout);
 					interactive=1;
 				}
