@@ -811,7 +811,7 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Countable
 
 /** @ingroup SPL
  * @brief File info class
- * @since PHP 6.0
+ * @since PHP 5.1.3
  */
 class SplFileInfo 
 {
