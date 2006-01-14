@@ -2,7 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, PHP 5.1.3
 - Added "consumed" stream filter. (Marcus)
-- Added new mysqli field constants for BIT and NEW_DECIMAL (#36007). (Georg) 
+- Added new mysqli constants for BIT and NEW_DECIMAL field types:
+  MYSQLI_TYPE_NEWDECIMAL and MYSQLI_TYPE_BIT. FR #36007. (Georg)
 - Fixed bug #35998 (SplFileInfo::getPathname() returns unix style filenames
   in win32). (Marcus)
 
