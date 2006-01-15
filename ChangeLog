@@ -1,3 +1,65 @@
+2006-01-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/tests/bug29210.phpt
+      ZendEngine2/tests/bug29210.phpt:
+      - Fix test
+
+    * (PHP_5_1)
+      NEWS:
+      - BFN
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c
+      ext/standard/tests/general_functions/bug36011.phpt:
+      - Fixed bug #36011
+
+    * ext/standard/tests/general_functions/bug36011.phpt
+      ext/standard/tests/general_functions/bug36011.phpt:
+      
+      - Fixed bug #36011
+
+2006-01-14  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS:
+      be wordy
+
+2006-01-14  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_1)
+      NEWS:
+      New field constants for BIT and NEWDECIMAL
+
+    * (PHP_5_1)
+      ext/mysqli/mysqli.c:
+      2nd attempt: implementation of 36007
+      1st commit stopped with protocol error - never seen that before :-(
+
+2006-01-14  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS:
+      removed false information
+
+2006-01-14  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_1)
+      NEWS:
+      Implemented feature request #36007: Support for BIT and NEW_DECIMAL field
+      types
+
+2006-01-14  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS:
+      fix news
+
+2006-01-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      sapi/cli/php_cli.c:
+      - Make clear what -a mode gets you
+
 2006-01-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
