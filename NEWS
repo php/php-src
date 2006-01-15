@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, Version 4.4.3
+- Added a check for special characters in the session name. (Ilia)
 	
 13 Jan 2006, Version 4.4.2
 - Added missing safe_mode/open_basedir checks into cURL extension. (Ilia)
