@@ -368,6 +368,7 @@ static spl_filesystem_object * spl_filesystem_object_create_type(int ht, spl_fil
 			Z_TYPE_P(return_value) = IS_NULL;
 			return NULL;
 		}
+		break;
 	case SPL_FS_DIR:	
 		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Operation not supported");
