@@ -741,6 +741,12 @@ static void php_session_initialize(TSRMLS_D)
 	char *val;
 	int vallen;
 
+	/* check session name for invalid characters */
+	if (PS(id) && strpbrk(PS(id), "\r\n\t <>'\"\\")) {
+		efree(PS(id));
+		PS(id) = NULL;
+	}
+
 	if (!PS(mod)) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "No storage module chosen - failed to initialize session.");
 		return;
