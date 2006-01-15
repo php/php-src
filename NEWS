@@ -2,7 +2,8 @@ PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, Version 4.4.3
 - Added a check for special characters in the session name. (Ilia)
-	
+- Fixed bug #36017 (fopen() crashes PHP when opening a URL). (Tony)
+
 13 Jan 2006, Version 4.4.2
 - Added missing safe_mode/open_basedir checks into cURL extension. (Ilia)
 - Backported missing imap_mailcompose() fixes from PHP 5.x. (Ilia)
