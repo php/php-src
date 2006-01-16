@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Added "consumed" stream filter. (Marcus)
 - Added new mysqli constants for BIT and NEW_DECIMAL field types:
   MYSQLI_TYPE_NEWDECIMAL and MYSQLI_TYPE_BIT. FR #36007. (Georg)
+- Fixed bug #36038 (ext/hash compile failure on Mac OSX). (Tony)
 - Fixed bug #36016 (realpath cache memleaks). (Dmitry, Nuno)
 - Fixed bug #36011 (Strict errormsg wrong for call_user_func() and the likes).
   (Marcus)
