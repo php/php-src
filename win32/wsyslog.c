@@ -62,9 +62,14 @@
 void closelog(void)
 {
 	TSRMLS_FETCH();
-	DeregisterEventSource(PW32G(log_source));
-	STR_FREE(PW32G(log_header));
-	PW32G(log_header) = NULL;
+	if (PW32G(log_source)) {
+		DeregisterEventSource(PW32G(log_source));
+		PW32G(log_source) = NULL;
+	}
+	if (PW32G(log_header)) {
+		STR_FREE(PW32G(log_header));
+		PW32G(log_header) = NULL;
+	}
 }
 
 /* Emulator for BSD syslog() routine
