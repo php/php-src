@@ -1,5 +1,5 @@
 --TEST--
-Bug #35229 (call_user_func() crashes when arguement_stack is nearly full)
+Bug #35229 (call_user_func() crashes when argument stack is nearly full)
 --FILE--
 <?php
 class test2 {
