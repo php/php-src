@@ -195,11 +195,9 @@ CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int li
 
 CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path, int use_realpath);
 
-#define REALPATH_CACHE
 #define REALPATH_CACHE_TTL  (2*60) /* 2 minutes */
 #define REALPATH_CACHE_SIZE 0      /* disabled while php.ini isn't loaded */
 
-#ifdef REALPATH_CACHE
 typedef struct _realpath_cache_bucket {
 	unsigned long                  key;
 	char                          *path;
@@ -209,16 +207,13 @@ typedef struct _realpath_cache_bucket {
 	time_t                         expires;
 	struct _realpath_cache_bucket *next;	
 } realpath_cache_bucket;
-#endif
 
 typedef struct _virtual_cwd_globals {
 	cwd_state cwd;
-#ifdef REALPATH_CACHE
 	long                   realpath_cache_size;
 	long                   realpath_cache_size_limit;
 	long                   realpath_cache_ttl;
 	realpath_cache_bucket *realpath_cache[1024];
-#endif
 } virtual_cwd_globals;
 
 #ifdef ZTS
