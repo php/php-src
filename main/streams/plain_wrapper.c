@@ -1095,12 +1095,17 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, char *dir, int mod
 			offset = p - buf + 1;
 		}
 
-		/* find a top level directory we need to create */
-		while ((p = strrchr(buf + offset, DEFAULT_SLASH))) {
-			*p = '\0';
-			if (VCWD_STAT(buf, &sb) == 0) {
-				*p = DEFAULT_SLASH;
-				break;
+		if (p && dir_len == 1) {
+			/* buf == "DEFAULT_SLASH" */	
+		}
+		else {
+			/* find a top level directory we need to create */
+			while ( (p = strrchr(buf + offset, DEFAULT_SLASH)) || (p = strrchr(buf, DEFAULT_SLASH)) ) {
+				*p = '\0';
+				if (VCWD_STAT(buf, &sb) == 0) {
+					*p = DEFAULT_SLASH;
+					break;
+				}
 			}
 		}
 
