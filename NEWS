@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - Fixed bug #36011 (Strict errormsg wrong for call_user_func() and the likes).
   (Marcus)
 - Fixed bug #36006 (Problem with $this in __destruct()). (Dmitry)
+- Fixed bug #35999 (recursive mkdir() does not work with relative path 
+  like "foo/bar"). (Tony)
 - Fixed bug #35998 (SplFileInfo::getPathname() returns unix style filenames
   in win32). (Marcus)
 
