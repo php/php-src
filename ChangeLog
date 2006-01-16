@@ -1,3 +1,32 @@
+2006-01-15  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      NEWS
+      ext/standard/http_fopen_wrapper.c:
+      fix bug #36017 (fopen() crashes PHP when opening a URL)
+      + fix incosistency in macro usage
+
+2006-01-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      ext/session/session.c:
+      MFH: Added a check for special characters in the session name.
+
+    * ext/session/session.c:
+      MFB51: Added a check for special characters in the session name.
+
+    * (PHP_5_1)
+      NEWS
+      ext/session/session.c:
+      Added a check for special characters in the session name.
+
+2006-01-15  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      main/php_version.h:
+      - Fixed typoes.
+
 2006-01-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/tests/bug29210.phpt
