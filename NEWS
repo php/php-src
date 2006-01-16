@@ -8,6 +8,7 @@ PHP                                                                        NEWS
 - Fixed bug #36016 (realpath cache memleaks). (Dmitry, Nuno)
 - Fixed bug #36011 (Strict errormsg wrong for call_user_func() and the likes).
   (Marcus)
+- Fixed bug #36006 (Problem with $this in __destruct()). (Dmitry)
 - Fixed bug #35998 (SplFileInfo::getPathname() returns unix style filenames
   in win32). (Marcus)
 
