@@ -338,8 +338,7 @@ static inline void realpath_cache_add(const char *path, int path_len, const char
 	}
 }
 
-//static inline 
-realpath_cache_bucket* realpath_cache_find(const char *path, int path_len, time_t t TSRMLS_DC)
+static inline realpath_cache_bucket* realpath_cache_find(const char *path, int path_len, time_t t TSRMLS_DC)
 {
 	unsigned long key = realpath_cache_key(path, path_len);
 	unsigned long n = key % (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
