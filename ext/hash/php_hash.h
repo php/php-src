@@ -122,7 +122,7 @@ PHP_HASH_API void php_hash_register_algo(const char *algo, php_hash_ops *ops);
 
 static inline void php_hash_bin2hex(char *out, const unsigned char *in, int in_len)
 {
-	static const char hexits[16] = "0123456789abcdef";
+	static const char hexits[17] = "0123456789abcdef";
 	int i;
 
 	for(i = 0; i < in_len; i++) {
