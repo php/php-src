@@ -5,8 +5,8 @@ PHP                                                                        NEWS
 - Added "consumed" stream filter. (Marcus)
 - Added new mysqli constants for BIT and NEW_DECIMAL field types:
   MYSQLI_TYPE_NEWDECIMAL and MYSQLI_TYPE_BIT. FR #36007. (Georg)
-- Ensure that imagecolorallocate and imagecolorallocatelapha returns FALSE
-  on error (Pierre)
+- Fixed imagecolorallocate() and imagecolorallocatelapha() to return FALSE
+  on error. (Pierre)
 - Fixed bug #36038 (ext/hash compile failure on Mac OSX). (Tony)
 - Fixed bug #36037 (heredoc adds extra line number). (Dmitry)
 - Fixed bug #36016 (realpath cache memleaks). (Dmitry, Nuno)
