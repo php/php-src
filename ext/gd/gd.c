@@ -2966,6 +2966,8 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 	fontname = (unsigned char *) fontname;
 #endif
 
+	PHP_GD_CHECK_OPEN_BASEDIR(fontname, "Invalid font filename");
+	
 #ifdef USE_GD_IMGSTRTTF
 # if HAVE_GD_STRINGFTEX
 	if (extended) {
