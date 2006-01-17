@@ -2286,7 +2286,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <ST_HEREDOC>^{LABEL}(";")?{NEWLINE} {
 	int label_len;
 
-	CG(zend_lineno)++;
 	if (yytext[yyleng-2]=='\r') {
 		label_len = yyleng-2;
 	} else {
@@ -2307,6 +2306,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		BEGIN(ST_IN_SCRIPTING);
 		return T_END_HEREDOC;
 	} else {
+		CG(zend_lineno)++;
 		if (!zend_copy_string_value(zendlval, yytext, yyleng, CG(literal_type) TSRMLS_CC)) {
 			return 0;
 		}
