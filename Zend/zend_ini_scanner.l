@@ -139,7 +139,17 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <INITIAL>["][^"]*["] {
+	char *p = yytext;
+
 	/* ENCAPSULATED TC_STRING */
+
+	while ((p = strpbrk(p, "\r\n"))) {
+		if (*p == '\r' && *(p + 1) == '\n') {
+			p++;
+		}
+		SCNG(lineno)++;
+		p++;
+	}
 
 	/* eat trailing " */
 	yytext[yyleng-1]=0;
