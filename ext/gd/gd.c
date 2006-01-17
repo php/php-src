@@ -1967,6 +1967,7 @@ PHP_FUNCTION(imagecolorallocate)
 {
 	zval **IM, **red, **green, **blue;
 	gdImagePtr im;
+	int ct = (-1);
 
 	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &IM, &red, &green, &blue) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -1977,8 +1978,11 @@ PHP_FUNCTION(imagecolorallocate)
 	convert_to_long_ex(red);
 	convert_to_long_ex(green);
 	convert_to_long_ex(blue);
-
-	RETURN_LONG(gdImageColorAllocate(im, Z_LVAL_PP(red), Z_LVAL_PP(green), Z_LVAL_PP(blue)));
+	ct = gdImageColorAllocate(im, Z_LVAL_PP(red), Z_LVAL_PP(green), Z_LVAL_PP(blue));
+	if (ct < 0) {
+		RETURN_FALSE;
+	}
+	RETURN_LONG(ct);
 }
 /* }}} */
 
