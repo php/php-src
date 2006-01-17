@@ -963,14 +963,18 @@ PHP_FUNCTION(imagecolorallocatealpha)
 	zval *IM;
 	long red, green, blue, alpha;
 	gdImagePtr im;
+	int ct = (-1);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zllll", &IM, &red, &green, &blue, &alpha) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
-
-	RETURN_LONG(gdImageColorAllocateAlpha(im, red, green, blue, alpha));
+	ct = gdImageColorAllocateAlpha(im, red, green, blue, alpha);
+	if (ct < 0) {
+		RETURN_FALSE;
+	}
+	RETURN_LONG(ct);
 }
 /* }}} */
 
@@ -1752,6 +1756,7 @@ PHP_FUNCTION(imagecolorallocate)
 {
 	zval **IM, **red, **green, **blue;
 	gdImagePtr im;
+	int ct = (-1);
 
 	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &IM, &red, &green, &blue) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -1762,8 +1767,12 @@ PHP_FUNCTION(imagecolorallocate)
 	convert_to_long_ex(red);
 	convert_to_long_ex(green);
 	convert_to_long_ex(blue);
+	ct = gdImageColorAllocate(im, Z_LVAL_PP(red), Z_LVAL_PP(green), Z_LVAL_PP(blue));
+	if (ct < 0) {
+		RETURN_FALSE;
+	}
 
-	RETURN_LONG(gdImageColorAllocate(im, Z_LVAL_PP(red), Z_LVAL_PP(green), Z_LVAL_PP(blue)));
+	RETURN_LONG(ct);
 }
 /* }}} */
 
