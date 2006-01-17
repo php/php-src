@@ -52,10 +52,6 @@ PHP_FUNCTION(gettype)
 			RETVAL_ASCII_STRING("string", 1);
 			break;
 	
-		case IS_BINARY:
-			RETVAL_ASCII_STRING("binary", 1);
-			break;
-
 		case IS_UNICODE:
 			RETVAL_ASCII_STRING("unicode", 1);
 			break;
@@ -199,7 +195,11 @@ PHP_FUNCTION(strval)
 		WRONG_PARAM_COUNT;
 	}
 
-	zend_make_printable_zval(*num, &expr_copy, &use_copy);
+	if (UG(unicode)) {
+		zend_make_unicode_zval(*num, &expr_copy, &use_copy);
+	} else {
+		zend_make_printable_zval(*num, &expr_copy, &use_copy);
+	}
 	if (use_copy) {
 		tmp = &expr_copy;
 		RETVAL_ZVAL(tmp, 0, 0);
@@ -300,14 +300,6 @@ PHP_FUNCTION(is_unicode)
 }
 /* }}} */
 
-/* {{{ proto bool is_binary(mixed var)
-   Returns true if variable is a binary string */
-PHP_FUNCTION(is_binary)
-{
-	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_BINARY);
-}
-/* }}} */
-
 /* {{{ proto bool is_buffer(mixed var)
    Returns true if variable is a native, unicode or binary string */
 PHP_FUNCTION(is_buffer)
@@ -319,7 +311,7 @@ PHP_FUNCTION(is_buffer)
 		RETURN_FALSE;
 	}
 
-	if (Z_TYPE_PP(arg) == IS_STRING || Z_TYPE_PP(arg) == IS_UNICODE || Z_TYPE_PP(arg) == IS_BINARY) {
+	if (Z_TYPE_PP(arg) == IS_STRING || Z_TYPE_PP(arg) == IS_UNICODE) {
 		RETURN_TRUE;
 	}
 	RETURN_FALSE;
@@ -399,7 +391,6 @@ PHP_FUNCTION(is_scalar)
 		case IS_DOUBLE:
 		case IS_LONG:
 		case IS_STRING:
-		case IS_BINARY:
 		case IS_UNICODE:
 			RETURN_TRUE;
 			break;

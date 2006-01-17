@@ -287,7 +287,6 @@ ZEND_NAMED_FUNCTION(zend_if_strlen)
 			break;
 
 		case IS_STRING:
-		case IS_BINARY:
 			RETVAL_LONG(Z_STRLEN_PP(str));
 			break;
 
@@ -431,9 +430,6 @@ ZEND_FUNCTION(each)
 		case HASH_KEY_IS_STRING:
 			add_get_index_stringl(return_value, 0, string_key, string_key_len-1, (void **) &inserted_pointer, 0);
 			break;
-		case HASH_KEY_IS_BINARY:
-			add_get_index_binaryl(return_value, 0, string_key, string_key_len-1, (void **) &inserted_pointer, 0);
-			break;
 		case HASH_KEY_IS_UNICODE:
 			add_get_index_unicodel(return_value, 0, (UChar*)string_key, string_key_len-1, (void **) &inserted_pointer, 0);
 			break;
@@ -511,7 +507,6 @@ ZEND_FUNCTION(define)
 		case IS_LONG:
 		case IS_DOUBLE:
 		case IS_STRING:
-		case IS_BINARY:
 		case IS_UNICODE:
 		case IS_BOOL:
 		case IS_RESOURCE:
@@ -1398,7 +1393,6 @@ static int copy_function_name(zend_function *func, int num_args, va_list args, z
 	     *user_ar     = va_arg(args, zval *);
 
 	if (hash_key->nKeyLength == 0 || 
-	    hash_key->type == IS_BINARY ||
 	    (hash_key->type == IS_UNICODE && hash_key->u.unicode[0] == 0) ||
 	    (hash_key->type == IS_STRING && hash_key->u.unicode[0] == 0)) {
 		return 0;
@@ -1407,16 +1401,12 @@ static int copy_function_name(zend_function *func, int num_args, va_list args, z
 	if (func->type == ZEND_INTERNAL_FUNCTION) {
 		if (hash_key->type == IS_STRING) {
 			add_next_index_stringl(internal_ar, hash_key->u.string, hash_key->nKeyLength-1, 1);
-		} else if (hash_key->type == IS_BINARY) {
-			add_next_index_binaryl(internal_ar, hash_key->u.string, hash_key->nKeyLength-1, 1);
 		} else {
 			add_next_index_unicodel(internal_ar, hash_key->u.unicode, hash_key->nKeyLength-1, 1);
 		}
 	} else if (func->type == ZEND_USER_FUNCTION) {
 		if (hash_key->type == IS_STRING) {
 			add_next_index_stringl(user_ar, hash_key->u.string, hash_key->nKeyLength-1, 1);
-		} else if (hash_key->type == IS_BINARY) {
-			add_next_index_binaryl(user_ar, hash_key->u.string, hash_key->nKeyLength-1, 1);
 		} else {
 			add_next_index_unicodel(user_ar, hash_key->u.unicode, hash_key->nKeyLength-1, 1);
 		}

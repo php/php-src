@@ -993,8 +993,9 @@ static int php_plain_files_unlink(php_stream_wrapper *wrapper, char *url, int op
 		return 0;
 	}
 	/* Clear stat cache */
-	ZVAL_STRINGL(&funcname, "clearstatcache", sizeof("clearstatcache")-1, 0);
+	ZVAL_ASCII_STRINGL(&funcname, "clearstatcache", sizeof("clearstatcache")-1, 1);
 	call_user_function_ex(CG(function_table), NULL, &funcname, &retval, 0, NULL, 0, NULL TSRMLS_CC);
+	zval_dtor(&funcname);
 	if (retval) {
 		zval_ptr_dtor(&retval);
 	}

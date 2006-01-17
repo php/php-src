@@ -74,7 +74,7 @@ object(DOMException)#%d (6) {
   [u"file":protected]=>
   unicode(%d) "%sdom_set_attr_node.php"
   [u"line":protected]=>
-  int(22)
+  int(%d)
   [u"trace":u"Exception":private]=>
   array(1) {
     [0]=>
@@ -82,7 +82,7 @@ object(DOMException)#%d (6) {
       [u"file"]=>
       unicode(%d) "%sdom_set_attr_node.php"
       [u"line"]=>
-      int(22)
+      int(%d)
       [u"function"]=>
       unicode(16) "setAttributeNode"
       [u"class"]=>
@@ -97,6 +97,6 @@ object(DOMException)#%d (6) {
       }
     }
   }
-  ["code"]=>
+  [u"code"]=>
   int(4)
 }

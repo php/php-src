@@ -57,9 +57,10 @@ ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend
 	if (!fn_proxy && !obj_ce) {
 		/* no interest in caching and no information already present that is
 		 * needed later inside zend_call_function. */
-		ZVAL_STRINGL(&z_fname, function_name, function_name_len, 0);
+		ZVAL_ASCII_STRINGL(&z_fname, function_name, function_name_len, 1);
 		fci.function_table = !object_pp ? EG(function_table) : NULL;
 		result = zend_call_function(&fci, NULL TSRMLS_CC);
+		zval_dtor(&z_fname);
 	} else {
 		zend_fcall_info_cache fcic;
 
@@ -213,12 +214,6 @@ static int zend_user_it_get_current_key(zend_object_iterator *_iter, char **str_
 			*str_key_len = retval->value.str.len+1;
 			zval_ptr_dtor(&retval);
 			return HASH_KEY_IS_STRING;
-
-		case IS_BINARY:
-			*str_key = estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
-			*str_key_len = retval->value.str.len+1;
-			zval_ptr_dtor(&retval);
-			return HASH_KEY_IS_BINARY;
 
 		case IS_UNICODE:
 			*str_key = (char*)eustrndup(Z_USTRVAL_P(retval), Z_USTRLEN_P(retval));

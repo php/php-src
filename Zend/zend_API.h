@@ -426,8 +426,6 @@ ZEND_API int add_index_resource(zval *arg, ulong idx, int r);
 ZEND_API int add_index_double(zval *arg, ulong idx, double d);
 ZEND_API int add_index_string(zval *arg, ulong idx, char *str, int duplicate);
 ZEND_API int add_index_stringl(zval *arg, ulong idx, char *str, uint length, int duplicate);
-ZEND_API int add_index_binary(zval *arg, ulong idx, char *str, int duplicate TSRMLS_DC);
-ZEND_API int add_index_binaryl(zval *arg, ulong idx, char *str, uint length, int duplicate TSRMLS_DC);
 ZEND_API int add_index_unicode(zval *arg, ulong idx, UChar *str, int duplicate);
 ZEND_API int add_index_unicodel(zval *arg, ulong idx, UChar *str, uint length, int duplicate);
 ZEND_API int add_index_zval(zval *arg, ulong index, zval *value);
@@ -470,8 +468,6 @@ ZEND_API int add_next_index_resource(zval *arg, int r);
 ZEND_API int add_next_index_double(zval *arg, double d);
 ZEND_API int add_next_index_string(zval *arg, char *str, int duplicate);
 ZEND_API int add_next_index_stringl(zval *arg, char *str, uint length, int duplicate);
-ZEND_API int add_next_index_binary(zval *arg, char *str, int duplicate);
-ZEND_API int add_next_index_binaryl(zval *arg, char *str, uint length, int duplicate);
 ZEND_API int add_next_index_unicode(zval *arg, UChar *str, int duplicate);
 ZEND_API int add_next_index_unicodel(zval *arg, UChar *str, uint length, int duplicate);
 ZEND_API int add_next_index_zval(zval *arg, zval *value);
@@ -540,8 +536,6 @@ ZEND_API int add_get_index_long(zval *arg, ulong idx, long l, void **dest);
 ZEND_API int add_get_index_double(zval *arg, ulong idx, double d, void **dest);
 ZEND_API int add_get_index_string(zval *arg, ulong idx, char *str, void **dest, int duplicate);
 ZEND_API int add_get_index_stringl(zval *arg, ulong idx, char *str, uint length, void **dest, int duplicate);
-ZEND_API int add_get_index_binary(zval *arg, ulong idx, char *str, void **dest, int duplicate);
-ZEND_API int add_get_index_binaryl(zval *arg, ulong idx, char *str, uint length, void **dest, int duplicate);
 ZEND_API int add_get_index_unicode(zval *arg, ulong idx, UChar *str, void **dest, int duplicate);
 ZEND_API int add_get_index_unicodel(zval *arg, ulong idx, UChar *str, uint length, void **dest, int duplicate);
 
@@ -557,6 +551,8 @@ ZEND_API int add_property_ascii_string_ex(zval *arg, char *key, uint key_len, ch
 ZEND_API int add_property_ascii_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, int duplicate TSRMLS_DC);
 ZEND_API int add_property_rt_string_ex(zval *arg, char *key, uint key_len, char *str, int duplicate TSRMLS_DC);
 ZEND_API int add_property_rt_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, int duplicate TSRMLS_DC);
+ZEND_API int add_property_unicode_ex(zval *arg, char *key, uint key_len, UChar *str, int duplicate TSRMLS_DC);
+ZEND_API int add_property_unicodel_ex(zval *arg, char *key, uint key_len,  UChar *str, uint length, int duplicate TSRMLS_DC);
 
 #define add_property_long(__arg, __key, __n) add_property_long_ex(__arg, __key, strlen(__key)+1, __n TSRMLS_CC)
 #define add_property_null(__arg, __key) add_property_null_ex(__arg, __key, strlen(__key) + 1 TSRMLS_CC)
@@ -570,6 +566,8 @@ ZEND_API int add_property_rt_stringl_ex(zval *arg, char *key, uint key_len, char
 #define add_property_rt_string(__arg, __key, __str, __duplicate) add_property_ascii_string_ex(__arg, __key, strlen(__key)+1, __str, __duplicate TSRMLS_CC)
 #define add_property_rt_stringl(__arg, __key, __str, __length, __duplicate) add_property_rt_stringl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate TSRMLS_CC)
 #define add_property_zval(__arg, __key, __value) add_property_zval_ex(__arg, __key, strlen(__key)+1, __value TSRMLS_CC)       
+#define add_property_unicode(__arg, __key, __str, __duplicate) add_property_unicode_ex(__arg, __key, strlen(__key)+1, __str, __duplicate TSRMLS_CC)
+#define add_property_unicodel(__arg, __key, __str, __length, __duplicate) add_property_unicodel_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate TSRMLS_CC)
 
 
 ZEND_API int call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval *retval_ptr, zend_uint param_count, zval *params[] TSRMLS_DC);
@@ -614,9 +612,6 @@ ZEND_API void zend_reset_all_cv(HashTable *symbol_table TSRMLS_DC);
 ZEND_API ZEND_FUNCTION(display_disabled_function);
 ZEND_API ZEND_FUNCTION(display_disabled_class);
 END_EXTERN_C()
-
-
-#define BINARY_TYPE (UG(unicode) ? IS_BINARY : IS_STRING)
 
 
 #if ZEND_DEBUG
@@ -745,20 +740,6 @@ END_EXTERN_C()
 		(z)->type = IS_UNICODE;		    \
 }
 
-#define ZVAL_BINARY(z, s, duplicate) {	\
-		char *__s=(s);					\
-		(z)->value.str.len = strlen(__s);	\
-		(z)->value.str.val = (duplicate?estrndup(__s, (z)->value.str.len):__s);	\
-		(z)->type = BINARY_TYPE;	\
-	}
-
-#define ZVAL_BINARYL(z, s, l, duplicate) {	\
-		char *__s=(s); int __l=l;		\
-		(z)->value.str.len = __l;	    \
-		(z)->value.str.val = (duplicate?estrndup(__s, __l):__s);	\
-		(z)->type = BINARY_TYPE;   \
-	}
-
 #define ZVAL_EMPTY_STRING(z) {	        \
 		(z)->value.str.len = 0;  	    \
 		(z)->value.str.val = STR_EMPTY_ALLOC(); \
@@ -769,12 +750,6 @@ END_EXTERN_C()
 		(z)->value.ustr.len = 0;  	    \
 		(z)->value.ustr.val = USTR_MAKE(""); \
 		(z)->type = IS_UNICODE;		    \
-	}
-
-#define ZVAL_EMPTY_BINARY(z) {	        \
-		(z)->value.str.len = 0;  	    \
-		(z)->value.str.val = STR_EMPTY_ALLOC(); \
-		(z)->type = BINARY_TYPE;   \
 	}
 
 #define ZVAL_ZVAL(z, zv, copy, dtor) {  \
@@ -840,9 +815,6 @@ END_EXTERN_C()
 #define RETVAL_UNICODE(u, duplicate) 		ZVAL_UNICODE(return_value, u, duplicate)
 #define RETVAL_UNICODEL(u, l, duplicate) 	ZVAL_UNICODEL(return_value, u, l, duplicate)
 #define RETVAL_EMPTY_UNICODE() 			ZVAL_EMPTY_UNICODE(return_value)
-#define RETVAL_BINARY(s, duplicate) 		ZVAL_BINARY(return_value, s, duplicate)
-#define RETVAL_BINARYL(s, l, duplicate) 	ZVAL_BINARYL(return_value, s, l, duplicate)
-#define RETVAL_EMPTY_BINARY() 			ZVAL_EMPTY_BINARY(return_value)
 #define RETVAL_ZVAL(zv, copy, dtor)		ZVAL_ZVAL(return_value, zv, copy, dtor)
 #define RETVAL_FALSE  					ZVAL_BOOL(return_value, 0)
 #define RETVAL_TRUE   					ZVAL_BOOL(return_value, 1)
@@ -860,9 +832,6 @@ END_EXTERN_C()
 #define RETURN_UNICODE(u, duplicate) 	{ RETVAL_UNICODE(u, duplicate); return; }
 #define RETURN_UNICODEL(u, l, duplicate) { RETVAL_UNICODEL(u, l, duplicate); return; }
 #define RETURN_EMPTY_UNICODE() 			{ RETVAL_EMPTY_UNICODE(); return; }
-#define RETURN_BINARY(s, duplicate) 	{ RETVAL_BINARY(s, duplicate); return; }
-#define RETURN_BINARYL(s, l, duplicate) { RETVAL_BINARYL(s, l, duplicate); return; }
-#define RETURN_EMPTY_BINARY() 			{ RETVAL_EMPTY_BINARY(); return; }
 #define RETURN_ZVAL(zv, copy, dtor)		{ RETVAL_ZVAL(zv, copy, dtor); return; }
 #define RETURN_FALSE  					{ RETVAL_FALSE; return; }
 #define RETURN_TRUE   					{ RETVAL_TRUE; return; }

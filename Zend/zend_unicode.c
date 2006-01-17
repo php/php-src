@@ -410,8 +410,8 @@ ZEND_API int zval_unicode_to_string(zval *string, UConverter *conv TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ zval_string_to_unicode */
-ZEND_API int zval_string_to_unicode(zval *string TSRMLS_DC)
+/* {{{ zval_string_to_unicode_ex */
+ZEND_API int zval_string_to_unicode_ex(zval *string, UConverter *conv)
 {
     UErrorCode status = U_ZERO_ERROR;
     int retval = TRUE;
@@ -422,7 +422,7 @@ ZEND_API int zval_string_to_unicode(zval *string TSRMLS_DC)
     int s_len = Z_STRLEN_P(string);
 
     Z_TYPE_P(string) = IS_UNICODE;
-    zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u, &u_len, s, s_len, &status);
+    zend_convert_to_unicode(conv, &u, &u_len, s, s_len, &status);
     ZVAL_UNICODEL(string, u, u_len, 0);
 
     if (U_FAILURE(status)) {
@@ -431,6 +431,13 @@ ZEND_API int zval_string_to_unicode(zval *string TSRMLS_DC)
 
     efree(s);
     return retval;
+}
+/* }}} */
+
+/* {{{ zval_string_to_unicode */
+ZEND_API int zval_string_to_unicode(zval *string TSRMLS_DC)
+{
+	return zval_string_to_unicode(string, ZEND_U_CONVERTER(UG(runtime_encoding_conv)));
 }
 /* }}} */
 

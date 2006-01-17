@@ -122,7 +122,7 @@ static void userfilter_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 		return;
 	}
 
-	ZVAL_STRINGL(&func_name, "onclose", sizeof("onclose")-1, 0);
+	ZVAL_ASCII_STRINGL(&func_name, "onclose", sizeof("onclose")-1, 1);
 
 	call_user_function_ex(NULL,
 			&obj,
@@ -130,6 +130,7 @@ static void userfilter_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 			&retval,
 			0, NULL,
 			0, NULL TSRMLS_CC);
+	zval_dtor(&func_name);
 
 	if (retval)
 		zval_ptr_dtor(&retval);
@@ -164,7 +165,7 @@ php_stream_filter_status_t userfilter_filter(
 		zval_ptr_dtor(&zstream);
 	}
 
-	ZVAL_STRINGL(&func_name, "filter", sizeof("filter")-1, 0);
+	ZVAL_ASCII_STRINGL(&func_name, "filter", sizeof("filter")-1, 1);
 
 	/* Setup calling arguments */
 	ALLOC_INIT_ZVAL(zin);
@@ -189,6 +190,7 @@ php_stream_filter_status_t userfilter_filter(
 			&retval,
 			4, args,
 			0, NULL TSRMLS_CC);
+	zval_dtor(&func_name);
 
 	if (call_result == SUCCESS && retval != NULL) {
 		convert_to_long(retval);
@@ -304,7 +306,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	}
 
 	/* invoke the constructor */
-	ZVAL_STRINGL(&func_name, "oncreate", sizeof("oncreate")-1, 0);
+	ZVAL_ASCII_STRINGL(&func_name, "oncreate", sizeof("oncreate")-1, 1);
 
 	call_user_function_ex(NULL,
 			&obj,
@@ -312,6 +314,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 			&retval,
 			0, NULL,
 			0, NULL TSRMLS_CC);
+	zval_dtor(&func_name);
 
 	if (retval) {
 		if (Z_TYPE_P(retval) == IS_BOOL && Z_LVAL_P(retval) == 0) {
@@ -374,12 +377,8 @@ PHP_FUNCTION(stream_bucket_make_writeable)
 		/* add_property_zval increments the refcount which is unwanted here */
 		zval_ptr_dtor(&zbucket);
 		if (bucket->is_unicode) {
-			zval *unicode_data;
-
-			ALLOC_INIT_ZVAL(unicode_data);
-			ZVAL_UNICODEL(unicode_data, bucket->buf.ustr.val, bucket->buf.ustr.len, 1);
-			add_property_zval(return_value, "data", unicode_data);
-			add_property_long(return_value, "datalen", bucket->buf.str.len);
+			add_property_unicodel(return_value, "data", bucket->buf.ustr.val, bucket->buf.ustr.len, 1);
+			add_property_long(return_value, "datalen", bucket->buf.ustr.len);
 		} else {
 			add_property_stringl(return_value, "data", bucket->buf.str.val, bucket->buf.str.len, 1);
 			add_property_long(return_value, "datalen", bucket->buf.str.len);

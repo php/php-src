@@ -1216,7 +1216,7 @@ ZEND_API int zend_hash_get_current_key_ex(HashTable *ht, char **str_index, uint 
 
 	if (p) {
 		if (p->nKeyLength) {
-			if (p->key.type == IS_STRING || p->key.type == IS_BINARY) {
+			if (p->key.type == IS_STRING) {
 				if (duplicate) {
 					*str_index = estrndup(p->key.u.string, p->nKeyLength-1);
 				} else {
@@ -1225,11 +1225,7 @@ ZEND_API int zend_hash_get_current_key_ex(HashTable *ht, char **str_index, uint 
 				if (str_length) {
 					*str_length = p->nKeyLength;
 				}
-				if (p->key.type == IS_BINARY) {
-					return HASH_KEY_IS_BINARY;
-				} else {
-					return HASH_KEY_IS_STRING;
-				}
+				return HASH_KEY_IS_STRING;
 			} else if (p->key.type == IS_UNICODE) {
 				if (duplicate) {
 					*str_index = (char*)eustrndup(p->key.u.unicode, p->nKeyLength-1);
@@ -1262,8 +1258,6 @@ ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos)
 		if (p->nKeyLength) {
 			if (p->key.type == IS_UNICODE) {
 				return HASH_KEY_IS_UNICODE;
-			} else if (p->key.type == IS_BINARY) {
-				return HASH_KEY_IS_BINARY;
 			} else {
 				return HASH_KEY_IS_STRING;
 			}
@@ -1310,14 +1304,14 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, char *
 				return SUCCESS;
 			}
 			zend_hash_index_del(ht, num_index);
-		} else if (key_type == HASH_KEY_IS_STRING || key_type == HASH_KEY_IS_BINARY) {
+		} else if (key_type == HASH_KEY_IS_STRING) {
 			real_length = str_length;
 			if (p->nKeyLength == str_length &&
-			    p->key.type == ((key_type == HASH_KEY_IS_STRING)?IS_STRING:IS_BINARY) &&
+			    p->key.type == IS_STRING &&
 			    memcmp(p->key.u.string, str_index, str_length) == 0) {
 				return SUCCESS;
 			}
-			zend_u_hash_del(ht, (key_type == HASH_KEY_IS_STRING)?IS_STRING:IS_BINARY, str_index, str_length);
+			zend_u_hash_del(ht, IS_STRING, str_index, str_length);
 		} else if (key_type == HASH_KEY_IS_UNICODE) {
 			real_length = str_length * sizeof(UChar);
 			if (p->nKeyLength == str_length &&
@@ -1381,7 +1375,7 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, char *
 			p->h = zend_u_inline_hash_func(IS_UNICODE, str_index, str_length);
 		} else {
 			memcpy(p->key.u.string, str_index, real_length);
-	    p->key.type = (key_type == HASH_KEY_IS_STRING)?IS_STRING:IS_BINARY;
+	    p->key.type = IS_STRING;
 			p->h = zend_u_inline_hash_func(p->key.type, str_index, str_length);
 		}
 
@@ -1705,8 +1699,6 @@ ZEND_API int zend_u_symtable_update_current_key(HashTable *ht, zend_uchar type, 
 	} else if (type == IS_UNICODE) {
 		key_type = HASH_KEY_IS_UNICODE;	
 		HANDLE_U_NUMERIC((UChar*)arKey, nKeyLength, zend_hash_update_current_key(ht, HASH_KEY_IS_LONG, NULL, 0, idx));
-	} else {
-		key_type = HASH_KEY_IS_BINARY;	
 	}
 	return zend_hash_update_current_key(ht, key_type, arKey, nKeyLength, 0);
 }

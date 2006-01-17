@@ -563,7 +563,11 @@ static char *date_format(char *format, int format_len, int *return_len, timelib_
 	php_locale_data *loc_dat;
 
 	if (!format_len) {
-		return estrdup("");
+		if (UG(unicode)) {
+			return eustrdup(EMPTY_STR);
+		} else {		
+			return estrdup("");
+		}
 	}
 
 	loc_dat = date_get_locale_data(UG(default_locale));
@@ -1187,7 +1191,14 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 
 	if (real_len && real_len != buf_len) {
 		buf = (char *) erealloc(buf, real_len + 1);
-		RETURN_STRINGL(buf, real_len, 0);
+		if (UG(unicode)) {
+			RETVAL_RT_STRINGL(buf, real_len, 1);
+			efree(buf);
+			return;
+		} else {
+			RETURN_STRINGL(buf, real_len, 0);
+		}
+
 	}
 	efree(buf);
 	RETURN_FALSE;
@@ -1820,7 +1831,7 @@ PHP_FUNCTION(date_default_timezone_get)
 	timelib_tzinfo *default_tz;
 
 	default_tz = get_timezone_info(TSRMLS_C);
-	RETVAL_STRING(default_tz->name, 1);
+	RETVAL_ASCII_STRING(default_tz->name, 1);
 }
 /* }}} */
 
@@ -1902,7 +1913,7 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 	switch (retformat) {
 		case SUNFUNCS_RET_STRING:
 			sprintf(retstr, "%02d:%02d", (int) N, (int) (60 * (N - (int) N)));
-			RETURN_STRINGL(retstr, 5, 1);
+			RETURN_RT_STRINGL(retstr, 5, 1);
 			break;
 		case SUNFUNCS_RET_DOUBLE:
 			RETURN_DOUBLE(N);

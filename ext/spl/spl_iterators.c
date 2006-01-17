@@ -481,9 +481,6 @@ SPL_METHOD(RecursiveIteratorIterator, key)
 			case HASH_KEY_IS_UNICODE:
 				RETURN_UNICODEL((void*)str_key, str_key_len-1, 0);
 				break;
-			case HASH_KEY_IS_BINARY:
-				RETURN_BINARYL(str_key, str_key_len-1, 0);
-				break;
 			default:
 				RETURN_NULL();
 		}
@@ -1110,8 +1107,6 @@ SPL_METHOD(dual_it, key)
 	if (intern->current.data) {
 		if (intern->current.key_type == HASH_KEY_IS_STRING) {
 			RETURN_STRINGL(intern->current.str_key, intern->current.str_key_len-1, 1);
-		} else if (intern->current.key_type == HASH_KEY_IS_BINARY) {
-			RETURN_BINARYL(intern->current.str_key, intern->current.str_key_len-1, 1);
 		} else if (intern->current.key_type == HASH_KEY_IS_UNICODE) {
 			RETURN_UNICODEL((UChar *)intern->current.str_key, intern->current.str_key_len-1, 1);
 		} else {
@@ -1659,7 +1654,11 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern TSRMLS_DC)
 			zval expr_copy;
 			ALLOC_ZVAL(intern->u.caching.zstr);
 			*intern->u.caching.zstr = *intern->current.data;
-			zend_make_printable_zval(intern->u.caching.zstr, &expr_copy, &use_copy);
+			if (UG(unicode)) {
+				zend_make_unicode_zval(intern->u.caching.zstr, &expr_copy, &use_copy);
+			} else {
+				zend_make_printable_zval(intern->u.caching.zstr, &expr_copy, &use_copy);
+			}
 			if (use_copy) {
 				*intern->u.caching.zstr = expr_copy;
 				INIT_PZVAL(intern->u.caching.zstr);
@@ -1750,8 +1749,6 @@ SPL_METHOD(CachingIterator, __toString)
 			RETURN_STRINGL(intern->current.str_key, intern->current.str_key_len, 1);
 		} else if (intern->current.key_type == HASH_KEY_IS_UNICODE) {
 			RETURN_UNICODEL((void*)intern->current.str_key, intern->current.str_key_len, 1);
-		} else if (intern->current.key_type == HASH_KEY_IS_BINARY) {
-			RETURN_BINARYL(intern->current.str_key, intern->current.str_key_len, 1);
 		} else {
 			RETVAL_LONG(intern->current.int_key);
 			convert_to_string(return_value);
@@ -2070,9 +2067,6 @@ SPL_METHOD(NoRewindIterator, key)
 			case HASH_KEY_IS_UNICODE:
 				RETURN_UNICODEL((void*)str_key, str_key_len-1, 0);
 				break;
-			case HASH_KEY_IS_BINARY:
-				RETURN_BINARYL(str_key, str_key_len-1, 0);
-				break;
 			default:
 				RETURN_NULL();
 		}
@@ -2381,10 +2375,6 @@ PHP_FUNCTION(iterator_to_array)
 			switch(key_type) {
 				case HASH_KEY_IS_STRING:
 					add_assoc_zval_ex(return_value, str_key, str_key_len, *data);
-					efree(str_key);
-					break;
-				case HASH_KEY_IS_BINARY:
-					add_u_assoc_zval_ex(return_value, IS_BINARY, str_key, str_key_len, *data);
 					efree(str_key);
 					break;
 				case HASH_KEY_IS_UNICODE:

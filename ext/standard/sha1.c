@@ -59,7 +59,7 @@ PHP_FUNCTION(sha1)
 		RETURN_STRINGL(digest, 20, 1);
 	} else {
 		make_sha1_digest(sha1str, digest);
-		RETVAL_STRING(sha1str, 1);
+		RETVAL_ASCII_STRING(sha1str, 1);
 	}
 
 }
@@ -108,7 +108,7 @@ PHP_FUNCTION(sha1_file)
 		RETURN_STRINGL(digest, 20, 1);
 	} else {
 		make_sha1_digest(sha1str, digest);
-		RETVAL_STRING(sha1str, 1);
+		RETVAL_ASCII_STRING(sha1str, 1);
 	}
 }
 /* }}} */

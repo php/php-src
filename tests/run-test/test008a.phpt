@@ -30,3 +30,11 @@ string(1) "1"
 string(1) "0"
 NULL
 string(%d) "%sivision by zer%s"
+--UEXPECTF--
+unicode(1) "1"
+unicode(4) "8191"
+unicode(1) "0"
+unicode(1) "1"
+unicode(1) "0"
+NULL
+unicode(%d) "%sivision by zer%s"

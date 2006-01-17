@@ -114,7 +114,6 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 {
 	switch (op->type) {
 		case IS_STRING:
-		case IS_BINARY:
 			{
 				char *strval;
 
@@ -174,7 +173,6 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 	} else {														\
 		switch ((op)->type) {										\
 			case IS_STRING:											\
-			case IS_BINARY:											\
 				{													\
 					switch (((holder).type=is_numeric_string((op)->value.str.val, (op)->value.str.len, &(holder).value.lval, &(holder).value.dval, 1))) {	\
 						case IS_DOUBLE:															\
@@ -239,7 +237,6 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 				DVAL_TO_LVAL((op)->value.dval, (holder).value.lval);	\
 				break;												\
 			case IS_STRING:											\
-			case IS_BINARY:											\
 				(holder).value.lval = strtol((op)->value.str.val, NULL, 10);					\
 				break;												\
 			case IS_UNICODE:                                        \
@@ -283,7 +280,6 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 				(holder).value.lval = ((op)->value.dval ? 1 : 0);	\
 				break;												\
 			case IS_STRING:											\
-			case IS_BINARY:											\
 				if ((op)->value.str.len == 0						\
 					|| ((op)->value.str.len==1 && (op)->value.str.val[0]=='0')) {	\
 					(holder).value.lval = 0;						\
@@ -369,7 +365,6 @@ ZEND_API void convert_to_long_base(zval *op, int base)
 			DVAL_TO_LVAL(op->value.dval, op->value.lval);
 			break;
 		case IS_STRING:
-		case IS_BINARY:
 			{
 				char *strval = op->value.str.val;
 				op->value.lval = strtol(strval, NULL, base);
@@ -443,7 +438,6 @@ ZEND_API void convert_to_double(zval *op)
 		case IS_DOUBLE:
 			break;
 		case IS_STRING:
-		case IS_BINARY:
 			{
 				char *strval = op->value.str.val;
 
@@ -543,7 +537,6 @@ ZEND_API void convert_to_boolean(zval *op)
 			op->value.lval = (op->value.dval ? 1 : 0);
 			break;
 		case IS_STRING:
-		case IS_BINARY:
 			{
 				char *strval = op->value.str.val;
 
@@ -615,9 +608,6 @@ ZEND_API void _convert_to_unicode(zval *op TSRMLS_DC ZEND_FILE_LINE_DC)
 		case IS_UNICODE:
 			break;
 		case IS_STRING:
-			zval_string_to_unicode(op TSRMLS_CC);
-			break;
-		case IS_BINARY:
 			zend_error(E_ERROR, "Cannot convert binary type to Unicode type");
 			return;
 		case IS_BOOL:
@@ -703,23 +693,6 @@ ZEND_API void _convert_to_string_with_converter(zval *op, UConverter *conv TSRML
 			op->value.str.len = 0;
 			break;
 		case IS_STRING:
-			if (conv == ZEND_U_CONVERTER(UG(runtime_encoding_conv))) {
-				break;
-			} else {
-				char *s;
-				int32_t s_len;
-				UErrorCode status = U_ZERO_ERROR;
-				s = op->value.str.val;
-				s_len = op->value.str.len;
-				zend_convert_encodings(conv, ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &op->value.str.val, &op->value.str.len, s, s_len, &status);
-				efree(s);
-				if (U_FAILURE(status)) {
-					zend_error(E_WARNING, "Error converting string for printing");
-				}
-			}
-			break;
-		case IS_BINARY:
-			zend_error(E_ERROR, "Cannot convert binary type to string type");
 			return;
 		case IS_UNICODE:
 			zval_unicode_to_string(op, conv TSRMLS_CC);
@@ -783,38 +756,6 @@ ZEND_API void _convert_to_string_with_converter(zval *op, UConverter *conv TSRML
 			break;
 	}
 	op->type = IS_STRING;
-}
-
-ZEND_API void _convert_to_binary(zval *op TSRMLS_DC ZEND_FILE_LINE_DC)
-{
-	if (!UG(unicode)) {
-		convert_to_string(op);
-		return;
-	}
-
-	switch (op->type) {
-		case IS_BINARY:
-			break;
-		case IS_OBJECT: {
-			TSRMLS_FETCH();
-			
-			convert_object_to_type(op, IS_BINARY, convert_to_binary);
-
-			if (op->type == IS_BINARY) {
-				return;
-			}
-
-			zend_error(E_NOTICE, "Object of class %v to binary conversion", Z_OBJCE_P(op)->name);
-			zval_dtor(op);
-			op->value.str.val = estrndup("Object", sizeof("Object")-1);
-			op->value.str.len = sizeof("Object")-1;
-			break;
-		}
-		default:
-			convert_to_string(op);
-			break;
-	}
-	op->type = IS_BINARY;
 }
 
 
@@ -1192,7 +1133,7 @@ ZEND_API int bitwise_not_function(zval *result, zval *op1 TSRMLS_DC)
 		result->type = IS_LONG;
 		return SUCCESS;
 	}
-	if (op1->type == IS_STRING || op1->type == IS_BINARY) {
+	if (op1->type == IS_STRING) {
 		int i;
 
 		result->type = op1->type;
@@ -1212,8 +1153,7 @@ ZEND_API int bitwise_or_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
 	zval op1_copy, op2_copy;
 
-	if ((op1->type == IS_STRING && op2->type == IS_STRING) ||
-	    (op1->type == IS_BINARY && op2->type == IS_BINARY)) {
+	if (op1->type == IS_STRING && op2->type == IS_STRING) {
 		zval *longer, *shorter;
 		char *result_str;
 		int i, result_len;
@@ -1256,8 +1196,7 @@ ZEND_API int bitwise_and_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
 	zval op1_copy, op2_copy;
 	
-	if ((op1->type == IS_STRING && op2->type == IS_STRING) ||
-	    (op1->type == IS_BINARY && op2->type == IS_BINARY)) {
+	if (op1->type == IS_STRING && op2->type == IS_STRING) {
 		zval *longer, *shorter;
 		char *result_str;
 		int i, result_len;
@@ -1302,8 +1241,7 @@ ZEND_API int bitwise_xor_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
 	zval op1_copy, op2_copy;
 	
-	if ((op1->type == IS_STRING && op2->type == IS_STRING) ||
-	    (op1->type == IS_BINARY && op2->type == IS_BINARY)) {
+	if (op1->type == IS_STRING && op2->type == IS_STRING) {
 		zval *longer, *shorter;
 		char *result_str;
 		int i, result_len;
@@ -1443,10 +1381,6 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 		zend_make_unicode_zval(op1, &op1_copy, &use_copy1);
 		zend_make_unicode_zval(op2, &op2_copy, &use_copy2);
 		result_type = IS_UNICODE;
-	} else if (op1->type == IS_BINARY && op2->type == IS_BINARY) {
-		result_type = IS_BINARY;
-		/* no conversion necessary */
-		use_copy1 = use_copy2 = 0;
 	} else {
 		result_type = IS_STRING;
 		zend_make_string_zval(op1, &op1_copy, &use_copy1);
@@ -1622,8 +1556,8 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 		}
 	}
 		
-	if ((op1->type == IS_UNICODE || op1->type == IS_STRING || op1->type == IS_BINARY) && 
-	    (op2->type == IS_UNICODE || op2->type == IS_STRING || op2->type == IS_BINARY)) {
+	if ((op1->type == IS_UNICODE || op1->type == IS_STRING) && 
+	    (op2->type == IS_UNICODE || op2->type == IS_STRING)) {
 
 		if (op1->type == IS_UNICODE || op2->type == IS_UNICODE) {
 			zendi_u_smart_strcmp(result, op1, op2);
@@ -1739,7 +1673,6 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 			result->value.lval = (op1->value.dval == op2->value.dval);
 			break;
 		case IS_STRING:
-		case IS_BINARY:
 			if ((op1->value.str.len == op2->value.str.len)
 				&& (!memcmp(op1->value.str.val, op2->value.str.val, op1->value.str.len))) {
 				result->value.lval = 1;
@@ -2009,7 +1942,6 @@ ZEND_API int increment_function(zval *op1)
 			op1->value.lval = 1;
 			op1->type = IS_LONG;
 			break;
-		case IS_BINARY:
 		case IS_STRING: {
 				long lval;
 				double dval;
@@ -2066,7 +1998,6 @@ ZEND_API int decrement_function(zval *op1)
 		case IS_DOUBLE:
 			op1->value.dval = op1->value.dval - 1;
 			break;
-		case IS_BINARY:
 		case IS_STRING:		/* Like perl we only support string increment */
 			if (op1->value.str.len == 0) { /* consider as 0 */
 				STR_FREE(op1->value.str.val);
@@ -2358,11 +2289,6 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2)
 	long lval1, lval2;
 	double dval1, dval2;
 	
-	if (s1->type == IS_BINARY || s2->type == IS_BINARY) {
-		zend_error(E_ERROR, "Cannot convert binary type to string type");
-		return;
-	}
-
 	if ((ret1=is_numeric_string(s1->value.str.val, s1->value.str.len, &lval1, &dval1, 0)) &&
 		(ret2=is_numeric_string(s2->value.str.val, s2->value.str.len, &lval2, &dval2, 0))) {
 		if ((ret1==IS_DOUBLE) || (ret2==IS_DOUBLE)) {

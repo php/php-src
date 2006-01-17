@@ -243,7 +243,6 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC);
 ZEND_API void _convert_to_string_with_converter(zval *op, UConverter *conv TSRMLS_DC ZEND_FILE_LINE_DC);
 ZEND_API void _convert_to_unicode(zval *op TSRMLS_DC ZEND_FILE_LINE_DC);
 ZEND_API void _convert_to_unicode_with_converter(zval *op, UConverter *conv TSRMLS_DC ZEND_FILE_LINE_DC);
-ZEND_API void _convert_to_binary(zval *op TSRMLS_DC ZEND_FILE_LINE_DC);
 ZEND_API void convert_to_long(zval *op);
 ZEND_API void convert_to_double(zval *op);
 ZEND_API void convert_to_long_base(zval *op, int base);
@@ -260,7 +259,6 @@ ZEND_API int add_string_to_string(zval *result, zval *op1, zval *op2);
 #define convert_to_string_with_converter(op, conv) _convert_to_string_with_converter((op), (conv) TSRMLS_CC ZEND_FILE_LINE_CC)
 #define convert_to_unicode(op)               _convert_to_unicode((op) TSRMLS_CC ZEND_FILE_LINE_CC)
 #define convert_to_unicode_with_converter(op, conv) _convert_to_unicode_with_converter((op), (conv) TSRMLS_CC ZEND_FILE_LINE_CC)
-#define convert_to_binary(op)               _convert_to_binary((op) TSRMLS_CC ZEND_FILE_LINE_CC)
 #define convert_to_text(op) (UG(unicode)?convert_to_unicode(op):convert_to_string(op))
 
 ZEND_API double zend_string_to_double(const char *number, zend_uint length);
@@ -343,9 +341,6 @@ END_EXTERN_C()
 			case IS_UNICODE: 					\
 				convert_to_unicode(pzv);		\
 				break; 							\
-			case IS_BINARY: 					\
-				convert_to_binary(pzv); 		\
-				break; 							\
 			default: 							\
 				assert(0); 						\
 				break; 							\
@@ -363,7 +358,6 @@ END_EXTERN_C()
 #define convert_to_double_ex(ppzv)	convert_to_ex_master(ppzv, double, DOUBLE)
 #define convert_to_string_ex(ppzv)	convert_to_ex_master(ppzv, string, STRING)
 #define convert_to_unicode_ex(ppzv)	convert_to_ex_master(ppzv, unicode, UNICODE)
-#define convert_to_binary_ex(ppzv)	convert_to_ex_master(ppzv, binary, BINARY)
 #define convert_to_array_ex(ppzv)	convert_to_ex_master(ppzv, array, ARRAY)
 #define convert_to_object_ex(ppzv)	convert_to_ex_master(ppzv, object, OBJECT)
 #define convert_to_null_ex(ppzv)	convert_to_ex_master(ppzv, null, NULL)
@@ -386,8 +380,6 @@ END_EXTERN_C()
 #define Z_USTRVAL(zval)			(zval).value.ustr.val
 #define Z_USTRLEN(zval)			(zval).value.ustr.len
 #define Z_USTRCPLEN(zval)		(u_countChar32((zval).value.ustr.val, (zval).value.ustr.len))
-#define Z_BINVAL(zval)			Z_STRVAL(zval)
-#define Z_BINLEN(zval)			Z_STRLEN(zval)
 #define Z_ARRVAL(zval)			(zval).value.ht
 #define Z_OBJVAL(zval)			(zval).value.obj
 #define Z_OBJ_HANDLE(zval)		(zval).value.obj.handle
@@ -407,8 +399,6 @@ END_EXTERN_C()
 #define Z_USTRVAL_P(zval_p)		Z_USTRVAL(*zval_p)
 #define Z_USTRLEN_P(zval_p)		Z_USTRLEN(*zval_p)
 #define Z_USTRCPLEN_P(zval_p)	Z_USTRCPLEN(*zval_p)
-#define Z_BINVAL_P(zval)		Z_STRVAL_P(zval)
-#define Z_BINLEN_P(zval)		Z_STRLEN_P(zval)
 #define Z_ARRVAL_P(zval_p)		Z_ARRVAL(*zval_p)
 #define Z_OBJPROP_P(zval_p)		Z_OBJPROP(*zval_p)
 #define Z_OBJCE_P(zval_p)		Z_OBJCE(*zval_p)
@@ -428,8 +418,6 @@ END_EXTERN_C()
 #define Z_USTRVAL_PP(zval_pp)	Z_USTRVAL(**zval_pp)
 #define Z_USTRLEN_PP(zval_pp)	Z_USTRLEN(**zval_pp)
 #define Z_USTRCPLEN_PP(zval_pp)	Z_USTRCPLEN(**zval_pp)
-#define Z_BINVAL_PP(zval)		Z_STRVAL_PP(zval)
-#define Z_BINLEN_PP(zval)		Z_STRLEN_PP(zval)
 #define Z_ARRVAL_PP(zval_pp)	Z_ARRVAL(**zval_pp)
 #define Z_OBJPROP_PP(zval_pp)	Z_OBJPROP(**zval_pp)
 #define Z_OBJCE_PP(zval_pp)		Z_OBJCE(**zval_pp)

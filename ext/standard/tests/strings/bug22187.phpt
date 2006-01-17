@@ -8,3 +8,6 @@ Bug #22187 (possible crash in number_format() function)
 --EXPECT--
 string(3) "0.0"
 string(1) "0"
+--UEXPECT--
+unicode(3) "0.0"
+unicode(1) "0"

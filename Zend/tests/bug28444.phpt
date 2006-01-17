@@ -90,7 +90,7 @@ Overloaded::__set(y,3)
 int(3)
 Overloaded::__get(y)
 int(3)
-string(55) "Object of class Object could not be converted to string"
+unicode(55) "Object of class Object could not be converted to string"
 Overloaded::__set(z,)
 object(Object)#%d (1) {
   [u"x"]=>

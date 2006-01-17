@@ -844,7 +844,10 @@ PHP_FUNCTION(tempnam)
 
 	if ((fd = php_open_temporary_fd(d, p, &opened_path TSRMLS_CC)) >= 0) {
 		close(fd);
-		RETVAL_STRING(opened_path, 0);
+		RETVAL_RT_STRING(opened_path, 0);
+		if (UG(unicode)) {
+			efree(opened_path);
+		}
 	} else {
 		RETVAL_FALSE;
 	}

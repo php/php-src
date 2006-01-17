@@ -434,7 +434,6 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 #define IS_CONSTANT	8
 #define IS_CONSTANT_ARRAY	9
 #define IS_UNICODE  10
-#define IS_BINARY   11
 
 /* Ugly hack to support constants as static array indices */
 #define IS_CONSTANT_INDEX	0x80

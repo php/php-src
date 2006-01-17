@@ -307,13 +307,23 @@ ZEND_METHOD(error_exception, getSeverity)
 		*len += l;                                                       \
 	}
 
+#define TRACE_APPEND_USTRL(val, vallen) \
+	{ \
+		zval tmp, copy; \
+		int use_copy; \
+		ZVAL_UNICODEL(&tmp, val, vallen, 0); \
+		zend_make_printable_zval(&tmp, &copy, &use_copy); \
+		TRACE_APPEND_STRL(Z_STRVAL(copy), Z_STRLEN(copy)); \
+		zval_dtor(&copy); \
+	}
+
 #define TRACE_APPEND_ZVAL(zv) \
 	if (Z_TYPE_P((zv)) == IS_UNICODE) { \
 		zval copy; \
 		int use_copy; \
 		zend_make_printable_zval((zv), &copy, &use_copy); \
-    TRACE_APPEND_STRL(Z_STRVAL(copy), Z_STRLEN(copy)); \
-    zval_dtor(&copy); \
+		TRACE_APPEND_STRL(Z_STRVAL(copy), Z_STRLEN(copy)); \
+		zval_dtor(&copy); \
 	} else { \
 		TRACE_APPEND_STRL(Z_STRVAL_P((zv)), Z_STRLEN_P((zv))); \
 	}
@@ -362,6 +372,26 @@ static int _build_trace_args(zval **arg, int num_args, va_list args, zend_hash_k
 			} else {
 				l_added = Z_STRLEN_PP(arg);
 				TRACE_APPEND_STRL(Z_STRVAL_PP(arg), l_added);
+				TRACE_APPEND_STR("', ");
+				l_added += 3 + 1;
+			}
+			while (--l_added) {
+				if ((*str)[*len - l_added] < 32) {
+					(*str)[*len - l_added] = '?';
+				}
+			}
+			break;
+		}
+		case IS_UNICODE: {
+			int l_added;
+			TRACE_APPEND_CHR('\'');
+			if (Z_USTRLEN_PP(arg) > 15) {
+				TRACE_APPEND_USTRL(Z_USTRVAL_PP(arg), 15);
+				TRACE_APPEND_STR("...', ");
+				l_added = 15 + 6 + 1; /* +1 because of while (--l_added) */
+			} else {
+				l_added = Z_USTRLEN_PP(arg);
+				TRACE_APPEND_USTRL(Z_USTRVAL_PP(arg), l_added);
 				TRACE_APPEND_STR("', ");
 				l_added += 3 + 1;
 			}
@@ -535,7 +565,7 @@ ZEND_METHOD(exception, __toString)
 
 	convert_to_long(&line);
 
-	ZVAL_STRINGL(&fname, "gettraceasstring", sizeof("gettraceasstring")-1, 0);
+	ZVAL_ASCII_STRINGL(&fname, "gettraceasstring", sizeof("gettraceasstring")-1, 1);
 
 	fci.size = sizeof(fci);
 	fci.function_table = &Z_OBJCE_P(getThis())->function_table;
@@ -548,6 +578,7 @@ ZEND_METHOD(exception, __toString)
 	fci.no_separation = 1;
 
 	zend_call_function(&fci, NULL TSRMLS_CC);
+	zval_dtor(&fname);
 
 	if (Z_TYPE_P(trace) != IS_STRING && Z_TYPE_P(trace) != IS_UNICODE) {
 		trace = NULL;
