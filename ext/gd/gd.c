@@ -1103,7 +1103,6 @@ PHP_FUNCTION(imagecolorallocatealpha)
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	RETURN_LONG(gdImageColorAllocateAlpha(im, red, green, blue, alpha));
 	ct = gdImageColorAllocateAlpha(im, red, green, blue, alpha);
 	if (ct < 0) {
 		RETURN_FALSE;
