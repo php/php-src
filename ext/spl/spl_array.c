@@ -225,7 +225,6 @@ static zval **spl_array_get_dimension_ptr_ptr(int check_inherited, zval *object,
 	
 	switch(Z_TYPE_P(offset)) {
 	case IS_STRING:
-	case IS_BINARY:
 	case IS_UNICODE:
 		if (zend_u_symtable_find(spl_array_get_hash_table(intern, 0 TSRMLS_CC), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, (void **) &retval) == FAILURE) {
 			zend_error(E_NOTICE, "Undefined index:  %R", Z_TYPE_P(offset), Z_STRVAL_P(offset));
@@ -303,7 +302,6 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 	}
 	switch(Z_TYPE_P(offset)) {
 	case IS_STRING:
-	case IS_BINARY:
 	case IS_UNICODE:
 		if (*(char*)Z_UNIVAL_P(offset) == '\0') {
 			zend_throw_exception(U_CLASS_ENTRY(spl_ce_InvalidArgumentException), "An offset must not begin with \\0 or be empty", 0 TSRMLS_CC);
@@ -351,7 +349,6 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 
 	switch(Z_TYPE_P(offset)) {
 	case IS_STRING:
-	case IS_BINARY:
 	case IS_UNICODE:
 		if (spl_array_get_hash_table(intern, 0 TSRMLS_CC) == &EG(symbol_table)) {
 			if (zend_u_delete_global_variable(Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset) TSRMLS_CC)) {
@@ -406,7 +403,6 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 	
 	switch(Z_TYPE_P(offset)) {
 	case IS_STRING:
-	case IS_BINARY:
 	case IS_UNICODE:
 		return zend_u_symtable_exists(spl_array_get_hash_table(intern, 0 TSRMLS_CC), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1);
 	case IS_DOUBLE:
@@ -1175,9 +1171,6 @@ void spl_array_iterator_key(zval *object, zval *return_value TSRMLS_DC) /* {{{ *
 	switch (zend_hash_get_current_key_ex(aht, &string_key, &string_length, &num_key, 1, &intern->pos)) {
 		case HASH_KEY_IS_STRING:
 			RETVAL_STRINGL(string_key, string_length - 1, 0);
-			break;
-		case HASH_KEY_IS_BINARY:
-			RETVAL_BINARYL(string_key, string_length - 1, 0);
 			break;
 		case HASH_KEY_IS_UNICODE:
 			RETVAL_UNICODEL((UChar*)string_key, string_length - 1, 0);

@@ -107,7 +107,6 @@ PHP_MINFO_FUNCTION(ctype)
 		convert_to_string(&tmp); \
 		c = &tmp; \
 	case IS_STRING: \
-	case IS_BINARY: \
 string:\
 		{ \
 			char *p = Z_STRVAL_P(c), *e = Z_STRVAL_P(c) + Z_STRLEN_P(c); \

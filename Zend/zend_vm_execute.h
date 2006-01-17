@@ -1284,7 +1284,7 @@ static int ZEND_ECHO_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zend_error(E_ERROR, "Unsupported encoding [%d]", EX(op_array)->script_encoding);
 		}
 		zend_convert_encodings(ZEND_U_CONVERTER(UG(output_encoding_conv)), script_enc_conv, &z_conv.value.str.val, &z_conv.value.str.len, z->value.str.val, z->value.str.len, &status);
-		z_conv.type = IS_BINARY;
+		z_conv.type = IS_STRING;
 		if (U_SUCCESS(status)) {
 			zend_print_variable(&z_conv);
 		} else {
@@ -1784,9 +1784,6 @@ static int ZEND_CAST_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			}
 			break;
 		}
-		case IS_BINARY:
-			convert_to_binary(result);
-			break;
 		case IS_ARRAY:
 			convert_to_array(result);
 			break;
@@ -2589,7 +2586,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 				zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_u_symtable_update(array_ptr->value.ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -2938,7 +2934,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_u_symtable_update(array_ptr->value.ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -3287,7 +3282,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_u_symtable_update(array_ptr->value.ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -3370,7 +3364,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 				zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_u_symtable_update(array_ptr->value.ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -3718,7 +3711,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 				zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_u_symtable_update(array_ptr->value.ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -3788,7 +3780,7 @@ static int ZEND_ECHO_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zend_error(E_ERROR, "Unsupported encoding [%d]", EX(op_array)->script_encoding);
 		}
 		zend_convert_encodings(ZEND_U_CONVERTER(UG(output_encoding_conv)), script_enc_conv, &z_conv.value.str.val, &z_conv.value.str.len, z->value.str.val, z->value.str.len, &status);
-		z_conv.type = IS_BINARY;
+		z_conv.type = IS_STRING;
 		if (U_SUCCESS(status)) {
 			zend_print_variable(&z_conv);
 		} else {
@@ -4290,9 +4282,6 @@ static int ZEND_CAST_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			}
 			break;
 		}
-		case IS_BINARY:
-			convert_to_binary(result);
-			break;
 		case IS_ARRAY:
 			convert_to_array(result);
 			break;
@@ -5177,7 +5166,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_u_symtable_update(array_ptr->value.ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -5614,7 +5602,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_u_symtable_update(array_ptr->value.ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -6051,7 +6038,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_u_symtable_update(array_ptr->value.ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -6134,7 +6120,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_AR
 				zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_u_symtable_update(array_ptr->value.ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -6568,7 +6553,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_u_symtable_update(array_ptr->value.ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -6800,7 +6784,7 @@ static int ZEND_ECHO_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zend_error(E_ERROR, "Unsupported encoding [%d]", EX(op_array)->script_encoding);
 		}
 		zend_convert_encodings(ZEND_U_CONVERTER(UG(output_encoding_conv)), script_enc_conv, &z_conv.value.str.val, &z_conv.value.str.len, z->value.str.val, z->value.str.len, &status);
-		z_conv.type = IS_BINARY;
+		z_conv.type = IS_STRING;
 		if (U_SUCCESS(status)) {
 			zend_print_variable(&z_conv);
 		} else {
@@ -7393,9 +7377,6 @@ static int ZEND_CAST_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			}
 			break;
 		}
-		case IS_BINARY:
-			convert_to_binary(result);
-			break;
 		case IS_ARRAY:
 			convert_to_array(result);
 			break;
@@ -7833,11 +7814,6 @@ static int ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				key->value.str.val = str_key;
 				key->value.str.len = str_key_len-1;
 				key->type = IS_STRING;
-				break;
-			case HASH_KEY_IS_BINARY:
-				key->value.str.val = str_key;
-				key->value.str.len = str_key_len-1;
-				key->type = IS_BINARY;
 				break;
 			case HASH_KEY_IS_UNICODE:
 				key->value.ustr.val = (UChar*)str_key;
@@ -9135,7 +9111,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_u_symtable_update(array_ptr->value.ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -9195,7 +9170,6 @@ static int ZEND_UNSET_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
-					case IS_BINARY:
 					case IS_UNICODE: {
 						void *offset_key = Z_UNIVAL_P(offset);
 						int  offset_len  = Z_UNILEN_P(offset);
@@ -9266,7 +9240,6 @@ static int ZEND_UNSET_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				}
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 				ZEND_VM_CONTINUE(); /* bailed out before */
@@ -9348,7 +9321,6 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CONST(int prop_dim, 
 					}
 					break;
 				case IS_STRING:
-				case IS_BINARY:
 				case IS_UNICODE: {
 					char *offset_key = Z_UNIVAL_P(offset);
 					int   offset_len = Z_UNILEN_P(offset);
@@ -9419,7 +9391,6 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CONST(int prop_dim, 
 
 			}
 		} else if (((*container)->type == IS_STRING ||
-		            (*container)->type == IS_BINARY ||
 		            (*container)->type == IS_UNICODE) && !prop_dim) { /* string offsets */
 			zval tmp;
 
@@ -10624,7 +10595,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_u_symtable_update(array_ptr->value.ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -10684,7 +10654,6 @@ static int ZEND_UNSET_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
-					case IS_BINARY:
 					case IS_UNICODE: {
 						void *offset_key = Z_UNIVAL_P(offset);
 						int  offset_len  = Z_UNILEN_P(offset);
@@ -10755,7 +10724,6 @@ static int ZEND_UNSET_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				}
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 				ZEND_VM_CONTINUE(); /* bailed out before */
@@ -10837,7 +10805,6 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_TMP(int prop_dim, ZE
 					}
 					break;
 				case IS_STRING:
-				case IS_BINARY:
 				case IS_UNICODE: {
 					char *offset_key = Z_UNIVAL_P(offset);
 					int   offset_len = Z_UNILEN_P(offset);
@@ -10908,7 +10875,6 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_TMP(int prop_dim, ZE
 				zval_dtor(free_op2.var);
 			}
 		} else if (((*container)->type == IS_STRING ||
-		            (*container)->type == IS_BINARY ||
 		            (*container)->type == IS_UNICODE) && !prop_dim) { /* string offsets */
 			zval tmp;
 
@@ -12151,7 +12117,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_u_symtable_update(array_ptr->value.ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -12211,7 +12176,6 @@ static int ZEND_UNSET_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
-					case IS_BINARY:
 					case IS_UNICODE: {
 						void *offset_key = Z_UNIVAL_P(offset);
 						int  offset_len  = Z_UNILEN_P(offset);
@@ -12282,7 +12246,6 @@ static int ZEND_UNSET_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				}
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 				ZEND_VM_CONTINUE(); /* bailed out before */
@@ -12364,7 +12327,6 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_VAR(int prop_dim, ZE
 					}
 					break;
 				case IS_STRING:
-				case IS_BINARY:
 				case IS_UNICODE: {
 					char *offset_key = Z_UNIVAL_P(offset);
 					int   offset_len = Z_UNILEN_P(offset);
@@ -12435,7 +12397,6 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_VAR(int prop_dim, ZE
 				if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
 			}
 		} else if (((*container)->type == IS_STRING ||
-		            (*container)->type == IS_BINARY ||
 		            (*container)->type == IS_UNICODE) && !prop_dim) { /* string offsets */
 			zval tmp;
 
@@ -12876,7 +12837,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_AR
 				zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_u_symtable_update(array_ptr->value.ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -14082,7 +14042,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_u_symtable_update(array_ptr->value.ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -14142,7 +14101,6 @@ static int ZEND_UNSET_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
-					case IS_BINARY:
 					case IS_UNICODE: {
 						void *offset_key = Z_UNIVAL_P(offset);
 						int  offset_len  = Z_UNILEN_P(offset);
@@ -14213,7 +14171,6 @@ static int ZEND_UNSET_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				}
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 				ZEND_VM_CONTINUE(); /* bailed out before */
@@ -14295,7 +14252,6 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CV(int prop_dim, ZEN
 					}
 					break;
 				case IS_STRING:
-				case IS_BINARY:
 				case IS_UNICODE: {
 					char *offset_key = Z_UNIVAL_P(offset);
 					int   offset_len = Z_UNILEN_P(offset);
@@ -14366,7 +14322,6 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CV(int prop_dim, ZEN
 
 			}
 		} else if (((*container)->type == IS_STRING ||
-		            (*container)->type == IS_BINARY ||
 		            (*container)->type == IS_UNICODE) && !prop_dim) { /* string offsets */
 			zval tmp;
 
@@ -15300,7 +15255,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 				zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_u_symtable_update(array_ptr->value.ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -15360,7 +15314,6 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
-					case IS_BINARY:
 					case IS_UNICODE: {
 						void *offset_key = Z_UNIVAL_P(offset);
 						int  offset_len  = Z_UNILEN_P(offset);
@@ -15431,7 +15384,6 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				}
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 				ZEND_VM_CONTINUE(); /* bailed out before */
@@ -15511,7 +15463,6 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CONST(int prop_di
 					}
 					break;
 				case IS_STRING:
-				case IS_BINARY:
 				case IS_UNICODE: {
 					char *offset_key = Z_UNIVAL_P(offset);
 					int   offset_len = Z_UNILEN_P(offset);
@@ -15582,7 +15533,6 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CONST(int prop_di
 
 			}
 		} else if (((*container)->type == IS_STRING ||
-		            (*container)->type == IS_BINARY ||
 		            (*container)->type == IS_UNICODE) && !prop_dim) { /* string offsets */
 			zval tmp;
 
@@ -16400,7 +16350,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 				zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_u_symtable_update(array_ptr->value.ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -16460,7 +16409,6 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
-					case IS_BINARY:
 					case IS_UNICODE: {
 						void *offset_key = Z_UNIVAL_P(offset);
 						int  offset_len  = Z_UNILEN_P(offset);
@@ -16531,7 +16479,6 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				}
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 				ZEND_VM_CONTINUE(); /* bailed out before */
@@ -16611,7 +16558,6 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_TMP(int prop_dim,
 					}
 					break;
 				case IS_STRING:
-				case IS_BINARY:
 				case IS_UNICODE: {
 					char *offset_key = Z_UNIVAL_P(offset);
 					int   offset_len = Z_UNILEN_P(offset);
@@ -16682,7 +16628,6 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_TMP(int prop_dim,
 				zval_dtor(free_op2.var);
 			}
 		} else if (((*container)->type == IS_STRING ||
-		            (*container)->type == IS_BINARY ||
 		            (*container)->type == IS_UNICODE) && !prop_dim) { /* string offsets */
 			zval tmp;
 
@@ -17500,7 +17445,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 				zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_u_symtable_update(array_ptr->value.ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -17560,7 +17504,6 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
-					case IS_BINARY:
 					case IS_UNICODE: {
 						void *offset_key = Z_UNIVAL_P(offset);
 						int  offset_len  = Z_UNILEN_P(offset);
@@ -17631,7 +17574,6 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				}
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 				ZEND_VM_CONTINUE(); /* bailed out before */
@@ -17711,7 +17653,6 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_VAR(int prop_dim,
 					}
 					break;
 				case IS_STRING:
-				case IS_BINARY:
 				case IS_UNICODE: {
 					char *offset_key = Z_UNIVAL_P(offset);
 					int   offset_len = Z_UNILEN_P(offset);
@@ -17782,7 +17723,6 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_VAR(int prop_dim,
 				if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
 			}
 		} else if (((*container)->type == IS_STRING ||
-		            (*container)->type == IS_BINARY ||
 		            (*container)->type == IS_UNICODE) && !prop_dim) { /* string offsets */
 			zval tmp;
 
@@ -18179,7 +18119,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 				zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_u_symtable_update(array_ptr->value.ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -18965,7 +18904,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_u_symtable_update(array_ptr->value.ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -19025,7 +18963,6 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
-					case IS_BINARY:
 					case IS_UNICODE: {
 						void *offset_key = Z_UNIVAL_P(offset);
 						int  offset_len  = Z_UNILEN_P(offset);
@@ -19096,7 +19033,6 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				}
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 				ZEND_VM_CONTINUE(); /* bailed out before */
@@ -19176,7 +19112,6 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CV(int prop_dim, 
 					}
 					break;
 				case IS_STRING:
-				case IS_BINARY:
 				case IS_UNICODE: {
 					char *offset_key = Z_UNIVAL_P(offset);
 					int   offset_len = Z_UNILEN_P(offset);
@@ -19247,7 +19182,6 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CV(int prop_dim, 
 
 			}
 		} else if (((*container)->type == IS_STRING ||
-		            (*container)->type == IS_BINARY ||
 		            (*container)->type == IS_UNICODE) && !prop_dim) { /* string offsets */
 			zval tmp;
 
@@ -19504,7 +19438,7 @@ static int ZEND_ECHO_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zend_error(E_ERROR, "Unsupported encoding [%d]", EX(op_array)->script_encoding);
 		}
 		zend_convert_encodings(ZEND_U_CONVERTER(UG(output_encoding_conv)), script_enc_conv, &z_conv.value.str.val, &z_conv.value.str.len, z->value.str.val, z->value.str.len, &status);
-		z_conv.type = IS_BINARY;
+		z_conv.type = IS_STRING;
 		if (U_SUCCESS(status)) {
 			zend_print_variable(&z_conv);
 		} else {
@@ -20083,9 +20017,6 @@ static int ZEND_CAST_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			}
 			break;
 		}
-		case IS_BINARY:
-			convert_to_binary(result);
-			break;
 		case IS_ARRAY:
 			convert_to_array(result);
 			break;
@@ -21667,7 +21598,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 				zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_u_symtable_update(array_ptr->value.ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -21727,7 +21657,6 @@ static int ZEND_UNSET_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
-					case IS_BINARY:
 					case IS_UNICODE: {
 						void *offset_key = Z_UNIVAL_P(offset);
 						int  offset_len  = Z_UNILEN_P(offset);
@@ -21798,7 +21727,6 @@ static int ZEND_UNSET_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				}
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 				ZEND_VM_CONTINUE(); /* bailed out before */
@@ -21878,7 +21806,6 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CONST(int prop_dim, Z
 					}
 					break;
 				case IS_STRING:
-				case IS_BINARY:
 				case IS_UNICODE: {
 					char *offset_key = Z_UNIVAL_P(offset);
 					int   offset_len = Z_UNILEN_P(offset);
@@ -21949,7 +21876,6 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CONST(int prop_dim, Z
 
 			}
 		} else if (((*container)->type == IS_STRING ||
-		            (*container)->type == IS_BINARY ||
 		            (*container)->type == IS_UNICODE) && !prop_dim) { /* string offsets */
 			zval tmp;
 
@@ -23148,7 +23074,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_u_symtable_update(array_ptr->value.ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -23208,7 +23133,6 @@ static int ZEND_UNSET_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
-					case IS_BINARY:
 					case IS_UNICODE: {
 						void *offset_key = Z_UNIVAL_P(offset);
 						int  offset_len  = Z_UNILEN_P(offset);
@@ -23279,7 +23203,6 @@ static int ZEND_UNSET_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				}
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 				ZEND_VM_CONTINUE(); /* bailed out before */
@@ -23359,7 +23282,6 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_TMP(int prop_dim, ZEN
 					}
 					break;
 				case IS_STRING:
-				case IS_BINARY:
 				case IS_UNICODE: {
 					char *offset_key = Z_UNIVAL_P(offset);
 					int   offset_len = Z_UNILEN_P(offset);
@@ -23430,7 +23352,6 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_TMP(int prop_dim, ZEN
 				zval_dtor(free_op2.var);
 			}
 		} else if (((*container)->type == IS_STRING ||
-		            (*container)->type == IS_BINARY ||
 		            (*container)->type == IS_UNICODE) && !prop_dim) { /* string offsets */
 			zval tmp;
 
@@ -24666,7 +24587,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_u_symtable_update(array_ptr->value.ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -24726,7 +24646,6 @@ static int ZEND_UNSET_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
-					case IS_BINARY:
 					case IS_UNICODE: {
 						void *offset_key = Z_UNIVAL_P(offset);
 						int  offset_len  = Z_UNILEN_P(offset);
@@ -24797,7 +24716,6 @@ static int ZEND_UNSET_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				}
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 				ZEND_VM_CONTINUE(); /* bailed out before */
@@ -24877,7 +24795,6 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_VAR(int prop_dim, ZEN
 					}
 					break;
 				case IS_STRING:
-				case IS_BINARY:
 				case IS_UNICODE: {
 					char *offset_key = Z_UNIVAL_P(offset);
 					int   offset_len = Z_UNILEN_P(offset);
@@ -24948,7 +24865,6 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_VAR(int prop_dim, ZEN
 				if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
 			}
 		} else if (((*container)->type == IS_STRING ||
-		            (*container)->type == IS_BINARY ||
 		            (*container)->type == IS_UNICODE) && !prop_dim) { /* string offsets */
 			zval tmp;
 
@@ -25386,7 +25302,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_u_symtable_update(array_ptr->value.ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -26587,7 +26502,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_u_symtable_update(array_ptr->value.ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -26647,7 +26561,6 @@ static int ZEND_UNSET_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
-					case IS_BINARY:
 					case IS_UNICODE: {
 						void *offset_key = Z_UNIVAL_P(offset);
 						int  offset_len  = Z_UNILEN_P(offset);
@@ -26718,7 +26631,6 @@ static int ZEND_UNSET_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				}
 				break;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 				ZEND_VM_CONTINUE(); /* bailed out before */
@@ -26798,7 +26710,6 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CV(int prop_dim, ZEND
 					}
 					break;
 				case IS_STRING:
-				case IS_BINARY:
 				case IS_UNICODE: {
 					char *offset_key = Z_UNIVAL_P(offset);
 					int   offset_len = Z_UNILEN_P(offset);
@@ -26869,7 +26780,6 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CV(int prop_dim, ZEND
 
 			}
 		} else if (((*container)->type == IS_STRING ||
-		            (*container)->type == IS_BINARY ||
 		            (*container)->type == IS_UNICODE) && !prop_dim) { /* string offsets */
 			zval tmp;
 

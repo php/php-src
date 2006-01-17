@@ -13,3 +13,9 @@ array(0) {
 array(0) {
 }
 string(3) "GPC"
+--UEXPECT--
+array(0) {
+}
+array(0) {
+}
+unicode(3) "GPC"

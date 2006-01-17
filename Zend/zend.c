@@ -263,9 +263,6 @@ static void print_hash(HashTable *ht, int indent, zend_bool is_object TSRMLS_DC)
 				goto str_type;
 			case HASH_KEY_IS_UNICODE:
 				ztype = IS_UNICODE;
-				goto str_type;
-			case HASH_KEY_IS_BINARY:
-				ztype = IS_BINARY;
 str_type:
 				if (is_object) {
 					char *prop_name, *class_name;
@@ -319,9 +316,6 @@ static void print_flat_hash(HashTable *ht TSRMLS_DC)
 		switch (zend_hash_get_current_key_ex(ht, &string_key, &str_len, &num_key, 0, &iterator)) {
 			case HASH_KEY_IS_STRING:
 				ZEND_PUTS(string_key);
-				break;
-			case HASH_KEY_IS_BINARY:
-				zend_printf("b\"%s\"", string_key);
 				break;
 			case HASH_KEY_IS_UNICODE:
 				zend_printf("%r", string_key);
@@ -377,7 +371,7 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 	UErrorCode temp = U_ZERO_ERROR;
 	TSRMLS_FETCH();
 
-	if (expr->type == IS_BINARY ||
+	if (
 	  /* UTODO: clean this up */
 	    (expr->type == IS_STRING && 
 	    (!strcmp(ucnv_getName(ZEND_U_CONVERTER(UG(output_encoding_conv)), &temp),
@@ -465,6 +459,10 @@ ZEND_API void zend_make_unicode_zval(zval *expr, zval *expr_copy, int *use_copy)
 			}
 			zend_error(EG(exception) ? E_ERROR : E_RECOVERABLE_ERROR, "Object of class %v could not be converted to string", Z_OBJCE_P(expr)->name);
 			ZVAL_EMPTY_UNICODE(expr_copy);
+			break;
+		case IS_ARRAY:
+			expr_copy->value.ustr.len = sizeof("Array")-1;
+			expr_copy->value.ustr.val = zend_ascii_to_unicode("Array", sizeof("Array") ZEND_FILE_LINE_CC);
 			break;
 		default:
 			*expr_copy = *expr;
@@ -650,9 +648,7 @@ static void zend_set_default_compile_time_values(TSRMLS_D)
 
 static void zval_copy_persistent(zval *zv)
 {
-	if (Z_TYPE_P(zv) == IS_BINARY) {
-		Z_BINVAL_P(zv) = zend_strndup(Z_BINVAL_P(zv), Z_BINLEN_P(zv));
-	} else if (Z_TYPE_P(zv) == IS_UNICODE) {
+	if (Z_TYPE_P(zv) == IS_UNICODE) {
 		Z_USTRVAL_P(zv) = zend_ustrndup(Z_USTRVAL_P(zv), Z_USTRLEN_P(zv));
 	} else if (Z_TYPE_P(zv) == IS_STRING || Z_TYPE_P(zv) == IS_CONSTANT) {
 		UChar *ustr;
@@ -1684,18 +1680,23 @@ ZEND_API void zend_error(int type, const char *format, ...)
 #endif
 			va_copy(usr_copy, args);
 			z_error_message->value.str.len = zend_vspprintf(&z_error_message->value.str.val, 0, format, usr_copy);
+			z_error_message->type = IS_STRING;
+			if (UG(unicode)) {
+				char *str = z_error_message->value.str.val;
+				int len  = z_error_message->value.str.len;
+
+				ZVAL_RT_STRINGL(z_error_message, str, len, 1);
+				efree(str);
+			}
 #ifdef va_copy
 			va_end(usr_copy);
 #endif
-			z_error_message->type = IS_STRING;
 
 			z_error_type->value.lval = type;
 			z_error_type->type = IS_LONG;
 
 			if (error_filename) {
-				z_error_filename->value.str.len = strlen(error_filename);
-				z_error_filename->value.str.val = estrndup(error_filename, z_error_filename->value.str.len);
-				z_error_filename->type = IS_STRING;
+				ZVAL_RT_STRING(z_error_filename, error_filename, 1);
 			}
 
 			z_error_lineno->value.lval = error_lineno;

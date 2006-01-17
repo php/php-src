@@ -21,3 +21,6 @@ var_dump((string)$sxe);
 --EXPECT--
 string(6) "barbar"
 ===DONE===
+--UEXPECT--
+unicode(6) "barbar"
+===DONE===

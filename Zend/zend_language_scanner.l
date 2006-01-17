@@ -1270,7 +1270,7 @@ int zend_scan_binary_double_string(zval *zendlval TSRMLS_DC)
 
 	zendlval->value.str.val = estrndup(yytext+1, yyleng-2);
 	zendlval->value.str.len = yyleng-2;
-	zendlval->type = UG(unicode) ? IS_BINARY : IS_STRING;
+	zendlval->type = IS_STRING;
 	HANDLE_NEWLINES(yytext, yyleng);
 
 	/* convert escape sequences */
@@ -1352,7 +1352,7 @@ int zend_scan_binary_single_string(zval *zendlval TSRMLS_DC)
 
 	zendlval->value.str.val = estrndup(yytext+1, yyleng-2);
 	zendlval->value.str.len = yyleng-2;
-	zendlval->type = UG(unicode) ? IS_BINARY : IS_STRING;
+	zendlval->type = IS_STRING;
 	HANDLE_NEWLINES(yytext, yyleng);
 
 	/* convert escape sequences */
@@ -1595,10 +1595,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"unicode"{TABS_AND_SPACES}")" {
 	return T_UNICODE_CAST;
-}
-
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"binary"{TABS_AND_SPACES}")" {
-	return T_BINARY_CAST;
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"array"{TABS_AND_SPACES}")" {
@@ -1988,16 +1984,14 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	if (!filename) {
 		filename = "";
 	}
-	zendlval->value.str.len = strlen(filename);
-	zendlval->value.str.val = estrndup(filename, zendlval->value.str.len);
-	zendlval->type = IS_STRING;
+	ZVAL_RT_STRING(zendlval, filename, 1);
 	return T_FILE;
 }
 
 <INITIAL>(([^<]|"<"[^?%s<]){1,400})|"<s"|"<" {
 	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
-	zendlval->type = IS_BINARY;
+	zendlval->type = IS_STRING;
 	HANDLE_NEWLINES(yytext, yyleng);
 	return T_INLINE_HTML;
 }
@@ -2013,7 +2007,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	} else {
 		zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
 		zendlval->value.str.len = yyleng;
-		zendlval->type = IS_BINARY;
+		zendlval->type = IS_STRING;
 		return T_INLINE_HTML;
 	}
 }
@@ -2029,7 +2023,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	} else {
 		zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
 		zendlval->value.str.len = yyleng;
-		zendlval->type = IS_BINARY;
+		zendlval->type = IS_STRING;
 		return T_INLINE_HTML;
 	}
 }
@@ -2045,7 +2039,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	} else {
 		zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
 		zendlval->value.str.len = yyleng;
-		zendlval->type = IS_BINARY;
+		zendlval->type = IS_STRING;
 		return T_INLINE_HTML;
 	}
 }

@@ -71,7 +71,7 @@
 %left '*' '/' '%'
 %right '!'
 %nonassoc T_INSTANCEOF
-%right '~' T_INC T_DEC T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_UNICODE_CAST T_BINARY_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST '@'
+%right '~' T_INC T_DEC T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_UNICODE_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST '@'
 %right '['
 %nonassoc T_NEW T_CLONE
 %token T_EXIT
@@ -611,9 +611,8 @@ expr_without_variable:
 	|	internal_functions_in_yacc { $$ = $1; }
 	|	T_INT_CAST expr 	{ zend_do_cast(&$$, &$2, IS_LONG TSRMLS_CC); }
 	|	T_DOUBLE_CAST expr 	{ zend_do_cast(&$$, &$2, IS_DOUBLE TSRMLS_CC); }
-	|	T_STRING_CAST expr	{ zend_do_cast(&$$, &$2, IS_STRING TSRMLS_CC); } 
+	|	T_STRING_CAST expr	{ zend_do_cast(&$$, &$2, UG(unicode)?IS_UNICODE:IS_STRING TSRMLS_CC); } 
 	|	T_UNICODE_CAST expr	{ zend_do_cast(&$$, &$2, IS_UNICODE TSRMLS_CC); } 
-	|	T_BINARY_CAST expr	{ zend_do_cast(&$$, &$2, UG(unicode)?IS_BINARY:IS_STRING TSRMLS_CC); } 
 	|	T_ARRAY_CAST expr 	{ zend_do_cast(&$$, &$2, IS_ARRAY TSRMLS_CC); }
 	|	T_OBJECT_CAST expr 	{ zend_do_cast(&$$, &$2, IS_OBJECT TSRMLS_CC); }
 	|	T_BOOL_CAST expr	{ zend_do_cast(&$$, &$2, IS_BOOL TSRMLS_CC); }
@@ -714,8 +713,8 @@ scalar:
 	|	common_scalar			{ $$ = $1; }
 	|	'"' { CG(literal_type) = UG(unicode)?IS_UNICODE:IS_STRING; } encaps_list '"' { $$ = $3; }
 	|	T_START_HEREDOC { CG(literal_type) = UG(unicode)?IS_UNICODE:IS_STRING; } encaps_list T_END_HEREDOC { $$ = $3; zend_do_end_heredoc(TSRMLS_C); }
-	|	T_BINARY_DOUBLE { CG(literal_type) = UG(unicode)?IS_BINARY:IS_STRING; } encaps_list '"' { $$ = $3; }
-	|	T_BINARY_HEREDOC { CG(literal_type) = UG(unicode)?IS_BINARY:IS_STRING; } encaps_list T_END_HEREDOC { $$ = $3; zend_do_end_heredoc(TSRMLS_C); }
+	|	T_BINARY_DOUBLE { CG(literal_type) = IS_STRING; } encaps_list '"' { $$ = $3; }
+	|	T_BINARY_HEREDOC { CG(literal_type) = IS_STRING; } encaps_list T_END_HEREDOC { $$ = $3; zend_do_end_heredoc(TSRMLS_C); }
 ;
 
 

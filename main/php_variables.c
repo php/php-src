@@ -679,9 +679,7 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 		int i;
 		for (i = 0; i < SG(request_info).argc; i++) {
 			ALLOC_ZVAL(tmp);
-			Z_TYPE_P(tmp) = IS_STRING;
-			Z_STRLEN_P(tmp) = strlen(SG(request_info).argv[i]);
-			Z_STRVAL_P(tmp) = estrndup(SG(request_info).argv[i], Z_STRLEN_P(tmp));
+			ZVAL_RT_STRING(tmp, SG(request_info).argv[i], 1);
 			INIT_PZVAL(tmp);
 			if (zend_hash_next_index_insert(Z_ARRVAL_P(arr), &tmp, sizeof(zval *), NULL) == FAILURE) {
 				if (Z_TYPE_P(tmp) == IS_STRING) {

@@ -226,7 +226,7 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 		zval *z_status;
 
 		ALLOC_INIT_ZVAL(orig_buffer);
-		ZVAL_STRINGL(orig_buffer, OG(active_ob_buffer).buffer, OG(active_ob_buffer).text_length, 1);
+		ZVAL_U_STRINGL(ZEND_U_CONVERTER(UG(output_encoding_conv)), orig_buffer, OG(active_ob_buffer).buffer, OG(active_ob_buffer).text_length, 1);
 		orig_buffer->refcount=2;	/* don't let call_user_function() destroy our buffer */
 		orig_buffer->is_ref=1;
 
@@ -704,7 +704,7 @@ PHPAPI int php_ob_get_buffer(zval *p TSRMLS_DC)
 	if (OG(ob_nesting_level)==0) {
 		return FAILURE;
 	}
-	ZVAL_STRINGL(p, OG(active_ob_buffer).buffer, OG(active_ob_buffer).text_length, 1);
+	ZVAL_U_STRINGL(ZEND_U_CONVERTER(UG(output_encoding_conv)), p, OG(active_ob_buffer).buffer, OG(active_ob_buffer).text_length, 1);
 	return SUCCESS;
 }
 /* }}} */

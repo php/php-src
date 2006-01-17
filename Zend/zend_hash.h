@@ -25,11 +25,10 @@
 #include <sys/types.h>
 #include "zend.h"
 
-#define HASH_KEY_IS_STRING 1
-#define HASH_KEY_IS_LONG 2
-#define HASH_KEY_NON_EXISTANT 3
-#define HASH_KEY_IS_BINARY 4
-#define HASH_KEY_IS_UNICODE 5
+#define HASH_KEY_NON_EXISTANT	IS_NULL
+#define HASH_KEY_IS_LONG		IS_LONG
+#define HASH_KEY_IS_STRING		IS_STRING
+#define HASH_KEY_IS_UNICODE		IS_UNICODE
 
 #define HASH_UPDATE 		(1<<0)
 #define HASH_ADD			(1<<1)

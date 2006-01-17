@@ -178,7 +178,7 @@ static inline zval *_get_zval_ptr_var(znode *node, temp_variable *Ts, zend_free_
 		should_free->var = ptr;
 
 		/* T->str_offset.str here is always IS_STRING or IS_UNICODE */
-		if (T->str_offset.str->type == IS_STRING || T->str_offset.str->type == IS_BINARY) {
+		if (T->str_offset.str->type == IS_STRING) {
 			if (((int)T->str_offset.offset<0)
 				|| (T->str_offset.str->value.str.len <= T->str_offset.offset)) {
 				zend_error(E_NOTICE, "Uninitialized string offset:  %d", T->str_offset.offset);
@@ -458,7 +458,7 @@ static inline void make_real_object(zval **object_ptr TSRMLS_DC)
 /* this should modify object only if it's empty */
 	if ((*object_ptr)->type == IS_NULL
 		|| ((*object_ptr)->type == IS_BOOL && (*object_ptr)->value.lval==0)
-		|| (((*object_ptr)->type == IS_STRING || (*object_ptr)->type == IS_BINARY) && (*object_ptr)->value.str.len == 0)
+		|| ((*object_ptr)->type == IS_STRING && (*object_ptr)->value.str.len == 0)
 		|| ((*object_ptr)->type == IS_UNICODE && (*object_ptr)->value.ustr.len == 0)) {
 		if (!PZVAL_IS_REF(*object_ptr)) {
 			SEPARATE_ZVAL(object_ptr);
@@ -668,8 +668,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 			convert_to_unicode(T->str_offset.str);
 		}
 
-		if (Z_TYPE_P(T->str_offset.str) == IS_STRING ||
-			Z_TYPE_P(T->str_offset.str) == IS_BINARY)
+		if (Z_TYPE_P(T->str_offset.str) == IS_STRING)
 		do {
 			zval tmp;
 			zval *final_value = value;
@@ -694,7 +693,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 				T->str_offset.str->value.str.len = T->str_offset.offset+1;
 			}
 
-			if (value->type!=IS_STRING && value->type!=IS_BINARY) {
+			if (value->type!=IS_STRING) {
 				tmp = *value;
 				if (op2->op_type & (IS_VAR|IS_CV|IS_CONST)) {
 					zval_copy_ctor(&tmp);
@@ -1031,7 +1030,6 @@ static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, zval *dim
 			offset_key_length = 1;
 			goto fetch_string_dim;
 		case IS_STRING:
-		case IS_BINARY:
 		case IS_UNICODE:
 			
 			offset_key = Z_UNIVAL_P(dim);
@@ -1152,7 +1150,7 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 
 	if (container->type==IS_NULL
 		|| (container->type==IS_BOOL && container->value.lval==0)
-		|| ((container->type==IS_STRING || container->type==IS_BINARY) && container->value.str.len==0)
+		|| (container->type==IS_STRING && container->value.str.len==0)
 		|| (container->type==IS_UNICODE && container->value.ustr.len==0)) {
 		switch (type) {
 			case BP_VAR_RW:
@@ -1204,7 +1202,6 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 			break;
 		}
 		case IS_UNICODE:
-		case IS_BINARY:
 		case IS_STRING: {
 				zval tmp;
 
@@ -1327,7 +1324,7 @@ static void zend_fetch_property_address(temp_variable *result, zval **container_
 	/* this should modify object only if it's empty */
 	if (container->type == IS_NULL
 		|| (container->type == IS_BOOL && container->value.lval==0)
-		|| ((container->type==IS_STRING || container->type==IS_BINARY) && container->value.str.len==0)
+		|| (container->type==IS_STRING && container->value.str.len==0)
 		|| (container->type==IS_UNICODE && container->value.ustr.len==0)) {
 		switch (type) {
 			case BP_VAR_RW:

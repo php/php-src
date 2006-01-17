@@ -3378,7 +3378,6 @@ void zend_do_add_static_array_element(znode *result, znode *offset, znode *expr)
 				/* break missing intentionally */
 				utype = UG(unicode)?IS_UNICODE:IS_STRING;
 			case IS_STRING:
-			case IS_BINARY:
 			case IS_UNICODE:
 				zend_u_symtable_update(result->u.constant.value.ht, utype, Z_UNIVAL(offset->u.constant), Z_UNILEN(offset->u.constant)+1, &element, sizeof(zval *), NULL);
 				zval_dtor(&offset->u.constant);

@@ -45,6 +45,7 @@ void zend_set_converter_error_mode(UConverter *conv, uint8_t error_mode);
 ZEND_API void zend_convert_to_unicode(UConverter *conv, UChar **target, int32_t *target_len, const char *source, int32_t source_len, UErrorCode *status);
 ZEND_API void zend_convert_from_unicode(UConverter *conv, char **target, int32_t *target_len, const UChar *source, int32_t source_len, UErrorCode *status);
 ZEND_API void zend_convert_encodings(UConverter *target_conv, UConverter *source_conv, char **target, int32_t *target_len, const char *source, int32_t source_len, UErrorCode *status);
+ZEND_API int zval_string_to_unicode_ex(zval *string, UConverter *conv);
 ZEND_API int zval_string_to_unicode(zval *string TSRMLS_DC);
 ZEND_API int zval_unicode_to_string(zval *string, UConverter *conv TSRMLS_DC);
 

@@ -143,7 +143,6 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 		}
 
 		if (token.type == IS_STRING ||
-		    token.type == IS_BINARY ||
 		    token.type == IS_UNICODE) {
 			switch (token_type) {
 				case T_OPEN_TAG:
@@ -213,7 +212,6 @@ ZEND_API void zend_strip(TSRMLS_D)
 		}
 
 		if (token.type == IS_STRING ||
-		    token.type == IS_BINARY || 
 		    token.type == IS_UNICODE) {
 			switch (token_type) {
 				case T_OPEN_TAG:

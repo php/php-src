@@ -1708,7 +1708,7 @@ PHP_FUNCTION(dom_document_savexml)
 		if (!size) {
 			RETURN_FALSE;
 		}
-		RETVAL_STRINGL(mem, size, 1);
+		RETVAL_RT_STRINGL(mem, size, 1);
 		xmlFree(mem);
 	}
 }

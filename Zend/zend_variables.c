@@ -36,7 +36,6 @@ ZEND_API void _zval_dtor_func(zval *zvalue ZEND_FILE_LINE_DC)
 			if (UG(unicode)) goto dtor_unicode;
 		}
 		case IS_STRING:
-		case IS_BINARY:
 			CHECK_ZVAL_STRING_REL(zvalue);
 			STR_FREE_REL(zvalue->value.str.val);
 			break;
@@ -90,7 +89,6 @@ ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 			if (UG(unicode)) goto dtor_unicode;
 		}
 		case IS_STRING:
-		case IS_BINARY:
 			CHECK_ZVAL_STRING_REL(zvalue);
 			free(zvalue->value.str.val);
 			break;
@@ -140,7 +138,6 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 			if (UG(unicode)) goto copy_unicode;
 		}
 		case IS_STRING:
-		case IS_BINARY:
 			CHECK_ZVAL_STRING_REL(zvalue);
 			zvalue->value.str.val = (char *) estrndup_rel(zvalue->value.str.val, zvalue->value.str.len);
 			break;

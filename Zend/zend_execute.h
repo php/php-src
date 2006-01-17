@@ -89,7 +89,6 @@ static inline int i_zend_is_true(zval *op)
 			result = (op->value.dval ? 1 : 0);
 			break;
 		case IS_STRING:
-		case IS_BINARY:
 			if (op->value.str.len == 0
 				|| (op->value.str.len==1 && op->value.str.val[0]=='0')) {
 				result = 0;

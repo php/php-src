@@ -244,9 +244,6 @@ ZEND_API char *zend_zval_type_name(zval *arg)
 		case IS_UNICODE:
 			return "Unicode string";
 
-		case IS_BINARY:
-			return "binary data";
-
 		default:
 			return "unknown";
 	}
@@ -280,11 +277,6 @@ ZEND_API int zend_get_object_classname(zval *object, char **class_name, zend_uin
 	*(char**)p = Z_STRVAL_PP(arg); \
 	*pl = Z_STRLEN_PP(arg); \
 	*type = IS_STRING; 
-
-#define RETURN_AS_BINARY(arg, p, pl, type) \
-	*(char**)p = Z_BINVAL_PP(arg); \
-	*pl = Z_BINLEN_PP(arg); \
-	*type = IS_BINARY; 
 
 #define RETURN_AS_UNICODE(arg, p, pl, type) \
 	*(UChar**)p = Z_USTRVAL_PP(arg); \
@@ -424,11 +416,6 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 						*pl = Z_STRLEN_PP(arg);
 						break;
 
-					case IS_BINARY:
-						*p = Z_BINVAL_PP(arg);
-						*pl = Z_BINLEN_PP(arg);
-						break;
-
 					case IS_OBJECT: {
 						if (Z_OBJ_HANDLER_PP(arg, cast_object)) {
 							SEPARATE_ZVAL_IF_NOT_REF(arg);
@@ -446,55 +433,6 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 					case IS_RESOURCE:
 					default:
 						return "native string";
-				}
-			}
-			break;
-
-		case 'y':
-			{
-				char **p = va_arg(*va, char **);
-				int *pl = va_arg(*va, int *);
-				switch (Z_TYPE_PP(arg)) {
-					case IS_NULL:
-						if (return_null) {
-							*p = NULL;
-							*pl = 0;
-							break;
-						}
-						/* break omitted intentionally */
-
-					case IS_STRING:
-					case IS_LONG:
-					case IS_DOUBLE:
-					case IS_BOOL:
-					case IS_UNICODE:
-						convert_to_binary_ex(arg);
-						*p = Z_BINVAL_PP(arg);
-						*pl = Z_BINLEN_PP(arg);
-						break;
-
-					case IS_BINARY:
-						*p = Z_BINVAL_PP(arg);
-						*pl = Z_BINLEN_PP(arg);
-						break;
-
-					case IS_OBJECT: {
-						if (Z_OBJ_HANDLER_PP(arg, cast_object)) {
-							SEPARATE_ZVAL_IF_NOT_REF(arg);
-							if (Z_OBJ_HANDLER_PP(arg, cast_object)(*arg, *arg, IS_BINARY TSRMLS_CC) == SUCCESS) {
-								*pl = Z_BINLEN_PP(arg);
-								*p = Z_BINVAL_PP(arg);
-								break;
-							} else {
-								return "binary data";
-							}
-						}
-					}
-						
-					case IS_ARRAY:
-					case IS_RESOURCE:
-					default:
-						return "binary data";
 				}
 			}
 			break;
@@ -564,7 +502,6 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 					case IS_BOOL:
 					case IS_STRING:
 					case IS_UNICODE:
-					case IS_BINARY:
 						if (T_arg_type == IS_UNICODE) {
 							convert_to_unicode_ex(arg);
 							RETURN_AS_UNICODE(arg, p, pl, type);
@@ -578,9 +515,6 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 								zend_error(E_WARNING, "%v%s%v() does not allow mixing binary and Unicode parameters",
 										   class_name, space, get_active_function_name(TSRMLS_C));
 								return "";
-							} else {
-								convert_to_binary_ex(arg);
-								RETURN_AS_BINARY(arg, p, pl, type);
 							}
 						}
 						break;
@@ -637,10 +571,6 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 
 					case IS_STRING:
 						RETURN_AS_STRING(arg, p, pl, type);
-						break;
-
-					case IS_BINARY:
-						RETURN_AS_BINARY(arg, p, pl, type);
 						break;
 
 					case IS_UNICODE:
@@ -926,10 +856,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 			switch (*spec_walk) {
 				case 'T':
 					arg = (zval **) p - (arg_count-i);
-					if (Z_TYPE_PP(arg) == IS_BINARY) {
-						/* we can always convert to binary */
-						T_arg_type = IS_BINARY;
-					} else if (Z_TYPE_PP(arg) == IS_UNICODE && (T_arg_type == -1 || T_arg_type == IS_STRING)) {
+					if (Z_TYPE_PP(arg) == IS_UNICODE && (T_arg_type == -1 || T_arg_type == IS_STRING)) {
 						/* we can upgrade from strings to Unicode */
 						T_arg_type = IS_UNICODE;
 					} else if (Z_TYPE_PP(arg) == IS_STRING && T_arg_type == -1) {
@@ -1082,8 +1009,6 @@ static int zend_merge_property(zval **value, int num_args, va_list args, zend_ha
 		MAKE_STD_ZVAL(member);
 		if (hash_key->type == IS_STRING) {
 			ZVAL_STRINGL(member, hash_key->u.string, hash_key->nKeyLength-1, 1);
-		} else if (hash_key->type == IS_BINARY) {
-			ZVAL_BINARYL(member, hash_key->u.string, hash_key->nKeyLength-1, 1);
 		} else if (hash_key->type == IS_UNICODE) {
 			ZVAL_UNICODEL(member, hash_key->u.unicode, hash_key->nKeyLength-1, 1);
 		}
@@ -1147,9 +1072,6 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC
 				switch (zend_hash_get_current_key_ex(&class_type->default_static_members, &str_index, &str_length, &num_index, 0, &pos)) {
 					case HASH_KEY_IS_UNICODE:
 						utype = IS_UNICODE;
-						break;
-					case HASH_KEY_IS_BINARY:
-						utype = IS_BINARY;
 						break;
 					case HASH_KEY_IS_STRING:
 					default:
@@ -1414,28 +1336,6 @@ ZEND_API int add_index_stringl(zval *arg, ulong index, char *str, uint length, i
 }
 
 
-ZEND_API int add_index_binary(zval *arg, ulong index, char *str, int duplicate TSRMLS_DC)
-{
-	zval *tmp;
-	
-	MAKE_STD_ZVAL(tmp);
-	ZVAL_BINARY(tmp, str, duplicate);
-
-	return zend_hash_index_update(Z_ARRVAL_P(arg), index, (void *) &tmp, sizeof(zval *), NULL);
-}
-
-
-ZEND_API int add_index_binaryl(zval *arg, ulong index, char *str, uint length, int duplicate TSRMLS_DC)
-{
-	zval *tmp;
-	
-	MAKE_STD_ZVAL(tmp);
-	ZVAL_BINARYL(tmp, str, length, duplicate);
-	
-	return zend_hash_index_update(Z_ARRVAL_P(arg), index, (void *) &tmp, sizeof(zval *), NULL);
-}
-
-
 ZEND_API int add_index_unicode(zval *arg, ulong index, UChar *str, int duplicate)
 {
 	zval *tmp;
@@ -1541,29 +1441,6 @@ ZEND_API int add_next_index_stringl(zval *arg, char *str, uint length, int dupli
 }
 
 
-ZEND_API int add_next_index_binary(zval *arg, char *str, int duplicate)
-{
-	zval *tmp;
-	TSRMLS_FETCH();
-
-	MAKE_STD_ZVAL(tmp);
-	ZVAL_BINARY(tmp, str, duplicate);
-
-	return zend_hash_next_index_insert(Z_ARRVAL_P(arg), &tmp, sizeof(zval *), NULL);
-}
-
-
-ZEND_API int add_next_index_binaryl(zval *arg, char *str, uint length, int duplicate)
-{
-	zval *tmp;
-	TSRMLS_FETCH();
-
-	MAKE_STD_ZVAL(tmp);
-	ZVAL_BINARYL(tmp, str, length, duplicate);
-
-	return zend_hash_next_index_insert(Z_ARRVAL_P(arg), &tmp, sizeof(zval *), NULL);
-}
-
 ZEND_API int add_next_index_unicode(zval *arg, UChar *str, int duplicate)
 {
 	zval *tmp;
@@ -1657,30 +1534,6 @@ ZEND_API int add_get_index_stringl(zval *arg, ulong index, char *str, uint lengt
 	return zend_hash_index_update(Z_ARRVAL_P(arg), index, (void *) &tmp, sizeof(zval *), dest);
 }
 
-ZEND_API int add_get_index_binary(zval *arg, ulong index, char *str, void **dest, int duplicate)
-{
-	zval *tmp;
-	TSRMLS_FETCH();
-	
-	MAKE_STD_ZVAL(tmp);
-	ZVAL_BINARY(tmp, str, duplicate);
-	
-	return zend_hash_index_update(Z_ARRVAL_P(arg), index, (void *) &tmp, sizeof(zval *), dest);
-}
-
-
-ZEND_API int add_get_index_binaryl(zval *arg, ulong index, char *str, uint length, void **dest, int duplicate)
-{
-	zval *tmp;
-	TSRMLS_FETCH();
-	
-	MAKE_STD_ZVAL(tmp);
-	ZVAL_BINARYL(tmp, str, length, duplicate);
-	
-	return zend_hash_index_update(Z_ARRVAL_P(arg), index, (void *) &tmp, sizeof(zval *), dest);
-}
-
-
 ZEND_API int add_get_index_unicode(zval *arg, ulong index, UChar *str, void **dest, int duplicate)
 {
 	zval *tmp;
@@ -1711,7 +1564,7 @@ ZEND_API int add_property_long_ex(zval *arg, char *key, uint key_len, long n TSR
 	ZVAL_LONG(tmp, n);
 	
 	MAKE_STD_ZVAL(z_key);
-	ZVAL_STRINGL(z_key, key, key_len-1, 1);
+	ZVAL_ASCII_STRINGL(z_key, key, key_len-1, 1);
 
 	Z_OBJ_HANDLER_P(arg, write_property)(arg, z_key, tmp TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
@@ -1728,7 +1581,7 @@ ZEND_API int add_property_bool_ex(zval *arg, char *key, uint key_len, int b TSRM
 	ZVAL_BOOL(tmp, b);
 
 	MAKE_STD_ZVAL(z_key);
-	ZVAL_STRINGL(z_key, key, key_len-1, 1);
+	ZVAL_ASCII_STRINGL(z_key, key, key_len-1, 1);
 
 	Z_OBJ_HANDLER_P(arg, write_property)(arg, z_key, tmp TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
@@ -1745,7 +1598,7 @@ ZEND_API int add_property_null_ex(zval *arg, char *key, uint key_len TSRMLS_DC)
 	ZVAL_NULL(tmp);
 	
 	MAKE_STD_ZVAL(z_key);
-	ZVAL_STRINGL(z_key, key, key_len-1, 1);
+	ZVAL_ASCII_STRINGL(z_key, key, key_len-1, 1);
 
 	Z_OBJ_HANDLER_P(arg, write_property)(arg, z_key, tmp TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
@@ -1762,7 +1615,7 @@ ZEND_API int add_property_resource_ex(zval *arg, char *key, uint key_len, long n
 	ZVAL_RESOURCE(tmp, n);
 
 	MAKE_STD_ZVAL(z_key);
-	ZVAL_STRINGL(z_key, key, key_len-1, 1);
+	ZVAL_ASCII_STRINGL(z_key, key, key_len-1, 1);
 
 	Z_OBJ_HANDLER_P(arg, write_property)(arg, z_key, tmp TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
@@ -1780,7 +1633,7 @@ ZEND_API int add_property_double_ex(zval *arg, char *key, uint key_len, double d
 	ZVAL_DOUBLE(tmp, d);
 	
 	MAKE_STD_ZVAL(z_key);
-	ZVAL_STRINGL(z_key, key, key_len-1, 1);
+	ZVAL_ASCII_STRINGL(z_key, key, key_len-1, 1);
 
 	Z_OBJ_HANDLER_P(arg, write_property)(arg, z_key, tmp TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
@@ -1798,7 +1651,7 @@ ZEND_API int add_property_string_ex(zval *arg, char *key, uint key_len, char *st
 	ZVAL_STRING(tmp, str, duplicate);
 
 	MAKE_STD_ZVAL(z_key);
-	ZVAL_STRINGL(z_key, key, key_len-1, 1);
+	ZVAL_ASCII_STRINGL(z_key, key, key_len-1, 1);
 
 	Z_OBJ_HANDLER_P(arg, write_property)(arg, z_key, tmp TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
@@ -1815,7 +1668,7 @@ ZEND_API int add_property_stringl_ex(zval *arg, char *key, uint key_len, char *s
 	ZVAL_STRINGL(tmp, str, length, duplicate);
 
 	MAKE_STD_ZVAL(z_key);
-	ZVAL_STRINGL(z_key, key, key_len-1, 1);
+	ZVAL_ASCII_STRINGL(z_key, key, key_len-1, 1);
 
 	Z_OBJ_HANDLER_P(arg, write_property)(arg, z_key, tmp TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
@@ -1832,7 +1685,7 @@ ZEND_API int add_property_ascii_string_ex(zval *arg, char *key, uint key_len, ch
 	ZVAL_ASCII_STRING(tmp, str, duplicate);
 
 	MAKE_STD_ZVAL(z_key);
-	ZVAL_STRINGL(z_key, key, key_len-1, 1);
+	ZVAL_ASCII_STRINGL(z_key, key, key_len-1, 1);
 
 	Z_OBJ_HANDLER_P(arg, write_property)(arg, z_key, tmp TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
@@ -1849,7 +1702,7 @@ ZEND_API int add_property_ascii_stringl_ex(zval *arg, char *key, uint key_len, c
 	ZVAL_ASCII_STRINGL(tmp, str, length, duplicate);
 
 	MAKE_STD_ZVAL(z_key);
-	ZVAL_STRINGL(z_key, key, key_len-1, 1);
+	ZVAL_ASCII_STRINGL(z_key, key, key_len-1, 1);
 
 	Z_OBJ_HANDLER_P(arg, write_property)(arg, z_key, tmp TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
@@ -1866,7 +1719,7 @@ ZEND_API int add_property_rt_string_ex(zval *arg, char *key, uint key_len, char 
 	ZVAL_RT_STRING(tmp, str, duplicate);
 
 	MAKE_STD_ZVAL(z_key);
-	ZVAL_STRINGL(z_key, key, key_len-1, 1);
+	ZVAL_ASCII_STRINGL(z_key, key, key_len-1, 1);
 
 	Z_OBJ_HANDLER_P(arg, write_property)(arg, z_key, tmp TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
@@ -1883,7 +1736,41 @@ ZEND_API int add_property_rt_stringl_ex(zval *arg, char *key, uint key_len, char
 	ZVAL_RT_STRINGL(tmp, str, length, duplicate);
 
 	MAKE_STD_ZVAL(z_key);
-	ZVAL_STRINGL(z_key, key, key_len-1, 1);
+	ZVAL_ASCII_STRINGL(z_key, key, key_len-1, 1);
+
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, z_key, tmp TSRMLS_CC);
+	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
+	zval_ptr_dtor(&z_key);
+	return SUCCESS;
+}
+
+ZEND_API int add_property_unicode_ex(zval *arg, char *key, uint key_len, UChar *str, int duplicate TSRMLS_DC)
+{
+	zval *tmp;
+	zval *z_key;
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_UNICODE(tmp, str, duplicate);
+
+	MAKE_STD_ZVAL(z_key);
+	ZVAL_ASCII_STRINGL(z_key, key, key_len-1, 1);
+
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, z_key, tmp TSRMLS_CC);
+	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
+	zval_ptr_dtor(&z_key);
+	return SUCCESS;
+}
+
+ZEND_API int add_property_unicodel_ex(zval *arg, char *key, uint key_len, UChar *str, uint length, int duplicate TSRMLS_DC)
+{
+	zval *tmp;
+	zval *z_key;
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_UNICODEL(tmp, str, length, duplicate);
+
+	MAKE_STD_ZVAL(z_key);
+	ZVAL_ASCII_STRINGL(z_key, key, key_len-1, 1);
 
 	Z_OBJ_HANDLER_P(arg, write_property)(arg, z_key, tmp TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
@@ -1896,7 +1783,7 @@ ZEND_API int add_property_zval_ex(zval *arg, char *key, uint key_len, zval *valu
 	zval *z_key;
 
 	MAKE_STD_ZVAL(z_key);
-	ZVAL_STRINGL(z_key, key, key_len-1, 1);
+	ZVAL_ASCII_STRINGL(z_key, key, key_len-1, 1);
 
 	Z_OBJ_HANDLER_P(arg, write_property)(arg, z_key, value TSRMLS_CC);
 	zval_ptr_dtor(&z_key);
@@ -3197,7 +3084,7 @@ ZEND_API void zend_update_property(zend_class_entry *scope, zval *object, char *
 		zend_error(E_CORE_ERROR, "Property %s of class %v cannot be updated", name, class_name);
 	}
 	MAKE_STD_ZVAL(property);
-	ZVAL_STRINGL(property, name, name_length, 1);
+	ZVAL_ASCII_STRINGL(property, name, name_length, 1);
 	Z_OBJ_HT_P(object)->write_property(object, property, value TSRMLS_CC);
 	zval_ptr_dtor(&property);
 
@@ -3518,7 +3405,7 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, char *n
 	}
 
 	MAKE_STD_ZVAL(property);
-	ZVAL_STRINGL(property, name, name_length, 1);
+	ZVAL_ASCII_STRINGL(property, name, name_length, 1);
 	value = Z_OBJ_HT_P(object)->read_property(object, property, silent TSRMLS_CC);
 	zval_ptr_dtor(&property);
 
@@ -3550,6 +3437,7 @@ ZEND_API zend_uchar zend_get_unified_string_type(int num_args TSRMLS_DC, ...)
 	va_list ap;
 	int best_type = UG(unicode) ? IS_UNICODE : IS_STRING;
 	zend_bool seen_unicode = 0;
+	zend_bool seen_string = 0;
 	int type;
 
 	if (num_args <= 0) return (zend_uchar)-1;
@@ -3560,22 +3448,20 @@ ZEND_API zend_uchar zend_get_unified_string_type(int num_args TSRMLS_DC, ...)
 	va_start(ap, num_args);
 #endif
 	while (num_args--) {
-		type = va_arg(ap, int);
-		if (type == IS_BINARY) {
-			best_type = IS_BINARY;
-		} else if (type == IS_UNICODE) {
+	type = va_arg(ap, int);
+		if (type == IS_UNICODE) {
 			seen_unicode = 1;
-			if (best_type == IS_STRING) {
-				best_type = IS_UNICODE;
-			}
+			best_type = IS_UNICODE;
 		} else if (type == IS_STRING) {
+			seen_string = 1;
 			best_type = IS_STRING;
 		}
 	}
 	va_end(ap);
 
 	/* We do not allow mixing binary and Unicode types */
-	if (best_type == IS_BINARY && seen_unicode) {
+	if (seen_string && seen_unicode) {
+		zend_error(E_WARNING, "Cannot mix binary and Unicode parameters");
 		return (zend_uchar)-1;
 	}
 

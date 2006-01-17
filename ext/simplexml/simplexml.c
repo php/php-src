@@ -370,7 +370,6 @@ static void change_node_zval(xmlNodePtr node, zval *value TSRMLS_DC)
 			convert_to_string(value);
 			/* break missing intentionally */
 		case IS_STRING:
-		case IS_BINARY:
 			xmlNodeSetContentLen(node, Z_STRVAL_P(value), Z_STRLEN_P(value));
 			if (value == &value_copy) {
 				zval_dtor(value);
@@ -521,7 +520,6 @@ next_iter:
 					case IS_UNICODE:
 						convert_to_string(value);
 					case IS_STRING:
-					case IS_BINARY:
 						newnode = (xmlNodePtr)xmlNewProp(node, name, Z_STRVAL_P(value));
 						break;
 					default:
@@ -1276,7 +1274,11 @@ SXE_METHOD(attributes)
 static int cast_object(zval *object, int type, char *contents TSRMLS_DC)
 {
 	if (contents) {
-		ZVAL_STRINGL(object, contents, strlen(contents), 1);
+		if (UG(unicode)) {
+			ZVAL_U_STRING(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), object, contents, 1);
+		} else {
+			ZVAL_STRINGL(object, contents, strlen(contents), 1);
+		}
 	} else {
 		ZVAL_NULL(object);
 	}
@@ -1286,9 +1288,6 @@ static int cast_object(zval *object, int type, char *contents TSRMLS_DC)
 	switch (type) {
 		case IS_STRING:
 			convert_to_string(object);
-			break;
-		case IS_BINARY:
-			convert_to_binary(object);
 			break;
 		case IS_UNICODE:
 			convert_to_unicode(object);
@@ -1381,7 +1380,7 @@ static zval *sxe_get_value(zval *z TSRMLS_DC)
 
 	MAKE_STD_ZVAL(retval);
 
-	if (sxe_object_cast(z, retval, IS_STRING TSRMLS_CC)==FAILURE) {
+	if (sxe_object_cast(z, retval, UG(unicode)?IS_UNICODE:IS_STRING TSRMLS_CC)==FAILURE) {
 		zend_error(E_ERROR, "Unable to cast node to string");
 		/* FIXME: Should not be fatal */
 	}

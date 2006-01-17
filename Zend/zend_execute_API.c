@@ -528,9 +528,6 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 				case IS_UNICODE:
 					zend_u_symtable_update_current_key(p->value.ht, Z_TYPE(const_value), Z_UNIVAL(const_value), Z_UNILEN(const_value)+1);
 					break;
-				case IS_BINARY:
-					zend_hash_update_current_key(p->value.ht, HASH_KEY_IS_BINARY, Z_STRVAL(const_value), Z_STRLEN(const_value)+1, 0);
-					break;
 				case IS_BOOL:
 				case IS_LONG:
 					zend_hash_update_current_key(p->value.ht, HASH_KEY_IS_LONG, NULL, 0, const_value.value.lval);
@@ -1054,7 +1051,7 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, void *name, int name_length
 		return FAILURE;
 	}
 
-	ZVAL_STRINGL(&autoload_function, ZEND_AUTOLOAD_FUNC_NAME, sizeof(ZEND_AUTOLOAD_FUNC_NAME)-1, 0);
+	ZVAL_ASCII_STRINGL(&autoload_function, ZEND_AUTOLOAD_FUNC_NAME, sizeof(ZEND_AUTOLOAD_FUNC_NAME)-1, 0);
 
 	ALLOC_ZVAL(class_name_ptr);
 	INIT_PZVAL(class_name_ptr);
@@ -1085,6 +1082,10 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, void *name, int name_length
 	EG(exception) = NULL;
 	retval = zend_call_function(&fcall_info, &fcall_cache TSRMLS_CC);
 	EG(autoload_func) = fcall_cache.function_handler;
+
+	if (UG(unicode)) {
+		zval_dtor(&autoload_function);
+	}
 
 	zval_ptr_dtor(&class_name_ptr);
 

@@ -604,8 +604,8 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 				}
 			} else if (Z_TYPE_P(zv) == IS_NULL) {
 				string_write(str, "NULL", sizeof("NULL")-1);
-			} else if (Z_TYPE_P(zv) == IS_STRING || Z_TYPE_P(zv) == IS_BINARY) {
-				if (Z_TYPE_P(zv) == IS_BINARY) {
+			} else if (Z_TYPE_P(zv) == IS_STRING) {
+				if (UG(unicode)) {
 					string_write(str, "b'", sizeof("b")-1);
 				}
 				string_write(str, "'", sizeof("'")-1);
@@ -1227,7 +1227,7 @@ ZEND_METHOD(reflection, export)
 	}
 
 	/* Invoke the __toString() method */
-	ZVAL_STRINGL(&fname, "__tostring", sizeof("__tostring") - 1, 1);
+	ZVAL_ASCII_STRINGL(&fname, "__tostring", sizeof("__tostring") - 1, 1);
 	result= call_user_function_ex(NULL, &object, &fname, &retval_ptr, 0, NULL, 0, NULL TSRMLS_CC);
 	zval_dtor(&fname);
 

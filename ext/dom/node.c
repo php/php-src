@@ -147,9 +147,9 @@ int dom_node_node_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 	ALLOC_ZVAL(*retval);
 
 	if(str != NULL) {
-		ZVAL_STRING(*retval, str, 1);
+		ZVAL_RT_STRING(*retval, str, 1);
 	} else {
-		ZVAL_EMPTY_STRING(*retval);
+		ZVAL_EMPTY_TEXT(*retval);
 	}
 	
 	if (qname != NULL) {
@@ -202,7 +202,7 @@ int dom_node_node_value_read(dom_object *obj, zval **retval TSRMLS_DC)
 	ALLOC_ZVAL(*retval);
 
 	if(str != NULL) {
-		ZVAL_STRING(*retval, str, 1);
+		ZVAL_RT_STRING(*retval, str, 1);
 		xmlFree(str);
 	} else {
 		ZVAL_NULL(*retval);

@@ -19,3 +19,15 @@ array(4) {
   ["dsttime"]=>
   int(0)
 }
+--UEXPECTF--
+unicode(3) "UTC"
+array(4) {
+  [u"sec"]=>
+  int(%d)
+  [u"usec"]=>
+  int(%d)
+  [u"minuteswest"]=>
+  int(0)
+  [u"dsttime"]=>
+  int(0)
+}

@@ -1077,8 +1077,8 @@ TEST $file
 	$exp_filename      = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').$pu.'exp';
 	$output_filename   = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').$pu.'out';
 	$memcheck_filename = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').$pu.'mem';
-	$temp_file         = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').$pu.'php';
-	$test_file         = $test_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').$pu.'php';
+	$temp_file         = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt')/*.$pu*/.'php';
+	$test_file         = $test_dir . DIRECTORY_SEPARATOR . basename($file,'phpt')/*.$pu*/.'php';
 	$temp_skipif       = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').$pu.'skip.php';
 	$test_skipif       = $test_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').$pu.'skip.php';
 	$temp_clean        = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').$pu.'clean.php';

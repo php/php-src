@@ -132,10 +132,6 @@ static int php_array_element_dump(zval **zv, int num_args, va_list args, zend_ha
 			php_printf("\"");
 			PHPWRITE(hash_key->u.string, hash_key->nKeyLength - 1);
 			php_printf("\"");
-		} else if (hash_key->type == IS_BINARY) {
-			php_printf("b\"");
-			PHPWRITE(hash_key->u.string, hash_key->nKeyLength - 1);
-			php_printf("\"");
 		} else if (hash_key->type == IS_UNICODE) {
 			php_printf("u");
 			php_var_dump_unicode(hash_key->u.unicode, hash_key->nKeyLength-1, verbose, "\"", 0 TSRMLS_CC);
@@ -206,11 +202,6 @@ PHPAPI void php_var_dump(zval **struc, int level, int verbose TSRMLS_DC)
 		break;
 	case IS_STRING:
 		php_printf("%sstring(%d) \"", COMMON, Z_STRLEN_PP(struc));
-		PHPWRITE(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc));
-		PUTS("\"\n");
-		break;
-	case IS_BINARY:
-		php_printf("%sbinary(%d) \"", COMMON, Z_STRLEN_PP(struc));
 		PHPWRITE(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc));
 		PUTS("\"\n");
 		break;
@@ -337,10 +328,6 @@ static int zval_array_element_dump(zval **zv, int num_args, va_list args, zend_h
 			php_printf("\"");
 			PHPWRITE(hash_key->u.string, hash_key->nKeyLength - 1);
 			php_printf("\"");
-		} else if (hash_key->type == IS_BINARY) {
-			php_printf("b\"");
-			PHPWRITE(hash_key->u.string, hash_key->nKeyLength - 1);
-			php_printf("\"");
 		} else if (hash_key->type == IS_UNICODE) {
 			php_printf("u");
 			php_var_dump_unicode(hash_key->u.unicode, hash_key->nKeyLength-1, 1, "\"", 0 TSRMLS_CC);
@@ -377,11 +364,6 @@ PHPAPI void php_debug_zval_dump(zval **struc, int level, int verbose TSRMLS_DC)
 		break;
 	case IS_STRING:
 		php_printf("%sstring(%d) \"", COMMON, Z_STRLEN_PP(struc));
-		PHPWRITE(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc));
-		php_printf("\" refcount(%u)\n", Z_REFCOUNT_PP(struc));
-		break;
-	case IS_BINARY:
-		php_printf("%sbinary(%d) \"", COMMON, Z_STRLEN_PP(struc));
 		PHPWRITE(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc));
 		php_printf("\" refcount(%u)\n", Z_REFCOUNT_PP(struc));
 		break;
@@ -525,8 +507,6 @@ PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC)
 	case IS_DOUBLE:
 		php_printf("%.*G", (int) EG(precision), Z_DVAL_PP(struc));
 		break;
-	case IS_BINARY:
-		PUTS ("b");
 	case IS_STRING:
 		tmp_str = php_addcslashes(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &tmp_len, 0, "'\\", 2 TSRMLS_CC);
 		PUTS ("'");
@@ -651,15 +631,6 @@ static inline void php_var_serialize_long(smart_str *buf, long val)
 static inline void php_var_serialize_string(smart_str *buf, char *str, int len)
 {
 	smart_str_appendl(buf, "s:", 2);
-	smart_str_append_long(buf, len);
-	smart_str_appendl(buf, ":\"", 2);
-	smart_str_appendl(buf, str, len);
-	smart_str_appendl(buf, "\";", 2);
-}
-
-static inline void php_var_serialize_binary(smart_str *buf, char *str, int len)
-{
-	smart_str_appendl(buf, "B:", 2);
 	smart_str_append_long(buf, len);
 	smart_str_appendl(buf, ":\"", 2);
 	smart_str_appendl(buf, str, len);
@@ -874,10 +845,6 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 			php_var_serialize_string(buf, Z_STRVAL_PP(struc), Z_STRLEN_PP(struc));
 			return;
 
-		case IS_BINARY:
-			php_var_serialize_binary(buf, Z_STRVAL_PP(struc), Z_STRLEN_PP(struc));
-			return;
-
 		case IS_UNICODE:
 			php_var_serialize_unicode(buf, Z_USTRVAL_PP(struc), Z_USTRLEN_PP(struc));
 			return;
@@ -920,10 +887,10 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 				if (ce && ce != PHP_IC_ENTRY &&
 				    zend_hash_exists(&ce->function_table, "__sleep", sizeof("__sleep"))) {
 					INIT_PZVAL(&fname);
-					ZVAL_STRINGL(&fname, "__sleep", sizeof("__sleep") - 1, 0);
+					ZVAL_ASCII_STRINGL(&fname, "__sleep", sizeof("__sleep") - 1, 1);
 					res = call_user_function_ex(CG(function_table), struc, &fname, 
 												&retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
-
+					zval_dtor(&fname);
 					if (res == SUCCESS && !EG(exception)) {
 						if (retval_ptr) {
 							if (HASH_OF(retval_ptr)) {
@@ -989,9 +956,6 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 							break;
 						case HASH_KEY_IS_STRING:
 							php_var_serialize_string(buf, key, key_len - 1);
-							break;
-						case HASH_KEY_IS_BINARY:
-							php_var_serialize_binary(buf, key, key_len - 1);
 							break;
 						case HASH_KEY_IS_UNICODE:
 							php_var_serialize_unicode(buf, (UChar*)key, key_len - 1);
