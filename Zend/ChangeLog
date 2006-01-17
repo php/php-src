@@ -1,3 +1,18 @@
+2006-01-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_objects_API.c
+      zend_objects_API.c
+      zend_objects_API.c
+      tests/bug36006.phpt
+      tests/bug36006.phpt
+      tests/bug36006.phpt:
+      Fixed bug #36006 (Problem with $this in __destruct())
+
+    * tests/bug36006.phpt
+      tests/bug36006.phpt:
+      
+      file bug36006.phpt was initially added on branch PHP_5_1.
+
 2006-01-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * tests/bug29210.phpt
