@@ -1,3 +1,61 @@
+2006-01-16  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      MFH: fix #36038 (ext/hash compile failure on Mac OSX)
+
+    * ext/standard/tests/general_functions/bug35229.phpt
+      ext/standard/tests/general_functions/bug35229.phpt:
+      fix typo
+
+    * (PHP_5_1)
+      NEWS
+      main/streams/plain_wrapper.c:
+      MFH: fix #35999 (recursive mkdir() does not work with relative path like
+      "foo/bar")
+
+    * main/streams/plain_wrapper.c:
+      fix bug #35999 (recursive mkdir() does not work with relative path like
+      "foo/bar")
+
+2006-01-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * win32/wsyslog.c
+      win32/wsyslog.c
+      win32/wsyslog.c
+      win32/wsyslog.c:
+      Fixed first-chance exception during request shutdown
+
+    * (PHP_5_0)
+      NEWS
+      NEWS
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/tests/bug36006.phpt:
+      Fixed bug #36006 (Problem with $this in __destruct())
+
+    * ZendEngine2/tests/bug36006.phpt
+      ZendEngine2/tests/bug36006.phpt:
+      
+      Fixed bug #36006 (Problem with $this in __destruct())
+
+    * ZendEngine2/tests/bug36006.phpt
+      ZendEngine2/tests/bug36006.phpt:
+      
+      file bug36006.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      NEWS
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.h
+      TSRM/tsrm_virtual_cwd.h
+      main/main.c
+      main/main.c:
+      Fixed bug #36016 (realpath cache memleaks)
+
 2006-01-15  Antony Dovgal  <antony@zend.com>
 
     * (PHP_4_4)
