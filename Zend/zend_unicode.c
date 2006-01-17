@@ -437,7 +437,7 @@ ZEND_API int zval_string_to_unicode_ex(zval *string, UConverter *conv)
 /* {{{ zval_string_to_unicode */
 ZEND_API int zval_string_to_unicode(zval *string TSRMLS_DC)
 {
-	return zval_string_to_unicode(string, ZEND_U_CONVERTER(UG(runtime_encoding_conv)));
+	return zval_string_to_unicode_ex(string, ZEND_U_CONVERTER(UG(runtime_encoding_conv)));
 }
 /* }}} */
 
