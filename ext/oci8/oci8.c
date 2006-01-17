@@ -89,6 +89,7 @@ static void php_oci_collection_list_dtor (zend_rsrc_list_entry * TSRMLS_DC);
 
 static int php_oci_persistent_helper(zend_rsrc_list_entry *le TSRMLS_DC);
 #ifdef ZTS
+static int php_oci_statement_helper(zend_rsrc_list_entry *le TSRMLS_DC);
 static int php_oci_regular_helper(zend_rsrc_list_entry *le TSRMLS_DC);
 #endif
 static int php_oci_connection_ping(php_oci_connection * TSRMLS_DC);
@@ -622,6 +623,10 @@ PHP_MSHUTDOWN_FUNCTION(oci)
 
 PHP_RSHUTDOWN_FUNCTION(oci)
 {
+#ifdef ZTS
+	zend_hash_apply(&EG(regular_list), (apply_func_t) php_oci_statement_helper TSRMLS_CC);
+#endif
+
 	/* check persistent connections and do the necessary actions if needed */
 	zend_hash_apply(&EG(persistent_list), (apply_func_t) php_oci_persistent_helper TSRMLS_CC);
 
@@ -1740,6 +1745,21 @@ static int php_oci_regular_helper(zend_rsrc_list_entry *le TSRMLS_DC)
 	if (le->type == le_connection) {
 		connection = (php_oci_connection *)le->ptr;
 		if (connection) {
+			return 1;
+		}
+	}
+	return 0;
+} /* }}} */
+
+/* {{{ php_oci_statement_helper() 
+ Helper function to destroy statements on thread shutdown in ZTS mode */
+static int php_oci_statement_helper(zend_rsrc_list_entry *le TSRMLS_DC)
+{
+	php_oci_statement *statement;
+
+	if (le->type == le_statement) {
+		statement = (php_oci_statement *)le->ptr;
+		if (statement) {
 			return 1;
 		}
 	}
