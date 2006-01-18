@@ -713,7 +713,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		if (calling_scope && (colon = strstr(fname, "::")) != NULL) {
 			int clen = colon - fname;
 			int mlen = fname_len - clen - 2;
-			zend_class_entry **pce, *ce_child;
+			zend_class_entry **pce, *ce_child = NULL;
 			if (zend_lookup_class(fname, clen, &pce TSRMLS_CC) == SUCCESS) {
 				ce_child = *pce;
 			} else {
