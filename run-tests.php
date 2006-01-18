@@ -714,7 +714,7 @@ if ($just_save_results || !getenv('NO_INTERACTION')) {
 		$failed_tests_data .= "Bundled Libtool:\n$libtool\n";
 		$failed_tests_data .= "System Libtool:\n$sys_libtool\n";
 		$failed_tests_data .= "Compiler:\n$compiler\n";
-		$failed_tests_data .= "Bison:\n". @shell_exec('bison --version'). "\n";
+		$failed_tests_data .= "Bison:\n". @shell_exec('bison --version 2>/dev/null'). "\n";
 		$failed_tests_data .= "Libraries:\n$ldd\n";
 		$failed_tests_data .= "\n";
 		
