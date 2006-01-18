@@ -716,7 +716,7 @@ static php_conv_err_t php_conv_base64_decode_convert(php_conv_base64_decode *ins
 	size_t icnt, ocnt;
 	unsigned int ustat;
 
-	const static unsigned int nbitsof_pack = 8;
+	static const unsigned int nbitsof_pack = 8;
 
 	if (in_pp == NULL || in_left_p == NULL) {
 		if (inst->eos || inst->urem_nbits == 0) { 
