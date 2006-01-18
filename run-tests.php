@@ -430,7 +430,7 @@ if (!getenv('NO_INTERACTION')) {
 		$failed_tests_data .= "Autoconf:\n$autoconf\n";
 		$failed_tests_data .= "Libtool:\n$libtool\n";
 		$failed_tests_data .= "Compiler:\n$compiler\n";
-		$failed_tests_data .= "Bison:\n". @shell_exec('bison --version'). "\n";
+		$failed_tests_data .= "Bison:\n". @shell_exec('bison --version 2>/dev/null'). "\n";
 		$failed_tests_data .= "Libraries:\n$ldd\n";
 		$failed_tests_data .= "\n";
 		
