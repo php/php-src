@@ -76,7 +76,7 @@ zend_function_entry date_functions[] = {
 	/* Astronomical functions */
 	PHP_FE(date_sunrise, NULL)
 	PHP_FE(date_sunset, NULL)
-/*	PHP_FE(date_sun_info, NULL) */
+	PHP_FE(date_sun_info, NULL)
 	{NULL, NULL, NULL}
 };
 
