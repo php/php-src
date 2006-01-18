@@ -1,3 +1,57 @@
+2006-01-17  Antony Dovgal  <antony@zend.com>
+
+    * zend_unicode.c:
+      fix build
+
+2006-01-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_ini_scanner.l:
+      MFB51: Fixed bug #36046 (parse_ini_file() miscounts lines in multi-line
+      values).
+
+    * (PHP_5_1)
+      zend_ini_scanner.l:
+      Fixed bug #36046 (parse_ini_file() miscounts lines in multi-line values).
+
+2006-01-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.c
+      zend.h
+      zend_API.c
+      zend_API.h
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_exceptions.c
+      zend_execute.c
+      zend_execute.h
+      zend_execute_API.c
+      zend_hash.c
+      zend_hash.h
+      zend_highlight.c
+      zend_interfaces.c
+      zend_language_parser.y
+      zend_language_scanner.l
+      zend_operators.c
+      zend_operators.h
+      zend_unicode.c
+      zend_unicode.h
+      zend_variables.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/bug26166.phpt
+      tests/bug28444.phpt:
+      Unicode stuff is changed according to decision maden on PDM.
+      Now IS_BINRAY data type is removed and IS_STRING starts behave as
+      IS_BINARY in unicode mode. IS_STRING is incompatible with IS_UNICODE, so
+      ALL functions should be improved to support unicode mode.
+
+    * zend_language_scanner.l
+      zend_language_scanner.l
+      tests/bug36037.phpt
+      tests/bug36037.phpt
+      tests/bug36037.phpt:
+      Fixed bug #36037 (heredoc adds extra line number)
+
 2006-01-16  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_objects_API.c
