@@ -25,6 +25,7 @@
 #include "php.h"
 
 #include "url.h"
+#include "file.h"
 #ifdef _OSD_POSIX
 #ifndef APACHE
 #error On this EBCDIC platform, PHP is only supported as an Apache module.
@@ -658,7 +659,7 @@ PHP_FUNCTION(get_headers)
 {
 	char *url;
 	int url_len;
-	php_stream_context *context = NULL;
+	php_stream_context *context;
 	php_stream *stream;
 	zval **prev_val, **hdr = NULL;
 	HashPosition pos;
@@ -667,6 +668,7 @@ PHP_FUNCTION(get_headers)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &url, &url_len, &format) == FAILURE) {
 		return;
 	}
+	context = FG(default_context) ? FG(default_context) : (FG(default_context) = php_stream_context_alloc());
 
 	if (!(stream = php_stream_open_wrapper_ex(url, "r", REPORT_ERRORS | STREAM_USE_URL | STREAM_ONLY_GET_HEADERS, NULL, context))) {
 		RETURN_FALSE;
