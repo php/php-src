@@ -759,7 +759,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			}
 		}
 		if (calling_scope && colon != NULL) {
-			zend_class_entry **pce, *ce_child;
+			zend_class_entry **pce, *ce_child = NULL;
 			if (zend_u_lookup_class(Z_TYPE_P(fci->function_name), Z_STRVAL_P(fci->function_name), clen, &pce TSRMLS_CC) == SUCCESS) {
 				ce_child = *pce;
 			} else {
