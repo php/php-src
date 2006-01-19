@@ -545,6 +545,16 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 	zval *value = get_zval_ptr(value_op, Ts, &free_value, BP_VAR_R);
 	zval **retval = &T(result->u.var).var.ptr;
 
+	if (*object_ptr == EG(error_zval_ptr)) {
+		FREE_OP(free_op2);
+		if (!RETURN_VALUE_UNUSED(result)) {
+			*retval = EG(uninitialized_zval_ptr);
+			PZVAL_LOCK(*retval);
+		}
+		FREE_OP(free_value);
+		return;
+	}
+
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
 	
