@@ -4,9 +4,14 @@ Bug #22224 (implode changes object references in array)
 error_reporting=0
 --FILE--
 <?php
-class foo {
+function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
+	//ignore all errors
 }
 
+set_error_handler('test_error_handler');
+	
+class foo {
+}
 
 $a = new foo();
 			    
