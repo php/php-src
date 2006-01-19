@@ -1,3 +1,13 @@
+2006-01-18  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      zend_execute_API.c:
+      MFH: make sure ce_child is properly initialized
+
+    * (RELEASE_1_0_4)
+      zend_execute_API.c:
+      make sure ce_child is properly initialized
+
 2006-01-17  Antony Dovgal  <antony@zend.com>
 
     * zend_unicode.c:
