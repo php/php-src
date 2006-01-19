@@ -60,17 +60,16 @@ echo "== WRONG PARAMETERS ==\n";
 // Note: PHP Notice, but returns some value
 $r = strlen($t_ary);
 echo $r."\n";
+
 // Object
-// Note: PHP Notice, but returns some value
+// Note: PHP Catchable error
 $r = strlen($t_obj);
 echo $r."\n";
+
 // Wrong encoding
 mb_internal_encoding('EUC-JP');
 $r = strlen($euc_jp, 'BAD_NAME');
 echo $r."\n";
-
-
-
 
 ?>
 
@@ -98,9 +97,7 @@ ERR: Warning
 == WRONG PARAMETERS ==
 ERR: Notice
 5
+ERR: Catchable fatal error
 ERR: Notice
 6
 ERR: Warning
-
-
-
