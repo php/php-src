@@ -1,3 +1,56 @@
+2006-01-18  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      ext/standard/cyr_convert.c
+      ext/standard/filters.c:
+      MFH: couple of pedantic fixes: "static" should be first
+
+    * ext/standard/cyr_convert.c
+      ext/standard/filters.c:
+      couple of pedantic fixes: "static" should be first
+
+    * (PHP_5_1)
+      ZendEngine2/zend_execute_API.c:
+      MFH: make sure ce_child is properly initialized
+
+    * (RELEASE_1_0_4)
+      ZendEngine2/zend_execute_API.c:
+      make sure ce_child is properly initialized
+
+    * (PHP_4_4)
+      run-tests.php
+      run-tests.php:
+      MFH: fix error message on `make test` when bison is not installed
+
+    * (RELEASE_1_0_4)
+      run-tests.php:
+      fix error message on `make test` when bison is not installed
+
+2006-01-18  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS:
+      fix news
+
+2006-01-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (RELEASE_1_0_4)
+      ext/standard/url.c:
+      MFB51: Make get_headers() use the default context.
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/url.c:
+      Make get_headers() use the default context.
+
+2006-01-18  Antony Dovgal  <antony@zend.com>
+
+    * (RELEASE_1_0_4)
+      ext/oci8/oci8.c:
+      reorganize resource destruction.
+      - use one helper function for all resource types
+      - destroy all resources when connections are still available
+
 2006-01-17  Antony Dovgal  <antony@zend.com>
 
     * ext/gd/gd.c:
