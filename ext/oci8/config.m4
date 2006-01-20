@@ -69,7 +69,7 @@ AC_DEFUN([AC_OCI8IC_VERSION],[
 AC_DEFUN([AC_OCI8_VERSION],[
   AC_MSG_CHECKING([Oracle version])
   if test -s "$OCI8_DIR/orainst/unix.rgs"; then
-    OCI8_VERSION=`grep '"ocommon"' $OCI8_DIR/orainst/unix.rgs | $PHP_OCI_SED 's/[ ][ ]*/:/g' | cut -d: -f 6 | cut -c 2-4`
+    OCI8_VERSION=`grep '"ocommon"' $OCI8_DIR/orainst/unix.rgs | $PHP_OCI8_SED 's/[ ][ ]*/:/g' | cut -d: -f 6 | cut -c 2-4`
     test -z "$OCI8_VERSION" && OCI8_VERSION=7.3
   elif test -f $OCI8_DIR/$OCI8_LIB_DIR/libclntsh.$SHLIB_SUFFIX_NAME.10.1; then
     OCI8_VERSION=10.1    
@@ -332,7 +332,7 @@ dnl Header directory for manual installation
     AC_MSG_ERROR([Oracle Instant Client SDK header files not found])
   fi
 
-  OCISYSLIBLIST=`echo "$OCI8INCDIR" | $PHP_OCI_SED -e 's!\(.*\)/include$!\1/demo/sysliblist!'`
+  OCISYSLIBLIST=`echo "$OCI8INCDIR" | $PHP_OCI8_SED -e 's!\(.*\)/include$!\1/demo/sysliblist!'`
   if test -f "$OCISYSLIBLIST"; then
     PHP_EVAL_LIBLINE(`cat $OCISYSLIBLIST`, OCI8_SYSLIB)
   fi
