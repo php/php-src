@@ -1,3 +1,23 @@
+2006-01-19  Antony Dovgal  <antony@zend.com>
+
+    * tests/bug32290.phpt:
+      fix test
+
+2006-01-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.c
+      zend_execute.c
+      zend_execute.c
+      tests/bug36071.phpt
+      tests/bug36071.phpt:
+      Fixed bug #36071 (Engine Crash related with 'clone')
+
+    * tests/bug36071.phpt
+      tests/bug36071.phpt
+      tests/bug36071.phpt:
+        1.1.4;
+      file bug36071.phpt was initially added on branch PHP_5_1.
+
 2006-01-18  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_1)
