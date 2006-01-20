@@ -208,19 +208,23 @@ AC_DEFUN([PHP_GD_JISX0208],
 AC_DEFUN([PHP_GD_CHECK_VERSION],
 [
   AC_MSG_CHECKING([for GD library version])
-  GD_VERSION=`$GDLIB_CONFIG --version`
-  AC_DEFINE_UNQUOTED(PHP_GD_VERSION_STRING, "$GD_VERSION", [GD library version])
+  GD_VERSION=`$GDLIB_CONFIG --version 2> /dev/null`
+
+  if test -z "$GD_VERSION"; then
+    AC_MSG_ERROR([invalid gdlib-config passed to --with-gd!])
+  fi
 
   ac_IFS=[$]IFS
   IFS="."
   set $GD_VERSION
   IFS=$ac_IFS
 
-  GD_VERNUM=`expr [$]1 \* 1000000 + [$]2 \* 1000 + [$]3`
+  GD_VERNUM=`expr [$]1 \* 1000000 + [$]2 \* 1000 + [$]3 2> /dev/null`
 
   if test "$GD_VERNUM" -lt "2000033"; then
     AC_MSG_ERROR([GD version 2.0.33 or greater required.])
   else
+    AC_DEFINE_UNQUOTED(PHP_GD_VERSION_STRING, "$GD_VERSION", [GD library version])
     AC_MSG_RESULT([$GD_VERSION])
   fi
 ])
@@ -263,7 +267,7 @@ dnl These are always defined with bundled library
 
 elif test "$PHP_GD" != "no"; then
 
-  if test -x "$PHP_GD"; then
+  if test -f "$PHP_GD" && test -x "$PHP_GD"; then
     GDLIB_CONFIG=$PHP_GD
     PHP_GD_CHECK_VERSION
   else
