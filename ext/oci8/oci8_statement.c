@@ -165,7 +165,6 @@ int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows TSRMLS_DC)
 			/* this is exactly what we requested */
 			return 0;
 		}
-		
 		return 1;
 	}
 
@@ -509,7 +508,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 					outcol->storage_size4 *= 3;
 					
 					dynamic = OCI_DEFAULT;
-					buf = outcol->data = (text *) emalloc(outcol->storage_size4);
+					buf = outcol->data = (text *) ecalloc(1, outcol->storage_size4);
 					break;
 			}
 
@@ -1018,6 +1017,10 @@ php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAME
 	statement = (php_oci_statement *) zend_fetch_resource(&z_statement TSRMLS_CC, -1, "oci8 statement", NULL, 1, le_statement);
 
 	if (!statement) {
+		return NULL;
+	}
+
+	if (!statement->has_data) {
 		return NULL;
 	}
 	
