@@ -1,3 +1,31 @@
+2006-01-19  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/tests/bug32290.phpt
+      ext/standard/tests/strings/bug22224.phpt:
+      fix test
+
+    * ext/mbstring/tests/common.inc
+      ext/mbstring/tests/mb_strlen.phpt:
+      fix tests
+
+2006-01-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      NEWS
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/tests/bug36071.phpt
+      ZendEngine2/tests/bug36071.phpt:
+      Fixed bug #36071 (Engine Crash related with 'clone')
+
+    * ZendEngine2/tests/bug36071.phpt
+      ZendEngine2/tests/bug36071.phpt
+      ZendEngine2/tests/bug36071.phpt:
+        1.1.4;
+      file bug36071.phpt was initially added on branch PHP_5_1.
+
 2006-01-18  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_1)
