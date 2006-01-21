@@ -48,32 +48,32 @@
 #define FILTER_FLAG_NO_RES_RANGE            0x400000
 #define FILTER_FLAG_NO_PRIV_RANGE           0x800000
 
-#define FL_INT           0x0101
-#define FL_BOOLEAN       0x0102
-#define FL_FLOAT         0x0103
+#define FILTER_VALIDATE_INT           0x0101
+#define FILTER_VALIDATE_BOOLEAN       0x0102
+#define FILTER_VALIDATE_FLOAT         0x0103
 
-#define FL_REGEXP        0x0110
-#define FL_URL           0x0111
-#define FL_EMAIL         0x0112
-#define FL_IP            0x0113
+#define FILTER_VALIDATE_REGEXP        0x0110
+#define FILTER_VALIDATE_URL           0x0111
+#define FILTER_VALIDATE_EMAIL         0x0112
+#define FILTER_VALIDATE_IP            0x0113
 
-#define FL_ALL           0x0100
+#define FILTER_VALIDATE_ALL           0x0100
 
-#define FS_DEFAULT       0x0201
+#define FILTER_DEFAULT                0x0201
+#define FILTER_UNSAFE_RAW             0x0204
 
-#define FS_STRING        0x0201
-#define FS_ENCODED       0x0202
-#define FS_SPECIAL_CHARS 0x0203
-#define FS_UNSAFE_RAW    0x0204
-#define FS_EMAIL         0x0205
-#define FS_URL           0x0206
-#define FS_NUMBER_INT    0x0207
-#define FS_NUMBER_FLOAT  0x0208
-#define FS_MAGIC_QUOTES  0x0209
+#define FILTER_SANITIZE_STRING        0x0201
+#define FILTER_SANITIZE_ENCODED       0x0202
+#define FILTER_SANITIZE_SPECIAL_CHARS 0x0203
+#define FILTER_SANITIZE_EMAIL         0x0205
+#define FILTER_SANITIZE_URL           0x0206
+#define FILTER_SANITIZE_NUMBER_INT    0x0207
+#define FILTER_SANITIZE_NUMBER_FLOAT  0x0208
+#define FILTER_SANITIZE_MAGIC_QUOTES  0x0209
 
-#define FS_ALL           0x0200
+#define FILTER_SANITIZE_ALL           0x0200
 
-#define FC_CALLBACK      0x0400
+#define FILTER_CALLBACK               0x0400
 
 #endif /* FILTER_PRIVATE_H */
 
