@@ -1,3 +1,33 @@
+2006-01-20  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/gd/config.m4:
+      - Fixed bug #Â36110 (missing sanity checks for external build)
+
+2006-01-20  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/config.m4
+      ext/oci8/config.m4:
+      fix typo
+
+    * (PHP_5_1)
+      NEWS
+      ext/oci8/oci8_statement.c:
+      MFH: fix #36096 (oci_result() returns garbage after oci_fetch() failed)
+
+    * ext/oci8/oci8_statement.c:
+      fix #36096 (oci_result() returns garbage after oci_fetch() failed)
+
+2006-01-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/http_fopen_wrapper.c:
+      MFB51: Allow get_headers() to return header information even for non-200
+      responses.
+
+    * (PHP_5_1)
+      ext/standard/http_fopen_wrapper.c:
+      Allow get_headers() to return header information even for non-200
+      responses.
+
 2006-01-19  Antony Dovgal  <antony@zend.com>
 
     * ZendEngine2/tests/bug32290.phpt
