@@ -1,12 +1,12 @@
 --TEST--
-filter_data() and FS_ENCODED
+filter_data() and FILTER_SANITIZE_ENCODED
 --FILE--
 <?php
 
-var_dump(filter_data("\"<br>blah</ph>", FS_ENCODED));
-var_dump(filter_data("", FS_ENCODED));
-var_dump(filter_data("  text here  ", FS_ENCODED));
-var_dump(filter_data("!@#$%^&*()QWERTYUIOP{ASDFGHJKL:\"ZXCVBNM<>?", FS_ENCODED));
+var_dump(filter_data("\"<br>blah</ph>", FILTER_SANITIZE_ENCODED));
+var_dump(filter_data("", FILTER_SANITIZE_ENCODED));
+var_dump(filter_data("  text here  ", FILTER_SANITIZE_ENCODED));
+var_dump(filter_data("!@#$%^&*()QWERTYUIOP{ASDFGHJKL:\"ZXCVBNM<>?", FILTER_SANITIZE_ENCODED));
 
 echo "Done\n";
 ?>

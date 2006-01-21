@@ -1,19 +1,19 @@
 --TEST--
-filter_data() and FS_ENCODED
+filter_data() and FILTER_SANITIZE_ENCODED
 --FILE--
 <?php
 
-var_dump(filter_data("?><!@#$%^&*()}{~Qwertyuilfdsasdfgmnbvcxcvbn", FS_ENCODED));
-var_dump(filter_data("<data&sons>", FS_ENCODED));
-var_dump(filter_data("", FS_ENCODED));
+var_dump(filter_data("?><!@#$%^&*()}{~Qwertyuilfdsasdfgmnbvcxcvbn", FILTER_SANITIZE_ENCODED));
+var_dump(filter_data("<data&sons>", FILTER_SANITIZE_ENCODED));
+var_dump(filter_data("", FILTER_SANITIZE_ENCODED));
 
-var_dump(filter_data("?><!@#$%^&*()}{~Qwertyuilfdsasdfgmnbvcxcvbn", FS_ENCODED, FILTER_FLAG_ENCODE_LOW));
-var_dump(filter_data("<data&sons>", FS_ENCODED, FILTER_FLAG_ENCODE_LOW));
-var_dump(filter_data("", FS_ENCODED, FILTER_FLAG_ENCODE_LOW));
+var_dump(filter_data("?><!@#$%^&*()}{~Qwertyuilfdsasdfgmnbvcxcvbn", FILTER_SANITIZE_ENCODED, FILTER_FLAG_ENCODE_LOW));
+var_dump(filter_data("<data&sons>", FILTER_SANITIZE_ENCODED, FILTER_FLAG_ENCODE_LOW));
+var_dump(filter_data("", FILTER_SANITIZE_ENCODED, FILTER_FLAG_ENCODE_LOW));
 
-var_dump(filter_data("?><!@#$%^&*()}{~Qwertyuilfdsasdfgmnbvcxcvbn", FS_ENCODED, FILTER_FLAG_ENCODE_HIGH));
-var_dump(filter_data("<data&sons>", FS_ENCODED, FILTER_FLAG_ENCODE_HIGH));
-var_dump(filter_data("", FS_ENCODED, FILTER_FLAG_ENCODE_HIGH));
+var_dump(filter_data("?><!@#$%^&*()}{~Qwertyuilfdsasdfgmnbvcxcvbn", FILTER_SANITIZE_ENCODED, FILTER_FLAG_ENCODE_HIGH));
+var_dump(filter_data("<data&sons>", FILTER_SANITIZE_ENCODED, FILTER_FLAG_ENCODE_HIGH));
+var_dump(filter_data("", FILTER_SANITIZE_ENCODED, FILTER_FLAG_ENCODE_HIGH));
 
 echo "Done\n";
 ?>

@@ -1,25 +1,25 @@
 --TEST--
-filter_data() and FS_NUMBER_*
+filter_data() and FILTER_SANITIZE_NUMBER_*
 --FILE--
 <?php
 
-var_dump(filter_data("qwertyu123456dfghj", FS_NUMBER_INT));
-var_dump(filter_data("asd123123.asd123.23", FS_NUMBER_INT));
-var_dump(filter_data("123,23", FS_NUMBER_INT));
-var_dump(filter_data("", FS_NUMBER_INT));
-var_dump(filter_data("0", FS_NUMBER_INT));
-var_dump(filter_data("asd123.2asd", FS_NUMBER_INT));
-var_dump(filter_data("qwertyuiop", FS_NUMBER_INT));
-var_dump(filter_data("123.4", FS_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION));
-var_dump(filter_data("123,4", FS_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION));
-var_dump(filter_data("123.4", FS_NUMBER_FLOAT, FILTER_FLAG_ALLOW_THOUSAND));
-var_dump(filter_data("123,4", FS_NUMBER_FLOAT, FILTER_FLAG_ALLOW_THOUSAND));
-var_dump(filter_data("123.4e", FS_NUMBER_FLOAT, FILTER_FLAG_ALLOW_SCIENTIFIC));
-var_dump(filter_data("123,4E", FS_NUMBER_FLOAT, FILTER_FLAG_ALLOW_SCIENTIFIC));
-var_dump(filter_data("qwe123,4qwe", FS_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION));
-var_dump(filter_data("werty65456.34", FS_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION));
-var_dump(filter_data("234.56fsfd", FS_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION));
-var_dump(filter_data("", FS_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION));
+var_dump(filter_data("qwertyu123456dfghj", FILTER_SANITIZE_NUMBER_INT));
+var_dump(filter_data("asd123123.asd123.23", FILTER_SANITIZE_NUMBER_INT));
+var_dump(filter_data("123,23", FILTER_SANITIZE_NUMBER_INT));
+var_dump(filter_data("", FILTER_SANITIZE_NUMBER_INT));
+var_dump(filter_data("0", FILTER_SANITIZE_NUMBER_INT));
+var_dump(filter_data("asd123.2asd", FILTER_SANITIZE_NUMBER_INT));
+var_dump(filter_data("qwertyuiop", FILTER_SANITIZE_NUMBER_INT));
+var_dump(filter_data("123.4", FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION));
+var_dump(filter_data("123,4", FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION));
+var_dump(filter_data("123.4", FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_THOUSAND));
+var_dump(filter_data("123,4", FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_THOUSAND));
+var_dump(filter_data("123.4e", FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_SCIENTIFIC));
+var_dump(filter_data("123,4E", FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_SCIENTIFIC));
+var_dump(filter_data("qwe123,4qwe", FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION));
+var_dump(filter_data("werty65456.34", FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION));
+var_dump(filter_data("234.56fsfd", FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION));
+var_dump(filter_data("", FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION));
 
 echo "Done\n";
 ?>

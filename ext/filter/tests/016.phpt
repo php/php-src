@@ -1,5 +1,5 @@
 --TEST--
-filter_data() and FL_EMAIL
+filter_data() and FILTER_VALIDATE_EMAIL
 --FILE--
 <?php
 $values = Array(
@@ -14,7 +14,7 @@ $values = Array(
 'QWERTYUIOPASDFGHJKLZXCVBNM@QWERTYUIOPASDFGHJKLZXCVBNM.NET',	
 );
 foreach ($values as $value) {
-	var_dump(filter_data($value, FL_EMAIL));
+	var_dump(filter_data($value, FILTER_VALIDATE_EMAIL));
 }
 
 echo "Done\n";

@@ -1,22 +1,22 @@
 --TEST--
-filter_data() and FS_SPECIAL_CHARS
+filter_data() and FILTER_SANITIZE_SPECIAL_CHARS
 --FILE--
 <?php
 
-var_dump(filter_data("?><!@#$%^&*()}{~Qwertyuilfdsasdfgmnbvcxcvbn", FS_SPECIAL_CHARS));
-var_dump(filter_data("<data&sons>", FS_SPECIAL_CHARS));
-var_dump(filter_data("", FS_SPECIAL_CHARS));
+var_dump(filter_data("?><!@#$%^&*()}{~Qwertyuilfdsasdfgmnbvcxcvbn", FILTER_SANITIZE_SPECIAL_CHARS));
+var_dump(filter_data("<data&sons>", FILTER_SANITIZE_SPECIAL_CHARS));
+var_dump(filter_data("", FILTER_SANITIZE_SPECIAL_CHARS));
 
-var_dump(filter_data("?><!@#$%^&*()}{~Qwertyuilfdsasdfgmnbvcxcvbn", FS_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW));
-var_dump(filter_data("<data&sons>", FS_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW));
-var_dump(filter_data("", FS_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW));
+var_dump(filter_data("?><!@#$%^&*()}{~Qwertyuilfdsasdfgmnbvcxcvbn", FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW));
+var_dump(filter_data("<data&sons>", FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW));
+var_dump(filter_data("", FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW));
 
-var_dump(filter_data("?><!@#$%^&*()}{~Qwertyuilfdsasdfgmnbvcxcvbn", FS_SPECIAL_CHARS, FILTER_FLAG_ENCODE_HIGH));
-var_dump(filter_data("<data&sons>", FS_SPECIAL_CHARS, FILTER_FLAG_ENCODE_HIGH));
-var_dump(filter_data("", FS_SPECIAL_CHARS, FILTER_FLAG_ENCODE_HIGH));
+var_dump(filter_data("?><!@#$%^&*()}{~Qwertyuilfdsasdfgmnbvcxcvbn", FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_HIGH));
+var_dump(filter_data("<data&sons>", FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_HIGH));
+var_dump(filter_data("", FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_HIGH));
 
-var_dump(filter_data("кириллица", FS_SPECIAL_CHARS, FILTER_FLAG_ENCODE_HIGH));
-var_dump(filter_data("кириллица", FS_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW));
+var_dump(filter_data("кириллица", FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_HIGH));
+var_dump(filter_data("кириллица", FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW));
 
 echo "Done\n";
 ?>

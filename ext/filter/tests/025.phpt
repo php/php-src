@@ -1,15 +1,15 @@
 --TEST--
-filter_data() and FS_STRING
+filter_data() and FILTER_SANITIZE_STRING
 --FILE--
 <?php
 
-var_dump(filter_data("", FS_STRING));
-var_dump(filter_data("<>", FS_STRING));
-var_dump(filter_data("<>!@#$%^&*()'\"", FS_STRING, FILTER_FLAG_NO_ENCODE_QUOTES));
-var_dump(filter_data("<>!@#$%^&*()'\"", FS_STRING, FILTER_FLAG_ENCODE_AMP));
-var_dump(filter_data("<>`1234567890", FS_STRING));
-var_dump(filter_data("`123`", FS_STRING));
-var_dump(filter_data(".", FS_STRING));
+var_dump(filter_data("", FILTER_SANITIZE_STRING));
+var_dump(filter_data("<>", FILTER_SANITIZE_STRING));
+var_dump(filter_data("<>!@#$%^&*()'\"", FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES));
+var_dump(filter_data("<>!@#$%^&*()'\"", FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_AMP));
+var_dump(filter_data("<>`1234567890", FILTER_SANITIZE_STRING));
+var_dump(filter_data("`123`", FILTER_SANITIZE_STRING));
+var_dump(filter_data(".", FILTER_SANITIZE_STRING));
 
 echo "Done\n";
 ?>
