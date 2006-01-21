@@ -7,14 +7,14 @@ c=<p>string</p>&d=12345.7
 --FILE--
 <?php
 
-var_dump(input_get(INPUT_GET, "a", FS_STRIPPED));
-var_dump(input_get(INPUT_GET, "b", FS_URL));
-var_dump(input_get(INPUT_GET, "a", FS_SPECIAL_CHARS, array(1,2,3,4,5)));
-var_dump(input_get(INPUT_GET, "b", FL_FLOAT, new stdClass));
-var_dump(input_get(INPUT_POST, "c", FS_STRIPPED, array(5,6,7,8)));
-var_dump(input_get(INPUT_POST, "d", FL_FLOAT));
-var_dump(input_get(INPUT_POST, "c", FS_SPECIAL_CHARS));
-var_dump(input_get(INPUT_POST, "d", FL_INT));
+var_dump(input_get(INPUT_GET, "a", FILTER_SANITIZE_STRIPPED));
+var_dump(input_get(INPUT_GET, "b", FILTER_SANITIZE_URL));
+var_dump(input_get(INPUT_GET, "a", FILTER_SANITIZE_SPECIAL_CHARS, array(1,2,3,4,5)));
+var_dump(input_get(INPUT_GET, "b", FILTER_VALIDATE_FLOAT, new stdClass));
+var_dump(input_get(INPUT_POST, "c", FILTER_SANITIZE_STRIPPED, array(5,6,7,8)));
+var_dump(input_get(INPUT_POST, "d", FILTER_VALIDATE_FLOAT));
+var_dump(input_get(INPUT_POST, "c", FILTER_SANITIZE_SPECIAL_CHARS));
+var_dump(input_get(INPUT_POST, "d", FILTER_VALIDATE_INT));
 
 var_dump(input_get(new stdClass, "d"));
 

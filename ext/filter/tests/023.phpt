@@ -1,13 +1,13 @@
 --TEST--
-filter_data() and FS_UNSAFE_RAW
+filter_data() and FILTER_UNSAFE_RAW
 --FILE--
 <?php
 
-var_dump(filter_data("}\"<p>test para</p>", FS_UNSAFE_RAW, FILTER_FLAG_ENCODE_AMP));
-var_dump(filter_data("a[!@#<b>$%^&*()@a@#$%^&*(.<br>com@#$%^&*(", FS_UNSAFE_RAW, FILTER_FLAG_ENCODE_AMP));
-var_dump(filter_data("white space here \ \ \" some more", FS_UNSAFE_RAW, FILTER_FLAG_ENCODE_AMP));
-var_dump(filter_data("", FS_UNSAFE_RAW, FILTER_FLAG_ENCODE_AMP));
-var_dump(filter_data("             123456789000000       <qwertyuiop> ", FS_UNSAFE_RAW, FILTER_FLAG_ENCODE_AMP));
+var_dump(filter_data("}\"<p>test para</p>", FILTER_UNSAFE_RAW, FILTER_FLAG_ENCODE_AMP));
+var_dump(filter_data("a[!@#<b>$%^&*()@a@#$%^&*(.<br>com@#$%^&*(", FILTER_UNSAFE_RAW, FILTER_FLAG_ENCODE_AMP));
+var_dump(filter_data("white space here \ \ \" some more", FILTER_UNSAFE_RAW, FILTER_FLAG_ENCODE_AMP));
+var_dump(filter_data("", FILTER_UNSAFE_RAW, FILTER_FLAG_ENCODE_AMP));
+var_dump(filter_data("             123456789000000       <qwertyuiop> ", FILTER_UNSAFE_RAW, FILTER_FLAG_ENCODE_AMP));
 	
 echo "Done\n";
 ?>

@@ -4,7 +4,7 @@ filter() test
 foo=<b>abc</b>
 --FILE--
 <?php 
-echo input_get(INPUT_POST, 'foo', FS_STRIPPED);
+echo input_get(INPUT_POST, 'foo', FILTER_SANITIZE_STRIPPED);
 ?>
 --EXPECT--
 abc

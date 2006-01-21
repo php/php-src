@@ -3,12 +3,12 @@ filter_data()
 --FILE--
 <?php
 
-var_dump(filter_data(array(1,"1","", "-23234", "text", "asdf234asdfgs", array()), FL_INT));
-var_dump(filter_data(array(1.2,"1.7","", "-23234.123", "text", "asdf234.2asdfgs", array()), FL_FLOAT));
+var_dump(filter_data(array(1,"1","", "-23234", "text", "asdf234asdfgs", array()), FILTER_VALIDATE_INT));
+var_dump(filter_data(array(1.2,"1.7","", "-23234.123", "text", "asdf234.2asdfgs", array()), FILTER_VALIDATE_FLOAT));
 var_dump(filter_data(1, array()));
-var_dump(filter_data(1, FS_STRING, 1));
-var_dump(filter_data(1, FS_STRING, 0));
-var_dump(filter_data(1, FS_STRING, array()));
+var_dump(filter_data(1, FILTER_SANITIZE_STRING, 1));
+var_dump(filter_data(1, FILTER_SANITIZE_STRING, 0));
+var_dump(filter_data(1, FILTER_SANITIZE_STRING, array()));
 var_dump(filter_data(1, -1, array(123)));
 var_dump(filter_data(1, 0, array()));
 

@@ -1,28 +1,28 @@
 --TEST--
-filter_data() and FL_IP
+filter_data() and FILTER_VALIDATE_IP
 --FILE--
 <?php
-var_dump(filter_data("192.168.0.1", FL_IP));
-var_dump(filter_data("192.168.0.1.1", FL_IP));
-var_dump(filter_data("::1", FL_IP));
-var_dump(filter_data("fe00::0", FL_IP));
-var_dump(filter_data("::123456", FL_IP));
-var_dump(filter_data("::1::b", FL_IP));
-var_dump(filter_data("127.0.0.1", FL_IP));
-var_dump(filter_data("192.168.0.1", FL_IP, FILTER_FLAG_NO_PRIV_RANGE));
-var_dump(filter_data("192.0.34.166", FL_IP, FILTER_FLAG_NO_PRIV_RANGE));
-var_dump(filter_data("127.0.0.1", FL_IP, FILTER_FLAG_NO_RES_RANGE));
-var_dump(filter_data("192.0.0.1", FL_IP, FILTER_FLAG_NO_RES_RANGE));
-var_dump(filter_data("192.0.34.166", FL_IP));
-var_dump(filter_data("256.1237.123.1", FL_IP));
-var_dump(filter_data("255.255.255.255", FL_IP));
-var_dump(filter_data("255.255.255.255", FL_IP, FILTER_FLAG_NO_RES_RANGE));
-var_dump(filter_data("", FL_IP));
-var_dump(filter_data(-1, FL_IP));
-var_dump(filter_data("::1", FL_IP, FILTER_FLAG_IPV4));
-var_dump(filter_data("127.0.0.1", FL_IP, FILTER_FLAG_IPV6));
-var_dump(filter_data("::1", FL_IP, FILTER_FLAG_IPV6));
-var_dump(filter_data("127.0.0.1", FL_IP, FILTER_FLAG_IPV4));
+var_dump(filter_data("192.168.0.1", FILTER_VALIDATE_IP));
+var_dump(filter_data("192.168.0.1.1", FILTER_VALIDATE_IP));
+var_dump(filter_data("::1", FILTER_VALIDATE_IP));
+var_dump(filter_data("fe00::0", FILTER_VALIDATE_IP));
+var_dump(filter_data("::123456", FILTER_VALIDATE_IP));
+var_dump(filter_data("::1::b", FILTER_VALIDATE_IP));
+var_dump(filter_data("127.0.0.1", FILTER_VALIDATE_IP));
+var_dump(filter_data("192.168.0.1", FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE));
+var_dump(filter_data("192.0.34.166", FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE));
+var_dump(filter_data("127.0.0.1", FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE));
+var_dump(filter_data("192.0.0.1", FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE));
+var_dump(filter_data("192.0.34.166", FILTER_VALIDATE_IP));
+var_dump(filter_data("256.1237.123.1", FILTER_VALIDATE_IP));
+var_dump(filter_data("255.255.255.255", FILTER_VALIDATE_IP));
+var_dump(filter_data("255.255.255.255", FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE));
+var_dump(filter_data("", FILTER_VALIDATE_IP));
+var_dump(filter_data(-1, FILTER_VALIDATE_IP));
+var_dump(filter_data("::1", FILTER_VALIDATE_IP, FILTER_FLAG_IPV4));
+var_dump(filter_data("127.0.0.1", FILTER_VALIDATE_IP, FILTER_FLAG_IPV6));
+var_dump(filter_data("::1", FILTER_VALIDATE_IP, FILTER_FLAG_IPV6));
+var_dump(filter_data("127.0.0.1", FILTER_VALIDATE_IP, FILTER_FLAG_IPV4));
 echo "Done\n";
 ?>
 --EXPECT--	

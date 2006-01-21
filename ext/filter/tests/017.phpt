@@ -1,14 +1,14 @@
 --TEST--
-filter_data() and FL_REGEXP
+filter_data() and FILTER_VALIDATE_REGEXP
 --FILE--
 <?php
 
-var_dump(filter_data("data", FL_REGEXP, array("regexp"=>'/.*/')));
-var_dump(filter_data("data", FL_REGEXP, array("regexp"=>'/^b(.*)/')));
-var_dump(filter_data("data", FL_REGEXP, array("regexp"=>'/^d(.*)/')));
-var_dump(filter_data("data", FL_REGEXP, array("regexp"=>'blah')));
-var_dump(filter_data("data", FL_REGEXP, array("regexp"=>'[')));
-var_dump(filter_data("data", FL_REGEXP));
+var_dump(filter_data("data", FILTER_VALIDATE_REGEXP, array("regexp"=>'/.*/')));
+var_dump(filter_data("data", FILTER_VALIDATE_REGEXP, array("regexp"=>'/^b(.*)/')));
+var_dump(filter_data("data", FILTER_VALIDATE_REGEXP, array("regexp"=>'/^d(.*)/')));
+var_dump(filter_data("data", FILTER_VALIDATE_REGEXP, array("regexp"=>'blah')));
+var_dump(filter_data("data", FILTER_VALIDATE_REGEXP, array("regexp"=>'[')));
+var_dump(filter_data("data", FILTER_VALIDATE_REGEXP));
 
 echo "Done\n";
 ?>
