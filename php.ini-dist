@@ -1132,6 +1132,9 @@ pfpro.defaulttimeout = 30
 ; 4: Overload ereg*() functions
 ;mbstring.func_overload = 0
 
+; enable strict encoding detection.
+;mbstring.strict_encoding = Off
+
 [FrontBase]
 ;fbsql.allow_persistent = On
 ;fbsql.autocommit = On
