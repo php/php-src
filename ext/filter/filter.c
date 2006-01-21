@@ -36,27 +36,27 @@ typedef struct filter_list_entry {
 } filter_list_entry;
 
 filter_list_entry filter_list[] = {
-	{ "int",             FL_INT,           php_filter_int             },
-	{ "boolean",         FL_BOOLEAN,       php_filter_boolean         },
-	{ "float",           FL_FLOAT,         php_filter_float           },
+	{ "int",             FILTER_VALIDATE_INT,           php_filter_int             },
+	{ "boolean",         FILTER_VALIDATE_BOOLEAN,       php_filter_boolean         },
+	{ "float",           FILTER_VALIDATE_FLOAT,         php_filter_float           },
 
-	{ "validate_regexp", FL_REGEXP,        php_filter_validate_regexp },
-	{ "validate_url",    FL_URL,           php_filter_validate_url    },
-	{ "validate_email",  FL_EMAIL,         php_filter_validate_email  },
-	{ "validate_ip",     FL_IP,            php_filter_validate_ip     },
+	{ "validate_regexp", FILTER_VALIDATE_REGEXP,        php_filter_validate_regexp },
+	{ "validate_url",    FILTER_VALIDATE_URL,           php_filter_validate_url    },
+	{ "validate_email",  FILTER_VALIDATE_EMAIL,         php_filter_validate_email  },
+	{ "validate_ip",     FILTER_VALIDATE_IP,            php_filter_validate_ip     },
 
-	{ "string",          FS_STRING,        php_filter_string          },
-	{ "stripped",        FS_STRING,        php_filter_string          },
-	{ "encoded",         FS_ENCODED,       php_filter_encoded         },
-	{ "special_chars",   FS_SPECIAL_CHARS, php_filter_special_chars   },
-	{ "unsafe_raw",      FS_UNSAFE_RAW,    php_filter_unsafe_raw      },
-	{ "email",           FS_EMAIL,         php_filter_email           },
-	{ "url",             FS_URL,           php_filter_url             },
-	{ "number_int",      FS_NUMBER_INT,    php_filter_number_int      },
-	{ "number_float",    FS_NUMBER_FLOAT,  php_filter_number_float    },
-	{ "magic_quotes",    FS_MAGIC_QUOTES,  php_filter_magic_quotes    },
+	{ "string",          FILTER_SANITIZE_STRING,        php_filter_string          },
+	{ "stripped",        FILTER_SANITIZE_STRING,        php_filter_string          },
+	{ "encoded",         FILTER_SANITIZE_ENCODED,       php_filter_encoded         },
+	{ "special_chars",   FILTER_SANITIZE_SPECIAL_CHARS, php_filter_special_chars   },
+	{ "unsafe_raw",      FILTER_UNSAFE_RAW,    php_filter_unsafe_raw      },
+	{ "email",           FILTER_SANITIZE_EMAIL,         php_filter_email           },
+	{ "url",             FILTER_SANITIZE_URL,           php_filter_url             },
+	{ "number_int",      FILTER_SANITIZE_NUMBER_INT,    php_filter_number_int      },
+	{ "number_float",    FILTER_SANITIZE_NUMBER_FLOAT,  php_filter_number_float    },
+	{ "magic_quotes",    FILTER_SANITIZE_MAGIC_QUOTES,  php_filter_magic_quotes    },
 
-	{ "callback",        FC_CALLBACK,      php_filter_callback        },
+	{ "callback",        FILTER_CALLBACK,               php_filter_callback        },
 };
 	
 #ifndef PARSE_ENV
@@ -120,7 +120,7 @@ static PHP_INI_MH(UpdateDefaultFilter)
 		}
 	}
 	/* Fallback to "string" filter */
-	IF_G(default_filter) = FS_DEFAULT;
+	IF_G(default_filter) = FILTER_DEFAULT;
 	return SUCCESS;
 }
 /* }}} */
@@ -153,7 +153,7 @@ static void php_filter_init_globals(zend_filter_globals *filter_globals)
 	filter_globals->env_array = NULL;
 	filter_globals->server_array = NULL;
 	filter_globals->session_array = NULL;
-	filter_globals->default_filter = FS_DEFAULT;
+	filter_globals->default_filter = FILTER_DEFAULT;
 }
 /* }}} */
 
@@ -175,29 +175,31 @@ PHP_MINIT_FUNCTION(filter)
 	REGISTER_LONG_CONSTANT("INPUT_SESSION", PARSE_SESSION, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_NONE", FILTER_FLAG_NONE, CONST_CS | CONST_PERSISTENT);
+/*
+	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_INT", FILTER_VALIDATE_INT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_BOOLEAN", FILTER_VALIDATE_BOOLEAN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_FLOAT", FILTER_VALIDATE_FLOAT, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("FL_INT", FL_INT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FL_BOOLEAN", FL_BOOLEAN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FL_FLOAT", FL_FLOAT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_REGEXP", FILTER_VALIDATE_REGEXP, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_URL", FILTER_VALIDATE_URL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_EMAIL", FILTER_VALIDATE_EMAIL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_IP", FILTER_VALIDATE_IP, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("FL_REGEXP", FL_REGEXP, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FL_URL", FL_URL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FL_EMAIL", FL_EMAIL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FL_IP", FL_IP, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_DEFAULT", FILTER_SANITIZE_DEFAULT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_UNSAFE_RAW", FILTER_UNSAFE_RAW, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("FS_DEFAULT", FS_DEFAULT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FS_STRING", FS_STRING, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FS_STRIPPED", FS_STRING, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FS_ENCODED", FS_ENCODED, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FS_SPECIAL_CHARS", FS_SPECIAL_CHARS, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FS_UNSAFE_RAW", FS_UNSAFE_RAW, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FS_EMAIL", FS_EMAIL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FS_URL", FS_URL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FS_NUMBER_INT", FS_NUMBER_INT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FS_NUMBER_FLOAT", FS_NUMBER_FLOAT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FS_MAGIC_QUOTES", FS_MAGIC_QUOTES, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FC_CALLBACK", FC_CALLBACK, CONST_CS | CONST_PERSISTENT);
-	
+	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_STRING", FILTER_SANITIZE_STRING, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_STRIPPED", FILTER_SANITIZE_STRING, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_ENCODED", FILTER_SANITIZE_ENCODED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_SPECIAL_CHARS", FILTER_SANITIZE_SPECIAL_CHARS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_EMAIL", FILTER_SANITIZE_EMAIL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_URL", FILTER_SANITIZE_URL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_NUMBER_INT", FILTER_SANITIZE_NUMBER_INT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_NUMBER_FLOAT", FILTER_SANITIZE_NUMBER_FLOAT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_MAGIC_QUOTES", FILTER_SANITIZE_MAGIC_QUOTES, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("FILTER_CALLBACK", FILTER_CALLBACK, CONST_CS | CONST_PERSISTENT);
+*/
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_ALLOW_OCTAL", FILTER_FLAG_ALLOW_OCTAL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_ALLOW_HEX", FILTER_FLAG_ALLOW_HEX, CONST_CS | CONST_PERSISTENT);
 
@@ -281,7 +283,7 @@ static filter_list_entry php_find_filter(long id)
 	}
 	/* Fallback to "string" filter */
 	for (i = 0; i < size; ++i) {
-		if (filter_list[i].id == FS_DEFAULT) {
+		if (filter_list[i].id == FILTER_DEFAULT) {
 			return filter_list[i];
 		}
 	}
@@ -297,7 +299,7 @@ static void php_zval_filter(zval *value, long filter, long flags, zval *options,
 
 	if (!filter_func.id) {
 		/* Find default filter */
-		filter_func = php_find_filter(FS_DEFAULT);
+		filter_func = php_find_filter(FILTER_DEFAULT);
 	}
 
 	/* Here be strings */
@@ -365,7 +367,7 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 	Z_TYPE(new_var) = IS_STRING;
 
 	if (val_len) {
-		if (! (IF_G(default_filter) == FS_UNSAFE_RAW)) {
+		if (! (IF_G(default_filter) == FILTER_UNSAFE_RAW)) {
 			php_zval_filter(&new_var, IF_G(default_filter), IF_G(default_filter_flags), NULL, NULL/*charset*/ TSRMLS_CC);
 		}
 	}
@@ -459,7 +461,7 @@ PHP_FUNCTION(input_has_variable)
  */
 PHP_FUNCTION(input_get)
 {
-	long        arg, filter = FS_DEFAULT;
+	long        arg, filter = FILTER_DEFAULT;
 	char       *var, *charset = NULL;
 	int         var_len, charset_len;
 	zval       *flags = NULL;
@@ -510,7 +512,7 @@ PHP_FUNCTION(input_get)
 					switch (*p) {
 						case 'p':
 						case 'P':
-							if (IF_G(default_filter) != FS_UNSAFE_RAW) {
+							if (IF_G(default_filter) != FILTER_UNSAFE_RAW) {
 								*a_ptr = IF_G(post_array);
 							} else {
 								*a_ptr = PG(http_globals)[TRACK_VARS_POST];
@@ -518,7 +520,7 @@ PHP_FUNCTION(input_get)
 							break;
 						case 'g':
 						case 'G':
-							if (IF_G(default_filter) != FS_UNSAFE_RAW) {
+							if (IF_G(default_filter) != FILTER_UNSAFE_RAW) {
 								*a_ptr = IF_G(get_array);
 							} else {
 								*a_ptr = PG(http_globals)[TRACK_VARS_GET];
@@ -526,7 +528,7 @@ PHP_FUNCTION(input_get)
 							break;
 						case 'c':
 						case 'C':
-							if (IF_G(default_filter) != FS_UNSAFE_RAW) {
+							if (IF_G(default_filter) != FILTER_UNSAFE_RAW) {
 								*a_ptr = IF_G(cookie_array);
 							} else {
 								*a_ptr = PG(http_globals)[TRACK_VARS_COOKIE];
@@ -623,7 +625,7 @@ PHP_FUNCTION(input_name_to_filter)
  */
 PHP_FUNCTION(filter_data)
 {
-	long        filter = FS_DEFAULT;
+	long        filter = FILTER_DEFAULT;
 	char       *charset = NULL;
 	int         charset_len;
 	zval       *var, *flags = NULL;
@@ -634,7 +636,7 @@ PHP_FUNCTION(filter_data)
 		return;
 	}
 
-	if (filter != FC_CALLBACK) {
+	if (filter != FILTER_CALLBACK) {
 		if (flags) {
 			switch (Z_TYPE_P(flags)) {
 				case IS_ARRAY:
