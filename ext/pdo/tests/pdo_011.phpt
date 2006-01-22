@@ -28,7 +28,7 @@ class DerivedStatement extends PDOStatement
 		echo __METHOD__ . "($name)\n";
 	}
 
-	function retrieve($id, $val) {
+	function reTrieve($id, $val) {
 		echo __METHOD__ . "($id,$val)\n";
 		return array($id=>$val);
 	}
@@ -77,6 +77,10 @@ var_dump($select2->fetchAll(PDO::FETCH_FUNC, array($f, 'factory')));
 var_dump(get_class($derived));
 $derived->execute();
 var_dump($derived->fetchAll(PDO::FETCH_FUNC, array($derived, 'retrieve')));
+$derived->execute();
+var_dump($derived->fetchAll(PDO::FETCH_FUNC, array($derived, 'reTrieve')));
+$derived->execute();
+var_dump($derived->fetchAll(PDO::FETCH_FUNC, array($derived, 'RETRIEVE')));
 
 ?>
 --EXPECTF--
@@ -217,10 +221,62 @@ array(4) {
   }
 }
 string(16) "DerivedStatement"
-DerivedStatement::retrieve(1,A)
-DerivedStatement::retrieve(2,B)
-DerivedStatement::retrieve(3,C)
-DerivedStatement::retrieve(4,D)
+DerivedStatement::reTrieve(1,A)
+DerivedStatement::reTrieve(2,B)
+DerivedStatement::reTrieve(3,C)
+DerivedStatement::reTrieve(4,D)
+array(4) {
+  [0]=>
+  array(1) {
+    [1]=>
+    string(1) "A"
+  }
+  [1]=>
+  array(1) {
+    [2]=>
+    string(1) "B"
+  }
+  [2]=>
+  array(1) {
+    [3]=>
+    string(1) "C"
+  }
+  [3]=>
+  array(1) {
+    [4]=>
+    string(1) "D"
+  }
+}
+DerivedStatement::reTrieve(1,A)
+DerivedStatement::reTrieve(2,B)
+DerivedStatement::reTrieve(3,C)
+DerivedStatement::reTrieve(4,D)
+array(4) {
+  [0]=>
+  array(1) {
+    [1]=>
+    string(1) "A"
+  }
+  [1]=>
+  array(1) {
+    [2]=>
+    string(1) "B"
+  }
+  [2]=>
+  array(1) {
+    [3]=>
+    string(1) "C"
+  }
+  [3]=>
+  array(1) {
+    [4]=>
+    string(1) "D"
+  }
+}
+DerivedStatement::reTrieve(1,A)
+DerivedStatement::reTrieve(2,B)
+DerivedStatement::reTrieve(3,C)
+DerivedStatement::reTrieve(4,D)
 array(4) {
   [0]=>
   array(1) {
