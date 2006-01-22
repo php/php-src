@@ -283,7 +283,6 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 	param->stmt = stmt;
 	param->is_param = is_param;
 
-	ZVAL_ADDREF(param->parameter);
 	if (param->driver_params) {
 		ZVAL_ADDREF(param->driver_params);
 	}
@@ -395,7 +394,6 @@ static PHP_METHOD(PDOStatement, execute)
 				zval_ptr_dtor(&param.parameter);
 				RETURN_FALSE;
 			}
-			zval_ptr_dtor(&param.parameter);
 
 			zend_hash_move_forward(Z_ARRVAL_P(input_params));
 		}
@@ -1472,6 +1470,7 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 		return 0;
 	}
 
+	ZVAL_ADDREF(param.parameter);
 	return really_register_bound_param(&param, stmt, is_param TSRMLS_CC);
 } /* }}} */
 
@@ -1490,16 +1489,17 @@ static PHP_METHOD(PDOStatement, bindValue)
 		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/|l", &param.name,
 				&param.namelen, &param.parameter, &param.param_type)) {
 			RETURN_FALSE;
-		}	
+		}
 	}
-
+	
 	if (param.paramno > 0) {
 		--param.paramno; /* make it zero-based internally */
 	} else if (!param.name) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "Columns/Parameters are 1-based" TSRMLS_CC);
 		RETURN_FALSE;
 	}
-
+	
+	ZVAL_ADDREF(param.parameter);
 	RETURN_BOOL(really_register_bound_param(&param, stmt, TRUE TSRMLS_CC));
 }
 /* }}} */
@@ -1657,6 +1657,7 @@ static PHP_METHOD(PDOStatement, getColumnMeta)
 		pdo_raise_impl_error(stmt->dbh, stmt, "42P10", "column number must be non-negative" TSRMLS_CC);
 		RETURN_FALSE;
 	}
+
 	if (!stmt->methods->get_column_meta) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "driver doesn't support meta data" TSRMLS_CC);
 		RETURN_FALSE;
