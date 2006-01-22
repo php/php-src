@@ -1,7 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, PHP 5.1.3
-- Allow get_headers() to retrieve headers from non-200 responses. (Ilia)
+- Chagned get_headers() to retrieve headers also from non-200 responses. (Ilia)
 - Changed get_headers() to use the default context. (Ilia)
 - Added a check for special characters in the session name. (Ilia)
 - Added "consumed" stream filter. (Marcus)
