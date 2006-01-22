@@ -44,51 +44,29 @@ document printzv
 end
 
 define ____printzv_contents
-	____executor_globals
 	set $zvalue = $arg0
+	set $type = $zvalue.type
 
-	if $zvalue.type == 0
-		set $typename = "NULL"
+	printf "(refcount=%d) ", $zvalue.refcount
+	if $type == 0
+		printf "NULL: "
 	end
-	if $zvalue.type == 1
-		set $typename = "long"
+	if $type == 1
+		printf "long: %ld", $zvalue.value.lval
 	end
-	if $zvalue.type == 2
-		set $typename = "double"
+	if $type == 2
+		printf "double: %lf", $zvalue.value.dval
 	end
-	if $zvalue.type == 3
-		set $typename = "string"
+	if $type == 3
+		printf "bool: "
+		if $zvalue.value.lval
+			printf "true"
+		else
+			printf "false"
+		end
 	end
-	if $zvalue.type == 4
-		set $typename = "array"
-	end
-	if $zvalue.type == 5
-		set $typename = "object"
-	end
-	if $zvalue.type == 6
-		set $typename = "bool"
-	end
-	if $zvalue.type == 7
-		set $typename = "resource"
-	end
-	if $zvalue.type == 8 
-		set $typename = "constant"
-	end
-	if $zvalue.type == 9
-		set $typename = "const_array"
-	end
-
-	printf "(refcount=%d) %s: ", $zvalue.refcount, $typename
-	if $zvalue.type == 1
-		printf "%ld", $zvalue.value.lval
-	end
-	if $zvalue->type == 2
-		printf "%lf", $zvalue.value.dval
-	end
-	if $zvalue.type == 3
-		printf "\"%s\"(%d)", $zvalue.value.str.val, $zvalue.value.str.len
-	end
-	if $zvalue.type == 4
+	if $type == 4
+		printf "array(%d): ", $zvalue.value.ht->nNumOfElements
 		if ! $arg1
 			printf "{\n"
 			set $ind = $ind + 1
@@ -101,34 +79,54 @@ define ____printzv_contents
 			end
 			printf "}"
 		end
+		set $type = 0
 	end
-	if $zvalue.type == 5
+	if $type == 5
+		printf "object"
+		____executor_globals
+		set $handle = $zvalue->value.obj.handle
+		set $zobj = (zend_object *)$eg->objects_store.object_buckets[$handle].bucket.obj.object
+		printf "(%s) #%d", $zobj->ce->name, $handle
 		if ! $arg1
 			printf "(prop examination disabled due to a gdb bug)"
-			if $zvalue.value.obj.handlers->get_properties
+#			if $zvalue.value.obj.handlers->get_properties
 #				set $ht = $zvalue->value.obj.handlers->get_properties($zvalue)
-#				printf "{\n"
-#				set $ind = $ind + 1
-#				____print_ht $ht
-#				set $ind = $ind - 1
-#				set $i = $ind
-#				while $i > 0
-#					printf "  "
-#					set $i = $i - 1
+#				if $ht
+#					printf "(%d): $ht->nNumOfElements
+#					printf "{\n"
+#					set $ind = $ind + 1
+#					____print_ht $ht
+#					set $ind = $ind - 1
+#					set $i = $ind
+#					while $i > 0
+#						printf "  "
+#						set $i = $i - 1
+#					end
+#					printf "}"
+#				else
+#					echo "no properties found"
 #				end
-#				printf "}"
 			end
 		end
+		set $type = 0
 	end
-	if $zvalue.type == 6
-		if $zvalue.value.lval
-			printf "true"
-		else
-			printf "false"
-		end
+	if $type == 6
+		printf "string(%d): \"%s\"", $zvalue.value.str.len, $zvalue.value.str.val
 	end
-	if $zvalue.type == 7
-		printf "#%d", $zvalue.value.lval
+	if $type == 7
+		printf "resource: #%d", $zvalue.value.lval
+	end
+	if $type == 8 
+		printf "constant"
+	end
+	if $type == 9
+		printf "const_array"
+	end
+	if $type == 10
+		printf "unicode string(%d): [%p]", $zvalue.value.str.len, $zvalue.value.str.val
+	end
+	if $type > 10
+		printf"unknown type %d", $type
 	end
 	printf "\n"
 end
