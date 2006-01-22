@@ -504,12 +504,12 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 			} else {
 				if (const_value.type == IS_STRING && 
 				    const_value.value.str.len == str_index_len-1 &&
-			   !strncmp(const_value.value.str.val, str_index, str_index_len)) {
-				/* constant value is the same as its name */
-				zval_dtor(&const_value);
-				zend_hash_move_forward(p->value.ht);
-				continue;
-			}
+				   !strncmp(const_value.value.str.val, str_index, str_index_len)) {
+					/* constant value is the same as its name */
+					zval_dtor(&const_value);
+					zend_hash_move_forward(p->value.ht);
+					continue;
+				}
 			}
 
 			ALLOC_ZVAL(new_val);
