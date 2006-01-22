@@ -1,3 +1,9 @@
+2006-01-21  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * php.ini-dist
+      php.ini-recommended:
+      added new option of mbstring to php.ini
+
 2006-01-20  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * ext/gd/config.m4:
