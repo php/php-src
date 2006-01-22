@@ -1422,28 +1422,28 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
    bind an input parameter to the value of a PHP variable.  $paramno is the 1-based position of the placeholder in the SQL statement (but can be the parameter name for drivers that support named placeholders).  It should be called prior to execute(). */
 static PHP_METHOD(PDOStatement, bindValue)
 {
-   pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
-   struct pdo_bound_param_data param = {0};
-
-   param.paramno = -1;
-   param.param_type = PDO_PARAM_STR;
-
-   if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
-           "lz/|l", &param.paramno, &param.parameter, &param.param_type)) {
-       if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/|l", &param.name,
-               &param.namelen, &param.parameter, &param.param_type)) {
-           RETURN_FALSE;
-       }
-   }
-
-   if (param.paramno > 0) {
-       --param.paramno; /* make it zero-based internally */
-   } else if (!param.name) {
-       pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "Columns/Parameters are 1-based" TSRMLS_CC);
-       RETURN_FALSE;
-   }
-
-   RETURN_BOOL(really_register_bound_param(&param, stmt, TRUE TSRMLS_CC));
+	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	struct pdo_bound_param_data param = {0};
+	
+	param.paramno = -1;
+	param.param_type = PDO_PARAM_STR;
+	
+	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
+	       "lz/|l", &param.paramno, &param.parameter, &param.param_type)) {
+	   if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/|l", &param.name,
+	           &param.namelen, &param.parameter, &param.param_type)) {
+	       RETURN_FALSE;
+	   }
+	}
+	
+	if (param.paramno > 0) {
+	   --param.paramno; /* make it zero-based internally */
+	} else if (!param.name) {
+	   pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "Columns/Parameters are 1-based" TSRMLS_CC);
+	   RETURN_FALSE;
+	}
+	
+	RETURN_BOOL(really_register_bound_param(&param, stmt, TRUE TSRMLS_CC));
 }
 /* }}} */
 
