@@ -283,7 +283,6 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 	param->stmt = stmt;
 	param->is_param = is_param;
 
-	ZVAL_ADDREF(param->parameter);
 	if (param->driver_params) {
 		ZVAL_ADDREF(param->driver_params);
 	}
@@ -380,6 +379,7 @@ static PHP_METHOD(PDOStatement, execute)
 			INIT_PZVAL(param.parameter);
 
 			if (!really_register_bound_param(&param, stmt, 1 TSRMLS_CC)) {
+				zval_ptr_dtor(&param.parameter);
 				RETURN_FALSE;
 			}
 
@@ -1415,6 +1415,7 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 		return 0;
 	}
 
+	ZVAL_ADDREF(param.parameter);
 	return really_register_bound_param(&param, stmt, is_param TSRMLS_CC);
 } /* }}} */
 
@@ -1443,6 +1444,7 @@ static PHP_METHOD(PDOStatement, bindValue)
 	   RETURN_FALSE;
 	}
 	
+	ZVAL_ADDREF(param.parameter);
 	RETURN_BOOL(really_register_bound_param(&param, stmt, TRUE TSRMLS_CC));
 }
 /* }}} */
