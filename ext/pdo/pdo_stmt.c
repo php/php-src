@@ -1430,18 +1430,18 @@ static PHP_METHOD(PDOStatement, bindValue)
 	param.param_type = PDO_PARAM_STR;
 	
 	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
-	       "lz/|l", &param.paramno, &param.parameter, &param.param_type)) {
-	   if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/|l", &param.name,
-	           &param.namelen, &param.parameter, &param.param_type)) {
-	       RETURN_FALSE;
-	   }
+			"lz/|l", &param.paramno, &param.parameter, &param.param_type)) {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/|l", &param.name,
+				&param.namelen, &param.parameter, &param.param_type)) {
+			RETURN_FALSE;
+		}
 	}
 	
 	if (param.paramno > 0) {
-	   --param.paramno; /* make it zero-based internally */
+		--param.paramno; /* make it zero-based internally */
 	} else if (!param.name) {
-	   pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "Columns/Parameters are 1-based" TSRMLS_CC);
-	   RETURN_FALSE;
+		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "Columns/Parameters are 1-based" TSRMLS_CC);
+		RETURN_FALSE;
 	}
 	
 	ZVAL_ADDREF(param.parameter);
@@ -1894,7 +1894,7 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
    Prevents use of a PDOStatement instance that has been unserialized */
 static PHP_METHOD(PDOStatement, __wakeup)
 {
-   	zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC, "You cannot serialize or unserialize PDOStatement instances");
+	zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC, "You cannot serialize or unserialize PDOStatement instances");
 }
 /* }}} */
 
@@ -1926,8 +1926,8 @@ zend_function_entry pdo_dbstmt_functions[] = {
 	PHP_ME(PDOStatement, nextRowset,	NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, closeCursor,	NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, debugDumpParams, NULL,					ZEND_ACC_PUBLIC)
- 	PHP_ME(PDOStatement, __wakeup,      NULL,                   ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-  	PHP_ME(PDOStatement, __sleep,       NULL,                   ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	PHP_ME(PDOStatement, __wakeup,		NULL,					ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	PHP_ME(PDOStatement, __sleep,		NULL,					ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	{NULL, NULL, NULL}
 };
 
