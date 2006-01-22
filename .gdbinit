@@ -106,7 +106,7 @@ define ____printzv_contents
 #				else
 #					echo "no properties found"
 #				end
-			end
+#			end
 		end
 		set $type = 0
 	end
