@@ -582,6 +582,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	zend_op **original_opline_ptr;
 	zend_class_entry *current_scope;
 	zend_class_entry *calling_scope = NULL;
+	zend_class_entry *check_scope_or_static = NULL;
 	zval *current_this;
 	zend_execute_data execute_data;
 	zval *method_name;
@@ -719,10 +720,12 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			} else {
 				char *lcname = zend_str_tolower_dup(fname, clen);
 				/* caution: lcname is not '\0' terminated */
-				if (clen == sizeof("self") - 1 && memcmp(lcname, "self", sizeof("self") - 1) == 0) {
-					ce_child = EG(active_op_array) ? EG(active_op_array)->scope : NULL;
-				} else if (clen == sizeof("parent") - 1 && memcmp(lcname, "parent", sizeof("parent") - 1) == 0 && EG(active_op_array)->scope) {
-					ce_child = EG(active_op_array) && EG(active_op_array)->scope ? EG(scope)->parent : NULL;
+				if (calling_scope) {
+					if (clen == sizeof("self") - 1 && memcmp(lcname, "self", sizeof("self") - 1) == 0) {
+						ce_child = EG(active_op_array) ? EG(active_op_array)->scope : NULL;
+					} else if (clen == sizeof("parent") - 1 && memcmp(lcname, "parent", sizeof("parent") - 1) == 0 && EG(active_op_array)->scope) {
+						ce_child = EG(active_op_array) && EG(active_op_array)->scope ? EG(scope)->parent : NULL;
+					}
 				}
 				efree(lcname);
 			}
@@ -730,10 +733,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 				zend_error(E_ERROR, "Cannot call method %s() or method does not exist", fname);
 				return FAILURE;
 			}
-			if (!instanceof_function(calling_scope, ce_child TSRMLS_CC)) {
-				zend_error(E_ERROR, "Cannot call method %s() of class %s which is not a derived from %s", fname, ce_child->name, calling_scope->name);
-				return 0;
-			}
+			check_scope_or_static = calling_scope;
 			fci->function_table = &ce_child->function_table;
 			calling_scope = ce_child;
 			fname = fname + clen + 2;
@@ -760,6 +760,12 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			EX(function_state).function = 
 				zend_std_get_static_method(calling_scope, function_name_lc, fname_len TSRMLS_CC);
 			efree(function_name_lc);
+			if (check_scope_or_static && EX(function_state).function
+			&& !(EX(function_state).function->common.fn_flags & ZEND_ACC_STATIC)
+			&& !instanceof_function(check_scope_or_static, calling_scope TSRMLS_CC)) {
+				zend_error(E_ERROR, "Cannot call method %s() of class %s which is not a derived from %s", fname, calling_scope->name, check_scope_or_static->name);
+				return 0;
+			}
 		} else {
 			char *function_name_lc = zend_str_tolower_dup(fname, fname_len);
 
