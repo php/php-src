@@ -393,6 +393,12 @@ SPL_METHOD(DirectoryIterator, __construct)
 		return;
 	}
 
+	if (!len) {
+		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+                zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Directory name must not be empty.");
+                return;
+	}
+
 	intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	spl_filesystem_dir_open(intern, path TSRMLS_CC);
 	intern->u.dir.is_recursive = instanceof_function(intern->std.ce, spl_ce_RecursiveDirectoryIterator TSRMLS_CC) ? 1 : 0;

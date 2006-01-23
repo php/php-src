@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   MYSQLI_TYPE_NEWDECIMAL and MYSQLI_TYPE_BIT. FR #36007. (Georg)
 - Fixed imagecolorallocate() and imagecolorallocatelapha() to return FALSE
   on error. (Pierre)
+- Fixed bug #36134 (DirectoryIterator constructor failed to detect empty 
+  directory names). (Ilia)
 - Fixed bug #36096 (oci_result() returns garbage after oci_fetch() failed). 
   (Tony)
 - Fixed bug #36071 (Engine Crash related with 'clone'). (Dmitry)
