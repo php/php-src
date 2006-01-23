@@ -68,11 +68,6 @@ PRIMARY MAINTAINER:  Alex Leigh <aleigh@php.net>
 MAINTENANCE:         Unknown
 STATUS:              Unknown
 -------------------------------------------------------------------------------
-EXTENSION:           date
-PRIMARY MAINTAINER:  Derick Rethans <derick@php.net>
-MAINTENANCE:         Maintained
-STATUS:              Working
--------------------------------------------------------------------------------
 EXTENSION:           embed
 PRIMARY MAINTAINER:  Edin Kadribasic <edink@php.net>
 MAINTENANCE:         Maintained
@@ -306,6 +301,11 @@ PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>,Ilia Alshanetsky <iliaa@
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               4.0.2
+-------------------------------------------------------------------------------
+EXTENSION:           date
+PRIMARY MAINTAINER:  Derick Rethans <derick@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           exif
 PRIMARY MAINTAINER:  Marcus Boerger <helly@php.net>
