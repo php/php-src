@@ -1,3 +1,16 @@
+2006-01-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute_API.c:
+      - WS
+
+    * (PHP_5_1)
+      zend_execute_API.c:
+      - MFH Fix issues with static method invocation
+
+    * zend_execute_API.c
+      zend_object_handlers.c:
+      - Fix method invocation issues
+
 2006-01-19  Antony Dovgal  <antony@zend.com>
 
     * tests/bug32290.phpt:
