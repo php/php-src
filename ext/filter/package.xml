@@ -24,14 +24,12 @@ of filters and mechanisms that users can use to safely access their input data.
  <license>PHP</license>
  <release>
   <state>beta</state>
-  <version>0.9.3</version>
-  <date>2005-11-18</date>
+  <version>0.9.4</version>
+  <date>2006-01-23</date>
   <notes>
-- Fixed PECL bug #5960: Build with PHP's PCRE headers
-- Fixed PECL bug #5962: Postive float returned when negative float given
-- Fixed PECL bug #5963: Segmentation fault when passing anything other than strings
-
-- Added PECL FR #5961: Support other cases of "On", "Off", "True", and "False"
+- Reimplement php_filter_callback() as exception-safe and without memleaks
+- Renamed all constants.
+- Fixed PECL bug #6124: Crash on HTML tags when using FS_STRING
   </notes>
   <filelist>
    <file role="src" name="config.m4"/>
