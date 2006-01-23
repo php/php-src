@@ -24,7 +24,7 @@ dbhead_t *get_dbf_head(int fd)
 	dbfield_t *dbf, *cur_f, *tdbf;
 	int ret, nfields, offset, gf_retval;
 
-	if ((dbh = (dbhead_t *)malloc(sizeof(dbhead_t))) == NULL)
+	if ((dbh = (dbhead_t *)calloc(1, sizeof(dbhead_t))) == NULL)
 		return NULL;
 	if (lseek(fd, 0, 0) < 0)
 		return NULL;
@@ -44,7 +44,7 @@ dbhead_t *get_dbf_head(int fd)
 
 	/* malloc enough memory for the maximum number of fields:
 	   32 * 1024 = 32K dBase5 (for Win) seems to allow that many */
-	tdbf = (dbfield_t *)malloc(sizeof(dbfield_t)*1024);
+	tdbf = (dbfield_t *)calloc(1, sizeof(dbfield_t)*1024);
 	
 	offset = 1;
 	nfields = 0;
@@ -157,7 +157,8 @@ int get_dbf_field(dbhead_t *dbh, dbfield_t *dbf)
 	}
 
 	if ((dbf->db_format = get_dbf_f_fmt(dbf)) == NULL) {
-		return 1;
+		/* something went wrong, most likely this fieldtype is not supported */
+		return -1;
 	}
 
 	return 0;
@@ -235,6 +236,8 @@ char *get_dbf_f_fmt(dbfield_t *dbf)
 	   case 'M':
 		strcpy(format, "%s");
 		break;
+	   default:
+		return NULL;
 	}
 	return (char *)strdup(format);
 }
@@ -256,7 +259,7 @@ dbhead_t *dbf_open(char *dp, int o_flags TSRMLS_DC)
 		}
 	}
 
-	if ((dbh = get_dbf_head(fd)) ==	 0) {
+	if ((dbh = get_dbf_head(fd)) ==	NULL) {
 		fprintf(stderr, "Unable to get header\n");
 		return NULL;
 	}
