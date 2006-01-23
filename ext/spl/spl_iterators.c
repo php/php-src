@@ -859,7 +859,7 @@ static inline spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAME
 			if (((flags & CIT_CALL_TOSTRING) && (flags & (CIT_TOSTRING_USE_KEY|CIT_TOSTRING_USE_CURRENT)))
 			|| ((flags & (CIT_TOSTRING_USE_KEY|CIT_TOSTRING_USE_CURRENT)) == (CIT_TOSTRING_USE_KEY|CIT_TOSTRING_USE_CURRENT))) {
 				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
-				zend_throw_exception(spl_ce_InvalidArgumentException, "Flags must contain only one of CIT_CALL_TOSTRING, CIT_TOSTRING_USE_KEY, CIT_TOSTRING_USE_CURRENT", 0 TSRMLS_CC);
+				zend_throw_exception(spl_ce_InvalidArgumentException, "Flags must contain only one of CATCH_GET_CHILD, CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT", 0 TSRMLS_CC);
 				return NULL;
 			}
 			intern->u.caching.flags |= flags & CIT_PUBLIC;
