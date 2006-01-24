@@ -1211,12 +1211,12 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *retval)
 		/* Append elem */
 		if (return_type == IS_UNICODE) {
 			Z_USTRVAL_P(retval) = eurealloc(Z_USTRVAL_P(retval),
-											UBYTES(Z_USTRLEN_P(retval)+Z_USTRLEN_PP(tmp)+1));
+											Z_USTRLEN_P(retval)+Z_USTRLEN_PP(tmp)+1);
 			memcpy(Z_USTRVAL_P(retval)+Z_USTRLEN_P(retval), Z_USTRVAL_PP(tmp), UBYTES(Z_USTRLEN_PP(tmp)+1));
 			Z_USTRLEN_P(retval) += Z_USTRLEN_PP(tmp);
 			if (++i < numelems) { /* Append delim */
 				Z_USTRVAL_P(retval) = eurealloc(Z_USTRVAL_P(retval),
-												UBYTES(Z_USTRLEN_P(retval)+Z_USTRLEN_P(delim)+1));
+												Z_USTRLEN_P(retval)+Z_USTRLEN_P(delim)+1);
 				memcpy(Z_USTRVAL_P(retval)+Z_USTRLEN_P(retval), Z_USTRVAL_P(delim), UBYTES(Z_USTRLEN_P(delim)+1));
 				Z_USTRLEN_P(retval) += Z_USTRLEN_P(delim);
 			}
@@ -2942,7 +2942,7 @@ PHPAPI int32_t php_do_substr_replace(void **result, zval **str, zval **repl, int
 	}
 
 	if (Z_TYPE_PP(str) == IS_UNICODE) {
-		buf = emalloc(UBYTES(Z_USTRLEN_PP(str) -l + repl_len + 1));
+		buf = eumalloc(Z_USTRLEN_PP(str) -l + repl_len + 1);
 
 		/* buf_len is codept count here */
 		buf_len = 0; idx = 0;
@@ -2959,7 +2959,7 @@ PHPAPI int32_t php_do_substr_replace(void **result, zval **str, zval **repl, int
 		buf_len += (Z_USTRLEN_PP(str) - idx);
 
 		*((UChar *)buf + buf_len) = 0;
-		buf = erealloc(buf, UBYTES(buf_len + 1));
+		buf = eurealloc(buf, buf_len + 1);
 	} else {
 		/* buf_len is char count here */
 		buf_len = Z_STRLEN_PP(str) - l + repl_len;
