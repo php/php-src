@@ -722,7 +722,7 @@ fmt_string:
 
 				case 'n':
 					*(va_arg(ap, int *)) = xbuf->len;
-					break;
+					goto skip_output;
 
 					/*
 					 * Always extract the argument as a "char *" pointer. We 
@@ -802,6 +802,7 @@ fmt_error:
 				PAD(unicode, xbuf, min_width - s_len, pad_char);
 			}
 		}
+skip_output:
 		fmt++;
 	}
 	return;
