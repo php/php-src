@@ -652,6 +652,20 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 			}
 			break;
 
+		case 'h':
+			{
+				HashTable **p = va_arg(*va, HashTable **);
+				if (Z_TYPE_PP(arg) != IS_ARRAY) {
+					if (Z_TYPE_PP(arg) == IS_NULL && return_null) {
+						*p = NULL;
+					} else {
+						return "array";
+					}
+				} else
+					*p = Z_ARRVAL_PP(arg);
+			}
+			break;
+
 		case 'o':
 			{
 				zval **p = va_arg(*va, zval **);
@@ -798,6 +812,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 			case 'z': case 'Z':
 			case 't': case 'y':
 			case 'u': case 'C':
+			case 'h':
 				max_num_args++;
 				break;
 
