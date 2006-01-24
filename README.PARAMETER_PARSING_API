@@ -37,6 +37,7 @@ Type specifiers
  b	- boolean, stored in zend_bool
  r	- resource (stored in zval)
  a	- array
+ h  - array (returned as HashTable*)
  o	- object (of any type)
  O	- object (of specific type, specified by class entry)
  z	- the actual zval
