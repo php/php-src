@@ -1015,7 +1015,7 @@ static int format_converter(register buffy * odp, const char *fmt,
 
 				case 'n':
 					*(va_arg(ap, int *)) = cc;
-					break;
+					goto skip_output;
 
 					/*
 					 * Always extract the argument as a "char *" pointer. We 
@@ -1096,6 +1096,7 @@ fmt_error:
 			if (adjust_width && adjust == LEFT && min_width > s_len)
 				PAD(min_width, s_len, pad_char);
 		}
+skip_output:
 		fmt++;
 	}
 	odp->nextb = sp;
