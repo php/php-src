@@ -633,8 +633,9 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 					} else {
 						return "resource";
 					}
-				} else
+				} else {
 					*p = *arg;
+				}
 			}
 			break;
 
@@ -647,8 +648,9 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 					} else {
 						return "array";
 					}
-				} else
+				} else {
 					*p = *arg;
+				}
 			}
 			break;
 
@@ -661,8 +663,9 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 					} else {
 						return "array";
 					}
-				} else
+				} else {
 					*p = Z_ARRVAL_PP(arg);
+				}
 			}
 			break;
 
@@ -675,8 +678,9 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 					} else {
 						return "object";
 					}
-				} else
+				} else {
 					*p = *arg;
+				}
 			}
 			break;
 
