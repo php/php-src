@@ -631,7 +631,7 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap)
 
 				case 'n':
 					*(va_arg(ap, int *)) = xbuf->len;
-					break;
+					goto skip_output;
 
 					/*
 					 * Always extract the argument as a "char *" pointer. We 
@@ -709,6 +709,7 @@ fmt_error:
 			if (adjust_width && adjust == LEFT && min_width > s_len)
 				PAD(xbuf, min_width - s_len, pad_char);
 		}
+skip_output:
 		fmt++;
 	}
 	return;
