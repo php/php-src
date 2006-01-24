@@ -135,6 +135,7 @@ zend_function_entry curl_functions[] = {
 	PHP_FE(curl_copy_handle,         NULL)
 	PHP_FE(curl_version,             NULL)
 	PHP_FE(curl_setopt,              NULL)
+	PHP_FE(curl_setopt_array,        NULL)
 	PHP_FE(curl_exec,                NULL)
 	PHP_FE(curl_getinfo,             NULL)
 	PHP_FE(curl_error,               NULL)
@@ -337,6 +338,7 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLINFO_CONTENT_TYPE);
 	REGISTER_CURL_CONSTANT(CURLINFO_REDIRECT_TIME);
 	REGISTER_CURL_CONSTANT(CURLINFO_REDIRECT_COUNT);
+	REGISTER_CURL_CONSTANT(CURLINFO_HEADER_OUT);
 
 	/* cURL protocol constants (curl_version) */
 	REGISTER_CURL_CONSTANT(CURL_VERSION_IPV6);
@@ -719,6 +721,23 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 }
 /* }}} */
 
+static int curl_debug(CURL *cp, curl_infotype type, char *buf, size_t buf_len, void *ctx)
+{
+	php_curl    *ch   = (php_curl *) ctx;
+
+	if (type == CURLINFO_HEADER_OUT) {
+		if (ch->header.str_len) {
+			efree(ch->header.str);		
+		}
+		if (buf_len > 0) {
+			ch->header.str = estrndup(buf, buf_len);
+			ch->header.str_len = buf_len;
+		}
+	}
+
+	return 0;
+}
+
 #if CURLOPT_PASSWDFUNCTION != 0
 /* {{{ curl_passwd
  */
@@ -841,6 +860,7 @@ static void alloc_curl_handle(php_curl **ch)
 	(*ch)->handlers->read         = ecalloc(1, sizeof(php_curl_read));
 
 	(*ch)->in_callback = 0;
+	(*ch)->header.str_len = 0;
 		
 	memset(&(*ch)->err, 0, sizeof((*ch)->err));
 	
@@ -949,24 +969,10 @@ PHP_FUNCTION(curl_copy_handle)
 }
 /* }}} */
 
-/* {{{ proto bool curl_setopt(resource ch, int option, mixed value)
-   Set an option for a CURL transfer */
-PHP_FUNCTION(curl_setopt)
+static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *return_value TSRMLS_DC)
 {
-	zval       **zid, **zoption, **zvalue;
-	php_curl    *ch;
 	CURLcode     error=CURLE_OK;
-	int          option;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &zid, &zoption, &zvalue) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-
-	ZEND_FETCH_RESOURCE(ch, php_curl *, zid, -1, le_curl_name, le_curl);
-
-	convert_to_long_ex(zoption);
-
-	option = Z_LVAL_PP(zoption);
 	switch (option) {
 		case CURLOPT_INFILESIZE:
 		case CURLOPT_VERBOSE:
@@ -1294,14 +1300,80 @@ PHP_FUNCTION(curl_setopt)
 
 			break;
 		}
+		case CURLINFO_HEADER_OUT:
+			convert_to_long_ex(zvalue);
+			if (Z_LVAL_PP(zvalue) == 1) {
+				curl_easy_setopt(ch->cp, CURLOPT_DEBUGFUNCTION, curl_debug);
+				curl_easy_setopt(ch->cp, CURLOPT_DEBUGDATA, (void *)ch);
+				curl_easy_setopt(ch->cp, CURLOPT_VERBOSE, 1);
+			} else {
+				curl_easy_setopt(ch->cp, CURLOPT_DEBUGFUNCTION, NULL);
+				curl_easy_setopt(ch->cp, CURLOPT_DEBUGDATA, NULL);
+				curl_easy_setopt(ch->cp, CURLOPT_VERBOSE, 0);
+			}
+			break;
 	}
 
 	SAVE_CURL_ERROR(ch, error);
 	if (error != CURLE_OK) {
-		RETURN_FALSE;
+		return 1;
 	} else {
-		RETURN_TRUE;
+		return 0;
 	}
+}
+
+/* {{{ proto bool curl_setopt(resource ch, int option, mixed value)
+   Set an option for a CURL transfer */
+PHP_FUNCTION(curl_setopt)
+{
+	zval       **zid, **zoption, **zvalue;
+	php_curl    *ch;
+
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &zid, &zoption, &zvalue) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(ch, php_curl *, zid, -1, le_curl_name, le_curl);
+
+	convert_to_long_ex(zoption);
+
+	if (!_php_curl_setopt(ch, Z_LVAL_PP(zoption), zvalue, return_value TSRMLS_CC)) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto bool curl_setopt_array(resource ch, array options)
+   Set an array of option for a CURL transfer */
+PHP_FUNCTION(curl_setopt_array)
+{
+	zval		*zid, *arr, **entry;
+	php_curl	*ch;
+	long		option;
+	HashPosition	pos;
+	char 		*string_key;
+	int 		str_key_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "za", &zid, &arr) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	ZEND_FETCH_RESOURCE(ch, php_curl *, &zid, -1, le_curl_name, le_curl);
+
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(arr), &pos);
+	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(arr), (void **)&entry, &pos) == SUCCESS) {
+		if (zend_hash_get_current_key_ex(Z_ARRVAL_P(arr), &string_key, &str_key_len, &option, 0, &pos) == HASH_KEY_IS_STRING) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array keys must be CURLOPT constants or equivalent interger values."); 
+			RETURN_FALSE;
+		}
+		if (_php_curl_setopt(ch, option, entry, return_value TSRMLS_CC)) {
+			RETURN_FALSE;
+		}
+		zend_hash_move_forward_ex(Z_ARRVAL_P(arr), &pos);
+	}
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1311,6 +1383,10 @@ void _php_curl_cleanup_handle(php_curl *ch)
 {
 	if (ch->handlers->write->buf.len > 0) {
 		memset(&ch->handlers->write->buf, 0, sizeof(smart_str));
+	}
+	if (ch->header.str_len) {
+		efree(ch->header.str);
+		ch->header.str_len = 0;
 	}
 
 	memset(ch->err.str, 0, CURL_ERROR_SIZE + 1);
@@ -1443,6 +1519,9 @@ PHP_FUNCTION(curl_getinfo)
 		if (curl_easy_getinfo(ch->cp, CURLINFO_REDIRECT_TIME, &d_code) == CURLE_OK) {
 			CAAD("redirect_time", d_code);
 		}
+		if (ch->header.str_len > 0) {
+			CAAS("request_header", ch->header.str);
+		}
 	} else {
 		option = Z_LVAL_PP(zoption);
 		switch (option) {
@@ -1493,6 +1572,12 @@ PHP_FUNCTION(curl_getinfo)
 				}
 				break;
 			}
+			case CURLINFO_HEADER_OUT:
+				if (ch->header.str_len > 0) {
+					RETURN_STRINGL(ch->header.str, ch->header.str_len, 1);
+				} else {
+					RETURN_FALSE;
+				}
 		}
 	}
 }
@@ -1586,6 +1671,10 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	if (ch->handlers->passwd) {
 		zval_ptr_dtor(&ch->handlers->passwd);
 	}
+	if (ch->header.str_len > 0) {
+		efree(ch->header.str);
+	}
+
 	efree(ch->handlers->write);
 	efree(ch->handlers->write_header);
 	efree(ch->handlers->read);
