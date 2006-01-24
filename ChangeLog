@@ -1,3 +1,29 @@
+2006-01-23  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      NEWS
+      ext/dbase/dbf_head.c:
+      MFH: fix #36113 (Reading records of unsupported type causes segfault)
+
+    * ext/dbase/dbf_head.c:
+      fix #36113 (Reading records of unsupported type causes segfault)
+
+2006-01-23  Derick Rethans  <php@derickrethans.nl>
+
+    * EXTENSIONS:
+      - MF51: date is not a server API
+
+    * (PHP_5_1)
+      EXTENSIONS:
+      - date is not a server API
+
+2006-01-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #36134 (DirectoryIterator constructor failed to detect empty
+      directory names).
+
 2006-01-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_execute_API.c:
