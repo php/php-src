@@ -3193,8 +3193,6 @@ ZEND_METHOD(reflection_class, newInstance)
 	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	object_init_ex(return_value, ce);
-
 	/* Run the constructor if there is one */
 	if (ce->constructor) {
 		zval ***params;
@@ -3211,6 +3209,8 @@ ZEND_METHOD(reflection_class, newInstance)
 			efree(params);
 			RETURN_FALSE;
 		}
+
+		object_init_ex(return_value, ce);
 
 		fci.size = sizeof(fci);
 		fci.function_table = EG(function_table);
@@ -3237,6 +3237,79 @@ ZEND_METHOD(reflection_class, newInstance)
 			zval_ptr_dtor(&retval_ptr);
 		}
 		efree(params);
+	} else if (!ZEND_NUM_ARGS()) {
+		object_init_ex(return_value, ce);
+	} else {
+		zend_throw_exception_ex(U_CLASS_ENTRY(reflection_exception_ptr), 0 TSRMLS_CC, "Class %v does not have a constructor, so you cannot pass any constructor arguments", ce->name);
+	}
+}
+/* }}} */
+
+/* {{{ proto public stdclass ReflectionClass::newInstanceArgs(array args)
+   Returns an instance of this class */
+ZEND_METHOD(reflection_class, newInstanceArgs)
+{
+	zval *retval_ptr;
+	reflection_object *intern;
+	zend_class_entry *ce;
+	int argc;
+	HashTable *args;
+	
+	
+	METHOD_NOTSTATIC(reflection_class_ptr);
+	GET_REFLECTION_OBJECT_PTR(ce);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|h", &args) == FAILURE) {
+		return;
+	}
+	argc = args->nNumOfElements;
+	
+	/* Run the constructor if there is one */
+	if (ce->constructor) {
+		zval ***params;
+		zend_fcall_info fci;
+		zend_fcall_info_cache fcc;
+
+		if (!(ce->constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
+			zend_throw_exception_ex(U_CLASS_ENTRY(reflection_exception_ptr), 0 TSRMLS_CC, "Access to non-public constructor of class %v", ce->name);
+			return;
+		}
+
+		params = safe_emalloc(sizeof(zval **), argc, 0);
+		zend_hash_apply_with_argument(args, (apply_func_arg_t)_zval_array_to_c_array, &params TSRMLS_CC);	
+		params -= argc;
+
+		object_init_ex(return_value, ce);
+
+		fci.size = sizeof(fci);
+		fci.function_table = EG(function_table);
+		fci.function_name = NULL;
+		fci.symbol_table = NULL;
+		fci.object_pp = &return_value;
+		fci.retval_ptr_ptr = &retval_ptr;
+		fci.param_count = argc;
+		fci.params = params;
+		fci.no_separation = 1;
+
+		fcc.initialized = 1;
+		fcc.function_handler = ce->constructor;
+		fcc.calling_scope = EG(scope);
+		fcc.object_pp = &return_value;
+
+		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
+			efree(params);
+			zval_ptr_dtor(&retval_ptr);
+			zend_error(E_WARNING, "Invocation of %v's constructor failed", ce->name);
+			RETURN_NULL();
+		}
+		if (retval_ptr) {
+			zval_ptr_dtor(&retval_ptr);
+		}
+		efree(params);
+	} else if (!ZEND_NUM_ARGS()) {
+		object_init_ex(return_value, ce);
+	} else {
+		zend_throw_exception_ex(U_CLASS_ENTRY(reflection_exception_ptr), 0 TSRMLS_CC, "Class %v does not have a constructor, so you cannot pass any constructor arguments", ce->name);
 	}
 }
 /* }}} */
@@ -4094,6 +4167,7 @@ static zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, getModifiers, NULL, 0)
 	ZEND_ME(reflection_class, isInstance, NULL, 0)
 	ZEND_ME(reflection_class, newInstance, NULL, 0)
+	ZEND_ME(reflection_class, newInstanceArgs, NULL, 0)
 	ZEND_ME(reflection_class, getParentClass, NULL, 0)
 	ZEND_ME(reflection_class, isSubclassOf, NULL, 0)
 	ZEND_ME(reflection_class, getStaticProperties, NULL, 0)
