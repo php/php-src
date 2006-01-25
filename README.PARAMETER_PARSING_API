@@ -31,16 +31,30 @@ resources cannot be auto-converted.
 
 Type specifiers
 ---------------
- l	- long
- d	- double
- s	- string (with possible null bytes) and its length
- b	- boolean, stored in zend_bool
- r	- resource (stored in zval)
- a	- array
+ The following list shows the type specifier, its meaning and the parameter 
+ types that need to be passed by address. All passed paramaters are set
+ if the PHP parameter is non optional and untouched if optional and the 
+ parameter is not present. The only exception is O where the zend_class_entry*
+ has to be provided on input and is used to verify the PHP parameter is an 
+ instance of that class.
+
+ l	- long (long)
+ d	- double (double)
+ s	- string (with possible null bytes) and its length (char*, int)
+ u	- unicode (UChar*, int)
+ t	- text (void * (char*/Uchar*), int (length), zend_uchar (IS_STRING/..))
+  	  actual type is controled by ini unicode setting
+ T	- text (void * (char*/Uchar*), int (length), zend_uchar (IS_STRING/..))
+  	  actual type controlled by first s or u
+ b	- boolean (zend_bool)
+ r	- resource (zval*)
+ a	- array (zval*)
  h	- array (returned as HashTable*)
- o	- object (of any type)
- O	- object (of specific type, specified by class entry)
- z	- the actual zval
+ o	- object of any type (zval*)
+ O	- object of specific type given by class entry (zval*, zend_class_entry)
+ C	- class (zend_class_entry*)
+ z	- the actual zval (zval*)
+ Z	- the actual zval (zval**)
 
  The following characters also have a meaning in the specifier string:
 	| - indicates that the remaining parameters are optional, they
