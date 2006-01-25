@@ -1,3 +1,13 @@
+2006-01-24  Antony Dovgal  <antony@zend.com>
+
+    * zend_API.c:
+      improve CS
+
+2006-01-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c:
+      - Add fast access to HashTable
+
 2006-01-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_execute_API.c:

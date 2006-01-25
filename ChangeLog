@@ -1,3 +1,54 @@
+2006-01-24  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_API.c:
+      improve CS
+
+    * README.PARAMETER_PARSING_API:
+      ws
+
+2006-01-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * README.PARAMETER_PARSING_API:
+      - Update docu
+
+2006-01-24  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/string.c:
+      eurealloc() should not be used with UBYTES()
+
+2006-01-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      main/snprintf.c
+      main/spprintf.c:
+      - MFH Bug #35978 %n format string specifier wrongly implemented
+
+    * main/snprintf.c
+      main/spprintf.c:
+      - Fixed Bug #35978 %n format string specifier wrongly implemented
+
+2006-01-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS
+      ext/curl/interface.c
+      ext/curl/php_curl.h:
+      cURL extension news.
+
+2006-01-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c:
+      - Add fast access to HashTable
+
+2006-01-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_iterator.c
+      ext/com_dotnet/com_misc.c
+      ext/com_dotnet/php_com_dotnet_internal.h:
+      MFH: Fixed crash on destroying COM object
+
 2006-01-23  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_1)
