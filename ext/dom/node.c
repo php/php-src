@@ -840,10 +840,10 @@ int dom_node_text_content_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	if(str != NULL) {
 		ZVAL_STRING(*retval, str, 1);
+		xmlFree(str);
 	} else {
 		ZVAL_EMPTY_STRING(*retval);
 	}
-	xmlFree(str);
 
 	return SUCCESS;
 }
