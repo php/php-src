@@ -15,6 +15,8 @@ PHP                                                                        NEWS
 - Fixed imagecolorallocate() and imagecolorallocatelapha() to return FALSE
   on error. (Pierre)
 - Fixed bug #36152 (problems with curl+ssl and pgsql+ssl in same PHP). (Mike)
+- Fixed bug #36148 (unpack("H*hex", $data) is adding an extra character to the 
+  end of the string). (Ilia)
 - Fixed bug #36134 (DirectoryIterator constructor failed to detect empty 
   directory names). (Ilia)
 - Fixed bug #36113 (Reading records of unsupported type causes segfault). 
