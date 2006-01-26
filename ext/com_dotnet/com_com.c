@@ -336,7 +336,7 @@ PHP_FUNCTION(com_get_active_object)
 /* Performs an Invoke on the given com object.
  * returns a failure code and creates an exception if there was an error */
 HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
-		WORD flags, DISPPARAMS *disp_params, VARIANT *v TSRMLS_DC)
+		WORD flags, DISPPARAMS *disp_params, VARIANT *v, int silent TSRMLS_DC)
 {
 	HRESULT hr;
 	unsigned int arg_err;
@@ -345,7 +345,7 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 	hr = IDispatch_Invoke(V_DISPATCH(&obj->v), id_member,
 		&IID_NULL, LOCALE_SYSTEM_DEFAULT, flags, disp_params, v, &e, &arg_err);
 
-	if (FAILED(hr)) {
+	if (silent == 0 && FAILED(hr)) {
 		char *source = NULL, *desc = NULL, *msg = NULL;
 		int source_len, desc_len;
 
@@ -543,7 +543,7 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, char *name, int namelen,
 	}
 
 	/* this will create an exception if needed */
-	hr = php_com_invoke_helper(obj, dispid, flags, &disp_params, v TSRMLS_CC);	
+	hr = php_com_invoke_helper(obj, dispid, flags, &disp_params, v, 0 TSRMLS_CC);	
 
 	/* release variants */
 	if (vargs) {
@@ -581,7 +581,7 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, char *name, int namelen,
 
 
 int php_com_do_invoke_by_id(php_com_dotnet_object *obj, DISPID dispid,
-		WORD flags,	VARIANT *v, int nargs, zval **args TSRMLS_DC)
+		WORD flags,	VARIANT *v, int nargs, zval **args, int silent TSRMLS_DC)
 {
 	DISPID altdispid;
 	DISPPARAMS disp_params;
@@ -610,7 +610,7 @@ int php_com_do_invoke_by_id(php_com_dotnet_object *obj, DISPID dispid,
 	}
 
 	/* this will create an exception if needed */
-	hr = php_com_invoke_helper(obj, dispid, flags, &disp_params, v TSRMLS_CC);	
+	hr = php_com_invoke_helper(obj, dispid, flags, &disp_params, v, silent TSRMLS_CC);	
 
 	/* release variants */
 	if (vargs) {
@@ -646,7 +646,7 @@ int php_com_do_invoke(php_com_dotnet_object *obj, char *name, int namelen,
 		return FAILURE;
 	}
 
-	return php_com_do_invoke_by_id(obj, dispid, flags, v, nargs, args TSRMLS_CC);
+	return php_com_do_invoke_by_id(obj, dispid, flags, v, nargs, args, 0 TSRMLS_CC);
 }
 
 /* {{{ proto string com_create_guid()
