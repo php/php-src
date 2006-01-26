@@ -1,3 +1,25 @@
+2006-01-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      NEWS:
+      - MFH Bug #36141 Add ReflectionClass::newInstanceArgs($args)
+
+2006-01-25  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/node.c
+      ext/dom/node.c:
+      fix possible crash in textContent
+
+2006-01-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * README.PARAMETER_PARSING_API:
+      . Update docu
+
+2006-01-25  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/string.c:
+      Use zend_codepoint_to_uchar() macro.
+
 2006-01-24  Antony Dovgal  <antony@zend.com>
 
     * ZendEngine2/zend_API.c:
