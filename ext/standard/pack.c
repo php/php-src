@@ -693,7 +693,9 @@ PHP_FUNCTION(unpack)
 							len = size * 2;
 						} 
 
-						len -= argb % 2;
+						if (argb > 0) {	
+							len -= argb % 2;
+						}
 
 						buf = emalloc(len + 1);
 
