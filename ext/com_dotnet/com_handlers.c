@@ -101,7 +101,7 @@ static zval *com_read_dimension(zval *object, zval *offset, int type TSRMLS_DC)
 		VariantInit(&v);
 
 		if (SUCCESS == php_com_do_invoke_by_id(obj, DISPID_VALUE,
-				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, 1, &offset TSRMLS_CC)) {
+				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, 1, &offset, 0 TSRMLS_CC)) {
 			php_com_zval_from_variant(return_value, &v, obj->code_page TSRMLS_CC);
 			VariantClear(&v);
 		}
@@ -140,7 +140,7 @@ static void com_write_dimension(zval *object, zval *offset, zval *value TSRMLS_D
 		VariantInit(&v);
 
 		if (SUCCESS == php_com_do_invoke_by_id(obj, DISPID_VALUE,
-				DISPATCH_METHOD|DISPATCH_PROPERTYPUT, &v, 2, args TSRMLS_CC)) {
+				DISPATCH_METHOD|DISPATCH_PROPERTYPUT, &v, 2, args, 0 TSRMLS_CC)) {
 			VariantClear(&v);
 		}
 	} else if (V_ISARRAY(&obj->v)) {
@@ -504,8 +504,8 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type, int should_f
 
 	if (V_VT(&obj->v) == VT_DISPATCH) {
 		if (FAILURE == php_com_do_invoke_by_id(obj, DISPID_VALUE,
-				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, 0, NULL TSRMLS_CC)) {
-			return FAILURE;
+				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, 0, NULL, 1 TSRMLS_CC)) {
+			VariantCopy(&v, &obj->v);
 		}
 	} else {
 		VariantCopy(&v, &obj->v);
