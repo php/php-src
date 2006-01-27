@@ -384,17 +384,17 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 	return im;
 }
 
-void gdImagePngEx (gdImagePtr im, FILE * outFile, int level)
+void gdImagePngEx (gdImagePtr im, FILE * outFile, int level, int basefilter)
 {
 	gdIOCtx *out = gdNewFileCtx(outFile);
-	gdImagePngCtxEx(im, out, level);
+	gdImagePngCtxEx(im, out, level, -1);
 	out->gd_free(out);
 }
 
 void gdImagePng (gdImagePtr im, FILE * outFile)
 {
 	gdIOCtx *out = gdNewFileCtx(outFile);
-  	gdImagePngCtxEx(im, out, -1);
+  	gdImagePngCtxEx(im, out, -1, -1);
 	out->gd_free(out);
 }
 
@@ -402,18 +402,18 @@ void * gdImagePngPtr (gdImagePtr im, int *size)
 {
 	void *rv;
 	gdIOCtx *out = gdNewDynamicCtx(2048, NULL);
-	gdImagePngCtxEx(im, out, -1);
+	gdImagePngCtxEx(im, out, -1, -1);
 	rv = gdDPExtractData(out, size);
 	out->gd_free(out);
 
 	return rv;
 }
 
-void * gdImagePngPtrEx (gdImagePtr im, int *size, int level)
+void * gdImagePngPtrEx (gdImagePtr im, int *size, int level, int basefilter)
 {
 	void *rv;
 	gdIOCtx *out = gdNewDynamicCtx(2048, NULL);
-	gdImagePngCtxEx(im, out, level);
+	gdImagePngCtxEx(im, out, level, basefilter);
 	rv = gdDPExtractData(out, size);
 	out->gd_free(out);
 	return rv;
@@ -421,14 +421,14 @@ void * gdImagePngPtrEx (gdImagePtr im, int *size, int level)
 
 void gdImagePngCtx (gdImagePtr im, gdIOCtx * outfile)
 {
-	gdImagePngCtxEx(im, outfile, -1);
+	gdImagePngCtxEx(im, outfile, -1, -1);
 }
 
 /* This routine is based in part on code from Dale Lutz (Safe Software Inc.)
  *  and in part on demo code from Chapter 15 of "PNG: The Definitive Guide"
  *  (http://www.cdrom.com/pub/png/pngbook.html).
  */
-void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level)
+void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilter)
 {
 	int i, j, bit_depth = 0, interlace_type;
 	int width = im->sx;
@@ -484,6 +484,9 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level)
 
 	/* 2.0.12: this is finally a parameter */
 	png_set_compression_level(png_ptr, level);
+	if (basefilter >= 0) {
+		png_set_filter(png_ptr, PNG_FILTER_TYPE_BASE, basefilter);
+	}
 
 	/* can set this to a smaller value without compromising compression if all
 	 * image data is 16K or less; will save some decoder memory [min == 8]
