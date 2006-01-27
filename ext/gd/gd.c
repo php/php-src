@@ -29,6 +29,11 @@
 #include "config.h"
 #endif
 
+#ifdef HAVE_GD_PNG
+/* needs to be first */
+#include <png.h>
+#endif
+
 #include "php.h"
 #include "ext/standard/head.h"
 #include <math.h>
