@@ -440,8 +440,8 @@ void gdImageGifCtx(gdImagePtr im, gdIOCtx *out);
  * compression (smallest files) but takes a long time to compress, and
  * -1 selects the default compiled into the zlib library.
  */
-void gdImagePngEx(gdImagePtr im, FILE * out, int level);
-void gdImagePngCtxEx(gdImagePtr im, gdIOCtx * out, int level);
+void gdImagePngEx(gdImagePtr im, FILE * out, int level, int basefilter);
+void gdImagePngCtxEx(gdImagePtr im, gdIOCtx * out, int level, int basefilter);
 
 void gdImageWBMP(gdImagePtr image, int fg, FILE *out);
 void gdImageWBMPCtx(gdImagePtr image, int fg, gdIOCtx *out);
@@ -485,7 +485,7 @@ void* gdImagePngPtr(gdImagePtr im, int *size);
 
 /* Best to free this memory with gdFree(), not free() */
 void* gdImageGdPtr(gdImagePtr im, int *size);
-void *gdImagePngPtrEx(gdImagePtr im, int *size, int level);
+void *gdImagePngPtrEx(gdImagePtr im, int *size, int level, int basefilter);
 
 /* Best to free this memory with gdFree(), not free() */
 void* gdImageGd2Ptr(gdImagePtr im, int cs, int fmt, int *size);
