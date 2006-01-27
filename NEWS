@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 - Changed get_headers() to retrieve headers also from non-200 responses. (Ilia)
 - Changed get_headers() to use the default context. (Ilia)
 - Added a check for special characters in the session name. (Ilia)
+- Added a filtering mode option to imagepng, allow to reduce drastically
+  the file size (Pierre) 
 - Added "consumed" stream filter. (Marcus)
 - Added new mysqli constants for BIT and NEW_DECIMAL field types:
   MYSQLI_TYPE_NEWDECIMAL and MYSQLI_TYPE_BIT. FR #36007. (Georg)
