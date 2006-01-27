@@ -68,8 +68,6 @@ static void _php_imap_add_body(zval *arg, BODY *body TSRMLS_DC);
 static void _php_imap_parse_address(ADDRESS *addresslist, char **fulladdress, zval *paddress TSRMLS_DC);
 static int _php_imap_address_size(ADDRESS *addresslist);
 
-/* c-clients gets */
-static mailgets_t old_mail_gets;
 /* the gets we use */
 static char *php_mail_gets(readfn_t f, void *stream, unsigned long size, GETS_DATA *md);
 
@@ -469,7 +467,6 @@ PHP_MINIT_FUNCTION(imap)
 	REGISTER_LONG_CONSTANT("NIL", NIL, CONST_PERSISTENT | CONST_CS);
 
 	/* plug in our gets */
-	old_mail_gets = mail_parameters(NIL, GET_GETS, NIL);
 	mail_parameters(NIL, SET_GETS, (void *) php_mail_gets);
 
 	/* set default timeout values */
@@ -4243,7 +4240,16 @@ static char *php_mail_gets(readfn_t f, void *stream, unsigned long size, GETS_DA
 		}
 		return NULL;
 	} else {
-		return old_mail_gets(f, stream, size, md);
+		char *buf = malloc(size + 1);
+		
+		if (f(stream, size, buf)) {
+			buf[size] = '\0';
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to read from socket");
+			efree(buf);
+			buf = NULL;
+		}
+		return buf;
 	}
 }
 /* }}} */
