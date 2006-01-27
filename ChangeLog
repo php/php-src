@@ -1,3 +1,61 @@
+2006-01-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/pack.c
+      ext/standard/tests/strings/bug36148.phpt:
+      MFB51: Fixed bug #36148 (unpack("H*hex", $data) is adding an extra
+      character to the end of the string).
+
+    * (PHP_4_4)
+      NEWS
+      ext/standard/pack.c
+      ext/standard/tests/strings/bug36148.phpt:
+      MFH: Fixed bug #36148 (unpack("H*hex", $data) is adding an extra character
+      to the end of the string).
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/pack.c:
+      Fixed bug #36148 (unpack("H*hex", $data) is adding an extra character to
+      the
+      end of the string).
+
+    * ext/standard/tests/strings/bug36148.phpt
+      ext/standard/tests/strings/bug36148.phpt
+      ext/standard/tests/strings/bug36148.phpt:
+        1.1.4;
+      file bug36148.phpt was initially added on branch PHP_5_1.
+
+2006-01-26  Michael Wallner  <mike@iworks.at>
+
+    * (PHP_5_1)
+      NEWS:
+      BFN
+
+    * (PHP_4_4)
+      ext/curl/curl.c
+      ext/curl/interface.c:
+      MFH: fix bug #36152 problems with curl+ssl and pgsql+ssl in same PHP
+
+    * ext/curl/interface.c:
+      - fix bug #36152 problems with curl+ssl and pgsql+ssl in same PHP
+
+2006-01-26  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_1)
+      NEWS:
+      BFN
+
+    * ext/com_dotnet/com_com.c
+      ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/php_com_dotnet_internal.h:
+      MFB51: Fix bug #35954 (Fatal com_exception casting object)
+
+    * (PHP_5_1)
+      ext/com_dotnet/com_com.c
+      ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/php_com_dotnet_internal.h:
+      Fix bug #35954 (Fatal com_exception casting object)
+
 2006-01-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
