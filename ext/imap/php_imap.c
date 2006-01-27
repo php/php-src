@@ -36,6 +36,7 @@
 
 #include "php.h"
 #include "php_ini.h"
+#include "php_streams.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
@@ -67,6 +68,11 @@ static void _php_imap_add_body(zval *arg, BODY *body TSRMLS_DC);
 static void _php_imap_parse_address(ADDRESS *addresslist, char **fulladdress, zval *paddress TSRMLS_DC);
 static int _php_imap_address_size(ADDRESS *addresslist);
 
+/* c-clients gets */
+static mailgets_t old_mail_gets;
+/* the gets we use */
+static char *php_mail_gets(readfn_t f, void *stream, unsigned long size, GETS_DATA *md);
+
 /* These function declarations are missing from the IMAP header files... */
 void rfc822_date(char *date);
 char *cpystr(const char *str);
@@ -93,6 +99,7 @@ zend_function_entry imap_functions[] = {
 	PHP_FE(imap_body,								NULL)
 	PHP_FE(imap_bodystruct,							NULL)
 	PHP_FE(imap_fetchbody,							NULL)
+	PHP_FE(imap_savebody,							NULL)
 	PHP_FE(imap_fetchheader,						NULL)
 	PHP_FE(imap_fetchstructure,						NULL)
 	PHP_FE(imap_expunge,							NULL)
@@ -418,6 +425,7 @@ static void php_imap_init_globals(zend_imap_globals *imap_globals)
 	imap_globals->quota_return = NIL;
 	imap_globals->imap_acl_list = NIL;
 #endif
+	imap_globals->gets_stream = NIL;
 }
 /* }}} */
 
@@ -459,6 +467,10 @@ PHP_MINIT_FUNCTION(imap)
 
 	/* lets allow NIL */
 	REGISTER_LONG_CONSTANT("NIL", NIL, CONST_PERSISTENT | CONST_CS);
+
+	/* plug in our gets */
+	old_mail_gets = mail_parameters(NIL, GET_GETS, NIL);
+	mail_parameters(NIL, SET_GETS, (void *) php_mail_gets);
 
 	/* set default timeout values */
 	mail_parameters(NIL, SET_OPENTIMEOUT, (void *) FG(default_socket_timeout));
@@ -650,6 +662,7 @@ PHP_RINIT_FUNCTION(imap)
 {
 	IMAPG(imap_errorstack) = NIL;
 	IMAPG(imap_alertstack) = NIL;
+	IMAPG(gets_stream) = NIL;
 	return SUCCESS;
 }
 /* }}} */
@@ -1843,6 +1856,57 @@ PHP_FUNCTION(imap_fetchbody)
 	RETVAL_STRINGL(body, len, 1);
 }
 
+/* }}} */
+
+/* {{{ proto bool imap_savebody(resource stream_id, string|resource file, int msg_no[, string section = ""[, int options = 0]])
+	Save a specific body section to a file */
+PHP_FUNCTION(imap_savebody)
+{
+	zval *stream, *out;
+	pils *imap_ptr = NULL;
+	php_stream *writer = NULL;
+	char *section = "";
+	int section_len = 0, close_stream = 1;
+	long msgno, flags = 0;
+	
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzl|sl", &stream, &out, &msgno, &section, &section_len, &flags)) {
+		RETURN_FALSE;
+	}
+	
+	ZEND_FETCH_RESOURCE(imap_ptr, pils *, &stream, -1, "imap", le_imap);
+	
+	if (!imap_ptr) {
+		RETURN_FALSE;
+	}
+	
+	switch (Z_TYPE_P(out))
+	{
+		case IS_LONG:
+		case IS_RESOURCE:
+			close_stream = 0;
+			php_stream_from_zval(writer, &out);
+		break;
+
+		default:
+			convert_to_string_ex(&out);
+			writer = php_stream_open_wrapper(Z_STRVAL_P(out), "wb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
+		break;
+	}
+	
+	if (!writer) {
+		RETURN_FALSE;
+	}
+	
+	IMAPG(gets_stream) = writer;
+	mail_fetchbody_full(imap_ptr->imap_stream, msgno, section, NULL, flags);
+	IMAPG(gets_stream) = NULL;
+	
+	if (close_stream) {
+		php_stream_close(writer);
+	}
+	
+	RETURN_TRUE;
+}
 /* }}} */
 
 /* {{{ proto string imap_base64(string text)
@@ -4143,6 +4207,43 @@ PHP_FUNCTION(imap_timeout)
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+#define GETS_FETCH_SIZE 8196LU
+/* {{{ php_mail_gets */
+static char *php_mail_gets(readfn_t f, void *stream, unsigned long size, GETS_DATA *md)
+{
+	TSRMLS_FETCH();
+	
+	/*	write to the gets stream if it is set, 
+		otherwise forward to c-clients gets */
+	if (IMAPG(gets_stream)) {
+		char buf[GETS_FETCH_SIZE];
+		
+		while (size) {
+			unsigned long read;
+			
+			if (size > GETS_FETCH_SIZE) {
+				read = GETS_FETCH_SIZE;
+				size -=GETS_FETCH_SIZE;
+			} else {
+				read = size;
+				size = 0;
+			}
+			
+			if (!f(stream, read, buf)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to read from socket");
+				break;
+			} else if (read != php_stream_write(IMAPG(gets_stream), buf, read)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write to stream");
+				break;
+			}
+		}
+		return NULL;
+	} else {
+		return old_mail_gets(f, stream, size, md);
 	}
 }
 /* }}} */
