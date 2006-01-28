@@ -17,6 +17,7 @@ PHP                                                                        NEWS
 - Added imap_savebody(). (Mike)
 - Fixed imagecolorallocate() and imagecolorallocatelapha() to return FALSE
   on error. (Pierre)
+- Fixed bug #36185 (str_rot13(NULL) crash). (Pierre)
 - Fixed bug #36152 (problems with curl+ssl and pgsql+ssl in same PHP). (Mike)
 - Fixed bug #36148 (unpack("H*hex", $data) is adding an extra character to the 
   end of the string). (Ilia)
