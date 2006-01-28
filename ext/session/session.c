@@ -277,7 +277,7 @@ typedef struct {
 
 #define MAX_STR 512
 
-void php_add_session_var(char *name, size_t namelen TSRMLS_DC)
+PHPAPI void php_add_session_var(char *name, size_t namelen TSRMLS_DC)
 {
 	zval **sym_track = NULL;
 	
@@ -318,7 +318,7 @@ void php_add_session_var(char *name, size_t namelen TSRMLS_DC)
 	}
 }
 
-void php_set_session_var(char *name, size_t namelen, zval *state_val, php_unserialize_data_t *var_hash TSRMLS_DC)
+PHPAPI void php_set_session_var(char *name, size_t namelen, zval *state_val, php_unserialize_data_t *var_hash TSRMLS_DC)
 {
 	if (PG(register_globals)) {
 		zval **old_symbol;
@@ -358,7 +358,7 @@ void php_set_session_var(char *name, size_t namelen, zval *state_val, php_unseri
 	}
 }
 
-int php_get_session_var(char *name, size_t namelen, zval ***state_var TSRMLS_DC)
+PHPAPI int php_get_session_var(char *name, size_t namelen, zval ***state_var TSRMLS_DC)
 {
 	int ret = FAILURE;
 
