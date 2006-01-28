@@ -786,7 +786,7 @@ PHPAPI void php_date_set_tzdb(timelib_tzdb *tzdb)
 /* }}} */
 
 /* {{{ php_parse_date: Backwards compability function */
-signed long php_parse_date(char *string, signed long *now)
+PHPAPI signed long php_parse_date(char *string, signed long *now)
 {
 	timelib_time *parsed_time;
 	int           error1, error2;
