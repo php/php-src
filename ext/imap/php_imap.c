@@ -4246,7 +4246,7 @@ static char *php_mail_gets(readfn_t f, void *stream, unsigned long size, GETS_DA
 			buf[size] = '\0';
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to read from socket");
-			efree(buf);
+			free(buf);
 			buf = NULL;
 		}
 		return buf;
