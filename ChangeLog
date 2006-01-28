@@ -1,3 +1,62 @@
+2006-01-27  Michael Wallner  <mike@iworks.at>
+
+    * ext/gd/gd.c:
+      MF5_1: include png.h prior php.h
+
+    * (PHP_5_1)
+      ext/gd/gd.c:
+      - include png.h prior php.h
+
+    * ext/imap/php_imap.c:
+      MF_5_1
+
+    * (PHP_5_1)
+      ext/imap/php_imap.c:
+      - fix imap_fetchbody(); there is no default mailgets()
+
+2006-01-27  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_1)
+      NEWS:
+      - imagepng filter enty
+
+2006-01-27  Michael Wallner  <mike@iworks.at>
+
+    * (PHP_5_1)
+      NEWS:
+      - added imap_savebody()
+
+    * ext/imap/php_imap.c
+      ext/imap/php_imap.h:
+      - add imap_savebody()
+
+2006-01-27  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/gd.c:
+      - add PNG filter constants
+
+    * (PHP_5_1)
+      ext/gd/gd.c
+      ext/gd/gd_ctx.c
+      ext/gd/libgd/gd.h
+      ext/gd/libgd/gd_png.c:
+      - MFH: add filter option to imagepng
+      - add constants
+        PS: If someone can check why #include "png.h" fails, it will be cleaner
+
+    * ext/gd/gd_ctx.c
+      ext/gd/libgd/gd.h
+      ext/gd/libgd/gd_png.c:
+      - add filter mode support for imagepng
+        imagepng("file", $comp_mode, $filter_mode);
+        The filters are defined in the libpng docs for png_set_filter
+        allow to divide the size of png images by more than 2. Constants
+        will be added later
+      
+        BC kept, by default no filter are set
+      
+      Fine to MFH? With the constants?
+
 2006-01-26  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/pack.c
