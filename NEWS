@@ -8,8 +8,7 @@ PHP                                                                        NEWS
 - Changed get_headers() to retrieve headers also from non-200 responses. (Ilia)
 - Changed get_headers() to use the default context. (Ilia)
 - Added a check for special characters in the session name. (Ilia)
-- Added a filtering mode option to imagepng, allow to reduce drastically
-  the file size (Pierre) 
+- Added filtering mode option to imagepng() to allow reducing file size. (Pierre)
 - Added "consumed" stream filter. (Marcus)
 - Added new mysqli constants for BIT and NEW_DECIMAL field types:
   MYSQLI_TYPE_NEWDECIMAL and MYSQLI_TYPE_BIT. FR #36007. (Georg)
@@ -37,7 +36,7 @@ PHP                                                                        NEWS
 - Fixed bug #36011 (Strict errormsg wrong for call_user_func() and the likes).
   (Marcus)
 - Fixed bug #36006 (Problem with $this in __destruct()). (Dmitry)
-- Fixed bug #35999 (recursive mkdir() does not work with relative path 
+- Fixed bug #35999 (recursive mkdir() does not work with relative path
   like "foo/bar"). (Tony)
 - Fixed bug #35998 (SplFileInfo::getPathname() returns unix style filenames
   in win32). (Marcus)
