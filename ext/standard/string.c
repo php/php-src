@@ -4654,7 +4654,7 @@ PHP_FUNCTION(str_rot13)
 		WRONG_PARAM_COUNT;
 	}
 
-    convert_to_string_ex(arg);
+	convert_to_string_ex(arg);
 	RETVAL_ZVAL(*arg, 1, 0);
 
 	php_strtr(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value), rot13_from, rot13_to, 52);
