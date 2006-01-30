@@ -3257,7 +3257,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 		zend_fcall_info_cache fcc;
 
 		if (!(ce->constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
-			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Access to non-public constructor of class %c", ce->name);
+			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Access to non-public constructor of class %s", ce->name);
 			return;
 		}
 
@@ -3285,7 +3285,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
 			efree(params);
 			zval_ptr_dtor(&retval_ptr);
-			zend_error(E_WARNING, "Invocation of %c's constructor failed", ce->name);
+			zend_error(E_WARNING, "Invocation of %s's constructor failed", ce->name);
 			RETURN_NULL();
 		}
 		if (retval_ptr) {
@@ -3295,7 +3295,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 	} else if (!ZEND_NUM_ARGS()) {
 		object_init_ex(return_value, ce);
 	} else {
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Class %c does not have a constructor, so you cannot pass any constructor arguments", ce->name);
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Class %s does not have a constructor, so you cannot pass any constructor arguments", ce->name);
 	}
 }
 /* }}} */
