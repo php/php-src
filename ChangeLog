@@ -1,3 +1,22 @@
+2006-01-29  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      ext/standard/string.c:
+      nuke ws pollution
+
+2006-01-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #36176 (PDO_PGSQL - PDO::exec() does not return number of rows
+      affected by the operation).
+
+2006-01-29  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS:
+      fix news
+
 2006-01-28  Michael Wallner  <mike@iworks.at>
 
     * ext/imap/php_imap.c:
