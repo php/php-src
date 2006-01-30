@@ -496,7 +496,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 					}
 				}
 			}
-			if (!PG(html_errors) || !strlen(PG(docref_root))) {
+			if (!PG(html_errors) && !strlen(PG(docref_root))) {
 				/* no docref and no html errors -> do not point to any documentation (e.g. production boxes) */
 				php_error(type, "%s(%s): %s", get_active_function_name(TSRMLS_C), params, buffer);
 			} else if (PG(html_errors)) {
