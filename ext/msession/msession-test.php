@@ -15,50 +15,45 @@
 # Start sessions, this will set a cookie.
 session_start();
 
+msession_connect('localhost','8086');
+
 # Now, optional, use msession_uniq() to create a guarenteed
 # uniq session name.
 # 
-if(!$HTTP_COOKIE_VARS["PHPSESSID"])
-{
-	# Use uniq to create the session. This is guarenteed to be
-	# uniq in the server.
-	$sid = msession_uniq(32);
-	setcookie ("PHPSESSID", $sid);
-	session_id($sid);
-	$HTTP_COOKIE_VARS["PHPSESSID"] = $sid;
-	# New session, set some variables
-	if(0) // One at a time
-	{
-		echo "Set Variable: " . msession_set($sid, 'time',time()) ."<p>\n";
-		echo "Set Variable: " . msession_set($sid, 'name1','test1') ."<p>\n";
-		echo "Set Variable: " . msession_set($sid, 'name2','test2') ."<p>\n";
-		echo "Set Variable: " . msession_set($sid, 'name3','test3') ."<p>\n";
-		echo "Set Variable: " . msession_set($sid, 'name4','test4') ."<p>\n";
-		echo "Set Variable: " . msession_set($sid, 'name5','test5') ."<p>\n";
-		echo "Set Variable: " . msession_set($sid, 'name6','test6') ."<p>\n";
-		echo "Set Variable: " . msession_set($sid, 'name7','test7') ."<p>\n";
-	}
-	else // All at once in an array
-	{
-		$setarray = array();
-		$setarray['time']=time();
-		$setarray['name1'] = 'test1';
-		$setarray['name2'] = 'test2';
-		$setarray['name3'] = 'test3';
-		$setarray['name4'] = 'test4';
-		$setarray['name5'] = 'test5';
-		$setarray['name6'] = 'test6';
-		$setarray['name7'] = 'test7';
-		msession_set_array($sid, $setarray);
-	}
-}
-else
-{
+# Use uniq to create the session. This is guarenteed to be
+# uniq in the server.
+
+if($HTTP_COOKIE_VARS["PHPSESSID"])
 	$sid = $HTTP_COOKIE_VARS["PHPSESSID"];
-}
+else
+	$sid = msession_uniq(32, "phpsession");
+setcookie ("PHPSESSID", $sid);
+session_id($sid);
+$HTTP_COOKIE_VARS["PHPSESSID"] = $sid;
+# New session, set some variables
+echo "Set Variable: " . msession_set($sid, 'time',time()) ."<p>\n";
+echo "Set Variable: " . msession_set($sid, 'name1','test1') ."<p>\n";
+echo "Set Variable: " . msession_set($sid, 'name2','test2') ."<p>\n";
+echo "Set Variable: " . msession_set($sid, 'name3','test3') ."<p>\n";
+echo "Set Variable: " . msession_set($sid, 'name4','test4') ."<p>\n";
+echo "Set Variable: " . msession_set($sid, 'name5','test5') ."<p>\n";
+echo "Set Variable: " . msession_set($sid, 'name6','test6') ."<p>\n";
+echo "Set Variable: " . msession_set($sid, 'name7','test7') ."<p>\n";
+
+	$setarray = array();
+	$setarray['time']=time();
+	$setarray['name1'] = 'test1';
+	$setarray['name2'] = 'test2';
+	$setarray['name3'] = 'test3';
+	$setarray['name4'] = 'test4';
+	$setarray['name5'] = 'test5';
+	$setarray['name6'] = 'test6';
+	$setarray['name7'] = 'test7';
+	msession_set_array($sid, $setarray);
 
 #This makes a link between the variable $count and the
 # session variable "count"
+
 session_register("count");
 
 $count ++;
@@ -76,6 +71,12 @@ echo "Random String: " . msession_randstr(32) . "<br>\n";
 # (for this to work, older versions of msessiond must be started with "-g globals"
 #  newer versions create it by default)
 echo "Global Count: " . msession_inc(globals, "counter") . "<br>\n";
+
+
+# Thread safe functions
+
+echo "Local Count: " . msession_add($sid, "counter", 2) . "<br>\n";
+echo "Muldiv counter * 2 / 3 :" . msession_muldiv($sid, "counter", "2", "3") . "<br>\n";
 
 # This gets a count of active sessions.
 echo "Total active sessions: " . msession_count() . "<br>\n";

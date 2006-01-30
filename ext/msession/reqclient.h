@@ -1,76 +1,45 @@
 /*
-   +----------------------------------------------------------------------+
-   | msession 1.0                                                         |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2006 The PHP Group                                |
-   +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
-   +----------------------------------------------------------------------+
-   | Authors: Mark Woodward <markw@mohawksoft.com>                        |
-   |    Portions copyright the PHP group.                                 |
-   +----------------------------------------------------------------------+
- */
-
-/*
---------------------------------------------------------------------------
-	These are definitions are pulled from Phoenix.
- 	It would probably be easier to maintain one file, 
-	but some phoenix header files conflict with other
-	project header files common to PHP. Besides, this
-	allows this header to be PHP license and Phoenix to
-	be LGPL with no conflicts.
-
-	MAKE NO CHANGES TO THIS FILE IT. MUST REMAIN CONSTANT
-	WITH PHOENIX OR IT WILL NOT WORK.
---------------------------------------------------------------------------
-*/
-/* Required to use the new version of Phoenix 1.2 */
+    Mohawk Software Framework by Mohawk Software
+    Copyright (C) 1998-2001 Mark L. Woodward
+ 
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Library General Public
+    License as published by the Free Software Foundation; either
+    version 2 of the License, or (at your option) any later version.
+ 
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Library General Public License for more details.
+ 
+    You should have received a copy of the GNU Library General Public
+    License along with this library; if not, write to the Free
+    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
+    MA 02111-1307, USA
+ 
+    If you want support or to professionally license this library, the author
+    can be reached at info@mohawksoft.com
+*/ 
+#ifndef _REQCLIENT_
+#define _REQCLIENT_
 
 #ifndef REQCLIENT_VER	
-#define REQCLIENT_VER 030113
+#define REQCLIENT_VER 051222
 #endif
 
-enum REQ_TYPES
-{
-	REQ_ERR,
-	REQ_OK,
-	REQ_CTL,
-	REQ_SETVAL,
-	REQ_GETVAL,
-	REQ_CREATE,
-	REQ_DROP,
-	REQ_GETALL,
-	REQ_FIND,
-	REQ_COUNT,
-	REQ_FLUSH,
-	REQ_SLOCK,
-	REQ_SUNLOCK,
-	REQ_TIMEOUT,
-	REQ_INC,
-	REQ_DATAGET,
-	REQ_DATASET,
-	REQ_LIST,
-	REQ_LISTVAR,
-	REQ_UNIQ,
-	REQ_RANDSTR,
-	REQ_PLUGIN,
-	REQ_CALL,
-	REQ_SERIALIZE,
-	REQ_RESTORE,
-	REQ_EXEC,
-	REQ_LAST,
-	REQ_INTERNAL_BEGIN=1023,
-	REQ_INTERNALLAST,
-};
+#ifndef _PHOENIX_
+typedef unsigned char Boolean;
+#endif
+
+#if defined (__cplusplus)
+extern "C" {
+#endif
+
+// Standard request transport errors.
 enum REQ_ERRORS
 {
 	REQE_NOERROR=0,
+	REQE_ERR,
 	REQE_NOSESSION,
 	REQE_DUPSESSION,
 	REQE_NOWLOCK,
@@ -85,14 +54,47 @@ enum REQ_ERRORS
 	REQE_BUFFER,
 	REQE_DENIED,
 	REQE_NOFN,
-	REQE_UNKNOWN
+	REQE_UNKNOWN,
+	REQE_PLUGIN1,
+	REQE_PLUGIN2,
+	REQE_PLUGIN3,
+	REQE_PLUGIN4
 };
 
+#define REQ_OK		0
+#define REQ_ERR		1
+#define REQ_UNHANDLED	3
 
-#define REQ_POPEN               1024
-#define REQ_PCLOSE              1025
-#define REQ_PING                1026
+#define REQ_INTERNAL_BEGIN	1024
+#define	REQ_POPEN		1024
+#define REQ_PCLOSE		1025
+#define REQ_PING		1026
+#define REQ_INTERNAL_END	2048
 
+/** Packet version */
+#define REQV_VERSION 		0x42
+#define REQV_VERMASK		0xFF
+
+/** Packet has array of strings */
+#define REQVF_STRINGS		0x0200
+/** Packet has binary information */
+#define REQVF_BVAL		0x0400
+
+
+#define REQV_ISVER(V)		(((V) & REQV_VERMASK) == REQV_VERSION)
+#define REQVF_TEST(V,F)		(((V) & (F)) == (F))
+#define REQVSZ_VERSION		"MV42"
+#define REQVSZ_STRINGS		"MS42"
+#define REQVSZ_BVAL		"MB42"
+
+#define REQFMT_BINARY	0
+#define REQFMT_ASCII	1
+
+// An application can use this to change the default
+extern unsigned int g_defReqFmt;
+
+/** Binary request packet */
+/** If sizeof(int) > 4 this will need to be fixed. */
 typedef struct _requestPacket
 {
 	int	version;
@@ -102,70 +104,106 @@ typedef struct _requestPacket
 	int	name;
 	int	value;
 	int 	param;
+	int	data;
 	char	datum[0];
 }REQ;
 
+/*** Ascii string version of request packet */
+typedef struct _REQSZ
+{
+	char	version[4];
+	char	stat[4];
+	char	len[4];
+	char	session[4];
+	char	name[4];
+	char	value[4];
+	char	param[4];
+	char 	misc[4];
+	char	datum[0];
+}REQSZ;
 typedef struct _requestBuf
 {
-	unsigned int type;	/* Type of packet, dynamic/static */
-	unsigned int size;	/* size of memory block */
+	unsigned int type;	// Type of packet, dynamic/static
+	unsigned int size;	// size of memory block
 #if (REQCLIENT_VER >= 030113)
-	unsigned int fmt;	/* format, binary/ascii */
-	unsigned int reserved;	/* Just in case */
+	unsigned int fmt;	// format, binary/ascii
+	unsigned int reserved;	// Just in case
 #else
-#warning You are using an old Phoenix definition, this will have problems with a newer version
+#warning You are using an old Phoenix definition (pre 030113), this will have problems with a newer version
 #endif
-	REQ	req;
+#if (REQCLIENT_VER >= 051222)
+	int	cmd;
+	int 	param;
+	char *	session;
+	char *	name;
+	char * 	value;
+	char *	data;
+	int	cbdata;
+
+	// To be used by library layer for bookeeping
+	int	cb;
+	int	count;
+#endif
+	REQ	*req;
 }REQB;
+
+typedef struct ListWalkDataStruct
+{
+	REQB	*reqb;
+	char	*Key;
+	char 	*Data;
+	int 	cb;
+	int	count;
+}ListWalkData;
 
 #define MAX_REQ		16384
 
 #define REQB_STATIC	1
 #define REQB_DYNAMIC	2
 
-#define REQ_STAT_EXIST	0
-#define REQ_STAT_TTL	1	
-#define REQ_STAT_AGE	2
-#define REQ_STAT_TLA	3
-#define REQ_STAT_CTIM	4
-#define REQ_STAT_TOUCH	5
-#define REQ_STAT_NOW	6
-
 
 #define STATIC_REQB( len )	\
 	char buffer [ len ]; 	\
 	REQB *preq = StaticRequestBuffer(buffer, len);
 
-#if defined (__cplusplus)
-extern "C" {
-#endif
+#define ASCII_REQB(reqb) (REQB)->fmt = REQFMT_ASCII
+#define BINARY_REQB(reqb) (REQB)->fmt = REQFMT_BINARY
 
-#define SIZEREQB(REQB,SIZE) (((REQB)->size >= (unsigned int) SIZE) ? REQB : SizeRequestBuffer(REQB,SIZE))
-REQB *AllocateRequestBuffer(unsigned size);
+REQB *AllocateRequestBuffer(REQB *reqb, unsigned size);
 void FreeRequestBuffer(REQB *req);
 REQB *SizeRequestBuffer(REQB *req, unsigned int size);
 REQB *StaticRequestBuffer(char *buffer, unsigned int cb);
 
-int FormatRequest(REQB **buffer, int stat, const char *session, const char *name, const char *value, int param);
-int FormatRequestMulti(REQB **buffer, int stat, char *session, int n, char **pairs, int param);
-int FormatRequestStrings(REQB **ppreq, int stat, char *session, int n, char **strings);
-int DoSingleRequest(char *hostname, int port, REQB **preq);
+int FilterRequest(REQB *preq);
+int FormatRequest(REQB *preq, int stat, char *session, char *name, char *value, int param);
+int FormatRequestData(REQB *preq, int stat, char *session, char *name, char *value, void *data, int cbdata, int param);
+int FormatRequestStrings(REQB *preq, int stat, char *session, char *name, char *value, int n, char **strings);
+int FormatRequestf(REQB *preq, int stat, char *session, char *name, char *value, int param, char *fmt, ...);
+
+void *GetReqbDatumPtr(REQB *preq);
+
+int DoSingleRequest(char *hostname, int port, REQB *preq);
 void *OpenReqConn(char *hostname, int port);
+Boolean ReopenReqConn(void *conn);
 void CloseReqConn(void *conn);
-void DeleteReqConn(void *conn);
-unsigned char ReopenReqConn(void *conn);
-int DoRequest(void *conn, REQB **preq);
+int DoRequest(void *conn, REQB *preq);
 char *ReqbErr(REQB *reqb);
+int LWDaddNameVal(ListWalkData *plw, char *name, char *value);
+int LWDaddValue(ListWalkData *plw, char *value);
+
 
 #define ASSERT_STAT(PREQ) if(PREQ->stat != REQ_OK) \
 	{fprintf(stderr, "Error in Request %s %d %s\n", \
 		__FILE__,__LINE__, ReqErr(PREQ->param)); exit(-1); }
 
 #if defined (__cplusplus)
-	/* C API but with class definitions */
-	int ReadRequestTimeout(REQB **ppreq, MSock *sock, int timeout);
-	int ReadRequest(REQB **preq, MSock *sock);
-	int WriteRequest(REQB *preq, MSock *sock);
+	// C API but with class definitions
+	int ReadRequestTimeout(REQB *preq, MSock *sock, int timeout);
+	int ReadRequest(REQB *reqb, MSock *sock);
+	int WriteRequest(REQB *reqb, MSock *sock);
+	Boolean OpenReqSock(REQB *reqb, MSock *sock, char *hostname);
+	void CloseReqSock(REQB *reqb, MSock *sock);
 }
-#endif
 
+#endif
+#endif

@@ -1,8 +1,8 @@
 This is msession, it is an interface to a stand-alone session
 management system. The msession daemon can be found at 
-Mohawk Software's web site.
+Mohawk Software's web site, under Project Phoenix
 
-http://www.mohawksoft.com
+http://www.mohawksoft.com/phoenix.html
 
 Requirements:
 Mohawk Software's Phoenix library.
