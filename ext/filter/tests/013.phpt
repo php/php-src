@@ -10,6 +10,17 @@ var_dump(filter_data("0XFF", FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALL
 var_dump(filter_data("07", FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_OCTAL)));
 var_dump(filter_data("0xff0000", FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_HEX)));
 var_dump(filter_data("0666", FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_OCTAL)));
+var_dump(filter_data("08", FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_OCTAL)));
+var_dump(filter_data("00", FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_OCTAL)));
+var_dump(filter_data("000", FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_OCTAL)));
+
+var_dump(filter_data("-0xff", FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_HEX)));
+var_dump(filter_data("-0Xff", FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_HEX)));
+var_dump(filter_data("-0xFF", FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_HEX)));
+var_dump(filter_data("-0XFF", FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_HEX)));
+var_dump(filter_data("-07", FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_OCTAL)));
+var_dump(filter_data("-0xff0000", FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_HEX)));
+var_dump(filter_data("-0666", FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_OCTAL)));
 
 var_dump(filter_data("6", FILTER_VALIDATE_INT, array("min_range"=>1, "max_range"=>7)));
 var_dump(filter_data("6", FILTER_VALIDATE_INT, array("min_range"=>0, "max_range"=>5)));
@@ -33,6 +44,16 @@ int(255)
 int(7)
 int(16711680)
 int(438)
+NULL
+int(0)
+int(0)
+int(-255)
+int(-255)
+int(-255)
+int(-255)
+int(-7)
+int(-16711680)
+int(-438)
 int(6)
 NULL
 NULL
