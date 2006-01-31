@@ -4,6 +4,9 @@ filter_data() and flags
 <?php
 
 var_dump(filter_data("0xff", FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_HEX)));
+var_dump(filter_data("0Xff", FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_HEX)));
+var_dump(filter_data("0xFF", FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_HEX)));
+var_dump(filter_data("0XFF", FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_HEX)));
 var_dump(filter_data("07", FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_OCTAL)));
 var_dump(filter_data("0xff0000", FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_HEX)));
 var_dump(filter_data("0666", FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_OCTAL)));
@@ -23,6 +26,9 @@ var_dump(filter_data("010", FILTER_VALIDATE_INT));
 echo "Done\n";
 ?>
 --EXPECT--	
+int(255)
+int(255)
+int(255)
 int(255)
 int(7)
 int(16711680)
