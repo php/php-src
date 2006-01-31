@@ -23,6 +23,6 @@ echo "Done\n";
 --EXPECT--
 bool(false)
 bool(false)
-bool(false)
-bool(false)
+string(5) "'ABC'"
+string(4) "CHAR"
 Done
