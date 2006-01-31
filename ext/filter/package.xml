@@ -28,6 +28,7 @@ of filters and mechanisms that users can use to safely access their input data.
   <date>2006-02-??</date>
   <notes>
 - Fixed PECL bug #6639: uppercase hexadecimal digits are not supported.
+- Implemented PECL req #6641: negative values for hexadecimal and octal numbers are not supported.
   </notes>
   <filelist>
    <file role="src" name="config.m4"/>
