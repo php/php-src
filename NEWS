@@ -2,6 +2,7 @@ PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, Version 4.4.3
 - Added a check for special characters in the session name. (Ilia)
+- Fixed bug #36223 (curl bypasses open_basedir restrictions). (Tony)
 - Fixed bug #36148 (unpack("H*hex", $data) is adding an extra character to the 
   end of the string). (Ilia)
 - Fixed bug #36017 (fopen() crashes PHP when opening a URL). (Tony)
