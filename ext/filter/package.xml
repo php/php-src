@@ -24,12 +24,10 @@ of filters and mechanisms that users can use to safely access their input data.
  <license>PHP</license>
  <release>
   <state>beta</state>
-  <version>0.9.4</version>
-  <date>2006-01-23</date>
+  <version>0.9.5</version>
+  <date>2006-02-??</date>
   <notes>
-- Reimplement php_filter_callback() as exception-safe and without memleaks
-- Renamed all constants.
-- Fixed PECL bug #6124: Crash on HTML tags when using FS_STRING
+- Fixed PECL bug #6639: uppercase hexadecimal digits are not supported.
   </notes>
   <filelist>
    <file role="src" name="config.m4"/>
