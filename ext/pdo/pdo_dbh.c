@@ -41,7 +41,7 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate
 	pdo_error_type *pdo_err = &dbh->error_code;
 	char *message = NULL;
 	const char *msg;
-	zval *info = NULL;
+	
 
 	if (dbh->error_mode == PDO_ERRMODE_SILENT) {
 #if 0
@@ -64,12 +64,6 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate
 		msg = "<<Unknown error>>";
 	}
 
-	MAKE_STD_ZVAL(info);
-	array_init(info);
-
-	add_next_index_string(info, *pdo_err, 1);
-	add_next_index_long(info, 0);
-		
 	if (supp) {
 		spprintf(&message, 0, "SQLSTATE[%s]: %s: %s", *pdo_err, msg, supp);
 	} else {
@@ -78,12 +72,8 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate
 
 	if (dbh->error_mode != PDO_ERRMODE_EXCEPTION) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", message);
-
-		if (info) {
-			zval_ptr_dtor(&info);
-		}
 	} else {
-		zval *ex;
+		zval *ex, *info;
 		zend_class_entry *def_ex = php_pdo_get_exception_base(1 TSRMLS_CC), *pdo_ex = php_pdo_get_exception();
 
 		MAKE_STD_ZVAL(ex);
@@ -92,10 +82,14 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate
 		zend_update_property_string(def_ex, ex, "message", sizeof("message")-1, message TSRMLS_CC);
 		zend_update_property_string(def_ex, ex, "code", sizeof("code")-1, *pdo_err TSRMLS_CC);
 		
-		if (info) {
-			zend_update_property(pdo_ex, ex, "errorInfo", sizeof("errorInfo")-1, info TSRMLS_CC);
-			zval_ptr_dtor(&info);
-		}
+		MAKE_STD_ZVAL(info);
+		array_init(info);
+
+		add_next_index_string(info, *pdo_err, 1);
+		add_next_index_long(info, 0);
+
+		zend_update_property(pdo_ex, ex, "errorInfo", sizeof("errorInfo")-1, info TSRMLS_CC);
+		zval_ptr_dtor(&info);
 
 		zend_throw_exception_object(ex TSRMLS_CC);
 	}
@@ -129,7 +123,6 @@ void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC)
 	}
 
 	if (dbh->methods->fetch_err) {
-		
 		MAKE_STD_ZVAL(info);
 		array_init(info);
 
@@ -146,9 +139,6 @@ void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC)
 				supp = estrndup(Z_STRVAL_PP(item), Z_STRLEN_PP(item));
 			}
 		}
-
-		zval_ptr_dtor(&info);
-		info = NULL;
 	}
 
 	if (supp) {
@@ -159,10 +149,6 @@ void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC)
 
 	if (dbh->error_mode == PDO_ERRMODE_WARNING) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", message);
-
-		if (info) {
-			zval_ptr_dtor(&info);
-		}
 	} else if (EG(exception) == NULL) {
 		zval *ex;
 		zend_class_entry *def_ex = php_pdo_get_exception_base(1 TSRMLS_CC), *pdo_ex = php_pdo_get_exception();
@@ -175,12 +161,15 @@ void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC)
 		
 		if (info) {
 			zend_update_property(pdo_ex, ex, "errorInfo", sizeof("errorInfo")-1, info TSRMLS_CC);
-			zval_ptr_dtor(&info);
 		}
 
 		zend_throw_exception_object(ex TSRMLS_CC);
 	}
-	
+
+	if (info) {
+		zval_ptr_dtor(&info);
+	}
+
 	if (message) {
 		efree(message);
 	}
