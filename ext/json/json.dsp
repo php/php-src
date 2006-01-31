@@ -94,6 +94,30 @@ LINK32=link.exe
 
 SOURCE=".\json.c"
 # End Source File
+# Begin Source File
+
+SOURCE=.\JSON_parser.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\JSON_parser.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\utf8_decode.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\utf8_decode.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\utf8_to_utf16.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\utf8_to_utf16.h
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -106,94 +130,6 @@ SOURCE=.\php_json.h
 # Begin Group "Resource Files"
 
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
-# End Group
-# Begin Group "json_c"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=.\json_c\arraylist.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\json_c\arraylist.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\json_c\bits.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\json_c\ConvertUTF.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\json_c\ConvertUTF.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\json_c\debug.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\json_c\debug.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\json_c\json.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\json_c\json_object.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\json_c\json_object.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\json_c\json_object_private.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\json_c\json_tokener.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\json_c\json_tokener.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\json_c\json_util.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\json_c\json_util.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\json_c\linkhash.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\json_c\linkhash.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\json_c\ossupport.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\json_c\ossupport.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\json_c\printbuf.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\json_c\printbuf.h
-# End Source File
 # End Group
 # End Target
 # End Project

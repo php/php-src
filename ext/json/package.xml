@@ -15,48 +15,30 @@
  <description> 
  Support for JSON (JavaScript Object Notation) serialization.
  </description>
- <license>LGPL</license>
+ <license>PHP 3.01</license>
  <release>
-  <state>stable</state>
-  <version>1.1.1</version>
-  <date>2006-01-12</date>
+  <state>beta</state>
+  <version>1.2.0</version>
+  <date>2006-01-31</date>
   <notes>
-   Cleanup and TSRM performance fixes by rasmus.
+   Complete rewrite using JSON_checker as the base for the parser. Implements the JSON specification. 3-8x faster on encodes and 1.2x-4x faster on decodes.
   </notes>
  </release>
   <configureoptions>
   </configureoptions>
   <filelist>
-    <file role="doc" name="json_c/README.FORK" />
-    <file role="doc" name="json_c/AUTHORS" />
+    <file role="doc" name="README" />
     <file role="src" name="config.m4" />
     <file role="src" name="config.w32" />
-    <file role="src" name="json.c" />
-    <file role="src" name="json_c/arraylist.c" />
-    <file role="src" name="json_c/arraylist.h" />
-    <file role="src" name="json_c/bits.h" />
-    <file role="src" name="json_c/ConvertUTF.c" />
-    <file role="src" name="json_c/ConvertUTF.h" />
-    <file role="src" name="json_c/debug.c" />
-    <file role="src" name="json_c/debug.h" />
-    <file role="src" name="json_c/json.h" />
-    <file role="src" name="json_c/json_object.c" />
-    <file role="src" name="json_c/json_object.h" />
-    <file role="src" name="json_c/json_object_private.h" />
-    <file role="src" name="json_c/json_tokener.c" />
-    <file role="src" name="json_c/json_tokener.h" />
-    <file role="src" name="json_c/json_util.c" />
-    <file role="src" name="json_c/json_util.h" />
-    <file role="src" name="json_c/linkhash.c" />
-    <file role="src" name="json_c/linkhash.h" />
-    <file role="src" name="json_c/ossupport.c" />
-    <file role="src" name="json_c/ossupport.h" />
-    <file role="src" name="json_c/printbuf.c" />
-    <file role="src" name="json_c/printbuf.h" />
-    <file role="src" name="json_c/test1.c" />
-    <file role="src" name="json_c/test2.c" />
     <file role="src" name="json.dsp" />
+    <file role="src" name="json.c" />
+    <file role="src" name="JSON_parser.c" />
+    <file role="src" name="JSON_parser.h" />
     <file role="src" name="php_json.h" />
+    <file role="src" name="utf8_decode.c" />
+    <file role="src" name="utf8_decode.h" />
+    <file role="src" name="utf8_to_utf16.c" />
+    <file role="src" name="utf8_to_utf16.h" />
   </filelist>
   <changelog>
      <release>
@@ -139,7 +121,15 @@
    Port to Win32.
   </notes>
  </release>
-  </changelog>
+ <release>
+  <state>stable</state>
+  <version>1.1.1</version>
+  <date>2006-01-12</date>
+  <notes>
+   Cleanup and TSRM performance fixes by rasmus.
+  </notes>
+ </release>
+ </changelog>
 </package>
 <!--
 vim:et:ts=1:sw=1
