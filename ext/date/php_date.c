@@ -235,6 +235,7 @@ PHP_RSHUTDOWN_FUNCTION(date)
 
 #define DATE_TIMEZONEDB      php_date_global_timezone_db ? php_date_global_timezone_db : timelib_builtin_db()
 
+#define DATE_FORMAT_RFC3339  "Y-m-d\\TH:i:sP"
 #define DATE_FORMAT_ISO8601  "Y-m-d\\TH:i:sO"
 #define DATE_FORMAT_RFC1036  "l, d-M-y H:i:s T"
 #define DATE_FORMAT_RFC1123  "D, d M Y H:i:s T"
@@ -260,7 +261,7 @@ PHP_MINIT_FUNCTION(date)
 #ifdef EXPERIMENTAL_DATE_SUPPORT
 	date_register_classes(TSRMLS_C);
 #endif
-	REGISTER_STRING_CONSTANT("DATE_ATOM",    DATE_FORMAT_ISO8601, CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("DATE_ATOM",    DATE_FORMAT_RFC3339, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_COOKIE",  DATE_FORMAT_RFC1123, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_ISO8601", DATE_FORMAT_ISO8601, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_RFC822",  DATE_FORMAT_RFC1123, CONST_CS | CONST_PERSISTENT);
@@ -459,6 +460,7 @@ static char *date_format(char *format, int format_len, timelib_time *t, int loca
 	char                 buffer[33];
 	timelib_time_offset *offset;
 	timelib_sll          isoweek, isoyear;
+	int                  rfc_colon = 0;
 
 	if (!format_len) {
 		return estrdup("");
@@ -537,9 +539,11 @@ static char *date_format(char *format, int format_len, timelib_time *t, int loca
 
 			/* timezone */
 			case 'I': snprintf(buffer, 32, "%d", localtime ? offset->is_dst : 0); break;
-			case 'O': snprintf(buffer, 32, "%c%02d%02d",
+			case 'P': rfc_colon = 1; /* break intentionally missing */
+			case 'O': snprintf(buffer, 32, "%c%02d%s%02d",
 											localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
 											localtime ? abs(offset->offset / 3600) : 0,
+											rfc_colon ? ":" : "",
 											localtime ? abs((offset->offset % 3600) / 60) : 0
 							  );
 					  break;
@@ -1198,7 +1202,7 @@ static void date_register_classes(TSRMLS_D)
 #define REGISTER_DATE_CLASS_CONST_STRING(const_name, value) \
 	zend_declare_class_constant_stringl(date_ce_date, const_name, sizeof(const_name)-1, value, sizeof(value)-1 TSRMLS_CC);
 
-	REGISTER_DATE_CLASS_CONST_STRING("ATOM",    DATE_FORMAT_ISO8601);
+	REGISTER_DATE_CLASS_CONST_STRING("ATOM",    DATE_FORMAT_RFC3339);
 	REGISTER_DATE_CLASS_CONST_STRING("COOKIE",  DATE_FORMAT_RFC1123);
 	REGISTER_DATE_CLASS_CONST_STRING("ISO8601", DATE_FORMAT_ISO8601);
 	REGISTER_DATE_CLASS_CONST_STRING("RFC822",  DATE_FORMAT_RFC1123);
@@ -1206,6 +1210,7 @@ static void date_register_classes(TSRMLS_D)
 	REGISTER_DATE_CLASS_CONST_STRING("RFC1036", DATE_FORMAT_RFC1036);
 	REGISTER_DATE_CLASS_CONST_STRING("RFC1123", DATE_FORMAT_RFC1123);
 	REGISTER_DATE_CLASS_CONST_STRING("RFC2822", DATE_FORMAT_RFC2822);
+	REGISTER_DATE_CLASS_CONST_STRING("RFC3339", DATE_FORMAT_RFC3339);
 	REGISTER_DATE_CLASS_CONST_STRING("RSS",     DATE_FORMAT_RFC1123);
 	REGISTER_DATE_CLASS_CONST_STRING("W3C",     DATE_FORMAT_ISO8601);
 
