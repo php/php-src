@@ -1,3 +1,20 @@
+2006-01-30  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
+
+    * ext/msession/README
+      ext/msession/config.m4
+      ext/msession/msession-test.php
+      ext/msession/msession.c
+      ext/msession/msessionapi.h
+      ext/msession/php_msession.h
+      ext/msession/reqclient.h:
+      MSession now works with the new MCache server
+
+2006-01-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      main/main.c:
+      Fixed error reporting logic for HTML errors
+
 2006-01-29  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * (PHP_5_1)
