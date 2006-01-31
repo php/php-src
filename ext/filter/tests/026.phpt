@@ -20,11 +20,11 @@ echo "Done\n";
 --EXPECTF--	
 string(40) "Let me see you Stripped down to the bone"
 string(11) "!@#$%^&*()>"
-NULL
+string(0) ""
 string(40) "Let me see you Stripped down to the bone"
 string(11) "!@#$%^&*()>"
-NULL
+string(0) ""
 string(40) "Let me see you Stripped down to the bone"
 string(11) "!@#$%^&*()>"
-NULL
+string(0) ""
 Done

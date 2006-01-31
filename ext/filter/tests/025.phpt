@@ -14,8 +14,8 @@ var_dump(filter_data(".", FILTER_SANITIZE_STRING));
 echo "Done\n";
 ?>
 --EXPECT--	
-NULL
-NULL
+string(0) ""
+string(0) ""
 string(12) "!@#$%^&*()'""
 string(32) "!@#$%^&#38;*()&#38;#39;&#38;#34;"
 string(11) "`1234567890"
