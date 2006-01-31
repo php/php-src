@@ -58,26 +58,12 @@ EOF
   done
 ])
 
-AC_DEFUN([PHP_JSON_SETUP_JSON_C], [
-  dnl json-c is required and can not be disabled
-  dnl
-  dnl Bundled json-c
-  dnl
-
-  PHP_JSON_ADD_BUILD_DIR([json_c])
-  PHP_JSON_ADD_INCLUDE([json_c])
-
+AC_DEFUN([PHP_JSON_SETUP_JSON_CHECKER], [
   PHP_JSON_ADD_SOURCES([
-    json_c/ConvertUTF.c
-    json_c/debug.c
-    json_c/linkhash.c
-    json_c/printbuf.c
-    json_c/arraylist.c
-    json_c/json_object.c
-    json_c/json_tokener.c
-    json_c/ossupport.c
+    utf8_to_utf16.c
+    utf8_decode.c
+    JSON_parser.c
   ])
-  PHP_JSON_ADD_CFLAG([-DHAVE_CONFIG_H])
 ])
 
 dnl
@@ -90,13 +76,11 @@ PHP_ARG_WITH(json, whether to enable JavaScript Object Serialization support,
 if test "$PHP_JSON" != "no"; then  
   AC_DEFINE([HAVE_JSON],1,[whether to have JavaScript Object Serialization support])
   AC_HEADER_STDC
-  AC_CHECK_FUNCS([strndup vsnprintf vasprintf strncasecmp])
-  AC_CHECK_HEADERS([stdarg.h])
 
   PHP_JSON_ADD_BASE_SOURCES([json.c])
 
   dnl json_c is required
-  PHP_JSON_SETUP_JSON_C
+  PHP_JSON_SETUP_JSON_CHECKER
   PHP_JSON_EXTENSION
   dnl PHP_INSTALL_HEADERS([ext/json], [json_c])
 fi
