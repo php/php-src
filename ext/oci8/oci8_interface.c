@@ -1102,7 +1102,7 @@ PHP_FUNCTION(oci_field_name)
 {
 	php_oci_out_column *column;
 
-	if ( ( column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU) ) ) {
+	if ( ( column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) ) ) {
 		RETURN_STRINGL(column->name, column->name_len, 1);
 	}
 	RETURN_FALSE;
@@ -1115,7 +1115,7 @@ PHP_FUNCTION(oci_field_size)
 {
 	php_oci_out_column *column;
 
-	if ( ( column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU) ) ) {
+	if ( ( column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) ) ) {
 		/* Handle data type of LONG */
 		if (column->data_type == SQLT_LNG){
 			RETURN_LONG(column->storage_size4);
@@ -1132,7 +1132,7 @@ PHP_FUNCTION(oci_field_scale)
 {
 	php_oci_out_column *column;
 
-	if ( ( column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU) ) ) {
+	if ( ( column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) ) ) {
 		RETURN_LONG(column->scale);
 	}
 	RETURN_FALSE;
@@ -1145,7 +1145,7 @@ PHP_FUNCTION(oci_field_precision)
 {
 	php_oci_out_column *column;
 
-	if ( ( column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU) ) ) {
+	if ( ( column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) ) ) {
 		RETURN_LONG(column->precision);
 	}
 	RETURN_FALSE;
@@ -1158,7 +1158,7 @@ PHP_FUNCTION(oci_field_type)
 {
 	php_oci_out_column *column;
 
-	column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 
 	if (!column) {
 		RETURN_FALSE;
@@ -1223,7 +1223,7 @@ PHP_FUNCTION(oci_field_type_raw)
 {
 	php_oci_out_column *column;
 
-	column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU); 
+	column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0); 
 	if (column) {
 		RETURN_LONG(column->data_type);
 	}
@@ -1237,7 +1237,7 @@ PHP_FUNCTION(oci_field_is_null)
 {
 	php_oci_out_column *column;
 
-	if ( ( column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU) ) ) {
+	if ( ( column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) ) ) {
 		if (column->indicator == -1) {
 			RETURN_TRUE;
 		}
@@ -1734,7 +1734,7 @@ PHP_FUNCTION(oci_result)
 {
 	php_oci_out_column *column;
 	
-	column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 	if(column) {
 		php_oci_column_to_zval(column, return_value, 0 TSRMLS_CC);
 	}

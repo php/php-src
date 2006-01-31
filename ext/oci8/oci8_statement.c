@@ -1004,7 +1004,7 @@ sb4 php_oci_bind_out_callback(
 
 /* {{{ php_oci_statement_get_column_helper() 
  Helper function to get column by name and index */
-php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAMETERS)
+php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAMETERS, int need_data)
 {
 	zval *z_statement, *column_index;
 	php_oci_statement *statement;
@@ -1020,7 +1020,7 @@ php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAME
 		return NULL;
 	}
 
-	if (!statement->has_data) {
+	if (need_data && !statement->has_data) {
 		return NULL;
 	}
 	
