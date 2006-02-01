@@ -306,6 +306,34 @@ xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr par
 			xmlSetNs(node, nsp);
 		}
 	} else {
+		if (SOAP_GLOBAL(class_map) && data &&
+		    Z_TYPE_P(data) == IS_OBJECT &&
+		    !Z_OBJPROP_P(data)->nApplyCount) {
+			zend_class_entry *ce = Z_OBJCE_P(data);
+			HashPosition pos;
+			zval **tmp;
+			char *type_name = NULL;
+			uint type_len;
+			ulong idx;
+
+			for (zend_hash_internal_pointer_reset_ex(SOAP_GLOBAL(class_map), &pos);
+			     zend_hash_get_current_data_ex(SOAP_GLOBAL(class_map), (void **) &tmp, &pos) == SUCCESS;
+			     zend_hash_move_forward_ex(SOAP_GLOBAL(class_map), &pos)) {
+				if (Z_TYPE_PP(tmp) == IS_STRING &&
+				    ce->name_length == Z_STRLEN_PP(tmp) &&
+				    zend_binary_strncasecmp(ce->name, ce->name_length, Z_STRVAL_PP(tmp), ce->name_length, ce->name_length) == 0 &&
+				    zend_hash_get_current_key_ex(SOAP_GLOBAL(class_map), &type_name, &type_len, &idx, 0, &pos) == HASH_KEY_IS_STRING) {
+
+				    /* TODO: namespace isn't stored */
+			    	encodePtr enc = get_encoder(SOAP_GLOBAL(sdl), SOAP_GLOBAL(sdl)->target_ns, type_name);
+			    	if (enc) {
+			    		encode = &enc->details;
+				 	}		        
+			        break;
+				}
+			}
+		}
+
 		if (encode == NULL) {
 			encode = get_conversion(UNKNOWN_TYPE);
 		}
@@ -1220,9 +1248,9 @@ static zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
 				ret = master_to_zval_int(sdlType->encode, data);
 				FIND_XML_NULL(data, ret);
 				if (get_zval_property(ret, "any" TSRMLS_CC) != NULL) {
-				  unset_zval_property(ret, "any" TSRMLS_CC);
+					unset_zval_property(ret, "any" TSRMLS_CC);
 					redo_any = 1;
-			  }
+				}
 				if (Z_TYPE_P(ret) == IS_OBJECT && ce != ZEND_STANDARD_CLASS_DEF_PTR) {
 					zend_object *zobj = zend_objects_get_address(ret TSRMLS_CC);
 					zobj->ce = ce;
@@ -1526,7 +1554,7 @@ static sdlTypePtr model_array_element(sdlContentModelPtr model)
 static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNodePtr parent)
 {
 	xmlNodePtr xmlParam;
-	HashTable *prop;
+	HashTable *prop = NULL;
 	int i;
 	sdlTypePtr sdlType = type->sdl_type;
 	TSRMLS_FETCH();
@@ -1534,19 +1562,19 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 	if (!data || Z_TYPE_P(data) == IS_NULL) {
 		xmlParam = xmlNewNode(NULL,"BOGUS");
 		xmlAddChild(parent, xmlParam);
-	  if (style == SOAP_ENCODED) {
+		if (style == SOAP_ENCODED) {
 			xmlSetProp(xmlParam, "xsi:nil", "true");
 		}
 		return xmlParam;
 	}
 
+	if (Z_TYPE_P(data) == IS_OBJECT) {
+		prop = Z_OBJPROP_P(data);
+	} else if (Z_TYPE_P(data) == IS_ARRAY) {
+		prop = Z_ARRVAL_P(data);
+	}
+
 	if (sdlType) {
-		prop = NULL;
-		if (Z_TYPE_P(data) == IS_OBJECT) {
-			prop = Z_OBJPROP_P(data);
-		} else if (Z_TYPE_P(data) == IS_ARRAY) {
-			prop = Z_ARRVAL_P(data);
-		}
 		if (sdlType->kind == XSD_TYPEKIND_RESTRICTION &&
 		    sdlType->encode && type != &sdlType->encode->details) {
 			encodePtr enc;
@@ -1562,7 +1590,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 				zval *tmp = get_zval_property(data, "_" TSRMLS_CC);
 				if (tmp) {
 					xmlParam = master_to_xml(enc, tmp, style, parent);
-				} else if (prop == NULL) {
+				} else if (prop == NULL) {					
 					xmlParam = master_to_xml(enc, data, style, parent);
 				} else {
 					xmlParam = xmlNewNode(NULL,"BOGUS");
@@ -1578,7 +1606,10 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_SIMPLE &&
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_LIST &&
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_UNION) {
+
+				if (prop) prop->nApplyCount++;
 				xmlParam = master_to_xml(sdlType->encode, data, style, parent);
+				if (prop) prop->nApplyCount--;
 			} else {
 				zval *tmp = get_zval_property(data, "_" TSRMLS_CC);
 
@@ -1595,7 +1626,6 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 			xmlParam = xmlNewNode(NULL,"BOGUS");
 			xmlAddChild(parent, xmlParam);
 		}
-		FIND_ZVAL_NULL(data, xmlParam, style);
 
 		if (prop != NULL) {
 		  sdlTypePtr array_el;
@@ -1678,14 +1708,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 	} else {
 		xmlParam = xmlNewNode(NULL,"BOGUS");
 		xmlAddChild(parent, xmlParam);
-		FIND_ZVAL_NULL(data, xmlParam, style);
 
-		prop = NULL;
-		if (Z_TYPE_P(data) == IS_OBJECT) {
-			prop = Z_OBJPROP_P(data);
-		} else if (Z_TYPE_P(data) == IS_ARRAY) {
-			prop = Z_ARRVAL_P(data);
-		}
 		if (prop != NULL) {
 			i = zend_hash_num_elements(prop);
 			zend_hash_internal_pointer_reset(prop);
