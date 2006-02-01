@@ -21,6 +21,8 @@
 #if HAVE_UNICODE
 #include "zend_unicode.h"
 
+void php_register_unicode_iterators(TSRMLS_D);
+
 /* {{{ proto unicode unicode_decode(string input, string encoding)
    Takes a string in the source encoding and converts it to a UTF-16 unicode string, returning the result */
 static PHP_FUNCTION(unicode_decode)
@@ -100,6 +102,8 @@ static PHP_FUNCTION(unicode_encode)
 
 	ucnv_close(conv);	
 }
+/* }}} */
+
 /* {{{ unicode_functions[] */
 zend_function_entry unicode_functions[] = {
 	PHP_FE(i18n_loc_get_default, NULL)
@@ -139,7 +143,8 @@ PHP_MINIT_FUNCTION(unicode)
 	if (php_stream_filter_register_factory("unicode.*", &php_unicode_filter_factory TSRMLS_CC) == FAILURE) {
 		return FAILURE;
 	}
-	/* add your stuff here */
+
+	php_register_unicode_iterators(TSRMLS_C);
 
 	return SUCCESS;
 }
