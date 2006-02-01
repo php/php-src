@@ -319,6 +319,12 @@
 #define term_source php_gd_term_source
 #define writewbmp php_gd_writewbmp
 #define ZeroDataBlock php_gd_ZeroDataBlock
+#define gdCacheCreate php_gd_gdCacheCreate
+#define gdCacheDelete php_gd_gdCacheDelete
+#define gdCacheGet php_gd_gdCacheGet
+#define gdFontCacheSetup php_gd_gdFontCacheSetup
+#define gdFontCacheShutdown php_gd_gdFontCacheShutdown
+#define gdFreeFontCache php_gd_gdFreeFontCache
 #endif /* HAVE_GD_BUNDLED */
 
 /* Define to specify how much context to retain around the current parse
