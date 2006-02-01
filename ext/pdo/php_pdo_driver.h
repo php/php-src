@@ -489,6 +489,13 @@ struct _pdo_dbh_t {
 	zend_class_entry *def_stmt_ce;
 	
 	zval *def_stmt_ctor_args;
+    
+	/* when calling PDO::query(), we need to keep the error
+	 * context from the statement around until we next clear it.
+	 * This will allow us to report the correct error message
+	 * when PDO::query() fails */
+	pdo_stmt_t *query_stmt;
+	zval query_stmt_zval;
 };
 
 /* describes a column */
