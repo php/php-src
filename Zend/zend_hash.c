@@ -546,11 +546,11 @@ ZEND_API int zend_u_hash_del_key_or_index(HashTable *ht, zend_uchar type, void *
 
 	p = ht->arBuckets[nIndex];
 	while (p != NULL) {
-		if ((p->h == h) &&
-		    ((p->nKeyLength == 0) || /* Numeric index */
-		     ((p->nKeyLength == nKeyLength) &&
-		      (p->key.type == type) &&
-		      (!memcmp(&p->key.u, arKey, realKeyLength))))) {
+		if ((p->h == h)
+			&& (p->nKeyLength == nKeyLength)
+		    && ((p->nKeyLength == 0) /* Numeric index (short circuits the memcmp()) */
+				|| ((p->key.type == type)
+		      		&& !memcmp(&p->key.u, arKey, realKeyLength)))) {
 			HANDLE_BLOCK_INTERRUPTIONS();
 			if (p == ht->arBuckets[nIndex]) {
 				ht->arBuckets[nIndex] = p->pNext;
