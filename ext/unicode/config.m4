@@ -8,6 +8,6 @@ PHP_ARG_ENABLE(unicode, whether to enable unicode functions,
 if test "$PHP_UNICODE" != "no"; then
   PHP_SUBST(UNICODE_SHARED_LIBADD)
   AC_DEFINE(HAVE_UNICODE, 1, [ ])
-  PHP_NEW_EXTENSION(unicode, unicode.c locale.c unicode_filter.c, $ext_shared)
+  PHP_NEW_EXTENSION(unicode, unicode.c locale.c unicode_filter.c unicode_iterators.c, $ext_shared)
 fi
 
