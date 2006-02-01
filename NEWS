@@ -15,7 +15,7 @@ PHP                                                                        NEWS
 - Added new mysqli constants for BIT and NEW_DECIMAL field types:
   MYSQLI_TYPE_NEWDECIMAL and MYSQLI_TYPE_BIT. FR #36007. (Georg)
 - Added ReflectionClass::newInstanceArgs($args). (Marcus)
-- Added imap_savebody(). (Mike)
+- Added imap_savebody() that allows message body to be written to a file. (Mike)
 - Fixed imagecolorallocate() and imagecolorallocatelapha() to return FALSE
   on error. (Pierre)
 - Fixed bug #36242 (Possible memory corruption in stream_select()). (Tony)
@@ -25,7 +25,7 @@ PHP                                                                        NEWS
   Magnusson)
 - Fixed bug #36222 (errorInfo in PDOException is always NULL). (Ilia)
 - Fixed bug #36208 (symbol namespace conflicts using bundled gd). (Jakub Moc)
-- Fixed bug #36185 (str_rot13(NULL) crash). (Pierre)
+- Fixed bug #36185 (str_rot13() crash on non-string parameter). (Pierre)
 - Fixed bug #36176 (PDO_PGSQL - PDO::exec() does not return number of rows 
   affected by the operation). (Ilia)
 - Fixed bug #36152 (problems with curl+ssl and pgsql+ssl in same PHP). (Mike)
