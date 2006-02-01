@@ -46,7 +46,7 @@ static void text_iterator_free_storage(void *object TSRMLS_DC)
 	zend_hash_destroy(intern->std.properties);
 	FREE_HASHTABLE(intern->std.properties);
 
-	zval_ptr_dtor(&intern->text);
+	if (intern->text) zval_ptr_dtor(&intern->text);
 	efree(object);
 }
 
@@ -90,6 +90,7 @@ PHP_METHOD(TextIterator, __construct)
 	}
 
 	if (Z_TYPE_P(text) != IS_UNICODE) {
+		printf("not unicode\n");
 		zend_throw_exception(U_CLASS_ENTRY(spl_ce_InvalidArgumentException), "Text iterator expects argument to be a Unicode string", 0 TSRMLS_CC);
 		return;
 	}
