@@ -18,6 +18,7 @@ PHP                                                                        NEWS
 - Added imap_savebody(). (Mike)
 - Fixed imagecolorallocate() and imagecolorallocatelapha() to return FALSE
   on error. (Pierre)
+- Fixed bug #36242 (Possible memory corruption in stream_select()). (Tony)
 - Fixed bug #36235 (ocicolumnname returns false before a succesfull fetch). 
   (Tony)
 - Fixed bug #36224 (date(DATE_ATOM) gives wrong results). (Derick, Hannes
