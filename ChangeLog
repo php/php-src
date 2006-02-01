@@ -1,3 +1,66 @@
+2006-01-31  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_1)
+      NEWS:
+      - MFH: Fixed bug #36224 (date(DATE_ATOM) gives wrong results).
+
+2006-01-31  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/config.w32:
+      merge from 5.1 forgotten patch
+
+    * (PHP_5_1)
+      NEWS
+      ext/oci8/oci8_interface.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h:
+      MFH: fix #36235 (ocicolumnname delivers empty results before a succesfull
+      ocifetch)
+
+    * ext/oci8/oci8_interface.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h:
+      fix #36235 (ocicolumnname delivers empty results before a succesfull
+      ocifetch)
+
+2006-01-31  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #36222 (errorInfo in PDOException is always NULL).
+
+2006-01-31  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      NEWS
+      ext/curl/curl.c:
+      fix #36223 (curl bypasses open_basedir restrictions)
+
+2006-01-31  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_1)
+      NEWS
+      ext/msession/.cvsignore
+      ext/msession/.cvsignore
+      ext/msession/CREDITS
+      ext/msession/CREDITS
+      ext/msession/README
+      ext/msession/README
+      ext/msession/config.m4
+      ext/msession/config.m4
+      ext/msession/msession-test.php
+      ext/msession/msession-test.php
+      ext/msession/msession.c
+      ext/msession/msession.c
+      ext/msession/msession.php
+      ext/msession/msession.php
+      ext/msession/msessionapi.h
+      ext/msession/php_msession.h
+      ext/msession/php_msession.h
+      ext/msession/reqclient.h
+      ext/msession/reqclient.h:
+      - Moved msession to PECL.
+
 2006-01-30  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
 
     * ext/msession/README
