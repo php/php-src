@@ -340,6 +340,8 @@ static spl_filesystem_object * spl_filesystem_object_create_type(int ht, spl_fil
 		spl_filesystem_object_get_file_name(source TSRMLS_CC);
 		intern->file_name = estrndup(source->file_name, source->file_name_len);
 		intern->file_name_len = source->file_name_len;
+		intern->path = estrndup(source->path, source->path_len);
+		intern->path_len = source->path_len;
 		break;
 	case SPL_FS_FILE:
 		return_value->value.obj = spl_filesystem_object_new_ex(ce ? ce : source->file_class, &intern TSRMLS_CC);
