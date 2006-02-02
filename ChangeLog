@@ -1,3 +1,68 @@
+2006-02-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      Clarify new entries.
+
+2006-02-01  Joe Orton  <jorton@redhat.com>
+
+    * (PHP_5_1)
+      NEWS
+      main/php_compat.h:
+      MFH: - Fixed bug #36208 (symbol namespace conflicts using bundled gd).
+      (Jakub Moc)
+
+    * main/php_compat.h:
+      Fixed bug #36208 (symbol namespace conflicts using bundled gd).  (Jakub
+      Moc)
+
+2006-02-01  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      ext/standard/file.c
+      ext/standard/streamsfuncs.c:
+      MFH: fix #36242 (Possible memory corruption in stream_select())
+
+    * ext/standard/streamsfuncs.c:
+      fix #36242 (Possible memory corruption in stream_select())
+
+2006-02-01  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_4_4)
+      Zend/zend_hash.c:
+      Fix the fix - PHP 4 behaves slightly differently than 5 (remarkably, nonw
+      of our tests cover it)
+
+2006-02-01  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/com_dotnet/com_persist.c
+      ext/com_dotnet/com_persist.c:
+      MFB: Fix line endings.
+
+    * (PHP_5_1)
+      ext/com_dotnet/com_persist.c:
+      Fix line endings.
+
+2006-02-01  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_hash.c:
+      Fix possibility of a wrong element being deleted by zend_hash_del()
+
+    * (PHP_4_4)
+      Zend/zend_hash.c:
+      MFB (Fix possibility of a wrong element being deleted by zend_hash_del())
+
+    * (PHP_5_0)
+      ZendEngine2/zend_hash.c:
+      MFB  (Fix possibility of a wrong element being deleted by zend_hash_del())
+
+    * (PHP_5_1)
+      ZendEngine2/zend_hash.c:
+      Fix possibility of a wrong element being deleted by zend_hash_del()
+      Thanks Stefan!
+
 2006-01-31  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_5_1)
