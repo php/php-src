@@ -79,9 +79,7 @@
 #include "php_getopt.h"
 
 #if PHP_FASTCGI
-#include "fcgi_config.h"
-#include "fcgiapp.h"
-/* don't want to include fcgios.h, causes conflicts */
+#include "fastcgi.h"
 #ifdef PHP_WIN32
 extern int OS_SetImpersonate(void);
 #else

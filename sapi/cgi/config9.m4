@@ -133,15 +133,12 @@ if test "$PHP_SAPI" = "default"; then
       exit 1
     fi
     if test "$PHP_ENABLE_FASTCGI" = "yes"; then
-      PHP_ADD_BUILD_DIR($abs_builddir/sapi/cgi/libfcgi)
       PHP_FASTCGI=1
-      PHP_FCGI_FILES="libfcgi/fcgi_stdio.c libfcgi/fcgiapp.c libfcgi/os_unix.c"
-      PHP_FCGI_INCLUDE="-I$PHP_LIBFCGI_DIR/include"
+      PHP_FCGI_FILES="fastcgi.c"
       PHP_FCGI_STATIC=1
     else
       PHP_FASTCGI=0
       PHP_FCGI_FILES=""
-      PHP_FCGI_INCLUDE=""
       PHP_FCGI_STATIC=0
     fi
     AC_DEFINE_UNQUOTED(PHP_FASTCGI, $PHP_FASTCGI, [ ])
@@ -149,7 +146,7 @@ if test "$PHP_SAPI" = "default"; then
     AC_MSG_RESULT($PHP_ENABLE_FASTCGI)
 
     INSTALL_IT="@echo \"Installing PHP CGI into: \$(INSTALL_ROOT)\$(bindir)/\"; \$(INSTALL) -m 0755 \$(SAPI_CGI_PATH) \$(INSTALL_ROOT)\$(bindir)/\$(program_prefix)php\$(program_suffix)\$(EXEEXT)"
-    PHP_SELECT_SAPI(cgi, program, $PHP_FCGI_FILES cgi_main.c getopt.c, $PHP_FCGI_INCLUDE, '$(SAPI_CGI_PATH)')
+    PHP_SELECT_SAPI(cgi, program, $PHP_FCGI_FILES cgi_main.c getopt.c, , '$(SAPI_CGI_PATH)')
 
     case $host_alias in
       *aix*)

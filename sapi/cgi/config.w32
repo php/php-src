@@ -16,8 +16,7 @@ AC_DEFINE("ENABLE_PATHINFO_CHECK", PHP_PATH_INFO_CHECK == "yes" ? 1 : 0, "Pathin
 if (PHP_CGI == "yes") {
 	AC_DEFINE('PHP_FASTCGI', PHP_FASTCGI == "yes" ? 1 : 0);
 	if (PHP_FASTCGI == "yes") {
-		SAPI('cgi', 'cgi_main.c getopt.c', 'php-cgi.exe', '/I sapi/cgi/libfcgi/include /D FCGI_STATIC');
-		ADD_SOURCES('sapi/cgi/libfcgi', 'fcgi_stdio.c fcgiapp.c os_win32.c', 'cgi');
+		SAPI('cgi', 'cgi_main.c getopt.c fastcgi.c', 'php-cgi.exe', '/I sapi/cgi/libfcgi/include /D FCGI_STATIC');
 		ADD_FLAG('LIBS_CGI', 'ws2_32.lib kernel32.lib advapi32.lib');
 	} else {
 		SAPI('cgi', 'cgi_main.c getopt.c', 'php-cgi.exe');
