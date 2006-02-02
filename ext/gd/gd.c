@@ -35,6 +35,7 @@
 #endif
 
 #include "php.h"
+#include "php_ini.h"
 #include "ext/standard/head.h"
 #include <math.h>
 #include "SAPI.h"
@@ -309,6 +310,12 @@ zend_module_entry gd_module_entry = {
 ZEND_GET_MODULE(gd)
 #endif
 
+/* {{{ PHP_INI_BEGIN */
+PHP_INI_BEGIN()
+    PHP_INI_ENTRY("gd.jpeg_ignore_warning", "0", PHP_INI_ALL, NULL)
+PHP_INI_END()
+/* }}} */
+
 /* {{{ php_free_gd_image
  */
 static void php_free_gd_image(zend_rsrc_list_entry *rsrc TSRMLS_DC)
@@ -356,6 +363,8 @@ PHP_MINIT_FUNCTION(gd)
 	le_ps_font = zend_register_list_destructors_ex(php_free_ps_font, NULL, "gd PS font", module_number);
 	le_ps_enc = zend_register_list_destructors_ex(php_free_ps_enc, NULL, "gd PS encoding", module_number);
 #endif
+
+	REGISTER_INI_ENTRIES();
 
 	REGISTER_LONG_CONSTANT("IMG_GIF", 1, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_JPG", 2, CONST_CS | CONST_PERSISTENT);
@@ -1375,7 +1384,8 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 	php_stream *stream;
 	FILE * fp = NULL;
 	int argc=ZEND_NUM_ARGS();
-
+	long ignore_warning;
+	
 	if ((image_type == PHP_GDIMG_TYPE_GD2PART && argc != 5) ||
 		(image_type != PHP_GDIMG_TYPE_GD2PART && argc != 1) ||
 		zend_get_parameters_ex(argc, &file, &srcx, &srcy, &width, &height) == FAILURE) {
@@ -1444,6 +1454,11 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 				im = gdImageCreateFromXpm(fn);
 				break;
 #endif
+			case PHP_GDIMG_TYPE_JPG:
+				ignore_warning = INI_INT("gd.jpeg_ignore_warning");
+				im = gdImageCreateFromJpeg(fp, ignore_warning);
+				break;
+
 			default:
 				im = (*func_p)(fp);
 				break;
@@ -3575,6 +3590,7 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 	int int_threshold;
 	int x, y;
 	float x_ratio, y_ratio;
+	long ignore_warning;
 
 	if (argc != 5 || zend_get_parameters_ex(argc, &f_org, &f_dest, &height, &width, &threshold) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -3631,7 +3647,8 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 
 #ifdef HAVE_GD_JPG
 		case PHP_GDIMG_TYPE_JPG:
-			im_org = gdImageCreateFromJpeg(org);
+			ignore_warning = INI_INT("gd.jpeg_ignore_warning");
+			im_org = gdImageCreateFromJpeg(org, ignore_warning);
 			if (im_org == NULL) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open '%s' Not a valid JPEG file", fn_dest);
 				RETURN_FALSE;
