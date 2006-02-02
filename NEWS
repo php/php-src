@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, PHP 5.1.3
+- Reimplemented FastCGI interface
 - Moved extensions to PECL:
   . ext/msession (Derick)
 - Improved cURL extension: (Ilia)
