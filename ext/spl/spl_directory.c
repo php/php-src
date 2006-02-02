@@ -699,6 +699,7 @@ SPL_METHOD(SplFileInfo, openFile)
 
 	spl_filesystem_object_create_type(ht, intern, SPL_FS_FILE, NULL, return_value TSRMLS_CC);
 }
+/* }}} */
 
 /* {{{ proto SplFileObject SplFileInfo::setFileClass([string class_name])
    Class to use in openFile() */
@@ -713,6 +714,7 @@ SPL_METHOD(SplFileInfo, setFileClass)
 
 	intern->file_class = ce;
 }
+/* }}} */
 
 /* {{{ proto SplFileObject SplFileInfo::setInfoClass([string class_name])
    Class to use in getFileInfo(), getPathInfo(), getSubPathInfo() */
@@ -727,6 +729,7 @@ SPL_METHOD(SplFileInfo, setInfoClass)
 
 	intern->file_class = ce;
 }
+/* }}} */
 
 /* {{{ proto SplFileInfo SplFileInfo::getFileInfo([string $class_name])
    Get/copy file info */
@@ -741,6 +744,7 @@ SPL_METHOD(SplFileInfo, getFileInfo)
 
 	spl_filesystem_object_create_type(ht, intern, SPL_FS_INFO, ce, return_value TSRMLS_CC);
 }
+/* }}} */
 
 /* {{{ proto SplFileInfo SplFileInfo::getPathInfo([string $class_name])
    Get/copy file info */
@@ -755,6 +759,7 @@ SPL_METHOD(SplFileInfo, getPathInfo)
 
 	spl_filesystem_object_create_info(intern, intern->path, intern->path_len, 1, ce, return_value TSRMLS_CC);
 }
+/* }}} */
 
 /* {{{ proto void RecursiveDirectoryIterator::__construct(string path [, int flags])
  Cronstructs a new dir iterator from a path. */
@@ -1199,19 +1204,19 @@ static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type, i
 static
 ZEND_BEGIN_ARG_INFO(arginfo_info___construct, 0) 
 	ZEND_ARG_INFO(0, file_name)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_info_openFile, 0, 0, 0)
 	ZEND_ARG_INFO(0, open_mode)
 	ZEND_ARG_INFO(0, use_include_path)
 	ZEND_ARG_INFO(0, context)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_info_optinalFileClass, 0, 0, 0)
 	ZEND_ARG_INFO(0, class_name)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 /* the method table */
 /* each method can have its own parameters and visibility */
@@ -1247,7 +1252,7 @@ static zend_function_entry spl_SplFileInfo_functions[] = {
 static
 ZEND_BEGIN_ARG_INFO(arginfo_dir___construct, 0) 
 	ZEND_ARG_INFO(0, path)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 /* the method table */
 /* each method can have its own parameters and visibility */
@@ -1268,7 +1273,7 @@ static
 ZEND_BEGIN_ARG_INFO(arginfo_r_dir___construct, 0) 
 	ZEND_ARG_INFO(0, path)
 	ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 static zend_function_entry spl_RecursiveDirectoryIterator_functions[] = {
 	SPL_ME(RecursiveDirectoryIterator, __construct,   arginfo_r_dir___construct, ZEND_ACC_PUBLIC)
@@ -1860,61 +1865,61 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, open_mode)
 	ZEND_ARG_INFO(0, use_include_path)
 	ZEND_ARG_INFO(0, context)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 static
 ZEND_BEGIN_ARG_INFO(arginfo_file_object_setFlags, 0) 
 	ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 static
 ZEND_BEGIN_ARG_INFO(arginfo_file_object_setMaxLineLen, 0) 
 	ZEND_ARG_INFO(0, max_len)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fgetcsv, 0, 0, 0) 
 	ZEND_ARG_INFO(0, delimiter)
 	ZEND_ARG_INFO(0, enclosure)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_flock, 0, 0, 1) 
 	ZEND_ARG_INFO(0, operation)
 	ZEND_ARG_INFO(1, wouldblock])
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fseek, 0, 0, 1) 
 	ZEND_ARG_INFO(0, pos)
 	ZEND_ARG_INFO(0, whence)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fgetss, 0, 0, 0) 
 	ZEND_ARG_INFO(0, allowable_tags)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fscanf, 0, 0, 1) 
 	ZEND_ARG_INFO(0, format)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fwrite, 0, 0, 1) 
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, length)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_ftruncate, 0, 0, 1) 
 	ZEND_ARG_INFO(0, size)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_seek, 0, 0, 1) 
 	ZEND_ARG_INFO(0, line_pos)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 static zend_function_entry spl_SplFileObject_functions[] = {
 	SPL_ME(SplFileObject, __construct,    arginfo_file_object___construct,   ZEND_ACC_PUBLIC)
@@ -1954,7 +1959,7 @@ static zend_function_entry spl_SplFileObject_functions[] = {
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_temp_file_object___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, max_memory)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 static zend_function_entry spl_SplTempFileObject_functions[] = {
 	SPL_ME(SplTempFileObject, __construct, arginfo_temp_file_object___construct,  ZEND_ACC_PUBLIC)
