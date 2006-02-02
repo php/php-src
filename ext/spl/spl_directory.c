@@ -176,7 +176,11 @@ static void spl_filesystem_dir_open(spl_filesystem_object* intern, char *path TS
 	intern->path_len = strlen(path);
 	intern->u.dir.dirp = php_stream_opendir(path, ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
 
-	if (intern->path_len && (path[intern->path_len-1] == '/' || path[intern->path_len-1] == '\\')) {
+	if (intern->path_len && (path[intern->path_len-1] == '/'
+#if defined(PHP_WIN32) || defined(NETWARE)
+		|| path[intern->path_len-1] == '\\'
+#endif
+	)) {
 		intern->path = estrndup(path, --intern->path_len);
 	} else {
 		intern->path = estrndup(path, intern->path_len);
@@ -279,7 +283,11 @@ void spl_filesystem_info_set_filename(spl_filesystem_object *intern, char *path,
 	intern->file_name_len = len;
 
 	p1 = strrchr(path, '/');
+#if defined(PHP_WIN32) || defined(NETWARE)
 	p2 = strrchr(path, '\\');
+#else
+	p2 = 0;
+#endif
 	if (p1 || p2) {
 		intern->path_len = (p1 > p2 ? p1 : p2) - path;
 	} else {
@@ -1397,7 +1405,11 @@ SPL_METHOD(SplFileObject, __construct)
 	
 	if (spl_filesystem_file_open(intern, use_include_path, 0 TSRMLS_CC) == SUCCESS) {
 		p1 = strrchr(intern->file_name, '/');
-		p2 = strrchr(intern->file_name, '\\');
+#if defined(PHP_WIN32) || defined(NETWARE)
+		p2 = strrchr(path, '\\');
+#else
+		p2 = 0;
+#endif
 		if (p1 || p2) {
 			intern->path_len = (p1 > p2 ? p1 : p2) - intern->file_name;
 		} else {
