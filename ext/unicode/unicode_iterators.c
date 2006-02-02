@@ -90,7 +90,6 @@ PHP_METHOD(TextIterator, __construct)
 	}
 
 	if (Z_TYPE_P(text) != IS_UNICODE) {
-		printf("not unicode\n");
 		zend_throw_exception(U_CLASS_ENTRY(spl_ce_InvalidArgumentException), "Text iterator expects argument to be a Unicode string", 0 TSRMLS_CC);
 		return;
 	}
