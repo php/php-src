@@ -208,6 +208,12 @@ static void json_escape_string(smart_str *buf, char *s, int len TSRMLS_DC)
     unsigned short us;
     unsigned short *utf16;
 
+    if (len == 0)
+    {
+        smart_str_appendl(buf, "\"\"", 2);
+        return;
+    }
+
     utf16 = (unsigned short *) emalloc(len * sizeof(unsigned short));
 
     len = utf8_to_utf16(utf16, s, len);
@@ -218,6 +224,7 @@ static void json_escape_string(smart_str *buf, char *s, int len TSRMLS_DC)
             efree(utf16);
         }
 
+        smart_str_appendl(buf, "\"\"", 2);
         return;
     }
 
