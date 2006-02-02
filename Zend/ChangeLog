@@ -1,3 +1,17 @@
+2006-02-01  Zeev Suraski  <zeev@zend.com>
+
+    * zend_hash.c:
+      Fix possibility of a wrong element being deleted by zend_hash_del()
+
+    * (PHP_5_0)
+      zend_hash.c:
+      MFB  (Fix possibility of a wrong element being deleted by zend_hash_del())
+
+    * (PHP_5_1)
+      zend_hash.c:
+      Fix possibility of a wrong element being deleted by zend_hash_del()
+      Thanks Stefan!
+
 2006-01-24  Antony Dovgal  <antony@zend.com>
 
     * zend_API.c:
