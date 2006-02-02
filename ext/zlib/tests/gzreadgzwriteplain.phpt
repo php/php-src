@@ -15,7 +15,12 @@ var_dump(ftell($fp));
 fclose($fp);
 
 $fp = gzopen($filename, "rb");
-$data = gzread($fp, strlen($original));
+
+$data = '';
+while ($buf = gzread($fp, 8192)) {
+	$data .= $buf;
+}
+
 if ($data == $original) {
 	echo "Strings are equal\n";
 } else {
@@ -24,7 +29,11 @@ if ($data == $original) {
 }
 
 gzseek($fp, strlen($original) / 2);
-$data = gzread($fp, strlen($original));
+
+$data = '';
+while ($buf = gzread($fp, 8192)) {
+	$data .= $buf;
+}
 
 var_dump(strlen($data));
 if ($data == substr($original, strlen($original) / 2)) {
