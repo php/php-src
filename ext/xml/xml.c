@@ -1358,9 +1358,8 @@ PHP_FUNCTION(xml_parse_into_struct)
 {
 	xml_parser *parser;
 	zval **pind, **data, **xdata, **info = 0;
-	int argc, ret;
+	int ret;
 
-	argc = ZEND_NUM_ARGS();
 	if (zend_get_parameters_ex(4, &pind, &data, &xdata,&info) == SUCCESS) {
 		zval_dtor(*info);
 		array_init(*info);
