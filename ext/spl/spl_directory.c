@@ -1406,7 +1406,7 @@ SPL_METHOD(SplFileObject, __construct)
 	if (spl_filesystem_file_open(intern, use_include_path, 0 TSRMLS_CC) == SUCCESS) {
 		p1 = strrchr(intern->file_name, '/');
 #if defined(PHP_WIN32) || defined(NETWARE)
-		p2 = strrchr(path, '\\');
+		p2 = strrchr(intern->file_name, '\\');
 #else
 		p2 = 0;
 #endif
