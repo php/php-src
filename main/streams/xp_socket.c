@@ -578,7 +578,7 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 		php_stream_xport_param *xparam TSRMLS_DC)
 {
 	char *host = NULL, *bindto = NULL;
-	int portno, bindport;
+	int portno, bindport = 0;
 	int err;
 	int ret;
 	zval **tmpzval = NULL;
