@@ -119,6 +119,7 @@ struct _soapService {
 	char      *uri;
 	xmlCharEncodingHandlerPtr encoding;
 	HashTable *class_map;
+	int        features;
 };
 
 #define SOAP_CLASS 1
@@ -151,6 +152,8 @@ struct _soapService {
 #define SOAP_AUTHENTICATION_BASIC   0
 #define SOAP_AUTHENTICATION_DIGEST  1
 
+#define SOAP_SINGLE_ELEMENT_ARRAYS  (1<<0)
+
 ZEND_BEGIN_MODULE_GLOBALS(soap)
 	HashTable  defEncNs;     /* mapping of default namespaces to prefixes */
 	HashTable  defEnc;
@@ -167,6 +170,7 @@ ZEND_BEGIN_MODULE_GLOBALS(soap)
 	long       cache_ttl;
 	xmlCharEncodingHandlerPtr encoding;
 	HashTable *class_map;
+	int        features;
 ZEND_END_MODULE_GLOBALS(soap)
 
 #ifdef PHP_WIN32

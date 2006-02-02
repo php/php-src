@@ -22,6 +22,8 @@ PHP                                                                        NEWS
 - Fixed bug #36242 (Possible memory corruption in stream_select()). (Tony)
 - Fixed bug #36235 (ocicolumnname returns false before a succesfull fetch). 
   (Tony)
+- Fixed bug #36226 (Inconsistent handling when passing potential arrays).
+  (Dmitry)
 - Fixed bug #36224 (date(DATE_ATOM) gives wrong results). (Derick, Hannes
   Magnusson)
 - Fixed bug #36222 (errorInfo in PDOException is always NULL). (Ilia)

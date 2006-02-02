@@ -1157,6 +1157,14 @@ static void model_to_zval_object(zval *ret, sdlContentModelPtr model, xmlNodePtr
 							add_next_index_zval(array, val);
 						} while ((node = get_node(node->next, model->u.element->name)) != NULL);
 						val = array;
+					} else if ((SOAP_GLOBAL(features) & SOAP_SINGLE_ELEMENT_ARRAYS) && 
+					           (model->max_occurs == -1 || model->max_occurs > 1)) {
+						zval *array;
+
+						MAKE_STD_ZVAL(array);
+						array_init(array);
+						add_next_index_zval(array, val);
+						val = array;
 					}
 					set_zval_property(ret, model->u.element->name, val TSRMLS_CC);
 				}

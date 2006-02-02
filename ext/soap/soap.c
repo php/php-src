@@ -479,6 +479,7 @@ PHP_RINIT_FUNCTION(soap)
 	SOAP_GLOBAL(soap_version) = SOAP_1_1;
 	SOAP_GLOBAL(encoding) = NULL;
 	SOAP_GLOBAL(class_map) = NULL;
+	SOAP_GLOBAL(features) = 0;
 	return SUCCESS;
 }
 
@@ -632,6 +633,8 @@ PHP_MINIT_FUNCTION(soap)
 
 	REGISTER_STRING_CONSTANT("XSD_NAMESPACE", XSD_NAMESPACE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("XSD_1999_NAMESPACE", XSD_1999_NAMESPACE,  CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("SOAP_SINGLE_ELEMENT_ARRAYS", SOAP_SINGLE_ELEMENT_ARRAYS, CONST_CS | CONST_PERSISTENT);
 
 	old_error_handler = zend_error_cb;
 	zend_error_cb = soap_error_handler;
@@ -955,6 +958,11 @@ PHP_METHOD(SoapServer, SoapServer)
 			ALLOC_HASHTABLE(service->class_map);
 			zend_hash_init(service->class_map, 0, NULL, ZVAL_PTR_DTOR, 0);
 			zend_hash_copy(service->class_map, (*tmp)->value.ht, (copy_ctor_func_t) zval_add_ref, (void *) &ztmp, sizeof(zval *));
+		}
+
+		if (zend_hash_find(ht, "features", sizeof("features"), (void**)&tmp) == SUCCESS &&
+			Z_TYPE_PP(tmp) == IS_LONG) {
+			service->features = Z_LVAL_PP(tmp);
 		}
 
 	} else if (wsdl == NULL) {
@@ -1358,6 +1366,7 @@ PHP_METHOD(SoapServer, handle)
 	int arg_len;
 	xmlCharEncodingHandlerPtr old_encoding;
 	HashTable *old_class_map;
+	int old_features;
 
 	SOAP_SERVER_BEGIN_CODE();
 
@@ -1503,6 +1512,8 @@ PHP_METHOD(SoapServer, handle)
 	SOAP_GLOBAL(encoding) = service->encoding;
 	old_class_map = SOAP_GLOBAL(class_map);
 	SOAP_GLOBAL(class_map) = service->class_map;
+	old_features = SOAP_GLOBAL(features);
+	SOAP_GLOBAL(features) = service->features;
 	old_soap_version = SOAP_GLOBAL(soap_version);
 	function = deserialize_function_call(service->sdl, doc_request, service->actor, &function_name, &num_params, &params, &soap_version, &soap_headers TSRMLS_CC);
 	xmlFreeDoc(doc_request);
@@ -1773,6 +1784,7 @@ fail:
 	SOAP_GLOBAL(encoding) = old_encoding;
 	SOAP_GLOBAL(sdl) = old_sdl;
 	SOAP_GLOBAL(class_map) = old_class_map;
+	SOAP_GLOBAL(features) = old_features;
 
 	/* Free soap headers */
 	zval_dtor(&retval);
@@ -2189,6 +2201,11 @@ PHP_METHOD(SoapClient, SoapClient)
 			add_property_zval(this_ptr, "_classmap", class_map);
 		}
 
+		if (zend_hash_find(ht, "features", sizeof("features"), (void**)&tmp) == SUCCESS &&
+			Z_TYPE_PP(tmp) == IS_ARRAY) {
+			add_property_long(this_ptr, "_features", Z_LVAL_PP(tmp));
+	    }
+
 		if (zend_hash_find(ht, "connection_timeout", sizeof("connection_timeout"), (void**)&tmp) == SUCCESS &&
 		    Z_TYPE_PP(tmp) == IS_LONG && Z_LVAL_PP(tmp) > 0) {
 			add_property_long(this_ptr, "_connection_timeout", Z_LVAL_PP(tmp));
@@ -2313,6 +2330,7 @@ static void do_soap_call(zval* this_ptr,
 	zval response;
 	xmlCharEncodingHandlerPtr old_encoding;
 	HashTable *old_class_map;
+	int old_features;
 
 	SOAP_CLIENT_BEGIN_CODE();
 
@@ -2357,6 +2375,13 @@ static void do_soap_call(zval* this_ptr,
 		SOAP_GLOBAL(class_map) = (*tmp)->value.ht;
 	} else {
 		SOAP_GLOBAL(class_map) = NULL;
+	}
+	old_features = SOAP_GLOBAL(features);
+	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_features", sizeof("_features"), (void **) &tmp) == SUCCESS &&
+	    Z_TYPE_PP(tmp) == IS_LONG) {
+		SOAP_GLOBAL(features) = Z_LVAL_PP(tmp);
+	} else {
+		SOAP_GLOBAL(features) = 0;
 	}
 
  	if (sdl != NULL) {
@@ -2458,10 +2483,11 @@ static void do_soap_call(zval* this_ptr,
 		zend_throw_exception_object(exception TSRMLS_CC);
 	}
 #endif
-  if (SOAP_GLOBAL(encoding) != NULL) {
+	if (SOAP_GLOBAL(encoding) != NULL) {
 		xmlCharEncCloseFunc(SOAP_GLOBAL(encoding));
-  }
-  SOAP_GLOBAL(class_map) = old_class_map;
+	}
+	SOAP_GLOBAL(features) = old_features;
+	SOAP_GLOBAL(class_map) = old_class_map;
 	SOAP_GLOBAL(encoding) = old_encoding;
 	SOAP_GLOBAL(sdl) = old_sdl;
 	SOAP_CLIENT_END_CODE();
