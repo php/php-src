@@ -588,7 +588,7 @@ ZEND_FUNCTION(get_class)
 
 	dup = zend_get_object_classname(*arg, &name, &name_len TSRMLS_CC);
 
-	RETURN_TEXTL(name, name_len, 0);
+	RETURN_TEXTL(name, name_len, dup);
 }
 /* }}} */
 
