@@ -1,3 +1,70 @@
+2006-02-02  Antony Dovgal  <antony@zend.com>
+
+    * ext/xml/xml.c:
+      MF51: nuke unused variable
+
+    * (PHP_5_1)
+      ext/xml/xml.c:
+      nuke unused variable
+
+2006-02-02  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/gd.c
+      ext/gd/libgd/gd.h
+      ext/gd/libgd/gd_jpeg.c:
+      - add a weak/tolerant mode to the jpeg loader
+       * new INI option to enable it (off by default)
+         gd.jpeg_ignore_warning (0|1)
+       * The default mode is the current behavior
+       * if the warning mode is enabled, the image may be loaded succesfully
+         but the jpeg warnings will be raise as notices
+
+2006-02-02  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_5_1)
+      main/streams/xp_socket.c:
+      MFH: Prevent bindport from being used uninitialized
+
+    * main/streams/xp_socket.c:
+      Prevent bindport from being used uninitialized
+
+2006-02-02  Antony Dovgal  <antony@zend.com>
+
+    * ext/zlib/tests/gzreadgzwrite.phpt
+      ext/zlib/tests/gzreadgzwriteplain.phpt:
+      fix tests
+
+    * (PHP_5_1)
+      NEWS:
+      fix #36258 (SplFileObject::getPath() may lead to segfault)
+
+2006-02-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      Bug #36226 Inconsistent handling when passing potential arrays
+
+    * sapi/cgi/config9.m4
+      sapi/cgi/config9.m4
+      sapi/cli/config.m4
+      sapi/cli/config.m4:
+      AIX support
+
+    * (PHP_5_1)
+      NEWS
+      sapi/cgi/cgi_main.c
+      sapi/cgi/config.w32
+      sapi/cgi/config9.m4
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.h:
+      Reimplement FastCGI interface
+      
+      Due to licensing restrictions that actually don't allow anybody to use
+      the libfcgi code without prior approval from Open Market, which is
+      impossible to obtain - we decided to reimplement this interface from
+      scratch.  The result is actually slightly faster, and more importantly,
+      clear of any copyright issues.
+
 2006-02-01  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_1)
