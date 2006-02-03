@@ -157,7 +157,7 @@ static DWORD WINAPI fcgi_shutdown_thread(LPVOID arg)
 
 static void fcgi_signal_handler(int signo)
 {
-	if (signo == SIGUSR1) {
+	if (signo == SIGUSR1 || signo == SIGTERM) {
 		in_shutdown = 1;
 	}
 }
@@ -217,6 +217,7 @@ int fcgi_init(void)
 			new_sa.sa_flags = 0;
 			new_sa.sa_handler = fcgi_signal_handler;
 			sigaction(SIGUSR1, &new_sa, NULL);
+			sigaction(SIGTERM, &new_sa, NULL);
 			sigaction(SIGPIPE, NULL, &old_sa);
 			if (old_sa.sa_handler == SIG_DFL) {
 				sigaction(SIGPIPE, &new_sa, NULL);
@@ -627,6 +628,9 @@ int fcgi_accept_request(fcgi_request *req)
 	while (1) {
 		if (req->fd < 0) {
 			while (1) {
+				if (in_shutdown) {
+					return -1;
+				}
 #ifdef _WIN32
 				HANDLE pipe = (HANDLE)_get_osfhandle(req->listen_socket);
 				OVERLAPPED ov;
@@ -663,7 +667,7 @@ int fcgi_accept_request(fcgi_request *req)
 				FCGI_UNLOCK(req->listen_socket);
 #endif
 
-				if (in_shutdown || (req->fd < 0 && errno != EINTR)) {
+				if (req->fd < 0 && (in_shutdown || errno != EINTR)) {
 					return -1;
 				}
 
@@ -686,6 +690,8 @@ try_again:
 				}
 #endif
 			}
+		} else if (in_shutdown) {
+			return -1;
 		}
 		if (fcgi_read_request(req)) {
 			return req->fd;
