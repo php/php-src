@@ -169,6 +169,7 @@ static void text_iterator_free_storage(void *object TSRMLS_DC)
 	if (intern->text) {
 		efree(intern->text);
 	}
+	ZVAL_DELREF(intern->current);
 	zval_ptr_dtor(&intern->current);
 	efree(object);
 }
@@ -191,6 +192,7 @@ static zend_object_value text_iterator_new(zend_class_entry *class_type TSRMLS_D
 	MAKE_STD_ZVAL(intern->current); /* pre-allocate buffer for codepoint */
 	Z_USTRVAL_P(intern->current) = eumalloc(3);
 	Z_TYPE_P(intern->current) = IS_UNICODE;
+	ZVAL_ADDREF(intern->current);
 
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) text_iterator_free_storage, NULL TSRMLS_CC);
 	retval.handlers = zend_get_std_object_handlers();
