@@ -820,6 +820,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 				AG(memory_limit) = PG(memory_limit); 
 #endif
 				efree(buffer);
+				zend_objects_store_mark_destructed(&EG(objects_store) TSRMLS_CC);
 				zend_bailout();
 				return;
 			}

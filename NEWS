@@ -19,6 +19,7 @@ PHP                                                                        NEWS
 - Added imap_savebody() that allows message body to be written to a file. (Mike)
 - Fixed imagecolorallocate() and imagecolorallocatelapha() to return FALSE
   on error. (Pierre)
+- Fixed bug #36268 (Object destructors called even after fatal errors). (Dmitry)
 - Fixed bug #36258 (SplFileObject::getPath() may lead to segfault). (Tony)
 - Fixed bug #36242 (Possible memory corruption in stream_select()). (Tony)
 - Fixed bug #36235 (ocicolumnname returns false before a succesfull fetch). 
