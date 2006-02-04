@@ -34,8 +34,15 @@ typedef struct {
 	uint32_t		text_len;
 	text_iter_type	type;
 	zval*			current;
-	int32_t			offset;
-	int32_t			index;
+	union {
+		struct {
+			int32_t	offset;
+			int32_t	index;
+		} cp;
+		struct {
+			int32_t	index;
+		} cu;
+	} u;
 } text_iter_obj;
 
 typedef struct {
@@ -43,17 +50,30 @@ typedef struct {
 	text_iter_obj*		 object;
 } text_iter_it;
 
+typedef struct {
+	int  (*valid)  (text_iter_obj* object TSRMLS_DC);
+	void (*current)(text_iter_obj* object TSRMLS_DC);
+	int  (*key)    (text_iter_obj* object TSRMLS_DC);
+	void (*next)   (text_iter_obj* object TSRMLS_DC);
+	void (*rewind) (text_iter_obj* object TSRMLS_DC);
+} text_iter_ops;
+
 PHPAPI zend_class_entry* text_iterator_aggregate_ce;
 PHPAPI zend_class_entry* text_iterator_ce;
+
+/* Code unit ops */
+
+static text_iter_ops text_iter_cu_ops = {
+};
 
 /* Code point ops */
 
 static int text_iter_cp_valid(text_iter_obj* object TSRMLS_DC)
 {
-	return (object->offset < object->text_len);
+	return (object->u.cp.offset < object->text_len);
 }
 
-static void text_iter_cp_get_current_data(text_iter_obj* object TSRMLS_DC)
+static void text_iter_cp_current(text_iter_obj* object TSRMLS_DC)
 {
 	UChar32 cp;
 	int32_t tmp, buf_len;
@@ -62,7 +82,7 @@ static void text_iter_cp_get_current_data(text_iter_obj* object TSRMLS_DC)
 		MAKE_STD_ZVAL(object->current);
 		Z_USTRVAL_P(object->current) = eumalloc(3);
 		Z_TYPE_P(object->current) = IS_UNICODE;
-		tmp = object->offset;
+		tmp = object->u.cp.offset;
 		U16_NEXT(object->text, tmp, object->text_len, cp);
 		buf_len = zend_codepoint_to_uchar(cp, Z_USTRVAL_P(object->current));
 		Z_USTRVAL_P(object->current)[buf_len] = 0;
@@ -70,15 +90,15 @@ static void text_iter_cp_get_current_data(text_iter_obj* object TSRMLS_DC)
 	}
 }
 
-static int text_iter_cp_get_current_key(text_iter_obj* object TSRMLS_DC)
+static int text_iter_cp_key(text_iter_obj* object TSRMLS_DC)
 {
-	return object->index;
+	return object->u.cp.index;
 }
 
-static void text_iter_cp_move_forward(text_iter_obj* object TSRMLS_DC)
+static void text_iter_cp_next(text_iter_obj* object TSRMLS_DC)
 {
-	U16_FWD_1(object->text, object->offset, object->text_len);
-	object->index++;
+	U16_FWD_1(object->text, object->u.cp.offset, object->text_len);
+	object->u.cp.index++;
 	if (object->current) {
 		zval_ptr_dtor(&object->current);
 		object->current = NULL;
@@ -87,14 +107,26 @@ static void text_iter_cp_move_forward(text_iter_obj* object TSRMLS_DC)
 
 static void text_iter_cp_rewind(text_iter_obj *object TSRMLS_DC)
 {
-	object->offset = 0;
-	object->index  = 0;
+	object->u.cp.offset = 0;
+	object->u.cp.index  = 0;
 	if (object->current) {
 		zval_ptr_dtor(&object->current);
 		object->current = NULL;
 	}
 }
 
+static text_iter_ops text_iter_cp_ops = {
+	text_iter_cp_valid,
+	text_iter_cp_current,
+	text_iter_cp_key,
+	text_iter_cp_next,
+	text_iter_cp_rewind,
+};
+
+static text_iter_ops* iter_ops[2] = {
+	&text_iter_cu_ops,
+	&text_iter_cp_ops,
+};
 
 /* Iterator Funcs */
 
@@ -110,7 +142,7 @@ static int text_iter_valid(zend_object_iterator* iter TSRMLS_DC)
 	text_iter_it*  iterator = (text_iter_it *) iter;
 	text_iter_obj* object   = iterator->object;
 
-	if (text_iter_cp_valid(object TSRMLS_CC))
+	if (iter_ops[object->type]->valid(object TSRMLS_CC))
 		return SUCCESS;
 	else
 		return FAILURE;
@@ -121,7 +153,7 @@ static void text_iter_get_current_data(zend_object_iterator* iter, zval*** data 
 	text_iter_it*  iterator = (text_iter_it *) iter;
 	text_iter_obj* object   = iterator->object;
 
-	text_iter_cp_get_current_data(object TSRMLS_CC);
+	iter_ops[object->type]->current(object TSRMLS_CC);
 	*data = &object->current;
 }
 
@@ -130,7 +162,7 @@ static int text_iter_get_current_key(zend_object_iterator* iter, char **str_key,
 	text_iter_it*  iterator = (text_iter_it *) iter;
 	text_iter_obj* object   = iterator->object;
 
-	*int_key = text_iter_cp_get_current_key(object TSRMLS_CC);
+	*int_key = iter_ops[object->type]->key(object TSRMLS_CC);
 	return HASH_KEY_IS_LONG;
 }
 
@@ -139,7 +171,7 @@ static void text_iter_move_forward(zend_object_iterator* iter TSRMLS_DC)
 	text_iter_it*  iterator = (text_iter_it *) iter;
 	text_iter_obj* object   = iterator->object;
 
-	text_iter_cp_move_forward(object TSRMLS_CC);
+	iter_ops[object->type]->next(object TSRMLS_CC);
 }
 
 static void text_iter_rewind(zend_object_iterator* iter TSRMLS_DC)
@@ -147,7 +179,7 @@ static void text_iter_rewind(zend_object_iterator* iter TSRMLS_DC)
 	text_iter_it*  iterator = (text_iter_it *) iter;
 	text_iter_obj* object   = iterator->object;
 
-	text_iter_cp_rewind(object TSRMLS_CC);
+	iter_ops[object->type]->rewind(object TSRMLS_CC);
 }
 
 zend_object_iterator_funcs text_iter_cp_funcs = {
@@ -234,7 +266,7 @@ PHP_METHOD(TextIterator, current)
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
-	text_iter_cp_get_current_data(intern TSRMLS_CC);
+	iter_ops[intern->type]->current(intern TSRMLS_CC);
 	RETURN_UNICODEL(Z_USTRVAL_P(intern->current), Z_USTRLEN_P(intern->current), 1);
 }
 
@@ -243,7 +275,7 @@ PHP_METHOD(TextIterator, next)
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
-	text_iter_cp_move_forward(intern TSRMLS_CC);
+	iter_ops[intern->type]->next(intern TSRMLS_CC);
 }
 
 PHP_METHOD(TextIterator, key)
@@ -251,7 +283,7 @@ PHP_METHOD(TextIterator, key)
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
-	RETURN_LONG(text_iter_cp_get_current_key(intern TSRMLS_CC));
+	RETURN_LONG(iter_ops[intern->type]->key(intern TSRMLS_CC));
 }
 
 PHP_METHOD(TextIterator, valid)
@@ -259,7 +291,7 @@ PHP_METHOD(TextIterator, valid)
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
-	RETURN_BOOL(text_iter_cp_valid(intern TSRMLS_CC));
+	RETURN_BOOL(iter_ops[intern->type]->valid(intern TSRMLS_CC));
 }
 
 PHP_METHOD(TextIterator, rewind)
@@ -267,7 +299,7 @@ PHP_METHOD(TextIterator, rewind)
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
-	text_iter_cp_rewind(intern TSRMLS_CC);
+	iter_ops[object->type]->rewind(intern TSRMLS_CC);
 }
 
 static zend_function_entry text_iterator_funcs[] = {
