@@ -16,6 +16,13 @@
 
 /* $Id$ */
 
+/*
+ * TODO
+ *
+ * - optimize current() to pass return_value to the handler so that it fills it
+ *   in directly instead of creating a new zval
+ * - return code units as binary strings? integers? or leave as unicode strings?
+ */
 
 #include "php.h"
 #include "zend_interfaces.h"
@@ -63,7 +70,48 @@ PHPAPI zend_class_entry* text_iterator_ce;
 
 /* Code unit ops */
 
+static int text_iter_cu_valid(text_iter_obj* object TSRMLS_DC)
+{
+	return (object->u.cu.index < object->text_len);
+}
+
+static void text_iter_cu_current(text_iter_obj* object TSRMLS_DC)
+{
+	if (!object->current) {
+		MAKE_STD_ZVAL(object->current);
+		ZVAL_UNICODEL(object->current, object->text + object->u.cu.index, 1, 1);
+	}
+}
+
+static int text_iter_cu_key(text_iter_obj* object TSRMLS_DC)
+{
+	return object->u.cu.index;
+}
+
+static void text_iter_cu_next(text_iter_obj* object TSRMLS_DC)
+{
+	object->u.cu.index++;
+	if (object->current) {
+		zval_ptr_dtor(&object->current);
+		object->current = NULL;
+	}
+}
+
+static void text_iter_cu_rewind(text_iter_obj *object TSRMLS_DC)
+{
+	object->u.cu.index  = 0;
+	if (object->current) {
+		zval_ptr_dtor(&object->current);
+		object->current = NULL;
+	}
+}
+
 static text_iter_ops text_iter_cu_ops = {
+	text_iter_cu_valid,
+	text_iter_cu_current,
+	text_iter_cu_key,
+	text_iter_cu_next,
+	text_iter_cu_rewind,
 };
 
 /* Code point ops */
