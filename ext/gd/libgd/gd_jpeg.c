@@ -43,11 +43,20 @@ static const char *const GD_JPEG_VERSION = "1.0";
 typedef struct _jmpbuf_wrapper
 {
 	jmp_buf jmpbuf;
+	int ignore_warning;
 } jmpbuf_wrapper;
 
 static long php_jpeg_emit_message(j_common_ptr jpeg_info, int level)
 {
 	char message[JMSG_LENGTH_MAX];
+	jmpbuf_wrapper *jmpbufw;
+	int ignore_warning = 0;
+	
+    jmpbufw = (jmpbuf_wrapper *) jpeg_info->client_data;
+
+	if (jmpbufw != 0) {
+		ignore_warning = jmpbufw->ignore_warning;
+	}
 
 	(jpeg_info->err->format_message)(jpeg_info,message);
 
@@ -57,7 +66,7 @@ static long php_jpeg_emit_message(j_common_ptr jpeg_info, int level)
 		 * unless strace_level >= 3
 		 */
 		if ((jpeg_info->err->num_warnings == 0) || (jpeg_info->err->trace_level >= 3)) {
-			php_gd_error_ex(E_NOTICE, "gd-jpeg, libjpeg: recoverable error: %s\n", message);
+			php_gd_error_ex(ignore_warning ? E_NOTICE : E_WARNING, "gd-jpeg, libjpeg: recoverable error: %s\n", message);
 		}
 
 		jpeg_info->err->num_warnings++;
@@ -281,12 +290,12 @@ gdImagePtr gdImageCreateFromJpegCtx (gdIOCtx * infile, int ignore_warning)
 	memset (&cinfo, 0, sizeof (cinfo));
 	memset (&jerr, 0, sizeof (jerr));
 
+	jmpbufw.ignore_warning = ignore_warning;
+
 	cinfo.err = jpeg_std_error (&jerr);
 	cinfo.client_data = &jmpbufw;
 
-	if (ignore_warning) {
-		cinfo.err->emit_message = (void (*)(j_common_ptr,int)) php_jpeg_emit_message;
-	}
+	cinfo.err->emit_message = (void (*)(j_common_ptr,int)) php_jpeg_emit_message;
 
 	if (setjmp (jmpbufw.jmpbuf) != 0) {
 		/* we're here courtesy of longjmp */
