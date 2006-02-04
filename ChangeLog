@@ -1,3 +1,44 @@
+2006-02-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_4_4)
+      sapi/cgi/cgi_main.c:
+      iFixed several small FastCGI releated bugs
+
+    * (PHP_5_1)
+      NEWS
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c:
+      Fixed bug #36158 (SIGTERM is not handled correctly when running as a
+      FastCGI server)
+
+2006-02-03  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/oci8_statement.c:
+      MF51: fix #36010 (Segfault when re-creating and re-executing statements
+      with bound parameters)
+
+    * (PHP_5_1)
+      NEWS
+      ext/oci8/oci8_statement.c:
+      fix #36010 (Segfault when re-creating and re-executing statements with
+      bound parameters)
+
+    * ZendEngine2/zend_builtin_functions.c:
+      duplicate string when needed
+
+2006-02-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/tests/bug36268.phpt
+      ZendEngine2/tests/bug36268.phpt
+      ZendEngine2/tests/bug36268.phpt
+      main/main.c
+      main/main.c:
+      Fixed bug #36268 (Object destructors called even after fatal errors)
+
 2006-02-02  Antony Dovgal  <antony@zend.com>
 
     * ext/xml/xml.c:
