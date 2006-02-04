@@ -366,9 +366,9 @@ void php_register_unicode_iterators(TSRMLS_D)
 	
 	INIT_CLASS_ENTRY(ce, "TextIterator", text_iterator_funcs);
 	text_iterator_ce = zend_register_internal_class(&ce TSRMLS_CC);
-	zend_class_implements(text_iterator_ce TSRMLS_CC, 1, zend_ce_iterator);
 	text_iterator_ce->create_object = text_iterator_new;
 	text_iterator_ce->get_iterator  = text_iter_get_iterator;
+	zend_class_implements(text_iterator_ce TSRMLS_CC, 1, zend_ce_traversable);
 }
 
 /*
