@@ -40,7 +40,7 @@ static void safe_array_from_zval(VARIANT *v, zval *z, int codepage TSRMLS_DC)
 	int keytype;
 	char *strindex;
 	int strindexlen;
-	long intindex;
+	long intindex = -1;
 	long max_index = 0;
 	VARIANT *va;
 	zval **item;
