@@ -61,6 +61,7 @@ PHP                                                                        NEWS
 - Fixed bug #35998 (SplFileInfo::getPathname() returns unix style filenames
   in win32). (Marcus)
 - Fixed bug #35954 (Fatal com_exception casting object). (Rob)
+- Fixed bug #34272 (empty array onto COM object blows up). (Rob)
 
 12 Jan 2006, PHP 5.1.2
 - Updated libsqlite in ext/sqlite to 2.8.17. (Ilia)
