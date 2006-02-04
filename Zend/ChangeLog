@@ -1,3 +1,18 @@
+2006-02-03  Antony Dovgal  <antony@zend.com>
+
+    * zend_builtin_functions.c:
+      duplicate string when needed
+
+2006-02-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/bug36268.phpt:
+      Fixed bug #36268 (Object destructors called even after fatal errors)
+
+    * tests/bug36268.phpt
+      tests/bug36268.phpt:
+      
+      file bug36268.phpt was initially added on branch PHP_5_1.
+
 2006-02-01  Zeev Suraski  <zeev@zend.com>
 
     * zend_hash.c:
