@@ -627,9 +627,11 @@ void php_com_object_free_storage(void *object TSRMLS_DC)
 	VariantClear(&obj->v);
 
 	if (obj->method_cache) {
+		zend_hash_destroy(obj->method_cache);
 		FREE_HASHTABLE(obj->method_cache);
 	}
 	if (obj->id_of_name_cache) {
+		zend_hash_destroy(obj->id_of_name_cache);
 		FREE_HASHTABLE(obj->id_of_name_cache);
 	}
 	efree(obj);
