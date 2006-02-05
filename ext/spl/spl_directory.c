@@ -1199,6 +1199,7 @@ static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type TS
 			return SUCCESS;
 		}
 	}
+	ZVAL_NULL(writeobj);
 	return FAILURE;
 }
 /* }}} */
