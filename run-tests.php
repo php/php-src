@@ -1028,17 +1028,19 @@ TEST $file
 		$temp_dir = str_replace($temp_source, $temp_target, $temp_dir);
 	}
 
-	$diff_filename     = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').'diff';
-	$log_filename      = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').'log';
-	$exp_filename      = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').'exp';
-	$output_filename   = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').'out';
-	$memcheck_filename = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').'mem';
-	$temp_file         = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').'php';
-	$test_file         = $test_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').'php';
-	$temp_skipif       = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').'skip.php';
-	$test_skipif       = $test_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').'skip.php';
-	$temp_clean        = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').'clean.php';
-	$test_clean        = $test_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').'clean.php';
+	$main_file_name = basename($file,'phpt');
+
+	$diff_filename     = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name.'diff';
+	$log_filename      = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name.'log';
+	$exp_filename      = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name.'exp';
+	$output_filename   = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name.'out';
+	$memcheck_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name.'mem';
+	$temp_file         = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name.'php';
+	$test_file         = $test_dir . DIRECTORY_SEPARATOR . $main_file_name.'php';
+	$temp_skipif       = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name.'skip.php';
+	$test_skipif       = $test_dir . DIRECTORY_SEPARATOR . $main_file_name.'skip.php';
+	$temp_clean        = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name.'clean.php';
+	$test_clean        = $test_dir . DIRECTORY_SEPARATOR . $main_file_name.'clean.php';
 	$tmp_post          = $temp_dir . DIRECTORY_SEPARATOR . uniqid('/phpt.');
 	$tmp_relative_file = str_replace(dirname(__FILE__).DIRECTORY_SEPARATOR, '', $test_file) . 't';
 
