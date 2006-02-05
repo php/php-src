@@ -757,10 +757,27 @@ zend_object_iterator_funcs spl_array_it_funcs = {
 	spl_array_it_rewind
 };
 
-zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC) /* {{{ */
+zend_object_iterator *spl_array_obj_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC) /* {{{ */
 {
-	spl_array_it       *iterator     = emalloc(sizeof(spl_array_it));
-	spl_array_object   *array_object = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
+	/* disable by_ref check */
+	/* We enable by ref if the returned thing does. If it is an ArrayIterator */
+	/* or derived then it does if it's current() method is not overloaded. */
+	return zend_user_it_get_new_iterator(ce, object, 0 TSRMLS_CC);
+}
+/* }}} */
+
+zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC) /* {{{ */
+{
+	spl_array_it       *iterator;
+	spl_array_object   *array_object;
+
+#if MBO_0
+	if (by_ref && /* check current() is overloaded, else it works */) {
+		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+	}
+#endif
+	iterator     = emalloc(sizeof(spl_array_it));
+	array_object = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 
 	object->refcount++;
 	iterator->intern.data = (void*)object;
@@ -1392,6 +1409,8 @@ PHP_MINIT_FUNCTION(spl_array)
 	REGISTER_SPL_IMPLEMENTS(ArrayObject, Aggregate);
 	REGISTER_SPL_IMPLEMENTS(ArrayObject, ArrayAccess);
 	memcpy(&spl_handler_ArrayObject, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	spl_ce_ArrayObject->get_iterator = spl_array_obj_get_iterator;
+
 	spl_handler_ArrayObject.clone_obj = spl_array_object_clone;
 	spl_handler_ArrayObject.read_dimension = spl_array_read_dimension;
 	spl_handler_ArrayObject.write_dimension = spl_array_write_dimension;
