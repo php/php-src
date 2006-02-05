@@ -1208,6 +1208,12 @@ pfpro.defaulttimeout = 30
 ;fbsql.max_results = 128
 ;fbsql.batchSize = 1000
 
+[gd]
+; Tell the jpeg decode to libjpeg warnings and try to create
+; a gd image. The warning will then be displayed as notices
+; disabled by default
+;gd.jpeg_ignore_warning = 0
+
 [exif]
 ; Exif UNICODE user comments are handled as UCS-2BE/UCS-2LE and JIS as JIS.
 ; With mbstring support this will automatically be converted into the encoding
