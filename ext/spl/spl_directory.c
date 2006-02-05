@@ -1895,7 +1895,7 @@ ZEND_END_ARG_INFO()
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_flock, 0, 0, 1) 
 	ZEND_ARG_INFO(0, operation)
-	ZEND_ARG_INFO(1, wouldblock])
+	ZEND_ARG_INFO(1, wouldblock)
 ZEND_END_ARG_INFO()
 
 static
