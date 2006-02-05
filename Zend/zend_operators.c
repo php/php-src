@@ -1539,6 +1539,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 		} else if (!op2_obj && Z_OBJ_HT_P(op1)->cast_object) {
 			ALLOC_INIT_ZVAL(op1_free);
 			if (Z_OBJ_HT_P(op1)->cast_object(op1, op1_free, Z_TYPE_P(op2) TSRMLS_CC) == FAILURE) {
+				op2_free = NULL;
 				ZVAL_BOOL(result, 0);
 				COMPARE_RETURN_AND_FREE(FAILURE);
 			}
