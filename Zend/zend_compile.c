@@ -3757,7 +3757,7 @@ void zend_do_foreach_begin(znode *foreach_token, znode *open_brackets_token, zno
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
 	opline->op1 = *array;
 	SET_UNUSED(opline->op2);
-	opline->extended_value = is_variable;
+	opline->extended_value = is_variable ? ZEND_FE_RESET_VARIABLE : 0;
 	*open_brackets_token = opline->result;
 
 	{
@@ -3830,6 +3830,7 @@ void zend_do_foreach_cont(znode *foreach_token, znode *as_token, znode *value, z
 		}
 		/* Mark extended_value for assign-by-reference */
 		opline->extended_value |= ZEND_FE_FETCH_BYREF;
+		CG(active_op_array)->opcodes[foreach_token->u.opline_num].extended_value |= ZEND_FE_RESET_REFERENCE;
 	}
 
 	value_node = opline->result;
