@@ -108,7 +108,7 @@ ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend
 /* iterator interface, c-level functions used by engine */
 
 /* {{{ zend_user_it_new_iterator */
-static zval *zend_user_it_new_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
+ZEND_API zval *zend_user_it_new_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
 {
 	zval *retval;
 
