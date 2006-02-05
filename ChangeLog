@@ -1,3 +1,46 @@
+2006-02-04  Frank M. Kromann  <frank@kromann.info>
+
+    * sapi/cgi/fastcgi.c:
+      MFB51 Fix build on win32
+
+    * (PHP_5_1)
+      sapi/cgi/fastcgi.c:
+      Fix build on win32
+
+2006-02-04  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/libgd/gd_jpeg.c:
+      - remove libjpeg direct output and wrap them in php warnings
+
+2006-02-04  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_1)
+      NEWS:
+      BFN
+
+    * ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_variant.c
+      ext/com_dotnet/tests/27974.phpt
+      ext/com_dotnet/tests/bug34272.phpt:
+      MFB51: Fixed bug #34272 (empty array onto COM object blows up)
+      fix mem leaks
+      WS fixes
+      add test
+
+    * ext/com_dotnet/tests/bug34272.phpt
+      ext/com_dotnet/tests/bug34272.phpt:
+      
+      file bug34272.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_variant.c
+      ext/com_dotnet/tests/27974.phpt:
+      Fixed bug #34272 (empty array onto COM object blows up)
+      fix mem leaks
+      WS fixes
+      add test
+
 2006-02-03  Dmitry Stogov  <dmitry@zend.com>
 
     * (PHP_4_4)
