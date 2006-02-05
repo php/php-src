@@ -1474,7 +1474,7 @@ ZEND_API int string_locale_compare_function(zval *result, zval *op1, zval *op2 T
 		op2 = &op2_copy;
 	}
 
-	result->value.lval = ucol_strcoll(col, (void*)op1->value.str.val, op1->value.str.len, (void*)op2->value.str.val, op2->value.str.len);
+	result->value.lval = ucol_strcoll(col, op1->value.ustr.val, op1->value.ustr.len, op2->value.ustr.val, op2->value.ustr.len);
 	result->type = IS_LONG;
 
 	if (use_copy1) {
