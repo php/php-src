@@ -1267,9 +1267,9 @@ ZEND_API int numeric_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_
 }
 
 
-static inline void zend_free_obj_get_result(zval *op, int free_op)
+static inline void zend_free_obj_get_result(zval *op)
 {
-	if (free_op) {
+	if (op) {
 		if (op->refcount == 0) {
 			zval_dtor(op);
 			FREE_ZVAL(op);
@@ -1280,26 +1280,50 @@ static inline void zend_free_obj_get_result(zval *op, int free_op)
 }
 
 #define COMPARE_RETURN_AND_FREE(retval) \
-			zend_free_obj_get_result(op1_orig, free_op1); \
-			zend_free_obj_get_result(op2_orig, free_op2); \
+			zend_free_obj_get_result(op1_free); \
+			zend_free_obj_get_result(op2_free); \
 			return retval;
 
 ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
 	zval op1_copy, op2_copy;
-	zend_bool free_op1 = 0, free_op2 = 0;
-	zval *op1_orig, *op2_orig;
+	zval *op1_free, *op2_free;
+	int op1_obj = op1->type == IS_OBJECT;
+	int op2_obj = op2->type == IS_OBJECT;
 	
-	if (op1->type == IS_OBJECT && Z_OBJ_HT_P(op1)->get) {
-		op1 = Z_OBJ_HT_P(op1)->get(op1 TSRMLS_CC);
-		free_op1 = 1;
+	if (op1_obj) {
+		if (Z_OBJ_HT_P(op1)->get) {
+			op1 = op1_free = Z_OBJ_HT_P(op1)->get(op1 TSRMLS_CC);
+		} else if (!op2_obj && Z_OBJ_HT_P(op1)->cast_object) {
+			ALLOC_INIT_ZVAL(op1_free);
+			if (Z_OBJ_HT_P(op1)->cast_object(op1, op1_free, Z_TYPE_P(op2), 0 TSRMLS_CC) == FAILURE) {
+				op2_free = NULL;
+				ZVAL_BOOL(result, 0);
+				COMPARE_RETURN_AND_FREE(FAILURE);
+			}
+			op1 = op1_free;
+		} else {
+			op1_free = NULL;
+		}
+	} else {
+		op1_free = NULL;
 	}
-	op1_orig = op1;
-	if (op2->type == IS_OBJECT && Z_OBJ_HT_P(op2)->get) {
-		op2 = Z_OBJ_HT_P(op2)->get(op2 TSRMLS_CC);
-		free_op2 = 1;
+	if (op2_obj) {
+		if (Z_OBJ_HT_P(op2)->get) {
+			op2 = op2_free = Z_OBJ_HT_P(op2)->get(op2 TSRMLS_CC);
+		} else if (!op1_obj && Z_OBJ_HT_P(op2)->cast_object) {
+			ALLOC_INIT_ZVAL(op2_free);
+			if (Z_OBJ_HT_P(op2)->cast_object(op2, op2_free, Z_TYPE_P(op1), 0 TSRMLS_CC) == FAILURE) {
+				ZVAL_BOOL(result, 0);
+				COMPARE_RETURN_AND_FREE(FAILURE);
+			}
+			op2 = op2_free;
+		} else {
+			op2_free = NULL;
+		}
+	} else {
+		op2_free = NULL;
 	}
-	op2_orig = op2;
 
 	if ((op1->type == IS_NULL && op2->type == IS_STRING)
 		|| (op2->type == IS_NULL && op1->type == IS_STRING)) {
