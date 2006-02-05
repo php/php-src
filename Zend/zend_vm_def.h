@@ -3041,7 +3041,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 	zend_class_entry *ce = NULL;
 	zend_bool is_empty = 0;
 
-	if (opline->extended_value) {
+	if (opline->extended_value & ZEND_FE_RESET_VARIABLE) {
 		array_ptr_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_R);
 		if (array_ptr_ptr == NULL || array_ptr_ptr == &EG(uninitialized_zval_ptr)) {
 			ALLOC_INIT_ZVAL(array_ptr);
@@ -3078,12 +3078,12 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 	}
 
 	if (ce && ce->get_iterator) {
-		iter = ce->get_iterator(ce, array_ptr TSRMLS_CC);
+		iter = ce->get_iterator(ce, array_ptr, opline->extended_value & ZEND_FE_RESET_REFERENCE TSRMLS_CC);
 
 		if (iter && !EG(exception)) {
 			array_ptr = zend_iterator_wrap(iter TSRMLS_CC);
 		} else {
-			if (opline->extended_value) {
+			if (opline->extended_value & ZEND_FE_RESET_VARIABLE) {
 				FREE_OP1_VAR_PTR();
 			} else {
 				FREE_OP1_IF_VAR();
@@ -3140,7 +3140,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		is_empty = 1;
 	}
 
-	if (opline->extended_value) {
+	if (opline->extended_value & ZEND_FE_RESET_VARIABLE) {
 		FREE_OP1_VAR_PTR();
 	} else {
 		FREE_OP1_IF_VAR();

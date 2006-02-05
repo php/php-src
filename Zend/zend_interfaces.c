@@ -270,9 +270,15 @@ zend_object_iterator_funcs zend_interface_iterator_funcs_iterator = {
 };
 
 /* {{{ zend_user_it_get_iterator */
-static zend_object_iterator *zend_user_it_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
+static zend_object_iterator *zend_user_it_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
 {
-	zend_user_iterator *iterator = emalloc(sizeof(zend_user_iterator));
+	zend_user_iterator *iterator;
+	
+	if (by_ref) {
+		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+	}
+
+	iterator = emalloc(sizeof(zend_user_iterator));
 
 	object->refcount++;
 	iterator->it.data = (void*)object;
@@ -284,7 +290,7 @@ static zend_object_iterator *zend_user_it_get_iterator(zend_class_entry *ce, zva
 /* }}} */
 
 /* {{{ zend_user_it_get_new_iterator */
-static zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
+ZEND_API zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
 {
 	zval *iterator = zend_user_it_new_iterator(ce, object TSRMLS_CC);
 	zend_object_iterator *new_iterator;
@@ -302,7 +308,11 @@ static zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *ce,
 		}
 		return NULL;
 	}
-	new_iterator = ce_it->get_iterator(ce_it, iterator TSRMLS_CC);
+	if (by_ref && ce_it && instanceof_function(ce_it, zend_ce_iterator TSRMLS_CC)) {
+		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+	}
+
+	new_iterator = ce_it->get_iterator(ce_it, iterator, by_ref TSRMLS_CC);
 	zval_ptr_dtor(&iterator);
 	return new_iterator;
 }
