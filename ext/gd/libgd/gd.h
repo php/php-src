@@ -237,8 +237,8 @@ gdImagePtr gdImageCreateFromPng(FILE *fd);
 gdImagePtr gdImageCreateFromPngCtx(gdIOCtxPtr in);
 gdImagePtr gdImageCreateFromWBMP(FILE *inFile);
 gdImagePtr gdImageCreateFromWBMPCtx(gdIOCtx *infile);
-gdImagePtr gdImageCreateFromJpeg(FILE *infile);
-gdImagePtr gdImageCreateFromJpegCtx(gdIOCtx *infile);
+gdImagePtr gdImageCreateFromJpeg(FILE *infile, int ignore_warning);
+gdImagePtr gdImageCreateFromJpegCtx(gdIOCtx *infile, int ignore_warning);
 
 /* A custom data source. */
 /* The source function must return -1 on error, otherwise the number
