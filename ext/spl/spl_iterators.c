@@ -278,7 +278,7 @@ next_step:
 					object->iterators[object->level].state = RS_NEXT;
 				}
 				object->iterators = erealloc(object->iterators, sizeof(spl_sub_iterator) * (++object->level+1));
-				sub_iter = ce->get_iterator(ce, child TSRMLS_CC);
+				sub_iter = ce->get_iterator(ce, child, 0 TSRMLS_CC);
 				object->iterators[object->level].iterator = sub_iter;
 				object->iterators[object->level].zobject = child;
 				object->iterators[object->level].ce = ce;
@@ -340,10 +340,16 @@ static void spl_recursive_it_rewind(zend_object_iterator *iter TSRMLS_DC)
 	spl_recursive_it_rewind_ex((spl_recursive_it_object*)iter->data, ((spl_recursive_it_iterator*)iter)->zobject TSRMLS_CC);
 }
 
-static zend_object_iterator *spl_recursive_it_get_iterator(zend_class_entry *ce, zval *zobject TSRMLS_DC)
+static zend_object_iterator *spl_recursive_it_get_iterator(zend_class_entry *ce, zval *zobject, int by_ref TSRMLS_DC)
 {
-	spl_recursive_it_iterator *iterator = emalloc(sizeof(spl_recursive_it_iterator));
-	spl_recursive_it_object   *object   = (spl_recursive_it_object*)zend_object_store_get_object(zobject TSRMLS_CC);
+	spl_recursive_it_iterator *iterator;
+	spl_recursive_it_object   *object;
+
+	if (by_ref) {
+		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+	}
+	iterator = emalloc(sizeof(spl_recursive_it_iterator));
+	object   = (spl_recursive_it_object*)zend_object_store_get_object(zobject TSRMLS_CC);
 
 	zobject->refcount++;
 	iterator->intern.data = (void*)object;
@@ -430,7 +436,7 @@ SPL_METHOD(RecursiveIteratorIterator, __construct)
 		intern->nextElement = NULL;
 	}
 	ce_iterator = Z_OBJCE_P(iterator); /* respect inheritance, don't use spl_ce_RecursiveIterator */
-	intern->iterators[0].iterator = ce_iterator->get_iterator(ce_iterator, iterator TSRMLS_CC);
+	intern->iterators[0].iterator = ce_iterator->get_iterator(ce_iterator, iterator, 0 TSRMLS_CC);
 	if (inc_refcount) {
 		iterator->refcount++;
 	}
@@ -918,7 +924,7 @@ static inline spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAME
 		case DIT_AppendIterator:
 			spl_instantiate(U_CLASS_ENTRY(spl_ce_ArrayIterator), &intern->u.append.zarrayit, 1 TSRMLS_CC);
 			zend_call_method_with_0_params(&intern->u.append.zarrayit, U_CLASS_ENTRY(spl_ce_ArrayIterator), &U_CLASS_ENTRY(spl_ce_ArrayIterator)->constructor, "__construct", NULL);
-			intern->u.append.iterator = U_CLASS_ENTRY(spl_ce_ArrayIterator)->get_iterator(U_CLASS_ENTRY(spl_ce_ArrayIterator), intern->u.append.zarrayit TSRMLS_CC);
+			intern->u.append.iterator = U_CLASS_ENTRY(spl_ce_ArrayIterator)->get_iterator(U_CLASS_ENTRY(spl_ce_ArrayIterator), intern->u.append.zarrayit, 0 TSRMLS_CC);
 			php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 			return intern;
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
@@ -954,7 +960,7 @@ static inline spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAME
 	intern->inner.zobject = zobject;
 	intern->inner.ce = dit_type == DIT_IteratorIterator ? ce : Z_OBJCE_P(zobject);
 	intern->inner.object = zend_object_store_get_object(zobject TSRMLS_CC);
-	intern->inner.iterator = intern->inner.ce->get_iterator(intern->inner.ce, zobject TSRMLS_CC);
+	intern->inner.iterator = intern->inner.ce->get_iterator(intern->inner.ce, zobject, 0 TSRMLS_CC);
 
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 	return intern;
@@ -2209,7 +2215,7 @@ int spl_append_it_next_iterator(spl_dual_it_object *intern TSRMLS_DC) /* {{{*/
 		intern->inner.zobject = *it;
 		intern->inner.ce = Z_OBJCE_PP(it);
 		intern->inner.object = zend_object_store_get_object(*it TSRMLS_CC);
-		intern->inner.iterator = intern->inner.ce->get_iterator(intern->inner.ce, *it TSRMLS_CC);
+		intern->inner.iterator = intern->inner.ce->get_iterator(intern->inner.ce, *it, 0 TSRMLS_CC);
 		spl_dual_it_rewind(intern TSRMLS_CC);
 		return SUCCESS;
 	} else {
@@ -2362,7 +2368,7 @@ PHP_FUNCTION(iterator_to_array)
 	
 	array_init(return_value);
 	
-	iter = Z_OBJCE_P(obj)->get_iterator(Z_OBJCE_P(obj), obj TSRMLS_CC);
+	iter = Z_OBJCE_P(obj)->get_iterator(Z_OBJCE_P(obj), obj, 0 TSRMLS_CC);
 
 	if (iter->funcs->rewind) {
 		iter->funcs->rewind(iter TSRMLS_CC);
@@ -2406,7 +2412,7 @@ PHP_FUNCTION(iterator_count)
 		RETURN_FALSE;
 	}
 	
-	iter = Z_OBJCE_P(obj)->get_iterator(Z_OBJCE_P(obj), obj TSRMLS_CC);
+	iter = Z_OBJCE_P(obj)->get_iterator(Z_OBJCE_P(obj), obj, 0 TSRMLS_CC);
 
 	if (iter->funcs->rewind) {
 		iter->funcs->rewind(iter TSRMLS_CC);

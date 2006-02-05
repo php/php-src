@@ -2177,9 +2177,13 @@ static int pdo_stmt_iter_valid(zend_object_iterator *iter TSRMLS_DC)
 	return I->fetch_ahead ? SUCCESS : FAILURE;
 }
 
-static void pdo_stmt_iter_get_data(zend_object_iterator *iter, zval ***data TSRMLS_DC)
+static void pdo_stmt_iter_get_data(zend_object_iterator *iter, zval ***data, int by_ref TSRMLS_DC)
 {
 	struct php_pdo_iterator *I = (struct php_pdo_iterator*)iter->data;
+
+	if (by_ref) {
+		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+	}
 
 	/* sanity */
 	if (!I->fetch_ahead) {
@@ -2237,10 +2241,14 @@ static zend_object_iterator_funcs pdo_stmt_iter_funcs = {
 	NULL
 };
 
-zend_object_iterator *pdo_stmt_iter_get(zend_class_entry *ce, zval *object TSRMLS_DC)
+zend_object_iterator *pdo_stmt_iter_get(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
 {
 	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(object TSRMLS_CC);
 	struct php_pdo_iterator *I;
+
+	if (by_ref) {
+		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+	}
 
 	I = ecalloc(1, sizeof(*I));
 	I->iter.funcs = &pdo_stmt_iter_funcs;

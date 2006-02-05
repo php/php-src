@@ -963,10 +963,16 @@ zend_object_iterator_funcs spl_filesystem_dir_it_funcs = {
 };
 
 /* {{{ spl_ce_dir_get_iterator */
-zend_object_iterator *spl_filesystem_dir_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
+zend_object_iterator *spl_filesystem_dir_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
 {
-	spl_filesystem_dir_it *iterator   = emalloc(sizeof(spl_filesystem_dir_it));
-	spl_filesystem_object *dir_object = (spl_filesystem_object*)zend_object_store_get_object(object TSRMLS_CC);
+	spl_filesystem_dir_it *iterator;
+	spl_filesystem_object *dir_object;
+
+	if (by_ref) {
+		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+	}
+	iterator   = emalloc(sizeof(spl_filesystem_dir_it));
+	dir_object = (spl_filesystem_object*)zend_object_store_get_object(object TSRMLS_CC);
 
 	object->refcount += 2;;
 	iterator->intern.data = (void*)object;
@@ -1168,10 +1174,16 @@ zend_object_iterator_funcs spl_filesystem_tree_it_funcs = {
 };
 
 /* {{{ spl_ce_dir_get_iterator */
-zend_object_iterator *spl_filesystem_tree_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
+zend_object_iterator *spl_filesystem_tree_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
 {
-	spl_filesystem_dir_it *iterator   = emalloc(sizeof(spl_filesystem_dir_it));
-	spl_filesystem_object *dir_object = (spl_filesystem_object*)zend_object_store_get_object(object TSRMLS_CC);
+	spl_filesystem_dir_it *iterator;
+	spl_filesystem_object *dir_object;
+
+	if (by_ref) {
+		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+	}
+	iterator   = emalloc(sizeof(spl_filesystem_dir_it));
+	dir_object = (spl_filesystem_object*)zend_object_store_get_object(object TSRMLS_CC);
 
 	object->refcount++;
 	iterator->intern.data = (void*)object;
