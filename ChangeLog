@@ -1,3 +1,81 @@
+2006-02-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_interfaces.h:
+      - Need one more thing exported
+
+    * ext/simplexml/simplexml.c:
+      - Iterator API was changed
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_interfaces.h
+      ZendEngine2/zend_iterators.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      - Disallow foreach($v as &$ref) when $v is an object that implements
+        interface Iterator. The signature of Iterator::current() doesn't allow
+        that. Maybe ppl also want IteratorByReference or similar. Unfortunatley
+        this comes with an API change but there is no easier way.
+
+2006-02-05  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_operators.c:
+      Needs to use .ustr. portion of the union for IS_UNICODE.
+
+2006-02-05  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      MFH: fix #36295 (typo in SplFileObject::flock() parameter name)
+
+2006-02-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      run-tests.php:
+      Simplify test code
+
+2006-02-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_operators.c:
+      - Initialize variable
+
+2006-02-05  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * php.ini-dist
+      php.ini-recommended:
+      - MFB: ini entry for gd.jpeg_ignore_warning
+
+    * (PHP_5_1)
+      php.ini-dist
+      php.ini-recommended:
+      - ini entry for gd.jpeg_ignore_warning
+
+    * (PHP_5_1)
+      NEWS:
+      - jpeg tolerant mode entry
+
+    * (PHP_5_1)
+      ext/gd/gd.c
+      ext/gd/libgd/gd.h
+      ext/gd/libgd/gd_jpeg.c:
+      - MFH: add a weak/tolerant mode to the jpeg loader
+
+    * ext/gd/gd.c:
+      - test for jpeg support
+
+2006-02-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_operators.c:
+      - Fix comparision where one argument is an object
+
+    * (PHP_5_1)
+      NEWS:
+      - BFN
+
 2006-02-04  Frank M. Kromann  <frank@kromann.info>
 
     * sapi/cgi/fastcgi.c:

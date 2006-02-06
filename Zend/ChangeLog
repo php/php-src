@@ -1,3 +1,36 @@
+2006-02-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_interfaces.c
+      zend_interfaces.h:
+      - Need one more thing exported
+
+    * zend.h
+      zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_interfaces.c
+      zend_interfaces.h
+      zend_iterators.h
+      zend_vm_def.h
+      zend_vm_execute.h:
+      - Disallow foreach($v as &$ref) when $v is an object that implements
+        interface Iterator. The signature of Iterator::current() doesn't allow
+        that. Maybe ppl also want IteratorByReference or similar. Unfortunatley
+        this comes with an API change but there is no easier way.
+
+2006-02-05  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_operators.c:
+      Needs to use .ustr. portion of the union for IS_UNICODE.
+
+2006-02-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_operators.c:
+      - Initialize variable
+
+    * zend_operators.c:
+      - Fix comparision where one argument is an object
+
 2006-02-03  Antony Dovgal  <antony@zend.com>
 
     * zend_builtin_functions.c:
