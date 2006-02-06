@@ -1341,7 +1341,7 @@ PHP_FUNCTION(xmlwriter_open_uri)
 
 #ifdef ZEND_ENGINE_2
 	zval *this = getThis();
-	ze_xmlwriter_object *ze_obj;
+	ze_xmlwriter_object *ze_obj = NULL;
 #endif
 
 #ifndef ZEND_ENGINE_2
@@ -1420,7 +1420,7 @@ PHP_FUNCTION(xmlwriter_open_memory)
 
 #ifdef ZEND_ENGINE_2
 	zval *this = getThis();
-	ze_xmlwriter_object *ze_obj;
+	ze_xmlwriter_object *ze_obj = NULL;
 #endif
 
 #ifdef ZEND_ENGINE_2
