@@ -380,9 +380,9 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	char *new_path;
 #endif
 	char orig_path[MAXPATHLEN];
-	int orig_path_len;
+	int orig_path_len = 0;
 	realpath_cache_bucket *bucket;
-	time_t t;
+	time_t t = 0;
 	TSRMLS_FETCH();
 
 	if (path_length == 0) 
