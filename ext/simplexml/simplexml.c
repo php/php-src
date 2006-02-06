@@ -229,10 +229,10 @@ static zval * sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, 
 	php_sxe_object *sxe;
 	char           *name;
 	xmlNodePtr      node;
-	xmlAttrPtr      attr;
+	xmlAttrPtr      attr = NULL;
 	zval            tmp_zv;
 	int				nodendx = 0;
-	int             test;
+	int             test = 0;
 
 	sxe = php_sxe_fetch_object(object TSRMLS_CC);
 
@@ -394,7 +394,7 @@ static void sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_boo
 	int             counter = 0;
 	int             is_attr = 0;
 	int				nodendx = 0;
-	int             test;
+	int             test = 0;
 	zval            tmp_zv, trim_zv;
 
 	if (!member) {
@@ -558,7 +558,7 @@ static int sxe_prop_dim_exists(zval *object, zval *member, int check_empty, zend
 	xmlNodePtr      node;
 	xmlAttrPtr      attr = NULL;
 	int				exists = 0;
-	int             test;
+	int             test = 0;
 
 	sxe = php_sxe_fetch_object(object TSRMLS_CC);
 
