@@ -308,9 +308,6 @@ ZEND_API zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *c
 		}
 		return NULL;
 	}
-	if (by_ref && ce_it && instanceof_function(ce_it, zend_ce_iterator TSRMLS_CC)) {
-		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
-	}
 
 	new_iterator = ce_it->get_iterator(ce_it, iterator, by_ref TSRMLS_CC);
 	zval_ptr_dtor(&iterator);
