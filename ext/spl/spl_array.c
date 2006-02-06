@@ -119,6 +119,8 @@ static void spl_array_object_free_storage(void *object TSRMLS_DC)
 }
 /* }}} */
 
+zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC);
+
 /* {{{ spl_array_object_new */
 static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, spl_array_object **obj, zval *orig TSRMLS_DC)
 {
@@ -156,6 +158,9 @@ static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, s
 	while (parent) {
 		if (parent == U_CLASS_ENTRY(spl_ce_ArrayIterator) || parent == U_CLASS_ENTRY(spl_ce_RecursiveArrayIterator)) {
 			retval.handlers = &spl_handler_ArrayIterator;
+#if MBO_0
+			class_type->get_iterator = spl_array_get_iterator;
+#endif
 			break;
 		} else if (parent == U_CLASS_ENTRY(spl_ce_ArrayObject)) {
 			retval.handlers = &spl_handler_ArrayObject;
@@ -801,31 +806,6 @@ zend_object_iterator_funcs spl_array_it_funcs = {
 	spl_array_it_rewind
 };
 
-zend_object_iterator *spl_array_obj_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC) /* {{{ */
-{
-	zval *iterator = zend_user_it_new_iterator(ce, object TSRMLS_CC);
-	zend_object_iterator *new_iterator;
-
-	zend_class_entry *ce_it = iterator && Z_TYPE_P(iterator) == IS_OBJECT ? Z_OBJCE_P(iterator) : NULL;
-
-	if (!ce || !ce_it || !ce_it->get_iterator || (ce_it->get_iterator == zend_user_it_get_new_iterator && iterator == object)) {
-		if (!EG(exception))
-		{
-			zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Objects returned by %v::getIterator() must be traversable or implement interface Iterator", ce->name);
-		}
-		if (iterator)
-		{
-			zval_ptr_dtor(&iterator);
-		}
-		return NULL;
-	}
-
-	new_iterator = ce_it->get_iterator(ce_it, iterator, by_ref TSRMLS_CC);
-	zval_ptr_dtor(&iterator);
-	return new_iterator;
-}
-/* }}} */
-
 zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC) /* {{{ */
 {
 	spl_array_it       *iterator;
@@ -1467,7 +1447,6 @@ PHP_MINIT_FUNCTION(spl_array)
 	REGISTER_SPL_IMPLEMENTS(ArrayObject, Aggregate);
 	REGISTER_SPL_IMPLEMENTS(ArrayObject, ArrayAccess);
 	memcpy(&spl_handler_ArrayObject, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	spl_ce_ArrayObject->get_iterator = spl_array_obj_get_iterator;
 
 	spl_handler_ArrayObject.clone_obj = spl_array_object_clone;
 	spl_handler_ArrayObject.read_dimension = spl_array_read_dimension;
