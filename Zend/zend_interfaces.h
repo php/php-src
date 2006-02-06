@@ -54,6 +54,7 @@ ZEND_API int zend_user_it_valid(zend_object_iterator *_iter TSRMLS_DC);
 ZEND_API int zend_user_it_get_current_key(zend_object_iterator *_iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC);
 ZEND_API void zend_user_it_get_current_data(zend_object_iterator *_iter, zval ***data TSRMLS_DC);
 ZEND_API void zend_user_it_move_forward(zend_object_iterator *_iter TSRMLS_DC);
+ZEND_API void zend_user_it_invalidate_current(zend_object_iterator *_iter TSRMLS_DC);
 
 ZEND_API zval *zend_user_it_new_iterator(zend_class_entry *ce, zval *object TSRMLS_DC);
 ZEND_API zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC);
