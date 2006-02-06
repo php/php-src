@@ -28,13 +28,16 @@
 #include "php.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
-#include "ext/spl/spl_exceptions.h"
 
 typedef enum {
 	ITER_CODE_UNIT,
 	ITER_CODE_POINT,
 	ITER_COMB_SEQUENCE,
+	ITER_TYPE_LAST,
 } text_iter_type;
+
+const uint32_t ITER_REVERSE = 0x100;
+const uint32_t ITER_TYPE_MASK = 0xFF;
 
 typedef struct {
 	zend_object		std;
@@ -78,10 +81,9 @@ static int text_iter_cu_valid(text_iter_obj* object TSRMLS_DC)
 
 static void text_iter_cu_current(text_iter_obj* object TSRMLS_DC)
 {
-	if (!object->current) {
-		MAKE_STD_ZVAL(object->current);
-		ZVAL_UNICODEL(object->current, object->text + object->u.cu.index, 1, 1);
-	}
+	u_memcpy(Z_USTRVAL_P(object->current), object->text + object->u.cu.index, 1);
+	Z_USTRVAL_P(object->current)[1] = 0;
+	Z_USTRLEN_P(object->current) = 1;
 }
 
 static int text_iter_cu_key(text_iter_obj* object TSRMLS_DC)
@@ -92,19 +94,11 @@ static int text_iter_cu_key(text_iter_obj* object TSRMLS_DC)
 static void text_iter_cu_next(text_iter_obj* object TSRMLS_DC)
 {
 	object->u.cu.index++;
-	if (object->current) {
-		zval_ptr_dtor(&object->current);
-		object->current = NULL;
-	}
 }
 
 static void text_iter_cu_rewind(text_iter_obj *object TSRMLS_DC)
 {
 	object->u.cu.index  = 0;
-	if (object->current) {
-		zval_ptr_dtor(&object->current);
-		object->current = NULL;
-	}
 }
 
 static text_iter_ops text_iter_cu_ops = {
@@ -218,7 +212,7 @@ static void text_iter_rewind(zend_object_iterator* iter TSRMLS_DC)
 	iter_ops[object->type]->rewind(object TSRMLS_CC);
 }
 
-zend_object_iterator_funcs text_iter_cp_funcs = {
+zend_object_iterator_funcs text_iter_funcs = {
 	text_iter_dtor,
 	text_iter_valid,
 	text_iter_get_current_data,
@@ -240,7 +234,7 @@ static zend_object_iterator* text_iter_get_iterator(zend_class_entry *ce, zval *
 
 	ZVAL_ADDREF(object);
 	iterator->intern.data  = (void *) object;
-	iterator->intern.funcs = &text_iter_cp_funcs;
+	iterator->intern.funcs = &text_iter_funcs;
 	iterator->object 	   = iter_object;
 
 	return (zend_object_iterator *) iterator;
@@ -256,7 +250,6 @@ static void text_iterator_free_storage(void *object TSRMLS_DC)
 	if (intern->text) {
 		efree(intern->text);
 	}
-	ZVAL_DELREF(intern->current);
 	zval_ptr_dtor(&intern->current);
 	efree(object);
 }
@@ -278,8 +271,8 @@ static zend_object_value text_iterator_new(zend_class_entry *class_type TSRMLS_D
 	intern->type = ITER_CODE_POINT;
 	MAKE_STD_ZVAL(intern->current); /* pre-allocate buffer for codepoint */
 	Z_USTRVAL_P(intern->current) = eumalloc(3);
+	Z_USTRVAL_P(intern->current)[0] = 0;
 	Z_TYPE_P(intern->current) = IS_UNICODE;
-	ZVAL_ADDREF(intern->current);
 
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) text_iterator_free_storage, NULL TSRMLS_CC);
 	retval.handlers = zend_get_std_object_handlers();
@@ -293,8 +286,10 @@ PHP_METHOD(TextIterator, __construct)
 	int32_t text_len;
 	zval *object = getThis();
 	text_iter_obj *intern;
+	text_iter_type ti_type;
+	long flags = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "u", &text, &text_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "u|l", &text, &text_len, &flags) == FAILURE) {
 		return;
 	}
 
@@ -302,8 +297,16 @@ PHP_METHOD(TextIterator, __construct)
 
 	intern->text = eustrndup(text, text_len);
 	intern->text_len = text_len;
+	if (ZEND_NUM_ARGS() > 1) {
+		ti_type = flags & ITER_TYPE_MASK;
+		if (flags < ITER_TYPE_LAST) { 
+			intern->type = ti_type;
+		} else {
+			php_error(E_WARNING, "Invalid iterator type in TextIterator constructor");
+		}
+	}
 
-	text_iter_cp_rewind(intern TSRMLS_CC);
+	iter_ops[intern->type]->rewind(intern TSRMLS_CC);
 }
 
 PHP_METHOD(TextIterator, current)
@@ -344,7 +347,7 @@ PHP_METHOD(TextIterator, rewind)
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
-	iter_ops[object->type]->rewind(intern TSRMLS_CC);
+	iter_ops[intern->type]->rewind(intern TSRMLS_CC);
 }
 
 static zend_function_entry text_iterator_funcs[] = {
@@ -366,6 +369,10 @@ void php_register_unicode_iterators(TSRMLS_D)
 	text_iterator_ce->create_object = text_iterator_new;
 	text_iterator_ce->get_iterator  = text_iter_get_iterator;
 	zend_class_implements(text_iterator_ce TSRMLS_CC, 1, zend_ce_traversable);
+
+	zend_declare_class_constant_long(text_iterator_ce, "CODE_UNIT", sizeof("CODE_UNIT")-1, ITER_CODE_UNIT TSRMLS_CC);
+	zend_declare_class_constant_long(text_iterator_ce, "CODE_POINT", sizeof("CODE_POINT")-1, ITER_CODE_POINT TSRMLS_CC);
+	zend_declare_class_constant_long(text_iterator_ce, "COMB_SEQUENCE", sizeof("COMB_SEQUENCE")-1, ITER_COMB_SEQUENCE TSRMLS_CC);
 }
 
 /*
