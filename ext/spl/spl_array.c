@@ -158,9 +158,7 @@ static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, s
 	while (parent) {
 		if (parent == U_CLASS_ENTRY(spl_ce_ArrayIterator) || parent == U_CLASS_ENTRY(spl_ce_RecursiveArrayIterator)) {
 			retval.handlers = &spl_handler_ArrayIterator;
-#if MBO_0
 			class_type->get_iterator = spl_array_get_iterator;
-#endif
 			break;
 		} else if (parent == U_CLASS_ENTRY(spl_ce_ArrayObject)) {
 			retval.handlers = &spl_handler_ArrayObject;
@@ -202,7 +200,7 @@ static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, s
 		}
 		if (inherited) {
 			if (class_type->iterator_funcs.zf_rewind->common.scope  != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_REWIND;
-			if (class_type->iterator_funcs.zf_valid->common.scope   != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_CURRENT;
+			if (class_type->iterator_funcs.zf_valid->common.scope   != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_VALID;
 			if (class_type->iterator_funcs.zf_key->common.scope     != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_KEY;
 			if (class_type->iterator_funcs.zf_current->common.scope != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_CURRENT;
 			if (class_type->iterator_funcs.zf_next->common.scope    != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_NEXT;
@@ -668,7 +666,7 @@ static int spl_array_next(spl_array_object *intern TSRMLS_DC) /* {{{ */
 
 /* define an overloaded iterator structure */
 typedef struct {
-	zend_object_iterator  intern;
+	zend_user_iterator    intern;
 	spl_array_object      *object;
 } spl_array_it;
 
@@ -676,7 +674,8 @@ static void spl_array_it_dtor(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 {
 	spl_array_it *iterator = (spl_array_it *)iter;
 
-	zval_ptr_dtor((zval**)&iterator->intern.data);
+	zend_user_it_invalidate_current(iter TSRMLS_CC);
+	zval_ptr_dtor((zval**)&iterator->intern.it.data);
 
 	efree(iterator);
 }
@@ -755,6 +754,7 @@ static void spl_array_it_move_forward(zend_object_iterator *iter TSRMLS_DC) /* {
 	if (object->ar_flags & SPL_ARRAY_OVERLOADED_NEXT) {
 		zend_user_it_move_forward(iter TSRMLS_CC);
 	} else {
+		zend_user_it_invalidate_current(iter TSRMLS_CC);
 		if (!aht) {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "ArrayIterator::current(): Array was modified outside object and is no longer an array");
 			return;
@@ -791,6 +791,7 @@ static void spl_array_it_rewind(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 	if (object->ar_flags & SPL_ARRAY_OVERLOADED_REWIND) {
 		zend_user_it_rewind(iter TSRMLS_CC);
 	} else {
+		zend_user_it_invalidate_current(iter TSRMLS_CC);
 		spl_array_rewind(object TSRMLS_CC);
 	}
 }
@@ -818,8 +819,10 @@ zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object,
 	iterator     = emalloc(sizeof(spl_array_it));
 
 	object->refcount++;
-	iterator->intern.data = (void*)object;
-	iterator->intern.funcs = &spl_array_it_funcs;
+	iterator->intern.it.data = (void*)object;
+	iterator->intern.it.funcs = &spl_array_it_funcs;
+	iterator->intern.ce = ce;
+	iterator->intern.value = NULL;
 	iterator->object = array_object;
 	
 	return (zend_object_iterator*)iterator;
