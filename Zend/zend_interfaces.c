@@ -142,7 +142,7 @@ static void zend_user_it_dtor(zend_object_iterator *_iter TSRMLS_DC)
 /* }}} */
 
 /* {{{ zend_user_it_valid */
-static int zend_user_it_valid(zend_object_iterator *_iter TSRMLS_DC)
+ZEND_API int zend_user_it_valid(zend_object_iterator *_iter TSRMLS_DC)
 {
 	if (_iter) {
 		zend_user_iterator *iter = (zend_user_iterator*)_iter;
@@ -162,7 +162,7 @@ static int zend_user_it_valid(zend_object_iterator *_iter TSRMLS_DC)
 /* }}} */
 
 /* {{{ zend_user_it_get_current_data */
-static void zend_user_it_get_current_data(zend_object_iterator *_iter, zval ***data TSRMLS_DC)
+ZEND_API void zend_user_it_get_current_data(zend_object_iterator *_iter, zval ***data TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 	zval *object = (zval*)iter->it.data;
@@ -185,7 +185,7 @@ static int zend_user_it_get_current_key_default(zend_object_iterator *_iter, cha
 /* }}} */
 
 /* {{{ zend_user_it_get_current_key */
-static int zend_user_it_get_current_key(zend_object_iterator *_iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
+ZEND_API int zend_user_it_get_current_key(zend_object_iterator *_iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 	zval *object = (zval*)iter->it.data;
@@ -238,7 +238,7 @@ static int zend_user_it_get_current_key(zend_object_iterator *_iter, char **str_
 /* }}} */
 
 /* {{{ zend_user_it_move_forward */
-static void zend_user_it_move_forward(zend_object_iterator *_iter TSRMLS_DC)
+ZEND_API void zend_user_it_move_forward(zend_object_iterator *_iter TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 	zval *object = (zval*)iter->it.data;
@@ -249,7 +249,7 @@ static void zend_user_it_move_forward(zend_object_iterator *_iter TSRMLS_DC)
 /* }}} */
 
 /* {{{ zend_user_it_rewind */
-static void zend_user_it_rewind(zend_object_iterator *_iter TSRMLS_DC)
+ZEND_API void zend_user_it_rewind(zend_object_iterator *_iter TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 	zval *object = (zval*)iter->it.data;
