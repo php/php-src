@@ -163,7 +163,7 @@ static
 	ZEND_BEGIN_ARG_INFO(third_and_rest_force_ref, 1)
 		ZEND_ARG_PASS_INFO(0)
 		ZEND_ARG_PASS_INFO(0)
-	ZEND_END_ARG_INFO();
+	ZEND_END_ARG_INFO()
 
 /* {{{ mb_overload_def mb_ovld[] */
 static const struct mb_overload_def mb_ovld[] = {
@@ -3047,7 +3047,7 @@ PHP_FUNCTION(mb_send_mail)
 	char *extra_cmd=NULL;
 	int extra_cmd_len;
 	int i;
-	char *to_r;
+	char *to_r = NULL;
 	char *force_extra_parameters = INI_STR("mail.force_extra_parameters");
 	struct {
 		int cnt_type:1;
