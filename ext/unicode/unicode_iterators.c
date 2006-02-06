@@ -126,16 +126,11 @@ static void text_iter_cp_current(text_iter_obj* object TSRMLS_DC)
 	UChar32 cp;
 	int32_t tmp, buf_len;
 
-	if (!object->current) {
-		MAKE_STD_ZVAL(object->current);
-		Z_USTRVAL_P(object->current) = eumalloc(3);
-		Z_TYPE_P(object->current) = IS_UNICODE;
-		tmp = object->u.cp.offset;
-		U16_NEXT(object->text, tmp, object->text_len, cp);
-		buf_len = zend_codepoint_to_uchar(cp, Z_USTRVAL_P(object->current));
-		Z_USTRVAL_P(object->current)[buf_len] = 0;
-		Z_USTRLEN_P(object->current) = buf_len;
-	}
+	tmp = object->u.cp.offset;
+	U16_NEXT(object->text, tmp, object->text_len, cp);
+	buf_len = zend_codepoint_to_uchar(cp, Z_USTRVAL_P(object->current));
+	Z_USTRVAL_P(object->current)[buf_len] = 0;
+	Z_USTRLEN_P(object->current) = buf_len;
 }
 
 static int text_iter_cp_key(text_iter_obj* object TSRMLS_DC)
@@ -147,20 +142,12 @@ static void text_iter_cp_next(text_iter_obj* object TSRMLS_DC)
 {
 	U16_FWD_1(object->text, object->u.cp.offset, object->text_len);
 	object->u.cp.index++;
-	if (object->current) {
-		zval_ptr_dtor(&object->current);
-		object->current = NULL;
-	}
 }
 
 static void text_iter_cp_rewind(text_iter_obj *object TSRMLS_DC)
 {
 	object->u.cp.offset = 0;
 	object->u.cp.index  = 0;
-	if (object->current) {
-		zval_ptr_dtor(&object->current);
-		object->current = NULL;
-	}
 }
 
 static text_iter_ops text_iter_cp_ops = {
@@ -268,9 +255,8 @@ static void text_iterator_free_storage(void *object TSRMLS_DC)
 	if (intern->text) {
 		efree(intern->text);
 	}
-	if (intern->current) {
-		zval_ptr_dtor(&intern->current);
-	}
+	ZVAL_DELREF(intern->current);
+	zval_ptr_dtor(&intern->current);
 	efree(object);
 }
 
@@ -289,6 +275,10 @@ static zend_object_value text_iterator_new(zend_class_entry *class_type TSRMLS_D
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 	intern->type = ITER_CODE_POINT;
+	MAKE_STD_ZVAL(intern->current); /* pre-allocate buffer for codepoint */
+	Z_USTRVAL_P(intern->current) = eumalloc(3);
+	Z_TYPE_P(intern->current) = IS_UNICODE;
+	ZVAL_ADDREF(intern->current);
 
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) text_iterator_free_storage, NULL TSRMLS_CC);
 	retval.handlers = zend_get_std_object_handlers();
