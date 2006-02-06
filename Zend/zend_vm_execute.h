@@ -1997,7 +1997,9 @@ static int ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			}
 			array_ptr = *array_ptr_ptr;
 		} else {
-			SEPARATE_ZVAL_IF_NOT_REF(array_ptr_ptr);
+			if (Z_TYPE_PP(array_ptr_ptr) == IS_ARRAY) {
+				SEPARATE_ZVAL_IF_NOT_REF(array_ptr_ptr);
+			}
 			array_ptr = *array_ptr_ptr;
 			array_ptr->refcount++;
 		}
@@ -4495,7 +4497,9 @@ static int ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			}
 			array_ptr = *array_ptr_ptr;
 		} else {
-			SEPARATE_ZVAL_IF_NOT_REF(array_ptr_ptr);
+			if (Z_TYPE_PP(array_ptr_ptr) == IS_ARRAY) {
+				SEPARATE_ZVAL_IF_NOT_REF(array_ptr_ptr);
+			}
 			array_ptr = *array_ptr_ptr;
 			array_ptr->refcount++;
 		}
@@ -7590,7 +7594,9 @@ static int ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			}
 			array_ptr = *array_ptr_ptr;
 		} else {
-			SEPARATE_ZVAL_IF_NOT_REF(array_ptr_ptr);
+			if (Z_TYPE_PP(array_ptr_ptr) == IS_ARRAY) {
+				SEPARATE_ZVAL_IF_NOT_REF(array_ptr_ptr);
+			}
 			array_ptr = *array_ptr_ptr;
 			array_ptr->refcount++;
 		}
@@ -20230,7 +20236,9 @@ static int ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			}
 			array_ptr = *array_ptr_ptr;
 		} else {
-			SEPARATE_ZVAL_IF_NOT_REF(array_ptr_ptr);
+			if (Z_TYPE_PP(array_ptr_ptr) == IS_ARRAY) {
+				SEPARATE_ZVAL_IF_NOT_REF(array_ptr_ptr);
+			}
 			array_ptr = *array_ptr_ptr;
 			array_ptr->refcount++;
 		}
