@@ -2264,7 +2264,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri TSRMLS_DC)
 	char* old_error_code = SOAP_GLOBAL(error_code);
 	int uri_len;
 	php_stream_context *context=NULL;
-	zval **tmp, **proxy_host, **proxy_port, *orig_context, *new_context;
+	zval **tmp, **proxy_host, **proxy_port, *orig_context = NULL, *new_context = NULL;
 	smart_str headers = {0};
 
 	if (SUCCESS == zend_hash_find(Z_OBJPROP_P(this_ptr),

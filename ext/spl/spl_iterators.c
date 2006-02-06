@@ -838,7 +838,7 @@ static inline spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAME
 {
 	zval                 *zobject, *retval;
 	spl_dual_it_object   *intern;
-	zend_class_entry     *ce;
+	zend_class_entry     *ce = NULL;
 	int                   inc_refcount = 1;
 
 
