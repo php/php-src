@@ -223,6 +223,7 @@ int make_http_soap_request(zval  *this_ptr,
 {
 	char *request;
 	smart_str soap_headers = {0};
+	smart_str soap_headers_z = {0};
 	int request_size, err;
 	php_url *phpurl = NULL;
 	php_stream *stream;
@@ -250,7 +251,7 @@ int make_http_soap_request(zval  *this_ptr,
 		int kind  = Z_LVAL_PP(tmp) & SOAP_COMPRESSION_DEFLATE;
 
 	  if ((Z_LVAL_PP(tmp) & SOAP_COMPRESSION_ACCEPT) != 0) {
-			smart_str_append_const(&soap_headers,"Accept-Encoding: gzip, deflate\r\n");
+			smart_str_append_const(&soap_headers_z,"Accept-Encoding: gzip, deflate\r\n");
 	  }
 	  if (level > 0) {
 			zval func;
@@ -270,11 +271,11 @@ int make_http_soap_request(zval  *this_ptr,
 	    if (kind == SOAP_COMPRESSION_DEFLATE) {
 	    	n = 2;
 				ZVAL_STRING(&func, "gzcompress", 0);
-				smart_str_append_const(&soap_headers,"Content-Encoding: deflate\r\n");
+				smart_str_append_const(&soap_headers_z,"Content-Encoding: deflate\r\n");
 	    } else {
 	      n = 3;
 				ZVAL_STRING(&func, "gzencode", 0);
-				smart_str_append_const(&soap_headers,"Content-Encoding: gzip\r\n");
+				smart_str_append_const(&soap_headers_z,"Content-Encoding: gzip\r\n");
 				ZVAL_LONG(params[2], 1);
 	    }
 			if (call_user_function(CG(function_table), (zval**)NULL, &func, &retval, n, params TSRMLS_CC) == SUCCESS &&
@@ -413,13 +414,17 @@ try_again:
 			smart_str_appendc(&soap_headers, ':');
 			smart_str_append_unsigned(&soap_headers, phpurl->port);
 		}
-		smart_str_append_const(&soap_headers, "\r\n"
+				smart_str_append_const(&soap_headers, "\r\n"
 			"Connection: Keep-Alive\r\n"
 /*
 			"Connection: close\r\n"
 			"Accept: text/html; text/xml; text/plain\r\n"
 */
 			"User-Agent: PHP SOAP 0.1\r\n");
+
+		smart_str_append(&soap_headers, &soap_headers_z);
+		smart_str_free(&soap_headers_z);
+
 		if (soap_version == SOAP_1_2) {
 			smart_str_append_const(&soap_headers,"Content-Type: application/soap+xml; charset=utf-8");
 			if (soapaction) {

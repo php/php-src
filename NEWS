@@ -22,6 +22,7 @@ PHP                                                                        NEWS
   on error. (Pierre)
 - Fixed bug #36295 (typo in SplFileObject::flock() parameter name). (Tony)
 - Fixed bug #36287 (Segfault with SplFileInfo conversion). (Marcus)
+- Fixed bug #36283 (SOAPClient Compression Broken). (Dmitry)
 - Fixed bug #36268 (Object destructors called even after fatal errors). (Dmitry)
 - Fixed bug #36258 (SplFileObject::getPath() may lead to segfault). (Tony)
 - Fixed bug #36242 (Possible memory corruption in stream_select()). (Tony)
