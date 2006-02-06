@@ -3334,7 +3334,7 @@ ZEND_METHOD(reflection_class, getInterfaces)
 			zval *interface;
 			ALLOC_ZVAL(interface);
 			zend_reflection_class_factory(ce->interfaces[i], interface TSRMLS_CC);
-			add_assoc_zval_ex(return_value, ce->interfaces[i]->name, ce->interfaces[i]->name_length, interface);
+			add_assoc_zval_ex(return_value, ce->interfaces[i]->name, ce->interfaces[i]->name_length + 1, interface);
 		}
 	}
 }
