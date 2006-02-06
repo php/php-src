@@ -758,7 +758,7 @@ PHP_METHOD(SoapHeader, SoapHeader)
 PHP_METHOD(SoapFault, SoapFault)
 {
 	char *fault_string = NULL, *fault_code = NULL, *fault_actor = NULL, *name = NULL, *fault_code_ns = NULL;
-	int fault_string_len, fault_code_len, fault_actor_len, name_len;
+	int fault_string_len, fault_actor_len, name_len, fault_code_len = 0;
 	zval *code = NULL, *details = NULL, *headerfault = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs|s!z!s!z",
