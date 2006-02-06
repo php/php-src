@@ -1510,8 +1510,8 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 	zend_function *ctor = NULL, *dtor = NULL, *clone = NULL, *__get = NULL, *__set = NULL, *__unset = NULL, *__isset = NULL, *__call = NULL;
 	char *lowercase_name;
 	int fname_len;
-	char *lc_class_name;
-	int class_name_len;
+	char *lc_class_name = NULL;
+	int class_name_len = 0;
 
 	if (type==MODULE_PERSISTENT) {
 		error_type = E_CORE_WARNING;
