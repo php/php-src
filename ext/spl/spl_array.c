@@ -819,18 +819,6 @@ zend_object_iterator *spl_array_obj_get_iterator(zend_class_entry *ce, zval *obj
 		}
 		return NULL;
 	}
-#if MBO_0
-	/* We enable by ref if the returned thing does. If it is an ArrayIterator */
-	/* or derived then it does if it's current() method is not overloaded. */
-	if (by_ref && ce_it && instanceof_function(ce_it, zend_ce_iterator TSRMLS_CC)) {
-		if (!ce_it->iterator_funcs.zf_current) {
-			zend_hash_find(&ce->function_table, "current", sizeof("current"), (void **) &ce_it->iterator_funcs.zf_current);
-		}
-		if (ce_it->iterator_funcs.zf_current->common.scope != spl_ce_ArrayObject) {
-			zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
-		}
-	}
-#endif
 
 	new_iterator = ce_it->get_iterator(ce_it, iterator, by_ref TSRMLS_CC);
 	zval_ptr_dtor(&iterator);
@@ -843,15 +831,9 @@ zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object,
 	spl_array_it       *iterator;
 	spl_array_object   *array_object = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 
-	if (by_ref) {
-		if (!ce->iterator_funcs.zf_current) {
-			zend_hash_find(&ce->function_table, "current", sizeof("current"), (void **) &ce->iterator_funcs.zf_current);
-		}
-		if (array_object->ar_flags & SPL_ARRAY_OVERLOADED_CURRENT) {
-			zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
-		}
+	if (by_ref && (array_object->ar_flags & SPL_ARRAY_OVERLOADED_CURRENT)) {
+		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
 	}
-
 
 	iterator     = emalloc(sizeof(spl_array_it));
 
