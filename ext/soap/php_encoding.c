@@ -327,7 +327,7 @@ xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr par
 				    /* TODO: namespace isn't stored */
 			    	encodePtr enc = get_encoder(SOAP_GLOBAL(sdl), SOAP_GLOBAL(sdl)->target_ns, type_name);
 			    	if (enc) {
-			    		encode = &enc->details;
+			    		encode = enc;
 				 	}		        
 			        break;
 				}
