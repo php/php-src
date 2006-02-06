@@ -3815,7 +3815,9 @@ int zend_fe_reset_handler(ZEND_OPCODE_HANDLER_ARGS)
 			}
 			array_ptr = *array_ptr_ptr;
 		} else {
-			SEPARATE_ZVAL_IF_NOT_REF(array_ptr_ptr);
+			if (Z_TYPE_PP(array_ptr_ptr) == IS_ARRAY) {
+				SEPARATE_ZVAL_IF_NOT_REF(array_ptr_ptr);
+			}
 			array_ptr = *array_ptr_ptr;
 			array_ptr->refcount++;
 		}
