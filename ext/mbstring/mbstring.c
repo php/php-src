@@ -3510,7 +3510,7 @@ PHP_FUNCTION(mb_send_mail)
 	mbfl_memory_device device;	/* automatic allocateable buffer for additional header */
 	const mbfl_language *lang;
 	int err = 0;
-	char *to_r;
+	char *to_r = NULL;
 	int to_len, i;
 
 	/* initialize */
