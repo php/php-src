@@ -2983,7 +2983,9 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 			}
 			array_ptr = *array_ptr_ptr;
 		} else {
-			SEPARATE_ZVAL_IF_NOT_REF(array_ptr_ptr);
+			if (Z_TYPE_PP(array_ptr_ptr) == IS_ARRAY) {
+				SEPARATE_ZVAL_IF_NOT_REF(array_ptr_ptr);
+			}
 			array_ptr = *array_ptr_ptr;
 			array_ptr->refcount++;
 		}
