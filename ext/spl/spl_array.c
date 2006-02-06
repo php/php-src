@@ -712,8 +712,8 @@ static void spl_array_it_get_current_data(zend_object_iterator *iter, zval ***da
 	spl_array_object   *object   = iterator->object;
 	HashTable          *aht      = spl_array_get_hash_table(object, 0 TSRMLS_CC);
 
-	if (object->ar_flags & SPL_ARRAY_OVERLOADED_CURRENT)	{
-		return zend_user_it_get_current_data(iter, data TSRMLS_CC);
+	if (object->ar_flags & SPL_ARRAY_OVERLOADED_CURRENT) {
+		zend_user_it_get_current_data(iter, data TSRMLS_CC);
 	} else {
 		if (zend_hash_get_current_data_ex(aht, (void**)data, &object->pos) == FAILURE) {
 			*data = NULL;
@@ -728,7 +728,7 @@ static int spl_array_it_get_current_key(zend_object_iterator *iter, char **str_k
 	spl_array_object   *object   = iterator->object;
 	HashTable          *aht      = spl_array_get_hash_table(object, 0 TSRMLS_CC);
 
-	if (object->ar_flags & SPL_ARRAY_OVERLOADED_KEY)	{
+	if (object->ar_flags & SPL_ARRAY_OVERLOADED_KEY) {
 		return zend_user_it_get_current_key(iter, str_key, str_key_len, int_key TSRMLS_CC);
 	} else {
 		if (!aht) {
@@ -752,7 +752,7 @@ static void spl_array_it_move_forward(zend_object_iterator *iter TSRMLS_DC) /* {
 	spl_array_object   *object   = iterator->object;
 	HashTable          *aht      = spl_array_get_hash_table(object, 0 TSRMLS_CC);
 
-	if (object->ar_flags & SPL_ARRAY_OVERLOADED_NEXT)	{
+	if (object->ar_flags & SPL_ARRAY_OVERLOADED_NEXT) {
 		zend_user_it_move_forward(iter TSRMLS_CC);
 	} else {
 		if (!aht) {
@@ -788,7 +788,7 @@ static void spl_array_it_rewind(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 	spl_array_it       *iterator = (spl_array_it *)iter;
 	spl_array_object   *object   = iterator->object;
 
-	if (object->ar_flags & SPL_ARRAY_OVERLOADED_REWIND)	{
+	if (object->ar_flags & SPL_ARRAY_OVERLOADED_REWIND) {
 		zend_user_it_rewind(iter TSRMLS_CC);
 	} else {
 		spl_array_rewind(object TSRMLS_CC);
