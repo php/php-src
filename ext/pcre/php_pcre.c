@@ -18,6 +18,13 @@
 
 /* $Id$ */
 
+/*
+ * TODO
+ *
+ * - Allow NULL for $matches argument (helps when using preg_match only for
+ *   match condition)
+ */
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
