@@ -46,11 +46,17 @@ PHPAPI zend_class_entry  *spl_ce_Countable;
 
 #define SPL_ARRAY_STD_PROP_LIST      0x00000001
 #define SPL_ARRAY_ARRAY_AS_PROPS     0x00000002
+#define SPL_ARRAY_OVERLOADED_REWIND  0x00010000
+#define SPL_ARRAY_OVERLOADED_VALID   0x00020000
+#define SPL_ARRAY_OVERLOADED_KEY     0x00040000
+#define SPL_ARRAY_OVERLOADED_CURRENT 0x00080000
+#define SPL_ARRAY_OVERLOADED_NEXT    0x00100000
 #define SPL_ARRAY_IS_REF             0x01000000
 #define SPL_ARRAY_IS_SELF            0x02000000
 #define SPL_ARRAY_USE_OTHER          0x04000000
-#define SPL_ARRAY_INT_MASK           0xFF000000
+#define SPL_ARRAY_INT_MASK           0xFFFF0000
 #define SPL_ARRAY_CLONE_MASK         0x03000007
+
 
 typedef struct _spl_array_object {
 	zend_object       std;
@@ -148,7 +154,7 @@ static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, s
 
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) spl_array_object_free_storage, NULL TSRMLS_CC);
 	while (parent) {
-		if (parent == U_CLASS_ENTRY(spl_ce_ArrayIterator)) {
+		if (parent == U_CLASS_ENTRY(spl_ce_ArrayIterator) || parent == U_CLASS_ENTRY(spl_ce_RecursiveArrayIterator)) {
 			retval.handlers = &spl_handler_ArrayIterator;
 			break;
 		} else if (parent == U_CLASS_ENTRY(spl_ce_ArrayObject)) {
@@ -159,7 +165,7 @@ static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, s
 		inherited = 1;
 	}
 	if (!parent) { /* this must never happen */
-		php_error_docref(NULL TSRMLS_CC, E_COMPILE_ERROR, "Internal compiler error, Class is not child of ArrayObject or arrayIterator");
+		php_error_docref(NULL TSRMLS_CC, E_COMPILE_ERROR, "Internal compiler error, Class is not child of ArrayObject or ArrayIterator");
 	}
 	if (inherited) {
 		zend_hash_find(&class_type->function_table, "offsetget",    sizeof("offsetget"),    (void **) &intern->fptr_offset_get);
@@ -179,6 +185,25 @@ static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, s
 			intern->fptr_offset_del = NULL;
 		}
 	}
+	/* Cache iterator functions if ArrayIterator or derived. Check current's */
+	/* cache since only current is always required */
+	if (retval.handlers == &spl_handler_ArrayIterator) {
+		if (!class_type->iterator_funcs.zf_current) {
+			zend_hash_find(&class_type->function_table, "rewind",  sizeof("rewind"),  (void **) &class_type->iterator_funcs.zf_rewind);
+			zend_hash_find(&class_type->function_table, "valid",   sizeof("valid"),   (void **) &class_type->iterator_funcs.zf_valid);
+			zend_hash_find(&class_type->function_table, "key",     sizeof("key"),     (void **) &class_type->iterator_funcs.zf_key);
+			zend_hash_find(&class_type->function_table, "current", sizeof("current"), (void **) &class_type->iterator_funcs.zf_current);
+			zend_hash_find(&class_type->function_table, "next",    sizeof("next"),    (void **) &class_type->iterator_funcs.zf_next);
+		}
+		if (inherited) {
+			if (class_type->iterator_funcs.zf_rewind->common.scope  != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_REWIND;
+			if (class_type->iterator_funcs.zf_valid->common.scope   != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_CURRENT;
+			if (class_type->iterator_funcs.zf_key->common.scope     != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_KEY;
+			if (class_type->iterator_funcs.zf_current->common.scope != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_CURRENT;
+			if (class_type->iterator_funcs.zf_next->common.scope    != parent) intern->ar_flags |= SPL_ARRAY_OVERLOADED_NEXT;
+		}
+	}
+
 	intern->ce_get_iterator = U_CLASS_ENTRY(spl_ce_ArrayIterator);
 	zend_hash_internal_pointer_reset_ex(spl_array_get_hash_table(intern, 0 TSRMLS_CC), &intern->pos);
 	return retval;
@@ -658,16 +683,20 @@ static int spl_array_it_valid(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 	spl_array_object   *object   = iterator->object;
 	HashTable          *aht      = spl_array_get_hash_table(object, 0 TSRMLS_CC);
 
-	if (!aht) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "ArrayIterator::valid(): Array was modified outside object and is no longer an array");
-		return FAILURE;
-	}
-
-	if (object->pos && (object->ar_flags & SPL_ARRAY_IS_REF) && spl_hash_verify_pos(object TSRMLS_CC) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "ArrayIterator::valid(): Array was modified outside object and internal position is no longer valid");
-		return FAILURE;
+	if (object->ar_flags & SPL_ARRAY_OVERLOADED_VALID) {
+		return zend_user_it_valid(iter TSRMLS_CC);
 	} else {
-		return zend_hash_has_more_elements_ex(aht, &object->pos);
+		if (!aht) {
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "ArrayIterator::valid(): Array was modified outside object and is no longer an array");
+			return FAILURE;
+		}
+	
+		if (object->pos && (object->ar_flags & SPL_ARRAY_IS_REF) && spl_hash_verify_pos(object TSRMLS_CC) == FAILURE) {
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "ArrayIterator::valid(): Array was modified outside object and internal position is no longer valid");
+			return FAILURE;
+		} else {
+			return zend_hash_has_more_elements_ex(aht, &object->pos);
+		}
 	}
 }
 /* }}} */
@@ -677,9 +706,13 @@ static void spl_array_it_get_current_data(zend_object_iterator *iter, zval ***da
 	spl_array_it       *iterator = (spl_array_it *)iter;
 	spl_array_object   *object   = iterator->object;
 	HashTable          *aht      = spl_array_get_hash_table(object, 0 TSRMLS_CC);
-	
-	if (zend_hash_get_current_data_ex(aht, (void**)data, &object->pos) == FAILURE) {
-		*data = NULL;
+
+	if (object->ar_flags & SPL_ARRAY_OVERLOADED_CURRENT)	{
+		return zend_user_it_get_current_data(iter, data TSRMLS_CC);
+	} else {
+		if (zend_hash_get_current_data_ex(aht, (void**)data, &object->pos) == FAILURE) {
+			*data = NULL;
+		}
 	}
 }
 /* }}} */
@@ -690,17 +723,21 @@ static int spl_array_it_get_current_key(zend_object_iterator *iter, char **str_k
 	spl_array_object   *object   = iterator->object;
 	HashTable          *aht      = spl_array_get_hash_table(object, 0 TSRMLS_CC);
 
-	if (!aht) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "ArrayIterator::current(): Array was modified outside object and is no longer an array");
-		return HASH_KEY_NON_EXISTANT;
+	if (object->ar_flags & SPL_ARRAY_OVERLOADED_KEY)	{
+		return zend_user_it_get_current_key(iter, str_key, str_key_len, int_key TSRMLS_CC);
+	} else {
+		if (!aht) {
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "ArrayIterator::current(): Array was modified outside object and is no longer an array");
+			return HASH_KEY_NON_EXISTANT;
+		}
+	
+		if ((object->ar_flags & SPL_ARRAY_IS_REF) && spl_hash_verify_pos(object TSRMLS_CC) == FAILURE) {
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "ArrayIterator::current(): Array was modified outside object and internal position is no longer valid");
+			return HASH_KEY_NON_EXISTANT;
+		}
+	
+		return zend_hash_get_current_key_ex(aht, str_key, str_key_len, int_key, 1, &object->pos);
 	}
-
-	if ((object->ar_flags & SPL_ARRAY_IS_REF) && spl_hash_verify_pos(object TSRMLS_CC) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "ArrayIterator::current(): Array was modified outside object and internal position is no longer valid");
-		return HASH_KEY_NON_EXISTANT;
-	}
-
-	return zend_hash_get_current_key_ex(aht, str_key, str_key_len, int_key, 1, &object->pos);
 }
 /* }}} */
 
@@ -708,18 +745,21 @@ static void spl_array_it_move_forward(zend_object_iterator *iter TSRMLS_DC) /* {
 {
 	spl_array_it       *iterator = (spl_array_it *)iter;
 	spl_array_object   *object   = iterator->object;
-
 	HashTable          *aht      = spl_array_get_hash_table(object, 0 TSRMLS_CC);
 
-	if (!aht) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "ArrayIterator::current(): Array was modified outside object and is no longer an array");
-		return;
-	}
-
-	if ((object->ar_flags & SPL_ARRAY_IS_REF) && spl_hash_verify_pos(object TSRMLS_CC) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "ArrayIterator::next(): Array was modified outside object and internal position is no longer valid");
+	if (object->ar_flags & SPL_ARRAY_OVERLOADED_NEXT)	{
+		zend_user_it_move_forward(iter TSRMLS_CC);
 	} else {
-		spl_array_next(object TSRMLS_CC);
+		if (!aht) {
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "ArrayIterator::current(): Array was modified outside object and is no longer an array");
+			return;
+		}
+	
+		if ((object->ar_flags & SPL_ARRAY_IS_REF) && spl_hash_verify_pos(object TSRMLS_CC) == FAILURE) {
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "ArrayIterator::next(): Array was modified outside object and internal position is no longer valid");
+		} else {
+			spl_array_next(object TSRMLS_CC);
+		}
 	}
 }
 /* }}} */
@@ -743,7 +783,11 @@ static void spl_array_it_rewind(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 	spl_array_it       *iterator = (spl_array_it *)iter;
 	spl_array_object   *object   = iterator->object;
 
-	spl_array_rewind(object TSRMLS_CC);
+	if (object->ar_flags & SPL_ARRAY_OVERLOADED_REWIND)	{
+		zend_user_it_rewind(iter TSRMLS_CC);
+	} else {
+		spl_array_rewind(object TSRMLS_CC);
+	}
 }
 /* }}} */
 
@@ -759,25 +803,57 @@ zend_object_iterator_funcs spl_array_it_funcs = {
 
 zend_object_iterator *spl_array_obj_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC) /* {{{ */
 {
-	/* disable by_ref check */
+	zval *iterator = zend_user_it_new_iterator(ce, object TSRMLS_CC);
+	zend_object_iterator *new_iterator;
+
+	zend_class_entry *ce_it = iterator && Z_TYPE_P(iterator) == IS_OBJECT ? Z_OBJCE_P(iterator) : NULL;
+
+	if (!ce || !ce_it || !ce_it->get_iterator || (ce_it->get_iterator == zend_user_it_get_new_iterator && iterator == object)) {
+		if (!EG(exception))
+		{
+			zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Objects returned by %v::getIterator() must be traversable or implement interface Iterator", ce->name);
+		}
+		if (iterator)
+		{
+			zval_ptr_dtor(&iterator);
+		}
+		return NULL;
+	}
+#if MBO_0
 	/* We enable by ref if the returned thing does. If it is an ArrayIterator */
 	/* or derived then it does if it's current() method is not overloaded. */
-	return zend_user_it_get_new_iterator(ce, object, 0 TSRMLS_CC);
+	if (by_ref && ce_it && instanceof_function(ce_it, zend_ce_iterator TSRMLS_CC)) {
+		if (!ce_it->iterator_funcs.zf_current) {
+			zend_hash_find(&ce->function_table, "current", sizeof("current"), (void **) &ce_it->iterator_funcs.zf_current);
+		}
+		if (ce_it->iterator_funcs.zf_current->common.scope != spl_ce_ArrayObject) {
+			zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+		}
+	}
+#endif
+
+	new_iterator = ce_it->get_iterator(ce_it, iterator, by_ref TSRMLS_CC);
+	zval_ptr_dtor(&iterator);
+	return new_iterator;
 }
 /* }}} */
 
 zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC) /* {{{ */
 {
 	spl_array_it       *iterator;
-	spl_array_object   *array_object;
+	spl_array_object   *array_object = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 
-#if MBO_0
-	if (by_ref && /* check current() is overloaded, else it works */) {
-		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+	if (by_ref) {
+		if (!ce->iterator_funcs.zf_current) {
+			zend_hash_find(&ce->function_table, "current", sizeof("current"), (void **) &ce->iterator_funcs.zf_current);
+		}
+		if (array_object->ar_flags & SPL_ARRAY_OVERLOADED_CURRENT) {
+			zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+		}
 	}
-#endif
+
+
 	iterator     = emalloc(sizeof(spl_array_it));
-	array_object = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 
 	object->refcount++;
 	iterator->intern.data = (void*)object;
@@ -1434,6 +1510,7 @@ PHP_MINIT_FUNCTION(spl_array)
 	
 	REGISTER_SPL_SUB_CLASS_EX(RecursiveArrayIterator, ArrayIterator, spl_array_object_new, spl_funcs_RecursiveArrayIterator);
 	REGISTER_SPL_IMPLEMENTS(RecursiveArrayIterator, RecursiveIterator);
+	spl_ce_RecursiveArrayIterator->get_iterator = spl_array_get_iterator;
 
 	REGISTER_SPL_INTERFACE(Countable);
 	
