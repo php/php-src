@@ -831,7 +831,7 @@ PHP_METHOD(xmlreader, open)
 {
 	zval *id;
 	int source_len = 0;
-	xmlreader_object *intern;
+	xmlreader_object *intern = NULL;
 	char *source, *valid_file = NULL;
 	char resolved_path[MAXPATHLEN + 1];
 	xmlTextReaderPtr reader = NULL;
@@ -953,7 +953,7 @@ PHP_METHOD(xmlreader, XML)
 {
 	zval *id;
 	int source_len = 0;
-	xmlreader_object *intern;
+	xmlreader_object *intern = NULL;
 	char *source, *uri = NULL;
 	int resolved_path_len;
 	char *directory=NULL, resolved_path[MAXPATHLEN];

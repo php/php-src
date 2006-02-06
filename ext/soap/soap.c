@@ -2523,7 +2523,7 @@ PHP_METHOD(SoapClient, __call)
 	zval **param;
 	int arg_count;
 	zval **tmp;
-	zend_bool free_soap_headers;
+	zend_bool free_soap_headers = 0;
 
 	HashPosition pos;
 
