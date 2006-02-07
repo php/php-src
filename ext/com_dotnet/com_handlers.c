@@ -499,7 +499,7 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 	VariantInit(&v);
 
 	if (V_VT(&obj->v) == VT_DISPATCH) {
-		if (FAILURE == php_com_do_invoke_by_id(obj, DISPID_VALUE,
+		if (SUCCESS != php_com_do_invoke_by_id(obj, DISPID_VALUE,
 				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, 0, NULL, 1 TSRMLS_CC)) {
 			VariantCopy(&v, &obj->v);
 		}

@@ -38,6 +38,7 @@ struct php_com_iterator {
 	VARIANT safe_array;
 	VARTYPE sa_type;
 	LONG sa_max;
+	zval *zdata;
 };
 
 static void com_iter_dtor(zend_object_iterator *iter TSRMLS_DC)
@@ -49,6 +50,9 @@ static void com_iter_dtor(zend_object_iterator *iter TSRMLS_DC)
 	}
 	VariantClear(&I->v);
 	VariantClear(&I->safe_array);
+	if (I->zdata) {
+		zval_ptr_dtor((zval**)&I->zdata);
+	}
 	efree(I);
 }
 
@@ -56,32 +60,18 @@ static int com_iter_valid(zend_object_iterator *iter TSRMLS_DC)
 {
 	struct php_com_iterator *I = (struct php_com_iterator*)iter->data;
 
-	if (I->key == (ulong)-1) {
-		return FAILURE;
+	if (I->zdata) {
+		return SUCCESS;
 	}
-	return SUCCESS;
+
+	return FAILURE;
 }
 
 static void com_iter_get_data(zend_object_iterator *iter, zval ***data TSRMLS_DC)
 {
 	struct php_com_iterator *I = (struct php_com_iterator*)iter->data;
-	zval **ptr_ptr;
-	zval *ptr;
 
-	/* sanity */
-	if (I->key == (ulong)-1) {
-		*data = NULL;
-		return;
-	}
-
-	MAKE_STD_ZVAL(ptr);
-	php_com_zval_from_variant(ptr, &I->v, I->code_page TSRMLS_CC);
-	/* php_com_wrap_variant(ptr, &I->v, I->code_page TSRMLS_CC); */
-	ptr_ptr = emalloc(sizeof(*ptr_ptr));
-	*ptr_ptr = ptr;
-	*data = ptr_ptr;
-
-	return;
+	*data = &I->zdata;
 }
 
 static int com_iter_get_key(zend_object_iterator *iter, char **str_key, uint *str_key_len,
@@ -100,15 +90,20 @@ static int com_iter_move_forwards(zend_object_iterator *iter TSRMLS_DC)
 {
 	struct php_com_iterator *I = (struct php_com_iterator*)iter->data;
 	unsigned long n_fetched;
+	zval *ptr;
 
 	/* release current cached element */
 	VariantClear(&I->v);
+
+	if (I->zdata) {
+		zval_ptr_dtor((zval**)&I->zdata);
+		I->zdata = NULL;
+	}
 
 	if (I->ev) {
 		/* Get the next element */
 		if (SUCCEEDED(IEnumVARIANT_Next(I->ev, 1, &I->v, &n_fetched)) && n_fetched > 0) {
 			I->key++;
-			return SUCCESS;
 		} else {
 			/* indicate that there are no more items */
 			I->key = (ulong)-1;
@@ -121,13 +116,17 @@ static int com_iter_move_forwards(zend_object_iterator *iter TSRMLS_DC)
 			return FAILURE;
 		}
 		I->key++;
-		if (php_com_safearray_get_elem(&I->safe_array, &I->v, (LONG)I->key TSRMLS_CC)) {
-			return SUCCESS;
-		} else {
+		if (php_com_safearray_get_elem(&I->safe_array, &I->v, (LONG)I->key TSRMLS_CC) == 0) {
 			I->key = (ulong)-1;
 			return FAILURE;
 		}
 	}
+
+	MAKE_STD_ZVAL(ptr);
+	php_com_zval_from_variant(ptr, &I->v, I->code_page TSRMLS_CC);
+	/* php_com_wrap_variant(ptr, &I->v, I->code_page TSRMLS_CC); */
+	I->zdata = ptr;
+	return SUCCESS;
 }
 
 
@@ -140,7 +139,7 @@ static zend_object_iterator_funcs com_iter_funcs = {
 	NULL
 };
 
-zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object TSRMLS_DC)
+zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
 {
 	php_com_dotnet_object *obj;
 	struct php_com_iterator *I;
@@ -148,6 +147,11 @@ zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object TSRMLS
 	DISPPARAMS dp;
 	VARIANT v;
 	unsigned long n_fetched;
+	zval *ptr;
+
+	if (by_ref) {
+		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+	}
 
 	obj = CDNO_FETCH(object);
 
@@ -163,6 +167,7 @@ zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object TSRMLS
 	I->iter.funcs = &com_iter_funcs;
 	I->iter.data = I;
 	I->code_page = obj->code_page;
+	I->zdata = NULL;
 	VariantInit(&I->safe_array);
 	VariantInit(&I->v);
 
@@ -189,6 +194,9 @@ zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object TSRMLS
 		/* pre-fetch the element */
 		if (php_com_safearray_get_elem(&I->safe_array, &I->v, bound TSRMLS_CC)) {
 			I->key = bound;
+			MAKE_STD_ZVAL(ptr);
+			php_com_zval_from_variant(ptr, &I->v, I->code_page TSRMLS_CC);
+			I->zdata = ptr;
 		} else {
 			I->key = (ulong)-1;
 		}
@@ -220,6 +228,9 @@ zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object TSRMLS
 		if (SUCCEEDED(IEnumVARIANT_Next(I->ev, 1, &I->v, &n_fetched)) && n_fetched > 0) {
 			/* indicate that we have element 0 */
 			I->key = 0;
+			MAKE_STD_ZVAL(ptr);
+			php_com_zval_from_variant(ptr, &I->v, I->code_page TSRMLS_CC);
+			I->zdata = ptr;
 		} else {
 			/* indicate that there are no more items */
 			I->key = (ulong)-1;
