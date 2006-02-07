@@ -679,6 +679,13 @@ try_again:
 		return FALSE;
 	}
 
+	if (!buffer) {
+		php_stream_close(stream);
+		zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
+		zend_hash_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy"));
+		return TRUE;
+	}
+
 	do {
 		if (!get_http_headers(stream, &http_headers, &http_header_size TSRMLS_CC)) {
 			if (http_headers) {efree(http_headers);}

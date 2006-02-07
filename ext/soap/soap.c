@@ -635,6 +635,7 @@ PHP_MINIT_FUNCTION(soap)
 	REGISTER_STRING_CONSTANT("XSD_1999_NAMESPACE", XSD_1999_NAMESPACE,  CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("SOAP_SINGLE_ELEMENT_ARRAYS", SOAP_SINGLE_ELEMENT_ARRAYS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SOAP_WAIT_ONE_WAY_CALLS", SOAP_WAIT_ONE_WAY_CALLS, CONST_CS | CONST_PERSISTENT);
 
 	old_error_handler = zend_error_cb;
 	zend_error_cb = soap_error_handler;
@@ -2202,7 +2203,7 @@ PHP_METHOD(SoapClient, SoapClient)
 		}
 
 		if (zend_hash_find(ht, "features", sizeof("features"), (void**)&tmp) == SUCCESS &&
-			Z_TYPE_PP(tmp) == IS_ARRAY) {
+			Z_TYPE_PP(tmp) == IS_LONG) {
 			add_property_long(this_ptr, "_features", Z_LVAL_PP(tmp));
 	    }
 
@@ -2241,13 +2242,13 @@ PHP_METHOD(SoapClient, SoapClient)
 }
 /* }}} */
 
-static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *action, int version, zval *response TSRMLS_DC)
+static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *action, int version, int one_way, zval *response TSRMLS_DC)
 {
 	int    ret = TRUE;
 	char  *buf;
 	int    buf_size;
-	zval   func, param0, param1, param2, param3;
-	zval  *params[4];
+	zval   func, param0, param1, param2, param3, param4;
+	zval  *params[5];
 	zval **trace;
 	zval **fault;
 
@@ -2287,7 +2288,11 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 	params[3] = &param3;
 	ZVAL_LONG(params[3], version);
 
-	if (call_user_function(NULL, &this_ptr, &func, response, 4, params TSRMLS_CC) != SUCCESS) {
+	INIT_ZVAL(param4);
+	params[4] = &param4;
+	ZVAL_LONG(params[4], one_way);
+
+	if (call_user_function(NULL, &this_ptr, &func, response, 5, params TSRMLS_CC) != SUCCESS) {
 		add_soap_fault(this_ptr, "Client", "SoapSlient::__doRequest() failed", NULL, NULL TSRMLS_CC);
 		ret = FALSE;
 	} else if (Z_TYPE_P(response) != IS_STRING) {
@@ -2388,16 +2393,24 @@ static void do_soap_call(zval* this_ptr,
  		fn = get_function(sdl, function);
  		if (fn != NULL) {
 			sdlBindingPtr binding = fn->binding;
+			int one_way = 0;
+
+			if (fn->responseName == NULL &&
+			    fn->responseParameters == NULL &&
+			    soap_headers == NULL) {
+				one_way = 1;
+			}
+
 			if (location == NULL) {
 				location = binding->location;
 			}
 			if (binding->bindingType == BINDING_SOAP) {
 				sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)fn->bindingAttributes;
  				request = serialize_function_call(this_ptr, fn, NULL, fnb->input.ns, real_args, arg_count, soap_version, soap_headers TSRMLS_CC);
- 				ret = do_request(this_ptr, request, location, fnb->soapAction, soap_version, &response TSRMLS_CC);
+ 				ret = do_request(this_ptr, request, location, fnb->soapAction, soap_version, one_way, &response TSRMLS_CC);
  			}	else {
  				request = serialize_function_call(this_ptr, fn, NULL, sdl->target_ns, real_args, arg_count, soap_version, soap_headers TSRMLS_CC);
- 				ret = do_request(this_ptr, request, location, NULL, soap_version, &response TSRMLS_CC);
+ 				ret = do_request(this_ptr, request, location, NULL, soap_version, one_way, &response TSRMLS_CC);
  			}
 
 			xmlFreeDoc(request);
@@ -2440,7 +2453,7 @@ static void do_soap_call(zval* this_ptr,
 			}
 			smart_str_0(&action);
 
-			ret = do_request(this_ptr, request, location, action.c, soap_version, &response TSRMLS_CC);
+			ret = do_request(this_ptr, request, location, action.c, soap_version, 0, &response TSRMLS_CC);
 
 	 		smart_str_free(&action);
 			xmlFreeDoc(request);
@@ -2737,15 +2750,21 @@ PHP_METHOD(SoapClient, __doRequest)
   char *buf, *location, *action;
   int   buf_size, location_size, action_size;
   long  version;
+  long  one_way = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sssl",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sssl|l",
 	    &buf, &buf_size,
 	    &location, &location_size,
 	    &action, &action_size,
-	    &version) == FAILURE) {
+	    &version, &one_way) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
 	}
-	if (make_http_soap_request(this_ptr, buf, buf_size, location, action, version,
+	if (SOAP_GLOBAL(features) & SOAP_WAIT_ONE_WAY_CALLS) {
+		one_way = 0;
+	}
+	if (one_way && make_http_soap_request(this_ptr, buf, buf_size, location, action, version, NULL, NULL TSRMLS_CC)) {
+		RETURN_EMPTY_STRING();
+	} else if (make_http_soap_request(this_ptr, buf, buf_size, location, action, version,
 	    &Z_STRVAL_P(return_value), &Z_STRLEN_P(return_value) TSRMLS_CC)) {
 		return_value->type = IS_STRING;
 		return;
