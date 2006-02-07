@@ -250,7 +250,7 @@ zend_object_iterator_funcs php_dom_iterator_funcs = {
 	NULL
 };
 
-zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
+zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
 {
 	dom_object *intern;
 	dom_nnodemap_object *objmap;
@@ -259,8 +259,13 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object TS
 	int ret, curindex = 0;
 	HashTable *nodeht;
 	zval **entry;
+	php_dom_iterator *iterator;
 
-	php_dom_iterator *iterator = emalloc(sizeof(php_dom_iterator));
+	if (by_ref) {
+		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+	}
+
+	iterator = emalloc(sizeof(php_dom_iterator));
 
 	object->refcount++;
 	iterator->intern.data = (void*)object;
