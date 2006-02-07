@@ -20,6 +20,7 @@ PHP                                                                        NEWS
 - Added imap_savebody() that allows message body to be written to a file. (Mike)
 - Fixed imagecolorallocate() and imagecolorallocatelapha() to return FALSE
   on error. (Pierre)
+- Fixed bug #36306 (crc32() differ on 32-bit and 64-bit platforms) (Pierre)
 - Fixed bug #36303 (foreach on error_zval produces segfault). (Dmitry)
 - Fixed bug #36295 (typo in SplFileObject::flock() parameter name). (Tony)
 - Fixed bug #36287 (Segfault with SplFileInfo conversion). (Marcus)
