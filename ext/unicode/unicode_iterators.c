@@ -36,8 +36,8 @@ typedef enum {
 	ITER_TYPE_LAST,
 } text_iter_type;
 
-const uint32_t ITER_REVERSE = 0x100;
-const uint32_t ITER_TYPE_MASK = 0xFF;
+static const uint32_t ITER_REVERSE = 0x100;
+static const uint32_t ITER_TYPE_MASK = 0xFF;
 
 typedef struct {
 	zend_object		std;
@@ -46,13 +46,14 @@ typedef struct {
 	text_iter_type	type;
 	zval*			current;
 	size_t			current_alloc;
+	long			flags;
 	union {
 		struct {
 			uint32_t index;
 			uint32_t offset;
 		} cp;
 		struct {
-			uint32_t index;
+			int32_t index;
 		} cu;
 		struct {
 			uint32_t index;
@@ -82,7 +83,11 @@ PHPAPI zend_class_entry* text_iterator_ce;
 
 static int text_iter_cu_valid(text_iter_obj* object TSRMLS_DC)
 {
-	return (object->u.cu.index < object->text_len);
+	if (object->flags & ITER_REVERSE) {
+		return (object->u.cu.index >= 0);
+	} else {
+		return (object->u.cu.index < object->text_len);
+	}
 }
 
 static void text_iter_cu_current(text_iter_obj* object TSRMLS_DC)
@@ -94,17 +99,33 @@ static void text_iter_cu_current(text_iter_obj* object TSRMLS_DC)
 
 static int text_iter_cu_key(text_iter_obj* object TSRMLS_DC)
 {
-	return object->u.cu.index;
+	if (object->flags & ITER_REVERSE) {
+		return object->text_len - object->u.cu.index - 1;
+	} else {
+		return object->u.cu.index;
+	}
 }
 
 static void text_iter_cu_next(text_iter_obj* object TSRMLS_DC)
 {
-	object->u.cu.index++;
+	if (object->flags & ITER_REVERSE) {
+		if (object->u.cu.index >= 0) {
+			object->u.cu.index--;
+		}
+	} else {
+		if (object->u.cu.index < object->text_len) {
+			object->u.cu.index++;
+		}
+	}
 }
 
 static void text_iter_cu_rewind(text_iter_obj *object TSRMLS_DC)
 {
-	object->u.cu.index  = 0;
+	if (object->flags & ITER_REVERSE) {
+		object->u.cu.index = object->text_len-1;
+	} else {
+		object->u.cu.index = 0;
+	}
 }
 
 static text_iter_ops text_iter_cu_ops = {
@@ -119,7 +140,11 @@ static text_iter_ops text_iter_cu_ops = {
 
 static int text_iter_cp_valid(text_iter_obj* object TSRMLS_DC)
 {
-	return (object->u.cp.offset < object->text_len);
+	if (object->flags & ITER_REVERSE) {
+		return (object->u.cp.offset > 0);
+	} else {
+		return (object->u.cp.offset < object->text_len);
+	}
 }
 
 static void text_iter_cp_current(text_iter_obj* object TSRMLS_DC)
@@ -128,7 +153,11 @@ static void text_iter_cp_current(text_iter_obj* object TSRMLS_DC)
 	int32_t tmp, buf_len;
 
 	tmp = object->u.cp.offset;
-	U16_NEXT(object->text, tmp, object->text_len, cp);
+	if (object->flags & ITER_REVERSE) {
+		U16_PREV(object->text, 0, tmp, cp);
+	} else {
+		U16_NEXT(object->text, tmp, object->text_len, cp);
+	}
 	buf_len = zend_codepoint_to_uchar(cp, Z_USTRVAL_P(object->current));
 	Z_USTRVAL_P(object->current)[buf_len] = 0;
 	Z_USTRLEN_P(object->current) = buf_len;
@@ -141,13 +170,21 @@ static int text_iter_cp_key(text_iter_obj* object TSRMLS_DC)
 
 static void text_iter_cp_next(text_iter_obj* object TSRMLS_DC)
 {
-	U16_FWD_1(object->text, object->u.cp.offset, object->text_len);
+	if (object->flags & ITER_REVERSE) {
+		U16_BACK_1(object->text, 0, object->u.cp.offset);
+	} else {
+		U16_FWD_1(object->text, object->u.cp.offset, object->text_len);
+	}
 	object->u.cp.index++;
 }
 
 static void text_iter_cp_rewind(text_iter_obj *object TSRMLS_DC)
 {
-	object->u.cp.offset = 0;
+	if (object->flags & ITER_REVERSE) {
+		object->u.cp.offset = object->text_len;
+	} else {
+		object->u.cp.offset = 0;
+	}
 	object->u.cp.index  = 0;
 }
 
@@ -371,11 +408,12 @@ PHP_METHOD(TextIterator, __construct)
 	intern->text_len = text_len;
 	if (ZEND_NUM_ARGS() > 1) {
 		ti_type = flags & ITER_TYPE_MASK;
-		if (flags < ITER_TYPE_LAST) { 
+		if (ti_type < ITER_TYPE_LAST) { 
 			intern->type = ti_type;
 		} else {
 			php_error(E_WARNING, "Invalid iterator type in TextIterator constructor");
 		}
+		intern->flags = flags;
 	}
 
 	iter_ops[intern->type]->rewind(intern TSRMLS_CC);
@@ -445,6 +483,8 @@ void php_register_unicode_iterators(TSRMLS_D)
 	zend_declare_class_constant_long(text_iterator_ce, "CODE_UNIT", sizeof("CODE_UNIT")-1, ITER_CODE_UNIT TSRMLS_CC);
 	zend_declare_class_constant_long(text_iterator_ce, "CODE_POINT", sizeof("CODE_POINT")-1, ITER_CODE_POINT TSRMLS_CC);
 	zend_declare_class_constant_long(text_iterator_ce, "COMB_SEQUENCE", sizeof("COMB_SEQUENCE")-1, ITER_COMB_SEQUENCE TSRMLS_CC);
+
+	zend_declare_class_constant_long(text_iterator_ce, "REVERSE", sizeof("REVERSE")-1, ITER_REVERSE TSRMLS_CC);
 }
 
 /*
