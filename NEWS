@@ -51,6 +51,8 @@ PHP                                                                        NEWS
   (Tony)
 - Fixed bug #36096 (oci_result() returns garbage after oci_fetch() failed). 
   (Tony)
+- Fixed bug #36083 (SoapClient waits for responses on one-way operations).
+  (Dmitry)
 - Fixed bug #36071 (Engine Crash related with 'clone'). (Dmitry)
 - Fixed bug #36055 (possible OCI8 crash in multithreaded environment). (Tony)
 - Fixed bug #36046 (parse_ini_file() miscounts lines in multi-line values).

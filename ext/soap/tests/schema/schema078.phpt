@@ -21,7 +21,7 @@ echo "ok";
 --EXPECTF--
 <?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://test-uri/"><SOAP-ENV:Body><ns1:test><testParam><ns1:int1>1</ns1:int1><ns1:int2>2</ns1:int2><int3>3</int3></testParam></ns1:test></SOAP-ENV:Body></SOAP-ENV:Envelope>
-object(stdClass)#5 (3) {
+object(stdClass)#%d (3) {
   ["int1"]=>
   int(1)
   ["int2"]=>
