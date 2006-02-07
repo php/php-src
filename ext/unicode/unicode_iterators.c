@@ -45,14 +45,20 @@ typedef struct {
 	uint32_t		text_len;
 	text_iter_type	type;
 	zval*			current;
+	size_t			current_alloc;
 	union {
 		struct {
-			int32_t	index;
-			int32_t	offset;
+			uint32_t index;
+			uint32_t offset;
 		} cp;
 		struct {
-			int32_t	index;
+			uint32_t index;
 		} cu;
+		struct {
+			uint32_t index;
+			uint32_t start;
+			uint32_t end;
+		} cs;
 	} u;
 } text_iter_obj;
 
@@ -153,9 +159,74 @@ static text_iter_ops text_iter_cp_ops = {
 	text_iter_cp_rewind,
 };
 
-static text_iter_ops* iter_ops[2] = {
+/* Combining sequence ops */
+
+static int text_iter_cs_valid(text_iter_obj* object TSRMLS_DC)
+{
+	return (object->u.cs.end <= object->text_len);
+}
+
+static void text_iter_cs_current(text_iter_obj* object TSRMLS_DC)
+{
+	uint32_t length = object->u.cs.end - object->u.cs.start;
+	if (length > object->current_alloc) {
+		object->current_alloc = length+1;
+		Z_USTRVAL_P(object->current) = eurealloc(Z_USTRVAL_P(object->current), object->current_alloc);
+	}
+	u_memcpy(Z_USTRVAL_P(object->current), object->text + object->u.cs.start, length);
+	Z_USTRVAL_P(object->current)[length] = 0;
+	Z_USTRLEN_P(object->current) = length;
+}
+
+static int text_iter_cs_key(text_iter_obj* object TSRMLS_DC)
+{
+	return object->u.cs.index;
+}
+
+static void text_iter_cs_next(text_iter_obj* object TSRMLS_DC)
+{
+	UChar32 cp;
+	uint32_t end;
+
+	object->u.cs.start = object->u.cs.end;
+	U16_NEXT(object->text, object->u.cs.end, object->text_len, cp);
+	if (u_getCombiningClass(cp) == 0) {
+		end = object->u.cs.end;
+		while (end < object->text_len) {
+			U16_NEXT(object->text, end, object->text_len, cp);
+			if (u_getCombiningClass(cp) == 0) {
+				break;
+			} else {
+				object->u.cs.end = end;
+			}
+		}
+	}
+	object->u.cs.index++;
+}
+
+static void text_iter_cs_rewind(text_iter_obj *object TSRMLS_DC)
+{
+	object->u.cs.start = 0;
+	object->u.cs.end   = 0;
+	text_iter_cs_next(object TSRMLS_CC); /* find first sequence */
+	object->u.cs.index = 0; /* because _next increments index */
+}
+
+static text_iter_ops text_iter_cs_ops = {
+	text_iter_cs_valid,
+	text_iter_cs_current,
+	text_iter_cs_key,
+	text_iter_cs_next,
+	text_iter_cs_rewind,
+};
+
+
+/* Ops array */
+
+static text_iter_ops* iter_ops[] = {
 	&text_iter_cu_ops,
 	&text_iter_cp_ops,
+	&text_iter_cs_ops,
 };
 
 /* Iterator Funcs */
@@ -270,6 +341,7 @@ static zend_object_value text_iterator_new(zend_class_entry *class_type TSRMLS_D
 
 	intern->type = ITER_CODE_POINT;
 	MAKE_STD_ZVAL(intern->current); /* pre-allocate buffer for codepoint */
+	intern->current_alloc = 3;
 	Z_USTRVAL_P(intern->current) = eumalloc(3);
 	Z_USTRVAL_P(intern->current)[0] = 0;
 	Z_TYPE_P(intern->current) = IS_UNICODE;
