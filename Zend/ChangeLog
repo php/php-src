@@ -1,3 +1,48 @@
+2006-02-06  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      zend_API.c
+      zend_hash.c:
+      init variables
+
+    * zend_API.c
+      zend_hash.c:
+      init variables (continue making GCC happy)
+
+2006-02-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug36303.phpt:
+      Fixed bug #36303 (foreach on error_zval produces segfault)
+
+    * tests/bug36303.phpt
+      tests/bug36303.phpt:
+      
+      Fixed bug #36303 (foreach on error_zval produces segfault)
+
+    * tests/bug36303.phpt
+      tests/bug36303.phpt:
+      
+      file bug36303.phpt was initially added on branch PHP_5_1.
+
+2006-02-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_interfaces.c
+      zend_interfaces.h:
+      - Missed one to be public
+
+    * zend_interfaces.c:
+      - The next get_iterator() call is supposed to do the check itself
+
+    * zend_interfaces.c
+      zend_interfaces.h:
+      - Make all default implementations public
+
 2006-02-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_interfaces.c

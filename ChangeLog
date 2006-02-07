@@ -1,3 +1,93 @@
+2006-02-06  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      TSRM/tsrm_virtual_cwd.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_hash.c:
+      init variables
+
+    * TSRM/tsrm_virtual_cwd.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_hash.c:
+      init variables (continue making GCC happy)
+
+2006-02-06  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_5_1)
+      ext/pcre/php_pcre.c:
+      TODO
+
+2006-02-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      NEWS
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug36303.phpt:
+      Fixed bug #36303 (foreach on error_zval produces segfault)
+
+    * ZendEngine2/tests/bug36303.phpt
+      ZendEngine2/tests/bug36303.phpt:
+      
+      Fixed bug #36303 (foreach on error_zval produces segfault)
+
+    * ZendEngine2/tests/bug36303.phpt
+      ZendEngine2/tests/bug36303.phpt:
+      
+      file bug36303.phpt was initially added on branch PHP_5_1.
+
+2006-02-06  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      ext/standard/math.c:
+      MFH: initialize variables and reduce the number of warnings
+
+    * ext/standard/math.c:
+      initialize variables and reduce the number of warnings
+
+    * ext/simplexml/simplexml.c:
+      MF51: initialize variables
+
+    * (PHP_5_1)
+      ext/simplexml/simplexml.c:
+      initialize variables
+
+    * (PHP_4_4)
+      ext/mbstring/mbstring.c:
+      MF51: initialize to_r
+
+    * ext/mbstring/mbstring.c:
+      MF51: initialize to_r
+      remove needless semicolon
+
+    * (PHP_5_1)
+      ext/mbstring/mbstring.c:
+      initialize to_r
+      remove needless semicolon
+
+2006-02-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #36283 (SOAPClient Compression Broken).
+
+2006-02-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_interfaces.h:
+      - Missed one to be public
+
+    * ZendEngine2/zend_interfaces.c:
+      - The next get_iterator() call is supposed to do the check itself
+
+    * ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_interfaces.h:
+      - Make all default implementations public
+
 2006-02-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_interfaces.c
