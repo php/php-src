@@ -250,6 +250,8 @@ int make_http_soap_request(zval  *this_ptr,
 		int level = Z_LVAL_PP(tmp) & 0x0f;
 		int kind  = Z_LVAL_PP(tmp) & SOAP_COMPRESSION_DEFLATE;
 
+		if (level > 9) {level = 9;}
+		
 	  if ((Z_LVAL_PP(tmp) & SOAP_COMPRESSION_ACCEPT) != 0) {
 			smart_str_append_const(&soap_headers_z,"Accept-Encoding: gzip, deflate\r\n");
 	  }
