@@ -18,13 +18,13 @@ oci_execute($statement);
 
 $name = null;
 $stmt = oci_parse($c, "UPDATE bind_test SET name=:name");
-oci_bind_by_name($stmt, ":name", &$name);
+oci_bind_by_name($stmt, ":name", $name);
 
 $res = oci_execute($stmt);
 
 $name = "";
 $stmt = oci_parse($c, "UPDATE bind_test SET name=:name");
-oci_bind_by_name($stmt, ":name", &$name);
+oci_bind_by_name($stmt, ":name", $name);
 
 $res = oci_execute($stmt);
 
