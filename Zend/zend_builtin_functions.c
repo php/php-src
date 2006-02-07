@@ -768,11 +768,16 @@ ZEND_FUNCTION(get_object_vars)
 		RETURN_FALSE;
 	}
 
+	properties = Z_OBJ_HT_PP(obj)->get_properties(*obj TSRMLS_CC);
+
+	if (properties == NULL) {
+		RETURN_FALSE;
+	}
+
 	instanceof = EG(This) && instanceof_function(Z_OBJCE_P(EG(This)), Z_OBJCE_PP(obj) TSRMLS_CC);
 
 	array_init(return_value);
 
-	properties = Z_OBJ_HT_PP(obj)->get_properties(*obj TSRMLS_CC);
 	zend_hash_internal_pointer_reset_ex(properties, &pos);
 
 	while (zend_hash_get_current_data_ex(properties, (void **) &value, &pos) == SUCCESS) {
