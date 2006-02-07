@@ -38,7 +38,7 @@ PHP_NAMED_FUNCTION(php_if_crc32)
 	for (len += nr; nr--; ++p) {
 	    CRC32(crc, *p);
 	}
-	RETVAL_LONG(~crc);
+	RETVAL_LONG(~ (long) crc);
 }
 /* }}} */
 
