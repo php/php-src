@@ -227,6 +227,16 @@ disable_classes =
 ; being interrupted by the user or a browser timing out.
 ; ignore_user_abort = On
 
+; Determines the size of the realpath cache to be used by PHP. This value should
+; be increased on systems where PHP opens many files to reflect the quantity of
+; the file operations performed.
+; realpath_cache_size=16k
+
+; Duration of time, in seconds for which to cache realpath information for a given
+; file or directory. For systems with rarely changing files, consider increasing this
+; value.
+; realpath_cache_ttl=120
+
 ;
 ; Misc
 ;
