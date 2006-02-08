@@ -1076,14 +1076,10 @@ static void reflection_property_factory(zend_class_entry *ce, zend_property_info
 
 	if (!(prop->flags & ZEND_ACC_PRIVATE)) {
 		/* we have to seach the class hierarchy for this (implicit) public or protected property */
-		zend_class_entry *tmp_ce = ce->parent;
+		zend_class_entry *tmp_ce = ce;
 		zend_property_info *tmp_info;
 		
-		while (tmp_ce && zend_hash_find(&tmp_ce->properties_info, prop_name, strlen(prop_name) + 1, (void **) &tmp_info) == SUCCESS) {
-			if (tmp_info->flags & ZEND_ACC_PRIVATE) {
-				/* private in super class => NOT the same property */
-				break;
-			}
+		while (tmp_ce && zend_hash_find(&tmp_ce->properties_info, prop_name, strlen(prop_name) + 1, (void **) &tmp_info) != SUCCESS) {
 			ce = tmp_ce;
 			prop = tmp_info;
 			tmp_ce = tmp_ce->parent;
