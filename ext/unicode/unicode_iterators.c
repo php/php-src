@@ -49,16 +49,16 @@ typedef struct {
 	long			flags;
 	union {
 		struct {
-			uint32_t index;
-			uint32_t offset;
+			int32_t index;
+			int32_t offset;
 		} cp;
 		struct {
 			int32_t index;
 		} cu;
 		struct {
-			uint32_t index;
-			uint32_t start;
-			uint32_t end;
+			int32_t index;
+			int32_t start;
+			int32_t end;
 		} cs;
 	} u;
 } text_iter_obj;
@@ -200,7 +200,11 @@ static text_iter_ops text_iter_cp_ops = {
 
 static int text_iter_cs_valid(text_iter_obj* object TSRMLS_DC)
 {
-	return (object->u.cs.end <= object->text_len);
+	if (object->flags & ITER_REVERSE) {
+		return (object->u.cs.end > 0);
+	} else {
+		return (object->u.cs.end <= object->text_len);
+	}
 }
 
 static void text_iter_cs_current(text_iter_obj* object TSRMLS_DC)
@@ -223,18 +227,28 @@ static int text_iter_cs_key(text_iter_obj* object TSRMLS_DC)
 static void text_iter_cs_next(text_iter_obj* object TSRMLS_DC)
 {
 	UChar32 cp;
-	uint32_t end;
+	uint32_t tmp;
 
-	object->u.cs.start = object->u.cs.end;
-	U16_NEXT(object->text, object->u.cs.end, object->text_len, cp);
-	if (u_getCombiningClass(cp) == 0) {
-		end = object->u.cs.end;
-		while (end < object->text_len) {
-			U16_NEXT(object->text, end, object->text_len, cp);
-			if (u_getCombiningClass(cp) == 0) {
-				break;
-			} else {
-				object->u.cs.end = end;
+	if (object->flags & ITER_REVERSE) {
+		object->u.cs.end = object->u.cs.start;
+		U16_PREV(object->text, 0, object->u.cs.start, cp);
+		if (u_getCombiningClass(cp) != 0) {
+			do {
+				U16_PREV(object->text, 0, object->u.cs.start, cp);
+			} while (object->u.cs.start > 0 && u_getCombiningClass(cp) != 0);
+		}
+	} else {
+		object->u.cs.start = object->u.cs.end;
+		U16_NEXT(object->text, object->u.cs.end, object->text_len, cp);
+		if (u_getCombiningClass(cp) == 0) {
+			tmp = object->u.cs.end;
+			while (tmp < object->text_len) {
+				U16_NEXT(object->text, tmp, object->text_len, cp);
+				if (u_getCombiningClass(cp) == 0) {
+					break;
+				} else {
+					object->u.cs.end = tmp;
+				}
 			}
 		}
 	}
@@ -243,8 +257,11 @@ static void text_iter_cs_next(text_iter_obj* object TSRMLS_DC)
 
 static void text_iter_cs_rewind(text_iter_obj *object TSRMLS_DC)
 {
-	object->u.cs.start = 0;
-	object->u.cs.end   = 0;
+	if (object->flags & ITER_REVERSE) {
+		object->u.cs.start = object->u.cs.end = object->text_len;
+	} else {
+		object->u.cs.start = object->u.cs.end = 0;
+	}
 	text_iter_cs_next(object TSRMLS_CC); /* find first sequence */
 	object->u.cs.index = 0; /* because _next increments index */
 }
