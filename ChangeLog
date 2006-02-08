@@ -1,3 +1,68 @@
+2006-02-07  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/array.c
+      ext/standard/php_array.h:
+      MFB.
+
+    * (PHP_5_1)
+      ext/standard/array.c
+      ext/standard/php_array.h:
+      Move array globals declarations back to the header file.
+
+2006-02-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #36083 (SoapClient waits for responses on one-way operations)
+
+2006-02-07  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_iterator.c
+      ext/com_dotnet/com_saproxy.c
+      ext/com_dotnet/php_com_dotnet_internal.h:
+      modify get_iterator calls for engine change
+      fix mem leak with iterators
+      fix object casting for edge case
+
+    * (PHP_5_1)
+      ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_iterator.c:
+      fix mem leak with iterators
+      fix object casting for edge case
+
+    * ext/dom/dom_iterators.c
+      ext/dom/php_dom.h:
+      modify get_iterator call for engine change
+
+2006-02-07  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_1)
+      NEWS:
+      - forgot the original credits
+
+2006-02-07  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      Check for get_properties handler before using it. (Patch from
+      rrichards@ctindustries.net).
+
+2006-02-07  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_1)
+      NEWS:
+      - entry for #36306
+
+    * ext/standard/crc32.c
+      ext/standard/tests/strings/bug36306.phpt:
+      - MFB: #36306, crc32() result differs on 32-bit and 64-bit platforms
+
+    * (PHP_5_1)
+      ext/standard/crc32.c
+      ext/standard/tests/strings/bug36306.phpt
+      ext/standard/tests/strings/bug36306.phpt:
+      - #36306, crc32() function result differs on 32-bit and 64-bit platforms
+
 2006-02-06  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_1)
