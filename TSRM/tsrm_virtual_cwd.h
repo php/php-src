@@ -166,23 +166,8 @@ CWD_API int virtual_access(const char *pathname, int mode TSRMLS_DC);
 #endif
 #endif
 
-/* On AIX & Tru64 when a file does not exist realpath() returns
- * NULL, and sets errno to ENOENT. Unlike in other libc implementations
- * the destination is not filled and remains undefined. Therefor, we
- * must populate it manually using strcpy as done on systems with no
- * realpath() function.
- */
 #if defined(__osf__) || defined(_AIX)
-static char *php_realpath_hack(char *src, char *dest)
-{
-	char *ret;
-
-	if ((ret = realpath(src, dest)) == NULL && errno == ENOENT) {
-		return strcpy(dest, src);
-	} else {
-		return ret;
-	}
-}
+char *php_realpath_hack(char *src, char *dest);
 #endif
 
 #if HAVE_UTIME
