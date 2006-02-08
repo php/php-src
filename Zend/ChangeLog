@@ -1,3 +1,9 @@
+2006-02-07  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_builtin_functions.c:
+      Check for get_properties handler before using it. (Patch from
+      rrichards@ctindustries.net).
+
 2006-02-06  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_1)
