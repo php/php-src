@@ -197,7 +197,7 @@ ZEND_INI_BEGIN()
 	STD_ZEND_INI_BOOLEAN("zend.ze1_compatibility_mode",	"0",	ZEND_INI_ALL,		OnUpdateBool,	ze1_compatibility_mode,	zend_executor_globals,	executor_globals)
 
 	/* Unicode .ini entries */
-	STD_ZEND_INI_ENTRY("unicode_semantics", "off", ZEND_INI_SYSTEM|ZEND_INI_PERDIR, OnUpdateBool, unicode, zend_unicode_globals, unicode_globals)
+	STD_ZEND_INI_ENTRY("unicode_semantics", "off", ZEND_INI_SYSTEM, OnUpdateBool, unicode, zend_unicode_globals, unicode_globals)
 	STD_ZEND_INI_ENTRY("unicode.fallback_encoding", NULL, ZEND_INI_ALL, OnUpdateEncoding,   fallback_encoding_conv, zend_unicode_globals, unicode_globals)
 	STD_ZEND_INI_ENTRY("unicode.runtime_encoding",  NULL, ZEND_INI_ALL, OnUpdateEncoding,   runtime_encoding_conv, zend_unicode_globals, unicode_globals)
 	STD_ZEND_INI_ENTRY("unicode.script_encoding",  NULL, ZEND_INI_ALL, OnUpdateEncoding,   script_encoding_conv, zend_unicode_globals, unicode_globals)
