@@ -1,3 +1,56 @@
+2006-02-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * php.ini-dist
+      php.ini-recommended:
+      MFB51: Fixed bug #36334 (Added missing documentation about realpath cache
+      INI
+      settings).
+
+    * (PHP_5_1)
+      NEWS
+      php.ini-dist
+      php.ini-recommended:
+      Fixed bug #36334 (Added missing documentation about realpath cache INI
+      settings).
+
+2006-02-08  Johannes Schlüter  <schlueter@phpbar.de>
+
+    * win32/sendmail.c:
+      - It's 2006 and PHP 6
+
+2006-02-08  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.h:
+      MFH: move function definition from .h to .c, where it should be
+
+    * TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.h:
+      move function definition from .h to .c, where it should be
+
+2006-02-08  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend.c:
+      unicode_semantics cannot be set on per-request basis
+
+2006-02-08  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_1)
+      pear/Makefile.frag:
+      MFB fix Bug #36001: make install fails when --enable-memory-limit used
+
+    * (PHP_4_4)
+      pear/Makefile.frag:
+      fix Bug #36001: make install fails when --enable-memory-limit used
+
+2006-02-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #36308 (ReflectionProperty::getDocComment() does not reflect
+      extended class commentary).
+
 2006-02-07  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ext/standard/array.c
