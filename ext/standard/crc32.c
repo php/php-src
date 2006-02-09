@@ -22,25 +22,23 @@
 #include "basic_functions.h"
 #include "crc32.h"
 
-/* {{{ proto string crc32(string str)
-   Calculate the crc32 polynomial of a string */
 PHP_NAMED_FUNCTION(php_if_crc32)
 {
-	unsigned int crc = ~0;
 	char *p;
 	int len, nr;
-	
+	php_uint32 crcinit = 0;
+	register php_uint32 crc;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &p, &nr) == FAILURE) {
 		return;
 	}
+	crc = crcinit^0xFFFFFFFF;
 
-	len = 0 ;
-	for (len += nr; nr--; ++p) {
-	    CRC32(crc, *p);
+	for (len =+nr; nr--; ++p) {
+		crc = ((crc >> 8) & 0x00FFFFFF) ^ crc32tab[(crc ^ (*p)) & 0xFF ];
 	}
-	RETVAL_LONG(~ (long) crc);
+	RETVAL_LONG(crc^0xFFFFFFFF);
 }
-/* }}} */
 
 /*
  * Local variables:
