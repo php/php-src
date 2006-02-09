@@ -1462,8 +1462,6 @@ ZEND_API int string_locale_compare_function(zval *result, zval *op1, zval *op2 T
 	UErrorCode status = U_ZERO_ERROR;
 	UCollator *col;
 
-	col = ucol_open(UG(default_locale), &status);
-
 	zend_make_unicode_zval(op1, &op1_copy, &use_copy1);
 	zend_make_unicode_zval(op2, &op2_copy, &use_copy2);
 
@@ -1474,7 +1472,7 @@ ZEND_API int string_locale_compare_function(zval *result, zval *op1, zval *op2 T
 		op2 = &op2_copy;
 	}
 
-	result->value.lval = ucol_strcoll(col, op1->value.ustr.val, op1->value.ustr.len, op2->value.ustr.val, op2->value.ustr.len);
+	result->value.lval = ucol_strcoll(UG(default_collator), op1->value.ustr.val, op1->value.ustr.len, op2->value.ustr.val, op2->value.ustr.len);
 	result->type = IS_LONG;
 
 	if (use_copy1) {
@@ -1483,8 +1481,6 @@ ZEND_API int string_locale_compare_function(zval *result, zval *op1, zval *op2 T
 	if (use_copy2) {
 		zval_dtor(op2);
 	}
-
-	ucol_close(col);
 
 	return SUCCESS;
 }
