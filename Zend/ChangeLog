@@ -1,3 +1,8 @@
+2006-02-09  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_operators.c:
+      We already have default collator available.
+
 2006-02-08  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend.c:

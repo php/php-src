@@ -1,3 +1,30 @@
+2006-02-09  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_operators.c:
+      We already have default collator available.
+
+2006-02-09  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_1)
+      ext/standard/crc32.c:
+      - protos
+
+    * ext/standard/crc32.c
+      ext/standard/tests/strings/bug36306.phpt:
+      - MFB:
+      - revert last fix
+      - ensure that we are in 32bit
+      - do not try to compare the decimal values but hex, php does not have
+        unsigned integer
+
+    * (PHP_5_1)
+      ext/standard/crc32.c
+      ext/standard/tests/strings/bug36306.phpt:
+      - revert last fix
+      - ensure that we are in 32bit
+      - do not try to compare the decimal values but hex, php does not have
+        unsigned integer
+
 2006-02-08  Ilia Alshanetsky  <ilia@prohost.org>
 
     * php.ini-dist
