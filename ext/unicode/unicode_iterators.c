@@ -78,6 +78,7 @@ typedef struct {
 
 PHPAPI zend_class_entry* text_iterator_aggregate_ce;
 PHPAPI zend_class_entry* text_iterator_ce;
+PHPAPI zend_class_entry* rev_text_iterator_ce;
 
 /* Code unit ops */
 
@@ -433,6 +434,10 @@ PHP_METHOD(TextIterator, __construct)
 		intern->flags = flags;
 	}
 
+	if (Z_OBJCE_P(this_ptr) == U_CLASS_ENTRY(rev_text_iterator_ce)) {
+		intern->flags |= ITER_REVERSE;
+	}
+
 	iter_ops[intern->type]->rewind(intern TSRMLS_CC);
 }
 
@@ -495,13 +500,19 @@ void php_register_unicode_iterators(TSRMLS_D)
 	text_iterator_ce = zend_register_internal_class(&ce TSRMLS_CC);
 	text_iterator_ce->create_object = text_iterator_new;
 	text_iterator_ce->get_iterator  = text_iter_get_iterator;
+	text_iterator_ce->ce_flags |= ZEND_ACC_FINAL_CLASS;
 	zend_class_implements(text_iterator_ce TSRMLS_CC, 1, zend_ce_traversable);
+
+	INIT_CLASS_ENTRY(ce, "ReverseTextIterator", text_iterator_funcs);
+	rev_text_iterator_ce = zend_register_internal_class(&ce TSRMLS_CC);
+	rev_text_iterator_ce->create_object = text_iterator_new;
+	rev_text_iterator_ce->get_iterator  = text_iter_get_iterator;
+	rev_text_iterator_ce->ce_flags |= ZEND_ACC_FINAL_CLASS;
+	zend_class_implements(rev_text_iterator_ce TSRMLS_CC, 1, zend_ce_traversable);
 
 	zend_declare_class_constant_long(text_iterator_ce, "CODE_UNIT", sizeof("CODE_UNIT")-1, ITER_CODE_UNIT TSRMLS_CC);
 	zend_declare_class_constant_long(text_iterator_ce, "CODE_POINT", sizeof("CODE_POINT")-1, ITER_CODE_POINT TSRMLS_CC);
 	zend_declare_class_constant_long(text_iterator_ce, "COMB_SEQUENCE", sizeof("COMB_SEQUENCE")-1, ITER_COMB_SEQUENCE TSRMLS_CC);
-
-	zend_declare_class_constant_long(text_iterator_ce, "REVERSE", sizeof("REVERSE")-1, ITER_REVERSE TSRMLS_CC);
 }
 
 /*
