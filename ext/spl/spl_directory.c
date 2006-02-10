@@ -1801,13 +1801,13 @@ SPL_METHOD(SplFileObject, fwrite)
 	char *str;
 	int str_len;
 	int ret;
-	long length;
+	long length = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &str_len, &length) == FAILURE) {
 		return;
 	}
 
-	if (ZEND_NUM_ARGS() < 2) {
+	if (ZEND_NUM_ARGS() > 1) {
 		str_len = MAX(0, MIN(length, str_len));
 	}
 	if (!str_len) {
