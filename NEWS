@@ -20,6 +20,8 @@ PHP                                                                        NEWS
 - Added imap_savebody() that allows message body to be written to a file. (Mike)
 - Fixed imagecolorallocate() and imagecolorallocatelapha() to return FALSE
   on error. (Pierre)
+- Fixed bug #36359 (splFileObject::fwrite() doesn't write when no data length 
+  specified). (Tony)
 - Fixed bug #36334 (Added missing documentation about realpath cache INI 
   settings). (Ilia)
 - Fixed bug #36308 (ReflectionProperty::getDocComment() does not reflect 
