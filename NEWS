@@ -1,25 +1,26 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, PHP 5.1.3
-- Reimplemented FastCGI interface
 - Moved extensions to PECL:
   . ext/msession (Derick)
+- Reimplemented FastCGI interface. (Dmitry)
 - Improved cURL extension: (Ilia)
   . Added curl_setopt_array() function that allows setting of multiple options
     via an associated array.
   . Added the ability to retrieve the request message sent to the server.
+- Improved GD extension: (Pierre)
+  . Added a weak/tolerant mode to the JPEG loader.
+  . Added filtering mode option to imagepng() to allow reducing file size.
+  . Fixed imagecolorallocate() and imagecolorallocatelapha() to return FALSE
+    on error.
 - Changed get_headers() to retrieve headers also from non-200 responses. (Ilia)
 - Changed get_headers() to use the default context. (Ilia)
 - Added a check for special characters in the session name. (Ilia)
-- add a weak/tolerant mode to the jpeg loader (Pierre)
-- Added filtering mode option to imagepng() to allow reducing file size. (Pierre)
 - Added "consumed" stream filter. (Marcus)
 - Added new mysqli constants for BIT and NEW_DECIMAL field types:
   MYSQLI_TYPE_NEWDECIMAL and MYSQLI_TYPE_BIT. FR #36007. (Georg)
 - Added ReflectionClass::newInstanceArgs($args). (Marcus)
 - Added imap_savebody() that allows message body to be written to a file. (Mike)
-- Fixed imagecolorallocate() and imagecolorallocatelapha() to return FALSE
-  on error. (Pierre)
 - Fixed bug #36359 (splFileObject::fwrite() doesn't write when no data length 
   specified). (Tony)
 - Fixed bug #36334 (Added missing documentation about realpath cache INI 
