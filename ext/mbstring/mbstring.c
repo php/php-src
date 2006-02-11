@@ -3333,6 +3333,7 @@ PHP_FUNCTION(mb_get_info)
 	}
 
 	if (!typ || !strcasecmp("all", typ)) {
+		const mbfl_language *lang = mbfl_no2language(MBSTRG(current_language));
 		array_init(return_value);
 		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(current_internal_encoding))) != NULL) {
 			add_assoc_string(return_value, "internal_encoding", name, 1);
@@ -3345,6 +3346,14 @@ PHP_FUNCTION(mb_get_info)
 		}
 		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(func_overload))) != NULL) {
 			add_assoc_string(return_value, "func_overload", name, 1);
+		}
+		if (lang != NULL) {
+			add_assoc_string(return_value, "mail_charset", 
+							 mbfl_no_encoding2name(lang->mail_charset), 1);
+			add_assoc_string(return_value, "mail_header_encoding", 
+							 mbfl_no_encoding2name(lang->mail_header_encoding), 1);
+			add_assoc_string(return_value, "mail_body_encoding", 
+							 mbfl_no_encoding2name(lang->mail_body_encoding), 1);
 		}
 	} else if (!strcasecmp("internal_encoding", typ)) {
 		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(current_internal_encoding))) != NULL) {
