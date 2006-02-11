@@ -1,3 +1,21 @@
+2006-02-10  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      MFH: fix #36359 (splFileObject::fwrite() doesn't write when no data length
+      specified)
+
+2006-02-10  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/session/session.c
+      ext/session/session.c:
+      (Missing patch from the PHP 4 tree that got lost in the shuffle)
+       See:
+      http://cvs.php.net/viewcvs.cgi/php-src/ext/session/session.c?r1=1.336.2.39&r2=1.336.2.40
+      - fix logic. if the client already sent us the cookie, we don't
+        need to send it again.  if the id has been changed, we need to
+        update the client side.
+
 2006-02-09  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ZendEngine2/zend_operators.c:
