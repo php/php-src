@@ -28,11 +28,16 @@
 #include "php.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
+#include <unicode/ubrk.h>
 
 typedef enum {
 	ITER_CODE_UNIT,
 	ITER_CODE_POINT,
 	ITER_COMB_SEQUENCE,
+	ITER_CHARACTER,
+	ITER_WORD,
+	ITER_LINE,
+	ITER_SENTENCE,
 	ITER_TYPE_LAST,
 } text_iter_type;
 
@@ -60,6 +65,12 @@ typedef struct {
 			int32_t start;
 			int32_t end;
 		} cs;
+		struct {
+			UBreakIterator *iter;
+			int32_t index;
+			int32_t start;
+			int32_t end;
+		} brk;
 	} u;
 } text_iter_obj;
 
@@ -75,6 +86,13 @@ typedef struct {
 	void (*next)   (text_iter_obj* object TSRMLS_DC);
 	void (*rewind) (text_iter_obj* object TSRMLS_DC);
 } text_iter_ops;
+
+enum UBreakIteratorType brk_type_map[] = {
+	UBRK_CHARACTER,
+	UBRK_WORD,
+	UBRK_LINE,
+	UBRK_SENTENCE,
+};
 
 PHPAPI zend_class_entry* text_iterator_aggregate_ce;
 PHPAPI zend_class_entry* text_iterator_ce;
@@ -276,12 +294,95 @@ static text_iter_ops text_iter_cs_ops = {
 };
 
 
+/* UBreakIterator Character Ops */
+
+static int text_iter_brk_char_valid(text_iter_obj* object TSRMLS_DC)
+{
+	if (object->flags & ITER_REVERSE) {
+		return (object->u.brk.start != UBRK_DONE);
+	} else {
+		return (object->u.brk.end != UBRK_DONE);
+	}
+}
+
+static void text_iter_brk_char_current(text_iter_obj* object TSRMLS_DC)
+{
+	uint32_t length;
+	int32_t start = object->u.brk.start;
+	int32_t end = object->u.brk.end;
+
+	if (object->flags & ITER_REVERSE) {
+		if (end == UBRK_DONE) {
+			end = object->text_len;
+		}
+	} else {
+		if (start == UBRK_DONE) {
+			start = 0;
+		}
+	}
+	length = end - start;
+	if (length > object->current_alloc-1) {
+		object->current_alloc = length+1;
+		Z_USTRVAL_P(object->current) = eurealloc(Z_USTRVAL_P(object->current), object->current_alloc);
+	}
+	u_memcpy(Z_USTRVAL_P(object->current), object->text + start, length);
+	Z_USTRVAL_P(object->current)[length] = 0;
+	Z_USTRLEN_P(object->current) = length;
+}
+
+static int text_iter_brk_char_key(text_iter_obj* object TSRMLS_DC)
+{
+	return object->u.brk.index;
+}
+
+static void text_iter_brk_char_next(text_iter_obj* object TSRMLS_DC)
+{
+	if (object->flags & ITER_REVERSE) {
+		if (object->u.brk.start != UBRK_DONE) {
+			object->u.brk.end = object->u.brk.start;
+			object->u.brk.start = ubrk_previous(object->u.brk.iter);
+			object->u.brk.index++;
+		}
+	} else {
+		if (object->u.brk.end != UBRK_DONE) {
+			object->u.brk.start = object->u.brk.end;
+			object->u.brk.end = ubrk_next(object->u.brk.iter);
+			object->u.brk.index++;
+		}
+	}
+}
+
+static void text_iter_brk_char_rewind(text_iter_obj *object TSRMLS_DC)
+{
+	if (object->flags & ITER_REVERSE) {
+		object->u.brk.end   = ubrk_last(object->u.brk.iter);
+		object->u.brk.start = ubrk_previous(object->u.brk.iter);
+	} else {
+		object->u.brk.start = ubrk_first(object->u.brk.iter);
+		object->u.brk.end   = ubrk_next(object->u.brk.iter);
+	}
+	object->u.brk.index = 0;
+}
+
+static text_iter_ops text_iter_brk_ops = {
+	text_iter_brk_char_valid,
+	text_iter_brk_char_current,
+	text_iter_brk_char_key,
+	text_iter_brk_char_next,
+	text_iter_brk_char_rewind,
+};
+
+
 /* Ops array */
 
 static text_iter_ops* iter_ops[] = {
 	&text_iter_cu_ops,
 	&text_iter_cp_ops,
 	&text_iter_cs_ops,
+	&text_iter_brk_ops,
+	&text_iter_brk_ops,
+	&text_iter_brk_ops,
+	&text_iter_brk_ops,
 };
 
 /* Iterator Funcs */
@@ -376,6 +477,9 @@ static void text_iterator_free_storage(void *object TSRMLS_DC)
 	if (intern->text) {
 		efree(intern->text);
 	}
+	if (intern->type > ITER_CHARACTER && intern->u.brk.iter) {
+		ubrk_close(intern->u.brk.iter);
+	}
 	zval_ptr_dtor(&intern->current);
 	efree(object);
 }
@@ -399,6 +503,7 @@ static zend_object_value text_iterator_new(zend_class_entry *class_type TSRMLS_D
 	intern->current_alloc = 3;
 	Z_USTRVAL_P(intern->current) = eumalloc(3);
 	Z_USTRVAL_P(intern->current)[0] = 0;
+	Z_USTRLEN_P(intern->current) = 0;
 	Z_TYPE_P(intern->current) = IS_UNICODE;
 
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) text_iterator_free_storage, NULL TSRMLS_CC);
@@ -426,16 +531,25 @@ PHP_METHOD(TextIterator, __construct)
 	intern->text_len = text_len;
 	if (ZEND_NUM_ARGS() > 1) {
 		ti_type = flags & ITER_TYPE_MASK;
-		if (ti_type < ITER_TYPE_LAST) { 
-			intern->type = ti_type;
-		} else {
+		if (ti_type < 0 || ti_type >= ITER_TYPE_LAST) { 
 			php_error(E_WARNING, "Invalid iterator type in TextIterator constructor");
+			ti_type = ITER_CODE_POINT;
 		}
+		intern->type = ti_type;
 		intern->flags = flags;
 	}
 
 	if (Z_OBJCE_P(this_ptr) == U_CLASS_ENTRY(rev_text_iterator_ce)) {
 		intern->flags |= ITER_REVERSE;
+	}
+
+	if (ti_type >= ITER_CHARACTER && ti_type < ITER_TYPE_LAST) {
+		UErrorCode status = U_ZERO_ERROR;
+		intern->u.brk.iter = ubrk_open(brk_type_map[ti_type - ITER_CHARACTER], UG(default_locale), text, text_len, &status);
+		if (!U_SUCCESS(status)) {
+			php_error(E_RECOVERABLE_ERROR, "Could not create UBreakIterator: %s", u_errorName(status));
+			return;
+		}
 	}
 
 	iter_ops[intern->type]->rewind(intern TSRMLS_CC);
@@ -513,6 +627,10 @@ void php_register_unicode_iterators(TSRMLS_D)
 	zend_declare_class_constant_long(text_iterator_ce, "CODE_UNIT", sizeof("CODE_UNIT")-1, ITER_CODE_UNIT TSRMLS_CC);
 	zend_declare_class_constant_long(text_iterator_ce, "CODE_POINT", sizeof("CODE_POINT")-1, ITER_CODE_POINT TSRMLS_CC);
 	zend_declare_class_constant_long(text_iterator_ce, "COMB_SEQUENCE", sizeof("COMB_SEQUENCE")-1, ITER_COMB_SEQUENCE TSRMLS_CC);
+	zend_declare_class_constant_long(text_iterator_ce, "CHARACTER", sizeof("CHARACTER")-1, ITER_CHARACTER TSRMLS_CC);
+	zend_declare_class_constant_long(text_iterator_ce, "WORD", sizeof("WORD")-1, ITER_WORD TSRMLS_CC);
+	zend_declare_class_constant_long(text_iterator_ce, "LINE", sizeof("LINE")-1, ITER_LINE TSRMLS_CC);
+	zend_declare_class_constant_long(text_iterator_ce, "SENTENCE", sizeof("SENTENCE")-1, ITER_SENTENCE TSRMLS_CC);
 }
 
 /*
