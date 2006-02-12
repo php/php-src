@@ -330,6 +330,9 @@ if (isset($argc) && $argc > 1) {
 					}
 					$pass_option_n = true;
 					break;
+				case 'N':
+					// this is always native
+					break;
 				case '--no-clean':
 					$no_clean = true;
 					break;
@@ -419,6 +422,8 @@ Options:
                 with value 'bar').
 
     -m          Test for memory leaks with Valgrind.
+    
+    -N          Always set (Test with unicode_semantics set off in PHP 6).
     
     -s <file>   Write output to <file>.
 
@@ -1104,15 +1109,27 @@ TEST $file
 		}
 	}
 
+	// Default ini settings
+	$ini_settings = array();
+	// additional ini overwrites
+	//$ini_overwrites[] = 'setting=value';
+	settings2array($ini_overwrites, $ini_settings);
+
+	// Any special ini settings
+	// these may overwrite the test defaults...
+	if (array_key_exists('INI', $section_text)) {
+		if (strpos($section_text['INI'], '{PWD}') !== false) {
+			$section_text['INI'] = str_replace('{PWD}', dirname($file), $section_text['INI']);
+		}
+		settings2array(preg_split( "/[\n\r]+/", $section_text['INI']), $ini_settings);
+	}
+	settings2params($ini_settings);
+
 	// Check if test should be skipped.
 	$info = '';
 	$warn = false;
 	if (array_key_exists('SKIPIF', $section_text)) {
 		if (trim($section_text['SKIPIF'])) {
-			$skipif_params = array();
-			settings2array($ini_overwrites,$skipif_params);
-			settings2params($skipif_params);
-
 			if ($cfg['show']['skip']) {
 				echo "\n========SKIP========\n";
 				echo $section_text['SKIPIF'];
@@ -1121,7 +1138,7 @@ TEST $file
 			save_text($test_skipif, $section_text['SKIPIF'], $temp_skipif);
 			$extra = substr(PHP_OS, 0, 3) !== "WIN" ?
 				"unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;": "";
-			$output = system_with_timeout("$extra $php -q $skipif_params $test_skipif", $env);
+			$output = system_with_timeout("$extra $php -q $ini_settings $test_skipif", $env);
 			if (!$cfg['keep']['skip']) {
 				@unlink($test_skipif);
 			}
@@ -1207,23 +1224,6 @@ TEST $file
 		return 'BORKED';
 	}
 	
-
-	// Default ini settings
-	$ini_settings = array();
-	// additional ini overwrites
-	//$ini_overwrites[] = 'setting=value';
-	settings2array($ini_overwrites, $ini_settings);
-
-	// Any special ini settings
-	// these may overwrite the test defaults...
-	if (array_key_exists('INI', $section_text)) {
-		if (strpos($section_text['INI'], '{PWD}') !== false) {
-			$section_text['INI'] = str_replace('{PWD}', dirname($file), $section_text['INI']);
-		}
-		settings2array(preg_split( "/[\n\r]+/", $section_text['INI']), $ini_settings);
-	}
-	settings2params($ini_settings);
-
 	// We've satisfied the preconditions - run the test!
 	if ($cfg['show']['php']) {
 		echo "\n========TEST========\n";
