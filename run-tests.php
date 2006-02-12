@@ -172,19 +172,18 @@ function write_information($show_html)
 	$info_file = realpath(dirname(__FILE__)) . '/run-test-info.php';
 	@unlink($info_file);
 	$php_info = '<?php echo "
-PHP_SAPI    : " . PHP_SAPI . "
-PHP_VERSION : " . phpversion() . "
-ZEND_VERSION: " . zend_version() . "
-PHP_OS      : " . PHP_OS . " - " . php_uname() . "
-UNICODE     : " . (ini_get("unicode_semantics") ? "ON" : "OFF") . "
-INI actual  : " . realpath(get_cfg_var("cfg_file_path")) . "
-More .INIs  : " . (function_exists(\'php_ini_scanned_files\') ? str_replace("\n","", php_ini_scanned_files()) : "** not determined **"); ?>';
+PHP_SAPI    : " , PHP_SAPI , "
+PHP_VERSION : " , phpversion() , "
+ZEND_VERSION: " , zend_version() , "
+PHP_OS      : " , PHP_OS , " - " , php_uname() , "
+UNICODE     : " , (ini_get("unicode_semantics") ? "ON" : "OFF") , "
+INI actual  : " , realpath(get_cfg_var("cfg_file_path")) , "
+More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n","", php_ini_scanned_files()) : "** not determined **"); ?>';
 	save_text($info_file, $php_info);
 	$info_params = array();
 	settings2array($ini_overwrites,$info_params);
 	settings2params($info_params);
 	$php_info = `$php $pass_options $info_params $info_file`;
-	@unlink($info_file);
 	define('TESTED_PHP_VERSION', `$php -r 'echo PHP_VERSION;'`);
 
 	$unicode = `$php $pass_options $info_params -r 'echo ini_get("unicode_semantics");'`;
@@ -1146,15 +1145,37 @@ TEST $file
 		}
 	}
 
+	// Default ini settings
+	$ini_settings = array();
+	// additional ini overwrites
+	//$ini_overwrites[] = 'setting=value';
+	settings2array($ini_overwrites, $ini_settings);
+	// is this unicode/native per run-tests.php switch?
+	if ($unicode_and_native) {
+		$ini_settings["unicode_semantics"] = $unicode_semantics ? '1' : '0';
+	}
+	// Any special ini settings 
+	// these may overwrite the test defaults...
+	if (array_key_exists('INI', $section_text)) {
+		if (strpos($section_text['INI'], '{PWD}') !== false) {
+			$section_text['INI'] = str_replace('{PWD}', dirname($file), $section_text['INI']);
+		}
+		settings2array(preg_split( "/[\n\r]+/", $section_text['INI']), $ini_settings);
+		if (isset($ini_settings["unicode_semantics"])) {
+			$unicode_test = strcasecmp($ini_settings["unicode_semantics"],"on") == 0 || $ini_settings["unicode_semantics"] == 1;
+		} else {
+			$unicode_test = TESTED_UNICODE;
+		}
+	} else {
+		$unicode_test = $unicode_and_native ? $unicode_semantics : TESTED_UNICODE;
+	}
+	settings2params($ini_settings);
+
 	// Check if test should be skipped.
 	$info = '';
 	$warn = false;
 	if (array_key_exists('SKIPIF', $section_text)) {
 		if (trim($section_text['SKIPIF'])) {
-			$skipif_params = array();
-			settings2array($ini_overwrites,$skipif_params);
-			settings2params($skipif_params);
-
 			if ($cfg['show']['skip']) {
 				echo "\n========SKIP========\n";
 				echo $section_text['SKIPIF'];
@@ -1163,7 +1184,7 @@ TEST $file
 			save_text($test_skipif, $section_text['SKIPIF'], $temp_skipif);
 			$extra = substr(PHP_OS, 0, 3) !== "WIN" ?
 				"unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;": "";
-			$output = system_with_timeout("$extra $php -q $skipif_params $test_skipif", $env);
+			$output = system_with_timeout("$extra $php -q $ini_settings $test_skipif", $env);
 			if (!$cfg['keep']['skip']) {
 				@unlink($test_skipif);
 			}
@@ -1249,33 +1270,6 @@ TEST $file
 		return 'BORKED';
 	}
 	
-
-	// Default ini settings
-	$ini_settings = array();
-	// additional ini overwrites
-	//$ini_overwrites[] = 'setting=value';
-	settings2array($ini_overwrites, $ini_settings);
-
-	if ($unicode_and_native) {
-		$ini_settings["unicode_semantics"] = $unicode_semantics ? '1' : '0';
-	}
-
-	// Any special ini settings 
-	// these may overwrite the test defaults...
-	if (array_key_exists('INI', $section_text)) {
-		if (strpos($section_text['INI'], '{PWD}') !== false) {
-			$section_text['INI'] = str_replace('{PWD}', dirname($file), $section_text['INI']);
-		}
-		settings2array(preg_split( "/[\n\r]+/", $section_text['INI']), $ini_settings);
-		if (isset($ini_settings["unicode_semantics"])) {
-			$unicode_test = strcasecmp($ini_settings["unicode_semantics"],"on") == 0 || $ini_settings["unicode_semantics"] == 1;
-		} else {
-			$unicode_test = TESTED_UNICODE;
-		}
-	} else {
-		$unicode_test = $unicode_and_native ? $unicode_semantics : TESTED_UNICODE;
-	}
-
 	if ($unicode_test) {
 		if (isset($section_text['UEXPECT'])) {
 			unset($section_text['EXPECT']);
@@ -1297,7 +1291,6 @@ TEST $file
 			unset($section_text['UEXPECTREGEX']);
 		}
 	}
-	settings2params($ini_settings);
 
 	// We've satisfied the preconditions - run the test!
 	if ($cfg['show']['php']) {
