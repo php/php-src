@@ -70,6 +70,7 @@ $sample_urls = array (
 'http://foo.com#bar',
 'scheme:',
 'foo+bar://baz@bang/bla',
+'gg:9130731',
 );
 
     foreach ($sample_urls as $url) {
@@ -677,6 +678,12 @@ array(4) {
   string(3) "baz"
   ["path"]=>
   string(4) "/bla"
+}
+array(2) {
+  ["scheme"]=>
+  string(2) "gg"
+  ["path"]=>
+  string(7) "9130731"
 }
 string(4) "http"
 string(11) "www.php.net"
