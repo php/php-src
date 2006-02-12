@@ -137,7 +137,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 				p++;
 			}
 			
-			if ((*p) == '\0' || *p == '/') {
+			if ((*p == '\0' || *p == '/') && (p - e) < 7) {
 				goto parse_port;
 			}
 			
