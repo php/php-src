@@ -340,7 +340,7 @@ static void autoload_func_info_dtor(autoload_func_info *alfi)
  Try all registerd autoload function to load the requested class */
 PHP_FUNCTION(spl_autoload_call)
 {
-	zval **class_name, *retval = NULL;
+	zval *class_name, *retval = NULL;
 	int class_name_len;
 	char *func_name, *lc_name;
 	uint func_name_len;
@@ -348,18 +348,18 @@ PHP_FUNCTION(spl_autoload_call)
 	HashPosition function_pos;
 	autoload_func_info *alfi;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &class_name) == FAILURE || Z_TYPE_PP(class_name) != IS_STRING) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &class_name) == FAILURE || Z_TYPE_P(class_name) != IS_STRING) {
 		return;
 	}
 
 	if (SPL_G(autoload_functions)) {
-		class_name_len = Z_STRLEN_PP(class_name);
-		lc_name = zend_str_tolower_dup(Z_STRVAL_PP(class_name), class_name_len);
+		class_name_len = Z_STRLEN_P(class_name);
+		lc_name = zend_str_tolower_dup(Z_STRVAL_P(class_name), class_name_len);
 		zend_hash_internal_pointer_reset_ex(SPL_G(autoload_functions), &function_pos);
 		while(zend_hash_has_more_elements_ex(SPL_G(autoload_functions), &function_pos) == SUCCESS && !EG(exception)) {
 			zend_hash_get_current_key_ex(SPL_G(autoload_functions), &func_name, &func_name_len, &dummy, 0, &function_pos);
 			zend_hash_get_current_data_ex(SPL_G(autoload_functions), (void **) &alfi, &function_pos);
-			zend_call_method(alfi->obj ? &alfi->obj : NULL, alfi->ce, &alfi->func_ptr, func_name, func_name_len, &retval, 1, *class_name, NULL TSRMLS_CC);
+			zend_call_method(alfi->obj ? &alfi->obj : NULL, alfi->ce, &alfi->func_ptr, func_name, func_name_len, &retval, 1, class_name, NULL TSRMLS_CC);
 			if (retval) {
 				zval_ptr_dtor(&retval);					
 			}
@@ -371,7 +371,7 @@ PHP_FUNCTION(spl_autoload_call)
 		efree(lc_name);
 	} else {
 		/* do not use or overwrite &EG(autoload_func) here */
-		zend_call_method_with_1_params(NULL, NULL, NULL, "spl_autoload", NULL, *class_name);
+		zend_call_method_with_1_params(NULL, NULL, NULL, "spl_autoload", NULL, class_name);
 	}
 } /* }}} */
 
