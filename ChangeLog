@@ -1,3 +1,15 @@
+2006-02-11  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS:
+      fix news
+
+2006-02-11  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbstring.c:
+      added additional info about mail encoding to mb_get_info(). (made by
+      Jokagi)
+
 2006-02-10  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_1)
