@@ -5,6 +5,7 @@ PHP                                                                        NEWS
   array when row number > field_count). (Georg)
 - Renamed CachingRecursiveIterator to RecursiveCachingIterator. (Marcus)
 - Fixed bug #36303 (foreach on error_zval produces segfault). (Dmitry)
+- Fixed bug #36205 (Memory leaks on duplicate cookies). (Dmitry)
 - Fixed bug #36071 (Engine Crash related with 'clone'). (Dmitry)
 - Fixed bug #36006 (Problem with $this in __destruct()). (Dmitry)
 - Fixed bug #35612 (iis6 Access Violation crash). (Dmitry, alacn.uhahaa)
