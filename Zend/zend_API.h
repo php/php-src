@@ -114,8 +114,6 @@ typedef struct _zend_function_entry {
 
 #endif
 
-#define U_CLASS_ENTRY(ce) ((UG(unicode)&&ce)?ce->u_twin:ce)
-
 #define INIT_CLASS_ENTRY(class_container, class_name, functions) INIT_OVERLOADED_CLASS_ENTRY(class_container, class_name, functions, NULL, NULL, NULL)
 
 #define INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, class_name, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \
@@ -145,7 +143,6 @@ typedef struct _zend_function_entry {
 		class_container.interfaces = NULL;						\
 		class_container.get_iterator = NULL;					\
 		class_container.iterator_funcs.funcs = NULL;			\
-		class_container.u_twin = NULL;							\
 		class_container.module = NULL;							\
 	}
 

@@ -131,8 +131,8 @@ static zend_object_value spl_filesystem_object_new_ex(zend_class_entry *class_ty
 	memset(intern, 0, sizeof(spl_filesystem_object));
 	intern->std.ce = class_type;
 	/* intern->type = SPL_FS_INFO; done by set o */
-	intern->file_class = U_CLASS_ENTRY(spl_ce_SplFileObject);
-	intern->info_class = U_CLASS_ENTRY(spl_ce_SplFileInfo);
+	intern->file_class = spl_ce_SplFileObject;
+	intern->info_class = spl_ce_SplFileInfo;
 	if (obj) *obj = intern;
 
 	ALLOC_HASHTABLE(intern->std.properties);
@@ -206,7 +206,7 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 
 	if (intern->u.file.stream == NULL) {
 		if (!EG(exception)) {
-			zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_RuntimeException), 0 TSRMLS_CC, "Cannot open file %s", intern->file_name);
+			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Cannot open file %s", intern->file_name);
 		}
 		intern->file_name = NULL; /* until here it is not a copy */
 		intern->u.file.open_mode = NULL;
@@ -301,7 +301,7 @@ static spl_filesystem_object * spl_filesystem_object_create_info(spl_filesystem_
 	spl_filesystem_object *intern;
 	
 	if (!file_path || !file_path_len) {
-		zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_RuntimeException), 0 TSRMLS_CC, "Cannot create SplFileInfo for empty path");
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Cannot create SplFileInfo for empty path");
 		if (file_path && !use_copy)
 		{
 			efree(file_path);
@@ -309,7 +309,7 @@ static spl_filesystem_object * spl_filesystem_object_create_info(spl_filesystem_
 		return NULL;
 	}
 
-	php_set_error_handling(EH_THROW, U_CLASS_ENTRY(spl_ce_RuntimeException) TSRMLS_CC);
+	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
 
 	return_value->value.obj = spl_filesystem_object_new_ex(ce ? ce : source->info_class, &intern TSRMLS_CC);
 	Z_TYPE_P(return_value) = IS_OBJECT;
@@ -326,7 +326,7 @@ static spl_filesystem_object * spl_filesystem_object_create_type(int ht, spl_fil
 	spl_filesystem_object *intern;
 	zend_bool use_include_path = 0;
 
-	php_set_error_handling(EH_THROW, U_CLASS_ENTRY(spl_ce_RuntimeException) TSRMLS_CC);
+	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
 
 	switch (source->type) {
 	case SPL_FS_INFO:
@@ -334,7 +334,7 @@ static spl_filesystem_object * spl_filesystem_object_create_type(int ht, spl_fil
 		break;
 	case SPL_FS_DIR:
 		if (!source->u.dir.entry.d_name[0]) {
-			zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_RuntimeException), 0 TSRMLS_CC, "Could not open file");
+			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Could not open file");
 			php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 			return NULL;
 		}
@@ -381,7 +381,7 @@ static spl_filesystem_object * spl_filesystem_object_create_type(int ht, spl_fil
 		break;
 	case SPL_FS_DIR:	
 		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
-		zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_RuntimeException), 0 TSRMLS_CC, "Operation not supported");
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Operation not supported");
 		return NULL;
 	}
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
@@ -396,7 +396,7 @@ SPL_METHOD(DirectoryIterator, __construct)
 	char *path;
 	int len;
 
-	php_set_error_handling(EH_THROW, U_CLASS_ENTRY(spl_ce_RuntimeException) TSRMLS_CC);
+	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &path, &len) == FAILURE) {
 		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
@@ -411,7 +411,7 @@ SPL_METHOD(DirectoryIterator, __construct)
 
 	intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	spl_filesystem_dir_open(intern, path TSRMLS_CC);
-	intern->u.dir.is_recursive = instanceof_function(intern->std.ce, U_CLASS_ENTRY(spl_ce_RecursiveDirectoryIterator) TSRMLS_CC) ? 1 : 0;
+	intern->u.dir.is_recursive = instanceof_function(intern->std.ce, spl_ce_RecursiveDirectoryIterator TSRMLS_CC) ? 1 : 0;
 	intern->flags = 0;
 
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
@@ -596,7 +596,7 @@ SPL_METHOD(SplFileInfo, __construct)
 	char *path;
 	int len;
 
-	php_set_error_handling(EH_THROW, U_CLASS_ENTRY(spl_ce_RuntimeException) TSRMLS_CC);
+	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &path, &len) == FAILURE) {
 		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
@@ -714,7 +714,7 @@ SPL_METHOD(SplFileInfo, openFile)
 SPL_METHOD(SplFileInfo, setFileClass)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	zend_class_entry *ce = U_CLASS_ENTRY(spl_ce_SplFileObject);
+	zend_class_entry *ce = spl_ce_SplFileObject;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|C", &ce) == FAILURE) {
 		return;
@@ -729,7 +729,7 @@ SPL_METHOD(SplFileInfo, setFileClass)
 SPL_METHOD(SplFileInfo, setInfoClass)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	zend_class_entry *ce = U_CLASS_ENTRY(spl_ce_SplFileInfo);
+	zend_class_entry *ce = spl_ce_SplFileInfo;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|C", &ce) == FAILURE) {
 		return;
@@ -778,7 +778,7 @@ SPL_METHOD(RecursiveDirectoryIterator, __construct)
 	int len;
 	long flags = SPL_FILE_DIR_CURRENT_AS_FILEINFO;
 
-	php_set_error_handling(EH_THROW, U_CLASS_ENTRY(spl_ce_RuntimeException) TSRMLS_CC);
+	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &path, &len, &flags) == FAILURE) {
 		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
@@ -787,7 +787,7 @@ SPL_METHOD(RecursiveDirectoryIterator, __construct)
 
 	intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	spl_filesystem_dir_open(intern, path TSRMLS_CC);
-	intern->u.dir.is_recursive = instanceof_function(intern->std.ce, U_CLASS_ENTRY(spl_ce_RecursiveDirectoryIterator) TSRMLS_CC) ? 1 : 0;
+	intern->u.dir.is_recursive = instanceof_function(intern->std.ce, spl_ce_RecursiveDirectoryIterator TSRMLS_CC) ? 1 : 0;
 	intern->flags = flags;
 
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
@@ -869,7 +869,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 	INIT_PZVAL(&zpath);
 	ZVAL_STRINGL(&zpath, intern->file_name, intern->file_name_len, 0);
 
-	spl_instantiate_arg_ex1(U_CLASS_ENTRY(spl_ce_RecursiveDirectoryIterator), &return_value, 0, &zpath TSRMLS_CC);
+	spl_instantiate_arg_ex1(spl_ce_RecursiveDirectoryIterator, &return_value, 0, &zpath TSRMLS_CC);
 	
 	subdir = (spl_filesystem_object*)zend_object_store_get_object(return_value TSRMLS_CC);
 	if (subdir) {
@@ -1317,7 +1317,7 @@ static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent TS
 	
 	if (php_stream_eof(intern->u.file.stream)) {
 		if (!silent) {
-			zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_RuntimeException), 0 TSRMLS_CC, "Cannot read from file %s", intern->file_name);
+			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Cannot read from file %s", intern->file_name);
 		}
 		return FAILURE;
 	}
@@ -1351,10 +1351,10 @@ static int spl_filesystem_file_read_line(zval * this_ptr, spl_filesystem_object 
 	zval *retval;
 
 	/* if overloaded call the function, otherwise do it directly */
-	if (intern->u.file.func_getCurr->common.scope != U_CLASS_ENTRY(spl_ce_SplFileObject)) {
+	if (intern->u.file.func_getCurr->common.scope != spl_ce_SplFileObject) {
 		if (php_stream_eof(intern->u.file.stream)) {
 			if (!silent) {
-				zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_RuntimeException), 0 TSRMLS_CC, "Cannot read from file %s", intern->file_name);
+				zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Cannot read from file %s", intern->file_name);
 			}
 			return FAILURE;
 		}
@@ -1384,7 +1384,7 @@ static int spl_filesystem_file_read_line(zval * this_ptr, spl_filesystem_object 
 static void spl_filesystem_file_rewind(spl_filesystem_object *intern TSRMLS_DC) /* {{{ */
 {
 	if (-1 == php_stream_rewind(intern->u.file.stream)) {
-		zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_RuntimeException), 0 TSRMLS_CC, "Cannot rewind file %s", intern->file_name);
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Cannot rewind file %s", intern->file_name);
 	} else {
 		spl_filesystem_file_free_line(intern TSRMLS_CC);
 		intern->u.file.current_line_num = 0;
@@ -1399,7 +1399,7 @@ SPL_METHOD(SplFileObject, __construct)
 	zend_bool use_include_path = 0;
 	char *p1, *p2;
 
-	php_set_error_handling(EH_THROW, U_CLASS_ENTRY(spl_ce_RuntimeException) TSRMLS_CC);
+	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
 
 	intern->u.file.open_mode = "r";
 	intern->u.file.open_mode_len = 1;
@@ -1438,7 +1438,7 @@ SPL_METHOD(SplTempFileObject, __construct)
 	char tmp_fname[48];
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	php_set_error_handling(EH_THROW, U_CLASS_ENTRY(spl_ce_RuntimeException) TSRMLS_CC);
+	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &max_memory) == FAILURE) {
 		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
@@ -1586,7 +1586,7 @@ SPL_METHOD(SplFileObject, setMaxLineLen)
 	}
 
 	if (max_len < 0) {
-		zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_DomainException), 0 TSRMLS_CC, "Maximum line length must be greater than or equal zero");
+		zend_throw_exception_ex(spl_ce_DomainException, 0 TSRMLS_CC, "Maximum line length must be greater than or equal zero");
 		return;
 	}
 	
@@ -1850,7 +1850,7 @@ SPL_METHOD(SplFileObject, ftruncate)
 	}
 
 	if (!php_stream_truncate_supported(intern->u.file.stream)) {
-		zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_LogicException), 0 TSRMLS_CC, "Can't truncate file %s", intern->file_name);
+		zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Can't truncate file %s", intern->file_name);
 		RETURN_FALSE;
 	}
 	
@@ -1868,7 +1868,7 @@ SPL_METHOD(SplFileObject, seek)
 		return;
 	}
 	if (line_pos < 0) {
-		zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_LogicException), 0 TSRMLS_CC, "Can't seek file %s to negative line %ld", intern->file_name, line_pos);
+		zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Can't seek file %s to negative line %ld", intern->file_name, line_pos);
 		RETURN_FALSE;		
 	}
 	

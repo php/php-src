@@ -27,7 +27,6 @@
 
 #  define ZVAL_RT_STRINGL(a, b, c, d)		ZVAL_STRINGL(a, b, c, d)
 #  define ZVAL_ASCII_STRINGL(a, b, c, d)	ZVAL_STRINGL(a, b, c, d)
-#  define U_CLASS_ENTRY(ce)					ce
 #  define PDO_ZVAL_PP_IS_TEXT(pp)			(Z_TYPE_PP(pp) == IS_STRING)
 #  define PDO_ZVAL_P_IS_TEXT(pp)			(Z_TYPE_P(pp) == IS_STRING)
 #  define Z_UNIVAL_PP(x)					Z_STRVAL_PP(x)

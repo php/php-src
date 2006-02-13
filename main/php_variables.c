@@ -581,6 +581,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 					php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
 				}
 				*/
+				efree(u_var);
 				efree(u_val);
 			}
 		} else {
@@ -696,15 +697,11 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 			}
 			/* auto-type */
 			ALLOC_ZVAL(tmp);
-			Z_TYPE_P(tmp) = IS_STRING;
-			Z_STRLEN_P(tmp) = strlen(ss);
-			Z_STRVAL_P(tmp) = estrndup(ss, Z_STRLEN_P(tmp));
+			ZVAL_RT_STRING(tmp, ss, 1);
 			INIT_PZVAL(tmp);
 			count++;
 			if (zend_hash_next_index_insert(Z_ARRVAL_P(arr), &tmp, sizeof(zval *), NULL) == FAILURE) {
-				if (Z_TYPE_P(tmp) == IS_STRING) {
-					efree(Z_STRVAL_P(tmp));
-				}
+				efree(Z_STRVAL_P(tmp));
 			}
 			if (space) {
 				*space = '+';

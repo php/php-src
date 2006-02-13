@@ -201,7 +201,7 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 	php_set_default_dir(dirp->rsrc_id TSRMLS_CC);
 
 	if (createobject) {
-		object_init_ex(return_value, U_CLASS_ENTRY(dir_class_entry_ptr));
+		object_init_ex(return_value, dir_class_entry_ptr);
 		add_property_rt_stringl(return_value, "path", dirname, dir_len, 1);
 		add_property_resource(return_value, "handle", dirp->rsrc_id);
 		php_stream_auto_cleanup(dirp); /* so we don't get warnings under debug */

@@ -49,16 +49,16 @@
 
 #define UNICODE_KEY(ht, type, arKey, nKeyLength, tmp) \
 	if (ht->unicode && type == IS_STRING) { \
-    UErrorCode status = U_ZERO_ERROR; \
+		UErrorCode status = U_ZERO_ERROR; \
 		UChar *u = NULL; \
 		int32_t u_len; \
 		TSRMLS_FETCH(); \
 		zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u, &u_len, (char*)arKey, nKeyLength-1, &status); \
-    if (U_FAILURE(status)) { \
+		if (U_FAILURE(status)) { \
 			/* UTODO: */ \
-   	} \
-   	type = IS_UNICODE; \
-   	tmp = arKey = u; \
+		} \
+		type = IS_UNICODE; \
+		tmp = arKey = u; \
 	}
 
 
@@ -1781,6 +1781,57 @@ void zend_hash_display(HashTable *ht)
 		p = p->pListLast;
 	}
 }
+
+ZEND_API void zend_hash_to_unicode(HashTable *ht, apply_func_t apply_func TSRMLS_DC)
+{
+	Bucket **p;
+	uint nIndex;
+
+	IS_CONSISTENT(ht);
+	if (ht->unicode) {
+		return;
+	}
+
+	ht->unicode = 1;
+	memset(ht->arBuckets, 0, ht->nTableSize * sizeof(Bucket *));
+	p = &ht->pListHead;
+	while ((*p) != NULL) {
+		if ((*p)->key.type == IS_STRING) {
+			UErrorCode status = U_ZERO_ERROR;
+			UChar *u = NULL;
+			int32_t u_len;
+			Bucket *q;
+
+			zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u, &u_len, (char*)(*p)->key.u.string, (*p)->nKeyLength-1, &status);
+
+			q = (Bucket *) pemalloc(sizeof(Bucket)-sizeof(q->key.u)+((u_len+1)*2), ht->persistent);
+			memcpy(q, *p, sizeof(Bucket)-sizeof(q->key.u));
+			memcpy(q->key.u.unicode, u, (u_len+1)*2);
+			q->key.type = IS_UNICODE;
+			q->nKeyLength = u_len+1;
+			q->h = zend_u_inline_hash_func(IS_UNICODE, (void*)q->key.u.unicode, q->nKeyLength);
+			if ((*p)->pData == &(*p)->pDataPtr) {
+				q->pData = &q->pDataPtr;
+			}
+			efree(u);
+			pefree(*p, ht->persistent);
+			*p = q;
+			if (q->pListNext) {
+				q->pListNext->pListLast = q;
+			} else {
+				ht->pListTail = q;
+			}
+		}
+		nIndex = (*p)->h & ht->nTableMask;
+		CONNECT_TO_BUCKET_DLLIST(*p, ht->arBuckets[nIndex]);
+		ht->arBuckets[nIndex] = *p;
+		if (apply_func) {
+			apply_func((*p)->pData TSRMLS_CC);
+		}
+		p = &(*p)->pListNext;
+	}
+}
+
 #endif
 
 /*

@@ -325,11 +325,11 @@ static int zend_implement_traversable(zend_class_entry *interface, zend_class_en
 		return SUCCESS;
 	}
 	for (i = 0; i < class_type->num_interfaces; i++) {
-		if (class_type->interfaces[i] == U_CLASS_ENTRY(zend_ce_aggregate) || class_type->interfaces[i] == U_CLASS_ENTRY(zend_ce_iterator)) {
+		if (class_type->interfaces[i] == zend_ce_aggregate || class_type->interfaces[i] == zend_ce_iterator) {
 			return SUCCESS;
 		}
 	}
-	zend_error(E_CORE_ERROR, "Class %v must implement interface %s as part of either %s or %s",
+	zend_error(E_CORE_ERROR, "Class %v must implement interface %v as part of either %v or %v",
 		class_type->name,
 		zend_ce_traversable->name,
 		zend_ce_iterator->name,
@@ -351,10 +351,10 @@ static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entr
 			/* c-level get_iterator cannot be changed (exception being only Traversable is implmented) */
 			if (class_type->num_interfaces) {
 				for (i = 0; i < class_type->num_interfaces; i++) {
-					if (class_type->interfaces[i] == U_CLASS_ENTRY(zend_ce_iterator)) {
+					if (class_type->interfaces[i] == zend_ce_iterator) {
 						return FAILURE;
 					}
-					if (class_type->interfaces[i] == U_CLASS_ENTRY(zend_ce_traversable)) {
+					if (class_type->interfaces[i] == zend_ce_traversable) {
 						t = i;
 					}
 				}

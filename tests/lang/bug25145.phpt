@@ -20,3 +20,13 @@ array(1) {
   }
 }
 Done
+--UEXPECT--
+array(1) {
+  [123]=>
+  array(1) {
+    [0]=>
+    unicode(4) "SEGV"
+  }
+}
+Done
+

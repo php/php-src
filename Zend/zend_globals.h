@@ -137,13 +137,6 @@ struct _zend_compiler_globals {
 	char *script_encoding;
 
 #ifdef ZTS
-	HashTable *global_function_table;
-	HashTable *global_class_table;
-	HashTable *global_auto_globals_table;
-	HashTable *global_u_function_table;
-	HashTable *global_u_class_table;
-	HashTable *global_u_auto_globals_table;
-
 	HashTable **static_members;
 	int last_static_member;
 #endif
@@ -235,11 +228,6 @@ struct _zend_executor_globals {
 	struct _zend_module_entry *current_module;
 
 	zend_property_info std_property_info;
-
-#ifdef ZTS
-	HashTable *global_constants_table;
-	HashTable *global_u_constants_table;
-#endif
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };

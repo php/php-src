@@ -879,12 +879,12 @@ static zend_object_value sqlite_object_new_exception(zend_class_entry *class_typ
 
 static zend_class_entry *sqlite_get_ce_query(zval *object TSRMLS_DC)
 {
-	return U_CLASS_ENTRY(sqlite_ce_query);
+	return sqlite_ce_query;
 }
 
 static zend_class_entry *sqlite_get_ce_ub_query(zval *object TSRMLS_DC)
 {
-	return U_CLASS_ENTRY(sqlite_ce_ub_query);
+	return sqlite_ce_ub_query;
 }
 
 static zval * sqlite_instanciate(zend_class_entry *pce, zval *object TSRMLS_DC)
@@ -1188,7 +1188,7 @@ static struct php_sqlite_db *php_sqlite_open(char *filename, int mode, char *per
 	if (object) {
 		/* if object is not an object then we're called from the factory() function */
 		if (Z_TYPE_P(object) != IS_OBJECT) {
-			sqlite_instanciate(U_CLASS_ENTRY(sqlite_ce_db), object TSRMLS_CC);
+			sqlite_instanciate(sqlite_ce_db, object TSRMLS_CC);
 		}
 		/* and now register the object */
 		SQLITE_REGISTER_OBJECT(db, object, db)
@@ -1295,7 +1295,7 @@ PHP_FUNCTION(sqlite_open)
 	zval *errmsg = NULL;
 	zval *object = getThis();
 
-	php_set_error_handling(object ? EH_THROW : EH_NORMAL, U_CLASS_ENTRY(sqlite_ce_exception) TSRMLS_CC);
+	php_set_error_handling(object ? EH_THROW : EH_NORMAL, sqlite_ce_exception TSRMLS_CC);
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz/",
 				&filename, &filename_len, &mode, &errmsg)) {
 		php_std_error_handling();
@@ -1350,7 +1350,7 @@ PHP_FUNCTION(sqlite_factory)
 	int filename_len;
 	zval *errmsg = NULL;
 
-	php_set_error_handling(EH_THROW, U_CLASS_ENTRY(sqlite_ce_exception) TSRMLS_CC);
+	php_set_error_handling(EH_THROW, sqlite_ce_exception TSRMLS_CC);
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz/",
 				&filename, &filename_len, &mode, &errmsg)) {
 		php_std_error_handling();
@@ -1577,9 +1577,9 @@ terminate:
 	if (object) {
 		sqlite_object *obj;
 		if (buffered) {
-			sqlite_instanciate(U_CLASS_ENTRY(sqlite_ce_query), return_value TSRMLS_CC);
+			sqlite_instanciate(sqlite_ce_query, return_value TSRMLS_CC);
 		} else {
-			sqlite_instanciate(U_CLASS_ENTRY(sqlite_ce_ub_query), return_value TSRMLS_CC);
+			sqlite_instanciate(sqlite_ce_ub_query, return_value TSRMLS_CC);
 		}
 		obj = (sqlite_object *) zend_object_store_get_object(return_value TSRMLS_CC);
 		obj->type = is_result;
@@ -2073,7 +2073,7 @@ PHP_FUNCTION(sqlite_fetch_object)
 	zval *ctor_params = NULL;
 	zend_uchar class_name_type;
 
-	php_set_error_handling(object ? EH_THROW : EH_NORMAL, U_CLASS_ENTRY(sqlite_ce_exception) TSRMLS_CC);
+	php_set_error_handling(object ? EH_THROW : EH_NORMAL, sqlite_ce_exception TSRMLS_CC);
 	if (object) {
 		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|tzb", &class_name, &class_name_len, &class_name_type, &ctor_params, &decode_binary)) {
 			php_std_error_handling();
@@ -2081,7 +2081,7 @@ PHP_FUNCTION(sqlite_fetch_object)
 		}
 		RES_FROM_OBJECT(res, object);
 		if (!ZEND_NUM_ARGS()) {
-			ce = U_CLASS_ENTRY(zend_standard_class_def);
+			ce = zend_standard_class_def;
 		} else {
 			ce = zend_u_fetch_class(class_name_type, class_name, class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
 		}
@@ -2092,14 +2092,14 @@ PHP_FUNCTION(sqlite_fetch_object)
 		}
 		ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
 		if (ZEND_NUM_ARGS() < 2) {
-			ce = U_CLASS_ENTRY(zend_standard_class_def);
+			ce = zend_standard_class_def;
 		} else {
 			ce = zend_u_fetch_class(class_name_type, class_name, class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
 		}
 	}
 
 	if (!ce) {
-		zend_throw_exception_ex(U_CLASS_ENTRY(sqlite_ce_exception), 0 TSRMLS_CC, "Could not find class '%s'", class_name);
+		zend_throw_exception_ex(sqlite_ce_exception, 0 TSRMLS_CC, "Could not find class '%s'", class_name);
 		php_std_error_handling();
 		return;
 	}
@@ -2142,7 +2142,7 @@ PHP_FUNCTION(sqlite_fetch_object)
 				 * single value is an array. Also we'd have to make that one
 				 * argument passed by reference.
 				 */
-				zend_throw_exception(U_CLASS_ENTRY(sqlite_ce_exception), "Parameter ctor_params must be an array", 0 TSRMLS_CC);
+				zend_throw_exception(sqlite_ce_exception, "Parameter ctor_params must be an array", 0 TSRMLS_CC);
 				return;
 			}
 		} else {
@@ -2157,7 +2157,7 @@ PHP_FUNCTION(sqlite_fetch_object)
 		fcc.object_pp = &return_value;
 
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
-			zend_throw_exception_ex(U_CLASS_ENTRY(sqlite_ce_exception), 0 TSRMLS_CC, "Could not execute %s::%v()", class_name, ce->constructor->common.function_name);
+			zend_throw_exception_ex(sqlite_ce_exception, 0 TSRMLS_CC, "Could not execute %s::%v()", class_name, ce->constructor->common.function_name);
 		} else {
 			if (retval_ptr) {
 				zval_ptr_dtor(&retval_ptr);
@@ -2167,7 +2167,7 @@ PHP_FUNCTION(sqlite_fetch_object)
 			efree(fci.params);
 		}
 	} else if (ctor_params && Z_TYPE_P(ctor_params) != IS_NULL) {
-		zend_throw_exception_ex(U_CLASS_ENTRY(sqlite_ce_exception), 0 TSRMLS_CC, "Class %s does not have a constructor, use NULL for parameter ctor_params or omit it", class_name);
+		zend_throw_exception_ex(sqlite_ce_exception, 0 TSRMLS_CC, "Class %s does not have a constructor, use NULL for parameter ctor_params or omit it", class_name);
 	}
 }
 /* }}} */
@@ -2545,7 +2545,7 @@ static int sqlite_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ */
 		* count = obj->u.res->nrows;
 		return SUCCESS;
 	} else {
-		zend_throw_exception(U_CLASS_ENTRY(sqlite_ce_exception), "Row count is not available for unbuffered queries", 0 TSRMLS_CC);
+		zend_throw_exception(sqlite_ce_exception, "Row count is not available for unbuffered queries", 0 TSRMLS_CC);
 		return FAILURE;
 	}
 } /* }}} */

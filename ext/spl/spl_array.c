@@ -156,11 +156,11 @@ static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, s
 
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) spl_array_object_free_storage, NULL TSRMLS_CC);
 	while (parent) {
-		if (parent == U_CLASS_ENTRY(spl_ce_ArrayIterator) || parent == U_CLASS_ENTRY(spl_ce_RecursiveArrayIterator)) {
+		if (parent == spl_ce_ArrayIterator || parent == spl_ce_RecursiveArrayIterator) {
 			retval.handlers = &spl_handler_ArrayIterator;
 			class_type->get_iterator = spl_array_get_iterator;
 			break;
-		} else if (parent == U_CLASS_ENTRY(spl_ce_ArrayObject)) {
+		} else if (parent == spl_ce_ArrayObject) {
 			retval.handlers = &spl_handler_ArrayObject;
 			break;
 		}
@@ -207,7 +207,7 @@ static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, s
 		}
 	}
 
-	intern->ce_get_iterator = U_CLASS_ENTRY(spl_ce_ArrayIterator);
+	intern->ce_get_iterator = spl_ce_ArrayIterator;
 	zend_hash_internal_pointer_reset_ex(spl_array_get_hash_table(intern, 0 TSRMLS_CC), &intern->pos);
 	return retval;
 }
@@ -332,7 +332,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 	case IS_STRING:
 	case IS_UNICODE:
 		if (*(char*)Z_UNIVAL_P(offset) == '\0') {
-			zend_throw_exception(U_CLASS_ENTRY(spl_ce_InvalidArgumentException), "An offset must not begin with \\0 or be empty", 0 TSRMLS_CC);
+			zend_throw_exception(spl_ce_InvalidArgumentException, "An offset must not begin with \\0 or be empty", 0 TSRMLS_CC);
 			return;
 		}
 		value->refcount++;
@@ -845,7 +845,7 @@ SPL_METHOD(Array, __construct)
 	if (ZEND_NUM_ARGS() == 0) {
 		return; /* nothing to do */
 	}
-	php_set_error_handling(EH_THROW, U_CLASS_ENTRY(spl_ce_InvalidArgumentException) TSRMLS_CC);
+	php_set_error_handling(EH_THROW, spl_ce_InvalidArgumentException TSRMLS_CC);
 
 	intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 
@@ -856,7 +856,7 @@ SPL_METHOD(Array, __construct)
 
 	if (ZEND_NUM_ARGS() > 2) {
 		if (zend_lookup_class(class_name, class_name_len, &pce_get_iterator TSRMLS_CC) == FAILURE) {
-			zend_throw_exception(U_CLASS_ENTRY(spl_ce_InvalidArgumentException), "A class that implements Iterator must be specified", 0 TSRMLS_CC);
+			zend_throw_exception(spl_ce_InvalidArgumentException, "A class that implements Iterator must be specified", 0 TSRMLS_CC);
 			php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 			return;
 		}
@@ -877,7 +877,7 @@ SPL_METHOD(Array, __construct)
 	} else {
 		if (Z_TYPE_P(array) != IS_OBJECT && Z_TYPE_P(array) != IS_ARRAY) {
 			php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
-			zend_throw_exception(U_CLASS_ENTRY(spl_ce_InvalidArgumentException), "Passed variable is not an array or object, using empty array instead", 0 TSRMLS_CC);
+			zend_throw_exception(spl_ce_InvalidArgumentException, "Passed variable is not an array or object, using empty array instead", 0 TSRMLS_CC);
 			return;
 		}
 		zval_ptr_dtor(&intern->array);
@@ -895,7 +895,7 @@ SPL_METHOD(Array, __construct)
 		if ((handler != std_object_handlers.get_properties && handler != spl_array_get_properties)
 		|| !spl_array_get_hash_table(intern, 0 TSRMLS_CC)) {
 			php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
-			zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_InvalidArgumentException), 0 TSRMLS_CC, "Overloaded object of type %s is not compatible with %s", Z_OBJCE_P(array)->name, intern->std.ce->name);
+			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "Overloaded object of type %s is not compatible with %s", Z_OBJCE_P(array)->name, intern->std.ce->name);
 			return;
 		}
 	}
@@ -922,7 +922,7 @@ SPL_METHOD(Array, setIteratorClass)
 	}
 
 	if (zend_lookup_class(class_name, class_name_len, &pce_get_iterator TSRMLS_CC) == FAILURE) {
-		zend_throw_exception(U_CLASS_ENTRY(spl_ce_InvalidArgumentException), "A class that implements Iterator must be specified", 0 TSRMLS_CC);
+		zend_throw_exception(spl_ce_InvalidArgumentException, "A class that implements Iterator must be specified", 0 TSRMLS_CC);
 		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 		return;
 	}
@@ -992,7 +992,7 @@ SPL_METHOD(Array, exchangeArray)
 		intern->array = other->array;
 	} else {
 		if (Z_TYPE_PP(array) != IS_OBJECT && !HASH_OF(*array)) {
-			zend_throw_exception(U_CLASS_ENTRY(spl_ce_InvalidArgumentException), "Passed variable is not an array or object, using empty array instead", 0 TSRMLS_CC);
+			zend_throw_exception(spl_ce_InvalidArgumentException, "Passed variable is not an array or object, using empty array instead", 0 TSRMLS_CC);
 			return;
 		}
 		zval_ptr_dtor(&intern->array);
@@ -1072,7 +1072,7 @@ SPL_METHOD(Array, seek)
 			return; /* ok */
 		}
 	}
-	zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_OutOfBoundsException), 0 TSRMLS_CC, "Seek position %ld is out of range", opos);
+	zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0 TSRMLS_CC, "Seek position %ld is out of range", opos);
 } /* }}} */
 
 int spl_array_object_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ */
@@ -1127,7 +1127,7 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 	
 	if (use_arg) {
 		if (ZEND_NUM_ARGS() != 1 || zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
-			zend_throw_exception(U_CLASS_ENTRY(spl_ce_BadMethodCallException), "Function expects exactly one argument", 0 TSRMLS_CC);
+			zend_throw_exception(spl_ce_BadMethodCallException, "Function expects exactly one argument", 0 TSRMLS_CC);
 			return;
 		}
 		zend_call_method(NULL, NULL, NULL, fname, fname_len, &return_value, 2, &tmp, arg TSRMLS_CC);
