@@ -226,6 +226,7 @@ plain_var:
 					if (index != escaped_index) {
 						efree(escaped_index);
 					}
+					zval_ptr_dtor(&gpc_element);
 					break;
 				}
 				zend_symtable_update(symtable1, escaped_index, index_len + 1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
