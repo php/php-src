@@ -239,7 +239,7 @@ plain_var:
 	}
 }
 
-PHPAPI void php_u_register_variable_ex(UChar *var, zval *val, pval *track_vars_array TSRMLS_DC)
+PHPAPI void php_u_register_variable_ex(UChar *var, zval *val, zval *track_vars_array TSRMLS_DC)
 {
 	UChar *p = NULL;
 	UChar *ip;		/* index pointer */
