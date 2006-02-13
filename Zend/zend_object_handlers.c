@@ -436,7 +436,7 @@ zval *zend_std_read_dimension(zval *object, zval *offset, int type TSRMLS_DC)
 	zend_class_entry *ce = Z_OBJCE_P(object);
 	zval *retval;
 	
-	if (instanceof_function_ex(ce, U_CLASS_ENTRY(zend_ce_arrayaccess), 1 TSRMLS_CC)) {
+	if (instanceof_function_ex(ce, zend_ce_arrayaccess, 1 TSRMLS_CC)) {
 		if(offset == NULL) {
 			/* [] construct */
 			ALLOC_INIT_ZVAL(offset);
@@ -469,7 +469,7 @@ static void zend_std_write_dimension(zval *object, zval *offset, zval *value TSR
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
 
-	if (instanceof_function_ex(ce, U_CLASS_ENTRY(zend_ce_arrayaccess), 1 TSRMLS_CC)) {
+	if (instanceof_function_ex(ce, zend_ce_arrayaccess, 1 TSRMLS_CC)) {
 		if (!offset) {
 			ALLOC_INIT_ZVAL(offset);
 		} else {
@@ -489,7 +489,7 @@ static int zend_std_has_dimension(zval *object, zval *offset, int check_empty TS
 	zval *retval;
 	int result;
 	
-	if (instanceof_function_ex(ce, U_CLASS_ENTRY(zend_ce_arrayaccess), 1 TSRMLS_CC)) {
+	if (instanceof_function_ex(ce, zend_ce_arrayaccess, 1 TSRMLS_CC)) {
 		SEPARATE_ARG_IF_REF(offset);
 		zend_call_method_with_1_params(&object, ce, NULL, "offsetexists", &retval, offset);
 		if (retval) {
@@ -603,7 +603,7 @@ static void zend_std_unset_dimension(zval *object, zval *offset TSRMLS_DC)
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
 	
-	if (instanceof_function_ex(ce, U_CLASS_ENTRY(zend_ce_arrayaccess), 1 TSRMLS_CC)) {
+	if (instanceof_function_ex(ce, zend_ce_arrayaccess, 1 TSRMLS_CC)) {
 		SEPARATE_ARG_IF_REF(offset);
 		zend_call_method_with_1_params(&object, ce, NULL, "offsetunset", NULL, offset);
 		zval_ptr_dtor(&offset);

@@ -29,7 +29,18 @@
 #include "zend_builtin_functions.h"
 #include "zend_ini.h"
 #include "zend_unicode.h"
-#include "zend_interfaces.h"
+
+#ifdef ZTS
+#   define GLOBAL_FUNCTION_TABLE    global_function_table
+#   define GLOBAL_CLASS_TABLE       global_class_table
+#   define GLOBAL_CONSTANTS_TABLE   global_constants_table
+#   define GLOBAL_AUTO_GLOBALS_TABLE    global_auto_globals_table
+#else
+#   define GLOBAL_FUNCTION_TABLE    CG(function_table)
+#   define GLOBAL_CLASS_TABLE       CG(class_table)
+#   define GLOBAL_AUTO_GLOBALS_TABLE    CG(auto_globals)
+#   define GLOBAL_CONSTANTS_TABLE   EG(zend_constants)
+#endif
 
 #if defined(ZEND_WIN32) && ZEND_DEBUG
 BOOL WINAPI IsDebuggerPresent(VOID);
@@ -211,16 +222,12 @@ ZEND_INI_END()
 ZEND_API int compiler_globals_id;
 ZEND_API int executor_globals_id;
 ZEND_API int alloc_globals_id;
-#endif
 static HashTable *global_function_table = NULL;
 static HashTable *global_class_table = NULL;
 static HashTable *global_constants_table = NULL;
 static HashTable *global_auto_globals_table = NULL;
-static HashTable *global_u_function_table = NULL;
-static HashTable *global_u_class_table = NULL;
-static HashTable *global_u_constants_table = NULL;
-static HashTable *global_u_auto_globals_table = NULL;
 static HashTable *global_persistent_list = NULL;
+#endif
 
 ZEND_API zend_utility_values zend_uv;
 
@@ -373,7 +380,7 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 
 	if (
 	  /* UTODO: clean this up */
-	    (expr->type == IS_STRING && 
+	    (expr->type == IS_STRING &&
 	    (!strcmp(ucnv_getName(ZEND_U_CONVERTER(UG(output_encoding_conv)), &temp),
 				 ucnv_getName(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &temp))))) {
 		*use_copy = 0;
@@ -648,13 +655,12 @@ static void zend_set_default_compile_time_values(TSRMLS_D)
 
 static void zval_copy_persistent(zval *zv)
 {
-	if (Z_TYPE_P(zv) == IS_UNICODE) {
-		Z_USTRVAL_P(zv) = zend_ustrndup(Z_USTRVAL_P(zv), Z_USTRLEN_P(zv));
-	} else if (Z_TYPE_P(zv) == IS_STRING || Z_TYPE_P(zv) == IS_CONSTANT) {
+	if (Z_TYPE_P(zv) == IS_STRING || Z_TYPE_P(zv) == IS_CONSTANT) {
 		UChar *ustr;
 
 		ustr = malloc(UBYTES(Z_STRLEN_P(zv)+1));
 		u_charsToUChars(Z_STRVAL_P(zv), ustr, Z_STRLEN_P(zv)+1);
+		free(Z_STRVAL_P(zv));
 		Z_USTRVAL_P(zv) = ustr;
 		if (Z_TYPE_P(zv) == IS_STRING) Z_TYPE_P(zv) = IS_UNICODE;
 	}
@@ -673,14 +679,14 @@ static void zend_u_function_dtor(zend_function *function)
 			int n = function->common.num_args;
 
 			while (n > 0) {
-		  	--n;
-			  if (function->common.arg_info[n].name) {
-			  	free(function->common.arg_info[n].name);
-			  }
-			  if (function->common.arg_info[n].class_name) {
+				--n;
+				if (function->common.arg_info[n].name) {
+					free(function->common.arg_info[n].name);
+				}
+				if (function->common.arg_info[n].class_name) {
 					free(function->common.arg_info[n].class_name);
 				}
-		  }
+			}
 			free(function->common.arg_info);
 		}
 	}
@@ -696,15 +702,7 @@ static void free_u_zend_constant(zend_constant *c)
 	free(c->name);
 }
 
-static void copy_u_zend_constant(zend_constant *c)
-{
-	c->name = (char*)zend_ustrndup((UChar*)c->name, c->name_len - 1);
-	if (!(c->flags & CONST_PERSISTENT)) {
-		zval_copy_ctor(&c->value);
-	}
-}
-
-static void function_to_unicode(zend_function *func)
+static void function_to_unicode(zend_function *func TSRMLS_DC)
 {
 	if (func->common.function_name) {
 		UChar *uname;
@@ -737,26 +735,22 @@ static void function_to_unicode(zend_function *func)
 	}
 }
 
-static void property_info_to_unicode(zend_property_info *info)
+static void property_info_to_unicode(zend_property_info *info TSRMLS_DC)
 {
 	if (info->name) {
 		UChar *uname;
 
 		uname = malloc(UBYTES(info->name_length+1));
 		u_charsToUChars(info->name, uname, info->name_length+1);
+		free(info->name);
 		info->name = (char*)uname;
 		info->h = zend_u_get_hash_value(IS_UNICODE, info->name, info->name_length+1);
 	}
 }
 
-static void zval_ptr_to_unicode(zval **zv)
+static void zval_ptr_to_unicode(zval **zv TSRMLS_DC)
 {
-	zval *new_zv = malloc(sizeof(zval));
-
-	memcpy(new_zv, *zv, sizeof(zval));
-	new_zv->refcount = 1;
-	zval_copy_persistent(new_zv);
-	*zv = new_zv;
+	zval_copy_persistent(*zv);
 }
 
 static void const_to_unicode(zend_constant *c)
@@ -766,157 +760,36 @@ static void const_to_unicode(zend_constant *c)
 	if (c->name) {
 		uname = malloc(UBYTES(c->name_len));
 		u_charsToUChars(c->name, uname, c->name_len);
+		free(c->name);
 		c->name = (char*)uname;
 	}
-	zval_copy_persistent(&c->value);
+	if (Z_TYPE(c->value) == IS_STRING || Z_TYPE(c->value) == IS_CONSTANT) {
+		UChar *ustr;
+
+		ustr = malloc(UBYTES(Z_STRLEN(c->value)+1));
+		u_charsToUChars(Z_STRVAL(c->value), ustr, Z_STRLEN(c->value)+1);
+		Z_USTRVAL(c->value) = ustr;
+		if (Z_TYPE(c->value) == IS_STRING) Z_TYPE(c->value) = IS_UNICODE;
+	}
 }
 
-static void class_to_unicode(zend_class_entry **ce)
+static void class_to_unicode(zend_class_entry **ce TSRMLS_DC)
 {
-	zend_class_entry *new_ce = malloc(sizeof(zend_class_entry));
-	zend_property_info tmp_info;
-	zval* tmp_zval;
-
-	memcpy(new_ce, *ce, sizeof(zend_class_entry));
-	(*ce)->u_twin = new_ce;
-
 	/* Convert name to unicode */
-	if (new_ce->name) {
-		UChar *uname = malloc(UBYTES(new_ce->name_length+1));
+	if ((*ce)->name) {
+		UChar *uname = malloc(UBYTES((*ce)->name_length+1));
 
-		u_charsToUChars(new_ce->name, uname, new_ce->name_length+1);
-		new_ce->name = (char*)uname;
+		u_charsToUChars((*ce)->name, uname, (*ce)->name_length+1);
+		free((*ce)->name);
+		(*ce)->name = (char*)uname;
 	}
 
-	/* Copy methods */
-	zend_u_hash_init_ex(&new_ce->function_table, (*ce)->function_table.nNumOfElements, NULL, ZEND_U_FUNCTION_DTOR, 1, 1, 0);
-	{
-		Bucket *p = (*ce)->function_table.pListHead;
-		while (p != NULL) {
-			zend_function *src = (zend_function*)p->pData;
-			zend_function *target;
-			zend_function tmp_func = *src;
-
-			function_to_unicode(&tmp_func);
-			
-			zend_hash_add(&new_ce->function_table, p->key.u.string, p->nKeyLength, &tmp_func, sizeof(zend_function), (void**)&target);
-			src->common.u_twin = target;
-
-		  p = p->pListNext;
-		}
-	}
-/*
-	zend_hash_copy(&new_ce->function_table, &(*ce)->function_table, (copy_ctor_func_t) function_to_unicode, &tmp_func, sizeof(zend_function));
-*/
-	/* Copy constants */
-	zend_u_hash_init_ex(&new_ce->constants_table, (*ce)->constants_table.nNumOfElements, NULL, (*ce)->constants_table.pDestructor, 1, 1, 0);
-	zend_hash_copy(&new_ce->constants_table, &(*ce)->constants_table, (copy_ctor_func_t) zval_ptr_to_unicode, &tmp_zval, sizeof(zval*));
-
-	/* Copy properties */
-	zend_u_hash_init_ex(&new_ce->properties_info, (*ce)->properties_info.nNumOfElements, NULL, (*ce)->properties_info.pDestructor/*(dtor_func_t)zend_destroy_property_info_internal*/, 1, 1, 0);
-	zend_hash_copy(&new_ce->properties_info, &(*ce)->properties_info, (copy_ctor_func_t) property_info_to_unicode, &tmp_info, sizeof(zend_property_info));
-
-	zend_u_hash_init_ex(&new_ce->default_properties, (*ce)->default_properties.nNumOfElements, NULL, (*ce)->default_properties.pDestructor, 1, 1, 0);
-	zend_hash_copy(&new_ce->default_properties, &(*ce)->default_properties, (copy_ctor_func_t) zval_ptr_to_unicode, &tmp_zval, sizeof(zval*));
-
-	zend_u_hash_init_ex(&new_ce->default_static_members, (*ce)->default_static_members.nNumOfElements, NULL, (*ce)->default_static_members.pDestructor, 1, 1, 0);
-
-	{
-		HashPosition pos;
-		zval **p;
-
-		zend_hash_internal_pointer_reset_ex(&(*ce)->default_static_members, &pos);
-		while (zend_hash_get_current_data_ex(&(*ce)->default_static_members, (void**)&p, &pos) == SUCCESS) {
-			char *str_index;
-			uint str_length;
-			ulong num_index;
-			zval **q;
-
-			zend_hash_get_current_key_ex(&(*ce)->default_static_members, &str_index, &str_length, &num_index, 0, &pos);
-			if ((*p)->is_ref &&
-			    (*ce)->parent &&
-			    zend_hash_find(&(*ce)->parent->default_static_members, str_index, str_length, (void**)&q) == SUCCESS &&
-			    *p == *q &&
-			    zend_hash_find(&new_ce->parent->u_twin->default_static_members, str_index, str_length, (void**)&q) == SUCCESS) {
-				(*q)->refcount++;
-				(*q)->is_ref = 1;
-				zend_hash_add(&new_ce->default_static_members, str_index, str_length, (void**)q, sizeof(zval*), NULL);
-			} else {
-				zval *q = *p;
-				zval_ptr_to_unicode(&q);
-				q->is_ref = 0;
-				zend_hash_add(&new_ce->default_static_members, str_index, str_length, (void**)&q, sizeof(zval*), NULL);
-			}
-			zend_hash_move_forward_ex(&(*ce)->default_static_members, &pos);
-		}
-	}
-
-	*ce = new_ce;
-}
-
-static void fix_classes(HashTable *ht) {
-	Bucket *p = ht->pListHead;
-	Bucket *q;
-
-	/* Fix parent classes */
-	while (p != NULL) {
-		zend_class_entry *ce = *(zend_class_entry**)p->pData;
-
-		if (ce->parent) {
-			ce->parent = ce->parent->u_twin;
-		}
-		if (ce->num_interfaces > 0 && ce->interfaces) {
-			int i = sizeof(zend_class_entry*)*ce->num_interfaces;
-			zend_class_entry **new_interfaces;
-
-			new_interfaces = (zend_class_entry**)malloc(i);
-			memcpy(new_interfaces, ce->interfaces, i);
-			ce->interfaces = new_interfaces;
-			for (i = 0; i < ce->num_interfaces; i++) {
-				ce->interfaces[i] = ce->interfaces[i]->u_twin;
-			}
-		}
-		
-		q = ce->function_table.pListHead;
-		while (q != NULL) {
-			zend_function *f = (zend_function*)q->pData;
-
-			if (f->common.scope) {
-				f->common.scope = f->common.scope->u_twin;
-			}			
-			if (f->common.prototype) {
-				f->common.prototype = f->common.prototype->common.u_twin;
-			}
-			q = q->pListNext;
-		}
-
-		if (ce->constructor) {
-			ce->constructor = ce->constructor->common.u_twin;
-		} else if (ce->destructor) {
-			ce->destructor = ce->destructor->common.u_twin;
-		} else if (ce->clone) {
-			ce->clone = ce->clone->common.u_twin;
-		} else if (ce->__get) {
-			ce->__get = ce->__get->common.u_twin;
-		} else if (ce->__set) {
-			ce->__set = ce->__set->common.u_twin;
-		} else if (ce->__unset) {
-			ce->__unset = ce->__unset->common.u_twin;
-		} else if (ce->__isset) {
-			ce->__isset = ce->__isset->common.u_twin;
-		} else if (ce->__call) {
-			ce->__call = ce->__call->common.u_twin;
-		} else if (ce->__tostring) {
-			ce->__tostring = ce->__tostring->common.u_twin;
-		} else if (ce->serialize_func) {
-			ce->serialize_func = ce->serialize_func->common.u_twin;
-		} else if (ce->unserialize_func) {
-			ce->unserialize_func = ce->unserialize_func->common.u_twin;
-		}
-
-		p = p->pListNext;
-	}
-
+	zend_hash_to_unicode(&(*ce)->function_table, (apply_func_t)function_to_unicode TSRMLS_CC);
+	(*ce)->function_table.pDestructor = ZEND_U_FUNCTION_DTOR;
+	zend_hash_to_unicode(&(*ce)->constants_table, (apply_func_t)zval_ptr_to_unicode TSRMLS_CC);
+	zend_hash_to_unicode(&(*ce)->properties_info, (apply_func_t)property_info_to_unicode TSRMLS_CC);
+	zend_hash_to_unicode(&(*ce)->default_properties, (apply_func_t)zval_ptr_to_unicode TSRMLS_CC);
+	zend_hash_to_unicode(&(*ce)->default_static_members, (apply_func_t)zval_ptr_to_unicode TSRMLS_CC);
 }
 
 #ifdef ZTS
@@ -927,45 +800,22 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS
 
 	compiler_globals->compiled_filename = NULL;
 
-	compiler_globals->global_function_table = compiler_globals->function_table = (HashTable *) malloc(sizeof(HashTable));
-	zend_u_hash_init_ex(compiler_globals->function_table, 100, NULL, ZEND_FUNCTION_DTOR, 1, 0, 0);
+	compiler_globals->function_table = (HashTable *) malloc(sizeof(HashTable));
+	zend_u_hash_init_ex(compiler_globals->function_table, 100, NULL, ZEND_FUNCTION_DTOR, 1, UG(unicode), 0);
 	zend_hash_copy(compiler_globals->function_table, global_function_table, NULL, &tmp_func, sizeof(zend_function));
 
-	if (global_u_function_table) {
-		compiler_globals->global_u_function_table = (HashTable *) malloc(sizeof(HashTable));
-		zend_u_hash_init_ex(compiler_globals->global_u_function_table, 100, NULL, ZEND_FUNCTION_DTOR, 1, 1, 0);
-		zend_hash_copy(compiler_globals->global_u_function_table, global_u_function_table, NULL, &tmp_func, sizeof(zend_function));
-	} else {
-		compiler_globals->global_u_function_table = 0;
-	}
-
-	compiler_globals->global_class_table = compiler_globals->class_table = (HashTable *) malloc(sizeof(HashTable));
-	zend_u_hash_init_ex(compiler_globals->class_table, 10, NULL, ZEND_CLASS_DTOR, 1, 0, 0);
+	compiler_globals->class_table = (HashTable *) malloc(sizeof(HashTable));
+	zend_u_hash_init_ex(compiler_globals->class_table, 10, NULL, ZEND_CLASS_DTOR, 1, UG(unicode), 0);
 	zend_hash_copy(compiler_globals->class_table, global_class_table, (copy_ctor_func_t) zend_class_add_ref, &tmp_class, sizeof(zend_class_entry *));
 
-	if (global_u_class_table) {
-		compiler_globals->global_u_class_table =  (HashTable *) malloc(sizeof(HashTable));
-		zend_u_hash_init_ex(compiler_globals->global_u_class_table, 10, NULL, ZEND_CLASS_DTOR, 1, 1, 0);
-		zend_hash_copy(compiler_globals->global_u_class_table, global_u_class_table, (copy_ctor_func_t) zend_class_add_ref, &tmp_class, sizeof(zend_class_entry *));
-	} else {
-		compiler_globals->global_u_class_table = NULL;
-	}
 	zend_set_default_compile_time_values(TSRMLS_C);
 
 	CG(interactive) = 0;
 	CG(literal_type) = IS_STRING;
 
-	compiler_globals->global_auto_globals_table = compiler_globals->auto_globals = (HashTable *) malloc(sizeof(HashTable));
-	zend_u_hash_init_ex(compiler_globals->auto_globals, 8, NULL, NULL, 1, 0, 0);
+	compiler_globals->auto_globals = (HashTable *) malloc(sizeof(HashTable));
+	zend_u_hash_init_ex(compiler_globals->auto_globals, 8, NULL, NULL, 1, UG(unicode), 0);
 	zend_hash_copy(compiler_globals->auto_globals, global_auto_globals_table, NULL, NULL, sizeof(zend_auto_global) /* empty element */);
-
-	if (global_u_auto_globals_table) {
-		compiler_globals->global_u_auto_globals_table = (HashTable *) malloc(sizeof(HashTable));
-		zend_u_hash_init_ex(compiler_globals->global_u_auto_globals_table, 8, NULL, NULL, 1, 1, 0);
-		zend_hash_copy(compiler_globals->global_u_auto_globals_table, global_u_auto_globals_table, NULL, NULL, sizeof(zend_auto_global) /* empty element */);
-	} else {
-		compiler_globals->global_u_auto_globals_table = NULL;
-	}
 
 	compiler_globals->last_static_member = zend_hash_num_elements(compiler_globals->class_table);
 	if (compiler_globals->last_static_member) {
@@ -978,38 +828,17 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS
 
 static void compiler_globals_dtor(zend_compiler_globals *compiler_globals TSRMLS_DC)
 {
-	if (compiler_globals->function_table != global_function_table &&
-	    compiler_globals->function_table != global_u_function_table) {
-		if (compiler_globals->global_function_table) {
-			zend_hash_destroy(compiler_globals->global_function_table);
-			free(compiler_globals->global_function_table);
-		}
-		if (compiler_globals->global_u_function_table) {
-			zend_hash_destroy(compiler_globals->global_u_function_table);
-			free(compiler_globals->global_u_function_table);
-		}
+	if (compiler_globals->function_table != GLOBAL_FUNCTION_TABLE) {
+		zend_hash_destroy(compiler_globals->function_table);
+		free(compiler_globals->function_table);
 	}
-	if (compiler_globals->class_table != global_class_table &&
-	    compiler_globals->class_table != global_u_class_table) {
-		if (compiler_globals->global_class_table) {
-			zend_hash_destroy(compiler_globals->global_class_table);
-			free(compiler_globals->global_class_table);
-		}
-		if (compiler_globals->global_u_class_table) {
-			zend_hash_destroy(compiler_globals->global_u_class_table);
-			free(compiler_globals->global_u_class_table);
-		}
+	if (compiler_globals->class_table != GLOBAL_CLASS_TABLE) {
+		zend_hash_destroy(compiler_globals->class_table);
+		free(compiler_globals->class_table);
 	}
-	if (compiler_globals->auto_globals != global_auto_globals_table &&
-	    compiler_globals->auto_globals != global_u_auto_globals_table) {
-		if (compiler_globals->global_auto_globals_table) {
-			zend_hash_destroy(compiler_globals->global_auto_globals_table);
-			free(compiler_globals->global_auto_globals_table);
-		}
-		if (compiler_globals->global_u_auto_globals_table) {
-			zend_hash_destroy(compiler_globals->global_u_auto_globals_table);
-			free(compiler_globals->global_u_auto_globals_table);
-		}
+	if (compiler_globals->auto_globals != GLOBAL_AUTO_GLOBALS_TABLE) {
+		zend_hash_destroy(compiler_globals->auto_globals);
+		free(compiler_globals->auto_globals);
 	}
 	if (compiler_globals->static_members) {
 		free(compiler_globals->static_members);
@@ -1020,20 +849,8 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals TSRMLS
 
 static void executor_globals_ctor(zend_executor_globals *executor_globals TSRMLS_DC)
 {
-	zend_constant tmp_const;
-
 	zend_startup_constants(TSRMLS_C);
-	zend_copy_constants(EG(zend_constants), global_constants_table);
-	EG(global_constants_table) = EG(zend_constants);
-
-	if (global_u_constants_table) {
-		EG(global_u_constants_table) = (HashTable *) malloc(sizeof(HashTable));
-		zend_u_hash_init_ex(EG(global_u_constants_table), global_u_constants_table->nNumOfElements, NULL, ZEND_CONSTANT_DTOR, 1, 1, 0);
-		zend_hash_copy(EG(global_u_constants_table), global_u_constants_table, (copy_ctor_func_t) copy_u_zend_constant, &tmp_const, sizeof(zend_constant));
-	} else {
-		EG(global_u_constants_table) = NULL;
-	}
-
+	zend_copy_constants(EG(zend_constants), GLOBAL_CONSTANTS_TABLE);
 	zend_init_rsrc_plist(TSRMLS_C);
 	EG(lambda_count)=0;
 	EG(user_error_handler) = NULL;
@@ -1051,16 +868,9 @@ static void executor_globals_dtor(zend_executor_globals *executor_globals TSRMLS
 	if (&executor_globals->persistent_list != global_persistent_list) {
 		zend_destroy_rsrc_list(&executor_globals->persistent_list TSRMLS_CC);
 	}
-	if (executor_globals->global_constants_table != global_constants_table &&
-	    executor_globals->global_u_constants_table != global_u_function_table) {
-		if (executor_globals->global_constants_table) {
-			zend_hash_destroy(executor_globals->global_constants_table);
-			free(executor_globals->global_constants_table);
-		}
-		if (executor_globals->global_u_constants_table) {
-			zend_hash_destroy(executor_globals->global_u_constants_table);
-			free(executor_globals->global_u_constants_table);
-		}
+	if (executor_globals->zend_constants != GLOBAL_CONSTANTS_TABLE) {
+		zend_hash_destroy(executor_globals->zend_constants);
+		free(executor_globals->zend_constants);
 	}
 }
 
@@ -1081,6 +891,7 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals_p TSRMLS_DC)
 {
 	start_memory_manager(TSRMLS_C);
 }
+
 
 #if defined(__FreeBSD__) || defined(__DragonFly__)
 /* FreeBSD and DragonFly floating point precision fix */
@@ -1201,15 +1012,15 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	zend_version_info = strdup(ZEND_CORE_VERSION_INFO);
 	zend_version_info_length = sizeof(ZEND_CORE_VERSION_INFO)-1;
 
-	global_function_table = (HashTable *) malloc(sizeof(HashTable));
-	global_class_table = (HashTable *) malloc(sizeof(HashTable));
-	global_auto_globals_table = (HashTable *) malloc(sizeof(HashTable));
-	global_constants_table = (HashTable *) malloc(sizeof(HashTable));
+	GLOBAL_FUNCTION_TABLE = (HashTable *) malloc(sizeof(HashTable));
+	GLOBAL_CLASS_TABLE = (HashTable *) malloc(sizeof(HashTable));
+	GLOBAL_AUTO_GLOBALS_TABLE = (HashTable *) malloc(sizeof(HashTable));
+	GLOBAL_CONSTANTS_TABLE = (HashTable *) malloc(sizeof(HashTable));
 
-	zend_hash_init_ex(global_function_table, 100, NULL, ZEND_FUNCTION_DTOR, 1, 0);
-	zend_hash_init_ex(global_class_table, 10, NULL, ZEND_CLASS_DTOR, 1, 0);
-	zend_hash_init_ex(global_auto_globals_table, 8, NULL, (dtor_func_t) zend_auto_global_dtor, 1, 0);
-	zend_hash_init_ex(global_constants_table, 20, NULL, ZEND_CONSTANT_DTOR, 1, 0);
+	zend_hash_init_ex(GLOBAL_FUNCTION_TABLE, 100, NULL, ZEND_FUNCTION_DTOR, 1, 0);
+	zend_hash_init_ex(GLOBAL_CLASS_TABLE, 10, NULL, ZEND_CLASS_DTOR, 1, 0);
+	zend_hash_init_ex(GLOBAL_AUTO_GLOBALS_TABLE, 8, NULL, (dtor_func_t) zend_auto_global_dtor, 1, 0);
+	zend_hash_init_ex(GLOBAL_CONSTANTS_TABLE, 20, NULL, ZEND_CONSTANT_DTOR, 1, 0);
 
 	zend_hash_init_ex(&module_registry, 50, NULL, ZEND_MODULE_DTOR, 1, 0);
 	zend_init_rsrc_list_dtors();
@@ -1235,22 +1046,16 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	compiler_globals->function_table = (HashTable *) malloc(sizeof(HashTable));
 	compiler_globals->class_table = (HashTable *) malloc(sizeof(HashTable));
 
-	*compiler_globals->function_table = *global_function_table;
-	*compiler_globals->class_table = *global_class_table;
-	compiler_globals->auto_globals = global_auto_globals_table;
+	*compiler_globals->function_table = *GLOBAL_FUNCTION_TABLE;
+	*compiler_globals->class_table = *GLOBAL_CLASS_TABLE;
+	compiler_globals->auto_globals = GLOBAL_AUTO_GLOBALS_TABLE;
 
 	zend_hash_destroy(executor_globals->zend_constants);
-	*executor_globals->zend_constants = *global_constants_table;
+	*executor_globals->zend_constants = *GLOBAL_CONSTANTS_TABLE;
 #else
 	unicode_globals_ctor(&unicode_globals TSRMLS_CC);
 	scanner_globals_ctor(&ini_scanner_globals TSRMLS_CC);
 	scanner_globals_ctor(&language_scanner_globals TSRMLS_CC);
-
-	CG(function_table) = global_function_table;
-	CG(class_table) = global_class_table;
-	CG(auto_globals) = global_auto_globals_table;
-	EG(zend_constants) = global_constants_table;
-
 	zend_set_default_compile_time_values(TSRMLS_C);
 	EG(user_error_handler) = NULL;
 	EG(user_exception_handler) = NULL;
@@ -1261,7 +1066,6 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 
 #ifndef ZTS
 	zend_init_rsrc_plist(TSRMLS_C);
-	global_persistent_list = &EG(persistent_list);
 #endif
 
 	if (start_builtin_functions) {
@@ -1290,44 +1094,34 @@ void zend_register_standard_ini_entries(TSRMLS_D)
  */
 void zend_post_startup(TSRMLS_D)
 {
-	UConverter *old_runtime_encoding_conv;
-  UErrorCode status = U_ZERO_ERROR;
-	zend_function tmp_func;
-	zend_class_entry *tmp_class;
-	zend_constant tmp_const;
 #ifdef ZTS
 	zend_compiler_globals *compiler_globals = ts_resource(compiler_globals_id);
 	zend_executor_globals *executor_globals = ts_resource(executor_globals_id);
 
-	*global_function_table = *compiler_globals->function_table;
-	*global_class_table = *compiler_globals->class_table;
-	*global_constants_table = *executor_globals->zend_constants;
+	*GLOBAL_FUNCTION_TABLE = *compiler_globals->function_table;
+	*GLOBAL_CLASS_TABLE = *compiler_globals->class_table;
+	*GLOBAL_CONSTANTS_TABLE = *executor_globals->zend_constants;
 #endif
 
 	/* Make copies of HashTables with UNICODE */
 
-	old_runtime_encoding_conv = UG(runtime_encoding_conv);
-	UG(runtime_encoding_conv) = ucnv_open("ASCII", &status);
+	if (UG(unicode)) {
+		UConverter *old_runtime_encoding_conv;
+		UErrorCode status = U_ZERO_ERROR;
 
-	global_u_function_table = (HashTable *) malloc(sizeof(HashTable));
-	zend_u_hash_init_ex(global_u_function_table, global_function_table->nNumOfElements, NULL, ZEND_U_FUNCTION_DTOR, 1, 1, 0);
-	zend_hash_copy(global_u_function_table, global_function_table, (copy_ctor_func_t) function_to_unicode, &tmp_func, sizeof(zend_function));
+		old_runtime_encoding_conv = UG(runtime_encoding_conv);
+		UG(runtime_encoding_conv) = ucnv_open("ASCII", &status);
 
-	global_u_class_table = (HashTable *) malloc(sizeof(HashTable));
-	zend_u_hash_init_ex(global_u_class_table, global_class_table->nNumOfElements, NULL, ZEND_CLASS_DTOR, 1, 1, 0);
-	zend_hash_copy(global_u_class_table, global_class_table, (copy_ctor_func_t) class_to_unicode, &tmp_class, sizeof(zend_class_entry *));
-	fix_classes(global_u_class_table);
+		zend_hash_to_unicode(GLOBAL_FUNCTION_TABLE, (apply_func_t)function_to_unicode TSRMLS_CC);
+		GLOBAL_FUNCTION_TABLE->pDestructor = ZEND_U_FUNCTION_DTOR;
+		zend_hash_to_unicode(GLOBAL_CLASS_TABLE, (apply_func_t)class_to_unicode TSRMLS_CC);
+		zend_hash_to_unicode(GLOBAL_AUTO_GLOBALS_TABLE, NULL TSRMLS_CC);
+		zend_hash_to_unicode(GLOBAL_CONSTANTS_TABLE, (apply_func_t)const_to_unicode TSRMLS_CC);
+		GLOBAL_CONSTANTS_TABLE->pDestructor = ZEND_U_CONSTANT_DTOR;
 
-	global_u_auto_globals_table = (HashTable *) malloc(sizeof(HashTable));
-	zend_u_hash_init_ex(global_u_auto_globals_table, global_auto_globals_table->nNumOfElements, NULL, NULL, 1, 1, 0);
-	zend_hash_copy(global_u_auto_globals_table, global_auto_globals_table, NULL, NULL, sizeof(zend_auto_global));
-
-	global_u_constants_table = (HashTable *) malloc(sizeof(HashTable));
-	zend_u_hash_init_ex(global_u_constants_table, global_constants_table->nNumOfElements, NULL, ZEND_U_CONSTANT_DTOR, 1, 1, 0);
-	zend_hash_copy(global_u_constants_table, global_constants_table, (copy_ctor_func_t) const_to_unicode, &tmp_const, sizeof(zend_constant));
-
-  ucnv_close(UG(runtime_encoding_conv));
-	UG(runtime_encoding_conv) = old_runtime_encoding_conv;
+		ucnv_close(UG(runtime_encoding_conv));
+		UG(runtime_encoding_conv) = old_runtime_encoding_conv;
+	}
 
 #ifdef ZTS
 	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
@@ -1347,54 +1141,29 @@ void zend_shutdown(TSRMLS_D)
 #ifdef ZEND_WIN32
 	zend_shutdown_timeout_thread();
 #endif
-	if (global_persistent_list) {
-		zend_destroy_rsrc_list(global_persistent_list TSRMLS_CC);
-	}
+	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
 	zend_hash_graceful_reverse_destroy(&module_registry);
 
-	zend_hash_destroy(global_function_table);
-	zend_hash_destroy(global_class_table);
-	if (global_u_function_table) {
-		zend_hash_destroy(global_u_function_table);
-	}
-	if (global_u_class_table) {
-		zend_hash_destroy(global_u_class_table);
-	}
+	zend_hash_destroy(GLOBAL_FUNCTION_TABLE);
+	zend_hash_destroy(GLOBAL_CLASS_TABLE);
 
-	zend_hash_destroy(global_auto_globals_table);
-	free(global_auto_globals_table);
-	if (global_u_auto_globals_table) {
-		zend_hash_destroy(global_u_auto_globals_table);
-		free(global_u_auto_globals_table);
-	}
+	zend_hash_destroy(GLOBAL_AUTO_GLOBALS_TABLE);
+	free(GLOBAL_AUTO_GLOBALS_TABLE);
 
 	zend_shutdown_extensions(TSRMLS_C);
 	free(zend_version_info);
 
-	zend_hash_destroy(global_constants_table);
-	free(global_constants_table);
-	if (global_u_constants_table) {
-		zend_hash_destroy(global_u_constants_table);
-		free(global_u_constants_table);
-	}
-	
-	free(global_function_table);
-	free(global_class_table);
-	if (global_u_function_table) {
-		free(global_u_function_table);
-	}
-	if (global_u_class_table) {
-		free(global_u_class_table);
-	}
+	free(GLOBAL_FUNCTION_TABLE);
+	free(GLOBAL_CLASS_TABLE);
+
+	zend_hash_destroy(GLOBAL_CONSTANTS_TABLE);
+	free(GLOBAL_CONSTANTS_TABLE);
+
 #ifdef ZTS
-	global_function_table = NULL;
-	global_u_function_table = NULL;
-	global_class_table = NULL;
-	global_u_class_table = NULL;
-	global_auto_globals_table = NULL;
-	global_u_auto_globals_table = NULL;
-	global_constants_table = NULL;
-	global_u_constants_table = NULL;
+	GLOBAL_FUNCTION_TABLE = NULL;
+	GLOBAL_CLASS_TABLE = NULL;
+	GLOBAL_AUTO_GLOBALS_TABLE = NULL;
+	GLOBAL_CONSTANTS_TABLE = NULL;
 #else
 	unicode_globals_dtor(&unicode_globals TSRMLS_CC);
 #endif
@@ -1489,19 +1258,7 @@ static void shutdown_unicode_request_globals(TSRMLS_D)
 
 void zend_activate(TSRMLS_D)
 {
-#ifdef ZTS
-	CG(function_table) = UG(unicode)?CG(global_u_function_table):CG(global_function_table);
-	CG(class_table) = UG(unicode)?CG(global_u_class_table):CG(global_class_table);
-	CG(auto_globals) = UG(unicode)?CG(global_u_auto_globals_table):CG(global_auto_globals_table);
-	EG(zend_constants) = UG(unicode)?EG(global_u_constants_table):EG(global_constants_table);
-#else
-	CG(function_table) = UG(unicode)?global_u_function_table:global_function_table;
-	CG(class_table) = UG(unicode)?global_u_class_table:global_class_table;
-	CG(auto_globals) = UG(unicode)?global_u_auto_globals_table:global_auto_globals_table;
-	EG(zend_constants) = UG(unicode)?global_u_constants_table:global_constants_table;
-#endif
 	init_unicode_request_globals(TSRMLS_C);
-
 	init_unicode_strings();
 	init_compiler(TSRMLS_C);
 	init_executor(TSRMLS_C);
@@ -1730,7 +1487,7 @@ ZEND_API void zend_error(int type, const char *format, ...)
 
 			if (!EG(user_error_handler)) {
 				EG(user_error_handler) = orig_user_error_handler;
-			} 
+			}
 			else {
 				zval_ptr_dtor(&orig_user_error_handler);
 			}

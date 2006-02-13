@@ -373,8 +373,6 @@ struct _zend_class_entry {
 	char *doc_comment;
 	zend_uint doc_comment_len;
 
-	zend_class_entry *u_twin;
-	
 	struct _zend_module_entry *module;
 };
 
@@ -541,7 +539,7 @@ ZEND_API void zend_error(int type, const char *format, ...);
 void zenderror(char *error);
 
 /* The following #define is used for code duality in PHP for Engine 1 & 2 */
-#define ZEND_STANDARD_CLASS_DEF_PTR U_CLASS_ENTRY(zend_standard_class_def)
+#define ZEND_STANDARD_CLASS_DEF_PTR zend_standard_class_def
 extern ZEND_API zend_class_entry *zend_standard_class_def;
 extern ZEND_API zend_utility_values zend_uv;
 extern ZEND_API zval zval_used_for_init;

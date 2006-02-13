@@ -55,7 +55,7 @@ zend_class_entry *pdo_exception_ce;
 
 PDO_API zend_class_entry *php_pdo_get_exception(TSRMLS_D)
 {
-	return U_CLASS_ENTRY(pdo_exception_ce);
+	return pdo_exception_ce;
 }
 
 PDO_API char *php_pdo_str_tolower_dup(const char *src, int len)

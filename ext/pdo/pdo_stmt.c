@@ -1178,7 +1178,7 @@ static PHP_METHOD(PDOStatement, fetchObject)
 	
 	switch(ZEND_NUM_ARGS()) {
 	case 0:
-		stmt->fetch.cls.ce = U_CLASS_ENTRY(zend_standard_class_def);
+		stmt->fetch.cls.ce = zend_standard_class_def;
 		break;
 	case 2:
 		if (Z_TYPE_P(ctor_args) != IS_NULL && Z_TYPE_P(ctor_args) != IS_ARRAY) {
@@ -1274,7 +1274,7 @@ static PHP_METHOD(PDOStatement, fetchAll)
 		switch(ZEND_NUM_ARGS()) {
 		case 0:
 		case 1:
-			stmt->fetch.cls.ce = U_CLASS_ENTRY(zend_standard_class_def);
+			stmt->fetch.cls.ce = zend_standard_class_def;
 			break;
 		case 3:
 			if (Z_TYPE_P(ctor_args) != IS_NULL && Z_TYPE_P(ctor_args) != IS_ARRAY) {
@@ -2406,7 +2406,7 @@ static union _zend_function *row_get_ctor(zval *object TSRMLS_DC)
 
 static zend_class_entry *row_get_ce(zval *object TSRMLS_DC)
 {
-	return U_CLASS_ENTRY(pdo_dbstmt_ce);
+	return pdo_dbstmt_ce;
 }
 
 static int row_get_classname(zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)

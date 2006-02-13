@@ -145,7 +145,7 @@ PHP_FUNCTION(class_implements)
 /* }}} */
 
 #define SPL_ADD_CLASS(class_name, z_list, sub, allow, ce_flags) \
-	spl_add_classes(U_CLASS_ENTRY(spl_ce_ ## class_name), z_list, sub, allow, ce_flags TSRMLS_CC)
+	spl_add_classes(spl_ce_ ## class_name, z_list, sub, allow, ce_flags TSRMLS_CC)
 
 #define SPL_LIST_CLASSES(z_list, sub, allow, ce_flags) \
 	SPL_ADD_CLASS(AppendIterator, z_list, sub, allow, ce_flags); \
@@ -298,7 +298,7 @@ PHP_FUNCTION(spl_autoload)
 	EG(function_state_ptr) = original_function_state_ptr;
 
 	if (!found) {
-		zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_LogicException), 0 TSRMLS_CC, "Class %s could not be loaded", class_name);
+		zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Class %s could not be loaded", class_name);
 	}
 } /* }}} */
 
@@ -420,25 +420,25 @@ PHP_FUNCTION(spl_autoload_register)
 			if (Z_TYPE_P(zcallable) == IS_ARRAY) {
 				if (!obj_ptr && alfi.func_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
 					if (do_throw) {
-						zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_LogicException), 0 TSRMLS_CC, "Passed array specifies a non static method but no object");
+						zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Passed array specifies a non static method but no object");
 					}
 					zval_dtor(&zfunc_name);
 					return;
 				}
 				else if (do_throw) {
-					zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_LogicException), 0 TSRMLS_CC, "Passed array does not specify %s %smethod", alfi.func_ptr ? "a callable" : "an existing", !obj_ptr ? "static " : "");
+					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Passed array does not specify %s %smethod", alfi.func_ptr ? "a callable" : "an existing", !obj_ptr ? "static " : "");
 				}
 				zval_dtor(&zfunc_name);
 				return;
 			} else if (Z_TYPE_P(zcallable) == IS_STRING || Z_TYPE_P(zcallable) == IS_UNICODE) {
 				if (do_throw) {
-					zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_LogicException), 0 TSRMLS_CC, "Function '%R' not %s", Z_TYPE_P(zcallable), Z_UNIVAL_P(zcallable), alfi.func_ptr ? "callable" : "found");
+					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Function '%R' not %s", Z_TYPE_P(zcallable), Z_UNIVAL_P(zcallable), alfi.func_ptr ? "callable" : "found");
 				}
 				zval_dtor(&zfunc_name);
 				return;
 			} else {
 				if (do_throw) {
-					zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_LogicException), 0 TSRMLS_CC, "Illegal value passed");
+					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Illegal value passed");
 				}
 				zval_dtor(&zfunc_name);
 				return;

@@ -539,7 +539,7 @@ PHP_METHOD(TextIterator, __construct)
 		intern->flags = flags;
 	}
 
-	if (Z_OBJCE_P(this_ptr) == U_CLASS_ENTRY(rev_text_iterator_ce)) {
+	if (Z_OBJCE_P(this_ptr) == rev_text_iterator_ce) {
 		intern->flags |= ITER_REVERSE;
 	}
 
