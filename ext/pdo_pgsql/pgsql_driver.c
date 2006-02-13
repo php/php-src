@@ -670,7 +670,7 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	H->pgoid = -1;
 
 	dbh->methods = &pgsql_methods;
-	dbh->alloc_own_columns = 0;
+	dbh->alloc_own_columns = 1;
 	dbh->max_escaped_char_length = 2;
 
 	ret = 1;
