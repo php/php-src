@@ -1738,50 +1738,6 @@ ZEND_API int zend_symtable_update_current_key(HashTable *ht, char *arKey, uint n
 	return zend_hash_update_current_key(ht, HASH_KEY_IS_STRING, arKey, nKeyLength, 0);
 }
 
-#if ZEND_DEBUG
-void zend_hash_display_pListTail(HashTable *ht)
-{
-	Bucket *p;
-
-	p = ht->pListTail;
-	while (p != NULL) {
-		if (p->key.type == IS_UNICODE) {
-			/* TODO: ??? */
-		} else {
-			zend_output_debug_string(0, "pListTail has key %s\n", p->key.u.string);
-		}
-		p = p->pListLast;
-	}
-}
-
-void zend_hash_display(HashTable *ht)
-{
-	Bucket *p;
-	uint i;
-
-	for (i = 0; i < ht->nTableSize; i++) {
-		p = ht->arBuckets[i];
-		while (p != NULL) {
-			if (p->key.type == IS_UNICODE) {
-				/* TODO: ??? */
-			} else {
-				zend_output_debug_string(0, "%s <==> 0x%lX\n", p->key.u.string, p->h);
-			}
-			p = p->pNext;
-		}
-	}
-
-	p = ht->pListTail;
-	while (p != NULL) {
-		if (p->key.type == IS_UNICODE) {
-			/* TODO: ??? */
-		} else {
-			zend_output_debug_string(0, "%s <==> 0x%lX\n", p->key.u.string, p->h);
-		}
-		p = p->pListLast;
-	}
-}
-
 ZEND_API void zend_hash_to_unicode(HashTable *ht, apply_func_t apply_func TSRMLS_DC)
 {
 	Bucket **p;
@@ -1829,6 +1785,50 @@ ZEND_API void zend_hash_to_unicode(HashTable *ht, apply_func_t apply_func TSRMLS
 			apply_func((*p)->pData TSRMLS_CC);
 		}
 		p = &(*p)->pListNext;
+	}
+}
+
+#if ZEND_DEBUG
+void zend_hash_display_pListTail(HashTable *ht)
+{
+	Bucket *p;
+
+	p = ht->pListTail;
+	while (p != NULL) {
+		if (p->key.type == IS_UNICODE) {
+			/* TODO: ??? */
+		} else {
+			zend_output_debug_string(0, "pListTail has key %s\n", p->key.u.string);
+		}
+		p = p->pListLast;
+	}
+}
+
+void zend_hash_display(HashTable *ht)
+{
+	Bucket *p;
+	uint i;
+
+	for (i = 0; i < ht->nTableSize; i++) {
+		p = ht->arBuckets[i];
+		while (p != NULL) {
+			if (p->key.type == IS_UNICODE) {
+				/* TODO: ??? */
+			} else {
+				zend_output_debug_string(0, "%s <==> 0x%lX\n", p->key.u.string, p->h);
+			}
+			p = p->pNext;
+		}
+	}
+
+	p = ht->pListTail;
+	while (p != NULL) {
+		if (p->key.type == IS_UNICODE) {
+			/* TODO: ??? */
+		} else {
+			zend_output_debug_string(0, "%s <==> 0x%lX\n", p->key.u.string, p->h);
+		}
+		p = p->pListLast;
 	}
 }
 
