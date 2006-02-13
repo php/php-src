@@ -68,6 +68,14 @@ static PHP_FUNCTION(unicode_decode)
 }
 /* }}} */
 
+/* {{{ proto bool unicode_enabled()
+   Check whether unicode semantics is enabled */
+static PHP_FUNCTION(unicode_enabled)
+{
+	RETURN_BOOL(UG(unicode));
+}
+/* }}} */
+
 /* {{{ proto string unicode_encode(unicode input, string encoding)
    Takes a unicode string and converts it to a string in the specified encoding */
 static PHP_FUNCTION(unicode_encode)
@@ -109,6 +117,7 @@ zend_function_entry unicode_functions[] = {
 	PHP_FE(i18n_loc_get_default, NULL)
 	PHP_FE(i18n_loc_set_default, NULL)
 	PHP_FE(unicode_decode, NULL)
+	PHP_FE(unicode_enabled, NULL)
 	PHP_FE(unicode_encode, NULL)
 	PHP_FE(i18n_strtotitle, NULL)
 	{ NULL, NULL, NULL }
