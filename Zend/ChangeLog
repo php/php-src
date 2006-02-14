@@ -1,3 +1,31 @@
+2006-02-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_hash.c:
+      Typo (misplaced #endif)
+
+    * zend.c
+      zend.h
+      zend_API.c
+      zend_API.h
+      zend_compile.h
+      zend_exceptions.c
+      zend_globals.h
+      zend_hash.c
+      zend_hash.h
+      zend_ini.h
+      zend_ini_parser.y
+      zend_ini_scanner.h
+      zend_ini_scanner.l
+      zend_interfaces.c
+      zend_object_handlers.c
+      zend_operators.c:
+      Made server wide switch for unicode on/off (according to PDM).
+
+2006-02-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend.c:
+      - Fix ini unicode_semantics (patch by Brion Vibber)
+
 2006-02-09  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_operators.c:
