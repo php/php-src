@@ -22,6 +22,7 @@ PHP                                                                        NEWS
 - Added ReflectionClass::newInstanceArgs($args). (Marcus)
 - Added imap_savebody() that allows message body to be written to a file.
   (Mike)
+- Fixed bug #36345 (PDO/MySQL problem loading BLOB over 1MB). (Ilia)
 - Fixed bug #36382 (PDO/PgSQL's getColumnMeta() crashes). (Derick)
 - Fixed bug #36359 (splFileObject::fwrite() doesn't write when no data length 
   specified). (Tony)
