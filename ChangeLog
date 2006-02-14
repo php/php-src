@@ -1,3 +1,93 @@
+2006-02-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * main/php_variables.c:
+      pval -> zval (Steph)
+
+2006-02-13  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_1)
+      NEWS:
+      - Fixed bug #36382 (PDO/PgSQL's getColumnMeta() crashes).
+
+2006-02-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_hash.c:
+      Typo (misplaced #endif)
+
+2006-02-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #36337 (ReflectionProperty fails to return correct visibility).
+
+2006-02-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      NEWS
+      main/php_variables.c
+      main/php_variables.c
+      main/php_variables.c
+      main/php_variables.c:
+      Fixed bug #36205 (Memory leaks on duplicate cookies)
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_hash.c
+      ZendEngine2/zend_hash.h
+      ZendEngine2/zend_ini.h
+      ZendEngine2/zend_ini_parser.y
+      ZendEngine2/zend_ini_scanner.h
+      ZendEngine2/zend_ini_scanner.l
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_operators.c
+      ext/com_dotnet/com_misc.c
+      ext/dom/attr.c
+      ext/dom/cdatasection.c
+      ext/dom/characterdata.c
+      ext/dom/comment.c
+      ext/dom/document.c
+      ext/dom/documentfragment.c
+      ext/dom/dom_iterators.c
+      ext/dom/domexception.c
+      ext/dom/domimplementation.c
+      ext/dom/element.c
+      ext/dom/entityreference.c
+      ext/dom/namednodemap.c
+      ext/dom/node.c
+      ext/dom/nodelist.c
+      ext/dom/php_dom.c
+      ext/dom/processinginstruction.c
+      ext/dom/text.c
+      ext/dom/xpath.c
+      ext/session/tests/015.phpt
+      ext/session/tests/020.phpt
+      ext/simplexml/simplexml.c
+      ext/sqlite/sqlite.c
+      ext/standard/array.c
+      ext/standard/dir.c
+      main/SAPI.c
+      main/SAPI.h
+      main/php_ini.c
+      main/php_variables.c
+      sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c
+      tests/lang/bug25145.phpt
+      tests/run-test/test004.phpt:
+      Made server wide switch for unicode on/off (according to PDM).
+
+2006-02-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend.c:
+      - Fix ini unicode_semantics (patch by Brion Vibber)
+
 2006-02-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
