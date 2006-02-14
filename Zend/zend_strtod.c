@@ -1250,7 +1250,7 @@ zend_strtod
 	_double rv, rv0;
 	Long L;
 	ULong y, z;
-	Bigint *bb, *bb1, *bd, *bd0, *bs, *delta;
+	Bigint *bb, *bb1, *bd, *bd0, *bs, *delta, *tmp;
 	double result;
 
 	CONST char decimal_point = '.';
@@ -1776,5 +1776,21 @@ zend_strtod
 	if (se)
 		*se = (char *)s;
 	result = sign ? -value(rv) : value(rv);
+		
+	for (i = 0; i <= Kmax; i++) {
+		Bigint **listp = &freelist[i];
+		while ((tmp = *listp) != NULL) {
+			*listp = tmp->next;
+			free(tmp);
+		}
+		freelist[i] = NULL;
+	}
+	
+	while (p5s) {
+		tmp = p5s;
+		p5s = p5s->next;
+		free(tmp);
+	}
+	
 	return result;
 	}
