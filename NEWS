@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Fixed an error in mysqli_fetch_fields (returned NULL instead of an
   array when row number > field_count). (Georg)
 - Renamed CachingRecursiveIterator to RecursiveCachingIterator. (Marcus)
+- Fixed bug #36400 (Custom 5xx error does not return correct HTTP response
+  error code). (Tony)
 - Fixed bug #36303 (foreach on error_zval produces segfault). (Dmitry)
 - Fixed bug #36205 (Memory leaks on duplicate cookies). (Dmitry)
 - Fixed bug #36071 (Engine Crash related with 'clone'). (Dmitry)
