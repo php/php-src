@@ -279,14 +279,18 @@ static int sapi_isapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 			break;
 		default: {
 			const char *sline = SG(sapi_headers).http_status_line;
-			
-			status_buf = emalloc(MAX_STATUS_LENGTH + 1);
+			int sline_len;
 			
 			/* httpd requires that r->status_line is set to the first digit of
 			 * the status-code: */
-			if (sline && strlen(sline) > 12 && strncmp(sline, "HTTP/1.", 7) == 0 && sline[8] == ' ') {
-				status_buf = estrndup(sline + 9, MAX_STATUS_LENGTH);
+			if (sline && ((sline_len = strlen(sline)) > 12) && strncmp(sline, "HTTP/1.", 7) == 0 && sline[8] == ' ') {
+				if ((sline_len - 9) > MAX_STATUS_LENGTH) {
+					status_buf = estrndup(sline + 9, MAX_STATUS_LENGTH);
+				} else {
+					status_buf = estrndup(sline + 9, sline_len - 9);
+				}
 			} else {
+				status_buf = emalloc(MAX_STATUS_LENGTH + 1);
 				snprintf(status_buf, MAX_STATUS_LENGTH, "%d Undescribed", SG(sapi_headers).http_response_code);
 			}
 			header_info.pszStatus = status_buf;
