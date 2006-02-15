@@ -72,12 +72,16 @@ typedef struct {
 			int32_t end;
 		} brk;
 	} u;
+	zend_object_iterator iter;
 } text_iter_obj;
 
-typedef struct {
-	zend_object_iterator intern;
-	text_iter_obj*		 object;
-} text_iter_it;
+static inline text_iter_obj* text_iter_to_obj(zend_object_iterator *iter)
+{
+	static text_iter_obj adr;
+	static int ofs = (char*)&adr.iter - (char*)&adr;
+
+	return (text_iter_obj *)((char*)iter - ofs);
+}
 
 typedef struct {
 	int  (*valid)  (text_iter_obj* object TSRMLS_DC);
@@ -389,54 +393,51 @@ static text_iter_ops* iter_ops[] = {
 
 static void text_iter_dtor(zend_object_iterator* iter TSRMLS_DC)
 {
-	text_iter_it* iterator = (text_iter_it *) iter;
-	zval_ptr_dtor((zval **)&iterator->intern.data);
-	efree(iterator);
+	text_iter_obj* obj = text_iter_to_obj(iter);
+	zval *object = obj->iter.data;
+
+	zval_ptr_dtor(&object);
 }
 
 static int text_iter_valid(zend_object_iterator* iter TSRMLS_DC)
 {
-	text_iter_it*  iterator = (text_iter_it *) iter;
-	text_iter_obj* object   = iterator->object;
+	text_iter_obj* obj = text_iter_to_obj(iter);
 
-	if (iter_ops[object->type]->valid(object TSRMLS_CC))
+	if (iter_ops[obj->type]->valid(obj TSRMLS_CC)) {
 		return SUCCESS;
-	else
+	} else {
 		return FAILURE;
+	}
 }
 
 static void text_iter_get_current_data(zend_object_iterator* iter, zval*** data TSRMLS_DC)
 {
-	text_iter_it*  iterator = (text_iter_it *) iter;
-	text_iter_obj* object   = iterator->object;
+	text_iter_obj* obj = text_iter_to_obj(iter);
 
-	iter_ops[object->type]->current(object TSRMLS_CC);
-	*data = &object->current;
+	iter_ops[obj->type]->current(obj TSRMLS_CC);
+	*data = &obj->current;
 }
 
 static int text_iter_get_current_key(zend_object_iterator* iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
 {
-	text_iter_it*  iterator = (text_iter_it *) iter;
-	text_iter_obj* object   = iterator->object;
+	text_iter_obj* obj = text_iter_to_obj(iter);
 
-	*int_key = iter_ops[object->type]->key(object TSRMLS_CC);
+	*int_key = iter_ops[obj->type]->key(obj TSRMLS_CC);
 	return HASH_KEY_IS_LONG;
 }
 
 static void text_iter_move_forward(zend_object_iterator* iter TSRMLS_DC)
 {
-	text_iter_it*  iterator = (text_iter_it *) iter;
-	text_iter_obj* object   = iterator->object;
+	text_iter_obj* obj = text_iter_to_obj(iter);
 
-	iter_ops[object->type]->next(object TSRMLS_CC);
+	iter_ops[obj->type]->next(obj TSRMLS_CC);
 }
 
 static void text_iter_rewind(zend_object_iterator* iter TSRMLS_DC)
 {
-	text_iter_it*  iterator = (text_iter_it *) iter;
-	text_iter_obj* object   = iterator->object;
+	text_iter_obj* obj = text_iter_to_obj(iter);
 
-	iter_ops[object->type]->rewind(object TSRMLS_CC);
+	iter_ops[obj->type]->rewind(obj TSRMLS_CC);
 }
 
 zend_object_iterator_funcs text_iter_funcs = {
@@ -450,21 +451,18 @@ zend_object_iterator_funcs text_iter_funcs = {
 
 static zend_object_iterator* text_iter_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
 {
-	text_iter_it* 	iterator;
 	text_iter_obj*	iter_object;
 
 	if (by_ref) {
 		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
 	}
-	iterator 	= emalloc(sizeof(text_iter_it));
 	iter_object = (text_iter_obj *) zend_object_store_get_object(object TSRMLS_CC);
 
 	ZVAL_ADDREF(object);
-	iterator->intern.data  = (void *) object;
-	iterator->intern.funcs = &text_iter_funcs;
-	iterator->object 	   = iter_object;
+	iter_object->iter.data  = (void *) object;
+	iter_object->iter.funcs = &text_iter_funcs;
 
-	return (zend_object_iterator *) iterator;
+	return (zend_object_iterator *) &iter_object->iter;
 }
 
 static void text_iterator_free_storage(void *object TSRMLS_DC)
