@@ -1,3 +1,30 @@
+2006-02-14  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      Zend/zend_strtod.c
+      ZendEngine2/zend_strtod.c:
+      MF51:
+      fix leak in zend_strtod() on big doubles
+
+    * ZendEngine2/zend_strtod.c
+      ZendEngine2/tests/zend_strtod.phpt:
+      MF51:
+      fix leak in zend_strtod() on big doubles
+      add new test
+
+    * (PHP_5_1)
+      ZendEngine2/zend_strtod.c
+      ZendEngine2/tests/zend_strtod.phpt
+      ZendEngine2/tests/zend_strtod.phpt:
+      fix leak in zend_strtod() on big doubles
+      add new test
+
+2006-02-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #36345 (PDO/MySQL problem loading BLOB over 1MB).
+
 2006-02-13  Dmitry Stogov  <dmitry@zend.com>
 
     * main/php_variables.c:

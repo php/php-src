@@ -1,3 +1,23 @@
+2006-02-14  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_0)
+      zend_strtod.c:
+      MF51:
+      fix leak in zend_strtod() on big doubles
+
+    * zend_strtod.c
+      tests/zend_strtod.phpt:
+      MF51:
+      fix leak in zend_strtod() on big doubles
+      add new test
+
+    * (PHP_5_1)
+      zend_strtod.c
+      tests/zend_strtod.phpt
+      tests/zend_strtod.phpt:
+      fix leak in zend_strtod() on big doubles
+      add new test
+
 2006-02-13  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_hash.c:
