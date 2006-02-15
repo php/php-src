@@ -282,8 +282,9 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 
 	switch (mode) {
 		case OCI_COMMIT_ON_SUCCESS:
+		case OCI_DESCRIBE_ONLY:
 		case OCI_DEFAULT:
-			/* only these two are allowed */
+			/* only these are allowed */
 			break;
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid execute mode given: %d", mode);
