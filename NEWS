@@ -22,6 +22,8 @@ PHP                                                                        NEWS
 - Added ReflectionClass::newInstanceArgs($args). (Marcus)
 - Added imap_savebody() that allows message body to be written to a file.
   (Mike)
+- Fixed bug #36403 (oci_execute() no longer supports OCI_DESCRIBE_ONLY). 
+  (Tony)
 - Fixed bug #36400 (Custom 5xx error does not return correct HTTP response 
   error code). (Tony)
 - Fixed bug #36345 (PDO/MySQL problem loading BLOB over 1MB). (Ilia)
