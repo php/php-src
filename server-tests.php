@@ -98,14 +98,6 @@ define('PHP_INI_SETTINGS_SCRIPT','<?php echo serialize(ini_get_all()); ?>');
  * various utility functions
  */
 
-function save_to_file($filename,$text)
-{
-	$fp = @fopen($filename,'w')
-		or die("Cannot open file '" . $filename . "' (save_to_file)");
-	fwrite($fp,$text);
-	fclose($fp);
-}
-
 function settings2array($settings, &$ini_settings)
 {
 	foreach($settings as $setting) {
@@ -578,7 +570,7 @@ class testHarness {
 			$tmp_file = "$cwd$pi";
 			$pi = substr($cwd,strlen($this->conf['TEST_BASE_PATH'])) . $pi;
 			$url = $this->conf['TEST_WEB_BASE_URL'] . $pi;
-			save_to_file($tmp_file,$script);
+			file_put_contents($tmp_file,$script);
 			$fd = fopen($url, "rb");
 			$out = '';
 			if ($fd) {
@@ -1285,7 +1277,7 @@ class testHarness {
 		}
 
 		// We've satisfied the preconditions - run the test!
-		save_to_file($tmp_file,$section_text['FILE']);
+		file_put_contents($tmp_file,$section_text['FILE']);
 
 		$post = NULL;
 		$args = "";
@@ -1507,25 +1499,25 @@ class testHarness {
 		// write .exp
 		if (strpos($this->conf['TEST_PHP_LOG_FORMAT'],'E') !== FALSE) {
 			$logname = ereg_replace('\.phpt$','.exp',$file);
-			save_to_file($logname,$wanted);
+			file_put_contents($logname,$wanted);
 		}
 	
 		// write .out
 		if (strpos($this->conf['TEST_PHP_LOG_FORMAT'],'O') !== FALSE) {
 			$logname = ereg_replace('\.phpt$','.out',$file);
-			save_to_file($logname,$output);
+			file_put_contents($logname,$output);
 		}
 	
 		// write .diff
 		if (strpos($this->conf['TEST_PHP_LOG_FORMAT'],'D') !== FALSE) {
 			$logname = ereg_replace('\.phpt$','.diff',$file);
-			save_to_file($logname,generate_diff($wanted,$output));
+			file_put_contents($logname,generate_diff($wanted,$output));
 		}
 	
 		// write .log
 		if (strpos($this->conf['TEST_PHP_LOG_FORMAT'],'L') !== FALSE) {
 			$logname = ereg_replace('\.phpt$','.log',$file);
-			save_to_file($logname,
+			file_put_contents($logname,
 						"\n---- EXPECTED OUTPUT\n$wanted\n".
 						"---- ACTUAL OUTPUT\n$output\n".
 						"---- FAILED\n");
