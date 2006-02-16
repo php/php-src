@@ -1,3 +1,33 @@
+2006-02-15  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      NEWS
+      ext/oci8/oci8_statement.c:
+      MFH: fix #36403 (oci_execute() no longer supports OCI_DESCRIBE_ONLY)
+
+    * ext/oci8/oci8_statement.c:
+      fix #36403 (oci_execute() no longer supports OCI_DESCRIBE_ONLY)
+
+    * sapi/isapi/php5isapi.c
+      sapi/isapi/php5isapi.c:
+      MF51: fix memory leak and possible invalid reads
+
+    * (PHP_5_1)
+      sapi/isapi/php5isapi.c:
+      fix memory leak and possible invalid reads
+
+    * (PHP_5_0)
+      NEWS
+      NEWS
+      sapi/apache/mod_php5.c
+      sapi/apache/mod_php5.c:
+      MFH: fix #36400 (Custom 5xx error does not return correct HTTP response
+      error code)
+
+    * sapi/apache/mod_php5.c:
+      fix #36400 (Custom 5xx error does not return correct HTTP response error
+      code)
+
 2006-02-14  Antony Dovgal  <antony@zend.com>
 
     * (PHP_4_4)
