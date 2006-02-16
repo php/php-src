@@ -40,13 +40,34 @@
 MYSQL *p; \
 ALLOC_ZVAL(*retval);\
 CHECK_OBJECT();\
-p = (MYSQL *)((MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr)->mysql;
+if (!obj->ptr || !(MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr) { \
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", obj->zo.ce->name);\
+	ZVAL_NULL(*retval);\
+	return SUCCESS; \
+} else if (!obj->valid) { \
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid resource %s", obj->zo.ce->name);\
+	ZVAL_NULL(*retval);\
+	return SUCCESS; \
+} else { \
+	p = (MYSQL *)((MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr)->mysql; \
+}
 
 #define MYSQLI_GET_RESULT() \
 MYSQL_RES *p; \
 ALLOC_ZVAL(*retval);\
 CHECK_OBJECT();\
-p = (MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr
+if (!obj->ptr) { \
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", obj->zo.ce->name);\
+	ZVAL_NULL(*retval);\
+	return SUCCESS; \
+} else if (!obj->valid) { \
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid resource %s", obj->zo.ce->name);\
+	ZVAL_NULL(*retval);\
+	return SUCCESS; \
+} else { \
+	p = (MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr; \
+}
+
 
 #define MYSQLI_GET_STMT() \
 MYSQL_STMT *p; \
