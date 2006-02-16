@@ -895,7 +895,7 @@ static zval * sqlite_instanciate(zend_class_entry *pce, zval *object TSRMLS_DC)
 	Z_TYPE_P(object) = IS_OBJECT;
 	object_init_ex(object, pce);
 	object->refcount = 1;
-	object->is_ref = 1;
+	object->is_ref = 0;
 	return object;
 }
 
@@ -1002,9 +1002,15 @@ zend_object_iterator_funcs sqlite_query_iterator_funcs = {
 	sqlite_iterator_rewind
 };
 
-zend_object_iterator *sqlite_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
+zend_object_iterator *sqlite_get_iterator(zend_class_entry *ce, zval *object, int by_ref  TSRMLS_DC)
 {
-	sqlite_object_iterator *iterator = emalloc(sizeof(sqlite_object_iterator));
+	sqlite_object_iterator *iterator;
+
+	if (by_ref) {
+		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+	}
+
+	iterator = emalloc(sizeof(sqlite_object_iterator));
 
 	sqlite_object *obj = (sqlite_object*) zend_object_store_get_object(object TSRMLS_CC);
 
