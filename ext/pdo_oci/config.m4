@@ -88,11 +88,11 @@ You need to tell me where to find your oracle SDK, or set ORACLE_HOME.
       PHP_ADD_INCLUDE($PDO_OCI_IC_PREFIX/lib/oracle/$PDO_OCI_IC_VERS/client/include)
       AC_MSG_RESULT($PDO_OCI_IC_PREFIX/lib/oracle/$PDO_OCI_IC_VERS/client/include)
     elif test -f $PDO_OCI_IC_PREFIX/sdk/include/oci.h ; then
-      PHP_ADD_INCLUDE($PDO_OCI_PREFIX/sdk/include)
-      AC_MSG_RESULT($PDO_OCI_PREFIX/sdk/include)
+      PHP_ADD_INCLUDE($PDO_OCI_IC_PREFIX/sdk/include)
+      AC_MSG_RESULT($PDO_OCI_IC_PREFIX/sdk/include)
     elif test -f $PDO_OCI_IC_PREFIX/client/include/oci.h ; then
-      PHP_ADD_INCLUDE($PDO_OCI_PREFIX/client/include)
-      AC_MSG_RESULT($PDO_OCI_PREFIX/client/include)
+      PHP_ADD_INCLUDE($PDO_OCI_IC_PREFIX/client/include)
+      AC_MSG_RESULT($PDO_OCI_IC_PREFIX/client/include)
     else
       AC_MSG_ERROR([I'm too dumb to figure out where the include dir is in your instant client install])
     fi
