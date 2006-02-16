@@ -427,7 +427,7 @@ Options:
     
     -s <file>   Write output to <file>.
 
-    -q          Quite, no user interaction (same as environment NO_INTERACTION).
+    -q          Quiet, no user interaction (same as environment NO_INTERACTION).
 
     --verbose
     -v          Verbose mode.
