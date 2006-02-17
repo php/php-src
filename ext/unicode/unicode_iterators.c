@@ -77,10 +77,7 @@ typedef struct {
 
 static inline text_iter_obj* text_iter_to_obj(zend_object_iterator *iter)
 {
-	static text_iter_obj adr;
-	static int ofs = (char*)&adr.iter - (char*)&adr;
-
-	return (text_iter_obj *)((char*)iter - ofs);
+	return (text_iter_obj *)((char*)iter - offsetof(text_iter_obj, iter));
 }
 
 typedef struct {
