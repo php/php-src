@@ -1,3 +1,66 @@
+2006-02-16  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_5_1)
+      configure.in
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+      add getloadavg() function that has been running in production on
+      rs1.php.net
+      for a couple of years.
+
+2006-02-16  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      ext/mysqli/mysqli_prop.c
+      ext/mysqli/tests/bug36420.phpt:
+      MFH: add checks and fix possible reincarnations of bug #36420
+
+    * ext/mysqli/mysqli_prop.c
+      ext/mysqli/tests/bug36420.phpt
+      ext/mysqli/tests/bug36420.phpt:
+      fix #36420 (segfault when access result->num_rows after calling
+      result->close())
+
+2006-02-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mysqli/mysqli.c:
+      MFB51: Fixed bug #36420 (segfault when access result->num_rows after
+      calling
+      result->close())
+
+    * (PHP_5_1)
+      NEWS
+      ext/mysqli/mysqli.c:
+      Fixed bug #36420 (segfault when access result->num_rows after calling
+      result->close())
+
+2006-02-16  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      ext/standard/basic_functions.c:
+      MFH: improve usleep(): use new param parsing API, check for negative values
+      (related to #36410)
+
+    * ext/standard/basic_functions.c:
+      improve usleep(): use new param parsing API, check for negative values
+      (related to #36410)
+
+    * run-tests.php
+      run-tests.php:
+      fix typo
+
+2006-02-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      server-tests.php:
+      Use 5.1 functions
+
+2006-02-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/sqlite/sqlite.c:
+      - Fix iterator handling (how did the fix after api change get lost here?)
+      - In php 5 we do not want to return &new
+
 2006-02-15  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_1)
