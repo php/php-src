@@ -426,7 +426,7 @@ zend_function_entry basic_functions[] = {
 	PHP_FE(getopt,															NULL)
 #endif
 #ifdef HAVE_GETLOADAVG
-	PHP_FE(getloadavg,														NULL)
+	PHP_FE(sys_getloadavg,														NULL)
 #endif
 #ifdef HAVE_GETTIMEOFDAY
 	PHP_FE(microtime,														NULL)
@@ -3347,7 +3347,7 @@ PHP_FUNCTION(import_request_variables)
 /* }}} */
 
 #ifdef HAVE_GETLOADAVG
-PHP_FUNCTION(getloadavg)
+PHP_FUNCTION(sys_getloadavg)
 {
 	double load[3];
 
