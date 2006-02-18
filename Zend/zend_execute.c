@@ -388,7 +388,7 @@ static inline void zend_switch_free(zend_op *opline, temp_variable *Ts TSRMLS_DC
 				PZVAL_UNLOCK_FREE(T->str_offset.str);
 			} else {
 				zval_ptr_dtor(&T(opline->op1.u.var).var.ptr);
-				if (opline->extended_value) { /* foreach() free */
+				if (opline->extended_value & ZEND_FE_RESET_VARIABLE) { /* foreach() free */
 					zval_ptr_dtor(&T(opline->op1.u.var).var.ptr);
 				}
 			}
@@ -483,8 +483,8 @@ static inline void zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zv
 
 	cur_arg_info = &zf->common.arg_info[arg_num-1];
 	fname = zf->common.function_name;
-	fsep = zf->common.scope ? "::" : EMPTY_STR;
-	fclass = zf->common.scope ? zf->common.scope->name : EMPTY_STR;
+	fsep = zf->common.scope ? "::" : (char*)EMPTY_STR;
+	fclass = zf->common.scope ? zf->common.scope->name : (char*)EMPTY_STR;
 
 	if (cur_arg_info->class_name) {
 		if (!arg) {
