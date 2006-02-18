@@ -3118,6 +3118,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 			zval_ptr_dtor(&array_ptr);
 			ZEND_VM_NEXT_OPCODE();
 		}
+		iter->index = -1; /* will be set to 0 before using next handler */
 	} else if ((fe_ht = HASH_OF(array_ptr)) != NULL) {
 		zend_hash_internal_pointer_reset(fe_ht);
 		if (ce) {
@@ -3218,7 +3219,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 
 		case ZEND_ITER_OBJECT:
 			/* !iter happens from exception */
-			if (iter && iter->index++) {
+			if (iter && ++iter->index > 0) {
 				/* This could cause an endless loop if index becomes zero again.
 				 * In case that ever happens we need an additional flag. */
 				iter->funcs->move_forward(iter TSRMLS_CC);
@@ -3228,7 +3229,8 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 					ZEND_VM_NEXT_OPCODE();
 				}
 			}
-			if (!iter || (iter->index > 1 && iter->funcs->valid(iter TSRMLS_CC) == FAILURE)) {
+			/* If index is zero we come from FE_RESET and checked valid() already. */
+			if (!iter || (iter->index > 0 && iter->funcs->valid(iter TSRMLS_CC) == FAILURE)) {
 				/* reached end of iteration */
 				if (EG(exception)) {
 					array->refcount--;
@@ -3260,7 +3262,6 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 					int_key = iter->index;
 				}
 			}
-
 			break;
 	}
 
