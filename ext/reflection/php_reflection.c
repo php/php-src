@@ -1862,9 +1862,9 @@ ZEND_METHOD(reflection_parameter, getName)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionClass ReflectionParameter::getClass()
+/* {{{ proto public ReflectionClass ReflectionParameter::getDeclaringClass()
    Returns this parameters's class hint or NULL if there is none */
-ZEND_METHOD(reflection_parameter, getClass)
+ZEND_METHOD(reflection_parameter, getDeclaringClass)
 {
 	reflection_object *intern;
 	parameter_reference *param;
@@ -4187,7 +4187,8 @@ static zend_function_entry reflection_parameter_functions[] = {
 	ZEND_ME(reflection_parameter, __toString, NULL, 0)
 	ZEND_ME(reflection_parameter, getName, NULL, 0)
 	ZEND_ME(reflection_parameter, isPassedByReference, NULL, 0)
-	ZEND_ME(reflection_parameter, getClass, NULL, 0)
+	ZEND_ME(reflection_parameter, getDeclaringClass, NULL, 0)
+	ZEND_MALIAS(reflection_parameter, getClass, getDeclaringClass, NULL, 0)
 	ZEND_ME(reflection_parameter, isArray, NULL, 0)
 	ZEND_ME(reflection_parameter, allowsNull, NULL, 0)
 	ZEND_ME(reflection_parameter, isOptional, NULL, 0)
