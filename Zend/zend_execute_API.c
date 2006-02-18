@@ -75,7 +75,7 @@ static void zend_handle_sigsegv(int dummy)
 	{
 		TSRMLS_FETCH();
 
-		fprintf(stderr, "SIGSEGV caught on opcode %d on opline %d of %v() at %s:%d\n\n",
+		fprintf(stderr, "SIGSEGV caught on opcode %d on opline %d of %s() at %s:%d\n\n",
 				active_opline->opcode,
 				active_opline-EG(active_op_array)->opcodes,
 				get_active_function_name(TSRMLS_C),
@@ -859,7 +859,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		calling_scope = fci_cache->calling_scope;
 		fci->object_pp = fci_cache->object_pp;
 	}
-
+	
 	for (i=0; i<fci->param_count; i++) {
 		zval *param;
 
