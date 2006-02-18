@@ -1,3 +1,9 @@
+2006-02-17  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/pcre/php_pcre.c:
+      NULL byte should be escaped to \000 instead of \0 in case it is followed
+      by an octal digit. (found by Jeffrey Friedl)
+
 2006-02-16  Wez Furlong  <wez.php@thebrainroom.net>
 
     * (PHP_5_1)
