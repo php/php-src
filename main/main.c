@@ -1601,8 +1601,8 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	orig_unicode = UG(unicode);
 	UG(unicode) = 0;
 
-	/* Disable realpath cache if safe_mode or open_basedir are set */
-	if (PG(safe_mode) || (PG(open_basedir) && *PG(open_basedir))) {
+	/* Disable realpath cache if open_basedir are set */
+	if ((PG(open_basedir) && *PG(open_basedir))) {
 		CWDG(realpath_cache_size_limit) = 0;
 	}
 
