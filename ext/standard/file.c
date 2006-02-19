@@ -77,7 +77,6 @@
 #endif
 #endif
 #include "ext/standard/head.h"
-#include "safe_mode.h"
 #include "php_string.h"
 #include "file.h"
 #if HAVE_PWD_H
@@ -954,47 +953,11 @@ PHP_FUNCTION(popen)
 		}
 	}
 #endif
-	if (PG(safe_mode)){
-		b = strchr(Z_STRVAL_PP(arg1), ' ');
-		if (!b) {
-			b = strrchr(Z_STRVAL_PP(arg1), '/');
-		} else {
-			char *c;
-			c = Z_STRVAL_PP(arg1);
-			while((*b != '/') && (b != c)) {
-				b--;
-			}
-			if (b == c) {
-				b = NULL;
-			}
-		}
-		
-		if (b) {
-			spprintf(&buf, 0, "%s%s", PG(safe_mode_exec_dir), b);
-		} else {
-			spprintf(&buf, 0, "%s/%s", PG(safe_mode_exec_dir), Z_STRVAL_PP(arg1));
-		}
-
-		tmp = php_escape_shell_cmd(buf);
-		fp = VCWD_POPEN(tmp, p);
-		efree(tmp);
-
-		if (!fp) {
-			php_error_docref2(NULL TSRMLS_CC, buf, p, E_WARNING, "%s", strerror(errno));
-			efree(p);
-			efree(buf);
-			RETURN_FALSE;
-		}
-		
-		efree(buf);
-
-	} else {
-		fp = VCWD_POPEN(Z_STRVAL_PP(arg1), p);
-		if (!fp) {
-			php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(arg1), p, E_WARNING, "%s", strerror(errno));
-			efree(p);
-			RETURN_FALSE;
-		}
+	fp = VCWD_POPEN(Z_STRVAL_PP(arg1), p);
+	if (!fp) {
+		php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(arg1), p, E_WARNING, "%s", strerror(errno));
+		efree(p);
+		RETURN_FALSE;
 	}
 	stream = php_stream_fopen_from_pipe(fp, p);
 

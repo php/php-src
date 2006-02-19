@@ -82,8 +82,6 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #include <getopt.h>
 #endif
 
-#include "safe_mode.h"
-
 #ifdef PHP_WIN32
 # include "win32/unistd.h"
 #endif
@@ -851,42 +849,6 @@ zend_function_entry basic_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-
-static PHP_INI_MH(OnUpdateSafeModeProtectedEnvVars)
-{
-	char *protected_vars, *protected_var;
-	char *token_buf;
-	int dummy = 1;
-
-	protected_vars = estrndup(new_value, new_value_length);
-	zend_hash_clean(&BG(sm_protected_env_vars));
-
-	protected_var = php_strtok_r(protected_vars, ", ", &token_buf);
-	while (protected_var) {
-		zend_hash_update(&BG(sm_protected_env_vars), protected_var, strlen(protected_var), &dummy, sizeof(int), NULL);
-		protected_var = php_strtok_r(NULL, ", ", &token_buf);
-	}
-	efree(protected_vars);
-	return SUCCESS;
-}
-
-
-static PHP_INI_MH(OnUpdateSafeModeAllowedEnvVars)
-{
-	if (BG(sm_allowed_env_vars)) {
-		free(BG(sm_allowed_env_vars));
-	}
-	BG(sm_allowed_env_vars) = zend_strndup(new_value, new_value_length);
-	return SUCCESS;
-}
-
-
-PHP_INI_BEGIN()
-	PHP_INI_ENTRY_EX("safe_mode_protected_env_vars", SAFE_MODE_PROTECTED_ENV_VARS, PHP_INI_SYSTEM, OnUpdateSafeModeProtectedEnvVars, NULL)
-	PHP_INI_ENTRY_EX("safe_mode_allowed_env_vars",   SAFE_MODE_ALLOWED_ENV_VARS,   PHP_INI_SYSTEM, OnUpdateSafeModeAllowedEnvVars,   NULL)
-PHP_INI_END()
-
-
 zend_module_entry basic_functions_module = {
     STANDARD_MODULE_HEADER,
 	"standard",					/* extension name */
@@ -1069,8 +1031,6 @@ PHP_MINIT_FUNCTION(basic)
 #if ENABLE_TEST_CLASS
 	test_class_startup();
 #endif
-
-	REGISTER_INI_ENTRIES();
 
 	register_phpinfo_constants(INIT_FUNC_ARGS_PASSTHRU);
 	register_html_constants(INIT_FUNC_ARGS_PASSTHRU);
@@ -1452,38 +1412,6 @@ PHP_FUNCTION(putenv)
 			*p = '\0';
 		}
 		pe.key_len = strlen(pe.key);
-
-		if (PG(safe_mode)) {
-			/* Check the protected list */
-			if (zend_hash_exists(&BG(sm_protected_env_vars), pe.key, pe.key_len)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Safe Mode warning: Cannot override protected environment variable '%s'", pe.key);
-				efree(pe.putenv_string);
-				efree(pe.key);
-				RETURN_FALSE;
-			}
-
-			/* Check the allowed list */
-			if (BG(sm_allowed_env_vars) && *BG(sm_allowed_env_vars)) {
-				char *allowed_env_vars = estrdup(BG(sm_allowed_env_vars));
-				char *allowed_prefix = strtok(allowed_env_vars, ", ");
-				zend_bool allowed = 0;
-
-				while (allowed_prefix) {
-					if (!strncmp(allowed_prefix, pe.key, strlen(allowed_prefix))) {
-						allowed = 1;
-						break;
-					}
-					allowed_prefix = strtok(NULL, ", ");
-				}
-				efree(allowed_env_vars);
-				if (!allowed) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Safe Mode warning: Cannot set environment variable '%s' - it's not in the allowed list", pe.key);
-					efree(pe.putenv_string);
-					efree(pe.key);
-					RETURN_FALSE;
-				}
-			}
-		}
 
 		zend_hash_del(&BG(putenv_ht), pe.key, pe.key_len+1);
 
@@ -2688,16 +2616,6 @@ PHP_FUNCTION(ini_set)
 				RETURN_FALSE;
 			}
 		}
-	}	
-		
-	/* checks that ensure the user does not overwrite certain ini settings when safe_mode is enabled */
-	if (PG(safe_mode)) {
-		if (!strncmp("max_execution_time", Z_STRVAL_PP(varname), sizeof("max_execution_time")) ||
-			!strncmp("memory_limit", Z_STRVAL_PP(varname), sizeof("memory_limit")) ||
-			!strncmp("child_terminate", Z_STRVAL_PP(varname), sizeof("child_terminate"))) {
-			zval_dtor(return_value);
-			RETURN_FALSE;
-		}	
 	}	
 		
 	if (zend_alter_ini_entry(Z_STRVAL_PP(varname), Z_STRLEN_PP(varname)+1, Z_STRVAL_PP(new_value), Z_STRLEN_PP(new_value),

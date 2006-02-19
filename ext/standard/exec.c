@@ -22,7 +22,6 @@
 #include "php.h"
 #include <ctype.h>
 #include "php_string.h"
-#include "safe_mode.h"
 #include "ext/standard/head.h"
 #include "ext/standard/file.h"
 #include "exec.h"
@@ -69,26 +68,7 @@ int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
 	void (*sig_handler)() = NULL;
 #endif
 
-	if (PG(safe_mode)) {
-		if ((c = strchr(cmd, ' '))) {
-			*c = '\0';
-			c++;
-		}
-		if (strstr(cmd, "..")) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "No '..' components allowed in path");
-			goto err;
-		}
-		b = strrchr(cmd, PHP_DIR_SEPARATOR);
-		spprintf(&d, 0, "%s%s%s%s%s", PG(safe_mode_exec_dir), (b ? "" : "/"), (b ? b : cmd), (c ? " " : ""), (c ? c : ""));
-		if (c) {
-			*(c - 1) = ' ';
-		}
-		cmd_p = php_escape_shell_cmd(d);
-		efree(d);
-		d = cmd_p;
-	} else {
-		cmd_p = cmd;
-	}
+	cmd_p = cmd;
 
 #if PHP_SIGCHILD
 	sig_handler = signal (SIGCHLD, SIG_DFL);
@@ -422,11 +402,6 @@ PHP_FUNCTION(shell_exec)
 		WRONG_PARAM_COUNT;
 	}
 	
-	if (PG(safe_mode)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot execute using backquotes in Safe Mode");
-		RETURN_FALSE;
-	}
-
 	convert_to_string_ex(cmd);
 #ifdef PHP_WIN32
 	if ((in=VCWD_POPEN(Z_STRVAL_PP(cmd), "rt"))==NULL) {

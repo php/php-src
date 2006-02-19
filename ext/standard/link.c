@@ -47,7 +47,6 @@
 #include <errno.h>
 #include <ctype.h>
 
-#include "safe_mode.h"
 #include "php_link.h"
 
 /* {{{ proto string readlink(string filename)
