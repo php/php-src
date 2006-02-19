@@ -23,6 +23,10 @@
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
+#else
+#ifndef PHP_WIN32
+#include "php_config.h"
+#endif
 #endif
 
 #ifndef PHP_WIN32
