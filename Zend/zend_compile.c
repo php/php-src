@@ -1108,6 +1108,9 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	} else {
 		fn_flags = 0;
 	}
+	if ((fn_flags & ZEND_ACC_STATIC) && (fn_flags & ZEND_ACC_ABSTRACT)) {
+		zend_error(E_COMPILE_ERROR, "Static function %v%s%R() cannot be abstract", is_method ? CG(active_class_entry)->name : "", is_method ? "::" : "", Z_TYPE(function_name->u.constant), Z_UNIVAL(function_name->u.constant));
+	}
 
 	function_token->u.op_array = CG(active_op_array);
 	lcname = zend_u_str_case_fold(Z_TYPE(function_name->u.constant), name, name_len, 0, &lcname_len);

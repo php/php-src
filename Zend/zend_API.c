@@ -2081,6 +2081,9 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 					scope->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
 				}
 			}
+			if (ptr->flags & ZEND_ACC_STATIC) {
+				zend_error(error_type, "Static function %s%s%s() cannot be abstract", scope ? scope->name : "", scope ? "::" : "", ptr->fname);
+			}
 		} else {
 			if (scope && (scope->ce_flags & ZEND_ACC_INTERFACE)) {
 				efree(lc_class_name);
