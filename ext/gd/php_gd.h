@@ -32,10 +32,9 @@
 
 /* open_basedir and safe_mode checks */
 #define PHP_GD_CHECK_OPEN_BASEDIR(filename, errormsg)                                   \
-	if (!filename || php_check_open_basedir(filename TSRMLS_CC))						\
-	) {                                                                                 \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, errormsg);                          \
-		RETURN_FALSE;                                                                   \
+	if (!filename || php_check_open_basedir(filename TSRMLS_CC)) {			\
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, errormsg);                 	\
+		RETURN_FALSE;                                                         	\
 	}
 
 #define PHP_GDIMG_TYPE_GIF      1
