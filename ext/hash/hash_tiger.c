@@ -88,6 +88,24 @@
 	} \
 	feedforward
 
+#define split_ex(str) \
+	x0=str[0]; x1=str[1]; x2=str[2]; x3=str[3]; \
+	x4=str[4]; x5=str[5]; x6=str[6]; x7=str[7];
+#ifdef WORDS_BIGENDIAN
+#	define split(str) \
+	{ \
+		int i; \
+		php_hash_uint64 tmp[8]; \
+		 \
+		for (i = 0; i < 64; ++i) { \
+			((unsigned char *) tmp)[i^7] = ((unsigned char *) str)[i]; \
+		} \
+		split_ex(tmp); \
+	}
+#else
+#	define split split_ex
+#endif
+
 #define tiger_compress(passes, str, state) \
 { \
 	register php_hash_uint64 a, b, c, tmpa, x0, x1, x2, x3, x4, x5, x6, x7; \
@@ -98,8 +116,7 @@
 	b = state[1]; \
 	c = state[2]; \
 	\
-	x0=str[0]; x1=str[1]; x2=str[2]; x3=str[3]; \
-	x4=str[4]; x5=str[5]; x6=str[6]; x7=str[7]; \
+	split(str); \
 	\
 	compress(passes); \
 	\
@@ -118,7 +135,7 @@ static inline void TigerFinalize(PHP_TIGER_CTX *context)
 		memset(&context->buffer[context->length], 0, 8-context->length%8);
 		context->length += 8-context->length%8;
 	}
-    
+	
 	if (context->length > 56) {
 		memset(&context->buffer[context->length], 0, 64 - context->length);
 		tiger_compress(context->passes, ((php_hash_uint64 *) context->buffer), context->state);
@@ -126,8 +143,19 @@ static inline void TigerFinalize(PHP_TIGER_CTX *context)
 	} else {
 		memset(&context->buffer[context->length], 0, 56 - context->length);
 	}
-	
+
+#ifndef WORDS_BIGENDIAN	
 	memcpy(&context->buffer[56], &context->passed, sizeof(php_hash_uint64));
+#else
+	context->buffer[56] = (unsigned char) (context->passed & 0xff);
+	context->buffer[57] = (unsigned char) ((context->passed >> 8) & 0xff);
+	context->buffer[58] = (unsigned char) ((context->passed >> 16) & 0xff);
+	context->buffer[59] = (unsigned char) ((context->passed >> 24) & 0xff);
+	context->buffer[60] = (unsigned char) ((context->passed >> 32) & 0xff);
+	context->buffer[61] = (unsigned char) ((context->passed >> 40) & 0xff);
+	context->buffer[62] = (unsigned char) ((context->passed >> 48) & 0xff);
+	context->buffer[63] = (unsigned char) ((context->passed >> 56) & 0xff);
+#endif
 	tiger_compress(context->passes, ((php_hash_uint64 *) context->buffer), context->state);
 }
 
@@ -165,11 +193,12 @@ PHP_HASH_API void PHP_TIGERUpdate(PHP_TIGER_CTX *context, const unsigned char *i
 		}
 		
 		for (; i + 64 <= len; i += 64) {
-			tiger_compress(context->passes, ((const php_hash_uint64 *) (input + i)), context->state);
+			memcpy(context->buffer, &input[i], 64);
+			tiger_compress(context->passes, ((const php_hash_uint64 *) context->buffer), context->state);
 			context->passed += 512;
 		}
-		
-		memcpy(context->buffer, input + i, r);
+		memset(&context->buffer[r], 0, 64-r);
+		memcpy(context->buffer, &input[i], r);
 		context->length = r;
 	}
 }

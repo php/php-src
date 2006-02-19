@@ -2,10 +2,12 @@ dnl $Id$
 dnl config.m4 for extension hash
 
 PHP_ARG_ENABLE(hash, whether to enable hash support,
-[  --enable-hash           Enable hash support])
+[  --disable-hash           Disable hash support], yes)
 
 if test "$PHP_HASH" != "no"; then
   AC_DEFINE(HAVE_HASH_EXT,1,[Have HASH Extension])
+
+  PHP_C_BIGENDIAN
 
   AC_CHECK_SIZEOF(short, 2)
   AC_CHECK_SIZEOF(int, 4)
