@@ -268,10 +268,6 @@ PHP_FUNCTION(filepro)
 	
 	snprintf(workbuf, sizeof(workbuf), "%s/map", Z_STRVAL_PP(dir));
 
-	if (PG(safe_mode) && (!php_checkuid(workbuf, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		RETURN_FALSE;
-	}
-	
 	if (php_check_open_basedir(workbuf TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
@@ -362,10 +358,6 @@ PHP_FUNCTION(filepro_rowcount)
 	/* Now read the records in, moving forward recsize-1 bytes each time */
 	snprintf(workbuf, sizeof(workbuf), "%s/key", FP_GLOBAL(fp_database));
 
-	if (PG(safe_mode) && (!php_checkuid(workbuf, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		RETURN_FALSE;
-	}
-	
 	if (php_check_open_basedir(workbuf TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
@@ -574,10 +566,6 @@ PHP_FUNCTION(filepro_retrieve)
 	/* Now read the record in */
 	snprintf(workbuf, sizeof(workbuf), "%s/key", FP_GLOBAL(fp_database));
 
-	if (PG(safe_mode) && (!php_checkuid(workbuf, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		RETURN_FALSE;
-	}
-	
 	if (php_check_open_basedir(workbuf TSRMLS_CC)) {
 		RETURN_FALSE;
 	}

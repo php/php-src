@@ -137,10 +137,6 @@ static PHP_INI_MH(OnUpdateSaveDir)
 {
 	/* Only do the safemode/open_basedir check at runtime */
 	if (stage == PHP_INI_STAGE_RUNTIME) {
-		if (PG(safe_mode) && (!php_checkuid(new_value, NULL, CHECKUID_ALLOW_ONLY_DIR))) {
-			return FAILURE;
-		}
-
 		if (php_check_open_basedir(new_value TSRMLS_CC)) {
 			return FAILURE;
 		}

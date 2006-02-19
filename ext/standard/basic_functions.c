@@ -2450,10 +2450,6 @@ PHP_FUNCTION(highlight_file)
 	}
 	convert_to_string(filename);
 
-	if (PG(safe_mode) && (!php_checkuid(Z_STRVAL_P(filename), NULL, CHECKUID_ALLOW_ONLY_FILE))) {
-		RETURN_FALSE;
-	}
-
 	if (php_check_open_basedir(Z_STRVAL_P(filename) TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
@@ -2678,19 +2674,15 @@ PHP_FUNCTION(ini_set)
 
 #define _CHECK_PATH(var, ini) php_ini_check_path(Z_STRVAL_PP(var), Z_STRLEN_PP(var), ini, sizeof(ini))
 	
-	/* safe_mode & basedir check */
-	if (PG(safe_mode) || PG(open_basedir)) {
+	/* basedir check */
+	if (PG(open_basedir)) {
 		if (_CHECK_PATH(varname, "error_log") ||
 			_CHECK_PATH(varname, "java.class.path") ||
 			_CHECK_PATH(varname, "java.home") ||
 			_CHECK_PATH(varname, "java.library.path") ||
 			_CHECK_PATH(varname, "session.save_path") ||
 			_CHECK_PATH(varname, "vpopmail.directory")) {
-			if (PG(safe_mode) &&(!php_checkuid(Z_STRVAL_PP(new_value), NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-				zval_dtor(return_value);
-				RETURN_FALSE;
-			}
-
+			
 			if (php_check_open_basedir(Z_STRVAL_PP(new_value) TSRMLS_CC)) {
 				zval_dtor(return_value);
 				RETURN_FALSE;
@@ -3080,10 +3072,6 @@ PHP_FUNCTION(move_uploaded_file)
 	convert_to_string_ex(new_path);
 
 	if (!zend_hash_exists(SG(rfc1867_uploaded_files), Z_STRVAL_PP(path), Z_STRLEN_PP(path)+1)) {
-		RETURN_FALSE;
-	}
-
-	if (PG(safe_mode) && (!php_checkuid(Z_STRVAL_PP(new_path), NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
 	}
 

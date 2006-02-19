@@ -32,8 +32,7 @@
 
 /* open_basedir and safe_mode checks */
 #define PHP_GD_CHECK_OPEN_BASEDIR(filename, errormsg)                                   \
-	if (!filename || php_check_open_basedir(filename TSRMLS_CC) ||                      \
-		(PG(safe_mode) && !php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))   \
+	if (!filename || php_check_open_basedir(filename TSRMLS_CC))						\
 	) {                                                                                 \
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, errormsg);                          \
 		RETURN_FALSE;                                                                   \

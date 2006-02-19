@@ -179,12 +179,9 @@ static void php_csr_free(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ openssl safe_mode & open_basedir checks */
+/* {{{ openssl open_basedir checks */
 inline static int php_openssl_safe_mode_chk(char *filename TSRMLS_DC)
 {
-	if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		return -1;
-	}
 	if (php_check_open_basedir(filename TSRMLS_CC)) {
 		return -1;
 	}

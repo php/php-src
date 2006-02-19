@@ -134,10 +134,6 @@ PHP_FUNCTION(dbase_open)
 		RETURN_FALSE;
 	}
 
-	if (PG(safe_mode) && (!php_checkuid(Z_STRVAL_PP(dbf_name), NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		RETURN_FALSE;
-	}
-	
 	if (php_check_open_basedir(Z_STRVAL_PP(dbf_name) TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
@@ -588,10 +584,6 @@ PHP_FUNCTION(dbase_create)
 
 	if (Z_TYPE_PP(fields) != IS_ARRAY) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expected array as second parameter");
-		RETURN_FALSE;
-	}
-
-	if (PG(safe_mode) && (!php_checkuid(Z_STRVAL_PP(filename), NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
 	}
 	

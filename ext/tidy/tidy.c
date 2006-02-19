@@ -85,7 +85,7 @@
             _php_tidy_apply_config_array(_doc, HASH_OF(_val) TSRMLS_CC); \
         } else { \
             convert_to_string_ex(&_val); \
-            TIDY_SAFE_MODE_CHECK(Z_STRVAL_P(_val)); \
+            TIDY_OPEN_BASEDIR_CHECK(Z_STRVAL_P(_val)); \
             if (tidyLoadConfig(_doc, Z_STRVAL_P(_val)) < 0) { \
                 php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not load configuration file '%s'", Z_STRVAL_P(_val)); \
                 RETURN_FALSE; \
@@ -163,8 +163,8 @@
        zend_hash_update(_table, #_key, sizeof(#_key), (void *)&tmp, sizeof(zval *), NULL); \
    }
 
-#define TIDY_SAFE_MODE_CHECK(filename) \
-if ((PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(filename TSRMLS_CC)) { \
+#define TIDY_OPEN_BASEDIR_CHECK(filename) \
+if (php_check_open_basedir(filename TSRMLS_CC)) { \
 	RETURN_FALSE; \
 } \
 
@@ -461,7 +461,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 			_php_tidy_apply_config_array(doc, HASH_OF(config) TSRMLS_CC);
 		} else {
 			convert_to_string_ex(&config);
-			TIDY_SAFE_MODE_CHECK(Z_STRVAL_P(config));
+			TIDY_OPEN_BASEDIR_CHECK(Z_STRVAL_P(config));
 			if (tidyLoadConfig(doc, Z_STRVAL_P(config)) < 0) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not load configuration file '%s'", Z_STRVAL_P(config));
 				RETVAL_FALSE;
