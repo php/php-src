@@ -22,6 +22,8 @@ PHP                                                                        NEWS
 - Added ReflectionClass::newInstanceArgs($args). (Marcus)
 - Added imap_savebody() that allows message body to be written to a file.
   (Mike)
+- Fixed tiger hash algorithm generating wrong results on big endian platforms.
+  (Mike)
 - Fixed bug #36436 (DBA problem with Berkeley DB4). (Marcus)
 - Fixed bug #36420 (segfault when access result->num_rows after calling 
   result->close()). (Ilia)
