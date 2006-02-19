@@ -913,7 +913,7 @@ PHP_FUNCTION(oci_lob_export)
 		RETURN_FALSE;
 	}
 
-	stream = php_stream_open_wrapper_ex(filename, "w", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, NULL);
+	stream = php_stream_open_wrapper_ex(filename, "w", REPORT_ERRORS, NULL, NULL);
 
 	block_length = PHP_OCI_LOB_BUFFER_SIZE;
 	if (block_length > length) {

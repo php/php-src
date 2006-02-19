@@ -76,7 +76,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		ZVAL_STRING(zerrstr, "", 1);
 	}
 
-	stream = php_stream_xport_create(hostname, hostname_len, ENFORCE_SAFE_MODE | REPORT_ERRORS,
+	stream = php_stream_xport_create(hostname, hostname_len, REPORT_ERRORS,
 			STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT, hashkey, &tv, NULL, &errstr, &err);
 
 	if (port > 0) {
