@@ -21,11 +21,11 @@
   </maintainers>
 
   <release>
-   <version>1.1</version>
+   <version>1.2</version>
    <state>stable</state>
-   <date>2005-12-00</date>
+   <date>2006-02-00</date>
    <notes>
-Fixed PECL bug #6183 - haval source file entries missing in package.xml
+Fixed tiger algorithm generating wrong results on big endian platforms.
 
 Supported Algorithms:
  * md4, md5
