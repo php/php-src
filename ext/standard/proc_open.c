@@ -28,7 +28,6 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "php_string.h"
-#include "safe_mode.h"
 #include "ext/standard/head.h"
 #include "ext/standard/file.h"
 #include "exec.h"
@@ -245,68 +244,6 @@ static void proc_open_rsrc_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ php_make_safe_mode_command */
-static int php_make_safe_mode_command(char *cmd, char **safecmd, int is_persistent TSRMLS_DC)
-{
-	int lcmd, larg0, ldir, len, overflow_limit;
-	char *space, *sep, *arg0;
-
-	if (!PG(safe_mode)) {
-		*safecmd = pestrdup(cmd, is_persistent);
-		return SUCCESS;
-	}
-
-	lcmd = strlen(cmd);
-	ldir = strlen(PG(safe_mode_exec_dir));
-	len = lcmd + ldir + 2;
-	overflow_limit = len;
-
-	arg0 = emalloc(len);
-	
-	strcpy(arg0, cmd);
-	
-	space = strchr(arg0, ' ');
-	if (space) {
-		*space = '\0';
-	}
-	larg0 = strlen(arg0);
-
-	if (strstr(arg0, "..")) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No '..' components allowed in path");
-		efree(arg0);
-		return FAILURE;
-	}
-
-	*safecmd = emalloc(len);
-	strcpy(*safecmd, PG(safe_mode_exec_dir));
-	overflow_limit -= ldir;
-	
-	sep = strrchr(arg0, PHP_DIR_SEPARATOR);
-	if (sep) {
-		strcat(*safecmd, sep);
-		overflow_limit -= strlen(sep);
-	} else {
-		strcat(*safecmd, "/");
-		strcat(*safecmd, arg0);
-		overflow_limit -= larg0 + 1;
-	}
-	if (space) {
-		strncat(*safecmd, cmd + larg0, overflow_limit);
-	}
-	efree(arg0);
-	arg0 = php_escape_shell_cmd(*safecmd);
-	efree(*safecmd);
-	if (is_persistent) {
-		*safecmd = pestrdup(arg0, 1);
-		efree(arg0);
-	} else {
-		*safecmd = arg0;
-	}
-
-	return SUCCESS;
-}
-/* }}} */
-
 /* {{{ PHP_MINIT_FUNCTION(proc_open) */
 PHP_MINIT_FUNCTION(proc_open)
 {
@@ -513,10 +450,6 @@ PHP_FUNCTION(proc_open)
 		RETURN_FALSE;
 	}
 
-	if (FAILURE == php_make_safe_mode_command(command, &command, is_persistent TSRMLS_CC)) {
-		RETURN_FALSE;
-	}
-
 	if (other_options) {
 		zval **item;
 		if (SUCCESS == zend_hash_find(Z_ARRVAL_P(other_options), "suppress_errors", sizeof("suppress_errors"), (void**)&item)) {
@@ -526,8 +459,6 @@ PHP_FUNCTION(proc_open)
 		}	
 	}
 	
-	command_len = strlen(command);
-
 	if (environment) {
 		env = _php_array_to_envp(environment, is_persistent TSRMLS_CC);
 	} else {
@@ -953,7 +884,6 @@ PHP_FUNCTION(proc_open)
 
 exit_fail:
 	_php_free_envp(env, is_persistent);
-	pefree(command, is_persistent);
 #if PHP_CAN_DO_PTS
 	if (dev_ptmx >= 0) {
 		close(dev_ptmx);

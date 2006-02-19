@@ -68,9 +68,6 @@ PHP_FUNCTION(dl)
 	if (!PG(enable_dl)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Dynamically loaded extensions aren't enabled");
 		RETURN_FALSE;
-	} else if (PG(safe_mode)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Dynamically loaded extensions aren't allowed when running in Safe Mode");
-		RETURN_FALSE;
 	}
 
 	if ((strncmp(sapi_module.name, "cgi", 3)!=0) && 

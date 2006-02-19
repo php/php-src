@@ -19,7 +19,6 @@
 /* $Id$ */
 
 #include "php.h"
-#include "safe_mode.h"
 #include "fopen_wrappers.h"
 #include "php_globals.h"
 
@@ -484,12 +483,6 @@ PHP_FUNCTION(chmod)
 	}
 
 	imode = (mode_t) Z_LVAL_PP(mode);
-	/* in safe mode, do not allow to setuid files.
-	   Setuiding files could allow users to gain privileges
-	   that safe mode doesn't give them.
-	*/
-	if(PG(safe_mode))
-		imode &= 0777;
 
 	ret = VCWD_CHMOD(Z_STRVAL_PP(filename), imode);
 	if (ret == -1) {
