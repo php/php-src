@@ -327,7 +327,7 @@ PHP_FUNCTION(bzopen)
 		stream = php_stream_bz2open(NULL,
 									Z_STRVAL_PP(file), 
 									Z_STRVAL_PP(mode), 
-									ENFORCE_SAFE_MODE | REPORT_ERRORS, 
+									REPORT_ERRORS, 
 									NULL);
 	} else {
 		/* If it is a resource, than its a stream resource */

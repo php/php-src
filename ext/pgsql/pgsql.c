@@ -2354,7 +2354,7 @@ PHP_FUNCTION(pg_trace)
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 	convert_to_string_ex(z_filename);
 
-	stream = php_stream_open_wrapper(Z_STRVAL_PP(z_filename), mode, ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
+	stream = php_stream_open_wrapper(Z_STRVAL_PP(z_filename), mode, REPORT_ERRORS, NULL);
 
 	if (!stream) {
 		RETURN_FALSE;

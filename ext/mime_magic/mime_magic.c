@@ -1060,7 +1060,7 @@ static int magic_process(zval *what TSRMLS_DC)
 
 	switch (Z_TYPE_P(what)) {
 	case IS_STRING:
-		stream = php_stream_open_wrapper(Z_STRVAL_P(what), "rb", IGNORE_PATH | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL);
+		stream = php_stream_open_wrapper(Z_STRVAL_P(what), "rb", IGNORE_PATH | REPORT_ERRORS, NULL);
 		if (stream == NULL) {
 			/* We can't open it, but we were able to stat it. */
 			if(MIME_MAGIC_G(debug))

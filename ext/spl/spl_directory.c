@@ -174,7 +174,7 @@ static void spl_filesystem_dir_open(spl_filesystem_object* intern, char *path TS
 {
 	intern->type = SPL_FS_DIR;
 	intern->path_len = strlen(path);
-	intern->u.dir.dirp = php_stream_opendir(path, ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
+	intern->u.dir.dirp = php_stream_opendir(path, REPORT_ERRORS, NULL);
 
 	if (intern->path_len && (path[intern->path_len-1] == '/'
 #if defined(PHP_WIN32) || defined(NETWARE)
@@ -202,7 +202,7 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 {
 	intern->type = SPL_FS_FILE;
 	intern->u.file.context = php_stream_context_from_zval(intern->u.file.zcontext, 0);
-	intern->u.file.stream = php_stream_open_wrapper_ex(intern->file_name, intern->u.file.open_mode, (use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, intern->u.file.context);
+	intern->u.file.stream = php_stream_open_wrapper_ex(intern->file_name, intern->u.file.open_mode, (use_include_path ? USE_PATH : 0) | REPORT_ERRORS, NULL, intern->u.file.context);
 
 	if (intern->u.file.stream == NULL) {
 		if (!EG(exception)) {

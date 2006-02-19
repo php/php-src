@@ -1886,7 +1886,7 @@ PHP_FUNCTION(imap_savebody)
 
 		default:
 			convert_to_string_ex(&out);
-			writer = php_stream_open_wrapper(Z_STRVAL_P(out), "wb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
+			writer = php_stream_open_wrapper(Z_STRVAL_P(out), "wb", REPORT_ERRORS, NULL);
 		break;
 	}
 	

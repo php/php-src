@@ -1001,7 +1001,7 @@ static FILE *php_fopen_wrapper_for_zend(const char *filename, char **opened_path
 {
 	TSRMLS_FETCH();
 
-	return php_stream_open_wrapper_as_file((char *)filename, "rb", ENFORCE_SAFE_MODE|USE_PATH|IGNORE_URL_WIN|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE, opened_path);
+	return php_stream_open_wrapper_as_file((char *)filename, "rb", USE_PATH|IGNORE_URL_WIN|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE, opened_path);
 }
 /* }}} */
 
@@ -1019,7 +1019,7 @@ static int php_stream_open_for_zend(const char *filename, zend_file_handle *hand
 {
 	php_stream *stream;
 
-	stream = php_stream_open_wrapper((char *)filename, "rb", ENFORCE_SAFE_MODE|USE_PATH|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE, &handle->opened_path);
+	stream = php_stream_open_wrapper((char *)filename, "rb", USE_PATH|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE, &handle->opened_path);
 
 	if (stream) {
 		handle->type = ZEND_HANDLE_STREAM;
