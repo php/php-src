@@ -964,8 +964,7 @@ static int php_plain_files_unlink(php_stream_wrapper *wrapper, char *url, int op
 		url = p + 3;
 	}
 
-	/* FIXME: Andi - Pending email I sent to internals@ re: ENFORCE_SAFE_MODE */
-	if (options & ENFORCE_SAFE_MODE) {
+	if (!(options & STREAM_DISABLE_OPEN_BASEDIR)) {
 		if (php_check_open_basedir(url TSRMLS_CC)) {
 			return 0;
 		}
