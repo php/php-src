@@ -31,7 +31,6 @@
 #endif
 
 #include "php.h"
-#include "safe_mode.h"
 #include "fopen_wrappers.h"
 #include <string.h>
 #if HAVE_SYS_PARAM_H
