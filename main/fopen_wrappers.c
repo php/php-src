@@ -187,55 +187,6 @@ PHPAPI int php_check_open_basedir_ex(const char *path, int warn TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ php_check_safe_mode_include_dir
- */
-PHPAPI int php_check_safe_mode_include_dir(char *path TSRMLS_DC)
-{
-	if (PG(safe_mode)) {
-		if (PG(safe_mode_include_dir) && *PG(safe_mode_include_dir)) {
-			char *pathbuf;
-			char *ptr;
-			char *end;
-			char resolved_name[MAXPATHLEN];
-
-			/* Resolve the real path into resolved_name */
-			if (expand_filepath(path, resolved_name TSRMLS_CC) == NULL)
-				return -1;
-
-			pathbuf = estrdup(PG(safe_mode_include_dir));
-
-			ptr = pathbuf;
-
-			while (ptr && *ptr) {
-				end = strchr(ptr, DEFAULT_DIR_SEPARATOR);
-				if (end != NULL) {
-					*end = '\0';
-					end++;
-				}
-
-				/* Check the path */
-#ifdef PHP_WIN32
-				if (strncasecmp(ptr, resolved_name, strlen(ptr)) == 0)
-#else
-				if (strncmp(ptr, resolved_name, strlen(ptr)) == 0)
-#endif
-				{
-					/* File is in the right directory */
-					efree(pathbuf);
-					return 0;
-				}
-
-				ptr = end;
-			}
-			efree(pathbuf);
-		}
-		return -1;
-	}
-
-	/* Nothing to check... */
-	return 0;
-}
-/* }}} */
 
 /* {{{ php_fopen_and_set_opened_path
  */
@@ -388,15 +339,8 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 	 */
 	
 	/* Absolute path open */
-	if (IS_ABSOLUTE_PATH(filename, filename_length)) {
-		if ((php_check_safe_mode_include_dir(filename TSRMLS_CC)) == 0)
-			/* filename is in safe_mode_include_dir (or subdir) */
-			return php_fopen_and_set_opened_path(filename, mode, opened_path TSRMLS_CC);
-			
-		return php_fopen_and_set_opened_path(filename, mode, opened_path TSRMLS_CC);
-	}
-
-	if (!path || (path && !*path)) {
+	/* FIXME: Andi - Do we actually need the if()? */
+	if (IS_ABSOLUTE_PATH(filename, filename_length) || (!path || (path && !*path))) {
 		return php_fopen_and_set_opened_path(filename, mode, opened_path TSRMLS_CC);
 	}
 
@@ -434,20 +378,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 			end++;
 		}
 		snprintf(trypath, MAXPATHLEN, "%s/%s", ptr, filename);
-		if (PG(safe_mode)) {
-			if (VCWD_STAT(trypath, &sb) == 0) {
-				/* file exists ... check permission */
-				if ((php_check_safe_mode_include_dir(trypath TSRMLS_CC) == 0) ||
-						php_checkuid(trypath, mode, CHECKUID_CHECK_MODE_PARAM))
-					/* UID ok, or trypath is in safe_mode_include_dir */
-					fp = php_fopen_and_set_opened_path(trypath, mode, opened_path TSRMLS_CC);
-				else
-					fp = NULL;
-
-				efree(pathbuf);
-				return fp;
-			}
-		}
+		
 		fp = php_fopen_and_set_opened_path(trypath, mode, opened_path TSRMLS_CC);
 		if (fp) {
 			efree(pathbuf);

@@ -1210,10 +1210,6 @@ not_relative_path:
 			return NULL;
 		}
 
-		if ((php_check_safe_mode_include_dir(filename TSRMLS_CC)) == 0)
-			/* filename is in safe_mode_include_dir (or subdir) */
-			return php_stream_fopen_rel(filename, mode, opened_path, options);
-
 		return php_stream_fopen_rel(filename, mode, opened_path, options);
 	}
 	
@@ -1232,9 +1228,6 @@ not_relative_path:
 		if (((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) && php_check_open_basedir(trypath TSRMLS_CC)) {
 			return NULL;
 		}
-		if ((php_check_safe_mode_include_dir(trypath TSRMLS_CC)) == 0) {
-			return php_stream_fopen_rel(trypath, mode, opened_path, options);
-		}	
 
 		return php_stream_fopen_rel(trypath, mode, opened_path, options);
 	}
@@ -1289,19 +1282,6 @@ not_relative_path:
 			continue;
 		}
 		
-		if (PG(safe_mode)) {
-			if (VCWD_STAT(trypath, &sb) == 0) {
-				/* file exists ... check permission */
-				if ((php_check_safe_mode_include_dir(trypath TSRMLS_CC) == 0) ||
-						php_checkuid_ex(trypath, mode, CHECKUID_CHECK_MODE_PARAM, CHECKUID_NO_ERRORS)) {
-					/* UID ok, or trypath is in safe_mode_include_dir */
-					stream = php_stream_fopen_rel(trypath, mode, opened_path, options);
-					goto stream_done;
-				}
-			}
-			ptr = end;
-			continue;
-		}
 		stream = php_stream_fopen_rel(trypath, mode, opened_path, options);
 		if (stream) {
 stream_done:
