@@ -7,6 +7,8 @@ PHP_ARG_ENABLE(hash, whether to enable hash support,
 if test "$PHP_HASH" != "no"; then
   AC_DEFINE(HAVE_HASH_EXT,1,[Have HASH Extension])
 
+  PHP_C_BIGENDIAN
+
   AC_CHECK_SIZEOF(short, 2)
   AC_CHECK_SIZEOF(int, 4)
   AC_CHECK_SIZEOF(long, 4)
