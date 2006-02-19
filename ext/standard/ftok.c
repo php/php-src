@@ -51,10 +51,6 @@ PHP_FUNCTION(ftok)
 		RETURN_LONG(-1);
     }
 
-	if ((PG(safe_mode) && (!php_checkuid(Z_STRVAL_PP(pathname), NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(Z_STRVAL_PP(pathname) TSRMLS_CC)) {
-		RETURN_LONG(-1);
-	}
-
 	k = ftok(Z_STRVAL_PP(pathname),Z_STRVAL_PP(proj)[0]);
 	if (k == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "ftok() failed - %s", strerror(errno));

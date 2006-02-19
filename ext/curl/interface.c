@@ -1281,7 +1281,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 					 * use since curl needs a long not an int. */
 					if (*postval == '@') {
 						++postval;
-						/* safe_mode / open_basedir check */
+						/* open_basedir check */
 						if (php_check_open_basedir(postval TSRMLS_CC)) {
 							RETURN_FALSE;
 						}
