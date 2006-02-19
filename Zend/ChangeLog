@@ -1,3 +1,16 @@
+2006-02-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute_API.c:
+      - There is no %v in sprintf
+
+    * zend_vm_def.h
+      zend_vm_execute.h:
+      - Fix integrated iterator index
+
+    * zend_execute.c:
+      - Fix possible memory corruption/memleak issue with foreach and iterators
+      - Fix warnings
+
 2006-02-14  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_0)
