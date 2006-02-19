@@ -1,3 +1,46 @@
+2006-02-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute_API.c:
+      - There is no %v in sprintf
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      - Fix integrated iterator index
+
+    * ZendEngine2/zend_execute.c:
+      - Fix possible memory corruption/memleak issue with foreach and iterators
+      - Fix warnings
+
+    * (PHP_5_1)
+      NEWS
+      ext/dba/dba_db4.c
+      ext/dba/tests/bug36436.phpt:
+      - Fixed bug #36436 (DBA problem with Berkeley DB4).
+
+    * ext/dba/tests/bug36436.phpt
+      ext/dba/tests/bug36436.phpt:
+      
+      - Add new test
+
+    * ext/dba/dba_db4.c:
+      - Initiai fix to Bug #36436 DBA problem with Berkeley DB4
+
+2006-02-18  Michael Wallner  <mike@iworks.at>
+
+    * ext/iconv/php_iconv.h:
+      MF51: fix misleading proto (confused in and out charset)
+
+    * (PHP_5_1)
+      ext/iconv/php_iconv.h:
+      - fix misleading proto (confused out and in charset)
+
+2006-02-18  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_1)
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+      Rename getloadavg to sys_getloadavg
+
 2006-02-17  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ext/pcre/php_pcre.c:
