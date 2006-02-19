@@ -1415,10 +1415,6 @@ PHPAPI int php_mkdir_ex(char *dir, long mode, int options TSRMLS_DC)
 {
 	int ret;
 
-	if (PG(safe_mode) && (!php_checkuid(dir, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		return -1;
-	}
-
 	if (php_check_open_basedir(dir TSRMLS_CC)) {
 		return -1;
 	}

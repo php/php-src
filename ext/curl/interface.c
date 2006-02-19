@@ -157,8 +157,8 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 #define CAAZ(s, v) add_assoc_zval_ex(return_value, s, sizeof(s), (zval *) v);
 
 #define PHP_CURL_CHECK_OPEN_BASEDIR(str, len)													\
-	if (((PG(open_basedir) && *PG(open_basedir)) || PG(safe_mode)) &&                                                \
-	    strncasecmp(str, "file:", sizeof("file:") - 1) == 0)								\
+	if (((PG(open_basedir) && *PG(open_basedir))) &&                                            \
+	    strncasecmp(str, "file:", sizeof("file:") - 1) == 0)									\
 	{ 																							\
 		php_url *tmp_url; 																		\
 																								\
@@ -167,8 +167,7 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 			RETURN_FALSE; 																		\
 		} 																						\
 																								\
-		if (tmp_url->query || tmp_url->fragment || php_check_open_basedir(tmp_url->path TSRMLS_CC) || 									\
-			(PG(safe_mode) && !php_checkuid(tmp_url->path, "rb+", CHECKUID_CHECK_MODE_PARAM))	\
+		if (tmp_url->query || tmp_url->fragment || php_check_open_basedir(tmp_url->path TSRMLS_CC))	\
 		) { 																					\
 			php_url_free(tmp_url); 																\
 			RETURN_FALSE; 																		\
@@ -1283,7 +1282,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 					if (*postval == '@') {
 						++postval;
 						/* safe_mode / open_basedir check */
-						if (php_check_open_basedir(postval TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(postval, "rb+", CHECKUID_CHECK_MODE_PARAM))) {
+						if (php_check_open_basedir(postval TSRMLS_CC)) {
 							RETURN_FALSE;
 						}
 						error = curl_formadd(&first, &last, 
@@ -1369,7 +1368,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 
 			convert_to_string_ex(zvalue);
 
-			if (php_check_open_basedir(Z_STRVAL_PP(zvalue) TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(Z_STRVAL_PP(zvalue), "rb+", CHECKUID_CHECK_MODE_PARAM))) {
+			if (php_check_open_basedir(Z_STRVAL_PP(zvalue) TSRMLS_CC)) {
 				RETURN_FALSE;			
 			}
 

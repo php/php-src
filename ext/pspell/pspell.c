@@ -281,10 +281,6 @@ PHP_FUNCTION(pspell_new_personal)
 
 	convert_to_string_ex(personal);
 
-	if (PG(safe_mode) && (!php_checkuid(Z_STRVAL_PP(personal), NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		RETURN_FALSE;
-	}
-
 	if (php_check_open_basedir(Z_STRVAL_PP(personal) TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
@@ -782,10 +778,6 @@ static void pspell_config_path(INTERNAL_FUNCTION_PARAMETERS, char *option)
 
 	convert_to_string_ex(value);
 
-	if (PG(safe_mode) && (!php_checkuid(Z_STRVAL_PP(value), NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		RETURN_FALSE;
-	}
-
 	if (php_check_open_basedir(Z_STRVAL_PP(value) TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
@@ -839,10 +831,6 @@ PHP_FUNCTION(pspell_config_repl)
 	pspell_config_replace(config, "save-repl", "true");
 
 	convert_to_string_ex(repl);
-
-	if (PG(safe_mode) && (!php_checkuid(Z_STRVAL_PP(repl), NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		RETURN_FALSE;
-	}
 
 	if (php_check_open_basedir(Z_STRVAL_PP(repl) TSRMLS_CC)) {
 		RETURN_FALSE;

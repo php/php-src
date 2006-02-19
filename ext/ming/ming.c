@@ -79,7 +79,7 @@ static SWFPrebuiltClip getPrebuiltClip(zval *id TSRMLS_DC);
 #endif
 
 #define PHP_MING_FILE_CHK(file) \
-	if ((PG(safe_mode) && !php_checkuid((file), NULL, CHECKUID_CHECK_FILE_AND_DIR)) || php_check_open_basedir((file) TSRMLS_CC)) {	\
+	if (php_check_open_basedir((file) TSRMLS_CC)) {	\
 		RETURN_FALSE;	\
 	}	\
 

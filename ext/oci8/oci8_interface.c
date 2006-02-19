@@ -909,10 +909,6 @@ PHP_FUNCTION(oci_lob_export)
 		RETURN_FALSE;
 	}
 	
-	if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		RETURN_FALSE;
-	}
-
 	if (php_check_open_basedir(filename TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
@@ -1679,12 +1675,6 @@ PHP_FUNCTION(oci_password_change)
 	text *user, *pass_old, *pass_new, *dbname;
 	int user_len, pass_old_len, pass_new_len, dbname_len;
 	php_oci_connection *connection;
-
-	/*  Disable in Safe Mode  */
-	if (PG(safe_mode)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "is disabled in Safe Mode");
-		RETURN_FALSE;
-	}
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "rsss", &z_connection, &user, &user_len, &pass_old, &pass_old_len, &pass_new, &pass_new_len) == SUCCESS) {
 		PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);

@@ -390,10 +390,6 @@ CPH_METHOD(SaveToFile)
 
 		if (filename) {
 			fullpath = expand_filepath(filename, NULL TSRMLS_CC);
-	
-			if (PG(safe_mode) && (!php_checkuid(fullpath, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-				RETURN_FALSE;
-			}
 
 			if (php_check_open_basedir(fullpath TSRMLS_CC)) {
 				RETURN_FALSE;
@@ -454,11 +450,8 @@ CPH_METHOD(LoadFromFile)
 
 		fullpath = expand_filepath(filename, NULL TSRMLS_CC);
 
-		if (PG(safe_mode) && (!php_checkuid(fullpath, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-			RETURN_FALSE;
-		}
-
 		if (php_check_open_basedir(fullpath TSRMLS_CC)) {
+			efree(fullpath);
 			RETURN_FALSE;
 		}
 
