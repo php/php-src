@@ -379,9 +379,6 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 	
 	/* Relative path open */
 	if (*filename == '.') {
-		if (PG(safe_mode) && (!php_checkuid(filename, mode, CHECKUID_CHECK_MODE_PARAM))) {
-			return NULL;
-		}
 		return php_fopen_and_set_opened_path(filename, mode, opened_path TSRMLS_CC);
 	}
 	
@@ -396,16 +393,10 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 			/* filename is in safe_mode_include_dir (or subdir) */
 			return php_fopen_and_set_opened_path(filename, mode, opened_path TSRMLS_CC);
 			
-		if (PG(safe_mode) && (!php_checkuid(filename, mode, CHECKUID_CHECK_MODE_PARAM)))
-			return NULL;
-
 		return php_fopen_and_set_opened_path(filename, mode, opened_path TSRMLS_CC);
 	}
 
 	if (!path || (path && !*path)) {
-		if (PG(safe_mode) && (!php_checkuid(filename, mode, CHECKUID_CHECK_MODE_PARAM))) {
-			return NULL;
-		}
 		return php_fopen_and_set_opened_path(filename, mode, opened_path TSRMLS_CC);
 	}
 

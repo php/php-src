@@ -813,10 +813,6 @@ static php_stream *php_plain_files_dir_opener(php_stream_wrapper *wrapper, char 
 		return NULL;
 	}
 	
-	if (PG(safe_mode) &&(!php_checkuid(path, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		return NULL;
-	}
-	
 	dir = VCWD_OPENDIR(path);
 
 #ifdef PHP_WIN32
@@ -935,9 +931,6 @@ static php_stream *php_plain_files_stream_opener(php_stream_wrapper *wrapper, ch
 		return NULL;
 	}
 
-	if ((options & ENFORCE_SAFE_MODE) && PG(safe_mode) && (!php_checkuid(path, mode, CHECKUID_CHECK_MODE_PARAM)))
-		return NULL;
-
 	return php_stream_fopen_rel(path, mode, opened_path, options);
 }
 
@@ -946,10 +939,6 @@ static int php_plain_files_url_stater(php_stream_wrapper *wrapper, char *url, in
 
 	if (strncmp(url, "file://", sizeof("file://") - 1) == 0) {
 		url += sizeof("file://") - 1;
-	}
-
-	if (PG(safe_mode) &&(!php_checkuid_ex(url, NULL, CHECKUID_CHECK_FILE_AND_DIR, (flags & PHP_STREAM_URL_STAT_QUIET) ? CHECKUID_NO_ERRORS : 0))) {
-		return -1;
 	}
 
 	if (php_check_open_basedir_ex(url, (flags & PHP_STREAM_URL_STAT_QUIET) ? 0 : 1 TSRMLS_CC)) {
@@ -975,11 +964,8 @@ static int php_plain_files_unlink(php_stream_wrapper *wrapper, char *url, int op
 		url = p + 3;
 	}
 
+	/* FIXME: Andi - Pending email I sent to internals@ re: ENFORCE_SAFE_MODE */
 	if (options & ENFORCE_SAFE_MODE) {
-		if (PG(safe_mode) && !php_checkuid(url, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
-			return 0;
-		}
-
 		if (php_check_open_basedir(url TSRMLS_CC)) {
 			return 0;
 		}
@@ -1017,11 +1003,6 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, char *url_from, c
 
 	if ((p = strstr(url_to, "://")) != NULL) {
 		url_to = p + 3;
-	}
-
-	if (PG(safe_mode) && (!php_checkuid(url_from, NULL, CHECKUID_CHECK_FILE_AND_DIR) ||
-				!php_checkuid(url_to, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		return 0;
 	}
 
 	if (php_check_open_basedir(url_from TSRMLS_CC) || php_check_open_basedir(url_to TSRMLS_CC)) {
@@ -1142,10 +1123,6 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, char *dir, int mod
 
 static int php_plain_files_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC)
 {
-	if (PG(safe_mode) &&(!php_checkuid(url, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		return 0;
-	}
-
 	if (php_check_open_basedir(url TSRMLS_CC)) {
 		return 0;
 	}
@@ -1216,9 +1193,6 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 			return NULL;
 		}
 
-		if (PG(safe_mode) && (!php_checkuid(filename, mode, CHECKUID_CHECK_MODE_PARAM))) {
-			return NULL;
-		}
 		return php_stream_fopen_rel(filename, mode, opened_path, options);
 	}
 
@@ -1239,9 +1213,6 @@ not_relative_path:
 		if ((php_check_safe_mode_include_dir(filename TSRMLS_CC)) == 0)
 			/* filename is in safe_mode_include_dir (or subdir) */
 			return php_stream_fopen_rel(filename, mode, opened_path, options);
-
-		if (PG(safe_mode) && (!php_checkuid(filename, mode, CHECKUID_CHECK_MODE_PARAM)))
-			return NULL;
 
 		return php_stream_fopen_rel(filename, mode, opened_path, options);
 	}
@@ -1264,10 +1235,7 @@ not_relative_path:
 		if ((php_check_safe_mode_include_dir(trypath TSRMLS_CC)) == 0) {
 			return php_stream_fopen_rel(trypath, mode, opened_path, options);
 		}	
-		if (PG(safe_mode) && (!php_checkuid(trypath, mode, CHECKUID_CHECK_MODE_PARAM))) {
-			return NULL;
-		}
-		
+
 		return php_stream_fopen_rel(trypath, mode, opened_path, options);
 	}
 #endif
@@ -1278,9 +1246,6 @@ not_relative_path:
 			return NULL;
 		}
 
-		if (PG(safe_mode) && (!php_checkuid(filename, mode, CHECKUID_CHECK_MODE_PARAM))) {
-			return NULL;
-		}
 		return php_stream_fopen_rel(filename, mode, opened_path, options);
 	}
 
