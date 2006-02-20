@@ -102,8 +102,14 @@
  * - interface SplObserver
  * - interface SplSubject
  * - class SplObjectStorage
+ *
+ * 8) @ref Examples
+ *
+ * The classes and interfaces in this group are contained as PHP code in the 
+ * examples subdirectory of ext/SPL. Sooner or later they will be moved to
+ * c-code.
  * 
- * Some articles about SPL:
+ * 9) Some articles about SPL:
  * - <a href="http://www.sitepoint.com/article/php5-standard-library/1">Introducing PHP 5's Standard Library</a>
  * - <a href="http://www.ramikayyali.com/archives/2005/02/25/iterators">Iterators in PHP5</a>
  * - <a href="http://www.phpriot.com/d/articles/php/oop/oop-with-spl-php-5-1/index.html">Advanced OOP with SPL in PHP 5</a>
@@ -112,7 +118,7 @@
  * - <a href="http://www.wiki.cc/php/SPL">SPL on PHP Wiki</a>
  * - <a href="http://www.professionelle-softwareentwicklung-mit-php5.de/erste_auflage/oop.iterators.spl.html">Die Standard PHP Library (SPL) [german]</a>
  *
- * Talks on SPL:
+ * 10) Talks on SPL:
  * - SPL for the masses <a href="http://somabo.de/talks/200504_php_quebec_spl_for_the_masses.pps">[pps]</a>, <a href="http://somabo.de/talks/200504_php_quebec_spl_for_the_masses.pdf">[pdf]</a>
  * - From engine overloading to SPL <a href="http://somabo.de/talks/200505_cancun_from_engine_overloading_to_spl.pps">[pps]</a>, <a href="http://somabo.de/talks/200505_cancun_from_engine_overloading_to_spl.pdf">[pdf]</a>
  * - Happy SPLing <a href="http://somabo.de/talks/200509_toronto_happy_spling.pps">[pps]</a>, <a href="http://somabo.de/talks/200509_toronto_happy_spling.pdf">[pdf]</a>
