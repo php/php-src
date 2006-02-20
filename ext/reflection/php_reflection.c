@@ -873,6 +873,41 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 				  module->module_number, module->name,
 				  (module->version == NO_VERSION_YET) ? "<no_version>" : module->version);
 
+	if (module->deps) {
+		zend_module_dep* dep = module->deps;
+
+		string_printf(str, "\n  - Dependencies {\n");
+
+		while(dep->name) {
+			string_printf(str, "%s    Dependency [ %s (", indent, dep->name);
+			
+			switch(dep->type) {
+			case MODULE_DEP_REQUIRED:
+				string_write(str, "Required", sizeof("Required") - 1);
+				break;
+			case MODULE_DEP_CONFLICTS:
+				string_write(str, "Conflicts", sizeof("Conflicts") - 1);
+				break;
+			case MODULE_DEP_OPTIONAL:
+				string_write(str, "Optional", sizeof("Optional") - 1);
+				break;
+			default:
+				string_write(str, "Error", sizeof("Error") - 1); /* shouldn't happen */
+				break;
+			}
+
+			if (dep->rel) {	
+				string_printf(str, " %s", dep->rel);
+			}
+			if (dep->version) {	
+				string_printf(str, " %s", dep->version);
+			}
+			string_write(str, ") ]\n", sizeof(") ]\n") - 1);
+			dep++;
+		}
+		string_printf(str, "%s  }\n", indent);
+	}
+
 	{
 		string str_ini;
 		string_init(&str_ini);
