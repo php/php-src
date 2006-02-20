@@ -187,7 +187,7 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC)
 	dom_object *intern;
 	dom_object *nnmap;
 	dom_nnodemap_object *objmap;
-	int ret, previndex=1;
+	int ret, previndex=0;
 	HashTable *nodeht;
 	zval **entry;
 
