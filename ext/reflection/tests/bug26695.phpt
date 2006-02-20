@@ -15,7 +15,7 @@ $class = new ReflectionClass('bar');
 $methods = $class->getMethods();
 $params = $methods[0]->getParameters();
 
-$class = $params[0]->getClass();
+$class = $params[0]->getDeclaringClass();
 
 var_dump($class->getName());
 ?>
