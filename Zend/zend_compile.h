@@ -136,6 +136,9 @@ typedef struct _zend_try_catch_element {
 /* shadow of parent's private method/property */
 #define ZEND_ACC_SHADOW 0x20000
 
+/* deprecation flag */
+#define ZEND_ACC_DEPRECATED 0x40000
+
 char *zend_visibility_string(zend_uint fn_flags);
 
 

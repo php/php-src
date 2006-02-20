@@ -1813,10 +1813,18 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 	zend_bool should_change_scope;
 	zend_op *ctor_opline;
 
-	if (EX(function_state).function->common.fn_flags & ZEND_ACC_ABSTRACT) {
-		/* FIXME: output identifiers properly */
-		zend_error_noreturn(E_ERROR, "Cannot call abstract method %v::%v()", EX(function_state).function->common.scope->name, EX(function_state).function->common.function_name);
-		ZEND_VM_NEXT_OPCODE(); /* Never reached */
+	if (EX(function_state).function->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) {
+		if (EX(function_state).function->common.fn_flags & ZEND_ACC_ABSTRACT) {
+			/* FIXME: output identifiers properly */
+			zend_error_noreturn(E_ERROR, "Cannot call abstract method %v::%v()", EX(function_state).function->common.scope->name, EX(function_state).function->common.function_name);
+			ZEND_VM_NEXT_OPCODE(); /* Never reached */
+		}
+		if (EX(function_state).function->common.fn_flags & ZEND_ACC_DEPRECATED) {
+			zend_error(E_NOTICE, "Function %s%s%s() is deprecated", 
+				EX(function_state).function->common.scope ? EX(function_state).function->common.scope->name : "",
+				EX(function_state).function->common.scope ? "::" : "",
+				EX(function_state).function->common.function_name);
+		}
 	}
 
 	zend_ptr_stack_2_push(&EG(argument_stack), (void *) opline->extended_value, NULL);

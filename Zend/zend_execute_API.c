@@ -861,6 +861,13 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		fci->object_pp = fci_cache->object_pp;
 	}
 	
+	if (EX(function_state).function->common.fn_flags & ZEND_ACC_DEPRECATED) { 
+		zend_error(E_NOTICE, "Function %s%s%s() is deprecated", 
+			EX(function_state).function->common.scope ? EX(function_state).function->common.scope->name : "",
+			EX(function_state).function->common.scope ? "::" : "",
+			EX(function_state).function->common.function_name);
+	}
+
 	for (i=0; i<fci->param_count; i++) {
 		zval *param;
 
