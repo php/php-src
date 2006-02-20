@@ -8,4 +8,4 @@ Bug #26927 (preg_quote() does not escape \0)
 ?>
 --EXPECT--
 int(1)
-string(4) "a\0b"
+string(6) "a\000b"
