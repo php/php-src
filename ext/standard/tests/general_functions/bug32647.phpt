@@ -35,15 +35,15 @@ register_shutdown_function(array($obj,'barfoo'));      // Valid
 --EXPECTF--
 Notice: Undefined variable:  obj in %s on line %d
 
-Warning: register_shutdown_function(): Invalid shutdown callback 'Array' passed in %s on line %d
+Warning: register_shutdown_function() [/phpmanual/function.register-shutdown-function.html]: Invalid shutdown callback 'Array' passed in %s on line %d
 
 Notice: Undefined variable:  obj in %s on line %d
 
-Warning: register_shutdown_function(): Invalid shutdown callback 'Array' passed in %s on line %d
+Warning: register_shutdown_function() [/phpmanual/function.register-shutdown-function.html]: Invalid shutdown callback 'Array' passed in %s on line %d
 
-Warning: register_shutdown_function(): Invalid shutdown callback 'Array' passed in %s on line %d
+Warning: register_shutdown_function() [/phpmanual/function.register-shutdown-function.html]: Invalid shutdown callback 'Array' passed in %s on line %d
 
-Warning: register_shutdown_function(): Invalid shutdown callback 'Array' passed in %s on line %d
+Warning: register_shutdown_function() [/phpmanual/function.register-shutdown-function.html]: Invalid shutdown callback 'Array' passed in %s on line %d
 
 Warning: (Registered shutdown functions) Unable to call bar::foo() - function does not exist in Unknown on line 0
 
