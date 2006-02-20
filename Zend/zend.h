@@ -645,7 +645,7 @@ END_EXTERN_C()
 		zval *original_var = varptr; \
 		ALLOC_ZVAL(varptr); \
 		varptr->value = original_var->value; \
-		varptr->type = original_var->type; \
+		Z_TYPE_P(varptr) = Z_TYPE_P(original_var); \
 		varptr->is_ref = 0; \
 		varptr->refcount = 1; \
 		zval_copy_ctor(varptr); \
@@ -658,6 +658,7 @@ END_EXTERN_C()
 
 #define ZEND_INTERNAL_ENCODING "UTF-16"
 
+#include "zend_operators.h"
 #include "zend_variables.h"
 
 #define ZEND_U_EQUAL(type, ustr, ulen, str, slen) \

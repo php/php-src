@@ -24,8 +24,8 @@
 
 #include "zend_compile.h"
 #include "zend_hash.h"
-#include "zend_variables.h"
 #include "zend_operators.h"
+#include "zend_variables.h"
 
 typedef union _temp_variable {
 	zval tmp_var;
@@ -76,36 +76,36 @@ static inline int i_zend_is_true(zval *op)
 {
 	int result;
 
-	switch (op->type) {
+	switch (Z_TYPE_P(op)) {
 		case IS_NULL:
 			result = 0;
 			break;
 		case IS_LONG:
 		case IS_BOOL:
 		case IS_RESOURCE:
-			result = (op->value.lval?1:0);
+			result = (Z_LVAL_P(op)?1:0);
 			break;
 		case IS_DOUBLE:
-			result = (op->value.dval ? 1 : 0);
+			result = (Z_DVAL_P(op) ? 1 : 0);
 			break;
 		case IS_STRING:
-			if (op->value.str.len == 0
-				|| (op->value.str.len==1 && op->value.str.val[0]=='0')) {
+			if (Z_STRLEN_P(op) == 0
+				|| (Z_STRLEN_P(op)==1 && Z_STRVAL_P(op)[0]=='0')) {
 				result = 0;
 			} else {
 				result = 1;
 			}
 			break;
 		case IS_UNICODE:
-			if (op->value.ustr.len == 0
-				|| (op->value.ustr.len==1 && op->value.ustr.val[0]=='0')) {
+			if (Z_USTRLEN_P(op) == 0
+				|| (Z_USTRLEN_P(op)==1 && Z_USTRVAL_P(op)[0]=='0')) {
 				result = 0;
 			} else {
 				result = 1;
 			}
 			break;
 		case IS_ARRAY:
-			result = (zend_hash_num_elements(op->value.ht)?1:0);
+			result = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);
 			break;
 		case IS_OBJECT:
 			if(IS_ZEND_STD_OBJECT(*op)) {
@@ -203,7 +203,7 @@ void zend_shutdown_timeout_thread();
 /* The following tries to resolve the classname of a zval of type object.
  * Since it is slow it should be only used in error messages.
  */
-#define Z_OBJ_CLASS_NAME_P(zval) ((zval) && (zval)->type == IS_OBJECT && Z_OBJ_HT_P(zval)->get_class_entry != NULL && Z_OBJ_HT_P(zval)->get_class_entry(zval TSRMLS_CC) ? Z_OBJ_HT_P(zval)->get_class_entry(zval TSRMLS_CC)->name : (char*)EMPTY_STR)
+#define Z_OBJ_CLASS_NAME_P(zval) ((zval) && Z_TYPE_P(zval) == IS_OBJECT && Z_OBJ_HT_P(zval)->get_class_entry != NULL && Z_OBJ_HT_P(zval)->get_class_entry(zval TSRMLS_CC) ? Z_OBJ_HT_P(zval)->get_class_entry(zval TSRMLS_CC)->name : (char*)EMPTY_STR)
 
 ZEND_API zval** zend_get_compiled_variable_value(zend_execute_data *execute_data_ptr, zend_uint var);
 

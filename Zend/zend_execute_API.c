@@ -161,8 +161,8 @@ void init_executor(TSRMLS_D)
 		ALLOC_ZVAL(globals);
 		globals->refcount=1;
 		globals->is_ref=1;
-		globals->type = IS_ARRAY;
-		globals->value.ht = &EG(symbol_table);
+		Z_TYPE_P(globals) = IS_ARRAY;
+		Z_ARRVAL_P(globals) = &EG(symbol_table);
 		zend_hash_update(&EG(symbol_table), "GLOBALS", sizeof("GLOBALS"), &globals, sizeof(zval *), NULL);
 	}
 	EG(active_symbol_table) = &EG(symbol_table);
@@ -397,7 +397,7 @@ ZEND_API void _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC)
 		zval_dtor(*zval_ptr);
 		safe_free_zval_ptr_rel(*zval_ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC);
 	} else if ((*zval_ptr)->refcount == 1) {
-		if ((*zval_ptr)->type == IS_OBJECT) {
+		if (Z_TYPE_PP(zval_ptr) == IS_OBJECT) {
 			TSRMLS_FETCH();
 
 			if (EG(ze1_compatibility_mode)) {
@@ -437,7 +437,7 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 	zend_bool inline_change = (zend_bool) (unsigned long) arg;
 	zval const_value;
 
-	if (p->type == IS_CONSTANT) {
+	if (Z_TYPE_P(p) == IS_CONSTANT) {
 		int refcount;
 		zend_uchar is_ref;
 
@@ -451,20 +451,20 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 			zend_error(E_NOTICE, "Use of undefined constant %v - assumed '%v'",
 				Z_UNIVAL_P(p),
 				Z_UNIVAL_P(p));
-			p->type = UG(unicode)?IS_UNICODE:IS_STRING;
+			Z_TYPE_P(p) = UG(unicode)?IS_UNICODE:IS_STRING;
 			if (!inline_change) {
 				zval_copy_ctor(p);
 			}
 		} else {
 			if (inline_change) {
-				STR_FREE(p->value.str.val);
+				STR_FREE(Z_STRVAL_P(p));
 			}
 			*p = const_value;
 		}
 
 		p->refcount = refcount;
 		p->is_ref = is_ref;
-	} else if (p->type == IS_CONSTANT_ARRAY) {
+	} else if (Z_TYPE_P(p) == IS_CONSTANT_ARRAY) {
 		zval **element, *new_val;
 		char *str_index;
 		uint str_index_len;
@@ -472,42 +472,42 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 
 		SEPARATE_ZVAL_IF_NOT_REF(pp);
 		p = *pp;
-		p->type = IS_ARRAY;
+		Z_TYPE_P(p) = IS_ARRAY;
 
 		/* First go over the array and see if there are any constant indices */
-		zend_hash_internal_pointer_reset(p->value.ht);
-		while (zend_hash_get_current_data(p->value.ht, (void **) &element)==SUCCESS) {
+		zend_hash_internal_pointer_reset(Z_ARRVAL_P(p));
+		while (zend_hash_get_current_data(Z_ARRVAL_P(p), (void **) &element)==SUCCESS) {
 			if (!(Z_TYPE_PP(element) & IS_CONSTANT_INDEX)) {
-				zend_hash_move_forward(p->value.ht);
+				zend_hash_move_forward(Z_ARRVAL_P(p));
 				continue;
 			}
 			Z_TYPE_PP(element) &= ~IS_CONSTANT_INDEX;
-			if (zend_hash_get_current_key_ex(p->value.ht, &str_index, &str_index_len, &num_index, 0, NULL) != (UG(unicode)?HASH_KEY_IS_UNICODE:HASH_KEY_IS_STRING)) {
-				zend_hash_move_forward(p->value.ht);
+			if (zend_hash_get_current_key_ex(Z_ARRVAL_P(p), &str_index, &str_index_len, &num_index, 0, NULL) != (UG(unicode)?HASH_KEY_IS_UNICODE:HASH_KEY_IS_STRING)) {
+				zend_hash_move_forward(Z_ARRVAL_P(p));
 				continue;
 			}
 			if (!zend_u_get_constant(UG(unicode)?IS_UNICODE:IS_STRING, str_index, str_index_len-1, &const_value TSRMLS_CC)) {
 				zend_error(E_NOTICE, "Use of undefined constant %v - assumed '%v'",	str_index, str_index);
-				zend_hash_move_forward(p->value.ht);
+				zend_hash_move_forward(Z_ARRVAL_P(p));
 				continue;
 			}
 
 			if (UG(unicode)) {
-				if (const_value.type == IS_UNICODE && 
-				    const_value.value.ustr.len == str_index_len-1 &&
+				if (Z_TYPE(const_value) == IS_UNICODE && 
+				    Z_USTRLEN(const_value) == str_index_len-1 &&
 				    !u_strncmp(Z_USTRVAL(const_value), (UChar*)str_index, str_index_len)) {
 					/* constant value is the same as its name */
 					zval_dtor(&const_value);
-					zend_hash_move_forward(p->value.ht);
+					zend_hash_move_forward(Z_ARRVAL_P(p));
 					continue;
 				}
 			} else {
-				if (const_value.type == IS_STRING && 
-				    const_value.value.str.len == str_index_len-1 &&
-				   !strncmp(const_value.value.str.val, str_index, str_index_len)) {
+				if (Z_TYPE(const_value) == IS_STRING && 
+				    Z_STRLEN(const_value) == str_index_len-1 &&
+				   !strncmp(Z_STRVAL(const_value), str_index, str_index_len)) {
 					/* constant value is the same as its name */
 					zval_dtor(&const_value);
-					zend_hash_move_forward(p->value.ht);
+					zend_hash_move_forward(Z_ARRVAL_P(p));
 					continue;
 				}
 			}
@@ -523,27 +523,27 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 			zval_ptr_dtor(element);
 			*element = new_val;
 
-			switch (const_value.type) {
+			switch (Z_TYPE(const_value)) {
 				case IS_STRING:
 				case IS_UNICODE:
-					zend_u_symtable_update_current_key(p->value.ht, Z_TYPE(const_value), Z_UNIVAL(const_value), Z_UNILEN(const_value)+1);
+					zend_u_symtable_update_current_key(Z_ARRVAL_P(p), Z_TYPE(const_value), Z_UNIVAL(const_value), Z_UNILEN(const_value)+1);
 					break;
 				case IS_BOOL:
 				case IS_LONG:
-					zend_hash_update_current_key(p->value.ht, HASH_KEY_IS_LONG, NULL, 0, const_value.value.lval);
+					zend_hash_update_current_key(Z_ARRVAL_P(p), HASH_KEY_IS_LONG, NULL, 0, Z_LVAL(const_value));
 					break;
 				case IS_DOUBLE:
-					zend_hash_update_current_key(p->value.ht, HASH_KEY_IS_LONG, NULL, 0, (long)const_value.value.dval);
+					zend_hash_update_current_key(Z_ARRVAL_P(p), HASH_KEY_IS_LONG, NULL, 0, (long)Z_DVAL(const_value));
 					break;
 				case IS_NULL:
-					zend_hash_update_current_key(p->value.ht, HASH_KEY_IS_STRING, "", 1, 0);
+					zend_hash_update_current_key(Z_ARRVAL_P(p), HASH_KEY_IS_STRING, "", 1, 0);
 					break;
 			}
-			zend_hash_move_forward(p->value.ht);
+			zend_hash_move_forward(Z_ARRVAL_P(p));
 			zval_dtor(&const_value);
 		}
-		zend_hash_apply_with_argument(p->value.ht, (apply_func_arg_t) zval_update_constant, (void *) 1 TSRMLS_CC);
-		zend_hash_internal_pointer_reset(p->value.ht);
+		zend_hash_apply_with_argument(Z_ARRVAL_P(p), (apply_func_arg_t) zval_update_constant, (void *) 1 TSRMLS_CC);
+		zend_hash_internal_pointer_reset(Z_ARRVAL_P(p));
 	}
 	return 0;
 }
@@ -612,7 +612,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	zval *params_array;
 	int call_via_handler = 0;
 	char *old_func_name = NULL;
-	int clen , mlen, fname_len;
+	unsigned int clen;
+	int mlen, fname_len;
 	char *mname, *colon, *fname, *lcname;
 
 	if (EG(exception)) {
@@ -646,13 +647,13 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	*fci->retval_ptr_ptr = NULL;
 
 	if (!fci_cache || !fci_cache->initialized) {
-		if (fci->function_name->type==IS_ARRAY) { /* assume array($obj, $name) couple */
+		if (Z_TYPE_P(fci->function_name)==IS_ARRAY) { /* assume array($obj, $name) couple */
 			zval **tmp_object_ptr, **tmp_real_function_name;
 
-			if (zend_hash_index_find(fci->function_name->value.ht, 0, (void **) &tmp_object_ptr)==FAILURE) {
+			if (zend_hash_index_find(Z_ARRVAL_P(fci->function_name), 0, (void **) &tmp_object_ptr)==FAILURE) {
 				return FAILURE;
 			}
-			if (zend_hash_index_find(fci->function_name->value.ht, 1, (void **) &tmp_real_function_name)==FAILURE) {
+			if (zend_hash_index_find(Z_ARRVAL_P(fci->function_name), 1, (void **) &tmp_real_function_name)==FAILURE) {
 				return FAILURE;
 			}
 			fci->function_name = *tmp_real_function_name;
@@ -734,12 +735,12 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			}
 		}
 
-		if (fci->function_name->type != IS_STRING &&
-		    fci->function_name->type != IS_UNICODE) {
+		if (Z_TYPE_P(fci->function_name) != IS_STRING &&
+		    Z_TYPE_P(fci->function_name) != IS_UNICODE) {
 			return FAILURE;
 		}
 
-		if (UG(unicode) && fci->function_name->type == IS_STRING) {
+		if (UG(unicode) && Z_TYPE_P(fci->function_name) == IS_STRING) {
 			old_func_name = Z_STRVAL_P(fci->function_name);
 
 			Z_STRVAL_P(fci->function_name) = estrndup(Z_STRVAL_P(fci->function_name), Z_STRLEN_P(fci->function_name));
@@ -1143,32 +1144,32 @@ ZEND_API int zend_u_eval_string(zend_uchar type, void *string, zval *retval_ptr,
 		UChar *str = (UChar*)string;
 
 		if (retval_ptr) {
-			pv.value.ustr.len = u_strlen(str)+sizeof("return  ;")-1;
-			pv.value.ustr.val = eumalloc(pv.value.ustr.len+1);
-			u_strcpy(pv.value.ustr.val, u_return);
-			u_strcat(pv.value.ustr.val, str);
-			u_strcat(pv.value.ustr.val, u_semicolon);
+			Z_USTRLEN(pv) = u_strlen(str)+sizeof("return  ;")-1;
+			Z_USTRVAL(pv) = eumalloc(Z_USTRLEN(pv)+1);
+			u_strcpy(Z_USTRVAL(pv), u_return);
+			u_strcat(Z_USTRVAL(pv), str);
+			u_strcat(Z_USTRVAL(pv), u_semicolon);
 		} else {
-			pv.value.ustr.len = u_strlen(str);
-			pv.value.ustr.val = eustrndup(str, pv.value.str.len);
+			Z_USTRLEN(pv) = u_strlen(str);
+			Z_USTRVAL(pv) = eustrndup(str, Z_USTRLEN(pv));
 		}
 	} else {
 		char *str = (char*)string;
 
 		if (retval_ptr) {
-			pv.value.str.len = strlen(str)+sizeof("return  ;")-1;
-			pv.value.str.val = emalloc(pv.value.str.len+1);
-			strcpy(pv.value.str.val, "return ");
-			strcat(pv.value.str.val, str);
-			strcat(pv.value.str.val, " ;");
+			Z_STRLEN(pv) = strlen(str)+sizeof("return  ;")-1;
+			Z_STRVAL(pv) = emalloc(Z_STRLEN(pv)+1);
+			strcpy(Z_STRVAL(pv), "return ");
+			strcat(Z_STRVAL(pv), str);
+			strcat(Z_STRVAL(pv), " ;");
 		} else {
-			pv.value.str.len = strlen(str);
-			pv.value.str.val = estrndup(str, pv.value.str.len);
+			Z_STRLEN(pv) = strlen(str);
+			Z_STRVAL(pv) = estrndup(str, Z_STRLEN(pv));
 		}
 	}
-	pv.type = type;
+	Z_TYPE(pv) = type;
 
-	/*printf("Evaluating '%s'\n", pv.value.str.val);*/
+	/*printf("Evaluating '%s'\n", Z_STRVAL(pv));*/
 
 	original_handle_op_arrays = CG(handle_op_arrays);
 	CG(handle_op_arrays) = 0;

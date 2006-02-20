@@ -89,7 +89,7 @@
  *	directly -- and assumed always to succeed.
  */
 
-#include <zend_strtod.h>
+#include <zend.h>
 #include <unicode/utypes.h>
 #include <unicode/ustdio.h>
 

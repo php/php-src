@@ -201,7 +201,7 @@ ZEND_API int zend_user_it_get_current_key(zend_object_iterator *_iter, char **st
 		}
 		return HASH_KEY_IS_LONG;
 	}
-	switch (retval->type) {
+	switch (Z_TYPE_P(retval)) {
 		default: 
 			zend_error(E_WARNING, "Illegal type returned from %v::key()", iter->ce->name);
 		case IS_NULL:
@@ -211,13 +211,13 @@ ZEND_API int zend_user_it_get_current_key(zend_object_iterator *_iter, char **st
 
 		case IS_STRING:
 			*str_key = estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
-			*str_key_len = retval->value.str.len+1;
+			*str_key_len = Z_STRLEN_P(retval)+1;
 			zval_ptr_dtor(&retval);
 			return HASH_KEY_IS_STRING;
 
 		case IS_UNICODE:
 			*str_key = (char*)eustrndup(Z_USTRVAL_P(retval), Z_USTRLEN_P(retval));
-			*str_key_len = retval->value.str.len+1;
+			*str_key_len = Z_USTRLEN_P(retval)+1;
 			zval_ptr_dtor(&retval);
 			return HASH_KEY_IS_UNICODE;
 
@@ -225,10 +225,10 @@ ZEND_API int zend_user_it_get_current_key(zend_object_iterator *_iter, char **st
 		case IS_RESOURCE:
 		case IS_BOOL: 
 		case IS_LONG: {
-				if (retval->type == IS_DOUBLE) {
-					*int_key = (long)retval->value.dval;
+				if (Z_TYPE_P(retval) == IS_DOUBLE) {
+					*int_key = (long)Z_DVAL_P(retval);
 				} else {
-					*int_key = retval->value.lval;
+					*int_key = Z_LVAL_P(retval);
 				}
 			}
 			zval_ptr_dtor(&retval);
@@ -430,12 +430,12 @@ int zend_user_serialize(zval *object, unsigned char **buffer, zend_uint *buf_len
 			zval_ptr_dtor(&retval);
 			return FAILURE;
 		case IS_STRING:
-			*buffer = estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
+			*buffer = (unsigned char*)estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
 			*buf_len = Z_STRLEN_P(retval);
 			result = SUCCESS;
 			break;
 		case IS_UNICODE:
-			*buffer = (char*)eustrndup(Z_USTRVAL_P(retval), Z_USTRLEN_P(retval));
+			*buffer = (unsigned char*)eustrndup(Z_USTRVAL_P(retval), Z_USTRLEN_P(retval));
 			*buf_len = Z_USTRLEN_P(retval);
 			result = SUCCESS;
 			break;

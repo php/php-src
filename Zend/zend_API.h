@@ -613,13 +613,13 @@ END_EXTERN_C()
 
 #if ZEND_DEBUG
 #define CHECK_ZVAL_STRING(z) \
-	if ((z)->value.str.val[ (z)->value.str.len ] != '\0') { zend_error(E_WARNING, "String is not zero-terminated (%s)", (z)->value.str.val); }
+	if (Z_STRVAL_P(z)[Z_STRLEN_P(z)] != '\0') { zend_error(E_WARNING, "String is not zero-terminated (%s)", Z_STRVAL_P(z)); }
 #define CHECK_ZVAL_STRING_REL(z) \
-	if ((z)->value.str.val[ (z)->value.str.len ] != '\0') { zend_error(E_WARNING, "String is not zero-terminated (%s) (source: %s:%d)", (z)->value.str.val ZEND_FILE_LINE_RELAY_CC); }
+	if (Z_STRVAL_P(z)[Z_STRLEN_P(z)] != '\0') { zend_error(E_WARNING, "String is not zero-terminated (%s) (source: %s:%d)", Z_STRVAL_P(z) ZEND_FILE_LINE_RELAY_CC); }
 #define CHECK_ZVAL_UNICODE(z) \
-	if ((z)->value.ustr.val[ (z)->value.ustr.len ] != 0 ) { zend_error(E_WARNING, "String is not zero-terminated"); }
+	if (Z_USTRVAL_P(z)[Z_USTRLEN_P(z)] != 0 ) { zend_error(E_WARNING, "String is not zero-terminated"); }
 #define CHECK_ZVAL_UNICODE_REL(z) \
-	if ((z)->value.ustr.val[ (z)->value.ustr.len ] != 0) { zend_error(E_WARNING, "String is not zero-terminated (source: %s:%d)", ZEND_FILE_LINE_RELAY_C); }
+	if (Z_USTRVAL_P(z)[Z_USTRLEN_P(z)] != 0) { zend_error(E_WARNING, "String is not zero-terminated (source: %s:%d)", ZEND_FILE_LINE_RELAY_C); }
 #else
 #define CHECK_ZVAL_STRING(z)
 #define CHECK_ZVAL_STRING_REL(z)
@@ -627,42 +627,42 @@ END_EXTERN_C()
 #define CHECK_ZVAL_UNICODE_REL(z)
 #endif
 
-#define ZVAL_RESOURCE(z, l) {			\
-		(z)->type = IS_RESOURCE;        \
-		(z)->value.lval = l;	        \
+#define ZVAL_RESOURCE(z, l) {		\
+		Z_TYPE_P(z) = IS_RESOURCE;	\
+		Z_LVAL_P(z) = l;			\
 	}
 
-#define ZVAL_BOOL(z, b) {				\
-		(z)->type = IS_BOOL;	        \
-		(z)->value.lval = ((b) != 0);   \
+#define ZVAL_BOOL(z, b) {			\
+		Z_TYPE_P(z) = IS_BOOL;		\
+		Z_LVAL_P(z) = ((b) != 0);   \
 	}
 
-#define ZVAL_NULL(z) {					\
-		(z)->type = IS_NULL;	        \
+#define ZVAL_NULL(z) {				\
+		Z_TYPE_P(z) = IS_NULL;		\
 	}
 
-#define ZVAL_LONG(z, l) {				\
-		(z)->type = IS_LONG;	        \
-		(z)->value.lval = l;	        \
+#define ZVAL_LONG(z, l) {			\
+		Z_TYPE_P(z) = IS_LONG;		\
+		Z_LVAL_P(z) = l;			\
 	}
 
-#define ZVAL_DOUBLE(z, d) {				\
-		(z)->type = IS_DOUBLE;	        \
-		(z)->value.dval = d;	        \
+#define ZVAL_DOUBLE(z, d) {			\
+		Z_TYPE_P(z) = IS_DOUBLE;	\
+		Z_DVAL_P(z) = d;			\
 	}
 
 #define ZVAL_STRING(z, s, duplicate) {	\
 		char *__s=(s);					\
-		(z)->value.str.len = strlen(__s);	\
-		(z)->value.str.val = (duplicate?estrndup(__s, (z)->value.str.len):__s);	\
-		(z)->type = IS_STRING;	        \
+		Z_STRLEN_P(z) = strlen(__s);	\
+		Z_STRVAL_P(z) = (duplicate?estrndup(__s, Z_STRLEN_P(z)):__s);	\
+		Z_TYPE_P(z) = IS_STRING;        \
 	}
 
 #define ZVAL_STRINGL(z, s, l, duplicate) {	\
 		char *__s=(s); int __l=l;		\
-		(z)->value.str.len = __l;	    \
-		(z)->value.str.val = (duplicate?estrndup(__s, __l):__s);	\
-		(z)->type = IS_STRING;		    \
+		Z_STRLEN_P(z) = __l;		    \
+		Z_STRVAL_P(z) = (duplicate?estrndup(__s, __l):__s);	\
+		Z_TYPE_P(z) = IS_STRING;		    \
 	}
 
 #define ZVAL_ASCII_STRING(z, s, duplicate) \
@@ -672,9 +672,9 @@ END_EXTERN_C()
 		ZVAL_UNICODEL(z, u_str, length, 0); \
 	} else { \
 		char *__s=(s);					\
-		(z)->value.str.len = strlen(__s);	\
-		(z)->value.str.val = (duplicate?estrndup(__s, (z)->value.str.len):__s);	\
-		(z)->type = IS_STRING;	        \
+		Z_STRLEN_P(z) = strlen(__s);	\
+		Z_STRVAL_P(z) = (duplicate?estrndup(__s, Z_STRLEN_P(z)):__s);	\
+		Z_TYPE_P(z) = IS_STRING;        \
 	}
 
 #define ZVAL_ASCII_STRINGL(z, s, l, duplicate) \
@@ -682,10 +682,10 @@ END_EXTERN_C()
 		UChar *u_str = zend_ascii_to_unicode((s), (l)+1 ZEND_FILE_LINE_CC); \
 		ZVAL_UNICODEL(z, u_str, l, 0); \
 	} else { \
-		char *__s=(s); int __l=l;		\
-		(z)->value.str.len = __l;	    \
-		(z)->value.str.val = (duplicate?estrndup(__s, __l):__s);	\
-		(z)->type = IS_STRING;		    \
+		char *__s=(s); int __l=l;	\
+		Z_STRLEN_P(z) = __l;	    \
+		Z_STRVAL_P(z) = (duplicate?estrndup(__s, __l):__s);	\
+		Z_TYPE_P(z) = IS_STRING;    \
 	}
 
 #define ZVAL_U_STRING(conv, z, s, duplicate) \
@@ -698,9 +698,9 @@ END_EXTERN_C()
 		ZVAL_UNICODEL(z, u_str, u_len, 0); \
 	} else { \
 		char *__s=(s);					\
-		(z)->value.str.len = strlen(__s);	\
-		(z)->value.str.val = (duplicate?estrndup(__s, (z)->value.str.len):__s);	\
-		(z)->type = IS_STRING;	        \
+		Z_STRLEN_P(z) = strlen(__s);	\
+		Z_STRVAL_P(z) = (duplicate?estrndup(__s, Z_STRLEN_P(z)):__s);	\
+		Z_TYPE_P(z) = IS_STRING;        \
 	}
 
 #define ZVAL_U_STRINGL(conv, z, s, l, duplicate) \
@@ -711,10 +711,10 @@ END_EXTERN_C()
 		zend_convert_to_unicode(conv, &u_str, &u_len, s, l, &status); \
 		ZVAL_UNICODEL(z, u_str, u_len, 0); \
 	} else { \
-		char *__s=(s); int __l=l;		\
-		(z)->value.str.len = __l;	    \
-		(z)->value.str.val = (duplicate?estrndup(__s, __l):__s);	\
-		(z)->type = IS_STRING;		    \
+		char *__s=(s); int __l=l;	\
+		Z_STRLEN_P(z) = __l;	    \
+		Z_STRVAL_P(z) = (duplicate?estrndup(__s, __l):__s);	\
+		Z_TYPE_P(z) = IS_STRING;    \
 	}
 
 #define ZVAL_RT_STRING(z, s, duplicate) \
@@ -725,28 +725,28 @@ END_EXTERN_C()
 
 #define ZVAL_UNICODE(z, u, duplicate) {	\
 		UChar *__u=(u); 				\
-		(z)->value.ustr.len = u_strlen(__u);    \
-		(z)->value.ustr.val = (duplicate?eustrndup(__u, (z)->value.ustr.len):__u);	\
-		(z)->type = IS_UNICODE;		    \
+		Z_USTRLEN_P(z) = u_strlen(__u); \
+		Z_USTRVAL_P(z) = (duplicate?eustrndup(__u, Z_USTRLEN_P(z)):__u);	\
+		Z_TYPE_P(z) = IS_UNICODE;		\
 }
 
 #define ZVAL_UNICODEL(z, u, l, duplicate) {	\
 	UChar *__u=(u); int32_t __l=l; 			\
-		(z)->value.ustr.len = __l;	    \
-		(z)->value.ustr.val = (duplicate?eustrndup(__u, __l):__u);	\
-		(z)->type = IS_UNICODE;		    \
+		Z_USTRLEN_P(z) = __l;	    \
+		Z_USTRVAL_P(z) = (duplicate?eustrndup(__u, __l):__u);	\
+		Z_TYPE_P(z) = IS_UNICODE;		    \
 }
 
-#define ZVAL_EMPTY_STRING(z) {	        \
-		(z)->value.str.len = 0;  	    \
-		(z)->value.str.val = STR_EMPTY_ALLOC(); \
-		(z)->type = IS_STRING;		    \
+#define ZVAL_EMPTY_STRING(z) {				\
+		Z_STRLEN_P(z) = 0;					\
+		Z_STRVAL_P(z) = STR_EMPTY_ALLOC();	\
+		Z_TYPE_P(z) = IS_STRING;			\
 	}
 
 #define ZVAL_EMPTY_UNICODE(z) {	        \
-		(z)->value.ustr.len = 0;  	    \
-		(z)->value.ustr.val = USTR_MAKE(""); \
-		(z)->type = IS_UNICODE;		    \
+		Z_USTRLEN_P(z) = 0;  	    	\
+		Z_USTRVAL_P(z) = USTR_MAKE(""); \
+		Z_TYPE_P(z) = IS_UNICODE;		\
 	}
 
 #define ZVAL_ZVAL(z, zv, copy, dtor) {  \
@@ -925,8 +925,8 @@ END_EXTERN_C()
 	zend_declare_property(class_ptr, _name, namelen, value, mask TSRMLS_CC);		\
 }
 
-#define HASH_OF(p) ((p)->type==IS_ARRAY ? (p)->value.ht : (((p)->type==IS_OBJECT ? Z_OBJ_HT_P(p)->get_properties((p) TSRMLS_CC) : NULL)))
-#define ZVAL_IS_NULL(z) ((z)->type==IS_NULL)
+#define HASH_OF(p) (Z_TYPE_P(p)==IS_ARRAY ? Z_ARRVAL_P(p) : ((Z_TYPE_P(p)==IS_OBJECT ? Z_OBJ_HT_P(p)->get_properties((p) TSRMLS_CC) : NULL)))
+#define ZVAL_IS_NULL(z) (Z_TYPE_P(z)==IS_NULL)
 
 /* For compatibility */
 #define ZEND_MINIT			ZEND_MODULE_STARTUP_N

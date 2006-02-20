@@ -659,7 +659,7 @@ ZEND_API void shutdown_memory_manager(int silent, int full_shutdown TSRMLS_DC)
 		if (zend_get_configuration_directive("display_memory_cache_stats", sizeof("display_memory_cache_stats"), &display_memory_cache_stats)==FAILURE) {
 			break;
 		}
-		if (!atoi(display_memory_cache_stats.value.str.val)) {
+		if (!atoi(Z_STRVAL(display_memory_cache_stats))) {
 			break;
 		}
 		fprintf(stderr, "Memory cache statistics\n"

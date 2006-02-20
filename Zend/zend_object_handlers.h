@@ -145,7 +145,7 @@ ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce
 ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type TSRMLS_DC);
 
 
-#define IS_ZEND_STD_OBJECT(z)  ((z).type == IS_OBJECT && (Z_OBJ_HT((z))->get_class_entry != NULL))
+#define IS_ZEND_STD_OBJECT(z)  (Z_TYPE(z) == IS_OBJECT && (Z_OBJ_HT((z))->get_class_entry != NULL))
 #define HAS_CLASS_ENTRY(z) (Z_OBJ_HT(z)->get_class_entry != NULL)
 
 ZEND_API int zend_check_private(union _zend_function *fbc, zend_class_entry *ce, char *function_name_strval, int function_name_strlen TSRMLS_DC);

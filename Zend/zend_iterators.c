@@ -67,8 +67,8 @@ ZEND_API zval *zend_iterator_wrap(zend_object_iterator *iter TSRMLS_DC)
 	
 	MAKE_STD_ZVAL(wrapped);
 	Z_TYPE_P(wrapped) = IS_OBJECT;
-	wrapped->value.obj.handle = zend_objects_store_put(iter, iter_wrapper_dtor, NULL, NULL TSRMLS_CC);
-	wrapped->value.obj.handlers = &iterator_object_handlers;
+	Z_OBJ_HANDLE_P(wrapped) = zend_objects_store_put(iter, iter_wrapper_dtor, NULL, NULL TSRMLS_CC);
+	Z_OBJ_HT_P(wrapped) = &iterator_object_handlers;
 
 	return wrapped;
 }

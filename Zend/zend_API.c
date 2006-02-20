@@ -169,7 +169,7 @@ ZEND_API int _zend_get_parameters_array_ex(int param_count, zval ***argument_arr
 			if(!dup) {
 				efree(class_name);
 			}
-			value_ptr->value.obj = Z_OBJ_HANDLER_PP(value, clone_obj)(*value TSRMLS_CC);
+			Z_OBJVAL_P(value_ptr) = Z_OBJ_HANDLER_PP(value, clone_obj)(*value TSRMLS_CC);
 			zval_ptr_dtor(value);
 			*value = value_ptr;
 		}
@@ -1008,10 +1008,10 @@ ZEND_API int _array_init(zval *arg ZEND_FILE_LINE_DC)
 {
 	TSRMLS_FETCH();
 
-	ALLOC_HASHTABLE_REL(arg->value.ht);
+	ALLOC_HASHTABLE_REL(Z_ARRVAL_P(arg));
 
-	zend_u_hash_init(arg->value.ht, 0, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
-	arg->type = IS_ARRAY;
+	zend_u_hash_init(Z_ARRVAL_P(arg), 0, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
+	Z_TYPE_P(arg) = IS_ARRAY;
 	return SUCCESS;
 }
 
@@ -1141,9 +1141,9 @@ ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *class_type
 
 	zend_update_class_constants(class_type TSRMLS_CC);
 	
-	arg->type = IS_OBJECT;
+	Z_TYPE_P(arg) = IS_OBJECT;
 	if (class_type->create_object == NULL) {
-		arg->value.obj = zend_objects_new(&object, class_type TSRMLS_CC);
+		Z_OBJVAL_P(arg) = zend_objects_new(&object, class_type TSRMLS_CC);
 		if (properties) {
 			object->properties = properties;
 		} else {
@@ -1152,7 +1152,7 @@ ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *class_type
 			zend_hash_copy(object->properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 		}
 	} else {
-		arg->value.obj = class_type->create_object(class_type TSRMLS_CC);
+		Z_OBJVAL_P(arg) = class_type->create_object(class_type TSRMLS_CC);
 	}
 	return SUCCESS;
 }
@@ -2514,7 +2514,7 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 {
 	int retval;
 	char *lcname, *lmname, *mname, *colon;
-	int clen, mlen;
+	unsigned int clen, mlen;
 	zend_function *fptr;
 	zend_class_entry **pce;
 	HashTable *ftable;
@@ -2603,7 +2603,7 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, zval *callable_name, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zval ***zobj_ptr_ptr TSRMLS_DC)
 {
 	char *lcname;
-	int lcname_len;
+	unsigned int lcname_len;
 	zend_class_entry *ce_local, **pce;
 	zend_function *fptr_local;
 	zval **zobj_ptr_local;
@@ -3259,7 +3259,7 @@ ZEND_API int zend_update_static_property(zend_class_entry *scope, char *name, in
 		if (*property != value) {
 			if (PZVAL_IS_REF(*property)) {
 				zval_dtor(*property);
-				(*property)->type = value->type;
+				Z_TYPE_PP(property) = Z_TYPE_P(value);
 				(*property)->value = value->value;
 				if (value->refcount > 0) {
 					zval_copy_ctor(*property);
