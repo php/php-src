@@ -634,7 +634,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Countable
 	/** Sort the entries by key.
 	 */
 	function ksort();
-	                    
+	
 	/** Sort the entries by values using user defined function.
 	 */
 	function uasort(mixed cmp_function);
@@ -642,7 +642,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Countable
 	/** Sort the entries by key using user defined function.
 	 */
 	function uksort(mixed cmp_function);
-	                    
+	
 	/** Sort the entries by values using "natural order" algorithm.
 	 */
 	function natsort();
@@ -650,7 +650,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Countable
 	/** Sort the entries by values using case insensitive "natural order" algorithm.
 	 */
 	function natcasesort();
-	                    
+	
 	/**
 	 * @param $array new array or object
 	 */
@@ -756,7 +756,7 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Countable
 	/** Sort the entries by key.
 	 */
 	function ksort();
-	                    
+	
 	/** Sort the entries by values using user defined function.
 	 */
 	function uasort(mixed cmp_function);
@@ -764,7 +764,7 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Countable
 	/** Sort the entries by key using user defined function.
 	 */
 	function uksort(mixed cmp_function);
-	                    
+	
 	/** Sort the entries by values using "natural order" algorithm.
 	 */
 	function natsort();
@@ -772,7 +772,7 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Countable
 	/** Sort the entries by values using case insensitive "natural order" algorithm.
 	 */
 	function natcasesort();
-	                    
+	
 	/** @param $index offset to inspect
 	 * @return whetehr offset $index esists
 	 */	
