@@ -2177,13 +2177,9 @@ static int pdo_stmt_iter_valid(zend_object_iterator *iter TSRMLS_DC)
 	return I->fetch_ahead ? SUCCESS : FAILURE;
 }
 
-static void pdo_stmt_iter_get_data(zend_object_iterator *iter, zval ***data, int by_ref TSRMLS_DC)
+static void pdo_stmt_iter_get_data(zend_object_iterator *iter, zval ***data TSRMLS_DC)
 {
 	struct php_pdo_iterator *I = (struct php_pdo_iterator*)iter->data;
-
-	if (by_ref) {
-		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
-	}
 
 	/* sanity */
 	if (!I->fetch_ahead) {
