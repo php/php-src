@@ -3581,7 +3581,7 @@ ZEND_METHOD(reflection_property, __construct)
 		zend_class_entry *tmp_ce = ce;
 		zend_property_info *tmp_info;
 		
-		while (tmp_ce && zend_hash_find(&tmp_ce->properties_info, name_str, name_len + 1, (void **) &tmp_info) != SUCCESS) {
+		while (tmp_ce && zend_u_hash_find(&tmp_ce->properties_info, name_type, name_str, name_len + 1, (void **) &tmp_info) != SUCCESS) {
 			ce = tmp_ce;
 			property_info = tmp_info;
 			tmp_ce = tmp_ce->parent;
