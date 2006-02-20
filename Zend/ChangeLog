@@ -1,3 +1,18 @@
+2006-02-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c
+      zend_compile.c:
+      - Interfaces may have static methods to enforce their existance in
+        implementing classes
+
+    * zend_API.c
+      zend_compile.c:
+      - Static functions cannot be abstract
+
+    * zend_API.c
+      zend_API.c:
+      - Fix method flag handling
+
 2006-02-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_execute_API.c:

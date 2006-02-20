@@ -1,3 +1,127 @@
+2006-02-19  Michael Wallner  <mike@iworks.at>
+
+    * (PHP_5_1)
+      NEWS:
+      BFN: fixed ext/hash/tiger on big endian platforms
+
+2006-02-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/dba/libflatfile/flatfile.c
+      ext/dba/libinifile/inifile.c
+      ext/dbase/dbase.c
+      ext/filepro/filepro.c
+      ext/standard/tests/file/bug22414.phpt:
+      More safe_mode nuking
+
+    * ext/standard/basic_functions.c
+      ext/standard/dl.c
+      ext/standard/exec.c
+      ext/standard/file.c
+      ext/standard/filestat.c
+      ext/standard/head.c
+      ext/standard/link.c
+      ext/standard/mail.c
+      ext/standard/pack.c
+      ext/standard/proc_open.c
+      ext/standard/var_unserializer.c:
+      Nuke safe_mode
+
+2006-02-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/abstract_user_call.phpt:
+      - Add new function
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_compile.c
+      tests/classes/abstract_static.phpt:
+      - Interfaces may have static methods to enforce their existance in
+        implementing classes
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_compile.c:
+      - Static functions cannot be abstract
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c:
+      - Fix method flag handling
+
+2006-02-19  Andi Gutmans  <andi@zend.com>
+
+    * ext/curl/interface.c
+      ext/gd/php_gd.h:
+      - Couple of compile fixes.
+
+    * ext/bz2/bz2.c
+      ext/dba/dba.c
+      ext/exif/exif.c
+      ext/ftp/php_ftp.c
+      ext/gd/gd.c
+      ext/imap/php_imap.c
+      ext/mime_magic/mime_magic.c
+      ext/ming/ming.c
+      ext/oci8/oci8_interface.c
+      ext/pgsql/pgsql.c
+      ext/standard/basic_functions.c
+      ext/standard/dir.c
+      ext/standard/file.c
+      ext/standard/fsock.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/image.c
+      ext/standard/md5.c
+      ext/standard/proc_open.c
+      ext/standard/sha1.c
+      ext/standard/streamsfuncs.c
+      ext/zlib/zlib.c
+      main/main.c
+      main/network.c
+      main/streams/streams.c:
+      - Get rid of using ENFORCE_SAFE_MODE.
+
+    * main/streams/plain_wrapper.c:
+      - Fix according to Sara's reply
+
+    * ext/curl/interface.c
+      ext/openssl/openssl.c
+      ext/standard/file.c
+      ext/standard/ftok.c
+      ext/standard/iptc.c:
+      - More safe_mode nuking
+
+    * main/fopen_wrappers.c
+      main/fopen_wrappers.h
+      main/streams/plain_wrapper.c:
+      Nuke php_check_safe_mode_include_dir
+
+    * main/fopen_wrappers.c
+      main/main.c
+      main/streams/plain_wrapper.c:
+      - Some more safe_mode nuking
+
+    * ext/com_dotnet/com_persist.c
+      ext/curl/interface.c
+      ext/dbase/dbase.c
+      ext/fdf/fdf.c
+      ext/filepro/filepro.c
+      ext/gd/php_gd.h
+      ext/ming/ming.c
+      ext/oci8/oci8_interface.c
+      ext/oci8/oci8_lob.c
+      ext/odbc/php_odbc.c
+      ext/openssl/openssl.c
+      ext/pgsql/pgsql.c
+      ext/posix/posix.c
+      ext/pspell/pspell.c
+      ext/session/session.c
+      ext/sqlite/pdo_sqlite2.c
+      ext/sqlite/sess_sqlite.c
+      ext/sqlite/sqlite.c
+      ext/standard/basic_functions.c
+      ext/standard/dir.c
+      ext/standard/file.c
+      ext/standard/filestat.c
+      ext/standard/link.c:
+      Start nuking safe_mode. Still a lot of work to do...
+
 2006-02-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_execute_API.c:
