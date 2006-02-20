@@ -3152,7 +3152,7 @@ PHP_FUNCTION(parse_ini_file)
 
 	memset(&fh, 0, sizeof(fh));
 	fh.filename = Z_STRVAL_PP(filename);
-	Z_TYPE(fh) = ZEND_HANDLE_FILENAME;
+	fh.type = ZEND_HANDLE_FILENAME;
 	
 	array_init(return_value);
 	zend_parse_ini_file(&fh, 0, ini_parser_cb, return_value);
