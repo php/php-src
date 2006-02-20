@@ -44,7 +44,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 					zend_error(EG(in_execution) ? E_ERROR : E_WARNING, 
 						"Call to private %v::__destruct() from context '%v'%s", 
 						ce->name, 
-						EG(scope) ? EG(scope)->name : EMPTY_STR, 
+						EG(scope) ? EG(scope)->name : (char*)EMPTY_STR, 
 						EG(in_execution) ? "" : " during shutdown ignored");
 					return;
 				}
@@ -57,16 +57,16 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 					zend_error(EG(in_execution) ? E_ERROR : E_WARNING, 
 						"Call to protected %v::__destruct() from context '%v'%s", 
 						ce->name, 
-						EG(scope) ? EG(scope)->name : EMPTY_STR, 
+						EG(scope) ? EG(scope)->name : (char*)EMPTY_STR, 
 						EG(in_execution) ? "" : " during shutdown ignored");
 					return;
 				}
 			}
 		}
 
-		zobj.type = IS_OBJECT;
-		zobj.value.obj.handle = handle;
-		zobj.value.obj.handlers = &std_object_handlers;
+		Z_TYPE(zobj) = IS_OBJECT;
+		Z_OBJ_HANDLE(zobj) = handle;
+		Z_OBJ_HT(zobj) = &std_object_handlers;
 		INIT_PZVAL(obj);
 
 		/* Make sure that destructors are protected from previously thrown exceptions.
@@ -127,7 +127,7 @@ static void zval_add_ref_or_clone(zval **p)
 			ALLOC_ZVAL(*p);
 			**p = *orig;
 			INIT_PZVAL(*p);
-			(*p)->value.obj = Z_OBJ_HT_PP(p)->clone_obj(orig TSRMLS_CC);
+			Z_OBJVAL_PP(p) = Z_OBJ_HT_PP(p)->clone_obj(orig TSRMLS_CC);
 		}
 	} else {
 		(*p)->refcount++;
@@ -145,8 +145,8 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object_va
 		zval *new_obj;
 
 		MAKE_STD_ZVAL(new_obj);
-		new_obj->type = IS_OBJECT;
-		new_obj->value.obj = new_obj_val;
+		Z_TYPE_P(new_obj) = IS_OBJECT;
+		Z_OBJVAL_P(new_obj) = new_obj_val;
 		zval_copy_ctor(new_obj);
 
 		zend_call_method_with_0_params(&new_obj, old_object->ce, &old_object->ce->clone, ZEND_CLONE_FUNC_NAME, NULL);

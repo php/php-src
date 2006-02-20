@@ -29,7 +29,7 @@
 
 ZEND_API void _zval_dtor_func(zval *zvalue ZEND_FILE_LINE_DC)
 {
-	switch (zvalue->type & ~IS_CONSTANT_INDEX) {
+	switch (Z_TYPE_P(zvalue) & ~IS_CONSTANT_INDEX) {
 		case IS_CONSTANT: {
 			TSRMLS_FETCH();
 
@@ -37,20 +37,20 @@ ZEND_API void _zval_dtor_func(zval *zvalue ZEND_FILE_LINE_DC)
 		}
 		case IS_STRING:
 			CHECK_ZVAL_STRING_REL(zvalue);
-			STR_FREE_REL(zvalue->value.str.val);
+			STR_FREE_REL(Z_STRVAL_P(zvalue));
 			break;
 		case IS_UNICODE:
 dtor_unicode:
 			CHECK_ZVAL_UNICODE_REL(zvalue);
-			STR_FREE_REL(zvalue->value.ustr.val);
+			STR_FREE_REL(Z_USTRVAL_P(zvalue));
 			break;
 		case IS_ARRAY:
 		case IS_CONSTANT_ARRAY: {
 				TSRMLS_FETCH();
 
-				if (zvalue->value.ht && (zvalue->value.ht != &EG(symbol_table))) {
-					zend_hash_destroy(zvalue->value.ht);
-					FREE_HASHTABLE(zvalue->value.ht);
+				if (Z_ARRVAL_P(zvalue) && (Z_ARRVAL_P(zvalue) != &EG(symbol_table))) {
+					zend_hash_destroy(Z_ARRVAL_P(zvalue));
+					FREE_HASHTABLE(Z_ARRVAL_P(zvalue));
 				}
 			}
 			break;
@@ -66,7 +66,7 @@ dtor_unicode:
 				TSRMLS_FETCH();
 
 				/* destroy resource */
-				zend_list_delete(zvalue->value.lval);
+				zend_list_delete(Z_LVAL_P(zvalue));
 			}
 			break;
 		case IS_LONG:
@@ -82,7 +82,7 @@ dtor_unicode:
 
 ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 {
-	switch (zvalue->type & ~IS_CONSTANT_INDEX) {
+	switch (Z_TYPE_P(zvalue) & ~IS_CONSTANT_INDEX) {
 		case IS_CONSTANT: {
 			TSRMLS_FETCH();
 
@@ -90,12 +90,12 @@ ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 		}
 		case IS_STRING:
 			CHECK_ZVAL_STRING_REL(zvalue);
-			free(zvalue->value.str.val);
+			free(Z_STRVAL_P(zvalue));
 			break;
 		case IS_UNICODE:
 dtor_unicode:
 			CHECK_ZVAL_UNICODE_REL(zvalue);
-			free(zvalue->value.ustr.val);
+			free(Z_USTRVAL_P(zvalue));
 			break;
 		case IS_ARRAY:
 		case IS_CONSTANT_ARRAY:
@@ -121,11 +121,11 @@ ZEND_API void zval_add_ref(zval **p)
 
 ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 {
-	switch (zvalue->type) {
+	switch (Z_TYPE_P(zvalue)) {
 		case IS_RESOURCE: {
 				TSRMLS_FETCH();
 
-				zend_list_addref(zvalue->value.lval);
+				zend_list_addref(Z_LVAL_P(zvalue));
 			}
 			break;
 		case IS_BOOL:
@@ -139,27 +139,27 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 		}
 		case IS_STRING:
 			CHECK_ZVAL_STRING_REL(zvalue);
-			zvalue->value.str.val = (char *) estrndup_rel(zvalue->value.str.val, zvalue->value.str.len);
+			Z_STRVAL_P(zvalue) = (char *) estrndup_rel(Z_STRVAL_P(zvalue), Z_STRLEN_P(zvalue));
 			break;
 		case IS_UNICODE:
 copy_unicode:
 			CHECK_ZVAL_UNICODE_REL(zvalue);
-			zvalue->value.ustr.val = eustrndup_rel(zvalue->value.ustr.val, zvalue->value.ustr.len);
+			Z_USTRVAL_P(zvalue) = eustrndup_rel(Z_USTRVAL_P(zvalue), Z_USTRLEN_P(zvalue));
 			break;
 		case IS_ARRAY:
 		case IS_CONSTANT_ARRAY: {
 				zval *tmp;
-				HashTable *original_ht = zvalue->value.ht;
+				HashTable *original_ht = Z_ARRVAL_P(zvalue);
 				HashTable *tmp_ht = NULL;
 				TSRMLS_FETCH();
 
-				if (zvalue->value.ht == &EG(symbol_table)) {
+				if (Z_ARRVAL_P(zvalue) == &EG(symbol_table)) {
 					return; /* do nothing */
 				}
 				ALLOC_HASHTABLE_REL(tmp_ht);
 				zend_u_hash_init(tmp_ht, 0, NULL, ZVAL_PTR_DTOR, 0, original_ht->unicode);
 				zend_hash_copy(tmp_ht, original_ht, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
-				zvalue->value.ht = tmp_ht;
+				Z_ARRVAL_P(zvalue) = tmp_ht;
 			}
 			break;
 		case IS_OBJECT:

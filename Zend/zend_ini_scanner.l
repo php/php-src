@@ -116,17 +116,17 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <INITIAL>[ ]*("true"|"on"|"yes")[ ]* {
-	ini_lval->value.str.val = zend_strndup("1", 1);
-	ini_lval->value.str.len = 1;
-	ini_lval->type = IS_STRING;
+	Z_STRVAL_P(ini_lval) = zend_strndup("1", 1);
+	Z_STRLEN_P(ini_lval) = 1;
+	Z_TYPE_P(ini_lval) = IS_STRING;
 	return CFG_TRUE;
 }
 
 
 <INITIAL>[ ]*("false"|"off"|"no"|"none")[ ]* {
-	ini_lval->value.str.val = zend_strndup("", 0);
-	ini_lval->value.str.len = 0;
-	ini_lval->type = IS_STRING;
+	Z_STRVAL_P(ini_lval) = zend_strndup("", 0);
+	Z_STRLEN_P(ini_lval) = 0;
+	Z_TYPE_P(ini_lval) = IS_STRING;
 	return CFG_FALSE;
 }
 
@@ -145,9 +145,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	yytext++;
 	yyleng--;
 
-	ini_lval->value.str.val = zend_strndup(yytext, yyleng);
-	ini_lval->value.str.len = yyleng;
-	ini_lval->type = IS_STRING;
+	Z_STRVAL_P(ini_lval) = zend_strndup(yytext, yyleng);
+	Z_STRLEN_P(ini_lval) = yyleng;
+	Z_TYPE_P(ini_lval) = IS_STRING;
 	return SECTION;
 }
 
@@ -171,9 +171,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	/* eat leading " */
 	yytext++;
 
-	ini_lval->value.str.val = zend_strndup(yytext, yyleng - 2);
-	ini_lval->value.str.len = yyleng - 2;
-	ini_lval->type = IS_STRING;
+	Z_STRVAL_P(ini_lval) = zend_strndup(yytext, yyleng - 2);
+	Z_STRLEN_P(ini_lval) = yyleng - 2;
+	Z_TYPE_P(ini_lval) = IS_STRING;
 	return TC_ENCAPSULATED_STRING;
 }
 
@@ -186,7 +186,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <INITIAL>"}" {
-	ini_lval->value.lval = (long) yytext[0];
+	Z_LVAL_P(ini_lval) = (long) yytext[0];
 	return yytext[0];
 }
 
@@ -213,9 +213,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		}
 	}
 	if (yyleng!=0) {
-		ini_lval->value.str.val = zend_strndup(yytext, yyleng);
-		ini_lval->value.str.len = yyleng;
-		ini_lval->type = IS_STRING;
+		Z_STRVAL_P(ini_lval) = zend_strndup(yytext, yyleng);
+		Z_STRLEN_P(ini_lval) = yyleng;
+		Z_TYPE_P(ini_lval) = IS_STRING;
 		return TC_STRING;
 	} else {
 		/* whitespace */

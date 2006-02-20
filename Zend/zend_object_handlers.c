@@ -312,7 +312,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC)
 	silent = (type == BP_VAR_IS);
 	zobj = Z_OBJ_P(object);
 
-	if (member->type != IS_UNICODE && (UG(unicode) || member->type != IS_STRING)) {
+	if (Z_TYPE_P(member) != IS_UNICODE && (UG(unicode) || Z_TYPE_P(member) != IS_STRING)) {
  		ALLOC_ZVAL(tmp_member);
 		*tmp_member = *member;
 		INIT_PZVAL(tmp_member);
@@ -370,7 +370,7 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 
 	zobj = Z_OBJ_P(object);
 
-	if (member->type != IS_UNICODE && (UG(unicode) || member->type != IS_STRING)) {
+	if (Z_TYPE_P(member) != IS_UNICODE && (UG(unicode) || Z_TYPE_P(member) != IS_STRING)) {
  		ALLOC_ZVAL(tmp_member);
 		*tmp_member = *member;
 		INIT_PZVAL(tmp_member);
@@ -392,7 +392,7 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 				zval garbage = **variable_ptr; /* old value should be destroyed */
 
 				/* To check: can't *variable_ptr be some system variable like error_zval here? */
-				(*variable_ptr)->type = value->type;
+				Z_TYPE_PP(variable_ptr) = Z_TYPE_P(value);
 				(*variable_ptr)->value = value->value;
 				if (value->refcount>0) {
 					zval_copy_ctor(*variable_ptr);
@@ -523,7 +523,7 @@ static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC
 	
 	zobj = Z_OBJ_P(object);
 
-	if (member->type != IS_UNICODE && (UG(unicode) || member->type != IS_STRING)) {
+	if (Z_TYPE_P(member) != IS_UNICODE && (UG(unicode) || Z_TYPE_P(member) != IS_STRING)) {
 		tmp_member = *member;
 		zval_copy_ctor(&tmp_member);
 		convert_to_text(&tmp_member);
@@ -569,7 +569,7 @@ static void zend_std_unset_property(zval *object, zval *member TSRMLS_DC)
 	
 	zobj = Z_OBJ_P(object);
 
-	if (member->type != IS_UNICODE && (UG(unicode) || member->type != IS_STRING)) {
+	if (Z_TYPE_P(member) != IS_UNICODE && (UG(unicode) || Z_TYPE_P(member) != IS_STRING)) {
  		ALLOC_ZVAL(tmp_member);
 		*tmp_member = *member;
 		INIT_PZVAL(tmp_member);
@@ -790,7 +790,7 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, char *method
 
 		/* Ensure that if we're calling a private function, we're allowed to do so.
 		 */
-		updated_fbc = zend_check_private_int(fbc, object->value.obj.handlers->get_class_entry(object TSRMLS_CC), lc_method_name, method_len TSRMLS_CC);
+		updated_fbc = zend_check_private_int(fbc, Z_OBJ_HANDLER_P(object, get_class_entry)(object TSRMLS_CC), lc_method_name, method_len TSRMLS_CC);
 		if (!updated_fbc) {
 			zend_error(E_ERROR, "Call to %s method %v::%v() from context '%v'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : (char*)EMPTY_STR);
 		}
@@ -914,7 +914,7 @@ static union _zend_function *zend_std_get_constructor(zval *object TSRMLS_DC)
 		} else if (constructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
 			/* Ensure that if we're calling a private function, we're allowed to do so.
 			 */
-			if (object->value.obj.handlers->get_class_entry(object TSRMLS_CC) != EG(scope)) {
+			if (Z_OBJ_HANDLER_P(object, get_class_entry)(object TSRMLS_CC) != EG(scope)) {
 				zend_error(E_ERROR, "Call to private %v::%v() from context '%v'", constructor->common.scope->name, constructor->common.function_name, EG(scope) ? EG(scope)->name : (char*)EMPTY_STR);
 			}
 		} else if ((constructor->common.fn_flags & ZEND_ACC_PROTECTED)) {
@@ -956,7 +956,7 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists 
 	
 	zobj = Z_OBJ_P(object);
 
-	if (member->type != IS_UNICODE && (UG(unicode) || member->type != IS_STRING)) {
+	if (Z_TYPE_P(member) != IS_UNICODE && (UG(unicode) || Z_TYPE_P(member) != IS_STRING)) {
  		ALLOC_ZVAL(tmp_member);
 		*tmp_member = *member;
 		INIT_PZVAL(tmp_member);

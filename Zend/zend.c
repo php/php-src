@@ -339,11 +339,11 @@ static void print_flat_hash(HashTable *ht TSRMLS_DC)
 
 ZEND_API void zend_make_string_zval(zval *expr, zval *expr_copy, int *use_copy)
 {
-	if (expr->type==IS_STRING) {
+	if (Z_TYPE_P(expr)==IS_STRING) {
 		*use_copy = 0;
 		return;
 	}
-	switch (expr->type) {
+	switch (Z_TYPE_P(expr)) {
 		case IS_OBJECT:
 			{
 				TSRMLS_FETCH();
@@ -369,7 +369,7 @@ ZEND_API void zend_make_string_zval(zval *expr, zval *expr_copy, int *use_copy)
 			convert_to_string(expr_copy);
 			break;
 	}
-	expr_copy->type = IS_STRING;
+	Z_TYPE_P(expr_copy) = IS_STRING;
 	*use_copy = 1;
 }
 
@@ -380,33 +380,33 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 
 	if (
 	  /* UTODO: clean this up */
-	    (expr->type == IS_STRING &&
+	    (Z_TYPE_P(expr) == IS_STRING &&
 	    (!strcmp(ucnv_getName(ZEND_U_CONVERTER(UG(output_encoding_conv)), &temp),
 				 ucnv_getName(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &temp))))) {
 		*use_copy = 0;
 		return;
 	}
-	switch (expr->type) {
+	switch (Z_TYPE_P(expr)) {
 		case IS_NULL:
-			expr_copy->value.str.len = 0;
-			expr_copy->value.str.val = STR_EMPTY_ALLOC();
+			Z_STRLEN_P(expr_copy) = 0;
+			Z_STRVAL_P(expr_copy) = STR_EMPTY_ALLOC();
 			break;
 		case IS_BOOL:
-			if (expr->value.lval) {
-				expr_copy->value.str.len = 1;
-				expr_copy->value.str.val = estrndup("1", 1);
+			if (Z_LVAL_P(expr)) {
+				Z_STRLEN_P(expr_copy) = 1;
+				Z_STRVAL_P(expr_copy) = estrndup("1", 1);
 			} else {
-				expr_copy->value.str.len = 0;
-				expr_copy->value.str.val = STR_EMPTY_ALLOC();
+				Z_STRLEN_P(expr_copy) = 0;
+				Z_STRVAL_P(expr_copy) = STR_EMPTY_ALLOC();
 			}
 			break;
 		case IS_RESOURCE:
-			expr_copy->value.str.val = (char *) emalloc(sizeof("Resource id #")-1 + MAX_LENGTH_OF_LONG);
-			expr_copy->value.str.len = sprintf(expr_copy->value.str.val, "Resource id #%ld", expr->value.lval);
+			Z_STRVAL_P(expr_copy) = (char *) emalloc(sizeof("Resource id #")-1 + MAX_LENGTH_OF_LONG);
+			Z_STRLEN_P(expr_copy) = sprintf(Z_STRVAL_P(expr_copy), "Resource id #%ld", Z_LVAL_P(expr));
 			break;
 		case IS_ARRAY:
-			expr_copy->value.str.len = sizeof("Array")-1;
-			expr_copy->value.str.val = estrndup("Array", expr_copy->value.str.len);
+			Z_STRLEN_P(expr_copy) = sizeof("Array")-1;
+			Z_STRVAL_P(expr_copy) = estrndup("Array", Z_STRLEN_P(expr_copy));
 			break;
 		case IS_OBJECT:
 			if(Z_OBJ_HT_P(expr)->cast_object && Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
@@ -438,7 +438,7 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 			}
 			break;
 	}
-	expr_copy->type = IS_STRING;
+	Z_TYPE_P(expr_copy) = IS_STRING;
 	*use_copy = 1;
 }
 
@@ -447,11 +447,11 @@ ZEND_API void zend_make_unicode_zval(zval *expr, zval *expr_copy, int *use_copy)
 {
 	TSRMLS_FETCH();
 
-	if (expr->type==IS_UNICODE) {
+	if (Z_TYPE_P(expr)==IS_UNICODE) {
 		*use_copy = 0;
 		return;
 	}
-	switch (expr->type) {
+	switch (Z_TYPE_P(expr)) {
 		case IS_OBJECT:
 			if(Z_OBJ_HT_P(expr)->cast_object && Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_UNICODE TSRMLS_CC) == SUCCESS) {
 				break;
@@ -468,8 +468,8 @@ ZEND_API void zend_make_unicode_zval(zval *expr, zval *expr_copy, int *use_copy)
 			ZVAL_EMPTY_UNICODE(expr_copy);
 			break;
 		case IS_ARRAY:
-			expr_copy->value.ustr.len = sizeof("Array")-1;
-			expr_copy->value.ustr.val = zend_ascii_to_unicode("Array", sizeof("Array") ZEND_FILE_LINE_CC);
+			Z_USTRLEN_P(expr_copy) = sizeof("Array")-1;
+			Z_USTRVAL_P(expr_copy) = zend_ascii_to_unicode("Array", sizeof("Array") ZEND_FILE_LINE_CC);
 			break;
 		default:
 			*expr_copy = *expr;
@@ -477,7 +477,7 @@ ZEND_API void zend_make_unicode_zval(zval *expr, zval *expr_copy, int *use_copy)
 			convert_to_unicode(expr_copy);
 			break;
 	}
-	expr_copy->type = IS_UNICODE;
+	Z_TYPE_P(expr_copy) = IS_UNICODE;
 	*use_copy = 1;
 }
 
@@ -497,32 +497,32 @@ ZEND_API int zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int in
 	if (use_copy) {
 		expr = &expr_copy;
 	}
-	if (expr->value.str.len==0) { /* optimize away empty strings */
+	if (Z_STRLEN_P(expr)==0) { /* optimize away empty strings */
 		if (use_copy) {
 			zval_dtor(expr);
 		}
 		return 0;
 	}
-	write_func(expr->value.str.val, expr->value.str.len);
+	write_func(Z_STRVAL_P(expr), Z_STRLEN_P(expr));
 	if (use_copy) {
 		zval_dtor(expr);
 	}
-	return expr->value.str.len;
+	return Z_STRLEN_P(expr);
 }
 
 ZEND_API void zend_print_flat_zval_r(zval *expr TSRMLS_DC)
 {
-	switch (expr->type) {
+	switch (Z_TYPE_P(expr)) {
 		case IS_ARRAY:
 			ZEND_PUTS("Array (");
-			if (++expr->value.ht->nApplyCount>1) {
+			if (++Z_ARRVAL_P(expr)->nApplyCount>1) {
 				ZEND_PUTS(" *RECURSION*");
-				expr->value.ht->nApplyCount--;
+				Z_ARRVAL_P(expr)->nApplyCount--;
 				return;
 			}
-			print_flat_hash(expr->value.ht TSRMLS_CC);
+			print_flat_hash(Z_ARRVAL_P(expr) TSRMLS_CC);
 			ZEND_PUTS(")");
-			expr->value.ht->nApplyCount--;
+			Z_ARRVAL_P(expr)->nApplyCount--;
 			break;
 		case IS_OBJECT:
 		{
@@ -570,16 +570,16 @@ ZEND_API void zend_print_zval_r(zval *expr, int indent TSRMLS_DC)
 
 ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int indent TSRMLS_DC)
 {
-	switch (expr->type) {
+	switch (Z_TYPE_P(expr)) {
 		case IS_ARRAY:
 			ZEND_PUTS("Array\n");
-			if (++expr->value.ht->nApplyCount>1) {
+			if (++Z_ARRVAL_P(expr)->nApplyCount>1) {
 				ZEND_PUTS(" *RECURSION*");
-				expr->value.ht->nApplyCount--;
+				Z_ARRVAL_P(expr)->nApplyCount--;
 				return;
 			}
-			print_hash(expr->value.ht, indent, 0 TSRMLS_CC);
-			expr->value.ht->nApplyCount--;
+			print_hash(Z_ARRVAL_P(expr), indent, 0 TSRMLS_CC);
+			Z_ARRVAL_P(expr)->nApplyCount--;
 			break;
 		case IS_OBJECT:
 			{
@@ -1029,7 +1029,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	/* This zval can be used to initialize allocate zval's to an uninit'ed value */
 	zval_used_for_init.is_ref = 0;
 	zval_used_for_init.refcount = 1;
-	zval_used_for_init.type = IS_NULL;
+	Z_TYPE(zval_used_for_init) = IS_NULL;
 
 #ifdef ZTS
 	ts_allocate_id(&unicode_globals_id, sizeof(zend_unicode_globals), (ts_allocate_ctor) unicode_globals_ctor, (ts_allocate_dtor) unicode_globals_dtor);
@@ -1436,11 +1436,11 @@ ZEND_API void zend_error(int type, const char *format, ...)
 # endif
 #endif
 			va_copy(usr_copy, args);
-			z_error_message->value.str.len = zend_vspprintf(&z_error_message->value.str.val, 0, format, usr_copy);
-			z_error_message->type = IS_STRING;
+			Z_STRLEN_P(z_error_message) = zend_vspprintf(&Z_STRVAL_P(z_error_message), 0, format, usr_copy);
+			Z_TYPE_P(z_error_message) = IS_STRING;
 			if (UG(unicode)) {
-				char *str = z_error_message->value.str.val;
-				int len  = z_error_message->value.str.len;
+				char *str = Z_STRVAL_P(z_error_message);
+				int len  = Z_STRLEN_P(z_error_message);
 
 				ZVAL_RT_STRINGL(z_error_message, str, len, 1);
 				efree(str);
@@ -1449,18 +1449,18 @@ ZEND_API void zend_error(int type, const char *format, ...)
 			va_end(usr_copy);
 #endif
 
-			z_error_type->value.lval = type;
-			z_error_type->type = IS_LONG;
+			Z_LVAL_P(z_error_type) = type;
+			Z_TYPE_P(z_error_type) = IS_LONG;
 
 			if (error_filename) {
 				ZVAL_RT_STRING(z_error_filename, error_filename, 1);
 			}
 
-			z_error_lineno->value.lval = error_lineno;
-			z_error_lineno->type = IS_LONG;
+			Z_LVAL_P(z_error_lineno) = error_lineno;
+			Z_TYPE_P(z_error_lineno) = IS_LONG;
 
-			z_context->value.ht = EG(active_symbol_table);
-			z_context->type = IS_ARRAY;
+			Z_ARRVAL_P(z_context) = EG(active_symbol_table);
+			Z_TYPE_P(z_context) = IS_ARRAY;
 			zval_copy_ctor(z_context);
 
 			params = (zval ***) emalloc(sizeof(zval **)*5);

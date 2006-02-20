@@ -309,7 +309,7 @@ ZEND_API void zend_locale_usprintf_double(zval *op ZEND_FILE_LINE_DC);
 ZEND_API void zend_locale_usprintf_long(zval *op ZEND_FILE_LINE_DC);
 END_EXTERN_C()
 #define convert_to_ex_master(ppzv, lower_type, upper_type)	\
-	if ((*ppzv)->type!=IS_##upper_type) {					\
+	if (Z_TYPE_PP(ppzv)!=IS_##upper_type) {					\
 		SEPARATE_ZVAL_IF_NOT_REF(ppzv);						\
 		convert_to_##lower_type(*ppzv);						\
 	}
@@ -348,7 +348,7 @@ END_EXTERN_C()
 	} while (0);								\
 
 #define convert_to_explicit_type_ex(ppzv, str_type)	\
-	if ((*ppzv)->type != str_type) {				\
+	if (Z_TYPE_PP(ppzv) != str_type) {				\
 		SEPARATE_ZVAL_IF_NOT_REF(ppzv);				\
 		convert_to_explicit_type(*ppzv, str_type);	\
 	}
@@ -364,7 +364,7 @@ END_EXTERN_C()
 #define convert_to_text_ex(ppzv)	if (UG(unicode)) {convert_to_unicode_ex(ppzv);} else {convert_to_string_ex(ppzv);}
 
 #define convert_scalar_to_number_ex(ppzv)							\
-	if ((*ppzv)->type!=IS_LONG && (*ppzv)->type!=IS_DOUBLE) {		\
+	if (Z_TYPE_PP(ppzv)!=IS_LONG && Z_TYPE_PP(ppzv)!=IS_DOUBLE) {		\
 		if (!(*ppzv)->is_ref) {										\
 			SEPARATE_ZVAL(ppzv);									\
 		}															\
@@ -382,14 +382,14 @@ END_EXTERN_C()
 #define Z_USTRCPLEN(zval)		(u_countChar32((zval).value.ustr.val, (zval).value.ustr.len))
 #define Z_ARRVAL(zval)			(zval).value.ht
 #define Z_OBJVAL(zval)			(zval).value.obj
-#define Z_OBJ_HANDLE(zval)		(zval).value.obj.handle
-#define Z_OBJ_HT(zval)			(zval).value.obj.handlers
+#define Z_OBJ_HANDLE(zval)		Z_OBJVAL(zval).handle
+#define Z_OBJ_HT(zval)			Z_OBJVAL(zval).handlers
 #define Z_OBJCE(zval)			zend_get_class_entry(&(zval) TSRMLS_CC)
 #define Z_OBJPROP(zval)			Z_OBJ_HT((zval))->get_properties(&(zval) TSRMLS_CC)
 #define Z_OBJ_HANDLER(zval, hf) Z_OBJ_HT((zval))->hf
 #define Z_RESVAL(zval)			(zval).value.lval
-#define Z_UNIVAL(zval)			((zval).type==IS_UNICODE?(char*)(zval).value.ustr.val:(zval).value.str.val)
-#define Z_UNILEN(zval)			((zval).type==IS_UNICODE?(zval).value.ustr.len:(zval).value.str.len)
+#define Z_UNIVAL(zval)			(Z_TYPE(zval)==IS_UNICODE?(char*)Z_USTRVAL(zval):Z_STRVAL(zval))
+#define Z_UNILEN(zval)			(Z_TYPE(zval)==IS_UNICODE?Z_USTRLEN(zval):Z_STRLEN(zval))
 
 #define Z_LVAL_P(zval_p)		Z_LVAL(*zval_p)
 #define Z_BVAL_P(zval_p)		Z_BVAL(*zval_p)

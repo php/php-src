@@ -81,8 +81,8 @@ static zend_object_value zend_default_exception_new_ex(zend_class_entry *class_t
 	zend_object *object;
 	zval *trace;
 
-	obj.value.obj = zend_objects_new(&object, class_type TSRMLS_CC);
-	obj.value.obj.handlers = &default_exception_handlers;
+	Z_OBJVAL(obj) = zend_objects_new(&object, class_type TSRMLS_CC);
+	Z_OBJ_HT(obj) = &default_exception_handlers;
 
 	ALLOC_HASHTABLE(object->properties);
 	zend_u_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
@@ -97,7 +97,7 @@ static zend_object_value zend_default_exception_new_ex(zend_class_entry *class_t
 	zend_update_property_long(default_exception_ce, &obj, "line", sizeof("line")-1, zend_get_executed_lineno(TSRMLS_C) TSRMLS_CC);
 	zend_update_property(default_exception_ce, &obj, "trace", sizeof("trace")-1, trace TSRMLS_CC);
 
-	return obj.value.obj;
+	return Z_OBJVAL(obj);
 }
 
 static zend_object_value zend_default_exception_new(zend_class_entry *class_type TSRMLS_DC)
@@ -125,7 +125,7 @@ ZEND_METHOD(exception, __clone)
    Exception constructor */
 ZEND_METHOD(exception, __construct)
 {
-	char  *message = NULL;
+	void  *message = NULL;
 	long   code = 0;
 	zval  *object;
 	int    argc = ZEND_NUM_ARGS(), message_len;
@@ -141,7 +141,7 @@ ZEND_METHOD(exception, __construct)
 		if (message_type == IS_UNICODE) {
 			zend_update_property_unicodel(default_exception_ce, object, "message", sizeof("message")-1, message, message_len TSRMLS_CC);
 		} else if (UG(unicode)) {
-	    UErrorCode status = U_ZERO_ERROR;
+			UErrorCode status = U_ZERO_ERROR;
 			UChar *u_str;
 			int32_t u_len;
 			
@@ -164,7 +164,7 @@ ZEND_METHOD(exception, __construct)
    ErrorException constructor */
 ZEND_METHOD(error_exception, __construct)
 {
-	char  *message = NULL, *filename = NULL;
+	void  *message = NULL, *filename = NULL;
 	long   code = 0, severity = E_ERROR, lineno;
 	zval  *object;
 	int    argc = ZEND_NUM_ARGS(), message_len, filename_len;
@@ -450,7 +450,7 @@ static int _build_trace_args(zval **arg, int num_args, va_list args, zend_hash_k
 			if (UG(unicode)) {
 				zval tmp;
 
-				ZVAL_UNICODEL(&tmp, class_name, class_name_len, 1);
+				ZVAL_UNICODEL(&tmp, (UChar*)class_name, class_name_len, 1);
 				convert_to_string_with_converter(&tmp, ZEND_U_CONVERTER(UG(output_encoding_conv)));
 				TRACE_APPEND_STRL(Z_STRVAL(tmp), Z_STRLEN(tmp));
 				zval_dtor(&tmp);
@@ -800,7 +800,7 @@ ZEND_API void zend_throw_exception_object(zval *exception TSRMLS_DC)
 {
 	zend_class_entry *exception_ce;
 
-	if (exception == NULL || exception->type != IS_OBJECT) {
+	if (exception == NULL || Z_TYPE_P(exception) != IS_OBJECT) {
 		zend_error(E_ERROR, "Need to supply an object when throwing an exception");
 	}
 

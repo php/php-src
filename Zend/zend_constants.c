@@ -118,31 +118,31 @@ void zend_register_standard_constants(TSRMLS_D)
 	{
 		zend_constant c;
 	
-		c.value.type = IS_BOOL;
+		Z_TYPE(c.value) = IS_BOOL;
 		c.flags = CONST_PERSISTENT;
 		c.module_number = 0;
 
 		c.name = zend_strndup(ZEND_STRL("TRUE"));
 		c.name_len = sizeof("TRUE");
-		c.value.value.lval = 1;
-		c.value.type = IS_BOOL;
+		Z_LVAL(c.value) = 1;
+		Z_TYPE(c.value) = IS_BOOL;
 		zend_register_constant(&c TSRMLS_CC);
 		
 		c.name = zend_strndup(ZEND_STRL("FALSE"));
 		c.name_len = sizeof("FALSE");
-		c.value.value.lval = 0;
-		c.value.type = IS_BOOL;
+		Z_LVAL(c.value) = 0;
+		Z_TYPE(c.value) = IS_BOOL;
 		zend_register_constant(&c TSRMLS_CC);
 
 		c.name = zend_strndup(ZEND_STRL("ZEND_THREAD_SAFE"));
 		c.name_len = sizeof("ZEND_THREAD_SAFE");
-		c.value.value.lval = ZTS_V;
-		c.value.type = IS_BOOL;
+		Z_LVAL(c.value) = ZTS_V;
+		Z_TYPE(c.value) = IS_BOOL;
 		zend_register_constant(&c TSRMLS_CC);
 
 		c.name = zend_strndup(ZEND_STRL("NULL"));
 		c.name_len = sizeof("NULL");
-		c.value.type = IS_NULL;
+		Z_TYPE(c.value) = IS_NULL;
 		zend_register_constant(&c TSRMLS_CC);
 	}
 }
@@ -170,8 +170,8 @@ ZEND_API void zend_register_long_constant(char *name, uint name_len, long lval, 
 {
 	zend_constant c;
 	
-	c.value.type = IS_LONG;
-	c.value.value.lval = lval;
+	Z_TYPE(c.value) = IS_LONG;
+	Z_LVAL(c.value) = lval;
 	c.flags = flags;
 	c.name = zend_strndup(name, name_len-1);
 	c.name_len = name_len;
@@ -184,8 +184,8 @@ ZEND_API void zend_register_double_constant(char *name, uint name_len, double dv
 {
 	zend_constant c;
 	
-	c.value.type = IS_DOUBLE;
-	c.value.value.dval = dval;
+	Z_TYPE(c.value) = IS_DOUBLE;
+	Z_DVAL(c.value) = dval;
 	c.flags = flags;
 	c.name = zend_strndup(name, name_len-1);
 	c.name_len = name_len;
@@ -198,9 +198,9 @@ ZEND_API void zend_register_stringl_constant(char *name, uint name_len, char *st
 {
 	zend_constant c;
 	
-	c.value.type = IS_STRING;
-	c.value.value.str.val = strval;
-	c.value.value.str.len = strlen;
+	Z_TYPE(c.value) = IS_STRING;
+	Z_STRVAL(c.value) = strval;
+	Z_STRLEN(c.value) = strlen;
 	c.flags = flags;
 	c.name = zend_strndup(name, name_len-1);
 	c.name_len = name_len;
@@ -286,7 +286,7 @@ ZEND_API int zend_u_get_constant(zend_uchar type, void *name, uint name_len, zva
 	}
 	
 	if (zend_u_hash_find(EG(zend_constants), type, name, name_len+1, (void **) &c) == FAILURE) {
-		int lookup_name_len;
+		unsigned int lookup_name_len;
 
 		lookup_name = zend_u_str_case_fold(type, name, name_len, 1, &lookup_name_len);
 		 
@@ -317,7 +317,7 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC
 
 ZEND_API int zend_u_register_constant(zend_uchar type, zend_constant *c TSRMLS_DC)
 {
-	int  lookup_name_len;
+	unsigned int  lookup_name_len;
 	char *lookup_name = NULL;
 	char *name;
 	int ret = SUCCESS;

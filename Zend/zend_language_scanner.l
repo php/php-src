@@ -416,18 +416,18 @@ static inline int zend_copy_string_value(zval *zendlval, char *str, zend_uint st
 	int32_t consumed = 0;
 
 	if (type == IS_UNICODE) {
-		consumed = zend_convert_scanner_output(&zendlval->value.ustr.val, &zendlval->value.ustr.len, str, str_len, &status TSRMLS_CC);
+		consumed = zend_convert_scanner_output(&Z_USTRVAL_P(zendlval), &Z_USTRLEN_P(zendlval), str, str_len, &status TSRMLS_CC);
 
 		if (U_FAILURE(status)) {
 			zend_error(E_COMPILE_WARNING,"Illegal or truncated character in input: offset %d, state=%d", consumed, YYSTATE);
-			efree(zendlval->value.ustr.val);
+			efree(Z_USTRVAL_P(zendlval));
 			return 0;
 		}
-		zendlval->type = IS_UNICODE;
+		Z_TYPE_P(zendlval) = IS_UNICODE;
 	} else {
-		zendlval->value.str.val = (char *)estrndup(str, str_len);
-		zendlval->value.str.len = str_len;
-		zendlval->type = type;
+		Z_STRVAL_P(zendlval) = (char *)estrndup(str, str_len);
+		Z_STRLEN_P(zendlval) = str_len;
+		Z_TYPE_P(zendlval) = type;
 	}
 
 	return 1;
@@ -786,8 +786,8 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 	zend_bool original_in_compilation = CG(in_compilation);
 
 	retval_znode.op_type = IS_CONST;
-	retval_znode.u.constant.type = IS_LONG;
-	retval_znode.u.constant.value.lval = 1;
+	Z_TYPE(retval_znode.u.constant) = IS_LONG;
+	Z_LVAL(retval_znode.u.constant) = 1;
 	retval_znode.u.constant.is_ref = 0;
 	retval_znode.u.constant.refcount = 1;
 
@@ -840,13 +840,13 @@ zend_op_array *compile_filename(int type, zval *filename TSRMLS_DC)
 	zend_op_array *retval;
 	char *opened_path = NULL;
 
-	if (filename->type != IS_STRING) {
+	if (Z_TYPE_P(filename) != IS_STRING) {
 		tmp = *filename;
 		zval_copy_ctor(&tmp);
 		convert_to_string(&tmp);
 		filename = &tmp;
 	}
-	file_handle.filename = filename->value.str.val;
+	file_handle.filename = Z_STRVAL_P(filename);
 	file_handle.free_filename = 0;
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.opened_path = NULL;
@@ -857,7 +857,7 @@ zend_op_array *compile_filename(int type, zval *filename TSRMLS_DC)
 		int dummy = 1;
 
 		if (!file_handle.opened_path) {
-			file_handle.opened_path = opened_path = estrndup(filename->value.str.val, filename->value.str.len);
+			file_handle.opened_path = opened_path = estrndup(Z_STRVAL_P(filename), Z_STRLEN_P(filename));
 		}
 
 		zend_hash_add(&EG(included_files), file_handle.opened_path, strlen(file_handle.opened_path)+1, (void *)&dummy, sizeof(int), NULL);
@@ -888,14 +888,14 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_D
 	}
 
 	/* enforce two trailing NULLs for flex... */
-	STR_REALLOC(str->value.str.val, str->value.str.len+2);
+	STR_REALLOC(Z_STRVAL_P(str), Z_STRLEN_P(str)+2);
 
-	str->value.str.val[str->value.str.len+1]=0;
+	Z_STRVAL_P(str)[Z_STRLEN_P(str)+1]=0;
 
 	SCNG(yy_in)=NULL;
 
 	zend_prepare_scanner_converters(encoding, 0 TSRMLS_CC);
-	yy_scan_buffer(str->value.str.val, str->value.str.len+2 TSRMLS_CC);
+	yy_scan_buffer(Z_STRVAL_P(str), Z_STRLEN_P(str)+2 TSRMLS_CC);
 
 	zend_set_compiled_filename(filename TSRMLS_CC);
 	zend_set_compiled_script_encoding((char*)ucnv_getName(SCNG(output_conv), &status) TSRMLS_CC);
@@ -1014,8 +1014,8 @@ int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_
 END_EXTERN_C()
 
 #define zend_copy_value(zendlval, yytext, yyleng) \
-	zendlval->value.str.val = (char *)estrndup(yytext, yyleng); \
-	zendlval->value.str.len = yyleng;
+	Z_STRVAL_P(zendlval) = (char *)estrndup(yytext, yyleng); \
+	Z_STRLEN_P(zendlval) = yyleng;
 
 int zend_scan_unicode_double_string(zval *zendlval TSRMLS_DC)
 {
@@ -1034,8 +1034,8 @@ int zend_scan_unicode_double_string(zval *zendlval TSRMLS_DC)
 	}
 
 	/* convert escape sequences */
-	s = t = zendlval->value.ustr.val;
-	end = s+zendlval->value.ustr.len;
+	s = t = Z_USTRVAL_P(zendlval);
+	end = s+Z_USTRLEN_P(zendlval);
 	while (s<end) {
 		if (*s==0x5C /*'\\'*/) {
 			s++;
@@ -1052,38 +1052,38 @@ int zend_scan_unicode_double_string(zval *zendlval TSRMLS_DC)
 			switch(c) {
 				case 0x6E:               /*'n'*/
 					*t++ = (UChar) 0x0A; /*'\n'*/
-					zendlval->value.ustr.len--;
+					Z_USTRLEN_P(zendlval)--;
 					break;
 				case 0x72:               /*'r'*/
 					*t++ = (UChar) 0x0D; /*'\r'*/
-					zendlval->value.ustr.len--;
+					Z_USTRLEN_P(zendlval)--;
 					break;
 				case 0x74:               /*'t'*/
 					*t++ = (UChar) 0x09; /*'\t'*/
-					zendlval->value.ustr.len--;
+					Z_USTRLEN_P(zendlval)--;
 					break;
 				case 0x5C:               /*'\\'*/
 				case 0x24:               /*'$'*/
 				case 0x22:               /*'"'*/
 					*t++ = *s;
-					zendlval->value.ustr.len--;
+					Z_USTRLEN_P(zendlval)--;
 					break;
 				case 0x43:				 /*'C'*/
 					{
 						UChar *p = s+1;
 						if (p < end && zend_parse_charname_sequence(&p, end, &codepoint)) {
-							zendlval->value.ustr.len -= p - s + 1;
+							Z_USTRLEN_P(zendlval) -= p - s + 1;
 							s = p;
 							if (U_IS_BMP(codepoint)) {
 								*t++ = (UChar) codepoint;
 							} else {
 								*t++ = (UChar) U16_LEAD(codepoint);
 								*t++ = (UChar) U16_TRAIL(codepoint);
-								zendlval->value.ustr.len++;
+								Z_USTRLEN_P(zendlval)++;
 							}
 						} else {
 							zend_error(E_COMPILE_WARNING, "Invalid \\C{..} sequence");
-							efree(zendlval->value.ustr.val);
+							efree(Z_USTRVAL_P(zendlval));
 							return 0;
 						}
 						break;
@@ -1091,12 +1091,12 @@ int zend_scan_unicode_double_string(zval *zendlval TSRMLS_DC)
 				case 0x75:               /*'u'*/
 					min_digits = 4;
 					max_digits = 4;
-					zendlval->value.ustr.len--;
+					Z_USTRLEN_P(zendlval)--;
 					break;
 				case 0x55:               /*'U'*/
 					min_digits = 6;
 					max_digits = 6;
-					zendlval->value.ustr.len--;
+					Z_USTRLEN_P(zendlval)--;
 					break;
 				default:
 					digit = zend_get_octal_digit(*s);
@@ -1110,7 +1110,7 @@ int zend_scan_unicode_double_string(zval *zendlval TSRMLS_DC)
 							   && (s+1) < end && (digit = zend_get_hex_digit(*(s+1))) >= 0) {
 						min_digits = 1;
 						max_digits = 2;
-						zendlval->value.ustr.len--;
+						Z_USTRLEN_P(zendlval)--;
 						s++;
 						n = 1; /* already have one digit */
 						codepoint = digit;
@@ -1135,20 +1135,20 @@ int zend_scan_unicode_double_string(zval *zendlval TSRMLS_DC)
 				if (n < min_digits) {
 					/* can only happen for \u and \U sequences */
 					zend_error(E_COMPILE_WARNING,"\\%c escape sequence requires exactly %d hexadecimal digits", (char) c, min_digits);
-					efree(zendlval->value.ustr.val);
+					efree(Z_USTRVAL_P(zendlval));
 					return 0;
 				}
 
 				if (U_IS_BMP(codepoint)) {
 					*t++ = (UChar) codepoint;
-					zendlval->value.ustr.len -= n;
+					Z_USTRLEN_P(zendlval) -= n;
 				} else if (codepoint <= 0x10FFFF) {
 					*t++ = (UChar) U16_LEAD(codepoint);
 					*t++ = (UChar) U16_TRAIL(codepoint);
-					zendlval->value.ustr.len -= n-1;
+					Z_USTRLEN_P(zendlval) -= n-1;
 				} else {
 					zend_error(E_COMPILE_WARNING,"\\U%06x is above the highest valid codepoint 0x10FFFF", codepoint);
-					efree(zendlval->value.ustr.val);
+					efree(Z_USTRVAL_P(zendlval));
 					return 0;
 				}
 			} else {
@@ -1176,8 +1176,8 @@ int zend_scan_unicode_single_string(zval *zendlval TSRMLS_DC)
 	}
 
 	/* convert escape sequences */
-	s = t = zendlval->value.ustr.val;
-	end = s+zendlval->value.ustr.len;
+	s = t = Z_USTRVAL_P(zendlval);
+	end = s+Z_USTRLEN_P(zendlval);
 	while (s<end) {
 		if (*s==0x5C /*'\\'*/) {
 			s++;
@@ -1188,24 +1188,24 @@ int zend_scan_unicode_single_string(zval *zendlval TSRMLS_DC)
 				case 0x5C: /*'\\'*/
 				case 0x27: /*'\''*/
 					*t++ = *s;
-					zendlval->value.ustr.len--;
+					Z_USTRLEN_P(zendlval)--;
 					break;
 				case 0x43: /*'C'*/
 					{
 						UChar *p = s+1;
 						if (p < end && zend_parse_charname_sequence(&p, end, &codepoint)) {
-							zendlval->value.ustr.len -= p - s + 1;
+							Z_USTRLEN_P(zendlval) -= p - s + 1;
 							s = p;
 							if (U_IS_BMP(codepoint)) {
 								*t++ = (UChar) codepoint;
 							} else {
 								*t++ = (UChar) U16_LEAD(codepoint);
 								*t++ = (UChar) U16_TRAIL(codepoint);
-								zendlval->value.ustr.len++;
+								Z_USTRLEN_P(zendlval)++;
 							}
 						} else {
 							zend_error(E_COMPILE_WARNING, "Invalid \\C{..} sequence");
-							efree(zendlval->value.ustr.val);
+							efree(Z_USTRVAL_P(zendlval));
 							return 0;
 						}
 						break;
@@ -1216,10 +1216,10 @@ int zend_scan_unicode_single_string(zval *zendlval TSRMLS_DC)
 						if (zend_udigits_to_codepoint(s+1, end, &codepoint, 4)) {
 							*t++ = (UChar) codepoint;
 							s += 4;
-							zendlval->value.ustr.len -= 5;
+							Z_USTRLEN_P(zendlval) -= 5;
 						} else {
 							zend_error(E_COMPILE_WARNING,"\\u escape sequence requires exactly 4 hexadecimal digits");
-							efree(zendlval->value.ustr.val);
+							efree(Z_USTRVAL_P(zendlval));
 							return 0;
 						}
 						break;
@@ -1230,20 +1230,20 @@ int zend_scan_unicode_single_string(zval *zendlval TSRMLS_DC)
 						if (zend_udigits_to_codepoint(s+1, end, &codepoint, 6)) {
 							if (U_IS_BMP(codepoint)) {
 								*t++ = (UChar) codepoint;
-								zendlval->value.ustr.len -= 7;
+								Z_USTRLEN_P(zendlval) -= 7;
 							} else if (codepoint <= 0x10FFFF) {
 								*t++ = (UChar) U16_LEAD(codepoint);
 								*t++ = (UChar) U16_TRAIL(codepoint);
-								zendlval->value.ustr.len -= 6;
+								Z_USTRLEN_P(zendlval) -= 6;
 							} else {
 								zend_error(E_COMPILE_WARNING,"\\U%06x is above the highest valid codepoint 0x10FFFF", codepoint);
-								efree(zendlval->value.ustr.val);
+								efree(Z_USTRVAL_P(zendlval));
 								return 0;
 							}
 							s += 6;
 						} else {
 							zend_error(E_COMPILE_WARNING,"\\U escape sequence requires exactly 6 hexadecimal digits");
-							efree(zendlval->value.ustr.val);
+							efree(Z_USTRVAL_P(zendlval));
 							return 0;
 						}
 						break;
@@ -1268,14 +1268,14 @@ int zend_scan_binary_double_string(zval *zendlval TSRMLS_DC)
 	register char *s, *t;
 	char *end;
 
-	zendlval->value.str.val = estrndup(yytext+1, yyleng-2);
-	zendlval->value.str.len = yyleng-2;
-	zendlval->type = IS_STRING;
+	Z_STRVAL_P(zendlval) = estrndup(yytext+1, yyleng-2);
+	Z_STRLEN_P(zendlval) = yyleng-2;
+	Z_TYPE_P(zendlval) = IS_STRING;
 	HANDLE_NEWLINES(yytext, yyleng);
 
 	/* convert escape sequences */
-	s = t = zendlval->value.str.val;
-	end = s+zendlval->value.str.len;
+	s = t = Z_STRVAL_P(zendlval);
+	end = s+Z_STRLEN_P(zendlval);
 	while (s<end) {
 		if (*s=='\\') {
 			s++;
@@ -1285,21 +1285,21 @@ int zend_scan_binary_double_string(zval *zendlval TSRMLS_DC)
 			switch(*s) {
 				case 'n':
 					*t++ = '\n';
-					zendlval->value.str.len--;
+					Z_STRLEN_P(zendlval)--;
 					break;
 				case 'r':
 					*t++ = '\r';
-					zendlval->value.str.len--;
+					Z_STRLEN_P(zendlval)--;
 					break;
 				case 't':
 					*t++ = '\t';
-					zendlval->value.str.len--;
+					Z_STRLEN_P(zendlval)--;
 					break;
 				case '\\':
 				case '$':
 				case '"':
 					*t++ = *s;
-					zendlval->value.str.len--;
+					Z_STRLEN_P(zendlval)--;
 					break;
 				default:
 					/* check for an octal */
@@ -1307,26 +1307,26 @@ int zend_scan_binary_double_string(zval *zendlval TSRMLS_DC)
 						char octal_buf[4] = { 0, 0, 0, 0 };
 
 						octal_buf[0] = *s;
-						zendlval->value.str.len--;
+						Z_STRLEN_P(zendlval)--;
 						if ((s+1)<end && ZEND_IS_OCT(*(s+1))) {
 							octal_buf[1] = *(++s);
-							zendlval->value.str.len--;
+							Z_STRLEN_P(zendlval)--;
 							if ((s+1)<end && ZEND_IS_OCT(*(s+1))) {
 								octal_buf[2] = *(++s);
-								zendlval->value.str.len--;
+								Z_STRLEN_P(zendlval)--;
 							}
 						}
 						*t++ = (char) strtol(octal_buf, NULL, 8);
 					} else if (*s=='x' && (s+1)<end && ZEND_IS_HEX(*(s+1))) {
 						char hex_buf[3] = { 0, 0, 0};
 
-						zendlval->value.str.len--; /* for the 'x' */
+						Z_STRLEN_P(zendlval)--; /* for the 'x' */
 
 						hex_buf[0] = *(++s);
-						zendlval->value.str.len--;
+						Z_STRLEN_P(zendlval)--;
 						if ((s+1)<end && ZEND_IS_HEX(*(s+1))) {
 							hex_buf[1] = *(++s);
-							zendlval->value.str.len--;
+							Z_STRLEN_P(zendlval)--;
 						}
 						*t++ = (char) strtol(hex_buf, NULL, 16);
 					} else {
@@ -1350,14 +1350,14 @@ int zend_scan_binary_single_string(zval *zendlval TSRMLS_DC)
 	register char *s, *t;
 	char *end;
 
-	zendlval->value.str.val = estrndup(yytext+1, yyleng-2);
-	zendlval->value.str.len = yyleng-2;
-	zendlval->type = IS_STRING;
+	Z_STRVAL_P(zendlval) = estrndup(yytext+1, yyleng-2);
+	Z_STRLEN_P(zendlval) = yyleng-2;
+	Z_TYPE_P(zendlval) = IS_STRING;
 	HANDLE_NEWLINES(yytext, yyleng);
 
 	/* convert escape sequences */
-	s = t = zendlval->value.str.val;
-	end = s+zendlval->value.str.len;
+	s = t = Z_STRVAL_P(zendlval);
+	end = s+Z_STRLEN_P(zendlval);
 	while (s<end) {
 		if (*s=='\\') {
 			s++;
@@ -1368,7 +1368,7 @@ int zend_scan_binary_single_string(zval *zendlval TSRMLS_DC)
 				case '\\':
 				case '\'':
 					*t++ = *s;
-					zendlval->value.str.len--;
+					Z_STRLEN_P(zendlval)--;
 					break;
 				default:
 					*t++ = '\\';
@@ -1846,34 +1846,34 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>{LNUM} {
 	errno = 0;
-	zendlval->value.lval = strtol(yytext, NULL, 0);
+	Z_LVAL_P(zendlval) = strtol(yytext, NULL, 0);
 	if (errno == ERANGE) { /* overflow */
-		zendlval->value.dval = zend_strtod(yytext, NULL);
-		zendlval->type = IS_DOUBLE;
+		Z_DVAL_P(zendlval) = zend_strtod(yytext, NULL);
+		Z_TYPE_P(zendlval) = IS_DOUBLE;
 		return T_DNUMBER;
 	} else {
-		zendlval->type = IS_LONG;
+		Z_TYPE_P(zendlval) = IS_LONG;
 		return T_LNUMBER;
 	}
 }
 
 <ST_IN_SCRIPTING>{HNUM} {
 	errno = 0;
-	zendlval->value.lval = strtoul(yytext, NULL, 16);
+	Z_LVAL_P(zendlval) = strtoul(yytext, NULL, 16);
 	if (errno == ERANGE) { /* overflow */
 		/* not trying strtod - it returns trash on 0x-es */
-		zendlval->value.lval = LONG_MAX; /* maximal long */
+		Z_LVAL_P(zendlval) = LONG_MAX; /* maximal long */
 		zend_error(E_NOTICE,"Hex number is too big: %s", yytext);
 	} else {
-		if (zendlval->value.lval < 0) {
+		if (Z_LVAL_P(zendlval) < 0) {
 			/* maintain consistency with the old way */
-			zendlval->value.dval = (unsigned long) zendlval->value.lval;
-			zendlval->type = IS_DOUBLE;
+			Z_DVAL_P(zendlval) = (unsigned long) Z_LVAL_P(zendlval);
+			Z_TYPE_P(zendlval) = IS_DOUBLE;
 			return T_DNUMBER;
 		}
-		zendlval->type = IS_LONG;
+		Z_TYPE_P(zendlval) = IS_LONG;
 	}
-	zendlval->type = IS_LONG;
+	Z_TYPE_P(zendlval) = IS_LONG;
 	return T_LNUMBER;
 }
 
@@ -1885,8 +1885,8 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>{DNUM}|{EXPONENT_DNUM} {
-	zendlval->value.dval = zend_strtod(yytext, NULL);
-	zendlval->type = IS_DOUBLE;
+	Z_DVAL_P(zendlval) = zend_strtod(yytext, NULL);
+	Z_TYPE_P(zendlval) = IS_DOUBLE;
 	return T_DNUMBER;
 }
 
@@ -1940,7 +1940,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		} else {
 			func_name = (char*)EMPTY_STR;
 		}
-		zendlval->value.str.len = len;
+		Z_USTRLEN_P(zendlval) = len;
 		Z_USTRVAL_P(zendlval) = eumalloc(len+1);
 		if (class_name) {
 			u_strcpy(Z_USTRVAL_P(zendlval), (UChar*)class_name);
@@ -1951,7 +1951,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			Z_USTRVAL_P(zendlval)[0] = 0;
 		}
 		u_strcat(Z_USTRVAL_P(zendlval), (UChar*)func_name);
-		zendlval->type = IS_UNICODE;
+		Z_TYPE_P(zendlval) = IS_UNICODE;
 	} else {
 		if (class_name) {
 			len += strlen(class_name) + 2;
@@ -1960,21 +1960,21 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			len += strlen(func_name);
 		}
 
-		zendlval->value.str.val = emalloc(len+1);
-		zendlval->value.str.len = sprintf(zendlval->value.str.val, "%s%s%s", 
+		Z_STRVAL_P(zendlval) = emalloc(len+1);
+		Z_STRLEN_P(zendlval) = sprintf(Z_STRVAL_P(zendlval), "%s%s%s", 
 			class_name ? class_name : "",
 			class_name && func_name ? "::" : "",
 			func_name ? func_name : ""
 			);
-		zendlval->value.str.len = strlen(zendlval->value.str.val);
-		zendlval->type = IS_STRING;
+		Z_STRLEN_P(zendlval) = strlen(Z_STRVAL_P(zendlval));
+		Z_TYPE_P(zendlval) = IS_STRING;
 	}
 	return T_METHOD_C;
 }
 
 <ST_IN_SCRIPTING>"__LINE__" {
-	zendlval->value.lval = CG(zend_lineno);
-	zendlval->type = IS_LONG;
+	Z_LVAL_P(zendlval) = CG(zend_lineno);
+	Z_TYPE_P(zendlval) = IS_LONG;
 	return T_LINE;
 }
 
@@ -1989,9 +1989,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <INITIAL>(([^<]|"<"[^?%s<]){1,400})|"<s"|"<" {
-	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
-	zendlval->value.str.len = yyleng;
-	zendlval->type = IS_STRING;
+	Z_STRVAL_P(zendlval) = (char *) estrndup(yytext, yyleng);
+	Z_STRLEN_P(zendlval) = yyleng;
+	Z_TYPE_P(zendlval) = IS_STRING;
 	HANDLE_NEWLINES(yytext, yyleng);
 	return T_INLINE_HTML;
 }
@@ -1999,15 +1999,15 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <INITIAL>"<?"|"<script"{WHITESPACE}+"language"{WHITESPACE}*"="{WHITESPACE}*("php"|"\"php\""|"\'php\'"){WHITESPACE}*">" {
 	HANDLE_NEWLINES(yytext, yyleng);
 	if (CG(short_tags) || yyleng>2) { /* yyleng>2 means it's not <? but <script> */
-		zendlval->value.str.val = yytext; /* no copying - intentional */
-		zendlval->value.str.len = yyleng;
-		zendlval->type = IS_STRING;
+		Z_STRVAL_P(zendlval) = yytext; /* no copying - intentional */
+		Z_STRLEN_P(zendlval) = yyleng;
+		Z_TYPE_P(zendlval) = IS_STRING;
 		BEGIN(ST_IN_SCRIPTING);
 		return T_OPEN_TAG;
 	} else {
-		zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
-		zendlval->value.str.len = yyleng;
-		zendlval->type = IS_STRING;
+		Z_STRVAL_P(zendlval) = (char *) estrndup(yytext, yyleng);
+		Z_STRLEN_P(zendlval) = yyleng;
+		Z_TYPE_P(zendlval) = IS_STRING;
 		return T_INLINE_HTML;
 	}
 }
@@ -2015,15 +2015,15 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <INITIAL>"<%="|"<?=" {
 	if ((yytext[1]=='%' && CG(asp_tags)) || (yytext[1]=='?' && CG(short_tags))) {
-		zendlval->value.str.val = yytext; /* no copying - intentional */
-		zendlval->value.str.len = yyleng;
-		zendlval->type = IS_STRING;
+		Z_STRVAL_P(zendlval) = yytext; /* no copying - intentional */
+		Z_STRLEN_P(zendlval) = yyleng;
+		Z_TYPE_P(zendlval) = IS_STRING;
 		BEGIN(ST_IN_SCRIPTING);
 		return T_OPEN_TAG_WITH_ECHO;
 	} else {
-		zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
-		zendlval->value.str.len = yyleng;
-		zendlval->type = IS_STRING;
+		Z_STRVAL_P(zendlval) = (char *) estrndup(yytext, yyleng);
+		Z_STRLEN_P(zendlval) = yyleng;
+		Z_TYPE_P(zendlval) = IS_STRING;
 		return T_INLINE_HTML;
 	}
 }
@@ -2031,24 +2031,24 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <INITIAL>"<%" {
 	if (CG(asp_tags)) {
-		zendlval->value.str.val = yytext; /* no copying - intentional */
-		zendlval->value.str.len = yyleng;
-		zendlval->type = IS_STRING;
+		Z_STRVAL_P(zendlval) = yytext; /* no copying - intentional */
+		Z_STRLEN_P(zendlval) = yyleng;
+		Z_TYPE_P(zendlval) = IS_STRING;
 		BEGIN(ST_IN_SCRIPTING);
 		return T_OPEN_TAG;
 	} else {
-		zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
-		zendlval->value.str.len = yyleng;
-		zendlval->type = IS_STRING;
+		Z_STRVAL_P(zendlval) = (char *) estrndup(yytext, yyleng);
+		Z_STRLEN_P(zendlval) = yyleng;
+		Z_TYPE_P(zendlval) = IS_STRING;
 		return T_INLINE_HTML;
 	}
 }
 
 
 <INITIAL>"<?php"([ \t]|{NEWLINE}) {
-	zendlval->value.str.val = yytext; /* no copying - intentional */
-	zendlval->value.str.len = yyleng;
-	zendlval->type = IS_STRING;
+	Z_STRVAL_P(zendlval) = yytext; /* no copying - intentional */
+	Z_STRLEN_P(zendlval) = yyleng;
+	Z_TYPE_P(zendlval) = IS_STRING;
 	HANDLE_NEWLINE(yytext[yyleng-1]);
 	BEGIN(ST_IN_SCRIPTING);
 	return T_OPEN_TAG;
@@ -2083,9 +2083,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <ST_IN_SCRIPTING>{WHITESPACE} {
-	zendlval->value.str.val = yytext; /* no copying - intentional */
-	zendlval->value.str.len = yyleng;
-	zendlval->type = IS_STRING;
+	Z_STRVAL_P(zendlval) = yytext; /* no copying - intentional */
+	Z_STRLEN_P(zendlval) = yyleng;
+	Z_TYPE_P(zendlval) = IS_STRING;
 	HANDLE_NEWLINES(yytext, yyleng);
 	return T_WHITESPACE;
 }
@@ -2110,18 +2110,18 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			CG(zend_lineno)++;
 			/* intentional fall through */
 		default:
-			zendlval->value.str.val = yytext; /* no copying - intentional */
-			zendlval->value.str.len = yyleng;
-			zendlval->type = IS_STRING;
+			Z_STRVAL_P(zendlval) = yytext; /* no copying - intentional */
+			Z_STRLEN_P(zendlval) = yyleng;
+			Z_TYPE_P(zendlval) = IS_STRING;
 			BEGIN(ST_IN_SCRIPTING);
 			return T_COMMENT;
 	}
 }
 
 <ST_ONE_LINE_COMMENT>{NEWLINE} {
-	zendlval->value.str.val = yytext; /* no copying - intentional */
-	zendlval->value.str.len = yyleng;
-	zendlval->type = IS_STRING;
+	Z_STRVAL_P(zendlval) = yytext; /* no copying - intentional */
+	Z_STRLEN_P(zendlval) = yyleng;
+	Z_TYPE_P(zendlval) = IS_STRING;
 	BEGIN(ST_IN_SCRIPTING);
 	CG(zend_lineno)++;
 	return T_COMMENT;
@@ -2129,9 +2129,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_ONE_LINE_COMMENT>"?>"|"%>" {
     if (CG(asp_tags) || yytext[yyleng-2] != '%') { /* asp comment? */
-		zendlval->value.str.val = yytext; /* no copying - intentional */
-		zendlval->value.str.len = yyleng;
-		zendlval->type = IS_STRING;
+		Z_STRVAL_P(zendlval) = yytext; /* no copying - intentional */
+		Z_STRLEN_P(zendlval) = yyleng;
+		Z_TYPE_P(zendlval) = IS_STRING;
 		yyless(yyleng-2);
 		BEGIN(ST_IN_SCRIPTING);
 		return T_COMMENT;
@@ -2177,9 +2177,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>("?>"|"</script"{WHITESPACE}*">"){NEWLINE}? {
-	zendlval->value.str.val = yytext; /* no copying - intentional */
-	zendlval->value.str.len = yyleng;
-	zendlval->type = IS_STRING;
+	Z_STRVAL_P(zendlval) = yytext; /* no copying - intentional */
+	Z_STRLEN_P(zendlval) = yyleng;
+	Z_TYPE_P(zendlval) = IS_STRING;
 	BEGIN(INITIAL);
 	return T_CLOSE_TAG;  /* implicit ';' at php-end tag */
 }
@@ -2188,9 +2188,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <ST_IN_SCRIPTING>"%>"{NEWLINE}? {
 	if (CG(asp_tags)) {
 		BEGIN(INITIAL);
-		zendlval->value.str.len = yyleng;
-		zendlval->type = IS_STRING;
-		zendlval->value.str.val = yytext; /* no copying - intentional */
+		Z_STRLEN_P(zendlval) = yyleng;
+		Z_TYPE_P(zendlval) = IS_STRING;
+		Z_STRVAL_P(zendlval) = yytext; /* no copying - intentional */
 		return T_CLOSE_TAG;  /* implicit ';' at php-end tag */
 	} else {
 		yyless(1);
@@ -2291,8 +2291,8 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	}
 
 	if (label_len==CG(heredoc_len) && !memcmp(yytext, CG(heredoc), label_len)) {
-		zendlval->value.str.val = estrndup(yytext, label_len); /* unput destroys yytext */
-		zendlval->value.str.len = label_len;
+		Z_STRVAL_P(zendlval) = estrndup(yytext, label_len); /* unput destroys yytext */
+		Z_STRLEN_P(zendlval) = label_len;
 		yyless(yyleng - (yyleng - label_len));
 		efree(CG(heredoc));
 		CG(heredoc)=NULL;
@@ -2334,7 +2334,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"$"[^a-zA-Z_\x7f-\xff{] {
-	zendlval->value.lval = (long) yytext[0];
+	Z_LVAL_P(zendlval) = (long) yytext[0];
 	if (yyleng == 2) {
 		yyless(1);
 	}
@@ -2343,12 +2343,12 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>{ENCAPSED_TOKENS} {
-	zendlval->value.lval = (long) yytext[0];
+	Z_LVAL_P(zendlval) = (long) yytext[0];
 	return yytext[0];
 }
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"{$" {
-	zendlval->value.lval = (long) yytext[0];
+	Z_LVAL_P(zendlval) = (long) yytext[0];
 	yy_push_state(ST_IN_SCRIPTING TSRMLS_CC);
 	yyless(1);
 	return T_CURLY_OPEN;
@@ -2356,22 +2356,22 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <ST_DOUBLE_QUOTES>"\\\"" {
-	zendlval->value.lval = (long) '"';
+	Z_LVAL_P(zendlval) = (long) '"';
 	return T_CHARACTER;
 }
 
 <ST_BACKQUOTE>"\\`" {
-	zendlval->value.lval = (long) '`';
+	Z_LVAL_P(zendlval) = (long) '`';
 	return T_CHARACTER;
 }
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\"[0-7]{1,3} {
-	zendlval->value.lval = strtol(yytext+1, NULL, 8);
+	Z_LVAL_P(zendlval) = strtol(yytext+1, NULL, 8);
 	return T_CHARACTER;
 }
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\x"[0-9A-Fa-f]{1,2} {
-	zendlval->value.lval = strtol (yytext+2, NULL, 16);
+	Z_LVAL_P(zendlval) = strtol (yytext+2, NULL, 16);
 	return T_CHARACTER;
 }
 
@@ -2383,7 +2383,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	if (CG(literal_type) == IS_UNICODE) {
 		if (zend_digits_to_codepoint(yytext+2, yytext+yyleng, &codepoint, req_digits)) {
 			if (codepoint <= 0x10FFFF) {
-				zendlval->value.lval = (long) codepoint;
+				Z_LVAL_P(zendlval) = (long) codepoint;
 				/* give back if we grabbed more than needed for \u case */
 				if (yyleng > req_digits + 2) {
 					yyless(req_digits + 2);
@@ -2413,7 +2413,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			/* safe, since we have } at the end */
 			yytext[yyleng-1] = 0;
 			if (zend_uchar_from_name(yytext+3, &codepoint)) {
-				zendlval->value.lval = (long) codepoint;
+				Z_LVAL_P(zendlval) = (long) codepoint;
 				return T_CHARACTER;
 			} else {
 				zend_error(E_COMPILE_WARNING, "Invalid Unicode character name: '%s'", yytext+3);
@@ -2439,19 +2439,19 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\"{ANY_CHAR} {
 	switch (yytext[1]) {
 		case 'n':
-			zendlval->value.lval = (long) '\n';
+			Z_LVAL_P(zendlval) = (long) '\n';
 			break;
 		case 't':
-			zendlval->value.lval = (long) '\t';
+			Z_LVAL_P(zendlval) = (long) '\t';
 			break;
 		case 'r':
-			zendlval->value.lval = (long) '\r';
+			Z_LVAL_P(zendlval) = (long) '\r';
 			break;
 		case '\\':
-			zendlval->value.lval = (long) '\\';
+			Z_LVAL_P(zendlval) = (long) '\\';
 			break;
 		case '$':
-			zendlval->value.lval = (long) yytext[1];
+			Z_LVAL_P(zendlval) = (long) yytext[1];
 			break;
 		default:
 			if (!zend_copy_string_value(zendlval, yytext, yyleng, CG(literal_type) TSRMLS_CC)) {

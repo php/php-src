@@ -99,8 +99,8 @@ ZEND_API int zend_register_resource(zval *rsrc_result, void *rsrc_pointer, int r
 	rsrc_id = zend_list_insert(rsrc_pointer, rsrc_type);
 	
 	if (rsrc_result) {
-		rsrc_result->value.lval = rsrc_id;
-		rsrc_result->type = IS_RESOURCE;
+		Z_RESVAL_P(rsrc_result) = rsrc_id;
+		Z_TYPE_P(rsrc_result) = IS_RESOURCE;
 	}
 
 	return rsrc_id;
@@ -124,14 +124,14 @@ ZEND_API void *zend_fetch_resource(zval **passed_id TSRMLS_DC, int default_id, c
 				zend_error(E_WARNING, "%s%s%s(): no %s resource supplied", class_name, space, get_active_function_name(TSRMLS_C), resource_type_name);
 			}
 			return NULL;
-		} else if ((*passed_id)->type != IS_RESOURCE) {
+		} else if (Z_TYPE_PP(passed_id) != IS_RESOURCE) {
 			if (resource_type_name) {
 				class_name = get_active_class_name(&space TSRMLS_CC);
 				zend_error(E_WARNING, "%s%s%s(): supplied argument is not a valid %s resource", class_name, space, get_active_function_name(TSRMLS_C), resource_type_name);
 			}
 			return NULL;
 		}
-		id = (*passed_id)->value.lval;
+		id = Z_RESVAL_PP(passed_id);
 	} else {
 		id = default_id;
 	}
