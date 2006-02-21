@@ -743,7 +743,7 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Countable
 	function setFlags($flags) {/**/}
 
 	/**
-	 * @ return current flags
+	 * @return current flags
 	 */
 	function getFlags() {/**/}
 
@@ -967,6 +967,12 @@ class DirectoryIterator extends SplFileInfo implements Iterator
 	 */
 	function __construct($path) {/**/}
 
+	/** @copydoc Iterator::rewind */
+	function rewind() {/**/}
+	
+	/** @copydoc Iterator::valid */
+	function valid() {/**/}
+	
 	/** @return index of entry
 	 */
 	function key() {/**/}
@@ -974,6 +980,9 @@ class DirectoryIterator extends SplFileInfo implements Iterator
 	/** @return $this
 	 */
 	function current() {/**/}
+
+	/** @copydoc Iterator::next */
+	function next() {/**/}
 
 	/** @return Whether the current entry is either '.' or '..'.
 	 */
@@ -1065,6 +1074,21 @@ class SimpleXMLIterator extends SimpleXMLElement implements RecursiveIterator, C
 	/** @return number of elements/attributes seen with foreach()
 	 */
 	function count() {/**/}
+
+	/** @copydoc Iterator::rewind */
+	function rewind() {/**/}
+	
+	/** @copydoc Iterator::valid */
+	function valid() {/**/}
+	
+	/** @copydoc Iterator::current */
+	function current() {/**/}
+	
+	/** @copydoc Iterator::key */
+	function key() {/**/}
+	
+	/** @copydoc Iterator::next */
+	function next() {/**/}
 }
 
 /** @ingroup SPL
