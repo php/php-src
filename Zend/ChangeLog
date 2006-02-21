@@ -1,3 +1,51 @@
+2006-02-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute_API.c:
+      - Synch zend_call_function() with VM function call helper
+
+    * zend_compile.h
+      zend_execute_API.c
+      zend_vm_def.h
+      zend_vm_execute.h:
+      - Add deprecation flag and message
+
+2006-02-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.c
+      zend.h
+      zend_API.c
+      zend_API.h
+      zend_alloc.c
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_constants.c
+      zend_exceptions.c
+      zend_execute.c
+      zend_execute.h
+      zend_execute_API.c
+      zend_highlight.c
+      zend_indent.c
+      zend_ini.c
+      zend_ini_parser.y
+      zend_ini_scanner.l
+      zend_interfaces.c
+      zend_iterators.c
+      zend_language_parser.y
+      zend_language_scanner.l
+      zend_list.c
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_objects.c
+      zend_objects_API.c
+      zend_operators.c
+      zend_operators.h
+      zend_strtod.c
+      zend_variables.c
+      zend_variables.h
+      zend_vm_def.h
+      zend_vm_execute.h:
+      Preparation for portable string API (use macroses to access zval).
+
 2006-02-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.c

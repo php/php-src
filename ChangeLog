@@ -1,3 +1,87 @@
+2006-02-20  Johannes Schlüter  <schlueter@phpbar.de>
+
+    * (PHP_5_1)
+      NEWS:
+      - MFH: Rename reflection constants to fix parser conflicts
+
+2006-02-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute_API.c:
+      - Synch zend_call_function() with VM function call helper
+
+    * ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      - Add deprecation flag and message
+
+2006-02-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_highlight.c
+      ZendEngine2/zend_indent.c
+      ZendEngine2/zend_ini.c
+      ZendEngine2/zend_ini_parser.y
+      ZendEngine2/zend_ini_scanner.l
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_iterators.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_list.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_objects.c
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h
+      ZendEngine2/zend_strtod.c
+      ZendEngine2/zend_variables.c
+      ZendEngine2/zend_variables.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      Preparation for portable string API (use macroses to access zval).
+
+    * ext/standard/basic_functions.c:
+      Incorrect usage of Z_TYPE() macro
+
+2006-02-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #36434 (Improper resolution of declaring class name of an
+      inherited property).
+
+2006-02-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/dom/dom_iterators.c:
+      Fixed start inex in iterator
+
+    * ext/standard/proc_open.c:
+      Fixed memory corruption
+
+    * ext/pcre/tests/bug26927.phpt
+      ext/pcre/tests/bug26927.phpt
+      ext/pcre/tests/bug26927.phpt:
+      Fixed test file
+
+    * (PHP_4_4)
+      ext/openssl/tests/bug25614.phpt
+      ext/session/tests/bug31454.phpt
+      ext/standard/tests/general_functions/bug32647.phpt
+      ext/standard/tests/serialize/bug25378.phpt:
+      Fixed test files (added docref)
+
 2006-02-19  Michael Wallner  <mike@iworks.at>
 
     * (PHP_5_1)
