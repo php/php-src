@@ -52,7 +52,7 @@ ZEND_API void {%EXECUTOR_NAME%}(zend_op_array *op_array TSRMLS_DC)
 	 */
 	EX(function_state).function_symbol_table = NULL;
 #endif
-	
+
 	while (1) {
     {%ZEND_VM_CONTINUE_LABEL%}
 #ifdef ZEND_WIN32

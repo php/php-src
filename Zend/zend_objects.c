@@ -1,4 +1,4 @@
-/* 
+/*
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
@@ -33,7 +33,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 	if (destructor) {
 		zval zobj, *obj = &zobj;
 		zval *old_exception;
-		
+
 		if (destructor->op_array.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
 			if (destructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
 				/* Ensure that if we're calling a private function, we're allowed to do so.
@@ -41,10 +41,10 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 				if (object->ce != EG(scope)) {
 					zend_class_entry *ce = object->ce;
 
-					zend_error(EG(in_execution) ? E_ERROR : E_WARNING, 
-						"Call to private %v::__destruct() from context '%v'%s", 
-						ce->name, 
-						EG(scope) ? EG(scope)->name : (char*)EMPTY_STR, 
+					zend_error(EG(in_execution) ? E_ERROR : E_WARNING,
+						"Call to private %v::__destruct() from context '%v'%s",
+						ce->name,
+						EG(scope) ? EG(scope)->name : (char*)EMPTY_STR,
 						EG(in_execution) ? "" : " during shutdown ignored");
 					return;
 				}
@@ -54,10 +54,10 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 				if (!zend_check_protected(destructor->common.scope, EG(scope))) {
 					zend_class_entry *ce = object->ce;
 
-					zend_error(EG(in_execution) ? E_ERROR : E_WARNING, 
-						"Call to protected %v::__destruct() from context '%v'%s", 
-						ce->name, 
-						EG(scope) ? EG(scope)->name : (char*)EMPTY_STR, 
+					zend_error(EG(in_execution) ? E_ERROR : E_WARNING,
+						"Call to protected %v::__destruct() from context '%v'%s",
+						ce->name,
+						EG(scope) ? EG(scope)->name : (char*)EMPTY_STR,
 						EG(in_execution) ? "" : " during shutdown ignored");
 					return;
 				}
@@ -90,7 +90,7 @@ ZEND_API void zend_objects_free_object_storage(zend_object *object TSRMLS_DC)
 {
 	if (object->guards) {
 		zend_hash_destroy(object->guards);
-		FREE_HASHTABLE(object->guards);		
+		FREE_HASHTABLE(object->guards);
 	}
 	zend_hash_destroy(object->properties);
 	FREE_HASHTABLE(object->properties);
@@ -98,7 +98,7 @@ ZEND_API void zend_objects_free_object_storage(zend_object *object TSRMLS_DC)
 }
 
 ZEND_API zend_object_value zend_objects_new(zend_object **object, zend_class_entry *class_type TSRMLS_DC)
-{	
+{
 	zend_object_value retval;
 
 	*object = emalloc(sizeof(zend_object));
@@ -162,7 +162,7 @@ ZEND_API zend_object_value zend_objects_clone_obj(zval *zobject TSRMLS_DC)
 	zend_object *new_object;
 	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
 
-	/* assume that create isn't overwritten, so when clone depends on the 
+	/* assume that create isn't overwritten, so when clone depends on the
 	 * overwritten one then it must itself be overwritten */
 	old_object = zend_objects_get_address(zobject TSRMLS_CC);
 	new_obj_val = zend_objects_new(&new_object, old_object->ce TSRMLS_CC);

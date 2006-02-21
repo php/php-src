@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2006 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -64,7 +64,7 @@ static void iter_wrapper_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 ZEND_API zval *zend_iterator_wrap(zend_object_iterator *iter TSRMLS_DC)
 {
 	zval *wrapped;
-	
+
 	MAKE_STD_ZVAL(wrapped);
 	Z_TYPE_P(wrapped) = IS_OBJECT;
 	Z_OBJ_HANDLE_P(wrapped) = zend_objects_store_put(iter, iter_wrapper_dtor, NULL, NULL TSRMLS_CC);
@@ -86,14 +86,14 @@ ZEND_API enum zend_object_iterator_kind zend_iterator_unwrap(
 				return ZEND_ITER_PLAIN_OBJECT;
 			}
 			return ZEND_ITER_INVALID;
-			
-			
+
+
 		case IS_ARRAY:
 			if (HASH_OF(array_ptr)) {
 				return ZEND_ITER_PLAIN_ARRAY;
 			}
 			return ZEND_ITER_INVALID;
-			
+
 		default:
 			return ZEND_ITER_INVALID;
 	}

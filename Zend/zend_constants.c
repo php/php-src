@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2006 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -117,7 +117,7 @@ void zend_register_standard_constants(TSRMLS_D)
 	/* true/false constants */
 	{
 		zend_constant c;
-	
+
 		Z_TYPE(c.value) = IS_BOOL;
 		c.flags = CONST_PERSISTENT;
 		c.module_number = 0;
@@ -127,7 +127,7 @@ void zend_register_standard_constants(TSRMLS_D)
 		Z_LVAL(c.value) = 1;
 		Z_TYPE(c.value) = IS_BOOL;
 		zend_register_constant(&c TSRMLS_CC);
-		
+
 		c.name = zend_strndup(ZEND_STRL("FALSE"));
 		c.name_len = sizeof("FALSE");
 		Z_LVAL(c.value) = 0;
@@ -169,7 +169,7 @@ void clean_non_persistent_constants(TSRMLS_D)
 ZEND_API void zend_register_long_constant(char *name, uint name_len, long lval, int flags, int module_number TSRMLS_DC)
 {
 	zend_constant c;
-	
+
 	Z_TYPE(c.value) = IS_LONG;
 	Z_LVAL(c.value) = lval;
 	c.flags = flags;
@@ -183,7 +183,7 @@ ZEND_API void zend_register_long_constant(char *name, uint name_len, long lval, 
 ZEND_API void zend_register_double_constant(char *name, uint name_len, double dval, int flags, int module_number TSRMLS_DC)
 {
 	zend_constant c;
-	
+
 	Z_TYPE(c.value) = IS_DOUBLE;
 	Z_DVAL(c.value) = dval;
 	c.flags = flags;
@@ -197,7 +197,7 @@ ZEND_API void zend_register_double_constant(char *name, uint name_len, double dv
 ZEND_API void zend_register_stringl_constant(char *name, uint name_len, char *strval, uint strlen, int flags, int module_number TSRMLS_DC)
 {
 	zend_constant c;
-	
+
 	Z_TYPE(c.value) = IS_STRING;
 	Z_STRVAL(c.value) = strval;
 	Z_STRLEN(c.value) = strlen;
@@ -237,7 +237,7 @@ ZEND_API int zend_u_get_constant(zend_uchar type, void *name, uint name_len, zva
 		} else {
 			scope = CG(active_class_entry);
 		}
-	
+
 		if (UG(unicode)) {
 			class_name = (char*)eustrndup((UChar*)name, class_name_len);
 		} else {
@@ -252,12 +252,12 @@ ZEND_API int zend_u_get_constant(zend_uchar type, void *name, uint name_len, zva
 				zend_error(E_ERROR, "Cannot access self:: when no class scope is active");
 				retval = 0;
 			}
-		} else if (class_name_len == sizeof("parent")-1 && 
+		} else if (class_name_len == sizeof("parent")-1 &&
 		           ZEND_U_EQUAL(type, class_name, class_name_len, "parent", sizeof("parent")-1)) {
-			if (!scope) {   	 
+			if (!scope) {
 				zend_error(E_ERROR, "Cannot access parent:: when no class scope is active");
-			} else if (!scope->parent) { 	 
-				zend_error(E_ERROR, "Cannot access parent:: when current class scope has no parent"); 	 
+			} else if (!scope->parent) {
+				zend_error(E_ERROR, "Cannot access parent:: when current class scope has no parent");
 			} else {
 				ce = &scope->parent;
 			}
@@ -281,15 +281,15 @@ ZEND_API int zend_u_get_constant(zend_uchar type, void *name, uint name_len, zva
 			*result = **ret_constant;
 			zval_copy_ctor(result);
 		}
-		
+
 		return retval;
 	}
-	
+
 	if (zend_u_hash_find(EG(zend_constants), type, name, name_len+1, (void **) &c) == FAILURE) {
 		unsigned int lookup_name_len;
 
 		lookup_name = zend_u_str_case_fold(type, name, name_len, 1, &lookup_name_len);
-		 
+
 		if (zend_u_hash_find(EG(zend_constants), type, lookup_name, lookup_name_len+1, (void **) &c)==SUCCESS) {
 			if ((c->flags & CONST_CS) && memcmp(c->name, name, UG(unicode)?UBYTES(name_len):name_len)!=0) {
 				retval=0;

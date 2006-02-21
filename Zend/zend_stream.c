@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2006 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -51,7 +51,7 @@ ZEND_API int zend_stream_open(const char *filename, zend_file_handle *handle TSR
 	handle->handle.fp = zend_fopen(filename, &handle->opened_path);
 	handle->filename = (char *)filename;
 	handle->free_filename = 0;
-	
+
 	return (handle->handle.fp) ? SUCCESS : FAILURE;
 }
 
@@ -63,20 +63,20 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle TSRMLS_DC)
 				return FAILURE;
 			}
 			break;
-			
+
 		case ZEND_HANDLE_FD:
 			file_handle->handle.fp = fdopen(file_handle->handle.fd, "rb");
 			file_handle->type = ZEND_HANDLE_FP;
 			break;
-			
+
 		case ZEND_HANDLE_FP:
 			file_handle->handle.fp = file_handle->handle.fp;
 			break;
-			
+
 		case ZEND_HANDLE_STREAM:
 			/* nothing to do */
 			return SUCCESS;
-			
+
 		default:
 			return FAILURE;
 	}
@@ -100,7 +100,7 @@ ZEND_API size_t zend_stream_read(zend_file_handle *file_handle, char *buf, size_
 {
 	if (file_handle->handle.stream.interactive) {
 		int c = '*';
-		size_t n; 
+		size_t n;
 
 #ifdef NETWARE
 		/*
@@ -110,11 +110,11 @@ ZEND_API size_t zend_stream_read(zend_file_handle *file_handle, char *buf, size_
 		*/
                 for ( n = 0; n < len && (c = zend_stream_getc( file_handle TSRMLS_CC)) != EOF && c != 4 && c != '\n'; ++n )
 #else
-		for ( n = 0; n < len && (c = zend_stream_getc( file_handle TSRMLS_CC)) != EOF && c != '\n'; ++n ) 
+		for ( n = 0; n < len && (c = zend_stream_getc( file_handle TSRMLS_CC)) != EOF && c != '\n'; ++n )
 #endif
-			buf[n] = (char) c; 
+			buf[n] = (char) c;
 		if ( c == '\n' )
-			buf[n++] = (char) c; 
+			buf[n++] = (char) c;
 
 		return n;
 	}

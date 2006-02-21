@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2006 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at                              |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -43,14 +43,14 @@ static void zend_from_unicode_substitute_cb(
         {
             return;
         }
-    
+
         *err = U_ZERO_ERROR;
         //ucnv_cbFromUWriteSub(fromArgs, 0, err);
         return;
     } else if (*((char*)context)=='i') {
         if (reason != UCNV_UNASSIGNED)
         {
-            /* the caller must have set 
+            /* the caller must have set
              * the error code accordingly
              */
             return;
@@ -143,7 +143,7 @@ int zend_set_converter_encoding(UConverter **converter, const char *encoding)
     }
 
     /*
-     * If encoding is NULL, ucnv_open() will return a converter based on 
+     * If encoding is NULL, ucnv_open() will return a converter based on
      * the default platform encoding as determined by ucnv_getDefaultName().
      */
     new_converter = ucnv_open(encoding, &status);
@@ -309,7 +309,7 @@ ZEND_API void zend_convert_encodings(UConverter *target_conv, UConverter *source
     if (U_FAILURE(*status)) {
         return;
     }
-    
+
     null_size = ucnv_getMinCharSize(target_conv);
     allocated = source_len + null_size;
 
@@ -493,7 +493,7 @@ ZEND_API int zend_is_valid_identifier(UChar *ident, int32_t ident_len)
 
     for (i = 0; i < ident_len; ) {
         U16_NEXT(ident, i, ident_len, codepoint);
-        if (!u_hasBinaryProperty(codepoint, id_prop) && 
+        if (!u_hasBinaryProperty(codepoint, id_prop) &&
             codepoint != 0x5f) { /* special case for starting '_' */
             return 0;
         }

@@ -1778,7 +1778,7 @@ zend_strtod
 	if (se)
 		*se = (char *)s;
 	result = sign ? -value(rv) : value(rv);
-		
+
 	for (i = 0; i <= Kmax; i++) {
 		Bigint **listp = &freelist[i];
 		while ((tmp = *listp) != NULL) {
@@ -1787,13 +1787,13 @@ zend_strtod
 		}
 		freelist[i] = NULL;
 	}
-	
+
 	while (p5s) {
 		tmp = p5s;
 		p5s = p5s->next;
 		free(tmp);
 	}
-	
+
 	return result;
 	}
 

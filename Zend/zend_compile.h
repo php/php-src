@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2006 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -173,7 +173,7 @@ typedef struct _zend_compiled_variable {
 struct _zend_op_array {
 	/* Common elements */
 	zend_uchar type;
-	char *function_name;		
+	char *function_name;
 	zend_class_entry *scope;
 	zend_uint fn_flags;
 	union _zend_function *prototype;
@@ -227,9 +227,9 @@ struct _zend_op_array {
 typedef struct _zend_internal_function {
 	/* Common elements */
 	zend_uchar type;
-	char *function_name;		
+	char *function_name;
 	zend_class_entry *scope;
-	zend_uint fn_flags;	
+	zend_uint fn_flags;
 	union _zend_function *prototype;
 	zend_uint num_args;
 	zend_uint required_num_args;
@@ -259,7 +259,7 @@ typedef union _zend_function {
 		zend_bool pass_rest_by_reference;
 		unsigned char return_reference;
 	} common;
-	
+
 	zend_op_array op_array;
 	zend_internal_function internal_function;
 } zend_function;
@@ -518,7 +518,7 @@ void zend_do_normalization(znode *result, znode *str TSRMLS_DC);
 
 /* helper functions in zend_language_scanner.l */
 ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSRMLS_DC);
-ZEND_API zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC);	
+ZEND_API zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC);
 ZEND_API zend_op_array *compile_filename(int type, zval *filename TSRMLS_DC);
 ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_count, ...);
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC);

@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2006 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -104,10 +104,10 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 			case T_CONSTANT_ENCAPSED_STRING:
 				next_color = syntax_highlighter_ini->highlight_string;
 				break;
-			case '"':				
+			case '"':
 				next_color = syntax_highlighter_ini->highlight_string;
 				in_string = !in_string;
-				break;				
+				break;
 			case T_WHITESPACE:
 				zend_html_puts(LANG_SCNG(yy_text), LANG_SCNG(yy_leng) TSRMLS_CC);  /* no color needed */
 				Z_TYPE(token) = 0;
@@ -193,7 +193,7 @@ ZEND_API void zend_strip(TSRMLS_D)
 
 			case EOF:
 				return;
-			
+
 			case T_END_HEREDOC:
 				zend_write(LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 				efree(Z_STRVAL(token));
@@ -205,7 +205,7 @@ ZEND_API void zend_strip(TSRMLS_D)
 				prev_space = 1;
 				Z_TYPE(token) = 0;
 				continue;
-			
+
 			default:
 				zend_write(LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 				break;
@@ -238,4 +238,3 @@ ZEND_API void zend_strip(TSRMLS_D)
  * indent-tabs-mode: t
  * End:
  */
-

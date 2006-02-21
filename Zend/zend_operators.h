@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2006 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -78,7 +78,7 @@ static inline zend_uchar is_numeric_string(char *str, int length, long *lval, do
 	if (!length) {
 		return 0;
 	}
-	
+
 	/* handle hex numbers */
 	if (length>=2 && str[0]=='0' && (str[1]=='x' || str[1]=='X')) {
 		conv_base=16;
@@ -147,7 +147,7 @@ static inline zend_uchar is_numeric_unicode(UChar *str, int32_t length, long *lv
 	if (!length) {
 		return 0;
 	}
-	
+
 	/* handle hex numbers */
 	if (length>=2 && str[0]=='0' && (str[1]=='x' || str[1]=='X')) {
 		conv_base=16;
@@ -222,14 +222,14 @@ zend_memnstr(char *haystack, char *needle, int needle_len, char *end)
 				return p;
 			}
 		}
-		
+
 		if (p == NULL) {
 			return NULL;
 		}
-		
+
 		p++;
 	}
-	
+
 	return NULL;
 }
 
@@ -406,7 +406,7 @@ END_EXTERN_C()
 #define Z_OBJVAL_P(zval_p)      Z_OBJVAL(*zval_p)
 #define Z_OBJ_HANDLE_P(zval_p)  Z_OBJ_HANDLE(*zval_p)
 #define Z_OBJ_HT_P(zval_p)      Z_OBJ_HT(*zval_p)
-#define Z_OBJ_HANDLER_P(zval_p, h) Z_OBJ_HANDLER(*zval_p, h) 
+#define Z_OBJ_HANDLER_P(zval_p, h) Z_OBJ_HANDLER(*zval_p, h)
 #define Z_UNIVAL_P(zval_p)		Z_UNIVAL(*zval_p)
 #define Z_UNILEN_P(zval_p)		Z_UNILEN(*zval_p)
 
@@ -425,7 +425,7 @@ END_EXTERN_C()
 #define Z_OBJVAL_PP(zval_pp)    Z_OBJVAL(**zval_pp)
 #define Z_OBJ_HANDLE_PP(zval_p) Z_OBJ_HANDLE(**zval_p)
 #define Z_OBJ_HT_PP(zval_p)     Z_OBJ_HT(**zval_p)
-#define Z_OBJ_HANDLER_PP(zval_p, h) Z_OBJ_HANDLER(**zval_p, h) 
+#define Z_OBJ_HANDLER_PP(zval_p, h) Z_OBJ_HANDLER(**zval_p, h)
 #define Z_UNIVAL_PP(zval_pp)	Z_UNIVAL(**zval_pp)
 #define Z_UNILEN_PP(zval_pp)	Z_UNILEN(**zval_pp)
 

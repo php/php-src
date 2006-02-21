@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2006 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -29,7 +29,7 @@ ZEND_API zend_class_entry *zend_ce_iterator;
 ZEND_API zend_class_entry *zend_ce_arrayaccess;
 ZEND_API zend_class_entry *zend_ce_serializable;
 
-/* {{{ zend_call_method 
+/* {{{ zend_call_method
  Only returns the returned zval if retval_ptr != NULL */
 ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int function_name_len, zval **retval_ptr_ptr, int param_count, zval* arg1, zval* arg2 TSRMLS_DC)
 {
@@ -149,7 +149,7 @@ ZEND_API int zend_user_it_valid(zend_object_iterator *_iter TSRMLS_DC)
 		zval *object = (zval*)iter->it.data;
 		zval *more;
 		int result;
-	
+
 		zend_call_method_with_0_params(&object, iter->ce, &iter->ce->iterator_funcs.zf_valid, "valid", &more);
 		if (more) {
 			result = i_zend_is_true(more);
@@ -202,7 +202,7 @@ ZEND_API int zend_user_it_get_current_key(zend_object_iterator *_iter, char **st
 		return HASH_KEY_IS_LONG;
 	}
 	switch (Z_TYPE_P(retval)) {
-		default: 
+		default:
 			zend_error(E_WARNING, "Illegal type returned from %v::key()", iter->ce->name);
 		case IS_NULL:
 			*int_key = 0;
@@ -223,7 +223,7 @@ ZEND_API int zend_user_it_get_current_key(zend_object_iterator *_iter, char **st
 
 		case IS_DOUBLE:
 		case IS_RESOURCE:
-		case IS_BOOL: 
+		case IS_BOOL:
 		case IS_LONG: {
 				if (Z_TYPE_P(retval) == IS_DOUBLE) {
 					*int_key = (long)Z_DVAL_P(retval);
@@ -273,7 +273,7 @@ zend_object_iterator_funcs zend_interface_iterator_funcs_iterator = {
 static zend_object_iterator *zend_user_it_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
 {
 	zend_user_iterator *iterator;
-	
+
 	if (by_ref) {
 		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
 	}
@@ -459,14 +459,14 @@ int zend_user_unserialize(zval **object, zend_class_entry *ce, const unsigned ch
 	zval * zdata;
 
 	object_init_ex(*object, ce);
-	
+
 	MAKE_STD_ZVAL(zdata);
 	ZVAL_STRINGL(zdata, (char*)buf, buf_len, 1);
 
 	zend_call_method_with_1_params(object, ce, &ce->unserialize_func, "unserialize", NULL, zdata);
-	
+
 	zval_ptr_dtor(&zdata);
-	
+
 	if (EG(exception)) {
 		return FAILURE;
 	} else {
@@ -517,7 +517,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_arrayaccess_offset_get, 0, 0, 1) /* actually this
 ZEND_END_ARG_INFO();
 
 static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_arrayaccess_offset_value, 0, 0, 2) 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_arrayaccess_offset_value, 0, 0, 2)
 	ZEND_ARG_INFO(0, offset)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO();
@@ -537,7 +537,7 @@ ZEND_END_ARG_INFO();
 
 zend_function_entry zend_funcs_serializable[] = {
 	ZEND_ABSTRACT_ME(serializable, serialize,   NULL)
-	ZEND_FENTRY(unserialize, NULL, arginfo_serializable_serialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT|ZEND_ACC_CTOR) 
+	ZEND_FENTRY(unserialize, NULL, arginfo_serializable_serialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT|ZEND_ACC_CTOR)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -563,9 +563,9 @@ ZEND_API void zend_register_interfaces(TSRMLS_D)
 
 	REGISTER_ITERATOR_INTERFACE(iterator, Iterator);
 	REGISTER_ITERATOR_IMPLEMENT(iterator, traversable);
-	
+
 	REGISTER_ITERATOR_INTERFACE(arrayaccess, ArrayAccess);
-	
+
 	REGISTER_ITERATOR_INTERFACE(serializable, Serializable)
 }
 /* }}} */

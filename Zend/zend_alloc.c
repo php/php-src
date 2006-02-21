@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2006 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -306,7 +306,7 @@ ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 #if MEMORY_LIMIT
 	AG(allocated_memory) -= SIZE;
 #endif
-	
+
 	ZEND_DO_FREE(p);
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 }
@@ -316,7 +316,7 @@ ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LI
 {
 	void *p;
 	int final_size = size*nmemb;
-	
+
 	HANDLE_BLOCK_INTERRUPTIONS();
 	p = _emalloc(final_size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	if (!p) {
@@ -385,7 +385,7 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 	p->lineno = __zend_lineno;
 	p->magic = MEM_BLOCK_START_MAGIC;
 	memcpy((((char *) p) + sizeof(zend_mem_header) + MEM_HEADER_PADDING + size), &mem_block_end_magic, sizeof(long));
-#endif	
+#endif
 
 	p->size = size;
 
@@ -510,7 +510,7 @@ ZEND_API int zend_set_memory_limit(unsigned int memory_limit)
 ZEND_API void start_memory_manager(TSRMLS_D)
 {
 	AG(head) = NULL;
-	
+
 #if MEMORY_LIMIT
 	AG(memory_limit) = 1<<30;		/* ridiculous limit, effectively no limit */
 	AG(allocated_memory) = 0;
@@ -683,7 +683,7 @@ ZEND_API void shutdown_memory_manager(int silent, int full_shutdown TSRMLS_DC)
 			}
 			fprintf(stderr, "\n");
 		}
-					
+
 	} while (0);
 #endif
 
@@ -821,7 +821,7 @@ ZEND_API int _mem_block_check(void *ptr, int silent ZEND_FILE_LINE_DC ZEND_FILE_
 			zend_debug_alloc_output("Unknown\n");
 		}
 	}
-		
+
 	if (!silent) {
 		zend_debug_alloc_output("---------------------------------------\n");
 	}
@@ -836,7 +836,7 @@ ZEND_API void _full_mem_check(int silent ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_D
 	TSRMLS_FETCH();
 
 	p = AG(head);
-	
+
 
 	zend_debug_alloc_output("------------------------------------------------\n");
 	zend_debug_alloc_output("Full Memory Check at %s:%d\n" ZEND_FILE_LINE_RELAY_CC);

@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2006 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -328,7 +328,7 @@ struct _zend_class_entry {
 	char type;
 	char *name;
 	zend_uint name_length;
-	struct _zend_class_entry *parent; 
+	struct _zend_class_entry *parent;
 	int refcount;
 	zend_bool constants_updated;
 	zend_uint ce_flags;
@@ -393,7 +393,7 @@ typedef struct _zend_utility_functions {
 	char *(*getenv_function)(char *name, size_t name_len TSRMLS_DC);
 } zend_utility_functions;
 
-		
+
 typedef struct _zend_utility_values {
 	char *import_use_extension;
 	uint import_use_extension_length;
@@ -576,7 +576,7 @@ END_EXTERN_C()
 
 #define INIT_PZVAL(z)		\
 	(z)->refcount = 1;		\
-	(z)->is_ref = 0;	
+	(z)->is_ref = 0;
 
 #define INIT_ZVAL(z) z = zval_used_for_init;
 

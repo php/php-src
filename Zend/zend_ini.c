@@ -26,7 +26,7 @@
 #include "zend_operators.h"
 #include "zend_strtod.h"
 
-static HashTable *registered_zend_ini_directives; 
+static HashTable *registered_zend_ini_directives;
 
 #define NO_VALUE_PLAINTEXT		"no value"
 #define NO_VALUE_HTML			"<i>no value</i>"
@@ -123,7 +123,7 @@ static int ini_key_compare(const void *a, const void *b TSRMLS_DC)
 {
 	Bucket *f;
 	Bucket *s;
- 
+
 	f = *((Bucket **) a);
 	s = *((Bucket **) b);
 
@@ -232,7 +232,7 @@ ZEND_API int zend_alter_ini_entry(char *name, uint name_length, char *new_value,
 	}
 
 	duplicate = estrndup(new_value, new_value_length);
-	
+
 	if (!ini_entry->on_modify
 		|| ini_entry->on_modify(ini_entry, duplicate, new_value_length, ini_entry->mh_arg1, ini_entry->mh_arg2, ini_entry->mh_arg3, stage TSRMLS_CC)==SUCCESS) {
 		if (!ini_entry->modified) {
@@ -354,7 +354,7 @@ static void zend_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 				} else {
 					display_string = NO_VALUE_PLAINTEXT;
 					display_string_length = sizeof(NO_VALUE_PLAINTEXT)-1;
-				}	
+				}
 			}
 		} else if (ini_entry->value && ini_entry->value[0]) {
 			display_string = ini_entry->value;
@@ -366,7 +366,7 @@ static void zend_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 			} else {
 				display_string = NO_VALUE_PLAINTEXT;
 				display_string_length = sizeof(NO_VALUE_PLAINTEXT)-1;
-			}	
+			}
 		}
 		ZEND_WRITE(display_string, display_string_length);
 	}
@@ -401,7 +401,7 @@ ZEND_INI_DISP(zend_ini_boolean_displayer_cb)
 	else {
 		value = atoi(tmp_value);
 	}
-	
+
 	if (value) {
 		ZEND_PUTS("On");
 	} else {
@@ -426,13 +426,13 @@ ZEND_INI_DISP(zend_ini_color_displayer_cb)
 			zend_printf("<font style=\"color: %s\">%s</font>", value, value);
 		} else {
 			ZEND_PUTS(value);
-		}   
+		}
 	} else {
 		if (zend_uv.html_errors) {
 			ZEND_PUTS(NO_VALUE_HTML);
 		} else {
 			ZEND_PUTS(NO_VALUE_PLAINTEXT);
-		}	
+		}
 	}
 }
 
@@ -476,13 +476,13 @@ ZEND_API ZEND_INI_MH(OnUpdateBool)
 
 	if (new_value_length==2 && strcasecmp("on", new_value)==0) {
 		*p = (zend_bool) 1;
-	} 
+	}
 	else if (new_value_length==3 && strcasecmp("yes", new_value)==0) {
 		*p = (zend_bool) 1;
-	} 
+	}
 	else if (new_value_length==4 && strcasecmp("true", new_value)==0) {
 		*p = (zend_bool) 1;
-	} 
+	}
 	else {
 		*p = (zend_bool) atoi(new_value);
 	}

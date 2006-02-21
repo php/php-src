@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2006 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -135,7 +135,7 @@ ZEND_API int zend_cleanup_function_data(zend_function *function TSRMLS_DC)
 {
 	if (function->type == ZEND_USER_FUNCTION) {
 		zend_cleanup_op_array_data((zend_op_array *) function);
-	}	
+	}
 	return 0;
 }
 
@@ -162,7 +162,7 @@ ZEND_API int zend_cleanup_class_data(zend_class_entry **pce TSRMLS_DC)
 ZEND_API void destroy_zend_class(zend_class_entry **pce)
 {
 	zend_class_entry *ce = *pce;
-	
+
 	if (--ce->refcount > 0) {
 		return;
 	}
@@ -296,9 +296,9 @@ zend_op *get_next_op(zend_op_array *op_array TSRMLS_DC)
 		op_array->size *= 4;
 		op_array_alloc_ops(op_array);
 	}
-	
+
 	next_op = &(op_array->opcodes[next_op_num]);
-	
+
 	init_op(next_op TSRMLS_CC);
 
 	return next_op;
@@ -388,7 +388,7 @@ int pass_two(zend_op_array *op_array TSRMLS_DC)
 		ZEND_VM_SET_OPCODE_HANDLER(opline);
 		opline++;
 	}
-	
+
 	op_array->done_pass_two = 1;
 	return 0;
 }
