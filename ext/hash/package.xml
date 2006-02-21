@@ -26,6 +26,7 @@
     <date>2006-02-00</date>
     <notes>
 Fixed tiger algorithm generating wrong results on big endian platforms.
+Add md2 support
     </notes>
    </release>
 
@@ -82,6 +83,7 @@ Supported Algorithms:
    <file role="doc" name="README"/>
    <dir role="test" name="tests">
     <file role="test" name="hmac-md5.phpt"/>
+    <file role="test" name="md2.phpt"/>
     <file role="test" name="md4.phpt"/>
     <file role="test" name="md5.phpt"/>
     <file role="test" name="sha1.phpt"/>

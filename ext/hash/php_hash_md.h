@@ -85,4 +85,16 @@ typedef struct {
 PHP_HASH_API void PHP_MD4Update(PHP_MD4_CTX *context, const unsigned char *, unsigned int);
 PHP_HASH_API void PHP_MD4Final(unsigned char[16], PHP_MD4_CTX *);
 
+/* MD2 context */
+typedef struct {
+	unsigned char state[48];
+	unsigned char checksum[16];
+	unsigned char buffer[16];
+	char in_buffer;
+} PHP_MD2_CTX;
+
+PHP_HASH_API void PHP_MD2Init(PHP_MD2_CTX *context);
+PHP_HASH_API void PHP_MD2Update(PHP_MD2_CTX *context, const unsigned char *, unsigned int);
+PHP_HASH_API void PHP_MD2Final(unsigned char[16], PHP_MD2_CTX *);
+
 #endif
