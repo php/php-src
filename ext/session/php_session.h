@@ -211,7 +211,7 @@ PHPAPI void php_session_start(TSRMLS_D);
 
 
 #define PS_ENCODE_VARS 											\
-	char *key;													\
+	zstr key;													\
 	uint key_length;											\
 	ulong num_key;												\
 	zval **struc;
@@ -223,7 +223,7 @@ PHPAPI void php_session_start(TSRMLS_D);
 				zend_hash_get_current_key_ex(_ht, &key, &key_length, &num_key, 0, NULL) == HASH_KEY_IS_STRING; \
 				zend_hash_move_forward(_ht)) {				\
 				key_length--;										\
-			if (php_get_session_var(key, key_length, &struc TSRMLS_CC) == SUCCESS) { \
+			if (php_get_session_var(key.s, key_length, &struc TSRMLS_CC) == SUCCESS) { \
 				code;		 										\
 			} 														\
 		}															\

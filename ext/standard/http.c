@@ -31,7 +31,8 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				const char *key_suffix, int key_suffix_len,
 				zval *type, char *arg_sep TSRMLS_DC)
 {
-	char *key = NULL, *ekey, *newprefix, *p;
+	zstr key;
+	char *ekey, *newprefix, *p;
 	int arg_sep_len, key_len, ekey_len, key_type, newprefix_len;
 	ulong idx;
 	zval **zdata = NULL, *copyzval;
@@ -57,22 +58,23 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 		(key_type = zend_hash_get_current_key_ex(ht, &key, &key_len, &idx, 0, NULL)) != HASH_KEY_NON_EXISTANT;
 		zend_hash_move_forward(ht)
 	) {
-		if (key_type == HASH_KEY_IS_STRING && key_len && key[key_len-1] == '\0') {
+		if (key_type == HASH_KEY_IS_STRING && key_len && key.s[key_len-1] == '\0') {
 			/* We don't want that trailing NULL */
 			key_len -= 1;
 		}
 
 		/* handling for private & protected object properties */
-		if (key && *key == '\0' && type != NULL) {
-			char *tmp;
+		/* FIXME: Unicode support??? */
+		if (key.s && key.s[0] == '\0' && type != NULL) {
+			zstr tmp;
 
 			zend_object *zobj = zend_objects_get_address(type TSRMLS_CC);
 			if (zend_check_property_access(zobj, IS_STRING, key TSRMLS_CC) != SUCCESS) {
 				/* private or protected property access outside of the class */
 				continue;
 			}
-			zend_unmangle_property_name(key, &tmp, &key);
-			key_len = strlen(key);		
+			zend_u_unmangle_property_name(key_type, key, &tmp, &key);
+			key_len = strlen(key.s);		
 		}
 
 		if (zend_hash_get_current_data_ex(ht, (void **)&zdata, NULL) == FAILURE || !zdata || !(*zdata)) {
@@ -81,7 +83,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 		}
 		if (Z_TYPE_PP(zdata) == IS_ARRAY || Z_TYPE_PP(zdata) == IS_OBJECT) {
 			if (key_type == HASH_KEY_IS_STRING) {
-				ekey = php_url_encode(key, key_len, &ekey_len);
+				ekey = php_url_encode(key.s, key_len, &ekey_len);
 				newprefix_len = key_suffix_len + ekey_len + key_prefix_len + 1;
 				newprefix = emalloc(newprefix_len + 1);
 				p = newprefix;
@@ -142,7 +144,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 			/* Simple key=value */
 			smart_str_appendl(formstr, key_prefix, key_prefix_len);
 			if (key_type == HASH_KEY_IS_STRING) {
-				ekey = php_url_encode(key, key_len, &ekey_len);
+				ekey = php_url_encode(key.s, key_len, &ekey_len);
 				smart_str_appendl(formstr, ekey, ekey_len);
 				efree(ekey);
 			} else {

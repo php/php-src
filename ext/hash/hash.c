@@ -472,7 +472,7 @@ Return a list of registered hashing algorithms */
 PHP_FUNCTION(hash_algos)
 {
 	HashPosition pos;
-	char *str;
+	zstr str;
 	int str_len;
 	long idx, type;
 
@@ -480,7 +480,7 @@ PHP_FUNCTION(hash_algos)
 	for(zend_hash_internal_pointer_reset_ex(&php_hash_hashtable, &pos);
 		(type = zend_hash_get_current_key_ex(&php_hash_hashtable, &str, &str_len, &idx, 0, &pos)) != HASH_KEY_NON_EXISTANT;
 		zend_hash_move_forward_ex(&php_hash_hashtable, &pos)) {
-		add_next_index_stringl(return_value, str, str_len-1, 1);
+		add_next_index_stringl(return_value, str.s, str_len-1, 1);
 	}
 }
 /* }}} */
@@ -577,13 +577,14 @@ PHP_MINFO_FUNCTION(hash)
 {
 	HashPosition pos;
 	char buffer[2048];
-	char *s = buffer, *e = s + sizeof(buffer), *str;
+	char *s = buffer, *e = s + sizeof(buffer);
+	zstr str;
 	long idx, type;
 
 	for(zend_hash_internal_pointer_reset_ex(&php_hash_hashtable, &pos);
 		(type = zend_hash_get_current_key_ex(&php_hash_hashtable, &str, NULL, &idx, 0, &pos)) != HASH_KEY_NON_EXISTANT;
 		zend_hash_move_forward_ex(&php_hash_hashtable, &pos)) {
-		s += snprintf(s, e - s, "%s ", str);
+		s += snprintf(s, e - s, "%s ", str.s);
 	}
 	*s = 0;
 

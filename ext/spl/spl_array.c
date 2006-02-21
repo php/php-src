@@ -331,7 +331,8 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 	switch(Z_TYPE_P(offset)) {
 	case IS_STRING:
 	case IS_UNICODE:
-		if (*(char*)Z_UNIVAL_P(offset) == '\0') {
+		/* FIXME: Unicode support??? */
+		if (Z_STRVAL_P(offset)[0] == '\0') {
 			zend_throw_exception(spl_ce_InvalidArgumentException, "An offset must not begin with \\0 or be empty", 0 TSRMLS_CC);
 			return;
 		}
@@ -621,7 +622,7 @@ static void spl_array_unset_property(zval *object, zval *member TSRMLS_DC) /* {{
 
 static int spl_array_skip_protected(spl_array_object *intern TSRMLS_DC) /* {{{ */
 {
-	char *string_key;
+	zstr string_key;
 	uint string_length;
 	ulong num_key;
 	HashTable *aht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
@@ -630,8 +631,8 @@ static int spl_array_skip_protected(spl_array_object *intern TSRMLS_DC) /* {{{ *
 		do {
 			if (zend_hash_get_current_key_ex(aht, &string_key, &string_length, &num_key, 0, &intern->pos) == (UG(unicode)?HASH_KEY_IS_UNICODE:HASH_KEY_IS_STRING)) {
 				if (!string_length || 
-				    ((UG(unicode) && ((UChar*)string_key)[0]) ||
-				     (!UG(unicode) && string_key[0]))) {
+				    ((UG(unicode) && string_key.u[0]) ||
+				     (!UG(unicode) && string_key.s[0]))) {
 					return SUCCESS;
 				}
 			} else {
@@ -721,7 +722,7 @@ static void spl_array_it_get_current_data(zend_object_iterator *iter, zval ***da
 }
 /* }}} */
 
-static int spl_array_it_get_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC) /* {{{ */
+static int spl_array_it_get_current_key(zend_object_iterator *iter, zstr *str_key, uint *str_key_len, ulong *int_key TSRMLS_DC) /* {{{ */
 {
 	spl_array_it       *iterator = (spl_array_it *)iter;
 	spl_array_object   *object   = iterator->object;
@@ -1208,7 +1209,7 @@ SPL_METHOD(Array, key)
 void spl_array_iterator_key(zval *object, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
-	char *string_key;
+	zstr string_key;
 	uint string_length;
 	ulong num_key;
 	HashTable *aht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
@@ -1225,10 +1226,10 @@ void spl_array_iterator_key(zval *object, zval *return_value TSRMLS_DC) /* {{{ *
 
 	switch (zend_hash_get_current_key_ex(aht, &string_key, &string_length, &num_key, 1, &intern->pos)) {
 		case HASH_KEY_IS_STRING:
-			RETVAL_STRINGL(string_key, string_length - 1, 0);
+			RETVAL_STRINGL(string_key.s, string_length - 1, 0);
 			break;
 		case HASH_KEY_IS_UNICODE:
-			RETVAL_UNICODEL((UChar*)string_key, string_length - 1, 0);
+			RETVAL_UNICODEL(string_key.u, string_length - 1, 0);
 			break;
 		case HASH_KEY_IS_LONG:
 			RETVAL_LONG(num_key);

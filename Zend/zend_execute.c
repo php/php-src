@@ -474,7 +474,8 @@ static inline void zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zv
 {
 	zend_arg_info *cur_arg_info;
 	zend_execute_data *ptr = EG(current_execute_data)->prev_execute_data;
-	char *fclass, *fsep, *fname;
+	char *fsep;
+	zstr fclass, fname;
 
 	if (!zf->common.arg_info
 		|| arg_num>zf->common.num_args) {
@@ -483,10 +484,10 @@ static inline void zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zv
 
 	cur_arg_info = &zf->common.arg_info[arg_num-1];
 	fname = zf->common.function_name;
-	fsep = zf->common.scope ? "::" : (char*)EMPTY_STR;
-	fclass = zf->common.scope ? zf->common.scope->name : (char*)EMPTY_STR;
+	fsep = zf->common.scope ? "::" : "";
+	fclass = zf->common.scope ? zf->common.scope->name : (zstr)EMPTY_STR;
 
-	if (cur_arg_info->class_name) {
+	if (cur_arg_info->class_name.v) {
 		if (!arg) {
 			if (ptr && ptr->op_array) {
 				zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %v%s%v() must be an object of class %v, called in %s on line %d and defined", arg_num, fclass, fsep, fname, cur_arg_info->class_name, ptr->op_array->filename, ptr->opline->lineno);
@@ -599,7 +600,7 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 	/* separate our value if necessary */
 	if (EG(ze1_compatibility_mode) && Z_TYPE_P(value) == IS_OBJECT) {
 		zval *orig_value = value;
-		char *class_name;
+		zstr class_name;
 		zend_uint class_name_len;
 		int dup;
 
@@ -609,12 +610,12 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 		value->refcount = 0;
 		dup = zend_get_object_classname(orig_value, &class_name, &class_name_len TSRMLS_CC);
 		if (Z_OBJ_HANDLER_P(value, clone_obj) == NULL) {
-			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v",  class_name);
+			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v",  class_name.v);
 		}
-		zend_error(E_STRICT, "Implicit cloning object of class '%v' because of 'zend.ze1_compatibility_mode'", class_name);
+		zend_error(E_STRICT, "Implicit cloning object of class '%v' because of 'zend.ze1_compatibility_mode'", class_name.v);
 		Z_OBJVAL_P(value) = Z_OBJ_HANDLER_P(orig_value, clone_obj)(orig_value TSRMLS_CC);
 		if (!dup) {
-			efree(class_name);
+			efree(class_name.v);
 		}
 	} else if (value_op->op_type == IS_TMP_VAR) {
 		zval *orig_value = value;
@@ -812,14 +813,14 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 	}
 
 	if (EG(ze1_compatibility_mode) && Z_TYPE_P(value) == IS_OBJECT) {
-		char *class_name;
+		zstr class_name;
 		zend_uint class_name_len;
 		int dup;
 
 		dup = zend_get_object_classname(value, &class_name, &class_name_len TSRMLS_CC);
 
 		if (Z_OBJ_HANDLER_P(value, clone_obj) == NULL) {
-			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v",  class_name);
+			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v",  class_name.v);
 		} else if (PZVAL_IS_REF(variable_ptr)) {
 			if (variable_ptr != value) {
 				zend_uint refcount = variable_ptr->refcount;
@@ -832,7 +833,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 				*variable_ptr = *value;
 				variable_ptr->refcount = refcount;
 				variable_ptr->is_ref = 1;
-				zend_error(E_STRICT, "Implicit cloning object of class '%v' because of 'zend.ze1_compatibility_mode'", class_name);
+				zend_error(E_STRICT, "Implicit cloning object of class '%v' because of 'zend.ze1_compatibility_mode'", class_name.v);
 				Z_OBJVAL_P(variable_ptr) = Z_OBJ_HANDLER_P(value, clone_obj)(value TSRMLS_CC);
 				if (type != IS_TMP_VAR) {
 					value->refcount--;
@@ -851,13 +852,13 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 				}
 				*variable_ptr = *value;
 				INIT_PZVAL(variable_ptr);
-				zend_error(E_STRICT, "Implicit cloning object of class '%v' because of 'zend.ze1_compatibility_mode'", class_name);
+				zend_error(E_STRICT, "Implicit cloning object of class '%v' because of 'zend.ze1_compatibility_mode'", class_name.v);
 				Z_OBJVAL_P(variable_ptr) = Z_OBJ_HANDLER_P(value, clone_obj)(value TSRMLS_CC);
 				zval_ptr_dtor(&value);
 			}
 		}
 		if (!dup) {
-			efree(class_name);
+			efree(class_name.v);
 		}
 	} else if (PZVAL_IS_REF(variable_ptr)) {
 		if (variable_ptr!=value) {
@@ -952,25 +953,25 @@ static inline void zend_receive(zval **variable_ptr_ptr, zval *value TSRMLS_DC)
 	zval *variable_ptr = *variable_ptr_ptr;
 
 	if (EG(ze1_compatibility_mode) && Z_TYPE_P(value) == IS_OBJECT) {
-		char *class_name;
+		zstr class_name;
 		zend_uint class_name_len;
 		int dup;
 
 		dup = zend_get_object_classname(value, &class_name, &class_name_len TSRMLS_CC);
 
  		if (Z_OBJ_HANDLER_P(value, clone_obj) == NULL) {
-			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v",  class_name);
+			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v",  class_name.v);
 		} else {
 			variable_ptr->refcount--;
 			ALLOC_ZVAL(variable_ptr);
 			*variable_ptr_ptr = variable_ptr;
 			*variable_ptr = *value;
 			INIT_PZVAL(variable_ptr);
-			zend_error(E_STRICT, "Implicit cloning object of class '%v' because of 'zend.ze1_compatibility_mode'", class_name);
+			zend_error(E_STRICT, "Implicit cloning object of class '%v' because of 'zend.ze1_compatibility_mode'", class_name.v);
 			Z_OBJVAL_P(variable_ptr) = Z_OBJ_HANDLER_P(value, clone_obj)(value TSRMLS_CC);
 		}
 		if (!dup) {
-			efree(class_name);
+			efree(class_name.v);
 		}
 	} else {
 		variable_ptr->refcount--;
@@ -1029,7 +1030,7 @@ static inline HashTable *zend_get_target_symbol_table(zend_op *opline, temp_vari
 static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, zval *dim, int type TSRMLS_DC)
 {
 	zval **retval;
-	char *offset_key;
+	zstr offset_key;
 	int offset_key_length;
 	zend_uchar ztype = Z_TYPE_P(dim);
 	int free_offset = 0;
@@ -1037,7 +1038,7 @@ static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, zval *dim
 	switch (ztype) {
 		case IS_NULL:
 			ztype = IS_STRING;
-			offset_key = "";
+			offset_key.s = "";
 			offset_key_length = 1;
 			goto fetch_string_dim;
 		case IS_STRING:
@@ -1050,12 +1051,12 @@ fetch_string_dim:
 			if (UG(unicode) && ht == &EG(symbol_table) && ztype == IS_UNICODE) {
 				/* Identifier normalization */
 				UChar *norm;
-				int32_t norm_len;
+				int norm_len;
 
-				if (!zend_normalize_identifier(&norm, &norm_len, (UChar*)offset_key, offset_key_length, 0)) {
+				if (!zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_key_length, 0)) {
 					zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
-				} else if ((char*)norm != offset_key) {
-					offset_key = (char*)norm;
+				} else if (norm != offset_key.u) {
+					offset_key.u = norm;
 					offset_key_length = norm_len;
 					free_offset = 1;
 				}
@@ -1082,7 +1083,7 @@ fetch_string_dim:
 				}
 			}
 			if (free_offset) {
-				efree(offset_key);
+				efree(offset_key.v);
 			}
 			break;
 		case IS_RESOURCE:

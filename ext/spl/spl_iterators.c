@@ -161,7 +161,7 @@ static void spl_recursive_it_get_current_data(zend_object_iterator *iter, zval *
 	sub_iter->funcs->get_current_data(sub_iter, data TSRMLS_CC);
 }
 
-static int spl_recursive_it_get_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
+static int spl_recursive_it_get_current_key(zend_object_iterator *iter, zstr *str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
 {
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)iter->data;
 	zend_object_iterator      *sub_iter = object->iterators[object->level].iterator;
@@ -473,7 +473,7 @@ SPL_METHOD(RecursiveIteratorIterator, key)
 	zend_object_iterator      *iterator = object->iterators[object->level].iterator;
 
 	if (iterator->funcs->get_current_key) {
-		char *str_key;
+		zstr str_key;
 		uint str_key_len;
 		ulong int_key;
 		
@@ -482,10 +482,10 @@ SPL_METHOD(RecursiveIteratorIterator, key)
 				RETURN_LONG(int_key);
 				break;
 			case HASH_KEY_IS_STRING:
-				RETURN_STRINGL(str_key, str_key_len-1, 0);
+				RETURN_STRINGL(str_key.s, str_key_len-1, 0);
 				break;
 			case HASH_KEY_IS_UNICODE:
-				RETURN_UNICODEL((void*)str_key, str_key_len-1, 0);
+				RETURN_UNICODEL(str_key.u, str_key_len-1, 0);
 				break;
 			default:
 				RETURN_NULL();
@@ -652,7 +652,7 @@ SPL_METHOD(RecursiveIteratorIterator, getMaxDepth)
 	}
 } /* }}} */
 
-static union _zend_function *spl_recursive_it_get_method(zval **object_ptr, char *method, int method_len TSRMLS_DC)
+static union _zend_function *spl_recursive_it_get_method(zval **object_ptr, zstr method, int method_len TSRMLS_DC)
 {
 	union _zend_function    *function_handler;
 	spl_recursive_it_object *object = (spl_recursive_it_object*)zend_object_store_get_object(*object_ptr TSRMLS_CC);
@@ -661,7 +661,7 @@ static union _zend_function *spl_recursive_it_get_method(zval **object_ptr, char
 	
 	function_handler = std_object_handlers.get_method(object_ptr, method, method_len TSRMLS_CC);
 	if (!function_handler) {
-		if (zend_hash_find(&Z_OBJCE_P(zobj)->function_table, method, method_len+1, (void **) &function_handler) == FAILURE) {
+		if (zend_u_hash_find(&Z_OBJCE_P(zobj)->function_table, UG(unicode)?IS_UNICODE:IS_STRING, method, method_len+1, (void **) &function_handler) == FAILURE) {
 			if (Z_OBJ_HT_P(zobj)->get_method) {
 				*object_ptr = zobj;
 				function_handler = Z_OBJ_HT_P(*object_ptr)->get_method(object_ptr, method, method_len TSRMLS_CC);
@@ -769,7 +769,7 @@ static int spl_dual_it_gets_implemented(zend_class_entry *interface, zend_class_
 }
 #endif
 
-static union _zend_function *spl_dual_it_get_method(zval **object_ptr, char *method, int method_len TSRMLS_DC)
+static union _zend_function *spl_dual_it_get_method(zval **object_ptr, zstr method, int method_len TSRMLS_DC)
 {
 	union _zend_function *function_handler;
 	spl_dual_it_object   *intern;
@@ -778,7 +778,7 @@ static union _zend_function *spl_dual_it_get_method(zval **object_ptr, char *met
 
 	function_handler = std_object_handlers.get_method(object_ptr, method, method_len TSRMLS_CC);
 	if (!function_handler) {
-		if (zend_hash_find(&intern->inner.ce->function_table, method, method_len+1, (void **) &function_handler) == FAILURE) {
+		if (zend_u_hash_find(&intern->inner.ce->function_table, UG(unicode)?IS_UNICODE:IS_STRING, method, method_len+1, (void **) &function_handler) == FAILURE) {
 			if (Z_OBJ_HT_P(intern->inner.zobject)->get_method) {
 				*object_ptr = intern->inner.zobject;
 				function_handler = Z_OBJ_HT_P(*object_ptr)->get_method(object_ptr, method, method_len TSRMLS_CC);
@@ -1007,9 +1007,9 @@ static inline void spl_dual_it_free(spl_dual_it_object *intern TSRMLS_DC)
 		zval_ptr_dtor(&intern->current.data);
 		intern->current.data = NULL;
 	}
-	if (intern->current.str_key) {
-		efree(intern->current.str_key);
-		intern->current.str_key = NULL;
+	if (intern->current.str_key.v) {
+		efree(intern->current.str_key.v);
+		intern->current.str_key.v = NULL;
 	}
 	if (intern->dit_type == DIT_CachingIterator || intern->dit_type == DIT_RecursiveCachingIterator) {
 		if (intern->u.caching.zstr) {
@@ -1112,9 +1112,9 @@ SPL_METHOD(dual_it, key)
 
 	if (intern->current.data) {
 		if (intern->current.key_type == HASH_KEY_IS_STRING) {
-			RETURN_STRINGL(intern->current.str_key, intern->current.str_key_len-1, 1);
+			RETURN_STRINGL(intern->current.str_key.s, intern->current.str_key_len-1, 1);
 		} else if (intern->current.key_type == HASH_KEY_IS_UNICODE) {
-			RETURN_UNICODEL((UChar *)intern->current.str_key, intern->current.str_key_len-1, 1);
+			RETURN_UNICODEL(intern->current.str_key.u, intern->current.str_key_len-1, 1);
 		} else {
 			RETURN_LONG(intern->current.int_key);
 		}
@@ -1303,7 +1303,8 @@ SPL_METHOD(RegExIterator, accept)
 			subject = &tmp[0];
 		} else {
 			subject_len = intern->current.str_key_len;
-			subject = intern->current.str_key;
+			/* FIXME: Unicode support??? */
+			subject = intern->current.str_key.s;
 		}
 	} else {
 		zend_make_printable_zval(intern->current.data, &subject_copy, &use_copy);
@@ -1752,9 +1753,9 @@ SPL_METHOD(CachingIterator, __toString)
 	}
 	if (intern->u.caching.flags & CIT_TOSTRING_USE_KEY) {
 		if (intern->current.key_type == HASH_KEY_IS_STRING) {
-			RETURN_STRINGL(intern->current.str_key, intern->current.str_key_len, 1);
+			RETURN_STRINGL(intern->current.str_key.s, intern->current.str_key_len, 1);
 		} else if (intern->current.key_type == HASH_KEY_IS_UNICODE) {
-			RETURN_UNICODEL((void*)intern->current.str_key, intern->current.str_key_len, 1);
+			RETURN_UNICODEL(intern->current.str_key.u, intern->current.str_key_len, 1);
 		} else {
 			RETVAL_LONG(intern->current.int_key);
 			convert_to_string(return_value);
@@ -1780,7 +1781,7 @@ SPL_METHOD(CachingIterator, __toString)
 SPL_METHOD(CachingIterator, offsetSet)
 {
 	spl_dual_it_object   *intern;
-	void *arKey;
+	zstr arKey;
 	uint nKeyLength;
 	zend_uchar type;
 	zval *value;
@@ -1805,7 +1806,7 @@ SPL_METHOD(CachingIterator, offsetSet)
 SPL_METHOD(CachingIterator, offsetGet)
 {
 	spl_dual_it_object   *intern;
-	void *arKey;
+	zstr arKey;
 	uint nKeyLength;
 	zend_uchar type;
 	zval **value;
@@ -1834,7 +1835,7 @@ SPL_METHOD(CachingIterator, offsetGet)
 SPL_METHOD(CachingIterator, offsetUnset)
 {
 	spl_dual_it_object   *intern;
-	void *arKey;
+	zstr arKey;
 	uint nKeyLength;
 	zend_uchar type;
 
@@ -1857,7 +1858,7 @@ SPL_METHOD(CachingIterator, offsetUnset)
 SPL_METHOD(CachingIterator, offsetExists)
 {
 	spl_dual_it_object   *intern;
-	void *arKey;
+	zstr arKey;
 	uint nKeyLength;
 	zend_uchar type;
 	
@@ -2060,7 +2061,7 @@ SPL_METHOD(NoRewindIterator, key)
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (intern->inner.iterator->funcs->get_current_key) {
-		char *str_key;
+		zstr str_key;
 		uint str_key_len;
 		ulong int_key;
 		switch (intern->inner.iterator->funcs->get_current_key(intern->inner.iterator, &str_key, &str_key_len, &int_key TSRMLS_CC)) {
@@ -2068,10 +2069,10 @@ SPL_METHOD(NoRewindIterator, key)
 				RETURN_LONG(int_key);
 				break;	
 			case HASH_KEY_IS_STRING:
-				RETURN_STRINGL(str_key, str_key_len-1, 0);
+				RETURN_STRINGL(str_key.s, str_key_len-1, 0);
 				break;
 			case HASH_KEY_IS_UNICODE:
-				RETURN_UNICODEL((void*)str_key, str_key_len-1, 0);
+				RETURN_UNICODEL(str_key.u, str_key_len-1, 0);
 				break;
 			default:
 				RETURN_NULL();
@@ -2357,7 +2358,7 @@ PHP_FUNCTION(iterator_to_array)
 {
 	zval                   *obj, **data;
 	zend_object_iterator   *iter;
-	char                   *str_key;
+	zstr                    str_key;
 	uint                    str_key_len;
 	ulong                   int_key;
 	int                     key_type;
@@ -2380,12 +2381,12 @@ PHP_FUNCTION(iterator_to_array)
 			key_type = iter->funcs->get_current_key(iter, &str_key, &str_key_len, &int_key TSRMLS_CC);
 			switch(key_type) {
 				case HASH_KEY_IS_STRING:
-					add_assoc_zval_ex(return_value, str_key, str_key_len, *data);
-					efree(str_key);
+					add_assoc_zval_ex(return_value, str_key.s, str_key_len, *data);
+					efree(str_key.s);
 					break;
 				case HASH_KEY_IS_UNICODE:
 					add_u_assoc_zval_ex(return_value, IS_UNICODE, str_key, str_key_len, *data);
-					efree(str_key);
+					efree(str_key.u);
 					break;
 				case HASH_KEY_IS_LONG:
 					add_index_zval(return_value, int_key, *data);

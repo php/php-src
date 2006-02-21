@@ -226,7 +226,8 @@ static void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 				RETURN_TRUE;
 			}
 			ce = Z_OBJCE_PP(arg);
-			if (!strcmp(ce->name, INCOMPLETE_CLASS)) {
+			/* FIXME: Unicode support??? */
+			if (!strcmp(ce->name.s, INCOMPLETE_CLASS)) {
 				RETURN_FALSE;
 			}
 		}

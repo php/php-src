@@ -401,13 +401,13 @@ PS_SERIALIZER_ENCODE_FUNC(php_binary)
 	PS_ENCODE_LOOP(
 			if (key_length > PS_BIN_MAX) continue;
 			smart_str_appendc(&buf, (unsigned char) key_length);
-			smart_str_appendl(&buf, key, key_length);
+			smart_str_appendl(&buf, key.s, key_length);
 			
 			php_var_serialize(&buf, struc, &var_hash TSRMLS_CC);
 		} else {
 			if (key_length > PS_BIN_MAX) continue;
 			smart_str_appendc(&buf, (unsigned char) (key_length & PS_BIN_UNDEF));
-			smart_str_appendl(&buf, key, key_length);
+			smart_str_appendl(&buf, key.s, key_length);
 	);
 	
 	if (newlen) *newlen = buf.len;
@@ -465,8 +465,8 @@ PS_SERIALIZER_ENCODE_FUNC(php)
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 
 	PS_ENCODE_LOOP(
-			smart_str_appendl(&buf, key, (unsigned char) key_length);
-			if (memchr(key, PS_DELIMITER, key_length)) {
+			smart_str_appendl(&buf, key.s, (unsigned char) key_length);
+			if (memchr(key.s, PS_DELIMITER, key_length)) {
 				PHP_VAR_SERIALIZE_DESTROY(var_hash);
 				smart_str_free(&buf);				
 				return FAILURE;
@@ -476,7 +476,7 @@ PS_SERIALIZER_ENCODE_FUNC(php)
 			php_var_serialize(&buf, struc, &var_hash TSRMLS_CC);
 		} else {
 			smart_str_appendc(&buf, PS_UNDEF_MARKER);
-			smart_str_appendl(&buf, key, key_length);
+			smart_str_appendl(&buf, key.s, key_length);
 			smart_str_appendc(&buf, PS_DELIMITER);
 	);
 	
@@ -775,7 +775,7 @@ static void php_session_initialize(TSRMLS_D)
 
 static int migrate_global(HashTable *ht, HashPosition *pos TSRMLS_DC)
 {
-	char *str;
+	zstr str;
 	uint str_len;
 	ulong num_key;
 	int n;
@@ -786,10 +786,12 @@ static int migrate_global(HashTable *ht, HashPosition *pos TSRMLS_DC)
 
 	switch (n) {
 		case HASH_KEY_IS_STRING:
-			if (zend_hash_find(&EG(symbol_table), str, str_len, 
+		case HASH_KEY_IS_UNICODE:
+			if (zend_u_hash_find(&EG(symbol_table), n, str, str_len, 
 						(void **) &val) == SUCCESS 
 					&& val && Z_TYPE_PP(val) != IS_NULL) {
-				ZEND_SET_SYMBOL_WITH_LENGTH(ht, str, str_len, *val, 
+				/* FIXME: Unicode support??? */
+				ZEND_SET_SYMBOL_WITH_LENGTH(ht, str.s, str_len, *val, 
 						(*val)->refcount + 1 , 1);
 				ret = 1;
 			}
@@ -1725,7 +1727,7 @@ PHP_FUNCTION(session_unset)
 
 		if (PG(register_globals)) {
 			uint str_len;
-			char *str;
+			zstr str;
 			ulong num_key;
 			HashPosition pos;
 			
@@ -1733,7 +1735,7 @@ PHP_FUNCTION(session_unset)
 
 			while (zend_hash_get_current_key_ex(ht, &str, &str_len, &num_key, 
 						0, &pos) == HASH_KEY_IS_STRING) {
-				zend_delete_global_variable(str, str_len-1 TSRMLS_CC);
+				zend_delete_global_variable(str.s, str_len-1 TSRMLS_CC);
 				zend_hash_move_forward_ex(ht, &pos);
 			}
 		}

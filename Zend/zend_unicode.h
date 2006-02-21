@@ -42,7 +42,7 @@ void zend_set_converter_error_mode(UConverter *conv, uint8_t error_mode);
 
 /* API functions */
 
-ZEND_API void zend_convert_to_unicode(UConverter *conv, UChar **target, int32_t *target_len, const char *source, int32_t source_len, UErrorCode *status);
+ZEND_API void zend_convert_to_unicode(UConverter *conv, UChar **target, int *target_len, const char *source, int source_len, UErrorCode *status);
 ZEND_API void zend_convert_from_unicode(UConverter *conv, char **target, int32_t *target_len, const UChar *source, int32_t source_len, UErrorCode *status);
 ZEND_API void zend_convert_encodings(UConverter *target_conv, UConverter *source_conv, char **target, int32_t *target_len, const char *source, int32_t source_len, UErrorCode *status);
 ZEND_API int zval_string_to_unicode_ex(zval *string, UConverter *conv);
@@ -52,10 +52,10 @@ ZEND_API int zval_unicode_to_string(zval *string, UConverter *conv TSRMLS_DC);
 ZEND_API int zend_cmp_unicode_and_string(UChar *ustr, char* str, uint len);
 ZEND_API int zend_cmp_unicode_and_literal(UChar *ustr, int32_t ulen, char* str, int32_t slen);
 
-ZEND_API void zend_case_fold_string(UChar **dest, int32_t *dest_len, UChar *src, int32_t src_len, uint32_t options, UErrorCode *status);
+ZEND_API void zend_case_fold_string(UChar **dest, int *dest_len, UChar *src, int src_len, uint32_t options, UErrorCode *status);
 
 ZEND_API int zend_is_valid_identifier(UChar *ident, int32_t ident_len);
-ZEND_API int zend_normalize_identifier(UChar **dest, int32_t *dest_len, UChar *ident, int32_t ident_len, zend_bool fold_case);
+ZEND_API int zend_normalize_identifier(UChar **dest, int *dest_len, UChar *ident, int ident_len, zend_bool fold_case);
 
 /*
  * Function to get a codepoint at position n. Iterates over codepoints starting from the
@@ -94,7 +94,7 @@ static inline int zend_codepoint_to_uchar(UChar32 codepoint, UChar *buf)
 
 #define USTR_FREE(ustr) do { if (ustr) { efree(ustr); } } while (0);
 #define UBYTES(len) ((len) * sizeof(UChar))
-#define USTR_LEN(str) (UG(unicode)?u_strlen((UChar*)(str)):strlen((char*)(str)))
+#define USTR_LEN(str) (UG(unicode)?u_strlen((str).u):strlen((str).s))
 
 #define USTR_MAKE(cs) zend_ascii_to_unicode(cs, sizeof(cs) ZEND_FILE_LINE_CC)
 #define USTR_MAKE_REL(cs) zend_ascii_to_unicode(cs, sizeof(cs) ZEND_FILE_LINE_RELAY_CC)

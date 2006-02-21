@@ -946,11 +946,11 @@ void sqlite_iterator_get_current_data(zend_object_iterator *iter, zval ***data T
 
 }
 
-int sqlite_iterator_get_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
+int sqlite_iterator_get_current_key(zend_object_iterator *iter, zstr *str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
 {
 	struct php_sqlite_result *res = ((sqlite_object_iterator*)iter)->res;
 
-	*str_key = NULL;
+	str_key->v = NULL;
 	*str_key_len = 0;
 	*int_key = res ? res->curr_row : 0;
 	return HASH_KEY_IS_LONG;
@@ -2043,7 +2043,7 @@ PHP_FUNCTION(sqlite_fetch_object)
 	zend_bool decode_binary = 1;
 	struct php_sqlite_result *res;
 	zval *object = getThis();
-	char *class_name;
+	zstr class_name;
 	int class_name_len;
 	zend_class_entry *ce;
 	zval dataset;

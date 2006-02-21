@@ -1701,7 +1701,7 @@ SXE_METHOD(__construct)
 static void php_sxe_iterator_dtor(zend_object_iterator *iter TSRMLS_DC);
 static int php_sxe_iterator_valid(zend_object_iterator *iter TSRMLS_DC);
 static void php_sxe_iterator_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC);
-static int php_sxe_iterator_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC);
+static int php_sxe_iterator_current_key(zend_object_iterator *iter, zstr *str_key, uint *str_key_len, ulong *int_key TSRMLS_DC);
 static void php_sxe_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC);
 static void php_sxe_iterator_rewind(zend_object_iterator *iter TSRMLS_DC);
 
@@ -1812,7 +1812,7 @@ static void php_sxe_iterator_current_data(zend_object_iterator *iter, zval ***da
 	*data = &iterator->sxe->iter.data;
 }
 
-static int php_sxe_iterator_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
+static int php_sxe_iterator_current_key(zend_object_iterator *iter, zstr *str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
 {
 	zval *curobj;
 	xmlNodePtr curnode = NULL;
@@ -1832,12 +1832,12 @@ static int php_sxe_iterator_current_key(zend_object_iterator *iter, char **str_k
 		int32_t u_len;
 
 		namelen = xmlStrlen(curnode->name);
-		zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), (UChar**)str_key, &u_len, (char*)curnode->name, namelen, &status);
+		zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &str_key->u, &u_len, (char*)curnode->name, namelen, &status);
 		*str_key_len = u_len + 1;
 		return HASH_KEY_IS_UNICODE;
 	} else {
 		namelen = xmlStrlen(curnode->name);
-		*str_key = estrndup(curnode->name, namelen);
+		str_key->s = estrndup(curnode->name, namelen);
 		*str_key_len = namelen + 1;
 		return HASH_KEY_IS_STRING;
 	}

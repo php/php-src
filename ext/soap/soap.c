@@ -509,7 +509,7 @@ PHP_MINIT_FUNCTION(soap)
 
 		fe.type = ZEND_INTERNAL_FUNCTION;
 		fe.handler = ZEND_FN(SoapClient___call);
-		fe.function_name = NULL;
+		fe.function_name.v = NULL;
 		fe.scope = NULL;
 		fe.fn_flags = 0;
 		fe.prototype = NULL;
@@ -1243,7 +1243,8 @@ PHP_METHOD(SoapServer, getFunctions)
 		zend_hash_internal_pointer_reset_ex(ft, &pos);
 		while (zend_hash_get_current_data_ex(ft, (void **)&f, &pos) != FAILURE) {
 			if ((service->type != SOAP_CLASS) || (f->common.fn_flags & ZEND_ACC_PUBLIC)) {
-				add_next_index_string(return_value, f->common.function_name, 1);
+				/* FIXME: Unicode support??? */
+				add_next_index_string(return_value, f->common.function_name.s, 1);
 			}
 			zend_hash_move_forward_ex(ft, &pos);
 		}
@@ -1301,7 +1302,7 @@ PHP_METHOD(SoapServer, addFunction)
 				}
 
 				MAKE_STD_ZVAL(function_copy);
-				ZVAL_STRING(function_copy, f->common.function_name, 1);
+				ZVAL_TEXT(function_copy, f->common.function_name, 1);
 				zend_hash_update(service->soap_functions.ft, key, key_len+1, &function_copy, sizeof(zval *), NULL);
 
 				efree(key);
@@ -1327,7 +1328,7 @@ PHP_METHOD(SoapServer, addFunction)
 		}
 
 		MAKE_STD_ZVAL(function_copy);
-		ZVAL_STRING(function_copy, f->common.function_name, 1);
+		ZVAL_TEXT(function_copy, f->common.function_name, 1);
 		zend_hash_update(service->soap_functions.ft, key, key_len+1, &function_copy, sizeof(zval *), NULL);
 		efree(key);
 	} else if (function_name->type == IS_LONG) {
@@ -1576,17 +1577,18 @@ PHP_METHOD(SoapServer, handle)
 #else
       {
 #endif
-				int class_name_len = strlen(service->soap_class.ce->name);
+				/* FIXME: Unicode support??? */
+				int class_name_len = strlen(service->soap_class.ce->name.s);
 				char *class_name = emalloc(class_name_len+1);
 
-				memcpy(class_name, service->soap_class.ce->name,class_name_len+1);
+				memcpy(class_name, service->soap_class.ce->name.s, class_name_len+1);
 				if (zend_hash_exists(&Z_OBJCE_P(tmp_soap)->function_table, php_strtolower(class_name, class_name_len), class_name_len+1)) {
 					zval c_ret, constructor;
 
 					INIT_ZVAL(c_ret);
 					INIT_ZVAL(constructor);
 
-					ZVAL_STRING(&constructor, service->soap_class.ce->name, 1);
+					ZVAL_TEXT(&constructor, service->soap_class.ce->name, 1);
 					if (call_user_function(NULL, &tmp_soap, &constructor, &c_ret, service->soap_class.argc, service->soap_class.argv TSRMLS_CC) == FAILURE) {
 						php_error_docref(NULL TSRMLS_CC, E_ERROR, "Error calling constructor");
 					}

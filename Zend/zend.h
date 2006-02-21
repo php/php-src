@@ -240,6 +240,12 @@ char *alloca ();
 #define LONG_MIN (- LONG_MAX - 1)
 #endif
 
+typedef union _zstr {
+	char  *s;
+	UChar *u;
+	void  *v;
+} zstr;
+
 #define EMPTY_STR ((UChar*)"\0\0")
 
 #undef SUCCESS
@@ -294,7 +300,7 @@ typedef union _zvalue_value {
 	} str;
 	struct {                    /* Unicode string type */
 		UChar *val;
-		int32_t len;
+		int len;
 	} ustr;
 	HashTable *ht;				/* hash table value */
 	zend_object_value obj;
@@ -326,7 +332,7 @@ typedef struct _zend_unserialize_data zend_unserialize_data;
 
 struct _zend_class_entry {
 	char type;
-	char *name;
+	zstr name;
 	zend_uint name_length;
 	struct _zend_class_entry *parent;
 	int refcount;
@@ -663,8 +669,8 @@ END_EXTERN_C()
 
 #define ZEND_U_EQUAL(type, ustr, ulen, str, slen) \
 	((type == IS_STRING)? \
-	  (!memcmp((ustr),(str),(slen))): \
-	  (!zend_cmp_unicode_and_literal(((UChar*)(ustr)), ulen, str, slen)))
+	  (!memcmp((ustr).s,(str),(slen))): \
+	  (!zend_cmp_unicode_and_literal((ustr).u, ulen, str, slen)))
 
 
 #endif /* ZEND_H */

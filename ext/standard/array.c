@@ -177,11 +177,11 @@ static int array_key_compare(const void *a, const void *b TSRMLS_DC)
 		Z_LVAL(first) = f->h;
 	} else if (f->key.type == IS_UNICODE) {
 		Z_TYPE(first) = IS_UNICODE;
-		Z_USTRVAL(first) = f->key.u.unicode;
+		Z_USTRVAL(first) = f->key.arKey.u;
 		Z_USTRLEN(first) = f->nKeyLength-1;
 	} else {
 		Z_TYPE(first) = f->key.type;
-		Z_STRVAL(first) = f->key.u.string;
+		Z_STRVAL(first) = f->key.arKey.s;
 		Z_STRLEN(first) = f->nKeyLength-1;
 	}
 
@@ -190,11 +190,11 @@ static int array_key_compare(const void *a, const void *b TSRMLS_DC)
 		Z_LVAL(second) = s->h;
 	} else if (s->key.type == IS_UNICODE) {
 		Z_TYPE(second) = IS_UNICODE;
-		Z_USTRVAL(second) = s->key.u.unicode;
+		Z_USTRVAL(second) = s->key.arKey.u;
 		Z_USTRLEN(second) = s->nKeyLength-1;
 	} else {
 		Z_TYPE(second) = s->key.type;
-		Z_STRVAL(second) = s->key.u.string;
+		Z_STRVAL(second) = s->key.arKey.s;
 		Z_STRLEN(second) = s->nKeyLength-1;
 	}
  
@@ -721,11 +721,11 @@ static int array_user_key_compare(const void *a, const void *b TSRMLS_DC)
 		Z_LVAL(key1) = f->h;
 		Z_TYPE(key1) = IS_LONG;
 	} else if (f->key.type == IS_UNICODE) {
-		Z_USTRVAL(key1) = eustrndup(f->key.u.unicode, f->nKeyLength-1);
+		Z_USTRVAL(key1) = eustrndup(f->key.arKey.u, f->nKeyLength-1);
 		Z_USTRLEN(key1) = f->nKeyLength-1;
 		Z_TYPE(key1) = IS_UNICODE;
 	} else {
-		Z_STRVAL(key1) = estrndup(f->key.u.string, f->nKeyLength-1);
+		Z_STRVAL(key1) = estrndup(f->key.arKey.s, f->nKeyLength-1);
 		Z_STRLEN(key1) = f->nKeyLength-1;
 		Z_TYPE(key1) = f->key.type;
 	}
@@ -733,11 +733,11 @@ static int array_user_key_compare(const void *a, const void *b TSRMLS_DC)
  		Z_LVAL(key2) = s->h;
  		Z_TYPE(key2) = IS_LONG;
 	} else if (s->key.type == IS_UNICODE) {
-		Z_USTRVAL(key2) = eustrndup(s->key.u.unicode, s->nKeyLength-1);
+		Z_USTRVAL(key2) = eustrndup(s->key.arKey.u, s->nKeyLength-1);
 		Z_USTRLEN(key2) = s->nKeyLength-1;
 		Z_TYPE(key2) = IS_UNICODE;
 	} else {
-		Z_STRVAL(key2) = estrndup(s->key.u.string, s->nKeyLength-1);
+		Z_STRVAL(key2) = estrndup(s->key.arKey.s, s->nKeyLength-1);
 		Z_STRLEN(key2) = s->nKeyLength-1;
 		Z_TYPE(key2) = s->key.type;
  	}
@@ -926,7 +926,7 @@ PHP_FUNCTION(current)
 PHP_FUNCTION(key)
 {
 	zval **array;
-	char *string_key;
+	zstr string_key;
 	uint string_length;
 	ulong num_key;
 	HashTable *target_hash;
@@ -941,10 +941,10 @@ PHP_FUNCTION(key)
 	}
 	switch (zend_hash_get_current_key_ex(target_hash, &string_key, &string_length, &num_key, 0, NULL)) {
 		case HASH_KEY_IS_STRING:
-			RETVAL_STRINGL(string_key, string_length - 1, 1);
+			RETVAL_STRINGL(string_key.s, string_length - 1, 1);
 			break;
 		case HASH_KEY_IS_UNICODE:
-			RETVAL_UNICODEL((UChar*)string_key, string_length - 1, 1);
+			RETVAL_UNICODEL(string_key.u, string_length - 1, 1);
 			break;
 		case HASH_KEY_IS_LONG:
 			RETVAL_LONG(num_key);
@@ -1059,7 +1059,7 @@ static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive
 	zval **args[3],			/* Arguments to userland function */
 		  *retval_ptr,			/* Return value - unused */
 		  *key=NULL;				/* Entry key */
-	char  *string_key;
+	zstr string_key;
 	uint   string_key_len;
 	ulong  num_key;
 	HashPosition pos;
@@ -1096,10 +1096,10 @@ static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive
 					Z_LVAL_P(key) = num_key;
 					break;
 				case HASH_KEY_IS_STRING:
-					ZVAL_STRINGL(key, string_key, string_key_len-1, 1);
+					ZVAL_STRINGL(key, string_key.s, string_key_len-1, 1);
 					break;
 				case HASH_KEY_IS_UNICODE:
-					ZVAL_UNICODEL(key, (UChar*)string_key, string_key_len-1, 1);
+					ZVAL_UNICODEL(key, string_key.u, string_key_len-1, 1);
 					break;
 			}
 
@@ -1234,7 +1234,7 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 	HashPosition pos;			/* hash iterator */
    	ulong num_key;
 	uint str_key_len;
-   	char *string_key;
+	zstr string_key;
 	int (*is_equal_func)(zval *, zval *, zval * TSRMLS_DC) = is_equal_function;
 
 	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 3 ||
@@ -1266,10 +1266,10 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 				/* Return current key */
 				switch (zend_hash_get_current_key_ex(target_hash, &string_key, &str_key_len, &num_key, 0, &pos)) {
 					case HASH_KEY_IS_STRING:
-						RETURN_STRINGL(string_key, str_key_len-1, 1);
+						RETURN_STRINGL(string_key.s, str_key_len-1, 1);
 						break;
 					case HASH_KEY_IS_UNICODE:
-						RETURN_UNICODEL((UChar*)string_key, str_key_len-1, 1);
+						RETURN_UNICODEL(string_key.u, str_key_len-1, 1);
 						break;
 					case HASH_KEY_IS_LONG:
 						RETURN_LONG(num_key);
@@ -1332,7 +1332,7 @@ PHP_FUNCTION(extract)
 {
 	zval **var_array, **z_extract_type, **prefix;
 	zval **entry, *data;
-	void *var_name;
+	zstr var_name;
 	ulong num_key;
 	uint var_name_len;
 	int var_exists, extract_type, key_type, count = 0;
@@ -1393,7 +1393,7 @@ PHP_FUNCTION(extract)
 
 		ZVAL_NULL(&final_name);
 
-		key_type = zend_hash_get_current_key_ex(Z_ARRVAL_PP(var_array), (char **)&var_name, &var_name_len, &num_key, 0, &pos);
+		key_type = zend_hash_get_current_key_ex(Z_ARRVAL_PP(var_array), &var_name, &var_name_len, &num_key, 0, &pos);
 		var_exists = 0;
 
 		if (key_type == HASH_KEY_IS_STRING ||
@@ -1438,7 +1438,8 @@ PHP_FUNCTION(extract)
 				/* break omitted intentionally */
 
 			case EXTR_OVERWRITE:
-				if (var_exists && !strcmp(var_name, "GLOBALS")) {
+				/* FIXME: Unicode support??? */
+				if (var_exists && !strcmp(var_name.s, "GLOBALS")) {
 					break;
 				}
 			
@@ -1453,13 +1454,13 @@ PHP_FUNCTION(extract)
 						Z_USTRVAL(final_name) = eumalloc(Z_USTRLEN(final_name)+1);
 						memcpy(Z_USTRVAL(final_name), Z_USTRVAL_PP(prefix), UBYTES(Z_USTRLEN_PP(prefix)));
 						Z_USTRVAL(final_name)[Z_USTRLEN_PP(prefix)] = '_';
-						memcpy(Z_USTRVAL(final_name)+Z_USTRLEN_PP(prefix)+1, var_name, UBYTES(var_name_len+1));
+						memcpy(Z_USTRVAL(final_name)+Z_USTRLEN_PP(prefix)+1, var_name.u, UBYTES(var_name_len+1));
 					} else {
 						Z_TYPE(final_name) = IS_STRING;
 						Z_STRVAL(final_name) = emalloc(Z_STRLEN(final_name)+1);
 						memcpy(Z_STRVAL(final_name), Z_STRVAL_PP(prefix), Z_STRLEN_PP(prefix));
 						Z_STRVAL(final_name)[Z_STRLEN_PP(prefix)] = '_';
-						memcpy(Z_STRVAL(final_name)+Z_STRLEN_PP(prefix)+1, var_name, var_name_len+1);
+						memcpy(Z_STRVAL(final_name)+Z_STRLEN_PP(prefix)+1, var_name.s, var_name_len+1);
 					}
 				}
 				break;
@@ -1478,33 +1479,34 @@ PHP_FUNCTION(extract)
 						Z_USTRVAL(final_name) = eumalloc(Z_USTRLEN(final_name)+1);
 						memcpy(Z_USTRVAL(final_name), Z_USTRVAL_PP(prefix), UBYTES(Z_USTRLEN_PP(prefix)));
 						Z_USTRVAL(final_name)[Z_USTRLEN_PP(prefix)] = '_';
-						memcpy(Z_USTRVAL(final_name)+Z_USTRLEN_PP(prefix)+1, var_name, UBYTES(var_name_len+1));
+						memcpy(Z_USTRVAL(final_name)+Z_USTRLEN_PP(prefix)+1, var_name.u, UBYTES(var_name_len+1));
 					} else {
 						Z_TYPE(final_name) = IS_STRING;
 						Z_STRVAL(final_name) = emalloc(Z_STRLEN(final_name)+1);
 						memcpy(Z_STRVAL(final_name), Z_STRVAL_PP(prefix), Z_STRLEN_PP(prefix));
 						Z_STRVAL(final_name)[Z_STRLEN_PP(prefix)] = '_';
-						memcpy(Z_STRVAL(final_name)+Z_STRLEN_PP(prefix)+1, var_name, var_name_len+1);
+						memcpy(Z_STRVAL(final_name)+Z_STRLEN_PP(prefix)+1, var_name.s, var_name_len+1);
 					}
 				}
 				break;
 
 			case EXTR_PREFIX_INVALID:
 				if (Z_TYPE(final_name) == IS_NULL) {
-					if (!php_valid_var_name(var_name)) {
+					/* FIXME: Unicode support??? */
+					if (!php_valid_var_name(var_name.s)) {
 					  Z_STRLEN(final_name) = Z_UNILEN_PP(prefix) + 1 + var_name_len;
 					  if (UG(unicode)) {
 							Z_TYPE(final_name) = IS_UNICODE;
 							Z_USTRVAL(final_name) = eumalloc(Z_USTRLEN(final_name)+1);
 							memcpy(Z_USTRVAL(final_name), Z_USTRVAL_PP(prefix), UBYTES(Z_USTRLEN_PP(prefix)));
 							Z_USTRVAL(final_name)[Z_USTRLEN_PP(prefix)] = '_';
-							memcpy(Z_USTRVAL(final_name)+Z_USTRLEN_PP(prefix)+1, var_name, UBYTES(var_name_len+1));
+							memcpy(Z_USTRVAL(final_name)+Z_USTRLEN_PP(prefix)+1, var_name.u, UBYTES(var_name_len+1));
 						} else {
 							Z_TYPE(final_name) = IS_STRING;
 							Z_STRVAL(final_name) = emalloc(Z_STRLEN(final_name)+1);
 							memcpy(Z_STRVAL(final_name), Z_STRVAL_PP(prefix), Z_STRLEN_PP(prefix));
 							Z_STRVAL(final_name)[Z_STRLEN_PP(prefix)] = '_';
-							memcpy(Z_STRVAL(final_name)+Z_STRLEN_PP(prefix)+1, var_name, var_name_len+1);
+							memcpy(Z_STRVAL(final_name)+Z_STRLEN_PP(prefix)+1, var_name.s, var_name_len+1);
 						}
 					} else {
 						ZVAL_TEXTL(&final_name, var_name, var_name_len, 1);
@@ -1520,7 +1522,8 @@ PHP_FUNCTION(extract)
 		}
 
 		if (Z_TYPE(final_name) != IS_NULL) {
-			if (php_valid_var_name(Z_UNIVAL(final_name))) {
+			/* FIXME: Unicode support??? */
+			if (php_valid_var_name(Z_STRVAL(final_name))) {
 				if (extract_refs) {
 					zval **orig_var;
 
@@ -1984,7 +1987,7 @@ HashTable* php_splice(HashTable *in_hash, int offset, int length,
 		if (p->nKeyLength == 0) {
 			zend_hash_next_index_insert(out_hash, &entry, sizeof(zval *), NULL);
 		} else {
-			zend_u_hash_update(out_hash, p->key.type, &p->key.u, p->nKeyLength, &entry, sizeof(zval *), NULL);
+			zend_u_hash_update(out_hash, p->key.type, (zstr)p->key.arKey.s, p->nKeyLength, &entry, sizeof(zval *), NULL);
 		}
 	}
 	
@@ -1996,7 +1999,7 @@ HashTable* php_splice(HashTable *in_hash, int offset, int length,
 			if (p->nKeyLength == 0) {
 				zend_hash_next_index_insert(*removed, &entry, sizeof(zval *), NULL);
 			} else {			
-				zend_u_hash_update(*removed, p->key.type, &p->key.u, p->nKeyLength, &entry, sizeof(zval *), NULL);
+				zend_u_hash_update(*removed, p->key.type, (zstr)p->key.arKey.s, p->nKeyLength, &entry, sizeof(zval *), NULL);
 			}
 		}
 	} else /* otherwise just skip those entries */
@@ -2029,7 +2032,7 @@ HashTable* php_splice(HashTable *in_hash, int offset, int length,
 		if (p->nKeyLength == 0) {
 			zend_hash_next_index_insert(out_hash, &entry, sizeof(zval *), NULL);
 		} else {
-			zend_u_hash_update(out_hash, p->key.type, &p->key.u, p->nKeyLength, &entry, sizeof(zval *), NULL);
+			zend_u_hash_update(out_hash, p->key.type, (zstr)p->key.arKey.s, p->nKeyLength, &entry, sizeof(zval *), NULL);
 		}
 	}
 
@@ -2090,7 +2093,7 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 {
 	zval **stack,			/* Input stack */
 	     **val;			/* Value to be popped */
-	char *key = NULL;
+	zstr key = (zstr)NULL;
 	int key_len = 0;
 	ulong index;
 	zend_uchar key_type;
@@ -2119,12 +2122,12 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 	
 	/* Delete the first or last value */
 	key_type = zend_hash_get_current_key_ex(Z_ARRVAL_PP(stack), &key, &key_len, &index, 0, NULL);
-	if (key && Z_ARRVAL_PP(stack) == &EG(symbol_table)) {
+	if (key.v && Z_ARRVAL_PP(stack) == &EG(symbol_table)) {
 		if (key_type == HASH_KEY_IS_UNICODE) key_type = IS_UNICODE;
 		else key_type = IS_STRING;
 		zend_u_delete_global_variable(key_type, key, key_len-1 TSRMLS_CC);
 	} else {
-		zend_hash_del_key_or_index(Z_ARRVAL_PP(stack), key, key_len, index, (key) ? HASH_DEL_KEY : HASH_DEL_INDEX);
+		zend_u_hash_del_key_or_index(Z_ARRVAL_PP(stack), key_type, key, key_len, index, (key.v) ? HASH_DEL_KEY : HASH_DEL_INDEX);
 	}
 	
 	/* If we did a shift... re-index like it did before */
@@ -2317,7 +2320,7 @@ PHP_FUNCTION(array_slice)
 		     pos,		/* Current position in the array */
 		     argc;		/* Number of function arguments */
 				 
-	char *string_key;
+	zstr string_key;
 	uint string_key_len;
 	ulong num_key;
 	HashPosition hpos;
@@ -2417,7 +2420,7 @@ ukey:
 PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS_DC)
 {
 	zval **src_entry, **dest_entry;
-	char *string_key;
+	zstr string_key;
 	uint string_key_len;
 	ulong num_key;
 	HashPosition pos;
@@ -2537,7 +2540,7 @@ PHP_FUNCTION(array_keys)
 	     **strict,		/* be strict */
 	      *new_val;		/* New value */
 	int    add_key;		/* Flag to indicate whether a key should be added */
-	char  *string_key;	/* String key */
+	zstr   string_key;	/* String key */
 	uint   string_key_len;
 	ulong  num_key;		/* Numeric key */
 	HashPosition pos;
@@ -2580,10 +2583,10 @@ PHP_FUNCTION(array_keys)
 
 			switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(input), &string_key, &string_key_len, &num_key, 1, &pos)) {
 				case HASH_KEY_IS_STRING:
-					ZVAL_STRINGL(new_val, string_key, string_key_len-1, 0);
+					ZVAL_STRINGL(new_val, string_key.s, string_key_len-1, 0);
 					goto ukey;
 				case HASH_KEY_IS_UNICODE:
-					ZVAL_UNICODEL(new_val, (UChar*)string_key, string_key_len-1, 0);
+					ZVAL_UNICODEL(new_val, string_key.u, string_key_len-1, 0);
 ukey:
 					zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &new_val,
 												sizeof(zval *), NULL);
@@ -2734,7 +2737,7 @@ PHP_FUNCTION(array_reverse)
 	zval	**input,			  /* Input array */
 		**z_preserve_keys, /* Flag: whether to preserve keys */
 		**entry;			  /* An entry in the input array */
-	char	 *string_key;
+	zstr	  string_key;
 	uint	  string_key_len;
 	ulong	  num_key;
 	zend_bool preserve_keys = 0;
@@ -2866,7 +2869,7 @@ PHP_FUNCTION(array_flip)
 {
 	zval **array, **entry, *data;
 	HashTable *target_hash;
-	char *string_key;
+	zstr string_key;
 	uint str_key_len;
 	ulong num_key;
 	HashPosition pos;
@@ -2888,10 +2891,10 @@ PHP_FUNCTION(array_flip)
 		MAKE_STD_ZVAL(data);
 		switch (zend_hash_get_current_key_ex(target_hash, &string_key, &str_key_len, &num_key, 1, &pos)) {
 			case HASH_KEY_IS_STRING:
-				ZVAL_STRINGL(data, string_key, str_key_len-1, 0);
+				ZVAL_STRINGL(data, string_key.s, str_key_len-1, 0);
 				break;
 			case HASH_KEY_IS_UNICODE:
-				ZVAL_UNICODEL(data, (UChar *)string_key, str_key_len-1, 0);
+				ZVAL_UNICODEL(data, string_key.u, str_key_len-1, 0);
 				break;
 			case HASH_KEY_IS_LONG:
 				Z_TYPE_P(data) = IS_LONG;
@@ -2920,8 +2923,8 @@ PHP_FUNCTION(array_flip)
 PHP_FUNCTION(array_change_key_case)
 {
 	zval **array, **entry, **to_upper;
-	char *string_key;
-	char *new_key;
+	zstr string_key;
+	zstr new_key;
 	uint str_key_len;
 	ulong num_key;
 	ulong change_to_upper=0;
@@ -2954,28 +2957,24 @@ PHP_FUNCTION(array_change_key_case)
 				zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, entry, sizeof(entry), NULL);
 				break;
 			case HASH_KEY_IS_STRING:
-				new_key = estrndup(string_key,str_key_len - 1);
+				new_key.s = estrndup(string_key.s, str_key_len - 1);
 				if (change_to_upper)
-					php_strtoupper(new_key, str_key_len - 1);
+					php_strtoupper(new_key.s, str_key_len - 1);
 				else
-					php_strtolower(new_key, str_key_len - 1);
+					php_strtolower(new_key.s, str_key_len - 1);
 				zend_u_hash_update(Z_ARRVAL_P(return_value), IS_STRING, new_key, str_key_len, entry, sizeof(entry), NULL);
-				efree(new_key);
+				efree(new_key.s);
 				break;
 			case HASH_KEY_IS_UNICODE:
-				{
-					UChar *new_key_u;
-
-					new_key_u = eustrndup((UChar *)string_key,str_key_len - 1);
-					str_key_len--;
-					if (change_to_upper)
-						new_key_u = php_u_strtoupper(&new_key_u, &str_key_len, UG(default_locale));
-					else
-						new_key_u = php_u_strtolower(&new_key_u, &str_key_len, UG(default_locale));
-					str_key_len++;
-					zend_u_hash_update(Z_ARRVAL_P(return_value), IS_UNICODE, new_key_u, str_key_len, entry, sizeof(entry), NULL);
-					efree(new_key_u);
-				}
+				new_key.u = eustrndup(string_key.u, str_key_len - 1);
+				str_key_len--;
+				if (change_to_upper)
+					new_key.u = php_u_strtoupper(&new_key.u, &str_key_len, UG(default_locale));
+				else
+					new_key.u = php_u_strtolower(&new_key.u, &str_key_len, UG(default_locale));
+				str_key_len++;
+				zend_u_hash_update(Z_ARRVAL_P(return_value), IS_UNICODE, new_key, str_key_len, entry, sizeof(entry), NULL);
+				efree(new_key.u);
 				break;
 		}
 
@@ -3043,9 +3042,9 @@ PHP_FUNCTION(array_unique)
 				zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);
 			} else {
 				if (Z_ARRVAL_P(return_value) == &EG(symbol_table)) {
-					zend_u_delete_global_variable(p->key.type, &p->key.u, p->nKeyLength-1 TSRMLS_CC);
+					zend_u_delete_global_variable(p->key.type, (zstr)p->key.arKey.s, p->nKeyLength-1 TSRMLS_CC);
 				} else {
-					zend_u_hash_del(Z_ARRVAL_P(return_value), p->key.type, &p->key.u, p->nKeyLength);
+					zend_u_hash_del(Z_ARRVAL_P(return_value), p->key.type, (zstr)p->key.arKey.s, p->nKeyLength);
 				}
 			}
 		}
@@ -3303,7 +3302,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 					if (p->nKeyLength == 0) {
 						zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);
 					} else {
-						zend_u_hash_del(Z_ARRVAL_P(return_value), p->key.type, &p->key.u, p->nKeyLength);
+						zend_u_hash_del(Z_ARRVAL_P(return_value), p->key.type, (zstr)p->key.arKey.s, p->nKeyLength);
 					}
 				}
 			}
@@ -3319,7 +3318,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 				if (p->nKeyLength == 0) {
 					zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);  
 				} else {
-					zend_u_hash_del(Z_ARRVAL_P(return_value), p->key.type, &p->key.u, p->nKeyLength);  
+					zend_u_hash_del(Z_ARRVAL_P(return_value), p->key.type, (zstr)p->key.arKey.s, p->nKeyLength);  
 				}
 				if (!*++ptrs[0]) { 
 					goto out;
@@ -3702,7 +3701,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 				if (p->nKeyLength == 0) {
 					zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);
 				} else {
-					zend_u_hash_del(Z_ARRVAL_P(return_value), p->key.type, &p->key.u, p->nKeyLength);
+					zend_u_hash_del(Z_ARRVAL_P(return_value), p->key.type, (zstr)p->key.arKey.s, p->nKeyLength);
 				}
 				if (!*++ptrs[0]) {
 					goto out;
@@ -4050,7 +4049,7 @@ PHP_FUNCTION(array_rand)
 	zval **input, **num_req;
 	long randval;
 	int num_req_val, num_avail, key_type;
-	char *string_key;
+	zstr string_key;
 	uint string_key_len;
 	ulong num_key;
 	HashPosition pos;
@@ -4092,18 +4091,18 @@ PHP_FUNCTION(array_rand)
 			/* If we are returning a single result, just do it. */
 			if (Z_TYPE_P(return_value) != IS_ARRAY) {
 				if (key_type == HASH_KEY_IS_STRING) {
-					RETURN_STRINGL(string_key, string_key_len-1, 1);
+					RETURN_STRINGL(string_key.s, string_key_len-1, 1);
 				} else if (key_type == HASH_KEY_IS_UNICODE) {
-					RETURN_UNICODEL((UChar *)string_key, string_key_len-1, 1);
+					RETURN_UNICODEL(string_key.u, string_key_len-1, 1);
 				} else {
 					RETURN_LONG(num_key);
 				}
 			} else {
 				/* Append the result to the return value. */
 				if (key_type == HASH_KEY_IS_STRING)
-					add_next_index_stringl(return_value, string_key, string_key_len-1, 1);
+					add_next_index_stringl(return_value, string_key.s, string_key_len-1, 1);
 				else if (key_type == HASH_KEY_IS_UNICODE)
-					add_next_index_unicodel(return_value, (UChar *)string_key, string_key_len-1, 1);
+					add_next_index_unicodel(return_value, string_key.u, string_key_len-1, 1);
 				else
 					add_next_index_long(return_value, num_key);
 			}
@@ -4320,7 +4319,7 @@ PHP_FUNCTION(array_filter)
 	zval **args[1];
 	zval *retval = NULL;
 	zval callback_name;
-	char *string_key;
+	zstr string_key;
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
 	uint string_key_len;
 	ulong num_key;
@@ -4490,7 +4489,7 @@ PHP_FUNCTION(array_map)
 	for (k = 0; k < maxlen; k++) {
 		uint str_key_len;
 		ulong num_key;
-		char *str_key;
+		zstr str_key;
 		int key_type = 0;
 
 		/*
@@ -4631,7 +4630,7 @@ PHP_FUNCTION(array_chunk)
 {
 	int argc = ZEND_NUM_ARGS(), key_type;
 	long size, current = 0;
-	char *str_key;
+	zstr str_key;
 	uint str_key_len;
 	ulong num_key;
 	zend_bool preserve_keys = 0;

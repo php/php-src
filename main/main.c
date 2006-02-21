@@ -548,9 +548,9 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	char *p;
 	int buffer_len = 0;
 	char *space;
-	char *class_name = get_active_class_name(&space TSRMLS_CC);
+	zstr class_name = get_active_class_name(&space TSRMLS_CC);
 	int origin_len;
-	char *function = NULL;
+	zstr function = (zstr)NULL;
 	char *origin;
 	char *message;
 	char *stage;
@@ -576,19 +576,19 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	           EG(current_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL) {
 		switch (EG(current_execute_data)->opline->op2.u.constant.value.lval) {
 			case ZEND_EVAL:
-				function = "eval";
+				function.s = "eval";
 				break;
 			case ZEND_INCLUDE:
-				function = "include";
+				function.s = "include";
 				break;
 			case ZEND_INCLUDE_ONCE:
-				function = "include_once";
+				function.s = "include_once";
 				break;
 			case ZEND_REQUIRE:
-				function = "require";
+				function.s = "require";
 				break;
 			case ZEND_REQUIRE_ONCE:
-				function = "require_once";
+				function.s = "require_once";
 				break;
 			default:
 				stage = "Unknown";
@@ -596,16 +596,16 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	} else {
 		function_name_is_string = 0;
 		function = get_active_function_name(TSRMLS_C);
-		if (!function || !USTR_LEN(function)) {
+		if (!function.v || !USTR_LEN(function)) {
 			stage = "Unknown";
-			function = NULL;
+			function.v = NULL;
 		}
 	}
 
 	/* if we still have memory then format the origin */
-	if (function) {
+	if (function.v) {
 		if (function_name_is_string) {
-			origin_len = spprintf(&origin, 0, "%v%s%s(%s)", class_name, space, function, params);	
+			origin_len = spprintf(&origin, 0, "%v%s%s(%s)", class_name, space, function.s, params);	
 		} else {
 			origin_len = spprintf(&origin, 0, "%v%s%v(%s)", class_name, space, function, params);	
 		}
@@ -627,9 +627,9 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	}
 
 	/* no docref given but function is known (the default) */
-	if (!docref && function) {
+	if (!docref && function.v) {
 		if (function_name_is_string) {
-			spprintf(&docref_buf, 0, "function.%s", function);
+			spprintf(&docref_buf, 0, "function.%s", function.s);
 		} else {
 			spprintf(&docref_buf, 0, "function.%v", function);
 		}
@@ -643,7 +643,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	 * - we show erroes in html mode OR
 	 * - the user wants to see the links anyway
 	 */
-	if (docref && function && (PG(html_errors) || strlen(PG(docref_root)))) {
+	if (docref && function.v && (PG(html_errors) || strlen(PG(docref_root)))) {
 		if (strncmp(docref, "http://", 7)) {
 			/* We don't have 'http://' so we use docref_root */
 

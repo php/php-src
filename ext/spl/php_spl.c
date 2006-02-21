@@ -59,17 +59,17 @@ static void spl_init_globals(zend_spl_globals *spl_globals)
 }
 /* }}} */
 
-static zend_class_entry * spl_find_ce_by_name(zend_uchar ztype, void *name, int len, zend_bool autoload TSRMLS_DC)
+static zend_class_entry * spl_find_ce_by_name(zend_uchar ztype, zstr name, int len, zend_bool autoload TSRMLS_DC)
 {
 	zend_class_entry **ce;
 	int found;
 
 	if (!autoload) {
-		char *lc_name;
+		zstr lc_name;
 
 		lc_name = zend_u_str_tolower_dup(ztype, name, len);
 		found = zend_u_hash_find(EG(class_table), ztype, lc_name, len +1, (void **) &ce);
-		efree(lc_name);
+		efree(lc_name.v);
 	} else {
  		found = zend_u_lookup_class(ztype, name, len, &ce TSRMLS_CC);
  	}
@@ -342,7 +342,7 @@ PHP_FUNCTION(spl_autoload_call)
 {
 	zval *class_name, *retval = NULL;
 	int class_name_len, class_name_type;
-	char *func_name, *lc_name;
+	zstr func_name, lc_name;
 	uint func_name_len;
 	ulong dummy;
 	HashPosition function_pos;
@@ -361,7 +361,8 @@ PHP_FUNCTION(spl_autoload_call)
 		while(zend_hash_has_more_elements_ex(SPL_G(autoload_functions), &function_pos) == SUCCESS && !EG(exception)) {
 			zend_hash_get_current_key_ex(SPL_G(autoload_functions), &func_name, &func_name_len, &dummy, 0, &function_pos);
 			zend_hash_get_current_data_ex(SPL_G(autoload_functions), (void **) &alfi, &function_pos);
-			zend_call_method(alfi->obj ? &alfi->obj : NULL, alfi->ce, &alfi->func_ptr, func_name, func_name_len, &retval, 1, class_name, NULL TSRMLS_CC);
+			/* TODO: Unicode support??? */
+			zend_call_method(alfi->obj ? &alfi->obj : NULL, alfi->ce, &alfi->func_ptr, func_name.s, func_name_len, &retval, 1, class_name, NULL TSRMLS_CC);
 			if (retval) {
 				zval_ptr_dtor(&retval);					
 			}
@@ -370,7 +371,7 @@ PHP_FUNCTION(spl_autoload_call)
 			}
 			zend_hash_move_forward_ex(SPL_G(autoload_functions), &function_pos);
 		}
-		efree(lc_name);
+		efree(lc_name.v);
 	} else {
 		/* do not use or overwrite &EG(autoload_func) here */
 		zend_call_method_with_1_params(NULL, NULL, NULL, "spl_autoload", NULL, class_name);
@@ -485,7 +486,7 @@ PHP_FUNCTION(spl_autoload_register)
  Unregister given function as __autoload() implementation */
 PHP_FUNCTION(spl_autoload_unregister)
 {
-	char *func_name, *lc_name;
+	zstr func_name, lc_name;
 	int func_name_len, success = FAILURE;
 	zend_function *spl_func_ptr;
 	zend_uchar func_name_type;
@@ -520,7 +521,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 		}
 	}
 
-	efree(lc_name);
+	efree(lc_name.v);
 	
 	RETURN_BOOL(success == SUCCESS);
 } /* }}} */

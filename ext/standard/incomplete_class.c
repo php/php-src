@@ -38,12 +38,13 @@ static zend_object_handlers php_incomplete_object_handlers;
  */
 static void incomplete_class_message(zval *object, int error_type TSRMLS_DC)
 {
-	char *class_name;
+	zstr class_name;
 
 	class_name = php_lookup_class_name(object, NULL);
 	
-	if (!class_name) {
-		class_name = "unknown";
+	/* FIXME: Unicode support??? */
+	if (!class_name.s) {
+		class_name.s = "unknown";
 	}
 	
 	php_error_docref(NULL TSRMLS_CC, error_type, INCOMPLETE_CLASS_MSG, class_name);
@@ -82,7 +83,7 @@ static int incomplete_class_has_property(zval *object, zval *member, int check_e
 	return 0;
 }
 
-static union _zend_function *incomplete_class_get_method(zval **object, char *method, int method_len TSRMLS_DC) {
+static union _zend_function *incomplete_class_get_method(zval **object, zstr method, int method_len TSRMLS_DC) {
 	incomplete_class_message(*object, E_ERROR TSRMLS_CC);
 	return NULL;
 }
@@ -122,23 +123,23 @@ zend_class_entry *php_create_incomplete_class(TSRMLS_D)
 
 /* {{{ php_lookup_class_name
  */
-PHPAPI char *php_lookup_class_name(zval *object, zend_uint *nlen)
+PHPAPI zstr php_lookup_class_name(zval *object, zend_uint *nlen)
 {
 	zval **val;
-	char *retval = NULL;
+	zstr retval = (zstr)NULL;
 	HashTable *object_properties;
 	TSRMLS_FETCH();
 
 	object_properties = Z_OBJPROP_P(object);
 
 	if (zend_hash_find(object_properties, MAGIC_MEMBER, sizeof(MAGIC_MEMBER), (void **) &val) == SUCCESS) {
-		retval = estrndup(Z_STRVAL_PP(val), Z_STRLEN_PP(val));
+		retval.s = estrndup(Z_STRVAL_PP(val), Z_STRLEN_PP(val));
 
 		if (nlen)
 			*nlen = Z_STRLEN_PP(val);
 	}
 
-	return (retval);
+	return retval;
 }
 /* }}} */
 

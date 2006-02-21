@@ -1140,7 +1140,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 	char			*result;
 	int				 result_len;
 	int				 limit_val = -1;
-	char			*string_key;
+	zstr			 string_key;
 	ulong			 num_key;
 	zval			 callback_name;
     int				replace_count=0;
@@ -1198,7 +1198,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 				switch(zend_hash_get_current_key(Z_ARRVAL_PP(subject), &string_key, &num_key, 0))
 				{
 					case HASH_KEY_IS_STRING:
-						add_assoc_stringl(return_value, string_key, result, result_len, 0);
+						add_assoc_stringl(return_value, string_key.s, result, result_len, 0);
 						break;
 
 					case HASH_KEY_IS_LONG:
@@ -1530,7 +1530,7 @@ PHP_FUNCTION(preg_grep)
 	int			 	*offsets;			/* Array of subpattern offsets */
 	int			 	 size_offsets;		/* Size of the offsets array */
 	int			 	 count = 0;			/* Count of matched subpatterns */
-	char			*string_key;
+	zstr			 string_key;
 	ulong			 num_key;
 	zend_bool		 invert = 0;		/* Whether to return non-matching
 										   entries */
@@ -1602,8 +1602,8 @@ PHP_FUNCTION(preg_grep)
 			switch(zend_hash_get_current_key(Z_ARRVAL_PP(input), &string_key, &num_key, 0))
 			{
 				case HASH_KEY_IS_STRING:
-					zend_hash_update(Z_ARRVAL_P(return_value), string_key,
-									 strlen(string_key)+1, entry, sizeof(zval *), NULL);
+					zend_hash_update(Z_ARRVAL_P(return_value), string_key.s,
+									 strlen(string_key.s)+1, entry, sizeof(zval *), NULL);
 					break;
 
 				case HASH_KEY_IS_LONG:
