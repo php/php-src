@@ -1106,15 +1106,17 @@ static void reflection_property_factory(zend_class_entry *ce, zend_property_info
 	zval *classname;
 	property_reference *reference;
 	char *class_name, *prop_name;
+	zend_uchar utype = UG(unicode) ? IS_UNICODE : IS_STRING;
 
-	zend_u_unmangle_property_name(UG(unicode)?IS_UNICODE:IS_STRING, prop->name, &class_name, &prop_name);
-
+	zend_u_unmangle_property_name(utype, prop->name, &class_name, &prop_name);
+	
 	if (!(prop->flags & ZEND_ACC_PRIVATE)) {
 		/* we have to seach the class hierarchy for this (implicit) public or protected property */
 		zend_class_entry *tmp_ce = ce;
 		zend_property_info *tmp_info;
+		int prop_name_len = UG(unicode) ? u_strlen((UChar*)prop_name) : strlen(prop_name);
 		
-		while (tmp_ce && zend_hash_find(&tmp_ce->properties_info, prop_name, strlen(prop_name) + 1, (void **) &tmp_info) != SUCCESS) {
+		while (tmp_ce && zend_u_hash_find(&tmp_ce->properties_info, utype, prop_name, prop_name_len + 1, (void **) &tmp_info) != SUCCESS) {
 			ce = tmp_ce;
 			prop = tmp_info;
 			tmp_ce = tmp_ce->parent;
@@ -3716,6 +3718,36 @@ ZEND_METHOD(reflection_property, isDefault)
 }
 /* }}} */
 
+/* {{{ proto public mixed ReflectionProperty::getDefaultValue()
+   Returns the default value of the property. */
+ZEND_METHOD(reflection_property, getDefaultValue)
+{
+	reflection_object *intern;
+	property_reference *ref;
+	HashTable *prop_defaults;
+	zval **zdef, *zv;
+	zend_uchar utype = UG(unicode) ? IS_UNICODE : IS_STRING;
+
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_property_ptr, 0);
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	if (ref->prop->flags & ZEND_ACC_STATIC) {
+		prop_defaults = &ref->ce->default_static_members;
+	} else {
+		prop_defaults = &ref->ce->default_properties;
+	}
+
+	if (zend_u_hash_quick_find(prop_defaults, utype, ref->prop->name, ref->prop->name_length+1, ref->prop->h, (void**)&zdef) == SUCCESS) {
+		ALLOC_ZVAL(zv);
+		*zv = **zdef;
+		zval_copy_ctor(zv);
+		INIT_PZVAL(zv);
+		zval_update_constant(&zv, (void*)1 TSRMLS_CC);
+		RETURN_ZVAL(zv, 1, 1);
+	}
+}
+/* }}} */
+
 /* {{{ proto public int ReflectionProperty::getModifiers()
    Returns a bitfield of the access modifiers for this property */
 ZEND_METHOD(reflection_property, getModifiers)
@@ -4287,6 +4319,7 @@ static zend_function_entry reflection_property_functions[] = {
 	ZEND_ME(reflection_property, isStatic, NULL, 0)
 	ZEND_ME(reflection_property, isDefault, NULL, 0)
 	ZEND_ME(reflection_property, getModifiers, NULL, 0)
+	ZEND_ME(reflection_property, getDefaultValue, NULL, 0)
 	ZEND_ME(reflection_property, getDeclaringClass, NULL, 0)
 	ZEND_ME(reflection_property, getDocComment, NULL, 0)
 	{NULL, NULL, NULL}
