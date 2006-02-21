@@ -4,7 +4,7 @@
  * @ingroup Examples
  * @brief abstract class SearchIterator
  * @author  Marcus Boerger
- * @date    2003 - 2005
+ * @date    2003 - 2006
  *
  * SPL - Standard PHP Library
  */
