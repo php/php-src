@@ -96,7 +96,7 @@ static int _display_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
 static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 {
 	zval **data, **tmp, tmp2;
-	char *string_key;
+	zstr string_key;
 	uint string_len;
 	ulong num_key;
 	char *elem_esc = NULL;
@@ -119,11 +119,11 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 			switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(data), &string_key, &string_len, &num_key, 0, NULL)) {
 				case HASH_KEY_IS_STRING:
 					if (!sapi_module.phpinfo_as_text) {
-						elem_esc = php_info_html_esc(string_key TSRMLS_CC);
+						elem_esc = php_info_html_esc(string_key.s TSRMLS_CC);
 						PUTS(elem_esc);
 						efree(elem_esc);
 					} else {
-						PUTS(string_key);
+						PUTS(string_key.s);
 					}	
 					break;
 				case HASH_KEY_IS_LONG:
@@ -506,7 +506,8 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 #endif
 		{
 			HashTable *url_stream_wrappers_hash;
-			char *stream_protocol, *stream_protocols_buf = NULL;
+			zstr stream_protocol;
+			char *stream_protocols_buf = NULL;
 			int stream_protocol_len, stream_protocols_buf_len = 0;
 			ulong num_key;
 
@@ -515,7 +516,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 						zend_hash_get_current_key_ex(url_stream_wrappers_hash, &stream_protocol, &stream_protocol_len, &num_key, 0, NULL) == HASH_KEY_IS_STRING;
 						zend_hash_move_forward(url_stream_wrappers_hash)) {
 					stream_protocols_buf = erealloc(stream_protocols_buf, stream_protocols_buf_len + stream_protocol_len + 2 + 1);
-					memcpy(stream_protocols_buf + stream_protocols_buf_len, stream_protocol, stream_protocol_len);
+					memcpy(stream_protocols_buf + stream_protocols_buf_len, stream_protocol.s, stream_protocol_len);
 					stream_protocols_buf[stream_protocols_buf_len + stream_protocol_len] = ',';
 					stream_protocols_buf[stream_protocols_buf_len + stream_protocol_len + 1] = ' ';
 					stream_protocols_buf_len += stream_protocol_len + 2;
@@ -537,7 +538,8 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 		{
 			HashTable *stream_xport_hash;
-			char *xport_name, *xport_buf = NULL;
+			zstr xport_name;
+			char *xport_buf = NULL;
 			int xport_name_len, xport_buf_len = 0, xport_buf_size = 0;
 			ulong num_key;
 
@@ -559,7 +561,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 						xport_buf[xport_buf_len++] = ',';
 						xport_buf[xport_buf_len++] = ' ';
 					}
-					memcpy(xport_buf + xport_buf_len, xport_name, xport_name_len);
+					memcpy(xport_buf + xport_buf_len, xport_name.s, xport_name_len);
 					xport_buf_len += xport_name_len;
 					xport_buf[xport_buf_len] = '\0';
 				}
@@ -578,7 +580,8 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 		{
 			HashTable *stream_filter_hash;
-			char *filter_name, *filter_buf = NULL;
+			zstr filter_name;
+			char *filter_buf = NULL;
 			int filter_name_len, filter_buf_len = 0, filter_buf_size = 0;
 			ulong num_key;
 
@@ -600,7 +603,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 						filter_buf[filter_buf_len++] = ',';
 						filter_buf[filter_buf_len++] = ' ';
 					}
-					memcpy(filter_buf + filter_buf_len, filter_name, filter_name_len);
+					memcpy(filter_buf + filter_buf_len, filter_name.s, filter_name_len);
 					filter_buf_len += filter_name_len;
 					filter_buf[filter_buf_len] = '\0';
 				}

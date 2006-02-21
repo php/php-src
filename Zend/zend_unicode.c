@@ -29,39 +29,6 @@ ZEND_API ts_rsrc_id unicode_globals_id;
 ZEND_API zend_unicode_globals unicode_globals;
 #endif
 
-static void zend_from_unicode_substitute_cb(
-        const void *context,
-        UConverterFromUnicodeArgs *toUArgs,
-        const char *codeUnits,
-        int32_t length,
-        UConverterCallbackReason reason,
-        UErrorCode *err
-    )
-{
-    if (context == NULL) {
-        if (reason > UCNV_IRREGULAR)
-        {
-            return;
-        }
-
-        *err = U_ZERO_ERROR;
-        //ucnv_cbFromUWriteSub(fromArgs, 0, err);
-        return;
-    } else if (*((char*)context)=='i') {
-        if (reason != UCNV_UNASSIGNED)
-        {
-            /* the caller must have set
-             * the error code accordingly
-             */
-            return;
-        } else {
-            *err = U_ZERO_ERROR;
-            //ucnv_cbFromUWriteSub(fromArgs, 0, err);
-            return;
-        }
-    }
-}
-
 /* {{{ zend_set_converter_error_mode */
 void zend_set_converter_error_mode(UConverter *conv, uint8_t error_mode)
 {
@@ -178,7 +145,7 @@ int zend_copy_converter(UConverter **target, UConverter *source)
 /* }}} */
 
 /* {{{ zend_convert_to_unicode */
-ZEND_API void zend_convert_to_unicode(UConverter *conv, UChar **target, int32_t *target_len, const char *source, int32_t source_len, UErrorCode *status)
+ZEND_API void zend_convert_to_unicode(UConverter *conv, UChar **target, int *target_len, const char *source, int source_len, UErrorCode *status)
 {
     UChar *buffer = NULL;
     UChar *output;
@@ -530,7 +497,7 @@ static inline void zend_normalize_string(UChar **dest, int32_t *dest_len, UChar 
 /* }}} */
 
 /* {{{ zend_case_fold_string */
-ZEND_API void zend_case_fold_string(UChar **dest, int32_t *dest_len, UChar *src, int32_t src_len, uint32_t options, UErrorCode *status)
+ZEND_API void zend_case_fold_string(UChar **dest, int *dest_len, UChar *src, int src_len, uint32_t options, UErrorCode *status)
 {
     UChar *buffer = NULL;
     int32_t buffer_len;
@@ -555,7 +522,7 @@ ZEND_API void zend_case_fold_string(UChar **dest, int32_t *dest_len, UChar *src,
 /* }}} */
 
 /* {{{ zend_normalize_identifier */
-ZEND_API int zend_normalize_identifier(UChar **dest, int32_t *dest_len, UChar *ident, int32_t ident_len, zend_bool fold_case)
+ZEND_API int zend_normalize_identifier(UChar **dest, int *dest_len, UChar *ident, int ident_len, zend_bool fold_case)
 {
     UChar *buffer = NULL;
     UChar *orig_ident = ident;

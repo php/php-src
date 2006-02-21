@@ -356,11 +356,14 @@ static PHP_METHOD(PDOStatement, execute)
 
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(input_params));
 		while (SUCCESS == zend_hash_get_current_data(Z_ARRVAL_P(input_params), (void*)&tmp)) {
+			zstr tmp_str;
+
 			memset(&param, 0, sizeof(param));
 
 			if (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(Z_ARRVAL_P(input_params),
-						&param.name, &str_length, &num_index, 0, NULL)) {
+						&tmp_str, &str_length, &num_index, 0, NULL)) {
 				/* yes this is correct.  we don't want to count the null byte.  ask wez */
+				param.name = tmp_str.s;
 				param.namelen = str_length - 1;
 				param.paramno = -1;
 			} else {
@@ -646,7 +649,7 @@ static int make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * 
 	zval **object = NULL, **method;
 	zend_class_entry * ce = NULL, **pce;
 	zend_function *function_handler;
-	char *lcname;
+	zstr lcname;
 	unsigned int lcname_len;
 	
 	if (Z_TYPE_P(callable) == IS_ARRAY) {
@@ -689,11 +692,11 @@ static int make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * 
 
 	fci->function_table = ce ? &ce->function_table : EG(function_table);
 	if (zend_u_hash_find(fci->function_table, Z_TYPE_PP(method), lcname, lcname_len+1, (void **)&function_handler) == FAILURE) {
-		efree(lcname);
+		efree(lcname.v);
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied function does not exist" TSRMLS_CC);
 		return 0;
 	}
-	efree(lcname);
+	efree(lcname.v);
 
 	fci->size = sizeof(zend_fcall_info);
 	fci->function_name = NULL;
@@ -1293,7 +1296,7 @@ static PHP_METHOD(PDOStatement, fetchAll)
 				error = 1;
 				break;
 			} else {
-				stmt->fetch.cls.ce = zend_u_fetch_class(Z_TYPE_P(arg2), Z_STRVAL_P(arg2), Z_STRLEN_P(arg2), ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
+				stmt->fetch.cls.ce = zend_u_fetch_class(Z_TYPE_P(arg2), Z_UNIVAL_P(arg2), Z_UNILEN_P(arg2), ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
 				if (!stmt->fetch.cls.ce) {
 					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "could not find user-specified class" TSRMLS_CC);
 					error = 1;
@@ -1868,7 +1871,7 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 		zend_hash_internal_pointer_reset_ex(stmt->bound_params, &pos);
 		while (SUCCESS == zend_hash_get_current_data_ex(stmt->bound_params,
 				(void**)&param, &pos)) {
-			char *str;
+			zstr str;
 			uint len;
 			ulong num;
 
@@ -1964,10 +1967,10 @@ static union _zend_function *dbstmt_method_get(
 #else
 	zval *object,
 #endif
-   	char *method_name, int method_len TSRMLS_DC)
+	zstr method_name, int method_len TSRMLS_DC)
 {
 	zend_function *fbc = NULL;
-	char *lc_method_name;
+	zstr lc_method_name;
 #if PHP_API_VERSION >= 20041225
 	zval *object = *object_pp;
 #endif
@@ -1999,7 +2002,7 @@ static union _zend_function *dbstmt_method_get(
 	}
 	
 out:
-	efree(lc_method_name);
+	efree(lc_method_name.v);
 	return fbc;
 }
 
@@ -2190,7 +2193,7 @@ static void pdo_stmt_iter_get_data(zend_object_iterator *iter, zval ***data TSRM
 	*data = &I->fetch_ahead;
 }
 
-static int pdo_stmt_iter_get_key(zend_object_iterator *iter, char **str_key, uint *str_key_len,
+static int pdo_stmt_iter_get_key(zend_object_iterator *iter, zstr *str_key, uint *str_key_len,
 	ulong *int_key TSRMLS_DC)
 {
 	struct php_pdo_iterator *I = (struct php_pdo_iterator*)iter->data;
@@ -2366,24 +2369,23 @@ static union _zend_function *row_method_get(
 #else
 	zval *object,
 #endif
-	char *method_name, int method_len TSRMLS_DC)
+	zstr method_name, int method_len TSRMLS_DC)
 {
 	zend_function *fbc;
-	char *lc_method_name;
+	zstr lc_method_name;
 
-	lc_method_name = emalloc(method_len + 1);
-	zend_str_tolower_copy(lc_method_name, method_name, method_len);
+	lc_method_name = zend_u_str_tolower_dup(UG(unicode)?IS_UNICODE:IS_STRING, method_name, method_len);
 
-	if (zend_hash_find(&pdo_row_ce->function_table, lc_method_name, method_len+1, (void**)&fbc) == FAILURE) {
-		efree(lc_method_name);
+	if (zend_u_hash_find(&pdo_row_ce->function_table, UG(unicode)?IS_UNICODE:IS_STRING, lc_method_name, method_len+1, (void**)&fbc) == FAILURE) {
+		efree(lc_method_name.v);
 		return NULL;
 	}
 	
-	efree(lc_method_name);
+	efree(lc_method_name.v);
 	return fbc;
 }
 
-static int row_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
+static int row_call_method(zstr method, INTERNAL_FUNCTION_PARAMETERS)
 {
 	return FAILURE;
 }
@@ -2393,7 +2395,7 @@ static union _zend_function *row_get_ctor(zval *object TSRMLS_DC)
 	static zend_internal_function ctor = {0};
 
 	ctor.type = ZEND_INTERNAL_FUNCTION;
-	ctor.function_name = "__construct";
+	ctor.function_name.s = "__construct";
 	ctor.scope = pdo_row_ce;
 	ctor.handler = ZEND_FN(dbstmt_constructor);
 
@@ -2405,9 +2407,9 @@ static zend_class_entry *row_get_ce(zval *object TSRMLS_DC)
 	return pdo_dbstmt_ce;
 }
 
-static int row_get_classname(zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
+static int row_get_classname(zval *object, zstr *class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
 {
-	*class_name = estrndup("PDORow", sizeof("PDORow")-1);
+	class_name->s = estrndup("PDORow", sizeof("PDORow")-1);
 	*class_name_len = sizeof("PDORow")-1;
 	return 0;
 }

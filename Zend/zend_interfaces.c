@@ -76,7 +76,7 @@ ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend
 		if (!fn_proxy || !*fn_proxy) {
 			if (zend_hash_find(function_table, function_name, function_name_len+1, (void **) &fcic.function_handler) == FAILURE) {
 				/* error at c-level */
-				zend_error(E_CORE_ERROR, "Couldn't find implementation for method %v%s%s", obj_ce ? (void*)obj_ce->name : EMPTY_STR, obj_ce ? "::" : "", function_name);
+				zend_error(E_CORE_ERROR, "Couldn't find implementation for method %v%s%s", obj_ce ? obj_ce->name : (zstr)EMPTY_STR, obj_ce ? "::" : "", function_name);
 			}
 			if (fn_proxy) {
 				*fn_proxy = fcic.function_handler;
@@ -93,7 +93,7 @@ ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend
 		if (!obj_ce) {
 			obj_ce = object_pp ? Z_OBJCE_PP(object_pp) : NULL;
 		}
-		zend_error(E_CORE_ERROR, "Couldn't execute method %v%s%s", obj_ce ? (void*)obj_ce->name : EMPTY_STR, obj_ce ? "::" : "", function_name);
+		zend_error(E_CORE_ERROR, "Couldn't execute method %v%s%s", obj_ce ? obj_ce->name : (zstr)EMPTY_STR, obj_ce ? "::" : "", function_name);
 	}
 	if (!retval_ptr_ptr) {
 		if (retval) {
@@ -176,7 +176,7 @@ ZEND_API void zend_user_it_get_current_data(zend_object_iterator *_iter, zval **
 
 /* {{{ zend_user_it_get_current_key_default */
 #if 0
-static int zend_user_it_get_current_key_default(zend_object_iterator *_iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
+static int zend_user_it_get_current_key_default(zend_object_iterator *_iter, zstr *str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
 {
 	*int_key = _iter->index;
 	return HASH_KEY_IS_LONG;
@@ -185,7 +185,7 @@ static int zend_user_it_get_current_key_default(zend_object_iterator *_iter, cha
 /* }}} */
 
 /* {{{ zend_user_it_get_current_key */
-ZEND_API int zend_user_it_get_current_key(zend_object_iterator *_iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
+ZEND_API int zend_user_it_get_current_key(zend_object_iterator *_iter, zstr *str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 	zval *object = (zval*)iter->it.data;
@@ -210,13 +210,13 @@ ZEND_API int zend_user_it_get_current_key(zend_object_iterator *_iter, char **st
 			return HASH_KEY_IS_LONG;
 
 		case IS_STRING:
-			*str_key = estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
+			str_key->s = estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
 			*str_key_len = Z_STRLEN_P(retval)+1;
 			zval_ptr_dtor(&retval);
 			return HASH_KEY_IS_STRING;
 
 		case IS_UNICODE:
-			*str_key = (char*)eustrndup(Z_USTRVAL_P(retval), Z_USTRLEN_P(retval));
+			str_key->u = eustrndup(Z_USTRVAL_P(retval), Z_USTRLEN_P(retval));
 			*str_key_len = Z_USTRLEN_P(retval)+1;
 			zval_ptr_dtor(&retval);
 			return HASH_KEY_IS_UNICODE;

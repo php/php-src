@@ -264,7 +264,7 @@ static void add_u_protected_variable(UChar *varname TSRMLS_DC)
 	int dummy=1;
 
 	normalize_u_protected_variable(varname TSRMLS_CC);
-	zend_u_hash_add(&PG(rfc1867_protected_variables), IS_UNICODE, varname, u_strlen(varname)+1, &dummy, sizeof(int), NULL);
+	zend_u_hash_add(&PG(rfc1867_protected_variables), IS_UNICODE, (zstr)varname, u_strlen(varname)+1, &dummy, sizeof(int), NULL);
 }
 
 
@@ -278,7 +278,7 @@ static zend_bool is_protected_variable(char *varname TSRMLS_DC)
 static zend_bool is_u_protected_variable(UChar *varname TSRMLS_DC)
 {
 	normalize_u_protected_variable(varname TSRMLS_CC);
-	return zend_u_hash_exists(&PG(rfc1867_protected_variables), IS_UNICODE, varname, u_strlen(varname)+1);
+	return zend_u_hash_exists(&PG(rfc1867_protected_variables), IS_UNICODE, (zstr)varname, u_strlen(varname)+1);
 }
 
 
@@ -1316,7 +1316,7 @@ var_done:
 				}
 				temp_filename = EMPTY_STR;
 			} else {
-				zend_u_hash_add(SG(rfc1867_uploaded_files), IS_UNICODE, temp_filename, u_strlen(temp_filename) + 1, &temp_filename, sizeof(UChar *), NULL);
+				zend_u_hash_add(SG(rfc1867_uploaded_files), IS_UNICODE, (zstr)temp_filename, u_strlen(temp_filename) + 1, &temp_filename, sizeof(UChar *), NULL);
 			}
 
 			/* is_arr_upload is true when name of file upload field

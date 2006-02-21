@@ -1244,17 +1244,18 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 		/* apply values from the dn hash */
 		zend_hash_internal_pointer_reset_ex(HASH_OF(dn), &hpos);
 		while(zend_hash_get_current_data_ex(HASH_OF(dn), (void**)&item, &hpos) == SUCCESS) {
-			char * strindex; int strindexlen;
+			zstr strindex;
+			int strindexlen;
 			long intindex;
 			
 			zend_hash_get_current_key_ex(HASH_OF(dn), &strindex, &strindexlen, &intindex, 0, &hpos);
 
 			convert_to_string_ex(item);
 
-			if (strindex) {
+			if (strindex.s) {
 				int nid;
 
-				nid = OBJ_txt2nid(strindex);
+				nid = OBJ_txt2nid(strindex.s);
 				if (nid != NID_undef) {
 					if (!X509_NAME_add_entry_by_NID(subj, nid, MBSTRING_ASC, 
 								(unsigned char*)Z_STRVAL_PP(item), -1, -1, 0))
@@ -1263,7 +1264,7 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 						return FAILURE;
 					}
 				} else {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "dn: %s is not a recognized name", strindex);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "dn: %s is not a recognized name", strindex.s);
 				}
 			}
 			zend_hash_move_forward_ex(HASH_OF(dn), &hpos);
@@ -1318,23 +1319,24 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 		if (attribs) {
 			zend_hash_internal_pointer_reset_ex(HASH_OF(attribs), &hpos);
 			while(zend_hash_get_current_data_ex(HASH_OF(attribs), (void**)&item, &hpos) == SUCCESS) {
-				char * strindex; int strindexlen;
+				zstr strindex;
+				int strindexlen;
 				long intindex;
 
 				zend_hash_get_current_key_ex(HASH_OF(attribs), &strindex, &strindexlen, &intindex, 0, &hpos);
 				convert_to_string_ex(item);
 
-				if (strindex) {
+				if (strindex.s) {
 					int nid;
 
-					nid = OBJ_txt2nid(strindex);
+					nid = OBJ_txt2nid(strindex.s);
 					if (nid != NID_undef) {
 						if (!X509_NAME_add_entry_by_NID(subj, nid, MBSTRING_ASC, (unsigned char*)Z_STRVAL_PP(item), -1, -1, 0)) {
 							php_error_docref(NULL TSRMLS_CC, E_WARNING, "attribs: add_entry_by_NID %d -> %s (failed)", nid, Z_STRVAL_PP(item));
 							return FAILURE;
 						}
 					} else {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "dn: %s is not a recognized name", strindex);
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "dn: %s is not a recognized name", strindex.s);
 					}
 				}
 				zend_hash_move_forward_ex(HASH_OF(attribs), &hpos);
@@ -2264,7 +2266,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 	long cipherid = PHP_OPENSSL_CIPHER_DEFAULT;
 	uint strindexlen;
 	ulong intindex;
-	char * strindex;
+	zstr strindex;
 	char * infilename = NULL;	int infilename_len;
 	char * outfilename = NULL;	int outfilename_len;
 	
@@ -2375,8 +2377,8 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 
 			convert_to_string_ex(zcertval);
 
-			if (strindex) {
-				BIO_printf(outfile, "%s: %s\n", strindex, Z_STRVAL_PP(zcertval));
+			if (strindex.s) {
+				BIO_printf(outfile, "%s: %s\n", strindex.s, Z_STRVAL_PP(zcertval));
 			} else {
 				BIO_printf(outfile, "%s\n", Z_STRVAL_PP(zcertval));
 			}
@@ -2419,7 +2421,7 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 	ulong intindex;
 	uint strindexlen;
 	HashPosition hpos;
-	char * strindex;
+	zstr strindex;
 	char * infilename;	int infilename_len;
 	char * outfilename;	int outfilename_len;
 	char * extracertsfilename = NULL; int extracertsfilename_len;
@@ -2484,8 +2486,8 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 
 			convert_to_string_ex(hval);
 
-			if (strindex) {
-				BIO_printf(outfile, "%s: %s\n", strindex, Z_STRVAL_PP(hval));
+			if (strindex.s) {
+				BIO_printf(outfile, "%s: %s\n", strindex.s, Z_STRVAL_PP(hval));
 			} else {
 				BIO_printf(outfile, "%s\n", Z_STRVAL_PP(hval));
 			}

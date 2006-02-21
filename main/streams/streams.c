@@ -2636,7 +2636,9 @@ PHPAPI int php_stream_context_del_link(php_stream_context *context,
         php_stream *stream)
 {
 	php_stream **pstream;
-	char *hostent;
+	zend_uchar type;
+	zstr hostent;
+	unsigned int hostent_len;
 	int ret = SUCCESS;
 
 	if (!context || !context->links || !stream) {
@@ -2647,8 +2649,9 @@ PHPAPI int php_stream_context_del_link(php_stream_context *context,
 		SUCCESS == zend_hash_get_current_data(Z_ARRVAL_P(context->links), (void**)&pstream);
 		zend_hash_move_forward(Z_ARRVAL_P(context->links))) {
 		if (*pstream == stream) {
-			if (SUCCESS == zend_hash_get_current_key(Z_ARRVAL_P(context->links), &hostent, NULL, 0)) {
-				if (FAILURE == zend_hash_del(Z_ARRVAL_P(context->links), (char*)hostent, strlen(hostent)+1)) {
+			type = zend_hash_get_current_key_ex(Z_ARRVAL_P(context->links), &hostent, &hostent_len, NULL, 0, NULL);
+			if (type == HASH_KEY_IS_STRING || type == HASH_KEY_IS_UNICODE) {
+				if (FAILURE == zend_u_hash_del(Z_ARRVAL_P(context->links), type, hostent, hostent_len)) {
 					ret = FAILURE;
 				}
 			} else {

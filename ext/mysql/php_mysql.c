@@ -1380,8 +1380,9 @@ PHP_FUNCTION(mysql_db_query)
 			WRONG_PARAM_COUNT;
 			break;
 	}
-	
-	if (MySG(trace_mode) || !strcasecmp(get_active_function_name(TSRMLS_C), "mysql")) {
+
+	/* FIXME: Unicode support??? */
+	if (MySG(trace_mode) || !strcasecmp(get_active_function_name(TSRMLS_C).s, "mysql")) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "This function is deprecated; use mysql_query() instead.");
 	}
 	

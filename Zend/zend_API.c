@@ -156,7 +156,7 @@ ZEND_API int _zend_get_parameters_array_ex(int param_count, zval ***argument_arr
 
 		if (EG(ze1_compatibility_mode) && Z_TYPE_PP(value) == IS_OBJECT) {
 			zval *value_ptr;
-			char *class_name;
+			zstr class_name;
 			zend_uint class_name_len;
 			int dup;
 
@@ -165,9 +165,9 @@ ZEND_API int _zend_get_parameters_array_ex(int param_count, zval ***argument_arr
 			ALLOC_ZVAL(value_ptr);
 			*value_ptr = **value;
 			INIT_PZVAL(value_ptr);
-			zend_error(E_STRICT, "Implicit cloning object of class '%v' because of 'zend.ze1_compatibility_mode'", class_name);
+			zend_error(E_STRICT, "Implicit cloning object of class '%v' because of 'zend.ze1_compatibility_mode'", class_name.v);
 			if(!dup) {
-				efree(class_name);
+				efree(class_name.v);
 			}
 			Z_OBJVAL_P(value_ptr) = Z_OBJ_HANDLER_PP(value, clone_obj)(*value TSRMLS_CC);
 			zval_ptr_dtor(value);
@@ -206,7 +206,7 @@ ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array TS
 ZEND_API void zend_wrong_param_count(TSRMLS_D)
 {
 	char *space;
-	char *class_name = get_active_class_name(&space TSRMLS_CC);
+	zstr class_name = get_active_class_name(&space TSRMLS_CC);
 
 	zend_error(E_WARNING, "Wrong parameter count for %v%s%v()", class_name, space, get_active_function_name(TSRMLS_C));
 }
@@ -260,7 +260,7 @@ ZEND_API zend_class_entry *zend_get_class_entry(zval *zobject TSRMLS_DC)
 }
 
 /* returns 1 if you need to copy result, 0 if it's already a copy */
-ZEND_API int zend_get_object_classname(zval *object, char **class_name, zend_uint *class_name_len TSRMLS_DC)
+ZEND_API int zend_get_object_classname(zval *object, zstr *class_name, zend_uint *class_name_len TSRMLS_DC)
 {
 	if (Z_OBJ_HT_P(object)->get_class_name == NULL ||
 		Z_OBJ_HT_P(object)->get_class_name(object, class_name, class_name_len, 0 TSRMLS_CC) != SUCCESS) {
@@ -440,7 +440,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 		case 'u':
 			{
 				UChar **p = va_arg(*va, UChar **);
-				int32_t *pl = va_arg(*va, int32_t *);
+				int *pl = va_arg(*va, int *);
 				switch (Z_TYPE_PP(arg)) {
 					case IS_NULL:
 						if (return_null) {
@@ -485,7 +485,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 			if (T_arg_type != -1)
 			{
 				void **p = va_arg(*va, void **);
-				int32_t *pl = va_arg(*va, int32_t *);
+				int *pl = va_arg(*va, int *);
 				zend_uchar *type = va_arg(*va, zend_uchar *);
 				switch (Z_TYPE_PP(arg)) {
 					case IS_NULL:
@@ -511,7 +511,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 						} else {
 							if (Z_TYPE_PP(arg) == IS_UNICODE) {
 								char *space;
-								char *class_name = get_active_class_name(&space TSRMLS_CC);
+								zstr class_name = get_active_class_name(&space TSRMLS_CC);
 								zend_error(E_WARNING, "%v%s%v() does not allow mixing binary and Unicode parameters",
 										   class_name, space, get_active_function_name(TSRMLS_C));
 								return "";
@@ -523,7 +523,8 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 						if (Z_OBJ_HANDLER_PP(arg, cast_object)) {
 							SEPARATE_ZVAL_IF_NOT_REF(arg);
 							if (Z_OBJ_HANDLER_PP(arg, cast_object)(*arg, *arg, T_arg_type TSRMLS_CC) == SUCCESS) {
-								*(char**)p = Z_UNIVAL_PP(arg);
+								/* FIXME: Unicode support??? */
+								*(char**)p = Z_STRVAL_PP(arg);
 								*pl = Z_UNILEN_PP(arg);
 								*type = Z_TYPE_PP(arg);
 								RETURN_AS_UNICODE(arg, p, pl, type);
@@ -545,7 +546,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 		case 't':
 			{
 				void **p = va_arg(*va, void **);
-				int32_t *pl = va_arg(*va, int32_t *);
+				int *pl = va_arg(*va, int *);
 				zend_uchar *type = va_arg(*va, zend_uchar *);
 				switch (Z_TYPE_PP(arg)) {
 					case IS_NULL:
@@ -696,7 +697,8 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 					if (Z_TYPE_PP(arg) == IS_NULL && return_null) {
 						*p = NULL;
 					} else {
-						return ce ? ce->name : "object";
+						/* FIXME: Unicode support??? */
+						return ce ? ce->name.s : "object";
 					}
 				}
 			}
@@ -707,12 +709,8 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 				zend_class_entry **lookup, **pce = va_arg(*va, zend_class_entry **);
 				zend_class_entry *ce_base = *pce;
 
-				if (UG(unicode)) {
-					convert_to_unicode_ex(arg);
-				} else {
-					convert_to_string_ex(arg);
-				}
-				if (zend_u_lookup_class(Z_TYPE_PP(arg), Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), &lookup TSRMLS_CC) == FAILURE) {
+				convert_to_text_ex(arg);
+				if (zend_u_lookup_class(Z_TYPE_PP(arg), Z_UNIVAL_PP(arg), Z_UNILEN_PP(arg), &lookup TSRMLS_CC) == FAILURE) {
 					*pce = NULL;
 				} else {
 					*pce = *lookup;
@@ -720,7 +718,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 				if (ce_base) {
 					if ((!*pce || !instanceof_function(*pce, ce_base TSRMLS_CC)) && !return_null) {
 						char *space;
-						char *class_name = get_active_class_name(&space TSRMLS_CC);
+						zstr class_name = get_active_class_name(&space TSRMLS_CC);
 						zend_error(E_WARNING, "%v%s%v() expects parameter %d to be a class name derived from %v, '%v' given",
 							   class_name, space, get_active_function_name(TSRMLS_C),
 							   arg_num, ce_base->name, Z_STRVAL_PP(arg));
@@ -730,7 +728,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 				}
 				if (!*pce && !return_null) {
 					char *space;
-					char *class_name = get_active_class_name(&space TSRMLS_CC);
+					zstr class_name = get_active_class_name(&space TSRMLS_CC);
 					zend_error(E_WARNING, "%v%s%v() expects parameter %d to be a valid class name, '%v' given",
 						   class_name, space, get_active_function_name(TSRMLS_C),
 						   arg_num, Z_STRVAL_PP(arg));
@@ -778,7 +776,7 @@ static int zend_parse_arg(int arg_num, zval **arg, va_list *va, char **spec, int
 	if (expected_type) {
 		if (!quiet && *expected_type) {
 			char *space;
-			char *class_name = get_active_class_name(&space TSRMLS_CC);
+			zstr class_name = get_active_class_name(&space TSRMLS_CC);
 
 			zend_error(E_WARNING, "%v%s%v() expects parameter %d to be %s, %s given",
 					class_name, space, get_active_function_name(TSRMLS_C), arg_num, expected_type,
@@ -832,7 +830,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 			default:
 				if (!quiet) {
 					char *space;
-					char *class_name = get_active_class_name(&space TSRMLS_CC);
+					zstr class_name = get_active_class_name(&space TSRMLS_CC);
 					zend_error(E_WARNING, "%v%s%v(): bad type specifier while parsing parameters",
 							class_name, space,
 							get_active_function_name(TSRMLS_C));
@@ -848,7 +846,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 	if (num_args < min_num_args || num_args > max_num_args) {
 		if (!quiet) {
 			char *space;
-			char *class_name = get_active_class_name(&space TSRMLS_CC);
+			zstr class_name = get_active_class_name(&space TSRMLS_CC);
 			zend_error(E_WARNING, "%v%s%v() expects %s %d parameter%s, %d given",
 					class_name, space,
 					get_active_function_name(TSRMLS_C),
@@ -1027,9 +1025,9 @@ static int zend_merge_property(zval **value, int num_args, va_list args, zend_ha
 
 		MAKE_STD_ZVAL(member);
 		if (hash_key->type == IS_STRING) {
-			ZVAL_STRINGL(member, hash_key->u.string, hash_key->nKeyLength-1, 1);
+			ZVAL_STRINGL(member, hash_key->arKey.s, hash_key->nKeyLength-1, 1);
 		} else if (hash_key->type == IS_UNICODE) {
-			ZVAL_UNICODEL(member, hash_key->u.unicode, hash_key->nKeyLength-1, 1);
+			ZVAL_UNICODEL(member, hash_key->arKey.u, hash_key->nKeyLength-1, 1);
 		}
 
 		obj_ht->write_property(obj, member, *value TSRMLS_CC);
@@ -1082,7 +1080,7 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC
 
 			zend_hash_internal_pointer_reset_ex(&class_type->default_static_members, &pos);
 			while (zend_hash_get_current_data_ex(&class_type->default_static_members, (void**)&p, &pos) == SUCCESS) {
-				char *str_index;
+				zstr str_index;
 				uint str_length;
 				ulong num_index;
 				zend_uchar utype;
@@ -1248,7 +1246,7 @@ ZEND_API int add_assoc_stringl_ex(zval *arg, char *key, uint key_len, char *str,
 	return zend_symtable_update(Z_ARRVAL_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
 }
 
-ZEND_API int add_assoc_unicode_ex(zval *arg, char *key, uint key_len, void *str, int duplicate)
+ZEND_API int add_assoc_unicode_ex(zval *arg, char *key, uint key_len, UChar *str, int duplicate)
 {
 	zval *tmp;
 
@@ -1259,7 +1257,7 @@ ZEND_API int add_assoc_unicode_ex(zval *arg, char *key, uint key_len, void *str,
 }
 
 
-ZEND_API int add_assoc_unicodel_ex(zval *arg, char *key, uint key_len, void *str, uint length, int duplicate)
+ZEND_API int add_assoc_unicodel_ex(zval *arg, char *key, uint key_len, UChar *str, uint length, int duplicate)
 {
 	zval *tmp;
 
@@ -1274,7 +1272,7 @@ ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value)
 	return zend_symtable_update(Z_ARRVAL_P(arg), key, key_len, (void *) &value, sizeof(zval *), NULL);
 }
 
-ZEND_API int add_u_assoc_zval_ex(zval *arg, zend_uchar type, void *key, uint key_len, zval *value)
+ZEND_API int add_u_assoc_zval_ex(zval *arg, zend_uchar type, zstr key, uint key_len, zval *value)
 {
 	return zend_u_symtable_update(Z_ARRVAL_P(arg), type, key, key_len, (void *) &value, sizeof(zval *), NULL);
 }
@@ -1964,16 +1962,16 @@ ZEND_API zend_module_entry* zend_register_internal_module(zend_module_entry *mod
 ZEND_API void zend_check_magic_method_implementation(zend_class_entry *ce, zend_function *fptr, int error_type TSRMLS_DC)
 {
 	unsigned int lcname_len;
-	char *lcname;
+	zstr lcname;
 	int name_len;
 	zend_uchar utype = UG(unicode)?IS_UNICODE:IS_STRING;
 
 	/* we don't care if the function name is longer, in fact lowercasing only
 	 * the beginning of the name speeds up the check process */
 	if (UG(unicode)) {
-		name_len = u_strlen((UChar*)fptr->common.function_name);
+		name_len = u_strlen(fptr->common.function_name.u);
 	} else {
-		name_len = strlen(fptr->common.function_name);
+		name_len = strlen(fptr->common.function_name.s);
 	}
 	lcname = zend_u_str_case_fold(utype, fptr->common.function_name, name_len, 0, &lcname_len);
 
@@ -2002,7 +2000,7 @@ ZEND_API void zend_check_magic_method_implementation(zend_class_entry *ce, zend_
 	    ZEND_U_EQUAL(utype, lcname, lcname_len, ZEND_TOSTRING_FUNC_NAME, sizeof(ZEND_TOSTRING_FUNC_NAME)-1) && fptr->common.num_args != 0) {
 		zend_error(error_type, "Method %v::%s() cannot take arguments", ce->name, ZEND_CALL_FUNC_NAME);
 	}
-	efree(lcname);
+	efree(lcname.v);
 }
 
 /* registers all functions in *library_functions in the function hash */
@@ -2034,12 +2032,12 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 
 	if (scope) {
 		class_name_len = scope->name_length;
-		lc_class_name = zend_str_tolower_dup(scope->name, class_name_len);
+		lc_class_name = zend_str_tolower_dup(scope->name.s, class_name_len);
 	}
 
 	while (ptr->fname) {
 		internal_function->handler = ptr->handler;
-		internal_function->function_name = ptr->fname;
+		internal_function->function_name.s = ptr->fname;
 		internal_function->scope = scope;
 		internal_function->prototype = NULL;
 		if (ptr->arg_info) {
@@ -2062,7 +2060,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 		}
 		if (ptr->flags) {
 			if (!(ptr->flags & ZEND_ACC_PPP_MASK)) {
-				zend_error(error_type, "Invalid access level for %s%s%s() - access must be exactly one of public, protected or private", scope ? scope->name : "", scope ? "::" : "", ptr->fname);
+				zend_error(error_type, "Invalid access level for %s%s%s() - access must be exactly one of public, protected or private", scope ? scope->name.s : "", scope ? "::" : "", ptr->fname);
 				internal_function->fn_flags = ZEND_ACC_PUBLIC | ptr->flags;
 			} else {
 				internal_function->fn_flags = ptr->flags;
@@ -2082,7 +2080,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 				}
 			}
 			if (ptr->flags & ZEND_ACC_STATIC && (!scope || (scope->ce_flags & ZEND_ACC_INTERFACE))) {
-				zend_error(error_type, "Static function %s%s%s() cannot be abstract", scope ? scope->name : "", scope ? "::" : "", ptr->fname);
+				zend_error(error_type, "Static function %s%s%s() cannot be abstract", scope ? scope->name.s : "", scope ? "::" : "", ptr->fname);
 			}
 		} else {
 			if (scope && (scope->ce_flags & ZEND_ACC_INTERFACE)) {
@@ -2094,7 +2092,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 				if (scope) {
 					efree(lc_class_name);
 				}
-				zend_error(error_type, "Method %s%s%s() cannot be a NULL function", scope ? scope->name : "", scope ? "::" : "", ptr->fname);
+				zend_error(error_type, "Method %s%s%s() cannot be a NULL function", scope ? scope->name.s : "", scope ? "::" : "", ptr->fname);
 				zend_unregister_functions(functions, count, target_function_table TSRMLS_CC);
 				return FAILURE;
 			}
@@ -2152,7 +2150,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 		}
 		while (ptr->fname) {
 			if (zend_hash_exists(target_function_table, ptr->fname, strlen(ptr->fname)+1)) {
-				zend_error(error_type, "Function registration failed - duplicate name - %s%s%s", scope ? scope->name : "", scope ? "::" : "", ptr->fname);
+				zend_error(error_type, "Function registration failed - duplicate name - %s%s%s", scope ? scope->name.s : "", scope ? "::" : "", ptr->fname);
 			}
 			ptr++;
 		}
@@ -2366,7 +2364,7 @@ static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class
 		zend_register_functions(class_entry, class_entry->builtin_functions, &class_entry->function_table, MODULE_PERSISTENT TSRMLS_CC);
 	}
 
-	zend_str_tolower_copy(lowercase_name, orig_class_entry->name, class_entry->name_length);
+	zend_str_tolower_copy(lowercase_name, orig_class_entry->name.s, class_entry->name_length);
 	zend_hash_update(CG(class_table), lowercase_name, class_entry->name_length+1, &class_entry, sizeof(zend_class_entry *), NULL);
 	free(lowercase_name);
 	return class_entry;
@@ -2513,7 +2511,7 @@ ZEND_API int zend_disable_class(char *class_name, uint class_name_length TSRMLS_
 static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, zend_class_entry *ce_org, zval *callable, zend_class_entry **ce_ptr, zend_function **fptr_ptr TSRMLS_DC)
 {
 	int retval;
-	char *lcname, *lmname, *mname, *colon;
+	zstr lcname, lmname, mname, colon;
 	unsigned int clen, mlen;
 	zend_function *fptr;
 	zend_class_entry **pce;
@@ -2523,30 +2521,31 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 	*fptr_ptr = NULL;
 
 	if (Z_TYPE_P(callable) == IS_UNICODE) {
-		if ((colon = (char*)u_strstr((UChar*)Z_UNIVAL_P(callable), (UChar*)":\0:\0")) != NULL) {
-			mlen = u_strlen((UChar*)(colon+4));
-			clen = Z_UNILEN_P(callable) - mlen - 2;
-			mname = colon + 4;
+		if ((colon.u = u_strstr(Z_USTRVAL_P(callable), (UChar*)":\0:\0")) != NULL) {
+			mlen = u_strlen(colon.u+2);
+			clen = Z_USTRLEN_P(callable) - mlen - 2;
+			mname.u = colon.u + 2;
 		}
 	} else {
-		if ((colon = strstr(Z_STRVAL_P(callable), "::")) != NULL) {
-			clen = colon - Z_STRVAL_P(callable);
+		if ((colon.s = strstr(Z_STRVAL_P(callable), "::")) != NULL) {
+			clen = colon.s - Z_STRVAL_P(callable);
 			mlen = Z_STRLEN_P(callable) - clen - 2;
-			mname = colon + 2;
+			mname.s = colon.s + 2;
 		}
 	}
-	if (colon != NULL) {
-		if (zend_u_lookup_class(Z_TYPE_P(callable), Z_STRVAL_P(callable), clen, &pce TSRMLS_CC) == SUCCESS) {
+	if (colon.v != NULL) {
+		if (zend_u_lookup_class(Z_TYPE_P(callable), Z_UNIVAL_P(callable), clen, &pce TSRMLS_CC) == SUCCESS) {
 			*ce_ptr = *pce;
 		} else {
 			lcname = zend_u_str_case_fold(Z_TYPE_P(callable), Z_UNIVAL_P(callable), clen, 0, &clen);
 			/* caution: lcname is not '\0' terminated */
-			if (clen == sizeof("self") - 1 && memcmp(lcname, "self", sizeof("self") - 1) == 0) {
+			/* FIXME: Unicode support??? */
+			if (clen == sizeof("self") - 1 && memcmp(lcname.s, "self", sizeof("self") - 1) == 0) {
 				*ce_ptr = EG(scope);
-			} else if (clen == sizeof("parent") - 1 && memcmp(lcname, "parent", sizeof("parent") - 1) == 0 && EG(active_op_array)->scope) {
+			} else if (clen == sizeof("parent") - 1 && memcmp(lcname.s, "parent", sizeof("parent") - 1) == 0 && EG(active_op_array)->scope) {
 				*ce_ptr = EG(scope) ? EG(scope)->parent : NULL;
 			}
-			efree(lcname);
+			efree(lcname.v);
 		}
 		if (!*ce_ptr) {
 			return 0;
@@ -2557,7 +2556,7 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 		}
 		lmname = zend_u_str_case_fold(Z_TYPE_P(callable), mname, mlen, 0, &mlen);
 	} else {
-		lmname = zend_u_str_case_fold(Z_TYPE_P(callable), Z_STRVAL_P(callable), Z_STRLEN_P(callable), 0, &mlen);
+		lmname = zend_u_str_case_fold(Z_TYPE_P(callable), Z_UNIVAL_P(callable), Z_UNILEN_P(callable), 0, &mlen);
 		if (ce_org) {
 			ftable = &ce_org->function_table;
 			*ce_ptr = ce_org;
@@ -2566,7 +2565,7 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 		}
 	}
 
-	retval = zend_hash_find(ftable, lmname, mlen+1, (void**)&fptr) == SUCCESS ? 1 : 0;
+	retval = zend_u_hash_find(ftable, Z_TYPE_P(callable), lmname, mlen+1, (void**)&fptr) == SUCCESS ? 1 : 0;
 
 	if (!retval) {
 		if (*zobj_ptr_ptr && *ce_ptr && (*ce_ptr)->__call != 0) {
@@ -2596,13 +2595,13 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 			}
 		}
 	}
-	efree(lmname);
+	efree(lmname.v);
 	return retval;
 }
 
 ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, zval *callable_name, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zval ***zobj_ptr_ptr TSRMLS_DC)
 {
-	char *lcname;
+	zstr lcname;
 	unsigned int lcname_len;
 	zend_class_entry *ce_local, **pce;
 	zend_function *fptr_local;
@@ -2724,7 +2723,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, zval *c
 						} else if (zend_u_lookup_class(Z_TYPE_PP(obj), Z_UNIVAL_PP(obj), Z_UNILEN_PP(obj), &pce TSRMLS_CC) == SUCCESS) {
 							ce = *pce;
 						}
-						efree(lcname);
+						efree(lcname.v);
 					} else {
 						ce = Z_OBJCE_PP(obj); /* TBFixed: what if it's overloaded? */
 
@@ -2735,7 +2734,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, zval *c
 								Z_TYPE_P(callable_name) = IS_UNICODE;
 								Z_USTRLEN_P(callable_name) = ce->name_length + Z_UNILEN_PP(method) + 2;
 								Z_USTRVAL_P(callable_name) = eumalloc(Z_USTRLEN_P(callable_name)+1);
-								memcpy(Z_USTRVAL_P(callable_name), ce->name, UBYTES(ce->name_length));
+								memcpy(Z_USTRVAL_P(callable_name), ce->name.u, UBYTES(ce->name_length));
 								Z_USTRVAL_P(callable_name)[ce->name_length] = ':';
 								Z_USTRVAL_P(callable_name)[ce->name_length+1] = ':';
 								if (Z_TYPE_PP(method) == IS_UNICODE) {
@@ -2752,7 +2751,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, zval *c
 								Z_TYPE_P(callable_name) = IS_STRING;
 								Z_STRLEN_P(callable_name) = ce->name_length + Z_UNILEN_PP(method) + 2;
 								Z_STRVAL_P(callable_name) = emalloc(Z_STRLEN_P(callable_name)+1);
-								memcpy(Z_STRVAL_P(callable_name), ce->name, ce->name_length);
+								memcpy(Z_STRVAL_P(callable_name), ce->name.s, ce->name_length);
 								Z_STRVAL_P(callable_name)[ce->name_length] = ':';
 								Z_STRVAL_P(callable_name)[ce->name_length+1] = ':';
 								if (Z_TYPE_PP(method) == IS_STRING) {
@@ -2849,7 +2848,7 @@ ZEND_API char *zend_get_module_version(char *module_name)
 	return module->version;
 }
 
-ZEND_API int zend_u_declare_property_ex(zend_class_entry *ce, zend_uchar type, void *name, int name_length, zval *property, int access_type, char *doc_comment, int doc_comment_len TSRMLS_DC)
+ZEND_API int zend_u_declare_property_ex(zend_class_entry *ce, zend_uchar type, zstr name, int name_length, zval *property, int access_type, char *doc_comment, int doc_comment_len TSRMLS_DC)
 {
 	zend_property_info property_info;
 	HashTable *target_symbol_table;
@@ -2876,7 +2875,7 @@ ZEND_API int zend_u_declare_property_ex(zend_class_entry *ce, zend_uchar type, v
 	}
 	switch (access_type & ZEND_ACC_PPP_MASK) {
 		case ZEND_ACC_PRIVATE: {
-				char *priv_name;
+				zstr priv_name;
 				int priv_name_length;
 
 				zend_u_mangle_property_name(&priv_name, &priv_name_length, type, ce->name, ce->name_length, name, name_length, ce->type & ZEND_INTERNAL_CLASS);
@@ -2886,10 +2885,10 @@ ZEND_API int zend_u_declare_property_ex(zend_class_entry *ce, zend_uchar type, v
 			}
 			break;
 		case ZEND_ACC_PROTECTED: {
-				char *prot_name;
+				zstr prot_name;
 				int prot_name_length;
 
-				zend_u_mangle_property_name(&prot_name, &prot_name_length, type, "*", 1, name, name_length, ce->type & ZEND_INTERNAL_CLASS);
+				zend_u_mangle_property_name(&prot_name, &prot_name_length, type, (zstr)"*", 1, name, name_length, ce->type & ZEND_INTERNAL_CLASS);
 				zend_u_hash_update(target_symbol_table, type, prot_name, prot_name_length+1, &property, sizeof(zval *), NULL);
 				property_info.name = prot_name;
 				property_info.name_length = prot_name_length;
@@ -2897,17 +2896,17 @@ ZEND_API int zend_u_declare_property_ex(zend_class_entry *ce, zend_uchar type, v
 			break;
 		case ZEND_ACC_PUBLIC:
 			if (ce->parent) {
-				char *prot_name;
+				zstr prot_name;
 				int prot_name_length;
 
-				zend_u_mangle_property_name(&prot_name, &prot_name_length, type, "*", 1, name, name_length, ce->type & ZEND_INTERNAL_CLASS);
+				zend_u_mangle_property_name(&prot_name, &prot_name_length, type, (zstr)"*", 1, name, name_length, ce->type & ZEND_INTERNAL_CLASS);
 				zend_u_hash_del(target_symbol_table, type, prot_name, prot_name_length+1);
-				pefree(prot_name, ce->type & ZEND_INTERNAL_CLASS);
+				pefree(prot_name.v, ce->type & ZEND_INTERNAL_CLASS);
 			}
 			zend_u_hash_update(target_symbol_table, type, name, name_length+1, &property, sizeof(zval *), NULL);
-			property_info.name = ce->type & ZEND_INTERNAL_CLASS ?
-				(type==IS_UNICODE?(char*)zend_ustrndup(name, name_length):zend_strndup(name, name_length)) :
-				(type==IS_UNICODE?(char*)eustrndup(name, name_length):estrndup(name, name_length));
+			property_info.name.s = ce->type & ZEND_INTERNAL_CLASS ?
+				(type==IS_UNICODE?(char*)zend_ustrndup(name.u, name_length):zend_strndup(name.s, name_length)) :
+				(type==IS_UNICODE?(char*)eustrndup(name.u, name_length):estrndup(name.s, name_length));
 			property_info.name_length = name_length;
 			break;
 	}
@@ -2924,17 +2923,17 @@ ZEND_API int zend_u_declare_property_ex(zend_class_entry *ce, zend_uchar type, v
 
 ZEND_API int zend_declare_property_ex(zend_class_entry *ce, char *name, int name_length, zval *property, int access_type, char *doc_comment, int doc_comment_len TSRMLS_DC)
 {
-	return zend_u_declare_property_ex(ce, IS_STRING, name, name_length, property, access_type, NULL, 0 TSRMLS_CC);
+	return zend_u_declare_property_ex(ce, IS_STRING, (zstr)name, name_length, property, access_type, NULL, 0 TSRMLS_CC);
 }
 
-ZEND_API int zend_u_declare_property(zend_class_entry *ce, zend_uchar type, void *name, int name_length, zval *property, int access_type TSRMLS_DC)
+ZEND_API int zend_u_declare_property(zend_class_entry *ce, zend_uchar type, zstr name, int name_length, zval *property, int access_type TSRMLS_DC)
 {
 	return zend_u_declare_property_ex(ce, type, name, name_length, property, access_type, NULL, 0 TSRMLS_CC);
 }
 
 ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_length, zval *property, int access_type TSRMLS_DC)
 {
-	return zend_u_declare_property_ex(ce, IS_STRING, name, name_length, property, access_type, NULL, 0 TSRMLS_CC);
+	return zend_u_declare_property_ex(ce, IS_STRING, (zstr)name, name_length, property, access_type, NULL, 0 TSRMLS_CC);
 }
 
 ZEND_API int zend_declare_property_null(zend_class_entry *ce, char *name, int name_length, int access_type TSRMLS_DC)
@@ -3098,12 +3097,12 @@ ZEND_API void zend_update_property(zend_class_entry *scope, zval *object, char *
 	EG(scope) = scope;
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		char *class_name;
+		zstr class_name;
 		zend_uint class_name_len;
 
 		zend_get_object_classname(object, &class_name, &class_name_len TSRMLS_CC);
 
-		zend_error(E_CORE_ERROR, "Property %s of class %v cannot be updated", name, class_name);
+		zend_error(E_CORE_ERROR, "Property %s of class %v cannot be updated", name, class_name.v);
 	}
 	MAKE_STD_ZVAL(property);
 	ZVAL_ASCII_STRINGL(property, name, name_length, 1);
@@ -3251,7 +3250,7 @@ ZEND_API int zend_update_static_property(zend_class_entry *scope, char *name, in
 	zend_class_entry *old_scope = EG(scope);
 
 	EG(scope) = scope;
-	property = zend_std_get_static_property(scope, IS_STRING, name, name_length, 0 TSRMLS_CC);
+	property = zend_std_get_static_property(scope, IS_STRING, (zstr)name, name_length, 0 TSRMLS_CC);
 	EG(scope) = old_scope;
 	if (!property) {
 		return FAILURE;
@@ -3419,11 +3418,11 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, char *n
 	EG(scope) = scope;
 
 	if (!Z_OBJ_HT_P(object)->read_property) {
-		char *class_name;
+		zstr class_name;
 		zend_uint class_name_len;
 
 		zend_get_object_classname(object, &class_name, &class_name_len TSRMLS_CC);
-		zend_error(E_CORE_ERROR, "Property %s of class %v cannot be read", name, class_name);
+		zend_error(E_CORE_ERROR, "Property %s of class %v cannot be read", name, class_name.v);
 	}
 
 	MAKE_STD_ZVAL(property);
@@ -3441,7 +3440,7 @@ ZEND_API zval *zend_read_static_property(zend_class_entry *scope, char *name, in
 	zend_class_entry *old_scope = EG(scope);
 
 	EG(scope) = scope;
-	property = zend_std_get_static_property(scope, IS_STRING, name, name_length, silent TSRMLS_CC);
+	property = zend_std_get_static_property(scope, IS_STRING, (zstr)name, name_length, silent TSRMLS_CC);
 	EG(scope) = old_scope;
 
 	return property?*property:NULL;

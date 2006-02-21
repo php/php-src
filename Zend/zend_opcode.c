@@ -75,7 +75,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 
 	op_array->T = 0;
 
-	op_array->function_name = NULL;
+	op_array->function_name.v = NULL;
 	op_array->filename = zend_get_compiled_filename(TSRMLS_C);
 	op_array->script_encoding = zend_get_compiled_script_encoding(TSRMLS_C);
 	op_array->doc_comment = NULL;
@@ -171,7 +171,7 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 			zend_hash_destroy(&ce->default_properties);
 			zend_hash_destroy(&ce->properties_info);
 			zend_hash_destroy(&ce->default_static_members);
-			efree(ce->name);
+			efree(ce->name.v);
 			zend_hash_destroy(&ce->function_table);
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0 && ce->interfaces) {
@@ -186,7 +186,7 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 			zend_hash_destroy(&ce->default_properties);
 			zend_hash_destroy(&ce->properties_info);
 			zend_hash_destroy(&ce->default_static_members);
-			free(ce->name);
+			free(ce->name.v);
 			zend_hash_destroy(&ce->function_table);
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0) {
@@ -226,7 +226,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 		i = op_array->last_var;
 		while (i > 0) {
 			i--;
-			efree(op_array->vars[i].name);
+			efree(op_array->vars[i].name.v);
 		}
 		efree(op_array->vars);
 	}
@@ -248,8 +248,8 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 	}
 	efree(op_array->opcodes);
 
-	if (op_array->function_name) {
-		efree(op_array->function_name);
+	if (op_array->function_name.v) {
+		efree(op_array->function_name.v);
 	}
 	if (op_array->doc_comment) {
 		efree(op_array->doc_comment);
@@ -265,9 +265,9 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 	}
 	if (op_array->arg_info) {
 		for (i=0; i<op_array->num_args; i++) {
-			efree(op_array->arg_info[i].name);
-			if (op_array->arg_info[i].class_name) {
-				efree(op_array->arg_info[i].class_name);
+			efree(op_array->arg_info[i].name.v);
+			if (op_array->arg_info[i].class_name.v) {
+				efree(op_array->arg_info[i].class_name.v);
 			}
 		}
 		efree(op_array->arg_info);

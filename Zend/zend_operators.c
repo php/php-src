@@ -621,7 +621,6 @@ ZEND_API void _convert_to_unicode(zval *op TSRMLS_DC ZEND_FILE_LINE_DC)
 			break;
 		case IS_RESOURCE: {
 			long tmp = Z_LVAL_P(op);
-			TSRMLS_FETCH();
 
 			zend_list_delete(Z_LVAL_P(op));
 			Z_USTRVAL_P(op) = eumalloc_rel(sizeof("Resource id #")-1 + MAX_LENGTH_OF_LONG + 1);
@@ -629,20 +628,16 @@ ZEND_API void _convert_to_unicode(zval *op TSRMLS_DC ZEND_FILE_LINE_DC)
 			break;
 		}
 		case IS_LONG: {
-			int32_t capacity = MAX_LENGTH_OF_LONG + 1;
 			long lval = Z_LVAL_P(op);
 
-			Z_USTRVAL_P(op) = eumalloc_rel(capacity);
+			Z_USTRVAL_P(op) = eumalloc_rel(MAX_LENGTH_OF_LONG + 1);
 			Z_USTRLEN_P(op) = u_sprintf(Z_USTRVAL_P(op), "%ld", lval);
 			break;
 	    }
 		case IS_DOUBLE: {
-			int32_t capacity;
 			double dval = Z_DVAL_P(op);
-			TSRMLS_FETCH();
 
-		   	capacity = MAX_LENGTH_OF_DOUBLE + EG(precision) + 1;
-			Z_USTRVAL_P(op) = eumalloc_rel(capacity);
+			Z_USTRVAL_P(op) = eumalloc_rel(MAX_LENGTH_OF_DOUBLE + EG(precision) + 1);
 			Z_USTRLEN_P(op) = u_sprintf(Z_USTRVAL_P(op), "%.*G", (int) EG(precision), dval);
 			break;
 		}
@@ -653,8 +648,6 @@ ZEND_API void _convert_to_unicode(zval *op TSRMLS_DC ZEND_FILE_LINE_DC)
 			Z_USTRLEN_P(op) = sizeof("Array")-1;
 			break;
 		case IS_OBJECT: {
-			TSRMLS_FETCH();
-
 			convert_object_to_type(op, IS_UNICODE, convert_to_unicode);
 
 			if (Z_TYPE_P(op) == IS_UNICODE) {
@@ -1351,7 +1344,7 @@ ZEND_API int add_string_to_string(zval *result, zval *op1, zval *op2)
 	assert(Z_TYPE_P(op1) == Z_TYPE_P(op2));
 
 	if (Z_TYPE_P(op1) == IS_UNICODE) {
-		int32_t length = Z_USTRLEN_P(op1) + Z_USTRLEN_P(op2);
+		int length = Z_USTRLEN_P(op1) + Z_USTRLEN_P(op2);
 
 		Z_USTRVAL_P(result) = eurealloc(Z_USTRVAL_P(op1), length+1);
 		u_memcpy(Z_USTRVAL_P(result)+Z_USTRLEN_P(op1), Z_USTRVAL_P(op2), Z_USTRLEN_P(op2));
@@ -2077,11 +2070,11 @@ ZEND_API char *zend_str_tolower_dup(const char *source, unsigned int length)
 	return zend_str_tolower_copy((char *)emalloc(length+1), source, length);
 }
 
-ZEND_API void *zend_u_str_tolower_copy(zend_uchar type, void *dest, const void *source, unsigned int length)
+ZEND_API zstr zend_u_str_tolower_copy(zend_uchar type, zstr dest, zstr source, unsigned int length)
 {
 	if (type == IS_UNICODE) {
-		register UChar *str = (UChar*)source;
-		register UChar *result = (UChar*)dest;
+		register UChar *str = source.u;
+		register UChar *result = dest.u;
 		register UChar *end = str + length;
 
 		while (str < end) {
@@ -2091,16 +2084,16 @@ ZEND_API void *zend_u_str_tolower_copy(zend_uchar type, void *dest, const void *
 
 		return dest;
 	} else {
-		return zend_str_tolower_copy(dest, source, length);
+		return (zstr)zend_str_tolower_copy(dest.s, source.s, length);
 	}
 }
 
-ZEND_API void *zend_u_str_tolower_dup(zend_uchar type, const void *source, unsigned int length)
+ZEND_API zstr zend_u_str_tolower_dup(zend_uchar type, zstr source, unsigned int length)
 {
 	if (type == IS_UNICODE) {
-		return zend_u_str_tolower_copy(IS_UNICODE, emalloc(UBYTES(length+1)), source, length);
+		return zend_u_str_tolower_copy(IS_UNICODE, (zstr)emalloc(UBYTES(length+1)), source, length);
 	} else {
-		return zend_str_tolower_copy((char*)emalloc(length+1), (char*)source, length);
+		return (zstr)zend_str_tolower_copy((char*)emalloc(length+1), source.s, length);
 	}
 }
 
@@ -2115,9 +2108,9 @@ ZEND_API void zend_str_tolower(char *str, unsigned int length)
 	}
 }
 
-ZEND_API void zend_u_str_tolower(zend_uchar type, void *str, unsigned int length) {
+ZEND_API void zend_u_str_tolower(zend_uchar type, zstr str, unsigned int length) {
 	if (type == IS_UNICODE) {
-		register UChar *p = (UChar*)str;
+		register UChar *p = str.u;
 		register UChar *end = p + length;
 
 		while (p < end) {
@@ -2125,29 +2118,29 @@ ZEND_API void zend_u_str_tolower(zend_uchar type, void *str, unsigned int length
 			p++;
 		}
 	} else {
-		zend_str_tolower((char*)str, length);
+		zend_str_tolower(str.s, length);
 	}
 }
 
-ZEND_API void *zend_u_str_case_fold(zend_uchar type, const void *source, unsigned int length, zend_bool normalize, unsigned int *new_len)
+ZEND_API zstr zend_u_str_case_fold(zend_uchar type, zstr source, unsigned int length, zend_bool normalize, unsigned int *new_len)
 {
 	if (type == IS_UNICODE) {
 		UChar *ret;
-		int32_t ret_len;
+		int ret_len;
 
 		if (normalize) {
-			zend_normalize_identifier(&ret, &ret_len, (UChar*)source, length, 1);
+			zend_normalize_identifier(&ret, &ret_len, source.u, length, 1);
 		} else {
 			UErrorCode status = U_ZERO_ERROR;
 
-			zend_case_fold_string(&ret, &ret_len, (UChar*)source, length, U_FOLD_CASE_DEFAULT, &status);
+			zend_case_fold_string(&ret, &ret_len, source.u, length, U_FOLD_CASE_DEFAULT, &status);
 		}
 
 		*new_len = ret_len;
-		return ret;
+		return (zstr)ret;
 	} else {
 		*new_len = length;
-		return zend_str_tolower_dup(source, length);
+		return (zstr)zend_str_tolower_dup(source.s, length);
 	}
 }
 
@@ -2164,9 +2157,9 @@ ZEND_API int zend_binary_strcmp(char *s1, uint len1, char *s2, uint len2)
 }
 
 
-ZEND_API int zend_u_binary_strcmp(UChar *s1, int32_t len1, UChar *s2, int32_t len2)
+ZEND_API int zend_u_binary_strcmp(UChar *s1, int len1, UChar *s2, int len2)
 {
-	int32_t result = u_strCompare(s1, len1, s2, len2, 1);
+	int result = u_strCompare(s1, len1, s2, len2, 1);
 	return ZEND_NORMALIZE_BOOL(result);
 }
 
@@ -2184,11 +2177,11 @@ ZEND_API int zend_binary_strncmp(char *s1, uint len1, char *s2, uint len2, uint 
 }
 
 
-ZEND_API int zend_u_binary_strncmp(UChar *s1, int32_t len1, UChar *s2, int32_t len2, uint length)
+ZEND_API int zend_u_binary_strncmp(UChar *s1, int len1, UChar *s2, int len2, uint length)
 {
 	int32_t off1 = 0, off2 = 0;
 	UChar32 c1, c2;
-	int32_t result = 0;
+	int result = 0;
 
 	for( ; length > 0; --length) {
 		if (off1 >= len1 || off2 >= len2) {
@@ -2226,10 +2219,10 @@ ZEND_API int zend_binary_strcasecmp(char *s1, uint len1, char *s2, uint len2)
 }
 
 
-ZEND_API int zend_u_binary_strcasecmp(UChar *s1, int32_t len1, UChar *s2, int32_t len2)
+ZEND_API int zend_u_binary_strcasecmp(UChar *s1, int len1, UChar *s2, int len2)
 {
 	UErrorCode status = U_ZERO_ERROR;
-	int32_t result = u_strCaseCompare(s1, len1, s2, len2, U_COMPARE_CODE_POINT_ORDER, &status);
+	int result = u_strCaseCompare(s1, len1, s2, len2, U_COMPARE_CODE_POINT_ORDER, &status);
 	return ZEND_NORMALIZE_BOOL(result);
 }
 
@@ -2258,11 +2251,11 @@ ZEND_API int zend_binary_strncasecmp(char *s1, uint len1, char *s2, uint len2, u
  * codepoints to compare, we take a hit upfront by iterating over both strings
  * until we find them. Then we can simply use u_strCaseCompare().
  */
-ZEND_API int zend_u_binary_strncasecmp(UChar *s1, int32_t len1, UChar *s2, int32_t len2, uint length)
+ZEND_API int zend_u_binary_strncasecmp(UChar *s1, int len1, UChar *s2, int len2, uint length)
 {
 	UErrorCode status = U_ZERO_ERROR;
 	int32_t off1 = 0, off2 = 0;
-	int32_t result;
+	int result;
 
 	U16_FWD_N(s1, off1, len1, length);
 	U16_FWD_N(s2, off2, len2, length);
@@ -2433,7 +2426,7 @@ ZEND_API void zend_locale_usprintf_double(zval *op ZEND_FILE_LINE_DC)
 {
 	double dval = Z_DVAL_P(op);
 	UFILE *strf;
-	int32_t capacity;
+	int capacity;
 
 	TSRMLS_FETCH();
 
@@ -2460,7 +2453,7 @@ ZEND_API void zend_locale_usprintf_long(zval *op ZEND_FILE_LINE_DC)
 {
 	long lval = Z_LVAL_P(op);
 	UFILE *strf;
-	int32_t capacity;
+	int capacity;
 
 	capacity = MAX_LENGTH_OF_LONG + 1;
 	Z_USTRVAL_P(op) = eumalloc_rel(capacity);

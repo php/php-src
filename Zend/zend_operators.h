@@ -137,9 +137,9 @@ static inline zend_uchar is_numeric_string(char *str, int length, long *lval, do
 	return 0;
 }
 
-static inline zend_uchar is_numeric_unicode(UChar *str, int32_t length, long *lval, double *dval, zend_bool allow_errors)
+static inline zend_uchar is_numeric_unicode(UChar *str, int length, long *lval, double *dval, zend_bool allow_errors)
 {
-	int32_t local_lval;
+	long local_lval;
 	double local_dval;
 	UChar *end_ptr_long, *end_ptr_double;
 	int conv_base=10;
@@ -203,7 +203,7 @@ static inline zend_uchar is_numeric_unicode(UChar *str, int32_t length, long *lv
 }
 
 static inline UChar*
-zend_u_memnstr(UChar *haystack, UChar *needle, int32_t needle_len, UChar *end)
+zend_u_memnstr(UChar *haystack, UChar *needle, int needle_len, UChar *end)
 {
 	return u_strFindFirst(haystack, end - haystack, needle, needle_len);
 }
@@ -275,11 +275,11 @@ ZEND_API void zend_str_tolower(char *str, unsigned int length);
 ZEND_API char *zend_str_tolower_copy(char *dest, const char *source, unsigned int length);
 ZEND_API char *zend_str_tolower_dup(const char *source, unsigned int length);
 
-ZEND_API void zend_u_str_tolower(zend_uchar type, void *str, unsigned int length);
-ZEND_API void *zend_u_str_tolower_copy(zend_uchar type, void *dest, const void *source, unsigned int length);
-ZEND_API void *zend_u_str_tolower_dup(zend_uchar type, const void *source, unsigned int length);
+ZEND_API void zend_u_str_tolower(zend_uchar type, zstr str, unsigned int length);
+ZEND_API zstr zend_u_str_tolower_copy(zend_uchar type, zstr dest, zstr source, unsigned int length);
+ZEND_API zstr zend_u_str_tolower_dup(zend_uchar type, zstr source, unsigned int length);
 
-ZEND_API void *zend_u_str_case_fold(zend_uchar type, const void *source, unsigned int length, zend_bool normalize, unsigned int *new_len);
+ZEND_API zstr zend_u_str_case_fold(zend_uchar type, zstr source, unsigned int length, zend_bool normalize, unsigned int *new_len);
 
 ZEND_API int zend_binary_zval_strcmp(zval *s1, zval *s2);
 ZEND_API int zend_binary_zval_strncmp(zval *s1, zval *s2, zval *s3);
@@ -291,10 +291,10 @@ ZEND_API int zend_binary_strcasecmp(char *s1, uint len1, char *s2, uint len2);
 ZEND_API int zend_binary_strncasecmp(char *s1, uint len1, char *s2, uint len2, uint length);
 
 ZEND_API int zend_u_binary_zval_strcmp(zval *s1, zval *s2);
-ZEND_API int zend_u_binary_strcmp(UChar *s1, int32_t len1, UChar *s2, int32_t len2);
-ZEND_API int zend_u_binary_strncmp(UChar *s1, int32_t len1, UChar *s2, int32_t len2, uint length);
-ZEND_API int zend_u_binary_strcasecmp(UChar *s1, int32_t len1, UChar *s2, int32_t len2);
-ZEND_API int zend_u_binary_strncasecmp(UChar *s1, int32_t len1, UChar *s2, int32_t len2, uint length);
+ZEND_API int zend_u_binary_strcmp(UChar *s1, int len1, UChar *s2, int len2);
+ZEND_API int zend_u_binary_strncmp(UChar *s1, int len1, UChar *s2, int len2, uint length);
+ZEND_API int zend_u_binary_strcasecmp(UChar *s1, int len1, UChar *s2, int len2);
+ZEND_API int zend_u_binary_strncasecmp(UChar *s1, int len1, UChar *s2, int len2, uint length);
 
 ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2);
 ZEND_API void zendi_u_smart_strcmp(zval *result, zval *s1, zval *s2);
@@ -388,8 +388,8 @@ END_EXTERN_C()
 #define Z_OBJPROP(zval)			Z_OBJ_HT((zval))->get_properties(&(zval) TSRMLS_CC)
 #define Z_OBJ_HANDLER(zval, hf) Z_OBJ_HT((zval))->hf
 #define Z_RESVAL(zval)			(zval).value.lval
-#define Z_UNIVAL(zval)			(Z_TYPE(zval)==IS_UNICODE?(char*)Z_USTRVAL(zval):Z_STRVAL(zval))
-#define Z_UNILEN(zval)			(Z_TYPE(zval)==IS_UNICODE?Z_USTRLEN(zval):Z_STRLEN(zval))
+#define Z_UNIVAL(zval)			((zstr)(Z_STRVAL(zval)))
+#define Z_UNILEN(zval)			Z_STRLEN(zval)
 
 #define Z_LVAL_P(zval_p)		Z_LVAL(*zval_p)
 #define Z_BVAL_P(zval_p)		Z_BVAL(*zval_p)

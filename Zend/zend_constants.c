@@ -32,13 +32,14 @@ void free_zend_constant(zend_constant *c)
 	if (!(c->flags & CONST_PERSISTENT)) {
 		zval_dtor(&c->value);
 	}
-	free(c->name);
+	free(c->name.v);
 }
 
 
 void copy_zend_constant(zend_constant *c)
 {
-	c->name = zend_strndup(c->name, c->name_len - 1);
+	/* FIXME: Unicode support??? */
+	c->name.s = zend_strndup(c->name.s, c->name_len - 1);
 	if (!(c->flags & CONST_PERSISTENT)) {
 		zval_copy_ctor(&c->value);
 	}
@@ -122,25 +123,25 @@ void zend_register_standard_constants(TSRMLS_D)
 		c.flags = CONST_PERSISTENT;
 		c.module_number = 0;
 
-		c.name = zend_strndup(ZEND_STRL("TRUE"));
+		c.name.s = zend_strndup(ZEND_STRL("TRUE"));
 		c.name_len = sizeof("TRUE");
 		Z_LVAL(c.value) = 1;
 		Z_TYPE(c.value) = IS_BOOL;
 		zend_register_constant(&c TSRMLS_CC);
 
-		c.name = zend_strndup(ZEND_STRL("FALSE"));
+		c.name.s = zend_strndup(ZEND_STRL("FALSE"));
 		c.name_len = sizeof("FALSE");
 		Z_LVAL(c.value) = 0;
 		Z_TYPE(c.value) = IS_BOOL;
 		zend_register_constant(&c TSRMLS_CC);
 
-		c.name = zend_strndup(ZEND_STRL("ZEND_THREAD_SAFE"));
+		c.name.s = zend_strndup(ZEND_STRL("ZEND_THREAD_SAFE"));
 		c.name_len = sizeof("ZEND_THREAD_SAFE");
 		Z_LVAL(c.value) = ZTS_V;
 		Z_TYPE(c.value) = IS_BOOL;
 		zend_register_constant(&c TSRMLS_CC);
 
-		c.name = zend_strndup(ZEND_STRL("NULL"));
+		c.name.s = zend_strndup(ZEND_STRL("NULL"));
 		c.name_len = sizeof("NULL");
 		Z_TYPE(c.value) = IS_NULL;
 		zend_register_constant(&c TSRMLS_CC);
@@ -173,7 +174,7 @@ ZEND_API void zend_register_long_constant(char *name, uint name_len, long lval, 
 	Z_TYPE(c.value) = IS_LONG;
 	Z_LVAL(c.value) = lval;
 	c.flags = flags;
-	c.name = zend_strndup(name, name_len-1);
+	c.name.s = zend_strndup(name, name_len-1);
 	c.name_len = name_len;
 	c.module_number = module_number;
 	zend_register_constant(&c TSRMLS_CC);
@@ -187,7 +188,7 @@ ZEND_API void zend_register_double_constant(char *name, uint name_len, double dv
 	Z_TYPE(c.value) = IS_DOUBLE;
 	Z_DVAL(c.value) = dval;
 	c.flags = flags;
-	c.name = zend_strndup(name, name_len-1);
+	c.name.s = zend_strndup(name, name_len-1);
 	c.name_len = name_len;
 	c.module_number = module_number;
 	zend_register_constant(&c TSRMLS_CC);
@@ -202,7 +203,7 @@ ZEND_API void zend_register_stringl_constant(char *name, uint name_len, char *st
 	Z_STRVAL(c.value) = strval;
 	Z_STRLEN(c.value) = strlen;
 	c.flags = flags;
-	c.name = zend_strndup(name, name_len-1);
+	c.name.s = zend_strndup(name, name_len-1);
 	c.name_len = name_len;
 	c.module_number = module_number;
 	zend_register_constant(&c TSRMLS_CC);
@@ -215,22 +216,27 @@ ZEND_API void zend_register_string_constant(char *name, uint name_len, char *str
 }
 
 
-ZEND_API int zend_u_get_constant(zend_uchar type, void *name, uint name_len, zval *result TSRMLS_DC)
+ZEND_API int zend_u_get_constant(zend_uchar type, zstr name, uint name_len, zval *result TSRMLS_DC)
 {
 	zend_constant *c;
 	int retval = 1;
-	char *lookup_name;
-	char *colon;
+	zstr lookup_name;
+	zstr colon;
 
-	if ((UG(unicode) && (colon = (char*)u_memchr((UChar*)name, ':', name_len)) && ((UChar*)colon)[1] == ':') ||
-	    (!UG(unicode) && (colon = memchr(name, ':', name_len)) && colon[1] == ':')) {
+	if ((UG(unicode) && (colon.u = u_memchr(name.u, ':', name_len)) && colon.u[1] == ':') ||
+	    (!UG(unicode) && (colon.s = memchr(name.s, ':', name_len)) && colon.s[1] == ':')) {
 		/* class constant */
 		zend_class_entry **ce = NULL, *scope;
-		int class_name_len = UG(unicode)?((colon-(char*)name)/sizeof(UChar)):colon-(char*)name;
+		int class_name_len = UG(unicode)?colon.u-name.u:colon.s-name.s;
 		int const_name_len = name_len - class_name_len - 2;
-		char *constant_name = colon + (UG(unicode)?UBYTES(2):2);
+		zstr constant_name, class_name;
 		zval **ret_constant;
-		char *class_name;
+
+		if (UG(unicode)) {
+			constant_name.u = colon.u + 2;
+		} else {
+			constant_name.s = colon.s + 2;
+		}
 
 		if (EG(in_execution)) {
 			scope = EG(scope);
@@ -239,9 +245,9 @@ ZEND_API int zend_u_get_constant(zend_uchar type, void *name, uint name_len, zva
 		}
 
 		if (UG(unicode)) {
-			class_name = (char*)eustrndup((UChar*)name, class_name_len);
+			class_name.u = eustrndup(name.u, class_name_len);
 		} else {
-			class_name = estrndup(name, class_name_len);
+			class_name.s = estrndup(name.s, class_name_len);
 		}
 
 		if (class_name_len == sizeof("self")-1 &&
@@ -266,7 +272,7 @@ ZEND_API int zend_u_get_constant(zend_uchar type, void *name, uint name_len, zva
 				retval = 0;
 			}
 		}
-		efree(class_name);
+		efree(class_name.v);
 
 		if (retval && ce) {
 			if (zend_u_hash_find(&((*ce)->constants_table), type, constant_name, const_name_len+1, (void **) &ret_constant) != SUCCESS) {
@@ -291,13 +297,13 @@ ZEND_API int zend_u_get_constant(zend_uchar type, void *name, uint name_len, zva
 		lookup_name = zend_u_str_case_fold(type, name, name_len, 1, &lookup_name_len);
 
 		if (zend_u_hash_find(EG(zend_constants), type, lookup_name, lookup_name_len+1, (void **) &c)==SUCCESS) {
-			if ((c->flags & CONST_CS) && memcmp(c->name, name, UG(unicode)?UBYTES(name_len):name_len)!=0) {
+			if ((c->flags & CONST_CS) && memcmp(c->name.v, name.v, UG(unicode)?UBYTES(name_len):name_len)!=0) {
 				retval=0;
 			}
 		} else {
 			retval=0;
 		}
-		efree(lookup_name);
+		efree(lookup_name.v);
 	}
 
 	if (retval) {
@@ -312,14 +318,14 @@ ZEND_API int zend_u_get_constant(zend_uchar type, void *name, uint name_len, zva
 
 ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC)
 {
-	return zend_u_get_constant(IS_STRING, name, name_len, result TSRMLS_CC);
+	return zend_u_get_constant(IS_STRING, (zstr)name, name_len, result TSRMLS_CC);
 }
 
 ZEND_API int zend_u_register_constant(zend_uchar type, zend_constant *c TSRMLS_DC)
 {
 	unsigned int  lookup_name_len;
-	char *lookup_name = NULL;
-	char *name;
+	zstr lookup_name;
+	zstr name;
 	int ret = SUCCESS;
 
 #if 0
@@ -333,18 +339,19 @@ ZEND_API int zend_u_register_constant(zend_uchar type, zend_constant *c TSRMLS_D
 	} else {
 		lookup_name_len = c->name_len;
 		name = c->name;
+		lookup_name.v = NULL;
 	}
 
 	if (zend_u_hash_add(EG(zend_constants), type, name, lookup_name_len, (void *) c, sizeof(zend_constant), NULL)==FAILURE) {
 		zend_error(E_NOTICE,"Constant %R already defined", type, name);
-		free(c->name);
+		free(c->name.v);
 		if (!(c->flags & CONST_PERSISTENT)) {
 			zval_dtor(&c->value);
 		}
 		ret = FAILURE;
 	}
-	if (lookup_name) {
-		efree(lookup_name);
+	if (lookup_name.v) {
+		efree(lookup_name.v);
 	}
 	return ret;
 }

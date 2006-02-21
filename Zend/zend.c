@@ -244,7 +244,7 @@ static uint zend_version_info_length;
 static void print_hash(HashTable *ht, int indent, zend_bool is_object TSRMLS_DC)
 {
 	zval **tmp;
-	char *string_key;
+	zstr string_key;
 	HashPosition iterator;
 	ulong num_key;
 	uint str_len;
@@ -272,12 +272,12 @@ static void print_hash(HashTable *ht, int indent, zend_bool is_object TSRMLS_DC)
 				ztype = IS_UNICODE;
 str_type:
 				if (is_object) {
-					char *prop_name, *class_name;
+					zstr prop_name, class_name;
 
 					zend_u_unmangle_property_name(ztype, string_key, &class_name, &prop_name);
 
-					if (class_name) {
-						if (class_name[0]=='*') {
+					if (class_name.v) {
+						if (class_name.s[0]=='*') {
 							zend_printf("%R:protected", ztype, prop_name);
 						} else {
 							zend_printf("%R:%v:private", ztype, prop_name, class_name);
@@ -308,7 +308,7 @@ str_type:
 static void print_flat_hash(HashTable *ht TSRMLS_DC)
 {
 	zval **tmp;
-	char *string_key;
+	zstr string_key;
 	HashPosition iterator;
 	ulong num_key;
 	uint str_len;
@@ -322,10 +322,10 @@ static void print_flat_hash(HashTable *ht TSRMLS_DC)
 		ZEND_PUTS("[");
 		switch (zend_hash_get_current_key_ex(ht, &string_key, &str_len, &num_key, 0, &iterator)) {
 			case HASH_KEY_IS_STRING:
-				ZEND_PUTS(string_key);
+				ZEND_PUTS(string_key.s);
 				break;
 			case HASH_KEY_IS_UNICODE:
-				zend_printf("%r", string_key);
+				zend_printf("%r", string_key.u);
 				break;
 			case HASH_KEY_IS_LONG:
 				zend_printf("%ld", num_key);
@@ -527,19 +527,19 @@ ZEND_API void zend_print_flat_zval_r(zval *expr TSRMLS_DC)
 		case IS_OBJECT:
 		{
 			HashTable *properties = NULL;
-			char *class_name = NULL;
+			zstr class_name = (zstr)NULL;
 			zend_uint clen;
 
 			if (Z_OBJ_HANDLER_P(expr, get_class_name)) {
 				Z_OBJ_HANDLER_P(expr, get_class_name)(expr, &class_name, &clen, 0 TSRMLS_CC);
 			}
-			if (class_name) {
-				zend_printf("%v Object (", class_name);
+			if (class_name.v) {
+				zend_printf("%v Object (", class_name.v);
 			} else {
 				zend_printf("%s Object (", "Unknown Class");
 			}
-			if (class_name) {
-				efree(class_name);
+			if (class_name.v) {
+				efree(class_name.v);
 			}
 			if (Z_OBJ_HANDLER_P(expr, get_properties)) {
 				properties = Z_OBJPROP_P(expr);
@@ -584,19 +584,19 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 		case IS_OBJECT:
 			{
 				HashTable *properties = NULL;
-				char *class_name = NULL;
+				zstr class_name = (zstr)NULL;
 				zend_uint clen;
 
 				if (Z_OBJ_HANDLER_P(expr, get_class_name)) {
 					Z_OBJ_HANDLER_P(expr, get_class_name)(expr, &class_name, &clen, 0 TSRMLS_CC);
 				}
-				if (class_name) {
-					zend_printf("%v Object\n", class_name);
+				if (class_name.v) {
+					zend_printf("%v Object\n", class_name.v);
 				} else {
 					zend_printf("%s Object\n", "Unknown Class");
 				}
-				if (class_name) {
-					efree(class_name);
+				if (class_name.v) {
+					efree(class_name.v);
 				}
 				if (Z_OBJ_HANDLER_P(expr, get_properties)) {
 					properties = Z_OBJPROP_P(expr);
@@ -634,7 +634,7 @@ static void register_standard_class(TSRMLS_D)
 
 	zend_standard_class_def->type = ZEND_INTERNAL_CLASS;
 	zend_standard_class_def->name_length = sizeof("stdClass") - 1;
-	zend_standard_class_def->name = zend_strndup("stdClass", zend_standard_class_def->name_length);
+	zend_standard_class_def->name.s = zend_strndup("stdClass", zend_standard_class_def->name_length);
 	zend_initialize_class_data(zend_standard_class_def, 1 TSRMLS_CC);
 
 	zend_hash_add(CG(class_table), "stdclass", sizeof("stdclass"), &zend_standard_class_def, sizeof(zend_class_entry *), NULL);
@@ -672,19 +672,19 @@ static void zend_u_function_dtor(zend_function *function)
 
 	destroy_zend_function(function TSRMLS_CC);
 	if (function->type == ZEND_INTERNAL_FUNCTION) {
-		if (function->common.function_name) {
-			free(function->common.function_name);
+		if (function->common.function_name.v) {
+			free(function->common.function_name.v);
 		}
 		if (function->common.arg_info) {
 			int n = function->common.num_args;
 
 			while (n > 0) {
 				--n;
-				if (function->common.arg_info[n].name) {
-					free(function->common.arg_info[n].name);
+				if (function->common.arg_info[n].name.v) {
+					free(function->common.arg_info[n].name.v);
 				}
-				if (function->common.arg_info[n].class_name) {
-					free(function->common.arg_info[n].class_name);
+				if (function->common.arg_info[n].class_name.v) {
+					free(function->common.arg_info[n].class_name.v);
 				}
 			}
 			free(function->common.arg_info);
@@ -699,18 +699,18 @@ static void free_u_zend_constant(zend_constant *c)
 	} else {
 		zval_internal_dtor(&c->value);
 	}
-	free(c->name);
+	free(c->name.v);
 }
 
 static void function_to_unicode(zend_function *func TSRMLS_DC)
 {
-	if (func->common.function_name) {
+	if (func->common.function_name.s) {
 		UChar *uname;
-		int   len = strlen(func->common.function_name)+1;
+		int   len = strlen(func->common.function_name.s)+1;
 
 		uname = malloc(UBYTES(len));
-		u_charsToUChars(func->common.function_name, uname, len);
-		func->common.function_name = (char*)uname;
+		u_charsToUChars(func->common.function_name.s, uname, len);
+		func->common.function_name.u = uname;
 	}
 	if (func->common.arg_info) {
 		zend_arg_info *args;
@@ -720,15 +720,15 @@ static void function_to_unicode(zend_function *func TSRMLS_DC)
 		memcpy(args, func->common.arg_info, (n + 1) * sizeof(zend_arg_info));
 		while (n > 0) {
 		  --n;
-		  if (args[n].name) {
+		  if (args[n].name.s) {
 				UChar *uname = malloc(UBYTES(args[n].name_len));
-				u_charsToUChars(args[n].name, uname, args[n].name_len);
-				args[n].name = (char*)uname;
+				u_charsToUChars(args[n].name.s, uname, args[n].name_len);
+				args[n].name.u = uname;
 		  }
-		  if (args[n].class_name) {
+		  if (args[n].class_name.s) {
 				UChar *uname = malloc(UBYTES(args[n].class_name_len));
-				u_charsToUChars(args[n].class_name, uname, args[n].class_name_len);
-				args[n].class_name = (char*)uname;
+				u_charsToUChars(args[n].class_name.s, uname, args[n].class_name_len);
+				args[n].class_name.u = uname;
 		  }
 		}
 		func->common.arg_info = args;
@@ -737,13 +737,13 @@ static void function_to_unicode(zend_function *func TSRMLS_DC)
 
 static void property_info_to_unicode(zend_property_info *info TSRMLS_DC)
 {
-	if (info->name) {
+	if (info->name.s) {
 		UChar *uname;
 
 		uname = malloc(UBYTES(info->name_length+1));
-		u_charsToUChars(info->name, uname, info->name_length+1);
-		free(info->name);
-		info->name = (char*)uname;
+		u_charsToUChars(info->name.s, uname, info->name_length+1);
+		free(info->name.s);
+		info->name.u = uname;
 		info->h = zend_u_get_hash_value(IS_UNICODE, info->name, info->name_length+1);
 	}
 }
@@ -757,11 +757,11 @@ static void const_to_unicode(zend_constant *c)
 {
 	UChar *uname;
 
-	if (c->name) {
+	if (c->name.s) {
 		uname = malloc(UBYTES(c->name_len));
-		u_charsToUChars(c->name, uname, c->name_len);
-		free(c->name);
-		c->name = (char*)uname;
+		u_charsToUChars(c->name.s, uname, c->name_len);
+		free(c->name.s);
+		c->name.u = uname;
 	}
 	if (Z_TYPE(c->value) == IS_STRING || Z_TYPE(c->value) == IS_CONSTANT) {
 		UChar *ustr;
@@ -776,12 +776,12 @@ static void const_to_unicode(zend_constant *c)
 static void class_to_unicode(zend_class_entry **ce TSRMLS_DC)
 {
 	/* Convert name to unicode */
-	if ((*ce)->name) {
+	if ((*ce)->name.s) {
 		UChar *uname = malloc(UBYTES((*ce)->name_length+1));
 
-		u_charsToUChars((*ce)->name, uname, (*ce)->name_length+1);
-		free((*ce)->name);
-		(*ce)->name = (char*)uname;
+		u_charsToUChars((*ce)->name.s, uname, (*ce)->name_length+1);
+		free((*ce)->name.s);
+		(*ce)->name.u = uname;
 	}
 
 	zend_hash_to_unicode(&(*ce)->function_table, (apply_func_t)function_to_unicode TSRMLS_CC);
@@ -1564,7 +1564,8 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 			if (EG(exception)) {
 				char ex_class_name[128];
 				if (Z_TYPE_P(EG(exception)) == IS_OBJECT) {
-					strncpy(ex_class_name, Z_OBJ_CLASS_NAME_P(EG(exception)), 127);
+					/* CHECK ME: why strings only */
+					strncpy(ex_class_name, Z_OBJ_CLASS_NAME_P(EG(exception)).s, 127);
 					ex_class_name[127] = '\0';
 				} else {
 					strcpy(ex_class_name, "Unknown Exception");

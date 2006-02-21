@@ -523,7 +523,7 @@ PHP_FUNCTION(stream_get_meta_data)
 PHP_FUNCTION(stream_get_transports)
 {
 	HashTable *stream_xport_hash;
-	char *stream_xport;
+	zstr stream_xport;
 	int stream_xport_len;
 	ulong num_key;
 
@@ -537,7 +537,7 @@ PHP_FUNCTION(stream_get_transports)
 		while (zend_hash_get_current_key_ex(stream_xport_hash,
 					&stream_xport, &stream_xport_len,
 					&num_key, 0, NULL) == HASH_KEY_IS_STRING) {
-			add_next_index_stringl(return_value, stream_xport, stream_xport_len, 1);
+			add_next_index_stringl(return_value, stream_xport.s, stream_xport_len, 1);
 			zend_hash_move_forward(stream_xport_hash);
 		}
 	} else {
@@ -551,7 +551,7 @@ PHP_FUNCTION(stream_get_transports)
 PHP_FUNCTION(stream_get_wrappers)
 {
 	HashTable *url_stream_wrappers_hash;
-	char *stream_protocol;
+	zstr stream_protocol;
 	int key_flags, stream_protocol_len = 0;
 	ulong num_key;
 
@@ -565,7 +565,7 @@ PHP_FUNCTION(stream_get_wrappers)
 			(key_flags = zend_hash_get_current_key_ex(url_stream_wrappers_hash, &stream_protocol, &stream_protocol_len, &num_key, 0, NULL)) != HASH_KEY_NON_EXISTANT;
 			zend_hash_move_forward(url_stream_wrappers_hash)) {
 				if (key_flags == HASH_KEY_IS_STRING) {
-					add_next_index_stringl(return_value, stream_protocol, stream_protocol_len, 1);
+					add_next_index_stringl(return_value, stream_protocol.s, stream_protocol_len, 1);
 				}
 		}
 	} else {
@@ -850,7 +850,7 @@ static int parse_context_options(php_stream_context *context, zval *options TSRM
 {
 	HashPosition pos, opos;
 	zval **wval, **oval;
-	char *wkey, *okey;
+	zstr wkey, okey;
 	int wkey_len, okey_len;
 	int ret = SUCCESS;
 	ulong num_key;
@@ -864,7 +864,7 @@ static int parse_context_options(php_stream_context *context, zval *options TSRM
 				/* fold to string */
 				UErrorCode errCode = 0;
 
-				zend_convert_from_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &wkey, &wkey_len, (UChar*)wkey, wkey_len, &errCode);
+				zend_convert_from_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &wkey.s, &wkey_len, wkey.u, wkey_len, &errCode);
 			}
 
 			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(wval), &opos);
@@ -874,17 +874,17 @@ static int parse_context_options(php_stream_context *context, zval *options TSRM
 					/* fold to string */
 					UErrorCode errCode = 0;
 	
-					zend_convert_from_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &okey, &okey_len, (UChar*)okey, okey_len, &errCode);
-					php_stream_context_set_option(context, wkey, okey, *oval);
-					efree(okey);
+					zend_convert_from_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &okey.s, &okey_len, okey.u, okey_len, &errCode);
+					php_stream_context_set_option(context, wkey.s, okey.s, *oval);
+					efree(okey.v);
 				}
 				if (HASH_KEY_IS_STRING == otype) {
-					php_stream_context_set_option(context, wkey, okey, *oval);
+					php_stream_context_set_option(context, wkey.s, okey.s, *oval);
 				}
 				zend_hash_move_forward_ex(Z_ARRVAL_PP(wval), &opos);
 			}
 			if (wtype == HASH_KEY_IS_UNICODE) {
-				efree(wkey);
+				efree(wkey.v);
 			}
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "options should have the form [\"wrappername\"][\"optionname\"] = $value");
@@ -912,7 +912,7 @@ static int parse_context_params(php_stream_context *context, zval *params TSRMLS
 	U_STRING_INIT(u_default_mode, "default_mode", 12);
 
 	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "notification", sizeof("notification"), (void**)&tmp) ||
-		SUCCESS == zend_u_hash_find(Z_ARRVAL_P(params), IS_UNICODE, u_notification, sizeof("notification"), (void**)&tmp)) {
+		SUCCESS == zend_u_hash_find(Z_ARRVAL_P(params), IS_UNICODE, (zstr)u_notification, sizeof("notification"), (void**)&tmp)) {
 		
 		if (context->notifier) {
 			php_stream_notification_free(context->notifier);
@@ -926,11 +926,11 @@ static int parse_context_params(php_stream_context *context, zval *params TSRMLS
 		context->notifier->dtor = user_space_stream_notifier_dtor;
 	}
 	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "options", sizeof("options"), (void**)&tmp) ||
-		SUCCESS == zend_u_hash_find(Z_ARRVAL_P(params), IS_UNICODE, u_options, sizeof("options"), (void**)&tmp)) {
+		SUCCESS == zend_u_hash_find(Z_ARRVAL_P(params), IS_UNICODE, (zstr)u_options, sizeof("options"), (void**)&tmp)) {
 		parse_context_options(context, *tmp TSRMLS_CC);
 	}
 	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "input_encoding", sizeof("input_encoding"), (void**)&tmp) ||
-		SUCCESS == zend_u_hash_find(Z_ARRVAL_P(params), IS_UNICODE, u_input_encoding, sizeof("input_encoding"), (void**)&tmp)) {
+		SUCCESS == zend_u_hash_find(Z_ARRVAL_P(params), IS_UNICODE, (zstr)u_input_encoding, sizeof("input_encoding"), (void**)&tmp)) {
 		zval strval = **tmp;
 
 		if (context->input_encoding) {
@@ -942,7 +942,7 @@ static int parse_context_params(php_stream_context *context, zval *params TSRMLS
 		context->input_encoding = Z_STRVAL(strval);
 	}
 	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "output_encoding", sizeof("output_encoding"), (void**)&tmp) ||
-		SUCCESS == zend_u_hash_find(Z_ARRVAL_P(params), IS_UNICODE, u_output_encoding, sizeof("output_encoding"), (void**)&tmp)) {
+		SUCCESS == zend_u_hash_find(Z_ARRVAL_P(params), IS_UNICODE, (zstr)u_output_encoding, sizeof("output_encoding"), (void**)&tmp)) {
 		zval strval = **tmp;
 
 		if (context->output_encoding) {
@@ -954,7 +954,7 @@ static int parse_context_params(php_stream_context *context, zval *params TSRMLS
 		context->output_encoding = Z_STRVAL(strval);
 	}
 	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "default_mode", sizeof("default_mode"), (void**)&tmp) ||
-		SUCCESS == zend_u_hash_find(Z_ARRVAL_P(params), IS_UNICODE, u_default_mode, sizeof("default_mode"), (void**)&tmp)) {
+		SUCCESS == zend_u_hash_find(Z_ARRVAL_P(params), IS_UNICODE, (zstr)u_default_mode, sizeof("default_mode"), (void**)&tmp)) {
 		zval longval = **tmp;
 
 		zval_copy_ctor(&longval);

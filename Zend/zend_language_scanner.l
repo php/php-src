@@ -370,7 +370,7 @@ static inline int zend_uchar_from_name(char *name, UChar32 *c)
 	}
 }
 
-static inline int zend_uchar_from_uname(UChar *name, int32_t name_len, UChar32 *c)
+static inline int zend_uchar_from_uname(UChar *name, int name_len, UChar32 *c)
 {
 	UChar32 codepoint = 0;
 	UErrorCode status = U_ZERO_ERROR;
@@ -413,7 +413,7 @@ static inline int zend_parse_charname_sequence(UChar **s, UChar *end, UChar32 *c
 static inline int zend_copy_string_value(zval *zendlval, char *str, zend_uint str_len, zend_uchar type TSRMLS_DC)
 {
 	UErrorCode status = U_ZERO_ERROR;
-	int32_t consumed = 0;
+	int consumed = 0;
 
 	if (type == IS_UNICODE) {
 		consumed = zend_convert_scanner_output(&Z_USTRVAL_P(zendlval), &Z_USTRLEN_P(zendlval), str, str_len, &status TSRMLS_CC);
@@ -436,7 +436,7 @@ static inline int zend_copy_string_value(zval *zendlval, char *str, zend_uint st
 static inline int zend_check_and_normalize_identifier(zval *zendlval)
 {
 	UChar *norm;
-	int32_t norm_len;
+	int norm_len;
 
 	if (!zend_is_valid_identifier(Z_USTRVAL_P(zendlval), Z_USTRLEN_P(zendlval))) {
 		zend_error(E_COMPILE_WARNING, "Invalid identifier syntax: %r", Z_USTRVAL_P(zendlval));
@@ -621,7 +621,7 @@ ZEND_API int zend_prepare_scanner_converters(const char *onetime_encoding, int r
 	return zend_set_converter_encoding(&SCNG(output_conv), encoding);
 }
 
-ZEND_API int32_t zend_convert_scanner_output(UChar **target, int32_t *target_len, const char *source, int32_t source_len, UErrorCode *status TSRMLS_DC)
+ZEND_API int zend_convert_scanner_output(UChar **target, int *target_len, const char *source, int source_len, UErrorCode *status TSRMLS_DC)
 {
 	const char *source_consumed = NULL;
 
@@ -1891,13 +1891,13 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"__CLASS__" {
-	char *class_name = NULL;
+	zstr class_name = (zstr)NULL;
 
 	if (CG(active_class_entry)) {
 		class_name = CG(active_class_entry)->name;
 	}
 
-	if (!class_name) {
+	if (!class_name.v) {
 		ZVAL_EMPTY_TEXT(zendlval);
 	} else {
 		ZVAL_TEXT(zendlval, class_name, 1);
@@ -1906,16 +1906,13 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"__FUNCTION__" {
-	char *func_name = NULL;
+	zstr func_name = (zstr)NULL;
 
 	if (CG(active_op_array)) {
 		func_name = CG(active_op_array)->function_name;
 	}
 
-	if (!func_name) {
-		func_name = "";
-	}
-	if (!func_name) {
+	if (!func_name.v) {
 		ZVAL_EMPTY_TEXT(zendlval);
 	} else {
 		ZVAL_TEXT(zendlval, func_name, 1);
@@ -1924,47 +1921,47 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"__METHOD__" {
-	char *class_name = CG(active_class_entry) ? CG(active_class_entry)->name : NULL;
-	char *func_name = CG(active_op_array)? CG(active_op_array)->function_name : NULL;
+	zstr class_name = CG(active_class_entry) ? CG(active_class_entry)->name : (zstr)NULL;
+	zstr func_name = CG(active_op_array)? CG(active_op_array)->function_name : (zstr)NULL;
 	size_t len = 0;
 
 	if (UG(unicode)) {
 		size_t len1;
 
-		if (class_name) {
-			len += len1 = u_strlen((UChar*)class_name);
+		if (class_name.u) {
+			len += len1 = u_strlen(class_name.u);
 			len += 2;
 		}
-		if (func_name) {
-			len += u_strlen((UChar*)func_name);
+		if (func_name.u) {
+			len += u_strlen(func_name.u);
 		} else {
-			func_name = (char*)EMPTY_STR;
+			func_name.u = EMPTY_STR;
 		}
 		Z_USTRLEN_P(zendlval) = len;
 		Z_USTRVAL_P(zendlval) = eumalloc(len+1);
-		if (class_name) {
-			u_strcpy(Z_USTRVAL_P(zendlval), (UChar*)class_name);
+		if (class_name.u) {
+			u_strcpy(Z_USTRVAL_P(zendlval), class_name.u);
 			Z_USTRVAL_P(zendlval)[len1] = 0x3a;   /* ':' */
 			Z_USTRVAL_P(zendlval)[len1+1] = 0x3a; /* ':' */
 			Z_USTRVAL_P(zendlval)[len1+2] = 0;
 		} else {
 			Z_USTRVAL_P(zendlval)[0] = 0;
 		}
-		u_strcat(Z_USTRVAL_P(zendlval), (UChar*)func_name);
+		u_strcat(Z_USTRVAL_P(zendlval), func_name.u);
 		Z_TYPE_P(zendlval) = IS_UNICODE;
 	} else {
-		if (class_name) {
-			len += strlen(class_name) + 2;
+		if (class_name.s) {
+			len += strlen(class_name.s) + 2;
 		}
-		if (func_name) {
-			len += strlen(func_name);
+		if (func_name.s) {
+			len += strlen(func_name.s);
 		}
 
 		Z_STRVAL_P(zendlval) = emalloc(len+1);
 		Z_STRLEN_P(zendlval) = sprintf(Z_STRVAL_P(zendlval), "%s%s%s",
-			class_name ? class_name : "",
-			class_name && func_name ? "::" : "",
-			func_name ? func_name : ""
+			class_name.s ? class_name.s : "",
+			class_name.s && func_name.s ? "::" : "",
+			func_name.s ? func_name.s : ""
 			);
 		Z_STRLEN_P(zendlval) = strlen(Z_STRVAL_P(zendlval));
 		Z_TYPE_P(zendlval) = IS_STRING;

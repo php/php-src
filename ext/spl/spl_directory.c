@@ -948,7 +948,7 @@ typedef struct {
 static void spl_filesystem_dir_it_dtor(zend_object_iterator *iter TSRMLS_DC);
 static int spl_filesystem_dir_it_valid(zend_object_iterator *iter TSRMLS_DC);
 static void spl_filesystem_dir_it_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC);
-static int spl_filesystem_dir_it_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC);
+static int spl_filesystem_dir_it_current_key(zend_object_iterator *iter, zstr *str_key, uint *str_key_len, ulong *int_key TSRMLS_DC);
 static void spl_filesystem_dir_it_move_forward(zend_object_iterator *iter TSRMLS_DC);
 static void spl_filesystem_dir_it_rewind(zend_object_iterator *iter TSRMLS_DC);
 
@@ -1017,7 +1017,7 @@ static void spl_filesystem_dir_it_current_data(zend_object_iterator *iter, zval 
 /* }}} */
 
 /* {{{ spl_filesystem_dir_it_current_key */
-static int spl_filesystem_dir_it_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
+static int spl_filesystem_dir_it_current_key(zend_object_iterator *iter, zstr *str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
 {
 	spl_filesystem_dir_it *iterator = (spl_filesystem_dir_it *)iter;
 	spl_filesystem_object *object   = iterator->object;
@@ -1101,18 +1101,18 @@ static void spl_filesystem_tree_it_current_data(zend_object_iterator *iter, zval
 /* }}} */
 
 /* {{{ spl_filesystem_tree_it_current_key */
-static int spl_filesystem_tree_it_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
+static int spl_filesystem_tree_it_current_key(zend_object_iterator *iter, zstr *str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
 {
 	spl_filesystem_dir_it *iterator = (spl_filesystem_dir_it *)iter;
 	spl_filesystem_object *object   = iterator->object;
 	
 	if (object->flags & SPL_FILE_DIR_KEY_AS_FILENAME) {
 		*str_key_len = strlen(object->u.dir.entry.d_name) + 1;
-		*str_key = estrndup(object->u.dir.entry.d_name, *str_key_len - 1);
+		str_key->s = estrndup(object->u.dir.entry.d_name, *str_key_len - 1);
 	} else {
 		spl_filesystem_object_get_file_name(object TSRMLS_CC);
 		*str_key_len = object->file_name_len + 1;
-		*str_key = estrndup(object->file_name, object->file_name_len);
+		str_key->s = estrndup(object->file_name, object->file_name_len);
 	}
 	return HASH_KEY_IS_STRING;
 }
@@ -1634,7 +1634,7 @@ static int spl_filesystem_file_call(INTERNAL_FUNCTION_PARAMETERS, spl_filesystem
 
 	zend_get_parameters_array_ex(ZEND_NUM_ARGS(), params+(arg2 ? 2 : 1));
 
-	ZVAL_STRING(&z_fname, func_ptr->common.function_name, 0);
+	ZVAL_STRING(&z_fname, func_ptr->common.function_name.s, 0);
 
 	fci.size = sizeof(fci);
 	fci.function_table = EG(function_table);

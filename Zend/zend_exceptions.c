@@ -143,7 +143,7 @@ ZEND_METHOD(exception, __construct)
 		} else if (UG(unicode)) {
 			UErrorCode status = U_ZERO_ERROR;
 			UChar *u_str;
-			int32_t u_len;
+			int u_len;
 
 			zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, message, message_len, &status);
 			zend_update_property_unicodel(default_exception_ce, object, "message", sizeof("message")-1, u_str, u_len TSRMLS_CC);
@@ -180,9 +180,9 @@ ZEND_METHOD(error_exception, __construct)
 		if (message_type == IS_UNICODE) {
 			zend_update_property_unicodel(default_exception_ce, object, "message", sizeof("message")-1, message, message_len TSRMLS_CC);
 		} else if (UG(unicode)) {
-	    UErrorCode status = U_ZERO_ERROR;
+			UErrorCode status = U_ZERO_ERROR;
 			UChar *u_str;
-			int32_t u_len;
+			int u_len;
 
 			zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, message, message_len, &status);
 			zend_update_property_unicodel(default_exception_ce, object, "message", sizeof("message")-1, u_str, u_len TSRMLS_CC);
@@ -438,7 +438,7 @@ static int _build_trace_args(zval **arg, int num_args, va_list args, zend_hash_k
 			TRACE_APPEND_STR("Array, ");
 			break;
 		case IS_OBJECT: {
-			char *class_name;
+			zstr class_name;
 			zend_uint class_name_len;
 			int dup;
 			TSRMLS_FETCH();
@@ -450,15 +450,15 @@ static int _build_trace_args(zval **arg, int num_args, va_list args, zend_hash_k
 			if (UG(unicode)) {
 				zval tmp;
 
-				ZVAL_UNICODEL(&tmp, (UChar*)class_name, class_name_len, 1);
+				ZVAL_UNICODEL(&tmp, class_name.u, class_name_len, 1);
 				convert_to_string_with_converter(&tmp, ZEND_U_CONVERTER(UG(output_encoding_conv)));
 				TRACE_APPEND_STRL(Z_STRVAL(tmp), Z_STRLEN(tmp));
 				zval_dtor(&tmp);
 			} else {
-				TRACE_APPEND_STRL(class_name, class_name_len);
+				TRACE_APPEND_STRL(class_name.s, class_name_len);
 			}
 			if(!dup) {
-				efree(class_name);
+				efree(class_name.v);
 			}
 
 			TRACE_APPEND_STR("), ");
@@ -760,7 +760,8 @@ ZEND_API void zend_exception_error(zval *exception TSRMLS_DC)
 			if (Z_TYPE_P(str) != IS_STRING) {
 				zend_error(E_WARNING, "%v::__toString() must return a string", ce_exception->name);
 			} else {
-				zend_update_property_string(default_exception_ce, exception, "string", sizeof("string")-1, EG(exception) ? ce_exception->name : Z_STRVAL_P(str) TSRMLS_CC);
+				/* FIXME: Unicode support??? */
+				zend_update_property_string(default_exception_ce, exception, "string", sizeof("string")-1, EG(exception) ? ce_exception->name.s : Z_STRVAL_P(str) TSRMLS_CC);
 			}
 		}
 		zval_ptr_dtor(&str);

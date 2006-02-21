@@ -55,7 +55,7 @@ zend_u_strtol(nptr, endptr, base)
 	register UChar c;
 	register unsigned long cutoff;
 	register int neg = 0, any, cutlim;
-	register int32_t val;
+	register int val;
 
 	/*
 	 * Skip white space and pick up leading +/- sign if any.

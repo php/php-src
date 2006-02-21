@@ -146,8 +146,8 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 			ZEND_VM_NEXT_OPCODE(); /* Never reached */
 		}
 		if (EX(function_state).function->common.fn_flags & ZEND_ACC_DEPRECATED) {
-			zend_error(E_NOTICE, "Function %s%s%s() is deprecated",
-				EX(function_state).function->common.scope ? EX(function_state).function->common.scope->name : "",
+			zend_error(E_NOTICE, "Function %v%s%v() is deprecated",
+				EX(function_state).function->common.scope ? EX(function_state).function->common.scope->name : (zstr)EMPTY_STR,
 				EX(function_state).function->common.scope ? "::" : "",
 				EX(function_state).function->common.function_name);
 		}
@@ -277,7 +277,7 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 		}
 
 		if (EX(function_state).function->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
-			efree(EX(function_state).function->common.function_name);
+			efree(EX(function_state).function->common.function_name.v);
 		}
 		efree(EX(fbc));
 
@@ -367,7 +367,7 @@ static int ZEND_RECV_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (zend_ptr_stack_get_arg(arg_num, (void **) &param TSRMLS_CC)==FAILURE) {
 		char *space;
-		char *class_name = get_active_class_name(&space TSRMLS_CC);
+		zstr class_name = get_active_class_name(&space TSRMLS_CC);
 		zend_execute_data *ptr = EX(prev_execute_data);
 
 		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, NULL TSRMLS_CC);
@@ -654,7 +654,7 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 
 	ce = EX_T(opline->op1.u.var).class_entry;
 	if(IS_CONST != IS_UNUSED) {
-		char *function_name_strval;
+		zstr function_name_strval;
 		unsigned int function_name_strlen;
 		zend_bool is_const = (IS_CONST == IS_CONST);
 
@@ -674,7 +674,7 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 
 		if (!is_const) {
-			efree(function_name_strval);
+			efree(function_name_strval.v);
 
 		}
 	} else {
@@ -700,7 +700,7 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_op *opline = EX(opline);
 	zval *function_name;
 	zend_function *function;
-	void *function_name_strval, *lcname;
+	zstr function_name_strval, lcname;
 	unsigned int function_name_strlen, lcname_len;
 
 
@@ -718,13 +718,13 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	function_name_strval = Z_UNIVAL_P(function_name);
 	function_name_strlen = Z_UNILEN_P(function_name);
 
-	lcname = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_STRVAL_P(function_name), function_name_strlen, 1, &lcname_len);
+	lcname = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), function_name_strlen, 1, &lcname_len);
 	if (zend_u_hash_find(EG(function_table), Z_TYPE_P(function_name), lcname, lcname_len+1, (void **) &function)==FAILURE) {
-		efree(lcname);
+		efree(lcname.v);
 		zend_error_noreturn(E_ERROR, "Call to undefined function %R()", Z_TYPE_P(function_name), function_name_strval);
 	}
 
-	efree(lcname);
+	efree(lcname.v);
 	if (IS_CONST != IS_CONST) {
 
 	}
@@ -841,7 +841,7 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	ce = EX_T(opline->op1.u.var).class_entry;
 	if(IS_TMP_VAR != IS_UNUSED) {
-		char *function_name_strval;
+		zstr function_name_strval;
 		unsigned int function_name_strlen;
 		zend_bool is_const = (IS_TMP_VAR == IS_CONST);
 		zend_free_op free_op2;
@@ -861,7 +861,7 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 
 		if (!is_const) {
-			efree(function_name_strval);
+			efree(function_name_strval.v);
 			zval_dtor(free_op2.var);
 		}
 	} else {
@@ -887,7 +887,7 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_op *opline = EX(opline);
 	zval *function_name;
 	zend_function *function;
-	void *function_name_strval, *lcname;
+	zstr function_name_strval, lcname;
 	unsigned int function_name_strlen, lcname_len;
 	zend_free_op free_op2;
 
@@ -905,13 +905,13 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	function_name_strval = Z_UNIVAL_P(function_name);
 	function_name_strlen = Z_UNILEN_P(function_name);
 
-	lcname = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_STRVAL_P(function_name), function_name_strlen, 1, &lcname_len);
+	lcname = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), function_name_strlen, 1, &lcname_len);
 	if (zend_u_hash_find(EG(function_table), Z_TYPE_P(function_name), lcname, lcname_len+1, (void **) &function)==FAILURE) {
-		efree(lcname);
+		efree(lcname.v);
 		zend_error_noreturn(E_ERROR, "Call to undefined function %R()", Z_TYPE_P(function_name), function_name_strval);
 	}
 
-	efree(lcname);
+	efree(lcname.v);
 	if (IS_TMP_VAR != IS_CONST) {
 		zval_dtor(free_op2.var);
 	}
@@ -965,7 +965,7 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	ce = EX_T(opline->op1.u.var).class_entry;
 	if(IS_VAR != IS_UNUSED) {
-		char *function_name_strval;
+		zstr function_name_strval;
 		unsigned int function_name_strlen;
 		zend_bool is_const = (IS_VAR == IS_CONST);
 		zend_free_op free_op2;
@@ -985,7 +985,7 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 
 		if (!is_const) {
-			efree(function_name_strval);
+			efree(function_name_strval.v);
 			if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
 		}
 	} else {
@@ -1011,7 +1011,7 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_op *opline = EX(opline);
 	zval *function_name;
 	zend_function *function;
-	void *function_name_strval, *lcname;
+	zstr function_name_strval, lcname;
 	unsigned int function_name_strlen, lcname_len;
 	zend_free_op free_op2;
 
@@ -1029,13 +1029,13 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	function_name_strval = Z_UNIVAL_P(function_name);
 	function_name_strlen = Z_UNILEN_P(function_name);
 
-	lcname = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_STRVAL_P(function_name), function_name_strlen, 1, &lcname_len);
+	lcname = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), function_name_strlen, 1, &lcname_len);
 	if (zend_u_hash_find(EG(function_table), Z_TYPE_P(function_name), lcname, lcname_len+1, (void **) &function)==FAILURE) {
-		efree(lcname);
+		efree(lcname.v);
 		zend_error_noreturn(E_ERROR, "Call to undefined function %R()", Z_TYPE_P(function_name), function_name_strval);
 	}
 
-	efree(lcname);
+	efree(lcname.v);
 	if (IS_VAR != IS_CONST) {
 		if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
 	}
@@ -1088,7 +1088,7 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 
 	ce = EX_T(opline->op1.u.var).class_entry;
 	if(IS_UNUSED != IS_UNUSED) {
-		char *function_name_strval;
+		zstr function_name_strval;
 		unsigned int function_name_strlen;
 		zend_bool is_const = (IS_UNUSED == IS_CONST);
 
@@ -1108,7 +1108,7 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 
 		if (!is_const) {
-			efree(function_name_strval);
+			efree(function_name_strval.v);
 
 		}
 	} else {
@@ -1169,7 +1169,7 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 	ce = EX_T(opline->op1.u.var).class_entry;
 	if(IS_CV != IS_UNUSED) {
-		char *function_name_strval;
+		zstr function_name_strval;
 		unsigned int function_name_strlen;
 		zend_bool is_const = (IS_CV == IS_CONST);
 
@@ -1189,7 +1189,7 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 
 		if (!is_const) {
-			efree(function_name_strval);
+			efree(function_name_strval.v);
 
 		}
 	} else {
@@ -1215,7 +1215,7 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_op *opline = EX(opline);
 	zval *function_name;
 	zend_function *function;
-	void *function_name_strval, *lcname;
+	zstr function_name_strval, lcname;
 	unsigned int function_name_strlen, lcname_len;
 
 
@@ -1233,13 +1233,13 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	function_name_strval = Z_UNIVAL_P(function_name);
 	function_name_strlen = Z_UNILEN_P(function_name);
 
-	lcname = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_STRVAL_P(function_name), function_name_strlen, 1, &lcname_len);
+	lcname = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), function_name_strlen, 1, &lcname_len);
 	if (zend_u_hash_find(EG(function_table), Z_TYPE_P(function_name), lcname, lcname_len+1, (void **) &function)==FAILURE) {
-		efree(lcname);
+		efree(lcname.v);
 		zend_error_noreturn(E_ERROR, "Call to undefined function %R()", Z_TYPE_P(function_name), function_name_strval);
 	}
 
-	efree(lcname);
+	efree(lcname.v);
 	if (IS_CV != IS_CONST) {
 
 	}
@@ -1587,7 +1587,7 @@ return_by_value:
 
 		if (EG(ze1_compatibility_mode) && Z_TYPE_P(retval_ptr) == IS_OBJECT) {
 			zval *ret;
-			char *class_name;
+			zstr class_name;
 			zend_uint class_name_len;
 			int dup;
 
@@ -1595,13 +1595,13 @@ return_by_value:
 			INIT_PZVAL_COPY(ret, retval_ptr);
 			dup = zend_get_object_classname(retval_ptr, &class_name, &class_name_len TSRMLS_CC);
 			if (Z_OBJ_HT_P(retval_ptr)->clone_obj == NULL) {
-				zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v",  Z_OBJCE_P(retval_ptr)->name);
+				zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v",  class_name);
 			}
-			zend_error(E_STRICT, "Implicit cloning object of class '%v' because of 'zend.ze1_compatibility_mode'", Z_OBJCE_P(retval_ptr)->name);
+			zend_error(E_STRICT, "Implicit cloning object of class '%v' because of 'zend.ze1_compatibility_mode'", class_name);
 			Z_OBJVAL_P(ret) = Z_OBJ_HT_P(retval_ptr)->clone_obj(retval_ptr TSRMLS_CC);
 			*EG(return_value_ptr_ptr) = ret;
 			if (!dup) {
-				efree(class_name);
+				efree(class_name.v);
 			}
 		} else if (!0) { /* Not a temp var */
 			if (EG(active_op_array)->return_reference == ZEND_RETURN_REF ||
@@ -1720,13 +1720,13 @@ static int ZEND_CLONE_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			/* Ensure that if we're calling a private function, we're allowed to do so.
 			 */
 			if (ce != EG(scope)) {
-				zend_error_noreturn(E_ERROR, "Call to private %v::__clone() from context '%v'", ce->name, EG(scope) ? EG(scope)->name : (char*)EMPTY_STR);
+				zend_error_noreturn(E_ERROR, "Call to private %v::__clone() from context '%v'", ce->name, EG(scope) ? EG(scope)->name : (zstr)EMPTY_STR);
 			}
 		} else if ((clone->common.fn_flags & ZEND_ACC_PROTECTED)) {
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
 			 */
 			if (!zend_check_protected(clone->common.scope, EG(scope))) {
-				zend_error_noreturn(E_ERROR, "Call to protected %v::__clone() from context '%v'", ce->name, EG(scope) ? EG(scope)->name : (char*)EMPTY_STR);
+				zend_error_noreturn(E_ERROR, "Call to protected %v::__clone() from context '%v'", ce->name, EG(scope) ? EG(scope)->name : (zstr)EMPTY_STR);
 			}
 		}
 	}
@@ -1959,7 +1959,7 @@ static int ZEND_UNSET_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 					for (i = 0; i < ex->op_array->last_var; i++) {
 						if (ex->op_array->vars[i].hash_value == hash_value &&
 						    ex->op_array->vars[i].name_len == Z_UNILEN_P(varname) &&
-						    !memcmp(ex->op_array->vars[i].name, Z_UNIVAL_P(varname), Z_TYPE_P(varname)==IS_UNICODE?UBYTES(Z_UNILEN_P(varname)):Z_UNILEN_P(varname))) {
+						    !memcmp(ex->op_array->vars[i].name.v, Z_UNIVAL_P(varname).v, Z_TYPE_P(varname)==IS_UNICODE?UBYTES(Z_UNILEN_P(varname)):Z_UNILEN_P(varname))) {
 							ex->CVs[i] = NULL;
 							break;
 						}
@@ -2070,7 +2070,7 @@ static int ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (ce) {
 			zend_object *zobj = zend_objects_get_address(array_ptr TSRMLS_CC);
 			while (zend_hash_has_more_elements(fe_ht) == SUCCESS) {
-				char *str_key;
+				zstr str_key;
 				uint str_key_len;
 				ulong int_key;
 				zend_uchar key_type;
@@ -2216,7 +2216,7 @@ static int ZEND_U_NORMALIZE_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zval var_copy;
 		int use_copy;
 		UChar *norm;
-		int32_t norm_len;
+		int norm_len;
 
 		zend_make_unicode_zval(result, &var_copy, &use_copy);
 		if (use_copy) {
@@ -4080,7 +4080,7 @@ return_by_value:
 
 		if (EG(ze1_compatibility_mode) && Z_TYPE_P(retval_ptr) == IS_OBJECT) {
 			zval *ret;
-			char *class_name;
+			zstr class_name;
 			zend_uint class_name_len;
 			int dup;
 
@@ -4088,13 +4088,13 @@ return_by_value:
 			INIT_PZVAL_COPY(ret, retval_ptr);
 			dup = zend_get_object_classname(retval_ptr, &class_name, &class_name_len TSRMLS_CC);
 			if (Z_OBJ_HT_P(retval_ptr)->clone_obj == NULL) {
-				zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v",  Z_OBJCE_P(retval_ptr)->name);
+				zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v",  class_name);
 			}
-			zend_error(E_STRICT, "Implicit cloning object of class '%v' because of 'zend.ze1_compatibility_mode'", Z_OBJCE_P(retval_ptr)->name);
+			zend_error(E_STRICT, "Implicit cloning object of class '%v' because of 'zend.ze1_compatibility_mode'", class_name);
 			Z_OBJVAL_P(ret) = Z_OBJ_HT_P(retval_ptr)->clone_obj(retval_ptr TSRMLS_CC);
 			*EG(return_value_ptr_ptr) = ret;
 			if (!dup) {
-				efree(class_name);
+				efree(class_name.v);
 			}
 		} else if (!1) { /* Not a temp var */
 			if (EG(active_op_array)->return_reference == ZEND_RETURN_REF ||
@@ -4220,13 +4220,13 @@ static int ZEND_CLONE_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			/* Ensure that if we're calling a private function, we're allowed to do so.
 			 */
 			if (ce != EG(scope)) {
-				zend_error_noreturn(E_ERROR, "Call to private %v::__clone() from context '%v'", ce->name, EG(scope) ? EG(scope)->name : (char*)EMPTY_STR);
+				zend_error_noreturn(E_ERROR, "Call to private %v::__clone() from context '%v'", ce->name, EG(scope) ? EG(scope)->name : (zstr)EMPTY_STR);
 			}
 		} else if ((clone->common.fn_flags & ZEND_ACC_PROTECTED)) {
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
 			 */
 			if (!zend_check_protected(clone->common.scope, EG(scope))) {
-				zend_error_noreturn(E_ERROR, "Call to protected %v::__clone() from context '%v'", ce->name, EG(scope) ? EG(scope)->name : (char*)EMPTY_STR);
+				zend_error_noreturn(E_ERROR, "Call to protected %v::__clone() from context '%v'", ce->name, EG(scope) ? EG(scope)->name : (zstr)EMPTY_STR);
 			}
 		}
 	}
@@ -4459,7 +4459,7 @@ static int ZEND_UNSET_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 					for (i = 0; i < ex->op_array->last_var; i++) {
 						if (ex->op_array->vars[i].hash_value == hash_value &&
 						    ex->op_array->vars[i].name_len == Z_UNILEN_P(varname) &&
-						    !memcmp(ex->op_array->vars[i].name, Z_UNIVAL_P(varname), Z_TYPE_P(varname)==IS_UNICODE?UBYTES(Z_UNILEN_P(varname)):Z_UNILEN_P(varname))) {
+						    !memcmp(ex->op_array->vars[i].name.v, Z_UNIVAL_P(varname).v, Z_TYPE_P(varname)==IS_UNICODE?UBYTES(Z_UNILEN_P(varname)):Z_UNILEN_P(varname))) {
 							ex->CVs[i] = NULL;
 							break;
 						}
@@ -4570,7 +4570,7 @@ static int ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (ce) {
 			zend_object *zobj = zend_objects_get_address(array_ptr TSRMLS_CC);
 			while (zend_hash_has_more_elements(fe_ht) == SUCCESS) {
-				char *str_key;
+				zstr str_key;
 				uint str_key_len;
 				ulong int_key;
 				zend_uchar key_type;
@@ -4739,7 +4739,7 @@ static int ZEND_U_NORMALIZE_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zval var_copy;
 		int use_copy;
 		UChar *norm;
-		int32_t norm_len;
+		int norm_len;
 
 		zend_make_unicode_zval(result, &var_copy, &use_copy);
 		if (use_copy) {
@@ -5043,7 +5043,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 {
 	zend_op *opline = EX(opline);
 	zval *function_name;
-	char *function_name_strval;
+	zstr function_name_strval;
 	int function_name_strlen;
 	zend_free_op free_op1;
 	/* FIXME: type is default */
@@ -5477,7 +5477,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
 	zval *function_name;
-	char *function_name_strval;
+	zstr function_name_strval;
 	int function_name_strlen;
 	zend_free_op free_op1, free_op2;
 	/* FIXME: type is default */
@@ -5913,7 +5913,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
 	zval *function_name;
-	char *function_name_strval;
+	zstr function_name_strval;
 	int function_name_strlen;
 	zend_free_op free_op1, free_op2;
 	/* FIXME: type is default */
@@ -6430,7 +6430,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
 	zval *function_name;
-	char *function_name_strval;
+	zstr function_name_strval;
 	int function_name_strlen;
 	zend_free_op free_op1;
 	/* FIXME: type is default */
@@ -7080,7 +7080,7 @@ return_by_value:
 
 		if (EG(ze1_compatibility_mode) && Z_TYPE_P(retval_ptr) == IS_OBJECT) {
 			zval *ret;
-			char *class_name;
+			zstr class_name;
 			zend_uint class_name_len;
 			int dup;
 
@@ -7088,13 +7088,13 @@ return_by_value:
 			INIT_PZVAL_COPY(ret, retval_ptr);
 			dup = zend_get_object_classname(retval_ptr, &class_name, &class_name_len TSRMLS_CC);
 			if (Z_OBJ_HT_P(retval_ptr)->clone_obj == NULL) {
-				zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v",  Z_OBJCE_P(retval_ptr)->name);
+				zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v",  class_name);
 			}
-			zend_error(E_STRICT, "Implicit cloning object of class '%v' because of 'zend.ze1_compatibility_mode'", Z_OBJCE_P(retval_ptr)->name);
+			zend_error(E_STRICT, "Implicit cloning object of class '%v' because of 'zend.ze1_compatibility_mode'", class_name);
 			Z_OBJVAL_P(ret) = Z_OBJ_HT_P(retval_ptr)->clone_obj(retval_ptr TSRMLS_CC);
 			*EG(return_value_ptr_ptr) = ret;
 			if (!dup) {
-				efree(class_name);
+				efree(class_name.v);
 			}
 		} else if (!0) { /* Not a temp var */
 			if (EG(active_op_array)->return_reference == ZEND_RETURN_REF ||
@@ -7317,13 +7317,13 @@ static int ZEND_CLONE_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			/* Ensure that if we're calling a private function, we're allowed to do so.
 			 */
 			if (ce != EG(scope)) {
-				zend_error_noreturn(E_ERROR, "Call to private %v::__clone() from context '%v'", ce->name, EG(scope) ? EG(scope)->name : (char*)EMPTY_STR);
+				zend_error_noreturn(E_ERROR, "Call to private %v::__clone() from context '%v'", ce->name, EG(scope) ? EG(scope)->name : (zstr)EMPTY_STR);
 			}
 		} else if ((clone->common.fn_flags & ZEND_ACC_PROTECTED)) {
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
 			 */
 			if (!zend_check_protected(clone->common.scope, EG(scope))) {
-				zend_error_noreturn(E_ERROR, "Call to protected %v::__clone() from context '%v'", ce->name, EG(scope) ? EG(scope)->name : (char*)EMPTY_STR);
+				zend_error_noreturn(E_ERROR, "Call to protected %v::__clone() from context '%v'", ce->name, EG(scope) ? EG(scope)->name : (zstr)EMPTY_STR);
 			}
 		}
 	}
@@ -7556,7 +7556,7 @@ static int ZEND_UNSET_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 					for (i = 0; i < ex->op_array->last_var; i++) {
 						if (ex->op_array->vars[i].hash_value == hash_value &&
 						    ex->op_array->vars[i].name_len == Z_UNILEN_P(varname) &&
-						    !memcmp(ex->op_array->vars[i].name, Z_UNIVAL_P(varname), Z_TYPE_P(varname)==IS_UNICODE?UBYTES(Z_UNILEN_P(varname)):Z_UNILEN_P(varname))) {
+						    !memcmp(ex->op_array->vars[i].name.v, Z_UNIVAL_P(varname).v, Z_TYPE_P(varname)==IS_UNICODE?UBYTES(Z_UNILEN_P(varname)):Z_UNILEN_P(varname))) {
 							ex->CVs[i] = NULL;
 							break;
 						}
@@ -7667,7 +7667,7 @@ static int ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (ce) {
 			zend_object *zobj = zend_objects_get_address(array_ptr TSRMLS_CC);
 			while (zend_hash_has_more_elements(fe_ht) == SUCCESS) {
-				char *str_key;
+				zstr str_key;
 				uint str_key_len;
 				ulong int_key;
 				zend_uchar key_type;
@@ -7704,7 +7704,7 @@ static int ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_free_op free_op1;
 	zval *array = _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 	zval **value;
-	char *str_key;
+	zstr str_key;
 	uint str_key_len;
 	ulong int_key;
 	HashTable *fe_ht;
@@ -7721,7 +7721,7 @@ static int ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.u.opline_num);
 
 		case ZEND_ITER_PLAIN_OBJECT: {
-			char *class_name, *prop_name;
+			zstr class_name, prop_name;
 			zend_object *zobj = zend_objects_get_address(array TSRMLS_CC);
 
 			fe_ht = HASH_OF(array);
@@ -7737,11 +7737,11 @@ static int ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			if (use_key) {
 				zend_u_unmangle_property_name(key_type == HASH_KEY_IS_UNICODE?IS_UNICODE:IS_STRING, str_key, &class_name, &prop_name);
 				if (key_type == HASH_KEY_IS_UNICODE) {
-					str_key_len = u_strlen((UChar*)prop_name);
-					str_key = (char*)eustrndup((UChar*)prop_name, str_key_len);
+					str_key_len = u_strlen(prop_name.u);
+					str_key.u = eustrndup(prop_name.u, str_key_len);
 				} else {
-					str_key_len = strlen(prop_name);
-					str_key = estrndup(prop_name, str_key_len);
+					str_key_len = strlen(prop_name.s);
+					str_key.s = estrndup(prop_name.s, str_key_len);
 				}
 				str_key_len++;
 			}
@@ -7825,12 +7825,12 @@ static int ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 		switch (key_type) {
 			case HASH_KEY_IS_STRING:
-				Z_STRVAL_P(key) = str_key;
+				Z_STRVAL_P(key) = str_key.s;
 				Z_STRLEN_P(key) = str_key_len-1;
 				Z_TYPE_P(key) = IS_STRING;
 				break;
 			case HASH_KEY_IS_UNICODE:
-				Z_USTRVAL_P(key) = (UChar*)str_key;
+				Z_USTRVAL_P(key) = str_key.u;
 				Z_USTRLEN_P(key) = str_key_len-1;
 				Z_TYPE_P(key) = IS_UNICODE;
 				break;
@@ -7966,7 +7966,7 @@ static int ZEND_U_NORMALIZE_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zval var_copy;
 		int use_copy;
 		UChar *norm;
-		int32_t norm_len;
+		int norm_len;
 
 		zend_make_unicode_zval(result, &var_copy, &use_copy);
 		if (use_copy) {
@@ -8989,7 +8989,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 {
 	zend_op *opline = EX(opline);
 	zval *function_name;
-	char *function_name_strval;
+	zstr function_name_strval;
 	int function_name_strlen;
 	zend_free_op free_op1;
 	/* FIXME: type is default */
@@ -9185,20 +9185,20 @@ static int ZEND_UNSET_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						break;
 					case IS_STRING:
 					case IS_UNICODE: {
-						void *offset_key = Z_UNIVAL_P(offset);
+						zstr offset_key = Z_UNIVAL_P(offset);
 						int  offset_len  = Z_UNILEN_P(offset);
 						int free_offset = 0;
 
 						if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 							/* Identifier normalization */
 							UChar *norm;
-							int32_t norm_len;
+							int norm_len;
 
 							if (!zend_normalize_identifier(&norm, &norm_len,
-							                               (UChar*)offset_key, offset_len, 0)) {
-								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
-							} else if ((char*)norm != offset_key) {
-								offset_key = (char*)norm;
+							                               offset_key.u, offset_len, 0)) {
+								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key.u);
+							} else if (norm != offset_key.u) {
+								offset_key.u = norm;
 								offset_len = norm_len;
 								free_offset = 1;
 							}
@@ -9216,7 +9216,7 @@ static int ZEND_UNSET_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 									for (i = 0; i < ex->op_array->last_var; i++) {
 										if (ex->op_array->vars[i].hash_value == hash_value &&
 										    ex->op_array->vars[i].name_len == offset_len &&
-										    !memcmp(ex->op_array->vars[i].name, offset_key, Z_TYPE_P(offset)==IS_UNICODE?UBYTES(offset_len):offset_len)) {
+										    !memcmp(ex->op_array->vars[i].name.v, offset_key.v, Z_TYPE_P(offset)==IS_UNICODE?UBYTES(offset_len):offset_len)) {
 											ex->CVs[i] = NULL;
 											break;
 										}
@@ -9225,7 +9225,7 @@ static int ZEND_UNSET_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							}
 						}
 						if (free_offset) {
-							efree(offset_key);
+							efree(offset_key.v);
 						}
 						break;
 					}
@@ -9336,20 +9336,19 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CONST(int prop_dim, 
 					break;
 				case IS_STRING:
 				case IS_UNICODE: {
-					char *offset_key = Z_UNIVAL_P(offset);
-					int   offset_len = Z_UNILEN_P(offset);
-					int   free_offset = 0;
+					zstr offset_key = Z_UNIVAL_P(offset);
+					int  offset_len = Z_UNILEN_P(offset);
+					int  free_offset = 0;
 
 					if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 						/* Identifier normalization */
 						UChar *norm;
-						int32_t norm_len;
+						int norm_len;
 
-						if (!zend_normalize_identifier(&norm, &norm_len,
-						                               (UChar*)offset_key, offset_len, 0)) {
+						if (!zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0)) {
 							zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
-						} else if ((char*)norm != offset_key) {
-							offset_key = (char*)norm;
+						} else if (norm != offset_key.u) {
+							offset_key.u = norm;
 							offset_len = norm_len;
 							free_offset = 1;
 						}
@@ -9358,7 +9357,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CONST(int prop_dim, 
 						isset = 1;
 					}
 					if (free_offset) {
-						efree(offset_key);
+						efree(offset_key.v);
 					}
 					break;
 				}
@@ -10471,7 +10470,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
 	zval *function_name;
-	char *function_name_strval;
+	zstr function_name_strval;
 	int function_name_strlen;
 	zend_free_op free_op1, free_op2;
 	/* FIXME: type is default */
@@ -10669,20 +10668,20 @@ static int ZEND_UNSET_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						break;
 					case IS_STRING:
 					case IS_UNICODE: {
-						void *offset_key = Z_UNIVAL_P(offset);
+						zstr offset_key = Z_UNIVAL_P(offset);
 						int  offset_len  = Z_UNILEN_P(offset);
 						int free_offset = 0;
 
 						if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 							/* Identifier normalization */
 							UChar *norm;
-							int32_t norm_len;
+							int norm_len;
 
 							if (!zend_normalize_identifier(&norm, &norm_len,
-							                               (UChar*)offset_key, offset_len, 0)) {
-								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
-							} else if ((char*)norm != offset_key) {
-								offset_key = (char*)norm;
+							                               offset_key.u, offset_len, 0)) {
+								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key.u);
+							} else if (norm != offset_key.u) {
+								offset_key.u = norm;
 								offset_len = norm_len;
 								free_offset = 1;
 							}
@@ -10700,7 +10699,7 @@ static int ZEND_UNSET_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 									for (i = 0; i < ex->op_array->last_var; i++) {
 										if (ex->op_array->vars[i].hash_value == hash_value &&
 										    ex->op_array->vars[i].name_len == offset_len &&
-										    !memcmp(ex->op_array->vars[i].name, offset_key, Z_TYPE_P(offset)==IS_UNICODE?UBYTES(offset_len):offset_len)) {
+										    !memcmp(ex->op_array->vars[i].name.v, offset_key.v, Z_TYPE_P(offset)==IS_UNICODE?UBYTES(offset_len):offset_len)) {
 											ex->CVs[i] = NULL;
 											break;
 										}
@@ -10709,7 +10708,7 @@ static int ZEND_UNSET_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							}
 						}
 						if (free_offset) {
-							efree(offset_key);
+							efree(offset_key.v);
 						}
 						break;
 					}
@@ -10820,20 +10819,19 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_TMP(int prop_dim, ZE
 					break;
 				case IS_STRING:
 				case IS_UNICODE: {
-					char *offset_key = Z_UNIVAL_P(offset);
-					int   offset_len = Z_UNILEN_P(offset);
-					int   free_offset = 0;
+					zstr offset_key = Z_UNIVAL_P(offset);
+					int  offset_len = Z_UNILEN_P(offset);
+					int  free_offset = 0;
 
 					if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 						/* Identifier normalization */
 						UChar *norm;
-						int32_t norm_len;
+						int norm_len;
 
-						if (!zend_normalize_identifier(&norm, &norm_len,
-						                               (UChar*)offset_key, offset_len, 0)) {
+						if (!zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0)) {
 							zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
-						} else if ((char*)norm != offset_key) {
-							offset_key = (char*)norm;
+						} else if (norm != offset_key.u) {
+							offset_key.u = norm;
 							offset_len = norm_len;
 							free_offset = 1;
 						}
@@ -10842,7 +10840,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_TMP(int prop_dim, ZE
 						isset = 1;
 					}
 					if (free_offset) {
-						efree(offset_key);
+						efree(offset_key.v);
 					}
 					break;
 				}
@@ -11993,7 +11991,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
 	zval *function_name;
-	char *function_name_strval;
+	zstr function_name_strval;
 	int function_name_strlen;
 	zend_free_op free_op1, free_op2;
 	/* FIXME: type is default */
@@ -12191,20 +12189,20 @@ static int ZEND_UNSET_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						break;
 					case IS_STRING:
 					case IS_UNICODE: {
-						void *offset_key = Z_UNIVAL_P(offset);
+						zstr offset_key = Z_UNIVAL_P(offset);
 						int  offset_len  = Z_UNILEN_P(offset);
 						int free_offset = 0;
 
 						if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 							/* Identifier normalization */
 							UChar *norm;
-							int32_t norm_len;
+							int norm_len;
 
 							if (!zend_normalize_identifier(&norm, &norm_len,
-							                               (UChar*)offset_key, offset_len, 0)) {
-								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
-							} else if ((char*)norm != offset_key) {
-								offset_key = (char*)norm;
+							                               offset_key.u, offset_len, 0)) {
+								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key.u);
+							} else if (norm != offset_key.u) {
+								offset_key.u = norm;
 								offset_len = norm_len;
 								free_offset = 1;
 							}
@@ -12222,7 +12220,7 @@ static int ZEND_UNSET_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 									for (i = 0; i < ex->op_array->last_var; i++) {
 										if (ex->op_array->vars[i].hash_value == hash_value &&
 										    ex->op_array->vars[i].name_len == offset_len &&
-										    !memcmp(ex->op_array->vars[i].name, offset_key, Z_TYPE_P(offset)==IS_UNICODE?UBYTES(offset_len):offset_len)) {
+										    !memcmp(ex->op_array->vars[i].name.v, offset_key.v, Z_TYPE_P(offset)==IS_UNICODE?UBYTES(offset_len):offset_len)) {
 											ex->CVs[i] = NULL;
 											break;
 										}
@@ -12231,7 +12229,7 @@ static int ZEND_UNSET_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							}
 						}
 						if (free_offset) {
-							efree(offset_key);
+							efree(offset_key.v);
 						}
 						break;
 					}
@@ -12342,20 +12340,19 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_VAR(int prop_dim, ZE
 					break;
 				case IS_STRING:
 				case IS_UNICODE: {
-					char *offset_key = Z_UNIVAL_P(offset);
-					int   offset_len = Z_UNILEN_P(offset);
-					int   free_offset = 0;
+					zstr offset_key = Z_UNIVAL_P(offset);
+					int  offset_len = Z_UNILEN_P(offset);
+					int  free_offset = 0;
 
 					if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 						/* Identifier normalization */
 						UChar *norm;
-						int32_t norm_len;
+						int norm_len;
 
-						if (!zend_normalize_identifier(&norm, &norm_len,
-						                               (UChar*)offset_key, offset_len, 0)) {
+						if (!zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0)) {
 							zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
-						} else if ((char*)norm != offset_key) {
-							offset_key = (char*)norm;
+						} else if (norm != offset_key.u) {
+							offset_key.u = norm;
 							offset_len = norm_len;
 							free_offset = 1;
 						}
@@ -12364,7 +12361,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_VAR(int prop_dim, ZE
 						isset = 1;
 					}
 					if (free_offset) {
-						efree(offset_key);
+						efree(offset_key.v);
 					}
 					break;
 				}
@@ -13920,7 +13917,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
 	zval *function_name;
-	char *function_name_strval;
+	zstr function_name_strval;
 	int function_name_strlen;
 	zend_free_op free_op1;
 	/* FIXME: type is default */
@@ -14116,20 +14113,20 @@ static int ZEND_UNSET_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						break;
 					case IS_STRING:
 					case IS_UNICODE: {
-						void *offset_key = Z_UNIVAL_P(offset);
+						zstr offset_key = Z_UNIVAL_P(offset);
 						int  offset_len  = Z_UNILEN_P(offset);
 						int free_offset = 0;
 
 						if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 							/* Identifier normalization */
 							UChar *norm;
-							int32_t norm_len;
+							int norm_len;
 
 							if (!zend_normalize_identifier(&norm, &norm_len,
-							                               (UChar*)offset_key, offset_len, 0)) {
-								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
-							} else if ((char*)norm != offset_key) {
-								offset_key = (char*)norm;
+							                               offset_key.u, offset_len, 0)) {
+								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key.u);
+							} else if (norm != offset_key.u) {
+								offset_key.u = norm;
 								offset_len = norm_len;
 								free_offset = 1;
 							}
@@ -14147,7 +14144,7 @@ static int ZEND_UNSET_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 									for (i = 0; i < ex->op_array->last_var; i++) {
 										if (ex->op_array->vars[i].hash_value == hash_value &&
 										    ex->op_array->vars[i].name_len == offset_len &&
-										    !memcmp(ex->op_array->vars[i].name, offset_key, Z_TYPE_P(offset)==IS_UNICODE?UBYTES(offset_len):offset_len)) {
+										    !memcmp(ex->op_array->vars[i].name.v, offset_key.v, Z_TYPE_P(offset)==IS_UNICODE?UBYTES(offset_len):offset_len)) {
 											ex->CVs[i] = NULL;
 											break;
 										}
@@ -14156,7 +14153,7 @@ static int ZEND_UNSET_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							}
 						}
 						if (free_offset) {
-							efree(offset_key);
+							efree(offset_key.v);
 						}
 						break;
 					}
@@ -14267,20 +14264,19 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CV(int prop_dim, ZEN
 					break;
 				case IS_STRING:
 				case IS_UNICODE: {
-					char *offset_key = Z_UNIVAL_P(offset);
-					int   offset_len = Z_UNILEN_P(offset);
-					int   free_offset = 0;
+					zstr offset_key = Z_UNIVAL_P(offset);
+					int  offset_len = Z_UNILEN_P(offset);
+					int  free_offset = 0;
 
 					if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 						/* Identifier normalization */
 						UChar *norm;
-						int32_t norm_len;
+						int norm_len;
 
-						if (!zend_normalize_identifier(&norm, &norm_len,
-						                               (UChar*)offset_key, offset_len, 0)) {
+						if (!zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0)) {
 							zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
-						} else if ((char*)norm != offset_key) {
-							offset_key = (char*)norm;
+						} else if (norm != offset_key.u) {
+							offset_key.u = norm;
 							offset_len = norm_len;
 							free_offset = 1;
 						}
@@ -14289,7 +14285,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CV(int prop_dim, ZEN
 						isset = 1;
 					}
 					if (free_offset) {
-						efree(offset_key);
+						efree(offset_key.v);
 					}
 					break;
 				}
@@ -14427,13 +14423,13 @@ static int ZEND_CLONE_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			/* Ensure that if we're calling a private function, we're allowed to do so.
 			 */
 			if (ce != EG(scope)) {
-				zend_error_noreturn(E_ERROR, "Call to private %v::__clone() from context '%v'", ce->name, EG(scope) ? EG(scope)->name : (char*)EMPTY_STR);
+				zend_error_noreturn(E_ERROR, "Call to private %v::__clone() from context '%v'", ce->name, EG(scope) ? EG(scope)->name : (zstr)EMPTY_STR);
 			}
 		} else if ((clone->common.fn_flags & ZEND_ACC_PROTECTED)) {
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
 			 */
 			if (!zend_check_protected(clone->common.scope, EG(scope))) {
-				zend_error_noreturn(E_ERROR, "Call to protected %v::__clone() from context '%v'", ce->name, EG(scope) ? EG(scope)->name : (char*)EMPTY_STR);
+				zend_error_noreturn(E_ERROR, "Call to protected %v::__clone() from context '%v'", ce->name, EG(scope) ? EG(scope)->name : (zstr)EMPTY_STR);
 			}
 		}
 	}
@@ -15122,7 +15118,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 {
 	zend_op *opline = EX(opline);
 	zval *function_name;
-	char *function_name_strval;
+	zstr function_name_strval;
 	int function_name_strlen;
 
 	/* FIXME: type is default */
@@ -15329,20 +15325,20 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						break;
 					case IS_STRING:
 					case IS_UNICODE: {
-						void *offset_key = Z_UNIVAL_P(offset);
+						zstr offset_key = Z_UNIVAL_P(offset);
 						int  offset_len  = Z_UNILEN_P(offset);
 						int free_offset = 0;
 
 						if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 							/* Identifier normalization */
 							UChar *norm;
-							int32_t norm_len;
+							int norm_len;
 
 							if (!zend_normalize_identifier(&norm, &norm_len,
-							                               (UChar*)offset_key, offset_len, 0)) {
-								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
-							} else if ((char*)norm != offset_key) {
-								offset_key = (char*)norm;
+							                               offset_key.u, offset_len, 0)) {
+								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key.u);
+							} else if (norm != offset_key.u) {
+								offset_key.u = norm;
 								offset_len = norm_len;
 								free_offset = 1;
 							}
@@ -15360,7 +15356,7 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 									for (i = 0; i < ex->op_array->last_var; i++) {
 										if (ex->op_array->vars[i].hash_value == hash_value &&
 										    ex->op_array->vars[i].name_len == offset_len &&
-										    !memcmp(ex->op_array->vars[i].name, offset_key, Z_TYPE_P(offset)==IS_UNICODE?UBYTES(offset_len):offset_len)) {
+										    !memcmp(ex->op_array->vars[i].name.v, offset_key.v, Z_TYPE_P(offset)==IS_UNICODE?UBYTES(offset_len):offset_len)) {
 											ex->CVs[i] = NULL;
 											break;
 										}
@@ -15369,7 +15365,7 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							}
 						}
 						if (free_offset) {
-							efree(offset_key);
+							efree(offset_key.v);
 						}
 						break;
 					}
@@ -15478,20 +15474,19 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CONST(int prop_di
 					break;
 				case IS_STRING:
 				case IS_UNICODE: {
-					char *offset_key = Z_UNIVAL_P(offset);
-					int   offset_len = Z_UNILEN_P(offset);
-					int   free_offset = 0;
+					zstr offset_key = Z_UNIVAL_P(offset);
+					int  offset_len = Z_UNILEN_P(offset);
+					int  free_offset = 0;
 
 					if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 						/* Identifier normalization */
 						UChar *norm;
-						int32_t norm_len;
+						int norm_len;
 
-						if (!zend_normalize_identifier(&norm, &norm_len,
-						                               (UChar*)offset_key, offset_len, 0)) {
+						if (!zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0)) {
 							zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
-						} else if ((char*)norm != offset_key) {
-							offset_key = (char*)norm;
+						} else if (norm != offset_key.u) {
+							offset_key.u = norm;
 							offset_len = norm_len;
 							free_offset = 1;
 						}
@@ -15500,7 +15495,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CONST(int prop_di
 						isset = 1;
 					}
 					if (free_offset) {
-						efree(offset_key);
+						efree(offset_key.v);
 					}
 					break;
 				}
@@ -16259,7 +16254,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 {
 	zend_op *opline = EX(opline);
 	zval *function_name;
-	char *function_name_strval;
+	zstr function_name_strval;
 	int function_name_strlen;
 	zend_free_op free_op2;
 	/* FIXME: type is default */
@@ -16424,20 +16419,20 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						break;
 					case IS_STRING:
 					case IS_UNICODE: {
-						void *offset_key = Z_UNIVAL_P(offset);
+						zstr offset_key = Z_UNIVAL_P(offset);
 						int  offset_len  = Z_UNILEN_P(offset);
 						int free_offset = 0;
 
 						if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 							/* Identifier normalization */
 							UChar *norm;
-							int32_t norm_len;
+							int norm_len;
 
 							if (!zend_normalize_identifier(&norm, &norm_len,
-							                               (UChar*)offset_key, offset_len, 0)) {
-								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
-							} else if ((char*)norm != offset_key) {
-								offset_key = (char*)norm;
+							                               offset_key.u, offset_len, 0)) {
+								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key.u);
+							} else if (norm != offset_key.u) {
+								offset_key.u = norm;
 								offset_len = norm_len;
 								free_offset = 1;
 							}
@@ -16455,7 +16450,7 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 									for (i = 0; i < ex->op_array->last_var; i++) {
 										if (ex->op_array->vars[i].hash_value == hash_value &&
 										    ex->op_array->vars[i].name_len == offset_len &&
-										    !memcmp(ex->op_array->vars[i].name, offset_key, Z_TYPE_P(offset)==IS_UNICODE?UBYTES(offset_len):offset_len)) {
+										    !memcmp(ex->op_array->vars[i].name.v, offset_key.v, Z_TYPE_P(offset)==IS_UNICODE?UBYTES(offset_len):offset_len)) {
 											ex->CVs[i] = NULL;
 											break;
 										}
@@ -16464,7 +16459,7 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							}
 						}
 						if (free_offset) {
-							efree(offset_key);
+							efree(offset_key.v);
 						}
 						break;
 					}
@@ -16573,20 +16568,19 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_TMP(int prop_dim,
 					break;
 				case IS_STRING:
 				case IS_UNICODE: {
-					char *offset_key = Z_UNIVAL_P(offset);
-					int   offset_len = Z_UNILEN_P(offset);
-					int   free_offset = 0;
+					zstr offset_key = Z_UNIVAL_P(offset);
+					int  offset_len = Z_UNILEN_P(offset);
+					int  free_offset = 0;
 
 					if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 						/* Identifier normalization */
 						UChar *norm;
-						int32_t norm_len;
+						int norm_len;
 
-						if (!zend_normalize_identifier(&norm, &norm_len,
-						                               (UChar*)offset_key, offset_len, 0)) {
+						if (!zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0)) {
 							zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
-						} else if ((char*)norm != offset_key) {
-							offset_key = (char*)norm;
+						} else if (norm != offset_key.u) {
+							offset_key.u = norm;
 							offset_len = norm_len;
 							free_offset = 1;
 						}
@@ -16595,7 +16589,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_TMP(int prop_dim,
 						isset = 1;
 					}
 					if (free_offset) {
-						efree(offset_key);
+						efree(offset_key.v);
 					}
 					break;
 				}
@@ -17354,7 +17348,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 {
 	zend_op *opline = EX(opline);
 	zval *function_name;
-	char *function_name_strval;
+	zstr function_name_strval;
 	int function_name_strlen;
 	zend_free_op free_op2;
 	/* FIXME: type is default */
@@ -17519,20 +17513,20 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						break;
 					case IS_STRING:
 					case IS_UNICODE: {
-						void *offset_key = Z_UNIVAL_P(offset);
+						zstr offset_key = Z_UNIVAL_P(offset);
 						int  offset_len  = Z_UNILEN_P(offset);
 						int free_offset = 0;
 
 						if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 							/* Identifier normalization */
 							UChar *norm;
-							int32_t norm_len;
+							int norm_len;
 
 							if (!zend_normalize_identifier(&norm, &norm_len,
-							                               (UChar*)offset_key, offset_len, 0)) {
-								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
-							} else if ((char*)norm != offset_key) {
-								offset_key = (char*)norm;
+							                               offset_key.u, offset_len, 0)) {
+								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key.u);
+							} else if (norm != offset_key.u) {
+								offset_key.u = norm;
 								offset_len = norm_len;
 								free_offset = 1;
 							}
@@ -17550,7 +17544,7 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 									for (i = 0; i < ex->op_array->last_var; i++) {
 										if (ex->op_array->vars[i].hash_value == hash_value &&
 										    ex->op_array->vars[i].name_len == offset_len &&
-										    !memcmp(ex->op_array->vars[i].name, offset_key, Z_TYPE_P(offset)==IS_UNICODE?UBYTES(offset_len):offset_len)) {
+										    !memcmp(ex->op_array->vars[i].name.v, offset_key.v, Z_TYPE_P(offset)==IS_UNICODE?UBYTES(offset_len):offset_len)) {
 											ex->CVs[i] = NULL;
 											break;
 										}
@@ -17559,7 +17553,7 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							}
 						}
 						if (free_offset) {
-							efree(offset_key);
+							efree(offset_key.v);
 						}
 						break;
 					}
@@ -17668,20 +17662,19 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_VAR(int prop_dim,
 					break;
 				case IS_STRING:
 				case IS_UNICODE: {
-					char *offset_key = Z_UNIVAL_P(offset);
-					int   offset_len = Z_UNILEN_P(offset);
-					int   free_offset = 0;
+					zstr offset_key = Z_UNIVAL_P(offset);
+					int  offset_len = Z_UNILEN_P(offset);
+					int  free_offset = 0;
 
 					if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 						/* Identifier normalization */
 						UChar *norm;
-						int32_t norm_len;
+						int norm_len;
 
-						if (!zend_normalize_identifier(&norm, &norm_len,
-						                               (UChar*)offset_key, offset_len, 0)) {
+						if (!zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0)) {
 							zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
-						} else if ((char*)norm != offset_key) {
-							offset_key = (char*)norm;
+						} else if (norm != offset_key.u) {
+							offset_key.u = norm;
 							offset_len = norm_len;
 							free_offset = 1;
 						}
@@ -17690,7 +17683,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_VAR(int prop_dim,
 						isset = 1;
 					}
 					if (free_offset) {
-						efree(offset_key);
+						efree(offset_key.v);
 					}
 					break;
 				}
@@ -18814,7 +18807,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 {
 	zend_op *opline = EX(opline);
 	zval *function_name;
-	char *function_name_strval;
+	zstr function_name_strval;
 	int function_name_strlen;
 
 	/* FIXME: type is default */
@@ -18978,20 +18971,20 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						break;
 					case IS_STRING:
 					case IS_UNICODE: {
-						void *offset_key = Z_UNIVAL_P(offset);
+						zstr offset_key = Z_UNIVAL_P(offset);
 						int  offset_len  = Z_UNILEN_P(offset);
 						int free_offset = 0;
 
 						if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 							/* Identifier normalization */
 							UChar *norm;
-							int32_t norm_len;
+							int norm_len;
 
 							if (!zend_normalize_identifier(&norm, &norm_len,
-							                               (UChar*)offset_key, offset_len, 0)) {
-								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
-							} else if ((char*)norm != offset_key) {
-								offset_key = (char*)norm;
+							                               offset_key.u, offset_len, 0)) {
+								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key.u);
+							} else if (norm != offset_key.u) {
+								offset_key.u = norm;
 								offset_len = norm_len;
 								free_offset = 1;
 							}
@@ -19009,7 +19002,7 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 									for (i = 0; i < ex->op_array->last_var; i++) {
 										if (ex->op_array->vars[i].hash_value == hash_value &&
 										    ex->op_array->vars[i].name_len == offset_len &&
-										    !memcmp(ex->op_array->vars[i].name, offset_key, Z_TYPE_P(offset)==IS_UNICODE?UBYTES(offset_len):offset_len)) {
+										    !memcmp(ex->op_array->vars[i].name.v, offset_key.v, Z_TYPE_P(offset)==IS_UNICODE?UBYTES(offset_len):offset_len)) {
 											ex->CVs[i] = NULL;
 											break;
 										}
@@ -19018,7 +19011,7 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							}
 						}
 						if (free_offset) {
-							efree(offset_key);
+							efree(offset_key.v);
 						}
 						break;
 					}
@@ -19127,20 +19120,19 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CV(int prop_dim, 
 					break;
 				case IS_STRING:
 				case IS_UNICODE: {
-					char *offset_key = Z_UNIVAL_P(offset);
-					int   offset_len = Z_UNILEN_P(offset);
-					int   free_offset = 0;
+					zstr offset_key = Z_UNIVAL_P(offset);
+					int  offset_len = Z_UNILEN_P(offset);
+					int  free_offset = 0;
 
 					if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 						/* Identifier normalization */
 						UChar *norm;
-						int32_t norm_len;
+						int norm_len;
 
-						if (!zend_normalize_identifier(&norm, &norm_len,
-						                               (UChar*)offset_key, offset_len, 0)) {
+						if (!zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0)) {
 							zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
-						} else if ((char*)norm != offset_key) {
-							offset_key = (char*)norm;
+						} else if (norm != offset_key.u) {
+							offset_key.u = norm;
 							offset_len = norm_len;
 							free_offset = 1;
 						}
@@ -19149,7 +19141,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CV(int prop_dim, 
 						isset = 1;
 					}
 					if (free_offset) {
-						efree(offset_key);
+						efree(offset_key.v);
 					}
 					break;
 				}
@@ -19730,7 +19722,7 @@ return_by_value:
 
 		if (EG(ze1_compatibility_mode) && Z_TYPE_P(retval_ptr) == IS_OBJECT) {
 			zval *ret;
-			char *class_name;
+			zstr class_name;
 			zend_uint class_name_len;
 			int dup;
 
@@ -19738,13 +19730,13 @@ return_by_value:
 			INIT_PZVAL_COPY(ret, retval_ptr);
 			dup = zend_get_object_classname(retval_ptr, &class_name, &class_name_len TSRMLS_CC);
 			if (Z_OBJ_HT_P(retval_ptr)->clone_obj == NULL) {
-				zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v",  Z_OBJCE_P(retval_ptr)->name);
+				zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v",  class_name);
 			}
-			zend_error(E_STRICT, "Implicit cloning object of class '%v' because of 'zend.ze1_compatibility_mode'", Z_OBJCE_P(retval_ptr)->name);
+			zend_error(E_STRICT, "Implicit cloning object of class '%v' because of 'zend.ze1_compatibility_mode'", class_name);
 			Z_OBJVAL_P(ret) = Z_OBJ_HT_P(retval_ptr)->clone_obj(retval_ptr TSRMLS_CC);
 			*EG(return_value_ptr_ptr) = ret;
 			if (!dup) {
-				efree(class_name);
+				efree(class_name.v);
 			}
 		} else if (!0) { /* Not a temp var */
 			if (EG(active_op_array)->return_reference == ZEND_RETURN_REF ||
@@ -19959,13 +19951,13 @@ static int ZEND_CLONE_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			/* Ensure that if we're calling a private function, we're allowed to do so.
 			 */
 			if (ce != EG(scope)) {
-				zend_error_noreturn(E_ERROR, "Call to private %v::__clone() from context '%v'", ce->name, EG(scope) ? EG(scope)->name : (char*)EMPTY_STR);
+				zend_error_noreturn(E_ERROR, "Call to private %v::__clone() from context '%v'", ce->name, EG(scope) ? EG(scope)->name : (zstr)EMPTY_STR);
 			}
 		} else if ((clone->common.fn_flags & ZEND_ACC_PROTECTED)) {
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
 			 */
 			if (!zend_check_protected(clone->common.scope, EG(scope))) {
-				zend_error_noreturn(E_ERROR, "Call to protected %v::__clone() from context '%v'", ce->name, EG(scope) ? EG(scope)->name : (char*)EMPTY_STR);
+				zend_error_noreturn(E_ERROR, "Call to protected %v::__clone() from context '%v'", ce->name, EG(scope) ? EG(scope)->name : (zstr)EMPTY_STR);
 			}
 		}
 	}
@@ -20198,7 +20190,7 @@ static int ZEND_UNSET_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 					for (i = 0; i < ex->op_array->last_var; i++) {
 						if (ex->op_array->vars[i].hash_value == hash_value &&
 						    ex->op_array->vars[i].name_len == Z_UNILEN_P(varname) &&
-						    !memcmp(ex->op_array->vars[i].name, Z_UNIVAL_P(varname), Z_TYPE_P(varname)==IS_UNICODE?UBYTES(Z_UNILEN_P(varname)):Z_UNILEN_P(varname))) {
+						    !memcmp(ex->op_array->vars[i].name.v, Z_UNIVAL_P(varname).v, Z_TYPE_P(varname)==IS_UNICODE?UBYTES(Z_UNILEN_P(varname)):Z_UNILEN_P(varname))) {
 							ex->CVs[i] = NULL;
 							break;
 						}
@@ -20309,7 +20301,7 @@ static int ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (ce) {
 			zend_object *zobj = zend_objects_get_address(array_ptr TSRMLS_CC);
 			while (zend_hash_has_more_elements(fe_ht) == SUCCESS) {
-				char *str_key;
+				zstr str_key;
 				uint str_key_len;
 				ulong int_key;
 				zend_uchar key_type;
@@ -20459,7 +20451,7 @@ static int ZEND_U_NORMALIZE_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zval var_copy;
 		int use_copy;
 		UChar *norm;
-		int32_t norm_len;
+		int norm_len;
 
 		zend_make_unicode_zval(result, &var_copy, &use_copy);
 		if (use_copy) {
@@ -21479,7 +21471,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
 	zval *function_name;
-	char *function_name_strval;
+	zstr function_name_strval;
 	int function_name_strlen;
 
 	/* FIXME: type is default */
@@ -21674,20 +21666,20 @@ static int ZEND_UNSET_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						break;
 					case IS_STRING:
 					case IS_UNICODE: {
-						void *offset_key = Z_UNIVAL_P(offset);
+						zstr offset_key = Z_UNIVAL_P(offset);
 						int  offset_len  = Z_UNILEN_P(offset);
 						int free_offset = 0;
 
 						if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 							/* Identifier normalization */
 							UChar *norm;
-							int32_t norm_len;
+							int norm_len;
 
 							if (!zend_normalize_identifier(&norm, &norm_len,
-							                               (UChar*)offset_key, offset_len, 0)) {
-								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
-							} else if ((char*)norm != offset_key) {
-								offset_key = (char*)norm;
+							                               offset_key.u, offset_len, 0)) {
+								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key.u);
+							} else if (norm != offset_key.u) {
+								offset_key.u = norm;
 								offset_len = norm_len;
 								free_offset = 1;
 							}
@@ -21705,7 +21697,7 @@ static int ZEND_UNSET_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 									for (i = 0; i < ex->op_array->last_var; i++) {
 										if (ex->op_array->vars[i].hash_value == hash_value &&
 										    ex->op_array->vars[i].name_len == offset_len &&
-										    !memcmp(ex->op_array->vars[i].name, offset_key, Z_TYPE_P(offset)==IS_UNICODE?UBYTES(offset_len):offset_len)) {
+										    !memcmp(ex->op_array->vars[i].name.v, offset_key.v, Z_TYPE_P(offset)==IS_UNICODE?UBYTES(offset_len):offset_len)) {
 											ex->CVs[i] = NULL;
 											break;
 										}
@@ -21714,7 +21706,7 @@ static int ZEND_UNSET_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							}
 						}
 						if (free_offset) {
-							efree(offset_key);
+							efree(offset_key.v);
 						}
 						break;
 					}
@@ -21823,20 +21815,19 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CONST(int prop_dim, Z
 					break;
 				case IS_STRING:
 				case IS_UNICODE: {
-					char *offset_key = Z_UNIVAL_P(offset);
-					int   offset_len = Z_UNILEN_P(offset);
-					int   free_offset = 0;
+					zstr offset_key = Z_UNIVAL_P(offset);
+					int  offset_len = Z_UNILEN_P(offset);
+					int  free_offset = 0;
 
 					if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 						/* Identifier normalization */
 						UChar *norm;
-						int32_t norm_len;
+						int norm_len;
 
-						if (!zend_normalize_identifier(&norm, &norm_len,
-						                               (UChar*)offset_key, offset_len, 0)) {
+						if (!zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0)) {
 							zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
-						} else if ((char*)norm != offset_key) {
-							offset_key = (char*)norm;
+						} else if (norm != offset_key.u) {
+							offset_key.u = norm;
 							offset_len = norm_len;
 							free_offset = 1;
 						}
@@ -21845,7 +21836,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CONST(int prop_dim, Z
 						isset = 1;
 					}
 					if (free_offset) {
-						efree(offset_key);
+						efree(offset_key.v);
 					}
 					break;
 				}
@@ -22953,7 +22944,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
 	zval *function_name;
-	char *function_name_strval;
+	zstr function_name_strval;
 	int function_name_strlen;
 	zend_free_op free_op2;
 	/* FIXME: type is default */
@@ -23150,20 +23141,20 @@ static int ZEND_UNSET_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						break;
 					case IS_STRING:
 					case IS_UNICODE: {
-						void *offset_key = Z_UNIVAL_P(offset);
+						zstr offset_key = Z_UNIVAL_P(offset);
 						int  offset_len  = Z_UNILEN_P(offset);
 						int free_offset = 0;
 
 						if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 							/* Identifier normalization */
 							UChar *norm;
-							int32_t norm_len;
+							int norm_len;
 
 							if (!zend_normalize_identifier(&norm, &norm_len,
-							                               (UChar*)offset_key, offset_len, 0)) {
-								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
-							} else if ((char*)norm != offset_key) {
-								offset_key = (char*)norm;
+							                               offset_key.u, offset_len, 0)) {
+								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key.u);
+							} else if (norm != offset_key.u) {
+								offset_key.u = norm;
 								offset_len = norm_len;
 								free_offset = 1;
 							}
@@ -23181,7 +23172,7 @@ static int ZEND_UNSET_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 									for (i = 0; i < ex->op_array->last_var; i++) {
 										if (ex->op_array->vars[i].hash_value == hash_value &&
 										    ex->op_array->vars[i].name_len == offset_len &&
-										    !memcmp(ex->op_array->vars[i].name, offset_key, Z_TYPE_P(offset)==IS_UNICODE?UBYTES(offset_len):offset_len)) {
+										    !memcmp(ex->op_array->vars[i].name.v, offset_key.v, Z_TYPE_P(offset)==IS_UNICODE?UBYTES(offset_len):offset_len)) {
 											ex->CVs[i] = NULL;
 											break;
 										}
@@ -23190,7 +23181,7 @@ static int ZEND_UNSET_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							}
 						}
 						if (free_offset) {
-							efree(offset_key);
+							efree(offset_key.v);
 						}
 						break;
 					}
@@ -23299,20 +23290,19 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_TMP(int prop_dim, ZEN
 					break;
 				case IS_STRING:
 				case IS_UNICODE: {
-					char *offset_key = Z_UNIVAL_P(offset);
-					int   offset_len = Z_UNILEN_P(offset);
-					int   free_offset = 0;
+					zstr offset_key = Z_UNIVAL_P(offset);
+					int  offset_len = Z_UNILEN_P(offset);
+					int  free_offset = 0;
 
 					if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 						/* Identifier normalization */
 						UChar *norm;
-						int32_t norm_len;
+						int norm_len;
 
-						if (!zend_normalize_identifier(&norm, &norm_len,
-						                               (UChar*)offset_key, offset_len, 0)) {
+						if (!zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0)) {
 							zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
-						} else if ((char*)norm != offset_key) {
-							offset_key = (char*)norm;
+						} else if (norm != offset_key.u) {
+							offset_key.u = norm;
 							offset_len = norm_len;
 							free_offset = 1;
 						}
@@ -23321,7 +23311,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_TMP(int prop_dim, ZEN
 						isset = 1;
 					}
 					if (free_offset) {
-						efree(offset_key);
+						efree(offset_key.v);
 					}
 					break;
 				}
@@ -24466,7 +24456,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
 	zval *function_name;
-	char *function_name_strval;
+	zstr function_name_strval;
 	int function_name_strlen;
 	zend_free_op free_op2;
 	/* FIXME: type is default */
@@ -24663,20 +24653,20 @@ static int ZEND_UNSET_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						break;
 					case IS_STRING:
 					case IS_UNICODE: {
-						void *offset_key = Z_UNIVAL_P(offset);
+						zstr offset_key = Z_UNIVAL_P(offset);
 						int  offset_len  = Z_UNILEN_P(offset);
 						int free_offset = 0;
 
 						if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 							/* Identifier normalization */
 							UChar *norm;
-							int32_t norm_len;
+							int norm_len;
 
 							if (!zend_normalize_identifier(&norm, &norm_len,
-							                               (UChar*)offset_key, offset_len, 0)) {
-								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
-							} else if ((char*)norm != offset_key) {
-								offset_key = (char*)norm;
+							                               offset_key.u, offset_len, 0)) {
+								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key.u);
+							} else if (norm != offset_key.u) {
+								offset_key.u = norm;
 								offset_len = norm_len;
 								free_offset = 1;
 							}
@@ -24694,7 +24684,7 @@ static int ZEND_UNSET_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 									for (i = 0; i < ex->op_array->last_var; i++) {
 										if (ex->op_array->vars[i].hash_value == hash_value &&
 										    ex->op_array->vars[i].name_len == offset_len &&
-										    !memcmp(ex->op_array->vars[i].name, offset_key, Z_TYPE_P(offset)==IS_UNICODE?UBYTES(offset_len):offset_len)) {
+										    !memcmp(ex->op_array->vars[i].name.v, offset_key.v, Z_TYPE_P(offset)==IS_UNICODE?UBYTES(offset_len):offset_len)) {
 											ex->CVs[i] = NULL;
 											break;
 										}
@@ -24703,7 +24693,7 @@ static int ZEND_UNSET_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							}
 						}
 						if (free_offset) {
-							efree(offset_key);
+							efree(offset_key.v);
 						}
 						break;
 					}
@@ -24812,20 +24802,19 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_VAR(int prop_dim, ZEN
 					break;
 				case IS_STRING:
 				case IS_UNICODE: {
-					char *offset_key = Z_UNIVAL_P(offset);
-					int   offset_len = Z_UNILEN_P(offset);
-					int   free_offset = 0;
+					zstr offset_key = Z_UNIVAL_P(offset);
+					int  offset_len = Z_UNILEN_P(offset);
+					int  free_offset = 0;
 
 					if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 						/* Identifier normalization */
 						UChar *norm;
-						int32_t norm_len;
+						int norm_len;
 
-						if (!zend_normalize_identifier(&norm, &norm_len,
-						                               (UChar*)offset_key, offset_len, 0)) {
+						if (!zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0)) {
 							zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
-						} else if ((char*)norm != offset_key) {
-							offset_key = (char*)norm;
+						} else if (norm != offset_key.u) {
+							offset_key.u = norm;
 							offset_len = norm_len;
 							free_offset = 1;
 						}
@@ -24834,7 +24823,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_VAR(int prop_dim, ZEN
 						isset = 1;
 					}
 					if (free_offset) {
-						efree(offset_key);
+						efree(offset_key.v);
 					}
 					break;
 				}
@@ -26383,7 +26372,7 @@ static int ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
 	zval *function_name;
-	char *function_name_strval;
+	zstr function_name_strval;
 	int function_name_strlen;
 
 	/* FIXME: type is default */
@@ -26578,20 +26567,20 @@ static int ZEND_UNSET_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						break;
 					case IS_STRING:
 					case IS_UNICODE: {
-						void *offset_key = Z_UNIVAL_P(offset);
+						zstr offset_key = Z_UNIVAL_P(offset);
 						int  offset_len  = Z_UNILEN_P(offset);
 						int free_offset = 0;
 
 						if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 							/* Identifier normalization */
 							UChar *norm;
-							int32_t norm_len;
+							int norm_len;
 
 							if (!zend_normalize_identifier(&norm, &norm_len,
-							                               (UChar*)offset_key, offset_len, 0)) {
-								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
-							} else if ((char*)norm != offset_key) {
-								offset_key = (char*)norm;
+							                               offset_key.u, offset_len, 0)) {
+								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key.u);
+							} else if (norm != offset_key.u) {
+								offset_key.u = norm;
 								offset_len = norm_len;
 								free_offset = 1;
 							}
@@ -26609,7 +26598,7 @@ static int ZEND_UNSET_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 									for (i = 0; i < ex->op_array->last_var; i++) {
 										if (ex->op_array->vars[i].hash_value == hash_value &&
 										    ex->op_array->vars[i].name_len == offset_len &&
-										    !memcmp(ex->op_array->vars[i].name, offset_key, Z_TYPE_P(offset)==IS_UNICODE?UBYTES(offset_len):offset_len)) {
+										    !memcmp(ex->op_array->vars[i].name.v, offset_key.v, Z_TYPE_P(offset)==IS_UNICODE?UBYTES(offset_len):offset_len)) {
 											ex->CVs[i] = NULL;
 											break;
 										}
@@ -26618,7 +26607,7 @@ static int ZEND_UNSET_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							}
 						}
 						if (free_offset) {
-							efree(offset_key);
+							efree(offset_key.v);
 						}
 						break;
 					}
@@ -26727,20 +26716,19 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CV(int prop_dim, ZEND
 					break;
 				case IS_STRING:
 				case IS_UNICODE: {
-					char *offset_key = Z_UNIVAL_P(offset);
-					int   offset_len = Z_UNILEN_P(offset);
-					int   free_offset = 0;
+					zstr offset_key = Z_UNIVAL_P(offset);
+					int  offset_len = Z_UNILEN_P(offset);
+					int  free_offset = 0;
 
 					if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 						/* Identifier normalization */
 						UChar *norm;
-						int32_t norm_len;
+						int norm_len;
 
-						if (!zend_normalize_identifier(&norm, &norm_len,
-						                               (UChar*)offset_key, offset_len, 0)) {
+						if (!zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0)) {
 							zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
-						} else if ((char*)norm != offset_key) {
-							offset_key = (char*)norm;
+						} else if (norm != offset_key.u) {
+							offset_key.u = norm;
 							offset_len = norm_len;
 							free_offset = 1;
 						}
@@ -26749,7 +26737,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CV(int prop_dim, ZEND
 						isset = 1;
 					}
 					if (free_offset) {
-						efree(offset_key);
+						efree(offset_key.v);
 					}
 					break;
 				}

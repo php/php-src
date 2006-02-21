@@ -1236,7 +1236,7 @@ PHP_FUNCTION(constant)
 	}
 	convert_to_string_ex(const_name);
 
-	if (!zend_u_get_constant(Z_TYPE_PP(const_name), Z_STRVAL_PP(const_name), Z_STRLEN_PP(const_name), return_value TSRMLS_CC)) {
+	if (!zend_u_get_constant(Z_TYPE_PP(const_name), Z_UNIVAL_PP(const_name), Z_UNILEN_PP(const_name), return_value TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't find constant %s", Z_STRVAL_PP(const_name));
 		RETURN_NULL();
 	}
@@ -2516,8 +2516,8 @@ static int php_ini_get_option(zend_ini_entry *ini_entry, int num_args, va_list a
 	}
 
 	if (hash_key->nKeyLength == 0 || 
-			hash_key->type != IS_STRING ||
-	    hash_key->u.string[0] != 0) {
+	    hash_key->type != IS_STRING ||
+	    hash_key->arKey.s[0] != 0) {
 
 		MAKE_STD_ZVAL(option);
 		array_init(option);
@@ -3179,7 +3179,8 @@ static int copy_request_variable(void *pDest, int num_args, va_list args, zend_h
 		if (!hash_key->nKeyLength) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Numeric key detected - possible security hazard.");
 			return 0;
-		} else if (!strcmp(hash_key->u.string, "GLOBALS")) {
+		/* FIXME: Unicode support??? */
+		} else if (!strcmp(hash_key->arKey.s, "GLOBALS")) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempted GLOBALS variable overwrite.");
 			return 0; 
 		}
@@ -3190,7 +3191,8 @@ static int copy_request_variable(void *pDest, int num_args, va_list args, zend_h
 		new_key = (char *) emalloc(new_key_len);
 
 		memcpy(new_key, prefix, prefix_len);
-		memcpy(new_key+prefix_len, hash_key->u.string, hash_key->nKeyLength);
+		/* FIXME: Unicode support??? */
+		memcpy(new_key+prefix_len, hash_key->arKey.s, hash_key->nKeyLength);
 	} else {
 		new_key_len = spprintf(&new_key, 0, "%s%ld", prefix, hash_key->h);
 	}

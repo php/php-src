@@ -75,7 +75,8 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 {
 	zval **element;
 	php_process_env_t env;
-	char *string_key, *data;
+	zstr string_key;
+	char *data;
 #ifndef PHP_WIN32
 	char **ep;
 #endif
@@ -148,7 +149,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 					continue;
 				}
 				l = string_length + el_len + 1;
-				memcpy(p, string_key, string_length);
+				memcpy(p, string_key.s, string_length);
 				strcat(p, "=");
 				strcat(p, data);
 				
@@ -478,14 +479,14 @@ PHP_FUNCTION(proc_open)
 	/* walk the descriptor spec and set up files/pipes */
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(descriptorspec), &pos);
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(descriptorspec), (void **)&descitem, &pos) == SUCCESS) {
-		char *str_index;
+		zstr str_index;
 		ulong nindex;
 		zval **ztype;
 
-		str_index = NULL;
+		str_index.v = NULL;
 		zend_hash_get_current_key_ex(Z_ARRVAL_P(descriptorspec), &str_index, NULL, &nindex, 0, &pos);
 
-		if (str_index) {
+		if (str_index.v) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "descriptor spec must be an integer indexed array");
 			goto exit_fail;
 		}

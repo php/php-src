@@ -153,11 +153,11 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				case T_DOC_COMMENT:
 					break;
 				default:
-					efree(Z_UNIVAL(token));
+					efree(Z_UNIVAL(token).v);
 					break;
 			}
 		} else if (token_type == T_END_HEREDOC) {
-			efree(Z_UNIVAL(token));
+			efree(Z_UNIVAL(token).v);
 		}
 		Z_TYPE(token) = 0;
 	}
@@ -223,7 +223,7 @@ ZEND_API void zend_strip(TSRMLS_D)
 					break;
 
 				default:
-					efree(Z_UNIVAL(token));
+					efree(Z_UNIVAL(token).v);
 					break;
 			}
 		}

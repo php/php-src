@@ -38,10 +38,10 @@
 	}
 
 #define PHP_CLEANUP_CLASS_ATTRIBUTES()	\
-	if (free_class_name) efree(class_name)
+	if (free_class_name) efree(class_name.v)
 
 #define PHP_CLASS_ATTRIBUTES											\
-	char *class_name;													\
+	zstr class_name;													\
 	zend_uint name_len;													\
 	zend_bool free_class_name = 0;										\
 	zend_bool incomplete_class = 0
@@ -55,7 +55,7 @@ extern "C" {
 	
 zend_class_entry *php_create_incomplete_class(TSRMLS_D);
 
-PHPAPI char *php_lookup_class_name(zval *object, zend_uint *nlen);
+PHPAPI zstr php_lookup_class_name(zval *object, zend_uint *nlen);
 PHPAPI void  php_store_class_name(zval *object, const char *name, zend_uint len);
 
 #ifdef __cplusplus

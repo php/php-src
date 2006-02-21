@@ -149,7 +149,7 @@ static void php_dom_iterator_current_data(zend_object_iterator *iter, zval ***da
 	*data = &iterator->curobj;
 }
 
-static int php_dom_iterator_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
+static int php_dom_iterator_current_key(zend_object_iterator *iter, zstr *str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
 {
 	zval *curobj;
 	xmlNodePtr curnode = NULL;
@@ -173,7 +173,7 @@ static int php_dom_iterator_current_key(zend_object_iterator *iter, char **str_k
 		}
 
 		namelen = xmlStrlen(curnode->name);
-		*str_key = estrndup(curnode->name, namelen);
+		str_key->s = estrndup(curnode->name, namelen);
 		*str_key_len = namelen + 1;
 		return HASH_KEY_IS_STRING;
 	}

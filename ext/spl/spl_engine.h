@@ -42,8 +42,9 @@ void spl_instantiate(zend_class_entry *pce, zval **object, int alloc TSRMLS_DC);
 static inline int spl_instantiate_arg_ex1(zend_class_entry *pce, zval **retval, int alloc, zval *arg1 TSRMLS_DC)
 {
 	spl_instantiate(pce, retval, alloc TSRMLS_CC);
-	
-	zend_call_method(retval, pce, &pce->constructor, pce->constructor->common.function_name, strlen(pce->constructor->common.function_name), NULL, 1, arg1, NULL TSRMLS_CC);
+
+	/* FIXME: Unicode support??? */
+	zend_call_method(retval, pce, &pce->constructor, pce->constructor->common.function_name.s, strlen(pce->constructor->common.function_name.s), NULL, 1, arg1, NULL TSRMLS_CC);
 	return 0;
 }
 /* }}} */
@@ -53,7 +54,8 @@ static inline int spl_instantiate_arg_ex2(zend_class_entry *pce, zval **retval, 
 {
 	spl_instantiate(pce, retval, alloc TSRMLS_CC);
 	
-	zend_call_method(retval, pce, &pce->constructor, pce->constructor->common.function_name, strlen(pce->constructor->common.function_name), NULL, 2, arg1, arg2 TSRMLS_CC);
+	/* FIXME: Unicode support??? */
+	zend_call_method(retval, pce, &pce->constructor, pce->constructor->common.function_name.s, strlen(pce->constructor->common.function_name.s), NULL, 2, arg1, arg2 TSRMLS_CC);
 	return 0;
 }
 /* }}} */

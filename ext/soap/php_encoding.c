@@ -321,7 +321,8 @@ xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr par
 			     zend_hash_move_forward_ex(SOAP_GLOBAL(class_map), &pos)) {
 				if (Z_TYPE_PP(tmp) == IS_STRING &&
 				    ce->name_length == Z_STRLEN_PP(tmp) &&
-				    zend_binary_strncasecmp(ce->name, ce->name_length, Z_STRVAL_PP(tmp), ce->name_length, ce->name_length) == 0 &&
+				    /* FIXME: Unicode support??? */
+				    zend_binary_strncasecmp(ce->name.s, ce->name_length, Z_STRVAL_PP(tmp), ce->name_length, ce->name_length) == 0 &&
 				    zend_hash_get_current_key_ex(SOAP_GLOBAL(class_map), &type_name, &type_len, &idx, 0, &pos) == HASH_KEY_IS_STRING) {
 
 				    /* TODO: namespace isn't stored */
@@ -1025,7 +1026,8 @@ static zval* get_zval_property(zval* object, char* name TSRMLS_DC)
 
 			property_info = zend_get_property_info(Z_OBJCE_P(object), &member, 1 TSRMLS_CC);
 			EG(scope) = old_scope;
-			if (property_info && zend_hash_quick_exists(Z_OBJPROP_P(object), property_info->name, property_info->name_length+1, property_info->h)) {
+			/* FIXME: Unicode support??? */
+			if (property_info && zend_hash_quick_exists(Z_OBJPROP_P(object), property_info->name.s, property_info->name_length+1, property_info->h)) {
 				return data;
 			}
 			return NULL;

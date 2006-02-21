@@ -245,30 +245,30 @@ ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce
 }
 
 
-ZEND_API int zend_check_property_access(zend_object *zobj, zend_uchar utype, void *prop_info_name TSRMLS_DC)
+ZEND_API int zend_check_property_access(zend_object *zobj, zend_uchar utype, zstr prop_info_name TSRMLS_DC)
 {
 	zend_property_info *property_info;
-	char *class_name, *prop_name;
+	zstr class_name, prop_name;
 	zval member;
 
 	zend_u_unmangle_property_name(utype, prop_info_name, &class_name, &prop_name);
 	if (utype == IS_UNICODE) {
-		ZVAL_UNICODE(&member, (UChar*)prop_name, 0);
+		ZVAL_UNICODE(&member, prop_name.u, 0);
 	} else {
-		ZVAL_STRING(&member, prop_name, 0);
+		ZVAL_STRING(&member, prop_name.s, 0);
 	}
 	property_info = zend_get_property_info(zobj->ce, &member, 1 TSRMLS_CC);
 	if (!property_info) {
 		return FAILURE;
 	}
-	if (class_name && class_name[0] != '*') {
+	if (class_name.s && class_name.s[0] != '*') {
 		if (!(property_info->flags & ZEND_ACC_PRIVATE)) {
 			/* we we're looking for a private prop but found a non private one of the same name */
 			return FAILURE;
-		} else if (!UG(unicode) && strcmp((char*)prop_info_name+1, property_info->name+1)) {
+		} else if (!UG(unicode) && strcmp(prop_info_name.s+1, property_info->name.s+1)) {
 			/* we we're looking for a private prop but found a private one of the same name but another class */
 			return FAILURE;
-		} else if (UG(unicode) && u_strcmp(((UChar*)prop_info_name)+1, ((UChar*)property_info->name)+1)) {
+		} else if (UG(unicode) && u_strcmp(prop_info_name.u+1, property_info->name.u+1)) {
 			/* we we're looking for a private prop but found a private one of the same name but another class */
 			return FAILURE;
 		}
@@ -285,7 +285,7 @@ static int zend_get_property_guard(zend_object *zobj, zend_property_info *proper
 		property_info = &info;
 		info.name = Z_UNIVAL_P(member);
 		info.name_length = Z_UNILEN_P(member);
-		info.h = zend_u_get_hash_value(Z_TYPE_P(member), Z_STRVAL_P(member), Z_STRLEN_P(member) + 1);
+		info.h = zend_u_get_hash_value(Z_TYPE_P(member), Z_UNIVAL_P(member), Z_UNILEN_P(member) + 1);
 	}
 	if (!zobj->guards) {
 		ALLOC_HASHTABLE(zobj->guards);
@@ -661,7 +661,7 @@ ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS)
  * Returns the function address that should be called, or NULL
  * if no such function exists.
  */
-static inline zend_function *zend_check_private_int(zend_function *fbc, zend_class_entry *ce, char *function_name_strval, int function_name_strlen TSRMLS_DC)
+static inline zend_function *zend_check_private_int(zend_function *fbc, zend_class_entry *ce, zstr function_name_strval, int function_name_strlen TSRMLS_DC)
 {
 	if (!ce) {
 		return 0;
@@ -696,7 +696,7 @@ static inline zend_function *zend_check_private_int(zend_function *fbc, zend_cla
 }
 
 
-ZEND_API int zend_check_private(zend_function *fbc, zend_class_entry *ce, char *function_name_strval, int function_name_strlen TSRMLS_DC)
+ZEND_API int zend_check_private(zend_function *fbc, zend_class_entry *ce, zstr function_name_strval, int function_name_strlen TSRMLS_DC)
 {
 	return zend_check_private_int(fbc, ce, function_name_strval, function_name_strlen TSRMLS_CC) != NULL;
 }
@@ -731,12 +731,12 @@ ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 }
 
 
-static union _zend_function *zend_std_get_method(zval **object_ptr, char *method_name, int method_len TSRMLS_DC)
+static union _zend_function *zend_std_get_method(zval **object_ptr, zstr method_name, int method_len TSRMLS_DC)
 {
 	zend_object *zobj;
 	zend_function *fbc;
 	unsigned int lc_method_name_len;
-	char *lc_method_name;
+	zstr lc_method_name;
 	zval *object = *object_ptr;
 
 	/* FIXME: type is default */
@@ -747,7 +747,7 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, char *method
 
 	zobj = Z_OBJ_P(object);
 	if (zend_u_hash_find(&zobj->ce->function_table, type, lc_method_name, lc_method_name_len+1, (void **)&fbc) == FAILURE) {
-		efree(lc_method_name);
+		efree(lc_method_name.v);
 		if (zobj->ce->__call) {
 			zend_internal_function *call_user_call = emalloc(sizeof(zend_internal_function));
 			call_user_call->type = ZEND_INTERNAL_FUNCTION;
@@ -758,9 +758,9 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, char *method
 			call_user_call->scope = zobj->ce;
 			call_user_call->fn_flags = 0;
 			if (UG(unicode)) {
-				call_user_call->function_name = (char*)eustrndup((UChar*)method_name, method_len);
+				call_user_call->function_name.u = eustrndup(method_name.u, method_len);
 			} else {
-				call_user_call->function_name = estrndup(method_name, method_len);
+				call_user_call->function_name.s = estrndup(method_name.s, method_len);
 			}
 			call_user_call->pass_rest_by_reference = 0;
 			call_user_call->return_reference = ZEND_RETURN_VALUE;
@@ -792,34 +792,34 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, char *method
 		 */
 		updated_fbc = zend_check_private_int(fbc, Z_OBJ_HANDLER_P(object, get_class_entry)(object TSRMLS_CC), lc_method_name, method_len TSRMLS_CC);
 		if (!updated_fbc) {
-			zend_error(E_ERROR, "Call to %s method %v::%v() from context '%v'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : (char*)EMPTY_STR);
+			zend_error(E_ERROR, "Call to %s method %v::%v() from context '%v'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : (zstr)EMPTY_STR);
 		}
 		fbc = updated_fbc;
 	} else if ((fbc->common.fn_flags & ZEND_ACC_PROTECTED)) {
 		/* Ensure that if we're calling a protected function, we're allowed to do so.
 		 */
 		if (!zend_check_protected(fbc->common.scope, EG(scope))) {
-			zend_error(E_ERROR, "Call to %s method %v::%v() from context '%v'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : (char*)EMPTY_STR);
+			zend_error(E_ERROR, "Call to %s method %v::%v() from context '%v'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : (zstr)EMPTY_STR);
 		}
 	}
 
-	efree(lc_method_name);
+	efree(lc_method_name.v);
 	return fbc;
 }
 
 
 /* This is not (yet?) in the API, but it belongs in the built-in objects callbacks */
-ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, char *function_name_strval, int function_name_strlen TSRMLS_DC)
+ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zstr function_name_strval, int function_name_strlen TSRMLS_DC)
 {
 	zend_function *fbc;
 	/* FIXME: type is default */
 	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
 
 	if (zend_u_hash_find(&ce->function_table, type, function_name_strval, function_name_strlen+1, (void **) &fbc)==FAILURE) {
-		char *class_name = ce->name;
+		zstr class_name = ce->name;
 
-		if (!class_name) {
-			class_name = (char*)EMPTY_STR;
+		if (!class_name.v) {
+			class_name.u = EMPTY_STR;
 		}
 		zend_error(E_ERROR, "Call to undefined method %R::%R()", type, class_name, type, function_name_strval);
 	}
@@ -839,14 +839,14 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, char *f
 		 */
 		updated_fbc = zend_check_private_int(fbc, EG(scope), function_name_strval, function_name_strlen TSRMLS_CC);
 		if (!updated_fbc) {
-			zend_error(E_ERROR, "Call to %s method %v::%v() from context '%v'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), fbc->common.function_name, EG(scope) ? EG(scope)->name : (char*)EMPTY_STR);
+			zend_error(E_ERROR, "Call to %s method %v::%v() from context '%v'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), fbc->common.function_name, EG(scope) ? EG(scope)->name : (zstr)EMPTY_STR);
 		}
 		fbc = updated_fbc;
 	} else if ((fbc->common.fn_flags & ZEND_ACC_PROTECTED)) {
 		/* Ensure that if we're calling a protected function, we're allowed to do so.
 		 */
 		if (!zend_check_protected(EG(scope), fbc->common.scope)) {
-			zend_error(E_ERROR, "Call to %s method %v::%v() from context '%v'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), fbc->common.function_name, EG(scope) ? EG(scope)->name : (char*)EMPTY_STR);
+			zend_error(E_ERROR, "Call to %s method %v::%v() from context '%v'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), fbc->common.function_name, EG(scope) ? EG(scope)->name : (zstr)EMPTY_STR);
 		}
 	}
 
@@ -854,7 +854,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, char *f
 }
 
 
-ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, zend_uchar type, void *property_name, int property_name_len, zend_bool silent TSRMLS_DC)
+ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, zend_uchar type, zstr property_name, int property_name_len, zend_bool silent TSRMLS_DC)
 {
 	zval **retval = NULL;
 	zend_class_entry *tmp_ce = ce;
@@ -865,7 +865,7 @@ ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, zend_uchar ty
 		std_property_info.flags = ZEND_ACC_PUBLIC;
 		std_property_info.name = property_name;
 		std_property_info.name_length = property_name_len;
-		std_property_info.h = zend_get_hash_value(std_property_info.name, std_property_info.name_length+1);
+		std_property_info.h = zend_u_get_hash_value(UG(unicode)?IS_UNICODE:IS_STRING, std_property_info.name, std_property_info.name_length+1);
 		property_info = &std_property_info;
 	}
 
@@ -896,7 +896,7 @@ ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, zend_uchar ty
 }
 
 
-ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, zend_uchar type, void *property_name, int property_name_len TSRMLS_DC)
+ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, zend_uchar type, zstr property_name, int property_name_len TSRMLS_DC)
 {
 	zend_error(E_ERROR, "Attempt to unset static property %v::$%R", ce->name, type, property_name);
 	return 0;
@@ -915,13 +915,13 @@ static union _zend_function *zend_std_get_constructor(zval *object TSRMLS_DC)
 			/* Ensure that if we're calling a private function, we're allowed to do so.
 			 */
 			if (Z_OBJ_HANDLER_P(object, get_class_entry)(object TSRMLS_CC) != EG(scope)) {
-				zend_error(E_ERROR, "Call to private %v::%v() from context '%v'", constructor->common.scope->name, constructor->common.function_name, EG(scope) ? EG(scope)->name : (char*)EMPTY_STR);
+				zend_error(E_ERROR, "Call to private %v::%v() from context '%v'", constructor->common.scope->name, constructor->common.function_name, EG(scope) ? EG(scope)->name : (zstr)EMPTY_STR);
 			}
 		} else if ((constructor->common.fn_flags & ZEND_ACC_PROTECTED)) {
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
 			 */
 			if (!zend_check_protected(constructor->common.scope, EG(scope))) {
-				zend_error(E_ERROR, "Call to protected %v::%v() from context '%v'", constructor->common.scope->name, constructor->common.function_name, EG(scope) ? EG(scope)->name : (char*)EMPTY_STR);
+				zend_error(E_ERROR, "Call to protected %v::%v() from context '%v'", constructor->common.scope->name, constructor->common.function_name, EG(scope) ? EG(scope)->name : (zstr)EMPTY_STR);
 			}
 		}
 	}
@@ -1029,7 +1029,7 @@ zend_class_entry *zend_std_object_get_class(zval *object TSRMLS_DC)
 	return zobj->ce;
 }
 
-int zend_std_object_get_class_name(zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
+int zend_std_object_get_class_name(zval *object, zstr *class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
 {
 	zend_object *zobj;
 	zend_class_entry *ce;
@@ -1046,9 +1046,9 @@ int zend_std_object_get_class_name(zval *object, char **class_name, zend_uint *c
 
 	*class_name_len = ce->name_length;
 	if (UG(unicode)) {
-		*class_name = (char*)eustrndup((UChar*)ce->name, ce->name_length);
+		class_name->u = eustrndup(ce->name.u, ce->name_length);
 	} else {
-		*class_name = estrndup(ce->name, ce->name_length);
+		class_name->s = estrndup(ce->name.s, ce->name_length);
 	}
 	return SUCCESS;
 }
