@@ -707,6 +707,9 @@ static void _function_string(string *str, zend_function *fptr, zend_class_entry 
 	}
 	string_printf(str, "> ");
 
+	if (fptr->common.fn_flags & ZEND_ACC_DEPRECATED) {
+		string_printf(str, "DEPRECATED ");
+	}
 	if (fptr->common.fn_flags & ZEND_ACC_ABSTRACT) {
 		string_printf(str, "abstract ");
 	}
