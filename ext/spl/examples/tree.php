@@ -4,7 +4,7 @@
  * @brief   Program Tree view example
  * @ingroup Examples
  * @author  Marcus Boerger
- * @date    2003 - 2005
+ * @date    2003 - 2006
  *
  * Usage: php tree.php \<path\>
  *
