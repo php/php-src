@@ -1747,17 +1747,19 @@ PHP_FUNCTION(flush)
    Delay for a given number of seconds */
 PHP_FUNCTION(sleep)
 {
-	zval **num;
+	long num;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &num) == FAILURE) {
+		RETURN_FALSE;
 	}
-
-	convert_to_long_ex(num);
+	if (num < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of seconds must be greater than or equal to 0");
+		RETURN_FALSE;
+	}
 #ifdef PHP_SLEEP_NON_VOID
-	RETURN_LONG(php_sleep(Z_LVAL_PP(num)));
+	RETURN_LONG(php_sleep(num));
 #else
-	php_sleep(Z_LVAL_PP(num));
+	php_sleep(num);
 #endif
 
 }
