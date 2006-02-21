@@ -157,7 +157,7 @@
  * @param class_name        name of class to load
  * @param file_extensions   file extensions (use defaults if NULL)
  */
-function spl_autoload(string $class_name, string $file_extensions = NULL);
+function spl_autoload(string $class_name, string $file_extensions = NULL) {/**/};
 
 /** @ingroup SPL
  * @brief Manual invocation of all registerd autoload functions
@@ -165,7 +165,7 @@ function spl_autoload(string $class_name, string $file_extensions = NULL);
  *
  * @param class_name        name of class to load
  */
-function spl_autoload_call(string $class_name);
+function spl_autoload_call(string $class_name) {/**/};
 
 /** @ingroup SPL 
  * @brief Register and return default file extensions for spl_autoload
@@ -176,7 +176,7 @@ function spl_autoload_call(string $class_name);
  * @return comma separated list of file extensions to use in default autoload 
  *        function.
  */
-function spl_autoload_extensions($file_extensions);
+function spl_autoload_extensions($file_extensions) {/**/};
 
 /** @ingroup SPL
  * @brief Return all registered autoload functionns
@@ -184,7 +184,7 @@ function spl_autoload_extensions($file_extensions);
  *
  * @return array of all registered autoload functions or false
  */
-function spl_autoload_functions();
+function spl_autoload_functions() {/**/};
 
 /** @ingroup SPL
  * @brief Register given function as autoload implementation
@@ -194,7 +194,7 @@ function spl_autoload_functions();
  *                           function name to register as autoload function.
  * @param throw              whether to throw or issue an error on failure.
  */
-function spl_autoload_register(string $autoload_function = "spl_autoload", $throw = true);
+function spl_autoload_register(string $autoload_function = "spl_autoload", $throw = true) {/**/};
 
 /** @ingroup SPL
  * @brief Unregister given function as autoload implementation
@@ -203,7 +203,7 @@ function spl_autoload_register(string $autoload_function = "spl_autoload", $thro
  * @param autoload_function  name of function or array of object/class and 
  *                           function name to unregister as autoload function.
  */
-function spl_autoload_unregister(string $autoload_function = "spl_autoload");
+function spl_autoload_unregister(string $autoload_function = "spl_autoload") {/**/};
 
 /** @ingroup SPL
  * @brief Return an array of classes and interfaces in SPL
@@ -211,7 +211,7 @@ function spl_autoload_unregister(string $autoload_function = "spl_autoload");
  * @return array containing the names of all clsses and interfaces defined in 
  *         extension SPL
  */
-function spl_classes();
+function spl_classes() {/**/};
 
 /** @ingroup SPL
  * @brief Count the elements in an iterator
@@ -219,7 +219,7 @@ function spl_classes();
  *
  * @return number of elements in an iterator
  */
-function iterator_count(Traversable $it);
+function iterator_count(Traversable $it) {/**/};
 
 /** @ingroup SPL
  * @brief Copy iterator elements into an array
@@ -228,7 +228,7 @@ function iterator_count(Traversable $it);
  * @param it  iterator to copy
  * @return array with elements copied from the iterator
  */
-function iterator_to_array(Traversable $it);
+function iterator_to_array(Traversable $it) {/**/};
 
 /** @ingroup ZendEngine
  * @brief Basic Exception class.
@@ -611,7 +611,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Countable
 	 * @param $flags see setFlags().
 	 * @param $iterator_class class used in getIterator()
 	 */
-	function __construct($array, $flags = 0, $iterator_class = "ArrayIterator");
+	function __construct($array, $flags = 0, $iterator_class = "ArrayIterator") {/**/}
 
 	/** Set behavior flags.
 	 *	
@@ -620,90 +620,88 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Countable
 	 *               when accessed as list (var_dump, foreach, etc.)
 	 *        1 set: array indices can be accessed as properties in read/write
 	 */
-	function setFlags($flags);
+	function setFlags($flags) {/**/}
 	                    
-	/**
-	 * @ return current flags
+	/** @return current flags
 	 */
-	function getFlags();
+	function getFlags() {/**/}
 
 	/** Sort the entries by values.
 	 */
-	function asort();
+	function asort() {/**/}
 	
 	/** Sort the entries by key.
 	 */
-	function ksort();
+	function ksort() {/**/}
 	
 	/** Sort the entries by values using user defined function.
 	 */
-	function uasort(mixed cmp_function);
+	function uasort(mixed cmp_function) {/**/}
 	
 	/** Sort the entries by key using user defined function.
 	 */
-	function uksort(mixed cmp_function);
+	function uksort(mixed cmp_function) {/**/}
 	
 	/** Sort the entries by values using "natural order" algorithm.
 	 */
-	function natsort();
+	function natsort() {/**/}
 	
 	/** Sort the entries by values using case insensitive "natural order" algorithm.
 	 */
-	function natcasesort();
+	function natcasesort() {/**/}
 	
-	/**
-	 * @param $array new array or object
+	/** @param $array new array or object
 	 */
-	function exchangeArray($array);
+	function exchangeArray($array) {/**/}
 
 	/** @return the iterator which is an ArrayIterator object connected to
 	 * this object.
 	 */
-	function getIterator();
+	function getIterator() {/**/}
 
 	/** @param $index offset to inspect
 	 * @return whetehr offset $index esists
 	 */	
-	function offsetExists($index);
+	function offsetExists($index) {/**/}
 
 	/** @param $index offset to return value for
 	 * @return value at offset $index
 	 */	
-	function offsetGet($index);
+	function offsetGet($index) {/**/}
 
 	/** @param $index index to set
 	 * @param $newval new value to store at offset $index
 	 */	
-	function offsetSet($index, $newval);
+	function offsetSet($index, $newval) {/**/}
 
 	/** @param $index offset to unset
 	 */	
-	function offsetUnset($index);
+	function offsetUnset($index) {/**/}
 
 	/** @param $value is appended as last element
 	 * @warning this method cannot be called when the ArrayObject refers to 
 	 *          an object.
 	 */	
-	function append($value);
+	function append($value) {/**/}
 
 	/** @return a \b copy of the array
 	 * @note when the ArrayObject refers to an object then this method 
 	 *       returns an array of the public properties.
 	 */	
-	function getArrayCopy();
+	function getArrayCopy() {/**/}
 
 	/** @return the number of elements in the array or the number of public
 	 * properties in the object.
 	 */
-	function count();
+	function count() {/**/}
 	
 	/* @param $iterator_class new class used in getIterator()
 	 */
-	function setIteratorClass($itertor_class);
+	function setIteratorClass($itertor_class) {/**/}
 	
 	/* @return class used in getIterator()
 	 */
-	function getIteratorClass();
+	function getIteratorClass() {/**/}
 }
 
 /** @ingroup SPL
@@ -733,7 +731,7 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Countable
 	 * @param $array the array to use.
 	 * @param $flags see setFlags().
 	 */
-	function __construct($array, $flags = 0);
+	function __construct($array, $flags = 0) {/**/}
 
 	/** Set behavior flags.
 	 *	
@@ -742,77 +740,92 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Countable
 	 *               when accessed as list (var_dump, foreach, etc.)
 	 *        1 set: array indices can be accessed as properties in read/write
 	 */
-	function setFlags($flags);
+	function setFlags($flags) {/**/}
 
 	/**
 	 * @ return current flags
 	 */
-	function getFlags();
+	function getFlags() {/**/}
 
 	/** Sort the entries by values.
 	 */
-	function asort();
+	function asort() {/**/}
 	
 	/** Sort the entries by key.
 	 */
-	function ksort();
+	function ksort() {/**/}
 	
 	/** Sort the entries by values using user defined function.
 	 */
-	function uasort(mixed cmp_function);
+	function uasort(mixed cmp_function) {/**/}
 	
 	/** Sort the entries by key using user defined function.
 	 */
-	function uksort(mixed cmp_function);
+	function uksort(mixed cmp_function) {/**/}
 	
 	/** Sort the entries by values using "natural order" algorithm.
 	 */
-	function natsort();
+	function natsort() {/**/}
 	
 	/** Sort the entries by values using case insensitive "natural order" algorithm.
 	 */
-	function natcasesort();
+	function natcasesort() {/**/}
 	
 	/** @param $index offset to inspect
 	 * @return whetehr offset $index esists
 	 */	
-	function offsetExists($index);
+	function offsetExists($index) {/**/}
 
 	/** @param $index offset to return value for
 	 * @return value at offset $index
 	 */	
-	function offsetGet($index);
+	function offsetGet($index) {/**/}
 
 	/** @param $index index to set
 	 * @param $newval new value to store at offset $index
 	 */	
-	function offsetSet($index, $newval);
+	function offsetSet($index, $newval) {/**/}
 
 	/** @param $index offset to unset
 	 */	
-	function offsetUnset($index);
+	function offsetUnset($index) {/**/}
 
 	/** @param $value is appended as last element
 	 * @warning this method cannot be called when the ArrayIterator refers to 
 	 *          an object.
 	 */	
-	function append($value);
+	function append($value) {/**/}
 
 	/** @return a \b copy of the array
 	 * @note when the ArrayIterator refers to an object then this method 
 	 *       returns an array of the public properties.
 	 */	
-	function getArrayCopy();
+	function getArrayCopy() {/**/}
 
 	/** @param $position offset to seek to
 	 * @throw OutOfBoundsException if $position is invalid
 	 */
-	function seek($position);
+	function seek($position) {/**/}
 
 	/** @return the number of elements in the array or the number of public
 	 * properties in the object.
 	 */
-	function count();
+	function count() {/**/}
+
+	/** @copydoc Iterator::rewind */
+	function rewind() {/**/}
+	
+	/** @copydoc Iterator::valid */
+	function valid() {/**/}
+	
+	/** @copydoc Iterator::current */
+	function current() {/**/}
+	
+	/** @copydoc Iterator::key */
+	function key() {/**/}
+	
+	/** @copydoc Iterator::next */
+	function next() {/**/}
 }
 
 /** @ingroup SPL
@@ -825,95 +838,95 @@ class SplFileInfo
 	 *
 	 * @param $file_name path or file name
 	 */
-	function __construct($file_name);
+	function __construct($file_name) {/**/}
 
 	/** @return the path part only.
 	 */
-	function getPath();	
+	function getPath() {/**/}	
 
 	/** @return the filename only.
 	 */
-	function getFilename();	
+	function getFilename() {/**/}	
 
 	/** @return SplFileInfo created for the file
 	 * @param class_name name of class to instantiate
 	 * @see SplFileInfo::setInfoClass()
 	 */
-	function getFileInfo(string class_name = NULL);
+	function getFileInfo(string class_name = NULL) {/**/}
 
 	/** @return The current entries path and file name.
 	 */
-	function getPathname();	
+	function getPathname() {/**/}	
 
 	/** @return SplFileInfo created for the path
 	 * @param class_name name of class to instantiate
 	 * @see SplFileInfo::setInfoClass()
 	 */
-	function getPathInfo(string class_name = NULL);
+	function getPathInfo(string class_name = NULL) {/**/}
 
 	/** @return The current entry's permissions.
 	 */
-	function getPerms();
+	function getPerms() {/**/}
 
 	/** @return The current entry's inode.
 	 */
-	function getInode();
+	function getInode() {/**/}
 
 	/** @return The current entry's size in bytes .
 	 */
-	function getSize();
+	function getSize() {/**/}
 
 	/** @return The current entry's owner name.
 	 */
-	function getOwner();
+	function getOwner() {/**/}
 
 	/** @return The current entry's group name.
 	 */
-	function getGroup();
+	function getGroup() {/**/}
 
 	/** @return The current entry's last access time.
 	 */
-	function getATime();
+	function getATime() {/**/}
 
 	/** @return The current entry's last modification time.
 	 */
-	function getMTime();
+	function getMTime() {/**/}
 
 	/** @return The current entry's last change time.
 	 */
-	function getCTime();
+	function getCTime() {/**/}
 
 	/** @return The current entry's size in bytes .
 	 */
-	function getType();
+	function getType() {/**/}
 
 	/** @return Whether the current entry is writeable.
 	 */
-	function isWritable();
+	function isWritable() {/**/}
 
 	/** @return Whether the current entry is readable.
 	 */
-	function isReadable();
+	function isReadable() {/**/}
 
 	/** @return Whether the current entry is executable.
 	 */
-	function isExecutable();
+	function isExecutable() {/**/}
 
 	/** @return Whether the current entry is .
 	 */
-	function isFile();
+	function isFile() {/**/}
 
 	/** @return Whether the current entry is a directory.
 	 */
-	function isDir();	
+	function isDir() {/**/}	
 
 	/** @return whether the current entry is a link.
 	 */
-	function isLink();
+	function isLink() {/**/}
 
 	/** @return getPathname()
 	 */
-	function __toString();
+	function __toString() {/**/}
 
 	/** Open the current file as a SplFileObject instance
 	 *
@@ -928,17 +941,17 @@ class SplFileInfo
 	 * @see SplFileInfo::setFileClass()
 	 * @see file()
 	 */
-	function openFile($mode = 'r', $use_include_path = false, $context = NULL);
+	function openFile($mode = 'r', $use_include_path = false, $context = NULL) {/**/}
 
 	/** @param class_name name of class used with openFile(). Must be derived 
 	 * from SPLFileObject.
 	 */
-	function setFileClass(string class_name = "SplFileObject");
+	function setFileClass(string class_name = "SplFileObject") {/**/}
 
 	/** @param class_name name of class used with getFileInfo(), getPathInfo(), 
 	 *                    getSubPathInfo(). Must be derived from SplFileInfo.
 	 */
-	function setInfoClass(string class_name = "SplFileInfo");
+	function setInfoClass(string class_name = "SplFileInfo") {/**/}
 }
 
 /** @ingroup SPL
@@ -952,27 +965,27 @@ class DirectoryIterator extends SplFileInfo implements Iterator
 	 *
 	 * @param $path directory to iterate.
 	 */
-	function __construct($path);
+	function __construct($path) {/**/}
 
 	/** @return index of entry
 	 */
-	function key();
+	function key() {/**/}
 
 	/** @return $this
 	 */
-	function current();
+	function current() {/**/}
 
 	/** @return Whether the current entry is either '.' or '..'.
 	 */
-	function isDot();	
+	function isDot() {/**/}	
 
 	/** @return whether the current entry is a link.
 	 */
-	function isLink();
+	function isLink() {/**/}
 
 	/** @return getFilename()
 	 */
-	function __toString();
+	function __toString() {/**/}
 }
 
 /** @ingroup SPL
@@ -994,37 +1007,37 @@ class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveI
 	 * - KEY_AS_FILENAME
 	 * - NEW_CURRENT_AND_KEY 
 	 */
-	function __construct($path, $flags = 0);
+	function __construct($path, $flags = 0) {/**/}
 
 	/** @return getPathname() or getFilename() depending on flags
 	 */
-	function key();
+	function key() {/**/}
 
 	/** @return getFilename() or getFileInfo() depending on flags
 	 */
-	function current();
+	function current() {/**/}
 
 	/** @return whether the current is a directory (not '.' or '..').
 	 */
-	function hasChildren();	
+	function hasChildren() {/**/}	
 
 	/** @return a RecursiveDirectoryIterator for the current entry.
 	 */
-	function getChildren();	
+	function getChildren() {/**/}	
 
 	/** @return sub path only (without main path)
 	 */
-	function getSubPath();
+	function getSubPath() {/**/}
 
 	/** @return the current sub path
 	 */
-	function getSubPathname();
+	function getSubPathname() {/**/}
 
 	/** @return SplFileInfo created for the current sub path
 	 * @param class_name name of class to instantiate
 	 * @see SplFileInfo::setInfoClass()
 	 */
-	function getSubPathInfo(string $class_name = NULL);
+	function getSubPathInfo(string $class_name = NULL) {/**/}
 
 }
 
@@ -1043,15 +1056,15 @@ class SimpleXMLIterator extends SimpleXMLElement implements RecursiveIterator, C
 {
 	/** @return whether the current node has sub nodes.
 	 */
-	function hasChildren();	
+	function hasChildren() {/**/}	
 
 	/** @return a SimpleXMLIterator for the current node.
 	 */
-	function getChildren();	
+	function getChildren() {/**/}	
 
 	/** @return number of elements/attributes seen with foreach()
 	 */
-	function count();
+	function count() {/**/}
 }
 
 /** @ingroup SPL
