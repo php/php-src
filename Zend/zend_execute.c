@@ -127,7 +127,7 @@ static inline void zend_pzval_unlock_free_func(zval *z)
 	(z)->value = (v)->value; \
 	Z_TYPE_P(z) = Z_TYPE_P(v); \
 	(z)->refcount = 1; \
-	(z)->is_ref = 0;	
+	(z)->is_ref = 0;
 
 #define MAKE_REAL_ZVAL_PTR(val) \
 	do { \
@@ -153,7 +153,7 @@ ZEND_API zval** zend_get_compiled_variable_value(zend_execute_data *execute_data
 static inline void zend_get_cv_address(zend_uchar utype, zend_compiled_variable *cv, zval ***ptr, temp_variable *Ts TSRMLS_DC)
 {
 	zval *new_zval = &EG(uninitialized_zval);
-   
+
 	new_zval->refcount++;
 	zend_u_hash_quick_update(EG(active_symbol_table), utype, cv->name, cv->name_len+1, cv->hash_value, &new_zval, sizeof(zval *), (void **)ptr);
 }
@@ -219,7 +219,7 @@ static inline zval *_get_zval_ptr_var(znode *node, temp_variable *Ts, zend_free_
 static inline zval *_get_zval_ptr_cv(znode *node, temp_variable *Ts, int type TSRMLS_DC)
 {
 	zval ***ptr = &CV_OF(node->u.var);
-			
+
 	if (!*ptr) {
 		zend_compiled_variable *cv = &CV_DEF_OF(node->u.var);
 		zend_uchar utype = UG(unicode)?IS_UNICODE:IS_STRING;
@@ -289,7 +289,7 @@ static inline zval **_get_zval_ptr_ptr_var(znode *node, temp_variable *Ts, zend_
 static inline zval **_get_zval_ptr_ptr_cv(znode *node, temp_variable *Ts, int type TSRMLS_DC)
 {
 	zval ***ptr = &CV_OF(node->u.var);
-		
+
 	if (!*ptr) {
 		zend_compiled_variable *cv = &CV_DEF_OF(node->u.var);
 		zend_uchar utype = UG(unicode)?IS_UNICODE:IS_STRING;
@@ -534,7 +534,7 @@ static inline void zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zv
 		if (!arg) {
 			if (ptr && ptr->op_array) {
 				zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %v%s%v() must be an array, called in %s on line %d and defined", arg_num, fclass, fsep, fname, ptr->op_array->filename, ptr->opline->lineno);
-			} else { 
+			} else {
 				zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %v%s%v() must be an array", arg_num, fclass, fsep, fname);
 			}
 		}
@@ -550,7 +550,7 @@ static inline void zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zv
 				break;
 			case IS_ARRAY:
 				break;
-			default:	
+			default:
 				if (ptr && ptr->op_array) {
 					zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %v%s%v() must be an array, called in %s on line %d and defined", arg_num, fclass, fsep, fname, ptr->op_array->filename, ptr->opline->lineno);
 				} else {
@@ -582,7 +582,7 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
-	
+
 	if (Z_TYPE_P(object) != IS_OBJECT || (opcode == ZEND_ASSIGN_OBJ && !Z_OBJ_HT_P(object)->write_property)) {
 		zend_error(E_WARNING, "Attempt to assign property of non-object");
 		FREE_OP(free_op2);
@@ -593,7 +593,7 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 		FREE_OP(free_value);
 		return;
 	}
-	
+
 	/* here we are sure we are dealing with an object */
 
 	/* separate our value if necessary */
@@ -602,7 +602,7 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 		char *class_name;
 		zend_uint class_name_len;
 		int dup;
-		
+
 		ALLOC_ZVAL(value);
 		*value = *orig_value;
 	 	value->is_ref = 0;
@@ -611,7 +611,7 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 		if (Z_OBJ_HANDLER_P(value, clone_obj) == NULL) {
 			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v",  class_name);
 		}
-		zend_error(E_STRICT, "Implicit cloning object of class '%v' because of 'zend.ze1_compatibility_mode'", class_name);		
+		zend_error(E_STRICT, "Implicit cloning object of class '%v' because of 'zend.ze1_compatibility_mode'", class_name);
 		Z_OBJVAL_P(value) = Z_OBJ_HANDLER_P(orig_value, clone_obj)(orig_value TSRMLS_CC);
 		if (!dup) {
 			efree(class_name);
@@ -632,7 +632,7 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 		value->refcount = 0;
 		zval_copy_ctor(value);
 	}
-		
+
 
 	value->refcount++;
 	if (opcode == ZEND_ASSIGN_OBJ) {
@@ -650,7 +650,7 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 		}
 		Z_OBJ_HT_P(object)->write_dimension(object, property_name, value TSRMLS_CC);
 	}
-	
+
 	if (result && !RETURN_VALUE_UNUSED(result)) {
 		T(result->u.var).var.ptr = value;
 		T(result->u.var).var.ptr_ptr = &T(result->u.var).var.ptr; /* this is so that we could use it in FETCH_DIM_R, etc. - see bug #27876 */
@@ -671,7 +671,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 	zend_free_op free_op1;
 	zval **variable_ptr_ptr = get_zval_ptr_ptr(op1, Ts, &free_op1, BP_VAR_W);
 	zval *variable_ptr;
-	
+
 	if (!variable_ptr_ptr) {
 		temp_variable *T = &T(op1->u.var);
 
@@ -714,7 +714,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 			}
 
 			Z_STRVAL_P(T->str_offset.str)[T->str_offset.offset] = Z_STRVAL_P(final_value)[0];
-			
+
 			if (op2->op_type == IS_TMP_VAR) {
 				if (final_value == &T(op2->u.var).tmp_var) {
 					/* we can safely free final_value here
@@ -779,7 +779,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 			}
 		} while (0);
 		/* zval_ptr_dtor(&T->str_offset.str); Nuke this line if it doesn't cause a leak */
-		
+
 /*		T(result->u.var).var.ptr_ptr = &EG(uninitialized_zval_ptr); */
 		if (!RETURN_VALUE_UNUSED(result)) {
 			T(result->u.var).var.ptr_ptr = &value;
@@ -810,14 +810,14 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 		Z_OBJ_HANDLER_P(variable_ptr, set)(variable_ptr_ptr, value TSRMLS_CC);
 		goto done_setting_var;
 	}
-	
+
 	if (EG(ze1_compatibility_mode) && Z_TYPE_P(value) == IS_OBJECT) {
 		char *class_name;
 		zend_uint class_name_len;
 		int dup;
-			
+
 		dup = zend_get_object_classname(value, &class_name, &class_name_len TSRMLS_CC);
- 
+
 		if (Z_OBJ_HANDLER_P(value, clone_obj) == NULL) {
 			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v",  class_name);
 		} else if (PZVAL_IS_REF(variable_ptr)) {
@@ -863,7 +863,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 		if (variable_ptr!=value) {
 			zend_uint refcount = variable_ptr->refcount;
 			zval garbage;
-			
+
 			if (type!=IS_TMP_VAR) {
 				value->refcount++;
 			}
@@ -889,7 +889,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 						variable_ptr->refcount++;
 					} else if (PZVAL_IS_REF(value)) {
 						zval tmp;
-						
+
 						tmp = *value;
 						zval_copy_ctor(&tmp);
 						tmp.refcount=1;
@@ -936,13 +936,13 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 		}
 		(*variable_ptr_ptr)->is_ref=0;
 	}
-	
+
 done_setting_var:
 	if (result && !RETURN_VALUE_UNUSED(result)) {
 		T(result->u.var).var.ptr_ptr = variable_ptr_ptr;
 		PZVAL_LOCK(*variable_ptr_ptr);
 		AI_USE_PTR(T(result->u.var).var);
-	} 
+	}
 	FREE_OP_VAR_PTR(free_op1);
 }
 
@@ -957,7 +957,7 @@ static inline void zend_receive(zval **variable_ptr_ptr, zval *value TSRMLS_DC)
 		int dup;
 
 		dup = zend_get_object_classname(value, &class_name, &class_name_len TSRMLS_CC);
-		
+
  		if (Z_OBJ_HANDLER_P(value, clone_obj) == NULL) {
 			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v",  class_name);
 		} else {
@@ -1042,10 +1042,10 @@ static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, zval *dim
 			goto fetch_string_dim;
 		case IS_STRING:
 		case IS_UNICODE:
-			
+
 			offset_key = Z_UNIVAL_P(dim);
 			offset_key_length = Z_UNILEN_P(dim)+1;
-			
+
 fetch_string_dim:
 			if (UG(unicode) && ht == &EG(symbol_table) && ztype == IS_UNICODE) {
 				/* Identifier normalization */
@@ -1089,7 +1089,7 @@ fetch_string_dim:
 			zend_error(E_STRICT, "Resource ID#%ld used as offset, casting to integer (%ld)", Z_LVAL_P(dim), Z_LVAL_P(dim));
 			/* Fall Through */
 		case IS_DOUBLE:
-		case IS_BOOL: 
+		case IS_BOOL:
 		case IS_LONG: {
 				long index;
 
@@ -1121,7 +1121,7 @@ fetch_string_dim:
 				}
 			}
 			break;
-		default: 
+		default:
 			zend_error(E_WARNING, "Illegal offset type");
 			switch (type) {
 				case BP_VAR_R:
@@ -1145,7 +1145,7 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 	if (!container_ptr) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
-	
+
 	container = *container_ptr;
 
 	if (container == EG(error_zval_ptr)) {
@@ -1191,7 +1191,7 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 				if (zend_hash_next_index_insert(Z_ARRVAL_P(container), &new_zval, sizeof(zval *), (void **) &retval) == FAILURE) {
 					zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
 					retval = &EG(error_zval_ptr);
-					new_zval->refcount--; 
+					new_zval->refcount--;
 				}
 			} else {
 				retval = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, type TSRMLS_CC);
@@ -1254,12 +1254,12 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 				zend_error_noreturn(E_ERROR, "Cannot use object as array");
 			} else {
 				zval *overloaded_result;
-				
+
 				if (dim_is_tmp_var) {
 					zval *orig = dim;
 					MAKE_REAL_ZVAL_PTR(dim);
 					ZVAL_NULL(orig);
-				} 
+				}
 				overloaded_result = Z_OBJ_HT_P(container)->read_dimension(container, dim, type TSRMLS_CC);
 
 				if (overloaded_result) {
@@ -1292,7 +1292,7 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 				return;
 			}
 			break;
-		default: {				
+		default: {
 				switch (type) {
 					case BP_VAR_UNSET:
 						zend_error(E_WARNING, "Cannot unset offset in a non-array variable");
@@ -1323,7 +1323,7 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 static void zend_fetch_property_address(temp_variable *result, zval **container_ptr, zval *prop_ptr, int type TSRMLS_DC)
 {
 	zval *container;
-	
+
 	container = *container_ptr;
 	if (container == EG(error_zval_ptr)) {
 		if (result) {
@@ -1348,7 +1348,7 @@ static void zend_fetch_property_address(temp_variable *result, zval **container_
 				break;
 		}
 	}
-	
+
 	if (Z_TYPE_P(container) != IS_OBJECT) {
 		if (result) {
 			if (type == BP_VAR_R || type == BP_VAR_IS) {
@@ -1360,7 +1360,7 @@ static void zend_fetch_property_address(temp_variable *result, zval **container_
 		}
 		return;
 	}
-		
+
 	if (Z_OBJ_HT_P(container)->get_property_ptr_ptr) {
 		zval **ptr_ptr = Z_OBJ_HT_P(container)->get_property_ptr_ptr(container, prop_ptr TSRMLS_CC);
 		if (NULL == ptr_ptr) {
@@ -1389,10 +1389,10 @@ static void zend_fetch_property_address(temp_variable *result, zval **container_
 			result->var.ptr_ptr = &EG(error_zval_ptr);
 		}
 	}
-	
+
 	if (result) {
 		PZVAL_LOCK(*result->var.ptr_ptr);
-	}	
+	}
 }
 
 static inline zend_brk_cont_element* zend_brk_cont(int nest_levels, int array_offset, zend_op_array *op_array, temp_variable *Ts TSRMLS_DC)
@@ -1438,7 +1438,7 @@ static int zend_check_symbol(zval **pz TSRMLS_DC)
 	} else if (Z_TYPE_PP(pz) == IS_ARRAY) {
 		zend_hash_apply(Z_ARRVAL_PP(pz), (apply_func_t) zend_check_symbol TSRMLS_CC);
 	} else if (Z_TYPE_PP(pz) == IS_OBJECT) {
-		
+
 		/* OBJ-TBI - doesn't support new object model! */
 		zend_hash_apply(Z_OBJPROP_PP(pz), (apply_func_t) zend_check_symbol TSRMLS_CC);
 	}

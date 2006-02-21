@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2006 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -107,7 +107,7 @@ ZEND_API void zend_llist_del_element(zend_llist *l, void *element, int (*compare
 ZEND_API void zend_llist_destroy(zend_llist *l)
 {
 	zend_llist_element *current=l->head, *next;
-	
+
 	while (current) {
 		next = current->next;
 		if (l->dtor) {
@@ -137,7 +137,7 @@ ZEND_API void *zend_llist_remove_tail(zend_llist *l)
 		if (l->tail->prev) {
 			l->tail->prev->next = NULL;
 		}
-        
+
 		data = old_tail->data;
 
 		l->tail = l->tail->prev;

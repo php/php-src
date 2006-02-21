@@ -1694,10 +1694,10 @@ ZEND_API int zend_u_symtable_update_current_key(HashTable *ht, zend_uchar type, 
 	zend_uchar key_type;
 
 	if (type == IS_STRING) {
-		key_type = HASH_KEY_IS_STRING;	
+		key_type = HASH_KEY_IS_STRING;
 		HANDLE_NUMERIC((char*)arKey, nKeyLength, zend_hash_update_current_key(ht, HASH_KEY_IS_LONG, NULL, 0, idx));
 	} else if (type == IS_UNICODE) {
-		key_type = HASH_KEY_IS_UNICODE;	
+		key_type = HASH_KEY_IS_UNICODE;
 		HANDLE_U_NUMERIC((UChar*)arKey, nKeyLength, zend_hash_update_current_key(ht, HASH_KEY_IS_LONG, NULL, 0, idx));
 	}
 	return zend_hash_update_current_key(ht, key_type, arKey, nKeyLength, 0);

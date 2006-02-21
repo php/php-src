@@ -493,7 +493,7 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 			}
 
 			if (UG(unicode)) {
-				if (Z_TYPE(const_value) == IS_UNICODE && 
+				if (Z_TYPE(const_value) == IS_UNICODE &&
 				    Z_USTRLEN(const_value) == str_index_len-1 &&
 				    !u_strncmp(Z_USTRVAL(const_value), (UChar*)str_index, str_index_len)) {
 					/* constant value is the same as its name */
@@ -502,7 +502,7 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 					continue;
 				}
 			} else {
-				if (Z_TYPE(const_value) == IS_STRING && 
+				if (Z_TYPE(const_value) == IS_STRING &&
 				    Z_STRLEN(const_value) == str_index_len-1 &&
 				   !strncmp(Z_STRVAL(const_value), str_index, str_index_len)) {
 					/* constant value is the same as its name */
@@ -682,7 +682,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 				zend_class_entry **ce;
 				int found = FAILURE;
 
-				if (EG(active_op_array) && 
+				if (EG(active_op_array) &&
 				    Z_UNILEN_PP(fci->object_pp) == sizeof("self")-1 &&
 				    ZEND_U_EQUAL(Z_TYPE_PP(fci->object_pp), Z_UNIVAL_PP(fci->object_pp), Z_UNILEN_PP(fci->object_pp), "self", sizeof("self")-1)) {
 					if (!EG(active_op_array)->scope) {
@@ -712,7 +712,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 					if (found == FAILURE) {
 						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE_PP(fci->object_pp), Z_UNIVAL_PP(fci->object_pp));
 					}
-					if (scope && EG(This) && 
+					if (scope && EG(This) &&
 						instanceof_function(Z_OBJCE_P(EG(This)), scope TSRMLS_CC) &&
 						instanceof_function(scope, *ce TSRMLS_CC)) {
 						fci->object_pp = &EG(This);
@@ -794,7 +794,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			if (Z_OBJ_HT_PP(fci->object_pp)->get_method == NULL) {
 				zend_error(E_ERROR, "Object does not support method calls");
 			}
-			EX(function_state).function = 
+			EX(function_state).function =
 				Z_OBJ_HT_PP(fci->object_pp)->get_method(fci->object_pp, fname, fname_len TSRMLS_CC);
 			if (EX(function_state).function && calling_scope != EX(function_state).function->common.scope) {
 				void *function_name_lc = zend_u_str_tolower_dup(Z_TYPE_P(fci->function_name), fname, fname_len);
@@ -808,7 +808,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			unsigned int lcname_len;
 			char *lcname = zend_u_str_case_fold(Z_TYPE_P(fci->function_name), fname, fname_len, 1, &lcname_len);
 
-			EX(function_state).function = 
+			EX(function_state).function =
 				zend_std_get_static_method(calling_scope, lcname, lcname_len TSRMLS_CC);
 			efree(lcname);
 			if (check_scope_or_static && EX(function_state).function
@@ -827,7 +827,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			efree(lcname);
 		}
 
-		if (EX(function_state).function == NULL) {			  
+		if (EX(function_state).function == NULL) {
 			/* try calling __call */
 			if (calling_scope && calling_scope->__call) {
 				EX(function_state).function = calling_scope->__call;
@@ -860,13 +860,13 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		calling_scope = fci_cache->calling_scope;
 		fci->object_pp = fci_cache->object_pp;
 	}
-	
-	if (EX(function_state).function->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) { 
+
+	if (EX(function_state).function->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) {
 		if (EX(function_state).function->common.fn_flags & ZEND_ACC_ABSTRACT) {
 			zend_error_noreturn(E_ERROR, "Cannot call abstract method %v::%v()", EX(function_state).function->common.scope->name, EX(function_state).function->common.function_name);
 		}
-		if (EX(function_state).function->common.fn_flags & ZEND_ACC_DEPRECATED) { 
-			zend_error(E_NOTICE, "Function %s%s%s() is deprecated", 
+		if (EX(function_state).function->common.fn_flags & ZEND_ACC_DEPRECATED) {
+			zend_error(E_NOTICE, "Function %s%s%s() is deprecated",
 				EX(function_state).function->common.scope ? EX(function_state).function->common.scope->name : "",
 				EX(function_state).function->common.scope ? "::" : "",
 				EX(function_state).function->common.function_name);
@@ -1044,7 +1044,7 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, void *name, int name_length
 	if (name == NULL) {
 		return FAILURE;
 	}
-	
+
 	lc_name = zend_u_str_case_fold(type, name, name_length, 1, &lc_name_len);
 
 	if (zend_u_hash_find(EG(class_table), type, lc_name, lc_name_len+1, (void **) ce) == SUCCESS) {
@@ -1064,7 +1064,7 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, void *name, int name_length
 		ALLOC_HASHTABLE(EG(in_autoload));
 		zend_u_hash_init(EG(in_autoload), 0, NULL, NULL, 0, UG(unicode));
 	}
-	
+
 	if (zend_u_hash_add(EG(in_autoload), type, lc_name, lc_name_len+1, (void**)&dummy, sizeof(char), NULL) == FAILURE) {
 		efree(lc_name);
 		return FAILURE;
@@ -1079,9 +1079,9 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, void *name, int name_length
 	} else {
 		ZVAL_STRINGL(class_name_ptr, name, name_length, 1);
 	}
-	
+
 	args[0] = &class_name_ptr;
-	
+
 	fcall_info.size = sizeof(fcall_info);
 	fcall_info.function_table = EG(function_table);
 	fcall_info.function_name = &autoload_function;
@@ -1307,7 +1307,7 @@ void execute_new_code(TSRMLS_D)
 	if (local_retval) {
 		zval_ptr_dtor(&local_retval);
 	}
-	
+
 	if (EG(exception)) {
 		zend_exception_error(EG(exception) TSRMLS_CC);
 	}
@@ -1588,9 +1588,9 @@ void zend_verify_abstract_class(zend_class_entry *ce TSRMLS_DC)
 
 		zend_hash_apply_with_argument(&ce->function_table, (apply_func_arg_t) zend_verify_abstract_class_function, &ai TSRMLS_CC);
 
-		if (ai.cnt) {		
-			zend_error(E_ERROR, "Class %v contains %d abstract method%s and must therefore be declared abstract or implement the remaining methods (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")", 
-				ce->name, ai.cnt, 
+		if (ai.cnt) {
+			zend_error(E_ERROR, "Class %v contains %d abstract method%s and must therefore be declared abstract or implement the remaining methods (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")",
+				ce->name, ai.cnt,
 				ai.cnt > 1 ? "s" : "",
 				DISPLAY_ABSTRACT_FN(0),
 				DISPLAY_ABSTRACT_FN(1),

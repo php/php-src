@@ -234,7 +234,7 @@ BEGIN_EXTERN_C()
 ZEND_API void zend_file_handle_dtor(zend_file_handle *fh)
 {
 	TSRMLS_FETCH();
-	
+
 	switch (fh->type) {
 		case ZEND_HANDLE_FP:
 			fclose(fh->handle.fp);
@@ -498,7 +498,7 @@ static int is_encoding_flex_compatible(const char *enc TSRMLS_DC)
 			case UCNV_EBCDIC_STATEFUL:
 			case UCNV_ISO_2022:
 			case UCNV_LMBCS_1:
-			case UCNV_LMBCS_2: 
+			case UCNV_LMBCS_2:
 			case UCNV_LMBCS_3:
 			case UCNV_LMBCS_4:
 			case UCNV_LMBCS_5:
@@ -743,7 +743,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 	}
 
 	zend_llist_add_element(&CG(open_files), file_handle);
-	
+
 	/* Reset the scanner for scanning the new file */
 	SCNG(yy_in) = file_handle;
 
@@ -1961,7 +1961,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		}
 
 		Z_STRVAL_P(zendlval) = emalloc(len+1);
-		Z_STRLEN_P(zendlval) = sprintf(Z_STRVAL_P(zendlval), "%s%s%s", 
+		Z_STRLEN_P(zendlval) = sprintf(Z_STRVAL_P(zendlval), "%s%s%s",
 			class_name ? class_name : "",
 			class_name && func_name ? "::" : "",
 			func_name ? func_name : ""

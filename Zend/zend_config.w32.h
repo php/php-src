@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2006 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -87,7 +87,7 @@ typedef unsigned int uint;
 #define ZEND_DLEXPORT		__declspec(dllexport)
 #define ZEND_DLIMPORT		__declspec(dllimport)
 
-/* 0x00200000L is MB_SERVICE_NOTIFICATION, which is only supported under Windows NT 
+/* 0x00200000L is MB_SERVICE_NOTIFICATION, which is only supported under Windows NT
  * (and requires _WIN32_WINNT to be defined, which prevents the resulting executable
  * from running under Windows 9x
  * Windows 9x should silently ignore it, so it's being used here directly

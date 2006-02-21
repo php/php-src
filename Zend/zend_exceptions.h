@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2006 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -34,7 +34,7 @@ ZEND_API zend_class_entry *zend_exception_get_default(TSRMLS_D);
 ZEND_API zend_class_entry *zend_get_error_exception(TSRMLS_D);
 ZEND_API void zend_register_default_classes(TSRMLS_D);
 
-/* exception_ce   NULL or zend_exception_get_default() or a derived class 
+/* exception_ce   NULL or zend_exception_get_default() or a derived class
  * message        NULL or the message of the exception */
 ZEND_API zval * zend_throw_exception(zend_class_entry *exception_ce, char *message, long code TSRMLS_DC);
 ZEND_API zval * zend_throw_exception_ex(zend_class_entry *exception_ce, long code TSRMLS_DC, char *format, ...);

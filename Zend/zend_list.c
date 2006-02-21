@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2006 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -51,7 +51,7 @@ ZEND_API int zend_list_insert(void *ptr, int type)
 ZEND_API int _zend_list_delete(int id TSRMLS_DC)
 {
 	zend_rsrc_list_entry *le;
-	
+
 	if (zend_hash_index_find(&EG(regular_list), id, (void **) &le)==SUCCESS) {
 /*		printf("del(%d): %d->%d\n", id, le->refcount, le->refcount-1); */
 		if (--le->refcount<=0) {
@@ -81,7 +81,7 @@ ZEND_API void *_zend_list_find(int id, int *type TSRMLS_DC)
 ZEND_API int _zend_list_addref(int id TSRMLS_DC)
 {
 	zend_rsrc_list_entry *le;
-	
+
 	if (zend_hash_index_find(&EG(regular_list), id, (void **) &le)==SUCCESS) {
 /*		printf("add(%d): %d->%d\n", id, le->refcount, le->refcount+1); */
 		le->refcount++;
@@ -97,7 +97,7 @@ ZEND_API int zend_register_resource(zval *rsrc_result, void *rsrc_pointer, int r
 	int rsrc_id;
 
 	rsrc_id = zend_list_insert(rsrc_pointer, rsrc_type);
-	
+
 	if (rsrc_result) {
 		Z_RESVAL_P(rsrc_result) = rsrc_id;
 		Z_TYPE_P(rsrc_result) = IS_RESOURCE;
@@ -171,7 +171,7 @@ void list_entry_destructor(void *ptr)
 	zend_rsrc_list_entry *le = (zend_rsrc_list_entry *) ptr;
 	zend_rsrc_list_dtors_entry *ld;
 	TSRMLS_FETCH();
-	
+
 	if (zend_hash_index_find(&list_destructors, le->type, (void **) &ld)==SUCCESS) {
 		switch (ld->type) {
 			case ZEND_RESOURCE_LIST_TYPE_STD:
@@ -271,11 +271,11 @@ void zend_clean_module_rsrc_dtors(int module_number TSRMLS_DC)
 ZEND_API int zend_register_list_destructors(void (*ld)(void *), void (*pld)(void *), int module_number)
 {
 	zend_rsrc_list_dtors_entry lde;
-	
+
 #if 0
 	printf("Registering destructors %d for module %d\n", list_destructors.nNextFreeElement, module_number);
 #endif
-	
+
 	lde.list_dtor=(void (*)(void *)) ld;
 	lde.plist_dtor=(void (*)(void *)) pld;
 	lde.list_dtor_ex = lde.plist_dtor_ex = NULL;
@@ -283,7 +283,7 @@ ZEND_API int zend_register_list_destructors(void (*ld)(void *), void (*pld)(void
 	lde.resource_id = list_destructors.nNextFreeElement;
 	lde.type = ZEND_RESOURCE_LIST_TYPE_STD;
 	lde.type_name = NULL;
-	
+
 	if (zend_hash_next_index_insert(&list_destructors, (void *) &lde, sizeof(zend_rsrc_list_dtors_entry), NULL)==FAILURE) {
 		return FAILURE;
 	}
@@ -294,7 +294,7 @@ ZEND_API int zend_register_list_destructors(void (*ld)(void *), void (*pld)(void
 ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_func_t pld, char *type_name, int module_number)
 {
 	zend_rsrc_list_dtors_entry lde;
-	
+
 #if 0
 	printf("Registering destructors %d for module %d\n", list_destructors.nNextFreeElement, module_number);
 #endif
@@ -307,7 +307,7 @@ ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_fu
 	lde.resource_id = list_destructors.nNextFreeElement;
 	lde.type = ZEND_RESOURCE_LIST_TYPE_EX;
 	lde.type_name = type_name;
-	
+
 	if (zend_hash_next_index_insert(&list_destructors, (void *) &lde, sizeof(zend_rsrc_list_dtors_entry), NULL)==FAILURE) {
 		return FAILURE;
 	}
