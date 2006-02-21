@@ -4268,7 +4268,7 @@ static zend_function_entry reflection_method_functions[] = {
 	ZEND_ME(reflection_method, isPublic, NULL, 0)
 	ZEND_ME(reflection_method, isPrivate, NULL, 0)
 	ZEND_ME(reflection_method, isProtected, NULL, 0)
- 	ZEND_ME(reflection_method, isAbstract, NULL, 0)
+	ZEND_ME(reflection_method, isAbstract, NULL, 0)
 	ZEND_ME(reflection_method, isFinal, NULL, 0)
 	ZEND_ME(reflection_method, isStatic, NULL, 0)
 	ZEND_ME(reflection_method, isDeprecated, NULL, 0)
