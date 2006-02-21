@@ -2414,6 +2414,14 @@ ZEND_METHOD(reflection_method, isStatic)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionMethod::isDeprecated()
+   Returns whether this method is deprecated */
+ZEND_METHOD(reflection_method, isDeprecated)
+{
+	_function_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_DEPRECATED);
+}
+/* }}} */
+
 /* {{{ proto public bool ReflectionMethod::isConstructor()
    Returns whether this method is the constructor */
 ZEND_METHOD(reflection_method, isConstructor)
@@ -4260,9 +4268,10 @@ static zend_function_entry reflection_method_functions[] = {
 	ZEND_ME(reflection_method, isPublic, NULL, 0)
 	ZEND_ME(reflection_method, isPrivate, NULL, 0)
 	ZEND_ME(reflection_method, isProtected, NULL, 0)
-	ZEND_ME(reflection_method, isAbstract, NULL, 0)
+ 	ZEND_ME(reflection_method, isAbstract, NULL, 0)
 	ZEND_ME(reflection_method, isFinal, NULL, 0)
 	ZEND_ME(reflection_method, isStatic, NULL, 0)
+	ZEND_ME(reflection_method, isDeprecated, NULL, 0)
 	ZEND_ME(reflection_method, isConstructor, NULL, 0)
 	ZEND_ME(reflection_method, isDestructor, NULL, 0)
 	ZEND_ME(reflection_method, getModifiers, NULL, 0)
