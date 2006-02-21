@@ -344,14 +344,14 @@ static char *cli_completion_generator_func(const char *text, int textlen, int *s
 			int32_t tmp_len, len;
 			UErrorCode status = U_ZERO_ERROR;
 
-			len = u_strlen((UChar *)func->common.function_name);
+			len = u_strlen((UChar *)func->common.function_name.u);
 			zend_convert_from_unicode(ZEND_U_CONVERTER(UG(output_encoding_conv)), &tmp, &tmp_len,
-									  (UChar *)func->common.function_name, len, &status);
+									  (UChar *)func->common.function_name.u, len, &status);
 
 			retval = strdup(tmp);
 			efree(tmp);
 		} else {
-			retval = strdup(func->common.function_name);
+			retval = strdup(func->common.function_name.s);
 		}
 	}
 	
@@ -370,14 +370,14 @@ static char *cli_completion_generator_class(const char *text, int textlen, int *
 			int32_t tmp_len, len;
 			UErrorCode status = U_ZERO_ERROR;
 
-			len = u_strlen((UChar *)(*pce)->name);
+			len = u_strlen((UChar *)(*pce)->name.u);
 			zend_convert_from_unicode(ZEND_U_CONVERTER(UG(output_encoding_conv)), &tmp, &tmp_len, 
-									  (UChar *)(*pce)->name, len, &status);
+									  (UChar *)(*pce)->name.u, len, &status);
 
 			retval = strdup(tmp);
 			efree(tmp);
 		} else {
-			retval = strdup((*pce)->name);
+			retval = strdup((*pce)->name.s);
 		}
 	}
 	
@@ -479,7 +479,7 @@ TODO:
 		if (pce && retval) {
 			char *tmp = malloc(class_name_len + 2 + strlen(retval) + 1);
 			
-			sprintf(tmp, "%s::%s", (*pce)->name, retval);
+			sprintf(tmp, "%s::%s", (*pce)->name.s, retval);
 			free(retval);
 			retval = tmp;
 		}
