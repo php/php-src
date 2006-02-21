@@ -4171,6 +4171,7 @@ ZEND_METHOD(reflection_extension, getDependencies)
 	while(dep->name) {
 		char *relation;
 		char *rel_type;
+		int len;
 		
 		switch(dep->type) {
 		case MODULE_DEP_REQUIRED:
@@ -4187,7 +4188,7 @@ ZEND_METHOD(reflection_extension, getDependencies)
 			break;
 		}
 
-		int len = spprintf(&relation, 0, "%s%s%s%s%s", 
+		len = spprintf(&relation, 0, "%s%s%s%s%s", 
 						rel_type,
 						dep->rel ? " " : "",
 						dep->rel ? dep->rel : "", 
