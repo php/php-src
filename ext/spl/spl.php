@@ -66,8 +66,8 @@
  * 
  * SPL offers advanced Array overloading:
  * 
- * - class ArrayObject implements IteratorAggregate
- * - class ArrayIterator implements Iterator
+ * - class ArrayObject implements IteratorAggregate, ArrayAccess, Countable
+ * - class ArrayIterator implements Iterator, ArrayAccess, Countable, SeekableIterator
  * - class RecursiveArrayIterator extends ArrayIterator implements RecursiveIterator
  * 
  * As the above suggest an ArrayObject creates an ArrayIterator when it comes to
