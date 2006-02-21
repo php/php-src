@@ -20,12 +20,22 @@
     </maintainer>
   </maintainers>
 
-  <release>
-   <version>1.2</version>
-   <state>stable</state>
-   <date>2006-02-00</date>
-   <notes>
+   <release>
+    <version>1.2</version>
+    <state>stable</stable>
+    <date>2006-02-00</date>
+    <notes>
 Fixed tiger algorithm generating wrong results on big endian platforms.
+    </notes>
+   </release>
+
+  <changelog>
+   <release>
+    <version>1.1</version>
+    <state>stable</state>
+    <date>2005-12-07</date>
+    <notes>
+Fixed PECL bug #6183 - haval source file entries missing in package.xml
 
 Supported Algorithms:
  * md4, md5
@@ -34,8 +44,9 @@ Supported Algorithms:
  * tiger128, tiger160, tiger192 (3 and 4 passes)
  * haval128, haval160, haval192, haval224, haval256 (3, 4 and 5 passes)
  * crc32, crc32b, adler32, gost, snefru, whirlpool
-   </notes>
-  </release>
+    </notes>
+   </release>
+  </changelog>
 
   <filelist>
    <file role="src" name="config.m4"/>
