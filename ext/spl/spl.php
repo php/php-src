@@ -128,7 +128,7 @@
  * You can download this documentation as a chm file 
  * <a href="http://php.net/~helly/php/ext/spl/spl.chm">here</a>.
  *
- * (c) Marcus Boerger, 2003 - 2005
+ * (c) Marcus Boerger, 2003 - 2006
  */
 
 /** @defgroup ZendEngine Zend engine classes
