@@ -38,8 +38,12 @@ void free_zend_constant(zend_constant *c)
 
 void copy_zend_constant(zend_constant *c)
 {
-	/* FIXME: Unicode support??? */
-	c->name.s = zend_strndup(c->name.s, c->name_len - 1);
+	TSRMLS_FETCH();
+	if (UG(unicode)) {
+		c->name.u = zend_ustrndup(c->name.u, c->name_len - 1);
+	} else {
+		c->name.s = zend_strndup(c->name.s, c->name_len - 1);
+	}
 	if (!(c->flags & CONST_PERSISTENT)) {
 		zval_copy_ctor(&c->value);
 	}
@@ -358,7 +362,26 @@ ZEND_API int zend_u_register_constant(zend_uchar type, zend_constant *c TSRMLS_D
 
 ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 {
-	return zend_u_register_constant(IS_STRING, c TSRMLS_CC);
+	if (UG(unicode)) {
+		UChar *ustr;
+
+		if (c->name.s) {
+			ustr = malloc(UBYTES(c->name_len));
+			u_charsToUChars(c->name.s, ustr, c->name_len);
+			free(c->name.s);
+			c->name.u = ustr;
+		}
+		if (Z_TYPE(c->value) == IS_STRING || Z_TYPE(c->value) == IS_CONSTANT) {
+			ustr = pemalloc(UBYTES(Z_STRLEN(c->value)+1), c->flags & CONST_PERSISTENT);
+			u_charsToUChars(Z_STRVAL(c->value), ustr, Z_STRLEN(c->value)+1);
+			pefree(Z_STRVAL(c->value), c->flags & CONST_PERSISTENT);
+			Z_USTRVAL(c->value) = ustr;
+			if (Z_TYPE(c->value) == IS_STRING) Z_TYPE(c->value) = IS_UNICODE;
+		}
+		return zend_u_register_constant(IS_UNICODE, c TSRMLS_CC);
+	} else {
+		return zend_u_register_constant(IS_STRING, c TSRMLS_CC);
+	}
 }
 /*
  * Local variables:

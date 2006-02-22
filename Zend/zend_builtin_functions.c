@@ -1663,8 +1663,8 @@ ZEND_FUNCTION(get_defined_constants)
 			zval_copy_ctor(const_val);
 			INIT_PZVAL(const_val);
 
-			/* FIXME: Unicode support??? */
-			add_assoc_zval_ex(modules[module_number], val->name.s, val->name_len, const_val);
+			add_u_assoc_zval_ex(modules[module_number], UG(unicode)?IS_UNICODE:IS_STRING, val->name, val->name_len, const_val);
+
 bad_module_id:
 			zend_hash_move_forward_ex(EG(zend_constants), &pos);
 		}
