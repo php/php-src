@@ -1434,9 +1434,19 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC)
 	last_op_number = get_next_op_number(CG(active_op_array))-1;
 	last_op = &CG(active_op_array)->opcodes[last_op_number];
 
-	if ((last_op->op2.op_type == IS_CONST) && (Z_TYPE(last_op->op2.u.constant) == IS_STRING) && (Z_STRLEN(last_op->op2.u.constant) == sizeof(ZEND_CLONE_FUNC_NAME)-1)
-		&& !zend_binary_strcasecmp(Z_STRVAL(last_op->op2.u.constant), Z_STRLEN(last_op->op2.u.constant), ZEND_CLONE_FUNC_NAME, sizeof(ZEND_CLONE_FUNC_NAME)-1)) {
-		zend_error(E_COMPILE_ERROR, "Cannot call __clone() method on objects - use 'clone $obj' instead");
+	if (last_op->op2.op_type == IS_CONST &&
+	    (Z_TYPE(last_op->op2.u.constant) == IS_STRING ||
+	     Z_TYPE(last_op->op2.u.constant) == IS_UNICODE) &&
+	    Z_UNILEN(last_op->op2.u.constant) == sizeof(ZEND_CLONE_FUNC_NAME)-1) {
+		zstr lcname;
+		unsigned int lcname_len;
+
+		lcname = zend_u_str_case_fold(Z_TYPE(last_op->op2.u.constant), Z_UNIVAL(last_op->op2.u.constant), Z_UNILEN(last_op->op2.u.constant), 0, &lcname_len);
+		if (ZEND_U_EQUAL(Z_TYPE(last_op->op2.u.constant), lcname, lcname_len, ZEND_CLONE_FUNC_NAME, sizeof(ZEND_CLONE_FUNC_NAME)-1)) {
+			efree(lcname.v);
+			zend_error(E_COMPILE_ERROR, "Cannot call __clone() method on objects - use 'clone $obj' instead");
+		}
+		efree(lcname.v);
 	}
 
 	if (last_op->opcode == ZEND_FETCH_OBJ_R) {
