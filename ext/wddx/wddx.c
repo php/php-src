@@ -239,7 +239,7 @@ PS_SERIALIZER_ENCODE_FUNC(wddx)
 	php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
 	
 	PS_ENCODE_LOOP(
-		php_wddx_serialize_var(packet, *struc, key, key_length TSRMLS_CC);
+		php_wddx_serialize_var(packet, *struc, key.s, key_length TSRMLS_CC);
 	);
 	
 	php_wddx_add_chunk_static(packet, WDDX_STRUCT_E);
@@ -479,7 +479,7 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 			sprintf(tmp_buf, WDDX_VAR_S, PHP_CLASS_NAME_VAR);
 			php_wddx_add_chunk(packet, tmp_buf);
 			php_wddx_add_chunk_static(packet, WDDX_STRING_S);
-			php_wddx_add_chunk_ex(packet, class_name, name_len);
+			php_wddx_add_chunk_ex(packet, class_name.s, name_len);
 			php_wddx_add_chunk_static(packet, WDDX_STRING_E);
 			php_wddx_add_chunk_static(packet, WDDX_VAR_E);
 
@@ -511,7 +511,7 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 		sprintf(tmp_buf, WDDX_VAR_S, PHP_CLASS_NAME_VAR);
 		php_wddx_add_chunk(packet, tmp_buf);
 		php_wddx_add_chunk_static(packet, WDDX_STRING_S);
-		php_wddx_add_chunk_ex(packet, class_name, name_len);
+		php_wddx_add_chunk_ex(packet, class_name.s, name_len);
 		php_wddx_add_chunk_static(packet, WDDX_STRING_E);
 		php_wddx_add_chunk_static(packet, WDDX_VAR_E);
 
