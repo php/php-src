@@ -757,11 +757,12 @@ ZEND_API void zend_exception_error(zval *exception TSRMLS_DC)
 
 		zend_call_method_with_0_params(&exception, ce_exception, NULL, "__tostring", &str);
 		if (!EG(exception)) {
-			if (Z_TYPE_P(str) != IS_STRING) {
-				zend_error(E_WARNING, "%v::__toString() must return a string", ce_exception->name);
+			if (Z_TYPE_P(str) == IS_UNICODE) {
+				zend_update_property_unicodel(default_exception_ce, exception, "string", sizeof("string")-1, Z_USTRVAL_P(str), Z_USTRLEN_P(str) TSRMLS_CC);
+			} else if (Z_TYPE_P(str) == IS_STRING) {
+				zend_update_property_stringl(default_exception_ce, exception, "string", sizeof("string")-1, Z_STRVAL_P(str), Z_STRLEN_P(str) TSRMLS_CC);
 			} else {
-				/* FIXME: Unicode support??? */
-				zend_update_property_string(default_exception_ce, exception, "string", sizeof("string")-1, EG(exception) ? ce_exception->name.s : Z_STRVAL_P(str) TSRMLS_CC);
+				zend_error(E_WARNING, "%v::__toString() must return a string", ce_exception->name);
 			}
 		}
 		zval_ptr_dtor(&str);
