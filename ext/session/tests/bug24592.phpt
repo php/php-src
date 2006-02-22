@@ -34,3 +34,17 @@ array(2) {
   ["bar"]=>
   NULL
 }
+--UEXPECTF--
+Notice: Undefined index:  foo in %s on line %d
+
+Notice: Undefined index:  bar in %s on line %d
+NULL
+NULL
+array(0) {
+}
+array(2) {
+  [u"foo"]=>
+  NULL
+  [u"bar"]=>
+  NULL
+}

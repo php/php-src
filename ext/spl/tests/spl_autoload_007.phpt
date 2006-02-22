@@ -138,3 +138,84 @@ array(2) {
 }
 ok
 ===DONE===
+--UEXPECTF--
+unicode(22) "MyAutoLoader::notExist"
+Function 'MyAutoLoader::notExist' not found
+
+unicode(22) "MyAutoLoader::noAccess"
+Function 'MyAutoLoader::noAccess' not callable
+
+unicode(22) "MyAutoLoader::autoLoad"
+ok
+
+unicode(22) "MyAutoLoader::dynaLoad"
+Function 'MyAutoLoader::dynaLoad' not callable
+
+array(2) {
+  [0]=>
+  unicode(12) "MyAutoLoader"
+  [1]=>
+  unicode(8) "notExist"
+}
+Passed array does not specify an existing static method
+
+array(2) {
+  [0]=>
+  unicode(12) "MyAutoLoader"
+  [1]=>
+  unicode(8) "noAccess"
+}
+Passed array does not specify a callable static method
+
+array(2) {
+  [0]=>
+  unicode(12) "MyAutoLoader"
+  [1]=>
+  unicode(8) "autoLoad"
+}
+ok
+
+array(2) {
+  [0]=>
+  unicode(12) "MyAutoLoader"
+  [1]=>
+  unicode(8) "dynaLoad"
+}
+Passed array specifies a non static method but no object
+
+array(2) {
+  [0]=>
+  object(MyAutoLoader)#%d (0) {
+  }
+  [1]=>
+  unicode(8) "notExist"
+}
+Passed array does not specify an existing method
+
+array(2) {
+  [0]=>
+  object(MyAutoLoader)#%d (0) {
+  }
+  [1]=>
+  unicode(8) "noAccess"
+}
+Passed array does not specify a callable method
+
+array(2) {
+  [0]=>
+  object(MyAutoLoader)#%d (0) {
+  }
+  [1]=>
+  unicode(8) "autoLoad"
+}
+ok
+
+array(2) {
+  [0]=>
+  object(MyAutoLoader)#%d (0) {
+  }
+  [1]=>
+  unicode(8) "dynaLoad"
+}
+ok
+===DONE===
