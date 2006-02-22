@@ -2578,7 +2578,7 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 				if ((check_flags & IS_CALLABLE_CHECK_IS_STATIC) != 0) {
 					retval = 0;
 				} else {
-					zend_error(E_STRICT, "Non-static method %s::%s() cannot be called statically", (*ce_ptr)->name, fptr->common.function_name);
+					zend_error(E_STRICT, "Non-static method %v::%v() cannot be called statically", (*ce_ptr)->name, fptr->common.function_name);
 				}
 			}
 			if (retval && (check_flags & IS_CALLABLE_CHECK_NO_ACCESS) == 0) {
