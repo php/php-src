@@ -1438,8 +1438,9 @@ PHP_FUNCTION(extract)
 				/* break omitted intentionally */
 
 			case EXTR_OVERWRITE:
-				/* FIXME: Unicode support??? */
-				if (var_exists && !strcmp(var_name.s, "GLOBALS")) {
+				if (var_exists && 
+					var_name_len == sizeof("GLOBALS") &&
+				    ZEND_U_EQUAL(key_type, var_name, var_name_len-1, "GLOBALS", sizeof("GLOBALS")-1)) {
 					break;
 				}
 			
