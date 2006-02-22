@@ -1,3 +1,124 @@
+2006-02-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.c
+      zend.h
+      zend_API.c
+      zend_API.h
+      zend_alloc.c
+      zend_alloc.h
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_compile.h
+      zend_constants.c
+      zend_constants.h
+      zend_exceptions.c
+      zend_execute.c
+      zend_execute.h
+      zend_execute_API.c
+      zend_hash.c
+      zend_hash.h
+      zend_highlight.c
+      zend_ini.c
+      zend_interfaces.c
+      zend_interfaces.h
+      zend_iterators.c
+      zend_iterators.h
+      zend_language_scanner.l
+      zend_list.c
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_objects.c
+      zend_opcode.c
+      zend_operators.c
+      zend_operators.h
+      zend_strtol.c
+      zend_unicode.c
+      zend_unicode.h
+      zend_vm_def.h
+      zend_vm_execute.h:
+      Portable unicode string API:
+        - use the same type (int) for zval.value.usr.len and zval.value.str.len
+        - use union "zstr" as char*/UChar* mixture instead of void*
+        - Z_UNISTR() and Z_UNILEN() no longer check for Z_TYPE()
+        - nuke int32_t from ZE (not finisned)
+
+    * zend.h
+      zend_API.c
+      zend_API.h
+      zend_alloc.c
+      zend_alloc.h
+      zend_arg_defs.c
+      zend_compile.c
+      zend_compile.h
+      zend_config.nw.h
+      zend_config.w32.h
+      zend_constants.c
+      zend_constants.h
+      zend_dynamic_array.c
+      zend_dynamic_array.h
+      zend_errors.h
+      zend_exceptions.c
+      zend_exceptions.h
+      zend_execute.c
+      zend_execute.h
+      zend_execute_API.c
+      zend_extensions.c
+      zend_extensions.h
+      zend_fast_cache.h
+      zend_globals_macros.h
+      zend_hash.c
+      zend_hash.h
+      zend_highlight.c
+      zend_highlight.h
+      zend_indent.c
+      zend_indent.h
+      zend_ini.c
+      zend_ini.h
+      zend_interfaces.c
+      zend_interfaces.h
+      zend_istdiostream.h
+      zend_iterators.c
+      zend_iterators.h
+      zend_language_scanner.h
+      zend_language_scanner.l
+      zend_list.c
+      zend_list.h
+      zend_llist.c
+      zend_llist.h
+      zend_mm.c
+      zend_modules.h
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_objects.c
+      zend_objects.h
+      zend_objects_API.c
+      zend_objects_API.h
+      zend_opcode.c
+      zend_operators.c
+      zend_operators.h
+      zend_ptr_stack.c
+      zend_ptr_stack.h
+      zend_qsort.c
+      zend_qsort.h
+      zend_sprintf.c
+      zend_stack.c
+      zend_stack.h
+      zend_stream.c
+      zend_stream.h
+      zend_strtod.c
+      zend_strtod.h
+      zend_ts_hash.c
+      zend_ts_hash.h
+      zend_unicode.c
+      zend_unicode.h
+      zend_variables.c
+      zend_variables.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.skl
+      zend_vm_gen.php:
+      WS
+
 2006-02-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_execute_API.c:

@@ -1,3 +1,180 @@
+2006-02-21  Johannes Schlüter  <schlueter@phpbar.de>
+
+    * (PHP_5_1)
+      sapi/cli/php_cli.c:
+      - MFH: List --rf/--rc/--re only with enabled reflection
+
+    * sapi/cli/php_cli.c:
+      - List --rf/--rc/--re only with enabled reflection
+
+    * sapi/cli/php_cli_readline.c:
+      - Fix build with readline-support
+
+2006-02-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_constants.h
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_hash.c
+      ZendEngine2/zend_hash.h
+      ZendEngine2/zend_highlight.c
+      ZendEngine2/zend_ini.c
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_interfaces.h
+      ZendEngine2/zend_iterators.c
+      ZendEngine2/zend_iterators.h
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_list.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_objects.c
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h
+      ZendEngine2/zend_strtol.c
+      ZendEngine2/zend_unicode.c
+      ZendEngine2/zend_unicode.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ext/dom/dom_iterators.c
+      ext/dom/php_dom.c
+      ext/mysql/php_mysql.c
+      ext/openssl/openssl.c
+      ext/pcre/php_pcre.c
+      ext/session/php_session.h
+      ext/session/session.c
+      ext/simplexml/simplexml.c
+      ext/sqlite/sqlite.c
+      ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/http.c
+      ext/standard/incomplete_class.c
+      ext/standard/info.c
+      ext/standard/php_incomplete_class.h
+      ext/standard/proc_open.c
+      ext/standard/streamsfuncs.c
+      ext/standard/string.c
+      ext/standard/type.c
+      ext/standard/user_filters.c
+      ext/standard/var.c
+      main/main.c
+      main/output.c
+      main/php_variables.c
+      main/rfc1867.c
+      main/streams/streams.c
+      sapi/cli/php_cli.c:
+      Portable unicode string API:
+        - use the same type (int) for zval.value.usr.len and zval.value.str.len
+        - use union "zstr" as char*/UChar* mixture instead of void*
+        - Z_UNISTR() and Z_UNILEN() no longer check for Z_TYPE()
+        - nuke int32_t from ZE (not finisned)
+
+2006-02-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      ext/standard/basic_functions.c:
+      MFH: Fixed bug #36458 (sleep() accepts negative values).
+
+    * ext/standard/basic_functions.c:
+      MFB51: Fixed bug #36458 (sleep() accepts negative values).
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/basic_functions.c:
+      Fixed bug #36458 (sleep() accepts negative values).
+
+2006-02-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h
+      ZendEngine2/zend_arg_defs.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_config.nw.h
+      ZendEngine2/zend_config.w32.h
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_constants.h
+      ZendEngine2/zend_dynamic_array.c
+      ZendEngine2/zend_dynamic_array.h
+      ZendEngine2/zend_errors.h
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_exceptions.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_extensions.c
+      ZendEngine2/zend_extensions.h
+      ZendEngine2/zend_fast_cache.h
+      ZendEngine2/zend_globals_macros.h
+      ZendEngine2/zend_hash.c
+      ZendEngine2/zend_hash.h
+      ZendEngine2/zend_highlight.c
+      ZendEngine2/zend_highlight.h
+      ZendEngine2/zend_indent.c
+      ZendEngine2/zend_indent.h
+      ZendEngine2/zend_ini.c
+      ZendEngine2/zend_ini.h
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_interfaces.h
+      ZendEngine2/zend_istdiostream.h
+      ZendEngine2/zend_iterators.c
+      ZendEngine2/zend_iterators.h
+      ZendEngine2/zend_language_scanner.h
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_list.c
+      ZendEngine2/zend_list.h
+      ZendEngine2/zend_llist.c
+      ZendEngine2/zend_llist.h
+      ZendEngine2/zend_mm.c
+      ZendEngine2/zend_modules.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_objects.c
+      ZendEngine2/zend_objects.h
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.h
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h
+      ZendEngine2/zend_ptr_stack.c
+      ZendEngine2/zend_ptr_stack.h
+      ZendEngine2/zend_qsort.c
+      ZendEngine2/zend_qsort.h
+      ZendEngine2/zend_sprintf.c
+      ZendEngine2/zend_stack.c
+      ZendEngine2/zend_stack.h
+      ZendEngine2/zend_stream.c
+      ZendEngine2/zend_stream.h
+      ZendEngine2/zend_strtod.c
+      ZendEngine2/zend_strtod.h
+      ZendEngine2/zend_ts_hash.c
+      ZendEngine2/zend_ts_hash.h
+      ZendEngine2/zend_unicode.c
+      ZendEngine2/zend_unicode.h
+      ZendEngine2/zend_variables.c
+      ZendEngine2/zend_variables.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.skl
+      ZendEngine2/zend_vm_gen.php:
+      WS
+
 2006-02-20  Johannes Schlüter  <schlueter@phpbar.de>
 
     * (PHP_5_1)
