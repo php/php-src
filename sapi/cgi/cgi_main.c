@@ -491,7 +491,9 @@ static void sapi_cgi_log_message(char *message)
                                                                                                         
 	if (!FCGX_IsCGI() && logging) {
 		FCGX_Request *request = (FCGX_Request *)SG(server_context);
-		FCGX_FPrintF( request->err, "%s\n", message );
+		if (request) {
+			FCGX_FPrintF( request->err, "%s\n", message );
+		}
 		/* ignore return code */
 	} else
 #endif /* PHP_FASTCGI */
