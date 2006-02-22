@@ -2534,19 +2534,18 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 		}
 	}
 	if (colon.v != NULL) {
-		if (zend_u_lookup_class(Z_TYPE_P(callable), Z_UNIVAL_P(callable), clen, &pce TSRMLS_CC) == SUCCESS) {
+		lcname = zend_u_str_case_fold(Z_TYPE_P(callable), Z_UNIVAL_P(callable), clen, 0, &clen);
+		/* caution: lcname is not '\0' terminated */
+		if (clen == sizeof("self") - 1 &&
+		    ZEND_U_EQUAL(Z_TYPE_P(callable), lcname, clen, "self", sizeof("self")-1)) {
+			*ce_ptr = EG(scope);
+		} else if (clen == sizeof("parent") - 1 &&
+		    ZEND_U_EQUAL(Z_TYPE_P(callable), lcname, clen, "parent", sizeof("parent")-1)) {
+			*ce_ptr = EG(scope) ? EG(scope)->parent : NULL;
+		} else if (zend_u_lookup_class(Z_TYPE_P(callable), Z_UNIVAL_P(callable), clen, &pce TSRMLS_CC) == SUCCESS) {
 			*ce_ptr = *pce;
-		} else {
-			lcname = zend_u_str_case_fold(Z_TYPE_P(callable), Z_UNIVAL_P(callable), clen, 0, &clen);
-			/* caution: lcname is not '\0' terminated */
-			/* FIXME: Unicode support??? */
-			if (clen == sizeof("self") - 1 && memcmp(lcname.s, "self", sizeof("self") - 1) == 0) {
-				*ce_ptr = EG(scope);
-			} else if (clen == sizeof("parent") - 1 && memcmp(lcname.s, "parent", sizeof("parent") - 1) == 0 && EG(active_op_array)->scope) {
-				*ce_ptr = EG(scope) ? EG(scope)->parent : NULL;
-			}
-			efree(lcname.v);
 		}
+		efree(lcname.v);
 		if (!*ce_ptr) {
 			return 0;
 		}

@@ -613,9 +613,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	int call_via_handler = 0;
 	char *old_func_name = NULL;
 	unsigned int clen;
-	int mlen, fname_len;
-	char *mname, *colon;
-	zstr fname, lcname;
+	int fname_len;
+	zstr colon, fname, lcname;
 
 	if (EG(exception)) {
 		return FAILURE; /* we would result in an instable executor otherwise */
@@ -749,35 +748,34 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		}
 
 		if (Z_TYPE_P(fci->function_name) == IS_UNICODE) {
-			if ((colon = (char*)u_strstr(Z_USTRVAL_P(fci->function_name), (UChar*)":\0:\0")) != NULL) {
-				mlen = u_strlen((UChar*)(colon+4));
-				clen = Z_UNILEN_P(fci->function_name) - mlen - 2;
-				mname = colon + 4;
+			if ((colon.u = u_strstr(Z_USTRVAL_P(fci->function_name), (UChar*)":\0:\0")) != NULL) {
+				fname_len = u_strlen(colon.u+2);
+				clen = Z_USTRLEN_P(fci->function_name) - fname_len - 2;
+				fname.u = colon.u + 2;
 			}
 		} else {
-			if ((colon = strstr(Z_STRVAL_P(fci->function_name), "::")) != NULL) {
-				clen = colon - Z_STRVAL_P(fci->function_name);
-				mlen = Z_STRLEN_P(fci->function_name) - clen - 2;
-				mname = colon + 2;
+			if ((colon.s = strstr(Z_STRVAL_P(fci->function_name), "::")) != NULL) {
+				clen = colon.s - Z_STRVAL_P(fci->function_name);
+				fname_len = Z_STRLEN_P(fci->function_name) - clen - 2;
+				fname.s = colon.s + 2;
 			}
 		}
-		if (colon != NULL) {
+		if (colon.v != NULL) {
 			zend_class_entry **pce, *ce_child = NULL;
-			if (zend_u_lookup_class(Z_TYPE_P(fci->function_name), Z_UNIVAL_P(fci->function_name), clen, &pce TSRMLS_CC) == SUCCESS) {
+
+			lcname = zend_u_str_case_fold(Z_TYPE_P(fci->function_name), Z_UNIVAL_P(fci->function_name), clen, 0, &clen);
+			/* caution: lcname is not '\0' terminated */
+			if (calling_scope && clen == sizeof("self") - 1 && 
+			    ZEND_U_EQUAL(Z_TYPE_P(fci->function_name), lcname, clen, "self", sizeof("self")-1)) {
+				ce_child = EG(active_op_array) ? EG(active_op_array)->scope : NULL;
+			} else if (calling_scope && clen == sizeof("parent") - 1 && 
+			    ZEND_U_EQUAL(Z_TYPE_P(fci->function_name), lcname, clen, "parent", sizeof("parent")-1)) {
+				ce_child = EG(active_op_array) && EG(active_op_array)->scope ? EG(scope)->parent : NULL;
+			} else if (zend_u_lookup_class(Z_TYPE_P(fci->function_name), Z_UNIVAL_P(fci->function_name), clen, &pce TSRMLS_CC) == SUCCESS) {
 				ce_child = *pce;
-			} else {
-				lcname = zend_u_str_case_fold(Z_TYPE_P(fci->function_name), Z_UNIVAL_P(fci->function_name), clen, 0, &clen);
-				/* caution: lcname is not '\0' terminated */
-				if (calling_scope) {
-					/* FIXME: Unicode support??? */
-					if (clen == sizeof("self") - 1 && memcmp(lcname.s, "self", sizeof("self") - 1) == 0) {
-						ce_child = EG(active_op_array) ? EG(active_op_array)->scope : NULL;
-					} else if (clen == sizeof("parent") - 1 && memcmp(lcname.s, "parent", sizeof("parent") - 1) == 0 && EG(active_op_array)->scope) {
-						ce_child = EG(active_op_array) && EG(active_op_array)->scope ? EG(scope)->parent : NULL;
-					}
-				}
-				efree(lcname.v);
 			}
+			efree(lcname.v);
+
 			if (!ce_child) {
 				zend_error(E_ERROR, "Cannot call method %R() or method does not exist", Z_TYPE_P(fci->function_name), Z_UNIVAL_P(fci->function_name));
 				return FAILURE;
@@ -785,11 +783,9 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			check_scope_or_static = calling_scope;
 			fci->function_table = &ce_child->function_table;
 			calling_scope = ce_child;
-			fname.s = colon + (Z_TYPE_P(fci->function_name) == IS_UNICODE ? 4 : 2);
-			fname_len = mlen;
 		} else {
-			fname.s = Z_STRVAL_P(fci->function_name);
-			fname_len = Z_STRLEN_P(fci->function_name);
+			fname = Z_UNIVAL_P(fci->function_name);
+			fname_len = Z_UNILEN_P(fci->function_name);
 		}
 
 		if (fci->object_pp) {
