@@ -2018,7 +2018,7 @@ static void do_inherit_method(zend_function *function)
 }
 
 
-static zend_bool zend_do_perform_implementation_check(zend_function *fe, zend_function *proto)
+static zend_bool zend_do_perform_implementation_check(zend_function *fe, zend_function *proto TSRMLS_DC)
 {
 	zend_uint i;
 
@@ -2052,9 +2052,10 @@ static zend_bool zend_do_perform_implementation_check(zend_function *fe, zend_fu
 			/* Only one has a type hint and the other one doesn't */
 			return 0;
 		}
-		if (fe->common.arg_info[i].class_name.v
-			&& strcmp(fe->common.arg_info[i].class_name.s, proto->common.arg_info[i].class_name.s)!=0) {
-			/* FIXME: Unicode support??? */
+		if (fe->common.arg_info[i].class_name.v &&
+			(fe->common.arg_info[i].class_name_len != proto->common.arg_info[i].class_name_len ||
+			 (!UG(unicode) && zend_binary_strcasecmp(fe->common.arg_info[i].class_name.s, fe->common.arg_info[i].class_name_len, proto->common.arg_info[i].class_name.s, proto->common.arg_info[i].class_name_len) != 0) ||
+			 (UG(unicode) && zend_u_binary_strcasecmp(fe->common.arg_info[i].class_name.u, fe->common.arg_info[i].class_name_len, proto->common.arg_info[i].class_name.u, proto->common.arg_info[i].class_name_len) != 0))) {
 			return 0;
 		}
 		if (fe->common.arg_info[i].array_type_hint != proto->common.arg_info[i].array_type_hint) {
@@ -2142,11 +2143,11 @@ static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_f
 
 
 	if (child->common.prototype) {
-		if (!zend_do_perform_implementation_check(child, child->common.prototype)) {
+		if (!zend_do_perform_implementation_check(child, child->common.prototype TSRMLS_CC)) {
 			zend_error(E_COMPILE_ERROR, "Declaration of %v::%v() must be compatible with that of %v::%v()", ZEND_FN_SCOPE_NAME(child), child->common.function_name, ZEND_FN_SCOPE_NAME(child->common.prototype), child->common.prototype->common.function_name);
 		}
 	} else if (EG(error_reporting) & E_STRICT) { /* Check E_STRICT before the check so that we save some time */
-		if (!zend_do_perform_implementation_check(child, parent)) {
+		if (!zend_do_perform_implementation_check(child, parent TSRMLS_CC)) {
 			zend_error(E_STRICT, "Declaration of %v::%v() should be compatible with that of %v::%v()", ZEND_FN_SCOPE_NAME(child), child->common.function_name, ZEND_FN_SCOPE_NAME(parent), parent->common.function_name);
 		}
 	}
