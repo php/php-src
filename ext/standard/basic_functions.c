@@ -3179,8 +3179,8 @@ static int copy_request_variable(void *pDest, int num_args, va_list args, zend_h
 		if (!hash_key->nKeyLength) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Numeric key detected - possible security hazard.");
 			return 0;
-		/* FIXME: Unicode support??? */
-		} else if (!strcmp(hash_key->arKey.s, "GLOBALS")) {
+		} else if (hash_key->nKeyLength == sizeof("GLOBALS") &&
+		           ZEND_U_EQUAL(hash_key->type, hash_key->arKey, hash_key->nKeyLength-1, "GLOBALS", sizeof("GLOBALS")-1)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempted GLOBALS variable overwrite.");
 			return 0; 
 		}
