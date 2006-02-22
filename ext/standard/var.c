@@ -697,6 +697,7 @@ static void php_var_serialize_class(smart_str *buf, zval **struc, zval *retval_p
 
 	if (count > 0) {
 		zstr key;
+		unsigned int key_len;
 		zval **d, **name;
 		ulong index;
 		HashPosition pos;
@@ -709,14 +710,15 @@ static void php_var_serialize_class(smart_str *buf, zval **struc, zval *retval_p
 		zend_hash_internal_pointer_reset_ex(HASH_OF(retval_ptr), &pos);
 	
 		for (;; zend_hash_move_forward_ex(HASH_OF(retval_ptr), &pos)) {
-			i = zend_hash_get_current_key_ex(HASH_OF(retval_ptr), &key, NULL, 
+			i = zend_hash_get_current_key_ex(HASH_OF(retval_ptr), &key, &key_len,
 					&index, 0, &pos);
 			
 			if (i == HASH_KEY_NON_EXISTANT)
 				break;
 
-			/* FIXME: Unicode support??? */
-			if (incomplete_class && strcmp(key.s, MAGIC_MEMBER) == 0) {
+			if (incomplete_class &&
+			    key_len == sizeof(MAGIC_MEMBER) &&
+			    ZEND_U_EQUAL(i, key, key_len-1, MAGIC_MEMBER, sizeof(MAGIC_MEMBER)-1)) {
 				continue;
 			}
 			zend_hash_get_current_data_ex(HASH_OF(retval_ptr), 
@@ -869,8 +871,13 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 						smart_str_appendl(buf, "C:", 2);
 						smart_str_append_long(buf, Z_OBJCE_PP(struc)->name_length);
 						smart_str_appendl(buf, ":\"", 2);
-						/* FIXME: Unicode support??? */
-						smart_str_appendl(buf, Z_OBJCE_PP(struc)->name.s, Z_OBJCE_PP(struc)->name_length);
+
+						if (UG(unicode)) {
+							php_var_serialize_ustr(buf, Z_OBJCE_PP(struc)->name.u, Z_OBJCE_PP(struc)->name_length);
+						} else {
+							smart_str_appendl(buf, Z_OBJCE_PP(struc)->name.s, Z_OBJCE_PP(struc)->name_length);
+						}
+
 						smart_str_appendl(buf, "\":", 2);
 					
 						smart_str_append_long(buf, serialized_length);
@@ -948,8 +955,9 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 					if (i == HASH_KEY_NON_EXISTANT)
 						break;
 					
-					/* FIXME: Unicode support??? */
-					if (incomplete_class && strcmp(key.s, MAGIC_MEMBER) == 0) {
+					if (incomplete_class &&
+					    key_len == sizeof(MAGIC_MEMBER) &&
+					    ZEND_U_EQUAL(i, key, key_len-1, MAGIC_MEMBER, sizeof(MAGIC_MEMBER)-1)) {
 						continue;
 					}		
 					
