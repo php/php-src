@@ -437,10 +437,10 @@ array(4) {
   }
 }
 unicode(16) "DerivedStatement"
-DerivedStatement::retrieve(1,A)
-DerivedStatement::retrieve(2,B)
-DerivedStatement::retrieve(3,C)
-DerivedStatement::retrieve(4,D)
+DerivedStatement::reTrieve(1,A)
+DerivedStatement::reTrieve(2,B)
+DerivedStatement::reTrieve(3,C)
+DerivedStatement::reTrieve(4,D)
 array(4) {
   [0]=>
   array(1) {
@@ -463,10 +463,10 @@ array(4) {
     unicode(1) "D"
   }
 }
-DerivedStatement::retrieve(1,A)
-DerivedStatement::retrieve(2,B)
-DerivedStatement::retrieve(3,C)
-DerivedStatement::retrieve(4,D)
+DerivedStatement::reTrieve(1,A)
+DerivedStatement::reTrieve(2,B)
+DerivedStatement::reTrieve(3,C)
+DerivedStatement::reTrieve(4,D)
 array(4) {
   [0]=>
   array(1) {
@@ -489,10 +489,10 @@ array(4) {
     unicode(1) "D"
   }
 }
-DerivedStatement::retrieve(1,A)
-DerivedStatement::retrieve(2,B)
-DerivedStatement::retrieve(3,C)
-DerivedStatement::retrieve(4,D)
+DerivedStatement::reTrieve(1,A)
+DerivedStatement::reTrieve(2,B)
+DerivedStatement::reTrieve(3,C)
+DerivedStatement::reTrieve(4,D)
 array(4) {
   [0]=>
   array(1) {

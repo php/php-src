@@ -69,3 +69,28 @@ object(b)#%d (1) {
     string(5) "hallo"
   }
 }
+--UEXPECTF--
+original values:
+object(a)#%d (1) {
+  [u"test"]=>
+  unicode(5) "hallo"
+}
+object(b)#%d (1) {
+  [u"a"]=>
+  &object(a)#%d (1) {
+    [u"test"]=>
+    unicode(5) "hallo"
+  }
+}
+values after session:
+object(a)#%d (1) {
+  [u"test"]=>
+  unicode(5) "hallo"
+}
+object(b)#%d (1) {
+  [u"a"]=>
+  &object(a)#%d (1) {
+    [u"test"]=>
+    unicode(5) "hallo"
+  }
+}
