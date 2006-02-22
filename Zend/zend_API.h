@@ -248,6 +248,21 @@ ZEND_API void zend_update_property_rt_stringl(zend_class_entry *scope, zval *obj
 ZEND_API void zend_update_property_unicode(zend_class_entry *scope, zval *object, char *name, int name_length, UChar *value TSRMLS_DC);
 ZEND_API void zend_update_property_unicodel(zend_class_entry *scope, zval *object, char *name, int name_length, UChar *value, int value_length TSRMLS_DC);
 
+#define zend_update_property_text(ce, obj, key, key_len, str) \
+	if (UG(unicode)) { \
+		zend_update_property_unicode(ce, obj, key, key_len, (str).u TSRMLS_CC); \
+	} else { \
+		zend_update_property_string(ce, obj, key, key_len, (str).s TSRMLS_CC); \
+	}
+
+#define zend_update_property_textl(ce, obj, key, key_len, str, len) \
+	if (UG(unicode)) { \
+		zend_update_property_unicodel(ce, obj, key, key_len, str.u, len TSRMLS_CC); \
+	} else { \
+		zend_update_property_stringl(ce, obj, key, key_len, str.s, len TSRMLS_CC); \
+	}
+
+
 ZEND_API int zend_update_static_property(zend_class_entry *scope, char *name, int name_length, zval *value TSRMLS_DC);
 ZEND_API int zend_update_static_property_null(zend_class_entry *scope, char *name, int name_length TSRMLS_DC);
 ZEND_API int zend_update_static_property_bool(zend_class_entry *scope, char *name, int name_length, long value TSRMLS_DC);
@@ -377,16 +392,16 @@ ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
 
 #define add_assoc_text(arg, key, str, duplicate) \
 	if (UG(unicode)) { \
-		add_assoc_unicode(arg, key, (UChar*)(str), duplicate); \
+		add_assoc_unicode(arg, key, (str).u, duplicate); \
 	} else { \
-		add_assoc_string(arg, key, (char*)(str), duplicate); \
+		add_assoc_string(arg, key, (str).s, duplicate); \
 	}
 
 #define add_assoc_textl(arg, key, str, length, duplicate) \
 	if (UG(unicode)) { \
-		add_assoc_unicodel(arg, key, (UChar*)(str), length, duplicate); \
+		add_assoc_unicodel(arg, key, (str).u, length, duplicate); \
 	} else { \
-		add_assoc_stringl(arg, key, (char*)(str), length, duplicate); \
+		add_assoc_stringl(arg, key, (str).s, length, duplicate); \
 	}
 
 #define add_assoc_ascii_string(arg, key, str, duplicate) \
@@ -429,16 +444,16 @@ ZEND_API int add_index_zval(zval *arg, ulong index, zval *value);
 
 #define add_index_text(arg, idx, str, duplicate) \
 	if (UG(unicode)) { \
-		add_index_unicode(arg, idx, (UChar*)(str), duplicate); \
+		add_index_unicode(arg, idx, (str).u, duplicate); \
 	} else { \
-		add_index_string(arg, idx, (char*)(str), duplicate); \
+		add_index_string(arg, idx, (str).s, duplicate); \
 	}
 
 #define add_index_textl(arg, idx, str, length, duplicate) \
 	if (UG(unicode)) { \
-		add_index_unicodel(arg, idx, (UChar*)(str), length, duplicate); \
+		add_index_unicodel(arg, idx, (str).u, length, duplicate); \
 	} else { \
-		add_index_stringl(arg, idx, (char*)(str), length, duplicate); \
+		add_index_stringl(arg, idx, (str).s, length, duplicate); \
 	}
 
 #define add_index_ascii_string(arg, idx, str, duplicate) \
