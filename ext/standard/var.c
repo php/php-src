@@ -882,7 +882,11 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 					
 						smart_str_append_long(buf, serialized_length);
 						smart_str_appendl(buf, ":{", 2);
-						smart_str_appendl(buf, serialized_data, serialized_length);
+						if (UG(unicode)) {
+							php_var_serialize_ustr(buf, (UChar*)serialized_data, serialized_length);
+						} else {
+							smart_str_appendl(buf, serialized_data, serialized_length);
+						}
 						smart_str_appendc(buf, '}'); 
 					} else {
 						smart_str_appendl(buf, "N;", 2);
