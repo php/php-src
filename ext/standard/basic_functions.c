@@ -1667,7 +1667,7 @@ PHP_FUNCTION(getopt)
 	opterr = 0;
 
 	/* Force reinitialization of getopt() (via optind reset) on every call. */
-	optind = 0;
+	optind = 1;
 
 	/* Invoke getopt(3) on the argument array. */
 #ifdef HARTMUT_0
