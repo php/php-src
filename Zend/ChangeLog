@@ -1,3 +1,27 @@
+2006-02-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_API.c
+      zend_API.h:
+      Unicode support
+
+    * zend_exceptions.c:
+      Unicode support: fixed __toString() in user defined exceptions
+
+    * zend_compile.c:
+      Unicode support: fixed check for class type hint
+
+    * zend_builtin_functions.c
+      zend_constants.c:
+      Unicode support: fixed internal constants usage and get_defined_constants()
+
+    * zend_compile.c:
+      Unicode support: fixed check for direct call to __clone()
+
+    * zend_API.c
+      zend_execute_API.c:
+      Unicode support: fixed call_user_func(array($this, "self::foo"))
+      Made check for "self/parent" before calling __autoload()
+
 2006-02-21  Dmitry Stogov  <dmitry@zend.com>
 
     * zend.c

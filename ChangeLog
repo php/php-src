@@ -1,3 +1,57 @@
+2006-02-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_4_4)
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      Fixed crash on error message during PHP startup in FastCGI
+
+    * ext/standard/var.c:
+      Unicode support: fixed serialization of "Serializable"
+
+    * ext/standard/var.c:
+      Unicode support: fixed serealization of "Serializable" and
+      "IncompleteClass"
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c:
+      Unicode support: fixed GLOBALS protection
+
+    * ext/standard/tests/array/array_intersect_1.phpt:
+      fixed test file
+
+    * ext/session/tests/006.phpt
+      ext/session/tests/bug24592.phpt
+      ext/standard/tests/array/007.phpt
+      tests/classes/tostring_001.phpt:
+      Fixed test file
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h:
+      Unicode support
+
+    * ZendEngine2/zend_exceptions.c:
+      Unicode support: fixed __toString() in user defined exceptions
+
+    * ZendEngine2/zend_compile.c:
+      Unicode support: fixed check for class type hint
+
+    * ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_constants.c:
+      Unicode support: fixed internal constants usage and get_defined_constants()
+
+    * ZendEngine2/zend_compile.c:
+      Unicode support: fixed check for direct call to __clone()
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_execute_API.c:
+      Unicode support: fixed call_user_func(array($this, "self::foo"))
+      Made check for "self/parent" before calling __autoload()
+
+2006-02-22  Antony Dovgal  <antony@zend.com>
+
+    * ext/wddx/wddx.c:
+      fix ext/wddx build
+
 2006-02-21  Johannes Schlüter  <schlueter@phpbar.de>
 
     * (PHP_5_1)
