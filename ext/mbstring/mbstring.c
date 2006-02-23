@@ -79,6 +79,8 @@
 #if HAVE_MBSTRING
 /* }}} */
 
+#include "oniguruma/oniguruma.h"
+
 /* {{{ prototypes */
 static void _php_mb_globals_ctor(zend_mbstring_globals *pglobals TSRMLS_DC);
 static void _php_mb_globals_dtor(zend_mbstring_globals *pglobals TSRMLS_DC);
