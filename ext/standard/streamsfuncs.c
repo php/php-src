@@ -752,6 +752,14 @@ PHP_FUNCTION(stream_select)
 	if (sec != NULL) {
 		convert_to_long(sec);
 
+		if (sec < 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The seconds parameter must be greater then 0.");
+			RETURN_FALSE;
+		} else if (usec < 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The microseconds parameter must be greater then 0.");
+			RETURN_FALSE;
+		}
+
 		/* Solaris + BSD do not like microsecond values which are >= 1 sec */
 		if (usec > 999999) {
 			tv.tv_sec = Z_LVAL_P(sec) + (usec / 1000000);
