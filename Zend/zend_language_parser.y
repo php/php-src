@@ -611,8 +611,13 @@ expr_without_variable:
 	|	internal_functions_in_yacc { $$ = $1; }
 	|	T_INT_CAST expr 	{ zend_do_cast(&$$, &$2, IS_LONG TSRMLS_CC); }
 	|	T_DOUBLE_CAST expr 	{ zend_do_cast(&$$, &$2, IS_DOUBLE TSRMLS_CC); }
+<<<<<<< zend_language_parser.y
+	|	T_STRING_CAST expr	{ zend_do_cast(&$$, &$2, IS_STRING TSRMLS_CC); } 
+	|	T_UNICODE_CAST expr	{ zend_do_cast(&$$, &$2, IS_UNICODE TSRMLS_CC); } 
+=======
 	|	T_STRING_CAST expr	{ zend_do_cast(&$$, &$2, UG(unicode)?IS_UNICODE:IS_STRING TSRMLS_CC); }
 	|	T_UNICODE_CAST expr	{ zend_do_cast(&$$, &$2, IS_UNICODE TSRMLS_CC); }
+>>>>>>> 1.167
 	|	T_ARRAY_CAST expr 	{ zend_do_cast(&$$, &$2, IS_ARRAY TSRMLS_CC); }
 	|	T_OBJECT_CAST expr 	{ zend_do_cast(&$$, &$2, IS_OBJECT TSRMLS_CC); }
 	|	T_BOOL_CAST expr	{ zend_do_cast(&$$, &$2, IS_BOOL TSRMLS_CC); }
