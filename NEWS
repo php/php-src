@@ -26,6 +26,7 @@ PHP                                                                        NEWS
   (Mike)
 - Fixed tiger hash algorithm generating wrong results on big endian platforms.
   (Mike)
+- Fixed crash with DOMImplementation::createDocumentType("name:"). (Mike)
 - Fixed bug #36458 (sleep() accepts negative values). (Ilia)
 - Fixed bug #36436 (DBA problem with Berkeley DB4). (Marcus)
 - Fixed bug #36434 (Improper resolution of declaring class name of an inherited
