@@ -1,3 +1,51 @@
+2006-02-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/mbstring/config.m4
+      ext/mbstring/mbstring.c:
+      - Disable mbregex support until someone finds a way to reenable the
+        required engine stuff
+      - Fix build
+
+2006-02-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/streamsfuncs.c:
+      MFB51: Fixed bug #35900 (stream_select() should warning when tv_sec is
+      negative).
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/streamsfuncs.c:
+      Fixed bug #35900 (stream_select() should warning when tv_sec is negative).
+
+2006-02-23  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_4_4)
+      Zend/zend_compile.c:
+      MFB
+
+    * ZendEngine2/zend_language_parser.y:
+      -** empty log message ***
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_language_parser.y:
+      Fix a bug where the default value for function argument could be an
+      array with array (!) keys.
+
+2006-02-23  Brian France  <list@firehawksystems.com>
+
+    * (PHP_4_4)
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.c:
+      
+      MFH: fixed bug #35594 for all systems.  "optind = 0" doesn't work on
+      FreeBSD, but "optind = 1" seems to work on all systems (bug #36091)
+
+    * ext/standard/basic_functions.c:
+      
+      fixed bug #35594 for all systems.  "optind = 0" doesn't work on FreeBSD,
+      but "optind = 1" seems to work on all systems (bug #36091)
+
 2006-02-22  Dmitry Stogov  <dmitry@zend.com>
 
     * (PHP_4_4)

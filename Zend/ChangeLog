@@ -1,3 +1,14 @@
+2006-02-23  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_language_parser.y:
+      -** empty log message ***
+
+    * zend_compile.c
+      zend_compile.c
+      zend_language_parser.y:
+      Fix a bug where the default value for function argument could be an
+      array with array (!) keys.
+
 2006-02-22  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_API.c
