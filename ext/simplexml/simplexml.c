@@ -390,6 +390,7 @@ static void sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_boo
 	char           *name;
 	xmlNodePtr      node;
 	xmlNodePtr      newnode = NULL;
+	xmlNodePtr      mynode;
 	xmlNodePtr		tempnode;
 	xmlAttrPtr      attr = NULL;
 	int             counter = 0;
@@ -449,6 +450,8 @@ static void sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_boo
 		attr = node ? node->properties : NULL;
 		test = 0;
 	}
+
+	mynode = node;
 
 	if (node) {
 		if (attribs) {
@@ -510,6 +513,8 @@ next_iter:
 			change_node_zval(newnode, value TSRMLS_CC);
 		} else if (counter > 1) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot assign to an array of nodes (duplicate subnodes or attr detected)");
+		} else if (elements && !node) {
+			xmlNewChild(mynode, mynode->ns, name, Z_STRVAL_P(value));	
 		} else {
 			if (attribs) {
 				switch (Z_TYPE_P(value)) {
