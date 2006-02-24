@@ -347,6 +347,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 
 	/* Constants */
 	if (&ce->constants_table) {
+		zend_hash_apply_with_argument(&ce->constants_table, (apply_func_arg_t) zval_update_constant, (void*)1 TSRMLS_CC);
 		string_printf(str, "\n");
 		count = zend_hash_num_elements(&ce->constants_table);
 		string_printf(str, "%s  - Constants [%d] {\n", indent, count);
