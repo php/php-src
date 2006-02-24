@@ -1,5 +1,5 @@
 --TEST--
-Reflection::export
+Bug #29986 Class constants won't work with predefined constants when using ReflectionClass
 --SKIPIF--
 <?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
