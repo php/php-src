@@ -533,7 +533,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 /* {{{ _const_string */
 static void _const_string(string *str, char *name, zval *value, char *indent TSRMLS_DC)
 {
-	string_printf(str, "%s    Constant [ %s %s ] { }\n",
+	string_printf(str, "%s    Constant [ %s %v ] { }\n",
 			   indent,
 			   zend_zval_type_name(value),
 			   name);
