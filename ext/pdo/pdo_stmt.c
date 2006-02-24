@@ -838,7 +838,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 							return 0;
 						}
 					}
-					if (ce->constructor && (flags & PDO_FETCH_PROPSLATE)) {
+					if (ce->constructor && (flags & PDO_FETCH_PROPS_LATE)) {
 						stmt->fetch.cls.fci.object_pp = &return_value;
 						stmt->fetch.cls.fcc.object_pp = &return_value;
 						if (zend_call_function(&stmt->fetch.cls.fci, &stmt->fetch.cls.fcc TSRMLS_CC) == FAILURE) {
@@ -1012,7 +1012,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 		
 		switch (how) {
 			case PDO_FETCH_CLASS:
-				if (ce->constructor && !(flags & PDO_FETCH_PROPSLATE)) {
+				if (ce->constructor && !(flags & PDO_FETCH_PROPS_LATE)) {
 					stmt->fetch.cls.fci.object_pp = &return_value;
 					stmt->fetch.cls.fcc.object_pp = &return_value;
 					if (zend_call_function(&stmt->fetch.cls.fci, &stmt->fetch.cls.fcc TSRMLS_CC) == FAILURE) {
