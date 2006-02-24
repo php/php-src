@@ -18,7 +18,7 @@ $db = PDOTest::factory();
 $db->exec("CREATE TABLE test (a VARCHAR(10))");
 $db->exec("INSERT INTO test (a) VALUES ('xyz')");
 $res = $db->query("SELECT a FROM test");
-var_dump($res->fetchAll(PDO::FETCH_CLASS|PDO::FETCH_PROPSLATE, 'SimpleXMLElement', array('<root/>')));
+var_dump($res->fetchAll(PDO::FETCH_CLASS|PDO::FETCH_PROPS_LATE, 'SimpleXMLElement', array('<root/>')));
 
 ?>
 ===DONE===
