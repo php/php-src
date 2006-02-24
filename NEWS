@@ -16,6 +16,7 @@ PHP                                                                        NEWS
 - Changed get_headers() to retrieve headers also from non-200 responses. (Ilia)
 - Changed get_headers() to use the default context. (Ilia)
 - Changed reflection constants to be prefixed with IS_. (Johannes)
+- Added support for exif date format in strtotime(). (Derick)
 - Added a check for special characters in the session name. (Ilia)
 - Added "consumed" stream filter. (Marcus)
 - Added new mysqli constants for BIT and NEW_DECIMAL field types:
@@ -35,6 +36,8 @@ PHP                                                                        NEWS
   (Tony)
 - Fixed bug #36400 (Custom 5xx error does not return correct HTTP response 
   error code). (Tony)
+- Fixed bug #36396 (strtotime() fails to parse dates in dd-mm-yyyy format).
+  (Derick)
 - Fixed bug #36345 (PDO/MySQL problem loading BLOB over 1MB). (Ilia)
 - Fixed bug #36382 (PDO/PgSQL's getColumnMeta() crashes). (Derick)
 - Fixed bug #36359 (splFileObject::fwrite() doesn't write when no data length 
