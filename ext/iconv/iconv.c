@@ -1395,11 +1395,13 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 
 			case 3: /* expecting a encoding scheme specifier */
 				switch (*p1) {
+					case 'b':
 					case 'B':
 						enc_scheme = PHP_ICONV_ENC_SCHEME_BASE64;
 						scan_stat = 4;
 						break;
 
+					case 'q':
 					case 'Q':
 						enc_scheme = PHP_ICONV_ENC_SCHEME_QPRINT;
 						scan_stat = 4;

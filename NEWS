@@ -24,6 +24,8 @@ PHP                                                                        NEWS
 - Added ReflectionClass::newInstanceArgs($args). (Marcus)
 - Added imap_savebody() that allows message body to be written to a file.
   (Mike)
+- Fixed issue with iconv_mime_decode where the "encoding" would only allow
+  upper case specifiers. (Derick)
 - Fixed tiger hash algorithm generating wrong results on big endian platforms.
   (Mike)
 - Fixed crash with DOMImplementation::createDocumentType("name:"). (Mike)
