@@ -757,13 +757,14 @@ static void _function_string(string *str, zend_function *fptr, zend_class_entry 
 /* }}} */
 
 /* {{{ _property_string */
-static void _property_string(string *str, zend_property_info *prop, char *prop_name, char* indent TSRMLS_DC)
+static void _property_string(string *str, zend_property_info *prop, char *sz_prop_name, char* indent TSRMLS_DC)
 {
 	zstr class_name;
+	zstr prop_name;
 
 	string_printf(str, "%sProperty [ ", indent);
 	if (!prop) {
-		string_printf(str, "<dynamic> public $%s", prop_name);
+		string_printf(str, "<dynamic> public $%s", sz_prop_name);
 	} else {
 		if (!(prop->flags & ZEND_ACC_STATIC)) {
 			if (prop->flags & ZEND_ACC_IMPLICIT_PUBLIC) {
