@@ -590,7 +590,7 @@ static void timelib_set_relative(char **ptr, timelib_sll amount, int behavior, S
 static timelib_tz_lookup_table* zone_search(const char *word, long gmtoffset, int isdst)
 {
 	int first_found = 0;
-	timelib_tz_lookup_table  *tp, *first_found_elem;
+	timelib_tz_lookup_table  *tp, *first_found_elem = NULL;
 	timelib_tz_lookup_table  *fmp;
 
 	if (strcasecmp("utc", word) == 0 || strcasecmp("gmt", word) == 0) {
@@ -800,7 +800,7 @@ iso8601dateslash = year4 "/" monthlz "/" daylz "/"?;
 dateslash        = year4 "/" month "/" day;
 gnudateshort     = year "-" month "-" day;
 iso8601date      = year4 "-" monthlz "-" daylz;
-pointeddate      = day "." month "." year;
+pointeddate      = day [.-] month [.-] year;
 datefull         = day ([ -.])* monthtext ([ -.])* year;
 datenoday        = monthtext ([ -.])* year4;
 datenodayrev     = year4 ([ -.])* monthtext;
@@ -819,6 +819,7 @@ pgtextshort      = monthabbr "-" daylz "-" year;
 pgtextreverse    = year "-" monthabbr "-" daylz;
 isoweekday       = year4 "W" weekofyear [0-7];
 isoweek          = year4 "W" weekofyear;
+exif             = year4 ":" monthlz ":" daylz " " hour24lz ":" minutelz ":" secondlz;
 
 /* Common Log Format: 10/Oct/2000:13:55:36 -0700 */
 clf              = day "/" monthabbr "/" year4 ":" hour24lz ":" minutelz ":" secondlz space tzcorrection;
@@ -1158,10 +1159,10 @@ relativetext = reltextnumber space? reltextunit;
 		return TIMELIB_DATE_NOCOLON;
 	}
 
-	xmlrpc | xmlrpcnocolon | soap | wddx
+	xmlrpc | xmlrpcnocolon | soap | wddx | exif
 	{
 		int tz_not_found;
-		DEBUG_OUTPUT("xmlrpc | xmlrpcnocolon | soap | wddx");
+		DEBUG_OUTPUT("xmlrpc | xmlrpcnocolon | soap | wddx | exif");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_TIME();
 		TIMELIB_HAVE_DATE();
@@ -1321,7 +1322,7 @@ relativetext = reltextnumber space? reltextunit;
 	relativetext
 	{
 		timelib_sll i;
-		int         behavior;
+		int         behavior = 0;
 		DEBUG_OUTPUT("relativetext");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_RELATIVE();
