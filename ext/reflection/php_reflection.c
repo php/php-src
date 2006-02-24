@@ -4438,7 +4438,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflection_register_implement(reflection_function_ptr, reflector_ptr TSRMLS_CC);
 	zend_declare_property_string(reflection_function_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
 
-	REGISTER_REFLECTION_CLASS_CONST_LONG(function, "IS_STATIC", ZEND_ACC_DEPRECATED);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(function, "IS_DEPRECATED", ZEND_ACC_DEPRECATED);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionParameter", reflection_parameter_functions);
 	_reflection_entry.create_object = reflection_objects_new;
