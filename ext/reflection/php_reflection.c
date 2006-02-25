@@ -871,6 +871,41 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 				  module->module_number, module->name,
 				  (module->version == NO_VERSION_YET) ? "<no_version>" : module->version);
 
+	if (module->deps) {
+		zend_module_dep* dep = module->deps;
+
+		string_printf(str, "\n  - Dependencies {\n");
+
+		while(dep->name) {
+			string_printf(str, "%s    Dependency [ %s (", indent, dep->name);
+			
+			switch(dep->type) {
+			case MODULE_DEP_REQUIRED:
+				string_write(str, "Required", sizeof("Required") - 1);
+				break;
+			case MODULE_DEP_CONFLICTS:
+				string_write(str, "Conflicts", sizeof("Conflicts") - 1);
+				break;
+			case MODULE_DEP_OPTIONAL:
+				string_write(str, "Optional", sizeof("Optional") - 1);
+				break;
+			default:
+				string_write(str, "Error", sizeof("Error") - 1); /* shouldn't happen */
+				break;
+			}
+
+			if (dep->rel) {	
+				string_printf(str, " %s", dep->rel);
+			}
+			if (dep->version) {	
+				string_printf(str, " %s", dep->version);
+			}
+			string_write(str, ") ]\n", sizeof(") ]\n") - 1);
+			dep++;
+		}
+		string_printf(str, "%s  }\n", indent);
+	}
+
 	{
 		string str_ini;
 		string_init(&str_ini);
@@ -4068,6 +4103,58 @@ ZEND_METHOD(reflection_extension, getClassNames)
 }
 /* }}} */
 
+/* {{{ proto public array ReflectionExtension::getDependencies()
+   Returns an array containing all names of all extensions this extension depends on */
+ZEND_METHOD(reflection_extension, getDependencies)
+{
+	reflection_object *intern;
+	zend_module_entry *module;
+	zend_module_dep *dep;
+
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_extension_ptr, 0);	
+	GET_REFLECTION_OBJECT_PTR(module);
+	
+	array_init(return_value);
+
+	dep = module->deps;
+	
+	if (!dep)
+	{
+		return;
+	}
+
+	while(dep->name) {
+		char *relation;
+		char *rel_type;
+		int len;
+		
+		switch(dep->type) {
+		case MODULE_DEP_REQUIRED:
+			rel_type = "Required";
+			break;
+		case MODULE_DEP_CONFLICTS:
+			rel_type = "Conflicts";
+			break;
+		case MODULE_DEP_OPTIONAL:
+			rel_type = "Optional";
+			break;
+		default:
+			rel_type = "Error"; /* shouldn't happen */
+			break;
+		}
+
+		len = spprintf(&relation, 0, "%s%s%s%s%s", 
+						rel_type,
+						dep->rel ? " " : "",
+						dep->rel ? dep->rel : "", 
+						dep->version ? " " : "",
+						dep->version ? dep->version : "");
+		add_assoc_stringl(return_value, dep->name, relation, len, 0);
+		dep++;
+	}
+}
+/* }}} */
+
 /* {{{ method tables */
 static zend_function_entry reflection_exception_functions[] = {
 	{NULL, NULL, NULL}
@@ -4230,6 +4317,7 @@ static zend_function_entry reflection_extension_functions[] = {
 	ZEND_ME(reflection_extension, getINIEntries, NULL, 0)
 	ZEND_ME(reflection_extension, getClasses, NULL, 0)
 	ZEND_ME(reflection_extension, getClassNames, NULL, 0)
+	ZEND_ME(reflection_extension, getDependencies, NULL, 0)
 	{NULL, NULL, NULL}
 };
 /* }}} */
