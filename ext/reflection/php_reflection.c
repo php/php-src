@@ -680,6 +680,9 @@ static void _function_string(string *str, zend_function *fptr, zend_class_entry 
 
 	string_printf(str, fptr->common.scope ? "%sMethod [ " : "%sFunction [ ", indent);
 	string_printf(str, (fptr->type == ZEND_USER_FUNCTION) ? "<user" : "<internal");
+	if (fptr->common.fn_flags & ZEND_ACC_DEPRECATED) {
+		string_printf(str, ", deprecated");
+	}
 	if (fptr->type == ZEND_INTERNAL_FUNCTION && ((zend_internal_function*)fptr)->module) {
 		string_printf(str, ":%s", ((zend_internal_function*)fptr)->module->name);
 	}
@@ -708,9 +711,6 @@ static void _function_string(string *str, zend_function *fptr, zend_class_entry 
 	}
 	string_printf(str, "> ");
 
-	if (fptr->common.fn_flags & ZEND_ACC_DEPRECATED) {
-		string_printf(str, "DEPRECATED ");
-	}
 	if (fptr->common.fn_flags & ZEND_ACC_ABSTRACT) {
 		string_printf(str, "abstract ");
 	}
