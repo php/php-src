@@ -4,6 +4,12 @@ PHP                                                                        NEWS
 - Moved extensions to PECL:
   . ext/msession (Derick)
 - Reimplemented FastCGI interface. (Dmitry)
+- Improved Reflection API: (Marcus)
+  . Added ReflectionClass::newInstanceArgs($args).
+  . Added ability to analyze extension dependency.
+  . Added ReflectionFunction::isDeprecated() and constant IS_DEPRECATED.
+  . Deprecated ReflectionParameter::getClass() and added getDeclaringClass().
+  . Changed reflection constants to be prefixed with IS_. (Johannes)
 - Improved cURL extension: (Ilia)
   . Added curl_setopt_array() function that allows setting of multiple options
     via an associated array.
@@ -15,13 +21,11 @@ PHP                                                                        NEWS
     on error.
 - Changed get_headers() to retrieve headers also from non-200 responses. (Ilia)
 - Changed get_headers() to use the default context. (Ilia)
-- Changed reflection constants to be prefixed with IS_. (Johannes)
 - Added support for exif date format in strtotime(). (Derick)
 - Added a check for special characters in the session name. (Ilia)
 - Added "consumed" stream filter. (Marcus)
 - Added new mysqli constants for BIT and NEW_DECIMAL field types:
   MYSQLI_TYPE_NEWDECIMAL and MYSQLI_TYPE_BIT. FR #36007. (Georg)
-- Added ReflectionClass::newInstanceArgs($args). (Marcus)
 - Added imap_savebody() that allows message body to be written to a file.
   (Mike)
 - Fixed issue with iconv_mime_decode where the "encoding" would only allow
