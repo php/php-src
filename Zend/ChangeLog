@@ -1,3 +1,11 @@
+2006-02-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c
+      zend_API.h:
+      - Add macros to mark functions/alias functions as deprecated
+        (mentioned by Sara and obviously neccessary)
+      - Fix function/method flag error detection logic
+
 2006-02-23  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_language_parser.y:

@@ -1,3 +1,48 @@
+2006-02-24  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_1)
+      NEWS
+      ext/iconv/iconv.c:
+      - MFH: Fixed issue with iconv_mime_decode where the "encoding" would only
+      allow
+        upper case specifiers.
+
+    * ext/iconv/iconv.c:
+      - Fixed issue with iconv_mime_decode where the "encoding" would only allow
+        upper case specifiers.
+
+2006-02-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/simplexml.c:
+      - Add ability to add new nodes via properties
+
+    * main/php.h:
+      - Add deprecation function/function alias macros
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h:
+      - Add macros to mark functions/alias functions as deprecated
+        (mentioned by Sara and obviously neccessary)
+      - Fix function/method flag error detection logic
+
+2006-02-24  Michael Wallner  <mike@iworks.at>
+
+    * ext/dom/domimplementation.c:
+      - MF51: fix crash in DOMImplementation::createDocumentType("name:")
+
+    * (PHP_5_1)
+      NEWS
+      ext/dom/domimplementation.c:
+       - fix crash with DOMImplementation::createDocumentType("name:")
+
+2006-02-24  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_1)
+      NEWS:
+      - MFH: Added support for exif date format
+      - MFH: Fixed bug #36396 (strtotime() fails to parse dates in dd-mm-yyyy
+        format).
+
 2006-02-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/mbstring/config.m4
