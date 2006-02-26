@@ -1,3 +1,10 @@
+2006-02-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute_API.c
+      zend_vm_def.h
+      zend_vm_execute.h:
+      - Deprecation severity shall be E_STRICT (as commented by ilia)
+
 2006-02-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.c

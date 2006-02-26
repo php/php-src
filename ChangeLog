@@ -1,3 +1,32 @@
+2006-02-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/026.phpt
+      ext/simplexml/tests/027.phpt:
+      - Added ability to add elements by index if such elements already exist
+      - Added SimpleXMLElement::getName() to access the node name
+
+    * (PHP_5_1)
+      NEWS:
+      - Update
+
+2006-02-25  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_4_4)
+      ext/standard/html.c
+      ext/standard/html.c:
+      MFH - binary safety patch from Moriyoshi
+
+    * ext/standard/html.c:
+      Binary safety patch from Moriyoshi
+
+2006-02-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      - Deprecation severity shall be E_STRICT (as commented by ilia)
+
 2006-02-24  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_5_1)
