@@ -31,3 +31,12 @@ array(1) {
   }
 }
 ===DONE===
+--UEXPECTF--
+array(1) {
+  [0]=>
+  object(SimpleXMLElement)#3 (1) {
+    [u"a"]=>
+    unicode(3) "xyz"
+  }
+}
+===DONE===
