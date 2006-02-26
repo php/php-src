@@ -535,7 +535,7 @@ static long timelib_get_month(char **ptr)
 
 static void timelib_eat_spaces(char **ptr)
 {
-	while (**ptr == ' ') {
+	while (**ptr == ' ' || **ptr == '\t') {
 		++*ptr;
 	}
 }
@@ -736,7 +736,7 @@ std:
 /*!re2c
 any = [\000-\377];
 
-space = [ ]+;
+space = [ \t]+;
 frac = "."[0-9]+;
 
 ago = 'ago';
