@@ -4,6 +4,9 @@ PHP                                                                        NEWS
 - Moved extensions to PECL:
   . ext/msession (Derick)
 - Reimplemented FastCGI interface. (Dmitry)
+- Improved SimpleXML: (Marcus)
+  . Added SimpleXMLElement::getName() to retrieve name of element.
+  . Added ability to create elements on the fly.
 - Improved Reflection API: (Marcus)
   . Added ReflectionClass::newInstanceArgs($args).
   . Added ability to analyze extension dependency.
@@ -110,6 +113,7 @@ PHP                                                                        NEWS
 - Fixed bug #35954 (Fatal com_exception casting object). (Rob)
 - Fixed bug #35900 (stream_select() should warning when tv_sec is negative).
   (Ilia)
+- Fixed bug #35785 (SimpleXML causes memory read error zend engine). (Marcus)
 - Fixed bug #34272 (empty array onto COM object blows up). (Rob)
 
 12 Jan 2006, PHP 5.1.2
