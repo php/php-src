@@ -3,21 +3,24 @@ Bug #35785 (SimpleXML memory read error)
 --FILE--
 <?php
 
-$options["database"] = "xmldatabase";
 $xml = simplexml_load_string("<root></root>");
-$count = count($xml->posts) + 1;
-$xml->bla->posts[$count]->name = $_POST["name"];
+$xml->bla->posts->name = "FooBar";
+echo $xml->asXML();
+
+echo "===FAIL===\n";
+
+$xml = simplexml_load_string("<root></root>");
+$count = count($xml->bla->posts);
+var_dump($count);
+$xml->bla->posts[++$count]->name = "FooBar";
 echo $xml->asXML();
 ?>
 ===DONE===
 <?php exit(0); __halt_compiler(); ?>
 --EXPECTF--
-
-Notice: Undefined index:  name in %sbug35785.php on line %d
-
-Strict Standards: Creating default object from empty value in %sbug35785.php on line %d
-
-Warning: Attempt to assign property of non-object in %sbug35785.php on line %d
 <?xml version="1.0"?>
-<root/>
-===DONE===
+<root><bla><posts><name>FooBar</name></posts></bla></root>
+===FAIL===
+int(0)
+
+Fatal error: Objects used as arrays in post/pre increment/decrement must return values by reference in %sext/simplexml/tests/bug35785.php on line %d
