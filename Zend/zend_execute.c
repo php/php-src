@@ -177,8 +177,8 @@ static inline zval *_get_zval_ptr_var(znode *node, temp_variable *Ts, zend_free_
 		should_free->var = ptr;
 
 		if (T->str_offset.str->type != IS_STRING
-			|| ((int)T->str_offset.offset<0)
-			|| (T->str_offset.str->value.str.len <= T->str_offset.offset)) {
+			|| ((int)T->str_offset.offset < 0)
+			|| (T->str_offset.str->value.str.len <= (int)T->str_offset.offset)) {
 			zend_error(E_NOTICE, "Uninitialized string offset:  %d", T->str_offset.offset);
 			ptr->value.str.val = STR_EMPTY_ALLOC();
 			ptr->value.str.len = 0;
@@ -658,7 +658,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 				zend_error(E_WARNING, "Illegal string offset:  %d", T->str_offset.offset);
 				break;
 			}
-			if (T->str_offset.offset >= T->str_offset.str->value.str.len) {
+			if ((int)T->str_offset.offset >= T->str_offset.str->value.str.len) {
 				zend_uint i;
 
 				if (T->str_offset.str->value.str.len==0) {

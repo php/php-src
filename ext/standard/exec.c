@@ -135,7 +135,7 @@ int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
 				/* strip trailing whitespaces */	
 				l = bufl;
 				while (l-- && isspace(((unsigned char *)buf)[l]));
-				if (l != (bufl - 1)) {
+				if (l != (int)(bufl - 1)) {
 					bufl = l + 1;
 					buf[bufl] = '\0';
 				}
@@ -148,7 +148,7 @@ int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
 			if (type != 2) {
 				l = bufl;
 				while (l-- && isspace(((unsigned char *)buf)[l]));
-				if (l != (bufl - 1)) {
+				if (l != (int)(bufl - 1)) {
 					bufl = l + 1;
 					buf[bufl] = '\0';
 				}

@@ -336,7 +336,7 @@ static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entr
 		} else if (class_type->get_iterator != zend_user_it_get_new_iterator) {
 			/* c-level get_iterator cannot be changed (exception being only Traversable is implmented) */
 			if (class_type->num_interfaces) {
-				for (i = 0; i < class_type->num_interfaces; i++) {
+				for (i = 0; i < (int)class_type->num_interfaces; i++) {
 					if (class_type->interfaces[i] == zend_ce_iterator) {
 						return FAILURE;
 					}

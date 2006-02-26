@@ -531,7 +531,7 @@ static int fcgi_read_request(fcgi_request *req)
 		}
 		len = p - buf - sizeof(fcgi_header);
 		len += fcgi_make_header((fcgi_header*)buf, FCGI_GET_VALUES_RESULT, 0, len);
-		if (safe_write(req, buf, sizeof(fcgi_header)+len) != sizeof(fcgi_header)+len) {
+		if (safe_write(req, buf, sizeof(fcgi_header)+len) != (int)sizeof(fcgi_header)+len) {
 			return 0;
 		}
 		return 0;
