@@ -458,6 +458,20 @@ static void sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_boo
 
 	mynode = node;
 
+	switch (Z_TYPE_P(value)) {
+		case IS_LONG:
+		case IS_BOOL:
+		case IS_DOUBLE:
+		case IS_NULL:
+		case IS_UNICODE:
+			convert_to_string(value);
+			break;
+		case IS_STRING:
+			break;
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "It is not yet possible to assign complex types to %s", attribs ? "attributes" : "properties");
+	}
+
 	if (node) {
 		if (attribs) {
 			if (Z_TYPE_P(member) == IS_LONG) {
@@ -527,22 +541,8 @@ next_iter:
 				}
 				xmlNewTextChild(mynode->parent, mynode->ns, mynode->name, Z_STRVAL_P(value));
 			}
-		} else {
-			if (attribs) {
-				switch (Z_TYPE_P(value)) {
-					case IS_LONG:
-					case IS_BOOL:
-					case IS_DOUBLE:
-					case IS_NULL:
-					case IS_UNICODE:
-						convert_to_string(value);
-					case IS_STRING:
-						newnode = (xmlNodePtr)xmlNewProp(node, name, Z_STRVAL_P(value));
-						break;
-					default:
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "It is not yet possible to assign complex types to attributes");
-				}
-			}
+		} else if (attribs) {
+			newnode = (xmlNodePtr)xmlNewProp(node, name, Z_STRVAL_P(value));
 		}
 	}
 
@@ -1273,7 +1273,7 @@ SXE_METHOD(getName)
 	GET_NODE(sxe, node);
 	
 	namelen = xmlStrlen(node->name);
-	RETURN_STRINGL((char*)node->name, namelen, 1);
+	RETURN_ASCII_STRINGL((char*)node->name, namelen, 1);
 }
 /* }}} */
 
