@@ -61,6 +61,7 @@ foreach($sxe->elem1 as $name => $data) {
 
 ?>
 ===DONE===
+<?php exit(0); __halt_compiler(); ?>
 --EXPECT--
 string(5) "elem1"
 string(10) "Bla bla 1."

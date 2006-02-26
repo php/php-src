@@ -3,15 +3,16 @@ Bug #35785 (SimpleXML memory read error)
 --FILE--
 <?php
 
-$options["database"] = "xmldatabase";
 $xml = simplexml_load_string("<root></root>");
-$count = count($xml->posts) + 1;
-$xml->bla->posts[$count]->name = $_POST["name"];
+$count = count($xml->posts);
+var_dump($count);
+$xml->bla->posts[++$count]->name = "FooBar";
 echo $xml->asXML();
 ?>
 ===DONE===
 <?php exit(0); __halt_compiler(); ?>
 --EXPECTF--
+int(0)
 
 Notice: Undefined index:  name in %sbug35785.php on line %d
 
