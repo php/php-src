@@ -121,13 +121,13 @@ ZEND_API void *zend_fetch_resource(zval **passed_id TSRMLS_DC, int default_id, c
 		if (!passed_id) {
 			if (resource_type_name) {
 				class_name = get_active_class_name(&space TSRMLS_CC);
-				zend_error(E_WARNING, "%s%s%s(): no %s resource supplied", class_name, space, get_active_function_name(TSRMLS_C), resource_type_name);
+				zend_error(E_WARNING, "%v%s%v(): no %s resource supplied", class_name, space, get_active_function_name(TSRMLS_C), resource_type_name);
 			}
 			return NULL;
 		} else if (Z_TYPE_PP(passed_id) != IS_RESOURCE) {
 			if (resource_type_name) {
 				class_name = get_active_class_name(&space TSRMLS_CC);
-				zend_error(E_WARNING, "%s%s%s(): supplied argument is not a valid %s resource", class_name, space, get_active_function_name(TSRMLS_C), resource_type_name);
+				zend_error(E_WARNING, "%v%s%v(): supplied argument is not a valid %s resource", class_name, space, get_active_function_name(TSRMLS_C), resource_type_name);
 			}
 			return NULL;
 		}
@@ -140,7 +140,7 @@ ZEND_API void *zend_fetch_resource(zval **passed_id TSRMLS_DC, int default_id, c
 	if (!resource) {
 		if (resource_type_name) {
 			class_name = get_active_class_name(&space TSRMLS_CC);
-			zend_error(E_WARNING, "%s%s%s(): %d is not a valid %s resource", class_name, space, get_active_function_name(TSRMLS_C), id, resource_type_name);
+			zend_error(E_WARNING, "%v%s%v(): %d is not a valid %s resource", class_name, space, get_active_function_name(TSRMLS_C), id, resource_type_name);
 		}
 		return NULL;
 	}
@@ -159,7 +159,7 @@ ZEND_API void *zend_fetch_resource(zval **passed_id TSRMLS_DC, int default_id, c
 
 	if (resource_type_name) {
 		class_name = get_active_class_name(&space TSRMLS_CC);
-		zend_error(E_WARNING, "%s%s%s(): supplied resource is not a valid %s resource", class_name, space, get_active_function_name(TSRMLS_C), resource_type_name);
+		zend_error(E_WARNING, "%v%s%v(): supplied resource is not a valid %s resource", class_name, space, get_active_function_name(TSRMLS_C), resource_type_name);
 	}
 
 	return NULL;
