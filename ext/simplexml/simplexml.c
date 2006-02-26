@@ -451,9 +451,14 @@ static void sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_boo
 		attr = (xmlAttrPtr)node;
 		test = sxe->iter.name != NULL;
 	} else if (sxe->iter.type != SXE_ITER_CHILD) {
+		mynode = node;
 		node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
 		attr = node ? node->properties : NULL;
 		test = 0;
+		if (attribs && !node && sxe->iter.type == SXE_ITER_ELEMENT) {
+			node = xmlNewChild(mynode, mynode->ns, sxe->iter.name, NULL);
+			attr = node->properties;
+		}
 	}
 
 	mynode = node;
