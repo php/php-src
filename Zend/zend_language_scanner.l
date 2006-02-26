@@ -1891,7 +1891,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"__CLASS__" {
-	zstr class_name = (zstr)NULL;
+	zstr class_name = NULL_ZSTR;
 
 	if (CG(active_class_entry)) {
 		class_name = CG(active_class_entry)->name;
@@ -1906,7 +1906,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"__FUNCTION__" {
-	zstr func_name = (zstr)NULL;
+	zstr func_name = NULL_ZSTR;
 
 	if (CG(active_op_array)) {
 		func_name = CG(active_op_array)->function_name;
@@ -1921,8 +1921,8 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"__METHOD__" {
-	zstr class_name = CG(active_class_entry) ? CG(active_class_entry)->name : (zstr)NULL;
-	zstr func_name = CG(active_op_array)? CG(active_op_array)->function_name : (zstr)NULL;
+	zstr class_name = CG(active_class_entry) ? CG(active_class_entry)->name : NULL_ZSTR;
+	zstr func_name = CG(active_op_array)? CG(active_op_array)->function_name : NULL_ZSTR;
 	size_t len = 0;
 
 	if (UG(unicode)) {

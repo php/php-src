@@ -485,7 +485,7 @@ static inline void zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zv
 	cur_arg_info = &zf->common.arg_info[arg_num-1];
 	fname = zf->common.function_name;
 	fsep = zf->common.scope ? "::" : "";
-	fclass = zf->common.scope ? zf->common.scope->name : (zstr)EMPTY_STR;
+	fclass = zf->common.scope ? zf->common.scope->name : EMPTY_ZSTR;
 
 	if (cur_arg_info->class_name.v) {
 		if (!arg) {

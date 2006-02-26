@@ -388,8 +388,8 @@ END_EXTERN_C()
 #define Z_OBJPROP(zval)			Z_OBJ_HT((zval))->get_properties(&(zval) TSRMLS_CC)
 #define Z_OBJ_HANDLER(zval, hf) Z_OBJ_HT((zval))->hf
 #define Z_RESVAL(zval)			(zval).value.lval
-#define Z_UNIVAL(zval)			((zstr)(Z_STRVAL(zval)))
-#define Z_UNILEN(zval)			Z_STRLEN(zval)
+#define Z_UNIVAL(zval)			(zval).value.uni.val
+#define Z_UNILEN(zval)			(zval).value.uni.len
 
 #define Z_LVAL_P(zval_p)		Z_LVAL(*zval_p)
 #define Z_BVAL_P(zval_p)		Z_BVAL(*zval_p)

@@ -684,6 +684,9 @@ static void php_var_serialize_class(smart_str *buf, zval **struc, zval *retval_p
 {
 	int count;
 	zend_bool  incomplete_class;
+	zstr star;
+
+	star.s = "*";
 
 	incomplete_class = php_var_serialize_class_name(buf, struc TSRMLS_CC);
 	/* count after serializing name, since php_var_serialize_class_name
@@ -762,7 +765,7 @@ static void php_var_serialize_class(smart_str *buf, zval **struc, zval *retval_p
 							break;
 						}
 						efree(priv_name.v);
-						zend_u_mangle_property_name(&prot_name, &prop_name_length,  Z_TYPE_PP(name), (zstr)"*", 1, 
+						zend_u_mangle_property_name(&prot_name, &prop_name_length,  Z_TYPE_PP(name), star, 1, 
 									Z_UNIVAL_PP(name), Z_UNILEN_PP(name), ce->type & ZEND_INTERNAL_CLASS);
 						if (zend_u_hash_find(Z_OBJPROP_PP(struc), Z_TYPE_PP(name), prot_name, prop_name_length+1, (void *) &d) == SUCCESS) {
 							if (Z_TYPE_PP(name) == IS_UNICODE) {

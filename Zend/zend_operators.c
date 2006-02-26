@@ -2084,17 +2084,24 @@ ZEND_API zstr zend_u_str_tolower_copy(zend_uchar type, zstr dest, zstr source, u
 
 		return dest;
 	} else {
-		return (zstr)zend_str_tolower_copy(dest.s, source.s, length);
+		zstr ret;
+		
+		ret.s = zend_str_tolower_copy(dest.s, source.s, length);
+		return ret;
 	}
 }
 
 ZEND_API zstr zend_u_str_tolower_dup(zend_uchar type, zstr source, unsigned int length)
 {
+	zstr ret;
+
 	if (type == IS_UNICODE) {
-		return zend_u_str_tolower_copy(IS_UNICODE, (zstr)emalloc(UBYTES(length+1)), source, length);
+		ret.u = eumalloc(length+1);
+		ret = zend_u_str_tolower_copy(IS_UNICODE, ret, source, length);
 	} else {
-		return (zstr)zend_str_tolower_copy((char*)emalloc(length+1), source.s, length);
+		ret.s = zend_str_tolower_copy((char*)emalloc(length+1), source.s, length);
 	}
+	return ret;
 }
 
 ZEND_API void zend_str_tolower(char *str, unsigned int length)
@@ -2124,24 +2131,25 @@ ZEND_API void zend_u_str_tolower(zend_uchar type, zstr str, unsigned int length)
 
 ZEND_API zstr zend_u_str_case_fold(zend_uchar type, zstr source, unsigned int length, zend_bool normalize, unsigned int *new_len)
 {
+	zstr ret;
+
 	if (type == IS_UNICODE) {
-		UChar *ret;
 		int ret_len;
 
 		if (normalize) {
-			zend_normalize_identifier(&ret, &ret_len, source.u, length, 1);
+			zend_normalize_identifier(&ret.u, &ret_len, source.u, length, 1);
 		} else {
 			UErrorCode status = U_ZERO_ERROR;
 
-			zend_case_fold_string(&ret, &ret_len, source.u, length, U_FOLD_CASE_DEFAULT, &status);
+			zend_case_fold_string(&ret.u, &ret_len, source.u, length, U_FOLD_CASE_DEFAULT, &status);
 		}
 
 		*new_len = ret_len;
-		return (zstr)ret;
-	} else {
+	} else {		
 		*new_len = length;
-		return (zstr)zend_str_tolower_dup(source.s, length);
+		ret.s = zend_str_tolower_dup(source.s, length);
 	}
+	return ret;
 }
 
 ZEND_API int zend_binary_strcmp(char *s1, uint len1, char *s2, uint len2)

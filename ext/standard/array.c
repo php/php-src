@@ -1988,7 +1988,7 @@ HashTable* php_splice(HashTable *in_hash, int offset, int length,
 		if (p->nKeyLength == 0) {
 			zend_hash_next_index_insert(out_hash, &entry, sizeof(zval *), NULL);
 		} else {
-			zend_u_hash_update(out_hash, p->key.type, (zstr)p->key.arKey.s, p->nKeyLength, &entry, sizeof(zval *), NULL);
+			zend_u_hash_update(out_hash, p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength, &entry, sizeof(zval *), NULL);
 		}
 	}
 	
@@ -2000,7 +2000,7 @@ HashTable* php_splice(HashTable *in_hash, int offset, int length,
 			if (p->nKeyLength == 0) {
 				zend_hash_next_index_insert(*removed, &entry, sizeof(zval *), NULL);
 			} else {			
-				zend_u_hash_update(*removed, p->key.type, (zstr)p->key.arKey.s, p->nKeyLength, &entry, sizeof(zval *), NULL);
+				zend_u_hash_update(*removed, p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength, &entry, sizeof(zval *), NULL);
 			}
 		}
 	} else /* otherwise just skip those entries */
@@ -2033,7 +2033,7 @@ HashTable* php_splice(HashTable *in_hash, int offset, int length,
 		if (p->nKeyLength == 0) {
 			zend_hash_next_index_insert(out_hash, &entry, sizeof(zval *), NULL);
 		} else {
-			zend_u_hash_update(out_hash, p->key.type, (zstr)p->key.arKey.s, p->nKeyLength, &entry, sizeof(zval *), NULL);
+			zend_u_hash_update(out_hash, p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength, &entry, sizeof(zval *), NULL);
 		}
 	}
 
@@ -2094,7 +2094,7 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 {
 	zval **stack,			/* Input stack */
 	     **val;			/* Value to be popped */
-	zstr key = (zstr)NULL;
+	zstr key = NULL_ZSTR;
 	int key_len = 0;
 	ulong index;
 	zend_uchar key_type;
@@ -3043,9 +3043,9 @@ PHP_FUNCTION(array_unique)
 				zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);
 			} else {
 				if (Z_ARRVAL_P(return_value) == &EG(symbol_table)) {
-					zend_u_delete_global_variable(p->key.type, (zstr)p->key.arKey.s, p->nKeyLength-1 TSRMLS_CC);
+					zend_u_delete_global_variable(p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength-1 TSRMLS_CC);
 				} else {
-					zend_u_hash_del(Z_ARRVAL_P(return_value), p->key.type, (zstr)p->key.arKey.s, p->nKeyLength);
+					zend_u_hash_del(Z_ARRVAL_P(return_value), p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength);
 				}
 			}
 		}
@@ -3303,7 +3303,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 					if (p->nKeyLength == 0) {
 						zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);
 					} else {
-						zend_u_hash_del(Z_ARRVAL_P(return_value), p->key.type, (zstr)p->key.arKey.s, p->nKeyLength);
+						zend_u_hash_del(Z_ARRVAL_P(return_value), p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength);
 					}
 				}
 			}
@@ -3319,7 +3319,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 				if (p->nKeyLength == 0) {
 					zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);  
 				} else {
-					zend_u_hash_del(Z_ARRVAL_P(return_value), p->key.type, (zstr)p->key.arKey.s, p->nKeyLength);  
+					zend_u_hash_del(Z_ARRVAL_P(return_value), p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength);  
 				}
 				if (!*++ptrs[0]) { 
 					goto out;
@@ -3702,7 +3702,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 				if (p->nKeyLength == 0) {
 					zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);
 				} else {
-					zend_u_hash_del(Z_ARRVAL_P(return_value), p->key.type, (zstr)p->key.arKey.s, p->nKeyLength);
+					zend_u_hash_del(Z_ARRVAL_P(return_value), p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength);
 				}
 				if (!*++ptrs[0]) {
 					goto out;

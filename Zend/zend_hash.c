@@ -121,7 +121,7 @@ ZEND_API ulong zend_u_hash_func(zend_uchar type, zstr arKey, uint nKeyLength)
 
 ZEND_API ulong zend_hash_func(char *arKey, uint nKeyLength)
 {
-	return zend_u_hash_func(IS_STRING, (zstr)arKey, nKeyLength);
+	return zend_u_hash_func(IS_STRING, ZSTR(arKey), nKeyLength);
 }
 
 #define UPDATE_DATA(ht, p, pData, nDataSize)											\
@@ -312,7 +312,7 @@ ZEND_API int _zend_u_hash_add_or_update(HashTable *ht, zend_uchar type, zstr arK
 
 ZEND_API int _zend_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
 {
-	return _zend_u_hash_add_or_update(ht, IS_STRING, (zstr)arKey, nKeyLength, pData, nDataSize, pDest, flag ZEND_FILE_LINE_CC);
+	return _zend_u_hash_add_or_update(ht, IS_STRING, ZSTR(arKey), nKeyLength, pData, nDataSize, pDest, flag ZEND_FILE_LINE_CC);
 }
 
 ZEND_API int _zend_u_hash_quick_add_or_update(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
@@ -400,7 +400,7 @@ ZEND_API int _zend_u_hash_quick_add_or_update(HashTable *ht, zend_uchar type, zs
 
 ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, char *arKey, uint nKeyLength, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
 {
-	return _zend_u_hash_quick_add_or_update(ht, IS_STRING, (zstr)arKey, nKeyLength, h, pData, nDataSize, pDest, flag ZEND_FILE_LINE_CC);
+	return _zend_u_hash_quick_add_or_update(ht, IS_STRING, ZSTR(arKey), nKeyLength, h, pData, nDataSize, pDest, flag ZEND_FILE_LINE_CC);
 }
 
 ZEND_API int zend_u_hash_add_empty_element(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength)
@@ -414,7 +414,7 @@ ZEND_API int zend_hash_add_empty_element(HashTable *ht, char *arKey, uint nKeyLe
 {
 	void *dummy = (void *) 1;
 
-	return zend_u_hash_add(ht, IS_STRING, (zstr)arKey, nKeyLength, &dummy, sizeof(void *), NULL);
+	return zend_u_hash_add(ht, IS_STRING, ZSTR(arKey), nKeyLength, &dummy, sizeof(void *), NULL);
 }
 
 
@@ -594,7 +594,7 @@ ZEND_API int zend_u_hash_del_key_or_index(HashTable *ht, zend_uchar type, zstr a
 
 ZEND_API int zend_hash_del_key_or_index(HashTable *ht, char *arKey, uint nKeyLength, ulong h, int flag)
 {
-	return zend_u_hash_del_key_or_index(ht, IS_STRING, (zstr)arKey, nKeyLength, h, flag);
+	return zend_u_hash_del_key_or_index(ht, IS_STRING, ZSTR(arKey), nKeyLength, h, flag);
 }
 
 ZEND_API void zend_hash_destroy(HashTable *ht)
@@ -830,7 +830,7 @@ ZEND_API void zend_hash_reverse_apply(HashTable *ht, apply_func_t apply_func TSR
 			if (q->nKeyLength==0) {
 				zend_hash_index_del(ht, q->h);
 			} else {
-				zend_u_hash_del(ht, q->key.type, (zstr)q->key.arKey.s, q->nKeyLength);
+				zend_u_hash_del(ht, q->key.type, ZSTR(q->key.arKey.s), q->nKeyLength);
 			}
 		}
 		if (result & ZEND_HASH_APPLY_STOP) {
@@ -854,7 +854,7 @@ ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_fun
 		if (p->nKeyLength == 0) {
  			zend_hash_index_update(target, p->h, p->pData, size, &new_entry);
 		} else {
-			zend_u_hash_update(target, p->key.type, (zstr)p->key.arKey.s, p->nKeyLength, p->pData, size, &new_entry);
+			zend_u_hash_update(target, p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength, p->pData, size, &new_entry);
 		}
 		if (pCopyConstructor) {
 			pCopyConstructor(new_entry);
@@ -881,7 +881,7 @@ ZEND_API void _zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_f
 				pCopyConstructor(t);
 			}
 		} else {
-			if (_zend_u_hash_add_or_update(target, p->key.type, (zstr)p->key.arKey.s, p->nKeyLength, p->pData, size, &t, mode ZEND_FILE_LINE_RELAY_CC)==SUCCESS && pCopyConstructor) {
+			if (_zend_u_hash_add_or_update(target, p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength, p->pData, size, &t, mode ZEND_FILE_LINE_RELAY_CC)==SUCCESS && pCopyConstructor) {
 				pCopyConstructor(t);
 			}
 		}
@@ -914,7 +914,7 @@ ZEND_API void zend_hash_merge_ex(HashTable *target, HashTable *source, copy_ctor
 	p = source->pListHead;
 	while (p) {
 		if (zend_hash_replace_checker_wrapper(target, p->pData, p, pParam, pMergeSource)) {
-			if (zend_u_hash_quick_update(target, p->key.type, (zstr)p->key.arKey.s, p->nKeyLength, p->h, p->pData, size, &t)==SUCCESS && pCopyConstructor) {
+			if (zend_u_hash_quick_update(target, p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength, p->h, p->pData, size, &t)==SUCCESS && pCopyConstructor) {
 				pCopyConstructor(t);
 			}
 		}
@@ -931,7 +931,7 @@ ZEND_API ulong zend_u_get_hash_value(zend_uchar type, zstr arKey, uint nKeyLengt
 
 ZEND_API ulong zend_get_hash_value(char *arKey, uint nKeyLength)
 {
-	return zend_u_get_hash_value(IS_STRING, (zstr)arKey, nKeyLength);
+	return zend_u_get_hash_value(IS_STRING, ZSTR(arKey), nKeyLength);
 }
 
 
@@ -973,7 +973,7 @@ ZEND_API int zend_u_hash_find(HashTable *ht, zend_uchar type, zstr arKey, uint n
 
 ZEND_API int zend_hash_find(HashTable *ht, char *arKey, uint nKeyLength, void **pData)
 {
-	return zend_u_hash_find(ht, IS_STRING, (zstr)arKey, nKeyLength, pData);
+	return zend_u_hash_find(ht, IS_STRING, ZSTR(arKey), nKeyLength, pData);
 }
 
 
@@ -1016,7 +1016,7 @@ ZEND_API int zend_u_hash_quick_find(HashTable *ht, zend_uchar type, zstr arKey, 
 
 ZEND_API int zend_hash_quick_find(HashTable *ht, char *arKey, uint nKeyLength, ulong h, void **pData)
 {
-	return zend_u_hash_quick_find(ht, IS_STRING, (zstr)arKey, nKeyLength, h, pData);
+	return zend_u_hash_quick_find(ht, IS_STRING, ZSTR(arKey), nKeyLength, h, pData);
 }
 
 ZEND_API int zend_u_hash_exists(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength)
@@ -1052,7 +1052,7 @@ ZEND_API int zend_u_hash_exists(HashTable *ht, zend_uchar type, zstr arKey, uint
 
 ZEND_API int zend_hash_exists(HashTable *ht, char *arKey, uint nKeyLength)
 {
-	return zend_u_hash_exists(ht, IS_STRING, (zstr)arKey, nKeyLength);
+	return zend_u_hash_exists(ht, IS_STRING, ZSTR(arKey), nKeyLength);
 }
 
 ZEND_API int zend_u_hash_quick_exists(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, ulong h)
@@ -1093,7 +1093,7 @@ ZEND_API int zend_u_hash_quick_exists(HashTable *ht, zend_uchar type, zstr arKey
 
 ZEND_API int zend_hash_quick_exists(HashTable *ht, char *arKey, uint nKeyLength, ulong h)
 {
-	return zend_u_hash_quick_exists(ht, IS_STRING, (zstr)arKey, nKeyLength, h);
+	return zend_u_hash_quick_exists(ht, IS_STRING, ZSTR(arKey), nKeyLength, h);
 }
 
 ZEND_API int zend_hash_index_find(HashTable *ht, ulong h, void **pData)
@@ -1505,7 +1505,7 @@ ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t co
 					return 1;
 				}
 			} else { /* string, binary or unicode index */
-				if (zend_u_hash_find(ht2, p1->key.type, (zstr)p1->key.arKey.s, p1->nKeyLength, &pData2)==FAILURE) {
+				if (zend_u_hash_find(ht2, p1->key.type, ZSTR(p1->key.arKey.s), p1->nKeyLength, &pData2)==FAILURE) {
 					HASH_UNPROTECT_RECURSION(ht1);
 					HASH_UNPROTECT_RECURSION(ht2);
 					return 1;
@@ -1687,10 +1687,10 @@ ZEND_API int zend_u_symtable_update_current_key(HashTable *ht, zend_uchar type, 
 
 	if (type == IS_STRING) {
 		key_type = HASH_KEY_IS_STRING;
-		HANDLE_NUMERIC(arKey.s, nKeyLength, zend_hash_update_current_key(ht, HASH_KEY_IS_LONG, (zstr)NULL, 0, idx));
+		HANDLE_NUMERIC(arKey.s, nKeyLength, zend_hash_update_current_key(ht, HASH_KEY_IS_LONG, NULL_ZSTR, 0, idx));
 	} else {
 		key_type = HASH_KEY_IS_UNICODE;
-		HANDLE_U_NUMERIC(arKey.u, nKeyLength, zend_hash_update_current_key(ht, HASH_KEY_IS_LONG, (zstr)NULL, 0, idx));
+		HANDLE_U_NUMERIC(arKey.u, nKeyLength, zend_hash_update_current_key(ht, HASH_KEY_IS_LONG, NULL_ZSTR, 0, idx));
 	}
 	return zend_hash_update_current_key(ht, key_type, arKey, nKeyLength, 0);
 }
@@ -1726,8 +1726,8 @@ ZEND_API int zend_symtable_exists(HashTable *ht, char *arKey, uint nKeyLength)
 
 ZEND_API int zend_symtable_update_current_key(HashTable *ht, char *arKey, uint nKeyLength)
 {
-	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_update_current_key(ht, HASH_KEY_IS_LONG, (zstr)NULL, 0, idx));
-	return zend_hash_update_current_key(ht, HASH_KEY_IS_STRING, (zstr)arKey, nKeyLength, 0);
+	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_update_current_key(ht, HASH_KEY_IS_LONG, NULL_ZSTR, 0, idx));
+	return zend_hash_update_current_key(ht, HASH_KEY_IS_STRING, ZSTR(arKey), nKeyLength, 0);
 }
 
 ZEND_API void zend_hash_to_unicode(HashTable *ht, apply_func_t apply_func TSRMLS_DC)

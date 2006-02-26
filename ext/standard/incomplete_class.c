@@ -126,7 +126,7 @@ zend_class_entry *php_create_incomplete_class(TSRMLS_D)
 PHPAPI zstr php_lookup_class_name(zval *object, zend_uint *nlen)
 {
 	zval **val;
-	zstr retval = (zstr)NULL;
+	zstr retval = NULL_ZSTR;
 	HashTable *object_properties;
 	TSRMLS_FETCH();
 
