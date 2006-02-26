@@ -370,7 +370,7 @@ PHP_FUNCTION(glob)
 	int pattern_len;
 	long flags = 0;
 	glob_t globbuf;
-	unsigned int n;
+	int n;
 	int ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &pattern, &pattern_len, &flags) == FAILURE) 

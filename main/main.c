@@ -659,7 +659,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 		 * be NULL if PG(last_error_message) is not NULL */
 		if (strcmp(PG(last_error_message), buffer)
 			|| (!PG(ignore_repeated_source)
-				&& ((PG(last_error_lineno) != error_lineno)
+				&& ((PG(last_error_lineno) != (int)error_lineno)
 					|| strcmp(PG(last_error_file), error_filename)))) {
 			display = 1;
 		} else {

@@ -237,7 +237,7 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 		}
 	}
 	
-	if (((unsigned) start + (unsigned) len) > len1) {
+	if ((start + len) > len1) {
 		len = len1 - start;
 	}
 
@@ -1166,7 +1166,7 @@ quit_loop:
 	if (state == 1) {
 		cend = c;
 	}
-	if (suffix != NULL && sufflen < (cend - comp) &&
+	if (suffix != NULL && sufflen < (uint)(cend - comp) &&
 			memcmp(cend - sufflen, suffix, sufflen) == 0) {
 		cend -= sufflen;
 	}
@@ -1983,7 +1983,7 @@ PHP_FUNCTION(substr)
 		RETURN_FALSE;
 	}
 
-	if (((unsigned) f + (unsigned) l) > Z_STRLEN_PP(str)) {
+	if ((f + l) > Z_STRLEN_PP(str)) {
 		l = Z_STRLEN_PP(str) - f;
 	}
 
@@ -2080,7 +2080,7 @@ PHP_FUNCTION(substr_replace)
 				}
 			}
 
-			if (((unsigned) f + (unsigned) l) > Z_STRLEN_PP(str)) {
+			if ((f + l) > Z_STRLEN_PP(str)) {
 				l = Z_STRLEN_PP(str) - f;
 			}
 			if (Z_TYPE_PP(repl) == IS_ARRAY) {
@@ -2176,7 +2176,7 @@ PHP_FUNCTION(substr_replace)
 				}
 			}
 
-			if (((unsigned) f + (unsigned) l) > Z_STRLEN_PP(tmp_str)) {
+			if ((f + l) > Z_STRLEN_PP(tmp_str)) {
 				l = Z_STRLEN_PP(tmp_str) - f;
 			}
 

@@ -55,7 +55,7 @@
 #endif
 
 #define INC_OUTPUTPOS(a,b) \
-	if ((a) < 0 || ((INT_MAX - outputpos)/(b)) < (a)) { \
+	if ((a) < 0 || ((INT_MAX - outputpos)/((int)b)) < (a)) { \
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: integer overflow in format string", code); \
 		RETURN_FALSE; \
 	} \
