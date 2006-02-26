@@ -792,14 +792,14 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, zstr method_
 		 */
 		updated_fbc = zend_check_private_int(fbc, Z_OBJ_HANDLER_P(object, get_class_entry)(object TSRMLS_CC), lc_method_name, method_len TSRMLS_CC);
 		if (!updated_fbc) {
-			zend_error(E_ERROR, "Call to %s method %v::%v() from context '%v'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : (zstr)EMPTY_STR);
+			zend_error(E_ERROR, "Call to %s method %v::%v() from context '%v'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : EMPTY_ZSTR);
 		}
 		fbc = updated_fbc;
 	} else if ((fbc->common.fn_flags & ZEND_ACC_PROTECTED)) {
 		/* Ensure that if we're calling a protected function, we're allowed to do so.
 		 */
 		if (!zend_check_protected(fbc->common.scope, EG(scope))) {
-			zend_error(E_ERROR, "Call to %s method %v::%v() from context '%v'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : (zstr)EMPTY_STR);
+			zend_error(E_ERROR, "Call to %s method %v::%v() from context '%v'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : EMPTY_ZSTR);
 		}
 	}
 
@@ -839,14 +839,14 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zstr fu
 		 */
 		updated_fbc = zend_check_private_int(fbc, EG(scope), function_name_strval, function_name_strlen TSRMLS_CC);
 		if (!updated_fbc) {
-			zend_error(E_ERROR, "Call to %s method %v::%v() from context '%v'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), fbc->common.function_name, EG(scope) ? EG(scope)->name : (zstr)EMPTY_STR);
+			zend_error(E_ERROR, "Call to %s method %v::%v() from context '%v'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), fbc->common.function_name, EG(scope) ? EG(scope)->name : EMPTY_ZSTR);
 		}
 		fbc = updated_fbc;
 	} else if ((fbc->common.fn_flags & ZEND_ACC_PROTECTED)) {
 		/* Ensure that if we're calling a protected function, we're allowed to do so.
 		 */
 		if (!zend_check_protected(EG(scope), fbc->common.scope)) {
-			zend_error(E_ERROR, "Call to %s method %v::%v() from context '%v'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), fbc->common.function_name, EG(scope) ? EG(scope)->name : (zstr)EMPTY_STR);
+			zend_error(E_ERROR, "Call to %s method %v::%v() from context '%v'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), fbc->common.function_name, EG(scope) ? EG(scope)->name : EMPTY_ZSTR);
 		}
 	}
 
@@ -915,13 +915,13 @@ static union _zend_function *zend_std_get_constructor(zval *object TSRMLS_DC)
 			/* Ensure that if we're calling a private function, we're allowed to do so.
 			 */
 			if (Z_OBJ_HANDLER_P(object, get_class_entry)(object TSRMLS_CC) != EG(scope)) {
-				zend_error(E_ERROR, "Call to private %v::%v() from context '%v'", constructor->common.scope->name, constructor->common.function_name, EG(scope) ? EG(scope)->name : (zstr)EMPTY_STR);
+				zend_error(E_ERROR, "Call to private %v::%v() from context '%v'", constructor->common.scope->name, constructor->common.function_name, EG(scope) ? EG(scope)->name : EMPTY_ZSTR);
 			}
 		} else if ((constructor->common.fn_flags & ZEND_ACC_PROTECTED)) {
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
 			 */
 			if (!zend_check_protected(constructor->common.scope, EG(scope))) {
-				zend_error(E_ERROR, "Call to protected %v::%v() from context '%v'", constructor->common.scope->name, constructor->common.function_name, EG(scope) ? EG(scope)->name : (zstr)EMPTY_STR);
+				zend_error(E_ERROR, "Call to protected %v::%v() from context '%v'", constructor->common.scope->name, constructor->common.function_name, EG(scope) ? EG(scope)->name : EMPTY_ZSTR);
 			}
 		}
 	}

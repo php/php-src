@@ -568,7 +568,7 @@ ZEND_FUNCTION(defined)
 ZEND_FUNCTION(get_class)
 {
 	zval **arg;
-	zstr name = (zstr)EMPTY_STR;
+	zstr name = EMPTY_ZSTR;
 	zend_uint name_len = 0;
 	int dup;
 
@@ -1776,10 +1776,10 @@ ZEND_FUNCTION(debug_print_backtrace)
 	array_init(return_value);
 
 	while (ptr) {
-		zstr free_class_name = (zstr)NULL;
+		zstr free_class_name = NULL_ZSTR;
 		int	function_name_string = 1;
 
-		class_name = (zstr)NULL;
+		class_name = NULL_ZSTR;
 		call_type = NULL;
 		arg_array = NULL;
 
@@ -1824,7 +1824,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 				class_name = ptr->function_state.function->common.scope->name;
 				call_type = "::";
 			} else {
-				class_name = (zstr)NULL;
+				class_name = NULL_ZSTR;
 				call_type = NULL;
 			}
 			if ((! ptr->opline) || ((ptr->opline->opcode == ZEND_DO_FCALL_BY_NAME) || (ptr->opline->opcode == ZEND_DO_FCALL))) {

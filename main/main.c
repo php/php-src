@@ -550,7 +550,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	char *space;
 	zstr class_name = get_active_class_name(&space TSRMLS_CC);
 	int origin_len;
-	zstr function = (zstr)NULL;
+	zstr function = NULL_ZSTR;
 	char *origin;
 	char *message;
 	char *stage;

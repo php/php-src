@@ -907,20 +907,8 @@ static int parse_context_params(php_stream_context *context, zval *params TSRMLS
 {
 	int ret = SUCCESS;
 	zval **tmp;
-	U_STRING_DECL(u_notification, "notification", 12);
-	U_STRING_DECL(u_options, "options", 7);
-	U_STRING_DECL(u_input_encoding, "input_encoding", 14);
-	U_STRING_DECL(u_output_encoding, "output_encoding", 15);
-	U_STRING_DECL(u_default_mode, "default_mode", 12);
 
-	U_STRING_INIT(u_notification, "notification", 12);
-	U_STRING_INIT(u_options, "options", 7);
-	U_STRING_INIT(u_input_encoding, "input_encoding", 14);
-	U_STRING_INIT(u_output_encoding, "output_encoding", 15);
-	U_STRING_INIT(u_default_mode, "default_mode", 12);
-
-	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "notification", sizeof("notification"), (void**)&tmp) ||
-		SUCCESS == zend_u_hash_find(Z_ARRVAL_P(params), IS_UNICODE, (zstr)u_notification, sizeof("notification"), (void**)&tmp)) {
+	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "notification", sizeof("notification"), (void**)&tmp)) {
 		
 		if (context->notifier) {
 			php_stream_notification_free(context->notifier);
@@ -933,12 +921,10 @@ static int parse_context_params(php_stream_context *context, zval *params TSRMLS
 		ZVAL_ADDREF(*tmp);
 		context->notifier->dtor = user_space_stream_notifier_dtor;
 	}
-	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "options", sizeof("options"), (void**)&tmp) ||
-		SUCCESS == zend_u_hash_find(Z_ARRVAL_P(params), IS_UNICODE, (zstr)u_options, sizeof("options"), (void**)&tmp)) {
+	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "options", sizeof("options"), (void**)&tmp)) {
 		parse_context_options(context, *tmp TSRMLS_CC);
 	}
-	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "input_encoding", sizeof("input_encoding"), (void**)&tmp) ||
-		SUCCESS == zend_u_hash_find(Z_ARRVAL_P(params), IS_UNICODE, (zstr)u_input_encoding, sizeof("input_encoding"), (void**)&tmp)) {
+	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "input_encoding", sizeof("input_encoding"), (void**)&tmp)) {
 		zval strval = **tmp;
 
 		if (context->input_encoding) {
@@ -949,8 +935,7 @@ static int parse_context_params(php_stream_context *context, zval *params TSRMLS
 		convert_to_string(&strval);
 		context->input_encoding = Z_STRVAL(strval);
 	}
-	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "output_encoding", sizeof("output_encoding"), (void**)&tmp) ||
-		SUCCESS == zend_u_hash_find(Z_ARRVAL_P(params), IS_UNICODE, (zstr)u_output_encoding, sizeof("output_encoding"), (void**)&tmp)) {
+	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "output_encoding", sizeof("output_encoding"), (void**)&tmp)) {
 		zval strval = **tmp;
 
 		if (context->output_encoding) {
@@ -961,8 +946,7 @@ static int parse_context_params(php_stream_context *context, zval *params TSRMLS
 		convert_to_string(&strval);
 		context->output_encoding = Z_STRVAL(strval);
 	}
-	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "default_mode", sizeof("default_mode"), (void**)&tmp) ||
-		SUCCESS == zend_u_hash_find(Z_ARRVAL_P(params), IS_UNICODE, (zstr)u_default_mode, sizeof("default_mode"), (void**)&tmp)) {
+	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "default_mode", sizeof("default_mode"), (void**)&tmp)) {
 		zval longval = **tmp;
 
 		zval_copy_ctor(&longval);

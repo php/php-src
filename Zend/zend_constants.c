@@ -322,7 +322,7 @@ ZEND_API int zend_u_get_constant(zend_uchar type, zstr name, uint name_len, zval
 
 ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC)
 {
-	return zend_u_get_constant(IS_STRING, (zstr)name, name_len, result TSRMLS_CC);
+	return zend_u_get_constant(IS_STRING, ZSTR(name), name_len, result TSRMLS_CC);
 }
 
 ZEND_API int zend_u_register_constant(zend_uchar type, zend_constant *c TSRMLS_DC)
@@ -343,7 +343,7 @@ ZEND_API int zend_u_register_constant(zend_uchar type, zend_constant *c TSRMLS_D
 	} else {
 		lookup_name_len = c->name_len;
 		name = c->name;
-		lookup_name.v = NULL;
+		lookup_name = NULL_ZSTR;
 	}
 
 	if (zend_u_hash_add(EG(zend_constants), type, name, lookup_name_len, (void *) c, sizeof(zend_constant), NULL)==FAILURE) {

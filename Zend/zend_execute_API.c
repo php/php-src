@@ -314,7 +314,7 @@ ZEND_API zstr get_active_class_name(char **space TSRMLS_DC)
 		if (space) {
 			*space = "";
 		}
-		return (zstr)EMPTY_STR;
+		return EMPTY_ZSTR;
 	}
 	switch (EG(function_state_ptr)->function->type) {
 		case ZEND_USER_FUNCTION:
@@ -325,21 +325,23 @@ ZEND_API zstr get_active_class_name(char **space TSRMLS_DC)
 			if (space) {
 				*space = ce ? "::" : "";
 			}
-			return ce ? ce->name : (zstr)EMPTY_STR;
+			return ce ? ce->name : EMPTY_ZSTR;
 		}
 		default:
 			if (space) {
 				*space = "";
 			}
-			return (zstr)EMPTY_STR;
+			return EMPTY_ZSTR;
 	}
 }
 
 
 ZEND_API zstr get_active_function_name(TSRMLS_D)
 {
+	zstr ret;
+
 	if (!zend_is_executing(TSRMLS_C)) {
-		return (zstr)NULL;
+		return NULL_ZSTR;
 	}
 	switch (EG(function_state_ptr)->function->type) {
 		case ZEND_USER_FUNCTION: {
@@ -347,16 +349,19 @@ ZEND_API zstr get_active_function_name(TSRMLS_D)
 
 				if (function_name.v) {
 					return function_name;
+				} else if (UG(unicode)) {
+					ret.u = u_main;
 				} else {
-					return UG(unicode)?(zstr)u_main:(zstr)"main";
+					ret.s = "main";
 				}
+				return ret;
 			}
 			break;
 		case ZEND_INTERNAL_FUNCTION:
 			return ((zend_internal_function *) EG(function_state_ptr)->function)->function_name;
 			break;
 		default:
-			return (zstr)NULL;
+			return NULL_ZSTR;
 	}
 }
 
@@ -530,13 +535,13 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 					break;
 				case IS_BOOL:
 				case IS_LONG:
-					zend_hash_update_current_key(Z_ARRVAL_P(p), HASH_KEY_IS_LONG, (zstr)NULL, 0, Z_LVAL(const_value));
+					zend_hash_update_current_key(Z_ARRVAL_P(p), HASH_KEY_IS_LONG, NULL_ZSTR, 0, Z_LVAL(const_value));
 					break;
 				case IS_DOUBLE:
-					zend_hash_update_current_key(Z_ARRVAL_P(p), HASH_KEY_IS_LONG, (zstr)NULL, 0, (long)Z_DVAL(const_value));
+					zend_hash_update_current_key(Z_ARRVAL_P(p), HASH_KEY_IS_LONG, NULL_ZSTR, 0, (long)Z_DVAL(const_value));
 					break;
 				case IS_NULL:
-					zend_hash_update_current_key(Z_ARRVAL_P(p), HASH_KEY_IS_STRING, (zstr)EMPTY_STR, 1, 0);
+					zend_hash_update_current_key(Z_ARRVAL_P(p), HASH_KEY_IS_STRING, EMPTY_ZSTR, 1, 0);
 					break;
 			}
 			zend_hash_move_forward(Z_ARRVAL_P(p));
@@ -865,7 +870,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		}
 		if (EX(function_state).function->common.fn_flags & ZEND_ACC_DEPRECATED) {
 			zend_error(E_STRICT, "Function %v%s%v() is deprecated",
-				EX(function_state).function->common.scope ? EX(function_state).function->common.scope->name : (zstr)EMPTY_STR,
+				EX(function_state).function->common.scope ? EX(function_state).function->common.scope->name : EMPTY_ZSTR,
 				EX(function_state).function->common.scope ? "::" : "",
 				EX(function_state).function->common.function_name);
 		}
@@ -1134,7 +1139,7 @@ ZEND_API int zend_u_lookup_class(zend_uchar type, zstr name, int name_length, ze
 
 ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***ce TSRMLS_DC)
 {
-	return zend_u_lookup_class(IS_STRING, (zstr)name, name_length, ce TSRMLS_CC);
+	return zend_u_lookup_class(IS_STRING, ZSTR(name), name_length, ce TSRMLS_CC);
 }
 
 ZEND_API int zend_u_eval_string(zend_uchar type, zstr string, zval *retval_ptr, char *string_name TSRMLS_DC)
@@ -1222,7 +1227,7 @@ ZEND_API int zend_u_eval_string(zend_uchar type, zstr string, zval *retval_ptr, 
 
 ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSRMLS_DC)
 {
-	return zend_u_eval_string(IS_STRING, (zstr)str, retval_ptr, string_name TSRMLS_CC);
+	return zend_u_eval_string(IS_STRING, ZSTR(str), retval_ptr, string_name TSRMLS_CC);
 }
 
 ZEND_API int zend_u_eval_string_ex(zend_uchar type, zstr str, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC)
@@ -1239,7 +1244,7 @@ ZEND_API int zend_u_eval_string_ex(zend_uchar type, zstr str, zval *retval_ptr, 
 
 ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC)
 {
-	return zend_u_eval_string_ex(IS_STRING, (zstr)str, retval_ptr, string_name, handle_exceptions TSRMLS_CC);
+	return zend_u_eval_string_ex(IS_STRING, ZSTR(str), retval_ptr, string_name, handle_exceptions TSRMLS_CC);
 }
 
 
@@ -1543,16 +1548,16 @@ check_fetch_type:
 
 zend_class_entry *zend_fetch_class(char *class_name, uint class_name_len, int fetch_type TSRMLS_DC)
 {
-	return zend_u_fetch_class(IS_STRING, (zstr)class_name, class_name_len, fetch_type TSRMLS_CC);
+	return zend_u_fetch_class(IS_STRING, ZSTR(class_name), class_name_len, fetch_type TSRMLS_CC);
 }
 
 
 #define MAX_ABSTRACT_INFO_CNT 3
 #define MAX_ABSTRACT_INFO_FMT "%v%s%v%s"
 #define DISPLAY_ABSTRACT_FN(idx) \
-	ai.afn[idx] ? ZEND_FN_SCOPE_NAME(ai.afn[idx]) : (zstr)EMPTY_STR, \
+	ai.afn[idx] ? ZEND_FN_SCOPE_NAME(ai.afn[idx]) : EMPTY_ZSTR, \
 	ai.afn[idx] ? "::" : "", \
-	ai.afn[idx] ? ai.afn[idx]->common.function_name : (zstr)EMPTY_STR, \
+	ai.afn[idx] ? ai.afn[idx]->common.function_name : EMPTY_ZSTR, \
 	ai.afn[idx] && ai.afn[idx+1] ? ", " : (ai.afn[idx] && ai.cnt > MAX_ABSTRACT_INFO_CNT ? ", ..." : "")
 
 typedef struct _zend_abstract_info {
@@ -1634,7 +1639,7 @@ ZEND_API int zend_u_delete_global_variable(zend_uchar type, zstr name, int name_
 
 ZEND_API int zend_delete_global_variable(char *name, int name_len TSRMLS_DC)
 {
-	return zend_u_delete_global_variable(IS_STRING, (zstr)name, name_len TSRMLS_CC);
+	return zend_u_delete_global_variable(IS_STRING, ZSTR(name), name_len TSRMLS_CC);
 }
 
 /*

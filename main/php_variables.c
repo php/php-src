@@ -296,7 +296,8 @@ PHPAPI void php_u_register_variable_ex(UChar *var, zval *val, zval *track_vars_a
 
 	while (1) {
 		if (is_array) {
-			UChar *escaped_index = NULL, *index_s;
+			zstr escaped_index = NULL_ZSTR;
+			UChar *index_s;
 			int32_t new_idx_len = 0;
 
 			ip++;
@@ -332,18 +333,18 @@ PHPAPI void php_u_register_variable_ex(UChar *var, zval *val, zval *track_vars_a
 					/* UTODO fix for magic_quotes_gpc case */
 					/* no need to addslashes() the index if it's the main variable name */
 					//escaped_index = php_addslashes(index, index_len, &index_len, 0 TSRMLS_CC);
-					escaped_index = index;
+					escaped_index.u = index;
 				} else {
-					escaped_index = index;
+					escaped_index.u = index;
 				}
-				if (zend_u_symtable_find(symtable1, IS_UNICODE, (zstr)escaped_index, index_len+1, (void **) &gpc_element_p)==FAILURE
+				if (zend_u_symtable_find(symtable1, IS_UNICODE, escaped_index, index_len+1, (void **) &gpc_element_p)==FAILURE
 					|| Z_TYPE_PP(gpc_element_p) != IS_ARRAY) {
 					MAKE_STD_ZVAL(gpc_element);
 					array_init(gpc_element);
-					zend_u_symtable_update(symtable1, IS_UNICODE, (zstr)escaped_index, index_len+1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
+					zend_u_symtable_update(symtable1, IS_UNICODE, escaped_index, index_len+1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 				}
-				if (index!=escaped_index) {
-					efree(escaped_index);
+				if (index!=escaped_index.u) {
+					efree(escaped_index.u);
 				}
 			}
 			symtable1 = Z_ARRVAL_PP(gpc_element_p);
@@ -368,8 +369,10 @@ plain_var:
 			} else {
 				/* UTODO fix for php_addslashes case */
 				//char *escaped_index = php_addslashes(index, index_len, &index_len, 0 TSRMLS_CC);
-				UChar *escaped_index = index;
-				zend_u_symtable_update(symtable1, IS_UNICODE, (zstr)escaped_index, index_len+1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
+				zstr escaped_index;
+
+				escaped_index.u = index;
+				zend_u_symtable_update(symtable1, IS_UNICODE, escaped_index, index_len+1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 				//efree(escaped_index);
 			}
 			break;

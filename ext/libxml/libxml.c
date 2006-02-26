@@ -843,12 +843,12 @@ int php_libxml_register_export(zend_class_entry *ce, php_libxml_export_node expo
 
 	if (zend_hash_add(&php_libxml_exports, ce->name.s, ce->name_length + 1, &export_hnd, sizeof(export_hnd), NULL) == SUCCESS) {
 		int ret;
-		UChar *uname;
+		zstr name;
 
-		uname = malloc(UBYTES(ce->name_length+1));
-		u_charsToUChars(ce->name.s, uname, ce->name_length+1);
-		ret = zend_u_hash_add(&php_libxml_exports, IS_UNICODE, (zstr)uname, ce->name_length + 1, &export_hnd, sizeof(export_hnd), NULL);
-		free(uname);
+		name.u = malloc(UBYTES(ce->name_length+1));
+		u_charsToUChars(ce->name.s, name.u, ce->name_length+1);
+		ret = zend_u_hash_add(&php_libxml_exports, IS_UNICODE, name, ce->name_length + 1, &export_hnd, sizeof(export_hnd), NULL);
+		free(name.u);
 		return ret;
 	}
 	return FAILURE;

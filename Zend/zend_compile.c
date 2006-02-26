@@ -1109,7 +1109,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		fn_flags = 0;
 	}
 	if ((fn_flags & ZEND_ACC_STATIC) && (fn_flags & ZEND_ACC_ABSTRACT) && !(CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE)) {
-		zend_error(E_COMPILE_ERROR, "Static function %v%s%R() cannot be abstract", is_method ? CG(active_class_entry)->name : (zstr)EMPTY_STR, is_method ? "::" : "", Z_TYPE(function_name->u.constant), Z_UNIVAL(function_name->u.constant));
+		zend_error(E_COMPILE_ERROR, "Static function %v%s%R() cannot be abstract", is_method ? CG(active_class_entry)->name : EMPTY_ZSTR, is_method ? "::" : "", Z_TYPE(function_name->u.constant), Z_UNIVAL(function_name->u.constant));
 	}
 
 	function_token->u.op_array = CG(active_op_array);
@@ -1361,7 +1361,7 @@ void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initia
 			}
 		} else {
 			cur_arg_info->array_type_hint = 1;
-			cur_arg_info->class_name.v = NULL;
+			cur_arg_info->class_name = NULL_ZSTR;
 			cur_arg_info->class_name_len = 0;
 			if (op == ZEND_RECV_INIT) {
 				if (Z_TYPE(initialization->u.constant) == IS_NULL ||
@@ -1375,7 +1375,7 @@ void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initia
 			}
 		}
 	} else {
-		cur_arg_info->class_name.v = NULL;
+		cur_arg_info->class_name = NULL_ZSTR;
 		cur_arg_info->class_name_len = 0;
 	}
 	opline->result.u.EA.type |= EXT_TYPE_UNUSED;
@@ -2209,7 +2209,7 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 			zstr prot_name;
 			int prot_name_length;
 
-			zend_u_mangle_property_name(&prot_name, &prot_name_length, utype, (zstr)"*", 1, child_info->name, child_info->name_length, ce->type & ZEND_INTERNAL_CLASS);
+			zend_u_mangle_property_name(&prot_name, &prot_name_length, utype, ZSTR("*"), 1, child_info->name, child_info->name_length, ce->type & ZEND_INTERNAL_CLASS);
 			if (child_info->flags & ZEND_ACC_STATIC) {
 				zval **prop;
 				HashTable *ht;
@@ -4158,7 +4158,7 @@ zend_bool zend_u_is_auto_global(zend_uchar type, zstr name, uint name_len TSRMLS
 
 zend_bool zend_is_auto_global(char *name, uint name_len TSRMLS_DC)
 {
-	return zend_u_is_auto_global(IS_STRING, (zstr)name, name_len TSRMLS_CC);
+	return zend_u_is_auto_global(IS_STRING, ZSTR(name), name_len TSRMLS_CC);
 }
 
 

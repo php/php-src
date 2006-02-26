@@ -246,6 +246,25 @@ typedef union _zstr {
 	void  *v;
 } zstr;
 
+#ifdef __GNUC__
+#	define ZSTR(x)    ((zstr)(x))
+#	define NULL_ZSTR  ZSTR(NULL)
+#	define EMPTY_ZSTR ZSTR("\0\0")
+#else
+extern ZEND_API zstr null_zstr;
+extern ZEND_API zstr empty_zstr;
+
+static inline zstr _to_zstr(void *v) {
+	zstr ret;
+	ret.v = v;
+	return ret;
+}
+
+#	define ZSTR(x)    _to_zstr(x)
+#	define NULL_ZSTR  null_zstr
+#	define EMPTY_ZSTR empty_zstr
+#endif
+
 #define EMPTY_STR ((UChar*)"\0\0")
 
 #undef SUCCESS
@@ -302,6 +321,10 @@ typedef union _zvalue_value {
 		UChar *val;
 		int len;
 	} ustr;
+	struct {                    /* Unicersal string type */
+		zstr val;
+		int len;
+	} uni;
 	HashTable *ht;				/* hash table value */
 	zend_object_value obj;
 } zvalue_value;

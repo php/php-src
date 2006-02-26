@@ -42,6 +42,11 @@
 #   define GLOBAL_CONSTANTS_TABLE   EG(zend_constants)
 #endif
 
+#ifndef __GNUC__
+ZEND_API zstr null_zstr;
+ZEND_API zstr empty_zstr;
+#endif
+
 #if defined(ZEND_WIN32) && ZEND_DEBUG
 BOOL WINAPI IsDebuggerPresent(VOID);
 #endif
@@ -527,7 +532,7 @@ ZEND_API void zend_print_flat_zval_r(zval *expr TSRMLS_DC)
 		case IS_OBJECT:
 		{
 			HashTable *properties = NULL;
-			zstr class_name = (zstr)NULL;
+			zstr class_name = NULL_ZSTR;
 			zend_uint clen;
 
 			if (Z_OBJ_HANDLER_P(expr, get_class_name)) {
@@ -584,7 +589,7 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 		case IS_OBJECT:
 			{
 				HashTable *properties = NULL;
-				zstr class_name = (zstr)NULL;
+				zstr class_name = NULL_ZSTR;
 				zend_uint clen;
 
 				if (Z_OBJ_HANDLER_P(expr, get_class_name)) {
@@ -968,6 +973,11 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	extern zend_scanner_globals ini_scanner_globals;
 	extern zend_scanner_globals language_scanner_globals;
 	extern zend_unicode_globals unicode_globals;
+#endif
+
+#ifndef __GNUC__
+	null_zstr.v = NULL;
+	empty_zstr.u = EMPTY_STR;
 #endif
 
 #ifdef ZTS

@@ -927,7 +927,7 @@ END_EXTERN_C()
 	}
 
 #define ZEND_SET_SYMBOL_WITH_LENGTH(symtable, name, name_length, var, _refcount, _is_ref)				\
-	ZEND_U_SET_SYMBOL_WITH_LENGTH(symtable, IS_STRING, (zstr)name, name_length, var, _refcount, _is_ref)
+		ZEND_U_SET_SYMBOL_WITH_LENGTH(symtable, IS_STRING, ZSTR(name), name_length, var, _refcount, _is_ref)
 
 #define ZEND_SET_GLOBAL_VAR(name, var)				\
 	ZEND_SET_SYMBOL(&EG(symbol_table), name, var)
