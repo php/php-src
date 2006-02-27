@@ -40,6 +40,7 @@ typedef enum {
 
 typedef struct _spl_filesystem_object {
 	zend_object        std;
+	void               *oth;
 	char               *path;
 	int                path_len;
 	char               *file_name;
