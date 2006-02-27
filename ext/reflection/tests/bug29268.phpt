@@ -15,7 +15,7 @@ class B{
 $ref = new reflectionMethod('B','doit');
 $parameters = $ref->getParameters();	
 foreach($parameters as $parameter){
-	$class = $parameter->getClass();	
+	$class = $parameter->getDeclaringClass();	
 	echo $class->name."\n";
 }
 echo "ok\n";
