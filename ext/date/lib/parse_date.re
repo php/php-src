@@ -285,7 +285,7 @@ static timelib_lookup_table const timelib_month_lookup[] = {
 static char* timelib_ltrim(char *s)
 {
 	char *ptr = s;
-	while (ptr[0] == ' ') {
+	while (ptr[0] == ' ' || ptr[0] == '\t') {
 		ptr++;
 	}
 	return ptr;
@@ -495,7 +495,7 @@ static timelib_sll timelib_lookup_relative_text(char **ptr, int *behavior)
 
 static timelib_sll timelib_get_relative_text(char **ptr, int *behavior)
 {
-	while (**ptr == ' ' || **ptr == '-' || **ptr == '/') {
+	while (**ptr == ' ' || **ptr == '\t' || **ptr == '-' || **ptr == '/') {
 		++*ptr;
 	}
 	return timelib_lookup_relative_text(ptr, behavior);
@@ -527,7 +527,7 @@ static long timelib_lookup_month(char **ptr)
 
 static long timelib_get_month(char **ptr)
 {
-	while (**ptr == ' ' || **ptr == '-' || **ptr == '.' || **ptr == '/') {
+	while (**ptr == ' ' || **ptr == '\t' || **ptr == '-' || **ptr == '.' || **ptr == '/') {
 		++*ptr;
 	}
 	return timelib_lookup_month(ptr);
@@ -535,7 +535,7 @@ static long timelib_get_month(char **ptr)
 
 static void timelib_eat_spaces(char **ptr)
 {
-	while (**ptr == ' ') {
+	while (**ptr == ' ' || **ptr == '\t') {
 		++*ptr;
 	}
 }
@@ -546,7 +546,7 @@ static const timelib_relunit* timelib_lookup_relunit(char **ptr)
 	char *begin = *ptr, *end;
 	const timelib_relunit *tp, *value = NULL;
 
-	while (**ptr != '\0' && **ptr != ' ') {
+	while (**ptr != '\0' && **ptr != ' ' && **ptr != '\t') {
 		++*ptr;
 	}
 	end = *ptr;
@@ -659,7 +659,7 @@ static long timelib_get_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_
 
 	*tz_not_found = 0;
 
-	while (**ptr == ' ' || **ptr == '(') {
+	while (**ptr == ' ' || **ptr == '\t' || **ptr == '(') {
 		++*ptr;
 	}
 	if (**ptr == '+') {
@@ -736,7 +736,7 @@ std:
 /*!re2c
 any = [\000-\377];
 
-space = [ ]+;
+space = [ \t]+;
 frac = "."[0-9]+;
 
 ago = 'ago';
@@ -800,13 +800,13 @@ iso8601dateslash = year4 "/" monthlz "/" daylz "/"?;
 dateslash        = year4 "/" month "/" day;
 gnudateshort     = year "-" month "-" day;
 iso8601date      = year4 "-" monthlz "-" daylz;
-pointeddate      = day [.-] month [.-] year;
-datefull         = day ([ -.])* monthtext ([ -.])* year;
-datenoday        = monthtext ([ -.])* year4;
-datenodayrev     = year4 ([ -.])* monthtext;
-datetextual      = monthtext ([ -.])* day [,.stndrh ]* year;
-datenoyear       = monthtext ([ -.])* day [,.stndrh ]*;
-datenoyearrev    = day ([ -.])* monthtext;
+pointeddate      = day [.\t-] month [.-] year;
+datefull         = day ([ \t.-])* monthtext ([ \t.-])* year;
+datenoday        = monthtext ([ .\t-])* year4;
+datenodayrev     = year4 ([ .\t-])* monthtext;
+datetextual      = monthtext ([ .\t-])* day [,.stndrh\t ]* year;
+datenoyear       = monthtext ([ .\t-])* day [,.stndrh\t ]*;
+datenoyearrev    = day ([ .\t-])* monthtext;
 datenocolon      = year4 monthlz daylz;
 
 /* Special formats */
@@ -838,7 +838,7 @@ dateshortwithtimelongtz = datenoyear iso8601normtz;
 reltextnumber = 'first'|'next'|'second'|'third'|'fourth'|'fifth'|'sixth'|'seventh'|'eight'|'ninth'|'tenth'|'eleventh'|'twelfth'|'last'|'previous'|'this';
 reltextunit = (('sec'|'second'|'min'|'minute'|'hour'|'day'|'week'|'fortnight'|'forthnight'|'month'|'year') 's'?) | daytext;
 
-relnumber = ([+-]?[ ]*[0-9]+);
+relnumber = ([+-]?[ \t]*[0-9]+);
 relative = relnumber space? reltextunit;
 relativetext = reltextnumber space? reltextunit;
 
@@ -1391,7 +1391,7 @@ relativetext = reltextnumber space? reltextunit;
 		return TIMELIB_RELATIVE;
 	}
 
-	[ .,]
+	[ .,\t]
 	{
 		goto std;
 	}
