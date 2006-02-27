@@ -1,3 +1,105 @@
+2006-02-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      NEWS:
+      - Update
+
+    * (PHP_5_1)
+      ext/simplexml/php_simplexml.h
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/026.phpt
+      ext/simplexml/tests/027.phpt
+      ext/simplexml/tests/028.phpt
+      ext/simplexml/tests/bug35785.phpt:
+      - Synch with head
+
+2006-02-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #36510 (strtotime() fails to parse date strings with tabs).
+
+2006-02-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/tests/bug35785.phpt:
+      - Fix test
+
+    * ext/simplexml/simplexml.c:
+      - Missing conversion
+
+    * ext/simplexml/php_simplexml.h
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/006.phpt
+      ext/simplexml/tests/bug35785.phpt:
+      - Use get_property_ptr_ptr handler to prevent SEGV as in bug #35785
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/028.phpt
+      ext/simplexml/tests/028.phpt:
+      - Add another write case
+
+    * ext/simplexml/simplexml.c:
+      - Unicode support
+
+2006-02-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_hash.c
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_objects.c
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ext/standard/array.c
+      ext/standard/incomplete_class.c
+      ext/standard/streamsfuncs.c
+      ext/standard/var.c
+      main/main.c
+      main/output.c
+      main/php_variables.c
+      main/rfc1867.c:
+      Unicode support: MS Visual C compatibility
+
+2006-02-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ext/standard/array.c
+      ext/standard/dir.c
+      ext/standard/exec.c
+      ext/standard/pack.c
+      ext/standard/reg.c
+      ext/standard/string.c
+      ext/standard/user_filters.c
+      main/main.c
+      main/streams/filter.c
+      sapi/cgi/fastcgi.c
+      win32/select.c:
+      - Warning fixes by Steph
+
+2006-02-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_list.c:
+      Unicode support
+
 2006-02-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/simplexml/simplexml.c
