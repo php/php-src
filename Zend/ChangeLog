@@ -1,3 +1,43 @@
+2006-02-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.c
+      zend.h
+      zend_API.c
+      zend_API.h
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_compile.h
+      zend_constants.c
+      zend_execute.c
+      zend_execute.h
+      zend_execute_API.c
+      zend_hash.c
+      zend_interfaces.c
+      zend_language_scanner.l
+      zend_object_handlers.c
+      zend_objects.c
+      zend_operators.c
+      zend_operators.h
+      zend_vm_def.h
+      zend_vm_execute.h:
+      Unicode support: MS Visual C compatibility
+
+2006-02-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      zend_execute.c
+      zend_execute_API.c
+      zend_interfaces.c
+      zend_vm_def.h
+      zend_vm_execute.h:
+      - Warning fixes by Steph
+
+2006-02-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute_API.c
+      zend_list.c:
+      Unicode support
+
 2006-02-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_execute_API.c
