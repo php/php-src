@@ -331,6 +331,10 @@ static zval * sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, 
 	if (member == &tmp_zv) {
 		zval_dtor(&tmp_zv);
 	}
+	if (Z_TYPE_P(return_value) == IS_NULL) {
+		FREE_ZVAL(return_value);
+		return_value = &EG(uninitialized_zval);
+	}
 
 	return return_value;
 }
