@@ -271,7 +271,7 @@ ZEND_API int zend_get_object_classname(zval *object, char **class_name, zend_uin
 }
 
 
-static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec TSRMLS_DC)
+static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **spec TSRMLS_DC)
 {
 	char *spec_walk = *spec;
 	char c = *spec_walk++;
@@ -492,6 +492,41 @@ static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec TSRMLS_DC)
 			}
 			break;
 
+		case 'C':
+			{
+				zend_class_entry **lookup, **pce = va_arg(*va, zend_class_entry **);
+				zend_class_entry *ce_base = *pce;
+
+				convert_to_string_ex(arg);
+				if (zend_lookup_class(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), &lookup TSRMLS_CC) == FAILURE) {
+					*pce = NULL;
+				} else {
+					*pce = *lookup;
+				}
+				if (ce_base) {
+					if ((!*pce || !instanceof_function(*pce, ce_base TSRMLS_CC)) && !return_null) {
+						char *space;
+						char *class_name = get_active_class_name(&space TSRMLS_CC);
+						zend_error(E_WARNING, "%s%s%s() expects parameter %d to be a class name derived from %s, '%s' given",
+							   class_name, space, get_active_function_name(TSRMLS_C),
+							   arg_num, ce_base->name, Z_STRVAL_PP(arg));
+						*pce = NULL;
+						return "";
+					}
+				}
+				if (!*pce && !return_null) {
+					char *space;
+					char *class_name = get_active_class_name(&space TSRMLS_CC);
+					zend_error(E_WARNING, "%s%s%s() expects parameter %d to be a valid class name, '%s' given",
+						   class_name, space, get_active_function_name(TSRMLS_C),
+						   arg_num, Z_STRVAL_PP(arg));
+					return "";
+				}
+				break;
+
+			}
+			break;
+
 		case 'z':
 			{
 				zval **p = va_arg(*va, zval **);
@@ -525,7 +560,7 @@ static int zend_parse_arg(int arg_num, zval **arg, va_list *va, char **spec, int
 {
 	char *expected_type = NULL;
 
-	expected_type = zend_parse_arg_impl(arg, va, spec TSRMLS_CC);
+	expected_type = zend_parse_arg_impl(arg_num, arg, va, spec TSRMLS_CC);
 	if (expected_type) {
 		if (!quiet) {
 			char *space;
@@ -560,7 +595,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 			case 'r': case 'a':
 			case 'o': case 'O':
 			case 'z': case 'Z':
-			case 'h':
+			case 'C': case 'h':
 				max_num_args++;
 				break;
 
