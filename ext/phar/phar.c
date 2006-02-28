@@ -1028,7 +1028,13 @@ static size_t phar_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) /
 {
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
 
-	return php_stream_read(data->fp, buf, count);
+	size_t got = php_stream_read(data->fp, buf, count);
+	
+	if (data->fp->eof) {
+		stream->eof = 1;
+	}
+	
+	return got;
 }
 /* }}} */
 
