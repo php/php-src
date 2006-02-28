@@ -248,7 +248,7 @@ typedef union _zstr {
 
 #ifdef __GNUC__
 #	define ZSTR(x)    ((zstr)(x))
-#	define NULL_ZSTR  ZSTR(NULL)
+#	define NULL_ZSTR  ZSTR((void*)NULL)
 #	define EMPTY_ZSTR ZSTR("\0\0")
 #else
 extern ZEND_API zstr null_zstr;
