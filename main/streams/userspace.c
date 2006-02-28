@@ -437,7 +437,7 @@ PHP_FUNCTION(stream_wrapper_register)
 }
 /* }}} */
 
-/* {{{ bool stream_wrapper_unregister(string protocol)
+/* {{{ proto bool stream_wrapper_unregister(string protocol)
 	Unregister a wrapper for the life of the current request. */
 PHP_FUNCTION(stream_wrapper_unregister)
 {
@@ -458,7 +458,7 @@ PHP_FUNCTION(stream_wrapper_unregister)
 }
 /* }}} */
 
-/* {{{ bool stream_wrapper_restore(string protocol)
+/* {{{ proto bool stream_wrapper_restore(string protocol)
 	Restore the original protocol handler, overriding if necessary */
 PHP_FUNCTION(stream_wrapper_restore)
 {
