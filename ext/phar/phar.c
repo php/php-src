@@ -1622,20 +1622,19 @@ function_entry phar_functions[] = {
 };
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_phar___construct, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, fname)
-	ZEND_ARG_INFO(1, flags)
-	ZEND_ARG_INFO(1, alias)
-ZEND_END_ARG_INFO();
-
-static
-ZEND_BEGIN_ARG_INFO(arginfo_phar_mapPhar, 0)
+	ZEND_ARG_INFO(0, flags)
 	ZEND_ARG_INFO(0, alias)
-	ZEND_ARG_INFO(0, compressed)
 ZEND_END_ARG_INFO();
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_phar_loadPhar, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_mapPhar, 0, 0, 0)
+	ZEND_ARG_INFO(0, alias)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_loadPhar, 0, 0, 1)
 	ZEND_ARG_INFO(0, fname)
 	ZEND_ARG_INFO(0, alias)
 ZEND_END_ARG_INFO();
@@ -1653,9 +1652,9 @@ zend_function_entry php_archive_methods[] = {
 };
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_entry___construct, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_entry___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, fname)
-	ZEND_ARG_INFO(1, flags)
+	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO();
 
 zend_function_entry php_entry_methods[] = {
