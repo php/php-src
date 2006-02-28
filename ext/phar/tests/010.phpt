@@ -20,4 +20,4 @@ echo file_get_contents('phar://hio/a');
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
-Fatal error: Phar::mapPhar(): internal corruption of phar "%s" (too many manifest entries for size of manifest) in %s on line %d
+%satal error: Phar::mapPhar(): internal corruption of phar "%s" (too many manifest entries for size of manifest) in %s on line %d

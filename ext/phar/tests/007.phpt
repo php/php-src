@@ -7,4 +7,4 @@ Phar::mapPhar manifest too big
 Phar::mapPhar('hio');
 __HALT_COMPILER(); ?>~~~~
 --EXPECTF--
-Fatal error: Phar::mapPhar(): manifest cannot be larger than 1 MB in phar "%s" in %s on line %d
+%satal error: Phar::mapPhar(): manifest cannot be larger than 1 MB in phar "%s" in %s on line %d
