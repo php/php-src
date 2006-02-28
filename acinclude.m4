@@ -1000,7 +1000,7 @@ AC_DEFUN([PHP_WITH_SHARED],[
 dnl
 dnl PHP_ADD_EXTENSION_DEP(extname, depends [, depconf])
 dnl
-dnl This macro is is scanned by genif.sh when it builds the internal functions
+dnl This macro is scanned by genif.sh when it builds the internal functions
 dnl list, so that modules can be init'd in the correct order
 dnl $1 = name of extension, $2 = extension upon which it depends
 dnl $3 = optional: if true, it's ok for $2 to have not been configured
@@ -1021,7 +1021,7 @@ You either need to build $1 shared or build $2 statically for the
 build to be successful.
 ])
   fi
-  if test "x$is_it_enabled" = "x" && test "x$3" != "xtrue"; then
+  if test "x$is_it_enabled" = "xno" && test "x$3" != "xtrue"; then
     AC_MSG_ERROR([
 You've configured extension $1, which depends on extension $2,
 but you've either not enabled $2, or have disabled it.
