@@ -38,6 +38,8 @@ PHP                                                                        NEWS
 - Fixed crash with DOMImplementation::createDocumentType("name:"). (Mike)
 - Fixed bug #36510 (strtotime() fails to parse date strings with tabs). (Ilia,
   Derick)
+- Fixed bug #36459 (Incorrect adding PHPSESSID to links, which contains \r\n).
+  (Ilia)
 - Fixed bug #36458 (sleep() accepts negative values). (Ilia)
 - Fixed bug #36436 (DBA problem with Berkeley DB4). (Marcus)
 - Fixed bug #36434 (Improper resolution of declaring class name of an inherited
