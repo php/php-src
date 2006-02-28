@@ -1,3 +1,43 @@
+2006-02-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      ZendEngine2/zend_API.c:
+      - MFH Argument parsing specifier 'C', which is necessary for SPL already
+
+2006-02-27  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_1)
+      NEWS:
+      - MFH: Fixed bug #36510 (strtotime() fails to parse date strings with
+      tabs).
+
+2006-02-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      This fix was reverted
+
+2006-02-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/php_simplexml.h
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/029.phpt
+      ext/simplexml/tests/029.phpt:
+      - Fix count/foreach interaction
+
+    * ext/simplexml/simplexml.c:
+      - MFB
+
+    * (PHP_5_1)
+      ext/simplexml/simplexml.c:
+      - Cleanup
+
+2006-02-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      ext/simplexml/simplexml.c:
+      Fixed memory leak
+
 2006-02-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
