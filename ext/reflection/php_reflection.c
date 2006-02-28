@@ -554,7 +554,7 @@ static zend_op* _get_recv_op(zend_op_array *op_array, zend_uint offset)
 	++offset;
 	while (op < end) {
 		if ((op->opcode == ZEND_RECV || op->opcode == ZEND_RECV_INIT) &&
-		    op->op1.u.constant.value.lval == offset) {
+		    op->op1.u.constant.value.lval == (long)offset) {
 		  return op;
 	  }
 	  ++op;
