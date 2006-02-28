@@ -843,9 +843,7 @@ static php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, cha
 		php_url_free(resource);
 		return NULL;
 	}
-#if (PHP_MAJOR_VERSION >= 6)
 	php_url_free(resource);
-#endif
 	
 #if MBO_0
 		fprintf(stderr, "Pharname:   %s\n", idata->phar->filename);
