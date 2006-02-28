@@ -2,6 +2,8 @@ PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, Version 4.4.3
 - Added a check for special characters in the session name. (Ilia)
+- Fixed bug #36459 (Incorrect adding PHPSESSID to links, which contains \r\n).
+  (Ilia)
 - Fixed bug #36458 (sleep() accepts negative values). (Ilia)
 - Fixed bug #36242 (Possible memory corruption in stream_select()). (Tony)
 - Fixed bug #36223 (curl bypasses open_basedir restrictions). (Tony)
