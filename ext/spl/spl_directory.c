@@ -268,6 +268,8 @@ static zend_object_value spl_filesystem_object_clone(zval *zobject TSRMLS_DC)
 	
 	intern->file_class = source->file_class;
 	intern->info_class = source->info_class;
+	intern->flags = source->flags;
+	intern->oth = source->oth;
 
 	zend_objects_clone_members(new_object, new_obj_val, old_object, handle TSRMLS_CC);
 
@@ -299,6 +301,7 @@ void spl_filesystem_info_set_filename(spl_filesystem_object *intern, char *path,
 static spl_filesystem_object * spl_filesystem_object_create_info(spl_filesystem_object *source, char *file_path, int file_path_len, int use_copy, zend_class_entry *ce, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	spl_filesystem_object *intern;
+	zval *arg1;
 	
 	if (!file_path || !file_path_len) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Cannot create SplFileInfo for empty path");
@@ -311,10 +314,18 @@ static spl_filesystem_object * spl_filesystem_object_create_info(spl_filesystem_
 
 	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
 
-	return_value->value.obj = spl_filesystem_object_new_ex(ce ? ce : source->info_class, &intern TSRMLS_CC);
+	ce = ce ? ce : source->info_class;
+	return_value->value.obj = spl_filesystem_object_new_ex(ce, &intern TSRMLS_CC);
 	Z_TYPE_P(return_value) = IS_OBJECT;
 
-	spl_filesystem_info_set_filename(intern, file_path, file_path_len, use_copy TSRMLS_CC);
+	if (ce->constructor->common.scope != spl_ce_SplFileInfo) {
+		MAKE_STD_ZVAL(arg1);
+		ZVAL_STRINGL(arg1, file_path, file_path_len, use_copy);
+		zend_call_method_with_1_params(&return_value, ce, &ce->constructor, "__construct", NULL, arg1);
+		zval_ptr_dtor(&arg1);
+	} else {
+		spl_filesystem_info_set_filename(intern, file_path, file_path_len, use_copy TSRMLS_CC);
+	}
 	
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 	
@@ -325,6 +336,7 @@ static spl_filesystem_object * spl_filesystem_object_create_type(int ht, spl_fil
 {
 	spl_filesystem_object *intern;
 	zend_bool use_include_path = 0;
+	zval *arg1, *arg2;
 
 	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
 
@@ -342,41 +354,61 @@ static spl_filesystem_object * spl_filesystem_object_create_type(int ht, spl_fil
 
 	switch (type) {
 	case SPL_FS_INFO:
-		return_value->value.obj = spl_filesystem_object_new_ex(ce ? ce : source->info_class, &intern TSRMLS_CC);
+		ce = ce ? ce : source->info_class;
+		return_value->value.obj = spl_filesystem_object_new_ex(ce, &intern TSRMLS_CC);
 		Z_TYPE_P(return_value) = IS_OBJECT;
-	
+
 		spl_filesystem_object_get_file_name(source TSRMLS_CC);
-		intern->file_name = estrndup(source->file_name, source->file_name_len);
-		intern->file_name_len = source->file_name_len;
-		intern->path = estrndup(source->path, source->path_len);
-		intern->path_len = source->path_len;
+		if (ce->constructor->common.scope != spl_ce_SplFileInfo) {
+			MAKE_STD_ZVAL(arg1);
+			ZVAL_STRINGL(arg1, source->file_name, source->file_name_len, 1);
+			zend_call_method_with_1_params(&return_value, ce, &ce->constructor, "__construct", NULL, arg1);
+			zval_ptr_dtor(&arg1);
+		} else {
+			intern->file_name = estrndup(source->file_name, source->file_name_len);
+			intern->file_name_len = source->file_name_len;
+			intern->path = estrndup(source->path, source->path_len);
+			intern->path_len = source->path_len;
+		}
 		break;
 	case SPL_FS_FILE:
-		return_value->value.obj = spl_filesystem_object_new_ex(ce ? ce : source->file_class, &intern TSRMLS_CC);
+		ce = ce ? ce : source->file_class;
+		return_value->value.obj = spl_filesystem_object_new_ex(ce, &intern TSRMLS_CC);
 		Z_TYPE_P(return_value) = IS_OBJECT;
 	
 		spl_filesystem_object_get_file_name(source TSRMLS_CC);
-		intern->file_name = source->file_name;
-		intern->file_name_len = source->file_name_len;
-	
-		intern->u.file.open_mode = "r";
-		intern->u.file.open_mode_len = 1;
-	
-		if (ht && zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sbr", 
-				&intern->u.file.open_mode, &intern->u.file.open_mode_len, 
-				&use_include_path, &intern->u.file.zcontext) == FAILURE) {
-			php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
-			intern->u.file.open_mode = NULL;
-			zval_dtor(return_value);
-			Z_TYPE_P(return_value) = IS_NULL;
-			return NULL;
-		}
-	
-		if (spl_filesystem_file_open(intern, use_include_path, 0 TSRMLS_CC) == FAILURE) {
-			php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
-			zval_dtor(return_value);
-			Z_TYPE_P(return_value) = IS_NULL;
-			return NULL;
+
+		if (ce->constructor->common.scope != spl_ce_SplFileObject) {
+			MAKE_STD_ZVAL(arg1);
+			MAKE_STD_ZVAL(arg2);
+			ZVAL_STRINGL(arg1, source->file_name, source->file_name_len, 1);
+			ZVAL_STRINGL(arg2, "r", 1, 1);
+			zend_call_method_with_2_params(&return_value, ce, &ce->constructor, "__construct", NULL, arg1, arg2);
+			zval_ptr_dtor(&arg1);
+			zval_ptr_dtor(&arg2);
+		} else {
+			intern->file_name = source->file_name;
+			intern->file_name_len = source->file_name_len;
+		
+			intern->u.file.open_mode = "r";
+			intern->u.file.open_mode_len = 1;
+		
+			if (ht && zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sbr", 
+					&intern->u.file.open_mode, &intern->u.file.open_mode_len, 
+					&use_include_path, &intern->u.file.zcontext) == FAILURE) {
+				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+				intern->u.file.open_mode = NULL;
+				zval_dtor(return_value);
+				Z_TYPE_P(return_value) = IS_NULL;
+				return NULL;
+			}
+		
+			if (spl_filesystem_file_open(intern, use_include_path, 0 TSRMLS_CC) == FAILURE) {
+				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+				zval_dtor(return_value);
+				Z_TYPE_P(return_value) = IS_NULL;
+				return NULL;
+			}
 		}
 		break;
 	case SPL_FS_DIR:	
@@ -735,7 +767,7 @@ SPL_METHOD(SplFileInfo, setInfoClass)
 		return;
 	}
 
-	intern->file_class = ce;
+	intern->info_class = ce;
 }
 /* }}} */
 
@@ -879,7 +911,10 @@ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 			subdir->u.dir.sub_path_len = strlen(intern->u.dir.entry.d_name);
 			subdir->u.dir.sub_path = estrndup(intern->u.dir.entry.d_name, subdir->u.dir.sub_path_len);
 		}
+		subdir->info_class = intern->info_class;
+		subdir->file_class = intern->file_class;
 		subdir->flags = intern->flags;
+		subdir->oth = intern->oth;
 	}
 }
 /* }}} */
