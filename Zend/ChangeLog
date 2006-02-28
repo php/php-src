@@ -1,3 +1,9 @@
+2006-02-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      zend_API.c:
+      - MFH Argument parsing specifier 'C', which is necessary for SPL already
+
 2006-02-26  Dmitry Stogov  <dmitry@zend.com>
 
     * zend.c
