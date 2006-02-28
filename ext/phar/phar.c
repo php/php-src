@@ -29,13 +29,21 @@
 #include "ext/standard/info.h"
 #include "ext/standard/url.h"
 #include "ext/standard/crc32.h"
-#include "zend_execute.h"
-#include "zend_qsort.h"
+#include "ext/spl/spl_array.h"
+#include "ext/spl/spl_directory.h"
+#include "ext/spl/spl_exceptions.h"
 #include "zend_constants.h"
+#include "zend_execute.h"
+#include "zend_exceptions.h"
+#include "zend_hash.h"
+#include "zend_interfaces.h"
 #include "zend_operators.h"
+#include "zend_qsort.h"
 #include "php_phar.h"
 #include "main/php_streams.h"
-#include "zend_hash.h"
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
 
 #ifndef TRUE
  #       define TRUE 1
@@ -65,7 +73,7 @@
 
 
 ZEND_BEGIN_MODULE_GLOBALS(phar)
-	HashTable	phar_fname_map;
+	HashTable   phar_fname_map;
 	HashTable   phar_alias_map;
 ZEND_END_MODULE_GLOBALS(phar)
 
@@ -75,42 +83,66 @@ ZEND_DECLARE_MODULE_GLOBALS(phar)
 # if SIZEOF_SHORT == 2
 #  define php_uint16 unsigned short
 # else
-#  error Need an unsigned 16 bit type
+#  define php_uint16 uint16_t
 # endif
 #endif
 
+typedef union _phar_archieve_object  phar_archieve_object;
+typedef union _phar_entry_object     phar_entry_object;
+
 /* entry for one file in a phar file */
 typedef struct _phar_manifest_entry {
-	php_uint32	filename_len;
-	char		*filename;
-	php_uint32	uncompressed_filesize;
-	php_uint32	timestamp;
-	long		offset_within_phar;
-	php_uint32	compressed_filesize;
-	php_uint32	crc32;
-	char		flags;
-	zend_bool	crc_checked;
-	php_stream  *fp;
-} phar_manifest_entry;
+	php_uint32               filename_len;
+	char                     *filename;
+	php_uint32               uncompressed_filesize;
+	php_uint32               timestamp;
+	long                     offset_within_phar;
+	php_uint32               compressed_filesize;
+	php_uint32               crc32;
+	char                     flags;
+	zend_bool                crc_checked;
+	php_stream               *fp;
+} phar_entry_info;
 
-/* information about a phar file */
-typedef struct _phar_file_data {
-	char        *fname;
-	int         fname_len;
-	char        *alias;
-	int         alias_len;
-	size_t      internal_file_start;
-	zend_bool   has_compressed_files;
-	HashTable   manifest;
-	php_stream  *fp;
-} phar_file_data;
+/* information about a phar file (the archieve itself) */
+typedef struct _phar_archieve_data {
+	char                     *fname;
+	int                      fname_len;
+	char                     *alias;
+	int                      alias_len;
+	char                     version[12];
+	size_t                   internal_file_start;
+	zend_bool                has_compressed_files;
+	HashTable                manifest;
+	php_stream               *fp;
+} phar_archieve_data;
 
 /* stream access data for one file entry in a phar file */
-typedef struct _phar_internal_file_data {
-	phar_file_data      *phar;
-	php_stream          *fp;
-	phar_manifest_entry	*internal_file;
-} phar_internal_file_data;
+typedef struct _phar_entry_data {
+	phar_archieve_data       *phar;
+	php_stream               *fp;
+	phar_entry_info      *internal_file;
+} phar_entry_data;
+
+/* archieve php object */
+union _phar_archieve_object {
+	zend_object              std;
+	spl_filesystem_object    spl;
+	struct {
+	    zend_object          std;
+	    phar_archieve_data   *archieve;
+	} arc;
+};
+
+/* entry php object */
+union _phar_entry_object {
+	zend_object              std;
+	spl_filesystem_object    spl;
+	struct {
+	    zend_object          std;
+	    phar_entry_info      *entry;
+	} ent;
+};
 
 /* {{{ forward declarations */
 static php_stream *php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
@@ -130,15 +162,17 @@ static php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filename, cha
 			int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 /* }}} */
 
-static zend_class_entry *php_archive_entry_ptr;
+static zend_class_entry *phar_ce_archieve;
+static zend_class_entry *phar_ce_entry;
 
 static void destroy_phar_data(void *pDest) /* {{{ */
 {
-	phar_file_data *data = (phar_file_data *) pDest;
+	phar_archieve_data *data = (phar_archieve_data *) pDest;
 	TSRMLS_FETCH();
 
 	if (data->alias && data->alias != data->fname) {
 		efree(data->alias);
+		data->alias = NULL;
 	}
 	efree(data->fname);
 	zend_hash_destroy(&data->manifest);
@@ -151,7 +185,7 @@ static void destroy_phar_data(void *pDest) /* {{{ */
 
 static void destroy_phar_manifest(void *pDest) /* {{{ */
 {
-	phar_manifest_entry *entry = (phar_manifest_entry *)pDest;
+	phar_entry_info *entry = (phar_entry_info *)pDest;
 
 	if (entry->fp) {
 		TSRMLS_FETCH();
@@ -163,9 +197,9 @@ static void destroy_phar_manifest(void *pDest) /* {{{ */
 }
 /* }}} */
 
-static phar_file_data * phar_get_file_data(char *fname, int fname_len, char *alias, int alias_len TSRMLS_DC) /* {{{ */
+static phar_archieve_data * phar_get_archieve(char *fname, int fname_len, char *alias, int alias_len TSRMLS_DC) /* {{{ */
 {
-	phar_file_data *fd, **fd_ptr;
+	phar_archieve_data *fd, **fd_ptr;
 
 	if (alias && alias_len) {
 		if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void**)&fd_ptr)) {
@@ -179,7 +213,7 @@ static phar_file_data * phar_get_file_data(char *fname, int fname_len, char *ali
 	if (fname && fname_len) {
 		if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void**)&fd)) {
 			if (alias && alias_len) {
-				zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void*)&fd,   sizeof(phar_file_data*), NULL);
+				zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void*)&fd,   sizeof(phar_archieve_data*), NULL);
 			}
 			return fd;
 		}
@@ -191,16 +225,31 @@ static phar_file_data * phar_get_file_data(char *fname, int fname_len, char *ali
 }
 /* }}} */
 
-static phar_internal_file_data *phar_get_file_entry(char *fname, char *path TSRMLS_DC) /* {{{ */
+static phar_entry_info *phar_get_entry_info(phar_archieve_data *phar, char *path, int path_len TSRMLS_DC) /* {{{ */
 {
-	phar_file_data *phar;
-	phar_manifest_entry *entry;
-	phar_internal_file_data *ret;
+	phar_entry_info *entry;
+
+	if (path && *path == '/') {
+		path++;
+		path_len--;
+	}
+	if (SUCCESS == zend_hash_find(&phar->manifest, path, path_len, (void**)&entry)) {
+		return entry;
+	}
+	return NULL;
+}
+/* }}} */
+
+static phar_entry_data *phar_get_entry_data(char *fname, int fname_len, char *path, int path_len TSRMLS_DC) /* {{{ */
+{
+	phar_archieve_data *phar;
+	phar_entry_info *entry;
+	phar_entry_data *ret;
 	
 	ret = NULL;
-	if ((phar = phar_get_file_data(fname, strlen(fname), NULL, 0 TSRMLS_CC)) != NULL) {
-		if (SUCCESS == zend_hash_find(&phar->manifest, path, strlen(path), (void**)&entry)) {
-			ret = (phar_internal_file_data *) emalloc(sizeof(phar_internal_file_data));
+	if ((phar = phar_get_archieve(fname, fname_len, NULL, 0 TSRMLS_CC)) != NULL) {
+		if ((entry = phar_get_entry_info(phar, path, path_len TSRMLS_CC)) != NULL) {
+			ret = (phar_entry_data *) emalloc(sizeof(phar_entry_data));
 			ret->phar = phar;
 			ret->internal_file = entry;
 			if (entry->fp) {
@@ -259,19 +308,23 @@ PHP_METHOD(Phar, canCompress)
 	buffer += 4
 #endif
 
-static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int alias_len, long halt_offset TSRMLS_DC) /* {{{ */
+static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int alias_len, long halt_offset, phar_archieve_data** pphar TSRMLS_DC) /* {{{ */
 {
 	char b32[4], *buffer, *endbuffer, *savebuf;
-	phar_file_data mydata;
-	phar_file_data *phar;
-	phar_manifest_entry entry;
+	phar_archieve_data mydata;
+	phar_archieve_data *phar;
+	phar_entry_info entry;
 	php_uint32 manifest_len, manifest_count, manifest_index, tmp_len;
 	php_uint16 manifest_tag;
 	long offset;
 	int compressed = 0;
 	int register_alias;
 
-	if ((phar = phar_get_file_data(fname, fname_len, alias, alias_len TSRMLS_CC)) != NULL) {
+	if (pphar) {
+		*pphar = NULL;
+	}
+
+	if ((phar = phar_get_archieve(fname, fname_len, alias, alias_len TSRMLS_CC)) != NULL) {
 		/* Overloading or reloading an archive would only be possible if we  */
 		/* refcount everything to be sure no stream for any file in the */
 		/* archive is open. */
@@ -280,6 +333,9 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, phar->fname, fname);
 			return FAILURE;
 		} else {
+			if (pphar) {
+				*pphar = phar;
+			}		
 			php_stream_close(fp);
 			return SUCCESS;
 		}
@@ -348,7 +404,7 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 	if ((manifest_tag & PHAR_API_VER_MASK) < PHAR_API_VERSION ||
 		    (manifest_tag & PHAR_API_MAJORVER_MASK) != PHAR_API_MAJORVERSION)
 	{
-		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "phar \"%s\" is API version %1.u.%1.u.%1.u, and cannot be processed", fname, manifest_tag >> 12, (manifest_tag >> 8) & 0xF, (manifest_tag >> 4) & 0xF0);
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "phar \"%s\" is API version %1.u.%1.u.%1.u, and cannot be processed", fname, manifest_tag >> 12, (manifest_tag >> 8) & 0xF, (manifest_tag >> 4) & 0x0F);
 		efree(savebuf);
 		return FAILURE;
 	}
@@ -393,7 +449,7 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 	}
 
 	/* set up our manifest */
-	zend_hash_init(&mydata.manifest, sizeof(phar_manifest_entry),
+	zend_hash_init(&mydata.manifest, sizeof(phar_entry_info),
 		zend_get_hash_value, destroy_phar_manifest, 0);
 	offset = 0;
 	for (manifest_index = 0; manifest_index < manifest_count; manifest_index++) {
@@ -419,17 +475,13 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 		switch (entry.flags & PHAR_ENT_COMPRESSION_MASK) {
 		case PHAR_ENT_COMPRESSED_GZ:
 #if !HAVE_ZLIB
-			if (!compressed) {
-				MAPPHAR_FAIL("zlib extension is required for gz compressed .phar file \"%s\"");
-			}
+			MAPPHAR_FAIL("zlib extension is required for gz compressed .phar file \"%s\"");
 #endif
 			compressed = 1;
 			break;
 		case PHAR_ENT_COMPRESSED_BZ2:
 #if !HAVE_BZ2
-			if (!compressed) {
-				MAPPHAR_FAIL("bz2 extension is required for bzip2 compressed .phar file \"%s\"");
-			}
+			MAPPHAR_FAIL("bz2 extension is required for bzip2 compressed .phar file \"%s\"");
 #endif
 			compressed = 1;
 			break;
@@ -441,27 +493,32 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 		}
 		entry.crc_checked = 0;
 		entry.fp = NULL;
-		zend_hash_add(&mydata.manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_manifest_entry), NULL);
+		zend_hash_add(&mydata.manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info), NULL);
 	}
 
 	mydata.fname = estrndup(fname, fname_len);
 	mydata.fname_len = fname_len;
-	mydata.alias = alias ? estrndup(alias, alias_len) : fname;
+	mydata.alias = alias ? estrndup(alias, alias_len) : mydata.fname;
 	mydata.alias_len = alias ? alias_len : fname_len;
+	snprintf(mydata.version, sizeof(mydata.version), "%u.%u.%u", manifest_tag >> 12, (manifest_tag >> 8) & 0xF, (manifest_tag >> 4) & 0xF);
 	mydata.internal_file_start = halt_offset + manifest_len + 4;
 	mydata.has_compressed_files = compressed;
 	mydata.fp = fp;
-	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void*)&mydata, sizeof(phar_file_data), (void**)&phar);
+	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void*)&mydata, sizeof(phar_archieve_data), (void**)&phar);
 	if (register_alias) {
-	zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void*)&phar,   sizeof(phar_file_data*), NULL);
+	zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void*)&phar,   sizeof(phar_archieve_data*), NULL);
 	}
 	efree(savebuf);
 	
+	if (pphar) {
+		*pphar = phar;
+	}
+
 	return SUCCESS;
 }
 /* }}} */
 
-static int phar_open_filename(char *fname, int fname_len, char *alias, int alias_len TSRMLS_DC) /* {{{ */
+static int phar_open_filename(char *fname, int fname_len, char *alias, int alias_len, phar_archieve_data** pphar TSRMLS_DC) /* {{{ */
 {
 	const char token[] = "__HALT_COMPILER();";
 	char *pos, buffer[1024 + sizeof(token)];
@@ -469,6 +526,19 @@ static int phar_open_filename(char *fname, int fname_len, char *alias, int alias
 	const long tokenlen = sizeof(token) - 1;
 	long halt_offset;
 	php_stream *fp;
+	phar_archieve_data *phar;
+	
+	if ((phar = phar_get_archieve(fname, fname_len, alias, alias_len TSRMLS_CC)) != NULL) {
+		if (fname_len != phar->fname_len || strncmp(fname, phar->fname, fname_len)) {
+			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, phar->fname, fname);
+			return FAILURE;
+		} else {
+			if (pphar) {
+				*pphar = phar;
+			}
+			return SUCCESS;
+		}
+	}
 
 	if (PG(safe_mode) && (!php_checkuid(fname, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
 		return FAILURE;
@@ -501,7 +571,7 @@ static int phar_open_filename(char *fname, int fname_len, char *alias, int alias
 		}
 		if ((pos = strstr(buffer, token)) != NULL) {
 			halt_offset += (pos - buffer); /* no -tokenlen+tokenlen here */
-			return phar_open_file(fp, fname, fname_len, alias, alias_len, halt_offset TSRMLS_CC);
+			return phar_open_file(fp, fname, fname_len, alias, alias_len, halt_offset, pphar TSRMLS_CC);
 		}
 
 		halt_offset += readsize;
@@ -514,46 +584,65 @@ static int phar_open_filename(char *fname, int fname_len, char *alias, int alias
 }
 /* }}} */
 
-static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char *mode, int options TSRMLS_DC) /* {{{ */
+static int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_len, char **entry, int *entry_len TSRMLS_DC) /* {{{ */
 {
-	php_url *resource;
 	char *pos_p, *pos_z, *ext_str;
-	int len, ext_len;
+	int ext_len;
 
 	if (!strncasecmp(filename, "phar://", 7)) {
 		filename += 7;
-		pos_p = strstr(filename, ".phar.php");
-		pos_z = strstr(filename, ".phar.gz");
-		if (pos_p) {
-			if (pos_z) {
-				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\" (cannot contain .phar.php and .phar.gz)", filename);
-				return NULL;
-			}
-			ext_str = pos_p;
-			ext_len = 9;
-		} else if (pos_z) {
-			ext_str = pos_z;
-			ext_len = 8;
-		} else if ((pos_p = strstr(filename, ".phar")) != NULL) {
-			ext_str = pos_p;
-			ext_len = 5;
-		} else {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\" (filename extension must be .phar.php, .phar.gz or .phar)", filename);
+		filename_len -= 7;
+	}
+
+	pos_p = strstr(filename, ".phar.php");
+	pos_z = strstr(filename, ".phar.gz");
+	if (pos_p) {
+		if (pos_z) {
+			return FAILURE;
+		}
+		ext_str = pos_p;
+		ext_len = 9;
+	} else if (pos_z) {
+		ext_str = pos_z;
+		ext_len = 8;
+	} else if ((pos_p = strstr(filename, ".phar")) != NULL) {
+		ext_str = pos_p;
+		ext_len = 5;
+	} else {
+		return FAILURE;
+	}
+	*arch_len = ext_str - filename + ext_len;
+	*arch = estrndup(filename, *arch_len);
+	if (ext_str[ext_len]) {
+		*entry_len = filename_len - *arch_len;
+		*entry = estrndup(ext_str+ext_len, *entry_len);
+	} else {
+		*entry_len = 1;
+		*entry = estrndup("/", 1);
+	}
+	return SUCCESS;
+}
+/* }}} */
+	
+static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char *mode, int options TSRMLS_DC) /* {{{ */
+{
+	php_url *resource;
+	char *arch, *entry;
+	int arch_len, entry_len;
+
+	if (!strncasecmp(filename, "phar://", 7)) {
+		
+		if (phar_split_fname(filename, strlen(filename), &arch, &arch_len, &entry, &entry_len TSRMLS_CC) == FAILURE) {
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\" (cannot contain .phar.php and .phar.gz)", filename);
 			return NULL;
 		}
-		resource = emalloc(sizeof(php_url));
+		resource = ecalloc(1, sizeof(php_url));
 		resource->scheme = estrndup("phar", 4);
-		len = ext_str - filename + ext_len;
-		resource->host = estrndup(filename, len);
-		if (ext_str[ext_len]) {
-			resource->path = estrdup(ext_str+ext_len);
-		} else {
-			resource->path = estrndup("/", 1);
-		}
+		resource->host = arch;
+		resource->path = entry;
 #if MBO_0
 		if (resource) {
 			fprintf(stderr, "Alias:     %s\n", alias);
-			fprintf(stderr, "Compressed:%s\n", pos_z ? "yes" : "no");
 			fprintf(stderr, "Scheme:    %s\n", resource->scheme);
 /*			fprintf(stderr, "User:      %s\n", resource->user);*/
 /*			fprintf(stderr, "Pass:      %s\n", resource->pass ? "***" : NULL);*/
@@ -564,7 +653,7 @@ static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char 
 /*			fprintf(stderr, "Fragment:  %s\n", resource->fragment);*/
 		}
 #endif
-		if (phar_open_filename(resource->host, len, NULL, 0 TSRMLS_CC) == FAILURE)
+		if (phar_open_filename(resource->host, arch_len, NULL, 0, NULL TSRMLS_CC) == FAILURE)
 		{
 			php_url_free(resource);
 			return NULL;
@@ -607,7 +696,7 @@ static int phar_open_compiled_file(char *alias, int alias_len TSRMLS_DC) /* {{{ 
 		return FAILURE;
 	}
 
-	return phar_open_file(fp, fname, strlen(fname), alias, alias_len, halt_offset TSRMLS_CC);
+	return phar_open_file(fp, fname, strlen(fname), alias, alias_len, halt_offset, NULL TSRMLS_CC);
 }
 /* }}} */
 
@@ -634,7 +723,7 @@ PHP_METHOD(Phar, loadPhar)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &fname, &fname_len, &alias, &alias_len) == FAILURE) {
 		return;
 	}
-	RETURN_BOOL(phar_open_filename(fname, fname_len, alias, alias_len TSRMLS_CC) == SUCCESS);
+	RETURN_BOOL(phar_open_filename(fname, fname_len, alias, alias_len, NULL TSRMLS_CC) == SUCCESS);
 } /* }}} */
 
 static php_stream_ops phar_ops = {
@@ -680,7 +769,7 @@ php_stream_wrapper php_stream_phar_wrapper =  {
     0 /* is_url */
 };
 
-static int phar_postprocess_file(php_stream_wrapper *wrapper, int options, phar_internal_file_data *idata, php_uint32 crc32 TSRMLS_DC) /* {{{ */
+static int phar_postprocess_file(php_stream_wrapper *wrapper, int options, phar_entry_data *idata, php_uint32 crc32 TSRMLS_DC) /* {{{ */
 {
 	unsigned int crc = ~0;
 	int len = idata->internal_file->uncompressed_filesize;
@@ -702,7 +791,7 @@ static int phar_postprocess_file(php_stream_wrapper *wrapper, int options, phar_
 }
 /* }}} */
 
-static char * phar_decompress_filter(phar_manifest_entry * entry, int return_unknow) /* {{{ */
+static char * phar_decompress_filter(phar_entry_info * entry, int return_unknow) /* {{{ */
 {
 	switch (entry->flags & PHAR_ENT_COMPRESSION_MASK) {
 	case PHAR_ENT_COMPRESSED_GZ:
@@ -717,7 +806,7 @@ static char * phar_decompress_filter(phar_manifest_entry * entry, int return_unk
 
 static php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
 {
-	phar_internal_file_data *idata;
+	phar_entry_data *idata;
 	char *internal_file;
 	char *buffer;
 	char *filter_name;
@@ -734,30 +823,29 @@ static php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, cha
 	}
 
 	/* we must have at the very least phar://alias.phar/internalfile.php */
-	if (!resource || !resource->scheme || !resource->host || !resource->path) {
-		if (resource) {
-			php_url_free(resource);
-		}
+	if (!resource->scheme || !resource->host || !resource->path) {
+		php_url_free(resource);
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\"", path);
 		return NULL;
 	}
 
 	if (strcasecmp("phar", resource->scheme)) {
-		if (resource) {
-			php_url_free(resource);
-		}
+		php_url_free(resource);
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: not a phar stream url \"%s\"", path);
 		return NULL;
 	}
 
 	/* strip leading "/" */
 	internal_file = estrdup(resource->path + 1);
-	if (NULL == (idata = phar_get_file_entry(resource->host, internal_file TSRMLS_CC))) {
+	if (NULL == (idata = phar_get_entry_data(resource->host, strlen(resource->host), internal_file, strlen(internal_file) TSRMLS_CC))) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: \"%s\" is not a file in phar \"%s\"", internal_file, resource->host);
 		efree(internal_file);
 		php_url_free(resource);
 		return NULL;
 	}
+#if (PHP_MAJOR_VERSION >= 6)
+	php_url_free(resource);
+#endif
 	
 #if MBO_0
 		fprintf(stderr, "Pharname:   %s\n", idata->phar->filename);
@@ -878,7 +966,7 @@ static php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, cha
 
 static int phar_close(php_stream *stream, int close_handle TSRMLS_DC) /* {{{ */
 {
-	phar_internal_file_data *data = (phar_internal_file_data *)stream->abstract;
+	phar_entry_data *data = (phar_entry_data *)stream->abstract;
 
 	/* data->fp is the temporary memory stream containing this file's data */
 	if (data->fp) {
@@ -940,7 +1028,7 @@ static int phar_seekdir(php_stream *stream, off_t offset, int whence, off_t *new
 
 static size_t phar_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
-	phar_internal_file_data *data = (phar_internal_file_data *)stream->abstract;
+	phar_entry_data *data = (phar_entry_data *)stream->abstract;
 
 	return php_stream_read(data->fp, buf, count);
 }
@@ -975,7 +1063,7 @@ static size_t phar_readdir(php_stream *stream, char *buf, size_t count TSRMLS_DC
 
 static int phar_seek(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC) /* {{{ */
 {
-	phar_internal_file_data *data = (phar_internal_file_data *)stream->abstract;
+	phar_entry_data *data = (phar_entry_data *)stream->abstract;
 
 	int res = php_stream_seek(data->fp, offset, whence);
 	*newoffset = php_stream_tell(data->fp);
@@ -995,22 +1083,22 @@ static int phar_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static void phar_dostat(phar_manifest_entry *data, php_stream_statbuf *ssb, zend_bool is_dir, char *alias,
+static void phar_dostat(phar_entry_info *data, php_stream_statbuf *ssb, zend_bool is_dir, char *alias,
 			int alias_len TSRMLS_DC);
 
 static int phar_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC) /* {{{ */
 {
-	phar_internal_file_data *data;
+	phar_entry_data *data;
 	/* If ssb is NULL then someone is misbehaving */
 	if (!ssb) return -1;
 
-	data = (phar_internal_file_data *)stream->abstract;
+	data = (phar_entry_data *)stream->abstract;
 	phar_dostat(data->internal_file, ssb, 0, data->phar->alias, data->phar->alias_len TSRMLS_CC);
 	return 0;
 }
 /* }}} */
 
-static void phar_dostat(phar_manifest_entry *data, php_stream_statbuf *ssb, zend_bool is_dir, char *alias,
+static void phar_dostat(phar_entry_info *data, php_stream_statbuf *ssb, zend_bool is_dir, char *alias,
 			int alias_len TSRMLS_DC) /* {{{ */
 {
 	char *tmp;
@@ -1079,8 +1167,8 @@ static int phar_stream_stat(php_stream_wrapper *wrapper, char *url, int flags,
 	char *internal_file, *key;
 	uint keylen;
 	ulong unused;
-	phar_file_data *phar;
-	phar_manifest_entry *entry;
+	phar_archieve_data *phar;
+	phar_entry_info *entry;
 
 	resource = php_url_parse(url);
 
@@ -1089,10 +1177,8 @@ static int phar_stream_stat(php_stream_wrapper *wrapper, char *url, int flags,
 	}
 
 	/* we must have at the very least phar://alias.phar/internalfile.php */
-	if (!resource || !resource->scheme || !resource->host || !resource->path) {
-		if (resource) {
-			php_url_free(resource);
-		}
+	if (!resource->scheme || !resource->host || !resource->path) {
+		php_url_free(resource);
 		php_stream_wrapper_log_error(wrapper, flags TSRMLS_CC, "phar error: invalid url \"%s\"", url);
 		return -1;
 	}
@@ -1105,7 +1191,7 @@ static int phar_stream_stat(php_stream_wrapper *wrapper, char *url, int flags,
 
 	internal_file = resource->path + 1; /* strip leading "/" */
 	/* find the phar in our trusty global hash indexed by alias (host of phar://blah.phar/file.whatever) */
-	if ((phar = phar_get_file_data(resource->host, strlen(resource->host), NULL, 0 TSRMLS_CC)) != NULL) {
+	if ((phar = phar_get_archieve(resource->host, strlen(resource->host), NULL, 0 TSRMLS_CC)) != NULL) {
 		if (*internal_file == '\0') {
 			/* root directory requested */
 			phar_dostat(NULL, ssb, 1, phar->alias, phar->alias_len TSRMLS_CC);
@@ -1160,12 +1246,11 @@ static int compare_dir_name(const void *a, const void *b TSRMLS_DC)  /* {{{ */
 	f = *((Bucket **) a);
 	s = *((Bucket **) b);
 
-	result = zend_binary_strcmp(f->arKey, f->nKeyLength,
-				    s->arKey, s->nKeyLength);
-
-	if (result == 0) {
-		return 0;
-	} 
+#if (PHP_MAJOR_VERSION < 6)
+	result = zend_binary_strcmp(f->arKey, f->nKeyLength, s->arKey, s->nKeyLength);
+#else
+	result = zend_binary_strcmp(f->key.arKey.s, f->nKeyLength, s->key.arKey.s, s->nKeyLength);
+#endif
 
 	if (result < 0) {
 		return -1;
@@ -1174,8 +1259,6 @@ static int compare_dir_name(const void *a, const void *b TSRMLS_DC)  /* {{{ */
 	} else {
 		return 0;
 	}
-
-	return 0;
 }
 /* }}} */
 
@@ -1272,8 +1355,8 @@ static php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filename, cha
 	char *internal_file, *key;
 	uint keylen;
 	ulong unused;
-	phar_file_data *phar;
-	phar_manifest_entry *entry;
+	phar_archieve_data *phar;
+	phar_entry_info *entry;
 
 	resource = php_url_parse(filename);
 
@@ -1282,15 +1365,13 @@ static php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filename, cha
 	}
 
 	/* we must have at the very least phar://alias.phar/ */
-	if (!resource || !resource->scheme || !resource->host || !resource->path) {
-		if (resource && resource->host && !resource->path) {
+	if (!resource->scheme || !resource->host || !resource->path) {
+		if (resource->host && !resource->path) {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: no directory in \"%s\", must have at least phar://%s/ for root directory", filename, resource->host);
 			php_url_free(resource);
 			return NULL;
 		}
-		if (resource) {
-			php_url_free(resource);
-		}
+		php_url_free(resource);
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\", must have at least phar://%s/", filename, filename);
 		return NULL;
 	}
@@ -1302,7 +1383,7 @@ static php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filename, cha
 	}
 
 	internal_file = resource->path + 1; /* strip leading "/" */
-	if ((phar = phar_get_file_data(resource->host, strlen(resource->host), NULL, 0 TSRMLS_CC)) != NULL) {
+	if ((phar = phar_get_archieve(resource->host, strlen(resource->host), NULL, 0 TSRMLS_CC)) != NULL) {
 		if (*internal_file == '\0') {
 			/* root directory requested */
 			internal_file = estrndup(internal_file - 1, 1);
@@ -1340,6 +1421,196 @@ static php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filename, cha
 }
 /* }}} */
 
+/* {{{ proto void Phar::__construct(string fname [, int flags [, string alias]])
+ * Construct a Phar archieve object
+ */
+PHP_METHOD(Phar, __construct)
+{
+	char *fname, *alias = NULL;
+	int fname_len, alias_len = 0;
+	long flags = 0;
+	phar_archieve_object *phar_obj;
+	phar_archieve_data   *phar_data;
+	zval *zobj = getThis(), arg1, arg2;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls", &fname, &fname_len, &flags, &alias, &alias_len) == FAILURE) {
+		return;
+	}
+
+	phar_obj = (phar_archieve_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (phar_obj->arc.archieve) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Cannot call constructor twice");
+		return;
+	}
+
+	if (phar_open_filename(fname, fname_len, alias, alias_len, &phar_data TSRMLS_CC) == FAILURE) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"Cannot open phar file '%s' with alias '%s'", fname, alias);
+		return;
+	}
+
+	phar_obj->arc.archieve = phar_data;
+
+	fname_len = spprintf(&fname, 0, "phar://%s", fname);
+
+	INIT_PZVAL(&arg1);
+	ZVAL_STRINGL(&arg1, fname, fname_len, 0);
+
+	if (ZEND_NUM_ARGS() > 1) {
+		INIT_PZVAL(&arg2);
+		ZVAL_LONG(&arg2, flags);
+		zend_call_method_with_2_params(&zobj, Z_OBJCE_P(zobj), 
+			&spl_ce_RecursiveDirectoryIterator->constructor, "__construct", NULL, &arg1, &arg2);
+	} else {
+		zend_call_method_with_1_params(&zobj, Z_OBJCE_P(zobj), 
+			&spl_ce_RecursiveDirectoryIterator->constructor, "__construct", NULL, &arg1);
+	}
+
+	phar_obj->spl.info_class = phar_ce_entry;
+
+	efree(fname);
+}
+/* }}} */
+
+#define PHAR_ARCHIEVE_OBJECT() \
+	phar_archieve_object *phar_obj = (phar_archieve_object*)zend_object_store_get_object(getThis() TSRMLS_CC); \
+	if (!phar_obj->arc.archieve) { \
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, \
+			"Cannot call method on an uninitialzed Phar object"); \
+		return; \
+	}
+
+/* {{{ proto int Phar::count()
+ * Returns the number of entries in the Phar archieve
+ */
+PHP_METHOD(Phar, count)
+{
+	PHAR_ARCHIEVE_OBJECT();
+	
+	RETURN_LONG(zend_hash_num_elements(&phar_obj->arc.archieve->manifest));
+}
+/* }}} */
+
+/* {{{ proto string Phar::getVersion()
+ * Return version info of Phar archieve
+ */
+PHP_METHOD(Phar, getVersion)
+{
+	PHAR_ARCHIEVE_OBJECT();
+	
+	RETURN_STRING(phar_obj->arc.archieve->version, 1);
+}
+/* }}} */
+
+/* {{{ proto void PharFileInfo::__construct(string entry)
+ * Construct a Phar entry object
+ */
+PHP_METHOD(PharFileInfo, __construct)
+{
+	char *fname, *arch, *entry;
+	int fname_len, arch_len, entry_len;
+	phar_entry_object  *entry_obj;
+	phar_entry_info    *entry_info;
+	phar_archieve_data *phar_data;
+	zval *zobj = getThis(), arg1;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &fname, &fname_len) == FAILURE) {
+		return;
+	}
+
+	entry_obj = (phar_entry_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (entry_obj->ent.entry) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Cannot call constructor twice");
+		return;
+	}
+
+	if (phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC) == FAILURE) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"Cannot access phar file entry '%s'", fname);
+		return;
+	}
+
+	if (phar_open_filename(arch, arch_len, NULL, 0, &phar_data TSRMLS_CC) == FAILURE) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"Cannot open phar file '%s'", fname);
+		return;
+	}
+
+	if ((entry_info = phar_get_entry_info(phar_data, entry, entry_len TSRMLS_CC)) == NULL) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"Cannot access phar file entry '%s' in archieve '%s'", entry, arch);
+		return;
+	}
+
+	entry_obj->ent.entry = entry_info;
+
+	INIT_PZVAL(&arg1);
+	ZVAL_STRINGL(&arg1, fname, fname_len, 0);
+
+	zend_call_method_with_1_params(&zobj, Z_OBJCE_P(zobj), 
+		&spl_ce_SplFileInfo->constructor, "__construct", NULL, &arg1);
+}
+/* }}} */
+
+#define PHAR_ENTRY_OBJECT() \
+	phar_entry_object *entry_obj = (phar_entry_object*)zend_object_store_get_object(getThis() TSRMLS_CC); \
+	if (!entry_obj->ent.entry) { \
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, \
+			"Cannot call method on an uninitialzed PharFileInfo object"); \
+		return; \
+	}
+
+/* {{{ proto int PharFileInfo::getCompressedSize()
+ * Returns the compressed size
+ */
+PHP_METHOD(PharFileInfo, getCompressedSize)
+{
+	PHAR_ENTRY_OBJECT();
+	
+	RETURN_LONG(entry_obj->ent.entry->compressed_filesize);
+}
+/* }}} */
+
+/* {{{ proto int PharFileInfo::getCRC32()
+ * Returns CRC32 code or throws an exception if not CRC checked
+ */
+PHP_METHOD(PharFileInfo, getCRC32)
+{
+	PHAR_ENTRY_OBJECT();
+
+	if (entry_obj->ent.entry->crc_checked) {
+		RETURN_LONG(entry_obj->ent.entry->crc32);
+	} else {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, \
+			"Phar entry was not CRC checked"); \
+	}
+}
+/* }}} */
+
+/* {{{ proto int PharFileInfo::getPharFlags()
+ * Returns the Phar file entry flags
+ */
+PHP_METHOD(PharFileInfo, getPharFlags)
+{
+	PHAR_ENTRY_OBJECT();
+	
+	RETURN_LONG(entry_obj->ent.entry->flags);
+}
+/* }}} */
+
+/* {{{ proto int PharFileInfo::isCRCChecked()
+ * Returns whether file entry is CRC checked
+ */
+PHP_METHOD(PharFileInfo, isCRCChecked)
+{
+	PHAR_ENTRY_OBJECT();
+	
+	RETURN_BOOL(entry_obj->ent.entry->crc_checked);
+}
+/* }}} */
+
 #ifdef COMPILE_DL_PHAR
 ZEND_GET_MODULE(phar)
 #endif
@@ -1351,6 +1622,13 @@ ZEND_GET_MODULE(phar)
 function_entry phar_functions[] = {
 	{NULL, NULL, NULL}	/* Must be the last line in phar_functions[] */
 };
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_phar___construct, 0)
+	ZEND_ARG_INFO(0, fname)
+	ZEND_ARG_INFO(1, flags)
+	ZEND_ARG_INFO(1, alias)
+ZEND_END_ARG_INFO();
 
 static
 ZEND_BEGIN_ARG_INFO(arginfo_phar_mapPhar, 0)
@@ -1365,10 +1643,29 @@ ZEND_BEGIN_ARG_INFO(arginfo_phar_loadPhar, 0)
 ZEND_END_ARG_INFO();
 
 zend_function_entry php_archive_methods[] = {
+	PHP_ME(Phar, __construct,   arginfo_phar___construct,  0)
+	PHP_ME(Phar, count,         NULL,                      0)
+	PHP_ME(Phar, getVersion,    NULL,                      0)
+	/* static member functions */
 	PHP_ME(Phar, apiVersion,    NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, canCompress,   NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, mapPhar,       arginfo_phar_mapPhar,      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, loadPhar,      arginfo_phar_loadPhar,     ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	{NULL, NULL, NULL}
+};
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_entry___construct, 0)
+	ZEND_ARG_INFO(0, fname)
+	ZEND_ARG_INFO(1, flags)
+ZEND_END_ARG_INFO();
+
+zend_function_entry php_entry_methods[] = {
+	PHP_ME(PharFileInfo, __construct,        arginfo_entry___construct,  0)
+	PHP_ME(PharFileInfo, getCompressedSize,  NULL,                       0)
+	PHP_ME(PharFileInfo, getCRC32,           NULL,                       0)
+	PHP_ME(PharFileInfo, getPharFlags,       NULL,                       0)
+	PHP_ME(PharFileInfo, isCRCChecked,       NULL,                       0)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -1385,11 +1682,17 @@ static void php_phar_init_globals_module(zend_phar_globals *phar_globals)
  */
 PHP_MINIT_FUNCTION(phar)
 {
-	zend_class_entry php_archive_entry;
+	zend_class_entry ce;
+
 	ZEND_INIT_MODULE_GLOBALS(phar, php_phar_init_globals_module, NULL);
 
-	INIT_CLASS_ENTRY(php_archive_entry, "Phar", php_archive_methods);
-	php_archive_entry_ptr = zend_register_internal_class(&php_archive_entry TSRMLS_CC);
+	INIT_CLASS_ENTRY(ce, "Phar", php_archive_methods);
+	phar_ce_archieve = zend_register_internal_class_ex(&ce, spl_ce_RecursiveDirectoryIterator, NULL  TSRMLS_CC);
+
+	zend_class_implements(phar_ce_archieve TSRMLS_CC, 1, spl_ce_Countable);
+
+	INIT_CLASS_ENTRY(ce, "PharFileInfo", php_entry_methods);
+	phar_ce_entry = zend_register_internal_class_ex(&ce, spl_ce_SplFileInfo, NULL  TSRMLS_CC);
 
 	return php_register_url_stream_wrapper("phar", &php_stream_phar_wrapper TSRMLS_CC);
 }
@@ -1407,8 +1710,8 @@ PHP_MSHUTDOWN_FUNCTION(phar)
  */
 PHP_RINIT_FUNCTION(phar)
 {
-	zend_hash_init(&(PHAR_GLOBALS->phar_fname_map), sizeof(phar_file_data),  zend_get_hash_value, destroy_phar_data, 0);
-	zend_hash_init(&(PHAR_GLOBALS->phar_alias_map), sizeof(phar_file_data*), zend_get_hash_value, NULL, 0);
+	zend_hash_init(&(PHAR_GLOBALS->phar_fname_map), sizeof(phar_archieve_data),  zend_get_hash_value, destroy_phar_data, 0);
+	zend_hash_init(&(PHAR_GLOBALS->phar_alias_map), sizeof(phar_archieve_data*), zend_get_hash_value, NULL, 0);
 	return SUCCESS;
 }
 /* }}} */
@@ -1457,6 +1760,7 @@ static zend_module_dep phar_deps[] = {
 #if HAVE_BZ2
 	ZEND_MOD_REQUIRED("bz2")
 #endif
+	ZEND_MOD_REQUIRED("spl")
 	{NULL, NULL, NULL}
 };
 

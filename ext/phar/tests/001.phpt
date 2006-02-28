@@ -4,7 +4,9 @@ Phar::apiVersion
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 --FILE--
 <?php
-echo Phar::apiVersion();
+var_dump(Phar::apiVersion());
 ?>
+===DONE===
 --EXPECT--
-0.8.0
+string(5) "0.8.0"
+===DONE===

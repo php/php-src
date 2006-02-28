@@ -47,4 +47,4 @@ unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php
 bool(true)
 bool(true)
 
-Fatal error: Phar::loadPhar(): alias "copy" is already used for archive "%s029.1.phar.php" cannot be overloaded with "%s029.2.phar.php" in %s029.php on line %d
+%satal error: Phar::loadPhar(): alias "copy" is already used for archive "%s029.1.phar.php" cannot be overloaded with "%s029.2.phar.php" in %s029.php on line %d

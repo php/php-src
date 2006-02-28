@@ -14,4 +14,4 @@ include dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
-Fatal error: Phar::mapPhar(): internal corruption of phar "%s" (truncated manifest) in %s on line %d
+%satal error: Phar::mapPhar(): internal corruption of phar "%s" (truncated manifest) in %s on line %d
