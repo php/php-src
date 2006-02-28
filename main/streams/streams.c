@@ -1638,7 +1638,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 			case SEEK_CUR:
 				if (offset == 0) {
 					/* nothing to do */
-					return 0;
+					return stream->position >= 0 ? 0 : -1;
 				}
 
 				if (offset > 0 && offset <= stream->readbuf_avail) {
