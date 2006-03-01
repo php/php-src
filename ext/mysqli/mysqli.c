@@ -200,11 +200,6 @@ zval *mysqli_read_property(zval *object, zval *member, int type TSRMLS_DC)
 
 	ret = FAILURE;
 	obj = (mysqli_object *)zend_objects_get_address(object TSRMLS_CC);
-	/* object was already destroyed */
-	if (!obj->ptr) {
-		retval = EG(uninitialized_zval_ptr);
-		return(retval);
-	}
 
  	if (member->type != IS_STRING) {
 		tmp_member = *member;
