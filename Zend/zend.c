@@ -360,7 +360,13 @@ ZEND_API void zend_make_string_zval(zval *expr, zval *expr_copy, int *use_copy)
 					zval *z = Z_OBJ_HANDLER_P(expr, get)(expr TSRMLS_CC);
 					if(Z_TYPE_P(z) != IS_OBJECT) {
 						zend_make_string_zval(z, expr_copy, use_copy);
-						FREE_ZVAL(z);
+						if (*use_copy) {
+							FREE_ZVAL(z);
+						} else {
+							ZVAL_ZVAL(expr_copy, z, 0, 1);
+							*use_copy = 1;
+							return;
+						}
 						break;
 					}
 				}
@@ -421,7 +427,13 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 				zval *z = Z_OBJ_HANDLER_P(expr, get)(expr TSRMLS_CC);
 				if(Z_TYPE_P(z) != IS_OBJECT) {
 					zend_make_printable_zval(z, expr_copy, use_copy);
-					FREE_ZVAL(z);
+					if (*use_copy) {
+						FREE_ZVAL(z);
+					} else {
+						ZVAL_ZVAL(expr_copy, z, 0, 1);
+						*use_copy = 1;
+						return;
+					}
 					break;
 				}
 			}
@@ -465,7 +477,13 @@ ZEND_API void zend_make_unicode_zval(zval *expr, zval *expr_copy, int *use_copy)
 				zval *z = Z_OBJ_HANDLER_P(expr, get)(expr TSRMLS_CC);
 				if(Z_TYPE_P(z) != IS_OBJECT) {
 					zend_make_unicode_zval(z, expr_copy, use_copy);
-					FREE_ZVAL(z);
+					if (*use_copy) {
+						FREE_ZVAL(z);
+					} else {
+						ZVAL_ZVAL(expr_copy, z, 0, 1);
+						*use_copy = 1;
+						return;
+					}
 					break;
 				}
 			}
