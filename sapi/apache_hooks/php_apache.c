@@ -566,7 +566,7 @@ static void add_header_to_table(table *t, INTERNAL_FUNCTION_PARAMETERS)
 	zval *first = NULL;
 	zval *second = NULL;
 	zval **entry, **value;
-	char *string_key;
+	zstr string_key;
 	uint string_key_len;
 	ulong num_key;
 	
@@ -584,7 +584,7 @@ static void add_header_to_table(table *t, INTERNAL_FUNCTION_PARAMETERS)
 				while (zend_hash_get_current_data_ex(Z_ARRVAL_P(first), (void **)&entry, &pos) == SUCCESS) {
 					switch(zend_hash_get_current_key_ex(Z_ARRVAL_P(first), &string_key, &string_key_len, &num_key, 0, &pos)) {
 						case HASH_KEY_IS_STRING:
-							if (zend_hash_find(Z_ARRVAL_P(first), string_key, string_key_len, (void **)&value) == FAILURE) {
+							if (zend_hash_find(Z_ARRVAL_P(first), string_key.s, string_key_len, (void **)&value) == FAILURE) {
 								zend_hash_move_forward_ex(Z_ARRVAL_P(first), &pos);
 								continue;
 							}
@@ -595,9 +595,9 @@ static void add_header_to_table(table *t, INTERNAL_FUNCTION_PARAMETERS)
 
 							convert_to_string_ex(value);
 							if (replace)
-								ap_table_set(t, string_key, Z_STRVAL_PP(value));
+								ap_table_set(t, string_key.s, Z_STRVAL_PP(value));
 							else
-								ap_table_merge(t, string_key, Z_STRVAL_PP(value));
+								ap_table_merge(t, string_key.s, Z_STRVAL_PP(value));
 							
 							break;
 						case HASH_KEY_IS_LONG:

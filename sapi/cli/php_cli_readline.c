@@ -277,7 +277,7 @@ int cli_is_valid_code(char *code, int len, char **prompt TSRMLS_DC)
 
 static char *cli_completion_generator_ht(const char *text, int textlen, int *state, HashTable *ht, void **pData TSRMLS_DC) /* {{{ */
 {
-	char *name;
+	zstr name;
 	ulong number;
 
 	if (!(*state % 2)) {
@@ -286,12 +286,12 @@ static char *cli_completion_generator_ht(const char *text, int textlen, int *sta
 	}
 	while(zend_hash_has_more_elements(ht) == SUCCESS) {
 		zend_hash_get_current_key(ht, &name, &number, 0);
-		if (!textlen || (UG(unicode) ? !zend_cmp_unicode_and_string((UChar *)name, (char *)text, textlen) : !strncmp(name, text, textlen))) {
+		if (!textlen || (UG(unicode) ? !zend_cmp_unicode_and_string(name.u, (char *)text, textlen) : !strncmp(name.s, text, textlen))) {
 			if (pData) {
 				zend_hash_get_current_data(ht, pData);
 			}
 			zend_hash_move_forward(ht);
-			return name;
+			return name.s;
 		}
 		if (zend_hash_move_forward(ht) == FAILURE) {
 			break;

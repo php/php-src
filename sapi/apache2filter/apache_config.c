@@ -131,7 +131,7 @@ void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf)
 	php_conf_rec *d = base_conf, *e = new_conf;
 	php_dir_entry *pe;
 	php_dir_entry *data;
-	char *str;
+	zstr str;
 	uint str_len;
 	ulong num_index;
 
@@ -142,10 +142,10 @@ void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf)
 			zend_hash_move_forward(&d->config)) {
 		pe = NULL;
 		zend_hash_get_current_data(&d->config, (void **) &data);
-		if (zend_hash_find(&e->config, str, str_len, (void **) &pe) == SUCCESS) {
+		if (zend_hash_find(&e->config, str.s, str_len, (void **) &pe) == SUCCESS) {
 			if (pe->status >= data->status) continue;
 		}
-		zend_hash_update(&e->config, str, str_len, data, sizeof(*data), NULL);
+		zend_hash_update(&e->config, str.s, str_len, data, sizeof(*data), NULL);
 		phpapdebug((stderr, "ADDING/OVERWRITING %s (%d vs. %d)\n", str, 
 					data->status, pe?pe->status:-1));
 	}
@@ -167,7 +167,7 @@ char *get_php_config(void *conf, char *name, size_t name_len)
 void apply_config(void *dummy)
 {
 	php_conf_rec *d = dummy;
-	char *str;
+	zstr str;
 	uint str_len;
 	php_dir_entry *data;
 	
@@ -176,8 +176,8 @@ void apply_config(void *dummy)
 				NULL) == HASH_KEY_IS_STRING;
 			zend_hash_move_forward(&d->config)) {
 		zend_hash_get_current_data(&d->config, (void **) &data);
-		phpapdebug((stderr, "APPLYING (%s)(%s)\n", str, data->value));
-		if (zend_alter_ini_entry(str, str_len, data->value, data->value_len, 
+		phpapdebug((stderr, "APPLYING (%s)(%s)\n", str.s, data->value));
+		if (zend_alter_ini_entry(str.s, str_len, data->value, data->value_len, 
 					data->status, PHP_INI_STAGE_ACTIVATE) == FAILURE) {
 			phpapdebug((stderr, "..FAILED\n"));
 		}	
