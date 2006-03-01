@@ -1,5 +1,7 @@
 --TEST--
 zend_strtod() leaks on big doubles
+--INI--
+precision=14
 --FILE--
 <?php
 var_dump("1139932690.21688500" - "1139932790.21688500");
