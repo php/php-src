@@ -1685,11 +1685,7 @@ PHP_FUNCTION(simplexml_load_file)
 		return;
 	}
 
-#if LIBXML_VERSION >= 20600
 	docp = xmlReadFile(filename, NULL, options);
-#else
-	docp = xmlParseFile(filename);
-#endif
 
 	if (! docp) {
 		RETURN_FALSE;
@@ -1729,11 +1725,7 @@ PHP_FUNCTION(simplexml_load_string)
 		return;
 	}
 
-#if LIBXML_VERSION >= 20600
 	docp = xmlReadMemory(data, data_len, NULL, NULL, options);
-#else
-	docp = xmlParseMemory(data, data_len);
-#endif
 
 	if (! docp) {
 		RETURN_FALSE;
@@ -1775,11 +1767,9 @@ SXE_METHOD(__construct)
 	}
 
 	php_std_error_handling();
-#if LIBXML_VERSION >= 20600
+
 	docp = is_url ? xmlReadFile(data, NULL, options) : xmlReadMemory(data, data_len, NULL, NULL, options);
-#else
-	docp = is_url ? xmlParseFile(data) : xmlParseMemory(data, data_len);
-#endif
+
 	if (!docp) {
 		((php_libxml_node_object *)sxe)->document = NULL;
 		zend_throw_exception(zend_exception_get_default(), "String could not be parsed as XML", 0 TSRMLS_CC);
