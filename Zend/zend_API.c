@@ -1062,6 +1062,7 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC
 		zend_class_entry *old_scope = *scope;
 
 		*scope = class_type;
+		zend_hash_apply_with_argument(&class_type->constants_table, (apply_func_arg_t) zval_update_constant, (void*)1 TSRMLS_CC);
 		zend_hash_apply_with_argument(&class_type->default_properties, (apply_func_arg_t) zval_update_constant, (void *) 1 TSRMLS_CC);
 
 		if (!CE_STATIC_MEMBERS(class_type)) {
