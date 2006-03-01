@@ -3174,7 +3174,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 	HashTable *fe_ht;
 	zend_object_iterator *iter = NULL;
 	int key_type;
-	zend_bool use_key = opline->extended_value & ZEND_FE_FETCH_WITH_KEY;
+	zend_bool use_key = (zend_bool)(opline->extended_value & ZEND_FE_FETCH_WITH_KEY);
 
 	PZVAL_LOCK(array);
 
