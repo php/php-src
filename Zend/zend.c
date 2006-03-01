@@ -365,9 +365,8 @@ ZEND_API void zend_make_string_zval(zval *expr, zval *expr_copy, int *use_copy)
 						} else {
 							ZVAL_ZVAL(expr_copy, z, 0, 1);
 							*use_copy = 1;
-							return;
 						}
-						break;
+						return;
 					}
 				}
 				zend_error(EG(exception) ? E_ERROR : E_RECOVERABLE_ERROR, "Object of class %v could not be converted to string", Z_OBJCE_P(expr)->name);
@@ -432,9 +431,8 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 					} else {
 						ZVAL_ZVAL(expr_copy, z, 0, 1);
 						*use_copy = 1;
-						return;
 					}
-					break;
+					return;
 				}
 			}
 			zend_error(EG(exception) ? E_ERROR : E_RECOVERABLE_ERROR, "Object of class %v could not be converted to string", Z_OBJCE_P(expr)->name);
@@ -482,9 +480,8 @@ ZEND_API void zend_make_unicode_zval(zval *expr, zval *expr_copy, int *use_copy)
 					} else {
 						ZVAL_ZVAL(expr_copy, z, 0, 1);
 						*use_copy = 1;
-						return;
 					}
-					break;
+					return;
 				}
 			}
 			zend_error(EG(exception) ? E_ERROR : E_RECOVERABLE_ERROR, "Object of class %v could not be converted to string", Z_OBJCE_P(expr)->name);
