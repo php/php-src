@@ -1,3 +1,59 @@
+2006-02-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend.h:
+      Fixed compilation on FreeBSD with gcc-3.2
+
+2006-02-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/streams/streams.c:
+      - If (SEEK_CUR,0) means an illegal seek we return -1 to denote the error
+
+2006-02-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      ext/session/tests/bug36459.phpt
+      ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re:
+      MFH: Fixed bug #36459 (Incorrect adding PHPSESSID to links, which
+      contains \r\n).
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re:
+      Parsers for previous patch
+
+    * ext/session/tests/bug36459.phpt
+      ext/session/tests/bug36459.phpt
+      ext/standard/url_scanner_ex.c:
+      
+      MFB51: Fixed bug #36459 (Incorrect adding PHPSESSID to links, which
+      contains \r\n).
+
+    * (PHP_5_1)
+      NEWS
+      ext/session/tests/bug36459.phpt
+      ext/session/tests/bug36459.phpt
+      ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re:
+      Fixed bug #36459 (Incorrect adding PHPSESSID to links, which contains
+      \r\n).
+
+2006-02-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * acinclude.m4:
+      - Fix the fix
+
+    * acinclude.m4:
+      - Fix dependency checks
+
+    * main/streams/streams.c
+      main/streams/userspace.c:
+      - Cleanup
+
+    * (PHP_5_1)
+      ext/iconv/iconv.c:
+      - Fix warning
+
 2006-02-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
