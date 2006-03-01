@@ -1089,7 +1089,7 @@ PHP_FUNCTION(explode)
 	void		*str, *delim;
 	int			str_len, delim_len;
 	zend_uchar	str_type, delim_type;
-	int			limit = -1;
+	long		limit = -1;
 	int			argc = ZEND_NUM_ARGS();
 
 	if ( argc < 2 || argc > 3 ) {
@@ -2226,7 +2226,7 @@ PHP_FUNCTION(strpos)
 	int haystack_len;
 	zend_uchar haystack_type;
 	zval **needle;
-	int   offset = 0;
+	long   offset = 0;
 	void *found = NULL;
 	char  needle_char[2];
 	UChar u_needle_char[3];
@@ -2825,8 +2825,8 @@ PHP_FUNCTION(substr)
 	int str_len;
 	int32_t cp_len;
 	zend_uchar str_type;
-	int l = -1;
-	int f;
+	long l = -1;
+	long f;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tl|l", &str, &str_len, &str_type, &f, &l) == FAILURE) {
 		return;
@@ -6148,9 +6148,9 @@ PHP_FUNCTION(str_pad)
 {
 	/* Input arguments */
 	void   *input;		/* Input string */
-	int32_t pad_length;	/* Length to pad to, in codepoints for Unicode */
+	long    pad_length;	/* Length to pad to, in codepoints for Unicode */
 	void   *padstr;		/* Padding string */
-	int32_t	pad_type;	/* Padding type (left/right/both) */
+	long    pad_type;	/* Padding type (left/right/both) */
 	int input_len, padstr_len; /* Lengths in code units for Unicode */
 	zend_uchar input_type, padstr_type;
 	
