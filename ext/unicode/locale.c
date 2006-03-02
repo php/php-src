@@ -99,7 +99,7 @@ PHPAPI UChar* php_u_strtotitle(UChar **s, int32_t *len, const char* locale)
 	UBreakIterator *brkiter;
 	
 	dest_len = *len;
-	brkiter = ubrk_open(UBRK_TITLE, locale, *s, *len, &status);
+	brkiter = ubrk_open(UBRK_WORD, locale, *s, *len, &status);
 	while (1) {
 		status = U_ZERO_ERROR;
 		dest = eurealloc(dest, dest_len+1);
