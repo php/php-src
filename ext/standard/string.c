@@ -181,7 +181,7 @@ PHP_MSHUTDOWN_FUNCTION(localeconv)
 # endif
 #endif
 
-/* {{{ proto string bin2hex(string data)
+/* {{{ proto string bin2hex(string data) U
    Converts the binary representation of data to hex */
 PHP_FUNCTION(bin2hex)
 {
@@ -284,7 +284,7 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 
 }
 
-/* {{{ proto int strspn(string str, string mask [, start [, len]])
+/* {{{ proto int strspn(string str, string mask [, start [, len]]) U
    Finds length of initial segment consisting entirely of characters found in mask. If start or/and length is provided works like strspn(substr($s,$start,$len),$good_chars) */
 PHP_FUNCTION(strspn)
 {
@@ -292,7 +292,7 @@ PHP_FUNCTION(strspn)
 }
 /* }}} */
 
-/* {{{ proto int strcspn(string str, string mask [, start [, len]])
+/* {{{ proto int strcspn(string str, string mask [, start [, len]]) U
    Finds length of initial segment consisting entirely of characters not found in mask. If start or/and length is provide works like strcspn(substr($s,$start,$len),$bad_chars) */
 PHP_FUNCTION(strcspn)
 {
@@ -792,7 +792,7 @@ static void php_do_trim(INTERNAL_FUNCTION_PARAMETERS, int mode)
 }
 /* }}} */
 
-/* {{{ proto string trim(string str [, string character_mask])
+/* {{{ proto string trim(string str [, string character_mask]) U
    Strips whitespace from the beginning and end of a string */
 PHP_FUNCTION(trim)
 {
@@ -800,7 +800,7 @@ PHP_FUNCTION(trim)
 }
 /* }}} */
 
-/* {{{ proto string rtrim(string str [, string character_mask])
+/* {{{ proto string rtrim(string str [, string character_mask]) U
    Removes trailing whitespace */
 PHP_FUNCTION(rtrim)
 {
@@ -808,7 +808,7 @@ PHP_FUNCTION(rtrim)
 }
 /* }}} */
 
-/* {{{ proto string ltrim(string str [, string character_mask])
+/* {{{ proto string ltrim(string str [, string character_mask]) U
    Strips whitespace from the beginning of a string */
 PHP_FUNCTION(ltrim)
 {
@@ -1082,7 +1082,7 @@ static void php_u_explode_negative_limit(UChar *delim, uint delim_len, UChar *st
 }
 /* }}} */
 
-/* {{{ proto array explode(string separator, string str [, int limit])
+/* {{{ proto array explode(string separator, string str [, int limit]) U
    Splits a string on string separator and return array of components. If limit is positive only limit number of components is returned. If limit is negative all components except the last abs(limit) are returned. */
 PHP_FUNCTION(explode)
 {
@@ -1240,7 +1240,7 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *retval)
 }
 /* }}} */
 
-/* {{{ proto string implode([string glue,] array pieces)
+/* {{{ proto string implode([string glue,] array pieces) U
    Joins array elements placing glue string between items and return one string */
 PHP_FUNCTION(implode)
 {
@@ -1300,7 +1300,7 @@ PHP_FUNCTION(implode)
 
 #define STRTOK_TABLE(p) BG(strtok_table)[(unsigned char) *p]	
 
-/* {{{ proto string strtok([string str,] string token)
+/* {{{ proto string strtok([string str,] string token) U
    Tokenize a string */
 PHP_FUNCTION(strtok)
 {
@@ -2111,7 +2111,7 @@ PHP_FUNCTION(stristr)
 }
 /* }}} */
 
-/* {{{ proto string strstr(string haystack, string needle[, bool part])
+/* {{{ proto string strstr(string haystack, string needle[, bool part]) U
    Finds first occurrence of a string within another */
 PHP_FUNCTION(strstr)
 {
@@ -2220,7 +2220,7 @@ PHP_FUNCTION(strstr)
    An alias for strstr */
 /* }}} */
 
-/* {{{ proto int strpos(text haystack, mixed needle [, int offset])
+/* {{{ proto int strpos(text haystack, mixed needle [, int offset]) U
    Finds position of first occurrence of a string within another */
 PHP_FUNCTION(strpos)
 {
@@ -2438,7 +2438,7 @@ PHP_FUNCTION(stripos)
 }
 /* }}} */
 
-/* {{{ proto int strrpos(string haystack, string needle [, int offset])
+/* {{{ proto int strrpos(string haystack, string needle [, int offset]) U
    Finds position of last occurrence of a string within another string */
 PHP_FUNCTION(strrpos)
 {
@@ -2664,7 +2664,7 @@ UChar *php_u_strrchr(UChar *s, UChar32 ch, int s_len)
 }
 /* }}} */
 
-/* {{{ proto string strrchr(string haystack, string needle)
+/* {{{ proto string strrchr(string haystack, string needle) U
    Finds the last occurrence of a character in a string within another */
 PHP_FUNCTION(strrchr)
 {
@@ -2819,7 +2819,7 @@ PHP_FUNCTION(chunk_split)
 }
 /* }}} */
 
-/* {{{ proto string substr(string str, int start [, int length])
+/* {{{ proto string substr(string str, int start [, int length]) U
    Returns part of a string */
 PHP_FUNCTION(substr)
 {
@@ -2974,7 +2974,7 @@ PHPAPI int php_do_substr_replace(void **result, zval **str, zval **repl, int f, 
 }
 /* }}} */
 
-/* {{{ proto mixed substr_replace(mixed str, mixed repl, mixed start [, mixed length])
+/* {{{ proto mixed substr_replace(mixed str, mixed repl, mixed start [, mixed length]) U
    Replaces part of a string with another string */
 PHP_FUNCTION(substr_replace)
 {
@@ -3203,7 +3203,7 @@ PHP_FUNCTION(quotemeta)
 }
 /* }}} */
 
-/* {{{ proto int ord(text character)
+/* {{{ proto int ord(text character) U
    Returns the codepoint value of a character */
 PHP_FUNCTION(ord)
 {
@@ -3222,7 +3222,7 @@ PHP_FUNCTION(ord)
 }
 /* }}} */
 
-/* {{{ proto text chr(int codepoint)
+/* {{{ proto text chr(int codepoint) U
    Converts a codepoint number to a character */
 PHP_FUNCTION(chr)
 {
@@ -3258,35 +3258,25 @@ PHP_FUNCTION(chr)
 static void php_u_ucfirst(zval *ustr, zval *return_value)
 {
 	UChar32 lc, uc;
-	UChar tmp[2] = {0, 0}; /* UChar32 will be converted to upto 2 UChar units ? */
-	int32_t tmp_len = 2;
-	int32_t pos = 0;
-	UErrorCode err = U_ZERO_ERROR;
+	UChar tmp[3] = { 0,}; /* UChar32 will be converted to upto 2 UChar units ? */
+	int tmp_len;
+	int pos = 0;
+	UErrorCode status = U_ZERO_ERROR;
 
-	U16_NEXT(Z_USTRVAL_P(ustr), pos, Z_USTRLEN_P(ustr), lc);
-	uc = u_toupper(lc);
-	if ( uc == lc ) {
-		ZVAL_UNICODEL(return_value, Z_USTRVAL_P(ustr), Z_USTRLEN_P(ustr), 1);
-		return;
-	}
-
-	u_strFromUTF32(tmp, tmp_len, &tmp_len, &uc, 1, &err);
-	if (U_FAILURE(err)) {
-		ZVAL_EMPTY_UNICODE(return_value);
-		return;
-	}
+	U16_FWD_1(Z_USTRVAL_P(ustr), pos, Z_USTRLEN_P(ustr));
+	tmp_len = u_strToUpper(tmp, tmp_len, Z_USTRVAL_P(ustr), pos, UG(default_locale), &status);
 
 	Z_USTRVAL_P(return_value) = eumalloc(tmp_len+Z_USTRLEN_P(ustr)-pos+1);
 	Z_USTRVAL_P(return_value)[0] = tmp[0];
 	if (tmp_len > 1) {
 		Z_USTRVAL_P(return_value)[1] = tmp[1];
 	}
-	memcpy(Z_USTRVAL_P(return_value)+tmp_len, Z_USTRVAL_P(ustr)+pos, UBYTES(Z_USTRLEN_P(ustr)-pos+1));
+	u_memcpy(Z_USTRVAL_P(return_value)+tmp_len, Z_USTRVAL_P(ustr)+pos, Z_USTRLEN_P(ustr)-pos+1);
 	Z_USTRLEN_P(return_value) = tmp_len+Z_USTRLEN_P(ustr)-pos;
 }
 /* }}} */
 
-/* {{{ proto string ucfirst(string str)
+/* {{{ proto string ucfirst(string str) U
    Makes a string's first character uppercase */
 PHP_FUNCTION(ucfirst)
 {
@@ -3316,7 +3306,7 @@ PHP_FUNCTION(ucfirst)
 }
 /* }}} */
 
-/* {{{ php_u_ucwords()
+/* {{{ php_u_ucwords() U
    Uppercase the first character of every word in an Unicode string */
 static void php_u_ucwords(zval *ustr, zval *retval)
 {
@@ -3576,7 +3566,7 @@ PHP_FUNCTION(strtr)
 }
 /* }}} */
 
-/* {{{ proto string strrev(string str)
+/* {{{ proto string strrev(string str) U
    Reverse a string */
 PHP_FUNCTION(strrev)
 {
@@ -3740,7 +3730,7 @@ static int php_u_similar_char(const UChar *txt1, int len1, const UChar *txt2, in
 }
 /* }}} */
 
-/* {{{ proto int similar_text(string str1, string str2 [, float percent])
+/* {{{ proto int similar_text(string str1, string str2 [, float percent]) U
    Calculates the similarity between two strings */
 PHP_FUNCTION(similar_text)
 {
@@ -3953,7 +3943,7 @@ PHP_FUNCTION(addcslashes)
 }
 /* }}} */
 
-/* {{{ proto string addslashes(string str)
+/* {{{ proto string addslashes(string str) U
    Escapes single quote, double quotes and backslash characters in a string with backslashes */
 PHP_FUNCTION(addslashes)
 {
@@ -4000,7 +3990,7 @@ PHP_FUNCTION(stripcslashes)
 }
 /* }}} */
 
-/* {{{ proto string stripslashes(string str)
+/* {{{ proto string stripslashes(string str) U
    Strips backslashes from a string */
 PHP_FUNCTION(stripslashes)
 {
@@ -5015,7 +5005,7 @@ PHP_FUNCTION(nl2br)
 /* }}} */
 
 
-/* {{{ proto string strip_tags(string str [, string allowable_tags])
+/* {{{ proto string strip_tags(string str [, string allowable_tags]) U
    Strips HTML and PHP tags from a string */
 PHP_FUNCTION(strip_tags)
 {
@@ -5765,7 +5755,7 @@ reg_char:
 }
 /* }}} */
 
-/* {{{ proto string str_repeat(string input, int mult)
+/* {{{ proto string str_repeat(string input, int mult) U
    Returns the input string repeat mult times */
 PHP_FUNCTION(str_repeat)
 {
@@ -6046,7 +6036,7 @@ PHP_FUNCTION(strnatcasecmp)
 }
 /* }}} */
 
-/* {{{ proto int substr_count(string haystack, string needle [, int offset [, int length]])
+/* {{{ proto int substr_count(string haystack, string needle [, int offset [, int length]]) U
    Returns the number of times a substring occurs in the string */
 PHP_FUNCTION(substr_count)
 {
@@ -6144,7 +6134,7 @@ PHP_FUNCTION(substr_count)
 }
 /* }}} */	
 
-/* {{{ proto string str_pad(string input, int pad_length [, string pad_string [, int pad_type]])
+/* {{{ proto string str_pad(string input, int pad_length [, string pad_string [, int pad_type]]) U
    Returns input string padded on the left or right to specified length with pad_string */
 PHP_FUNCTION(str_pad)
 {
@@ -6517,7 +6507,7 @@ PHP_FUNCTION(str_split)
 }
 /* }}} */
 
-/* {{{ proto array strpbrk(string haystack, string char_list)
+/* {{{ proto array strpbrk(string haystack, string char_list) U
    Search a string for any of a set of characters */
 PHP_FUNCTION(strpbrk)
 {
