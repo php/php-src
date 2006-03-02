@@ -508,7 +508,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 			HashTable *url_stream_wrappers_hash;
 			zstr stream_protocol;
 			char *stream_protocols_buf = NULL;
-			int stream_protocol_len, stream_protocols_buf_len = 0;
+			uint stream_protocol_len, stream_protocols_buf_len = 0;
 			ulong num_key;
 
 			if ((url_stream_wrappers_hash = php_stream_get_url_stream_wrappers_hash())) {
@@ -540,7 +540,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 			HashTable *stream_xport_hash;
 			zstr xport_name;
 			char *xport_buf = NULL;
-			int xport_name_len, xport_buf_len = 0, xport_buf_size = 0;
+			uint xport_name_len, xport_buf_len = 0, xport_buf_size = 0;
 			ulong num_key;
 
 			if ((stream_xport_hash = php_stream_xport_get_hash())) {
@@ -582,7 +582,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 			HashTable *stream_filter_hash;
 			zstr filter_name;
 			char *filter_buf = NULL;
-			int filter_name_len, filter_buf_len = 0, filter_buf_size = 0;
+			uint filter_name_len, filter_buf_len = 0, filter_buf_size = 0;
 			ulong num_key;
 
 			if ((stream_filter_hash = php_get_stream_filters_hash())) {

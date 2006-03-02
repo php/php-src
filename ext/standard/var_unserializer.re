@@ -430,11 +430,11 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	*p = YYCURSOR;
 	INIT_PZVAL(*rval);
 
-	if (!strncmp(start + 2, "NAN", 3)) {
+	if (!strncmp((char*)start + 2, "NAN", 3)) {
 		ZVAL_DOUBLE(*rval, php_get_nan());
-	} else if (!strncmp(start + 2, "INF", 3)) {
+	} else if (!strncmp((char*)start + 2, "INF", 3)) {
 		ZVAL_DOUBLE(*rval, php_get_inf());
-	} else if (!strncmp(start + 2, "-INF", 4)) {
+	} else if (!strncmp((char*)start + 2, "-INF", 4)) {
 		ZVAL_DOUBLE(*rval, -php_get_inf());
 	}
 

@@ -1926,7 +1926,7 @@ PHPAPI int php_handle_auth_data(const char *auth TSRMLS_DC)
 		char *pass;
 		char *user;
 
-		user = php_base64_decode(auth + 6, strlen(auth) - 6, NULL);
+		user = (char*)php_base64_decode((unsigned char*)auth + 6, strlen(auth) - 6, NULL);
 		if (user) {
 			pass = strchr(user, ':');
 			if (pass) {

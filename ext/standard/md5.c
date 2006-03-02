@@ -55,10 +55,10 @@ PHP_NAMED_FUNCTION(php_if_md5)
 	
 	md5str[0] = '\0';
 	PHP_MD5Init(&context);
-	PHP_MD5Update(&context, arg, arg_len);
+	PHP_MD5Update(&context, (unsigned char*)arg, arg_len);
 	PHP_MD5Final(digest, &context);
 	if (raw_output) {
-		RETURN_STRINGL(digest, 16, 1);
+		RETURN_STRINGL((char*)digest, 16, 1);
 	} else {
 		make_digest(md5str, digest);
 		RETVAL_ASCII_STRING(md5str, 1);
@@ -92,7 +92,7 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 
 	PHP_MD5Init(&context);
 
-	while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
+	while ((n = php_stream_read(stream, (char*)buf, sizeof(buf))) > 0) {
 		PHP_MD5Update(&context, buf, n);
 	}
 
@@ -105,7 +105,7 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 	}
 
 	if (raw_output) {
-		RETURN_STRINGL(digest, 16, 1);
+		RETURN_STRINGL((char*)digest, 16, 1);
 	} else {
 		make_digest(md5str, digest);
 		RETVAL_ASCII_STRING(md5str, 1);

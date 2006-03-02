@@ -474,7 +474,6 @@ PHP_FUNCTION(stream_bucket_new)
 	zval *zstream, *zbucket;
 	php_stream *stream;
 	zval *buffer;
-	char *pbuffer;
 	php_stream_bucket *bucket;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &zstream, &buffer) == FAILURE) {
@@ -510,7 +509,7 @@ PHP_FUNCTION(stream_bucket_new)
 PHP_FUNCTION(stream_get_filters)
 {
 	zstr filter_name;
-	int key_flags, filter_name_len = 0;
+	uint key_flags, filter_name_len = 0;
 	HashTable *filters_hash;
 	ulong num_key;
 

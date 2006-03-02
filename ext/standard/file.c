@@ -625,8 +625,8 @@ PHP_FUNCTION(file_put_contents)
 							numbytes = -1;
 							break;
 						} else if (wrote_bytes != UBYTES(Z_USTRLEN_PP(tmp))) {
-							int32_t ustrlen = u_countChar32(Z_USTRVAL_PP(tmp), Z_USTRLEN_PP(tmp));
-							int32_t numchars = u_countChar32(Z_USTRVAL_PP(tmp), wrote_bytes / UBYTES(1));
+							int ustrlen = u_countChar32(Z_USTRVAL_PP(tmp), Z_USTRLEN_PP(tmp));
+							int numchars = u_countChar32(Z_USTRVAL_PP(tmp), wrote_bytes / UBYTES(1));
 
 							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d characters written, possibly out of free disk space", numchars, ustrlen);
 							numbytes = -1;
@@ -675,8 +675,8 @@ PHP_FUNCTION(file_put_contents)
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %d characters to %s", Z_USTRLEN_P(data), filename);
 					numbytes = -1;
 				} else if (numbytes != UBYTES(Z_USTRLEN_P(data))) {
-					int32_t ustrlen = u_countChar32(Z_USTRVAL_P(data), Z_USTRLEN_P(data));
-					int32_t numchars = u_countChar32(Z_USTRVAL_P(data), numbytes / UBYTES(1));
+					int ustrlen = u_countChar32(Z_USTRVAL_P(data), Z_USTRLEN_P(data));
+					int numchars = u_countChar32(Z_USTRVAL_P(data), numbytes / UBYTES(1));
 
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d characters written, possibly out of free disk space", numchars, ustrlen);
 					numbytes = -1;
@@ -935,8 +935,7 @@ PHP_FUNCTION(popen)
 {
 	zval **arg1, **arg2;
 	FILE *fp;
-	char *p, *tmp = NULL;
-	char *b, *buf = 0;
+	char *p;
 	php_stream *stream;
 	
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
@@ -1076,7 +1075,7 @@ PHPAPI PHP_FUNCTION(fgetc)
 	} else {
 		if (is_unicode) {
 			UChar *ubuf = (UChar *)buf;
-			int32_t num_u16 = num_bytes >> 1;
+			int num_u16 = num_bytes >> 1;
 			ubuf[num_u16] = 0;
 			RETURN_UNICODEL(ubuf, num_u16, 1);
 		} else {

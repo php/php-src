@@ -101,7 +101,7 @@ static struct gfxinfo *php_handle_gif (php_stream * stream TSRMLS_DC)
 	if (php_stream_seek(stream, 3, SEEK_CUR))
 		return NULL;
 
-	if (php_stream_read(stream, dim, sizeof(dim)) != sizeof(dim))
+	if (php_stream_read(stream, (char*)dim, sizeof(dim)) != sizeof(dim))
 		return NULL;
 
 	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
@@ -124,7 +124,7 @@ static struct gfxinfo *php_handle_psd (php_stream * stream TSRMLS_DC)
 	if (php_stream_seek(stream, 11, SEEK_CUR))
 		return NULL;
 
-	if (php_stream_read(stream, dim, sizeof(dim)) != sizeof(dim))
+	if (php_stream_read(stream, (char*)dim, sizeof(dim)) != sizeof(dim))
 		return NULL;
 
 	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
@@ -146,7 +146,7 @@ static struct gfxinfo *php_handle_bmp (php_stream * stream TSRMLS_DC)
 	if (php_stream_seek(stream, 11, SEEK_CUR))
 		return NULL;
 
-	if (php_stream_read(stream, dim, sizeof(dim)) != sizeof(dim))
+	if (php_stream_read(stream, (char*)dim, sizeof(dim)) != sizeof(dim))
 		return NULL;
 
 	size   = (((unsigned int)dim[ 3]) << 24) + (((unsigned int)dim[ 2]) << 16) + (((unsigned int)dim[ 1]) << 8) + ((unsigned int) dim[ 0]);
@@ -196,22 +196,22 @@ static struct gfxinfo *php_handle_swc(php_stream * stream TSRMLS_DC)
 	unsigned long len=64, szlength;
 	int factor=1,maxfactor=16;
 	int slength, status=0;
-	char *b, *buf=NULL, *bufz=NULL;
+	unsigned char *b, *buf=NULL, *bufz=NULL;
 
 	b = ecalloc (1, len + 1);
 
 	if (php_stream_seek(stream, 5, SEEK_CUR))
 		return NULL;
 
-	if (php_stream_read(stream, a, sizeof(a)) != sizeof(a))
+	if (php_stream_read(stream, (char*)a, sizeof(a)) != sizeof(a))
 		return NULL;
 
-	if (uncompress(b, &len, a, sizeof(a)) != Z_OK) {
+	if (uncompress((unsigned char*)b, &len, a, sizeof(a)) != Z_OK) {
 		/* failed to decompress the file, will try reading the rest of the file */
 		if (php_stream_seek(stream, 8, SEEK_SET))
 			return NULL;
 
-		slength = php_stream_copy_to_mem(stream, &bufz, PHP_STREAM_COPY_ALL, 0);
+		slength = php_stream_copy_to_mem(stream, (char**)&bufz, PHP_STREAM_COPY_ALL, 0);
 		
 		/*
 		 * zlib::uncompress() wants to know the output data length
@@ -223,7 +223,7 @@ static struct gfxinfo *php_handle_swc(php_stream * stream TSRMLS_DC)
 		
 		do {
 			szlength=slength*(1<<factor++);
-			buf = (char *) erealloc(buf,szlength);
+			buf = (unsigned char *) erealloc(buf,szlength);
 			status = uncompress(buf, &szlength, bufz, slength);
 		} while ((status==Z_BUF_ERROR)&&(factor<maxfactor));
 		
@@ -268,7 +268,7 @@ static struct gfxinfo *php_handle_swf (php_stream * stream TSRMLS_DC)
 	if (php_stream_seek(stream, 5, SEEK_CUR))
 		return NULL;
 
-	if (php_stream_read(stream, a, sizeof(a)) != sizeof(a))
+	if (php_stream_read(stream, (char*)a, sizeof(a)) != sizeof(a))
 		return NULL;
 
 	result = (struct gfxinfo *) ecalloc (1, sizeof (struct gfxinfo));
@@ -301,7 +301,7 @@ static struct gfxinfo *php_handle_png (php_stream * stream TSRMLS_DC)
 	if (php_stream_seek(stream, 8, SEEK_CUR))
 		return NULL;
 
-	if((php_stream_read(stream, dim, sizeof(dim))) < sizeof(dim))
+	if((php_stream_read(stream, (char*)dim, sizeof(dim))) < sizeof(dim))
 		return NULL;
 
 	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
@@ -358,7 +358,7 @@ static unsigned short php_read2(php_stream * stream TSRMLS_DC)
 	unsigned char a[2];
 
 	/* just return 0 if we hit the end-of-file */
-	if((php_stream_read(stream, a, sizeof(a))) <= 0) return 0;
+	if((php_stream_read(stream, (char*)a, sizeof(a))) <= 0) return 0;
 
 	return (((unsigned short)a[0]) << 8) + ((unsigned short)a[1]);
 }
@@ -437,8 +437,8 @@ static int php_skip_variable(php_stream * stream TSRMLS_DC)
 static int php_read_APP(php_stream * stream, unsigned int marker, zval *info TSRMLS_DC)
 {
 	unsigned short length;
-	unsigned char *buffer;
-	unsigned char markername[16];
+	char *buffer;
+	char markername[16];
 	zval *tmp;
 
 	length = php_read2(stream TSRMLS_CC);
@@ -562,7 +562,7 @@ static unsigned int php_read4(php_stream * stream TSRMLS_DC)
 	unsigned char a[4];
 
 	/* just return 0 if we hit the end-of-file */
-	if ((php_stream_read(stream, a, sizeof(a))) != sizeof(a)) return 0;
+	if ((php_stream_read(stream, (char*)a, sizeof(a))) != sizeof(a)) return 0;
 
 	return (((unsigned int)a[0]) << 24)
 	     + (((unsigned int)a[1]) << 16)
@@ -803,7 +803,8 @@ static struct gfxinfo *php_handle_tiff (php_stream * stream, zval *info, int mot
 	unsigned char *dir_entry;
 	size_t ifd_size, dir_size, entry_value, width=0, height=0, ifd_addr;
 	int entry_tag , entry_type;
-	char *ifd_data, ifd_ptr[4];
+	unsigned char *ifd_data;
+	char ifd_ptr[4];
 
 	if (php_stream_read(stream, ifd_ptr, 4) != 4)
 		return NULL;
@@ -812,7 +813,7 @@ static struct gfxinfo *php_handle_tiff (php_stream * stream, zval *info, int mot
 		return NULL;
 	ifd_size = 2;
 	ifd_data = emalloc(ifd_size);
-	if (php_stream_read(stream, ifd_data, 2) != 2) {
+	if (php_stream_read(stream, (char*)ifd_data, 2) != 2) {
 		efree(ifd_data);
 		return NULL;
 	}
@@ -820,7 +821,7 @@ static struct gfxinfo *php_handle_tiff (php_stream * stream, zval *info, int mot
 	dir_size = 2/*num dir entries*/ +12/*length of entry*/*num_entries +4/* offset to next ifd (points to thumbnail or NULL)*/;
 	ifd_size = dir_size;
 	ifd_data = erealloc(ifd_data,ifd_size);
-	if (php_stream_read(stream, ifd_data+2, dir_size-2) != dir_size-2) {
+	if (php_stream_read(stream, (char*)ifd_data+2, dir_size-2) != dir_size-2) {
 		efree(ifd_data);
 		return NULL;
 	}
@@ -885,16 +886,16 @@ static struct gfxinfo *php_handle_iff(php_stream * stream TSRMLS_DC)
 	int size;
 	short width, height, bits;
 
-	if (php_stream_read(stream, a, 8) != 8) {
+	if (php_stream_read(stream, (char*)a, 8) != 8) {
 		return NULL;
 	}
-	if (strncmp(a+4, "ILBM", 4) && strncmp(a+4, "PBM ", 4)) {
+	if (strncmp((char*)a+4, "ILBM", 4) && strncmp((char*)a+4, "PBM ", 4)) {
 		return NULL;
 	}
 
 	/* loop chunks to find BMHD chunk */
 	do {
-		if (php_stream_read(stream, a, 8) != 8) {
+		if (php_stream_read(stream, (char*)a, 8) != 8) {
 			return NULL;
 		}
 		chunkId = php_ifd_get32s(a+0, 1);
@@ -906,7 +907,7 @@ static struct gfxinfo *php_handle_iff(php_stream * stream TSRMLS_DC)
 			size++;
 		}
 		if (chunkId == 0x424d4844) { /* BMHD chunk */
-			if (size < 9 || php_stream_read(stream, a, 9) != 9) {
+			if (size < 9 || php_stream_read(stream, (char*)a, 9) != 9) {
 				return NULL;
 			}
 			width  = php_ifd_get16s(a+0, 1);

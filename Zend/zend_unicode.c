@@ -215,7 +215,7 @@ ZEND_API void zend_convert_to_unicode(UConverter *conv, UChar **target, int *tar
 /* }}} */
 
 /* {{{ zend_convert_from_unicode */
-ZEND_API void zend_convert_from_unicode(UConverter *conv, char **target, int32_t *target_len, const UChar *source, int32_t source_len, UErrorCode *status)
+ZEND_API void zend_convert_from_unicode(UConverter *conv, char **target, int *target_len, const UChar *source, int source_len, UErrorCode *status)
 {
     char *buffer = NULL;
     char *output;
@@ -262,8 +262,8 @@ ZEND_API void zend_convert_from_unicode(UConverter *conv, char **target, int32_t
 
 /* {{{ zend_convert_encodings */
 ZEND_API void zend_convert_encodings(UConverter *target_conv, UConverter *source_conv,
-                                     char **target, int32_t *target_len,
-                                     const char *source, int32_t source_len, UErrorCode *status)
+                                     char **target, int *target_len,
+                                     const char *source, int source_len, UErrorCode *status)
 {
     char *buffer = NULL;
     char *output;
@@ -362,7 +362,7 @@ ZEND_API int zval_unicode_to_string(zval *string, UConverter *conv TSRMLS_DC)
 #endif
 
     UChar *u = Z_USTRVAL_P(string);
-    int32_t u_len = Z_USTRLEN_P(string);
+    int u_len = Z_USTRLEN_P(string);
 
     Z_TYPE_P(string) = IS_STRING;
     zend_convert_from_unicode(conv, &s, &s_len, u, u_len, &status);
@@ -383,7 +383,7 @@ ZEND_API int zval_string_to_unicode_ex(zval *string, UConverter *conv)
     UErrorCode status = U_ZERO_ERROR;
     int retval = TRUE;
     UChar *u = NULL;
-    int32_t u_len;
+    int u_len;
 
     char *s = Z_STRVAL_P(string);
     int s_len = Z_STRLEN_P(string);
@@ -413,7 +413,7 @@ ZEND_API int zend_cmp_unicode_and_string(UChar *ustr, char* str, uint len)
 {
     UErrorCode status = U_ZERO_ERROR;
     UChar *u = NULL;
-    int32_t u_len;
+    int u_len;
     int retval = TRUE;
 	TSRMLS_FETCH();
 
@@ -434,13 +434,13 @@ ZEND_API int zend_cmp_unicode_and_string(UChar *ustr, char* str, uint len)
  * range U+0000 .. U+007F, we can simply casst ASCII chars to Unicode values and avoid
  * memory allocation.
  */
-ZEND_API int zend_cmp_unicode_and_literal(UChar *ustr, int32_t ulen, char *str, int32_t  slen)
+ZEND_API int zend_cmp_unicode_and_literal(UChar *ustr, int ulen, char *str, int slen)
 {
-    int32_t result;
+    int result;
     uint len = MIN(ulen, slen);
 
     while (len--) {
-        result = (int32_t)(uint16_t)*ustr - (int32_t)(uint16_t)*str;
+        result = (int)(uint16_t)*ustr - (int)(uint16_t)*str;
         if (result != 0)
             return result;
         ustr++;
@@ -452,10 +452,11 @@ ZEND_API int zend_cmp_unicode_and_literal(UChar *ustr, int32_t ulen, char *str, 
 /* }}} */
 
 /* {{{ zend_is_valid_identifier */
-ZEND_API int zend_is_valid_identifier(UChar *ident, int32_t ident_len)
+ZEND_API int zend_is_valid_identifier(UChar *ident, int len)
 {
     UChar32 codepoint;
     int32_t i;
+    int32_t ident_len = len;
     UProperty id_prop = UCHAR_XID_START;
 
     for (i = 0; i < ident_len; ) {
@@ -472,7 +473,7 @@ ZEND_API int zend_is_valid_identifier(UChar *ident, int32_t ident_len)
 /* }}} */
 
 /* {{{ zend_normalize_string */
-static inline void zend_normalize_string(UChar **dest, int32_t *dest_len, UChar *src, int32_t src_len, UErrorCode *status)
+static inline void zend_normalize_string(UChar **dest, int32_t *dest_len, UChar *src, int src_len, UErrorCode *status)
 {
     UChar *buffer = NULL;
     int32_t buffer_len;

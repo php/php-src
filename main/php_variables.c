@@ -57,7 +57,7 @@ PHPAPI void php_register_variable_safe(char *var, char *strval, int str_len, zva
 	php_register_variable_ex(var, &new_entry, track_vars_array TSRMLS_CC);
 }
 
-PHPAPI void php_u_register_variable_safe(UChar *var, UChar *strval, int32_t str_len, zval *track_vars_array TSRMLS_DC)
+PHPAPI void php_u_register_variable_safe(UChar *var, UChar *strval, int str_len, zval *track_vars_array TSRMLS_DC)
 {
 	zval new_entry;
 	assert(strval != NULL);
@@ -244,7 +244,7 @@ PHPAPI void php_u_register_variable_ex(UChar *var, zval *val, zval *track_vars_a
 	UChar *p = NULL;
 	UChar *ip;		/* index pointer */
 	UChar *index;
-	int32_t var_len, index_len;
+	int var_len, index_len;
 	zval *gpc_element, **gpc_element_p;
 	zend_bool is_array;
 	HashTable *symtable1=NULL;
@@ -298,7 +298,7 @@ PHPAPI void php_u_register_variable_ex(UChar *var, zval *val, zval *track_vars_a
 		if (is_array) {
 			zstr escaped_index = NULL_ZSTR;
 			UChar *index_s;
-			int32_t new_idx_len = 0;
+			int new_idx_len = 0;
 
 			ip++;
 			index_s = ip;
@@ -402,9 +402,9 @@ SAPI_API SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 		if (val) { /* have a value */
 			if (UG(unicode)) {
 				UChar *u_var, *u_val;
-				int32_t u_var_len, u_val_len;
-				int32_t var_len;
-				int32_t val_len;
+				int u_var_len, u_val_len;
+				int var_len;
+				int val_len;
 				UErrorCode status1 = U_ZERO_ERROR, status2 = U_ZERO_ERROR;
 
 				*val++ = '\0';
@@ -534,7 +534,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 	var = php_strtok_r(res, separator, &strtok_buf);
 	
 	while (var) {
-		int32_t var_len;
+		int var_len;
 
 		val = strchr(var, '=');
 		if (val) {
@@ -545,7 +545,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 
 		if (UG(unicode)) {
 			UChar *u_var, *u_val;
-			int32_t u_var_len, u_val_len;
+			int u_var_len, u_val_len;
 			UErrorCode status = U_ZERO_ERROR;
 
 			zend_convert_to_unicode(input_conv, &u_var, &u_var_len, var, var_len, &status);

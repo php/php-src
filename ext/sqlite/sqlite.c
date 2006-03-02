@@ -1685,7 +1685,7 @@ PHP_FUNCTION(sqlite_fetch_column_types)
 			char *tmp = colnames[ncols + i] ? (char *)colnames[ncols + i] : "";
 			UErrorCode status = U_ZERO_ERROR;
 			UChar *u_str;
-			int32_t u_len;
+			int u_len;
 
 			zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, tmp, strlen(tmp), &status);
 			if (result_type == PHPSQLITE_ASSOC) {
@@ -1851,7 +1851,7 @@ static void php_sqlite_fetch_array(struct php_sqlite_result *res, int mode, zend
 			if (UG(unicode)) {
 				UErrorCode status = U_ZERO_ERROR;
 				UChar *u_str;
-				int32_t u_len;
+				int u_len;
 
 				zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, (char*)rowdata[j], strlen((char*)rowdata[j]), &status);
 				ZVAL_UNICODEL(decoded, u_str, u_len, 0);
@@ -1939,7 +1939,7 @@ static void php_sqlite_fetch_column(struct php_sqlite_result *res, zval *which, 
 	} else if (UG(unicode)) {
 		UErrorCode status = U_ZERO_ERROR;
 		UChar *u_str;
-		int32_t u_len;
+		int u_len;
 
 		zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, (char*)rowdata[j], strlen((char*)rowdata[j]), &status);
 		RETVAL_UNICODEL(u_str, u_len, 0);
@@ -2271,7 +2271,7 @@ static void php_sqlite_fetch_single(struct php_sqlite_result *res, zend_bool dec
 	} else if (UG(unicode)) {
 		UErrorCode status = U_ZERO_ERROR;
 		UChar *u_str;
-		int32_t u_len;
+		int u_len;
 
 		zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, decoded, decoded_len, &status);
 		if (free_decoded) {

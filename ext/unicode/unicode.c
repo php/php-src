@@ -38,7 +38,7 @@ static PHP_FUNCTION(unicode_decode)
 	UErrorCode status;
 	UConverter *conv = NULL;
 	UChar *target;
-	int32_t targetlen;
+	int targetlen;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ts", &input.vptr, &len, &type, &encoding, &enclen)) {
 		return;
@@ -87,7 +87,7 @@ static PHP_FUNCTION(unicode_encode)
 	UErrorCode status;
 	UConverter *conv = NULL;
 	char *target;
-	int32_t targetlen;
+	int targetlen;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "us", &uni, &len, &encoding, &enclen)) {
 		return;

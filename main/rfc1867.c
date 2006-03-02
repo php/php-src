@@ -298,7 +298,7 @@ static void safe_php_register_variable_ex(char *var, zval *val, zval *track_vars
 }
 
 
-static void safe_u_php_register_variable(UChar *var, UChar *str_val, int32_t str_len, zval *track_vars_array, zend_bool override_protection TSRMLS_DC)
+static void safe_u_php_register_variable(UChar *var, UChar *str_val, int str_len, zval *track_vars_array, zend_bool override_protection TSRMLS_DC)
 {
 	if (override_protection || !is_u_protected_variable(var TSRMLS_CC)) {
 		php_u_register_variable_safe(var, str_val, str_len, track_vars_array TSRMLS_CC);
@@ -324,7 +324,7 @@ static void register_http_post_files_variable(char *strvar, char *val, zval *htt
 }
 
 
-static void register_u_http_post_files_variable(UChar *strvar, UChar *val, int32_t val_len, zval *http_post_files, zend_bool override_protection TSRMLS_DC)
+static void register_u_http_post_files_variable(UChar *strvar, UChar *val, int val_len, zval *http_post_files, zend_bool override_protection TSRMLS_DC)
 {
 	int register_globals = PG(register_globals);
 
@@ -373,7 +373,7 @@ static inline UChar *php_ap_to_unicode(char *in, int32_t in_len, int32_t *out_le
 {
 	UErrorCode status = U_ZERO_ERROR;
 	UChar *buf;
-	int32_t buf_len = 0;
+	int buf_len = 0;
 	UConverter *input_conv = UG(http_input_encoding_conv);
 
 	if (!input_conv) {
@@ -752,11 +752,11 @@ static char *php_ap_getword(char **line, char stop)
 }
 
 
-static UChar *substring_u_conf(UChar *start, int32_t len, UChar quote TSRMLS_DC)
+static UChar *substring_u_conf(UChar *start, int len, UChar quote TSRMLS_DC)
 {
 	UChar *result = eumalloc(len + 2);
 	UChar *resp = result;
-	int32_t i;
+	int i;
 
 	for (i = 0; i < len; ++i) {
 		if (start[i] == '\\' && (start[i + 1] == '\\' || (quote && start[i + 1] == quote))) {

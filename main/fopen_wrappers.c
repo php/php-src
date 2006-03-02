@@ -312,7 +312,6 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 	char *pathbuf, *ptr, *end;
 	char *exec_fname;
 	char trypath[MAXPATHLEN];
-	struct stat sb;
 	FILE *fp;
 	int path_length;
 	int filename_length;

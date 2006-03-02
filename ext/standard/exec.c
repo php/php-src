@@ -61,7 +61,7 @@ int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
 	FILE *fp;
 	char *buf, *tmp=NULL;
 	int l, pclose_return;
-	char *cmd_p, *b, *c, *d=NULL;
+	char *cmd_p, *b, *d=NULL;
 	php_stream *stream;
 	size_t buflen, bufl = 0;
 #if PHP_SIGCHILD

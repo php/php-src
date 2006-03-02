@@ -43,25 +43,25 @@ void zend_set_converter_error_mode(UConverter *conv, uint8_t error_mode);
 /* API functions */
 
 ZEND_API void zend_convert_to_unicode(UConverter *conv, UChar **target, int *target_len, const char *source, int source_len, UErrorCode *status);
-ZEND_API void zend_convert_from_unicode(UConverter *conv, char **target, int32_t *target_len, const UChar *source, int32_t source_len, UErrorCode *status);
-ZEND_API void zend_convert_encodings(UConverter *target_conv, UConverter *source_conv, char **target, int32_t *target_len, const char *source, int32_t source_len, UErrorCode *status);
+ZEND_API void zend_convert_from_unicode(UConverter *conv, char **target, int *target_len, const UChar *source, int source_len, UErrorCode *status);
+ZEND_API void zend_convert_encodings(UConverter *target_conv, UConverter *source_conv, char **target, int *target_len, const char *source, int source_len, UErrorCode *status);
 ZEND_API int zval_string_to_unicode_ex(zval *string, UConverter *conv);
 ZEND_API int zval_string_to_unicode(zval *string TSRMLS_DC);
 ZEND_API int zval_unicode_to_string(zval *string, UConverter *conv TSRMLS_DC);
 
 ZEND_API int zend_cmp_unicode_and_string(UChar *ustr, char* str, uint len);
-ZEND_API int zend_cmp_unicode_and_literal(UChar *ustr, int32_t ulen, char* str, int32_t slen);
+ZEND_API int zend_cmp_unicode_and_literal(UChar *ustr, int ulen, char* str, int slen);
 
 ZEND_API void zend_case_fold_string(UChar **dest, int *dest_len, UChar *src, int src_len, uint32_t options, UErrorCode *status);
 
-ZEND_API int zend_is_valid_identifier(UChar *ident, int32_t ident_len);
+ZEND_API int zend_is_valid_identifier(UChar *ident, int ident_len);
 ZEND_API int zend_normalize_identifier(UChar **dest, int *dest_len, UChar *ident, int ident_len, zend_bool fold_case);
 
 /*
  * Function to get a codepoint at position n. Iterates over codepoints starting from the
  * beginning of the string. Does not check for n > length, this is left up to the caller.
  */
-static inline UChar32 zend_get_codepoint_at(UChar *str, int32_t length, int32_t n)
+static inline UChar32 zend_get_codepoint_at(UChar *str, int length, int n)
 {
 	int32_t offset = 0;
 	UChar32 c = 0;
