@@ -71,7 +71,10 @@ var_dump(ftell($fp));
 fclose($fp);
 ?>
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
+exit(0);
+ ?>
 --EXPECT--
 int(0)
 fseek($fp, 1)int(0)

@@ -21,6 +21,9 @@ foreach($phar as $name => $ent)
 	var_dump($ent->isFile());
 	var_dump($ent->isDir());
 	var_dump($ent->isLink());
+	var_dump($ent->getCTime());
+	var_dump($ent->getMTime());
+	var_dump($ent->getATime());
 }
 
 echo "==RECURSIVE==\n";
@@ -54,6 +57,9 @@ bool(false)
 bool(true)
 bool(false)
 bool(false)
+int(1141214400)
+int(1141214400)
+int(1141214400)
 string(32) "phar://*/phar_oo_test.phar.php/b"
 string(1) "b"
 int(0)
@@ -64,6 +70,9 @@ bool(false)
 bool(false)
 bool(true)
 bool(false)
+int(1141214400)
+int(1141214400)
+int(1141214400)
 string(36) "phar://*/phar_oo_test.phar.php/b.php"
 string(5) "b.php"
 int(32)
@@ -74,6 +83,9 @@ bool(false)
 bool(true)
 bool(false)
 bool(false)
+int(1141214400)
+int(1141214400)
+int(1141214400)
 string(36) "phar://*/phar_oo_test.phar.php/e.php"
 string(5) "e.php"
 int(32)
@@ -84,6 +96,9 @@ bool(false)
 bool(true)
 bool(false)
 bool(false)
+int(1141214400)
+int(1141214400)
+int(1141214400)
 ==RECURSIVE==
 string(36) "phar://*/phar_oo_test.phar.php/a.php"
 string(5) "a.php"

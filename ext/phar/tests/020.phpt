@@ -105,11 +105,11 @@ array(26) {
   [7]=>
   int(0)
   [8]=>
-  int(0)
+  int(%d)
   [9]=>
-  int(0)
+  int(%d)
   [10]=>
-  int(0)
+  int(%d)
   [11]=>
   int(-1)
   [12]=>
@@ -131,11 +131,11 @@ array(26) {
   ["size"]=>
   int(0)
   ["atime"]=>
-  int(0)
+  int(%d)
   ["mtime"]=>
-  int(0)
+  int(%d)
   ["ctime"]=>
-  int(0)
+  int(%d)
   ["blksize"]=>
   int(-1)
   ["blocks"]=>
