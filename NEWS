@@ -45,7 +45,7 @@ PHP                                                                        NEWS
 - Fixed bug #36434 (Improper resolution of declaring class name of an inherited
   property). (Ilia)
 - Fixed bug #36420 (segfault when access result->num_rows after calling 
-  result->close()). (Ilia)
+  result->close()). (Ilia,Tony)
 - Fixed bug #36403 (oci_execute() no longer supports OCI_DESCRIBE_ONLY). 
   (Tony)
 - Fixed bug #36400 (Custom 5xx error does not return correct HTTP response 
