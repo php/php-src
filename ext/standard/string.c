@@ -3257,9 +3257,8 @@ PHP_FUNCTION(chr)
    Makes an Unicode string's first character uppercase */
 static void php_u_ucfirst(zval *ustr, zval *return_value)
 {
-	UChar32 lc, uc;
 	UChar tmp[3] = { 0,}; /* UChar32 will be converted to upto 2 UChar units ? */
-	int tmp_len;
+	int tmp_len = 0;
 	int pos = 0;
 	UErrorCode status = U_ZERO_ERROR;
 
@@ -3310,46 +3309,52 @@ PHP_FUNCTION(ucfirst)
    Uppercase the first character of every word in an Unicode string */
 static void php_u_ucwords(zval *ustr, zval *retval)
 {
-	UChar32 *codepts;
-	int32_t len, retval_len;
-	int32_t i;
-	UErrorCode err;
+	UChar32 cp = 0;
+	UChar *tmp;
+	int retval_len;
+	int pos = 0, last_pos = 0;
+	int tmp_len = 0;
+	zend_bool last_was_space = TRUE;
+	UErrorCode status = U_ZERO_ERROR;
 
-	len = Z_USTRLEN_P(ustr);
-	codepts = (UChar32 *)emalloc((len+1)*sizeof(UChar32));
-	err = U_ZERO_ERROR;
-	u_strToUTF32(codepts, len+1, &len, Z_USTRVAL_P(ustr), len, &err);
-	if (U_FAILURE(err)) {
-		efree(codepts);
-		ZVAL_EMPTY_UNICODE(retval);
-		return;
-	}
+	/*
+	 * We can calculate maximum resulting length precisely considering that not
+	 * more than half of the codepoints in the string can follow a whitespace
+	 * and that maximum expansion is 2 UChar's.
+	 */
+	retval_len = ((3 * Z_USTRLEN_P(ustr)) >> 1) + 2;
+	tmp = eumalloc(retval_len);
 
-	codepts[0] = u_toupper(codepts[0]);
-	for (i = 1; i < len ; i++) {
-		if (u_isWhitespace(codepts[i-1]) == TRUE) {
-			codepts[i] = u_totitle(codepts[i]);
+	while (pos < Z_USTRLEN_P(ustr)) {
+
+		U16_NEXT(Z_USTRVAL_P(ustr), pos, Z_USTRLEN_P(ustr), cp);
+
+		if (u_isWhitespace(cp) == TRUE) {
+			tmp_len += zend_codepoint_to_uchar(cp, tmp + tmp_len);
+			last_was_space = TRUE;
+		} else {
+			if (last_was_space) {
+				tmp_len += u_strToUpper(tmp + tmp_len, retval_len - tmp_len, Z_USTRVAL_P(ustr) + last_pos, 1, UG(default_locale), &status);
+				last_was_space = FALSE;
+			} else {
+				tmp_len += zend_codepoint_to_uchar(cp, tmp + tmp_len);
+			}
 		}
+		
+		last_pos = pos;
 	}
+	tmp[tmp_len] = 0;
 
-	retval_len = len;
-	Z_USTRVAL_P(retval) = eumalloc(retval_len+1);
-	err = U_ZERO_ERROR;
-	u_strFromUTF32(Z_USTRVAL_P(retval), retval_len+1, &retval_len, codepts, len, &err);
-	if (U_FAILURE(err) == U_BUFFER_OVERFLOW_ERROR) {
-		err = U_ZERO_ERROR;
-		Z_USTRVAL_P(retval) = eurealloc(Z_USTRVAL_P(retval), retval_len+1);
-		u_strFromUTF32(Z_USTRVAL_P(retval), retval_len+1, NULL, codepts, len, &err);
-	}
-
-	if (U_SUCCESS(err)) {
-		Z_USTRLEN_P(retval) = retval_len;
+	/*
+	 * Try to avoid another alloc if the difference between allocated size and
+	 * real length is "small".
+	 */
+	if (retval_len - tmp_len > 256) {
+		ZVAL_UNICODEL(retval, tmp, tmp_len, 1);
+		efree(tmp);
 	} else {
-		efree(Z_USTRVAL_P(retval));
-		ZVAL_EMPTY_UNICODE(retval);
+		ZVAL_UNICODEL(retval, tmp, tmp_len, 0);
 	}
-
-	efree(codepts);
 }
 /* }}} */
 
