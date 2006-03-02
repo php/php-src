@@ -1,3 +1,26 @@
+2006-03-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      zend.c
+      zend_API.c:
+      - MFH Fix string-conversion and const updating
+
+    * tests/zend_strtod.phpt
+      tests/zend_strtod.phpt:
+      - Fix test
+
+    * zend.c:
+      - Must use return as in 5.1 after recursion
+
+    * zend.c:
+      - Fix string conversion issues
+
+    * zend_API.c:
+      - Constants need to be updated too (when updating class constants)
+
+    * zend_vm_def.h:
+      - Fix warning
+
 2006-02-28  Dmitry Stogov  <dmitry@zend.com>
 
     * zend.h:

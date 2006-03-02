@@ -1,3 +1,56 @@
+2006-03-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mysqli/mysqli.c:
+      MFB51: Remove no longer needed check (checked at a higher level now).
+
+    * (PHP_5_1)
+      ext/mysqli/mysqli.c:
+      Remove no longer needed check (checked at a higher level now).
+
+2006-03-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      ZendEngine2/zend.c
+      ZendEngine2/zend_API.c:
+      - MFH Fix string-conversion and const updating
+
+    * ZendEngine2/tests/zend_strtod.phpt
+      ZendEngine2/tests/zend_strtod.phpt:
+      - Fix test
+
+2006-03-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/apache/mod_php5.c
+      sapi/apache2filter/apache_config.c
+      sapi/apache2handler/apache_config.c
+      sapi/apache_hooks/mod_php5.c
+      sapi/apache_hooks/php_apache.c
+      sapi/cli/php_cli_readline.c:
+      Unicode support: zstr union
+
+2006-03-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend.c:
+      - Must use return as in 5.1 after recursion
+
+    * ZendEngine2/zend.c:
+      - Fix string conversion issues
+
+    * ZendEngine2/zend_API.c:
+      - Constants need to be updated too (when updating class constants)
+
+    * ZendEngine2/zend_vm_def.h:
+      - Fix warning
+
+2006-03-01  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/simplexml.c:
+      nuke tests for libxml2 version - will always be > 2.6.0
+
+    * ext/standard/string.c:
+      64-bit fixes - ("make test" now works again on these platforms)
+
 2006-02-28  Dmitry Stogov  <dmitry@zend.com>
 
     * ZendEngine2/zend.h:
