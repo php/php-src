@@ -53,6 +53,8 @@ PHP                                                                        NEWS
 - Fixed bug #36396 (strtotime() fails to parse dates in dd-mm-yyyy format).
   (Derick)
 - Fixed bug #36345 (PDO/MySQL problem loading BLOB over 1MB). (Ilia)
+- Fixed bug #36388 (ext/soap crashes when throwing exception and session
+  persistence). (David)
 - Fixed bug #36382 (PDO/PgSQL's getColumnMeta() crashes). (Derick)
 - Fixed bug #36359 (splFileObject::fwrite() doesn't write when no data length 
   specified). (Tony)
