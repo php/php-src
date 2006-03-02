@@ -208,8 +208,7 @@ static void xbuf_format_converter(int unicode, smart_str *xbuf, const char *fmt,
 	register char *s = NULL;
 	register UChar *u = NULL;
 	char *q;
-	int s_len, s_unicode;
-	int32_t u_len;
+	int s_len, s_unicode, u_len;
 
 	register int min_width = 0;
 	int precision = 0;

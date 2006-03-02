@@ -286,7 +286,7 @@ PHP_FUNCTION(iptcembed)
 	fclose(fp);
 
 	if (spool < 2) {
-		RETVAL_STRINGL(spoolbuf, poi - spoolbuf, 0);
+		RETVAL_STRINGL((char*)spoolbuf, poi - spoolbuf, 0);
 	} else {
 		RETURN_TRUE;
 	}
@@ -300,7 +300,7 @@ PHP_FUNCTION(iptcparse)
 	unsigned int length, inx, len, tagsfound;
 	unsigned char *buffer;
 	unsigned char recnum, dataset;
-	unsigned char key[ 16 ];
+	char key[16];
 	zval *values, **str, **element;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
@@ -310,7 +310,7 @@ PHP_FUNCTION(iptcparse)
 
 	inx = 0;
 	length = Z_STRLEN_PP(str);
-	buffer = Z_STRVAL_PP(str);
+	buffer = (unsigned char*)Z_STRVAL_PP(str);
 
 	tagsfound = 0; /* number of tags already found */
 
@@ -359,7 +359,7 @@ PHP_FUNCTION(iptcparse)
 			zend_hash_update(Z_ARRVAL_P(return_value), key, strlen(key)+1, (void *) &values, sizeof(zval*), (void **) &element);
 		} 
 			
-		add_next_index_stringl(*element, buffer+inx, len, 1);
+		add_next_index_stringl(*element, (char*)buffer+inx, len, 1);
 
 		inx += len;
 

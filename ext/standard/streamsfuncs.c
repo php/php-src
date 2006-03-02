@@ -524,7 +524,7 @@ PHP_FUNCTION(stream_get_transports)
 {
 	HashTable *stream_xport_hash;
 	zstr stream_xport;
-	int stream_xport_len;
+	uint stream_xport_len;
 	ulong num_key;
 
 	if (ZEND_NUM_ARGS() != 0) {
@@ -552,7 +552,7 @@ PHP_FUNCTION(stream_get_wrappers)
 {
 	HashTable *url_stream_wrappers_hash;
 	zstr stream_protocol;
-	int key_flags, stream_protocol_len = 0;
+	uint key_flags, stream_protocol_len = 0;
 	ulong num_key;
 
 	if (ZEND_NUM_ARGS() != 0) {
@@ -859,7 +859,7 @@ static int parse_context_options(php_stream_context *context, zval *options TSRM
 	HashPosition pos, opos;
 	zval **wval, **oval;
 	zstr wkey, okey;
-	int wkey_len, okey_len;
+	uint wkey_len, okey_len;
 	int ret = SUCCESS;
 	ulong num_key;
 	
@@ -871,8 +871,12 @@ static int parse_context_options(php_stream_context *context, zval *options TSRM
 			if (HASH_KEY_IS_UNICODE == wtype) {
 				/* fold to string */
 				UErrorCode errCode = 0;
+				char *tmp;
+				int tmp_len;
 
-				zend_convert_from_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &wkey.s, &wkey_len, wkey.u, wkey_len, &errCode);
+				zend_convert_from_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &tmp, &tmp_len, wkey.u, wkey_len, &errCode);
+				wkey.s = tmp;
+				wkey_len = tmp_len;
 			}
 
 			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(wval), &opos);
@@ -881,8 +885,12 @@ static int parse_context_options(php_stream_context *context, zval *options TSRM
 				if (HASH_KEY_IS_UNICODE == otype) {
 					/* fold to string */
 					UErrorCode errCode = 0;
+					char *tmp;
+					int tmp_len;
 	
-					zend_convert_from_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &okey.s, &okey_len, okey.u, okey_len, &errCode);
+					zend_convert_from_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &tmp, &tmp_len, okey.u, okey_len, &errCode);
+					okey.s = tmp;
+					okey_len = tmp_len;
 					php_stream_context_set_option(context, wkey.s, okey.s, *oval);
 					efree(okey.v);
 				}

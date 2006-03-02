@@ -378,7 +378,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		strcat(scratch, ":");
 		strcat(scratch, resource->pass);
 
-		tmp = php_base64_encode((unsigned char*)scratch, strlen(scratch), NULL);
+		tmp = (char*)php_base64_encode((unsigned char*)scratch, strlen(scratch), NULL);
 		
 		if (snprintf(scratch, scratch_len, "Authorization: Basic %s\r\n", tmp) > 0) {
 			php_stream_write(stream, scratch, strlen(scratch));
@@ -627,7 +627,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		unsigned char *s, *e;	\
 		int l;	\
 		l = php_url_decode(val, strlen(val));	\
-		s = val; e = s + l;	\
+		s = (unsigned char*)val; e = s + l;	\
 		while (s < e) {	\
 			if (iscntrl(*s)) {	\
 				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Invalid redirect url! %s", new_path);	\

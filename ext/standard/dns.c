@@ -462,11 +462,11 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 			add_assoc_string(*subarray, "type", "HINFO", 1);
 			n = *cp & 0xFF;
 			cp++;
-			add_assoc_stringl(*subarray, "cpu", cp, n, 1);
+			add_assoc_stringl(*subarray, "cpu", (char*)cp, n, 1);
 			cp += n;
 			n = *cp & 0xFF;
 			cp++;
-			add_assoc_stringl(*subarray, "os", cp, n, 1);
+			add_assoc_stringl(*subarray, "os", (char*)cp, n, 1);
 			cp += n;
 			break;
 		case DNS_T_TXT:
@@ -476,7 +476,7 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 			memcpy(tp, cp + 1, n);
 			tp[n] = '\0';
 			cp += dlen;
-			add_assoc_stringl(*subarray, "txt", tp, n, 0);
+			add_assoc_stringl(*subarray, "txt", (char*)tp, n, 0);
 			break;
 		case DNS_T_SOA:
 			add_assoc_string(*subarray, "type", "SOA", 1);
@@ -504,7 +504,7 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 			add_assoc_long(*subarray, "minimum-ttl", n);
 			break;
 		case DNS_T_AAAA:
-			tp = name;
+			tp = (u_char*)name;
 			for(i=0; i < 8; i++) {
 				GETSHORT(s, cp);
 				if (s != 0) {
@@ -513,7 +513,7 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 						tp[0] = ':';
 						tp++;
 					}
-					tp += sprintf(tp,"%x",s);
+					tp += sprintf((char*)tp,"%x",s);
 				} else {
 					if (!have_v6_break) {
 						have_v6_break = 1;
@@ -542,7 +542,7 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 			n = ((int)cp[0]) & 0xFF;
 			cp++;
 			add_assoc_long(*subarray, "masklen", n);
-			tp = name;
+			tp = (u_char*)name;
 			if (n > 15) {
 				have_v6_break = 1;
 				in_v6_break = 1;
@@ -557,7 +557,7 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 						tp[0] = ':';
 						tp++;
 					}
-					sprintf(tp, "%x", cp[0] & 0xFF);
+					sprintf((char*)tp, "%x", cp[0] & 0xFF);
 				} else {
 					if (!have_v6_break) {
 						have_v6_break = 1;
@@ -581,7 +581,7 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 						tp[0] = ':';
 						tp++;
 					}
-					tp += sprintf(tp,"%x",s);
+					tp += sprintf((char*)tp,"%x",s);
 				} else {
 					if (!have_v6_break) {
 						have_v6_break = 1;
@@ -633,13 +633,13 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 			GETSHORT(n, cp);
 			add_assoc_long(*subarray, "pref", n);
 			n = (cp[0] & 0xFF);
-			add_assoc_stringl(*subarray, "flags", ++cp, n, 1);
+			add_assoc_stringl(*subarray, "flags", (char*)++cp, n, 1);
 			cp += n;
 			n = (cp[0] & 0xFF);
-			add_assoc_stringl(*subarray, "services", ++cp, n, 1);
+			add_assoc_stringl(*subarray, "services", (char*)++cp, n, 1);
 			cp += n;
 			n = (cp[0] & 0xFF);
-			add_assoc_stringl(*subarray, "regex", ++cp, n, 1);
+			add_assoc_stringl(*subarray, "regex", (char*)++cp, n, 1);
 			cp += n;
 			n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof name) - 2);
 			if (n < 0) {

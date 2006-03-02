@@ -211,7 +211,7 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
  {
 	 FILE *fp;
 	 fp = fopen("/tmp/ob_log", "a");
-	 fprintf(fp, "NestLevel: %d  ObStatus: %d  HandlerName: %s\n", OG(ob_nesting_level), status, OG(active_ob_buffer).handler_name);
+	 fprintf(fp, "NestLevel: %d  ObStatus: %d  HandlerName: %s\n", OG(ob_nesting_level), status, OG(active_ob_buffer).handler_name.s);
 	 fclose(fp);
  }
 #endif
@@ -270,7 +270,8 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 	}
 
 	to_be_destroyed_buffer = OG(active_ob_buffer).buffer;
-	to_be_destroyed_handler_name = OG(active_ob_buffer).handler_name;
+	/* FIXME: unicode support??? */
+	to_be_destroyed_handler_name = OG(active_ob_buffer).handler_name.s;
 	if (OG(active_ob_buffer).internal_output_handler
 		&& (final_buffer != OG(active_ob_buffer).internal_output_handler_buffer)
 		&& (final_buffer != OG(active_ob_buffer).buffer)) {
@@ -361,17 +362,18 @@ PHPAPI void php_end_implicit_flush(TSRMLS_D)
  */
 PHPAPI void php_ob_set_internal_handler(php_output_handler_func_t internal_output_handler, uint buffer_size, char *handler_name, zend_bool erase TSRMLS_DC)
 {
-	if (OG(ob_nesting_level)==0 || OG(active_ob_buffer).internal_output_handler || strcmp(OG(active_ob_buffer).handler_name, OB_DEFAULT_HANDLER_NAME)) {
+	/* FIXME: Unicode support??? */
+	if (OG(ob_nesting_level)==0 || OG(active_ob_buffer).internal_output_handler || strcmp(OG(active_ob_buffer).handler_name.s, OB_DEFAULT_HANDLER_NAME)) {
 		php_start_ob_buffer(NULL, buffer_size, erase TSRMLS_CC);
 	}
 
 	OG(active_ob_buffer).internal_output_handler = internal_output_handler;
 	OG(active_ob_buffer).internal_output_handler_buffer = (char *) emalloc(buffer_size);
 	OG(active_ob_buffer).internal_output_handler_buffer_size = buffer_size;
-	if (OG(active_ob_buffer).handler_name) {
-		efree(OG(active_ob_buffer).handler_name);
+	if (OG(active_ob_buffer).handler_name.s) {
+		efree(OG(active_ob_buffer).handler_name.s);
 	}
-	OG(active_ob_buffer).handler_name = estrdup(handler_name);
+	OG(active_ob_buffer).handler_name.s = estrdup(handler_name);
 	OG(active_ob_buffer).erase = erase;
 }
 /* }}} */
@@ -450,9 +452,9 @@ static int php_ob_init_named(uint initial_size, uint block_size, zend_uchar type
 	OG(active_ob_buffer).internal_output_handler = NULL;
 	if (type == IS_UNICODE) {
 		/* FIXME: Unicode support??? */
-		OG(active_ob_buffer).handler_name = eustrdup((handler_name.u && handler_name.u[0])?handler_name.u:(UChar*)OB_DEFAULT_HANDLER_NAME);
+		OG(active_ob_buffer).handler_name.u = eustrdup((handler_name.u && handler_name.u[0])?handler_name.u:(UChar*)OB_DEFAULT_HANDLER_NAME);
 	} else {
-		OG(active_ob_buffer).handler_name = estrdup((handler_name.s && handler_name.s[0])?handler_name.s:OB_DEFAULT_HANDLER_NAME);
+		OG(active_ob_buffer).handler_name.s = estrdup((handler_name.s && handler_name.s[0])?handler_name.s:OB_DEFAULT_HANDLER_NAME);
 	}
 	OG(active_ob_buffer).erase = erase;
 	OG(php_body_write) = php_b_body_write;
@@ -595,7 +597,9 @@ static int php_ob_init(uint initial_size, uint block_size, zval *output_handler,
  */
 static int php_ob_list_each(php_ob_buffer *ob_buffer, zval *ob_handler_array) 
 {
-	add_next_index_string(ob_handler_array, ob_buffer->handler_name, 1);
+	TSRMLS_FETCH();
+
+	add_next_index_text(ob_handler_array, ob_buffer->handler_name, 1);
 	return 0;
 }
 /* }}} */
@@ -625,7 +629,8 @@ PHP_FUNCTION(ob_list_handlers)
  */
 static int php_ob_handler_used_each(php_ob_buffer *ob_buffer, char **handler_name) 
 {
-	if (!strcmp(ob_buffer->handler_name, *handler_name)) {
+	/* FIXME: Unicode support??? */
+	if (!strcmp(ob_buffer->handler_name.s, *handler_name)) {
 		*handler_name = NULL;
 		return 1;
 	}
@@ -638,10 +643,11 @@ static int php_ob_handler_used_each(php_ob_buffer *ob_buffer, char **handler_nam
  */
 PHPAPI int php_ob_handler_used(char *handler_name TSRMLS_DC)
 {
+	/* FIXME: Unicode support??? */
 	char *tmp = handler_name;
 
 	if (OG(ob_nesting_level)) {
-		if (!strcmp(OG(active_ob_buffer).handler_name, handler_name)) {
+		if (!strcmp(OG(active_ob_buffer).handler_name.s, handler_name)) {
 			return 1;
 		}
 		if (OG(ob_nesting_level)>1) {
@@ -995,6 +1001,7 @@ PHP_FUNCTION(ob_get_length)
 static int php_ob_buffer_status(php_ob_buffer *ob_buffer, zval *result) 
 {
 	zval *elem;
+	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(elem);
 	array_init(elem);
@@ -1012,7 +1019,7 @@ static int php_ob_buffer_status(php_ob_buffer *ob_buffer, zval *result)
 		add_assoc_long(elem, "type", PHP_OUTPUT_HANDLER_USER);
 	}
 	add_assoc_long(elem, "status", ob_buffer->status);
-	add_assoc_string(elem, "name", ob_buffer->handler_name, 1);
+	add_assoc_text(elem, "name", ob_buffer->handler_name, 1);
 	add_assoc_bool(elem, "del", ob_buffer->erase);
 	add_next_index_zval(result, elem);
 
@@ -1048,7 +1055,7 @@ PHP_FUNCTION(ob_get_status)
 			add_assoc_long(return_value, "type", PHP_OUTPUT_HANDLER_USER);
 		}
 		add_assoc_long(return_value, "status", OG(active_ob_buffer).status);
-		add_assoc_string(return_value, "name", OG(active_ob_buffer).handler_name, 1);
+		add_assoc_text(return_value, "name", OG(active_ob_buffer).handler_name, 1);
 		add_assoc_bool(return_value, "del", OG(active_ob_buffer).erase);
 	}
 }

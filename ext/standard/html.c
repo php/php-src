@@ -875,8 +875,9 @@ size_t php_utf32_utf8(unsigned char *buf, int k)
 
 /* {{{ php_unescape_html_entities
  */
-PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *newlen, int all, int quote_style, char *hint_charset TSRMLS_DC)
+PHPAPI char *php_unescape_html_entities(char *orig, int oldlen, int *newlen, int all, int quote_style, char *hint_charset TSRMLS_DC)
 {
+	unsigned char *old = (unsigned char*)orig;
 	int retlen;
 	int j, k;
 	char *replaced, *ret, *p, *q, *lim, *next;
@@ -884,7 +885,7 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 	unsigned char replacement[15];
 	int replacement_len;
 
-	ret = estrndup(old, oldlen);
+	ret = estrndup((char*)old, oldlen);
 	retlen = oldlen;
 	if (!retlen) {
 		goto empty_source;
@@ -897,7 +898,7 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 				continue;
 
 			for (k = entity_map[j].basechar; k <= entity_map[j].endchar; k++) {
-				unsigned char entity[32];
+				char entity[32];
 				int entity_length = 0;
 
 				if (entity_map[j].table[k - entity_map[j].basechar] == NULL)
@@ -943,7 +944,7 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 				}
 
 				if (php_memnstr(ret, entity, entity_length, ret+retlen)) {
-					replaced = php_str_to_str(ret, retlen, entity, entity_length, replacement, replacement_len, &retlen);
+					replaced = php_str_to_str(ret, retlen, entity, entity_length, (char*)replacement, replacement_len, &retlen);
 					efree(ret);
 					ret = replaced;
 				}
@@ -960,7 +961,7 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 		replacement[1] = '\0';
 
 		if (php_memnstr(ret, basic_entities[j].entity, basic_entities[j].entitylen, ret+retlen)) {		
-			replaced = php_str_to_str(ret, retlen, basic_entities[j].entity, basic_entities[j].entitylen, replacement, 1, &retlen);
+			replaced = php_str_to_str(ret, retlen, basic_entities[j].entity, basic_entities[j].entitylen, (char*)replacement, 1, &retlen);
 			efree(ret);
 			ret = replaced;
 		}
@@ -985,7 +986,7 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 					if (next != NULL && *next == ';') {
 						switch (charset) {
 							case cs_utf_8:
-								q += php_utf32_utf8(q, code);
+								q += php_utf32_utf8((unsigned char*)q, code);
 								break;
 
 							case cs_8859_1:
@@ -1075,8 +1076,9 @@ empty_source:
 
 /* {{{ php_escape_html_entities
  */
-PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newlen, int all, int quote_style, char *hint_charset TSRMLS_DC)
+PHPAPI char *php_escape_html_entities(char *orig, int oldlen, int *newlen, int all, int quote_style, char *hint_charset TSRMLS_DC)
 {
+	unsigned char *old = (unsigned char *)orig;
 	int i, j, maxlen, len;
 	char *replaced;
 	enum entity_charset charset = determine_charset(hint_charset TSRMLS_CC);
@@ -1101,14 +1103,14 @@ PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newle
 
 		if (all) {
 			/* look for a match in the maps for this charset */
-			unsigned char *rep = NULL;
+			char *rep = NULL;
 
 
 			for (j = 0; entity_map[j].charset != cs_terminator; j++) {
 				if (entity_map[j].charset == charset
 						&& this_char >= entity_map[j].basechar
 						&& this_char <= entity_map[j].endchar) {
-					rep = (unsigned char*)entity_map[j].table[this_char - entity_map[j].basechar];
+					rep = (char*)entity_map[j].table[this_char - entity_map[j].basechar];
 					if (rep == NULL) {
 						/* there is no entity for this position; fall through and
 						 * just output the character itself */

@@ -120,7 +120,7 @@ static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *
 	register unsigned char *result = NULL;
 	size_t i, j;
 
-	result = (char *) safe_emalloc(oldlen * 2, sizeof(char), 1);
+	result = (unsigned char *) safe_emalloc(oldlen * 2, sizeof(char), 1);
 	
 	for (i = j = 0; i < oldlen; i++) {
 		result[j++] = hexconvtab[old[i] >> 4];
@@ -131,7 +131,7 @@ static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *
 	if (newlen) 
 		*newlen = oldlen * 2 * sizeof(char);
 
-	return result;
+	return (char*)result;
 }
 /* }}} */
 
@@ -572,9 +572,9 @@ PHPAPI char *php_trim(char *c, int len, char *what, int what_len, zend_uchar str
 	char mask[256];
 
 	if (what) {
-		php_charmask(what, what_len, mask TSRMLS_CC);
+		php_charmask((unsigned char*)what, what_len, mask TSRMLS_CC);
 	} else {
-		php_charmask(" \n\r\t\v\0", 6, mask TSRMLS_CC);
+		php_charmask((unsigned char*)" \n\r\t\v\0", 6, mask TSRMLS_CC);
 	}
 
 	if (mode & 1) {
@@ -611,7 +611,7 @@ PHPAPI char *php_trim(char *c, int len, char *what, int what_len, zend_uchar str
  * Expands possible ranges of the form 'a..b' in input charlist,
  * where a < b in code-point order
  */
-static int php_expand_u_trim_range(UChar **range, int32_t *range_len TSRMLS_DC)
+static int php_expand_u_trim_range(UChar **range, int *range_len TSRMLS_DC)
 {
 	UChar32 *codepts, *tmp, *input, *end, c;
 	int32_t len, tmp_len, idx;
@@ -693,7 +693,7 @@ static int php_expand_u_trim_range(UChar **range, int32_t *range_len TSRMLS_DC)
 /* {{{ php_u_trim()
  * Unicode capable version of php_trim()
  */
-static UChar *php_u_trim(UChar *c, int32_t len, UChar *what, int32_t what_len, zval *return_value, int mode TSRMLS_DC)
+static UChar *php_u_trim(UChar *c, int len, UChar *what, int what_len, zval *return_value, int mode TSRMLS_DC)
 {
 	int32_t	i,j;
 	UChar	ch,wh;
@@ -1470,7 +1470,7 @@ PHPAPI char *php_strtoupper(char *s, size_t len)
 {
 	unsigned char *c, *e;
 	
-	c = s;
+	c = (unsigned char*)s;
 	e = c+len;
 
 	while (c < e) {
@@ -1483,10 +1483,10 @@ PHPAPI char *php_strtoupper(char *s, size_t len)
 
 /* {{{ php_u_strtoupper
  */
-PHPAPI UChar* php_u_strtoupper(UChar **s, int32_t *len, const char* locale)
+PHPAPI UChar* php_u_strtoupper(UChar **s, int *len, const char* locale)
 {
 	UChar *dest = NULL;
-	int32_t dest_len;
+	int dest_len;
 	UErrorCode status;
 	
 	dest_len = *len;
@@ -1536,10 +1536,10 @@ PHP_FUNCTION(strtoupper)
 
 /* {{{ php_u_strtolower
  */
-PHPAPI UChar *php_u_strtolower(UChar **s, int32_t *len, const char* locale)
+PHPAPI UChar *php_u_strtolower(UChar **s, int *len, const char* locale)
 {
 	UChar *dest = NULL;
-	int32_t dest_len;
+	int dest_len;
 	UErrorCode status = U_ZERO_ERROR;
 
 	dest_len = *len;
@@ -1570,7 +1570,7 @@ PHPAPI char *php_strtolower(char *s, size_t len)
 {
 	unsigned char *c, *e;
 	
-	c = s;
+	c = (unsigned char*)s;
 	e = c+len;
 
 	while (c < e) {
@@ -1879,7 +1879,7 @@ PHP_FUNCTION(pathinfo)
 
 /* {{{ php_u_stristr
    Unicode version of case insensitve strstr */
-PHPAPI UChar *php_u_stristr(UChar *s, UChar *t, int32_t s_len, int32_t t_len)
+PHPAPI UChar *php_u_stristr(UChar *s, UChar *t, int s_len, int t_len)
 {
 	int32_t i,j, last;
 	UChar32 ch1, ch2;
@@ -1928,7 +1928,7 @@ PHPAPI UChar *php_u_stristr(UChar *s, UChar *t, int32_t s_len, int32_t t_len)
 
 /* {{{ php_stristr
    case insensitve strstr */
-PHPAPI char *php_stristr(unsigned char *s, unsigned char *t, size_t s_len, size_t t_len)
+PHPAPI char *php_stristr(char *s, char *t, size_t s_len, size_t t_len)
 {
 	php_strtolower(s, s_len);
 	php_strtolower(t, t_len);
@@ -1938,11 +1938,12 @@ PHPAPI char *php_stristr(unsigned char *s, unsigned char *t, size_t s_len, size_
 
 /* {{{ php_u_strspn
  */
-PHPAPI int32_t php_u_strspn(UChar *s1, UChar *s2, UChar *s1_end, UChar *s2_end)
+PHPAPI int php_u_strspn(UChar *s1, UChar *s2, UChar *s1_end, UChar *s2_end)
 {
 	int32_t len1 = s1_end - s1;
 	int32_t len2 = s2_end - s2;
-	int32_t i, codepts;
+	int32_t i;
+	int codepts;
 	UChar32 ch;
 
 	for (i = 0, codepts = 0 ; i < len1 ; codepts++) {
@@ -1975,11 +1976,12 @@ cont:
 
 /* {{{ php_u_strcspn
  */
-PHPAPI int32_t php_u_strcspn(UChar *s1, UChar *s2, UChar *s1_end, UChar *s2_end)
+PHPAPI int php_u_strcspn(UChar *s1, UChar *s2, UChar *s1_end, UChar *s2_end)
 {
 	int32_t len1 = s1_end - s1;
 	int32_t len2 = s2_end - s2;
-	int32_t i, codepts;
+	int32_t i;
+	int codepts;
 	UChar32 ch;
 
 	for (i = 0, codepts = 0 ; i < len1 ; codepts++) {
@@ -2021,7 +2023,7 @@ PHP_FUNCTION(stristr)
 	zend_uchar str_type;
 	char needle_char[2];
 	UChar u_needle_char[3];
-	int32_t needle_len;
+	int needle_len;
 	char *haystack_copy;
 	zstr target;
 	void *found = NULL;
@@ -2120,7 +2122,7 @@ PHP_FUNCTION(strstr)
 	void *found = NULL;
 	char  needle_char[2];
 	UChar u_needle_char[3];
-	int32_t n_len = 0;
+	int n_len = 0;
 	size_t found_offset;
 	zend_bool part = 0;
 
@@ -2230,7 +2232,7 @@ PHP_FUNCTION(strpos)
 	void *found = NULL;
 	char  needle_char[2];
 	UChar u_needle_char[3];
-	int32_t n_len = 0;
+	int n_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tZ|l", &haystack,
 							  &haystack_len, &haystack_type, &needle, &offset) == FAILURE) {
@@ -2318,7 +2320,7 @@ PHP_FUNCTION(stripos)
 {
 	zval *haystack, *needle;
 	long offset = 0;
-	int32_t haystack_len, needle_len = 0;
+	int haystack_len, needle_len = 0;
 	zend_uchar str_type;
 	void *haystack_dup, *needle_dup = NULL;
 	char needle_char[2];
@@ -2442,7 +2444,7 @@ PHP_FUNCTION(strrpos)
 {
 	zval *zhaystack, *zneedle;
 	zstr haystack, needle;
-	int32_t haystack_len, needle_len = 0;
+	int haystack_len, needle_len = 0;
 	zend_uchar str_type;
 	long offset = 0;
 	char *p, *e, ord_needle[2];
@@ -2647,7 +2649,7 @@ PHP_FUNCTION(strripos)
 
 /* {{{ php_u_strrchr
  */
-UChar *php_u_strrchr(UChar *s, UChar32 ch, int32_t s_len)
+UChar *php_u_strrchr(UChar *s, UChar32 ch, int s_len)
 {
 	UChar32 ch1;
 	int32_t i = s_len;
@@ -2670,7 +2672,7 @@ PHP_FUNCTION(strrchr)
 	zend_uchar str_type;
 	UChar32 ch;
 	void *found = NULL;
-	int32_t found_offset;
+	int found_offset;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_parse_parameters(2 TSRMLS_CC, "zz", &haystack, &needle) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2823,7 +2825,7 @@ PHP_FUNCTION(substr)
 {
 	void *str;
 	int str_len;
-	int32_t cp_len;
+	int cp_len;
 	zend_uchar str_type;
 	long l = -1;
 	long f;
@@ -2885,9 +2887,9 @@ PHP_FUNCTION(substr)
 
 /* {{{ php_adjust_limits
  */
-PHPAPI void php_adjust_limits(zval **str, int32_t *f, int32_t *l)
+PHPAPI void php_adjust_limits(zval **str, int *f, int *l)
 {
-	int32_t str_codepts;
+	int str_codepts;
 
 	if (Z_TYPE_PP(str) == IS_UNICODE) {
 		str_codepts = u_countChar32(Z_USTRVAL_PP(str), Z_USTRLEN_PP(str));
@@ -2921,7 +2923,7 @@ PHPAPI void php_adjust_limits(zval **str, int32_t *f, int32_t *l)
 
 /* {{{ php_do_substr_replace
  */
-PHPAPI int32_t php_do_substr_replace(void **result, zval **str, zval **repl, int32_t f, int32_t l TSRMLS_DC)
+PHPAPI int php_do_substr_replace(void **result, zval **str, zval **repl, int f, int l TSRMLS_DC)
 {
 	void *buf;
 	int32_t buf_len, idx;
@@ -2981,9 +2983,9 @@ PHP_FUNCTION(substr_replace)
 	zval **len = NULL;
 	zval **repl;
 	void *result;
-	int32_t result_len;
-	int32_t l = 0;
-	int32_t f;
+	int result_len;
+	int l = 0;
+	int f;
 	int argc = ZEND_NUM_ARGS();
 
 	HashPosition pos_str, pos_from, pos_repl, pos_len;
@@ -3234,7 +3236,7 @@ PHP_FUNCTION(chr)
 	
 	if (UG(unicode)) {
 		UChar buf[2];
-		int32_t buf_len;
+		int buf_len;
 
 		if (Z_LVAL_PP(num) > UCHAR_MAX_VALUE) {
 			php_error(E_WARNING, "Codepoint value cannot be greater than %X", UCHAR_MAX_VALUE);
@@ -3637,10 +3639,10 @@ PHP_FUNCTION(strrev)
 
 /* {{{ php_u_similar_str
  */
-static void php_u_similar_str(const UChar *txt1, int32_t len1,
-							  const UChar *txt2, int32_t len2,
-							  int32_t *pos1, int32_t *end1,
-							  int32_t *pos2, int32_t *end2, int *max)
+static void php_u_similar_str(const UChar *txt1, int len1,
+							  const UChar *txt2, int len2,
+							  int *pos1, int *end1,
+							  int *pos2, int *end2, int *max)
 {
 	int32_t i1, i2, j1, j2, l;
 	UChar32 ch1, ch2;
@@ -3719,10 +3721,10 @@ static int php_similar_char(const char *txt1, int len1, const char *txt2, int le
 
 /* {{{ php_u_similar_char
  */
-static int php_u_similar_char(const UChar *txt1, int32_t len1, const UChar *txt2, int32_t len2)
+static int php_u_similar_char(const UChar *txt1, int len1, const UChar *txt2, int len2)
 {
 	int sum, max;
-	int32_t pos1, pos2, end1, end2;
+	int pos1, pos2, end1, end2;
 
 	php_u_similar_str(txt1, len1, txt2, len2, &pos1, &end1, &pos2, &end2, &max);
 	if ((sum = max)) {
@@ -3795,26 +3797,26 @@ PHP_FUNCTION(similar_text)
 /* {{{ php_u_stripslashes
  *
  * be careful, this edits the string in-place */
-PHPAPI void php_u_stripslashes(UChar *str, int32_t *len TSRMLS_DC)
+PHPAPI void php_u_stripslashes(UChar *str, int *len TSRMLS_DC)
 {
-	int32_t tmp_len = 0, i = 0;
+	int32_t tmp_len = 0, i = 0, src_len = *len;
 	UChar32 ch1, ch2;
 
 	ch1 = -1; ch2 = -1;
 	if (PG(magic_quotes_sybase)) {
-		while (i < *len) {
-			U16_NEXT(str, i, *len, ch1);
+		while (i < src_len) {
+			U16_NEXT(str, i, src_len, ch1);
 			if (ch1 == '\'') {
 				tmp_len += zend_codepoint_to_uchar(ch1, str+tmp_len);
-				if (i < *len) {
-					U16_NEXT(str, i, *len, ch2);
+				if (i < src_len) {
+					U16_NEXT(str, i, src_len, ch2);
 					if (ch2 != '\'') {
 						tmp_len += zend_codepoint_to_uchar(ch2, str+tmp_len);
 					}
 				}
 			} else if (ch1 == '\\') {
-				if (i < *len) {
-					U16_NEXT(str, i, *len, ch2);
+				if (i < src_len) {
+					U16_NEXT(str, i, src_len, ch2);
 					if (ch2 == '0') {
 						tmp_len += zend_codepoint_to_uchar('\0', str+tmp_len);
 					} else {
@@ -3829,11 +3831,11 @@ PHPAPI void php_u_stripslashes(UChar *str, int32_t *len TSRMLS_DC)
 			}
 		}
 	} else {
-		while (i < *len) {
-			U16_NEXT(str, i, *len, ch1);
+		while (i < src_len) {
+			U16_NEXT(str, i, src_len, ch1);
 			if (ch1 == '\\') {
-				if (i < *len) {
-					U16_NEXT(str, i, *len, ch2);
+				if (i < src_len) {
+					U16_NEXT(str, i, src_len, ch2);
 					if (ch2 == '0') {
 						tmp_len += zend_codepoint_to_uchar('\0', str+tmp_len);
 					} else {
@@ -3957,7 +3959,7 @@ PHP_FUNCTION(addslashes)
 {
 	zval **str;
 	void *tmp = NULL;
-	int32_t tmp_len = 0;
+	int tmp_len = 0;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -4120,7 +4122,7 @@ PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int should_
 		length = strlen(str);
 	}
 
-	php_charmask(what, wlength, flags TSRMLS_CC);
+	php_charmask((unsigned char*)what, wlength, flags TSRMLS_CC);
 
 	for (source = str, end = source + length, target = new_str; (c = *source) || (source < end); source++) {
 		if (flags[(unsigned char)c]) {
@@ -4159,7 +4161,7 @@ PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int should_
 
 /* {{{ php_u_addslashes
  */
-PHPAPI UChar *php_u_addslashes(UChar *str, int32_t length, int32_t *new_length, int should_free TSRMLS_DC)
+PHPAPI UChar *php_u_addslashes(UChar *str, int length, int *new_length, int should_free TSRMLS_DC)
 {
 	return php_u_addslashes_ex(str, length, new_length, should_free, 0 TSRMLS_CC);
 }
@@ -4167,7 +4169,7 @@ PHPAPI UChar *php_u_addslashes(UChar *str, int32_t length, int32_t *new_length, 
 
 /* {{{ php_u_addslashes_ex
  */
-PHPAPI UChar *php_u_addslashes_ex(UChar *str, int32_t length, int32_t *new_length, int should_free, int ignore_sybase TSRMLS_DC)
+PHPAPI UChar *php_u_addslashes_ex(UChar *str, int length, int *new_length, int should_free, int ignore_sybase TSRMLS_DC)
 {
 	UChar *buf;
 	int32_t buf_len = 0, i = 0;
@@ -5021,7 +5023,7 @@ PHP_FUNCTION(strip_tags)
 	int str_len, allow_len = 0;
 	zend_uchar str_type, allow_type;
 	void *buf;
-	int32_t retval_len;
+	int retval_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "T|T", &str, &str_len, &str_type,
 							  &allow, &allow_len, &allow_type) == FAILURE) {
@@ -5189,7 +5191,7 @@ PHP_FUNCTION(parse_str)
 
 /* {{{ php_u_tag_find
  */
-int php_u_tag_find(UChar *tag, int32_t len, UChar *set, int32_t set_len)
+int php_u_tag_find(UChar *tag, int len, UChar *set, int set_len)
 {
 	int32_t idx = 0;
 	UChar32 ch;
@@ -5319,7 +5321,7 @@ int php_tag_find(char *tag, int len, char *set) {
 */
 /* {{{ php_u_strip_tags
  */
-PHPAPI int32_t php_u_strip_tags(UChar *rbuf, int32_t len, int *stateptr, UChar *allow, int32_t allow_len TSRMLS_DC)
+PHPAPI int php_u_strip_tags(UChar *rbuf, int len, int *stateptr, UChar *allow, int allow_len TSRMLS_DC)
 {
 	UChar *tbuf = NULL, *tp = NULL;
 	UChar *buf, *rp;
@@ -5539,7 +5541,7 @@ reg_u_char:
 	if (stateptr)
 		*stateptr = state;
 
-	return (int32_t)(rp-rbuf);
+	return (int)(rp-rbuf);
 }
 /* }}} */
 
@@ -5768,13 +5770,13 @@ reg_char:
 PHP_FUNCTION(str_repeat)
 {
 	void		*input_str;		/* Input string */
-	int		input_str_len;
-	int32_t		input_str_chars;
+	int			input_str_len;
+	int			input_str_chars;
 	zend_uchar	input_str_type;
 	long		mult;			/* Multiplier */
 	void		*result;		/* Resulting string */
-	int32_t		result_len;		/* Length of the resulting string, in bytes */
-	int32_t		result_chars;	/* Chars/UChars in resulting string */
+	int			result_len;		/* Length of the resulting string, in bytes */
+	int			result_chars;	/* Chars/UChars in resulting string */
 
 	if ( zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tl", &input_str,
 							   &input_str_chars, &input_str_type, &mult) == FAILURE ) {
@@ -6155,8 +6157,8 @@ PHP_FUNCTION(str_pad)
 	zend_uchar input_type, padstr_type;
 	
 	/* Helper variables */
-	int32_t input_codepts;	/* Number of codepts in Unicode input */
-	int32_t	num_pad_chars;	/* Number of padding characters (total - input size) */
+	int input_codepts;	/* Number of codepts in Unicode input */
+	int	num_pad_chars;	/* Number of padding characters (total - input size) */
 	void   *result = NULL;	/* Resulting string */
 	int32_t	result_len = 0;	/* Length of the resulting string */
 	int32_t	i, j, left_pad=0, right_pad=0;
@@ -6399,7 +6401,7 @@ PHP_FUNCTION(str_word_count)
 	}
 
 	if (char_list) {
-		php_charmask(char_list, char_list_len, ch TSRMLS_CC);
+		php_charmask((unsigned char*)char_list, char_list_len, ch TSRMLS_CC);
 	}
 	
 	p = str;

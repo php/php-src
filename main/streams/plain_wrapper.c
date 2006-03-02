@@ -1160,7 +1160,6 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 	char *pathbuf, *ptr, *end;
 	char *exec_fname;
 	char trypath[MAXPATHLEN];
-	struct stat sb;
 	php_stream *stream;
 	int path_length;
 	int filename_length;

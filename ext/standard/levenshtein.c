@@ -27,7 +27,7 @@
 
 /* {{{ reference_levdist
  * reference implementation, only optimized for memory usage, not speed */
-static int reference_levdist(void *s1, int32_t l1, void *s2, int32_t l2, zend_uchar str_type, int cost_ins, int cost_rep, int cost_del )
+static int reference_levdist(void *s1, int l1, void *s2, int l2, zend_uchar str_type, int cost_ins, int cost_rep, int cost_del )
 {
 	int *p1, *p2, *tmp;
 	int32_t i1, i2, j1, j2, cp1, cp2;
@@ -104,7 +104,7 @@ PHP_FUNCTION(levenshtein)
 {
 	int	argc = ZEND_NUM_ARGS();
 	void *str1, *str2;
-	int32_t str1_len, str2_len;
+	int str1_len, str2_len;
 	zend_uchar str1_type, str2_type;
 	long cost_ins, cost_rep, cost_del;
 	char *callback_name;

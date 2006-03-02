@@ -1738,7 +1738,7 @@ PHP_FUNCTION(range)
 				goto err;
 			}
 			for (; *low >= *high; (*low) -= (unsigned int)lstep) {
-				add_next_index_stringl(return_value, low, 1, 1);
+				add_next_index_stringl(return_value, (char*)low, 1, 1);
 				if (((signed int)*low - lstep) < 0) {
 					break;
 				}
@@ -1749,13 +1749,13 @@ PHP_FUNCTION(range)
 				goto err;
 			}
 			for (; *low <= *high; (*low) += (unsigned int)lstep) {
-				add_next_index_stringl(return_value, low, 1, 1);
+				add_next_index_stringl(return_value, (char*)low, 1, 1);
 				if (((signed int)*low + lstep) > 255) {
 					break;
 				}
 			}
 		} else {
-			add_next_index_stringl(return_value, low, 1, 1);
+			add_next_index_stringl(return_value, (char*)low, 1, 1);
 		}
 	} else if (Z_TYPE_P(zlow) == IS_UNICODE &&
 			   Z_USTRLEN_P(zlow) >= 1 && Z_USTRLEN_P(zhigh) >= 1) {
@@ -2095,7 +2095,7 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 	zval **stack,			/* Input stack */
 	     **val;			/* Value to be popped */
 	zstr key = NULL_ZSTR;
-	int key_len = 0;
+	uint key_len = 0;
 	ulong index;
 	zend_uchar key_type;
 	
@@ -2927,6 +2927,7 @@ PHP_FUNCTION(array_change_key_case)
 	zstr string_key;
 	zstr new_key;
 	uint str_key_len;
+	int str_len;
 	ulong num_key;
 	ulong change_to_upper=0;
 
@@ -2968,13 +2969,12 @@ PHP_FUNCTION(array_change_key_case)
 				break;
 			case HASH_KEY_IS_UNICODE:
 				new_key.u = eustrndup(string_key.u, str_key_len - 1);
-				str_key_len--;
+				str_len = str_key_len - 1;
 				if (change_to_upper)
-					new_key.u = php_u_strtoupper(&new_key.u, &str_key_len, UG(default_locale));
+					new_key.u = php_u_strtoupper(&new_key.u, &str_len, UG(default_locale));
 				else
-					new_key.u = php_u_strtolower(&new_key.u, &str_key_len, UG(default_locale));
-				str_key_len++;
-				zend_u_hash_update(Z_ARRVAL_P(return_value), IS_UNICODE, new_key, str_key_len, entry, sizeof(entry), NULL);
+					new_key.u = php_u_strtolower(&new_key.u, &str_len, UG(default_locale));
+				zend_u_hash_update(Z_ARRVAL_P(return_value), IS_UNICODE, new_key, str_len+1, entry, sizeof(entry), NULL);
 				efree(new_key.u);
 				break;
 		}

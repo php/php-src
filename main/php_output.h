@@ -75,7 +75,7 @@ typedef struct _php_ob_buffer {
 	php_output_handler_func_t internal_output_handler;
 	char *internal_output_handler_buffer;
 	uint internal_output_handler_buffer_size;
-	char *handler_name;
+	zstr handler_name;
 	zend_bool erase;
 } php_ob_buffer;
 

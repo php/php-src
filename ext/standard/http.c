@@ -33,7 +33,8 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 {
 	zstr key;
 	char *ekey, *newprefix, *p;
-	int arg_sep_len, key_len, ekey_len, key_type, newprefix_len;
+	uint key_len;
+	int arg_sep_len, ekey_len, key_type, newprefix_len;
 	ulong idx;
 	zval **zdata = NULL, *copyzval;
 

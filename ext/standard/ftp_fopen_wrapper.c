@@ -210,7 +210,7 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, char *path
 	}
 
 #define PHP_FTP_CNTRL_CHK(val, val_len, err_msg) {	\
-	unsigned char *s = val, *e = s + val_len;	\
+	unsigned char *s = (unsigned char*)val, *e = s + val_len;	\
 	while (s < e) {	\
 		if (iscntrl(*s)) {	\
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, err_msg, val);	\

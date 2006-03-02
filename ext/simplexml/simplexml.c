@@ -1912,7 +1912,7 @@ static int php_sxe_iterator_current_key(zend_object_iterator *iter, zstr *str_ke
 
 	if (UG(unicode)) {
 		UErrorCode status = U_ZERO_ERROR;
-		int32_t u_len;
+		int u_len;
 
 		namelen = xmlStrlen(curnode->name);
 		zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &str_key->u, &u_len, (char*)curnode->name, namelen, &status);

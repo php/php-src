@@ -42,7 +42,7 @@
 /* {{{ php_var_dump */
 
 /* temporary, for debugging */
-static void php_var_dump_unicode(UChar *ustr, int32_t length, int verbose, char *quote, int escape TSRMLS_DC)
+static void php_var_dump_unicode(UChar *ustr, int length, int verbose, char *quote, int escape TSRMLS_DC)
 {
 	UChar32 c;
 	int32_t i;
