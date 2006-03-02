@@ -1,5 +1,7 @@
 <?php
 
+ini_set('date.timezone', 'GMT');
+
 $fname = dirname(__FILE__) . '/phar_oo_test.phar.php';
 $pname = 'phar://' . $fname;
 $file = '<?php include "' . $pname . '/a.php"; __HALT_COMPILER(); ?>';
@@ -14,7 +16,7 @@ $files['e.php']   = '<?php echo "This is e.php\n"; ?>';
 $manifest = '';
 foreach($files as $name => $cont) {
 	$len = strlen($cont);
-	$manifest .= pack('V', strlen($name)) . $name . pack('VVVVC', $len, time(), $len, crc32($cont), 0x00);
+	$manifest .= pack('V', strlen($name)) . $name . pack('VVVVC', $len, mktime (12, 0, 0, 3, 1, 2006), $len, crc32($cont), 0x00);
 }
 $alias = 'alias';
 $manifest = pack('VnV', count($files), 0x0800, strlen($alias)) . $alias . $manifest;

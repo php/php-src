@@ -114,6 +114,8 @@ typedef struct _phar_archieve_data {
 	size_t                   internal_file_start;
 	zend_bool                has_compressed_files;
 	HashTable                manifest;
+	php_uint32               min_timestamp;
+	php_uint32               max_timestamp;
 	php_stream               *fp;
 } phar_archieve_data;
 
@@ -121,7 +123,7 @@ typedef struct _phar_archieve_data {
 typedef struct _phar_entry_data {
 	phar_archieve_data       *phar;
 	php_stream               *fp;
-	phar_entry_info      *internal_file;
+	phar_entry_info          *internal_file;
 } phar_entry_data;
 
 /* archieve php object */
@@ -452,6 +454,8 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 	zend_hash_init(&mydata.manifest, sizeof(phar_entry_info),
 		zend_get_hash_value, destroy_phar_manifest, 0);
 	offset = 0;
+	mydata.min_timestamp = 0;
+	mydata.max_timestamp = 0;
 	for (manifest_index = 0; manifest_index < manifest_count; manifest_index++) {
 		if (buffer + 4 > endbuffer) {
 			MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest entry)")
@@ -467,6 +471,16 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 		buffer += entry.filename_len;
 		PHAR_GET_32(buffer, entry.uncompressed_filesize);
 		PHAR_GET_32(buffer, entry.timestamp);
+		if (offset == 0) {
+			mydata.min_timestamp = entry.timestamp;
+			mydata.max_timestamp = entry.timestamp;
+		} else {
+			if (mydata.min_timestamp > entry.timestamp) {
+				mydata.min_timestamp = entry.timestamp;
+			} else if (mydata.max_timestamp < entry.timestamp) {
+				mydata.max_timestamp = entry.timestamp;
+			}
+		}
 		PHAR_GET_32(buffer, entry.compressed_filesize);
 		PHAR_GET_32(buffer, entry.crc32);
 		entry.offset_within_phar = offset;
@@ -1087,23 +1101,9 @@ static int phar_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static void phar_dostat(phar_entry_info *data, php_stream_statbuf *ssb, zend_bool is_dir, char *alias,
-			int alias_len TSRMLS_DC);
-
-static int phar_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC) /* {{{ */
-{
-	phar_entry_data *data;
-	/* If ssb is NULL then someone is misbehaving */
-	if (!ssb) return -1;
-
-	data = (phar_entry_data *)stream->abstract;
-	phar_dostat(data->internal_file, ssb, 0, data->phar->alias, data->phar->alias_len TSRMLS_CC);
-	return 0;
-}
-/* }}} */
-
-static void phar_dostat(phar_entry_info *data, php_stream_statbuf *ssb, zend_bool is_dir, char *alias,
-			int alias_len TSRMLS_DC) /* {{{ */
+ /* {{{ phar_dostat */
+static void phar_dostat(phar_archieve_data *phar, phar_entry_info *data, php_stream_statbuf *ssb, 
+			zend_bool is_dir, char *alias, int alias_len TSRMLS_DC)
 {
 	char *tmp;
 	int tmp_len;
@@ -1128,13 +1128,13 @@ static void phar_dostat(phar_entry_info *data, php_stream_statbuf *ssb, zend_boo
 		ssb->sb.st_size = 0;
 		ssb->sb.st_mode |= S_IFDIR; /* regular directory */
 #ifdef NETWARE
-		ssb->sb.st_mtime.tv_sec = 0;
-		ssb->sb.st_atime.tv_sec = 0;
-		ssb->sb.st_ctime.tv_sec = 0;
+		ssb->sb.st_mtime.tv_sec = phar->max_timestamp;
+		ssb->sb.st_atime.tv_sec = phar->max_timestamp;
+		ssb->sb.st_ctime.tv_sec = phar->max_timestamp;
 #else
-		ssb->sb.st_mtime = 0;
-		ssb->sb.st_atime = 0;
-		ssb->sb.st_ctime = 0;
+		ssb->sb.st_mtime = phar->max_timestamp;
+		ssb->sb.st_atime = phar->max_timestamp;
+		ssb->sb.st_ctime = phar->max_timestamp;
 #endif
 	}
 
@@ -1163,6 +1163,18 @@ static void phar_dostat(phar_entry_info *data, php_stream_statbuf *ssb, zend_boo
 #endif
 }
 /* }}}*/
+
+static int phar_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC) /* {{{ */
+{
+	phar_entry_data *data;
+	/* If ssb is NULL then someone is misbehaving */
+	if (!ssb) return -1;
+
+	data = (phar_entry_data *)stream->abstract;
+	phar_dostat(data->phar, data->internal_file, ssb, 0, data->phar->alias, data->phar->alias_len TSRMLS_CC);
+	return 0;
+}
+/* }}} */
 
 static int phar_stream_stat(php_stream_wrapper *wrapper, char *url, int flags,
 				  php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC) /* {{{ */
@@ -1198,13 +1210,13 @@ static int phar_stream_stat(php_stream_wrapper *wrapper, char *url, int flags,
 	if ((phar = phar_get_archieve(resource->host, strlen(resource->host), NULL, 0 TSRMLS_CC)) != NULL) {
 		if (*internal_file == '\0') {
 			/* root directory requested */
-			phar_dostat(NULL, ssb, 1, phar->alias, phar->alias_len TSRMLS_CC);
+			phar_dostat(phar, NULL, ssb, 1, phar->alias, phar->alias_len TSRMLS_CC);
 			php_url_free(resource);
 			return 0;
 		}
 		/* search through the manifest of files, and if we have an exact match, it's a file */
 		if (SUCCESS == zend_hash_find(&phar->manifest, internal_file, strlen(internal_file), (void**)&entry)) {
-			phar_dostat(entry, ssb, 0, phar->alias, phar->alias_len TSRMLS_CC);
+			phar_dostat(phar, entry, ssb, 0, phar->alias, phar->alias_len TSRMLS_CC);
 		} else {
 			/* search for directory (partial match of a file) */
 			zend_hash_internal_pointer_reset(&phar->manifest);
@@ -1215,7 +1227,7 @@ static int phar_stream_stat(php_stream_wrapper *wrapper, char *url, int flags,
 					if (0 == memcmp(internal_file, key, strlen(internal_file))) {
 						/* directory found, all dirs have the same stat */
 						if (key[strlen(internal_file)] == '/') {
-							phar_dostat(NULL, ssb, 1, phar->alias, phar->alias_len TSRMLS_CC);
+							phar_dostat(phar, NULL, ssb, 1, phar->alias, phar->alias_len TSRMLS_CC);
 							break;
 						}
 					}
