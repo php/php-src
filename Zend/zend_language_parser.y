@@ -183,11 +183,12 @@ inner_statement:
 
 
 statement:
-		unticked_statement { zend_do_ticks(TSRMLS_C); }
+		unticked_statement { CG(last_label) = NULL; zend_do_ticks(TSRMLS_C); }
+	|	T_STRING ':' { zend_do_label(&$1 TSRMLS_CC); }
 ;
 
 unticked_statement:
-		'{' inner_statement_list '}'
+		'{' { CG(last_label) = NULL; } inner_statement_list '}'
 	|	T_IF '(' expr ')' { zend_do_if_cond(&$3, &$4 TSRMLS_CC); } statement { zend_do_if_after_statement(&$4, 1 TSRMLS_CC); } elseif_list else_single { zend_do_if_end(TSRMLS_C); }
 	|	T_IF '(' expr ')' ':' { zend_do_if_cond(&$3, &$4 TSRMLS_CC); } inner_statement_list { zend_do_if_after_statement(&$4, 1 TSRMLS_CC); } new_elseif_list new_else_single T_ENDIF ';' { zend_do_if_end(TSRMLS_C); }
 	|	T_WHILE '(' { $1.u.opline_num = get_next_op_number(CG(active_op_array));  } expr  ')' { zend_do_while_cond(&$4, &$5 TSRMLS_CC); } while_statement { zend_do_while_end(&$1, &$5 TSRMLS_CC); }
@@ -203,9 +204,11 @@ unticked_statement:
 			for_statement { zend_do_for_end(&$7 TSRMLS_CC); }
 	|	T_SWITCH '(' expr ')'	{ zend_do_switch_cond(&$3 TSRMLS_CC); } switch_case_list { zend_do_switch_end(&$6 TSRMLS_CC); }
 	|	T_BREAK ';'				{ zend_do_brk_cont(ZEND_BRK, NULL TSRMLS_CC); }
-	|	T_BREAK expr ';'		{ zend_do_brk_cont(ZEND_BRK, &$2 TSRMLS_CC); }
+	|	T_BREAK T_LNUMBER ';'		{ zend_do_brk_cont(ZEND_BRK, &$2 TSRMLS_CC); }
+	|	T_BREAK T_STRING ';'		{ zend_do_brk_cont(ZEND_BRK, &$2 TSRMLS_CC); }
 	|	T_CONTINUE ';'			{ zend_do_brk_cont(ZEND_CONT, NULL TSRMLS_CC); }
-	|	T_CONTINUE expr ';'		{ zend_do_brk_cont(ZEND_CONT, &$2 TSRMLS_CC); }
+	|	T_CONTINUE T_LNUMBER ';'		{ zend_do_brk_cont(ZEND_CONT, &$2 TSRMLS_CC); }
+	|	T_CONTINUE T_STRING ';'		{ zend_do_brk_cont(ZEND_CONT, &$2 TSRMLS_CC); }
 	|	T_RETURN ';'						{ zend_do_return(NULL, 0 TSRMLS_CC); }
 	|	T_RETURN expr_without_variable ';'	{ zend_do_return(&$2, 0 TSRMLS_CC); }
 	|	T_RETURN variable ';'				{ zend_do_return(&$2, 1 TSRMLS_CC); }

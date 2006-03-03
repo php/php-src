@@ -136,6 +136,10 @@ struct _zend_compiler_globals {
 	HashTable script_encodings_table;
 	char *script_encoding;
 
+	HashTable *labels;
+	zend_label *last_label;
+	zend_stack labels_stack;
+
 #ifdef ZTS
 	HashTable **static_members;
 	int last_static_member;
