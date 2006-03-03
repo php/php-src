@@ -2197,6 +2197,7 @@ PHP_METHOD(SoapClient, SoapClient)
 
 			MAKE_STD_ZVAL(class_map);
 			*class_map = **tmp;
+			INIT_PZVAL(class_map);
 			zval_copy_ctor(class_map);
 #ifdef ZEND_ENGINE_2
 			class_map->refcount--;

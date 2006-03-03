@@ -246,6 +246,23 @@ void whiteSpace_collapse(char* str)
 	*pos = '\0';
 }
 
+static encodePtr find_encoder_by_type_name(sdlPtr sdl, const char *type)
+{
+	if (sdl && sdl->encoders) {
+		HashPosition pos;
+		encodePtr *enc;
+
+		for (zend_hash_internal_pointer_reset_ex(sdl->encoders, &pos);
+		     zend_hash_get_current_data_ex(sdl->encoders, (void **) &enc, &pos) == SUCCESS;
+		     zend_hash_move_forward_ex(sdl->encoders, &pos)) {
+			if (strcmp((*enc)->details.type_str, type) == 0) {
+				return *enc;
+			}
+		}
+	}
+	return NULL;
+}
+
 xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr parent)
 {
 	xmlNodePtr node = NULL;
@@ -329,7 +346,12 @@ xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr par
 			    	encodePtr enc = get_encoder(SOAP_GLOBAL(sdl), SOAP_GLOBAL(sdl)->target_ns, type_name);
 			    	if (enc) {
 			    		encode = enc;
-				 	}		        
+					} else if (SOAP_GLOBAL(sdl)) {
+						enc = find_encoder_by_type_name(SOAP_GLOBAL(sdl), type_name);
+						if (enc) {
+							encode = enc;
+						}
+					}
 			        break;
 				}
 			}
@@ -1202,7 +1224,7 @@ static void model_to_zval_object(zval *ret, sdlContentModelPtr model, xmlNodePtr
 }
 
 /* Struct encode/decode */
-static zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
+static zval *to_zval_object_ex(encodeTypePtr type, xmlNodePtr data, zend_class_entry *pce)
 {
 	zval *ret;
 	xmlNodePtr trav;
@@ -1213,7 +1235,9 @@ static zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
 	TSRMLS_FETCH();
 
 	ce = ZEND_STANDARD_CLASS_DEF_PTR;
-	if (SOAP_GLOBAL(class_map) && type->type_str) {
+	if (pce) {
+		ce = pce;
+	} else if (SOAP_GLOBAL(class_map) && type->type_str) {
 		zval             **classname;
 		zend_class_entry  *tmp;
 
@@ -1256,7 +1280,20 @@ static zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_SIMPLE &&
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_LIST &&
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_UNION) {
-				ret = master_to_zval_int(sdlType->encode, data);
+
+				if (ce != ZEND_STANDARD_CLASS_DEF_PTR &&
+				    sdlType->encode->to_zval == sdl_guess_convert_zval &&
+				    sdlType->encode->details.sdl_type != NULL &&
+				    (sdlType->encode->details.sdl_type->kind == XSD_TYPEKIND_COMPLEX ||
+				     sdlType->encode->details.sdl_type->kind == XSD_TYPEKIND_RESTRICTION ||
+				     sdlType->encode->details.sdl_type->kind == XSD_TYPEKIND_EXTENSION) &&
+				    (sdlType->encode->details.sdl_type->encode == NULL ||
+				     (sdlType->encode->details.sdl_type->encode->details.type != IS_ARRAY &&
+				      sdlType->encode->details.sdl_type->encode->details.type != SOAP_ENC_ARRAY))) {
+					ret = to_zval_object_ex(&sdlType->encode->details, data, ce);
+				} else {
+					ret = master_to_zval_int(sdlType->encode, data);
+				}
 				FIND_XML_NULL(data, ret);
 				if (get_zval_property(ret, "any" TSRMLS_CC) != NULL) {
 					unset_zval_property(ret, "any" TSRMLS_CC);
@@ -1359,6 +1396,11 @@ static zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
 		}
 	}
 	return ret;
+}
+
+static zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
+{
+	return to_zval_object_ex(type, data, NULL);
 }
 
 static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *object, int style, int strict TSRMLS_DC)
