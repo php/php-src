@@ -61,8 +61,11 @@ int dom_namednodemap_length_read(dom_object *obj, zval **retval TSRMLS_DC)
 	objmap = (dom_nnodemap_object *)obj->ptr;
 
 	if (objmap != NULL) {
-		if (objmap->ht) {
-			count = xmlHashSize(objmap->ht);
+		if ((objmap->nodetype == XML_NOTATION_NODE) || 
+			objmap->nodetype == XML_ENTITY_NODE) {
+			if (objmap->ht) {
+				count = xmlHashSize(objmap->ht);
+			}
 		} else {
 			nodep = dom_object_get_node(objmap->baseobj);
 			if (nodep) {
@@ -113,12 +116,17 @@ PHP_FUNCTION(dom_namednodemap_get_named_item)
 	objmap = (dom_nnodemap_object *)intern->ptr;
 
 	if (objmap != NULL) {
-		if (objmap->ht) {
-			if (objmap->nodetype == XML_ENTITY_NODE) {
-				itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, named);
-			} else {
-				notep = (xmlNotation *)xmlHashLookup(objmap->ht, named);
-				itemnode = create_notation(notep->name, notep->PublicID, notep->SystemID);
+		if ((objmap->nodetype == XML_NOTATION_NODE) || 
+			objmap->nodetype == XML_ENTITY_NODE) {
+			if (objmap->ht) {
+				if (objmap->nodetype == XML_ENTITY_NODE) {
+					itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, named);
+				} else {
+					notep = (xmlNotation *)xmlHashLookup(objmap->ht, named);
+					if (notep) {
+						itemnode = create_notation(notep->name, notep->PublicID, notep->SystemID);
+					}
+				}
 			}
 		} else {
 			nodep = dom_object_get_node(objmap->baseobj);
@@ -185,11 +193,14 @@ PHP_FUNCTION(dom_namednodemap_item)
 		objmap = (dom_nnodemap_object *)intern->ptr;
 
 		if (objmap != NULL) {
-			if (objmap->ht) {
-				if (objmap->nodetype == XML_ENTITY_NODE) {
-					itemnode = php_dom_libxml_hash_iter(objmap->ht, index);
-				} else {
-					itemnode = php_dom_libxml_notation_iter(objmap->ht, index);
+			if ((objmap->nodetype == XML_NOTATION_NODE) || 
+				objmap->nodetype == XML_ENTITY_NODE) {
+				if (objmap->ht) {
+					if (objmap->nodetype == XML_ENTITY_NODE) {
+						itemnode = php_dom_libxml_hash_iter(objmap->ht, index);
+					} else {
+						itemnode = php_dom_libxml_notation_iter(objmap->ht, index);
+					}
 				}
 			} else {
 				nodep = dom_object_get_node(objmap->baseobj);
@@ -241,12 +252,17 @@ PHP_FUNCTION(dom_namednodemap_get_named_item_ns)
 	objmap = (dom_nnodemap_object *)intern->ptr;
 
 	if (objmap != NULL) {
-		if (objmap->ht) {
-			if (objmap->nodetype == XML_ENTITY_NODE) {
-				itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, named);
-			} else {
-				notep = (xmlNotation *)xmlHashLookup(objmap->ht, named);
-				itemnode = create_notation(notep->name, notep->PublicID, notep->SystemID);
+		if ((objmap->nodetype == XML_NOTATION_NODE) || 
+			objmap->nodetype == XML_ENTITY_NODE) {
+			if (objmap->ht) {
+				if (objmap->nodetype == XML_ENTITY_NODE) {
+					itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, named);
+				} else {
+					notep = (xmlNotation *)xmlHashLookup(objmap->ht, named);
+					if (notep) {
+						itemnode = create_notation(notep->name, notep->PublicID, notep->SystemID);
+					}
+				}
 			}
 		} else {
 			nodep = dom_object_get_node(objmap->baseobj);
