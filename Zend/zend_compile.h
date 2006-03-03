@@ -94,6 +94,11 @@ typedef struct _zend_brk_cont_element {
 	int parent;
 } zend_brk_cont_element;
 
+typedef struct _zend_label {
+	int brk_cont;
+	int loop;
+	zend_uint opline_num;
+} zend_label;
 
 typedef struct _zend_try_catch_element {
 	zend_uint try_op;
@@ -512,6 +517,8 @@ void zend_do_abstract_method(znode *function_name, znode *modifiers, znode *body
 ZEND_API void function_add_ref(zend_function *function TSRMLS_DC);
 
 void zend_do_normalization(znode *result, znode *str TSRMLS_DC);
+
+void zend_do_label(znode *label TSRMLS_DC);
 
 #define INITIAL_OP_ARRAY_SIZE 64
 
