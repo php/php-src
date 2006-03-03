@@ -321,7 +321,7 @@ typedef union _zvalue_value {
 		UChar *val;
 		int len;
 	} ustr;
-	struct {                    /* Unicersal string type */
+	struct {                    /* Universal string type */
 		zstr val;
 		int len;
 	} uni;
