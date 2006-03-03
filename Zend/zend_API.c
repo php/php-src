@@ -2524,7 +2524,7 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 	*fptr_ptr = NULL;
 
 	if (Z_TYPE_P(callable) == IS_UNICODE) {
-		if ((colon.u = u_strstr(Z_USTRVAL_P(callable), (UChar*)":\0:\0\0")) != NULL) {
+		if ((colon.u = u_strstr(Z_USTRVAL_P(callable), u_doublecolon)) != NULL) {
 			mlen = u_strlen(colon.u+2);
 			clen = Z_USTRLEN_P(callable) - mlen - 2;
 			mname.u = colon.u + 2;
