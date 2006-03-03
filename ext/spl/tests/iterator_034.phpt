@@ -116,7 +116,7 @@ $it->rewind();
 echo "===CHECK===\n";
 
 var_dump($it->valid());
-var_dump($it->current());
+var_dump($it->current() == "a");
 
 ?>
 ===DONE===
@@ -186,5 +186,5 @@ RecursiveArrayIteratorIterator::rewind() - DONE
 RecursiveArrayIteratorIterator::valid()
 bool(true)
 RecursiveArrayIteratorIterator::current()
-string(1) "a"
+bool(true)
 ===DONE===
