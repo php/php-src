@@ -311,10 +311,11 @@ ZEND_METHOD(error_exception, getSeverity)
 	{ \
 		zval tmp, copy; \
 		int use_copy; \
-		ZVAL_UNICODEL(&tmp, val, vallen, 0); \
+		ZVAL_UNICODEL(&tmp, val, vallen, 1); \
 		zend_make_printable_zval(&tmp, &copy, &use_copy); \
 		TRACE_APPEND_STRL(Z_STRVAL(copy), Z_STRLEN(copy)); \
 		zval_dtor(&copy); \
+		zval_dtor(&tmp); \
 	}
 
 #define TRACE_APPEND_ZVAL(zv) \
