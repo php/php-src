@@ -36,6 +36,7 @@ PHP                                                                        NEWS
 - Fixed tiger hash algorithm generating wrong results on big endian platforms.
   (Mike)
 - Fixed crash with DOMImplementation::createDocumentType("name:"). (Mike)
+- Fixed bug #36599 (DATE_W3C format constant incorrect). (Derick)
 - Fixed bug #36510 (strtotime() fails to parse date strings with tabs). (Ilia,
   Derick)
 - Fixed bug #36459 (Incorrect adding PHPSESSID to links, which contains \r\n).
