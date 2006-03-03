@@ -50,7 +50,7 @@ class LogOffEvent {
   public $audienceMemberId;
   public $timestamp;
   public $smokeStatus;
-  public $callInititator;
+  public $callInitiator;
 
   function __construct($audienceMemberId, $timestamp, $smokeStatus) {
     $this->audienceMemberId = $audienceMemberId;
@@ -99,6 +99,18 @@ object(IVREvents)#%d (6) {
   int(101)
   ["messageId"]=>
   int(12345)
+  ["source"]=>
+  string(3) "IVR"
+  ["logOnEvent"]=>
+  array(1) {
+    [0]=>
+    object(LogOnEvent)#10 (2) {
+      ["audienceMemberId"]=>
+      int(34567)
+      ["timestamp"]=>
+      string(25) "2005-11-08T11:22:07+03:00"
+    }
+  }
   ["logOffEvent"]=>
   array(2) {
     [0]=>
@@ -124,16 +136,4 @@ object(IVREvents)#%d (6) {
       string(3) "IVR"
     }
   }
-  ["logOnEvent"]=>
-  array(1) {
-    [0]=>
-    object(LogOnEvent)#10 (2) {
-      ["audienceMemberId"]=>
-      int(34567)
-      ["timestamp"]=>
-      string(25) "2005-11-08T11:22:07+03:00"
-    }
-  }
-  ["source"]=>
-  string(3) "IVR"
 }
