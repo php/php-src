@@ -51,14 +51,16 @@ static DWORD timeout_thread_id;
 static int timeout_thread_initialized=0;
 #endif
 
-static UChar u_main[sizeof("main")];
-static UChar u_return[sizeof("return ")];
-static UChar u_semicolon[sizeof(" ;")];
+UChar u_main[sizeof("main")];
+UChar u_return[sizeof("return ")];
+UChar u_semicolon[sizeof(" ;")];
+UChar u_doublecolon[sizeof(" ;")];
 
 void init_unicode_strings() {
 	u_charsToUChars("main", u_main, sizeof("main"));
 	u_charsToUChars("return ", u_return, sizeof("return "));
 	u_charsToUChars(" ;", u_semicolon, sizeof(" ;"));
+	u_charsToUChars("::", u_doublecolon, sizeof("::"));
 }
 
 #if ZEND_DEBUG
