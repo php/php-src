@@ -1,0 +1,6 @@
+* md5() on Unicode string will obviously be different from md5() done on
+  a native encoding version of that string. This can trip up people who
+  generate signatures externally (storing them in DB for instance) and then
+  pass md5() of Unicode strings to check against that. The solution is to
+  always run md5() on a string of the same type and encoding that the
+  external md5() was run on.
