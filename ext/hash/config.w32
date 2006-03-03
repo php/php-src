@@ -1,7 +1,7 @@
 // $Id$
 // vim:ft=javascript
 
-ARG_ENABLE("hash", "enable hash support", "no");
+ARG_ENABLE("hash", "enable hash support", "yes");
 
 if (PHP_HASH != "no") {
 	AC_DEFINE('HAVE_HASH_EXT', 1);
