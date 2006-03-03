@@ -7710,7 +7710,7 @@ static int ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	HashTable *fe_ht;
 	zend_object_iterator *iter = NULL;
 	int key_type;
-	zend_bool use_key = opline->extended_value & ZEND_FE_FETCH_WITH_KEY;
+	zend_bool use_key = (zend_bool)(opline->extended_value & ZEND_FE_FETCH_WITH_KEY);
 
 	PZVAL_LOCK(array);
 
