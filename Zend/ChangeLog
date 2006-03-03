@@ -1,3 +1,18 @@
+2006-03-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_unicode.c
+      zend_unicode.h:
+      Nuke int32_t (everywhere except streams layer) and signed/unsigned warnings
+
+2006-03-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      zend.c:
+      - MFH Use object handler get in the same way as the rest of the engine does
+
+    * zend.c:
+      - Use object handler get in the same way as the rest of the engine does
+
 2006-03-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
