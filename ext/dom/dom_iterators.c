@@ -200,7 +200,8 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC)
 	curobj = iterator->curobj;
 	intern = (dom_object *)zend_object_store_get_object(curobj TSRMLS_CC);
 	if (intern != NULL && intern->ptr != NULL) {
-		if (objmap->ht == NULL) {
+		if (objmap->nodetype != XML_ENTITY_NODE && 
+			objmap->nodetype != XML_NOTATION_NODE) {
 			if (objmap->nodetype == DOM_NODESET) {
 				nodeht = HASH_OF(objmap->baseobjptr);
 				zend_hash_move_forward(nodeht);
@@ -210,12 +211,14 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC)
 				}
 			} else {
 				curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->ptr)->node;
-				if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
+				if (objmap->nodetype == XML_ATTRIBUTE_NODE || 
+					objmap->nodetype == XML_ELEMENT_NODE) {
 					curnode = curnode->next;
 				} else {
 					/* Nav the tree evey time as this is LIVE */
 					basenode = dom_object_get_node(objmap->baseobj);
-					if (basenode && (basenode->type == XML_DOCUMENT_NODE || basenode->type == XML_HTML_DOCUMENT_NODE)) {
+					if (basenode && (basenode->type == XML_DOCUMENT_NODE || 
+						basenode->type == XML_HTML_DOCUMENT_NODE)) {
 						basenode = xmlDocGetRootElement((xmlDoc *) basenode);
 					} else {
 						basenode = basenode->children;
@@ -225,9 +228,9 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC)
 			}
 		} else {
 			if (objmap->nodetype == XML_ENTITY_NODE) {
-				curnode = php_dom_libxml_hash_iter(objmap->ht, iter->index);
+				curnode = php_dom_libxml_hash_iter(objmap->ht, iter->index - 1);
 			} else {
-				curnode = php_dom_libxml_notation_iter(objmap->ht, iter->index);
+				curnode = php_dom_libxml_notation_iter(objmap->ht, iter->index - 1);
 			}
 		}
 	}
@@ -269,7 +272,8 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object TS
 	intern = (dom_object *)zend_object_store_get_object(object TSRMLS_CC);
 	objmap = (dom_nnodemap_object *)intern->ptr;
 	if (objmap != NULL) {
-		if (objmap->ht == NULL) {
+		if (objmap->nodetype != XML_ENTITY_NODE && 
+			objmap->nodetype != XML_NOTATION_NODE) {
 			if (objmap->nodetype == DOM_NODESET) {
 				nodeht = HASH_OF(objmap->baseobjptr);
 				zend_hash_internal_pointer_reset(nodeht);
@@ -295,7 +299,11 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object TS
 				}
 			}
 		} else {
-			curnode = php_dom_libxml_hash_iter(objmap->ht, 0);
+			if (objmap->nodetype == XML_ENTITY_NODE) {
+				curnode = php_dom_libxml_hash_iter(objmap->ht, 0);
+			} else {
+				curnode = php_dom_libxml_notation_iter(objmap->ht, 0);
+			}
 		}
 	}
 
