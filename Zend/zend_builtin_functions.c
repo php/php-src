@@ -1892,7 +1892,11 @@ ZEND_FUNCTION(debug_print_backtrace)
 			debug_print_backtrace_args(arg_array TSRMLS_CC);
 			zval_ptr_dtor(&arg_array);
 		}
-		zend_printf(") called at [%s:%d]\n", filename, lineno);
+		if (filename) {
+			zend_printf(") called at [%s:%d]\n", filename, lineno);
+		} else {
+			ZEND_PUTS(")\n");
+		}
 		include_filename = filename;
 		ptr = skip->prev_execute_data;
 		++indent;
