@@ -471,16 +471,24 @@ PHP_FUNCTION(hash_final)
 Return a list of registered hashing algorithms */
 PHP_FUNCTION(hash_algos)
 {
-	HashPosition pos;
+#if (PHP_MAJOR_VERSION >= 6)
 	zstr str;
+#else
+	char *str;
+#endif
 	int str_len;
 	long idx, type;
+	HashPosition pos;
 
 	array_init(return_value);
 	for(zend_hash_internal_pointer_reset_ex(&php_hash_hashtable, &pos);
 		(type = zend_hash_get_current_key_ex(&php_hash_hashtable, &str, &str_len, &idx, 0, &pos)) != HASH_KEY_NON_EXISTANT;
 		zend_hash_move_forward_ex(&php_hash_hashtable, &pos)) {
-		add_next_index_stringl(return_value, str.s, str_len-1, 1);
+#if (PHP_MAJOR_VERSION >= 6)
+			add_next_index_stringl(return_value, str.s, str_len-1, 1);
+#else
+			add_next_index_stringl(return_value, str, str_len-1, 1);
+#endif
 	}
 }
 /* }}} */
@@ -579,13 +587,21 @@ PHP_MINFO_FUNCTION(hash)
 	HashPosition pos;
 	char buffer[2048];
 	char *s = buffer, *e = s + sizeof(buffer);
-	zstr str;
 	long idx, type;
+#if (PHP_MAJOR_VERSION >= 6)
+	zstr str;
+#else
+	char *str;
+#endif
 
 	for(zend_hash_internal_pointer_reset_ex(&php_hash_hashtable, &pos);
 		(type = zend_hash_get_current_key_ex(&php_hash_hashtable, &str, NULL, &idx, 0, &pos)) != HASH_KEY_NON_EXISTANT;
 		zend_hash_move_forward_ex(&php_hash_hashtable, &pos)) {
+#if (PHP_MAJOR_VERSION >= 6)
 		s += snprintf(s, e - s, "%s ", str.s);
+#else
+		s += snprintf(s, e - s, "%s ", str);
+#endif
 	}
 	*s = 0;
 
