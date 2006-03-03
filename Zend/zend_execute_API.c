@@ -638,6 +638,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		execute_data = *EG(current_execute_data);
 		EX(op_array) = NULL;
 		EX(opline) = NULL;
+		EX(object) =  NULL;
 	} else {
 		/* This only happens when we're called outside any execute()'s
 		 * It shouldn't be strictly necessary to NULL execute_data out,
@@ -696,6 +697,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 					ce = &(EG(active_op_array)->scope);
 					found = (*ce != NULL?SUCCESS:FAILURE);
 					fci->object_pp = EG(This)?&EG(This):NULL;
+					EX(object) = EG(This);
 				} else if (EG(active_op_array) &&
 				           Z_UNILEN_PP(fci->object_pp) == sizeof("parent")-1 &&
 				           ZEND_U_EQUAL(Z_TYPE_PP(fci->object_pp), Z_UNIVAL_PP(fci->object_pp), Z_UNILEN_PP(fci->object_pp), "parent", sizeof("parent")-1)) {
@@ -709,6 +711,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 					ce = &(EG(active_op_array)->scope->parent);
 					found = (*ce != NULL?SUCCESS:FAILURE);
 					fci->object_pp = EG(This)?&EG(This):NULL;
+					EX(object) = EG(This);
 				} else {
 					zend_class_entry *scope;
 					scope = EG(active_op_array) ? EG(active_op_array)->scope : NULL;
@@ -721,6 +724,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 						instanceof_function(Z_OBJCE_P(EG(This)), scope TSRMLS_CC) &&
 						instanceof_function(scope, *ce TSRMLS_CC)) {
 						fci->object_pp = &EG(This);
+						EX(object) = EG(This);
 					} else {
 						fci->object_pp = NULL;
 					}
@@ -862,6 +866,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		EX(function_state).function = fci_cache->function_handler;
 		calling_scope = fci_cache->calling_scope;
 		fci->object_pp = fci_cache->object_pp;
+		EX(object) = fci->object_pp ? *fci->object_pp : NULL;
 	}
 
 	if (EX(function_state).function->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) {
