@@ -48,9 +48,9 @@ Since:
 */
 int dom_notation_public_id_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
-	xmlNotationPtr nodep;
+	xmlEntityPtr nodep;
 
-	nodep = (xmlNotationPtr) dom_object_get_node(obj);
+	nodep = (xmlEntityPtr) dom_object_get_node(obj);
 
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
@@ -58,8 +58,8 @@ int dom_notation_public_id_read(dom_object *obj, zval **retval TSRMLS_DC)
 	}
 
 	ALLOC_ZVAL(*retval);
-	if (nodep->PublicID) {
-		ZVAL_STRING(*retval, (char *) (nodep->PublicID), 1);
+	if (nodep->ExternalID) {
+		ZVAL_STRING(*retval, (char *) (nodep->ExternalID), 1);
 	} else {
 		ZVAL_EMPTY_STRING(*retval);
 	}
@@ -78,9 +78,9 @@ Since:
 */
 int dom_notation_system_id_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
-	xmlNotationPtr nodep;
+	xmlEntityPtr nodep;
 
-	nodep = (xmlNotationPtr) dom_object_get_node(obj);
+	nodep = (xmlEntityPtr) dom_object_get_node(obj);
 
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
@@ -89,7 +89,7 @@ int dom_notation_system_id_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	ALLOC_ZVAL(*retval);
 	if (nodep->SystemID) {
-		ZVAL_STRING(*retval, (char *) (nodep->PublicID), 1);
+		ZVAL_STRING(*retval, (char *) (nodep->SystemID), 1);
 	} else {
 		ZVAL_EMPTY_STRING(*retval);
 	}
