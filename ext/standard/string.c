@@ -3255,7 +3255,7 @@ PHP_FUNCTION(chr)
 
 /* {{{ php_u_ucfirst()
    Makes an Unicode string's first character uppercase */
-static void php_u_ucfirst(zval *ustr, zval *return_value)
+static void php_u_ucfirst(zval *ustr, zval *return_value TSRMLS_DC)
 {
 	UChar tmp[3] = { 0,}; /* UChar32 will be converted to upto 2 UChar units ? */
 	int tmp_len = 0;
@@ -3297,7 +3297,7 @@ PHP_FUNCTION(ucfirst)
 
 	if (Z_TYPE_PP(str) == IS_UNICODE) {
 		Z_TYPE_P(return_value) = IS_UNICODE;
-		php_u_ucfirst(*str, return_value);
+		php_u_ucfirst(*str, return_value TSRMLS_CC);
 	} else {
 		ZVAL_STRINGL(return_value, Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);
 		*Z_STRVAL_P(return_value) = toupper((unsigned char) *Z_STRVAL_P(return_value));
@@ -3307,7 +3307,7 @@ PHP_FUNCTION(ucfirst)
 
 /* {{{ php_u_ucwords() U
    Uppercase the first character of every word in an Unicode string */
-static void php_u_ucwords(zval *ustr, zval *retval)
+static void php_u_ucwords(zval *ustr, zval *retval TSRMLS_DC)
 {
 	UChar32 cp = 0;
 	UChar *tmp;
@@ -3381,7 +3381,7 @@ PHP_FUNCTION(ucwords)
 
 	if (Z_TYPE_PP(str) == IS_UNICODE) {
 		Z_TYPE_P(return_value) = IS_UNICODE;
-		php_u_ucwords(*str, return_value);
+		php_u_ucwords(*str, return_value TSRMLS_CC);
 	} else {
 		ZVAL_STRINGL(return_value, Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);
 
