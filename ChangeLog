@@ -1,3 +1,89 @@
+2006-03-02  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/string.c:
+      Fix ucwords() to use full case mapping.
+      
+
+2006-03-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      give credit where it is due.
+
+2006-03-02  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/string.c:
+      - Update protos for Unicode-upgraded functions
+      - Also fix ucfirst() to use full case mapping, so that ß (sharp s)
+        maps to 'SS' for example
+
+2006-03-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #36388 (ext/soap crashes when throwing exception and session
+      persistence). (David)
+
+    * ZendEngine2/zend_unicode.c
+      ZendEngine2/zend_unicode.h
+      ext/simplexml/simplexml.c
+      ext/sqlite/sqlite.c
+      ext/standard/array.c
+      ext/standard/base64.c
+      ext/standard/dns.c
+      ext/standard/exec.c
+      ext/standard/file.c
+      ext/standard/filters.c
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/html.c
+      ext/standard/html.h
+      ext/standard/http.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/image.c
+      ext/standard/info.c
+      ext/standard/iptc.c
+      ext/standard/levenshtein.c
+      ext/standard/md5.c
+      ext/standard/php_string.h
+      ext/standard/sha1.c
+      ext/standard/streamsfuncs.c
+      ext/standard/string.c
+      ext/standard/url.c
+      ext/standard/user_filters.c
+      ext/standard/var.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re
+      main/fopen_wrappers.c
+      main/main.c
+      main/output.c
+      main/php_logos.c
+      main/php_output.h
+      main/php_variables.c
+      main/php_variables.h
+      main/rfc1867.c
+      main/spprintf.c
+      main/streams/plain_wrapper.c:
+      Nuke int32_t (everywhere except streams layer) and signed/unsigned warnings
+
+2006-03-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      ZendEngine2/zend.c:
+      - MFH Use object handler get in the same way as the rest of the engine does
+
+    * ZendEngine2/zend.c:
+      - Use object handler get in the same way as the rest of the engine does
+
+2006-03-02  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * (PHP_4_4)
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.c:
+      MFH add safe_mode num of parameter check
+
+    * ext/mbstring/mbstring.c:
+      add safe_mode num of parameter check
+
 2006-03-01  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/mysqli/mysqli.c:
