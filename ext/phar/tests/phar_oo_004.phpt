@@ -1,5 +1,5 @@
 --TEST--
-Phar object: entry & openFile()
+Phar and DirectoryIteraotr
 --SKIPIF--
 <?php if (!extension_loaded("phar")) print "skip"; ?>
 --FILE--
