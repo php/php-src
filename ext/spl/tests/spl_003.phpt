@@ -2,8 +2,6 @@
 SPL: class_parents() and class_implements()
 --SKIPIF--
 <?php if (!extension_loaded("spl")) print "skip"; ?>
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 class a{}
