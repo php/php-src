@@ -43,20 +43,6 @@ void spl_instantiate(zend_class_entry *pce, zval **object, int alloc TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ spl_is_instance_of */
-int spl_is_instance_of(zval **obj, zend_class_entry *ce TSRMLS_DC)
-{
-	/* Ensure everything needed is available before checking for the type.
-	 */
-	zend_class_entry *instance_ce;
-
-	if (obj && (instance_ce = spl_get_class_entry(*obj TSRMLS_CC)) != NULL) {
-		return instanceof_function(instance_ce, ce TSRMLS_CC);
-	}
-	return 0;
-}
-/* }}} */
-
 /*
  * Local variables:
  * tab-width: 4
