@@ -1,3 +1,62 @@
+2006-03-03  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_execute.h:
+      Clean up after Marcus.
+
+2006-03-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c
+      zend_execute.h
+      zend_execute_API.c:
+      - Make unicode handling portable (noted by andrei)
+
+    * zend_API.c:
+      - As expected (but told otherwise) unicode strings indeed need to be
+        terminated by two \0.
+
+    * zend_exceptions.c:
+      - Fix issue with uncaught exceptions in unicode mode
+
+    * tests/break_label10.phpt
+      tests/break_label11.phpt:
+      - Add new tests
+
+2006-03-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_execute.h:
+      Regenerated
+
+    * zend_compile.c
+      zend_compile.h
+      zend_globals.h
+      zend_language_parser.y
+      tests/break_label01.phpt
+      tests/break_label02.phpt
+      tests/break_label03.phpt
+      tests/break_label04.phpt
+      tests/break_label05.phpt
+      tests/break_label06.phpt
+      tests/break_label07.phpt
+      tests/break_label08.inc
+      tests/break_label08.phpt
+      tests/break_label09.phpt:
+      Added support for "continue" and "break" operators with labels. Each loop
+      or switch statement can be marked by label and then it is possible to
+      write "break <label>" instead of "break <number>".
+
+    * zend_execute_API.c
+      zend_execute_API.c:
+      Fixed incorrect backtrace type ("::" instead of "->") for __set()/__get()
+
+    * zend_builtin_functions.c
+      zend_builtin_functions.c:
+      Remove "called at [(null):0]" from debug backtrace
+
+2006-03-03  Johannes Schlüter  <schlueter@phpbar.de>
+
+    * zend.h:
+      - Fix typo
+
 2006-03-02  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_unicode.c
