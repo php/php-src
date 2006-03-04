@@ -3,6 +3,7 @@ JSON Test Pattern pass1.1
 Modified to test unescaped UNICODE as keys and values.
 Modified to test numbers with exponents without a decimal point.
 Modified to test empty string values.
+Modified to test a mix of integers and strings as keys.
 http://www.crockford.com/JSON/JSON_checker/test/pass1.json
 --SKIPIF--
 <?php
@@ -50,6 +51,7 @@ $test = "
         \"null\": null,
         \"array\":[  ],
         \"object\":{  },
+        \"123\":{\"456\":{\"abc\":{\"789\":\"def\",\"012\":[1,2,\"5\",500],\"ghi\":[1,2,\"five\",50,\"sixty\"]}}},
         \"address\": \"50 St. James Street\",
         \"url\": \"http://www.JSON.org/\",
         \"comment\": \"// /* <!-- --\",
@@ -137,6 +139,7 @@ Testing:
         "null": null,
         "array":[  ],
         "object":{  },
+        "123":{"456":{"abc":{"789":"def","012":[1,2,"5",500],"ghi":[1,2,"five",50,"sixty"]}}},
         "address": "50 St. James Street",
         "url": "http://www.JSON.org/",
         "comment": "// /* <!-- --",
@@ -189,7 +192,7 @@ array(14) {
   [7]=>
   NULL
   [8]=>
-  object(stdClass)#3 (35) {
+  object(stdClass)#3 (36) {
     ["integer"]=>
     int(1234567890)
     ["real"]=>
@@ -245,6 +248,41 @@ array(14) {
     }
     ["object"]=>
     object(stdClass)#4 (0) {
+    }
+    ["123"]=>
+    object(stdClass)#5 (1) {
+      ["456"]=>
+      object(stdClass)#6 (1) {
+        ["abc"]=>
+        object(stdClass)#7 (3) {
+          ["789"]=>
+          string(3) "def"
+          ["012"]=>
+          array(4) {
+            [0]=>
+            int(1)
+            [1]=>
+            int(2)
+            [2]=>
+            string(1) "5"
+            [3]=>
+            int(500)
+          }
+          ["ghi"]=>
+          array(5) {
+            [0]=>
+            int(1)
+            [1]=>
+            int(2)
+            [2]=>
+            string(4) "five"
+            [3]=>
+            int(50)
+            [4]=>
+            string(5) "sixty"
+          }
+        }
+      }
     }
     ["address"]=>
     string(19) "50 St. James Street"
@@ -335,7 +373,7 @@ array(14) {
   [7]=>
   NULL
   [8]=>
-  array(35) {
+  array(36) {
     ["integer"]=>
     int(1234567890)
     ["real"]=>
@@ -391,6 +429,41 @@ array(14) {
     }
     ["object"]=>
     array(0) {
+    }
+    [123]=>
+    array(1) {
+      [456]=>
+      array(1) {
+        ["abc"]=>
+        array(3) {
+          [789]=>
+          string(3) "def"
+          ["012"]=>
+          array(4) {
+            [0]=>
+            int(1)
+            [1]=>
+            int(2)
+            [2]=>
+            string(1) "5"
+            [3]=>
+            int(500)
+          }
+          ["ghi"]=>
+          array(5) {
+            [0]=>
+            int(1)
+            [1]=>
+            int(2)
+            [2]=>
+            string(4) "five"
+            [3]=>
+            int(50)
+            [4]=>
+            string(5) "sixty"
+          }
+        }
+      }
     }
     ["address"]=>
     string(19) "50 St. James Street"
@@ -455,15 +528,15 @@ array(14) {
   string(7) "rosebud"
 }
 ENCODE: FROM OBJECT
-["JSON Test Pattern pass1",{"object with 1 member":["array with 1 element"]},{},[],-42,true,false,null,{"integer":1234567890,"real":-9876.54321,"e":1.23456789e-13,"E":1.23456789e+34,"_empty_":0,"E no .":4.0e+12,"zero":0,"one":1,"space":" ","quote":"\"","backslash":"\\","controls":"\b\f\n\r\t","slash":"\/ & \/","alpha":"abcdefghijklmnopqrstuvwyz","ALPHA":"ABCDEFGHIJKLMNOPQRSTUVWYZ","digit":"0123456789","special":"`1~!@#$%^&*()_+-={':[,]}|;.<\/>?","hex":"\u0123\u4567\u89ab\ucdef\uabcd\uef4a","unicode":"\u30d7\u30ec\u30b9\u30ad\u30c3\u30c8","\u30d7\u30ec\u30b9\u30ad\u30c3\u30c8":"\u30d7\u30ec\u30b9\u30ad\u30c3\u30c8","empty_string":"","true":true,"false":false,"null":null,"array":[],"object":{},"address":"50 St. James Street","url":"http:\/\/www.JSON.org\/","comment":"\/\/ \/* <!-- --","# -- --> *\/":" "," s p a c e d ":[1,2,3,4,5,6,7],"compact":[1,2,3,4,5,6,7],"jsontext":"{\"object with 1 member\":[\"array with 1 element\"]}","quotes":"&#34; \" %22 0x22 034 &#x22;","\/\\\"\ucafe\ubabe\uab98\ufcde\ubcda\uef4a\b\f\n\r\t`1~!@#$%^&*()_+-=[]{}|;:',.\/<>?":"A key can be any string"},0.5,98.6,99.44,1066,"rosebud"]
+["JSON Test Pattern pass1",{"object with 1 member":["array with 1 element"]},{},[],-42,true,false,null,{"integer":1234567890,"real":-9876.54321,"e":1.23456789e-13,"E":1.23456789e+34,"_empty_":0,"E no .":4.0e+12,"zero":0,"one":1,"space":" ","quote":"\"","backslash":"\\","controls":"\b\f\n\r\t","slash":"\/ & \/","alpha":"abcdefghijklmnopqrstuvwyz","ALPHA":"ABCDEFGHIJKLMNOPQRSTUVWYZ","digit":"0123456789","special":"`1~!@#$%^&*()_+-={':[,]}|;.<\/>?","hex":"\u0123\u4567\u89ab\ucdef\uabcd\uef4a","unicode":"\u30d7\u30ec\u30b9\u30ad\u30c3\u30c8","\u30d7\u30ec\u30b9\u30ad\u30c3\u30c8":"\u30d7\u30ec\u30b9\u30ad\u30c3\u30c8","empty_string":"","true":true,"false":false,"null":null,"array":[],"object":{},"123":{"456":{"abc":{"789":"def","012":[1,2,"5",500],"ghi":[1,2,"five",50,"sixty"]}}},"address":"50 St. James Street","url":"http:\/\/www.JSON.org\/","comment":"\/\/ \/* <!-- --","# -- --> *\/":" "," s p a c e d ":[1,2,3,4,5,6,7],"compact":[1,2,3,4,5,6,7],"jsontext":"{\"object with 1 member\":[\"array with 1 element\"]}","quotes":"&#34; \" %22 0x22 034 &#x22;","\/\\\"\ucafe\ubabe\uab98\ufcde\ubcda\uef4a\b\f\n\r\t`1~!@#$%^&*()_+-=[]{}|;:',.\/<>?":"A key can be any string"},0.5,98.6,99.44,1066,"rosebud"]
 ENCODE: FROM ARRAY
-["JSON Test Pattern pass1",{"object with 1 member":["array with 1 element"]},[],[],-42,true,false,null,{"integer":1234567890,"real":-9876.54321,"e":1.23456789e-13,"E":1.23456789e+34,"_empty_":0,"E no .":4.0e+12,"zero":0,"one":1,"space":" ","quote":"\"","backslash":"\\","controls":"\b\f\n\r\t","slash":"\/ & \/","alpha":"abcdefghijklmnopqrstuvwyz","ALPHA":"ABCDEFGHIJKLMNOPQRSTUVWYZ","digit":"0123456789","special":"`1~!@#$%^&*()_+-={':[,]}|;.<\/>?","hex":"\u0123\u4567\u89ab\ucdef\uabcd\uef4a","unicode":"\u30d7\u30ec\u30b9\u30ad\u30c3\u30c8","\u30d7\u30ec\u30b9\u30ad\u30c3\u30c8":"\u30d7\u30ec\u30b9\u30ad\u30c3\u30c8","empty_string":"","true":true,"false":false,"null":null,"array":[],"object":[],"address":"50 St. James Street","url":"http:\/\/www.JSON.org\/","comment":"\/\/ \/* <!-- --","# -- --> *\/":" "," s p a c e d ":[1,2,3,4,5,6,7],"compact":[1,2,3,4,5,6,7],"jsontext":"{\"object with 1 member\":[\"array with 1 element\"]}","quotes":"&#34; \" %22 0x22 034 &#x22;","\/\\\"\ucafe\ubabe\uab98\ufcde\ubcda\uef4a\b\f\n\r\t`1~!@#$%^&*()_+-=[]{}|;:',.\/<>?":"A key can be any string"},0.5,98.6,99.44,1066,"rosebud"]
+["JSON Test Pattern pass1",{"object with 1 member":["array with 1 element"]},[],[],-42,true,false,null,{"integer":1234567890,"real":-9876.54321,"e":1.23456789e-13,"E":1.23456789e+34,"_empty_":0,"E no .":4.0e+12,"zero":0,"one":1,"space":" ","quote":"\"","backslash":"\\","controls":"\b\f\n\r\t","slash":"\/ & \/","alpha":"abcdefghijklmnopqrstuvwyz","ALPHA":"ABCDEFGHIJKLMNOPQRSTUVWYZ","digit":"0123456789","special":"`1~!@#$%^&*()_+-={':[,]}|;.<\/>?","hex":"\u0123\u4567\u89ab\ucdef\uabcd\uef4a","unicode":"\u30d7\u30ec\u30b9\u30ad\u30c3\u30c8","\u30d7\u30ec\u30b9\u30ad\u30c3\u30c8":"\u30d7\u30ec\u30b9\u30ad\u30c3\u30c8","empty_string":"","true":true,"false":false,"null":null,"array":[],"object":[],"123":{"456":{"abc":{"789":"def","012":[1,2,"5",500],"ghi":[1,2,"five",50,"sixty"]}}},"address":"50 St. James Street","url":"http:\/\/www.JSON.org\/","comment":"\/\/ \/* <!-- --","# -- --> *\/":" "," s p a c e d ":[1,2,3,4,5,6,7],"compact":[1,2,3,4,5,6,7],"jsontext":"{\"object with 1 member\":[\"array with 1 element\"]}","quotes":"&#34; \" %22 0x22 034 &#x22;","\/\\\"\ucafe\ubabe\uab98\ufcde\ubcda\uef4a\b\f\n\r\t`1~!@#$%^&*()_+-=[]{}|;:',.\/<>?":"A key can be any string"},0.5,98.6,99.44,1066,"rosebud"]
 DECODE AGAIN: AS OBJECT
 array(14) {
   [0]=>
   string(23) "JSON Test Pattern pass1"
   [1]=>
-  object(stdClass)#5 (1) {
+  object(stdClass)#8 (1) {
     ["object with 1 member"]=>
     array(1) {
       [0]=>
@@ -471,7 +544,7 @@ array(14) {
     }
   }
   [2]=>
-  object(stdClass)#6 (0) {
+  object(stdClass)#9 (0) {
   }
   [3]=>
   array(0) {
@@ -485,7 +558,7 @@ array(14) {
   [7]=>
   NULL
   [8]=>
-  object(stdClass)#7 (35) {
+  object(stdClass)#10 (36) {
     ["integer"]=>
     int(1234567890)
     ["real"]=>
@@ -540,7 +613,42 @@ array(14) {
     array(0) {
     }
     ["object"]=>
-    object(stdClass)#8 (0) {
+    object(stdClass)#11 (0) {
+    }
+    ["123"]=>
+    object(stdClass)#12 (1) {
+      ["456"]=>
+      object(stdClass)#13 (1) {
+        ["abc"]=>
+        object(stdClass)#14 (3) {
+          ["789"]=>
+          string(3) "def"
+          ["012"]=>
+          array(4) {
+            [0]=>
+            int(1)
+            [1]=>
+            int(2)
+            [2]=>
+            string(1) "5"
+            [3]=>
+            int(500)
+          }
+          ["ghi"]=>
+          array(5) {
+            [0]=>
+            int(1)
+            [1]=>
+            int(2)
+            [2]=>
+            string(4) "five"
+            [3]=>
+            int(50)
+            [4]=>
+            string(5) "sixty"
+          }
+        }
+      }
     }
     ["address"]=>
     string(19) "50 St. James Street"
@@ -631,7 +739,7 @@ array(14) {
   [7]=>
   NULL
   [8]=>
-  array(35) {
+  array(36) {
     ["integer"]=>
     int(1234567890)
     ["real"]=>
@@ -687,6 +795,41 @@ array(14) {
     }
     ["object"]=>
     array(0) {
+    }
+    [123]=>
+    array(1) {
+      [456]=>
+      array(1) {
+        ["abc"]=>
+        array(3) {
+          [789]=>
+          string(3) "def"
+          ["012"]=>
+          array(4) {
+            [0]=>
+            int(1)
+            [1]=>
+            int(2)
+            [2]=>
+            string(1) "5"
+            [3]=>
+            int(500)
+          }
+          ["ghi"]=>
+          array(5) {
+            [0]=>
+            int(1)
+            [1]=>
+            int(2)
+            [2]=>
+            string(4) "five"
+            [3]=>
+            int(50)
+            [4]=>
+            string(5) "sixty"
+          }
+        }
+      }
     }
     ["address"]=>
     string(19) "50 St. James Street"
