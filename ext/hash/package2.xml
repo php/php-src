@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package 
+ packagerversion="1.4.6" 
+ version="2.0" 
+ xmlns="http://pear.php.net/dtd/package-2.0" 
+ xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" 
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+ xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+  http://pear.php.net/dtd/tasks-1.0.xsd
+  http://pear.php.net/dtd/package-2.0
+  http://pear.php.net/dtd/package-2.0.xsd">
+ <name>hash</name>
+ <channel>pecl.php.net</channel>
+ <summary>HASH Message Digest Framework</summary>
+ <description>Native implementations of common message digest algorithms using a generic factory method
+ </description>
+ <lead>
+  <name>Sara Golemon</name>
+  <user>pollita</user>
+  <email>pollita@php.net</email>
+  <active>yes</active>
+ </lead>
+ <lead>
+  <name>Michael Wallner</name>
+  <user>mike</user>
+  <email>mike@php.net</email>
+  <active>yes</active>
+ </lead>
+ <date>2006-00-00</date>
+ <version>
+  <release>1.2</release>
+  <api>1.0</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes><![CDATA[
+* Fixed tiger algorithm generating wrong results on big endian platforms.
++ Added MD2 to supported algorithms.
+]]>
+ </notes>
+ <contents>
+  <dir name="/">
+   <dir name="tests">
+    <file name="adler32.phpt" role="test" />
+    <file name="crc32.phpt" role="test" />
+    <file name="gost.phpt" role="test" />
+    <file name="haval.phpt" role="test" />
+    <file name="hmac-md5.phpt" role="test" />
+    <file name="md2.phpt" role="test" />
+    <file name="md4.phpt" role="test" />
+    <file name="md5.phpt" role="test" />
+    <file name="ripemd128.phpt" role="test" />
+    <file name="ripemd160.phpt" role="test" />
+    <file name="sha1.phpt" role="test" />
+    <file name="sha256.phpt" role="test" />
+    <file name="sha384.phpt" role="test" />
+    <file name="sha512.phpt" role="test" />
+    <file name="snefru.phpt" role="test" />
+    <file name="tiger.phpt" role="test" />
+    <file name="whirlpool.phpt" role="test" />
+   </dir> <!-- //tests -->
+   <file name="config.m4" role="src" />
+   <file name="config.w32" role="src" />
+   <file name="hash.c" role="src" />
+   <file name="hash_adler32.c" role="src" />
+   <file name="hash_crc32.c" role="src" />
+   <file name="hash_gost.c" role="src" />
+   <file name="hash_haval.c" role="src" />
+   <file name="hash_md.c" role="src" />
+   <file name="hash_ripemd.c" role="src" />
+   <file name="hash_sha.c" role="src" />
+   <file name="hash_snefru.c" role="src" />
+   <file name="hash_tiger.c" role="src" />
+   <file name="hash_whirlpool.c" role="src" />
+   <file name="php_hash.h" role="src" />
+   <file name="php_hash_adler32.h" role="src" />
+   <file name="php_hash_crc32.h" role="src" />
+   <file name="php_hash_crc32_tables.h" role="src" />
+   <file name="php_hash_gost.h" role="src" />
+   <file name="php_hash_gost_tables.h" role="src" />
+   <file name="php_hash_haval.h" role="src" />
+   <file name="php_hash_md.h" role="src" />
+   <file name="php_hash_ripemd.h" role="src" />
+   <file name="php_hash_sha.h" role="src" />
+   <file name="php_hash_snefru.h" role="src" />
+   <file name="php_hash_snefru_tables.h" role="src" />
+   <file name="php_hash_tiger.h" role="src" />
+   <file name="php_hash_tiger_tables.h" role="src" />
+   <file name="php_hash_types.h" role="src" />
+   <file name="php_hash_whirlpool.h" role="src" />
+   <file name="php_hash_whirlpool_tables.h" role="src" />
+   <file name="README" role="doc" />
+  </dir> <!-- / -->
+ </contents>
+ <dependencies>
+  <required>
+   <php>
+    <min>4.0.0</min>
+   </php>
+   <pearinstaller>
+    <min>1.4.0b1</min>
+   </pearinstaller>
+  </required>
+ </dependencies>
+ <providesextension>hash</providesextension>
+ <extsrcrelease />
+ <changelog>
+  <release>
+   <version>
+    <release>1.1</release>
+    <api>1.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <date>2005-12-07</date>
+   <license uri="http://www.php.net/license">PHP</license>
+   <notes><![CDATA[
+* Fixed PECL bug #6183 - haval source file entries missing in package.xml
+
+Supported Algorithms:
+ * md4, md5
+ * sha1, sha256, sha384, sha512
+ * ripemd128, ripemd160
+ * tiger128, tiger160, tiger192 (3 and 4 passes)
+ * haval128, haval160, haval192, haval224, haval256 (3, 4 and 5 passes)
+ * crc32, crc32b, adler32, gost, snefru, whirlpool
+]]>
+   </notes>
+  </release>
+ </changelog>
+</package>
