@@ -174,11 +174,15 @@ static void json_encode_array(smart_str *buf, zval **val TSRMLS_DC) {
 
                         json_escape_string(buf, key, key_len - 1 TSRMLS_CC);
                         smart_str_appendc(buf, ':');
+
                         json_encode_r(buf, *data TSRMLS_CC);
                     } else {
                         smart_str_appendc(buf, '"');
                         smart_str_append_long(buf, (long) index);
                         smart_str_appendc(buf, '"');
+                        smart_str_appendc(buf, ':');
+
+                        json_encode_r(buf, *data TSRMLS_CC);
                     }
                 }
 
