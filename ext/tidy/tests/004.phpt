@@ -2,11 +2,15 @@
 tidy_diagnose()
 --SKIPIF--
 <?php if (!extension_loaded("tidy")) print "skip"; ?>
+--POST--
+--GET--
+--INI--
 --FILE--
 <?php 
-	$a = tidy_parse_string("<HTML></HTML>");
-	tidy_diagnose($a);
-	echo tidy_get_error_buffer($a);
+    tidy_parse_string("<HTML></HTML>");
+    tidy_diagnose();
+    echo tidy_get_error_buffer();
+
 ?>
 --EXPECT--
 

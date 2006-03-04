@@ -6,8 +6,6 @@
      * A simple script to clean and repair HTML,XHTML,PHP,ASP,etc. documents
      * if no file is provided, it reads from standard input.
      *
-     * NOTE: Works only with tidy for PHP 4.3.x, for tidy in PHP 5 see cleanhtml5.php
-     *
      * By: John Coggeshall <john@php.net>
      *
      * Usage: php cleanhtml.php [filename]
