@@ -1,3 +1,112 @@
+2006-03-03  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_execute.h:
+      Clean up after Marcus.
+
+2006-03-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c:
+      - Make unicode handling portable (noted by andrei)
+
+2006-03-03  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-gotchas.txt:
+      Add note about md5().
+
+2006-03-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c:
+      - As expected (but told otherwise) unicode strings indeed need to be
+        terminated by two \0.
+
+    * ZendEngine2/zend_exceptions.c:
+      - Fix issue with uncaught exceptions in unicode mode
+
+2006-03-03  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/mbstring/mbstring.c:
+      remove obsolete check
+
+2006-03-03  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_1)
+      ext/dom/dom_iterators.c
+      ext/dom/namednodemap.c
+      ext/dom/notation.c
+      ext/dom/tests/dom007.phpt:
+      fix crashes using notations and entity decls
+      add test
+
+    * ext/dom/dom_iterators.c
+      ext/dom/namednodemap.c
+      ext/dom/notation.c
+      ext/dom/tests/dom007.phpt
+      ext/dom/tests/dom007.phpt:
+      update dom iterator get key function for engine iterator changes
+      fix crashes using notations and entity decls
+      add test
+
+2006-03-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/tests/break_label10.phpt
+      ZendEngine2/tests/break_label11.phpt:
+      - Add new tests
+
+2006-03-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_execute.h:
+      Regenerated
+
+    * NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/tests/break_label01.phpt
+      ZendEngine2/tests/break_label02.phpt
+      ZendEngine2/tests/break_label03.phpt
+      ZendEngine2/tests/break_label04.phpt
+      ZendEngine2/tests/break_label05.phpt
+      ZendEngine2/tests/break_label06.phpt
+      ZendEngine2/tests/break_label07.phpt
+      ZendEngine2/tests/break_label08.inc
+      ZendEngine2/tests/break_label08.phpt
+      ZendEngine2/tests/break_label09.phpt:
+      Added support for "continue" and "break" operators with labels. Each loop
+      or switch statement can be marked by label and then it is possible to
+      write "break <label>" instead of "break <number>".
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c:
+      Fixed incorrect backtrace type ("::" instead of "->") for __set()/__get()
+
+    * ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c:
+      Remove "called at [(null):0]" from debug backtrace
+
+2006-03-03  Johannes Schlüter  <schlueter@phpbar.de>
+
+    * ZendEngine2/zend.h:
+      - Fix typo
+
+2006-03-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #36575 (SOAP: Incorrect complex type instantiation with
+      hierarchies)
+
+    * ext/standard/string.c:
+      ZTS fix
+
+2006-03-03  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_1)
+      NEWS:
+      - Fixed bug #36599 (DATE_W3C format constant incorrect).
+
 2006-03-02  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ext/standard/string.c:
