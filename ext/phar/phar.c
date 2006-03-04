@@ -31,6 +31,7 @@
 #include "ext/standard/crc32.h"
 #include "ext/spl/spl_array.h"
 #include "ext/spl/spl_directory.h"
+#include "ext/spl/spl_engine.h"
 #include "ext/spl/spl_exceptions.h"
 #include "zend_constants.h"
 #include "zend_execute.h"
@@ -1519,6 +1520,72 @@ PHP_METHOD(Phar, getVersion)
 }
 /* }}} */
 
+/* {{{ proto int Phar::offsetExists(string offset)
+ * determines whether a file exists in the phar
+ */
+PHP_METHOD(Phar, offsetExists)
+{
+	char *fname;
+	int fname_len;
+	PHAR_ARCHIVE_OBJECT();
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &fname, &fname_len) == FAILURE) {
+		return;
+	}
+
+	if (zend_hash_exists(&phar_obj->arc.archive->manifest, fname, (uint) fname_len)) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto int Phar::offsetGet(string offset)
+ * get a PharFileInfo object for a specific file
+ */
+PHP_METHOD(Phar, offsetGet)
+{
+	char *fname;
+	int fname_len;
+	zval *zfname;
+	PHAR_ARCHIVE_OBJECT();
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &fname, &fname_len) == FAILURE) {
+		return;
+	}
+	
+	if (!phar_get_entry_info(phar_obj->arc.archive, fname, fname_len TSRMLS_CC)) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s does not exist", fname);
+	} else {
+		fname_len = spprintf(&fname, 0, "phar://%s/%s", phar_obj->arc.archive->fname, fname);
+		MAKE_STD_ZVAL(zfname);
+		ZVAL_STRINGL(zfname, fname, fname_len, 0);
+		spl_instantiate_arg_ex1(phar_obj->spl.file_class, &return_value, 0, zfname TSRMLS_CC);
+		zval_ptr_dtor(&zfname);
+	}
+
+}
+/* }}} */
+
+/* {{{ proto int Phar::offsetSet(string offset, string value)
+ * set the contents of an internal file to those of an external file
+ */
+PHP_METHOD(Phar, offsetSet)
+{
+	zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Operation currently not supported");
+}
+/* }}} */
+
+/* {{{ proto int Phar::offsetUnset()
+ * remove a file from a phar
+ */
+PHP_METHOD(Phar, offsetUnset)
+{
+	zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Operation currently not supported");
+}
+/* }}} */
+
 /* {{{ proto void PharFileInfo::__construct(string entry)
  * Construct a Phar entry object
  */
@@ -1534,7 +1601,7 @@ PHP_METHOD(PharFileInfo, __construct)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &fname, &fname_len) == FAILURE) {
 		return;
 	}
-
+	
 	entry_obj = (phar_entry_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (entry_obj->ent.entry) {
@@ -1657,10 +1724,25 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_loadPhar, 0, 0, 1)
 	ZEND_ARG_INFO(0, alias)
 ZEND_END_ARG_INFO();
 
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_offsetExists, 0, 0, 1)
+	ZEND_ARG_INFO(0, entry)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_offsetSet, 0, 0, 2)
+	ZEND_ARG_INFO(0, entry)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO();
+
 zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, __construct,   arginfo_phar___construct,  0)
 	PHP_ME(Phar, count,         NULL,                      0)
 	PHP_ME(Phar, getVersion,    NULL,                      0)
+	PHP_ME(Phar, offsetGet,     arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, offsetSet,     arginfo_phar_offsetSet,    ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, offsetUnset,   arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, offsetExists,  arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
 	/* static member functions */
 	PHP_ME(Phar, apiVersion,    NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, canCompress,   NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
@@ -1704,7 +1786,7 @@ PHP_MINIT_FUNCTION(phar)
 	INIT_CLASS_ENTRY(ce, "Phar", php_archive_methods);
 	phar_ce_archive = zend_register_internal_class_ex(&ce, spl_ce_RecursiveDirectoryIterator, NULL  TSRMLS_CC);
 
-	zend_class_implements(phar_ce_archive TSRMLS_CC, 1, spl_ce_Countable);
+	zend_class_implements(phar_ce_archive TSRMLS_CC, 2, spl_ce_Countable, zend_ce_arrayaccess);
 
 	INIT_CLASS_ENTRY(ce, "PharFileInfo", php_entry_methods);
 	phar_ce_entry = zend_register_internal_class_ex(&ce, spl_ce_SplFileInfo, NULL  TSRMLS_CC);
