@@ -48,8 +48,8 @@ PHP                                                                        NEWS
 - Fixed bug #36599 (DATE_W3C format constant incorrect). (Derick)
 - Fixed bug #36575 (SOAP: Incorrect complex type instantiation with
   hierarchies). (Dmitry)
-- Fixed bug #36572 (Added PDO::MYSQL_ATTR_DIRECT_QUERY constant that show be
-  set when executing internal queries such as "show master status" via MySQL).
+- Fixed bug #36572 (Added PDO::MYSQL_ATTR_DIRECT_QUERY constant that should be
+  set when executing internal queries like "show master status" via MySQL).
   (Ilia)
 - Fixed bug #36510 (strtotime() fails to parse date strings with tabs). (Ilia,
   Derick)
