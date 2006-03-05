@@ -472,6 +472,7 @@ void spl_array_iterator_append(zval *object, zval *append_value TSRMLS_DC) /* {{
 	
 	if (Z_TYPE_P(intern->array) == IS_OBJECT) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot append properties to objects, use %s::offsetSet() instead", Z_OBJCE_P(object)->name);
+		return;
 	}
 
 	spl_array_write_dimension(object, NULL, append_value TSRMLS_CC);
@@ -701,7 +702,6 @@ static void spl_array_it_move_forward(zend_object_iterator *iter TSRMLS_DC) /* {
 {
 	spl_array_it       *iterator = (spl_array_it *)iter;
 	spl_array_object   *object   = iterator->object;
-
 	HashTable          *aht      = spl_array_get_hash_table(object, 0 TSRMLS_CC);
 
 	if (!aht) {
@@ -909,8 +909,8 @@ SPL_METHOD(Array, exchangeArray)
 {
 	zval *object = getThis(), *tmp, **array;
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
-    
-    array_init(return_value);
+
+	array_init(return_value);
 	zend_hash_copy(HASH_OF(return_value), spl_array_get_hash_table(intern, 0 TSRMLS_CC), (copy_ctor_func_t) zval_add_ref, &tmp, sizeof(zval*));
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &array) == FAILURE) {
@@ -1195,7 +1195,7 @@ SPL_METHOD(Array, getChildren)
 	if (zend_hash_get_current_data_ex(aht, (void **) &entry, &intern->pos) == FAILURE) {
 		return;
 	}
-	
+
 	if (Z_TYPE_PP(entry) == IS_OBJECT && instanceof_function(Z_OBJCE_PP(entry), Z_OBJCE_P(getThis()) TSRMLS_CC)) {
 		RETURN_ZVAL(*entry, 0, 0);
 	}
@@ -1303,6 +1303,7 @@ PHP_MINIT_FUNCTION(spl_array)
 	REGISTER_SPL_IMPLEMENTS(ArrayObject, Aggregate);
 	REGISTER_SPL_IMPLEMENTS(ArrayObject, ArrayAccess);
 	memcpy(&spl_handler_ArrayObject, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+
 	spl_handler_ArrayObject.clone_obj = spl_array_object_clone;
 	spl_handler_ArrayObject.read_dimension = spl_array_read_dimension;
 	spl_handler_ArrayObject.write_dimension = spl_array_write_dimension;
