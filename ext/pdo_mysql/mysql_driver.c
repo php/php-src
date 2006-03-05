@@ -169,6 +169,10 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 	stmt->driver_data = S;
 	stmt->methods = &mysql_stmt_methods;
 
+	if (H->emulate_prepare) {
+		goto end;
+	}
+
 	/* TODO: add runtime check to determine if the server we are talking to supports
 	 * prepared statements; if it doesn't, we should set stmt->supports_placeholders
 	 * to PDO_PLACEHOLDER_NONE, and have the rest of the code look at S->stmt to
@@ -230,6 +234,7 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 
 fallback:
 #endif
+end:
 	stmt->supports_placeholders = PDO_PLACEHOLDER_NONE;
 	
 	return 1;
@@ -312,7 +317,9 @@ static int pdo_mysql_set_attribute(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_D
 	case PDO_MYSQL_ATTR_USE_BUFFERED_QUERY:
 		((pdo_mysql_db_handle *)dbh->driver_data)->buffered = Z_BVAL_P(val);
 		return 1;
-		
+	case PDO_MYSQL_ATTR_DIRECT_QUERY:
+		((pdo_mysql_db_handle *)dbh->driver_data)->emulate_prepare = Z_BVAL_P(val);
+		return 1;
 	default:
 		return 0;
 	}
