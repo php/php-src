@@ -2448,6 +2448,20 @@ ZEND_API int zend_declare_class_constant(zend_class_entry *ce, char *name, size_
 	return zend_hash_update(&ce->constants_table, name, name_length+1, &value, sizeof(zval *), NULL);
 }
 
+ZEND_API int zend_declare_class_constant_null(zend_class_entry *ce, char *name, size_t name_length TSRMLS_DC)
+{
+	zval *constant;
+
+	if (ce->type & ZEND_INTERNAL_CLASS) {
+		constant = malloc(sizeof(zval));
+	} else {
+		ALLOC_ZVAL(constant);
+	}
+	ZVAL_NULL(constant);
+	INIT_PZVAL(constant);
+	return zend_declare_class_constant(ce, name, name_length, constant TSRMLS_CC);
+}
+
 ZEND_API int zend_declare_class_constant_long(zend_class_entry *ce, char *name, size_t name_length, long value TSRMLS_DC)
 {
 	zval *constant;
