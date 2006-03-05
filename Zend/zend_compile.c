@@ -2055,7 +2055,7 @@ static zend_bool zend_do_perform_implementation_check(zend_function *fe, zend_fu
 	}
 
 	/* No implementation checks for constructors */
-	if (fe->common.fn_flags & ZEND_ACC_CTOR) {
+	if ((fe->common.fn_flags & ZEND_ACC_CTOR) && !(proto->common.scope->ce_flags & ZEND_ACC_INTERFACE)) {
 		return 1;
 	}
 
