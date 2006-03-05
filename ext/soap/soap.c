@@ -278,7 +278,7 @@ PHP_METHOD(SoapParam, SoapParam);
 PHP_METHOD(SoapHeader, SoapHeader);
 
 #ifdef ZEND_ENGINE_2
-#define SOAP_CTOR(class_name, func_name, arginfo, flags) ZEND_FENTRY(__construct, ZEND_FN(class_name##_##func_name), arginfo, flags)
+#define SOAP_CTOR(class_name, func_name, arginfo, flags) ZEND_FENTRY(__construct, ZEND_MN(class_name##_##func_name), arginfo, flags)
 #else
 #define SOAP_CTOR(class_name, func_name, arginfo, flags) PHP_ME(class_name, func_name, arginfo, flags)
 #endif
@@ -336,9 +336,9 @@ static zend_function_entry soap_client_functions[] = {
 	SOAP_CTOR(SoapClient, SoapClient, NULL, 0)
 	PHP_ME(SoapClient, __call, __call_args, 0)
 #ifdef ZEND_ENGINE_2
-	ZEND_FENTRY(__soapCall, ZEND_FN(SoapClient___call), __soap_call_args, 0)
+	ZEND_FENTRY(__soapCall, ZEND_MN(SoapClient___call), __soap_call_args, 0)
 #else
-	ZEND_NAMED_FE(__soapCall, ZEND_FN(SoapClient___call), __soap_call_args)
+	ZEND_NAMED_FE(__soapCall, ZEND_MN(SoapClient___call), __soap_call_args)
 #endif
 	PHP_ME(SoapClient, __getLastRequest, NULL, 0)
 	PHP_ME(SoapClient, __getLastResponse, NULL, 0)
@@ -508,7 +508,7 @@ PHP_MINIT_FUNCTION(soap)
 		zend_internal_function fe;
 
 		fe.type = ZEND_INTERNAL_FUNCTION;
-		fe.handler = ZEND_FN(SoapClient___call);
+		fe.handler = ZEND_MN(SoapClient___call);
 		fe.function_name.v = NULL;
 		fe.scope = NULL;
 		fe.fn_flags = 0;

@@ -411,7 +411,7 @@ PHP_FUNCTION(mysqli_warning_count);
 ZEND_FUNCTION(mysqli_stmt_construct);
 ZEND_FUNCTION(mysqli_result_construct);
 ZEND_FUNCTION(mysqli_driver_construct);
-ZEND_METHOD(mysqli_warning,__construct);
+PHP_METHOD(mysqli_warning, __construct);
 
 ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 	long			default_link;
