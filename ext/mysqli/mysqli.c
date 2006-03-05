@@ -327,7 +327,7 @@ static union _zend_function *php_mysqli_constructor_get(zval *object TSRMLS_DC)
 		} else if (obj->zo.ce == mysqli_driver_class_entry) {
 			f.handler = ZEND_FN(mysqli_driver_construct);
 		} else if (obj->zo.ce == mysqli_warning_class_entry) {
-			f.handler = ZEND_FN(mysqli_warning___construct);
+			f.handler = ZEND_MN(mysqli_warning___construct);
 		}
 	
 		return (union _zend_function*)&f;
