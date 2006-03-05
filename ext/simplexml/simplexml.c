@@ -408,7 +408,7 @@ static void sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_boo
 	int				nodendx = 0;
 	int             test = 0;
 	long            cnt;
-	zval            tmp_zv, trim_zv;
+	zval            tmp_zv, trim_zv, value_copy;
 
 	if (!member) {
 		/* This happens when the user did: $sxe[] = $value
@@ -475,6 +475,11 @@ static void sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_boo
 			case IS_BOOL:
 			case IS_DOUBLE:
 			case IS_NULL:
+				if (value->refcount > 1) {
+					value_copy = *value;
+					zval_copy_ctor(&value_copy);
+					value = &value_copy;
+				}
 				convert_to_string(value);
 				break;
 			case IS_STRING:
@@ -565,6 +570,9 @@ next_iter:
 	}
 	if (pnewnode) {
 		*pnewnode = newnode;
+	}
+	if (value && value == &value_copy) {
+		zval_dtor(value);
 	}
 }
 /* }}} */
