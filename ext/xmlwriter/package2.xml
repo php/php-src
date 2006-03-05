@@ -17,9 +17,9 @@
   <email>pajoye@php.net</email>
   <active>yes</active>
  </developer>
- <date>2005-12-10</date>
+ <date>2006-03-05</date>
  <version>
-  <release>2.0.3</release>
+  <release>2.0.4</release>
   <api>2.0.0</api>
  </version>
  <stability>
@@ -27,11 +27,9 @@
   <api>stable</api>
  </stability>
  <license uri="http://www.php.net/license/3_01.txt">PHP</license>
- <notes>- fix ::startDtd and ::startElementNs arguments
-- Add tests for both methods
-- fix ::setIndent() parameter parsing (Ilia)
-- Fix compile warnings
-- update tests suite
+ <notes>- #6267, Implement xmlTextWriterWriteRaw
+- #6266, Implement xmlTextWriterFullEndElement
+-#6177, xmlwriter_write_dtd_element inconsistent parameters between function/method
 </notes>
  <contents>
   <dir name="/">
@@ -67,6 +65,24 @@
  <providesextension>xmlwriter</providesextension>
  <extsrcrelease />
  <changelog>
+ <release>
+ <date>2005-12-10</date>
+ <version>
+  <release>2.0.3</release>
+  <api>2.0.0</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.php.net/license/3_01.txt">PHP</license>
+ <notes>- fix ::startDtd and ::startElementNs arguments
+- Add tests for both methods
+- fix ::setIndent() parameter parsing (Ilia)
+- Fix compile warnings
+- update tests suite
+</notes>
+ </release>
  <release>
  <date>2005-12-01</date>
  <version>
