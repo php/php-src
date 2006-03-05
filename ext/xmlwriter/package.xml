@@ -30,6 +30,25 @@
  </release>
  <changelog>
  <release>
+  <version>2.0.4</version>
+  <date>2005-03-05</date>
+  <state>stable</state>
+ <notes>- #6267, Implement xmlTextWriterWriteRaw
+- #6266, Implement xmlTextWriterFullEndElement
+-#6177, xmlwriter_write_dtd_element inconsistent parameters between function/method
+</notes>
+ </release>
+ <release>
+  <version>2.0.2</version>
+  <date>2005-12-01</date>
+  <state>stable</state>
+ <notes>- fix build under 5.0
+- fix crash when XMLWriter is instantiated but not used
+- Switch from BSD-like license to PHP License 3.01
+</notes>
+ </release>
+
+ <release>
   <version>2.0.2</version>
   <date>2005-12-01</date>
   <state>stable</state>
