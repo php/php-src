@@ -698,8 +698,6 @@ zend_function_entry basic_functions[] = {
 #endif
 #if HAVE_LCHOWN
 	PHP_FE(lchown,															NULL)
-#endif
-#if HAVE_LCHOWN
 	PHP_FE(lchgrp,															NULL)
 #endif
 	PHP_FE(chmod,															NULL)

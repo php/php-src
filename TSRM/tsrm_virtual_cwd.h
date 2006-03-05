@@ -175,7 +175,7 @@ CWD_API int virtual_utime(const char *filename, struct utimbuf *buf TSRMLS_DC);
 #endif
 CWD_API int virtual_chmod(const char *filename, mode_t mode TSRMLS_DC);
 #if !defined(TSRM_WIN32) && !defined(NETWARE)
-CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group TSRMLS_DC);
+CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int link TSRMLS_DC);
 #endif
 
 CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path, int use_realpath);
@@ -242,7 +242,8 @@ extern virtual_cwd_globals cwd_globals;
 #endif
 #define VCWD_CHMOD(path, mode) virtual_chmod(path, mode TSRMLS_CC)
 #if !defined(TSRM_WIN32) && !defined(NETWARE)
-#define VCWD_CHOWN(path, owner, group) virtual_chown(path, owner, group TSRMLS_CC)
+#define VCWD_CHOWN(path, owner, group) virtual_chown(path, owner, group, 0 TSRMLS_CC)
+#define VCWD_LCHOWN(path, owner, group) virtual_chown(path, owner, group, 1 TSRMLS_CC)
 #endif
 
 #else
@@ -285,6 +286,7 @@ extern virtual_cwd_globals cwd_globals;
 #define VCWD_CHMOD(path, mode) chmod(path, mode)
 #if !defined(TSRM_WIN32) && !defined(NETWARE)
 #define VCWD_CHOWN(path, owner, group) chown(path, owner, group)
+#define VCWD_LCHOWN(path, owner, group) lchown(path, owner, group)
 #endif
 
 #endif

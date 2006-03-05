@@ -47,9 +47,18 @@ PHP_FUNCTION(disk_total_space);
 PHP_FUNCTION(disk_free_space);
 PHP_FUNCTION(chown);
 PHP_FUNCTION(chgrp);
+#if HAVE_LCHOWN
+PHP_FUNCTION(lchown);
+#endif
+#if HAVE_LCHOWN
+PHP_FUNCTION(lchgrp);
+#endif
 PHP_FUNCTION(chmod);
 #if HAVE_UTIME
 PHP_FUNCTION(touch);
+# if HAVE_LTOUCH
+PHP_FUNCTION(ltouch);
+# endif
 #endif
 PHP_FUNCTION(clearstatcache);
 

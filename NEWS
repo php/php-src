@@ -30,6 +30,8 @@ PHP                                                                        NEWS
     on error.
 - Changed get_headers() to retrieve headers also from non-200 responses. (Ilia)
 - Changed get_headers() to use the default context. (Ilia)
+- Added lchown() and lchgrp() to change user/group ownership of symlinks.
+  (Derick)
 - Added support for exif date format in strtotime(). (Derick)
 - Added a check for special characters in the session name. (Ilia)
 - Added "consumed" stream filter. (Marcus)
