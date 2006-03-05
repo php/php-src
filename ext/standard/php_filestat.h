@@ -56,9 +56,6 @@ PHP_FUNCTION(lchgrp);
 PHP_FUNCTION(chmod);
 #if HAVE_UTIME
 PHP_FUNCTION(touch);
-# if HAVE_LTOUCH
-PHP_FUNCTION(ltouch);
-# endif
 #endif
 PHP_FUNCTION(clearstatcache);
 
