@@ -144,6 +144,7 @@ zend_function_entry gd_functions[] = {
 	PHP_FE(imagechar,								NULL)
 	PHP_FE(imagecharup,								NULL)
 	PHP_FE(imagecolorat,							NULL)
+	PHP_FE(imagecolorhistogram,                     NULL)
 	PHP_FE(imagecolorallocate,						NULL)
 	PHP_FE(imagepalettecopy,						NULL)
 	PHP_FE(imagecreatefromstring,					NULL)
@@ -2346,6 +2347,53 @@ PHP_FUNCTION(imagecolorstotal)
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
 	RETURN_LONG(gdImageColorsTotal(im));
+}
+/* }}} */
+
+/* {{{ proto array imagecolorhistogram(resource im)
+   Return color histogram for an image */
+PHP_FUNCTION(imagecolorhistogram)
+{
+	zval **IM;
+	gdImagePtr im;
+	int num_colors, x, y, n;
+	long *color_count;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &IM) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+
+	if (!im->pixels) {
+		RETURN_FALSE;
+	}
+	
+	num_colors = gdImageColorsTotal(im);
+
+	if (num_colors <= 0) {
+		RETURN_FALSE;
+	}
+
+	color_count = (long *)calloc(num_colors, sizeof(long));
+	
+	for (x = 0; x < gdImageSX(im); x++) {
+		for (y = 0; y < gdImageSY(im); y++) {
+#if HAVE_LIBGD13
+			color_count[im->pixels[y][x]]++;
+#else
+			color_count[im->pixels[x][y]]++;
+#endif
+		}
+	}
+
+	array_init(return_value);
+
+	for (n = 0; n < num_colors; n++) {
+		add_index_long(return_value, n, color_count[n]);
+	}
+
+	efree(color_count);
 }
 /* }}} */
 
