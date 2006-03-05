@@ -4,6 +4,12 @@ PHP                                                                        NEWS
 - Moved extensions to PECL:
   . ext/msession (Derick)
 - Reimplemented FastCGI interface. (Dmitry)
+- Improved SPL: (Marcus)
+  - Fixed issues with not/double calling of constructors of SPL iterators.
+  - Fixed issues with info-class/file-class in SPL directory handling classes.
+  - Fixed ArrayIterator::seek().
+  - Added SimpleXMLElement::count().
+  - Dropped erroneous RecursiveDirectoryIterator::getSubPathInfo().
 - Improved SimpleXML: (Marcus)
   . Added SimpleXMLElement::getName() to retrieve name of element.
   . Added ability to create elements on the fly.
