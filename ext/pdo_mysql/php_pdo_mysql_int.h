@@ -37,6 +37,7 @@ typedef struct {
 
 	unsigned attached:1;
 	unsigned buffered:1;
+	unsigned emulate_prepare:1;
 	unsigned _reserved:31;
 	unsigned long max_buffer_size;
 
@@ -84,5 +85,6 @@ enum {
 	PDO_MYSQL_ATTR_READ_DEFAULT_FILE,
 	PDO_MYSQL_ATTR_READ_DEFAULT_GROUP,
 	PDO_MYSQL_ATTR_MAX_BUFFER_SIZE,
+	PDO_MYSQL_ATTR_DIRECT_QUERY,
 };
 #endif
