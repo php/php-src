@@ -86,7 +86,6 @@ PHP_FUNCTION(imagecolorexact);
 PHP_FUNCTION(imagecolorset);
 PHP_FUNCTION(imagecolorstotal);
 PHP_FUNCTION(imagecolorsforindex);
-PHP_FUNCTION(imagecolorhistogram);
 PHP_FUNCTION(imagecolortransparent);
 PHP_FUNCTION(imagecopy);
 PHP_FUNCTION(imagecopymerge);
