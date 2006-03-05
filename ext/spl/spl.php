@@ -887,8 +887,8 @@ class SplFileInfo
 	 */
 	function setFileClass(string class_name = "SplFileObject");
 
-	/** @param class_name name of class used with getFileInfo(), getPathInfo(), 
-	 *                    getSubPathInfo(). Must be derived from SplFileInfo.
+	/** @param class_name name of class used with getFileInfo(), getPathInfo().
+	 *                    Must be derived from SplFileInfo.
 	 */
 	function setInfoClass(string class_name = "SplFileInfo");
 }
@@ -971,13 +971,6 @@ class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveI
 	/** @return the current sub path
 	 */
 	function getSubPathname();
-
-	/** @return SplFileInfo created for the current sub path
-	 * @param class_name name of class to instantiate
-	 * @see SplFileInfo::setInfoClass()
-	 */
-	function getSubPathInfo(string $class_name = NULL);
-
 }
 
 /** @ingroup SPL

@@ -53,6 +53,9 @@ PHP_FUNCTION(iterator_count);
 
 typedef enum {
 	DIT_Default = 0,
+	DIT_FilterIterator = DIT_Default,
+	DIT_RecursiveFilterIterator = DIT_Default,
+	DIT_ParentIterator = DIT_Default,
 	DIT_LimitIterator,
 	DIT_CachingIterator,
 	DIT_RecursiveCachingIterator,
@@ -60,6 +63,7 @@ typedef enum {
 	DIT_NoRewindIterator,
 	DIT_InfiniteIterator,
 	DIT_AppendIterator,
+	DIT_Unknown = ~0
 } dual_it_type;
 
 enum {

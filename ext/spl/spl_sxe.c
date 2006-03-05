@@ -32,6 +32,7 @@
 #include "spl_engine.h"
 #include "spl_iterators.h"
 #include "spl_sxe.h"
+#include "spl_array.h"
 
 zend_class_entry *spl_ce_SimpleXMLIterator = NULL;
 zend_class_entry *spl_ce_SimpleXMLElement;
@@ -85,7 +86,7 @@ SPL_METHOD(SimpleXMLIterator, key) /* {{{ */
 		RETURN_STRINGL((char*)curnode->name, xmlStrlen(curnode->name), 1);
 	}
     
-    RETURN_FALSE;
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -106,7 +107,7 @@ SPL_METHOD(SimpleXMLIterator, hasChildren)
 	php_sxe_object *child;
 	xmlNodePtr      node;
 
-	if (!sxe->iter.data) {
+	if (!sxe->iter.data || sxe->iter.type == SXE_ITER_ATTRLIST) {
 		RETURN_FALSE;
 	}
 	child = php_sxe_fetch_object(sxe->iter.data TSRMLS_CC);
@@ -128,11 +129,20 @@ SPL_METHOD(SimpleXMLIterator, getChildren)
 {
 	php_sxe_object *sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
 
-	if (!sxe->iter.data) {
+	if (!sxe->iter.data || sxe->iter.type == SXE_ITER_ATTRLIST) {
 		return; /* return NULL */
 	}
 	return_value->type = IS_OBJECT;
 	return_value->value.obj = zend_objects_store_clone_obj(sxe->iter.data TSRMLS_CC);
+}
+
+SPL_METHOD(SimpleXMLIterator, count) /* {{{ */
+{
+	long count = 0;
+
+	Z_OBJ_HANDLER_P(getThis(), count_elements)(getThis(), &count TSRMLS_CC);
+	
+	RETURN_LONG(count);
 }
 
 static zend_function_entry spl_funcs_SimpleXMLIterator[] = {
@@ -143,6 +153,7 @@ static zend_function_entry spl_funcs_SimpleXMLIterator[] = {
 	SPL_ME(SimpleXMLIterator, next,                   NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SimpleXMLIterator, hasChildren,            NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SimpleXMLIterator, getChildren,            NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(SimpleXMLIterator, count,                  NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -150,17 +161,18 @@ static zend_function_entry spl_funcs_SimpleXMLIterator[] = {
 SPL_API PHP_MINIT_FUNCTION(spl_sxe) /* {{{ */
 {
 	zend_class_entry **pce;
-	
+
 	if (zend_hash_find(CG(class_table), "simplexmlelement", sizeof("SimpleXMLElement"), (void **) &pce) == FAILURE) {
 		spl_ce_SimpleXMLElement  = NULL;
 		spl_ce_SimpleXMLIterator = NULL;
 		return SUCCESS; /* SimpleXML must be initialized before */
 	}
-	
+
 	spl_ce_SimpleXMLElement = *pce;
 
 	REGISTER_SPL_SUB_CLASS_EX(SimpleXMLIterator, SimpleXMLElement, spl_ce_SimpleXMLElement->create_object, spl_funcs_SimpleXMLIterator);
 	REGISTER_SPL_IMPLEMENTS(SimpleXMLIterator, RecursiveIterator);
+	REGISTER_SPL_IMPLEMENTS(SimpleXMLIterator, Countable);
 
 	return SUCCESS;
 }

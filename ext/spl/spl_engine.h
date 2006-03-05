@@ -58,8 +58,6 @@ static inline int spl_instantiate_arg_ex2(zend_class_entry *pce, zval **retval, 
 }
 /* }}} */
 
-int spl_is_instance_of(zval **obj, zend_class_entry *ce TSRMLS_DC);
-
 #endif /* SPL_ENGINE_H */
 
 /*
