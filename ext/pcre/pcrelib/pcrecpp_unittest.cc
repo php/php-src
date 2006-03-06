@@ -348,21 +348,46 @@ static void TestMatchNumberPeculiarity() {
   CHECK_EQ(a, "");
 }
 
-static void TestRecursion(int size, const char *pattern, int match_limit) {
+static void TestRecursion() {
   printf("Testing recursion\n");
 
-  // Fill up a string repeating the pattern given
-  string domain;
-  domain.resize(size);
-  int patlen = strlen(pattern);
-  for (int i = 0; i < size; ++i) {
-    domain[i] = pattern[i % patlen];
-  }
-  // Just make sure it doesn't crash due to too much recursion.
-  RE_Options options;
-  options.set_match_limit(match_limit);
-  RE re("([a-zA-Z0-9]|-)+(\\.([a-zA-Z0-9]|-)+)*(\\.)?", options);
-  re.FullMatch(domain);
+  // Get one string that passes (sometimes), one that never does.
+  string text_good("abcdefghijk");
+  string text_bad("acdefghijkl");
+
+  // According to pcretest, matching text_good against (\w+)*b
+  // requires match_limit of at least 8192, and match_recursion_limit
+  // of at least 37.
+
+  RE_Options options_ml;
+  options_ml.set_match_limit(8192);
+  RE re("(\\w+)*b", options_ml);
+  CHECK(re.PartialMatch(text_good) == true);
+  CHECK(re.PartialMatch(text_bad) == false);
+  CHECK(re.FullMatch(text_good) == false);
+  CHECK(re.FullMatch(text_bad) == false);
+
+  options_ml.set_match_limit(1024);
+  RE re2("(\\w+)*b", options_ml);
+  CHECK(re2.PartialMatch(text_good) == false);   // because of match_limit
+  CHECK(re2.PartialMatch(text_bad) == false);
+  CHECK(re2.FullMatch(text_good) == false);
+  CHECK(re2.FullMatch(text_bad) == false);
+
+  RE_Options options_mlr;
+  options_mlr.set_match_limit_recursion(50);
+  RE re3("(\\w+)*b", options_mlr);
+  CHECK(re3.PartialMatch(text_good) == true);
+  CHECK(re3.PartialMatch(text_bad) == false);
+  CHECK(re3.FullMatch(text_good) == false);
+  CHECK(re3.FullMatch(text_bad) == false);
+
+  options_mlr.set_match_limit_recursion(10);
+  RE re4("(\\w+)*b", options_mlr);
+  CHECK(re4.PartialMatch(text_good) == false);
+  CHECK(re4.PartialMatch(text_bad) == false);
+  CHECK(re4.FullMatch(text_good) == false);
+  CHECK(re4.FullMatch(text_bad) == false);
 }
 
 //
@@ -1021,14 +1046,8 @@ int main(int argc, char** argv) {
     CHECK(!re.error().empty());
   }
 
-  // Test that recursion is stopped: there will be some errors reported
-  int matchlimit = 5000;
-  int bytes = 15 * 1024;  // enough to crash if there was no match limit
-  TestRecursion(bytes, ".", matchlimit);
-  TestRecursion(bytes, "a", matchlimit);
-  TestRecursion(bytes, "a.", matchlimit);
-  TestRecursion(bytes, "ab.", matchlimit);
-  TestRecursion(bytes, "abc.", matchlimit);
+  // Test that recursion is stopped
+  TestRecursion();
 
   // Test Options
   if (getenv("VERBOSE_TEST") != NULL)

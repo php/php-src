@@ -51,6 +51,7 @@
     \x{09f} 
   
 /^\p{Cn}/8
+    \x{e0000}
     ** Failers
     \x{09f} 
   
@@ -77,9 +78,15 @@
   
 /^\p{Lo}/8
     \x{1bb}
+    \x{3400}
+    \x{3401}
+    \x{4d00}
+    \x{4db4}
+    \x{4db5}     
     ** Failers
     a 
     \x{2b0}
+    \x{4db6} 
   
 /^\p{Lt}/8
     \x{1c5}
@@ -514,4 +521,221 @@
     A\x{300}\x{301}B\x{300}C\x{300}\x{301}X
     A\x{300}\x{301}B\x{300}C\x{300}\x{301}DA\x{300}X
     
+/^\p{Han}+/8
+    \x{2e81}\x{3007}\x{2f804}\x{31a0}
+    ** Failers
+    \x{2e7f}  
+
+/^\P{Katakana}+/8
+    \x{3105}
+    ** Failers
+    \x{30ff}  
+
+/^[\p{Arabic}]/8
+    \x{06e9}
+    \x{060b}
+    ** Failers
+    X\x{06e9}   
+
+/^[\P{Yi}]/8
+    \x{2f800}
+    ** Failers
+    \x{a014}
+    \x{a4c6}   
+    
+/^\p{Any}X/8
+    AXYZ
+    \x{1234}XYZ 
+    ** Failers
+    X  
+    
+/^\P{Any}X/8
+    ** Failers
+    AX
+    
+/^\p{Any}?X/8
+    XYZ
+    AXYZ
+    \x{1234}XYZ 
+    ** Failers
+    ABXYZ   
+
+/^\P{Any}?X/8
+    XYZ
+    ** Failers
+    AXYZ
+    \x{1234}XYZ 
+    ABXYZ   
+
+/^\p{Any}+X/8
+    AXYZ
+    \x{1234}XYZ
+    A\x{1234}XYZ
+    ** Failers
+    XYZ
+
+/^\P{Any}+X/8
+    ** Failers
+    AXYZ
+    \x{1234}XYZ
+    A\x{1234}XYZ
+    XYZ
+
+/^\p{Any}*X/8
+    XYZ
+    AXYZ
+    \x{1234}XYZ
+    A\x{1234}XYZ
+    ** Failers
+
+/^\P{Any}*X/8
+    XYZ
+    ** Failers
+    AXYZ
+    \x{1234}XYZ
+    A\x{1234}XYZ
+
+/^[\p{Any}]X/8
+    AXYZ
+    \x{1234}XYZ 
+    ** Failers
+    X  
+    
+/^[\P{Any}]X/8
+    ** Failers
+    AX
+    
+/^[\p{Any}]?X/8
+    XYZ
+    AXYZ
+    \x{1234}XYZ 
+    ** Failers
+    ABXYZ   
+
+/^[\P{Any}]?X/8
+    XYZ
+    ** Failers
+    AXYZ
+    \x{1234}XYZ 
+    ABXYZ   
+
+/^[\p{Any}]+X/8
+    AXYZ
+    \x{1234}XYZ
+    A\x{1234}XYZ
+    ** Failers
+    XYZ
+
+/^[\P{Any}]+X/8
+    ** Failers
+    AXYZ
+    \x{1234}XYZ
+    A\x{1234}XYZ
+    XYZ
+
+/^[\p{Any}]*X/8
+    XYZ
+    AXYZ
+    \x{1234}XYZ
+    A\x{1234}XYZ
+    ** Failers
+
+/^[\P{Any}]*X/8
+    XYZ
+    ** Failers
+    AXYZ
+    \x{1234}XYZ
+    A\x{1234}XYZ
+
+/^\p{Any}{3,5}?/8
+    abcdefgh
+    \x{1234}\n\r\x{3456}xyz 
+
+/^\p{Any}{3,5}/8
+    abcdefgh
+    \x{1234}\n\r\x{3456}xyz 
+
+/^\P{Any}{3,5}?/8
+    ** Failers
+    abcdefgh
+    \x{1234}\n\r\x{3456}xyz 
+
+/^\p{L&}X/8
+     AXY
+     aXY
+     \x{1c5}XY
+     ** Failers
+     \x{1bb}XY
+     \x{2b0}XY
+     !XY      
+
+/^[\p{L&}]X/8
+     AXY
+     aXY
+     \x{1c5}XY
+     ** Failers
+     \x{1bb}XY
+     \x{2b0}XY
+     !XY      
+
+/^\p{L&}+X/8
+     AXY
+     aXY
+     AbcdeXyz 
+     \x{1c5}AbXY
+     abcDEXypqreXlmn 
+     ** Failers
+     \x{1bb}XY
+     \x{2b0}XY
+     !XY      
+
+/^[\p{L&}]+X/8
+     AXY
+     aXY
+     AbcdeXyz 
+     \x{1c5}AbXY
+     abcDEXypqreXlmn 
+     ** Failers
+     \x{1bb}XY
+     \x{2b0}XY
+     !XY      
+
+/^\p{L&}+?X/8
+     AXY
+     aXY
+     AbcdeXyz 
+     \x{1c5}AbXY
+     abcDEXypqreXlmn 
+     ** Failers
+     \x{1bb}XY
+     \x{2b0}XY
+     !XY      
+
+/^[\p{L&}]+?X/8
+     AXY
+     aXY
+     AbcdeXyz 
+     \x{1c5}AbXY
+     abcDEXypqreXlmn 
+     ** Failers
+     \x{1bb}XY
+     \x{2b0}XY
+     !XY      
+
+/^\P{L&}X/8
+     !XY
+     \x{1bb}XY
+     \x{2b0}XY
+     ** Failers
+     \x{1c5}XY
+     AXY      
+
+/^[\P{L&}]X/8
+     !XY
+     \x{1bb}XY
+     \x{2b0}XY
+     ** Failers
+     \x{1c5}XY
+     AXY      
+
 / End of testinput6 /

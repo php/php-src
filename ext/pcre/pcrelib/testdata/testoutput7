@@ -1,5 +1,3 @@
-PCRE version 6.2 01-Aug-2005
-
 /abc/
     abc
  0: abc
@@ -675,7 +673,6 @@ No match
 /^(a*\w|ab)=(?1)/
     ab=ab
  0: ab=ab
- 1: ab=a
 
 /^([^()]|\((?1)*\))*$/
     abc
@@ -983,13 +980,13 @@ Partial match: abc
 /(?<=foo)bar/
    xyzfo\P 
 No match
-   foob\R\P\>2 
+   foob\P\>2 
 Partial match: b
    foobar...\R\P\>4 
  0: ar
    xyzfo\P
 No match
-   foobar\R\>2  
+   foobar\>2  
  0: bar
    *** Failers
 No match
@@ -6513,5 +6510,17 @@ No match
 No match
     line one\nthis is a line\nbreak in the second line 
 No match
+
+/1234/
+    123\P
+Partial match: 123
+    a4\P\R
+No match
+
+/1234/
+    123\P
+Partial match: 123
+    4\P\R
+ 0: 4
 
 / End of testinput7 /

@@ -9,7 +9,7 @@
 Compatible Regular Expression library. It defines the things POSIX says should
 be there. I hope.
 
-            Copyright (c) 1997-2005 University of Cambridge
+            Copyright (c) 1997-2006 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -50,22 +50,20 @@ POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-/* Options defined by POSIX. */
+/* Options, mostly defined by POSIX, but with a couple of extras. */
 
-#define REG_ICASE     0x01
-#define REG_NEWLINE   0x02
-#define REG_NOTBOL    0x04
-#define REG_NOTEOL    0x08
+#define REG_ICASE     0x0001
+#define REG_NEWLINE   0x0002
+#define REG_NOTBOL    0x0004
+#define REG_NOTEOL    0x0008
+#define REG_DOTALL    0x0010   /* NOT defined by POSIX. */
+#define REG_NOSUB     0x0020
+#define REG_UTF8      0x0040   /* NOT defined by POSIX. */
 
-/* Additional options, not defined by POSIX, but somebody wanted them. */
-
-#define REG_DOTALL    0x10
-
-/* These are not used by PCRE, but by defining them we make it easier
+/* This is not used by PCRE, but by defining it we make it easier
 to slot PCRE into existing programs that make POSIX calls. */
 
 #define REG_EXTENDED  0
-#define REG_NOSUB     0
 
 /* Error values. Not all these are relevant or used by the wrapper. */
 
@@ -107,12 +105,40 @@ typedef struct {
   regoff_t rm_eo;
 } regmatch_t;
 
+/* Win32 uses DLL by default; it needs special stuff for exported functions
+when building PCRE. */
+
+#ifndef PCRE_DATA_SCOPE
+#ifdef _WIN32
+#  ifdef PCRE_DEFINITION
+#    ifdef DLL_EXPORT
+#      define PCRE_DATA_SCOPE __declspec(dllexport)
+#    endif
+#  else
+#    ifndef PCRE_STATIC
+#      define PCRE_DATA_SCOPE extern __declspec(dllimport)
+#    endif
+#  endif
+#endif
+#endif
+
+/* Otherwise, we use the standard "extern". */
+
+#ifndef PCRE_DATA_SCOPE
+#  ifdef __cplusplus
+#    define PCRE_DATA_SCOPE     extern "C"
+#  else
+#    define PCRE_DATA_SCOPE     extern
+#  endif
+#endif
+
 /* The functions */
 
-extern int regcomp(regex_t *, const char *, int);
-extern int regexec(const regex_t *, const char *, size_t, regmatch_t *, int);
-extern size_t regerror(int, const regex_t *, char *, size_t);
-extern void regfree(regex_t *);
+PCRE_DATA_SCOPE int regcomp(regex_t *, const char *, int);
+PCRE_DATA_SCOPE int regexec(const regex_t *, const char *, size_t,
+                  regmatch_t *, int);
+PCRE_DATA_SCOPE size_t regerror(int, const regex_t *, char *, size_t);
+PCRE_DATA_SCOPE void regfree(regex_t *);
 
 #ifdef __cplusplus
 }   /* extern "C" */

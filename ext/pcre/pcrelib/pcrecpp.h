@@ -30,8 +30,8 @@
 // Author: Sanjay Ghemawat
 // Support for PCRE_XXX modifiers added by Giuseppe Maxia, July 2005
 
-#ifndef _PCRE_REGEXP_H
-#define _PCRE_REGEXP_H
+#ifndef _PCRECPP_H
+#define _PCRECPP_H
 
 // C++ interface to the pcre regular-expression library.  RE supports
 // Perl-style regular expressions (with extensions like \d, \w, \s,
@@ -196,13 +196,16 @@
 //    RE_Options & set_caseless(bool),
 // which sets or unsets the modifier.
 //
-// Moreover, PCRE_CONFIG_MATCH_LIMIT can be accessed through the
+// Moreover, PCRE_EXTRA_MATCH_LIMIT can be accessed through the
 // set_match_limit() and match_limit() member functions.
 // Setting match_limit to a non-zero value will limit the executation of
 // pcre to keep it from doing bad things like blowing the stack or taking
 // an eternity to return a result.  A value of 5000 is good enough to stop
 // stack blowup in a 2MB thread stack.  Setting match_limit to zero will
-// disable match limiting.
+// disable match limiting.  Alternately, you can set match_limit_recursion()
+// which uses PCRE_EXTRA_MATCH_LIMIT_RECURSION to limit how much pcre
+// recurses.  match_limit() caps the number of matches pcre does;
+// match_limit_recrusion() caps the depth of recursion.
 //
 // Normally, to pass one or more modifiers to a RE class, you declare
 // a RE_Options object, set the appropriate options, and pass this
@@ -322,6 +325,7 @@
 
 
 #include <string>
+#include <pcrecpparg.h>   // defines the Arg class
 // These aren't technically needed here, but we include them
 // anyway so folks who include pcrecpp.h don't have to include
 // all these other header files as well.
@@ -338,18 +342,18 @@ namespace pcrecpp {
         (all_options_ & o) == o
 
 // We convert user-passed pointers into special Arg objects
-class Arg;
 extern Arg no_arg;
 
 /***** Compiling regular expressions: the RE class *****/
 
 // RE_Options allow you to set options to be passed along to pcre,
 // along with other options we put on top of pcre.
-// Only 9 modifiers, plus match_limit are supported now.
+// Only 9 modifiers, plus match_limit and match_limit_recursion,
+// are supported now.
 class RE_Options {
  public:
   // constructor
-  RE_Options() : match_limit_(0), all_options_(0) {}
+  RE_Options() : match_limit_(0), match_limit_recursion_(0), all_options_(0) {}
 
   // alternative constructor.
   // To facilitate transfer of legacy code from C programs
@@ -359,13 +363,20 @@ class RE_Options {
   // But new code is better off doing
   //    RE(pattern,
   //      RE_Options().set_caseless(true).set_multiline(true)).PartialMatch(str);
-  RE_Options(int option_flags) : match_limit_(0), all_options_ (option_flags) {}
+  RE_Options(int option_flags) : match_limit_(0), match_limit_recursion_(0),
+                                 all_options_(option_flags) {}
   // we're fine with the default destructor, copy constructor, etc.
 
   // accessors and mutators
   int match_limit() const { return match_limit_; };
   RE_Options &set_match_limit(int limit) {
     match_limit_ = limit;
+    return *this;
+  }
+
+  int match_limit_recursion() const { return match_limit_recursion_; };
+  RE_Options &set_match_limit_recursion(int limit) {
+    match_limit_recursion_ = limit;
     return *this;
   }
 
@@ -444,6 +455,7 @@ class RE_Options {
 
  private:
   int match_limit_;
+  int match_limit_recursion_;
   int all_options_;
 };
 
@@ -595,7 +607,7 @@ class RE {
 
   // Return the number of capturing subpatterns, or -1 if the
   // regexp wasn't valid on construction.
-  int NumberOfCapturingGroups();
+  int NumberOfCapturingGroups() const;
 
  private:
 
@@ -643,7 +655,6 @@ class RE {
   pcre*         re_full_;       // For full matches
   pcre*         re_partial_;    // For partial matches
   const string* error_;         // Error indicator (or points to empty string)
-  int           match_limit_;   // limit on execution resources
 
   // Don't allow the default copy or assignment constructors --
   // they're expensive and too easy to do by accident.
@@ -651,136 +662,6 @@ class RE {
   void operator=(const RE&);
 };
 
-
-/***** Implementation details *****/
-
-// Hex/Octal/Binary?
-
-// Special class for parsing into objects that define a ParseFrom() method
-template <class T>
-class _RE_MatchObject {
- public:
-  static inline bool Parse(const char* str, int n, void* dest) {
-    T* object = reinterpret_cast<T*>(dest);
-    return object->ParseFrom(str, n);
-  }
-};
-
-class Arg {
- public:
-  // Empty constructor so we can declare arrays of Arg
-  Arg();
-
-  // Constructor specially designed for NULL arguments
-  Arg(void*);
-
-  typedef bool (*Parser)(const char* str, int n, void* dest);
-
-// Type-specific parsers
-#define PCRE_MAKE_PARSER(type,name)                             \
-  Arg(type* p) : arg_(p), parser_(name) { }                     \
-  Arg(type* p, Parser parser) : arg_(p), parser_(parser) { }
-
-
-  PCRE_MAKE_PARSER(char,               parse_char);
-  PCRE_MAKE_PARSER(unsigned char,      parse_uchar);
-  PCRE_MAKE_PARSER(short,              parse_short);
-  PCRE_MAKE_PARSER(unsigned short,     parse_ushort);
-  PCRE_MAKE_PARSER(int,                parse_int);
-  PCRE_MAKE_PARSER(unsigned int,       parse_uint);
-  PCRE_MAKE_PARSER(long,               parse_long);
-  PCRE_MAKE_PARSER(unsigned long,      parse_ulong);
-#if 1
-  PCRE_MAKE_PARSER(long long,          parse_longlong);
-#endif
-#if 1
-  PCRE_MAKE_PARSER(unsigned long long, parse_ulonglong);
-#endif
-  PCRE_MAKE_PARSER(float,              parse_float);
-  PCRE_MAKE_PARSER(double,             parse_double);
-  PCRE_MAKE_PARSER(string,             parse_string);
-  PCRE_MAKE_PARSER(StringPiece,        parse_stringpiece);
-
-#undef PCRE_MAKE_PARSER
-
-  // Generic constructor
-  template <class T> Arg(T*, Parser parser);
-  // Generic constructor template
-  template <class T> Arg(T* p)
-    : arg_(p), parser_(_RE_MatchObject<T>::Parse) {
-  }
-
-  // Parse the data
-  bool Parse(const char* str, int n) const;
-
- private:
-  void*         arg_;
-  Parser        parser_;
-
-  static bool parse_null          (const char* str, int n, void* dest);
-  static bool parse_char          (const char* str, int n, void* dest);
-  static bool parse_uchar         (const char* str, int n, void* dest);
-  static bool parse_float         (const char* str, int n, void* dest);
-  static bool parse_double        (const char* str, int n, void* dest);
-  static bool parse_string        (const char* str, int n, void* dest);
-  static bool parse_stringpiece   (const char* str, int n, void* dest);
-
-#define PCRE_DECLARE_INTEGER_PARSER(name)                                   \
- private:                                                                   \
-  static bool parse_ ## name(const char* str, int n, void* dest);           \
-  static bool parse_ ## name ## _radix(                                     \
-    const char* str, int n, void* dest, int radix);                         \
- public:                                                                    \
-  static bool parse_ ## name ## _hex(const char* str, int n, void* dest);   \
-  static bool parse_ ## name ## _octal(const char* str, int n, void* dest); \
-  static bool parse_ ## name ## _cradix(const char* str, int n, void* dest)
-
-  PCRE_DECLARE_INTEGER_PARSER(short);
-  PCRE_DECLARE_INTEGER_PARSER(ushort);
-  PCRE_DECLARE_INTEGER_PARSER(int);
-  PCRE_DECLARE_INTEGER_PARSER(uint);
-  PCRE_DECLARE_INTEGER_PARSER(long);
-  PCRE_DECLARE_INTEGER_PARSER(ulong);
-  PCRE_DECLARE_INTEGER_PARSER(longlong);
-  PCRE_DECLARE_INTEGER_PARSER(ulonglong);
-
-#undef PCRE_DECLARE_INTEGER_PARSER
-};
-
-inline Arg::Arg() : arg_(NULL), parser_(parse_null) { }
-inline Arg::Arg(void* p) : arg_(p), parser_(parse_null) { }
-
-inline bool Arg::Parse(const char* str, int n) const {
-  return (*parser_)(str, n, arg_);
-}
-
-// This part of the parser, appropriate only for ints, deals with bases
-#define MAKE_INTEGER_PARSER(type, name) \
-  inline Arg Hex(type* ptr) { \
-    return Arg(ptr, Arg::parse_ ## name ## _hex); } \
-  inline Arg Octal(type* ptr) { \
-    return Arg(ptr, Arg::parse_ ## name ## _octal); } \
-  inline Arg CRadix(type* ptr) { \
-    return Arg(ptr, Arg::parse_ ## name ## _cradix); }
-
-MAKE_INTEGER_PARSER(short,              short);
-MAKE_INTEGER_PARSER(unsigned short,     ushort);
-MAKE_INTEGER_PARSER(int,                int);
-MAKE_INTEGER_PARSER(unsigned int,       uint);
-MAKE_INTEGER_PARSER(long,               long);
-MAKE_INTEGER_PARSER(unsigned long,      ulong);
-#if 1
-MAKE_INTEGER_PARSER(long long,          longlong);
-#endif
-#if 1
-MAKE_INTEGER_PARSER(unsigned long long, ulonglong);
-#endif
-
-#undef PCRE_IS_SET
-#undef PCRE_SET_OR_CLEAR
-#undef MAKE_INTEGER_PARSER
-
 }   // namespace pcrecpp
 
-
-#endif /* _PCRE_REGEXP_H */
+#endif /* _PCRECPP_H */

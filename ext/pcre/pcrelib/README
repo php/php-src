@@ -68,6 +68,9 @@ others are pointers to URLs containing relevant files.
 Building PCRE on a Unix-like system
 -----------------------------------
 
+If you are using HP's ANSI C++ compiler (aCC), please see the special note
+in the section entitled "Using HP's ANSI C++ compiler (aCC)" below.
+
 To build PCRE on a Unix-like system, first run the "configure" command from the
 PCRE distribution directory, with your current directory set to the directory
 where you want the files to be created. This command is a standard GNU
@@ -91,8 +94,17 @@ into /source/pcre/pcre-xxx, but you want to build it in /build/pcre/pcre-xxx:
 cd /build/pcre/pcre-xxx
 /source/pcre/pcre-xxx/configure
 
+PCRE is written in C and is normally compiled as a C library. However, it is
+possible to build it as a C++ library, though the provided building apparatus
+does not have any features to support this.
+
 There are some optional features that can be included or omitted from the PCRE
 library. You can read more about them in the pcrebuild man page.
+
+. If you want to suppress the building of the C++ wrapper library, you can add
+  --disable-cpp to the "configure" command. Otherwise, when "configure" is run,
+  will try to find a C++ compiler and C++ header files, and if it succeeds, it
+  will try to build the C++ wrapper.
 
 . If you want to make use of the support for UTF-8 character strings in PCRE,
   you must add --enable-utf8 to the "configure" command. Without it, the code
@@ -106,11 +118,11 @@ library. You can read more about them in the pcrebuild man page.
   property table); only the basic two-letter properties such as Lu are
   supported.
 
-. You can build PCRE to recognized CR or NL as the newline character, instead
-  of whatever your compiler uses for "\n", by adding --newline-is-cr or
-  --newline-is-nl to the "configure" command, respectively. Only do this if you
+. You can build PCRE to recognize either CR or LF as the newline character,
+  instead of whatever your compiler uses for "\n", by adding --newline-is-cr or
+  --newline-is-lf to the "configure" command, respectively. Only do this if you
   really understand what you are doing. On traditional Unix-like systems, the
-  newline character is NL.
+  newline character is LF.
 
 . When called via the POSIX interface, PCRE uses malloc() to get additional
   storage for processing capturing parentheses if there are more than 10 of
@@ -255,6 +267,22 @@ You can do this by specifying CC_FOR_BUILD (and if necessary CFLAGS_FOR_BUILD;
 there are also CXX_FOR_BUILD and CXXFLAGS_FOR_BUILD for the C++ wrapper)
 when calling the "configure" command. If they are not specified, they default
 to the values of CC and CFLAGS.
+
+
+Using HP's ANSI C++ compiler (aCC)
+----------------------------------
+
+Unless C++ support is disabled by specifiying the "--disable-cpp" option of the
+"configure" script, you *must* include the "-AA" option in the CXXFLAGS
+environment variable in order for the C++ components to compile correctly.
+
+Also, note that the aCC compiler on PA-RISC platforms may have a defect whereby
+needed libraries fail to get included when specifying the "-AA" compiler
+option. If you experience unresolved symbols when linking the C++ programs,
+use the workaround of specifying the following environment variable prior to
+running the "configure" script:
+
+  CXXLDFLAGS="-lstd_v2 -lCsup_v2"
 
 
 Building on non-Unix systems
@@ -425,7 +453,8 @@ The distribution should contain the following files:
   pcre_internal.h       header for internal use
   config.in             template for config.h, which is built by configure
 
-  pcrecpp.h.in          "source" for the header file for the C++ wrapper
+  pcrecpp.h             the header file for the C++ wrapper
+  pcrecpparg.h.in       "source" for another C++ header file
   pcrecpp.cc            )
   pcre_scanner.cc       ) source for the C++ wrapper library
 
@@ -486,4 +515,4 @@ The distribution should contain the following files:
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-June 2005
+January 2006
