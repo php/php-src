@@ -397,12 +397,16 @@ int RE::TryMatch(const StringPiece& text,
 
   pcre_extra extra = { 0 };
   if (options_.match_limit() > 0) {
-    extra.flags = PCRE_EXTRA_MATCH_LIMIT;
+    extra.flags |= PCRE_EXTRA_MATCH_LIMIT;
     extra.match_limit = options_.match_limit();
+  }
+  if (options_.match_limit_recursion() > 0) {
+    extra.flags |= PCRE_EXTRA_MATCH_LIMIT_RECURSION;
+    extra.match_limit_recursion = options_.match_limit_recursion();
   }
   int rc = pcre_exec(re,              // The regular expression object
                      &extra,
-                     text.data(),
+                     (text.data() == NULL) ? "" : text.data(),
                      text.size(),
                      startpos,
                      (anchor == UNANCHORED) ? 0 : PCRE_ANCHORED,
@@ -449,9 +453,14 @@ bool RE::DoMatchImpl(const StringPiece& text,
 
   *consumed = vec[1];
 
-  if (args == NULL) {
+  if (n == 0 || args == NULL) {
     // We are not interested in results
     return true;
+  }
+
+  if (NumberOfCapturingGroups() < n) {
+    // RE has fewer capturing groups than number of arg pointers passed in
+    return false;
   }
 
   // If we got here, we must have matched the whole pattern.
@@ -517,7 +526,7 @@ bool RE::Rewrite(string *out, const StringPiece &rewrite,
 
 // Return the number of capturing subpatterns, or -1 if the
 // regexp wasn't valid on construction.
-int RE::NumberOfCapturingGroups() {
+int RE::NumberOfCapturingGroups() const {
   if (re_partial_ == NULL) return -1;
 
   int result;
@@ -613,6 +622,7 @@ bool Arg::parse_ulong_radix(const char* str,
   if (n == 0) return false;
   char buf[kMaxNumberLength+1];
   str = TerminateNumber(buf, str, n);
+  if (str[0] == '-') return false;    // strtoul() on a negative number?!
   char* end;
   errno = 0;
   unsigned long r = strtoul(str, &end, radix);
@@ -702,6 +712,7 @@ bool Arg::parse_ulonglong_radix(const char* str,
   if (n == 0) return false;
   char buf[kMaxNumberLength+1];
   str = TerminateNumber(buf, str, n);
+  if (str[0] == '-') return false;    // strtoull() on a negative number?!
   char* end;
   errno = 0;
 #if defined HAVE_STRTOQ

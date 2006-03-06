@@ -1,5 +1,3 @@
-PCRE version 6.2 01-Aug-2005
-
 /\x{100}/8DM
 Memory allocation (code space): 10
 ------------------------------------------------------------------
@@ -645,12 +643,14 @@ Need char = 'A'
 
 /\x{100}*\d(?R)/8D
 ------------------------------------------------------------------
-  0  10 Bra 0
+  0  16 Bra 0
   3     \x{100}*
   6     \d
-  7   0 Recurse
- 10  10 Ket
- 13     End
+  7   6 Once
+ 10   0 Recurse
+ 13   6 Ket
+ 16  16 Ket
+ 19     End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 Partial matching not supported
@@ -660,10 +660,10 @@ No need char
 
 /[^\x{c4}]/D
 ------------------------------------------------------------------
-  0  36 Bra 0
-  3     [\x01-35-bd-z|~-\xff] (neg)
- 36  36 Ket
- 39     End
+  0   5 Bra 0
+  3     [^\xc4]
+  5   5 Ket
+  8     End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 No options
@@ -912,14 +912,16 @@ No match
 
 /\x{100}abc(xyz(?1))/8D
 ------------------------------------------------------------------
-  0  27 Bra 0
+  0  33 Bra 0
   3     \x{100}abc
- 12  12 Bra 1
+ 12  18 Bra 1
  15     xyz
- 21  12 Recurse
- 24  12 Ket
- 27  27 Ket
- 30     End
+ 21   6 Once
+ 24  12 Recurse
+ 27   6 Ket
+ 30  18 Ket
+ 33  33 Ket
+ 36     End
 ------------------------------------------------------------------
 Capturing subpattern count = 1
 Options: utf8
@@ -928,15 +930,17 @@ Need char = 'z'
 
 /[^\x{100}]abc(xyz(?1))/8D
 ------------------------------------------------------------------
-  0  32 Bra 0
+  0  38 Bra 0
   3     [^\x{100}]
  11     abc
- 17  12 Bra 1
+ 17  18 Bra 1
  20     xyz
- 26  17 Recurse
- 29  12 Ket
- 32  32 Ket
- 35     End
+ 26   6 Once
+ 29  17 Recurse
+ 32   6 Ket
+ 35  18 Ket
+ 38  38 Ket
+ 41     End
 ------------------------------------------------------------------
 Capturing subpattern count = 1
 Options: utf8
@@ -945,15 +949,17 @@ Need char = 'z'
 
 /[ab\x{100}]abc(xyz(?1))/8D
 ------------------------------------------------------------------
-  0  64 Bra 0
+  0  70 Bra 0
   3     [ab\x{100}]
  43     abc
- 49  12 Bra 1
+ 49  18 Bra 1
  52     xyz
- 58  49 Recurse
- 61  12 Ket
- 64  64 Ket
- 67     End
+ 58   6 Once
+ 61  49 Recurse
+ 64   6 Ket
+ 67  18 Ket
+ 70  70 Ket
+ 73     End
 ------------------------------------------------------------------
 Capturing subpattern count = 1
 Options: utf8
@@ -962,18 +968,20 @@ Need char = 'z'
 
 /(\x{100}(b(?2)c))?/D8
 ------------------------------------------------------------------
-  0  26 Bra 0
+  0  32 Bra 0
   3     Brazero
-  4  19 Bra 1
+  4  25 Bra 1
   7     \x{100}
- 10  10 Bra 2
+ 10  16 Bra 2
  13     b
- 15  10 Recurse
- 18     c
- 20  10 Ket
- 23  19 Ket
- 26  26 Ket
- 29     End
+ 15   6 Once
+ 18  10 Recurse
+ 21   6 Ket
+ 24     c
+ 26  16 Ket
+ 29  25 Ket
+ 32  32 Ket
+ 35     End
 ------------------------------------------------------------------
 Capturing subpattern count = 2
 Options: utf8
@@ -982,29 +990,33 @@ No need char
 
 /(\x{100}(b(?2)c)){0,2}/D8
 ------------------------------------------------------------------
-  0  55 Bra 0
+  0  67 Bra 0
   3     Brazero
-  4  48 Bra 0
-  7  19 Bra 1
+  4  60 Bra 0
+  7  25 Bra 1
  10     \x{100}
- 13  10 Bra 2
+ 13  16 Bra 2
  16     b
- 18  13 Recurse
- 21     c
- 23  10 Ket
- 26  19 Ket
- 29     Brazero
- 30  19 Bra 1
- 33     \x{100}
- 36  10 Bra 2
- 39     b
- 41  13 Recurse
- 44     c
- 46  10 Ket
- 49  19 Ket
- 52  48 Ket
- 55  55 Ket
- 58     End
+ 18   6 Once
+ 21  13 Recurse
+ 24   6 Ket
+ 27     c
+ 29  16 Ket
+ 32  25 Ket
+ 35     Brazero
+ 36  25 Bra 1
+ 39     \x{100}
+ 42  16 Bra 2
+ 45     b
+ 47   6 Once
+ 50  13 Recurse
+ 53   6 Ket
+ 56     c
+ 58  16 Ket
+ 61  25 Ket
+ 64  60 Ket
+ 67  67 Ket
+ 70     End
 ------------------------------------------------------------------
 Capturing subpattern count = 2
 Options: utf8
@@ -1013,18 +1025,20 @@ No need char
 
 /(\x{100}(b(?1)c))?/D8
 ------------------------------------------------------------------
-  0  26 Bra 0
+  0  32 Bra 0
   3     Brazero
-  4  19 Bra 1
+  4  25 Bra 1
   7     \x{100}
- 10  10 Bra 2
+ 10  16 Bra 2
  13     b
- 15   4 Recurse
- 18     c
- 20  10 Ket
- 23  19 Ket
- 26  26 Ket
- 29     End
+ 15   6 Once
+ 18   4 Recurse
+ 21   6 Ket
+ 24     c
+ 26  16 Ket
+ 29  25 Ket
+ 32  32 Ket
+ 35     End
 ------------------------------------------------------------------
 Capturing subpattern count = 2
 Options: utf8
@@ -1033,29 +1047,33 @@ No need char
 
 /(\x{100}(b(?1)c)){0,2}/D8
 ------------------------------------------------------------------
-  0  55 Bra 0
+  0  67 Bra 0
   3     Brazero
-  4  48 Bra 0
-  7  19 Bra 1
+  4  60 Bra 0
+  7  25 Bra 1
  10     \x{100}
- 13  10 Bra 2
+ 13  16 Bra 2
  16     b
- 18   7 Recurse
- 21     c
- 23  10 Ket
- 26  19 Ket
- 29     Brazero
- 30  19 Bra 1
- 33     \x{100}
- 36  10 Bra 2
- 39     b
- 41   7 Recurse
- 44     c
- 46  10 Ket
- 49  19 Ket
- 52  48 Ket
- 55  55 Ket
- 58     End
+ 18   6 Once
+ 21   7 Recurse
+ 24   6 Ket
+ 27     c
+ 29  16 Ket
+ 32  25 Ket
+ 35     Brazero
+ 36  25 Bra 1
+ 39     \x{100}
+ 42  16 Bra 2
+ 45     b
+ 47   6 Once
+ 50   7 Recurse
+ 53   6 Ket
+ 56     c
+ 58  16 Ket
+ 61  25 Ket
+ 64  60 Ket
+ 67  67 Ket
+ 70     End
 ------------------------------------------------------------------
 Capturing subpattern count = 2
 Options: utf8
@@ -1071,5 +1089,22 @@ No need char
 /\w/8
     \x{100}X   
  0: X
+
+/a\x{1234}b/P8
+    a\x{1234}b
+ 0: a\x{1234}b
+
+/^\ሴ/8D
+------------------------------------------------------------------
+  0   8 Bra 0
+  3     ^
+  4     \x{1234}
+  8   8 Ket
+ 11     End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: anchored utf8
+No first char
+No need char
 
 / End of testinput5 /

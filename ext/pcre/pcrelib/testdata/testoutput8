@@ -1,5 +1,3 @@
-PCRE version 6.2 01-Aug-2005
-
 /-- Do not use the \x{} construct except with patterns that have the --/
 /-- /8 option set, because PCRE doesn't recognize them as UTF-8 unless --/
 No match

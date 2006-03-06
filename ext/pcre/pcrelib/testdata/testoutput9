@@ -1,5 +1,3 @@
-PCRE version 6.2 01-Aug-2005
-
 /\pL\P{Nd}/8
     AB
  0: AB
@@ -1231,4 +1229,399 @@ No match
     \x{101} 
  0: \x{101}
     
+/^\p{Han}+/8
+    \x{2e81}\x{3007}\x{2f804}\x{31a0}
+ 0: \x{2e81}\x{3007}\x{2f804}
+ 1: \x{2e81}\x{3007}
+ 2: \x{2e81}
+    ** Failers
+No match
+    \x{2e7f}  
+No match
+
+/^\P{Katakana}+/8
+    \x{3105}
+ 0: \x{3105}
+    ** Failers
+ 0: ** Failers
+ 1: ** Failer
+ 2: ** Faile
+ 3: ** Fail
+ 4: ** Fai
+ 5: ** Fa
+ 6: ** F
+ 7: ** 
+ 8: **
+ 9: *
+    \x{30ff}  
+No match
+
+/^[\p{Arabic}]/8
+    \x{06e9}
+ 0: \x{6e9}
+    \x{060b}
+ 0: \x{60b}
+    ** Failers
+No match
+    X\x{06e9}   
+No match
+
+/^[\P{Yi}]/8
+    \x{2f800}
+ 0: \x{2f800}
+    ** Failers
+ 0: *
+    \x{a014}
+No match
+    \x{a4c6}   
+No match
+
+/^\p{Any}X/8
+    AXYZ
+ 0: AX
+    \x{1234}XYZ 
+ 0: \x{1234}X
+    ** Failers
+No match
+    X  
+No match
+    
+/^\P{Any}X/8
+    ** Failers
+No match
+    AX
+No match
+    
+/^\p{Any}?X/8
+    XYZ
+ 0: X
+    AXYZ
+ 0: AX
+    \x{1234}XYZ 
+ 0: \x{1234}X
+    ** Failers
+No match
+    ABXYZ   
+No match
+
+/^\P{Any}?X/8
+    XYZ
+ 0: X
+    ** Failers
+No match
+    AXYZ
+No match
+    \x{1234}XYZ 
+No match
+    ABXYZ   
+No match
+
+/^\p{Any}+X/8
+    AXYZ
+ 0: AX
+    \x{1234}XYZ
+ 0: \x{1234}X
+    A\x{1234}XYZ
+ 0: A\x{1234}X
+    ** Failers
+No match
+    XYZ
+No match
+
+/^\P{Any}+X/8
+    ** Failers
+No match
+    AXYZ
+No match
+    \x{1234}XYZ
+No match
+    A\x{1234}XYZ
+No match
+    XYZ
+No match
+
+/^\p{Any}*X/8
+    XYZ
+ 0: X
+    AXYZ
+ 0: AX
+    \x{1234}XYZ
+ 0: \x{1234}X
+    A\x{1234}XYZ
+ 0: A\x{1234}X
+    ** Failers
+No match
+
+/^\P{Any}*X/8
+    XYZ
+ 0: X
+    ** Failers
+No match
+    AXYZ
+No match
+    \x{1234}XYZ
+No match
+    A\x{1234}XYZ
+No match
+
+/^[\p{Any}]X/8
+    AXYZ
+ 0: AX
+    \x{1234}XYZ 
+ 0: \x{1234}X
+    ** Failers
+No match
+    X  
+No match
+    
+/^[\P{Any}]X/8
+    ** Failers
+No match
+    AX
+No match
+    
+/^[\p{Any}]?X/8
+    XYZ
+ 0: X
+    AXYZ
+ 0: AX
+    \x{1234}XYZ 
+ 0: \x{1234}X
+    ** Failers
+No match
+    ABXYZ   
+No match
+
+/^[\P{Any}]?X/8
+    XYZ
+ 0: X
+    ** Failers
+No match
+    AXYZ
+No match
+    \x{1234}XYZ 
+No match
+    ABXYZ   
+No match
+
+/^[\p{Any}]+X/8
+    AXYZ
+ 0: AX
+    \x{1234}XYZ
+ 0: \x{1234}X
+    A\x{1234}XYZ
+ 0: A\x{1234}X
+    ** Failers
+No match
+    XYZ
+No match
+
+/^[\P{Any}]+X/8
+    ** Failers
+No match
+    AXYZ
+No match
+    \x{1234}XYZ
+No match
+    A\x{1234}XYZ
+No match
+    XYZ
+No match
+
+/^[\p{Any}]*X/8
+    XYZ
+ 0: X
+    AXYZ
+ 0: AX
+    \x{1234}XYZ
+ 0: \x{1234}X
+    A\x{1234}XYZ
+ 0: A\x{1234}X
+    ** Failers
+No match
+
+/^[\P{Any}]*X/8
+    XYZ
+ 0: X
+    ** Failers
+No match
+    AXYZ
+No match
+    \x{1234}XYZ
+No match
+    A\x{1234}XYZ
+No match
+
+/^\p{Any}{3,5}?/8
+    abcdefgh
+ 0: abcde
+ 1: abcd
+ 2: abc
+    \x{1234}\n\r\x{3456}xyz 
+ 0: \x{1234}\x{0a}\x{0d}\x{3456}x
+ 1: \x{1234}\x{0a}\x{0d}\x{3456}
+ 2: \x{1234}\x{0a}\x{0d}
+
+/^\p{Any}{3,5}/8
+    abcdefgh
+ 0: abcde
+ 1: abcd
+ 2: abc
+    \x{1234}\n\r\x{3456}xyz 
+ 0: \x{1234}\x{0a}\x{0d}\x{3456}x
+ 1: \x{1234}\x{0a}\x{0d}\x{3456}
+ 2: \x{1234}\x{0a}\x{0d}
+
+/^\P{Any}{3,5}?/8
+    ** Failers
+No match
+    abcdefgh
+No match
+    \x{1234}\n\r\x{3456}xyz 
+No match
+
+/^\p{L&}X/8
+     AXY
+ 0: AX
+     aXY
+ 0: aX
+     \x{1c5}XY
+ 0: \x{1c5}X
+     ** Failers
+No match
+     \x{1bb}XY
+No match
+     \x{2b0}XY
+No match
+     !XY      
+No match
+
+/^[\p{L&}]X/8
+     AXY
+ 0: AX
+     aXY
+ 0: aX
+     \x{1c5}XY
+ 0: \x{1c5}X
+     ** Failers
+No match
+     \x{1bb}XY
+No match
+     \x{2b0}XY
+No match
+     !XY      
+No match
+
+/^\p{L&}+X/8
+     AXY
+ 0: AX
+     aXY
+ 0: aX
+     AbcdeXyz 
+ 0: AbcdeX
+     \x{1c5}AbXY
+ 0: \x{1c5}AbX
+     abcDEXypqreXlmn 
+ 0: abcDEXypqreX
+ 1: abcDEX
+     ** Failers
+No match
+     \x{1bb}XY
+No match
+     \x{2b0}XY
+No match
+     !XY      
+No match
+
+/^[\p{L&}]+X/8
+     AXY
+ 0: AX
+     aXY
+ 0: aX
+     AbcdeXyz 
+ 0: AbcdeX
+     \x{1c5}AbXY
+ 0: \x{1c5}AbX
+     abcDEXypqreXlmn 
+ 0: abcDEXypqreX
+ 1: abcDEX
+     ** Failers
+No match
+     \x{1bb}XY
+No match
+     \x{2b0}XY
+No match
+     !XY      
+No match
+
+/^\p{L&}+?X/8
+     AXY
+ 0: AX
+     aXY
+ 0: aX
+     AbcdeXyz 
+ 0: AbcdeX
+     \x{1c5}AbXY
+ 0: \x{1c5}AbX
+     abcDEXypqreXlmn 
+ 0: abcDEXypqreX
+ 1: abcDEX
+     ** Failers
+No match
+     \x{1bb}XY
+No match
+     \x{2b0}XY
+No match
+     !XY      
+No match
+
+/^[\p{L&}]+?X/8
+     AXY
+ 0: AX
+     aXY
+ 0: aX
+     AbcdeXyz 
+ 0: AbcdeX
+     \x{1c5}AbXY
+ 0: \x{1c5}AbX
+     abcDEXypqreXlmn 
+ 0: abcDEXypqreX
+ 1: abcDEX
+     ** Failers
+No match
+     \x{1bb}XY
+No match
+     \x{2b0}XY
+No match
+     !XY      
+No match
+
+/^\P{L&}X/8
+     !XY
+ 0: !X
+     \x{1bb}XY
+ 0: \x{1bb}X
+     \x{2b0}XY
+ 0: \x{2b0}X
+     ** Failers
+No match
+     \x{1c5}XY
+No match
+     AXY      
+No match
+
+/^[\P{L&}]X/8
+     !XY
+ 0: !X
+     \x{1bb}XY
+ 0: \x{1bb}X
+     \x{2b0}XY
+ 0: \x{2b0}X
+     ** Failers
+No match
+     \x{1c5}XY
+No match
+     AXY      
+No match
+
 / End / 

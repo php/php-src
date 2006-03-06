@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2005 University of Cambridge
+           Copyright (c) 1997-2006 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -39,14 +39,16 @@ POSSIBILITY OF SUCH DAMAGE.
 
 
 /* This module contains some fixed tables that are used by more than one of the
-PCRE code modules. */
+PCRE code modules. The tables are also #included by the pcretest program, which
+uses macros to change their names from _pcre_xxx to xxxx, thereby avoiding name
+clashes with the library. */
 
 
 #include "pcre_internal.h"
 
 
 /* Table of sizes for the fixed-length opcodes. It's defined in a macro so that
-the definition is next to the definition of the opcodes in internal.h. */
+the definition is next to the definition of the opcodes in pcre_internal.h. */
 
 const uschar _pcre_OP_lengths[] = { OP_LENGTHS };
 
@@ -80,48 +82,110 @@ const uschar _pcre_utf8_table4[] = {
   2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
   3,3,3,3,3,3,3,3,4,4,4,4,5,5,5,5 };
 
-/* This table translates Unicode property names into code values for the
-ucp_findchar() function. It is used by pcretest as well as by the library
-functions. */
+/* This table translates Unicode property names into type and code values. It
+is searched by binary chop, so must be in collating sequence of name. */
 
 const ucp_type_table _pcre_utt[] = {
-  { "C",  128 + ucp_C },
-  { "Cc", ucp_Cc },
-  { "Cf", ucp_Cf },
-  { "Cn", ucp_Cn },
-  { "Co", ucp_Co },
-  { "Cs", ucp_Cs },
-  { "L",  128 + ucp_L },
-  { "Ll", ucp_Ll },
-  { "Lm", ucp_Lm },
-  { "Lo", ucp_Lo },
-  { "Lt", ucp_Lt },
-  { "Lu", ucp_Lu },
-  { "M",  128 + ucp_M },
-  { "Mc", ucp_Mc },
-  { "Me", ucp_Me },
-  { "Mn", ucp_Mn },
-  { "N",  128 + ucp_N },
-  { "Nd", ucp_Nd },
-  { "Nl", ucp_Nl },
-  { "No", ucp_No },
-  { "P",  128 + ucp_P },
-  { "Pc", ucp_Pc },
-  { "Pd", ucp_Pd },
-  { "Pe", ucp_Pe },
-  { "Pf", ucp_Pf },
-  { "Pi", ucp_Pi },
-  { "Po", ucp_Po },
-  { "Ps", ucp_Ps },
-  { "S",  128 + ucp_S },
-  { "Sc", ucp_Sc },
-  { "Sk", ucp_Sk },
-  { "Sm", ucp_Sm },
-  { "So", ucp_So },
-  { "Z",  128 + ucp_Z },
-  { "Zl", ucp_Zl },
-  { "Zp", ucp_Zp },
-  { "Zs", ucp_Zs }
+  { "Any",                 PT_ANY,  0 },
+  { "Arabic",              PT_SC,   ucp_Arabic },
+  { "Armenian",            PT_SC,   ucp_Armenian },
+  { "Bengali",             PT_SC,   ucp_Bengali },
+  { "Bopomofo",            PT_SC,   ucp_Bopomofo },
+  { "Braille",             PT_SC,   ucp_Braille },
+  { "Buginese",            PT_SC,   ucp_Buginese },
+  { "Buhid",               PT_SC,   ucp_Buhid },
+  { "C",                   PT_GC,   ucp_C },
+  { "Canadian_Aboriginal", PT_SC,   ucp_Canadian_Aboriginal },
+  { "Cc",                  PT_PC,   ucp_Cc },
+  { "Cf",                  PT_PC,   ucp_Cf },
+  { "Cherokee",            PT_SC,   ucp_Cherokee },
+  { "Cn",                  PT_PC,   ucp_Cn },
+  { "Co",                  PT_PC,   ucp_Co },
+  { "Common",              PT_SC,   ucp_Common },
+  { "Coptic",              PT_SC,   ucp_Coptic },
+  { "Cs",                  PT_PC,   ucp_Cs },
+  { "Cypriot",             PT_SC,   ucp_Cypriot },
+  { "Cyrillic",            PT_SC,   ucp_Cyrillic },
+  { "Deseret",             PT_SC,   ucp_Deseret },
+  { "Devanagari",          PT_SC,   ucp_Devanagari },
+  { "Ethiopic",            PT_SC,   ucp_Ethiopic },
+  { "Georgian",            PT_SC,   ucp_Georgian },
+  { "Glagolitic",          PT_SC,   ucp_Glagolitic },
+  { "Gothic",              PT_SC,   ucp_Gothic },
+  { "Greek",               PT_SC,   ucp_Greek },
+  { "Gujarati",            PT_SC,   ucp_Gujarati },
+  { "Gurmukhi",            PT_SC,   ucp_Gurmukhi },
+  { "Han",                 PT_SC,   ucp_Han },
+  { "Hangul",              PT_SC,   ucp_Hangul },
+  { "Hanunoo",             PT_SC,   ucp_Hanunoo },
+  { "Hebrew",              PT_SC,   ucp_Hebrew },
+  { "Hiragana",            PT_SC,   ucp_Hiragana },
+  { "Inherited",           PT_SC,   ucp_Inherited },
+  { "Kannada",             PT_SC,   ucp_Kannada },
+  { "Katakana",            PT_SC,   ucp_Katakana },
+  { "Kharoshthi",          PT_SC,   ucp_Kharoshthi },
+  { "Khmer",               PT_SC,   ucp_Khmer },
+  { "L",                   PT_GC,   ucp_L },
+  { "L&",                  PT_LAMP, 0 },
+  { "Lao",                 PT_SC,   ucp_Lao },
+  { "Latin",               PT_SC,   ucp_Latin },
+  { "Limbu",               PT_SC,   ucp_Limbu },
+  { "Linear_B",            PT_SC,   ucp_Linear_B },
+  { "Ll",                  PT_PC,   ucp_Ll },
+  { "Lm",                  PT_PC,   ucp_Lm },
+  { "Lo",                  PT_PC,   ucp_Lo },
+  { "Lt",                  PT_PC,   ucp_Lt },
+  { "Lu",                  PT_PC,   ucp_Lu },
+  { "M",                   PT_GC,   ucp_M },
+  { "Malayalam",           PT_SC,   ucp_Malayalam },
+  { "Mc",                  PT_PC,   ucp_Mc },
+  { "Me",                  PT_PC,   ucp_Me },
+  { "Mn",                  PT_PC,   ucp_Mn },
+  { "Mongolian",           PT_SC,   ucp_Mongolian },
+  { "Myanmar",             PT_SC,   ucp_Myanmar },
+  { "N",                   PT_GC,   ucp_N },
+  { "Nd",                  PT_PC,   ucp_Nd },
+  { "New_Tai_Lue",         PT_SC,   ucp_New_Tai_Lue },
+  { "Nl",                  PT_PC,   ucp_Nl },
+  { "No",                  PT_PC,   ucp_No },
+  { "Ogham",               PT_SC,   ucp_Ogham },
+  { "Old_Italic",          PT_SC,   ucp_Old_Italic },
+  { "Old_Persian",         PT_SC,   ucp_Old_Persian },
+  { "Oriya",               PT_SC,   ucp_Oriya },
+  { "Osmanya",             PT_SC,   ucp_Osmanya },
+  { "P",                   PT_GC,   ucp_P },
+  { "Pc",                  PT_PC,   ucp_Pc },
+  { "Pd",                  PT_PC,   ucp_Pd },
+  { "Pe",                  PT_PC,   ucp_Pe },
+  { "Pf",                  PT_PC,   ucp_Pf },
+  { "Pi",                  PT_PC,   ucp_Pi },
+  { "Po",                  PT_PC,   ucp_Po },
+  { "Ps",                  PT_PC,   ucp_Ps },
+  { "Runic",               PT_SC,   ucp_Runic },
+  { "S",                   PT_GC,   ucp_S },
+  { "Sc",                  PT_PC,   ucp_Sc },
+  { "Shavian",             PT_SC,   ucp_Shavian },
+  { "Sinhala",             PT_SC,   ucp_Sinhala },
+  { "Sk",                  PT_PC,   ucp_Sk },
+  { "Sm",                  PT_PC,   ucp_Sm },
+  { "So",                  PT_PC,   ucp_So },
+  { "Syloti_Nagri",        PT_SC,   ucp_Syloti_Nagri },
+  { "Syriac",              PT_SC,   ucp_Syriac },
+  { "Tagalog",             PT_SC,   ucp_Tagalog },
+  { "Tagbanwa",            PT_SC,   ucp_Tagbanwa },
+  { "Tai_Le",              PT_SC,   ucp_Tai_Le },
+  { "Tamil",               PT_SC,   ucp_Tamil },
+  { "Telugu",              PT_SC,   ucp_Telugu },
+  { "Thaana",              PT_SC,   ucp_Thaana },
+  { "Thai",                PT_SC,   ucp_Thai },
+  { "Tibetan",             PT_SC,   ucp_Tibetan },
+  { "Tifinagh",            PT_SC,   ucp_Tifinagh },
+  { "Ugaritic",            PT_SC,   ucp_Ugaritic },
+  { "Yi",                  PT_SC,   ucp_Yi },
+  { "Z",                   PT_GC,   ucp_Z },
+  { "Zl",                  PT_PC,   ucp_Zl },
+  { "Zp",                  PT_PC,   ucp_Zp },
+  { "Zs",                  PT_PC,   ucp_Zs }
 };
 
 const int _pcre_utt_size = sizeof(_pcre_utt)/sizeof(ucp_type_table);

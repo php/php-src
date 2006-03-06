@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2005 University of Cambridge
+           Copyright (c) 1997-2006 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -288,7 +288,9 @@ const uschar *start_subject = md->start_subject;
 const uschar *end_subject = md->end_subject;
 const uschar *start_code = md->start_code;
 
+#ifdef SUPPORT_UTF8
 BOOL utf8 = (md->poptions & PCRE_UTF8) != 0;
+#endif
 
 rlevel++;
 offsetcount &= (-2);
@@ -480,7 +482,7 @@ for (;;)
     const uschar *code;
     int state_offset = current_state->offset;
     int count, codevalue;
-    int chartype, othercase;
+    int chartype, script;
 
 #ifdef DEBUG
     printf ("%.*sProcessing state %d c=", rlevel*2-2, SP, state_offset);
@@ -757,19 +759,38 @@ for (;;)
       case OP_NOTPROP:
       if (clen > 0)
         {
-        int rqdtype, category;
-        category = ucp_findchar(c, &chartype, &othercase);
-        rqdtype = code[1];
-        if (rqdtype >= 128)
+        BOOL OK;
+        int category = _pcre_ucp_findprop(c, &chartype, &script);
+        switch(code[1])
           {
-          if ((rqdtype - 128 == category) == (codevalue == OP_PROP))
-            { ADD_NEW(state_offset + 2, 0); }
+          case PT_ANY:
+          OK = TRUE;
+          break;
+
+          case PT_LAMP:
+          OK = chartype == ucp_Lu || chartype == ucp_Ll || chartype == ucp_Lt;
+          break;
+
+          case PT_GC:
+          OK = category == code[2];
+          break;
+
+          case PT_PC:
+          OK = chartype == code[2];
+          break;
+
+          case PT_SC:
+          OK = script == code[2];
+          break;
+
+          /* Should never occur, but keep compilers from grumbling. */
+
+          default:
+          OK = codevalue != OP_PROP;
+          break;
           }
-        else
-          {
-          if ((rqdtype == chartype) == (codevalue == OP_PROP))
-            { ADD_NEW(state_offset + 2, 0); }
-          }
+
+        if (OK == (codevalue == OP_PROP)) { ADD_NEW(state_offset + 3, 0); }
         }
       break;
 #endif
@@ -862,14 +883,41 @@ for (;;)
       case OP_PROP_EXTRA + OP_TYPEPLUS:
       case OP_PROP_EXTRA + OP_TYPEMINPLUS:
       count = current_state->count;           /* Already matched */
-      if (count > 0) { ADD_ACTIVE(state_offset + 3, 0); }
+      if (count > 0) { ADD_ACTIVE(state_offset + 4, 0); }
       if (clen > 0)
         {
-        int category = ucp_findchar(c, &chartype, &othercase);
-        int rqdtype = code[2];
-        if ((d == OP_PROP) ==
-            (rqdtype == ((rqdtype >= 128)? (category + 128) : chartype)))
-          { count++; ADD_NEW(state_offset, count); }
+        BOOL OK;
+        int category = _pcre_ucp_findprop(c, &chartype, &script);
+        switch(code[2])
+          {
+          case PT_ANY:
+          OK = TRUE;
+          break;
+
+          case PT_LAMP:
+          OK = chartype == ucp_Lu || chartype == ucp_Ll || chartype == ucp_Lt;
+          break;
+
+          case PT_GC:
+          OK = category == code[3];
+          break;
+
+          case PT_PC:
+          OK = chartype == code[3];
+          break;
+
+          case PT_SC:
+          OK = script == code[3];
+          break;
+
+          /* Should never occur, but keep compilers from grumbling. */
+
+          default:
+          OK = codevalue != OP_PROP;
+          break;
+          }
+
+        if (OK == (d == OP_PROP)) { count++; ADD_NEW(state_offset, count); }
         }
       break;
 
@@ -878,7 +926,7 @@ for (;;)
       case OP_EXTUNI_EXTRA + OP_TYPEMINPLUS:
       count = current_state->count;  /* Already matched */
       if (count > 0) { ADD_ACTIVE(state_offset + 2, 0); }
-      if (clen > 0 && ucp_findchar(c, &chartype, &othercase) != ucp_M)
+      if (clen > 0 && _pcre_ucp_findprop(c, &chartype, &script) != ucp_M)
         {
         const uschar *nptr = ptr + clen;
         int ncount = 0;
@@ -887,7 +935,7 @@ for (;;)
           int nd;
           int ndlen = 1;
           GETCHARLEN(nd, nptr, ndlen);
-          if (ucp_findchar(nd, &chartype, &othercase) != ucp_M) break;
+          if (_pcre_ucp_findprop(nd, &chartype, &script) != ucp_M) break;
           ncount++;
           nptr += ndlen;
           }
@@ -899,7 +947,7 @@ for (;;)
       /*-----------------------------------------------------------------*/
       case OP_PROP_EXTRA + OP_TYPEQUERY:
       case OP_PROP_EXTRA + OP_TYPEMINQUERY:
-      count = 3;
+      count = 4;
       goto QS1;
 
       case OP_PROP_EXTRA + OP_TYPESTAR:
@@ -908,14 +956,41 @@ for (;;)
 
       QS1:
 
-      ADD_ACTIVE(state_offset + 3, 0);
+      ADD_ACTIVE(state_offset + 4, 0);
       if (clen > 0)
         {
-        int category = ucp_findchar(c, &chartype, &othercase);
-        int rqdtype = code[2];
-        if ((d == OP_PROP) ==
-            (rqdtype == ((rqdtype >= 128)? (category + 128) : chartype)))
-          { ADD_NEW(state_offset + count, 0); }
+        BOOL OK;
+        int category = _pcre_ucp_findprop(c, &chartype, &script);
+        switch(code[2])
+          {
+          case PT_ANY:
+          OK = TRUE;
+          break;
+
+          case PT_LAMP:
+          OK = chartype == ucp_Lu || chartype == ucp_Ll || chartype == ucp_Lt;
+          break;
+
+          case PT_GC:
+          OK = category == code[3];
+          break;
+
+          case PT_PC:
+          OK = chartype == code[3];
+          break;
+
+          case PT_SC:
+          OK = script == code[3];
+          break;
+
+          /* Should never occur, but keep compilers from grumbling. */
+
+          default:
+          OK = codevalue != OP_PROP;
+          break;
+          }
+
+        if (OK == (d == OP_PROP)) { ADD_NEW(state_offset + count, 0); }
         }
       break;
 
@@ -932,7 +1007,7 @@ for (;;)
       QS2:
 
       ADD_ACTIVE(state_offset + 2, 0);
-      if (clen > 0 && ucp_findchar(c, &chartype, &othercase) != ucp_M)
+      if (clen > 0 && _pcre_ucp_findprop(c, &chartype, &script) != ucp_M)
         {
         const uschar *nptr = ptr + clen;
         int ncount = 0;
@@ -941,7 +1016,7 @@ for (;;)
           int nd;
           int ndlen = 1;
           GETCHARLEN(nd, nptr, ndlen);
-          if (ucp_findchar(nd, &chartype, &othercase) != ucp_M) break;
+          if (_pcre_ucp_findprop(nd, &chartype, &script) != ucp_M) break;
           ncount++;
           nptr += ndlen;
           }
@@ -954,17 +1029,45 @@ for (;;)
       case OP_PROP_EXTRA + OP_TYPEUPTO:
       case OP_PROP_EXTRA + OP_TYPEMINUPTO:
       if (codevalue != OP_PROP_EXTRA + OP_TYPEEXACT)
-        { ADD_ACTIVE(state_offset + 5, 0); }
+        { ADD_ACTIVE(state_offset + 6, 0); }
       count = current_state->count;  /* Number already matched */
       if (clen > 0)
         {
-        int category = ucp_findchar(c, &chartype, &othercase);
-        int rqdtype = code[4];
-        if ((d == OP_PROP) ==
-            (rqdtype == ((rqdtype >= 128)? (category + 128) : chartype)))
+        BOOL OK;
+        int category = _pcre_ucp_findprop(c, &chartype, &script);
+        switch(code[4])
+          {
+          case PT_ANY:
+          OK = TRUE;
+          break;
+
+          case PT_LAMP:
+          OK = chartype == ucp_Lu || chartype == ucp_Ll || chartype == ucp_Lt;
+          break;
+
+          case PT_GC:
+          OK = category == code[5];
+          break;
+
+          case PT_PC:
+          OK = chartype == code[5];
+          break;
+
+          case PT_SC:
+          OK = script == code[5];
+          break;
+
+          /* Should never occur, but keep compilers from grumbling. */
+
+          default:
+          OK = codevalue != OP_PROP;
+          break;
+          }
+
+        if (OK == (d == OP_PROP))
           {
           if (++count >= GET2(code, 1))
-            { ADD_NEW(state_offset + 5, 0); }
+            { ADD_NEW(state_offset + 6, 0); }
           else
             { ADD_NEW(state_offset, count); }
           }
@@ -978,7 +1081,7 @@ for (;;)
       if (codevalue != OP_EXTUNI_EXTRA + OP_TYPEEXACT)
         { ADD_ACTIVE(state_offset + 4, 0); }
       count = current_state->count;  /* Number already matched */
-      if (clen > 0 && ucp_findchar(c, &chartype, &othercase) != ucp_M)
+      if (clen > 0 && _pcre_ucp_findprop(c, &chartype, &script) != ucp_M)
         {
         const uschar *nptr = ptr + clen;
         int ncount = 0;
@@ -987,7 +1090,7 @@ for (;;)
           int nd;
           int ndlen = 1;
           GETCHARLEN(nd, nptr, ndlen);
-          if (ucp_findchar(nd, &chartype, &othercase) != ucp_M) break;
+          if (_pcre_ucp_findprop(nd, &chartype, &script) != ucp_M) break;
           ncount++;
           nptr += ndlen;
           }
@@ -1018,17 +1121,17 @@ for (;;)
         {
         if (c == d) { ADD_NEW(state_offset + dlen + 1, 0); } else
           {
+          int othercase;
           if (c < 128) othercase = fcc[c]; else
 
           /* If we have Unicode property support, we can use it to test the
-          other case of the character, if there is one. The result of
-          ucp_findchar() is < 0 if the char isn't found, and othercase is
-          returned as zero if there isn't another case. */
+          other case of the character. */
 
 #ifdef SUPPORT_UCP
-          if (ucp_findchar(c, &chartype, &othercase) < 0)
+          othercase = _pcre_ucp_othercase(c);
+#else
+          othercase = -1;
 #endif
-            othercase = -1;
 
           if (d == othercase) { ADD_NEW(state_offset + dlen + 1, 0); }
           }
@@ -1050,7 +1153,7 @@ for (;;)
       to wait for them to pass before continuing. */
 
       case OP_EXTUNI:
-      if (clen > 0 && ucp_findchar(c, &chartype, &othercase) != ucp_M)
+      if (clen > 0 && _pcre_ucp_findprop(c, &chartype, &script) != ucp_M)
         {
         const uschar *nptr = ptr + clen;
         int ncount = 0;
@@ -1058,7 +1161,7 @@ for (;;)
           {
           int nclen = 1;
           GETCHARLEN(c, nptr, nclen);
-          if (ucp_findchar(c, &chartype, &othercase) != ucp_M) break;
+          if (_pcre_ucp_findprop(c, &chartype, &script) != ucp_M) break;
           ncount++;
           nptr += nclen;
           }
@@ -1093,10 +1196,10 @@ for (;;)
         if ((ims & PCRE_CASELESS) != 0)
           {
 #ifdef SUPPORT_UTF8
-          if (utf8 && c >= 128)
+          if (utf8 && d >= 128)
             {
 #ifdef SUPPORT_UCP
-            if (ucp_findchar(d, &chartype, &otherd) < 0) otherd = -1;
+            otherd = _pcre_ucp_othercase(d);
 #endif  /* SUPPORT_UCP */
             }
           else
@@ -1120,10 +1223,10 @@ for (;;)
         if ((ims && PCRE_CASELESS) != 0)
           {
 #ifdef SUPPORT_UTF8
-          if (utf8 && c >= 128)
+          if (utf8 && d >= 128)
             {
 #ifdef SUPPORT_UCP
-            if (ucp_findchar(c, &chartype, &otherd) < 0) otherd = -1;
+            otherd = _pcre_ucp_othercase(d);
 #endif  /* SUPPORT_UCP */
             }
           else
@@ -1147,10 +1250,10 @@ for (;;)
         if ((ims && PCRE_CASELESS) != 0)
           {
 #ifdef SUPPORT_UTF8
-          if (utf8 && c >= 128)
+          if (utf8 && d >= 128)
             {
 #ifdef SUPPORT_UCP
-            if (ucp_findchar(c, &chartype, &otherd) < 0) otherd = -1;
+            otherd = _pcre_ucp_othercase(d);
 #endif  /* SUPPORT_UCP */
             }
           else
@@ -1178,10 +1281,10 @@ for (;;)
         if ((ims & PCRE_CASELESS) != 0)
           {
 #ifdef SUPPORT_UTF8
-          if (utf8 && c >= 128)
+          if (utf8 && d >= 128)
             {
 #ifdef SUPPORT_UCP
-            if (ucp_findchar(d, &chartype, &otherd) < 0) otherd = -1;
+            otherd = _pcre_ucp_othercase(d);
 #endif  /* SUPPORT_UCP */
             }
           else
@@ -1519,7 +1622,7 @@ for (;;)
         cb.version          = 1;   /* Version 1 of the callout block */
         cb.callout_number   = code[1];
         cb.offset_vector    = offsets;
-        cb.subject          = (char *)start_subject;
+        cb.subject          = (PCRE_SPTR)start_subject;
         cb.subject_length   = end_subject - start_subject;
         cb.start_match      = current_subject - start_subject;
         cb.current_position = ptr - start_subject;
@@ -1611,7 +1714,7 @@ Returns:          > 0 => number of match offset pairs placed in offsets
                  < -1 => some kind of unexpected problem
 */
 
-EXPORT int
+PCRE_DATA_SCOPE int
 pcre_dfa_exec(const pcre *argument_re, const pcre_extra *extra_data,
   const char *subject, int length, int start_offset, int options, int *offsets,
   int offsetcount, int *workspace, int wscount)
@@ -1655,6 +1758,8 @@ if (extra_data != NULL)
   if ((flags & PCRE_EXTRA_STUDY_DATA) != 0)
     study = (const pcre_study_data *)extra_data->study_data;
   if ((flags & PCRE_EXTRA_MATCH_LIMIT) != 0) return PCRE_ERROR_DFA_UMLIMIT;
+  if ((flags & PCRE_EXTRA_MATCH_LIMIT_RECURSION) != 0)
+    return PCRE_ERROR_DFA_UMLIMIT;
   if ((flags & PCRE_EXTRA_CALLOUT_DATA) != 0)
     match_block.callout_data = extra_data->callout_data;
   if ((flags & PCRE_EXTRA_TABLES) != 0)
@@ -1680,7 +1785,9 @@ end_subject = (const unsigned char *)subject + length;
 req_byte_ptr = current_subject - 1;
 
 utf8 = (re->options & PCRE_UTF8) != 0;
-anchored = (options & PCRE_ANCHORED) != 0 || (re->options & PCRE_ANCHORED) != 0;
+
+anchored = (options & (PCRE_ANCHORED|PCRE_DFA_RESTART)) != 0 ||
+  (re->options & PCRE_ANCHORED) != 0;
 
 /* The remaining fixed data for passing around. */
 
@@ -1771,9 +1878,9 @@ for (;;)
 
     /* Advance to a unique first char if possible. If firstline is TRUE, the
     start of the match is constrained to the first line of a multiline string.
-    Implement this by temporarily adjusting end_subject so that we stop scanning
-    at a newline. If the match fails at the newline, later code breaks this loop.
-    */
+    Implement this by temporarily adjusting end_subject so that we stop
+    scanning at a newline. If the match fails at the newline, later code breaks
+    this loop. */
 
     if (firstline)
       {
