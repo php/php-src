@@ -179,7 +179,7 @@ function fibo($n) {
 
 /****/
 
-function hash($n) {
+function hash1($n) {
   for ($i = 1; $i <= $n; $i++) {
     $X[dechex($i)] = $i;
   }
@@ -401,8 +401,8 @@ ary3(2000);
 $t = end_test($t, "ary3(2000)");
 fibo(30);
 $t = end_test($t, "fibo(30)");
-hash(50000);
-$t = end_test($t, "hash(50000)");
+hash1(50000);
+$t = end_test($t, "hash1(50000)");
 hash2(500);
 $t = end_test($t, "hash2(500)");
 heapsort(20000);
