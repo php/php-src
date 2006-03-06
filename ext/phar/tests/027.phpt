@@ -32,7 +32,7 @@ file_put_contents($fname, $file);
 
 function dump($phar, $base)
 {
-	var_dump($phar . $base);
+	var_dump(str_replace(dirname(__FILE__), '*', $phar) . $base);
 	$dir = opendir($phar . $base);
 	if ($base == '/')
 	{
@@ -56,12 +56,12 @@ dump($pname, '/');
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
-string(52) "phar://%s027.phar.php/"
+string(%d) "phar://*/027.phar.php/"
 string(6) "/a.php"
 bool(false)
 string(2) "/b"
 bool(true)
-string(53) "phar://%s027.phar.php/b"
+string(%d) "phar://*/027.phar.php/b"
 string(8) "/b/c.php"
 bool(false)
 string(8) "/b/d.php"
