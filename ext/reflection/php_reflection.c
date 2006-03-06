@@ -1330,7 +1330,7 @@ ZEND_METHOD(reflection, getModifierNames)
 }
 /* }}} */
 
-/* {{{ proto public static mixed ReflectionFunction::export(string name [, bool return]) throws ReflectionException
+/* {{{ proto public static mixed ReflectionFunction::export(string name [, bool return])
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_function, export)
 {
