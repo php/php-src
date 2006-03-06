@@ -1,6 +1,290 @@
 ChangeLog for PCRE
 ------------------
 
+Version 6.6 06-Feb-06
+---------------------
+
+ 1. Change 16(a) for 6.5 broke things, because PCRE_DATA_SCOPE was not defined
+    in pcreposix.h. I have copied the definition from pcre.h.
+
+ 2. Change 25 for 6.5 broke compilation in a build directory out-of-tree
+    because pcre.h is no longer a built file.
+
+ 3. Added Jeff Friedl's additional debugging patches to pcregrep. These are
+    not normally included in the compiled code.
+
+
+Version 6.5 01-Feb-06
+---------------------
+
+ 1. When using the partial match feature with pcre_dfa_exec(), it was not
+    anchoring the second and subsequent partial matches at the new starting
+    point. This could lead to incorrect results. For example, with the pattern
+    /1234/, partially matching against "123" and then "a4" gave a match.
+
+ 2. Changes to pcregrep:
+
+    (a) All non-match returns from pcre_exec() were being treated as failures
+        to match the line. Now, unless the error is PCRE_ERROR_NOMATCH, an
+        error message is output. Some extra information is given for the
+        PCRE_ERROR_MATCHLIMIT and PCRE_ERROR_RECURSIONLIMIT errors, which are
+        probably the only errors that are likely to be caused by users (by
+        specifying a regex that has nested indefinite repeats, for instance).
+        If there are more than 20 of these errors, pcregrep is abandoned.
+
+    (b) A binary zero was treated as data while matching, but terminated the
+        output line if it was written out. This has been fixed: binary zeroes
+        are now no different to any other data bytes.
+
+    (c) Whichever of the LC_ALL or LC_CTYPE environment variables is set is
+        used to set a locale for matching. The --locale=xxxx long option has
+        been added (no short equivalent) to specify a locale explicitly on the
+        pcregrep command, overriding the environment variables.
+
+    (d) When -B was used with -n, some line numbers in the output were one less
+        than they should have been.
+
+    (e) Added the -o (--only-matching) option.
+
+    (f) If -A or -C was used with -c (count only), some lines of context were
+        accidentally printed for the final match.
+
+    (g) Added the -H (--with-filename) option.
+
+    (h) The combination of options -rh failed to suppress file names for files
+        that were found from directory arguments.
+
+    (i) Added the -D (--devices) and -d (--directories) options.
+
+    (j) Added the -F (--fixed-strings) option.
+
+    (k) Allow "-" to be used as a file name for -f as well as for a data file.
+
+    (l) Added the --colo(u)r option.
+
+    (m) Added Jeffrey Friedl's -S testing option, but within #ifdefs so that it
+        is not present by default.
+
+ 3. A nasty bug was discovered in the handling of recursive patterns, that is,
+    items such as (?R) or (?1), when the recursion could match a number of
+    alternatives. If it matched one of the alternatives, but subsequently,
+    outside the recursion, there was a failure, the code tried to back up into
+    the recursion. However, because of the way PCRE is implemented, this is not
+    possible, and the result was an incorrect result from the match.
+
+    In order to prevent this happening, the specification of recursion has
+    been changed so that all such subpatterns are automatically treated as
+    atomic groups. Thus, for example, (?R) is treated as if it were (?>(?R)).
+
+ 4. I had overlooked the fact that, in some locales, there are characters for
+    which isalpha() is true but neither isupper() nor islower() are true. In
+    the fr_FR locale, for instance, the \xAA and \xBA characters (ordmasculine
+    and ordfeminine) are like this. This affected the treatment of \w and \W
+    when they appeared in character classes, but not when they appeared outside
+    a character class. The bit map for "word" characters is now created
+    separately from the results of isalnum() instead of just taking it from the
+    upper, lower, and digit maps. (Plus the underscore character, of course.)
+
+ 5. The above bug also affected the handling of POSIX character classes such as
+    [[:alpha:]] and [[:alnum:]]. These do not have their own bit maps in PCRE's
+    permanent tables. Instead, the bit maps for such a class were previously
+    created as the appropriate unions of the upper, lower, and digit bitmaps.
+    Now they are created by subtraction from the [[:word:]] class, which has
+    its own bitmap.
+
+ 6. The [[:blank:]] character class matches horizontal, but not vertical space.
+    It is created by subtracting the vertical space characters (\x09, \x0a,
+    \x0b, \x0c) from the [[:space:]] bitmap. Previously, however, the
+    subtraction was done in the overall bitmap for a character class, meaning
+    that a class such as [\x0c[:blank:]] was incorrect because \x0c would not
+    be recognized. This bug has been fixed.
+
+ 7. Patches from the folks at Google:
+
+      (a) pcrecpp.cc: "to handle a corner case that may or may not happen in
+      real life, but is still worth protecting against".
+
+      (b) pcrecpp.cc: "corrects a bug when negative radixes are used with
+      regular expressions".
+
+      (c) pcre_scanner.cc: avoid use of std::count() because not all systems
+      have it.
+
+      (d) Split off pcrecpparg.h from pcrecpp.h and had the former built by
+      "configure" and the latter not, in order to fix a problem somebody had
+      with compiling the Arg class on HP-UX.
+
+      (e) Improve the error-handling of the C++ wrapper a little bit.
+
+      (f) New tests for checking recursion limiting.
+
+ 8. The pcre_memmove() function, which is used only if the environment does not
+    have a standard memmove() function (and is therefore rarely compiled),
+    contained two bugs: (a) use of int instead of size_t, and (b) it was not
+    returning a result (though PCRE never actually uses the result).
+
+ 9. In the POSIX regexec() interface, if nmatch is specified as a ridiculously
+    large number - greater than INT_MAX/(3*sizeof(int)) - REG_ESPACE is
+    returned instead of calling malloc() with an overflowing number that would
+    most likely cause subsequent chaos.
+
+10. The debugging option of pcretest was not showing the NO_AUTO_CAPTURE flag.
+
+11. The POSIX flag REG_NOSUB is now supported. When a pattern that was compiled
+    with this option is matched, the nmatch and pmatch options of regexec() are
+    ignored.
+
+12. Added REG_UTF8 to the POSIX interface. This is not defined by POSIX, but is
+    provided in case anyone wants to the the POSIX interface with UTF-8
+    strings.
+
+13. Added CXXLDFLAGS to the Makefile parameters to provide settings only on the
+    C++ linking (needed for some HP-UX environments).
+
+14. Avoid compiler warnings in get_ucpname() when compiled without UCP support
+    (unused parameter) and in the pcre_printint() function (omitted "default"
+    switch label when the default is to do nothing).
+
+15. Added some code to make it possible, when PCRE is compiled as a C++
+    library, to replace subject pointers for pcre_exec() with a smart pointer
+    class, thus making it possible to process discontinuous strings.
+
+16. The two macros PCRE_EXPORT and PCRE_DATA_SCOPE are confusing, and perform
+    much the same function. They were added by different people who were trying
+    to make PCRE easy to compile on non-Unix systems. It has been suggested
+    that PCRE_EXPORT be abolished now that there is more automatic apparatus
+    for compiling on Windows systems. I have therefore replaced it with
+    PCRE_DATA_SCOPE. This is set automatically for Windows; if not set it
+    defaults to "extern" for C or "extern C" for C++, which works fine on
+    Unix-like systems. It is now possible to override the value of PCRE_DATA_
+    SCOPE with something explicit in config.h. In addition:
+
+    (a) pcreposix.h still had just "extern" instead of either of these macros;
+        I have replaced it with PCRE_DATA_SCOPE.
+
+    (b) Functions such as _pcre_xclass(), which are internal to the library,
+        but external in the C sense, all had PCRE_EXPORT in their definitions.
+        This is apparently wrong for the Windows case, so I have removed it.
+        (It makes no difference on Unix-like systems.)
+
+17. Added a new limit, MATCH_LIMIT_RECURSION, which limits the depth of nesting
+    of recursive calls to match(). This is different to MATCH_LIMIT because
+    that limits the total number of calls to match(), not all of which increase
+    the depth of recursion. Limiting the recursion depth limits the amount of
+    stack (or heap if NO_RECURSE is set) that is used. The default can be set
+    when PCRE is compiled, and changed at run time. A patch from Google adds
+    this functionality to the C++ interface.
+
+18. Changes to the handling of Unicode character properties:
+
+    (a) Updated the table to Unicode 4.1.0.
+
+    (b) Recognize characters that are not in the table as "Cn" (undefined).
+
+    (c) I revised the way the table is implemented to a much improved format
+        which includes recognition of ranges. It now supports the ranges that
+        are defined in UnicodeData.txt, and it also amalgamates other
+        characters into ranges. This has reduced the number of entries in the
+        table from around 16,000 to around 3,000, thus reducing its size
+        considerably. I realized I did not need to use a tree structure after
+        all - a binary chop search is just as efficient. Having reduced the
+        number of entries, I extended their size from 6 bytes to 8 bytes to
+        allow for more data.
+
+    (d) Added support for Unicode script names via properties such as \p{Han}.
+
+19. In UTF-8 mode, a backslash followed by a non-Ascii character was not
+    matching that character.
+
+20. When matching a repeated Unicode property with a minimum greater than zero,
+    (for example \pL{2,}), PCRE could look past the end of the subject if it
+    reached it while seeking the minimum number of characters. This could
+    happen only if some of the characters were more than one byte long, because
+    there is a check for at least the minimum number of bytes.
+
+21. Refactored the implementation of \p and \P so as to be more general, to
+    allow for more different types of property in future. This has changed the
+    compiled form incompatibly. Anybody with saved compiled patterns that use
+    \p or \P will have to recompile them.
+
+22. Added "Any" and "L&" to the supported property types.
+
+23. Recognize \x{...} as a code point specifier, even when not in UTF-8 mode,
+    but give a compile time error if the value is greater than 0xff.
+
+24. The man pages for pcrepartial, pcreprecompile, and pcre_compile2 were
+    accidentally not being installed or uninstalled.
+
+25. The pcre.h file was built from pcre.h.in, but the only changes that were
+    made were to insert the current release number. This seemed silly, because
+    it made things harder for people building PCRE on systems that don't run
+    "configure". I have turned pcre.h into a distributed file, no longer built
+    by "configure", with the version identification directly included. There is
+    no longer a pcre.h.in file.
+
+    However, this change necessitated a change to the pcre-config script as
+    well. It is built from pcre-config.in, and one of the substitutions was the
+    release number. I have updated configure.ac so that ./configure now finds
+    the release number by grepping pcre.h.
+
+26. Added the ability to run the tests under valgrind.
+
+
+Version 6.4 05-Sep-05
+---------------------
+
+ 1. Change 6.0/10/(l) to pcregrep introduced a bug that caused separator lines
+    "--" to be printed when multiple files were scanned, even when none of the
+    -A, -B, or -C options were used. This is not compatible with Gnu grep, so I
+    consider it to be a bug, and have restored the previous behaviour.
+
+ 2. A couple of code tidies to get rid of compiler warnings.
+
+ 3. The pcretest program used to cheat by referring to symbols in the library
+    whose names begin with _pcre_. These are internal symbols that are not
+    really supposed to be visible externally, and in some environments it is
+    possible to suppress them. The cheating is now confined to including
+    certain files from the library's source, which is a bit cleaner.
+
+ 4. Renamed pcre.in as pcre.h.in to go with pcrecpp.h.in; it also makes the
+    file's purpose clearer.
+
+ 5. Reorganized pcre_ucp_findchar().
+
+
+Version 6.3 15-Aug-05
+---------------------
+
+ 1. The file libpcre.pc.in did not have general read permission in the tarball.
+
+ 2. There were some problems when building without C++ support:
+
+    (a) If C++ support was not built, "make install" and "make test" still
+        tried to test it.
+
+    (b) There were problems when the value of CXX was explicitly set. Some
+        changes have been made to try to fix these, and ...
+
+    (c) --disable-cpp can now be used to explicitly disable C++ support.
+
+    (d) The use of @CPP_OBJ@ directly caused a blank line preceded by a
+        backslash in a target when C++ was disabled. This confuses some
+        versions of "make", apparently. Using an intermediate variable solves
+        this. (Same for CPP_LOBJ.)
+
+ 3. $(LINK_FOR_BUILD) now includes $(CFLAGS_FOR_BUILD) and $(LINK)
+    (non-Windows) now includes $(CFLAGS) because these flags are sometimes
+    necessary on certain architectures.
+
+ 4. Added a setting of -export-symbols-regex to the link command to remove
+    those symbols that are exported in the C sense, but actually are local
+    within the library, and not documented. Their names all begin with
+    "_pcre_". This is not a perfect job, because (a) we have to except some
+    symbols that pcretest ("illegally") uses, and (b) the facility isn't always
+    available (and never for static libraries). I have made a note to try to
+    find a way round (a) in the future.
+
+
 Version 6.2 01-Aug-05
 ---------------------
 

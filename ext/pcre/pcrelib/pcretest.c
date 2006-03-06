@@ -46,12 +46,33 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #define PCRE_SPY        /* For Win32 build, import data, not export */
 
-/* We need the internal info for displaying the results of pcre_study() and
-other internal data; pcretest also uses some of the fixed tables, and generally
-has "inside information" compared to a program that strictly follows the PCRE
-API. */
+/* We include pcre_internal.h because we need the internal info for displaying
+the results of pcre_study() and we also need to know about the internal
+macros, structures, and other internal data values; pcretest has "inside
+information" compared to a program that strictly follows the PCRE API. */
 
 #include "pcre_internal.h"
+
+/* We need access to the data tables that PCRE uses. So as not to have to keep
+two copies, we include the source file here, changing the names of the external
+symbols to prevent clashes. */
+
+#define _pcre_utf8_table1      utf8_table1
+#define _pcre_utf8_table1_size utf8_table1_size
+#define _pcre_utf8_table2      utf8_table2
+#define _pcre_utf8_table3      utf8_table3
+#define _pcre_utf8_table4      utf8_table4
+#define _pcre_utt              utt
+#define _pcre_utt_size         utt_size
+#define _pcre_OP_lengths       OP_lengths
+
+#include "pcre_tables.c"
+
+/* We also need the pcre_printint() function for printing out compiled
+patterns. This function is in a separate file so that it can be included in
+pcre_compile.c when that module is compiled with debugging enabled. */
+
+#include "pcre_printint.src"
 
 
 /* It is possible to compile this test program without including support for
@@ -68,6 +89,8 @@ to the DFA matcher (NODFA), and without the doublecheck of the old "info"
 function (define NOINFOCHECK). */
 
 
+/* Other parameters */
+
 #ifndef CLOCKS_PER_SEC
 #ifdef CLK_TCK
 #define CLOCKS_PER_SEC CLK_TCK
@@ -82,6 +105,8 @@ function (define NOINFOCHECK). */
 #define PBUFFER_SIZE BUFFER_SIZE
 #define DBUFFER_SIZE BUFFER_SIZE
 
+
+/* Static variables */
 
 static FILE *outfile;
 static int log_store = 0;
@@ -162,7 +187,7 @@ if (i == 0 || i == 6) return 0;        /* invalid UTF-8 */
 /* i now has a value in the range 1-5 */
 
 s = 6*i;
-d = (c & _pcre_utf8_table3[i]) << s;
+d = (c & utf8_table3[i]) << s;
 
 for (j = 0; j < i; j++)
   {
@@ -174,8 +199,8 @@ for (j = 0; j < i; j++)
 
 /* Check that encoding was the correct unique one */
 
-for (j = 0; j < _pcre_utf8_table1_size; j++)
-  if (d <= _pcre_utf8_table1[j]) break;
+for (j = 0; j < utf8_table1_size; j++)
+  if (d <= utf8_table1[j]) break;
 if (j != i) return -(i+1);
 
 /* Valid value */
@@ -189,6 +214,38 @@ return i+1;
 
 
 /*************************************************
+*       Convert character value to UTF-8         *
+*************************************************/
+
+/* This function takes an integer value in the range 0 - 0x7fffffff
+and encodes it as a UTF-8 character in 0 to 6 bytes.
+
+Arguments:
+  cvalue     the character value
+  buffer     pointer to buffer for result - at least 6 bytes long
+
+Returns:     number of characters placed in the buffer
+*/
+
+static int
+ord2utf8(int cvalue, uschar *buffer)
+{
+register int i, j;
+for (i = 0; i < utf8_table1_size; i++)
+  if (cvalue <= utf8_table1[i]) break;
+buffer += i;
+for (j = i; j > 0; j--)
+ {
+ *buffer-- = 0x80 | (cvalue & 0x3f);
+ cvalue >>= 6;
+ }
+*buffer = utf8_table2[i] | cvalue;
+return i + 1;
+}
+
+
+
+/*************************************************
 *             Print character string             *
 *************************************************/
 
@@ -198,7 +255,7 @@ chars without printing. */
 
 static int pchars(unsigned char *p, int length, FILE *f)
 {
-int c;
+int c = 0;
 int yield = 0;
 
 while (length-- > 0)
@@ -418,6 +475,57 @@ return ((value & 0x000000ff) << 24) |
 
 
 /*************************************************
+*        Check match or recursion limit          *
+*************************************************/
+
+static int
+check_match_limit(pcre *re, pcre_extra *extra, uschar *bptr, int len,
+  int start_offset, int options, int *use_offsets, int use_size_offsets,
+  int flag, unsigned long int *limit, int errnumber, const char *msg)
+{
+int count;
+int min = 0;
+int mid = 64;
+int max = -1;
+
+extra->flags |= flag;
+
+for (;;)
+  {
+  *limit = mid;
+
+  count = pcre_exec(re, extra, (char *)bptr, len, start_offset, options,
+    use_offsets, use_size_offsets);
+
+  if (count == errnumber)
+    {
+    /* fprintf(outfile, "Testing %s limit = %d\n", msg, mid); */
+    min = mid;
+    mid = (mid == max - 1)? max : (max > 0)? (min + max)/2 : mid*2;
+    }
+
+  else if (count >= 0 || count == PCRE_ERROR_NOMATCH ||
+                         count == PCRE_ERROR_PARTIAL)
+    {
+    if (mid == min + 1)
+      {
+      fprintf(outfile, "Minimum %s limit = %d\n", msg, mid);
+      break;
+      }
+    /* fprintf(outfile, "Testing %s limit = %d\n", msg, mid); */
+    max = mid;
+    mid = (min + mid)/2;
+    }
+  else break;    /* Some other error */
+  }
+
+extra->flags &= ~flag;
+return count;
+}
+
+
+
+/*************************************************
 *                Main Program                    *
 *************************************************/
 
@@ -434,6 +542,7 @@ int op = 1;
 int timeit = 0;
 int showinfo = 0;
 int showstore = 0;
+int quiet = 0;
 int size_offsets = 45;
 int size_offsets_max;
 int *offsets = NULL;
@@ -474,6 +583,7 @@ while (argc > 1 && argv[op][0] == '-')
   if (strcmp(argv[op], "-s") == 0 || strcmp(argv[op], "-m") == 0)
     showstore = 1;
   else if (strcmp(argv[op], "-t") == 0) timeit = 1;
+  else if (strcmp(argv[op], "-q") == 0) quiet = 1;
   else if (strcmp(argv[op], "-i") == 0) showinfo = 1;
   else if (strcmp(argv[op], "-d") == 0) showinfo = debug = 1;
 #if !defined NODFA
@@ -506,6 +616,8 @@ while (argc > 1 && argv[op][0] == '-')
     printf("  POSIX malloc threshold = %d\n", rc);
     (void)pcre_config(PCRE_CONFIG_MATCH_LIMIT, &rc);
     printf("  Default match limit = %d\n", rc);
+    (void)pcre_config(PCRE_CONFIG_MATCH_LIMIT_RECURSION, &rc);
+    printf("  Default recursion depth limit = %d\n", rc);
     (void)pcre_config(PCRE_CONFIG_STACKRECURSE, &rc);
     printf("  Match recursion uses %s\n", rc? "stack" : "heap");
     exit(0);
@@ -577,9 +689,9 @@ pcre_free = new_free;
 pcre_stack_malloc = stack_malloc;
 pcre_stack_free = stack_free;
 
-/* Heading line, then prompt for first regex if stdin */
+/* Heading line unless quiet, then prompt for first regex if stdin */
 
-fprintf(outfile, "PCRE version %s\n\n", pcre_version());
+if (!quiet) fprintf(outfile, "PCRE version %s\n\n", pcre_version());
 
 /* Main loop */
 
@@ -839,6 +951,9 @@ while (!done)
     if ((options & PCRE_CASELESS) != 0) cflags |= REG_ICASE;
     if ((options & PCRE_MULTILINE) != 0) cflags |= REG_NEWLINE;
     if ((options & PCRE_DOTALL) != 0) cflags |= REG_DOTALL;
+    if ((options & PCRE_NO_AUTO_CAPTURE) != 0) cflags |= REG_NOSUB;
+    if ((options & PCRE_UTF8) != 0) cflags |= REG_UTF8;
+
     rc = regcomp(&preg, (char *)p, cflags);
 
     /* Compilation failed; go back for another re, skipping to blank line
@@ -988,7 +1103,7 @@ while (!done)
       if (do_debug)
         {
         fprintf(outfile, "------------------------------------------------------------------\n");
-        _pcre_printint(re, outfile);
+        pcre_printint(re, outfile);
         }
 
       new_info(re, NULL, PCRE_INFO_OPTIONS, &get_options);
@@ -1054,7 +1169,7 @@ while (!done)
         fprintf(outfile, "Partial matching not supported\n");
 
       if (get_options == 0) fprintf(outfile, "No options\n");
-        else fprintf(outfile, "Options:%s%s%s%s%s%s%s%s%s%s%s\n",
+        else fprintf(outfile, "Options:%s%s%s%s%s%s%s%s%s%s%s%s\n",
           ((get_options & PCRE_ANCHORED) != 0)? " anchored" : "",
           ((get_options & PCRE_CASELESS) != 0)? " caseless" : "",
           ((get_options & PCRE_EXTENDED) != 0)? " extended" : "",
@@ -1064,6 +1179,7 @@ while (!done)
           ((get_options & PCRE_DOLLAR_ENDONLY) != 0)? " dollar_endonly" : "",
           ((get_options & PCRE_EXTRA) != 0)? " extra" : "",
           ((get_options & PCRE_UNGREEDY) != 0)? " ungreedy" : "",
+          ((get_options & PCRE_NO_AUTO_CAPTURE) != 0)? " no_auto_capture" : "",
           ((get_options & PCRE_UTF8) != 0)? " utf8" : "",
           ((get_options & PCRE_NO_UTF8_CHECK) != 0)? " no_utf8_check" : "");
 
@@ -1209,8 +1325,8 @@ while (!done)
 
   for (;;)
     {
-    unsigned char *q;
-    unsigned char *bptr = dbuffer;
+    uschar *q;
+    uschar *bptr = dbuffer;
     int *use_offsets = offsets;
     int use_size_offsets = size_offsets;
     int callout_data = 0;
@@ -1290,7 +1406,7 @@ while (!done)
             {
             unsigned char buff8[8];
             int ii, utn;
-            utn = _pcre_ord2utf8(c, buff8);
+            utn = ord2utf8(c, buff8);
             for (ii = 0; ii < utn - 1; ii++) *q++ = buff8[ii];
             c = buff8[ii];   /* Last byte */
             p = pt + 1;
@@ -1498,6 +1614,11 @@ while (!done)
         (void)regerror(rc, &preg, (char *)buffer, BUFFER_SIZE);
         fprintf(outfile, "No match: POSIX code %d: %s\n", rc, buffer);
         }
+      else if ((((const pcre *)preg.re_pcre)->options & PCRE_NO_AUTO_CAPTURE)
+              != 0)
+        {
+        fprintf(outfile, "Matched with REG_NOSUB\n");
+        }
       else
         {
         size_t i;
@@ -1558,48 +1679,26 @@ while (!done)
         }
 
       /* If find_match_limit is set, we want to do repeated matches with
-      varying limits in order to find the minimum value. */
+      varying limits in order to find the minimum value for the match limit and
+      for the recursion limit. */
 
       if (find_match_limit)
         {
-        int min = 0;
-        int mid = 64;
-        int max = -1;
-
         if (extra == NULL)
           {
           extra = (pcre_extra *)malloc(sizeof(pcre_extra));
           extra->flags = 0;
           }
-        extra->flags |= PCRE_EXTRA_MATCH_LIMIT;
 
-        for (;;)
-          {
-          extra->match_limit = mid;
-          count = pcre_exec(re, extra, (char *)bptr, len, start_offset,
-            options | g_notempty, use_offsets, use_size_offsets);
-          if (count == PCRE_ERROR_MATCHLIMIT)
-            {
-            /* fprintf(outfile, "Testing match limit = %d\n", mid); */
-            min = mid;
-            mid = (mid == max - 1)? max : (max > 0)? (min + max)/2 : mid*2;
-            }
-          else if (count >= 0 || count == PCRE_ERROR_NOMATCH ||
-                                 count == PCRE_ERROR_PARTIAL)
-            {
-            if (mid == min + 1)
-              {
-              fprintf(outfile, "Minimum match limit = %d\n", mid);
-              break;
-              }
-            /* fprintf(outfile, "Testing match limit = %d\n", mid); */
-            max = mid;
-            mid = (min + mid)/2;
-            }
-          else break;    /* Some other error */
-          }
+        count = check_match_limit(re, extra, bptr, len, start_offset,
+          options|g_notempty, use_offsets, use_size_offsets,
+          PCRE_EXTRA_MATCH_LIMIT, &(extra->match_limit),
+          PCRE_ERROR_MATCHLIMIT, "match()");
 
-        extra->flags &= ~PCRE_EXTRA_MATCH_LIMIT;
+        count = check_match_limit(re, extra, bptr, len, start_offset,
+          options|g_notempty, use_offsets, use_size_offsets,
+          PCRE_EXTRA_MATCH_LIMIT_RECURSION, &(extra->match_limit_recursion),
+          PCRE_ERROR_RECURSIONLIMIT, "match() recursion");
         }
 
       /* If callout_data is set, use the interface with additional data */

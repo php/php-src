@@ -68,6 +68,7 @@ static void TestScanner() {
   s.Consume(re, &var, &number);
   CHECK_EQ(var, "alpha");
   CHECK_EQ(number, 1);
+  CHECK_EQ(s.LineNumber(), 3);
   s.GetNextComments(&comments);
   CHECK_EQ(comments.size(), 1);
   CHECK_EQ(comments[0].as_string(), " // this sets alpha\n");

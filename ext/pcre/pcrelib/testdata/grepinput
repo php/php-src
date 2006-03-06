@@ -583,6 +583,26 @@ jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick
 brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog.
 -------------------------------------------------------------------------------
 
-Check up on PATTERN near the end.
+aaaaa0
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+bbbbbb
+cccccccccccccccccccccccccccccccccccccccccc
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+eeeee
+aaaaa2
+ffffffffff
 
+This is a line before the binary zero.
+This line contains a binary zero here >This is a line after the binary zero.
+
+ABOVE the elephant 
+ABOVE
+ABOVE theatre
+AB.VE
+AB.VE the turtle
+
+PUT NEW DATA ABOVE THIS LINE.
+=============================
+
+Check up on PATTERN near the end.
 This is the last line of this file.

@@ -672,11 +672,17 @@
 
 /^[[:^alpha:]]/D
              
+/[_[:alpha:]]/IS
+
 /^[[:ascii:]]/D
 
 /^[[:^ascii:]]/D
 
 /^[[:blank:]]/D
+
+/^[[:^blank:]]/D
+
+/[\n\x0b\x0c\x0d[:blank:]]/IS
 
 /^[[:cntrl:]]/D
 
@@ -1449,5 +1455,39 @@
 
 "(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)"
     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+/[^()]*(?:\((?R)\)[^()]*)*/
+    (this(and)that
+    (this(and)that) 
+    (this(and)that)stuff
+
+/[^()]*(?:\((?>(?R))\)[^()]*)*/
+    (this(and)that
+    (this(and)that) 
+    
+/[^()]*(?:\((?R)\))*[^()]*/
+    (this(and)that
+    (this(and)that) 
+
+/(?:\((?R)\))*[^()]*/
+    (this(and)that
+    (this(and)that) 
+    ((this)) 
+
+/(?:\((?R)\))|[^()]*/
+    (this(and)that
+    (this(and)that) 
+    (this)
+    ((this)) 
+    
+/a(b)c/PN
+    abc
+    
+/a(?P<name>b)c/PN
+    abc  
+    
+/\x{100}/ 
+
+/\x{0000ff}/
 
 / End of testinput2 /

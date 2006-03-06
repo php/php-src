@@ -483,10 +483,10 @@
    
 /(?<=foo)bar/
    xyzfo\P 
-   foob\R\P\>2 
+   foob\P\>2 
    foobar...\R\P\>4 
    xyzfo\P
-   foobar\R\>2  
+   foobar\>2  
    *** Failers
    xyzfo\P
    obar\R   
@@ -4010,5 +4010,13 @@
     this is a line\nbreak
     ** Failers 
     line one\nthis is a line\nbreak in the second line 
+
+/1234/
+    123\P
+    a4\P\R
+
+/1234/
+    123\P
+    4\P\R
 
 / End of testinput7 /

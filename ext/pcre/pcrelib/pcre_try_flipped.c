@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2005 University of Cambridge
+           Copyright (c) 1997-2006 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -94,7 +94,7 @@ Returns:           the new block if is is indeed a byte-flipped regex
                    NULL if it is not
 */
 
-EXPORT real_pcre *
+real_pcre *
 _pcre_try_flipped(const real_pcre *re, real_pcre *internal_re,
   const pcre_study_data *study, pcre_study_data *internal_study)
 {

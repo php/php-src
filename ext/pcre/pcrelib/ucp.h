@@ -1,12 +1,14 @@
 /*************************************************
-*     libucp - Unicode Property Table handler    *
+*          Unicode Property Table handler        *
 *************************************************/
-
 
 #ifndef _UCP_H
 #define _UCP_H
 
-/* These are the character categories that are returned by ucp_findchar */
+/* This file contains definitions of the property values that are returned by
+the function _pcre_ucp_findprop(). */
+
+/* These are the general character categories. */
 
 enum {
   ucp_C,     /* Other */
@@ -18,7 +20,7 @@ enum {
   ucp_Z      /* Separator */
 };
 
-/* These are the detailed character types that are returned by ucp_findchar */
+/* These are the particular character types. */
 
 enum {
   ucp_Cc,    /* Control */
@@ -53,7 +55,71 @@ enum {
   ucp_Zs     /* Space separator */
 };
 
-extern int ucp_findchar(const int, int *, int *);
+/* These are the script identifications. */
+
+enum {
+  ucp_Arabic,
+  ucp_Armenian,
+  ucp_Bengali,
+  ucp_Bopomofo,
+  ucp_Braille,
+  ucp_Buginese,
+  ucp_Buhid,
+  ucp_Canadian_Aboriginal,
+  ucp_Cherokee,
+  ucp_Common,
+  ucp_Coptic,
+  ucp_Cypriot,
+  ucp_Cyrillic,
+  ucp_Deseret,
+  ucp_Devanagari,
+  ucp_Ethiopic,
+  ucp_Georgian,
+  ucp_Glagolitic,
+  ucp_Gothic,
+  ucp_Greek,
+  ucp_Gujarati,
+  ucp_Gurmukhi,
+  ucp_Han,
+  ucp_Hangul,
+  ucp_Hanunoo,
+  ucp_Hebrew,
+  ucp_Hiragana,
+  ucp_Inherited,
+  ucp_Kannada,
+  ucp_Katakana,
+  ucp_Kharoshthi,
+  ucp_Khmer,
+  ucp_Lao,
+  ucp_Latin,
+  ucp_Limbu,
+  ucp_Linear_B,
+  ucp_Malayalam,
+  ucp_Mongolian,
+  ucp_Myanmar,
+  ucp_New_Tai_Lue,
+  ucp_Ogham,
+  ucp_Old_Italic,
+  ucp_Old_Persian,
+  ucp_Oriya,
+  ucp_Osmanya,
+  ucp_Runic,
+  ucp_Shavian,
+  ucp_Sinhala,
+  ucp_Syloti_Nagri,
+  ucp_Syriac,
+  ucp_Tagalog,
+  ucp_Tagbanwa,
+  ucp_Tai_Le,
+  ucp_Tamil,
+  ucp_Telugu,
+  ucp_Thaana,
+  ucp_Thai,
+  ucp_Tibetan,
+  ucp_Tifinagh,
+  ucp_Ugaritic,
+  ucp_Yi
+};
 
 #endif
 
