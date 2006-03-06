@@ -296,7 +296,7 @@ static SWFInput getInput(zval **zfile TSRMLS_DC)
 
 /* {{{ SWFAction
 */
-/* {{{ proto object swfaction::__construct(string)
+/* {{{ proto void swfaction::__construct(string)
    Returns a new SWFAction object, compiling the given script */
 PHP_METHOD(swfaction, __construct)
 {
@@ -345,7 +345,7 @@ static zend_function_entry swfaction_functions[] = {
 
 /* {{{ SWFBitmap 
 */
-/* {{{ proto class swfbitmap::__construct(mixed file [, mixed maskfile])
+/* {{{ proto void swfbitmap::__construct(mixed file [, mixed maskfile])
    Returns a new SWFBitmap object from jpg (with optional mask) or dbl file */
 PHP_METHOD(swfbitmap, __construct)
 {
@@ -440,7 +440,7 @@ static zend_function_entry swfbitmap_functions[] = {
 
 /* {{{ SWFButton
 */
-/* {{{ proto object swfbutton::__construct()
+/* {{{ proto void swfbutton::__construct()
    Returns a new SWFButton object */
 PHP_METHOD(swfbutton, __construct)
 {
@@ -1204,7 +1204,7 @@ static zend_function_entry swfdisplayitem_functions[] = {
 
 /* {{{ SWFFill
 */
-/* {{{ proto class swffill::__construct()
+/* {{{ proto void swffill::__construct()
    Returns a new SWFFill object */
 PHP_METHOD(swffill, __construct)
 {
@@ -1404,7 +1404,7 @@ static SWFFont getFont(zval *id TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto object swffont::__construct(string filename)
+/* {{{ proto void swffont::__construct(string filename)
    Returns a new SWFFont object from given file */
 PHP_METHOD(swffont, __construct)
 {
@@ -1594,7 +1594,7 @@ static zend_function_entry swffont_functions[] = {
 
 /* {{{ SWFGradient
 */
-/* {{{ proto class swfgradient::__construct()
+/* {{{ proto void swfgradient::__construct()
    Returns a new SWFGradient object */
 PHP_METHOD(swfgradient, __construct)
 {
@@ -1669,7 +1669,7 @@ static zend_function_entry swfgradient_functions[] = {
 
 /* {{{ SWFMorph 
 */
-/* {{{ proto object swfmorph::__construct()
+/* {{{ proto void swfmorph::__construct()
    Returns a new SWFMorph object */
 PHP_METHOD(swfmorph, __construct)
 {
@@ -1752,7 +1752,7 @@ SWFSound getSound(zval *id TSRMLS_DC)
 }
 
 /* }}} */
-/* {{{ proto class swfsound::__construct(string filename, int flags)
+/* {{{ proto void swfsound::__construct(string filename, int flags)
    Returns a new SWFSound object from given file */
 PHP_METHOD(swfsound, __construct)
 {
@@ -1903,9 +1903,8 @@ static zend_function_entry swfsoundinstance_functions[] = {
 
 /* {{{ SWFVideoStream */
 
-/* {{{ proto class swfvideostream_init([file])
+/* {{{ proto void swfvideostream_init([file])
    Returns a SWVideoStream object */
-
 PHP_METHOD(swfvideostream, __construct)
 {
 	zval **zfile = NULL;
@@ -2010,9 +2009,8 @@ static zend_function_entry swfvideostream_functions[] = {
 
 #ifdef HAVE_SWFPREBUILTCLIP
 /* {{{ SWFPrebuiltClip */
-/* {{{ proto class swfprebuiltclip_init([file])
+/* {{{ proto void swfprebuiltclip_init([file])
     Returns a SWFPrebuiltClip object */
-
 PHP_METHOD(swfprebuiltclip, __construct)
 {
 	zval **zfile = NULL;
@@ -2088,7 +2086,7 @@ static zend_function_entry swfprebuiltclip_functions[] = {
 
 /* {{{ SWFMovie
 */
-/* {{{ proto object swfmovie::__construct(int version) 
+/* {{{ proto void swfmovie::__construct(int version) 
   Creates swfmovie object according to the passed version */
 PHP_METHOD(swfmovie, __construct)
 {
@@ -2695,7 +2693,7 @@ static zend_function_entry swfmovie_functions[] = {
 
 /* {{{ SWFShape
 */
-/* {{{ proto object swfshape::__construct()
+/* {{{ proto void swfshape::__construct()
    Returns a new SWFShape object */
 PHP_METHOD(swfshape, __construct)
 {
@@ -3216,7 +3214,7 @@ static zend_function_entry swfshape_functions[] = {
 
 /* {{{ SWFSprite
 */
-/* {{{ proto class swfsprite::__construct()
+/* {{{ proto void swfsprite::__construct()
    Returns a new SWFSprite object */
 PHP_METHOD(swfsprite, __construct)
 {
@@ -3401,7 +3399,7 @@ static zend_function_entry swfsprite_functions[] = {
 
 /* {{{ SWFText
 */
-/* {{{ proto class swftext::__construct()
+/* {{{ proto void swftext::__construct()
    Returns new SWFText object */
 PHP_METHOD(swftext, __construct)
 {
@@ -3687,7 +3685,7 @@ static zend_function_entry swftext_functions[] = {
 
 /* {{{ SWFTextField
 */
-/* {{{ proto object swftextfield::__construct([int flags])
+/* {{{ proto void swftextfield::__construct([int flags])
    Returns a new SWFTextField object */
 PHP_METHOD(swftextfield, __construct)
 {
