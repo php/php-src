@@ -825,7 +825,7 @@ exif             = year4 ":" monthlz ":" daylz " " hour24lz ":" minutelz ":" sec
 clf              = day "/" monthabbr "/" year4 ":" hour24lz ":" minutelz ":" secondlz space tzcorrection;
 
 /* Timestamp format: @1126396800 */
-timestamp        = "@" "-"? [1-9] [0-9]*;
+timestamp        = "@" "-"? [0-9]+;
 
 /* To fix some ambiguities */
 dateshortwithtimeshort  = datenoyear timeshort24;
