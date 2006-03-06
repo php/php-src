@@ -2220,7 +2220,7 @@ PHP_FUNCTION(strstr)
    An alias for strstr */
 /* }}} */
 
-/* {{{ proto int strpos(text haystack, mixed needle [, int offset]) U
+/* {{{ proto int strpos(string haystack, mixed needle [, int offset]) U
    Finds position of first occurrence of a string within another */
 PHP_FUNCTION(strpos)
 {
@@ -3203,7 +3203,7 @@ PHP_FUNCTION(quotemeta)
 }
 /* }}} */
 
-/* {{{ proto int ord(text character) U
+/* {{{ proto int ord(string character) U
    Returns the codepoint value of a character */
 PHP_FUNCTION(ord)
 {
@@ -3222,7 +3222,7 @@ PHP_FUNCTION(ord)
 }
 /* }}} */
 
-/* {{{ proto text chr(int codepoint) U
+/* {{{ proto string chr(int codepoint) U
    Converts a codepoint number to a character */
 PHP_FUNCTION(chr)
 {
