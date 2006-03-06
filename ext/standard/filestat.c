@@ -323,7 +323,7 @@ PHP_FUNCTION(disk_free_space)
 }
 /* }}} */
 
-
+#if !defined(WINDOWS)
 static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp)
 {
 	zval **filename, **group;
@@ -368,6 +368,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp)
 	}
 	RETURN_TRUE;
 }
+#endif
 
 #ifndef NETWARE
 /* {{{ proto bool chgrp(string filename, mixed group)
