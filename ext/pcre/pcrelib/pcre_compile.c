@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2005 University of Cambridge
+           Copyright (c) 1997-2006 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,15 @@ supporting internal functions that are not used by other modules. */
 
 
 #include "pcre_internal.h"
+
+
+/* When DEBUG is defined, we need the pcre_printint() function, which is also
+used by pcretest. DEBUG is not defined when building a production library. */
+
+#ifdef DEBUG
+#include "pcre_printint.src"
+#endif
+
 
 
 /*************************************************
@@ -107,7 +116,7 @@ static const short int escapes[] = {
 
 
 /* Tables of names of POSIX character classes and their lengths. The list is
-terminated by a zero length entry. The first three must be alpha, upper, lower,
+terminated by a zero length entry. The first three must be alpha, lower, upper,
 as this is assumed for handling case independence. */
 
 static const char *const posix_names[] = {
@@ -118,25 +127,31 @@ static const char *const posix_names[] = {
 static const uschar posix_name_lengths[] = {
   5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 6, 0 };
 
-/* Table of class bit maps for each POSIX class; up to three may be combined
-to form the class. The table for [:blank:] is dynamically modified to remove
-the vertical space characters. */
+/* Table of class bit maps for each POSIX class. Each class is formed from a
+base map, with an optional addition or removal of another map. Then, for some
+classes, there is some additional tweaking: for [:blank:] the vertical space
+characters are removed, and for [:alpha:] and [:alnum:] the underscore
+character is removed. The triples in the table consist of the base map offset,
+second map offset or -1 if no second map, and a non-negative value for map
+addition or a negative value for map subtraction (if there are two maps). The
+absolute value of the third field has these meanings: 0 => no tweaking, 1 =>
+remove vertical space characters, 2 => remove underscore. */
 
 static const int posix_class_maps[] = {
-  cbit_lower, cbit_upper, -1,             /* alpha */
-  cbit_lower, -1,         -1,             /* lower */
-  cbit_upper, -1,         -1,             /* upper */
-  cbit_digit, cbit_lower, cbit_upper,     /* alnum */
-  cbit_print, cbit_cntrl, -1,             /* ascii */
-  cbit_space, -1,         -1,             /* blank - a GNU extension */
-  cbit_cntrl, -1,         -1,             /* cntrl */
-  cbit_digit, -1,         -1,             /* digit */
-  cbit_graph, -1,         -1,             /* graph */
-  cbit_print, -1,         -1,             /* print */
-  cbit_punct, -1,         -1,             /* punct */
-  cbit_space, -1,         -1,             /* space */
-  cbit_word,  -1,         -1,             /* word - a Perl extension */
-  cbit_xdigit,-1,         -1              /* xdigit */
+  cbit_word,  cbit_digit, -2,             /* alpha */
+  cbit_lower, -1,          0,             /* lower */
+  cbit_upper, -1,          0,             /* upper */
+  cbit_word,  -1,          2,             /* alnum - word without underscore */
+  cbit_print, cbit_cntrl,  0,             /* ascii */
+  cbit_space, -1,          1,             /* blank - a GNU extension */
+  cbit_cntrl, -1,          0,             /* cntrl */
+  cbit_digit, -1,          0,             /* digit */
+  cbit_graph, -1,          0,             /* graph */
+  cbit_print, -1,          0,             /* print */
+  cbit_punct, -1,          0,             /* punct */
+  cbit_space, -1,          0,             /* space */
+  cbit_word,  -1,          0,             /* word - a Perl extension */
+  cbit_xdigit,-1,          0              /* xdigit */
 };
 
 
@@ -362,12 +377,15 @@ static int
 check_escape(const uschar **ptrptr, int *errorcodeptr, int bracount,
   int options, BOOL isclass)
 {
-const uschar *ptr = *ptrptr;
+BOOL utf8 = (options & PCRE_UTF8) != 0;
+const uschar *ptr = *ptrptr + 1;
 int c, i;
+
+GETCHARINCTEST(c, ptr);           /* Get character value, increment pointer */
+ptr--;                            /* Set pointer back to the last byte */
 
 /* If backslash is at the end of the pattern, it's an error. */
 
-c = *(++ptr);
 if (c == 0) *errorcodeptr = ERR1;
 
 /* Non-alphamerics are literals. For digits or letters, do an initial lookup in
@@ -451,40 +469,44 @@ else
     c &= 255;     /* Take least significant 8 bits */
     break;
 
-    /* \x is complicated when UTF-8 is enabled. \x{ddd} is a character number
-    which can be greater than 0xff, but only if the ddd are hex digits. */
+    /* \x is complicated. \x{ddd} is a character number which can be greater
+    than 0xff in utf8 mode, but only if the ddd are hex digits. If not, { is
+    treated as a data character. */
 
     case 'x':
-#ifdef SUPPORT_UTF8
-    if (ptr[1] == '{' && (options & PCRE_UTF8) != 0)
+    if (ptr[1] == '{')
       {
       const uschar *pt = ptr + 2;
-      register int count = 0;
+      int count = 0;
+
       c = 0;
       while ((digitab[*pt] & ctype_xdigit) != 0)
         {
-        int cc = *pt++;
+        register int cc = *pt++;
+        if (c == 0 && cc == '0') continue;     /* Leading zeroes */
         count++;
+
 #if !EBCDIC    /* ASCII coding */
         if (cc >= 'a') cc -= 32;               /* Convert to upper case */
-        c = c * 16 + cc - ((cc < 'A')? '0' : ('A' - 10));
+        c = (c << 4) + cc - ((cc < 'A')? '0' : ('A' - 10));
 #else          /* EBCDIC coding */
         if (cc >= 'a' && cc <= 'z') cc += 64;  /* Convert to upper case */
-        c = c * 16 + cc - ((cc >= '0')? '0' : ('A' - 10));
+        c = (c << 4) + cc - ((cc >= '0')? '0' : ('A' - 10));
 #endif
         }
+
       if (*pt == '}')
         {
-        if (c < 0 || count > 8) *errorcodeptr = ERR34;
+        if (c < 0 || count > (utf8? 8 : 2)) *errorcodeptr = ERR34;
         ptr = pt;
         break;
         }
+
       /* If the sequence of hex digits does not end with '}', then we don't
       recognize this construct; fall through to the normal \x handling. */
       }
-#endif
 
-    /* Read just a single hex char */
+    /* Read just a single-byte hex-defined char */
 
     c = 0;
     while (i++ < 2 && (digitab[ptr[1]] & ctype_xdigit) != 0)
@@ -560,25 +582,26 @@ escape sequence.
 Argument:
   ptrptr         points to the pattern position pointer
   negptr         points to a boolean that is set TRUE for negation else FALSE
+  dptr           points to an int that is set to the detailed property value
   errorcodeptr   points to the error code variable
 
-Returns:     value from ucp_type_table, or -1 for an invalid type
+Returns:         type value from ucp_type_table, or -1 for an invalid type
 */
 
 static int
-get_ucp(const uschar **ptrptr, BOOL *negptr, int *errorcodeptr)
+get_ucp(const uschar **ptrptr, BOOL *negptr, int *dptr, int *errorcodeptr)
 {
 int c, i, bot, top;
 const uschar *ptr = *ptrptr;
-char name[4];
+char name[32];
 
 c = *(++ptr);
 if (c == 0) goto ERROR_RETURN;
 
 *negptr = FALSE;
 
-/* \P or \p can be followed by a one- or two-character name in {}, optionally
-preceded by ^ for negation. */
+/* \P or \p can be followed by a name in {}, optionally preceded by ^ for
+negation. */
 
 if (c == '{')
   {
@@ -587,18 +610,14 @@ if (c == '{')
     *negptr = TRUE;
     ptr++;
     }
-  for (i = 0; i <= 2; i++)
+  for (i = 0; i < sizeof(name) - 1; i++)
     {
     c = *(++ptr);
     if (c == 0) goto ERROR_RETURN;
     if (c == '}') break;
     name[i] = c;
     }
-  if (c !='}')   /* Try to distinguish error cases */
-    {
-    while (*(++ptr) != 0 && *ptr != '}');
-    if (*ptr == '}') goto UNKNOWN_RETURN; else goto ERROR_RETURN;
-    }
+  if (c !='}') goto ERROR_RETURN;
   name[i] = 0;
   }
 
@@ -619,13 +638,16 @@ top = _pcre_utt_size;
 
 while (bot < top)
   {
-  i = (bot + top)/2;
+  i = (bot + top) >> 1;
   c = strcmp(name, _pcre_utt[i].name);
-  if (c == 0) return _pcre_utt[i].value;
+  if (c == 0)
+    {
+    *dptr = _pcre_utt[i].value;
+    return _pcre_utt[i].type;
+    }
   if (c > 0) bot = i + 1; else top = i;
   }
 
-UNKNOWN_RETURN:
 *errorcodeptr = ERR47;
 *ptrptr = ptr;
 return -1;
@@ -928,7 +950,7 @@ for (;;)
 
     case OP_PROP:
     case OP_NOTPROP:
-    cc++;
+    cc += 2;
     /* Fall through */
 
     case OP_NOT_DIGIT:
@@ -1488,13 +1510,10 @@ Yield:        TRUE when range returned; FALSE when no more
 static BOOL
 get_othercase_range(int *cptr, int d, int *ocptr, int *odptr)
 {
-int c, chartype, othercase, next;
+int c, othercase, next;
 
 for (c = *cptr; c <= d; c++)
-  {
-  if (_pcre_ucp_findchar(c, &chartype, &othercase) == ucp_L && othercase != 0)
-    break;
-  }
+  { if ((othercase = _pcre_ucp_othercase(c)) >= 0) break; }
 
 if (c > d) return FALSE;
 
@@ -1503,9 +1522,7 @@ next = othercase + 1;
 
 for (++c; c <= d; c++)
   {
-  if (_pcre_ucp_findchar(c, &chartype, &othercase) != ucp_L ||
-        othercase != next)
-    break;
+  if (_pcre_ucp_othercase(c) != next) break;
   next++;
   }
 
@@ -1722,11 +1739,11 @@ for (;; ptr++)
     *code++ = OP_ANY;
     break;
 
-    /* Character classes. If the included characters are all < 255 in value, we
-    build a 32-byte bitmap of the permitted characters, except in the special
-    case where there is only one such character. For negated classes, we build
-    the map as usual, then invert it at the end. However, we use a different
-    opcode so that data characters > 255 can be handled correctly.
+    /* Character classes. If the included characters are all < 256, we build a
+    32-byte bitmap of the permitted characters, except in the special case
+    where there is only one such character. For negated classes, we build the
+    map as usual, then invert it at the end. However, we use a different opcode
+    so that data characters > 255 can be handled correctly.
 
     If the class contains characters outside the 0-255 range, a different
     opcode is compiled. It may optionally have a bit map for characters < 256,
@@ -1817,8 +1834,9 @@ for (;; ptr++)
           check_posix_syntax(ptr, &tempptr, cd))
         {
         BOOL local_negate = FALSE;
-        int posix_class, i;
+        int posix_class, taboffset, tabopt;
         register const uschar *cbits = cd->cbits;
+        uschar pbits[32];
 
         if (ptr[1] != ':')
           {
@@ -1847,31 +1865,45 @@ for (;; ptr++)
         if ((options & PCRE_CASELESS) != 0 && posix_class <= 2)
           posix_class = 0;
 
-        /* Or into the map we are building up to 3 of the static class
-        tables, or their negations. The [:blank:] class sets up the same
-        chars as the [:space:] class (all white space). We remove the vertical
-        white space chars afterwards. */
+        /* We build the bit map for the POSIX class in a chunk of local store
+        because we may be adding and subtracting from it, and we don't want to
+        subtract bits that may be in the main map already. At the end we or the
+        result into the bit map that is being built. */
 
         posix_class *= 3;
-        for (i = 0; i < 3; i++)
+
+        /* Copy in the first table (always present) */
+
+        memcpy(pbits, cbits + posix_class_maps[posix_class],
+          32 * sizeof(uschar));
+
+        /* If there is a second table, add or remove it as required. */
+
+        taboffset = posix_class_maps[posix_class + 1];
+        tabopt = posix_class_maps[posix_class + 2];
+
+        if (taboffset >= 0)
           {
-          BOOL blankclass = strncmp((char *)ptr, "blank", 5) == 0;
-          int taboffset = posix_class_maps[posix_class + i];
-          if (taboffset < 0) break;
-          if (local_negate)
-            {
-            if (i == 0)
-              for (c = 0; c < 32; c++) classbits[c] |= ~cbits[c+taboffset];
-            else
-              for (c = 0; c < 32; c++) classbits[c] &= ~cbits[c+taboffset];
-            if (blankclass) classbits[1] |= 0x3c;
-            }
+          if (tabopt >= 0)
+            for (c = 0; c < 32; c++) pbits[c] |= cbits[c + taboffset];
           else
-            {
-            for (c = 0; c < 32; c++) classbits[c] |= cbits[c+taboffset];
-            if (blankclass) classbits[1] &= ~0x3c;
-            }
+            for (c = 0; c < 32; c++) pbits[c] &= ~cbits[c + taboffset];
           }
+
+        /* Not see if we need to remove any special characters. An option
+        value of 1 removes vertical space and 2 removes underscore. */
+
+        if (tabopt < 0) tabopt = -tabopt;
+        if (tabopt == 1) pbits[1] &= ~0x3c;
+          else if (tabopt == 2) pbits[11] &= 0x7f;
+
+        /* Add the POSIX table or its complement into the main table that is
+        being built and we are done. */
+
+        if (local_negate)
+          for (c = 0; c < 32; c++) classbits[c] |= ~pbits[c];
+        else
+          for (c = 0; c < 32; c++) classbits[c] |= pbits[c];
 
         ptr = tempptr + 1;
         class_charcount = 10;  /* Set > 1; assumes more than 1 per class */
@@ -1939,12 +1971,14 @@ for (;; ptr++)
             case ESC_P:
               {
               BOOL negated;
-              int property = get_ucp(&ptr, &negated, errorcodeptr);
-              if (property < 0) goto FAILED;
+              int pdata;
+              int ptype = get_ucp(&ptr, &negated, &pdata, errorcodeptr);
+              if (ptype < 0) goto FAILED;
               class_utf8 = TRUE;
               *class_utf8data++ = ((-c == ESC_p) != negated)?
                 XCL_PROP : XCL_NOTPROP;
-              *class_utf8data++ = property;
+              *class_utf8data++ = ptype;
+              *class_utf8data++ = pdata;
               class_charcount -= 2;   /* Not a < 256 character */
               }
             continue;
@@ -2126,10 +2160,8 @@ for (;; ptr++)
 #ifdef SUPPORT_UCP
         if ((options & PCRE_CASELESS) != 0)
           {
-          int chartype;
           int othercase;
-          if (_pcre_ucp_findchar(c, &chartype, &othercase) >= 0 &&
-               othercase > 0)
+          if ((othercase = _pcre_ucp_othercase(c)) >= 0)
             {
             *class_utf8data++ = XCL_SINGLE;
             class_utf8data += _pcre_ord2utf8(othercase, class_utf8data);
@@ -2414,13 +2446,17 @@ for (;; ptr++)
     else if (*previous < OP_EODN)
       {
       uschar *oldcode;
-      int prop_type;
+      int prop_type, prop_value;
       op_type = OP_TYPESTAR - OP_STAR;  /* Use type opcodes */
       c = *previous;
 
       OUTPUT_SINGLE_REPEAT:
-      prop_type = (*previous == OP_PROP || *previous == OP_NOTPROP)?
-        previous[1] : -1;
+      if (*previous == OP_PROP || *previous == OP_NOTPROP)
+        {
+        prop_type = previous[1];
+        prop_value = previous[2];
+        }
+      else prop_type = prop_value = -1;
 
       oldcode = code;
       code = previous;                  /* Usually overwrite previous item */
@@ -2481,7 +2517,7 @@ for (;; ptr++)
 
         /* If the maximum is unlimited, insert an OP_STAR. Before doing so,
         we have to insert the character for the previous code. For a repeated
-        Unicode property match, there is an extra byte that defines the
+        Unicode property match, there are two extra bytes that define the
         required property. In UTF-8 mode, long characters have their length in
         c, with the 0x80 bit as a flag. */
 
@@ -2497,7 +2533,11 @@ for (;; ptr++)
 #endif
             {
             *code++ = c;
-            if (prop_type >= 0) *code++ = prop_type;
+            if (prop_type >= 0)
+              {
+              *code++ = prop_type;
+              *code++ = prop_value;
+              }
             }
           *code++ = OP_STAR + repeat_type;
           }
@@ -2516,7 +2556,11 @@ for (;; ptr++)
           else
 #endif
           *code++ = c;
-          if (prop_type >= 0) *code++ = prop_type;
+          if (prop_type >= 0)
+            {
+            *code++ = prop_type;
+            *code++ = prop_value;
+            }
           repeat_max -= repeat_min;
           *code++ = OP_UPTO + repeat_type;
           PUT2INC(code, 0, repeat_max);
@@ -2535,11 +2579,15 @@ for (;; ptr++)
 #endif
       *code++ = c;
 
-      /* For a repeated Unicode property match, there is an extra byte that
-      defines the required property. */
+      /* For a repeated Unicode property match, there are two extra bytes that
+      define the required property. */
 
 #ifdef SUPPORT_UCP
-      if (prop_type >= 0) *code++ = prop_type;
+      if (prop_type >= 0)
+        {
+        *code++ = prop_type;
+        *code++ = prop_value;
+        }
 #endif
       }
 
@@ -3007,10 +3055,19 @@ for (;; ptr++)
             goto FAILED;
             }
 
-          /* Insert the recursion/subroutine item */
+          /* Insert the recursion/subroutine item, automatically wrapped inside
+          "once" brackets. */
+
+          *code = OP_ONCE;
+          PUT(code, 1, 2 + 2*LINK_SIZE);
+          code += 1 + LINK_SIZE;
 
           *code = OP_RECURSE;
           PUT(code, 1, called - cd->start_code);
+          code += 1 + LINK_SIZE;
+
+          *code = OP_KET;
+          PUT(code, 1, 2 + 2*LINK_SIZE);
           code += 1 + LINK_SIZE;
           }
         continue;
@@ -3281,10 +3338,12 @@ for (;; ptr++)
       else if (-c == ESC_P || -c == ESC_p)
         {
         BOOL negated;
-        int value = get_ucp(&ptr, &negated, errorcodeptr);
+        int pdata;
+        int ptype = get_ucp(&ptr, &negated, &pdata, errorcodeptr);
         previous = code;
         *code++ = ((-c == ESC_p) != negated)? OP_PROP : OP_NOTPROP;
-        *code++ = value;
+        *code++ = ptype;
+        *code++ = pdata;
         }
 #endif
 
@@ -3839,7 +3898,7 @@ Returns:        pointer to compiled data block, or NULL on error,
                 with errorptr and erroroffset set
 */
 
-EXPORT pcre *
+PCRE_DATA_SCOPE pcre *
 pcre_compile(const char *pattern, int options, const char **errorptr,
   int *erroroffset, const unsigned char *tables)
 {
@@ -3847,7 +3906,7 @@ return pcre_compile2(pattern, options, NULL, errorptr, erroroffset, tables);
 }
 
 
-EXPORT pcre *
+PCRE_DATA_SCOPE pcre *
 pcre_compile2(const char *pattern, int options, int *errorcodeptr,
   const char **errorptr, int *erroroffset, const unsigned char *tables)
 {
@@ -4040,15 +4099,17 @@ while ((c = *(++ptr)) != 0)
 #endif
 
     /* \P and \p are for Unicode properties, but only when the support has
-    been compiled. Each item needs 2 bytes. */
+    been compiled. Each item needs 3 bytes. */
 
     else if (-c == ESC_P || -c == ESC_p)
       {
 #ifdef SUPPORT_UCP
       BOOL negated;
-      length += 2;
-      lastitemlength = 2;
-      if (get_ucp(&ptr, &negated, &errorcode) < 0) goto PCRE_ERROR_RETURN;
+      BOOL pdata;
+      length += 3;
+      lastitemlength = 3;
+      if (get_ucp(&ptr, &negated, &pdata, &errorcode) < 0)
+        goto PCRE_ERROR_RETURN;
       continue;
 #else
       errorcode = ERR45;
@@ -4214,7 +4275,7 @@ while ((c = *(++ptr)) != 0)
               class_utf8 = TRUE;
               length += LINK_SIZE + 2;
               }
-            length += 2;
+            length += 3;
             }
 #endif
           }
@@ -4477,7 +4538,7 @@ while ((c = *(++ptr)) != 0)
           errorcode = ERR29;
           goto PCRE_ERROR_RETURN;
           }
-        length += 1 + LINK_SIZE;
+        length += 3 + 3*LINK_SIZE;  /* Allows for the automatic "once" */
 
         /* If this item is quantified, it will get wrapped inside brackets so
         as to use the code for quantified brackets. We jump down and use the
@@ -4533,6 +4594,7 @@ while ((c = *(++ptr)) != 0)
 
         if (*ptr == '=' || *ptr == '>')
           {
+          length += 2 + 2*LINK_SIZE;  /* Allow for the automatic "once" */
           while ((compile_block.ctypes[*(++ptr)] & ctype_word) != 0);
           if (*ptr != ')')
             {
@@ -5000,7 +5062,8 @@ if (reqbyte >= 0 &&
   re->options |= PCRE_REQCHSET;
   }
 
-/* Print out the compiled data for debugging */
+/* Print out the compiled data if debugging is enabled. This is never the
+case when building a production library. */
 
 #ifdef DEBUG
 
@@ -5025,7 +5088,8 @@ if (re->options != 0)
 if ((re->options & PCRE_FIRSTSET) != 0)
   {
   int ch = re->first_byte & 255;
-  const char *caseless = ((re->first_byte & REQ_CASELESS) == 0)? "" : " (caseless)";
+  const char *caseless = ((re->first_byte & REQ_CASELESS) == 0)?
+    "" : " (caseless)";
   if (isprint(ch)) printf("First char = %c%s\n", ch, caseless);
     else printf("First char = \\x%02x%s\n", ch, caseless);
   }
@@ -5033,12 +5097,13 @@ if ((re->options & PCRE_FIRSTSET) != 0)
 if ((re->options & PCRE_REQCHSET) != 0)
   {
   int ch = re->req_byte & 255;
-  const char *caseless = ((re->req_byte & REQ_CASELESS) == 0)? "" : " (caseless)";
+  const char *caseless = ((re->req_byte & REQ_CASELESS) == 0)?
+    "" : " (caseless)";
   if (isprint(ch)) printf("Req char = %c%s\n", ch, caseless);
     else printf("Req char = \\x%02x%s\n", ch, caseless);
   }
 
-_pcre_printint(re, stdout);
+pcre_printint(re, stdout);
 
 /* This check is done here in the debugging case so that the code that
 was compiled can be seen. */

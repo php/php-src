@@ -309,7 +309,10 @@ Recursion
 
 Recursion either matches the current regex, or some subexpression. The opcode
 OP_RECURSE is followed by an value which is the offset to the starting bracket
-from the start of the whole pattern.
+from the start of the whole pattern. From release 6.5, OP_RECURSE is 
+automatically wrapped inside OP_ONCE brackets (because otherwise some patterns 
+broke it). OP_RECURSE is also used for "subroutine" calls, even though they 
+are not strictly a recursion.
 
 
 Callout
@@ -336,4 +339,4 @@ at compile time, and so does not cause anything to be put into the compiled
 data.
 
 Philip Hazel
-March 2005
+January 2006

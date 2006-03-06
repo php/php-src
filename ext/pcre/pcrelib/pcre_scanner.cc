@@ -30,7 +30,6 @@
 // Author: Sanjay Ghemawat
 
 #include <vector>
-#include <algorithm>     // for count()
 #include <assert.h>
 #include "config.h"
 #include "pcre_scanner.h"
@@ -90,7 +89,12 @@ void Scanner::EnableSkip() {
 int Scanner::LineNumber() const {
   // TODO: Make it more efficient by keeping track of the last point
   // where we computed line numbers and counting newlines since then.
-  return 1 + std::count(data_.data(), input_.data(), '\n');
+  // We could use std:count, but not all systems have it. :-(
+  int count = 1;
+  for (const char* p = data_.data(); p < input_.data(); ++p)
+    if (*p == '\n')
+      ++count;
+  return count;
 }
 
 int Scanner::Offset() const {
