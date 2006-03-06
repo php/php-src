@@ -192,7 +192,7 @@ static char *dsn_from_uri(char *uri, char *buf, size_t buflen TSRMLS_DC)
 	return dsn;
 }
 
-/* {{{ proto object PDO::__construct(string dsn, string username, string passwd [, array options])
+/* {{{ proto void PDO::__construct(string dsn, string username, string passwd [, array options])
    */
 static PHP_METHOD(PDO, dbh_constructor)
 {
