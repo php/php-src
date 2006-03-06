@@ -2043,7 +2043,7 @@ static zend_function_entry spl_funcs_AppendIterator[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ array iterator_to_array(Traversable it) 
+/* {{{ proto array iterator_to_array(Traversable it) 
    Copy the iterator into an array */
 PHP_FUNCTION(iterator_to_array)
 {
@@ -2088,7 +2088,7 @@ PHP_FUNCTION(iterator_to_array)
 }
 /* }}} */
 
-/* {{{ int iterator_count(Traversable it) 
+/* {{{ proto int iterator_count(Traversable it) 
    Count the elements in an iterator */
 PHP_FUNCTION(iterator_count)
 {
