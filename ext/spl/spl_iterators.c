@@ -817,7 +817,7 @@ int spl_dual_it_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 
 #define SPL_CHECK_CTOR(intern, classname) \
 	if (intern->dit_type == DIT_Unknown) { \
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Classes derived from %v must call %s::__construct()", \
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Classes derived from %s must call %s::__construct()", \
 				(spl_ce_##classname)->name, (spl_ce_##classname)->name); \
 		return; \
 	}
