@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, Version 4.4.3
+- Updated PCRE to version 6.6. (Andrei)
 - Added a check for special characters in the session name. (Ilia)
 - Fixed bug #36459 (Incorrect adding PHPSESSID to links, which contains \r\n).
   (Ilia)
