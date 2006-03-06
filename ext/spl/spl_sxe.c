@@ -41,7 +41,9 @@ zend_class_entry *spl_ce_SimpleXMLElement;
 
 #include "ext/simplexml/php_simplexml_exports.h"
 
-SPL_METHOD(SimpleXMLIterator, rewind) /* {{{ */
+/* {{{ proto void SimpleXMLIterator::rewind()
+ Rewind to first element */
+SPL_METHOD(SimpleXMLIterator, rewind)
 {
 	php_sxe_iterator iter;
 
@@ -50,7 +52,9 @@ SPL_METHOD(SimpleXMLIterator, rewind) /* {{{ */
 }
 /* }}} */
 
-SPL_METHOD(SimpleXMLIterator, valid) /* {{{ */
+/* {{{ proto bool SimpleXMLIterator::valid()
+ Check whether iteration is valid */
+SPL_METHOD(SimpleXMLIterator, valid)
 {
 	php_sxe_object *sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
 
@@ -58,7 +62,9 @@ SPL_METHOD(SimpleXMLIterator, valid) /* {{{ */
 }
 /* }}} */
 
-SPL_METHOD(SimpleXMLIterator, current) /* {{{ */
+/* {{{ proto SimpleXMLIterator SimpleXMLIterator::current()
+ Get current element */
+SPL_METHOD(SimpleXMLIterator, current)
 {
 	php_sxe_object *sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
 
@@ -70,7 +76,9 @@ SPL_METHOD(SimpleXMLIterator, current) /* {{{ */
 }
 /* }}} */
 
-SPL_METHOD(SimpleXMLIterator, key) /* {{{ */
+/* {{{ proto string SimpleXMLIterator::key()
+ Get name of current child element */
+SPL_METHOD(SimpleXMLIterator, key)
 {
 	xmlNodePtr curnode;
 	php_sxe_object *intern;
@@ -90,7 +98,9 @@ SPL_METHOD(SimpleXMLIterator, key) /* {{{ */
 }
 /* }}} */
 
-SPL_METHOD(SimpleXMLIterator, next) /* {{{ */
+/* {{{ proto void SimpleXMLIterator::next()
+ Move to next element */
+SPL_METHOD(SimpleXMLIterator, next)
 {
 	php_sxe_iterator iter;
 
@@ -99,8 +109,8 @@ SPL_METHOD(SimpleXMLIterator, next) /* {{{ */
 }
 /* }}} */
 
-/* {{{ hasChildren()
- */ 
+/* {{{ proto bool SimpleXMLIterator::hasChildren()
+ Check whether element has children (elements) */ 
 SPL_METHOD(SimpleXMLIterator, hasChildren)
 {
 	php_sxe_object *sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
@@ -123,8 +133,8 @@ SPL_METHOD(SimpleXMLIterator, hasChildren)
 }
 /* }}} */
 
-/* {{{ getChildren()
- */ 
+/* {{{ proto SimpleXMLIterator SimpleXMLIterator::getChildren()
+ Get child element iterator */ 
 SPL_METHOD(SimpleXMLIterator, getChildren)
 {
 	php_sxe_object *sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
@@ -136,7 +146,9 @@ SPL_METHOD(SimpleXMLIterator, getChildren)
 	return_value->value.obj = zend_objects_store_clone_obj(sxe->iter.data TSRMLS_CC);
 }
 
-SPL_METHOD(SimpleXMLIterator, count) /* {{{ */
+/* {{{ proto int SimpleXMLIterator::count()
+ Get number of child elements */
+SPL_METHOD(SimpleXMLIterator, count)
 {
 	long count = 0;
 

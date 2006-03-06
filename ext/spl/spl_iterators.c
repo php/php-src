@@ -359,7 +359,7 @@ zend_object_iterator_funcs spl_recursive_it_iterator_funcs = {
 	spl_recursive_it_rewind
 };
 
-/* {{{ proto RecursiveIteratorIterator::__construct(RecursiveIterator|IteratorAggregate it [, int mode = RIT_LEAVES_ONLY [, int flags = 0]]) throws InvalidArgumentException
+/* {{{ proto void RecursiveIteratorIterator::__construct(RecursiveIterator|IteratorAggregate it [, int mode = RIT_LEAVES_ONLY [, int flags = 0]]) throws InvalidArgumentException
    Creates a RecursiveIteratorIterator from a RecursiveIterator. */
 SPL_METHOD(RecursiveIteratorIterator, __construct)
 {
@@ -448,7 +448,7 @@ SPL_METHOD(RecursiveIteratorIterator, rewind)
 	spl_recursive_it_rewind_ex(object, getThis() TSRMLS_CC);
 } /* }}} */
 
-/* {{{ proto bolean RecursiveIteratorIterator::valid()
+/* {{{ proto bool RecursiveIteratorIterator::valid()
    Check whether the current position is valid */
 SPL_METHOD(RecursiveIteratorIterator, valid)
 {
@@ -584,28 +584,28 @@ SPL_METHOD(RecursiveIteratorIterator, callGetChildren)
 	}
 } /* }}} */
 
-/* {{{ proto RecursiveIterator RecursiveIteratorIterator::beginChildren()
+/* {{{ proto void RecursiveIteratorIterator::beginChildren()
    Called when recursing one level down */
 SPL_METHOD(RecursiveIteratorIterator, beginChildren)
 {
 	/* nothing to do */
 } /* }}} */
 
-/* {{{ proto RecursiveIterator RecursiveIteratorIterator::endChildren()
+/* {{{ proto void RecursiveIteratorIterator::endChildren()
    Called when end recursing one level */
 SPL_METHOD(RecursiveIteratorIterator, endChildren)
 {
 	/* nothing to do */
 } /* }}} */
 
-/* {{{ proto RecursiveIterator RecursiveIteratorIterator::nextElement()
+/* {{{ proto void RecursiveIteratorIterator::nextElement()
    Called when the next element is available */
 SPL_METHOD(RecursiveIteratorIterator, nextElement)
 {
 	/* nothing to do */
 } /* }}} */
 
-/* {{{ proto RecursiveIterator RecursiveIteratorIterator::setMaxDepth([$max_depth = -1])
+/* {{{ proto void RecursiveIteratorIterator::setMaxDepth([$max_depth = -1])
    Set the maximum allowed depth (or any depth if pmax_depth = -1] */
 SPL_METHOD(RecursiveIteratorIterator, setMaxDepth)
 {
@@ -622,7 +622,7 @@ SPL_METHOD(RecursiveIteratorIterator, setMaxDepth)
 	object->max_depth = max_depth;
 } /* }}} */
 
-/* {{{ proto RecursiveIterator RecursiveIteratorIterator::getMaxDepth()
+/* {{{ proto int|false RecursiveIteratorIterator::getMaxDepth()
    Return the maximum accepted depth or false if any depth is allowed */
 SPL_METHOD(RecursiveIteratorIterator, getMaxDepth)
 {
@@ -943,7 +943,7 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 	return intern;
 }
 
-/* {{{ proto FilterIterator::__construct(Iterator it) 
+/* {{{ proto void FilterIterator::__construct(Iterator it) 
    Create an Iterator from another iterator */
 SPL_METHOD(FilterIterator, __construct)
 {
@@ -1059,10 +1059,10 @@ SPL_METHOD(dual_it, rewind)
 	spl_dual_it_fetch(intern, 1 TSRMLS_CC);
 } /* }}} */
 
-/* {{{ proto boolean FilterIterator::valid()
-       proto boolean ParentIterator::valid()
-       proto boolean IteratorIterator::valid()
-       proto boolean NoRewindIterator::valid()
+/* {{{ proto bool FilterIterator::valid()
+       proto bool ParentIterator::valid()
+       proto bool IteratorIterator::valid()
+       proto bool NoRewindIterator::valid()
    Check whether the current element is valid */
 SPL_METHOD(dual_it, valid)
 {
@@ -1183,14 +1183,14 @@ SPL_METHOD(FilterIterator, next)
 	spl_filter_it_next(getThis(), intern TSRMLS_CC);
 } /* }}} */
 
-/* {{{ proto RecursiveFilterIterator::__construct(RecursiveIterator it)
+/* {{{ proto void RecursiveFilterIterator::__construct(RecursiveIterator it)
    Create a RecursiveFilterIterator from a RecursiveIterator */
 SPL_METHOD(RecursiveFilterIterator, __construct)
 {
 	spl_dual_it_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, spl_ce_RecursiveFilterIterator, spl_ce_RecursiveIterator, DIT_RecursiveFilterIterator);
 } /* }}} */
 
-/* {{{ proto boolean RecursiveFilterIterator::hasChildren()
+/* {{{ proto bool RecursiveFilterIterator::hasChildren()
    Check whether the inner iterator's current element has children */
 SPL_METHOD(RecursiveFilterIterator, hasChildren)
 {
@@ -1217,14 +1217,14 @@ SPL_METHOD(RecursiveFilterIterator, getChildren)
 	zval_ptr_dtor(&retval);
 } /* }}} */
 
-/* {{{ proto ParentIterator::__construct(RecursiveIterator it)
+/* {{{ proto void ParentIterator::__construct(RecursiveIterator it)
    Create a ParentIterator from a RecursiveIterator */
 SPL_METHOD(ParentIterator, __construct)
 {
 	spl_dual_it_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, spl_ce_ParentIterator, spl_ce_RecursiveIterator, DIT_ParentIterator);
 } /* }}} */
 
-/* {{{ proto boolean ParentIterator::hasChildren()
+/* {{{ proto bool ParentIterator::hasChildren()
    Check whether the inner iterator's current element has children */
 SPL_METHOD(ParentIterator, hasChildren)
 {
@@ -1405,7 +1405,7 @@ SPL_METHOD(LimitIterator, rewind)
 	spl_limit_it_seek(intern, intern->u.limit.offset TSRMLS_CC);
 } /* }}} */
 
-/* {{{ proto boolean LimitIterator::valid()
+/* {{{ proto bool LimitIterator::valid()
    Check whether the current element is valid */
 SPL_METHOD(LimitIterator, valid)
 {
@@ -1579,7 +1579,7 @@ static inline void spl_caching_it_rewind(spl_dual_it_object *intern TSRMLS_DC)
 	spl_caching_it_next(intern TSRMLS_CC);
 }
 
-/* {{{ proto CachingIterator::__construct(Iterator it [, flags = CIT_CALL_TOSTRING])
+/* {{{ proto void CachingIterator::__construct(Iterator it [, flags = CIT_CALL_TOSTRING])
    Construct a CachingIterator from an Iterator */
 SPL_METHOD(CachingIterator, __construct)
 {
@@ -1597,7 +1597,7 @@ SPL_METHOD(CachingIterator, rewind)
 	spl_caching_it_rewind(intern TSRMLS_CC);
 } /* }}} */
 
-/* {{{ proto boolean CachingIterator::valid()
+/* {{{ proto bool CachingIterator::valid()
    Check whether the current element is valid */
 SPL_METHOD(CachingIterator, valid)
 {
@@ -1619,7 +1619,7 @@ SPL_METHOD(CachingIterator, next)
 	spl_caching_it_next(intern TSRMLS_CC);
 } /* }}} */
 
-/* {{{ proto boolean CachingIterator::hasNext()
+/* {{{ proto bool CachingIterator::hasNext()
    Check whether the inner iterator has a valid next element */
 SPL_METHOD(CachingIterator, hasNext)
 {
@@ -1680,14 +1680,14 @@ static zend_function_entry spl_funcs_CachingIterator[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto RecursiveCachingIterator::__construct(RecursiveIterator it [, flags = CIT_CALL_TOSTRING])
+/* {{{ proto void RecursiveCachingIterator::__construct(RecursiveIterator it [, flags = CIT_CALL_TOSTRING])
    Create an iterator from a RecursiveIterator */
 SPL_METHOD(RecursiveCachingIterator, __construct)
 {
 	spl_dual_it_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, spl_ce_RecursiveCachingIterator, spl_ce_RecursiveIterator, DIT_RecursiveCachingIterator);
 } /* }}} */
 
-/* {{{ proto bolean RecursiveCachingIterator::hasChildren()
+/* {{{ proto bool RecursiveCachingIterator::hasChildren()
    Check whether the current element of the inner iterator has children */
 SPL_METHOD(RecursiveCachingIterator, hasChildren)
 {
@@ -1726,7 +1726,7 @@ static zend_function_entry spl_funcs_RecursiveCachingIterator[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto IteratorIterator::__construct(Traversable it)
+/* {{{ proto void IteratorIterator::__construct(Traversable it)
    Create an iterator from anything that is traversable */
 SPL_METHOD(IteratorIterator, __construct)
 {
@@ -1749,7 +1749,7 @@ static zend_function_entry spl_funcs_IteratorIterator[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto NoRewindIterator::__construct(Iterator it)
+/* {{{ proto void NoRewindIterator::__construct(Iterator it)
    Create an iterator from another iterator */
 SPL_METHOD(NoRewindIterator, __construct)
 {
@@ -1763,7 +1763,7 @@ SPL_METHOD(NoRewindIterator, rewind)
 	/* nothing to do */
 } /* }}} */
 
-/* {{{ proto void NoRewindIterator::valid()
+/* {{{ proto bool NoRewindIterator::valid()
    Return inner iterators valid() */
 SPL_METHOD(NoRewindIterator, valid)
 {
@@ -1833,14 +1833,14 @@ static zend_function_entry spl_funcs_NoRewindIterator[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto InfiniteIterator::__construct(Iterator it)
+/* {{{ proto void InfiniteIterator::__construct(Iterator it)
    Create an iterator from another iterator */
 SPL_METHOD(InfiniteIterator, __construct)
 {
 	spl_dual_it_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, spl_ce_InfiniteIterator, zend_ce_iterator, DIT_InfiniteIterator);
 } /* }}} */
 
-/* {{{ proto InfiniteIterator::next()
+/* {{{ proto void InfiniteIterator::next()
    Prevent a call to inner iterators rewind() (internally the current data will be fetched if valid()) */
 SPL_METHOD(InfiniteIterator, next)
 {
@@ -1865,34 +1865,34 @@ static zend_function_entry spl_funcs_InfiniteIterator[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto EmptyIterator::rewind()
+/* {{{ proto void EmptyIterator::rewind()
    Does nothing  */
 SPL_METHOD(EmptyIterator, rewind)
 {
 } /* }}} */
 
-/* {{{ proto EmptyIterator::valid()
+/* {{{ proto false EmptyIterator::valid()
    Return false */
 SPL_METHOD(EmptyIterator, valid)
 {
 	RETURN_FALSE;
 } /* }}} */
 
-/* {{{ proto EmptyIterator::key()
-   Throws exception */
+/* {{{ proto void EmptyIterator::key()
+   Throws exception BadMethodCallException */
 SPL_METHOD(EmptyIterator, key)
 {
 	zend_throw_exception(spl_ce_BadMethodCallException, "Accessing the key of an EmptyIterator", 0 TSRMLS_CC);
 } /* }}} */
 
-/* {{{ proto EmptyIterator::current()
-   Throws exception */
+/* {{{ proto void EmptyIterator::current()
+   Throws exception BadMethodCallException */
 SPL_METHOD(EmptyIterator, current)
 {
 	zend_throw_exception(spl_ce_BadMethodCallException, "Accessing the value of an EmptyIterator", 0 TSRMLS_CC);
 } /* }}} */
 
-/* {{{ proto EmptyIterator::next()
+/* {{{ proto void EmptyIterator::next()
    Does nothing */
 SPL_METHOD(EmptyIterator, next)
 {
@@ -1956,7 +1956,7 @@ void spl_append_it_next(spl_dual_it_object *intern TSRMLS_DC) /* {{{ */
 	spl_append_it_fetch(intern TSRMLS_CC);
 } /* }}} */
 
-/* {{{ proto AppendIterator::__construct()
+/* {{{ proto void AppendIterator::__construct()
    Create an AppendIterator */
 SPL_METHOD(AppendIterator, __construct)
 {
@@ -2004,7 +2004,7 @@ SPL_METHOD(AppendIterator, rewind)
 	}
 } /* }}} */
 
-/* {{{ proto boolean AppendIterator::valid()
+/* {{{ proto bool AppendIterator::valid()
    Check if the current state is valid */
 SPL_METHOD(AppendIterator, valid)
 {
@@ -2015,7 +2015,7 @@ SPL_METHOD(AppendIterator, valid)
 	RETURN_BOOL(intern->current.data);
 } /* }}} */
 
-/* {{{ proto AppendIterator::next()
+/* {{{ proto void AppendIterator::next()
    Forward to next element */
 SPL_METHOD(AppendIterator, next)
 {

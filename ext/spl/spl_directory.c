@@ -741,7 +741,7 @@ SPL_METHOD(SplFileInfo, openFile)
 }
 /* }}} */
 
-/* {{{ proto SplFileObject SplFileInfo::setFileClass([string class_name])
+/* {{{ proto void SplFileInfo::setFileClass([string class_name])
    Class to use in openFile() */
 SPL_METHOD(SplFileInfo, setFileClass)
 {
@@ -758,7 +758,7 @@ SPL_METHOD(SplFileInfo, setFileClass)
 }
 /* }}} */
 
-/* {{{ proto SplFileObject SplFileInfo::setInfoClass([string class_name])
+/* {{{ proto void SplFileInfo::setInfoClass([string class_name])
    Class to use in getFileInfo(), getPathInfo() */
 SPL_METHOD(SplFileInfo, setInfoClass)
 {
