@@ -1,3 +1,148 @@
+2006-03-05  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * NEWS
+      ext/gd/gd.c
+      ext/gd/php_gd.h:
+      - revert Harmut commit, Histogram implementation not correct and no idea
+        where you got the ok to add that
+
+2006-03-05  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/php_filestat.h:
+      - And not here either...
+
+    * (PHP_5_1)
+      ext/standard/php_filestat.h:
+      - There is no ltouch.
+
+    * (PHP_5_1)
+      NEWS
+      configure.in
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.h
+      ext/standard/basic_functions.c
+      ext/standard/filestat.c
+      ext/standard/php_filestat.h:
+      - Added lchown() and lchgrp() to change user/group ownership of symlinks.
+
+2006-03-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_compile.c:
+      - Fix comment, too
+
+2006-03-05  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ext/gd/gd.c
+      ext/gd/php_gd.h:
+      - fixed size information for _php_sig_png array
+      - removed extra memcmp step in signature comparison,
+        this seemed to have been inherited from ext/standard/image.c
+        but is not needed here as the provided buffer is big enough
+        from the start
+
+2006-03-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_compile.c
+      tests/classes/ctor_in_interface_01.phpt
+      tests/classes/ctor_in_interface_02.phpt
+      tests/classes/ctor_in_interface_03.phpt
+      tests/classes/ctor_in_interface_04.phpt
+      tests/classes/interface_construct.phpt:
+      - Fix Bug #34019 by popular demand: Implementing interface with a
+        __construct method strange behaviour
+
+2006-03-05  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * NEWS
+      ext/gd/gd.c
+      ext/gd/php_gd.h:
+      added ImageColorHistogram function
+
+2006-03-05  Michael Wallner  <mike@iworks.at>
+
+    * (PHP_5_1)
+      NEWS:
+      - fix typo, reword slightly
+
+2006-03-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      NEWS:
+      - Update
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/php_mysqli.h:
+      - Fix build
+
+2006-03-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      MFH:
+      Fixed bug #36572 (Added PDO::MYSQL_ATTR_DIRECT_QUERY constant that show be
+      set when executing internal queries such as "show master status" via
+      MySQL).
+      
+      Added missing constant for MAX_BUFFER_SIZE.
+
+2006-03-05  Antony Dovgal  <antony@zend.com>
+
+    * ext/simplexml/tests/bug36611.phpt:
+      add test
+
+    * ext/simplexml/tests/bug36611.phpt
+      ext/simplexml/tests/bug36611.phpt:
+      
+      file bug36611.phpt was initially added on branch PHP_5_1.
+
+2006-03-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_API.h:
+      - Add missing function for completeness
+
+2006-03-05  Antony Dovgal  <antony@zend.com>
+
+    * ext/simplexml/simplexml.c:
+      MF51: fix #36611 (assignment to SimpleXML object attribute changes argument
+      type to string)
+
+2006-03-05  Johannes Schlüter  <schlueter@phpbar.de>
+
+    * ext/mysqli/mysqli.c:
+      - Fix build after unicode changes
+
+2006-03-05  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      NEWS
+      ext/simplexml/simplexml.c:
+      fix #36611 (assignment to SimpleXML object attribute changes argument type
+      to string)
+
+2006-03-05  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/027.phpt
+      ext/simplexml/tests/030.phpt
+      ext/simplexml/tests/bug35785.phpt:
+      fix crash passing non-string member to sxe_prop_dim_exists
+      allow offsets to be used when calling isset/unset
+      fix tests
+      add test
+
+2006-03-05  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      NEWS
+      ext/pgsql/pgsql.c:
+      MFH: fix #36606 (pg_query_params() changes arguments type to string)
+
+    * ext/pgsql/pgsql.c:
+      fix #36606 (pg_query_params() changes arguments type to string)
+
 2006-03-04  Johannes Schlüter  <schlueter@phpbar.de>
 
     * ZendEngine2/zend_API.h:
