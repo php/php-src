@@ -1338,7 +1338,7 @@ ZEND_METHOD(reflection_function, export)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionFunction::__construct(string name)
+/* {{{ proto public void ReflectionFunction::__construct(string name)
    Constructor. Throws an Exception in case the given function does not exist */
 ZEND_METHOD(reflection_function, __construct)
 {
@@ -1755,7 +1755,7 @@ ZEND_METHOD(reflection_parameter, export)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionParameter::__construct(mixed function, mixed parameter)
+/* {{{ proto public void ReflectionParameter::__construct(mixed function, mixed parameter)
    Constructor. Throws an Exception in case the given method does not exist */
 ZEND_METHOD(reflection_parameter, __construct)
 {
@@ -2059,7 +2059,7 @@ ZEND_METHOD(reflection_method, export)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionMethod::__construct(mixed class_or_method [, string name])
+/* {{{ proto public void ReflectionMethod::__construct(mixed class_or_method [, string name])
    Constructor. Throws an Exception in case the given method does not exist */
 ZEND_METHOD(reflection_method, __construct)
 {
@@ -2570,7 +2570,7 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_ob
 }
 /* }}} */
 
-/* {{{ proto public ReflectionClass::__construct(mixed argument) throws ReflectionException
+/* {{{ proto public void ReflectionClass::__construct(mixed argument) throws ReflectionException
    Constructor. Takes a string or an instance as an argument */
 ZEND_METHOD(reflection_class, __construct)
 {
@@ -3572,7 +3572,7 @@ ZEND_METHOD(reflection_object, export)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionObject::__construct(mixed argument) throws ReflectionException
+/* {{{ proto public void ReflectionObject::__construct(mixed argument) throws ReflectionException
    Constructor. Takes an instance as an argument */
 ZEND_METHOD(reflection_object, __construct)
 {
@@ -3588,7 +3588,7 @@ ZEND_METHOD(reflection_property, export)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionProperty::__construct(mixed class, string name)
+/* {{{ proto public void ReflectionProperty::__construct(mixed class, string name)
    Constructor. Throws an Exception in case the given property does not exist */
 ZEND_METHOD(reflection_property, __construct)
 {
@@ -3941,7 +3941,7 @@ ZEND_METHOD(reflection_extension, export)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionExtension::__construct(string name)
+/* {{{ proto public void ReflectionExtension::__construct(string name)
    Constructor. Throws an Exception in case the given extension does not exist */
 ZEND_METHOD(reflection_extension, __construct)
 {
