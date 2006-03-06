@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2005 University of Cambridge
+           Copyright (c) 1997-2006 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -131,7 +131,7 @@ static const char *const pstring[] = {
 *          Translate error code to string        *
 *************************************************/
 
-EXPORT size_t
+PCRE_DATA_SCOPE size_t
 regerror(int errcode, const regex_t *preg, char *errbuf, size_t errbuf_size)
 {
 const char *message, *addmessage;
@@ -166,7 +166,7 @@ return length + addlength;
 *           Free store held by a regex           *
 *************************************************/
 
-EXPORT void
+PCRE_DATA_SCOPE void
 regfree(regex_t *preg)
 {
 (pcre_free)(preg->re_pcre);
@@ -189,7 +189,7 @@ Returns:      0 on success
               various non-zero codes on failure
 */
 
-EXPORT int
+PCRE_DATA_SCOPE int
 regcomp(regex_t *preg, const char *pattern, int cflags)
 {
 const char *errorptr;
@@ -197,9 +197,11 @@ int erroffset;
 int errorcode;
 int options = 0;
 
-if ((cflags & REG_ICASE) != 0) options |= PCRE_CASELESS;
+if ((cflags & REG_ICASE) != 0)   options |= PCRE_CASELESS;
 if ((cflags & REG_NEWLINE) != 0) options |= PCRE_MULTILINE;
-if ((cflags & REG_DOTALL) != 0) options |= PCRE_DOTALL;
+if ((cflags & REG_DOTALL) != 0)  options |= PCRE_DOTALL;
+if ((cflags & REG_NOSUB) != 0)   options |= PCRE_NO_AUTO_CAPTURE;
+if ((cflags & REG_UTF8) != 0)    options |= PCRE_UTF8;
 
 preg->re_pcre = pcre_compile2(pattern, options, &errorcode, &errorptr,
   &erroffset, NULL);
@@ -223,9 +225,13 @@ substring, so we have to get and release working store instead of just using
 the POSIX structures as was done in earlier releases when PCRE needed only 2
 ints. However, if the number of possible capturing brackets is small, use a
 block of store on the stack, to reduce the use of malloc/free. The threshold is
-in a macro that can be changed at configure time. */
+in a macro that can be changed at configure time.
 
-EXPORT int
+If REG_NOSUB was specified at compile time, the PCRE_NO_AUTO_CAPTURE flag will
+be set. When this is the case, the nmatch and pmatch arguments are ignored, and
+the only result is yes/no/error. */
+
+PCRE_DATA_SCOPE int
 regexec(const regex_t *preg, const char *string, size_t nmatch,
   regmatch_t pmatch[], int eflags)
 {
@@ -234,13 +240,20 @@ int options = 0;
 int *ovector = NULL;
 int small_ovector[POSIX_MALLOC_THRESHOLD * 3];
 BOOL allocated_ovector = FALSE;
+BOOL nosub =
+  (((const pcre *)preg->re_pcre)->options & PCRE_NO_AUTO_CAPTURE) != 0;
 
 if ((eflags & REG_NOTBOL) != 0) options |= PCRE_NOTBOL;
 if ((eflags & REG_NOTEOL) != 0) options |= PCRE_NOTEOL;
 
 ((regex_t *)preg)->re_erroffset = (size_t)(-1);  /* Only has meaning after compile */
 
-if (nmatch > 0)
+/* When no string data is being returned, ensure that nmatch is zero.
+Otherwise, ensure the vector for holding the return data is large enough. */
+
+if (nosub) nmatch = 0;
+
+else if (nmatch > 0)
   {
   if (nmatch <= POSIX_MALLOC_THRESHOLD)
     {
@@ -248,6 +261,7 @@ if (nmatch > 0)
     }
   else
     {
+    if (nmatch > INT_MAX/(sizeof(int) * 3)) return REG_ESPACE;
     ovector = (int *)malloc(sizeof(int) * nmatch * 3);
     if (ovector == NULL) return REG_ESPACE;
     allocated_ovector = TRUE;
@@ -262,13 +276,16 @@ if (rc == 0) rc = nmatch;    /* All captured slots were filled in */
 if (rc >= 0)
   {
   size_t i;
-  for (i = 0; i < (size_t)rc; i++)
+  if (!nosub)
     {
-    pmatch[i].rm_so = ovector[i*2];
-    pmatch[i].rm_eo = ovector[i*2+1];
+    for (i = 0; i < (size_t)rc; i++)
+      {
+      pmatch[i].rm_so = ovector[i*2];
+      pmatch[i].rm_eo = ovector[i*2+1];
+      }
+    if (allocated_ovector) free(ovector);
+    for (; i < nmatch; i++) pmatch[i].rm_so = pmatch[i].rm_eo = -1;
     }
-  if (allocated_ovector) free(ovector);
-  for (; i < nmatch; i++) pmatch[i].rm_so = pmatch[i].rm_eo = -1;
   return 0;
   }
 

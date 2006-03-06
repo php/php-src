@@ -1,4 +1,3 @@
-pcregrep version 4.0 07-Jun-2005 using PCRE version 6.2 01-Aug-2005
 ---------------------------- Test 1 ------------------------------
 PATTERN at the start of a line.
 In the middle of a line, PATTERN appears.
@@ -9,23 +8,21 @@ PATTERN at the start of a line.
 7:PATTERN at the start of a line.
 8:In the middle of a line, PATTERN appears.
 10:This pattern is in lower case.
-586:Check up on PATTERN near the end.
+608:Check up on PATTERN near the end.
 ---------------------------- Test 4 ------------------------------
 4
 ---------------------------- Test 5 ------------------------------
 ./testdata/grepinput:7:PATTERN at the start of a line.
 ./testdata/grepinput:8:In the middle of a line, PATTERN appears.
 ./testdata/grepinput:10:This pattern is in lower case.
-./testdata/grepinput:586:Check up on PATTERN near the end.
---
+./testdata/grepinput:608:Check up on PATTERN near the end.
 ./testdata/grepinputx:3:Here is the pattern again.
 ./testdata/grepinputx:5:Pattern
 ---------------------------- Test 6 ------------------------------
 7:PATTERN at the start of a line.
 8:In the middle of a line, PATTERN appears.
 10:This pattern is in lower case.
-586:Check up on PATTERN near the end.
---
+608:Check up on PATTERN near the end.
 3:Here is the pattern again.
 5:Pattern
 ---------------------------- Test 7 ------------------------------
@@ -87,7 +84,7 @@ That time it was on a line by itself.
 ---------------------------- Test 14 -----------------------------
 ./testdata/grepinputx:To pat or not to pat, that is the question.
 ---------------------------- Test 15 -----------------------------
-pcregrep: Error in regex at offset 4: nothing to repeat
+pcregrep: Error in command-line regex at offset 4: nothing to repeat
 ---------------------------- Test 16 -----------------------------
 pcregrep: Failed to open ./testdata/nonexistfile: No such file or directory
 ---------------------------- Test 17 -----------------------------
@@ -116,14 +113,14 @@ of lines
 36-sixteen
 37-seventeen
 ---------------------------- Test 22 -----------------------------
-20-one
-21-two
-22-three
+21-one
+22-two
+23-three
 24:four
 --
-30-eleven
-31-twelve
-32-thirteen
+31-eleven
+32-twelve
+33-thirteen
 34:fourteen
 ---------------------------- Test 23 -----------------------------
 one
@@ -162,15 +159,15 @@ twenty
 
 This is the last line of this file.
 ---------------------------- Test 25 -----------------------------
-14-
-15-complete pair
-16-of lines
-17-
-18-And there they were again, to check line numbers.
-19-
-20-one
-21-two
-22-three
+15-
+16-complete pair
+17-of lines
+18-
+19-And there they were again, to check line numbers.
+20-
+21-one
+22-two
+23-three
 24:four
 25-five
 26-six
@@ -232,16 +229,16 @@ twenty
 
 This is the last line of this file.
 ---------------------------- Test 28 -----------------------------
-13-of lines all by themselves.
-14-
-15-complete pair
-16-of lines
-17-
-18-And there they were again, to check line numbers.
-19-
-20-one
-21-two
-22-three
+14-of lines all by themselves.
+15-
+16-complete pair
+17-of lines
+18-
+19-And there they were again, to check line numbers.
+20-
+21-one
+22-two
+23-three
 24:four
 25-five
 26-six
@@ -284,18 +281,18 @@ twenty
 
 This is the last line of this file.
 ---------------------------- Test 30 -----------------------------
-./testdata/grepinput-3-features should be added at the end, because some of the tests involve the
-./testdata/grepinput-4-output of line numbers, and we don't want these to change.
-./testdata/grepinput-5-
+./testdata/grepinput-4-features should be added at the end, because some of the tests involve the
+./testdata/grepinput-5-output of line numbers, and we don't want these to change.
+./testdata/grepinput-6-
 ./testdata/grepinput:7:PATTERN at the start of a line.
 ./testdata/grepinput:8:In the middle of a line, PATTERN appears.
 ./testdata/grepinput-9-
 ./testdata/grepinput:10:This pattern is in lower case.
 --
-./testdata/grepinput-582-brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog.
-./testdata/grepinput-583--------------------------------------------------------------------------------
-./testdata/grepinput-584-
-./testdata/grepinput:586:Check up on PATTERN near the end.
+./testdata/grepinput-605-PUT NEW DATA ABOVE THIS LINE.
+./testdata/grepinput-606-=============================
+./testdata/grepinput-607-
+./testdata/grepinput:608:Check up on PATTERN near the end.
 --
 ./testdata/grepinputx-1-This is a second file of input for the pcregrep tests.
 ./testdata/grepinputx-2-
@@ -311,9 +308,8 @@ This is the last line of this file.
 ./testdata/grepinput-12-Here follows a whole lot of stuff that makes the file over 24K long.
 ./testdata/grepinput-13-
 --
-./testdata/grepinput:586:Check up on PATTERN near the end.
-./testdata/grepinput-587-
-./testdata/grepinput-588-This is the last line of this file.
+./testdata/grepinput:608:Check up on PATTERN near the end.
+./testdata/grepinput-609-This is the last line of this file.
 --
 ./testdata/grepinputx:3:Here is the pattern again.
 ./testdata/grepinputx-4-
@@ -334,3 +330,51 @@ RC=0
 ---------------------------- Test 36 -----------------------------
 ./testdata/grepinputx
 RC=0
+---------------------------- Test 37 -----------------------------
+aaaaa0
+aaaaa2
+RC=0
+======== STDERR ========
+pcregrep: pcre_exec() error -8 while matching this line:
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+pcregrep: error -8 means that a resource limit was exceeded
+pcregrep: check your regex for nested unlimited loops
+pcregrep: pcre_exec() error -8 while matching this line:
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+---------------------------- Test 38 ------------------------------
+This line contains a binary zero here >---------------------------- Test 39 ------------------------------
+This is a line before the binary zero.
+This line contains a binary zero here >---------------------------- Test 40 ------------------------------
+This line contains a binary zero here >This is a line after the binary zero.
+---------------------------- Test 41 ------------------------------
+before the binary zero
+after the binary zero
+---------------------------- Test 41 ------------------------------
+./testdata/grepinput:595:before the binary zero
+./testdata/grepinput:597:after the binary zero
+---------------------------- Test 42 ------------------------------
+595:before
+596:zero
+597:after
+---------------------------- Test 43 ------------------------------
+595:before
+596:zero
+597:zero
+---------------------------- Test 44 ------------------------------
+10:pattern
+595:binary
+596:binary
+597:binary
+---------------------------- Test 45 ------------------------------
+pcregrep: Error in 2nd command-line regex at offset 9: missing )
+---------------------------- Test 46 ------------------------------
+AB.VE
+---------------------------- Test 47 ------------------------------
+ABOVE the elephant 
+AB.VE
+AB.VE the turtle
+---------------------------- Test 48 ------------------------------
+ABOVE the elephant 
+AB.VE
+AB.VE the turtle
+PUT NEW DATA ABOVE THIS LINE.

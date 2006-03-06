@@ -6,7 +6,7 @@
 its pattern matching. On a Unix or Win32 system it can recurse into
 directories.
 
-           Copyright (c) 1997-2005 University of Cambridge
+           Copyright (c) 1997-2006 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,7 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <ctype.h>
+#include <locale.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -55,7 +56,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 typedef int BOOL;
 
-#define VERSION "4.0 07-Jun-2005"
+#define VERSION "4.2 09-Jan-2006"
 #define MAX_PATTERN_COUNT 100
 
 #if BUFSIZ > 8192
@@ -65,13 +66,50 @@ typedef int BOOL;
 #endif
 
 
+/* Values for the "filenames" variable, which specifies options for file name
+output. The order is important; it is assumed that a file name is wanted for
+all values greater than FN_DEFAULT. */
+
+enum { FN_NONE, FN_DEFAULT, FN_ONLY, FN_NOMATCH_ONLY, FN_FORCE };
+
+/* Actions for the -d and -D options */
+
+enum { dee_READ, dee_SKIP, dee_RECURSE };
+enum { DEE_READ, DEE_SKIP };
+
+/* Actions for special processing options (flag bits) */
+
+#define PO_WORD_MATCH     0x0001
+#define PO_LINE_MATCH     0x0002
+#define PO_FIXED_STRINGS  0x0004
+
+
 
 /*************************************************
 *               Global variables                 *
 *************************************************/
 
+/* Jeffrey Friedl has some debugging requirements that are not part of the
+regular code. */
+
+#ifdef JFRIEDL_DEBUG
+static int S_arg = -1;
+static unsigned int jfriedl_XR = 0; /* repeat regex attempt this many times */
+static unsigned int jfriedl_XT = 0; /* replicate text this many times */
+static const char *jfriedl_prefix = "";
+static const char *jfriedl_postfix = "";
+#endif
+
+static char *colour_string = (char *)"1;31";
+static char *colour_option = NULL;
+static char *dee_option = NULL;
+static char *DEE_option = NULL;
 static char *pattern_filename = NULL;
 static char *stdin_name = (char *)"(standard input)";
+static char *locale = NULL;
+
+static const unsigned char *pcretables = NULL;
+
 static int  pattern_count = 0;
 static pcre **pattern_list;
 static pcre_extra **hints_list;
@@ -85,24 +123,26 @@ static pcre *exclude_compiled = NULL;
 static int after_context = 0;
 static int before_context = 0;
 static int both_context = 0;
+static int dee_action = dee_READ;
+static int DEE_action = DEE_READ;
+static int error_count = 0;
+static int filenames = FN_DEFAULT;
+static int process_options = 0;
 
 static BOOL count_only = FALSE;
-static BOOL filenames = TRUE;
-static BOOL filenames_only = FALSE;
-static BOOL filenames_nomatch_only = FALSE;
+static BOOL do_colour = FALSE;
 static BOOL hyphenpending = FALSE;
 static BOOL invert = FALSE;
 static BOOL multiline = FALSE;
 static BOOL number = FALSE;
+static BOOL only_matching = FALSE;
 static BOOL quiet = FALSE;
-static BOOL recurse = FALSE;
 static BOOL silent = FALSE;
-static BOOL whole_lines = FALSE;
-static BOOL word_match = FALSE;
 
 /* Structure for options and list of them */
 
-enum { OP_NODATA, OP_STRING, OP_NUMBER };
+enum { OP_NODATA, OP_STRING, OP_OP_STRING, OP_NUMBER, OP_OP_NUMBER,
+       OP_PATLIST };
 
 typedef struct option_item {
   int type;
@@ -112,42 +152,76 @@ typedef struct option_item {
   const char *help_text;
 } option_item;
 
+/* Options without a single-letter equivalent get a negative value. This can be
+used to identify them. */
+
+#define N_COLOUR    (-1)
+#define N_EXCLUDE   (-2)
+#define N_HELP      (-3)
+#define N_INCLUDE   (-4)
+#define N_LABEL     (-5)
+#define N_LOCALE    (-6)
+#define N_NULL      (-7)
+
 static option_item optionlist[] = {
-  { OP_NODATA, -1,  NULL,              "",              "  terminate options" },
-  { OP_NODATA, -1,  NULL,              "help",          "display this help and exit" },
-  { OP_NUMBER, 'A', &after_context,    "after-context=number", "set number of following context lines" },
-  { OP_NUMBER, 'B', &before_context,   "before-context=number", "set number of prior context lines" },
-  { OP_NUMBER, 'C', &both_context,     "context=number", "set number of context lines, before & after" },
-  { OP_NODATA, 'c', NULL,              "count",         "print only a count of matching lines per FILE" },
-  { OP_STRING, 'f', &pattern_filename, "file=path",     "read patterns from file" },
-  { OP_NODATA, 'h', NULL,              "no-filename",   "suppress the prefixing filename on output" },
-  { OP_NODATA, 'i', NULL,              "ignore-case",   "ignore case distinctions" },
-  { OP_NODATA, 'l', NULL,              "files-with-matches", "print only FILE names containing matches" },
-  { OP_NODATA, 'L', NULL,              "files-without-match","print only FILE names not containing matches" },
-  { OP_STRING, -1,  &stdin_name,       "label=name",    "set name for standard input" },
-  { OP_NODATA, 'M', NULL,              "multiline",     "run in multiline mode" },
-  { OP_NODATA, 'n', NULL,              "line-number",   "print line number with output lines" },
-  { OP_NODATA, 'q', NULL,              "quiet",         "suppress output, just set return code" },
-  { OP_NODATA, 'r', NULL,              "recursive",     "recursively scan sub-directories" },
-  { OP_STRING, -1,  &exclude_pattern,  "exclude=pattern","exclude matching files when recursing" },
-  { OP_STRING, -1,  &include_pattern,  "include=pattern","include matching files when recursing" },
-  { OP_NODATA, 's', NULL,              "no-messages",   "suppress error messages" },
-  { OP_NODATA, 'u', NULL,              "utf-8",         "use UTF-8 mode" },
-  { OP_NODATA, 'V', NULL,              "version",       "print version information and exit" },
-  { OP_NODATA, 'v', NULL,              "invert-match",  "select non-matching lines" },
-  { OP_NODATA, 'w', NULL,              "word-regex(p)", "force PATTERN to match only as a word"  },
-  { OP_NODATA, 'x', NULL,              "line-regex(p)", "force PATTERN to match only whole lines" },
-  { OP_NODATA, 0,   NULL,               NULL,            NULL }
+  { OP_NODATA,    N_NULL,   NULL,              "",              "  terminate options" },
+  { OP_NODATA,    N_HELP,   NULL,              "help",          "display this help and exit" },
+  { OP_NUMBER,    'A',      &after_context,    "after-context=number", "set number of following context lines" },
+  { OP_NUMBER,    'B',      &before_context,   "before-context=number", "set number of prior context lines" },
+  { OP_OP_STRING, N_COLOUR, &colour_option,    "color=option",  "matched text color option" },
+  { OP_NUMBER,    'C',      &both_context,     "context=number", "set number of context lines, before & after" },
+  { OP_NODATA,    'c',      NULL,              "count",         "print only a count of matching lines per FILE" },
+  { OP_OP_STRING, N_COLOUR, &colour_option,    "colour=option", "matched text colour option" },
+  { OP_STRING,    'D',      &DEE_option,       "devices=action","how to handle devices, FIFOs, and sockets" },
+  { OP_STRING,    'd',      &dee_option,       "directories=action", "how to handle directories" },
+  { OP_PATLIST,   'e',      NULL,              "regex(p)",      "specify pattern (may be used more than once)" },
+  { OP_NODATA,    'F',      NULL,              "fixed_strings", "patterns are sets of newline-separated strings" },
+  { OP_STRING,    'f',      &pattern_filename, "file=path",     "read patterns from file" },
+  { OP_NODATA,    'H',      NULL,              "with-filename", "force the prefixing filename on output" },
+  { OP_NODATA,    'h',      NULL,              "no-filename",   "suppress the prefixing filename on output" },
+  { OP_NODATA,    'i',      NULL,              "ignore-case",   "ignore case distinctions" },
+  { OP_NODATA,    'l',      NULL,              "files-with-matches", "print only FILE names containing matches" },
+  { OP_NODATA,    'L',      NULL,              "files-without-match","print only FILE names not containing matches" },
+  { OP_STRING,    N_LABEL,  &stdin_name,       "label=name",    "set name for standard input" },
+  { OP_STRING,    N_LOCALE, &locale,           "locale=locale", "use the named locale" },
+  { OP_NODATA,    'M',      NULL,              "multiline",     "run in multiline mode" },
+  { OP_NODATA,    'n',      NULL,              "line-number",   "print line number with output lines" },
+  { OP_NODATA,    'o',      NULL,              "only-matching", "show only the part of the line that matched" },
+  { OP_NODATA,    'q',      NULL,              "quiet",         "suppress output, just set return code" },
+  { OP_NODATA,    'r',      NULL,              "recursive",     "recursively scan sub-directories" },
+  { OP_STRING,    N_EXCLUDE,&exclude_pattern,  "exclude=pattern","exclude matching files when recursing" },
+  { OP_STRING,    N_INCLUDE,&include_pattern,  "include=pattern","include matching files when recursing" },
+#ifdef JFRIEDL_DEBUG
+  { OP_OP_NUMBER, 'S',      &S_arg,            "jeffS",         "replace matched (sub)string with X" },
+#endif
+  { OP_NODATA,    's',      NULL,              "no-messages",   "suppress error messages" },
+  { OP_NODATA,    'u',      NULL,              "utf-8",         "use UTF-8 mode" },
+  { OP_NODATA,    'V',      NULL,              "version",       "print version information and exit" },
+  { OP_NODATA,    'v',      NULL,              "invert-match",  "select non-matching lines" },
+  { OP_NODATA,    'w',      NULL,              "word-regex(p)", "force patterns to match only as words"  },
+  { OP_NODATA,    'x',      NULL,              "line-regex(p)", "force patterns to match only whole lines" },
+  { OP_NODATA,    0,        NULL,               NULL,            NULL }
 };
+
+/* Tables for prefixing and suffixing patterns, according to the -w, -x, and -F
+options. These set the 1, 2, and 4 bits in process_options, respectively. Note
+that the combination of -w and -x has the same effect as -x on its own, so we
+can treat them as the same. */
+
+static const char *prefix[] = {
+  "", "\\b", "^(?:", "^(?:", "\\Q", "\\b\\Q", "^(?:\\Q", "^(?:\\Q" };
+
+static const char *suffix[] = {
+  "", "\\b", ")$",   ")$",   "\\E", "\\E\\b", "\\E)$",   "\\E)$" };
+
 
 
 /*************************************************
-*       Functions for directory scanning         *
+*            OS-specific functions               *
 *************************************************/
 
 /* These functions are defined so that they can be made system specific,
-although at present the only ones are for Unix, Win32, and for "no directory
-recursion support". */
+although at present the only ones are for Unix, Win32, and for "no support". */
 
 
 /************* Directory scanning in Unix ***********/
@@ -191,6 +265,27 @@ static void
 closedirectory(directory_type *dir)
 {
 closedir(dir);
+}
+
+
+/************* Test for regular file in Unix **********/
+
+static int
+isregfile(char *filename)
+{
+struct stat statbuf;
+if (stat(filename, &statbuf) < 0)
+  return 1;        /* In the expectation that opening as a file will fail */
+return (statbuf.st_mode & S_IFMT) == S_IFREG;
+}
+
+
+/************* Test stdout for being a terminal in Unix **********/
+
+static BOOL
+is_stdout_tty(void)
+{
+return isatty(fileno(stdout));
 }
 
 
@@ -292,6 +387,28 @@ free(dir);
 }
 
 
+/************* Test for regular file in Win32 **********/
+
+/* I don't know how to do this, or if it can be done; assume all paths are
+regular if they are not directories. */
+
+int isregfile(char *filename)
+{
+return !isdirectory(filename)
+}
+
+
+/************* Test stdout for being a terminal in Win32 **********/
+
+/* I don't know how to do this; assume never */
+
+static BOOL
+is_stdout_tty(void)
+{
+FALSE;
+}
+
+
 /************* Directory scanning when we can't do it ***********/
 
 /* The type is void, and apart from isdirectory(), the functions do nothing. */
@@ -300,10 +417,27 @@ free(dir);
 
 typedef void directory_type;
 
-int isdirectory(char *filename) { return FALSE; }
+int isdirectory(char *filename) { return 0; }
 directory_type * opendirectory(char *filename) {}
 char *readdirectory(directory_type *dir) {}
 void closedirectory(directory_type *dir) {}
+
+
+/************* Test for regular when we can't do it **********/
+
+/* Assume all files are regular. */
+
+int isregfile(char *filename) { return 1; }
+
+
+/************* Test stdout for being a terminal when we can't do it **********/
+
+static BOOL
+is_stdout_tty(void)
+{
+return FALSE;
+}
+
 
 #endif
 
@@ -336,7 +470,8 @@ return sys_errlist[n];
 *************************************************/
 
 /* This is called if we are about to lose said lines because of buffer filling,
-and at the end of the file.
+and at the end of the file. The data in the line is written using fwrite() so
+that a binary zero does not terminate it.
 
 Arguments:
   lastmatchnumber   the number of the last matching line, plus one
@@ -359,7 +494,7 @@ if (after_context > 0 && lastmatchnumber > 0)
     if (printname != NULL) fprintf(stdout, "%s-", printname);
     if (number) fprintf(stdout, "%d-", lastmatchnumber++);
     while (*pp != '\n') pp++;
-    fprintf(stdout, "%.*s", pp - lastmatchrestart + 1, lastmatchrestart);
+    fwrite(lastmatchrestart, 1, pp - lastmatchrestart + 1, stdout);
     lastmatchrestart = pp + 1;
     }
   hyphenpending = TRUE;
@@ -418,6 +553,7 @@ way, the buffer is shifted left and re-filled. */
 while (ptr < endptr)
   {
   int i;
+  int mrc = 0;
   BOOL match = FALSE;
   char *t = ptr;
   size_t length, linelength;
@@ -433,32 +569,129 @@ while (ptr < endptr)
   while (t < endptr && *t++ != '\n') linelength++;
   length = multiline? endptr - ptr : linelength;
 
+
+  /* Extra processing for Jeffrey Friedl's debugging. */
+
+#ifdef JFRIEDL_DEBUG
+  if (jfriedl_XT || jfriedl_XR)
+  {
+      #include <sys/time.h>
+      #include <time.h>
+      struct timeval start_time, end_time;
+      struct timezone dummy;
+
+      if (jfriedl_XT)
+      {
+          unsigned long newlen = length * jfriedl_XT + strlen(jfriedl_prefix) + strlen(jfriedl_postfix);
+          const char *orig = ptr;
+          ptr = malloc(newlen + 1);
+          if (!ptr) {
+                  printf("out of memory");
+                  exit(2);
+          }
+          endptr = ptr;
+          strcpy(endptr, jfriedl_prefix); endptr += strlen(jfriedl_prefix);
+          for (i = 0; i < jfriedl_XT; i++) {
+                  strncpy(endptr, orig,  length);
+                  endptr += length;
+          }
+          strcpy(endptr, jfriedl_postfix); endptr += strlen(jfriedl_postfix);
+          length = newlen;
+      }
+
+      if (gettimeofday(&start_time, &dummy) != 0)
+              perror("bad gettimeofday");
+
+
+      for (i = 0; i < jfriedl_XR; i++)
+          match = (pcre_exec(pattern_list[0], hints_list[0], ptr, length, 0, 0, offsets, 99) >= 0);
+
+      if (gettimeofday(&end_time, &dummy) != 0)
+              perror("bad gettimeofday");
+
+      double delta = ((end_time.tv_sec + (end_time.tv_usec / 1000000.0))
+                      -
+                      (start_time.tv_sec + (start_time.tv_usec / 1000000.0)));
+
+      printf("%s TIMER[%.4f]\n", match ? "MATCH" : "FAIL", delta);
+      return 0;
+  }
+#endif
+
+
   /* Run through all the patterns until one matches. Note that we don't include
   the final newline in the subject string. */
 
-  for (i = 0; !match && i < pattern_count; i++)
+  for (i = 0; i < pattern_count; i++)
     {
-    match = pcre_exec(pattern_list[i], hints_list[i], ptr, length, 0, 0,
-      offsets, 99) >= 0;
+    mrc = pcre_exec(pattern_list[i], hints_list[i], ptr, length, 0, 0,
+      offsets, 99);
+    if (mrc >= 0) { match = TRUE; break; }
+    if (mrc != PCRE_ERROR_NOMATCH)
+      {
+      fprintf(stderr, "pcregrep: pcre_exec() error %d while matching ", mrc);
+      if (pattern_count > 1) fprintf(stderr, "pattern number %d to ", i+1);
+      fprintf(stderr, "this line:\n");
+      fwrite(ptr, 1, linelength, stderr);   /* In case binary zero included */
+      fprintf(stderr, "\n");
+      if (error_count == 0 &&
+          (mrc == PCRE_ERROR_MATCHLIMIT || mrc == PCRE_ERROR_RECURSIONLIMIT))
+        {
+        fprintf(stderr, "pcregrep: error %d means that a resource limit "
+          "was exceeded\n", mrc);
+        fprintf(stderr, "pcregrep: check your regex for nested unlimited loops\n");
+        }
+      if (error_count++ > 20)
+        {
+        fprintf(stderr, "pcregrep: too many errors - abandoned\n");
+        exit(2);
+        }
+      match = invert;    /* No more matching; don't show the line again */
+      break;
+      }
     }
 
-  /* If it's a match or a not-match (as required), print what's wanted. */
+  /* If it's a match or a not-match (as required), do what's wanted. */
 
   if (match != invert)
     {
     BOOL hyphenprinted = FALSE;
 
-    if (filenames_nomatch_only) return 1;
+    /* We've failed if we want a file that doesn't have any matches. */
+
+    if (filenames == FN_NOMATCH_ONLY) return 1;
+
+    /* Just count if just counting is wanted. */
 
     if (count_only) count++;
 
-    else if (filenames_only)
+    /* If all we want is a file name, there is no need to scan any more lines
+    in the file. */
+
+    else if (filenames == FN_ONLY)
       {
       fprintf(stdout, "%s\n", printname);
       return 0;
       }
 
+    /* Likewise, if all we want is a yes/no answer. */
+
     else if (quiet) return 0;
+
+    /* The --only-matching option prints just the substring that matched, and
+    does not pring any context. */
+
+    else if (only_matching)
+      {
+      if (printname != NULL) fprintf(stdout, "%s:", printname);
+      if (number) fprintf(stdout, "%d:", linenumber);
+      fwrite(ptr + offsets[0], 1, offsets[1] - offsets[0], stdout);
+      fprintf(stdout, "\n");
+      }
+
+    /* This is the default case when none of the above options is set. We print
+    the matching lines(s), possibly preceded and/or followed by other lines of
+    context. */
 
     else
       {
@@ -478,7 +711,8 @@ while (ptr < endptr)
           }
 
         /* It is important to advance lastmatchrestart during this printing so
-        that it interacts correctly with any "before" printing below. */
+        that it interacts correctly with any "before" printing below. Print
+        each line's data using fwrite() in case there are binary zeroes. */
 
         while (lastmatchrestart < p)
           {
@@ -486,7 +720,7 @@ while (ptr < endptr)
           if (printname != NULL) fprintf(stdout, "%s-", printname);
           if (number) fprintf(stdout, "%d-", lastmatchnumber++);
           while (*pp != '\n') pp++;
-          fprintf(stdout, "%.*s", pp - lastmatchrestart + 1, lastmatchrestart);
+          fwrite(lastmatchrestart, 1, pp - lastmatchrestart + 1, stdout);
           lastmatchrestart = pp + 1;
           }
         if (lastmatchrestart != ptr) hyphenpending = TRUE;
@@ -510,8 +744,9 @@ while (ptr < endptr)
         char *p = ptr;
 
         while (p > buffer && (lastmatchnumber == 0 || p > lastmatchrestart) &&
-               linecount++ < before_context)
+               linecount < before_context)
           {
+          linecount++;
           p--;
           while (p > buffer && p[-1] != '\n') p--;
           }
@@ -525,15 +760,17 @@ while (ptr < endptr)
           if (printname != NULL) fprintf(stdout, "%s-", printname);
           if (number) fprintf(stdout, "%d-", linenumber - linecount--);
           while (*pp != '\n') pp++;
-          fprintf(stdout, "%.*s", pp - p + 1, p);
+          fwrite(p, 1, pp - p + 1, stdout);   /* In case binary zero */
           p = pp + 1;
           }
         }
 
       /* Now print the matching line(s); ensure we set hyphenpending at the end
-      of the file. */
+      of the file if any context lines are being output. */
 
-      endhyphenpending = TRUE;
+      if (after_context > 0 || before_context > 0)
+        endhyphenpending = TRUE;
+
       if (printname != NULL) fprintf(stdout, "%s:", printname);
       if (number) fprintf(stdout, "%d:", linenumber);
 
@@ -551,8 +788,41 @@ while (ptr < endptr)
         linelength = endmatch - ptr;
         }
 
-      fprintf(stdout, "%.*s\n", linelength, ptr);
+      /*** NOTE: Use only fwrite() to output the data line, so that binary
+      zeroes are treated as just another data character. */
+
+      /* This extra option, for Jeffrey Friedl's debugging requirements,
+      replaces the matched string, or a specific captured string if it exists,
+      with X. When this happens, colouring is ignored. */
+
+#ifdef JFRIEDL_DEBUG
+      if (S_arg >= 0 && S_arg < mrc)
+        {
+        int first = S_arg * 2;
+        int last  = first + 1;
+        fwrite(ptr, 1, offsets[first], stdout);
+        fprintf(stdout, "X");
+        fwrite(ptr + offsets[last], 1, linelength - offsets[last], stdout);
+        }
+      else
+#endif
+
+      /* We have to split the line(s) up if colouring. */
+
+      if (do_colour)
+        {
+        fwrite(ptr, 1, offsets[0], stdout);
+        fprintf(stdout, "%c[%sm", 0x1b, colour_string);
+        fwrite(ptr + offsets[0], 1, offsets[1] - offsets[0], stdout);
+        fprintf(stdout, "%c[00m", 0x1b);
+        fwrite(ptr + offsets[1], 1, linelength - offsets[1], stdout);
+        }
+      else fwrite(ptr, 1, linelength, stdout);
+
+      fprintf(stdout, "\n");
       }
+
+    /* End of doing what has to be done for a match */
 
     rc = 0;    /* Had some success */
 
@@ -599,13 +869,16 @@ while (ptr < endptr)
 /* End of file; print final "after" lines if wanted; do_after_lines sets
 hyphenpending if it prints something. */
 
-do_after_lines(lastmatchnumber, lastmatchrestart, endptr, printname);
-hyphenpending |= endhyphenpending;
+if (!only_matching && !count_only)
+  {
+  do_after_lines(lastmatchnumber, lastmatchrestart, endptr, printname);
+  hyphenpending |= endhyphenpending;
+  }
 
 /* Print the file name if we are looking for those without matches and there
 were none. If we found a match, we won't have got this far. */
 
-if (filenames_nomatch_only)
+if (filenames == FN_NOMATCH_ONLY)
   {
   fprintf(stdout, "%s\n", printname);
   return 0;
@@ -633,9 +906,7 @@ recursing; if it's a file, grep it.
 
 Arguments:
   pathname          the path to investigate
-  dir_recurse       TRUE if recursing is wanted (-r)
-  show_filenames    TRUE if file names are wanted for multiple files, except
-                      for the only file at top level when not filenames_only
+  dir_recurse       TRUE if recursing is wanted (-r or -drecurse)
   only_one_at_top   TRUE if the path is the only one at toplevel
 
 Returns:   0 if there was at least one match
@@ -646,69 +917,77 @@ However, file opening failures are suppressed if "silent" is set.
 */
 
 static int
-grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL show_filenames,
-  BOOL only_one_at_top)
+grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
 {
 int rc = 1;
 int sep;
 FILE *in;
-char *printname;
 
 /* If the file name is "-" we scan stdin */
 
 if (strcmp(pathname, "-") == 0)
   {
   return pcregrep(stdin,
-    (filenames_only || filenames_nomatch_only ||
-    (show_filenames && !only_one_at_top))?
+    (filenames > FN_DEFAULT || (filenames == FN_DEFAULT && !only_one_at_top))?
       stdin_name : NULL);
   }
 
-/* If the file is a directory and we are recursing, scan each file within it,
-subject to any include or exclude patterns that were set. The scanning code is
-localized so it can be made system-specific. */
 
-if ((sep = isdirectory(pathname)) != 0 && dir_recurse)
+/* If the file is a directory, skip if skipping or if we are recursing, scan
+each file within it, subject to any include or exclude patterns that were set.
+The scanning code is localized so it can be made system-specific. */
+
+if ((sep = isdirectory(pathname)) != 0)
   {
-  char buffer[1024];
-  char *nextfile;
-  directory_type *dir = opendirectory(pathname);
-
-  if (dir == NULL)
+  if (dee_action == dee_SKIP) return 1;
+  if (dee_action == dee_RECURSE)
     {
-    if (!silent)
-      fprintf(stderr, "pcregrep: Failed to open directory %s: %s\n", pathname,
-        strerror(errno));
-    return 2;
+    char buffer[1024];
+    char *nextfile;
+    directory_type *dir = opendirectory(pathname);
+
+    if (dir == NULL)
+      {
+      if (!silent)
+        fprintf(stderr, "pcregrep: Failed to open directory %s: %s\n", pathname,
+          strerror(errno));
+      return 2;
+      }
+
+    while ((nextfile = readdirectory(dir)) != NULL)
+      {
+      int frc, blen;
+      sprintf(buffer, "%.512s%c%.128s", pathname, sep, nextfile);
+      blen = strlen(buffer);
+
+      if (exclude_compiled != NULL &&
+          pcre_exec(exclude_compiled, NULL, buffer, blen, 0, 0, NULL, 0) >= 0)
+        continue;
+
+      if (include_compiled != NULL &&
+          pcre_exec(include_compiled, NULL, buffer, blen, 0, 0, NULL, 0) < 0)
+        continue;
+
+      frc = grep_or_recurse(buffer, dir_recurse, FALSE);
+      if (frc > 1) rc = frc;
+       else if (frc == 0 && rc == 1) rc = 0;
+      }
+
+    closedirectory(dir);
+    return rc;
     }
-
-  while ((nextfile = readdirectory(dir)) != NULL)
-    {
-    int frc, blen;
-    sprintf(buffer, "%.512s%c%.128s", pathname, sep, nextfile);
-    blen = strlen(buffer);
-
-    if (exclude_compiled != NULL &&
-        pcre_exec(exclude_compiled, NULL, buffer, blen, 0, 0, NULL, 0) >= 0)
-      continue;
-
-    if (include_compiled != NULL &&
-        pcre_exec(include_compiled, NULL, buffer, blen, 0, 0, NULL, 0) < 0)
-      continue;
-
-    frc = grep_or_recurse(buffer, dir_recurse, TRUE, FALSE);
-    if (frc > 1) rc = frc;
-     else if (frc == 0 && rc == 1) rc = 0;
-    }
-
-  closedirectory(dir);
-  return rc;
   }
 
-/* If the file is not a directory, or we are not recursing, scan it. If this is
-the first and only argument at top level, we don't show the file name (unless
-we are only showing the file name). Otherwise, control is via the
-show_filenames variable. */
+/* If the file is not a directory and not a regular file, skip it if that's
+been requested. */
+
+else if (!isregfile(pathname) && DEE_action == DEE_SKIP) return 1;
+
+/* Control reaches here if we have a regular file, or if we have a directory
+and recursion or skipping was not requested, or if we have anything else and
+skipping was not requested. The scan proceeds. If this is the first and only
+argument at top level, we don't show the file name, unless we are only showing
+the file name, or the filename was forced (-H). */
 
 in = fopen(pathname, "r");
 if (in == NULL)
@@ -719,10 +998,8 @@ if (in == NULL)
   return 2;
   }
 
-printname =  (filenames_only || filenames_nomatch_only ||
-  (show_filenames && !only_one_at_top))? pathname : NULL;
-
-rc = pcregrep(in, printname);
+rc = pcregrep(in, (filenames > FN_DEFAULT ||
+  (filenames == FN_DEFAULT && !only_one_at_top))? pathname : NULL);
 
 fclose(in);
 return rc;
@@ -738,7 +1015,13 @@ return rc;
 static int
 usage(int rc)
 {
-fprintf(stderr, "Usage: pcregrep [-LMVcfhilnqrsvwx] [long-options] [pattern] [file1 file2 ...]\n");
+option_item *op;
+fprintf(stderr, "Usage: pcregrep [-");
+for (op = optionlist; op->one_char != 0; op++)
+  {
+  if (op->one_char > 0) fprintf(stderr, "%c", op->one_char);
+  }
+fprintf(stderr, "] [long options] [pattern] [files]\n");
 fprintf(stderr, "Type `pcregrep --help' for more information.\n");
 return rc;
 }
@@ -757,8 +1040,8 @@ option_item *op;
 
 printf("Usage: pcregrep [OPTION]... [PATTERN] [FILE1 FILE2 ...]\n");
 printf("Search for PATTERN in each FILE or standard input.\n");
-printf("PATTERN must be present if -f is not used.\n");
-printf("\"-\" can be used as a file name to mean STDIN.\n");
+printf("PATTERN must be present if neither -e nor -f is used.\n");
+printf("\"-\" can be used as a file name to mean STDIN.\n\n");
 printf("Example: pcregrep -i 'hello.*world' menu.h main.c\n\n");
 
 printf("Options:\n");
@@ -794,21 +1077,24 @@ handle_option(int letter, int options)
 {
 switch(letter)
   {
-  case -1:  help(); exit(0);
+  case N_HELP: help(); exit(0);
   case 'c': count_only = TRUE; break;
-  case 'h': filenames = FALSE; break;
+  case 'F': process_options |= PO_FIXED_STRINGS; break;
+  case 'H': filenames = FN_FORCE; break;
+  case 'h': filenames = FN_NONE; break;
   case 'i': options |= PCRE_CASELESS; break;
-  case 'l': filenames_only = TRUE; break;
-  case 'L': filenames_nomatch_only = TRUE; break;
+  case 'l': filenames = FN_ONLY; break;
+  case 'L': filenames = FN_NOMATCH_ONLY; break;
   case 'M': multiline = TRUE; options |= PCRE_MULTILINE|PCRE_FIRSTLINE; break;
   case 'n': number = TRUE; break;
+  case 'o': only_matching = TRUE; break;
   case 'q': quiet = TRUE; break;
-  case 'r': recurse = TRUE; break;
+  case 'r': dee_action = dee_RECURSE; break;
   case 's': silent = TRUE; break;
   case 'u': options |= PCRE_UTF8; break;
   case 'v': invert = TRUE; break;
-  case 'w': word_match = TRUE; break;
-  case 'x': whole_lines = TRUE; break;
+  case 'w': process_options |= PO_WORD_MATCH; break;
+  case 'x': process_options |= PO_LINE_MATCH; break;
 
   case 'V':
   fprintf(stderr, "pcregrep version %s using ", VERSION);
@@ -828,6 +1114,134 @@ return options;
 
 
 /*************************************************
+*          Construct printed ordinal             *
+*************************************************/
+
+/* This turns a number into "1st", "3rd", etc. */
+
+static char *
+ordin(int n)
+{
+static char buffer[8];
+char *p = buffer;
+sprintf(p, "%d", n);
+while (*p != 0) p++;
+switch (n%10)
+  {
+  case 1: strcpy(p, "st"); break;
+  case 2: strcpy(p, "nd"); break;
+  case 3: strcpy(p, "rd"); break;
+  default: strcpy(p, "th"); break;
+  }
+return buffer;
+}
+
+
+
+/*************************************************
+*          Compile a single pattern              *
+*************************************************/
+
+/* When the -F option has been used, this is called for each substring.
+Otherwise it's called for each supplied pattern.
+
+Arguments:
+  pattern        the pattern string
+  options        the PCRE options
+  filename       the file name, or NULL for a command-line pattern
+  count          0 if this is the only command line pattern, or
+                 number of the command line pattern, or
+                 linenumber for a pattern from a file
+
+Returns:         TRUE on success, FALSE after an error
+*/
+
+static BOOL
+compile_single_pattern(char *pattern, int options, char *filename, int count)
+{
+char buffer[MBUFTHIRD + 16];
+const char *error;
+int errptr;
+
+if (pattern_count >= MAX_PATTERN_COUNT)
+  {
+  fprintf(stderr, "pcregrep: Too many %spatterns (max %d)\n",
+    (filename == NULL)? "command-line " : "", MAX_PATTERN_COUNT);
+  return FALSE;
+  }
+
+sprintf(buffer, "%s%.*s%s", prefix[process_options], MBUFTHIRD, pattern,
+  suffix[process_options]);
+pattern_list[pattern_count] =
+  pcre_compile(buffer, options, &error, &errptr, pcretables);
+if (pattern_list[pattern_count++] != NULL) return TRUE;
+
+/* Handle compile errors */
+
+errptr -= (int)strlen(prefix[process_options]);
+if (errptr > (int)strlen(pattern)) errptr = (int)strlen(pattern);
+
+if (filename == NULL)
+  {
+  if (count == 0)
+    fprintf(stderr, "pcregrep: Error in command-line regex "
+      "at offset %d: %s\n", errptr, error);
+  else
+    fprintf(stderr, "pcregrep: Error in %s command-line regex "
+      "at offset %d: %s\n", ordin(count), errptr, error);
+  }
+else
+  {
+  fprintf(stderr, "pcregrep: Error in regex in line %d of %s "
+    "at offset %d: %s\n", count, filename, errptr, error);
+  }
+
+return FALSE;
+}
+
+
+
+/*************************************************
+*           Compile one supplied pattern         *
+*************************************************/
+
+/* When the -F option has been used, each string may be a list of strings,
+separated by newlines. They will be matched literally.
+
+Arguments:
+  pattern        the pattern string
+  options        the PCRE options
+  filename       the file name, or NULL for a command-line pattern
+  count          0 if this is the only command line pattern, or
+                 number of the command line pattern, or
+                 linenumber for a pattern from a file
+
+Returns:         TRUE on success, FALSE after an error
+*/
+
+static BOOL
+compile_pattern(char *pattern, int options, char *filename, int count)
+{
+if ((process_options & PO_FIXED_STRINGS) != 0)
+  {
+  char buffer[MBUFTHIRD];
+  for(;;)
+    {
+    char *p = strchr(pattern, '\n');
+    if (p == NULL)
+      return compile_single_pattern(pattern, options, filename, count);
+    sprintf(buffer, "%.*s", p - pattern, pattern);
+    pattern = p + 1;
+    if (!compile_single_pattern(buffer, options, filename, count))
+      return FALSE;
+    }
+  }
+else return compile_single_pattern(pattern, options, filename, count);
+}
+
+
+
+/*************************************************
 *                Main program                    *
 *************************************************/
 
@@ -838,10 +1252,13 @@ main(int argc, char **argv)
 {
 int i, j;
 int rc = 1;
-int options = 0;
+int pcre_options = 0;
+int cmd_pattern_count = 0;
 int errptr;
-const char *error;
 BOOL only_one_at_top;
+char *patterns[MAX_PATTERN_COUNT];
+const char *locale_from = "--locale";
+const char *error;
 
 /* Process the options */
 
@@ -855,11 +1272,11 @@ for (i = 1; i < argc; i++)
   if (argv[i][0] != '-') break;
 
   /* If we hit an argument that is just "-", it may be a reference to STDIN,
-  but only if we have previously had -f to define the patterns. */
+  but only if we have previously had -e or -f to define the patterns. */
 
   if (argv[i][1] == 0)
     {
-    if (pattern_filename != NULL) break;
+    if (pattern_filename != NULL || pattern_count > 0) break;
       else exit(usage(2));
     }
 
@@ -881,9 +1298,9 @@ for (i = 1; i < argc; i++)
     /* Some long options have data that follows after =, for example file=name.
     Some options have variations in the long name spelling: specifically, we
     allow "regexp" because GNU grep allows it, though I personally go along
-    with Jeff Friedl in preferring "regex" without the "p". These options are
-    entered in the table as "regex(p)". No option is in both these categories,
-    fortunately. */
+    with Jeffrey Friedl and Larry Wall in preferring "regex" without the "p".
+    These options are entered in the table as "regex(p)". No option is in both
+    these categories, fortunately. */
 
     for (op = optionlist; op->one_char != 0; op++)
       {
@@ -931,6 +1348,30 @@ for (i = 1; i < argc; i++)
       }
     }
 
+
+  /* Jeffrey Friedl's debugging harness uses these additional options which
+  are not in the right form for putting in the option table because they use
+  only one hyphen, yet are more than one character long. By putting them
+  separately here, they will not get displayed as part of the help() output,
+  but I don't think Jeffrey will care about that. */
+
+#ifdef JFRIEDL_DEBUG
+  else if (strcmp(argv[i], "-pre") == 0) {
+          jfriedl_prefix = argv[++i];
+          continue;
+  } else if (strcmp(argv[i], "-post") == 0) {
+          jfriedl_postfix = argv[++i];
+          continue;
+  } else if (strcmp(argv[i], "-XT") == 0) {
+          sscanf(argv[++i], "%d", &jfriedl_XT);
+          continue;
+  } else if (strcmp(argv[i], "-XR") == 0) {
+          sscanf(argv[++i], "%d", &jfriedl_XR);
+          continue;
+  }
+#endif
+
+
   /* One-char options; many that have no data may be in a single argument; we
   continue till we hit the last one or one that needs data. */
 
@@ -953,42 +1394,94 @@ for (i = 1; i < argc; i++)
         option_data = s+1;
         break;
         }
-      options = handle_option(*s++, options);
+      pcre_options = handle_option(*s++, pcre_options);
       }
     }
 
-  /* At this point we should have op pointing to a matched option */
+  /* At this point we should have op pointing to a matched option. If the type
+  is NO_DATA, it means that there is no data, and the option might set
+  something in the PCRE options. */
 
   if (op->type == OP_NODATA)
-    options = handle_option(op->one_char, options);
+    {
+    pcre_options = handle_option(op->one_char, pcre_options);
+    continue;
+    }
+
+  /* If the option type is OP_OP_STRING or OP_OP_NUMBER, it's an option that
+  either has a value or defaults to something. It cannot have data in a
+  separate item. At the moment, the only such options are "colo(u)r" and
+  Jeffrey Friedl's special -S debugging option. */
+
+  if (*option_data == 0 &&
+      (op->type == OP_OP_STRING || op->type == OP_OP_NUMBER))
+    {
+    switch (op->one_char)
+      {
+      case N_COLOUR:
+      colour_option = (char *)"auto";
+      break;
+#ifdef JFRIEDL_DEBUG
+      case 'S':
+      S_arg = 0;
+      break;
+#endif
+      }
+    continue;
+    }
+
+  /* Otherwise, find the data string for the option. */
+
+  if (*option_data == 0)
+    {
+    if (i >= argc - 1 || longopwasequals)
+      {
+      fprintf(stderr, "pcregrep: Data missing after %s\n", argv[i]);
+      exit(usage(2));
+      }
+    option_data = argv[++i];
+    }
+
+  /* If the option type is OP_PATLIST, it's the -e option, which can be called
+  multiple times to create a list of patterns. */
+
+  if (op->type == OP_PATLIST)
+    {
+    if (cmd_pattern_count >= MAX_PATTERN_COUNT)
+      {
+      fprintf(stderr, "pcregrep: Too many command-line patterns (max %d)\n",
+        MAX_PATTERN_COUNT);
+      return 2;
+      }
+    patterns[cmd_pattern_count++] = option_data;
+    }
+
+  /* Otherwise, deal with single string or numeric data values. */
+
+  else if (op->type != OP_NUMBER && op->type != OP_OP_NUMBER)
+    {
+    *((char **)op->dataptr) = option_data;
+    }
   else
     {
-    if (*option_data == 0)
+    char *endptr;
+    int n = strtoul(option_data, &endptr, 10);
+    if (*endptr != 0)
       {
-      if (i >= argc - 1 || longopwasequals)
+      if (longop)
         {
-        fprintf(stderr, "pcregrep: Data missing after %s\n", argv[i]);
-        exit(usage(2));
+        char *equals = strchr(op->long_name, '=');
+        int nlen = (equals == NULL)? (int)strlen(op->long_name) :
+          equals - op->long_name;
+        fprintf(stderr, "pcregrep: Malformed number \"%s\" after --%.*s\n",
+          option_data, nlen, op->long_name);
         }
-      option_data = argv[++i];
+      else
+        fprintf(stderr, "pcregrep: Malformed number \"%s\" after -%c\n",
+          option_data, op->one_char);
+      exit(usage(2));
       }
-
-    if (op->type == OP_STRING) *((char **)op->dataptr) = option_data; else
-      {
-      char *endptr;
-      int n = strtoul(option_data, &endptr, 10);
-      if (*endptr != 0)
-        {
-        if (longop)
-          fprintf(stderr, "pcregrep: Malformed number \"%s\" after --%s\n",
-            option_data, op->long_name);
-        else
-          fprintf(stderr, "pcregrep: Malformed number \"%s\" after -%c\n",
-            option_data, op->one_char);
-        exit(usage(2));
-        }
-      *((int *)op->dataptr) = n;
-      }
+    *((int *)op->dataptr) = n;
     }
   }
 
@@ -1001,6 +1494,97 @@ if (both_context > 0)
   if (before_context == 0) before_context = both_context;
   }
 
+/* If a locale has not been provided as an option, see if the LC_CTYPE or
+LC_ALL environment variable is set, and if so, use it. */
+
+if (locale == NULL)
+  {
+  locale = getenv("LC_ALL");
+  locale_from = "LCC_ALL";
+  }
+
+if (locale == NULL)
+  {
+  locale = getenv("LC_CTYPE");
+  locale_from = "LC_CTYPE";
+  }
+
+/* If a locale has been provided, set it, and generate the tables the PCRE
+needs. Otherwise, pcretables==NULL, which causes the use of default tables. */
+
+if (locale != NULL)
+  {
+  if (setlocale(LC_CTYPE, locale) == NULL)
+    {
+    fprintf(stderr, "pcregrep: Failed to set locale %s (obtained from %s)\n",
+      locale, locale_from);
+    return 2;
+    }
+  pcretables = pcre_maketables();
+  }
+
+/* Sort out colouring */
+
+if (colour_option != NULL && strcmp(colour_option, "never") != 0)
+  {
+  if (strcmp(colour_option, "always") == 0) do_colour = TRUE;
+  else if (strcmp(colour_option, "auto") == 0) do_colour = is_stdout_tty();
+  else
+    {
+    fprintf(stderr, "pcregrep: Unknown colour setting \"%s\"\n",
+      colour_option);
+    return 2;
+    }
+  if (do_colour)
+    {
+    char *cs = getenv("PCREGREP_COLOUR");
+    if (cs == NULL) cs = getenv("PCREGREP_COLOR");
+    if (cs != NULL) colour_string = cs;
+    }
+  }
+
+/* Interpret the text values for -d and -D */
+
+if (dee_option != NULL)
+  {
+  if (strcmp(dee_option, "read") == 0) dee_action = dee_READ;
+  else if (strcmp(dee_option, "recurse") == 0) dee_action = dee_RECURSE;
+  else if (strcmp(dee_option, "skip") == 0) dee_action = dee_SKIP;
+  else
+    {
+    fprintf(stderr, "pcregrep: Invalid value \"%s\" for -d\n", dee_option);
+    return 2;
+    }
+  }
+
+if (DEE_option != NULL)
+  {
+  if (strcmp(DEE_option, "read") == 0) DEE_action = DEE_READ;
+  else if (strcmp(DEE_option, "skip") == 0) DEE_action = DEE_SKIP;
+  else
+    {
+    fprintf(stderr, "pcregrep: Invalid value \"%s\" for -D\n", DEE_option);
+    return 2;
+    }
+  }
+
+/* Check the values for Jeffrey Friedl's debugging options. */
+
+#ifdef JFRIEDL_DEBUG
+if (S_arg > 9)
+  {
+  fprintf(stderr, "pcregrep: bad value for -S option\n");
+  return 2;
+  }
+if (jfriedl_XT != 0 || jfriedl_XR != 0)
+  {
+  if (jfriedl_XT == 0) jfriedl_XT = 1;
+  if (jfriedl_XR == 0) jfriedl_XR = 1;
+  }
+#endif
+
+/* Get memory to store the pattern and hints lists. */
+
 pattern_list = (pcre **)malloc(MAX_PATTERN_COUNT * sizeof(pcre *));
 hints_list = (pcre_extra **)malloc(MAX_PATTERN_COUNT * sizeof(pcre_extra *));
 
@@ -1010,93 +1594,63 @@ if (pattern_list == NULL || hints_list == NULL)
   return 2;
   }
 
-/* Compile the regular expression(s). */
+/* If no patterns were provided by -e, and there is no file provided by -f,
+the first argument is the one and only pattern, and it must exist. */
+
+if (cmd_pattern_count == 0 && pattern_filename == NULL)
+  {
+  if (i >= argc) return usage(2);
+  patterns[cmd_pattern_count++] = argv[i++];
+  }
+
+/* Compile the patterns that were provided on the command line, either by
+multiple uses of -e or as a single unkeyed pattern. */
+
+for (j = 0; j < cmd_pattern_count; j++)
+  {
+  if (!compile_pattern(patterns[j], pcre_options, NULL,
+       (j == 0 && cmd_pattern_count == 1)? 0 : j + 1))
+    return 2;
+  }
+
+/* Compile the regular expressions that are provided in a file. */
 
 if (pattern_filename != NULL)
   {
-  FILE *f = fopen(pattern_filename, "r");
-  char buffer[MBUFTHIRD + 16];
-  char *rdstart;
-  int adjust = 0;
+  int linenumber = 0;
+  FILE *f;
+  char *filename;
+  char buffer[MBUFTHIRD];
 
-  if (f == NULL)
+  if (strcmp(pattern_filename, "-") == 0)
     {
-    fprintf(stderr, "pcregrep: Failed to open %s: %s\n", pattern_filename,
-      strerror(errno));
-    return 2;
+    f = stdin;
+    filename = stdin_name;
     }
-
-  if (whole_lines)
+  else
     {
-    strcpy(buffer, "^(?:");
-    adjust = 4;
-    }
-  else if (word_match)
-    {
-    strcpy(buffer, "\\b");
-    adjust = 2;
-    }
-
-  rdstart = buffer + adjust;
-  while (fgets(rdstart, MBUFTHIRD, f) != NULL)
-    {
-    char *s = rdstart + (int)strlen(rdstart);
-    if (pattern_count >= MAX_PATTERN_COUNT)
+    f = fopen(pattern_filename, "r");
+    if (f == NULL)
       {
-      fprintf(stderr, "pcregrep: Too many patterns in file (max %d)\n",
-        MAX_PATTERN_COUNT);
+      fprintf(stderr, "pcregrep: Failed to open %s: %s\n", pattern_filename,
+        strerror(errno));
       return 2;
       }
-    while (s > rdstart && isspace((unsigned char)(s[-1]))) s--;
-    if (s == rdstart) continue;
-    if (whole_lines) strcpy(s, ")$");
-      else if (word_match)strcpy(s, "\\b");
-        else *s = 0;
-    pattern_list[pattern_count] = pcre_compile(buffer, options, &error,
-      &errptr, NULL);
-    if (pattern_list[pattern_count++] == NULL)
-      {
-      fprintf(stderr, "pcregrep: Error in regex number %d at offset %d: %s\n",
-        pattern_count, errptr - adjust, error);
+    filename = pattern_filename;
+    }
+
+  while (fgets(buffer, MBUFTHIRD, f) != NULL)
+    {
+    char *s = buffer + (int)strlen(buffer);
+    while (s > buffer && isspace((unsigned char)(s[-1]))) s--;
+    *s = 0;
+    linenumber++;
+    if (buffer[0] == 0) continue;   /* Skip blank lines */
+    if (!compile_pattern(buffer, pcre_options, filename, linenumber))
       return 2;
-      }
     }
-  fclose(f);
-  }
 
-/* If no file name, a single regex must be given inline. */
-
-else
-  {
-  char buffer[MBUFTHIRD + 16];
-  char *pat;
-  int adjust = 0;
-
-  if (i >= argc) return usage(2);
-
-  if (whole_lines)
-    {
-    sprintf(buffer, "^(?:%.*s)$", MBUFTHIRD, argv[i++]);
-    pat = buffer;
-    adjust = 4;
-    }
-  else if (word_match)
-    {
-    sprintf(buffer, "\\b%.*s\\b", MBUFTHIRD, argv[i++]);
-    pat = buffer;
-    adjust = 2;
-    }
-  else pat = argv[i++];
-
-  pattern_list[0] = pcre_compile(pat, options, &error, &errptr, NULL);
-
-  if (pattern_list[0] == NULL)
-    {
-    fprintf(stderr, "pcregrep: Error in regex at offset %d: %s\n",
-      errptr - adjust, error);
-    return 2;
-    }
-  pattern_count++;
+  if (f != stdin) fclose(f);
   }
 
 /* Study the regular expressions, as we will be running them many times */
@@ -1117,7 +1671,8 @@ for (j = 0; j < pattern_count; j++)
 
 if (exclude_pattern != NULL)
   {
-  exclude_compiled = pcre_compile(exclude_pattern, 0, &error, &errptr, NULL);
+  exclude_compiled = pcre_compile(exclude_pattern, 0, &error, &errptr,
+    pcretables);
   if (exclude_compiled == NULL)
     {
     fprintf(stderr, "pcregrep: Error in 'exclude' regex at offset %d: %s\n",
@@ -1128,7 +1683,8 @@ if (exclude_pattern != NULL)
 
 if (include_pattern != NULL)
   {
-  include_compiled = pcre_compile(include_pattern, 0, &error, &errptr, NULL);
+  include_compiled = pcre_compile(include_pattern, 0, &error, &errptr,
+    pcretables);
   if (include_compiled == NULL)
     {
     fprintf(stderr, "pcregrep: Error in 'include' regex at offset %d: %s\n",
@@ -1137,21 +1693,22 @@ if (include_pattern != NULL)
     }
   }
 
-/* If there are no further arguments, do the business on stdin and exit */
+/* If there are no further arguments, do the business on stdin and exit. */
 
-if (i >= argc) return pcregrep(stdin,
-  (filenames_only || filenames_nomatch_only)? stdin_name : NULL);
+if (i >= argc)
+  return pcregrep(stdin, (filenames > FN_DEFAULT)? stdin_name : NULL);
 
 /* Otherwise, work through the remaining arguments as files or directories.
 Pass in the fact that there is only one argument at top level - this suppresses
-the file name if the argument is not a directory and filenames_only is not set.
-*/
+the file name if the argument is not a directory and filenames are not
+otherwise forced. */
 
-only_one_at_top = (i == argc - 1);
+only_one_at_top = i == argc - 1;   /* Catch initial value of i */
 
 for (; i < argc; i++)
   {
-  int frc = grep_or_recurse(argv[i], recurse, filenames, only_one_at_top);
+  int frc = grep_or_recurse(argv[i], dee_action == dee_RECURSE,
+    only_one_at_top);
   if (frc > 1) rc = frc;
     else if (frc == 0 && rc == 1) rc = 0;
   }

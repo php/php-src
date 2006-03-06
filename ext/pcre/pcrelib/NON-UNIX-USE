@@ -11,8 +11,9 @@ the Contrib directory on the ftp site that you may find useful. See
 
 If you want to compile PCRE for a non-Unix system (or perhaps, more strictly,
 for a system that does not support "configure" and "make" files), note that
-PCRE consists entirely of code written in Standard C, and so should compile
-successfully on any system that has a Standard C compiler and library.
+the basic PCRE library consists entirely of code written in Standard C, and so
+should compile successfully on any system that has a Standard C compiler and
+library. The C++ wrapper functions are a separate issue (see below).
 
 
 GENERIC INSTRUCTIONS FOR THE C LIBRARY
@@ -34,27 +35,16 @@ your compiler gives to '\n'.
   rem Use write, because notepad cannot handle UNIX files. Change values.
   write config.h
 
-(2) Copy or rename the file pcre.in as pcre.h, and change the macro definitions
-for PCRE_MAJOR, PCRE_MINOR, and PCRE_DATE near its start to the values set in
-configure.in.
-
-  rem Mark Tetrode's commands
-  copy pcre.in pcre.h
-  rem Read values from configure.in
-  write configure.in
-  rem Change values
-  write pcre.h
-
-(3) Compile dftables.c as a stand-alone program, and then run it with
-the single argument "chartables.c". This generates a set of standard
+(2) Compile dftables.c as a stand-alone program, and then run it with
+the single argument "pcre_chartables.c". This generates a set of standard
 character tables and writes them to that file.
 
   rem Mark Tetrode's commands
   rem Compile & run
   cl -DSUPPORT_UTF8 -DSUPPORT_UCP dftables.c
-  dftables.exe chartables.c
+  dftables.exe pcre_chartables.c
 
-(4) Compile the following source files:
+(3) Compile the following source files:
 
   pcre_chartables.c
   pcre_compile.c
@@ -67,12 +57,11 @@ character tables and writes them to that file.
   pcre_info.c
   pcre_maketables.c
   pcre_ord2utf8.c
-  pcre_printint.c
   pcre_refcount.c
   pcre_study.c
   pcre_tables.c
   pcre_try_flipped.c
-  pcre_ucp_findchar.c
+  pcre_ucp_searchfuncs.c
   pcre_valid_utf8.c
   pcre_version.c
   pcre_xclass.c
@@ -88,7 +77,7 @@ shared libraries, you may have to do this once for each type.
   cl -DSUPPORT_UTF8 -DSUPPORT_UCP -DPOSIX_MALLOC_THRESHOLD=10 /c maketables.c get.c study.c pcre.c
   lib /OUT:pcre.lib maketables.obj get.obj study.obj pcre.obj
 
-(5) Similarly, compile pcreposix.c and link it (on its own) as the pcreposix
+(4) Similarly, compile pcreposix.c and link it (on its own) as the pcreposix
 library.
 
   rem Mark Tetrode's commands, for a static library
@@ -96,14 +85,14 @@ library.
   cl -DSUPPORT_UTF8 -DSUPPORT_UCP -DPOSIX_MALLOC_THRESHOLD=10 /c pcreposix.c
   lib /OUT:pcreposix.lib pcreposix.obj
 
-(6) Compile the test program pcretest.c. This needs the functions in the
+(5) Compile the test program pcretest.c. This needs the functions in the
 pcre and pcreposix libraries when linking.
 
   rem Mark Tetrode's commands
   rem compile & link
   cl /F0x400000 pcretest.c pcre.lib pcreposix.lib
 
-(7) Run pcretest on the testinput files in the testdata directory, and check
+(6) Run pcretest on the testinput files in the testdata directory, and check
 that the output matches the corresponding testoutput files. You must use the
 -i option when checking testinput2. Note that the supplied files are in Unix
 format, with just LF characters as line terminators. You may need to edit them
@@ -125,6 +114,9 @@ to change this if your system uses a different convention.
 
 Note that there are now three more tests (7, 8, 9) that did not exist when Mark
 wrote those comments. The test the new pcre_dfa_exec() function.
+
+(7) If you want to use the pcregrep command, compile and link pcregrep.c; it
+uses only the basic PCRE library.
 
 
 THE C++ WRAPPER FUNCTIONS
