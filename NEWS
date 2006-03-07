@@ -14,6 +14,9 @@ PHP                                                                        NEWS
 - Improved SimpleXML: (Marcus)
   . Added SimpleXMLElement::getName() to retrieve name of element.
   . Added ability to create elements on the fly.
+  . Added addChild() method for element creation supporting namespaces.
+  . Added addAttribute() method for attribute creation supporting namespaces.
+  . Added ability to delete specific elements and attributes by offset.
 - Improved Reflection API: (Marcus)
   . Added ReflectionClass::newInstanceArgs($args).
   . Added ability to analyze extension dependency.
