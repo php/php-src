@@ -417,7 +417,7 @@ END_EXTERN_C()
  */
 
 #ifndef XtOffset
-#if defined(CRAY) || (defined(__arm) && !defined(LINUX))
+#if defined(CRAY) || (defined(__arm) && !(defined(LINUX) || defined(__riscos__)))
 #ifdef __STDC__
 #define XtOffset(p_type, field) _Offsetof(p_type, field)
 #else

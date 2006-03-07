@@ -69,6 +69,7 @@
 
 #ifdef __riscos__
 #include <unixlib/local.h>
+int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 #endif
 
 #include "zend_compile.h"
