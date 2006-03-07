@@ -437,8 +437,8 @@ SPL_METHOD(DirectoryIterator, __construct)
 
 	if (!len) {
 		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
-                zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Directory name must not be empty.");
-                return;
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Directory name must not be empty.");
+		return;
 	}
 
 	intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
