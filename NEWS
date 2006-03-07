@@ -92,6 +92,8 @@ PHP                                                                        NEWS
 - Fixed bug #36283 (SOAPClient Compression Broken). (Dmitry)
 - Fixed bug #36268 (Object destructors called even after fatal errors). (Dmitry)
 - Fixed bug #36258 (SplFileObject::getPath() may lead to segfault). (Tony)
+- Fixed bug #36250 (PHP causes ORA-07445 core dump in Oracle server 9.2.x). 
+  (Tony)
 - Fixed bug #36242 (Possible memory corruption in stream_select()). (Tony)
 - Fixed bug #36235 (ocicolumnname returns false before a succesfull fetch). 
   (Tony)

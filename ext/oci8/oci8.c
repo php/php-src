@@ -988,7 +988,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 		smart_str_appends_ex(&hashed_details, charset, 1);
 	}
 	else {
-		size_t rsize;
+		size_t rsize = 0;
 
 		PHP_OCI_CALL(OCINlsEnvironmentVariableGet, (&charsetid, 2, OCI_NLS_CHARSET_ID, 0, &rsize));
 		smart_str_append_unsigned_ex(&hashed_details, charsetid, 0);
@@ -1347,8 +1347,8 @@ open:
  * Ping connection. Uses OCIPing() or OCIServerVersion() depending on the Oracle Client version */
 static int php_oci_connection_ping(php_oci_connection *connection TSRMLS_DC)
 {
-#if OCI_MAJOR_VERSION >= 10 && OCI_MINOR_VERSION >= 2
-	/* OCIPing() is usable only in 10.2 */
+	/* OCIPing() crashes Oracle servers older than 10.2 */
+#if 0
 	OCI_G(errcode) = PHP_OCI_CALL(OCIPing, (connection->svc, OCI_G(err), OCI_DEFAULT));
 #else
 	char version[256];
