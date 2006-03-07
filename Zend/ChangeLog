@@ -1,3 +1,12 @@
+2006-03-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * bench.php:
+      fixed compatibility with ext/hash
+
+    * (PHP_5_1)
+      bench.php:
+      Fixed compatibility with ext/hash
+
 2006-03-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_compile.c:
