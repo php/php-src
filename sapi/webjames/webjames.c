@@ -27,7 +27,7 @@
 
 #include <unixlib/local.h>
 
-#define WEBJAMES_SAPI_VERSION "1.0.0"
+#define WEBJAMES_SAPI_VERSION "1.0.1"
 
 typedef struct {
 	struct connection *conn; /*structure holding all the details of the current request*/
@@ -96,6 +96,7 @@ static char *sapi_webjames_read_cookies(TSRMLS_D)
 static void sapi_webjames_register_variables(zval *track_vars_array TSRMLS_DC)
 {
 	char buf[BUF_SIZE + 1];
+	char *docroot;
 
 	buf[BUF_SIZE] = '\0';
 
@@ -105,7 +106,9 @@ static void sapi_webjames_register_variables(zval *track_vars_array TSRMLS_DC)
 	ADD_NUM("SERVER_PORT", port);
 	ADD_STRING("SERVER_ADMIN",configuration.webmaster);
 	ADD_STRING("GATEWAY_INTERFACE", "CGI/1.1");
-	ADD_STRING("DOCUMENT_ROOT", configuration.site);
+
+	docroot = __unixify(WG(conn)->homedir,0,NULL,1024,0);
+	if (docroot) ADD_STRING("DOCUMENT_ROOT", docroot);
 
 	ADD_FIELD("REQUEST_METHOD", methodstr);
 	ADD_FIELD("REQUEST_URI", requesturi);
@@ -147,7 +150,7 @@ static void webjames_module_main(TSRMLS_D)
 	char *path;
 
 	/* Convert filename to Unix format*/
-	__riscosify_control|=__RISCOSIFY_DONT_CHECK_DIR;
+	__riscosify_control|=__RISCOSIFY_STRICT_UNIX_SPECS;
 	path = __unixify(WG(conn)->filename,0,NULL,1024,0);
 	if (path) SG(request_info).path_translated = estrdup(path);
 
