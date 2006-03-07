@@ -5,7 +5,6 @@ session object deserialization
 --INI--
 session.use_cookies=0
 session.cache_limiter=
-register_globals=1
 session.serialize_handler=php
 session.save_handler=files
 --FILE--
@@ -20,6 +19,8 @@ class foo {
 session_id("abtest");
 session_start();
 session_decode('baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}}');
+$baz = $_SESSION['baz'];
+$arr = $_SESSION['arr'];
 
 $baz->method();
 $arr[3]->method();

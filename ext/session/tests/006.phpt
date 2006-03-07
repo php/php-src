@@ -5,7 +5,6 @@ correct instantiation of references between variables in sessions
 --INI--
 session.use_cookies=0
 session.cache_limiter=
-register_globals=1
 session.serialize_handler=php
 session.save_handler=files
 --FILE--
@@ -32,15 +31,16 @@ $b = new b($a);
 echo "original values:\n";
 var_dump($a,$b);
 
-session_register("a");
-session_register("b");
-session_write_close();
+$_SESSION['a'] = $a;
+$_SESSION['b'] = $b;
 
-session_unregister("a");
-session_unregister("b");
+session_write_close();
+unset($_SESSION['a']);
+unset($_SESSION['b']);
 
 session_start();
-
+$a = $_SESSION['a'];
+$b = $_SESSION['b'];
 echo "values after session:\n";
 var_dump($a,$b);
 ?>

@@ -63,9 +63,6 @@ zend_function_entry session_functions[] = {
 	PHP_FE(session_id,                NULL)
 	PHP_FE(session_regenerate_id,     NULL)
 	PHP_FE(session_decode,            NULL)
-	PHP_FE(session_register,          NULL)
-	PHP_FE(session_unregister,        NULL)
-	PHP_FE(session_is_registered,     NULL)
 	PHP_FE(session_encode,            NULL)
 	PHP_FE(session_start,             NULL)
 	PHP_FE(session_destroy,           NULL)
@@ -281,79 +278,17 @@ PHPAPI void php_add_session_var(char *name, size_t namelen TSRMLS_DC)
 	
 	zend_hash_find(Z_ARRVAL_P(PS(http_session_vars)), name, namelen + 1, 
 			(void *) &sym_track);
+	if (sym_track == NULL) {
+		zval *empty_var;
 
-	/*
-	 * Set up a proper reference between $_SESSION["x"] and $x.
-	 */
-
-	if (PG(register_globals)) {
-		zval **sym_global = NULL;
-		
-		zend_hash_find(&EG(symbol_table), name, namelen + 1, 
-				(void *) &sym_global);
-				
-		if (sym_global == NULL && sym_track == NULL) {
-			zval *empty_var;
-
-			ALLOC_INIT_ZVAL(empty_var); /* this sets refcount to 1 */
-			empty_var->refcount = 0; /* our module does not maintain a ref */
-			/* The next call will increase refcount by NR_OF_SYM_TABLES==2 */
-			zend_set_hash_symbol(empty_var, name, namelen, 1, 2, Z_ARRVAL_P(PS(http_session_vars)), &EG(symbol_table));
-		} else if (sym_global == NULL) {
-			SEPARATE_ZVAL_IF_NOT_REF(sym_track);
-			zend_set_hash_symbol(*sym_track, name, namelen, 1, 1, &EG(symbol_table));
-		} else if (sym_track == NULL) {
-			SEPARATE_ZVAL_IF_NOT_REF(sym_global);
-			zend_set_hash_symbol(*sym_global, name, namelen, 1, 1, Z_ARRVAL_P(PS(http_session_vars)));
-		}
-	} else {
-		if (sym_track == NULL) {
-			zval *empty_var;
-	
-			ALLOC_INIT_ZVAL(empty_var);
-			ZEND_SET_SYMBOL_WITH_LENGTH(Z_ARRVAL_P(PS(http_session_vars)), name, namelen+1, empty_var, 1, 0);
-		}
+		ALLOC_INIT_ZVAL(empty_var);
+		ZEND_SET_SYMBOL_WITH_LENGTH(Z_ARRVAL_P(PS(http_session_vars)), name, namelen+1, empty_var, 1, 0);
 	}
 }
 
 PHPAPI void php_set_session_var(char *name, size_t namelen, zval *state_val, php_unserialize_data_t *var_hash TSRMLS_DC)
 {
-	if (PG(register_globals)) {
-		zval **old_symbol;
-		if (zend_hash_find(&EG(symbol_table),name,namelen+1,(void *)&old_symbol) == SUCCESS) { 
-			
-			/* 
-			 * A global symbol with the same name exists already. That
-			 * symbol might have been created by other means (e.g. $_GET).
-			 *
-			 * hash_update in zend_set_hash_symbol is not good, because
-			 * it will leave referenced variables (such as local instances
-			 * of a global variable) dangling.
-			 *
-			 * BTW: if you use register_globals references between
-			 * session-vars won't work because of this very reason!
-			 */
-
-			
-			REPLACE_ZVAL_VALUE(old_symbol,state_val,1);
-
-			/*
-			 * The following line will update the reference table used for
-			 * unserialization.  It is optional, because some storage 
-			 * formats may not be able to represent references.
-			 */
-
-			if (var_hash) {
-				PHP_VAR_UNSERIALIZE_ZVAL_CHANGED(var_hash,state_val,*old_symbol);
-			}
-
-			zend_set_hash_symbol(*old_symbol, name, namelen, 1, 1, Z_ARRVAL_P(PS(http_session_vars)));
-		} else {
-			zend_set_hash_symbol(state_val, name, namelen, 1, 2, Z_ARRVAL_P(PS(http_session_vars)), &EG(symbol_table));
-		}
-	} else IF_SESSION_VARS() {
-		zend_set_hash_symbol(state_val, name, namelen, PZVAL_IS_REF(state_val), 1, Z_ARRVAL_P(PS(http_session_vars)));
-	}
+	zend_set_hash_symbol(state_val, name, namelen, PZVAL_IS_REF(state_val), 1, Z_ARRVAL_P(PS(http_session_vars)));
 }
 
 PHPAPI int php_get_session_var(char *name, size_t namelen, zval ***state_var TSRMLS_DC)
@@ -364,23 +299,6 @@ PHPAPI int php_get_session_var(char *name, size_t namelen, zval ***state_var TSR
 		ret = zend_hash_find(Z_ARRVAL_P(PS(http_session_vars)), name, 
 				namelen+1, (void **) state_var);
 
-		/*
-		 * If register_globals is enabled, and
-		 * if there is an entry for the slot in $_SESSION, and
-		 * if that entry is still set to NULL, and
-		 * if the global var exists, then
-		 * we prefer the same key in the global sym table
-		 */
-		
-		if (PG(register_globals) && ret == SUCCESS 
-				&& Z_TYPE_PP(*state_var) == IS_NULL) {
-			zval **tmp;
-
-			if (zend_hash_find(&EG(symbol_table), name, namelen + 1,
-						(void **) &tmp) == SUCCESS) {
-				*state_var = tmp;
-			}
-		}
 	}
 	
 	return ret;
@@ -811,7 +729,7 @@ static void php_session_save_current_state(TSRMLS_D)
 	int ret = FAILURE;
 	
 	IF_SESSION_VARS() {
-		if (PS(bug_compat) && !PG(register_globals)) {
+		if (PS(bug_compat)) {
 			HashTable *ht = Z_ARRVAL_P(PS(http_session_vars));
 			HashPosition pos;
 			zval **val;
@@ -829,7 +747,7 @@ static void php_session_save_current_state(TSRMLS_D)
 			}
 
 			if (do_warn && PS(bug_compat_warn)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Your script possibly relies on a session side-effect which existed until PHP 4.2.3. Please be advised that the session extension does not consider global variables as a source of data, unless register_globals is enabled. You can disable this functionality and this warning by setting session.bug_compat_42 or session.bug_compat_warn to off, respectively.");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Your script possibly relies on a session side-effect which existed until PHP 4.2.3. Please be advised that the session extension does not consider global variables as a source of data. You can disable this functionality and this warning by setting session.bug_compat_42 or session.bug_compat_warn to off, respectively.");
 			}
 		}
 
@@ -1562,90 +1480,6 @@ static void php_register_var(zval** entry TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto bool session_register(mixed var_names [, mixed ...])
-   Adds varname(s) to the list of variables which are freezed at the session end */
-PHP_FUNCTION(session_register)
-{
-	zval  ***args;
-	int      argc = ZEND_NUM_ARGS();
-	int      i;
-
-	if (argc <= 0)
-		RETURN_FALSE
-	else
-		args = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
-	
-	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
-		efree(args);
-		WRONG_PARAM_COUNT;
-	}
-
-	if (PS(session_status) == php_session_none || PS(session_status) == php_session_disabled) {
-		php_session_start(TSRMLS_C);
-	}
-	
-	if (PS(session_status) == php_session_disabled) {
-		efree(args);
-		RETURN_FALSE;
-	}
-	
-	for (i = 0; i < argc; i++) {
-		if (Z_TYPE_PP(args[i]) == IS_ARRAY)
-			SEPARATE_ZVAL(args[i]);
-		php_register_var(args[i] TSRMLS_CC);
-	}	
-	
-	efree(args);
-	
-	RETURN_TRUE;
-}
-/* }}} */
-
-/* {{{ proto bool session_unregister(string varname)
-   Removes varname from the list of variables which are freezed at the session end */
-PHP_FUNCTION(session_unregister)
-{
-	zval **p_name;
-	int ac = ZEND_NUM_ARGS();
-
-	if (ac != 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
-		WRONG_PARAM_COUNT;
-	
-	convert_to_string_ex(p_name);
-	
-	PS_DEL_VARL(Z_STRVAL_PP(p_name), Z_STRLEN_PP(p_name));
-
-	RETURN_TRUE;
-}
-/* }}} */
-
-/* {{{ proto bool session_is_registered(string varname)
-   Checks if a variable is registered in session */
-PHP_FUNCTION(session_is_registered)
-{
-	zval **p_name;
-	zval *p_var;
-	int ac = ZEND_NUM_ARGS();
-
-	if (ac != 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
-		WRONG_PARAM_COUNT;
-	
-	convert_to_string_ex(p_name);
-	
-	if (PS(session_status) == php_session_none)
-		RETURN_FALSE;
-
-	IF_SESSION_VARS() {
-		if (zend_hash_find(Z_ARRVAL_P(PS(http_session_vars)), 
-					Z_STRVAL_PP(p_name), Z_STRLEN_PP(p_name)+1, 
-					(void **)&p_var) == SUCCESS) {
-			RETURN_TRUE;
-		}
-	}
-	RETURN_FALSE;
-}
-/* }}} */
-
 /* {{{ proto string session_encode(void)
    Serializes the current setup and returns the serialized representation */
 PHP_FUNCTION(session_encode)
@@ -1725,21 +1559,6 @@ PHP_FUNCTION(session_unset)
 	IF_SESSION_VARS() {
 		HashTable *ht = Z_ARRVAL_P(PS(http_session_vars));
 
-		if (PG(register_globals)) {
-			uint str_len;
-			zstr str;
-			ulong num_key;
-			HashPosition pos;
-			
-			zend_hash_internal_pointer_reset_ex(ht, &pos);
-
-			while (zend_hash_get_current_key_ex(ht, &str, &str_len, &num_key, 
-						0, &pos) == HASH_KEY_IS_STRING) {
-				zend_delete_global_variable(str.s, str_len-1 TSRMLS_CC);
-				zend_hash_move_forward_ex(ht, &pos);
-			}
-		}
-		
 		/* Clean $_SESSION. */
 		zend_hash_clean(ht);
 	}

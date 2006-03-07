@@ -1,12 +1,11 @@
 --TEST--
 bug compatibility: unset($c) with enabled register_globals
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php die('skip');/* RG removed */ ?>
 --INI--
 register_long_arrays=1
 session.use_cookies=0
 session.cache_limiter=
-register_globals=1
 session.bug_compat_42=1
 session.serialize_handler=php
 session.save_handler=files
@@ -22,7 +21,8 @@ session_destroy();
 
 ### Phase 2 $HTTP_SESSION_VARS["c"] does not contain any value
 session_id("abtest");
-session_register("c");
+$_SESSION['c'] = $c;
+
 unset($c);
 $c = 3.14;
 session_write_close();
@@ -31,6 +31,7 @@ unset($c);
 
 ### Phase 3 $HTTP_SESSION_VARS["c"] is set
 session_start();
+$c = $_SESSION['c'];
 var_dump($c);
 var_dump($HTTP_SESSION_VARS);
 unset($c);
@@ -43,6 +44,7 @@ unset($c);
 ### Phase 4 final
 
 session_start();
+$c = $_SESSION['c'];
 var_dump($c);
 var_dump($HTTP_SESSION_VARS);
 

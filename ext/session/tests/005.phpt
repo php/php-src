@@ -5,7 +5,6 @@ custom save handler, multiple session_start()s, complex data structure test.
 --INI--
 session.use_cookies=0
 session.cache_limiter=
-register_globals=1
 session.name=PHPSESSID
 session.serialize_handler=php
 --FILE--
@@ -58,6 +57,8 @@ session_set_save_handler(array($hnd, "open"), array($hnd, "close"), array($hnd, 
 
 session_id("abtest");
 session_start();
+$baz = $_SESSION['baz'];
+$arr = $_SESSION['arr'];
 $baz->method();
 $arr[3]->method();
 
@@ -68,12 +69,16 @@ session_write_close();
 
 session_set_save_handler(array($hnd, "open"), array($hnd, "close"), array($hnd, "read"), array($hnd, "write"), array($hnd, "destroy"), array($hnd, "gc"));
 session_start();
+$baz = $_SESSION['baz'];
+$arr = $_SESSION['arr'];
+
+
 $baz->method();
 $arr[3]->method();
 
 
 $c = 123;
-session_register("c");
+$_SESSION['c'] = $c;
 var_dump($baz); var_dump($arr); var_dump($c);
 
 session_write_close();
@@ -84,10 +89,10 @@ var_dump($baz); var_dump($arr); var_dump($c);
 
 session_destroy();
 ?>
---EXPECT--
+--EXPECTF--
 OPEN: PHPSESSID
 READ: abtest
-object(foo)#2 (2) {
+object(foo)#%d (2) {
   ["bar"]=>
   string(2) "ok"
   ["yes"]=>
@@ -95,7 +100,7 @@ object(foo)#2 (2) {
 }
 array(1) {
   [3]=>
-  object(foo)#3 (2) {
+  object(foo)#%d (2) {
     ["bar"]=>
     string(2) "ok"
     ["yes"]=>
@@ -106,7 +111,7 @@ WRITE: abtest, baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:2;}arr|a:1:{i:3;O
 CLOSE
 OPEN: PHPSESSID
 READ: abtest
-object(foo)#4 (2) {
+object(foo)#%d (2) {
   ["bar"]=>
   string(2) "ok"
   ["yes"]=>
@@ -114,7 +119,7 @@ object(foo)#4 (2) {
 }
 array(1) {
   [3]=>
-  object(foo)#2 (2) {
+  object(foo)#%d (2) {
     ["bar"]=>
     string(2) "ok"
     ["yes"]=>
@@ -126,7 +131,7 @@ WRITE: abtest, baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:3;}arr|a:1:{i:3;O
 CLOSE
 OPEN: PHPSESSID
 READ: abtest
-object(foo)#3 (2) {
+object(foo)#%d (2) {
   ["bar"]=>
   string(2) "ok"
   ["yes"]=>
@@ -134,7 +139,7 @@ object(foo)#3 (2) {
 }
 array(1) {
   [3]=>
-  object(foo)#4 (2) {
+  object(foo)#%d (2) {
     ["bar"]=>
     string(2) "ok"
     ["yes"]=>

@@ -2,13 +2,13 @@
 bug compatibility: global is used albeit register_globals=0
 --SKIPIF--
 <?php include('skipif.inc'); 
+die("skip, no more RG and session_register");
  if (version_compare(PHP_VERSION,"4.2.3-dev", "<")) die("skip this is for PHP >= 4.2.3");
 ?>
 --INI--
 register_long_arrays=1
 session.use_cookies=0
 session.cache_limiter=
-register_globals=0
 session.bug_compat_42=1
 session.bug_compat_warn=1
 track_errors=1
@@ -21,14 +21,14 @@ session.save_handler=files
 --FILE--
 <?php
 session_id("abtest");
-
 ### Phase 1 cleanup
 session_start();
 session_destroy();
 
 ### Phase 2 $HTTP_SESSION_VARS["c"] does not contain any value
 session_id("abtest");
-session_register("c");
+$_SESSION['c'] = NULL;
+$c = $_SESSION['c'];
 var_dump($c);
 unset($c);
 $c = 3.14;
@@ -40,6 +40,7 @@ unset($c);
 
 ### Phase 3 $HTTP_SESSION_VARS["c"] is set
 session_start();
+$c = $_SESSION['c'];
 var_dump($HTTP_SESSION_VARS);
 unset($c);
 $c = 2.78;
@@ -51,6 +52,7 @@ unset($c);
 ### Phase 4 final
 
 session_start();
+$c = $_SESSION['c'];
 var_dump($c);
 var_dump($HTTP_SESSION_VARS);
 

@@ -6,7 +6,6 @@ a script should not be able to modify session.use_trans_sid
 session.use_trans_sid=1
 session.use_cookies=0
 session.cache_limiter=
-register_globals=1
 session.bug_compat_42=1
 session.bug_compat_warn=0
 session.name=PHPSESSID

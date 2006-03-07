@@ -5,7 +5,6 @@ session object serialization
 --INI--
 session.use_cookies=0
 session.cache_limiter=
-register_globals=1
 session.serialize_handler=php
 session.save_handler=files
 --FILE--
@@ -23,12 +22,10 @@ $baz->method();
 
 $arr[3] = new foo;
 $arr[3]->method();
-
-session_register("baz");
-session_register("arr");
-
-print session_encode()."\n";
-
+session_start();
+$_SESSION["baz"] = $baz;
+$_SESSION["arr"] = $arr;
+print session_encode();
 session_destroy();
 --EXPECT--
 baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";s:4:"done";}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";s:4:"done";}}

@@ -79,12 +79,8 @@ int apache_php_module_hook(request_rec *r, php_handler *handler, zval **ret TSRM
     }
 
 	req = php_apache_request_new(r);
-    if(PG(register_globals)) {
-        php_register_variable_ex("request", req, NULL TSRMLS_CC);
-    }
-    else {
-        php_register_variable_ex("request", req, PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
-    }
+	php_register_variable_ex("request", req, PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
+
     switch(handler->type) {
         case AP_HANDLER_TYPE_FILE:
             php_register_variable("PHP_SELF_HOOK", handler->name, PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);

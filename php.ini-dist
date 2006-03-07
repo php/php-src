@@ -388,17 +388,6 @@ track_errors = Off
 ; values override older values.
 variables_order = "EGPCS"
 
-; Whether or not to register the EGPCS variables as global variables.  You may
-; want to turn this off if you don't want to clutter your scripts' global scope
-; with user data.  This makes most sense when coupled with track_vars - in which
-; case you can access all of the GPC variables through the $HTTP_*_VARS[],
-; variables.
-;
-; You should do your best to write your scripts so that they do not require
-; register_globals to be on;  Using form variables as globals can easily lead
-; to possible security problems, if the code is not very well thought of.
-register_globals = Off
-
 ; Whether or not to register the old-style input arrays, HTTP_GET_VARS
 ; and friends.  If you're not using them, it's recommended to turn them off,
 ; for performance reasons.
@@ -412,8 +401,8 @@ register_argc_argv = On
 ; When enabled, the SERVER and ENV variables are created when they're first
 ; used (Just In Time) instead of when the script starts. If these variables
 ; are not used within a script, having this directive on will result in a
-; performance gain. The PHP directives register_globals, register_long_arrays,
-; and register_argc_argv must be disabled for this directive to have any affect.
+; performance gain. The PHP directives  register_long_arrays and 
+; register_argc_argv must be disabled for this directive to have any affect.
 auto_globals_jit = On
 
 ; Maximum size of POST data that PHP will accept.
