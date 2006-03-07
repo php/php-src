@@ -31,8 +31,13 @@
  <release>
   <state>beta</state>
   <version>1.2</version>
-  <date>2005-??-??</date>
+  <date>2006-??-??</date>
   <notes>
+   Changed OCI8 code to use OCIServerVersion() instead of OCIPing(), which may crash Oracle server of version < 10.2
+   Fixed bug #36235 (ocicolumnname returns false before a succesfull fetch)
+   Fixed bug #36096 (oci_result() returns garbage after oci_fetch() failed)
+   Fixed bug #36055 (possible OCI8 crash in multithreaded environment)
+   Fixed bug #36010 (Segfault when re-creating and re-executing statements with bound parameters)
    Fixed PECL bug #5571 (oci_new_connect() not closed by oci_close())
    Fixed bug #33383 (crash when retrieving empty BLOBs)
   </notes>
@@ -50,12 +55,14 @@
   <file role="src" name="oci8_collection.c"/>
   <file role="src" name="php_oci8.h"/>
   <file role="src" name="php_oci8_int.h"/>
+  <file role="test" name="tests/bind_empty.phpt"/>
   <file role="test" name="tests/bug26133.phpt"/>
   <file role="test" name="tests/bug27303_2.phpt"/>
   <file role="test" name="tests/bug27303_3.phpt"/>
   <file role="test" name="tests/bug27303_4.phpt"/>
   <file role="test" name="tests/bug27303.phpt"/>
   <file role="test" name="tests/bug32325.phpt"/>
+  <file role="test" name="tests/bug36096.phpt"/>
   <file role="test" name="tests/close.phpt"/>
   <file role="test" name="tests/coll_001.phpt"/>
   <file role="test" name="tests/coll_002_func.phpt"/>
