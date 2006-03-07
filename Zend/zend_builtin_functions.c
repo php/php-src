@@ -699,7 +699,7 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 
 /* {{{ proto bool is_subclass_of(object object, string class_name)
    Returns true if the object has this class as one of its parents */
-ZEND_FUNCTION(is_subclass_of) U
+ZEND_FUNCTION(is_subclass_of)
 {
 	is_a_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
@@ -708,7 +708,7 @@ ZEND_FUNCTION(is_subclass_of) U
 
 /* {{{ proto bool is_a(object object, string class_name)
    Returns true if the object is of this class or has this class as one of its parents */
-ZEND_FUNCTION(is_a) U
+ZEND_FUNCTION(is_a)
 {
 	zend_error(E_STRICT, "is_a(): Deprecated. Please use the instanceof operator");
 	is_a_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
