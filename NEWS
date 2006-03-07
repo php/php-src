@@ -11,7 +11,7 @@ PHP                                                                        NEWS
   - Fixed ArrayIterator::seek().
   - Added SimpleXMLElement::count().
   - Dropped erroneous RecursiveDirectoryIterator::getSubPathInfo().
-- Improved SimpleXML: (Marcus)
+- Improved SimpleXML: (Marcus, Rob)
   . Added SimpleXMLElement::getName() to retrieve name of element.
   . Added ability to create elements on the fly.
   . Added addChild() method for element creation supporting namespaces.
@@ -49,6 +49,7 @@ PHP                                                                        NEWS
   (Mike)
 - Fixed crash with DOMImplementation::createDocumentType("name:"). (Mike)
 - Fixed bug #36638 (strtotime() returns false when 2nd argument < 1). (Derick)
+- Fixed bug #36625 (pg_trace() does not work). (iakio at mono-space dot net)
 - Fixed bug #36611 (assignment to SimpleXML object attribute changes argument 
   type to string). (Tony)
 - Fixed bug #36606 (pg_query_params() changes arguments type to string). (Tony)
