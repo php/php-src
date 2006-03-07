@@ -1,3 +1,161 @@
+2006-03-06  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/pcre/config.w32:
+      MFB: Fix build and sync parameters with config0.m4.
+
+    * (PHP_5_1)
+      ext/pcre/config.w32:
+      Fix build and sync parameters with config0.m4.
+
+2006-03-06  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS:
+      -** empty log message ***
+
+    * ext/standard/string.c:
+      Fix protos to use 'string' for parameters that can be either binary or
+      unicode.
+
+2006-03-06  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_1)
+      NEWS:
+      - MFH: Fixed bug #36638 (strtotime() returns false when 2nd argument < 1).
+        (Derick)
+
+2006-03-06  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/pcre/pcrelib/pcre_printint.src
+      ext/pcre/pcrelib/pcre_printint.src
+      ext/pcre/pcrelib/pcre_printint.src
+      ext/pcre/pcrelib/pcre_refcount.c
+      ext/pcre/pcrelib/pcre_scanner.cc
+      ext/pcre/pcrelib/pcre_scanner_unittest.cc
+      ext/pcre/pcrelib/pcre_study.c
+      ext/pcre/pcrelib/pcre_tables.c
+      ext/pcre/pcrelib/pcre_try_flipped.c
+      ext/pcre/pcrelib/pcre_ucp_findchar.c
+      ext/pcre/pcrelib/pcre_ucp_searchfuncs.c
+      ext/pcre/pcrelib/pcre_ucp_searchfuncs.c
+      ext/pcre/pcrelib/pcre_ucp_searchfuncs.c
+      ext/pcre/pcrelib/pcre_valid_utf8.c
+      ext/pcre/pcrelib/pcre_version.c
+      ext/pcre/pcrelib/pcre_xclass.c
+      ext/pcre/pcrelib/pcrecpp.cc
+      ext/pcre/pcrelib/pcrecpp.h
+      ext/pcre/pcrelib/pcrecpp_unittest.cc
+      ext/pcre/pcrelib/pcrecpparg.h
+      ext/pcre/pcrelib/pcrecpparg.h
+      ext/pcre/pcrelib/pcrecpparg.h
+      ext/pcre/pcrelib/pcregrep.c
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pcre/pcrelib/pcreposix.h
+      ext/pcre/pcrelib/pcretest.c
+      ext/pcre/pcrelib/ucp.h
+      ext/pcre/pcrelib/ucp_findchar.c
+      ext/pcre/pcrelib/ucpinternal.h
+      ext/pcre/pcrelib/ucptable.c
+      ext/pcre/pcrelib/doc/Tech.Notes
+      ext/pcre/pcrelib/doc/pcre.txt
+      ext/pcre/pcrelib/testdata/grepinput
+      ext/pcre/pcrelib/testdata/greplist
+      ext/pcre/pcrelib/testdata/grepoutput
+      ext/pcre/pcrelib/testdata/testinput2
+      ext/pcre/pcrelib/testdata/testinput3
+      ext/pcre/pcrelib/testdata/testinput4
+      ext/pcre/pcrelib/testdata/testinput5
+      ext/pcre/pcrelib/testdata/testinput6
+      ext/pcre/pcrelib/testdata/testinput7
+      ext/pcre/pcrelib/testdata/testinput9
+      ext/pcre/pcrelib/testdata/testoutput1
+      ext/pcre/pcrelib/testdata/testoutput2
+      ext/pcre/pcrelib/testdata/testoutput3
+      ext/pcre/pcrelib/testdata/testoutput4
+      ext/pcre/pcrelib/testdata/testoutput5
+      ext/pcre/pcrelib/testdata/testoutput6
+      ext/pcre/pcrelib/testdata/testoutput7
+      ext/pcre/pcrelib/testdata/testoutput8
+      ext/pcre/pcrelib/testdata/testoutput9:
+        1.1.4;
+      Import PCRE 6.6 and make adjustments.
+
+    * ext/pcre/config.w32
+      ext/pcre/config0.m4
+      ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/LICENCE
+      ext/pcre/pcrelib/NEWS
+      ext/pcre/pcrelib/NON-UNIX-USE
+      ext/pcre/pcrelib/README
+      ext/pcre/pcrelib/dftables.c
+      ext/pcre/pcrelib/pcre.def
+      ext/pcre/pcrelib/pcre.h
+      ext/pcre/pcrelib/pcre_compile.c
+      ext/pcre/pcrelib/pcre_config.c
+      ext/pcre/pcrelib/pcre_dfa_exec.c
+      ext/pcre/pcrelib/pcre_exec.c
+      ext/pcre/pcrelib/pcre_fullinfo.c
+      ext/pcre/pcrelib/pcre_get.c
+      ext/pcre/pcrelib/pcre_globals.c
+      ext/pcre/pcrelib/pcre_info.c
+      ext/pcre/pcrelib/pcre_internal.h
+      ext/pcre/pcrelib/pcre_maketables.c
+      ext/pcre/pcrelib/pcre_ord2utf8.c
+      ext/pcre/pcrelib/pcre_printint.c:
+      Import PCRE 6.6 and make adjustments.
+
+2006-03-06  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_1)
+      ext/standard/filestat.c:
+      fix win build
+
+2006-03-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/tests/.cvsignore
+      ext/pgsql/tests/80_bug36625.phpt:
+      - Fixed #36625 pg_trace() does not work
+
+2006-03-06  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/031.phpt:
+      implement addChild() and addAttribute() methods
+      add test
+
+2006-03-06  Colin Viebrock  <colin@viebrock.ca>
+
+    * (PHP_5_1)
+      php.gif
+      main/logos.h:
+      fix logo (proper spacing between the letters)
+
+2006-03-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/file.c:
+      Fixed bug #36630 (umask not reset at the end of the request).
+      
+
+2006-03-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/ming/ming.c
+      ext/ming/ming.c:
+      - Proto fixes
+
+2006-03-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/bench.php:
+      fixed compatibility with ext/hash
+
+    * (PHP_5_1)
+      ZendEngine2/bench.php:
+      Fixed compatibility with ext/hash
+
 2006-03-05  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * NEWS
