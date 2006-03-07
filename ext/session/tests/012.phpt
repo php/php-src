@@ -1,11 +1,10 @@
 --TEST--
 registering $_SESSION should not segfault
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php die("skip no more RG or session_register"); ?>
 --INI--
 session.use_cookies=0
 session.cache_limiter=
-register_globals=1
 session.bug_compat_42=1
 session.bug_compat_warn=0
 session.serialize_handler=php

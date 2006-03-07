@@ -32,7 +32,6 @@
 typedef struct _php_mb_encoding_handler_info_t {
 	int data_type;
 	const char *separator;
-	unsigned int force_register_globals: 1;
 	unsigned int report_errors: 1;
 	enum mbfl_no_language to_language;
 	enum mbfl_no_encoding to_encoding;

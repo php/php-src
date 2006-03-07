@@ -1,11 +1,10 @@
 --TEST--
 serializing references test case using globals
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php die("skip no more RG or session_register");include('skipif.inc'); ?>
 --INI--
 session.use_cookies=0
 session.cache_limiter=
-register_globals=1
 session.serialize_handler=php
 session.save_handler=files
 --FILE--
@@ -25,7 +24,8 @@ class TFoo {
 
 session_id("abtest");
 session_start();
-session_register('o1', 'o2' );
+$_SESSION['o1'] = $o1;
+$_SESSION['o2'] = $o2;
 
 $o1 = new TFoo(42);
 $o2 =& $o1;

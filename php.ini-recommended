@@ -67,18 +67,6 @@
 ; PHP.  Please make sure you read what's different, and modify your scripts
 ; accordingly, if you decide to use this file instead.
 ;
-; - register_globals = Off         [Security, Performance]
-;     Global variables are no longer registered for input data (POST, GET, cookies,
-;     environment and other server variables).  Instead of using $foo, you must use
-;     you can use $_REQUEST["foo"] (includes any variable that arrives through the
-;     request, namely, POST, GET and cookie variables), or use one of the specific
-;     $_GET["foo"], $_POST["foo"], $_COOKIE["foo"] or $_FILES["foo"], depending
-;     on where the input originates.  Also, you can look at the
-;     import_request_variables() function.
-;     Note that register_globals is going to be depracated (i.e., turned off by
-;     default) in the next version of PHP, because it often leads to security bugs.
-;     Read http://php.net/manual/en/security.registerglobals.php for further
-;     information.
 ; - register_long_arrays = Off     [Performance]
 ;     Disables registration of the older (and deprecated) long predefined array
 ;     variables ($HTTP_*_VARS).  Instead, use the superglobals that were
@@ -446,17 +434,6 @@ track_errors = Off
 ; values override older values.
 variables_order = "GPCS"
 
-; Whether or not to register the EGPCS variables as global variables.  You may
-; want to turn this off if you don't want to clutter your scripts' global scope
-; with user data.  This makes most sense when coupled with track_vars - in which
-; case you can access all of the GPC variables through the $HTTP_*_VARS[],
-; variables.
-;
-; You should do your best to write your scripts so that they do not require
-; register_globals to be on;  Using form variables as globals can easily lead
-; to possible security problems, if the code is not very well thought of.
-register_globals = Off
-
 ; Whether or not to register the old-style input arrays, HTTP_GET_VARS
 ; and friends.  If you're not using them, it's recommended to turn them off,
 ; for performance reasons.
@@ -470,8 +447,8 @@ register_argc_argv = Off
 ; When enabled, the SERVER and ENV variables are created when they're first
 ; used (Just In Time) instead of when the script starts. If these variables
 ; are not used within a script, having this directive on will result in a
-; performance gain. The PHP directives register_globals, register_long_arrays,
-; and register_argc_argv must be disabled for this directive to have any affect.
+; performance gain. The PHP directives  register_long_arrays and
+; register_argc_argv must be disabled for this directive to have any affect.
 auto_globals_jit = On
 
 ; Maximum size of POST data that PHP will accept.
@@ -1005,8 +982,8 @@ session.gc_maxlifetime = 1440
 ;          cd /path/to/sessions; find -cmin +24 | xargs rm
 
 ; PHP 4.2 and less have an undocumented feature/bug that allows you to
-; to initialize a session variable in the global scope, albeit register_globals
-; is disabled.  PHP 4.3 and later will warn you, if this feature is used.
+; to initialize a session variable in the global scope.
+; PHP 4.3 and later will warn you, if this feature is used.
 ; You can disable the feature and the warning separately. At this time,
 ; the warning is only displayed, if bug_compat_42 is enabled.
 
