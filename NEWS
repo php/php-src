@@ -10,9 +10,6 @@ PHP                                                                        NEWS
   for more details. (Dmitry)
 - Removed support for "continue" and "break" operators with non-constant
   operands. (Dmitry)
-- Added support for "continue" and "break" operators with labels. Each loop or
-  switch statement can be marked by label and then it is possible to write
-  "break <label>" instead of "break <number>". (Dmitry, Sara)
 - Changed __toString() behavior to call it in all necessary places
   (Marcus, Dmitry)
 - Changed "instanceof" and "catch" operators, is_a() and is_subclass_of()
