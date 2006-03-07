@@ -61,7 +61,7 @@ $people->person[3]['gender'] = 'error';
   </person>
 </people>
 
-Warning: main(): Cannot add element person number 3 when only 2 such elements exist in %sext/simplexml/tests/027.php on line %d
+Warning: main(): Cannot add element person number 3 when only 2 such elements exist in %s027.php on line %d
 <people>
   <person gender="female">Jane
   </person>
@@ -71,4 +71,4 @@ Warning: main(): Cannot add element person number 3 when only 2 such elements ex
   </person>
 </people>
 
-Fatal error: Objects used as arrays in post/pre increment/decrement must return values by reference in %sext/simplexml/tests/027.php on line %d
+Fatal error: Objects used as arrays in post/pre increment/decrement must return values by reference in %s027.php on line %d
