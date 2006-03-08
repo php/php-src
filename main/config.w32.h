@@ -82,8 +82,6 @@
 /* PHP Runtime Configuration */
 #define FORCE_CGI_REDIRECT 1
 #define PHP_URL_FOPEN 1
-#define PHP_SAFE_MODE 0
-#define MAGIC_QUOTES 0
 #define USE_CONFIG_FILE 1
 #define DEFAULT_SHORT_OPEN_TAG "1"
 #define ENABLE_PATHINFO_CHECK 1

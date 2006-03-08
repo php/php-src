@@ -237,10 +237,6 @@ SOURCE=..\main\rfc1867.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\main\safe_mode.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\main\SAPI.c
 # End Source File
 # Begin Source File
@@ -350,10 +346,6 @@ SOURCE=..\ext\standard\quot_print.h
 # Begin Source File
 
 SOURCE=..\main\rfc1867.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\main\safe_mode.h
 # End Source File
 # Begin Source File
 

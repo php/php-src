@@ -1194,11 +1194,6 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 		return php_stream_fopen_rel(filename, mode, opened_path, options);
 	}
 
-	/*
-	 * files in safe_mode_include_dir (or subdir) are excluded from
-	 * safe mode GID/UID checks
-	 */
-
 not_relative_path:
 
 	/* Absolute path open */

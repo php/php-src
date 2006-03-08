@@ -29,7 +29,6 @@
 
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "safe_mode.h"
 
 #include "Zend/zend_exceptions.h"
 #include "Zend/zend_object_handlers.h"

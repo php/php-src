@@ -259,7 +259,6 @@ static void pvalue_config_destructor(zval *pvalue)
 int php_init_config(TSRMLS_D)
 {
 	char *php_ini_search_path = NULL;
-	int safe_mode_state;
 	char *open_basedir;
 	int free_ini_search_path = 0;
 	zend_file_handle fh;
@@ -282,7 +281,6 @@ int php_init_config(TSRMLS_D)
 	zend_llist_init(&extension_lists.functions, sizeof(zval), (llist_dtor_func_t)  ZVAL_DESTRUCTOR, 1);
 	zend_llist_init(&scanned_ini_list, sizeof(char *), (llist_dtor_func_t) free_estring, 1);
 	
-	safe_mode_state = PG(safe_mode);
 	open_basedir = PG(open_basedir);
 
 	if (sapi_module.php_ini_path_override) {
@@ -415,7 +413,6 @@ int php_init_config(TSRMLS_D)
 #endif
 	}
 
-	PG(safe_mode) = 0;
 	PG(open_basedir) = NULL;
 
 	memset(&fh, 0, sizeof(fh));
@@ -455,7 +452,6 @@ int php_init_config(TSRMLS_D)
 		efree(php_ini_search_path);
 	}
 
-	PG(safe_mode) = safe_mode_state;
 	PG(open_basedir) = open_basedir;
 
 	if (fh.handle.fp) {
