@@ -1005,7 +1005,6 @@ static SAPI_POST_HANDLER_FUNC(rfc1867_post_handler_unicode)
 	int boundary_len=0, total_bytes=0, cancel_upload=0, is_arr_upload=0, array_len=0;
 	int max_file_size=0, skip_upload=0, anonindex=0, is_anonymous;
 	zval *http_post_files=NULL; HashTable *uploaded_files=NULL;
-	zend_bool magic_quotes_gpc;
 	multipart_buffer *mbuff;
 	zval *array_ptr = (zval *) arg;
 	FILE *fp;
@@ -1341,15 +1340,6 @@ var_done:
 			if ((tmp = u_strrchr(filename, 0x2f /*'/'*/)) > s) {
 				s = tmp;
 			}
-#ifdef PHP_WIN32
-			if (PG(magic_quotes_gpc)) {
-				s = s ? s : filename;
-				tmp = u_strrchr(s, 0x27 /*'\''*/);
-				s = tmp > s ? tmp : s;
-				tmp = u_strrchr(s, 0x22 /*'"'*/);
-				s = tmp > s ? tmp : s;
-			}
-#endif
 
 			if (!is_anonymous) {
 				if (s && s > filename) {
@@ -1418,8 +1408,6 @@ var_done:
 			/* Initialize variables */
 			add_u_protected_variable(param TSRMLS_CC);
 
-			magic_quotes_gpc = PG(magic_quotes_gpc);
-			PG(magic_quotes_gpc) = 0;
 			/* if param is of form xxx[.*] this will cut it to xxx */
 			if (!is_anonymous) {
 				safe_u_php_register_variable(param, temp_filename, u_strlen(temp_filename), NULL, 1 TSRMLS_CC);
@@ -1433,8 +1421,6 @@ var_done:
 			}
 			add_u_protected_variable(lbuf TSRMLS_CC);
 			register_u_http_post_files_variable(lbuf, temp_filename, u_strlen(temp_filename), http_post_files, 1 TSRMLS_CC);
-
-			PG(magic_quotes_gpc) = magic_quotes_gpc;
 
 			{
 				zval file_size, error_type;
@@ -1495,7 +1481,6 @@ static SAPI_POST_HANDLER_FUNC(rfc1867_post_handler_legacy)
 	int str_len = 0, num_vars = 0, num_vars_max = 2*10, *len_list = NULL;
 	char **val_list = NULL;
 #endif
-	zend_bool magic_quotes_gpc;
 	multipart_buffer *mbuff;
 	zval *array_ptr = (zval *) arg;
 	int fd=-1;
@@ -1822,15 +1807,6 @@ static SAPI_POST_HANDLER_FUNC(rfc1867_post_handler_legacy)
 			if ((tmp = strrchr(filename, '/')) > s) {
 				s = tmp;
 			}
-#ifdef PHP_WIN32
-			if (PG(magic_quotes_gpc)) {
-				s = s ? s : filename;
-				tmp = strrchr(s, '\'');
-				s = tmp > s ? tmp : s;
-				tmp = strrchr(s, '"');
-				s = tmp > s ? tmp : s;
-			}
-#endif
 
 #if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
 filedone:			
@@ -1896,8 +1872,6 @@ filedone:
 			/* Initialize variables */
 			add_protected_variable(param TSRMLS_CC);
 
-			magic_quotes_gpc = PG(magic_quotes_gpc);
-			PG(magic_quotes_gpc) = 0;
 			/* if param is of form xxx[.*] this will cut it to xxx */
 			if (!is_anonymous) {
 				safe_php_register_variable(param, temp_filename, NULL, 1 TSRMLS_CC);
@@ -1911,8 +1885,6 @@ filedone:
 			}
 			add_protected_variable(lbuf TSRMLS_CC);
 			register_http_post_files_variable(lbuf, temp_filename, http_post_files, 1 TSRMLS_CC);
-
-			PG(magic_quotes_gpc) = magic_quotes_gpc;
 
 			{
 				zval file_size, error_type;

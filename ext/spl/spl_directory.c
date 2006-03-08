@@ -1353,11 +1353,6 @@ static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent TS
 			buf[line_len] = '\0';
 		}
 	
-		if (PG(magic_quotes_runtime)) {
-			buf = php_addslashes(buf, line_len, &len, 1 TSRMLS_CC);
-			line_len = len;
-		}
-	
 		intern->u.file.current_line = buf;
 		intern->u.file.current_line_len = line_len;
 	}
@@ -1840,14 +1835,6 @@ SPL_METHOD(SplFileObject, fwrite)
 	}
 	if (!str_len) {
 		RETURN_LONG(0);
-	}
-
-	if (PG(magic_quotes_runtime)) {
-		str = estrndup(str, str_len);
-		php_stripslashes(str, &str_len TSRMLS_CC);
-		ret = php_stream_write(intern->u.file.stream, str, str_len);
-		efree(str);
-		RETURN_LONG(ret);
 	}
 
 	RETURN_LONG(php_stream_write(intern->u.file.stream, str, str_len));

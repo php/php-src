@@ -135,14 +135,7 @@ int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
 			}
 
 			/* Return last line from the shell command */
-			if (PG(magic_quotes_runtime)) {
-				int len;
-	
-				tmp = php_addslashes(buf, bufl, &len, 0 TSRMLS_CC);
-				RETVAL_STRINGL(tmp, len, 0);
-			} else {
-				RETVAL_STRINGL(buf, bufl, 1);
-			}
+			RETVAL_STRINGL(buf, bufl, 1);
 		} else { /* should return NULL, but for BC we return "" */
 			RETVAL_EMPTY_STRING();
 		}

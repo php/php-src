@@ -422,10 +422,7 @@ void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 	if (!FCGX_IsCGI()) {
 		FCGX_Request *request = (FCGX_Request *) SG(server_context);
 		char **env, *p, *t;
-		int magic_quotes_gpc = PG(magic_quotes_gpc);
 
-		/* turn off magic_quotes while importing environment variables */
-		PG(magic_quotes_gpc) = 0;
 		for (env = request->envp; env != NULL && *env != NULL; env++) {
 			p = strchr(*env, '=');
 			if (!p) {				/* malformed entry? */
@@ -435,7 +432,6 @@ void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 			php_register_variable(t, p + 1, array_ptr TSRMLS_CC);
 			efree(t);
 		}
-		PG(magic_quotes_gpc) = magic_quotes_gpc;
 	}
 	/* call php's original import as a catch-all */
 	php_php_import_environment_variables(array_ptr TSRMLS_CC);

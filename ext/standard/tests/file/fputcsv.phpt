@@ -1,7 +1,5 @@
 --TEST--
 various fputcsv() functionality tests
---INI--
-magic_quotes_runtime=0
 --FILE--
 <?php
 
