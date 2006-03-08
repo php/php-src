@@ -1,7 +1,5 @@
-set $zts = 0
-
 define ____executor_globals
-	if $zts
+	if basic_functions_module.zts
 		set $eg = ((zend_executor_globals) (*((void ***) tsrm_ls))[executor_globals_id-1])
 	else
 		set $eg = executor_globals
@@ -10,7 +8,7 @@ end
 
 document ____executor_globals
 	portable way of accessing executor_globals
-	type "set $zts = 1" if you use --enable-maintainer-zts on your configure line
+	ZTS detection is automatically based on ext/standard module struct
 end
 
 define dump_bt
