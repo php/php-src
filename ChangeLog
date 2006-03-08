@@ -1,3 +1,159 @@
+2006-03-07  Alex Waugh  <alex@alexwaugh.com>
+
+    * main/php.h
+      sapi/cgi/cgi_main.c:
+      Fix for RISC OS
+
+    * sapi/webjames/webjames.c:
+      Improve DOCUMENT_ROOT setting
+
+2006-03-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      NEWS:
+      - Update
+
+2006-03-07  Colin Viebrock  <colin@viebrock.ca>
+
+    * php.gif
+      main/logos.h:
+      change these in HEAD too
+
+2006-03-07  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_1)
+      NEWS:
+      updated for simplexml changes
+
+    * (PHP_5_1)
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/027.phpt
+      ext/simplexml/tests/030.phpt
+      ext/simplexml/tests/031.phpt
+      ext/simplexml/tests/bug35785.phpt:
+      - Synch with head
+
+2006-03-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/apache/mod_php5.c
+      sapi/apache/php_apache.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c
+      sapi/apache_hooks/php_apache.c
+      sapi/nsapi/nsapi.c:
+      Nuke safe_mode from sapi/*
+      
+
+2006-03-07  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/package.xml:
+      prepare to the next release
+
+2006-03-07  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_4_4)
+      win32/php4dllts.dsp:
+      Sync pcre update changes
+
+2006-03-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/tests/break_label01.phpt
+      ZendEngine2/tests/break_label02.phpt
+      ZendEngine2/tests/break_label03.phpt
+      ZendEngine2/tests/break_label04.phpt
+      ZendEngine2/tests/break_label05.phpt
+      ZendEngine2/tests/break_label06.phpt
+      ZendEngine2/tests/break_label07.phpt
+      ZendEngine2/tests/break_label08.inc
+      ZendEngine2/tests/break_label08.phpt
+      ZendEngine2/tests/break_label09.phpt
+      ZendEngine2/tests/break_label10.phpt
+      ZendEngine2/tests/break_label11.phpt:
+      Reverted "break label"
+
+2006-03-07  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      -** empty log message ***
+
+2006-03-07  Derick Rethans  <php@derickrethans.nl>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      - Make this compile again
+
+2006-03-07  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      NEWS
+      ext/oci8/oci8.c:
+      MFH
+      add workaround for Oracle server crash, use OCIServerVersion() instead of
+      OCIPing()
+      fix #36250 (PHP Causes ORA-07445 Core dump in Oracle server 9.2.x)
+
+    * ext/oci8/oci8.c:
+      add workaround for Oracle server crash, use OCIServerVersion() instead of
+      OCIPing()
+      fix #36250 (PHP Causes ORA-07445 Core dump in Oracle server 9.2.x)
+
+2006-03-07  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      Mark some functions as Unicode-safe and adjust UTODO notices for others.
+
+2006-03-07  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * NEWS:
+      - gd1 and ft1 entry
+
+2006-03-07  Sara Golemon  <sara@golemon.com>
+
+    * ZendEngine2/tests/unset_cv06.phpt:
+      Remove register_globals regression test for Pierre
+
+2006-03-07  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * NEWS
+      php.ini-dist
+      php.ini-recommended
+      ext/mbstring/mb_gpc.c
+      ext/mbstring/mb_gpc.h
+      ext/mbstring/mbstring.c
+      ext/mbstring/tests/mb_parse_str.phpt
+      ext/mbstring/tests/mb_parse_str02.phpt
+      ext/session/php_session.h
+      ext/session/session.c
+      ext/session/tests/001.phpt
+      ext/session/tests/003.phpt
+      ext/session/tests/004.phpt
+      ext/session/tests/005.phpt
+      ext/session/tests/006.phpt
+      ext/session/tests/007.phpt
+      ext/session/tests/008-php4.2.3.phpt
+      ext/session/tests/008.phpt
+      ext/session/tests/009.phpt
+      ext/session/tests/010.phpt
+      ext/session/tests/011.phpt
+      ext/session/tests/012.phpt
+      ext/session/tests/013.phpt
+      ext/session/tests/014.phpt
+      ext/session/tests/019.phpt
+      ext/session/tests/bug24592.phpt
+      ext/session/tests/bug26862.phpt
+      main/main.c
+      main/php_globals.h
+      main/php_variables.c
+      main/rfc1867.c
+      sapi/apache/mod_php5.c
+      sapi/apache_hooks/mod_php5.c
+      sapi/apache_hooks/sapi_apache.c:
+      - remove register_globals support (aka "Kill the f***ing thing" :)
+
 2006-03-06  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * ext/pcre/config.w32:

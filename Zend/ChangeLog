@@ -1,3 +1,43 @@
+2006-03-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_globals.h
+      zend_language_parser.y
+      tests/break_label01.phpt
+      tests/break_label02.phpt
+      tests/break_label03.phpt
+      tests/break_label04.phpt
+      tests/break_label05.phpt
+      tests/break_label06.phpt
+      tests/break_label07.phpt
+      tests/break_label08.inc
+      tests/break_label08.phpt
+      tests/break_label09.phpt
+      tests/break_label10.phpt
+      tests/break_label11.phpt:
+      Reverted "break label"
+
+2006-03-07  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_builtin_functions.c:
+      -** empty log message ***
+
+2006-03-07  Derick Rethans  <php@derickrethans.nl>
+
+    * zend_builtin_functions.c:
+      - Make this compile again
+
+2006-03-07  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_builtin_functions.c:
+      Mark some functions as Unicode-safe and adjust UTODO notices for others.
+
+2006-03-07  Sara Golemon  <sara@golemon.com>
+
+    * tests/unset_cv06.phpt:
+      Remove register_globals regression test for Pierre
+
 2006-03-06  Dmitry Stogov  <dmitry@zend.com>
 
     * bench.php:
