@@ -1,0 +1,84 @@
+--TEST--
+Phar object: access through SplFileObject
+--SKIPIF--
+<?php if (!extension_loaded("phar")) print "skip"; ?>
+--FILE--
+<?php
+
+require_once 'phar_oo_test.inc';
+
+class MyFile extends SplFileObject
+{
+	function __construct($name)
+	{
+		echo __METHOD__ . "(" . str_replace(dirname(__FILE__), '*', $name) . ")\n";
+		parent::__construct($name);
+	}
+}
+
+$phar = new Phar($fname);
+$phar->setFileClass('MyFile');
+
+$f = $phar['a.php'];
+
+$s = $f->fstat();
+
+var_dump($s['atime']);
+var_dump($s['ctime']);
+var_dump($s['mtime']);
+
+var_dump($f->ftell());
+var_dump($f->eof());
+var_dump($f->fgets());
+var_dump($f->eof());
+var_dump($f->fseek(20));
+var_dump($f->ftell());
+var_dump($f->fgets());
+var_dump($f->rewind());
+var_dump($f->ftell());
+var_dump($f->fgets());
+var_dump($f->ftell());
+
+?>
+===AGAIN===
+<?php
+
+$f = $phar['a.php'];
+
+var_dump($f->ftell());
+var_dump($f->eof());
+var_dump($f->fgets());
+var_dump($f->eof());
+
+//unset($f); without unset we check for working refcounting
+
+?>
+===DONE===
+--CLEAN--
+<?php 
+unlink(dirname(__FILE__) . '/phar_oo_test.phar.php');
+__halt_compiler();
+?>
+--EXPECTF--
+MyFile::__construct(phar://*/phar_oo_test.phar.php/a.php)
+int(1141214400)
+int(1141214400)
+int(1141214400)
+int(0)
+bool(false)
+string(32) "<?php echo "This is a.php\n"; ?>"
+bool(true)
+int(0)
+int(20)
+string(12) "a.php\n"; ?>"
+NULL
+int(0)
+string(32) "<?php echo "This is a.php\n"; ?>"
+int(32)
+===AGAIN===
+MyFile::__construct(phar://*/phar_oo_test.phar.php/a.php)
+int(0)
+bool(false)
+string(32) "<?php echo "This is a.php\n"; ?>"
+bool(true)
+===DONE===

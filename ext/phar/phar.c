@@ -181,17 +181,30 @@ static void phar_destroy_phar_data(phar_archive_data *data TSRMLS_DC) /* {{{ */
 		php_stream_close(data->fp);
 	}
 	data->fp = 0;
+	efree(data);
 }
 /* }}}*/
 
 static void destroy_phar_data(void *pDest) /* {{{ */
 {
-	phar_archive_data *phar_data = (phar_archive_data *) pDest;
+	phar_archive_data *phar_data = *(phar_archive_data **) pDest;
 	TSRMLS_FETCH();
 
-	phar_destroy_phar_data(phar_data TSRMLS_CC);
+	if (--phar_data->refcount < 0) {
+		phar_destroy_phar_data(phar_data TSRMLS_CC);
+	}
 }
 /* }}}*/
+
+static void phar_spl_foreign_dtor(spl_filesystem_object *object TSRMLS_DC) /* {{{ */
+{
+	phar_archive_data *phar_data = (phar_archive_data *) object->oth;
+
+	if (--phar_data->refcount < 0) {
+		phar_destroy_phar_data(phar_data TSRMLS_CC);
+	}
+}
+/* }}} */
 
 static void destroy_phar_manifest(void *pDest) /* {{{ */
 {
@@ -221,7 +234,8 @@ static phar_archive_data * phar_get_archive(char *fname, int fname_len, char *al
 		}
 	}
 	if (fname && fname_len) {
-		if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void**)&fd)) {
+		if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void**)&fd_ptr)) {
+			fd = *fd_ptr;
 			if (alias && alias_len) {
 				zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void*)&fd,   sizeof(phar_archive_data*), NULL);
 			}
@@ -321,8 +335,7 @@ PHP_METHOD(Phar, canCompress)
 static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int alias_len, long halt_offset, phar_archive_data** pphar TSRMLS_DC) /* {{{ */
 {
 	char b32[4], *buffer, *endbuffer, *savebuf;
-	phar_archive_data mydata;
-	phar_archive_data *phar;
+	phar_archive_data *mydata;
 	phar_entry_info entry;
 	php_uint32 manifest_len, manifest_count, manifest_index, tmp_len;
 	php_uint16 manifest_tag;
@@ -334,17 +347,17 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 		*pphar = NULL;
 	}
 
-	if ((phar = phar_get_archive(fname, fname_len, alias, alias_len TSRMLS_CC)) != NULL) {
+	if ((mydata = phar_get_archive(fname, fname_len, alias, alias_len TSRMLS_CC)) != NULL) {
 		/* Overloading or reloading an archive would only be possible if we  */
 		/* refcount everything to be sure no stream for any file in the */
 		/* archive is open. */
-		if (fname_len != phar->fname_len || strncmp(fname, phar->fname, fname_len)) {
+		if (fname_len != mydata->fname_len || strncmp(fname, mydata->fname, fname_len)) {
 			php_stream_close(fp);
-			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, phar->fname, fname);
+			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, mydata->fname, fname);
 			return FAILURE;
 		} else {
 			if (pphar) {
-				*pphar = phar;
+				*pphar = mydata;
 			}		
 			php_stream_close(fp);
 			return SUCCESS;
@@ -459,11 +472,12 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 	}
 
 	/* set up our manifest */
-	zend_hash_init(&mydata.manifest, sizeof(phar_entry_info),
+	mydata = emalloc(sizeof(phar_archive_data));
+	zend_hash_init(&mydata->manifest, sizeof(phar_entry_info),
 		zend_get_hash_value, destroy_phar_manifest, 0);
 	offset = 0;
-	mydata.min_timestamp = 0;
-	mydata.max_timestamp = 0;
+	mydata->min_timestamp = 0;
+	mydata->max_timestamp = 0;
 	for (manifest_index = 0; manifest_index < manifest_count; manifest_index++) {
 		if (buffer + 4 > endbuffer) {
 			MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest entry)")
@@ -480,13 +494,13 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 		PHAR_GET_32(buffer, entry.uncompressed_filesize);
 		PHAR_GET_32(buffer, entry.timestamp);
 		if (offset == 0) {
-			mydata.min_timestamp = entry.timestamp;
-			mydata.max_timestamp = entry.timestamp;
+			mydata->min_timestamp = entry.timestamp;
+			mydata->max_timestamp = entry.timestamp;
 		} else {
-			if (mydata.min_timestamp > entry.timestamp) {
-				mydata.min_timestamp = entry.timestamp;
-			} else if (mydata.max_timestamp < entry.timestamp) {
-				mydata.max_timestamp = entry.timestamp;
+			if (mydata->min_timestamp > entry.timestamp) {
+				mydata->min_timestamp = entry.timestamp;
+			} else if (mydata->max_timestamp < entry.timestamp) {
+				mydata->max_timestamp = entry.timestamp;
 			}
 		}
 		PHAR_GET_32(buffer, entry.compressed_filesize);
@@ -515,25 +529,26 @@ static int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alia
 		}
 		entry.crc_checked = 0;
 		entry.fp = NULL;
-		zend_hash_add(&mydata.manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info), NULL);
+		zend_hash_add(&mydata->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info), NULL);
 	}
 
-	mydata.fname = estrndup(fname, fname_len);
-	mydata.fname_len = fname_len;
-	mydata.alias = alias ? estrndup(alias, alias_len) : mydata.fname;
-	mydata.alias_len = alias ? alias_len : fname_len;
-	snprintf(mydata.version, sizeof(mydata.version), "%u.%u.%u", manifest_tag >> 12, (manifest_tag >> 8) & 0xF, (manifest_tag >> 4) & 0xF);
-	mydata.internal_file_start = halt_offset + manifest_len + 4;
-	mydata.has_compressed_files = compressed;
-	mydata.fp = fp;
-	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void*)&mydata, sizeof(phar_archive_data), (void**)&phar);
+	mydata->fname = estrndup(fname, fname_len);
+	mydata->fname_len = fname_len;
+	mydata->alias = alias ? estrndup(alias, alias_len) : mydata->fname;
+	mydata->alias_len = alias ? alias_len : fname_len;
+	snprintf(mydata->version, sizeof(mydata->version), "%u.%u.%u", manifest_tag >> 12, (manifest_tag >> 8) & 0xF, (manifest_tag >> 4) & 0xF);
+	mydata->internal_file_start = halt_offset + manifest_len + 4;
+	mydata->has_compressed_files = compressed;
+	mydata->fp = fp;
+	mydata->refcount = 0;
+	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void*)&mydata, sizeof(phar_archive_data),  NULL);
 	if (register_alias) {
-	zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void*)&phar,   sizeof(phar_archive_data*), NULL);
+	zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void*)&mydata, sizeof(phar_archive_data*), NULL);
 	}
 	efree(savebuf);
 	
 	if (pphar) {
-		*pphar = phar;
+		*pphar = mydata;
 	}
 
 	return SUCCESS;
@@ -1818,7 +1833,6 @@ PHP_RINIT_FUNCTION(phar) /* {{{ */
 
 PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 {
-/*	zend_hash_apply(&(PHAR_GLOBALS->phar_fname_map), phar_apply_destroy TSRMLS_CC);*/
 	zend_hash_destroy(&(PHAR_GLOBALS->phar_alias_map));
 	zend_hash_destroy(&(PHAR_GLOBALS->phar_fname_map));
 	return SUCCESS;
