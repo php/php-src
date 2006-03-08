@@ -89,7 +89,7 @@ ZEND_DECLARE_MODULE_GLOBALS(phar)
 #endif
 
 typedef union _phar_archive_object  phar_archive_object;
-typedef union _phar_entry_object     phar_entry_object;
+typedef union _phar_entry_object    phar_entry_object;
 
 /* entry for one file in a phar file */
 typedef struct _phar_manifest_entry {
@@ -118,11 +118,12 @@ typedef struct _phar_archive_data {
 	php_uint32               min_timestamp;
 	php_uint32               max_timestamp;
 	php_stream               *fp;
+	int                      refcount;
 } phar_archive_data;
 
 /* stream access data for one file entry in a phar file */
 typedef struct _phar_entry_data {
-	phar_archive_data       *phar;
+	phar_archive_data        *phar;
 	php_stream               *fp;
 	phar_entry_info          *internal_file;
 } phar_entry_data;
@@ -133,7 +134,7 @@ union _phar_archive_object {
 	spl_filesystem_object    spl;
 	struct {
 	    zend_object          std;
-	    phar_archive_data   *archive;
+	    phar_archive_data    *archive;
 	} arc;
 };
 
@@ -168,11 +169,8 @@ static php_stream *phar_opendir(php_stream_wrapper *wrapper, char *filename, cha
 static zend_class_entry *phar_ce_archive;
 static zend_class_entry *phar_ce_entry;
 
-static void destroy_phar_data(void *pDest) /* {{{ */
+static void phar_destroy_phar_data(phar_archive_data *data TSRMLS_DC) /* {{{ */
 {
-	phar_archive_data *data = (phar_archive_data *) pDest;
-	TSRMLS_FETCH();
-
 	if (data->alias && data->alias != data->fname) {
 		efree(data->alias);
 		data->alias = NULL;
@@ -183,6 +181,15 @@ static void destroy_phar_data(void *pDest) /* {{{ */
 		php_stream_close(data->fp);
 	}
 	data->fp = 0;
+}
+/* }}}*/
+
+static void destroy_phar_data(void *pDest) /* {{{ */
+{
+	phar_archive_data *phar_data = (phar_archive_data *) pDest;
+	TSRMLS_FETCH();
+
+	phar_destroy_phar_data(phar_data TSRMLS_CC);
 }
 /* }}}*/
 
@@ -1467,7 +1474,9 @@ PHP_METHOD(Phar, __construct)
 		return;
 	}
 
+	phar_data->refcount++;
 	phar_obj->arc.archive = phar_data;
+	phar_obj->spl.oth_dtor = phar_spl_foreign_dtor;
 
 	fname_len = spprintf(&fname, 0, "phar://%s", fname);
 
@@ -1775,9 +1784,7 @@ static void php_phar_init_globals_module(zend_phar_globals *phar_globals)
 }
 /* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
- */
-PHP_MINIT_FUNCTION(phar)
+PHP_MINIT_FUNCTION(phar) /* {{{ */
 {
 	zend_class_entry ce;
 
@@ -1795,17 +1802,13 @@ PHP_MINIT_FUNCTION(phar)
 }
 /* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
-PHP_MSHUTDOWN_FUNCTION(phar)
+PHP_MSHUTDOWN_FUNCTION(phar) /* {{{ */
 {
 	return php_unregister_url_stream_wrapper("phar" TSRMLS_CC);
 }
 /* }}} */
 
-/* {{{ PHP_RINIT_FUNCTION
- */
-PHP_RINIT_FUNCTION(phar)
+PHP_RINIT_FUNCTION(phar) /* {{{ */
 {
 	zend_hash_init(&(PHAR_GLOBALS->phar_fname_map), sizeof(phar_archive_data),  zend_get_hash_value, destroy_phar_data, 0);
 	zend_hash_init(&(PHAR_GLOBALS->phar_alias_map), sizeof(phar_archive_data*), zend_get_hash_value, NULL, 0);
@@ -1813,19 +1816,16 @@ PHP_RINIT_FUNCTION(phar)
 }
 /* }}} */
 
-/* {{{ PHP_RSHUTDOWN_FUNCTION
- */
-PHP_RSHUTDOWN_FUNCTION(phar)
+PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 {
+/*	zend_hash_apply(&(PHAR_GLOBALS->phar_fname_map), phar_apply_destroy TSRMLS_CC);*/
 	zend_hash_destroy(&(PHAR_GLOBALS->phar_alias_map));
 	zend_hash_destroy(&(PHAR_GLOBALS->phar_fname_map));
 	return SUCCESS;
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
-PHP_MINFO_FUNCTION(phar)
+PHP_MINFO_FUNCTION(phar) /* {{{ */
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Phar: PHP Archive support", "enabled");
