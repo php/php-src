@@ -33,14 +33,25 @@ extern PHPAPI zend_class_entry *spl_ce_SplTempFileObject;
 PHP_MINIT_FUNCTION(spl_directory);
 
 typedef enum {
-	SPL_FS_INFO,
+	SPL_FS_INFO, /* must be 0 */
 	SPL_FS_DIR,
 	SPL_FS_FILE,
 } SPL_FS_OBJ_TYPE;
 
-typedef struct _spl_filesystem_object {
+typedef struct _spl_filesystem_object  spl_filesystem_object;
+
+typedef void (*spl_foreign_dtor_t)(spl_filesystem_object *object TSRMLS_DC);
+typedef void (*spl_foreign_clone_t)(spl_filesystem_object *src, spl_filesystem_object *dst TSRMLS_DC);
+
+typedef struct _spl_other_handler {
+	spl_foreign_dtor_t     dtor;
+	spl_foreign_clone_t    clone;
+} spl_other_handler;
+
+struct _spl_filesystem_object {
 	zend_object        std;
 	void               *oth;
+	spl_other_handler  *oth_handler;
 	char               *path;
 	int                path_len;
 	char               *file_name;
@@ -73,7 +84,7 @@ typedef struct _spl_filesystem_object {
 			zend_function      *func_getCurr;
 		} file;
 	} u;
-} spl_filesystem_object;
+};
 
 #define SPL_FILE_OBJECT_DROP_NEW_LINE      0x00000001 /* drop new lines */
 
