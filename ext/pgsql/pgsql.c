@@ -1962,12 +1962,8 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 				int data_len;
 				int should_copy=0;
 
-				if (PG(magic_quotes_runtime)) {
-					data = php_addslashes(element, element_len, &data_len, 0 TSRMLS_CC);
-				} else {
-					data = safe_estrndup(element, element_len);
-					data_len = element_len;
-				}
+				data = safe_estrndup(element, element_len);
+				data_len = element_len;
 			
 				if (result_type & PGSQL_NUM) {
 					add_index_stringl(return_value, i, data, data_len, should_copy);
@@ -5583,12 +5579,9 @@ PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array TS
 				element = PQgetvalue(pg_result, pg_row, i);
 				element_len = (element ? strlen(element) : 0);
 				if (element) {
-					if (PG(magic_quotes_runtime)) {
-						data = php_addslashes(element, element_len, &data_len, 0 TSRMLS_CC);
-					} else {
-						data = safe_estrndup(element, element_len);
-						data_len = element_len;
-					}
+					data = safe_estrndup(element, element_len);
+					data_len = element_len;
+
 					field_name = PQfname(pg_result, i);
 					add_assoc_stringl(row, field_name, data, data_len, 0);
 				}

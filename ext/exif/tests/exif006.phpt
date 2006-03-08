@@ -2,8 +2,7 @@
 Check for exif_read_data, magic_quotes_runtime
 --SKIPIF--
 <?php 
-	if (!extension_loaded('exif')) die('skip exif extension not available');
-	if (version_compare(PHP_VERSION, "4.4.0-dev", "<")) die('skip PHP 4.4 required');
+	die('skip magic_quotes removed');
 ?>
 --INI--
 output_handler=

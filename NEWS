@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Droped register_globals support (Pierre)
   - session_register, session_unregister and session_is_registered removed they
     depend on register_globals
+- Droped magic_quotes_gpc, magic_quotes_runtime and magic_quotes_sybase ini
+  settings (Pierre)
+  -  get_magic_quotes_gpc, get_magic_quotes_runtime are kept but always return
+     false, set_magic_quotes_runtime raises an E_CORE_ERROR
 - Freetype 1.x and GD 1.x support removed (Pierre)
 - Cleaned CGI code. Now FastCGI can not be disabled. See sapi/cgi/CHANGES
   for more details. (Dmitry)

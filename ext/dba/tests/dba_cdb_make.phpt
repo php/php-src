@@ -1,7 +1,5 @@
 --TEST--
 DBA CDB_MAKE handler test
---INI--
-magic_quotes_runtime=1
 --SKIPIF--
 <?php 
 	$handler = 'cdb_make';

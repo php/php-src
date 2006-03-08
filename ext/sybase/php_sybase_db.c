@@ -858,9 +858,6 @@ PHP_FUNCTION(sybase_query)
 				zval *cur_value = result->data[i][j-1];
 
 				convert_to_string(cur_value);
-				if (PG(magic_quotes_runtime)) {
-					Z_STRVAL_P(cur_value) = php_addslashes(Z_STRVAL_P(cur_value), Z_STRLEN_P(cur_value), &Z_STRLEN_P(cur_value),0 TSRMLS_CC);
-				}
 			}
 		}
 		retvalue=dbnextrow(sybase_ptr->link);

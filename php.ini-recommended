@@ -92,10 +92,6 @@
 ; - register_argc_argv = Off       [Performance]
 ;     Disables registration of the somewhat redundant $argv and $argc global
 ;     variables.
-; - magic_quotes_gpc = Off         [Performance]
-;     Input data is no longer escaped with slashes so that it can be sent into
-;     SQL databases without further manipulation.  Instead, you should use the
-;     function addslashes() on each input element you wish to send to a database.
 ; - variables_order = "GPCS"       [Performance]
 ;     The environment variables are not hashed into the $_ENV.  To access
 ;     environment variables, you can use getenv() instead.
@@ -453,18 +449,6 @@ auto_globals_jit = On
 
 ; Maximum size of POST data that PHP will accept.
 post_max_size = 8M
-
-; Magic quotes
-;
-
-; Magic quotes for incoming GET/POST/Cookie data.
-magic_quotes_gpc = Off
-
-; Magic quotes for runtime-generated data, e.g. data from SQL, from exec(), etc.
-magic_quotes_runtime = Off
-
-; Use Sybase-style magic quotes (escape ' with '' instead of \').
-magic_quotes_sybase = Off
 
 ; Automatically add files before or after any PHP document.
 auto_prepend_file =

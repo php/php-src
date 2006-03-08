@@ -70,7 +70,15 @@ all, it had only been about 10 years then... */
 #else
 # include <php_config.h>
 #endif
+/*
+#ifndef MATCH_LIMIT
+#define MATCH_LIMIT 10000000
+#endif
 
+#ifndef MATCH_LIMIT_RECURSION
+#define MATCH_LIMIT_RECURSION MATCH_LIMIT
+#endif
+*/
 /* Standard C headers plus the external interface definition. The only time
 setjmp and stdarg are used is when NO_RECURSE is set. */
 

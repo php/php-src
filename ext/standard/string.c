@@ -3798,48 +3798,19 @@ PHPAPI void php_u_stripslashes(UChar *str, int *len TSRMLS_DC)
 	UChar32 ch1, ch2;
 
 	ch1 = -1; ch2 = -1;
-	if (PG(magic_quotes_sybase)) {
-		while (i < src_len) {
-			U16_NEXT(str, i, src_len, ch1);
-			if (ch1 == '\'') {
-				tmp_len += zend_codepoint_to_uchar(ch1, str+tmp_len);
-				if (i < src_len) {
-					U16_NEXT(str, i, src_len, ch2);
-					if (ch2 != '\'') {
-						tmp_len += zend_codepoint_to_uchar(ch2, str+tmp_len);
-					}
-				}
-			} else if (ch1 == '\\') {
-				if (i < src_len) {
-					U16_NEXT(str, i, src_len, ch2);
-					if (ch2 == '0') {
-						tmp_len += zend_codepoint_to_uchar('\0', str+tmp_len);
-					} else {
-						tmp_len += zend_codepoint_to_uchar(ch1, str+tmp_len);
-						tmp_len += zend_codepoint_to_uchar(ch2, str+tmp_len);
-					}
+	while (i < src_len) {
+		U16_NEXT(str, i, src_len, ch1);
+		if (ch1 == '\\') {
+			if (i < src_len) {
+				U16_NEXT(str, i, src_len, ch2);
+				if (ch2 == '0') {
+					tmp_len += zend_codepoint_to_uchar('\0', str+tmp_len);
 				} else {
-					tmp_len += zend_codepoint_to_uchar(ch1, str+tmp_len);
+					tmp_len += zend_codepoint_to_uchar(ch2, str+tmp_len);
 				}
-			} else {
-				tmp_len += zend_codepoint_to_uchar(ch1, str+tmp_len);
 			}
-		}
-	} else {
-		while (i < src_len) {
-			U16_NEXT(str, i, src_len, ch1);
-			if (ch1 == '\\') {
-				if (i < src_len) {
-					U16_NEXT(str, i, src_len, ch2);
-					if (ch2 == '0') {
-						tmp_len += zend_codepoint_to_uchar('\0', str+tmp_len);
-					} else {
-						tmp_len += zend_codepoint_to_uchar(ch2, str+tmp_len);
-					}
-				}
-			} else {
-				tmp_len += zend_codepoint_to_uchar(ch1, str+tmp_len);
-			}
+		} else {
+			tmp_len += zend_codepoint_to_uchar(ch1, str+tmp_len);
 		}
 	}
 	*(str+tmp_len) = 0;
@@ -3864,34 +3835,6 @@ PHPAPI void php_stripslashes(char *str, int *len TSRMLS_DC)
 	}
 	s = str;
 	t = str;
-
-	if (PG(magic_quotes_sybase)) {
-		while (l > 0) {
-			if (*t == '\'') {
-				if ((l > 0) && (t[1] == '\'')) {
-					t++;
-					if (len != NULL) {
-						(*len)--;
-					}
-					l--;
-				}
-				*s++ = *t++;
-			} else if (*t == '\\' && t[1] == '0' && l > 0) {
-				*s++='\0';
-				t+=2;
-				if (len != NULL) {
-					(*len)--;
-				}
-				l--;
-			} else {
-				*s++ = *t++;
-			}
-			l--;
-		}
-		*s = '\0';
-		
-		return;
-	}
 
 	while (l > 0) {
 		if (*t == '\\') {
@@ -4179,42 +4122,25 @@ PHPAPI UChar *php_u_addslashes_ex(UChar *str, int length, int *new_length, int s
 	}
 
 	buf = eumalloc(length * 2);
-	if (!ignore_sybase && PG(magic_quotes_sybase)) {
-		while (i < length) {
-			U16_NEXT(str, i, length, ch);
-			switch (ch) {
+
+	while (i < length) {
+		U16_NEXT(str, i, length, ch);
+		switch (ch) {
 			case '\0':
 				*(buf+buf_len) = (UChar)0x5C; buf_len++; /* \ */
 				*(buf+buf_len) = (UChar)0x30; buf_len++; /* 0 */
 				break;
 			case '\'':
-				*(buf+buf_len) = (UChar)0x27; buf_len++; /* ' */
-				*(buf+buf_len) = (UChar)0x27; buf_len++; /* ' */
-				break;
-			default:
-				buf_len += zend_codepoint_to_uchar(ch, buf+buf_len);
-				break;
-			}
-		}
-	} else {
-		while (i < length) {
-			U16_NEXT(str, i, length, ch);
-			switch (ch) {
-			case '\0':
-				*(buf+buf_len) = (UChar)0x5C; buf_len++; /* \ */
-				*(buf+buf_len) = (UChar)0x30; buf_len++; /* 0 */
-				break;
-			case '\'':
-			case '\"':
+				case '\"':
 			case '\\':
-				*(buf+buf_len) = (UChar)0x5C; buf_len++; /* \ */
-				/* break is missing *intentionally* */
+					*(buf+buf_len) = (UChar)0x5C; buf_len++; /* \ */
+					/* break is missing *intentionally* */
 			default:
-				buf_len += zend_codepoint_to_uchar(ch, buf+buf_len);
-				break;	
-			}
+					buf_len += zend_codepoint_to_uchar(ch, buf+buf_len);
+					break;	
 		}
 	}
+
 	*(buf+buf_len) = 0;
 
 	if (should_free) {
@@ -4256,44 +4182,25 @@ PHPAPI char *php_addslashes_ex(char *str, int length, int *new_length, int shoul
 	end = source + length;
 	target = new_str;
 	
-	if (!ignore_sybase && PG(magic_quotes_sybase)) {
-		while (source < end) {
-			switch (*source) {
-				case '\0':
-					*target++ = '\\';
-					*target++ = '0';
-					break;
-				case '\'':
-					*target++ = '\'';
-					*target++ = '\'';
-					break;
-				default:
-					*target++ = *source;
-					break;
-			}
-			source++;
-		}
-	} else {
-		while (source < end) {
-			switch (*source) {
-				case '\0':
-					*target++ = '\\';
-					*target++ = '0';
-					break;
-				case '\'':
+	while (source < end) {
+		switch (*source) {
+			case '\0':
+				*target++ = '\\';
+				*target++ = '0';
+				break;
+			case '\'':
 				case '\"':
-				case '\\':
+			case '\\':
 					*target++ = '\\';
 					/* break is missing *intentionally* */
-				default:
+			default:
 					*target++ = *source;
 					break;	
-			}
-		
-			source++;
 		}
+
+		source++;
 	}
-	
+
 	*target = 0;
 	*new_length = target - new_str;
 	if (should_free) {

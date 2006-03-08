@@ -1417,16 +1417,9 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 			int should_copy;
 
 			if (Z_TYPE(result->data[result->cur_row][i]) == IS_STRING) {
-				if (PG(magic_quotes_runtime)) {
-					data = php_addslashes(Z_STRVAL(result->data[result->cur_row][i]), Z_STRLEN(result->data[result->cur_row][i]), &data_len, 0 TSRMLS_CC);
-					should_copy = 0;
-				}
-				else
-				{
-					data = Z_STRVAL(result->data[result->cur_row][i]);
-					data_len = Z_STRLEN(result->data[result->cur_row][i]);
-					should_copy = 1;
-				}
+				data = Z_STRVAL(result->data[result->cur_row][i]);
+				data_len = Z_STRLEN(result->data[result->cur_row][i]);
+				should_copy = 1;
 
 				if (result_type & MSSQL_NUM) {
 					add_index_stringl(return_value, i, data, data_len, should_copy);

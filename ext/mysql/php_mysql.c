@@ -1841,13 +1841,8 @@ PHP_FUNCTION(mysql_result)
 
 	if (sql_row[field_offset]) {
 		Z_TYPE_P(return_value) = IS_STRING;
-
-		if (PG(magic_quotes_runtime)) {
-			Z_STRVAL_P(return_value) = php_addslashes(sql_row[field_offset], sql_row_lengths[field_offset],&Z_STRLEN_P(return_value), 0 TSRMLS_CC);
-		} else {	
-			Z_STRLEN_P(return_value) = sql_row_lengths[field_offset];
-			Z_STRVAL_P(return_value) = (char *) safe_estrndup(sql_row[field_offset], Z_STRLEN_P(return_value));
-		}
+		Z_STRLEN_P(return_value) = sql_row_lengths[field_offset];
+		Z_STRVAL_P(return_value) = (char *) safe_estrndup(sql_row[field_offset], Z_STRLEN_P(return_value));
 	} else {
 		Z_TYPE_P(return_value) = IS_NULL;
 	}
@@ -1970,12 +1965,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 
 			MAKE_STD_ZVAL(data);
 
-			if (PG(magic_quotes_runtime)) {
-				Z_TYPE_P(data) = IS_STRING;
-				Z_STRVAL_P(data) = php_addslashes(mysql_row[i], mysql_row_lengths[i], &Z_STRLEN_P(data), 0 TSRMLS_CC);
-			} else {
-				ZVAL_STRINGL(data, mysql_row[i], mysql_row_lengths[i], 1);
-			}
+			ZVAL_STRINGL(data, mysql_row[i], mysql_row_lengths[i], 1);
 
 			if (result_type & MYSQL_NUM) {
 				add_index_zval(return_value, i, data);

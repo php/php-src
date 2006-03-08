@@ -408,18 +408,6 @@ auto_globals_jit = On
 ; Maximum size of POST data that PHP will accept.
 post_max_size = 8M
 
-; Magic quotes
-;
-
-; Magic quotes for incoming GET/POST/Cookie data.
-magic_quotes_gpc = On
-
-; Magic quotes for runtime-generated data, e.g. data from SQL, from exec(), etc.
-magic_quotes_runtime = Off
-
-; Use Sybase-style magic quotes (escape ' with '' instead of \').
-magic_quotes_sybase = Off
-
 ; Automatically add files before or after any PHP document.
 auto_prepend_file =
 auto_append_file =

@@ -1,7 +1,5 @@
 --TEST--
 mhash() test
---INI--
-magic_quotes_runtime=0
 --SKIPIF--
 <?php
 	include "skip.inc";
