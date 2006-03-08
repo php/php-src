@@ -206,6 +206,19 @@ static void phar_spl_foreign_dtor(spl_filesystem_object *object TSRMLS_DC) /* {{
 }
 /* }}} */
 
+static void phar_spl_foreign_clone(spl_filesystem_object *src, spl_filesystem_object *dst TSRMLS_DC) /* {{{ */
+{
+	phar_archive_data *phar_data = (phar_archive_data *) dst->oth;
+
+	phar_data->refcount++;
+}
+/* }}} */
+
+static spl_other_handler phar_spl_foreign_handler = {
+	phar_spl_foreign_dtor,
+	NULL
+};
+
 static void destroy_phar_manifest(void *pDest) /* {{{ */
 {
 	phar_entry_info *entry = (phar_entry_info *)pDest;
@@ -577,9 +590,11 @@ static int phar_open_filename(char *fname, int fname_len, char *alias, int alias
 		}
 	}
 
+#if PHP_MAJOR_VERSION < 6
 	if (PG(safe_mode) && (!php_checkuid(fname, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
 		return FAILURE;
 	}
+#endif
 
 	if (php_check_open_basedir(fname TSRMLS_CC)) {
 		return FAILURE;
@@ -899,11 +914,13 @@ static php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, cha
 		return fpf;
 	}
 
+#if PHP_MAJOR_VERSION < 6
 	if (PG(safe_mode) && (!php_checkuid(idata->phar->fname, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
 		efree(idata);
 		efree(internal_file);
 		return NULL;
 	}
+#endif
 	
 	if (php_check_open_basedir(idata->phar->fname TSRMLS_CC)) {
 		efree(idata);
@@ -1491,7 +1508,7 @@ PHP_METHOD(Phar, __construct)
 
 	phar_data->refcount++;
 	phar_obj->arc.archive = phar_data;
-	phar_obj->spl.oth_dtor = phar_spl_foreign_dtor;
+	phar_obj->spl.oth_handler = &phar_spl_foreign_handler;
 
 	fname_len = spprintf(&fname, 0, "phar://%s", fname);
 
