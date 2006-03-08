@@ -665,74 +665,9 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 
 				sapi_update_response_code(401 TSRMLS_CC); /* authentication-required */
 
-				if(PG(safe_mode)) 
-#if (HAVE_PCRE || HAVE_BUNDLED_PCRE) && !defined(COMPILE_DL_PCRE)
-				{
-					zval *repl_temp;
-					char *ptr = colon_offset+1, *result, *newheader;
-					int ptr_len=0, result_len = 0, newlen = 0;
-
-					/* skip white space */
-					while (isspace(*ptr)) {
-						ptr++;
-					}
-
-					myuid = php_getuid();
-
-					ptr_len = strlen(ptr);
-					MAKE_STD_ZVAL(repl_temp);
-					Z_TYPE_P(repl_temp) = IS_STRING;
-					Z_STRVAL_P(repl_temp) = emalloc(32);
-					Z_STRLEN_P(repl_temp) = sprintf(Z_STRVAL_P(repl_temp), "realm=\"\\1-%ld\"", myuid);
-					/* Modify quoted realm value */
-					result = php_pcre_replace("/realm=\"(.*?)\"/i", 16,
-											 ptr, ptr_len,
-											 repl_temp,
-											 0, &result_len, -1, NULL TSRMLS_CC);
-					if(result_len==ptr_len) {
-						efree(result);
-						sprintf(Z_STRVAL_P(repl_temp), "realm=\\1-%ld\\2", myuid);
-						/* modify unquoted realm value */
-						result = php_pcre_replace("/realm=([^\\s]+)(.*)/i", 21, 
-											 	ptr, ptr_len,
-											 	repl_temp,
-											 	0, &result_len, -1, NULL TSRMLS_CC);
-						if(result_len==ptr_len) {
-							char *lower_temp = estrdup(ptr);	
-							char conv_temp[32];
-							int conv_len;
-
-							php_strtolower(lower_temp,strlen(lower_temp));
-							/* If there is no realm string at all, append one */
-							if(!strstr(lower_temp,"realm")) {
-								efree(result);
-								conv_len = sprintf(conv_temp, " realm=\"%ld\"",myuid);
-								result = emalloc(ptr_len+conv_len+1);
-								result_len = ptr_len+conv_len;
-								memcpy(result, ptr, ptr_len);	
-								memcpy(result+ptr_len, conv_temp, conv_len);
-								*(result+ptr_len+conv_len) = '\0';
-							}
-							efree(lower_temp);
-						}
-					}
-					newlen = sizeof("WWW-Authenticate: ") - 1  + result_len;
-					newheader = emalloc(newlen+1);
-					sprintf(newheader,"WWW-Authenticate: %s", result);
-					efree(header_line);
-					sapi_header.header = newheader;
-					sapi_header.header_len = newlen;
-					efree(result);
-					efree(Z_STRVAL_P(repl_temp));
-					efree(repl_temp);
-				} 
-#else
-				{
-					myuid = php_getuid();
-					efree(header_line);
-					sapi_header.header_len = spprintf(&sapi_header.header, 0, "WWW-Authenticate: Basic realm=\"%ld\"", myuid);
-				}
-#endif
+				myuid = php_getuid();
+				efree(header_line);
+				sapi_header.header_len = spprintf(&sapi_header.header, 0, "WWW-Authenticate: Basic realm=\"%ld\"", myuid);
 			}
 			if (sapi_header.header==header_line) {
 				*colon_offset = ':';

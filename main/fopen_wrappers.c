@@ -39,7 +39,6 @@
 #include <sys/param.h>
 #endif
 
-#include "safe_mode.h"
 #include "ext/standard/head.h"
 #include "ext/standard/php_standard.h"
 #include "zend_compile.h"
@@ -331,11 +330,6 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 	if (*filename == '.') {
 		return php_fopen_and_set_opened_path(filename, mode, opened_path TSRMLS_CC);
 	}
-	
-	/*
-	 * files in safe_mode_include_dir (or subdir) are excluded from
-	 * safe mode GID/UID checks
-	 */
 	
 	/* Absolute path open */
 	/* FIXME: Andi - Do we actually need the if()? */

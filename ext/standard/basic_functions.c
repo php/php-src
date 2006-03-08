@@ -1961,6 +1961,35 @@ PHPAPI int _php_error_log(int opt_err, char *message, char *opt, char *headers T
 	return SUCCESS;
 }
 
+PHPAPI char *php_get_current_user()
+{
+	struct passwd *pwd;
+	struct stat *pstat;
+	TSRMLS_FETCH();
+
+	if (SG(request_info).current_user) {
+		return SG(request_info).current_user;
+	}
+
+	/* FIXME: I need to have this somehow handled if
+	USE_SAPI is defined, because cgi will also be
+	interfaced in USE_SAPI */
+
+	pstat = sapi_get_stat(TSRMLS_C);
+
+	if (!pstat) {
+		return "";
+	}
+
+	if ((pwd=getpwuid(pstat->st_uid))==NULL) {
+		return "";
+	}
+	SG(request_info).current_user_length = strlen(pwd->pw_name);
+	SG(request_info).current_user = estrndup(pwd->pw_name, SG(request_info).current_user_length);
+	
+	return SG(request_info).current_user;		
+}	
+
 /* {{{ proto mixed call_user_func(string function_name [, mixed parmeter] [, mixed ...])
    Call a user function which is the first parameter */
 PHP_FUNCTION(call_user_func)

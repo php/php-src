@@ -48,14 +48,6 @@ define('PCRE_MISSING_ERROR',
 | with --with-pcre-regex or if you have compiled pcre as a  |
 | shared module load it via php.ini.                        |
 +-----------------------------------------------------------+');
-define('SAFE_MODE_WARNING',
-'+-----------------------------------------------------------+
-|                       ! WARNING !                         |
-| You are running the test-suite with "safe_mode" ENABLED ! |
-|                                                           |
-| Chances are high that no test will work at all,           |
-| depending on how you configured "safe_mode" !             |
-+-----------------------------------------------------------+');
 define('TMP_MISSING',
 '+-----------------------------------------------------------+
 |                       ! ERROR   !                         |
@@ -464,7 +456,6 @@ class testHarness {
 			'output_handler'=>'',
 			'zlib.output_compression'=>'Off',
 			'open_basedir'=>'',
-			'safe_mode'=>'0',
 			'disable_functions'=>'',
 			'output_buffering'=>'Off',
 			'error_reporting'=>'4095',
@@ -761,9 +752,6 @@ class testHarness {
 		if (!extension_loaded("pcre")) {
 			$this->writemsg(PCRE_MISSING_ERROR);
 			exit;
-		}
-		if (ini_get('safe_mode')) {
-			$this->writemsg(SAFE_MODE_WARNING);
 		}
 	}
 	

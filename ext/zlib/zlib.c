@@ -42,7 +42,6 @@
 /* #include <sys/uio.h> */
 #endif
 #include "ext/standard/head.h"
-#include "safe_mode.h"
 #include "ext/standard/php_standard.h"
 #include "ext/standard/info.h"
 #include "php_zlib.h"

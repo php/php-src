@@ -189,8 +189,6 @@ typedef zval pval;
 # endif
 #endif
 
-#include "safe_mode.h"
-
 #ifndef HAVE_STRERROR
 char *strerror(int);
 #endif

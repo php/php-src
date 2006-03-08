@@ -82,21 +82,6 @@ if (ob_get_level()) echo "Not all buffers were deleted.\n";
 error_reporting(E_ALL);
 ini_set('magic_quotes_runtime',0); // this would break tests by modifying EXPECT sections
 
-if (ini_get('safe_mode')) {
-	echo <<< SAFE_MODE_WARNING
-
-+-----------------------------------------------------------+
-|                       ! WARNING !                         |
-| You are running the test-suite with "safe_mode" ENABLED ! |
-|                                                           |
-| Chances are high that no test will work at all,           |
-| depending on how you configured "safe_mode" !             |
-+-----------------------------------------------------------+
-
-
-SAFE_MODE_WARNING;
-}
-
 $environment = isset($_ENV) ? $_ENV : array();
 
 // Don't ever guess at the PHP executable location.
@@ -145,7 +130,6 @@ if (getenv('TEST_PHP_USER')) {
 $ini_overwrites = array(
 		'output_handler=',
 		'open_basedir=',
-		'safe_mode=0',
 		'disable_functions=',
 		'output_buffering=Off',
 		'error_reporting=8191',
