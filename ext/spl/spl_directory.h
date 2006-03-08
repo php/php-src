@@ -38,9 +38,14 @@ typedef enum {
 	SPL_FS_FILE,
 } SPL_FS_OBJ_TYPE;
 
-typedef struct _spl_filesystem_object {
+typedef struct _spl_filesystem_object  spl_filesystem_object;
+
+typedef void (*spl_foreign_dtor_t)(spl_filesystem_object *object TSRMLS_DC);
+
+struct _spl_filesystem_object {
 	zend_object        std;
 	void               *oth;
+	spl_foreign_dtor_t oth_dtor;
 	char               *path;
 	int                path_len;
 	char               *file_name;
@@ -73,7 +78,7 @@ typedef struct _spl_filesystem_object {
 			zend_function      *func_getCurr;
 		} file;
 	} u;
-} spl_filesystem_object;
+};
 
 #define SPL_FILE_OBJECT_DROP_NEW_LINE      0x00000001 /* drop new lines */
 
