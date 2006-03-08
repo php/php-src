@@ -1,8 +1,7 @@
-set $zts = 0
-
 define ____executor_globals
-	if $zts
-		set $eg = ((zend_executor_globals) (*((void ***) tsrm_ls))[executor_globals_id-1])
+	if basic_functions_module.zts
+		set $tsrm_ls = ts_resource_ex(0, 0)
+		set $eg = ((zend_executor_globals) (*((void ***) $tsrm_ls))[executor_globals_id-1])
 	else
 		set $eg = executor_globals
 	end
@@ -10,7 +9,7 @@ end
 
 document ____executor_globals
 	portable way of accessing executor_globals
-	type "set $zts = 1" if you use --enable-maintainer-zts on your configure line
+	ZTS detection is automatically based on ext/standard module struct
 end
 
 define dump_bt
@@ -44,55 +43,33 @@ document printzv
 end
 
 define ____printzv_contents
-	____executor_globals
 	set $zvalue = $arg0
+	set $type = $zvalue->type
 
-	if $zvalue.type == 0
-		set $typename = "NULL"
+	printf "(refcount=%d) ", $zvalue->refcount
+	if $type == 0
+		printf "NULL"
 	end
-	if $zvalue.type == 1
-		set $typename = "long"
+	if $type == 1
+		printf "long: %ld", $zvalue->value.lval
 	end
-	if $zvalue.type == 2
-		set $typename = "double"
+	if $type == 2
+		printf "double: %lf", $zvalue->value.dval
 	end
-	if $zvalue.type == 3
-		set $typename = "string"
+	if $type == 3
+		printf "bool: "
+		if $zvalue->value.lval
+			printf "true"
+		else
+			printf "false"
+		end
 	end
-	if $zvalue.type == 4
-		set $typename = "array"
-	end
-	if $zvalue.type == 5
-		set $typename = "object"
-	end
-	if $zvalue.type == 6
-		set $typename = "bool"
-	end
-	if $zvalue.type == 7
-		set $typename = "resource"
-	end
-	if $zvalue.type == 8 
-		set $typename = "constant"
-	end
-	if $zvalue.type == 9
-		set $typename = "const_array"
-	end
-
-	printf "(refcount=%d) %s: ", $zvalue.refcount, $typename
-	if $zvalue.type == 1
-		printf "%ld", $zvalue.value.lval
-	end
-	if $zvalue->type == 2
-		printf "%lf", $zvalue.value.dval
-	end
-	if $zvalue.type == 3
-		printf "\"%s\"(%d)", $zvalue.value.str.val, $zvalue.value.str.len
-	end
-	if $zvalue.type == 4
+	if $type == 4
+		printf "array(%d): ", $zvalue->value.ht->nNumOfElements
 		if ! $arg1
 			printf "{\n"
 			set $ind = $ind + 1
-			____print_ht $zvalue.value.ht
+			____print_ht $zvalue->value.ht
 			set $ind = $ind - 1
 			set $i = $ind
 			while $i > 0
@@ -101,34 +78,60 @@ define ____printzv_contents
 			end
 			printf "}"
 		end
+		set $type = 0
 	end
-	if $zvalue.type == 5
+	if $type == 5
+		printf "object"
+		____executor_globals
+		set $handle = $zvalue->value.obj.handle
+		set $handlers = $zvalue->value.obj.handlers
+		if basic_functions_module.zts
+			set $zobj = zend_objects_get_address($zvalue, $tsrm_ls)
+		else
+			set $zobj = zend_objects_get_address($zvalue)
+		end
+		if $handlers->get_class_entry == &zend_std_object_get_class
+			set $cname = $zobj->ce.name
+		else
+			set $cname = "Unknown"
+		end
+		printf "(%s) #%d", $cname, $handle
 		if ! $arg1
-			printf "(prop examination disabled due to a gdb bug)"
-			if $zvalue.value.obj.handlers->get_properties
-#				set $ht = $zvalue->value.obj.handlers->get_properties($zvalue)
-#				printf "{\n"
-#				set $ind = $ind + 1
-#				____print_ht $ht
-#				set $ind = $ind - 1
-#				set $i = $ind
-#				while $i > 0
-#					printf "  "
-#					set $i = $i - 1
-#				end
-#				printf "}"
+			if $handlers->get_properties == &zend_std_get_properties
+				set $ht = $zobj->properties
+				if $ht
+					printf "(%d): ", $ht->nNumOfElements
+					printf "{\n"
+					set $ind = $ind + 1
+					____print_ht $ht
+					set $ind = $ind - 1
+					set $i = $ind
+					while $i > 0
+						printf "  "
+						set $i = $i - 1
+					end
+					printf "}"
+				else
+					echo "no properties found"
+				end
 			end
 		end
+		set $type = 0
 	end
-	if $zvalue.type == 6
-		if $zvalue.value.lval
-			printf "true"
-		else
-			printf "false"
-		end
+	if $type == 6
+		printf "string(%d): \"%s\"", $zvalue->value.str.len, $zvalue->value.str.val
 	end
-	if $zvalue.type == 7
-		printf "#%d", $zvalue.value.lval
+	if $type == 7
+		printf "resource: #%d", $zvalue->value.lval
+	end
+	if $type == 8 
+		printf "constant"
+	end
+	if $type == 9
+		printf "const_array"
+	end
+	if $type > 9
+		printf "unknown type %d", $type
 	end
 	printf "\n"
 end
@@ -143,7 +146,7 @@ define ____printzv
 		printf "*uninitialized* "
 	end
 
-	set $zcontents = *(struct _zval_struct *) $zvalue
+	set $zcontents = (zval*) $zvalue
 	if $arg1
 		____printzv_contents $zcontents $arg1
 	else
@@ -156,7 +159,7 @@ define ____print_const_table
 	set $p = $ht->pListHead
 
 	while $p != 0
-		set $const = *(zend_constant *) $p->pData
+		set $const = (zend_constant *) $p->pData
 
 		set $i = $ind
 		while $i > 0
@@ -170,7 +173,7 @@ define ____print_const_table
 			printf "%d => ", $p->h
 		end
 
-		____printzv_contents $const.value 0
+		____printzv_contents &$const->value 0
 		set $p = $p->pListNext
 	end
 end
@@ -187,7 +190,7 @@ define ____print_ht
 	set $p = $ht->pListHead
 
 	while $p != 0
-		set $zval = *(struct _zval_struct **)$p->pData
+		set $zval = *(zval **)$p->pData
 
 		set $i = $ind
 		while $i > 0
@@ -215,6 +218,41 @@ end
 
 document print_ht
 	dumps elements of HashTable made of zval
+end
+
+define ____print_ft
+	set $ht = $arg0
+	set $p = $ht->pListHead
+
+	while $p != 0
+		set $func = (zend_function*)$p->pData
+
+		set $i = $ind
+		while $i > 0
+			printf "  "
+			set $i = $i - 1
+		end
+
+		if $p->nKeyLength > 0 
+			printf "\"%s\" => ", (char*)$p->arKey
+		else
+			printf "%d => ", $p->h
+		end
+
+		printf "\"%s\"\n", $func->common.function_name
+		set $p = $p->pListNext
+	end
+end
+
+define print_ft
+	set $ind = 1
+	printf "[0x%08x] {\n", $arg0
+	____print_ft $arg0
+	printf "}\n"
+end
+
+document print_ft
+	dumps a function table (HashTable)
 end
 
 define printzn
