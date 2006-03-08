@@ -2,6 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 6.0
 - Unicode support. (Andrei, Dmitry, et al)
+- Dropped safe_mode support (Ilia, Andi)
 - Droped register_globals support (Pierre)
   - session_register, session_unregister and session_is_registered removed they
     depend on register_globals
