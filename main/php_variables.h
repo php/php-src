@@ -31,7 +31,6 @@
 #define PARSE_STRING 3
 
 BEGIN_EXTERN_C()
-void php_treat_data(int arg, char *str, zval* destArray TSRMLS_DC);
 void php_startup_auto_globals(TSRMLS_D);
 extern PHPAPI void (*php_import_environment_variables)(zval *array_ptr TSRMLS_DC);
 PHPAPI void php_register_variable(char *var, char *val, zval *track_vars_array TSRMLS_DC);
