@@ -70,6 +70,9 @@ static void spl_filesystem_object_free_storage(void *object TSRMLS_DC) /* {{{ */
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)object;
 
+	if (intern->oth_dtor) {
+		intern->oth_dtor(intern TSRMLS_CC);
+	}
 	zend_hash_destroy(intern->std.properties);
 	FREE_HASHTABLE(intern->std.properties);
 
@@ -1330,7 +1333,6 @@ static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent TS
 {
 	char *buf;
 	size_t line_len;
-	int len;
 	long line_add = (intern->u.file.current_line || intern->u.file.current_zval) ? 1 : 0;
 
 	spl_filesystem_file_free_line(intern TSRMLS_CC);
@@ -1823,7 +1825,6 @@ SPL_METHOD(SplFileObject, fwrite)
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	char *str;
 	int str_len;
-	int ret;
 	long length = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &str_len, &length) == FAILURE) {
