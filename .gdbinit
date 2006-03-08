@@ -44,32 +44,32 @@ end
 
 define ____printzv_contents
 	set $zvalue = $arg0
-	set $type = $zvalue.type
+	set $type = $zvalue->type
 
-	printf "(refcount=%d) ", $zvalue.refcount
+	printf "(refcount=%d) ", $zvalue->refcount
 	if $type == 0
 		printf "NULL: "
 	end
 	if $type == 1
-		printf "long: %ld", $zvalue.value.lval
+		printf "long: %ld", $zvalue->value.lval
 	end
 	if $type == 2
-		printf "double: %lf", $zvalue.value.dval
+		printf "double: %lf", $zvalue->value.dval
 	end
 	if $type == 3
 		printf "bool: "
-		if $zvalue.value.lval
+		if $zvalue->value.lval
 			printf "true"
 		else
 			printf "false"
 		end
 	end
 	if $type == 4
-		printf "array(%d): ", $zvalue.value.ht->nNumOfElements
+		printf "array(%d): ", $zvalue->value.ht->nNumOfElements
 		if ! $arg1
 			printf "{\n"
 			set $ind = $ind + 1
-			____print_ht $zvalue.value.ht
+			____print_ht $zvalue->value.ht
 			set $ind = $ind - 1
 			set $i = $ind
 			while $i > 0
@@ -84,36 +84,45 @@ define ____printzv_contents
 		printf "object"
 		____executor_globals
 		set $handle = $zvalue->value.obj.handle
-		set $zobj = (zend_object *)$eg->objects_store.object_buckets[$handle].bucket.obj.object
-		printf "(%s) #%d", $zobj->ce->name, $handle
+		set $handlers = $zvalue->value.obj.handlers
+		if basic_functions_module.zts
+			set $zobj = zend_objects_get_address($zvalue, $tsrm_ls)
+		else
+			set $zobj = zend_objects_get_address($zvalue)
+		end
+		if $handlers->get_class_entry == &zend_std_object_get_class
+			set $cname = $zobj->ce.name.s
+		else
+			set $cname = "Unknown"
+		end
+		printf "(%s) #%d", $cname, $handle
 		if ! $arg1
-			printf "(prop examination disabled due to a gdb bug)"
-#			if $zvalue.value.obj.handlers->get_properties
-#				set $ht = $zvalue->value.obj.handlers->get_properties($zvalue)
-#				if $ht
-#					printf "(%d): $ht->nNumOfElements
-#					printf "{\n"
-#					set $ind = $ind + 1
-#					____print_ht $ht
-#					set $ind = $ind - 1
-#					set $i = $ind
-#					while $i > 0
-#						printf "  "
-#						set $i = $i - 1
-#					end
-#					printf "}"
-#				else
-#					echo "no properties found"
-#				end
-#			end
+			if $handlers->get_properties == &zend_std_get_properties
+				set $ht = $zobj->properties
+				if $ht
+					printf "(%d): ", $ht->nNumOfElements
+					printf "{\n"
+					set $ind = $ind + 1
+					____print_ht $ht
+					set $ind = $ind - 1
+					set $i = $ind
+					while $i > 0
+						printf "  "
+						set $i = $i - 1
+					end
+					printf "}"
+				else
+					echo "no properties found"
+				end
+			end
 		end
 		set $type = 0
 	end
 	if $type == 6
-		printf "string(%d): \"%s\"", $zvalue.value.str.len, $zvalue.value.str.val
+		printf "string(%d): \"%s\"", $zvalue->value.str.len, $zvalue->value.str.val
 	end
 	if $type == 7
-		printf "resource: #%d", $zvalue.value.lval
+		printf "resource: #%d", $zvalue->value.lval
 	end
 	if $type == 8 
 		printf "constant"
@@ -122,7 +131,7 @@ define ____printzv_contents
 		printf "const_array"
 	end
 	if $type == 10
-		printf "unicode string(%d): [%p]", $zvalue.value.str.len, $zvalue.value.str.val
+		printf "unicode string(%d): [%p]", $zvalue->value.str.len, $zvalue->value.str.val
 	end
 	if $type > 10
 		printf"unknown type %d", $type
@@ -140,7 +149,7 @@ define ____printzv
 		printf "*uninitialized* "
 	end
 
-	set $zcontents = *(struct _zval_struct *) $zvalue
+	set $zcontents = (zval*) $zvalue
 	if $arg1
 		____printzv_contents $zcontents $arg1
 	else
@@ -153,7 +162,7 @@ define ____print_const_table
 	set $p = $ht->pListHead
 
 	while $p != 0
-		set $const = *(zend_constant *) $p->pData
+		set $const = (zend_constant *) $p->pData
 
 		set $i = $ind
 		while $i > 0
@@ -162,12 +171,12 @@ define ____print_const_table
 		end
 
 		if $p->nKeyLength > 0 
-			printf "\"%s\" => ", $p->key.u.string
+			printf "\"%s\" => ", $p->key.arKey.s
 		else
 			printf "%d => ", $p->h
 		end
 
-		____printzv_contents $const.value 0
+		____printzv_contents &$const->value 0
 		set $p = $p->pListNext
 	end
 end
@@ -184,7 +193,7 @@ define ____print_ht
 	set $p = $ht->pListHead
 
 	while $p != 0
-		set $zval = *(struct _zval_struct **)$p->pData
+		set $zval = *(zval **)$p->pData
 
 		set $i = $ind
 		while $i > 0
@@ -193,7 +202,7 @@ define ____print_ht
 		end
 
 		if $p->nKeyLength > 0 
-			printf "\"%s\" => ", (char*)$p->key.u.string
+			printf "\"%s\" => ", (char*)$p->key.arKey.s
 		else
 			printf "%d => ", $p->h
 		end
@@ -228,7 +237,7 @@ define ____print_ft
 		end
 
 		if $p->nKeyLength > 0 
-			printf "\"%s\" => ", (char*)$p->key.u.string
+			printf "\"%s\" => ", (char*)$p->key.arKey.s
 		else
 			printf "%d => ", $p->h
 		end
