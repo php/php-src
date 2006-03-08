@@ -70,8 +70,8 @@ static void spl_filesystem_object_free_storage(void *object TSRMLS_DC) /* {{{ */
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)object;
 
-	if (intern->oth_dtor) {
-		intern->oth_dtor(intern TSRMLS_CC);
+	if (intern->oth_handler && intern->oth_handler->dtor) {
+		intern->oth_handler->dtor(intern TSRMLS_CC);
 	}
 	zend_hash_destroy(intern->std.properties);
 	FREE_HASHTABLE(intern->std.properties);
@@ -133,7 +133,7 @@ static zend_object_value spl_filesystem_object_new_ex(zend_class_entry *class_ty
 	intern = emalloc(sizeof(spl_filesystem_object));
 	memset(intern, 0, sizeof(spl_filesystem_object));
 	intern->std.ce = class_type;
-	/* intern->type = SPL_FS_INFO; done by set o */
+	/* intern->type = SPL_FS_INFO; done by set 0 */
 	intern->file_class = spl_ce_SplFileObject;
 	intern->info_class = spl_ce_SplFileInfo;
 	if (obj) *obj = intern;
@@ -273,8 +273,13 @@ static zend_object_value spl_filesystem_object_clone(zval *zobject TSRMLS_DC)
 	intern->info_class = source->info_class;
 	intern->flags = source->flags;
 	intern->oth = source->oth;
+	intern->oth_handler = source->oth_handler;
 
 	zend_objects_clone_members(new_object, new_obj_val, old_object, handle TSRMLS_CC);
+
+	if (intern->oth_handler && intern->oth_handler->clone) {
+		intern->oth_handler->clone(source, intern TSRMLS_CC);
+	}
 
 	return new_obj_val;
 }
