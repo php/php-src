@@ -48,6 +48,8 @@ PHP                                                                        NEWS
 - Fixed tiger hash algorithm generating wrong results on big endian platforms.
   (Mike)
 - Fixed crash with DOMImplementation::createDocumentType("name:"). (Mike)
+- Fixed bug #36656 (http_build_query generates invalid URIs due to use of 
+  square brackets). (Mike)
 - Fixed bug #36638 (strtotime() returns false when 2nd argument < 1). (Derick)
 - Fixed bug #36625 (pg_trace() does not work). (iakio at mono-space dot net)
 - Fixed bug #36611 (assignment to SimpleXML object attribute changes argument 
