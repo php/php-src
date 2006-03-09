@@ -1,3 +1,113 @@
+2006-03-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * .gdbinit:
+      - Fix a bunch of issues, now the classname and the properties of objects
+        are shown correctly (though standard object handlers are assumed and
+        tested for)
+
+    * .gdbinit:
+      - Automatic tsrm key fetching
+
+    * .gdbinit:
+      - Automatic TSRM/ZTS detection
+
+2006-03-08  Michael Wallner  <mike@iworks.at>
+
+    * ext/standard/http.c:
+      MFB: Fix bug #36656 (http_build_query generates invalid URIs due to use of
+      square brackets)
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/http.c:
+      - Fix bug #36656 (http_build_query generates invalid URIs due to use of
+      square brackets)
+
+2006-03-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS:
+      safe_mode news
+
+    * Makefile.gcov
+      Makefile.global
+      configure.in
+      php.ini-dist
+      php.ini-recommended
+      run-tests.php
+      server-tests.php
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/zlib/zlib.c
+      main/SAPI.c
+      main/config.w32.h
+      main/fopen_wrappers.c
+      main/main.c
+      main/php.h
+      main/php_globals.h
+      main/php_ini.c
+      main/streams/plain_wrapper.c
+      win32/install.txt
+      win32/php5dll.dsp
+      win32/php5dllts.dsp:
+      So long safe_mode mode.
+      Also removed the magic_quotes configure option, no longer relevant since
+      the magic is gone :-).
+
+2006-03-08  Michael Wallner  <mike@iworks.at>
+
+    * (PHP_5_1)
+      main/php_variables.h:
+      - remove declaration of non existant function php_treat_data
+
+2006-03-08  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * NEWS
+      php.ini-dist
+      php.ini-recommended
+      ext/bz2/bz2.c
+      ext/dba/dba.c
+      ext/dba/tests/dba008.phpt
+      ext/dba/tests/dba_cdb_make.phpt
+      ext/exif/exif.c
+      ext/exif/tests/bug34704.phpt
+      ext/exif/tests/exif002.phpt
+      ext/exif/tests/exif006.phpt
+      ext/iconv/tests/translit-utf8.phpt
+      ext/interbase/ibase_query.c
+      ext/mhash/tests/001.phpt
+      ext/msql/php_msql.c
+      ext/mssql/php_mssql.c
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli.c
+      ext/pcre/config0.m4
+      ext/pcre/pcrelib/pcre_internal.h
+      ext/pcre/tests/bug33200.phpt
+      ext/pgsql/pgsql.c
+      ext/standard/basic_functions.c
+      ext/standard/exec.c
+      ext/standard/file.c
+      ext/standard/streamsfuncs.c
+      ext/standard/string.c
+      ext/standard/tests/file/fputcsv.phpt
+      ext/standard/tests/strings/add-and-stripslashes.phpt
+      ext/sybase/php_sybase_db.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/xml/tests/xml001.phpt
+      ext/xml/tests/xml002.phpt
+      ext/xml/tests/xml003.phpt
+      ext/xml/tests/xml004.phpt
+      ext/zlib/zlib.c
+      main/main.c
+      main/php_globals.h
+      main/php_variables.c
+      main/rfc1867.c
+      sapi/cgi/cgi_main.c:
+      - remove magic_quotes_gpc, magic_quotes_runtime, magic_quotes_sybase
+       (calling ini_set('magic_....') returns 0|false
+      - get_magic_quotes_gpc, get_magic_quotes_runtime are kept but always
+      return false
+      - set_magic_quotes_runtime raises an E_CORE_ERROR
+
 2006-03-07  Alex Waugh  <alex@alexwaugh.com>
 
     * main/php.h
