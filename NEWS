@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2006, PHP 5.1.3
+09 Mar 2006, PHP 5.1.3RC1
 - Updated PCRE to version 6.6. (Andrei)
 - Moved extensions to PECL:
   . ext/msession (Derick)
