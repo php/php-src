@@ -41,6 +41,28 @@ while(!$v->eof())
 	echo $v->key() . "=>" . join('|',$v->fgetcsv()) . "\n";
 }
 
+foreach($v as $k => $d)
+{
+	echo "$k=>" . join('|',$d) . "\n";
+}
+
+class MyCSVFile2 extends SplFileObject
+{
+	function getCurrentLine()
+	{
+		echo __METHOD__ . "\n";
+		return parent::fgetcsv(',', '"');
+	}
+}
+
+$phar->setFileClass('MyCSVFile2');
+$v = $phar['a.csv'];
+
+foreach($v as $k => $d)
+{
+	echo "$k=>" . join('|',$d) . "\n";
+}
+
 ?>
 ===DONE===
 --CLEAN--
@@ -60,4 +82,13 @@ __halt_compiler();
 0=>1|2|3
 1=>2|a|b
 2=>3|c|'e'
+1=>1|2|3
+3=>2|a|b
+5=>3|c|'e'
+MyCSVFile2::getCurrentLine
+1=>1|2|3
+MyCSVFile2::getCurrentLine
+3=>2|a|b
+MyCSVFile2::getCurrentLine
+5=>3|c|'e'
 ===DONE===
