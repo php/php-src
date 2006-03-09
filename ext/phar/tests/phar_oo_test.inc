@@ -26,6 +26,18 @@ switch($pharconfig)
 2,a,b
 3,"c","'e'"
 EOF;
+		break;
+	case 2:
+		$files['a.csv'] =<<<EOF
+1,2,3
+2,a,b
+3,"c","'e'"
+4
+5,5
+
+7,777
+EOF;
+		break;
 }
 
 $manifest = '';
