@@ -82,11 +82,15 @@ struct _spl_filesystem_object {
 			long               current_line_num;
 			zval               zresource;
 			zend_function      *func_getCurr;
+			zend_function      *func_fgetcsv;
 		} file;
 	} u;
 };
 
 #define SPL_FILE_OBJECT_DROP_NEW_LINE      0x00000001 /* drop new lines */
+#define SPL_FILE_OBJECT_READ_AHEAD         0x00000002 /* read on rewind/next */
+#define SPL_FILE_OBJECT_SKIP_EMPTY         0x00000006 /* skip empty lines */
+#define SPL_FILE_OBJECT_READ_CSV           0x00000008 /* read via fgetcsv */
 
 #define SPL_FILE_DIR_CURRENT_AS_FILEINFO   0x00000010 /* make RecursiveDirectoryTree::current() return SplFileInfo */
 #define SPL_FILE_DIR_CURRENT_AS_PATHNAME   0x00000020 /* make RecursiveDirectoryTree::current() return getPathname() */
