@@ -3699,13 +3699,15 @@ PHP_FUNCTION(mb_send_mail)
 
 /* }}} */
 
-/* {{{ proto string mb_get_info([string type])
+/* {{{ proto mixed mb_get_info([string type])
    Returns the current settings of mbstring */
 PHP_FUNCTION(mb_get_info)
 {
 	zval **type;
 	char *name;
 	int argc = ZEND_NUM_ARGS();
+	const struct mb_overload_def *over_func;
+	zval *row;
 
 	if (argc < 0 || argc > 1 || zend_get_parameters_ex(1, &type) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -3726,9 +3728,20 @@ PHP_FUNCTION(mb_get_info)
 		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(current_http_output_encoding))) != NULL) {
 			add_assoc_string(return_value, "http_output", name, 1);
 		}
-		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(func_overload))) != NULL) {
-			add_assoc_string(return_value, "func_overload", name, 1);
-		}
+		if (MBSTRG(func_overload)){
+			over_func = &(mb_ovld[0]);
+			MAKE_STD_ZVAL(row);
+			array_init(row);
+			while (over_func->type > 0) {
+				if ((MBSTRG(func_overload) & over_func->type) == over_func->type ) {
+					add_assoc_string(row, over_func->orig_func, over_func->ovld_func, 1);
+				}
+				over_func++;
+			}
+			add_assoc_zval(return_value, "func_overload", row);
+		} else {
+			add_assoc_string(return_value, "func_overload", "no overload", 1);
+ 		}
 	} else if (!strcasecmp("internal_encoding", Z_STRVAL_PP(type))) {
 		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(current_internal_encoding))) != NULL) {
 			RETVAL_STRING(name, 1);
@@ -3742,9 +3755,18 @@ PHP_FUNCTION(mb_get_info)
 			RETVAL_STRING(name, 1);
 		}		
 	} else if (!strcasecmp("func_overload", Z_STRVAL_PP(type))) {
-		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(func_overload))) != NULL) {
-			RETVAL_STRING(name, 1);
-		}
+			if (MBSTRG(func_overload)){
+				over_func = &(mb_ovld[0]);
+				array_init(return_value);
+				while (over_func->type > 0) {
+					if ((MBSTRG(func_overload) & over_func->type) == over_func->type ) {
+						add_assoc_string(return_value, over_func->orig_func, over_func->ovld_func, 1);
+					}
+					over_func++;
+				}
+			} else {
+				RETVAL_STRING("no overload", 1);
+			}
 	} else {
 		RETURN_FALSE;
 	}
