@@ -802,13 +802,14 @@ static int ZEND_CONT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 static int ZEND_GOTO_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zend_op *brk_opline;
 	zend_op *opline = EX(opline);
 	zend_brk_cont_element *el;
 
 	el = zend_brk_cont(Z_LVAL(opline->op2.u.constant), opline->extended_value,
  	                   EX(op_array), EX(Ts) TSRMLS_CC);
 
-	zend_op *brk_opline = EX(op_array)->opcodes + el->brk;
+	brk_opline = EX(op_array)->opcodes + el->brk;
 
 	switch (brk_opline->opcode) {
 		case ZEND_SWITCH_FREE:
