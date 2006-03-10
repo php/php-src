@@ -13,7 +13,7 @@ PHP                                                                        NEWS
   - Fixed issues with not/double calling of constructors of SPL iterators.
   - Fixed issues with info-class/file-class in SPL directory handling classes.
   - Fixed ArrayIterator::seek().
-  - Added SimpleXMLElement::count().
+  - Added SimpleXMLIterator::count().
   - Dropped erroneous RecursiveDirectoryIterator::getSubPathInfo().
 - Improved SimpleXML: (Marcus, Rob)
   . Added SimpleXMLElement::getName() to retrieve name of element.
