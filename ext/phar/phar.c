@@ -910,6 +910,7 @@ static php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, cha
 	/* do we have the data already? */
 	if (idata->fp) {
 		fpf = php_stream_alloc(&phar_ops, idata, NULL, mode);
+		idata->phar->refcount++;
 		efree(internal_file);
 		return fpf;
 	}
@@ -1011,6 +1012,7 @@ static php_stream * php_stream_phar_url_wrapper(php_stream_wrapper *wrapper, cha
 	idata->internal_file->crc_checked = 1;
 
 	fpf = php_stream_alloc(&phar_ops, idata, NULL, mode);
+	idata->phar->refcount++;
 	efree(internal_file);
 	return fpf;
 }
@@ -1028,6 +1030,9 @@ static int phar_close(php_stream *stream, int close_handle TSRMLS_DC) /* {{{ */
 		} else {
 			data->internal_file->fp = data->fp;
 		}
+	}
+	if (--data->phar->refcount < 0) {
+		phar_destroy_phar_data(data->phar TSRMLS_CC);
 	}
 
 	efree(data);
