@@ -338,12 +338,46 @@ static int zval_array_element_dump(zval **zv, int num_args, va_list args, zend_h
 	return 0;
 }
 
+static int zval_object_property_dump(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	int level;
+	zstr prop_name, class_name;
+	int verbose;
+	TSRMLS_FETCH();
+
+	level = va_arg(args, int);
+	verbose = va_arg(args, int);
+
+	if (hash_key->nKeyLength ==0 ) { /* numeric key */
+		php_printf("%*c[%ld]=>\n", level + 1, ' ', hash_key->h);
+	} else { /* string key */
+		int is_unicode = hash_key->type == IS_UNICODE;
+
+		zend_u_unmangle_property_name(hash_key->type, hash_key->arKey, &class_name, &prop_name);
+		php_printf("%*c[", level + 1, ' ');
+
+		if (class_name.s) {
+			if (class_name.s[0]=='*') {
+				php_printf("%s\"%R\":protected", is_unicode ? "u" : "", hash_key->type, prop_name);
+			} else {
+				php_printf("%s\"%R\":%s\"%R\":private", is_unicode ? "u" : "", hash_key->type, prop_name, is_unicode ? "u" : "", hash_key->type, class_name);
+			}
+		} else {
+			php_printf("%s\"%R\"", is_unicode ? "u" : "", hash_key->type, prop_name);
+		}
+		ZEND_PUTS("]=>\n");
+	}
+	php_debug_zval_dump(zv, level + 2, 1 TSRMLS_CC);
+	return 0;
+}
+
 PHPAPI void php_debug_zval_dump(zval **struc, int level, int verbose TSRMLS_DC)
 {
 	HashTable *myht = NULL;
 	zstr class_name;
 	zend_uint class_name_len;
 	zend_class_entry *ce;
+	int (*zval_element_dump_func)(zval**, int, va_list, zend_hash_key*);
 
 	if (level > 1) {
 		php_printf("%*c", level - 1, ' ');
@@ -379,6 +413,7 @@ PHPAPI void php_debug_zval_dump(zval **struc, int level, int verbose TSRMLS_DC)
 			return;
 		}
 		php_printf("%sarray(%d) refcount(%u){\n", COMMON, zend_hash_num_elements(myht), Z_REFCOUNT_PP(struc));
+		zval_element_dump_func = zval_array_element_dump;
 		goto head_done;
 	case IS_OBJECT:
 		myht = Z_OBJPROP_PP(struc);
@@ -390,9 +425,10 @@ PHPAPI void php_debug_zval_dump(zval **struc, int level, int verbose TSRMLS_DC)
 		Z_OBJ_HANDLER(**struc, get_class_name)(*struc, &class_name, &class_name_len, 0 TSRMLS_CC);
 		php_printf("%sobject(%v)#%d (%d) refcount(%u){\n", COMMON, class_name, Z_OBJ_HANDLE_PP(struc), myht ? zend_hash_num_elements(myht) : 0, Z_REFCOUNT_PP(struc));
 		efree(class_name.v);
+		zval_element_dump_func = zval_object_property_dump;
 head_done:
 		if (myht) {
-			zend_hash_apply_with_arguments(myht, (apply_func_args_t) zval_array_element_dump, 1, level, (Z_TYPE_PP(struc) == IS_ARRAY ? 0 : 1));
+			zend_hash_apply_with_arguments(myht, (apply_func_args_t) zval_element_dump_func, 1, level, (Z_TYPE_PP(struc) == IS_ARRAY ? 0 : 1));
 		}
 		if (level > 1) {
 			php_printf("%*c", level-1, ' ');
