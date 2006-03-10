@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Mar 2006, PHP 5.1.3RC2
+- Fixed debug_zval_dump() to support private and protected members. (Dmitry)
 
 09 Mar 2006, PHP 5.1.3RC1
 - Updated PCRE to version 6.6. (Andrei)
