@@ -107,6 +107,7 @@
 %token T_DEFAULT
 %token T_BREAK
 %token T_CONTINUE
+%token T_GOTO
 %token T_FUNCTION
 %token T_CONST
 %token T_RETURN
@@ -184,6 +185,7 @@ inner_statement:
 
 statement:
 		unticked_statement { zend_do_ticks(TSRMLS_C); }
+	|	T_STRING ':' { zend_do_label(&$1 TSRMLS_CC); }
 ;
 
 unticked_statement:
@@ -233,6 +235,7 @@ unticked_statement:
 		'{' inner_statement_list '}' { zend_do_end_catch(&$1 TSRMLS_CC); }
 		additional_catches { zend_do_mark_last_catch(&$7, &$18 TSRMLS_CC); }
 	|	T_THROW expr ';' { zend_do_throw(&$2 TSRMLS_CC); }
+	|	T_GOTO T_STRING ';' { zend_do_goto(&$2 TSRMLS_CC); }
 ;
 
 

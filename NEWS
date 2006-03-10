@@ -15,6 +15,7 @@ PHP                                                                        NEWS
   for more details. (Dmitry)
 - Removed support for "continue" and "break" operators with non-constant
   operands. (Dmitry)
+- Implemented "jump label" operator (limited "goto"). (Dmitry, Sara)
 - Changed __toString() behavior to call it in all necessary places
   (Marcus, Dmitry)
 - Changed "instanceof" and "catch" operators, is_a() and is_subclass_of()

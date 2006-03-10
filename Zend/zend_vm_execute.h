@@ -800,6 +800,27 @@ static int ZEND_CONT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	ZEND_VM_JMP(EX(op_array)->opcodes + el->cont);
 }
 
+static int ZEND_GOTO_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_op *opline = EX(opline);
+	zend_brk_cont_element *el;
+
+	el = zend_brk_cont(Z_LVAL(opline->op2.u.constant), opline->extended_value,
+ 	                   EX(op_array), EX(Ts) TSRMLS_CC);
+
+	zend_op *brk_opline = EX(op_array)->opcodes + el->brk;
+
+	switch (brk_opline->opcode) {
+		case ZEND_SWITCH_FREE:
+			zend_switch_free(brk_opline, EX(Ts) TSRMLS_CC);
+			break;
+		case ZEND_FREE:
+			zendi_zval_dtor(EX_T(brk_opline->op1.u.var).tmp_var);
+			break;
+	}
+	ZEND_VM_JMP(opline->op1.u.jmp_addr);
+}
+
 static int ZEND_FETCH_CLASS_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
@@ -28577,27 +28598,27 @@ void zend_init_opcodes_handlers()
   	ZEND_NEW_SPEC_HANDLER,
   	ZEND_NEW_SPEC_HANDLER,
   	ZEND_NEW_SPEC_HANDLER,
+  	ZEND_GOTO_SPEC_CONST_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
+  	ZEND_GOTO_SPEC_CONST_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
+  	ZEND_GOTO_SPEC_CONST_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
+  	ZEND_GOTO_SPEC_CONST_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
+  	ZEND_GOTO_SPEC_CONST_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
