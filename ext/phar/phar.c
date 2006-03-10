@@ -216,7 +216,7 @@ static void phar_spl_foreign_clone(spl_filesystem_object *src, spl_filesystem_ob
 
 static spl_other_handler phar_spl_foreign_handler = {
 	phar_spl_foreign_dtor,
-	NULL
+	phar_spl_foreign_clone
 };
 
 static void destroy_phar_manifest(void *pDest) /* {{{ */
