@@ -16,3 +16,4 @@ echo "ok\n";
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://soapinterop.org/types" xmlns:ns2="http://soapinterop.org/types/requestresponse"><SOAP-ENV:Body><ns2:echoIntArrayFaultRequest><ns1:value>34</ns1:value><ns1:value>12</ns1:value></ns2:echoIntArrayFaultRequest></SOAP-ENV:Body></SOAP-ENV:Envelope>
 <?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://soapinterop.org/types" xmlns:ns2="http://soapinterop.org/types/part"><SOAP-ENV:Body><SOAP-ENV:Fault><faultcode>SOAP-ENV:Server</faultcode><faultstring>Fault in response to 'echoIntArrayFault'.</faultstring><detail><ns2:ArrayOfIntPart><ns1:value>34</ns1:value><ns1:value>12</ns1:value></ns2:ArrayOfIntPart></detail></SOAP-ENV:Fault></SOAP-ENV:Body></SOAP-ENV:Envelope>
+ok
