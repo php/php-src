@@ -1786,7 +1786,10 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 			VCWD_CHDIR_FILE(primary_file->filename);
 		}
 
-		if (primary_file->filename) {			
+ 		/* Only lookup the real file path and add it to the included_files list if already opened
+		 *   otherwise it will get opened and added to the included_files list in zend_execute_scripts
+		 */
+ 		if (primary_file->filename && primary_file->type != ZEND_HANDLE_FILENAME) {			
 			int realfile_len;
 			int dummy = 1;
 			if (VCWD_REALPATH(primary_file->filename, realfile)) {
