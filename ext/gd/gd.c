@@ -1094,6 +1094,7 @@ PHP_FUNCTION(imagesavealpha)
 
 	RETURN_TRUE;
 }
+/* }}} */
 #endif
 
 #if HAVE_GD_BUNDLED
@@ -1635,7 +1636,11 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 #ifdef HAVE_GD_JPG
 			case PHP_GDIMG_TYPE_JPG:
 				ignore_warning = INI_INT("gd.jpeg_ignore_warning");
+#ifdef HAVE_GD_BUNDLED
 				im = gdImageCreateFromJpeg(fp, ignore_warning);
+#else
+				im = gdImageCreateFromJpeg(fp);
+#endif
 			break;
 #endif
 
@@ -3918,7 +3923,11 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 #ifdef HAVE_GD_JPG
 		case PHP_GDIMG_TYPE_JPG:
 			ignore_warning = INI_INT("gd.jpeg_ignore_warning");
+#ifdef HAVE_GD_BUNDLED
 			im_org = gdImageCreateFromJpeg(org, ignore_warning);
+#else
+			im_org = gdImageCreateFromJpeg(org);
+#endif
 			if (im_org == NULL) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open '%s' Not a valid JPEG file", fn_dest);
 				RETURN_FALSE;
