@@ -1,7 +1,8 @@
 --TEST--
 Phar object: iterating via SplFileObject and reading csv
 --SKIPIF--
-<?php if (!extension_loaded("phar")) print "skip"; ?>
+<?php if (!extension_loaded("phar")) die "skip"; ?>
+<?php if (!defined('SplFileObject::READ_CSV') || !defined('SplFileObject::SKIP_EMPTY')) die "skip newer SPL version is required"; ?>
 --FILE--
 <?php
 
