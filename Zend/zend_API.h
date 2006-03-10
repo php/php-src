@@ -836,6 +836,7 @@ END_EXTERN_C()
 #define RETVAL_TRUE   					ZVAL_BOOL(return_value, 1)
 #define RETVAL_TEXT(t, duplicate) ZVAL_TEXT(return_value, t, duplicate)
 #define RETVAL_TEXTL(t, l, duplicate) ZVAL_TEXTL(return_value, t, l, duplicate)
+#define RETVAL_EMPTY_TEXT() 			ZVAL_EMPTY_TEXT(return_value)
 
 #define RETURN_RESOURCE(l) 				{ RETVAL_RESOURCE(l); return; }
 #define RETURN_BOOL(b) 					{ RETVAL_BOOL(b); return; }
@@ -853,6 +854,7 @@ END_EXTERN_C()
 #define RETURN_TRUE   					{ RETVAL_TRUE; return; }
 #define RETURN_TEXT(t, duplicate)		{ RETVAL_TEXT(t, duplicate); return; }
 #define RETURN_TEXTL(t, l, duplicate)	{ RETVAL_TEXTL(t, l, duplicate); return; }
+#define RETURN_EMPTY_TEXT() 			{ RETVAL_EMPTY_TEXT(); return; }
 #define RETURN_ASCII_STRING(t, duplicate)		{ RETVAL_ASCII_STRING(t, duplicate); return; }
 #define RETURN_ASCII_STRINGL(t, l, duplicate)	{ RETVAL_ASCII_STRINGL(t, l, duplicate); return; }
 #define RETURN_U_STRING(conv, t, duplicate)		{ RETVAL_U_STRING(conv, t, duplicate); return; }
