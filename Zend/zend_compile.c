@@ -148,6 +148,8 @@ void zend_init_compiler_data_structures(TSRMLS_D)
 	CG(start_lineno) = 0;
 	init_compiler_declarables(TSRMLS_C);
 	zend_hash_apply(CG(auto_globals), (apply_func_t) zend_auto_global_arm TSRMLS_CC);
+	zend_stack_init(&CG(labels_stack));
+	CG(labels) = NULL;
 }
 
 
@@ -174,6 +176,7 @@ void shutdown_compiler(TSRMLS_D)
 	zend_hash_destroy(&CG(script_encodings_table));
 	zend_hash_destroy(&CG(filenames_table));
 	zend_llist_destroy(&CG(open_files));
+	zend_stack_destroy(&CG(labels_stack));
 }
 
 
@@ -1241,6 +1244,9 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		CG(doc_comment) = NULL;
 		CG(doc_comment_len) = 0;
 	}
+
+	zend_stack_push(&CG(labels_stack), (void *) &CG(labels), sizeof(HashTable*));
+	CG(labels) = NULL;
 }
 
 void zend_do_handle_exception(TSRMLS_D)
@@ -1266,6 +1272,8 @@ void zend_do_end_function_declaration(znode *function_token TSRMLS_DC)
 
 	pass_two(CG(active_op_array) TSRMLS_CC);
 
+	zend_release_labels(TSRMLS_C);
+	
 	if (CG(active_class_entry)) {
 		zend_check_magic_method_implementation(CG(active_class_entry), (zend_function*)CG(active_op_array), E_COMPILE_ERROR TSRMLS_CC);
 	} else {
@@ -4313,6 +4321,108 @@ void zend_do_normalization(znode *result, znode *str TSRMLS_DC)
 	opline->op1 = *str;
 	SET_UNUSED(opline->op2);
 	*result = opline->result;
+}
+
+void zend_do_label(znode *label TSRMLS_DC)
+{
+	zend_op_array *oparray = CG(active_op_array);
+	zend_label dest;
+
+	if (!CG(labels)) {
+		ALLOC_HASHTABLE(CG(labels));
+		zend_hash_init(CG(labels), 4, NULL, NULL, 0);
+	}
+
+	dest.brk_cont = oparray->current_brk_cont;
+	dest.opline_num = get_next_op_number(oparray);
+
+	if (zend_u_hash_add(CG(labels), Z_TYPE(label->u.constant), Z_UNIVAL(label->u.constant),
+					Z_UNILEN(label->u.constant) + 1, (void**)&dest, sizeof(zend_label), NULL) == FAILURE) {
+		zend_error(E_COMPILE_ERROR, "Label '%R' already defined", Z_TYPE(label->u.constant), Z_UNIVAL(label->u.constant));
+	}
+
+	/* Done with label now */
+	zval_dtor(&label->u.constant);
+}
+
+void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2 TSRMLS_DC)
+{
+	zend_label *dest;
+	long current, distance;
+
+	if (CG(labels) == NULL ||
+	    zend_u_hash_find(CG(labels), Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant)+1, (void**)&dest) == FAILURE) {
+
+	    if (pass2) {
+	    	CG(in_compilation) = 1;
+	    	CG(active_op_array) = op_array;
+	    	CG(zend_lineno) = opline->lineno;
+			zend_error(E_COMPILE_ERROR, "'jump' to undefined label '%R'", Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant));
+	    } else {
+			/* Label is not defined. Delay to pass 2. */
+			INC_BPC(op_array);
+			return;
+		}
+	}
+
+	opline->op1.u.opline_num = dest->opline_num;
+	zval_dtor(&opline->op2.u.constant);
+
+	/* Check that we are not moving into loop or switch */
+	current = opline->extended_value;
+	for (distance = 0; current != dest->brk_cont; distance++) {
+		if (current == -1) {
+		    if (pass2) {
+		    	CG(in_compilation) = 1;
+	    		CG(active_op_array) = op_array;
+	    		CG(zend_lineno) = opline->lineno;
+	    	}
+			zend_error(E_COMPILE_ERROR, "'jump' into loop or switch statement is disallowed");
+		}
+		current = op_array->brk_cont_array[current].parent;
+	}
+
+	if (distance == 0) {
+		/* Nothing to break out of, optimize to ZEND_JMP */
+		opline->opcode = ZEND_JMP;
+		opline->extended_value = 0;
+		SET_UNUSED(opline->op2);
+	} else {
+		/* Set real break distance */
+		ZVAL_LONG(&opline->op2.u.constant, distance);
+	}
+
+    if (pass2) {
+		DEC_BPC(op_array);
+    }
+}
+
+void zend_do_goto(znode *label TSRMLS_DC)
+{
+	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+
+	opline->opcode = ZEND_GOTO;
+	opline->extended_value = CG(active_op_array)->current_brk_cont;
+	SET_UNUSED(opline->op1);
+	opline->op2 = *label;
+	zend_resolve_goto_label(CG(active_op_array), opline, 0 TSRMLS_CC);
+}
+
+void zend_release_labels(TSRMLS_D)
+{
+	if (CG(labels)) {
+		zend_hash_destroy(CG(labels));
+		FREE_HASHTABLE(CG(labels));
+	}
+	if (!zend_stack_is_empty(&CG(labels_stack))) {
+		HashTable **pht;
+
+		zend_stack_top(&CG(labels_stack), (void**)&pht);
+		CG(labels) = *pht;
+		zend_stack_del_top(&CG(labels_stack));
+	} else {
+		CG(labels) = NULL;
+	}
 }
 
 /*

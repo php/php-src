@@ -87,6 +87,7 @@
 #define ZEND_SEND_VAR                 66
 #define ZEND_SEND_REF                 67
 #define ZEND_NEW                      68
+#define ZEND_GOTO                     69
 #define ZEND_FREE                     70
 #define ZEND_INIT_ARRAY               71
 #define ZEND_ADD_ARRAY_ELEMENT        72

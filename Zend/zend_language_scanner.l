@@ -821,6 +821,7 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 		CG(active_op_array) = original_active_op_array;
 		if (compilation_successful) {
 			pass_two(op_array TSRMLS_CC);
+			zend_release_labels(TSRMLS_C);
 		} else {
 			efree(op_array);
 			retval = NULL;
@@ -963,6 +964,7 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 			zend_do_handle_exception(TSRMLS_C);
 			CG(active_op_array) = original_active_op_array;
 			pass_two(op_array TSRMLS_CC);
+			zend_release_labels(TSRMLS_C);
 			retval = op_array;
 		}
 		zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
@@ -1518,6 +1520,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>"continue" {
 	return T_CONTINUE;
+}
+
+<ST_IN_SCRIPTING>"jump" {
+	return T_GOTO;
 }
 
 <ST_IN_SCRIPTING>"echo" {
