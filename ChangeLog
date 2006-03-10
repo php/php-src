@@ -1,3 +1,28 @@
+2006-03-09  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_5_1)
+      main/main.c:
+      MFH: Move temporary local storage of primary file's realpath up one block
+      to ensure it stays on the stack.
+
+    * main/main.c:
+      Move temporary local storage of primary file's realpath up one block to
+      ensure it stays on the stack.
+
+2006-03-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Back to dev
+
+    * (PHP_5_1)
+      NEWS
+      configure.in
+      main/php_version.h:
+      5.1.3RC1
+
 2006-03-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * .gdbinit:
