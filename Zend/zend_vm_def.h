@@ -2397,13 +2397,14 @@ ZEND_VM_HANDLER(51, ZEND_CONT, ANY, CONST)
 
 ZEND_VM_HANDLER(69, ZEND_GOTO, ANY, CONST)
 {
+	zend_op *brk_opline;
 	zend_op *opline = EX(opline);
 	zend_brk_cont_element *el;
 
 	el = zend_brk_cont(Z_LVAL(opline->op2.u.constant), opline->extended_value,
  	                   EX(op_array), EX(Ts) TSRMLS_CC);
 
-	zend_op *brk_opline = EX(op_array)->opcodes + el->brk;
+	brk_opline = EX(op_array)->opcodes + el->brk;
 
 	switch (brk_opline->opcode) {
 		case ZEND_SWITCH_FREE:
