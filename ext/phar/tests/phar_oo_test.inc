@@ -38,6 +38,9 @@ EOF;
 7,777
 EOF;
 		break;
+	case 3:
+		$files['a.php'] = '<?php echo new new class;';
+		break;
 }
 
 $manifest = '';
