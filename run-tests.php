@@ -142,6 +142,7 @@ if (getenv('TEST_PHP_USER')) {
 	$user_tests = array();
 }
 
+$exts_to_test = array();
 $ini_overwrites = array(
 		'output_handler=',
 		'open_basedir=',
@@ -166,7 +167,7 @@ $ini_overwrites = array(
 
 function write_information($show_html)
 {
-	global $cwd, $php, $php_info, $user_tests, $ini_overwrites, $pass_options;
+	global $cwd, $php, $php_info, $user_tests, $ini_overwrites, $pass_options, $exts_to_test;
 
 	// Get info from php
 	$info_file = realpath(dirname(__FILE__)) . '/run-test-info.php';
@@ -186,17 +187,17 @@ More .INIs  : " . (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 	@unlink($info_file);
 	define('TESTED_PHP_VERSION', `$php -r 'echo PHP_VERSION;'`);
 
+	// load list of enabled extensions
+	save_text($info_file, '<?php echo join(",",get_loaded_extensions()); ?>');
+	$exts_to_test = explode(',',`$php $pass_options $info_params $info_file`);
 	// check for extensions that need special handling and regenerate
-	$php_extensions = '<?php echo join(",",get_loaded_extensions()); ?>'; 
-	save_text($info_file, $php_extensions);
-	$php_extensions = explode(',',`$php $pass_options $info_params $info_file`);
 	$info_params_ex = array(
 		'session' => array('session.auto_start=0'),
 		'zlib' => array('zlib.output_compression=Off'),
 		'xdebug' => array('xdebug.default_enable=0'),
 	);
 	foreach($info_params_ex as $ext => $ini_overwrites_ex) {
-		if (in_array($ext, $php_extensions)) {
+		if (in_array($ext, $exts_to_test)) {
 			$ini_overwrites = array_merge($ini_overwrites, $ini_overwrites_ex);
 		}
 	}
@@ -518,13 +519,12 @@ write_information($html_output);
 
 // Compile a list of all test files (*.phpt).
 $test_files = array();
-$exts_to_test = get_loaded_extensions();
 $exts_tested = count($exts_to_test);
 $exts_skipped = 0;
 $ignored_by_ext = 0;
 sort($exts_to_test);
-$test_dirs = array('tests', 'ext');
-$optionals = array('Zend', 'ZendEngine2');
+$test_dirs = array();
+$optionals = array('tests', 'ext', 'Zend', 'ZendEngine2');
 foreach($optionals as $dir) {
 	if (@filetype($dir) == 'dir') {
 		$test_dirs[] = $dir;
