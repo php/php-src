@@ -876,9 +876,13 @@ function run_all_tests($test_files, $env, $redir_tested = NULL)
 {
 	global $test_results, $failed_tests_file, $php, $test_cnt, $test_idx;
 
-	foreach($test_files AS $name)
+	foreach($test_files as $name)
 	{
-		$index = is_array($name) ? $name[0] : $name;
+		if ($redir_tested) {
+			$index = "# $redir_tested: $name";
+		} else {
+			$index = is_array($name) ? "# $name[1]: $name[0]" : $name;
+		}
 		$test_idx++;
 		$result = run_test($php, $name, $env);
 		if (!is_array($name) && $result != 'REDIR')
@@ -886,12 +890,7 @@ function run_all_tests($test_files, $env, $redir_tested = NULL)
 			$test_results[$index] = $result;
 			if ($failed_tests_file && ($result == 'FAILED' || $result == 'WARNED' || $result == 'LEAKED'))
 			{
-				if ($redir_tested)
-				{
-					fwrite($failed_tests_file, "# $redir_tested: $name\n");
-				} else {
-					fwrite($failed_tests_file, "$name\n");
-				}
+				fwrite($failed_tests_file, "$index\n");
 			}
 		}
 	}
