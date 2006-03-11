@@ -1,3 +1,85 @@
+2006-03-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      NEWS:
+      - Fix
+
+2006-03-10  Brian France  <list@firehawksystems.com>
+
+    * (PHP_5_1)
+      main/main.c:
+      
+      	MFH:
+              for the primary file only lookup the real file path and
+              add it to the included_files list if already opened
+              otherwise it will get opened and added to the included_files list
+      in zend_execute_scripts
+
+    * main/main.c:
+      
+      	for the primary file only lookup the real file path and
+              add it to the included_files list if already opened
+      	otherwise it will get opened and added to the included_files list in
+      zend_execute_scripts
+
+2006-03-10  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/gd.c:
+      - MFB: #36686, do not be quiet with the extern GD
+
+    * (PHP_5_1)
+      ext/gd/gd.c:
+      - #36686, do not be quiet with the extern GD
+
+2006-03-10  Seiji Masugata  <s.masugata@digicom.dnp.co.jp>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.c:
+      fixed different value was returned in mb_get_info.
+
+2006-03-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      Fixed compilation error (Rob)
+
+    * ZendEngine2/zend_API.h:
+      Added RETVAL_EMPTRY_TEXT() and RETURN_EMPTY_TEXT() macroses
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #36629 (SoapServer::handle() exits on SOAP faults)
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/var.c
+      ext/standard/var.c:
+      Fixed debug_zval_dump() to support private and protected members
+
+    * NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/tests/jump01.phpt
+      ZendEngine2/tests/jump02.phpt
+      ZendEngine2/tests/jump03.phpt
+      ZendEngine2/tests/jump04.phpt
+      ZendEngine2/tests/jump05.phpt
+      ZendEngine2/tests/jump06.phpt
+      ZendEngine2/tests/jump07.phpt
+      ZendEngine2/tests/jump08.phpt
+      ZendEngine2/tests/jump09.phpt
+      ZendEngine2/tests/jump10.phpt:
+      Implemented "jump label" operator (limited "goto")
+
 2006-03-09  Sara Golemon  <sara@golemon.com>
 
     * (PHP_5_1)
