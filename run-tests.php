@@ -878,10 +878,21 @@ function run_all_tests($test_files, $env, $redir_tested = NULL)
 
 	foreach($test_files as $name)
 	{
-		if ($redir_tested) {
+		if (is_array($name))
+		{
+			$index = "# $name[1]: $name[0]";
+			if ($redir_tested)
+			{
+				$name = $name[0];
+			}
+		}
+		else if ($redir_tested)
+		{
 			$index = "# $redir_tested: $name";
-		} else {
-			$index = is_array($name) ? "# $name[1]: $name[0]" : $name;
+		}
+		else
+		{
+			$index = $name;
 		}
 		$test_idx++;
 		$result = run_test($php, $name, $env);
@@ -1186,7 +1197,9 @@ TEST $file
 			} else {
 				$GLOBALS['test_files'] = $test_files;
 				find_files($IN_REDIRECT['TESTS']);
-				$test_files = $GLOBALS['test_files'];
+				foreach($GLOBALS['test_files'] as $f) {
+					$test_files[] = array($f, $file);
+				}
 			}
 			$test_cnt += count($test_files) - 1;
 			$test_idx--;
