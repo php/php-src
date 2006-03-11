@@ -883,9 +883,13 @@ function run_all_tests($test_files, $env, $redir_tested = NULL)
 	{
 		$test_cnt *= 2;
 	}
-	foreach($test_files AS $name)
+	foreach($test_files as $name)
 	{
-		$index = is_array($name) ? $name[0] : $name;
+		if ($redir_tested) {
+			$index = "# $redir_tested: $name";
+		} else {
+			$index = is_array($name) ? "# $name[1]: $name[0]" : $name;
+		}
 		$unicode_semantics = $unicode_and_native ? 0 : ($unicode_testing ? 1 : 0);
 		for(; $unicode_semantics < ($unicode_testing ? 2 : 1); $unicode_semantics++)
 		{
@@ -897,12 +901,7 @@ function run_all_tests($test_files, $env, $redir_tested = NULL)
 				$test_results[$index.$pu] = $result;
 				if ($failed_tests_file && ($result == 'FAILED' || $result == 'WARNED' || $result == 'LEAKED'))
 				{
-					if ($redir_tested)
-					{
-						fwrite($failed_tests_file, "# $redir_tested: $name\n");
-					} else {
-						fwrite($failed_tests_file, "$name\n");
-					}
+					fwrite($failed_tests_file, "$index\n");
 				}
 			}
 			if ($result == 'REDIR')
