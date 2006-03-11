@@ -326,7 +326,12 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 			case MYSQL_TYPE_NEWDECIMAL:
 #endif
 			{
+#if VERSION_ID > 50999
+				/* Changed to my_bool in MySQL 5.1. See MySQL Bug #16144 */
+				my_bool tmp;
+#else
 				ulong tmp;
+#endif
 				stmt->result.buf[ofs].type = IS_STRING;
 				/*
 					If the user has called $stmt->store_result() then we have asked
@@ -1822,7 +1827,7 @@ PHP_FUNCTION(mysqli_stmt_attr_get)
 {
 	MY_STMT	*stmt;
 	zval 	*mysql_stmt;
-	ulong	value;
+	ulong	value = 0;
 	ulong	attr;
 	int		rc;
 
