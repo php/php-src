@@ -1,0 +1,53 @@
+--TEST--
+Phar object: ArrayAccess and isset
+--SKIPIF--
+<?php if (!extension_loaded('phar')) die('skip'); ?>
+<?php if (!defined('SplFileObject::READ_CSV') || !defined('SplFileObject::SKIP_EMPTY')) die('skip newer SPL version is required'); ?>
+--FILE--
+<?php
+
+$pharconfig = 0;
+
+require_once 'phar_oo_test.inc';
+
+$phar = new Phar($fname);
+
+var_dump(isset($phar['a.php']));
+var_dump(isset($phar['b.php']));
+var_dump(isset($phar['b/c.php']));
+var_dump(isset($phar['b/d.php']));
+var_dump(isset($phar['e.php']));
+
+?>
+===DIR===
+<?php
+var_dump(isset($phar['b']));
+?>
+===NA===
+<?php
+var_dump(isset($phar['a']));
+var_dump(isset($phar['b/c']));
+var_dump(isset($phar[12]));
+var_dump(isset($phar['b']));
+
+?>
+===DONE===
+--CLEAN--
+<?php 
+unlink(dirname(__FILE__) . '/phar_oo_test.phar.php');
+__halt_compiler();
+?>
+--EXPECTF--
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+===DIR===
+bool(false)
+===NA===
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+===DONE===
