@@ -127,6 +127,7 @@ if (getenv('TEST_PHP_USER')) {
 	$user_tests = array();
 }
 
+$exts_to_test = array();
 $ini_overwrites = array(
 		'output_handler=',
 		'open_basedir=',
@@ -150,7 +151,7 @@ $ini_overwrites = array(
 
 function write_information($show_html)
 {
-	global $cwd, $php, $php_info, $user_tests, $ini_overwrites, $pass_options;
+	global $cwd, $php, $php_info, $user_tests, $ini_overwrites, $pass_options, $exts_to_test;
 
 	// Get info from php
 	$info_file = realpath(dirname(__FILE__)) . '/run-test-info.php';
@@ -174,17 +175,17 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 	$unicode = `$php $pass_options $info_params -r 'echo ini_get("unicode_semantics");'`;
 	define('TESTED_UNICODE', strcasecmp($unicode,"on") == 0 || $unicode == 1);
 
+	// load list of enabled extensions
+	save_text($info_file, '<?php echo join(",",get_loaded_extensions()); ?>');
+	$exts_to_test = explode(',',`$php $pass_options $info_params $info_file`);
 	// check for extensions that need special handling and regenerate
-	$php_extensions = '<?php echo join(",",get_loaded_extensions()); ?>'; 
-	save_text($info_file, $php_extensions);
-	$php_extensions = explode(',',`$php $pass_options $info_params $info_file`);
 	$info_params_ex = array(
 		'session' => array('session.auto_start=0'),
 		'zlib' => array('zlib.output_compression=Off'),
 		'xdebug' => array('xdebug.default_enable=0'),
 	);
 	foreach($info_params_ex as $ext => $ini_overwrites_ex) {
-		if (in_array($ext, $php_extensions)) {
+		if (in_array($ext, $exts_to_test)) {
 			$ini_overwrites = array_merge($ini_overwrites, $ini_overwrites_ex);
 		}
 	}
@@ -521,13 +522,12 @@ write_information($html_output);
 
 // Compile a list of all test files (*.phpt).
 $test_files = array();
-$exts_to_test = get_loaded_extensions();
 $exts_tested = count($exts_to_test);
 $exts_skipped = 0;
 $ignored_by_ext = 0;
 sort($exts_to_test);
-$test_dirs = array('tests', 'ext');
-$optionals = array('Zend', 'ZendEngine2');
+$test_dirs = array();
+$optionals = array('tests', 'ext', 'Zend', 'ZendEngine2');
 foreach($optionals as $dir) {
 	if (@filetype($dir) == 'dir') {
 		$test_dirs[] = $dir;
@@ -1016,7 +1016,7 @@ TEST $file
 	$tested_file = $shortname;
 
 	if ($borked) {
-		show_result("BORK", $bork_info, $tested_file);
+		show_result("BORK", $bork_info, $tested_file, $unicode_semantics);
 		$PHP_FAILED_TESTS['BORKED'][] = array (
 								'name' => $file,
 								'test_name' => '',
@@ -1038,7 +1038,7 @@ TEST $file
 			$old_php = $php;
 			$php = realpath("./sapi/cgi/php") . ' -C ';
 		} else {
-			show_result("SKIP", $tested, $tested_file, "reason: CGI not available");
+			show_result("SKIP", $tested, $tested_file, $unicode_semantics, "reason: CGI not available");
 			return 'SKIPPED';
 		}
 	}
@@ -1176,9 +1176,9 @@ TEST $file
 			if (!strncasecmp('skip', trim($output), 4)) {
 				$reason = (eregi("^skip[[:space:]]*(.+)\$", trim($output))) ? eregi_replace("^skip[[:space:]]*(.+)\$", "\\1", trim($output)) : FALSE;
 				if ($reason) {
-					show_result("SKIP", $tested, $tested_file, "reason: $reason", $temp_filenames);
+					show_result("SKIP", $tested, $tested_file, $unicode_semantics, "reason: $reason", $temp_filenames);
 				} else {
-					show_result("SKIP", $tested, $tested_file, '', $temp_filenames);
+					show_result("SKIP", $tested, $tested_file, $unicode_semantics, '', $temp_filenames);
 				}
 				if (isset($old_php)) {
 					$php = $old_php;
@@ -1242,7 +1242,7 @@ TEST $file
 	if (is_array($org_file) || @count($section_text['REDIRECTTEST']) == 1) {
 		if (is_array($org_file)) $file = $org_file[0];
 		$bork_info = "Redirected test did not contain redirection info";
-		show_result("BORK", $bork_info, '', $temp_filenames);
+		show_result("BORK", $bork_info, '', $unicode_semantics, $temp_filenames);
 		$PHP_FAILED_TESTS['BORKED'][] = array (
 								'name' => $file,
 								'test_name' => '',
@@ -1411,7 +1411,7 @@ COMMAND $cmd
 				$php = $old_php;
 			}
 			if (!$leaked) {
-				show_result("PASS", $tested, $tested_file, '', $temp_filenames);
+				show_result("PASS", $tested, $tested_file, $unicode_semantics, '', $temp_filenames);
 				return 'PASSED';
 			}
 		}
@@ -1428,7 +1428,7 @@ COMMAND $cmd
 				$php = $old_php;
 			}
 			if (!$leaked) {
-				show_result("PASS", $tested, $tested_file, '', $temp_filenames);
+				show_result("PASS", $tested, $tested_file, $unicode_semantics, '', $temp_filenames);
 				return 'PASSED';
 			}
 		}
@@ -1474,7 +1474,7 @@ $output
 		}
 	}
 
-	show_result($restype, $tested, $tested_file, $info, $temp_filenames);
+	show_result($restype, $tested, $tested_file, $unicode_semantics, $info, $temp_filenames);
 
 	$PHP_FAILED_TESTS[$restype.'ED'][] = array (
 						'name' => $file,
@@ -1805,11 +1805,13 @@ function show_test($test_idx, $shortname)
 	flush();
 }
 
-function show_result($result, $tested, $tested_file, $extra = '', $temp_filenames = null)
+function show_result($result, $tested, $tested_file, $unicode_semantics, $extra = '', $temp_filenames = null)
 {
-	global $html_output, $html_file, $temp_target, $temp_urlbase;
+	global $html_output, $html_file, $temp_target, $temp_urlbase, $unicode_and_native;
 
-	echo "$result $tested [$tested_file] $extra\n";
+	$kind = $unicode_and_native ? ($unicode_semantics ? ':U' : ':N') : '';
+
+	echo "$result$kind $tested [$tested_file] $extra\n";
 
 	if ($html_output)
 	{
