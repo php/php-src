@@ -1,5 +1,7 @@
 --TEST--
-ZE2 property_exists()
+Reflection and property_exists()
+--SKIPIF--
+<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

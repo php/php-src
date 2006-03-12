@@ -1,7 +1,7 @@
 --TEST--
-ZE2 Inheriting static properties
+Reflection and inheriting static properties
 --SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
+<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

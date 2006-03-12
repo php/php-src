@@ -1,5 +1,7 @@
 --TEST--
-Bug #33312 (ReflectionParameter methods do not work correctly)
+Reflection Bug #33312 (ReflectionParameter methods do not work correctly)
+--SKIPIF--
+<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 class Foo {
