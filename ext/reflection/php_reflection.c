@@ -1787,6 +1787,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 				}
 				efree(lcname);
 			}
+			ce = fptr->common.scope;
 			break;
 
 		case IS_ARRAY: {
@@ -1901,8 +1902,28 @@ ZEND_METHOD(reflection_parameter, getName)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionClass ReflectionParameter::getDeclaringClass()
-   Returns this parameters's class hint or NULL if there is none */
+#if MBO_0
+/* {{{ proto public ReflectionFunction ReflectionParameter::getDeclaringFunction()
+   Returns the ReflectionFunction for the function of this parameter */
+ZEND_METHOD(reflection_parameter, getDeclaringFunction)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_parameter_ptr, 0);
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	if (!param->fptr->common.scope) {
+		reflection_function_factory(param->fptr, return_value TSRMLS_CC);
+	} else {
+		reflection_method_factory(param->fptr->common.scope, param->fptr, return_value TSRMLS_CC);
+	}
+}
+/* }}} */
+#endif
+
+/* {{{ proto public ReflectionClass|NULL ReflectionParameter::getDeclaringClass()
+   Returns in which class this parameter is defined (not the typehint of the parameter) */
 ZEND_METHOD(reflection_parameter, getDeclaringClass)
 {
 	reflection_object *intern;
@@ -1911,12 +1932,25 @@ ZEND_METHOD(reflection_parameter, getDeclaringClass)
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_parameter_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	if (!param->arg_info->class_name) {
-		RETURN_NULL();
-	} else {
-		zend_class_entry **pce;
+	if (param->fptr->common.scope) {
+		zend_reflection_class_factory(param->fptr->common.scope, return_value TSRMLS_CC);
+	}	
+}
+/* }}} */
 
-		if (zend_lookup_class_ex(param->arg_info->class_name, param->arg_info->class_name_len, 1, &pce TSRMLS_CC) == FAILURE) {
+/* {{{ proto public ReflectionClass|NULL ReflectionParameter::getClass()
+   Returns this parameters's class hint or NULL if there is none */
+ZEND_METHOD(reflection_parameter, getClass)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+	zend_class_entry **pce;
+
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_parameter_ptr, 0);
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	if (param->arg_info->class_name) {
+		if (zend_lookup_class(param->arg_info->class_name, param->arg_info->class_name_len, &pce TSRMLS_CC) == FAILURE) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 				"Class %s does not exist", param->arg_info->class_name);
 			return;
@@ -1967,6 +2001,22 @@ ZEND_METHOD(reflection_parameter, isPassedByReference)
 	RETVAL_BOOL(param->arg_info->pass_by_reference);
 }
 /* }}} */
+
+#if MBO_0
+/* {{{ proto public bool ReflectionParameter::getPosition()
+   Returns whether this parameter is an optional parameter */
+ZEND_METHOD(reflection_parameter, getPosition)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_parameter_ptr, 0);
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_LONG(param->offset);
+}
+/* }}} */
+#endif
 
 /* {{{ proto public bool ReflectionParameter::isOptional()
    Returns whether this parameter is an optional parameter */
@@ -4295,10 +4345,16 @@ static zend_function_entry reflection_parameter_functions[] = {
 	ZEND_ME(reflection_parameter, __toString, NULL, 0)
 	ZEND_ME(reflection_parameter, getName, NULL, 0)
 	ZEND_ME(reflection_parameter, isPassedByReference, NULL, 0)
+#if MBO_0
+	ZEND_ME(reflection_parameter, getDeclaringFunction, NULL, 0)
+#endif
 	ZEND_ME(reflection_parameter, getDeclaringClass, NULL, 0)
-	ZEND_MALIAS(reflection_parameter, getClass, getDeclaringClass, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
+	ZEND_ME(reflection_parameter, getClass, NULL, 0)
 	ZEND_ME(reflection_parameter, isArray, NULL, 0)
 	ZEND_ME(reflection_parameter, allowsNull, NULL, 0)
+#if MBO_0
+	ZEND_ME(reflection_parameter, getPosition, NULL, 0)
+#endif
 	ZEND_ME(reflection_parameter, isOptional, NULL, 0)
 	ZEND_ME(reflection_parameter, isDefaultValueAvailable, NULL, 0)
 	ZEND_ME(reflection_parameter, getDefaultValue, NULL, 0)
