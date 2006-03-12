@@ -1,5 +1,7 @@
 --TEST--
-Bug #29828 (Interfaces no longer work)
+Reflection Bug #29828 (Interfaces no longer work)
+--SKIPIF--
+<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

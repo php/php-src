@@ -1,5 +1,7 @@
 --TEST--
-Bug #30146 (ReflectionProperty->getValue() requires instance for static property)
+Reflection Bug #30146 (ReflectionProperty->getValue() requires instance for static property)
+--SKIPIF--
+<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 class test {

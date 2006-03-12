@@ -1,5 +1,7 @@
 --TEST--
-invoke() with non object or null value
+ReflectionMethod::invoke() with non object or null value
+--SKIPIF--
+<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 
