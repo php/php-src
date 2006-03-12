@@ -1,5 +1,7 @@
 --TEST--
-invoke() with base class method
+ReflectionMethod::invoke() with base class method
+--SKIPIF--
+<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

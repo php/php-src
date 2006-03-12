@@ -1,5 +1,7 @@
 --TEST--
-Bug #30961 (Wrong linenumber in ReflectionClass getStartLine())
+Reflection Bug #30961 (Wrong linenumber in ReflectionClass getStartLine())
+--SKIPIF--
+<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
     class a

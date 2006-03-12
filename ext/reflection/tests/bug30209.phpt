@@ -1,5 +1,7 @@
 --TEST--
-Bug #30209 (ReflectionClass::getMethod() lowercases attribute)
+Reflection Bug #30209 (ReflectionClass::getMethod() lowercases attribute)
+--SKIPIF--
+<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 
