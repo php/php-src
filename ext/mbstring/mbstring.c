@@ -688,6 +688,9 @@ static PHP_INI_MH(OnUpdate_mbstring_script_encoding)
 /* {{{ static PHP_INI_MH(OnUpdate_mbstring_substitute_character) */
 static PHP_INI_MH(OnUpdate_mbstring_substitute_character)
 {
+	int c;
+	char *endptr = NULL;
+
 	if (new_value != NULL) {
 		if (strcasecmp("none", new_value) == 0) {
 			MBSTRG(filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE;
@@ -695,7 +698,12 @@ static PHP_INI_MH(OnUpdate_mbstring_substitute_character)
 			MBSTRG(filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG;
 		} else {
 			MBSTRG(filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
-			MBSTRG(filter_illegal_substchar) = zend_atoi(new_value, new_value_length);
+			if (new_value_length >0) {
+				c = strtol(new_value, &endptr, 0);
+				if (*endptr == '\0') {
+					MBSTRG(filter_illegal_substchar) = c;
+				}
+			}
 		}
 	}
 
