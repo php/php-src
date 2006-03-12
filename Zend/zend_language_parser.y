@@ -506,7 +506,7 @@ method_body:
 
 variable_modifiers:
 		non_empty_member_modifiers		{ $$ = $1; }
-	|	T_VAR							{ zend_error(E_STRICT, "var: Deprecated. Please use the public/private/protected modifiers"); Z_LVAL($$.u.constant) = ZEND_ACC_PUBLIC; }
+	|	T_VAR							{ Z_LVAL($$.u.constant) = ZEND_ACC_PUBLIC; }
 ;
 
 method_modifiers:
