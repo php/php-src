@@ -1,3 +1,36 @@
+2006-03-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      run-tests.php:
+      - MFH Fix writing faillog with redirected tests
+
+    * run-tests.php:
+      - Fix writing faillog with redirected tests
+
+    * (PHP_5_1)
+      run-tests.php:
+      - MFH Fix test results with redirected tests
+
+    * run-tests.php:
+      - Fix test results with redirected tests
+
+    * run-tests.php:
+      - Load list of extensions to test from php that is being tested rather than
+        from php running the tests
+      - When executing both unicode and native modes then show the type of test
+        in the reult list (PASS:U, PASS:N, etc)
+
+    * (PHP_5_1)
+      run-tests.php:
+      - Load list of extensions to test from php that is being tested rather than
+        from php running the tests
+
+2006-03-11  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_1)
+      ext/mysqli/mysqli_api.c:
+      fix for MySQL 5.1 (see http://bugs.mysql.com/?id=16144)
+
 2006-03-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
