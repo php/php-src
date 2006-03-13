@@ -135,8 +135,18 @@ ZEND_API int zend_cleanup_function_data(zend_function *function TSRMLS_DC)
 {
 	if (function->type == ZEND_USER_FUNCTION) {
 		zend_cleanup_op_array_data((zend_op_array *) function);
+		return ZEND_HASH_APPLY_KEEP;
+	} else {
+		return ZEND_HASH_APPLY_STOP;
 	}
-	return 0;
+}
+
+ZEND_API int zend_cleanup_function_data_full(zend_function *function TSRMLS_DC)
+{
+	if (function->type == ZEND_USER_FUNCTION) {
+		zend_cleanup_op_array_data((zend_op_array *) function);
+	}
+	return ZEND_HASH_APPLY_KEEP;
 }
 
 ZEND_API int zend_cleanup_class_data(zend_class_entry **pce TSRMLS_DC)
@@ -145,7 +155,7 @@ ZEND_API int zend_cleanup_class_data(zend_class_entry **pce TSRMLS_DC)
 		/* Clean all parts that can contain run-time data */
 		/* Note that only run-time accessed data need to be cleaned up, pre-defined data can
 		   not contain objects and thus are not probelmatic */
-		zend_hash_apply(&(*pce)->function_table, (apply_func_t) zend_cleanup_function_data TSRMLS_CC);
+		zend_hash_apply(&(*pce)->function_table, (apply_func_t) zend_cleanup_function_data_full TSRMLS_CC);
 		(*pce)->static_members = NULL;
 	} else if (CE_STATIC_MEMBERS(*pce)) {
 		zend_hash_destroy(CE_STATIC_MEMBERS(*pce));

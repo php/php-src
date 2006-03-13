@@ -537,6 +537,7 @@ ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle TSRMLS_DC);
 ZEND_API void zend_file_handle_dtor(zend_file_handle *fh);
 ZEND_API int zend_cleanup_class_data(zend_class_entry **pce TSRMLS_DC);
 ZEND_API int zend_cleanup_function_data(zend_function *function TSRMLS_DC);
+ZEND_API int zend_cleanup_function_data_full(zend_function *function TSRMLS_DC);
 
 ZEND_API void destroy_zend_function(zend_function *function TSRMLS_DC);
 ZEND_API void zend_function_dtor(zend_function *function);
