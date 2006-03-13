@@ -150,8 +150,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 			off_t dummy;
 
 			stream->ops->seek(stream, stream->position, SEEK_SET, &dummy TSRMLS_CC);
-			
-			php_stream_flush_readbuf(stream);
+			stream->readpos = stream->writepos = 0;
 		}
 	}
 	
@@ -259,7 +258,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 
 exit_success:
 
-	if ((stream->readbuf_avail) > 0 &&
+	if ((stream->writepos - stream->readpos) > 0 &&
 			stream->fclose_stdiocast != PHP_STREAM_FCLOSE_FOPENCOOKIE &&
 			(flags & PHP_STREAM_CAST_INTERNAL) == 0) {
 		/* the data we have buffered will be lost to the third party library that
@@ -268,7 +267,7 @@ exit_success:
 		
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,
 				"%ld bytes of buffered data lost during stream conversion!",
-				stream->readbuf_avail);
+				(long)(stream->writepos - stream->readpos));
 	}
 	
 	if (castas == PHP_STREAM_AS_STDIO && ret)

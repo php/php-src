@@ -507,7 +507,7 @@ PHP_FUNCTION(file_get_contents)
 	char *contents;
 	zend_bool use_include_path = 0;
 	php_stream *stream;
-	int len, newlen;
+	int len;
 	long offset = -1;
 	long maxlen = PHP_STREAM_COPY_ALL;
 	zval *zcontext = NULL;
@@ -555,7 +555,7 @@ PHP_FUNCTION(file_put_contents)
 	char *filename;
 	int filename_len;
 	zval *data;
-	int numbytes = 0;
+	int numchars = 0;
 	long flags = 0;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
@@ -592,36 +592,36 @@ PHP_FUNCTION(file_put_contents)
 			php_stream *srcstream;
 			php_stream_from_zval(srcstream, &data);
 
-			numbytes = php_stream_copy_to_stream(srcstream, stream, PHP_STREAM_COPY_ALL);
+			numchars = php_stream_copy_to_stream(srcstream, stream, PHP_STREAM_COPY_ALL);
 
 			break;
 		}
 		case IS_ARRAY:
 			if (zend_hash_num_elements(Z_ARRVAL_P(data))) {
-				int bytes_written;
 				zval **tmp;
 				HashPosition pos;
 
 				zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(data), &pos);
 				while (zend_hash_get_current_data_ex(Z_ARRVAL_P(data), (void **) &tmp, &pos) == SUCCESS) {
 					if (Z_TYPE_PP(tmp) == IS_UNICODE) {
-						int wrote_bytes = php_stream_u_write(stream, Z_USTRVAL_PP(tmp), Z_USTRLEN_PP(tmp));
-						if (wrote_bytes < 0) {
-							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %d characters to %s", Z_USTRLEN_PP(tmp), filename);
-							numbytes = -1;
+						int ustrlen = u_countChar32(Z_USTRVAL_PP(tmp), Z_USTRLEN_PP(tmp));
+						int wrote_u16 = php_stream_write_unicode(stream, Z_USTRVAL_PP(tmp), Z_USTRLEN_PP(tmp));
+						if (wrote_u16 < 0) {
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %d characters to %s", ustrlen, filename);
+							numchars = -1;
 							break;
-						} else if (wrote_bytes != UBYTES(Z_USTRLEN_PP(tmp))) {
-							int ustrlen = u_countChar32(Z_USTRVAL_PP(tmp), Z_USTRLEN_PP(tmp));
-							int numchars = u_countChar32(Z_USTRVAL_PP(tmp), wrote_bytes / UBYTES(1));
+						} else if (wrote_u16 != Z_USTRLEN_PP(tmp)) {
+							int numchars = u_countChar32(Z_USTRVAL_PP(tmp), wrote_u16);
 
 							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d characters written, possibly out of free disk space", numchars, ustrlen);
-							numbytes = -1;
+							numchars = -1;
 							break;
 						}
-						numbytes += wrote_bytes;
+						numchars += ustrlen;
 					} else { /* non-unicode */
 						int free_val = 0;
 						zval strval = **tmp;
+						int wrote_bytes;
 
 						if (Z_TYPE(strval) != IS_STRING) {
 							zval_copy_ctor(&strval);
@@ -629,15 +629,16 @@ PHP_FUNCTION(file_put_contents)
 							free_val = 1;
 						}
 						if (Z_STRLEN(strval)) {
-							numbytes += Z_STRLEN(strval);
-							bytes_written = php_stream_write(stream, Z_STRVAL(strval), Z_STRLEN(strval));
-							if (bytes_written < 0 || bytes_written != Z_STRLEN(strval)) {
-								if (bytes_written < 0) {
-									php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %d bytes to %s",  Z_STRLEN(strval), filename);
-								} else {
-									php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space",  bytes_written, Z_STRLEN(strval));
-								}
-								numbytes = -1;
+							numchars += Z_STRLEN(strval);
+							wrote_bytes = php_stream_write(stream, Z_STRVAL(strval), Z_STRLEN(strval));
+							if (wrote_bytes < 0) {
+								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %d bytes to %s",  Z_STRLEN(strval), filename);
+								numchars = -1;
+								break;
+							}
+							if (wrote_bytes != Z_STRLEN(strval)) {
+								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space",  wrote_bytes, Z_STRLEN(strval));
+								numchars = -1;
 								break;
 							}
 						}
@@ -652,20 +653,20 @@ PHP_FUNCTION(file_put_contents)
 		case IS_OBJECT:
 			/* TODO */
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "2nd parameter must be non-object (for now)");
-			numbytes = -1;
+			numchars = -1;
 			break;
 		case IS_UNICODE:
 			if (Z_USTRLEN_P(data)) {
-				numbytes = php_stream_u_write(stream, Z_USTRVAL_P(data), Z_USTRLEN_P(data));
-				if (numbytes < 0) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %d characters to %s", Z_USTRLEN_P(data), filename);
-					numbytes = -1;
-				} else if (numbytes != UBYTES(Z_USTRLEN_P(data))) {
-					int ustrlen = u_countChar32(Z_USTRVAL_P(data), Z_USTRLEN_P(data));
-					int numchars = u_countChar32(Z_USTRVAL_P(data), numbytes / UBYTES(1));
+				int ustrlen = u_countChar32(Z_USTRVAL_P(data), Z_USTRLEN_P(data));
+				numchars = php_stream_write_unicode(stream, Z_USTRVAL_P(data), Z_USTRLEN_P(data));
+				if (numchars < 0) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %d characters to %s", ustrlen, filename);
+					numchars = -1;
+				} else if (numchars != UBYTES(Z_USTRLEN_P(data))) {
+					int numchars = u_countChar32(Z_USTRVAL_P(data), numchars);
 
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d characters written, possibly out of free disk space", numchars, ustrlen);
-					numbytes = -1;
+					numchars = -1;
 				}
 			}
 			break;
@@ -680,10 +681,10 @@ PHP_FUNCTION(file_put_contents)
 				convert_to_string_ex(&data);
 			}
 			if (Z_STRLEN_P(data)) {
-				numbytes = php_stream_write(stream, Z_STRVAL_P(data), Z_STRLEN_P(data));
-				if (numbytes != Z_STRLEN_P(data)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space", numbytes, Z_STRLEN_P(data));
-					numbytes = -1;
+				numchars = php_stream_write(stream, Z_STRVAL_P(data), Z_STRLEN_P(data));
+				if (numchars != Z_STRLEN_P(data)) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space", numchars, Z_STRLEN_P(data));
+					numchars = -1;
 				}
 			}
 			break;
@@ -691,11 +692,11 @@ PHP_FUNCTION(file_put_contents)
 	}
 	php_stream_close(stream);
 
-	if (numbytes < 0) {
+	if (numchars < 0) {
 		RETURN_FALSE;	
 	}
 
-	RETURN_LONG(numbytes);
+	RETURN_LONG(numchars);
 }
 /* }}} */
 
@@ -709,9 +710,9 @@ PHP_FUNCTION(file)
 {
 	char *filename;
 	int filename_len;
-	char *slashed, *target_buf=NULL, *p, *s, *e;
+	char *target_buf=NULL, *p, *s, *e;
 	register int i = 0;
-	int target_len, len;
+	int target_len;
 	char eol_marker = '\n';
 	long flags = 0;
 	zend_bool use_include_path;
@@ -748,7 +749,7 @@ PHP_FUNCTION(file)
  		s = target_buf;
  		e = target_buf + target_len;
  	
- 		if (!(p = php_stream_locate_eol(stream, target_buf, target_len TSRMLS_CC))) {
+ 		if (!(p = php_stream_locate_eol(stream, (zstr)target_buf, target_len TSRMLS_CC))) {
  			p = e;
  			goto parse_eol;
 		}
@@ -1024,10 +1025,7 @@ PHPAPI PHP_FUNCTION(fgets)
 PHPAPI PHP_FUNCTION(fgetc)
 {
 	zval **arg1;
-	char buf[2 * sizeof(UChar)];
-	int is_unicode;
 	php_stream *stream;
-	int32_t num_bytes = UBYTES(2), num_chars = 1;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1035,18 +1033,20 @@ PHPAPI PHP_FUNCTION(fgetc)
 
 	PHP_STREAM_TO_ZVAL(stream, arg1);
 
-	if (!php_stream_u_read(stream, buf, &num_bytes, &num_chars, &is_unicode)) {
-		RETVAL_FALSE;
-	} else {
-		if (is_unicode) {
-			UChar *ubuf = (UChar *)buf;
-			int num_u16 = num_bytes >> 1;
-			ubuf[num_u16] = 0;
-			RETURN_UNICODEL(ubuf, num_u16, 1);
-		} else {
-			buf[1] = 0;
-			RETURN_STRINGL(buf, 1, 1);
+	if (php_stream_reads_unicode(stream)) {
+		int buflen = 1;
+		UChar *buf = php_stream_read_unicode_chars(stream, &buflen);
+
+		if (!buf) {
+			RETURN_FALSE;
 		}
+		RETURN_UNICODEL(buf, buflen, 0);
+	} else {
+		char buf[2];
+
+		buf[0] = php_stream_getc(stream);
+		buf[1] = 0;
+		RETURN_STRINGL(buf, 1, 1);
 	}
 }
 /* }}} */
@@ -1213,26 +1213,19 @@ PHPAPI PHP_FUNCTION(fwrite)
 		if (write_len < 0 || write_len > Z_USTRLEN_P(zstring)) {
 			write_len = Z_USTRLEN_P(zstring);
 		}
-		ret = php_stream_u_write(stream, Z_USTRVAL_P(zstring), write_len);
+		ret = php_stream_write_unicode(stream, Z_USTRVAL_P(zstring), write_len);
 
 		/* Convert data points back to code units */
 		if (ret > 0) {
 			ret = u_countChar32(Z_USTRVAL_P(zstring), ret);
 		}
 	} else {
-		char *buffer = NULL;
-		int num_bytes;
-
 		convert_to_string(zstring);
 		if (write_len < 0 || write_len > Z_STRLEN_P(zstring)) {
 			write_len = Z_STRLEN_P(zstring);
 		}
 
-		num_bytes = write_len;
-		ret = php_stream_write(stream, buffer ? buffer : Z_STRVAL_P(zstring), num_bytes);
-		if (buffer) {
-			efree(buffer);
-		}
+		ret = php_stream_write(stream, Z_STRVAL_P(zstring), write_len);
 	}
 
 	RETURN_LONG(ret);
@@ -1759,11 +1752,8 @@ safe_to_copy:
 PHPAPI PHP_FUNCTION(fread)
 {
 	zval *zstream;
-	char *buf;
 	long len;
 	php_stream *stream;
-	int is_unicode;
-	int32_t num_bytes, num_chars;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &zstream, &len) == FAILURE) {
 		RETURN_NULL();
@@ -1776,22 +1766,25 @@ PHPAPI PHP_FUNCTION(fread)
 		RETURN_FALSE;
 	}
 
-	num_chars = len;
-	num_bytes = UBYTES(len);
-	buf = emalloc(num_bytes + UBYTES(1));
+	if (php_stream_reads_unicode(stream)) {
+		int buflen = len;
+		UChar *buf = php_stream_read_unicode_chars(stream, &buflen);
 
-	if (!php_stream_u_read(stream, buf, &num_bytes, &num_chars, &is_unicode)) {
-		efree(buf);
-		RETURN_FALSE;
-	}
+		if (!buf) {
+			RETURN_FALSE;
+		}
 
-	if (is_unicode) {
-		buf[num_bytes] = 0;
-		buf[num_bytes + 1] = 0;
-		RETURN_UNICODEL((UChar *)buf, num_bytes >> 1, 0);
+		RETURN_UNICODEL(buf, buflen, 0);
 	} else {
-		buf[num_bytes] = 0;
-		RETURN_STRINGL(buf, num_bytes, 0);
+		char *buf = emalloc(len + 1);
+		int buflen = php_stream_read(stream, buf, len);
+
+		if (!buflen) {
+			efree(buf);
+			RETURN_FALSE;
+		}
+		buf[buflen] = 0;
+		RETURN_STRINGL(buf, buflen, 0);
 	}
 }
 /* }}} */

@@ -376,12 +376,12 @@ PHP_FUNCTION(stream_bucket_make_writeable)
 		add_property_zval(return_value, "bucket", zbucket);
 		/* add_property_zval increments the refcount which is unwanted here */
 		zval_ptr_dtor(&zbucket);
-		if (bucket->is_unicode) {
-			add_property_unicodel(return_value, "data", bucket->buf.ustr.val, bucket->buf.ustr.len, 1);
-			add_property_long(return_value, "datalen", bucket->buf.ustr.len);
+		if (bucket->buf_type == IS_UNICODE) {
+			add_property_unicodel(return_value, "data", bucket->buf.u, bucket->buflen, 1);
+			add_property_long(return_value, "datalen", bucket->buflen);
 		} else {
-			add_property_stringl(return_value, "data", bucket->buf.str.val, bucket->buf.str.len, 1);
-			add_property_long(return_value, "datalen", bucket->buf.str.len);
+			add_property_stringl(return_value, "data", bucket->buf.s, bucket->buflen, 1);
+			add_property_long(return_value, "datalen", bucket->buflen);
 		}
 	}
 }
@@ -412,34 +412,34 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 			bucket = php_stream_bucket_make_writeable(bucket TSRMLS_CC);
 		}
 		if (Z_TYPE_PP(pzdata) == IS_UNICODE) {
-			if (!bucket->is_unicode) {
-				pefree(bucket->buf.str.val, bucket->is_persistent);
-				bucket->buf.ustr.len = Z_USTRLEN_PP(pzdata);
-				bucket->buf.ustr.val = safe_pemalloc(sizeof(UChar), bucket->buf.ustr.len, 0, bucket->is_persistent);
-				bucket->is_unicode = 1;
+			if (!bucket->buf_type == IS_UNICODE) {
+				pefree(bucket->buf.u, bucket->is_persistent);
+				bucket->buflen = Z_USTRLEN_PP(pzdata);
+				bucket->buf.u = safe_pemalloc(sizeof(UChar), bucket->buflen, 0, bucket->is_persistent);
+				bucket->buf_type = IS_UNICODE;
 			}
-			if (bucket->buf.ustr.len < Z_USTRLEN_PP(pzdata)) {
-				pefree(bucket->buf.ustr.val, bucket->is_persistent);
-				bucket->buf.ustr.len = Z_USTRLEN_PP(pzdata);
-				bucket->buf.ustr.val = safe_pemalloc(sizeof(UChar), bucket->buf.ustr.len, 0, bucket->is_persistent);
+			if (bucket->buflen < Z_USTRLEN_PP(pzdata)) {
+				pefree(bucket->buf.u, bucket->is_persistent);
+				bucket->buflen = Z_USTRLEN_PP(pzdata);
+				bucket->buf.u = safe_pemalloc(sizeof(UChar), bucket->buflen, 0, bucket->is_persistent);
 			}
-			bucket->buf.ustr.len = Z_USTRLEN_PP(pzdata);
-			memcpy(bucket->buf.ustr.val, Z_USTRVAL_PP(pzdata), bucket->buf.ustr.len * sizeof(UChar));
+			bucket->buflen = Z_USTRLEN_PP(pzdata);
+			memcpy(bucket->buf.u, Z_USTRVAL_PP(pzdata), UBYTES(bucket->buflen));
 		} else { /* string -- or at least string expressable */
 			SEPARATE_ZVAL_IF_NOT_REF(pzdata);
 			convert_to_string_ex(pzdata);
-			if (bucket->is_unicode) {
-				pefree(bucket->buf.ustr.val, bucket->is_persistent);
-				bucket->buf.str.len = Z_STRLEN_PP(pzdata);
-				bucket->buf.str.val = pemalloc(bucket->buf.str.len, bucket->is_persistent);
-				bucket->is_unicode = 0;
+			if (bucket->buf_type == IS_UNICODE) {
+				pefree(bucket->buf.u, bucket->is_persistent);
+				bucket->buflen = Z_STRLEN_PP(pzdata);
+				bucket->buf.s = pemalloc(bucket->buflen, bucket->is_persistent);
+				bucket->buf_type = IS_STRING;
 			}
-			if (bucket->buf.str.len < Z_STRLEN_PP(pzdata)) {
-				bucket->buf.str.len = Z_STRLEN_PP(pzdata);
-				bucket->buf.str.val = perealloc(bucket->buf.str.val, bucket->buf.str.len, bucket->is_persistent);
+			if (bucket->buflen < Z_STRLEN_PP(pzdata)) {
+				bucket->buflen = Z_STRLEN_PP(pzdata);
+				bucket->buf.s = perealloc(bucket->buf.s, bucket->buflen, bucket->is_persistent);
 			}
-			bucket->buf.str.len = Z_STRLEN_PP(pzdata);
-			memcpy(bucket->buf.str.val, Z_STRVAL_PP(pzdata), bucket->buf.str.len);
+			bucket->buflen = Z_STRLEN_PP(pzdata);
+			memcpy(bucket->buf.s, Z_STRVAL_PP(pzdata), bucket->buflen);
 		}
 	}
 

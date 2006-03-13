@@ -53,19 +53,19 @@ static php_stream_filter_status_t php_unicode_to_string_filter(
 	data = (php_unicode_filter_data *)(thisfilter->abstract);
 	while (buckets_in->head) {
 		php_stream_bucket *bucket = buckets_in->head;
-		UChar *src = bucket->buf.ustr.val;
+		UChar *src = bucket->buf.u;
 
 		php_stream_bucket_unlink(bucket TSRMLS_CC);
-		if (!bucket->is_unicode) {
+		if (!bucket->buf_type == IS_UNICODE) {
 			/* Already ASCII, can't really do anything with it */
-			consumed += bucket->buf.str.len;
+			consumed += bucket->buflen;
 			php_stream_bucket_append(buckets_out, bucket TSRMLS_CC);
 			exit_status = PSFS_PASS_ON;
 			continue;
 		}
 
-		while (src < (bucket->buf.ustr.val + bucket->buf.ustr.len)) {
-			int remaining = bucket->buf.ustr.len - (src - bucket->buf.ustr.val);
+		while (src < (bucket->buf.u + bucket->buflen)) {
+			int remaining = bucket->buflen - (src - bucket->buf.u);
 			char *destp, *destbuf;
 			int32_t destlen = UCNV_GET_MAX_BYTES_FOR_STRING(remaining, ucnv_getMaxCharSize(data->conv));
 			UErrorCode errCode = U_ZERO_ERROR;
@@ -78,7 +78,7 @@ static php_stream_filter_status_t php_unicode_to_string_filter(
 			php_stream_bucket_append(buckets_out, new_bucket TSRMLS_CC);
 			exit_status = PSFS_PASS_ON;
 		}
-		consumed += UBYTES(bucket->buf.ustr.len);
+		consumed += UBYTES(bucket->buflen);
 		php_stream_bucket_delref(bucket TSRMLS_CC);
 	}
 
@@ -124,19 +124,19 @@ static php_stream_filter_status_t php_unicode_from_string_filter(
 	data = (php_unicode_filter_data *)(thisfilter->abstract);
 	while (buckets_in->head) {
 		php_stream_bucket *bucket = buckets_in->head;
-		char *src = bucket->buf.str.val;
+		char *src = bucket->buf.s;
 
 		php_stream_bucket_unlink(bucket TSRMLS_CC);
-		if (bucket->is_unicode) {
+		if (bucket->buf_type == IS_UNICODE) {
 			/* already in unicode, nothing to do */
-			consumed += UBYTES(bucket->buf.ustr.len);
+			consumed += UBYTES(bucket->buflen);
 			php_stream_bucket_append(buckets_out, bucket TSRMLS_CC);
 			exit_status = PSFS_PASS_ON;
 			continue;
 		}
 
-		while (src < (bucket->buf.str.val + bucket->buf.str.len)) {
-			int remaining = bucket->buf.str.len - (src - bucket->buf.str.val);
+		while (src < (bucket->buf.s + bucket->buflen)) {
+			int remaining = bucket->buflen - (src - bucket->buf.s);
 			UChar *destp, *destbuf;
 			int32_t destlen = UCNV_GET_MAX_BYTES_FOR_STRING(remaining, ucnv_getMaxCharSize(data->conv));
 			UErrorCode errCode = U_ZERO_ERROR;
@@ -150,7 +150,7 @@ static php_stream_filter_status_t php_unicode_from_string_filter(
 			php_stream_bucket_append(buckets_out, new_bucket TSRMLS_CC);
 			exit_status = PSFS_PASS_ON;
 		}
-		consumed += bucket->buf.str.len;
+		consumed += bucket->buflen;
 		php_stream_bucket_delref(bucket TSRMLS_CC);
 	}
 

@@ -206,11 +206,16 @@ struct _php_stream  {
 	php_stream_context *context;
 	int flags;	/* PHP_STREAM_FLAG_XXX */
 
+	/* unicode */
+	UConverter *input_encoding;
+	UConverter *output_encoding;
+
 	/* buffer */
 	off_t position; /* of underlying stream */
-
-	php_stream_bucket_brigade readbuf;
-	off_t readbuf_ofs, readbuf_avail;
+	zstr readbuf; /* readbuf.s or readbuf.u */
+	size_t readbuflen; /* Length in units (char or UChar) */
+	off_t readpos; /* Position in units (char or UChar) */
+	off_t writepos;
 	
 	/* how much data to read when filling buffer */
 	size_t chunk_size;
@@ -230,7 +235,6 @@ PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract,
 END_EXTERN_C()
 #define php_stream_alloc(ops, thisptr, persistent_id, mode)	_php_stream_alloc((ops), (thisptr), (persistent_id), (mode) STREAMS_CC TSRMLS_CC)
 
-
 #define php_stream_get_resource_id(stream)		(stream)->rsrc_id
 #if ZEND_DEBUG
 /* use this to tell the stream that it is OK if we don't explicitly close it */
@@ -246,6 +250,10 @@ END_EXTERN_C()
 
 #define php_stream_from_zval(xstr, ppzval)	ZEND_FETCH_RESOURCE2((xstr), php_stream *, (ppzval), -1, "stream", php_file_le_stream(), php_file_le_pstream())
 #define php_stream_from_zval_no_verify(xstr, ppzval)	(xstr) = (php_stream*)zend_fetch_resource((ppzval) TSRMLS_CC, -1, "stream", NULL, 2, php_file_le_stream(), php_file_le_pstream())
+
+#define PS_ULEN(is_unicode, len)	((is_unicode) ? UBYTES(len) : (len))
+#define php_stream_reads_unicode(stream)	((stream->input_encoding) ? 1 : 0)
+#define php_stream_writes_unicode(stream)	((stream->output_encoding) ? 1 : 0)
 
 BEGIN_EXTERN_C()
 PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream **stream TSRMLS_DC);
@@ -279,20 +287,22 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t count TSRML
 #define php_stream_read(stream, buf, count)		_php_stream_read((stream), (buf), (count) TSRMLS_CC)
 
 /* Convert using runtime_encoding if necessary -- return unicode */
-PHPAPI size_t _php_stream_read_unicode(php_stream *stream, UChar *buf, int32_t size TSRMLS_DC);
-#define php_stream_read_unicode(stream, buf, size)		_php_stream_read_unicode((stream), (buf), (size) TSRMLS_CC)
+PHPAPI size_t _php_stream_read_unicode(php_stream *stream, UChar *buf, int maxlen, int maxchars TSRMLS_DC);
+#define php_stream_read_unicode(stream, buf, maxlen)	_php_stream_read_unicode((stream), (buf), (maxlen), -1 TSRMLS_CC)
 
-/* Read count data points (char or UChar) until buffered type changes -- return single type without conversion */
-PHPAPI void *_php_stream_u_read(php_stream *stream, void *buf, int32_t *pnum_bytes, int32_t *pnum_chars, int *pis_unicode TSRMLS_DC);
-#define php_stream_u_read(stream, buf, pnum_bytes, pnum_chars, pis_unicode) \
-		_php_stream_u_read((stream), (buf), (pnum_bytes), (pnum_chars), (pis_unicode) TSRMLS_CC)
+PHPAPI UChar *_php_stream_read_unicode_chars(php_stream *stream, int *pchars TSRMLS_DC);
+#define  php_stream_read_unicode_chars(stream, pchars) _php_stream_read_unicode_chars((stream), (pchars) TSRMLS_CC)
 
 PHPAPI size_t _php_stream_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC);
 #define php_stream_write_string(stream, str)	_php_stream_write(stream, str, strlen(str) TSRMLS_CC)
 #define php_stream_write(stream, buf, count)	_php_stream_write(stream, (buf), (count) TSRMLS_CC)
 
-PHPAPI size_t _php_stream_u_write(php_stream *stream, const UChar *buf, int32_t count TSRMLS_DC);
-#define php_stream_u_write(stream, buf, count)	_php_stream_u_write((stream), (buf), (count) TSRMLS_CC)
+PHPAPI size_t _php_stream_write_unicode(php_stream *stream, const UChar *buf, int count TSRMLS_DC);
+#define php_stream_write_unicode(stream, buf, count)	_php_stream_write_unicode((stream), (buf), (count) TSRMLS_CC)
+
+#define php_stream_u_write(stream, type, zbuf, buflen)	((type == IS_UNICODE) ? \
+																php_stream_write_unicode((stream), (zbuf).u, (buflen)) : \
+																php_stream_write((stream), (zbuf).s, (buflen)))
 
 PHPAPI size_t _php_stream_printf(php_stream *stream TSRMLS_DC, const char *fmt, ...);
 /* php_stream_printf macro & function require TSRMLS_CC */
@@ -302,7 +312,7 @@ PHPAPI int _php_stream_eof(php_stream *stream TSRMLS_DC);
 #define php_stream_eof(stream)	_php_stream_eof((stream) TSRMLS_CC)
 
 PHPAPI int _php_stream_getc(php_stream *stream TSRMLS_DC);
-#define php_stream_getc(stream)	_php_stream_getc((stream) TSRMLS_CC)
+#define php_stream_getc(stream)		_php_stream_getc((stream) TSRMLS_CC)
 
 PHPAPI int _php_stream_putc(php_stream *stream, int c TSRMLS_DC);
 #define php_stream_putc(stream, c)	_php_stream_putc((stream), (c) TSRMLS_CC)
@@ -310,23 +320,18 @@ PHPAPI int _php_stream_putc(php_stream *stream, int c TSRMLS_DC);
 PHPAPI int _php_stream_flush(php_stream *stream, int closing TSRMLS_DC);
 #define php_stream_flush(stream)	_php_stream_flush((stream), 0 TSRMLS_CC)
 
-PHPAPI void _php_stream_flush_readbuf(php_stream *stream TSRMLS_DC);
-#define php_stream_flush_readbuf(stream)	_php_stream_flush_readbuf((stream) TSRMLS_CC)
-
 PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen, size_t *returned_len TSRMLS_DC);
 #define php_stream_gets(stream, buf, maxlen)	_php_stream_get_line((stream), (buf), (maxlen), NULL TSRMLS_CC)
+
 #define php_stream_get_line(stream, buf, maxlen, retlen) _php_stream_get_line((stream), (buf), (maxlen), (retlen) TSRMLS_CC)
 PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *returned_len, char *delim, size_t delim_len TSRMLS_DC);
 
-PHPAPI UChar *_php_stream_u_get_line(php_stream *stream, UChar *buf, int32_t *pmax_u16, int32_t *pmax_chars, int *pis_unicode TSRMLS_DC);
-#define php_stream_u_get_line(stream, buf, max_u16, max_chars, is_unicode)	_php_stream_u_get_line((stream), (buf), (max_u16), (max_chars), (is_unicode) TSRMLS_CC)
+PHPAPI UChar *_php_stream_u_get_line(php_stream *stream, UChar *buf, int32_t *pmax_bytes, int32_t *pmax_chars, int *pis_unicode TSRMLS_DC);
+#define php_stream_u_get_line(stream, buf, maxlen_buf, maxlen_chars, buf_type)	_php_stream_u_get_line((stream), (buf), (maxlen_buf), (maxlen_chars), (buf_type) TSRMLS_CC)
 
 /* CAREFUL! this is equivalent to puts NOT fputs! */
 PHPAPI int _php_stream_puts(php_stream *stream, char *buf TSRMLS_DC);
 #define php_stream_puts(stream, buf)	_php_stream_puts((stream), (buf) TSRMLS_CC)
-
-PHPAPI int _php_stream_will_read_unicode(php_stream *stream TSRMLS_DC);
-#define php_stream_will_read_unicode(stream)	_php_stream_will_read_unicode((stream) TSRMLS_CC);
 
 PHPAPI int _php_stream_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC);
 #define php_stream_stat(stream, ssb)	_php_stream_stat((stream), (ssb) TSRMLS_CC)
@@ -532,7 +537,7 @@ PHPAPI int php_register_url_stream_wrapper_volatile(char *protocol, php_stream_w
 PHPAPI int php_unregister_url_stream_wrapper_volatile(char *protocol TSRMLS_DC);
 PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char **path_for_open, int options TSRMLS_DC);
-PHPAPI char *php_stream_locate_eol(php_stream *stream, char *buf, size_t buf_len TSRMLS_DC);
+PHPAPI void *php_stream_locate_eol(php_stream *stream, zstr zbuf, int buf_len TSRMLS_DC);
 
 #define php_stream_open_wrapper(path, mode, options, opened)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), NULL STREAMS_CC TSRMLS_CC)
 #define php_stream_open_wrapper_ex(path, mode, options, opened, context)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), (context) STREAMS_CC TSRMLS_CC)

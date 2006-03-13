@@ -45,21 +45,13 @@ struct _php_stream_bucket {
 	php_stream_bucket *next, *prev;
 	php_stream_bucket_brigade *brigade;
 
-	union {
-		struct {
-			char *val;
-			size_t len;
-		} str;
-		struct {
-			UChar *val;
-			int32_t len;
-		} ustr;
-	} buf;
+	zstr buf;
+	int buflen; /* Length in units (char or UChar) */
 			
 	/* if non-zero, buf should be pefreed when the bucket is destroyed */
 	char own_buf;
+	char buf_type; /* IS_STRING or IS_UNICODE */
 	char is_persistent;
-	char is_unicode;
 
 	/* destroy this struct when refcount falls to zero */
 	int refcount;
@@ -86,9 +78,10 @@ PHPAPI void php_stream_bucket_prepend(php_stream_bucket_brigade *brigade, php_st
 PHPAPI void php_stream_bucket_append(php_stream_bucket_brigade *brigade, php_stream_bucket *bucket TSRMLS_DC);
 PHPAPI void php_stream_bucket_unlink(php_stream_bucket *bucket TSRMLS_DC);
 PHPAPI php_stream_bucket *php_stream_bucket_make_writeable(php_stream_bucket *bucket TSRMLS_DC);
-PHPAPI int php_stream_bucket_tounicode(php_stream *stream, php_stream_bucket **pbucket, off_t *offset TSRMLS_DC);
-PHPAPI int php_stream_bucket_tostring(php_stream *stream, php_stream_bucket **pbucket, off_t *offset TSRMLS_DC);
+PHPAPI int _php_stream_bucket_convert(php_stream_bucket *bucket, unsigned char type, UConverter *conv TSRMLS_DC);
 END_EXTERN_C()
+#define php_stream_bucket_convert(bucket, type, conv) _php_stream_bucket_convert((bucket), (type), (conv) TSRMLS_CC);
+#define php_stream_bucket_convert_notranscode(bucket, type) _php_stream_bucket_convert((bucket), (type), NULL TSRMLS_CC);
 
 #define PSFS_FLAG_NORMAL			0	/* regular read/write */
 #define PSFS_FLAG_FLUSH_INC			1	/* an incremental flush */
