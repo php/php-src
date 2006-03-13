@@ -48,7 +48,7 @@ define ____printzv_contents
 
 	printf "(refcount=%d) ", $zvalue->refcount
 	if $type == 0
-		printf "NULL: "
+		printf "NULL"
 	end
 	if $type == 1
 		printf "long: %ld", $zvalue->value.lval
@@ -202,7 +202,7 @@ define ____print_ht
 		end
 
 		if $p->nKeyLength > 0 
-			printf "\"%s\" => ", (char*)$p->key.arKey.s
+			printf "\"%s\" => ", $p->key.arKey.s
 		else
 			printf "%d => ", $p->h
 		end
@@ -237,7 +237,7 @@ define ____print_ft
 		end
 
 		if $p->nKeyLength > 0 
-			printf "\"%s\" => ", (char*)$p->key.arKey.s
+			printf "\"%s\" => ", $p->key.arKey.s
 		else
 			printf "%d => ", $p->h
 		end
