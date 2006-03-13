@@ -95,23 +95,27 @@ static void zend_extension_deactivator(zend_extension *extension TSRMLS_DC)
 }
 
 
-static int is_not_internal_function(zend_function *function TSRMLS_DC)
+static int clean_non_persistent_function(zend_function *function TSRMLS_DC)
 {
-	if (function->type == ZEND_INTERNAL_FUNCTION) {
-		return EG(full_tables_cleanup) ? 0 : ZEND_HASH_APPLY_STOP;
-	} else {
-		return EG(full_tables_cleanup) ? 1 : ZEND_HASH_APPLY_REMOVE;
-	}
+	return (function->type == ZEND_INTERNAL_FUNCTION) ? ZEND_HASH_APPLY_STOP : ZEND_HASH_APPLY_REMOVE;
 }
 
 
-static int is_not_internal_class(zend_class_entry **ce TSRMLS_DC)
+static int clean_non_persistent_function_full(zend_function *function TSRMLS_DC)
 {
-	if ((*ce)->type == ZEND_INTERNAL_CLASS) {
-		return EG(full_tables_cleanup) ? 0 : ZEND_HASH_APPLY_STOP;
-	} else {
-		return EG(full_tables_cleanup) ? 1 : ZEND_HASH_APPLY_REMOVE;
-	}
+	return (function->type == ZEND_INTERNAL_FUNCTION) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_REMOVE;
+}
+
+
+static int clean_non_persistent_class(zend_class_entry **ce TSRMLS_DC)
+{
+	return ((*ce)->type == ZEND_INTERNAL_CLASS) ? ZEND_HASH_APPLY_STOP : ZEND_HASH_APPLY_REMOVE;
+}
+
+
+static int clean_non_persistent_class_full(zend_class_entry **ce TSRMLS_DC)
+{
+	return ((*ce)->type == ZEND_INTERNAL_CLASS) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_REMOVE;
 }
 
 
@@ -251,18 +255,22 @@ void shutdown_executor(TSRMLS_D)
 		   So we want first of all to clean up all data and then move to tables destruction.
 		   Note that only run-time accessed data need to be cleaned up, pre-defined data can
 		   not contain objects and thus are not probelmatic */
-		zend_hash_apply(EG(function_table), (apply_func_t) zend_cleanup_function_data TSRMLS_CC);
+		if (EG(full_tables_cleanup)) {
+			zend_hash_apply(EG(function_table), (apply_func_t) zend_cleanup_function_data_full TSRMLS_CC);
+		} else {
+			zend_hash_reverse_apply(EG(function_table), (apply_func_t) zend_cleanup_function_data TSRMLS_CC);
+		}
 		zend_hash_apply(EG(class_table), (apply_func_t) zend_cleanup_class_data TSRMLS_CC);
 
 		zend_ptr_stack_destroy(&EG(argument_stack));
 
 		/* Destroy all op arrays */
 		if (EG(full_tables_cleanup)) {
-			zend_hash_apply(EG(function_table), (apply_func_t) is_not_internal_function TSRMLS_CC);
-			zend_hash_apply(EG(class_table), (apply_func_t) is_not_internal_class TSRMLS_CC);
+			zend_hash_apply(EG(function_table), (apply_func_t) clean_non_persistent_function_full TSRMLS_CC);
+			zend_hash_apply(EG(class_table), (apply_func_t) clean_non_persistent_class_full TSRMLS_CC);
 		} else {
-			zend_hash_reverse_apply(EG(function_table), (apply_func_t) is_not_internal_function TSRMLS_CC);
-			zend_hash_reverse_apply(EG(class_table), (apply_func_t) is_not_internal_class TSRMLS_CC);
+			zend_hash_reverse_apply(EG(function_table), (apply_func_t) clean_non_persistent_function TSRMLS_CC);
+			zend_hash_reverse_apply(EG(class_table), (apply_func_t) clean_non_persistent_class TSRMLS_CC);
 		}
 
 		while (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
