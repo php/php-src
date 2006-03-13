@@ -489,7 +489,14 @@ PHP_FUNCTION(stream_get_meta_data)
 		add_assoc_zval(return_value, "write_filters", newval);
 	}
 	
-	add_assoc_long(return_value, "unread_bytes", stream->readbuf_avail);
+	if (php_stream_reads_unicode(stream)) {
+		int readbuf_len = u_countChar32(stream->readbuf.u + stream->readpos, stream->writepos - stream->readpos);
+		add_assoc_long(return_value, "unread_bytes", UBYTES(stream->writepos - stream->readpos));
+		add_assoc_long(return_value, "unread_chars", readbuf_len);
+	} else {
+		add_assoc_long(return_value, "unread_bytes", stream->writepos - stream->readpos);
+		add_assoc_long(return_value, "unread_chars", stream->writepos - stream->readpos);
+	}
 
 	add_assoc_bool(return_value, "seekable", (stream->ops->seek) && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0);
 	if (stream->orig_path) {
@@ -666,7 +673,7 @@ static int stream_array_emulate_read_fd_set(zval *stream_array TSRMLS_DC)
 		if (stream == NULL) {
 			continue;
 		}
-		if ((stream->readbuf_avail) > 0) {
+		if ((stream->writepos - stream->readpos) > 0) {
 			/* allow readable non-descriptor based streams to participate in stream_select.
 			 * Non-descriptor streams will only "work" if they have previously buffered the
 			 * data.  Not ideal, but better than nothing.

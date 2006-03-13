@@ -81,18 +81,18 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 
 		bucket = buckets_in->head;
 
-		if (bucket->is_unicode) {
+		if (bucket->buf_type == IS_UNICODE) {
 			/* inflation not allowed for unicode data */
 			return PSFS_ERR_FATAL;
 		}
 
 		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
-		while (bin < bucket->buf.str.len) {
-			desired = bucket->buf.str.len - bin;
+		while (bin < bucket->buflen) {
+			desired = bucket->buflen - bin;
 			if (desired > data->inbuf_len) {
 				desired = data->inbuf_len;
 			}
-			memcpy(data->strm.next_in, bucket->buf.str.val + bin, desired);
+			memcpy(data->strm.next_in, bucket->buf.s + bin, desired);
 			data->strm.avail_in = desired;
 
 			status = inflate(&(data->strm), flags & PSFS_FLAG_FLUSH_CLOSE ? Z_FINISH : Z_SYNC_FLUSH);
@@ -116,7 +116,7 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 				exit_status = PSFS_PASS_ON;
 			}
 		}
-		consumed += bucket->buf.str.len;
+		consumed += bucket->buflen;
 		php_stream_bucket_delref(bucket TSRMLS_CC);
 	}
 
@@ -196,19 +196,19 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 
 		bucket = buckets_in->head;
 
-		if (bucket->is_unicode) {
+		if (bucket->buf_type == IS_UNICODE) {
 			/* inflation not allowed for unicode data */
 			return PSFS_ERR_FATAL;
 		}
 
 		bucket = php_stream_bucket_make_writeable(bucket TSRMLS_CC);
 
-		while (bin < bucket->buf.str.len) {
-			desired = bucket->buf.str.len - bin;
+		while (bin < bucket->buflen) {
+			desired = bucket->buflen - bin;
 			if (desired > data->inbuf_len) {
 				desired = data->inbuf_len;
 			}
-			memcpy(data->strm.next_in, bucket->buf.str.val + bin, desired);
+			memcpy(data->strm.next_in, bucket->buf.s + bin, desired);
 			data->strm.avail_in = desired;
 
 			status = deflate(&(data->strm), flags & PSFS_FLAG_FLUSH_CLOSE ? Z_FULL_FLUSH : (flags & PSFS_FLAG_FLUSH_INC ? Z_SYNC_FLUSH : Z_NO_FLUSH));
@@ -233,7 +233,7 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 				exit_status = PSFS_PASS_ON;
 			}
 		}
-		consumed += bucket->buf.str.len;
+		consumed += bucket->buflen;
 		php_stream_bucket_delref(bucket TSRMLS_CC);
 	}
 
