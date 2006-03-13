@@ -1,3 +1,14 @@
+2006-03-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_language_parser.y:
+      MFB51: As per agreement during PDM, remove the E_STRICT deprecation notice
+      from "var".
+
+    * (PHP_5_1)
+      zend_language_parser.y:
+      As per agreement during PDM, remove the E_STRICT deprecation notice from
+      "var".
+
 2006-03-10  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_vm_def.h
