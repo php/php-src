@@ -26,7 +26,7 @@ PHP                                                                        NEWS
   . Added ReflectionClass::newInstanceArgs($args).
   . Added ability to analyze extension dependency.
   . Added ReflectionFunction::isDeprecated() and constant IS_DEPRECATED.
-  . Deprecated ReflectionParameter::getClass() and added getDeclaringClass().
+  . Added ReflectionParameter::getDeclaringClass().
   . Changed reflection constants to be prefixed with IS_. (Johannes)
 - Improved cURL extension: (Ilia)
   . Added curl_setopt_array() function that allows setting of multiple options
