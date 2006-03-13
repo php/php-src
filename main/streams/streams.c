@@ -1140,7 +1140,7 @@ static size_t _php_stream_write_buffer(php_stream *stream, int buf_type, zstr bu
 		stream->ops->seek(stream, stream->position, SEEK_SET, &stream->position TSRMLS_CC);
 	}
 
-	if (stream->output_encoding) {
+	if (stream->output_encoding && buf_type == IS_UNICODE) {
 		char *dest;
 		int destlen;
 		UErrorCode status = U_ZERO_ERROR;
@@ -1150,7 +1150,9 @@ static size_t _php_stream_write_buffer(php_stream *stream, int buf_type, zstr bu
 		buflen = destlen;
 	} else {
 		/* Sloppy handling, make it a binary buffer */
-		buflen = UBYTES(buflen);
+		if (buf_type != IS_STRING) {
+			buflen = UBYTES(buflen);
+		}
 	}
 
 	while (buflen > 0) {
