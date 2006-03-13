@@ -1,3 +1,24 @@
+2006-03-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      var news
+
+    * ZendEngine2/zend_language_parser.y:
+      MFB51: As per agreement during PDM, remove the E_STRICT deprecation notice
+      from "var".
+
+    * (PHP_5_1)
+      ZendEngine2/zend_language_parser.y:
+      As per agreement during PDM, remove the E_STRICT deprecation notice from
+      "var".
+
+2006-03-12  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbstring.c:
+      fixed a possible null injection caused by missuse of
+      mbstring.substitute_character.
+
 2006-03-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
