@@ -1128,7 +1128,8 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 /* Writes a buffer directly to a stream, using multiple of the chunk size */
 static size_t _php_stream_write_buffer(php_stream *stream, int buf_type, zstr buf, int buflen TSRMLS_DC)
 {
-	size_t didwrite = 0, towrite, justwrote;
+	size_t didwrite = 0, towrite, justwrote, shouldwrite, buflen_orig = buflen;
+	zstr buf_orig = buf;
 	char *freeme = NULL;
 
  	/* if we have a seekable stream we need to ensure that data is written at the
@@ -1155,6 +1156,8 @@ static size_t _php_stream_write_buffer(php_stream *stream, int buf_type, zstr bu
 		}
 	}
 
+	shouldwrite = buflen;
+
 	while (buflen > 0) {
 		towrite = buflen;
 		if (towrite > stream->chunk_size) {
@@ -1177,6 +1180,36 @@ static size_t _php_stream_write_buffer(php_stream *stream, int buf_type, zstr bu
 		} else {
 			break;
 		}
+	}
+
+
+	if (stream->output_encoding) {
+		/* Map didwrite back to the original character count */
+		if (didwrite == shouldwrite) {
+			/* Everything wrote okay, no need to count */
+			didwrite = buflen_orig;
+		} else {
+			UErrorCode status = U_ZERO_ERROR;
+			char *t = freeme;
+			UChar *p = buf_orig.u;
+
+			switch (ucnv_getType(stream->output_encoding)) {
+				case UCNV_SBCS:
+				case UCNV_LATIN_1:
+				case UCNV_US_ASCII:
+					/* 1:1 character->byte mapping, didwrite really does mean the number of characters written */
+					break;
+				default:
+					/* Reconvert into junk buffer to see where conversion stops in source string */
+					ucnv_resetFromUnicode(stream->output_encoding);
+					ucnv_fromUnicode(stream->output_encoding, &t, t + didwrite, &p, p + buflen_orig, NULL, TRUE, &status);
+					/* p stops at the first unconvertable UChar when t runs out of space */
+					didwrite = p - buf_orig.u;
+			}
+		}
+	} else if (buf_type == IS_UNICODE) {
+		/* Was slopily converted */
+		didwrite /= UBYTES(1);
 	}
 
 	if (freeme) {
@@ -1296,10 +1329,6 @@ PHPAPI size_t _php_stream_write_unicode(php_stream *stream, const UChar *buf, in
 		ret = _php_stream_write_buffer(stream, IS_UNICODE, (zstr)((UChar*)buf), count TSRMLS_CC);
 	}
 
-	/* Return data points, not bytes */
-	if (ret > 0) {
-		ret >>= 1;
-	}
 	return ret;
 }
 
