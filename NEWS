@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Removed the E_STRICT deprecation notice from "var". (Ilia)
 - Fixed debug_zval_dump() to support private and protected members. (Dmitry)
 - Fixed bug #36629 (SoapServer::handle() exits on SOAP faults). (Dmitry)
+- Fixed bug #36697 (Transparency is lost when using imagecreatetruecolor).
+ (Pierre)
 
 09 Mar 2006, PHP 5.1.3RC1
 - Updated PCRE to version 6.6. (Andrei)
