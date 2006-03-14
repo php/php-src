@@ -295,7 +295,7 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 				convert_to_long_ex(args[i]);
 				stmt->result.buf[ofs].type = IS_LONG;
 				stmt->result.buf[ofs].buflen = 0;
-				stmt->result.buf[ofs].val = (char *)emalloc(sizeof(long));
+				stmt->result.buf[ofs].val = (char *)emalloc(sizeof(int));
 				bind[ofs].buffer_type = MYSQL_TYPE_LONG;
 				bind[ofs].buffer = stmt->result.buf[ofs].val;
 				bind[ofs].is_null = &stmt->result.is_null[ofs];
@@ -663,7 +663,7 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 			if (!stmt->result.is_null[i]) {
 				switch (stmt->result.buf[i].type) {
 					case IS_LONG:
-						if ((sizeof(long) ==4) && (stmt->stmt->fields[i].type == MYSQL_TYPE_LONG) 
+						if ((stmt->stmt->fields[i].type == MYSQL_TYPE_LONG) 
 						    && (stmt->stmt->fields[i].flags & UNSIGNED_FLAG)) 
 						{
 							/* unsigned int (11) */
@@ -684,7 +684,11 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 								break;
 							}
 						}
-						ZVAL_LONG(stmt->result.vars[i], *(int *)stmt->result.buf[i].val);
+						if (stmt->stmt->fields[i].flags & UNSIGNED_FLAG) { 
+							ZVAL_LONG(stmt->result.vars[i], *(unsigned int *)stmt->result.buf[i].val);
+						} else {
+							ZVAL_LONG(stmt->result.vars[i], *(int *)stmt->result.buf[i].val);
+						};
 						break;
 					case IS_DOUBLE:
 						memcpy(&dval, stmt->result.buf[i].val, sizeof(dval));
