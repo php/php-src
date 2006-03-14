@@ -1,0 +1,119 @@
+Updating your script to PHP6
+============================
+
+This document attempts to describe portions of PHP that changed or
+disapeared in PHP6 and the best practices for upgrading existing
+applications to support PHP6.
+
+1. Language
+	1.1 Functions and function aliases
+	1.2 Register globals
+	1.3 Magic quotes
+	1.4 References
+2. Unicode (see README.UNICODE-UPGRADES)
+2. Extensions
+2.1 GD
+
+
+1.1 Functions and function aliases
+    ------------------------------
+
+<TODO: List all arguments order changes, aliases droped in php6...>
+1.2 Register globals
+    ---------------- 
+
+For security reasons, register_globals has been removed from php6.
+ini_get('register_globals') will always return false.
+
+You can emulate its behavior with some minimum changes in your code.
+
+*DISCLAIMER*
+people should get a short-term solution if they are willing to run
+an insecure app.
+
+Here is an example to emulate the session related functions and
+a snippet to register variables:
+
+$_register_globals_order = ini_get("variables_order");
+$_register_globals_order_len = strlen($_register_globals_order);
+
+for($_register_globals_i=0;$_register_globals_i<$_register_globals_order_len;$_register_globals_i++) {
+	switch($_register_globals_order{$_register_globals_i}) {
+		case "E":
+			extract($_ENV, EXTR_REFS|EXTR_OVERWRITE);
+		case "G":
+			continue;
+		break;
+
+		case "P":
+			extract($_POST, EXTR_REFS|EXTR_OVERWRITE);
+		break;
+
+		case "C":
+			extract($_COOKIE, EXTR_REFS|EXTR_OVERWRITE);
+		break;
+
+		case "S":
+			if(!isset($_SESSION)) {
+				continue;
+			}
+		extract($_SESSION, EXTR_REFS|EXTR_OVERWRITE);
+		break;
+	}
+}
+unset($_register_globals_order, $_register_globals_order_len, $_register_globals_i);
+
+function session_register($mixed) {
+	static $started;
+	if(!isset($started) || session_id() === "") {
+		session_start();
+		$started = true;
+	}
+
+	$array = func_get_args();
+	foreach($array as $mixed) {
+
+		if(is_scalar($mixed)) {
+			$_SESSION[$mixed] =& $GLOBALS[$mixed];
+		}
+		elseif(is_array($mixed)) {
+			foreach($mixed as $name) {
+				$ok = session_register($name);
+				if(!$ok) {
+					return false;
+				}
+			}
+		}
+		else {
+			return false;
+		}
+	}
+	return true;
+}
+
+function session_is_registered($name) {
+	if(is_scalar($name)) {
+		return isset($_SESSION[$name]);
+	}
+	return false;
+}
+
+function session_unregister($name) {
+	if(isset($_SESSION[$name]) && is_scalar($name)) {
+		unset($_SESSION[$name]);
+		return true;
+	}
+	return false;
+}
+
+1.3 Magic quotes
+    ------------
+
+1.4 References
+    ----------
+
+<TODO: Derick plans to clean the reference mess in php6>
+
+2.1 GD
+
+<TODO: gd2/ft2 only, functions droped>
