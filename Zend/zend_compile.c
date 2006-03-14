@@ -4357,7 +4357,7 @@ void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2
 	    	CG(in_compilation) = 1;
 	    	CG(active_op_array) = op_array;
 	    	CG(zend_lineno) = opline->lineno;
-			zend_error(E_COMPILE_ERROR, "'jump' to undefined label '%R'", Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant));
+			zend_error(E_COMPILE_ERROR, "'goto' to undefined label '%R'", Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant));
 	    } else {
 			/* Label is not defined. Delay to pass 2. */
 			INC_BPC(op_array);
@@ -4377,7 +4377,7 @@ void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2
 	    		CG(active_op_array) = op_array;
 	    		CG(zend_lineno) = opline->lineno;
 	    	}
-			zend_error(E_COMPILE_ERROR, "'jump' into loop or switch statement is disallowed");
+			zend_error(E_COMPILE_ERROR, "'goto' into loop or switch statement is disallowed");
 		}
 		current = op_array->brk_cont_array[current].parent;
 	}

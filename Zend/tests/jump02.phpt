@@ -1,13 +1,13 @@
 --TEST--
-jump 02: jump forward
+jump 02: goto forward
 --FILE--
 <?php
 $n = 1;
 L1:
-if ($n > 3) jump L2;
+if ($n > 3) goto L2;
 echo "$n: ok\n";
 $n++;
-jump L1;
+goto L1;
 L2:
 ?>
 --EXPECT--

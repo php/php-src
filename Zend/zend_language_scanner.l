@@ -1522,7 +1522,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_CONTINUE;
 }
 
-<ST_IN_SCRIPTING>"jump" {
+<ST_IN_SCRIPTING>"goto" {
 	return T_GOTO;
 }
 

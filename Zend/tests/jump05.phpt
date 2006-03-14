@@ -1,5 +1,5 @@
 --TEST--
-jump 05: jump from loop (forward)
+jump 05: goto from loop (forward)
 --FILE--
 <?php
 $ar = array("1","2","3");
@@ -10,7 +10,7 @@ foreach ($ar as $val) {
 			break;
 		case "2":
 			echo "2: ok\n";
-			jump L1;
+			goto L1;
 		case "3":
 			echo "bug\n";
 			break;
