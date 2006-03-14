@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - Fixed bug #36697 (Transparency is lost when using imagecreatetruecolor).
  (Pierre)
 - Fixed bug #36568 (memory_limit setting on win32 has no effect). (Dmitry)
+- Fixed bug #35988 (Unknown persistent list entry type in module shutdown).
+  (Dmitry)
 
 09 Mar 2006, PHP 5.1.3RC1
 - Updated PCRE to version 6.6. (Andrei)
