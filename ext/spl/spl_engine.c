@@ -32,7 +32,7 @@
 #include "spl_array.h"
 
 /* {{{ spl_instantiate */
-void spl_instantiate(zend_class_entry *pce, zval **object, int alloc TSRMLS_DC)
+PHPAPI void spl_instantiate(zend_class_entry *pce, zval **object, int alloc TSRMLS_DC)
 {
 	if (alloc) {
 		ALLOC_ZVAL(*object);
