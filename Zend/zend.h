@@ -92,7 +92,7 @@ const char *zend_mh_bundle_error(void);
 
 #endif /* HAVE_MACH_O_DYLD_H */
 
-#if defined(HAVE_LIBDL) && !defined(HAVE_MACH_O_DYLD_H)
+#if defined(HAVE_LIBDL) && !defined(HAVE_MACH_O_DYLD_H) && !defined(ZEND_WIN32)
 
 # ifndef RTLD_LAZY
 #  define RTLD_LAZY 1    /* Solaris 1, FreeBSD's (2.1.7.1 and older) */

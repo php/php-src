@@ -23,8 +23,9 @@
 #define ZEND_CONFIG_W32_H
 
 #define USE_ZEND_ALLOC 1
-#define HAVE_ALLOCA 1
-#define HAVE_LIMITS_H 1
+
+#include <../main/config.w32.h>
+
 #define _CRTDBG_MAP_ALLOC
 
 #include <malloc.h>
@@ -44,19 +45,9 @@
 typedef unsigned long ulong;
 typedef unsigned int uint;
 
-#undef HAVE_KILL
-#define HAVE_GETPID 1
-/* #define HAVE_ALLOCA_H 1 */
-#define HAVE_MEMCPY 1
-#define HAVE_STRDUP 1
-#define HAVE_SYS_TYPES_H 1
 #define HAVE_STDIOSTR_H 1
 #define HAVE_CLASS_ISTDIOSTREAM
 #define istdiostream stdiostream
-#define HAVE_STDARG_H	1
-#define HAVE_SNPRINTF	1
-#define HAVE_VSNPRINTF	1
-#define HAVE_STRCOLL	1
 
 #define snprintf _snprintf
 #define vsnprintf _vsnprintf
