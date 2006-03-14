@@ -66,7 +66,7 @@ static int clean_non_persistent_constant(zend_constant *c TSRMLS_DC)
 
 static int clean_non_persistent_constant_full(zend_constant *c TSRMLS_DC)
 {
-	return (c->flags & CONST_PERSISTENT) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_REMOVE;
+	return (c->flags & CONST_PERSISTENT) ? 0 : 1;
 }
 
 
