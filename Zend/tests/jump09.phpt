@@ -1,5 +1,5 @@
 --TEST--
-jump 09: jump into switch (backward)
+jump 09: goto into switch (backward)
 --FILE--
 <?php
 switch (0) {
@@ -7,7 +7,7 @@ switch (0) {
 		L1: echo "bug\n";
 		break;
 }
-jump L1;
+goto L1;
 ?>
 --EXPECTF--
-Fatal error: 'jump' into loop or switch statement is disallowed in %sjump09.php on line 7
+Fatal error: 'goto' into loop or switch statement is disallowed in %sjump09.php on line 7

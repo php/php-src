@@ -1,5 +1,5 @@
 --TEST--
-jump 04: jump from loop (backward)
+jump 04: goto from loop (backward)
 --FILE--
 <?php
 $s = "X";
@@ -11,7 +11,7 @@ L1: if ($s != "X") {
 	while ($s != "XXX") {
 		echo "3: ok\n";	
 		$s .= "X";
-		jump L1;
+		goto L1;
 		echo "bug\n";	
 	}
 	echo "bug\n";	

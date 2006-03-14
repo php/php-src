@@ -1,8 +1,8 @@
 --TEST--
-jump 06: jump to undefined label
+jump 06: goto to undefined label
 --FILE--
 <?php
-jump L1;
+goto L1;
 ?>
 --EXPECTF--
-Fatal error: 'jump' to undefined label 'L1' in %sjump06.php on line 2
+Fatal error: 'goto' to undefined label 'L1' in %sjump06.php on line 2

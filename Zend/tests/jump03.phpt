@@ -1,11 +1,11 @@
 --TEST--
-jump 03: jump inside control structures
+jump 03: goto inside control structures
 --FILE--
 <?php
 do {
 	if (1) {
 		echo "1: ok\n";
-		jump L1;
+		goto L1;
 	} else {
 	    echo "bug\n";
 L1:
