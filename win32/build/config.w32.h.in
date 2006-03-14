@@ -107,7 +107,11 @@
 #undef HAVE_SYS_WAIT_H
 #define HAVE_SYSLOG_H 1
 #undef HAVE_UNISTD_H
-#define HAVE_LIBDL 1
+#define HAVE_SYS_TYPES_H 1
+#define HAVE_STDARG_H 1
+#undef HAVE_ALLOCA_H
+#undef HAVE_KILL
+#define HAVE_GETPID 1
 #define HAVE_LIBM 1
 #define HAVE_CUSERID 0
 #undef HAVE_RINT
