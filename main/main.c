@@ -1699,6 +1699,10 @@ void php_module_shutdown(TSRMLS_D)
 		return;
 	}
 
+#ifdef ZTS
+	ts_free_worker_threads();
+#endif
+
 #if defined(PHP_WIN32) || (defined(NETWARE) && defined(USE_WINSOCK))
 	/*close winsock */
 	WSACleanup();

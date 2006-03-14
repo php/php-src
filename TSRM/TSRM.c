@@ -480,6 +480,52 @@ void ts_free_thread(void)
 }
 
 
+/* frees all resources allocated for all threads except current */
+void ts_free_worker_threads(void)
+{
+	tsrm_tls_entry *thread_resources;
+	int i;
+	THREAD_T thread_id = tsrm_thread_id();
+	int hash_value;
+	tsrm_tls_entry *last=NULL;
+
+	tsrm_mutex_lock(tsmm_mutex);
+	hash_value = THREAD_HASH_OF(thread_id, tsrm_tls_table_size);
+	thread_resources = tsrm_tls_table[hash_value];
+
+	while (thread_resources) {
+		if (thread_resources->thread_id != thread_id) {
+			for (i=0; i<thread_resources->count; i++) {
+				if (resource_types_table[i].dtor) {
+					resource_types_table[i].dtor(thread_resources->storage[i], &thread_resources->storage);
+				}
+			}
+			for (i=0; i<thread_resources->count; i++) {
+				free(thread_resources->storage[i]);
+			}
+			free(thread_resources->storage);
+			if (last) {
+				last->next = thread_resources->next;
+			} else {
+				tsrm_tls_table[hash_value] = thread_resources->next;
+			}
+			free(thread_resources);
+			if (last) {
+				thread_resources = last->next;
+			} else {
+				thread_resources = tsrm_tls_table[hash_value];
+			}
+		} else {
+			if (thread_resources->next) {
+				last = thread_resources;
+			}
+			thread_resources = thread_resources->next;
+		}
+	}
+	tsrm_mutex_unlock(tsmm_mutex);
+}
+
+
 /* deallocates all occurrences of a given id */
 void ts_free_id(ts_rsrc_id id)
 {

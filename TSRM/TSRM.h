@@ -106,6 +106,9 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id);
 /* frees all resources allocated for the current thread */
 TSRM_API void ts_free_thread(void);
 
+/* frees all resources allocated for all threads except current */
+void ts_free_worker_threads(void);
+
 /* deallocates all occurrences of a given id */
 TSRM_API void ts_free_id(ts_rsrc_id id);
 
