@@ -955,18 +955,25 @@ PHPAPI void *php_stream_locate_eol(php_stream *stream, zstr zbuf, int buf_len TS
 
 /* If buf == NULL, the buffer will be allocated automatically and will be of an
  * appropriate length to hold the line, regardless of the line length, memory
- * permitting -- returned string will be up to (maxlen-1), last byte holding terminating NULL
- * Like php_stream_read(), this will treat unicode streams as ugly binary data (use with caution) */
-PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
-		size_t *returned_len TSRMLS_DC)
+ * permitting -- returned string will be up to (maxlen-1) units of (maxchars) characters, last byte holding terminating NULL
+ * Like php_stream_read(), this will (UTODO) treat unicode streams as ugly binary data (use with caution) */
+PHPAPI void *_php_stream_get_line(php_stream *stream, int buf_type, zstr buf, size_t maxlen, size_t maxchars, size_t *returned_len TSRMLS_DC)
 {
 	size_t avail = 0;
 	size_t current_buf_size = 0;
 	size_t total_copied = 0;
 	int grow_mode = 0;
-	char *bufstart = buf;
+	int is_unicode = php_stream_reads_unicode(stream);
+	int split_surrogate = 0;
+	zstr bufstart = buf;
 
-	if (buf == NULL) {
+	if ((buf_type == IS_STRING && is_unicode) ||
+		(buf_type == IS_UNICODE && !is_unicode)) {
+		/* UTODO: Allow sloppy conversion */
+		return NULL;
+	}
+
+	if (buf.v == NULL) {
 		grow_mode = 1;
 	} else if (maxlen == 0) {
 		return NULL;
@@ -988,20 +995,39 @@ PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
 	for (;;) {
 		avail = stream->writepos - stream->readpos;
 
-		if (avail > 0) {
-			size_t cpysz = 0;
-			char *readptr;
-			char *eol;
+		if (!split_surrogate && avail > 0) {
+			size_t cpysz = avail;
+			zstr readptr;
 			int done = 0;
 
-			readptr = stream->readbuf.s + stream->readpos;
-			eol = php_stream_locate_eol(stream, (zstr)NULL, 0 TSRMLS_CC);
+			if (is_unicode) {
+				UChar *eol;
+				readptr.u = stream->readbuf.u + stream->readpos;
 
-			if (eol) {
-				cpysz = eol - readptr + 1;
-				done = 1;
+				eol = php_stream_locate_eol(stream, ZSTR(NULL), 0 TSRMLS_CC);
+				if (eol) {
+					cpysz = eol - readptr.u + 1;
+					done = 1;
+				}
+
+				if (U16_IS_SURROGATE(readptr.u[cpysz - 1]) &&
+					U16_IS_SURROGATE_LEAD(readptr.u[cpysz - 1])) {
+					/* Don't orphan */
+					cpysz--;
+					if (!cpysz) {
+						/* Force the loop to land on fill_read_buffer */
+						split_surrogate = 1; /* must specifically be 1 */
+						continue;
+					}
+				}
 			} else {
-				cpysz = avail;
+				char *eol;
+				readptr.s = stream->readbuf.s + stream->readpos;
+				eol = php_stream_locate_eol(stream, ZSTR(NULL), 0 TSRMLS_CC);
+				if (eol) {
+					cpysz = eol - readptr.s + 1;
+					done = 1;
+				}
 			}
 
 			if (grow_mode) {
@@ -1012,9 +1038,9 @@ PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
 				 * than 8K, we waste 1 byte per additional 8K or so.
 				 * That seems acceptable to me, to avoid making this code
 				 * hard to follow */
-				bufstart = erealloc(bufstart, current_buf_size + cpysz + 1);
+				bufstart.s = erealloc(bufstart.s, PS_ULEN(stream, current_buf_size + cpysz + 1));
+				buf.s = bufstart.s + PS_ULEN(stream, total_copied);
 				current_buf_size += cpysz + 1;
-				buf = bufstart + total_copied;
 			} else {
 				if (cpysz >= maxlen - 1) {
 					cpysz = maxlen - 1;
@@ -1022,11 +1048,29 @@ PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
 				}
 			}
 
-			memcpy(buf, readptr, cpysz);
+			if (is_unicode) {
+				int ulen = u_countChar32(readptr.u, cpysz);
+
+				if (ulen > maxchars) {
+					int32_t i = 0;
+
+					ulen = maxchars;
+					U16_FWD_N(readptr.u, i, cpysz, ulen);
+					cpysz = i;
+				}
+				maxchars -= ulen;
+				memcpy(buf.u, readptr.u, UBYTES(cpysz));
+				buf.u += cpysz;
+			} else {
+				if (cpysz > maxchars) {
+					cpysz = maxchars;
+				}
+				memcpy(buf.s, readptr.s, cpysz);
+				buf.s += cpysz;
+			}
 
 			stream->position += cpysz;
 			stream->readpos += cpysz;
-			buf += cpysz;
 			maxlen -= cpysz;
 			total_copied += cpysz;
 
@@ -1050,32 +1094,31 @@ PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
 
 			php_stream_fill_read_buffer(stream, toread TSRMLS_CC);
 
-			if (stream->writepos - stream->readpos == 0) {
+			if (stream->writepos - stream->readpos <= split_surrogate) {
 				break;
 			}
+			split_surrogate = 0;
 		}
 	}
 
 	if (total_copied == 0) {
 		if (grow_mode) {
-			assert(bufstart == NULL);
+			assert(bufstart.v == NULL);
 		}
 		return NULL;
 	}
 
-	buf[0] = '\0';
+	if (is_unicode) {
+		buf.u[0] = 0;
+	} else {
+		buf.s[0] = 0;
+	}
+
 	if (returned_len) {
 		*returned_len = total_copied;
 	}
 
-	return bufstart;
-}
-
-PHPAPI UChar *_php_stream_u_get_line(php_stream *stream, UChar *buf, int32_t *pmax_bytes, int32_t *pmax_chars, int *pis_unicode TSRMLS_DC)
-{
-	/* TODO: Bring this back up to date */
-
-	return NULL;
+	return bufstart.s;
 }
 
 /* Same deal as php_stream_read() and php_stream_get_line()

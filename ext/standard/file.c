@@ -993,9 +993,8 @@ PHPAPI PHP_FUNCTION(fgets)
 	zval *zstream;
 	int argc = ZEND_NUM_ARGS();
 	long length = -1;
-	UChar *buf = NULL;
-	int32_t num_chars = -1, num_bytes = -1;
-	int is_unicode;
+	zstr buf;
+	size_t retlen = 0;
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "r|l", &zstream, &length) == FAILURE) {
 		RETURN_NULL();
@@ -1003,19 +1002,15 @@ PHPAPI PHP_FUNCTION(fgets)
 
 	php_stream_from_zval(stream, &zstream);
 
-	if (length > 0) {
-		/* Don't try to short circuit this by just using num_chars in parse_parameters, long doesn't always mean 32-bit */
-		num_chars = length;
-	}
-
-	if ((buf = php_stream_u_get_line(stream, NULL, &num_bytes, &num_chars, &is_unicode)) == NULL) {
+	buf.v = php_stream_get_line_ex(stream, php_stream_reads_unicode(stream) ? IS_UNICODE : IS_STRING, NULL, 0, length, &retlen);
+	if (!buf.v) {
 		RETURN_FALSE;
 	}
 
-	if (is_unicode) {
-		RETURN_UNICODEL(buf, num_chars, 0);
+	if (php_stream_reads_unicode(stream)) {
+		RETURN_UNICODEL(buf.u, retlen, 0);
 	} else {
-			RETURN_STRINGL((char*)buf, num_bytes, 0);
+		RETURN_STRINGL(buf.s, retlen, 0);
 	}
 }
 /* }}} */

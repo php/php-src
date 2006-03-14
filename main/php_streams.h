@@ -320,10 +320,14 @@ PHPAPI int _php_stream_putc(php_stream *stream, int c TSRMLS_DC);
 PHPAPI int _php_stream_flush(php_stream *stream, int closing TSRMLS_DC);
 #define php_stream_flush(stream)	_php_stream_flush((stream), 0 TSRMLS_CC)
 
-PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen, size_t *returned_len TSRMLS_DC);
-#define php_stream_gets(stream, buf, maxlen)	_php_stream_get_line((stream), (buf), (maxlen), NULL TSRMLS_CC)
+PHPAPI void *_php_stream_get_line(php_stream *stream, int buf_type, zstr buf, size_t maxlen, size_t maxchars, size_t *returned_len TSRMLS_DC);
+#define php_stream_get_line(stream, buf, maxlen, retlen) 	_php_stream_get_line((stream), IS_STRING, ZSTR(buf), (maxlen), 0, (retlen) TSRMLS_CC)
+#define php_stream_get_line_ex(stream, buf_type, buf, maxlen, maxchars, retlen) \
+															_php_stream_get_line((stream), (buf_type), ZSTR(buf), (maxlen), (maxchars), (retlen) TSRMLS_CC)
+#define php_stream_gets(stream, buf, maxlen)				_php_stream_get_line((stream), IS_STRING, ZSTR(buf), (maxlen), 0, NULL TSRMLS_CC)
+#define php_stream_gets_ex(stream, buf_type, buf, maxlen, maxchars) \
+															_php_stream_get_line((stream), (buf_type), ZSTR(buf), (maxlen), (maxchars), NULL TSRMLS_CC)
 
-#define php_stream_get_line(stream, buf, maxlen, retlen) _php_stream_get_line((stream), (buf), (maxlen), (retlen) TSRMLS_CC)
 PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *returned_len, char *delim, size_t delim_len TSRMLS_DC);
 
 PHPAPI UChar *_php_stream_u_get_line(php_stream *stream, UChar *buf, int32_t *pmax_bytes, int32_t *pmax_chars, int *pis_unicode TSRMLS_DC);
