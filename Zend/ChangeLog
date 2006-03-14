@@ -1,3 +1,15 @@
+2006-03-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.h
+      zend_compile.h
+      zend_constants.c
+      zend_constants.c
+      zend_execute_API.c
+      zend_execute_API.c
+      zend_opcode.c
+      zend_opcode.c:
+      Optimized cleanup loops on request shutdown
+
 2006-03-12  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_language_parser.y:

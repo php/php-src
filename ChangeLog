@@ -1,3 +1,117 @@
+2006-03-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      ext/pgsql/pgsql.c
+      ext/pgsql/tests/80_bug36625.phpt:
+      - bug #36625 fix
+
+    * (PHP_5_1)
+      ext/pgsql/tests/.cvsignore:
+      - Add missing file extension
+
+    * .gdbinit:
+      - Cleanup
+
+2006-03-13  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_1)
+      NEWS
+      ext/gd/libgd/gd_gif_out.c
+      ext/gd/tests/bug36697.phpt
+      ext/gd/tests/bug36697.phpt:
+      - #36697, Transparency is lost when using imagecreatetruecolor
+
+2006-03-13  Sara Golemon  <sara@golemon.com>
+
+    * main/streams/streams.c:
+      Make php_stream_write_buffer() return characters written, not bytes
+
+2006-03-13  Seiji Masugata  <s.masugata@digicom.dnp.co.jp>
+
+    * ext/mbstring/mb_gpc.c:
+      fixed compiler warning.
+
+2006-03-13  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/file.c
+      main/streams/streams.c:
+      This makes file_put_contents() work for:
+      
+      <?php
+          declare(encoding="latin1");
+          $a = "1234å67890";
+          file_put_contents( "/tmp/testuc.1", $a);
+          file_put_contents( "/tmp/testuc.2", (string) $a);
+      
+          $context = stream_context_create();
+          stream_context_set_params($context, array( "output_encoding" =>
+      "latin1" ) );
+          file_put_contents( "/tmp/testuc.3", $a, FILE_TEXT, $context);
+          file_put_contents( "/tmp/testuc.4", (string) $a, FILE_TEXT, $context);
+      ?>
+      
+      But it still throws a warning on ".3". It's a small design issue that I
+      didn't want to touch right now.
+
+2006-03-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      ext/standard/string.c:
+      MFH: Added overflow checks to wordwrap() function.
+
+    * ext/standard/string.c:
+      MFB51: Added overflow checks to wordwrap() function.
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/string.c:
+      Added overflow checks to wordwrap() function.
+
+2006-03-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.h
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_opcode.c:
+      Optimized cleanup loops on request shutdown
+
+    * main/main.c
+      main/main.c:
+      Fixed realpath() cache for main script with FastCGI SAPI
+
+2006-03-13  Sara Golemon  <sara@golemon.com>
+
+    * ext/bz2/bz2_filter.c
+      ext/standard/file.c
+      ext/standard/filters.c
+      ext/standard/streamsfuncs.c
+      ext/standard/user_filters.c
+      ext/zlib/zlib_filter.c
+      main/php_streams.h
+      main/streams/cast.c
+      main/streams/filter.c
+      main/streams/php_stream_filter_api.h
+      main/streams/streams.c:
+      Refactor streams layer for PHP6.
+      
+      Don't be frightened by the size of this commit.
+      A significant portion of it is restoring the read buffer semantics back
+      to what PHP4/5 use.  (Or a close aproximation thereof).
+      
+      See main/streams/streams.c and ext/standard/file.c for a set of
+      UTODO comments covering work yet to be done.
+
+2006-03-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      NEWS:
+      - Fix news
+
 2006-03-12  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_1)
