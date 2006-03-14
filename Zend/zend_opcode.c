@@ -143,7 +143,7 @@ ZEND_API int zend_cleanup_function_data_full(zend_function *function TSRMLS_DC)
 	if (function->type == ZEND_USER_FUNCTION) {
 		zend_cleanup_op_array_data((zend_op_array *) function);
 	}
-	return ZEND_HASH_APPLY_KEEP;
+	return 0;
 }
 
 ZEND_API int zend_cleanup_class_data(zend_class_entry **pce TSRMLS_DC)
