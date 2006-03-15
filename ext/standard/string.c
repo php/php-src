@@ -632,8 +632,8 @@ static int php_expand_u_trim_range(UChar **range, int *range_len TSRMLS_DC)
 	for ( idx = 0, end = input+len ; input < end ; input++ ) {
 		c = input[0];
 		if ( (input+3 < end) && input[1] == '.' && input[2] == '.' && input[3] >= c ) {
-			tmp_len += (input[3] - c + 1);
-			tmp = (UChar32 *)erealloc(tmp, tmp_len*sizeof(UChar32));
+			tmp_len += (input[3] - c + 1 - 4);
+			tmp = (UChar32 *)erealloc(tmp, (tmp_len+1)*sizeof(UChar32));
 			for ( ; c <= input[3] ; c++ ) {
 				if ( U_IS_UNICODE_CHAR(c) ) tmp[idx++] = c;
 			}
@@ -700,6 +700,7 @@ static UChar *php_u_trim(UChar *c, int len, UChar *what, int what_len, zval *ret
 	int32_t	start = 0, end = len;
 
 	if ( what ) {
+		what = eustrndup(what, what_len);
 		php_expand_u_trim_range(&what, &what_len TSRMLS_CC);
 	}
 
@@ -737,6 +738,10 @@ static UChar *php_u_trim(UChar *c, int len, UChar *what, int what_len, zval *ret
 		end = i;
 	} else {
 		--end;
+	}
+	if ( what )
+	{
+		efree( what );
 	}
 
 	if ( start < len ) {
