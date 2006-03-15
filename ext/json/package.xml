@@ -2,7 +2,7 @@
 <!DOCTYPE package SYSTEM "../pear/package.dtd">
 <package>
  <dep type="php" rel="ge" version="4.3.0" optional="no"/>
- <name>JSON</name>
+ <name>json</name>
  <summary>JavaScript Object Notation</summary>
  <maintainers>
   <maintainer>
@@ -17,9 +17,9 @@
  </description>
  <license>PHP 3.01</license>
  <release>
-  <state>beta</state>
+  <state>stable</state>
   <version>1.2.0</version>
-  <date>2006-01-31</date>
+  <date>2006-03-15</date>
   <notes>
    Complete rewrite using JSON_checker as the base for the parser. Implements the JSON specification. 3-8x faster on encodes and 1.2x-4x faster on decodes.
   </notes>
