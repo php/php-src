@@ -749,7 +749,7 @@ PHP_FUNCTION(file)
  		s = target_buf;
  		e = target_buf + target_len;
  	
- 		if (!(p = php_stream_locate_eol(stream, (zstr)target_buf, target_len TSRMLS_CC))) {
+ 		if (!(p = php_stream_locate_eol(stream, ZSTR(target_buf), target_len TSRMLS_CC))) {
  			p = e;
  			goto parse_eol;
 		}
