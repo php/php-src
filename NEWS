@@ -6,9 +6,10 @@ PHP                                                                        NEWS
 - Added overflow checks to wordwrap() function. (Ilia)
 - Removed the E_STRICT deprecation notice from "var". (Ilia)
 - Fixed debug_zval_dump() to support private and protected members. (Dmitry)
-- Fixed bug #36629 (SoapServer::handle() exits on SOAP faults). (Dmitry)
 - Fixed bug #36697 (Transparency is lost when using imagecreatetruecolor).
- (Pierre)
+  (Pierre)
+- Fixed bug #36629 (SoapServer::handle() exits on SOAP faults). (Dmitry)
+- Fixed Bug #36614 (Segfault when using Soap). (Dmitry)
 - Fixed bug #36568 (memory_limit setting on win32 has no effect). (Dmitry)
 - Fixed bug #35988 (Unknown persistent list entry type in module shutdown).
   (Dmitry)
