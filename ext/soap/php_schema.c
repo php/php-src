@@ -2117,7 +2117,7 @@ static void schema_attribute_fixup(sdlCtx *ctx, sdlAttributePtr attr)
 		}
 		if (attr->name == NULL && attr->ref != NULL) {
 			char *name = strrchr(attr->ref, ':');
-			if (*name) {
+			if (name) {
 				attr->name = estrdup(name+1);
 			} else{
 				attr->name = estrdup(attr->ref);
