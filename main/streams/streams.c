@@ -1335,7 +1335,7 @@ PHPAPI int _php_stream_flush(php_stream *stream, int closing TSRMLS_DC)
 	int ret = 0;
 
 	if (stream->writefilters.head) {
-		_php_stream_write_filtered(stream, IS_STRING, (zstr)NULL, 0, closing ? PSFS_FLAG_FLUSH_CLOSE : PSFS_FLAG_FLUSH_INC  TSRMLS_CC);
+		_php_stream_write_filtered(stream, IS_STRING, ZSTR(NULL), 0, closing ? PSFS_FLAG_FLUSH_CLOSE : PSFS_FLAG_FLUSH_INC  TSRMLS_CC);
 	}
 
 	if (stream->ops->flush) {
@@ -1352,9 +1352,9 @@ PHPAPI size_t _php_stream_write(php_stream *stream, const char *buf, size_t coun
 	}
 
 	if (stream->writefilters.head) {
-		return _php_stream_write_filtered(stream, IS_STRING, (zstr)((char*)buf), count, PSFS_FLAG_NORMAL TSRMLS_CC);
+		return _php_stream_write_filtered(stream, IS_STRING, ZSTR((void*)buf), count, PSFS_FLAG_NORMAL TSRMLS_CC);
 	} else {
-		return _php_stream_write_buffer(stream, IS_STRING, (zstr)((char*)buf), count TSRMLS_CC);
+		return _php_stream_write_buffer(stream, IS_STRING, ZSTR((void*)buf), count TSRMLS_CC);
 	}
 }
 
@@ -1367,9 +1367,9 @@ PHPAPI size_t _php_stream_write_unicode(php_stream *stream, const UChar *buf, in
 	}
 
 	if (stream->writefilters.head) {
-		ret = _php_stream_write_filtered(stream, IS_UNICODE, (zstr)((UChar*)buf), count, PSFS_FLAG_NORMAL TSRMLS_CC);
+		ret = _php_stream_write_filtered(stream, IS_UNICODE, ZSTR((void*)buf), count, PSFS_FLAG_NORMAL TSRMLS_CC);
 	} else {
-		ret = _php_stream_write_buffer(stream, IS_UNICODE, (zstr)((UChar*)buf), count TSRMLS_CC);
+		ret = _php_stream_write_buffer(stream, IS_UNICODE, ZSTR((void*)buf), count TSRMLS_CC);
 	}
 
 	return ret;
