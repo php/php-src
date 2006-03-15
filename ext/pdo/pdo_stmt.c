@@ -322,6 +322,10 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 	}
 
 	if (is_param && !rewrite_name_to_position(stmt, pparam TSRMLS_CC)) {
+		if (param->name) {
+			efree(param->name);
+			param->name = NULL;
+		}
 		return 0;
 	}
 	
