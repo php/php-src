@@ -1,3 +1,97 @@
+2006-03-14  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/file.c
+      main/php_streams.h
+      main/streams/streams.c:
+      More stream updates.
+      fgets() will work now as will anything which calls one of the
+      _php_stream_get_line() family of functions.
+      The one exception here is when the legacy defines are used on a unicode
+      stream.  At the moment they'll simply return NULL, I'll update these
+      to do sloppy conversion in a bit.
+      
+      'make (u)test' still doesn't work, but it's a different doesn't work.
+
+2006-03-14  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * README.UPDATING_TO_PHP6:
+      - initial commit, feel free to change/adapt
+
+2006-03-14  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_1)
+      ext/mysqli/mysqli_api.c:
+      fixed a 64-bit problem reported by Pierre
+
+2006-03-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      NEWS
+      TSRM/TSRM.c
+      TSRM/TSRM.c
+      TSRM/TSRM.h
+      TSRM/TSRM.h
+      main/main.c
+      main/main.c:
+      Fixed bug #35988 (Unknown persistent list entry type in module shutdown)
+
+2006-03-14  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/string.c:
+      add brackets and clarity
+
+2006-03-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/string.c:
+      MFB51: Fixed offset/length parameter validation in substr_compare()
+      function.
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/string.c:
+      Fixed offset/length parameter validation in substr_compare() function.
+
+2006-03-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/zend.h
+      ZendEngine2/zend.h
+      ZendEngine2/zend_config.w32.h
+      ZendEngine2/zend_config.w32.h
+      ZendEngine2/tests/bug36568.phpt
+      ZendEngine2/tests/bug36568.phpt
+      ZendEngine2/tests/bug36568.phpt:
+      Fixed bug #36568 (memory_limit setting on win32 has no effect)
+
+    * ZendEngine2/zend_constants.c
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_opcode.c:
+      zend_hash_apply() doesn't use ZEND_HASH_APPLY_... macros
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/tests/jump01.phpt
+      ZendEngine2/tests/jump02.phpt
+      ZendEngine2/tests/jump03.phpt
+      ZendEngine2/tests/jump04.phpt
+      ZendEngine2/tests/jump05.phpt
+      ZendEngine2/tests/jump06.phpt
+      ZendEngine2/tests/jump07.phpt
+      ZendEngine2/tests/jump08.phpt
+      ZendEngine2/tests/jump09.phpt
+      ZendEngine2/tests/jump10.phpt:
+      "jump" -> "goto"
+
+2006-03-14  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/libgd/gd_gif_out.c
+      ext/gd/tests/bug36697.phpt:
+      - MFB: #36697, truecolor image lost im->transparent
+
 2006-03-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)

@@ -1,3 +1,39 @@
+2006-03-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.h
+      zend.h
+      zend_config.w32.h
+      zend_config.w32.h
+      tests/bug36568.phpt:
+      Fixed bug #36568 (memory_limit setting on win32 has no effect)
+
+    * tests/bug36568.phpt
+      tests/bug36568.phpt:
+      
+      file bug36568.phpt was initially added on branch PHP_5_1.
+
+    * zend_constants.c
+      zend_constants.c
+      zend_execute_API.c
+      zend_execute_API.c
+      zend_opcode.c
+      zend_opcode.c:
+      zend_hash_apply() doesn't use ZEND_HASH_APPLY_... macros
+
+    * zend_compile.c
+      zend_language_scanner.l
+      tests/jump01.phpt
+      tests/jump02.phpt
+      tests/jump03.phpt
+      tests/jump04.phpt
+      tests/jump05.phpt
+      tests/jump06.phpt
+      tests/jump07.phpt
+      tests/jump08.phpt
+      tests/jump09.phpt
+      tests/jump10.phpt:
+      "jump" -> "goto"
+
 2006-03-13  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.h
