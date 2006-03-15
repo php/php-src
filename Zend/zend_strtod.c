@@ -1800,7 +1800,7 @@ zend_strtod
 /* UTODO: someone can reimplement this using the code above, if they really want to. */
 ZEND_API double zend_u_strtod(const UChar *nptr, UChar **endptr)
 {
-	double value;
+	double value = 0.0;
 	int32_t num_conv = 0, num_read = 0;
 
 	num_conv = u_sscanf(nptr, "%f%n", &value, &num_read);
