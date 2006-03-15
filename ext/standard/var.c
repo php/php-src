@@ -681,11 +681,15 @@ static inline void php_var_serialize_ustr(smart_str *buf, UChar *ustr, int len)
 
 	for(i=0; i<len; /* U16_NEXT post-increments */) {
 		U16_NEXT(ustr, i, len, c);
-		smart_str_appendl(buf, "\\u", 2);
-		smart_str_appendc(buf, hex[(c >> 12) & 0xf]);
-		smart_str_appendc(buf, hex[(c >> 8) & 0xf]);
-		smart_str_appendc(buf, hex[(c >> 4) & 0xf]);
-		smart_str_appendc(buf, hex[(c >> 0) & 0xf]);
+		if (c < 128) {
+			smart_str_appendc(buf, c & 0xff);
+		} else {
+			smart_str_appendl(buf, "\\u", 2);
+			smart_str_appendc(buf, hex[(c >> 12) & 0xf]);
+			smart_str_appendc(buf, hex[(c >> 8) & 0xf]);
+			smart_str_appendc(buf, hex[(c >> 4) & 0xf]);
+			smart_str_appendc(buf, hex[(c >> 0) & 0xf]);
+		}
 	}
 }
 
