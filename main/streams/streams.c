@@ -424,6 +424,10 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
    TODO: Needs better handling of surrogate pairs */
 static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_DC)
 {
+	if (stream->readpos == stream->writepos) {
+		stream->readpos = stream->writepos = 0;
+	}
+
 	/* allocate/fill the buffer */
 
 	if (stream->readfilters.head) {
@@ -573,7 +577,7 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 
 			/* reduce buffer memory consumption if possible, to avoid a realloc */
 			if (stream->readbuf.s && stream->readbuflen - stream->writepos < stream->chunk_size) {
-				memmove(stream->readbuf.s, stream->readbuf.s + stream->readpos, stream->readbuflen - stream->readpos);
+				memmove(stream->readbuf.s, stream->readbuf.s + stream->readpos, stream->writepos - stream->readpos);
 				stream->writepos -= stream->readpos;
 				stream->readpos = 0;
 			}
@@ -605,7 +609,7 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 		 * drain the remainder of the buffer before using the "raw" read mode for
 		 * the excess */
 		if (stream->writepos - stream->readpos > 0) {
-			toread = UBYTES(stream->writepos - stream->readpos);
+			toread = PS_ULEN(stream->input_encoding, stream->writepos - stream->readpos);
 
 			if (toread > size) {
 				toread = size;
@@ -1038,8 +1042,8 @@ PHPAPI void *_php_stream_get_line(php_stream *stream, int buf_type, zstr buf, si
 				 * than 8K, we waste 1 byte per additional 8K or so.
 				 * That seems acceptable to me, to avoid making this code
 				 * hard to follow */
-				bufstart.s = erealloc(bufstart.s, PS_ULEN(stream, current_buf_size + cpysz + 1));
-				buf.s = bufstart.s + PS_ULEN(stream, total_copied);
+				bufstart.s = erealloc(bufstart.s, PS_ULEN(stream->input_encoding, current_buf_size + cpysz + 1));
+				buf.s = bufstart.s + PS_ULEN(stream->input_encoding, total_copied);
 				current_buf_size += cpysz + 1;
 			} else {
 				if (cpysz >= maxlen - 1) {
@@ -1121,8 +1125,6 @@ PHPAPI void *_php_stream_get_line(php_stream *stream, int buf_type, zstr buf, si
 	return bufstart.s;
 }
 
-/* Same deal as php_stream_read() and php_stream_get_line()
- * Will give unexpected results if used against a unicode stream */
 PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *returned_len, char *delim, size_t delim_len TSRMLS_DC)
 {
 	char *e, *buf;
