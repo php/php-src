@@ -312,8 +312,8 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 
 	if (!(c->flags & CONST_CS)) {
 		/* keep in mind that c->name_len already contains the '\0' */
-		lowercase_name = estrndup(c->name, c->name_len);
-		zend_str_tolower(lowercase_name, c->name_len);
+		lowercase_name = estrndup(c->name, c->name_len-1);
+		zend_str_tolower(lowercase_name, c->name_len-1);
 		name = lowercase_name;
 	} else {
 		name = c->name;
