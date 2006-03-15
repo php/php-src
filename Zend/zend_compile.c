@@ -3278,6 +3278,34 @@ void zend_do_end_new_object(znode *result, znode *new_token, znode *argument_lis
 	*result = CG(active_op_array)->opcodes[new_token->u.opline_num].result;
 }
 
+static int zend_constant_ct_subst(znode *result, zval *const_name TSRMLS_DC)
+{
+	zend_constant *c = NULL;
+
+	if (zend_u_hash_find(EG(zend_constants), Z_TYPE_P(const_name), Z_UNIVAL_P(const_name), Z_UNILEN_P(const_name)+1, (void **) &c) == FAILURE) {
+		unsigned int lookup_name_len;
+		zstr lookup_name = zend_u_str_case_fold(Z_TYPE_P(const_name), Z_UNIVAL_P(const_name), Z_UNILEN_P(const_name), 1, &lookup_name_len);
+		 
+		if (zend_u_hash_find(EG(zend_constants), Z_TYPE_P(const_name), lookup_name, lookup_name_len+1, (void **) &c)==SUCCESS) {
+			if ((c->flags & CONST_CS) && memcmp(c->name.v, Z_UNIVAL_P(const_name).v, UG(unicode)?UBYTES(Z_USTRLEN_P(const_name)):Z_STRLEN_P(const_name))!=0) {
+				c = NULL;
+			}
+		} else {
+			c = NULL;
+		}
+		efree(lookup_name.v);
+	}
+	if (c && (c->flags & CONST_CT_SUBST)) {
+		zval_dtor(const_name);
+		result->op_type = IS_CONST;
+		result->u.constant = c->value;
+		zval_copy_ctor(&result->u.constant);
+		INIT_PZVAL(&result->u.constant);
+		return 1;
+	}
+	return 0;
+}
+
 void zend_do_fetch_constant(znode *result, znode *constant_container, znode *constant_name, int mode TSRMLS_DC)
 {
 	switch (mode) {
@@ -3285,13 +3313,15 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 			if (constant_container) {
 				zend_do_fetch_class_name(NULL, constant_container, constant_name TSRMLS_CC);
 				*result = *constant_container;
-			} else {
+				result->u.constant.type = IS_CONSTANT;
+			} else if (!zend_constant_ct_subst(result, &constant_name->u.constant TSRMLS_CC)) {
 				*result = *constant_name;
+				result->u.constant.type = IS_CONSTANT;
 			}
-			Z_TYPE(result->u.constant) = IS_CONSTANT;
 			break;
 		case ZEND_RT:
-			{
+			if (constant_container ||
+			    !zend_constant_ct_subst(result, &constant_name->u.constant TSRMLS_CC)) {
 				zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
 				opline->opcode = ZEND_FETCH_CONSTANT;
