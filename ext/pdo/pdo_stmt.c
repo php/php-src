@@ -326,8 +326,11 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 	
 	/* tell the driver we just created a parameter */
 	if (stmt->methods->param_hook) {
-		if (!stmt->methods->param_hook(stmt, param,
-				PDO_PARAM_EVT_ALLOC TSRMLS_CC)) {
+		if (!stmt->methods->param_hook(stmt, param, PDO_PARAM_EVT_ALLOC TSRMLS_CC)) {
+			if (param->name) {
+				efree(param->name);
+				param->name = NULL;
+			}
 			return 0;
 		}
 	}
