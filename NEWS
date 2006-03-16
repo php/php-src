@@ -4,7 +4,7 @@ PHP                                                                        NEWS
 - Unicode support. (Andrei, Dmitry, et al)
 - Dropped safe_mode support (Ilia, Andi)
 - Dropped zend.ze1_compatibility_mode (Dmitry)
-- Dropped allow_call_time_pass_reference, the error is maden E_STRICT. (Dmitry)
+- Dropped allow_call_time_pass_reference, added E_STRICT error message. (Dmitry)
 - Dropped register_long_arrays (Dmitry)
 - Droped register_globals support (Pierre)
   - session_register, session_unregister and session_is_registered removed they
