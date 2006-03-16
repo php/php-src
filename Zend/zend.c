@@ -210,7 +210,6 @@ static ZEND_INI_MH(OnUpdateConversionSubstChar)
 
 ZEND_INI_BEGIN()
 	ZEND_INI_ENTRY("error_reporting",			NULL,		ZEND_INI_ALL,		OnUpdateErrorReporting)
-	STD_ZEND_INI_BOOLEAN("zend.ze1_compatibility_mode",	"0",	ZEND_INI_ALL,		OnUpdateBool,	ze1_compatibility_mode,	zend_executor_globals,	executor_globals)
 
 	/* Unicode .ini entries */
 	STD_ZEND_INI_BOOLEAN("unicode_semantics", "0", ZEND_INI_SYSTEM, OnUpdateBool, unicode, zend_unicode_globals, unicode_globals)

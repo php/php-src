@@ -1578,6 +1578,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 			"magic_quotes_gpc",
 			"magic_quotes_runtime",
 			"magic_quotes_sybase",
+			"zend.ze1_compatibility_mode",
 			NULL};
 		const char **p = directives;
 		long val;

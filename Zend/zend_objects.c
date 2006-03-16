@@ -114,33 +114,9 @@ ZEND_API zend_object *zend_objects_get_address(zval *zobject TSRMLS_DC)
 	return (zend_object *)zend_object_store_get_object(zobject TSRMLS_CC);
 }
 
-static void zval_add_ref_or_clone(zval **p)
-{
-	if (Z_TYPE_PP(p) == IS_OBJECT && !PZVAL_IS_REF(*p)) {
-		TSRMLS_FETCH();
-
-		if (Z_OBJ_HANDLER_PP(p, clone_obj) == NULL) {
-			zend_error(E_ERROR, "Trying to clone an uncloneable object of class %v",  Z_OBJCE_PP(p)->name);
-		} else {
-			zval *orig = *p;
-
-			ALLOC_ZVAL(*p);
-			**p = *orig;
-			INIT_PZVAL(*p);
-			Z_OBJVAL_PP(p) = Z_OBJ_HT_PP(p)->clone_obj(orig TSRMLS_CC);
-		}
-	} else {
-		(*p)->refcount++;
-	}
-}
-
 ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object_value new_obj_val, zend_object *old_object, zend_object_handle handle TSRMLS_DC)
 {
-	if (EG(ze1_compatibility_mode)) {
-		zend_hash_copy(new_object->properties, old_object->properties, (copy_ctor_func_t) zval_add_ref_or_clone, (void *) NULL /* Not used anymore */, sizeof(zval *));
-	} else {
-		zend_hash_copy(new_object->properties, old_object->properties, (copy_ctor_func_t) zval_add_ref, (void *) NULL /* Not used anymore */, sizeof(zval *));
-	}
+	zend_hash_copy(new_object->properties, old_object->properties, (copy_ctor_func_t) zval_add_ref, (void *) NULL /* Not used anymore */, sizeof(zval *));
 	if (old_object->ce->clone) {
 		zval *new_obj;
 
