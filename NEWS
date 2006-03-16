@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 6.0
 - Unicode support. (Andrei, Dmitry, et al)
 - Dropped safe_mode support (Ilia, Andi)
+- Dropped zend.ze1_compatibility_mode (Dmitry)
 - Dropped register_long_arrays (Dmitry)
 - Droped register_globals support (Pierre)
   - session_register, session_unregister and session_is_registered removed they

@@ -598,26 +598,7 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 	/* here we are sure we are dealing with an object */
 
 	/* separate our value if necessary */
-	if (EG(ze1_compatibility_mode) && Z_TYPE_P(value) == IS_OBJECT) {
-		zval *orig_value = value;
-		zstr class_name;
-		zend_uint class_name_len;
-		int dup;
-
-		ALLOC_ZVAL(value);
-		*value = *orig_value;
-	 	value->is_ref = 0;
-		value->refcount = 0;
-		dup = zend_get_object_classname(orig_value, &class_name, &class_name_len TSRMLS_CC);
-		if (Z_OBJ_HANDLER_P(value, clone_obj) == NULL) {
-			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v",  class_name.v);
-		}
-		zend_error(E_STRICT, "Implicit cloning object of class '%v' because of 'zend.ze1_compatibility_mode'", class_name.v);
-		Z_OBJVAL_P(value) = Z_OBJ_HANDLER_P(orig_value, clone_obj)(orig_value TSRMLS_CC);
-		if (!dup) {
-			efree(class_name.v);
-		}
-	} else if (value_op->op_type == IS_TMP_VAR) {
+	if (value_op->op_type == IS_TMP_VAR) {
 		zval *orig_value = value;
 
 		ALLOC_ZVAL(value);
@@ -807,60 +788,11 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 	}
 
 	if (Z_TYPE_P(variable_ptr) == IS_OBJECT && Z_OBJ_HANDLER_P(variable_ptr, set)) {
-		/* TODO? ze1_compatibility_mode support */
 		Z_OBJ_HANDLER_P(variable_ptr, set)(variable_ptr_ptr, value TSRMLS_CC);
 		goto done_setting_var;
 	}
 
-	if (EG(ze1_compatibility_mode) && Z_TYPE_P(value) == IS_OBJECT) {
-		zstr class_name;
-		zend_uint class_name_len;
-		int dup;
-
-		dup = zend_get_object_classname(value, &class_name, &class_name_len TSRMLS_CC);
-
-		if (Z_OBJ_HANDLER_P(value, clone_obj) == NULL) {
-			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v",  class_name.v);
-		} else if (PZVAL_IS_REF(variable_ptr)) {
-			if (variable_ptr != value) {
-				zend_uint refcount = variable_ptr->refcount;
-				zval garbage;
-
-				if (type != IS_TMP_VAR) {
-					value->refcount++;
-				}
-				garbage = *variable_ptr;
-				*variable_ptr = *value;
-				variable_ptr->refcount = refcount;
-				variable_ptr->is_ref = 1;
-				zend_error(E_STRICT, "Implicit cloning object of class '%v' because of 'zend.ze1_compatibility_mode'", class_name.v);
-				Z_OBJVAL_P(variable_ptr) = Z_OBJ_HANDLER_P(value, clone_obj)(value TSRMLS_CC);
-				if (type != IS_TMP_VAR) {
-					value->refcount--;
-				}
-				zendi_zval_dtor(garbage);
-			}
-		} else {
-			if (variable_ptr != value) {
-				value->refcount++;
-				variable_ptr->refcount--;
-				if (variable_ptr->refcount == 0) {
-					zendi_zval_dtor(*variable_ptr);
-				} else {
-					ALLOC_ZVAL(variable_ptr);
-					*variable_ptr_ptr = variable_ptr;
-				}
-				*variable_ptr = *value;
-				INIT_PZVAL(variable_ptr);
-				zend_error(E_STRICT, "Implicit cloning object of class '%v' because of 'zend.ze1_compatibility_mode'", class_name.v);
-				Z_OBJVAL_P(variable_ptr) = Z_OBJ_HANDLER_P(value, clone_obj)(value TSRMLS_CC);
-				zval_ptr_dtor(&value);
-			}
-		}
-		if (!dup) {
-			efree(class_name.v);
-		}
-	} else if (PZVAL_IS_REF(variable_ptr)) {
+	if (PZVAL_IS_REF(variable_ptr)) {
 		if (variable_ptr!=value) {
 			zend_uint refcount = variable_ptr->refcount;
 			zval garbage;
@@ -950,34 +882,9 @@ done_setting_var:
 
 static inline void zend_receive(zval **variable_ptr_ptr, zval *value TSRMLS_DC)
 {
-	zval *variable_ptr = *variable_ptr_ptr;
-
-	if (EG(ze1_compatibility_mode) && Z_TYPE_P(value) == IS_OBJECT) {
-		zstr class_name;
-		zend_uint class_name_len;
-		int dup;
-
-		dup = zend_get_object_classname(value, &class_name, &class_name_len TSRMLS_CC);
-
- 		if (Z_OBJ_HANDLER_P(value, clone_obj) == NULL) {
-			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v",  class_name.v);
-		} else {
-			variable_ptr->refcount--;
-			ALLOC_ZVAL(variable_ptr);
-			*variable_ptr_ptr = variable_ptr;
-			*variable_ptr = *value;
-			INIT_PZVAL(variable_ptr);
-			zend_error(E_STRICT, "Implicit cloning object of class '%v' because of 'zend.ze1_compatibility_mode'", class_name.v);
-			Z_OBJVAL_P(variable_ptr) = Z_OBJ_HANDLER_P(value, clone_obj)(value TSRMLS_CC);
-		}
-		if (!dup) {
-			efree(class_name.v);
-		}
-	} else {
-		variable_ptr->refcount--;
-		*variable_ptr_ptr = value;
-		value->refcount++;
-	}
+	(*variable_ptr_ptr)->refcount--;
+	*variable_ptr_ptr = value;
+	value->refcount++;
 }
 
 /* Utility Functions for Extensions */
