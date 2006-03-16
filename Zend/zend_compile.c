@@ -1807,10 +1807,12 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC)
 
 	if (do_end_vparse) {
 		if (zend_is_function_or_method_call(expr)) {
-			opline->extended_value = ZEND_RETURNS_FUNCTION;
-		} else {
-			opline->extended_value = 0;
+			opline->extended_value = ZEND_RETURNS_FUNCTION;			
 		}
+	} else if (CG(active_op_array)->return_reference && 
+	           expr && expr->u.EA.type == ZEND_PARSED_NEW) {
+		opline->extended_value = ZEND_RETURNS_NEW;
+		zend_error(E_STRICT, "Returning the return value of new by reference is deprecated");
 	}
 
 	SET_UNUSED(opline->op2);
