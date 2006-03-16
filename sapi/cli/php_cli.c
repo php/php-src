@@ -328,7 +328,8 @@ static void sapi_cli_send_header(sapi_header_struct *sapi_header, void *server_c
 
 static int php_cli_startup(sapi_module_struct *sapi_module)
 {
-	if (php_module_startup(sapi_module, NULL, 0)==FAILURE) {
+	if (php_module_startup(sapi_module, NULL, 0)==FAILURE ||
+	    php_enable_dl()==FAILURE) {
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -681,7 +682,8 @@ int main(int argc, char *argv[])
 #endif
 
 	/* startup after we get the above ini override se we get things right */
-	if (php_module_startup(&cli_sapi_module, NULL, 0)==FAILURE) {
+	if (php_module_startup(&cli_sapi_module, NULL, 0)==FAILURE ||
+	    php_enable_dl()==FAILURE) {
 		/* there is no way to see if we must call zend_ini_deactivate()
 		 * since we cannot check if EG(ini_directives) has been initialised
 		 * because the executor's constructor does not set initialize it.

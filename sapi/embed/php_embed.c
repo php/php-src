@@ -93,7 +93,8 @@ static void php_embed_register_variables(zval *track_vars_array TSRMLS_DC)
 
 static int php_embed_startup(sapi_module_struct *sapi_module)
 {
-	if (php_module_startup(sapi_module, NULL, 0)==FAILURE) {
+	if (php_module_startup(sapi_module, NULL, 0)==FAILURE ||
+	    php_enable_dl()==FAILURE) {
 		return FAILURE;
 	}
 	return SUCCESS;

@@ -548,9 +548,6 @@ zend_function_entry basic_functions[] = {
 	PHP_FALIAS(join,				implode,								NULL)
 	PHP_FE(sql_regcase,														NULL)
 
-	/* functions from dl.c */
-	PHP_FE(dl,																NULL)
-
 	/* functions from file.c */
 	PHP_FE(pclose,															NULL)
 	PHP_FE(popen,															NULL)
