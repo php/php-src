@@ -29,11 +29,11 @@
  </description>
  <license>PHP</license>
  <release>
-  <state>beta</state>
-  <version>1.2</version>
-  <date>2006-??-??</date>
+  <state>stable</state>
+  <version>1.2.0</version>
+  <date>2006-03-16</date>
   <notes>
-   Changed OCI8 code to use OCIServerVersion() instead of OCIPing(), which may crash Oracle server of version < 10.2
+   Changed OCI8 code to use OCIServerVersion() instead of OCIPing(), which may crash Oracle server of version &lt; 10.2
    Fixed bug #36235 (ocicolumnname returns false before a succesfull fetch)
    Fixed bug #36096 (oci_result() returns garbage after oci_fetch() failed)
    Fixed bug #36055 (possible OCI8 crash in multithreaded environment)
