@@ -50,7 +50,6 @@ typedef struct _arg_separators {
 } arg_separators;
 
 struct _php_core_globals {
-	zend_bool allow_call_time_pass_reference;
 	zend_bool implicit_flush;
 
 	long output_buffering;

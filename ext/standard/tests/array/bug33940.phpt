@@ -24,7 +24,10 @@ $ret = array_map('ref_map', &$a);
 echo 'Array: '; print_r($a);
 echo 'Return: '; print_r($ret);
 ?>
---EXPECT--
+--EXPECTF--
+Strict Standards: Call-time pass-by-reference has been deprecated in %sbug33940.php on line 7
+
+Strict Standards: Call-time pass-by-reference has been deprecated in %sbug33940.php on line 17
 Array: Array
 (
     [0] => Array
