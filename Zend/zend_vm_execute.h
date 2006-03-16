@@ -1639,9 +1639,7 @@ static int ZEND_RETURN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				if (IS_CONST == IS_VAR && !0) {
 					PZVAL_LOCK(*retval_ptr_ptr); /* undo the effect of get_zval_ptr_ptr() */
 				}
-//				if (opline->extended_value != ZEND_RETURNS_NEW) {
-					zend_error(E_NOTICE, "Only variable references should be returned by reference");
-//				}
+				zend_error(E_NOTICE, "Only variable references should be returned by reference");
 				goto return_by_value;
 			}
 		}
@@ -4117,9 +4115,7 @@ static int ZEND_RETURN_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				if (IS_TMP_VAR == IS_VAR && !1) {
 					PZVAL_LOCK(*retval_ptr_ptr); /* undo the effect of get_zval_ptr_ptr() */
 				}
-//				if (opline->extended_value != ZEND_RETURNS_NEW) {
-					zend_error(E_NOTICE, "Only variable references should be returned by reference");
-//				}
+				zend_error(E_NOTICE, "Only variable references should be returned by reference");
 				goto return_by_value;
 			}
 		}
@@ -7102,9 +7098,7 @@ static int ZEND_RETURN_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				if (IS_VAR == IS_VAR && !(free_op1.var != NULL)) {
 					PZVAL_LOCK(*retval_ptr_ptr); /* undo the effect of get_zval_ptr_ptr() */
 				}
-//				if (opline->extended_value != ZEND_RETURNS_NEW) {
-					zend_error(E_NOTICE, "Only variable references should be returned by reference");
-//				}
+				zend_error(E_NOTICE, "Only variable references should be returned by reference");
 				goto return_by_value;
 			}
 		}
@@ -19729,9 +19723,7 @@ static int ZEND_RETURN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				if (IS_CV == IS_VAR && !0) {
 					PZVAL_LOCK(*retval_ptr_ptr); /* undo the effect of get_zval_ptr_ptr() */
 				}
-//				if (opline->extended_value != ZEND_RETURNS_NEW) {
-					zend_error(E_NOTICE, "Only variable references should be returned by reference");
-//				}
+				zend_error(E_NOTICE, "Only variable references should be returned by reference");
 				goto return_by_value;
 			}
 		}
