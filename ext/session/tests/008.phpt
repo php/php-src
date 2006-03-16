@@ -19,31 +19,31 @@ session_id("abtest");
 session_start();
 session_destroy();
 
-### Phase 2 $HTTP_SESSION_VARS["c"] does not contain any value
+### Phase 2 $_SESSION["c"] does not contain any value
 session_id("abtest");
 session_register("c");
 var_dump($c);
 unset($c);
 $c = 3.14;
 session_write_close();
-unset($HTTP_SESSION_VARS);
+unset($_SESSION);
 unset($c);
 
-### Phase 3 $HTTP_SESSION_VARS["c"] is set
+### Phase 3 $_SESSION["c"] is set
 session_start();
-var_dump($HTTP_SESSION_VARS);
+var_dump($_SESSION);
 unset($c);
 $c = 2.78;
 
 session_write_close();
-unset($HTTP_SESSION_VARS);
+unset($_SESSION);
 unset($c);
 
 ### Phase 4 final
 
 session_start();
 var_dump($c);
-var_dump($HTTP_SESSION_VARS);
+var_dump($_SESSION);
 
 session_destroy();
 ?>

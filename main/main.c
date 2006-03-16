@@ -372,7 +372,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("output_buffering",		"0",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateLong,	output_buffering,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("output_handler",			NULL,		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateString,	output_handler,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("register_argc_argv",	"1",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	register_argc_argv,		php_core_globals,	core_globals)
-	STD_PHP_INI_BOOLEAN("register_long_arrays",	"1",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	register_long_arrays,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("auto_globals_jit",		"1",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	auto_globals_jit,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("short_open_tag",	DEFAULT_SHORT_OPEN_TAG,	PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			short_tags,				zend_compiler_globals,	compiler_globals)
 	STD_PHP_INI_BOOLEAN("sql.safe_mode",		"0",		PHP_INI_SYSTEM,		OnUpdateBool,			sql_safe_mode,			php_core_globals,	core_globals)
@@ -425,6 +424,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("always_populate_raw_post_data",		"0",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			always_populate_raw_post_data,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("realpath_cache_size", "16K", PHP_INI_SYSTEM, OnUpdateLong, realpath_cache_size_limit, virtual_cwd_globals, cwd_globals)
 	STD_PHP_INI_ENTRY("realpath_cache_ttl", "120", PHP_INI_SYSTEM, OnUpdateLong, realpath_cache_ttl, virtual_cwd_globals, cwd_globals)
+
 PHP_INI_END()
 /* }}} */
 
@@ -1567,6 +1567,27 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	   to be loaded later */
 	if (php_init_config(TSRMLS_C) == FAILURE) {
 		return FAILURE;
+	}
+
+	/* Check for deprecated directives */
+	{
+		static const char *directives[] = {
+			"register_globals",
+			"register_long_arrays",
+			"safe_mode",
+			"magic_quotes_gpc",
+			"magic_quotes_runtime",
+			"magic_quotes_sybase",
+			NULL};
+		const char **p = directives;
+		long val;
+
+		while (*p) {
+			if (cfg_get_long(*p, &val) == SUCCESS && val) {
+				zend_error(E_CORE_ERROR, "Directive '%s' is not longer supported in PHP-6 and above", *p);
+			}
+			++p;
+		}	   
 	}
 
 	/* Register PHP core ini entries */

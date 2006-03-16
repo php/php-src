@@ -2,8 +2,6 @@
 Bug #33200 (magic_quotes_sybase = On makes 'e' modifier misbehave)
 --SKIPIF--
 die('skip magic_quotes removed');
---INI--
-magic_quotes_sybase=1
 --FILE--
 <?php
 $str = 'some \'$sample\' text';
