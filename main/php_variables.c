@@ -818,20 +818,18 @@ int php_hash_environment(TSRMLS_D)
 	unsigned char _gpc_flags[5] = {0, 0, 0, 0, 0};
 	zval *dummy_track_vars_array = NULL;
 	zend_bool initialized_dummy_track_vars_array=0;
-	zend_bool jit_initialization = (PG(auto_globals_jit) && !PG(register_long_arrays) && !PG(register_argc_argv));
+	zend_bool jit_initialization = (PG(auto_globals_jit) && !PG(register_argc_argv));
 	struct auto_global_record {
 		char *name;
 		uint name_len;
-		char *long_name;
-		uint long_name_len;
 		zend_bool jit_initialization;
 	} auto_global_records[] = {
-		{ "_POST", sizeof("_POST"), "HTTP_POST_VARS", sizeof("HTTP_POST_VARS"), 0 },
-		{ "_GET", sizeof("_GET"), "HTTP_GET_VARS", sizeof("HTTP_GET_VARS"), 0 },
-		{ "_COOKIE", sizeof("_COOKIE"), "HTTP_COOKIE_VARS", sizeof("HTTP_COOKIE_VARS"), 0 },
-		{ "_SERVER", sizeof("_SERVER"), "HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS"), 1 },
-		{ "_ENV", sizeof("_ENV"), "HTTP_ENV_VARS", sizeof("HTTP_ENV_VARS"), 1 },
-		{ "_FILES", sizeof("_FILES"), "HTTP_POST_FILES", sizeof("HTTP_POST_FILES"), 0 },
+		{ "_POST", sizeof("_POST"), 0 },
+		{ "_GET", sizeof("_GET"), 0 },
+		{ "_COOKIE", sizeof("_COOKIE"), 0 },
+		{ "_SERVER", sizeof("_SERVER"), 1 },
+		{ "_ENV", sizeof("_ENV"), 1 },
+		{ "_FILES", sizeof("_FILES"), 0 },
 	};
 	size_t num_track_vars = sizeof(auto_global_records)/sizeof(struct auto_global_record);
 	size_t i;
@@ -906,10 +904,6 @@ int php_hash_environment(TSRMLS_D)
 
 		PG(http_globals)[i]->refcount++;
 		zend_hash_update(&EG(symbol_table), auto_global_records[i].name, auto_global_records[i].name_len, &PG(http_globals)[i], sizeof(zval *), NULL);
-		if (PG(register_long_arrays)) {
-			zend_hash_update(&EG(symbol_table), auto_global_records[i].long_name, auto_global_records[i].long_name_len, &PG(http_globals)[i], sizeof(zval *), NULL);
-			PG(http_globals)[i]->refcount++;
-		}
 	}
 
 	/* Create _REQUEST */
@@ -940,11 +934,6 @@ static zend_bool php_auto_globals_create_server(char *name, uint name_len TSRMLS
 	zend_hash_update(&EG(symbol_table), name, name_len + 1, &PG(http_globals)[TRACK_VARS_SERVER], sizeof(zval *), NULL);
 	PG(http_globals)[TRACK_VARS_SERVER]->refcount++;
 
-	if (PG(register_long_arrays)) {
-		zend_hash_update(&EG(symbol_table), "HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS"), &PG(http_globals)[TRACK_VARS_SERVER], sizeof(zval *), NULL);
-		PG(http_globals)[TRACK_VARS_SERVER]->refcount++;
-	}
-
 	return 0; /* don't rearm */
 }
 
@@ -965,11 +954,6 @@ static zend_bool php_auto_globals_create_env(char *name, uint name_len TSRMLS_DC
 
 	zend_hash_update(&EG(symbol_table), name, name_len + 1, &PG(http_globals)[TRACK_VARS_ENV], sizeof(zval *), NULL);
 	PG(http_globals)[TRACK_VARS_ENV]->refcount++;
-
-	if (PG(register_long_arrays)) {
-		zend_hash_update(&EG(symbol_table), "HTTP_ENV_VARS", sizeof("HTTP_ENV_VARS"), &PG(http_globals)[TRACK_VARS_ENV], sizeof(zval *), NULL);
-		PG(http_globals)[TRACK_VARS_ENV]->refcount++;
-	}
 
 	return 0; /* don't rearm */
 }

@@ -466,13 +466,7 @@ static void php_session_track_init(TSRMLS_D)
 	array_init(session_vars);
 	PS(http_session_vars) = session_vars;
 	
-	if (PG(register_long_arrays)) {
-		ZEND_SET_GLOBAL_VAR_WITH_LENGTH("HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS"), PS(http_session_vars), 2, 1);
-		ZEND_SET_GLOBAL_VAR_WITH_LENGTH("_SESSION", sizeof("_SESSION"), PS(http_session_vars), 2, 1);
-	}
-	else {
-		ZEND_SET_GLOBAL_VAR_WITH_LENGTH("_SESSION", sizeof("_SESSION"), PS(http_session_vars), 1, 0);
-	}
+	ZEND_SET_GLOBAL_VAR_WITH_LENGTH("_SESSION", sizeof("_SESSION"), PS(http_session_vars), 1, 0);
 }
 
 static char *php_session_encode(int *newlen TSRMLS_DC)
