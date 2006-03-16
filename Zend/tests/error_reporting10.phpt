@@ -3,7 +3,7 @@ testing @ and error_reporting - 10
 --FILE--
 <?php
 
-error_reporting(E_ALL);
+error_reporting(E_ALL & ~E_STRICT);
 
 function make_exception()
 {
@@ -19,7 +19,7 @@ try {
 
 var_dump(error_reporting());
 
-error_reporting(E_ALL&~E_NOTICE);
+error_reporting(E_ALL&~E_NOTICE&~E_STRICT);
 
 try {
 	@make_exception();

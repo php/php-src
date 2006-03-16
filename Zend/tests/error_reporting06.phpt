@@ -3,7 +3,7 @@ testing @ and error_reporting - 6
 --FILE--
 <?php
 
-error_reporting(E_ALL);
+error_reporting(E_ALL & ~E_STRICT);
 	
 function foo1($arg) {
 }

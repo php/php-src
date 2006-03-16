@@ -14,7 +14,7 @@ function make_exception()
 
 function make_exception_and_change_err_reporting()
 {
-	error_reporting(E_ALL);
+    error_reporting(E_ALL & ~E_STRICT);
     throw new Exception();
 }
 
