@@ -1236,7 +1236,7 @@ static size_t _php_stream_write_buffer(php_stream *stream, int buf_type, zstr bu
 		} else {
 			UErrorCode status = U_ZERO_ERROR;
 			char *t = freeme;
-			UChar *p = buf_orig.u;
+			const UChar *p = buf_orig.u;
 
 			switch (ucnv_getType(stream->output_encoding)) {
 				case UCNV_SBCS:
