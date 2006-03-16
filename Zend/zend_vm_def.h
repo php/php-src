@@ -1756,7 +1756,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, ANY, CONST|TMP|VAR|UNUSED|CV)
 		if (OP2_TYPE != IS_UNUSED &&
 		    EG(This) &&
 		    Z_OBJ_HT_P(EG(This))->get_class_entry &&
-		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) { 
+		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
 			zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
@@ -2062,9 +2062,7 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 				if (OP1_TYPE == IS_VAR && !OP1_FREE) {
 					PZVAL_LOCK(*retval_ptr_ptr); /* undo the effect of get_zval_ptr_ptr() */
 				}
-//				if (opline->extended_value != ZEND_RETURNS_NEW) {
-					zend_error(E_NOTICE, "Only variable references should be returned by reference");
-//				}
+				zend_error(E_NOTICE, "Only variable references should be returned by reference");
 				ZEND_VM_C_GOTO(return_by_value);
 			}
 		}
