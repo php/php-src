@@ -3,7 +3,7 @@ testing @ and error_reporting - 5
 --FILE--
 <?php
 
-error_reporting(E_ALL);
+error_reporting(E_ALL & ~E_STRICT);
 	
 class test {
 	function __get($name) {
