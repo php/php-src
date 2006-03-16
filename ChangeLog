@@ -1,3 +1,84 @@
+2006-03-15  Sara Golemon  <sara@golemon.com>
+
+    * main/streams/streams.c:
+      Fix improper byte count on partial reads
+
+2006-03-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed Bug #36614 (Segfault when using Soap)
+
+    * (PHP_5_1)
+      ZendEngine2/zend_constants.c:
+      Fix: incorrect string length passed
+
+    * ZendEngine2/zend_strtod.c:
+      Fixed zend_u_strtod() that returned uninitialized value in case of empty
+      string
+
+2006-03-15  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/string.c:
+      - Fixed two memory issues:
+        - In the first one we were calculating the tmp_len wrong which made the
+      	u_strFromUTF32() function try to convert too many code points.
+        - The second issue was a bit more subtle as the "what" string wasn't
+      	duplicated but still modified. This string is passed as data to the
+      	function and this kind of data the engine tries to free when the function
+      	ends. Because we were re-allocating the data the original memory location
+      	was already freed resulting in a double free error when the engine tries
+      to
+      	free the argument as it was passed to the function.
+
+2006-03-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      Added E_STRICT warning in case of calling non-static method from
+      incompatible context (this feature is staying for BC with php-4)
+
+    * (PHP_5_1)
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      Added E_STRICT warning in case of calling non-static method from
+      incompatible context (this feature is staying for BC with php-4).
+
+2006-03-15  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/var.c:
+      - Reduce space in serialization. The first 128 bytes will now use just the
+        character and everything above will use \uXXXX. It seems that
+      unserialize
+        doesn't work at all yet on the U: element so that I added to my to-do
+      list.
+
+2006-03-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_constants.h
+      ZendEngine2/zend_constants.h:
+      Eliminated run-time constant fetching for TRUE, FALSE and NULL
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_gen.php
+      ZendEngine2/zend_vm_gen.php:
+      Fixed "zend_vm_gen.php --without-specializer"
+
+2006-03-15  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/file.c
+      main/streams/streams.c:
+      Switch (zstr) casts to use ZSTR() macro.
+
 2006-03-14  Sara Golemon  <sara@golemon.com>
 
     * ext/standard/file.c
