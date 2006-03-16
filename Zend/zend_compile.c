@@ -1273,7 +1273,7 @@ void zend_do_end_function_declaration(znode *function_token TSRMLS_DC)
 	pass_two(CG(active_op_array) TSRMLS_CC);
 
 	zend_release_labels(TSRMLS_C);
-	
+
 	if (CG(active_class_entry)) {
 		zend_check_magic_method_implementation(CG(active_class_entry), (zend_function*)CG(active_op_array), E_COMPILE_ERROR TSRMLS_CC);
 	} else {
@@ -1807,9 +1807,9 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC)
 
 	if (do_end_vparse) {
 		if (zend_is_function_or_method_call(expr)) {
-			opline->extended_value = ZEND_RETURNS_FUNCTION;			
+			opline->extended_value = ZEND_RETURNS_FUNCTION;
 		}
-	} else if (CG(active_op_array)->return_reference && 
+	} else if (CG(active_op_array)->return_reference &&
 	           expr && expr->u.EA.type == ZEND_PARSED_NEW) {
 		opline->extended_value = ZEND_RETURNS_NEW;
 		zend_error(E_STRICT, "Returning the return value of new by reference is deprecated");
@@ -3290,7 +3290,7 @@ static int zend_constant_ct_subst(znode *result, zval *const_name TSRMLS_DC)
 	if (zend_u_hash_find(EG(zend_constants), Z_TYPE_P(const_name), Z_UNIVAL_P(const_name), Z_UNILEN_P(const_name)+1, (void **) &c) == FAILURE) {
 		unsigned int lookup_name_len;
 		zstr lookup_name = zend_u_str_case_fold(Z_TYPE_P(const_name), Z_UNIVAL_P(const_name), Z_UNILEN_P(const_name), 1, &lookup_name_len);
-		 
+
 		if (zend_u_hash_find(EG(zend_constants), Z_TYPE_P(const_name), lookup_name, lookup_name_len+1, (void **) &c)==SUCCESS) {
 			if ((c->flags & CONST_CS) && memcmp(c->name.v, Z_UNIVAL_P(const_name).v, UG(unicode)?UBYTES(Z_USTRLEN_P(const_name)):Z_STRLEN_P(const_name))!=0) {
 				c = NULL;
