@@ -673,7 +673,6 @@ static void zend_set_default_compile_time_values(TSRMLS_D)
 	/* default compile-time values */
 	CG(asp_tags) = 0;
 	CG(short_tags) = 1;
-	CG(allow_call_time_pass_reference) = 1;
 	CG(extended_info) = 0;
 }
 
