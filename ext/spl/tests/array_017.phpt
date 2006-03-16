@@ -29,7 +29,7 @@ class ArrayIteratorEx extends ArrayIterator
 	function setFlags($flags)
 	{
 		echo __METHOD__ . "($flags)\n";
-		ArrayObject::setFlags($flags);
+		ArrayIterator::setFlags($flags);
 	}
 }
 
