@@ -54,6 +54,10 @@ extern void php_free_shutdown_functions(TSRMLS_D);
 /* environment module */
 extern int php_init_environ(void);
 extern int php_shutdown_environ(void);
+
+/* dl() support */
+PHPAPI int php_enable_dl(void);
+
 END_EXTERN_C()
 
 #endif

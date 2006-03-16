@@ -23,10 +23,10 @@
 #ifndef DL_H
 #define DL_H
 
-PHPAPI void php_dl(zval *file,int type, zval *return_value, int start_now TSRMLS_DC);
+void php_dl(zval *file,int type, zval *return_value, int start_now TSRMLS_DC);
 
 /* dynamic loading functions */
-PHP_FUNCTION(dl);
+PHPAPI PHP_FUNCTION(dl);
 
 PHP_MINFO_FUNCTION(dl);
 

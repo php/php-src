@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 6.0
 - Unicode support. (Andrei, Dmitry, et al)
+- Disabled dl(). Now it is enabled only when a SAPI layer registers it
+  explicitly. Only CLI, CGI and EMBED do this. (Dmitry).
 - Return "new" by reference now throws an E_STRICT error. (Dmitry)
 - Added E_STRICT to E_ALL. (Dmitry)
 - Dropped safe_mode support (Ilia, Andi)

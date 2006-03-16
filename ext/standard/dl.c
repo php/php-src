@@ -65,22 +65,6 @@ PHP_FUNCTION(dl)
 
 	convert_to_string_ex(file);
 
-	if (!PG(enable_dl)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Dynamically loaded extensions aren't enabled");
-		RETURN_FALSE;
-	}
-
-	if ((strncmp(sapi_module.name, "cgi", 3)!=0) && 
-		(strcmp(sapi_module.name, "cli")!=0) &&
-		(strncmp(sapi_module.name, "embed", 5)!=0)) {
-#ifdef ZTS
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not supported in multithreaded Web servers - use extension=%s in your php.ini", Z_STRVAL_PP(file));
-		RETURN_FALSE;
-#else
-		php_error_docref(NULL TSRMLS_CC, E_STRICT, "dl() is deprecated - use extension=%s in your php.ini", Z_STRVAL_PP(file));
-#endif
-	}
-
 	php_dl(*file, MODULE_TEMPORARY, return_value, 0 TSRMLS_CC);
 	EG(full_tables_cleanup) = 1;
 }
