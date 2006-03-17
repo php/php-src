@@ -423,8 +423,7 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 	int count = 0;
 	char *ss, *space;
 	
-	if (! (PG(register_globals) || SG(request_info).argc ||
-		   PG(http_globals)[TRACK_VARS_SERVER]) ) {
+	if (!(PG(register_globals) || SG(request_info).argc || track_vars_array)) {
 		return;
 	}
 	
@@ -614,7 +613,7 @@ int php_hash_environment(TSRMLS_D)
 	unsigned char _gpc_flags[5] = {0, 0, 0, 0, 0};
 	zval *dummy_track_vars_array = NULL;
 	zend_bool initialized_dummy_track_vars_array=0;
-	zend_bool jit_initialization = (PG(auto_globals_jit) && !PG(register_globals) && !PG(register_long_arrays) && !PG(register_argc_argv));
+	zend_bool jit_initialization = (PG(auto_globals_jit) && !PG(register_globals) && !PG(register_long_arrays));
 	struct auto_global_record {
 		char *name;
 		uint name_len;
@@ -754,6 +753,18 @@ static zend_bool php_auto_globals_create_server(char *name, uint name_len TSRMLS
 	if (PG(register_long_arrays)) {
 		zend_hash_update(&EG(symbol_table), "HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS"), &PG(http_globals)[TRACK_VARS_SERVER], sizeof(zval *), NULL);
 		PG(http_globals)[TRACK_VARS_SERVER]->refcount++;
+	}
+
+	if (PG(register_argc_argv)) {
+		zval **argc, **argv;
+
+		if (zend_hash_find(&EG(symbol_table), "argc", sizeof("argc"), (void**)&argc) == SUCCESS &&
+		    zend_hash_find(&EG(symbol_table), "argv", sizeof("argv"), (void**)&argv) == SUCCESS) {
+			(*argc)->refcount++;
+			(*argv)->refcount++;
+			zend_hash_update(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "argv", sizeof("argv"), argv, sizeof(zval *), NULL);
+			zend_hash_update(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "argc", sizeof("argc"), argc, sizeof(zval *), NULL);
+		}
 	}
 
 	return 0; /* don't rearm */
