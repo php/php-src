@@ -1349,7 +1349,7 @@ static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent TS
 		return FAILURE;
 	}
 
-	buf = php_stream_get_line(intern->u.file.stream, NULL, intern->u.file.max_line_len, &line_len);
+	buf = php_stream_get_line(intern->u.file.stream, NULL_ZSTR, intern->u.file.max_line_len, &line_len);
 
 	if (!buf) {
 		intern->u.file.current_line = estrdup("");
