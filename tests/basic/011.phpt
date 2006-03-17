@@ -8,16 +8,9 @@ register_argc_argv=1
 ab+cd+ef+123+test
 --FILE--
 <?php 
-
-if (!ini_get('register_globals')) {
-	$argc = $_SERVER['argc'];
-	$argv = $_SERVER['argv'];
-}
-
 for ($i=0; $i<$argc; $i++) {
 	echo "$i: ".$argv[$i]."\n";
 }
-
 ?>
 --EXPECT--
 0: ab
