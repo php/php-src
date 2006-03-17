@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - Fixed debug_zval_dump() to support private and protected members. (Dmitry)
 - Fixed bug #36743 (In a class extending XMLReader array properties are not 
   writable). (Tony)
+- Fixed bug #36727 (segfault in pdo_pgsql bindValue() when no parameters are 
+  defined). (Tony)
 - Fixed bug #36697 (Transparency is lost when using imagecreatetruecolor).
   (Pierre)
 - Fixed bug #36629 (SoapServer::handle() exits on SOAP faults). (Dmitry)
