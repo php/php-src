@@ -285,11 +285,19 @@ PHP_FUNCTION(is_float)
 }
 /* }}} */
 
-/* {{{ proto bool is_string(mixed var)
-   Returns true if variable is a native string */
-PHP_FUNCTION(is_string)
+/* {{{ proto bool is_binary(mixed var)
+   Returns true if variable is a native (binary) string */
+PHP_FUNCTION(is_binary)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_STRING);
+}
+/* }}} */
+
+/* {{{ proto bool is_string(mixed var)
+   Returns true if variable is a string */
+PHP_FUNCTION(is_string)
+{
+	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, UG(unicode) ? IS_UNICODE : IS_STRING);
 }
 /* }}} */
 
