@@ -3494,7 +3494,7 @@ PHPAPI UChar *php_u_strtr(UChar *str, int len, UChar *str_from, int str_from_len
 
 /* {{{ php_u_strtr_array
  */
-static void php_u_strtr_array(zval *return_value, UChar *str, int slen, HashTable *hash)
+static void php_u_strtr_array(zval *return_value, UChar *str, int slen, HashTable *hash TSRMLS_DC)
 {
 	zval **entry;
 	zstr   string_key;
@@ -3740,7 +3740,7 @@ PHP_FUNCTION(strtr)
 
 	if (Z_TYPE_PP(str) == IS_UNICODE) {
 		if (ac == 2) {
-			php_u_strtr_array(return_value, Z_USTRVAL_PP(str), Z_USTRLEN_PP(str), HASH_OF(*from));
+			php_u_strtr_array(return_value, Z_USTRVAL_PP(str), Z_USTRLEN_PP(str), HASH_OF(*from) TSRMLS_CC);
 			Z_TYPE_P(return_value) = IS_UNICODE;
 		} else {
 			convert_to_unicode_ex(from);
