@@ -32,6 +32,7 @@ PHP_FUNCTION(is_bool);
 PHP_FUNCTION(is_long);
 PHP_FUNCTION(is_float);
 PHP_FUNCTION(is_numeric);
+PHP_FUNCTION(is_binary);
 PHP_FUNCTION(is_string);
 PHP_FUNCTION(is_unicode);
 PHP_FUNCTION(is_binary);
