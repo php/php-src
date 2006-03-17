@@ -63,7 +63,7 @@ void init_unicode_strings() {
 	u_charsToUChars("::", u_doublecolon, sizeof("::"));
 }
 
-#if ZEND_DEBUG
+#if 0&&ZEND_DEBUG
 static void (*original_sigsegv_handler)(int);
 static void zend_handle_sigsegv(int dummy)
 {
@@ -298,7 +298,7 @@ void shutdown_executor(TSRMLS_D)
 	} zend_end_try();
 
 	zend_try {
-#if ZEND_DEBUG
+#if 0&&ZEND_DEBUG
 	signal(SIGSEGV, original_sigsegv_handler);
 #endif
 
