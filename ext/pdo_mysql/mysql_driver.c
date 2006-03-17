@@ -353,6 +353,14 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value
 			ZVAL_LONG(return_value, H->buffered);
 			return 1;
 
+		case PDO_MYSQL_ATTR_DIRECT_QUERY:
+			ZVAL_LONG(return_value, H->emulate_prepare);
+			return 1;
+
+		case PDO_MYSQL_ATTR_MAX_BUFFER_SIZE:
+			ZVAL_LONG(return_value, H->max_buffer_size);
+			return 1;
+
 		default:
 			return 0;	
 	}
@@ -431,7 +439,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		char *init_cmd = NULL, *default_file = NULL, *default_group = NULL;
 
 		H->buffered = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_USE_BUFFERED_QUERY, 0 TSRMLS_CC);
-
+		H->emulate_prepare = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_DIRECT_QUERY, 0 TSRMLS_CC);
 		H->max_buffer_size = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_MAX_BUFFER_SIZE, 1024 * 1024 TSRMLS_CC);
 
 		if (mysql_options(H->server, MYSQL_OPT_CONNECT_TIMEOUT, (const char *)&connect_timeout)) {
@@ -488,7 +496,9 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		goto cleanup;
 	}
 
-	mysql_handle_autocommit(dbh TSRMLS_CC);
+	if (!dbh->auto_commit) {
+		mysql_handle_autocommit(dbh TSRMLS_CC);
+	}
 
 	H->attached = 1;
 
