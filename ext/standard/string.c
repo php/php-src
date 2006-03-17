@@ -3263,8 +3263,8 @@ PHP_FUNCTION(chr)
    Makes an Unicode string's first character uppercase */
 static void php_u_ucfirst(zval *ustr, zval *return_value TSRMLS_DC)
 {
-	UChar tmp[3] = { 0,}; /* UChar32 will be converted to upto 2 UChar units ? */
-	int tmp_len = 0;
+	UChar tmp[3] = { 0, 0, 0 }; /* UChar32 will be converted to upto 2 UChar units ? */
+	int tmp_len = 2;
 	int pos = 0;
 	UErrorCode status = U_ZERO_ERROR;
 
@@ -3427,6 +3427,181 @@ PHPAPI char *php_strtr(char *str, int len, char *str_from, char *str_to, int trl
 }
 /* }}} */
 
+/* {{{ php_u_strtr
+ */
+PHPAPI UChar *php_u_strtr(UChar *str, int len, UChar *str_from, int str_from_len, UChar *str_to, int str_to_len, int trlen)
+{
+	int i, j;
+	int can_optimize = 1;
+	
+	if ((trlen < 1) || (len < 1)) {
+		return str;
+	}
+
+	/* First loop to see if we can use the optimized version */
+	for (i = 0; i < trlen; i++)	{
+		if (str_from[i] > 255 || str_to[i] > 255) {
+			can_optimize = 0;
+			break;
+		}
+	}
+	if (can_optimize) {
+		for (i = trlen; i < str_from_len; i++) {
+			if (str_from[i] > 255) {
+				can_optimize = 0;
+				break;
+			}
+		}
+	}
+	if (can_optimize) {
+		for (i = trlen; i < str_to_len; i++) {
+			if (str_from[i] > 255) {
+				can_optimize = 0;
+				break;
+			}
+		}
+	}
+
+	if (can_optimize) {
+		UChar xlat[256];
+
+		for (i = 0; i < 256; xlat[i] = i, i++);
+
+		for (i = 0; i < trlen; i++) {
+			xlat[str_from[i]] = str_to[i];
+		}
+
+		for (i = 0; i < len; i++) {
+			str[i] = xlat[str[i]];
+		}
+
+		return str;
+	} else {
+		/* UTODO: We're quite fucked... this is *extremely* slow, better
+		 * algorithm wanted here! It also doesn't handle combining sequences, I
+		 * asked the icu-support list for good algorithms.  */
+		for (i = 0; i < len; i++) {
+			for (j = 0; j < trlen; j++) {
+				if (str[i] == str_from[j]) {
+					str[i] = str_to[j];
+				}
+			}
+		}
+		return str;
+	}
+}
+/* }}} */
+
+/* {{{ php_u_strtr_array
+ */
+static void php_u_strtr_array(zval *return_value, UChar *str, int slen, HashTable *hash)
+{
+	zval **entry;
+	zstr   string_key;
+	uint   string_key_len;
+	zval **trans;
+	zval   ctmp;
+	ulong num_key;
+	int minlen = 128*1024;
+	int maxlen = 0, pos, len, found;
+	UChar *key;
+	HashPosition hpos;
+	smart_str result = {0};
+	HashTable tmp_hash;
+	
+	zend_hash_init(&tmp_hash, 0, NULL, NULL, 0);
+	zend_hash_internal_pointer_reset_ex(hash, &hpos);
+	while (zend_hash_get_current_data_ex(hash, (void **)&entry, &hpos) == SUCCESS) {
+		switch (zend_hash_get_current_key_ex(hash, &string_key, &string_key_len, &num_key, 0, &hpos)) {
+			case HASH_KEY_IS_UNICODE:
+				len = string_key_len-1;
+				if (len < 1) {
+					zend_hash_destroy(&tmp_hash);
+					RETURN_FALSE;
+				}
+				zend_u_hash_add(&tmp_hash, IS_UNICODE, string_key, string_key_len, entry, sizeof(zval*), NULL);
+				if (len > maxlen) {
+					maxlen = len;
+				}
+				if (len < minlen) {
+					minlen = len;
+				}
+				break; 
+			
+			case HASH_KEY_IS_LONG:
+				Z_TYPE(ctmp) = IS_LONG;
+				Z_LVAL(ctmp) = num_key;
+			
+				convert_to_unicode(&ctmp);
+				len = Z_USTRLEN(ctmp);
+				zend_u_hash_add(&tmp_hash, IS_UNICODE, Z_UNIVAL(ctmp), len+1, entry, sizeof(zval*), NULL);
+				zval_dtor(&ctmp);
+
+				if (len > maxlen) {
+					maxlen = len;
+				}
+				if (len < minlen) {
+					minlen = len;
+				}
+				break;
+		}
+		zend_hash_move_forward_ex(hash, &hpos);
+	}
+
+	key = eumalloc(maxlen+1);
+	pos = 0;
+
+	while (pos < slen) {
+		if ((pos + maxlen) > slen) {
+			maxlen = slen - pos;
+		}
+
+		found = 0;
+		memcpy(key, str+pos, UBYTES(maxlen));
+
+		for (len = maxlen; len >= minlen; len--) {
+			key[len] = 0;
+			
+			if (zend_u_hash_find(&tmp_hash, IS_UNICODE, ZSTR(key), len+1, (void**)&trans) == SUCCESS) {
+				UChar *tval;
+				int tlen;
+				zval tmp;
+
+				if (Z_TYPE_PP(trans) != IS_UNICODE) {
+					tmp = **trans;
+					zval_copy_ctor(&tmp);
+					convert_to_string(&tmp);
+					tval = Z_USTRVAL(tmp);
+					tlen = Z_USTRLEN(tmp);
+				} else {
+					tval = Z_USTRVAL_PP(trans);
+					tlen = Z_USTRLEN_PP(trans);
+				}
+
+				smart_str_appendl(&result, tval, UBYTES(tlen));
+				pos += len;
+				found = 1;
+
+				if (Z_TYPE_PP(trans) != IS_UNICODE) {
+					zval_dtor(&tmp);
+				}
+				break;
+			} 
+		}
+
+		if (! found) {
+			smart_str_append2c(&result, str[pos]);
+			pos++;
+		}
+	}
+
+	efree(key);
+	zend_hash_destroy(&tmp_hash);
+	smart_str_0(&result);
+	RETVAL_UNICODEL((UChar *) result.c, result.len >> 1, 0);
+}
+/* }}} */
+
 /* {{{ php_strtr_array
  */
 static void php_strtr_array(zval *return_value, char *str, int slen, HashTable *hash)
@@ -3552,27 +3727,52 @@ PHP_FUNCTION(strtr)
 		RETURN_FALSE;
 	}
 
-	convert_to_string_ex(str);
+	if (Z_TYPE_PP(str) != IS_UNICODE && Z_TYPE_PP(str) != IS_STRING) {
+		convert_to_text_ex(str);
+	}
 
 	/* shortcut for empty string */
-	if (Z_STRLEN_PP(str) == 0) {
+	if (Z_TYPE_PP(str) == IS_UNICODE && !Z_USTRLEN_PP(str)) {
+		RETURN_EMPTY_UNICODE();
+	} else if (!Z_STRLEN_PP(str)) {
 		RETURN_EMPTY_STRING();
 	}
 
-	if (ac == 2) {
-		php_strtr_array(return_value, Z_STRVAL_PP(str), Z_STRLEN_PP(str), HASH_OF(*from));
-	} else {
-		convert_to_string_ex(from);
-		convert_to_string_ex(to);
+	if (Z_TYPE_PP(str) == IS_UNICODE) {
+		if (ac == 2) {
+			php_u_strtr_array(return_value, Z_USTRVAL_PP(str), Z_USTRLEN_PP(str), HASH_OF(*from));
+			Z_TYPE_P(return_value) = IS_UNICODE;
+		} else {
+			convert_to_unicode_ex(from);
+			convert_to_unicode_ex(to);
 
-		ZVAL_STRINGL(return_value, Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);
-		
-		php_strtr(Z_STRVAL_P(return_value),
-				  Z_STRLEN_P(return_value),
-				  Z_STRVAL_PP(from),
-				  Z_STRVAL_PP(to),
-				  MIN(Z_STRLEN_PP(from), 
-				  Z_STRLEN_PP(to)));
+			ZVAL_UNICODEL(return_value, Z_USTRVAL_PP(str), Z_USTRLEN_PP(str), 1);
+			
+			php_u_strtr(Z_USTRVAL_P(return_value),
+					  Z_USTRLEN_P(return_value),
+					  Z_USTRVAL_PP(from),
+					  Z_USTRLEN_PP(from),
+					  Z_USTRVAL_PP(to),
+					  Z_USTRLEN_PP(to),
+					  MIN(Z_USTRLEN_PP(from), Z_USTRLEN_PP(to)));
+			Z_TYPE_P(return_value) = IS_UNICODE;
+		}
+	} else {
+		if (ac == 2) {
+			php_strtr_array(return_value, Z_STRVAL_PP(str), Z_STRLEN_PP(str), HASH_OF(*from));
+		} else {
+			convert_to_string_ex(from);
+			convert_to_string_ex(to);
+
+			ZVAL_STRINGL(return_value, Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);
+			
+			php_strtr(Z_STRVAL_P(return_value),
+					  Z_STRLEN_P(return_value),
+					  Z_STRVAL_PP(from),
+					  Z_STRVAL_PP(to),
+					  MIN(Z_STRLEN_PP(from), 
+					  Z_STRLEN_PP(to)));
+		}
 	}
 }
 /* }}} */
