@@ -1680,6 +1680,17 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	/* start Zend extensions */
 	zend_startup_extensions();
 
+	/* register additional functions */
+	if (sapi_module.additional_functions) {
+		zend_module_entry *module;
+
+		if (zend_hash_find(&module_registry, "standard", sizeof("standard"), (void**)&module)==SUCCESS) {
+			EG(current_module) = module;
+			zend_register_functions(NULL, sapi_module.additional_functions, NULL, MODULE_PERSISTENT TSRMLS_CC);
+			EG(current_module) = NULL;
+		}
+	}
+
 	UG(unicode) = orig_unicode;
 	zend_post_startup(TSRMLS_C);
 
@@ -1689,27 +1700,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 	/* we're done */
 	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ php_enable_dl
- */
-int php_enable_dl()
-{
-	zend_module_entry *module;
-	static zend_function_entry dl_functions[] = {
-		ZEND_FE(dl, NULL)
-		{ NULL, NULL, NULL }
-	};
-	int ret = FAILURE;
-	TSRMLS_FETCH();
-
-	if (zend_hash_find(&module_registry, "standard", sizeof("standard"), (void**)&module)==SUCCESS) {
-		EG(current_module) = module;
-		ret = zend_register_functions(NULL, dl_functions, NULL, MODULE_PERSISTENT TSRMLS_CC);
-		EG(current_module) = NULL;
-	}
-	return ret;
 }
 /* }}} */
 
