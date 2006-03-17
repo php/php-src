@@ -93,8 +93,7 @@ static void php_embed_register_variables(zval *track_vars_array TSRMLS_DC)
 
 static int php_embed_startup(sapi_module_struct *sapi_module)
 {
-	if (php_module_startup(sapi_module, NULL, 0)==FAILURE ||
-	    php_enable_dl()==FAILURE) {
+	if (php_module_startup(sapi_module, NULL, 0)==FAILURE) {
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -131,6 +130,11 @@ sapi_module_struct php_embed_module = {
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 /* }}} */
+
+static zend_function_entry additional_functions[] = {
+	ZEND_FE(dl, NULL)
+	{NULL, NULL, NULL}
+};
 
 int php_embed_init(int argc, char **argv PTSRMLS_DC)
 {
@@ -174,6 +178,7 @@ int php_embed_init(int argc, char **argv PTSRMLS_DC)
   *ptsrm_ls = tsrm_ls;
 #endif
 
+  php_embed_module.additional_functions = additional_functions;
   sapi_startup(&php_embed_module);
 
   if (php_embed_module.startup(&php_embed_module)==FAILURE) {
