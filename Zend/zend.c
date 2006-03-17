@@ -1358,7 +1358,7 @@ static int exec_done_cb(zend_module_entry *module TSRMLS_DC)
 void zend_post_deactivate_modules(TSRMLS_D)
 {
 	zend_hash_apply(&module_registry, (apply_func_t) exec_done_cb TSRMLS_CC);
-	zend_hash_apply(&module_registry, (apply_func_t) module_registry_unload_temp TSRMLS_CC);
+	zend_hash_reverse_apply(&module_registry, (apply_func_t) module_registry_unload_temp TSRMLS_CC);
 }
 
 

@@ -2319,11 +2319,7 @@ int module_registry_cleanup(zend_module_entry *module TSRMLS_DC)
 
 int module_registry_unload_temp(zend_module_entry *module TSRMLS_DC)
 {
-	switch (module->type) {
-		case MODULE_TEMPORARY:
-			return 1;
-	}
-	return 0;
+	return (module->type == MODULE_TEMPORARY) ? ZEND_HASH_APPLY_REMOVE : ZEND_HASH_APPLY_STOP;
 }
 
 
