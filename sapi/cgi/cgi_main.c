@@ -147,6 +147,10 @@ static const opt_struct OPTIONS[] = {
 /* true global.  this is retreived once only, even for fastcgi */
 static long fix_pathinfo = 1;
 static long discard_path = 0;
+static long fcgi_logging = 1;
+
+static long rfc2616_headers = 0;
+static long cgi_nph = 0;
 
 #ifdef PHP_WIN32
 #define TRANSLATE_SLASHES(path) \
@@ -287,25 +291,12 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	char buf[SAPI_CGI_MAX_HEADER_LENGTH];
 	sapi_header_struct *h;
 	zend_llist_position pos;
-	long rfc2616_headers = 0, nph = 0;
 
 	if (SG(request_info).no_headers == 1) {
 		return  SAPI_HEADER_SENT_SUCCESSFULLY;
 	}
-	/* Check wheater to send RFC2616 style headers compatible with
-	 * PHP versions 4.2.3 and earlier compatible with web servers
-	 * such as IIS. Default is informal CGI RFC header compatible
-	 * with Apache.
-	 */
-	if (cfg_get_long("cgi.rfc2616_headers", &rfc2616_headers) == FAILURE) {
-		rfc2616_headers = 0;
-	}
 
-	if (cfg_get_long("cgi.nph", &nph) == FAILURE) {
-		nph = 0;
-	}
-
-	if (nph || SG(sapi_headers).http_response_code != 200)
+	if (cgi_nph || SG(sapi_headers).http_response_code != 200)
 	{
 		int len;
 
@@ -449,14 +440,9 @@ static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 
 static void sapi_cgi_log_message(char *message)
 {
-	long logging = 1;
-	TSRMLS_FETCH();
+	if (!FCGX_IsCGI() && fcgi_logging) {
+		TSRMLS_FETCH();
 
-	if (cfg_get_long("fastcgi.logging", &logging) == FAILURE) {
-		logging = 1;
-	}
-
-	if (!FCGX_IsCGI() && logging) {
 		FCGX_Request *request = (FCGX_Request *) SG(server_context);
 		if (request) {
 			FCGX_FPrintF(request->err, "%s\n", message);
@@ -1082,6 +1068,24 @@ consult the installation file that came with this distribution, or visit \n\
 
 	if (cfg_get_long("cgi.discard_path", &discard_path) == FAILURE) {
 		discard_path = 0;
+	}
+
+	if (cfg_get_long("fastcgi.logging", &fcgi_logging) == FAILURE) {
+		fcgi_logging = 1;
+	}
+
+
+	/* Check wheater to send RFC2616 style headers compatible with
+	 * PHP versions 4.2.3 and earlier compatible with web servers
+	 * such as IIS. Default is informal CGI RFC header compatible
+	 * with Apache.
+	 */
+	if (cfg_get_long("cgi.rfc2616_headers", &rfc2616_headers) == FAILURE) {
+		rfc2616_headers = 0;
+	}
+
+	if (cfg_get_long("cgi.nph", &cgi_nph) == FAILURE) {
+		cgi_nph = 0;
 	}
 
 #ifndef PHP_WIN32
