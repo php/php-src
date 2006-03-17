@@ -1008,7 +1008,7 @@ PHPAPI void *_php_stream_get_line(php_stream *stream, int buf_type, zstr buf, si
 				UChar *eol;
 				readptr.u = stream->readbuf.u + stream->readpos;
 
-				eol = php_stream_locate_eol(stream, ZSTR(NULL), 0 TSRMLS_CC);
+				eol = php_stream_locate_eol(stream, NULL_ZSTR, 0 TSRMLS_CC);
 				if (eol) {
 					cpysz = eol - readptr.u + 1;
 					done = 1;
@@ -1027,7 +1027,7 @@ PHPAPI void *_php_stream_get_line(php_stream *stream, int buf_type, zstr buf, si
 			} else {
 				char *eol;
 				readptr.s = stream->readbuf.s + stream->readpos;
-				eol = php_stream_locate_eol(stream, ZSTR(NULL), 0 TSRMLS_CC);
+				eol = php_stream_locate_eol(stream, NULL_ZSTR, 0 TSRMLS_CC);
 				if (eol) {
 					cpysz = eol - readptr.s + 1;
 					done = 1;
@@ -1337,7 +1337,7 @@ PHPAPI int _php_stream_flush(php_stream *stream, int closing TSRMLS_DC)
 	int ret = 0;
 
 	if (stream->writefilters.head) {
-		_php_stream_write_filtered(stream, IS_STRING, ZSTR(NULL), 0, closing ? PSFS_FLAG_FLUSH_CLOSE : PSFS_FLAG_FLUSH_INC  TSRMLS_CC);
+		_php_stream_write_filtered(stream, IS_STRING, NULL_ZSTR, 0, closing ? PSFS_FLAG_FLUSH_CLOSE : PSFS_FLAG_FLUSH_INC  TSRMLS_CC);
 	}
 
 	if (stream->ops->flush) {
