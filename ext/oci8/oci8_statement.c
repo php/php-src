@@ -502,6 +502,10 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 #endif
 						) {
 						outcol->storage_size4 = 512; /* XXX this should fit "most" NLS date-formats and Numbers */
+#if defined(SQLT_IBFLOAT) && defined(SQLT_IBDOUBLE)
+					} else if (outcol->data_type == SQLT_IBFLOAT || outcol->data_type == SQLT_IBDOUBLE) {
+						outcol->storage_size4 = 1024;
+#endif
 					} else {
 						outcol->storage_size4++; /* add one for string terminator */
 					}
