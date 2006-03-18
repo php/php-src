@@ -7,6 +7,7 @@ PHP                                                                        NEWS
 - Added overflow checks to wordwrap() function. (Ilia)
 - Removed the E_STRICT deprecation notice from "var". (Ilia)
 - Fixed debug_zval_dump() to support private and protected members. (Dmitry)
+- Fixed bug #36756 (DOMDocument::removeChild corrupts node). (Rob)
 - Fixed bug #36743 (In a class extending XMLReader array properties are not 
   writable). (Tony)
 - Fixed bug #36727 (segfault in pdo_pgsql bindValue() when no parameters are 
