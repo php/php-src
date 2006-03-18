@@ -13,6 +13,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #36148 (unpack("H*hex", $data) is adding an extra character to the 
   end of the string). (Ilia)
 - Fixed bug #36017 (fopen() crashes PHP when opening a URL). (Tony)
+- Fixed bug #36776 (node_list_wrapper_dtor segfault). (Rob)
 
 13 Jan 2006, Version 4.4.2
 - Added missing safe_mode/open_basedir checks into cURL extension. (Ilia)
