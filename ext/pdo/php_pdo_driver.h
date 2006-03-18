@@ -44,7 +44,7 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC);
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20050711
+#define PDO_DRIVER_API	20060318
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -477,9 +477,6 @@ struct _pdo_dbh_t {
 
 	enum pdo_case_conversion native_case, desired_case;
 
-	/* defaults for fetches */
-	enum pdo_fetch_type default_fetch_type;
-
 	/* persistent hash key associated with this handle */
 	const char *persistent_id;
 	int persistent_id_len;
@@ -500,6 +497,9 @@ struct _pdo_dbh_t {
 	 * when PDO::query() fails */
 	pdo_stmt_t *query_stmt;
 	zval query_stmt_zval;
+
+	/* defaults for fetches */
+	enum pdo_fetch_type default_fetch_type;
 };
 
 /* describes a column */
