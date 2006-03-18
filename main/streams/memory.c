@@ -159,7 +159,7 @@ static int php_stream_memory_seek(php_stream *stream, off_t offset, int whence, 
 					return 0;
 				}
 			} else {
-				if (ms->fpos < (size_t)(offset)) {
+				if (ms->fpos + (size_t)(offset) > ms->fsize) {
 					ms->fpos = ms->fsize;
 					*newoffs = -1;
 					return -1;
