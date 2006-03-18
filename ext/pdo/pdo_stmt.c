@@ -42,19 +42,19 @@
  * since it is a .c file, it won't be installed for use by PECL extensions, so we include it here. */
 ZEND_BEGIN_ARG_INFO(first_arg_force_ref, 0)
 	ZEND_ARG_PASS_INFO(1)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 
 ZEND_BEGIN_ARG_INFO(second_arg_force_ref, 0)
 	ZEND_ARG_PASS_INFO(0)
 	ZEND_ARG_PASS_INFO(1)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(third_arg_force_ref, 0)
 	ZEND_ARG_PASS_INFO(0)
 	ZEND_ARG_PASS_INFO(0)
 	ZEND_ARG_PASS_INFO(1)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 
 ZEND_BEGIN_ARG_INFO(fourth_arg_force_ref, 0)
@@ -62,10 +62,10 @@ ZEND_BEGIN_ARG_INFO(fourth_arg_force_ref, 0)
 	ZEND_ARG_PASS_INFO(0)
 	ZEND_ARG_PASS_INFO(0)
 	ZEND_ARG_PASS_INFO(1)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(all_args_by_ref, 1)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 /* }}} */
 #endif
 
@@ -1876,6 +1876,10 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 	struct pdo_bound_param_data *param;
 	PHP_STMT_GET_OBJ;
 
+	if (out == NULL) {
+		RETURN_FALSE;
+	}
+	
 	php_stream_printf(out TSRMLS_CC, "SQL: [%d] %.*s\n",
 		stmt->query_stringlen,
 		stmt->query_stringlen, stmt->query_string);
