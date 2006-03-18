@@ -1053,20 +1053,22 @@ PHPAPI void *_php_stream_get_line(php_stream *stream, int buf_type, zstr buf, si
 			}
 
 			if (is_unicode) {
-				int ulen = u_countChar32(readptr.u, cpysz);
-
-				if (ulen > maxchars) {
-					int32_t i = 0;
-
-					ulen = maxchars;
-					U16_FWD_N(readptr.u, i, cpysz, ulen);
-					cpysz = i;
+				if (maxchars) {
+					int ulen = u_countChar32(readptr.u, cpysz);
+	
+					if (ulen > maxchars) {
+						int32_t i = 0;
+	
+						ulen = maxchars;
+						U16_FWD_N(readptr.u, i, cpysz, ulen);
+						cpysz = i;
+					}
+					maxchars -= ulen;
 				}
-				maxchars -= ulen;
 				memcpy(buf.u, readptr.u, UBYTES(cpysz));
 				buf.u += cpysz;
 			} else {
-				if (cpysz > maxchars) {
+				if (maxchars && cpysz > maxchars) {
 					cpysz = maxchars;
 				}
 				memcpy(buf.s, readptr.s, cpysz);
@@ -1105,10 +1107,12 @@ PHPAPI void *_php_stream_get_line(php_stream *stream, int buf_type, zstr buf, si
 		}
 	}
 
+	if (returned_len) {
+		*returned_len = total_copied;
+	}
+
 	if (total_copied == 0) {
-		if (grow_mode) {
-			assert(bufstart.v == NULL);
-		}
+		assert(bufstart.v != NULL || !grow_mode || stream->eof);
 		return NULL;
 	}
 
