@@ -649,6 +649,7 @@ static inline void node_list_wrapper_dtor(xmlNodePtr node, int destroyref TSRMLS
 			/* Skip property freeing for the following types */
 			case XML_ATTRIBUTE_DECL:
 			case XML_DTD_NODE:
+			case XML_ELEMENT_DECL:
 			case XML_ENTITY_DECL:
 			case XML_ATTRIBUTE_NODE:
 				break;
@@ -689,6 +690,7 @@ static inline void node_list_unlink(xmlNodePtr node)
 				case XML_ATTRIBUTE_DECL:
 				case XML_DTD_NODE:
 				case XML_ENTITY_DECL:
+				case XML_ELEMENT_DECL:
 				case XML_ATTRIBUTE_NODE:
 					break;
 				default:
