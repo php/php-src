@@ -3711,22 +3711,19 @@ PHP_FUNCTION(mb_send_mail)
    Returns the current settings of mbstring */
 PHP_FUNCTION(mb_get_info)
 {
-	zval **type;
+	char *typ = NULL;
+	int typ_len;
 	char *name;
-	int argc = ZEND_NUM_ARGS();
 	const struct mb_overload_def *over_func;
 	zval *row;
+	const mbfl_language *lang = mbfl_no2language(MBSTRG(current_language));
 
-	if (argc < 0 || argc > 1 || zend_get_parameters_ex(1, &type) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &typ, &typ_len) == FAILURE) {
+		RETURN_FALSE;
 	}
 
-	convert_to_string_ex(type);
-
-	if (argc == 0 || !strcasecmp("all", Z_STRVAL_PP(type))) {
-		if (array_init(return_value) == FAILURE) {
-			RETURN_FALSE;
-		}
+	if (!typ || !strcasecmp("all", typ)) {
+		array_init(return_value);
 		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(current_internal_encoding))) != NULL) {
 			add_assoc_string(return_value, "internal_encoding", name, 1);
 		}
@@ -3750,19 +3747,30 @@ PHP_FUNCTION(mb_get_info)
 		} else {
 			add_assoc_string(return_value, "func_overload", "no overload", 1);
  		}
-	} else if (!strcasecmp("internal_encoding", Z_STRVAL_PP(type))) {
+		if (lang != NULL) {
+			if ((name = (char *)mbfl_no_encoding2name(lang->mail_charset)) != NULL) {
+				add_assoc_string(return_value, "mail_charset", name, 1);
+			}
+			if ((name = (char *)mbfl_no_encoding2name(lang->mail_header_encoding)) != NULL) {
+				add_assoc_string(return_value, "mail_header_encoding", name, 1);
+			}
+			if ((name = (char *)mbfl_no_encoding2name(lang->mail_body_encoding)) != NULL) {
+				add_assoc_string(return_value, "mail_body_encoding", name, 1);
+			}
+		}
+	} else if (!strcasecmp("internal_encoding", typ)) {
 		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(current_internal_encoding))) != NULL) {
 			RETVAL_STRING(name, 1);
 		}		
-	} else if (!strcasecmp("http_input", Z_STRVAL_PP(type))) {
+	} else if (!strcasecmp("http_input", typ)) {
 		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(http_input_identify))) != NULL) {
 			RETVAL_STRING(name, 1);
 		}		
-	} else if (!strcasecmp("http_output", Z_STRVAL_PP(type))) {
+	} else if (!strcasecmp("http_output", typ)) {
 		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(current_http_output_encoding))) != NULL) {
 			RETVAL_STRING(name, 1);
 		}		
-	} else if (!strcasecmp("func_overload", Z_STRVAL_PP(type))) {
+	} else if (!strcasecmp("func_overload", typ)) {
 			if (MBSTRG(func_overload)){
 				over_func = &(mb_ovld[0]);
 				array_init(return_value);
@@ -3775,6 +3783,18 @@ PHP_FUNCTION(mb_get_info)
 			} else {
 				RETVAL_STRING("no overload", 1);
 			}
+	} else if (!strcasecmp("mail_charset", typ)) {
+		if (lang != NULL && (name = (char *)mbfl_no_encoding2name(lang->mail_charset)) != NULL) {
+			RETVAL_STRING(name, 1);
+		}
+	} else if (!strcasecmp("mail_header_encoding", typ)) {
+		if (lang != NULL && (name = (char *)mbfl_no_encoding2name(lang->mail_header_encoding)) != NULL) {
+			RETVAL_STRING(name, 1);
+		}
+	} else if (!strcasecmp("mail_body_encoding", typ)) {
+		if (lang != NULL && (name = (char *)mbfl_no_encoding2name(lang->mail_body_encoding)) != NULL) {
+			RETVAL_STRING(name, 1);
+		}
 	} else {
 		RETURN_FALSE;
 	}
