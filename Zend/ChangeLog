@@ -1,3 +1,21 @@
+2006-03-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute_API.c:
+      FIX: For some reason SIGSEGV handler wasn't set, but was restoring. Now all
+      SIGS
+      EGV related code is commented.
+
+    * (PHP_5_1)
+      zend_execute_API.c:
+      FIX: For some reason SIGSEGV handler wasn't set, but was restoring. Now all
+      SIGSEGV related code is commented.
+
+    * zend.c
+      zend.c
+      zend_API.c
+      zend_API.c:
+      Optimization of module unloading (temporary modules can be only in the end)
+
 2006-03-16  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_vm_def.h

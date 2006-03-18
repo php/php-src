@@ -1,3 +1,114 @@
+2006-03-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/string.c:
+      - Fix TSRM
+
+2006-03-17  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/type.c:
+      Make is_string() return TRUE for both Unicode and binary strings.
+
+    * ext/standard/file.c
+      ext/standard/image.c
+      main/streams/streams.c
+      sapi/cli/php_cli.c:
+      Fix compiler errors by using NULL_ZSTR where zstr is expected.
+      
+
+    * ext/standard/string.c:
+      Calculate the size of the tmp[] buffer directly at compile time.
+
+2006-03-17  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      fix #36727 (segfault in pdo_pgsql bindValue() when no parameters are
+      defined)
+
+2006-03-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * main/php_variables.c
+      tests/basic/011.phpt
+      tests/basic/bug29971.phpt:
+      Fixed register_argc_argv
+
+2006-03-17  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_type.h:
+      - Actually make this is_binary() too.
+
+    * ext/standard/string.c
+      ext/standard/type.c
+      ext/standard/tests/strings/strtr2.phpt
+      ext/standard/tests/strings/ucfirst.phpt:
+      - Fixed bug in ucfirst() implementation. If the tmp_len = 0 then it will
+      not
+        write the uppercased character to the buffer, but only returns the
+      length of
+        the uppercased letter as per
+        http://icu.sourceforge.net/apiref/icu4c/ustring_8h.html#a50.
+      - Updated is_string():
+        If Unicode semantics is turned on, return "true" for Unicode strings
+      only.
+        If Unicode semantics is turned off, return "true" for native strings
+      only.
+      - Added is_binary() function that returns "true" for native strings only.
+      - Added first implementation of upgraded strtr function. It works except
+      if
+        combining sequences or surrogates are used in the non-array method of
+      calling
+        this function.
+
+2006-03-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * main/SAPI.h
+      main/main.c
+      main/php_main.h
+      sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c
+      sapi/embed/php_embed.c:
+      Unicode support for dl() patch.
+
+    * main/fopen_wrappers.c
+      main/fopen_wrappers.c:
+      Eliminated unnecessary getcwd() syscall
+
+2006-03-17  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      fix #36743 (In a class extending XMLReader array properties are not
+      writable)
+
+2006-03-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      Optimized FastCGI SAPI check. Check for ini options only once.
+
+    * (PHP_5_1)
+      NEWS
+      main/php_variables.c
+      main/php_variables.c:
+      Allowed 'auto_globals_jit' work together with 'register_argc_argv'
+
+    * ZendEngine2/zend_execute_API.c:
+      FIX: For some reason SIGSEGV handler wasn't set, but was restoring. Now all
+      SIGS
+      EGV related code is commented.
+
+    * (PHP_5_1)
+      ZendEngine2/zend_execute_API.c:
+      FIX: For some reason SIGSEGV handler wasn't set, but was restoring. Now all
+      SIGSEGV related code is commented.
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c:
+      Optimization of module unloading (temporary modules can be only in the end)
+
 2006-03-16  Dmitry Stogov  <dmitry@zend.com>
 
     * NEWS
