@@ -153,8 +153,7 @@ static void json_encode_array(smart_str *buf, zval **val TSRMLS_DC) {
         ulong index;
         uint key_len;
         HashPosition pos;
-        int htlen = i;
-        int wpos = 0;
+        int need_comma = 0;
 
         zend_hash_internal_pointer_reset_ex(myht, &pos);
         for (;; zend_hash_move_forward_ex(myht, &pos)) {
@@ -164,6 +163,12 @@ static void json_encode_array(smart_str *buf, zval **val TSRMLS_DC) {
 
             if (zend_hash_get_current_data_ex(myht, (void **) &data, &pos) == SUCCESS) {
                 if (r == 0) {
+                    if (need_comma) {
+                        smart_str_appendc(buf, ',');
+                    } else {
+                        need_comma = 1;
+                    }
+ 
                     json_encode_r(buf, *data TSRMLS_CC);
                 } else if (r == 1) {
                     if (i == HASH_KEY_IS_STRING) {
@@ -172,11 +177,23 @@ static void json_encode_array(smart_str *buf, zval **val TSRMLS_DC) {
                             continue;
                         }
 
+                        if (need_comma) {
+                            smart_str_appendc(buf, ',');
+                        } else {
+                            need_comma = 1;
+                        }
+
                         json_escape_string(buf, key, key_len - 1 TSRMLS_CC);
                         smart_str_appendc(buf, ':');
 
                         json_encode_r(buf, *data TSRMLS_CC);
                     } else {
+                        if (need_comma) {
+                            smart_str_appendc(buf, ',');
+                        } else {
+                            need_comma = 1;
+                        }
+                        
                         smart_str_appendc(buf, '"');
                         smart_str_append_long(buf, (long) index);
                         smart_str_appendc(buf, '"');
@@ -184,11 +201,6 @@ static void json_encode_array(smart_str *buf, zval **val TSRMLS_DC) {
 
                         json_encode_r(buf, *data TSRMLS_CC);
                     }
-                }
-
-                if (htlen > 1 && wpos++ < htlen - 1)
-                {
-                    smart_str_appendc(buf, ',');
                 }
             }
         }

@@ -18,10 +18,11 @@
  <license>PHP 3.01</license>
  <release>
   <state>stable</state>
-  <version>1.2.0</version>
-  <date>2006-03-15</date>
+  <version>1.2.1</version>
+  <date>2006-03-18</date>
   <notes>
-   Complete rewrite using JSON_checker as the base for the parser. Implements the JSON specification. 3-8x faster on encodes and 1.2x-4x faster on decodes.
+   Fix PECL bug #7147 - rework handling of comma insertion while encoding.
+   Add tests to package.xml
   </notes>
  </release>
   <configureoptions>
@@ -39,6 +40,13 @@
     <file role="src" name="utf8_decode.h" />
     <file role="src" name="utf8_to_utf16.c" />
     <file role="src" name="utf8_to_utf16.h" />
+    <dir role="test" name="tests">
+      <file role="test" name="fail001.phpt" />
+      <file role="test" name="pass001.phpt" />
+      <file role="test" name="pass001.1.phpt" />
+      <file role="test" name="pass002.phpt" />
+      <file role="test" name="pass003.phpt" />
+    </dir>
   </filelist>
   <changelog>
      <release>
@@ -127,6 +135,14 @@
   <date>2006-01-12</date>
   <notes>
    Cleanup and TSRM performance fixes by rasmus.
+  </notes>
+ </release>
+ <release>
+  <state>stable</state>
+  <version>1.2.0</version>
+  <date>2006-03-15</date>
+  <notes>
+   Complete rewrite using JSON_checker as the base for the parser. Implements the JSON specification. 3-8x faster on encodes and 1.2x-4x faster on decodes.
   </notes>
  </release>
  </changelog>
