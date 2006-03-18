@@ -477,6 +477,9 @@ struct _pdo_dbh_t {
 
 	enum pdo_case_conversion native_case, desired_case;
 
+	/* defaults for fetches */
+	enum pdo_fetch_type default_fetch_type;
+
 	/* persistent hash key associated with this handle */
 	const char *persistent_id;
 	int persistent_id_len;
