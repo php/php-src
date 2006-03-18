@@ -545,6 +545,10 @@ static int oci_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{ */
 					) {
 				/* should be big enough for most date formats and numbers */
 				S->cols[colno].datalen = 512;
+#if defined(SQLT_IBFLOAT) && defined(SQLT_IBDOUBLE)
+			} else if (dtype == SQLT_IBFLOAT || dtype == SQLT_IBDOUBLE) {
+				S->cols[colno].datalen = 1024;
+#endif
 			} else {
 				S->cols[colno].datalen = col->maxlen;
 			}

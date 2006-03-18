@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Eliminated run-time constant fetching for TRUE, FALSE and NULL. (Dmitry)
 - Fixed offset/length parameter validation in substr_compare() function. (Ilia)
 - Added overflow checks to wordwrap() function. (Ilia)
+- Added support for BINARY_DOUBLE and BINARY_FLOAT to PDO_OCI and OCI8 
+  (also fixes bug #36764). (Tony)
 - Removed the E_STRICT deprecation notice from "var". (Ilia)
 - Fixed debug_zval_dump() to support private and protected members. (Dmitry)
 - Fixed bug #36756 (DOMDocument::removeChild corrupts node). (Rob)
