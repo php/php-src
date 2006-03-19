@@ -1,3 +1,62 @@
+2006-03-18  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/oci8_statement.c:
+      MFB: Added support for BINARY_DOUBLE and BINARY_FLOAT to PDO_OCI and OCI8
+      (also fixes bug #36764)
+
+    * (PHP_5_1)
+      NEWS
+      ext/oci8/oci8_statement.c:
+      Added support for BINARY_DOUBLE and BINARY_FLOAT to PDO_OCI and OCI8 (also
+      fixes bug #36764)
+
+2006-03-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      main/streams/memory.c:
+      - MFH Fix seek/eof issue in temp streams
+
+    * main/streams/memory.c:
+      - Fix seek/eof issue in temp streams
+
+    * main/streams/streams.c:
+      - Fix issue in _php_stream_get_line(): Allow maxchars == 0 as macro
+        php_stream_get_line() does
+
+2006-03-18  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_4_4)
+      NEWS:
+      fix news (re-order)
+
+    * ext/dom/php_dom.c
+      ext/dom/tests/bug36756.phpt:
+      MFB51: Fixed bug #36756 (DOMDocument::removeChild corrupts node)
+      add test
+
+    * (PHP_5_1)
+      ext/dom/php_dom.c
+      ext/dom/tests/bug36756.phpt
+      ext/dom/tests/bug36756.phpt:
+      Fixed bug #36756 (DOMDocument::removeChild corrupts node)
+      add test
+
+    * (PHP_4_4)
+      NEWS
+      NEWS:
+      BFN
+
+    * (PHP_4_4)
+      ext/domxml/php_domxml.c:
+      Fixed bug #36776 (node_list_wrapper_dtor segfault)
+        - no optimizations. this extension is VERY touchy
+
+2006-03-18  Seiji Masugata  <s.masugata@digicom.dnp.co.jp>
+
+    * (PHP_4_4)
+      ext/mbstring/mbstring.c:
+      fixed doesn't return value when omitting arguments in mb_get_info( ).
+
 2006-03-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/standard/string.c:
