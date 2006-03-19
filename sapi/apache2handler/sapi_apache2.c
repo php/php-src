@@ -86,7 +86,7 @@ static int
 php_apache_sapi_header_handler(sapi_header_struct *sapi_header,sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
 	php_struct *ctx;
-	char *val;
+	char *val, *ptr;
 
 	ctx = SG(server_context);
 
@@ -96,6 +96,7 @@ php_apache_sapi_header_handler(sapi_header_struct *sapi_header,sapi_headers_stru
 		sapi_free_header(sapi_header);
 		return 0;
 	}
+	ptr = val;
 
 	*val = '\0';
 	
@@ -111,6 +112,7 @@ php_apache_sapi_header_handler(sapi_header_struct *sapi_header,sapi_headers_stru
 	} else {
 		apr_table_add(ctx->r->headers_out, sapi_header->header, val);
 	}
+	*ptr = ':';
 	
 	return SAPI_HEADER_ADD;
 }
