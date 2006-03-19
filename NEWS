@@ -10,10 +10,10 @@ PHP                                                                        NEWS
 - Dropped zend.ze1_compatibility_mode (Dmitry)
 - Dropped allow_call_time_pass_reference, added E_STRICT error message. (Dmitry)
 - Dropped register_long_arrays (Dmitry)
-- Droped register_globals support (Pierre)
+- Dropped register_globals support (Pierre)
   - session_register, session_unregister and session_is_registered removed they
     depend on register_globals
-- Droped magic_quotes_gpc, magic_quotes_runtime and magic_quotes_sybase ini
+- Dropped magic_quotes_gpc, magic_quotes_runtime and magic_quotes_sybase ini
   settings (Pierre)
   -  get_magic_quotes_gpc, get_magic_quotes_runtime are kept but always return
      false, set_magic_quotes_runtime raises an E_CORE_ERROR
