@@ -387,6 +387,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 
 		dbh->driver = driver;
 
+#if 0
 		if (options) {
 			zval **attr_value;
 			char *str_key;
@@ -400,7 +401,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 				zend_hash_move_forward(Z_ARRVAL_P(options));
 			}
 		}
-
+#endif
 		return;	
 	}
 
@@ -683,27 +684,6 @@ static PHP_METHOD(PDO, rollBack)
 }
 /* }}} */
 
-/* {{{ proto bool PDO::setAttribute(long attribute, mixed value)
-   Set an attribute */
-static PHP_METHOD(PDO, setAttribute)
-{
-	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
-	long attr;
-	zval *value = NULL;
-
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lz!", &attr, &value)) {
-		RETURN_FALSE;
-	}
-
-	PDO_CONSTRUCT_CHECK;
-
-	if (pdo_dbh_attribute_set(dbh, attr, value TSRMLS_CC)) {
- 		RETURN_TRUE;
- 	}
- 	RETURN_FALSE;
-}
-/* }}} */
-
 static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, long attr, zval *value TSRMLS_DC) /* {{{ */
 {
 	switch (attr) {
@@ -818,7 +798,7 @@ static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, long attr, zval *value TSRMLS_D
 
 fail:
 	if (attr == PDO_ATTR_AUTOCOMMIT) {
-		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "The auto-commit mode cannot be changed for this driver");
+		zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC, "The auto-commit mode cannot be changed for this driver");
 	} else if (!dbh->methods->set_attribute) {
 		pdo_raise_impl_error(dbh, NULL, "IM001", "driver does not support setting attributes" TSRMLS_CC);
 	} else {
@@ -828,6 +808,27 @@ fail:
 }
 /* }}} */
  
+/* {{{ proto bool PDO::setAttribute(long attribute, mixed value)
+   Set an attribute */
+static PHP_METHOD(PDO, setAttribute)
+{
+	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
+	long attr;
+	zval *value = NULL;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lz!", &attr, &value)) {
+		RETURN_FALSE;
+	}
+
+	PDO_CONSTRUCT_CHECK;
+
+	if (pdo_dbh_attribute_set(dbh, attr, value TSRMLS_CC)) {
+ 		RETURN_TRUE;
+ 	}
+ 	RETURN_FALSE;
+}
+/* }}} */
+
 /* {{{ proto mixed PDO::getAttribute(long attribute)
    Get an attribute */
 static PHP_METHOD(PDO, getAttribute)
