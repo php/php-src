@@ -36,6 +36,8 @@
 #include "zend_object_handlers.h"
 #include "zend_hash.h"
 
+static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, long attr, zval *value TSRMLS_DC);
+
 void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate, const char *supp TSRMLS_DC) /* {{{ */
 {
 	pdo_error_type *pdo_err = &dbh->error_code;
@@ -387,10 +389,9 @@ static PHP_METHOD(PDO, dbh_constructor)
 
 		dbh->driver = driver;
 
-#if 0
 		if (options) {
 			zval **attr_value;
-			char *str_key;
+			zstr str_key;
 			long long_key;
 			
 			zend_hash_internal_pointer_reset(Z_ARRVAL_P(options));
@@ -401,7 +402,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 				zend_hash_move_forward(Z_ARRVAL_P(options));
 			}
 		}
-#endif
+
 		return;	
 	}
 
