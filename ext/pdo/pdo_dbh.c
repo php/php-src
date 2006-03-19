@@ -386,6 +386,21 @@ static PHP_METHOD(PDO, dbh_constructor)
 		}
 
 		dbh->driver = driver;
+
+		if (options) {
+			zval **attr_value;
+			char *str_key;
+			long long_key;
+			
+			zend_hash_internal_pointer_reset(Z_ARRVAL_P(options));
+			while (SUCCESS == zend_hash_get_current_data(Z_ARRVAL_P(options), (void**)&attr_value) 
+				  && HASH_KEY_IS_LONG == zend_hash_get_current_key(Z_ARRVAL_P(options), &str_key, &long_key, 0)) {
+				
+				pdo_dbh_attribute_set(dbh, long_key, *attr_value TSRMLS_CC);
+				zend_hash_move_forward(Z_ARRVAL_P(options));
+			}
+		}
+
 		return;	
 	}
 
@@ -682,6 +697,15 @@ static PHP_METHOD(PDO, setAttribute)
 
 	PDO_CONSTRUCT_CHECK;
 
+	if (pdo_dbh_attribute_set(dbh, attr, value TSRMLS_CC)) {
+ 		RETURN_TRUE;
+ 	}
+ 	RETURN_FALSE;
+}
+/* }}} */
+
+static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, long attr, zval *value TSRMLS_DC) /* {{{ */
+{
 	switch (attr) {
 		case PDO_ATTR_ERRMODE:
 			convert_to_long(value);
@@ -690,13 +714,13 @@ static PHP_METHOD(PDO, setAttribute)
 				case PDO_ERRMODE_WARNING:
 				case PDO_ERRMODE_EXCEPTION:
 					dbh->error_mode = Z_LVAL_P(value);
-					RETURN_TRUE;
+					return SUCCESS;
 				default:
 					pdo_raise_impl_error(dbh, NULL, "HY000", "invalid error mode" TSRMLS_CC);
 					PDO_HANDLE_DBH_ERR();
-					RETURN_FALSE;
+					return FAILURE;
 			}
-			RETURN_FALSE;
+			return FAILURE;
 
 		case PDO_ATTR_CASE:
 			convert_to_long(value);
@@ -705,24 +729,24 @@ static PHP_METHOD(PDO, setAttribute)
 				case PDO_CASE_UPPER:
 				case PDO_CASE_LOWER:
 					dbh->desired_case = Z_LVAL_P(value);
-					RETURN_TRUE;
+					return SUCCESS;
 				default:
 					pdo_raise_impl_error(dbh, NULL, "HY000", "invalid case folding mode" TSRMLS_CC);
 					PDO_HANDLE_DBH_ERR();
-					RETURN_FALSE;
+					return FAILURE;
 			}
-			RETURN_FALSE;
+			return FAILURE;
 
 		case PDO_ATTR_ORACLE_NULLS:
 			convert_to_long(value);
 			dbh->oracle_nulls = Z_LVAL_P(value);
-			RETURN_TRUE;
+			return SUCCESS;
 
 		case PDO_ATTR_STRINGIFY_FETCHES:
 			convert_to_long(value);
 			dbh->stringify = Z_LVAL_P(value) ? 1 : 0;
-			RETURN_TRUE;
-
+			return SUCCESS;
+			
 		case PDO_ATTR_STATEMENT_CLASS: {
 			/* array(string classname, array(mixed ctor_args)) */
 			zend_class_entry **pce;
@@ -733,31 +757,31 @@ static PHP_METHOD(PDO, setAttribute)
 					"PDO::ATTR_STATEMENT_CLASS cannot be used with persistent PDO instances"
 					TSRMLS_CC);
 				PDO_HANDLE_DBH_ERR();
-				RETURN_FALSE;
+				return FAILURE;
 			}
 			if (Z_TYPE_P(value) != IS_ARRAY
 				|| zend_hash_index_find(Z_ARRVAL_P(value), 0, (void**)&item) == FAILURE
-				|| !PDO_ZVAL_PP_IS_TEXT(item)
-				|| zend_u_lookup_class(Z_TYPE_PP(item), Z_UNIVAL_PP(item), Z_UNILEN_PP(item), &pce TSRMLS_CC) == FAILURE
+				|| Z_TYPE_PP(item) != IS_STRING
+				|| zend_lookup_class(Z_STRVAL_PP(item), Z_STRLEN_PP(item), &pce TSRMLS_CC) == FAILURE
 			) {
 				pdo_raise_impl_error(dbh, NULL, "HY000", 
 					"PDO::ATTR_STATEMENT_CLASS requires format array(classname, array(ctor_args)); "
 					"the classname must be a string specifying an existing class"
 					TSRMLS_CC);
 				PDO_HANDLE_DBH_ERR();
-				RETURN_FALSE;
+				return FAILURE;
 			}
 			if (!instanceof_function(*pce, pdo_dbstmt_ce TSRMLS_CC)) {
 				pdo_raise_impl_error(dbh, NULL, "HY000", 
 					"user-supplied statement class must be derived from PDOStatement" TSRMLS_CC);
 				PDO_HANDLE_DBH_ERR();
-				RETURN_FALSE;
+				return FAILURE;
 			}
 			if ((*pce)->constructor && !((*pce)->constructor->common.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED))) {
 				pdo_raise_impl_error(dbh, NULL, "HY000", 
 					"user-supplied statement class cannot have a public constructor" TSRMLS_CC);
 				PDO_HANDLE_DBH_ERR();
-				RETURN_FALSE;
+				return FAILURE;
 			}
 			dbh->def_stmt_ce = *pce;
 			if (dbh->def_stmt_ctor_args) {
@@ -771,12 +795,12 @@ static PHP_METHOD(PDO, setAttribute)
 						"ctor_args must be an array"
 					TSRMLS_CC);
 					PDO_HANDLE_DBH_ERR();
-					RETURN_FALSE;
+					return FAILURE;
 				}
 				(*item)->refcount++;
 				dbh->def_stmt_ctor_args = *item;
 			}
-			RETURN_TRUE;
+			return SUCCESS;
 		}
 			
 		default:
@@ -789,21 +813,21 @@ static PHP_METHOD(PDO, setAttribute)
 
 	PDO_DBH_CLEAR_ERR();
 	if (dbh->methods->set_attribute(dbh, attr, value TSRMLS_CC)) {
-		RETURN_TRUE;
+		return SUCCESS;
 	}
 
 fail:
 	if (attr == PDO_ATTR_AUTOCOMMIT) {
-		zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC, "The auto-commit mode cannot be changed for this driver");
+		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "The auto-commit mode cannot be changed for this driver");
 	} else if (!dbh->methods->set_attribute) {
 		pdo_raise_impl_error(dbh, NULL, "IM001", "driver does not support setting attributes" TSRMLS_CC);
 	} else {
 		PDO_HANDLE_DBH_ERR();
 	}
-	RETURN_FALSE;
+	return FAILURE;
 }
 /* }}} */
-
+ 
 /* {{{ proto mixed PDO::getAttribute(long attribute)
    Get an attribute */
 static PHP_METHOD(PDO, getAttribute)
