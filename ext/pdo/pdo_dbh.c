@@ -566,7 +566,7 @@ static PHP_METHOD(PDO, prepare)
 	/* unconditionally keep this for later reference */
 	stmt->query_string = estrndup(statement, statement_len);
 	stmt->query_stringlen = statement_len;
-	stmt->default_fetch_type = PDO_FETCH_BOTH;
+	stmt->default_fetch_type = dbh->default_fetch_type;
 	stmt->dbh = dbh;
 	/* give it a reference to me */
 	zend_objects_store_add_ref(getThis() TSRMLS_CC);
@@ -981,12 +981,7 @@ static PHP_METHOD(PDO, query)
 	stmt->query_string = estrndup(statement, statement_len);
 	stmt->query_stringlen = statement_len;
 
-	if (ZEND_NUM_ARGS() == 1 && dbh->default_fetch_type) {
-		stmt->default_fetch_type = dbh->default_fetch_type;
-	} else {
-		stmt->default_fetch_type = PDO_FETCH_BOTH;
-	}
-
+	stmt->default_fetch_type = dbh->default_fetch_type;
 	stmt->active_query_string = stmt->query_string;
 	stmt->active_query_stringlen = statement_len;
 	stmt->dbh = dbh;
