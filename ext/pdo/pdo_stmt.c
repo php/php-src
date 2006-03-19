@@ -2126,7 +2126,7 @@ static void free_statement(pdo_stmt_t *stmt TSRMLS_DC)
 		int i;
 		struct pdo_column_data *cols = stmt->columns;
 
-		for (i = stmt->column_count; i >= 0;) {
+		for (i = stmt->column_count; i > 0;) {
 			if (cols[--i].name) {
 				efree(cols[i].name);
 			}
