@@ -1,7 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Mar 2006, PHP 5.1.3RC2
-- Fixed Apache2 SAPIs header handler modifying header strings.
+- Fixed Apache2 SAPIs header handler modifying header strings. (Mike)
 - Allowed 'auto_globals_jit' work together with 'register_argc_argv'. (Dmitry)
 - Eliminated run-time constant fetching for TRUE, FALSE and NULL. (Dmitry)
 - Fixed offset/length parameter validation in substr_compare() function. (Ilia)
