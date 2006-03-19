@@ -36,7 +36,7 @@
 #include "zend_object_handlers.h"
 #include "zend_hash.h"
 
-void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate, const char *supp TSRMLS_DC)
+void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate, const char *supp TSRMLS_DC) /* {{{ */
 {
 	pdo_error_type *pdo_err = &dbh->error_code;
 	char *message = NULL;
@@ -97,8 +97,9 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate
 		efree(message);
 	}
 }
+/* }}} */
 
-void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC)
+void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 {
 	pdo_error_type *pdo_err = &dbh->error_code;
 	const char *msg = "<<Unknown>>";
@@ -177,8 +178,9 @@ void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC)
 		efree(supp);
 	}
 }
+/* }}} */
 
-static char *dsn_from_uri(char *uri, char *buf, size_t buflen TSRMLS_DC)
+static char *dsn_from_uri(char *uri, char *buf, size_t buflen TSRMLS_DC) /* {{{ */
 {
 	php_stream *stream;
 	char *dsn = NULL;
@@ -190,6 +192,7 @@ static char *dsn_from_uri(char *uri, char *buf, size_t buflen TSRMLS_DC)
 	}
 	return dsn;
 }
+/* }}} */
 
 /* {{{ proto void PDO::__construct(string dsn, string username, string passwd [, array options])
    */
