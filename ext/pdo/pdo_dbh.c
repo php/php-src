@@ -349,6 +349,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 	dbh->data_source = (const char*)pestrdup(colon + 1, is_persistent);
 	dbh->username = username ? pestrdup(username, is_persistent) : NULL;
 	dbh->password = password ? pestrdup(password, is_persistent) : NULL;
+	dbh->default_fetch_type = PDO_FETCH_BOTH;
 
 	dbh->auto_commit = pdo_attr_lval(options, PDO_ATTR_AUTOCOMMIT, 1 TSRMLS_CC);
 
