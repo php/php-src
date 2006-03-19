@@ -4133,12 +4133,10 @@ PHP_FUNCTION(array_filter)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The first argument should be an array");
 		return;
 	}
-	if (callback) {
-		func = *callback;
-	}
 	array = *input;
 
 	if (ZEND_NUM_ARGS() > 1) {
+		func = *callback;
 		if (!zend_is_callable(func, 0, &callback_name)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The second argument, '%s', should be a valid callback", callback_name);
 			efree(callback_name);
