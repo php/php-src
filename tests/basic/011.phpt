@@ -8,8 +8,8 @@ register_argc_argv=1
 ab+cd+ef+123+test
 --FILE--
 <?php 
-for ($i=0; $i<$argc; $i++) {
-	echo "$i: ".$argv[$i]."\n";
+for ($i=0; $i<$_SERVER['argc']; $i++) {
+	echo "$i: ".$_SERVER['argv'][$i]."\n";
 }
 ?>
 --EXPECT--
