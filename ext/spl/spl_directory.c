@@ -1368,7 +1368,7 @@ static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent TS
 
 static int spl_filesystem_file_read_line(zval * this_ptr, spl_filesystem_object *intern, int silent TSRMLS_DC) /* {{{ */
 {
-	zval *retval;
+	zval *retval = NULL;
 
 	/* if overloaded call the function, otherwise do it directly */
 	if (intern->u.file.func_getCurr->common.scope != spl_ce_SplFileObject) {
