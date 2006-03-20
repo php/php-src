@@ -211,15 +211,15 @@ for ($i = 0; $i < 256; $i++) {
 	$whence = $whence_map[array_rand($whence_map, 1)];
 	switch($whence) {
 		case SEEK_SET:
-			$offset = rand(0, $DATALEN);
+			$offset = rand(0, $DATALEN - 1);
 			$position = $offset;
 			break;
 		case SEEK_END:
-			$offset = -rand(0, $DATALEN);
+			$offset = -rand(0, $DATALEN - 1);
 			$position = $DATALEN + $offset;
 			break;
 		case SEEK_CUR:
-			$offset = rand(0, $DATALEN);
+			$offset = rand(0, $DATALEN - 1);
 			$offset -= $position;
 			$position += $offset;
 			break;
