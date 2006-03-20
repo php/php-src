@@ -1,3 +1,40 @@
+2006-03-19  Antony Dovgal  <antony@zend.com>
+
+    * main/network.c:
+      MFB: first check stream for NULL, then dereference
+
+    * (PHP_5_1)
+      main/network.c:
+      first check stream for NULL, then dereference
+
+    * ext/standard/array.c:
+      make the code a bit cleaner - no need for two different checks that are
+      doing effectively the same
+
+2006-03-19  Michael Wallner  <mike@iworks.at>
+
+    * (PHP_5_1)
+      NEWS:
+      - add comitters name
+
+    * (PHP_5_1)
+      NEWS:
+      - Fixed Apache2 SAPIs header handler modifying header strings.
+
+    * sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c:
+      MFB: fix php_apache_sapi_header_handler() modifying sapi_header
+
+    * (PHP_5_1)
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c:
+      - fix php_apache_sapi_header_handler() modifying sapi_header
+
+2006-03-19  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * NEWS:
+      - typos
+
 2006-03-18  Antony Dovgal  <antony@zend.com>
 
     * ext/oci8/oci8_statement.c:
