@@ -723,6 +723,15 @@ static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, long attr, zval *value TSRMLS_D
 			dbh->oracle_nulls = Z_LVAL_P(value);
 			return SUCCESS;
 
+		case PDO_ATTR_DEFAULT_FETCH_MODE:
+			convert_to_long(value);
+			if (Z_LVAL_P(value) == PDO_FETCH_USE_DEFAULT) {
+				pdo_raise_impl_error(dbh, NULL, "HY000", "invalid fetch mode type" TSRMLS_CC);
+				return FAILURE;
+			}
+			dbh->default_fetch_type = Z_LVAL_P(value);
+			return SUCCESS;
+
 		case PDO_ATTR_STRINGIFY_FETCHES:
 			convert_to_long(value);
 			dbh->stringify = Z_LVAL_P(value) ? 1 : 0;
@@ -869,6 +878,9 @@ static PHP_METHOD(PDO, getAttribute)
 				add_next_index_zval(return_value, dbh->def_stmt_ctor_args);
 			}
 			return;
+		case PDO_ATTR_DEFAULT_FETCH_MODE:
+			RETURN_LONG(dbh->default_fetch_type);
+
 	}
 	
 	if (!dbh->methods->get_attribute) {
@@ -1308,6 +1320,7 @@ void pdo_dbh_init(TSRMLS_D)
 	REGISTER_PDO_CLASS_CONST_LONG("ATTR_DRIVER_NAME",		(long)PDO_ATTR_DRIVER_NAME);
 	REGISTER_PDO_CLASS_CONST_LONG("ATTR_STRINGIFY_FETCHES",(long)PDO_ATTR_STRINGIFY_FETCHES);
 	REGISTER_PDO_CLASS_CONST_LONG("ATTR_MAX_COLUMN_LEN",(long)PDO_ATTR_MAX_COLUMN_LEN);
+	REGISTER_PDO_CLASS_CONST_LONG("ATTR_DEFAULT_FETCH_MODE",(long)PDO_ATTR_DEFAULT_FETCH_MODE);
 	
 	REGISTER_PDO_CLASS_CONST_LONG("ERRMODE_SILENT",	(long)PDO_ERRMODE_SILENT);
 	REGISTER_PDO_CLASS_CONST_LONG("ERRMODE_WARNING",	(long)PDO_ERRMODE_WARNING);
