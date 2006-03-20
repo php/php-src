@@ -50,6 +50,7 @@ static php_stream_filter_status_t strfilter_rot13_filter(
 
 		if (bucket->buf_type == IS_UNICODE) {
 			/* rot13 is silly enough, don't apply it to unicode data */
+			php_stream_bucket_delref(bucket TSRMLS_CC);
 			return PSFS_ERR_FATAL;
 		}
 		php_strtr(bucket->buf.s, bucket->buflen, rot13_from, rot13_to, 52);
@@ -286,6 +287,7 @@ static php_stream_filter_status_t strfilter_strip_tags_filter(
 
 		if (bucket->buf_type == IS_UNICODE) {
 			/* Uh oh! */
+			php_stream_bucket_delref(bucket TSRMLS_CC);
 			return PSFS_ERR_FATAL;
 		}
 
