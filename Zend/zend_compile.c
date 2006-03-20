@@ -3124,13 +3124,7 @@ void zend_do_declare_class_constant(znode *var_name, znode *value TSRMLS_DC)
 	}
 
 	ALLOC_ZVAL(property);
-
-	if (value) {
-		*property = value->u.constant;
-	} else {
-		INIT_PZVAL(property);
-		Z_TYPE_P(property) = IS_NULL;
-	}
+	*property = value->u.constant;
 
 	if (zend_u_hash_add(&CG(active_class_entry)->constants_table, Z_TYPE(var_name->u.constant), Z_UNIVAL(var_name->u.constant), Z_UNILEN(var_name->u.constant)+1, &property, sizeof(zval *), NULL)==FAILURE) {
 		FREE_ZVAL(property);
