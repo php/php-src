@@ -97,6 +97,7 @@ PHP_MINIT_FUNCTION(syslog)
 	/* AIX doesn't have LOG_PERROR */
 	REGISTER_LONG_CONSTANT("LOG_PERROR", LOG_PERROR, CONST_CS | CONST_PERSISTENT); /*log to stderr*/
 #endif
+	BG(syslog_device)=NULL;
 
 	return SUCCESS;
 }
@@ -109,19 +110,23 @@ PHP_RINIT_FUNCTION(syslog)
 	} else {
 		BG(syslog_started)=0;
 	}
-	BG(syslog_device)=NULL;
 	return SUCCESS;
 }
 
 
 PHP_RSHUTDOWN_FUNCTION(syslog)
 {
-	if (BG(syslog_device)) {
-		efree(BG(syslog_device));
-	}
 #ifdef PHP_WIN32
 	closelog();
 #endif
+	return SUCCESS;
+}
+
+PHP_MSHUTDOWN_FUNCTION(syslog)
+{
+	if (BG(syslog_device)) {
+		free(BG(syslog_device));
+	}
 	return SUCCESS;
 }
 
@@ -224,9 +229,9 @@ PHP_FUNCTION(openlog)
 		return;
 	}
 	if (BG(syslog_device)) {
-		efree(BG(syslog_device));
+		free(BG(syslog_device));
 	}
-	BG(syslog_device) = estrndup(ident, ident_len);
+	BG(syslog_device) = zend_strndup(ident, ident_len);
 	openlog(BG(syslog_device), option, facility);
 	RETURN_TRUE;
 }
@@ -242,7 +247,7 @@ PHP_FUNCTION(closelog)
 
 	closelog();
 	if (BG(syslog_device)) {
-		efree(BG(syslog_device));
+		free(BG(syslog_device));
 		BG(syslog_device)=NULL;
 	}
 	RETURN_TRUE;
