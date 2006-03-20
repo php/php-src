@@ -412,22 +412,6 @@ static PHP_METHOD(PDO, dbh_constructor)
 }
 /* }}} */
 
-/* {{{ proto object PDO::setDefaultFetchMode(PDOStatement::setFetchMode())
-   Set the default fetch mode for this connection */
-static PHP_METHOD(PDO, setDefaultFetchMode)
-{
-	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
-	long mode;
-
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &mode)) {
-		RETURN_FALSE;
-	}
-
-	PDO_CONSTRUCT_CHECK;
-	dbh->default_fetch_type = mode;
-}
-/* }}} */
-
 static zval *pdo_stmt_instantiate(pdo_dbh_t *dbh, zval *object, zend_class_entry *dbstmt_ce, zval *ctor_args TSRMLS_DC) /* {{{ */
 {
 	if (ctor_args) {
@@ -1131,7 +1115,6 @@ static PHP_METHOD(PDO, getAvailableDrivers)
 zend_function_entry pdo_dbh_functions[] = {
 	ZEND_MALIAS(PDO, __construct, dbh_constructor,	NULL, 			ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, prepare, 				NULL,			ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, setDefaultFetchMode, 	NULL, 			ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, beginTransaction,		NULL,			ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, commit,			NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, rollBack,		NULL,					ZEND_ACC_PUBLIC)
