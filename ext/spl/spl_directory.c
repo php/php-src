@@ -1435,7 +1435,7 @@ static void spl_filesystem_file_read_csv(zval * this_ptr, spl_filesystem_object 
 
 static int spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesystem_object *intern, int silent TSRMLS_DC) /* {{{ */
 {
-	zval *retval;
+	zval *retval = NULL;
 
 	/* 1) use fgetcsv? 2) overloaded call the function, 3) do it directly */
 	if (intern->flags & SPL_FILE_OBJECT_READ_CSV || intern->u.file.func_getCurr->common.scope != spl_ce_SplFileObject) {
