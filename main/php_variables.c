@@ -736,6 +736,23 @@ static zend_bool php_auto_globals_create_server(char *name, uint name_len TSRMLS
 {
 	if (PG(variables_order) && (strchr(PG(variables_order),'S') || strchr(PG(variables_order),'s'))) {
 		php_register_server_variables(TSRMLS_C);
+
+		if (PG(register_argc_argv)) {
+			if (SG(request_info).argc) {
+				zval **argc, **argv;
+	
+				if (zend_hash_find(&EG(symbol_table), "argc", sizeof("argc"), (void**)&argc) == SUCCESS &&
+				    zend_hash_find(&EG(symbol_table), "argv", sizeof("argv"), (void**)&argv) == SUCCESS) {
+				(*argc)->refcount++;
+					(*argv)->refcount++;
+					zend_hash_update(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "argv", sizeof("argv"), argv, sizeof(zval *), NULL);
+					zend_hash_update(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "argc", sizeof("argc"), argc, sizeof(zval *), NULL);
+				}
+			} else {
+				php_build_argv(SG(request_info).query_string, PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
+			}
+		}
+	
 	} else {
 		zval *server_vars=NULL;
 		ALLOC_ZVAL(server_vars);
@@ -754,19 +771,7 @@ static zend_bool php_auto_globals_create_server(char *name, uint name_len TSRMLS
 		zend_hash_update(&EG(symbol_table), "HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS"), &PG(http_globals)[TRACK_VARS_SERVER], sizeof(zval *), NULL);
 		PG(http_globals)[TRACK_VARS_SERVER]->refcount++;
 	}
-
-	if (PG(register_argc_argv)) {
-		zval **argc, **argv;
-
-		if (zend_hash_find(&EG(symbol_table), "argc", sizeof("argc"), (void**)&argc) == SUCCESS &&
-		    zend_hash_find(&EG(symbol_table), "argv", sizeof("argv"), (void**)&argv) == SUCCESS) {
-			(*argc)->refcount++;
-			(*argv)->refcount++;
-			zend_hash_update(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "argv", sizeof("argv"), argv, sizeof(zval *), NULL);
-			zend_hash_update(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "argc", sizeof("argc"), argc, sizeof(zval *), NULL);
-		}
-	}
-
+	
 	return 0; /* don't rearm */
 }
 
