@@ -785,6 +785,7 @@ static void _php_mb_globals_ctor(zend_mbstring_globals *pglobals TSRMLS_DC)
 	MBSTRG(filter_illegal_substchar) = 0x3f;	/* '?' */
 	MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 	MBSTRG(current_filter_illegal_substchar) = 0x3f;	/* '?' */
+	MBSTRG(illegalchars) = 0;
 	MBSTRG(func_overload) = 0;
 	MBSTRG(encoding_translation) = 0;
 	MBSTRG(strict_detection) = 0;
