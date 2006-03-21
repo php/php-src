@@ -50,7 +50,9 @@ see www.abisource.com/enchant/
       <file name="config.m4" role="src"/>
       <file name="config.w32" role="src"/>
       <file name="CREDITS" role="doc"/>
-      <file name="enchant.c" role="src"/>
+      <file name="enchant.c" role="src">
+        <tasks:replace from="@package_version@" to="version" type="package-info" />
+      </file>
       <file name="php_enchant.h" role="src"/>
     </dir>
 <!-- / -->
