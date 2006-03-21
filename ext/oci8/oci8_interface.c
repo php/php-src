@@ -1187,7 +1187,7 @@ PHP_FUNCTION(oci_field_type)
 			RETVAL_STRING("LONG RAW",1);
 			break;
 		case SQLT_CHR:
-			RETVAL_STRING("VARCHAR",1);
+			RETVAL_STRING("VARCHAR2",1);
 			break;
 		case SQLT_RSET:
 			RETVAL_STRING("REFCURSOR",1);
