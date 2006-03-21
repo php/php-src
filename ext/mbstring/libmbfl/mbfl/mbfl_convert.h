@@ -51,6 +51,7 @@ struct _mbfl_convert_filter {
 	const mbfl_encoding *to;
 	int illegal_mode;
 	int illegal_substchar;
+	int num_illegalchar;
 	void *opaque;
 };
 
