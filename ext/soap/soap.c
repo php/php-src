@@ -1359,7 +1359,7 @@ PHP_METHOD(SoapServer, handle)
 	sdlPtr old_sdl = NULL;
 	soapServicePtr service;
 	xmlDocPtr doc_request=NULL, doc_return;
-	zval function_name, **params, **raw_post, *soap_obj, retval, **server_vars;
+	zval function_name, **params, **raw_post, *soap_obj, retval;
 	char *fn_name, cont_len[30];
 	int num_params = 0, size, i, call_status = 0;
 	xmlChar *buf;
@@ -1381,54 +1381,51 @@ PHP_METHOD(SoapServer, handle)
 	}
 	INIT_ZVAL(retval);
 
-	if (zend_hash_find(&EG(symbol_table), "_SERVER", sizeof("_SERVER"), (void **)&server_vars) == SUCCESS) {
-		zval **req_method, **query_string;
-		if (zend_hash_find(Z_ARRVAL_PP(server_vars), "REQUEST_METHOD", sizeof("REQUEST_METHOD"), (void **)&req_method) == SUCCESS) {
-			if (!strcmp(Z_STRVAL_PP(req_method), "GET") && zend_hash_find(Z_ARRVAL_PP(server_vars), "QUERY_STRING", sizeof("QUERY_STRING"), (void **)&query_string) == SUCCESS) {
-				if (stricmp(Z_STRVAL_PP(query_string), "wsdl") == 0) {
-					if (service->sdl) {
+	if (SG(request_info).request_method &&
+	    strcmp(SG(request_info).request_method, "GET") == 0 &&
+	    SG(request_info).query_string &&
+	    stricmp(SG(request_info).query_string, "wsdl") == 0) {
+
+		if (service->sdl) {
 /*
-					  char *hdr = emalloc(sizeof("Location: ")+strlen(service->sdl->source));
-					  strcpy(hdr,"Location: ");
-					  strcat(hdr,service->sdl->source);
-						sapi_add_header(hdr, sizeof("Location: ")+strlen(service->sdl->source)-1, 1);
-						efree(hdr);
+			char *hdr = emalloc(sizeof("Location: ")+strlen(service->sdl->source));
+			strcpy(hdr,"Location: ");
+			strcat(hdr,service->sdl->source);
+			sapi_add_header(hdr, sizeof("Location: ")+strlen(service->sdl->source)-1, 1);
+			efree(hdr);
 */
-						zval readfile, readfile_ret, *param;
+			zval readfile, readfile_ret, *param;
 
-						INIT_ZVAL(readfile);
-						INIT_ZVAL(readfile_ret);
-						MAKE_STD_ZVAL(param);
+			INIT_ZVAL(readfile);
+			INIT_ZVAL(readfile_ret);
+			MAKE_STD_ZVAL(param);
 
-						sapi_add_header("Content-Type: text/xml; charset=utf-8", sizeof("Content-Type: text/xml; charset=utf-8")-1, 1);
-						ZVAL_STRING(param, service->sdl->source, 1);
-						ZVAL_STRING(&readfile, "readfile", 1);
-						if (call_user_function(EG(function_table), NULL, &readfile, &readfile_ret, 1, &param  TSRMLS_CC) == FAILURE) {
-							soap_server_fault("Server", "Couldn't find WSDL", NULL, NULL, NULL TSRMLS_CC);
-						}
-
-						zval_ptr_dtor(&param);
-						zval_dtor(&readfile);
-						zval_dtor(&readfile_ret);
-
-						SOAP_SERVER_END_CODE();
-						return;
-					} else {
-						soap_server_fault("Server", "WSDL generation is not supported yet", NULL, NULL, NULL TSRMLS_CC);
-/*
-						sapi_add_header("Content-Type: text/xml; charset=utf-8", sizeof("Content-Type: text/xml; charset=utf-8"), 1);
-						PUTS("<?xml version=\"1.0\" ?>\n<definitions\n");
-						PUTS("    xmlns=\"http://schemas.xmlsoap.org/wsdl/\"\n");
-						PUTS("    targetNamespace=\"");
-						PUTS(service->uri);
-						PUTS("\">\n");
-						PUTS("</definitions>");
-*/
-						SOAP_SERVER_END_CODE();
-						return;
-					}
-				}
+			sapi_add_header("Content-Type: text/xml; charset=utf-8", sizeof("Content-Type: text/xml; charset=utf-8")-1, 1);
+			ZVAL_STRING(param, service->sdl->source, 1);
+			ZVAL_STRING(&readfile, "readfile", 1);
+			if (call_user_function(EG(function_table), NULL, &readfile, &readfile_ret, 1, &param  TSRMLS_CC) == FAILURE) {
+				soap_server_fault("Server", "Couldn't find WSDL", NULL, NULL, NULL TSRMLS_CC);
 			}
+
+			zval_ptr_dtor(&param);
+			zval_dtor(&readfile);
+			zval_dtor(&readfile_ret);
+
+			SOAP_SERVER_END_CODE();
+			return;
+		} else {
+			soap_server_fault("Server", "WSDL generation is not supported yet", NULL, NULL, NULL TSRMLS_CC);
+/*
+			sapi_add_header("Content-Type: text/xml; charset=utf-8", sizeof("Content-Type: text/xml; charset=utf-8"), 1);
+			PUTS("<?xml version=\"1.0\" ?>\n<definitions\n");
+			PUTS("    xmlns=\"http://schemas.xmlsoap.org/wsdl/\"\n");
+			PUTS("    targetNamespace=\"");
+			PUTS(service->uri);
+			PUTS("\">\n");
+			PUTS("</definitions>");
+*/
+			SOAP_SERVER_END_CODE();
+			return;
 		}
 	}
 
@@ -1441,6 +1438,7 @@ PHP_METHOD(SoapServer, handle)
 			&& ((*raw_post)->type==IS_STRING)) {
 			zval **server_vars, **encoding;
 
+			zend_is_auto_global("_SERVER", sizeof("_SERVER")-1 TSRMLS_CC);
 			if (zend_hash_find(&EG(symbol_table), "_SERVER", sizeof("_SERVER"), (void **) &server_vars) == SUCCESS &&
 			    Z_TYPE_PP(server_vars) == IS_ARRAY &&
 			    zend_hash_find(Z_ARRVAL_PP(server_vars), "HTTP_CONTENT_ENCODING", sizeof("HTTP_CONTENT_ENCODING"), (void **) &encoding)==SUCCESS &&
@@ -1477,15 +1475,9 @@ PHP_METHOD(SoapServer, handle)
 				doc_request = soap_xmlParseMemory(Z_STRVAL_PP(raw_post),Z_STRLEN_PP(raw_post));
 			}
 		} else {
-			if (zend_hash_find(&EG(symbol_table), "_SERVER", sizeof("_SERVER"), (void **)&server_vars) == SUCCESS) {
-				zval **req_method;
-				if (zend_hash_find(Z_ARRVAL_PP(server_vars), "REQUEST_METHOD", sizeof("REQUEST_METHOD"), (void **)&req_method) == SUCCESS) {
-					if (!strcmp(Z_STRVAL_PP(req_method), "POST")) {
-						if (!zend_ini_long("always_populate_raw_post_data", sizeof("always_populate_raw_post_data"), 0)) {
-							php_error_docref(NULL TSRMLS_CC, E_ERROR, "PHP-SOAP requires 'always_populate_raw_post_data' to be on please check your php.ini file");
-						}
-					}
-				}
+			if (SG(request_info).request_method &&
+	    		strcmp(SG(request_info).request_method, "POST") == 0) {
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "PHP-SOAP requires 'always_populate_raw_post_data' to be on please check your php.ini file");
 			}
 			soap_server_fault("Server", "Bad Request. Can't find HTTP_RAW_POST_DATA", NULL, NULL, NULL TSRMLS_CC);
 			return;
