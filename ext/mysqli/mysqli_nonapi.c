@@ -326,7 +326,7 @@ PHP_FUNCTION(mysqli_set_charset)
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL*, &mysql_link, "mysqli_link");
 
-	if (mysql_set_character_set(mysql->mysql, cs_name)) {
+	if (!mysql->mysql->thread_id || mysql_set_character_set(mysql->mysql, cs_name)) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
