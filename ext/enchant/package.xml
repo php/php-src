@@ -1,23 +1,9 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?>
-<!DOCTYPE package SYSTEM "../pear/package.dtd">
-<package>
- <name>enchant</name>
- <summary>libenchant binder, support near all spelling tools</summary>
- <maintainers>
-  <maintainer>
-   <user>pajoye</user>
-   <name>Pierre-Alain Joye</name>
-   <email>paj@pearfr.org</email>
-   <role>lead</role>
-  </maintainer>
-  <maintainer>
-   <user>iliaa</user>
-   <name>Ilia Alshanetsky</name>
-   <email>ilia@php.net</email>
-   <role>lead</role>
-  </maintainer>
- </maintainers>
- <description>Enchant is a binder for libenchant. Libenchant provides a common
+<?xml version="1.0" encoding="UTF-8"?>
+<package xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" packagerversion="1.4.8" version="2.0" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+  <name>enchant</name>
+  <channel>pecl.php.net</channel>
+  <summary>libenchant binder, support near all spelling tools</summary>
+  <description>Enchant is a binder for libenchant. Libenchant provides a common
 API for many spell libraries:
 - aspell/pspell (intended to replace ispell)
 - hspell (hebrew)
@@ -25,59 +11,127 @@ API for many spell libraries:
 - myspell (OpenOffice project, mozilla)
 - uspell (primarily Yiddish, Hebrew, and Eastern European languages)
 A plugin system allows to add custom spell support.
-see www.abisource.com/enchant/</description>
- <license>PHP</license>
- <release>
-  <state>stable</state>
-  <version>1.0</version>
-  <date>2004-08-11</date>
-  <notes>- Fixed leak inside MINFO function.
+see www.abisource.com/enchant/
+ </description>
+  <lead>
+    <name>Pierre-Alain Joye</name>
+    <user>pajoye</user>
+    <email>paj@pearfr.org</email>
+    <active>yes</active>
+  </lead>
+  <lead>
+    <name>Ilia Alshanetsky</name>
+    <user>iliaa</user>
+    <email>ilia@php.net</email>
+    <active>yes</active>
+  </lead>
+  <date>2006-03-21</date>
+  <version>
+    <release>1.0.1</release>
+    <api>1.0</api>
+  </version>
+  <stability>
+    <release>stable</release>
+    <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>- fix compilation warnings
+- add examples
+- add tests</notes>
+  <contents>
+    <dir name="/">
+      <dir name="docs">
+        <dir name="examples">
+          <file name="example1.php" role="doc"/>
+        </dir>
+<!-- //docs/examples -->
+      </dir>
+<!-- //docs -->
+      <file name="config.m4" role="src"/>
+      <file name="config.w32" role="src"/>
+      <file name="CREDITS" role="doc"/>
+      <file name="enchant.c" role="src"/>
+      <file name="php_enchant.h" role="src"/>
+    </dir>
+<!-- / -->
+  </contents>
+  <dependencies>
+    <required>
+      <php>
+        <min>5</min>
+      </php>
+      <pearinstaller>
+        <min>1.4.0b1</min>
+      </pearinstaller>
+    </required>
+  </dependencies>
+  <providesextension>enchant</providesextension>
+  <extsrcrelease>
+    <configureoption default="shared" name="with-enchant" prompt="libenchant prefix?"/>
+  </extsrcrelease>
+  <changelog>
+    <release>
+      <date>2004-08-11</date>
+      <version>
+        <release>1.0</release>
+        <api>1.0</api>
+      </version>
+      <stability>
+        <release>stable</release>
+        <api>stable</api>
+      </stability>
+      <license uri="http://www.php.net/license">PHP</license>
+      <notes>- Fixed leak inside MINFO function.
 - Fixed crash inside enchant_dict_suggest() when there are no suggestions.
 - Added missing safe_mode/open_basedir check inside enchant_broker_request_pwl_dict().
 - Fixed various function prototypes.
-- Fixed possible leak in suggestions result.</notes>
-  <filelist>
-   <file role="src" name="config.m4"/>
-   <file role="src" name="config.w32"/>
-   <file role="src" name="enchant.c"/>
-   <file role="src" name="php_enchant.h"/>
-   <file role="doc" name="CREDITS"/>
-   <dir name="docs" role="doc">
-     <dir name="examples">
-       <file name="example1.php"/>
-     </dir>
-   </dir>
-  </filelist>
-  <configureoptions>
-   <configureoption name="with-enchant" default="shared" prompt="libenchant prefix?"/>
-  </configureoptions>
-  <deps>
-   <dep type="php" rel="ge" version="5" />
-  </deps>
- </release>
- <changelog>
-  <release>
-   <state>beta</state>
-   <version>0.2.1</version>
-   <date>2004-03-11</date>
-   <notes>- Fix possible leak in suggestions result
-- Move to beta status</notes>
-  </release>
-  <release>
-   <state>alpha</state>
-   <version>0.2.0</version>
-   <notes>- Add Ilia Alshanetsky as maintainer
+- Fixed possible leak in suggestions result.
+ </notes>
+    </release>
+    <release>
+      <version>
+        <release>0.2.1</release>
+        <api>0.2.1</api>
+      </version>
+      <stability>
+        <release>beta</release>
+        <api>beta</api>
+      </stability>
+      <date>2004-03-11</date>
+      <license uri="http://www.php.net/license">PHP</license>
+      <notes>- Fix possible leak in suggestions result
+- Move to beta status
+   </notes>
+    </release>
+    <release>
+      <version>
+        <release>0.2.0</release>
+        <api>0.2.0</api>
+      </version>
+      <stability>
+        <release>alpha</release>
+        <api>alpha</api>
+      </stability>
+      <date>2006-03-21</date>
+      <license uri="http://www.php.net/license">PHP</license>
+      <notes>- Add Ilia Alshanetsky as maintainer
 - Cleanup sources codes (ilia)
-- Add enchant_dict_quick_check (ilia)</notes>
-  </release>
-  <release>
-   <version>0.1</version>
-   <state>alpha</state>
-   <date>2003-03-08</date>
-   <notes>Initial release</notes>
-  </release>
- </changelog>
+- Add enchant_dict_quick_check (ilia)
+   </notes>
+    </release>
+    <release>
+      <version>
+        <release>0.1</release>
+        <api>0.1</api>
+      </version>
+      <stability>
+        <release>alpha</release>
+        <api>alpha</api>
+      </stability>
+      <date>2003-03-08</date>
+      <license uri="http://www.php.net/license">PHP</license>
+      <notes>Initial release
+   </notes>
+    </release>
+  </changelog>
 </package>
-<!--
-vim:et:ts=1:sw=1
--->
