@@ -18,6 +18,8 @@ PHP                                                                        NEWS
   defined). (Tony)
 - Fixed bug #36697 (Transparency is lost when using imagecreatetruecolor).
   (Pierre)
+- Fixed bug #36689 (Removed arbitrary limit on the length of syslog messages).
+  (Ilia)
 - Fixed bug #36629 (SoapServer::handle() exits on SOAP faults). (Dmitry)
 - Fixed Bug #36614 (Segfault when using Soap). (Dmitry)
 - Fixed bug #36568 (memory_limit setting on win32 has no effect). (Dmitry)
