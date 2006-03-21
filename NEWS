@@ -10,6 +10,7 @@ PHP                                                                        NEWS
   (also fixes bug #36764). (Tony)
 - Removed the E_STRICT deprecation notice from "var". (Ilia)
 - Fixed debug_zval_dump() to support private and protected members. (Dmitry)
+- Fixed bug #36809 (__FILE__ behavior changed). (Dmitry)
 - FIxed bug #36808 (syslog ident becomes garbage between requests). (Tony)
 - Fixed bug #36756 (DOMDocument::removeChild corrupts node). (Rob)
 - Fixed bug #36749 (SOAP: 'Error Fetching http body' when using HTTP Proxy).
