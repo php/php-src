@@ -244,6 +244,7 @@ PHP_METHOD(SoapServer, getFunctions);
 PHP_METHOD(SoapServer, handle);
 PHP_METHOD(SoapServer, setPersistence);
 PHP_METHOD(SoapServer, fault);
+PHP_METHOD(SoapServer, addSoapHeader);
 #ifdef HAVE_PHP_DOMXML
 PHP_METHOD(PHP_SOAP_SERVER_CLASS, map);
 #endif
@@ -309,6 +310,7 @@ static zend_function_entry soap_server_functions[] = {
 	PHP_ME(SoapServer, getFunctions, NULL, 0)
 	PHP_ME(SoapServer, handle, NULL, 0)
 	PHP_ME(SoapServer, fault, NULL, 0)
+	PHP_ME(SoapServer, addSoapHeader, NULL, 0)
 #ifdef HAVE_PHP_DOMXML
 	PHP_ME(SoapServer, map, NULL, 0)
 #endif
@@ -1518,6 +1520,8 @@ PHP_METHOD(SoapServer, handle)
 	old_soap_version = SOAP_GLOBAL(soap_version);
 	function = deserialize_function_call(service->sdl, doc_request, service->actor, &function_name, &num_params, &params, &soap_version, &soap_headers TSRMLS_CC);
 	xmlFreeDoc(doc_request);
+	
+	service->soap_headers_ptr = &soap_headers;
 
 	soap_obj = NULL;
 	if (service->type == SOAP_CLASS) {
@@ -1802,15 +1806,18 @@ fail:
 		int i;
 
 		soap_headers = soap_headers->next;
-		i = h->num_params;
-		while (i > 0) {
-			zval_ptr_dtor(&h->parameters[--i]);
+		if (h->parameters) {
+			i = h->num_params;
+			while (i > 0) {
+				zval_ptr_dtor(&h->parameters[--i]);
+			}
+			efree(h->parameters);
 		}
-		efree(h->parameters);
 		zval_dtor(&h->function_name);
 		zval_dtor(&h->retval);
 		efree(h);
 	}
+	service->soap_headers_ptr = NULL;
 
 	/* Free Memory */
 	if (num_params > 0) {
@@ -1846,6 +1853,37 @@ PHP_METHOD(SoapServer, fault)
 	SOAP_SERVER_END_CODE();
 }
 /* }}} */
+
+PHP_METHOD(SoapServer, addSoapHeader)
+{
+	soapServicePtr service;
+	zval *fault;
+	soapHeader **p;
+
+	SOAP_SERVER_BEGIN_CODE();
+
+	FETCH_THIS_SERVICE(service);
+
+	if (!service || !service->soap_headers_ptr) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "The SoapServer::addSoapHeader function may be called only during SOAP request processing");
+	}
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &fault, soap_header_class_entry) == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
+	}
+
+	p = service->soap_headers_ptr;
+	while (*p != NULL) {
+		p = &(*p)->next;
+	}
+	*p = emalloc(sizeof(soapHeader));
+	memset(*p, 0, sizeof(soapHeader));
+	ZVAL_NULL(&(*p)->function_name);
+	(*p)->retval = *fault;
+	zval_copy_ctor(&(*p)->retval);
+
+	SOAP_SERVER_END_CODE();
+}
 
 static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeader *hdr TSRMLS_DC)
 {
@@ -2523,7 +2561,7 @@ static void verify_soap_headers_array(HashTable *ht TSRMLS_DC)
 	zend_hash_internal_pointer_reset(ht);
 	while (zend_hash_get_current_data(ht, (void**)&tmp) == SUCCESS) {
 		if (Z_TYPE_PP(tmp) != IS_OBJECT ||
-		    Z_OBJCE_PP(tmp) != soap_header_class_entry) {
+		    !instanceof_function(Z_OBJCE_PP(tmp), soap_header_class_entry TSRMLS_CC)) {
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid SOAP header");
 		}
 		zend_hash_move_forward(ht);
@@ -2583,7 +2621,7 @@ PHP_METHOD(SoapClient, __call)
 		verify_soap_headers_array(soap_headers TSRMLS_CC);
 		free_soap_headers = 0;
 	} else if (Z_TYPE_P(headers) == IS_OBJECT &&
-	           Z_OBJCE_P(headers) == soap_header_class_entry) {
+	           instanceof_function(Z_OBJCE_P(headers), soap_header_class_entry TSRMLS_CC)) {
 	    soap_headers = emalloc(sizeof(HashTable));
 		zend_hash_init(soap_headers, 0, NULL, ZVAL_PTR_DTOR, 0);
 		zend_hash_next_index_insert(soap_headers, &headers, sizeof(zval*), NULL);
@@ -2846,7 +2884,7 @@ PHP_METHOD(SoapClient, __setSoapHeaders)
 			add_property_zval(this_ptr, "__default_headers", headers);
 		}
 	} else if (Z_TYPE_P(headers) == IS_OBJECT &&
-	           Z_OBJCE_P(headers) == soap_header_class_entry) {
+	           instanceof_function(Z_OBJCE_P(headers), soap_header_class_entry TSRMLS_CC)) {
 		zval *default_headers;
 		ALLOC_INIT_ZVAL(default_headers);
 		array_init(default_headers);
@@ -3518,7 +3556,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 
 			head = xmlNewChild(envelope, ns, "Header", NULL);
 			if (Z_TYPE_P(hdr_ret) == IS_OBJECT &&
-			    Z_OBJCE_P(hdr_ret) == soap_header_class_entry) {
+			    instanceof_function(Z_OBJCE_P(hdr_ret), soap_header_class_entry)) {
 				HashTable* ht = Z_OBJPROP_P(hdr_ret);
 				zval **tmp;
 				sdlSoapBindingFunctionHeaderPtr *hdr;
@@ -3745,7 +3783,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 
 
 					if (Z_TYPE(h->retval) == IS_OBJECT &&
-					    Z_OBJCE(h->retval) == soap_header_class_entry) {
+					    instanceof_function(Z_OBJCE(h->retval), soap_header_class_entry TSRMLS_CC)) {
 						HashTable* ht = Z_OBJPROP(h->retval);
 						zval **tmp;
 						sdlSoapBindingFunctionHeaderPtr *hdr;
