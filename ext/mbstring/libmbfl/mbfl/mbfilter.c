@@ -335,6 +335,10 @@ int mbfl_buffer_illegalchars(mbfl_buffer_converter *convd)
 {
 	int num_illegalchars = 0;
 
+	if (convd == NULL) {
+		return 0;
+	}
+
 	if (convd->filter1 != NULL) {
 		num_illegalchars += convd->filter1->num_illegalchar;
 	}
