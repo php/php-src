@@ -1,3 +1,66 @@
+2006-03-20  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.c:
+      shutdown syslog module before freeing basic_globals
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_ext_syslog.h
+      ext/standard/syslog.c:
+      MF51: fix #36808 (syslog ident becomes garbage between requests)
+
+    * (PHP_5_1)
+      ext/standard/basic_functions.c:
+      .. and add missing #ifdef
+
+    * (PHP_5_1)
+      ext/standard/basic_functions.c:
+      fix wrong mshutdown func params
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/php_ext_syslog.h
+      ext/standard/syslog.c:
+      fix #36808 (syslog ident becomes garbage between requests)
+
+    * (PHP_5_1)
+      ext/standard/tests/file/userstreams.phpt:
+      MFH: fix #36741 (userstreams testcase have off-by-one error on fseek())
+
+    * ext/standard/tests/file/userstreams.phpt:
+      fix #36741 (userstreams testcase have off-by-one error on fseek())
+
+    * ext/standard/filters.c:
+      don't leak memory even though the code is not stable yet
+
+2006-03-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c:
+      Removed unreachable code
+
+2006-03-20  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/ftp_fopen_wrapper.c:
+      fix buffer overrun
+
+2006-03-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * main/php_variables.c
+      tests/basic/011.phpt:
+      Fixed register_argc_argv behavior. Now it behave in the same way as before
+      in combinations with variables_order and auto_globals_jit.
+      $argc and $argv global variables are registered only in CLI mode and under
+      $_SERVER[] in other case. (This is done because register_globals was
+      removed and assumed - off).
+
+    * (PHP_5_1)
+      main/php_variables.c:
+      Fixed register_argc_argv behavior. Now it behave in the same way as before
+      in all combinations with register_globals, register_long_arrays,
+      variables_order and auto_globals_jit.
+
 2006-03-19  Antony Dovgal  <antony@zend.com>
 
     * main/network.c:

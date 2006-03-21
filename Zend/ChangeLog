@@ -1,3 +1,9 @@
+2006-03-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c:
+      Removed unreachable code
+
 2006-03-17  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_execute_API.c:
