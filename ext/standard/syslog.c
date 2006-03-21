@@ -267,12 +267,7 @@ PHP_FUNCTION(syslog)
 		return;
 	}
 
-	/*
-	 * CAVEAT: if the message contains patterns such as "%s",
-	 * this will cause problems.
-	 */
-
-	php_syslog(priority, "%.500s", message);
+	php_syslog(priority, "%s", message);
 	RETURN_TRUE;
 }
 /* }}} */
