@@ -129,6 +129,7 @@ MBFLAPI extern int mbfl_buffer_converter_flush(mbfl_buffer_converter *convd);
 MBFLAPI extern mbfl_string * mbfl_buffer_converter_getbuffer(mbfl_buffer_converter *convd, mbfl_string *result);
 MBFLAPI extern mbfl_string * mbfl_buffer_converter_result(mbfl_buffer_converter *convd, mbfl_string *result);
 MBFLAPI extern mbfl_string * mbfl_buffer_converter_feed_result(mbfl_buffer_converter *convd, mbfl_string *string, mbfl_string *result);
+MBFLAPI extern int mbfl_buffer_illegalchars(mbfl_buffer_converter *convd);
 
 /*
  * encoding detector

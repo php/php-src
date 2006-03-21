@@ -854,6 +854,7 @@ php_mb_init_globals(zend_mbstring_globals *pglobals TSRMLS_DC)
 	MBSTRG(filter_illegal_substchar) = 0x3f;	/* '?' */
 	MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 	MBSTRG(current_filter_illegal_substchar) = 0x3f;	/* '?' */
+	MBSTRG(illegalchars) = 0;
 	MBSTRG(func_overload) = 0;
 	MBSTRG(encoding_translation) = 0;
 	pglobals->outconv = NULL;
@@ -1011,6 +1012,7 @@ PHP_RINIT_FUNCTION(mbstring)
 	MBSTRG(current_http_output_encoding) = MBSTRG(http_output_encoding);
 	MBSTRG(current_filter_illegal_mode) = MBSTRG(filter_illegal_mode);
 	MBSTRG(current_filter_illegal_substchar) = MBSTRG(filter_illegal_substchar);
+	MBSTRG(illegalchars) = 0;
 
 	n = 0;
 	if (MBSTRG(detect_order_list)) {
@@ -1078,6 +1080,7 @@ PHP_RSHUTDOWN_FUNCTION(mbstring)
 		MBSTRG(current_detect_order_list_size) = 0;
 	}
 	if (MBSTRG(outconv) != NULL) {
+		MBSTRG(illegalchars) += mbfl_buffer_illegalchars(MBSTRG(outconv));
 		mbfl_buffer_converter_delete(MBSTRG(outconv));
 		MBSTRG(outconv) = NULL;
 	}
@@ -1627,6 +1630,7 @@ php_mbstr_encoding_handler(const php_mb_encoding_handler_info_t *info, zval *arg
 	}
 
 	if (convd != NULL) {
+		MBSTRG(illegalchars) += mbfl_buffer_illegalchars(convd);
 		mbfl_buffer_converter_delete(convd);
 	}
 	if (val_list != NULL) {
@@ -1978,6 +1982,7 @@ PHP_FUNCTION(mb_parse_str)
 	PG(register_globals) = old_rg;
 
 	if (convd != NULL) {
+		MBSTRG(illegalchars) += mbfl_buffer_illegalchars(convd);
 		mbfl_buffer_converter_delete(convd);
 	}
 	efree((void *)str_list);
@@ -2015,6 +2020,7 @@ PHP_FUNCTION(mb_output_handler)
  	if ((arg_status & PHP_OUTPUT_HANDLER_START) != 0) {
  		/* delete the converter just in case. */
  		if (MBSTRG(outconv)) {
+			MBSTRG(illegalchars) += mbfl_buffer_illegalchars(MBSTRG(outconv));
  			mbfl_buffer_converter_delete(MBSTRG(outconv));
  			MBSTRG(outconv) = NULL;
   		}
@@ -2079,6 +2085,7 @@ PHP_FUNCTION(mb_output_handler)
  
  	/* delete the converter if it is the last feed. */
  	if (last_feed) {
+		MBSTRG(illegalchars) += mbfl_buffer_illegalchars(MBSTRG(outconv));
 		mbfl_buffer_converter_delete(MBSTRG(outconv));
 		MBSTRG(outconv) = NULL;
 	}
@@ -2711,6 +2718,7 @@ MBSTRING_API char * php_mb_convert_encoding(char *input, size_t length, char *_t
 		output = (char *)ret->val;
 	}
 
+	MBSTRG(illegalchars) += mbfl_buffer_illegalchars(convd);
 	mbfl_buffer_converter_delete(convd);
 	return output;
 }
@@ -3376,6 +3384,7 @@ detect_end:
 			}
 			efree(stack);
 		}
+		MBSTRG(illegalchars) += mbfl_buffer_illegalchars(convd);
 		mbfl_buffer_converter_delete(convd);
 	}
 
@@ -3795,6 +3804,8 @@ PHP_FUNCTION(mb_get_info)
 		if (lang != NULL && (name = (char *)mbfl_no_encoding2name(lang->mail_body_encoding)) != NULL) {
 			RETVAL_STRING(name, 1);
 		}
+ 	} else if (!strcasecmp("illegal_chars", typ)) {
+ 		RETVAL_LONG(MBSTRG(illegalchars));
 	} else {
 		RETURN_FALSE;
 	}
@@ -3961,6 +3972,7 @@ MBSTRING_API int php_mb_gpc_encoding_converter(char **str, int *len, int num, co
 			str[i] = ret->val;
 			len[i] = ret->len;
 		}
+		MBSTRG(illegalchars) += mbfl_buffer_illegalchars(convd);
 		mbfl_buffer_converter_delete(convd);
 	}
 	return ret ? 0 : -1;
@@ -4184,6 +4196,7 @@ int php_mb_encoding_converter(char **to, int *to_length, const char *from,
 		*to = ret->val;
 		*to_length = ret->len;
 	}
+	MBSTRG(illegalchars) += mbfl_buffer_illegalchars(convd);
 	mbfl_buffer_converter_delete(convd);
 
 	return ret ? 0 : -1;
