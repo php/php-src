@@ -55,6 +55,14 @@ see www.abisource.com/enchant/
         <tasks:replace from="@package_version@" to="version" type="package-info"/>
       </file>
       <file name="php_enchant.h" role="src"/>
+      <dir name="tests">
+	      <file name="broker_describe.phpt" role="test"/>
+	      <file name="broker_free.phpt" role="test"/>
+	      <file name="broker_init.phpt" role="test"/>
+	      <file name="broker_request_dict.phpt" role="test"/>
+	      <file name="hindi_correct.txt" role="test"/>
+	      <file name="hindi_incorrect.txt" role="test"/>
+      </dir>
     </dir>
 <!-- / -->
   </contents>
