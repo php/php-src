@@ -1583,7 +1583,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 		while (*p) {
 			if (cfg_get_long((char*)*p, &val) == SUCCESS && val) {
-				zend_error(E_CORE_ERROR, "Directive '%s' is not longer supported in PHP-6 and above", *p);
+				zend_error(E_CORE_ERROR, "Directive '%s' is no longer supported in PHP6 and greater", *p);
 			}
 			++p;
 		}
