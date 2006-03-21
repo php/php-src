@@ -215,12 +215,10 @@ PHP_MSHUTDOWN_FUNCTION(enchant)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
 static void __enumerate_providers_fn (const char * const name,
                         const char * const desc,
                         const char * const file,
-                        void * ud)
+                        void * ud) /* {{{ */
 {
 	php_info_print_table_row(3, name, desc, file);
 }
@@ -235,7 +233,7 @@ PHP_MINFO_FUNCTION(enchant)
 	pbroker = enchant_broker_init();
 	php_info_print_table_start();
 	php_info_print_table_header(2, "enchant support", "enabled");
-	php_info_print_table_row(2, "Version", "@version@");
+	php_info_print_table_row(2, "Version", "@package_version@");
 	php_info_print_table_row(2, "Revision", "$Revision$");
 	php_info_print_table_end();
 
@@ -462,7 +460,6 @@ PHP_FUNCTION(enchant_broker_dict_exists)
 	RETURN_BOOL(enchant_broker_dict_exists(pbroker->pbroker, tag));
 }
 /* }}} */
-
 
 /* {{{ proto bool enchant_broker_set_ordering(resource broker, string tag, string ordering)
 	Declares a preference of dictionaries to use for the language
