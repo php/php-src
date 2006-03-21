@@ -150,7 +150,6 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 {
 	php_oci_connection *connection = descriptor->connection;
 	ub4 length = 0;
-	ub4 block_length = PHP_OCI_LOB_BUFFER_SIZE;
 	int bytes_read, bytes_total = 0, offset = 0, data_len_chars = 0;
 	int requested_len = read_length; /* this is by default */
 
@@ -178,14 +177,10 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 		requested_len = length - initial_offset;
 	}
 	
-	if (requested_len == 0) {
+	if (requested_len <= 0) {
 		return 0;
 	}
 
-	if (requested_len < block_length) {
-		block_length = requested_len;
-	}
-	
 	if (descriptor->type == OCI_DTYPE_FILE) {
 		connection->errcode = PHP_OCI_CALL(OCILobFileOpen, (connection->svc, connection->err, descriptor->descriptor, OCI_FILE_READONLY));
 
@@ -196,10 +191,14 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 		}
 	}
 
-	*data = (char *)emalloc(block_length + 1);
-	bytes_read = block_length;
+	*data = (char *)emalloc(requested_len + 1);
+	bytes_read = requested_len;
 	offset = initial_offset;
 		
+	/* TODO
+	 * We need to make sure this function works with Unicode LOBs
+	 * */
+	
 	do {
 		connection->errcode = PHP_OCI_CALL(OCILobRead, 
 			(
@@ -209,7 +208,7 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 				&bytes_read,								/* IN/OUT bytes toread/read */ 
 				offset + 1,								/* offset (starts with 1) */ 
 				(dvoid *) ((char *) *data + *data_len),	
-				block_length,									/* size of buffer */ 
+				requested_len,									/* size of buffer */ 
 				(dvoid *)0, 
 				(OCICallbackLobRead) 0,					/* callback... */ 
 				(ub2) connection->charset,	/* The character set ID of the buffer data. */ 
@@ -225,7 +224,6 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 		offset = initial_offset + data_len_chars;
 		
 		*data_len += bytes_read;
-		block_length = PHP_OCI_LOB_BUFFER_SIZE;
 		
 		if (connection->errcode != OCI_NEED_DATA) {
 			break;
