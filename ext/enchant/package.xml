@@ -28,14 +28,14 @@ see www.abisource.com/enchant/
   <date>2006-03-21</date>
   <version>
     <release>1.0.1</release>
-    <api>1.0</api>
+    <api>1.1.0</api>
   </version>
   <stability>
     <release>stable</release>
     <api>stable</api>
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
-  <notes>- add enchant_broker_list_dicts to get a list of available dictionnaries
+  <notes>- add enchant_broker_list_dicts to get a list of available dictionaries
 - fix compilation warnings
 - add examples
 - add tests</notes>
@@ -52,7 +52,7 @@ see www.abisource.com/enchant/
       <file name="config.w32" role="src"/>
       <file name="CREDITS" role="doc"/>
       <file name="enchant.c" role="src">
-        <tasks:replace from="@package_version@" to="version" type="package-info" />
+        <tasks:replace from="@package_version@" to="version" type="package-info"/>
       </file>
       <file name="php_enchant.h" role="src"/>
     </dir>
