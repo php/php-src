@@ -1831,6 +1831,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 			if (VCWD_REALPATH(primary_file->filename, realfile)) {
 				realfile_len =  strlen(realfile);
 				zend_hash_add(&EG(included_files), realfile, realfile_len+1, (void *)&dummy, sizeof(int), NULL);
+				primary_file->opened_path = estrndup(realfile, realfile_len);
 			}
 		}
 
