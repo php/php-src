@@ -250,6 +250,7 @@ mbfl_convert_filter_new(
 	filter->data = data;
 	filter->illegal_mode = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 	filter->illegal_substchar = 0x3f;		/* '?' */
+	filter->num_illegalchar = 0;
 
 	/* setup the function table */
 	mbfl_convert_filter_reset_vtbl(filter);
@@ -317,6 +318,7 @@ mbfl_convert_filter_copy(
 	dist->to = src->to;
 	dist->illegal_mode = src->illegal_mode;
 	dist->illegal_substchar = src->illegal_substchar;
+	dist->num_illegalchar = src->num_illegalchar;
 }
 
 int mbfl_convert_filter_devcat(mbfl_convert_filter *filter, mbfl_memory_device *src) 
@@ -432,7 +434,7 @@ mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter)
 		break;
 	}
 	filter->illegal_mode = mode_backup;
-
+	filter->num_illegalchar++;
 	return ret;
 }
 

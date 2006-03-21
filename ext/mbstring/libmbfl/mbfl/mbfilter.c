@@ -331,6 +331,20 @@ mbfl_buffer_converter_feed_result(mbfl_buffer_converter *convd, mbfl_string *str
 	return mbfl_memory_device_result(&convd->device, result);
 }
 
+int mbfl_buffer_illegalchars(mbfl_buffer_converter *convd)
+{
+	int num_illegalchars = 0;
+
+	if (convd->filter1 != NULL) {
+		num_illegalchars += convd->filter1->num_illegalchar;
+	}
+
+	if (convd->filter2 != NULL) {
+		num_illegalchars += convd->filter2->num_illegalchar;
+	}
+
+	return (num_illegalchars);
+}
 
 /*
  * encoding detector
