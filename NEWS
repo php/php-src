@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   (also fixes bug #36764). (Tony)
 - Removed the E_STRICT deprecation notice from "var". (Ilia)
 - Fixed debug_zval_dump() to support private and protected members. (Dmitry)
+- Fixed bug #36820 (Privileged connection with an Oracle password file fails). 
+  (Tony)
 - Fixed bug #36809 (__FILE__ behavior changed). (Dmitry)
 - Fixed bug #36808 (syslog ident becomes garbage between requests). (Tony)
 - Fixed bug #36802 (mysqli_set_charset() crash with a non-open connection).
