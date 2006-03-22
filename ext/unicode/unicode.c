@@ -119,7 +119,6 @@ zend_function_entry unicode_functions[] = {
 	PHP_FE(unicode_decode, NULL)
 	PHP_FE(unicode_semantics, NULL)
 	PHP_FE(unicode_encode, NULL)
-	PHP_FE(i18n_strtotitle, NULL)
 	{ NULL, NULL, NULL }
 };
 /* }}} */
