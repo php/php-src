@@ -1,3 +1,104 @@
+2006-03-21  Sara Golemon  <sara@golemon.com>
+
+    * main/streams/streams.c:
+      Allow grow_mode && !bufstart (original assertion logic)
+
+2006-03-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      Makefile.gcov:
+      MFH:
+      - Drop --no-prefix as disables --prefix which we do for
+      http://gcov.php.net
+
+    * Makefile.gcov:
+      - Drop --no-prefix as disables --prefix which we do for http://gcov.php.net
+
+2006-03-21  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/oci8_interface.c
+      ext/oci8/oci8_interface.c:
+      change oci_field_type() to return VARCHAR2 instead of VARCHAR
+      (fixes feature request #36800)
+
+2006-03-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mysqli/mysqli_nonapi.c:
+      MFB51: Fixed bug #36802 (mysqli_set_charset() crash with a non-open
+      connection).
+
+    * (PHP_5_1)
+      NEWS
+      ext/mysqli/mysqli_nonapi.c:
+      Fixed bug #36802 (mysqli_set_charset() crash with a non-open connection).
+
+2006-03-21  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/oci8_lob.c
+      ext/oci8/oci8_lob.c:
+      reimplement php_oci_lob_read() and fix PECL bug #5995
+      now the function dosn't try to read data by blocks, as this is nearly
+      impossible
+      to do with Unicode and regular LOBs in the same time
+
+    * main/main.c:
+      fix spelling
+
+2006-03-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #36721 (The SoapServer is not able to send a header that it
+      didn't receive)
+
+    * (PHP_5_1)
+      NEWS
+      main/main.c
+      main/main.c:
+      Fixed bug #36809 (__FILE__ behavior changed)
+
+2006-03-21  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+      added mb_check_encoding() to detect possible invalid encoding attack.
+
+2006-03-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #36749 (SOAP: 'Error Fetching http body' when using HTTP Proxy)
+
+2006-03-21  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbstring.c:
+      changed a option name based on PHP naming convension.
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+      MF PHP_5_1
+
+    * (PHP_5_1)
+      ext/mbstring/mbstring.c:
+      -** empty log message ***
+
+    * (PHP_5_1)
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+      
+
+2006-03-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/syslog.c:
+      MFB51: Fixed bug #36689 (Removed arbitrary limit on the length of syslog
+      messages).
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/syslog.c:
+      Fixed bug #36689 (Removed arbitrary limit on the length of syslog
+      messages).
+
 2006-03-20  Antony Dovgal  <antony@zend.com>
 
     * ext/standard/basic_functions.c
