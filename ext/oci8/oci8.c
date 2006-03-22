@@ -1286,7 +1286,11 @@ open:
 			case OCI_SYSDBA:
 			case OCI_SYSOPER:
 			default:
-				OCI_G(errcode) = PHP_OCI_CALL(OCISessionBegin, (connection->svc, OCI_G(err), connection->session, (ub4) OCI_CRED_EXT, (ub4) session_mode));
+				if (username_len == 1 && username[0] == '/' && password_len == 0) {
+					OCI_G(errcode) = PHP_OCI_CALL(OCISessionBegin, (connection->svc, OCI_G(err), connection->session, (ub4) OCI_CRED_EXT, (ub4) session_mode));
+				} else {
+					OCI_G(errcode) = PHP_OCI_CALL(OCISessionBegin, (connection->svc, OCI_G(err), connection->session, (ub4) OCI_CRED_RDBMS, (ub4) session_mode));
+				}
 				break;
 		}
 
