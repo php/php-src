@@ -41,6 +41,7 @@ PHP_FUNCTION(implode);
 PHP_FUNCTION(strtok);
 PHP_FUNCTION(strtoupper);
 PHP_FUNCTION(strtolower);
+PHP_FUNCTION(strtotitle);
 PHP_FUNCTION(basename);
 PHP_FUNCTION(dirname);
 PHP_FUNCTION(pathinfo);

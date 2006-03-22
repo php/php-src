@@ -79,68 +79,6 @@ PHP_FUNCTION(i18n_loc_set_default)
 	zend_reset_locale_deps(TSRMLS_C);
 	RETURN_TRUE;
 }
-
-/* {{{ php_strtotitle
- */
-PHPAPI char *php_strtotitle(char *s, size_t len)
-{
-	s[0] = toupper(s[0]);
-	return s;
-}
-/* }}} */
-
-/* {{{ php_u_strtotitle
- */
-PHPAPI UChar* php_u_strtotitle(UChar **s, int32_t *len, const char* locale)
-{
-	UChar *dest = NULL;
-	int32_t dest_len;
-	UErrorCode status = U_ZERO_ERROR;
-	UBreakIterator *brkiter;
-	
-	dest_len = *len;
-	brkiter = ubrk_open(UBRK_WORD, locale, *s, *len, &status);
-	while (1) {
-		status = U_ZERO_ERROR;
-		dest = eurealloc(dest, dest_len+1);
-		dest_len = u_strToTitle(dest, dest_len, *s, *len, NULL, locale, &status);
-		if (status != U_BUFFER_OVERFLOW_ERROR) {
-			break;
-		}
-	}
-	ubrk_close(brkiter);
-
-	if (U_SUCCESS(status)) {
-		efree(*s);
-		dest[dest_len] = 0;
-		*s = dest;
-		*len = dest_len;
-	} else {
-		efree(dest);
-	}
-
-	return *s;
-}
-/* }}} */
-
-
-/* {{{ proto string strtoupper(string str)
-   Makes a string uppercase */
-PHP_FUNCTION(i18n_strtotitle)
-{
-	zval **arg;
-	
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg)) {
-		WRONG_PARAM_COUNT;
-	}
-	if (Z_TYPE_PP(arg) != IS_STRING && Z_TYPE_PP(arg) != IS_UNICODE) {
-		convert_to_text_ex(arg);
-	}
-
-	RETVAL_ZVAL(*arg, 1, 0);
-	php_u_strtotitle(&Z_USTRVAL_P(return_value), &Z_USTRLEN_P(return_value), UG(default_locale));
-}
-/* }}} */
 #endif /* HAVE_UNICODE */
 
 

@@ -54,6 +54,7 @@
 #endif
 
 #include "unicode/uchar.h"
+#include "unicode/ubrk.h"
 
 #define STR_PAD_LEFT			0
 #define STR_PAD_RIGHT			1
@@ -104,6 +105,7 @@ void register_string_constants(INIT_FUNC_ARGS)
 /* }}} */
 
 int php_tag_find(char *tag, int len, char *set);
+static void php_ucwords(zval *str);
 
 /* this is read-only, so it's ok */
 static char hexconvtab[] = "0123456789abcdef";
@@ -1605,6 +1607,79 @@ PHP_FUNCTION(strtolower)
 		php_u_strtolower(&Z_USTRVAL_P(return_value), &Z_USTRLEN_P(return_value), UG(default_locale));
 	} else {
 		php_strtolower(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value));
+	}
+}
+/* }}} */
+
+/* {{{ php_strtotitle
+ */
+PHPAPI char *php_strtotitle(char *s, size_t len)
+{
+	s[0] = toupper(s[0]);
+	return s;
+}
+/* }}} */
+
+/* {{{ php_u_strtotitle
+ */
+PHPAPI UChar* php_u_strtotitle(UChar **s, int32_t *len, const char* locale)
+{
+	UChar *dest = NULL;
+	int32_t dest_len;
+	UErrorCode status = U_ZERO_ERROR;
+	UBreakIterator *brkiter;
+	
+	dest_len = *len;
+	brkiter = ubrk_open(UBRK_WORD, locale, *s, *len, &status);
+	while (1) {
+		status = U_ZERO_ERROR;
+		dest = eurealloc(dest, dest_len+1);
+		dest_len = u_strToTitle(dest, dest_len, *s, *len, NULL, locale, &status);
+		if (status != U_BUFFER_OVERFLOW_ERROR) {
+			break;
+		}
+	}
+	ubrk_close(brkiter);
+
+	if (U_SUCCESS(status)) {
+		efree(*s);
+		dest[dest_len] = 0;
+		*s = dest;
+		*len = dest_len;
+	} else {
+		efree(dest);
+	}
+
+	return *s;
+}
+/* }}} */
+
+
+/* {{{ proto string strtotitle(string str)
+   Makes a string titlecase */
+PHP_FUNCTION(strtotitle)
+{
+	zval **str;
+	
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str)) {
+		WRONG_PARAM_COUNT;
+	}
+	if (Z_TYPE_PP(str) != IS_STRING && Z_TYPE_PP(str) != IS_UNICODE) {
+		convert_to_text_ex(str);
+	}
+
+	if (Z_TYPE_PP(str) == IS_UNICODE && !Z_USTRLEN_PP(str)) {
+		RETURN_EMPTY_UNICODE();
+	} else if (!Z_STRLEN_PP(str)) {
+		RETURN_EMPTY_STRING();
+	}
+
+	if (Z_TYPE_PP(str) == IS_UNICODE) {
+		RETVAL_ZVAL(*str, 1, 0);
+		php_u_strtotitle(&Z_USTRVAL_P(return_value), &Z_USTRLEN_P(return_value), UG(default_locale));
+	} else {
+		ZVAL_STRINGL(return_value, Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);
+		php_ucwords(return_value);
 	}
 }
 /* }}} */
@@ -3311,6 +3386,22 @@ PHP_FUNCTION(ucfirst)
 }
 /* }}} */
 
+/* {{{ php_ucwords()
+   Uppercase the first character of every word in a native string */
+static void php_ucwords(zval *str)
+{
+	register char *r, *r_end;
+
+	r = Z_STRVAL_P(str);
+	*r = toupper((unsigned char) *r);
+	for (r_end = r + Z_STRLEN_P(str) - 1; r < r_end; ) {
+		if (isspace((int) *(unsigned char *)r++)) {
+			*r = toupper((unsigned char) *r);
+		}
+	}
+}
+/* }}} */
+
 /* {{{ php_u_ucwords() U
    Uppercase the first character of every word in an Unicode string */
 static void php_u_ucwords(zval *ustr, zval *retval TSRMLS_DC)
@@ -3369,7 +3460,6 @@ static void php_u_ucwords(zval *ustr, zval *retval TSRMLS_DC)
 PHP_FUNCTION(ucwords)
 {
 	zval **str;
-	register char *r, *r_end;
 	
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -3390,14 +3480,7 @@ PHP_FUNCTION(ucwords)
 		php_u_ucwords(*str, return_value TSRMLS_CC);
 	} else {
 		ZVAL_STRINGL(return_value, Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);
-
-		r = Z_STRVAL_P(return_value);
-		*r = toupper((unsigned char) *r);
-		for (r_end = r + Z_STRLEN_P(return_value) - 1; r < r_end; ) {
-			if (isspace((int) *(unsigned char *)r++)) {
-				*r = toupper((unsigned char) *r);
-			}
-		}
+		php_ucwords(return_value);
 	}
 }
 /* }}} */

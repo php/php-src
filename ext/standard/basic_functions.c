@@ -214,6 +214,7 @@ zend_function_entry basic_functions[] = {
 	PHP_FE(strtok,															NULL)
 	PHP_FE(strtoupper,														NULL)
 	PHP_FE(strtolower,														NULL)
+	PHP_FE(strtotitle,														NULL)
 	PHP_FE(strpos,															NULL)
 	PHP_FE(stripos,															NULL)
 	PHP_FE(strrpos,															NULL)
