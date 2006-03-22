@@ -34,30 +34,29 @@ an insecure app.
 Here is an example to emulate the session related functions and
 a snippet to register variables:
 
-$_register_globals_order = ini_get("variables_order");
+$_register_globals_order = strrev(ini_get("variables_order"));
 $_register_globals_order_len = strlen($_register_globals_order);
 
 for($_register_globals_i=0;$_register_globals_i<$_register_globals_order_len;$_register_globals_i++) {
 	switch($_register_globals_order{$_register_globals_i}) {
 		case "E":
-			extract($_ENV, EXTR_REFS|EXTR_OVERWRITE);
+			extract($_ENV, EXTR_REFS|EXTR_SKIP);
+		break;
+
 		case "G":
-			continue;
+			extract($_GET, EXTR_REFS|EXTR_SKIP);
 		break;
 
 		case "P":
-			extract($_POST, EXTR_REFS|EXTR_OVERWRITE);
+			extract($_POST, EXTR_REFS|EXTR_SKIP);
 		break;
 
 		case "C":
-			extract($_COOKIE, EXTR_REFS|EXTR_OVERWRITE);
+			extract($_COOKIE, EXTR_REFS|EXTR_SKIP);
 		break;
 
 		case "S":
-			if(!isset($_SESSION)) {
-				continue;
-			}
-		extract($_SESSION, EXTR_REFS|EXTR_OVERWRITE);
+			extract($_SERVER, EXTR_REFS|EXTR_SKIP);
 		break;
 	}
 }
