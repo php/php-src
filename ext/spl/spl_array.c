@@ -289,14 +289,13 @@ static zval *spl_array_read_dimension_ex(int check_inherited, zval *object, zval
 		if (intern->fptr_offset_get) {
 			zval *rv;
 			zend_call_method_with_1_params(&object, Z_OBJCE_P(object), &intern->fptr_offset_get, "offsetGet", &rv, offset);	
-			zval_ptr_dtor(&intern->retval);
-			MAKE_STD_ZVAL(intern->retval);
 			if (rv) {
+				zval_ptr_dtor(&intern->retval);
+				MAKE_STD_ZVAL(intern->retval);
 				ZVAL_ZVAL(intern->retval, rv, 1, 1);
-			} else {
-				ZVAL_NULL(intern->retval);
+				return intern->retval;
 			}
-			return intern->retval;
+			return EG(uninitialized_zval_ptr);
 		}
 	}
 	return *spl_array_get_dimension_ptr_ptr(check_inherited, object, offset, type TSRMLS_CC);
