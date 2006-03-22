@@ -2672,16 +2672,15 @@ PHP_FUNCTION(pg_lo_open)
 	   (Jouni)
 	*/
 
-	if (strchr(mode_string, 'r') == mode_string) {
+	if (mode_string[0] == 'r') {
 		pgsql_mode |= INV_READ;
-		if (strchr(mode_string, '+') == mode_string+1) {
+		if (mode_string[1] == '+') {
 			pgsql_mode |= INV_WRITE;
 		}
-	}
-	if (strchr(mode_string, 'w') == mode_string) {
+	} else if (mode_string[0] == 'w') {
 		pgsql_mode |= INV_WRITE;
 		create = 1;
-		if (strchr(mode_string, '+') == mode_string+1) {
+		if (mode_string[1] == '+') {
 			pgsql_mode |= INV_READ;
 		}
 	}
