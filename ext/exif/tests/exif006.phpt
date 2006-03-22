@@ -7,7 +7,6 @@ Check for exif_read_data, magic_quotes_runtime
 --INI--
 output_handler=
 zlib.output_compression=0
-magic_quotes_runtime=1
 --FILE--
 <?php
 /*
