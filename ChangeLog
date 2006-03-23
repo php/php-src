@@ -1,3 +1,67 @@
+2006-03-22  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/array.c:
+      MF51: prevent segfault when exception is thrown from Countable::count()
+
+    * (PHP_5_1)
+      ext/standard/array.c:
+      prevent segfault when exception is thrown from Countable::count()
+
+    * (PHP_5_1)
+      NEWS:
+      fix #36825 (Exceptions thrown in ArrayObject::offsetGet cause segfault)
+      fix similar issue in offsetExists()
+      remove redundant semicolons
+
+    * ext/exif/tests/exif006.phpt:
+      no magic_quotes anymore
+
+    * ZendEngine2/zend_compile.c:
+      don't segfault on 64bit platforms
+
+    * (PHP_5_1)
+      ext/standard/tests/math/bug21523.phpt:
+      MFH: use set_time_limit(), this test takes forever on AIX
+
+    * ext/standard/tests/math/bug21523.phpt:
+      use set_time_limit(), this test takes forever on AIX
+
+2006-03-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pgsql/pgsql.c:
+      Simplify and optimize code.
+
+2006-03-22  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_string.h
+      ext/standard/string.c:
+      - Moved strtotitle to ext/standard and implemented the fallback case to
+        non-unicode with ucwords. There is also an implementation for unicode
+      ucwords
+        but that returns different results then strtotitle as it uppercases the
+        first character of every word, and doesn't *titlecase* a word. The test
+      case
+        shows that.
+
+2006-03-22  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/oci8.c:
+      MF51: fix #36820 (Privileged connection with an Oracle password file fails)
+
+    * (PHP_5_1)
+      NEWS
+      ext/oci8/oci8.c:
+      fix #36820 (Privileged connection with an Oracle password file fails)
+
+2006-03-22  Stefan Esser  <php@nopiracy.de>
+
+    * README.UPDATING_TO_PHP6:
+      Fix the bullshit register_globals emulation
+      
+      1) S is not _SESSION but _SERVER
+      2) EXTR_OVERWRITE is evil
+
 2006-03-21  Sara Golemon  <sara@golemon.com>
 
     * main/streams/streams.c:
