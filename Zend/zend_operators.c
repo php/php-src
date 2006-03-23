@@ -588,7 +588,9 @@ ZEND_API void _convert_to_unicode(zval *op TSRMLS_DC ZEND_FILE_LINE_DC)
 		case IS_UNICODE:
 			break;
 		case IS_STRING:
-			zend_error(E_ERROR, "Cannot convert binary type to Unicode type");
+			if (zval_string_to_unicode(op TSRMLS_CC) == FAILURE) {
+				zend_error(E_WARNING, "Could not convert binary string to Unicode string");
+			}
 			return;
 		case IS_BOOL:
 			if (Z_LVAL_P(op)) {
@@ -668,7 +670,9 @@ ZEND_API void _convert_to_string_with_converter(zval *op, UConverter *conv TSRML
 		case IS_STRING:
 			return;
 		case IS_UNICODE:
-			zval_unicode_to_string(op, conv TSRMLS_CC);
+			if (zval_unicode_to_string(op, conv TSRMLS_CC) == FAILURE) {
+				zend_error(E_WARNING, "Could not convert Unicode string to binary string");
+			}
 			break;
 		case IS_BOOL:
 			if (Z_LVAL_P(op)) {
