@@ -89,6 +89,7 @@ TIDY_NODE_METHOD(isText);
 TIDY_NODE_METHOD(isJste);
 TIDY_NODE_METHOD(isAsp);
 TIDY_NODE_METHOD(isPhp);
+TIDY_NODE_METHOD(getParent);
 
 ZEND_BEGIN_MODULE_GLOBALS(tidy)
 	char *default_config;
