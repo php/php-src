@@ -869,6 +869,19 @@ void fastcgi_cleanup(int signal)
 	exit(0);
 }
 
+#ifndef PHP_WIN32
+static int is_port_number(const char *bindpath)
+{
+	while (*bindpath) {
+		if (*bindpath < '0' || *bindpath > '9') {
+			return 0;
+		}
+		bindpath++;
+	}
+	return 1;
+}
+#endif
+
 /* {{{ main
  */
 int main(int argc, char *argv[])
@@ -1104,7 +1117,7 @@ consult the installation file that came with this distribution, or visit \n\
 		 * path (it's what the fastcgi library expects)
 		 */
 		
-		if (strchr(bindpath, ':') == NULL) {
+		if (strchr(bindpath, ':') == NULL && is_port_number(bindpath)) {
 			char *tmp;
 
 			tmp = malloc(strlen(bindpath) + 2);
