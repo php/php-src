@@ -4377,7 +4377,7 @@ void zend_do_label(znode *label TSRMLS_DC)
 void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2 TSRMLS_DC)
 {
 	zend_label *dest;
-	int current, distance;
+	long current, distance;
 
 	if (CG(labels) == NULL ||
 	    zend_u_hash_find(CG(labels), Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant)+1, (void**)&dest) == FAILURE) {
