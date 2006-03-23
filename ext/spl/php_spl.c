@@ -375,7 +375,7 @@ PHP_FUNCTION(spl_autoload_call)
 	}
 } /* }}} */
 
-/* {{{ proto void spl_autoload_register([string autoload_function = "spl_autoload" [, throw = true]])
+/* {{{ proto bool spl_autoload_register([mixed autoload_function = "spl_autoload" [, throw = true]])
  Register given function as __autoload() implementation */
 PHP_FUNCTION(spl_autoload_register)
 {
@@ -399,7 +399,7 @@ PHP_FUNCTION(spl_autoload_register)
 					if (do_throw) {
 						zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Function spl_autoload_call() cannot be registered");
 					}
-					return;
+					RETURN_FALSE;
 				}
 			}
 		}
@@ -411,25 +411,25 @@ PHP_FUNCTION(spl_autoload_register)
 						zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Passed array specifies a non static method but no object");
 					}
 					efree(func_name);
-					return;
+					RETURN_FALSE;
 				}
 				else if (do_throw) {
 					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Passed array does not specify %s %smethod", alfi.func_ptr ? "a callable" : "an existing", !obj_ptr ? "static " : "");
 				}
 				efree(func_name);
-				return;
+				RETURN_FALSE;
 			} else if (Z_TYPE_P(zcallable) == IS_STRING) {
 				if (do_throw) {
 					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Function '%s' not %s", func_name, alfi.func_ptr ? "callable" : "found");
 				}
 				efree(func_name);
-				return;
+				RETURN_FALSE;
 			} else {
 				if (do_throw) {
 					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Illegal value passed");
 				}
 				efree(func_name);
-				return;
+				RETURN_FALSE;
 			}
 		}
 	
@@ -442,7 +442,7 @@ PHP_FUNCTION(spl_autoload_register)
 		} else {
 			alfi.obj = NULL;
 		}
-		
+
 		if (!SPL_G(autoload_functions)) {
 			ALLOC_HASHTABLE(SPL_G(autoload_functions));
 			zend_hash_init(SPL_G(autoload_functions), 1, NULL, (dtor_func_t) autoload_func_info_dtor, 0);
@@ -469,25 +469,34 @@ PHP_FUNCTION(spl_autoload_register)
 	} else {
 		zend_hash_find(EG(function_table), "spl_autoload", sizeof("spl_autoload"), (void **) &EG(autoload_func));
 	}
+	RETURN_TRUE;
 } /* }}} */
 
-/* {{{ proto bool spl_autoload_unregister(string autoload_function)
+/* {{{ proto bool spl_autoload_unregister(mixed autoload_function)
  Unregister given function as __autoload() implementation */
 PHP_FUNCTION(spl_autoload_unregister)
 {
-	char *func_name, *lc_name;
-	int func_name_len, success = FAILURE;
+	char *func_name;
+	int func_name_len;
+	zval *zcallable;
+	int success = FAILURE;
 	zend_function *spl_func_ptr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &func_name, &func_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zcallable) == FAILURE) {
 		return;
 	}
 
-	lc_name = do_alloca(func_name_len + 1);
-	zend_str_tolower_copy(lc_name, func_name, func_name_len);
+	if (!zend_is_callable_ex(zcallable, IS_CALLABLE_CHECK_SYNTAX_ONLY, &func_name, &func_name_len, NULL, NULL, NULL TSRMLS_CC)) {
+		if (func_name) {
+			efree(func_name);
+		}
+		RETURN_FALSE;
+	}
+
+	zend_str_tolower(func_name, func_name_len);
 
 	if (SPL_G(autoload_functions)) {
-		if (func_name_len == sizeof("spl_autoload_call")-1 && !strcmp(lc_name, "spl_autoload_call")) {
+		if (func_name_len == sizeof("spl_autoload_call")-1 && !strcmp(func_name, "spl_autoload_call")) {
 			/* remove all */
 			zend_hash_destroy(SPL_G(autoload_functions));
 			FREE_HASHTABLE(SPL_G(autoload_functions));
@@ -496,9 +505,9 @@ PHP_FUNCTION(spl_autoload_unregister)
 			success = SUCCESS;
 		} else {
 			/* remove specific */
-			success = zend_hash_del(SPL_G(autoload_functions), lc_name, func_name_len+1);
+			success = zend_hash_del(SPL_G(autoload_functions), func_name, func_name_len+1);
 		}
-	} else if (func_name_len == sizeof("spl_autoload")-1 && !strcmp(lc_name, "spl_autoload")) {
+	} else if (func_name_len == sizeof("spl_autoload")-1 && !strcmp(func_name, "spl_autoload")) {
 		/* register single spl_autoload() */
 		zend_hash_find(EG(function_table), "spl_autoload", sizeof("spl_autoload"), (void **) &spl_func_ptr);
 
@@ -508,8 +517,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 		}
 	}
 
-	free_alloca(lc_name);
-	
+	efree(func_name);
 	RETURN_BOOL(success == SUCCESS);
 } /* }}} */
 
