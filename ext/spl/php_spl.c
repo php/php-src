@@ -378,7 +378,7 @@ PHP_FUNCTION(spl_autoload_call)
 	}
 } /* }}} */
 
-/* {{{ proto void spl_autoload_register([mixed autoload_function = "spl_autoload" [, throw = true]])
+/* {{{ proto bool spl_autoload_register([mixed autoload_function = "spl_autoload" [, throw = true]])
  Register given function as __autoload() implementation */
 PHP_FUNCTION(spl_autoload_register)
 {
@@ -400,7 +400,7 @@ PHP_FUNCTION(spl_autoload_register)
 					if (do_throw) {
 						zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Function spl_autoload_call() cannot be registered");
 					}
-					return;
+					RETURN_FALSE;
 				}
 			}
 		} else if (Z_TYPE_P(zcallable) == IS_UNICODE) {
@@ -411,7 +411,7 @@ PHP_FUNCTION(spl_autoload_register)
 						zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Function spl_autoload_call() cannot be registered");
 					}
 					zval_dtor(&ztmp);
-					return;
+					RETURN_FALSE;
 				}
 			}
 			zval_dtor(&ztmp);
@@ -424,25 +424,25 @@ PHP_FUNCTION(spl_autoload_register)
 						zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Passed array specifies a non static method but no object");
 					}
 					zval_dtor(&zfunc_name);
-					return;
+					RETURN_FALSE;
 				}
 				else if (do_throw) {
 					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Passed array does not specify %s %smethod", alfi.func_ptr ? "a callable" : "an existing", !obj_ptr ? "static " : "");
 				}
 				zval_dtor(&zfunc_name);
-				return;
+				RETURN_FALSE;
 			} else if (Z_TYPE_P(zcallable) == IS_STRING || Z_TYPE_P(zcallable) == IS_UNICODE) {
 				if (do_throw) {
 					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Function '%R' not %s", Z_TYPE_P(zcallable), Z_UNIVAL_P(zcallable), alfi.func_ptr ? "callable" : "found");
 				}
 				zval_dtor(&zfunc_name);
-				return;
+				RETURN_FALSE;
 			} else {
 				if (do_throw) {
 					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Illegal value passed");
 				}
 				zval_dtor(&zfunc_name);
-				return;
+				RETURN_FALSE;
 			}
 		}
 	
@@ -480,6 +480,7 @@ PHP_FUNCTION(spl_autoload_register)
 	} else {
 		zend_hash_find(EG(function_table), "spl_autoload", sizeof("spl_autoload"), (void **) &EG(autoload_func));
 	}
+	RETURN_TRUE;
 } /* }}} */
 
 /* {{{ proto bool spl_autoload_unregister(mixed autoload_function)
@@ -498,7 +499,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 
 	if (!zend_is_callable_ex(zcallable, IS_CALLABLE_CHECK_SYNTAX_ONLY, &zfunc_name, NULL, NULL, NULL TSRMLS_CC)) {
 		zval_dtor(&zfunc_name);
-		return;
+		RETURN_FALSE;
 	}
 
 	lc_name = zend_u_str_tolower_dup(Z_TYPE(zfunc_name), Z_UNIVAL(zfunc_name), Z_UNILEN(zfunc_name));
