@@ -921,6 +921,8 @@ void fastcgi_cleanup(int signal)
 }
 #endif
 
+#if PHP_FASTCGI
+#ifndef PHP_WIN32
 static int is_port_number(const char *bindpath)
 {
 	while (*bindpath) {
@@ -931,6 +933,8 @@ static int is_port_number(const char *bindpath)
 	}
 	return 1;
 }
+#endif
+#endif
 
 /* {{{ main
  */
