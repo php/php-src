@@ -1076,6 +1076,7 @@ static PHP_METHOD(PDO, quote)
 		RETURN_STRINGL(qstr, qlen, 0);
 	}
 	PDO_HANDLE_DBH_ERR();
+	RETURN_FALSE;
 }
 /* }}} */
 
