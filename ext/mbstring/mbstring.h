@@ -117,7 +117,6 @@ PHP_FUNCTION(mb_encode_numericentity);
 PHP_FUNCTION(mb_decode_numericentity);
 PHP_FUNCTION(mb_send_mail);
 PHP_FUNCTION(mb_get_info);
-PHP_FUNCTION(mb_check_encoding);
 
 MBSTRING_API int php_mb_encoding_translation(TSRMLS_D);
 
