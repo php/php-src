@@ -2118,6 +2118,9 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, char **
 	zend_function *fptr_local;
 	zval **zobj_ptr_local;
 
+	if (callable_name) {
+		*callable_name = NULL;
+	}
 	if (callable_name_len == NULL) {
 		callable_name_len = &callable_name_len_local;
 	}
