@@ -35,21 +35,36 @@ void zend_set_converter_error_mode(UConverter *conv, uint8_t error_mode)
     UErrorCode status = U_ZERO_ERROR;
 
     switch (error_mode) {
-        case ZEND_FROM_U_ERROR_STOP:
+        case ZEND_CONV_ERROR_STOP:
             ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_STOP, NULL, NULL, NULL, &status);
             break;
 
-        case ZEND_FROM_U_ERROR_SKIP:
+        case ZEND_CONV_ERROR_SKIP:
             ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_SKIP, UCNV_SKIP_STOP_ON_ILLEGAL, NULL, NULL, &status);
             break;
 
-        case ZEND_FROM_U_ERROR_ESCAPE:
-            /* UTODO replace with custom callback for various substitution patterns */
+        case ZEND_CONV_ERROR_SUBST:
+            ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_SUBSTITUTE, UCNV_SUB_STOP_ON_ILLEGAL, NULL, NULL, &status);
+            break;
+
+        case ZEND_CONV_ERROR_ESCAPE_UNICODE:
             ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_ESCAPE, UCNV_ESCAPE_UNICODE, NULL, NULL, &status);
             break;
 
-        case ZEND_FROM_U_ERROR_SUBST:
-            ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_SUBSTITUTE, UCNV_SKIP_STOP_ON_ILLEGAL, NULL, NULL, &status);
+        case ZEND_CONV_ERROR_ESCAPE_ICU:
+            ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_ESCAPE, UCNV_ESCAPE_ICU, NULL, NULL, &status);
+            break;
+
+        case ZEND_CONV_ERROR_ESCAPE_JAVA:
+            ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_ESCAPE, UCNV_ESCAPE_JAVA, NULL, NULL, &status);
+            break;
+
+        case ZEND_CONV_ERROR_ESCAPE_XML_DEC:
+            ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_ESCAPE, UCNV_ESCAPE_XML_DEC, NULL, NULL, &status);
+            break;
+
+        case ZEND_CONV_ERROR_ESCAPE_XML_HEX:
+            ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_ESCAPE, UCNV_ESCAPE_XML_HEX, NULL, NULL, &status);
             break;
 
         default:
@@ -316,50 +331,6 @@ ZEND_API int zval_unicode_to_string(zval *string, UConverter *conv TSRMLS_DC)
     int retval = TRUE;
     char *s = NULL;
     int s_len;
-
-#if 0
-    /* UTODO Putting it here for now, until we figure out the framework */
-    switch (UG(from_u_error_mode)) {
-        case ZEND_FROM_U_ERROR_STOP:
-            ucnv_setFromUCallBack(UG(runtime_encoding_conv), UCNV_FROM_U_CALLBACK_STOP, NULL, NULL, NULL, &status);
-            break;
-
-        case ZEND_FROM_U_ERROR_SKIP:
-            ucnv_setFromUCallBack(UG(runtime_encoding_conv), UCNV_FROM_U_CALLBACK_SKIP, NULL, NULL, NULL, &status);
-            break;
-
-        case ZEND_FROM_U_ERROR_ESCAPE:
-            ucnv_setFromUCallBack(UG(runtime_encoding_conv), UCNV_FROM_U_CALLBACK_ESCAPE, UCNV_ESCAPE_UNICODE, NULL, NULL, &status);
-            break;
-
-        case ZEND_FROM_U_ERROR_SUBST:
-            ucnv_setFromUCallBack(UG(runtime_encoding_conv), UCNV_FROM_U_CALLBACK_SUBSTITUTE, NULL, NULL, NULL, &status);
-            break;
-
-        default:
-            assert(0);
-            break;
-    }
-
-    if (UG(subst_chars)) {
-        char subchar[16];
-        int8_t char_len = 16;
-        status = U_ZERO_ERROR;
-        ucnv_getSubstChars(UG(runtime_encoding_conv), subchar, &char_len, &status);
-        if (U_FAILURE(status)) {
-            zend_error(E_WARNING, "Could not get substitution characters");
-            return FAILURE;
-        }
-        status = U_ZERO_ERROR;
-        ucnv_setSubstChars(UG(runtime_encoding_conv), UG(subst_chars), MIN(char_len, UG(subst_chars_len)), &status);
-        if (U_FAILURE(status)) {
-            zend_error(E_WARNING, "Could not set substitution characters");
-            return FAILURE;
-        }
-    }
-
-    status = U_ZERO_ERROR;
-#endif
 
     UChar *u = Z_USTRVAL_P(string);
     int u_len = Z_USTRLEN_P(string);

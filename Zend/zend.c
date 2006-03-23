@@ -173,9 +173,15 @@ static void zend_update_converters_error_behavior(TSRMLS_D)
 static ZEND_INI_MH(OnUpdateConversionErrorMode)
 {
 	if (!new_value) {
-		UG(from_u_error_mode) = ZEND_FROM_U_ERROR_SUBST;
+		UG(from_u_error_mode) = ZEND_CONV_ERROR_SUBST;
 	} else {
-		UG(from_u_error_mode) = atoi(new_value);
+		uint16_t mode = atoi(new_value);
+
+		if ((mode & 0xff) > ZEND_CONV_ERROR_LAST_ENUM) {
+			zend_error(E_WARNING, "Illegal value for conversion error mode");
+			return FAILURE;
+		}
+		UG(from_u_error_mode) = mode;
 	}
 	zend_update_converters_error_behavior(TSRMLS_C);
 	return SUCCESS;
@@ -194,7 +200,7 @@ static ZEND_INI_MH(OnUpdateConversionSubstChar)
 			zend_error(E_WARNING, "Substitution character string should be a hexadecimal Unicode codepoint value");
 			return FAILURE;
 		}
-		if (c < 0 || c >= 0x10FFFF) {
+		if (c < 0 || c >= UCHAR_MAX_VALUE) {
 			zend_error(E_WARNING, "Substitution character value U+%06x is out of range 0-10FFFF", c);
 			return FAILURE;
 		}
@@ -952,7 +958,7 @@ static void unicode_globals_ctor(zend_unicode_globals *unicode_globals TSRMLS_DC
 	unicode_globals->http_input_encoding_conv = NULL;
 	unicode_globals->subst_char_len = 0;
 	zend_set_converter_encoding(&unicode_globals->utf8_conv, "UTF-8");
-	unicode_globals->from_u_error_mode = ZEND_FROM_U_ERROR_SUBST;
+	unicode_globals->from_u_error_mode = ZEND_CONV_ERROR_SUBST;
 
 	zend_hash_init_ex(&unicode_globals->flex_compatible, 0, NULL, NULL, 1, 0);
 }
