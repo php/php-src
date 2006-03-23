@@ -60,12 +60,6 @@ foreach($funcs as $idx => $func)
 		echo get_class($e) . ": " . $e->getMessage() . "\n";
 	}
 
-	if (is_array($func)) {
-		if (is_object($func[0])) {
-			$func[0] = get_class($func[0]);
-		}
-		$func = join('::', $func);
-	}
 	spl_autoload_unregister($func);
 	var_dump(count(spl_autoload_functions()));
 }
