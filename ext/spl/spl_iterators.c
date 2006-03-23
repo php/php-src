@@ -1455,9 +1455,10 @@ static zend_function_entry spl_funcs_ParentIterator[] = {
 
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 static
-ZEND_BEGIN_ARG_INFO(arginfo_regex_it___construct, 0) 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_regex_it___construct, 0, 0, 2) 
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
 	ZEND_ARG_INFO(0, regex)
+	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO();
 
 static zend_function_entry spl_funcs_RegExIterator[] = {
@@ -1466,8 +1467,15 @@ static zend_function_entry spl_funcs_RegExIterator[] = {
 	{NULL, NULL, NULL}
 };
 
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_rec_regex_it___construct, 0, 0, 2) 
+	ZEND_ARG_OBJ_INFO(0, iterator, RecursiveIterator, 0)
+	ZEND_ARG_INFO(0, regex)
+	ZEND_ARG_INFO(0, flags)
+ZEND_END_ARG_INFO();
+
 static zend_function_entry spl_funcs_RecursiveRegExIterator[] = {
-	SPL_ME(RecursiveRegExIterator, __construct,      arginfo_regex_it___construct, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveRegExIterator, __construct,      arginfo_rec_regex_it___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(ParentIterator,         hasChildren,      NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(ParentIterator,         getChildren,      NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
