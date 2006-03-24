@@ -19,6 +19,7 @@
 #include "zend.h"
 #include "zend_globals.h"
 #include "zend_operators.h"
+#include "zend_exceptions.h"
 #include "zend_API.h"
 #include "zend_unicode.h"
 #include <unicode/unorm.h>
@@ -28,6 +29,8 @@ ZEND_API ts_rsrc_id unicode_globals_id;
 #else
 ZEND_API zend_unicode_globals unicode_globals;
 #endif
+
+ZEND_API zend_class_entry *unicodeConversionException;
 
 /* {{{ zend_set_converter_error_mode */
 void zend_set_converter_error_mode(UConverter *conv, uint8_t error_mode)
@@ -197,9 +200,9 @@ ZEND_API void zend_convert_to_unicode(UConverter *conv, UChar **target, int *tar
              * too much. In case there is a lot of single-byte characters
              * around a single multi-byte character this estimation is too low,
              * and then the re-allocation routines in the loop below kick in.
-             * Here we multiply by 1.33 and add 1 so that it's even quite
-             * efficient for smaller input strings without causing too much
-             * iterations of this loop.
+             * There we multiply by 1.33 and add 1 so that it's quite efficient
+             * for smaller input strings without causing too many iterations of
+             * this loop.
              */
             buffer_len = (source_len > 2) ? ((source_len >> 1) + (source_len >> 3) + 2) : source_len;
             break;
@@ -230,7 +233,7 @@ ZEND_API void zend_convert_to_unicode(UConverter *conv, UChar **target, int *tar
 /* }}} */
 
 /* {{{ zend_convert_from_unicode */
-ZEND_API void zend_convert_from_unicode(UConverter *conv, char **target, int *target_len, const UChar *source, int source_len, UErrorCode *status)
+ZEND_API int zend_convert_from_unicode(UConverter *conv, char **target, int *target_len, const UChar *source, int source_len, UErrorCode *status)
 {
     char *buffer = NULL;
     char *output;
@@ -239,7 +242,7 @@ ZEND_API void zend_convert_from_unicode(UConverter *conv, char **target, int *ta
     const UChar *input = source;
 
     if (U_FAILURE(*status)) {
-        return;
+        return 0;
     }
 
     ucnv_resetFromUnicode(conv);
@@ -268,10 +271,7 @@ ZEND_API void zend_convert_from_unicode(UConverter *conv, char **target, int *ta
     *target = buffer;
     *target_len = converted;
 
-    /* Report the conversion error */
-    if (U_FAILURE(*status)) {
-        zend_error(E_NOTICE, "Error converting from Unicode to codepage string: %s", u_errorName(*status));
-    }
+    return input - source;
 }
 /* }}} */
 
@@ -324,6 +324,42 @@ ZEND_API void zend_convert_encodings(UConverter *target_conv, UConverter *source
 }
 /* }}} */
 
+/* {{{ zend_raise_conversion_error_ex */
+ZEND_API void zend_raise_conversion_error_ex(char *message, UConverter *conv, int error_char_offset, int use_exception TSRMLS_DC)
+{
+    UChar err_char[U16_MAX_LENGTH];
+    int8_t err_char_len = sizeof(err_char);
+    UChar32 codepoint;
+    const char *conv_name;
+    UErrorCode status = U_ZERO_ERROR;
+    char *reason_fmt = "%s (converter %s failed on character {U+%04X} at offset %d)";
+    char *no_reason_fmt = "%s";
+    char *message_fmt;
+
+    if (!message)
+        return;
+
+    ucnv_getInvalidUChars(conv, err_char, &err_char_len, &status);
+    conv_name = ucnv_getName(conv, &status);
+    /*
+     * UTODO
+     * use some other standard than MIME? or fallback onto IANA? or use
+     * internal converter name? ponder
+     */
+    conv_name = ucnv_getStandardName(conv_name, "MIME", &status);
+    codepoint = (err_char_len < 2) ? err_char[0] : U16_GET_SUPPLEMENTARY(err_char[0], err_char[1]);
+    ;
+
+    message_fmt = conv ? reason_fmt : no_reason_fmt;
+
+    if (use_exception) {
+        zend_throw_exception_ex(unicodeConversionException, 0 TSRMLS_CC, message_fmt, message, conv_name?conv_name:"<unknown>", codepoint, error_char_offset);
+    } else {
+        zend_error(E_WARNING, message_fmt, message, conv_name?conv_name:"", codepoint, error_char_offset);
+    }
+}
+/* }}} */
+
 /* {{{ zval_unicode_to_string */
 ZEND_API int zval_unicode_to_string(zval *string, UConverter *conv TSRMLS_DC)
 {
@@ -331,19 +367,22 @@ ZEND_API int zval_unicode_to_string(zval *string, UConverter *conv TSRMLS_DC)
     int retval = TRUE;
     char *s = NULL;
     int s_len;
+    int num_conv;
 
     UChar *u = Z_USTRVAL_P(string);
     int u_len = Z_USTRLEN_P(string);
 
-    Z_TYPE_P(string) = IS_STRING;
-    zend_convert_from_unicode(conv, &s, &s_len, u, u_len, &status);
+    num_conv = zend_convert_from_unicode(conv, &s, &s_len, u, u_len, &status);
+
     ZVAL_STRINGL(string, s, s_len, 0);
 
     if (U_FAILURE(status)) {
+        int32_t offset = u_countChar32(u, num_conv)-1;
+        zend_raise_conversion_error_ex("Could not convert Unicode string to binary string", conv, offset, (UG(from_u_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
         retval = FAILURE;
     }
 
-    efree(u);
+    efree((UChar*)u);
     return retval;
 }
 /* }}} */
@@ -539,5 +578,13 @@ ZEND_API int zend_normalize_identifier(UChar **dest, int *dest_len, UChar *ident
     return 1;
 }
 /* }}} */
+
+void zend_register_unicode_exceptions(TSRMLS_D)
+{
+    zend_class_entry ce;
+
+    INIT_CLASS_ENTRY(ce, "UnicodeConversionException", NULL);
+    unicodeConversionException = zend_register_internal_class_ex(&ce, zend_exception_get_default(TSRMLS_C), NULL TSRMLS_CC);
+}
 
 /* vim: set fdm=marker et sts=4: */

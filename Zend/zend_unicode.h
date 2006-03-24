@@ -43,17 +43,21 @@ enum {
 };
 
 
+extern ZEND_API zend_class_entry *unicodeConversionException;
+
+
 /* internal functions */
 
 int zend_set_converter_encoding(UConverter **converter, const char *encoding);
 void zend_set_converter_subst_char(UConverter *conv, UChar *subst_char, int8_t subst_char_len);
 void zend_set_converter_error_mode(UConverter *conv, uint8_t error_mode);
+void zend_register_unicode_exceptions(TSRMLS_D);
 
 
 /* API functions */
 
 ZEND_API void zend_convert_to_unicode(UConverter *conv, UChar **target, int *target_len, const char *source, int source_len, UErrorCode *status);
-ZEND_API void zend_convert_from_unicode(UConverter *conv, char **target, int *target_len, const UChar *source, int source_len, UErrorCode *status);
+ZEND_API int zend_convert_from_unicode(UConverter *conv, char **target, int *target_len, const UChar *source, int source_len, UErrorCode *status);
 ZEND_API void zend_convert_encodings(UConverter *target_conv, UConverter *source_conv, char **target, int *target_len, const char *source, int source_len, UErrorCode *status);
 ZEND_API int zval_string_to_unicode_ex(zval *string, UConverter *conv);
 ZEND_API int zval_string_to_unicode(zval *string TSRMLS_DC);
@@ -66,6 +70,10 @@ ZEND_API void zend_case_fold_string(UChar **dest, int *dest_len, UChar *src, int
 
 ZEND_API int zend_is_valid_identifier(UChar *ident, int ident_len);
 ZEND_API int zend_normalize_identifier(UChar **dest, int *dest_len, UChar *ident, int ident_len, zend_bool fold_case);
+
+#define zend_raise_conversion_error(message, exception) \
+	zend_raise_conversion_error_ex(message, NULL, 0, exception TSRMLS_CC)
+ZEND_API void zend_raise_conversion_error_ex(char *message, UConverter *conv, int error_char_offset, int use_exception TSRMLS_DC);
 
 /*
  * Function to get a codepoint at position n. Iterates over codepoints starting from the

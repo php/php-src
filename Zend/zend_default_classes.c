@@ -30,6 +30,7 @@ ZEND_API void zend_register_default_classes(TSRMLS_D)
 {
 	zend_register_interfaces(TSRMLS_C);
 	zend_register_default_exception(TSRMLS_C);
+	zend_register_unicode_exceptions(TSRMLS_C);
 	zend_register_iterator_wrapper(TSRMLS_C);
 }
 
