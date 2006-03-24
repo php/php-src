@@ -1256,10 +1256,15 @@ static size_t _php_stream_write_buffer(php_stream *stream, int buf_type, zstr bu
 
 	if (stream->output_encoding && buf_type == IS_UNICODE) {
 		char *dest;
-		int destlen;
+		int destlen, num_conv;
 		UErrorCode status = U_ZERO_ERROR;
 
-		zend_convert_from_unicode(stream->output_encoding, &dest, &destlen, buf.u, buflen, &status);
+		num_conv = zend_convert_from_unicode(stream->output_encoding, &dest, &destlen, buf.u, buflen, &status);
+		if (U_FAILURE(status)) {
+			int32_t offset = u_countChar32(buf.u, num_conv)-1;
+
+			zend_raise_conversion_error_ex("Could not convert Unicode string to binary string", stream->output_encoding, offset, (UG(from_u_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
+		}
 		freeme = buf.s = dest;
 		buflen = destlen;
 	} else {
