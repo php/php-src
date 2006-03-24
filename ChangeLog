@@ -1,3 +1,89 @@
+2006-03-23  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_unicode.c
+      ZendEngine2/zend_unicode.h:
+      Update conversion error behavior and add some new modes.
+      
+
+    * ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_scanner.l:
+      Add (binary) cast operator.
+
+    * ZendEngine2/zend_operators.c:
+      Allow conversion between binary/Unicode strings (based on
+      runtime_encoding setting).
+
+2006-03-23  Seiji Masugata  <s.masugata@digicom.dnp.co.jp>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+      added mb_list_encodings_alias_names( ).
+
+2006-03-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/credits.c
+      ext/standard/credits_ext.h:
+      MFB51:
+      Added myself to PDO and PDO_MySQL credits
+      Added Wez to PDO_MySQL credits
+      Added Tony to Q&A team credits
+      Regenerated the credits file
+
+    * (PHP_5_1)
+      ext/standard/credits.c
+      ext/standard/credits_ext.h:
+      Added myself to PDO and PDO_MySQL credits
+      Added Wez to PDO_MySQL credits
+      Added Tony to Q&A team credits
+      Regenerated the credits file
+
+2006-03-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      ZendEngine2/zend_API.c:
+      - Initialized callable_name if present
+
+    * ZendEngine2/zend_API.c:
+      - Initialize callable_name if requested
+
+2006-03-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/cgi_main.c:
+      MTH: Allowed '-b' with UNIX sockets
+
+    * (PHP_5_1)
+      sapi/cgi/cgi_main.c:
+      Cleanup
+
+    * (PHP_5_1)
+      sapi/cgi/cgi_main.c:
+      Allowed '-b' with UNIX sockets:
+        -b <hostname>:<port_number>
+        -b <port_number>
+        -b <unix_socket_path>
+
+2006-03-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_4)
+      ext/standard/Makefile.frag:
+      - Provide complete rule (to have relative #line info)wq
+
+2006-03-23  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h:
+      implement correct fix for segfault on 64bit platform
+
+2006-03-23  Seiji Masugata  <s.masugata@digicom.dnp.co.jp>
+
+    * (PHP_4_4)
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+      revert.(See http://news.php.net/php.cvs/37387)
+
 2006-03-22  Antony Dovgal  <antony@zend.com>
 
     * ext/standard/array.c:

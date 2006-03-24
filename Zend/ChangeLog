@@ -1,3 +1,36 @@
+2006-03-23  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend.c
+      zend_constants.c
+      zend_globals.h
+      zend_unicode.c
+      zend_unicode.h:
+      Update conversion error behavior and add some new modes.
+      
+
+    * zend_language_parser.y
+      zend_language_scanner.l:
+      Add (binary) cast operator.
+
+    * zend_operators.c:
+      Allow conversion between binary/Unicode strings (based on
+      runtime_encoding setting).
+
+2006-03-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      zend_API.c:
+      - Initialized callable_name if present
+
+    * zend_API.c:
+      - Initialize callable_name if requested
+
+2006-03-23  Antony Dovgal  <antony@zend.com>
+
+    * zend_compile.c
+      zend_compile.h:
+      implement correct fix for segfault on 64bit platform
+
 2006-03-22  Antony Dovgal  <antony@zend.com>
 
     * zend_compile.c:
