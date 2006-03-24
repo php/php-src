@@ -9,10 +9,10 @@ class DbConnection {
 	public function connect() {
 		include "connect.inc";
 
-		$link = mysqli::connect($host, $user, $passwd);
+		$link = mysqli_connect($host, $user, $passwd);
 		var_dump($link); 
 		
-		$link = mysqli::init();
+		$link = mysqli_init();
 		var_dump($link);
 		
 		$mysql = new mysqli($host, $user, $passwd, "test");
