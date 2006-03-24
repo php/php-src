@@ -36,12 +36,20 @@
 #define HAVE_MYSQLI_SET_CHARSET
 #endif
 
+
 #include <errmsg.h>
 
 #ifndef PHP_MYSQLI_H
 #define PHP_MYSQLI_H
 
-#define MYSQLI_VERSION_ID		101008
+#define MYSQLI_VERSION_ID		101009
+
+enum mysqli_status {
+	MYSQLI_STATUS_UNKNOWN=0,
+	MYSQLI_STATUS_CLEARED,
+	MYSQLI_STATUS_INITIALIZED,
+	MYSQLI_STATUS_VALID
+};
 
 typedef struct {
 	ulong		buflen;
@@ -57,17 +65,17 @@ typedef struct {
 } BIND_BUFFER;
 
 typedef struct {
-	MYSQL_STMT	*stmt;
-	BIND_BUFFER	param;
-	BIND_BUFFER	result;
-	char		*query;
+	MYSQL_STMT			*stmt;
+	BIND_BUFFER			param;
+	BIND_BUFFER			result;
+	char				*query;
 } MY_STMT;
 
 typedef struct {
-	MYSQL		*mysql;
-	zval		*li_read;
-	php_stream	*li_stream;
-	unsigned int multi_query;	
+	MYSQL				*mysql;
+	zval				*li_read;
+	php_stream			*li_stream;
+	unsigned int 		multi_query;	
 } MY_MYSQL;
 
 typedef struct {
@@ -77,15 +85,15 @@ typedef struct {
 } PROFILER;
 
 typedef struct {
-	void		*ptr;		/* resource: (mysql, result, stmt)   */
-	void		*info;		/* additional buffer				 */
+	void				*ptr;		/* resource: (mysql, result, stmt)   */
+	void				*info;		/* additional buffer				 */
+    enum mysqli_status	status;
 } MYSQLI_RESOURCE;
 
 typedef struct _mysqli_object {
-	zend_object 	zo;
-	void 			*ptr;
-	char			valid;
-	HashTable 		*prop_handler;
+	zend_object 		zo;
+	void 				*ptr;
+	HashTable 			*prop_handler;
 } mysqli_object; /* extends zend_object */
 
 typedef struct {
@@ -181,7 +189,6 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 
 #define MYSQLI_REGISTER_RESOURCE_EX(__ptr, __zval, __ce)  \
 	((mysqli_object *) zend_object_store_get_object(__zval TSRMLS_CC))->ptr = __ptr; \
-	((mysqli_object *) zend_object_store_get_object(__zval TSRMLS_CC))->valid = 1;
 
 #define MYSQLI_RETURN_RESOURCE(__ptr, __ce) \
 	Z_TYPE_P(return_value) = IS_OBJECT; \
@@ -199,7 +206,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 	MYSQLI_REGISTER_RESOURCE_EX(__ptr, object, __ce)\
 }
 
-#define MYSQLI_FETCH_RESOURCE(__ptr, __type, __id, __name) \
+#define MYSQLI_FETCH_RESOURCE(__ptr, __type, __id, __name, __check) \
 { \
 	MYSQLI_RESOURCE *my_res; \
 	mysqli_object *intern = (mysqli_object *)zend_object_store_get_object(*(__id) TSRMLS_CC);\
@@ -207,18 +214,18 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
   		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", intern->zo.ce->name);\
   		RETURN_NULL();\
   	}\
-	if (!intern->valid) { \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid resource %s", intern->zo.ce->name); \
-		RETURN_NULL(); \
-	} \
 	__ptr = (__type)my_res->ptr; \
-	if (!strcmp((char *)__name, "mysqli_stmt")) {\
-		if (!((MY_STMT *)__ptr)->stmt->mysql) {\
-  			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Statement isn't valid anymore");\
-			RETURN_NULL();\
-		}\
+	if (__check && my_res->status < __check) { \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid object or resource %s\n", intern->zo.ce->name); \
+		RETURN_NULL();\
 	}\
 } 
+
+#define MYSQLI_SET_STATUS(__id, __value) \
+{ \
+	mysqli_object *intern = (mysqli_object *)zend_object_store_get_object(*(__id) TSRMLS_CC);\
+	((MYSQLI_RESOURCE *)intern->ptr)->status = __value; \
+} \
 
 #define MYSQLI_CLEAR_RESOURCE(__id) \
 { \

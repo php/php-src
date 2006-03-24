@@ -8,13 +8,12 @@ mysqli autocommit/commit/rollback
 	$row = mysqli_fetch_row($result);
 	mysqli_free_result($result);
 	mysqli_close($link);
-	
 	if ($row[1] == "DISABLED" || $row[1] == "NO") {
 		printf ("skip innodb support is not installed or enabled.");
+		exit;
 	}
+	require_once('skipif.inc');
 ?>
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 	include "connect.inc";
