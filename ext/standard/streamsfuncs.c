@@ -1259,14 +1259,18 @@ PHP_FUNCTION(stream_get_line)
 
 	if (php_stream_reads_unicode(stream)) {
 		UChar *buf;
+		UChar *d = NULL;
+		int dlen = 0;
 
-		if (Z_TYPE_PP(delim) != IS_UNICODE) {
+		if (delim) {
 			convert_to_unicode_ex(delim);
+			d = Z_USTRVAL_PP(delim);
+			dlen = Z_USTRLEN_PP(delim);
 		}
 
 		/* maxchars == maxlength will prevent the otherwise generous maxlen == max_length * 2
 		   from allocating beyond what's requested */
-		buf = php_stream_get_record_unicode(stream, max_length * 2, max_length, &buf_size, Z_USTRVAL_PP(delim), Z_USTRLEN_PP(delim) TSRMLS_CC);
+		buf = php_stream_get_record_unicode(stream, max_length * 2, max_length, &buf_size, d, dlen TSRMLS_CC);
 		if (!buf) {
 			RETURN_FALSE;
 		}
@@ -1274,12 +1278,16 @@ PHP_FUNCTION(stream_get_line)
 		RETURN_UNICODEL(buf, buf_size, 0);
 	} else {
 		char *buf;
+		char *d = NULL;
+		int dlen = 0;
 
-		if (Z_TYPE_PP(delim) != IS_STRING) {
+		if (delim) {
 			convert_to_string_ex(delim);
+			d = Z_STRVAL_PP(delim);
+			dlen = Z_STRLEN_PP(delim);
 		}
 
-		buf = php_stream_get_record(stream, max_length, &buf_size, Z_STRVAL_PP(delim), Z_STRLEN_PP(delim) TSRMLS_CC);
+		buf = php_stream_get_record(stream, max_length, &buf_size, d, dlen TSRMLS_CC);
 		if (!buf) {
 			RETURN_FALSE;
 		}
