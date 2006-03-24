@@ -1048,70 +1048,55 @@ PHPAPI PHP_FUNCTION(fgetc)
 
 /* {{{ proto string fgetss(resource fp [, int length, string allowable_tags])
    Get a line from file pointer and strip HTML tags */
-/* UTODO: Accept unicode contents */
 PHPAPI PHP_FUNCTION(fgetss)
 {
-	zval **fd, **bytes = NULL, **allow=NULL;
-	size_t len = 0;
-	size_t actual_len, retval_len;
-	char *buf = NULL, *retval;
+	zval *zstream;
 	php_stream *stream;
-	char *allowed_tags=NULL;
-	int allowed_tags_len=0;
+	long length = 0;
+	zval **allow = NULL;
+	size_t retlen = 0;
 
-	switch(ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters_ex(1, &fd) == FAILURE) {
-				RETURN_FALSE;
-			}
-			break;
-
-		case 2:
-			if (zend_get_parameters_ex(2, &fd, &bytes) == FAILURE) {
-				RETURN_FALSE;
-			}
-			break;
-
-		case 3:
-			if (zend_get_parameters_ex(3, &fd, &bytes, &allow) == FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_string_ex(allow);
-			allowed_tags = Z_STRVAL_PP(allow);
-			allowed_tags_len = Z_STRLEN_PP(allow);
-			break;
-
-		default:
-			WRONG_PARAM_COUNT;
-			/* NOTREACHED */
-			break;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|lZ", &zstream, &length, &allow) == FAILURE) {
+		return;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, fd);
+	php_stream_from_zval(stream, &zstream);
 
-	if (bytes != NULL) {
-		convert_to_long_ex(bytes);
-		if (Z_LVAL_PP(bytes) <= 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0");
+	if (php_stream_reads_unicode(stream)) {
+		UChar *buf = php_stream_get_line_ex(stream, IS_UNICODE, NULL_ZSTR, 0, length, &retlen);
+		UChar *allowed = NULL;
+		int allowed_len = 0;
+
+		if (!buf) {
 			RETURN_FALSE;
 		}
 
-		len = (size_t) Z_LVAL_PP(bytes);
-		buf = safe_emalloc(sizeof(char), (len + 1), 0);
-		/*needed because recv doesnt set null char at end*/
-		memset(buf, 0, len + 1);
-	}
-
-	if ((retval = php_stream_get_line(stream, buf, len, &actual_len)) == NULL)	{
-		if (buf != NULL) {
-			efree(buf);
+		if (allow) {
+			convert_to_unicode_ex(allow);
+			allowed = Z_USTRVAL_PP(allow);
+			allowed_len = Z_USTRLEN_PP(allow);
 		}
-		RETURN_FALSE;
+		retlen = php_u_strip_tags(buf, retlen, &stream->fgetss_state, allowed, allowed_len TSRMLS_CC);
+
+		RETURN_UNICODEL(buf, retlen, 0);
+	} else {
+		char *buf = php_stream_get_line_ex(stream, IS_STRING, NULL_ZSTR, 0, length, &retlen);
+		char *allowed = NULL;
+		int allowed_len = 0;
+
+		if (!buf) {
+			RETURN_FALSE;
+		}
+
+		if (allow) {
+			convert_to_string_ex(allow);
+			allowed = Z_STRVAL_PP(allow);
+			allowed_len = Z_STRLEN_PP(allow);
+		}
+		retlen = php_strip_tags(buf, retlen, &stream->fgetss_state, allowed, allowed_len);
+
+		RETURN_STRINGL(buf, retlen, 0);
 	}
-
-	retval_len = php_strip_tags(retval, actual_len, &stream->fgetss_state, allowed_tags, allowed_tags_len);
-
-	RETURN_STRINGL(retval, retval_len, 0);
 }
 /* }}} */
 
