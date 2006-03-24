@@ -926,6 +926,20 @@ static int parse_context_params(php_stream_context *context, zval *params TSRMLS
 	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "options", sizeof("options"), (void**)&tmp)) {
 		parse_context_options(context, *tmp TSRMLS_CC);
 	}
+	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "encoding", sizeof("encoding"), (void**)&tmp)) {
+		zval strval = **tmp;
+
+		if (context->input_encoding) {
+			efree(context->input_encoding);
+		}
+		if (context->output_encoding) {
+			efree(context->output_encoding);
+		}
+		zval_copy_ctor(&strval);
+		convert_to_string(&strval);
+		context->input_encoding = Z_STRVAL(strval);
+		context->output_encoding = estrdup(Z_STRVAL(strval));
+	}
 	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "input_encoding", sizeof("input_encoding"), (void**)&tmp)) {
 		zval strval = **tmp;
 
