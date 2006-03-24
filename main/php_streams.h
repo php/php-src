@@ -329,6 +329,8 @@ PHPAPI void *_php_stream_get_line(php_stream *stream, int buf_type, zstr buf, si
 															_php_stream_get_line((stream), (buf_type), ZSTR(buf), (maxlen), (maxchars), NULL TSRMLS_CC)
 
 PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *returned_len, char *delim, size_t delim_len TSRMLS_DC);
+PHPAPI UChar *php_stream_get_record_unicode(php_stream *stream, size_t maxlen, size_t maxchars, size_t *returned_len, UChar *delim, size_t delim_len TSRMLS_DC);
+
 
 PHPAPI UChar *_php_stream_u_get_line(php_stream *stream, UChar *buf, int32_t *pmax_bytes, int32_t *pmax_chars, int *pis_unicode TSRMLS_DC);
 #define php_stream_u_get_line(stream, buf, maxlen_buf, maxlen_chars, buf_type)	_php_stream_u_get_line((stream), (buf), (maxlen_buf), (maxlen_chars), (buf_type) TSRMLS_CC)
