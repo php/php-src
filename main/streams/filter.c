@@ -706,9 +706,14 @@ PHPAPI int _php_stream_bucket_convert(php_stream_bucket *bucket, unsigned char t
 		} else {
 			UErrorCode status = U_ZERO_ERROR;
 			char *dest;
-			int destlen;
+			int destlen, num_conv;
 
-			zend_convert_from_unicode(conv, &dest, &destlen, bucket->buf.u, bucket->buflen, &status);
+			num_conv = zend_convert_from_unicode(conv, &dest, &destlen, bucket->buf.u, bucket->buflen, &status);
+			if (U_FAILURE(status)) {
+				int32_t offset = u_countChar32(bucket->buf.u, num_conv)-1;
+
+				zend_raise_conversion_error_ex("Could not convert Unicode string to binary string", conv, offset, (UG(from_u_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
+			}
 
 			if (bucket->own_buf) {
 				pefree(bucket->buf.u, bucket->is_persistent);
