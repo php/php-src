@@ -583,6 +583,7 @@ ZEND_API int zend_normalize_identifier(UChar **dest, int *dest_len, UChar *ident
 }
 /* }}} */
 
+/* {{{ zend_register_unicode_exceptions */
 void zend_register_unicode_exceptions(TSRMLS_D)
 {
 	zend_class_entry ce;
@@ -590,6 +591,7 @@ void zend_register_unicode_exceptions(TSRMLS_D)
 	INIT_CLASS_ENTRY(ce, "UnicodeConversionException", NULL);
 	unicodeConversionException = zend_register_internal_class_ex(&ce, zend_exception_get_default(TSRMLS_C), NULL TSRMLS_CC);
 }
+/* }}} */
 
 /*
  * Local variables:
@@ -597,4 +599,5 @@ void zend_register_unicode_exceptions(TSRMLS_D)
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim: noet sw=4 ts=4 fdm=marker
  */
