@@ -234,6 +234,10 @@ SAPI_API void sapi_update_default_charset(TSRMLS_D)
 		UErrorCode status = U_ZERO_ERROR;
 
 		canonical_name = ucnv_getName(ZEND_U_CONVERTER(UG(output_encoding_conv)), &status);
+		/*
+		 * UTODO handle NULL return which signifies that MIME standard has no
+		 * name for this converter
+		 */
 		SG(default_charset) = (char *)ucnv_getStandardName(canonical_name, "MIME", &status);
 	} else {
 		SG(default_charset) = zend_ini_string("default_charset", sizeof("default_charset"), 0);
