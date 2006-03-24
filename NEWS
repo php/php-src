@@ -19,6 +19,8 @@ PHP                                                                        NEWS
 - Fixed bug #36808 (syslog ident becomes garbage between requests). (Tony)
 - Fixed bug #36802 (mysqli_set_charset() crash with a non-open connection).
   (Ilia)
+- Fixed bug #36745 (No error message when load data local file isn't found).
+  (Georg)
 - Fixed bug #36721 (The SoapServer is not able to send a header that it didn't
   receive). (Dmitry)
 - Fixed bug #36756 (DOMDocument::removeChild corrupts node). (Rob)
