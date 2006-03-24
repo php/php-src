@@ -12,14 +12,12 @@ mysqli fetch functions
 
 	mysqli_select_db($link, "test");
 
-	$stmt = mysqli_prepare($link, "SELECT current_user(), database(), 'foo'");
+	$stmt = mysqli_prepare($link, "SELECT md5('bar'), database(), 'foo'");
 	mysqli_bind_result($stmt, $c0, $c1, $c2); 
 	mysqli_execute($stmt);
 
 	mysqli_fetch($stmt);
 	mysqli_stmt_close($stmt);
-
-	$c0 = ($c0 == $user . "@" . $host) ? 1 : 0;
 
 	$test = array($c0, $c1, $c2);
 
@@ -29,7 +27,7 @@ mysqli fetch functions
 --EXPECT--
 array(3) {
   [0]=>
-  int(1)
+  string(32) "37b51d194a7513e45b56f6524f2d51f2"
   [1]=>
   string(4) "test"
   [2]=>
