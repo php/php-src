@@ -670,9 +670,7 @@ ZEND_API void _convert_to_string_with_converter(zval *op, UConverter *conv TSRML
 		case IS_STRING:
 			return;
 		case IS_UNICODE:
-			if (zval_unicode_to_string(op, conv TSRMLS_CC) == FAILURE) {
-				zend_error(E_WARNING, "Could not convert Unicode string to binary string");
-			}
+			zval_unicode_to_string(op, conv TSRMLS_CC);
 			break;
 		case IS_BOOL:
 			if (Z_LVAL_P(op)) {
