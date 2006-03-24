@@ -374,13 +374,17 @@ ZEND_API int zval_unicode_to_string(zval *string, UConverter *conv TSRMLS_DC)
 
     num_conv = zend_convert_from_unicode(conv, &s, &s_len, u, u_len, &status);
 
-    ZVAL_STRINGL(string, s, s_len, 0);
-
     if (U_FAILURE(status)) {
         int32_t offset = u_countChar32(u, num_conv)-1;
+
+		if (s) {
+			efree(s);
+		}
         zend_raise_conversion_error_ex("Could not convert Unicode string to binary string", conv, offset, (UG(from_u_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
         retval = FAILURE;
     }
+
+    ZVAL_STRINGL(string, s, s_len, 0);
 
     efree((UChar*)u);
     return retval;
