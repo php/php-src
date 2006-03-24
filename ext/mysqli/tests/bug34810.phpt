@@ -18,6 +18,7 @@ class DbConnection {
 		$mysql = new mysqli($host, $user, $passwd, "test");
 		$mysql->query("DROP TABLE IF EXISTS test_warnings");
 		$mysql->query("CREATE TABLE test_warnings (a int not null)");
+		$mysql->query("SET sql_mode=''");
 		$mysql->query("INSERT INTO test_warnings VALUES (1),(2),(NULL)");
 		var_dump(mysqli_warning::__construct($mysql));
 	} 

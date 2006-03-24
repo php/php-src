@@ -211,22 +211,11 @@ zval *mysqli_read_property(zval *object, zval *member, int type TSRMLS_DC)
 	}
 
 	if (ret == SUCCESS) {
-
-		/* check if mysqli object is still valid */
-		if (!strcmp(obj->zo.ce->name, "mysqli")) {
-			if (!obj->ptr ||
-		    	!((MYSQL *)((MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr)->mysql)->thread_id) {
-				retval = EG(uninitialized_zval_ptr);
-				return(retval);
-			}
-		} else
-		/* check if stmt object is still valid */
-		if (!strcmp(obj->zo.ce->name, "mysqli_stmt")) {
-			if (!obj->ptr ||
-		    	!((MYSQL_STMT *)((MY_STMT *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr)->stmt)->mysql) {
-				retval = EG(uninitialized_zval_ptr);
-				return(retval);
-			}
+		if (strcmp(obj->zo.ce->name, "mysqli_driver") &&
+            (!obj->ptr || ((MYSQLI_RESOURCE *)(obj->ptr))->status < MYSQLI_STATUS_INITIALIZED)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", obj->zo.ce->name );
+			retval = EG(uninitialized_zval_ptr);
+			return(retval);
 		}
 
 		ret = hnd->read_func(obj, &retval TSRMLS_CC);
@@ -346,7 +335,6 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 	intern->zo.ce = class_type;
 	intern->zo.guards = NULL;
 	intern->ptr = NULL;
-	intern->valid = 0;
 	intern->prop_handler = NULL;
 
 	mysqli_base_class = class_type;
@@ -652,7 +640,7 @@ PHP_MINFO_FUNCTION(mysqli)
 /* {{{ mixed mysqli_stmt_construct() 
 constructor for statement object.
 Parameters: 
-  object -> mysqli_init
+  object -> mysqli_stmt_init
   object, query -> mysqli_prepare
 */
 ZEND_FUNCTION(mysqli_stmt_construct)
@@ -670,7 +658,7 @@ ZEND_FUNCTION(mysqli_stmt_construct)
 	        if (zend_parse_parameters(1 TSRMLS_CC, "O", &mysql_link, mysqli_link_class_entry)==FAILURE) {
 				return;
 			}
-			MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link");
+			MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
 			stmt = (MY_STMT *)ecalloc(1,sizeof(MY_STMT));
 
@@ -680,7 +668,7 @@ ZEND_FUNCTION(mysqli_stmt_construct)
 	        if (zend_parse_parameters(2 TSRMLS_CC, "Os", &mysql_link, mysqli_link_class_entry, &statement, &stmt_len)==FAILURE) {
 				return;
 			}
-			MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link");
+			MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
 			stmt = (MY_STMT *)ecalloc(1,sizeof(MY_STMT));
 	
@@ -700,9 +688,9 @@ ZEND_FUNCTION(mysqli_stmt_construct)
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)stmt;
-	
+	mysqli_resource->status = (ZEND_NUM_ARGS() == 1) ? MYSQLI_STATUS_INITIALIZED : MYSQLI_STATUS_VALID;
+
 	((mysqli_object *) zend_object_store_get_object(getThis() TSRMLS_CC))->ptr = mysqli_resource;
-	((mysqli_object *) zend_object_store_get_object(getThis() TSRMLS_CC))->valid = 1;
 }
 /* }}} */
 
@@ -734,7 +722,7 @@ ZEND_FUNCTION(mysqli_result_construct)
 			WRONG_PARAM_COUNT;
 	}
 
-	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link");
+	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
 	result = (resmode == MYSQLI_STORE_RESULT) ? mysql_store_result(mysql->mysql) :
 												mysql_use_result(mysql->mysql);
@@ -745,9 +733,9 @@ ZEND_FUNCTION(mysqli_result_construct)
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)result;
+	mysqli_resource->status = MYSQLI_STATUS_VALID;
 	
 	((mysqli_object *) zend_object_store_get_object(getThis() TSRMLS_CC))->ptr = mysqli_resource;
-	((mysqli_object *) zend_object_store_get_object(getThis() TSRMLS_CC))->valid = 1;
 
 }
 /* }}} */
@@ -796,7 +784,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			}
 		}
 	}
-	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, &mysql_result, "mysqli_result"); 
+	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, &mysql_result, "mysqli_result", MYSQLI_STATUS_VALID); 
 
 	if ((fetchtype & MYSQLI_BOTH) == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The result type should be either MYSQLI_NUM, MYSQLI_ASSOC or MYSQLI_BOTH");

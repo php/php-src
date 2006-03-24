@@ -130,7 +130,6 @@ MAP_PROPERTY_MYG_LONG_READ(driver_report_read, report_mode);
 
 ZEND_FUNCTION(mysqli_driver_construct)
 {
-	
 }
 
 mysqli_property_entry mysqli_driver_property_entries[] = {

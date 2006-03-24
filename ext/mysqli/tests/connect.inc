@@ -10,14 +10,16 @@
 		$passwd = "";
 	} else {
 		$path =  dirname(__FILE__);
-		$host = $user = $passwd = NULL;
+		$host = ":embedded";
+		$user = $passwd = NULL;
 		$args = array(
 					"--datadir=$path", 
 					"--innodb_data_home_dir=$path",
 					"--innodb_data_file_path=ibdata1:10M:autoextend",
 					"--log-error=$path/testrun.log"
 				);
-		$driver->embedded_server_start(TRUE, $args, NULL);
+		$x = $driver->embedded_server_start(TRUE, $args, NULL);
+		var_dump($x);
 	}
 
 ?>

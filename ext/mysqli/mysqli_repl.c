@@ -39,7 +39,7 @@ PHP_FUNCTION(mysqli_disable_reads_from_master)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
 		return;
 	}
-	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link");
+	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 	mysql_disable_reads_from_master(mysql);
 	RETURN_TRUE;
 }
@@ -55,7 +55,7 @@ PHP_FUNCTION(mysqli_disable_rpl_parse)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
 		return;
 	}
-	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link");
+	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 	mysql_disable_rpl_parse(mysql);
 	RETURN_TRUE;
 }
@@ -71,7 +71,7 @@ PHP_FUNCTION(mysqli_enable_reads_from_master)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
 		return;
 	}
-	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link");
+	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
 	mysql_enable_reads_from_master(mysql);
 	RETURN_TRUE;
@@ -88,7 +88,7 @@ PHP_FUNCTION(mysqli_enable_rpl_parse)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
 		return;
 	}
-	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link");
+	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
 	mysql_enable_rpl_parse(mysql);
 	RETURN_TRUE;
@@ -106,7 +106,7 @@ PHP_FUNCTION(mysqli_master_query) {
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &mysql_link, mysqli_link_class_entry, &query, &query_len) == FAILURE) {
 		return;
 	}
-	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link");
+	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
 	if (mysql_master_query(mysql, query, query_len)) {
 		RETURN_FALSE;
@@ -125,7 +125,7 @@ PHP_FUNCTION(mysqli_rpl_parse_enabled)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
 		return;
 	}
-	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link");
+	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
 	RETURN_LONG(mysql_rpl_parse_enabled(mysql));
 }
@@ -141,7 +141,7 @@ PHP_FUNCTION(mysqli_rpl_probe)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
 		return;
 	}
-	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link");
+	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
 
 	if (mysql_rpl_probe(mysql)) {
@@ -163,7 +163,7 @@ PHP_FUNCTION(mysqli_rpl_query_type)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &mysql_link, mysqli_link_class_entry, &query, &query_len) == FAILURE) {
 		return;
 	}
-	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link");
+	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
 	RETURN_LONG(mysql_rpl_query_type(query, query_len));
 }
@@ -181,7 +181,7 @@ PHP_FUNCTION(mysqli_send_query)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &mysql_link, mysqli_link_class_entry, &query, &query_len) == FAILURE) {
 		return;
 	}
-	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link");
+	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
 	if (mysql_send_query(mysql, query, query_len)) {
 		RETURN_FALSE;
@@ -202,7 +202,7 @@ PHP_FUNCTION(mysqli_slave_query)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &mysql_link, mysqli_link_class_entry, &query, &query_len) == FAILURE) {
 		return;
 	}
-	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link");
+	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
 	if (mysql_slave_query(mysql, query, query_len)) {
 		RETURN_FALSE;
