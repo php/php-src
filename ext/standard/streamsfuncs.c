@@ -1235,18 +1235,15 @@ PHP_FUNCTION(stream_filter_remove)
 
 /* {{{ proto string stream_get_line(resource stream, int maxlen [, string ending])
    Read up to maxlen bytes from a stream or until the ending string is found */
-/* UTODO */
 PHP_FUNCTION(stream_get_line)
 {
-	char *str = NULL;
-	int str_len;
 	long max_length;
 	zval *zstream;
-	char *buf;
 	size_t buf_size;
 	php_stream *stream;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|s", &zstream, &max_length, &str, &str_len) == FAILURE) {
+	zval **delim = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|Z", &zstream, &max_length, &delim) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1260,10 +1257,34 @@ PHP_FUNCTION(stream_get_line)
 
 	php_stream_from_zval(stream, &zstream);
 
-	if ((buf = php_stream_get_record(stream, max_length, &buf_size, str, str_len TSRMLS_CC))) {
-		RETURN_STRINGL(buf, buf_size, 0);
+	if (php_stream_reads_unicode(stream)) {
+		UChar *buf;
+
+		if (Z_TYPE_PP(delim) != IS_UNICODE) {
+			convert_to_unicode_ex(delim);
+		}
+
+		/* maxchars == maxlength will prevent the otherwise generous maxlen == max_length * 2
+		   from allocating beyond what's requested */
+		buf = php_stream_get_record_unicode(stream, max_length * 2, max_length, &buf_size, Z_USTRVAL_PP(delim), Z_USTRLEN_PP(delim) TSRMLS_CC);
+		if (!buf) {
+			RETURN_FALSE;
+		}
+
+		RETURN_UNICODEL(buf, buf_size, 0);
 	} else {
-		RETURN_FALSE;
+		char *buf;
+
+		if (Z_TYPE_PP(delim) != IS_STRING) {
+			convert_to_string_ex(delim);
+		}
+
+		buf = php_stream_get_record(stream, max_length, &buf_size, Z_STRVAL_PP(delim), Z_STRLEN_PP(delim) TSRMLS_CC);
+		if (!buf) {
+			RETURN_FALSE;
+		}
+
+		RETURN_STRINGL(buf, buf_size, 0);
 	}
 }
 
