@@ -10,6 +10,7 @@ PHP                                                                        NEWS
   (also fixes bug #36764). (Tony)
 - Removed the E_STRICT deprecation notice from "var". (Ilia)
 - Fixed debug_zval_dump() to support private and protected members. (Dmitry)
+- Fixed SoapFault::getMessage(). (Dmitry)
 - Fixed bug #36825 (Exceptions thrown in ArrayObject::offsetGet cause 
   segfault). (Tony)
 - Fixed bug #36820 (Privileged connection with an Oracle password file fails). 
