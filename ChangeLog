@@ -1,3 +1,137 @@
+2006-03-24  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/streamsfuncs.c:
+      Allow bidirectional encoding option via single context param
+
+    * ext/standard/streamsfuncs.c:
+      Fix stream_get_line():
+      Checking type isn't nearly as important as checking nullness...
+
+    * ext/standard/file.c:
+      Update fgetss() for unicode
+
+2006-03-24  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * main/streams/filter.c:
+      This is probably not a test..
+
+2006-03-24  Sara Golemon  <sara@golemon.com>
+
+    * main/streams/filter.c
+      main/streams/streams.c:
+      Hook into new unicode conversion error handling API
+
+    * ext/standard/streamsfuncs.c
+      main/php_streams.h
+      main/streams/streams.c:
+      Add php_stream_get_record_unicde() API call.
+      Update stream_get_line() userspace function to handle unicode streams.
+
+2006-03-24  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_unicode.c:
+      Hey! Don't remove vim modeline completely! :)
+
+2006-03-24  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/tests/bug36745.phpt
+      ext/mysqli/tests/bug36745.phpt:
+      
+      file bug36745.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      NEWS
+      ext/mysqli/mysqli.c:
+      fix and testcase for bug #36745
+
+2006-03-24  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      ext/simplexml/tests/032.phpt
+      ext/simplexml/tests/033.phpt:
+      add new tests
+
+    * ext/simplexml/tests/032.phpt
+      ext/simplexml/tests/032.phpt
+      ext/simplexml/tests/033.phpt
+      ext/simplexml/tests/033.phpt:
+      
+      add new tests
+
+2006-03-24  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_1)
+      ext/mysqli/tests/017.phpt
+      ext/mysqli/tests/049.phpt
+      ext/mysqli/tests/bug34810.phpt:
+      fixed minor problems (thx to tony)
+
+2006-03-24  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_unicode.c:
+      whitespaces -> tabs
+      no other changes done
+
+2006-03-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      ZendEngine2/zend_unicode.c:
+      Fixed bug #36840 (Memory leak if cast operator throws an exception that is
+      caught)
+
+2006-03-24  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_1)
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_driver.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_prop.c
+      ext/mysqli/mysqli_repl.c
+      ext/mysqli/mysqli_warning.c
+      ext/mysqli/php_mysqli.h
+      ext/mysqli/tests/002.phpt
+      ext/mysqli/tests/014.phpt
+      ext/mysqli/tests/bug34810.phpt
+      ext/mysqli/tests/bug36802.phpt
+      ext/mysqli/tests/bug36802.phpt
+      ext/mysqli/tests/connect.inc:
+      Fix for bug #36802 (server crashes with invalid/not opened connections)
+      	Added status to mysqli_resource:
+      		MYSQLI_STATUS_UNKNOWN
+      		MYSQLI_STATUS_CLEARED (for future use)
+      		MYSQLI_STATUS_INITIALIZED (after mysqli_init and mysqli_stmt_init)
+      		MYSQLI_STATUS_VALID (for valid objects)
+      	removed valid flag
+      	changed MYSQLI_FETCH_RESOURCE
+      		added last parameter __check which specifies the status
+
+2006-03-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed SoapFault::getMessage()
+
+2006-03-24  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_default_classes.c
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_unicode.c
+      ZendEngine2/zend_unicode.h:
+      Support warning/exceptions flag for conversion errors.
+
+    * main/SAPI.c:
+      UTODO note
+
+2006-03-24  Sara Golemon  <sara@golemon.com>
+
+    * main/streams/streams.c:
+      Add some error checking when stream converters are instantiated.
+      
+      Use the global conversion error handlers for output conversion (for now)
+      We may want to make this customizable on a per-stream basis
+      via context param later on...
+
 2006-03-23  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ZendEngine2/zend.c
