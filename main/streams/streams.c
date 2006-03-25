@@ -2277,45 +2277,47 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 			UErrorCode status = U_ZERO_ERROR;
 
 			stream->output_encoding = ucnv_open(encoding, &status);
-			switch (U_FAILURE(status)) {
-				case U_ZERO_ERROR:
-					/* UTODO: (Maybe?) Allow overriding the default error handlers on a per-stream basis via context params */
-					zend_set_converter_error_mode(stream->output_encoding, UG(from_u_error_mode));
-					zend_set_converter_subst_char(stream->output_encoding, UG(subst_char), UG(subst_char_len));
-					break;
-				case U_MEMORY_ALLOCATION_ERROR:
-					php_stream_wrapper_log_error(wrapper, options ^ REPORT_ERRORS TSRMLS_CC,
-						"Unable to allocate memory for unicode output converter: %s", encoding);
-					break;
-				case U_FILE_ACCESS_ERROR:
-					php_stream_wrapper_log_error(wrapper, options ^ REPORT_ERRORS TSRMLS_CC,
-						"Error loading unicode output converter: %s", encoding);
-					break;
-				default:
-					php_stream_wrapper_log_error(wrapper, options ^ REPORT_ERRORS TSRMLS_CC,
-						"Unknown error starting unicode output converter: %s", encoding);
+			if (U_FAILURE(status)) {
+				switch (status) {
+					case U_MEMORY_ALLOCATION_ERROR:
+						php_stream_wrapper_log_error(wrapper, options ^ REPORT_ERRORS TSRMLS_CC,
+							"Unable to allocate memory for unicode output converter: %s", encoding);
+						break;
+					case U_FILE_ACCESS_ERROR:
+						php_stream_wrapper_log_error(wrapper, options ^ REPORT_ERRORS TSRMLS_CC,
+							"Error loading unicode output converter: %s", encoding);
+						break;
+					default:
+						php_stream_wrapper_log_error(wrapper, options ^ REPORT_ERRORS TSRMLS_CC,
+							"Unknown error starting unicode output converter: %s", encoding);
+				}
+			} else {
+				/* UTODO: (Maybe?) Allow overriding the default error handlers on a per-stream basis via context params */
+				zend_set_converter_error_mode(stream->output_encoding, UG(from_u_error_mode));
+				zend_set_converter_subst_char(stream->output_encoding, UG(subst_char), UG(subst_char_len));
 			}
 		}
 		if (strchr(implicit_mode, 'r') || strchr(implicit_mode, '+')) {
 			char *encoding = (context && context->input_encoding) ? context->input_encoding : "utf8";
 			UErrorCode status = U_ZERO_ERROR;
+
 			stream->input_encoding = ucnv_open(encoding, &status);
-			switch (U_FAILURE(status)) {
-				case U_ZERO_ERROR:
-					/* UTODO: If/When Input error handling gets implemented, set the options here */
-					break;
-				case U_MEMORY_ALLOCATION_ERROR:
-					php_stream_wrapper_log_error(wrapper, options ^ REPORT_ERRORS TSRMLS_CC,
-						"Unable to allocate memory for unicode input converter: %s", encoding);
-					break;
-				case U_FILE_ACCESS_ERROR:
-					php_stream_wrapper_log_error(wrapper, options ^ REPORT_ERRORS TSRMLS_CC,
-						"Error loading unicode input converter: %s", encoding);
-					break;
-				default:
-					php_stream_wrapper_log_error(wrapper, options ^ REPORT_ERRORS TSRMLS_CC,
-						"Unknown error starting unicode input converter: %s", encoding);
+			if (U_FAILURE(status)) {
+				switch (status) {
+					case U_MEMORY_ALLOCATION_ERROR:
+						php_stream_wrapper_log_error(wrapper, options ^ REPORT_ERRORS TSRMLS_CC,
+							"Unable to allocate memory for unicode input converter: %s", encoding);
+						break;
+					case U_FILE_ACCESS_ERROR:
+						php_stream_wrapper_log_error(wrapper, options ^ REPORT_ERRORS TSRMLS_CC,
+							"Error loading unicode input converter: %s", encoding);
+						break;
+					default:
+						php_stream_wrapper_log_error(wrapper, options ^ REPORT_ERRORS TSRMLS_CC,
+							"Unknown error starting unicode input converter: %s", encoding);
+				}
 			}
+			/* UTODO: If/When Input error handling gets implemented, set the options on success */
 		}
 	}
 
