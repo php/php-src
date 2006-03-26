@@ -112,6 +112,74 @@ static PHP_FUNCTION(unicode_encode)
 }
 /* }}} */
 
+PHP_FUNCTION(unicode_set_error_mode)
+{
+	zend_conv_direction direction;
+	long tmp, mode;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &tmp, &mode) == FAILURE) {
+		return;
+	}
+	direction = (zend_conv_direction) tmp;
+
+	if (direction != ZEND_FROM_UNICODE && direction != ZEND_TO_UNICODE) {
+		php_error(E_WARNING, "Invalid conversion direction value");
+		RETURN_FALSE;
+	}
+
+	if ((mode & 0xff) > ZEND_CONV_ERROR_LAST_ENUM) {
+		php_error(E_WARNING, "Illegal value for conversion error mode");
+		RETURN_FALSE;
+	}
+
+	if (direction == ZEND_FROM_UNICODE) {
+		UG(from_error_mode) = mode;
+	}
+
+	zend_update_converters_error_behavior(TSRMLS_C);
+	RETURN_TRUE;
+}
+
+PHP_FUNCTION(unicode_set_subst_char)
+{
+	zend_conv_direction direction;
+	UChar *subst_char;
+	UChar32 cp;
+	int subst_char_len;
+	long tmp;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lu", &tmp, &subst_char, &subst_char_len) == FAILURE) {
+		return;
+	}
+	direction = (zend_conv_direction) tmp;
+
+	if (direction != ZEND_FROM_UNICODE && direction != ZEND_TO_UNICODE) {
+		php_error(E_WARNING, "Invalid conversion direction value");
+		RETURN_FALSE;
+	}
+
+	if (subst_char_len < 1 ) {
+		php_error(E_WARNING, "Empty substitution character");
+		RETURN_FALSE;
+	}
+
+	cp = zend_get_codepoint_at(subst_char, subst_char_len, 0);
+
+	if (cp < 0 || cp >= UCHAR_MAX_VALUE) {
+		zend_error(E_WARNING, "Substitution character value U+%06x is out of range (0 - 0x10FFFF)", cp);
+		RETURN_FALSE;
+	}
+
+	if (direction == ZEND_FROM_UNICODE) {
+		int len;
+		len = zend_codepoint_to_uchar(cp, UG(from_subst_char));
+		UG(from_subst_char)[len] = 0;
+	}
+
+	zend_update_converters_error_behavior(TSRMLS_C);
+	RETURN_TRUE;
+}
+
 /* {{{ unicode_functions[] */
 zend_function_entry unicode_functions[] = {
 	PHP_FE(i18n_loc_get_default, NULL)
@@ -119,6 +187,8 @@ zend_function_entry unicode_functions[] = {
 	PHP_FE(unicode_decode, NULL)
 	PHP_FE(unicode_semantics, NULL)
 	PHP_FE(unicode_encode, NULL)
+	PHP_FE(unicode_set_error_mode, NULL)
+	PHP_FE(unicode_set_subst_char, NULL)
 	{ NULL, NULL, NULL }
 };
 /* }}} */
@@ -144,7 +214,6 @@ zend_module_entry unicode_module_entry = {
 ZEND_GET_MODULE(unicode)
 #endif
 
-
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(unicode)
 {
@@ -157,7 +226,6 @@ PHP_MINIT_FUNCTION(unicode)
 	return SUCCESS;
 }
 /* }}} */
-
 
 /* {{{ PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(unicode)
@@ -172,7 +240,6 @@ PHP_MSHUTDOWN_FUNCTION(unicode)
 }
 /* }}} */
 
-
 /* {{{ PHP_RINIT_FUNCTION */
 PHP_RINIT_FUNCTION(unicode)
 {
@@ -180,14 +247,12 @@ PHP_RINIT_FUNCTION(unicode)
 }
 /* }}} */
 
-
 /* {{{ PHP_RSHUTDOWN_FUNCTION */
 PHP_RSHUTDOWN_FUNCTION(unicode)
 {
 	return SUCCESS;
 }
 /* }}} */
-
 
 /* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(unicode)

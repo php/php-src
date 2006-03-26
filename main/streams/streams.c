@@ -1263,7 +1263,7 @@ static size_t _php_stream_write_buffer(php_stream *stream, int buf_type, zstr bu
 		if (U_FAILURE(status)) {
 			int32_t offset = u_countChar32(buf.u, num_conv)-1;
 
-			zend_raise_conversion_error_ex("Could not convert Unicode string to binary string", stream->output_encoding, offset, (UG(from_u_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
+			zend_raise_conversion_error_ex("Could not convert Unicode string to binary string", stream->output_encoding, offset, (UG(from_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
 		}
 		freeme = buf.s = dest;
 		buflen = destlen;
@@ -2293,8 +2293,8 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 				}
 			} else {
 				/* UTODO: (Maybe?) Allow overriding the default error handlers on a per-stream basis via context params */
-				zend_set_converter_error_mode(stream->output_encoding, UG(from_u_error_mode));
-				zend_set_converter_subst_char(stream->output_encoding, UG(subst_char), UG(subst_char_len));
+				zend_set_converter_error_mode(stream->output_encoding, UG(from_error_mode));
+				zend_set_converter_subst_char(stream->output_encoding, UG(from_subst_char));
 			}
 		}
 		if (strchr(implicit_mode, 'r') || strchr(implicit_mode, '+')) {

@@ -78,7 +78,7 @@ void zend_set_converter_error_mode(UConverter *conv, uint8_t error_mode)
 /* }}} */
 
 /* {{{ zend_set_converter_subst_char */
-void zend_set_converter_subst_char(UConverter *conv, UChar *subst_char, int8_t subst_char_len)
+void zend_set_converter_subst_char(UConverter *conv, UChar *subst_char)
 {
 	char dest[8];
 	int8_t dest_len = 8;
@@ -86,6 +86,7 @@ void zend_set_converter_subst_char(UConverter *conv, UChar *subst_char, int8_t s
 	UErrorCode temp = U_ZERO_ERROR;
 	const void *old_context;
 	UConverterFromUCallback old_cb;
+	int32_t subst_char_len = u_strlen(subst_char);
 
 	if (!subst_char_len)
 		return;
@@ -377,10 +378,12 @@ ZEND_API int zval_unicode_to_string(zval *string, UConverter *conv TSRMLS_DC)
 	if (U_FAILURE(status)) {
 		int32_t offset = u_countChar32(u, num_conv)-1;
 
+		/* XXX needs to be fixed, but a leak is better than invalid memory
 		if (s) {
 			efree(s);
 		}
-		zend_raise_conversion_error_ex("Could not convert Unicode string to binary string", conv, offset, (UG(from_u_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
+		*/
+		zend_raise_conversion_error_ex("Could not convert Unicode string to binary string", conv, offset, (UG(from_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
 		retval = FAILURE;
 	}
 
