@@ -57,7 +57,16 @@ PHP_MINFO_FUNCTION(unicode);
 
 PHP_FUNCTION(i18n_loc_get_default);
 PHP_FUNCTION(i18n_loc_set_default);
+PHP_FUNCTION(collator_create);
+PHP_FUNCTION(collator_compare);
+PHP_FUNCTION(collator_sort);
+PHP_FUNCTION(collator_set_strength);
+PHP_FUNCTION(collator_set_attribute);
+PHP_FUNCTION(collator_get_strength);
+PHP_FUNCTION(collator_get_attribute);
+PHP_METHOD(collator, __construct);
 
+void php_init_collation(TSRMLS_D);
 extern php_stream_filter_factory php_unicode_filter_factory;
 
 #ifdef  __cplusplus
