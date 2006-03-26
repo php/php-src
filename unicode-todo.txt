@@ -57,3 +57,7 @@
 
 * Optimize T_INLINE_HTML blocks conversion by either creating a converter
   cache or remembering the last used converter in the executor globals.
+
+* What to do with binary string literals and runtime casting? Literals are in
+  script_encoding, casting uses runtime_encoding. If they are different, bad
+  stuff happens.
