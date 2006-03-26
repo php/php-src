@@ -691,8 +691,7 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 						};
 						break;
 					case IS_DOUBLE:
-						memcpy(&dval, stmt->result.buf[i].val, sizeof(dval));
-						ZVAL_DOUBLE(stmt->result.vars[i], dval);
+						ZVAL_DOUBLE(stmt->result.vars[i], *(double *)stmt->result.buf[i].val);
 						break;
 					case IS_STRING:
 						if (stmt->stmt->bind[i].buffer_type == MYSQL_TYPE_LONGLONG) {
