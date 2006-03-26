@@ -23,7 +23,7 @@
 
 void php_register_unicode_iterators(TSRMLS_D);
 
-/* {{{ proto unicode unicode_decode(string input, string encoding)
+/* {{{ proto unicode unicode_decode(string input, string encoding) U
    Takes a string in the source encoding and converts it to a UTF-16 unicode string, returning the result */
 static PHP_FUNCTION(unicode_decode)
 {
@@ -68,15 +68,15 @@ static PHP_FUNCTION(unicode_decode)
 }
 /* }}} */
 
-/* {{{ proto bool unicode_semantics()
-   Check whether unicode semantics is enabled */
+/* {{{ proto bool unicode_semantics() U
+   Check whether unicode semantics are enabled */
 static PHP_FUNCTION(unicode_semantics)
 {
 	RETURN_BOOL(UG(unicode));
 }
 /* }}} */
 
-/* {{{ proto string unicode_encode(unicode input, string encoding)
+/* {{{ proto string unicode_encode(unicode input, string encoding) U
    Takes a unicode string and converts it to a string in the specified encoding */
 static PHP_FUNCTION(unicode_encode)
 {
@@ -112,6 +112,8 @@ static PHP_FUNCTION(unicode_encode)
 }
 /* }}} */
 
+/* {{{ proto bool unicode_set_error_mode(int direction, int mode) U
+   Sets global conversion error mode for the specified conversion direction */
 PHP_FUNCTION(unicode_set_error_mode)
 {
 	zend_conv_direction direction;
@@ -139,7 +141,10 @@ PHP_FUNCTION(unicode_set_error_mode)
 	zend_update_converters_error_behavior(TSRMLS_C);
 	RETURN_TRUE;
 }
+/* }}} */
 
+/* {{{ proto bool unicode_set_subst_char(int direction, string character) U
+   Sets global substitution character for the specified conversion direction */
 PHP_FUNCTION(unicode_set_subst_char)
 {
 	zend_conv_direction direction;
