@@ -60,11 +60,6 @@
 
 #define EXTR_REFS				0x100
 
-#define SORT_REGULAR			0
-#define SORT_NUMERIC			1
-#define	SORT_STRING				2
-#define	SORT_LOCALE_STRING      5
-
 #define SORT_DESC				3
 #define SORT_ASC				4
 
@@ -139,7 +134,7 @@ PHP_MSHUTDOWN_FUNCTION(array)
 	return SUCCESS;
 }
 
-static void set_compare_func(int sort_type TSRMLS_DC)
+PHPAPI void php_set_compare_func(int sort_type TSRMLS_DC)
 {
 	switch (sort_type) {
 		case SORT_NUMERIC:
@@ -241,7 +236,7 @@ PHP_FUNCTION(krsort)
 	}
 	
 	target_hash = HASH_OF(array);
-	set_compare_func(sort_type TSRMLS_CC);
+	php_set_compare_func(sort_type TSRMLS_CC);
 	
 	if (zend_hash_sort(target_hash, zend_qsort, array_reverse_key_compare, 0 TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
@@ -263,7 +258,7 @@ PHP_FUNCTION(ksort)
 	}
 
 	target_hash = HASH_OF(array);
-	set_compare_func(sort_type TSRMLS_CC);
+	php_set_compare_func(sort_type TSRMLS_CC);
 	
 	if (zend_hash_sort(target_hash, zend_qsort, array_key_compare, 0 TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
@@ -346,7 +341,7 @@ PHP_FUNCTION(count)
  *
  * This is not correct any more, depends on what compare_func is set to.
  */
-static int array_data_compare(const void *a, const void *b TSRMLS_DC)
+PHPAPI int php_array_data_compare(const void *a, const void *b TSRMLS_DC)
 {
 	Bucket *f;
 	Bucket *s;
@@ -387,7 +382,7 @@ static int array_data_compare(const void *a, const void *b TSRMLS_DC)
 
 static int array_reverse_data_compare(const void *a, const void *b TSRMLS_DC)
 {
-	return array_data_compare(a, b TSRMLS_CC)*-1;
+	return php_array_data_compare(a, b TSRMLS_CC)*-1;
 }
 
 static int array_natural_general_compare(const void *a, const void *b, int fold_case)
@@ -493,9 +488,9 @@ PHP_FUNCTION(asort)
 	}
 	
 	target_hash = HASH_OF(array);
-	set_compare_func(sort_type TSRMLS_CC);
+	php_set_compare_func(sort_type TSRMLS_CC);
 	
-	if (zend_hash_sort(target_hash, zend_qsort, array_data_compare, 0 TSRMLS_CC) == FAILURE) {
+	if (zend_hash_sort(target_hash, zend_qsort, php_array_data_compare, 0 TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -515,7 +510,7 @@ PHP_FUNCTION(arsort)
 	}
 	
 	target_hash = HASH_OF(array);
-	set_compare_func(sort_type TSRMLS_CC);
+	php_set_compare_func(sort_type TSRMLS_CC);
 	
 	if (zend_hash_sort(target_hash, zend_qsort, array_reverse_data_compare, 0 TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
@@ -537,9 +532,9 @@ PHP_FUNCTION(sort)
 	}
 	
 	target_hash = HASH_OF(array);
-	set_compare_func(sort_type TSRMLS_CC);
+	php_set_compare_func(sort_type TSRMLS_CC);
 	
-	if (zend_hash_sort(target_hash, zend_qsort, array_data_compare, 1 TSRMLS_CC) == FAILURE) {
+	if (zend_hash_sort(target_hash, zend_qsort, php_array_data_compare, 1 TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -559,7 +554,7 @@ PHP_FUNCTION(rsort)
 	}
 	
 	target_hash = HASH_OF(array);
-	set_compare_func(sort_type TSRMLS_CC);
+	php_set_compare_func(sort_type TSRMLS_CC);
 	
 	if (zend_hash_sort(target_hash, zend_qsort, array_reverse_data_compare, 1 TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
@@ -968,14 +963,14 @@ PHP_FUNCTION(min)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Atleast one value should be passed");
 		RETURN_NULL();
 	}
-	set_compare_func(SORT_REGULAR TSRMLS_CC);
+	php_set_compare_func(SORT_REGULAR TSRMLS_CC);
 	if (argc == 1) {
 		zval **arr;
 
 		if (zend_get_parameters_ex(1, &arr) == FAILURE || Z_TYPE_PP(arr) != IS_ARRAY) {
 			WRONG_PARAM_COUNT;
 		}
-		if (zend_hash_minmax(Z_ARRVAL_PP(arr), array_data_compare, 0, (void **) &result TSRMLS_CC) == SUCCESS) {
+		if (zend_hash_minmax(Z_ARRVAL_PP(arr), php_array_data_compare, 0, (void **) &result TSRMLS_CC) == SUCCESS) {
 			RETVAL_ZVAL(*result, 1, 0);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array must contain atleast one element");
@@ -1018,14 +1013,14 @@ PHP_FUNCTION(max)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Atleast one value should be passed");
 		RETURN_NULL();
 	}
-	set_compare_func(SORT_REGULAR TSRMLS_CC);
+	php_set_compare_func(SORT_REGULAR TSRMLS_CC);
 	if (argc == 1) {
 		zval **arr;
 
 		if (zend_get_parameters_ex(1, &arr) == FAILURE || Z_TYPE_PP(arr) != IS_ARRAY) {
 			WRONG_PARAM_COUNT;
 		}
-		if (zend_hash_minmax(Z_ARRVAL_PP(arr), array_data_compare, 1, (void **) &result TSRMLS_CC) == SUCCESS) {
+		if (zend_hash_minmax(Z_ARRVAL_PP(arr), php_array_data_compare, 1, (void **) &result TSRMLS_CC) == SUCCESS) {
 			RETVAL_ZVAL(*result, 1, 0);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array must contain atleast one element");
@@ -3026,13 +3021,13 @@ PHP_FUNCTION(array_unique)
 		arTmp[i].i = i;
 	}
 	arTmp[i].b = NULL;
-	set_compare_func(SORT_STRING TSRMLS_CC);
-	zend_qsort((void *) arTmp, i, sizeof(struct bucketindex), array_data_compare TSRMLS_CC);
+	php_set_compare_func(SORT_STRING TSRMLS_CC);
+	zend_qsort((void *) arTmp, i, sizeof(struct bucketindex), php_array_data_compare TSRMLS_CC);
 
 	/* go through the sorted array and delete duplicates from the copy */
 	lastkept = arTmp;
 	for (cmpdata = arTmp + 1; cmpdata->b; cmpdata++) {
-		if (array_data_compare(lastkept, cmpdata TSRMLS_CC)) {
+		if (php_array_data_compare(lastkept, cmpdata TSRMLS_CC)) {
 			lastkept = cmpdata;
 		} else {
 			if (lastkept->i > cmpdata->i) {
@@ -3091,7 +3086,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 				WRONG_PARAM_COUNT;
 			}
 			arr_argc = argc;
-			intersect_data_compare_func = array_data_compare;
+			intersect_data_compare_func = php_array_data_compare;
 		} else if (data_compare_type == INTERSECT_COMP_DATA_USER) {
 			/* array_uintersect() */
 			if (argc < 3) {
@@ -3130,7 +3125,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 			}
 			arr_argc = argc;
 			intersect_key_compare_func = array_key_compare;
-			intersect_data_compare_func = array_data_compare;
+			intersect_data_compare_func = php_array_data_compare;
 		} else if (data_compare_type == INTERSECT_COMP_DATA_USER 
 				&&
 				key_compare_type == INTERSECT_COMP_KEY_INTERNAL) {
@@ -3168,7 +3163,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 				}
 				zval_dtor(&callback_name);
 				intersect_key_compare_func = array_user_key_compare;
-				intersect_data_compare_func = array_data_compare;
+				intersect_data_compare_func = php_array_data_compare;
 				BG(user_compare_func_name) = args[arr_argc];
 		} else if (data_compare_type == INTERSECT_COMP_DATA_USER
 				&&
@@ -3210,7 +3205,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 	/* for each argument, create and sort list with pointers to the hash buckets */
 	lists = (Bucket ***)safe_emalloc(arr_argc, sizeof(Bucket **), 0);
 	ptrs = (Bucket ***)safe_emalloc(arr_argc, sizeof(Bucket **), 0);
-	set_compare_func(SORT_STRING TSRMLS_CC);
+	php_set_compare_func(SORT_STRING TSRMLS_CC);
 	for (i = 0; i < arr_argc; i++) {
 		if (Z_TYPE_PP(args[i]) != IS_ARRAY) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument #%d is not an array", i+1);
@@ -3476,7 +3471,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 				WRONG_PARAM_COUNT;
 			}
 			arr_argc = argc;
-			diff_data_compare_func = array_data_compare;
+			diff_data_compare_func = php_array_data_compare;
 		} else if (data_compare_type == DIFF_COMP_DATA_USER) {
 			/* array_udiff */
 			if (argc < 3) {
@@ -3515,7 +3510,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 			}
 			arr_argc = argc;
 			diff_key_compare_func = array_key_compare;
-			diff_data_compare_func = array_data_compare;
+			diff_data_compare_func = php_array_data_compare;
 		} else if (data_compare_type == DIFF_COMP_DATA_USER 
 				&& 
 			key_compare_type == DIFF_COMP_KEY_INTERNAL) {
@@ -3553,7 +3548,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 			}
 			zval_dtor(&callback_name);
 			diff_key_compare_func = array_user_key_compare;
-			diff_data_compare_func = array_data_compare;
+			diff_data_compare_func = php_array_data_compare;
 			BG(user_compare_func_name) = args[arr_argc];
 		} else if (data_compare_type == DIFF_COMP_DATA_USER 
 				&& 
@@ -3595,7 +3590,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 	/* for each argument, create and sort list with pointers to the hash buckets */
 	lists = (Bucket ***)safe_emalloc(arr_argc, sizeof(Bucket **), 0);
 	ptrs = (Bucket ***)safe_emalloc(arr_argc, sizeof(Bucket **), 0);
-	set_compare_func(SORT_STRING TSRMLS_CC);
+	php_set_compare_func(SORT_STRING TSRMLS_CC);
 	for (i = 0; i < arr_argc; i++) {
 		if (Z_TYPE_PP(args[i]) != IS_ARRAY) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument #%d is not an array", i + 1);
@@ -3841,7 +3836,7 @@ int multisort_compare(const void *a, const void *b TSRMLS_DC)
 	
 	r = 0;
 	do {
-		set_compare_func(ARRAYG(multisort_flags)[MULTISORT_TYPE][r] TSRMLS_CC);
+		php_set_compare_func(ARRAYG(multisort_flags)[MULTISORT_TYPE][r] TSRMLS_CC);
 
 		ARRAYG(compare_func)(&temp, *((zval **)ab[r]->pData), *((zval **)bb[r]->pData) TSRMLS_CC);
 		result = ARRAYG(multisort_flags)[MULTISORT_ORDER][r] * Z_LVAL(temp);
