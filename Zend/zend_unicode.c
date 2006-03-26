@@ -33,41 +33,69 @@ ZEND_API zend_unicode_globals unicode_globals;
 ZEND_API zend_class_entry *unicodeConversionException;
 
 /* {{{ zend_set_converter_error_mode */
-void zend_set_converter_error_mode(UConverter *conv, uint8_t error_mode)
+void zend_set_converter_error_mode(UConverter *conv, zend_conv_direction direction, uint16_t error_mode)
 {
 	UErrorCode status = U_ZERO_ERROR;
 
-	switch (error_mode) {
+	switch (error_mode & 0xff) {
 		case ZEND_CONV_ERROR_STOP:
-			ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_STOP, NULL, NULL, NULL, &status);
+			if (direction == ZEND_FROM_UNICODE)
+				ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_STOP, NULL, NULL, NULL, &status);
+			else
+				ucnv_setToUCallBack(conv, UCNV_TO_U_CALLBACK_STOP, NULL, NULL, NULL, &status);
 			break;
 
 		case ZEND_CONV_ERROR_SKIP:
-			ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_SKIP, UCNV_SKIP_STOP_ON_ILLEGAL, NULL, NULL, &status);
+			if (direction == ZEND_FROM_UNICODE)
+				ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_SKIP, UCNV_SKIP_STOP_ON_ILLEGAL, NULL, NULL, &status);
+			else
+				ucnv_setToUCallBack(conv, UCNV_TO_U_CALLBACK_SKIP, UCNV_SKIP_STOP_ON_ILLEGAL, NULL, NULL, &status);
 			break;
 
 		case ZEND_CONV_ERROR_SUBST:
-			ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_SUBSTITUTE, UCNV_SUB_STOP_ON_ILLEGAL, NULL, NULL, &status);
+			if (direction == ZEND_FROM_UNICODE)
+				ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_SUBSTITUTE, UCNV_SUB_STOP_ON_ILLEGAL, NULL, NULL, &status);
+			else
+				ucnv_setToUCallBack(conv, UCNV_TO_U_CALLBACK_SUBSTITUTE, UCNV_SUB_STOP_ON_ILLEGAL, NULL, NULL, &status);
 			break;
 
 		case ZEND_CONV_ERROR_ESCAPE_UNICODE:
-			ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_ESCAPE, UCNV_ESCAPE_UNICODE, NULL, NULL, &status);
+			if (direction == ZEND_FROM_UNICODE)
+				ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_ESCAPE, UCNV_ESCAPE_UNICODE, NULL, NULL, &status);
+			else
+				ucnv_setToUCallBack(conv, UCNV_TO_U_CALLBACK_ESCAPE, UCNV_ESCAPE_UNICODE, NULL, NULL, &status);
 			break;
 
 		case ZEND_CONV_ERROR_ESCAPE_ICU:
-			ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_ESCAPE, UCNV_ESCAPE_ICU, NULL, NULL, &status);
+			if (direction == ZEND_FROM_UNICODE)
+				ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_ESCAPE, UCNV_ESCAPE_ICU, NULL, NULL, &status);
+			else
+				ucnv_setToUCallBack(conv, UCNV_TO_U_CALLBACK_ESCAPE, UCNV_ESCAPE_ICU, NULL, NULL, &status);
 			break;
 
 		case ZEND_CONV_ERROR_ESCAPE_JAVA:
-			ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_ESCAPE, UCNV_ESCAPE_JAVA, NULL, NULL, &status);
+			if (direction == ZEND_FROM_UNICODE)
+				ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_ESCAPE, UCNV_ESCAPE_JAVA, NULL, NULL, &status);
+			else
+				/*
+				 * use C escape, even though JAVA is requested, so that we don't
+				 * have to expose another constant
+				 */
+				ucnv_setToUCallBack(conv, UCNV_TO_U_CALLBACK_ESCAPE, UCNV_ESCAPE_C, NULL, NULL, &status);
 			break;
 
 		case ZEND_CONV_ERROR_ESCAPE_XML_DEC:
-			ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_ESCAPE, UCNV_ESCAPE_XML_DEC, NULL, NULL, &status);
+			if (direction == ZEND_FROM_UNICODE)
+				ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_ESCAPE, UCNV_ESCAPE_XML_DEC, NULL, NULL, &status);
+			else
+				ucnv_setToUCallBack(conv, UCNV_TO_U_CALLBACK_ESCAPE, UCNV_ESCAPE_XML_DEC, NULL, NULL, &status);
 			break;
 
 		case ZEND_CONV_ERROR_ESCAPE_XML_HEX:
-			ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_ESCAPE, UCNV_ESCAPE_XML_HEX, NULL, NULL, &status);
+			if (direction == ZEND_FROM_UNICODE)
+				ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_ESCAPE, UCNV_ESCAPE_XML_HEX, NULL, NULL, &status);
+			else
+				ucnv_setToUCallBack(conv, UCNV_TO_U_CALLBACK_ESCAPE, UCNV_ESCAPE_XML_HEX, NULL, NULL, &status);
 			break;
 
 		default:
@@ -164,7 +192,7 @@ int zend_copy_converter(UConverter **target, UConverter *source)
 /* }}} */
 
 /* {{{ zend_convert_to_unicode */
-ZEND_API void zend_convert_to_unicode(UConverter *conv, UChar **target, int *target_len, const char *source, int source_len, UErrorCode *status)
+ZEND_API int zend_convert_to_unicode(UConverter *conv, UChar **target, int *target_len, const char *source, int source_len, UErrorCode *status)
 {
 	UChar *buffer = NULL;
 	UChar *output;
@@ -174,7 +202,7 @@ ZEND_API void zend_convert_to_unicode(UConverter *conv, UChar **target, int *tar
 	UConverterType conv_type;
 
 	if (U_FAILURE(*status)) {
-		return;
+		return 0;
 	}
 
 	ucnv_resetToUnicode(conv);
@@ -230,6 +258,8 @@ ZEND_API void zend_convert_to_unicode(UConverter *conv, UChar **target, int *tar
 	buffer[converted] = 0;
 	*target = buffer;
 	*target_len = converted;
+
+	return input - source;
 }
 /* }}} */
 
@@ -326,21 +356,23 @@ ZEND_API void zend_convert_encodings(UConverter *target_conv, UConverter *source
 /* }}} */
 
 /* {{{ zend_raise_conversion_error_ex */
-ZEND_API void zend_raise_conversion_error_ex(char *message, UConverter *conv, int error_char_offset, int use_exception TSRMLS_DC)
+ZEND_API void zend_raise_conversion_error_ex(char *message, UConverter *conv, zend_conv_direction dir, int error_char_offset, int use_exception TSRMLS_DC)
 {
-	UChar err_char[U16_MAX_LENGTH];
-	int8_t err_char_len = sizeof(err_char);
-	UChar32 codepoint;
 	const char *conv_name;
 	UErrorCode status = U_ZERO_ERROR;
-	char *reason_fmt = "%s (converter %s failed on character {U+%04X} at offset %d)";
-	char *no_reason_fmt = "%s";
-	char *message_fmt;
 
 	if (!message)
 		return;
 
-	ucnv_getInvalidUChars(conv, err_char, &err_char_len, &status);
+	if (!conv) {
+		if (use_exception) {
+			zend_throw_exception_ex(unicodeConversionException, 0 TSRMLS_CC, "%s", message);
+		} else {
+			zend_error(E_WARNING, "%s", message);
+		}
+		return;
+	}
+
 	conv_name = ucnv_getName(conv, &status);
 	/*
 	 * UTODO
@@ -348,15 +380,42 @@ ZEND_API void zend_raise_conversion_error_ex(char *message, UConverter *conv, in
 	 * internal converter name? ponder
 	 */
 	conv_name = ucnv_getStandardName(conv_name, "MIME", &status);
-	codepoint = (err_char_len < 2) ? err_char[0] : U16_GET_SUPPLEMENTARY(err_char[0], err_char[1]);
-	;
+	status = U_ZERO_ERROR;
 
-	message_fmt = conv ? reason_fmt : no_reason_fmt;
+	if (dir == ZEND_FROM_UNICODE) {
+		UChar err_char[U16_MAX_LENGTH];
+		int8_t err_char_len = sizeof(err_char);
+		UChar32 codepoint;
+		char *message_fmt = "%s (converter %s failed on character {U+%04X} at offset %d)";
 
-	if (use_exception) {
-		zend_throw_exception_ex(unicodeConversionException, 0 TSRMLS_CC, message_fmt, message, conv_name?conv_name:"<unknown>", codepoint, error_char_offset);
+		ucnv_getInvalidUChars(conv, err_char, &err_char_len, &status);
+		codepoint = (err_char_len < 2) ? err_char[0] : U16_GET_SUPPLEMENTARY(err_char[0], err_char[1]);
+
+		if (use_exception) {
+			zend_throw_exception_ex(unicodeConversionException, 0 TSRMLS_CC, message_fmt, message, conv_name?conv_name:"<unknown>", codepoint, error_char_offset-1);
+		} else {
+			zend_error(E_WARNING, message_fmt, message, conv_name?conv_name:"", codepoint, error_char_offset-1);
+		}
 	} else {
-		zend_error(E_WARNING, message_fmt, message, conv_name?conv_name:"", codepoint, error_char_offset);
+		char err_char[8]; /* UTF-8 uses up to 8 bytes */
+		char buf[32];     /* 4x number of error bytes */
+		int8_t err_char_len = sizeof(err_char);
+		char *message_fmt = "%s (converter %s failed on bytes (%s) at offset %d)";
+		char *p;
+		int i;
+
+		ucnv_getInvalidChars(conv, err_char, &err_char_len, &status);
+		p = buf;
+		for (i = 0; i < err_char_len; i++) {
+			sprintf(p, "0x%02X%s", (unsigned char)err_char[i], (i+1<err_char_len)?",":"");
+			p += 5;
+		}
+
+		if (use_exception) {
+			zend_throw_exception_ex(unicodeConversionException, 0 TSRMLS_CC, message_fmt, message, conv_name?conv_name:"<unknown>", buf, error_char_offset-err_char_len);
+		} else {
+			zend_error(E_WARNING, message_fmt, message, conv_name?conv_name:"", buf, error_char_offset-err_char_len);
+		}
 	}
 }
 /* }}} */
@@ -376,14 +435,14 @@ ZEND_API int zval_unicode_to_string(zval *string, UConverter *conv TSRMLS_DC)
 	num_conv = zend_convert_from_unicode(conv, &s, &s_len, u, u_len, &status);
 
 	if (U_FAILURE(status)) {
-		int32_t offset = u_countChar32(u, num_conv)-1;
+		int32_t offset = u_countChar32(u, num_conv);
 
 		/* XXX needs to be fixed, but a leak is better than invalid memory
 		if (s) {
 			efree(s);
 		}
 		*/
-		zend_raise_conversion_error_ex("Could not convert Unicode string to binary string", conv, offset, (UG(from_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
+		zend_raise_conversion_error_ex("Could not convert Unicode string to binary string", conv, ZEND_FROM_UNICODE, offset, (UG(from_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
 		retval = FAILURE;
 	}
 
@@ -400,18 +459,19 @@ ZEND_API int zval_string_to_unicode_ex(zval *string, UConverter *conv)
 	UErrorCode status = U_ZERO_ERROR;
 	int retval = TRUE;
 	UChar *u = NULL;
-	int u_len;
+	int u_len, num_conv;
 
 	char *s = Z_STRVAL_P(string);
 	int s_len = Z_STRLEN_P(string);
 
-	Z_TYPE_P(string) = IS_UNICODE;
-	zend_convert_to_unicode(conv, &u, &u_len, s, s_len, &status);
-	ZVAL_UNICODEL(string, u, u_len, 0);
+	num_conv = zend_convert_to_unicode(conv, &u, &u_len, s, s_len, &status);
 
 	if (U_FAILURE(status)) {
+		zend_raise_conversion_error_ex("Could not convert binary string to Unicode string", conv, ZEND_TO_UNICODE, num_conv, (UG(to_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
 		retval = FALSE;
 	}
+
+	ZVAL_UNICODEL(string, u, u_len, 0);
 
 	efree(s);
 	return retval;

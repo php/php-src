@@ -304,7 +304,6 @@ struct _zend_unicode_globals {
 	uint16_t from_error_mode;
 	UChar from_subst_char[3];
 	uint16_t to_error_mode;
-	UChar to_subst_char[3];
 
 	char *default_locale;
 	UCollator *default_collator;

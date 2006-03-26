@@ -588,9 +588,7 @@ ZEND_API void _convert_to_unicode(zval *op TSRMLS_DC ZEND_FILE_LINE_DC)
 		case IS_UNICODE:
 			break;
 		case IS_STRING:
-			if (zval_string_to_unicode(op TSRMLS_CC) == FAILURE) {
-				zend_error(E_WARNING, "Could not convert binary string to Unicode string");
-			}
+			zval_string_to_unicode(op TSRMLS_CC);
 			return;
 		case IS_BOOL:
 			if (Z_LVAL_P(op)) {
