@@ -2147,8 +2147,13 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	REGISTER_SPL_CLASS_CONST_LONG(RecursiveIteratorIterator, "CHILD_FIRST",     RIT_CHILD_FIRST);
 	REGISTER_SPL_CLASS_CONST_LONG(RecursiveIteratorIterator, "CATCH_GET_CHILD", RIT_CATCH_GET_CHILD);
 
-	REGISTER_SPL_STD_CLASS_EX(FilterIterator, spl_dual_it_new, spl_funcs_FilterIterator);
-	REGISTER_SPL_ITERATOR(FilterIterator);
+	REGISTER_SPL_INTERFACE(OuterIterator);
+	REGISTER_SPL_ITERATOR(OuterIterator);
+
+	REGISTER_SPL_STD_CLASS_EX(IteratorIterator, spl_dual_it_new, spl_funcs_IteratorIterator);
+	REGISTER_SPL_ITERATOR(IteratorIterator);
+
+	REGISTER_SPL_SUB_CLASS_EX(FilterIterator, IteratorIterator, spl_dual_it_new, spl_funcs_FilterIterator);
 	spl_ce_FilterIterator->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
 
 	REGISTER_SPL_SUB_CLASS_EX(RecursiveFilterIterator, FilterIterator, spl_dual_it_new, spl_funcs_RecursiveFilterIterator);
@@ -2159,11 +2164,9 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	REGISTER_SPL_INTERFACE(SeekableIterator);
 	REGISTER_SPL_ITERATOR(SeekableIterator);
 
-	REGISTER_SPL_STD_CLASS_EX(LimitIterator, spl_dual_it_new, spl_funcs_LimitIterator);
-	REGISTER_SPL_ITERATOR(LimitIterator);
+	REGISTER_SPL_SUB_CLASS_EX(LimitIterator, IteratorIterator, spl_dual_it_new, spl_funcs_LimitIterator);
 
-	REGISTER_SPL_STD_CLASS_EX(CachingIterator, spl_dual_it_new, spl_funcs_CachingIterator);
-	REGISTER_SPL_ITERATOR(CachingIterator);
+	REGISTER_SPL_SUB_CLASS_EX(CachingIterator, IteratorIterator, spl_dual_it_new, spl_funcs_CachingIterator);
 
 	REGISTER_SPL_CLASS_CONST_LONG(CachingIterator, "CALL_TOSTRING",        CIT_CALL_TOSTRING); 
 	REGISTER_SPL_CLASS_CONST_LONG(CachingIterator, "CATCH_GET_CHILD",      CIT_CATCH_GET_CHILD); 
@@ -2173,25 +2176,11 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	REGISTER_SPL_SUB_CLASS_EX(RecursiveCachingIterator, CachingIterator, spl_dual_it_new, spl_funcs_RecursiveCachingIterator);
 	REGISTER_SPL_IMPLEMENTS(RecursiveCachingIterator, RecursiveIterator);
 	
-	REGISTER_SPL_STD_CLASS_EX(IteratorIterator, spl_dual_it_new, spl_funcs_IteratorIterator);
-	REGISTER_SPL_ITERATOR(IteratorIterator);
+	REGISTER_SPL_SUB_CLASS_EX(NoRewindIterator, IteratorIterator, spl_dual_it_new, spl_funcs_NoRewindIterator);
 
-	REGISTER_SPL_STD_CLASS_EX(NoRewindIterator, spl_dual_it_new, spl_funcs_NoRewindIterator);
-	REGISTER_SPL_ITERATOR(NoRewindIterator);
-
-	REGISTER_SPL_INTERFACE(OuterIterator);
-	REGISTER_SPL_ITERATOR(OuterIterator);
-
-	REGISTER_SPL_STD_CLASS_EX(AppendIterator, spl_dual_it_new, spl_funcs_AppendIterator);
+	REGISTER_SPL_SUB_CLASS_EX(AppendIterator, IteratorIterator, spl_dual_it_new, spl_funcs_AppendIterator);
 
 	REGISTER_SPL_IMPLEMENTS(RecursiveIteratorIterator, OuterIterator);
-	REGISTER_SPL_IMPLEMENTS(CachingIterator, OuterIterator);
-	REGISTER_SPL_IMPLEMENTS(FilterIterator, OuterIterator);
-	REGISTER_SPL_IMPLEMENTS(LimitIterator, OuterIterator);
-	REGISTER_SPL_IMPLEMENTS(IteratorIterator, OuterIterator);
-	REGISTER_SPL_IMPLEMENTS(NoRewindIterator, OuterIterator);
-	REGISTER_SPL_IMPLEMENTS(AppendIterator, OuterIterator);
-
 	REGISTER_SPL_SUB_CLASS_EX(InfiniteIterator, IteratorIterator, spl_dual_it_new, spl_funcs_InfiniteIterator);
 	
 	REGISTER_SPL_STD_CLASS_EX(EmptyIterator, NULL, spl_funcs_EmptyIterator);
