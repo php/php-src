@@ -136,6 +136,8 @@ PHP_FUNCTION(unicode_set_error_mode)
 
 	if (direction == ZEND_FROM_UNICODE) {
 		UG(from_error_mode) = mode;
+	} else {
+		UG(to_error_mode)   = mode;
 	}
 
 	zend_update_converters_error_behavior(TSRMLS_C);
@@ -143,24 +145,16 @@ PHP_FUNCTION(unicode_set_error_mode)
 }
 /* }}} */
 
-/* {{{ proto bool unicode_set_subst_char(int direction, string character) U
-   Sets global substitution character for the specified conversion direction */
+/* {{{ proto bool unicode_set_subst_char(string character) U
+   Sets global substitution character for conversion from Unicode to codepage */
 PHP_FUNCTION(unicode_set_subst_char)
 {
-	zend_conv_direction direction;
 	UChar *subst_char;
 	UChar32 cp;
-	int subst_char_len;
-	long tmp;
+	int subst_char_len, len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lu", &tmp, &subst_char, &subst_char_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "u", &subst_char, &subst_char_len) == FAILURE) {
 		return;
-	}
-	direction = (zend_conv_direction) tmp;
-
-	if (direction != ZEND_FROM_UNICODE && direction != ZEND_TO_UNICODE) {
-		php_error(E_WARNING, "Invalid conversion direction value");
-		RETURN_FALSE;
 	}
 
 	if (subst_char_len < 1 ) {
@@ -175,12 +169,8 @@ PHP_FUNCTION(unicode_set_subst_char)
 		RETURN_FALSE;
 	}
 
-	if (direction == ZEND_FROM_UNICODE) {
-		int len;
-		len = zend_codepoint_to_uchar(cp, UG(from_subst_char));
-		UG(from_subst_char)[len] = 0;
-	}
-
+	len = zend_codepoint_to_uchar(cp, UG(from_subst_char));
+	UG(from_subst_char)[len] = 0;
 	zend_update_converters_error_behavior(TSRMLS_C);
 	RETURN_TRUE;
 }

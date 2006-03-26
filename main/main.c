@@ -220,7 +220,7 @@ static ZEND_INI_MH(OnUpdateOutputEncoding)
 		UG(output_encoding_conv) = NULL;
 	}
 	if (UG(output_encoding_conv)) {
-		zend_set_converter_error_mode(UG(output_encoding_conv), UG(from_error_mode));
+		zend_set_converter_error_mode(UG(output_encoding_conv), ZEND_FROM_UNICODE, UG(from_error_mode));
 		zend_set_converter_subst_char(UG(output_encoding_conv), UG(from_subst_char));
 		if (stage == ZEND_INI_STAGE_RUNTIME) {
 			sapi_update_default_charset(TSRMLS_C);

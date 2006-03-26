@@ -110,7 +110,8 @@ static ZEND_INI_MH(OnUpdateEncoding)
 		*converter = NULL;
 	}
 	if (*converter) {
-		zend_set_converter_error_mode(*converter, UG(from_error_mode));
+		zend_set_converter_error_mode(*converter, ZEND_FROM_UNICODE, UG(from_error_mode));
+		zend_set_converter_error_mode(*converter, ZEND_TO_UNICODE, UG(to_error_mode));
 		zend_set_converter_subst_char(*converter, UG(from_subst_char));
 	}
 
@@ -153,15 +154,17 @@ static ZEND_INI_MH(OnUpdateErrorMode)
 void zend_update_converters_error_behavior(TSRMLS_D)
 {
 	if (UG(fallback_encoding_conv)) {
-		zend_set_converter_error_mode(UG(fallback_encoding_conv), UG(from_error_mode));
+		zend_set_converter_error_mode(UG(fallback_encoding_conv), ZEND_FROM_UNICODE, UG(from_error_mode));
+		zend_set_converter_error_mode(UG(fallback_encoding_conv), ZEND_TO_UNICODE, UG(to_error_mode));
 		zend_set_converter_subst_char(UG(fallback_encoding_conv), UG(from_subst_char));
 	}
 	if (UG(runtime_encoding_conv)) {
-		zend_set_converter_error_mode(UG(runtime_encoding_conv), UG(from_error_mode));
+		zend_set_converter_error_mode(UG(runtime_encoding_conv), ZEND_FROM_UNICODE, UG(from_error_mode));
+		zend_set_converter_error_mode(UG(runtime_encoding_conv), ZEND_TO_UNICODE, UG(to_error_mode));
 		zend_set_converter_subst_char(UG(runtime_encoding_conv), UG(from_subst_char));
 	}
 	if (UG(output_encoding_conv)) {
-		zend_set_converter_error_mode(UG(output_encoding_conv), UG(from_error_mode));
+		zend_set_converter_error_mode(UG(output_encoding_conv), ZEND_FROM_UNICODE, UG(from_error_mode));
 		zend_set_converter_subst_char(UG(output_encoding_conv), UG(from_subst_char));
 	}
 }
@@ -911,6 +914,7 @@ static void unicode_globals_ctor(zend_unicode_globals *unicode_globals TSRMLS_DC
 	unicode_globals->from_error_mode = ZEND_CONV_ERROR_SUBST;
 	memset(unicode_globals->from_subst_char, 0, 3 * sizeof(UChar));
 	zend_codepoint_to_uchar(0x3f, unicode_globals->from_subst_char);
+	unicode_globals->to_error_mode = ZEND_CONV_ERROR_STOP;
 
 	zend_hash_init_ex(&unicode_globals->flex_compatible, 0, NULL, NULL, 1, 0);
 }
