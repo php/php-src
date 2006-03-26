@@ -493,6 +493,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 			}
 			switch(response_code) {
 				case 200:
+				case 206: /* partial content */
 				case 302:
 				case 303:
 				case 301:
