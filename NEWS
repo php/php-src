@@ -11,6 +11,8 @@ PHP                                                                        NEWS
 - Removed the E_STRICT deprecation notice from "var". (Ilia)
 - Fixed debug_zval_dump() to support private and protected members. (Dmitry)
 - Fixed SoapFault::getMessage(). (Dmitry)
+- Fixed bug #36859 (DOMElement crashes when calling __construct when 
+  clone'ing). (Tony)
 - Fixed bug #36825 (Exceptions thrown in ArrayObject::offsetGet cause 
   segfault). (Tony)
 - Fixed bug #36820 (Privileged connection with an Oracle password file fails). 
