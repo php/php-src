@@ -61,3 +61,5 @@
 * What to do with binary string literals and runtime casting? Literals are in
   script_encoding, casting uses runtime_encoding. If they are different, bad
   stuff happens.
+
+* Control of fallback mappings in conversions.
