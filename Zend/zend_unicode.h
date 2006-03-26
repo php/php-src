@@ -42,6 +42,11 @@ enum {
   ZEND_CONV_ERROR_EXCEPTION	= 0x100
 };
 
+typedef enum {
+	ZEND_FROM_UNICODE,
+	ZEND_TO_UNICODE,
+} zend_conv_direction;
+
 
 extern ZEND_API zend_class_entry *unicodeConversionException;
 
@@ -49,9 +54,10 @@ extern ZEND_API zend_class_entry *unicodeConversionException;
 /* internal functions */
 
 int zend_set_converter_encoding(UConverter **converter, const char *encoding);
-void zend_set_converter_subst_char(UConverter *conv, UChar *subst_char, int8_t subst_char_len);
+void zend_set_converter_subst_char(UConverter *conv, UChar *subst_char);
 void zend_set_converter_error_mode(UConverter *conv, uint8_t error_mode);
 void zend_register_unicode_exceptions(TSRMLS_D);
+void zend_update_converters_error_behavior(TSRMLS_D);
 
 
 /* API functions */
@@ -84,7 +90,9 @@ static inline UChar32 zend_get_codepoint_at(UChar *str, int length, int n)
 	int32_t offset = 0;
 	UChar32 c = 0;
 
-	U16_FWD_N(str, offset, length, n);
+	if (n > 0) {
+		U16_FWD_N(str, offset, length, n);
+	}
 	U16_GET(str, 0, offset, length, c);
 
 	return c;

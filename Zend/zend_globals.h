@@ -301,9 +301,10 @@ struct _zend_unicode_globals {
 	UConverter *http_input_encoding_conv;/* http input encoding converter */
 	UConverter *utf8_conv;				 /* all-purpose UTF-8 converter */
 
-	uint16_t from_u_error_mode;
-	UChar subst_char[3];
-	uint8_t subst_char_len;
+	uint16_t from_error_mode;
+	UChar from_subst_char[3];
+	uint16_t to_error_mode;
+	UChar to_subst_char[3];
 
 	char *default_locale;
 	UCollator *default_collator;

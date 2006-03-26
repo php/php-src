@@ -110,8 +110,8 @@ static ZEND_INI_MH(OnUpdateEncoding)
 		*converter = NULL;
 	}
 	if (*converter) {
-		zend_set_converter_error_mode(*converter, UG(from_u_error_mode));
-		zend_set_converter_subst_char(*converter, UG(subst_char), UG(subst_char_len));
+		zend_set_converter_error_mode(*converter, UG(from_error_mode));
+		zend_set_converter_subst_char(*converter, UG(from_subst_char));
 	}
 
 	return SUCCESS;
@@ -150,67 +150,20 @@ static ZEND_INI_MH(OnUpdateErrorMode)
 }
 #endif
 
-static void zend_update_converters_error_behavior(TSRMLS_D)
+void zend_update_converters_error_behavior(TSRMLS_D)
 {
 	if (UG(fallback_encoding_conv)) {
-		zend_set_converter_error_mode(UG(fallback_encoding_conv), UG(from_u_error_mode));
-		zend_set_converter_subst_char(UG(fallback_encoding_conv), UG(subst_char), UG(subst_char_len));
+		zend_set_converter_error_mode(UG(fallback_encoding_conv), UG(from_error_mode));
+		zend_set_converter_subst_char(UG(fallback_encoding_conv), UG(from_subst_char));
 	}
 	if (UG(runtime_encoding_conv)) {
-		zend_set_converter_error_mode(UG(runtime_encoding_conv), UG(from_u_error_mode));
-		zend_set_converter_subst_char(UG(runtime_encoding_conv), UG(subst_char), UG(subst_char_len));
+		zend_set_converter_error_mode(UG(runtime_encoding_conv), UG(from_error_mode));
+		zend_set_converter_subst_char(UG(runtime_encoding_conv), UG(from_subst_char));
 	}
 	if (UG(output_encoding_conv)) {
-		zend_set_converter_error_mode(UG(output_encoding_conv), UG(from_u_error_mode));
-		zend_set_converter_subst_char(UG(output_encoding_conv), UG(subst_char), UG(subst_char_len));
+		zend_set_converter_error_mode(UG(output_encoding_conv), UG(from_error_mode));
+		zend_set_converter_subst_char(UG(output_encoding_conv), UG(from_subst_char));
 	}
-	if (UG(http_input_encoding_conv)) {
-		zend_set_converter_error_mode(UG(http_input_encoding_conv), UG(from_u_error_mode));
-	}
-}
-
-
-static ZEND_INI_MH(OnUpdateConversionErrorMode)
-{
-	if (!new_value) {
-		UG(from_u_error_mode) = ZEND_CONV_ERROR_SUBST;
-	} else {
-		uint16_t mode = atoi(new_value);
-
-		if ((mode & 0xff) > ZEND_CONV_ERROR_LAST_ENUM) {
-			zend_error(E_WARNING, "Illegal value for conversion error mode");
-			return FAILURE;
-		}
-		UG(from_u_error_mode) = mode;
-	}
-	zend_update_converters_error_behavior(TSRMLS_C);
-	return SUCCESS;
-}
-
-
-static ZEND_INI_MH(OnUpdateConversionSubstChar)
-{
-	uint8_t i = 0;
-	UChar32 c = 0x3f; /*'?'*/
-	char *end_ptr;
-
-	if (new_value) {
-		c = (int32_t)strtol(new_value, &end_ptr, 16);
-		if (end_ptr < new_value + strlen(new_value)) {
-			zend_error(E_WARNING, "Substitution character string should be a hexadecimal Unicode codepoint value");
-			return FAILURE;
-		}
-		if (c < 0 || c >= UCHAR_MAX_VALUE) {
-			zend_error(E_WARNING, "Substitution character value U+%06x is out of range 0-10FFFF", c);
-			return FAILURE;
-		}
-	}
-	U16_APPEND_UNSAFE(UG(subst_char), i, c);
-	UG(subst_char)[i] = 0;
-	UG(subst_char_len) = i;
-	zend_update_converters_error_behavior(TSRMLS_C);
-
-	return SUCCESS;
 }
 
 
@@ -223,8 +176,6 @@ ZEND_INI_BEGIN()
 	STD_ZEND_INI_ENTRY("unicode.runtime_encoding",  NULL, ZEND_INI_ALL, OnUpdateEncoding,   runtime_encoding_conv, zend_unicode_globals, unicode_globals)
 	STD_ZEND_INI_ENTRY("unicode.script_encoding",  NULL, ZEND_INI_ALL, OnUpdateEncoding,   script_encoding_conv, zend_unicode_globals, unicode_globals)
 	STD_ZEND_INI_ENTRY("unicode.http_input_encoding",  NULL, ZEND_INI_ALL, OnUpdateEncoding,   http_input_encoding_conv, zend_unicode_globals, unicode_globals)
-	ZEND_INI_ENTRY("unicode.from_error_mode", "2", ZEND_INI_ALL, OnUpdateConversionErrorMode)
-	ZEND_INI_ENTRY("unicode.from_error_subst_char", "3f", ZEND_INI_ALL, OnUpdateConversionSubstChar)
 ZEND_INI_END()
 
 
@@ -956,9 +907,10 @@ static void unicode_globals_ctor(zend_unicode_globals *unicode_globals TSRMLS_DC
 	unicode_globals->output_encoding_conv = NULL;
 	unicode_globals->script_encoding_conv = NULL;
 	unicode_globals->http_input_encoding_conv = NULL;
-	unicode_globals->subst_char_len = 0;
 	zend_set_converter_encoding(&unicode_globals->utf8_conv, "UTF-8");
-	unicode_globals->from_u_error_mode = ZEND_CONV_ERROR_SUBST;
+	unicode_globals->from_error_mode = ZEND_CONV_ERROR_SUBST;
+	memset(unicode_globals->from_subst_char, 0, 3 * sizeof(UChar));
+	zend_codepoint_to_uchar(0x3f, unicode_globals->from_subst_char);
 
 	zend_hash_init_ex(&unicode_globals->flex_compatible, 0, NULL, NULL, 1, 0);
 }
