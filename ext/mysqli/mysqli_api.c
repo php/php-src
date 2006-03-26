@@ -632,7 +632,6 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 	unsigned int 	i;
 	ulong 			ret;
 	unsigned int    uval;
-	double			dval;
 	my_ulonglong	llval;
 	
 
