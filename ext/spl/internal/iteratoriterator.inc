@@ -109,7 +109,7 @@ class IteratorIterator implements OuterIterator
 	 */
 	function __call($func, $params)
 	{
-		return call_user_func_array(array($this->it, $func), $params);
+		return call_user_func_array(array($this->iterator, $func), $params);
 	}
 
 	/** The inner iterator must be private because when this class will be
