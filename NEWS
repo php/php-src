@@ -43,6 +43,8 @@ PHP                                                                        NEWS
   the part of haystack before or after first occurence of needle. (Johannes)
 - Added possibility to check in which extension an internal function was
   defined using reflection API. (Johannes)
+- Added second optional parameter to stream_context_create() to set params
+  during context creation. (Sara)
 - Fixed bug #36840 (Memory leak if cast operator throws an exception that is
   caught). (Dmitry)
 - Fixed bug #36630 (umask not reset at the end of the request). (Ilia)
