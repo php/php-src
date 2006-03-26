@@ -3528,10 +3528,8 @@ PHP_FUNCTION(mb_check_encoding)
 	int var_len;
 	char *enc = NULL;
 	int enc_len;
-	char *name;
 	mbfl_buffer_converter *convd;
 	enum mbfl_no_encoding no_encoding = MBSTRG(current_internal_encoding);
-	zval *row;
 	mbfl_string string, result, *ret = NULL;
 	long illegalchars = 0;
 
