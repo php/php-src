@@ -13,6 +13,8 @@ PHP                                                                        NEWS
 - Fixed SoapFault::getMessage(). (Dmitry)
 - Fixed bug #36859 (DOMElement crashes when calling __construct when 
   clone'ing). (Tony)
+- Fixed bug #36857 (Added support for partial content fetching to the HTTP
+  streams wrapper). (Ilia)
 - Fixed bug #36825 (Exceptions thrown in ArrayObject::offsetGet cause 
   segfault). (Tony)
 - Fixed bug #36820 (Privileged connection with an Oracle password file fails). 
