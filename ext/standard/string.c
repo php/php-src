@@ -106,6 +106,7 @@ void register_string_constants(INIT_FUNC_ARGS)
 
 int php_tag_find(char *tag, int len, char *set);
 static void php_ucwords(zval *str);
+static UChar* php_u_strtr_array(UChar *str, int slen, HashTable *hash, int minlen, int maxlen, int *outlen TSRMLS_DC);
 
 /* this is read-only, so it's ok */
 static char hexconvtab[] = "0123456789abcdef";
@@ -3512,7 +3513,7 @@ PHPAPI char *php_strtr(char *str, int len, char *str_from, char *str_to, int trl
 
 /* {{{ php_u_strtr
  */
-PHPAPI UChar *php_u_strtr(UChar *str, int len, UChar *str_from, int str_from_len, UChar *str_to, int str_to_len, int trlen)
+PHPAPI UChar *php_u_strtr(UChar *str, int len, UChar *str_from, int str_from_len, UChar *str_to, int str_to_len, int trlen, int *outlen)
 {
 	int i, j;
 	int can_optimize = 1;
@@ -3547,6 +3548,7 @@ PHPAPI UChar *php_u_strtr(UChar *str, int len, UChar *str_from, int str_from_len
 
 	if (can_optimize) {
 		UChar xlat[256];
+		UChar *tmp_str = eustrndup(str, len);
 
 		for (i = 0; i < 256; xlat[i] = i, i++);
 
@@ -3555,54 +3557,61 @@ PHPAPI UChar *php_u_strtr(UChar *str, int len, UChar *str_from, int str_from_len
 		}
 
 		for (i = 0; i < len; i++) {
-			str[i] = xlat[str[i]];
+			tmp_str[i] = xlat[str[i]];
 		}
 
-		return str;
+		*outlen = len;
+		return tmp_str;
 	} else {
-		/* UTODO: We're quite fucked... this is *extremely* slow, better
-		 * algorithm wanted here! It also doesn't handle combining sequences, I
-		 * asked the icu-support list for good algorithms.  */
-		for (i = 0; i < len; i++) {
-			for (j = 0; j < trlen; j++) {
-				if (str[i] == str_from[j]) {
-					str[i] = str_to[j];
-				}
-			}
-		}
+		/* We use the character break iterator here to assemble an mapping
+		 * array in such a way that we can reuse the code in php_u_strtr_array
+		 * to do the replacements in order to avoid duplicating code. */
+		HashTable *tmp_hash;
+		int minlen = 128*1024, maxlen;
+		zval *tmp;
+		
+		tmp_hash = emalloc(sizeof(HashTable));
+		zend_hash_init(tmp_hash, 0, NULL, NULL, 0);
+
+		/* Loop over the two strings and prepare the hash entries */
+		MAKE_STD_ZVAL(tmp);
+		ZVAL_UNICODEL(tmp, "X", 1, 1);
+		minlen = maxlen = 1;
+		zend_u_hash_add(tmp_hash, IS_UNICODE, ZSTR("a"), 2, &tmp, sizeof(zval *), NULL);
+
+		/* Run the replacement */
+		str = php_u_strtr_array(str, len, tmp_hash, minlen, maxlen, outlen TSRMLS_DC);
+		zend_hash_destroy(tmp_hash);
+		efree(tmp_hash);
+
 		return str;
 	}
 }
 /* }}} */
 
-/* {{{ php_u_strtr_array
- */
-static void php_u_strtr_array(zval *return_value, UChar *str, int slen, HashTable *hash TSRMLS_DC)
+static HashTable* php_u_strtr_array_prepare_hashtable(HashTable *hash, int *minlen_out, int *maxlen_out)
 {
+	HashTable *tmp_hash = emalloc(sizeof(HashTable));
+	HashPosition hpos;
 	zval **entry;
 	zstr   string_key;
 	uint   string_key_len;
-	zval **trans;
-	zval   ctmp;
-	ulong num_key;
 	int minlen = 128*1024;
-	int maxlen = 0, pos, len, found;
-	UChar *key;
-	HashPosition hpos;
-	smart_str result = {0};
-	HashTable tmp_hash;
+	ulong num_key;
+	int maxlen = 0, len;
+	zval   ctmp;
 	
-	zend_hash_init(&tmp_hash, 0, NULL, NULL, 0);
+	zend_hash_init(tmp_hash, 0, NULL, NULL, 0);
 	zend_hash_internal_pointer_reset_ex(hash, &hpos);
 	while (zend_hash_get_current_data_ex(hash, (void **)&entry, &hpos) == SUCCESS) {
 		switch (zend_hash_get_current_key_ex(hash, &string_key, &string_key_len, &num_key, 0, &hpos)) {
 			case HASH_KEY_IS_UNICODE:
 				len = string_key_len-1;
 				if (len < 1) {
-					zend_hash_destroy(&tmp_hash);
-					RETURN_FALSE;
+					zend_hash_destroy(tmp_hash);
+					return NULL;
 				}
-				zend_u_hash_add(&tmp_hash, IS_UNICODE, string_key, string_key_len, entry, sizeof(zval*), NULL);
+				zend_u_hash_add(tmp_hash, IS_UNICODE, string_key, string_key_len, entry, sizeof(zval*), NULL);
 				if (len > maxlen) {
 					maxlen = len;
 				}
@@ -3617,7 +3626,7 @@ static void php_u_strtr_array(zval *return_value, UChar *str, int slen, HashTabl
 			
 				convert_to_unicode(&ctmp);
 				len = Z_USTRLEN(ctmp);
-				zend_u_hash_add(&tmp_hash, IS_UNICODE, Z_UNIVAL(ctmp), len+1, entry, sizeof(zval*), NULL);
+				zend_u_hash_add(tmp_hash, IS_UNICODE, Z_UNIVAL(ctmp), len+1, entry, sizeof(zval*), NULL);
 				zval_dtor(&ctmp);
 
 				if (len > maxlen) {
@@ -3630,6 +3639,19 @@ static void php_u_strtr_array(zval *return_value, UChar *str, int slen, HashTabl
 		}
 		zend_hash_move_forward_ex(hash, &hpos);
 	}
+	*minlen_out = minlen;
+	*maxlen_out = maxlen;
+	return tmp_hash;
+}
+
+/* {{{ php_u_strtr_array
+ */
+static UChar* php_u_strtr_array(UChar *str, int slen, HashTable *hash, int minlen, int maxlen, int *outlen TSRMLS_DC)
+{
+	zval **trans;
+	UChar *key;
+	int pos, found, len;
+	smart_str result = {0};
 
 	key = eumalloc(maxlen+1);
 	pos = 0;
@@ -3645,7 +3667,7 @@ static void php_u_strtr_array(zval *return_value, UChar *str, int slen, HashTabl
 		for (len = maxlen; len >= minlen; len--) {
 			key[len] = 0;
 			
-			if (zend_u_hash_find(&tmp_hash, IS_UNICODE, ZSTR(key), len+1, (void**)&trans) == SUCCESS) {
+			if (zend_u_hash_find(hash, IS_UNICODE, ZSTR(key), len+1, (void**)&trans) == SUCCESS) {
 				UChar *tval;
 				int tlen;
 				zval tmp;
@@ -3653,7 +3675,7 @@ static void php_u_strtr_array(zval *return_value, UChar *str, int slen, HashTabl
 				if (Z_TYPE_PP(trans) != IS_UNICODE) {
 					tmp = **trans;
 					zval_copy_ctor(&tmp);
-					convert_to_string(&tmp);
+					convert_to_unicode(&tmp);
 					tval = Z_USTRVAL(tmp);
 					tlen = Z_USTRLEN(tmp);
 				} else {
@@ -3679,9 +3701,9 @@ static void php_u_strtr_array(zval *return_value, UChar *str, int slen, HashTabl
 	}
 
 	efree(key);
-	zend_hash_destroy(&tmp_hash);
 	smart_str_0(&result);
-	RETVAL_UNICODEL((UChar *) result.c, result.len >> 1, 0);
+	*outlen = result.len >> 1;
+	return (UChar*) result.c;
 }
 /* }}} */
 
@@ -3822,22 +3844,33 @@ PHP_FUNCTION(strtr)
 	}
 
 	if (Z_TYPE_PP(str) == IS_UNICODE) {
+		int outlen;
+		UChar *outstr;
+
 		if (ac == 2) {
-			php_u_strtr_array(return_value, Z_USTRVAL_PP(str), Z_USTRLEN_PP(str), HASH_OF(*from) TSRMLS_CC);
+			int minlen, maxlen;
+			HashTable *hash;
+			
+			hash = php_u_strtr_array_prepare_hashtable(HASH_OF(*from), &minlen, &maxlen);
+			outstr = php_u_strtr_array(Z_USTRVAL_PP(str), Z_USTRLEN_PP(str), hash, minlen, maxlen, &outlen TSRMLS_CC);
+			zend_hash_destroy(hash);
+			efree(hash);
+			RETVAL_UNICODEL(outstr, outlen, 0);
 			Z_TYPE_P(return_value) = IS_UNICODE;
 		} else {
 			convert_to_unicode_ex(from);
 			convert_to_unicode_ex(to);
 
-			ZVAL_UNICODEL(return_value, Z_USTRVAL_PP(str), Z_USTRLEN_PP(str), 1);
-			
-			php_u_strtr(Z_USTRVAL_P(return_value),
-					  Z_USTRLEN_P(return_value),
+			outstr = php_u_strtr(Z_USTRVAL_PP(str),
+					  Z_USTRLEN_PP(str),
 					  Z_USTRVAL_PP(from),
 					  Z_USTRLEN_PP(from),
 					  Z_USTRVAL_PP(to),
 					  Z_USTRLEN_PP(to),
-					  MIN(Z_USTRLEN_PP(from), Z_USTRLEN_PP(to)));
+					  MIN(Z_USTRLEN_PP(from), Z_USTRLEN_PP(to)),
+					  &outlen);
+			ZVAL_UNICODEL(return_value, outstr, outlen, 0);
+			
 			Z_TYPE_P(return_value) = IS_UNICODE;
 		}
 	} else {
