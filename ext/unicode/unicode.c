@@ -174,6 +174,43 @@ PHP_FUNCTION(unicode_set_subst_char)
 	zend_update_converters_error_behavior(TSRMLS_C);
 	RETURN_TRUE;
 }
+/* }}} */
+
+/* {{{ proto int unicode_get_error_mode(int direction) U
+   Returns global conversion error mode for the specified conversion direction */
+PHP_FUNCTION(unicode_get_error_mode)
+{
+	zend_conv_direction direction;
+	long tmp;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &tmp) == FAILURE) {
+		return;
+	}
+	direction = (zend_conv_direction) tmp;
+
+	if (direction == ZEND_FROM_UNICODE) {
+		RETURN_LONG(UG(from_error_mode));
+	} else if (direction == ZEND_TO_UNICODE) {
+		RETURN_LONG(UG(to_error_mode));
+	} else {
+		php_error(E_WARNING, "Invalid conversion direction value");
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto string unicode_get_subst_char() U
+   Returns global substitution character for conversion from Unicode to codepage */
+PHP_FUNCTION(unicode_get_subst_char)
+{
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+		return;
+	}
+
+	RETURN_UNICODE(UG(from_subst_char), 1);
+}
+/* }}} */
+
 
 /* {{{ unicode_functions[] */
 zend_function_entry unicode_functions[] = {
@@ -184,6 +221,8 @@ zend_function_entry unicode_functions[] = {
 	PHP_FE(unicode_encode, NULL)
 	PHP_FE(unicode_set_error_mode, NULL)
 	PHP_FE(unicode_set_subst_char, NULL)
+	PHP_FE(unicode_get_error_mode, NULL)
+	PHP_FE(unicode_get_subst_char, NULL)
 	PHP_FE(collator_create, NULL)
 	PHP_FE(collator_compare, NULL)
 	{ NULL, NULL, NULL }
