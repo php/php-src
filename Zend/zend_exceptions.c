@@ -377,7 +377,7 @@ static int _build_trace_args(zval **arg, int num_args, va_list args, zend_hash_k
 				l_added += 3 + 1;
 			}
 			while (--l_added) {
-				if ((*str)[*len - l_added] < 32) {
+				if ((unsigned char)(*str)[*len - l_added] < 32) {
 					(*str)[*len - l_added] = '?';
 				}
 			}
@@ -397,7 +397,7 @@ static int _build_trace_args(zval **arg, int num_args, va_list args, zend_hash_k
 				l_added += 3 + 1;
 			}
 			while (--l_added) {
-				if ((*str)[*len - l_added] < 32) {
+				if ((unsigned char)(*str)[*len - l_added] < 32) {
 					(*str)[*len - l_added] = '?';
 				}
 			}
