@@ -135,3 +135,102 @@ object(SimpleXMLElement)#%d (1) {
   }
 }
 ===DONE===
+--UEXPECTF--
+bool(false)
+bool(true)
+int(0)
+int(0)
+float(0)
+float(0)
+unicode(0) ""
+unicode(15) "
+test
+  
+  
+  
+"
+array(0) {
+}
+array(1) {
+  [u"person"]=>
+  array(3) {
+    [0]=>
+    object(SimpleXMLElement)#%d (1) {
+      [u"@attributes"]=>
+      array(1) {
+        [u"name"]=>
+        unicode(3) "Joe"
+      }
+    }
+    [1]=>
+    object(SimpleXMLElement)#%d (2) {
+      [u"@attributes"]=>
+      array(1) {
+        [u"name"]=>
+        unicode(4) "John"
+      }
+      [u"children"]=>
+      object(SimpleXMLElement)#%d (1) {
+        [u"person"]=>
+        object(SimpleXMLElement)#%d (1) {
+          [u"@attributes"]=>
+          array(1) {
+            [u"name"]=>
+            unicode(3) "Joe"
+          }
+        }
+      }
+    }
+    [2]=>
+    object(SimpleXMLElement)#%d (1) {
+      [u"@attributes"]=>
+      array(1) {
+        [u"name"]=>
+        unicode(4) "Jane"
+      }
+    }
+  }
+}
+object(SimpleXMLElement)#%d (0) {
+}
+object(SimpleXMLElement)#%d (1) {
+  [u"person"]=>
+  array(3) {
+    [0]=>
+    object(SimpleXMLElement)#%d (1) {
+      [u"@attributes"]=>
+      array(1) {
+        [u"name"]=>
+        unicode(3) "Joe"
+      }
+    }
+    [1]=>
+    object(SimpleXMLElement)#%d (2) {
+      [u"@attributes"]=>
+      array(1) {
+        [u"name"]=>
+        unicode(4) "John"
+      }
+      [u"children"]=>
+      object(SimpleXMLElement)#%d (1) {
+        [u"person"]=>
+        object(SimpleXMLElement)#%d (1) {
+          [u"@attributes"]=>
+          array(1) {
+            [u"name"]=>
+            unicode(3) "Joe"
+          }
+        }
+      }
+    }
+    [2]=>
+    object(SimpleXMLElement)#%d (1) {
+      [u"@attributes"]=>
+      array(1) {
+        [u"name"]=>
+        unicode(4) "Jane"
+      }
+    }
+  }
+}
+===DONE===

@@ -129,3 +129,65 @@ MyAutoLoader::dynaLoad(NoExistingTestClass)
 Exception: Bla
 int(0)
 ===DONE===
+--UEXPECTF--
+====0====
+unicode(10) "MyAutoLoad"
+registered
+MyAutoLoad(NoExistingTestClass)
+Exception: Bla
+int(0)
+====1====
+unicode(22) "MyAutoLoader::autoLoad"
+registered
+MyAutoLoader::autoLoad(NoExistingTestClass)
+Exception: Bla
+int(0)
+====2====
+unicode(22) "MyAutoLoader::dynaLoad"
+LogicException: Function 'MyAutoLoader::dynaLoad' not callable
+int(0)
+====3====
+array(2) {
+  [0]=>
+  unicode(12) "MyAutoLoader"
+  [1]=>
+  unicode(8) "autoLoad"
+}
+registered
+MyAutoLoader::autoLoad(NoExistingTestClass)
+Exception: Bla
+int(0)
+====4====
+array(2) {
+  [0]=>
+  unicode(12) "MyAutoLoader"
+  [1]=>
+  unicode(8) "dynaLoad"
+}
+LogicException: Passed array specifies a non static method but no object
+int(0)
+====5====
+array(2) {
+  [0]=>
+  object(MyAutoLoader)#%d (0) {
+  }
+  [1]=>
+  unicode(8) "autoLoad"
+}
+registered
+MyAutoLoader::autoLoad(NoExistingTestClass)
+Exception: Bla
+int(0)
+====6====
+array(2) {
+  [0]=>
+  object(MyAutoLoader)#%d (0) {
+  }
+  [1]=>
+  unicode(8) "dynaLoad"
+}
+registered
+MyAutoLoader::dynaLoad(NoExistingTestClass)
+Exception: Bla
+int(0)
+===DONE===
