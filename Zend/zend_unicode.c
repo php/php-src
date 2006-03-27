@@ -108,7 +108,7 @@ void zend_set_converter_error_mode(UConverter *conv, zend_conv_direction directi
 /* {{{ zend_set_converter_subst_char */
 void zend_set_converter_subst_char(UConverter *conv, UChar *subst_char)
 {
-	char dest[8];
+	char dest[8], *dest_ptr;
 	int8_t dest_len = 8;
 	UErrorCode status = U_ZERO_ERROR;
 	UErrorCode temp = U_ZERO_ERROR;
@@ -126,7 +126,25 @@ void zend_set_converter_subst_char(UConverter *conv, UChar *subst_char)
 		zend_error(E_WARNING, "Could not set substitution character for the converter");
 		return;
 	}
-	ucnv_setSubstChars(conv, dest, dest_len, &status);
+
+	/* skip BOM for UTF-16/32 converters */
+	switch (ucnv_getType(conv)) {
+		case UCNV_UTF16:
+			dest_ptr = dest + 2;
+			dest_len -= 2;
+			break;
+
+		case UCNV_UTF32:
+			dest_ptr = dest + 4;
+			dest_len -= 4;
+			break;
+
+		default:
+			dest_ptr = dest;
+			break;
+	}
+
+	ucnv_setSubstChars(conv, dest_ptr, dest_len, &status);
 	if (status == U_ILLEGAL_ARGUMENT_ERROR) {
 		zend_error(E_WARNING, "Substitution character byte sequence is too short or long for this converter");
 		return;
