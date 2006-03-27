@@ -323,10 +323,14 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 		}
 		return 0;
 	}
-	
-	/* tell the driver we just created a parameter */
+
+	/* ask the driver to perform any normalization it needs on the
+	 * parameter name.  Note that it is illegal for the driver to take
+	 * a reference to param, as it resides in transient storage only
+	 * at this time. */
 	if (stmt->methods->param_hook) {
-		if (!stmt->methods->param_hook(stmt, param, PDO_PARAM_EVT_ALLOC TSRMLS_CC)) {
+		if (!stmt->methods->param_hook(stmt, param, PDO_PARAM_EVT_NORMALIZE
+				TSRMLS_CC)) {
 			if (param->name) {
 				efree(param->name);
 				param->name = NULL;
@@ -335,16 +339,36 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 		}
 	}
 
+	/* delete any other parameter registered with this number.
+	 * If the parameter is named, it will be removed and correctly
+	 * disposed of by the hash_update call that follows */
 	if (param->paramno >= 0) {
 		zend_hash_index_del(hash, param->paramno);
 	}
-	
+
+	/* allocate storage for the parameter, keyed by its "canonical" name */
 	if (param->name) {
-		zend_hash_update(hash, param->name, param->namelen, param, sizeof(*param), (void**)&pparam);
+		zend_hash_update(hash, param->name, param->namelen, param,
+			sizeof(*param), (void**)&pparam);
 	} else {
-		zend_hash_index_update(hash, param->paramno, param, sizeof(*param), (void**)&pparam);
+		zend_hash_index_update(hash, param->paramno, param, sizeof(*param),
+			(void**)&pparam);
 	}
 
+	/* tell the driver we just created a parameter */
+	if (stmt->methods->param_hook) {
+		if (!stmt->methods->param_hook(stmt, pparam, PDO_PARAM_EVT_ALLOC
+					TSRMLS_CC)) {
+			/* undo storage allocation; the hash will free the parameter
+			 * name if required */
+			if (pparam->name) {
+				zend_hash_del(hash, pparam->name, pparam->namelen);
+			} else {
+				zend_hash_index_del(hash, pparam->paramno);
+			}
+			return 0;
+		}
+	}
 	return 1;
 }
 /* }}} */
