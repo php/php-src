@@ -681,10 +681,10 @@ static inline void php_var_serialize_ustr(smart_str *buf, UChar *ustr, int len)
 
 	for(i=0; i<len; /* U16_NEXT post-increments */) {
 		U16_NEXT(ustr, i, len, c);
-		if (c < 128) {
+		if (c < 128 && c != '\\') {
 			smart_str_appendc(buf, c & 0xff);
 		} else {
-			smart_str_appendl(buf, "\\u", 2);
+			smart_str_appendc(buf, '\\');
 			smart_str_appendc(buf, hex[(c >> 12) & 0xf]);
 			smart_str_appendc(buf, hex[(c >> 8) & 0xf]);
 			smart_str_appendc(buf, hex[(c >> 4) & 0xf]);
@@ -1070,7 +1070,10 @@ PHP_FUNCTION(serialize)
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
 	if (buf.c) {
-		RETURN_STRINGL(buf.c, buf.len, 0);
+		RETVAL_ASCII_STRINGL(buf.c, buf.len, 0);
+		if (UG(unicode)) {
+			smart_str_free(&buf);
+		}
 	} else {
 		RETURN_NULL();
 	}
@@ -1088,6 +1091,23 @@ PHP_FUNCTION(unserialize)
 	
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &buf) == FAILURE) {
 		WRONG_PARAM_COUNT;
+	}
+
+	if (Z_TYPE_PP(buf) == IS_UNICODE) {
+		/* ASCII unicode string to binary string conversion */
+		char *str = emalloc(Z_USTRLEN_PP(buf)+1);
+		int i;
+
+		for (i = 0; i < Z_UNILEN_PP(buf); i++) {
+			if (Z_USTRVAL_PP(buf)[i] > 128) {
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Error at offset %d of %d bytes", i, Z_USTRLEN_PP(buf));				
+			}
+			str[i] = Z_USTRVAL_PP(buf)[i];
+		}
+		str[i] = '\0';
+		efree(Z_USTRVAL_PP(buf));
+		Z_STRVAL_PP(buf) = str;
+		Z_TYPE_PP(buf) = IS_STRING;
 	}
 
 	if (Z_TYPE_PP(buf) == IS_STRING) {

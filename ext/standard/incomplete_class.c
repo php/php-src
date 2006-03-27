@@ -98,7 +98,7 @@ static zend_object_value php_create_incomplete_object(zend_class_entry *class_ty
 	value.handlers = &php_incomplete_object_handlers;
 	
 	ALLOC_HASHTABLE(object->properties);
-	zend_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_u_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
 	return value;
 }
 
@@ -133,10 +133,14 @@ PHPAPI zstr php_lookup_class_name(zval *object, zend_uint *nlen)
 	object_properties = Z_OBJPROP_P(object);
 
 	if (zend_hash_find(object_properties, MAGIC_MEMBER, sizeof(MAGIC_MEMBER), (void **) &val) == SUCCESS) {
-		retval.s = estrndup(Z_STRVAL_PP(val), Z_STRLEN_PP(val));
+		if (UG(unicode)) {
+			retval.u = eustrndup(Z_USTRVAL_PP(val), Z_USTRLEN_PP(val));
+		} else {
+			retval.s = estrndup(Z_STRVAL_PP(val), Z_STRLEN_PP(val));
+		}
 
 		if (nlen)
-			*nlen = Z_STRLEN_PP(val);
+			*nlen = Z_UNILEN_PP(val);
 	}
 
 	return retval;
@@ -145,16 +149,13 @@ PHPAPI zstr php_lookup_class_name(zval *object, zend_uint *nlen)
 
 /* {{{ php_store_class_name
  */
-PHPAPI void php_store_class_name(zval *object, const char *name, zend_uint len)
+PHPAPI void php_store_class_name(zval *object, zstr name, zend_uint len)
 {
 	zval *val;
 	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(val);
-
-	Z_TYPE_P(val)   = IS_STRING;
-	Z_STRVAL_P(val) = estrndup(name, len);
-	Z_STRLEN_P(val) = len;
+	ZVAL_TEXTL(val, name, len, 1);
 
 	zend_hash_update(Z_OBJPROP_P(object), MAGIC_MEMBER, sizeof(MAGIC_MEMBER), &val, sizeof(val), NULL);
 }

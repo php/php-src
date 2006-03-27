@@ -184,3 +184,55 @@ object(__PHP_Incomplete_Class)#1 (1) {
   string(22) "autoload_not_available"
 }
 ===DONE===
+--UEXPECTF--
+===O1===
+TestOld::__sleep()
+unicode(18) "O:7:"TestOld":0:{}"
+TestOld::__wakeup()
+object(TestOld)#%d (0) {
+}
+===N1===
+TestNew::serialize()
+unicode(2) "N;"
+NULL
+===N2===
+TestNew::serialize()
+unicode(19) "C:7:"TestNew":1:{2}"
+TestNew::unserialize()
+object(TestNew)#%d (0) {
+}
+===NAOld===
+unserializer(TestNAOld)
+TestOld::__wakeup()
+object(TestNAOld)#%d (0) {
+}
+===NANew===
+unserializer(TestNANew)
+TestNew::__wakeup()
+object(TestNANew)#%d (0) {
+}
+===NANew2===
+unserializer(TestNANew2)
+TestNew::unserialize()
+object(TestNANew2)#%d (0) {
+}
+===AutoOld===
+unserializer(autoload_implements)
+Try __autoload()
+do_autoload(autoload_interface)
+do_autoload(autoload_implements)
+object(autoload_implements)#%d (0) {
+}
+===AutoNA===
+do_autoload(autoload_not_available)
+unserializer(autoload_not_available)
+Try __autoload()
+do_autoload(autoload_not_available)
+do_autoload(autoload_not_available)
+
+Warning: unserialize(): Function unserializer() hasn't defined the class it was called for in %s005.php on line %d
+object(__PHP_Incomplete_Class)#1 (1) {
+  [u"__PHP_Incomplete_Class_Name"]=>
+  unicode(22) "autoload_not_available"
+}
+===DONE===

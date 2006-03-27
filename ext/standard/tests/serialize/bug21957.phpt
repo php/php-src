@@ -47,3 +47,22 @@ array(2) {
   ["two"]=>
   NULL
 }
+--UEXPECT--
+array(2) {
+  [u"one"]=>
+  unicode(3) "ABC"
+  [u"two"]=>
+  object(test)#1 (2) {
+    [u"a"]=>
+    int(7)
+    [u"b"]=>
+    int(2)
+  }
+}
+a:2:{U:3:"one";U:3:"ABC";U:3:"two";N;}
+array(2) {
+  [u"one"]=>
+  unicode(3) "ABC"
+  [u"two"]=>
+  NULL
+}
