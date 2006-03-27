@@ -42,3 +42,32 @@ array(3) {
 object(stdClass)#%d (0) {
 }
 ===DONE===
+--UEXPECTF--
+bool(false)
+bool(true)
+int(823)
+unicode(0) ""
+unicode(3) "foo"
+array(1) {
+  [0]=>
+  unicode(2) "12"
+}
+array(2) {
+  [0]=>
+  array(0) {
+  }
+  [1]=>
+  array(0) {
+  }
+}
+array(3) {
+  [0]=>
+  unicode(3) "foo"
+  [1]=>
+  unicode(3) "bar"
+  [2]=>
+  unicode(3) "baz"
+}
+object(stdClass)#%d (0) {
+}
+===DONE===
