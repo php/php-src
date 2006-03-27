@@ -208,7 +208,7 @@ ZEND_API char *zend_zval_type_name(zval *arg)
 			return "double";
 
 		case IS_STRING:
-			return "native string";
+			return "binary string";
 
 		case IS_ARRAY:
 			return "array";
@@ -375,6 +375,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 			break;
 
 		case 's':
+		case 'S':
 			{
 				char **p = va_arg(*va, char **);
 				int *pl = va_arg(*va, int *);
@@ -387,11 +388,15 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 						}
 						/* break omitted intentionally */
 
+					case IS_UNICODE:
+						if (c == 'S') {
+							return "definitely a binary string";
+						}
+						/* fall through */
 					case IS_STRING:
 					case IS_LONG:
 					case IS_DOUBLE:
 					case IS_BOOL:
-					case IS_UNICODE:
 						convert_to_string_ex(arg);
 						*p = Z_STRVAL_PP(arg);
 						*pl = Z_STRLEN_PP(arg);
@@ -405,7 +410,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 								*p = Z_STRVAL_PP(arg);
 								break;
 							} else {
-								return "native string";
+								return "binary string";
 							}
 						}
 					}
@@ -413,12 +418,13 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 					case IS_ARRAY:
 					case IS_RESOURCE:
 					default:
-						return "native string";
+						return "binary string";
 				}
 			}
 			break;
 
 		case 'u':
+		case 'U':
 			{
 				UChar **p = va_arg(*va, UChar **);
 				int *pl = va_arg(*va, int *);
@@ -432,6 +438,10 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 						/* break omitted intentionally */
 
 					case IS_STRING:
+						if (c == 'U') {
+							return "definitely a Unicode string";
+						}
+						/* fall through */
 					case IS_LONG:
 					case IS_DOUBLE:
 					case IS_BOOL:
@@ -517,7 +527,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 					case IS_ARRAY:
 					case IS_RESOURCE:
 					default:
-						return "string (native, Unicode, or binary)";
+						return "string (Unicode or binary)";
 				}
 
 				break;
@@ -579,7 +589,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 					case IS_ARRAY:
 					case IS_RESOURCE:
 					default:
-						return "string (native, Unicode, or binary)";
+						return "string (Unicode or binary)";
 				}
 			}
 			break;
@@ -795,7 +805,8 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 			case 'z': case 'Z':
 			case 't': case 'y':
 			case 'u': case 'C':
-			case 'h':
+			case 'h': case 'U':
+			case 'S':
 				max_num_args++;
 				break;
 
