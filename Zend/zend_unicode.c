@@ -528,7 +528,7 @@ ZEND_API int zend_cmp_unicode_and_string(UChar *ustr, char* str, uint len)
 /* {{{ zend_cmp_unicode_and_literal */
 /*
  * Compare a Unicode string and an ASCII literal. Because ASCII maps nicely onto Unicode
- * range U+0000 .. U+007F, we can simply casst ASCII chars to Unicode values and avoid
+ * range U+0000 .. U+007F, we can simply cast ASCII chars to Unicode values and avoid
  * memory allocation.
  */
 ZEND_API int zend_cmp_unicode_and_literal(UChar *ustr, int ulen, char *str, int slen)
@@ -536,6 +536,7 @@ ZEND_API int zend_cmp_unicode_and_literal(UChar *ustr, int ulen, char *str, int 
 	int result;
 	uint len = MIN(ulen, slen);
 
+	/* UTODO: make sure we're only comparing against ASCII values here (< 0x80) */
 	while (len--) {
 		result = (int)(uint16_t)*ustr - (int)(uint16_t)*str;
 		if (result != 0)
