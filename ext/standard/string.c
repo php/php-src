@@ -675,7 +675,7 @@ static int php_expand_u_trim_range(UChar **range, int *range_len TSRMLS_DC)
 		*range = (UChar *)erealloc(*range, (len+1)*sizeof(UChar));
 		err = U_ZERO_ERROR;
 		u_strFromUTF32(*range, len+1, &len, tmp, tmp_len, &err);
-		if ( U_FAILURE(err) == U_BUFFER_OVERFLOW_ERROR ) {
+		if ( err == U_BUFFER_OVERFLOW_ERROR ) {
 			err = U_ZERO_ERROR;
 			*range = (UChar *)erealloc(*range, (len+1)*sizeof(UChar));
 			u_strFromUTF32(*range, len+1, NULL, tmp, tmp_len, &err);
