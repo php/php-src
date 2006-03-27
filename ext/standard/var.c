@@ -256,7 +256,7 @@ head_done:
 
 
 
-/* {{{ proto void var_dump(mixed var)
+/* {{{ proto void var_dump(mixed var) U
    Dumps a string representation of variable to output */
 PHP_FUNCTION(var_dump)
 {
@@ -280,7 +280,7 @@ PHP_FUNCTION(var_dump)
 /* }}} */
 
 
-/* {{{ proto void var_inspect(mixed var)
+/* {{{ proto void var_inspect(mixed var) U
    Dumps a string representation of variable to output (verbose form) */
 PHP_FUNCTION(var_inspect)
 {
@@ -450,7 +450,7 @@ head_done:
 
 /* }}} */
 
-/* {{{ proto void debug_zval_dump(mixed var)
+/* {{{ proto void debug_zval_dump(mixed var) U
    Dumps a string representation of an internal zend value to output. */
 PHP_FUNCTION(debug_zval_dump)
 {
