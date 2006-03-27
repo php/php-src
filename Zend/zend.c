@@ -1474,7 +1474,7 @@ ZEND_API void zend_error(int type, const char *format, ...)
 					}
 					zval_ptr_dtor(&retval);
 				}
-			} else {
+			} else if (!EG(exception)) {
 				/* The user error handler failed, use built-in error handler */
 				zend_error_cb(type, error_filename, error_lineno, format, args);
 			}
