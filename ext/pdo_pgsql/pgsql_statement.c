@@ -221,7 +221,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 				}
 				break;
 
-			case PDO_PARAM_EVT_ALLOC:
+			case PDO_PARAM_EVT_NORMALIZE:
 				/* decode name from $1, $2 into 0, 1 etc. */
 				if (param->name) {
 					if (param->name[0] == '$') {
@@ -239,6 +239,10 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 					}
 				}
 				break;
+
+			case PDO_PARAM_EVT_ALLOC:
+				/* work is handled by EVT_NORMALIZE */
+				return 1;
 
 			case PDO_PARAM_EVT_EXEC_PRE:
 				if (!S->param_values) {
