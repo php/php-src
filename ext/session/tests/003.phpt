@@ -44,3 +44,19 @@ array(1) {
     int(2)
   }
 }
+--UEXPECT--
+object(foo)#1 (2) {
+  [u"bar"]=>
+  unicode(2) "ok"
+  [u"yes"]=>
+  int(2)
+}
+array(1) {
+  [3]=>
+  object(foo)#2 (2) {
+    [u"bar"]=>
+    unicode(2) "ok"
+    [u"yes"]=>
+    int(2)
+  }
+}
