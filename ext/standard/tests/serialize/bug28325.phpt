@@ -37,3 +37,23 @@ object(a)#%d (1) {
     }
   }
 }
+--UEXPECTF--
+object(a)#%d (1) {
+  [u"b"]=>
+  object(b)#%d (1) {
+    [u"c"]=>
+    object(c)#%d (1) {
+      [u"d"]=>
+      object(a)#%d (1) {
+        [u"b"]=>
+        object(b)#%d (1) {
+          [u"c"]=>
+          object(c)#%d (1) {
+            [u"d"]=>
+            *RECURSION*
+          }
+        }
+      }
+    }
+  }
+}

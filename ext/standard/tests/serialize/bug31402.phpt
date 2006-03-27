@@ -85,3 +85,55 @@ object(TestY)#%d (2) {
   }
 }
 ===DONE===
+--UEXPECTF--
+object(TestY)#%d (2) {
+  [u"A"]=>
+  array(3) {
+    [1]=>
+    object(TestX)#%d (1) {
+      [u"i"]=>
+      int(1)
+    }
+    [2]=>
+    &object(TestX)#%d (1) {
+      [u"i"]=>
+      int(2)
+    }
+    [3]=>
+    &object(TestX)#%d (1) {
+      [u"i"]=>
+      int(2)
+    }
+  }
+  [u"B"]=>
+  object(TestX)#%d (1) {
+    [u"i"]=>
+    int(1)
+  }
+}
+object(TestY)#%d (2) {
+  [u"A"]=>
+  array(3) {
+    [1]=>
+    object(TestX)#%d (1) {
+      [u"i"]=>
+      int(1)
+    }
+    [2]=>
+    &object(TestX)#%d (1) {
+      [u"i"]=>
+      int(2)
+    }
+    [3]=>
+    &object(TestX)#%d (1) {
+      [u"i"]=>
+      int(2)
+    }
+  }
+  [u"B"]=>
+  object(TestX)#%d (1) {
+    [u"i"]=>
+    int(1)
+  }
+}
+===DONE===

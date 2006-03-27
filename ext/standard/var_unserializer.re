@@ -78,6 +78,38 @@ static inline void var_push_dtor(php_unserialize_data_t *var_hashx, zval **rval)
 	var_hash->data[var_hash->used_slots++] = *rval;
 }
 
+static UChar *unserialize_ustr(const unsigned char **p, int len)
+{
+	int i, j;
+	UChar *ustr = eumalloc(len+1);
+
+	for (i = 0; i < len; i++) {
+		if (**p != '\\') {
+			ustr[i] = (UChar)**p;
+		} else {
+			UChar ch = 0;
+
+			for (j = 0; j < 4; j++) {
+				(*p)++;
+				if (**p >= '0' && **p <= '9') {
+					ch = (ch << 4) + (**p -'0');
+				} else if (**p >= 'a' && **p <= 'f') {
+					ch = (ch << 4) + (**p -'a'+10);
+				} else if (**p >= 'A' && **p <= 'F') {
+					ch = (ch << 4) + (**p -'A'+10);
+				} else {
+					efree(ustr);
+					return NULL;
+				}
+			}
+			ustr[i] = ch;
+		}
+		(*p)++;
+	}
+	ustr[i] = 0;
+	return ustr;
+}
+
 PHPAPI void var_replace(php_unserialize_data_t *var_hashx, zval *ozval, zval **nzval)
 {
 	long i;
@@ -227,7 +259,9 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, long
 			return 0;
 		}
 
-		if (Z_TYPE_P(key) != IS_LONG && Z_TYPE_P(key) != IS_STRING) {
+		if (Z_TYPE_P(key) != IS_LONG &&
+		    Z_TYPE_P(key) != IS_STRING &&
+		    Z_TYPE_P(key) != IS_UNICODE) {
 			zval_dtor(key);
 			FREE_ZVAL(key);
 			return 0;
@@ -251,10 +285,11 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, long
 				zend_hash_index_update(ht, Z_LVAL_P(key), &data, sizeof(data), NULL);
 				break;
 			case IS_STRING:
-				if (zend_hash_find(ht, Z_STRVAL_P(key), Z_STRLEN_P(key) + 1, (void **)&old_data)==SUCCESS) {
+			case IS_UNICODE:
+				if (zend_u_hash_find(ht, Z_TYPE_P(key), Z_UNIVAL_P(key), Z_UNILEN_P(key) + 1, (void **)&old_data)==SUCCESS) {
 					var_push_dtor(var_hash, old_data);
 				}
-				zend_hash_update(ht, Z_STRVAL_P(key), Z_STRLEN_P(key) + 1, &data, sizeof(data), NULL);
+				zend_u_hash_update(ht, Z_TYPE_P(key), Z_UNIVAL_P(key), Z_UNILEN_P(key) + 1, &data, sizeof(data), NULL);
 				break;
 		}
 		
@@ -476,6 +511,36 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	return 1;
 }
 
+"U:" uiv ":" ["] 	{
+	size_t len, maxlen;
+	UChar *ustr;
+
+	len = parse_uiv(start + 2);
+	maxlen = max - YYCURSOR;
+	if (maxlen < len) {
+		*p = start + 2;
+		return 0;
+	}
+
+	if ((ustr = unserialize_ustr(&YYCURSOR, len)) == NULL) {
+		efree(ustr);
+		return 0;
+	}
+
+	if (*(YYCURSOR) != '"') {
+		efree(ustr);
+		*p = YYCURSOR;
+		return 0;
+	}
+
+	YYCURSOR += 2;
+	*p = YYCURSOR;
+
+	INIT_PZVAL(*rval);
+	ZVAL_UNICODEL(*rval, ustr, len, 0);
+	return 1;
+}
+
 "a:" uiv ":" "{" {
 	long elements = parse_iv(start + 2);
 	/* use iv() not uiv() in order to check data range */
@@ -509,7 +574,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 object ":" uiv ":" ["]	{
 	size_t len, len2, len3, maxlen;
 	long elements;
-	char *class_name;
+	zstr class_name;
 	zend_class_entry *ce;
 	zend_class_entry **pce;
 	int incomplete_class = 0;
@@ -533,31 +598,32 @@ object ":" uiv ":" ["]	{
 		return 0;
 	}
 
-	class_name = (char*)YYCURSOR;
-
-	YYCURSOR += len;
+	if (UG(unicode)) {
+		class_name.u = unserialize_ustr(&YYCURSOR, len);
+	} else {
+		len3 = strspn((char*)YYCURSOR, "0123456789_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\177\200\201\202\203\204\205\206\207\210\211\212\213\214\215\216\217\220\221\222\223\224\225\226\227\230\231\232\233\234\235\236\237\240\241\242\243\244\245\246\247\250\251\252\253\254\255\256\257\260\261\262\263\264\265\266\267\270\271\272\273\274\275\276\277\300\301\302\303\304\305\306\307\310\311\312\313\314\315\316\317\320\321\322\323\324\325\326\327\330\331\332\333\334\335\336\337\340\341\342\343\344\345\346\347\350\351\352\353\354\355\356\357\360\361\362\363\364\365\366\367\370\371\372\373\374\375\376\377");
+		if (len3 != len) {
+			*p = YYCURSOR + len3 - len;
+			return 0;
+		}
+		class_name.s = estrndup((char*)YYCURSOR, len);
+		YYCURSOR += len;
+	}
 
 	if (*(YYCURSOR) != '"') {
+		efree(class_name.v);
 		*p = YYCURSOR;
 		return 0;
 	}
 	if (*(YYCURSOR+1) != ':') {
+		efree(class_name.v);
 		*p = YYCURSOR+1;
 		return 0;
 	}
 
-	len3 = strspn(class_name, "0123456789_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\177\200\201\202\203\204\205\206\207\210\211\212\213\214\215\216\217\220\221\222\223\224\225\226\227\230\231\232\233\234\235\236\237\240\241\242\243\244\245\246\247\250\251\252\253\254\255\256\257\260\261\262\263\264\265\266\267\270\271\272\273\274\275\276\277\300\301\302\303\304\305\306\307\310\311\312\313\314\315\316\317\320\321\322\323\324\325\326\327\330\331\332\333\334\335\336\337\340\341\342\343\344\345\346\347\350\351\352\353\354\355\356\357\360\361\362\363\364\365\366\367\370\371\372\373\374\375\376\377");
-	if (len3 != len)
-	{
-		*p = YYCURSOR + len3 - len;
-		return 0;
-	}
-
-	class_name = estrndup(class_name, len);
-
 	do {
 		/* Try to find class directly */
-		if (zend_lookup_class(class_name, len2, &pce TSRMLS_CC) == SUCCESS) {
+		if (zend_u_lookup_class(UG(unicode)?IS_UNICODE:IS_STRING, class_name, len2, &pce TSRMLS_CC) == SUCCESS) {
 			ce = *pce;
 			break;
 		}
@@ -574,7 +640,7 @@ object ":" uiv ":" ["]	{
 		ZVAL_STRING(user_func, PG(unserialize_callback_func), 1);
 		args[0] = &arg_func_name;
 		MAKE_STD_ZVAL(arg_func_name);
-		ZVAL_STRING(arg_func_name, class_name, 1);
+		ZVAL_TEXT(arg_func_name, class_name, 1);
 		if (call_user_function_ex(CG(function_table), NULL, user_func, &retval_ptr, 1, args, 0, NULL TSRMLS_CC) != SUCCESS) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "defined (%s) but not found", user_func->value.str.val);
 			incomplete_class = 1;
@@ -588,7 +654,7 @@ object ":" uiv ":" ["]	{
 		}
 		
 		/* The callback function may have defined the class */
-		if (zend_lookup_class(class_name, len2, &pce TSRMLS_CC) == SUCCESS) {
+		if (zend_u_lookup_class(UG(unicode)?IS_UNICODE:IS_STRING, class_name, len2, &pce TSRMLS_CC) == SUCCESS) {
 			ce = *pce;
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Function %s() hasn't defined the class it was called for", user_func->value.str.val);
@@ -604,7 +670,7 @@ object ":" uiv ":" ["]	{
 	*p = YYCURSOR;
 
 	if(custom_object) {
-		efree(class_name);
+		efree(class_name.v);
 		return object_custom(UNSERIALIZE_PASSTHRU, ce);
 	}
 	
@@ -613,7 +679,7 @@ object ":" uiv ":" ["]	{
 	if (incomplete_class) {
 		php_store_class_name(*rval, class_name, len2);
 	}
-	efree(class_name);
+	efree(class_name.v);
 
 	return object_common2(UNSERIALIZE_PASSTHRU, elements);
 }
