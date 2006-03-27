@@ -146,6 +146,7 @@ static int odbc_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 
 		stmt->column_count = (int)colcount;
 		S->cols = ecalloc(colcount, sizeof(pdo_odbc_column));
+		S->going_long = 0;
 	}
 
 	return 1;
@@ -399,8 +400,9 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	col->param_type = PDO_PARAM_STR;
 
 	/* tell ODBC to put it straight into our buffer, but only if it
-	 * isn't "long" data */
-	if (colsize < 256) {
+	 * isn't "long" data, and only if we haven't already bound a long
+	 * column. */
+	if (colsize < 256 && !S->going_long) {
 		S->cols[colno].data = emalloc(colsize+1);
 
 		rc = SQLBindCol(S->stmt, colno+1, SQL_C_CHAR, S->cols[colno].data,
@@ -414,6 +416,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 		/* allocate a smaller buffer to keep around for smaller
 		 * "long" columns */
 		S->cols[colno].data = emalloc(256);
+		S->going_long = 1;
 	}
 
 	return 1;
@@ -589,6 +592,7 @@ static int odbc_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 	SQLNumResultCols(S->stmt, &colcount);
 	stmt->column_count = (int)colcount;
 	S->cols = ecalloc(colcount, sizeof(pdo_odbc_column));
+	S->going_long = 0;
 
 	return 1;
 }
