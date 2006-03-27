@@ -3513,7 +3513,7 @@ PHPAPI char *php_strtr(char *str, int len, char *str_from, char *str_to, int trl
 
 /* {{{ php_u_strtr
  */
-PHPAPI UChar *php_u_strtr(UChar *str, int len, UChar *str_from, int str_from_len, UChar *str_to, int str_to_len, int trlen, int *outlen)
+PHPAPI UChar *php_u_strtr(UChar *str, int len, UChar *str_from, int str_from_len, UChar *str_to, int str_to_len, int trlen, int *outlen TSRMLS_DC)
 {
 	int i, j;
 	int can_optimize = 1;
@@ -3580,7 +3580,7 @@ PHPAPI UChar *php_u_strtr(UChar *str, int len, UChar *str_from, int str_from_len
 		zend_u_hash_add(tmp_hash, IS_UNICODE, ZSTR("a"), 2, &tmp, sizeof(zval *), NULL);
 
 		/* Run the replacement */
-		str = php_u_strtr_array(str, len, tmp_hash, minlen, maxlen, outlen TSRMLS_DC);
+		str = php_u_strtr_array(str, len, tmp_hash, minlen, maxlen, outlen TSRMLS_CC);
 		zend_hash_destroy(tmp_hash);
 		efree(tmp_hash);
 
@@ -3589,7 +3589,7 @@ PHPAPI UChar *php_u_strtr(UChar *str, int len, UChar *str_from, int str_from_len
 }
 /* }}} */
 
-static HashTable* php_u_strtr_array_prepare_hashtable(HashTable *hash, int *minlen_out, int *maxlen_out)
+static HashTable* php_u_strtr_array_prepare_hashtable(HashTable *hash, int *minlen_out, int *maxlen_out TSRMLS_DC)
 {
 	HashTable *tmp_hash = emalloc(sizeof(HashTable));
 	HashPosition hpos;
@@ -3851,7 +3851,7 @@ PHP_FUNCTION(strtr)
 			int minlen, maxlen;
 			HashTable *hash;
 			
-			hash = php_u_strtr_array_prepare_hashtable(HASH_OF(*from), &minlen, &maxlen);
+			hash = php_u_strtr_array_prepare_hashtable(HASH_OF(*from), &minlen, &maxlen TSRMLS_CC);
 			outstr = php_u_strtr_array(Z_USTRVAL_PP(str), Z_USTRLEN_PP(str), hash, minlen, maxlen, &outlen TSRMLS_CC);
 			zend_hash_destroy(hash);
 			efree(hash);
@@ -3868,7 +3868,7 @@ PHP_FUNCTION(strtr)
 					  Z_USTRVAL_PP(to),
 					  Z_USTRLEN_PP(to),
 					  MIN(Z_USTRLEN_PP(from), Z_USTRLEN_PP(to)),
-					  &outlen);
+					  &outlen TSRMLS_CC);
 			ZVAL_UNICODEL(return_value, outstr, outlen, 0);
 			
 			Z_TYPE_P(return_value) = IS_UNICODE;
