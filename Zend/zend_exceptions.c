@@ -385,6 +385,8 @@ static int _build_trace_args(zval **arg, int num_args, va_list args, zend_hash_k
 		}
 		case IS_UNICODE: {
 			int l_added;
+			TSRMLS_FETCH();
+
 			/*
 			 * We do not want to apply current error mode here, since
 			 * zend_make_printable_zval() uses output encoding converter.

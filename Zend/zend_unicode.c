@@ -472,7 +472,7 @@ ZEND_API int zval_unicode_to_string(zval *string, UConverter *conv TSRMLS_DC)
 /* }}} */
 
 /* {{{ zval_string_to_unicode_ex */
-ZEND_API int zval_string_to_unicode_ex(zval *string, UConverter *conv)
+ZEND_API int zval_string_to_unicode_ex(zval *string, UConverter *conv TSRMLS_DC)
 {
 	UErrorCode status = U_ZERO_ERROR;
 	int retval = TRUE;
@@ -499,7 +499,7 @@ ZEND_API int zval_string_to_unicode_ex(zval *string, UConverter *conv)
 /* {{{ zval_string_to_unicode */
 ZEND_API int zval_string_to_unicode(zval *string TSRMLS_DC)
 {
-	return zval_string_to_unicode_ex(string, ZEND_U_CONVERTER(UG(runtime_encoding_conv)));
+	return zval_string_to_unicode_ex(string, ZEND_U_CONVERTER(UG(runtime_encoding_conv)) TSRMLS_CC);
 }
 /* }}} */
 
