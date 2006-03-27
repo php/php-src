@@ -3978,6 +3978,8 @@ void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC)
 		 */
 		CG(active_op_array)->script_encoding = zend_get_compiled_script_encoding(TSRMLS_C);
 		efree(Z_STRVAL(val->u.constant));
+	} else {
+		zval_dtor(&val->u.constant);
 	}
 	zval_dtor(&var->u.constant);
 }
