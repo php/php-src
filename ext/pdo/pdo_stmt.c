@@ -794,7 +794,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 			case PDO_FETCH_NAMED:
 				if (!return_all) {
 					ALLOC_HASHTABLE(return_value->value.ht);
-					zend_hash_init(return_value->value.ht, stmt->column_count, NULL, ZVAL_PTR_DTOR, 0);			
+					zend_u_hash_init(return_value->value.ht, stmt->column_count, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
 					Z_TYPE_P(return_value) = IS_ARRAY;
 				} else {
 					array_init(return_value);
