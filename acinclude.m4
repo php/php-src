@@ -298,9 +298,6 @@ AC_DEFUN([PHP_SHLIB_SUFFIX_NAME],[
   *hpux*[)]
 	SHLIB_SUFFIX_NAME=sl
 	;;
-  *darwin*[)]
-	SHLIB_SUFFIX_NAME=dylib
-	;;
   esac
 ])
 
