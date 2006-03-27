@@ -45,7 +45,5 @@ PHP                                                                        NEWS
   defined using reflection API. (Johannes)
 - Added second optional parameter to stream_context_create() to set params
   during context creation. (Sara)
-- Fixed bug #36840 (Memory leak if cast operator throws an exception that is
-  caught). (Dmitry)
 - Fixed bug #36630 (umask not reset at the end of the request). (Ilia)
 - Fixed bug #34286 (__toString() behavior is inconsistent). (Marcus)
