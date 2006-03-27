@@ -1,3 +1,22 @@
+2006-03-26  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend.c
+      zend_globals.h
+      zend_operators.c
+      zend_unicode.c
+      zend_unicode.h:
+      Implement to-Unicode conversion error behavior. Note the adjusted APIs.
+
+    * zend.c
+      zend_constants.c
+      zend_globals.h
+      zend_unicode.c
+      zend_unicode.h:
+      - Remove unicode.from_error_mode and unicode.from_subst_char from INI
+      settings.
+      * Add unicode_set_error_mode() and unicode_set_subst_char() functions to
+        manipulate these global settings.
+
 2006-03-24  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_unicode.c:
