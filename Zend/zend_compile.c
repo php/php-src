@@ -98,7 +98,7 @@ static void build_runtime_defined_function_key(zval *result, zend_uchar type, zs
 		Z_USTRVAL_P(result)[0] = 0;
 		memcpy(Z_USTRVAL_P(result)+1, name.u, UBYTES(name_length));
 
-		/* FIXME: Support for non-ascii filenames */
+		/* UTODO: Support for non-ascii filenames */
 		u_charsToUChars(filename, Z_USTRVAL_P(result)+1+name_length, filename_length);
 		u_charsToUChars(char_pos_buf, Z_USTRVAL_P(result)+1+name_length+filename_length, char_pos_len);
 		Z_USTRVAL_P(result)[1+name_length+filename_length+char_pos_len] = 0;
