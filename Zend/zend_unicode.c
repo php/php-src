@@ -442,7 +442,6 @@ ZEND_API void zend_raise_conversion_error_ex(char *message, UConverter *conv, ze
 ZEND_API int zval_unicode_to_string(zval *string, UConverter *conv TSRMLS_DC)
 {
 	UErrorCode status = U_ZERO_ERROR;
-	int retval = TRUE;
 	char *s = NULL;
 	int s_len;
 	int num_conv;
@@ -455,19 +454,18 @@ ZEND_API int zval_unicode_to_string(zval *string, UConverter *conv TSRMLS_DC)
 	if (U_FAILURE(status)) {
 		int32_t offset = u_countChar32(u, num_conv);
 
-		/* XXX needs to be fixed, but a leak is better than invalid memory
+		zend_raise_conversion_error_ex("Could not convert Unicode string to binary string", conv, ZEND_FROM_UNICODE, offset, (UG(from_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
 		if (s) {
 			efree(s);
 		}
-		*/
-		zend_raise_conversion_error_ex("Could not convert Unicode string to binary string", conv, ZEND_FROM_UNICODE, offset, (UG(from_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
-		retval = FAILURE;
+		ZVAL_EMPTY_STRING(string);
+		efree((UChar*)u);
+		return FAILURE;
+	} else {
+		ZVAL_STRINGL(string, s, s_len, 0);
+		efree((UChar*)u);
+		return SUCCESS;
 	}
-
-	ZVAL_STRINGL(string, s, s_len, 0);
-
-	efree((UChar*)u);
-	return retval;
 }
 /* }}} */
 
@@ -486,13 +484,17 @@ ZEND_API int zval_string_to_unicode_ex(zval *string, UConverter *conv TSRMLS_DC)
 
 	if (U_FAILURE(status)) {
 		zend_raise_conversion_error_ex("Could not convert binary string to Unicode string", conv, ZEND_TO_UNICODE, num_conv, (UG(to_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
-		retval = FALSE;
+		if (u) {
+			efree(u);
+		}
+		ZVAL_EMPTY_UNICODE(string);
+		efree(s);
+		return FAILURE;
+	} else {
+		ZVAL_UNICODEL(string, u, u_len, 0);
+		efree(s);
+		return SUCCESS;
 	}
-
-	ZVAL_UNICODEL(string, u, u_len, 0);
-
-	efree(s);
-	return retval;
 }
 /* }}} */
 
