@@ -3781,6 +3781,8 @@ void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC)
 		}
 		efree(val->u.constant.value.str.val);
 #endif /* ZEND_MULTIBYTE */
+	} else {
+		zval_dtor(&val->u.constant);
 	}
 	zval_dtor(&var->u.constant);
 }
