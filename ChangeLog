@@ -1,3 +1,134 @@
+2006-03-26  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-todo.txt
+      unicode-todo.txt:
+      -** empty log message ***
+
+2006-03-26  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_1)
+      ext/mysqli/mysqli_api.c:
+      kill the left unused variable
+
+    * (PHP_5_1)
+      ext/mysqli/mysqli_api.c:
+      remove unnecessary memcpy, cast directly
+
+2006-03-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      ext/standard/http_fopen_wrapper.c:
+      MFH: Fixed bug #36857 (Added support for partial content fetching to the
+      HTTP streams wrapper).
+
+    * ext/standard/http_fopen_wrapper.c:
+      MFB51: Fixed bug #36857 (Added support for partial content fetching to the
+      HTTP streams wrapper).
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/http_fopen_wrapper.c:
+      Fixed bug #36857 (Added support for partial content fetching to the HTTP
+      streams wrapper).
+
+2006-03-26  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/array.c
+      ext/standard/php_array.h:
+      - Implemented basic collation support. For some reason "new Collator" gives
+      segfaults when the object's collation resource is used.
+      - The following example shows what is implemented:
+      
+      <?php
+      $orig = $strings = array(
+          'côte',
+          'cote',
+          'côté',
+          'coté',
+          'fluße',
+          'flüße',
+      );
+      
+      echo "German phonebook:\n";
+      $c = collator_create( "de@collation=phonebook" );
+      foreach($c->sort($strings) as $string) {
+          echo $string, "\n";
+      }
+      echo $c->getAttribute(Collator::FRENCH_COLLATION) == Collator::ON
+          ? "With" : "Without", " french accent sorting order\n";
+      
+      echo "\nFrench with options:\n";
+      $c = collator_create( "fr" );
+      $c->setAttribute(Collator::CASE_FIRST, Collator::UPPER_FIRST);
+      $c->setAttribute(Collator::CASE_LEVEL, Collator::ON);
+      $c->setStrength(Collator::SECONDARY);
+      foreach($c->sort($strings) as $string) {
+          echo $string, "\n";
+      }
+      echo $c->getAttribute(Collator::FRENCH_COLLATION) == Collator::ON
+          ? "With" : "Without", " french accent sorting order\n";
+      ?>
+
+2006-03-26  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_unicode.c
+      ZendEngine2/zend_unicode.h
+      main/main.c
+      main/streams/filter.c
+      main/streams/streams.c:
+      Implement to-Unicode conversion error behavior. Note the adjusted APIs.
+
+2006-03-26  Sara Golemon  <sara@golemon.com>
+
+    * NEWS
+      ext/standard/streamsfuncs.c:
+      Expand stream_context_create() to allow specifying params
+      as well as options.  Ignore the internal name change of the first arg.
+      The first arg is still for options, the second arg is for actual params.
+
+2006-03-26  Seiji Masugata  <s.masugata@digicom.dnp.co.jp>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.c:
+      fixed compiler warning.
+
+2006-03-26  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/strtotitle.phpt
+      ext/standard/tests/strings/strtr2.phpt:
+      - Commit intermediate work so that I can hack on it on some plane.
+
+2006-03-26  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_unicode.c
+      ZendEngine2/zend_unicode.h
+      main/main.c
+      main/streams/filter.c
+      main/streams/streams.c:
+      - Remove unicode.from_error_mode and unicode.from_subst_char from INI
+      settings.
+      * Add unicode_set_error_mode() and unicode_set_subst_char() functions to
+        manipulate these global settings.
+
+2006-03-26  Antony Dovgal  <antony@zend.com>
+
+    * ext/dom/php_dom.c:
+      MF51: fix #36859 (DOMElement crashes when calling __construct when
+      clone'ing)
+
+    * (PHP_5_1)
+      NEWS
+      ext/dom/php_dom.c:
+      fix #36859 (DOMElement crashes when calling __construct when clone'ing)
+
 2006-03-25  Sara Golemon  <sara@golemon.com>
 
     * main/streams/streams.c:
