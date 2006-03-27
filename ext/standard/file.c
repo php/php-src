@@ -552,8 +552,9 @@ PHP_FUNCTION(tempnam)
 	pval **arg1, **arg2;
 	char *d;
 	char *opened_path;
-	char p[64];
+	char *p;
 	FILE *fp;
+	size_t p_len;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -566,7 +567,11 @@ PHP_FUNCTION(tempnam)
 	}
 
 	d = estrndup(Z_STRVAL_PP(arg1), Z_STRLEN_PP(arg1));
-	strlcpy(p, Z_STRVAL_PP(arg2), sizeof(p));
+
+	php_basename(Z_STRVAL_PP(arg2), Z_STRLEN_PP(arg2), NULL, 0, &p, &p_len TSRMLS_CC);
+	if (p_len > 64) {
+		p[63] = '\0';
+	}
 
 	if ((fp = php_open_temporary_file(d, p, &opened_path TSRMLS_CC))) {
 		fclose(fp);
@@ -574,6 +579,7 @@ PHP_FUNCTION(tempnam)
 	} else {
 		RETVAL_FALSE;
 	}
+	efree(p);
 	efree(d);
 }
 /* }}} */
