@@ -507,7 +507,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	*p = YYCURSOR;
 
 	INIT_PZVAL(*rval);
-	ZVAL_STRINGL(*rval, str, len, 1);
+	ZVAL_RT_STRINGL(*rval, str, len, 1);
 	return 1;
 }
 
