@@ -55,3 +55,18 @@ array(0) {
 }
 array(0) {
 }
+--UEXPECT--
+array(0) {
+}
+array(1) {
+  [u"name"]=>
+  unicode(3) "foo"
+}
+array(1) {
+  [u"name"]=>
+  unicode(3) "foo"
+}
+array(0) {
+}
+array(0) {
+}
