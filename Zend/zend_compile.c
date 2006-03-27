@@ -76,11 +76,12 @@ static void zend_destroy_property_info_internal(zend_property_info *property_inf
 	free(property_info->name.v);
 }
 
-static void build_runtime_defined_function_key(zval *result, zend_uchar type, char *name, int name_length TSRMLS_DC)
+static void build_runtime_defined_function_key(zval *result, zend_uchar type, zstr name, int name_length TSRMLS_DC)
 {
 	char char_pos_buf[32];
 	uint char_pos_len;
 	char *filename;
+	uint filename_length;
 
 	char_pos_len = zend_sprintf(char_pos_buf, "%p", LANG_SCNG(_yy_last_accepting_cpos));
 	if (CG(active_op_array)->filename) {
@@ -90,17 +91,26 @@ static void build_runtime_defined_function_key(zval *result, zend_uchar type, ch
 	}
 
 	/* NULL, name length, filename length, last accepting char position length */
+	filename_length = strlen(filename);
+	Z_UNILEN_P(result) = 1+name_length+filename_length+char_pos_len;
 	if (type == IS_UNICODE) {
-		name_length *= sizeof(UChar);
+		Z_USTRVAL_P(result) = (UChar *) eumalloc(Z_STRLEN_P(result)+1);		
+		Z_USTRVAL_P(result)[0] = 0;
+		memcpy(Z_USTRVAL_P(result)+1, name.u, UBYTES(name_length));
+
+		/* FIXME: Support for non-ascii filenames */
+		u_charsToUChars(filename, Z_USTRVAL_P(result)+1+name_length, filename_length);
+		u_charsToUChars(char_pos_buf, Z_USTRVAL_P(result)+1+name_length+filename_length, char_pos_len);
+		Z_USTRVAL_P(result)[1+name_length+filename_length+char_pos_len] = 0;
+		Z_TYPE_P(result) = IS_UNICODE;
+	} else {
+		Z_STRVAL_P(result) = (char *) emalloc(Z_STRLEN_P(result)+1);
+		Z_STRVAL_P(result)[0] = '\0';
+		memcpy(Z_STRVAL_P(result)+1, name.s, name_length);
+		memcpy(Z_STRVAL_P(result)+1+name_length, filename, filename_length);
+		memcpy(Z_STRVAL_P(result)+1+name_length+filename_length, char_pos_buf, char_pos_len+1);
+		Z_TYPE_P(result) = IS_STRING;
 	}
-	Z_STRLEN_P(result) = 1+name_length+strlen(filename)+char_pos_len;
-	Z_STRVAL_P(result) = (char *) emalloc(Z_STRLEN_P(result)+1);
-	/* UTODO: function key should probably store UTF-16 value instead of converting to
-	   runtime encoding */
-	Z_STRVAL_P(result)[0] = '\0';
-	memcpy(Z_STRVAL_P(result)+1, name, name_length);
-	sprintf(Z_STRVAL_P(result)+1+name_length, "%s%s", filename, char_pos_buf);
-	Z_TYPE_P(result) = IS_STRING;
 	result->refcount = 1;
 }
 
@@ -1198,7 +1208,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 
 		opline->opcode = ZEND_DECLARE_FUNCTION;
 		opline->op1.op_type = IS_CONST;
-		build_runtime_defined_function_key(&opline->op1.u.constant, Z_TYPE(function_name->u.constant), lcname.s, lcname_len TSRMLS_CC);
+		build_runtime_defined_function_key(&opline->op1.u.constant, Z_TYPE(function_name->u.constant), lcname, lcname_len TSRMLS_CC);
 		opline->op2.op_type = IS_CONST;
 		Z_TYPE(opline->op2.u.constant) = Z_TYPE(function_name->u.constant);
 		Z_STRVAL(opline->op2.u.constant) = lcname.s;
@@ -2878,7 +2888,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->op1.op_type = IS_CONST;
-	build_runtime_defined_function_key(&opline->op1.u.constant, Z_TYPE(class_name->u.constant), lcname.s, lcname_len TSRMLS_CC);
+	build_runtime_defined_function_key(&opline->op1.u.constant, Z_TYPE(class_name->u.constant), lcname, lcname_len TSRMLS_CC);
 
 	opline->op2.op_type = IS_CONST;
 	Z_TYPE(opline->op2.u.constant) = Z_TYPE(class_name->u.constant);
