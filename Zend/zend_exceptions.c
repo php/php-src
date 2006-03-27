@@ -385,6 +385,13 @@ static int _build_trace_args(zval **arg, int num_args, va_list args, zend_hash_k
 		}
 		case IS_UNICODE: {
 			int l_added;
+			/*
+			 * We do not want to apply current error mode here, since
+			 * zend_make_printable_zval() uses output encoding converter.
+			 * Temporarily set output encoding converter to escape offending
+			 * chars with \uXXXX notation.
+			 */
+			zend_set_converter_error_mode(ZEND_U_CONVERTER(UG(output_encoding_conv)), ZEND_FROM_UNICODE, ZEND_CONV_ERROR_ESCAPE_JAVA);
 			TRACE_APPEND_CHR('\'');
 			if (Z_USTRLEN_PP(arg) > 15) {
 				TRACE_APPEND_USTRL(Z_USTRVAL_PP(arg), 15);
@@ -396,6 +403,10 @@ static int _build_trace_args(zval **arg, int num_args, va_list args, zend_hash_k
 				TRACE_APPEND_STR("', ");
 				l_added += 3 + 1;
 			}
+			/*
+			 * Reset output encoding converter error mode.
+			 */
+			zend_set_converter_error_mode(ZEND_U_CONVERTER(UG(output_encoding_conv)), ZEND_FROM_UNICODE, UG(from_error_mode));
 			while (--l_added) {
 				if ((unsigned char)(*str)[*len - l_added] < 32) {
 					(*str)[*len - l_added] = '?';
