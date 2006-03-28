@@ -64,6 +64,15 @@ static zend_function_entry user_filter_class_funcs[] = {
 
 static zend_class_entry user_filter_class_entry;
 
+static ZEND_RSRC_DTOR_FUNC(php_bucket_dtor)
+{
+	php_stream_bucket *bucket = (struct php_stream_bucket *)rsrc->ptr;
+	if (bucket) {
+		php_stream_bucket_delref(bucket TSRMLS_CC);
+		bucket = NULL;
+	}
+}
+
 PHP_MINIT_FUNCTION(user_filters)
 {
 	/* init the filter class ancestor */
@@ -83,7 +92,7 @@ PHP_MINIT_FUNCTION(user_filters)
 	/* Filters will dispose of their brigades */
 	le_bucket_brigade = zend_register_list_destructors_ex(NULL, NULL, PHP_STREAM_BRIGADE_RES_NAME, module_number);
 	/* Brigades will dispose of their buckets */
-	le_bucket = zend_register_list_destructors_ex(NULL, NULL, PHP_STREAM_BUCKET_RES_NAME, module_number);
+	le_bucket = zend_register_list_destructors_ex(php_bucket_dtor, NULL, PHP_STREAM_BUCKET_RES_NAME, module_number);
 	
 	if (le_bucket_brigade == FAILURE) {
 		return FAILURE;
@@ -417,6 +426,12 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 		php_stream_bucket_append(brigade, bucket TSRMLS_CC);
 	} else {
 		php_stream_bucket_prepend(brigade, bucket TSRMLS_CC);
+	}
+	/* This is a hack necessary to accomodate situations where bucket is appended to the stream
+ 	 * multiple times. See bug35916.phpt for reference.
+	 */
+	if (bucket->refcount == 1) {
+		bucket->refcount++;
 	}
 }
 /* }}} */
