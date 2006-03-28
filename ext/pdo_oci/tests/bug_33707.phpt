@@ -3,8 +3,7 @@ PDO OCI Bug #33707
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_oci')) die('skip not loaded');
-require 'ext/pdo_oci/tests/config.inc';
-require 'ext/pdo/tests/pdo_test.inc';
+require dirname(__FILE__).'/../../pdo/tests/pdo_test.inc';
 PDOTest::skip();
 ?>
 --FILE--
