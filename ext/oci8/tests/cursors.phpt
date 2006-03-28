@@ -45,15 +45,21 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-array(2) {
+array(5) {
   ["ID"]=>
   string(1) "1"
   ["VALUE"]=>
   string(1) "1"
+  ["BLOB"]=>
+  NULL
+  ["CLOB"]=>
+  NULL
+  ["STRING"]=>
+  NULL
 }
 bool(true)
 
-Warning: oci_fetch_assoc()%sORA-01002: fetch out of sequence in %scursors.php on line %d
+Warning: oci_fetch_assoc(): ORA-01002: fetch out of sequence in %s on line %d
 bool(false)
 bool(true)
 Done
