@@ -43,22 +43,40 @@ echo "Done\n";
 
 ?>
 --EXPECT--
-array(2) {
+array(5) {
   ["ID"]=>
   string(1) "1"
   ["VALUE"]=>
   string(1) "1"
+  ["BLOB"]=>
+  NULL
+  ["CLOB"]=>
+  NULL
+  ["STRING"]=>
+  NULL
 }
-array(2) {
+array(5) {
   ["ID"]=>
   string(1) "1"
   ["VALUE"]=>
   string(1) "1"
+  ["BLOB"]=>
+  NULL
+  ["CLOB"]=>
+  NULL
+  ["STRING"]=>
+  NULL
 }
-array(2) {
+array(5) {
   ["ID"]=>
   string(1) "1"
   ["VALUE"]=>
   string(1) "1"
+  ["BLOB"]=>
+  NULL
+  ["CLOB"]=>
+  NULL
+  ["STRING"]=>
+  NULL
 }
 Done

@@ -97,7 +97,7 @@ int(0)
 int(4000)
 bool(true)
 string(6) "STRING"
-string(7) "VARCHAR"
+string(8) "VARCHAR2"
 int(1)
 int(0)
 int(0)
