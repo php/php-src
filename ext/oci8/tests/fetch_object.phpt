@@ -42,23 +42,41 @@ require dirname(__FILE__).'/drop_table.inc';
 echo "Done\n";
 
 ?>
---EXPECT--
-object(stdClass)#1 (2) {
+--EXPECTF--
+object(stdClass)#%d (5) {
   ["ID"]=>
   string(1) "1"
   ["VALUE"]=>
   string(1) "1"
+  ["BLOB"]=>
+  NULL
+  ["CLOB"]=>
+  NULL
+  ["STRING"]=>
+  NULL
 }
-object(stdClass)#2 (2) {
+object(stdClass)#%d (5) {
   ["ID"]=>
   string(1) "1"
   ["VALUE"]=>
   string(1) "1"
+  ["BLOB"]=>
+  NULL
+  ["CLOB"]=>
+  NULL
+  ["STRING"]=>
+  NULL
 }
-object(stdClass)#1 (2) {
+object(stdClass)#%d (5) {
   ["ID"]=>
   string(1) "1"
   ["VALUE"]=>
   string(1) "1"
+  ["BLOB"]=>
+  NULL
+  ["CLOB"]=>
+  NULL
+  ["STRING"]=>
+  NULL
 }
 Done
