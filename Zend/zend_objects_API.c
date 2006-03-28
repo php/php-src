@@ -33,6 +33,7 @@ ZEND_API void zend_objects_store_init(zend_objects_store *objects, zend_uint ini
 	objects->top = 1; /* Skip 0 so that handles are true */
 	objects->size = init_size;
 	objects->free_list_head = -1;
+	memset(&objects->object_buckets[0], 0, sizeof(zend_object_store_bucket));
 }
 
 ZEND_API void zend_objects_store_destroy(zend_objects_store *objects)
