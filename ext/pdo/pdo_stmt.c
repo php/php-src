@@ -663,6 +663,7 @@ static int do_fetch_class_prepare(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 
 	if (!ce) {
 		stmt->fetch.cls.ce = ZEND_STANDARD_CLASS_DEF_PTR;
+		ce = ZEND_STANDARD_CLASS_DEF_PTR;
 	}
 	
 	if (ce->constructor) {
