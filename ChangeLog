@@ -1,3 +1,165 @@
+2006-03-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      ext/standard/file.c:
+      MFH: Check 2nd parameter of tempnam() against path components.
+
+    * ext/standard/file.c:
+      MFB51: Check 2nd parameter of tempnam() against path components.
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/file.c:
+      Check 2nd parameter of tempnam() against path components.
+
+2006-03-27  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/string.c:
+      Fix UErrorCode check.
+
+    * ext/standard/var.c:
+      Typo.
+
+2006-03-27  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend.c:
+      MF51: fix #36878 (error messages are printed even though an exception has
+      been thrown)
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/zend.c:
+      fix #36878 (error messages are printed even though an exception has been
+      thrown)
+
+2006-03-27  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/var.c:
+      Make a UTODO note.
+
+    * ext/standard/var.c:
+      Proto updates.
+
+    * unicode-todo.txt:
+      -** empty log message ***
+
+    * ZendEngine2/zend_unicode.c:
+      Add UTODO.
+
+    * ZendEngine2/zend_compile.c:
+      Mark with UTODO instead of FIXME.
+
+2006-03-27  Seiji Masugata  <s.masugata@digicom.dnp.co.jp>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+      added mb_list_mime_names( ).
+
+2006-03-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/tests/strings/strtr3.phpt:
+      Test for strtr() with non-ascii encoding
+
+    * ZendEngine2/tests/bug30791.phpt
+      ext/session/tests/003.phpt
+      ext/session/tests/009.phpt
+      ext/simplexml/tests/033.phpt
+      tests/classes/bug26737.phpt:
+      Fixed test
+
+    * ext/standard/incomplete_class.c
+      ext/standard/php_incomplete_class.h
+      ext/standard/var.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re
+      ext/standard/var_unserializer.re
+      ext/standard/tests/serialize/001.phpt
+      ext/standard/tests/serialize/002.phpt
+      ext/standard/tests/serialize/005.phpt
+      ext/standard/tests/serialize/006.phpt
+      ext/standard/tests/serialize/bug14293.phpt
+      ext/standard/tests/serialize/bug21957.phpt
+      ext/standard/tests/serialize/bug26762.phpt
+      ext/standard/tests/serialize/bug27469.phpt
+      ext/standard/tests/serialize/bug28325.phpt
+      ext/standard/tests/serialize/bug31402.phpt:
+      Unicode support
+
+    * ext/standard/tests/strings/strtr.phpt:
+      Fixed testFixed testFixed testFixed testFixed testFixed testFixed testFixed
+      testFixed test
+
+    * ZendEngine2/zend_compile.c:
+      Fixed bug during function/class declaration in unicode mode
+
+    * tests/classes/serialize_001.phpt:
+      Fixed test file (test still fail)
+
+2006-03-27  Antony Dovgal  <antony@zend.com>
+
+    * main/output.c:
+      MF51: fix #36869 (memory leak in output buffering when using chunked
+      output)
+
+    * (PHP_5_1)
+      NEWS
+      main/output.c:
+      fix #36869 (memory leak in output buffering when using chunked output)
+
+2006-03-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c:
+      Fixed meory leak in case of unknown pragma
+
+    * NEWS
+      ZendEngine2/zend_unicode.c:
+      Better but incomplete fix for bug #36840
+
+    * ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_unicode.c
+      ZendEngine2/zend_unicode.h
+      ext/standard/string.c:
+      Fixed ZTS build
+
+2006-03-27  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * acinclude.m4
+      acinclude.m4:
+      MFB
+
+    * (PHP_5_1)
+      acinclude.m4:
+      On Mac OSX, our extensions are actually "bundles" and should not have
+      .dylib extension. Read this:
+      
+      http://www.sm.luth.se/~alapaa/file_fetch/unixcdbookshelf/mac/ch05_03.htm
+
+    * ZendEngine2/zend_exceptions.c:
+      Fix a case where we could have an encoding conversion exception thrown
+      while building exception trace args!
+
+    * ZendEngine2/zend_exceptions.c:
+      Use (unsigned char) to make sure that only the control chars are
+      replaced with '?';
+
+    * ZendEngine2/zend_unicode.c:
+      Skip BOM for UTF-16/32 converters when setting subst char.
+
+2006-03-27  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/pgsql.c:
+      remove pg_execute() E_WARNING error when query plan is not defined
+
+2006-03-27  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_API.c:
+      Some functions may want to accept only Unicode or binary strings,
+      without having auto-conversion from the other string type. Add 'U' and
+      'S' specifiers for this. Also, remove traces of 'native' strings.
+
 2006-03-26  Andrei Zmievski  <andrei@gravitonic.com>
 
     * unicode-todo.txt
