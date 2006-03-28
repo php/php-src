@@ -20,6 +20,8 @@ PHP                                                                        NEWS
   clone'ing). (Tony)
 - Fixed bug #36857 (Added support for partial content fetching to the HTTP
   streams wrapper). (Ilia)
+- Fixed bug #36851 (Documentation and code discrepancies for NULL data 
+  in oci_fetch_*() functions). (Tony)
 - Fixed bug #36825 (Exceptions thrown in ArrayObject::offsetGet cause 
   segfault). (Tony)
 - Fixed bug #36820 (Privileged connection with an Oracle password file fails). 
