@@ -43,22 +43,40 @@ echo "Done\n";
 
 ?>
 --EXPECT--
-array(2) {
+array(5) {
   [0]=>
   string(1) "1"
   [1]=>
   string(1) "1"
+  [2]=>
+  NULL
+  [3]=>
+  NULL
+  [4]=>
+  NULL
 }
-array(2) {
+array(5) {
   [0]=>
   string(1) "1"
   [1]=>
   string(1) "1"
+  [2]=>
+  NULL
+  [3]=>
+  NULL
+  [4]=>
+  NULL
 }
-array(2) {
+array(5) {
   [0]=>
   string(1) "1"
   [1]=>
   string(1) "1"
+  [2]=>
+  NULL
+  [3]=>
+  NULL
+  [4]=>
+  NULL
 }
 Done

@@ -20,12 +20,14 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-OCI8 DEBUG: OCINlsEnvironmentVariableGet in php_oci_do_connect_ex() (%s/oci8.c:%d) 
+OCI8 DEBUG: OCINlsEnvironmentVariableGet at (%s:%d) 
 Done
-OCI8 DEBUG: OCISessionEnd in php_oci_connection_close() (%s/oci8.c:%d) 
-OCI8 DEBUG: OCIHandleFree in php_oci_connection_close() (%s/oci8.c:%d) 
-OCI8 DEBUG: OCIServerDetach in php_oci_connection_close() (%s/oci8.c:%d) 
-OCI8 DEBUG: OCIHandleFree in php_oci_connection_close() (%s/oci8.c:%d) 
-OCI8 DEBUG: OCIHandleFree in php_oci_connection_close() (%s/oci8.c:%d) 
-OCI8 DEBUG: OCIHandleFree in php_oci_connection_close() (%s/oci8.c:%d) 
-OCI8 DEBUG: OCIHandleFree in php_oci_connection_close() (%s/oci8.c:%d)
+OCI8 DEBUG: OCISessionEnd at (%s:%d) 
+OCI8 DEBUG: OCIHandleFree at (%s:%d) 
+OCI8 DEBUG: OCIServerDetach at (%s:%d) 
+OCI8 DEBUG: OCIHandleFree at (%s:%d) 
+OCI8 DEBUG: OCIHandleFree at (%s:%d) 
+OCI8 DEBUG: OCIHandleFree at (%s:%d) 
+OCI8 DEBUG: OCIHandleFree at (%s:%d) 
+OCI8 DEBUG: OCIHandleFree at (%s:%d) 
+OCI8 DEBUG: OCIHandleFree at (%s:%d)

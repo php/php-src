@@ -16,4 +16,9 @@ var_dump(oci_fetch_array($stmt));
 echo "Done\n";
 ?>
 --EXPECTF--	
+Warning: oci_execute(): ORA-00942: table or view does not exist in %s on line %d
+bool(false)
+
+Warning: oci_fetch_array(): ORA-24374: define not done before fetch or execute and fetch in %s on line %d
+bool(false)
 Done
