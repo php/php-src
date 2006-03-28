@@ -1,3 +1,60 @@
+2006-03-27  Antony Dovgal  <antony@zend.com>
+
+    * zend.c:
+      MF51: fix #36878 (error messages are printed even though an exception has
+      been thrown)
+
+    * (PHP_5_1)
+      zend.c:
+      fix #36878 (error messages are printed even though an exception has been
+      thrown)
+
+2006-03-27  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_unicode.c:
+      Add UTODO.
+
+    * zend_compile.c:
+      Mark with UTODO instead of FIXME.
+
+2006-03-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/bug30791.phpt:
+      Fixed test
+
+    * zend_compile.c:
+      Fixed bug during function/class declaration in unicode mode
+
+    * zend_compile.c
+      zend_compile.c:
+      Fixed meory leak in case of unknown pragma
+
+    * zend_unicode.c:
+      Better but incomplete fix for bug #36840
+
+    * zend_exceptions.c
+      zend_unicode.c
+      zend_unicode.h:
+      Fixed ZTS build
+
+2006-03-27  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_exceptions.c:
+      Fix a case where we could have an encoding conversion exception thrown
+      while building exception trace args!
+
+    * zend_exceptions.c:
+      Use (unsigned char) to make sure that only the control chars are
+      replaced with '?';
+
+    * zend_unicode.c:
+      Skip BOM for UTF-16/32 converters when setting subst char.
+
+    * zend_API.c:
+      Some functions may want to accept only Unicode or binary strings,
+      without having auto-conversion from the other string type. Add 'U' and
+      'S' specifiers for this. Also, remove traces of 'native' strings.
+
 2006-03-26  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend.c
