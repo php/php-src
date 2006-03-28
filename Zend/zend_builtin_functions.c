@@ -1698,8 +1698,6 @@ ZEND_FUNCTION(debug_print_backtrace)
 		}
 	}
 
-	array_init(return_value);
-
 	while (ptr) {
 		char *free_class_name = NULL;
 
