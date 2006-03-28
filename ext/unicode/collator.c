@@ -155,14 +155,18 @@ static void collator_object_free_storage(void *object TSRMLS_DC)
 
 static zval* collator_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC)
 {
+	/* FIXME
+	 * not sure what what this is for but moved here so it doesn't break stuff
+	 * below
+	 */
 	if (!object) {
 		ALLOC_ZVAL(object);
+		object->refcount = 1;
+		object->is_ref = 1;
 	}
 
 	Z_TYPE_P(object) = IS_OBJECT;
 	object_init_ex(object, pce);
-	object->refcount = 1;
-	object->is_ref = 1;
 	return object;
 }
 
@@ -177,13 +181,17 @@ PHP_FUNCTION(collator_create)
 	UErrorCode        error;
 	char             *collator_name;
 	int               collator_name_len;
+	zval 			 *object;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &collator_name, &collator_name_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	collator_instantiate(unicode_ce_collator, return_value TSRMLS_CC);
-	collatorobj = (php_collator_obj *) zend_object_store_get_object(return_value TSRMLS_CC);
+	if ((object = getThis()) == NULL) {
+		object = return_value;
+	}
+	collator_instantiate(unicode_ce_collator, object TSRMLS_CC);
+	collatorobj = (php_collator_obj *) zend_object_store_get_object(object TSRMLS_CC);
 	error = U_ZERO_ERROR;
 	collatorobj->col = ucol_open(collator_name, &error);
 }
