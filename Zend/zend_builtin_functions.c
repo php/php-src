@@ -1778,8 +1778,6 @@ ZEND_FUNCTION(debug_print_backtrace)
 		}
 	}
 
-	array_init(return_value);
-
 	while (ptr) {
 		zstr free_class_name = NULL_ZSTR;
 		int	function_name_string = 1;
