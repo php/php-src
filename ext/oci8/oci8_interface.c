@@ -1435,7 +1435,7 @@ PHP_FUNCTION(oci_fetch_all)
    Fetch a result row as an object */
 PHP_FUNCTION(oci_fetch_object)
 {
-	php_oci_fetch_row(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_OCI_ASSOC, 2);
+	php_oci_fetch_row(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_OCI_ASSOC | PHP_OCI_RETURN_NULLS, 2);
 
 	if (Z_TYPE_P(return_value) == IS_ARRAY) {
 		object_and_properties_init(return_value, ZEND_STANDARD_CLASS_DEF_PTR, Z_ARRVAL_P(return_value));
@@ -1447,7 +1447,7 @@ PHP_FUNCTION(oci_fetch_object)
    Fetch a result row as an enumerated array */
 PHP_FUNCTION(oci_fetch_row)
 {
-	php_oci_fetch_row(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_OCI_NUM, 1);
+	php_oci_fetch_row(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_OCI_NUM | PHP_OCI_RETURN_NULLS, 1);
 }
 /* }}} */
 
@@ -1455,7 +1455,7 @@ PHP_FUNCTION(oci_fetch_row)
    Fetch a result row as an associative array */
 PHP_FUNCTION(oci_fetch_assoc)
 {
-	php_oci_fetch_row(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_OCI_ASSOC, 1);
+	php_oci_fetch_row(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_OCI_ASSOC | PHP_OCI_RETURN_NULLS, 1);
 }
 /* }}} */
 
@@ -1463,7 +1463,7 @@ PHP_FUNCTION(oci_fetch_assoc)
    Fetch a result row as an array */
 PHP_FUNCTION(oci_fetch_array)
 {
-	php_oci_fetch_row(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_OCI_BOTH, 2);
+	php_oci_fetch_row(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_OCI_BOTH | PHP_OCI_RETURN_NULLS, 2);
 }
 /* }}} */
 
@@ -1517,7 +1517,7 @@ PHP_FUNCTION(oci_new_connect)
 }
 /* }}} */
 
-/* {{{ proto resource oci_connect(string user, string pass [, string db])
+/* {{{ proto resource oci_connect(string user, string pass [, string db [, string charset [, int session_mode ]])
    Connect to an Oracle database and log on. Returns a new session. */
 PHP_FUNCTION(oci_connect)
 {
@@ -1525,7 +1525,7 @@ PHP_FUNCTION(oci_connect)
 }
 /* }}} */
 
-/* {{{ proto resource oci_pconnect(string user, string pass [, string db])
+/* {{{ proto resource oci_pconnect(string user, string pass [, string db [, string charset ]])
    Connect to an Oracle database using a persistent connection and log on. Returns a new session. */
 PHP_FUNCTION(oci_pconnect)
 {
