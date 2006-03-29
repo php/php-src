@@ -1008,14 +1008,14 @@ PHPAPI PHP_FUNCTION(fgets)
 
 	php_stream_from_zval(stream, &zstream);
 
-	buf.v = php_stream_get_line_ex(stream, php_stream_reads_unicode(stream) ? IS_UNICODE : IS_STRING, NULL_ZSTR, 0, length, &retlen);
+	buf.v = php_stream_get_line_ex(stream, stream->readbuf_type, NULL_ZSTR, 0, length, &retlen);
 	if (!buf.v) {
 		RETURN_FALSE;
 	}
 
-	if (php_stream_reads_unicode(stream)) {
+	if (stream->readbuf_type == IS_UNICODE) {
 		RETURN_UNICODEL(buf.u, retlen, 0);
-	} else {
+	} else { /* IS_STRING */
 		RETURN_STRINGL(buf.s, retlen, 0);
 	}
 }
@@ -1034,7 +1034,7 @@ PHPAPI PHP_FUNCTION(fgetc)
 
 	PHP_STREAM_TO_ZVAL(stream, arg1);
 
-	if (php_stream_reads_unicode(stream)) {
+	if (stream->readbuf_type == IS_UNICODE) {
 		int buflen = 1;
 		UChar *buf = php_stream_read_unicode_chars(stream, &buflen);
 
@@ -1042,7 +1042,7 @@ PHPAPI PHP_FUNCTION(fgetc)
 			RETURN_FALSE;
 		}
 		RETURN_UNICODEL(buf, buflen, 0);
-	} else {
+	} else { /* IS_STRING */
 		char buf[2];
 
 		buf[0] = php_stream_getc(stream);
@@ -1068,7 +1068,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 
 	php_stream_from_zval(stream, &zstream);
 
-	if (php_stream_reads_unicode(stream)) {
+	if (stream->readbuf_type == IS_UNICODE) {
 		UChar *buf = php_stream_get_line_ex(stream, IS_UNICODE, NULL_ZSTR, 0, length, &retlen);
 		UChar *allowed = NULL;
 		int allowed_len = 0;
@@ -1085,7 +1085,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 		retlen = php_u_strip_tags(buf, retlen, &stream->fgetss_state, allowed, allowed_len TSRMLS_CC);
 
 		RETURN_UNICODEL(buf, retlen, 0);
-	} else {
+	} else { /* IS_STRING */
 		char *buf = php_stream_get_line_ex(stream, IS_STRING, NULL_ZSTR, 0, length, &retlen);
 		char *allowed = NULL;
 		int allowed_len = 0;
@@ -1752,7 +1752,7 @@ PHPAPI PHP_FUNCTION(fread)
 		RETURN_FALSE;
 	}
 
-	if (php_stream_reads_unicode(stream)) {
+	if (stream->readbuf_type == IS_UNICODE) {
 		int buflen = len;
 		UChar *buf = php_stream_read_unicode_chars(stream, &buflen);
 
@@ -1761,7 +1761,7 @@ PHPAPI PHP_FUNCTION(fread)
 		}
 
 		RETURN_UNICODEL(buf, buflen, 0);
-	} else {
+	} else { /* IS_STRING */
 		char *buf = emalloc(len + 1);
 		int buflen = php_stream_read(stream, buf, len);
 

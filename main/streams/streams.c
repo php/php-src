@@ -239,6 +239,7 @@ fprintf(stderr, "stream_alloc: %s:%p persistent=%s\n", ops->label, ret, persiste
 	ret->abstract = abstract;
 	ret->is_persistent = persistent_id ? 1 : 0;
 	ret->chunk_size = FG(def_chunk_size);
+	ret->readbuf_type = IS_STRING;
 
 	if (FG(auto_detect_line_endings)) {
 		ret->flags |= PHP_STREAM_FLAG_DETECT_EOL;
@@ -483,12 +484,9 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 					 * stream read buffer */
 					while (brig_inp->head) {
 						bucket = brig_inp->head;
-						if (bucket->buf_type != IS_UNICODE && stream->input_encoding) {
-							/* Stream expects unicode, convert using stream encoding */
-							php_stream_bucket_convert(bucket, IS_UNICODE, stream->input_encoding);
-						} else if (bucket->buf_type == IS_UNICODE && !stream->input_encoding) {
-							/* Stream expects binary, filter provided unicode, just take the buffer as is */
-							php_stream_bucket_convert_notranscode(bucket, IS_STRING);
+						if (bucket->buf_type != stream->readbuf_type) {
+							/* Stream expects different datatype than bucket has, convert slopily */
+							php_stream_bucket_convert_notranscode(bucket, stream->readbuf_type);
 						}
 						/* Bucket type now matches stream type */
 
@@ -496,9 +494,9 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 						 * TODO: this can fail for persistent streams */
 						if (stream->readbuflen - stream->writepos < bucket->buflen) {
 							stream->readbuflen += bucket->buflen;
-							stream->readbuf.v = perealloc(stream->readbuf.v, PS_ULEN(stream->input_encoding, stream->readbuflen), stream->is_persistent);
+							stream->readbuf.v = perealloc(stream->readbuf.v, PS_ULEN(stream->readbuf_type == IS_UNICODE, stream->readbuflen), stream->is_persistent);
 						}
-						memcpy(stream->readbuf.s + stream->writepos, bucket->buf.s, PS_ULEN(stream->input_encoding, bucket->buflen));
+						memcpy(stream->readbuf.s + stream->writepos, bucket->buf.s, PS_ULEN(stream->readbuf_type == IS_UNICODE, bucket->buflen));
 						stream->writepos += bucket->buflen;
 
 						php_stream_bucket_unlink(bucket TSRMLS_CC);
@@ -530,46 +528,6 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 		}
 
 		efree(chunk_buf);
-	} else if (stream->input_encoding) { /* Unfiltered Unicode stream */
-		/* is there enough data in the buffer ? */
-		if (stream->writepos - stream->readpos < (off_t)size) {
-			char *binbuf;
-			UChar *ubuf;
-			int binbuf_len, ubuf_len;
-			size_t toread = (size > stream->chunk_size) ? size : stream->chunk_size;
-			UErrorCode status = U_ZERO_ERROR;
-
-			/* Read stream data into temporary buffer, then convert to unicode
-			   TODO: This can be improved */
-			binbuf = emalloc(toread + 1);
-			binbuf_len = stream->ops->read(stream, binbuf, toread TSRMLS_CC);
-			if (binbuf_len == (size_t)-1) {
-				/* Failure */
-				efree(binbuf);
-				return;
-			}
-			/* Convert to unicode */
-			zend_convert_to_unicode(stream->input_encoding, &ubuf, &ubuf_len, binbuf, binbuf_len, &status);
-			efree(binbuf);
-
-			/* reduce buffer memory consumption if possible, to avoid a realloc */
-			if (stream->readbuf.u && stream->readbuflen - stream->writepos < stream->chunk_size) {
-				memmove(stream->readbuf.u, stream->readbuf.u + stream->readpos, UBYTES(stream->readbuflen - stream->readpos));
-				stream->writepos -= stream->readpos;
-				stream->readpos = 0;
-			}
-
-			/* grow the buffer if required
-			 * TODO: this can fail for persistent streams */
-			if (stream->readbuflen - stream->writepos < ubuf_len) {
-				stream->readbuflen += ((stream->chunk_size > ubuf_len) ? stream->chunk_size : ubuf_len);
-				stream->readbuf.u = (UChar*)perealloc(stream->readbuf.u, UBYTES(stream->readbuflen), stream->is_persistent);
-			}
-
-			memcpy(stream->readbuf.u + stream->writepos, ubuf, UBYTES(ubuf_len));
-			efree(ubuf);
-			stream->writepos += ubuf_len;
-		}
 	} else {	/* Unfiltered Binary stream */
 		/* is there enough data in the buffer ? */
 		if (stream->writepos - stream->readpos < (off_t)size) {
@@ -609,13 +567,13 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 		 * drain the remainder of the buffer before using the "raw" read mode for
 		 * the excess */
 		if (stream->writepos - stream->readpos > 0) {
-			toread = PS_ULEN(stream->input_encoding, stream->writepos - stream->readpos);
+			toread = PS_ULEN(stream->readbuf_type == IS_UNICODE, stream->writepos - stream->readpos);
 
 			if (toread > size) {
 				toread = size;
 			}
 
-			if (stream->input_encoding) {
+			if (stream->readbuf_type == IS_UNICODE) {
 				/* Sloppy read, anyone using php_stream_read() on a unicode stream
 				 * had better know what they're doing */
 				
@@ -647,7 +605,7 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 			}
 
 			if (toread > 0) {
-				if (php_stream_reads_unicode(stream)) {
+				if (stream->readbuf_type == IS_UNICODE) {
 					/* Sloppy read, anyone using php_stream_read() on a unicode stream
 					 * had better know what they're doing */
 				
@@ -685,7 +643,7 @@ PHPAPI size_t _php_stream_read_unicode(php_stream *stream, UChar *buf, int size,
 {
 	size_t toread = 0, didread = 0, string_length = 0;
 
-	if (!stream->input_encoding) {
+	if (stream->readbuf_type != IS_UNICODE) {
 		return -1;
 	}
 
@@ -763,7 +721,7 @@ PHPAPI UChar *_php_stream_read_unicode_chars(php_stream *stream, int *pchars TSR
 	int buflen = size;
 	size_t toread = 0, didread = 0, string_length = 0;
 
-	if (!stream->input_encoding) {
+	if (stream->readbuf_type != IS_UNICODE) {
 		return NULL;
 	}
 
@@ -921,7 +879,7 @@ PHPAPI void *php_stream_locate_eol(php_stream *stream, zstr zbuf, int buf_len TS
 	char *readptr, *buf = zbuf.s;
 
 	if (!buf) {
-		readptr = stream->readbuf.s + PS_ULEN(stream->input_encoding, stream->readpos);
+		readptr = stream->readbuf.s + PS_ULEN(stream->readbuf_type == IS_UNICODE, stream->readpos);
 		avail = stream->writepos - stream->readpos;
 	} else {
 		readptr = zbuf.s;
@@ -929,7 +887,7 @@ PHPAPI void *php_stream_locate_eol(php_stream *stream, zstr zbuf, int buf_len TS
 	}
 
 	if (stream->flags & PHP_STREAM_FLAG_DETECT_EOL) {
-		if (stream->input_encoding) {
+		if (stream->readbuf_type == IS_UNICODE) {
 			cr = (char*)u_memchr((UChar*)readptr, '\r', avail);
 			lf = (char*)u_memchr((UChar*)readptr, '\n', avail);
 		} else {
@@ -948,10 +906,10 @@ PHPAPI void *php_stream_locate_eol(php_stream *stream, zstr zbuf, int buf_len TS
 			eol = lf;
 		}
 	} else if (stream->flags & PHP_STREAM_FLAG_EOL_MAC) {
-		eol = stream->input_encoding ? u_memchr((UChar*)readptr, '\r', avail) : memchr(readptr, '\r', avail);
+		eol = (stream->readbuf_type == IS_UNICODE) ? u_memchr((UChar*)readptr, '\r', avail) : memchr(readptr, '\r', avail);
 	} else {
 		/* unix (and dos) line endings */
-		eol = stream->input_encoding ? u_memchr((UChar*)readptr, '\n', avail) : memchr(readptr, '\n', avail);
+		eol = (stream->readbuf_type == IS_UNICODE) ? u_memchr((UChar*)readptr, '\n', avail) : memchr(readptr, '\n', avail);
 	}
 
 	return (void*)eol;
@@ -967,7 +925,7 @@ PHPAPI void *_php_stream_get_line(php_stream *stream, int buf_type, zstr buf, si
 	size_t current_buf_size = 0;
 	size_t total_copied = 0;
 	int grow_mode = 0;
-	int is_unicode = php_stream_reads_unicode(stream);
+	int is_unicode = stream->readbuf_type == IS_UNICODE;
 	int split_surrogate = 0;
 	zstr bufstart = buf;
 
@@ -1042,8 +1000,8 @@ PHPAPI void *_php_stream_get_line(php_stream *stream, int buf_type, zstr buf, si
 				 * than 8K, we waste 1 byte per additional 8K or so.
 				 * That seems acceptable to me, to avoid making this code
 				 * hard to follow */
-				bufstart.s = erealloc(bufstart.s, PS_ULEN(stream->input_encoding, current_buf_size + cpysz + 1));
-				buf.s = bufstart.s + PS_ULEN(stream->input_encoding, total_copied);
+				bufstart.s = erealloc(bufstart.s, PS_ULEN(stream->readbuf_type == IS_UNICODE, current_buf_size + cpysz + 1));
+				buf.s = bufstart.s + PS_ULEN(stream->readbuf_type == IS_UNICODE, total_copied);
 				current_buf_size += cpysz + 1;
 			} else {
 				if (cpysz >= maxlen - 1) {
@@ -1177,7 +1135,7 @@ PHPAPI UChar *php_stream_get_record_unicode(php_stream *stream, size_t maxlen, s
 	size_t toread;
 	int skip = 0;
 
-	if (!php_stream_reads_unicode(stream)) {
+	if (stream->readbuf_type != IS_UNICODE) {
 		return NULL;
 	}
 
@@ -1241,8 +1199,7 @@ PHPAPI UChar *php_stream_get_record_unicode(php_stream *stream, size_t maxlen, s
 /* Writes a buffer directly to a stream, using multiple of the chunk size */
 static size_t _php_stream_write_buffer(php_stream *stream, int buf_type, zstr buf, int buflen TSRMLS_DC)
 {
-	size_t didwrite = 0, towrite, justwrote, shouldwrite, buflen_orig = buflen;
-	zstr buf_orig = buf;
+	size_t didwrite = 0, towrite, justwrote, shouldwrite;
 	char *freeme = NULL;
 
  	/* if we have a seekable stream we need to ensure that data is written at the
@@ -1254,24 +1211,9 @@ static size_t _php_stream_write_buffer(php_stream *stream, int buf_type, zstr bu
 		stream->ops->seek(stream, stream->position, SEEK_SET, &stream->position TSRMLS_CC);
 	}
 
-	if (stream->output_encoding && buf_type == IS_UNICODE) {
-		char *dest;
-		int destlen, num_conv;
-		UErrorCode status = U_ZERO_ERROR;
-
-		num_conv = zend_convert_from_unicode(stream->output_encoding, &dest, &destlen, buf.u, buflen, &status);
-		if (U_FAILURE(status)) {
-			int32_t offset = u_countChar32(buf.u, num_conv);
-
-			zend_raise_conversion_error_ex("Could not convert Unicode string to binary string", stream->output_encoding, ZEND_FROM_UNICODE, offset, (UG(from_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
-		}
-		freeme = buf.s = dest;
-		buflen = destlen;
-	} else {
-		/* Sloppy handling, make it a binary buffer */
-		if (buf_type != IS_STRING) {
-			buflen = UBYTES(buflen);
-		}
+	/* Sloppy handling, make it a binary buffer */
+	if (buf_type == IS_UNICODE) {
+		buflen = UBYTES(buflen);
 	}
 
 	shouldwrite = buflen;
@@ -1300,32 +1242,7 @@ static size_t _php_stream_write_buffer(php_stream *stream, int buf_type, zstr bu
 		}
 	}
 
-
-	if (stream->output_encoding) {
-		/* Map didwrite back to the original character count */
-		if (didwrite == shouldwrite) {
-			/* Everything wrote okay, no need to count */
-			didwrite = buflen_orig;
-		} else {
-			UErrorCode status = U_ZERO_ERROR;
-			char *t = freeme;
-			const UChar *p = buf_orig.u;
-
-			switch (ucnv_getType(stream->output_encoding)) {
-				case UCNV_SBCS:
-				case UCNV_LATIN_1:
-				case UCNV_US_ASCII:
-					/* 1:1 character->byte mapping, didwrite really does mean the number of characters written */
-					break;
-				default:
-					/* Reconvert into junk buffer to see where conversion stops in source string */
-					ucnv_resetFromUnicode(stream->output_encoding);
-					ucnv_fromUnicode(stream->output_encoding, &t, t + didwrite, &p, p + buflen_orig, NULL, TRUE, &status);
-					/* p stops at the first unconvertable UChar when t runs out of space */
-					didwrite = p - buf_orig.u;
-			}
-		}
-	} else if (buf_type == IS_UNICODE) {
+	if (buf_type == IS_UNICODE) {
 		/* Was slopily converted */
 		didwrite /= UBYTES(1);
 	}
@@ -2274,50 +2191,15 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 	if (stream && strchr(implicit_mode, 't') && UG(unicode)) {
 		if (strchr(implicit_mode, 'w') || strchr(implicit_mode, 'a') || strchr(implicit_mode, '+')) {
 			char *encoding = (context && context->output_encoding) ? context->output_encoding : "utf8";
-			UErrorCode status = U_ZERO_ERROR;
 
-			stream->output_encoding = ucnv_open(encoding, &status);
-			if (U_FAILURE(status)) {
-				switch (status) {
-					case U_MEMORY_ALLOCATION_ERROR:
-						php_stream_wrapper_log_error(wrapper, options ^ REPORT_ERRORS TSRMLS_CC,
-							"Unable to allocate memory for unicode output converter: %s", encoding);
-						break;
-					case U_FILE_ACCESS_ERROR:
-						php_stream_wrapper_log_error(wrapper, options ^ REPORT_ERRORS TSRMLS_CC,
-							"Error loading unicode output converter: %s", encoding);
-						break;
-					default:
-						php_stream_wrapper_log_error(wrapper, options ^ REPORT_ERRORS TSRMLS_CC,
-							"Unknown error starting unicode output converter: %s", encoding);
-				}
-			} else {
-				/* UTODO: (Maybe?) Allow overriding the default error handlers on a per-stream basis via context params */
-				zend_set_converter_error_mode(stream->output_encoding, ZEND_FROM_UNICODE, UG(from_error_mode));
-				zend_set_converter_subst_char(stream->output_encoding, UG(from_subst_char));
-			}
+			/* UTODO: (Maybe?) Allow overriding the default error handlers on a per-stream basis via context params */
+			php_stream_encoding_apply(stream, 1, encoding, UG(from_error_mode), UG(from_subst_char));
 		}
 		if (strchr(implicit_mode, 'r') || strchr(implicit_mode, '+')) {
 			char *encoding = (context && context->input_encoding) ? context->input_encoding : "utf8";
-			UErrorCode status = U_ZERO_ERROR;
 
-			stream->input_encoding = ucnv_open(encoding, &status);
-			if (U_FAILURE(status)) {
-				switch (status) {
-					case U_MEMORY_ALLOCATION_ERROR:
-						php_stream_wrapper_log_error(wrapper, options ^ REPORT_ERRORS TSRMLS_CC,
-							"Unable to allocate memory for unicode input converter: %s", encoding);
-						break;
-					case U_FILE_ACCESS_ERROR:
-						php_stream_wrapper_log_error(wrapper, options ^ REPORT_ERRORS TSRMLS_CC,
-							"Error loading unicode input converter: %s", encoding);
-						break;
-					default:
-						php_stream_wrapper_log_error(wrapper, options ^ REPORT_ERRORS TSRMLS_CC,
-							"Unknown error starting unicode input converter: %s", encoding);
-				}
-			}
-			/* UTODO: If/When Input error handling gets implemented, set the options on success */
+			/* UTODO: (Maybe?) Allow overriding the default error handlers on a per-stream basis via context params */
+			php_stream_encoding_apply(stream, 0, encoding, UG(to_error_mode), NULL);
 		}
 	}
 
@@ -2334,6 +2216,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 		pefree(copy_of_path, persistent);
 	}
 #endif
+
 	return stream;
 }
 /* }}} */

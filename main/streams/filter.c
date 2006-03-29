@@ -396,50 +396,63 @@ PHPAPI void _php_stream_filter_append(php_stream_filter_chain *chain, php_stream
 	chain->tail = filter;
 	filter->chain = chain;
 
-	if (&(stream->readfilters) == chain && (stream->writepos - stream->readpos) > 0) {
+	if (&(stream->readfilters) == chain) {
 		/* Let's going ahead and wind anything in the buffer through this filter */
 		php_stream_bucket_brigade brig_in = { NULL, NULL }, brig_out = { NULL, NULL };
 		php_stream_bucket_brigade *brig_inp = &brig_in, *brig_outp = &brig_out;
-		php_stream_filter_status_t status;
+		php_stream_filter_status_t status = PSFS_FEED_ME;
 		php_stream_bucket *bucket;
 		size_t consumed = 0;
 
-		if (stream->input_encoding) {
-			bucket = php_stream_bucket_new_unicode(stream, stream->readbuf.u + stream->readpos, stream->writepos - stream->readpos, 0, 0 TSRMLS_CC);
+		if ((stream->writepos - stream->readpos) > 0) {
+			if (stream->readbuf_type == IS_UNICODE) {
+				bucket = php_stream_bucket_new_unicode(stream, stream->readbuf.u + stream->readpos, stream->writepos - stream->readpos, 0, 0 TSRMLS_CC);
+			} else {
+				bucket = php_stream_bucket_new(stream, stream->readbuf.s + stream->readpos, stream->writepos - stream->readpos, 0, 0 TSRMLS_CC);
+			}
+			php_stream_bucket_append(brig_inp, bucket TSRMLS_CC);
+			status = filter->fops->filter(stream, filter, brig_inp, brig_outp, &consumed, PSFS_FLAG_NORMAL TSRMLS_CC);
+
+			if (stream->readpos + consumed > stream->writepos || consumed < 0) {
+				/* No behaving filter should cause this. */
+				status = PSFS_ERR_FATAL;
+			}
+		}
+
+		if (status == PSFS_ERR_FATAL) {
+			/* If this first cycle simply fails then there's something wrong with the filter.
+			   Pull the filter off the chain and leave the read buffer alone. */
+			if (chain->head == filter) {
+				chain->head = NULL;
+				chain->tail = NULL;
+			} else {
+				filter->prev->next = NULL;
+				chain->tail = filter->prev;
+			}
+			php_stream_bucket_unlink(bucket TSRMLS_CC);
+			php_stream_bucket_delref(bucket TSRMLS_CC);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Filter failed to process pre-buffered data.  Not adding to filterchain.");
 		} else {
-			bucket = php_stream_bucket_new(stream, stream->readbuf.s + stream->readpos, stream->writepos - stream->readpos, 0, 0 TSRMLS_CC);
-		}
-		php_stream_bucket_append(brig_inp, bucket TSRMLS_CC);
-		status = filter->fops->filter(stream, filter, brig_inp, brig_outp, &consumed, PSFS_FLAG_NORMAL TSRMLS_CC);
+			/* This filter addition may change the readbuffer type.
+			   Since all the previously held data is in the bucket brigade,
+			   we can reappropriate the buffer that already exists (if one does) */
+			if (stream->readbuf_type == IS_UNICODE && (filter->fops->flags & PSFO_FLAG_OUTPUTS_UNICODE) == 0) {
+				/* Buffer is currently based on unicode characters, but filter only outputs STRING adjust counting */
+				stream->readbuf_type = IS_STRING;
+				stream->readbuflen *= UBYTES(1);
+			} else if (stream->readbuf_type == IS_STRING && (filter->fops->flags & PSFO_FLAG_OUTPUTS_STRING) == 0) {
+				/* Buffer is currently based on binary characters, but filter only outputs UNICODE adjust counting */
+				stream->readbuf_type = IS_UNICODE;
+				stream->readbuflen /= UBYTES(1);
+			}
 
-		if (stream->readpos + consumed > stream->writepos || consumed < 0) {
-			/* No behaving filter should cause this. */
-			status = PSFS_ERR_FATAL;
-		}
-
-		switch (status) {
-			case PSFS_ERR_FATAL:
-				/* If this first cycle simply fails then there's something wrong with the filter.
-				   Pull the filter off the chain and leave the read buffer alone. */
-				if (chain->head == filter) {
-					chain->head = NULL;
-					chain->tail = NULL;
-				} else {
-					filter->prev->next = NULL;
-					chain->tail = filter->prev;
-				}
-				php_stream_bucket_unlink(bucket TSRMLS_CC);
-				php_stream_bucket_delref(bucket TSRMLS_CC);
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Filter failed to process pre-buffered data.  Not adding to filterchain.");
-				break;
-			case PSFS_FEED_ME:
+			if (status == PSFS_FEED_ME) {
 				/* We don't actually need data yet,
 				   leave this filter in a feed me state until data is needed. 
 				   Reset stream's internal read buffer since the filter is "holding" it. */
 				stream->readpos = 0;
 				stream->writepos = 0;
-				break;
-			case PSFS_PASS_ON:
+			} else if (status == PSFS_PASS_ON) {
 				/* Put any filtered data onto the readbuffer stack.
 				   Previously read data has been at least partially consumed. */
 				stream->readpos += consumed;
@@ -454,23 +467,20 @@ PHPAPI void _php_stream_filter_append(php_stream_filter_chain *chain, php_stream
 					bucket = brig_outp->head;
 
 					/* Convert for stream type */
-					if (bucket->buf_type != IS_UNICODE && stream->input_encoding) {
-						/* Stream expects unicode, convert using stream encoding */
-						php_stream_bucket_convert(bucket, IS_UNICODE, stream->input_encoding);
-					} else if (bucket->buf_type == IS_UNICODE && !stream->input_encoding) {
-						/* Stream expects binary, filter provided unicode, just take the buffer as is */
-						php_stream_bucket_convert_notranscode(bucket, IS_STRING);
+					if (bucket->buf_type != stream->readbuf_type) {
+						/* Stream expects different type than bucket contains, convert slopily */
+						php_stream_bucket_convert_notranscode(bucket, stream->readbuf_type);
 					}
 
 					/* Grow buffer to hold this bucket if need be.
 					   TODO: See warning in main/stream/streams.c::php_stream_fill_read_buffer */
 					if (stream->readbuflen - stream->writepos < bucket->buflen) {
 						stream->readbuflen += bucket->buflen;
-						stream->readbuf.v = perealloc(stream->readbuf.v, PS_ULEN(stream->input_encoding, stream->readbuflen), stream->is_persistent);
+						stream->readbuf.v = perealloc(stream->readbuf.v, PS_ULEN(stream->readbuf_type == IS_UNICODE, stream->readbuflen), stream->is_persistent);
 					}
 
 					/* Append to readbuf */
-					if (stream->input_encoding) {
+					if (stream->readbuf_type == IS_UNICODE) {
 						memcpy(stream->readbuf.u + stream->writepos, bucket->buf.u, UBYTES(bucket->buflen));
 					} else {
 						memcpy(stream->readbuf.s + stream->writepos, bucket->buf.s, bucket->buflen);
@@ -480,10 +490,9 @@ PHPAPI void _php_stream_filter_append(php_stream_filter_chain *chain, php_stream
 					php_stream_bucket_unlink(bucket TSRMLS_CC);
 					php_stream_bucket_delref(bucket TSRMLS_CC);
 				}
-				break;
+			}
 		}
-		
-	}
+	} /* end of readfilters specific code */
 }
 
 PHPAPI int _php_stream_filter_check_chain(php_stream_filter_chain *chain TSRMLS_DC)
@@ -597,26 +606,23 @@ PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish TSRMLS
 		/* Dump any newly flushed data to the read buffer */
 		if (stream->readpos > stream->chunk_size) {
 			/* Back the buffer up */
-			memcpy(stream->readbuf.s, stream->readbuf.s + PS_ULEN(stream->input_encoding, stream->readpos), PS_ULEN(stream->input_encoding, stream->writepos - stream->readpos));
+			memcpy(stream->readbuf.s, stream->readbuf.s + PS_ULEN(stream->readbuf_type == IS_UNICODE, stream->readpos), PS_ULEN(stream->readbuf_type == IS_UNICODE, stream->writepos - stream->readpos));
 			stream->writepos -= stream->readpos;
 			stream->readpos = 0;
 		}
 		if (flushed_size > (stream->readbuflen - stream->writepos)) {
 			/* Grow the buffer */
-			stream->readbuf.v = perealloc(stream->readbuf.v, PS_ULEN(stream->input_encoding, stream->writepos + flushed_size + stream->chunk_size), stream->is_persistent);
+			stream->readbuf.v = perealloc(stream->readbuf.v, PS_ULEN(stream->readbuf_type == IS_UNICODE, stream->writepos + flushed_size + stream->chunk_size), stream->is_persistent);
 		}
 		while ((bucket = inp->head)) {
 			/* Convert if necessary */
-			if (bucket->buf_type != IS_UNICODE && stream->input_encoding) {
-				/* Stream expects unicode, convert using stream encoding */
-				php_stream_bucket_convert(bucket, IS_UNICODE, stream->input_encoding);
-			} else if (bucket->buf_type == IS_UNICODE && !stream->input_encoding) {
-				/* Stream expects binary, filter provided unicode, just take the buffer as is */
-				php_stream_bucket_convert_notranscode(bucket, IS_STRING);
+			if (bucket->buf_type != stream->readbuf_type) {
+				/* Stream expects different type than what's in bucket, convert slopily */
+				php_stream_bucket_convert_notranscode(bucket, stream->readbuf_type);
 			}
 
 			/* Append to readbuf */
-			if (stream->input_encoding) {
+			if (stream->readbuf_type == IS_UNICODE) {
 				 memcpy(stream->readbuf.u + stream->writepos, bucket->buf.u, UBYTES(bucket->buflen));
 			} else {
 				 memcpy(stream->readbuf.s + stream->writepos, bucket->buf.s, bucket->buflen);
@@ -632,13 +638,8 @@ PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish TSRMLS
 		while ((bucket = inp->head)) {
 			/* Convert if necessary */
 			if (bucket->buf_type == IS_UNICODE) {
-				if (stream->output_encoding) {
-					/* Stream has a configured output encoding, convert to appropriate type */
-					php_stream_bucket_convert(bucket, IS_STRING, stream->output_encoding);
-				} else {
-					/* Stream is binary, write ugly UChars as is */
-					php_stream_bucket_convert_notranscode(bucket, IS_STRING);
-				}
+				/* Force data to binary, adjusting buflen */
+				php_stream_bucket_convert_notranscode(bucket, IS_STRING);
 			}
 
 			/* Must be binary by this point */
@@ -654,6 +655,9 @@ PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish TSRMLS
 
 PHPAPI php_stream_filter *php_stream_filter_remove(php_stream_filter *filter, int call_dtor TSRMLS_DC)
 {
+	/* UTODO: Figure out a sane way to "defilter" so that unicode converters can be swapped around
+	   For now, at least fopen(,'b') + stream_encoding($fp, 'charset') works since there's nothing to remove */
+
 	if (filter->prev) {
 		filter->prev->next = filter->next;
 	} else {
@@ -768,6 +772,42 @@ PHPAPI int _php_stream_bucket_convert(php_stream_bucket *bucket, unsigned char t
 
 	/* Never reached */
 	return FAILURE;
+}
+
+PHPAPI int _php_stream_encoding_apply(php_stream *stream, int writechain, const char *encoding, uint16_t error_mode, UChar *subst TSRMLS_DC)
+{
+	int encoding_len = strlen(encoding);
+	int buflen = sizeof("unicode.from.") + encoding_len - 1; /* might be "to", but "from" is long enough for both */
+	char *buf = emalloc(buflen + 1);
+	php_stream_filter *filter;
+	zval *filterparams;
+
+	if (writechain) {
+		memcpy(buf, "unicode.to.", sizeof("unicode.to.") - 1);
+		memcpy(buf + sizeof("unicode.to.") - 1, encoding, encoding_len + 1);
+	} else {
+		memcpy(buf, "unicode.from.", sizeof("unicode.from.") - 1);
+		memcpy(buf + sizeof("unicode.from.") - 1, encoding, encoding_len + 1);
+	}
+
+	ALLOC_INIT_ZVAL(filterparams);
+	array_init(filterparams);
+	add_assoc_long(filterparams, "error_mode", error_mode);
+	if (subst) {
+		add_assoc_unicode(filterparams, "subst_char", subst, 1);
+	}
+	filter = php_stream_filter_create(buf, filterparams, php_stream_is_persistent(stream) TSRMLS_CC);
+	efree(buf);
+	zval_ptr_dtor(&filterparams);
+
+	if (!filter) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to apply encoding for charset: %s\n", encoding);
+		return FAILURE;
+	}
+
+	php_stream_filter_append(writechain ? &stream->writefilters : &stream->readfilters, filter);
+
+	return SUCCESS;
 }
 
 /*

@@ -206,12 +206,9 @@ struct _php_stream  {
 	php_stream_context *context;
 	int flags;	/* PHP_STREAM_FLAG_XXX */
 
-	/* unicode */
-	UConverter *input_encoding;
-	UConverter *output_encoding;
-
 	/* buffer */
 	off_t position; /* of underlying stream */
+	zend_uchar readbuf_type;
 	zstr readbuf; /* readbuf.s or readbuf.u */
 	size_t readbuflen; /* Length in units (char or UChar) */
 	off_t readpos; /* Position in units (char or UChar) */
@@ -252,8 +249,6 @@ END_EXTERN_C()
 #define php_stream_from_zval_no_verify(xstr, ppzval)	(xstr) = (php_stream*)zend_fetch_resource((ppzval) TSRMLS_CC, -1, "stream", NULL, 2, php_file_le_stream(), php_file_le_pstream())
 
 #define PS_ULEN(is_unicode, len)	((is_unicode) ? UBYTES(len) : (len))
-#define php_stream_reads_unicode(stream)	((stream->input_encoding) ? 1 : 0)
-#define php_stream_writes_unicode(stream)	((stream->output_encoding) ? 1 : 0)
 
 BEGIN_EXTERN_C()
 PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream **stream TSRMLS_DC);
