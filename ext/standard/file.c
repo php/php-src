@@ -547,7 +547,7 @@ PHP_FUNCTION(file_get_contents)
 }
 /* }}} */
 
-/* {{{ proto int file_put_contents(string file, mixed data [, int flags [, resource context]])
+/* {{{ proto int file_put_contents(string file, mixed data [, int flags [, resource context]]) U
    Write/Create a file with contents data and return the number of bytes written */
 PHP_FUNCTION(file_put_contents)
 {
@@ -991,7 +991,7 @@ PHPAPI PHP_FUNCTION(feof)
 }
 /* }}} */
 
-/* {{{ proto string fgets(resource fp[, int length])
+/* {{{ proto string fgets(resource fp[, int length]) U
    Get a line from file pointer */
 PHPAPI PHP_FUNCTION(fgets)
 {
@@ -1021,7 +1021,7 @@ PHPAPI PHP_FUNCTION(fgets)
 }
 /* }}} */
 
-/* {{{ proto string fgetc(resource fp)
+/* {{{ proto string fgetc(resource fp) U
    Get a character from file pointer */
 PHPAPI PHP_FUNCTION(fgetc)
 {
@@ -1052,7 +1052,7 @@ PHPAPI PHP_FUNCTION(fgetc)
 }
 /* }}} */
 
-/* {{{ proto string fgetss(resource fp [, int length, string allowable_tags])
+/* {{{ proto string fgetss(resource fp [, int length, string allowable_tags]) U
    Get a line from file pointer and strip HTML tags */
 PHPAPI PHP_FUNCTION(fgetss)
 {
@@ -1168,7 +1168,7 @@ PHP_FUNCTION(fscanf)
 }
 /* }}} */
 
-/* {{{ proto int fwrite(resource fp, string str [, int length])
+/* {{{ proto int fwrite(resource fp, string str [, int length]) U
    Binary-safe file write */
 PHPAPI PHP_FUNCTION(fwrite)
 {
@@ -1371,26 +1371,30 @@ PHP_FUNCTION(rmdir)
 }
 /* }}} */
 
-/* {{{ proto int readfile(string filename [, bool use_include_path[, resource context]])
+/* {{{ proto int readfile(string filename [, int flags[, resource context]]) U
    Output a file or a URL */
-/* UTODO: Accept unicode contents */
 PHP_FUNCTION(readfile)
 {
 	char *filename;
 	int size = 0;
 	int filename_len;
-	zend_bool use_include_path = 0;
+	long flags = 0;
 	zval *zcontext = NULL;
 	php_stream *stream;
 	php_stream_context *context = NULL;
+	char *mode = "rb";
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|br!", &filename, &filename_len, &use_include_path, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lr!", &filename, &filename_len, &flags, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
-	stream = php_stream_open_wrapper_ex(filename, "rb", (use_include_path ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
+	if (flags & PHP_FILE_TEXT) {
+		mode = "rt";
+	}
+
+	stream = php_stream_open_wrapper_ex(filename, mode, ((flags & PHP_FILE_USE_INCLUDE_PATH) ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
 	if (stream) {
 		size = php_stream_passthru(stream);
 		php_stream_close(stream);
@@ -1429,9 +1433,8 @@ PHP_FUNCTION(umask)
 
 /* }}} */
 
-/* {{{ proto int fpassthru(resource fp)
+/* {{{ proto int fpassthru(resource fp) U
    Output all remaining data from a file pointer */
-/* UTODO: Accept unicode contents */
 PHPAPI PHP_FUNCTION(fpassthru)
 {
 	zval **arg1;
@@ -1733,7 +1736,7 @@ safe_to_copy:
 }
 /* }}} */
 
-/* {{{ proto string fread(resource fp, int length)
+/* {{{ proto string fread(resource fp, int length) U
    Binary-safe file read */
 PHPAPI PHP_FUNCTION(fread)
 {

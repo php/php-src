@@ -1507,11 +1507,10 @@ PHPAPI int _php_stream_truncate_set_size(php_stream *stream, size_t newsize TSRM
 
 PHPAPI size_t _php_stream_passthru(php_stream * stream STREAMS_DC TSRMLS_DC)
 {
-	size_t bcount = 0;
-	char buf[8192];
-	int b;
+	size_t count = 0;
 
 	if (php_stream_mmap_possible(stream)) {
+		/* mmap_possible == non-filtered stream == binary stream */
 		char *p;
 		size_t mapped;
 
@@ -1526,12 +1525,46 @@ PHPAPI size_t _php_stream_passthru(php_stream * stream STREAMS_DC TSRMLS_DC)
 		}
 	}
 
-	while ((b = php_stream_read(stream, buf, sizeof(buf))) > 0) {
-		PHPWRITE(buf, b);
-		bcount += b;
+	if (stream->readbuf_type == IS_UNICODE) {
+		UChar inbuf_start[8192];
+		UConverter *conv = ZEND_U_CONVERTER(UG(output_encoding_conv));
+		int outbuflen = UCNV_GET_MAX_BYTES_FOR_STRING(8192, ucnv_getMaxCharSize(conv));
+		char *outbuf_start = emalloc(outbuflen + 1);
+		int b;
+
+		ucnv_resetFromUnicode(conv);
+
+		while ((b = php_stream_read_unicode(stream, inbuf_start, sizeof(inbuf_start))) > 0) {
+			char *outbuf = outbuf_start;
+			UChar *inbuf = inbuf_start;
+			UErrorCode status = U_ZERO_ERROR;
+			int len;
+
+			ucnv_fromUnicode(conv, &outbuf, outbuf + outbuflen, &inbuf, inbuf + b, NULL, TRUE, &status);
+			len = u_countChar32(inbuf_start, inbuf - inbuf_start);
+			if (U_FAILURE(status)) {
+				/* Memory overflow isn't a problem becuase MAX_BYTES_FOR_STRING was allocated,
+				   anything else is a more serious problem */
+				zend_raise_conversion_error_ex("Unable to convert unicode character using output_encoding, at least one character was lost",
+									conv, ZEND_FROM_UNICODE, len, (UG(from_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
+			}
+			if (outbuf > outbuf_start) {
+				PHPWRITE(outbuf_start, outbuf - outbuf_start);
+				count += len;
+			}
+		}
+		efree(outbuf_start);
+	} else {
+		char buf[8192];
+		int b;
+
+		while ((b = php_stream_read(stream, buf, sizeof(buf))) > 0) {
+			PHPWRITE(buf, b);
+			count += b;
+		}
 	}
 
-	return bcount;
+	return count;
 }
 
 
