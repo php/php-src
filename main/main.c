@@ -1611,6 +1611,12 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		return FAILURE;
 	}
 
+	/* Initialize unicode filters */
+	if (php_stream_filter_register_factory("unicode.*", &php_unicode_filter_factory TSRMLS_CC) == FAILURE) {
+		php_printf("PHP:  Unable to initialize unicode stream filters.\n");
+		return FAILURE;
+	}
+
 	/* initialize registry for images to be used in phpinfo()
 	   (this uses configuration parameters from php.ini)
 	 */
@@ -1744,6 +1750,7 @@ void php_module_shutdown(TSRMLS_D)
 
 	zend_shutdown(TSRMLS_C);
 
+	/* Destroys filter & transport registries too */
 	php_shutdown_stream_wrappers(module_number TSRMLS_CC);
 
 	php_shutdown_info_logos();

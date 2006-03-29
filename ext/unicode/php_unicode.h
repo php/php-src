@@ -67,7 +67,6 @@ PHP_FUNCTION(collator_get_attribute);
 PHP_METHOD(collator, __construct);
 
 void php_init_collation(TSRMLS_D);
-extern php_stream_filter_factory php_unicode_filter_factory;
 
 #ifdef  __cplusplus
 } // extern "C" 

@@ -489,11 +489,11 @@ PHP_FUNCTION(stream_get_meta_data)
 		add_assoc_zval(return_value, "write_filters", newval);
 	}
 	
-	if (php_stream_reads_unicode(stream)) {
+	if (stream->readbuf_type == IS_UNICODE) {
 		int readbuf_len = u_countChar32(stream->readbuf.u + stream->readpos, stream->writepos - stream->readpos);
 		add_assoc_long(return_value, "unread_bytes", UBYTES(stream->writepos - stream->readpos));
 		add_assoc_long(return_value, "unread_chars", readbuf_len);
-	} else {
+	} else { /* IS_STRING */
 		add_assoc_long(return_value, "unread_bytes", stream->writepos - stream->readpos);
 		add_assoc_long(return_value, "unread_chars", stream->writepos - stream->readpos);
 	}
@@ -1275,7 +1275,7 @@ PHP_FUNCTION(stream_get_line)
 
 	php_stream_from_zval(stream, &zstream);
 
-	if (php_stream_reads_unicode(stream)) {
+	if (stream->readbuf_type == IS_UNICODE) {
 		UChar *buf;
 		UChar *d = NULL;
 		int dlen = 0;
@@ -1294,7 +1294,7 @@ PHP_FUNCTION(stream_get_line)
 		}
 
 		RETURN_UNICODEL(buf, buf_size, 0);
-	} else {
+	} else { /* IS_STRING */
 		char *buf;
 		char *d = NULL;
 		int dlen = 0;
@@ -1459,6 +1459,67 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 		default:
 			RETURN_TRUE;
 	}
+}
+/* }}} */
+
+/* {{{ proto void stream_encoding(resource stream[, string encoding])
+Set character set for stream encoding
+UTODO: Return current encoding charset
+*/
+PHP_FUNCTION(stream_encoding)
+{
+	zval *zstream;
+	php_stream *stream;
+	char *encoding = NULL;
+	int encoding_len = 0;
+	int remove_read_tail = 0, remove_write_tail = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|s", &zstream, &encoding, &encoding_len) == FAILURE) {
+		return;
+	}
+
+	php_stream_from_zval(stream, &zstream);
+
+	/* Double check that the target encoding is legal before attempting anything */
+
+	if (stream->readfilters.tail) {
+		if (stream->readfilters.tail->fops == &php_unicode_from_string_filter_ops) {
+			/* Remove the current unicode.from.* filter, 
+               the filter layer will transcode anything in the read buffer back to binary 
+               or invalidate the read buffer */
+			remove_read_tail = 1;
+		} else if (stream->readbuf_type == IS_UNICODE) {
+			/* There's an encoding on the stream already, but then there's filtering happening after that point
+			   It's asking too much for PHP to figure out what the user wants, throw an error back in their face */
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot change encoding on filtered stream");
+			RETURN_FALSE;
+		}
+	}
+
+	if (stream->writefilters.tail) {
+		if (stream->writefilters.tail->fops == &php_unicode_to_string_filter_ops) {
+			/* Remove the current unicode.to.* filter */
+			remove_write_tail = 1;
+		} else if ((stream->writefilters.tail->fops->flags & PSFO_FLAG_OUTPUTS_UNICODE) == 0) {
+			/* conversion to binary is happening, them another filter is doing something
+			   bailout for same reason as read filters */
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot change encoding on filtered stream");
+			RETURN_FALSE;
+		}
+	}
+
+	if (remove_read_tail) {
+		php_stream_filter_remove(stream->readfilters.tail, 1 TSRMLS_CC);
+	}
+	if (remove_write_tail) {
+		php_stream_filter_remove(stream->writefilters.tail, 1 TSRMLS_CC);
+	}
+
+	/* UTODO: Allow overriding error handling for converters */
+	php_stream_encoding_apply(stream, 1, encoding, UG(from_error_mode), UG(from_subst_char));
+	php_stream_encoding_apply(stream, 0, encoding, UG(to_error_mode), NULL);
+
+	RETURN_TRUE;
 }
 /* }}} */
 

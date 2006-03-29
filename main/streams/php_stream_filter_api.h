@@ -157,6 +157,7 @@ PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish TSRMLS
 PHPAPI php_stream_filter *php_stream_filter_remove(php_stream_filter *filter, int call_dtor TSRMLS_DC);
 PHPAPI void php_stream_filter_free(php_stream_filter *filter TSRMLS_DC);
 PHPAPI php_stream_filter *_php_stream_filter_alloc(php_stream_filter_ops *fops, void *abstract, int persistent STREAMS_DC TSRMLS_DC);
+PHPAPI int _php_stream_encoding_apply(php_stream *stream, int writechain, const char *encoding, uint16_t error_mode, UChar *subst TSRMLS_DC);
 END_EXTERN_C()
 #define php_stream_filter_alloc(fops, thisptr, persistent) _php_stream_filter_alloc((fops), (thisptr), (persistent) STREAMS_CC TSRMLS_CC)
 #define php_stream_filter_alloc_rel(fops, thisptr, persistent) _php_stream_filter_alloc((fops), (thisptr), (persistent) STREAMS_REL_CC TSRMLS_CC)
@@ -165,6 +166,8 @@ END_EXTERN_C()
 #define php_stream_filter_flush(filter, finish) _php_stream_filter_flush((filter), (finish) TSRMLS_CC)
 #define php_stream_filter_check_chain(chain) _php_stream_filter_check_chain((chain) TSRMLS_CC)
 #define php_stream_filter_output_prefer_unicode(filter) _php_stream_filter_output_prefer_unicode((filter) TSRMLS_CC)
+#define php_stream_encoding_apply(stream, writechain, encoding, error_mode, subst) \
+		_php_stream_encoding_apply((stream), (writechain), (encoding), (error_mode), (subst) TSRMLS_CC)
 
 #define php_stream_is_filtered(stream)	((stream)->readfilters.head || (stream)->writefilters.head)
 
@@ -178,6 +181,12 @@ PHPAPI int php_stream_filter_unregister_factory(const char *filterpattern TSRMLS
 PHPAPI int php_stream_filter_register_factory_volatile(const char *filterpattern, php_stream_filter_factory *factory TSRMLS_DC);
 PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval *filterparams, int persistent TSRMLS_DC);
 END_EXTERN_C()
+
+/* unicode_filter.c exports */
+extern php_stream_filter_ops php_unicode_to_string_filter_ops;
+extern php_stream_filter_ops php_unicode_from_string_filter_ops;
+extern php_stream_filter_ops php_unicode_tidy_filter_ops;
+extern php_stream_filter_factory php_unicode_filter_factory;
 
 /*
  * Local variables:

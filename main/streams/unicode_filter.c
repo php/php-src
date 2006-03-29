@@ -74,6 +74,7 @@ static php_stream_filter_status_t php_unicode_to_string_filter(
 			destp = destbuf = (char *)pemalloc(destlen, data->is_persistent);
 
 			ucnv_fromUnicode(data->conv, &destp, destbuf + destlen, (const UChar**)&src, src + remaining, NULL, FALSE, &errCode);
+			/* UTODO: Error catching */
 			new_bucket = php_stream_bucket_new(stream, destbuf, destp - destbuf, 1, data->is_persistent TSRMLS_CC);
 			php_stream_bucket_append(buckets_out, new_bucket TSRMLS_CC);
 			exit_status = PSFS_PASS_ON;
@@ -88,6 +89,7 @@ static php_stream_filter_status_t php_unicode_to_string_filter(
 		/* Spit it out! */
 
 		ucnv_fromUnicode(data->conv, &dest, destp, NULL, NULL, NULL, TRUE, &errCode);
+		/* UTODO: Error catching */
 		if (dest > d) {
 			php_stream_bucket *bucket = php_stream_bucket_new(stream, d, dest - d, 0, 0 TSRMLS_CC);
 			php_stream_bucket_append(buckets_out, bucket TSRMLS_CC);
@@ -145,6 +147,7 @@ static php_stream_filter_status_t php_unicode_from_string_filter(
 			destp = destbuf = (UChar *)pemalloc(destlen, data->is_persistent);
 
 			ucnv_toUnicode(data->conv, &destp, (UChar*)((char*)destbuf + destlen), (const char**)&src, src + remaining, NULL, FALSE, &errCode);
+			/* UTODO: Error catching */
 
 			new_bucket = php_stream_bucket_new_unicode(stream, destbuf, destp - destbuf, 1, data->is_persistent TSRMLS_CC);
 			php_stream_bucket_append(buckets_out, new_bucket TSRMLS_CC);
@@ -160,6 +163,7 @@ static php_stream_filter_status_t php_unicode_from_string_filter(
 		/* Spit it out! */
 
 		ucnv_toUnicode(data->conv, &dest, destp, NULL, NULL, NULL, TRUE, &errCode);
+		/* UTODO: Error catching */
 		if (dest > d) {
 			php_stream_bucket *bucket = php_stream_bucket_new_unicode(stream, d, dest - d, 0, 0 TSRMLS_CC);
 			php_stream_bucket_append(buckets_out, bucket TSRMLS_CC);
@@ -220,21 +224,21 @@ static void php_unicode_filter_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 	}
 }
 
-static php_stream_filter_ops php_unicode_to_string_filter_ops = {
+php_stream_filter_ops php_unicode_to_string_filter_ops = {
 	php_unicode_to_string_filter,
 	php_unicode_filter_dtor,
 	"unicode.to.*",
 	PSFO_FLAG_ACCEPTS_UNICODE | PSFO_FLAG_OUTPUTS_STRING
 };
 
-static php_stream_filter_ops php_unicode_from_string_filter_ops = {
+php_stream_filter_ops php_unicode_from_string_filter_ops = {
 	php_unicode_from_string_filter,
 	php_unicode_filter_dtor,
 	"unicode.from.*",
 	PSFO_FLAG_ACCEPTS_STRING | PSFO_FLAG_OUTPUTS_UNICODE
 };
 
-static php_stream_filter_ops php_unicode_tidy_filter_ops = {
+php_stream_filter_ops php_unicode_tidy_filter_ops = {
 	php_unicode_tidy_filter,
 	php_unicode_filter_dtor,
 	"unicode.tidy.*",
@@ -251,7 +255,10 @@ static php_stream_filter *php_unicode_filter_create(const char *filtername, zval
 	const char *charset, *direction;
 	php_stream_filter_ops *fops;
 	UErrorCode ucnvError = U_ZERO_ERROR;
+	/* Note: from_error_mode means from unicode to charset.  from filter means from charset to unicode */
+	uint16_t err_mode = UG(from_error_mode);
 	char to_unicode = 0;
+	zval **tmpzval;
 
 	if (strncasecmp(filtername, "unicode.", sizeof("unicode.") - 1)) {
 		/* Never happens */
@@ -264,8 +271,9 @@ static php_stream_filter *php_unicode_filter_create(const char *filtername, zval
 		charset = direction + sizeof("to.") - 1;
 	} else if (strncmp(direction, "from.", sizeof("from.") - 1) == 0) {
 		fops = &php_unicode_from_string_filter_ops;
-		to_unicode = 1;
 		charset = direction + sizeof("from.") - 1;
+		to_unicode = 1;
+		err_mode = UG(to_error_mode);
 	} else if (strncmp(direction, "tidy.", sizeof("tidy.") - 1) == 0) {
 		fops = &php_unicode_tidy_filter_ops;
 		charset = direction + sizeof("tidy.") - 1;
@@ -301,6 +309,46 @@ static php_stream_filter *php_unicode_filter_create(const char *filtername, zval
 		}
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open charset converter, %s", reason);
 		return NULL;
+	}
+
+	if (filterparams &&
+		Z_TYPE_P(filterparams) == IS_ARRAY &&
+		zend_hash_find(Z_ARRVAL_P(filterparams), "error_mode", sizeof("error_mode"), (void**)&tmpzval) == SUCCESS &&
+		tmpzval && *tmpzval) {
+		if (Z_TYPE_PP(tmpzval) == IS_LONG) {
+			err_mode = Z_LVAL_PP(tmpzval);
+		} else {
+			zval copyval = **tmpzval;
+			zval_copy_ctor(&copyval);
+			convert_to_long(&copyval);
+			err_mode = Z_LVAL(copyval);
+		}
+	}
+
+	zend_set_converter_error_mode(data->conv, to_unicode ? ZEND_TO_UNICODE : ZEND_FROM_UNICODE, err_mode);
+	if (!to_unicode) {
+		UChar *freeme = NULL;
+		UChar *subst_char = UG(from_subst_char);
+
+		if (filterparams &&
+			Z_TYPE_P(filterparams) == IS_ARRAY &&
+			zend_hash_find(Z_ARRVAL_P(filterparams), "subst_char", sizeof("subst_char"), (void**)&tmpzval) == SUCCESS &&
+			tmpzval && *tmpzval) {
+			if (Z_TYPE_PP(tmpzval) == IS_UNICODE) {
+				subst_char = Z_USTRVAL_PP(tmpzval);
+			} else {
+				zval copyval = **tmpzval;
+				zval_copy_ctor(&copyval);
+				convert_to_unicode(&copyval);
+				subst_char = freeme = Z_USTRVAL(copyval);
+			}
+		}
+
+		zend_set_converter_subst_char(data->conv, subst_char);
+
+		if (freeme) {
+			efree(freeme);
+		}
 	}
 
 	return php_stream_filter_alloc(fops, data, persistent);
