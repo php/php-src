@@ -80,8 +80,7 @@ void xsl_objects_free_storage(void *object TSRMLS_DC)
 {
 	xsl_object *intern = (xsl_object *)object;
 
-	zend_hash_destroy(intern->std.properties);
-	FREE_HASHTABLE(intern->std.properties);
+	zend_object_std_dtor(&intern->std TSRMLS_CC);
 
 	zend_hash_destroy(intern->parameter);
 	FREE_HASHTABLE(intern->parameter);
@@ -119,8 +118,6 @@ zend_object_value xsl_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	zval *tmp;
 
 	intern = emalloc(sizeof(xsl_object));
-	intern->std.ce = class_type;
-	intern->std.guards = NULL;
 	intern->ptr = NULL;
 	intern->prop_handler = NULL;
 	intern->parameter = NULL;
@@ -130,8 +127,7 @@ zend_object_value xsl_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	intern->node_list = NULL;
 	intern->doc = NULL;
 
-	ALLOC_HASHTABLE(intern->std.properties);
-	zend_hash_init(intern->std.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 	ALLOC_HASHTABLE(intern->parameter);
 	zend_hash_init(intern->parameter, 0, NULL, ZVAL_PTR_DTOR, 0);

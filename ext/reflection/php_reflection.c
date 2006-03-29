@@ -235,9 +235,7 @@ static void reflection_objects_clone(void *object, void **object_clone TSRMLS_DC
 	reflection_object **intern_clone = (reflection_object **) object_clone;
 
 	*intern_clone = emalloc(sizeof(reflection_object));
-	(*intern_clone)->zo.ce = intern->zo.ce;
-	(*intern_clone)->zo.guards = NULL;
-	ALLOC_HASHTABLE((*intern_clone)->zo.properties);
+	zend_object_std_init(&(*intern_clone)->zo, intern->zo.ce TSRMLS_CC);
 	(*intern_clone)->ptr = intern->ptr;
 	(*intern_clone)->free_ptr = intern->free_ptr;
 	(*intern_clone)->obj = intern->obj;
@@ -253,14 +251,11 @@ static zend_object_value reflection_objects_new(zend_class_entry *class_type TSR
 	reflection_object *intern;
 
 	intern = emalloc(sizeof(reflection_object));
-	intern->zo.ce = class_type;
-	intern->zo.guards = NULL;
 	intern->ptr = NULL;
 	intern->obj = NULL;
 	intern->free_ptr = 0;
 
-	ALLOC_HASHTABLE(intern->zo.properties);
-	zend_u_hash_init(intern->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
+	zend_object_std_init(&intern->zo, class_type TSRMLS_CC);
 	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 	retval.handle = zend_objects_store_put(intern, NULL, reflection_free_objects_storage, reflection_objects_clone TSRMLS_CC);
 	retval.handlers = &reflection_object_handlers;

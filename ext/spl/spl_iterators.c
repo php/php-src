@@ -687,8 +687,7 @@ static void spl_RecursiveIteratorIterator_free_storage(void *_object TSRMLS_DC)
 		object->iterators = NULL;
 	}
 
-	zend_hash_destroy(object->std.properties);
-	FREE_HASHTABLE(object->std.properties);
+	zend_object_std_dtor(&object->std TSRMLS_CC);
 
 	efree(object);
 }
@@ -703,10 +702,8 @@ static zend_object_value spl_RecursiveIteratorIterator_new(zend_class_entry *cla
 
 	intern = emalloc(sizeof(spl_recursive_it_object));
 	memset(intern, 0, sizeof(spl_recursive_it_object));
-	intern->std.ce = class_type;
 
-	ALLOC_HASHTABLE(intern->std.properties);
-	zend_hash_init(intern->std.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) spl_RecursiveIteratorIterator_free_storage, NULL TSRMLS_CC);
@@ -1385,8 +1382,7 @@ static inline void spl_dual_it_free_storage(void *_object TSRMLS_DC)
 	}
 #endif
 
-	zend_hash_destroy(object->std.properties);
-	FREE_HASHTABLE(object->std.properties);
+	zend_object_std_dtor(&object->std TSRMLS_CC);
 
 	efree(object);
 }
@@ -1401,11 +1397,9 @@ static zend_object_value spl_dual_it_new(zend_class_entry *class_type TSRMLS_DC)
 
 	intern = emalloc(sizeof(spl_dual_it_object));
 	memset(intern, 0, sizeof(spl_dual_it_object));
-	intern->std.ce = class_type;
 	intern->dit_type = DIT_Unknown;
 
-	ALLOC_HASHTABLE(intern->std.properties);
-	zend_hash_init(intern->std.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) spl_dual_it_free_storage, NULL TSRMLS_CC);

@@ -378,8 +378,7 @@ void xmlreader_objects_free_storage(void *object TSRMLS_DC)
 {
 	xmlreader_object *intern = (xmlreader_object *)object;
 
-	zend_hash_destroy(intern->std.properties);
-	FREE_HASHTABLE(intern->std.properties);
+	zend_object_std_dtor(&intern->std TSRMLS_CC);
 	
 	xmlreader_free_resources(intern);
 
@@ -396,13 +395,11 @@ zend_object_value xmlreader_objects_new(zend_class_entry *class_type TSRMLS_DC)
 
 	intern = emalloc(sizeof(xmlreader_object));
 	memset(&intern->std, 0, sizeof(zend_object));
-	intern->std.ce = class_type;
 	intern->ptr = NULL;
 	intern->schema = NULL;
 	intern->prop_handler = &xmlreader_prop_handlers;
 
-	ALLOC_HASHTABLE(intern->std.properties);
-	zend_hash_init(intern->std.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) xmlreader_objects_free_storage, xmlreader_objects_clone TSRMLS_CC);
 	intern->handle = retval.handle;
