@@ -12,6 +12,8 @@ PHP                                                                        NEWS
 - Removed the E_STRICT deprecation notice from "var". (Ilia)
 - Fixed debug_zval_dump() to support private and protected members. (Dmitry)
 - Fixed SoapFault::getMessage(). (Dmitry)
+- Fixed bug #36898 (__set() leaks in classes extending internal ones). 
+  (Tony, Dmitry)
 - Fixed bug #36886 (User filters can leak buckets in some situations). (Ilia)
 - Fixed bug #36878 (error messages are printed even though an exception has 
   been thrown). (Tony)

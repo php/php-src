@@ -530,8 +530,7 @@ static void tidy_object_free_storage(void *object TSRMLS_DC)
 {
 	PHPTidyObj *intern = (PHPTidyObj *)object;
 
-	zend_hash_destroy(intern->std.properties);
-	FREE_HASHTABLE(intern->std.properties);
+	zend_object_std_dtor(&intern->std TSRMLS_CC);
 
 	if (intern->ptdoc) {
 		intern->ptdoc->ref_count--;
@@ -555,10 +554,8 @@ static void tidy_object_new(zend_class_entry *class_type, zend_object_handlers *
 
 	intern = emalloc(sizeof(PHPTidyObj));
 	memset(intern, 0, sizeof(PHPTidyObj));
-	intern->std.ce = class_type;
 
-	ALLOC_HASHTABLE(intern->std.properties);
-	zend_hash_init(intern->std.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 	switch(objtype) {

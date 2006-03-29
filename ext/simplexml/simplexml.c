@@ -1785,9 +1785,8 @@ static void sxe_object_free_storage(void *object TSRMLS_DC)
 
 	sxe = (php_sxe_object *) object;
 
-	zend_hash_destroy(sxe->zo.properties);
-	FREE_HASHTABLE(sxe->zo.properties);
-
+	zend_object_std_dtor(&sxe->zo TSRMLS_CC);
+	
 	php_libxml_node_decrement_resource((php_libxml_node_object *)sxe TSRMLS_CC);
 
 	if (sxe->xpath) {
@@ -1810,14 +1809,12 @@ static php_sxe_object* php_sxe_object_new(zend_class_entry *ce TSRMLS_DC)
 	php_sxe_object *intern;
 
 	intern = ecalloc(1, sizeof(php_sxe_object));
-	intern->zo.ce = ce;
 
 	intern->iter.type = SXE_ITER_NONE;
 	intern->iter.nsprefix = NULL;
 	intern->iter.name = NULL;
 
-	ALLOC_HASHTABLE(intern->zo.properties);
-	zend_hash_init(intern->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_object_std_init(&intern->zo, ce TSRMLS_CC);
 
 	return intern;
 }
