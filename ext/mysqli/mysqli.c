@@ -344,7 +344,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 	zend_hash_find(&classes, mysqli_base_class->name, mysqli_base_class->name_length + 1, 
 					(void **) &intern->prop_handler);
 
-	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
+	zend_object_std_init(&intern->zo, class_type TSRMLS_CC);
 	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref,
 					(void *) &tmp, sizeof(zval *));
 
