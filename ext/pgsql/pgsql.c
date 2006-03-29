@@ -1522,6 +1522,7 @@ PHP_FUNCTION(pg_execute)
 		case PGRES_NONFATAL_ERROR:
 		case PGRES_FATAL_ERROR:
 			PQclear(pgsql_result);
+			PHP_PQ_ERROR("Query failed: %s", pgsql);
 			RETURN_FALSE;
 			break;
 		case PGRES_COMMAND_OK: /* successful command that did not return rows */
