@@ -701,8 +701,7 @@ static void helper_free_storage(void *obj TSRMLS_DC)
 	if (object->unk) {
 		IUnknown_Release(object->unk);
 	}
-	zend_hash_destroy(object->std.properties);
-	FREE_HASHTABLE(object->std.properties);
+	zend_object_std_dtor(&object->std TSRMLS_CC);
 	efree(object);
 }
 
@@ -715,9 +714,8 @@ static void helper_clone(void *obj, void **clone_ptr TSRMLS_DC)
 	memcpy(clone, object, sizeof(*object));
 	*clone_ptr = clone;
 
-	ALLOC_HASHTABLE(clone->std.properties);
-	zend_hash_init(clone->std.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-	
+	zend_object_std_init(&clone->std, object->std.ce TSRMLS_CC);
+
 	if (clone->ipf) {
 		IPersistFile_AddRef(clone->ipf);
 	}
@@ -740,9 +738,7 @@ static zend_object_value helper_new(zend_class_entry *ce TSRMLS_DC)
 	helper = emalloc(sizeof(*helper));
 	memset(helper, 0, sizeof(*helper));
 
-	ALLOC_HASHTABLE(helper->std.properties);
-	zend_hash_init(helper->std.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-	helper->std.ce = helper_ce;
+	zend_object_std_init(&helper->std, helper_ce TSRMLS_CC);
 	
 	retval.handle = zend_objects_store_put(helper, NULL, helper_free_storage, helper_clone TSRMLS_CC);
 	retval.handlers = &helper_handlers;

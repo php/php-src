@@ -123,8 +123,9 @@ void php_clear_mysql(MY_MYSQL *mysql) {
 static void mysqli_objects_free_storage(zend_object *object TSRMLS_DC)
 {
 	mysqli_object 	*intern = (mysqli_object *)object;
-	
-	zend_objects_free_object_storage(&(intern->zo) TSRMLS_CC);
+
+	zend_object_std_dtor(&intern->zo TSRMLS_CC);
+	efree(intern);
 }
 /* }}} */
 
@@ -345,8 +346,6 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 
 	intern = emalloc(sizeof(mysqli_object));
 	memset(intern, 0, sizeof(mysqli_object));
-	intern->zo.ce = class_type;
-	intern->zo.guards = NULL;
 	intern->ptr = NULL;
 	intern->valid = 0;
 	intern->prop_handler = NULL;
@@ -359,8 +358,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 	zend_hash_find(&classes, mysqli_base_class->name.s, mysqli_base_class->name_length + 1, 
 					(void **) &intern->prop_handler);
 
-	ALLOC_HASHTABLE(intern->zo.properties);
-	zend_hash_init(intern->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref,
 					(void *) &tmp, sizeof(zval *));
 

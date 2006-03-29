@@ -109,8 +109,7 @@ static void spl_array_object_free_storage(void *object TSRMLS_DC)
 {
 	spl_array_object *intern = (spl_array_object *)object;
 
-	zend_hash_destroy(intern->std.properties);
-	FREE_HASHTABLE(intern->std.properties);
+	zend_object_std_dtor(&intern->std TSRMLS_CC);
 
 	zval_ptr_dtor(&intern->array);
 	zval_ptr_dtor(&intern->retval);
@@ -132,12 +131,10 @@ static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, s
 
 	intern = emalloc(sizeof(spl_array_object));
 	memset(intern, 0, sizeof(spl_array_object));
-	intern->std.ce = class_type;
 	*obj = intern;
 	ALLOC_INIT_ZVAL(intern->retval);
 
-	ALLOC_HASHTABLE(intern->std.properties);
-	zend_hash_init(intern->std.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 	intern->ar_flags = 0;

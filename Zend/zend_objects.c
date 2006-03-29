@@ -25,6 +25,26 @@
 #include "zend_API.h"
 #include "zend_interfaces.h"
 
+ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce TSRMLS_DC)
+{
+	ALLOC_HASHTABLE(object->properties);
+	zend_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+
+	object->ce = ce;	
+	object->guards = NULL;
+}
+
+ZEND_API void zend_object_std_dtor(zend_object *object TSRMLS_DC)
+{
+	if (object->guards) {
+		zend_hash_destroy(object->guards);
+		FREE_HASHTABLE(object->guards);		
+	}
+	if (object->properties) {
+		zend_hash_destroy(object->properties);
+		FREE_HASHTABLE(object->properties);
+	}
+}
 
 ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handle handle TSRMLS_DC)
 {
