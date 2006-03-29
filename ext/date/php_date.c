@@ -1230,10 +1230,8 @@ static zend_object_value date_object_new_date(zend_class_entry *class_type TSRML
 
 	intern = emalloc(sizeof(php_date_obj));
 	memset(intern, 0, sizeof(php_date_obj));
-	intern->std.ce = class_type;
 	
-	ALLOC_HASHTABLE(intern->std.properties);
-	zend_hash_init(intern->std.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 	
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) date_object_free_storage_date, NULL TSRMLS_CC);
@@ -1250,10 +1248,8 @@ static zend_object_value date_object_new_timezone(zend_class_entry *class_type T
 
 	intern = emalloc(sizeof(php_timezone_obj));
 	memset(intern, 0, sizeof(php_timezone_obj));
-	intern->std.ce = class_type;
 
-	ALLOC_HASHTABLE(intern->std.properties);
-	zend_hash_init(intern->std.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 	
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) date_object_free_storage_timezone, NULL TSRMLS_CC);
@@ -1273,12 +1269,7 @@ static void date_object_free_storage_date(void *object TSRMLS_DC)
 		timelib_time_dtor(intern->time);
 	}
 
-	if (intern->std.properties) {
-		zend_hash_destroy(intern->std.properties);
-		efree(intern->std.properties);
-		intern->std.properties = NULL;
-	}
-	
+	zend_object_std_dtor(&intern->std TSRMLS_CC);
 	efree(object);
 }
 
@@ -1286,12 +1277,7 @@ static void date_object_free_storage_timezone(void *object TSRMLS_DC)
 {
 	php_timezone_obj *intern = (php_timezone_obj *)object;
 
-	if (intern->std.properties) {
-		zend_hash_destroy(intern->std.properties);
-		efree(intern->std.properties);
-		intern->std.properties = NULL;
-	}
-
+	zend_object_std_dtor(&intern->std TSRMLS_CC);
 	efree(object);
 }
 

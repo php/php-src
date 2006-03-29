@@ -906,8 +906,7 @@ void dom_xpath_objects_free_storage(void *object TSRMLS_DC)
 {
 	dom_object *intern = (dom_object *)object;
 
-	zend_hash_destroy(intern->std.properties);
-	FREE_HASHTABLE(intern->std.properties);
+	zend_object_std_dtor(&intern->std TSRMLS_CC);
 
 	if (intern->ptr != NULL) {
 		xmlXPathFreeContext((xmlXPathContextPtr) intern->ptr);
@@ -926,8 +925,7 @@ void dom_objects_free_storage(void *object TSRMLS_DC)
 	dom_object *intern = (dom_object *)object;
 	int retcount;
 
-	zend_hash_destroy(intern->std.properties);
-	FREE_HASHTABLE(intern->std.properties);
+	zend_object_std_dtor(&intern->std TSRMLS_CC);
 
 	if (intern->ptr != NULL && ((php_libxml_node_ptr *)intern->ptr)->node != NULL) {
 		if (((xmlNodePtr) ((php_libxml_node_ptr *)intern->ptr)->node)->type != XML_DOCUMENT_NODE && ((xmlNodePtr) ((php_libxml_node_ptr *)intern->ptr)->node)->type != XML_HTML_DOCUMENT_NODE) {
@@ -973,8 +971,6 @@ static dom_object* dom_objects_set_class(zend_class_entry *class_type, zend_bool
 	dom_object *intern;
 
 	intern = emalloc(sizeof(dom_object));
-	intern->std.ce = class_type;
-	intern->std.guards = NULL;
 	intern->ptr = NULL;
 	intern->prop_handler = NULL;
 	intern->document = NULL;
@@ -986,8 +982,7 @@ static dom_object* dom_objects_set_class(zend_class_entry *class_type, zend_bool
 
 	zend_hash_find(&classes, base_class->name, base_class->name_length + 1, (void **) &intern->prop_handler);
 
-	ALLOC_HASHTABLE(intern->std.properties);
-	zend_hash_init(intern->std.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	if (hash_copy) {
 		zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 	}
@@ -1092,8 +1087,7 @@ void dom_nnodemap_objects_free_storage(void *object TSRMLS_DC)
 
 	php_libxml_decrement_doc_ref((php_libxml_node_object *)intern TSRMLS_CC);
 
-	zend_hash_destroy(intern->std.properties);
-	FREE_HASHTABLE(intern->std.properties);
+	zend_object_std_dtor(&intern->std TSRMLS_CC);
 
 	efree(object);
 }
