@@ -1,3 +1,59 @@
+2006-03-28  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_objects_API.c:
+      initialize bucket #0 with nulls
+
+    * (PHP_5_1)
+      ZendEngine2/zend_objects_API.c:
+      initialize bucket #0 with nulls (normally it shouldn't be used at all, but
+      if it is - we don't want any memory issues, do we?)
+
+    * ZendEngine2/zend_builtin_functions.c:
+      MF51: fix #36897 (debug_print_backtrace() doesn't return void but array(0)
+      {})
+
+    * (PHP_5_1)
+      ZendEngine2/zend_builtin_functions.c:
+      fix #36897 (debug_print_backtrace() doesn't return void but array(0) {})
+
+2006-03-28  Seiji Masugata  <s.masugata@digicom.dnp.co.jp>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+      added mb_strstr( ).
+
+2006-03-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/user_filters.c:
+      Fixed bug #36886 (User filters can leak buckets in some situations).
+
+2006-03-28  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      ext/standard/file.c:
+      fix build and #36887
+
+    * ext/oci8/oci8_interface.c:
+      MF51: fix #36851 (Documentation and code discrepancies for NULL data)
+
+    * (PHP_5_1)
+      NEWS
+      ext/oci8/oci8_interface.c:
+      fix #36851 (Documentation and code discrepancies for NULL data)
+
+2006-03-28  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_operators.c:
+      Note
+
+2006-03-28  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * (PHP_5_1)
+      ext/pgsql/pgsql.c:
+      reenable pg_execute E_WARNING
+
 2006-03-27  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_4)
