@@ -1,3 +1,26 @@
+2006-03-28  Antony Dovgal  <antony@zend.com>
+
+    * zend_objects_API.c:
+      initialize bucket #0 with nulls
+
+    * (PHP_5_1)
+      zend_objects_API.c:
+      initialize bucket #0 with nulls (normally it shouldn't be used at all, but
+      if it is - we don't want any memory issues, do we?)
+
+    * zend_builtin_functions.c:
+      MF51: fix #36897 (debug_print_backtrace() doesn't return void but array(0)
+      {})
+
+    * (PHP_5_1)
+      zend_builtin_functions.c:
+      fix #36897 (debug_print_backtrace() doesn't return void but array(0) {})
+
+2006-03-28  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_operators.c:
+      Note
+
 2006-03-27  Antony Dovgal  <antony@zend.com>
 
     * zend.c:
