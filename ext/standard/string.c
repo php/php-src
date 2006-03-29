@@ -702,6 +702,10 @@ static UChar *php_u_trim(UChar *c, int len, UChar *what, int what_len, zval *ret
 	UChar	ch,wh;
 	int32_t	start = 0, end = len;
 
+	/*
+	 * UTODO
+	 * fix trim("a") results in ""
+	 */
 	if ( what ) {
 		what = eustrndup(what, what_len);
 		php_expand_u_trim_range(&what, &what_len TSRMLS_CC);
