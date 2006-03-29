@@ -174,6 +174,7 @@ static const struct mb_overload_def mb_ovld[] = {
 	{MB_OVERLOAD_STRING, "strpos", "mb_strpos", "mb_orig_strpos"},
 	{MB_OVERLOAD_STRING, "strrpos", "mb_strrpos", "mb_orig_strrpos"},
 	{MB_OVERLOAD_STRING, "strstr", "mb_strstr", "mb_orig_strstr"},
+	{MB_OVERLOAD_STRING, "strrchr", "mb_strrchr", "mb_orig_strrchr"},
 	{MB_OVERLOAD_STRING, "substr", "mb_substr", "mb_orig_substr"},
 	{MB_OVERLOAD_STRING, "strtolower", "mb_strtolower", "mb_orig_strtolower"},
 	{MB_OVERLOAD_STRING, "strtoupper", "mb_strtoupper", "mb_orig_strtoupper"},
@@ -207,6 +208,7 @@ zend_function_entry mbstring_functions[] = {
 	PHP_FE(mb_strpos,				NULL)
 	PHP_FE(mb_strrpos,				NULL)
 	PHP_FE(mb_strstr,				NULL)
+	PHP_FE(mb_strrchr,				NULL)
 	PHP_FE(mb_substr_count,			NULL)
 	PHP_FE(mb_substr,				NULL)
 	PHP_FE(mb_strcut,				NULL)
@@ -1713,6 +1715,69 @@ PHP_FUNCTION(mb_strstr)
 		RETURN_FALSE;
 	}
 	n = mbfl_strpos(&haystack, &needle, 0, 0);
+	if (n >= 0) {
+		if (part) {
+			mblen = mbfl_strlen(&haystack);
+			ret = mbfl_substr(&haystack, &result, 0, n);
+			if (ret != NULL) {
+				RETVAL_STRINGL((char *)ret->val, ret->len, 0);
+			} else {
+				RETVAL_FALSE;
+			}
+		} else {
+			mblen = mbfl_strlen(&haystack);
+			len = (mblen - n);
+			ret = mbfl_substr(&haystack, &result, n, len);
+			if (ret != NULL) {
+				RETVAL_STRINGL((char *)ret->val, ret->len, 0);
+			} else {
+				RETVAL_FALSE;
+			}
+		}
+	} else {
+		RETVAL_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto string mb_strrchr(string haystack, string needle[, bool part[, string encoding]])
+   Finds the last occurrence of a character in a string within another */
+PHP_FUNCTION(mb_strrchr)
+{
+	int n, len, mblen;
+	mbfl_string haystack, needle, result, *ret = NULL;;
+	char *enc_name = NULL;
+	int enc_name_len;
+	zend_bool part = 0;
+
+	mbfl_string_init(&haystack);
+	mbfl_string_init(&needle);
+	haystack.no_language = MBSTRG(current_language);
+	haystack.no_encoding = MBSTRG(current_internal_encoding);
+	needle.no_language = MBSTRG(current_language);
+	needle.no_encoding = MBSTRG(current_internal_encoding);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|bs", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &part, &enc_name, &enc_name_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (enc_name != NULL) {
+		haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(enc_name);
+		if (haystack.no_encoding == mbfl_no_encoding_invalid) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", enc_name);
+			RETURN_FALSE;
+		}
+	}
+
+	if (haystack.len <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty haystack");
+		RETURN_FALSE;
+	}
+	if (needle.len <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Empty needle");
+		RETURN_FALSE;
+	}
+	n = mbfl_strpos(&haystack, &needle, 0, 1);
 	if (n >= 0) {
 		if (part) {
 			mblen = mbfl_strlen(&haystack);
