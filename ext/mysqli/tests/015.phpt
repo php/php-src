@@ -2,6 +2,7 @@
 mysqli autocommit/commit/rollback with myisam 
 --SKIPIF--
 <?php	
+	require_once('skipif.inc');
 	include "connect.inc";
 	$link = mysqli_connect($host, $user, $passwd);
 	$result = mysqli_query($link, "SHOW VARIABLES LIKE 'have_innodb'");
@@ -13,8 +14,6 @@ mysqli autocommit/commit/rollback with myisam
 		printf ("skip innodb support not installed.");
 	}
 ?>
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 	include "connect.inc";
