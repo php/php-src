@@ -66,7 +66,7 @@ static zend_class_entry user_filter_class_entry;
 
 static ZEND_RSRC_DTOR_FUNC(php_bucket_dtor)
 {
-	php_stream_bucket *bucket = (struct php_stream_bucket *)rsrc->ptr;
+	php_stream_bucket *bucket = (php_stream_bucket *)rsrc->ptr;
 	if (bucket) {
 		php_stream_bucket_delref(bucket TSRMLS_CC);
 		bucket = NULL;
