@@ -1,3 +1,120 @@
+2006-03-29  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/file.c
+      main/streams/streams.c:
+      Update php_stream_passthru() to handle unicode data.
+      This updates userspace functions fpassthru() and readfile()
+      
+      UG(output_encoding) is used by php_stream_passthru() to translate
+      unicode stream contents back to an outputable character set.
+      
+      Note: readfile()'s second parameter (use_include_path) has been changed
+      to be a bitmask "flags" parameter instead.
+      
+      For the most commonly used values (TRUE, 1) this will continue functioning
+      as expected since the value of FILE_USE_INCLUDE_PATH is (coincidentally)
+      1.
+      The impact to other values should be noted in the migration6 guide.
+      
+      This change makes it possible to allow readfile() to output binary file
+      contents (default) or unicode transcoded contents (using FILE_TEXT flag).
+
+2006-03-29  Antony Dovgal  <antony@zend.com>
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli.c:
+      fix typo
+
+2006-03-29  Seiji Masugata  <s.masugata@digicom.dnp.co.jp>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+      added mb_strrchr( ).
+
+2006-03-29  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_objects.c
+      ZendEngine2/zend_objects.h
+      ext/com_dotnet/com_persist.c
+      ext/dom/php_dom.c
+      ext/mysqli/mysqli.c
+      ext/simplexml/simplexml.c
+      ext/sqlite/sqlite.c
+      ext/xsl/php_xsl.c:
+      MF51: fix bug #36898 (__set() leaks in classes extending internal ones)
+      
+      Added:
+      ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry
+      *ce TSRMLS_DC)
+      ZEND_API void zend_object_std_dtor(zend_object *object TSRMLS_DC)
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/zend_objects.c
+      ZendEngine2/zend_objects.h
+      ext/com_dotnet/com_persist.c
+      ext/dom/php_dom.c
+      ext/mysqli/mysqli.c
+      ext/simplexml/simplexml.c
+      ext/sqlite/sqlite.c
+      ext/xsl/php_xsl.c:
+      fix bug #36898 (__set() leaks in classes extending internal ones)
+      
+      Added:
+      ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry
+      *ce TSRMLS_DC)
+      ZEND_API void zend_object_std_dtor(zend_object *object TSRMLS_DC)
+      
+      to initialize and destroy zend_object structs
+
+2006-03-29  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/string.c:
+      Bug!
+
+2006-03-29  Sara Golemon  <sara@golemon.com>
+
+    * configure.in:
+      Ooops, missed a file
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.h
+      main/main.c
+      main/php_streams.h
+      main/streams/filter.c
+      main/streams/php_stream_filter_api.h
+      main/streams/streams.c
+      main/streams/unicode_filter.c:
+      Another (and hopefully last) major streams commit.
+      This moves unicode conversion to the filter layer
+      (rather than at the lower streams layer)
+      unicode_filter.c has been moved from ext/unicode to main/streams
+      as it's an integral part of the streams unicode conversion process.
+      
+      There are now three ways to set encoding on a stream:
+      
+      (1) By context
+      $ctx = stream_context_create(NULL,array('encoding'=>'latin1'));
+      $fp = fopen('somefile', 'r+t', false, $ctx);
+      
+      (2) By stream_encoding()
+      $fp = fopen('somefile', 'r+');
+      stream_encoding($fp, 'latin1');
+      
+      (3) By filter
+      $fp = fopen('somefile', 'r+');
+      stream_filter_append($fp, 'unicode.from.latin1', STREAM_FILTER_READ);
+      stream_filter_append($fp, 'unicode.to.latin1', STREAM_FILTER_WRITE);
+      
+      Note: Methods 1 and 2 are convenience wrappers around method 3.
+
+2006-03-29  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/pgsql/pgsql.c:
+      restore E_WARNING in correct place
+
 2006-03-28  Antony Dovgal  <antony@zend.com>
 
     * ZendEngine2/zend_objects_API.c:
