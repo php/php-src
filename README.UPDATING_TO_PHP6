@@ -112,7 +112,7 @@ function session_unregister($name) {
 1.3 Magic quotes
     ------------
 
-1.4 Register long Arrays ($HTTP_*_VARS)
+1.4 Register long arrays ($HTTP_*_VARS)
     -----------------------------------
 
 register_long_arrays and the long versions of super globals had been removed.
@@ -122,7 +122,7 @@ register_long_arrays setting.
 You can emulate long arrays by including the following file:
 
 <?php
-if (!ini_get('register_globals')) {	
+if (!ini_get('register_long_arrays')) {	
 	$HTTP_POST_VARS =& $_POST;
 	$HTTP_GET_VARS =& $_GET;
 	$HTTP_COOKIE_VARS =& $_COOKIE;
