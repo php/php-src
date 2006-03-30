@@ -1,3 +1,26 @@
+2006-03-29  Antony Dovgal  <antony@zend.com>
+
+    * zend_objects.c
+      zend_objects.h:
+      MF51: fix bug #36898 (__set() leaks in classes extending internal ones)
+      
+      Added:
+      ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry
+      *ce TSRMLS_DC)
+      ZEND_API void zend_object_std_dtor(zend_object *object TSRMLS_DC)
+
+    * (PHP_5_1)
+      zend_objects.c
+      zend_objects.h:
+      fix bug #36898 (__set() leaks in classes extending internal ones)
+      
+      Added:
+      ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry
+      *ce TSRMLS_DC)
+      ZEND_API void zend_object_std_dtor(zend_object *object TSRMLS_DC)
+      
+      to initialize and destroy zend_object structs
+
 2006-03-28  Antony Dovgal  <antony@zend.com>
 
     * zend_objects_API.c:
