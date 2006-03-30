@@ -280,7 +280,7 @@ static inline zstr _to_zstr(void *v) {
 #define INTERNAL_FUNCTION_PARAMETERS int ht, zval *return_value, zval **return_value_ptr, zval *this_ptr, int return_value_used TSRMLS_DC
 #define INTERNAL_FUNCTION_PARAM_PASSTHRU ht, return_value, return_value_ptr, this_ptr, return_value_used TSRMLS_CC
 
-#if defined(__GNUC__) && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux)
+#if defined(__GNUC__) && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX)
 #  define ZEND_VM_ALWAYS_INLINE  __attribute__ ((always_inline))
 void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((noreturn));
 #else
