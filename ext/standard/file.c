@@ -497,32 +497,32 @@ PHP_FUNCTION(get_meta_tags)
 
 /* }}} */
 
-/* {{{ proto string file_get_contents(string filename [, bool use_include_path [, resource context [, long offset [, long maxlen]]]])
+/* {{{ proto string file_get_contents(string filename [, long flags [, resource context [, long offset [, long maxlen]]]]) U
    Read the entire file into a string */
-/* UTODO: Accept unicode contents -- Maybe? Perhaps a binary fetch leaving the script to icu_ucnv_toUnicode() on its own is best? */
 PHP_FUNCTION(file_get_contents)
 {
 	char *filename;
 	int filename_len;
 	char *contents;
+	long flags = 0;
 	zend_bool use_include_path = 0;
 	php_stream *stream;
 	int len;
 	long offset = -1;
-	long maxlen = PHP_STREAM_COPY_ALL;
+	long maxlen = PHP_STREAM_COPY_ALL, real_maxlen;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 
 	/* Parse arguments */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|br!ll",
-				  &filename, &filename_len, &use_include_path, &zcontext, &offset, &maxlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lr!ll",
+				  &filename, &filename_len, &flags, &zcontext, &offset, &maxlen) == FAILURE) {
 		return;
 	}
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
-	stream = php_stream_open_wrapper_ex(filename, "rb", 
-				(use_include_path ? USE_PATH : 0) | REPORT_ERRORS,
+	stream = php_stream_open_wrapper_ex(filename, (flags & PHP_FILE_TEXT) ? "rt" : "rb", 
+				((flags & PHP_FILE_USE_INCLUDE_PATH) ? USE_PATH : 0) | REPORT_ERRORS,
 				NULL, context);
 	if (!stream) {
 		RETURN_FALSE;
@@ -533,9 +533,20 @@ PHP_FUNCTION(file_get_contents)
 		RETURN_FALSE;
 	}
 
+	if (maxlen <= 0 || stream->readbuf_type == IS_STRING) {
+		real_maxlen = maxlen;
+	} else {
+		/* Allows worst case scenario of each input char being turned into two UChars */
+		real_maxlen = (maxlen * 2);
+	}
+
 	/* uses mmap if possible */
-	if ((len = php_stream_copy_to_mem(stream, &contents, maxlen, 0)) > 0) {
+	len = php_stream_copy_to_mem_ex(stream, stream->readbuf_type, &contents, real_maxlen, maxlen, 0);
+
+	if (stream->readbuf_type == IS_STRING && len > 0) {
 		RETVAL_STRINGL(contents, len, 0);
+	} else if (stream->readbuf_type == IS_UNICODE && len > 0) {
+		RETVAL_UNICODEL(contents, len, 0);
 	} else if (len == 0) {
 		RETVAL_EMPTY_STRING();
 	} else {
