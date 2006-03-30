@@ -1568,17 +1568,22 @@ PHPAPI size_t _php_stream_passthru(php_stream * stream STREAMS_DC TSRMLS_DC)
 }
 
 
-PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen, int persistent STREAMS_DC TSRMLS_DC)
+PHPAPI size_t _php_stream_copy_to_mem_ex(php_stream *src, zend_uchar rettype, void **buf, size_t maxlen, size_t maxchars, int persistent STREAMS_DC TSRMLS_DC)
 {
 	size_t ret = 0;
-	char *ptr;
+	zstr ptr;
 	size_t len = 0, max_len;
 	int step = CHUNK_SIZE;
 	int min_room = CHUNK_SIZE / 4;
 	php_stream_statbuf ssbuf;
 
-	if (buf) { 
+	if (buf) {
 		*buf = NULL;
+	}
+
+	if (rettype != src->readbuf_type) {
+		/* UTODO: Introduce sloppy buffer conversion */
+		return 0;
 	}
 
 	if (maxlen == 0) { 
@@ -1590,6 +1595,7 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 	}
 
 	if (php_stream_mmap_possible(src)) {
+		/* guarantees src->readbuf_type == IS_STRING */
 		char *p;
 		size_t mapped;
 
@@ -1600,7 +1606,7 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 
 			if (*buf) {
 				memcpy(*buf, p, mapped);
-				(*buf)[mapped] = '\0';
+				((char*)(*buf))[mapped] = 0;
 			}
 
 			php_stream_mmap_unmap(src);
@@ -1610,14 +1616,29 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 	}
 
 	if (maxlen > 0) {
-		ptr = *buf = pemalloc_rel_orig(maxlen + 1, persistent);
-		while ((len < maxlen) & !php_stream_eof(src)) {
-			ret = php_stream_read(src, ptr, maxlen - len);
-			len += ret;
-			ptr += ret;
+		if (rettype == IS_UNICODE) {
+			ptr.u = *buf = pemalloc_rel_orig(UBYTES(maxlen + 1), persistent);
+			while ((len < maxlen) & !php_stream_eof(src)) {
+				int ulen;
+
+				ret = php_stream_read_unicode_ex(src, ptr.u, maxlen - len, maxchars);
+				ulen = u_countChar32(ptr.u, ret);
+				len += ret;
+				ptr.u += ret;
+				maxchars -= ret;
+			}
+			*(ptr.u) = 0;
+			return len;
+		} else {
+			ptr.s = *buf = pemalloc_rel_orig(maxlen + 1, persistent);
+			while ((len < maxlen) & !php_stream_eof(src)) {
+				ret = php_stream_read(src, ptr.s, maxlen - len);
+				len += ret;
+				ptr.s += ret;
+			}
+			*(ptr.s) = 0;
+			return len;
 		}
-		*ptr = '\0';
-		return len;
 	}
 
 	/* avoid many reallocs by allocating a good sized chunk to begin with, if
@@ -1632,21 +1653,49 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 		max_len = step;
 	}
 
-	ptr = *buf = pemalloc_rel_orig(max_len, persistent);
+	if (rettype == IS_UNICODE) {
+		ptr.u = *buf = pemalloc_rel_orig(UBYTES(max_len + 1), persistent);
 
-	while((ret = php_stream_read(src, ptr, max_len - len)))	{
-		len += ret;
-		if (len + min_room >= max_len) {
-			*buf = perealloc_rel_orig(*buf, max_len + step, persistent);
-			max_len += step;
-			ptr = *buf + len;
-		} else {
-			ptr += ret;
+		while((ret = php_stream_read_unicode_ex(src, ptr.u, max_len - len, maxchars)))	{
+			int ulen = u_countChar32(ptr.u, ret);
+
+			len += ret;
+			if (len + min_room >= max_len) {
+				*buf = perealloc_rel_orig(*buf, UBYTES(max_len + step), persistent);
+				max_len += step;
+				ptr.u = ((UChar*)(*buf)) + len;
+			} else {
+				ptr.u += ret;
+			}
+			maxchars -= ulen;
+		}
+	} else {
+		ptr.s = *buf = pemalloc_rel_orig(max_len + 1, persistent);
+
+		while((ret = php_stream_read(src, ptr.s, max_len - len)))	{
+			len += ret;
+			if (len + min_room >= max_len) {
+				*buf = perealloc_rel_orig(*buf, max_len + step, persistent);
+				max_len += step;
+				ptr.s = ((char*)(*buf)) + len;
+			} else {
+				ptr.s += ret;
+			}
 		}
 	}
+
 	if (len) {
-		*buf = perealloc_rel_orig(*buf, len + 1, persistent);
-		(*buf)[len] = '\0';
+		if (rettype == IS_UNICODE) {
+			if ((max_len - len) > (2 * step)) {
+				*buf = perealloc_rel_orig(*buf, UBYTES(len + 1), persistent);
+			}
+			((UChar*)(*buf))[len] = 0;
+		} else {
+			if ((max_len - len) > (2 * step)) {
+				*buf = perealloc_rel_orig(*buf, len + 1, persistent);
+			}
+			((char*)(*buf))[len] = 0;
+		}
 	} else {
 		pefree(*buf, persistent);
 		*buf = NULL;

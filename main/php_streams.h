@@ -284,6 +284,7 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t count TSRML
 /* Convert using runtime_encoding if necessary -- return unicode */
 PHPAPI size_t _php_stream_read_unicode(php_stream *stream, UChar *buf, int maxlen, int maxchars TSRMLS_DC);
 #define php_stream_read_unicode(stream, buf, maxlen)	_php_stream_read_unicode((stream), (buf), (maxlen), -1 TSRMLS_CC)
+#define php_stream_read_unicode_ex(stream, buf, maxlen, maxchars)	_php_stream_read_unicode((stream), (buf), (maxlen), (maxchars) TSRMLS_CC)
 
 PHPAPI UChar *_php_stream_read_unicode_chars(php_stream *stream, int *pchars TSRMLS_DC);
 #define  php_stream_read_unicode_chars(stream, pchars) _php_stream_read_unicode_chars((stream), (pchars) TSRMLS_CC)
@@ -443,9 +444,12 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 
 /* read all data from stream and put into a buffer. Caller must free buffer when done.
  * The copy will use mmap if available. */
-PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen,
+PHPAPI size_t _php_stream_copy_to_mem_ex(php_stream *src, zend_uchar rettype, void **buf, size_t maxlen, size_t maxchars,
 		int persistent STREAMS_DC TSRMLS_DC);
-#define php_stream_copy_to_mem(src, buf, maxlen, persistent) _php_stream_copy_to_mem((src), (buf), (maxlen), (persistent) STREAMS_CC TSRMLS_CC)
+#define php_stream_copy_to_mem(src, buf, maxlen, persistent) \
+		_php_stream_copy_to_mem_ex((src), IS_STRING, (buf), (maxlen), -1, (persistent) STREAMS_CC TSRMLS_CC)
+#define php_stream_copy_to_mem_ex(src, rettype, buf, maxlen, maxchars, persistent) \
+		_php_stream_copy_to_mem_ex((src), (rettype), (buf), (maxlen), (maxchars), (persistent) STREAMS_CC TSRMLS_CC)
 
 /* output all data from a stream */
 PHPAPI size_t _php_stream_passthru(php_stream * src STREAMS_DC TSRMLS_DC);
