@@ -28,7 +28,7 @@
 ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce TSRMLS_DC)
 {
 	ALLOC_HASHTABLE(object->properties);
-	zend_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_u_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
 
 	object->ce = ce;	
 	object->guards = NULL;
