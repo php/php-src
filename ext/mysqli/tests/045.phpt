@@ -2,6 +2,9 @@
 mysqli_bind_result (SHOW)
 --SKIPIF--
 <?php	
+	require_once('skipif.inc');
+	require_once('skipifemb.inc'); 
+
 	include "connect.inc";
 	$link = mysqli_connect($host, $user, $passwd);
 
@@ -15,9 +18,6 @@ mysqli_bind_result (SHOW)
 	$stmt->close();
 	mysqli_close($link);
 ?>
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
-<?php require_once('skipifemb.inc'); ?>
 --FILE--
 <?php
 	include "connect.inc";
