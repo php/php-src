@@ -21,7 +21,14 @@ class DirectoryTreeIterator extends RecursiveIteratorIterator
 	 */
 	function __construct($path)
 	{
-		parent::__construct(new RecursiveCachingIterator(new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::KEY_AS_FILENAME), CachingIterator::CALL_TOSTRING|CachingIterator::CATCH_GET_CHILD), 1);
+		parent::__construct(
+			new RecursiveCachingIterator(
+				new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::KEY_AS_FILENAME
+				), 
+				CachingIterator::CALL_TOSTRING|CachingIterator::CATCH_GET_CHILD
+			), 
+			parent::SELF_FIRST
+		);
 	}
 
 	/** @return the current element prefixed with ASCII graphics
