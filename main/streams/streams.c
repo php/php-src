@@ -2526,6 +2526,131 @@ PHPAPI int _php_stream_scandir(char *dirname, char **namelist[], int flags, php_
 }
 /* }}} */
 
+/* {{{ php_stream_path_encode
+Encode a filepath to the appropriate characterset.
+If the wrapper supports its own encoding rules it will be dispatched to wrapper->wops->path_encode()
+Otherwise the INI defined filesystem_encoding converter will be used
+If wrapper == NULL, the path will be explored to locate the correct wrapper
+*/
+PHPAPI int _php_stream_path_encode(php_stream_wrapper *wrapper,
+				char **pathenc, int *pathenc_len, UChar *path, int path_len,
+				int options, php_stream_context *context TSRMLS_DC)
+{
+	UErrorCode status = U_ZERO_ERROR;
+	int num_conv;
+
+	if (!wrapper) {
+		UChar *p;
+		U_STRING_DECL(delim, "://", 3);
+		int delim_len = 3;
+
+		U_STRING_INIT(delim, "://", 3);
+
+		p = u_strFindFirst(path, path_len, delim, delim_len);
+		if (p) {
+			char *scheme = NULL;
+			int scheme_len = 0;
+
+			/* Convert just the scheme using utf8 in order to look it up in the registry */
+			num_conv = zend_convert_from_unicode(UG(utf8_conv), &scheme, &scheme_len, path, (p - path) + delim_len, &status);
+			if (U_FAILURE(status)) {
+				if (options & REPORT_ERRORS) {
+					zend_raise_conversion_error_ex("Unable to convert filepath", UG(utf8_conv), ZEND_FROM_UNICODE,
+											num_conv, (UG(from_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
+				}
+				*pathenc = NULL;
+				*pathenc_len = 0;
+
+				return FAILURE;
+			}
+			wrapper = php_stream_locate_url_wrapper(scheme, NULL, options TSRMLS_CC);
+			efree(scheme);
+			if (!wrapper) {
+				*pathenc = NULL;
+				*pathenc_len = 0;
+
+				return FAILURE;
+			}			
+		} else {
+			wrapper = &php_plain_files_wrapper;
+		}
+	}
+
+	if (wrapper->wops->path_encode) {
+		if (wrapper->wops->path_encode(wrapper, pathenc, pathenc_len, path, path_len, options, context TSRMLS_CC) == FAILURE) {
+			*pathenc = NULL;
+			*pathenc_len = 0;
+
+			return FAILURE;
+		}
+
+		return SUCCESS;
+	}
+
+	/* Otherwise, fallback on filesystem_encoding */
+	status = U_ZERO_ERROR;
+
+	num_conv = zend_convert_from_unicode(ZEND_U_CONVERTER(UG(filesystem_encoding_conv)),
+				pathenc, pathenc_len, path, path_len, &status);
+	if (U_FAILURE(status)) {
+		if (options & REPORT_ERRORS) {
+			zend_raise_conversion_error_ex("Unable to convert filepath", ZEND_U_CONVERTER(UG(filesystem_encoding_conv)),
+							ZEND_FROM_UNICODE, num_conv, (UG(from_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
+		}
+
+		*pathenc = NULL;
+		*pathenc_len = 0;
+
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
+
+/* {{{ php_stream_path_decode
+Decode a filepath from its character set to unicode
+If the wrapper supports its own decoding rules it will be dispatched to wrapper->wops->path_encode()
+Otherwise (or if wrapper == NULL) the INI defined filesystem_encoding converter will be used.
+*/
+PHPAPI int _php_stream_path_decode(php_stream_wrapper *wrapper,
+				char **pathdec, int *pathdec_len, UChar *path, int path_len,
+				int options, php_stream_context *context TSRMLS_DC)
+{
+	int num_conv;
+	UErrorCode status = U_ZERO_ERROR;
+
+	if (wrapper && wrapper->wops->path_decode) {
+		if (wrapper->wops->path_decode(wrapper, pathdec, pathdec_len, path, path_len, options, context TSRMLS_CC) == FAILURE) {
+			*pathdec = NULL;
+			*pathdec_len = 0;
+
+			return FAILURE;
+		}
+		return SUCCESS;
+	}
+
+	/* Otherwise fallback on filesystem_encoding */
+	num_conv = zend_convert_to_unicode(ZEND_U_CONVERTER(UG(filesystem_encoding_conv)),
+				pathdec, pathdec_len, path, path_len, &status);
+	if (U_FAILURE(status)) {
+		if (options & REPORT_ERRORS) {
+			zend_raise_conversion_error_ex("Unable to convert filepath", ZEND_U_CONVERTER(UG(filesystem_encoding_conv)),
+							ZEND_TO_UNICODE, num_conv, (UG(to_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
+		}
+
+		*pathdec = NULL;
+		*pathdec_len = 0;
+
+		return FAILURE;
+	}
+
+	return SUCCESS;
+
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

@@ -179,6 +179,7 @@ ZEND_INI_BEGIN()
 	STD_ZEND_INI_ENTRY("unicode.runtime_encoding",  NULL, ZEND_INI_ALL, OnUpdateEncoding,   runtime_encoding_conv, zend_unicode_globals, unicode_globals)
 	STD_ZEND_INI_ENTRY("unicode.script_encoding",  NULL, ZEND_INI_ALL, OnUpdateEncoding,   script_encoding_conv, zend_unicode_globals, unicode_globals)
 	STD_ZEND_INI_ENTRY("unicode.http_input_encoding",  NULL, ZEND_INI_ALL, OnUpdateEncoding,   http_input_encoding_conv, zend_unicode_globals, unicode_globals)
+	STD_ZEND_INI_ENTRY("unicode.filesystem_encoding",  NULL, ZEND_INI_ALL, OnUpdateEncoding,   filesystem_encoding_conv, zend_unicode_globals, unicode_globals)
 ZEND_INI_END()
 
 
