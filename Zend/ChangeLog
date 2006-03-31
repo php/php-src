@@ -1,3 +1,19 @@
+2006-03-30  Antony Dovgal  <antony@zend.com>
+
+    * zend.c
+      zend.h:
+      MF51: fix compilation on AIX
+
+    * (PHP_5_1)
+      zend.c
+      zend.h:
+      fix compilation on AIX
+
+2006-03-30  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_objects.c:
+      Unicode support
+
 2006-03-29  Antony Dovgal  <antony@zend.com>
 
     * zend_objects.c
