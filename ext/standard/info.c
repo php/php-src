@@ -63,10 +63,12 @@ PHPAPI extern char *php_ini_scanned_files;
 	
 static int php_info_write_wrapper(const char *str, uint str_length)
 {
+	int new_len, written;
+	char *elem_esc;
+	
 	TSRMLS_FETCH();
 
-	int new_len, written;
-	char *elem_esc = php_escape_html_entities((char *)str, str_length, &new_len, 0, ENT_QUOTES, NULL TSRMLS_CC);
+	elem_esc = php_escape_html_entities((char *)str, str_length, &new_len, 0, ENT_QUOTES, NULL TSRMLS_CC);
 
 	written = php_body_write(elem_esc, new_len TSRMLS_CC);
 
