@@ -944,6 +944,47 @@ PHP_METHOD(xmlreader, readString)
 	php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextReaderReadString);
 }
 /* }}} */
+
+/* {{{ proto boolean XMLReader::setSchema(string filename)
+Use W3C XSD schema to validate the document as it is processed. Activation is only possible before the first Read(). */
+PHP_METHOD(xmlreader, setSchema)
+{
+#ifdef LIBXML_SCHEMAS_ENABLED
+	zval *id;
+	int source_len = 0, retval = -1;
+	xmlreader_object *intern;
+	char *source;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!", &source, &source_len) == FAILURE) {
+		return;
+	}
+
+	if (source != NULL && !source_len) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Schema data source is required");
+		RETURN_FALSE;
+	}
+
+	id = getThis();
+
+	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
+	if (intern && intern->ptr) {
+		retval = xmlTextReaderSchemaValidate(intern->ptr, source);
+
+		if (retval == 0) {
+			RETURN_TRUE;
+		}
+	}
+	
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set schema. This must be set prior to reading or schema contains errors.");
+
+	RETURN_FALSE;
+#else
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "No Schema support built into libxml.");
+
+	RETURN_FALSE;
+#endif
+}
+/* }}} */
 #endif
 
 /* {{{ proto boolean XMLReader::setParserProperty(int property, boolean value)
@@ -991,46 +1032,6 @@ PHP_METHOD(xmlreader, setRelaxNGSchemaSource)
 	php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAM_PASSTHRU, XMLREADER_LOAD_STRING);
 }
 /* }}} */
-
-/* {{{ proto boolean XMLReader::setSchema(string filename)
-Use W3C XSD schema to validate the document as it is processed. Activation is only possible before the first Read(). */
-PHP_METHOD(xmlreader, setSchema)
-{
-#ifdef LIBXML_SCHEMAS_ENABLED
-	zval *id;
-	int source_len = 0, retval = -1;
-	xmlreader_object *intern;
-	char *source;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!", &source, &source_len) == FAILURE) {
-		return;
-	}
-
-	if (source != NULL && !source_len) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Schema data source is required");
-		RETURN_FALSE;
-	}
-
-	id = getThis();
-
-	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
-	if (intern && intern->ptr) {
-		retval = xmlTextReaderSchemaValidate(intern->ptr, source);
-
-		if (retval == 0) {
-			RETURN_TRUE;
-		}
-	}
-	
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set schema. This must be set prior to reading or schema contains errors.");
-
-	RETURN_FALSE;
-#else
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "No Schema support built into libxml.");
-
-	RETURN_FALSE;
-#endif
-}
 
 /* TODO
 XMLPUBFUN int XMLCALL		
@@ -1167,6 +1168,7 @@ static zend_function_entry xmlreader_functions[] = {
 	PHP_ME(xmlreader, readInnerXml, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(xmlreader, readOuterXml, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(xmlreader, readString, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(xmlreader, setSchema, NULL, ZEND_ACC_PUBLIC)
 #endif
 /* Not Yet Implemented though defined in libxml as of 2.6.9dev
 	PHP_ME(xmlreader, resetState, NULL, ZEND_ACC_PUBLIC)
@@ -1174,7 +1176,6 @@ static zend_function_entry xmlreader_functions[] = {
 	PHP_ME(xmlreader, setParserProperty, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(xmlreader, setRelaxNGSchema, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(xmlreader, setRelaxNGSchemaSource, NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(xmlreader, setSchema, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(xmlreader, XML, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_ALLOW_STATIC)
 	PHP_ME(xmlreader, expand, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
