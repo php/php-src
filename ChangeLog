@@ -1,3 +1,109 @@
+2006-03-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/wddx/wddx.c:
+      - Fix build
+
+2006-03-30  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend.h:
+      MF51: fix compilation on AIX
+
+    * (PHP_5_1)
+      ZendEngine2/zend.c
+      ZendEngine2/zend.h:
+      fix compilation on AIX
+
+    * (PHP_5_1)
+      ext/standard/user_filters.c:
+      nuke compile warning
+
+    * ext/mysqli/tests/014.phpt
+      ext/mysqli/tests/015.phpt
+      ext/mysqli/tests/045.phpt:
+      MF51: fix tests
+
+    * (PHP_5_1)
+      ext/mysqli/tests/014.phpt
+      ext/mysqli/tests/015.phpt
+      ext/mysqli/tests/045.phpt:
+      fix tests
+
+    * ext/standard/info.c:
+      fix TSRM build
+
+    * (PHP_5_1)
+      ext/standard/info.c:
+      fix build: there is no TSRMLS_CC in this function
+
+2006-03-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      configure.in
+      main/php_version.h:
+      Back to dev
+
+    * (PHP_5_1)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Go with RC2
+
+    * ext/standard/info.c:
+      MFB51: Fixed XSS inside phpinfo() with long inputs.
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/info.c:
+      Fixed XSS inside phpinfo() with long inputs.
+
+2006-03-30  Seiji Masugata  <s.masugata@digicom.dnp.co.jp>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+      added mb_stripos( ), mb_strripos( ).
+
+2006-03-30  Dmitry Stogov  <dmitry@zend.com>
+
+    * README.UPDATING_TO_PHP6:
+      typo
+
+2006-03-30  Antony Dovgal  <antony@zend.com>
+
+    * ext/mysqli/mysqli.c:
+      MF51: fix #36922 (missing MYSQLI_REPORT_STRICT constant in userspace)
+
+    * (PHP_5_1)
+      ext/mysqli/mysqli.c:
+      fix #36922 (missing MYSQLI_REPORT_STRICT constant in userspace)
+
+2006-03-30  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_objects.c:
+      Unicode support
+
+    * README.UPDATING_TO_PHP6:
+      Describe registr_long_arrays, ze1_compatibility_mode, dl(), E_ALL/E_STRICT
+
+2006-03-30  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/file.c
+      main/php_streams.h
+      main/streams/streams.c:
+      Make php_stream_copy_to_mem() unicode aware and
+      update userspace function file_get_contents().
+      
+      Note: fgc()'s second parameter (use_include_path) has been changed
+      to be a bitmask "flags" parameter instead.
+      
+      For the most commonly used values (TRUE, 1) this will continue functioning
+      as expected since the value of FILE_USE_INCLUDE_PATH is (coincidentally)
+      1.
+      The impact to other values should be noted in the migration6 guide.
+      
+      This change makes it possible to allow fgc() to return binary file
+      contents (default) or unicode transcoded contents (using FILE_TEXT flag).
+
 2006-03-29  Sara Golemon  <sara@golemon.com>
 
     * ext/standard/file.c
