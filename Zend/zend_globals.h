@@ -299,6 +299,7 @@ struct _zend_unicode_globals {
 	UConverter *output_encoding_conv;    /* output layer converter */
 	UConverter *script_encoding_conv;    /* default script encoding converter */
 	UConverter *http_input_encoding_conv;/* http input encoding converter */
+	UConverter *filesystem_encoding_conv;/* default filesystem converter (entries, not contents) */ 
 	UConverter *utf8_conv;				 /* all-purpose UTF-8 converter */
 
 	uint16_t from_error_mode;
