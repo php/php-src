@@ -1,3 +1,15 @@
+2006-03-31  Sara Golemon  <sara@golemon.com>
+
+    * zend.c
+      zend_globals.h:
+      Add API hooks and unicode.filesystem_encoding for handling unicode
+      conversions of filename entries.
+      
+      Normal path conversions will simply use this converter,
+      Certain other protocols (such as http) which specify a
+      required character set (utf8), may override the conversion
+      by defining a path_encode() and/or path_decode() wrapper ops method.
+
 2006-03-30  Antony Dovgal  <antony@zend.com>
 
     * zend.c
