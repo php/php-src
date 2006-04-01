@@ -219,6 +219,10 @@ static zval **spl_array_get_dimension_ptr_ptr(int check_inherited, zval *object,
 	if (check_inherited && intern->fptr_offset_get) {
 		return zend_call_method_with_1_params(&object, Z_OBJCE_P(object), &intern->fptr_offset_get, "offsetGet", NULL, offset);
 	}*/
+
+	if (!offset) {
+		return &EG(uninitialized_zval_ptr);
+	}
 	
 	switch(Z_TYPE_P(offset)) {
 	case IS_STRING:
