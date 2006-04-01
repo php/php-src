@@ -1,3 +1,27 @@
+2006-03-31  Sara Golemon  <sara@golemon.com>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_globals.h
+      ext/standard/file.c
+      main/php_streams.h
+      main/streams/streams.c:
+      Add API hooks and unicode.filesystem_encoding for handling unicode
+      conversions of filename entries.
+      
+      Normal path conversions will simply use this converter,
+      Certain other protocols (such as http) which specify a
+      required character set (utf8), may override the conversion
+      by defining a path_encode() and/or path_decode() wrapper ops method.
+
+2006-03-31  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/info.c:
+      MF51: fix compile failure with old GCC (see bug #36931)
+
+    * (PHP_5_1)
+      ext/standard/info.c:
+      fix compile failure with old GCC (see bug #36931)
+
 2006-03-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/wddx/wddx.c:
