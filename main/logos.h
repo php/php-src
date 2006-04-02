@@ -1,4 +1,4 @@
-#define CONTEXT_TYPE_IMAGE_GIF "Content-Type:  image/gif"
+#define CONTEXT_TYPE_IMAGE_GIF "Content-Type: image/gif"
 
 unsigned char zend_logo[] = {
 	 71,  73,  70,  56,  57,  97, 100,   0,  58,   0, 
