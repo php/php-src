@@ -1,3 +1,8 @@
+2006-04-01  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/file.c:
+      Update filename handling and mark various functions for unicode safety
+
 2006-03-31  Sara Golemon  <sara@golemon.com>
 
     * ZendEngine2/zend.c
