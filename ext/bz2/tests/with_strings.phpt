@@ -8,7 +8,7 @@ BZ2 with strings
 error_reporting(E_ALL);
 
 # This FAILS
-$blaat = <<<HEREDOC
+$blaat = b<<<HEREDOC
 This is some random data
 HEREDOC;
 

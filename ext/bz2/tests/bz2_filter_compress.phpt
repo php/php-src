@@ -4,7 +4,7 @@ bzip2.compress (with convert.base64-encode)
 <?php if (!extension_loaded("bz2")) print "skip"; ?>
 --FILE--
 <?php /* $Id$ */
-$text = 'I am the very model of a modern major general, I\'ve information vegetable, animal, and mineral.';
+$text = b'I am the very model of a modern major general, I\'ve information vegetable, animal, and mineral.';
 
 $fp = fopen('php://stdout', 'w');
 stream_filter_append($fp, 'bzip2.compress', STREAM_FILTER_WRITE);
