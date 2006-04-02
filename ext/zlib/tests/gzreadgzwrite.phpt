@@ -5,7 +5,7 @@ gzopen(), gzread(), gzwrite()
 if (!extension_loaded("zlib")) print "skip"; ?>
 --FILE--
 <?php
-$original = str_repeat("hallo php",4096);
+$original = str_repeat(b"hallo php",4096);
 $filename = tempnam("/tmp", "phpt");
 
 $fp = gzopen($filename, "wb");
