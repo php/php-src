@@ -8,7 +8,7 @@ BZ2 with files
 error_reporting(E_ALL);
 
 $filename = "testfile.bz2";
-$str = "This is a test string.\n";
+$str = b"This is a test string.\n";
 $bz = bzopen($filename, "w");
 bzwrite($bz, $str);
 bzclose($bz);
