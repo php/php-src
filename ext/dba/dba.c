@@ -468,8 +468,6 @@ PHP_MINFO_FUNCTION(dba)
  */
 static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
-	char *v;
-	int len;
 	DBA_ID_GET3;
 
 	DBA_WRITE_CHECK;
