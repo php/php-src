@@ -626,7 +626,8 @@ PHP_MINFO_FUNCTION(mysqli)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "MysqlI Support", "enabled");
-	php_info_print_table_row(2, "Client API version", mysql_get_client_info());
+	php_info_print_table_row(2, "Client API library version", mysql_get_client_info());
+	php_info_print_table_row(2, "Client API header version", MYSQL_SERVER_VERSION);
 	php_info_print_table_row(2, "MYSQLI_SOCKET", MYSQL_UNIX_ADDR);
 	
 	
