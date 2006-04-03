@@ -77,8 +77,21 @@ static void xmlwriter_object_free_storage(void *object TSRMLS_DC)
 		xmlwriter_free_resource_ptr(intern->xmlwriter_ptr TSRMLS_CC);
 	}
 	intern->xmlwriter_ptr = NULL;
+
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 1 && PHP_RELEASE_VERSION > 2) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
 	zend_object_std_dtor(&intern->zo TSRMLS_CC);
-	
+#else
+	if (intern->zo.guards) {
+		zend_hash_destroy(intern->zo.guards);
+		FREE_HASHTABLE(intern->zo.guards);
+	}
+
+	if (intern->zo.properties) {
+		zend_hash_destroy(intern->zo.properties);
+		FREE_HASHTABLE(intern->zo.properties);
+	}
+#endif
+
 	efree(intern);
 }
 /* }}} */
@@ -94,8 +107,17 @@ PHP_XMLWRITER_API zend_object_value xmlwriter_object_new(zend_class_entry *class
 	intern = emalloc(sizeof(ze_xmlwriter_object));
 	memset(&intern->zo, 0, sizeof(zend_object));
 	intern->xmlwriter_ptr = NULL;
-	
+
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 1 && PHP_RELEASE_VERSION > 2) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
 	zend_object_std_init(&intern->zo, class_type TSRMLS_CC);
+#else
+	ALLOC_HASHTABLE(intern->zo.properties);
+	zend_hash_init(intern->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+
+	intern->zo.ce = class_type;
+	intern->zo.guards = NULL;
+#endif
+
 	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref,
 					(void *) &tmp, sizeof(zval *));
 
