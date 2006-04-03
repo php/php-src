@@ -377,8 +377,20 @@ void xmlreader_objects_free_storage(void *object TSRMLS_DC)
 {
 	xmlreader_object *intern = (xmlreader_object *)object;
 
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 1 && PHP_RELEASE_VERSION > 2) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
 	zend_object_std_dtor(&intern->std TSRMLS_CC);
-	
+#else
+	if (intern->std.guards) {
+		zend_hash_destroy(intern->std.guards);
+		FREE_HASHTABLE(intern->std.guards);
+	}
+
+	if (intern->std.properties) {
+		zend_hash_destroy(intern->std.properties);
+		FREE_HASHTABLE(intern->std.properties);
+	}
+#endif
+
 	xmlreader_free_resources(intern);
 
 	efree(object);
@@ -398,7 +410,16 @@ zend_object_value xmlreader_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	intern->schema = NULL;
 	intern->prop_handler = &xmlreader_prop_handlers;
 
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 1 && PHP_RELEASE_VERSION > 2) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
+#else
+	ALLOC_HASHTABLE(intern->std.properties);
+	zend_hash_init(intern->std.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+
+	intern->std.ce = class_type;
+	intern->std.guards = NULL;
+#endif
+
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) xmlreader_objects_free_storage, xmlreader_objects_clone TSRMLS_CC);
 	intern->handle = retval.handle;

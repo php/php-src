@@ -1785,8 +1785,20 @@ static void sxe_object_free_storage(void *object TSRMLS_DC)
 
 	sxe = (php_sxe_object *) object;
 
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 1 && PHP_RELEASE_VERSION > 2) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
 	zend_object_std_dtor(&sxe->zo TSRMLS_CC);
-	
+#else
+	if (sxe->zo.guards) {
+		zend_hash_destroy(sxe->zo.guards);
+		FREE_HASHTABLE(sxe->zo.guards);
+	}
+
+	if (sxe->zo.properties) {
+		zend_hash_destroy(sxe->zo.properties);
+		FREE_HASHTABLE(sxe->zo.properties);
+	}
+#endif
+
 	php_libxml_node_decrement_resource((php_libxml_node_object *)sxe TSRMLS_CC);
 
 	if (sxe->xpath) {
@@ -1814,7 +1826,15 @@ static php_sxe_object* php_sxe_object_new(zend_class_entry *ce TSRMLS_DC)
 	intern->iter.nsprefix = NULL;
 	intern->iter.name = NULL;
 
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 1 && PHP_RELEASE_VERSION > 2) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
 	zend_object_std_init(&intern->zo, ce TSRMLS_CC);
+#else
+	ALLOC_HASHTABLE(intern->zo.properties);
+	zend_hash_init(intern->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+
+	intern->zo.ce = ce;
+	intern->zo.guards = NULL;
+#endif
 
 	return intern;
 }
