@@ -753,10 +753,10 @@ PHP_FUNCTION(stream_select)
 		convert_to_long(sec);
 
 		if (sec < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The seconds parameter must be greater then 0.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The seconds parameter must be greater than 0.");
 			RETURN_FALSE;
 		} else if (usec < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The microseconds parameter must be greater then 0.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The microseconds parameter must be greater than 0.");
 			RETURN_FALSE;
 		}
 
@@ -1181,7 +1181,7 @@ PHP_FUNCTION(stream_get_line)
 	}
 
 	if (max_length < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The maximum allowed length must be greater then or equal to zero.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The maximum allowed length must be greater than or equal to zero.");
 		RETURN_FALSE;
 	}
 	if (!max_length) {

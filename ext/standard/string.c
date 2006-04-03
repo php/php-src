@@ -4474,7 +4474,7 @@ PHP_FUNCTION(substr_count)
 	if (ac > 2) {
 		convert_to_long_ex(offset);
 		if (Z_LVAL_PP(offset) < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset should be greater then or equal to 0.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset should be greater than or equal to 0.");
 			RETURN_FALSE;		
 		}
 		p += Z_LVAL_PP(offset);
