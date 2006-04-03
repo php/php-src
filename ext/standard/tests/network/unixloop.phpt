@@ -29,7 +29,7 @@ Streams Based Unix Domain Loopback test
 		die('Unable to accept connection');
 	}
 
-	fwrite($client, "ABCdef123\n");
+	fwrite($client, b"ABCdef123\n");
 
 	$data = fread($socket, 10);
 	var_dump($data);
