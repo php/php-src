@@ -2219,6 +2219,7 @@ PHP_FUNCTION(register_shutdown_function)
 	shutdown_function_entry.arguments = (zval **) safe_emalloc(sizeof(zval *), shutdown_function_entry.arg_count, 0);
 
 	if (zend_get_parameters_array(ht, shutdown_function_entry.arg_count, shutdown_function_entry.arguments) == FAILURE) {
+		efree(shutdown_function_entry.arguments);
 		RETURN_FALSE;
 	}
 	
@@ -2760,6 +2761,7 @@ PHP_FUNCTION(register_tick_function)
 	tick_fe.arguments = (zval **) safe_emalloc(sizeof(zval *), tick_fe.arg_count, 0);
 
 	if (zend_get_parameters_array(ht, tick_fe.arg_count, tick_fe.arguments) == FAILURE) {
+		efree(tick_fe.arguments);
 		RETURN_FALSE;
 	}
 
