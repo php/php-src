@@ -57,7 +57,6 @@ PHPAPI zend_class_entry  *spl_ce_Countable;
 #define SPL_ARRAY_INT_MASK           0xFFFF0000
 #define SPL_ARRAY_CLONE_MASK         0x03000007
 
-
 typedef struct _spl_array_object {
 	zend_object       std;
 	zval              *array;
