@@ -2878,11 +2878,11 @@ zval *sdl_guess_convert_zval(encodeTypePtr enc, xmlNodePtr data)
 		}
 		if (type->restrictions->minLength &&
 		    strlen(data->children->content) < type->restrictions->minLength->value) {
-		  soap_error0(E_WARNING, "Encoding: Restriction: length less then 'minLength'");
+		  soap_error0(E_WARNING, "Encoding: Restriction: length less than 'minLength'");
 		}
 		if (type->restrictions->maxLength &&
 		    strlen(data->children->content) > type->restrictions->maxLength->value) {
-		  soap_error0(E_WARNING, "Encoding: Restriction: length greater then 'maxLength'");
+		  soap_error0(E_WARNING, "Encoding: Restriction: length greater than 'maxLength'");
 		}
 		if (type->restrictions->length &&
 		    strlen(data->children->content) != type->restrictions->length->value) {
@@ -2941,11 +2941,11 @@ xmlNodePtr sdl_guess_convert_xml(encodeTypePtr enc, zval *data, int style, xmlNo
 			}
 			if (type->restrictions->minLength &&
 			    Z_STRLEN_P(data) < type->restrictions->minLength->value) {
-		  	soap_error0(E_WARNING, "Encoding: Restriction: length less then 'minLength'");
+		  	soap_error0(E_WARNING, "Encoding: Restriction: length less than 'minLength'");
 			}
 			if (type->restrictions->maxLength &&
 			    Z_STRLEN_P(data) > type->restrictions->maxLength->value) {
-		  	soap_error0(E_WARNING, "Encoding: Restriction: length greater then 'maxLength'");
+		  	soap_error0(E_WARNING, "Encoding: Restriction: length greater than 'maxLength'");
 			}
 			if (type->restrictions->length &&
 			    Z_STRLEN_P(data) != type->restrictions->length->value) {

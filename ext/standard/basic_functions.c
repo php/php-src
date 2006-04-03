@@ -1832,7 +1832,7 @@ PHP_FUNCTION(time_sleep_until)
 
 	c_ts = (double)(d_ts - tm.tv_sec - tm.tv_usec / 1000000.00);
 	if (c_ts < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sleep until to time is less then current time.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sleep until to time is less than current time.");
 		RETURN_FALSE;
 	}
 
