@@ -253,6 +253,7 @@ function_entry mbstring_functions[] = {
 	PHP_FE(mb_decode_numericentity,		NULL)
 	PHP_FE(mb_send_mail,					NULL)
 	PHP_FE(mb_get_info,					NULL)
+	PHP_FE(mb_check_encoding,		NULL)
 	PHP_FALIAS(mbstrlen,	mb_strlen,	NULL)
 	PHP_FALIAS(mbstrpos,	mb_strpos,	NULL)
 	PHP_FALIAS(mbstrrpos,	mb_strrpos,	NULL)
@@ -3806,6 +3807,65 @@ PHP_FUNCTION(mb_get_info)
 		}
  	} else if (!strcasecmp("illegal_chars", typ)) {
  		RETVAL_LONG(MBSTRG(illegalchars));
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto bool mb_check_encoding([string var[, string encoding]])
+   Check if the string is valid for the specified encoding */
+PHP_FUNCTION(mb_check_encoding)
+{
+	char *var = NULL;
+	int var_len;
+	char *enc = NULL;
+	int enc_len;
+	mbfl_buffer_converter *convd;
+	enum mbfl_no_encoding no_encoding = MBSTRG(current_internal_encoding);
+	mbfl_string string, result, *ret = NULL;
+	long illegalchars = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ss", &var, &var_len, &enc, &enc_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (var == NULL) {
+		RETURN_BOOL(MBSTRG(illegalchars) == 0);
+	}
+
+	if (enc != NULL) {
+		no_encoding = mbfl_name2no_encoding(enc);
+		if (no_encoding == mbfl_no_encoding_invalid || no_encoding == mbfl_no_encoding_pass) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid encoding \"%s\"", enc);
+			RETURN_FALSE;
+		}
+	}
+	
+	convd = mbfl_buffer_converter_new(no_encoding, no_encoding, 0);
+	if (convd == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create converter");
+		RETURN_FALSE;
+	}	
+	mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
+	mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));	
+	
+	/* initialize string */
+	mbfl_string_init(&string);
+	mbfl_string_init(&result);
+	string.no_encoding = no_encoding;
+	string.no_language = MBSTRG(current_language);
+
+	string.val = (unsigned char *)var;
+	string.len = var_len;
+	ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
+	illegalchars = mbfl_buffer_illegalchars(convd);
+	mbfl_buffer_converter_delete(convd);
+
+	if (ret != NULL) {
+		MBSTRG(illegalchars) += illegalchars;
+		efree(ret->val);
+		RETURN_BOOL(illegalchars == 0);
 	} else {
 		RETURN_FALSE;
 	}
