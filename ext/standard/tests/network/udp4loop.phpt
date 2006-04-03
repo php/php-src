@@ -14,7 +14,7 @@ Streams Based IPv4 UDP Loopback test
 		die('Unable to create AF_INET socket [client]');
 	}
 
-	fwrite($client, "ABCdef123\n");
+	fwrite($client, b"ABCdef123\n");
 
 	$data = fread($server, 10);
 	var_dump($data);

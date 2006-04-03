@@ -23,7 +23,7 @@ Streams Based Unix Domain Datagram Loopback test
 		die('Unable to create AF_UNIX socket [client]');
 	}
 
-	fwrite($client, "ABCdef123\n");
+	fwrite($client, b"ABCdef123\n");
 
 	$data = fread($server, 10);
 	var_dump($data);
