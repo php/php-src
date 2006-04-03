@@ -1,3 +1,47 @@
+2006-04-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      main/logos.h
+      main/logos.h
+      sapi/apache/mod_php4.c
+      sapi/apache/mod_php5.c:
+      MFH:
+      Removed extra space in the Content-Type header for logos
+      Simplified stderr error reporting in apache sapi.
+
+    * main/logos.h
+      sapi/apache/mod_php5.c:
+      Removed extra space in the Content-Type header for logos
+      Simplified stderr error reporting in apache sapi.
+
+2006-04-02  Sara Golemon  <sara@golemon.com>
+
+    * ext/zlib/tests/gzfilegzreadfile.phpt
+      ext/zlib/tests/gzreadgzwrite.phpt
+      ext/zlib/tests/gzreadgzwriteplain.phpt
+      ext/zlib/tests/zlib_filter_deflate.phpt
+      ext/zlib/tests/zlib_filter_inflate.phpt:
+      Silence false positive test failures
+
+    * ext/bz2/tests/bz2_filter_compress.phpt
+      ext/bz2/tests/bz2_filter_decompress.phpt
+      ext/bz2/tests/with_files.phpt
+      ext/bz2/tests/with_strings.phpt:
+      Make some tests pass.
+      compression is just a binary thing.
+      Write unicode and suffer my wrath!
+
+2006-04-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/dba.c:
+      - Fix warning
+
+2006-04-02  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_1)
+      ext/mysqli/mysqli.c:
+      Added additional information for compiled header files.
+
 2006-04-01  Sara Golemon  <sara@golemon.com>
 
     * ext/standard/file.c:
