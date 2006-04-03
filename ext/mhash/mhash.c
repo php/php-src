@@ -205,7 +205,7 @@ PHP_FUNCTION(mhash_keygen_s2k)
 		WRONG_PARAM_COUNT;
 	}
 	if (bytes <= 0){
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "the byte parameter must be greater then 0");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "the byte parameter must be greater than 0");
 		RETURN_FALSE;
 	}
 	

@@ -6310,7 +6310,7 @@ PHP_FUNCTION(substr_count)
 
 	if (ac > 2) {
 		if (offset < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset should be greater then or equal to 0.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset should be greater than or equal to 0.");
 			RETURN_FALSE;
 		}
 		if (haystack_type == IS_UNICODE) {
