@@ -28,6 +28,7 @@ PHP                                                                        NEWS
 - Changed "instanceof" and "catch" operators, is_a() and is_subclass_of()
   functions to not call __autoload(). (Dmitry)
 - Removed global reflection constants. (Johannes)
+- Added gmp_nextprime() function. (Tony, patch by ants dot aasma at gmail dot com) 
 - Added "allow_url_include" ini directive to be able to turn off remote url
   code execution separately from the "allow_url_fopen" setting. (Rasmus)
 - Added to cURL extension: (Ilia)

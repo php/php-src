@@ -79,6 +79,7 @@ zend_function_entry gmp_functions[] = {
 	ZEND_FE(gmp_scan1, NULL)
 	ZEND_FE(gmp_popcount, NULL)
 	ZEND_FE(gmp_hamdist, NULL)
+	ZEND_FE(gmp_nextprime, NULL)
 	{NULL, NULL, NULL}	/* Must be the last line in gmp_functions[] */
 };
 /* }}} */
@@ -1196,6 +1197,14 @@ ZEND_FUNCTION(gmp_or)
 ZEND_FUNCTION(gmp_com)
 {
 	gmp_unary_op(mpz_com);
+}
+/* }}} */
+
+/* {{{ proto resource gmp_nextprime(resource a)
+   Finds next prime of a */
+ZEND_FUNCTION(gmp_nextprime)
+{
+	gmp_unary_op(mpz_nextprime);
 }
 /* }}} */
 
