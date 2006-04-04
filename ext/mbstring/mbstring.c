@@ -1640,7 +1640,7 @@ PHP_FUNCTION(mb_strpos)
 /* }}} */
 
 /* {{{ proto int mb_strrpos(string haystack, string needle [, string encoding])
-   Find the last occurrence of a character in a string within another */
+   Find position of last occurrence of a string within another */
 PHP_FUNCTION(mb_strrpos)
 {
 	int n;
@@ -1741,7 +1741,7 @@ PHP_FUNCTION(mb_strripos)
 PHP_FUNCTION(mb_strstr)
 {
 	int n, len, mblen;
-	mbfl_string haystack, needle, result, *ret = NULL;;
+	mbfl_string haystack, needle, result, *ret = NULL;
 	char *enc_name = NULL;
 	int enc_name_len;
 	zend_bool part = 0;
@@ -1775,8 +1775,8 @@ PHP_FUNCTION(mb_strstr)
 	}
 	n = mbfl_strpos(&haystack, &needle, 0, 0);
 	if (n >= 0) {
+		mblen = mbfl_strlen(&haystack);
 		if (part) {
-			mblen = mbfl_strlen(&haystack);
 			ret = mbfl_substr(&haystack, &result, 0, n);
 			if (ret != NULL) {
 				RETVAL_STRINGL((char *)ret->val, ret->len, 0);
@@ -1784,7 +1784,6 @@ PHP_FUNCTION(mb_strstr)
 				RETVAL_FALSE;
 			}
 		} else {
-			mblen = mbfl_strlen(&haystack);
 			len = (mblen - n);
 			ret = mbfl_substr(&haystack, &result, n, len);
 			if (ret != NULL) {
@@ -1804,7 +1803,7 @@ PHP_FUNCTION(mb_strstr)
 PHP_FUNCTION(mb_strrchr)
 {
 	int n, len, mblen;
-	mbfl_string haystack, needle, result, *ret = NULL;;
+	mbfl_string haystack, needle, result, *ret = NULL;
 	char *enc_name = NULL;
 	int enc_name_len;
 	zend_bool part = 0;
@@ -1838,8 +1837,8 @@ PHP_FUNCTION(mb_strrchr)
 	}
 	n = mbfl_strpos(&haystack, &needle, 0, 1);
 	if (n >= 0) {
+		mblen = mbfl_strlen(&haystack);
 		if (part) {
-			mblen = mbfl_strlen(&haystack);
 			ret = mbfl_substr(&haystack, &result, 0, n);
 			if (ret != NULL) {
 				RETVAL_STRINGL((char *)ret->val, ret->len, 0);
@@ -1847,7 +1846,6 @@ PHP_FUNCTION(mb_strrchr)
 				RETVAL_FALSE;
 			}
 		} else {
-			mblen = mbfl_strlen(&haystack);
 			len = (mblen - n);
 			ret = mbfl_substr(&haystack, &result, n, len);
 			if (ret != NULL) {
