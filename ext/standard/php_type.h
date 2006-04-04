@@ -35,7 +35,6 @@ PHP_FUNCTION(is_numeric);
 PHP_FUNCTION(is_binary);
 PHP_FUNCTION(is_string);
 PHP_FUNCTION(is_unicode);
-PHP_FUNCTION(is_binary);
 PHP_FUNCTION(is_buffer);
 PHP_FUNCTION(is_array);
 PHP_FUNCTION(is_object);
