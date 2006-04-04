@@ -1,3 +1,78 @@
+2006-04-03  Antony Dovgal  <antony@zend.com>
+
+    * ext/gmp/tests/gmp_nextprime.phpt:
+      add test for gmp_nextprime()
+
+    * NEWS
+      ext/gmp/gmp.c
+      ext/gmp/php_gmp.h:
+      add gmp_nextprime() function
+      patch by ants dot aasma at gmail dot com
+
+2006-04-03  Seiji Masugata  <s.masugata@digicom.dnp.co.jp>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+      added mb_stristr( ), mb_strrichr( ).
+
+2006-04-03  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      ext/simplexml/simplexml.c:
+      (as was agreed with Ilia)
+
+2006-04-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      ext/standard/basic_functions.c:
+      MFH: Fixed an unlikely, but possible memory leak.
+
+    * ext/standard/basic_functions.c:
+      MFB51: Fixed an unlikely, but possible memory leak.
+
+    * (PHP_5_1)
+      ext/standard/basic_functions.c:
+      Fixed an unlikely, but possible memory leak.
+
+2006-04-03  Seiji Masugata  <s.masugata@digicom.dnp.co.jp>
+
+    * (PHP_4_4)
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+      added mb_check_encoding( ). detect possible invalid encoding attack(avoids
+      a security issue).
+
+2006-04-03  Antony Dovgal  <antony@zend.com>
+
+    * ext/ftp/ftp.c
+      ext/ftp/ftp.c
+      ext/mhash/mhash.c
+      ext/mhash/mhash.c
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.c
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.c
+      ext/standard/string.c
+      ext/standard/string.c:
+      fix spelling in error messages:
+      greater/less thEn -> greater/less thAn
+
+2006-04-03  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/tests/network/tcp4loop.phpt
+      ext/standard/tests/network/tcp6loop.phpt
+      ext/standard/tests/network/udgloop.phpt
+      ext/standard/tests/network/udp4loop.phpt
+      ext/standard/tests/network/udp6loop.phpt
+      ext/standard/tests/network/unixloop.phpt:
+      Update tests for working with unicode
+
+2006-04-03  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_1)
+      ext/mysqli/mysqli_prop.c:
+      fixed stmt property container and required status for error properties
+
 2006-04-02  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_4)
