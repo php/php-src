@@ -67,7 +67,9 @@ typedef struct _spl_array_object {
 } spl_array_object;
 
 static inline HashTable *spl_array_get_hash_table(spl_array_object* intern, int check_std_props TSRMLS_DC) {
-	if ((intern->ar_flags & SPL_ARRAY_USE_OTHER) && (check_std_props == 0 || (intern->ar_flags & SPL_ARRAY_STD_PROP_LIST) == 0)) {
+	if ((intern->ar_flags & SPL_ARRAY_IS_SELF) != 0) {
+		return intern->std.properties;
+	} else if ((intern->ar_flags & SPL_ARRAY_USE_OTHER) && (check_std_props == 0 || (intern->ar_flags & SPL_ARRAY_STD_PROP_LIST) == 0)) {
 		spl_array_object *other  = (spl_array_object*)zend_object_store_get_object(intern->array TSRMLS_CC);
 		return spl_array_get_hash_table(other, check_std_props TSRMLS_CC);
 	} else if ((intern->ar_flags & ((check_std_props ? SPL_ARRAY_STD_PROP_LIST : 0) | SPL_ARRAY_IS_SELF)) != 0) {
@@ -112,8 +114,10 @@ static void spl_array_object_free_storage(void *object TSRMLS_DC)
 }
 /* }}} */
 
+zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC);
+
 /* {{{ spl_array_object_new */
-static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, spl_array_object **obj, zval *orig TSRMLS_DC)
+static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, spl_array_object **obj, zval *orig, int clone_orig TSRMLS_DC)
 {
 	zend_object_value retval;
 	spl_array_object *intern;
@@ -130,13 +134,26 @@ static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, s
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 	intern->ar_flags = 0;
+	intern->ce_get_iterator = spl_ce_ArrayIterator;
 	if (orig) {
 		spl_array_object *other = (spl_array_object*)zend_object_store_get_object(orig TSRMLS_CC);
 
-		intern->array = orig;
-		ZVAL_ADDREF(intern->array);
 		intern->ar_flags &= ~ SPL_ARRAY_CLONE_MASK;
-		intern->ar_flags |= (other->ar_flags & SPL_ARRAY_CLONE_MASK) | SPL_ARRAY_IS_REF | SPL_ARRAY_USE_OTHER;
+		intern->ar_flags |= (other->ar_flags & SPL_ARRAY_CLONE_MASK);
+		intern->ce_get_iterator = other->ce_get_iterator;
+		if (clone_orig) {
+			intern->array = other->array;
+			if (Z_OBJ_HT_P(orig) == &spl_handler_ArrayObject) {
+				ZVAL_ADDREF(intern->array);
+				SEPARATE_ZVAL(&intern->array);
+				ZVAL_ADDREF(other->array);
+				ZVAL_ADDREF(intern->array);
+			}
+		} else {
+			intern->array = orig;
+			ZVAL_ADDREF(intern->array);
+			intern->ar_flags |= SPL_ARRAY_IS_REF | SPL_ARRAY_USE_OTHER;
+		}
 	} else {
 		MAKE_STD_ZVAL(intern->array);
 		array_init(intern->array);
@@ -145,7 +162,7 @@ static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, s
 
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) spl_array_object_free_storage, NULL TSRMLS_CC);
 	while (parent) {
-		if (parent == spl_ce_ArrayIterator) {
+		if (parent == spl_ce_ArrayIterator || parent == spl_ce_RecursiveArrayIterator) {
 			retval.handlers = &spl_handler_ArrayIterator;
 			break;
 		} else if (parent == spl_ce_ArrayObject) {
@@ -156,7 +173,7 @@ static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, s
 		inherited = 1;
 	}
 	if (!parent) { /* this must never happen */
-		php_error_docref(NULL TSRMLS_CC, E_COMPILE_ERROR, "Internal compiler error, Class is not child of ArrayObject or arrayIterator");
+		php_error_docref(NULL TSRMLS_CC, E_COMPILE_ERROR, "Internal compiler error, Class is not child of ArrayObject or ArrayIterator");
 	}
 	if (inherited) {
 		zend_hash_find(&class_type->function_table, "offsetget",    sizeof("offsetget"),    (void **) &intern->fptr_offset_get);
@@ -186,7 +203,7 @@ static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, s
 static zend_object_value spl_array_object_new(zend_class_entry *class_type TSRMLS_DC)
 {
 	spl_array_object *tmp;
-	return spl_array_object_new_ex(class_type, &tmp, NULL TSRMLS_CC);
+	return spl_array_object_new_ex(class_type, &tmp, NULL, 0 TSRMLS_CC);
 }
 /* }}} */
 
@@ -200,7 +217,7 @@ static zend_object_value spl_array_object_clone(zval *zobject TSRMLS_DC)
 	spl_array_object *intern;
 
 	old_object = zend_objects_get_address(zobject TSRMLS_CC);
-	new_obj_val = spl_array_object_new_ex(old_object->ce, &intern, zobject TSRMLS_CC);
+	new_obj_val = spl_array_object_new_ex(old_object->ce, &intern, zobject, 1 TSRMLS_CC);
 	new_object = &intern->std;
 
 	zend_objects_clone_members(new_object, new_obj_val, old_object, handle TSRMLS_CC);
@@ -828,6 +845,7 @@ SPL_METHOD(Array, __construct)
 	}
 	if (object == array) {
 		intern->ar_flags |= SPL_ARRAY_IS_SELF;
+		intern->ar_flags &= ~SPL_ARRAY_USE_OTHER;
 	} else {
 		intern->ar_flags &= ~SPL_ARRAY_IS_SELF;
 	}
@@ -966,7 +984,7 @@ SPL_METHOD(Array, getIterator)
 	}
 
 	return_value->type = IS_OBJECT;
-	return_value->value.obj = spl_array_object_new_ex(intern->ce_get_iterator, &iterator, object TSRMLS_CC);
+	return_value->value.obj = spl_array_object_new_ex(intern->ce_get_iterator, &iterator, object, 0 TSRMLS_CC);
 	return_value->refcount = 1;
 	return_value->is_ref = 1;
 }
