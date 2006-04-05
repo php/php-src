@@ -314,6 +314,12 @@ ZEND_FUNCTION(strncmp)
 	convert_to_string_ex(s1);
 	convert_to_string_ex(s2);
 	convert_to_long_ex(s3);
+
+	if (Z_LVAL_PP(s3) < 0) {
+		zend_error(E_WARNING, "Length must be greater than or equal to 0");
+		RETURN_FALSE;
+	}
+	
 	RETURN_LONG(zend_binary_zval_strncmp(*s1, *s2, *s3));
 }
 /* }}} */
@@ -347,6 +353,12 @@ ZEND_FUNCTION(strncasecmp)
 	convert_to_string_ex(s1);
 	convert_to_string_ex(s2);
 	convert_to_long_ex(s3);
+
+	if (Z_LVAL_PP(s3) < 0) {
+		zend_error(E_WARNING, "Length must be greater than or equal to 0");
+		RETURN_FALSE;
+	}
+
 	RETURN_LONG(zend_binary_zval_strncasecmp(*s1, *s2, *s3));
 }
 /* }}} */
