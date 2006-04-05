@@ -333,6 +333,12 @@ ZEND_FUNCTION(strncmp)
 							  &s1_type, &s2, &s2_len, &s2_type, &count) == FAILURE) {
 		return;
 	}
+
+	if (count < 0) {
+		zend_error(E_WARNING, "Length must be greater than or equal to 0");
+		RETURN_FALSE;
+	}
+	
 	if (s1_type == IS_UNICODE) {
 		RETURN_LONG(zend_u_binary_strncmp(s1, s1_len, s2, s2_len, count));
 	} else {
@@ -376,6 +382,12 @@ ZEND_FUNCTION(strncasecmp)
 							  &s1_type, &s2, &s2_len, &s2_type, &len) == FAILURE) {
 		return;
 	}
+
+	if (len < 0) {
+		zend_error(E_WARNING, "Length must be greater than or equal to 0");
+		RETURN_FALSE;
+	}
+
 	if (s1_type == IS_UNICODE) {
 		RETURN_LONG(zend_u_binary_strncasecmp(s1, s1_len, s2, s2_len, len));
 	} else {
