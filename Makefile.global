@@ -44,13 +44,13 @@ install-modules: build-modules
 
 install-headers:
 	-@if test "$(INSTALL_HEADERS)"; then \
-		for i in $(INSTALL_HEADERS); do \
+		for i in `echo $(INSTALL_HEADERS)`; do \
 			i=`$(top_srcdir)/build/shtool path -d $$i`; \
 			paths="$$paths $(INSTALL_ROOT)$(phpincludedir)/$$i"; \
 		done; \
 		$(mkinstalldirs) $$paths && \
 		echo "Installing header files:          $(INSTALL_ROOT)$(phpincludedir)/" && \
-		for i in $(INSTALL_HEADERS); do \
+		for i in `echo $(INSTALL_HEADERS)`; do \
 			if test "$(PHP_PECL_EXTENSION)"; then \
 				src=`echo $$i | $(SED) -e "s#ext/$(PHP_PECL_EXTENSION)/##g"`; \
 			else \
