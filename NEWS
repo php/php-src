@@ -13,6 +13,7 @@ PHP                                                                        NEWS
 - Removed the E_STRICT deprecation notice from "var". (Ilia)
 - Fixed debug_zval_dump() to support private and protected members. (Dmitry)
 - Fixed SoapFault::getMessage(). (Dmitry)
+- Fixed bug #36957 (serialize() does not handle recursion). (Ilia)
 - Fixed bug #36941 (ArrayIterator does not clone itself). (Marcus)
 - Fixed bug #36898 (__set() leaks in classes extending internal ones). 
   (Tony, Dmitry)
