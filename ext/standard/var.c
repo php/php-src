@@ -1031,10 +1031,18 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 					if (zend_hash_get_current_data_ex(myht, 
 						(void **) &data, &pos) != SUCCESS 
 						|| !data 
-						|| data == struc) {
+						|| data == struc
+						|| (Z_TYPE_PP(data) == IS_ARRAY && Z_ARRVAL_PP(data)->nApplyCount > 1)
+					) {
 						smart_str_appendl(buf, "N;", 2);
 					} else {
+						if (Z_TYPE_PP(data) == IS_ARRAY) {
+							Z_ARRVAL_PP(data)->nApplyCount++;
+						}
 						php_var_serialize_intern(buf, data, var_hash TSRMLS_CC);
+						if (Z_TYPE_PP(data) == IS_ARRAY) {
+							Z_ARRVAL_PP(data)->nApplyCount--;
+						}
 					}
 				}
 			}
