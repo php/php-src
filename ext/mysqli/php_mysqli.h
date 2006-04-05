@@ -118,8 +118,12 @@ typedef struct {
 
 #ifdef PHP_WIN32
 #define PHP_MYSQLI_API __declspec(dllexport)
+#define MYSQLI_LLU_SPEC "%I64u"
+#define MYSQLI_LL_SPEC "%I64d"
 #else
 #define PHP_MYSQLI_API
+#define MYSQLI_LLU_SPEC "%llu"
+#define MYSQLI_LL_SPEC "%lld"
 #endif
 
 #ifdef ZTS
