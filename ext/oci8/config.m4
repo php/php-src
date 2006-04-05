@@ -232,6 +232,13 @@ if test "$PHP_OCI8" != "no" && test "$PHP_OCI8_INSTANT_CLIENT" = "no"; then
       ], [], [
         -L$OCI8_DIR/$OCI8_LIB_DIR $OCI8_SHARED_LIBADD
       ])
+
+      PHP_CHECK_LIBRARY(clntsh, OCILobRead2,
+      [
+        AC_DEFINE(HAVE_OCI_LOB_READ2,1,[ ])
+      ], [], [
+        -L$OCI8_DIR/$OCI8_LIB_DIR $OCI8_SHARED_LIBADD
+      ])
  
       ;;
       
@@ -242,6 +249,7 @@ if test "$PHP_OCI8" != "no" && test "$PHP_OCI8_INSTANT_CLIENT" = "no"; then
       AC_DEFINE(HAVE_OCI_ENV_NLS_CREATE,1,[ ])
       AC_DEFINE(HAVE_OCI_ENV_CREATE,1,[ ])
       AC_DEFINE(HAVE_OCI_STMT_PREPARE2,1,[ ])
+      AC_DEFINE(HAVE_OCI_LOB_READ2,1,[ ])
       AC_DEFINE(HAVE_OCI8_TEMP_LOB,1,[ ])
       AC_DEFINE(PHP_OCI8_HAVE_COLLECTIONS,1,[ ])
       ;;
@@ -354,6 +362,7 @@ dnl Header directory for manual installation
   AC_DEFINE(HAVE_OCI_ENV_NLS_CREATE,1,[ ])
   AC_DEFINE(HAVE_OCI_ENV_CREATE,1,[ ])
   AC_DEFINE(HAVE_OCI_STMT_PREPARE2,1,[ ])
+  AC_DEFINE(HAVE_OCI_LOB_READ2,1,[ ])
   AC_DEFINE(HAVE_OCI8_TEMP_LOB,1,[ ])
   AC_DEFINE(PHP_OCI8_HAVE_COLLECTIONS,1,[ ])
 

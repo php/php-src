@@ -78,7 +78,7 @@ extern zend_class_entry *oci_coll_class_entry_ptr;
 #define PHP_OCI_MAX_NAME_LEN  64
 #define PHP_OCI_MAX_DATA_SIZE INT_MAX
 #define PHP_OCI_PIECE_SIZE    (64*1024)-1
-#define PHP_OCI_LOB_BUFFER_SIZE 1048576l 
+#define PHP_OCI_LOB_BUFFER_SIZE 32768 
 
 #define PHP_OCI_ASSOC               1<<0
 #define PHP_OCI_NUM                 1<<1
