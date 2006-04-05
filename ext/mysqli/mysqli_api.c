@@ -705,10 +705,10 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 #endif
 								char tmp[22];
 								/* even though lval is declared as unsigned, the value
-								 * may be negative. Therefor we cannot use %llu and must
-								 * use %lld.
+								 * may be negative. Therefor we cannot use MYSQLI_LLU_SPEC and must
+								 * use MYSQLI_LL_SPEC.
 								 */
-								sprintf((char *)&tmp, (stmt->stmt->fields[i].flags & UNSIGNED_FLAG)? "%llu":"%lld", llval);
+								sprintf((char *)&tmp, (stmt->stmt->fields[i].flags & UNSIGNED_FLAG)? MYSQLI_LLU_SPEC : MYSQLI_LL_SPEC, llval);
 								ZVAL_STRING(stmt->result.vars[i], tmp, 1);
 							} else {
 								ZVAL_LONG(stmt->result.vars[i], llval);
@@ -1859,7 +1859,7 @@ PHP_FUNCTION(mysqli_stmt_errno)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
 		return;
 	}
-	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt", MYSQLI_STATUS_VALID);
+	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt", MYSQLI_STATUS_INITIALIZED);
 
 	RETURN_LONG(mysql_stmt_errno(stmt->stmt));
 }
@@ -1875,7 +1875,7 @@ PHP_FUNCTION(mysqli_stmt_error)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
 		return;
 	}
-	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt", MYSQLI_STATUS_VALID);
+	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt", MYSQLI_STATUS_INITIALIZED);
 	
 	RETURN_STRING((char *)mysql_stmt_error(stmt->stmt),1);
 }
