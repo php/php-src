@@ -3,7 +3,7 @@ Bug #27619 (filters not applied to pre-buffered data)
 --FILE--
 <?php
 	$fp = tmpfile();
-	fwrite($fp, "this is a lowercase string.\n");
+	fwrite($fp, b"this is a lowercase string.\n");
 	rewind($fp);
 
 	/* Echo out the first four bytes 'this' without applying filter

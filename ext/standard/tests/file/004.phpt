@@ -31,7 +31,7 @@ file_put_contents() test
 	}
 	echo "\n";
 	
-	$ret = file_put_contents("TEST4", __FILE__);
+	$ret = file_put_contents("TEST4", (binary)__FILE__);
 	echo "Bool Test: ";
 	if ($ret !== FALSE && md5(__FILE__) == md5_file("TEST4")) {
 		echo 'OK';
