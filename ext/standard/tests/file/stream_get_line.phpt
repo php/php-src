@@ -2,10 +2,9 @@
 Crash inside stream_get_line(), when length=0
 --FILE--
 <?php
-die("Temporary unavailable in unicode PHP. Remove this line.");
 $path = dirname(__FILE__) . '/test.html';
 
-file_put_contents($path, "foo<br>bar<br>foo");
+file_put_contents($path, b"foo<br>bar<br>foo");
 $fp = fopen($path, "r");
 while ($fp && !feof($fp)) {
 	echo stream_get_line($fp, 0, "<br>")."\n";
