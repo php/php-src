@@ -1335,7 +1335,7 @@ static zend_function_entry spl_RecursiveDirectoryIterator_functions[] = {
 static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent TSRMLS_DC) /* {{{ */
 {
 	char *buf;
-	size_t line_len;
+	size_t line_len = 0;
 	long line_add = (intern->u.file.current_line || intern->u.file.current_zval) ? 1 : 0;
 
 	spl_filesystem_file_free_line(intern TSRMLS_CC);
@@ -1347,7 +1347,17 @@ static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent TS
 		return FAILURE;
 	}
 
-	buf = php_stream_get_line(intern->u.file.stream, NULL_ZSTR, intern->u.file.max_line_len, &line_len);
+	if (intern->u.file.max_line_len > 0) {
+		buf = emalloc((intern->u.file.max_line_len + 1) * sizeof(char));
+		if (php_stream_get_line(intern->u.file.stream, buf, intern->u.file.max_line_len, &line_len) == NULL) {
+			efree(buf);
+			buf = NULL;
+		} else {
+			buf[line_len] = '\0';
+		}
+	} else {
+		buf = php_stream_get_line(intern->u.file.stream, NULL_ZSTR, 0, &line_len);
+	}
 
 	if (!buf) {
 		intern->u.file.current_line = estrdup("");
