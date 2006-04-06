@@ -17,5 +17,18 @@
   (Note that this would not involve the use of PCRE_NO_AUTO_CAPTURE, as
   that would change the semantics of backreferences)
 
+- In looking at preg_grep, I think it'd be pretty easy to implement some flags:
+
+   PREG_GREP_REKEY_ALL --- all key values are rekeyed, as if return array had been
+                           passed through array_values().
+  
+   PREG_GREP_REKEY_NUMS --- only numeric key values are rekeyed; string key values
+                            are maintained
+
+   PREG_GREP_REKEY_NONE  ---- (default and current situation) keys are maintained
+  
+  I can't judge the social effect of changing the default, but my intuition
+  of a grep function in PHP would be that the default is PREG_GREP_REKEY_NUMS
+  or PREG_GREP_REKEY_ALL....
 
 
