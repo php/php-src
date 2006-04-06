@@ -1,7 +1,8 @@
 - Allow NULL for $matches argument (helps when using preg_match only for
   match condition) - might not be possible
 
-- http://bugs.php.net/bug.php?id=36975
+- http://bugs.php.net/bug.php?id=36983
+  http://bugs.php.net/bug.php?id=33151
 
 - I'd love to see a pattern modifer which says "don't fill $matches except
   for the overall match and any specific named captures". This would allow
