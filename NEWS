@@ -15,6 +15,7 @@ PHP                                                                        NEWS
 - Removed the E_STRICT deprecation notice from "var". (Ilia)
 - Fixed debug_zval_dump() to support private and protected members. (Dmitry)
 - Fixed SoapFault::getMessage(). (Dmitry)
+- Fixed bug #36981 (SplFileObject->fgets() ignores max_length). (Tony)
 - Fixed bug #36957 (serialize() does not handle recursion). (Ilia)
 - Fixed bug #36944 (strncmp & strncasecmp do not return false on negative 
   string length). (Tony)
