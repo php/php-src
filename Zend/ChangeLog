@@ -1,3 +1,14 @@
+2006-04-05  Antony Dovgal  <antony@zend.com>
+
+    * zend_builtin_functions.c:
+      MF51: fix #36944 (strncmp & strncasecmp do not return false on negative
+      string length)
+
+    * (PHP_5_1)
+      zend_builtin_functions.c:
+      fix #36944 (strncmp & strncasecmp do not return false on negative string
+      length)
+
 2006-03-31  Sara Golemon  <sara@golemon.com>
 
     * zend.c
