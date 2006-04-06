@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 30 Mar 2006, PHP 5.1.3RC2
+- Fixed safe_mode check for source argument of the copy() function. (Ilia)
 - Fixed mysqli bigint conversion under Windows (Georg)
 - Fixed XSS inside phpinfo() with long inputs. (Ilia)
 - Check 2nd parameter of tempnam() against path components. (Ilia)
