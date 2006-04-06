@@ -1767,7 +1767,7 @@ no_stat:
 	}
 safe_to_copy:
 
-	srcstream = php_stream_open_wrapper(src, "rb", STREAM_DISABLE_OPEN_BASEDIR | REPORT_ERRORS, NULL);
+	srcstream = php_stream_open_wrapper(src, "rb", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL);
 	
 	if (!srcstream) {
 		return ret;
