@@ -31,4 +31,6 @@
   of a grep function in PHP would be that the default is PREG_GREP_REKEY_NUMS
   or PREG_GREP_REKEY_ALL....
 
+- Disallow numeric named captures.
+
 
