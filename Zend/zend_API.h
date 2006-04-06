@@ -327,6 +327,9 @@ ZEND_API int add_assoc_unicode_ex(zval *arg, char *key, uint key_len, UChar *str
 ZEND_API int add_assoc_unicodel_ex(zval *arg, char *key, uint key_len, UChar *str, uint length, int duplicate);
 ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
 
+#define ZSTR_DUPLICATE	(1<<0)
+#define ZSTR_AUTOFREE	(1<<1)
+
 #define add_assoc_text_ex(arg, key, key_len, str, duplicate) \
 	if (UG(unicode)) { \
 		add_assoc_unicode_ex(arg, key, key_len, (str).u, duplicate); \
@@ -341,44 +344,56 @@ ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
 		add_assoc_stringl_ex(arg, key, key_len, (str).s, length, duplicate); \
 	}
 
-#define add_assoc_ascii_string_ex(arg, key, key_len, str, duplicate) \
+#define add_assoc_ascii_string_ex(arg, key, key_len, str, flags) \
 	if (UG(unicode)) { \
 		uint length = strlen(str); \
 		UChar *u_str = zend_ascii_to_unicode((str), length+1 ZEND_FILE_LINE_CC); \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
+		} \
 		add_assoc_unicodel_ex(arg, key, key_len, u_str, length, 0); \
 	} else { \
-		add_assoc_string_ex(arg, key, key_len, (char*)(str), duplicate); \
+		add_assoc_string_ex(arg, key, key_len, (char*)(str), (flags) & ZSTR_DUPLICATE); \
 	}
 
-#define add_assoc_ascii_stringl_ex(arg, key, key_len, str, length, duplicate) \
+#define add_assoc_ascii_stringl_ex(arg, key, key_len, str, length, flags) \
 	if (UG(unicode)) { \
 		UChar *u_str = zend_ascii_to_unicode((str), (length)+1 ZEND_FILE_LINE_CC); \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
+		} \
 		add_assoc_unicodel_ex(arg, key, key_len, u_str, length, 0); \
 	} else { \
-		add_assoc_stringl_ex(arg, key, key_len, (char*)(str), length, duplicate); \
+		add_assoc_stringl_ex(arg, key, key_len, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
 	}
 
-#define add_assoc_rt_string_ex(arg, key, key_len, str, duplicate) \
+#define add_assoc_rt_string_ex(arg, key, key_len, str, flags) \
 	if (UG(unicode)) { \
     UErrorCode status = U_ZERO_ERROR; \
 		UChar *u_str; \
 		int u_len; \
 		int length = strlen(str); \
 		zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, str, length, &status); \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
+		} \
 		add_assoc_unicodel_ex(arg, key, key_len, u_str, u_len, 0); \
 	} else { \
-		add_assoc_string_ex(arg, key, key_len, (char*)(str), duplicate); \
+		add_assoc_string_ex(arg, key, key_len, (char*)(str), (flags) & ZSTR_DUPLICATE); \
 	}
 
-#define add_assoc_rt_stringl_ex(arg, key, key_len, str, length, duplicate) \
+#define add_assoc_rt_stringl_ex(arg, key, key_len, str, length, flags) \
 	if (UG(unicode)) { \
     UErrorCode status = U_ZERO_ERROR; \
 		UChar *u_str; \
 		int u_len; \
 		zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, str, length, &status); \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
+		} \
 		add_assoc_unicodel_ex(arg, key, key_len, u_str, u_len, 0); \
 	} else { \
-		add_assoc_stringl_ex(arg, key, key_len, (char*)(str), length, duplicate); \
+		add_assoc_stringl_ex(arg, key, key_len, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
 	}
 
 #define add_assoc_long(__arg, __key, __n) add_assoc_long_ex(__arg, __key, strlen(__key)+1, __n)
@@ -408,21 +423,27 @@ ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
 		add_assoc_stringl(arg, key, (str).s, length, duplicate); \
 	}
 
-#define add_assoc_ascii_string(arg, key, str, duplicate) \
+#define add_assoc_ascii_string(arg, key, str, flags) \
 	if (UG(unicode)) { \
 		uint length = strlen(str); \
 		UChar *u_str = zend_ascii_to_unicode((str), length+1 ZEND_FILE_LINE_CC); \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
+		} \
 		add_assoc_unicodel(arg, key, u_str, length, 0); \
 	} else { \
-		add_assoc_string(arg, key, (char*)(str), duplicate); \
+		add_assoc_string(arg, key, (char*)(str), (flags) & ZSTR_DUPLICATE); \
 	}
 
-#define add_assoc_ascii_stringl(arg, key, str, length, duplicate) \
+#define add_assoc_ascii_stringl(arg, key, str, length, flags) \
 	if (UG(unicode)) { \
 		UChar *u_str = zend_ascii_to_unicode((str), (length)+1 ZEND_FILE_LINE_CC); \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
+		} \
 		add_assoc_unicodel(arg, key, u_str, length, 0); \
 	} else { \
-		add_assoc_stringl(arg, key, (char*)(str), length, duplicate); \
+		add_assoc_stringl(arg, key, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
 	}
 
 ZEND_API int add_u_assoc_zval_ex(zval *arg, zend_uchar type, zstr key, uint key_len, zval *value);
@@ -460,21 +481,27 @@ ZEND_API int add_index_zval(zval *arg, ulong index, zval *value);
 		add_index_stringl(arg, idx, (str).s, length, duplicate); \
 	}
 
-#define add_index_ascii_string(arg, idx, str, duplicate) \
+#define add_index_ascii_string(arg, idx, str, flags) \
 	if (UG(unicode)) { \
 		uint length = strlen(str); \
 		UChar *u_str = zend_ascii_to_unicode((str), length+1 ZEND_FILE_LINE_CC); \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
+		} \
 		add_index_unicodel(arg, idx, u_str, length, 0); \
 	} else { \
-		add_index_string(arg, idx, (char*)(str), duplicate); \
+		add_index_string(arg, idx, (char*)(str), (flags) & ZSTR_DUPLICATE); \
 	}
 
-#define add_index_ascii_stringl(arg, idx, str, length, duplicate) \
+#define add_index_ascii_stringl(arg, idx, str, length, flags) \
 	if (UG(unicode)) { \
 		UChar *u_str = zend_ascii_to_unicode((str), length+1 ZEND_FILE_LINE_CC); \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
+		} \
 		add_index_unicodel(arg, idx, u_str, length, 0); \
 	} else { \
-		add_index_stringl(arg, idx, (char*)(str), length, duplicate); \
+		add_index_stringl(arg, idx, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
 	}
 
 ZEND_API int add_next_index_long(zval *arg, long n);
@@ -502,44 +529,56 @@ ZEND_API int add_next_index_zval(zval *arg, zval *value);
 		add_next_index_stringl(arg, (str).s, length, duplicate); \
 	}
 
-#define add_next_index_ascii_string(arg, str, duplicate) \
+#define add_next_index_ascii_string(arg, str, flags) \
 	if (UG(unicode)) { \
 		uint length = strlen(str); \
 		UChar *u_str = zend_ascii_to_unicode((str), length+1 ZEND_FILE_LINE_CC); \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
+		} \
 		add_next_index_unicodel(arg, u_str, length, 0); \
 	} else { \
-		add_next_index_string(arg, (char*)(str), duplicate); \
+		add_next_index_string(arg, (char*)(str), (flags) & ZSTR_DUPLICATE); \
 	}
 
-#define add_next_index_ascii_stringl(arg, str, length, duplicate) \
+#define add_next_index_ascii_stringl(arg, str, length, flags) \
 	if (UG(unicode)) { \
 		UChar *u_str = zend_ascii_to_unicode((str), length+1 ZEND_FILE_LINE_CC); \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
+		} \
 		add_next_index_unicodel(arg, u_str, length, 0); \
 	} else { \
-		add_next_index_stringl(arg, (char*)(str), length, duplicate); \
+		add_next_index_stringl(arg, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
 	}
 
-#define add_next_index_rt_string(arg, str, duplicate) \
+#define add_next_index_rt_string(arg, str, flags) \
 	if (UG(unicode)) { \
     UErrorCode status = U_ZERO_ERROR; \
 		UChar *u_str; \
 		int u_len; \
 		int length = strlen(str); \
 		zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, str, length, &status); \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
+		} \
 		add_next_index_unicodel(arg, u_str, u_len, 0); \
 	} else { \
-		add_next_index_string(arg, (char*)(str), duplicate); \
+		add_next_index_string(arg, (char*)(str), (flags) & ZSTR_DUPLICATE); \
 	}
 
-#define add_next_index_rt_stringl(arg, str, length, duplicate) \
+#define add_next_index_rt_stringl(arg, str, length, flags) \
 	if (UG(unicode)) { \
     UErrorCode status = U_ZERO_ERROR; \
 		UChar *u_str; \
 		int u_len; \
 		zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, str, length, &status); \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
+		} \
 		add_next_index_unicodel(arg, u_str, u_len, 0); \
 	} else { \
-		add_next_index_stringl(arg, (char*)(str), length, duplicate); \
+		add_next_index_stringl(arg, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
 	}
 
 ZEND_API int add_get_assoc_string_ex(zval *arg, char *key, uint key_len, char *str, void **dest, int duplicate);
@@ -684,63 +723,75 @@ END_EXTERN_C()
 		Z_TYPE_P(z) = IS_STRING;		    \
 	}
 
-#define ZVAL_ASCII_STRING(z, s, duplicate) \
+#define ZVAL_ASCII_STRING(z, s, flags) \
 	if (UG(unicode)) { \
 		uint length = strlen(s); \
 		UChar *u_str = zend_ascii_to_unicode((s), length+1 ZEND_FILE_LINE_CC); \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(s); \
+		} \
 		ZVAL_UNICODEL(z, u_str, length, 0); \
 	} else { \
 		char *__s=(s);					\
 		Z_STRLEN_P(z) = strlen(__s);	\
-		Z_STRVAL_P(z) = (duplicate?estrndup(__s, Z_STRLEN_P(z)):__s);	\
+		Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, Z_STRLEN_P(z)) : __s);	\
 		Z_TYPE_P(z) = IS_STRING;        \
 	}
 
-#define ZVAL_ASCII_STRINGL(z, s, l, duplicate) \
+#define ZVAL_ASCII_STRINGL(z, s, l, flags) \
 	if (UG(unicode)) { \
 		UChar *u_str = zend_ascii_to_unicode((s), (l)+1 ZEND_FILE_LINE_CC); \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(s); \
+		} \
 		ZVAL_UNICODEL(z, u_str, l, 0); \
 	} else { \
 		char *__s=(s); int __l=l;	\
 		Z_STRLEN_P(z) = __l;	    \
-		Z_STRVAL_P(z) = (duplicate?estrndup(__s, __l):__s);	\
+		Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, __l) : __s);	\
 		Z_TYPE_P(z) = IS_STRING;    \
 	}
 
-#define ZVAL_U_STRING(conv, z, s, duplicate) \
+#define ZVAL_U_STRING(conv, z, s, flags) \
 	if (UG(unicode)) { \
 		UErrorCode status = U_ZERO_ERROR; \
 		UChar *u_str; \
 		int u_len; \
 		uint length = strlen(s); \
 		zend_convert_to_unicode(conv, &u_str, &u_len, s, length, &status); \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(s); \
+		} \
 		ZVAL_UNICODEL(z, u_str, u_len, 0); \
 	} else { \
 		char *__s=(s);					\
 		Z_STRLEN_P(z) = strlen(__s);	\
-		Z_STRVAL_P(z) = (duplicate?estrndup(__s, Z_STRLEN_P(z)):__s);	\
+		Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, Z_STRLEN_P(z)) : __s);	\
 		Z_TYPE_P(z) = IS_STRING;        \
 	}
 
-#define ZVAL_U_STRINGL(conv, z, s, l, duplicate) \
+#define ZVAL_U_STRINGL(conv, z, s, l, flags) \
 	if (UG(unicode)) { \
 		UErrorCode status = U_ZERO_ERROR; \
 		UChar *u_str; \
 		int u_len; \
 		zend_convert_to_unicode(conv, &u_str, &u_len, s, l, &status); \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(s); \
+		} \
 		ZVAL_UNICODEL(z, u_str, u_len, 0); \
 	} else { \
 		char *__s=(s); int __l=l;	\
 		Z_STRLEN_P(z) = __l;	    \
-		Z_STRVAL_P(z) = (duplicate?estrndup(__s, __l):__s);	\
+		Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, __l) : __s);	\
 		Z_TYPE_P(z) = IS_STRING;    \
 	}
 
-#define ZVAL_RT_STRING(z, s, duplicate) \
-	ZVAL_U_STRING(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), z, s, duplicate)
+#define ZVAL_RT_STRING(z, s, flags) \
+	ZVAL_U_STRING(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), z, s, flags)
 
-#define ZVAL_RT_STRINGL(z, s, l, duplicate) \
-	ZVAL_U_STRINGL(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), z, s, l, duplicate)
+#define ZVAL_RT_STRINGL(z, s, l, flags) \
+	ZVAL_U_STRINGL(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), z, s, l, flags)
 
 #define ZVAL_UNICODE(z, u, duplicate) {	\
 		UChar *__u=(u); 				\
@@ -821,12 +872,12 @@ END_EXTERN_C()
 #define RETVAL_DOUBLE(d) 				ZVAL_DOUBLE(return_value, d)
 #define RETVAL_STRING(s, duplicate) 		ZVAL_STRING(return_value, s, duplicate)
 #define RETVAL_STRINGL(s, l, duplicate) 	ZVAL_STRINGL(return_value, s, l, duplicate)
-#define RETVAL_ASCII_STRING(s, duplicate) 		ZVAL_ASCII_STRING(return_value, s, duplicate)
-#define RETVAL_ASCII_STRINGL(s, l, duplicate) 	ZVAL_ASCII_STRINGL(return_value, s, l, duplicate)
-#define RETVAL_U_STRING(conv, s, duplicate) 		ZVAL_U_STRING(conv, return_value, s, duplicate)
-#define RETVAL_U_STRINGL(conv, s, l, duplicate) 	ZVAL_U_STRINGL(conv, return_value, s, l, duplicate)
-#define RETVAL_RT_STRING(s, duplicate) 		ZVAL_RT_STRING(return_value, s, duplicate)
-#define RETVAL_RT_STRINGL(s, l, duplicate) 	ZVAL_RT_STRINGL(return_value, s, l, duplicate)
+#define RETVAL_ASCII_STRING(s, flags) 		ZVAL_ASCII_STRING(return_value, s, flags)
+#define RETVAL_ASCII_STRINGL(s, l, flags) 	ZVAL_ASCII_STRINGL(return_value, s, l, flags)
+#define RETVAL_U_STRING(conv, s, flags) 		ZVAL_U_STRING(conv, return_value, s, flags)
+#define RETVAL_U_STRINGL(conv, s, l, flags) 	ZVAL_U_STRINGL(conv, return_value, s, l, flags)
+#define RETVAL_RT_STRING(s, flags) 		ZVAL_RT_STRING(return_value, s, flags)
+#define RETVAL_RT_STRINGL(s, l, flags) 	ZVAL_RT_STRINGL(return_value, s, l, flags)
 #define RETVAL_EMPTY_STRING() 			ZVAL_EMPTY_STRING(return_value)
 #define RETVAL_UNICODE(u, duplicate) 		ZVAL_UNICODE(return_value, u, duplicate)
 #define RETVAL_UNICODEL(u, l, duplicate) 	ZVAL_UNICODEL(return_value, u, l, duplicate)
@@ -855,12 +906,12 @@ END_EXTERN_C()
 #define RETURN_TEXT(t, duplicate)		{ RETVAL_TEXT(t, duplicate); return; }
 #define RETURN_TEXTL(t, l, duplicate)	{ RETVAL_TEXTL(t, l, duplicate); return; }
 #define RETURN_EMPTY_TEXT() 			{ RETVAL_EMPTY_TEXT(); return; }
-#define RETURN_ASCII_STRING(t, duplicate)		{ RETVAL_ASCII_STRING(t, duplicate); return; }
-#define RETURN_ASCII_STRINGL(t, l, duplicate)	{ RETVAL_ASCII_STRINGL(t, l, duplicate); return; }
-#define RETURN_U_STRING(conv, t, duplicate)		{ RETVAL_U_STRING(conv, t, duplicate); return; }
-#define RETURN_U_STRINGL(conv, t, l, duplicate)	{ RETVAL_U_STRINGL(conv, t, l, duplicate); return; }
-#define RETURN_RT_STRING(t, duplicate)		{ RETVAL_RT_STRING(t, duplicate); return; }
-#define RETURN_RT_STRINGL(t, l, duplicate)	{ RETVAL_RT_STRINGL(t, l, duplicate); return; }
+#define RETURN_ASCII_STRING(t, flags)		{ RETVAL_ASCII_STRING(t, flags); return; }
+#define RETURN_ASCII_STRINGL(t, l, flags)	{ RETVAL_ASCII_STRINGL(t, l, flags); return; }
+#define RETURN_U_STRING(conv, t, flags)		{ RETVAL_U_STRING(conv, t, flags); return; }
+#define RETURN_U_STRINGL(conv, t, l, flags)	{ RETVAL_U_STRINGL(conv, t, l, flags); return; }
+#define RETURN_RT_STRING(t, flags)		{ RETVAL_RT_STRING(t, flags); return; }
+#define RETURN_RT_STRINGL(t, l, flags)	{ RETVAL_RT_STRINGL(t, l, flags); return; }
 
 #define SET_VAR_STRING(n, v) {																				\
 								{																			\
