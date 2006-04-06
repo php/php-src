@@ -1201,6 +1201,8 @@ static size_t _php_stream_write_buffer(php_stream *stream, int buf_type, zstr bu
 {
 	size_t didwrite = 0, towrite, justwrote, shouldwrite;
 	char *freeme = NULL;
+	void *buf_orig = buf.v;
+	int buflen_orig = buflen, conv_err = 0;
 
  	/* if we have a seekable stream we need to ensure that data is written at the
  	 * current stream->position. This means invalidating the read buffer and then
@@ -1211,9 +1213,26 @@ static size_t _php_stream_write_buffer(php_stream *stream, int buf_type, zstr bu
 		stream->ops->seek(stream, stream->position, SEEK_SET, &stream->position TSRMLS_CC);
 	}
 
-	/* Sloppy handling, make it a binary buffer */
 	if (buf_type == IS_UNICODE) {
-		buflen = UBYTES(buflen);
+		int len, num_conv, ulen = u_countChar32(buf.u, buflen);
+		char *str;
+		UErrorCode status = U_ZERO_ERROR;
+
+		/* Use runtime_encoding to map to binary */
+		num_conv = zend_convert_from_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &str, &len, buf.u, buflen, &status);
+		if (U_FAILURE(status)) {
+			zend_raise_conversion_error_ex("Unable to convert data to be writen", ZEND_U_CONVERTER(UG(runtime_encoding_conv)),
+									ZEND_FROM_UNICODE, num_conv, (UG(from_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%d character unicode buffer downcoded for binary stream runtime_encoding", ulen);
+		}
+
+		if (num_conv < buflen) {
+			conv_err = 1;
+		}
+
+		freeme = buf.s = str;
+		buflen = len;
 	}
 
 	shouldwrite = buflen;
@@ -1243,8 +1262,23 @@ static size_t _php_stream_write_buffer(php_stream *stream, int buf_type, zstr bu
 	}
 
 	if (buf_type == IS_UNICODE) {
-		/* Was slopily converted */
-		didwrite /= UBYTES(1);
+		/* Map bytes written back to UChars written */
+
+		if (shouldwrite == didwrite && !conv_err) {
+			/* wrote it all */
+			didwrite = buflen_orig;
+		} else {
+			/* Figure out how didwrite corresponds to the input buffer */
+			char *tmp = emalloc(didwrite + 1), *t = tmp;
+			UChar *s = buf_orig;
+			UErrorCode status = U_ZERO_ERROR;
+
+			ucnv_resetFromUnicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)));
+			ucnv_fromUnicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &t, t + didwrite, &s, s + buflen_orig, NULL, TRUE, &status);
+
+			didwrite = s - ((UChar*)buf_orig);
+			efree(tmp);
+		}
 	}
 
 	if (freeme) {
