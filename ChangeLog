@@ -1,3 +1,74 @@
+2006-04-05  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      Makefile.global:
+      MFH: workaround for problem on Solaris: shell tries to parse "for i in ;"
+      and fails
+
+    * Makefile.global:
+      workaround for problem on Solaris: shell tries to parse "for i in ;" and
+      fails
+
+    * (PHP_5_1)
+      NEWS:
+      BFN
+
+    * ext/oci8/config.w32
+      ext/oci8/config.w32:
+      add missing defines to .w32
+
+    * ext/oci8/config.m4
+      ext/oci8/oci8_lob.c
+      ext/oci8/php_oci8_int.h:
+      fix #36934 (OCILob->read() doesn't move internal pointer when reading 0's)
+      no support for Unicode CLOBs in Oracle < 10, sorry.
+
+    * (PHP_5_1)
+      ext/oci8/config.m4
+      ext/oci8/oci8_lob.c
+      ext/oci8/php_oci8_int.h:
+      fix #36934 (OCILob->read() doesn't move internal pointer when reading 0's)
+
+    * ext/standard/tests/strings/bug36944.phpt:
+      add test
+
+    * ext/standard/tests/strings/bug36944.phpt
+      ext/standard/tests/strings/bug36944.phpt:
+      
+      file bug36944.phpt was initially added on branch PHP_5_1.
+
+2006-04-05  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_1)
+      NEWS:
+      fixed bigint conversion errors (windows)
+
+    * (PHP_5_1)
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_prop.c
+      ext/mysqli/php_mysqli.h:
+      fixed bigint conversion on windows platforms
+
+2006-04-05  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      MF51: fix #36944 (strncmp & strncasecmp do not return false on negative
+      string length)
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/zend_builtin_functions.c:
+      fix #36944 (strncmp & strncasecmp do not return false on negative string
+      length)
+
+2006-04-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/var.c
+      ext/standard/var.c:
+      Fixed bug #36957 (serialize() does not handle recursion).
+
 2006-04-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
