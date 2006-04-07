@@ -144,10 +144,12 @@ static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, s
 		if (clone_orig) {
 			intern->array = other->array;
 			if (Z_OBJ_HT_P(orig) == &spl_handler_ArrayObject) {
-				ZVAL_ADDREF(intern->array);
-				SEPARATE_ZVAL(&intern->array);
+				MAKE_STD_ZVAL(intern->array);
+				array_init(intern->array);
+				zend_hash_copy(HASH_OF(intern->array), HASH_OF(other->array), (copy_ctor_func_t) zval_add_ref, &tmp, sizeof(zval*));
+			}
+			if (Z_OBJ_HT_P(orig) == &spl_handler_ArrayIterator) {
 				ZVAL_ADDREF(other->array);
-				ZVAL_ADDREF(intern->array);
 			}
 		} else {
 			intern->array = orig;
