@@ -126,18 +126,16 @@ ZEND_API ulong zend_hash_func(char *arKey, uint nKeyLength)
 
 #define UPDATE_DATA(ht, p, pData, nDataSize)											\
 	if (nDataSize == sizeof(void*)) {													\
-		if ((p)->pData && (p)->pData != &(p)->pDataPtr) {								\
+		if ((p)->pData != &(p)->pDataPtr) {												\
 			pefree_rel(p->pData, ht->persistent);										\
 		}																				\
 		memcpy(&(p)->pDataPtr, pData, sizeof(void *));									\
 		(p)->pData = &(p)->pDataPtr;													\
 	} else {																			\
-		if ((p)->pDataPtr) {															\
-			(p)->pData = (void *) pemalloc_rel(nDataSize, (ht)->persistent);				\
-			(p)->pDataPtr=NULL;															\
+		if ((p)->pData == &(p)->pDataPtr) {												\
+			(p)->pData = (void *) pemalloc_rel(nDataSize, (ht)->persistent);			\
 		} else {																		\
 			(p)->pData = (void *) perealloc_rel((p)->pData, nDataSize, (ht)->persistent);	\
-			/* (p)->pDataPtr is already NULL so no need to initialize it */				\
 		}																				\
 		memcpy((p)->pData, pData, nDataSize);											\
 	}
@@ -153,7 +151,6 @@ ZEND_API ulong zend_hash_func(char *arKey, uint nKeyLength)
 			return FAILURE;												\
 		}																\
 		memcpy((p)->pData, pData, nDataSize);							\
-		(p)->pDataPtr=NULL;												\
 	}
 
 
@@ -577,7 +574,7 @@ ZEND_API int zend_u_hash_del_key_or_index(HashTable *ht, zend_uchar type, zstr a
 			if (ht->pDestructor) {
 				ht->pDestructor(p->pData);
 			}
-			if (p->pData && p->pData != &p->pDataPtr) {
+			if (p->pData != &p->pDataPtr) {
 				pefree(p->pData, ht->persistent);
 			}
 			pefree(p, ht->persistent);
@@ -612,7 +609,7 @@ ZEND_API void zend_hash_destroy(HashTable *ht)
 		if (ht->pDestructor) {
 			ht->pDestructor(q->pData);
 		}
-		if (q->pData && q->pData != &q->pDataPtr) {
+		if (q->pData != &q->pDataPtr) {
 			pefree(q->pData, ht->persistent);
 		}
 		pefree(q, ht->persistent);
@@ -638,7 +635,7 @@ ZEND_API void zend_hash_clean(HashTable *ht)
 		if (ht->pDestructor) {
 			ht->pDestructor(q->pData);
 		}
-		if (q->pData && q->pData != &q->pDataPtr) {
+		if (q->pData != &q->pDataPtr) {
 			pefree(q->pData, ht->persistent);
 		}
 		pefree(q, ht->persistent);
@@ -667,7 +664,7 @@ static Bucket *zend_hash_apply_deleter(HashTable *ht, Bucket *p)
 	if (ht->pDestructor) {
 		ht->pDestructor(p->pData);
 	}
-	if (p->pData && p->pData != &p->pDataPtr) {
+	if (p->pData != &p->pDataPtr) {
 		pefree(p->pData, ht->persistent);
 	}
 	retval = p->pListNext;
