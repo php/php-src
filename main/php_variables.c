@@ -70,10 +70,10 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, zval *track_vars_arra
 {
 	char *p = NULL;
 	char *ip;		/* index pointer */
-	char *index, *escaped_index = NULL;
+	char *index;
 	int var_len, index_len;
 	zval *gpc_element, **gpc_element_p;
-	zend_bool is_array;
+	zend_bool is_array = 0;
 	HashTable *symtable1 = NULL;
 
 	assert(var != NULL);
@@ -91,44 +91,43 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, zval *track_vars_arra
 	/*
 	 * Prepare variable name
 	 */
-	ip = strchr(var, '[');
-	if (ip) {
-		is_array = 1;
-		*ip = 0;
-	} else {
-		is_array = 0;
-	}
+
 	/* ignore leading spaces in the variable name */
 	while (*var && *var==' ') {
 		var++;
 	}
-	var_len = strlen(var);
+
+	/* ensure that we don't have spaces or dots in the variable name (not binary safe) */
+	for (p = var; *p; p++) {
+		if (*p == ' ' || *p == '.') {
+			*p='_';
+		} else if (*p == '[') {
+			is_array = 1;
+			ip = p;
+			*p = 0;
+			break;
+		}
+	}
+	var_len = p - var;
+
 	if (var_len==0) { /* empty variable name, or variable name with a space in it */
 		zval_dtor(val);
 		return;
 	}
 
 	/* GLOBALS hijack attempt, reject parameter */
-	if (symtable1 == EG(active_symbol_table) && !strcmp("GLOBALS", var)) {
+	if (symtable1 == EG(active_symbol_table) &&
+		var_len == sizeof("GLOBALS")-1 &&
+		!memcmp(var, "GLOBALS", sizeof("GLOBALS")-1)) {
 		zval_dtor(val);
 		return;
-	}
-
-	/* ensure that we don't have spaces or dots in the variable name (not binary safe) */
-	for (p=var; *p; p++) {
-		switch (*p) {
-			case ' ':
-			case '.':
-				*p='_';
-				break;
-		}
 	}
 
 	index = var;
 	index_len = var_len;
 
-	while (1) {
-		if (is_array) {
+	if (is_array) {
+		while (1) {
 			char *index_s;
 			int new_idx_len = 0;
 
@@ -161,16 +160,11 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, zval *track_vars_arra
 				array_init(gpc_element);
 				zend_hash_next_index_insert(symtable1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 			} else {
-				escaped_index = index;
-
-				if (zend_symtable_find(symtable1, escaped_index, index_len + 1, (void **) &gpc_element_p) == FAILURE
+				if (zend_symtable_find(symtable1, index, index_len + 1, (void **) &gpc_element_p) == FAILURE
 					|| Z_TYPE_PP(gpc_element_p) != IS_ARRAY) {
 					MAKE_STD_ZVAL(gpc_element);
 					array_init(gpc_element);
-					zend_symtable_update(symtable1, escaped_index, index_len + 1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
-				}
-				if (index != escaped_index) {
-					efree(escaped_index);
+					zend_symtable_update(symtable1, index, index_len + 1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 				}
 			}
 			symtable1 = Z_ARRVAL_PP(gpc_element_p);
@@ -185,38 +179,28 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, zval *track_vars_arra
 			} else {
 				is_array = 0;
 			}
-		} else {
+		}
+	} else {
 plain_var:
-			MAKE_STD_ZVAL(gpc_element);
-			gpc_element->value = val->value;
-			Z_TYPE_P(gpc_element) = Z_TYPE_P(val);
-			if (!index) {
-				zend_hash_next_index_insert(symtable1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
+		MAKE_STD_ZVAL(gpc_element);
+		gpc_element->value = val->value;
+		Z_TYPE_P(gpc_element) = Z_TYPE_P(val);
+		if (!index) {
+			zend_hash_next_index_insert(symtable1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
+		} else {
+			/* 
+			 * According to rfc2965, more specific paths are listed above the less specific ones.
+			 * If we encounter a duplicate cookie name, we should skip it, since it is not possible
+			 * to have the same (plain text) cookie name for the same path and we should not overwrite
+			 * more specific cookies with the less specific ones.
+			 */
+			if (PG(http_globals)[TRACK_VARS_COOKIE] &&
+				symtable1 == Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]) && 
+				zend_symtable_exists(symtable1, index, index_len+1)) {
+				zval_ptr_dtor(&gpc_element);
 			} else {
-				zval **tmp;
-
-				escaped_index = index;
-
-				/* 
-				 * According to rfc2965, more specific paths are listed above the less specific ones.
-				 * If we encounter a duplicate cookie name, we should skip it, since it is not possible
-				 * to have the same (plain text) cookie name for the same path and we should not overwrite
-				 * more specific cookies with the less specific ones.
-				 */
-				if (PG(http_globals)[TRACK_VARS_COOKIE] && symtable1 == Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]) && 
-					zend_symtable_find(symtable1, escaped_index, index_len+1, (void **) &tmp) != FAILURE) {
-					if (index != escaped_index) {
-						efree(escaped_index);
-					}
-					zval_ptr_dtor(&gpc_element);
-					break;
-				}
-				zend_symtable_update(symtable1, escaped_index, index_len + 1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
-				if (index != escaped_index) {
-					efree(escaped_index);
-				}
+				zend_symtable_update(symtable1, index, index_len + 1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 			}
-			break;
 		}
 	}
 }
