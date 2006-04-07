@@ -412,16 +412,16 @@ void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 {
 	if (!FCGX_IsCGI()) {
 		FCGX_Request *request = (FCGX_Request *) SG(server_context);
-		char **env, *p, *t;
+		char **env, *p;
 
 		for (env = request->envp; env != NULL && *env != NULL; env++) {
 			p = strchr(*env, '=');
 			if (!p) {				/* malformed entry? */
 				continue;
 			}
-			t = estrndup(*env, p - *env);
-			php_register_variable(t, p + 1, array_ptr TSRMLS_CC);
-			efree(t);
+			*p = 0;
+			php_register_variable(*env, p + 1, array_ptr TSRMLS_CC);
+			*p = '=';
 		}
 	}
 	/* call php's original import as a catch-all */
