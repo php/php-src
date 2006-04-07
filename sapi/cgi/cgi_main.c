@@ -431,6 +431,17 @@ static char *sapi_cgi_read_cookies(TSRMLS_D)
 #if PHP_FASTCGI
 void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 {
+	if (PG(http_globals)[TRACK_VARS_ENV] &&
+	    array_ptr != PG(http_globals)[TRACK_VARS_ENV]) {
+	    *array_ptr = *PG(http_globals)[TRACK_VARS_ENV];
+	    zval_copy_ctor(array_ptr);
+	    return;
+	} else if (PG(http_globals)[TRACK_VARS_SERVER] &&
+		array_ptr != PG(http_globals)[TRACK_VARS_SERVER]) {
+	    *array_ptr = *PG(http_globals)[TRACK_VARS_SERVER];
+	    zval_copy_ctor(array_ptr);
+	    return;
+	}
 	if (!FCGX_IsCGI()) {
 		FCGX_Request *request = (FCGX_Request *) SG(server_context);
 		char **env, *p;
