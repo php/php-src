@@ -1,3 +1,111 @@
+2006-04-06  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/pcre/TODO:
+      That is not the bug you're looking for.
+
+    * ext/pcre/TODO:
+      Even more stuff from Friedl.
+
+    * (PHP_5_1)
+      ext/pcre/TODO:
+      I guess we only need this on HEAD.
+
+    * ext/pcre/TODO:
+      More stuff from Friedl..
+
+    * ZendEngine2/zend_arg_defs.c
+      ZendEngine2/zend_modules.h
+      ext/pcre/TODO
+      ext/pcre/php_pcre.c:
+      MFB
+
+    * (PHP_5_1)
+      NEWS:
+      -** empty log message ***
+
+    * (PHP_5_1)
+      ZendEngine2/zend_arg_defs.c
+      ZendEngine2/zend_modules.h
+      ext/pcre/TODO
+      ext/pcre/TODO
+      ext/pcre/php_pcre.c:
+      Fix a bug that would not fill in the fifth argument to preg_replace()
+      properly, if the variable was not declared previously.
+
+2006-04-06  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/uniqid.c:
+      Plug leak which occurs in unicode mode
+
+    * ext/standard/tests/file/stream_get_line.phpt
+      ext/standard/tests/file/userfilters.phpt
+      ext/standard/tests/file/userstreams.phpt
+      ext/standard/tests/filters/basic.phpt:
+      Silence false positives on test results
+
+    * ext/standard/tests/file/004.phpt
+      ext/standard/tests/file/bug27508.phpt
+      ext/standard/tests/file/bug27619.phpt
+      ext/standard/tests/file/bug35781.phpt:
+      Silence false positives in test failures
+
+    * main/streams/streams.c:
+      Do runtime conversions (with an E_NOTICE) on writing unicode data to a
+      binary stream.  Take the WTF out of the equation
+
+2006-04-06  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      fix #36981 (SplFileObject->fgets() ignores max_length)
+
+2006-04-06  Sara Golemon  <sara@golemon.com>
+
+    * ZendEngine2/zend_API.h:
+      Overload 'duplicate' arg as applied to:
+      add_((next_)?index|assoc)_(ascii|rt)_stringl?(_ex)?
+      and
+      (ZVAL|RETVAL|RETURN)_(ASCII|RT|U)_STRINGL?
+      
+      
+      Duplicate keeps traditional value of '1', additional bit '2' tells
+      unicode mode conversion to automatically free the original string
+      in order to avoid leaks due to conversion on a value otherwise being
+      "given" to the engine.
+      
+      /* Uses s as-is for non-unicode, or frees s after converting to unicode */
+      {
+        char *s = estrdup("Hello");
+        ZVAL_RT_STRING(pzv, s, ZSTR_AUTOFREE);
+      }
+      
+      /* Duplicates for non-unicode, or converts (but doesn't free original) */
+      {
+        char *s = "Hello";
+        ZVAL_RT_STRING(pzv, s, ZSTR_DUPLICATE);
+      }
+      
+      /* Uses as-is for non-unicode, or converts (but doesn't free original) */
+      {
+        char *s = "Hello";
+        zval zv;
+        ZVAL_RT_STRING(&zv, s, 0);
+      
+        /* use zv for some temporary purpose */
+      
+        /* It's now necessary to manually free this generated value */
+        if (UG(unicode)) {
+          zval_dtor(&zv);
+        }
+      }
+
+2006-04-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/file.c:
+      Fixed safe_mode check for source argument of the copy() function.
+
 2006-04-05  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_1)

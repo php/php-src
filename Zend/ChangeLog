@@ -1,3 +1,55 @@
+2006-04-06  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_arg_defs.c
+      zend_modules.h:
+      MFB
+
+    * (PHP_5_1)
+      zend_arg_defs.c
+      zend_modules.h:
+      Fix a bug that would not fill in the fifth argument to preg_replace()
+      properly, if the variable was not declared previously.
+
+2006-04-06  Sara Golemon  <sara@golemon.com>
+
+    * zend_API.h:
+      Overload 'duplicate' arg as applied to:
+      add_((next_)?index|assoc)_(ascii|rt)_stringl?(_ex)?
+      and
+      (ZVAL|RETVAL|RETURN)_(ASCII|RT|U)_STRINGL?
+      
+      
+      Duplicate keeps traditional value of '1', additional bit '2' tells
+      unicode mode conversion to automatically free the original string
+      in order to avoid leaks due to conversion on a value otherwise being
+      "given" to the engine.
+      
+      /* Uses s as-is for non-unicode, or frees s after converting to unicode */
+      {
+        char *s = estrdup("Hello");
+        ZVAL_RT_STRING(pzv, s, ZSTR_AUTOFREE);
+      }
+      
+      /* Duplicates for non-unicode, or converts (but doesn't free original) */
+      {
+        char *s = "Hello";
+        ZVAL_RT_STRING(pzv, s, ZSTR_DUPLICATE);
+      }
+      
+      /* Uses as-is for non-unicode, or converts (but doesn't free original) */
+      {
+        char *s = "Hello";
+        zval zv;
+        ZVAL_RT_STRING(&zv, s, 0);
+      
+        /* use zv for some temporary purpose */
+      
+        /* It's now necessary to manually free this generated value */
+        if (UG(unicode)) {
+          zval_dtor(&zv);
+        }
+      }
+
 2006-04-05  Antony Dovgal  <antony@zend.com>
 
     * zend_builtin_functions.c:
