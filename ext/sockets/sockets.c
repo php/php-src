@@ -869,7 +869,6 @@ PHP_FUNCTION(socket_read)
 			php_sock->error = errno;
 			SOCKETS_G(last_error) = errno;
 		} else {
-			efree(tmpbuf);
 			PHP_SOCKET_ERROR(php_sock, "unable to read from socket", errno);
 		}
 
