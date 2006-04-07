@@ -102,14 +102,14 @@ ZEND_API ulong zend_hash_func(char *arKey, uint nKeyLength)
 
 #define UPDATE_DATA(ht, p, pData, nDataSize)											\
 	if (nDataSize == sizeof(void*)) {													\
-		if (!(p)->pDataPtr) {															\
-			pefree_rel((p)->pData, (ht)->persistent);										\
+		if ((p)->pData != &(p)->pDataPtr) {												\
+			pefree_rel((p)->pData, (ht)->persistent);									\
 		}																				\
 		memcpy(&(p)->pDataPtr, pData, sizeof(void *));									\
 		(p)->pData = &(p)->pDataPtr;													\
 	} else {																			\
-		if ((p)->pDataPtr) {															\
-			(p)->pData = (void *) pemalloc_rel(nDataSize, (ht)->persistent);				\
+		if ((p)->pData == &(p)->pDataPtr) {												\
+			(p)->pData = (void *) pemalloc_rel(nDataSize, (ht)->persistent);			\
 			(p)->pDataPtr=NULL;															\
 		} else {																		\
 			(p)->pData = (void *) perealloc_rel((p)->pData, nDataSize, (ht)->persistent);	\
@@ -123,9 +123,9 @@ ZEND_API ulong zend_hash_func(char *arKey, uint nKeyLength)
 		memcpy(&(p)->pDataPtr, pData, sizeof(void *));					\
 		(p)->pData = &(p)->pDataPtr;									\
 	} else {															\
-		(p)->pData = (void *) pemalloc_rel(nDataSize, (ht)->persistent);	\
+		(p)->pData = (void *) pemalloc_rel(nDataSize, (ht)->persistent);\
 		if (!(p)->pData) {												\
-			pefree_rel(p, (ht)->persistent);								\
+			pefree_rel(p, (ht)->persistent);							\
 			return FAILURE;												\
 		}																\
 		memcpy((p)->pData, pData, nDataSize);							\
@@ -491,7 +491,7 @@ ZEND_API int zend_hash_del_key_or_index(HashTable *ht, char *arKey, uint nKeyLen
 			if (ht->pDestructor) {
 				ht->pDestructor(p->pData);
 			}
-			if (!p->pDataPtr) {
+			if (p->pData != &p->pDataPtr) {
 				pefree(p->pData, ht->persistent);
 			}
 			pefree(p, ht->persistent);
@@ -520,7 +520,7 @@ ZEND_API void zend_hash_destroy(HashTable *ht)
 		if (ht->pDestructor) {
 			ht->pDestructor(q->pData);
 		}
-		if (!q->pDataPtr && q->pData) {
+		if (q->pData != &q->pDataPtr) {
 			pefree(q->pData, ht->persistent);
 		}
 		pefree(q, ht->persistent);
@@ -546,7 +546,7 @@ ZEND_API void zend_hash_clean(HashTable *ht)
 		if (ht->pDestructor) {
 			ht->pDestructor(q->pData);
 		}
-		if (!q->pDataPtr && q->pData) {
+		if (q->pData != &q->pDataPtr) {
 			pefree(q->pData, ht->persistent);
 		}
 		pefree(q, ht->persistent);
@@ -575,7 +575,7 @@ static Bucket *zend_hash_apply_deleter(HashTable *ht, Bucket *p)
 	if (ht->pDestructor) {
 		ht->pDestructor(p->pData);
 	}
-	if (!p->pDataPtr) {
+	if (p->pData != &p->pDataPtr) {
 		pefree(p->pData, ht->persistent);
 	}
 	retval = p->pListNext;
@@ -734,11 +734,7 @@ ZEND_API void zend_hash_reverse_apply(HashTable *ht, apply_func_t apply_func TSR
 		q = p;
 		p = p->pListLast;
 		if (result & ZEND_HASH_APPLY_REMOVE) {
-			if (q->nKeyLength>0) {
-				zend_hash_del(ht, q->arKey, q->nKeyLength);
-			} else {
-				zend_hash_index_del(ht, q->h);
-			}
+			zend_hash_apply_deleter(ht, q);
 		}
 		if (result & ZEND_HASH_APPLY_STOP) {
 			break;
