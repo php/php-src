@@ -147,6 +147,19 @@ typedef struct timelib_time {
 	                              *  2 TimeZone abbreviation */
 } timelib_time;
 
+typedef struct timelib_error_message {
+	int         position;
+	char        character;
+	char       *message;
+} timelib_error_message;
+
+typedef struct timelib_error_container {
+	int                           warning_count;
+	struct timelib_error_message *warning_messages;
+	int                           error_count;
+	struct timelib_error_message *error_messages;
+} timelib_error_container;
+
 typedef struct _timelib_tz_lookup_table {
 	char       *name;
 	int         type;
