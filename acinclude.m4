@@ -1877,20 +1877,43 @@ dnl Platform characteristics checks
 dnl -------------------------------------------------------------------------
 
 dnl
-dnl PHP_SHLIB_SUFFIX_NAME
+dnl PHP_SHLIB_BUILD_SUFFIX_NAME
 dnl
-dnl Determines shared library suffix 
+dnl Determines link library suffix
 dnl suffix can be: .so, .sl or .dylib
 dnl
+AC_DEFUN([PHP_SHLIB_BUILD_SUFFIX_NAME],[
+ AC_REQUIRE([PHP_CANONICAL_HOST_TARGET])dnl
+ PHP_SUBST(SHLIB_SUFFIX_NAME)
+ SHLIB_SUFFIX_NAME=so
+ case $host_alias in
+ *hpux*[)]
+   SHLIB_SUFFIX_NAME=sl
+   ;;
+ *darwin*[)]
+   SHLIB_SUFFIX_NAME=dylib
+   ;;
+ esac
+])
+
+dnl
+dnl PHP_SHLIB_SUFFIX_NAME
+dnl
+dnl Determines shared library suffix
+dnl suffix can be: .so or .sl
+dnl
 AC_DEFUN([PHP_SHLIB_SUFFIX_NAME],[
-  AC_REQUIRE([PHP_CANONICAL_HOST_TARGET])dnl
-  PHP_SUBST(SHLIB_SUFFIX_NAME)
-  SHLIB_SUFFIX_NAME=so
-  case $host_alias in
-  *hpux*[)]
-    SHLIB_SUFFIX_NAME=sl
-    ;;
-  esac
+ AC_REQUIRE([PHP_CANONICAL_HOST_TARGET])dnl
+ PHP_SUBST(SHLIB_DL_SUFFIX_NAME)
+ SHLIB_DL_SUFFIX_NAME=$SHLIB_SUFFIX_NAME
+ case $host_alias in
+ *hpux*[)]
+   SHLIB_DL_SUFFIX_NAME=sl
+   ;;
+ *darwin*[)]
+   SHLIB_DL_SUFFIX_NAME=so
+   ;;
+ esac
 ])
 
 dnl
