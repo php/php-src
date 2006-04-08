@@ -1,3 +1,72 @@
+2006-04-07  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/pcre/TODO
+      ext/pcre/php_pcre.c:
+      Disallowed numeric named captures.
+
+2006-04-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS
+      configure.in
+      main/php_version.h:
+      RC3
+
+2006-04-07  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/sockets/sockets.c:
+      - MFB: revert leak fix, something else went wrong
+
+    * (PHP_5_1)
+      ext/sockets/sockets.c:
+      - revert last commit, something else went wrong
+
+2006-04-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * main/php_variables.c
+      main/php_variables.c:
+      Optimization
+
+    * sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      CGI anf FastCGI assume $_SERVER and $_ENV have the same values,
+      so we don't need construct the same arrays twich and may just copy it
+
+2006-04-07  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/sockets/sockets.c:
+      - MFB: fix leak when an error occured in socket_read, free tmpbuf
+
+    * (PHP_5_1)
+      ext/sockets/sockets.c:
+      - fix leak when an error occured in socket_read, free tmpbuf
+
+2006-04-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      Removed unnecessary copying
+
+    * main/main.c
+      main/main.c:
+      We don't need setup the same time-out two times.
+
+    * (PHP_5_1)
+      ZendEngine2/zend_hash.c:
+      MFH:
+      - Allowed storing NULL pointers in HashTable
+      - Optimized zend_hash_reverse_apply()
+
+    * ZendEngine2/zend_hash.c:
+      - Fixed storing NULL pointers in HashTable
+      - Optimized zend_hash_reverse_apply()
+
+2006-04-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      ext/posix/CREDITS:
+      Adjusted credits file so that it appears properly on phpinfo()
+
 2006-04-06  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ext/pcre/TODO:
