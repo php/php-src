@@ -49,6 +49,7 @@ PHP_FUNCTION(getdate);
 #ifdef EXPERIMENTAL_DATE_SUPPORT
 /* Advanced Interface */
 PHP_FUNCTION(date_create);
+PHP_FUNCTION(date_parse);
 PHP_FUNCTION(date_format);
 PHP_FUNCTION(date_format_locale);
 PHP_FUNCTION(date_modify);
@@ -62,10 +63,14 @@ PHP_FUNCTION(date_isodate_set);
 
 PHP_FUNCTION(timezone_open);
 PHP_FUNCTION(timezone_name_get);
+PHP_FUNCTION(timezone_name_from_abbr);
 PHP_FUNCTION(timezone_offset_get);
 PHP_FUNCTION(timezone_transistions_get);
 PHP_FUNCTION(timezone_identifiers_list);
 PHP_FUNCTION(timezone_abbreviations_list);
+
+PHP_METHOD(timezone, identifiers_list);
+PHP_METHOD(timezone, abbreviations_list);
 #endif
 
 /* Options and Configuration */

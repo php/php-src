@@ -122,6 +122,21 @@ char *timelib_get_tz_abbr_ptr(timelib_time *t)
 	return t->tz_abbr;
 }
 
+void timelib_error_container_dtor(timelib_error_container *errors)
+{
+	int i;
+
+	for (i = 0; i < errors->warning_count; i++) {
+		free(errors->warning_messages[i].message);
+	}
+	free(errors->warning_messages);
+	for (i = 0; i < errors->error_count; i++) {
+		free(errors->error_messages[i].message);
+	}
+	free(errors->error_messages);
+	free(errors);
+}
+
 signed long timelib_date_to_int(timelib_time *d, int *error)
 {
 	timelib_sll ts;
