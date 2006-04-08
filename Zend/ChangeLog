@@ -1,3 +1,15 @@
+2006-04-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      zend_hash.c:
+      MFH:
+      - Allowed storing NULL pointers in HashTable
+      - Optimized zend_hash_reverse_apply()
+
+    * zend_hash.c:
+      - Fixed storing NULL pointers in HashTable
+      - Optimized zend_hash_reverse_apply()
+
 2006-04-06  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_arg_defs.c
