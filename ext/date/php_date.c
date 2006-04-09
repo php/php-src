@@ -947,7 +947,7 @@ PHP_FUNCTION(strtotime)
 
 	tzi = get_timezone_info(TSRMLS_C);
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "sl|l", &times, &time_len, &preset_ts) != FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "sl", &times, &time_len, &preset_ts) != FAILURE) {
 		/* We have an initial timestamp */
 		now = timelib_time_ctor();
 
