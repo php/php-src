@@ -29,6 +29,7 @@ PHP                                                                        NEWS
 - Fixed bug #36886 (User filters can leak buckets in some situations). (Ilia)
 - Fixed bug #36878 (error messages are printed even though an exception has 
   been thrown). (Tony)
+- Fixed bug #36875 (is_*() functions do not account for open_basedir). (Ilia)
 - Fixed bug #36869 (memory leak in output buffering when using chunked output).
   (Tony)
 - Fixed bug #36859 (DOMElement crashes when calling __construct when 
