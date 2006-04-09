@@ -33,6 +33,7 @@
 static int le_sdl = 0;
 int le_url = 0;
 static int le_service = 0;
+static int le_psdl = 0;
 
 typedef struct _soapHeader {
 	sdlFunctionPtr                    function;
@@ -225,6 +226,11 @@ static char *zend_str_tolower_copy(char *dest, const char *source, unsigned int 
 	return dest;
 }
 #endif
+
+int php_soap_psdl_list_entry(void)
+{
+	return le_psdl;
+}
 
 /*
   Registry Functions
@@ -492,7 +498,7 @@ PHP_MINIT_FUNCTION(soap)
 	/* TODO: add ini entry for always use soap errors */
 	php_soap_prepare_globals();
 	ZEND_INIT_MODULE_GLOBALS(soap, php_soap_init_globals, NULL);
-  REGISTER_INI_ENTRIES();
+	REGISTER_INI_ENTRIES();
 
 #ifndef ZEND_ENGINE_2
 	/* Enable php stream/wrapper support for libxml */
@@ -552,6 +558,7 @@ PHP_MINIT_FUNCTION(soap)
 	soap_header_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 
 	le_sdl = register_list_destructors(delete_sdl, NULL);
+	le_psdl = zend_register_list_destructors_ex(NULL, delete_psdl, "SOAP persistent WSDL", module_number);
 	le_url = register_list_destructors(delete_url, NULL);
 	le_service = register_list_destructors(delete_service, NULL);
 
@@ -905,6 +912,7 @@ PHP_METHOD(SoapServer, SoapServer)
 	zval *wsdl, *options = NULL;
 	int ret;
 	int version = SOAP_1_1;
+	zend_bool persistent;
 
 	SOAP_SERVER_BEGIN_CODE();
 
@@ -921,6 +929,8 @@ PHP_METHOD(SoapServer, SoapServer)
 
 	service = emalloc(sizeof(soapService));
 	memset(service, 0, sizeof(soapService));
+
+	persistent = SOAP_GLOBAL(cache_enabled);
 
 	if (options != NULL) {
 		HashTable *ht = Z_ARRVAL_P(options);
@@ -972,6 +982,10 @@ PHP_METHOD(SoapServer, SoapServer)
 			service->features = Z_LVAL_PP(tmp);
 		}
 
+		if (zend_hash_find(ht, "cache_wsdl", sizeof("cache_wsdl"), (void**)&tmp) == SUCCESS) {
+			persistent = zend_is_true(*tmp);
+		}
+
 	} else if (wsdl == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid arguments. 'uri' option is required in nonWSDL mode.");
 	}
@@ -983,7 +997,7 @@ PHP_METHOD(SoapServer, SoapServer)
 	zend_hash_init(service->soap_functions.ft, 0, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (wsdl) {
-		service->sdl = get_sdl(this_ptr, Z_STRVAL_P(wsdl) TSRMLS_CC);
+		service->sdl = get_sdl(this_ptr, Z_STRVAL_P(wsdl), persistent TSRMLS_CC);
 		if (service->uri == NULL) {
 			if (service->sdl->target_ns) {
 				service->uri = estrdup(service->sdl->target_ns);
@@ -2100,6 +2114,7 @@ PHP_METHOD(SoapClient, SoapClient)
 	zval *options = NULL;
 	int  soap_version = SOAP_1_1;
 	php_stream_context *context = NULL;
+	zend_bool persistent;
 
 	SOAP_CLIENT_BEGIN_CODE();
 
@@ -2115,6 +2130,9 @@ PHP_METHOD(SoapClient, SoapClient)
 	} else {
 		wsdl = NULL;
 	}
+
+	persistent = SOAP_GLOBAL(cache_enabled);
+
 	if (options != NULL) {
 		HashTable *ht = Z_ARRVAL_P(options);
 		zval **tmp;
@@ -2262,6 +2280,10 @@ PHP_METHOD(SoapClient, SoapClient)
 			add_property_resource(this_ptr, "_stream_context", context->rsrc_id);
 		}
 	
+		if (zend_hash_find(ht, "cache_wsdl", sizeof("cache_wsdl"), (void**)&tmp) == SUCCESS) {
+			persistent = zend_is_true(*tmp);
+		}
+
 	} else if (wsdl == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "'location' and 'uri' options are requred in nonWSDL mode");
 		return;
@@ -2276,7 +2298,7 @@ PHP_METHOD(SoapClient, SoapClient)
 		old_soap_version = SOAP_GLOBAL(soap_version);
 		SOAP_GLOBAL(soap_version) = soap_version;
 
-		sdl = get_sdl(this_ptr, Z_STRVAL_P(wsdl) TSRMLS_CC);
+		sdl = get_sdl(this_ptr, Z_STRVAL_P(wsdl), persistent TSRMLS_CC);
 		ret = zend_list_insert(sdl, le_sdl);
 
 		add_property_resource(this_ptr, "sdl", ret);

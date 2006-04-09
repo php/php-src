@@ -175,6 +175,7 @@ ZEND_BEGIN_MODULE_GLOBALS(soap)
 	xmlCharEncodingHandlerPtr encoding;
 	HashTable *class_map;
 	int        features;
+	HashTable  wsdl_cache;
 ZEND_END_MODULE_GLOBALS(soap)
 
 #ifdef PHP_WIN32

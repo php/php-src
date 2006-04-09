@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 06 Apr 2006, PHP 5.1.3RC3
+- Sped up SoapClient/SoapServer construction by making SOAP extension cache
+  WSDL structure in memory. (Andrei)
 - Fixed a bug that would not fill in the fifth argument to preg_replace() 
   properly, if the variable was not declared previously. (Andrei)
 - Fixed safe_mode check for source argument of the copy() function. (Ilia)
