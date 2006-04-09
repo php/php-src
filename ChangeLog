@@ -1,3 +1,13 @@
+2006-04-08  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * Makefile.global
+      acinclude.m4
+      configure.in
+      main/build-defs.h.in
+      scripts/phpize.m4:
+      Separate suffixes of shared libraries that we link against and the ones
+      we load with dlopen(). This matters on Mac OS X, for example.
+
 2006-04-07  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ext/pcre/TODO
