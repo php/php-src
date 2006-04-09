@@ -1633,6 +1633,17 @@ fail:
 
 /* {{{ proto mixed PDOStatement::getAttribute(long attribute)
    Get an attribute */
+
+static int generic_stmt_attr_get(pdo_stmt_t *stmt, zval *return_value, long attr)
+{
+	switch (attr) {
+		case PDO_ATTR_EMULATE_PREPARES:
+			RETVAL_BOOL(stmt->supports_placeholders == PDO_PLACEHOLDER_NONE);
+			return 1;
+	}
+	return 0;
+}
+   
 static PHP_METHOD(PDOStatement, getAttribute)
 {
 	long attr;
@@ -1643,8 +1654,12 @@ static PHP_METHOD(PDOStatement, getAttribute)
 	}
 
 	if (!stmt->methods->get_attribute) {
-		pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "This driver doesn't support getting attributes" TSRMLS_CC);
-		RETURN_FALSE;
+		if (!generic_stmt_attr_get(stmt, return_value, attr)) {
+			pdo_raise_impl_error(stmt->dbh, stmt, "IM001",
+				"This driver doesn't support getting attributes" TSRMLS_CC);
+			RETURN_FALSE;
+		}
+		return;
 	}
 
 	PDO_STMT_CLEAR_ERR();
@@ -1654,9 +1669,13 @@ static PHP_METHOD(PDOStatement, getAttribute)
 			RETURN_FALSE;
 
 		case 0:
-			/* XXX: should do something better here */
-			pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "driver doesn't support getting that attribute" TSRMLS_CC);
-			RETURN_FALSE;
+			if (!generic_stmt_attr_get(stmt, return_value, attr)) {
+				/* XXX: should do something better here */
+				pdo_raise_impl_error(stmt->dbh, stmt, "IM001",
+					"driver doesn't support getting that attribute" TSRMLS_CC);
+				RETURN_FALSE;
+			}
+			return;
 
 		default:
 			return;
