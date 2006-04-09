@@ -218,6 +218,7 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 	int ret;
 	char *nsql = NULL;
 	int nsql_len = 0;
+	int emulate = 0;
 #endif
 
 	S->H = H;
@@ -233,9 +234,18 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 	}
 
 #if HAVE_PQPREPARE
-	if ((!driver_options || pdo_attr_lval(driver_options,
-			PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT, 0 TSRMLS_CC) == 0)
-			&& PQprotocolVersion(H->server) > 2) {
+
+	if (driver_options) {
+		if (pdo_attr_lval(driver_options,
+				PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT, 0 TSRMLS_CC) == 1) {
+			emulate = 1;
+		} else if (pdo_attr_lval(driver_options, PDO_ATTR_EMULATE_PREPARES,
+				0 TSRMLS_CC) == 1) {
+			emulate = 1;
+		}
+	}
+
+	if (!emulate && PQprotocolVersion(H->server) > 2) {
 		stmt->supports_placeholders = PDO_PLACEHOLDER_NAMED;
 		stmt->named_rewrite_template = "$%d";
 		ret = pdo_parse_params(stmt, (char*)sql, sql_len, &nsql, &nsql_len TSRMLS_CC);
