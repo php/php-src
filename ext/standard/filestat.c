@@ -584,15 +584,22 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 	int flags = 0, rmask=S_IROTH, wmask=S_IWOTH, xmask=S_IXOTH; /* access rights defaults to other */
 	char *stat_sb_names[13]={"dev", "ino", "mode", "nlink", "uid", "gid", "rdev",
 			      "size", "atime", "mtime", "ctime", "blksize", "blocks"};
+	char *local;
+	php_stream_wrapper *wrapper;
 
 	if (!filename_length) {
 		RETURN_FALSE;
 	}
 
-	if (IS_ACCESS_CHECK(type)) {
-		char *local;
+	if ((wrapper = php_stream_locate_url_wrapper(filename, &local, 0 TSRMLS_CC)) == &php_plain_files_wrapper) {
+		if (php_check_open_basedir(local TSRMLS_CC)) {
+			RETURN_FALSE;
+		}
+	}
 
-		if (php_stream_locate_url_wrapper(filename, &local, 0 TSRMLS_CC) == &php_plain_files_wrapper) {
+	if (IS_ACCESS_CHECK(type)) {
+		if (wrapper == &php_plain_files_wrapper) {
+
 			switch (type) {
 #ifdef F_OK
 				case FS_EXISTS:
@@ -672,9 +679,6 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 	if (IS_ABLE_CHECK(type) && getuid() == 0) {
 		/* root has special perms on plain_wrapper 
 		   But we don't know about root under Netware */
-		php_stream_wrapper *wrapper;
-
-		wrapper = php_stream_locate_url_wrapper(filename, NULL, 0 TSRMLS_CC);
 		if (wrapper == &php_plain_files_wrapper) {
 			if (type == FS_IS_X) {
 				xmask = S_IXROOT;
