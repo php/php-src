@@ -590,6 +590,16 @@ static int pdo_mysql_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC)
 		mysql_free_result(S->result);
 		S->result = NULL;
 	}
+#if HAVE_MYSQL_NEXT_RESULT
+	while (mysql_more_results(S->H->server)) {
+		if (mysql_next_result(S->H->server) == 0) {
+			MYSQL_RES *res = mysql_store_result(S->H->server);
+			if (res) {
+				mysql_free_result(res);
+			}
+		}
+	}
+#endif
 	return 1;
 }
 
