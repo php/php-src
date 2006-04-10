@@ -292,21 +292,14 @@ static zend_object_iterator *zend_user_it_get_iterator(zend_class_entry *ce, zva
 /* {{{ zend_user_it_get_new_iterator */
 ZEND_API zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
 {
-	zval *iterator;
+	zval *iterator = zend_user_it_new_iterator(ce, object TSRMLS_CC);
 	zend_object_iterator *new_iterator;
-
-	if (!ce) {
-		zend_error(E_ERROR, "Cannot create iterator without knowing the class type");
-		return NULL;
-	}
-
-	iterator = zend_user_it_new_iterator(ce, object TSRMLS_CC);
 
 	zend_class_entry *ce_it = iterator && Z_TYPE_P(iterator) == IS_OBJECT ? Z_OBJCE_P(iterator) : NULL;
 
 	if (!ce_it || !ce_it->get_iterator || (ce_it->get_iterator == zend_user_it_get_new_iterator && iterator == object)) {
 		if (!EG(exception)) {
-			zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Objects returned by %v::getIterator() must be traversable or implement interface Iterator", ce->name);
+			zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Objects returned by %s::getIterator() must be traversable or implement interface Iterator", ce ? ce->name : Z_OBJCE_P(object)->name);
 		}
 		if (iterator) {
 			zval_ptr_dtor(&iterator);
