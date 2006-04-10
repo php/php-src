@@ -2055,6 +2055,9 @@ static int php_sxe_iterator_current_key(zend_object_iterator *iter, zstr *str_ke
 	if (intern != NULL && intern->node != NULL) {
 		curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->node)->node;
 	}
+	if (!curnode) {
+		return HASH_KEY_NON_EXISTANT;
+	}
 
 	if (UG(unicode)) {
 		UErrorCode status = U_ZERO_ERROR;
