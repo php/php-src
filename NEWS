@@ -26,6 +26,8 @@ PHP                                                                        NEWS
 - Fixed bug #36941 (ArrayIterator does not clone itself). (Marcus)
 - Fixed bug #36934 (OCILob->read() doesn't move internal pointer when 
   reading 0's). (Tony)
+- Fixed bug #36908 (wsdl default value overrides value in soap request).
+  (Dmitry)
 - Fixed bug #36898 (__set() leaks in classes extending internal ones). 
   (Tony, Dmitry)
 - Fixed bug #36886 (User filters can leak buckets in some situations). (Ilia)
