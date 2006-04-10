@@ -6,8 +6,6 @@ a script should not be able to modify session.use_trans_sid
 session.use_trans_sid=1
 session.use_cookies=0
 session.cache_limiter=
-session.bug_compat_42=1
-session.bug_compat_warn=0
 session.name=PHPSESSID
 session.serialize_handler=php
 session.save_handler=files
