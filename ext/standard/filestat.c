@@ -358,7 +358,9 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp)
 	}
 
 	if (do_lchgrp) {
+#if HAVE_LCHOWN
 		ret = VCWD_LCHOWN(Z_STRVAL_PP(filename), -1, gid);
+#endif
 	} else {
 		ret = VCWD_CHOWN(Z_STRVAL_PP(filename), -1, gid);
 	}
@@ -432,7 +434,9 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown)
 	}
 
 	if (do_lchown) {
+#if HAVE_LCHOWN
 		ret = VCWD_LCHOWN(Z_STRVAL_PP(filename), uid, -1);
+#endif
 	} else {
 		ret = VCWD_CHOWN(Z_STRVAL_PP(filename), uid, -1);
 	}
