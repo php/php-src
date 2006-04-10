@@ -243,7 +243,9 @@ extern virtual_cwd_globals cwd_globals;
 #define VCWD_CHMOD(path, mode) virtual_chmod(path, mode TSRMLS_CC)
 #if !defined(TSRM_WIN32) && !defined(NETWARE)
 #define VCWD_CHOWN(path, owner, group) virtual_chown(path, owner, group, 0 TSRMLS_CC)
+#if HAVE_LCHOWN
 #define VCWD_LCHOWN(path, owner, group) virtual_chown(path, owner, group, 1 TSRMLS_CC)
+#endif
 #endif
 
 #else
@@ -286,7 +288,9 @@ extern virtual_cwd_globals cwd_globals;
 #define VCWD_CHMOD(path, mode) chmod(path, mode)
 #if !defined(TSRM_WIN32) && !defined(NETWARE)
 #define VCWD_CHOWN(path, owner, group) chown(path, owner, group)
+#if HAVE_LCHOWN
 #define VCWD_LCHOWN(path, owner, group) lchown(path, owner, group)
+#endif
 #endif
 
 #endif
