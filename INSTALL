@@ -714,12 +714,10 @@ CGI environment and recommended modifications in php.ini
      CGI-like environment variables.
 
    Simply change your scripts to get CGI variables in the correct way for
-   PHP 4.x by using the superglobal $_SERVER. If you have older scripts
-   which use $HTTP_HOST, etc., you should turn on register_globals in
-   php.ini and change the variable order too (important: remove "E" from
-   it, because you do not need the environment here):
+   PHP 4.x by using the superglobal $_SERVER. 
+   (important: remove "E" from variables_order because you do not need 
+   the environment here):
 variables_order = "GPCS"
-register_globals = On
      _________________________________________________________________
 
 Special use for error pages or self-made directory listings (PHP >= 4.3.3)
@@ -1430,7 +1428,6 @@ The configuration file
 ; Boolean values can be set to either:
 ;    true, on, yes
 ; or false, off, no, none
-register_globals = off
 track_errors = yes
 
 ; you can enclose strings in double-quotes

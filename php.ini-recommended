@@ -67,10 +67,6 @@
 ; PHP.  Please make sure you read what's different, and modify your scripts
 ; accordingly, if you decide to use this file instead.
 ;
-; - register_long_arrays = Off     [Performance]
-;     Disables registration of the older (and deprecated) long predefined array
-;     variables ($HTTP_*_VARS).  Instead, use the superglobals that were
-;     introduced in PHP 4.1.0
 ; - display_errors = Off           [Security]
 ;     With this directive set to off, errors that occur during the execution of
 ;     scripts will no longer be displayed as a part of the script output, and thus,
@@ -100,11 +96,6 @@
 ;     are emitted for non-critical errors, but that could be a symptom of a bigger
 ;     problem.  Most notably, this will cause error messages about the use
 ;     of uninitialized variables to be displayed.
-; - allow_call_time_pass_reference = Off     [Code cleanliness]
-;     It's not possible to decide to force a variable to be passed by reference
-;     when calling a function.  The PHP 4 style to do this is by making the
-;     function require the relevant argument by reference.
-
 
 ;;;;;;;;;;;;;;;;;;;;
 ; Language Options ;
@@ -113,9 +104,6 @@
 ; Enable the PHP scripting language engine under Apache.
 engine = On
 
-; Enable compatibility mode with Zend Engine 1 (PHP 4.x)
-zend.ze1_compatibility_mode = Off
-
 ; Allow the <? tag.  Otherwise, only <?php and <script> tags are recognized.
 ; NOTE: Using short tags should be avoided when developing applications or
 ; libraries that are meant for redistribution, or deployment on PHP
@@ -123,9 +111,6 @@ zend.ze1_compatibility_mode = Off
 ; be supported on the target server. For portable, redistributable code,
 ; be sure not to use short tags.
 short_open_tag = Off
-
-; Allow ASP-style <% %> tags.
-asp_tags = Off
 
 ; The number of significant digits displayed in floating point numbers.
 precision    =  14
@@ -192,17 +177,6 @@ unserialize_callback_func=
 ; digits after the floating point. The default value ensures that when floats
 ; are decoded with unserialize, the data will remain the same.
 serialize_precision = 100
-
-; Whether to enable the ability to force arguments to be passed by reference
-; at function call time.  This method is deprecated and is likely to be
-; unsupported in future versions of PHP/Zend.  The encouraged method of
-; specifying which arguments should be passed by reference is in the function
-; declaration.  You're encouraged to try and turn this option Off and make
-; sure your scripts work properly with it in order to ensure they will work
-; with future versions of the language (you will receive a warning each time
-; you use this feature, and the argument will be passed by value instead of by
-; reference).
-allow_call_time_pass_reference = Off
 
 ; open_basedir, if set, limits all file operations to the defined directory
 ; and below.  This directive makes most sense if used in a per-directory
@@ -395,11 +369,6 @@ track_errors = Off
 ; values override older values.
 variables_order = "GPCS"
 
-; Whether or not to register the old-style input arrays, HTTP_GET_VARS
-; and friends.  If you're not using them, it's recommended to turn them off,
-; for performance reasons.
-register_long_arrays = Off
-
 ; This directive tells PHP whether to declare the argv&argc variables (that
 ; would contain the GET information).  If you don't use these variables, you
 ; should turn it off for increased performance.
@@ -408,8 +377,8 @@ register_argc_argv = Off
 ; When enabled, the SERVER and ENV variables are created when they're first
 ; used (Just In Time) instead of when the script starts. If these variables
 ; are not used within a script, having this directive on will result in a
-; performance gain. The PHP directives  register_long_arrays and
-; register_argc_argv must be disabled for this directive to have any affect.
+; performance gain. The PHP directive register_argc_argv must be disabled
+; for this directive to have any affect.
 auto_globals_jit = On
 
 ; Maximum size of POST data that PHP will accept.
@@ -430,7 +399,10 @@ default_mimetype = "text/html"
 ; Always populate the $HTTP_RAW_POST_DATA variable.
 ;always_populate_raw_post_data = On
 
-; Unicode settings
+;;;;;;;;;;;;;;;;;;;;
+; Unicode settings ;
+;;;;;;;;;;;;;;;;;;;;
+
 unicode_semantics = off
 unicode.runtime_encoding = iso-8859-1 
 unicode.script_encoding = utf-8
@@ -461,11 +433,6 @@ user_dir =
 
 ; Directory in which the loadable extensions (modules) reside.
 extension_dir = "./"
-
-; Whether or not to enable the dl() function.  The dl() function does NOT work
-; properly in multithreaded servers, such as IIS or Zeus, and is automatically
-; disabled on them.
-enable_dl = On
 
 ; cgi.force_redirect is necessary to provide security running PHP as a CGI under
 ; most web servers.  Left undefined, PHP turns this on by default.  You can
@@ -929,15 +896,6 @@ session.gc_maxlifetime = 1440
 ;       For example, the following script would is the equivalent of
 ;       setting session.gc_maxlifetime to 1440 (1440 seconds = 24 minutes):
 ;          cd /path/to/sessions; find -cmin +24 | xargs rm
-
-; PHP 4.2 and less have an undocumented feature/bug that allows you to
-; to initialize a session variable in the global scope.
-; PHP 4.3 and later will warn you, if this feature is used.
-; You can disable the feature and the warning separately. At this time,
-; the warning is only displayed, if bug_compat_42 is enabled.
-
-session.bug_compat_42 = 0
-session.bug_compat_warn = 1
 
 ; Check HTTP Referer to invalidate externally stored URLs containing ids.
 ; HTTP_REFERER has to contain this substring for the session to be
