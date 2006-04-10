@@ -3316,7 +3316,10 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 				Z_LVAL_P(key) = int_key;
 				Z_TYPE_P(key) = IS_LONG;
 				break;
-			EMPTY_SWITCH_DEFAULT_CASE()
+			default:
+			case HASH_KEY_NON_EXISTANT:
+				ZVAL_NULL(key);
+				break;
 		}
 	}
 
