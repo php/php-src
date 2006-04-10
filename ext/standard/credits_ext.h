@@ -58,7 +58,7 @@ CREDIT_LINE("pcntl", "Jason Greene");
 CREDIT_LINE("Perl Compatible Regexps", "Andrei Zmievski");
 CREDIT_LINE("PHP Data Objects", "Wez Furlong, Marcus Boerger, Sterling Hughes, George Schlossnagle, Ilia Alshanetsky");
 CREDIT_LINE("PHP hash", "Sara Golemon, Rasmus Lerdorf, Stefan Esser, Michael Wallner");
-CREDIT_LINE("Posix", "Kristian Köhntopp");
+CREDIT_LINE("Posix", "Kristian Koehntopp");
 CREDIT_LINE("PostgreSQL driver for PDO", "Edin Kadribasic, Ilia Alshanetsky");
 CREDIT_LINE("PostgreSQL", "Jouni Ahto, Zeev Suraski, Yasuo Ohgaki, Chris Kings-Lynne");
 CREDIT_LINE("Pspell", "Vlad Krupin");
