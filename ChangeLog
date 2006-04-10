@@ -1,3 +1,30 @@
+2006-04-09  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_5_1)
+      NEWS:
+      Speed up SoapClient/SoapServer constructors by caching WSDL structures
+      in memory. All WSDL files will be cached, unless turned off via an
+      option to the constructor.
+
+2006-04-09  Edin Kadribasic  <edink@emini.dk>
+
+    * ext/gettext/config.w32:
+      MFB: Fixed bug #36935
+
+    * (PHP_5_1)
+      ext/gettext/config.w32:
+      Fixed bug #36935
+
+2006-04-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/filestat.c:
+      MFB51: Fixed bug #36875 (is_*() functions do not account for open_basedir).
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/filestat.c:
+      -** empty log message ***
+
 2006-04-08  Andrei Zmievski  <andrei@gravitonic.com>
 
     * Makefile.global
