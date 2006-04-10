@@ -16,7 +16,7 @@ CREDIT_LINE("Apache 1.3", "Rasmus Lerdorf, Zeev Suraski, Stig Bakken, David Skla
 CREDIT_LINE("Apache 2.0 Filter", "Sascha Schumann, Aaron Bannert");
 CREDIT_LINE("Apache 2.0 Handler", "Ian Holsman, Justin Erenkrantz (based on Apache 2.0 Filter code)");
 CREDIT_LINE("Caudium / Roxen", "David Hedbor");
-CREDIT_LINE("CGI / FastCGI", "Rasmus Lerdorf, Stig Bakken, Shane Caraveo");
+CREDIT_LINE("CGI / FastCGI", "Rasmus Lerdorf, Stig Bakken, Shane Caraveo, Dmitry Stogov");
 CREDIT_LINE("CLI", "Edin Kadribasic, Marcus Boerger, Johannes Schlueter");
 CREDIT_LINE("Continuity", "Alex Leigh (based on nsapi code)");
 CREDIT_LINE("Embed", "Edin Kadribasic");
