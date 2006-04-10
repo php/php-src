@@ -1,22 +1,22 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 06 Apr 2006, PHP 5.1.3RC3
-- Sped up SoapClient/SoapServer construction by making SOAP extension cache
-  WSDL structure in memory. (Andrei)
+- Eliminated run-time constant fetching for TRUE, FALSE and NULL. (Dmitry)
+- Changed SOAP extension to cache WSDL structure in memory and thus speed up
+  SoapClient/SoapServer construction. (Andrei)
+- Removed the E_STRICT deprecation notice from "var". (Ilia)
+- Added overflow checks to wordwrap() function. (Ilia)
+- Added support for BINARY_DOUBLE and BINARY_FLOAT to PDO_OCI and OCI8 
+  (also fixes bug #36764). (Tony)
+- Fixed tempnam() 2nd parameter to be checked against path components. (Ilia)
 - Fixed a bug that would not fill in the fifth argument to preg_replace() 
   properly, if the variable was not declared previously. (Andrei)
 - Fixed safe_mode check for source argument of the copy() function. (Ilia)
 - Fixed mysqli bigint conversion under Windows (Georg)
 - Fixed XSS inside phpinfo() with long inputs. (Ilia)
-- Check 2nd parameter of tempnam() against path components. (Ilia)
 - Fixed Apache2 SAPIs header handler modifying header strings. (Mike)
-- Allowed 'auto_globals_jit' work together with 'register_argc_argv'. (Dmitry)
-- Eliminated run-time constant fetching for TRUE, FALSE and NULL. (Dmitry)
+- Fixed 'auto_globals_jit' to work together with 'register_argc_argv'. (Dmitry)
 - Fixed offset/length parameter validation in substr_compare() function. (Ilia)
-- Added overflow checks to wordwrap() function. (Ilia)
-- Added support for BINARY_DOUBLE and BINARY_FLOAT to PDO_OCI and OCI8 
-  (also fixes bug #36764). (Tony)
-- Removed the E_STRICT deprecation notice from "var". (Ilia)
 - Fixed debug_zval_dump() to support private and protected members. (Dmitry)
 - Fixed SoapFault::getMessage(). (Dmitry)
 - Fixed bug #36981 (SplFileObject->fgets() ignores max_length). (Tony)
@@ -70,7 +70,7 @@ PHP                                                                        NEWS
   (Dmitry)
 
 09 Mar 2006, PHP 5.1.3RC1
-- Updated PCRE to version 6.6. (Andrei)
+- Updated bundled PCRE libary to version 6.6. (Andrei)
 - Moved extensions to PECL:
   . ext/msession (Derick)
 - Reimplemented FastCGI interface. (Dmitry)
