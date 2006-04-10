@@ -145,8 +145,6 @@ static PHP_INI_MH(OnUpdateSaveDir)
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
-	STD_PHP_INI_BOOLEAN("session.bug_compat_42",    "1",         PHP_INI_ALL, OnUpdateBool,   bug_compat,         php_ps_globals,    ps_globals)
-	STD_PHP_INI_BOOLEAN("session.bug_compat_warn",  "1",         PHP_INI_ALL, OnUpdateBool,   bug_compat_warn,    php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.save_path",          "",          PHP_INI_ALL, OnUpdateSaveDir,save_path,          php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.name",               "PHPSESSID", PHP_INI_ALL, OnUpdateString, session_name,       php_ps_globals,    ps_globals)
 	PHP_INI_ENTRY("session.save_handler",           "files",     PHP_INI_ALL, OnUpdateSaveHandler)
@@ -723,27 +721,6 @@ static void php_session_save_current_state(TSRMLS_D)
 	int ret = FAILURE;
 	
 	IF_SESSION_VARS() {
-		if (PS(bug_compat)) {
-			HashTable *ht = Z_ARRVAL_P(PS(http_session_vars));
-			HashPosition pos;
-			zval **val;
-			int do_warn = 0;
-
-			zend_hash_internal_pointer_reset_ex(ht, &pos);
-
-			while (zend_hash_get_current_data_ex(ht, 
-						(void **) &val, &pos) != FAILURE) {
-				if (Z_TYPE_PP(val) == IS_NULL) {
-					if (migrate_global(ht, &pos TSRMLS_CC))
-						do_warn = 1;
-				}
-				zend_hash_move_forward_ex(ht, &pos);
-			}
-
-			if (do_warn && PS(bug_compat_warn)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Your script possibly relies on a session side-effect which existed until PHP 4.2.3. Please be advised that the session extension does not consider global variables as a source of data. You can disable this functionality and this warning by setting session.bug_compat_42 or session.bug_compat_warn to off, respectively.");
-			}
-		}
 
 		if (PS(mod_data)) {
 			char *val;
