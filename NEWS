@@ -1,39 +1,44 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 6.0
+?? ??? 20??, PHP 6.0
 - Unicode support. (Andrei, Dmitry, et al)
-- Disabled dl(). Now it is enabled only when a SAPI layer registers it
-  explicitly. Only CLI, CGI and EMBED do this. (Dmitry).
-- Return "new" by reference now throws an E_STRICT error. (Dmitry)
-- Added E_STRICT to E_ALL. (Dmitry)
-- Dropped safe_mode support (Ilia, Andi)
-- Dropped zend.ze1_compatibility_mode (Dmitry)
-- Dropped allow_call_time_pass_reference, added E_STRICT error message. (Dmitry)
-- Dropped register_long_arrays (Dmitry)
-- Dropped register_globals support (Pierre)
-  - session_register, session_unregister and session_is_registered removed they
-    depend on register_globals
-- Dropped magic_quotes_gpc, magic_quotes_runtime and magic_quotes_sybase ini
-  settings (Pierre)
-  -  get_magic_quotes_gpc, get_magic_quotes_runtime are kept but always return
-     false, set_magic_quotes_runtime raises an E_CORE_ERROR
-- Freetype 1.x and GD 1.x support removed (Pierre)
-- Cleaned CGI code. Now FastCGI can not be disabled. See sapi/cgi/CHANGES
-  for more details. (Dmitry)
-- Removed support for "continue" and "break" operators with non-constant
-  operands. (Dmitry)
-- Implemented "jump label" operator (limited "goto"). (Dmitry, Sara)
+
+- Changed dl() to be disabled by default. Enabled only when explicitly 
+  registered by the SAPI layer. Enabled only with CLI, CGI and EMBED. (Dmitry)
+- Changed return "new" by reference to throw an E_STRICT error. (Dmitry)
 - Changed __toString() behavior to call it in all necessary places
   (Marcus, Dmitry)
 - Changed "instanceof" and "catch" operators, is_a() and is_subclass_of()
   functions to not call __autoload(). (Dmitry)
+
+- Removed old legacy:
+  . "register_globals" support. (Pierre)
+  . "register_long_arrays" ini option. (Dmitry)
+  . "safe_mode" support. (Ilia, Andi)
+  . "zend.ze1_compatibility_mode" ini option. (Dmitry)
+  . "allow_call_time_pass_reference", added E_STRICT error message. (Dmitry)
+  . session_register(), session_unregister() and session_is_registered()
+    (needed only with "register_globals=On").
+  . "magic_quotes_gpc", "magic_quotes_runtime" and "magic_quotes_sybase" ini
+    options. (Pierre)
+  . Changed get_magic_quotes_gpc(), get_magic_quotes_runtime to always return
+    false and set_magic_quotes_runtime() to raise an E_CORE_ERROR.
+- Removed support for "continue" and "break" operators with non-constant
+  operands. (Dmitry)
+- Removed Freetype 1.x and GD 1.x from GD extension. (Pierre)
 - Removed global reflection constants. (Johannes)
+
+- Improved and cleaned CGI code. FastCGI is now always enabled and can not be
+  disabled. See sapi/cgi/CHANGES for more details. (Dmitry)
+- Improved cURL: (Ilia)
+  . Added curl_setopt_array() which allows setting of multiple cURL options.
+  . Added CURLINFO_HEADER_OUT constant to facilitate request retrieval.
+
+- Added "jump label" operator (limited "goto"). (Dmitry, Sara)
+- Added E_STRICT to E_ALL. (Dmitry)
 - Added gmp_nextprime() function. (Tony, patch by ants dot aasma at gmail dot com) 
-- Added "allow_url_include" ini directive to be able to turn off remote url
+- Added "allow_url_include" ini option to be able to turn off remote url
   code execution separately from the "allow_url_fopen" setting. (Rasmus)
-- Added to cURL extension: (Ilia)
-  . curl_setopt_array() which allows setting of multiple cURL options.
-  . CURLINFO_HEADER_OUT constant to facilitate request retrieval.
 - Added --rclass and --rextension CLI parameters to reflect internal classes
   and loaded extensions. (Johannes)
 - Added optional parameter to http_build_query() to allow specification of 
@@ -46,5 +51,6 @@ PHP                                                                        NEWS
   defined using reflection API. (Johannes)
 - Added second optional parameter to stream_context_create() to set params
   during context creation. (Sara)
+
 - Fixed bug #36630 (umask not reset at the end of the request). (Ilia)
 - Fixed bug #34286 (__toString() behavior is inconsistent). (Marcus)
