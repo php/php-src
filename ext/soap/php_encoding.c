@@ -1130,11 +1130,13 @@ static void model_to_zval_object(zval *ret, sdlContentModelPtr model, xmlNodePtr
 {
 	switch (model->kind) {
 		case XSD_CONTENT_ELEMENT:
-		  if (model->u.element->name) {
-		  	xmlNodePtr node = get_node(data->children, model->u.element->name);
-		  	if (node) {
-			  	zval *val;
+			if (model->u.element->name) {
+				xmlNodePtr node = get_node(data->children, model->u.element->name);
 
+				if (node) {
+					zval *val;
+
+					node = check_and_resolve_href(node);
 					if (node && node->children && node->children->content) {
 						if (model->u.element->fixed && strcmp(model->u.element->fixed,node->children->content) != 0) {
 							soap_error3(E_ERROR, "Encoding: Element '%s' has fixed value '%s' (value '%s' is not allowed)", model->u.element->name, model->u.element->fixed, node->children->content);
