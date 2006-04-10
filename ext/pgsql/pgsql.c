@@ -4586,7 +4586,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 	char *field = NULL;
 	uint field_len = -1;
 	ulong num_idx = -1;
-	zval *meta, **def, **type, **not_null, **has_default, **val, *new_val = NULL;
+	zval *meta, **def, **type, **not_null, **has_default, **val, *new_val;
 	int new_len, key_type, err = 0, skip_field;
 	
 	assert(pg_link != NULL);
@@ -4608,6 +4608,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 		 zend_hash_get_current_data_ex(Z_ARRVAL_P(values), (void **)&val, &pos) == SUCCESS;
 		 zend_hash_move_forward_ex(Z_ARRVAL_P(values), &pos)) {
 		skip_field = 0;
+		new_val = NULL;
 		
 		if ((key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(values), &field, &field_len, &num_idx, 0, &pos)) == HASH_KEY_NON_EXISTANT) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to get array key type");
