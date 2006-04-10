@@ -1560,7 +1560,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 	image_info_data  *info_data;
 	image_info_data  *list;
 
-	if (length >= LONG_MAX) {
+	if (length < 0) {
 		return;
 	}
 
