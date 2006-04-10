@@ -38,6 +38,8 @@
 #define pcre_study				php_pcre_study
 #define pcre_version			php_pcre_version
 #define pcre_fullinfo			php_pcre_fullinfo
+#define pcre_free				php_pcre_free
+#define pcre_malloc				php_pcre_malloc
 #endif
 
 #define lookup				php_lookup
