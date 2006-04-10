@@ -4531,6 +4531,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 		 zend_hash_get_current_data_ex(Z_ARRVAL_P(values), (void **)&val, &pos) == SUCCESS;
 		 zend_hash_move_forward_ex(Z_ARRVAL_P(values), &pos)) {
 		skip_field = 0;
+		new_val = NULL;
 		
 		if ((key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(values), &field, &field_len, &num_idx, 0, &pos)) == HASH_KEY_NON_EXISTANT) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to get array key type");
@@ -4569,7 +4570,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 		if (err) {
 			break; /* break out for() */
 		}
-		MAKE_STD_ZVAL(new_val);
+		ALLOC_INIT_ZVAL(new_val);
 		switch(php_pgsql_get_data_type(Z_STRVAL_PP(type), Z_STRLEN_PP(type)))
 		{
 			case PG_BOOL:
