@@ -7724,7 +7724,9 @@ static int ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				key->value.lval = int_key;
 				key->type = IS_LONG;
 				break;
-			EMPTY_SWITCH_DEFAULT_CASE()
+			default:
+				ZVAL_NULL(key);
+				break;
 		}
 	}
 
