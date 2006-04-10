@@ -4586,7 +4586,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 	char *field = NULL;
 	uint field_len = -1;
 	ulong num_idx = -1;
-	zval *meta, **def, **type, **not_null, **has_default, **val, *new_val;
+	zval *meta, **def, **type, **not_null, **has_default, **val, *new_val = NULL;
 	int new_len, key_type, err = 0, skip_field;
 	
 	assert(pg_link != NULL);
@@ -4646,7 +4646,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 		if (err) {
 			break; /* break out for() */
 		}
-		MAKE_STD_ZVAL(new_val);
+		ALLOC_INIT_ZVAL(new_val);
 		switch(php_pgsql_get_data_type(Z_STRVAL_PP(type), Z_STRLEN_PP(type)))
 		{
 			case PG_BOOL:
@@ -5178,7 +5178,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 				break;
 		} /* switch */
 		
-		if (err) {
+		if (err && new_val) {
 			zval_dtor(new_val);
 			FREE_ZVAL(new_val);
 			break; /* break out for() */
