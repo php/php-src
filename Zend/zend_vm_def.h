@@ -3223,7 +3223,9 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 				key->value.lval = int_key;
 				key->type = IS_LONG;
 				break;
-			EMPTY_SWITCH_DEFAULT_CASE()
+			default:
+				ZVAL_NULL(key);
+				break;
 		}
 	}
 
