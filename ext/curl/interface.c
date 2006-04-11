@@ -1356,7 +1356,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 
 			break;
 		}
-		/* the following options deal with files, therefor safe_mode & open_basedir checks
+		/* the following options deal with files, therefore open_basedir checks
 		 * are required.
 		 */
 		case CURLOPT_COOKIEJAR:
