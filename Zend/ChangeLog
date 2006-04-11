@@ -1,3 +1,29 @@
+2006-04-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      zend_vm_def.h
+      zend_vm_execute.h:
+      - MFH Iterators from overloaded objects are allowed to not have keys...
+
+    * zend_vm_def.h
+      zend_vm_execute.h:
+      - Iterators from overloaded objects are allowed to not have keys...
+
+    * zend_interfaces.c:
+      - Allowing to pass in ce as NULL has its charme, too
+
+    * zend_interfaces.c:
+      - Fix coverity issue 49: ce might be forwarded as NULL without an exception
+        being thrown in case the Zend API is being used wrong (in custom exts
+      for
+        instance).
+
+2006-04-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_opcode.c
+      zend_opcode.c:
+      Fixed possible crash in interactive mode
+
 2006-04-07  Dmitry Stogov  <dmitry@zend.com>
 
     * (PHP_5_1)

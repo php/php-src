@@ -1,3 +1,140 @@
+2006-04-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/file/bug24313.phpt:
+      MFB51: fixed test
+
+    * (PHP_5_1)
+      ext/standard/tests/file/bug24313.phpt:
+      Fixed test
+
+2006-04-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/simplexml.c:
+      - Coverity issue 59
+
+    * (PHP_5_1)
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      - MFH Iterators from overloaded objects are allowed to not have keys...
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      - Iterators from overloaded objects are allowed to not have keys...
+
+    * ZendEngine2/zend_interfaces.c:
+      - Allowing to pass in ce as NULL has its charme, too
+
+    * ZendEngine2/zend_interfaces.c:
+      - Fix coverity issue 49: ce might be forwarded as NULL without an exception
+        being thrown in case the Zend API is being used wrong (in custom exts
+      for
+        instance).
+
+    * ext/pgsql/pgsql.c:
+      - Better order for SEGV prevention
+
+    * ext/pgsql/pgsql.c:
+      - Fix possible SEGV
+
+    * ext/exif/exif.c:
+      - Fix condition
+
+2006-04-10  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * INSTALL
+      php.ini-dist
+      php.ini-recommended
+      ext/mbstring/tests/skipif.inc
+      ext/standard/tests/array/bug33940.phpt
+      main/php_variables.c
+      tests/basic/012.phpt:
+      more cleanup (lingering ini settings which do not exist anymore, etc.)
+
+    * ext/session/php_session.h
+      ext/session/session.c
+      ext/session/tests/007.phpt
+      ext/session/tests/008-php4.2.3.phpt
+      ext/session/tests/008.phpt
+      ext/session/tests/009.phpt
+      ext/session/tests/010.phpt
+      ext/session/tests/011.phpt
+      ext/session/tests/012.phpt
+      ext/session/tests/013.phpt
+      ext/session/tests/014.phpt
+      ext/session/tests/019.phpt
+      ext/session/tests/skipif.inc:
+      - Cleanup
+
+    * ext/iconv/tests/bug16069.phpt
+      ext/iconv/tests/eucjp2iso2022jp.phpt
+      ext/iconv/tests/eucjp2sjis.phpt
+      ext/iconv/tests/eucjp2utf8.phpt
+      ext/iconv/tests/iconv001.phpt
+      ext/iconv/tests/iconv002.phpt
+      ext/iconv/tests/ob_iconv_handler.phpt
+      ext/iconv/tests/test.inc
+      ext/iconv/tests/translit-failure.phpt
+      ext/iconv/tests/translit-utf8.phpt:
+      cleanup
+
+2006-04-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #36908 (wsdl default value overrides value in soap request).
+
+    * ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_opcode.c:
+      Fixed possible crash in interactive mode
+
+2006-04-10  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * acinclude.m4:
+      fix typo
+
+    * (PHP_5_1)
+      acinclude.m4
+      configure.in
+      scripts/phpize.m4:
+      MFH: - Determine the shared/link lib suffixes in one macro.
+
+    * acinclude.m4
+      configure.in
+      scripts/phpize.m4:
+      - Determine the shared/link lib suffixes in one macro.
+
+    * (PHP_5_1)
+      TSRM/tsrm_virtual_cwd.h
+      ext/standard/filestat.c:
+      MFH: - Fixed bug #36909 (ld: Undefined symbols: _lchown)
+
+    * TSRM/tsrm_virtual_cwd.h
+      ext/standard/filestat.c:
+      - Fixed bug #36909 (ld: Undefined symbols: _lchown)
+
+    * (PHP_5_1)
+      main/php_compat.h:
+      MFH: - Silence some PCRE compile warnings
+
+    * main/php_compat.h:
+      - Silence some PCRE compile warnings
+
+    * NEWS:
+      - Fix NEWS. The empty lines were left on purpose..
+
+    * (PHP_5_1)
+      ext/standard/credits_ext.h:
+      update credits
+
+    * ext/standard/credits_ext.h
+      ext/standard/credits_sapi.h:
+      fix credits
+
+    * (PHP_5_1)
+      NEWS:
+      Fix NEWS
+
 2006-04-09  Andrei Zmievski  <andrei@gravitonic.com>
 
     * (PHP_5_1)
