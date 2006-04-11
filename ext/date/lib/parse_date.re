@@ -97,13 +97,13 @@ typedef unsigned char uchar;
 
 #define timelib_string_free free
 
-#define TIMELIB_HAVE_TIME() { if (s->time->have_time) { return TIMELIB_ERROR; } else { s->time->have_time = 1; s->time->h = 0; s->time->i = 0; s->time->s = 0; s->time->f = 0; } }
+#define TIMELIB_HAVE_TIME() { if (s->time->have_time) { add_error(s, "Double time specification"); timelib_string_free(str); return TIMELIB_ERROR; } else { s->time->have_time = 1; s->time->h = 0; s->time->i = 0; s->time->s = 0; s->time->f = 0; } }
 #define TIMELIB_UNHAVE_TIME() { s->time->have_time = 0; s->time->h = 0; s->time->i = 0; s->time->s = 0; s->time->f = 0; }
-#define TIMELIB_HAVE_DATE() { if (s->time->have_date) { return TIMELIB_ERROR; } else { s->time->have_date = 1; } }
+#define TIMELIB_HAVE_DATE() { if (s->time->have_date) { add_error(s, "Double date specification"); timelib_string_free(str); return TIMELIB_ERROR; } else { s->time->have_date = 1; } }
 #define TIMELIB_UNHAVE_DATE() { s->time->have_date = 0; s->time->d = 0; s->time->m = 0; s->time->y = 0; }
 #define TIMELIB_HAVE_RELATIVE() { s->time->have_relative = 1; s->time->relative.weekday_behavior = 0; }
 #define TIMELIB_HAVE_WEEKDAY_RELATIVE() { s->time->have_weekday_relative = 1; }
-#define TIMELIB_HAVE_TZ() { s->cur = cursor; if (s->time->have_zone) { return TIMELIB_ERROR; } else { s->time.have_zone = 1; } }
+#define TIMELIB_HAVE_TZ() { s->cur = cursor; if (s->time->have_zone) { add_warning(s, "Double timezone specification"); timelib_string_free(str); return TIMELIB_ERROR; } else { s->time->have_zone = 1; } }
 
 #define TIMELIB_INIT  s->cur = cursor; str = timelib_string(s); ptr = str
 #define TIMELIB_DEINIT timelib_string_free(str)
@@ -140,7 +140,7 @@ typedef struct Scanner {
 	int           fd;
 	uchar        *lim, *str, *ptr, *cur, *tok, *pos;
 	unsigned int  line, len;
-	int           errors;
+	struct timelib_error_container *errors;
 
 	struct timelib_time *time;
 	timelib_tzdb        *tzdb;
@@ -324,6 +324,24 @@ uchar *fill(Scanner *s, uchar *cursor){
 	return cursor;
 }
 #endif
+
+static void add_warning(Scanner *s, char *error)
+{
+	s->errors->warning_count++;
+	s->errors->warning_messages = realloc(s->errors->warning_messages, s->errors->warning_count * sizeof(timelib_error_message));
+	s->errors->warning_messages[s->errors->warning_count - 1].position = s->tok ? s->tok - s->str : 0;
+	s->errors->warning_messages[s->errors->warning_count - 1].character = s->tok ? *s->tok : 0;
+	s->errors->warning_messages[s->errors->warning_count - 1].message = strdup(error);
+}
+
+static void add_error(Scanner *s, char *error)
+{
+	s->errors->error_count++;
+	s->errors->error_messages = realloc(s->errors->error_messages, s->errors->error_count * sizeof(timelib_error_message));
+	s->errors->error_messages[s->errors->error_count - 1].position = s->tok ? s->tok - s->str : 0;
+	s->errors->error_messages[s->errors->error_count - 1].character = s->tok ? *s->tok : 0;
+	s->errors->error_messages[s->errors->error_count - 1].message = strdup(error);
+}
 
 static timelib_sll timelib_meridian(char **ptr, timelib_sll h)
 {
@@ -684,9 +702,11 @@ static long timelib_get_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_
 		char *tz_abbr;
 
 		t->is_localtime = 1;
-		t->zone_type = TIMELIB_ZONETYPE_ABBR;
 
 		offset = timelib_lookup_zone(ptr, dst, &tz_abbr, &found);
+		if (found) {
+			t->zone_type = TIMELIB_ZONETYPE_ABBR;
+		}
 #if 0
 		/* If we found a TimeZone identifier, use it */
 		if (tz_name) {
@@ -702,7 +722,7 @@ static long timelib_get_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_
 				found++;
 			}
 		}
-		if (t->zone_type != TIMELIB_ZONETYPE_ID) {
+		if (found && t->zone_type != TIMELIB_ZONETYPE_ID) {
 			timelib_time_tz_abbr_update(t, tz_abbr);
 		}
 		free(tz_abbr);
@@ -748,8 +768,8 @@ minute = [0-5]?[0-9];
 minutelz = [0-5][0-9];
 second = minute | "60";
 secondlz = minutelz | "60";
-meridian = [AaPp] "."? [Mm] "."?;
-tz = "("? [A-Za-z]{1,4} ")"? | [A-Z][a-z]+([_/][A-Z][a-z]+)+;
+meridian = ([AaPp] "."? [Mm] "."?) [\000\t ];
+tz = "("? [A-Za-z]{1,6} ")"? | [A-Z][a-z]+([_/][A-Z][a-z]+)+;
 tzcorrection = [+-] hour24 ":"? minute?;
 
 daysuf = "st" | "nd" | "rd" | "th";
@@ -780,17 +800,17 @@ timetiny12 = hour12 space? meridian;
 timeshort12 = hour12[:.]minutelz space? meridian;
 timelong12 = hour12[:.]minute[:.]secondlz space? meridian;
 
-timeshort24 = hour24[:.]minute;
-timelong24 =  hour24[:.]minute[:.]second;
-iso8601long =  hour24 [:.] minute [:.] second frac;
+timeshort24 = 't'? hour24[:.]minute;
+timelong24 =  't'? hour24[:.]minute[:.]second;
+iso8601long =  't'? hour24 [:.] minute [:.] second frac;
 
 /* iso8601shorttz = hour24 [:] minutelz space? (tzcorrection | tz); */
-iso8601normtz =  hour24 [:.] minute [:.] secondlz space? (tzcorrection | tz);
+iso8601normtz =  't'? hour24 [:.] minute [:.] secondlz space? (tzcorrection | tz);
 /* iso8601longtz =  hour24 [:] minute [:] secondlz frac space? (tzcorrection | tz); */
 
-gnunocolon       = hour24lz minutelz;
+gnunocolon       = 't'? hour24lz minutelz;
 /* gnunocolontz     = hour24lz minutelz space? (tzcorrection | tz); */
-iso8601nocolon   = hour24lz minutelz secondlz; 
+iso8601nocolon   = 't'? hour24lz minutelz secondlz; 
 /* iso8601nocolontz = hour24lz minutelz secondlz space? (tzcorrection | tz); */
 
 /* Date formats */
@@ -960,7 +980,9 @@ relativetext = reltextnumber space? reltextunit;
 
 		if (*ptr != '\0') {
 			s->time->z = timelib_get_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb);
-			s->errors += tz_not_found;
+			if (tz_not_found) {
+				add_error(s, "The timezone could not be found in the database");
+			}
 		}
 		TIMELIB_DEINIT;
 		return TIMELIB_TIME24_WITH_ZONE;
@@ -981,6 +1003,7 @@ relativetext = reltextnumber space? reltextunit;
 				break;
 			default:
 				TIMELIB_DEINIT;
+				add_error(s, "Double time specification");
 				return TIMELIB_ERROR;
 		}
 		s->time->have_time++;
@@ -1023,7 +1046,9 @@ relativetext = reltextnumber space? reltextunit;
 
 		if (*ptr != '\0') {
 			s->time->z = timelib_get_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb);
-			s->errors += tz_not_found;
+			if (tz_not_found) {
+				add_error(s, "The timezone could not be found in the database");
+			}
 		}
 		TIMELIB_DEINIT;
 		return TIMELIB_ISO_NOCOLON;
@@ -1176,7 +1201,9 @@ relativetext = reltextnumber space? reltextunit;
 			s->time->f = timelib_get_frac_nr((char **) &ptr, 9);
 			if (*ptr) { /* timezone is optional */
 				s->time->z = timelib_get_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb);
-				s->errors += tz_not_found;
+				if (tz_not_found) {
+					add_error(s, "The timezone could not be found in the database");
+				}
 			}
 		}
 		TIMELIB_DEINIT;
@@ -1274,7 +1301,9 @@ relativetext = reltextnumber space? reltextunit;
 		s->time->i = timelib_get_nr((char **) &ptr, 2);
 		s->time->s = timelib_get_nr((char **) &ptr, 2);
 		s->time->z = timelib_get_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb);
-		s->errors += tz_not_found;
+		if (tz_not_found) {
+			add_error(s, "The timezone could not be found in the database");
+		}
 		TIMELIB_DEINIT;
 		return TIMELIB_CLF;
 	}
@@ -1341,8 +1370,11 @@ relativetext = reltextnumber space? reltextunit;
 		int tz_not_found;
 		DEBUG_OUTPUT("tzcorrection | tz");
 		TIMELIB_INIT;
+		TIMELIB_HAVE_TZ();
 		s->time->z = timelib_get_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb);
-		s->errors += tz_not_found;
+		if (tz_not_found) {
+			add_error(s, "The timezone could not be found in the database");
+		}
 		TIMELIB_DEINIT;
 		return TIMELIB_TIMEZONE;
 	}
@@ -1369,7 +1401,9 @@ relativetext = reltextnumber space? reltextunit;
 
 		if (*ptr != '\0') {
 			s->time->z = timelib_get_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb);
-			s->errors += tz_not_found;
+			if (tz_not_found) {
+				add_error(s, "The timezone could not be found in the database");
+			}
 		}
 		TIMELIB_DEINIT;
 		return TIMELIB_SHORTDATE_WITH_TIME;
@@ -1404,8 +1438,7 @@ relativetext = reltextnumber space? reltextunit;
 
 	any
 	{
-/*		printf("unexpected character: #%d, %c ", *s->tok, *s->tok); */
-		s->errors++;
+		add_error(s, "Unexpected character");
 		goto std;
 	}
 */
@@ -1413,11 +1446,18 @@ relativetext = reltextnumber space? reltextunit;
 
 /*!max:re2c */
 
-timelib_time* timelib_strtotime(char *s, int len, int *errors, timelib_tzdb *tzdb)
+timelib_time* timelib_strtotime(char *s, int len, struct timelib_error_container **errors, timelib_tzdb *tzdb)
 {
 	Scanner in;
 	int t;
 	char *e = s + len - 1;
+
+	memset(&in, 0, sizeof(in));
+	in.errors = malloc(sizeof(struct timelib_error_container));
+	in.errors->warning_count = 0;
+	in.errors->warning_messages = NULL;
+	in.errors->error_count = 0;
+	in.errors->error_messages = NULL;
 
 	while (isspace(*s) && s < e) {
 		s++;
@@ -1426,15 +1466,19 @@ timelib_time* timelib_strtotime(char *s, int len, int *errors, timelib_tzdb *tzd
 		e--;
 	}
 	if (e - s < 1) {
-		*errors = 1;
 		in.time = timelib_time_ctor();
+		add_error(&in, "Empty string");
+		if (errors) {
+			*errors = in.errors;
+		} else {
+			timelib_error_container_dtor(in.errors);
+		}
 		in.time->y = in.time->d = in.time->m = in.time->h = in.time->i = in.time->s = in.time->f = in.time->z = in.time->dst = -1;
 		in.time->is_localtime = in.time->zone_type = 0;
 		return in.time;
 	}
 	e++;
 
-	memset(&in, 0, sizeof(in));
 	in.str = malloc((e - s) + YYMAXFILL);
 	memset(in.str, 0, (e - s) + YYMAXFILL);
 	memcpy(in.str, s, (e - s));
@@ -1450,7 +1494,6 @@ timelib_time* timelib_strtotime(char *s, int len, int *errors, timelib_tzdb *tzd
 	in.time->f = -1;
 	in.time->z = -1;
 	in.time->dst = -1;
-	in.errors = 0;
 	in.tzdb = tzdb;
 	in.time->is_localtime = 0;
 	in.time->zone_type = 0;
@@ -1463,7 +1506,11 @@ timelib_time* timelib_strtotime(char *s, int len, int *errors, timelib_tzdb *tzd
 	} while(t != EOI);
 
 	free(in.str);
-	*errors = in.errors;
+	if (errors) {
+		*errors = in.errors;
+	} else {
+		timelib_error_container_dtor(in.errors);
+	}
 	return in.time;
 }
 
