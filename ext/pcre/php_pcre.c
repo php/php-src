@@ -453,7 +453,7 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 
 	/*
 	 * Build a mapping from subpattern numbers to their names. We will always
-	 * allocate the table, even though they may be no named subpatterns. This
+	 * allocate the table, even though there may be no named subpatterns. This
 	 * avoids somewhat more complicated logic in the inner loops.
 	 */
 	subpat_names = (char **)safe_emalloc(num_subpats, sizeof(char *), 0);
@@ -467,22 +467,34 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 		if (rc < 0) {
 			php_error(E_WARNING, "%s: internal pcre_fullinfo() error %d",
 					  get_active_function_name(TSRMLS_C), rc);
+			efree(offsets);
+			efree(subpat_names);
 			RETURN_FALSE;
 		}
 		if (name_cnt > 0) {
 			int rc1, rc2;
+			long dummy_l;
+			double dummy_d;
 			rc1 = pcre_fullinfo(re, extra, PCRE_INFO_NAMETABLE, &name_table);
 			rc2 = pcre_fullinfo(re, extra, PCRE_INFO_NAMEENTRYSIZE, &name_size);
 			rc = rc2 ? rc2 : rc1;
 			if (rc < 0) {
 				php_error(E_WARNING, "%s: internal pcre_fullinfo() error %d",
 						  get_active_function_name(TSRMLS_C), rc);
+				efree(offsets);
+				efree(subpat_names);
 				RETURN_FALSE;
 			}
 
 			while (ni++ < name_cnt) {
 				name_idx = 0xff * name_table[0] + name_table[1];
 				subpat_names[name_idx] = name_table + 2;
+				if (is_numeric_string(subpat_names[name_idx], strlen(subpat_names[name_idx]), &dummy_l, &dummy_d, 0) > 0) {
+					php_error(E_WARNING, "%s: numeric named subpatterns are not allowed", get_active_function_name(TSRMLS_C));
+					efree(offsets);
+					efree(subpat_names);
+					RETURN_FALSE;
+				}
 				name_table += name_size;
 			}
 		}
