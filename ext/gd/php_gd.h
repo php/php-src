@@ -30,7 +30,7 @@
 
 #if HAVE_LIBGD
 
-/* open_basedir and safe_mode checks */
+/* open_basedir check */
 #define PHP_GD_CHECK_OPEN_BASEDIR(filename, errormsg)                                   \
 	if (!filename || php_check_open_basedir(filename TSRMLS_CC)) {			\
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, errormsg);                 	\
