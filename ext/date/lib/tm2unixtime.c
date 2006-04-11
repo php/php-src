@@ -135,6 +135,13 @@ static timelib_sll do_years(timelib_sll year)
 {
 	timelib_sll i;
 	timelib_sll res = 0;
+	timelib_sll eras;
+
+	eras = (year - 1970) / 400;
+	if (eras != 0) {
+		year = year - (eras * 400);
+		res += (SECS_PER_ERA * eras);
+	}
 
 	if (year >= 1970) {
 		for (i = year - 1; i >= 1970; i--) {
