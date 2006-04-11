@@ -1,5 +1,7 @@
 --TEST--
 Bug #37017 (strtotime fails before 13:00:00 with some time zones identifiers).
+--INI--
+date.timezone=GMT
 --FILE--
 <?php
 echo strtotime("2006-05-12 13:00:01 America/New_York"), "\n";
