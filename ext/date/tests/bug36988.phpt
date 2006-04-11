@@ -1,5 +1,7 @@
 --TEST--
 Bug #36988 (mktime freezes on long numbers)
+--INI--
+date.timezone=GMT
 --FILE--
 <?php
 $start = microtime(true);
