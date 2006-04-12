@@ -493,6 +493,9 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 				case SQLT_BIN:
 				default:
 					define_type = SQLT_CHR;
+					if (outcol->data_type == SQLT_BIN) {
+						define_type = SQLT_BIN;
+					}
 					if ((outcol->data_type == SQLT_DAT) || (outcol->data_type == SQLT_NUM)
 #ifdef SQLT_TIMESTAMP
 						|| (outcol->data_type == SQLT_TIMESTAMP)
@@ -813,6 +816,9 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 			mode = OCI_DEFAULT;
 			break;
 			
+		case SQLT_LBI:
+		case SQLT_BIN:
+		case SQLT_LNG:
 		case SQLT_CHR:
 			/* this is the default case when type was not specified */
 			convert_to_string(var);
