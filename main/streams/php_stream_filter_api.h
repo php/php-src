@@ -153,6 +153,7 @@ PHPAPI void _php_stream_filter_prepend(php_stream_filter_chain *chain, php_strea
 PHPAPI void _php_stream_filter_append(php_stream_filter_chain *chain, php_stream_filter *filter TSRMLS_DC);
 PHPAPI int _php_stream_filter_check_chain(php_stream_filter_chain *chain TSRMLS_DC);
 PHPAPI int _php_stream_filter_output_prefer_unicode(php_stream_filter *filter TSRMLS_DC);
+PHPAPI int _php_stream_filter_product(php_stream_filter_chain *chain, int type TSRMLS_DC);
 PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish TSRMLS_DC);
 PHPAPI php_stream_filter *php_stream_filter_remove(php_stream_filter *filter, int call_dtor TSRMLS_DC);
 PHPAPI void php_stream_filter_free(php_stream_filter *filter TSRMLS_DC);
@@ -166,6 +167,7 @@ END_EXTERN_C()
 #define php_stream_filter_flush(filter, finish) _php_stream_filter_flush((filter), (finish) TSRMLS_CC)
 #define php_stream_filter_check_chain(chain) _php_stream_filter_check_chain((chain) TSRMLS_CC)
 #define php_stream_filter_output_prefer_unicode(filter) _php_stream_filter_output_prefer_unicode((filter) TSRMLS_CC)
+#define php_stream_filter_product(chain, type) _php_stream_filter_product((chain), (type) TSRMLS_CC)
 #define php_stream_encoding_apply(stream, writechain, encoding, error_mode, subst) \
 		_php_stream_encoding_apply((stream), (writechain), (encoding), (error_mode), (subst) TSRMLS_CC)
 
