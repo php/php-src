@@ -1,3 +1,36 @@
+2006-04-11  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_1)
+      NEWS:
+      - MFH: Fixed bug #37017 (strtotime fails before 13:00:00 with some time
+      zones
+        identifiers). (Derick)
+      - MFH: Fixed bug #36988 (mktime freezes on long numbers). (Derick)
+      - MFH: Implemented better error and warning handling that is also used for
+      the
+        date_parse() function.
+      - MFH: Fixed problems with "T" in front of a time string was seen as a
+      time
+        zone string.
+      - MFH: Fixed a problem were 5 and 6 character timezone abbreviations where
+      not
+        correctly parsed.
+      
+      Experimental support (All MFH):
+      - Added the date_parse() function that returns a parsed date/time string
+        including warnings and errors.
+      - Added the timezone_name_from_abbr() function that exposes the guessing
+        mechanism that tries to find a timezone identifier from a timezone
+        abbreviation and GMT offset.
+
+2006-04-11  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/curl/interface.c
+      ext/gd/php_gd.h
+      main/safe_mode.c
+      main/safe_mode.h:
+      - More safe_mode left-overs.
+
 2006-04-10  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/tests/file/bug24313.phpt:
