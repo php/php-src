@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Apr 2006, PHP 5.1.3
+- Fixed bug #37060 (Type of retval of Countable::count() is not checked). 
+  (Johannes)
 - FIxed bug #37059 (oci_bind_by_name() doesn't support RAW and LONG RAW 
   fields). (Tony)
 - Fixed bug #37057 (xmlrpc_decode() may produce arrays with numeric strings, 
