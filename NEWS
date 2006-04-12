@@ -1,5 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? Apr 2006, PHP 5.1.3
+- Fixed bug #37002 (Have to quote literals in INI when concatenating with
+  vars). (Dmitry) 
+
 06 Apr 2006, PHP 5.1.3RC3
 - Eliminated run-time constant fetching for TRUE, FALSE and NULL. (Dmitry)
 - Changed SOAP extension to cache WSDL structure in memory and thus speed up
