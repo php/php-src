@@ -1056,7 +1056,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 							/* okay, the connection is open and the server is still alive */
 							connection->used_this_request = 1;
 							smart_str_free_ex(&hashed_details, 0);
-							connection->rsrc_id = zend_list_insert(connection, le_pconnection);
+							zend_list_addref(connection->rsrc_id);
 							return connection;
 						}
 					}
