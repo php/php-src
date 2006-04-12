@@ -300,7 +300,13 @@ static int add_zval(zval* list, const char* id, zval** val)
 {
 	if (list && val) {
 		if (id) {
-			return zend_hash_update(Z_ARRVAL_P(list), (char*) id, strlen(id) + 1, (void *) val, sizeof(zval **), NULL);
+			int id_len = strlen(id);
+			if (!(id_len > 1 && id[0] == '0') && is_numeric_string((char *)id, id_len, NULL, NULL, 0) == IS_LONG) {
+				long index = strtol(id, NULL, 0);
+				return zend_hash_index_update(Z_ARRVAL_P(list), index, (void *) val, sizeof(zval **), NULL);
+			} else {
+				return zend_hash_update(Z_ARRVAL_P(list), (char*) id, strlen(id) + 1, (void *) val, sizeof(zval **), NULL);
+			}
 		} else {
 			return zend_hash_next_index_insert(Z_ARRVAL_P(list), (void *) val, sizeof(zval **), NULL); 
 		}
