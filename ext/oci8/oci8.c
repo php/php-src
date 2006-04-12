@@ -541,6 +541,7 @@ PHP_MINIT_FUNCTION(oci)
 	REGISTER_LONG_CONSTANT("SQLT_FLT",SQLT_FLT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQLT_UIN",SQLT_UIN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQLT_LNG",SQLT_LNG, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SQLT_LBI",SQLT_LBI, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQLT_ODT",SQLT_ODT, CONST_CS | CONST_PERSISTENT);
 #if defined(HAVE_OCI_INSTANT_CLIENT) || (defined(OCI_MAJOR_VERSION) && OCI_MAJOR_VERSION > 10)
 	REGISTER_LONG_CONSTANT("SQLT_BDOUBLE",SQLT_BDOUBLE, CONST_CS | CONST_PERSISTENT);
@@ -1056,7 +1057,9 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 							/* okay, the connection is open and the server is still alive */
 							connection->used_this_request = 1;
 							smart_str_free_ex(&hashed_details, 0);
-							zend_list_addref(connection->rsrc_id);
+							if (zend_list_addref(connection->rsrc_id) == FAILURE) {
+								connection->rsrc_id = zend_list_insert(connection, le_pconnection);
+							}
 							return connection;
 						}
 					}
