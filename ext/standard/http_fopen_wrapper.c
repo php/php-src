@@ -81,6 +81,47 @@
 #define HTTP_HEADER_CONTENT_LENGTH	16
 #define HTTP_HEADER_TYPE			32
 
+static inline char *php_http_detect_charset(char *http_header_line)
+{
+	char *s;
+
+	/* Note: This is a fairly remedial parser which could be easily confused by invalid data
+	   The worst case scenario from such confusion should only result in the unicode filter not
+	   being applied.  While unfortunate, it's more an issue of the server sending a bad header */
+	for (s = strchr(http_header_line, ';'); s; s = strchr(s + 1, ';')) {
+		char *p = s;
+
+		while (*(++p) == ' ');
+		if (strncmp(p, "charset", sizeof("charset") - 1) != 0) {
+			continue;
+		}
+		p += sizeof("charset") - 1;
+
+		while (*p == ' ') p++;
+		if (*p != '=') {
+			continue;
+		}
+
+		while (*(++p) == ' ');
+		if (*p == '"') {
+			s = p + 1;
+			if (!(p = strchr(s, '"'))) {
+				/* Bad things, unmatched quote */
+				return NULL;
+			}
+			return estrndup(s, p - s);
+			break;
+		}
+
+		/* Unquoted value */
+		s = p;
+		while (*p && *p != ' ' && *p != ';') p++;
+		return estrndup(s, p - s);
+	}
+
+	return NULL;
+}
+
 php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context, int redirect_max, int header_init STREAMS_DC TSRMLS_DC)
 {
 	php_stream *stream = NULL;
@@ -104,6 +145,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	int transport_len, have_header = 0, request_fulluri = 0;
 	char *protocol_version = NULL;
 	int protocol_version_len = 3; /* Default: "1.0" */
+	char *charset = NULL;
 
 	tmp_line[0] = '\0';
 
@@ -543,6 +585,11 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 			if (!strncasecmp(http_header_line, "Location: ", 10)) {
 				strlcpy(location, http_header_line + 10, sizeof(location));
 			} else if (!strncasecmp(http_header_line, "Content-Type: ", 14)) {
+
+				if (UG(unicode) && strchr(mode, 't')) {
+					charset = php_http_detect_charset(http_header_line + sizeof("Content-type: "));
+				}
+
 				php_stream_notify_info(context, PHP_STREAM_NOTIFY_MIME_TYPE_IS, http_header_line + 14, 0);
 			} else if (!strncasecmp(http_header_line, "Content-Length: ", 16)) {
 				file_size = atoi(http_header_line + 16);
@@ -571,6 +618,11 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 
 		php_stream_close(stream);
 		stream = NULL;
+
+		if (charset) {
+			efree(charset);
+			charset = NULL;
+		}
 
 		if (location[0] != '\0')	{
 
@@ -682,6 +734,13 @@ out:
 		 * the stream */
 		stream->position = 0;
 
+	}
+
+	if (charset) {
+		if (stream && UG(unicode) && strchr(mode, 't')) {
+			php_stream_encoding_apply(stream, 0, charset, UG(to_error_mode), NULL);
+		}
+		efree(charset);
 	}
 
 	return stream;
