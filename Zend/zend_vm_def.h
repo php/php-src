@@ -3096,7 +3096,20 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 			ce = Z_OBJCE_P(array_ptr);
 		} else {
-			array_ptr->refcount++;
+			if (OP1_TYPE == IS_VAR &&
+				free_op1.var == NULL &&
+			    !array_ptr->is_ref &&
+			    array_ptr->refcount > 1) {
+				/* non-separated return value from function */
+				zval *tmp;
+
+				ALLOC_ZVAL(tmp);
+				INIT_PZVAL_COPY(tmp, array_ptr);
+				zval_copy_ctor(tmp);
+				array_ptr = tmp;
+			} else {
+				array_ptr->refcount++;
+			}
 		}
 	}
 
