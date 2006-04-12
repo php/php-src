@@ -1,5 +1,5 @@
 --TEST--
-fix #36944 (strncmp & strncasecmp do not return false on negative string length)
+Bug #36944 (strncmp & strncasecmp do not return false on negative string length)
 --FILE--
 <?php
 
