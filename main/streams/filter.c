@@ -338,10 +338,12 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 
 	if (filter == NULL) {
 		/* TODO: these need correct docrefs */
-		if (factory == NULL)
+		if (factory == NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to locate filter \"%s\"", filtername);
-		else
+		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to create or locate filter \"%s\"", filtername);
+		}
+		return NULL;
 	}
 
 	filter->name = pestrdup(filtername, filter->is_persistent);
