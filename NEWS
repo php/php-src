@@ -9,6 +9,7 @@ PHP                                                                        NEWS
   which are unaccessible). (Tony)
 - Fixed bug #37055 (incorrect reference counting for persistent OCI8 
   connections). (Tony)
+- Fixed bug #37054 (SoapClient Error Fetching http headers). (Dmitry)
 - Fixed bug #37053 (html_errors with internal classes produces wrong links). 
   (Tony)
 - Fixed bug #37046 (foreach breaks static scope). (Dmitry)
