@@ -36,6 +36,10 @@
 #include "spl_array.h"
 #include "spl_exceptions.h"
 
+#ifdef accept
+#undef accept
+#endif
+
 PHPAPI zend_class_entry *spl_ce_RecursiveIterator;
 PHPAPI zend_class_entry *spl_ce_RecursiveIteratorIterator;
 PHPAPI zend_class_entry *spl_ce_FilterIterator;
