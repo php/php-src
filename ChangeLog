@@ -1,3 +1,104 @@
+2006-04-12  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/http_fopen_wrapper.c
+      main/streams/filter.c
+      main/streams/php_stream_filter_api.h
+      main/streams/streams.c:
+      Allow http:// wrapper to automatically apply correct unicode.from.* filter
+      based on content-type header
+
+2006-04-12  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/strings/bug36944.phpt
+      ext/standard/tests/strings/bug36944.phpt:
+      fix test title
+
+2006-04-12  Johannes Schlüter  <schlueter@phpbar.de>
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/array.c:
+      - MFH: Fix bug #37060 (Type of retval of Countable::count() is not checked)
+
+    * ext/standard/array.c:
+      - Fix bug #37060 (Type of retval of Countable::count() is not checked)
+
+2006-04-12  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/oci8.c
+      ext/oci8/oci8_statement.c:
+      MF51: fix #37059 (oci_bind_by_name() doesn't support RAW and LONG RAW
+      fields)
+      add tests
+
+    * (PHP_5_1)
+      NEWS
+      ext/oci8/oci8.c
+      ext/oci8/oci8_statement.c:
+      fix #37059 (oci_bind_by_name() doesn't support RAW and LONG RAW fields)
+      add tests
+
+    * (PHP_5_1)
+      ext/oci8/oci8.c:
+      oops.. I didn't want to commit this..
+
+    * ext/oci8/oci8.c:
+      MF51: correct fix for bug #37055
+
+    * (PHP_5_1)
+      ext/oci8/oci8.c:
+      correct fix for bug #37055
+
+    * ext/xmlrpc/xmlrpc-epi-php.c:
+      MF51: fix #37057 (xmlrpc_decode() may produce arrays with numeric string
+      keys which are unaccessible)
+
+    * (PHP_5_1)
+      NEWS
+      ext/xmlrpc/xmlrpc-epi-php.c:
+      fix #37057 (xmlrpc_decode() may produce arrays with numeric strings which
+      are unaccessible)
+
+    * ext/oci8/oci8.c:
+      MF51: fix #37055 (incorrect reference counting for persistent OCI8
+      connections)
+
+    * (PHP_5_1)
+      NEWS
+      ext/oci8/oci8.c:
+      fix #37055 (incorrect reference counting for persistent OCI8 connections)
+
+    * main/main.c:
+      MF51: fix #37053 (html_errors with internal classes produces wrong links)
+
+    * (PHP_5_1)
+      NEWS
+      main/main.c:
+      fix #37053 (html_errors with internal classes produces wrong links)
+
+2006-04-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug37046.phpt
+      ZendEngine2/tests/bug37046.phpt:
+      
+      file bug37046.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug37046.phpt:
+      Fixed bug #37046 (foreach breaks static scope)
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/zend_ini_parser.y
+      ZendEngine2/zend_ini_parser.y:
+      Fixed bug #37002 (Have to quote literals in INI when concatenating with
+      vars)
+
 2006-04-11  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_5_1)

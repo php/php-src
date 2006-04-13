@@ -1,3 +1,22 @@
+2006-04-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug37046.phpt:
+      Fixed bug #37046 (foreach breaks static scope)
+
+    * tests/bug37046.phpt
+      tests/bug37046.phpt:
+      
+      file bug37046.phpt was initially added on branch PHP_5_1.
+
+    * zend_ini_parser.y
+      zend_ini_parser.y:
+      Fixed bug #37002 (Have to quote literals in INI when concatenating with
+      vars)
+
 2006-04-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
