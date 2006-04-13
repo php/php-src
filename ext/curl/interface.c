@@ -1208,6 +1208,8 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 
 			if (Z_LVAL_PP(zvalue)) {
 				ch->handlers->write->type = PHP_CURL_BINARY;
+			} else {
+				ch->handlers->write->type = PHP_CURL_ASCII;
 			}
 			break;
 		case CURLOPT_WRITEFUNCTION:
@@ -1462,7 +1464,7 @@ PHP_FUNCTION(curl_setopt_array)
 void _php_curl_cleanup_handle(php_curl *ch)
 {
 	if (ch->handlers->write->buf.len > 0) {
-		memset(&ch->handlers->write->buf, 0, sizeof(smart_str));
+		smart_str_free(&ch->handlers->write->buf);
 	}
 	if (ch->header.str_len) {
 		efree(ch->header.str);
@@ -1497,7 +1499,6 @@ PHP_FUNCTION(curl_exec)
 		if (ch->handlers->write->buf.len > 0) {
 			smart_str_free(&ch->handlers->write->buf);
 		}
-
 		RETURN_FALSE;
 	}
 
@@ -1505,10 +1506,8 @@ PHP_FUNCTION(curl_exec)
 
 	if (ch->handlers->write->method == PHP_CURL_RETURN && ch->handlers->write->buf.len > 0) {
 		--ch->uses;
-		if (ch->handlers->write->type != PHP_CURL_BINARY)  {
-			smart_str_0(&ch->handlers->write->buf);
-		}
-		RETURN_STRINGL(ch->handlers->write->buf.c, ch->handlers->write->buf.len, 0);
+		smart_str_0(&ch->handlers->write->buf);
+		RETURN_STRINGL(ch->handlers->write->buf.c, ch->handlers->write->buf.len, 1);
 	}
 	--ch->uses;
 	RETURN_TRUE;
@@ -1739,6 +1738,9 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	zend_llist_clean(&ch->to_free.slist);
 	zend_llist_clean(&ch->to_free.post);
 
+	if (ch->handlers->write->buf.len > 0) {
+		smart_str_free(&ch->handlers->write->buf);
+	}
 	if (ch->handlers->write->func_name) {
 		zval_ptr_dtor(&ch->handlers->write->func_name);
 	}
@@ -1754,7 +1756,7 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	if (ch->header.str_len > 0) {
 		efree(ch->header.str);
 	}
-
+	
 	efree(ch->handlers->write);
 	efree(ch->handlers->write_header);
 	efree(ch->handlers->read);
