@@ -343,6 +343,8 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 		else
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to create or locate filter \"%s\"", filtername);
 	}
+
+	filter->name = pestrdup(filtername, filter->is_persistent);
 	
 	return filter;
 }
@@ -365,6 +367,7 @@ PHPAPI void php_stream_filter_free(php_stream_filter *filter TSRMLS_DC)
 {
 	if (filter->fops->dtor)
 		filter->fops->dtor(filter TSRMLS_CC);
+	pefree(filter->name, filter->is_persistent);
 	pefree(filter, filter->is_persistent);
 }
 
