@@ -145,6 +145,8 @@ struct _php_stream_filter {
 	/* filters are auto_registered when they're applied */
 	int rsrc_id;
 	int flags;
+
+	char *name;
 };
 
 /* stack filter onto a stream */

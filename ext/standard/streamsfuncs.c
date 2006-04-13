@@ -470,7 +470,7 @@ PHP_FUNCTION(stream_get_meta_data)
 		array_init(newval);
 		
 		for (filter = stream->readfilters.head; filter != NULL; filter = filter->next) {
-			add_next_index_string(newval, (char *)filter->fops->label, 1);
+			add_next_index_string(newval, filter->name, 1);
 		}
 
 		add_assoc_zval(return_value, "read_filters", newval);
@@ -483,7 +483,7 @@ PHP_FUNCTION(stream_get_meta_data)
 		array_init(newval);
 		
 		for (filter = stream->writefilters.head; filter != NULL; filter = filter->next) {
-			add_next_index_string(newval, (char *)filter->fops->label, 1);
+			add_next_index_string(newval, filter->name, 1);
 		}
 
 		add_assoc_zval(return_value, "write_filters", newval);
