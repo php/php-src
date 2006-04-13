@@ -16,7 +16,7 @@ foreach (s() as $k => $function) {
   }
 }
 ?>
---EXPEXT--
+--EXPECT--
 op1 0
 op2 0
 op2 1
