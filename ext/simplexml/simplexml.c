@@ -950,6 +950,9 @@ static HashTable * sxe_properties_get(zval *object TSRMLS_DC)
 	}
 
 	GET_NODE(sxe, node);
+	if (!node) {
+		return rv;
+	}
 	if (1||sxe->iter.type != SXE_ITER_CHILD) {
 		if (sxe->iter.type == SXE_ITER_ELEMENT) {
 			node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
