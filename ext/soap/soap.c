@@ -1667,7 +1667,9 @@ PHP_METHOD(SoapServer, handle)
 			}
 
 			fn_name = estrndup(Z_STRVAL(h->function_name),Z_STRLEN(h->function_name));
-			if (zend_hash_exists(function_table, php_strtolower(fn_name, Z_STRLEN(h->function_name)), Z_STRLEN(h->function_name) + 1)) {
+			if (zend_hash_exists(function_table, php_strtolower(fn_name, Z_STRLEN(h->function_name)), Z_STRLEN(h->function_name) + 1) ||
+			    (service->type == SOAP_CLASS &&
+			     zend_hash_exists(function_table, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)))) {
 				if (service->type == SOAP_CLASS) {
 					call_status = call_user_function(NULL, &soap_obj, &h->function_name, &h->retval, h->num_params, h->parameters TSRMLS_CC);
 				} else {
