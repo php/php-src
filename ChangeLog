@@ -1,3 +1,62 @@
+2006-04-13  Antony Dovgal  <antony@zend.com>
+
+    * main/streams/filter.c:
+      fix CS and prevent NULL dereference
+
+2006-04-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug36513.phpt
+      ZendEngine2/tests/bug36513.phpt:
+      
+      file bug36513.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      NEWS
+      Zend/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/tests/bug36513.phpt:
+      Fixed bug #36513 (comment will be outputed in last line)
+
+2006-04-13  Antony Dovgal  <antony@zend.com>
+
+    * ext/curl/interface.c
+      ext/curl/multi.c:
+      MF51:
+      fix bug #37061 (curl_exec() doesn't zero-terminate binary strings) - we
+      get the data length from cURL, so it's binary safe.
+      fix leak appearing when re-using curl handle
+
+    * (PHP_5_1)
+      NEWS
+      ext/curl/interface.c
+      ext/curl/multi.c:
+      fix bug #37061 (curl_exec() doesn't zero-terminate binary strings) - we get
+      the data length from cURL, so it's binary safe.
+      fix leak appearing when re-using curl handle
+
+2006-04-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #37054 (SoapClient Error Fetching http headers)
+
+    * (PHP_4_4)
+      NEWS
+      Zend/zend_execute.c:
+      Fixed bug #37046 (foreach breaks static scope)
+
+    * ZendEngine2/tests/bug37046.phpt
+      ZendEngine2/tests/bug37046.phpt:
+      Fixed test
+
+2006-04-13  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/streamsfuncs.c
+      main/streams/filter.c
+      main/streams/php_stream_filter_api.h:
+      Preserve full name of filter for use in stream_get_meta_data()
+
 2006-04-12  Sara Golemon  <sara@golemon.com>
 
     * ext/standard/http_fopen_wrapper.c
