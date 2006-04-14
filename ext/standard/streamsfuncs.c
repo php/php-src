@@ -207,6 +207,8 @@ PHP_FUNCTION(stream_socket_server)
 			/* no need to dup; we need to efree buf anyway */
 			zval_dtor(zerrstr);
 			ZVAL_STRING(zerrstr, errstr, 0);
+		} else if (errstr) {
+			efree(errstr);
 		}
 		RETURN_FALSE;
 	}
