@@ -677,7 +677,7 @@ if ($just_save_results || !getenv('NO_INTERACTION')) {
 
 		if ($sum_results['FAILED']) {
 			foreach ($PHP_FAILED_TESTS['FAILED'] as $test_info) {
-				$failed_tests_data .= $sep . $test_info['name'] . $test_info['info'];
+				$failed_tests_data .= $sep . ($test_info['unicode']?'U:':'N:') . $test_info['name'] . $test_info['info'];
 				$failed_tests_data .= $sep . file_get_contents(realpath($test_info['output']));
 				$failed_tests_data .= $sep . file_get_contents(realpath($test_info['diff']));
 				$failed_tests_data .= $sep . "\n\n";
@@ -1033,6 +1033,7 @@ TEST $file
 								'output' => '',
 								'diff'   => '',
 								'info'   => "$bork_info [$file]",
+								'unicode'=> $unicode_semantics,
 		);
 		return 'BORKED';
 	}
@@ -1261,6 +1262,7 @@ TEST $file
 								'output' => '',
 								'diff'   => '',
 								'info'   => "$bork_info [$file]",
+								'unicode'=> $unicode_semantics,
 		);
 		//$test_cnt -= 1;  // Only if is_array($org_file) ?
 		//$test_idx--;
@@ -1493,7 +1495,8 @@ $output
 						'test_name' => (is_array($IN_REDIRECT) ? $IN_REDIRECT['via'] : '') . $tested . " [$tested_file]",
 						'output' => $output_filename,
 						'diff'   => $diff_filename,
-						'info'   => $info
+						'info'   => $info,
+						'unicode'=> $unicode_semantics,
 						);
 
 	if (isset($old_php)) {
@@ -1713,8 +1716,8 @@ Time taken      : " . sprintf("%4d seconds", $end_time - $start_time) . "
 BORKED TEST SUMMARY
 ---------------------------------------------------------------------
 ";
-		foreach ($PHP_FAILED_TESTS['BORKED'] as $failed_test_data) {
-			$failed_test_summary .= $failed_test_data['info'] . "\n";
+		foreach ($PHP_FAILED_TESTS['BORKED'] as $test_data) {
+			$failed_test_summary .= ($test_data['unicode']?'U:':'N:') . $test_data['info'] . "\n";
 		}
 		$failed_test_summary .=  "=====================================================================\n";
 	}
@@ -1725,8 +1728,8 @@ BORKED TEST SUMMARY
 FAILED TEST SUMMARY
 ---------------------------------------------------------------------
 ";
-		foreach ($PHP_FAILED_TESTS['FAILED'] as $failed_test_data) {
-			$failed_test_summary .= $failed_test_data['test_name'] . $failed_test_data['info'] . "\n";
+		foreach ($PHP_FAILED_TESTS['FAILED'] as $test_data) {
+			$failed_test_summary .= ($test_data['unicode']?'U:':'N:') . $test_data['test_name'] . $test_data['info'] . "\n";
 		}
 		$failed_test_summary .=  "=====================================================================\n";
 	}
@@ -1737,8 +1740,8 @@ FAILED TEST SUMMARY
 LEAKED TEST SUMMARY
 ---------------------------------------------------------------------
 ";
-		foreach ($PHP_FAILED_TESTS['LEAKED'] as $failed_test_data) {
-			$failed_test_summary .= $failed_test_data['test_name'] . $failed_test_data['info'] . "\n";
+		foreach ($PHP_FAILED_TESTS['LEAKED'] as $test_data) {
+			$failed_test_summary .= ($test_data['unicode']?'U:':'N:') . $test_data['test_name'] . $test_data['info'] . "\n";
 		}
 		$failed_test_summary .=  "=====================================================================\n";
 	}
