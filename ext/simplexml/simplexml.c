@@ -69,7 +69,7 @@ static void _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value, SXE
 	if (name) {
 		subnode->iter.name = xmlStrdup(name);
 	}
-	if (prefix) {
+	if (prefix && *prefix) {
 		subnode->iter.nsprefix = xmlStrdup(prefix);
 	}
 
@@ -122,7 +122,7 @@ static inline int match_ns(php_sxe_object *sxe, xmlNodePtr node, xmlChar *name) 
 		return 1;
 	}
 
-	if (node->ns && !xmlStrcmp(node->ns->href, name)) {
+	if (node->ns && (/*!xmlStrcmp(node->ns->prefix, name) ||*/ !xmlStrcmp(node->ns->href, name))) {
 		return 1;
 	}
 
@@ -1816,7 +1816,7 @@ sxe_object_new(zend_class_entry *ce TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto simplemxml_element simplexml_load_file(string filename [, string class_name [, int options]])
+/* {{{ proto simplemxml_element simplexml_load_file(string filename [, string class_name [, int options [, string ns]]])
    Load a filename and return a simplexml_element object to allow for processing */
 PHP_FUNCTION(simplexml_load_file)
 {
@@ -1824,12 +1824,12 @@ PHP_FUNCTION(simplexml_load_file)
 	char           *filename;
 	int             filename_len;
 	xmlDocPtr       docp;
-	char           *classname = "";
-	int             classname_len = 0;
+	char           *classname = NULL, *ns = NULL;
+	int             classname_len = 0, ns_len = 0;
 	long            options = 0;
 	zend_class_entry *ce= sxe_class_entry;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sl", &filename, &filename_len, &classname, &classname_len, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sls", &filename, &filename_len, &classname, &classname_len, &options, &ns, &ns_len) == FAILURE) {
 		return;
 	}
 
@@ -1848,6 +1848,7 @@ PHP_FUNCTION(simplexml_load_file)
 	}
 
 	sxe = php_sxe_object_new(ce TSRMLS_CC);
+	sxe->iter.nsprefix = ns_len ? xmlStrdup(ns) : NULL;
 	php_libxml_increment_doc_ref((php_libxml_node_object *)sxe, docp TSRMLS_CC);
 	php_libxml_increment_node_ptr((php_libxml_node_object *)sxe, xmlDocGetRootElement(docp), NULL TSRMLS_CC);
 
@@ -1856,7 +1857,7 @@ PHP_FUNCTION(simplexml_load_file)
 }
 /* }}} */
 
-/* {{{ proto simplemxml_element simplexml_load_string(string data [, string class_name [, int options]])
+/* {{{ proto simplemxml_element simplexml_load_string(string data [, string class_name [, int options [, string ns]]])
    Load a string and return a simplexml_element object to allow for processing */
 PHP_FUNCTION(simplexml_load_string)
 {
@@ -1864,12 +1865,12 @@ PHP_FUNCTION(simplexml_load_string)
 	char           *data;
 	int             data_len;
 	xmlDocPtr       docp;
-	char           *classname = "";
-	int             classname_len = 0;
+	char           *classname = NULL, *ns = NULL;
+	int             classname_len = 0, ns_len = 0;
 	long            options = 0;
 	zend_class_entry *ce= sxe_class_entry;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sl", &data, &data_len, &classname, &classname_len, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sls", &data, &data_len, &classname, &classname_len, &options, &ns, &ns_len) == FAILURE) {
 		return;
 	}
 
@@ -1888,6 +1889,7 @@ PHP_FUNCTION(simplexml_load_string)
 	}
 
 	sxe = php_sxe_object_new(ce TSRMLS_CC);
+	sxe->iter.nsprefix = ns_len ? xmlStrdup(ns) : NULL;
 	php_libxml_increment_doc_ref((php_libxml_node_object *)sxe, docp TSRMLS_CC);
 	php_libxml_increment_node_ptr((php_libxml_node_object *)sxe, xmlDocGetRootElement(docp), NULL TSRMLS_CC);
 
@@ -1897,19 +1899,19 @@ PHP_FUNCTION(simplexml_load_string)
 /* }}} */
 
 
-/* {{{ proto SimpleXMLElement::__construct(string data [, int options [, bool data_is_url]])
+/* {{{ proto SimpleXMLElement::__construct(string data [, int options [, bool data_is_url [, string ns]]])
    SimpleXMLElement constructor */
 SXE_METHOD(__construct)
 {
 	php_sxe_object *sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
-	char           *data;
-	int             data_len;
+	char           *data, *ns = NULL;
+	int             data_len, *ns_len = 0;
 	xmlDocPtr       docp;
 	long            options = 0;
 	zend_bool       is_url = 0;
 
 	php_set_error_handling(EH_THROW, zend_exception_get_default(TSRMLS_C) TSRMLS_CC);
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lb", &data, &data_len, &options, &is_url) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lbs", &data, &data_len, &options, &is_url, &ns, &ns_len) == FAILURE) {
 		php_std_error_handling();
 		return;
 	}
@@ -1924,6 +1926,7 @@ SXE_METHOD(__construct)
 		return;
 	}
 
+	sxe->iter.nsprefix = ns_len ? xmlStrdup(ns) : NULL;
 	php_libxml_increment_doc_ref((php_libxml_node_object *)sxe, docp TSRMLS_CC);
 	php_libxml_increment_node_ptr((php_libxml_node_object *)sxe, xmlDocGetRootElement(docp), NULL TSRMLS_CC);
 }
