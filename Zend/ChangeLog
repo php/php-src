@@ -1,3 +1,19 @@
+2006-04-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_language_scanner.l
+      zend_language_scanner.l
+      tests/bug36513.phpt:
+      Fixed bug #36513 (comment will be outputed in last line)
+
+    * tests/bug36513.phpt
+      tests/bug36513.phpt:
+      
+      file bug36513.phpt was initially added on branch PHP_5_1.
+
+    * tests/bug37046.phpt
+      tests/bug37046.phpt:
+      Fixed test
+
 2006-04-12  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_vm_def.h
