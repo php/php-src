@@ -18,7 +18,7 @@ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 </soap:Envelope>
 EOF;
 
-$sxe = simplexml_load_string($xml, NULL, 0, 'soap');
+$sxe = simplexml_load_string($xml);
 $nsl = $sxe->getNamespaces();
 var_dump($nsl);
 
