@@ -989,7 +989,7 @@ static HashTable * sxe_properties_get(zval *object TSRMLS_DC)
 			ZVAL_STRING(value, sxe_xmlNodeListGetString(node->doc, node->children, 1), 0);
 			zend_hash_next_index_insert(rv, &value, sizeof(zval *), NULL);
 			node = NULL;
-		} else {
+		} else if (sxe->iter.type != SXE_ITER_CHILD) {
 			node = node->children;
 		}
 
