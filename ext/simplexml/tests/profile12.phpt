@@ -1,0 +1,97 @@
+--TEST--
+SimpleXML [profile]: Accessing namespaced root and non namespaced children
+--FILE--
+<?php
+
+$xml =<<<EOF
+<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope
+xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+>
+<soap:Body>
+<businessList foo="bar">
+<businessInfo businessKey="bla"/>
+</businessList>
+</soap:Body> 
+</soap:Envelope>
+EOF;
+
+$sxe = simplexml_load_string($xml, NULL, 0, 'soap');
+$nsl = $sxe->getNamespaces();
+var_dump($nsl);
+
+$sxe = simplexml_load_string($xml, NULL, 0, $nsl['soap']);
+var_dump($sxe->Body);
+var_dump($sxe->Body->children(''));
+var_dump($sxe->Body->children('')->businessList);
+
+?>
+===DONE===
+--EXPECTF--
+array(1) {
+  ["soap"]=>
+  string(41) "http://schemas.xmlsoap.org/soap/envelope/"
+}
+object(SimpleXMLElement)#%d (0) {
+}
+object(SimpleXMLElement)#%d (1) {
+  ["businessInfo"]=>
+  object(SimpleXMLElement)#%d (1) {
+    ["@attributes"]=>
+    array(1) {
+      ["businessKey"]=>
+      string(3) "bla"
+    }
+  }
+}
+object(SimpleXMLElement)#%d (2) {
+  ["@attributes"]=>
+  array(1) {
+    ["foo"]=>
+    string(3) "bar"
+  }
+  ["businessInfo"]=>
+  object(SimpleXMLElement)#%d (1) {
+    ["@attributes"]=>
+    array(1) {
+      ["businessKey"]=>
+      string(3) "bla"
+    }
+  }
+}
+===DONE===
+--UEXPECTF--
+array(1) {
+  [u"soap"]=>
+  string(41) "http://schemas.xmlsoap.org/soap/envelope/"
+}
+object(SimpleXMLElement)#%d (0) {
+}
+object(SimpleXMLElement)#%d (1) {
+  [u"businessInfo"]=>
+  object(SimpleXMLElement)#%d (1) {
+    [u"@attributes"]=>
+    array(1) {
+      [u"businessKey"]=>
+      unicode(3) "bla"
+    }
+  }
+}
+object(SimpleXMLElement)#%d (2) {
+  [u"@attributes"]=>
+  array(1) {
+    [u"foo"]=>
+    unicode(3) "bar"
+  }
+  [u"businessInfo"]=>
+  object(SimpleXMLElement)#%d (1) {
+    [u"@attributes"]=>
+    array(1) {
+      [u"businessKey"]=>
+      unicode(3) "bla"
+    }
+  }
+}
+===DONE===
