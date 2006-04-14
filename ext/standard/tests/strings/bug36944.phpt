@@ -16,11 +16,11 @@ echo "Done\n";
 --EXPECTF--	
 Warning: Length must be greater than or equal to 0 in %s on line %d
 bool(false)
-int(1)
+int(%d)
 int(0)
 
 Warning: Length must be greater than or equal to 0 in %s on line %d
 bool(false)
-int(15)
+int(%d)
 int(0)
 Done
