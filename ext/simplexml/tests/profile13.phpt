@@ -1,5 +1,5 @@
 --TEST--
-SimpleXML [profile]: Accessing namespaced root and non namespaced children
+SimpleXML [profile]: Accessing by namespace prefix
 --FILE--
 <?php
 
@@ -19,33 +19,34 @@ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 EOF;
 
 $sxe = simplexml_load_string($xml);
-$nsl = $sxe->getNamespaces();
-var_dump($nsl);
+var_dump($sxe->children('soap', 1));
 
-$sxe = simplexml_load_string($xml, NULL, 0, $nsl['soap']);
+$sxe = simplexml_load_string($xml, NULL, 0, 'soap', 1);
 var_dump($sxe->Body);
 var_dump($sxe->Body->children(''));
 var_dump($sxe->Body->children('')->businessList);
 
 ?>
 ===DONE===
+<?php exit(0); ?>
 --EXPECTF--
-array(1) {
-  ["soap"]=>
-  string(41) "http://schemas.xmlsoap.org/soap/envelope/"
+object(SimpleXMLElement)#%d (1) {
+  ["Body"]=>
+  object(SimpleXMLElement)#%d (0) {
+  }
 }
-object(SimpleXMLElement)#%s (0) {
+object(SimpleXMLElement)#%d (0) {
 }
-object(SimpleXMLElement)#%s (1) {
+object(SimpleXMLElement)#%d (1) {
   ["businessList"]=>
-  object(SimpleXMLElement)#%s (2) {
+  object(SimpleXMLElement)#%d (2) {
     ["@attributes"]=>
     array(1) {
       ["foo"]=>
       string(3) "bar"
     }
     ["businessInfo"]=>
-    object(SimpleXMLElement)#%s (1) {
+    object(SimpleXMLElement)#%d (1) {
       ["@attributes"]=>
       array(1) {
         ["businessKey"]=>
@@ -54,14 +55,14 @@ object(SimpleXMLElement)#%s (1) {
     }
   }
 }
-object(SimpleXMLElement)#%s (2) {
+object(SimpleXMLElement)#%d (2) {
   ["@attributes"]=>
   array(1) {
     ["foo"]=>
     string(3) "bar"
   }
   ["businessInfo"]=>
-  object(SimpleXMLElement)#%s (1) {
+  object(SimpleXMLElement)#%d (1) {
     ["@attributes"]=>
     array(1) {
       ["businessKey"]=>
@@ -71,22 +72,23 @@ object(SimpleXMLElement)#%s (2) {
 }
 ===DONE===
 --UEXPECTF--
-array(1) {
-  [u"soap"]=>
-  string(41) "http://schemas.xmlsoap.org/soap/envelope/"
+object(SimpleXMLElement)#%d (1) {
+  [u"Body"]=>
+  object(SimpleXMLElement)#%d (0) {
+  }
 }
-object(SimpleXMLElement)#%s (0) {
+object(SimpleXMLElement)#%d (0) {
 }
-object(SimpleXMLElement)#%s (1) {
+object(SimpleXMLElement)#%d (1) {
   [u"businessList"]=>
-  object(SimpleXMLElement)#%s (2) {
+  object(SimpleXMLElement)#%d (2) {
     [u"@attributes"]=>
     array(1) {
       [u"foo"]=>
       unicode(3) "bar"
     }
     [u"businessInfo"]=>
-    object(SimpleXMLElement)#%s (1) {
+    object(SimpleXMLElement)#%d (1) {
       [u"@attributes"]=>
       array(1) {
         [u"businessKey"]=>
@@ -95,14 +97,14 @@ object(SimpleXMLElement)#%s (1) {
     }
   }
 }
-object(SimpleXMLElement)#%s (2) {
+object(SimpleXMLElement)#%d (2) {
   [u"@attributes"]=>
   array(1) {
     [u"foo"]=>
     unicode(3) "bar"
   }
   [u"businessInfo"]=>
-  object(SimpleXMLElement)#%s (1) {
+  object(SimpleXMLElement)#%d (1) {
     [u"@attributes"]=>
     array(1) {
       [u"businessKey"]=>
