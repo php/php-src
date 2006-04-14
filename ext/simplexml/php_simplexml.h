@@ -69,6 +69,7 @@ typedef struct {
 	struct {
 		char                  *name;
 		char                  *nsprefix;
+		int                   isprefix;
 		SXE_ITER              type;
 		zval                  *data;
 	} iter;
