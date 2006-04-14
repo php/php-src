@@ -2143,7 +2143,7 @@ PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
 	int ret = FAILURE;
 
 	srcstream = php_stream_open_wrapper(src, "rb",
-				STREAM_DISABLE_OPEN_BASEDIR | REPORT_ERRORS,
+				ENFORCE_SAFE_MODE | REPORT_ERRORS,
 				NULL);
 
 	if (!srcstream)
