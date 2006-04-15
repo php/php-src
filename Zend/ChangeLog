@@ -1,3 +1,12 @@
+2006-04-14  Antony Dovgal  <antony@zend.com>
+
+    * tests/bug34873.phpt:
+      make it consistent with the other ones
+
+    * (PHP_5_1)
+      tests/bug34873.phpt:
+      make it consistent with the other ones =)
+
 2006-04-13  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_language_scanner.l
