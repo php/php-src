@@ -995,14 +995,13 @@ zend_object_iterator_funcs sqlite_query_iterator_funcs = {
 zend_object_iterator *sqlite_get_iterator(zend_class_entry *ce, zval *object, int by_ref  TSRMLS_DC)
 {
 	sqlite_object_iterator *iterator;
+	sqlite_object *obj = (sqlite_object*) zend_object_store_get_object(object TSRMLS_CC);
 
 	if (by_ref) {
 		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
 	}
 
 	iterator = emalloc(sizeof(sqlite_object_iterator));
-
-	sqlite_object *obj = (sqlite_object*) zend_object_store_get_object(object TSRMLS_CC);
 
 	object->refcount++;
 	iterator->it.data = (void*)object;
