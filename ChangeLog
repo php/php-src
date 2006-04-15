@@ -1,3 +1,76 @@
+2006-04-14  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/tests/bug34873.phpt:
+      make it consistent with the other ones
+
+    * (PHP_5_1)
+      ZendEngine2/tests/bug34873.phpt:
+      make it consistent with the other ones =)
+
+    * ext/standard/tests/strings/bug36944.phpt:
+      make this test to work on all systems
+
+    * (PHP_5_1)
+      ext/standard/tests/strings/bug36944.phpt:
+      ok, let's make this test to work on all systems
+      currently it fails at least on Linux PPC and Solaris, probably because of
+      different strncmp/strncasecmp implementations.
+
+2006-04-14  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_4_3)
+      ext/standard/file.c
+      ext/standard/file.c
+      ext/standard/file.c:
+      MFH (r-1.436) copy() should not disrespect open_basedir on source file
+
+    * ext/standard/file.c:
+      MFB (r-1.409.2.6)  copy() should not disrespect open_basedir on source file
+
+2006-04-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/009b.phpt:
+      - MFH Fix properties access to children() result
+
+    * ext/simplexml/php_simplexml.h
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/profile12.phpt:
+      - Fix properties access to children() result
+      - Allow access by namespace prefix
+
+    * ext/simplexml/tests/009b.phpt
+      ext/simplexml/tests/009b.phpt
+      ext/simplexml/tests/profile13.phpt:
+      
+      - Fix properties access to children() result
+      - Allow access by namespace prefix
+
+    * ext/simplexml/tests/profile12.phpt:
+      - Do not provide ns info in first sxe creation
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/profile12.phpt:
+      - Allow access to namespaced root by specifying prefix on creation
+      - Fix access to non namespaced root
+
+    * run-tests.php:
+      - Prefix summaries with either U or N
+
+    * ext/simplexml/simplexml.c:
+      - If node no longer exists then there won't be any data
+
+2006-04-14  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/streamsfuncs.c:
+      MF51: fix #37077 (stream_socket_server() leaks when the port is not
+      allowed)
+
+    * (PHP_5_1)
+      ext/standard/streamsfuncs.c:
+      fix #37077 (stream_socket_server() leaks when the port is not allowed)
+
 2006-04-13  Antony Dovgal  <antony@zend.com>
 
     * main/streams/filter.c:
