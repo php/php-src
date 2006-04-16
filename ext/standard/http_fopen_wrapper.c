@@ -503,9 +503,11 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	}	\
 }	\
 			/* check for control characters in login, password & path */
-			CHECK_FOR_CNTRL_CHARS(resource->user)
-			CHECK_FOR_CNTRL_CHARS(resource->pass)
-			CHECK_FOR_CNTRL_CHARS(resource->path)
+			if (strncasecmp(newpath, "http://", sizeof("http://") - 1) || strncasecmp(newpath, "https://", sizeof("https://") - 1) {
+				CHECK_FOR_CNTRL_CHARS(resource->user)
+				CHECK_FOR_CNTRL_CHARS(resource->pass)
+				CHECK_FOR_CNTRL_CHARS(resource->path)
+			}
 
 			stream = php_stream_url_wrap_http_ex(NULL, new_path, mode, options, opened_path, context, --redirect_max, 0 STREAMS_CC TSRMLS_CC);
 			if (stream && stream->wrapperdata)	{

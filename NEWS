@@ -5,6 +5,7 @@ PHP 4                                                                      NEWS
 - Added overflow checks to wordwrap() function. (Ilia)
 - Added a check for special characters in the session name. (Ilia)
 - Fixed bug #37046 (foreach breaks static scope). (Dmitry)
+- Fixed bug #37045 (Fixed check for special chars for http redirects). (Ilia)
 - Fixed bug #36857 (Added support for partial content fetching to the HTTP
   streams wrapper). (Ilia)
 - Fixed bug #36776 (node_list_wrapper_dtor segfault). (Rob)
