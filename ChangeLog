@@ -1,3 +1,17 @@
+2006-04-15  Antony Dovgal  <antony@zend.com>
+
+    * ext/sqlite/sqlite.c:
+      fix compile failure
+
+    * ZendEngine2/zend_strtod.c:
+      MF51: fix #37062 (compile failure on ARM architecture)
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/zend_strtod.c:
+      fix #37062 (compile failure on ARM architecture)
+      if ARM is big endian - don't define IEEE_LITTLE_ENDIAN
+
 2006-04-14  Antony Dovgal  <antony@zend.com>
 
     * ZendEngine2/tests/bug34873.phpt:
