@@ -15,6 +15,7 @@ PHP                                                                        NEWS
 - Fixed bug #37053 (html_errors with internal classes produces wrong links). 
   (Tony)
 - Fixed bug #37046 (foreach breaks static scope). (Dmitry)
+- Fixed bug #37045 (Fixed check for special chars for http redirects). (Ilia)
 - Fixed bug #37002 (Have to quote literals in INI when concatenating with
   vars). (Dmitry)
 - Fixed bug #36513 (comment will be outputed in last line). (Dmitry)
