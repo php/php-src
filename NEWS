@@ -19,6 +19,8 @@ PHP                                                                        NEWS
 - Fixed bug #37045 (Fixed check for special chars for http redirects). (Ilia)
 - Fixed bug #37002 (Have to quote literals in INI when concatenating with
   vars). (Dmitry)
+- Fixed Bug #36872 (session_destroy() fails after call to 
+  session_regenerate_id(true)). (Ilia)
 - Fixed bug #36513 (comment will be outputed in last line). (Dmitry)
 
 06 Apr 2006, PHP 5.1.3RC3
