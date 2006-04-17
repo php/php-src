@@ -2269,7 +2269,7 @@ static void make_persistent_restriction_int(void *data)
 	sdlRestrictionIntPtr *rest = (sdlRestrictionIntPtr *)data;
 	sdlRestrictionIntPtr prest = NULL;
 
-	prest = malloc(sizeof(sdlRestrictionIntPtr));
+	prest = malloc(sizeof(sdlRestrictionInt));
 	*prest = **rest;
 	*rest = prest;
 }
@@ -2843,8 +2843,12 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl TSRMLS_DC)
 	psdl = malloc(sizeof(*sdl));
 	memset(psdl, 0, sizeof(*sdl));
 
-	psdl->source = strdup(sdl->source);
-	psdl->target_ns = strdup(sdl->target_ns);
+	if (sdl->source) {
+		psdl->source = strdup(sdl->source);
+	}
+	if (sdl->target_ns) {
+		psdl->target_ns = strdup(sdl->target_ns);
+	}
 
 	if (sdl->groups) {
 		sdlTypePtr *tmp;
@@ -3026,6 +3030,20 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_bool persistent TSRMLS_DC)
 	php_stream_context *context=NULL;
 	zval **tmp, **proxy_host, **proxy_port, *orig_context = NULL, *new_context = NULL;
 	smart_str headers = {0};
+	char *pkey = NULL;
+	int plen;
+
+	if (persistent) {
+		zend_rsrc_list_entry *le_ptr;
+
+		plen = spprintf(&pkey, 0, "SOAP:WSDL:%s", uri);
+		if (SUCCESS == zend_hash_find(&EG(persistent_list), pkey, plen+1, (void*)&le_ptr)) {
+			if (Z_TYPE_P(le_ptr) == php_soap_psdl_list_entry()) {
+				efree(pkey);
+				return (sdlPtr)le_ptr->ptr;
+			}
+		}
+	}
 
 	if (SUCCESS == zend_hash_find(Z_OBJPROP_P(this_ptr),
 			"_stream_context", sizeof("_stream_context"), (void**)&tmp)) {
@@ -3090,7 +3108,6 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_bool persistent TSRMLS_DC)
 
 	SOAP_GLOBAL(error_code) = "WSDL";
 
-#if 0
 	if (SOAP_GLOBAL(cache_enabled) && ((uri_len = strlen(uri)) < MAXPATHLEN)) {
 		char  fn[MAXPATHLEN];
 
@@ -3128,26 +3145,21 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_bool persistent TSRMLS_DC)
 	} else {
 		sdl = load_wsdl(this_ptr, uri TSRMLS_CC);
 	}
-#endif
+
+	if (sdl) {
+		sdl->is_persistent = 0;
+	}
 
 	if (persistent) {
-		char *hashkey = NULL;
-		int plen;
-		zend_rsrc_list_entry le, *le_ptr;
+		if (sdl) {
+			zend_rsrc_list_entry le;
+			sdlPtr psdl = make_persistent_sdl(sdl TSRMLS_CC);
 
-		plen = spprintf(&hashkey, 0, "SOAP:WSDL:%s", uri);
-		if (SUCCESS == zend_hash_find(&EG(persistent_list), hashkey, plen+1, (void*)&le_ptr)) {
-			if (Z_TYPE_P(le_ptr) == php_soap_psdl_list_entry()) {
-				sdl = (sdlPtr)le_ptr->ptr;
-			}
-		} else {
-			sdlPtr psdl = NULL;
-			sdl = load_wsdl(this_ptr, uri TSRMLS_CC);
-			psdl = make_persistent_sdl(sdl TSRMLS_CC);
 			psdl->is_persistent = 1;
 			le.type = php_soap_psdl_list_entry();
 			le.ptr = psdl;
-			if (SUCCESS == zend_hash_update(&EG(persistent_list), hashkey,
+			le.refcount = 0;
+			if (SUCCESS == zend_hash_update(&EG(persistent_list), pkey,
 											plen+1, (void*)&le, sizeof(le), NULL)) {
 				/* remove non-persitent sdl structure */
 				delete_sdl_impl(sdl);
@@ -3156,14 +3168,11 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_bool persistent TSRMLS_DC)
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to register persistent entry");
 				/* clean up persistent sdl */
-				delete_psdl(le_ptr TSRMLS_CC);
+				delete_psdl(&le TSRMLS_CC);
 				/* keep non-persistent sdl and return it */
 			}
 		}
-		efree(hashkey);
-	} else {
-		sdl = load_wsdl(this_ptr, uri TSRMLS_CC);
-		sdl->is_persistent = 0;
+		efree(pkey);
 	}
 
 	SOAP_GLOBAL(error_code) = old_error_code;
