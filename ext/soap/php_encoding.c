@@ -211,6 +211,9 @@ encode defaultEncoding[] = {
 	{{END_KNOWN_TYPES, NULL, NULL, NULL}, guess_zval_convert, guess_xml_convert}
 };
 
+int numDefaultEncodings = sizeof(defaultEncoding)/sizeof(encode);
+
+
 void whiteSpace_replace(char* str)
 {
 	while (*str != '\0') {

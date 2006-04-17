@@ -2292,7 +2292,7 @@ static void make_persistent_sdl_type_ref(sdlTypePtr *type, HashTable *ptr_map, H
 {
 	sdlTypePtr *tmp;
 
-	if (zend_hash_find(ptr_map, (char *)(*type), sizeof(sdlTypePtr), (void**)&tmp) == SUCCESS) {
+	if (zend_hash_find(ptr_map, (char *)type, sizeof(sdlTypePtr), (void**)&tmp) == SUCCESS) {
 		*type = *tmp;
 	} else {
 		zend_hash_next_index_insert(bp_types, (void*)&type, sizeof(sdlTypePtr*), NULL);
@@ -2305,11 +2305,11 @@ static void make_persistent_sdl_encoder_ref(encodePtr *enc, HashTable *ptr_map, 
 	encodePtr *tmp;
 
 	/* do not process defaultEncoding's here */
-	if ((*enc)->details.sdl_type == NULL) {
+	if ((*enc) >= defaultEncoding && (*enc) < defaultEncoding + numDefaultEncodings) {
 		return;
 	}
 
-	if (zend_hash_find(ptr_map, (char *)(*enc), sizeof(encodePtr), (void**)&tmp) == SUCCESS) {
+	if (zend_hash_find(ptr_map, (char *)enc, sizeof(encodePtr), (void**)&tmp) == SUCCESS) {
 		*enc = *tmp;
 	} else {
 		zend_hash_next_index_insert(bp_encoders, (void*)&enc, sizeof(encodePtr*), NULL);
@@ -2513,7 +2513,7 @@ static sdlAttributePtr make_persistent_sdl_attribute(sdlAttributePtr attr, HashT
 	}
 
 	/* we do not want to process defaultEncoding's here */
-	if (pattr->encode && pattr->encode->details.sdl_type) {
+	if (pattr->encode) {
 		make_persistent_sdl_encoder_ref(&pattr->encode, ptr_map, bp_encoders);
 	}
 
@@ -2625,7 +2625,7 @@ static sdlTypePtr make_persistent_sdl_type(sdlTypePtr type, HashTable *ptr_map, 
 	}
 
 	/* we do not want to process defaultEncoding's here */
-	if (ptype->encode && ptype->encode->details.sdl_type) {
+	if (ptype->encode) {
 		make_persistent_sdl_encoder_ref(&ptype->encode, ptr_map, bp_encoders);
 	}
 

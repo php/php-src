@@ -222,5 +222,6 @@ void delete_encoder(void *handle);
 void delete_encoder_persistent(void *handle);
 
 extern encode defaultEncoding[];
+extern int numDefaultEncodings;
 
 #endif
