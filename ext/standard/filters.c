@@ -1031,6 +1031,18 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 					scan_stat = 4;
 					ps++, icnt--;
 					break;
+				} else if (!inst->lbchars && lb_cnt == 0 && *ps == '\r') {
+					/* auto-detect line endings, looks like network line ending \r\n (could be mac \r) */
+					lb_cnt++;
+					scan_stat = 5;
+					ps++, icnt--;
+					break;
+				} else if (!inst->lbchars && lb_cnt == 0 && *ps == '\n') {
+					/* auto-detect line endings, looks like unix-lineendings, not to spec, but it is seem in the wild, a lot */
+					lb_cnt = lb_ptr = 0;
+					scan_stat = 0;
+					ps++, icnt--;
+					break;
 				} else if (lb_cnt < inst->lbchars_len &&
 							*ps == (unsigned char)inst->lbchars[lb_cnt]) {
 					lb_cnt++;
@@ -1088,7 +1100,16 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 			} break;
 
 			case 5: {
-				if (lb_cnt >= inst->lbchars_len) {
+				if (!inst->lbchars && lb_cnt == 1 && *ps == '\n') {
+					/* auto-detect soft line breaks, found network line break */
+					lb_cnt = lb_ptr = 0;
+					scan_stat = 0;
+					ps++, icnt--; /* consume \n */
+				} else if (!inst->lbchars && lb_cnt > 0) {
+					/* auto-detect soft line breaks, found mac line break */
+					lb_cnt = lb_ptr = 0;
+					scan_stat = 0;
+				} else if (lb_cnt >= inst->lbchars_len) {
 					/* soft line break */
 					lb_cnt = lb_ptr = 0;
 					scan_stat = 0;
@@ -1408,12 +1429,10 @@ static php_conv *php_conv_open(int conv_mode, const HashTable *options, int pers
 			size_t lbchars_len;
 
 			if (options != NULL) {
+				/* If line-break-chars are not specified, filter will attempt to detect line endings (\r, \n, or \r\n) */
 				GET_STR_PROP(options, lbchars, lbchars_len, "line-break-chars", 0);
-				if (lbchars == NULL) {
-					lbchars = pestrdup("\r\n", 0);
-					lbchars_len = 2;
-				}
 			}
+
 			retval = pemalloc(sizeof(php_conv_qprint_decode), persistent);
 			if (lbchars != NULL) {
 				if (php_conv_qprint_decode_ctor((php_conv_qprint_decode *)retval, lbchars, lbchars_len, 1, persistent)) {
