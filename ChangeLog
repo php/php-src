@@ -1,3 +1,26 @@
+2006-04-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/http_fopen_wrapper.c:
+      MFB51: fixed typo
+
+    * (PHP_5_1)
+      ext/standard/http_fopen_wrapper.c:
+      Fixed a typo in the previous patch.
+      
+
+    * (PHP_4_4)
+      NEWS
+      ext/standard/http_fopen_wrapper.c:
+      MFH: Fixed bug #37045 (Fixed check for special chars for http redirects).
+
+    * ext/standard/http_fopen_wrapper.c:
+      MFB51: Fixed bug #37045 (Fixed check for special chars for http redirects).
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/http_fopen_wrapper.c:
+      Fixed bug #37045 (Fixed check for special chars for http redirects).
+
 2006-04-15  Antony Dovgal  <antony@zend.com>
 
     * ext/sqlite/sqlite.c:
