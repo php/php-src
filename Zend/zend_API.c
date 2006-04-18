@@ -208,7 +208,11 @@ ZEND_API char *zend_zval_type_name(zval *arg)
 			return "double";
 
 		case IS_STRING:
-			return "binary string";
+			if (UG(unicode)) {
+				return "binary string";
+			} else {
+				return "string";
+			}
 
 		case IS_ARRAY:
 			return "array";
@@ -410,7 +414,11 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 								*p = Z_STRVAL_PP(arg);
 								break;
 							} else {
-								return "binary string";
+								if (UG(unicode)) {
+									return "binary string";
+								} else {
+									return "string";
+								}
 							}
 						}
 					}
@@ -418,7 +426,11 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 					case IS_ARRAY:
 					case IS_RESOURCE:
 					default:
-						return "binary string";
+						if (UG(unicode)) {
+							return "binary string";
+						} else {
+							return "string";
+						}
 				}
 			}
 			break;
