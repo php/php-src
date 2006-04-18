@@ -40,6 +40,8 @@ static void php_canonicalize_locale_id(char **target, int32_t *target_len, char 
 	*target_len = canonicalized_len;
 }
 
+/* {{{ proto string i18n_loc_get_default(void) U
+   Returns default locale */
 PHP_FUNCTION(i18n_loc_get_default)
 {
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
@@ -48,7 +50,10 @@ PHP_FUNCTION(i18n_loc_get_default)
 
 	RETURN_STRING(UG(default_locale), 1);
 }
+/* }}} */
 
+/* {{{ proto bool i18n_loc_set_default(string locale) U
+	Sets default locale */
 PHP_FUNCTION(i18n_loc_set_default)
 {
 	char *locale;
@@ -63,7 +68,8 @@ PHP_FUNCTION(i18n_loc_set_default)
 	php_canonicalize_locale_id(&canonicalized, &locale_len, locale, &status);
 	/*
 	 * UTODO: is this right? canonicalization does not seem to perform locale
-	 * validation.
+	 * validation. See this for possible solution:
+	 * http://sourceforge.net/mailarchive/message.php?msg_id=11953411
 	 */
 	if (U_FAILURE(status)) {
 		php_error(E_WARNING, "Invalid locale: %s", locale);
@@ -79,6 +85,8 @@ PHP_FUNCTION(i18n_loc_set_default)
 	zend_reset_locale_deps(TSRMLS_C);
 	RETURN_TRUE;
 }
+/* }}} */
+
 #endif /* HAVE_UNICODE */
 
 
