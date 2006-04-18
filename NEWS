@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Apr 2006, PHP 5.1.3
 - Fixed bug #37103 (libmbfl headers not installed). (Jani)
+- Fixed bug #37083 (Frequent crashs in SOAP extension with new WSDL caching
+  code in multithread WS). (Andrei, Dmitry)
 - Fixed bug #37062 (compile failure on ARM architecture). (Tony)
 - Fixed bug #37061 (curl_exec() doesn't zero-terminate binary strings). (Tony)
 - Fixed bug #37060 (Type of retval of Countable::count() is not checked). 
