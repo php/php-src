@@ -1,3 +1,42 @@
+2006-04-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/session/mod_files.c:
+      MFB51: Fixed Bug #36872 (session_destroy() fails after call to
+      session_regenerate_id(true)).
+
+    * (PHP_4_4)
+      ext/session/mod_files.c:
+      MFH: Fixed Bug #36872 (session_destroy() fails after call to
+      session_regenerate_id(true)).
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed Bug #36872 (session_destroy() fails after call to
+      +  session_regenerate_id(true)).
+
+2006-04-17  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS:
+      BFN
+
+    * (PHP_5_1)
+      ext/mbstring/config.m4:
+      MFH: Fixed bug #37103 (libmbfl headers not installed)
+
+    * ext/mbstring/config.m4:
+      Fixed bug #37103 (libmbfl headers not installed)
+
+2006-04-17  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_5_1)
+      ext/standard/filters.c:
+      MFH(r-1.55) Fix 'soft line break' handling in
+      convert.quoted-printable-decode
+
+    * ext/standard/filters.c:
+      Fix 'soft line break' handling in convert.quoted-printable-decode
+
 2006-04-16  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/http_fopen_wrapper.c:
