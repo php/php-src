@@ -2653,7 +2653,7 @@ If the wrapper supports its own decoding rules it will be dispatched to wrapper-
 Otherwise (or if wrapper == NULL) the INI defined filesystem_encoding converter will be used.
 */
 PHPAPI int _php_stream_path_decode(php_stream_wrapper *wrapper,
-				char **pathdec, int *pathdec_len, UChar *path, int path_len,
+				UChar **pathdec, int *pathdec_len, char *path, int path_len,
 				int options, php_stream_context *context TSRMLS_DC)
 {
 	int num_conv;

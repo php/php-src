@@ -380,7 +380,7 @@ PHPAPI int _php_stream_path_encode(php_stream_wrapper *wrapper,
 		_php_stream_path_encode((wrapper), (pathenc), (pathenc_len), (path), (path_len), (options), (context) TSRMLS_CC)
 
 PHPAPI int _php_stream_path_decode(php_stream_wrapper *wrapper,
-				char **pathdec, int *pathdec_len, UChar *path, int path_len,
+				UChar **pathdec, int *pathdec_len, char *path, int path_len,
 				int options, php_stream_context *context TSRMLS_DC);
 #define  php_stream_path_decode(wrapper, pathdec, pathdec_len, path, path_len, options, context) \
 		_php_stream_path_decode((wrapper), (pathdec), (pathdec_len), (path), (path_len), (options), (context) TSRMLS_CC)
