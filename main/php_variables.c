@@ -627,10 +627,8 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 		return;
 	}
 	
-	ALLOC_ZVAL(arr);
+	ALLOC_INIT_ZVAL(arr);
 	array_init(arr);
-	arr->is_ref = 0;
-	arr->refcount = 0;
 
 	/* Prepare argv */
 	if (SG(request_info).argc) { /* are we in cli sapi? */
@@ -670,15 +668,13 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 	}
 
 	/* prepare argc */
-	ALLOC_ZVAL(argc);
+	ALLOC_INIT_ZVAL(argc);
 	if (SG(request_info).argc) {
 		Z_LVAL_P(argc) = SG(request_info).argc;
 	} else {
 		Z_LVAL_P(argc) = count;
 	}
 	Z_TYPE_P(argc) = IS_LONG;
-	argc->is_ref = 0;
-	argc->refcount = 0;
 
 	if (SG(request_info).argc) {
 		arr->refcount++;
@@ -692,6 +688,8 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 		zend_hash_update(Z_ARRVAL_P(track_vars_array), "argv", sizeof("argv"), &arr, sizeof(zval *), NULL);
 		zend_hash_update(Z_ARRVAL_P(track_vars_array), "argc", sizeof("argc"), &argc, sizeof(zval *), NULL);
 	}
+	zval_ptr_dtor(&arr);
+	zval_ptr_dtor(&argc);
 }
 /* }}} */
 
