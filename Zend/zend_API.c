@@ -208,12 +208,15 @@ ZEND_API char *zend_zval_type_name(zval *arg)
 			return "double";
 
 		case IS_STRING:
+		{
+			TSRMLS_FETCH();
+
 			if (UG(unicode)) {
 				return "binary string";
 			} else {
 				return "string";
 			}
-
+		}
 		case IS_ARRAY:
 			return "array";
 
