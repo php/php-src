@@ -721,10 +721,12 @@ static UChar *php_u_trim(UChar *c, int len, UChar *what, int what_len, zval *ret
 				}
 				if ( wh != ch ) break;
 			} else {
-				if ( u_isWhitespace(ch) == FALSE ) break;
+				if ( u_isWhitespace(ch) == FALSE ) {
+					U16_BACK_1(c, 0, i); /* U16_NEXT() post-increments 'i' */
+					break;
+				}
 			}
 		}
-		U16_BACK_1(c, 0, i); /* U16_NEXT() post-increments 'i' */
 		start = i;
 	}
 	if ( mode & 2 ) {
@@ -737,12 +739,13 @@ static UChar *php_u_trim(UChar *c, int len, UChar *what, int what_len, zval *ret
 				}
 				if ( wh != ch ) break;
 			} else {
-				if ( u_isWhitespace(ch) == FALSE ) break;
+				if ( u_isWhitespace(ch) == FALSE ) {
+					U16_FWD_1(c, i, end); /* U16_PREV() pre-decrements 'i' */
+					break;
+				}
 			}
 		}
 		end = i;
-	} else {
-		--end;
 	}
 	if ( what )
 	{
@@ -751,10 +754,10 @@ static UChar *php_u_trim(UChar *c, int len, UChar *what, int what_len, zval *ret
 
 	if ( start < len ) {
 		if ( return_value ) {
-			RETVAL_UNICODEL(c+start, end-start+1, 1);
+			RETVAL_UNICODEL(c+start, end-start, 1);
 			return NULL;
 		} else {
-			return eustrndup(c+start, end-start+1);
+			return eustrndup(c+start, end-start);
 		}
 	} else { /* Trimmed the whole string */
 		if ( return_value ) {
