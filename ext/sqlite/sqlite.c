@@ -1701,7 +1701,9 @@ PHP_FUNCTION(sqlite_fetch_column_types)
 		}
 		efree(colname);
 	}
-
+	if (res.vm) {
+		sqlite_finalize(res.vm, NULL);
+	}
 done:
 	sqlite_exec(db->db, "PRAGMA show_datatypes = OFF", NULL, NULL, NULL);
 }
