@@ -504,7 +504,7 @@ PHP_FUNCTION(file_get_contents)
 	char *filename;
 	int filename_len;
 	zend_uchar filename_type;
-	char *contents;
+	void *contents;
 	long flags = 0;
 	zend_bool use_include_path = 0;
 	php_stream *stream;
@@ -522,7 +522,7 @@ PHP_FUNCTION(file_get_contents)
 
 	context = php_stream_context_from_zval(zcontext, 0);
 	if (filename_type == IS_UNICODE) {
-		if (php_stream_path_encode(NULL, &filename, &filename_len, filename, filename_len, REPORT_ERRORS, context) == FAILURE) {
+		if (php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, context) == FAILURE) {
 			RETURN_FALSE;
 		}
 	}
@@ -599,7 +599,7 @@ PHP_FUNCTION(file_put_contents)
 	}
 
 	if (filename_type == IS_UNICODE) {
-		if (php_stream_path_encode(NULL, &filename, &filename_len, filename, filename_len, REPORT_ERRORS, context) == FAILURE) {
+		if (php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, context) == FAILURE) {
 			RETURN_FALSE;
 		}
 	}
@@ -907,7 +907,7 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 	context = php_stream_context_from_zval(zcontext, 0);
 
 	if (filename_type == IS_UNICODE) {
-		if (php_stream_path_encode(NULL, &filename, &filename_len, filename, filename_len, REPORT_ERRORS, context) == FAILURE) {
+		if (php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, context) == FAILURE) {
 			RETURN_FALSE;
 		}
 	}
@@ -1438,7 +1438,7 @@ PHP_FUNCTION(readfile)
 	}
 
 	if (filename_type == IS_UNICODE) {
-		if (php_stream_path_encode(NULL, &filename, &filename_len, filename, filename_len, REPORT_ERRORS, context) == FAILURE) {
+		if (php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, context) == FAILURE) {
 			RETURN_FALSE;
 		}
 	}
@@ -1561,7 +1561,7 @@ PHP_FUNCTION(unlink)
 	context = php_stream_context_from_zval(zcontext, 0);
 
 	if (filename_type == IS_UNICODE) {
-		if (php_stream_path_encode(NULL, &filename, &filename_len, filename, filename_len, REPORT_ERRORS, context) == FAILURE) {
+		if (php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, context) == FAILURE) {
 			RETURN_FALSE;
 		}
 	}
@@ -2333,7 +2333,7 @@ PHP_FUNCTION(realpath)
 	}
 
 	if (filename_type == IS_UNICODE) {
-		if (php_stream_path_encode(&php_plain_files_wrapper, &filename, &filename_len, filename, filename_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+		if (php_stream_path_encode(&php_plain_files_wrapper, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
 			RETURN_FALSE;
 		}
 	}
