@@ -24,6 +24,8 @@ PHP                                                                        NEWS
 - Fixed Bug #36872 (session_destroy() fails after call to 
   session_regenerate_id(true)). (Ilia)
 - Fixed bug #36513 (comment will be outputed in last line). (Dmitry)
+- Fixed bug #29476 (sqlite_fetch_column_types() locks the database forever).
+  (Ilia)
 
 06 Apr 2006, PHP 5.1.3RC3
 - Eliminated run-time constant fetching for TRUE, FALSE and NULL. (Dmitry)
