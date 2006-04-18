@@ -423,7 +423,7 @@ Options:
 
     -u          Test with unicode_semantics set on.
 
-    -U          Test in unicode and non unicde mode.
+    -U          Test in unicode and non unicode mode.
 
     -m          Test for memory leaks with Valgrind.
     
