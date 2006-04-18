@@ -1705,7 +1705,9 @@ PHP_FUNCTION(sqlite_fetch_column_types)
 			add_index_string(return_value, i, colnames[ncols + i] ? (char *)colnames[ncols + i] : "", 1);
 		}
 	}
-
+	if (res.vm) {
+		sqlite_finalize(res.vm, NULL);
+	}
 done:
 	sqlite_exec(db->db, "PRAGMA show_datatypes = OFF", NULL, NULL, NULL);
 }
