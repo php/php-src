@@ -143,13 +143,18 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 		enc = get_encoder_ex(NULL, enc_nscat, enc_len);
 		efree(enc_nscat);
 		if (enc && sdl) {
-			encodePtr new_enc	= emalloc(sizeof(encode));
+			encodePtr new_enc = pemalloc(sizeof(encode), sdl->is_persistent);
 			memcpy(new_enc, enc, sizeof(encode));
-			new_enc->details.ns = estrndup(ns, ns_len);
-			new_enc->details.type_str = estrdup(new_enc->details.type_str);
+			if (sdl->is_persistent) {
+				new_enc->details.ns = zend_strndup(ns, ns_len);
+				new_enc->details.type_str = strdup(new_enc->details.type_str);
+			} else {
+				new_enc->details.ns = estrndup(ns, ns_len);
+				new_enc->details.type_str = estrdup(new_enc->details.type_str);
+			}
 			if (sdl->encoders == NULL) {
-				sdl->encoders = emalloc(sizeof(HashTable));
-				zend_hash_init(sdl->encoders, 0, NULL, delete_encoder, 0);
+				sdl->encoders = pemalloc(sizeof(HashTable), sdl->is_persistent);
+				zend_hash_init(sdl->encoders, 0, NULL, delete_encoder, sdl->is_persistent);
 			}
 			zend_hash_update(sdl->encoders, nscat, len + 1, &new_enc, sizeof(encodePtr), NULL);
 			enc = new_enc;
