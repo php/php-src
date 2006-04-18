@@ -433,12 +433,16 @@ void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 {
 	if (PG(http_globals)[TRACK_VARS_ENV] &&
 	    array_ptr != PG(http_globals)[TRACK_VARS_ENV]) {
+	    zval_dtor(array_ptr);
 	    *array_ptr = *PG(http_globals)[TRACK_VARS_ENV];
+	    INIT_PZVAL(array_ptr);
 	    zval_copy_ctor(array_ptr);
 	    return;
 	} else if (PG(http_globals)[TRACK_VARS_SERVER] &&
 		array_ptr != PG(http_globals)[TRACK_VARS_SERVER]) {
+	    zval_dtor(array_ptr);
 	    *array_ptr = *PG(http_globals)[TRACK_VARS_SERVER];
+	    INIT_PZVAL(array_ptr);
 	    zval_copy_ctor(array_ptr);
 	    return;
 	}
