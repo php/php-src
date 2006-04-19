@@ -33,7 +33,6 @@
 static int le_sdl = 0;
 int le_url = 0;
 static int le_service = 0;
-static int le_psdl = 0;
 
 typedef struct _soapHeader {
 	sdlFunctionPtr                    function;
@@ -227,11 +226,6 @@ static char *zend_str_tolower_copy(char *dest, const char *source, unsigned int 
 }
 #endif
 
-int php_soap_psdl_list_entry(void)
-{
-	return le_psdl;
-}
-
 /*
   Registry Functions
   TODO: this!
@@ -397,18 +391,49 @@ zend_module_entry soap_module_entry = {
 ZEND_GET_MODULE(soap)
 #endif
 
+#ifndef ZEND_ENGINE_2
+# define OnUpdateLong OnUpdateInt
+#endif
+
+ZEND_API ZEND_INI_MH(OnUpdateCacheEnabled)
+{
+	long *p;
+#ifndef ZTS
+	char *base = (char *) mh_arg2;
+#else
+	char *base;
+
+	base = (char *) ts_resource(*((int *) mh_arg2));
+#endif
+
+	p = (long*) (base+(size_t) mh_arg1);
+
+	if (new_value_length==2 && strcasecmp("on", new_value)==0) {
+		*p = 1;
+	} 
+	else if (new_value_length==3 && strcasecmp("yes", new_value)==0) {
+		*p = 1;
+	} 
+	else if (new_value_length==4 && strcasecmp("true", new_value)==0) {
+		*p = 1;
+	} 
+	else {
+		*p = (long) (atoi(new_value) != 0);
+	}
+	return SUCCESS;
+}
+
 PHP_INI_BEGIN()
-STD_PHP_INI_ENTRY("soap.wsdl_cache_enabled",     "1", PHP_INI_ALL, OnUpdateBool,
-                  cache_enabled, zend_soap_globals, soap_globals)
+STD_PHP_INI_ENTRY("soap.wsdl_cache_enabled",     "1", PHP_INI_ALL, OnUpdateCacheEnabled,
+                  cache, zend_soap_globals, soap_globals)
 STD_PHP_INI_ENTRY("soap.wsdl_cache_dir",         "/tmp", PHP_INI_ALL, OnUpdateString,
                   cache_dir, zend_soap_globals, soap_globals)
-#ifdef ZEND_ENGINE_2
 STD_PHP_INI_ENTRY("soap.wsdl_cache_ttl",         "86400", PHP_INI_ALL, OnUpdateLong,
                   cache_ttl, zend_soap_globals, soap_globals)
-#else
-STD_PHP_INI_ENTRY("soap.wsdl_cache_ttl",         "86400", PHP_INI_ALL, OnUpdateInt,
-                  cache_ttl, zend_soap_globals, soap_globals)
-#endif
+STD_PHP_INI_ENTRY("soap.wsdl_cache",             "1", PHP_INI_ALL, OnUpdateLong,
+                  cache, zend_soap_globals, soap_globals)
+STD_PHP_INI_ENTRY("soap.wsdl_cache_limit",       "5", PHP_INI_ALL, OnUpdateLong,
+                  cache_limit, zend_soap_globals, soap_globals)
 PHP_INI_END()
 
 static HashTable defEnc, defEncIndex, defEncNs;
@@ -465,6 +490,7 @@ static void php_soap_init_globals(zend_soap_globals *soap_globals TSRMLS_DC)
 	soap_globals->error_object = NULL;
 	soap_globals->sdl = NULL;
 	soap_globals->soap_version = SOAP_1_1;
+	soap_globals->mem_cache = NULL;
 }
 
 PHP_MSHUTDOWN_FUNCTION(soap)
@@ -473,6 +499,10 @@ PHP_MSHUTDOWN_FUNCTION(soap)
 	zend_hash_destroy(&SOAP_GLOBAL(defEnc));
 	zend_hash_destroy(&SOAP_GLOBAL(defEncIndex));
 	zend_hash_destroy(&SOAP_GLOBAL(defEncNs));
+	if (SOAP_GLOBAL(mem_cache)) {
+		zend_hash_destroy(SOAP_GLOBAL(mem_cache));
+		free(SOAP_GLOBAL(mem_cache));
+	}
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
@@ -558,7 +588,6 @@ PHP_MINIT_FUNCTION(soap)
 	soap_header_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 
 	le_sdl = register_list_destructors(delete_sdl, NULL);
-	le_psdl = zend_register_list_destructors_ex(NULL, delete_psdl, "SOAP persistent WSDL", module_number);
 	le_url = register_list_destructors(delete_url, NULL);
 	le_service = register_list_destructors(delete_service, NULL);
 
@@ -645,6 +674,11 @@ PHP_MINIT_FUNCTION(soap)
 
 	REGISTER_LONG_CONSTANT("SOAP_SINGLE_ELEMENT_ARRAYS", SOAP_SINGLE_ELEMENT_ARRAYS, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOAP_WAIT_ONE_WAY_CALLS", SOAP_WAIT_ONE_WAY_CALLS, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("WSDL_CACHE_NONE",   WSDL_CACHE_NONE,   CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("WSDL_CACHE_DISK",   WSDL_CACHE_DISK,   CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("WSDL_CACHE_MEMORY", WSDL_CACHE_MEMORY, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("WSDL_CACHE_BOTH",   WSDL_CACHE_BOTH,   CONST_CS | CONST_PERSISTENT);
 
 	old_error_handler = zend_error_cb;
 	zend_error_cb = soap_error_handler;
@@ -912,7 +946,7 @@ PHP_METHOD(SoapServer, SoapServer)
 	zval *wsdl, *options = NULL;
 	int ret;
 	int version = SOAP_1_1;
-	zend_bool persistent;
+	zend_bool cache_wsdl;
 
 	SOAP_SERVER_BEGIN_CODE();
 
@@ -930,7 +964,7 @@ PHP_METHOD(SoapServer, SoapServer)
 	service = emalloc(sizeof(soapService));
 	memset(service, 0, sizeof(soapService));
 
-	persistent = SOAP_GLOBAL(cache_enabled);
+	cache_wsdl = SOAP_GLOBAL(cache);
 
 	if (options != NULL) {
 		HashTable *ht = Z_ARRVAL_P(options);
@@ -982,8 +1016,9 @@ PHP_METHOD(SoapServer, SoapServer)
 			service->features = Z_LVAL_PP(tmp);
 		}
 
-		if (zend_hash_find(ht, "cache_wsdl", sizeof("cache_wsdl"), (void**)&tmp) == SUCCESS) {
-			persistent = zend_is_true(*tmp);
+		if (zend_hash_find(ht, "cache_wsdl", sizeof("cache_wsdl"), (void**)&tmp) == SUCCESS &&
+		    Z_TYPE_PP(tmp) == IS_LONG) {
+			cache_wsdl = Z_LVAL_PP(tmp);
 		}
 
 	} else if (wsdl == NULL) {
@@ -997,7 +1032,7 @@ PHP_METHOD(SoapServer, SoapServer)
 	zend_hash_init(service->soap_functions.ft, 0, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (wsdl) {
-		service->sdl = get_sdl(this_ptr, Z_STRVAL_P(wsdl), persistent TSRMLS_CC);
+		service->sdl = get_sdl(this_ptr, Z_STRVAL_P(wsdl), cache_wsdl TSRMLS_CC);
 		if (service->uri == NULL) {
 			if (service->sdl->target_ns) {
 				service->uri = estrdup(service->sdl->target_ns);
@@ -2110,7 +2145,7 @@ PHP_METHOD(SoapClient, SoapClient)
 	zval *options = NULL;
 	int  soap_version = SOAP_1_1;
 	php_stream_context *context = NULL;
-	zend_bool persistent;
+	zend_bool cache_wsdl;
 
 	SOAP_CLIENT_BEGIN_CODE();
 
@@ -2127,7 +2162,7 @@ PHP_METHOD(SoapClient, SoapClient)
 		wsdl = NULL;
 	}
 
-	persistent = SOAP_GLOBAL(cache_enabled);
+	cache_wsdl = SOAP_GLOBAL(cache);
 
 	if (options != NULL) {
 		HashTable *ht = Z_ARRVAL_P(options);
@@ -2276,8 +2311,9 @@ PHP_METHOD(SoapClient, SoapClient)
 			add_property_resource(this_ptr, "_stream_context", context->rsrc_id);
 		}
 	
-		if (zend_hash_find(ht, "cache_wsdl", sizeof("cache_wsdl"), (void**)&tmp) == SUCCESS) {
-			persistent = zend_is_true(*tmp);
+		if (zend_hash_find(ht, "cache_wsdl", sizeof("cache_wsdl"), (void**)&tmp) == SUCCESS &&
+		    Z_TYPE_PP(tmp) == IS_LONG) {
+			cache_wsdl = Z_LVAL_PP(tmp);
 		}
 
 		if (zend_hash_find(ht, "user_agent", sizeof("user_agent"), (void**)&tmp) == SUCCESS &&
@@ -2299,7 +2335,7 @@ PHP_METHOD(SoapClient, SoapClient)
 		old_soap_version = SOAP_GLOBAL(soap_version);
 		SOAP_GLOBAL(soap_version) = soap_version;
 
-		sdl = get_sdl(this_ptr, Z_STRVAL_P(wsdl), persistent TSRMLS_CC);
+		sdl = get_sdl(this_ptr, Z_STRVAL_P(wsdl), cache_wsdl TSRMLS_CC);
 		ret = zend_list_insert(sdl, le_sdl);
 
 		add_property_resource(this_ptr, "sdl", ret);
