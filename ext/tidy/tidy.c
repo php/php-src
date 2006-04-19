@@ -37,6 +37,11 @@
 #include "tidy.h"
 #include "buffio.h"
 
+/* compatibility with older versions of libtidy */
+#ifndef TIDY_CALL
+#define TIDY_CALL
+#endif
+
 #define PHP_TIDY_MODULE_VERSION	"2.0"
 
 /* {{{ ext/tidy macros
@@ -333,22 +338,22 @@ zend_module_entry tidy_module_entry = {
 ZEND_GET_MODULE(tidy)
 #endif
 
-void *php_tidy_malloc(size_t len)
+void* TIDY_CALL php_tidy_malloc(size_t len)
 {
 	return emalloc(len);
 }
 
-void *php_tidy_realloc(void *buf, size_t len)
+void* TIDY_CALL php_tidy_realloc(void *buf, size_t len)
 {
 	return erealloc(buf, len);
 }
 
-void php_tidy_free(void *buf)
+void TIDY_CALL php_tidy_free(void *buf)
 {
 	efree(buf);
 }
 
-void php_tidy_panic(ctmbstr msg)
+void TIDY_CALL php_tidy_panic(ctmbstr msg)
 {
 	TSRMLS_FETCH();
 	php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not allocate memory for tidy! (Reason: %s)", (char *)msg);
