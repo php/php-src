@@ -45,7 +45,6 @@ tidyOptGetCategory
 tidyOptGetDefault
 tidyOptGetDefaultInt
 tidyOptGetDefaultBool
-tidyOptGetDoc
 tidyOptGetPickList
 tidyOptGetNextPick
 tidyOptGetValue
