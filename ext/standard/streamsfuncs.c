@@ -759,7 +759,7 @@ PHP_FUNCTION(stream_select)
 	if (sec != NULL) {
 		convert_to_long(sec);
 
-		if (sec < 0) {
+		if (Z_LVAL_P(sec) < 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The seconds parameter must be greater than 0.");
 			RETURN_FALSE;
 		} else if (usec < 0) {
