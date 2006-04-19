@@ -1,3 +1,77 @@
+2006-04-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      configure.in
+      main/php_version.h:
+      Restore dev so win32 snaps can build
+
+2006-04-18  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/file.c:
+      Silence compiler warnings
+
+    * main/php_streams.h
+      main/streams/streams.c:
+      Fix copy/paste typo in php_stream_path_decode() proto
+
+    * ZendEngine2/zend_API.c:
+      Fix ZTS build
+
+2006-04-18  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_API.c:
+      binary strings exist only in unicode mode
+
+2006-04-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sqlite/sqlite.c:
+      MFB51: Fixed bug #29476 (sqlite_fetch_column_types() locks the database
+      forever).
+
+    * (PHP_5_1)
+      NEWS
+      ext/sqlite/sqlite.c:
+      Fixed bug #29476 (sqlite_fetch_column_types() locks the database forever).
+
+2006-04-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #37083 (Frequent crashs in SOAP extension with new WSDL caching
+      code in multithread WS). (Andrei, Dmitry)
+
+2006-04-18  Antony Dovgal  <antony@zend.com>
+
+    * run-tests.php:
+      typofix
+
+2006-04-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c:
+      Fixed SUN_LEN calculation
+
+    * main/php_variables.c
+      main/php_variables.c
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      Fixed memory leaks
+
+2006-04-18  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/string.c:
+      I'm not sure what the heck people were thinking here, but it should be
+      fixed finally. Please test.
+
+    * ext/standard/string.c:
+      Fix trim("a") bug.
+
+2006-04-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      ext/session/mod_files.c:
+      Commit the actual fix
+
 2006-04-17  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/session/mod_files.c:
