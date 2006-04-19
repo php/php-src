@@ -30,7 +30,7 @@ PHP                                                                        NEWS
 06 Apr 2006, PHP 5.1.3RC3
 - Eliminated run-time constant fetching for TRUE, FALSE and NULL. (Dmitry)
 - Changed SOAP extension to cache WSDL structure in memory and thus speed up
-  SoapClient/SoapServer construction. (Andrei)
+  SoapClient/SoapServer construction. (Andrei, Dmitry)
 - Removed the E_STRICT deprecation notice from "var". (Ilia)
 - Added overflow checks to wordwrap() function. (Ilia)
 - Added support for BINARY_DOUBLE and BINARY_FLOAT to PDO_OCI and OCI8 

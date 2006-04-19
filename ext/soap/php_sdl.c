@@ -1417,7 +1417,7 @@ static HashTable* sdl_deserialize_parameters(encodePtr *encoders, sdlTypePtr *ty
 	return ht;
 }
 
-static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t TSRMLS_DC)
+static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t, time_t *cached TSRMLS_DC)
 {
 	sdlPtr sdl;
 	time_t old_t;
@@ -1461,6 +1461,7 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t TSRML
 		efree(buf);
 		return NULL;
 	}
+	*cached = old_t;
 
 	WSDL_CACHE_GET_INT(i, &in);
 	if (i == 0 && strncmp(in, uri, i) != 0) {
@@ -3027,26 +3028,106 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl TSRMLS_DC)
 	return psdl;
 }
 
-sdlPtr get_sdl(zval *this_ptr, char *uri, zend_bool persistent TSRMLS_DC)
+typedef struct _sdl_cache_bucket {
+	sdlPtr sdl;
+	time_t time;
+} sdl_cache_bucket;
+
+static void delete_psdl(void *data)
 {
+	sdl_cache_bucket *p = (sdl_cache_bucket*)data;
+	sdlPtr tmp = p->sdl;
+
+	zend_hash_destroy(&tmp->functions);
+	if (tmp->source) {
+		free(tmp->source);
+	}
+	if (tmp->target_ns) {
+		free(tmp->target_ns);
+	}
+	if (tmp->elements) {
+		zend_hash_destroy(tmp->elements);
+		free(tmp->elements);
+	}
+	if (tmp->encoders) {
+		zend_hash_destroy(tmp->encoders);
+		free(tmp->encoders);
+	}
+	if (tmp->types) {
+		zend_hash_destroy(tmp->types);
+		free(tmp->types);
+	}
+	if (tmp->groups) {
+		zend_hash_destroy(tmp->groups);
+		free(tmp->groups);
+	}
+	if (tmp->bindings) {
+		zend_hash_destroy(tmp->bindings);
+		free(tmp->bindings);
+	}
+	if (tmp->requests) {
+		zend_hash_destroy(tmp->requests);
+		free(tmp->requests);
+	}
+	free(tmp);
+}
+
+sdlPtr get_sdl(zval *this_ptr, char *uri, long cache_wsdl TSRMLS_DC)
+{
+	char  fn[MAXPATHLEN];
 	sdlPtr sdl = NULL;
 	char* old_error_code = SOAP_GLOBAL(error_code);
-	int uri_len;
+	int uri_len = 0;
 	php_stream_context *context=NULL;
 	zval **tmp, **proxy_host, **proxy_port, *orig_context = NULL, *new_context = NULL;
 	smart_str headers = {0};
-	char *pkey = NULL;
-	int plen;
+	char* key = NULL;
+	time_t t = time(0);
 
-	if (persistent) {
-		zend_rsrc_list_entry *le_ptr;
+	if (strchr(uri,':') != NULL || IS_ABSOLUTE_PATH(uri, uri_len)) {
+		uri_len = strlen(uri);
+	} else if (VCWD_REALPATH(uri, fn) == NULL) {
+		cache_wsdl = WSDL_CACHE_NONE;
+	} else {
+		uri = fn;
+		uri_len = strlen(uri);
+	}
 
-		plen = spprintf(&pkey, 0, "SOAP:WSDL:%s", uri);
-		if (SUCCESS == zend_hash_find(&EG(persistent_list), pkey, plen+1, (void*)&le_ptr)) {
-			if (Z_TYPE_P(le_ptr) == php_soap_psdl_list_entry()) {
-				efree(pkey);
-				return (sdlPtr)le_ptr->ptr;
+	if ((cache_wsdl & WSDL_CACHE_MEMORY) && SOAP_GLOBAL(mem_cache)) {
+		sdl_cache_bucket *p;
+
+		if (SUCCESS == zend_hash_find(SOAP_GLOBAL(mem_cache), uri, uri_len+1, (void*)&p)) {
+			if (p->time < t - SOAP_GLOBAL(cache_ttl)) {
+				/* in-memory cache entry is expired */
+				zend_hash_del(&EG(persistent_list), uri, uri_len+1);
+			} else {
+				return p->sdl;
 			}
+		}
+	}
+
+	if ((cache_wsdl & WSDL_CACHE_DISK) && (uri_len < MAXPATHLEN)) {
+		time_t t = time(0);
+		char md5str[33];
+		PHP_MD5_CTX context;
+		unsigned char digest[16];
+		int len = strlen(SOAP_GLOBAL(cache_dir));
+		time_t cached;
+
+		md5str[0] = '\0';
+		PHP_MD5Init(&context);
+		PHP_MD5Update(&context, uri, uri_len);
+		PHP_MD5Final(digest, &context);
+		make_digest(md5str, digest);
+		key = emalloc(len+sizeof("/wsdl-")-1+sizeof(md5str));
+		memcpy(key,SOAP_GLOBAL(cache_dir),len);
+		memcpy(key+len,"/wsdl-",sizeof("/wsdl-")-1);
+		memcpy(key+len+sizeof("/wsdl-")-1,md5str,sizeof(md5str));
+
+		if ((sdl = get_sdl_from_cache(key, uri, t-SOAP_GLOBAL(cache_ttl), &cached TSRMLS_CC)) != NULL) {
+			t = cached;
+			efree(key);
+			goto cache_in_memory;
 		}
 	}
 
@@ -3113,71 +3194,9 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_bool persistent TSRMLS_DC)
 
 	SOAP_GLOBAL(error_code) = "WSDL";
 
-	if (SOAP_GLOBAL(cache_enabled) && ((uri_len = strlen(uri)) < MAXPATHLEN)) {
-		char  fn[MAXPATHLEN];
-
-		if (strchr(uri,':') != NULL || IS_ABSOLUTE_PATH(uri, uri_len)) {
-			strcpy(fn, uri);
-		} else if (VCWD_REALPATH(uri, fn) == NULL) {
-			sdl = load_wsdl(this_ptr, uri TSRMLS_CC);
-		}
-		if (sdl == NULL) {
-			char* key;
-			time_t t = time(0);
-			char md5str[33];
-			PHP_MD5_CTX context;
-			unsigned char digest[16];
-			int len = strlen(SOAP_GLOBAL(cache_dir));
-
-			md5str[0] = '\0';
-			PHP_MD5Init(&context);
-			PHP_MD5Update(&context, fn, strlen(fn));
-			PHP_MD5Final(digest, &context);
-			make_digest(md5str, digest);
-			key = emalloc(len+sizeof("/wsdl-")-1+sizeof(md5str));
-			memcpy(key,SOAP_GLOBAL(cache_dir),len);
-			memcpy(key+len,"/wsdl-",sizeof("/wsdl-")-1);
-			memcpy(key+len+sizeof("/wsdl-")-1,md5str,sizeof(md5str));
-
-			if ((sdl = get_sdl_from_cache(key, fn, t-SOAP_GLOBAL(cache_ttl) TSRMLS_CC)) == NULL) {
-				sdl = load_wsdl(this_ptr, fn TSRMLS_CC);
-				if (sdl != NULL) {
-					add_sdl_to_cache(key, fn, t, sdl TSRMLS_CC);
-				}
-			}
-			efree(key);
-		}
-	} else {
-		sdl = load_wsdl(this_ptr, uri TSRMLS_CC);
-	}
-
+	sdl = load_wsdl(this_ptr, uri TSRMLS_CC);
 	if (sdl) {
 		sdl->is_persistent = 0;
-	}
-
-	if (persistent) {
-		if (sdl) {
-			zend_rsrc_list_entry le;
-			sdlPtr psdl = make_persistent_sdl(sdl TSRMLS_CC);
-
-			psdl->is_persistent = 1;
-			le.type = php_soap_psdl_list_entry();
-			le.ptr = psdl;
-			le.refcount = 0;
-			if (SUCCESS == zend_hash_update(&EG(persistent_list), pkey,
-											plen+1, (void*)&le, sizeof(le), NULL)) {
-				/* remove non-persitent sdl structure */
-				delete_sdl_impl(sdl);
-				/* and replace it with persistent one */
-				sdl = psdl;
-			} else {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to register persistent entry");
-				/* clean up persistent sdl */
-				delete_psdl(&le TSRMLS_CC);
-				/* keep non-persistent sdl and return it */
-			}
-		}
-		efree(pkey);
 	}
 
 	SOAP_GLOBAL(error_code) = old_error_code;
@@ -3185,6 +3204,67 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_bool persistent TSRMLS_DC)
 	if (context) {
 		php_libxml_switch_context(orig_context TSRMLS_CC);
 		zval_ptr_dtor(&new_context);
+	}
+
+	if ((cache_wsdl & WSDL_CACHE_DISK) && key) {
+		if (sdl) {
+			add_sdl_to_cache(key, uri, t, sdl TSRMLS_CC);
+		}
+		efree(key);
+	}
+
+cache_in_memory:
+	if (cache_wsdl & WSDL_CACHE_MEMORY) {
+		if (sdl) {
+			sdlPtr psdl;
+			sdl_cache_bucket p;
+
+			if (SOAP_GLOBAL(mem_cache) == NULL) {
+				SOAP_GLOBAL(mem_cache) = malloc(sizeof(HashTable));
+				zend_hash_init(SOAP_GLOBAL(mem_cache), 0, NULL, delete_psdl, 1);
+			} else if (SOAP_GLOBAL(cache_limit) > 0 &&
+			           SOAP_GLOBAL(cache_limit) <= zend_hash_num_elements(SOAP_GLOBAL(mem_cache))) {
+				/* in-memory cache overflow */
+				sdl_cache_bucket *q;
+				HashPosition pos;
+				time_t latest = t;
+				char *key = NULL;
+				uint key_len;
+				ulong idx;
+
+				for (zend_hash_internal_pointer_reset_ex(SOAP_GLOBAL(mem_cache), &pos);
+					 zend_hash_get_current_data_ex(SOAP_GLOBAL(mem_cache), (void **) &q, &pos) == SUCCESS;
+					 zend_hash_move_forward_ex(SOAP_GLOBAL(mem_cache), &pos)) {
+					if (q->time < latest) {
+						latest = q->time;
+						zend_hash_get_current_key_ex(SOAP_GLOBAL(mem_cache), &key, &key_len, &idx, 0, &pos);
+					}
+				}
+				if (key) {
+					zend_hash_del(SOAP_GLOBAL(mem_cache), key, key_len);
+				} else {
+					return sdl;
+				}
+			}
+
+			psdl = make_persistent_sdl(sdl TSRMLS_CC);
+			psdl->is_persistent = 1;
+			p.time = t;
+			p.sdl = psdl;
+
+			if (SUCCESS == zend_hash_update(SOAP_GLOBAL(mem_cache), uri,
+											uri_len+1, (void*)&p, sizeof(sdl_cache_bucket), NULL)) {
+				/* remove non-persitent sdl structure */
+				delete_sdl_impl(sdl);
+				/* and replace it with persistent one */
+				sdl = psdl;
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to register persistent entry");
+				/* clean up persistent sdl */
+				delete_psdl(&p);
+				/* keep non-persistent sdl and return it */
+			}
+		}
 	}
 
 	return sdl;
@@ -3235,46 +3315,6 @@ void delete_sdl(void *handle)
 
 	if (!tmp->is_persistent) {
 		delete_sdl_impl(tmp);
-	}
-}
-
-ZEND_RSRC_DTOR_FUNC(delete_psdl)
-{
-	if (rsrc->ptr) {
-		sdlPtr tmp = (sdlPtr)rsrc->ptr;
-
-		zend_hash_destroy(&tmp->functions);
-		if (tmp->source) {
-			free(tmp->source);
-		}
-		if (tmp->target_ns) {
-			free(tmp->target_ns);
-		}
-		if (tmp->elements) {
-			zend_hash_destroy(tmp->elements);
-			free(tmp->elements);
-		}
-		if (tmp->encoders) {
-			zend_hash_destroy(tmp->encoders);
-			free(tmp->encoders);
-		}
-		if (tmp->types) {
-			zend_hash_destroy(tmp->types);
-			free(tmp->types);
-		}
-		if (tmp->groups) {
-			zend_hash_destroy(tmp->groups);
-			free(tmp->groups);
-		}
-		if (tmp->bindings) {
-			zend_hash_destroy(tmp->bindings);
-			free(tmp->bindings);
-		}
-		if (tmp->requests) {
-			zend_hash_destroy(tmp->requests);
-			free(tmp->requests);
-		}
-		free(tmp);
 	}
 }
 

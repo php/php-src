@@ -3,7 +3,7 @@ Bug #37083 (Frequent crashs in SOAP extension with new WSDL caching code in mult
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --INI--
-soap.wsdl_cache_enabled=0
+soap.wsdl_cache_enabled=3
 --FILE--
 <?php
 class TestSoapClient extends SoapClient {
@@ -43,7 +43,7 @@ EOF;
 for ($i = 0; $i < 10; $i++) {
 	$ws=new TestSoapClient(dirname(__FILE__).'/bug37083.wsdl',
                    array('encoding'=>'ISO-8859-1',
-                         'cache_wsdl'=>1));
+                         'cache_wsdl'=>WSDL_CACHE_BOTH));
 	$search=new stdClass();
 	$search->queryString='argo';
 	$search->ranges[]=$r=new stdClass();
