@@ -433,7 +433,7 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 		/* allocate a buffer for reading chunks */
 		chunk_buf = emalloc(stream->chunk_size);
 
-		while (!err_flag && (stream->writepos - stream->readpos < (off_t)size)) {
+		while (!stream->eof && !err_flag && (stream->writepos - stream->readpos < (off_t)size)) {
 			size_t justread = 0;
 			int flags;
 			php_stream_bucket *bucket;
@@ -442,7 +442,7 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 
 			/* read a chunk into a bucket */
 			justread = stream->ops->read(stream, chunk_buf, stream->chunk_size TSRMLS_CC);
-			if (justread != (size_t)-1) {
+			if (justread && justread != (size_t)-1) {
 				bucket = php_stream_bucket_new(stream, chunk_buf, justread, 0, 0 TSRMLS_CC);
 
 				/* after this call, bucket is owned by the brigade */

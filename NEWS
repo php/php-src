@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Apr 2006, PHP 5.1.3
+- Fixed reading stream filters never notified about EOF. (Mike)
 - Fixed bug #37138 (__autoload tries to load callback'ed self and parent).
   (Dmitry)
 - Fixed bug #37103 (libmbfl headers not installed). (Jani)
