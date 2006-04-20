@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Apr 2006, PHP 5.1.3
+20 Apr 2006, PHP 5.1.3RC3
 - Fixed reading stream filters never notified about EOF. (Mike)
 - Fixed bug #37138 (__autoload tries to load callback'ed self and parent).
   (Dmitry)
@@ -30,7 +30,7 @@ PHP                                                                        NEWS
 - Fixed bug #29476 (sqlite_fetch_column_types() locks the database forever).
   (Ilia)
 
-06 Apr 2006, PHP 5.1.3RC3
+06 Apr 2006, PHP 5.1.3RC2
 - Eliminated run-time constant fetching for TRUE, FALSE and NULL. (Dmitry)
 - Changed SOAP extension to cache WSDL structure in memory and thus speed up
   SoapClient/SoapServer construction. (Andrei, Dmitry)
