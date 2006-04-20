@@ -1443,7 +1443,7 @@ ZEND_API int string_locale_compare_function(zval *result, zval *op1, zval *op2 T
 		op2 = &op2_copy;
 	}
 
-	Z_LVAL_P(result) = ucol_strcoll(UG(default_collator), Z_USTRVAL_P(op1), Z_USTRLEN_P(op1), Z_USTRVAL_P(op2), Z_USTRLEN_P(op2));
+	Z_LVAL_P(result) = ucol_strcoll(UG(default_collator)->coll, Z_USTRVAL_P(op1), Z_USTRLEN_P(op1), Z_USTRVAL_P(op2), Z_USTRLEN_P(op2));
 	Z_TYPE_P(result) = IS_LONG;
 
 	if (use_copy1) {

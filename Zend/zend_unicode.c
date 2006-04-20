@@ -677,6 +677,27 @@ void zend_register_unicode_exceptions(TSRMLS_D)
 }
 /* }}} */
 
+zend_collator* zend_collator_create(UCollator *coll)
+{
+	zend_collator *zcoll = NULL;
+
+	zcoll = emalloc(sizeof(zend_collator));
+	zcoll->coll = coll;
+	zcoll->refcount = 1;
+
+	return zcoll;
+}
+
+void zend_collator_destroy(zend_collator *zcoll)
+{
+	zcoll->refcount--;
+	if (zcoll->refcount == 0) {
+		ucol_close(zcoll->coll);
+		efree(zcoll);
+	}
+}
+
+
 /*
  * Local variables:
  * tab-width: 4

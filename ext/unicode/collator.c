@@ -42,8 +42,8 @@ static zend_object_handlers unicode_object_handlers_collator;
 typedef struct _php_collator_obj php_collator_obj;
 
 struct _php_collator_obj {
-	zend_object   std;
-	UCollator *col;
+	zend_object      std;
+	zend_collator *zcoll;
 };
 
 #define COLLATOR_SET_CONTEXT \
@@ -140,8 +140,8 @@ static void collator_object_free_storage(void *object TSRMLS_DC)
 {
 	php_collator_obj *intern = (php_collator_obj *)object;
 
-	if (intern->col) {
-		ucol_close(intern->col);
+	if (intern->zcoll) {
+		zend_collator_destroy(intern->zcoll);
 	}
 
 	if (intern->std.properties) {
@@ -178,10 +178,11 @@ PHP_METHOD(collator, __construct)
 PHP_FUNCTION(collator_create)
 {
 	php_collator_obj *collatorobj;
-	UErrorCode        error;
+	UErrorCode        status = U_ZERO_ERROR;
 	char             *collator_name;
 	int               collator_name_len;
 	zval 			 *object;
+	UCollator		 *ucoll;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &collator_name, &collator_name_len) == FAILURE) {
 		RETURN_FALSE;
@@ -192,8 +193,13 @@ PHP_FUNCTION(collator_create)
 	}
 	collator_instantiate(unicode_ce_collator, object TSRMLS_CC);
 	collatorobj = (php_collator_obj *) zend_object_store_get_object(object TSRMLS_CC);
-	error = U_ZERO_ERROR;
-	collatorobj->col = ucol_open(collator_name, &error);
+	ucoll = ucol_open(collator_name, &status);
+	if (U_FAILURE(status)) {
+		/* UTODO handle error case properly */
+		zend_error(E_ERROR, "Could not open collator for locale %s", UG(default_locale));
+		return;
+	}
+	collatorobj->zcoll = zend_collator_create(ucoll);
 }
 
 PHP_FUNCTION(collator_compare)
@@ -207,7 +213,7 @@ PHP_FUNCTION(collator_compare)
 		RETURN_FALSE;
 	}
 	collatorobj = (php_collator_obj *) zend_object_store_get_object(object TSRMLS_CC);
-	RETURN_LONG(ucol_strcoll(collatorobj->col, string1, string1_len, string2, string2_len));
+	RETURN_LONG(ucol_strcoll(collatorobj->zcoll->coll, string1, string1_len, string2, string2_len));
 }
 
 PHP_FUNCTION(collator_sort)
@@ -216,7 +222,7 @@ PHP_FUNCTION(collator_sort)
 	php_collator_obj *collatorobj;
 	zval             *array;
 	HashTable        *target_hash;
-	UCollator        *orig_collator;
+	zend_collator    *orig_collator;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oa/", &object, unicode_ce_collator, &array) == FAILURE) {
 		RETURN_FALSE;
@@ -226,7 +232,7 @@ PHP_FUNCTION(collator_sort)
 	target_hash = HASH_OF(array);
 	php_set_compare_func(SORT_LOCALE_STRING TSRMLS_CC);
 	orig_collator = UG(default_collator);
-	UG(default_collator) = collatorobj->col;
+	UG(default_collator) = collatorobj->zcoll;
 	if (zend_hash_sort(target_hash, zend_qsort, php_array_data_compare, 1 TSRMLS_CC) == FAILURE) {
 		RETVAL_FALSE;
 	} else {
@@ -245,7 +251,7 @@ PHP_FUNCTION(collator_set_strength)
 		RETURN_FALSE;
 	}
 	collatorobj = (php_collator_obj *) zend_object_store_get_object(object TSRMLS_CC);
-	ucol_setStrength(collatorobj->col, strength);
+	ucol_setStrength(collatorobj->zcoll->coll, strength);
 }
 
 PHP_FUNCTION(collator_get_strength)
@@ -257,7 +263,7 @@ PHP_FUNCTION(collator_get_strength)
 		RETURN_FALSE;
 	}
 	collatorobj = (php_collator_obj *) zend_object_store_get_object(object TSRMLS_CC);
-	RETURN_LONG(ucol_getStrength(collatorobj->col));
+	RETURN_LONG(ucol_getStrength(collatorobj->zcoll->coll));
 }
 
 PHP_FUNCTION(collator_set_attribute)
@@ -272,7 +278,7 @@ PHP_FUNCTION(collator_set_attribute)
 	}
 	collatorobj = (php_collator_obj *) zend_object_store_get_object(object TSRMLS_CC);
 	error = U_ZERO_ERROR;
-	ucol_setAttribute(collatorobj->col, attribute, value, &error);
+	ucol_setAttribute(collatorobj->zcoll->coll, attribute, value, &error);
 	RETURN_BOOL(error == U_ZERO_ERROR ? 1 : 0);
 }
 
@@ -288,9 +294,26 @@ PHP_FUNCTION(collator_get_attribute)
 	}
 	collatorobj = (php_collator_obj *) zend_object_store_get_object(object TSRMLS_CC);
 	error = U_ZERO_ERROR;
-	value = ucol_getAttribute(collatorobj->col, attribute, &error);
+	value = ucol_getAttribute(collatorobj->zcoll->coll, attribute, &error);
 	if (error != U_ZERO_ERROR) {
 		RETURN_FALSE;
 	}
 	RETURN_LONG(value);
 }
+
+PHP_FUNCTION(i18n_coll_get_default)
+{
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+		return;
+	}
+
+}
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */
