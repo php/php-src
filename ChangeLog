@@ -1,3 +1,28 @@
+2006-04-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      Cleaned up Andrei's patch for caching WSDL in process memory, added TTL and
+      LIMIT for memory cache.
+      Memory cache is disblead by fefault because it is experemental and isn't
+      tested enough. It can be enabled whit configuartion directive
+      "soap.wsdl_cache = WSDL_CACHE_MEMORY" or "soap.wsdl_cache =
+      WSDL_CACHE_BOTH" or derectly in SoapClent/SoapServer constructor: $ws =
+      new SoapClient($wsdl, array("cache_wsdl"=>WSDL_CACHE_BOTH))
+      Disk and memory caches use the same TTL value - "soap.wsdl_cache_ttl".
+      Configuration directive "soap.wsdl_cache_limit" restricts the number of
+      cached wsdl files in memory. Adding new files into full memory cache will
+      delete oldest files from it.
+      Note that, each PHP process or thread uses it's own memory cache.
+
+    * ZendEngine2/zend.c:
+      Fixed cleanup dependent on uninitialized value
+
+2006-04-19  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/streamsfuncs.c:
+      fix typo (see #35900)
+
 2006-04-18  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_1)
