@@ -307,9 +307,9 @@ struct _zend_unicode_globals {
 	uint16_t to_error_mode;
 
 	char *default_locale;
-	UCollator *default_collator;
+	zend_collator *default_collator;
 
-	HashTable flex_compatible;
+	HashTable flex_compatible;			 /* table of flex-compatible encodings */
 };
 
 #endif /* ZEND_GLOBALS_H */

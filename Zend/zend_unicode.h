@@ -48,6 +48,12 @@ typedef enum {
 } zend_conv_direction;
 
 
+typedef struct _zend_collator {
+	UCollator    *coll;
+	int       refcount;
+} zend_collator;
+
+
 extern ZEND_API zend_class_entry *unicodeConversionException;
 
 
@@ -58,6 +64,8 @@ void zend_set_converter_error_mode(UConverter *conv, zend_conv_direction dir, ui
 void zend_set_converter_subst_char(UConverter *conv, UChar *subst_char);
 void zend_register_unicode_exceptions(TSRMLS_D);
 void zend_update_converters_error_behavior(TSRMLS_D);
+zend_collator* zend_collator_create(UCollator *coll);
+void zend_collator_destroy(zend_collator *zcoll);
 
 
 /* API functions */

@@ -1227,15 +1227,17 @@ ZEND_API char *get_zend_version()
 
 ZEND_API void zend_reset_locale_deps(TSRMLS_D)
 {
+	UCollator *coll;
 	UErrorCode status = U_ZERO_ERROR;
 
 	if (UG(default_collator)) {
-		ucol_close(UG(default_collator));
+		zend_collator_destroy(UG(default_collator));
 	}
-	UG(default_collator) = ucol_open(UG(default_locale), &status);
+	coll = ucol_open(UG(default_locale), &status);
 	if (U_FAILURE(status)) {
 		zend_error(E_ERROR, "Could not open collator for locale %s", UG(default_locale));
 	}
+	UG(default_collator) = zend_collator_create(coll);
 }
 
 static void init_unicode_request_globals(TSRMLS_D)
@@ -1248,7 +1250,7 @@ static void init_unicode_request_globals(TSRMLS_D)
 
 static void shutdown_unicode_request_globals(TSRMLS_D)
 {
-	ucol_close(UG(default_collator));
+	zend_collator_destroy(UG(default_collator));
 	efree(UG(default_locale));
 }
 
