@@ -26,15 +26,9 @@ int load_schema(sdlCtx *ctx, xmlNodePtr schema TSRMLS_DC);
 void schema_pass2(sdlCtx *ctx);
 
 void delete_model(void *handle);
-void delete_model_persistent(void *handle);
 void delete_type(void *data);
-void delete_type_persistent(void *data);
 void delete_extra_attribute(void *attribute);
-void delete_extra_attribute_persistent(void *attribute);
 void delete_attribute(void *attribute);
-void delete_attribute_persistent(void *attribute);
 void delete_restriction_var_int(void *rvi);
-void delete_restriction_var_int_persistent(void *rvi);
 void delete_restriction_var_char(void *srvc);
-void delete_restriction_var_char_persistent(void *srvc);
 #endif
