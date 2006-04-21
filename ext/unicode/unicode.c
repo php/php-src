@@ -245,6 +245,7 @@ zend_function_entry unicode_functions[] = {
 	PHP_FE(collator_create, NULL)
 	PHP_FE(collator_compare, NULL)
 	PHP_FE(collator_get_default, NULL)
+	PHP_FE(collator_set_default, NULL)
 	{ NULL, NULL, NULL }
 };
 /* }}} */

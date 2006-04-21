@@ -26,13 +26,14 @@
 
 zend_function_entry collator_funcs_collator[] = {
 	ZEND_ME(collator, __construct, NULL, ZEND_ACC_PUBLIC)
-	ZEND_FENTRY(getDefault, ZEND_FN(collator_get_default), NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_NAMED_FE(compare, ZEND_FN(collator_compare), NULL)
-	ZEND_NAMED_FE(setStrength, ZEND_FN(collator_set_strength), NULL)
+	ZEND_FENTRY(getDefault, 	ZEND_FN(collator_get_default), NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FENTRY(setDefault, 	ZEND_FN(collator_set_default), NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_NAMED_FE(compare, 		ZEND_FN(collator_compare), NULL)
+	ZEND_NAMED_FE(setStrength, 	ZEND_FN(collator_set_strength), NULL)
 	ZEND_NAMED_FE(setAttribute, ZEND_FN(collator_set_attribute), NULL)
-	ZEND_NAMED_FE(getStrength, ZEND_FN(collator_get_strength), NULL)
+	ZEND_NAMED_FE(getStrength, 	ZEND_FN(collator_get_strength), NULL)
 	ZEND_NAMED_FE(getAttribute, ZEND_FN(collator_get_attribute), NULL)
-	ZEND_NAMED_FE(sort, ZEND_FN(collator_sort), NULL)
+	ZEND_NAMED_FE(sort,			ZEND_FN(collator_sort), NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -290,16 +291,36 @@ PHP_FUNCTION(collator_get_attribute)
 	RETURN_LONG(value);
 }
 
-/* {{{ proto object collator_get_default(void) U
+/* {{{ proto Collator collator_get_default(void) U
    Returns default collator */
 PHP_FUNCTION(collator_get_default)
 {
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 
 	UG(default_collator)->refcount++;
 	collator_set_wrapper(return_value, UG(default_collator) TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ proto void collator_set_default(Collator coll) U
+   Returns default collator */
+PHP_FUNCTION(collator_set_default)
+{
+	zval *coll;
+	php_collator_obj *coll_obj;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &coll, unicode_collator_ce) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	coll_obj = (php_collator_obj *) zend_object_store_get_object(coll TSRMLS_CC);
+	zend_collator_destroy(UG(default_collator));
+	coll_obj->zcoll->refcount++;
+	UG(default_collator) = coll_obj->zcoll;
+
+	RETURN_TRUE;
 }
 /* }}} */
 
