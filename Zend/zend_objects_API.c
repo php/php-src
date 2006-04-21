@@ -135,6 +135,11 @@ ZEND_API void zend_objects_store_add_ref(zval *object TSRMLS_DC)
 #endif
 }
 
+ZEND_API void zend_objects_store_add_ref_by_handle(zend_object_handle handle TSRMLS_DC)
+{
+	EG(objects_store).object_buckets[handle].bucket.obj.refcount++;
+}
+
 #define ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST()																	\
 			EG(objects_store).object_buckets[handle].bucket.free_list.next = EG(objects_store).free_list_head;	\
 			EG(objects_store).free_list_head = handle;															\
@@ -143,28 +148,35 @@ ZEND_API void zend_objects_store_add_ref(zval *object TSRMLS_DC)
 ZEND_API void zend_objects_store_del_ref(zval *zobject TSRMLS_DC)
 {
 	zend_object_handle handle;
+
+	handle = Z_OBJ_HANDLE_P(zobject);
+
+	zobject->refcount++;
+	zend_objects_store_del_ref_by_handle(handle TSRMLS_CC);
+	zobject->refcount--;
+}
+
+ZEND_API void zend_objects_store_del_ref_by_handle(zend_object_handle handle TSRMLS_DC)
+{
 	struct _store_object *obj;
 
 	if (!EG(objects_store).object_buckets) {
 		return;
 	}
 
-	handle = Z_OBJ_HANDLE_P(zobject);
 	obj = &EG(objects_store).object_buckets[handle].bucket.obj;
 
 	/*	Make sure we hold a reference count during the destructor call
 		otherwise, when the destructor ends the storage might be freed
 		when the refcount reaches 0 a second time
-	*/
+	 */
 	if (EG(objects_store).object_buckets[handle].valid) {
 		if (obj->refcount == 1) {
 			if (!EG(objects_store).object_buckets[handle].destructor_called) {
 				EG(objects_store).object_buckets[handle].destructor_called = 1;
 
 				if (obj->dtor) {
-					zobject->refcount++;
 					obj->dtor(obj->object, handle TSRMLS_CC);
-					zobject->refcount--;
 				}
 			}
 			if (obj->refcount == 1) {
@@ -212,6 +224,11 @@ ZEND_API void *zend_object_store_get_object(zval *zobject TSRMLS_DC)
 {
 	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
 
+	return EG(objects_store).object_buckets[handle].bucket.obj.object;
+}
+
+ZEND_API void *zend_object_store_get_object_by_handle(zend_object_handle handle TSRMLS_DC)
+{
 	return EG(objects_store).object_buckets[handle].bucket.obj.object;
 }
 
