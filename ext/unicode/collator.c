@@ -26,6 +26,7 @@
 
 zend_function_entry collator_funcs_collator[] = {
 	ZEND_ME(collator, __construct, NULL, ZEND_ACC_PUBLIC)
+	ZEND_FENTRY(getDefault, ZEND_FN(collator_get_default), NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_NAMED_FE(compare, ZEND_FN(collator_compare), NULL)
 	ZEND_NAMED_FE(setStrength, ZEND_FN(collator_set_strength), NULL)
 	ZEND_NAMED_FE(setAttribute, ZEND_FN(collator_set_attribute), NULL)
@@ -289,6 +290,8 @@ PHP_FUNCTION(collator_get_attribute)
 	RETURN_LONG(value);
 }
 
+/* {{{ proto object collator_get_default(void) U
+   Returns default collator */
 PHP_FUNCTION(collator_get_default)
 {
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
@@ -298,6 +301,7 @@ PHP_FUNCTION(collator_get_default)
 	UG(default_collator)->refcount++;
 	collator_set_wrapper(return_value, UG(default_collator) TSRMLS_CC);
 }
+/* }}} */
 
 /*
  * Local variables:
