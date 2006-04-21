@@ -55,8 +55,8 @@ PHP_MINFO_FUNCTION(unicode);
 #include "TSRM.h"
 #endif
 
-PHP_FUNCTION(i18n_loc_get_default);
-PHP_FUNCTION(i18n_loc_set_default);
+PHP_FUNCTION(locale_get_default);
+PHP_FUNCTION(locale_set_default);
 PHP_FUNCTION(collator_get_default);
 PHP_FUNCTION(collator_create);
 PHP_FUNCTION(collator_compare);

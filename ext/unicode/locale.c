@@ -40,9 +40,9 @@ static void php_canonicalize_locale_id(char **target, int32_t *target_len, char 
 	*target_len = canonicalized_len;
 }
 
-/* {{{ proto string i18n_loc_get_default(void) U
+/* {{{ proto string locale_get_default(void) U
    Returns default locale */
-PHP_FUNCTION(i18n_loc_get_default)
+PHP_FUNCTION(locale_get_default)
 {
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
 		return;
@@ -52,9 +52,9 @@ PHP_FUNCTION(i18n_loc_get_default)
 }
 /* }}} */
 
-/* {{{ proto bool i18n_loc_set_default(string locale) U
+/* {{{ proto bool locale_set_default(string locale) U
 	Sets default locale */
-PHP_FUNCTION(i18n_loc_set_default)
+PHP_FUNCTION(locale_set_default)
 {
 	char *locale;
 	int locale_len;
