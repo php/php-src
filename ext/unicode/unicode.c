@@ -235,7 +235,7 @@ PHP_FUNCTION(unicode_get_subst_char)
 zend_function_entry unicode_functions[] = {
 	PHP_FE(i18n_loc_get_default, NULL)
 	PHP_FE(i18n_loc_set_default, NULL)
-	PHP_FE(i18n_coll_get_default, NULL)
+	PHP_FE(collator_get_default, NULL)
 	PHP_FE(unicode_decode, NULL)
 	PHP_FE(unicode_semantics, NULL)
 	PHP_FE(unicode_encode, NULL)

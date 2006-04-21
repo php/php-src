@@ -35,7 +35,7 @@ zend_function_entry collator_funcs_collator[] = {
 	{NULL, NULL, NULL}
 };
 
-zend_class_entry *unicode_ce_collator;
+zend_class_entry *unicode_collator_ce;
 
 static zend_object_handlers unicode_object_handlers_collator;
 
@@ -64,7 +64,7 @@ struct _php_collator_obj {
 	}	\
 	obj = (php_collator_obj *) zend_object_store_get_object(object TSRMLS_CC);
 
-static zend_object_value collator_object_new(zend_class_entry *class_type TSRMLS_DC);
+static zend_object_value collator_object_create(zend_class_entry *class_type TSRMLS_DC);
 static void collator_object_free_storage(void *object TSRMLS_DC);
 
 static void collator_register_class(TSRMLS_D)
@@ -72,15 +72,15 @@ static void collator_register_class(TSRMLS_D)
 	zend_class_entry ce_collator;
 
 	INIT_CLASS_ENTRY(ce_collator, "Collator", collator_funcs_collator);
-	ce_collator.create_object = collator_object_new;
-	unicode_ce_collator = zend_register_internal_class_ex(&ce_collator, NULL, NULL TSRMLS_CC);
+	ce_collator.create_object = collator_object_create;
+	unicode_collator_ce = zend_register_internal_class_ex(&ce_collator, NULL, NULL TSRMLS_CC);
 	memcpy(&unicode_object_handlers_collator, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	unicode_object_handlers_collator.clone_obj = NULL;
 
 #define REGISTER_COLLATOR_CLASS_CONST_STRING(const_name, value) \
-	zend_declare_class_constant_stringl(unicode_ce_collator, const_name, sizeof(const_name)-1, value, sizeof(value)-1 TSRMLS_CC);
+	zend_declare_class_constant_stringl(unicode_collator_ce, const_name, sizeof(const_name)-1, value, sizeof(value)-1 TSRMLS_CC);
 #define REGISTER_COLLATOR_CLASS_CONST_LONG(const_name, value) \
-	zend_declare_class_constant_long(unicode_ce_collator, const_name, sizeof(const_name)-1, value TSRMLS_CC);
+	zend_declare_class_constant_long(unicode_collator_ce, const_name, sizeof(const_name)-1, value TSRMLS_CC);
 
 	/* Attributes */
 	REGISTER_COLLATOR_CLASS_CONST_LONG("FRENCH_COLLATION", UCOL_FRENCH_COLLATION);
@@ -116,7 +116,7 @@ void php_init_collation(TSRMLS_D)
 }
 
 
-static zend_object_value collator_object_new(zend_class_entry *class_type TSRMLS_DC)
+static zend_object_value collator_object_create(zend_class_entry *ce TSRMLS_DC)
 {
 	php_collator_obj *intern;
 	zend_object_value retval;
@@ -124,11 +124,9 @@ static zend_object_value collator_object_new(zend_class_entry *class_type TSRMLS
 
 	intern = emalloc(sizeof(php_collator_obj));
 	memset(intern, 0, sizeof(php_collator_obj));
-	intern->std.ce = class_type;
-	
-	ALLOC_HASHTABLE(intern->std.properties);
-	zend_hash_init(intern->std.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+
+	zend_object_std_init(&intern->std, ce TSRMLS_CC);
+	zend_hash_copy(intern->std.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 	
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) collator_object_free_storage, NULL TSRMLS_CC);
 	retval.handlers = &unicode_object_handlers_collator;
@@ -144,29 +142,22 @@ static void collator_object_free_storage(void *object TSRMLS_DC)
 		zend_collator_destroy(intern->zcoll);
 	}
 
-	if (intern->std.properties) {
-		zend_hash_destroy(intern->std.properties);
-		efree(intern->std.properties);
-		intern->std.properties = NULL;
-	}
+	zend_object_std_dtor(&intern->std TSRMLS_CC);
 	
 	efree(object);
 }
 
-static zval* collator_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC)
+static zval* collator_set_wrapper(zval *object, zend_collator *zcoll TSRMLS_DC)
 {
-	/* FIXME
-	 * not sure what what this is for but moved here so it doesn't break stuff
-	 * below
-	 */
-	if (!object) {
-		ALLOC_ZVAL(object);
-		object->refcount = 1;
-		object->is_ref = 1;
+	php_collator_obj *coll_obj;
+
+	if (Z_TYPE_P(object) != IS_OBJECT) {
+		object_init_ex(object, unicode_collator_ce);
 	}
 
-	Z_TYPE_P(object) = IS_OBJECT;
-	object_init_ex(object, pce);
+	coll_obj = (php_collator_obj *) zend_object_store_get_object(object TSRMLS_CC);
+	coll_obj->zcoll = zcoll;
+
 	return object;
 }
 
@@ -177,7 +168,6 @@ PHP_METHOD(collator, __construct)
 
 PHP_FUNCTION(collator_create)
 {
-	php_collator_obj *collatorobj;
 	UErrorCode        status = U_ZERO_ERROR;
 	char             *collator_name;
 	int               collator_name_len;
@@ -191,15 +181,13 @@ PHP_FUNCTION(collator_create)
 	if ((object = getThis()) == NULL) {
 		object = return_value;
 	}
-	collator_instantiate(unicode_ce_collator, object TSRMLS_CC);
-	collatorobj = (php_collator_obj *) zend_object_store_get_object(object TSRMLS_CC);
 	ucoll = ucol_open(collator_name, &status);
 	if (U_FAILURE(status)) {
 		/* UTODO handle error case properly */
 		zend_error(E_ERROR, "Could not open collator for locale %s", UG(default_locale));
 		return;
 	}
-	collatorobj->zcoll = zend_collator_create(ucoll);
+	collator_set_wrapper(object, zend_collator_create(ucoll) TSRMLS_CC);
 }
 
 PHP_FUNCTION(collator_compare)
@@ -209,7 +197,7 @@ PHP_FUNCTION(collator_compare)
 	UChar            *string1, *string2;
 	int               string1_len, string2_len;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ouu", &object, unicode_ce_collator, &string1, &string1_len, &string2, &string2_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ouu", &object, unicode_collator_ce, &string1, &string1_len, &string2, &string2_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 	collatorobj = (php_collator_obj *) zend_object_store_get_object(object TSRMLS_CC);
@@ -224,7 +212,7 @@ PHP_FUNCTION(collator_sort)
 	HashTable        *target_hash;
 	zend_collator    *orig_collator;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oa/", &object, unicode_ce_collator, &array) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oa/", &object, unicode_collator_ce, &array) == FAILURE) {
 		RETURN_FALSE;
 	}
 	collatorobj = (php_collator_obj *) zend_object_store_get_object(object TSRMLS_CC);
@@ -247,7 +235,7 @@ PHP_FUNCTION(collator_set_strength)
 	php_collator_obj *collatorobj;
 	long              strength;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol", &object, unicode_ce_collator, &strength) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol", &object, unicode_collator_ce, &strength) == FAILURE) {
 		RETURN_FALSE;
 	}
 	collatorobj = (php_collator_obj *) zend_object_store_get_object(object TSRMLS_CC);
@@ -259,7 +247,7 @@ PHP_FUNCTION(collator_get_strength)
 	zval             *object;
 	php_collator_obj *collatorobj;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &object, unicode_ce_collator) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &object, unicode_collator_ce) == FAILURE) {
 		RETURN_FALSE;
 	}
 	collatorobj = (php_collator_obj *) zend_object_store_get_object(object TSRMLS_CC);
@@ -273,7 +261,7 @@ PHP_FUNCTION(collator_set_attribute)
 	long              attribute, value;
 	UErrorCode        error;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oll", &object, unicode_ce_collator, &attribute, &value) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oll", &object, unicode_collator_ce, &attribute, &value) == FAILURE) {
 		RETURN_FALSE;
 	}
 	collatorobj = (php_collator_obj *) zend_object_store_get_object(object TSRMLS_CC);
@@ -289,7 +277,7 @@ PHP_FUNCTION(collator_get_attribute)
 	long              attribute, value;
 	UErrorCode        error;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol", &object, unicode_ce_collator, &attribute) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol", &object, unicode_collator_ce, &attribute) == FAILURE) {
 		RETURN_FALSE;
 	}
 	collatorobj = (php_collator_obj *) zend_object_store_get_object(object TSRMLS_CC);
@@ -301,12 +289,14 @@ PHP_FUNCTION(collator_get_attribute)
 	RETURN_LONG(value);
 }
 
-PHP_FUNCTION(i18n_coll_get_default)
+PHP_FUNCTION(collator_get_default)
 {
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
 		return;
 	}
 
+	UG(default_collator)->refcount++;
+	collator_set_wrapper(return_value, UG(default_collator) TSRMLS_CC);
 }
 
 /*
