@@ -1,3 +1,29 @@
+2006-04-20  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      zend_execute_API.c:
+      there is no %v in 5_1
+
+2006-04-20  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend.c
+      zend_globals.h
+      zend_operators.c
+      zend_unicode.c
+      zend_unicode.h:
+      Move to refcounted implementation of collators.
+
+2006-04-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/bug37138.phpt:
+      Test added
+
+    * (PHP_5_1)
+      zend_API.c
+      tests/bug37138.phpt
+      tests/bug37138.phpt:
+      Fixed bug #37138 (__autoload tries to load callback'ed self and parent)
+
 2006-04-19  Dmitry Stogov  <dmitry@zend.com>
 
     * zend.c:

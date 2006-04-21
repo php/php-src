@@ -1,3 +1,60 @@
+2006-04-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      configure.in
+      main/php_version.h:
+      Back to dev
+
+2006-04-20  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      ZendEngine2/zend_execute_API.c:
+      there is no %v in 5_1
+
+2006-04-20  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_unicode.c
+      ZendEngine2/zend_unicode.h:
+      Move to refcounted implementation of collators.
+
+2006-04-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Prepare for RC3
+
+2006-04-20  Michael Wallner  <mike@iworks.at>
+
+    * main/streams/streams.c:
+      MFB: Fix reading stream filters never notified about EOF
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/tests/filters/read.phpt
+      ext/standard/tests/filters/read.phpt
+      main/streams/streams.c:
+      - Fix reading stream filters never notified about EOF
+
+2006-04-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug37138.phpt:
+      Test added
+
+    * ZendEngine2/tests/bug37138.phpt
+      ZendEngine2/tests/bug37138.phpt:
+      
+      file bug37138.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/zend_API.c:
+      Fixed bug #37138 (__autoload tries to load callback'ed self and parent)
+
 2006-04-19  Dmitry Stogov  <dmitry@zend.com>
 
     * (PHP_5_1)
