@@ -1356,7 +1356,7 @@ static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent TS
 			buf[line_len] = '\0';
 		}
 	} else {
-		buf = php_stream_get_line(intern->u.file.stream, NULL_ZSTR, 0, &line_len);
+		buf = php_stream_get_line(intern->u.file.stream, NULL, 0, &line_len);
 	}
 
 	if (!buf) {
