@@ -464,7 +464,7 @@ PHP_FUNCTION(stream_wrapper_restore)
 {
 	char *protocol;
 	int protocol_len;
-	php_stream_wrapper *wrapper = NULL;
+	php_stream_wrapper **wrapperpp = NULL, *wrapper;
 	HashTable *global_wrapper_hash;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &protocol, &protocol_len) == FAILURE) {
@@ -477,10 +477,13 @@ PHP_FUNCTION(stream_wrapper_restore)
 		RETURN_TRUE;
 	}
 
-	if ((zend_hash_find(global_wrapper_hash, protocol, protocol_len, (void**)&wrapper) == FAILURE) || !wrapper) {
+	if ((zend_hash_find(global_wrapper_hash, protocol, protocol_len, (void**)&wrapperpp) == FAILURE) || !wrapperpp) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s:// never existed, nothing to restore", protocol);
 		RETURN_FALSE;
 	}
+
+	/* next line might delete the pointer that wrapperpp points at, so deref it now */
+	wrapper = *wrapperpp;
 
 	/* A failure here could be okay given that the protocol might have been merely unregistered */
 	php_unregister_url_stream_wrapper_volatile(protocol TSRMLS_CC);
