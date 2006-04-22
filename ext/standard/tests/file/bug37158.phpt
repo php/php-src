@@ -37,7 +37,3 @@ echo "Done\n";
 string(26) "size of contents 1 = 20000"
 string(26) "size of contents 2 = 40960"
 Done
---UEXPECT--	
-unicode(26) "size of contents 1 = 20000"
-unicode(26) "size of contents 2 = 40960"
-Done
