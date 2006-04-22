@@ -22,7 +22,7 @@ Class [ <user> class just_constants ] {
   - Constants [5] {
     Constant [ boolean BOOLEAN_CONSTANT ] { }
     Constant [ null NULL_CONSTANT ] { }
-    Constant [ native string STRING_CONSTANT ] { }
+    Constant [ string STRING_CONSTANT ] { }
     Constant [ integer INTEGER_CONSTANT ] { }
     Constant [ double FLOAT_CONSTANT ] { }
   }
