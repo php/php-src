@@ -1049,7 +1049,7 @@ PHPAPI PHP_FUNCTION(fgets)
 
 	php_stream_from_zval(stream, &zstream);
 
-	buf.v = php_stream_get_line_ex(stream, stream->readbuf_type, NULL_ZSTR, 0, length, &retlen);
+	buf.v = php_stream_get_line_ex(stream, stream->readbuf_type, NULL, 0, length, &retlen);
 	if (!buf.v) {
 		RETURN_FALSE;
 	}
@@ -1110,7 +1110,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 	php_stream_from_zval(stream, &zstream);
 
 	if (stream->readbuf_type == IS_UNICODE) {
-		UChar *buf = php_stream_get_line_ex(stream, IS_UNICODE, NULL_ZSTR, 0, length, &retlen);
+		UChar *buf = php_stream_get_line_ex(stream, IS_UNICODE, NULL, 0, length, &retlen);
 		UChar *allowed = NULL;
 		int allowed_len = 0;
 
@@ -1127,7 +1127,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 
 		RETURN_UNICODEL(buf, retlen, 0);
 	} else { /* IS_STRING */
-		char *buf = php_stream_get_line_ex(stream, IS_STRING, NULL_ZSTR, 0, length, &retlen);
+		char *buf = php_stream_get_line_ex(stream, IS_STRING, NULL, 0, length, &retlen);
 		char *allowed = NULL;
 		int allowed_len = 0;
 
@@ -1189,7 +1189,7 @@ PHP_FUNCTION(fscanf)
 	}
 
 
-	buf = php_stream_get_line((php_stream *) what, NULL_ZSTR, 0, &len);
+	buf = php_stream_get_line((php_stream *) what, NULL, 0, &len);
 	if (buf == NULL) {
 		efree(args);
 		RETURN_FALSE;
@@ -2056,7 +2056,7 @@ PHP_FUNCTION(fgetcsv)
 	}
 
 	if (len < 0) {
-		if ((buf = php_stream_get_line(stream, NULL_ZSTR, 0, &buf_len)) == NULL) {
+		if ((buf = php_stream_get_line(stream, NULL, 0, &buf_len)) == NULL) {
 			RETURN_FALSE;
 		}
 	} else {
@@ -2153,7 +2153,7 @@ PHP_FUNCTION(fgetcsv)
 								memcpy(tptr, line_end, line_end_len);
 								tptr += line_end_len;
 
-								if ((new_buf = php_stream_get_line(stream, NULL_ZSTR, 0, &new_len)) == NULL) {
+								if ((new_buf = php_stream_get_line(stream, NULL, 0, &new_len)) == NULL) {
 									/* we've got an unterminated enclosure,
 									 * assign all the data from the start of
 									 * the enclosure to end of data to the
