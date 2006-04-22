@@ -1,3 +1,15 @@
+2006-04-21  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_objects_API.c:
+      Happy, Pierre?
+
+    * ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.h:
+      Add:
+       * zend_objects_store_add_ref_by_handle()
+       * zend_objects_store_del_ref_by_handle()
+       * zend_objects_store_get_object_by_handle()
+
 2006-04-20  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_1)
