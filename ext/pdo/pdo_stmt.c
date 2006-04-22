@@ -1107,7 +1107,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 					if (return_all) {
 						zval_ptr_dtor(&return_value); /* we don't need that */
 						return_value = retval;
-					} else {
+					} else if (retval) {
 						*return_value = *retval;
 						zval_copy_ctor(return_value);
 						INIT_PZVAL(return_value);
