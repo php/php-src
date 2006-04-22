@@ -46,7 +46,6 @@
 
 #define STREAM_DEBUG 0
 #define STREAM_WRAPPER_PLAIN_FILES	((php_stream_wrapper*)-1)
-extern php_stream_wrapper php_plain_files_wrapper;
 
 #ifndef MAP_FAILED
 #define MAP_FAILED ((void *) -1)
