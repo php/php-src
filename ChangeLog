@@ -1,3 +1,41 @@
+2006-04-22  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/file/bug37158.phpt
+      main/streams/php_streams_int.h
+      main/streams/streams.c
+      main/streams/userspace.c:
+      merge fix for #37158 into HEAD
+      add test
+
+    * (PHP_5_1)
+      ext/standard/tests/file/bug37158.phpt:
+      bah.. no UEXPECT in this branch..
+
+    * ext/standard/tests/file/bug37158.phpt
+      ext/standard/tests/file/bug37158.phpt:
+      
+      file bug37158.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      NEWS:
+      BFN
+
+2006-04-22  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_5_1)
+      NEWS
+      main/streams/php_streams_int.h
+      main/streams/streams.c
+      main/streams/userspace.c:
+      fix for #37158
+
+2006-04-22  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/standard/file.c
+      ext/standard/image.c
+      sapi/cli/php_cli.c:
+      Fix Win32 build. NULL_ZSTR was converted to ZSTR(NULL_ZSTR)
+
 2006-04-21  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ZendEngine2/zend_objects_API.c:
