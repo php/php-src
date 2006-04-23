@@ -6,18 +6,18 @@ PHP                                                                        NEWS
   handler). (Tony)
 - Fixed bug #37162 (wddx does not build as a shared extension).  
   (jdolecek at NetBSD dot org, Ilia)
-- Fixed bug #37158 (fread behaviour changes after calling
+- Fixed bug #37158 (fread behavior changes after calling
   stream_wrapper_register). (Wez)
 - Fixed bug #37138 (__autoload tries to load callback'ed self and parent).
   (Dmitry)
 - Fixed bug #37103 (libmbfl headers not installed). (Jani)
-- Fixed bug #37083 (Frequent crashs in SOAP extension with new WSDL caching
+- Fixed bug #37083 (Frequent crashes in SOAP extension with new WSDL caching
   code in multithread WS). (Andrei, Dmitry)
 - Fixed bug #37062 (compile failure on ARM architecture). (Tony)
 - Fixed bug #37061 (curl_exec() doesn't zero-terminate binary strings). (Tony)
 - Fixed bug #37060 (Type of retval of Countable::count() is not checked). 
   (Johannes)
-- FIxed bug #37059 (oci_bind_by_name() doesn't support RAW and LONG RAW 
+- Fixed bug #37059 (oci_bind_by_name() doesn't support RAW and LONG RAW 
   fields). (Tony)
 - Fixed bug #37057 (xmlrpc_decode() may produce arrays with numeric strings, 
   which are unaccessible). (Tony)
@@ -32,7 +32,7 @@ PHP                                                                        NEWS
   vars). (Dmitry)
 - Fixed Bug #36872 (session_destroy() fails after call to 
   session_regenerate_id(true)). (Ilia)
-- Fixed bug #36513 (comment will be outputed in last line). (Dmitry)
+- Fixed bug #36513 (comment will be outputted in last line). (Dmitry)
 - Fixed bug #29476 (sqlite_fetch_column_types() locks the database forever).
   (Ilia)
 
