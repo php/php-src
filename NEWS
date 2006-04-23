@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Fixed reading stream filters never notified about EOF. (Mike)
 - Fixed bug #37167 (PDO segfaults when throwing exception from the fetch 
   handler). (Tony)
+- Fixed bug #37162 (wddx does not build as a shared extension).  
+  (jdolecek at NetBSD dot org, Ilia)
 - Fixed bug #37158 (fread behaviour changes after calling
   stream_wrapper_register). (Wez)
 - Fixed bug #37138 (__autoload tries to load callback'ed self and parent).
