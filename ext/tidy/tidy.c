@@ -1191,7 +1191,7 @@ PHP_FUNCTION(tidy_diagnose)
 }
 /* }}} */
 
-/* {{{ proto string tidy_get_release()
+/* {{{ proto string tidy_get_release() U
    Get release date (version) for Tidy library */
 PHP_FUNCTION(tidy_get_release)
 {
@@ -1201,7 +1201,7 @@ PHP_FUNCTION(tidy_get_release)
 		WRONG_PARAM_COUNT;
 	}
 
-	RETURN_STRING((char *)tidyReleaseDate(), 1);
+	RETURN_ASCII_STRING((char *)tidyReleaseDate(), ZSTR_DUPLICATE);
 }
 /* }}} */
 
