@@ -71,6 +71,10 @@
 # include <netdb.h>
 # include <sys/signal.h>
 
+#ifndef INADDR_NONE
+#define INADDR_NONE ((unsigned long) -1)
+#endif
+
 # ifndef HAVE_SOCKLEN_T
 	typedef unsigned int socklen_t;
 # endif
