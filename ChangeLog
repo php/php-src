@@ -1,3 +1,33 @@
+2006-04-23  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * sapi/cli/php.1.in
+      sapi/cli/php.1.in:
+      MFB
+
+    * (PHP_5_1)
+      sapi/cli/php.1.in:
+      Typo.
+
+2006-04-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed typos
+
+    * ext/wddx/wddx.c:
+      MFB51: Fixed bug #37162 (wddx does not build as a shared extension).
+
+    * (PHP_4_4)
+      NEWS
+      ext/wddx/wddx.c:
+      MFH: Fixed bug #37162 (wddx does not build as a shared extension).
+
+    * (PHP_5_1)
+      NEWS
+      ext/wddx/wddx.c:
+      Fixed bug #37162 (wddx does not build as a shared extension).
+      
+
 2006-04-22  Antony Dovgal  <antony@zend.com>
 
     * ext/standard/tests/file/bug37158.phpt
