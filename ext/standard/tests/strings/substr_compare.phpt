@@ -1,7 +1,5 @@
 --TEST--
 substr_compare()
---FUNCTIONS--
-substr_compare
 --FILE--
 <?php
 
