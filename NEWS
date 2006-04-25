@@ -1,7 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Apr 2006, PHP 5.1.3RC4
-- Fixed bug #37192 (cc fails on hash_adler.c:32). Mike
+- Fixed bug #37192 (cc fails on hash_adler.c:32). (Mike)
+- Fixed bug #37191 (chmod takes off sticky bit when safe_mode is On). (Tony)
 
 20 Apr 2006, PHP 5.1.3RC3
 - Fixed reading stream filters never notified about EOF. (Mike)
