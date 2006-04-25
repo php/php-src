@@ -1,3 +1,12 @@
+2006-04-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/fastcgi.c:
+      Fixed compilation on Solaris
+
+    * (PHP_5_1)
+      sapi/cgi/fastcgi.c:
+      iFixed compilation on Solaris
+
 2006-04-23  Andrei Zmievski  <andrei@gravitonic.com>
 
     * sapi/cli/php.1.in
