@@ -1,6 +1,6 @@
 --TEST--
 Bug #26317 (military timezone offset signedness)
---SKIP--
+--SKIPIF--
 if (!@putenv("TZ=GMT0") || getenv("TZ") != 'GMT0') {
 	die("skip unable to change TZ enviroment variable\n");
 }
