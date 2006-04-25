@@ -90,9 +90,13 @@
         } else { \
             convert_to_string_ex(&_val); \
             TIDY_OPEN_BASEDIR_CHECK(Z_STRVAL_P(_val)); \
-            if (tidyLoadConfig(_doc, Z_STRVAL_P(_val)) < 0) { \
+            switch (tidyLoadConfig(_doc, Z_STRVAL_P(_val))) { \
+              case -1: \
                 php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not load configuration file '%s'", Z_STRVAL_P(_val)); \
-                RETURN_FALSE; \
+                break; \
+              case 1: \
+                php_error_docref(NULL TSRMLS_CC, E_NOTICE, "There were errors while parsing the configuration file '%s'", Z_STRVAL_P(_val)); \
+                break; \
             } \
         } \
     }
@@ -462,16 +466,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	/* We can't use TIDY_APPLY_CONFIG_ZVAL() here, it uses RETURN_FALSE */
 
 	if (ZEND_NUM_ARGS() > 1) {
-		if(Z_TYPE_P(config) == IS_ARRAY) {
-			_php_tidy_apply_config_array(doc, HASH_OF(config) TSRMLS_CC);
-		} else {
-			convert_to_string_ex(&config);
-			TIDY_OPEN_BASEDIR_CHECK(Z_STRVAL_P(config));
-			if (tidyLoadConfig(doc, Z_STRVAL_P(config)) < 0) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not load configuration file '%s'", Z_STRVAL_P(config));
-				RETVAL_FALSE;
-			}
-		}
+		TIDY_APPLY_CONFIG_ZVAL(doc, config);
 	}
 
 	if(enc_len) {
@@ -522,7 +517,7 @@ static char *php_tidy_file_to_mem(char *filename, zend_bool use_include_path, in
 	if (!(stream = php_stream_open_wrapper(filename, "rb", (use_include_path ? USE_PATH : 0), NULL))) {
 		return NULL;
 	}
-	if ((*len = (int) php_stream_copy_to_mem(stream, &data, PHP_STREAM_COPY_ALL, 0)) == 0) {
+	if ((*len = (int) php_stream_copy_to_mem(stream, (void**)&data, PHP_STREAM_COPY_ALL, 0)) == 0) {
 		data = estrdup("");
 		*len = 0;
 	}
@@ -889,26 +884,51 @@ static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetyp
 
 static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options TSRMLS_DC)
 {
-	char *opt_name = NULL;
+	zstr opt_name;
 	zval **opt_val;
 	ulong opt_indx;
-	
+	uint opt_name_len;
+	UConverter *conv = NULL;
+	UErrorCode status = U_ZERO_ERROR;
+	zend_bool clear_str;
+
+	zend_set_converter_encoding(&conv, "ASCII");
+
 	for (zend_hash_internal_pointer_reset(ht_options);
 		 zend_hash_get_current_data(ht_options, (void **)&opt_val) == SUCCESS;
 		 zend_hash_move_forward(ht_options)) {
 		
-		if(zend_hash_get_current_key(ht_options, &opt_name, &opt_indx, FALSE) == FAILURE) {
+		switch (zend_hash_get_current_key_ex(ht_options, &opt_name, &opt_name_len, &opt_indx, FALSE, NULL)) {
+			case HASH_KEY_IS_STRING:
+			clear_str = 0;
+			break;
+
+			case HASH_KEY_IS_UNICODE:
+			zend_convert_from_unicode(conv, &(opt_name.s), &opt_name_len, opt_name.u, opt_name_len, &status);
+			if (U_FAILURE(status)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not convert key from the option array");
+				ucnv_close(conv);
+				return FAILURE;
+			}
+			clear_str = 1;
+			break;
+
+			case HASH_KEY_IS_LONG:
+			continue; /* ignore numeric keys */
+
+			default:
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not retrieve key from option array");
+			ucnv_close(conv);
 			return FAILURE;
 		}
 
-		if(opt_name) {
-			_php_tidy_set_tidy_opt(doc, opt_name, *opt_val TSRMLS_CC);
-			opt_name = NULL;
+		_php_tidy_set_tidy_opt(doc, opt_name.s, *opt_val TSRMLS_CC);
+		if (clear_str) {
+			efree(opt_name.s);
 		}
-					
 	}
-	
+
+	ucnv_close(conv);
 	return SUCCESS;
 }
 
