@@ -28,7 +28,7 @@
  </lead>
  <date>2006-00-00</date>
  <version>
-  <release>1.2</release>
+  <release>1.3</release>
   <api>1.0</api>
  </version>
  <stability>
@@ -37,8 +37,7 @@
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes><![CDATA[
-* Fixed tiger algorithm generating wrong results on big endian platforms.
-+ Added MD2 to supported algorithms.
+* Fixed PHP bug #37192 - cc may complain about non-constant initializers in hash_adler.c
 ]]>
  </notes>
  <contents>
@@ -108,6 +107,23 @@
  <providesextension>hash</providesextension>
  <extsrcrelease />
  <changelog>
+  <release>
+   <version>
+    <release>1.2</release>
+    <api>1.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <date>2006-03-04</date>
+   <license uri="http://www.php.net/license">PHP</license>
+   <notes><![CDATA[
+* Fixed tiger algorithm generating wrong results on big endian platforms.
++ Added MD2 to supported algorithms.
+]]>
+   </notes>
+  </release>
   <release>
    <version>
     <release>1.1</release>

@@ -20,12 +20,11 @@
   </maintainer>
   </maintainers>
  <release>
-  <version>1.2</version>
-  <date>2006-03-04</date>
+  <version>1.3</version>
+  <date>2006-04-25</date>
   <license>PHP</license>
   <state>stable</state>
-  <notes>* Fixed tiger algorithm generating wrong results on big endian platforms.
-+ Added MD2 to supported algorithms.
+  <notes>* Fixed PHP bug #37192 - cc may complain about non-constant initializers in hash_adler.c
   </notes>
   <deps>
    <dep type="php" rel="ge" version="4.0.0"/>
