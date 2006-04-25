@@ -29,8 +29,10 @@ PHP_HASH_API void PHP_ADLER32Init(PHP_ADLER32_CTX *context)
 
 PHP_HASH_API void PHP_ADLER32Update(PHP_ADLER32_CTX *context, const unsigned char *input, size_t len)
 {
-	php_hash_uint32 i, s[2] = { context->state & 0xffff, (context->state >> 16) & 0xffff };
+	php_hash_uint32 i, s[2];
 	
+	s[0] = context->state & 0xffff;
+	s[1] = (context->state >> 16) & 0xffff;
 	for (i = 0; i < len; ++i) {
 		s[0] = (s[0] + input[i]) % 65521;
 		s[1] = (s[1] + s[0]) % 65521;
