@@ -504,8 +504,23 @@ PHP_FUNCTION(chmod)
 	   Setuiding files could allow users to gain privileges
 	   that safe mode doesn't give them.
 	*/
-	if(PG(safe_mode))
-		imode &= 0777;
+
+	if(PG(safe_mode)) {
+		php_stream_statbuf ssb;
+		if (php_stream_stat_path_ex(Z_STRVAL_PP(filename), 0, &ssb, NULL)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "stat failed for %s", Z_STRVAL_PP(filename));
+			RETURN_FALSE;
+		}
+		if ((imode & 04000) != 0 && (ssb.sb.st_mode & 04000) == 0) {
+			imode ^= 04000;
+		}
+		if ((imode & 02000) != 0 && (ssb.sb.st_mode & 02000) == 0) {
+			imode ^= 02000;
+		}
+		if ((imode & 01000) != 0 && (ssb.sb.st_mode & 01000) == 0) {
+			imode ^= 01000;
+		}
+	}
 
 	ret = VCWD_CHMOD(Z_STRVAL_PP(filename), imode);
 	if (ret == -1) {
