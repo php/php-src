@@ -1286,7 +1286,7 @@ PHP_FUNCTION(tidy_get_config)
 }
 /* }}} */
 
-/* {{{ proto int tidy_get_status()
+/* {{{ proto int tidy_get_status() U
    Get status of specfied document. */
 PHP_FUNCTION(tidy_get_status)
 {
@@ -1296,7 +1296,7 @@ PHP_FUNCTION(tidy_get_status)
 }
 /* }}} */
 
-/* {{{ proto int tidy_get_html_ver()
+/* {{{ proto int tidy_get_html_ver() U
    Get the Detected HTML version for the specified document. */
 PHP_FUNCTION(tidy_get_html_ver)
 {
@@ -1306,7 +1306,7 @@ PHP_FUNCTION(tidy_get_html_ver)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_is_xhtml()
+/* {{{ proto bool tidy_is_xhtml() U
    Indicates if the document is a XHTML document. */
 PHP_FUNCTION(tidy_is_xhtml)
 {
@@ -1316,7 +1316,7 @@ PHP_FUNCTION(tidy_is_xhtml)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_is_xhtml()
+/* {{{ proto bool tidy_is_xhtml() U
    Indicates if the document is a generic (non HTML/XHTML) XML document. */
 PHP_FUNCTION(tidy_is_xml)
 {
@@ -1326,7 +1326,7 @@ PHP_FUNCTION(tidy_is_xml)
 }
 /* }}} */
 
-/* {{{ proto int tidy_error_count()
+/* {{{ proto int tidy_error_count() U
    Returns the Number of Tidy errors encountered for specified document. */
 PHP_FUNCTION(tidy_error_count)
 {
@@ -1336,7 +1336,7 @@ PHP_FUNCTION(tidy_error_count)
 }
 /* }}} */
 
-/* {{{ proto int tidy_warning_count()
+/* {{{ proto int tidy_warning_count() U
    Returns the Number of Tidy warnings encountered for specified document. */
 PHP_FUNCTION(tidy_warning_count)
 {
@@ -1346,7 +1346,7 @@ PHP_FUNCTION(tidy_warning_count)
 }
 /* }}} */
 
-/* {{{ proto int tidy_access_count()
+/* {{{ proto int tidy_access_count() U
    Returns the Number of Tidy accessibility warnings encountered for specified document. */
 PHP_FUNCTION(tidy_access_count)
 {
@@ -1356,7 +1356,7 @@ PHP_FUNCTION(tidy_access_count)
 }
 /* }}} */
 
-/* {{{ proto int tidy_config_count()
+/* {{{ proto int tidy_config_count() U
    Returns the Number of Tidy configuration errors encountered for specified document. */
 PHP_FUNCTION(tidy_config_count)
 {
@@ -1559,7 +1559,7 @@ TIDY_NODE_METHOD(__construct)
 }
 /* }}} */
 
-/* {{{ proto boolean tidyNode::hasChildren()
+/* {{{ proto bool tidyNode::hasChildren() U
    Returns true if this node has children */
 TIDY_NODE_METHOD(hasChildren)
 {
@@ -1573,7 +1573,7 @@ TIDY_NODE_METHOD(hasChildren)
 }
 /* }}} */
 
-/* {{{ proto boolean tidyNode::hasSiblings()
+/* {{{ proto bool tidyNode::hasSiblings() U
    Returns true if this node has siblings */
 TIDY_NODE_METHOD(hasSiblings)
 {
@@ -1587,7 +1587,7 @@ TIDY_NODE_METHOD(hasSiblings)
 }
 /* }}} */
 
-/* {{{ proto boolean tidyNode::isComment()
+/* {{{ proto bool tidyNode::isComment() U
    Returns true if this node represents a comment */
 TIDY_NODE_METHOD(isComment)
 {
@@ -1601,7 +1601,7 @@ TIDY_NODE_METHOD(isComment)
 }
 /* }}} */
 
-/* {{{ proto boolean tidyNode::isHtml()
+/* {{{ proto bool tidyNode::isHtml() U
    Returns true if this node is part of a HTML document */
 TIDY_NODE_METHOD(isHtml)
 {
@@ -1615,7 +1615,7 @@ TIDY_NODE_METHOD(isHtml)
 }
 /* }}} */
 
-/* {{{ proto boolean tidyNode::isXhtml()
+/* {{{ proto bool tidyNode::isXhtml() U
    Returns true if this node is part of a XHTML document */
 TIDY_NODE_METHOD(isXhtml)
 {
@@ -1629,7 +1629,7 @@ TIDY_NODE_METHOD(isXhtml)
 }
 /* }}} */
 
-/* {{{ proto boolean tidyNode::isXml()
+/* {{{ proto bool tidyNode::isXml() U
    Returns true if this node is part of a XML document */
 TIDY_NODE_METHOD(isXml)
 {
@@ -1643,7 +1643,7 @@ TIDY_NODE_METHOD(isXml)
 }
 /* }}} */
 
-/* {{{ proto boolean tidyNode::isText()
+/* {{{ proto bool tidyNode::isText() U
    Returns true if this node represents text (no markup) */
 TIDY_NODE_METHOD(isText)
 {
@@ -1657,7 +1657,7 @@ TIDY_NODE_METHOD(isText)
 }
 /* }}} */
 
-/* {{{ proto boolean tidyNode::isJste()
+/* {{{ proto bool tidyNode::isJste() U
    Returns true if this node is JSTE */
 TIDY_NODE_METHOD(isJste)
 {
@@ -1671,7 +1671,7 @@ TIDY_NODE_METHOD(isJste)
 }
 /* }}} */
 
-/* {{{ proto boolean tidyNode::isAsp()
+/* {{{ proto bool tidyNode::isAsp() U
    Returns true if this node is ASP */
 TIDY_NODE_METHOD(isAsp)
 {
@@ -1685,7 +1685,7 @@ TIDY_NODE_METHOD(isAsp)
 }
 /* }}} */
 
-/* {{{ proto boolean tidyNode::isPhp()
+/* {{{ proto bool tidyNode::isPhp() U
    Returns true if this node is PHP */
 TIDY_NODE_METHOD(isPhp)
 {
@@ -1699,7 +1699,7 @@ TIDY_NODE_METHOD(isPhp)
 }
 /* }}} */
 
-/* {{{ proto boolean tidyNode::getParent()
+/* {{{ proto tidyNode tidyNode::getParent() U
    Returns the parent node if available or NULL */
 TIDY_NODE_METHOD(getParent)
 {
