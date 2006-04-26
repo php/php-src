@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<definitions name="SonicMobile Web-Services" 
+   targetNamespace="http://soap.sonicmobile.com/sonicmobile.wsdl"
+   xmlns="http://schemas.xmlsoap.org/wsdl/" 
+   xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+   xmlns:sonic="http://soap.sonicmobile.com/sonicmobile.wsdl"
+   xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <types>
+        <xsd:schema xmlns="http://www.w3.org/2000/10/XMLSchema">
+            <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+            <complexType name="TransportCount">
+                <all>
+                    <element name="transport" type="string" />
+                    <element name="count" type="integer" />
+                    <element name="rate" type="integer" />
+                    <element name="last_message" type="integer" />
+                </all>
+            </complexType>                    
+            <complexType name="ArrayOfTransportCount">
+                <complexContent>
+                    <restriction base="soapenc:Array">
+                        <attribute ref="soapenc:arrayType" arrayType="TransportCount[]" />
+                    </restriction>
+                </complexContent>
+            </complexType>
+        </xsd:schema>
+    </types>
+    
+   <message name="userSendMessageRequest">
+     <part name="sourceUser" type="xsd:int"/>
+     <part name="password" type="xsd:string"/>
+     <part name="destinationUser" type="xsd:int"/>
+     <part name="content" type="xsd:string"/>
+     <part name="sendRepliesTo" type="xsd:string"/>
+     <part name="reference" type="xsd:string"/>
+   </message>
+
+   <message name="sendMessageRequest">
+     <part name="application" type="xsd:string"/>
+     <part name="password" type="xsd:string"/>
+     <part name="destination" type="xsd:string"/>
+     <part name="content" type="xsd:string"/>
+     <part name="reference" type="xsd:string"/>
+     <part name="requestSource" type="xsd:string"/>
+     <part name="customer" type="xsd:string"/>
+     <part name="class" type="xsd:string"/>
+   </message>
+
+   <message name="MessageResponse">
+     <part name="messageid" type="xsd:int"/>
+     <part name="response" type="xsd:string"/>
+   </message>
+
+   <message name="messageCountRequest">
+	   <part name="password" type="xsd:string"/>
+   </message>
+
+   <message name="messageCountResponse">
+	   <part name="transports" type="tns:ArrayOfTransportCount"/>
+   </message>
+   
+   <message name="serverStatusRequest">
+        <part name="password" type="xsd:string"/>
+    </message>
+    <message name="serverStatusResponse">
+        <part name="status_string" type="xsd:string"/>
+    </message>
+ 
+    <message name="flushGatewayRequest">
+        <part name="password" type="xsd:string"/>
+    </message>
+    <message name="flushGatewayResponse">
+        <part name="status_string" type="xsd:string"/>
+    </message>
+    
+   <portType name="SonicMobilePortType">
+     <operation name="userSendMessage">         
+       <input  message="sonic:userSendMessageRequest"/>
+       <output message="sonic:MessageResponse"/>
+     </operation>
+
+     <operation name="sendMessage">
+       <input  message="sonic:sendMessageRequest"/>
+       <output message="sonic:MessageResponse"/>
+     </operation>
+
+     <operation name="messageCount">
+	     <input message="sonic:messageCountRequest"/>
+	     <output message="sonic:messageCountResponse"/>
+     </operation>
+     
+     <operation name="serverStatus">
+         <input message="sonic:serverStatusRequest"/>
+         <output message="sonic:serverStatusResponse"/>
+     </operation>
+     
+     <operation name="flushGateway">
+         <input message="sonic:flushGatewayRequest"/>
+         <output message="sonic:flushGatewayResponse"/>
+     </operation>
+   </portType>
+
+   <binding name="SonicMobileBinding" type="sonic:SonicMobilePortType">
+     <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http" />
+
+     <operation name="userSendMessage">
+       <soap:operation soapAction="http://soap.sonicmobile.com/SonicMobile/SOAP#userSendMessage"/>
+
+       <input>
+         <soap:body 
+           encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" 
+           namespace="http://soap.sonicmobile.com/SonicMobile/SOAP" 
+           use="encoded" />
+       </input>
+       
+       <output>
+         <soap:body 
+           encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" 
+           namespace="http://soap.sonicmobile.com/SonicMobile/SOAP"
+           use="encoded" />
+       </output>
+     </operation>
+
+     <operation name="sendMessage">
+       <soap:operation soapAction="http://soap.sonicmobile.com/SonicMobile/SOAP#sendMessage"/>
+
+       <input>
+         <soap:body 
+           encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" 
+           namespace="http://soap.sonicmobile.com/SonicMobile/SOAP" 
+           use="encoded" />
+       </input>
+       
+       <output>
+         <soap:body 
+           encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" 
+           namespace="http://soap.sonicmobile.com/SonicMobile/SOAP"
+           use="encoded" />
+       </output>
+     </operation>
+ 
+     <operation name="messageCount">
+       <soap:operation soapAction="http://soap.sonicmobile.com/SonicMobile/SOAP#messageCount"/>
+
+       <input>
+         <soap:body 
+           encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" 
+           namespace="http://soap.sonicmobile.com/SonicMobile/SOAP" 
+           use="encoded" />
+       </input>
+       
+       <output>
+         <soap:body 
+           encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" 
+           namespace="http://soap.sonicmobile.com/SonicMobile/SOAP"
+           use="encoded" />
+       </output>
+     </operation>
+     
+     <operation name="serverStatus">
+         <soap:operation soapAction="http://soap.sonicmobile.com/SonicMobile/SOAP#serverStatus"/>
+         
+         <input>
+             <soap:body 
+                        encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" 
+                        namespace="http://soap.sonicmobile.com/SonicMobile/SOAP" 
+                        use="encoded" />
+         </input>
+         
+         <output>
+             <soap:body 
+                        encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" 
+                        namespace="http://soap.sonicmobile.com/SonicMobile/SOAP"
+                        use="encoded" />
+         </output>
+     </operation>
+     
+     <operation name="flushGateway">
+         <soap:operation soapAction="http://soap.sonicmobile.com/SonicMobile/SOAP#flushGateway"/>
+         
+         <input>
+             <soap:body 
+                        encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" 
+                        namespace="http://soap.sonicmobile.com/SonicMobile/SOAP" 
+                        use="encoded" />
+         </input>
+        <output>
+             <soap:body 
+                        encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" 
+                        namespace="http://soap.sonicmobile.com/SonicMobile/SOAP"
+                        use="encoded" />
+         </output>
+     </operation>
+     
+   </binding>
+
+   <service name="SonicMobile">
+     <port name="SonicMobilePort" binding="sonic:SonicMobileBinding">
+       <soap:address location="http://soap.sonicmobile.com/"/>
+     </port>
+   </service>
+
+</definitions>

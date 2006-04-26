@@ -1,0 +1,2 @@
+<!ELEMENT foo EMPTY>
+<!ATTLIST foo bar CDATA '' baz CDATA ''>
