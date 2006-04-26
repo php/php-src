@@ -34,8 +34,13 @@ php_apache_info_struct php_apache_info;
 
 #define SECTION(name)  PUTS("<h2>" name "</h2>\n")
 
+#ifndef PHP_WIN32
 extern module *top_module;
 extern module **ap_loaded_modules;
+#else
+extern  __declspec(dllimport) module *top_module;
+extern  __declspec(dllimport) module **ap_loaded_modules;
+#endif
 
 PHP_FUNCTION(virtual);
 PHP_FUNCTION(apache_request_headers);
