@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Apr 2006, PHP 5.1.3RC4
+- Fixed bug #37205 (Serving binary content/images fails with "comm with server
+  aborted" FastCGI err). (Dmitry)
 - Fixed bug #37192 (cc may complain about non-constant initializers in
   hash_adler.c). (Mike)
 - Fixed bug #37191 (chmod takes off sticky bit when safe_mode is On). (Tony)
