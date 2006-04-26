@@ -35,8 +35,6 @@ PHP                                                                        NEWS
 - Changed get_headers() to retrieve headers also from non-200 responses.
   (Ilia)
 - Changed get_headers() to use the default context. (Ilia)
-- Changed SOAP extension to cache WSDL structure in memory and thus speed 
-  up SoapClient/SoapServer construction. (Andrei, Dmitry)
 - Added lchown() and lchgrp() to change user/group ownership of symlinks.
   (Derick)
 - Added support for exif date format in strtotime(). (Derick)
@@ -82,8 +80,6 @@ PHP                                                                        NEWS
 - Fixed bug #37138 (__autoload tries to load callback'ed self and parent). 
   (Dmitry)
 - Fixed bug #37103 (libmbfl headers not installed). (Jani) 
-- Fixed bug #37083 (Frequent crashes in SOAP extension with new WSDL caching 
-  code in multithread WS). (Andrei, Dmitry)
 - Fixed bug #37062 (compile failure on ARM architecture). (Tony)
 - Fixed bug #37061 (curl_exec() doesn't zero-terminate binary strings). (Tony)
 - Fixed bug #37060 (Type of retval of Countable::count() is not checked).  
