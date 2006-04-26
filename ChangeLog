@@ -1,3 +1,46 @@
+2006-04-25  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/strings/substr_compare.phpt
+      ext/standard/tests/strings/substr_compare.phpt:
+      remove nonexistent tag
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/bug33605.phpt
+      ext/standard/tests/strings/substr_compare.phpt:
+      MF51: fix possible substr_compare() crash
+      add new tests
+
+    * ext/standard/tests/strings/bug33605.phpt
+      ext/standard/tests/strings/bug33605.phpt
+      ext/standard/tests/strings/substr_compare.phpt
+      ext/standard/tests/strings/substr_compare.phpt:
+      
+      file bug33605.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      ext/standard/string.c:
+      fix possible substr_compare() crash
+      add new tests
+
+2006-04-25  Michael Wallner  <mike@iworks.at>
+
+    * (PHP_5_1)
+      NEWS:
+      -improve last entry
+
+2006-04-25  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/filestat.c:
+      fix #37191 (chmod takes off sticky bit when safe_mode is On)
+
+2006-04-25  Michael Wallner  <mike@iworks.at>
+
+    * (PHP_5_1)
+      NEWS:
+      - Fixed bug #37192 (cc fails on hash_adler.c:32)
+
 2006-04-24  Dmitry Stogov  <dmitry@zend.com>
 
     * sapi/cgi/fastcgi.c:
