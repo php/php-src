@@ -1,124 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Apr 2006, PHP 5.1.3RC4
-- Fixed bug #37205 (Serving binary content/images fails with "comm with server
-  aborted" FastCGI err). (Dmitry)
-- Fixed bug #37192 (cc may complain about non-constant initializers in
-  hash_adler.c). (Mike)
-- Fixed bug #37191 (chmod takes off sticky bit when safe_mode is On). (Tony)
-
-20 Apr 2006, PHP 5.1.3RC3
-- Fixed reading stream filters never notified about EOF. (Mike)
-- Fixed bug #37167 (PDO segfaults when throwing exception from the fetch 
-  handler). (Tony)
-- Fixed bug #37162 (wddx does not build as a shared extension).  
-  (jdolecek at NetBSD dot org, Ilia)
-- Fixed bug #37158 (fread behavior changes after calling
-  stream_wrapper_register). (Wez)
-- Fixed bug #37138 (__autoload tries to load callback'ed self and parent).
-  (Dmitry)
-- Fixed bug #37103 (libmbfl headers not installed). (Jani)
-- Fixed bug #37083 (Frequent crashes in SOAP extension with new WSDL caching
-  code in multithread WS). (Andrei, Dmitry)
-- Fixed bug #37062 (compile failure on ARM architecture). (Tony)
-- Fixed bug #37061 (curl_exec() doesn't zero-terminate binary strings). (Tony)
-- Fixed bug #37060 (Type of retval of Countable::count() is not checked). 
-  (Johannes)
-- Fixed bug #37059 (oci_bind_by_name() doesn't support RAW and LONG RAW 
-  fields). (Tony)
-- Fixed bug #37057 (xmlrpc_decode() may produce arrays with numeric strings, 
-  which are unaccessible). (Tony)
-- Fixed bug #37055 (incorrect reference counting for persistent OCI8 
-  connections). (Tony)
-- Fixed bug #37054 (SoapClient Error Fetching http headers). (Dmitry)
-- Fixed bug #37053 (html_errors with internal classes produces wrong links). 
-  (Tony)
-- Fixed bug #37046 (foreach breaks static scope). (Dmitry)
-- Fixed bug #37045 (Fixed check for special chars for http redirects). (Ilia)
-- Fixed bug #37002 (Have to quote literals in INI when concatenating with
-  vars). (Dmitry)
-- Fixed Bug #36872 (session_destroy() fails after call to 
-  session_regenerate_id(true)). (Ilia)
-- Fixed bug #36513 (comment will be outputted in last line). (Dmitry)
-- Fixed bug #29476 (sqlite_fetch_column_types() locks the database forever).
-  (Ilia)
-
-06 Apr 2006, PHP 5.1.3RC2
-- Eliminated run-time constant fetching for TRUE, FALSE and NULL. (Dmitry)
-- Changed SOAP extension to cache WSDL structure in memory and thus speed up
-  SoapClient/SoapServer construction. (Andrei, Dmitry)
-- Removed the E_STRICT deprecation notice from "var". (Ilia)
-- Added overflow checks to wordwrap() function. (Ilia)
-- Added support for BINARY_DOUBLE and BINARY_FLOAT to PDO_OCI and OCI8 
-  (also fixes bug #36764). (Tony)
-- Fixed tempnam() 2nd parameter to be checked against path components. (Ilia)
-- Fixed a bug that would not fill in the fifth argument to preg_replace() 
-  properly, if the variable was not declared previously. (Andrei)
-- Fixed safe_mode check for source argument of the copy() function. (Ilia)
-- Fixed mysqli bigint conversion under Windows (Georg)
-- Fixed XSS inside phpinfo() with long inputs. (Ilia)
-- Fixed Apache2 SAPIs header handler modifying header strings. (Mike)
-- Fixed 'auto_globals_jit' to work together with 'register_argc_argv'. (Dmitry)
-- Fixed offset/length parameter validation in substr_compare() function. (Ilia)
-- Fixed debug_zval_dump() to support private and protected members. (Dmitry)
-- Fixed SoapFault::getMessage(). (Dmitry)
-- Fixed bug #37017 (strtotime fails before 13:00:00 with some time zones
-  identifiers). (Derick)
-- Fixed bug #36988 (mktime freezes on long numbers). (Derick)
-- Fixed bug #36981 (SplFileObject->fgets() ignores max_length). (Tony)
-- Fixed bug #36957 (serialize() does not handle recursion). (Ilia)
-- Fixed bug #36944 (strncmp & strncasecmp do not return false on negative 
-  string length). (Tony)
-- Fixed bug #36941 (ArrayIterator does not clone itself). (Marcus)
-- Fixed bug #36934 (OCILob->read() doesn't move internal pointer when 
-  reading 0's). (Tony)
-- Fixed bug #36908 (wsdl default value overrides value in soap request).
-  (Dmitry)
-- Fixed bug #36898 (__set() leaks in classes extending internal ones). 
-  (Tony, Dmitry)
-- Fixed bug #36886 (User filters can leak buckets in some situations). (Ilia)
-- Fixed bug #36878 (error messages are printed even though an exception has 
-  been thrown). (Tony)
-- Fixed bug #36875 (is_*() functions do not account for open_basedir). (Ilia)
-- Fixed bug #36869 (memory leak in output buffering when using chunked output).
-  (Tony)
-- Fixed bug #36859 (DOMElement crashes when calling __construct when 
-  clone'ing). (Tony)
-- Fixed bug #36857 (Added support for partial content fetching to the HTTP
-  streams wrapper). (Ilia)
-- Fixed bug #36851 (Documentation and code discrepancies for NULL data 
-  in oci_fetch_*() functions). (Tony)
-- Fixed bug #36825 (Exceptions thrown in ArrayObject::offsetGet cause 
-  segfault). (Tony)
-- Fixed bug #36820 (Privileged connection with an Oracle password file fails). 
-  (Tony)
-- Fixed bug #36809 (__FILE__ behavior changed). (Dmitry)
-- Fixed bug #36808 (syslog ident becomes garbage between requests). (Tony)
-- Fixed bug #36802 (mysqli_set_charset() crash with a non-open connection).
-  (Ilia)
-- Fixed bug #36745 (No error message when load data local file isn't found).
-  (Georg)
-- Fixed bug #36721 (The SoapServer is not able to send a header that it didn't
-  receive). (Dmitry)
-- Fixed bug #36756 (DOMDocument::removeChild corrupts node). (Rob)
-- Fixed bug #36749 (SOAP: 'Error Fetching http body' when using HTTP Proxy).
-  (Dmitry)
-- Fixed bug #36743 (In a class extending XMLReader array properties are not 
-  writable). (Tony)
-- Fixed bug #36727 (segfault in pdo_pgsql bindValue() when no parameters are 
-  defined). (Tony)
-- Fixed bug #36697 (Transparency is lost when using imagecreatetruecolor).
-  (Pierre)
-- Fixed bug #36689 (Removed arbitrary limit on the length of syslog messages).
-  (Ilia)
-- Fixed bug #36629 (SoapServer::handle() exits on SOAP faults). (Dmitry)
-- Fixed Bug #36614 (Segfault when using Soap). (Dmitry)
-- Fixed bug #36568 (memory_limit setting on win32 has no effect). (Dmitry)
-- Fixed bug #35988 (Unknown persistent list entry type in module shutdown).
-  (Dmitry)
-
-09 Mar 2006, PHP 5.1.3RC1
-- Updated bundled PCRE libary to version 6.6. (Andrei)
+27 Apr 2006, PHP 5.1.3
+- Updated bundled PCRE library to version 6.6. (Andrei)
 - Moved extensions to PECL:
   . ext/msession (Derick)
 - Reimplemented FastCGI interface. (Dmitry)
@@ -141,66 +24,173 @@ PHP                                                                        NEWS
   . Added ReflectionParameter::getDeclaringClass().
   . Changed reflection constants to be prefixed with IS_. (Johannes)
 - Improved cURL extension: (Ilia)
-  . Added curl_setopt_array() function that allows setting of multiple options
-    via an associated array.
+  . Added curl_setopt_array() function that allows setting of multiple 
+    options via an associated array.
   . Added the ability to retrieve the request message sent to the server.
 - Improved GD extension: (Pierre)
   . Added a weak/tolerant mode to the JPEG loader.
   . Added filtering mode option to imagepng() to allow reducing file size.
-  . Fixed imagecolorallocate() and imagecolorallocatelapha() to return FALSE
+  . Fixed imagecolorallocate() and imagecolorallocatelapha() to return FALSE 
     on error.
-- Changed get_headers() to retrieve headers also from non-200 responses. (Ilia)
+- Changed get_headers() to retrieve headers also from non-200 responses.
+  (Ilia)
 - Changed get_headers() to use the default context. (Ilia)
+- Changed SOAP extension to cache WSDL structure in memory and thus speed 
+  up SoapClient/SoapServer construction. (Andrei, Dmitry)
 - Added lchown() and lchgrp() to change user/group ownership of symlinks.
   (Derick)
 - Added support for exif date format in strtotime(). (Derick)
 - Added a check for special characters in the session name. (Ilia)
 - Added "consumed" stream filter. (Marcus)
-- Added new mysqli constants for BIT and NEW_DECIMAL field types:
+- Added new mysqli constants for BIT and NEW_DECIMAL field types: 
   MYSQLI_TYPE_NEWDECIMAL and MYSQLI_TYPE_BIT. FR #36007. (Georg)
-- Added imap_savebody() that allows message body to be written to a file.
-  (Mike)
-- Fixed issue with iconv_mime_decode where the "encoding" would only allow
+- Added imap_savebody() that allows message body to be written to a 
+  file. (Mike)
+- Added overflow checks to wordwrap() function. (Ilia)
+- Added support for BINARY_DOUBLE and BINARY_FLOAT to PDO_OCI and OCI8 
+  (also fixes bug #36764). (Tony)
+- Eliminated run-time constant fetching for TRUE, FALSE and NULL. (Dmitry) 
+- Removed the E_STRICT deprecation notice from "var". (Ilia)
+- Fixed reading stream filters never notified about EOF. (Mike)
+- Fixed tempnam() 2nd parameter to be checked against path components. (Ilia)
+- Fixed a bug that would not fill in the fifth argument to preg_replace() 
+  properly, if the variable was not declared previously. (Andrei)
+- Fixed safe_mode check for source argument of the copy() function. (Ilia)
+- Fixed mysqli bigint conversion under Windows (Georg)
+- Fixed XSS inside phpinfo() with long inputs. (Ilia)
+- Fixed Apache2 SAPIs header handler modifying header strings. (Mike)
+- Fixed 'auto_globals_jit' to work together with 'register_argc_argv'. (Dmitry)
+- Fixed offset/length parameter validation in substr_compare() function. (Ilia)
+- Fixed debug_zval_dump() to support private and protected members. (Dmitry)
+- Fixed SoapFault::getMessage(). (Dmitry)
+- Fixed issue with iconv_mime_decode where the "encoding" would only allow 
   upper case specifiers. (Derick)
 - Fixed tiger hash algorithm generating wrong results on big endian platforms.
   (Mike)
 - Fixed crash with DOMImplementation::createDocumentType("name:"). (Mike)
+- Fixed bug #37205 (Serving binary content/images fails with "comm with server 
+  aborted" FastCGI err). (Dmitry)
+- Fixed bug #37192 (cc may complain about non-constant initializers in 
+  hash_adler.c). (Mike)
+- Fixed bug #37191 (chmod takes off sticky bit when safe_mode is On). (Tony)	
+- Fixed bug #37167 (PDO segfaults when throwing exception from the 
+  fetch handler). (Tony)
+- Fixed bug #37162 (wddx does not build as a shared extension).
+  (jdolecek at NetBSD dot org, Ilia)
+- Fixed bug #37158 (fread behavior changes after calling 
+  stream_wrapper_register). (Wez)
+- Fixed bug #37138 (__autoload tries to load callback'ed self and parent). 
+  (Dmitry)
+- Fixed bug #37103 (libmbfl headers not installed). (Jani) 
+- Fixed bug #37083 (Frequent crashes in SOAP extension with new WSDL caching 
+  code in multithread WS). (Andrei, Dmitry)
+- Fixed bug #37062 (compile failure on ARM architecture). (Tony)
+- Fixed bug #37061 (curl_exec() doesn't zero-terminate binary strings). (Tony)
+- Fixed bug #37060 (Type of retval of Countable::count() is not checked).  
+  (Johannes)
+- Fixed bug #37059 (oci_bind_by_name() doesn't support RAW and LONG RAW 
+  fields). (Tony)
+- Fixed bug #37057 (xmlrpc_decode() may produce arrays with numeric strings, 
+  which are unaccessible). (Tony)
+- Fixed bug #37055 (incorrect reference counting for persistent OCI8 
+  connections). (Tony)
+- Fixed bug #37054 (SoapClient Error Fetching http headers). (Dmitry)
+- Fixed bug #37053 (html_errors with internal classes produces wrong links).
+  (Tony)
+- Fixed bug #37046 (foreach breaks static scope). (Dmitry)
+- Fixed bug #37045 (Fixed check for special chars for http redirects). (Ilia)
+- Fixed bug #37017 (strtotime fails before 13:00:00 with some time zones 
+  identifiers). (Derick)
+- Fixed bug #37002 (Have to quote literals in INI when concatenating with 
+  vars). (Dmitry)z
+- Fixed bug #36988 (mktime freezes on long numbers). (Derick)
+- Fixed bug #36981 (SplFileObject->fgets() ignores max_length). (Tony)
+- Fixed bug #36957 (serialize() does not handle recursion). (Ilia)
+- Fixed bug #36944 (strncmp & strncasecmp do not return false on negative 
+  string length). (Tony)
+- Fixed bug #36941 (ArrayIterator does not clone itself). (Marcus)
+- Fixed bug #36934 (OCILob->read() doesn't move internal pointer when 
+  reading 0's). (Tony)
+- Fixed bug #36908 (wsdl default value overrides value in soap request). 
+  (Dmitry)
+- Fixed bug #36898 (__set() leaks in classes extending internal ones).
+  (Tony, Dmitry)
+- Fixed bug #36886 (User filters can leak buckets in some situations). (Ilia)
+- Fixed bug #36878 (error messages are printed even though an exception has 
+  been thrown). (Tony)
+- Fixed bug #36875 (is_*() functions do not account for open_basedir). (Ilia)
+- Fixed bug #36872 (session_destroy() fails after call to 
+  session_regenerate_id(true)). (Ilia)
+- Fixed bug #36869 (memory leak in output buffering when using chunked 
+  output). (Tony)
+- Fixed bug #36859 (DOMElement crashes when calling __construct when 
+  cloning). (Tony)
+- Fixed bug #36857 (Added support for partial content fetching to the 
+  HTTP streams wrapper). (Ilia)
+- Fixed bug #36851 (Documentation and code discrepancies for NULL 
+  data in oci_fetch_*() functions). (Tony)
+- Fixed bug #36825 (Exceptions thrown in ArrayObject::offsetGet cause 
+  segfault). (Tony)
+- Fixed bug #36820 (Privileged connection with an Oracle password file 
+  fails). (Tony)
+- Fixed bug #36809 (__FILE__ behavior changed). (Dmitry)
+- Fixed bug #36808 (syslog ident becomes garbage between requests). (Tony)
+- Fixed bug #36802 (mysqli_set_charset() crash with a non-open connection).
+  (Ilia)
+- Fixed bug #36756 (DOMDocument::removeChild corrupts node). (Rob)
+- Fixed bug #36749 (SOAP: 'Error Fetching http body' when using HTTP Proxy).
+  (Dmitry)
+- Fixed bug #36745 (No error message when load data local file isn't found).
+  (Georg)
+- Fixed bug #36743 (In a class extending XMLReader array properties are not 
+  writable). (Tony)
+- Fixed bug #36727 (segfault in pdo_pgsql bindValue() when no parameters are 
+  defined). (Tony)
+- Fixed bug #36721 (The SoapServer is not able to send a header that it didn't 
+  receive). (Dmitry)
+- Fixed bug #36697 (Transparency is lost when using imagecreatetruecolor).
+  (Pierre)
+- Fixed bug #36689 (Removed arbitrary limit on the length of syslog messages).
+  (Ilia)
 - Fixed bug #36656 (http_build_query generates invalid URIs due to use of 
   square brackets). (Mike)
 - Fixed bug #36638 (strtotime() returns false when 2nd argument < 1). (Derick)
+- Fixed bug #36629 (SoapServer::handle() exits on SOAP faults). (Dmitry)
 - Fixed bug #36625 (pg_trace() does not work). (iakio at mono-space dot net)
+- Fixed bug #36614 (Segfault when using Soap). (Dmitry)
 - Fixed bug #36611 (assignment to SimpleXML object attribute changes argument 
   type to string). (Tony)
 - Fixed bug #36606 (pg_query_params() changes arguments type to string). (Tony)
 - Fixed bug #36599 (DATE_W3C format constant incorrect). (Derick)
-- Fixed bug #36575 (SOAP: Incorrect complex type instantiation with
+- Fixed bug #36575 (SOAP: Incorrect complex type instantiation with 
   hierarchies). (Dmitry)
-- Fixed bug #36572 (Added PDO::MYSQL_ATTR_DIRECT_QUERY constant that should be
-  set when executing internal queries like "show master status" via MySQL).
+- Fixed bug #36572 (Added PDO::MYSQL_ATTR_DIRECT_QUERY constant that should 
+  be set when executing internal queries like "show master status" via MySQL). 
   (Ilia)
-- Fixed bug #36510 (strtotime() fails to parse date strings with tabs). (Ilia,
-  Derick)
+- Fixed bug #36568 (memory_limit setting on win32 has no effect). (Dmitry)
+- Fixed bug #36513 (comment will be outputted in last line). (Dmitry)
+- Fixed bug #36510 (strtotime() fails to parse date strings with tabs).
+  (Ilia, Derick)
 - Fixed bug #36459 (Incorrect adding PHPSESSID to links, which contains \r\n).
   (Ilia)
 - Fixed bug #36458 (sleep() accepts negative values). (Ilia)
 - Fixed bug #36436 (DBA problem with Berkeley DB4). (Marcus)
-- Fixed bug #36434 (Improper resolution of declaring class name of an inherited
-  property). (Ilia)
+- Fixed bug #36434 (Improper resolution of declaring class name of an 
+  inherited property). (Ilia)
 - Fixed bug #36420 (segfault when access result->num_rows after calling 
   result->close()). (Ilia,Tony)
-- Fixed bug #36403 (oci_execute() no longer supports OCI_DESCRIBE_ONLY). 
-  (Tony)
-- Fixed bug #36400 (Custom 5xx error does not return correct HTTP response 
-  error code). (Tony)
+- Fixed bug #36403 (oci_execute() no longer supports OCI_DESCRIBE_ONLY). (Tony)
+- Fixed bug #36400 (Custom 5xx error does not return correct HTTP response error
+  code). (Tony)
 - Fixed bug #36396 (strtotime() fails to parse dates in dd-mm-yyyy format).
   (Derick)
-- Fixed bug #36345 (PDO/MySQL problem loading BLOB over 1MB). (Ilia)
-- Fixed bug #36388 (ext/soap crashes when throwing exception and session
+- Fixed bug #36388 (ext/soap crashes when throwing exception and session 
   persistence). (David)
 - Fixed bug #36382 (PDO/PgSQL's getColumnMeta() crashes). (Derick)
-- Fixed bug #36359 (splFileObject::fwrite() doesn't write when no data length 
-  specified). (Tony)
+- Fixed bug #36359 (splFileObject::fwrite() doesn't write when no data 
+  length specified). (Tony)
 - Fixed bug #36351 (parse_url() does not parse numeric paths properly). (Ilia)
+- Fixed bug #36345 (PDO/MySQL problem loading BLOB over 1MB). (Ilia)
 - Fixed bug #36337 (ReflectionProperty fails to return correct visibility). 
   (Ilia)
 - Fixed bug #36334 (Added missing documentation about realpath cache INI 
@@ -215,36 +205,36 @@ PHP                                                                        NEWS
 - Fixed bug #36283 (SOAPClient Compression Broken). (Dmitry)
 - Fixed bug #36268 (Object destructors called even after fatal errors). (Dmitry)
 - Fixed bug #36258 (SplFileObject::getPath() may lead to segfault). (Tony)
-- Fixed bug #36250 (PHP causes ORA-07445 core dump in Oracle server 9.2.x). 
+- Fixed bug #36250 (PHP causes ORA-07445 core dump in Oracle server 9.2.x).
   (Tony)
 - Fixed bug #36242 (Possible memory corruption in stream_select()). (Tony)
-- Fixed bug #36235 (ocicolumnname returns false before a succesfull fetch). 
+- Fixed bug #36235 (ocicolumnname returns false before a successful fetch).
   (Tony)
-- Fixed bug #36226 (Inconsistent handling when passing potential arrays).
+- Fixed bug #36226 (Inconsistent handling when passing potential arrays). 
   (Dmitry)
-- Fixed bug #36224 (date(DATE_ATOM) gives wrong results). (Derick, Hannes
-  Magnusson)
+- Fixed bug #36224 (date(DATE_ATOM) gives wrong results).
+  (Derick, Hannes Magnusson)
 - Fixed bug #36222 (errorInfo in PDOException is always NULL). (Ilia)
 - Fixed bug #36208 (symbol namespace conflicts using bundled gd). (Jakub Moc)
 - Fixed bug #36205 (Memory leaks on duplicate cookies). (Dmitry)
 - Fixed bug #36185 (str_rot13() crash on non-string parameter). (Pierre)
 - Fixed bug #36176 (PDO_PGSQL - PDO::exec() does not return number of rows 
   affected by the operation). (Ilia)
-- Fixed bug #36158 (SIGTERM is not handled correctly when running as a FastCGI
-  server). (Dmitry)
+- Fixed bug #36158 (SIGTERM is not handled correctly when running as a 
+  FastCGI server). (Dmitry)
 - Fixed bug #36152 (problems with curl+ssl and pgsql+ssl in same PHP). (Mike)
-- Fixed bug #36148 (unpack("H*hex", $data) is adding an extra character to the 
-  end of the string). (Ilia)
+- Fixed bug #36148 (unpack("H*hex", $data) is adding an extra character to 
+  the end of the string). (Ilia)
 - Fixed bug #36134 (DirectoryIterator constructor failed to detect empty 
   directory names). (Ilia)
-- Fixed bug #36113 (Reading records of unsupported type causes segfault). 
+- Fixed bug #36113 (Reading records of unsupported type causes segfault).
   (Tony)
-- Fixed bug #36096 (oci_result() returns garbage after oci_fetch() failed). 
+- Fixed bug #36096 (oci_result() returns garbage after oci_fetch() failed).
   (Tony)
 - Fixed bug #36083 (SoapClient waits for responses on one-way operations).
   (Dmitry)
 - Fixed bug #36071 (Engine Crash related with 'clone'). (Dmitry)
-- Fixed bug #36055 (possible OCI8 crash in multithreaded environment). (Tony)
+- Fixed bug #36055 (possible OCI8 crash in multi-threaded environment). (Tony)
 - Fixed bug #36046 (parse_ini_file() miscounts lines in multi-line values).
   (Ilia)
 - Fixed bug #36038 (ext/hash compile failure on Mac OSX). (Tony)
@@ -255,15 +245,19 @@ PHP                                                                        NEWS
 - Fixed bug #36010 (Segfault when re-creating and re-executing statements with 
   bound parameters). (Tony)
 - Fixed bug #36006 (Problem with $this in __destruct()). (Dmitry)
-- Fixed bug #35999 (recursive mkdir() does not work with relative path
+- Fixed bug #35999 (recursive mkdir() does not work with relative path 
   like "foo/bar"). (Tony)
-- Fixed bug #35998 (SplFileInfo::getPathname() returns unix style filenames
+- Fixed bug #35998 (SplFileInfo::getPathname() returns unix style filenames 
   in win32). (Marcus)
+- Fixed bug #35988 (Unknown persistent list entry type in module shutdown).
+  (Dmitry)
 - Fixed bug #35954 (Fatal com_exception casting object). (Rob)
 - Fixed bug #35900 (stream_select() should warning when tv_sec is negative).
   (Ilia)
 - Fixed bug #35785 (SimpleXML causes memory read error zend engine). (Marcus)
 - Fixed bug #34272 (empty array onto COM object blows up). (Rob)
+- Fixed bug #29476 (sqlite_fetch_column_types() locks the database forever). 
+  (Ilia)
 
 12 Jan 2006, PHP 5.1.2
 - Updated libsqlite in ext/sqlite to 2.8.17. (Ilia)
