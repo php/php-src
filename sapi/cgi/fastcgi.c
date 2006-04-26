@@ -618,11 +618,7 @@ static inline void fcgi_close(fcgi_request *req, int force, int destroy)
 			RevertToSelf();
 		}
 #else
-#if 1
-		shutdown(req->fd, 2);
-#else
 		close(req->fd);
-#endif
 #endif
 		req->fd = -1;
 	}
@@ -857,8 +853,10 @@ int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int l
 
 int fcgi_finish_request(fcgi_request *req)
 {
-	fcgi_flush(req, 1);
-	fcgi_close(req, 0, 1);
+	if (req->fd >= 0) {
+		fcgi_flush(req, 1);
+		fcgi_close(req, 0, 1);
+	}
 	return 1;
 }
 
