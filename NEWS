@@ -256,6 +256,7 @@ PHP                                                                        NEWS
   (Ilia)
 - Fixed bug #35785 (SimpleXML causes memory read error zend engine). (Marcus)
 - Fixed bug #34272 (empty array onto COM object blows up). (Rob)
+- Fixed bug #33292 (apache_get_modules() crashes on Windows). (Edin)
 - Fixed bug #29476 (sqlite_fetch_column_types() locks the database forever). 
   (Ilia)
 
