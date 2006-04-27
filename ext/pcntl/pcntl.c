@@ -516,7 +516,7 @@ PHP_FUNCTION(pcntl_exec)
 }
 /* }}} */
 
-/* {{{ proto bool pcntl_signal(int signo, callback handle [, bool restart_syscalls])
+/* {{{ proto bool pcntl_signal(int signo, callback handle [, bool restart_syscalls]) U
    Assigns a system signal handler to a PHP function */
 PHP_FUNCTION(pcntl_signal)
 {
