@@ -822,18 +822,16 @@ static php_iconv_err_t _php_iconv_strpos(unsigned int *pretval,
 						j += GENERIC_SUPERSET_NBYTES;
 					}
 
-					if (!_php_iconv_memequal(buf, &ndl_buf[i], sizeof(buf))) {
-						i = 0;
-					}
-
-					if (i == 0) {
-						match_ofs = (unsigned int)-1;
-					} else {
+					if (_php_iconv_memequal(buf, &ndl_buf[i], sizeof(buf))) {
 						match_ofs += (lim - i) / GENERIC_SUPERSET_NBYTES;
 						i += GENERIC_SUPERSET_NBYTES;
+						ndl_buf_p = &ndl_buf[i];
+						ndl_buf_left = ndl_buf_len - i;
+					} else {
+						match_ofs = (unsigned int)-1;
+						ndl_buf_p = ndl_buf;
+						ndl_buf_left = ndl_buf_len;
 					}
-					ndl_buf_p = &ndl_buf[i];
-					ndl_buf_left = ndl_buf_len - i;
 				}
 			}
 		} else {
@@ -867,18 +865,16 @@ static php_iconv_err_t _php_iconv_strpos(unsigned int *pretval,
 					j += GENERIC_SUPERSET_NBYTES;
 				}
 
-				if (!_php_iconv_memequal(buf, &ndl_buf[i], sizeof(buf))) {
-					i = 0;
-				}
-
-				if (i == 0) {
-					match_ofs = (unsigned int)-1;
-				} else {
+				if (_php_iconv_memequal(buf, &ndl_buf[i], sizeof(buf))) {
 					match_ofs += (lim - i) / GENERIC_SUPERSET_NBYTES;
 					i += GENERIC_SUPERSET_NBYTES;
+					ndl_buf_p = &ndl_buf[i];
+					ndl_buf_left = ndl_buf_len - i;
+				} else {
+					match_ofs = (unsigned int)-1;
+					ndl_buf_p = ndl_buf;
+					ndl_buf_left = ndl_buf_len;
 				}
-				ndl_buf_p = &ndl_buf[i];
-				ndl_buf_left = ndl_buf_len - i;
 			}
 		}
 	}
