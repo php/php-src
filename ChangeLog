@@ -1,3 +1,56 @@
+2006-04-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c:
+      Revert wrong fix
+
+2006-04-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Restore dev
+
+    * (PHP_5_1)
+      NEWS:
+      Remove soap cache news
+
+2006-04-26  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_5_1)
+      NEWS:
+      BFN
+
+2006-04-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      configure.in
+      main/php_version.h:
+      Go with 5.1.3
+
+    * (PHP_5_1)
+      NEWS:
+      Prepare the news file for release
+
+2006-04-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      NEWS
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c:
+      Fixed bug #37205 (Serving binary content/images fails with "comm with
+      server aborted" FastCGI err)
+
+2006-04-26  Edin Kadribasic  <edink@emini.dk>
+
+    * sapi/apache/php_apache.c:
+      MFB: Correctly import external data (#33292)
+
+    * (PHP_5_1)
+      sapi/apache/php_apache.c:
+      Correctly import external data (#33292)
+
 2006-04-25  Antony Dovgal  <antony@zend.com>
 
     * ext/standard/tests/strings/substr_compare.phpt
