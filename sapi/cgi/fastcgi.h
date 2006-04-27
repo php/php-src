@@ -97,6 +97,7 @@ typedef struct _fcgi_request {
 	int            id;
 	int            keep;
 
+	int            has_in;
 	int            in_len;
 	int            in_pad;
 
