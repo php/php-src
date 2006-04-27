@@ -2358,28 +2358,6 @@ void delete_model(void *handle)
 	efree(tmp);
 }
 
-void delete_model_persistent(void *handle)
-{
-	sdlContentModelPtr tmp = *((sdlContentModelPtr*)handle);
-	switch (tmp->kind) {
-		case XSD_CONTENT_ELEMENT:
-		case XSD_CONTENT_GROUP:
-			break;
-		case XSD_CONTENT_SEQUENCE:
-		case XSD_CONTENT_ALL:
-		case XSD_CONTENT_CHOICE:
-			zend_hash_destroy(tmp->u.content);
-			free(tmp->u.content);
-			break;
-		case XSD_CONTENT_GROUP_REF:
-			free(tmp->u.group_ref);
-			break;
-		default:
-			break;
-	}
-	free(tmp);
-}
-
 void delete_type(void *data)
 {
 	sdlTypePtr type = *((sdlTypePtr*)data);
@@ -2427,53 +2405,6 @@ void delete_type(void *data)
 	efree(type);
 }
 
-void delete_type_persistent(void *data)
-{
-	sdlTypePtr type = *((sdlTypePtr*)data);
-	if (type->name) {
-		free(type->name);
-	}
-	if (type->namens) {
-		free(type->namens);
-	}
-	if (type->def) {
-		free(type->def);
-	}
-	if (type->fixed) {
-		free(type->fixed);
-	}
-	if (type->elements) {
-		zend_hash_destroy(type->elements);
-		free(type->elements);
-	}
-	if (type->attributes) {
-		zend_hash_destroy(type->attributes);
-		free(type->attributes);
-	}
-	if (type->model) {
-		delete_model_persistent((void**)&type->model);
-	}
-	if (type->restrictions) {
-		delete_restriction_var_int_persistent(&type->restrictions->minExclusive);
-		delete_restriction_var_int_persistent(&type->restrictions->minInclusive);
-		delete_restriction_var_int_persistent(&type->restrictions->maxExclusive);
-		delete_restriction_var_int_persistent(&type->restrictions->maxInclusive);
-		delete_restriction_var_int_persistent(&type->restrictions->totalDigits);
-		delete_restriction_var_int_persistent(&type->restrictions->fractionDigits);
-		delete_restriction_var_int_persistent(&type->restrictions->length);
-		delete_restriction_var_int_persistent(&type->restrictions->minLength);
-		delete_restriction_var_int_persistent(&type->restrictions->maxLength);
-		delete_restriction_var_char_persistent(&type->restrictions->whiteSpace);
-		delete_restriction_var_char_persistent(&type->restrictions->pattern);
-		if (type->restrictions->enumeration) {
-			zend_hash_destroy(type->restrictions->enumeration);
-			free(type->restrictions->enumeration);
-		}
-		free(type->restrictions);
-	}
-	free(type);
-}
-
 void delete_extra_attribute(void *attribute)
 {
 	sdlExtraAttributePtr attr = *((sdlExtraAttributePtr*)attribute);
@@ -2485,19 +2416,6 @@ void delete_extra_attribute(void *attribute)
 		efree(attr->val);
 	}
 	efree(attr);
-}
-
-void delete_extra_attribute_persistent(void *attribute)
-{
-	sdlExtraAttributePtr attr = *((sdlExtraAttributePtr*)attribute);
-
-	if (attr->ns) {
-		free(attr->ns);
-	}
-	if (attr->val) {
-		free(attr->val);
-	}
-	free(attr);
 }
 
 void delete_attribute(void *attribute)
@@ -2526,45 +2444,11 @@ void delete_attribute(void *attribute)
 	efree(attr);
 }
 
-void delete_attribute_persistent(void *attribute)
-{
-	sdlAttributePtr attr = *((sdlAttributePtr*)attribute);
-
-	if (attr->def) {
-		free(attr->def);
-	}
-	if (attr->fixed) {
-		free(attr->fixed);
-	}
-	if (attr->name) {
-		free(attr->name);
-	}
-	if (attr->namens) {
-		free(attr->namens);
-	}
-	if (attr->ref) {
-		free(attr->ref);
-	}
-	if (attr->extraAttributes) {
-		zend_hash_destroy(attr->extraAttributes);
-		free(attr->extraAttributes);
-	}
-	free(attr);
-}
-
 void delete_restriction_var_int(void *rvi)
 {
 	sdlRestrictionIntPtr ptr = *((sdlRestrictionIntPtr*)rvi);
 	if (ptr) {
 		efree(ptr);
-	}
-}
-
-void delete_restriction_var_int_persistent(void *rvi)
-{
-	sdlRestrictionIntPtr ptr = *((sdlRestrictionIntPtr*)rvi);
-	if (ptr) {
-		free(ptr);
 	}
 }
 
@@ -2576,16 +2460,5 @@ void delete_restriction_var_char(void *srvc)
 			efree(ptr->value);
 		}
 		efree(ptr);
-	}
-}
-
-void delete_restriction_var_char_persistent(void *srvc)
-{
-	sdlRestrictionCharPtr ptr = *((sdlRestrictionCharPtr*)srvc);
-	if (ptr) {
-		if (ptr->value) {
-			free(ptr->value);
-		}
-		free(ptr);
 	}
 }

@@ -42,7 +42,7 @@ function test($type, $num) {
   try {
 	  printf("  %0.0f\n    ", $num);  	
 	  $ret = $soap->foo($type, new SoapVar($num, $type));
-	  printf("    %0.0f\n", $ret);
+	  printf("    %0.0f\n", $num, $ret);
 	} catch (SoapFault $ex) {
 	  var_dump($ex);
 	}
