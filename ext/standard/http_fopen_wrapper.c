@@ -232,7 +232,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
  	 		char header_line[HTTP_HEADER_BLOCK_SIZE];
 
 			/* get response header */
-			while (php_stream_gets(stream, header_line, HTTP_HEADER_BLOCK_SIZE-1) != NULL)	{
+			while (php_stream_gets(stream, ZSTR(header_line), HTTP_HEADER_BLOCK_SIZE-1) != NULL)	{
 				if (header_line[0] == '\n' ||
 				    header_line[0] == '\r' ||
 				    header_line[0] == '\0') {
@@ -520,7 +520,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		size_t tmp_line_len;
 		/* get response header */
 
-		if (php_stream_get_line(stream, tmp_line, sizeof(tmp_line) - 1, &tmp_line_len) != NULL) {
+		if (php_stream_get_line(stream, ZSTR(tmp_line), sizeof(tmp_line) - 1, &tmp_line_len) != NULL) {
 			zval *http_response;
 			int response_code;
 
@@ -574,7 +574,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 
 	while (!body && !php_stream_eof(stream)) {
 		size_t http_header_line_length;
-		if (php_stream_get_line(stream, http_header_line, HTTP_HEADER_BLOCK_SIZE, &http_header_line_length) && *http_header_line != '\n' && *http_header_line != '\r') {
+		if (php_stream_get_line(stream, ZSTR(http_header_line), HTTP_HEADER_BLOCK_SIZE, &http_header_line_length) && *http_header_line != '\n' && *http_header_line != '\r') {
 			char *e = http_header_line + http_header_line_length - 1;
 			while (*e == '\n' || *e == '\r') {
 				e--;
