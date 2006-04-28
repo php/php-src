@@ -1,3 +1,34 @@
+2006-04-27  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/pcntl/pcntl.c:
+      pcntl_signal is safe too
+
+    * ext/pcntl/pcntl.c:
+      Safe-fy some functions.
+
+2006-04-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.h
+      sapi/cgi/fastcgi.h:
+      Proper fix for bug #37205
+
+2006-04-27  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/iconv.c:
+      - Remove fprintf() used for debugging
+
+    * (PHP_5_1)
+      ext/iconv/iconv.c
+      ext/iconv/tests/bug37176.phpt:
+      - MFH: fix bug #37176 (iconv_strpos() fails to find a string)
+
+    * ext/iconv/iconv.c
+      ext/iconv/tests/bug37176.phpt
+      ext/iconv/tests/bug37176.phpt:
+      - Fix bug #37176 (iconv_strpos() fails to find a string)
+
 2006-04-26  Dmitry Stogov  <dmitry@zend.com>
 
     * sapi/cgi/fastcgi.c
