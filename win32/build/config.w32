@@ -302,11 +302,6 @@ if (PHP_ZEND_MULTIBYTE == "yes") {
 	AC_DEFINE('ZEND_MULTIBYTE', 1);
 }
 
-ARG_ENABLE("pdb-files", "Enable generation of .pdp files", "no");
-if (PHP_PDB_FILES == "yes") {
-	ADD_FLAG("LDFLAGS", "/debug /opt:ref");
-}
-
 AC_DEFINE('HAVE_USLEEP', 1);
 AC_DEFINE('HAVE_STRCOLL', 1);
 
