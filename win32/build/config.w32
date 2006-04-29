@@ -313,11 +313,6 @@ AC_DEFINE('MEMORY_LIMIT', PHP_MEMORY_LIMIT == "yes" ? 1 : 0);
 ARG_ENABLE("memory-manager", "Enable Zend memory manager", "yes");
 AC_DEFINE('USE_ZEND_ALLOC', PHP_MEMORY_MANAGER == "yes" ? 1 : 0);
 
-ARG_ENABLE("pdb-files", "Enable generation of .pdp files", "no");
-if (PHP_PDB_FILES == "yes") {
-	ADD_FLAG("LDFLAGS", "/debug /opt:ref");
-}
-
 AC_DEFINE('HAVE_USLEEP', 1);
 AC_DEFINE('HAVE_STRCOLL', 1);
 
