@@ -410,9 +410,7 @@ PHP_FUNCTION(nsapi_request_headers)
 	for (i=0; i < rc->rq->headers->hsize; i++) {
 		entry=rc->rq->headers->ht[i];
 		while (entry) {
-			if (strncasecmp(entry->param->name, "authorization", 13)) {
-				add_assoc_string(return_value, entry->param->name, entry->param->value, 1);
-			}
+			add_assoc_string(return_value, entry->param->name, entry->param->value, 1);
 			entry=entry->next;
 		}
   	}
@@ -602,23 +600,21 @@ static void sapi_nsapi_register_server_variables(zval *track_vars_array TSRMLS_D
 	for (i=0; i < rc->rq->headers->hsize; i++) {
 		entry=rc->rq->headers->ht[i];
 		while (entry) {
-			if (strncasecmp(entry->param->name, "authorization", 13)) {
-				if (strcasecmp(entry->param->name, "content-length")==0 || strcasecmp(entry->param->name, "content-type")==0) {
-					strlcpy(buf, entry->param->name, NS_BUF_SIZE);
-					pos = 0;
-				} else {
-					snprintf(buf, NS_BUF_SIZE, "HTTP_%s", entry->param->name);
-					pos = 5;
-				}
-				buf[NS_BUF_SIZE]='\0';
-				for(p = buf + pos; *p; p++) {
-					*p = toupper(*p);
-					if (*p < 'A' || *p > 'Z') {
-						*p = '_';
-					}
-				}
-				php_register_variable(buf, entry->param->value, track_vars_array TSRMLS_CC);
+			if (strcasecmp(entry->param->name, "content-length")==0 || strcasecmp(entry->param->name, "content-type")==0) {
+				strlcpy(buf, entry->param->name, NS_BUF_SIZE);
+				pos = 0;
+			} else {
+				snprintf(buf, NS_BUF_SIZE, "HTTP_%s", entry->param->name);
+				pos = 5;
 			}
+			buf[NS_BUF_SIZE]='\0';
+			for(p = buf + pos; *p; p++) {
+				*p = toupper(*p);
+				if (*p < 'A' || *p > 'Z') {
+					*p = '_';
+				}
+			}
+			php_register_variable(buf, entry->param->value, track_vars_array TSRMLS_CC);
 			entry=entry->next;
 		}
   	}
