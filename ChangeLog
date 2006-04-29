@@ -1,3 +1,11 @@
+2006-04-28  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/standard/file.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/image.c
+      main/php_streams.h:
+      Remove ZSTR() from stream macros. Calling function must apply this macro
+
 2006-04-27  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ext/pcntl/pcntl.c:
