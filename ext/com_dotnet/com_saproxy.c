@@ -347,7 +347,7 @@ static zend_class_entry *saproxy_class_entry_get(zval *object TSRMLS_DC)
 
 static int saproxy_class_name_get(zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
 {
-	*class_name = estrndup(php_com_saproxy_class_entry->name, php_com_saproxy_class_entry->name_length);
+	*class_name = estrndup(php_com_saproxy_class_entry->name.s, php_com_saproxy_class_entry->name_length);
 	*class_name_len = php_com_saproxy_class_entry->name_length;
 	return 0;
 }

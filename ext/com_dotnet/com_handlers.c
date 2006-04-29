@@ -246,7 +246,7 @@ static void function_dtor(void *pDest)
 {
 	zend_internal_function *f = (zend_internal_function*)pDest;
 
-	efree(f->function_name);
+	efree(f->function_name.s);
 	if (f->arg_info) {
 		efree(f->arg_info);
 	}
@@ -284,7 +284,7 @@ static union _zend_function *com_method_get(zval **object_ptr, char *name, int l
 		f.arg_info = NULL;
 		f.scope = obj->ce;
 		f.fn_flags = 0;
-		f.function_name = estrndup(name, len);
+		f.function_name.s = estrndup(name, len);
 		f.handler = PHP_FN(com_method_handler);
 
 		fptr = &f;
@@ -417,7 +417,7 @@ static union _zend_function *com_constructor_get(zval *object TSRMLS_DC)
 	f.handler = ZEND_FN(fn); \
 	return (union _zend_function*)&f;
 	
-	switch (obj->ce->name[0]) {
+	switch (obj->ce->name.s[0]) {
 #if HAVE_MSCOREE_H
 		case 'd':
 			POPULATE_CTOR(d, com_dotnet_create_instance);
@@ -447,7 +447,7 @@ static int com_class_name_get(zval *object, char **class_name, zend_uint *class_
 	php_com_dotnet_object *obj;
 	obj = CDNO_FETCH(object);
 
-	*class_name = estrndup(obj->ce->name, obj->ce->name_length);
+	*class_name = estrndup(obj->ce->name.s, obj->ce->name_length);
 	*class_name_len = obj->ce->name_length;
 
 	return 0;
