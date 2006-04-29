@@ -71,7 +71,7 @@
 
 static inline int get_ftp_result(php_stream *stream, char *buffer, size_t buffer_size TSRMLS_DC)
 {
-	while (php_stream_gets(stream, buffer, buffer_size-1) &&
+	while (php_stream_gets(stream, ZSTR(buffer), buffer_size-1) &&
 		   !(isdigit((int) buffer[0]) && isdigit((int) buffer[1]) &&
 			 isdigit((int) buffer[2]) && buffer[3] == ' '));
 	return strtol(buffer, NULL, 10);
@@ -595,7 +595,7 @@ static size_t php_ftp_dirstream_read(php_stream *stream, char *buf, size_t count
 		return 0;
 	}
 
-	if (!php_stream_get_line(innerstream, ent->d_name, sizeof(ent->d_name), &tmp_len)) {
+	if (!php_stream_get_line(innerstream, ZSTR(ent->d_name), sizeof(ent->d_name), &tmp_len)) {
 		return 0;
 	}
 
