@@ -2,6 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, PHP 5.2.0
 - Fixed bug #35552 (crash when pdo_odbc prepare fails). (Wez).
+- Fixed bug #36632 (bad error reporting for pdo_odbc exec UPDATE). (Wez).
 
 28 Apr 2006, PHP 5.1.3
 - Updated bundled PCRE library to version 6.6. (Andrei)
