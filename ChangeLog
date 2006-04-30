@@ -1,3 +1,25 @@
+2006-04-29  Uwe Schindler  <uwe@thetaphi.de>
+
+    * sapi/nsapi/nsapi.c:
+      Remove hiding of authorization headers completely because safe mode
+      canceled
+
+2006-04-29  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_saproxy.c
+      ext/com_dotnet/com_typeinfo.c
+      ext/com_dotnet/php_com_dotnet_internal.h:
+      fix build
+
+    * ext/standard/exec.c
+      ext/standard/ftp_fopen_wrapper.c
+      sapi/cli/php_cli.c:
+      More ZSTR() fixes
+
+    * ext/zlib/zlib.c:
+      fix build. ZSTR() must be applied to the buf argument of php_stream macros
+
 2006-04-28  Frank M. Kromann  <frank@kromann.info>
 
     * ext/standard/file.c
