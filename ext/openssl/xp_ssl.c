@@ -33,6 +33,7 @@
 
 int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stream TSRMLS_DC);
 SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC);
+int php_openssl_get_x509_list_id(void);
 
 /* This implementation is very closely tied to the that of the native
  * sockets implemented in the core.
@@ -414,9 +415,63 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 				SSL_shutdown(sslsock->ssl_handle);
 			} else {	
 				sslsock->ssl_active = 1;
+
+				/* allow the script to capture the peer cert
+				 * and/or the certificate chain */
+				if (stream->context) {
+					zval **val, *zcert;
+
+					if (SUCCESS == php_stream_context_get_option(
+								stream->context, "ssl",
+								"capture_peer_cert", &val) &&
+							zval_is_true(*val)) {
+						MAKE_STD_ZVAL(zcert);
+						ZVAL_RESOURCE(zcert, zend_list_insert(peer_cert, 
+									php_openssl_get_x509_list_id()));
+						php_stream_context_set_option(stream->context,
+								"ssl", "peer_certificate",
+								zcert);
+						peer_cert = NULL;
+					}
+
+					if (SUCCESS == php_stream_context_get_option(
+								stream->context, "ssl",
+								"capture_peer_cert_chain", &val) &&
+							zval_is_true(*val)) {
+						zval *arr;
+						STACK_OF(X509) *chain;
+
+						MAKE_STD_ZVAL(arr);
+						chain = SSL_get_peer_cert_chain(
+									sslsock->ssl_handle);
+
+						if (chain) {
+							int i;
+							array_init(arr);
+
+							for (i = 0; i < sk_X509_num(chain); i++) {
+								X509 *mycert = X509_dup(
+										sk_X509_value(chain, i));
+								MAKE_STD_ZVAL(zcert);
+								ZVAL_RESOURCE(zcert,
+										zend_list_insert(mycert,
+											php_openssl_get_x509_list_id()));
+								add_next_index_zval(arr, zcert);
+							}
+						} else {
+							ZVAL_NULL(arr);
+						}
+
+						php_stream_context_set_option(stream->context,
+								"ssl", "peer_certificate_chain",
+								arr);
+					}
+				}
 			}
 
-			X509_free(peer_cert);
+			if (peer_cert) {
+				X509_free(peer_cert);
+			}
 		} else  {
 			n = errno == EAGAIN ? 0 : -1;
 		}
