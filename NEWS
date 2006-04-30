@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2006, PHP 5.2.0
+?? ??? 2006, PHP 5.1.4
 - Fixed bug #35552 (crash when pdo_odbc prepare fails). (Wez).
 - Fixed bug #36632 (bad error reporting for pdo_odbc exec UPDATE). (Wez).
 
