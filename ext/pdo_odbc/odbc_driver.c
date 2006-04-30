@@ -198,12 +198,20 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, p
 		efree(nsql);
 	}
 
-	if (rc != SQL_SUCCESS) {
-		pdo_odbc_stmt_error("SQLPrepare");
-	}
-
 	stmt->driver_data = S;
 	stmt->methods = &odbc_stmt_methods;
+
+	if (rc != SQL_SUCCESS) {
+		pdo_odbc_stmt_error("SQLPrepare");
+        if (rc != SQL_SUCCESS_WITH_INFO) {
+            /* clone error information into the db handle */
+            strcpy(H->einfo.last_err_msg, S->einfo.last_err_msg);
+            H->einfo.file = S->einfo.file;
+            H->einfo.line = S->einfo.line;
+            H->einfo.what = S->einfo.what;
+            strcpy(dbh->error_code, stmt->error_code);
+        }
+	}
 
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 		return 0;
