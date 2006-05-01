@@ -160,8 +160,9 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 	char *p, *token, *pathdup;
 	long max_memory;
 
-	if (!strncasecmp(path, "php://", 6))
+	if (!strncasecmp(path, "php://", 6)) {
 		path += 6;
+	}
 	
 	if (!strncasecmp(path, "temp", 4)) {
 		path += 4;
