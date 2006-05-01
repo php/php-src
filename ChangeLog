@@ -1,3 +1,45 @@
+2006-04-30  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/openssl/openssl.c
+      ext/openssl/xp_ssl.c:
+      merge from branch: peer certificate capture context options.
+
+    * (PHP_5_1)
+      ext/openssl/openssl.c
+      ext/openssl/xp_ssl.c:
+      Add two new context options for ssl:
+      
+      "capture_peer_cert" and "capture_peer_cert_chain"
+      
+      If true, the peer certificate and peer certificate chain respectively will
+      be
+      captured and made available in the ssl context variables
+      "peer_certificate" and
+      "peer_certificate_chain" respectively.  The certificates are exposed as
+      x509
+      certificate resources and can be inspected using the existing openssl
+      extension
+      functions.
+      
+      This allows applications to perform extended validation.
+
+2006-04-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      NEWS:
+      - After 5.1.3 follows 5.1.4, 5.2 requires a new branch, preferable from
+        this point of development (ilia will do so)
+
+2006-04-30  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_5_1)
+      NEWS:
+      Fix #36632
+
+    * (PHP_5_1)
+      NEWS:
+      Fix #35552
+
 2006-04-29  Uwe Schindler  <uwe@thetaphi.de>
 
     * sapi/nsapi/nsapi.c:
