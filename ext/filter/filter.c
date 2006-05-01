@@ -374,6 +374,8 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 
 	if (orig_array_ptr) {
 		php_register_variable_ex(orig_var, &new_var, orig_array_ptr TSRMLS_CC);
+	}
+	if (array_ptr) {
 		efree(orig_var);
 	}
 
