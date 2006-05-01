@@ -158,9 +158,29 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 	int mode_rw = 0;
 	php_stream * stream = NULL;
 	char *p, *token, *pathdup;
+	long max_memory;
 
-	if (!strncasecmp(path, "php://", 6))
+	if (!strncasecmp(path, "php://", 6)) {
 		path += 6;
+	}
+	
+	if (!strncasecmp(path, "temp", 4)) {
+		path += 4;
+		max_memory = PHP_STREAM_MAX_MEM;
+		if (!strncasecmp(path, "/maxmemory:", 11)) {
+			path += 11;
+			max_memory = strtol(path, NULL, 10);
+			if (max_memory < 0) {
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Max memory must be >= 0");
+				return NULL;
+			}
+		}
+		return php_stream_temp_create(TEMP_STREAM_DEFAULT, max_memory);		
+	}
+	
+	if (!strcasecmp(path, "memory")) {
+		return php_stream_memory_create(TEMP_STREAM_DEFAULT);
+	}
 	
 	if (!strcasecmp(path, "output")) {
 		return php_stream_alloc(&php_stream_output_ops, NULL, 0, "wb");
