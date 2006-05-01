@@ -25,10 +25,11 @@ of filters and mechanisms that users can use to safely access their input data.
  <release>
   <state>beta</state>
   <version>0.9.5</version>
-  <date>2006-0?-??</date>
+  <date>2006-05-01</date>
   <notes>
 - Fixed PECL bug #6639: uppercase hexadecimal digits are not supported.
 - Implemented PECL req #6641: negative values for hexadecimal and octal numbers are not supported.
+- Fixed Possible leak in internal sapi_filter (Pierre)
   </notes>
   <filelist>
    <file role="src" name="config.m4"/>
