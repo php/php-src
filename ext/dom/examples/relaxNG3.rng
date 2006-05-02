@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<grammar xmlns="http://relaxng.org/ns/structure/1.0" xmlns:t="http://www.thaiopensource.com/ns/annotations" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
-
-   <define name="TEI.prose" combine="interleave">
-      <ref name="IGNORE"/>
-   </define>
-
-</grammar>

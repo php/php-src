@@ -1,9 +1,0 @@
-// $Id$
-// vim:ft=javascript
-
-ARG_ENABLE("reflection", "disable reflection support", "yes");
-
-if (PHP_REFLECTION != "no") {
-	EXTENSION("reflection", "php_reflection.c");
-}
-
