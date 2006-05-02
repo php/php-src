@@ -19,7 +19,7 @@ concurrency.
   <email>wez@php.net</email>
   <active>yes</active>
  </lead>
- <date>2005-12-04</date>
+ <date>2006-05-01</date>
  <version>
   <release>1.0.1</release>
   <api>1.0.1</api>
@@ -30,8 +30,8 @@ concurrency.
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes>
-- Upgraded to new package2 format; no code changes in this release
-
+- Updated libsqlite in ext/pdo_sqlite to 3.2.8. (Ilia)
+- Upgraded to new package2 format
 - Fixed PECL Bug #5633; build issues
 - Added sqliteCreateFunction() and sqliteCreateAggregate()
 - Fixed PECL Bug #3452; problem when first row of a result set contains a NULL value.

@@ -36,7 +36,7 @@ Read the documentation at http://www.php.net/pdo for more information.
   <email>george@omniti.com</email>
   <active>yes</active>
  </lead>
- <date>2005-12-04</date>
+ <date>2006-05-01</date>
  <version>
   <release>1.0.3</release>
   <api>1.0.3</api>
@@ -46,16 +46,13 @@ Read the documentation at http://www.php.net/pdo for more information.
   <api>stable</api>
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
- <notes>** NOTE WELL! **
-All the PDO_XXX constants have been renamed to PDO::XXX form for future
-compatibility with PHP namespaces.  Sorry for the inconvenience, especially
-after Release Candidate 1.
+ <notes>
+It is highly recommended that you update to PHP 5.1 or higher before using PDO.
+This PECL release corresponds to the PHP 5.1.3 release.
 
 You need to install a PDO database driver to make use of PDO,
 check http://pecl.php.net/package-search.php?pkg_name=PDO
 for a list of available PDO drivers.
-
-It is highly recommended that you update to PHP 5.1 before using PDO.
 
 If you are running on Windows, you can find a precompiled binary at:
 http://pecl4win.php.net/ext.php/php_pdo.dll
@@ -64,6 +61,12 @@ You can find additional PDO drivers at:
 http://pecl4win.php.net
 
 ** Changes **
+- Fixed bug #37167 (PDO segfaults when throwing exception from the
+  fetch handler). (Tony)
+- Fixed memory corruption when PDO::FETCH_LAZY mode is being used. (Ilia)
+- Fixed bug #36222 (errorInfo in PDOException is always NULL). (Ilia)
+- Fixed bug #35797 (segfault on PDOStatement::execute() with
+  zend.ze1_compatibility_mode = On). (Tony, Ilia)
 - Fixed bug #35543 (crash when calling non-existing method in extended class). (Tony)
 - Fixed bug #35508 (improved validation of fetch modes). (Tony)
 - Fixed bug #35431 (PDO crashes when using LAZY fetch with fetchAll). (Wez)
@@ -93,7 +96,6 @@ http://pecl4win.php.net
 You should uninstall and re-install your individual database drivers whenever
 you upgrade the base PDO package, otherwise you will see an error about PDO API
 numbers when you run your PHP scripts.
-
   
  </notes>
  <contents>
