@@ -29,8 +29,6 @@ extern "C" {
 
 #include <php.h>
 
-#ifdef HAVE_UNICODE
-
 #include <php_ini.h>
 #include <SAPI.h>
 #include <ext/standard/info.h>
@@ -75,8 +73,6 @@ void php_init_collation(TSRMLS_D);
 #endif
 
 #include <zend_unicode.h>
-#include <unicode/uloc.h>
-#endif /* PHP_HAVE_UNICODE */
 
 #endif /* PHP_UNICODE_H */
 

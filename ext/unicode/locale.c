@@ -17,8 +17,6 @@
 /* $Id$ */ 
 
 #include "php_unicode.h"
-
-#if HAVE_UNICODE
 #include "unicode/ubrk.h"
 
 static void php_canonicalize_locale_id(char **target, int32_t *target_len, char *locale, UErrorCode *status)
@@ -86,8 +84,6 @@ PHP_FUNCTION(locale_set_default)
 	RETURN_TRUE;
 }
 /* }}} */
-
-#endif /* HAVE_UNICODE */
 
 
 /*
