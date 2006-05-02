@@ -59,7 +59,7 @@ http://pecl4win.php.net/ext.php/php_pdo_odbc.dll
    <package>
     <name>pdo</name>
     <channel>pecl.php.net</channel>
-    <min>1.0</min>
+    <min>1.0.3</min>
     <providesextension>PDO</providesextension>
    </package>
   </required>

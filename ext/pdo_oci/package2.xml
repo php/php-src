@@ -14,7 +14,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>wez@php.net</email>
   <active>yes</active>
  </lead>
- <date>2005-12-04</date>
+ <date>2006-05-01</date>
  <version>
   <release>1.0.1</release>
   <api>1.0.1</api>
@@ -25,6 +25,9 @@ http://pear.php.net/dtd/package-2.0.xsd">
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes>
+- Added support for BINARY_DOUBLE and BINARY_FLOAT to PDO_OCI and OCI8
+  (also fixes bug #36764). (Tony)
+- Fixed bug #35907 (PDO_OCI uses hardcoded lib path $ORACLE_HOME/lib). (Tony)
 - Repackage with package2.xml
 - Improved handling of long columns
 - Fixed PECL Bug #5722; implemented LOB support.
@@ -59,7 +62,7 @@ http://pecl4win.php.net/ext.php/php_pdo_oci.dll
    <package>
     <name>pdo</name>
     <channel>pecl.php.net</channel>
-    <min>1.0</min>
+    <min>1.0.3</min>
     <providesextension>PDO</providesextension>
    </package>
   </required>
