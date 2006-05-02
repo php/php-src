@@ -1,3 +1,18 @@
+2006-05-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      ext/standard/php_fopen_wrapper.c:
+      - Make SplTempFileObject work in 5.1
+
+    * ext/standard/php_fopen_wrapper.c:
+      - WS
+
+2006-05-01  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_5_1)
+      NEWS:
+      add note about ssl context options.
+
 2006-04-30  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/openssl/openssl.c
