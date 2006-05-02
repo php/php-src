@@ -131,7 +131,6 @@ void zend_init_compiler_data_structures(TSRMLS_D)
 	zend_stack_init(&CG(foreach_copy_stack));
 	zend_stack_init(&CG(object_stack));
 	zend_stack_init(&CG(declare_stack));
-	CG(active_op_array) = NULL;
 	CG(active_class_entry) = NULL;
 	zend_llist_init(&CG(list_llist), sizeof(list_llist_element), NULL, 0);
 	zend_llist_init(&CG(dimension_llist), sizeof(int), NULL, 0);
@@ -155,6 +154,7 @@ void zend_init_compiler_data_structures(TSRMLS_D)
 
 void init_compiler(TSRMLS_D)
 {
+	CG(active_op_array) = NULL;
 	zend_init_compiler_data_structures(TSRMLS_C);
 	zend_init_rsrc_list(TSRMLS_C);
 	zend_hash_init(&CG(filenames_table), 5, NULL, (dtor_func_t) free_estring, 0);
