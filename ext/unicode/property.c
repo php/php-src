@@ -109,6 +109,75 @@ PHP_FUNCTION(unicode_is_print)
 
 /* }}} */
 
+/*
+ * Additional binary property functions
+ */
+
+PHP_FUNCTION(unicode_is_title)
+{
+	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_istitle);
+}
+
+PHP_FUNCTION(unicode_is_defined)
+{
+	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isdefined);
+}
+
+PHP_FUNCTION(unicode_is_id_start)
+{
+	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isIDStart);
+}
+
+PHP_FUNCTION(unicode_is_id_part)
+{
+	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isIDPart);
+}
+
+PHP_FUNCTION(unicode_is_id_ignorable)
+{
+	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isIDIgnorable);
+}
+
+PHP_FUNCTION(unicode_is_iso_control)
+{
+	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isISOControl);
+}
+
+PHP_FUNCTION(unicode_is_mirrored)
+{
+	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isMirrored);
+}
+
+PHP_FUNCTION(unicode_is_base)
+{
+	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isbase);
+}
+
+PHP_FUNCTION(unicode_is_whitespace)
+{
+	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isWhitespace);
+}
+
+PHP_FUNCTION(unicode_is_u_whitespace)
+{
+	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isUWhiteSpace);
+}
+
+PHP_FUNCTION(unicode_is_u_alphabetic)
+{
+	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isUAlphabetic);
+}
+
+PHP_FUNCTION(unicode_is_u_uppercase)
+{
+	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isUUppercase);
+}
+
+PHP_FUNCTION(unicode_is_u_lowercase)
+{
+	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isULowercase);
+}
+
 
 /*
  * Local variables:
