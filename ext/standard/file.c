@@ -360,6 +360,7 @@ PHP_FUNCTION(get_meta_tags)
 {
 	char *filename;
 	int filename_len;
+	zend_uchar filename_type;
 	zend_bool use_include_path = 0;
 	int in_tag = 0, done = 0;
 	int looking_for_val = 0, have_name = 0, have_content = 0;
@@ -372,15 +373,22 @@ PHP_FUNCTION(get_meta_tags)
 	memset(&md, 0, sizeof(md));
 
 	/* Parse arguments */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b",
-							  &filename, &filename_len, &use_include_path) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|b",
+							  &filename, &filename_len, &filename_type, &use_include_path) == FAILURE) {
 		return;
 	}
 
+	if (filename_type == IS_UNICODE) {
+		if (php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+			RETURN_FALSE;
+		}
+	}
 	md.stream = php_stream_open_wrapper(filename, "rb",
 			(use_include_path ? USE_PATH : 0) | REPORT_ERRORS,
 			NULL);
-
+	if (filename_type == IS_UNICODE) {
+		efree(filename);
+	}
 	if (!md.stream)	{
 		RETURN_FALSE;
 	}
@@ -506,7 +514,6 @@ PHP_FUNCTION(file_get_contents)
 	zend_uchar filename_type;
 	void *contents;
 	long flags = 0;
-	zend_bool use_include_path = 0;
 	php_stream *stream;
 	int len;
 	long offset = -1;
@@ -732,7 +739,7 @@ PHP_FUNCTION(file_put_contents)
 }
 /* }}} */
 
-/* {{{ proto array file(string filename [, int flags[, resource context]])
+/* {{{ proto array file(string filename [, int flags[, resource context]]) U
    Read entire file into an array */
 
 #define PHP_FILE_BUF_SIZE	80
@@ -742,23 +749,24 @@ PHP_FUNCTION(file)
 {
 	char *filename;
 	int filename_len;
-	char *target_buf=NULL, *p, *s, *e;
+	zend_uchar filename_type;
+	char *target_buf=NULL;
 	register int i = 0;
 	int target_len;
-	char eol_marker = '\n';
 	long flags = 0;
 	zend_bool use_include_path;
 	zend_bool include_new_line;
 	zend_bool skip_blank_lines;
+	zend_bool text_mode;
 	php_stream *stream;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 
 	/* Parse arguments */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lr!", &filename, &filename_len, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|lr!", &filename, &filename_len, &filename_type, &flags, &zcontext) == FAILURE) {
 		return;
 	}
-	if (flags < 0 || flags > (PHP_FILE_USE_INCLUDE_PATH | PHP_FILE_IGNORE_NEW_LINES | PHP_FILE_SKIP_EMPTY_LINES | PHP_FILE_NO_DEFAULT_CONTEXT)) {
+	if (flags < 0 || flags > (PHP_FILE_USE_INCLUDE_PATH | PHP_FILE_IGNORE_NEW_LINES | PHP_FILE_SKIP_EMPTY_LINES | PHP_FILE_NO_DEFAULT_CONTEXT | PHP_FILE_TEXT)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "'%ld' flag is not supported", flags);
 		RETURN_FALSE;
 	}
@@ -766,10 +774,19 @@ PHP_FUNCTION(file)
 	use_include_path = flags & PHP_FILE_USE_INCLUDE_PATH;
 	include_new_line = !(flags & PHP_FILE_IGNORE_NEW_LINES);
 	skip_blank_lines = flags & PHP_FILE_SKIP_EMPTY_LINES;
+	text_mode = flags & PHP_FILE_TEXT;
 
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
 
-	stream = php_stream_open_wrapper_ex(filename, "rb", (use_include_path ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
+	if (filename_type == IS_UNICODE) {
+		if (php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, context) == FAILURE) {
+			RETURN_FALSE;
+		}
+	}
+	stream = php_stream_open_wrapper_ex(filename, text_mode ? "rt" : "rb", (use_include_path ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
+	if (filename_type == IS_UNICODE) {
+		efree(filename);
+	}
 	if (!stream) {
 		RETURN_FALSE;
 	}
@@ -777,9 +794,53 @@ PHP_FUNCTION(file)
 	/* Initialize return array */
 	array_init(return_value);
 
- 	if ((target_len = php_stream_copy_to_mem(stream, &target_buf, PHP_STREAM_COPY_ALL, 0))) {
- 		s = target_buf;
- 		e = target_buf + target_len;
+	target_len = php_stream_copy_to_mem_ex(stream, stream->readbuf_type, (void**)&target_buf, PHP_STREAM_COPY_ALL, -1, 0);
+
+	if (!target_len) {
+		/* Empty file, do nothing and return an empty array */
+	} else if (stream->readbuf_type == IS_UNICODE) {
+		UChar *s = (UChar*)target_buf, *p;
+		UChar *e = s + target_len, eol_marker = '\n';
+
+		if (!(p = php_stream_locate_eol(stream, ZSTR(target_buf), target_len TSRMLS_CC))) {
+			p = e;
+			goto uparse_eol;
+		}
+
+		if (stream->flags & PHP_STREAM_FLAG_EOL_MAC) {
+			eol_marker = '\r';
+		}
+
+		/* for performance reasons the code is quadruplicated, so that the if (include_new_line/unicode 
+		 * will not need to be done for every single line in the file.
+		 */
+		if (include_new_line) {	
+	 		do {
+ 				p++;
+uparse_eol:
+				add_index_unicodel(return_value, i++, eustrndup(s, p-s), p-s, 0);
+ 				s = p;
+	 		} while ((p = u_memchr(p, eol_marker, (e-p))));
+	 	} else {
+	 		do {
+ 				if (skip_blank_lines && !(p-s)) {
+ 					s = ++p;
+ 					continue;
+ 				}
+				add_index_unicodel(return_value, i++, eustrndup(s, p-s), p-s, 0);
+ 				s = ++p;
+	 		} while ((p = u_memchr(p, eol_marker, (e-p))));
+	 	}
+ 		
+ 		/* handle any left overs of files without new lines */
+ 		if (s != e) {
+ 			p = e;
+ 			goto uparse_eol;
+		}
+
+	} else { /* !IS_UNICODE */
+ 		char *s = target_buf, *p;
+ 		char *e = target_buf + target_len, eol_marker = '\n';
  	
  		if (!(p = php_stream_locate_eol(stream, ZSTR(target_buf), target_len TSRMLS_CC))) {
  			p = e;
@@ -790,9 +851,6 @@ PHP_FUNCTION(file)
 			eol_marker = '\r';
  		}	
 
-		/* for performance reasons the code is duplicated, so that the if (include_new_line) 
-		 * will not need to be done for every single line in the file.
-		 */
 		if (include_new_line) {	
 	 		do {
  				p++;
