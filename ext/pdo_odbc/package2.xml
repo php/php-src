@@ -15,7 +15,7 @@ and IBM DB2 libraries, and will support more in future releases.
   <email>wez@php.net</email>
   <active>yes</active>
  </lead>
- <date>2005-12-04</date>
+ <date>2006-05-01</date>
  <version>
   <release>1.0.1</release>
   <api>1.0.1</api>
@@ -26,6 +26,8 @@ and IBM DB2 libraries, and will support more in future releases.
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes>
+- Fixed bug #35552 (crash when pdo_odbc prepare fails). (Wez).
+- Fixed bug #36632 (bad error reporting for pdo_odbc exec UPDATE). (Wez).
 - repackage with package2.xml
 
 You require either IBM DB2 CLI libraries or unixODBC to use this package.
