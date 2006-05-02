@@ -30,16 +30,16 @@
  <license>PHP</license>
  <release>
   <state>stable</state>
-  <version>1.2.0</version>
-  <date>2006-03-16</date>
+  <version>1.2.1</version>
+  <date>2006-05-02</date>
   <notes>
-   Changed OCI8 code to use OCIServerVersion() instead of OCIPing(), which may crash Oracle server of version &lt; 10.2
-   Fixed bug #36235 (ocicolumnname returns false before a succesfull fetch)
-   Fixed bug #36096 (oci_result() returns garbage after oci_fetch() failed)
-   Fixed bug #36055 (possible OCI8 crash in multithreaded environment)
-   Fixed bug #36010 (Segfault when re-creating and re-executing statements with bound parameters)
-   Fixed PECL bug #5571 (oci_new_connect() not closed by oci_close())
-   Fixed bug #33383 (crash when retrieving empty BLOBs)
+   Added support for BINARY_DOUBLE and BINARY_FLOAT (see #36764)
+   Changed oci_field_type() to return VARCHAR2 instead of VARCHAR (according to feature request #36800)
+   Fixed bug #37059 (oci_bind_by_name() doesn't support RAW and LONG RAW fields)
+   Fixed bug #37055 (incorrect reference counting for persistent OCI8 connections)
+   Fixed bug #36934 (OCILob->read() doesn't move internal pointer when reading 0's)
+   Fixed bug #36851 (Documentation and code discrepancies for NULL data)
+   Fixed bug #36820 (Privileged connection with an Oracle password file fails)
   </notes>
  </release>
  <filelist>
@@ -56,6 +56,9 @@
   <file role="src" name="php_oci8.h"/>
   <file role="src" name="php_oci8_int.h"/>
   <file role="test" name="tests/bind_empty.phpt"/>
+  <file role="test" name="tests/bind_long.phpt"/>
+  <file role="test" name="tests/bind_raw.phpt"/>
+  <file role="test" name="tests/bind_long_raw.phpt"/>
   <file role="test" name="tests/bug26133.phpt"/>
   <file role="test" name="tests/bug27303_2.phpt"/>
   <file role="test" name="tests/bug27303_3.phpt"/>
@@ -149,6 +152,9 @@
   <file role="test" name="tests/lob_016.phpt"/>
   <file role="test" name="tests/lob_017.phpt"/>
   <file role="test" name="tests/lob_018.phpt"/>
+  <file role="test" name="tests/lob_019.phpt"/>
+  <file role="test" name="tests/lob_020.phpt"/>
+  <file role="test" name="tests/test.gif"/>
   <file role="test" name="tests/lob_temp1.phpt"/>
   <file role="test" name="tests/lob_temp.phpt"/>
   <file role="test" name="tests/num.phpt"/>
@@ -174,6 +180,20 @@
   <configureoption name="with-oci8" default="autodetect" prompt="Please provide the path to ORACLE_HOME dir. Use 'instantclient,/path/to/instant/client/lib' if you're compiling against Oracle Instant Client"/>
  </configureoptions>
  <changelog>
+  <release>
+   <state>stable</state>
+   <version>1.2.0</version>
+   <date>2006-03-16</date>
+   <notes>
+    Changed OCI8 code to use OCIServerVersion() instead of OCIPing(), which may crash Oracle server of version &lt; 10.2
+    Fixed bug #36235 (ocicolumnname returns false before a succesfull fetch)
+    Fixed bug #36096 (oci_result() returns garbage after oci_fetch() failed)
+    Fixed bug #36055 (possible OCI8 crash in multithreaded environment)
+    Fixed bug #36010 (Segfault when re-creating and re-executing statements with bound parameters)
+    Fixed PECL bug #5571 (oci_new_connect() not closed by oci_close())
+    Fixed bug #33383 (crash when retrieving empty BLOBs)
+   </notes>
+  </release>
   <release>
    <state>beta</state>
    <version>1.1.1</version>
