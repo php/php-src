@@ -443,7 +443,6 @@ zend_object_value dom_objects_store_clone_obj(zval *zobject TSRMLS_DC)
 	retval.handle = zend_objects_store_put(new_object, obj->dtor, obj->free_storage, obj->clone TSRMLS_CC);
 	intern = (dom_object *) new_object;
 	intern->handle = retval.handle;
-	intern->ptr = NULL;
 	retval.handlers = Z_OBJ_HT_P(zobject);
 	
 	old_object = (dom_object *) obj->object;
