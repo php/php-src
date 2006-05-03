@@ -510,6 +510,9 @@ static int fcgi_read_request(fcgi_request *req)
 			len = (hdr.contentLengthB1 << 8) | hdr.contentLengthB0;
 			padding = hdr.paddingLength;
 		}
+#ifdef _WIN32
+		req->has_in = 1;
+#else
 		if (safe_read(req, &hdr, sizeof(fcgi_header)) != sizeof(fcgi_header) ||
 		    hdr.version < FCGI_VERSION_1 ||
 		    hdr.type != FCGI_STDIN) {
@@ -519,6 +522,7 @@ static int fcgi_read_request(fcgi_request *req)
 		req->in_len = (hdr.contentLengthB1 << 8) | hdr.contentLengthB0;
 		req->in_pad = hdr.paddingLength;
 		req->has_in = (req->in_len != 0);
+#endif
 	} else if (hdr.type == FCGI_GET_VALUES) {
 		int i, j;
 		int name_len;
