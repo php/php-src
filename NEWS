@@ -5,6 +5,7 @@ PHP                                                                        NEWS
   for SSL streams. (Wez).
 - Fixed possible crash in highlight_string(). (Dmitry)
 - Fixed bug #37277 (cloning Dom Documents or Nodes does not work). (Rob)
+- Fixed bug #37276 (problems witch $_POST array). (Dmitry)
 - Fixed bug #36632 (bad error reporting for pdo_odbc exec UPDATE). (Wez).
 - Fixed bug #35552 (crash when pdo_odbc prepare fails). (Wez).
 
