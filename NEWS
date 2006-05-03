@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 - Added "capture_peer_cert" and "capture_peer_cert_chain" context options
   for SSL streams. (Wez).
 - Fixed possible crash in highlight_string(). (Dmitry)
+- Fixed bug #37291 (FastCGI now longer works with isapi_fcgi.dll). (Dmitry)
 - Fixed bug #37277 (cloning Dom Documents or Nodes does not work). (Rob)
 - Fixed bug #37276 (problems witch $_POST array). (Dmitry)
 - Fixed bug #36632 (bad error reporting for pdo_odbc exec UPDATE). (Wez).
