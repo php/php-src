@@ -109,9 +109,7 @@ PHP_FUNCTION(unicode_is_print)
 
 /* }}} */
 
-/*
- * Additional binary property functions
- */
+/* {{{ Additional binary property functions */
 
 PHP_FUNCTION(unicode_is_title)
 {
@@ -178,6 +176,146 @@ PHP_FUNCTION(unicode_is_u_lowercase)
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isULowercase);
 }
 
+/* }}} */
+
+/* {{{ Single character properties */
+
+PHP_FUNCTION(unicode_get_numeric_value)
+{
+	UChar	   *str;
+	int			str_len;
+	int			offset = 0;
+	UChar32		ch;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "u", &str, &str_len) == FAILURE) {
+		return;
+	}
+
+	if (str_len == 0) {
+		RETURN_FALSE;
+	}
+	U16_NEXT(str, offset, str_len, ch);
+
+	RETURN_DOUBLE(u_getNumericValue(ch));
+}
+
+PHP_FUNCTION(unicode_get_combining_class)
+{
+	UChar	   *str;
+	int			str_len;
+	int			offset = 0;
+	UChar32		ch;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "u", &str, &str_len) == FAILURE) {
+		return;
+	}
+
+	if (str_len == 0) {
+		RETURN_FALSE;
+	}
+	U16_NEXT(str, offset, str_len, ch);
+
+	RETURN_LONG((long)u_getCombiningClass(ch));
+}
+
+PHP_FUNCTION(unicode_get_digit_value)
+{
+	UChar	   *str;
+	int			str_len;
+	int			offset = 0;
+	UChar32		ch;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "u", &str, &str_len) == FAILURE) {
+		return;
+	}
+
+	if (str_len == 0) {
+		RETURN_FALSE;
+	}
+	U16_NEXT(str, offset, str_len, ch);
+
+	RETURN_LONG(u_charDigitValue(ch));
+}
+
+PHP_FUNCTION(unicode_get_mirror)
+{
+	UChar	   *str;
+	int			str_len;
+	int			offset = 0, buf_len;
+	UChar32		ch;
+	UChar       buf[3];
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "u", &str, &str_len) == FAILURE) {
+		return;
+	}
+
+	if (str_len == 0) {
+		RETURN_FALSE;
+	}
+	U16_NEXT(str, offset, str_len, ch);
+	buf_len = zend_codepoint_to_uchar(u_charMirror(ch), buf);
+
+	RETURN_UNICODEL(buf, buf_len, 1);
+}
+
+PHP_FUNCTION(unicode_get_direction)
+{
+	UChar	   *str;
+	int			str_len;
+	int			offset = 0;
+	UChar32		ch;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "u", &str, &str_len) == FAILURE) {
+		return;
+	}
+
+	if (str_len == 0) {
+		RETURN_FALSE;
+	}
+	U16_NEXT(str, offset, str_len, ch);
+
+	RETURN_LONG((long)u_charDirection(ch));
+}
+
+PHP_FUNCTION(unicode_get_char_type)
+{
+	UChar	   *str;
+	int			str_len;
+	int			offset = 0;
+	UChar32		ch;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "u", &str, &str_len) == FAILURE) {
+		return;
+	}
+
+	if (str_len == 0) {
+		RETURN_FALSE;
+	}
+	U16_NEXT(str, offset, str_len, ch);
+
+	RETURN_LONG(u_charType(ch));
+}
+
+PHP_FUNCTION(unicode_is_char_valid)
+{
+	UChar	   *str;
+	int			str_len;
+	int			offset = 0;
+	UChar32		ch;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "u", &str, &str_len) == FAILURE) {
+		return;
+	}
+
+	if (str_len == 0) {
+		RETURN_FALSE;
+	}
+	U16_NEXT(str, offset, str_len, ch);
+
+	RETURN_BOOL(U_IS_UNICODE_CHAR(ch));
+}
+
+/* }}} */
 
 /*
  * Local variables:

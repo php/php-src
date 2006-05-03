@@ -276,6 +276,14 @@ zend_function_entry unicode_functions[] = {
 	PHP_FE(unicode_is_u_uppercase, 	NULL)
 	PHP_FE(unicode_is_u_lowercase, 	NULL)
 
+	PHP_FE(unicode_get_numeric_value, 	NULL)
+	PHP_FE(unicode_get_combining_class, NULL)
+	PHP_FE(unicode_get_digit_value, 	NULL)
+	PHP_FE(unicode_get_mirror, 			NULL)
+	PHP_FE(unicode_get_direction, 		NULL)
+	PHP_FE(unicode_get_char_type, 		NULL)
+	PHP_FE(unicode_is_char_valid, 		NULL)
+
 	{ NULL, NULL, NULL }
 };
 /* }}} */
