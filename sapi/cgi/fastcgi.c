@@ -305,7 +305,7 @@ int fcgi_listen(const char *path, int backlog)
 		memset(&sa.sa_unix, 0, sizeof(sa.sa_unix));
 		sa.sa_unix.sun_family = AF_UNIX;
 		memcpy(sa.sa_unix.sun_path, path, path_len + 1);
-		sa_len = (size_t)(((struct sockaddr_un *)0)->sun_path)  + path_len;
+		sa_len = (size_t)(((struct sockaddr_un *)0)->sun_path)	+ path_len;
 #ifdef HAVE_SOCKADDR_UN_SUN_LEN
 		sa.sa_unix.sun_len = sa_len;
 #endif
@@ -441,7 +441,6 @@ static int fcgi_read_request(fcgi_request *req)
 	unsigned char buf[FCGI_MAX_LENGTH+8];
 
 	req->keep = 0;
-	req->has_in = 0;
 	req->in_len = 0;
 	req->out_hdr = NULL;
 	req->out_pos = req->out_buf;
@@ -510,19 +509,6 @@ static int fcgi_read_request(fcgi_request *req)
 			len = (hdr.contentLengthB1 << 8) | hdr.contentLengthB0;
 			padding = hdr.paddingLength;
 		}
-#ifdef _WIN32
-		req->has_in = 1;
-#else
-		if (safe_read(req, &hdr, sizeof(fcgi_header)) != sizeof(fcgi_header) ||
-		    hdr.version < FCGI_VERSION_1 ||
-		    hdr.type != FCGI_STDIN) {
-			req->keep = 0;
-			return 0;
-		}
-		req->in_len = (hdr.contentLengthB1 << 8) | hdr.contentLengthB0;
-		req->in_pad = hdr.paddingLength;
-		req->has_in = (req->in_len != 0);
-#endif
 	} else if (hdr.type == FCGI_GET_VALUES) {
 		int i, j;
 		int name_len;
@@ -548,7 +534,7 @@ static int fcgi_read_request(fcgi_request *req)
 		}
 		len = p - buf - sizeof(fcgi_header);
 		len += fcgi_make_header((fcgi_header*)buf, FCGI_GET_VALUES_RESULT, 0, len);
-		if (safe_write(req, buf, sizeof(fcgi_header)+len) != sizeof(fcgi_header)+len) {
+		if (safe_write(req, buf, sizeof(fcgi_header)+len) != (int)sizeof(fcgi_header)+len) {
 			return 0;
 		}
 		return 0;
@@ -565,9 +551,6 @@ int fcgi_read(fcgi_request *req, char *str, int len)
 	fcgi_header hdr;
 	unsigned char buf[8];
 
-	if (!req->has_in) {
-		return 0;
-	}
 	n = 0;
 	rest = len;
 	while (rest > 0) {
@@ -635,6 +618,10 @@ static inline void fcgi_close(fcgi_request *req, int force, int destroy)
 			RevertToSelf();
 		}
 #else
+		char buf[8];
+
+		shutdown(req->fd, 1);
+		while (recv(req->fd, buf, sizeof(buf), 0) > 0) {}
 		close(req->fd);
 #endif
 		req->fd = -1;
