@@ -4,8 +4,9 @@ PHP                                                                        NEWS
 - Added "capture_peer_cert" and "capture_peer_cert_chain" context options
   for SSL streams. (Wez).
 - Fixed possible crash in highlight_string(). (Dmitry)
-- Fixed bug #35552 (crash when pdo_odbc prepare fails). (Wez).
+- Fixed bug #37277 (cloning Dom Documents or Nodes does not work). (Rob)
 - Fixed bug #36632 (bad error reporting for pdo_odbc exec UPDATE). (Wez).
+- Fixed bug #35552 (crash when pdo_odbc prepare fails). (Wez).
 
 28 Apr 2006, PHP 5.1.3
 - Updated bundled PCRE library to version 6.6. (Andrei)
