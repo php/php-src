@@ -53,6 +53,17 @@ PHP_FUNCTION(unicode_is_u_alphabetic);
 PHP_FUNCTION(unicode_is_u_uppercase);
 PHP_FUNCTION(unicode_is_u_lowercase);
 
+/*
+ * Single character property functions.
+ */
+
+PHP_FUNCTION(unicode_get_numeric_value);
+PHP_FUNCTION(unicode_get_combining_class);
+PHP_FUNCTION(unicode_get_digit_value);
+PHP_FUNCTION(unicode_get_mirror);
+PHP_FUNCTION(unicode_get_direction);
+PHP_FUNCTION(unicode_get_char_type);
+PHP_FUNCTION(unicode_is_char_valid);
 
 #endif /* PHP_PROPERTY_H */
 
