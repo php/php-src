@@ -1306,7 +1306,6 @@ TEST $file
 		$env['CONTENT_LENGTH'] = $content_length;
 
 		$cmd = "$php$pass_options$ini_settings -f \"$test_file\" 2>&1 < $tmp_post";
-		save_text('/home/pierre/cmd.txt', $cmd);
 	} else {
 
 		$env['REQUEST_METHOD'] = 'GET';
