@@ -178,7 +178,7 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, zval *track_vars_arra
 				is_array = 1;
 				*ip = 0;
 			} else {
-				is_array = 0;
+				goto plain_var;
 			}
 		}
 	} else {
