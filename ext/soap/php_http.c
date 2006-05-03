@@ -416,22 +416,13 @@ try_again:
 			smart_str_appendc(&soap_headers, ':');
 			smart_str_append_unsigned(&soap_headers, phpurl->port);
 		}
-		smart_str_append_const(&soap_headers, "\r\n"
-			"Connection: Keep-Alive\r\n");
+				smart_str_append_const(&soap_headers, "\r\n"
+			"Connection: Keep-Alive\r\n"
 /*
 			"Connection: close\r\n"
 			"Accept: text/html; text/xml; text/plain\r\n"
 */
-		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_user_agent", sizeof("_user_agent"), (void **)&tmp) == SUCCESS &&
-		    Z_TYPE_PP(tmp) == IS_STRING) {
-			if (Z_STRLEN_PP(tmp) > 0) {
-				smart_str_append_const(&soap_headers, "User-Agent: ");
-				smart_str_appendl(&soap_headers, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
-				smart_str_append_const(&soap_headers, "\r\n");
-			}
-		} else{
-			smart_str_append_const(&soap_headers, "User-Agent: PHP-SOAP/"PHP_VERSION"\r\n");
-		}
+			"User-Agent: PHP SOAP 0.1\r\n");
 
 		smart_str_append(&soap_headers, &soap_headers_z);
 		smart_str_free(&soap_headers_z);

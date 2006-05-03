@@ -61,7 +61,6 @@ struct _sdl {
 	HashTable *groups;           /* array of sdlTypesPtr */
 	char      *target_ns;
 	char      *source;
-	zend_bool  is_persistent;
 };
 
 typedef struct sdlCtx {
@@ -251,8 +250,7 @@ struct _sdlAttribute {
 	encodePtr  encode;
 };
 
-
-sdlPtr get_sdl(zval *this_ptr, char *uri, long cache_wsdl TSRMLS_DC);
+sdlPtr get_sdl(zval *this_ptr, char *uri TSRMLS_DC);
 
 encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr data, const char *type);
 encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type);
@@ -262,6 +260,5 @@ sdlBindingPtr get_binding_from_type(sdlPtr sdl, int type);
 sdlBindingPtr get_binding_from_name(sdlPtr sdl, char *name, char *ns);
 
 void delete_sdl(void *handle);
-void delete_sdl_impl(void *handle);
 
 #endif

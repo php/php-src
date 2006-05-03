@@ -211,9 +211,6 @@ encode defaultEncoding[] = {
 	{{END_KNOWN_TYPES, NULL, NULL, NULL}, guess_zval_convert, guess_xml_convert}
 };
 
-int numDefaultEncodings = sizeof(defaultEncoding)/sizeof(encode);
-
-
 void whiteSpace_replace(char* str)
 {
 	while (*str != '\0') {
@@ -1131,13 +1128,11 @@ static void model_to_zval_object(zval *ret, sdlContentModelPtr model, xmlNodePtr
 {
 	switch (model->kind) {
 		case XSD_CONTENT_ELEMENT:
-			if (model->u.element->name) {
-				xmlNodePtr node = get_node(data->children, model->u.element->name);
+		  if (model->u.element->name) {
+		  	xmlNodePtr node = get_node(data->children, model->u.element->name);
+		  	if (node) {
+			  	zval *val;
 
-				if (node) {
-					zval *val;
-
-					node = check_and_resolve_href(node);
 					if (node && node->children && node->children->content) {
 						if (model->u.element->fixed && strcmp(model->u.element->fixed,node->children->content) != 0) {
 							soap_error3(E_ERROR, "Encoding: Element '%s' has fixed value '%s' (value '%s' is not allowed)", model->u.element->name, model->u.element->fixed, node->children->content);
@@ -2883,11 +2878,11 @@ zval *sdl_guess_convert_zval(encodeTypePtr enc, xmlNodePtr data)
 		}
 		if (type->restrictions->minLength &&
 		    strlen(data->children->content) < type->restrictions->minLength->value) {
-		  soap_error0(E_WARNING, "Encoding: Restriction: length less than 'minLength'");
+		  soap_error0(E_WARNING, "Encoding: Restriction: length less then 'minLength'");
 		}
 		if (type->restrictions->maxLength &&
 		    strlen(data->children->content) > type->restrictions->maxLength->value) {
-		  soap_error0(E_WARNING, "Encoding: Restriction: length greater than 'maxLength'");
+		  soap_error0(E_WARNING, "Encoding: Restriction: length greater then 'maxLength'");
 		}
 		if (type->restrictions->length &&
 		    strlen(data->children->content) != type->restrictions->length->value) {
@@ -2946,11 +2941,11 @@ xmlNodePtr sdl_guess_convert_xml(encodeTypePtr enc, zval *data, int style, xmlNo
 			}
 			if (type->restrictions->minLength &&
 			    Z_STRLEN_P(data) < type->restrictions->minLength->value) {
-		  	soap_error0(E_WARNING, "Encoding: Restriction: length less than 'minLength'");
+		  	soap_error0(E_WARNING, "Encoding: Restriction: length less then 'minLength'");
 			}
 			if (type->restrictions->maxLength &&
 			    Z_STRLEN_P(data) > type->restrictions->maxLength->value) {
-		  	soap_error0(E_WARNING, "Encoding: Restriction: length greater than 'maxLength'");
+		  	soap_error0(E_WARNING, "Encoding: Restriction: length greater then 'maxLength'");
 			}
 			if (type->restrictions->length &&
 			    Z_STRLEN_P(data) != type->restrictions->length->value) {
@@ -3304,18 +3299,4 @@ void delete_encoder(void *encode)
 		delete_mapping(t->details.map);
 	}
 	efree(t);
-}
-
-void delete_encoder_persistent(void *encode)
-{
-	encodePtr t = *((encodePtr*)encode);
-	if (t->details.ns) {
-		free(t->details.ns);
-	}
-	if (t->details.type_str) {
-		free(t->details.type_str);
-	}
-	/* we should never have mapping in persistent encoder */
-	assert(t->details.map == NULL);
-	free(t);
 }
