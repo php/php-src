@@ -112,6 +112,15 @@ if (getenv('TEST_PHP_EXECUTABLE')) {
 	$environment['TEST_PHP_EXECUTABLE'] = $php;
 }
 
+if (getenv('TEST_PHP_CGI_EXECUTABLE')) {
+	$php_cgi = getenv('TEST_PHP_CGI_EXECUTABLE');
+	if ($php_cgi=='auto') {
+		$php_cgi = $cwd.'/sapi/cgi/php';
+		putenv("TEST_PHP_CGI_EXECUTABLE=$php_cgi");
+	}
+	$environment['TEST_PHP_CGI_EXECUTABLE'] = $php_cgi;
+}
+
 if ($argc !=2 || ($argv[1] != '-h' && $argv[1] != '-help' && $argv != '--help'))
 {
 	if (empty($php) || !file_exists($php)) {
@@ -919,7 +928,11 @@ function run_test($php, $file, $env)
 
 	$temp_filenames = null;
 	$org_file = $file;
-	
+
+	if (isset($env['TEST_PHP_CGI_EXECUTABLE'])) {
+		$php_cgi = $env['TEST_PHP_CGI_EXECUTABLE'];
+	}
+
 	if (is_array($file)) $file = $file[0];
 
 	if ($DETAILED) echo "
@@ -932,7 +945,9 @@ TEST $file
 		'TEST'   => '',
 		'SKIPIF' => '',
 		'GET'    => '',
+		'POST_RAW' => '',
 		'POST'   => '',
+		'UPLOAD' => '',
 		'ARGS'   => '',
 	);
 
@@ -957,7 +972,7 @@ TEST $file
 		$line = fgets($fp);
 
 		// Match the beginning of a section.
-		if (preg_match('/^--([A-Z]+)--/', $line, $r)) {
+		if (preg_match('/^--([A-Z_]+)--/', $line, $r)) {
 			$section = $r[1];
 			$section_text[$section] = '';
 			$secfile = $section == 'FILE' || $section == 'FILEEOF';
@@ -1019,8 +1034,11 @@ TEST $file
 	$tested = trim($section_text['TEST']);
 
 	/* For GET/POST tests, check if cgi sapi is available and if it is, use it. */
-	if ((!empty($section_text['GET']) || !empty($section_text['POST']))) {
-		if (!strncasecmp(PHP_OS, "win", 3) && file_exists(dirname($php) ."/php-cgi.exe")) {
+	if (!empty($section_text['GET']) || !empty($section_text['POST']) || !empty($section_text['POST_RAW'])) {
+		if (isset($php_cgi)) {
+			$old_php = $php;
+			$php = $php_cgi .' -C ';
+		} elseif (!strncasecmp(PHP_OS, "win", 3) && file_exists(dirname($php) ."/php-cgi.exe")) {
 			$old_php = $php;
 			$php = realpath(dirname($php) ."/php-cgi.exe") .' -C ';
 		} elseif (file_exists("./sapi/cgi/php")) {
@@ -1256,18 +1274,39 @@ TEST $file
 
 	$args = $section_text['ARGS'] ? ' -- '.$section_text['ARGS'] : '';
 
-	if (array_key_exists('POST', $section_text) && !empty($section_text['POST'])) {
+	if (array_key_exists('POST_RAW', $section_text) && !empty($section_text['POST_RAW'])) {
+		$post = trim($section_text['POST_RAW']);
+		$raw_lines = explode("\n", $post);
+
+		$request = '';
+		foreach ($raw_lines as $line) {
+			if (empty($env['CONTENT_TYPE']) && eregi('^(Content-Type:)(.*)', $line, $res)) {
+				$env['CONTENT_TYPE'] = trim(str_replace("\r", '', $res[2]));
+				continue;
+			}
+			$request .= $line . "\n";
+		}
+
+		$env['CONTENT_LENGTH'] = strlen($request);
+		$env['REQUEST_METHOD'] = 'POST';
+
+		if (empty($request)) {
+			return 'BORKED';
+		}
+		save_text($tmp_post, $request);
+		$cmd = "$php$pass_options$ini_settings -f \"$test_file\" 2>&1 < $tmp_post";
+	} elseif (array_key_exists('POST', $section_text) && !empty($section_text['POST'])) {
 
 		$post = trim($section_text['POST']);
 		save_text($tmp_post, $post);
-		$content_length = strlen($post);
 
+		$content_length = strlen($post);
 		$env['REQUEST_METHOD'] = 'POST';
 		$env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded';
 		$env['CONTENT_LENGTH'] = $content_length;
 
 		$cmd = "$php$pass_options$ini_settings -f \"$test_file\" 2>&1 < $tmp_post";
-
+		save_text('/home/pierre/cmd.txt', $cmd);
 	} else {
 
 		$env['REQUEST_METHOD'] = 'GET';
