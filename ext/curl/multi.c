@@ -84,16 +84,28 @@ PHP_FUNCTION(curl_multi_add_handle)
 	ZEND_FETCH_RESOURCE(mh, php_curlm *, &z_mh, -1, le_curl_multi_handle_name, le_curl_multi_handle);
 	ZEND_FETCH_RESOURCE(ch, php_curl *, &z_ch, -1, le_curl_name, le_curl);
 
-	zval_add_ref(&z_ch);
-
 	_php_curl_cleanup_handle(ch);
 	ch->uses++;
 
+	/* we want to create a copy of this zval that we store in the multihandle
+	   structure element "easyh" - so we separate it from the original
+	   input zval to this function using SEPARATE_ZVAL */
+	SEPARATE_ZVAL( &z_ch );
 	zend_llist_add_element(&mh->easyh, &z_ch);
 
 	RETURN_LONG((long) curl_multi_add_handle(mh->multi, ch->cp));	
 }
 /* }}} */
+
+
+/* Used internally as comparison routine passed to zend_list_del_element */
+static int curl_compare_resources( zval **z1, zval **z2 )
+{
+	return (Z_TYPE_PP( z1 ) == Z_TYPE_PP( z2 ) && 
+            Z_TYPE_PP( z1 ) == IS_RESOURCE     &&
+            Z_LVAL_PP( z1 ) == Z_LVAL_PP( z2 ) );
+}
+
 
 /* {{{ proto int curl_multi_remove_handle(resource mh, resource ch)
    Remove a multi handle from a set of cURL handles */
@@ -112,6 +124,9 @@ PHP_FUNCTION(curl_multi_remove_handle)
 	ZEND_FETCH_RESOURCE(ch, php_curl *, &z_ch, -1, le_curl_name, le_curl);
 
 	--ch->uses;
+
+	zend_llist_del_element( &mh->easyh, &z_ch, 
+							(int (*)(void *, void *)) curl_compare_resources );
 	
 	RETURN_LONG((long) curl_multi_remove_handle(mh->multi, ch->cp));
 }
@@ -206,13 +221,11 @@ PHP_FUNCTION(curl_multi_info_read)
 {
 	zval      *z_mh;
 	php_curlm *mh;
-	CURLMsg   *tmp_msg;
+	CURLMsg	  *tmp_msg;
 	int        queued_msgs;
+	zval      *zmsgs_in_queue = NULL;
 
-	/* XXX: Not Implemented */
-	return;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &z_mh) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|z", &z_mh, &zmsgs_in_queue) == FAILURE) {
 		return;
 	}
 
@@ -222,12 +235,46 @@ PHP_FUNCTION(curl_multi_info_read)
 	if (tmp_msg == NULL) {
 		RETURN_FALSE;
 	}
+	if (zmsgs_in_queue) {
+		zval_dtor(zmsgs_in_queue);
+		ZVAL_LONG(zmsgs_in_queue, queued_msgs);
+	}
 
 	array_init(return_value);
 	add_assoc_long(return_value, "msg", tmp_msg->msg);
 	add_assoc_long(return_value, "result", tmp_msg->data.result);
-	/* add_assoc_resource(return_value, "handle", zend_list_id_by_pointer(tmp_msg->easy_handle, le_curl TSRMLS_CC)); */
-	add_assoc_string(return_value, "whatever", (char *) tmp_msg->data.whatever, 1);
+
+	/* find the original easy curl handle */
+	{
+		zend_llist_position pos;
+		php_curl *ch;
+		zval	**pz_ch;
+
+		/* search the list of easy handles hanging off the multi-handle */
+		for(pz_ch = (zval **)zend_llist_get_first_ex(&mh->easyh, &pos); pz_ch;
+			pz_ch = (zval **)zend_llist_get_next_ex(&mh->easyh, &pos)) {
+			ZEND_FETCH_RESOURCE(ch, php_curl *, pz_ch, -1, le_curl_name, le_curl);
+			if (ch->cp == tmp_msg->easy_handle) {
+
+				/* we are adding a reference to the underlying php_curl
+				   resource, so we need to add one to the resource's refcount 
+				   in order to ensure it doesn't get destroyed when the 
+				   underlying curl easy handle goes out of scope.
+				   Normally you would call zval_copy_ctor( pz_ch ), or
+				   SEPARATE_ZVAL, but those create new zvals, which is already
+				   being done in add_assoc_resource */
+
+				zend_list_addref( Z_RESVAL_PP( pz_ch ) );
+
+				/* add_assoc_resource automatically creates a new zval to 
+				   wrap the "resource" represented by the current pz_ch */
+
+				add_assoc_resource(return_value, "handle", Z_RESVAL_PP(pz_ch));
+
+				break;
+			}
+		}
+	}
 }
 /* }}} */
 
