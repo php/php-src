@@ -395,7 +395,7 @@ ZEND_GET_MODULE(soap)
 # define OnUpdateLong OnUpdateInt
 #endif
 
-ZEND_API ZEND_INI_MH(OnUpdateCacheEnabled)
+ZEND_INI_MH(OnUpdateCacheEnabled)
 {
 	long *p;
 #ifndef ZTS
