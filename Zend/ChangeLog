@@ -1,3 +1,13 @@
+2006-05-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c:
+      Fixed possible crash in highlight_string() (proper place)
+
+    * (PHP_5_1)
+      zend_compile.c:
+      Fixed ossible crash in highlight_string().
+
 2006-04-21  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_objects_API.c:

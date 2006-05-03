@@ -1,3 +1,39 @@
+2006-05-02  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/file.c:
+      Unicode Updates:
+      file() now unicode ready
+      get_meta_tags() updated for FS encoding, but content is still non-unicode
+
+2006-05-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      typo
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c:
+      Fixed possible crash in highlight_string() (proper place)
+
+2006-05-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      ext/standard/php_smart_str.h:
+      Attempt to increase smart_str performance through the use of larger
+      default buffers. Biased micro benchmarks show it makes sense :P
+
+2006-05-02  Antony Dovgal  <antony@zend.com>
+
+    * (RELEASE_1_2_1)
+      ext/oci8/package.xml:
+      prepare to 1.2.1 release
+
+2006-05-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      ZendEngine2/zend_compile.c:
+      Fixed ossible crash in highlight_string().
+
 2006-05-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
