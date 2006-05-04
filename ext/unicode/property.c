@@ -369,6 +369,35 @@ PHP_FUNCTION(char_from_digit)
 
 PHP_FUNCTION(char_from_name)
 {
+	UChar	   *name;
+	int			name_len;
+	UChar32		ch;
+	UCharNameChoice choice = U_UNICODE_CHAR_NAME;
+	zend_bool	extended = FALSE;
+	char	   *buf;
+	UErrorCode	status = U_ZERO_ERROR;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "u|b", &name, &name_len, &extended) == FAILURE) {
+		return;
+	}
+
+	if (extended) {
+		choice = U_EXTENDED_CHAR_NAME;
+	}
+
+	buf = zend_unicode_to_ascii(name, name_len TSRMLS_CC);
+	if (buf) {
+		ch = u_charFromName(choice, buf, &status);
+		if (U_SUCCESS(status)) {
+			RETVAL_UCHAR32(ch);
+		} else {
+			RETVAL_FALSE;
+		}
+	} else {
+		php_error(E_WARNING, "Character name has to consist only of ASCII characters");
+		RETURN_FALSE;
+	}
+	efree(buf);
 }
 
 PHP_FUNCTION(char_get_name)
