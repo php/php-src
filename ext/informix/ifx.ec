@@ -96,14 +96,14 @@ static long php_intifx_create_char(char* param, long len, HashTable *list TSRMLS
 static long php_intifx_free_char(long id, HashTable *list TSRMLS_DC);
 static long php_intifx_update_char(long bid, char* param, long len, HashTable *list TSRMLS_DC);
 static long php_intifx_get_char(long bid, HashTable *list, char** content TSRMLS_DC);
-#if HAVE_IFX_IUS
+$ifdef HAVE_IFX_IUS;
 static long php_intifxus_create_slob(long create_mode, HashTable *list TSRMLS_DC);
 static long php_intifxus_free_slob(long bid, HashTable *list TSRMLS_DC);
 static long php_intifxus_close_slob(long bid, HashTable *list TSRMLS_DC);
 static long php_intifxus_open_slob(long bid, long create_mode, HashTable *list TSRMLS_DC);
 static long php_intifxus_new_slob(HashTable *list TSRMLS_DC);
 static ifx_lo_t *php_intifxus_get_slobloc(long bid, HashTable *list TSRMLS_DC);
-#endif
+$endif;
 
 /* 7.10 on (at least) AIX is missing this */
 #ifndef CLIENT_SQLI_VER
@@ -534,12 +534,12 @@ EXEC SQL END DECLARE SECTION;
 			zend_rsrc_list_entry new_le;
 
 			if (IFXG(max_links) != -1 && IFXG(num_links) >= IFXG(max_links)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%d)", IFXG(num_links));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%ld)", IFXG(num_links));
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
 			if (IFXG(max_persistent) != -1 && IFXG(num_persistent) >= IFXG(max_persistent)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open persistent links (%d)", IFXG(num_persistent));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open persistent links (%ld)", IFXG(num_persistent));
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
@@ -643,7 +643,7 @@ EXEC SQL END DECLARE SECTION;
 			}
 		}
 		if (IFXG(max_links) != -1 && IFXG(num_links) >= IFXG(max_links)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%d)", IFXG(num_links));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%ld)", IFXG(num_links));
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -972,7 +972,7 @@ EXEC SQL END DECLARE SECTION;
 							EXEC SQL DEALLOCATE DESCRIPTOR :i_descrpid;
 							EXEC SQL free :statemid;
 							efree(Ifx_Result);
-							php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not an Informix blob-result index", (int)((*tmp)->value.lval));
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not an Informix blob-result index", (int)((*tmp)->value.lval));
 							RETURN_FALSE;
 						}
 						if (locator->loc_loctype == LOCFNAME) {
@@ -1398,7 +1398,7 @@ EXEC SQL END DECLARE SECTION;
 							EXEC SQL DEALLOCATE DESCRIPTOR :i_descrpid;
 							EXEC SQL free :statemid;
 							efree(Ifx_Result);
-							php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix blob-result index", (int)((*tmp)->value.lval));
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a Informix blob-result index", (*tmp)->value.lval);
 							RETURN_FALSE;
 						}
 						if (locator->loc_loctype == LOCFNAME) {
@@ -1564,7 +1564,7 @@ EXEC SQL END DECLARE SECTION;
 	PHP_IFX_CHECK_CONNECTION(ifx);
 	
 	if (Ifx_Result->iscursory < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Resultindex %d is not a prepared query", Z_LVAL_PP(result));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Resultindex %ld is not a prepared query", Z_LVAL_PP(result));
 		RETURN_FALSE;
 	}
 
@@ -3049,7 +3049,7 @@ static long php_intifx_getType(long id, HashTable *list TSRMLS_DC)
 
 	Ifx_res = (IFX_IDRES *) zend_list_find(id, &type);
 	if (type != le_idresult) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix id-result index", id);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a Informix id-result index", id);
 		return -1;
 	}
 	return Ifx_res->type;
@@ -3331,7 +3331,7 @@ static long php_intifx_copy_blob(long bid, HashTable *list TSRMLS_DC)
 
 	Ifx_blob_orig = (IFX_IDRES *) zend_list_find(bid, &type);
 	if (type != le_idresult || !(Ifx_blob_orig->type == TYPE_BLBYTE || Ifx_blob_orig->type == TYPE_BLTEXT)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix blob-result index", bid);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a Informix blob-result index", bid);
 		return -1;
 	}
 
@@ -3425,12 +3425,12 @@ static long php_intifx_free_blob(long bid, HashTable *list TSRMLS_DC)
 
 	Ifx_blob = (IFX_IDRES *) zend_list_find(bid, &type);
 	if (type != le_idresult && !(Ifx_blob->type == TYPE_BLTEXT || Ifx_blob->type == TYPE_BLBYTE)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix blob-result index", bid);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a Informix blob-result index", bid);
 		return -1;
 	}
 
 	if (!(Ifx_blob->type == TYPE_BLTEXT || Ifx_blob->type == TYPE_BLBYTE)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix BYTE or TEXT type", bid);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a Informix BYTE or TEXT type", bid);
 		return -1;
 	}
 
@@ -3488,7 +3488,7 @@ static long php_intifx_get_blob(long bid, HashTable *list, char** content TSRMLS
 
 	Ifx_blob = (IFX_IDRES *) zend_list_find(bid, &type);
 	if (type != le_idresult && !(Ifx_blob->type == TYPE_BLTEXT || Ifx_blob->type == TYPE_BLBYTE)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix blob-result index", bid);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a Informix blob-result index", bid);
 		return -1;
 	}
 
@@ -3517,7 +3517,7 @@ static loc_t *php_intifx_get_blobloc(long bid, HashTable *list TSRMLS_DC)
 
 	Ifx_blob = (IFX_IDRES *) zend_list_find(bid, &type);
 	if (type != le_idresult && !(Ifx_blob->type == TYPE_BLTEXT || Ifx_blob->type == TYPE_BLBYTE)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix blob-result index", bid);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a Informix blob-result index", bid);
 		return NULL;
 	}
 	return &(Ifx_blob->BLOB.blob_data);
@@ -3572,7 +3572,7 @@ static long php_intifx_update_blob(long bid, char* param, long len, HashTable *l
 
 	Ifx_blob = (IFX_IDRES *) zend_list_find(bid, &type);
 	if (type != le_idresult && !(Ifx_blob->type == TYPE_BLTEXT || Ifx_blob->type == TYPE_BLBYTE)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix blob-result index", bid);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a Informix blob-result index", bid);
 		return -1;
 	}
 
@@ -4019,7 +4019,7 @@ static long php_intifx_get_char(long bid, HashTable *list, char** content TSRMLS
 
 	Ifx_char = (IFX_IDRES *) zend_list_find(bid, &type);
 	if (type != le_idresult && !(Ifx_char->type == TYPE_CHAR)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix char-result index", bid);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a Informix char-result index", bid);
 		return -1;
 	}
 
@@ -4072,7 +4072,7 @@ static long php_intifx_free_char(long bid, HashTable *list TSRMLS_DC)
 
 	Ifx_char = (IFX_IDRES *) zend_list_find(bid, &type);
 	if (type != le_idresult && !(Ifx_char->type == TYPE_CHAR)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix char-result index", bid);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a Informix char-result index", bid);
 		return -1;
 	}
 
@@ -4132,7 +4132,7 @@ static long php_intifx_update_char(long bid, char* param, long len, HashTable *l
 
 	Ifx_char = (IFX_IDRES *) zend_list_find(bid, &type);
 	if (type != le_idresult && !(Ifx_char->type == TYPE_CHAR)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix char-result index", bid);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a Informix char-result index", bid);
 		return -1;
 	}
 
