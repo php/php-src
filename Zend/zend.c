@@ -42,10 +42,8 @@
 #   define GLOBAL_CONSTANTS_TABLE   EG(zend_constants)
 #endif
 
-#ifndef __GNUC__
 ZEND_API zstr null_zstr;
 ZEND_API zstr empty_zstr;
-#endif
 
 #if defined(ZEND_WIN32) && ZEND_DEBUG
 BOOL WINAPI IsDebuggerPresent(VOID);
@@ -906,6 +904,7 @@ static void unicode_globals_ctor(zend_unicode_globals *unicode_globals TSRMLS_DC
 {
 	unicode_globals->unicode = 0;
 	unicode_globals->utf8_conv = NULL;
+	unicode_globals->ascii_conv = NULL;
 	unicode_globals->fallback_encoding_conv = NULL;
 	unicode_globals->runtime_encoding_conv = NULL;
 	unicode_globals->output_encoding_conv = NULL;
@@ -913,6 +912,8 @@ static void unicode_globals_ctor(zend_unicode_globals *unicode_globals TSRMLS_DC
 	unicode_globals->http_input_encoding_conv = NULL;
 	unicode_globals->filesystem_encoding_conv = NULL;
 	zend_set_converter_encoding(&unicode_globals->utf8_conv, "UTF-8");
+	zend_set_converter_encoding(&unicode_globals->ascii_conv, "US-ASCII");
+	zend_set_converter_error_mode(unicode_globals->ascii_conv, ZEND_FROM_UNICODE, ZEND_CONV_ERROR_STOP);
 	unicode_globals->from_error_mode = ZEND_CONV_ERROR_SUBST;
 	memset(unicode_globals->from_subst_char, 0, 3 * sizeof(UChar));
 	zend_codepoint_to_uchar(0x3f, unicode_globals->from_subst_char);
@@ -940,6 +941,9 @@ static void unicode_globals_dtor(zend_unicode_globals *unicode_globals TSRMLS_DC
 	}
 	if (unicode_globals->utf8_conv) {
 		ucnv_close(unicode_globals->utf8_conv);
+	}
+	if (unicode_globals->ascii_conv) {
+		ucnv_close(unicode_globals->ascii_conv);
 	}
 	zend_hash_destroy(&unicode_globals->flex_compatible);
 }

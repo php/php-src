@@ -373,6 +373,23 @@ ZEND_API void zend_convert_encodings(UConverter *target_conv, UConverter *source
 }
 /* }}} */
 
+/* {{{ zend_unicode_to_ascii */
+ZEND_API char* zend_unicode_to_ascii(const UChar *us, int us_len TSRMLS_DC)
+{
+	char *cs;
+	int   cs_len;
+	UErrorCode status = U_ZERO_ERROR;
+
+	zend_convert_from_unicode(UG(ascii_conv), &cs, &cs_len, us, us_len, &status);
+	if (U_FAILURE(status)) {
+		efree(cs);
+		return NULL;
+	}
+
+	return cs;
+}
+/* }}} */
+
 /* {{{ zend_raise_conversion_error_ex */
 ZEND_API void zend_raise_conversion_error_ex(char *message, UConverter *conv, zend_conv_direction dir, int error_char_offset, int use_exception TSRMLS_DC)
 {
