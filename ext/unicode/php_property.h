@@ -22,48 +22,56 @@
 /*
  * C/POSIX migration functions
  */
-PHP_FUNCTION(unicode_is_lower);
-PHP_FUNCTION(unicode_is_upper);
-PHP_FUNCTION(unicode_is_digit);
-PHP_FUNCTION(unicode_is_alpha);
-PHP_FUNCTION(unicode_is_alnum);
-PHP_FUNCTION(unicode_is_xdigit);
-PHP_FUNCTION(unicode_is_punct);
-PHP_FUNCTION(unicode_is_graph);
-PHP_FUNCTION(unicode_is_blank);
-PHP_FUNCTION(unicode_is_space);
-PHP_FUNCTION(unicode_is_cntrl);
-PHP_FUNCTION(unicode_is_print);
+PHP_FUNCTION(char_is_lower);
+PHP_FUNCTION(char_is_upper);
+PHP_FUNCTION(char_is_digit);
+PHP_FUNCTION(char_is_alpha);
+PHP_FUNCTION(char_is_alnum);
+PHP_FUNCTION(char_is_xdigit);
+PHP_FUNCTION(char_is_punct);
+PHP_FUNCTION(char_is_graph);
+PHP_FUNCTION(char_is_blank);
+PHP_FUNCTION(char_is_space);
+PHP_FUNCTION(char_is_cntrl);
+PHP_FUNCTION(char_is_print);
 
 /*
  * Additional binary property functions
  */
 
-PHP_FUNCTION(unicode_is_title);
-PHP_FUNCTION(unicode_is_defined);
-PHP_FUNCTION(unicode_is_id_start);
-PHP_FUNCTION(unicode_is_id_part);
-PHP_FUNCTION(unicode_is_id_ignorable);
-PHP_FUNCTION(unicode_is_iso_control);
-PHP_FUNCTION(unicode_is_mirrored);
-PHP_FUNCTION(unicode_is_base);
-PHP_FUNCTION(unicode_is_whitespace);
-PHP_FUNCTION(unicode_is_u_whitespace);
-PHP_FUNCTION(unicode_is_u_alphabetic);
-PHP_FUNCTION(unicode_is_u_uppercase);
-PHP_FUNCTION(unicode_is_u_lowercase);
+PHP_FUNCTION(char_is_defined);
+PHP_FUNCTION(char_is_id_start);
+PHP_FUNCTION(char_is_id_part);
+PHP_FUNCTION(char_is_id_ignorable);
+PHP_FUNCTION(char_is_iso_control);
+PHP_FUNCTION(char_is_mirrored);
+PHP_FUNCTION(char_is_base);
+PHP_FUNCTION(char_is_whitespace);
+PHP_FUNCTION(char_is_alphabetic);
+PHP_FUNCTION(char_is_uppercase);
+PHP_FUNCTION(char_is_lowercase);
+PHP_FUNCTION(char_is_titlecase);
 
 /*
  * Single character property functions.
  */
 
-PHP_FUNCTION(unicode_get_numeric_value);
-PHP_FUNCTION(unicode_get_combining_class);
-PHP_FUNCTION(unicode_get_digit_value);
-PHP_FUNCTION(unicode_get_mirror);
-PHP_FUNCTION(unicode_get_direction);
-PHP_FUNCTION(unicode_get_char_type);
-PHP_FUNCTION(unicode_is_char_valid);
+PHP_FUNCTION(char_get_numeric_value);
+PHP_FUNCTION(char_get_combining_class);
+PHP_FUNCTION(char_get_digit_value);
+PHP_FUNCTION(char_get_mirrored);
+PHP_FUNCTION(char_get_direction);
+PHP_FUNCTION(char_get_type);
+PHP_FUNCTION(char_is_valid);
+
+/*
+ * Other functions
+ */
+
+PHP_FUNCTION(char_to_digit);
+PHP_FUNCTION(char_from_digit);
+PHP_FUNCTION(char_from_name);
+PHP_FUNCTION(char_get_name);
 
 #endif /* PHP_PROPERTY_H */
 
