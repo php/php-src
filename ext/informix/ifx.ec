@@ -2624,6 +2624,7 @@ EXEC SQL END DECLARE SECTION;
 			IFXG(sv_sqlcode) = SQLCODE;
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Get descriptor (field # %d) fails (%s)", i, ifx_err);
 			efree(ifx_err);
+			zval_dtor(return_value);
 			RETURN_FALSE;
 		}
 
@@ -2789,6 +2790,7 @@ EXEC SQL END DECLARE SECTION;
 			IFXG(sv_sqlcode) = SQLCODE;
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Get descriptor (field # %d) fails (%s)", i, ifx_err);
 			efree(ifx_err);
+			zval_dtor(return_value);
 			RETURN_FALSE;
 		}
 		
