@@ -47,62 +47,62 @@ static void check_property_impl(INTERNAL_FUNCTION_PARAMETERS, prop_check_func_t 
 
 /* {{{ C/POSIX migration functions */
 
-PHP_FUNCTION(unicode_is_lower)
+PHP_FUNCTION(char_is_lower)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_islower);
 }
 
-PHP_FUNCTION(unicode_is_upper)
+PHP_FUNCTION(char_is_upper)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isupper);
 }
 
-PHP_FUNCTION(unicode_is_digit)
+PHP_FUNCTION(char_is_digit)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isdigit);
 }
 
-PHP_FUNCTION(unicode_is_alpha)
+PHP_FUNCTION(char_is_alpha)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isalpha);
 }
 
-PHP_FUNCTION(unicode_is_alnum)
+PHP_FUNCTION(char_is_alnum)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isalnum);
 }
 
-PHP_FUNCTION(unicode_is_xdigit)
+PHP_FUNCTION(char_is_xdigit)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isxdigit);
 }
 
-PHP_FUNCTION(unicode_is_punct)
+PHP_FUNCTION(char_is_punct)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_ispunct);
 }
 
-PHP_FUNCTION(unicode_is_graph)
+PHP_FUNCTION(char_is_graph)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isgraph);
 }
 
-PHP_FUNCTION(unicode_is_blank)
+PHP_FUNCTION(char_is_blank)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isblank);
 }
 
-PHP_FUNCTION(unicode_is_space)
+PHP_FUNCTION(char_is_space)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isspace);
 }
 
-PHP_FUNCTION(unicode_is_cntrl)
+PHP_FUNCTION(char_is_cntrl)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_iscntrl);
 }
 
-PHP_FUNCTION(unicode_is_print)
+PHP_FUNCTION(char_is_print)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isprint);
 }
@@ -111,76 +111,72 @@ PHP_FUNCTION(unicode_is_print)
 
 /* {{{ Additional binary property functions */
 
-PHP_FUNCTION(unicode_is_title)
-{
-	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_istitle);
-}
-
-PHP_FUNCTION(unicode_is_defined)
+PHP_FUNCTION(char_is_defined)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isdefined);
 }
 
-PHP_FUNCTION(unicode_is_id_start)
+PHP_FUNCTION(char_is_id_start)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isIDStart);
 }
 
-PHP_FUNCTION(unicode_is_id_part)
+PHP_FUNCTION(char_is_id_part)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isIDPart);
 }
 
-PHP_FUNCTION(unicode_is_id_ignorable)
+PHP_FUNCTION(char_is_id_ignorable)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isIDIgnorable);
 }
 
-PHP_FUNCTION(unicode_is_iso_control)
+PHP_FUNCTION(char_is_iso_control)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isISOControl);
 }
 
-PHP_FUNCTION(unicode_is_mirrored)
+PHP_FUNCTION(char_is_mirrored)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isMirrored);
 }
 
-PHP_FUNCTION(unicode_is_base)
+PHP_FUNCTION(char_is_base)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isbase);
 }
 
-PHP_FUNCTION(unicode_is_whitespace)
-{
-	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isWhitespace);
-}
-
-PHP_FUNCTION(unicode_is_u_whitespace)
+PHP_FUNCTION(char_is_whitespace)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isUWhiteSpace);
 }
 
-PHP_FUNCTION(unicode_is_u_alphabetic)
+PHP_FUNCTION(char_is_alphabetic)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isUAlphabetic);
 }
 
-PHP_FUNCTION(unicode_is_u_uppercase)
+PHP_FUNCTION(char_is_uppercase)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isUUppercase);
 }
 
-PHP_FUNCTION(unicode_is_u_lowercase)
+PHP_FUNCTION(char_is_lowercase)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isULowercase);
 }
+
+PHP_FUNCTION(char_is_titlecase)
+{
+	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_istitle);
+}
+
 
 /* }}} */
 
 /* {{{ Single character properties */
 
-PHP_FUNCTION(unicode_get_numeric_value)
+PHP_FUNCTION(char_get_numeric_value)
 {
 	UChar	   *str;
 	int			str_len;
@@ -199,7 +195,7 @@ PHP_FUNCTION(unicode_get_numeric_value)
 	RETURN_DOUBLE(u_getNumericValue(ch));
 }
 
-PHP_FUNCTION(unicode_get_combining_class)
+PHP_FUNCTION(char_get_combining_class)
 {
 	UChar	   *str;
 	int			str_len;
@@ -218,7 +214,7 @@ PHP_FUNCTION(unicode_get_combining_class)
 	RETURN_LONG((long)u_getCombiningClass(ch));
 }
 
-PHP_FUNCTION(unicode_get_digit_value)
+PHP_FUNCTION(char_get_digit_value)
 {
 	UChar	   *str;
 	int			str_len;
@@ -237,7 +233,7 @@ PHP_FUNCTION(unicode_get_digit_value)
 	RETURN_LONG(u_charDigitValue(ch));
 }
 
-PHP_FUNCTION(unicode_get_mirror)
+PHP_FUNCTION(char_get_mirrored)
 {
 	UChar	   *str;
 	int			str_len;
@@ -258,7 +254,7 @@ PHP_FUNCTION(unicode_get_mirror)
 	RETURN_UNICODEL(buf, buf_len, 1);
 }
 
-PHP_FUNCTION(unicode_get_direction)
+PHP_FUNCTION(char_get_direction)
 {
 	UChar	   *str;
 	int			str_len;
@@ -277,7 +273,7 @@ PHP_FUNCTION(unicode_get_direction)
 	RETURN_LONG((long)u_charDirection(ch));
 }
 
-PHP_FUNCTION(unicode_get_char_type)
+PHP_FUNCTION(char_get_type)
 {
 	UChar	   *str;
 	int			str_len;
@@ -296,7 +292,7 @@ PHP_FUNCTION(unicode_get_char_type)
 	RETURN_LONG(u_charType(ch));
 }
 
-PHP_FUNCTION(unicode_is_char_valid)
+PHP_FUNCTION(char_is_valid)
 {
 	UChar	   *str;
 	int			str_len;
