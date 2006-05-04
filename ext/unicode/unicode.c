@@ -231,7 +231,6 @@ PHP_FUNCTION(unicode_get_subst_char)
 }
 /* }}} */
 
-
 /* {{{ unicode_functions[] */
 zend_function_entry unicode_functions[] = {
 	PHP_FE(locale_get_default, NULL)
@@ -276,12 +275,17 @@ zend_function_entry unicode_functions[] = {
 	PHP_FE(char_is_titlecase,		NULL)
 
 	PHP_FE(char_get_numeric_value, 		NULL)
-	PHP_FE(char_get_combining_class,	NULL)
 	PHP_FE(char_get_digit_value, 		NULL)
+	PHP_FE(char_get_combining_class,	NULL)
 	PHP_FE(char_get_mirrored, 			NULL)
 	PHP_FE(char_get_direction, 			NULL)
+	PHP_FE(char_get_age,	 			NULL)
 	PHP_FE(char_get_type,	 			NULL)
 	PHP_FE(char_is_valid, 				NULL)
+
+	PHP_FE(char_from_digit, NULL)
+	PHP_FE(char_from_name, NULL)
+	PHP_FE(char_get_name, NULL)
 
 	{ NULL, NULL, NULL }
 };

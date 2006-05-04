@@ -218,6 +218,34 @@ PHP_FUNCTION(char_get_digit_value)
 {
 	UChar	   *str;
 	int			str_len;
+	int			radix = 0;
+	int			offset = 0;
+	UChar32		ch;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "u|l", &str, &str_len, &radix) == FAILURE) {
+		return;
+	}
+
+	if (str_len == 0) {
+		RETURN_FALSE;
+	}
+	U16_NEXT(str, offset, str_len, ch);
+
+	if (ZEND_NUM_ARGS() > 1) {
+		if (radix < 2 || radix > 36) {
+			php_error(E_WARNING, "Radix has to be in 2-36 range");
+			return;
+		}
+		RETURN_LONG(u_digit(ch, radix));
+	} else {
+		RETURN_LONG(u_charDigitValue(ch));
+	}
+}
+
+PHP_FUNCTION(char_get_mirrored)
+{
+	UChar	   *str;
+	int			str_len;
 	int			offset = 0;
 	UChar32		ch;
 
@@ -230,28 +258,7 @@ PHP_FUNCTION(char_get_digit_value)
 	}
 	U16_NEXT(str, offset, str_len, ch);
 
-	RETURN_LONG(u_charDigitValue(ch));
-}
-
-PHP_FUNCTION(char_get_mirrored)
-{
-	UChar	   *str;
-	int			str_len;
-	int			offset = 0, buf_len;
-	UChar32		ch;
-	UChar       buf[3];
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "u", &str, &str_len) == FAILURE) {
-		return;
-	}
-
-	if (str_len == 0) {
-		RETURN_FALSE;
-	}
-	U16_NEXT(str, offset, str_len, ch);
-	buf_len = zend_codepoint_to_uchar(u_charMirror(ch), buf);
-
-	RETURN_UNICODEL(buf, buf_len, 1);
+	RETURN_UCHAR32(u_charMirror(ch));
 }
 
 PHP_FUNCTION(char_get_direction)
@@ -271,6 +278,30 @@ PHP_FUNCTION(char_get_direction)
 	U16_NEXT(str, offset, str_len, ch);
 
 	RETURN_LONG((long)u_charDirection(ch));
+}
+
+PHP_FUNCTION(char_get_age)
+{
+	UChar	   *str;
+	int			str_len;
+	int			offset = 0;
+	UChar32		ch;
+	UVersionInfo version;
+	char        buf[18] = { 0, };
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "u", &str, &str_len) == FAILURE) {
+		return;
+	}
+
+	if (str_len == 0) {
+		RETURN_FALSE;
+	}
+	U16_NEXT(str, offset, str_len, ch);
+
+	u_charAge(ch, version);
+	u_versionToString(version, buf);
+
+	RETURN_ASCII_STRING(buf, ZSTR_DUPLICATE);
 }
 
 PHP_FUNCTION(char_get_type)
@@ -309,6 +340,75 @@ PHP_FUNCTION(char_is_valid)
 	U16_NEXT(str, offset, str_len, ch);
 
 	RETURN_BOOL(U_IS_UNICODE_CHAR(ch));
+}
+
+PHP_FUNCTION(char_from_digit)
+{
+	int			digit;
+	int			radix = 10;
+	UChar32		ch;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l", &digit, &radix) == FAILURE) {
+		return;
+	}
+
+	if (ZEND_NUM_ARGS() > 1) {
+		if (radix < 2 || radix > 36) {
+			php_error(E_WARNING, "Radix has to be in 2-36 range");
+			return;
+		}
+	}
+	ch = u_forDigit(digit, radix);
+	
+	if (ch == (UChar32)0) {
+		RETURN_FALSE;
+	}
+
+	RETURN_UCHAR32(ch);
+}
+
+PHP_FUNCTION(char_from_name)
+{
+}
+
+PHP_FUNCTION(char_get_name)
+{
+	UChar	   *str;
+	int			str_len;
+	int			offset = 0;
+	UChar32		ch;
+	zend_bool	extended = FALSE;
+	UCharNameChoice choice = U_UNICODE_CHAR_NAME;
+	char	   *buf;
+	int			buf_len = 128;
+	UErrorCode  status = U_ZERO_ERROR;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "u|b", &str, &str_len, &extended) == FAILURE) {
+		return;
+	}
+
+	if (str_len == 0) {
+		RETURN_FALSE;
+	}
+
+	if (extended) {
+		choice = U_EXTENDED_CHAR_NAME;
+	}
+
+	U16_NEXT(str, offset, str_len, ch);
+
+	buf = emalloc(buf_len);
+	buf_len = u_charName(ch, choice, buf, buf_len, &status);
+	if (buf_len == 0) {
+		efree(buf);
+		RETURN_FALSE;
+	} else if (status == U_BUFFER_OVERFLOW_ERROR) {
+		status = U_ZERO_ERROR;
+		buf = erealloc(buf, buf_len+1);
+		buf_len = u_charName(ch, choice, buf, buf_len+1, &status);
+	}
+
+	RETURN_ASCII_STRINGL(buf, buf_len, ZSTR_AUTOFREE);
 }
 
 /* }}} */

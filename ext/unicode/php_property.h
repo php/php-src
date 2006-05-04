@@ -61,6 +61,7 @@ PHP_FUNCTION(char_get_combining_class);
 PHP_FUNCTION(char_get_digit_value);
 PHP_FUNCTION(char_get_mirrored);
 PHP_FUNCTION(char_get_direction);
+PHP_FUNCTION(char_get_age);
 PHP_FUNCTION(char_get_type);
 PHP_FUNCTION(char_is_valid);
 
