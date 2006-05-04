@@ -60,7 +60,7 @@ if test "$PHP_INFORMIX" != "no"; then
 
   AC_DEFINE_UNQUOTED(IFX_VERSION, $IFX_VERSION, [ ])
 
-  if test $IFX_VERSION -ge "900"; then
+  if test $IFX_VERSION -ge 900; then
     AC_DEFINE(HAVE_IFX_IUS,1,[ ])
     IFX_ESQL_FLAGS="$IFX_ESQL_FLAGS -EDHAVE_IFX_IUS"
   else
