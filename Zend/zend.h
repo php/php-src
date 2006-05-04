@@ -246,11 +246,6 @@ typedef union _zstr {
 	void  *v;
 } zstr;
 
-#ifdef __GNUC__
-#	define ZSTR(x)    ((zstr)(x))
-#	define NULL_ZSTR  ZSTR((void*)NULL)
-#	define EMPTY_ZSTR ZSTR("\0\0")
-#else
 extern ZEND_API zstr null_zstr;
 extern ZEND_API zstr empty_zstr;
 
@@ -263,7 +258,6 @@ static inline zstr _to_zstr(void *v) {
 #	define ZSTR(x)    _to_zstr(x)
 #	define NULL_ZSTR  null_zstr
 #	define EMPTY_ZSTR empty_zstr
-#endif
 
 #define EMPTY_STR ((UChar*)"\0\0")
 

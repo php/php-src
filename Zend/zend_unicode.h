@@ -73,6 +73,8 @@ void zend_collator_destroy(zend_collator *zcoll);
 ZEND_API int zend_convert_to_unicode(UConverter *conv, UChar **target, int *target_len, const char *source, int source_len, UErrorCode *status);
 ZEND_API int zend_convert_from_unicode(UConverter *conv, char **target, int *target_len, const UChar *source, int source_len, UErrorCode *status);
 ZEND_API void zend_convert_encodings(UConverter *target_conv, UConverter *source_conv, char **target, int *target_len, const char *source, int source_len, UErrorCode *status);
+ZEND_API char* zend_unicode_to_ascii(const UChar *us, int us_len TSRMLS_DC);
+
 ZEND_API int zval_string_to_unicode_ex(zval *string, UConverter *conv TSRMLS_DC);
 ZEND_API int zval_string_to_unicode(zval *string TSRMLS_DC);
 ZEND_API int zval_unicode_to_string(zval *string, UConverter *conv TSRMLS_DC);

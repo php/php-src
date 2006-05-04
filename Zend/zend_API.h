@@ -807,6 +807,12 @@ END_EXTERN_C()
 		Z_TYPE_P(z) = IS_UNICODE;		    \
 }
 
+#define ZVAL_UCHAR32(z, ch) { 							\
+		UChar buf[3];									\
+		int buf_len = zend_codepoint_to_uchar(ch, buf); \
+		ZVAL_UNICODEL(z, buf, buf_len, 1); 				\
+}
+
 #define ZVAL_EMPTY_STRING(z) {				\
 		Z_STRLEN_P(z) = 0;					\
 		Z_STRVAL_P(z) = STR_EMPTY_ALLOC();	\
@@ -881,6 +887,7 @@ END_EXTERN_C()
 #define RETVAL_EMPTY_STRING() 			ZVAL_EMPTY_STRING(return_value)
 #define RETVAL_UNICODE(u, duplicate) 		ZVAL_UNICODE(return_value, u, duplicate)
 #define RETVAL_UNICODEL(u, l, duplicate) 	ZVAL_UNICODEL(return_value, u, l, duplicate)
+#define RETVAL_UCHAR32(ch)			 	ZVAL_UCHAR32(return_value, ch)
 #define RETVAL_EMPTY_UNICODE() 			ZVAL_EMPTY_UNICODE(return_value)
 #define RETVAL_ZVAL(zv, copy, dtor)		ZVAL_ZVAL(return_value, zv, copy, dtor)
 #define RETVAL_FALSE  					ZVAL_BOOL(return_value, 0)
@@ -899,6 +906,7 @@ END_EXTERN_C()
 #define RETURN_EMPTY_STRING() 			{ RETVAL_EMPTY_STRING(); return; }
 #define RETURN_UNICODE(u, duplicate) 	{ RETVAL_UNICODE(u, duplicate); return; }
 #define RETURN_UNICODEL(u, l, duplicate) { RETVAL_UNICODEL(u, l, duplicate); return; }
+#define RETURN_UCHAR32(ch)				{ RETVAL_UCHAR32(ch); return; }
 #define RETURN_EMPTY_UNICODE() 			{ RETVAL_EMPTY_UNICODE(); return; }
 #define RETURN_ZVAL(zv, copy, dtor)		{ RETVAL_ZVAL(zv, copy, dtor); return; }
 #define RETURN_FALSE  					{ RETVAL_FALSE; return; }

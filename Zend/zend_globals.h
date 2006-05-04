@@ -301,6 +301,7 @@ struct _zend_unicode_globals {
 	UConverter *http_input_encoding_conv;/* http input encoding converter */
 	UConverter *filesystem_encoding_conv;/* default filesystem converter (entries, not contents) */ 
 	UConverter *utf8_conv;				 /* all-purpose UTF-8 converter */
+	UConverter *ascii_conv;				 /* all-purpose ASCII converter */
 
 	uint16_t from_error_mode;
 	UChar from_subst_char[3];
