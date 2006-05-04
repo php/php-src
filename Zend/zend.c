@@ -42,8 +42,10 @@
 #   define GLOBAL_CONSTANTS_TABLE   EG(zend_constants)
 #endif
 
+#ifndef __GNUC__
 ZEND_API zstr null_zstr;
 ZEND_API zstr empty_zstr;
+#endif
 
 #if defined(ZEND_WIN32) && ZEND_DEBUG
 BOOL WINAPI IsDebuggerPresent(VOID);
