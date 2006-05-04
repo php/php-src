@@ -53,6 +53,13 @@ PHP_MINFO_FUNCTION(unicode);
 #include "TSRM.h"
 #endif
 
+/*
+ * Because of ICU they are expanded to have _<version> suffix
+ * We don't want that
+ */
+#undef locale_get_default
+#undef locale_set_default
+
 PHP_FUNCTION(locale_get_default);
 PHP_FUNCTION(locale_set_default);
 PHP_FUNCTION(collator_create);
