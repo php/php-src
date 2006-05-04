@@ -370,15 +370,16 @@ static inline int zend_uchar_from_name(char *name, UChar32 *c)
 	}
 }
 
-static inline int zend_uchar_from_uname(UChar *name, int name_len, UChar32 *c)
+static inline int zend_uchar_from_uname(UChar *name, int name_len, UChar32 *c TSRMLS_DC)
 {
 	UChar32 codepoint = 0;
 	UErrorCode status = U_ZERO_ERROR;
-	char buf[128];
+	char *buf;
 
-	u_UCharsToChars(name, buf, name_len);
-	buf[name_len] = 0;
+	buf = zend_unicode_to_ascii(name, name_len TSRMLS_CC);
+	if (!buf) return 0;
 	codepoint = u_charFromName(U_UNICODE_CHAR_NAME, buf, &status);
+	efree(buf);
 	if (U_SUCCESS(status)) {
 		*c = codepoint;
 		return 1;
@@ -387,7 +388,7 @@ static inline int zend_uchar_from_uname(UChar *name, int name_len, UChar32 *c)
 	}
 }
 
-static inline int zend_parse_charname_sequence(UChar **s, UChar *end, UChar32 *c)
+static inline int zend_parse_charname_sequence(UChar **s, UChar *end, UChar32 *c TSRMLS_DC)
 {
 	UChar *start;
 
@@ -395,7 +396,7 @@ static inline int zend_parse_charname_sequence(UChar **s, UChar *end, UChar32 *c
 		start = ++(*s);
 		while ((*s)++ != end) {
 			if (**s == '}') {
-				if (zend_uchar_from_uname(start, *s - start, c)) {
+				if (zend_uchar_from_uname(start, *s - start, c TSRMLS_CC)) {
 					return 1;
 				} else {
 					/* safe, since *s points to '}' */
@@ -1073,7 +1074,7 @@ int zend_scan_unicode_double_string(zval *zendlval TSRMLS_DC)
 				case 0x43:				 /*'C'*/
 					{
 						UChar *p = s+1;
-						if (p < end && zend_parse_charname_sequence(&p, end, &codepoint)) {
+						if (p < end && zend_parse_charname_sequence(&p, end, &codepoint TSRMLS_CC)) {
 							Z_USTRLEN_P(zendlval) -= p - s + 1;
 							s = p;
 							if (U_IS_BMP(codepoint)) {
@@ -1195,7 +1196,7 @@ int zend_scan_unicode_single_string(zval *zendlval TSRMLS_DC)
 				case 0x43: /*'C'*/
 					{
 						UChar *p = s+1;
-						if (p < end && zend_parse_charname_sequence(&p, end, &codepoint)) {
+						if (p < end && zend_parse_charname_sequence(&p, end, &codepoint TSRMLS_CC)) {
 							Z_USTRLEN_P(zendlval) -= p - s + 1;
 							s = p;
 							if (U_IS_BMP(codepoint)) {
