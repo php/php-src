@@ -61,6 +61,7 @@ You can find additional PDO drivers at:
 http://pecl4win.php.net
 
 ** Changes **
+- Added PDO::PARAM_EVT_* family of constants. (Sara)
 - Fixed bug #37167 (PDO segfaults when throwing exception from the
   fetch handler). (Tony)
 - Fixed memory corruption when PDO::FETCH_LAZY mode is being used. (Ilia)
