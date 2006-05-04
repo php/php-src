@@ -1,3 +1,143 @@
+2006-05-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      configure.in
+      main/php_version.h:
+      Back to dev
+
+    * (PHP_5_1)
+      configure.in
+      main/php_version.h:
+      go with 5.1.4
+
+2006-05-03  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_5_1)
+      NEWS:
+      News entry for exporting PDO::PARAM_EVT_* constants
+
+2006-05-03  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_1)
+      run-tests.php:
+      - remove debug part
+        nota bene, there is still work in this area, but this is a start
+
+    * tests/basic/021.phpt
+      tests/basic/021.phpt:
+      
+      file 021.phpt was initially added on branch PHP_5_1.
+
+    * (PHP_5_1)
+      run-tests.php:
+      - add support for POST_RAW, allow to pass raw POST data
+      - add support for TEST_PHP_CGI_EXECUTABLE env variable, it is now possible
+        to set both TEST_PHP_EXECUTABLE and CGI
+
+2006-05-03  Brian France  <list@firehawksystems.com>
+
+    * NEWS
+      ext/curl/multi.c:
+      
+      - Add implementation of curl_multi_info_read (Brian)
+      
+      Not adding to PHP 5_1, but should go into 5_2.
+
+2006-05-03  Antony Dovgal  <antony@zend.com>
+
+    * sapi/cgi/cgi_main.c:
+      plug leak
+
+    * tests/basic/013.phpt
+      tests/basic/014.phpt
+      tests/basic/015.phpt
+      tests/basic/016.phpt
+      tests/basic/017.phpt
+      tests/basic/018.phpt
+      tests/basic/019.phpt
+      tests/basic/020.phpt:
+      more POST+arrays tests
+
+    * tests/basic/013.phpt
+      tests/basic/013.phpt
+      tests/basic/014.phpt
+      tests/basic/014.phpt
+      tests/basic/015.phpt
+      tests/basic/015.phpt
+      tests/basic/016.phpt
+      tests/basic/016.phpt
+      tests/basic/017.phpt
+      tests/basic/017.phpt
+      tests/basic/018.phpt
+      tests/basic/018.phpt
+      tests/basic/019.phpt
+      tests/basic/019.phpt
+      tests/basic/020.phpt
+      tests/basic/020.phpt:
+      
+      file 013.phpt was initially added on branch PHP_5_1.
+
+2006-05-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.h
+      sapi/cgi/fastcgi.h:
+      Fixed bug #37205 (incompatibility with mod_fastcgi)
+
+2006-05-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      Prepare news file for release
+
+    * (PHP_5_1)
+      ext/standard/php_smart_str.h:
+      Revert previous optimization if preparation for 5.1.4
+
+2006-05-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      Fixed bug #37291 (FastCGI now longer works with isapi_fcgi.dll)
+
+    * sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c:
+      Fixed incompatibility with isapi_fcgi.dll
+
+    * (PHP_5_1)
+      NEWS
+      main/php_variables.c
+      main/php_variables.c:
+      Fixed bug #37276 (problems witch $_POST array)
+
+2006-05-03  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_1)
+      NEWS:
+      BFN
+      re-order news
+
+    * (PHP_5_1)
+      ext/dom/attr.c
+      ext/dom/element.c
+      ext/dom/php_dom.c
+      ext/dom/tests/bug37277.phpt:
+      Fix bug #37277 (cloning Dom Documents or Nodes does not work)
+      Proper fix for bug #36859
+      add test
+
+    * ext/dom/tests/bug37277.phpt
+      ext/dom/tests/bug37277.phpt:
+      
+      add test
+
+    * ext/dom/attr.c
+      ext/dom/element.c
+      ext/dom/php_dom.c:
+      Fix bug #37277 (cloning Dom Documents or Nodes does not work)
+      Proper fix for bug #36859
+
 2006-05-02  Sara Golemon  <sara@golemon.com>
 
     * ext/standard/file.c:
