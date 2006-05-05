@@ -1,3 +1,23 @@
+2006-05-04  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_language_scanner.l:
+      Don't use fixed size buffer in zend_uchar_from_uname();
+
+    * zend.h:
+      Oops again.
+
+    * zend.c:
+      Oops.
+
+    * zend.c
+      zend.h
+      zend_API.h
+      zend_globals.h
+      zend_unicode.c
+      zend_unicode.h:
+      Add a global ASCII connverter, macros to return single codepoints
+      (UCHAR32), and zend_unicode_to_ascii() function.
+
 2006-05-02  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.c
