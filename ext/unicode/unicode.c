@@ -317,6 +317,7 @@ PHP_MINIT_FUNCTION(unicode)
 {
 	php_register_unicode_iterators(TSRMLS_C);
 	php_init_collation(TSRMLS_C);
+	php_register_unicode_constants(TSRMLS_C);
 	
 	return SUCCESS;
 }
