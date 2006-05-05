@@ -1,3 +1,40 @@
+2006-05-04  Antony Dovgal  <antony@zend.com>
+
+    * ext/informix/ifx.ec
+      ext/informix/ifx.ec:
+      plug a leak
+
+2006-05-04  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_language_scanner.l:
+      Don't use fixed size buffer in zend_uchar_from_uname();
+
+    * ZendEngine2/zend.h:
+      Oops again.
+
+    * ZendEngine2/zend.c:
+      Oops.
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_unicode.c
+      ZendEngine2/zend_unicode.h:
+      Add a global ASCII connverter, macros to return single codepoints
+      (UCHAR32), and zend_unicode_to_ascii() function.
+
+2006-05-04  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      ext/informix/config.m4
+      ext/informix/ifx.ec:
+      MFH: several minor fixes: nuke compile warnings etc.
+
+    * ext/informix/config.m4
+      ext/informix/ifx.ec:
+      several minor fixes: nuke compile warnings etc.
+
 2006-05-03  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_1)
