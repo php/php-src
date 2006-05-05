@@ -1,5 +1,5 @@
 // $Id$
 // vim:ft=javascript
 
-EXTENSION("unicode", "unicode.c unicode_iterators.c collator.c locale.c", false);
+EXTENSION("unicode", "unicode.c unicode_iterators.c collator.c locale.c property.c", false);
 AC_DEFINE('HAVE_UNICODE', 1, 'ICU API extension');
