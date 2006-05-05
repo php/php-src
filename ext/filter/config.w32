@@ -1,0 +1,8 @@
+// $Id$
+// vim:ft=javascript
+
+ARG_ENABLE("filter", "Filter Support", "yes");
+
+if (PHP_FILTER == "yes") {
+	EXTENSION("filter", "filter.c sanitizing_filters.c logical_filters.c callback_filter.c");
+}
