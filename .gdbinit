@@ -259,6 +259,44 @@ document print_ft
 	dumps a function table (HashTable)
 end
 
+define ____print_inh_class
+	set $ce = $arg0
+	if $ce->ce_flags & 0x10 || $ce->ce_flags & 0x20
+		printf "abstract "
+	else
+		if $ce->ce_flags & 0x40
+			printf "final "
+		end
+	end
+	printf "class %s", $ce->name
+	if $ce->parent != 0
+		printf " extends %s", $ce->parent->name
+	end
+	if $ce->num_interfaces != 0
+		printf " implements"
+		set $tmp = 0
+		while $tmp < $ce->num_interfaces
+			printf " %s", $ce->interfaces[$tmp]->name
+			set $tmp = $tmp + 1
+			if $tmp < $ce->num_interfaces
+				printf ","
+			end
+		end
+	end
+	set $ce = $ce->parent
+end
+
+define ____print_inh_iface
+	set $ce = $arg0
+	printf "interface %s", $ce->name
+	if $ce->num_interfaces != 0
+		set $ce = $ce->interfaces[0]
+		printf " extends %s", $ce->name
+	else
+		set $ce = 0
+	end
+end
+
 define print_inh
 	set $ce = $arg0
 	set $depth = 0
@@ -268,13 +306,13 @@ define print_inh
 			printf " "
 			set $tmp = $tmp - 1
 		end
-		printf "class %s", $ce->name
-		if $ce->parent != 0
-			printf " extends %s", $ce->parent->name
+		set $depth = $depth + 1
+		if $ce->ce_flags & 0x80
+			____print_inh_iface $ce
+		else
+			____print_inh_class $ce
 		end
 		printf " {\n"
-		set $depth = $depth + 1
-		set $ce = $ce->parent
 	end
 	while $depth != 0
 		set $tmp = $depth
