@@ -2286,11 +2286,12 @@ ZEND_VM_HANDLER(63, ZEND_RECV, ANY, ANY)
 		zstr class_name = get_active_class_name(&space TSRMLS_CC);
 		zend_execute_data *ptr = EX(prev_execute_data);
 
-		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, NULL TSRMLS_CC);
-		if(ptr && ptr->op_array) {
-			zend_error(E_WARNING, "Missing argument %ld for %v%s%v(), called in %s on line %d and defined", Z_LVAL(opline->op1.u.constant), class_name, space, get_active_function_name(TSRMLS_C), ptr->op_array->filename, ptr->opline->lineno);
-		} else {
-			zend_error(E_WARNING, "Missing argument %ld for %v%s%v()", Z_LVAL(opline->op1.u.constant), class_name, space, get_active_function_name(TSRMLS_C));
+		if (zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, NULL TSRMLS_CC)) {
+			if(ptr && ptr->op_array) {
+				zend_error(E_WARNING, "Missing argument %ld for %v%s%v(), called in %s on line %d and defined", Z_LVAL(opline->op1.u.constant), class_name, space, get_active_function_name(TSRMLS_C), ptr->op_array->filename, ptr->opline->lineno);
+			} else {
+				zend_error(E_WARNING, "Missing argument %ld for %v%s%v()", Z_LVAL(opline->op1.u.constant), class_name, space, get_active_function_name(TSRMLS_C));
+			}
 		}
 		if (opline->result.op_type == IS_VAR) {
 			PZVAL_UNLOCK_FREE(*EX_T(opline->result.u.var).var.ptr_ptr);
