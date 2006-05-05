@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE package SYSTEM "../pear/package.dtd">
+<package>
+ <dep type="php" rel="ge" version="4.3.0" optional="no"/>
+ <name>json</name>
+ <summary>JavaScript Object Notation</summary>
+ <maintainers>
+  <maintainer>
+   <user>omar</user>
+   <name>Omar Kilani</name>
+   <email>omar@php.net</email>
+   <role>lead</role>
+  </maintainer>
+ </maintainers>
+ <description> 
+ Support for JSON (JavaScript Object Notation) serialization.
+ </description>
+ <license>PHP 3.01</license>
+ <release>
+  <state>stable</state>
+  <version>1.2.1</version>
+  <date>2006-03-18</date>
+  <notes>
+   Fix PECL bug #7147 - rework handling of comma insertion while encoding.
+   Add tests to package.xml
+  </notes>
+ </release>
+  <configureoptions>
+  </configureoptions>
+  <filelist>
+    <file role="doc" name="README" />
+    <file role="src" name="config.m4" />
+    <file role="src" name="config.w32" />
+    <file role="src" name="json.dsp" />
+    <file role="src" name="json.c" />
+    <file role="src" name="JSON_parser.c" />
+    <file role="src" name="JSON_parser.h" />
+    <file role="src" name="php_json.h" />
+    <file role="src" name="utf8_decode.c" />
+    <file role="src" name="utf8_decode.h" />
+    <file role="src" name="utf8_to_utf16.c" />
+    <file role="src" name="utf8_to_utf16.h" />
+    <dir role="test" name="tests">
+      <file role="test" name="fail001.phpt" />
+      <file role="test" name="pass001.phpt" />
+      <file role="test" name="pass001.1.phpt" />
+      <file role="test" name="pass002.phpt" />
+      <file role="test" name="pass003.phpt" />
+    </dir>
+  </filelist>
+  <changelog>
+     <release>
+      <state>stable</state>
+      <version>1.0.0</version>
+      <date>2005-04-01</date>
+      <notes>
+       Initial release.
+      </notes>
+     </release>
+     <release>
+      <state>stable</state>
+      <version>1.0.1</version>
+      <date>2005-06-10</date>
+      <notes>
+       Fixed non-linear and mixed type array index issues, fixed issues with escaping \\, forked json-c and added Unicode support.
+      </notes>
+     </release>
+   <release>
+    <state>stable</state>
+    <version>1.0.2</version>
+    <date>2005-06-11</date>
+    <notes>
+     Fixed issues with object reference counts under PHP4.
+    </notes>
+   </release>
+   <release>
+    <state>stable</state>
+    <version>1.0.3</version>
+    <date>2005-06-15</date>
+    <notes>
+     Fixed json-c string corruption issues under Mac OS X and FreeBSD.
+    </notes>
+   </release>
+   <release>
+    <state>stable</state>
+    <version>1.0.4</version>
+    <date>2005-06-15</date>
+    <notes>
+     Changes in 1.0.4 released with 1.0.5.
+    </notes>
+   </release>
+   <release>
+    <state>stable</state>
+    <version>1.0.5</version>
+    <date>2005-06-16</date>
+    <notes>
+     Changed spacing in json-c encoding, added optional assoc (boolean) parameter to json_decode to decode as associative array instead of object, fixed issues with escaping /.
+    </notes>
+   </release>
+ <release>
+  <state>stable</state>
+  <version>1.0.6</version>
+  <date>2005-08-05</date>
+  <notes>
+   Fixed issues with exporting private and protected class members.
+  </notes>
+ </release>
+ <release>
+  <state>stable</state>
+  <version>1.0.7</version>
+  <date>2005-09-07</date>
+  <notes>
+   Fixed issues with negative array keys, modified json-c to return an error on unquoted object key names instead of going into an infinite loop.
+  </notes>
+ </release>
+ <release>
+  <state>stable</state>
+  <version>1.0.8</version>
+  <date>2005-12-01</date>
+  <notes>
+   Changed license to LGPL, modified build system to allow static compilation into PHP, added strndup check for json-c.
+  </notes>
+ </release>
+ <release>
+  <state>stable</state>
+  <version>1.1.0</version>
+  <date>2005-12-04</date>
+  <notes>
+   Port to Win32.
+  </notes>
+ </release>
+ <release>
+  <state>stable</state>
+  <version>1.1.1</version>
+  <date>2006-01-12</date>
+  <notes>
+   Cleanup and TSRM performance fixes by rasmus.
+  </notes>
+ </release>
+ <release>
+  <state>stable</state>
+  <version>1.2.0</version>
+  <date>2006-03-15</date>
+  <notes>
+   Complete rewrite using JSON_checker as the base for the parser. Implements the JSON specification. 3-8x faster on encodes and 1.2x-4x faster on decodes.
+  </notes>
+ </release>
+ </changelog>
+</package>
+<!--
+vim:et:ts=1:sw=1
+-->

@@ -1,0 +1,10 @@
+// $Id$
+// vim:ft=javascript
+
+ARG_WITH("json", "JavaScript Object Serialization support", "no");
+
+if (PHP_JSON != "no") {
+	EXTENSION('json', 'json.c', PHP_JSON_SHARED, "");
+	ADD_SOURCES(configure_module_dirname, "JSON_parser.c utf8_decode.c utf8_to_utf16.c", "json");
+}
+
