@@ -69,7 +69,7 @@
 # include <netinet/in.h>
 # include <arpa/inet.h>
 # include <netdb.h>
-# include <sys/signal.h>
+# include <signal.h>
 
 #ifndef INADDR_NONE
 #define INADDR_NONE ((unsigned long) -1)
