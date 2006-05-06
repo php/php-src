@@ -888,11 +888,7 @@ static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options TSRML
 	zval **opt_val;
 	ulong opt_indx;
 	uint opt_name_len;
-	UConverter *conv = NULL;
-	UErrorCode status = U_ZERO_ERROR;
 	zend_bool clear_str;
-
-	zend_set_converter_encoding(&conv, "ASCII");
 
 	for (zend_hash_internal_pointer_reset(ht_options);
 		 zend_hash_get_current_data(ht_options, (void **)&opt_val) == SUCCESS;
@@ -904,10 +900,9 @@ static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options TSRML
 			break;
 
 			case HASH_KEY_IS_UNICODE:
-			zend_convert_from_unicode(conv, &(opt_name.s), &opt_name_len, opt_name.u, opt_name_len, &status);
-			if (U_FAILURE(status)) {
+			opt_name.s = zend_unicode_to_ascii(opt_name.u, opt_name_len);
+			if (!opt_name.s) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not convert key from the option array");
-				ucnv_close(conv);
 				return FAILURE;
 			}
 			clear_str = 1;
@@ -918,7 +913,6 @@ static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options TSRML
 
 			default:
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not retrieve key from option array");
-			ucnv_close(conv);
 			return FAILURE;
 		}
 
@@ -928,7 +922,6 @@ static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options TSRML
 		}
 	}
 
-	ucnv_close(conv);
 	return SUCCESS;
 }
 
