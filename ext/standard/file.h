@@ -66,6 +66,7 @@ PHP_FUNCTION(fnmatch);
 #endif
 PHP_NAMED_FUNCTION(php_if_ftruncate);
 PHP_NAMED_FUNCTION(php_if_fstat);
+PHP_FUNCTION(php_get_tmpdir);
 
 PHP_MINIT_FUNCTION(user_streams);
 

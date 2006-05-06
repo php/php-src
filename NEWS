@@ -52,6 +52,8 @@ PHP                                                                        NEWS
   defined using reflection API. (Johannes)
 - Added second optional parameter to stream_context_create() to set params
   during context creation. (Sara)
+- Added php_get_tmpdir() function that returns the default directory for
+  temporary files (as requested in bug #35380). (Hartmut)
 
 - Fixed bug #36630 (umask not reset at the end of the request). (Ilia)
 - Fixed bug #34286 (__toString() behavior is inconsistent). (Marcus)
