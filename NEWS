@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2006, PHP 5.?.?
+?? ??? 2006, PHP 5.2.0
 - Fixed bug #37313 (sigemptyset() used without including <signal.h>).
   (jdolecek)
 
