@@ -1,3 +1,31 @@
+2006-05-05  Michael Wallner  <mike@iworks.at>
+
+    * (PHP_5_1)
+      .gdbinit:
+      - treat interfaces and classes gracefully in print_inh
+
+    * (PHP_5_1)
+      .gdbinit:
+      - add print_inh (prints a very simple class tree, ie. extensible)
+      - add print_pi (prints property_info)
+      - add ____print_str (print strings binary safely, for hash keys etc)
+
+2006-05-05  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug37251.phpt:
+      Fixed bug #37251 (deadlock when custom error handler is to catch array type
+      hint error).
+
+    * (PHP_5_1)
+      NEWS
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c:
+      Fixed bug #37313 (sigemptyset() used without including <signal.h>).
+      (jdolecek)
+
 2006-05-04  Antony Dovgal  <antony@zend.com>
 
     * ext/informix/ifx.ec
