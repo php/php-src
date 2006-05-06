@@ -900,7 +900,7 @@ static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options TSRML
 			break;
 
 			case HASH_KEY_IS_UNICODE:
-			opt_name.s = zend_unicode_to_ascii(opt_name.u, opt_name_len);
+			opt_name.s = zend_unicode_to_ascii(opt_name.u, opt_name_len TSRMLS_CC);
 			if (!opt_name.s) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not convert key from the option array");
 				return FAILURE;
