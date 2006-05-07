@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2006, PHP 5.?.?
 - Fixed bug #37313 (sigemptyset() used without including <signal.h>).
   (jdolecek)
-- Fixed bug #37346, invalid colormap format
+- Fixed bug #37346 (invalid colormap format)
 
 04 May 2006, PHP 5.1.4
 - Added "capture_peer_cert" and "capture_peer_cert_chain" context options
