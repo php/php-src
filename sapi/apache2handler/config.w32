@@ -16,3 +16,20 @@ if (PHP_APACHE2HANDLER != "no") {
 		WARNING("Could not find apache2 libraries/headers");
 	}
 }
+
+ARG_ENABLE('apache2-2handler', 'Build Apache 2.2.x handler', 'no');
+
+if (PHP_APACHE2_2HANDLER != "no") {
+	if (CHECK_HEADER_ADD_INCLUDE("httpd.h", "CFLAGS_APACHE2_2HANDLER", PHP_PHP_BUILD + "\\include\\apache2_2") &&
+			CHECK_LIB("libhttpd.lib", "apache2_2handler", PHP_PHP_BUILD + "\\lib\\apache2_2") &&
+			CHECK_LIB("libapr-1.lib", "apache2_2handler", PHP_PHP_BUILD + "\\lib\\apache2_2") &&
+			CHECK_LIB("libaprutil-1.lib", "apache2_2handler", PHP_PHP_BUILD + "\\lib\\apache2_2")
+			) {
+		SAPI('apache2_2handler', 'mod_php5.c sapi_apache2.c apache_config.c php_functions.c',
+				'php' + PHP_VERSION + 'apache2_2.dll',
+				'/D PHP_APACHE2_EXPORTS /I win32',
+				'sapi\\apache2_2handler');
+	} else {
+		WARNING("Could not find apache2.2 libraries/headers");
+	}
+}
