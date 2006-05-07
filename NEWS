@@ -4,6 +4,7 @@ PHP 4                                                                      NEWS
 - Updated PCRE to version 6.6. (Andrei)
 - Added overflow checks to wordwrap() function. (Ilia)
 - Added a check for special characters in the session name. (Ilia)
+- Fixed bug #37348 (make PEAR install ignore open_basedir). (Ilia)
 - Fixed bug #37162 (wddx does not build as a shared extension).  
   (jdolecek at NetBSD dot org, Ilia)
 - Fixed bug #37046 (foreach breaks static scope). (Dmitry)
