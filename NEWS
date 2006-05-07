@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, PHP 5.2.0
+- Fixed bug #37348 (make PEAR install ignore open_basedir). (Ilia)
 - Fixed bug #37313 (sigemptyset() used without including <signal.h>).
   (jdolecek)
 - Fixed bug #37244 (Added strict flag to base64_decode() that enforces 
