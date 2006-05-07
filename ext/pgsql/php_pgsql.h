@@ -125,6 +125,7 @@ PHP_FUNCTION(pg_field_type);
 PHP_FUNCTION(pg_field_type_oid);
 PHP_FUNCTION(pg_field_prtlen);
 PHP_FUNCTION(pg_field_is_null);
+PHP_FUNCTION(pg_field_table);
 /* async message functions */
 PHP_FUNCTION(pg_get_notify);
 PHP_FUNCTION(pg_get_pid);
