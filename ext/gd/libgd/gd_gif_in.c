@@ -44,7 +44,7 @@ static int set_verbose(void)
 #define LOCALCOLORMAP  0x80
 #define BitSet(byte, bit)      (((byte) & (bit)) == (bit))
 
-#define        ReadOK(file,buffer,len) (gdGetBuf(buffer, len, file) != 0)
+#define        ReadOK(file,buffer,len) (gdGetBuf(buffer, len, file) > 0)
 
 #define LM_to_uint(a,b)                        (((b)<<8)|(a))
 
@@ -184,14 +184,18 @@ gdImageCreateFromGifCtx(gdIOCtxPtr fd)
 
                imw = LM_to_uint(buf[4],buf[5]);
                imh = LM_to_uint(buf[6],buf[7]);
-	       if (!(im = gdImageCreate(imw, imh))) {
-			 return 0;
-	       }
-               im->interlace = BitSet(buf[8], INTERLACE);
+
                if (! useGlobalColormap) {
                        if (ReadColorMap(fd, bitPixel, localColorMap)) {
                                  return 0;
                        }
+			   }
+
+			   if (!(im = gdImageCreate(imw, imh))) {
+				   return 0;
+			   }
+               im->interlace = BitSet(buf[8], INTERLACE);
+               if (! useGlobalColormap) {
                        ReadImage(im, fd, imw, imh, localColorMap,
                                  BitSet(buf[8], INTERLACE));
                                  /*1.4//imageCount != imageNumber); */
