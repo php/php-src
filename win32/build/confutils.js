@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1 2006-01-01 12:50:20 sniper Exp $
+// $Id: confutils.js,v 1.60.2.1.2.1 2006-05-07 00:04:56 edink Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -871,14 +871,20 @@ function generate_version_info_resource(makefiletarget, creditspath)
 	return resname;
 }
 
-function SAPI(sapiname, file_list, makefiletarget, cflags)
+function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 {
 	var SAPI = sapiname.toUpperCase();
 	var ldflags;
 	var resname;
 	var ld = "@$(LD)";
 
-	STDOUT.WriteLine("Enabling SAPI " + configure_module_dirname);
+	if (typeof(obj_dir) == "undefined") {
+		sapiname_for_printing = configure_module_dirname;
+	} else {
+		sapiname_for_printing = configure_module_dirname + " (via " + obj_dir + ")";
+	}
+
+	STDOUT.WriteLine("Enabling SAPI " + sapiname_for_printing);
 
 	MFO.WriteBlankLines(1);
 	MFO.WriteLine("# objects for SAPI " + sapiname);
@@ -888,7 +894,7 @@ function SAPI(sapiname, file_list, makefiletarget, cflags)
 		ADD_FLAG('CFLAGS_' + SAPI, cflags);
 	}
 
-	ADD_SOURCES(configure_module_dirname, file_list, sapiname);
+	ADD_SOURCES(configure_module_dirname, file_list, sapiname, obj_dir);
 	MFO.WriteBlankLines(1);
 	MFO.WriteLine("# SAPI " + sapiname);
 	MFO.WriteBlankLines(1);
@@ -897,7 +903,7 @@ function SAPI(sapiname, file_list, makefiletarget, cflags)
 	resname = generate_version_info_resource(makefiletarget, configure_module_dirname);
 	
 	MFO.WriteLine(makefiletarget + ": $(BUILD_DIR)\\" + makefiletarget);
-	MFO.WriteLine("\t@echo SAPI " + configure_module_dirname + " build complete");
+	MFO.WriteLine("\t@echo SAPI " + sapiname_for_printing + " build complete");
 	MFO.WriteLine("$(BUILD_DIR)\\" + makefiletarget + ": $(DEPS_" + SAPI + ") $(" + SAPI + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname);
 
 	if (makefiletarget.match(new RegExp("\\.dll$"))) {
