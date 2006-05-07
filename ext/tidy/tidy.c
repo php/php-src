@@ -1220,7 +1220,7 @@ PHP_FUNCTION(tidy_get_release)
 
 
 #if HAVE_TIDYOPTGETDOC
-/* {{{ proto string tidy_get_opt_doc(tidy resource, string optname)
+/* {{{ proto string tidy_get_opt_doc(tidy resource, string optname) U
    Returns the documentation for the given option name */
 PHP_FUNCTION(tidy_get_opt_doc)
 {
@@ -1251,7 +1251,7 @@ PHP_FUNCTION(tidy_get_opt_doc)
 	}
 
 	if ( (optval = (char *) tidyOptGetDoc(obj->ptdoc->doc, opt)) ) {
-		RETURN_STRING(optval, 1);
+		RETURN_ASCII_STRING(optval, 1);
 	}
 
 	RETURN_FALSE;
@@ -1260,8 +1260,8 @@ PHP_FUNCTION(tidy_get_opt_doc)
 #endif
 
 
-/* {{{ proto array tidy_get_config()
-   Get current Tidy configuarion */
+/* {{{ proto array tidy_get_config() U
+   Get current Tidy configuration */
 PHP_FUNCTION(tidy_get_config)
 {
 	TidyIterator itOpt;
@@ -1282,7 +1282,7 @@ PHP_FUNCTION(tidy_get_config)
 		opt_value = php_tidy_get_opt_val(obj->ptdoc, opt, &optt TSRMLS_CC);
 		switch (optt) {
 			case TidyString:
-				add_assoc_string(return_value, opt_name, (char*)opt_value, 0);
+				add_assoc_ascii_string(return_value, opt_name, (char*)opt_value, 0);
 				break;
 
 			case TidyInteger:
@@ -1414,7 +1414,7 @@ PHP_FUNCTION(tidy_getopt)
 	optval = php_tidy_get_opt_val(obj->ptdoc, opt, &optt TSRMLS_CC);
 	switch (optt) {
 		case TidyString:
-			RETURN_STRING((char *)optval, 0);
+			RETURN_ASCII_STRING((char *)optval, 0);
 			break;
 
 		case TidyInteger:
