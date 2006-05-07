@@ -19,3 +19,7 @@ tidy.default_config=
 Current Value of 'tidy-mark': bool(false)
 Current Value of 'error-file': string(0) ""
 Current Value of 'tab-size': int(8)
+--UEXPECT--
+Current Value of 'tidy-mark': bool(false)
+Current Value of 'error-file': unicode(0) ""
+Current Value of 'tab-size': int(8)
