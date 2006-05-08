@@ -548,7 +548,6 @@ PHP_FUNCTION(char_get_property_name)
 	} else {
 		RETURN_FALSE;
 	}
-
 }
 
 PHP_FUNCTION(char_get_property_from_name)
@@ -579,6 +578,60 @@ PHP_FUNCTION(char_get_property_from_name)
 	}
 
 	RETURN_LONG(prop);
+}
+
+PHP_FUNCTION(char_get_property_value_name)
+{
+	long 		 prop;
+	long		 value;
+	long		 name_choice = U_LONG_PROPERTY_NAME;
+	const char	*name;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll|l", &prop, &value, &name_choice) == FAILURE) {
+		return;
+	}
+
+	if (name_choice < 0) {
+		name_choice = U_LONG_PROPERTY_NAME;
+	}
+
+	name = u_getPropertyValueName((UProperty) prop, (int32_t) value, (UPropertyNameChoice) name_choice);
+	if (name) {
+		RETURN_ASCII_STRING((char *)name, ZSTR_DUPLICATE);
+	} else {
+		RETURN_FALSE;
+	}
+}
+
+PHP_FUNCTION(char_get_property_value_from_name)
+{
+	long		prop;
+	void	   *name;
+	int			name_len;
+	zend_uchar	name_type;
+	char	   *buf;
+	long		value;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lt", &prop, &name, &name_len, &name_type) == FAILURE) {
+		return;
+	}
+
+	if (name_type == IS_UNICODE) {
+		buf = zend_unicode_to_ascii(name, name_len TSRMLS_CC);
+		if (buf == NULL) {
+			php_error(E_WARNING, "Property value name has to consist only of ASCII characters");
+			RETURN_FALSE;
+		}
+	} else {
+		buf = (char *) name;
+	}
+
+	value = u_getPropertyValueEnum((UProperty)prop, buf);
+	if (name_type == IS_UNICODE) {
+		efree(buf);
+	}
+
+	RETURN_LONG(value);
 }
 
 /* }}} */
