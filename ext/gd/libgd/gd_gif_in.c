@@ -78,7 +78,7 @@ static void ReadImage (gdImagePtr im, gdIOCtx *fd, int len, int height, unsigned
 
 int ZeroDataBlock;
 
-gdImagePtr gdImageCreateFromGifSource(gdSourcePtr inSource)
+gdImagePtr gdImageCreateFromGifSource(gdSourcePtr inSource) /* {{{ */
 {
 	gdIOCtx         *in = gdNewSSCtx(inSource, NULL);
 	gdImagePtr      im;
@@ -89,9 +89,9 @@ gdImagePtr gdImageCreateFromGifSource(gdSourcePtr inSource)
 
 	return im;
 }
+/* }}} */
 
-	gdImagePtr
-gdImageCreateFromGif(FILE *fdFile)
+gdImagePtr gdImageCreateFromGif(FILE *fdFile) /* {{{ */
 {
 	gdIOCtx		*fd = gdNewFileCtx(fdFile);
 	gdImagePtr    	im = 0;
@@ -102,9 +102,9 @@ gdImageCreateFromGif(FILE *fdFile)
 
 	return im;
 }
+/* }}} */
 
-	gdImagePtr
-gdImageCreateFromGifCtx(gdIOCtxPtr fd)
+gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr fd) /* {{{ */
 {
 	/* 1.4       int imageNumber; */
 	int BitPixel;
@@ -229,8 +229,9 @@ terminated:
 	}
 	return im;
 }
+/* }}} */
 
-static int ReadColorMap(gdIOCtx *fd, int number, unsigned char (*buffer)[256])
+static int ReadColorMap(gdIOCtx *fd, int number, unsigned char (*buffer)[256]) /* {{{ */
 {
 	int             i;
 	unsigned char   rgb[3];
@@ -248,8 +249,9 @@ static int ReadColorMap(gdIOCtx *fd, int number, unsigned char (*buffer)[256])
 
 	return FALSE;
 }
+/* }}} */
 
-static int DoExtension(gdIOCtx *fd, int label, int *Transparent)
+static int DoExtension(gdIOCtx *fd, int label, int *Transparent) /* {{{ */
 {
 	static unsigned char     buf[256];
 
@@ -273,8 +275,9 @@ static int DoExtension(gdIOCtx *fd, int label, int *Transparent)
 
 	return FALSE;
 }
+/* }}} */
 
-static int GetDataBlock_(gdIOCtx *fd, unsigned char *buf)
+static int GetDataBlock_(gdIOCtx *fd, unsigned char *buf) /* {{{ */
 {
 	unsigned char   count;
 
@@ -290,8 +293,9 @@ static int GetDataBlock_(gdIOCtx *fd, unsigned char *buf)
 
 	return count;
 }
+/* }}} */
 
-static int GetDataBlock(gdIOCtx *fd, unsigned char *buf)
+static int GetDataBlock(gdIOCtx *fd, unsigned char *buf) /* {{{ */
 {
 	int rv;
 	int i;
@@ -312,8 +316,9 @@ static int GetDataBlock(gdIOCtx *fd, unsigned char *buf)
 	}
 	return(rv);
 }
+/* }}} */
 
-static int GetCode_(gdIOCtx *fd, int code_size, int flag)
+static int GetCode_(gdIOCtx *fd, int code_size, int flag) /* {{{ */
 {
 	static unsigned char    buf[280];
 	static int              curbit, lastbit, done, last_byte;
@@ -353,7 +358,7 @@ static int GetCode_(gdIOCtx *fd, int code_size, int flag)
 	return ret;
 }
 
-static int GetCode(gdIOCtx *fd, int code_size, int flag)
+static int GetCode(gdIOCtx *fd, int code_size, int flag) /* {{{ */
 {
 	int rv;
 
@@ -361,9 +366,10 @@ static int GetCode(gdIOCtx *fd, int code_size, int flag)
 	if (VERBOSE) php_gd_error_ex(E_NOTICE, "[GetCode(,%d,%d) returning %d]",code_size,flag,rv);
 	return(rv);
 }
+/* }}} */
 
 #define STACK_SIZE ((1<<(MAX_LWZ_BITS))*2)
-static int LWZReadByte_(gdIOCtx *fd, int flag, int input_code_size)
+static int LWZReadByte_(gdIOCtx *fd, int flag, int input_code_size) /* {{{ */
 {
 	static int      fresh = FALSE;
 	int             code, incode;
@@ -482,8 +488,9 @@ static int LWZReadByte_(gdIOCtx *fd, int flag, int input_code_size)
 	}
 	return code;
 }
+/* }}} */
 
-static int LWZReadByte(gdIOCtx *fd, int flag, int input_code_size)
+static int LWZReadByte(gdIOCtx *fd, int flag, int input_code_size) /* {{{ */
 {
 	int rv;
 
@@ -491,8 +498,9 @@ static int LWZReadByte(gdIOCtx *fd, int flag, int input_code_size)
 	if (VERBOSE) php_gd_error_ex(E_NOTICE, "[LWZReadByte(,%d,%d) returning %d]",flag,input_code_size,rv);
 	return(rv);
 }
+/* }}} */
 
-static void ReadImage(gdImagePtr im, gdIOCtx *fd, int len, int height, unsigned char (*cmap)[256], int interlace) /*1.4//, int ignore) */
+static void ReadImage(gdImagePtr im, gdIOCtx *fd, int len, int height, unsigned char (*cmap)[256], int interlace) /* {{{ */ /*1.4//, int ignore) */
 {
 	unsigned char   c;
 	int             v;
@@ -573,4 +581,4 @@ fini:
 		/* Ignore extra */
 	}
 }
-
+/* }}} */
