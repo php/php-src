@@ -1,3 +1,69 @@
+2006-05-07  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_1)
+      NEWS:
+      - +()
+
+    * (PHP_5_1)
+      NEWS:
+      - entry for #37346, invalid colormap format
+
+    * ext/gd/libgd/gd_gif_in.c
+      ext/gd/tests/bug37346.gif
+      ext/gd/tests/bug37346.phpt:
+      - MFB: #37346, invalid colormap format
+
+    * (PHP_5_1)
+      ext/gd/libgd/gd_gif_in.c
+      ext/gd/tests/bug37346.gif
+      ext/gd/tests/bug37346.phpt:
+      - MF52, #37346, invalid colormap format
+
+2006-05-07  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_2)
+      ext/mbstring/config.m4:
+      INSTALL_HEADERS takes absolute filenames there in the second arg.
+      This makes pecl/mailparse build again
+
+2006-05-07  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd_gif_in.c
+      ext/gd/tests/bug37346.gif
+      ext/gd/tests/bug37346.gif
+      ext/gd/tests/bug37346.gif
+      ext/gd/tests/bug37346.phpt
+      ext/gd/tests/bug37346.phpt
+      ext/gd/tests/bug37346.phpt:
+      - #37346, invalid colormap format
+
+2006-05-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      pear/Makefile.frag:
+      MFH: Fixed bug #37348 (make PEAR install ignore open_basedir).
+
+    * (PHP_5_2)
+      NEWS
+      pear/Makefile.frag:
+      Fixed bug #37348 (make PEAR install ignore open_basedir).
+
+2006-05-07  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_5_2)
+      ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h:
+      MFH: Added pg_field_table() as per req: #36750
+
+    * sapi/apache2handler/config.w32:
+      MFB: Enable parallel build against Apache 2.2 libs and headers
+
+    * (PHP_5_2)
+      sapi/apache2handler/config.w32:
+      Enable parallel build against Apache 2.2 libs and headers
+
 2006-05-06  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
