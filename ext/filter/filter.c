@@ -144,8 +144,8 @@ static PHP_INI_MH(OnUpdateFlags)
 }
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("filter.default",   "string", PHP_INI_ALL, UpdateDefaultFilter, default_filter, zend_filter_globals, filter_globals)
-	PHP_INI_ENTRY("filter.default_flags", NULL,     PHP_INI_ALL, OnUpdateFlags)
+	STD_PHP_INI_ENTRY("filter.default",   "string", PHP_INI_SYSTEM|PHP_INI_PERDIR, UpdateDefaultFilter, default_filter, zend_filter_globals, filter_globals)
+	PHP_INI_ENTRY("filter.default_flags", NULL,     PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateFlags)
 PHP_INI_END()
 /* }}} */
 
@@ -236,6 +236,7 @@ PHP_MINIT_FUNCTION(filter)
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_NO_PRIV_RANGE", FILTER_FLAG_NO_PRIV_RANGE, CONST_CS | CONST_PERSISTENT);
 
 	sapi_register_input_filter(php_sapi_filter);
+
 	return SUCCESS;
 }
 /* }}} */
@@ -428,6 +429,7 @@ static void php_zval_filter_recursive(zval *value, long filter, long flags, zval
 static zval * php_filter_get_storage(long arg TSRMLS_DC)
 {
 	zval * array_ptr = NULL;
+
 	switch (arg) {
 		case PARSE_GET:
 			array_ptr = IF_G(get_array);
