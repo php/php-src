@@ -36,6 +36,7 @@ typedef struct filter_list_entry {
 	void (*function)(PHP_INPUT_FILTER_PARAM_DECL);
 } filter_list_entry;
 
+/* {{{ filter_list */
 filter_list_entry filter_list[] = {
 	{ "int",             FILTER_VALIDATE_INT,           php_filter_int             },
 	{ "boolean",         FILTER_VALIDATE_BOOLEAN,       php_filter_boolean         },
@@ -59,6 +60,7 @@ filter_list_entry filter_list[] = {
 
 	{ "callback",        FILTER_CALLBACK,               php_filter_callback        },
 };
+/* }}} */
 
 #ifndef PARSE_ENV
 #define PARSE_ENV 4
@@ -113,9 +115,7 @@ zend_module_entry filter_module_entry = {
 ZEND_GET_MODULE(filter)
 #endif
 
-/* {{{ UpdateDefaultFilter
- */
-static PHP_INI_MH(UpdateDefaultFilter)
+static PHP_INI_MH(UpdateDefaultFilter) /* {{{ */
 {
 	int i, size = sizeof(filter_list) / sizeof(filter_list_entry);
 
@@ -149,9 +149,7 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
-/* {{{ php_filter_init_globals
-*/
-static void php_filter_init_globals(zend_filter_globals *filter_globals)
+static void php_filter_init_globals(zend_filter_globals *filter_globals) /* {{{ */
 {
 	filter_globals->post_array = NULL;
 	filter_globals->get_array = NULL;
@@ -283,7 +281,7 @@ PHP_MINFO_FUNCTION(filter)
 }
 /* }}} */
 
-static filter_list_entry php_find_filter(long id)
+static filter_list_entry php_find_filter(long id) /* {{{ */
 {
 	int i, size = sizeof(filter_list) / sizeof(filter_list_entry);
 
@@ -301,8 +299,9 @@ static filter_list_entry php_find_filter(long id)
 	/* To shut up GCC */
 	return filter_list[0];
 }
+/* }}} */
 
-static void php_zval_filter(zval *value, long filter, long flags, zval *options, char* charset TSRMLS_DC)
+static void php_zval_filter(zval *value, long filter, long flags, zval *options, char* charset TSRMLS_DC) /* {{{ */
 {
 	filter_list_entry  filter_func;
 
@@ -318,10 +317,9 @@ static void php_zval_filter(zval *value, long filter, long flags, zval *options,
 
 	filter_func.function(value, flags, options, charset TSRMLS_CC);
 }
+/* }}} */
 
-/* {{{ php_sapi_filter(int arg, char *var, char **val, unsigned int val_len, unsigned *new_val_len)
- */
-static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int val_len, unsigned int *new_val_len TSRMLS_DC)
+static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int val_len, unsigned int *new_val_len TSRMLS_DC) /* {{{ */
 {
 	zval  new_var, raw_var;
 	zval *array_ptr = NULL, *orig_array_ptr = NULL;
@@ -407,9 +405,7 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 }
 /* }}} */
 
-/* {{{ static void php_zval_filter_recursive(zval *array, long filter, long flags, char *charset TSRMLS_DC)
- */
-static void php_zval_filter_recursive(zval *value, long filter, long flags, zval *options, char *charset TSRMLS_DC)
+static void php_zval_filter_recursive(zval *value, long filter, long flags, zval *options, char *charset TSRMLS_DC) /* {{{ */
 {
 	zval **element;
 	HashPosition pos;
@@ -426,7 +422,7 @@ static void php_zval_filter_recursive(zval *value, long filter, long flags, zval
 }
 /* }}} */
 
-static zval * php_filter_get_storage(long arg TSRMLS_DC)
+static zval * php_filter_get_storage(long arg TSRMLS_DC) /* {{{ */
 {
 	zval * array_ptr = NULL;
 
@@ -450,8 +446,11 @@ static zval * php_filter_get_storage(long arg TSRMLS_DC)
 
 	return array_ptr;
 }
+/* }}} */
 
 /* {{{ proto mixed input_has_variable(constant type, string variable_name)
+ * Returns true if the variable with the name *name* exists in source
+ * or false otherwise.
  */
 PHP_FUNCTION(input_has_variable)
 {
@@ -486,6 +485,9 @@ PHP_FUNCTION(input_has_variable)
 /* }}} */
 
 /* {{{ proto mixed input_get(constant type, string variable_name [, int filter [, mixed flags [, string charset]]])
+ * Returns the filtered variable *$name* from source `type`. It uses the
+ * filter as specified in `filter` with a constant, and additional options
+ * to the filter through `flags`.
  */
 PHP_FUNCTION(input_get)
 {
@@ -621,7 +623,7 @@ PHP_FUNCTION(input_get)
 /* }}} */
 
 /* {{{ proto mixed input_get_args(array definition, constant type [, array data])
- * returns an array with all arguments defined in 'definition'. The key is used
+ * Returns an array with all arguments defined in 'definition'. The key is used
  * as the name of the argument. The value can be either an integer (flags) or
  * an of options. This array can contain the 'filter' type, the 'flags',
  * the 'otptions' or the 'charset'
