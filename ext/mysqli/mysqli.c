@@ -43,6 +43,13 @@ static HashTable mysqli_result_properties;
 static HashTable mysqli_stmt_properties;
 static HashTable mysqli_warning_properties;
 
+zend_class_entry *mysqli_link_class_entry;
+zend_class_entry *mysqli_stmt_class_entry;
+zend_class_entry *mysqli_result_class_entry;
+zend_class_entry *mysqli_driver_class_entry;
+zend_class_entry *mysqli_warning_class_entry;
+zend_class_entry *mysqli_exception_class_entry;
+
 extern void php_mysqli_connect(INTERNAL_FUNCTION_PARAMETERS);
 
 typedef int (*mysqli_read_t)(mysqli_object *obj, zval **retval TSRMLS_DC);
