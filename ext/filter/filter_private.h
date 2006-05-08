@@ -23,6 +23,9 @@
 
 #define FILTER_FLAG_NONE                    0x0000
 
+#define FILTER_FLAG_ARRAY			        0x1000000
+#define FILTER_FLAG_SCALAR		            0x2000000
+
 #define FILTER_FLAG_ALLOW_OCTAL             0x0001
 #define FILTER_FLAG_ALLOW_HEX               0x0002
 

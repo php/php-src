@@ -14,6 +14,7 @@
   +----------------------------------------------------------------------+
   | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
   |          Derick Rethans <derick@php.net>                             |
+  |          Pierre-A. Joye <pierre@php.net>                             |
   +----------------------------------------------------------------------+
 */
 
@@ -58,7 +59,7 @@ filter_list_entry filter_list[] = {
 
 	{ "callback",        FILTER_CALLBACK,               php_filter_callback        },
 };
-	
+
 #ifndef PARSE_ENV
 #define PARSE_ENV 4
 #endif
@@ -71,12 +72,17 @@ filter_list_entry filter_list[] = {
 #define PARSE_SESSION 6
 #endif
 
+#ifndef PARSE_DATA
+#define PARSE_DATA 7
+#endif
+
 static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int val_len, unsigned int *new_val_len TSRMLS_DC);
 
 /* {{{ filter_functions[]
  */
 zend_function_entry filter_functions[] = {
 	PHP_FE(input_get, NULL)
+	PHP_FE(input_get_args, NULL)
 	PHP_FE(input_filters_list, NULL)
 	PHP_FE(input_has_variable, NULL)
 	PHP_FE(input_name_to_filter, NULL)
@@ -167,14 +173,18 @@ PHP_MINIT_FUNCTION(filter)
 
 	REGISTER_INI_ENTRIES();
 
-	REGISTER_LONG_CONSTANT("INPUT_POST", PARSE_POST, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("INPUT_GET", PARSE_GET, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("INPUT_COOKIE", PARSE_COOKIE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("INPUT_ENV", PARSE_ENV, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("INPUT_SERVER", PARSE_SERVER, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("INPUT_SESSION", PARSE_SESSION, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INPUT_POST",	PARSE_POST, 	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INPUT_GET",		PARSE_GET, 		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INPUT_COOKIE",	PARSE_COOKIE, 	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INPUT_ENV",		PARSE_ENV, 		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INPUT_SERVER",	PARSE_SERVER, 	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INPUT_SESSION", PARSE_SESSION, 	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INPUT_DATA", 	PARSE_DATA, 	CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_NONE", FILTER_FLAG_NONE, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_SCALAR", FILTER_FLAG_SCALAR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_ARRAY", FILTER_FLAG_ARRAY, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_INT", FILTER_VALIDATE_INT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_BOOLEAN", FILTER_VALIDATE_BOOLEAN, CONST_CS | CONST_PERSISTENT);
@@ -294,7 +304,7 @@ static filter_list_entry php_find_filter(long id)
 static void php_zval_filter(zval *value, long filter, long flags, zval *options, char* charset TSRMLS_DC)
 {
 	filter_list_entry  filter_func;
-	
+
 	filter_func = php_find_filter(filter);
 
 	if (!filter_func.id) {
@@ -415,9 +425,29 @@ static void php_zval_filter_recursive(zval *value, long filter, long flags, zval
 }
 /* }}} */
 
-#define FIND_SOURCE(a,t)                              \
-		array_ptr = IF_G(a);                          \
-		break;
+static zval * php_filter_get_storage(long arg TSRMLS_DC)
+{
+	zval * array_ptr = NULL;
+	switch (arg) {
+		case PARSE_GET:
+			array_ptr = IF_G(get_array);
+			break;
+		case PARSE_POST:
+			array_ptr = IF_G(post_array);
+			break;
+		case PARSE_COOKIE:
+			array_ptr = IF_G(cookie_array);
+			break;
+		case PARSE_SERVER:
+			array_ptr = IF_G(server_array);
+			break;
+		case PARSE_ENV:
+			array_ptr = IF_G(env_array);
+			break;
+	}
+
+	return array_ptr;
+}
 
 /* {{{ proto mixed input_has_variable(constant type, string variable_name)
  */
@@ -435,13 +465,7 @@ PHP_FUNCTION(input_has_variable)
 		return;
 	}
 
-	switch (arg) {
-		case PARSE_GET:     FIND_SOURCE(get_array,     TRACK_VARS_GET)
-		case PARSE_POST:    FIND_SOURCE(post_array,    TRACK_VARS_POST)
-		case PARSE_COOKIE:  FIND_SOURCE(cookie_array,  TRACK_VARS_COOKIE)
-		case PARSE_SERVER:  FIND_SOURCE(server_array,  TRACK_VARS_SERVER)
-		case PARSE_ENV:     FIND_SOURCE(env_array,     TRACK_VARS_ENV)
-	}
+	array_ptr = php_filter_get_storage(arg TSRMLS_CC);
 
 	if (!array_ptr) {
 		RETURN_FALSE;
@@ -495,17 +519,23 @@ PHP_FUNCTION(input_get)
 	}
 
 	switch(arg) {
-		case PARSE_GET:     FIND_SOURCE(get_array,     TRACK_VARS_GET)
-		case PARSE_POST:    FIND_SOURCE(post_array,    TRACK_VARS_POST)
-		case PARSE_COOKIE:  FIND_SOURCE(cookie_array,  TRACK_VARS_COOKIE)
-		case PARSE_SERVER:  FIND_SOURCE(server_array,  TRACK_VARS_SERVER)
-		case PARSE_ENV:     FIND_SOURCE(env_array,     TRACK_VARS_ENV)
+		case PARSE_GET:
+		case PARSE_POST:
+		case PARSE_COOKIE:
+		case PARSE_SERVER:
+		case PARSE_ENV:
+			array_ptr = php_filter_get_storage(arg TSRMLS_CC);
+			break;
 
 		case PARSE_SESSION:
 			/* FIXME: Implement session source */
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "INPUT_SESSION not implemented");
 			break;
 
 		case PARSE_REQUEST:
+			/* FIXME: Implement session source */
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "INPUT_SESSION not implemented");
+			return;
 			if (PG(variables_order)) {
 				zval **a_ptr = &array_ptr;
 				char *p, *variables_order = PG(variables_order);
@@ -541,14 +571,13 @@ PHP_FUNCTION(input_get)
 						a_ptr = &array_ptr2;
 						continue;
 					}
-					if (array_ptr2 && !array_ptr3) { 
+					if (array_ptr2 && !array_ptr3) {
 						a_ptr = &array_ptr3;
 					}
 				}
 			} else {
-				FIND_SOURCE(get_array, TRACK_VARS_GET)
+				array_ptr = php_filter_get_storage(PARSE_GET);
 			}
-
 	}
 
 	if (!array_ptr) {
@@ -560,7 +589,7 @@ PHP_FUNCTION(input_get)
 		if (hash_ptr && zend_hash_find(hash_ptr, var, var_len + 1, (void **)&tmp) == SUCCESS) {
 			*return_value = **tmp;
 			found = 1;
-		} 
+		}
 	}
 
 	if (array_ptr2 && !found) {
@@ -585,6 +614,152 @@ PHP_FUNCTION(input_get)
 		php_zval_filter_recursive(return_value, filter, filter_flags, options, charset TSRMLS_CC);
 	} else {
 		RETVAL_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto mixed input_get_args(array definition, constant type [, array data])
+ * returns an array with all arguments defined in 'definition'. The key is used
+ * as the name of the argument. The value can be either an integer (flags) or
+ * an of options. This array can contain the 'filter' type, the 'flags',
+ * the 'otptions' or the 'charset'
+ */
+PHP_FUNCTION(input_get_args)
+{
+	long        arg, filter = FILTER_DEFAULT;
+	char       *charset = NULL;
+	zval      **tmp, ** option;
+	int         filter_flags = FILTER_FLAG_SCALAR;
+	zval       *options = NULL, *temparray = NULL;
+
+	zval *args_array, *values;
+	HashTable *args_hash;
+	HashPosition pos;
+
+	long args_from = 0;
+	long elm_count;
+	char *key;
+	unsigned int key_len;
+	unsigned long index;
+
+	/* pointers to the zval array GET, POST,... */
+	zval       *array_ptr = NULL;
+	zval **element;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "al|a", &args_array, &args_from, &values) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	args_hash = HASH_OF(args_array);
+	elm_count = zend_hash_num_elements(args_hash);
+
+	if (elm_count < 1) {
+		RETURN_NULL();
+	}
+
+	switch (args_from) {
+		case PARSE_GET:
+		case PARSE_POST:
+		case PARSE_COOKIE:
+		case PARSE_SERVER:
+		case PARSE_ENV:
+			array_ptr = php_filter_get_storage(arg TSRMLS_CC);
+			break;
+
+		case PARSE_DATA:
+			array_ptr = values;
+			break;
+
+		case PARSE_SESSION:
+			/* FIXME: Implement session source */
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "INPUT_SESSION not implemented");
+			break;
+	}
+
+	if (!array_ptr) {
+		RETURN_FALSE;
+	}
+
+	HashTable * g_hash = HASH_OF(array_ptr);
+	zend_hash_internal_pointer_reset_ex(g_hash, &pos);
+	array_init(return_value);
+
+	for (zend_hash_internal_pointer_reset_ex(args_hash, &pos);
+			zend_hash_get_current_data_ex(args_hash, (void **) &element, &pos) == SUCCESS;
+			zend_hash_move_forward_ex(args_hash, &pos)) {
+
+		if (zend_hash_get_current_key_ex(args_hash, &key, &key_len, &index, 0, &pos) != HASH_KEY_IS_STRING) {
+			zval_dtor(return_value);
+			RETURN_FALSE;
+		}
+
+		if (g_hash && zend_hash_find(g_hash, key, key_len, (void **)&tmp) == SUCCESS) {
+			if (Z_TYPE_PP(element) != IS_ARRAY) {
+				convert_to_long(*element);
+				filter = Z_LVAL_PP(element);
+			} else {
+				if (zend_hash_find(HASH_OF(*element), "filter", sizeof("filter"), (void **)&option) == SUCCESS) {
+					convert_to_long(*option);
+					filter = Z_LVAL_PP(option);
+				}
+
+				if (zend_hash_find(HASH_OF(*element), "options", sizeof("options"), (void **)&option) == SUCCESS) {
+					if (Z_TYPE_PP(option) == IS_ARRAY) {
+						options = *option;
+					}
+				} else {
+					options = NULL;
+				}
+
+				if (zend_hash_find(HASH_OF(*element), "flags", sizeof("flags"), (void **)&option) == SUCCESS) {
+
+					switch (Z_TYPE_PP(option)) {
+						case IS_ARRAY:
+							break;
+						default:
+							convert_to_long(*option);
+							filter_flags = Z_LVAL_PP(option);
+							break;
+					}
+				} else {
+					filter_flags = FILTER_FLAG_SCALAR;
+				}
+
+				if (filter_flags & FILTER_FLAG_SCALAR && Z_TYPE_PP(tmp) == IS_ARRAY) {
+					/* asked for scalar and found an array do not test further */
+					add_assoc_bool(return_value, key, 0);
+					continue;
+				}
+
+				if (zend_hash_find(HASH_OF(*element), "charset", sizeof("charset"), (void **)&option) == SUCCESS) {
+					convert_to_string(*option);
+					charset = Z_STRVAL_PP(option);
+				}
+			}
+
+			if (filter_flags & FILTER_FLAG_SCALAR) {
+				php_zval_filter(*tmp, filter, filter_flags, options, charset TSRMLS_CC);
+			} else {
+				php_zval_filter_recursive(*tmp, filter, filter_flags, options, charset TSRMLS_CC);
+
+				/* ARRAY always returns an array */
+				if (Z_TYPE_PP(tmp) != IS_ARRAY) {
+					ALLOC_INIT_ZVAL(temparray);
+					array_init(temparray);
+					add_next_index_zval(temparray, *tmp);
+					*tmp = temparray;
+				}
+			}
+
+			if (Z_TYPE_PP(tmp) == IS_NULL) {
+				add_assoc_bool(return_value, key, 0);
+			} else {
+				add_assoc_zval(return_value, key, *tmp);
+			}
+		} else {
+			add_assoc_null(return_value, key);
+		}
+		filter_flags = 0;
 	}
 }
 /* }}} */

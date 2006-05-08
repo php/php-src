@@ -58,6 +58,12 @@ mixed *input_get* (int *source*, string *name*, [, int *filter* [, mixed *filter
     filter as specified in *$filter* with a constant, and additional options
     to the filter through *$filter_options*.
 
+mixed *input_get_args* (array *definitions*, int *source*, [, array *data*]);
+    Returns an array with all filtered variables defined in 'definition'.
+    The keys are used as the name of the argument. The value can be either
+    an integer (flags) or an array of options. This array can contain 
+    the 'filter' type, the 'flags', the 'otptions' or the 'charset'
+
 bool *input_has_variable (int *source*, string *name*);
     Returns *true* if the variable with the name *name* exists in *source*, or
     *false* otherwise.
