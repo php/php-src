@@ -578,7 +578,7 @@ PHP_FUNCTION(input_get)
 					}
 				}
 			} else {
-				array_ptr = php_filter_get_storage(PARSE_GET);
+				array_ptr = php_filter_get_storage(PARSE_GET TSRMLS_CC);
 			}
 	}
 
