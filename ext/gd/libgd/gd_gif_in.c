@@ -147,6 +147,9 @@ gdImageCreateFromGifCtx(gdIOCtxPtr fd)
        Background      = buf[5];
        AspectRatio     = buf[6];
 
+		imw = LM_to_uint(buf[0],buf[1]);
+		imh = LM_to_uint(buf[2],buf[3]);
+
        if (BitSet(buf[4], LOCALCOLORMAP)) {    /* Global Colormap */
                if (ReadColorMap(fd, BitPixel, ColorMap)) {
 			return 0;
@@ -182,8 +185,6 @@ gdImageCreateFromGifCtx(gdIOCtxPtr fd)
 
                bitPixel = 1<<((buf[8]&0x07)+1);
 
-               imw = LM_to_uint(buf[4],buf[5]);
-               imh = LM_to_uint(buf[6],buf[7]);
 
                if (! useGlobalColormap) {
                        if (ReadColorMap(fd, bitPixel, localColorMap)) {
