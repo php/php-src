@@ -25,8 +25,8 @@ of filters and mechanisms that users can use to safely access their input data.
  <date>2006-01-23</date>
  <time>10:04:15</time>
  <version>
-  <release>0.9.4</release>
-  <api>0.9.4</api>
+  <release>0.9.5</release>
+  <api>0.9.5</api>
  </version>
  <stability>
   <release>beta</release>
