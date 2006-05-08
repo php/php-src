@@ -33,10 +33,12 @@ of filters and mechanisms that users can use to safely access their input data.
   <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
- <notes>- Reimplement php_filter_callback() as exception-safe and without memleaks
-- Renamed all constants.
-- Fixed PECL bug #6124: Crash on HTML tags when using FS_STRING
-  
+ <notes>- Fixed PECL bug #6639: uppercase hexadecimal digits are not supported
+- Implemented PECL req #6641: negative values for hexadecimal and octal numbers are not supported.
+- Added support for php pcre expressions (Pierre)
+- Fixed Possible leak in internal sapi_filter (Pierre)
+- Added input_get_args, fetches all input in one call (Pierre)
+- Added FILTER_FLAG_SCALAR and FILTER_FLAG_ARRAY , allows or not array values (Pierre)
  </notes>
  <contents>
   <dir name="/">
@@ -63,4 +65,21 @@ of filters and mechanisms that users can use to safely access their input data.
  </dependencies>
  <providesextension>filter</providesextension>
  <extsrcrelease />
+ <changelog>
+   <release>
+     <date>2006-01-23</date>
+     <time>10:04:15</time>
+     <version>
+       <release>0.9.4</release>
+       <api>0.9.4</api>
+     </version>
+     <stability>
+       <release>beta</release>
+       <api>beta</api>
+     </stability>
+     <notes>- Reimplement php_filter_callback() as exception-safe and without memleaks
+- Renamed all constants.
+- Fixed PECL bug #6124: Crash on HTML tags when using FS_STRING</notes>
+   </release>
+   </changelog>
 </package>
