@@ -241,6 +241,7 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 		
 		spprintf(&q, 0, "FETCH %s %ld FROM %s", ori_str, offset, S->cursor_name);
 		S->result = PQexec(S->H->server, q);
+		efree(q);
 		status = PQresultStatus(S->result);
 
 		if (status != PGRES_COMMAND_OK && status != PGRES_TUPLES_OK) {
