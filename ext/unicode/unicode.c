@@ -292,6 +292,8 @@ zend_function_entry unicode_functions[] = {
 	PHP_FE(char_get_property_max_value, NULL)
 	PHP_FE(char_get_property_name, 		NULL)
 	PHP_FE(char_get_property_from_name,	NULL)
+	PHP_FE(char_get_property_value_name, NULL)
+	PHP_FE(char_get_property_value_from_name, NULL)
 
 	{ NULL, NULL, NULL }
 };
