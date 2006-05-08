@@ -144,7 +144,7 @@ static PHP_INI_MH(OnUpdateFlags)
 }
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("filter.default",   "string", PHP_INI_SYSTEM|PHP_INI_PERDIR, UpdateDefaultFilter, default_filter, zend_filter_globals, filter_globals)
+	STD_PHP_INI_ENTRY("filter.default",   "unsafe_raw", PHP_INI_SYSTEM|PHP_INI_PERDIR, UpdateDefaultFilter, default_filter, zend_filter_globals, filter_globals)
 	PHP_INI_ENTRY("filter.default_flags", NULL,     PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateFlags)
 PHP_INI_END()
 /* }}} */
