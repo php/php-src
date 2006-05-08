@@ -47,6 +47,7 @@ of filters and mechanisms that users can use to safely access their input data.
    <file role="doc" name="CREDITS"/>
   </filelist>
   <deps>
+    <dep type="php" rel="ge" version="5.0.0"/>
   </deps>
  </release>
 </package>
