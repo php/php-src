@@ -62,7 +62,7 @@
 
 #define FILTER_VALIDATE_ALL           0x0100
 
-#define FILTER_DEFAULT                0x0201
+#define FILTER_DEFAULT                0x0204
 #define FILTER_UNSAFE_RAW             0x0204
 
 #define FILTER_SANITIZE_STRING        0x0201
