@@ -283,9 +283,13 @@ zend_function_entry unicode_functions[] = {
 	PHP_FE(char_get_type,	 			NULL)
 	PHP_FE(char_is_valid, 				NULL)
 
-	PHP_FE(char_from_digit, NULL)
-	PHP_FE(char_from_name, NULL)
-	PHP_FE(char_get_name, NULL)
+	PHP_FE(char_from_digit, 			NULL)
+	PHP_FE(char_from_name, 				NULL)
+	PHP_FE(char_get_name, 				NULL)
+	PHP_FE(char_has_binary_property, 	NULL)
+	PHP_FE(char_get_property_value, 	NULL)
+	PHP_FE(char_get_property_min_value, NULL)
+	PHP_FE(char_get_property_max_value, NULL)
 
 	{ NULL, NULL, NULL }
 };

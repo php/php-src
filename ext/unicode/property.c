@@ -442,6 +442,84 @@ PHP_FUNCTION(char_get_name)
 
 /* }}} */
 
+/* {{{ Other property functions */
+
+PHP_FUNCTION(char_has_binary_property)
+{
+	UChar 		*str = NULL;
+	int    		 str_len;
+	long   		 prop;
+	UProperty	 uprop; 
+	int			 offset = 0;
+	zend_bool	 result = 1;
+	UChar32		 ch;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ul", &str, &str_len, &prop) == FAILURE) {
+		return;
+	}
+
+	if (str_len == 0) {
+		RETURN_FALSE;
+	}
+
+	uprop = (UProperty)prop;
+
+	while (offset < str_len && result) {
+		U16_NEXT(str, offset, str_len, ch);
+		result = u_hasBinaryProperty(ch, uprop);
+	}
+
+	RETURN_BOOL(result);
+}
+
+PHP_FUNCTION(char_get_property_value)
+{
+	UChar	   *str;
+	int			str_len;
+	int			offset = 0;
+	UChar32		ch;
+	long		prop;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ul", &str, &str_len, &prop) == FAILURE) {
+		return;
+	}
+
+	if (str_len == 0) {
+		RETURN_FALSE;
+	}
+
+	U16_NEXT(str, offset, str_len, ch);
+
+	if (prop >= UCHAR_BINARY_START && prop < UCHAR_BINARY_LIMIT) {
+		RETURN_BOOL((zend_bool)u_getIntPropertyValue(ch, (UProperty)prop));
+	} else {
+		RETURN_LONG(u_getIntPropertyValue(ch, (UProperty)prop));
+	}
+}
+
+PHP_FUNCTION(char_get_property_min_value)
+{
+	long prop;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &prop) == FAILURE) {
+		return;
+	}
+	
+	RETURN_LONG(u_getIntPropertyMinValue((UProperty)prop));
+}
+
+PHP_FUNCTION(char_get_property_max_value)
+{
+	long prop;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &prop) == FAILURE) {
+		return;
+	}
+	
+	RETURN_LONG(u_getIntPropertyMaxValue((UProperty)prop));
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

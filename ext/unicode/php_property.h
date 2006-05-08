@@ -69,10 +69,15 @@ PHP_FUNCTION(char_is_valid);
  * Other functions
  */
 
-PHP_FUNCTION(char_to_digit);
 PHP_FUNCTION(char_from_digit);
 PHP_FUNCTION(char_from_name);
 PHP_FUNCTION(char_get_name);
+
+PHP_FUNCTION(char_has_binary_property);
+PHP_FUNCTION(char_get_property_value);
+PHP_FUNCTION(char_get_property_value);
+PHP_FUNCTION(char_get_property_min_value);
+PHP_FUNCTION(char_get_property_max_value);
 
 #endif /* PHP_PROPERTY_H */
 
