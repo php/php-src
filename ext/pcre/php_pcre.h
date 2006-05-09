@@ -61,6 +61,9 @@ typedef struct {
 
 ZEND_BEGIN_MODULE_GLOBALS(pcre)
 	HashTable pcre_cache;
+	long backtrack_limit;
+	long recursion_limit;
+	int  error_code;
 ZEND_END_MODULE_GLOBALS(pcre)
 
 #ifdef ZTS
