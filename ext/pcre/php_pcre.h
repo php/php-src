@@ -64,6 +64,9 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
 
 ZEND_BEGIN_MODULE_GLOBALS(pcre)
 	HashTable pcre_cache;
+	long backtrack_limit;
+	long recursion_limit;
+	int  error_code;
 ZEND_END_MODULE_GLOBALS(pcre)
 
 #ifdef ZTS
