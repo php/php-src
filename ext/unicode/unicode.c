@@ -296,6 +296,7 @@ zend_function_entry unicode_functions[] = {
 	PHP_FE(char_get_property_value_from_name, NULL)
 
 	PHP_FE(char_enum_names, NULL)
+	PHP_FE(char_enum_types, NULL)
 
 	{ NULL, NULL, NULL }
 };
