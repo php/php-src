@@ -6,6 +6,7 @@ PHP                                                                        NEWS
 - Added support for Apache 2.2 handler in the Windows distro. (Edin)
 - Added pg_field_table() function. (Edin)
 - Add implementation of curl_multi_info_read (Brian)
+- Fixed bug #37376 (fastcgi.c compile fail with gcc 2.95.4). (Ilia)
 - Fixed bug #37348 (make PEAR install ignore open_basedir). (Ilia)
 - Fixed bug #37313 (sigemptyset() used without including <signal.h>).
   (jdolecek)
