@@ -25,7 +25,6 @@
 #include "php_spl.h"
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 #include "ext/pcre/php_pcre.h"
-
 #endif
 
 #define spl_ce_Traversable   zend_ce_traversable
