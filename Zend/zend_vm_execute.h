@@ -1398,7 +1398,7 @@ static int ZEND_ECHO_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zval *z = &opline->op1.u.constant;
 
 	if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get_method != NULL &&
-		zend_std_cast_object_tostring(z, &z_copy, IS_STRING, 0 TSRMLS_CC) == SUCCESS) {
+		zend_std_cast_object_tostring(z, &z_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
 		zend_print_variable(&z_copy);
 		zval_dtor(&z_copy);
 	} else {
@@ -1682,25 +1682,7 @@ return_by_value:
 
 		retval_ptr = &opline->op1.u.constant;
 
-		if (EG(ze1_compatibility_mode) && Z_TYPE_P(retval_ptr) == IS_OBJECT) {
-			zval *ret;
-			char *class_name;
-			zend_uint class_name_len;
-			int dup;
-
-			ALLOC_ZVAL(ret);
-			INIT_PZVAL_COPY(ret, retval_ptr);
-			dup = zend_get_object_classname(retval_ptr, &class_name, &class_name_len TSRMLS_CC);
-			if (Z_OBJ_HT_P(retval_ptr)->clone_obj == NULL) {
-				zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  class_name);
-			}
-			zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);
-			ret->value.obj = Z_OBJ_HT_P(retval_ptr)->clone_obj(retval_ptr TSRMLS_CC);
-			*EG(return_value_ptr_ptr) = ret;
-			if (!dup) {
-				efree(class_name);
-			}
-		} else if (!0) { /* Not a temp var */
+		if (!0) { /* Not a temp var */
 			if (EG(active_op_array)->return_reference == ZEND_RETURN_REF ||
 			    (PZVAL_IS_REF(retval_ptr) && retval_ptr->refcount > 0)) {
 				zval *ret;
@@ -2118,7 +2100,7 @@ static int ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	if (ce && ce->get_iterator) {
-		iter = ce->get_iterator(ce, array_ptr TSRMLS_CC);
+		iter = ce->get_iterator(ce, array_ptr, 0 TSRMLS_CC);
 
 		if (iter && !EG(exception)) {
 			array_ptr = zend_iterator_wrap(iter TSRMLS_CC);
@@ -3826,7 +3808,7 @@ static int ZEND_ECHO_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zval *z = _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 
 	if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get_method != NULL &&
-		zend_std_cast_object_tostring(z, &z_copy, IS_STRING, 0 TSRMLS_CC) == SUCCESS) {
+		zend_std_cast_object_tostring(z, &z_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
 		zend_print_variable(&z_copy);
 		zval_dtor(&z_copy);
 	} else {
@@ -4106,25 +4088,7 @@ return_by_value:
 
 		retval_ptr = _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 
-		if (EG(ze1_compatibility_mode) && Z_TYPE_P(retval_ptr) == IS_OBJECT) {
-			zval *ret;
-			char *class_name;
-			zend_uint class_name_len;
-			int dup;
-
-			ALLOC_ZVAL(ret);
-			INIT_PZVAL_COPY(ret, retval_ptr);
-			dup = zend_get_object_classname(retval_ptr, &class_name, &class_name_len TSRMLS_CC);
-			if (Z_OBJ_HT_P(retval_ptr)->clone_obj == NULL) {
-				zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  class_name);
-			}
-			zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);
-			ret->value.obj = Z_OBJ_HT_P(retval_ptr)->clone_obj(retval_ptr TSRMLS_CC);
-			*EG(return_value_ptr_ptr) = ret;
-			if (!dup) {
-				efree(class_name);
-			}
-		} else if (!1) { /* Not a temp var */
+		if (!1) { /* Not a temp var */
 			if (EG(active_op_array)->return_reference == ZEND_RETURN_REF ||
 			    (PZVAL_IS_REF(retval_ptr) && retval_ptr->refcount > 0)) {
 				zval *ret;
@@ -4549,7 +4513,7 @@ static int ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	if (ce && ce->get_iterator) {
-		iter = ce->get_iterator(ce, array_ptr TSRMLS_CC);
+		iter = ce->get_iterator(ce, array_ptr, 0 TSRMLS_CC);
 
 		if (iter && !EG(exception)) {
 			array_ptr = zend_iterator_wrap(iter TSRMLS_CC);
@@ -6748,7 +6712,7 @@ static int ZEND_ECHO_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zval *z = _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 
 	if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get_method != NULL &&
-		zend_std_cast_object_tostring(z, &z_copy, IS_STRING, 0 TSRMLS_CC) == SUCCESS) {
+		zend_std_cast_object_tostring(z, &z_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
 		zend_print_variable(&z_copy);
 		zval_dtor(&z_copy);
 	} else {
@@ -7022,25 +6986,7 @@ return_by_value:
 
 		retval_ptr = _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 
-		if (EG(ze1_compatibility_mode) && Z_TYPE_P(retval_ptr) == IS_OBJECT) {
-			zval *ret;
-			char *class_name;
-			zend_uint class_name_len;
-			int dup;
-
-			ALLOC_ZVAL(ret);
-			INIT_PZVAL_COPY(ret, retval_ptr);
-			dup = zend_get_object_classname(retval_ptr, &class_name, &class_name_len TSRMLS_CC);
-			if (Z_OBJ_HT_P(retval_ptr)->clone_obj == NULL) {
-				zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  class_name);
-			}
-			zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);
-			ret->value.obj = Z_OBJ_HT_P(retval_ptr)->clone_obj(retval_ptr TSRMLS_CC);
-			*EG(return_value_ptr_ptr) = ret;
-			if (!dup) {
-				efree(class_name);
-			}
-		} else if (!0) { /* Not a temp var */
+		if (!0) { /* Not a temp var */
 			if (EG(active_op_array)->return_reference == ZEND_RETURN_REF ||
 			    (PZVAL_IS_REF(retval_ptr) && retval_ptr->refcount > 0)) {
 				zval *ret;
@@ -7562,7 +7508,7 @@ static int ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	if (ce && ce->get_iterator) {
-		iter = ce->get_iterator(ce, array_ptr TSRMLS_CC);
+		iter = ce->get_iterator(ce, array_ptr, 0 TSRMLS_CC);
 
 		if (iter && !EG(exception)) {
 			array_ptr = zend_iterator_wrap(iter TSRMLS_CC);
@@ -18874,7 +18820,7 @@ static int ZEND_ECHO_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zval *z = _get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
 
 	if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get_method != NULL &&
-		zend_std_cast_object_tostring(z, &z_copy, IS_STRING, 0 TSRMLS_CC) == SUCCESS) {
+		zend_std_cast_object_tostring(z, &z_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
 		zend_print_variable(&z_copy);
 		zval_dtor(&z_copy);
 	} else {
@@ -19142,25 +19088,7 @@ return_by_value:
 
 		retval_ptr = _get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
 
-		if (EG(ze1_compatibility_mode) && Z_TYPE_P(retval_ptr) == IS_OBJECT) {
-			zval *ret;
-			char *class_name;
-			zend_uint class_name_len;
-			int dup;
-
-			ALLOC_ZVAL(ret);
-			INIT_PZVAL_COPY(ret, retval_ptr);
-			dup = zend_get_object_classname(retval_ptr, &class_name, &class_name_len TSRMLS_CC);
-			if (Z_OBJ_HT_P(retval_ptr)->clone_obj == NULL) {
-				zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  class_name);
-			}
-			zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);
-			ret->value.obj = Z_OBJ_HT_P(retval_ptr)->clone_obj(retval_ptr TSRMLS_CC);
-			*EG(return_value_ptr_ptr) = ret;
-			if (!dup) {
-				efree(class_name);
-			}
-		} else if (!0) { /* Not a temp var */
+		if (!0) { /* Not a temp var */
 			if (EG(active_op_array)->return_reference == ZEND_RETURN_REF ||
 			    (PZVAL_IS_REF(retval_ptr) && retval_ptr->refcount > 0)) {
 				zval *ret;
@@ -19674,7 +19602,7 @@ static int ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	if (ce && ce->get_iterator) {
-		iter = ce->get_iterator(ce, array_ptr TSRMLS_CC);
+		iter = ce->get_iterator(ce, array_ptr, 0 TSRMLS_CC);
 
 		if (iter && !EG(exception)) {
 			array_ptr = zend_iterator_wrap(iter TSRMLS_CC);

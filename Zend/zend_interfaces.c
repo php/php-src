@@ -29,7 +29,7 @@ ZEND_API zend_class_entry *zend_ce_iterator;
 ZEND_API zend_class_entry *zend_ce_arrayaccess;
 ZEND_API zend_class_entry *zend_ce_serializable;
 
-/* {{{ zend_call_method 
+/* {{{ zend_call_method
  Only returns the returned zval if retval_ptr != NULL */
 ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int function_name_len, zval **retval_ptr_ptr, int param_count, zval* arg1, zval* arg2 TSRMLS_DC)
 {
@@ -107,7 +107,7 @@ ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend
 /* iterator interface, c-level functions used by engine */
 
 /* {{{ zend_user_it_new_iterator */
-static zval *zend_user_it_new_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
+ZEND_API zval *zend_user_it_new_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
 {
 	zval *retval;
 
@@ -117,7 +117,7 @@ static zval *zend_user_it_new_iterator(zend_class_entry *ce, zval *object TSRMLS
 /* }}} */
 
 /* {{{ zend_user_it_dtor */
-static void zend_user_it_invalidate_current(zend_object_iterator *_iter TSRMLS_DC)
+ZEND_API void zend_user_it_invalidate_current(zend_object_iterator *_iter TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 
@@ -141,14 +141,14 @@ static void zend_user_it_dtor(zend_object_iterator *_iter TSRMLS_DC)
 /* }}} */
 
 /* {{{ zend_user_it_valid */
-static int zend_user_it_valid(zend_object_iterator *_iter TSRMLS_DC)
+ZEND_API int zend_user_it_valid(zend_object_iterator *_iter TSRMLS_DC)
 {
 	if (_iter) {
 		zend_user_iterator *iter = (zend_user_iterator*)_iter;
 		zval *object = (zval*)iter->it.data;
 		zval *more;
 		int result;
-	
+
 		zend_call_method_with_0_params(&object, iter->ce, &iter->ce->iterator_funcs.zf_valid, "valid", &more);
 		if (more) {
 			result = i_zend_is_true(more);
@@ -161,7 +161,7 @@ static int zend_user_it_valid(zend_object_iterator *_iter TSRMLS_DC)
 /* }}} */
 
 /* {{{ zend_user_it_get_current_data */
-static void zend_user_it_get_current_data(zend_object_iterator *_iter, zval ***data TSRMLS_DC)
+ZEND_API void zend_user_it_get_current_data(zend_object_iterator *_iter, zval ***data TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 	zval *object = (zval*)iter->it.data;
@@ -184,7 +184,7 @@ static int zend_user_it_get_current_key_default(zend_object_iterator *_iter, cha
 /* }}} */
 
 /* {{{ zend_user_it_get_current_key */
-static int zend_user_it_get_current_key(zend_object_iterator *_iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
+ZEND_API int zend_user_it_get_current_key(zend_object_iterator *_iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 	zval *object = (zval*)iter->it.data;
@@ -216,7 +216,7 @@ static int zend_user_it_get_current_key(zend_object_iterator *_iter, char **str_
 
 		case IS_DOUBLE:
 		case IS_RESOURCE:
-		case IS_BOOL: 
+		case IS_BOOL:
 		case IS_LONG: {
 				if (retval->type == IS_DOUBLE) {
 					*int_key = (long)retval->value.dval;
@@ -231,7 +231,7 @@ static int zend_user_it_get_current_key(zend_object_iterator *_iter, char **str_
 /* }}} */
 
 /* {{{ zend_user_it_move_forward */
-static void zend_user_it_move_forward(zend_object_iterator *_iter TSRMLS_DC)
+ZEND_API void zend_user_it_move_forward(zend_object_iterator *_iter TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 	zval *object = (zval*)iter->it.data;
@@ -242,7 +242,7 @@ static void zend_user_it_move_forward(zend_object_iterator *_iter TSRMLS_DC)
 /* }}} */
 
 /* {{{ zend_user_it_rewind */
-static void zend_user_it_rewind(zend_object_iterator *_iter TSRMLS_DC)
+ZEND_API void zend_user_it_rewind(zend_object_iterator *_iter TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 	zval *object = (zval*)iter->it.data;
@@ -263,9 +263,15 @@ zend_object_iterator_funcs zend_interface_iterator_funcs_iterator = {
 };
 
 /* {{{ zend_user_it_get_iterator */
-static zend_object_iterator *zend_user_it_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
+static zend_object_iterator *zend_user_it_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
 {
-	zend_user_iterator *iterator = emalloc(sizeof(zend_user_iterator));
+	zend_user_iterator *iterator;
+
+	if (by_ref) {
+		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+	}
+
+	iterator = emalloc(sizeof(zend_user_iterator));
 
 	object->refcount++;
 	iterator->it.data = (void*)object;
@@ -277,25 +283,24 @@ static zend_object_iterator *zend_user_it_get_iterator(zend_class_entry *ce, zva
 /* }}} */
 
 /* {{{ zend_user_it_get_new_iterator */
-static zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
+ZEND_API zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
 {
 	zval *iterator = zend_user_it_new_iterator(ce, object TSRMLS_CC);
 	zend_object_iterator *new_iterator;
 
 	zend_class_entry *ce_it = iterator && Z_TYPE_P(iterator) == IS_OBJECT ? Z_OBJCE_P(iterator) : NULL;
 
-	if (!ce || !ce_it || !ce_it->get_iterator || (ce_it->get_iterator == zend_user_it_get_new_iterator && iterator == object)) {
-		if (!EG(exception))
-		{
+	if (!ce_it || !ce_it->get_iterator || (ce_it->get_iterator == zend_user_it_get_new_iterator && iterator == object)) {
+		if (!EG(exception)) {
 			zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Objects returned by %s::getIterator() must be traversable or implement interface Iterator", ce ? ce->name : Z_OBJCE_P(object)->name);
 		}
-		if (iterator)
-		{
+		if (iterator) {
 			zval_ptr_dtor(&iterator);
 		}
 		return NULL;
 	}
-	new_iterator = ce_it->get_iterator(ce_it, iterator TSRMLS_CC);
+
+	new_iterator = ce_it->get_iterator(ce_it, iterator, by_ref TSRMLS_CC);
 	zval_ptr_dtor(&iterator);
 	return new_iterator;
 }
@@ -336,7 +341,7 @@ static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entr
 		} else if (class_type->get_iterator != zend_user_it_get_new_iterator) {
 			/* c-level get_iterator cannot be changed (exception being only Traversable is implmented) */
 			if (class_type->num_interfaces) {
-				for (i = 0; i < (int)class_type->num_interfaces; i++) {
+				for (i = 0; i < class_type->num_interfaces; i++) {
 					if (class_type->interfaces[i] == zend_ce_iterator) {
 						return FAILURE;
 					}
@@ -428,7 +433,7 @@ int zend_user_serialize(zval *object, unsigned char **buffer, zend_uint *buf_len
 	}
 
 	if (result == FAILURE) {
-		zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "%s::serialize() must return a string or NULL", ce->name);
+		zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "%v::serialize() must return a string or NULL", ce->name);
 	}
 	return result;
 }
@@ -440,14 +445,14 @@ int zend_user_unserialize(zval **object, zend_class_entry *ce, const unsigned ch
 	zval * zdata;
 
 	object_init_ex(*object, ce);
-	
+
 	MAKE_STD_ZVAL(zdata);
 	ZVAL_STRINGL(zdata, (char*)buf, buf_len, 1);
 
 	zend_call_method_with_1_params(object, ce, &ce->unserialize_func, "unserialize", NULL, zdata);
-	
+
 	zval_ptr_dtor(&zdata);
-	
+
 	if (EG(exception)) {
 		return FAILURE;
 	} else {
@@ -498,7 +503,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_arrayaccess_offset_get, 0, 0, 1) /* actually this
 ZEND_END_ARG_INFO();
 
 static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_arrayaccess_offset_value, 0, 0, 2) 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_arrayaccess_offset_value, 0, 0, 2)
 	ZEND_ARG_INFO(0, offset)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO();
@@ -518,7 +523,7 @@ ZEND_END_ARG_INFO();
 
 zend_function_entry zend_funcs_serializable[] = {
 	ZEND_ABSTRACT_ME(serializable, serialize,   NULL)
-	ZEND_FENTRY(unserialize, NULL, arginfo_serializable_serialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT|ZEND_ACC_CTOR) 
+	ZEND_FENTRY(unserialize, NULL, arginfo_serializable_serialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT|ZEND_ACC_CTOR)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -544,9 +549,9 @@ ZEND_API void zend_register_interfaces(TSRMLS_D)
 
 	REGISTER_ITERATOR_INTERFACE(iterator, Iterator);
 	REGISTER_ITERATOR_IMPLEMENT(iterator, traversable);
-	
+
 	REGISTER_ITERATOR_INTERFACE(arrayaccess, ArrayAccess);
-	
+
 	REGISTER_ITERATOR_INTERFACE(serializable, Serializable)
 }
 /* }}} */

@@ -64,11 +64,11 @@ static void iter_wrapper_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 ZEND_API zval *zend_iterator_wrap(zend_object_iterator *iter TSRMLS_DC)
 {
 	zval *wrapped;
-	
+
 	MAKE_STD_ZVAL(wrapped);
 	Z_TYPE_P(wrapped) = IS_OBJECT;
-	wrapped->value.obj.handle = zend_objects_store_put(iter, iter_wrapper_dtor, NULL, NULL TSRMLS_CC);
-	wrapped->value.obj.handlers = &iterator_object_handlers;
+	Z_OBJ_HANDLE_P(wrapped) = zend_objects_store_put(iter, iter_wrapper_dtor, NULL, NULL TSRMLS_CC);
+	Z_OBJ_HT_P(wrapped) = &iterator_object_handlers;
 
 	return wrapped;
 }
@@ -86,14 +86,13 @@ ZEND_API enum zend_object_iterator_kind zend_iterator_unwrap(
 				return ZEND_ITER_PLAIN_OBJECT;
 			}
 			return ZEND_ITER_INVALID;
-			
-			
+
 		case IS_ARRAY:
 			if (HASH_OF(array_ptr)) {
 				return ZEND_ITER_PLAIN_ARRAY;
 			}
 			return ZEND_ITER_INVALID;
-			
+
 		default:
 			return ZEND_ITER_INVALID;
 	}

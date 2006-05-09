@@ -1,4 +1,4 @@
-/* 
+/*
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
@@ -97,7 +97,10 @@ typedef zend_object_value (*zend_object_clone_obj_t)(zval *object TSRMLS_DC);
 typedef zend_class_entry *(*zend_object_get_class_entry_t)(zval *object TSRMLS_DC);
 typedef int (*zend_object_get_class_name_t)(zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC);
 typedef int (*zend_object_compare_t)(zval *object1, zval *object2 TSRMLS_DC);
-typedef int (*zend_object_cast_t)(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC);
+
+/* Cast an object to some other type
+ */
+typedef int (*zend_object_cast_t)(zval *readobj, zval *retval, int type TSRMLS_DC);
 
 /* updates *count to hold the number of elements present and returns SUCCESS.
  * Returns FAILURE if the object does not have any sense of overloaded dimensions */
@@ -139,10 +142,10 @@ ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, char *propert
 ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, char *property_name, int property_name_len TSRMLS_DC);
 ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce, zval *member, int silent TSRMLS_DC);
 
-ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC);
+ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type TSRMLS_DC);
 
 
-#define IS_ZEND_STD_OBJECT(z)  ((z).type == IS_OBJECT && (Z_OBJ_HT((z))->get_class_entry != NULL))
+#define IS_ZEND_STD_OBJECT(z)  (Z_TYPE(z) == IS_OBJECT && (Z_OBJ_HT((z))->get_class_entry != NULL))
 #define HAS_CLASS_ENTRY(z) (Z_OBJ_HT(z)->get_class_entry != NULL)
 
 ZEND_API int zend_check_private(union _zend_function *fbc, zend_class_entry *ce, char *function_name_strval, int function_name_strlen TSRMLS_DC);

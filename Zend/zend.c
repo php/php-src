@@ -77,7 +77,6 @@ static ZEND_INI_MH(OnUpdateErrorReporting)
 
 ZEND_INI_BEGIN()
 	ZEND_INI_ENTRY("error_reporting",				NULL,		ZEND_INI_ALL,		OnUpdateErrorReporting)
-	STD_ZEND_INI_BOOLEAN("zend.ze1_compatibility_mode",	"0",	ZEND_INI_ALL,		OnUpdateBool,	ze1_compatibility_mode,	zend_executor_globals,	executor_globals)
 #ifdef ZEND_MULTIBYTE
 	STD_ZEND_INI_BOOLEAN("detect_unicode", "1", ZEND_INI_ALL, OnUpdateBool, detect_unicode, zend_compiler_globals, compiler_globals)
 #endif
@@ -221,19 +220,13 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 		case IS_OBJECT:
 			{
 				TSRMLS_FETCH();
-#if 0
+
 				/* Standard PHP objects */
 				if (Z_OBJ_HT_P(expr) == &std_object_handlers || !Z_OBJ_HT_P(expr)->cast_object) {
-					if (zend_std_cast_object_tostring(expr, expr_copy, IS_STRING, 0 TSRMLS_CC) == SUCCESS) {
+					if (zend_std_cast_object_tostring(expr, expr_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
 						break;
 					}
 					zend_error(E_NOTICE, "Object of class %s could not be converted to string", Z_OBJCE_P(expr)->name);
-				}
-#endif
-				if (Z_OBJ_HANDLER_P(expr, cast_object)) {
-					if(Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_STRING, 0 TSRMLS_CC) == SUCCESS) {
-						break;
-					}
 				} else {
 					if(Z_OBJ_HANDLER_P(expr, get)) {
 						zval *z = Z_OBJ_HANDLER_P(expr, get)(expr TSRMLS_CC);

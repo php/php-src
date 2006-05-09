@@ -50,4 +50,3 @@ ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(all_args_by_ref, 1)
 ZEND_END_ARG_INFO();
-

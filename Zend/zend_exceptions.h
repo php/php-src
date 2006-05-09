@@ -30,11 +30,11 @@ void zend_throw_exception_internal(zval *exception TSRMLS_DC);
 
 void zend_register_default_exception(TSRMLS_D);
 
-ZEND_API zend_class_entry *zend_exception_get_default(void);
-ZEND_API zend_class_entry *zend_get_error_exception(void);
+ZEND_API zend_class_entry *zend_exception_get_default(TSRMLS_D);
+ZEND_API zend_class_entry *zend_get_error_exception(TSRMLS_D);
 ZEND_API void zend_register_default_classes(TSRMLS_D);
 
-/* exception_ce   NULL or zend_exception_get_default() or a derived class 
+/* exception_ce   NULL or zend_exception_get_default() or a derived class
  * message        NULL or the message of the exception */
 ZEND_API zval * zend_throw_exception(zend_class_entry *exception_ce, char *message, long code TSRMLS_DC);
 ZEND_API zval * zend_throw_exception_ex(zend_class_entry *exception_ce, long code TSRMLS_DC, char *format, ...);
@@ -47,6 +47,9 @@ extern ZEND_API void (*zend_throw_exception_hook)(zval *ex TSRMLS_DC);
 
 /* show an exception using zend_error(E_ERROR,...) */
 ZEND_API void zend_exception_error(zval *exception TSRMLS_DC);
+
+/* do not export, in php it's available thru spprintf directly */
+int zend_spprintf(char **message, int max_len, char *format, ...);
 
 END_EXTERN_C()
 

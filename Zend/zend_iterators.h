@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2006 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -31,7 +31,7 @@ typedef struct _zend_object_iterator zend_object_iterator;
 typedef struct _zend_object_iterator_funcs {
 	/* release all resources associated with this iterator instance */
 	void (*dtor)(zend_object_iterator *iter TSRMLS_DC);
-	
+
 	/* check for end of iteration (FAILURE or SUCCESS if data is valid) */
 	int (*valid)(zend_object_iterator *iter TSRMLS_DC);
 
@@ -46,7 +46,7 @@ typedef struct _zend_object_iterator_funcs {
 
 	/* rewind to start of data (optional, may be NULL) */
 	void (*rewind)(zend_object_iterator *iter TSRMLS_DC);
-	
+
 	/* invalidate current value/key (optional, may be NULL) */
 	void (*invalidate_current)(zend_object_iterator *iter TSRMLS_DC);
 } zend_object_iterator_funcs;
@@ -57,11 +57,8 @@ struct _zend_object_iterator {
 	ulong index; /* private to fe_reset/fe_fetch opcodes */
 };
 
-typedef zval *(*zend_object_new_iterator_t)(zend_class_entry *ce, zval *object TSRMLS_DC);
-
 typedef struct _zend_class_iterator_funcs {
 	zend_object_iterator_funcs  *funcs;
-	zend_object_new_iterator_t  new_iterator;
 	union _zend_function *zf_new_iterator;
 	union _zend_function *zf_valid;
 	union _zend_function *zf_current;

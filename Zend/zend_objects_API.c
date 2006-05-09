@@ -1,4 +1,4 @@
-/* 
+/*
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
@@ -97,7 +97,7 @@ ZEND_API zend_object_handle zend_objects_store_put(void *object, zend_objects_st
 {
 	zend_object_handle handle;
 	struct _store_object *obj;
-	
+
 	if (EG(objects_store).free_list_head != -1) {
 		handle = EG(objects_store).free_list_head;
 		EG(objects_store).free_list_head = EG(objects_store).object_buckets[handle].bucket.free_list.next;
@@ -135,6 +135,14 @@ ZEND_API void zend_objects_store_add_ref(zval *object TSRMLS_DC)
 #endif
 }
 
+/*
+ * Add a reference to an objects store entry given the object handle.
+ */
+ZEND_API void zend_objects_store_add_ref_by_handle(zend_object_handle handle TSRMLS_DC)
+{
+	EG(objects_store).object_buckets[handle].bucket.obj.refcount++;
+}
+
 #define ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST()																	\
 			EG(objects_store).object_buckets[handle].bucket.free_list.next = EG(objects_store).free_list_head;	\
 			EG(objects_store).free_list_head = handle;															\
@@ -143,28 +151,38 @@ ZEND_API void zend_objects_store_add_ref(zval *object TSRMLS_DC)
 ZEND_API void zend_objects_store_del_ref(zval *zobject TSRMLS_DC)
 {
 	zend_object_handle handle;
+
+	handle = Z_OBJ_HANDLE_P(zobject);
+
+	zobject->refcount++;
+	zend_objects_store_del_ref_by_handle(handle TSRMLS_CC);
+	zobject->refcount--;
+}
+
+/*
+ * Delete a reference to an objects store entry given the object handle.
+ */
+ZEND_API void zend_objects_store_del_ref_by_handle(zend_object_handle handle TSRMLS_DC)
+{
 	struct _store_object *obj;
 
 	if (!EG(objects_store).object_buckets) {
 		return;
 	}
 
-	handle = Z_OBJ_HANDLE_P(zobject);
 	obj = &EG(objects_store).object_buckets[handle].bucket.obj;
 
 	/*	Make sure we hold a reference count during the destructor call
 		otherwise, when the destructor ends the storage might be freed
 		when the refcount reaches 0 a second time
-	*/
+	 */
 	if (EG(objects_store).object_buckets[handle].valid) {
 		if (obj->refcount == 1) {
 			if (!EG(objects_store).object_buckets[handle].destructor_called) {
 				EG(objects_store).object_buckets[handle].destructor_called = 1;
 
 				if (obj->dtor) {
-					zobject->refcount++;
 					obj->dtor(obj->object, handle TSRMLS_CC);
-					zobject->refcount--;
 				}
 			}
 			if (obj->refcount == 1) {
@@ -195,16 +213,16 @@ ZEND_API zend_object_value zend_objects_store_clone_obj(zval *zobject TSRMLS_DC)
 	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
 
 	obj = &EG(objects_store).object_buckets[handle].bucket.obj;
-	
+
 	if (obj->clone == NULL) {
 		zend_error(E_CORE_ERROR, "Trying to clone uncloneable object of class %s", Z_OBJCE_P(zobject)->name);
-	}		
+	}
 
 	obj->clone(obj->object, &new_object TSRMLS_CC);
 
 	retval.handle = zend_objects_store_put(new_object, obj->dtor, obj->free_storage, obj->clone TSRMLS_CC);
 	retval.handlers = Z_OBJ_HT_P(zobject);
-	
+
 	return retval;
 }
 
@@ -212,6 +230,14 @@ ZEND_API void *zend_object_store_get_object(zval *zobject TSRMLS_DC)
 {
 	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
 
+	return EG(objects_store).object_buckets[handle].bucket.obj.object;
+}
+
+/*
+ * Retrieve an entry from the objects store given the object handle.
+ */
+ZEND_API void *zend_object_store_get_object_by_handle(zend_object_handle handle TSRMLS_DC)
+{
 	return EG(objects_store).object_buckets[handle].bucket.obj.object;
 }
 
@@ -274,10 +300,10 @@ ZEND_API zval *zend_object_create_proxy(zval *object, zval *member TSRMLS_DC)
 	zval_add_ref(&pobj->object);
 
 	MAKE_STD_ZVAL(retval);
-	retval->type = IS_OBJECT;
+	Z_TYPE_P(retval) = IS_OBJECT;
 	Z_OBJ_HANDLE_P(retval) = zend_objects_store_put(pobj, NULL, (zend_objects_free_object_storage_t) zend_objects_proxy_free_storage, (zend_objects_store_clone_t) zend_objects_proxy_clone TSRMLS_CC);
 	Z_OBJ_HT_P(retval) = &zend_object_proxy_handlers;
-	
+
 	return retval;
 }
 
@@ -312,7 +338,7 @@ ZEND_API zend_object_handlers *zend_get_std_object_handlers()
 
 static zend_object_handlers zend_object_proxy_handlers = {
 	ZEND_OBJECTS_STORE_HANDLERS,
-	
+
 	NULL,						/* read_property */
 	NULL,						/* write_property */
 	NULL,						/* read dimension */

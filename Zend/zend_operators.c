@@ -266,10 +266,16 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 	}
 
 
-#define convert_object_to_type(op, ctype, conv_func)											\
+#define convert_object_to_type(op, ctype, conv_func)										\
 	if (Z_OBJ_HT_P(op)->cast_object) {														\
-		if (Z_OBJ_HT_P(op)->cast_object(op, op, ctype, 1 TSRMLS_CC) == SUCCESS) {			\
-			op->type = ctype;																\
+		zval dst;																			\
+		if (Z_OBJ_HT_P(op)->cast_object(op, &dst, ctype TSRMLS_CC) == FAILURE) {			\
+			zend_error(E_RECOVERABLE_ERROR, 												\
+			"Object of class %s could not be converted to " # ctype, Z_OBJCE_P(op)->name);	\
+		} else {																			\
+			zval_dtor(op);																	\
+			Z_TYPE_P(op) = ctype;															\
+			op->value = dst.value;															\
 		}																					\
 	} else {																				\
 		if(Z_OBJ_HT_P(op)->get) {															\
@@ -333,14 +339,7 @@ ZEND_API void convert_to_long_base(zval *op, int base)
 					return;
 				}
 
-				if (EG(ze1_compatibility_mode)) {
-					HashTable *ht = Z_OBJPROP_P(op);
-					if (ht) {
-						retval = (zend_hash_num_elements(ht)?1:0);
-					}
-				} else {
-					zend_error(E_NOTICE, "Object of class %s could not be converted to int", Z_OBJCE_P(op)->name);
-				}
+				zend_error(E_NOTICE, "Object of class %s could not be converted to int", Z_OBJCE_P(op)->name);
 				zval_dtor(op);
 				ZVAL_LONG(op, retval);
 				return;
@@ -399,15 +398,7 @@ ZEND_API void convert_to_double(zval *op)
 					return;
 				}
 
-				if (EG(ze1_compatibility_mode)) {
-					HashTable *ht = Z_OBJPROP_P(op);
-					if (ht) {
-						retval = (zend_hash_num_elements(ht)?1.0:0.0);
-					}
-				} else {
-					zend_error(E_NOTICE, "Object of class %s could not be converted to double", Z_OBJCE_P(op)->name);
-				}
-
+				zend_error(E_NOTICE, "Object of class %s could not be converted to double", Z_OBJCE_P(op)->name);
 				zval_dtor(op);
 				ZVAL_DOUBLE(op, retval);
 				break;
@@ -424,17 +415,23 @@ ZEND_API void convert_to_double(zval *op)
 
 ZEND_API void convert_to_null(zval *op)
 {
-	if (op->type == IS_OBJECT) {
+	if (Z_TYPE_P(op) == IS_OBJECT) {
 		if (Z_OBJ_HT_P(op)->cast_object) {
+			zval *org;
 			TSRMLS_FETCH();
-			if (Z_OBJ_HT_P(op)->cast_object(op, op, IS_NULL, 1 TSRMLS_CC) == SUCCESS) {
+
+			ALLOC_ZVAL(org);
+			*org = *op;
+			if (Z_OBJ_HT_P(op)->cast_object(org, op, IS_NULL TSRMLS_CC) == SUCCESS) {
+				zval_dtor(org);
 				return;
 			}
+			*op = *org;
 		}
 	}
 
 	zval_dtor(op);
-	op->type = IS_NULL;
+	Z_TYPE_P(op) = IS_NULL;
 }
 
 
@@ -488,13 +485,6 @@ ZEND_API void convert_to_boolean(zval *op)
 					return;
 				}
 					
-				if (EG(ze1_compatibility_mode)) {
-					HashTable *ht = Z_OBJPROP_P(op);
-					if (ht) {
-						retval = (zend_hash_num_elements(ht)?1:0);
-					}
-				}
-				
 				zval_dtor(op);
 				ZVAL_BOOL(op, retval);
 				break;
@@ -1296,7 +1286,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 			op1 = op1_free = Z_OBJ_HT_P(op1)->get(op1 TSRMLS_CC);
 		} else if (!op2_obj && Z_OBJ_HT_P(op1)->cast_object) {
 			ALLOC_INIT_ZVAL(op1_free);
-			if (Z_OBJ_HT_P(op1)->cast_object(op1, op1_free, Z_TYPE_P(op2), 0 TSRMLS_CC) == FAILURE) {
+			if (Z_OBJ_HT_P(op1)->cast_object(op1, op1_free, Z_TYPE_P(op2) TSRMLS_CC) == FAILURE) {
 				op2_free = NULL;
 				ZVAL_BOOL(result, 0);
 				COMPARE_RETURN_AND_FREE(FAILURE);
@@ -1313,7 +1303,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 			op2 = op2_free = Z_OBJ_HT_P(op2)->get(op2 TSRMLS_CC);
 		} else if (!op1_obj && Z_OBJ_HT_P(op2)->cast_object) {
 			ALLOC_INIT_ZVAL(op2_free);
-			if (Z_OBJ_HT_P(op2)->cast_object(op2, op2_free, Z_TYPE_P(op1), 0 TSRMLS_CC) == FAILURE) {
+			if (Z_OBJ_HT_P(op2)->cast_object(op2, op2_free, Z_TYPE_P(op1) TSRMLS_CC) == FAILURE) {
 				ZVAL_BOOL(result, 0);
 				COMPARE_RETURN_AND_FREE(FAILURE);
 			}
@@ -1461,15 +1451,7 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 			break;
 		case IS_OBJECT:
 			if (Z_OBJ_HT_P(op1) == Z_OBJ_HT_P(op2)) {
-				if (EG(ze1_compatibility_mode)) {
-					zend_compare_objects(result, op1, op2 TSRMLS_CC);
-					/* comparison returns 0 in case of equality and
-					 * 1 in case of ineqaulity, we need to reverse it
-					 */
-					result->value.lval = !result->value.lval;
-				} else {
-					result->value.lval = (Z_OBJ_HANDLE_P(op1) == Z_OBJ_HANDLE_P(op2));
-				}
+				result->value.lval = (Z_OBJ_HANDLE_P(op1) == Z_OBJ_HANDLE_P(op2));
 			} else {
 				result->value.lval = 0;
 			}
