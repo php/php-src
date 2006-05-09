@@ -668,7 +668,6 @@ ZEND_API ZEND_FUNCTION(display_disabled_function);
 ZEND_API ZEND_FUNCTION(display_disabled_class);
 END_EXTERN_C()
 
-
 #if ZEND_DEBUG
 #define CHECK_ZVAL_STRING(z) \
 	if (Z_STRVAL_P(z)[Z_STRLEN_P(z)] != '\0') { zend_error(E_WARNING, "String is not zero-terminated (%s)", Z_STRVAL_P(z)); }

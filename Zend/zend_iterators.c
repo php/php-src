@@ -87,7 +87,6 @@ ZEND_API enum zend_object_iterator_kind zend_iterator_unwrap(
 			}
 			return ZEND_ITER_INVALID;
 
-
 		case IS_ARRAY:
 			if (HASH_OF(array_ptr)) {
 				return ZEND_ITER_PLAIN_ARRAY;

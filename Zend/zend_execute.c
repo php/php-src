@@ -511,7 +511,7 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 					zend_class_entry *ce = zend_u_fetch_class(UG(unicode) ? IS_UNICODE : IS_STRING, cur_arg_info->class_name, cur_arg_info->class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
 					if (!instanceof_function(Z_OBJCE_P(arg), ce TSRMLS_CC)) {
 						char *error_msg;
-							if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+						if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 							error_msg = "implement interface";
 						} else {
 							error_msg = "be an instance of";

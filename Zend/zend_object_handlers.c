@@ -957,7 +957,7 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists 
 	zobj = Z_OBJ_P(object);
 
 	if (Z_TYPE_P(member) != IS_UNICODE && (UG(unicode) || Z_TYPE_P(member) != IS_STRING)) {
- 		ALLOC_ZVAL(tmp_member);
+		ALLOC_ZVAL(tmp_member);
 		*tmp_member = *member;
 		INIT_PZVAL(tmp_member);
 		zval_copy_ctor(tmp_member);
