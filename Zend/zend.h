@@ -258,7 +258,6 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 #  define zend_error_noreturn zend_error
 #endif
 
-
 /*
  * zval
  */
@@ -320,7 +319,7 @@ struct _zend_class_entry {
 	char type;
 	char *name;
 	zend_uint name_length;
-	struct _zend_class_entry *parent; 
+	struct _zend_class_entry *parent;
 	int refcount;
 	zend_bool constants_updated;
 	zend_uint ce_flags;
@@ -341,6 +340,7 @@ struct _zend_class_entry {
 	union _zend_function *__unset;
 	union _zend_function *__isset;
 	union _zend_function *__call;
+	union _zend_function *__tostring;
 	union _zend_function *serialize_func;
 	union _zend_function *unserialize_func;
 
@@ -348,7 +348,7 @@ struct _zend_class_entry {
 
 	/* handlers */
 	zend_object_value (*create_object)(zend_class_entry *class_type TSRMLS_DC);
-	zend_object_iterator *(*get_iterator)(zend_class_entry *ce, zval *object TSRMLS_DC);
+	zend_object_iterator *(*get_iterator)(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC);
 	int (*interface_gets_implemented)(zend_class_entry *iface, zend_class_entry *class_type TSRMLS_DC); /* a class implements this interface */
 
 	/* serializer callbacks */
@@ -363,7 +363,7 @@ struct _zend_class_entry {
 	zend_uint line_end;
 	char *doc_comment;
 	zend_uint doc_comment_len;
-	
+
 	struct _zend_module_entry *module;
 };
 
@@ -384,7 +384,7 @@ typedef struct _zend_utility_functions {
 	char *(*getenv_function)(char *name, size_t name_len TSRMLS_DC);
 } zend_utility_functions;
 
-		
+
 typedef struct _zend_utility_values {
 	char *import_use_extension;
 	uint import_use_extension_length;
@@ -429,7 +429,6 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 #define OE_IS_ARRAY	(1<<0)
 #define OE_IS_OBJECT	(1<<1)
 #define OE_IS_METHOD	(1<<2)
-
 
 int zend_startup(zend_utility_functions *utility_functions, char **extensions, int start_builtin_functions);
 void zend_shutdown(TSRMLS_D);
@@ -562,7 +561,7 @@ END_EXTERN_C()
 
 #define INIT_PZVAL(z)		\
 	(z)->refcount = 1;		\
-	(z)->is_ref = 0;	
+	(z)->is_ref = 0;
 
 #define INIT_ZVAL(z) z = zval_used_for_init;
 

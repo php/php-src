@@ -226,9 +226,9 @@ struct _zend_op_array {
 typedef struct _zend_internal_function {
 	/* Common elements */
 	zend_uchar type;
-	char *function_name;		
+	char * function_name;
 	zend_class_entry *scope;
-	zend_uint fn_flags;	
+	zend_uint fn_flags;
 	union _zend_function *prototype;
 	zend_uint num_args;
 	zend_uint required_num_args;
@@ -238,6 +238,7 @@ typedef struct _zend_internal_function {
 	/* END of common elements */
 
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
+	struct _zend_module_entry *module;
 } zend_internal_function;
 
 #define ZEND_FN_SCOPE_NAME(function)  ((function) && (function)->common.scope ? (function)->common.scope->name : "")
@@ -257,7 +258,7 @@ typedef union _zend_function {
 		zend_bool pass_rest_by_reference;
 		unsigned char return_reference;
 	} common;
-	
+
 	zend_op_array op_array;
 	zend_internal_function internal_function;
 } zend_function;
@@ -507,7 +508,7 @@ ZEND_API void function_add_ref(zend_function *function);
 
 /* helper functions in zend_language_scanner.l */
 ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSRMLS_DC);
-ZEND_API zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC);	
+ZEND_API zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC);
 ZEND_API zend_op_array *compile_filename(int type, zval *filename TSRMLS_DC);
 ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_count, ...);
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC);
@@ -705,9 +706,10 @@ END_EXTERN_C()
 #define ZEND_DESTRUCTOR_FUNC_NAME	"__destruct"
 #define ZEND_GET_FUNC_NAME          "__get"
 #define ZEND_SET_FUNC_NAME          "__set"
-#define ZEND_UNSET_FUNC_NAME          "__unset"
-#define ZEND_ISSET_FUNC_NAME          "__isset"
+#define ZEND_UNSET_FUNC_NAME        "__unset"
+#define ZEND_ISSET_FUNC_NAME        "__isset"
 #define ZEND_CALL_FUNC_NAME         "__call"
+#define ZEND_TOSTRING_FUNC_NAME     "__tostring"
 #define ZEND_AUTOLOAD_FUNC_NAME     "__autoload"
 
 #endif /* ZEND_COMPILE_H */

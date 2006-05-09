@@ -78,7 +78,7 @@ int zend_load_extension(char *path)
 					new_extension->name);
 			DL_UNLOAD(handle);
 			return FAILURE;
-		} 
+		}
 	} else if (ZTS_V!=extension_version_info->thread_safe) {
 		fprintf(stderr, "Cannot load %s - it %s thread safe, whereas Zend %s\n",
 					new_extension->name,
@@ -229,10 +229,10 @@ ZEND_API zend_extension *zend_get_extension(char *extension_name)
  * Support for dynamic loading of MH_BUNDLEs on Darwin / Mac OS X
  *
  */
- 
+
 #if HAVE_MACH_O_DYLD_H
 
-void *zend_mh_bundle_load(char* bundle_path) 
+void *zend_mh_bundle_load(char* bundle_path)
 {
 	NSObjectFileImage bundle_image;
 	NSModule bundle_handle;
@@ -242,17 +242,17 @@ void *zend_mh_bundle_load(char* bundle_path)
 	if (NSCreateObjectFileImageFromFile(bundle_path, &bundle_image) != NSObjectFileImageSuccess) {
 		return NULL;
 	}
-	
+
 	bundle_handle = NSLinkModule(bundle_image, bundle_path, NSLINKMODULE_OPTION_PRIVATE);
 	NSDestroyObjectFileImage(bundle_image);
-	
+
 	/* call the init function of the bundle */
 	bundle_init_nssymbol = NSLookupSymbolInModule(bundle_handle, "__init");
 	if (bundle_init_nssymbol != NULL) {
 		bundle_init = NSAddressOfSymbol(bundle_init_nssymbol);
 		bundle_init();
 	}
-	
+
 	return bundle_handle;
 }
 
@@ -260,14 +260,14 @@ int zend_mh_bundle_unload(void *bundle_handle)
 {
 	NSSymbol bundle_fini_nssymbol;
 	void (*bundle_fini)(void);
-	
+
 	/* call the fini function of the bundle */
 	bundle_fini_nssymbol = NSLookupSymbolInModule(bundle_handle, "__fini");
 	if (bundle_fini_nssymbol != NULL) {
 		bundle_fini = NSAddressOfSymbol(bundle_fini_nssymbol);
 		bundle_fini();
 	}
-	
+
 	return (int) NSUnLinkModule(bundle_handle, NULL);
 }
 
