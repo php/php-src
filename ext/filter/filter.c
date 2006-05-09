@@ -740,9 +740,7 @@ PHP_FUNCTION(input_get_args)
 				}
 			}
 
-			if (filter_flags & FILTER_FLAG_SCALAR) {
-				php_zval_filter(*tmp, filter, filter_flags, options, charset TSRMLS_CC);
-			} else {
+			if (filter_flags & FILTER_FLAG_ARRAY) {
 				php_zval_filter_recursive(*tmp, filter, filter_flags, options, charset TSRMLS_CC);
 
 				/* ARRAY always returns an array */
@@ -752,6 +750,8 @@ PHP_FUNCTION(input_get_args)
 					add_next_index_zval(temparray, *tmp);
 					*tmp = temparray;
 				}
+			} else {
+				php_zval_filter(*tmp, filter, filter_flags, options, charset TSRMLS_CC);
 			}
 
 			if (Z_TYPE_PP(tmp) == IS_NULL) {
