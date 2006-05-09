@@ -448,8 +448,7 @@ static zval * php_filter_get_storage(long arg TSRMLS_DC) /* {{{ */
 /* }}} */
 
 /* {{{ proto mixed input_has_variable(constant type, string variable_name)
- * Returns true if the variable with the name *name* exists in source
- * or false otherwise.
+ * Returns true if the variable with the name 'name' exists in source.
  */
 PHP_FUNCTION(input_has_variable)
 {
@@ -484,9 +483,7 @@ PHP_FUNCTION(input_has_variable)
 /* }}} */
 
 /* {{{ proto mixed input_get(constant type, string variable_name [, int filter [, mixed flags [, string charset]]])
- * Returns the filtered variable *$name* from source `type`. It uses the
- * filter as specified in `filter` with a constant, and additional options
- * to the filter through `flags`.
+ * Returns the filtered variable 'name'* from source `type`.
  */
 PHP_FUNCTION(input_get)
 {
@@ -622,10 +619,7 @@ PHP_FUNCTION(input_get)
 /* }}} */
 
 /* {{{ proto mixed input_get_args(array definition, constant type [, array data])
- * Returns an array with all arguments defined in 'definition'. The key is used
- * as the name of the argument. The value can be either an integer (flags) or
- * an of options. This array can contain the 'filter' type, the 'flags',
- * the 'otptions' or the 'charset'
+ * Returns an array with all arguments defined in 'definition'.
  */
 PHP_FUNCTION(input_get_args)
 {
@@ -802,6 +796,7 @@ PHP_FUNCTION(input_name_to_filter)
 /* }}} */
 
 /* {{{ proto filter_data(mixed variable, int filter [, mixed filter_options [, string charset ]])
+ * Returns the filterd variable (scalar or array can be used).
  */
 PHP_FUNCTION(filter_data)
 {
