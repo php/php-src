@@ -180,18 +180,9 @@ static int pcre_clean_cache(void *data, void *arg TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ pcre_get_compiled_regex
+/* {{{ pcre_get_compiled_regex_cache
  */
-PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *preg_options TSRMLS_DC)
-{
-	int compile_options;
-	return pcre_get_compiled_regex_ex(regex, extra, preg_options, &compile_options TSRMLS_CC);
-}
-/* }}} */
-
-/* {{{ pcre_get_compiled_regex_ex
- */
-PHPAPI pcre* pcre_get_compiled_regex_ex(char *regex, pcre_extra **extra, int *preg_options, int *compile_options TSRMLS_DC)
+PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_len, pcre_extra **extra, int *preg_options, int *compile_options TSRMLS_DC)
 {
 	pcre				*re = NULL;
 	int				 	 coptions = 0;
@@ -203,7 +194,6 @@ PHPAPI pcre* pcre_get_compiled_regex_ex(char *regex, pcre_extra **extra, int *pr
 	char				 end_delimiter;
 	char 				*p, *pp;
 	char				*pattern;
-	int				 	 regex_len;
 	int				 	 do_study = 0;
 	int					 poptions = 0;
 	unsigned const char *tables = NULL;
@@ -230,7 +220,7 @@ PHPAPI pcre* pcre_get_compiled_regex_ex(char *regex, pcre_extra **extra, int *pr
 				*extra = pce->extra;
 				*preg_options = pce->preg_options;
 				*compile_options = pce->compile_options;
-				return pce->re;
+				return pce;
 #if HAVE_SETLOCALE
 			}
 		}
@@ -393,9 +383,30 @@ PHPAPI pcre* pcre_get_compiled_regex_ex(char *regex, pcre_extra **extra, int *pr
 	new_entry.tables = tables;
 #endif
 	zend_hash_update(&PCRE_G(pcre_cache), regex, regex_len+1, (void *)&new_entry,
-						sizeof(pcre_cache_entry), NULL);
+						sizeof(pcre_cache_entry), (void**)&pce);
 
-	return re;
+	return pce;
+}
+/* }}} */
+
+/* {{{ pcre_get_compiled_regex
+ */
+PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *preg_options TSRMLS_DC)
+{
+	int compile_options;
+	pcre_cache_entry * pce = pcre_get_compiled_regex_cache(regex, strlen(regex), extra, preg_options, &compile_options TSRMLS_CC);
+	
+	return pce ? pce->re : NULL;
+}
+/* }}} */
+
+/* {{{ pcre_get_compiled_regex_ex
+ */
+PHPAPI pcre* pcre_get_compiled_regex_ex(char *regex, pcre_extra **extra, int *preg_options, int *compile_options TSRMLS_DC)
+{
+	pcre_cache_entry * pce = pcre_get_compiled_regex_cache(regex, strlen(regex), extra, preg_options, compile_options TSRMLS_CC);
+	
+	return pce ? pce->re : NULL;
 }
 /* }}} */
 
