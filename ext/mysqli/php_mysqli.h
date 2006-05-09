@@ -191,13 +191,13 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 	mysqli_entry = zend_register_internal_class(&ce TSRMLS_CC); \
 } \
 
-#define MYSQLI_REGISTER_RESOURCE_EX(__ptr, __zval, __ce)  \
+#define MYSQLI_REGISTER_RESOURCE_EX(__ptr, __zval)  \
 	((mysqli_object *) zend_object_store_get_object(__zval TSRMLS_CC))->ptr = __ptr; \
 
 #define MYSQLI_RETURN_RESOURCE(__ptr, __ce) \
 	Z_TYPE_P(return_value) = IS_OBJECT; \
 	(return_value)->value.obj = mysqli_objects_new(__ce TSRMLS_CC); \
-	MYSQLI_REGISTER_RESOURCE_EX(__ptr, return_value, __ce)
+	MYSQLI_REGISTER_RESOURCE_EX(__ptr, return_value)
 
 #define MYSQLI_REGISTER_RESOURCE(__ptr, __ce) \
 {\
@@ -207,7 +207,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 		Z_TYPE_P(object) = IS_OBJECT;\
 		(object)->value.obj = mysqli_objects_new(__ce TSRMLS_CC);\
 	}\
-	MYSQLI_REGISTER_RESOURCE_EX(__ptr, object, __ce)\
+	MYSQLI_REGISTER_RESOURCE_EX(__ptr, object)\
 }
 
 #define MYSQLI_FETCH_RESOURCE(__ptr, __type, __id, __name, __check) \
