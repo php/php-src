@@ -83,6 +83,8 @@ PHP_FUNCTION(char_get_property_from_name);
 PHP_FUNCTION(char_get_property_value_name);
 PHP_FUNCTION(char_get_property_value_from_name);
 
+PHP_FUNCTION(char_enum_names);
+
 #endif /* PHP_PROPERTY_H */
 
 

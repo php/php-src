@@ -20,6 +20,13 @@
 
 typedef UBool (*prop_check_func_t)(UChar32 ch);
 
+typedef struct {
+	zval	  			  **args[4];
+	void	 			 ***thread_ctx;
+	zend_fcall_info 		fci;
+	zend_fcall_info_cache	fci_cache;
+} char_enum_context_t;
+
 static void check_property_impl(INTERNAL_FUNCTION_PARAMETERS, prop_check_func_t checker)
 {
 	UChar	   *str;
@@ -632,6 +639,115 @@ PHP_FUNCTION(char_get_property_value_from_name)
 	}
 
 	RETURN_LONG(value);
+}
+
+/* }}} */
+
+
+/* {{{ Enumerator functions */
+
+static UBool php_enum_char_names(void *context,
+								 UChar32 code,
+								 UCharNameChoice nameChoice,
+								 const char *name,
+								 int32_t length)
+{
+    char_enum_context_t	   *ctx = (char_enum_context_t *)context;
+    zval				   *retval_ptr = NULL;
+    int						status;
+    UBool					result = FALSE;
+    TSRMLS_FETCH_FROM_CTX(ctx->thread_ctx);
+
+	/*
+    convert_to_long_ex(ctx->args[0]);
+    convert_to_bool_ex(ctx->args[1]);
+    convert_to_string_ex(ctx->args[2]);
+	*/
+
+    ZVAL_LONG(*ctx->args[0], code);
+    ZVAL_BOOL(*ctx->args[1], nameChoice == U_EXTENDED_CHAR_NAME);
+	if (Z_USTRVAL_PP(ctx->args[2])) {
+		efree(Z_USTRVAL_PP(ctx->args[2]));
+	}
+    ZVAL_ASCII_STRINGL(*ctx->args[2], (char *)name, length, ZSTR_DUPLICATE);
+
+    ctx->fci.retval_ptr_ptr = &retval_ptr;
+
+    status = zend_call_function(&ctx->fci, &ctx->fci_cache TSRMLS_CC);
+
+    if (status == SUCCESS && retval_ptr && !EG(exception)) {
+        convert_to_boolean(retval_ptr);
+        result = (UBool)Z_BVAL_P(retval_ptr);
+    } else {
+        if (!EG(exception)) {
+            php_error_docref(NULL TSRMLS_CC, E_WARNING, "Enumeration callback encountered an error");
+        }
+        result = FALSE;
+    }
+    if (retval_ptr) {
+        zval_ptr_dtor(&retval_ptr);
+    }
+    return result;
+}
+
+PHP_FUNCTION(char_enum_names)
+{
+    zval			   *callback;
+    long				start, limit;
+	zend_bool			extended = FALSE;
+    zval			   *zcode, *zname, *zextended;
+    char_enum_context_t ectx;
+	UCharNameChoice		choice = U_UNICODE_CHAR_NAME;
+    UErrorCode 			status = U_ZERO_ERROR;
+    
+    if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "zll|l", &callback, &start, &limit, &extended)) {
+        return;               
+    }   
+    
+	if (!zend_is_callable(callback, 0, NULL)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid enumeration callback");
+		return;
+	}
+
+	if (extended) {
+		choice = U_EXTENDED_CHAR_NAME;
+	}  
+
+    /* Do all the heavy lifing once, instead of in the callback */
+    MAKE_STD_ZVAL(zcode);
+    MAKE_STD_ZVAL(zextended);
+    MAKE_STD_ZVAL(zname);
+
+    ZVAL_LONG(zcode, 0);
+    ZVAL_BOOL(zextended, 0);
+    Z_TYPE_P(zname) = IS_UNICODE;
+	Z_USTRVAL_P(zname) = NULL;
+
+    memset(&ectx, 0, sizeof(char_enum_context_t));
+    ectx.fci.size = sizeof(ectx.fci);
+    ectx.fci.function_table = EG(function_table);
+    ectx.fci.function_name = callback;
+    ectx.fci.no_separation = 1;
+    ectx.fci_cache = empty_fcall_info_cache;
+    ectx.args[0] = &zcode;
+    ectx.args[1] = &zextended;
+    ectx.args[2] = &zname;
+    ectx.fci.param_count = 3;
+    ectx.fci.params = ectx.args;
+    TSRMLS_SET_CTX(ectx.thread_ctx);
+
+	u_enumCharNames(start, limit, (UEnumCharNamesFn *)php_enum_char_names,
+					(void *)&ectx, choice, &status);
+
+    zval_ptr_dtor(&zcode);
+    zval_ptr_dtor(&zextended);
+    zval_ptr_dtor(&zname);
+
+	if (U_SUCCESS(status)) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
 }
 
 /* }}} */
