@@ -54,11 +54,12 @@ typedef struct _zend_function_entry {
 #define ZEND_DEP_FE(name, arg_info)                 ZEND_FENTRY(name, ZEND_FN(name), arg_info, ZEND_ACC_DEPRECATED)
 #define ZEND_FALIAS(name, alias, arg_info)			ZEND_FENTRY(name, ZEND_FN(alias), arg_info, 0)
 #define ZEND_DEP_FALIAS(name, alias, arg_info)		ZEND_FENTRY(name, ZEND_FN(alias), arg_info, ZEND_ACC_DEPRECATED)
+#define ZEND_NAMED_ME(zend_name, name, arg_info, flags)	ZEND_FENTRY(zend_name, name, arg_info, flags)
 #define ZEND_ME(classname, name, arg_info, flags)	ZEND_FENTRY(name, ZEND_MN(classname##_##name), arg_info, flags)
 #define ZEND_ABSTRACT_ME(classname, name, arg_info)	ZEND_FENTRY(name, NULL, arg_info, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 #define ZEND_MALIAS(classname, name, alias, arg_info, flags) \
                                                     ZEND_FENTRY(name, ZEND_MN(classname##_##alias), arg_info, flags)
-#define ZEND_ME_MAPPING(name, func_name, arg_types) ZEND_NAMED_FE(name, ZEND_FN(func_name), arg_types)
+#define ZEND_ME_MAPPING(name, func_name, arg_types, flags) ZEND_NAMED_ME(name, ZEND_FN(func_name), arg_types, flags)
 
 #define ZEND_ARG_INFO(pass_by_ref, name)							{ {#name}, sizeof(#name)-1, {NULL}, 0, 0, 0, pass_by_ref, 0, 0 },
 #define ZEND_ARG_PASS_INFO(pass_by_ref)								{ {NULL}, 0, {NULL}, 0, 0, 0, pass_by_ref, 0, 0 },
