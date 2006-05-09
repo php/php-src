@@ -1,3 +1,61 @@
+2006-05-08  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_5_2)
+      NEWS:
+      Update news
+
+2006-05-08  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_2)
+      ext/mysqli/mysqli.c
+      ext/mysqli/php_mysqli.h:
+      moved zend_class_entry variables to mysqli.c
+
+2006-05-08  Brian France  <list@firehawksystems.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/curl/multi.c:
+      
+      MFH: Add implementation of curl_multi_info_read
+
+2006-05-08  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_2)
+      ext/mysqli/mysqli_api.c:
+      tweaks and optimizations
+
+2006-05-08  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_4_4)
+      NEWS
+      ext/gd/libgd/gd_gif_in.c
+      ext/gd/tests/bug37346.gif
+      ext/gd/tests/bug37346.phpt
+      ext/gd/tests/bug37360.gif
+      ext/gd/tests/bug37360.phpt:
+      - MFH: #37346, invalid colormap format
+      - MFH: #37360, bad gif size
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd_gif_in.c:
+      - more CS
+
+    * ext/gd/libgd/gd_gif_in.c
+      ext/gd/tests/bug37360.gif
+      ext/gd/tests/bug37360.gif
+      ext/gd/tests/bug37360.gif
+      ext/gd/tests/bug37360.gif
+      ext/gd/tests/bug37360.phpt
+      ext/gd/tests/bug37360.phpt
+      ext/gd/tests/bug37360.phpt
+      ext/gd/tests/bug37360.phpt:
+      - #37360, bad gif size
+
+    * ext/gd/libgd/gd_gif_in.c
+      ext/gd/libgd/gd_gif_in.c:
+      - CS (spaces > tabs)
+
 2006-05-07  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * (PHP_5_1)
