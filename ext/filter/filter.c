@@ -425,7 +425,6 @@ static void php_zval_filter_recursive(zval *value, long filter, long flags, zval
 static zval * php_filter_get_storage(long arg TSRMLS_DC) /* {{{ */
 {
 	zval * array_ptr = NULL;
-
 	switch (arg) {
 		case PARSE_GET:
 			array_ptr = IF_G(get_array);
@@ -630,7 +629,7 @@ PHP_FUNCTION(input_get)
  */
 PHP_FUNCTION(input_get_args)
 {
-	long        arg, filter = FILTER_DEFAULT;
+	long       filter = FILTER_DEFAULT;
 	char       *charset = NULL;
 	zval      **tmp, ** option;
 	int         filter_flags = FILTER_FLAG_SCALAR;
@@ -667,7 +666,7 @@ PHP_FUNCTION(input_get_args)
 		case PARSE_COOKIE:
 		case PARSE_SERVER:
 		case PARSE_ENV:
-			array_ptr = php_filter_get_storage(arg TSRMLS_CC);
+			array_ptr = php_filter_get_storage(args_from TSRMLS_CC);
 			break;
 
 		case PARSE_DATA:
