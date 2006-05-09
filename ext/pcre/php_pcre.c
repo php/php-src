@@ -23,6 +23,7 @@
 #endif
 
 #include "php.h"
+#include "php_ini.h"
 #include "php_globals.h"
 #include "php_pcre.h"
 #include "ext/standard/info.h"
@@ -44,8 +45,45 @@
 
 #define PREG_GREP_INVERT			(1<<0)
 
+#define PCRE_CACHE_SIZE 4096
 
-ZEND_DECLARE_MODULE_GLOBALS(pcre)
+enum {
+	PHP_PCRE_NO_ERROR = 0,
+	PHP_PCRE_INTERNAL_ERROR,
+	PHP_PCRE_BACKTRACK_LIMIT_ERROR,
+	PHP_PCRE_RECURSION_LIMIT_ERROR,
+	PHP_PCRE_BAD_UTF8_ERROR,
+};
+
+
+ZEND_DECLARE_MODULE_GLOBALS(pcre);
+
+
+static void pcre_handle_exec_error(int pcre_code TSRMLS_DC)
+{
+	int preg_code = 0;
+
+	switch (pcre_code) {
+		case PCRE_ERROR_MATCHLIMIT:
+			preg_code = PHP_PCRE_BACKTRACK_LIMIT_ERROR;
+			break;
+
+		case PCRE_ERROR_RECURSIONLIMIT:
+			preg_code = PHP_PCRE_RECURSION_LIMIT_ERROR;
+			break;
+
+		case PCRE_ERROR_BADUTF8:
+			preg_code = PHP_PCRE_BAD_UTF8_ERROR;
+			break;
+
+		default:
+			preg_code = PHP_PCRE_INTERNAL_ERROR;
+			break;
+	}
+
+	PCRE_G(error_code) = preg_code;
+}
+
 
 static void php_free_pcre_cache(void *data)
 {
@@ -62,12 +100,20 @@ static void php_free_pcre_cache(void *data)
 static void php_pcre_init_globals(zend_pcre_globals *pcre_globals TSRMLS_DC)
 {
 	zend_hash_init(&pcre_globals->pcre_cache, 0, NULL, php_free_pcre_cache, 1);
+	pcre_globals->backtrack_limit = 0;
+	pcre_globals->recursion_limit = 0;
+	pcre_globals->error_code      = PHP_PCRE_NO_ERROR;
 }
 
 static void php_pcre_shutdown_globals(zend_pcre_globals *pcre_globals TSRMLS_DC)
 {
 	zend_hash_destroy(&pcre_globals->pcre_cache);
 }
+
+PHP_INI_BEGIN()
+	STD_PHP_INI_ENTRY("pcre.backtrack_limit", "100000", PHP_INI_ALL, OnUpdateLong, backtrack_limit, zend_pcre_globals, pcre_globals)
+	STD_PHP_INI_ENTRY("pcre.recursion_limit", "100000", PHP_INI_ALL, OnUpdateLong, recursion_limit, zend_pcre_globals, pcre_globals)
+PHP_INI_END()
 
 
 /* {{{ PHP_MINFO_FUNCTION(pcre) */
@@ -84,6 +130,8 @@ static PHP_MINFO_FUNCTION(pcre)
 static PHP_MINIT_FUNCTION(pcre)
 {
 	ZEND_INIT_MODULE_GLOBALS(pcre, php_pcre_init_globals, php_pcre_shutdown_globals);
+
+	REGISTER_INI_ENTRIES();
 	
 	REGISTER_LONG_CONSTANT("PREG_PATTERN_ORDER", PREG_PATTERN_ORDER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SET_ORDER", PREG_SET_ORDER, CONST_CS | CONST_PERSISTENT);
@@ -92,6 +140,12 @@ static PHP_MINIT_FUNCTION(pcre)
 	REGISTER_LONG_CONSTANT("PREG_SPLIT_DELIM_CAPTURE", PREG_SPLIT_DELIM_CAPTURE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SPLIT_OFFSET_CAPTURE", PREG_SPLIT_OFFSET_CAPTURE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_GREP_INVERT", PREG_GREP_INVERT, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("PREG_NO_ERROR", PHP_PCRE_NO_ERROR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_INTERNAL_ERROR", PHP_PCRE_INTERNAL_ERROR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_BACKTRACK_LIMIT_ERROR", PHP_PCRE_BACKTRACK_LIMIT_ERROR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_RECURSION_LIMIT_ERROR", PHP_PCRE_RECURSION_LIMIT_ERROR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_BAD_UTF8_ERROR", PHP_PCRE_BAD_UTF8_ERROR, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -106,11 +160,11 @@ static PHP_MSHUTDOWN_FUNCTION(pcre)
 	php_pcre_shutdown_globals(&pcre_globals TSRMLS_CC);
 #endif
 
+	UNREGISTER_INI_ENTRIES();
+
 	return SUCCESS;
 }
 /* }}} */
-
-#define PCRE_CACHE_SIZE 4096
 
 /* {{{ static pcre_clean_cache */
 static int pcre_clean_cache(void *data, void *arg TSRMLS_DC)
@@ -296,6 +350,9 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
 	   store the result in extra for passing to pcre_exec. */
 	if (do_study) {
 		*extra = pcre_study(re, soptions, &error);
+		if (*extra) {
+			(*extra)->flags |= PCRE_EXTRA_MATCH_LIMIT | PCRE_EXTRA_MATCH_LIMIT_RECURSION;
+		}
 		if (error != NULL) {
 			php_error_docref(NULL TSRMLS_CC,E_WARNING, "Error while studying pattern");
 		}
@@ -384,21 +441,22 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	int			     regex_len;
 	int				 subject_len;
 	zval 			*subpats = NULL;	/* Array for subpatterns */
-	long				 flags;				/* Match control flags */
+	long			 flags;				/* Match control flags */
 
 	zval			*result_set,		/* Holds a set of subpatterns after
 										   a global match */
 				   **match_sets = NULL;	/* An array of sets of matches for each
 										   subpattern after a global match */
 	pcre			*re = NULL;			/* Compiled regular expression */
-	pcre_extra		*extra = NULL;		/* Holds results of studying */
+	pcre_extra		*extra = NULL;		/* Holds results of studying pattern */
+	pcre_extra		 extra_data;		/* Used locally for exec options */
 	int			 	 exoptions = 0;		/* Execution options */
 	int			 	 preg_options = 0;	/* Custom preg options */
 	int			 	 count = 0;			/* Count of matched subpatterns */
 	int			 	*offsets;			/* Array of subpattern offsets */
 	int				 num_subpats;		/* Number of captured subpatterns */
 	int			 	 size_offsets;		/* Size of the offsets array */
-	long				 start_offset = 0;	/* Where the new search starts */
+	long			 start_offset = 0;	/* Where the new search starts */
 	int			 	 matched;			/* Has anything matched */
 	int				 subpats_order = 0; /* Order of subpattern matches */
 	int				 offset_capture = 0;/* Capture match offsets: yes/no */
@@ -450,6 +508,13 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	if ((re = pcre_get_compiled_regex(regex, &extra, &preg_options TSRMLS_CC)) == NULL) {
 		RETURN_FALSE;
 	}
+
+	if (extra == NULL) {
+		extra_data.flags = PCRE_EXTRA_MATCH_LIMIT | PCRE_EXTRA_MATCH_LIMIT_RECURSION;
+		extra = &extra_data;
+	}
+	extra->match_limit = PCRE_G(backtrack_limit);
+	extra->match_limit_recursion = PCRE_G(recursion_limit);
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
 	rc = pcre_fullinfo(re, extra, PCRE_INFO_CAPTURECOUNT, &num_subpats);
@@ -523,6 +588,7 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 
 	match = NULL;
 	matched = 0;
+	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 	
 	do {
 		/* Execute the regular expression. */
@@ -536,7 +602,7 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 		}
 
 		/* If something has matched */
-		if (count >= 0) {
+		if (count > 0) {
 			matched++;
 			match = subject + offsets[0];
 
@@ -548,7 +614,7 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 					efree(offsets);
 					efree(re);
 					zend_error(E_WARNING, "Get subpatterns list failed");
-					return;
+					RETURN_FALSE;
 				}
 
 				if (global) {	/* global pattern matching */
@@ -616,8 +682,7 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 
 				pcre_free((void *) stringlist);
 			}
-		}
-		else { /* Failed to match */
+		} else if (count == PCRE_ERROR_NOMATCH) {
 			/* If we previously set PCRE_NOTEMPTY after a null match,
 			   this is not necessarily the end. We need to advance
 			   the start offset, and continue. Fudge the offset values
@@ -627,6 +692,9 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 				offsets[1] = start_offset + 1;
 			} else
 				break;
+		} else {
+			pcre_handle_exec_error(count TSRMLS_CC);
+			break;
 		}
 		
 		/* If we have matched an empty string, mimic what Perl's /g options does.
@@ -845,6 +913,7 @@ PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
 {
 	pcre			*re = NULL;			/* Compiled regular expression */
 	pcre_extra		*extra = NULL;		/* Holds results of studying */
+	pcre_extra		 extra_data;		/* Used locally for exec options */
 	int			 	 exoptions = 0;		/* Execution options */
 	int			 	 preg_options = 0;	/* Custom preg options */
 	int			 	 count = 0;			/* Count of matched subpatterns */
@@ -877,6 +946,13 @@ PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
 		return NULL;
 	}
 
+	if (extra == NULL) {
+		extra_data.flags = PCRE_EXTRA_MATCH_LIMIT | PCRE_EXTRA_MATCH_LIMIT_RECURSION;
+		extra = &extra_data;
+	}
+	extra->match_limit = PCRE_G(backtrack_limit);
+	extra->match_limit_recursion = PCRE_G(recursion_limit);
+
 	eval = preg_options & PREG_REPLACE_EVAL;
 	if (is_callable_replace) {
 		if (eval) {
@@ -906,6 +982,7 @@ PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
 	match = NULL;
 	*result_len = 0;
 	start_offset = 0;
+	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 	
 	while (1) {
 		/* Execute the regular expression. */
@@ -1011,7 +1088,7 @@ PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
 			if (limit != -1)
 				limit--;
 
-		} else { /* Failed to match */
+		} else if (count == PCRE_ERROR_NOMATCH) {
 			/* If we previously set PCRE_NOTEMPTY after a null match,
 			   this is not necessarily the end. We need to advance
 			   the start offset, and continue. Fudge the offset values
@@ -1036,6 +1113,9 @@ PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
 				result[*result_len] = '\0';
 				break;
 			}
+		} else {
+			pcre_handle_exec_error(count TSRMLS_CC);
+			break;
 		}
 			
 		/* If we have matched an empty string, mimic what Perl's /g options does.
@@ -1262,6 +1342,7 @@ PHP_FUNCTION(preg_split)
 	pcre			*re_bump = NULL;	/* Regex instance for empty matches */
 	pcre_extra		*extra = NULL;		/* Holds results of studying */
 	pcre_extra		*extra_bump = NULL;	/* Almost dummy */
+	pcre_extra		 extra_data;		/* Used locally for exec options */
 	int			 	*offsets;			/* Array of subpattern offsets */
 	int			 	 size_offsets;		/* Size of the offsets array */
 	int				 exoptions = 0;		/* Execution options */
@@ -1308,6 +1389,13 @@ PHP_FUNCTION(preg_split)
 	if ((re = pcre_get_compiled_regex_ex(Z_STRVAL_PP(regex), &extra, &preg_options, &coptions TSRMLS_CC)) == NULL) {
 		RETURN_FALSE;
 	}
+
+	if (extra == NULL) {
+		extra_data.flags = PCRE_EXTRA_MATCH_LIMIT | PCRE_EXTRA_MATCH_LIMIT_RECURSION;
+		extra = &extra_data;
+	}
+	extra->match_limit = PCRE_G(backtrack_limit);
+	extra->match_limit_recursion = PCRE_G(recursion_limit);
 	
 	/* Initialize return value */
 	array_init(return_value);
@@ -1327,6 +1415,7 @@ PHP_FUNCTION(preg_split)
 	next_offset = 0;
 	last_match = Z_STRVAL_PP(subject);
 	match = NULL;
+	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 	
 	/* Get next piece if no limit or limit not yet reached and something matched*/
 	while ((limit_val == -1 || limit_val > 1)) {
@@ -1379,7 +1468,7 @@ PHP_FUNCTION(preg_split)
 					}
 				}
 			}
-		} else { /* Failed to match */
+		} else if (count == PCRE_ERROR_NOMATCH) {
 			/* If we previously set PCRE_NOTEMPTY after a null match,
 			   this is not necessarily the end. We need to advance
 			   the start offset, and continue. Fudge the offset values
@@ -1407,6 +1496,9 @@ PHP_FUNCTION(preg_split)
 				}
 			} else
 				break;
+		} else {
+			pcre_handle_exec_error(count TSRMLS_CC);
+			break;
 		}
 
 		/* If we have matched an empty string, mimic what Perl's /g options does.
@@ -1538,6 +1630,7 @@ PHP_FUNCTION(preg_grep)
 			   	   **entry;				/* An entry in the input array */
 	pcre			*re = NULL;			/* Compiled regular expression */
 	pcre_extra		*extra = NULL;		/* Holds results of studying */
+	pcre_extra		 extra_data;		/* Used locally for exec options */
 	int			 	 preg_options = 0;	/* Custom preg options */
 	int			 	*offsets;			/* Array of subpattern offsets */
 	int			 	 size_offsets;		/* Size of the offsets array */
@@ -1575,6 +1668,13 @@ PHP_FUNCTION(preg_grep)
 		RETURN_FALSE;
 	}
 
+	if (extra == NULL) {
+		extra_data.flags = PCRE_EXTRA_MATCH_LIMIT | PCRE_EXTRA_MATCH_LIMIT_RECURSION;
+		extra = &extra_data;
+	}
+	extra->match_limit = PCRE_G(backtrack_limit);
+	extra->match_limit_recursion = PCRE_G(recursion_limit);
+
 	/* Calculate the size of the offsets array, and allocate memory for it. */
 	rc = pcre_fullinfo(re, extra, PCRE_INFO_CAPTURECOUNT, &size_offsets);
 	if (rc < 0) {
@@ -1587,6 +1687,8 @@ PHP_FUNCTION(preg_grep)
 	
 	/* Initialize return array */
 	array_init(return_value);
+
+	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
 	/* Go through the input array */
 	zend_hash_internal_pointer_reset(Z_ARRVAL_PP(input));
@@ -1603,15 +1705,18 @@ PHP_FUNCTION(preg_grep)
 		if (count == 0) {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Matched, but too many substrings");
 			count = size_offsets/3;
+		} else if (count < 0 && count != PCRE_ERROR_NOMATCH) {
+			pcre_handle_exec_error(count TSRMLS_CC);
+			break;
 		}
 
 		/* If the entry fits our requirements */
 		if ((count > 0 && !invert) ||
-			(count < 0 && invert)) {
+			(count == PCRE_ERROR_NOMATCH && invert)) {
 			(*entry)->refcount++;
 
 			/* Add to return array */
-			switch(zend_hash_get_current_key(Z_ARRVAL_PP(input), &string_key, &num_key, 0))
+			switch (zend_hash_get_current_key(Z_ARRVAL_PP(input), &string_key, &num_key, 0))
 			{
 				case HASH_KEY_IS_STRING:
 					zend_hash_update(Z_ARRVAL_P(return_value), string_key.s,
@@ -1633,6 +1738,18 @@ PHP_FUNCTION(preg_grep)
 }
 /* }}} */
 
+/* {{{ proto int preg_last_error()
+   Returns the error code of the last regexp execution. */
+PHP_FUNCTION(preg_last_error)
+{
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+		return;
+	}
+
+	RETURN_LONG(PCRE_G(error_code));
+}
+/* }}} */
+
 /* {{{ module definition structures */
 
 zend_function_entry pcre_functions[] = {
@@ -1643,6 +1760,7 @@ zend_function_entry pcre_functions[] = {
 	PHP_FE(preg_split,				NULL)
 	PHP_FE(preg_quote,				NULL)
 	PHP_FE(preg_grep,				NULL)
+	PHP_FE(preg_last_error,			NULL)
 	{NULL, 		NULL,				NULL}
 };
 
