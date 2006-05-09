@@ -74,7 +74,7 @@ PDO_API zend_class_entry *php_pdo_get_exception_base(int root TSRMLS_DC)
 		}
 	}
 #endif
-#if (PHP_MAJOR_VERSION < 6)
+#if (PHP_MAJOR_VERSION <= 5) && (PHP_MINOR_VERSION < 2)
 	return zend_exception_get_default();
 #else
 	return zend_exception_get_default(TSRMLS_C);
