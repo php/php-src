@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, PHP 5.2.0
+- Added run-time configurable backtracking/recursion limits. (Andrei)
+- Added preg_last_error(). (Andrei)
 - Added support for Apache 2.2 handler in the Windows distro. (Edin)
 - Added pg_field_table() function. (Edin)
 - Add implementation of curl_multi_info_read (Brian)
