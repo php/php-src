@@ -100,7 +100,7 @@ PHP_METHOD(mysqli_warning, next)
 			return;
 		}
 
-		MYSQLI_FETCH_RESOURCE(w, MYSQLI_WARNING *, &mysqli_warning, "mysqli_warning");
+		MYSQLI_FETCH_RESOURCE(w, MYSQLI_WARNING *, &mysqli_warning, "mysqli_warning", MYSQLI_STATUS_VALID);
 
 		if (w->next) {
 			w = w->next;
@@ -164,7 +164,7 @@ int mysqli_warning_errno(mysqli_object *obj, zval **retval TSRMLS_DC)
 /* }}} */
 
 /* {{{ mysqli_warning_construct(object obj) */
-PHP_METHOD(mysqli_warning, __construct)
+PHP_FUNCTION(mysqli_warning_construct)
 {
 	zval			*z;
 	mysqli_object	*obj;
@@ -182,11 +182,11 @@ PHP_METHOD(mysqli_warning, __construct)
 
 	if (obj->zo.ce == mysqli_link_class_entry) {
 		MY_MYSQL *mysql;
-		MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &z, "mysqli_link");
+		MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &z, "mysqli_link", MYSQLI_STATUS_VALID);
 		hdl = mysql->mysql;
 	} else if (obj->zo.ce == mysqli_stmt_class_entry) {
 		MY_STMT *stmt;
-		MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &z, "mysqli_stmt");
+		MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &z, "mysqli_stmt", MYSQLI_STATUS_VALID);
 		hdl = stmt->stmt->mysql;
 	} else {
 		RETURN_FALSE;
@@ -200,20 +200,20 @@ PHP_METHOD(mysqli_warning, __construct)
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = mysqli_resource->info = (void *)w;
+	mysqli_resource->status = MYSQLI_STATUS_VALID;
 
 	if (!getThis() || !instanceof_function(Z_OBJCE_P(getThis()), mysqli_warning_class_entry TSRMLS_CC)) {
 		MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_warning_class_entry);	
 	} else {
 		((mysqli_object *) zend_object_store_get_object(getThis() TSRMLS_CC))->ptr = mysqli_resource;
-		((mysqli_object *) zend_object_store_get_object(getThis() TSRMLS_CC))->valid = 1;
 	}
 
 }
 /* }}} */
 
 zend_function_entry mysqli_warning_methods[] = {
-	PHP_ME(mysqli_warning, __construct,		NULL, ZEND_ACC_PROTECTED)
-	PHP_ME(mysqli_warning, next, 			NULL, ZEND_ACC_PUBLIC)
+	PHP_FALIAS(mysqli_warning, mysqli_warning_construct, NULL)
+	ZEND_ME(mysqli_warning, next, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 

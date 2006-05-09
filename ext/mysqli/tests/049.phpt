@@ -11,14 +11,16 @@ mysql_fetch_row (OO-Style)
 	$mysql = mysqli_connect($host, $user, $passwd);
 
 	$mysql->select_db("test");		
-	$result = $mysql->query("SELECT CURRENT_USER()");
+	$result = $mysql->query("SELECT DATABASE()");
 	$row = $result->fetch_row();
 	$result->close();
 
-	$ok = ($row[0] == $user . "@" . $host);	
-	var_dump($ok);
+	var_dump($row);
 
 	$mysql->close();
 ?>
 --EXPECT--
-bool(true)
+array(1) {
+  [0]=>
+  string(4) "test"
+}
