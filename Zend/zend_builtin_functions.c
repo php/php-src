@@ -1958,7 +1958,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 	ptr = EG(current_execute_data);
 
 	/* skip "new Exception()" */
-	if ((skip_last == 0) && ptr->opline && (ptr->opline->opcode == ZEND_NEW)) {
+	if (ptr && (skip_last == 0) && ptr->opline && (ptr->opline->opcode == ZEND_NEW)) {
 		ptr = ptr->prev_execute_data;
 	}
 
