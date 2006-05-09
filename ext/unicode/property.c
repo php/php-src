@@ -643,7 +643,6 @@ PHP_FUNCTION(char_get_property_value_from_name)
 
 /* }}} */
 
-
 /* {{{ Enumerator functions */
 
 static UBool php_enum_char_names(void *context,
@@ -658,18 +657,16 @@ static UBool php_enum_char_names(void *context,
     UBool					result = FALSE;
     TSRMLS_FETCH_FROM_CTX(ctx->thread_ctx);
 
-	/*
     convert_to_long_ex(ctx->args[0]);
-    convert_to_bool_ex(ctx->args[1]);
-    convert_to_string_ex(ctx->args[2]);
-	*/
+    convert_to_unicode_ex(ctx->args[1]);
+    convert_to_boolean_ex(ctx->args[2]);
 
     ZVAL_LONG(*ctx->args[0], code);
-    ZVAL_BOOL(*ctx->args[1], nameChoice == U_EXTENDED_CHAR_NAME);
-	if (Z_USTRVAL_PP(ctx->args[2])) {
-		efree(Z_USTRVAL_PP(ctx->args[2]));
+	if (Z_USTRVAL_PP(ctx->args[1])) {
+		efree(Z_USTRVAL_PP(ctx->args[1]));
 	}
-    ZVAL_ASCII_STRINGL(*ctx->args[2], (char *)name, length, ZSTR_DUPLICATE);
+    ZVAL_ASCII_STRINGL(*ctx->args[1], (char *)name, length, ZSTR_DUPLICATE);
+    ZVAL_BOOL(*ctx->args[2], nameChoice == U_EXTENDED_CHAR_NAME);
 
     ctx->fci.retval_ptr_ptr = &retval_ptr;
 
@@ -730,8 +727,8 @@ PHP_FUNCTION(char_enum_names)
     ectx.fci.no_separation = 1;
     ectx.fci_cache = empty_fcall_info_cache;
     ectx.args[0] = &zcode;
-    ectx.args[1] = &zextended;
-    ectx.args[2] = &zname;
+    ectx.args[1] = &zname;
+    ectx.args[2] = &zextended;
     ectx.fci.param_count = 3;
     ectx.fci.params = ectx.args;
     TSRMLS_SET_CTX(ectx.thread_ctx);
