@@ -1,7 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, PHP 5.2.0
-- Removed ze1 compatibility mode.
+- Removed ze1 compatibility mode. (Marcus)
 - Added support for constructors in interfaces to force constructor signature
   checks in implementations. (Marcus)
 - Changed __toString to be called whereever applicable. (Marcus)
