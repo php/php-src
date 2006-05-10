@@ -54,6 +54,7 @@ typedef struct _xmlreader_prop_handler {
 
 #define XMLREADER_LOAD_STRING 0
 #define XMLREADER_LOAD_FILE 1
+
 /* {{{ xmlreader_register_prop_handler */
 static void xmlreader_register_prop_handler(HashTable *prop_handler, char *name, xmlreader_read_int_t read_int_func, xmlreader_read_const_char_t read_char_func, int rettype TSRMLS_DC)
 {
@@ -65,6 +66,7 @@ static void xmlreader_register_prop_handler(HashTable *prop_handler, char *name,
 	zend_hash_add(prop_handler, name, strlen(name)+1, &hnd, sizeof(xmlreader_prop_handler), NULL);
 }
 /* }}} */
+
 /* {{{ xmlreader_property_reader */
 static int xmlreader_property_reader(xmlreader_object *obj, xmlreader_prop_handler *hnd, zval **retval TSRMLS_DC)
 {
@@ -359,6 +361,11 @@ void xmlreader_objects_clone(void *object, void **object_clone TSRMLS_DC)
 /* {{{ xmlreader_free_resources */
 static void xmlreader_free_resources(xmlreader_object *intern) {
 	if (intern) {
+		if (intern->input) {
+			xmlFreeParserInputBuffer(intern->input);
+			intern->input = NULL;
+		}
+
 		if (intern->ptr) {
 			xmlFreeTextReader(intern->ptr);
 			intern->ptr = NULL;
@@ -396,6 +403,7 @@ zend_object_value xmlreader_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	intern = emalloc(sizeof(xmlreader_object));
 	memset(&intern->std, 0, sizeof(zend_object));
 	intern->ptr = NULL;
+	intern->input = NULL;
 	intern->schema = NULL;
 	intern->prop_handler = &xmlreader_prop_handlers;
 
@@ -1050,6 +1058,7 @@ PHP_METHOD(xmlreader, XML)
 	char *source, *uri = NULL, *encoding = NULL;
 	int resolved_path_len;
 	char *directory=NULL, resolved_path[MAXPATHLEN];
+	xmlParserInputBufferPtr inputbfr;
 	xmlTextReaderPtr reader;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!l", &source, &source_len, &encoding, &encoding_len, &options) == FAILURE) {
@@ -1070,39 +1079,43 @@ PHP_METHOD(xmlreader, XML)
 		RETURN_FALSE;
 	}
 
+	inputbfr = xmlParserInputBufferCreateMem(source, source_len, XML_CHAR_ENCODING_NONE);
+
+    if (inputbfr != NULL) {
 /* Get the URI of the current script so that we can set the base directory in libxml */
 #if HAVE_GETCWD
-	directory = VCWD_GETCWD(resolved_path, MAXPATHLEN);
+		directory = VCWD_GETCWD(resolved_path, MAXPATHLEN);
 #elif HAVE_GETWD
-	directory = VCWD_GETWD(resolved_path);
+		directory = VCWD_GETWD(resolved_path);
 #endif
-	if (directory) {
-		resolved_path_len = strlen(resolved_path);
-		if (resolved_path[resolved_path_len - 1] != DEFAULT_SLASH) {
-			resolved_path[resolved_path_len] = DEFAULT_SLASH;
-			resolved_path[++resolved_path_len] = '\0';
+		if (directory) {
+			resolved_path_len = strlen(resolved_path);
+			if (resolved_path[resolved_path_len - 1] != DEFAULT_SLASH) {
+				resolved_path[resolved_path_len] = DEFAULT_SLASH;
+				resolved_path[++resolved_path_len] = '\0';
+			}
+			uri = (char *) xmlCanonicPath((const xmlChar *) resolved_path);
 		}
-		uri = (char *) xmlCanonicPath((const xmlChar *) resolved_path);
-	}
-
-	reader = xmlReaderForMemory(source, source_len, uri, encoding, options);
-
-	if (uri) {
-		xmlFree(uri);
-	}
-
-	if (reader != NULL) {
-		if (id == NULL) {
-			object_init_ex(return_value, xmlreader_class_entry);
-			intern = (xmlreader_object *)zend_objects_get_address(return_value TSRMLS_CC);
+		reader = xmlNewTextReader(inputbfr, uri);
+		if (uri) {
+			xmlFree(uri);
+		}
+		if (reader != NULL) {
+			if (id == NULL) {
+				object_init_ex(return_value, xmlreader_class_entry);
+				intern = (xmlreader_object *)zend_objects_get_address(return_value TSRMLS_CC);
+			} else {
+				RETVAL_TRUE;
+			}
+			intern->input = inputbfr;
 			intern->ptr = reader;
 			return;
-		} else {
-			intern->ptr = reader;
-			RETURN_TRUE;
 		}
 	}
 
+	if (inputbfr) {
+		xmlFreeParserInputBuffer(inputbfr);
+	}
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to load source data");
 	RETURN_FALSE;
 }
