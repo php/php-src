@@ -1,5 +1,5 @@
 --TEST--
-bug #33771 (error_reporting falls to 0 when @ was used inside try/catch block)
+Bug #33771 (error_reporting falls to 0 when @ was used inside try/catch block)
 --FILE--
 <?php
 
