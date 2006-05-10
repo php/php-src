@@ -7,27 +7,20 @@ class MyObject {}
 
 interface MyInterface
 {
-	public function __construct(Object $o);
+	public function __construct(MyObject $o);
 }
 
 class MyTestClass implements MyInterface
 {
-	public function __construct(Object $o)
+	public function __construct(MyObject $o)
 	{
 	}
 }
 
 $obj = new MyTestClass;
 
-class MyTestFail
-{
-	public function __construct()
-	{
-	}
-}
-
 ?>
 ===DONE===
 --EXPECTF--
 
-Fatal error: Argument 1 passed to MyTestClass::__construct() must be an object of class Object, called in %sinterfaces_003.php on line %d
+Catchable fatal error: Argument 1 passed to MyTestClass::__construct() must be an object of class MyObject, called in %sinterfaces_003.php on line %d

@@ -1,21 +1,29 @@
 --TEST--
-ZE2 A static abstrcat method may not be called
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
+ZE2 A static abstrcat methods
 --FILE--
 <?php
 
-abstract class fail {
-	abstract static function show();
+interface showable
+{
+	static function show();
 }
 
-class pass extends fail {
+class pass implements showable
+{
 	static function show() {
 		echo "Call to function show()\n";
 	}
 }
 
 pass::show();
+
+eval('
+class fail
+{
+	abstract static function func();
+}
+');
+
 fail::show();
 
 echo "Done\n"; // shouldn't be displayed
@@ -23,4 +31,4 @@ echo "Done\n"; // shouldn't be displayed
 --EXPECTF--
 Call to function show()
 
-Fatal error: Cannot call abstract method fail::show() in %s on line %d
+Fatal error: Static function fail::func() cannot be abstract in %s on line %d
