@@ -923,6 +923,7 @@ ZEND_API void zend_error(int type, const char *format, ...)
 		case E_USER_ERROR:
 		case E_USER_WARNING:
 		case E_USER_NOTICE:
+		case E_RECOVERABLE_ERROR:
 			if (zend_is_compiling(TSRMLS_C)) {
 				error_filename = zend_get_compiled_filename(TSRMLS_C);
 				error_lineno = zend_get_compiled_lineno(TSRMLS_C);
