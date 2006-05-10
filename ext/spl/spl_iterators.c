@@ -1812,7 +1812,6 @@ SPL_METHOD(CachingIterator, offsetSet)
 	spl_dual_it_object   *intern;
 	char *arKey;
 	uint nKeyLength;
-	zend_uchar type;
 	zval *value;
 
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
@@ -1821,7 +1820,7 @@ SPL_METHOD(CachingIterator, offsetSet)
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "%v does not use a full cache (see CachingIterator::__construct)", Z_OBJCE_P(getThis())->name);
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Tz", &arKey, &nKeyLength, &type, &value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz", &arKey, &nKeyLength, &value) == FAILURE) {
 		return;
 	}
 
