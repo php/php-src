@@ -48,8 +48,8 @@ extern PHPAPI zend_class_entry *spl_ce_NoRewindIterator;
 extern PHPAPI zend_class_entry *spl_ce_InfiniteIterator;
 extern PHPAPI zend_class_entry *spl_ce_EmptyIterator;
 extern PHPAPI zend_class_entry *spl_ce_AppendIterator;
-extern PHPAPI zend_class_entry *spl_ce_RegExIterator;
-extern PHPAPI zend_class_entry *spl_ce_RecursiveRegExIterator;
+extern PHPAPI zend_class_entry *spl_ce_RegexIterator;
+extern PHPAPI zend_class_entry *spl_ce_RecursiveRegexIterator;
 
 PHP_MINIT_FUNCTION(spl_iterators);
 
@@ -69,8 +69,8 @@ typedef enum {
 	DIT_InfiniteIterator,
 	DIT_AppendIterator,
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
-	DIT_RegExIterator,
-	DIT_RecursiveRegExIterator,
+	DIT_RegexIterator,
+	DIT_RecursiveRegexIterator,
 #endif
 	DIT_Unknown = ~0
 } dual_it_type;
