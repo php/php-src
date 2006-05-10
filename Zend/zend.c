@@ -229,7 +229,6 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 					if (zend_std_cast_object_tostring(expr, expr_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
 						break;
 					}
-					zend_error(E_NOTICE, "Object of class %s could not be converted to string", Z_OBJCE_P(expr)->name);
 				} else {
 					if(Z_OBJ_HANDLER_P(expr, get)) {
 						zval *z = Z_OBJ_HANDLER_P(expr, get)(expr TSRMLS_CC);
@@ -248,15 +247,11 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 						zval_ptr_dtor(&z);
 					}
 				}
-				if (EG(exception)) {
-					zval_dtor(expr_copy);
-					expr_copy->value.str.len = 0;
-					expr_copy->value.str.val = STR_EMPTY_ALLOC();
-					break;
-				}
+				zend_error(EG(exception) ? E_ERROR : E_RECOVERABLE_ERROR, "Object of class %s could not be converted to string", Z_OBJCE_P(expr)->name);
+				zval_dtor(expr_copy);
+				expr_copy->value.str.len = 0;
+				expr_copy->value.str.val = STR_EMPTY_ALLOC();
 			}
-			expr_copy->value.str.val = (char *) emalloc(sizeof("Object id #")-1 + MAX_LENGTH_OF_LONG);
-			expr_copy->value.str.len = sprintf(expr_copy->value.str.val, "Object id #%ld", (long)expr->value.obj.handle);
 			break;
 		case IS_DOUBLE:
 			*expr_copy = *expr;
