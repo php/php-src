@@ -725,6 +725,9 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			case E_USER_ERROR:
 				error_type_str = "Fatal error";
 				break;
+			case E_RECOVERABLE_ERROR:
+				error_type_str = "Catchable fatal error";
+				break;
 			case E_WARNING:
 			case E_CORE_WARNING:
 			case E_COMPILE_WARNING:
@@ -814,6 +817,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			}
 		/* no break - intentionally */
 		case E_ERROR:
+		case E_RECOVERABLE_ERROR:
 		/* case E_PARSE: the parser would return 1 (failure), we can bail out nicely */
 		case E_COMPILE_ERROR:
 		case E_USER_ERROR:
