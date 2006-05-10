@@ -716,7 +716,6 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 	}
 
 	if(Z_TYPE_P(variable_ptr) == IS_OBJECT && Z_OBJ_HANDLER_P(variable_ptr, set)) {
-		/* TODO? ze1_compatibility_mode support */
 		Z_OBJ_HANDLER_P(variable_ptr, set)(variable_ptr_ptr, value TSRMLS_CC);
 		goto done_setting_var;
 	}

@@ -1682,38 +1682,6 @@ static zend_object_handlers sxe_object_handlers = {
 	sxe_count_elements
 };
 
-static zend_object_handlers sxe_ze1_object_handlers = {
-	ZEND_OBJECTS_STORE_HANDLERS,
-	sxe_property_read,
-	sxe_property_write,
-	sxe_dimension_read,
-	sxe_dimension_write,
-	sxe_property_get_adr,
-	sxe_get_value,			/* get */
-	NULL,
-	sxe_property_exists,
-	sxe_property_delete,
-	sxe_dimension_exists,
-	sxe_dimension_delete,
-	sxe_properties_get,
-	NULL, /* zend_get_std_object_handlers()->get_method,*/
-	NULL, /* zend_get_std_object_handlers()->call_method,*/
-	NULL, /* zend_get_std_object_handlers()->get_constructor, */
-	NULL, /* zend_get_std_object_handlers()->get_class_entry,*/
-	NULL, /* zend_get_std_object_handlers()->get_class_name,*/
-	sxe_objects_compare,
-	sxe_object_cast,
-	sxe_count_elements
-};
-
-static zend_object_value sxe_object_ze1_clone(zval *zobject TSRMLS_DC)
-{
-	php_error(E_ERROR, "Cannot clone object of class %s due to 'zend.ze1_compatibility_mode'", Z_OBJCE_P(zobject)->name);
-	/* Return zobject->value.obj just to satisfy compiler */
-	/* FIXME: Should not be a fatal */
-	return zobject->value.obj;
-}
-
 /* {{{ sxe_object_clone()
  */
 static void
@@ -2269,12 +2237,6 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe_object_handlers.get_constructor = zend_get_std_object_handlers()->get_constructor;
 	sxe_object_handlers.get_class_entry = zend_get_std_object_handlers()->get_class_entry;
 	sxe_object_handlers.get_class_name = zend_get_std_object_handlers()->get_class_name;
-
-	sxe_ze1_object_handlers.get_method = zend_get_std_object_handlers()->get_method;
-	sxe_ze1_object_handlers.get_constructor = zend_get_std_object_handlers()->get_constructor;
-	sxe_ze1_object_handlers.get_class_entry = zend_get_std_object_handlers()->get_class_entry;
-	sxe_ze1_object_handlers.get_class_name = zend_get_std_object_handlers()->get_class_name;
-	sxe_ze1_object_handlers.clone_obj = sxe_object_ze1_clone;
 
 #ifdef HAVE_SPL
 	if (zend_get_module_started("spl") == SUCCESS) {

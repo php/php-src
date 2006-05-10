@@ -71,9 +71,6 @@
 ; Enable the PHP scripting language engine under Apache.
 engine = On
 
-; Enable compatibility mode with Zend Engine 1 (PHP 4.x)
-zend.ze1_compatibility_mode = Off
-
 ; Allow the <? tag.  Otherwise, only <?php and <script> tags are recognized.
 ; NOTE: Using short tags should be avoided when developing applications or
 ; libraries that are meant for redistribution, or deployment on PHP
