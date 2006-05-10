@@ -139,7 +139,7 @@ static zend_object_iterator_funcs com_iter_funcs = {
 	NULL
 };
 
-zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object TSRMLS_DC)
+zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
 {
 	php_com_dotnet_object *obj;
 	struct php_com_iterator *I;
@@ -148,6 +148,10 @@ zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object TSRMLS
 	VARIANT v;
 	unsigned long n_fetched;
 	zval *ptr;
+
+	if (by_ref) {
+		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+	}
 
 	obj = CDNO_FETCH(object);
 
