@@ -1,3 +1,78 @@
+2006-05-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      zend.c
+      zend.h
+      zend_API.c
+      zend_API.h
+      zend_arg_defs.c
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_compile.h
+      zend_errors.h
+      zend_exceptions.c
+      zend_exceptions.h
+      zend_execute.c
+      zend_execute.h
+      zend_execute_API.c
+      zend_extensions.c
+      zend_extensions.h
+      zend_globals.h
+      zend_globals_macros.h
+      zend_interfaces.c
+      zend_iterators.c
+      zend_iterators.h
+      zend_modules.h
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_objects.c
+      zend_objects_API.c
+      zend_objects_API.h
+      zend_operators.c
+      zend_operators.h
+      zend_vm_def.h
+      zend_vm_execute.h:
+      - MFH as discussed
+        . zend_exception_get_default() -> zend_exception_get_default(TSRMLS_D)
+        . zend_get_error_exception()   -> zend_get_error_exception(TSRMLS_D)
+        . added E_RECOVERABLE_ERROR
+        . added ZEND_TOSTRING_FUNC_NAME
+        . added __tostring function cache to zend_class_entry
+        . added ZEND_NAMED_ME
+        . modified ZEND_ME_MAPPING to support method flags
+        . added ZEND_MN
+        . method entries now use prefix "zim_" instead of "zif_"
+        . drop EG(ze1_compatibility_mode)
+        . changed cast handler, now without (int should_free):
+          typedef int (*zend_object_cast_t)(zval *readobj, zval *retval, int
+      type TSRMLS_DC);
+        . changed get_iterator, now receives whether value is by ref:
+          zend_object_iterator *(*get_iterator)(zend_class_entry *ce, zval
+      *object, int by_ref TSRMLS_DC);
+        . added zend_objects_store_add_ref_by_handle
+        . added zend_objects_store_del_ref_by_handle
+        . convert_to_explicit_type(pzv, type)
+
+    * zend_API.h:
+      - Methods have flags
+
+    * zend_exceptions.c
+      zend_exceptions.h:
+      - zend_spprintf() is actually used elsewhere in the engine
+
+    * zend.h
+      zend_exceptions.c:
+      - MFB WS/CS, zend_spprintf() must not be exported
+
+    * zend_builtin_functions.c:
+      - MFB Missing check
+
+    * zend_API.h
+      zend_execute.c
+      zend_iterators.c
+      zend_object_handlers.c:
+      - MFB: WS
+
 2006-05-05  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_execute.c

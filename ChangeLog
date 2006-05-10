@@ -1,3 +1,144 @@
+2006-05-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      ext/dom/dom_iterators.c
+      ext/dom/php_dom.c
+      ext/dom/php_dom.h
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_driver.c
+      ext/simplexml/simplexml.c
+      ext/sqlite/sqlite.c
+      sapi/cli/php_cli.c:
+      - Update after api changes
+
+    * (PHP_5_2)
+      ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.h:
+      - MFH pcre_get_compiled_regex_cache() support
+
+    * (PHP_5_2)
+      ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_arg_defs.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_errors.h
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_exceptions.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_extensions.c
+      ZendEngine2/zend_extensions.h
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_globals_macros.h
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_iterators.c
+      ZendEngine2/zend_iterators.h
+      ZendEngine2/zend_modules.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_objects.c
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.h
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      - MFH as discussed
+        . zend_exception_get_default() -> zend_exception_get_default(TSRMLS_D)
+        . zend_get_error_exception()   -> zend_get_error_exception(TSRMLS_D)
+        . added E_RECOVERABLE_ERROR
+        . added ZEND_TOSTRING_FUNC_NAME
+        . added __tostring function cache to zend_class_entry
+        . added ZEND_NAMED_ME
+        . modified ZEND_ME_MAPPING to support method flags
+        . added ZEND_MN
+        . method entries now use prefix "zim_" instead of "zif_"
+        . drop EG(ze1_compatibility_mode)
+        . changed cast handler, now without (int should_free):
+          typedef int (*zend_object_cast_t)(zval *readobj, zval *retval, int
+      type TSRMLS_DC);
+        . changed get_iterator, now receives whether value is by ref:
+          zend_object_iterator *(*get_iterator)(zend_class_entry *ce, zval
+      *object, int by_ref TSRMLS_DC);
+        . added zend_objects_store_add_ref_by_handle
+        . added zend_objects_store_del_ref_by_handle
+        . convert_to_explicit_type(pzv, type)
+
+    * ZendEngine2/zend_API.h
+      ext/sqlite/sqlite.c:
+      - Methods have flags
+
+    * ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_exceptions.h:
+      - zend_spprintf() is actually used elsewhere in the engine
+
+2006-05-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/cgi/fastcgi.c:
+      MFB: Fixed bug #37376 (fastcgi.c compile fail with gcc 2.95.4).
+
+    * (PHP_5_2)
+      NEWS
+      sapi/cgi/fastcgi.c:
+      Fixed bug #37376 (fastcgi.c compile fail with gcc 2.95.4).
+
+2006-05-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend_exceptions.c:
+      - MFB WS/CS, zend_spprintf() must not be exported
+
+    * ZendEngine2/zend_builtin_functions.c:
+      - MFB Missing check
+
+    * ZendEngine2/zend_API.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_iterators.c
+      ZendEngine2/zend_object_handlers.c:
+      - MFB: WS
+
+2006-05-09  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_5_2)
+      NEWS:
+      -** empty log message ***
+
+    * ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.h:
+      Add pcre_last_error() and backtrack/recursion limit settings.
+
+2006-05-09  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/tests/bug34785.phpt
+      ext/mysqli/tests/bug36745.phpt
+      ext/mysqli/tests/bug36802.phpt:
+      merge from 5.2
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_prop.c
+      ext/mysqli/mysqli_repl.c
+      ext/mysqli/mysqli_warning.c
+      ext/mysqli/php_mysqli.h
+      ext/mysqli/tests/002.phpt
+      ext/mysqli/tests/014.phpt
+      ext/mysqli/tests/017.phpt
+      ext/mysqli/tests/049.phpt
+      ext/mysqli/tests/bug34810.phpt:
+      Merge from 5.2
+
+    * (PHP_5_2)
+      ext/mysqli/php_mysqli.h:
+      removed unused macro parameter
+
 2006-05-08  Edin Kadribasic  <edink@emini.dk>
 
     * (PHP_5_2)
