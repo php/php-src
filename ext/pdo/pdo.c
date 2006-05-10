@@ -90,7 +90,7 @@ PDO_API zend_class_entry *php_pdo_get_exception_base(int root TSRMLS_DC)
 
 zend_class_entry *pdo_dbh_ce, *pdo_dbstmt_ce, *pdo_row_ce;
 
-/* proto array pdo_drivers()
+/* {{{ proto array pdo_drivers()
  Return array of available PDO drivers */
 PHP_FUNCTION(pdo_drivers)
 {
