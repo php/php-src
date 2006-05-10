@@ -250,12 +250,16 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 	}
 
 	bind = (MYSQL_BIND *)ecalloc(var_cnt, sizeof(MYSQL_BIND));
-	stmt->result.buf = (VAR_BUFFER *)ecalloc(var_cnt,sizeof(VAR_BUFFER));
-	stmt->result.is_null = (char *)ecalloc(var_cnt, sizeof(char));
+	{
+		int size;
+		char *p= emalloc(size= var_cnt * (sizeof(char) + sizeof(VAR_BUFFER)));
+		stmt->result.buf = (VAR_BUFFER *) p;
+		stmt->result.is_null = p + var_cnt * sizeof(VAR_BUFFER);
+		memset(p, 0, size);
+	}
 
 	for (i=start; i < var_cnt + start ; i++) {
 		ofs = i - start;
-		stmt->result.is_null[ofs] = 0;
 		col_type = (stmt->stmt->fields) ? stmt->stmt->fields[ofs].type : MYSQL_TYPE_STRING;
 
 		switch (col_type) {
@@ -373,8 +377,8 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 				efree(stmt->result.buf[i].val);
 			}
 		}
+		/* Don't free stmt->result.is_null because is_null & buf are one block of memory  */
 		efree(stmt->result.buf);
-		efree(stmt->result.is_null);
 		RETVAL_FALSE;
 	} else {
 		stmt->result.var_cnt = var_cnt;

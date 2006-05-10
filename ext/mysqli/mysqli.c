@@ -69,10 +69,6 @@ void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type)
 		return;
 	}
 
-	if (bbuf.is_null) {
-		efree(bbuf.is_null);
-	}
-
 	for (i=0; i < bbuf.var_cnt; i++) {
 
 		/* free temporary bind buffer */
@@ -89,9 +85,18 @@ void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type)
 		efree(bbuf.vars);
 	}
 
+	/*
+	  Don't free bbuf.is_null for FETCH_RESULT since we have allocated
+	  is_null and buf in one block so we free only buf, which is the beginning
+	  of the block. When FETCH_SIMPLE then buf wasn't allocated together with
+	  buf and we have to free it.
+	*/
 	if (type == FETCH_RESULT) {
 		efree(bbuf.buf);
+	} else if (type == FETCH_SIMPLE){
+		efree(bbuf.is_null);
 	}
+
 	bbuf.var_cnt = 0;
 	return;
 }
