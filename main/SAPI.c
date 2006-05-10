@@ -25,6 +25,7 @@
 
 #include "php.h"
 #include "SAPI.h"
+#include "php_variables.h"
 #include "php_ini.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/pageinfo.h"
@@ -914,11 +915,15 @@ SAPI_API struct stat *sapi_get_stat(TSRMLS_D)
 
 SAPI_API char *sapi_getenv(char *name, size_t name_len TSRMLS_DC)
 {
-	if (sapi_module.getenv) {
-		return sapi_module.getenv(name, name_len TSRMLS_CC);
+	if (sapi_module.getenv) { 
+		char *value, *tmp = sapi_module.getenv(name, name_len TSRMLS_CC);
+		if(tmp) value = estrdup(tmp); 
+		else return NULL;
+		sapi_module.input_filter(PARSE_ENV, name, &value, strlen(value), NULL TSRMLS_CC);
+		return value;
 	} else {
-		return NULL;
-	}
+		return NULL; 
+	}   
 }
 
 SAPI_API int sapi_get_fd(int *fd TSRMLS_DC)
