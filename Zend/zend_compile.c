@@ -104,7 +104,7 @@ int zend_auto_global_arm(zend_auto_global *auto_global TSRMLS_DC)
 }
 
 
-int zend_auto_global_disable_jit(char *varname, zend_uint varname_length TSRMLS_DC)
+ZEND_API int zend_auto_global_disable_jit(char *varname, zend_uint varname_length TSRMLS_DC)
 {
 	zend_auto_global *auto_global;
 
