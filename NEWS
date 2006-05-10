@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, PHP 5.?.?
+- Fixed bug #37392 (Unnecessary call to OCITransRollback() at the end of 
+  request). (Tony)
 - Fixed bug #37313 (sigemptyset() used without including <signal.h>).
   (jdolecek)
 - Fixed bug #37346 (invalid colormap format) (Pierre)
