@@ -2,6 +2,7 @@
 Bug #26166 (__toString() crash when no values returned)
 --FILE--
 <?php
+
 class Foo
 {
     function __toString()
@@ -28,6 +29,23 @@ class Bar
 $o = new Bar;
 echo $o;
 
+echo "===NONE===\n";
+
+function my_error_handler($errno, $errstr, $errfile, $errline) {
+	var_dump($errstr);
+}
+
+set_error_handler('my_error_handler');
+
+class None
+{
+	function __toString() {
+	}
+}
+
+$o = new None;
+echo $o;
+
 echo "===THROW===\n";
 
 class Error 
@@ -45,23 +63,12 @@ catch (Exception $e) {
 	echo "Got the exception\n";
 }
 
-echo "===NONE===\n";
-
-class None
-{
-	function __toString() {
-	}
-}
-
-$o = new None;
-echo $o;
-
 ?>
 ===DONE===
 --EXPECTF--
 Hello World!
-===THROW===
-Got the exception
 ===NONE===
+string(52) "Method None::__toString() must return a string value"
+===THROW===
 
-Fatal error: Method None::__toString() must return a string value in %sbug26166.php on line %d
+Fatal error: Method Error::__toString() must not throw an exception in %sbug26166.php on line %d
