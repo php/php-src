@@ -1718,7 +1718,9 @@ static int php_oci_persistent_helper(zend_rsrc_list_entry *le TSRMLS_DC)
 				connection->descriptors = NULL;
 			}
 			
-			php_oci_connection_rollback(connection TSRMLS_CC);
+			if (connection->needs_commit) {
+				php_oci_connection_rollback(connection TSRMLS_CC);
+			}
 			
 			if (OCI_G(persistent_timeout) > 0) {
 				connection->idle_expiry = timestamp + OCI_G(persistent_timeout);
