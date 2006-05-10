@@ -23,6 +23,9 @@
 
 #include "php.h"
 #include "php_spl.h"
+#if HAVE_PCRE || HAVE_BUNDLED_PCRE
+#include "ext/pcre/php_pcre.h"
+#endif
 
 #define spl_ce_Traversable   zend_ce_traversable
 #define spl_ce_Iterator      zend_ce_iterator
@@ -45,6 +48,8 @@ extern PHPAPI zend_class_entry *spl_ce_NoRewindIterator;
 extern PHPAPI zend_class_entry *spl_ce_InfiniteIterator;
 extern PHPAPI zend_class_entry *spl_ce_EmptyIterator;
 extern PHPAPI zend_class_entry *spl_ce_AppendIterator;
+extern PHPAPI zend_class_entry *spl_ce_RegExIterator;
+extern PHPAPI zend_class_entry *spl_ce_RecursiveRegExIterator;
 
 PHP_MINIT_FUNCTION(spl_iterators);
 
@@ -63,6 +68,10 @@ typedef enum {
 	DIT_NoRewindIterator,
 	DIT_InfiniteIterator,
 	DIT_AppendIterator,
+#if HAVE_PCRE || HAVE_BUNDLED_PCRE
+	DIT_RegExIterator,
+	DIT_RecursiveRegExIterator,
+#endif
 	DIT_Unknown = ~0
 } dual_it_type;
 
@@ -72,10 +81,16 @@ enum {
 	CIT_CATCH_GET_CHILD      = 0x00000002,
 	CIT_TOSTRING_USE_KEY     = 0x00000010,
 	CIT_TOSTRING_USE_CURRENT = 0x00000020,
+	CIT_FULL_CACHE           = 0x00000100,
 	CIT_PUBLIC               = 0x0000FFFF,
 	/* private */
 	CIT_VALID                = 0x00010000,
 	CIT_HAS_CHILDREN         = 0x00020000
+};
+
+enum {
+	/* public */
+	REGIT_USE_KEY            = 0x00000001,
 };
 
 typedef struct _spl_dual_it_object {
@@ -104,11 +119,18 @@ typedef struct _spl_dual_it_object {
 			int              flags; /* CIT_* */
 			zval             *zstr;
 			zval             *zchildren;
+			zval             *zcache;
 		} caching;
 		struct {
 			zval                 *zarrayit;
 			zend_object_iterator *iterator;
 		} append;
+#if HAVE_PCRE || HAVE_BUNDLED_PCRE
+		struct {
+			int              flags;
+			pcre_cache_entry *pce;
+		} regex;
+#endif
 	} u;
 } spl_dual_it_object;
 
