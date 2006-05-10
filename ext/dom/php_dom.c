@@ -69,7 +69,6 @@ zend_class_entry *dom_xpath_class_entry;
 zend_class_entry *dom_namespace_node_class_entry;
 
 zend_object_handlers dom_object_handlers;
-zend_object_handlers dom_ze1_object_handlers;
 
 static HashTable classes;
 
@@ -451,13 +450,6 @@ zend_object_value dom_objects_store_clone_obj(zval *zobject TSRMLS_DC)
 	return retval;
 }
 
-zend_object_value dom_objects_ze1_clone_obj(zval *zobject TSRMLS_DC)
-{
-	php_error(E_ERROR, "Cannot clone object of class %s due to 'zend.ze1_compatibility_mode'", Z_OBJCE_P(zobject)->name);
-	/* Return zobject->value.obj just to satisfy compiler */
-	return zobject->value.obj;
-}
-
 static zend_function_entry dom_functions[] = {
 	PHP_FE(dom_import_simplexml, NULL)
 	{NULL, NULL, NULL}
@@ -502,13 +494,6 @@ PHP_MINIT_FUNCTION(dom)
 	dom_object_handlers.get_property_ptr_ptr = dom_get_property_ptr_ptr;
 	dom_object_handlers.clone_obj = dom_objects_store_clone_obj;
 	dom_object_handlers.has_property = dom_property_exists;
-
-	memcpy(&dom_ze1_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	dom_ze1_object_handlers.read_property = dom_read_property;
-	dom_ze1_object_handlers.write_property = dom_write_property;
-	dom_object_handlers.get_property_ptr_ptr = dom_get_property_ptr_ptr;
-	dom_ze1_object_handlers.clone_obj = dom_objects_ze1_clone_obj;
-	dom_ze1_object_handlers.has_property = dom_property_exists;
 
 	zend_hash_init(&classes, 0, NULL, NULL, 1);
 
