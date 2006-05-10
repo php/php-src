@@ -71,11 +71,11 @@ Hello World!
 string(52) "Method None::__toString() must return a string value"
 ===THROW===
 
-Fatal error: Object of class Error could not be converted to string in %sbug26166.php on line %d
+Fatal error: Method Error::__toString() must not throw an exception in %sbug26166.php on line %d
 --UEXPECTF--
 Hello World!
 ===NONE===
 unicode(52) "Method None::__toString() must return a string value"
 ===THROW===
 
-Fatal error: Object of class Error could not be converted to string in %sbug26166.php on line %d
+Fatal error: Method Error::__toString() must not throw an exception in %sbug26166.php on line %d
