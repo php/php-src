@@ -69,10 +69,6 @@ void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type)
 		return;
 	}
 
-	if (bbuf.is_null) {
-		efree(bbuf.is_null);
-	}
-
 	for (i=0; i < bbuf.var_cnt; i++) {
 
 		/* free temporary bind buffer */
@@ -89,9 +85,18 @@ void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type)
 		efree(bbuf.vars);
 	}
 
+	/*
+	  Don't free bbuf.is_null for FETCH_RESULT since we have allocated
+	  is_null and buf in one block so we free only buf, which is the beginning
+	  of the block. When FETCH_SIMPLE then buf wasn't allocated together with
+	  buf and we have to free it.
+	*/
 	if (type == FETCH_RESULT) {
 		efree(bbuf.buf);
+	} else if (type == FETCH_SIMPLE){
+		efree(bbuf.is_null);
 	}
+
 	bbuf.var_cnt = 0;
 	return;
 }
@@ -158,16 +163,16 @@ static void mysqli_objects_destroy_object(void *object, zend_object_handle handl
 			efree(mysql);
 			my_res->ptr = NULL;
 		}
-	} else if (instanceof_function(intern->zo.ce, mysqli_stmt_class_entry TSRMLS_CC)) { /* stmt obj */
+	} else if (instanceof_function(intern->zo.ce, mysqli_stmt_class_entry TSRMLS_CC)) { /* stmt object */
 		if (my_res && my_res->ptr) {
 			MY_STMT *stmt = (MY_STMT *)my_res->ptr;
 			php_clear_stmt_bind(stmt);
 		}
-	} else if (instanceof_function(intern->zo.ce, mysqli_result_class_entry TSRMLS_CC)) { /* result obj */
+	} else if (instanceof_function(intern->zo.ce, mysqli_result_class_entry TSRMLS_CC)) { /* result object */
 		if (my_res && my_res->ptr) {
 			mysql_free_result(my_res->ptr);
 		}
-	} else if (instanceof_function(intern->zo.ce, mysqli_warning_class_entry TSRMLS_CC)) { /* warning obj */
+	} else if (instanceof_function(intern->zo.ce, mysqli_warning_class_entry TSRMLS_CC)) { /* warning object */
 		if (my_res && my_res->ptr) {
 			php_clear_warnings((MYSQLI_WARNING *)my_res->info);
 		}
@@ -453,7 +458,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	zend_hash_init(&mysqli_driver_properties, 0, NULL, NULL, 1);
 	MYSQLI_ADD_PROPERTIES(&mysqli_driver_properties, mysqli_driver_property_entries);
 	zend_hash_add(&classes, ce->name.s, ce->name_length+1, &mysqli_driver_properties, sizeof(mysqli_driver_properties), NULL);
-    ce->ce_flags |= ZEND_ACC_FINAL_CLASS;
+	ce->ce_flags |= ZEND_ACC_FINAL_CLASS;
 
 	REGISTER_MYSQLI_CLASS_ENTRY("mysqli", mysqli_link_class_entry, mysqli_link_methods);
 	ce = mysqli_link_class_entry;
@@ -463,7 +468,7 @@ PHP_MINIT_FUNCTION(mysqli)
 
 	REGISTER_MYSQLI_CLASS_ENTRY("mysqli_warning", mysqli_warning_class_entry, mysqli_warning_methods);
 	ce = mysqli_warning_class_entry;
-    ce->ce_flags |= ZEND_ACC_FINAL_CLASS | ZEND_ACC_PROTECTED;
+	ce->ce_flags |= ZEND_ACC_FINAL_CLASS | ZEND_ACC_PROTECTED;
 	zend_hash_init(&mysqli_warning_properties, 0, NULL, NULL, 1);
 	MYSQLI_ADD_PROPERTIES(&mysqli_warning_properties, mysqli_warning_property_entries);
 	zend_hash_add(&classes, ce->name.s, ce->name_length+1, &mysqli_warning_properties, sizeof(mysqli_warning_properties), NULL);
@@ -560,10 +565,13 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_TYPE_CHAR", FIELD_TYPE_CHAR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_TYPE_INTERVAL", FIELD_TYPE_INTERVAL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_TYPE_GEOMETRY", FIELD_TYPE_GEOMETRY, CONST_CS | CONST_PERSISTENT);
+
 #if MYSQL_VERSION_ID > 50002
 	REGISTER_LONG_CONSTANT("MYSQLI_TYPE_NEWDECIMAL", FIELD_TYPE_NEWDECIMAL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_TYPE_BIT", FIELD_TYPE_BIT, CONST_CS | CONST_PERSISTENT);
 #endif
+
+
 
 	/* replication */
 	REGISTER_LONG_CONSTANT("MYSQLI_RPL_MASTER", MYSQL_RPL_MASTER, CONST_CS | CONST_PERSISTENT);
@@ -693,7 +701,7 @@ ZEND_FUNCTION(mysqli_stmt_construct)
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)stmt;
 	mysqli_resource->status = (ZEND_NUM_ARGS() == 1) ? MYSQLI_STATUS_INITIALIZED : MYSQLI_STATUS_VALID;
-	
+
 	((mysqli_object *) zend_object_store_get_object(getThis() TSRMLS_CC))->ptr = mysqli_resource;
 }
 /* }}} */
