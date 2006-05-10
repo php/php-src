@@ -1220,7 +1220,7 @@ int main(int argc, char *argv[])
 					zend_call_method_with_1_params(&ref, pce, &pce->constructor, "__construct", NULL, arg);
 
 					if (EG(exception)) {
-						zval *msg = zend_read_property(zend_exception_get_default(), EG(exception), "message", sizeof("message")-1, 0 TSRMLS_CC);
+						zval *msg = zend_read_property(zend_exception_get_default(TSRMLS_C), EG(exception), "message", sizeof("message")-1, 0 TSRMLS_CC);
 						zend_printf("Exception: %s\n", Z_STRVAL_P(msg));
 						zval_ptr_dtor(&EG(exception));
 						EG(exception) = NULL;

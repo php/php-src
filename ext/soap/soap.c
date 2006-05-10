@@ -278,11 +278,7 @@ PHP_METHOD(SoapParam, SoapParam);
 /* SoapHeader Functions */
 PHP_METHOD(SoapHeader, SoapHeader);
 
-#ifdef ZEND_ENGINE_2
-#define SOAP_CTOR(class_name, func_name, arginfo, flags) ZEND_FENTRY(__construct, ZEND_FN(class_name##_##func_name), arginfo, flags)
-#else
 #define SOAP_CTOR(class_name, func_name, arginfo, flags) PHP_ME(class_name, func_name, arginfo, flags)
-#endif
 
 static zend_function_entry soap_functions[] = {
 #ifdef HAVE_PHP_DOMXML
@@ -337,11 +333,7 @@ unsigned char __soap_call_args[] = { 5, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYRE
 static zend_function_entry soap_client_functions[] = {
 	SOAP_CTOR(SoapClient, SoapClient, NULL, 0)
 	PHP_ME(SoapClient, __call, __call_args, 0)
-#ifdef ZEND_ENGINE_2
-	ZEND_FENTRY(__soapCall, ZEND_FN(SoapClient___call), __soap_call_args, 0)
-#else
-	ZEND_NAMED_FE(__soapCall, ZEND_FN(SoapClient___call), __soap_call_args)
-#endif
+	ZEND_NAMED_ME(__soapCall, ZEND_MN(SoapClient___call), __soap_call_args, 0)
 	PHP_ME(SoapClient, __getLastRequest, NULL, 0)
 	PHP_ME(SoapClient, __getLastResponse, NULL, 0)
 	PHP_ME(SoapClient, __getLastRequestHeaders, NULL, 0)
@@ -546,7 +538,7 @@ PHP_MINIT_FUNCTION(soap)
 		zend_internal_function fe;
 
 		fe.type = ZEND_INTERNAL_FUNCTION;
-		fe.handler = ZEND_FN(SoapClient___call);
+		fe.handler = ZEND_MN(SoapClient___call);
 		fe.function_name = NULL;
 		fe.scope = NULL;
 		fe.fn_flags = 0;
@@ -575,7 +567,7 @@ PHP_MINIT_FUNCTION(soap)
 	/* Register SoapFault class */
 	INIT_CLASS_ENTRY(ce, PHP_SOAP_FAULT_CLASSNAME, soap_fault_functions);
 #ifdef ZEND_ENGINE_2
-	soap_fault_class_entry = zend_register_internal_class_ex(&ce, zend_exception_get_default(), NULL TSRMLS_CC);
+	soap_fault_class_entry = zend_register_internal_class_ex(&ce, zend_exception_get_default(TSRMLS_C), NULL TSRMLS_CC);
 #else
 	soap_fault_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 #endif
@@ -3055,7 +3047,7 @@ static void set_soap_fault(zval *obj, char *fault_code_ns, char *fault_code, cha
 	if (fault_string != NULL) {
 		add_property_string(obj, "faultstring", fault_string, 1);
 #ifdef ZEND_ENGINE_2
-		zend_update_property_string(zend_exception_get_default(), obj, "message", sizeof("message")-1, fault_string TSRMLS_CC);
+		zend_update_property_string(zend_exception_get_default(TSRMLS_C), obj, "message", sizeof("message")-1, fault_string TSRMLS_CC);
 #endif
 	}
 	if (fault_code != NULL) {

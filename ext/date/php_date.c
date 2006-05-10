@@ -99,8 +99,8 @@ zend_function_entry date_funcs_timezone[] = {
 	ZEND_NAMED_FE(getName, ZEND_FN(timezone_name_get), NULL)
 	ZEND_NAMED_FE(getOffset, ZEND_FN(timezone_offset_get), NULL)
 	ZEND_NAMED_FE(getTransistions, ZEND_FN(timezone_transistions_get), NULL)
-	ZEND_MALIAS(timezone, listAbbreviations, abbreviations_list, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_MALIAS(timezone, listIdentifiers, identifiers_list, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME_MAPPING(listAbbreviations, timezone_abbreviations_list, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME_MAPPING(listIdentifiers, timezone_identifiers_list, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	{NULL, NULL, NULL}
 };
 

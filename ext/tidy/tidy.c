@@ -223,8 +223,8 @@ static zend_object_value tidy_object_new_exception(zend_class_entry * TSRMLS_DC)
 static zend_class_entry *tidy_get_ce_node(zval * TSRMLS_DC);
 static zend_class_entry *tidy_get_ce_doc(zval * TSRMLS_DC);
 static zval * tidy_instanciate(zend_class_entry *, zval * TSRMLS_DC);
-static int tidy_doc_cast_handler(zval *, zval *, int, int TSRMLS_DC);
-static int tidy_node_cast_handler(zval *, zval *, int, int TSRMLS_DC);
+static int tidy_doc_cast_handler(zval *, zval *, int TSRMLS_DC);
+static int tidy_node_cast_handler(zval *, zval *, int TSRMLS_DC);
 static void tidy_doc_update_properties(PHPTidyObj * TSRMLS_DC);
 static void tidy_add_default_properties(PHPTidyObj *, tidy_obj_type TSRMLS_DC);
 static void *php_tidy_get_opt_val(PHPTidyDoc *, TidyOption, TidyOptionType * TSRMLS_DC);
@@ -668,7 +668,7 @@ static zval * tidy_instanciate(zend_class_entry *pce, zval *object TSRMLS_DC)
 	return object;
 }
 
-static int tidy_doc_cast_handler(zval *in, zval *out, int type, int free TSRMLS_DC)
+static int tidy_doc_cast_handler(zval *in, zval *out, int type TSRMLS_DC)
 {
 	TidyBuffer output = {0};
 	PHPTidyObj *obj;
@@ -700,7 +700,7 @@ static int tidy_doc_cast_handler(zval *in, zval *out, int type, int free TSRMLS_
 	return SUCCESS;
 }
 
-static int tidy_node_cast_handler(zval *in, zval *out, int type, int free TSRMLS_DC)
+static int tidy_node_cast_handler(zval *in, zval *out, int type TSRMLS_DC)
 {
 	TidyBuffer buf = {0};
 	PHPTidyObj *obj;
