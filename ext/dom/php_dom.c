@@ -464,11 +464,7 @@ static zend_function_entry dom_functions[] = {
 };
 
 static zend_object_handlers* dom_get_obj_handlers(TSRMLS_D) {
-	if (EG(ze1_compatibility_mode)) {
-		return &dom_ze1_object_handlers;
-	} else {
-		return &dom_object_handlers;
-	}
+	return &dom_object_handlers;
 }
 
 static zend_module_dep dom_deps[] = {
@@ -517,7 +513,7 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_init(&classes, 0, NULL, NULL, 1);
 
 	INIT_CLASS_ENTRY(ce, "DOMException", php_dom_domexception_class_functions);
-	dom_domexception_class_entry = zend_register_internal_class_ex(&ce, zend_exception_get_default(), NULL TSRMLS_CC);
+	dom_domexception_class_entry = zend_register_internal_class_ex(&ce, zend_exception_get_default(TSRMLS_C), NULL TSRMLS_CC);
 	dom_domexception_class_entry->ce_flags |= ZEND_ACC_FINAL;
 	zend_declare_property_long(dom_domexception_class_entry, "code", sizeof("code")-1, 0, ZEND_ACC_PUBLIC TSRMLS_CC);
 

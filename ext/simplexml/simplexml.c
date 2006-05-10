@@ -1567,7 +1567,7 @@ static int cast_object(zval *object, int type, char *contents TSRMLS_DC)
 
 /* {{{ sxe_object_cast()
  */
-static int sxe_object_cast(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC)
+static int sxe_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 {
 	php_sxe_object *sxe;
 	char           *contents = NULL;
@@ -1579,9 +1579,6 @@ static int sxe_object_cast(zval *readobj, zval *writeobj, int type, int should_f
 	if (type == IS_BOOL) {
 		node = php_sxe_get_first_node(sxe, NULL TSRMLS_CC);
 		empty = node == NULL && zend_hash_num_elements(sxe_properties_get(readobj TSRMLS_CC)) == 0;
-		if (should_free) {
-			zval_dtor(readobj);
-		}
 		INIT_PZVAL(writeobj);
 		ZVAL_BOOL(writeobj, !empty);
 		return SUCCESS;
@@ -1604,10 +1601,6 @@ static int sxe_object_cast(zval *readobj, zval *writeobj, int type, int should_f
 				contents = xmlNodeListGetString((xmlDocPtr) sxe->document->ptr, sxe->node->node->children, 1);
 			}
 		}
-	}
-
-	if (should_free) {
-		zval_dtor(readobj);
 	}
 
 	rv = cast_object(writeobj, type, contents TSRMLS_CC);
@@ -1655,7 +1648,7 @@ static zval *sxe_get_value(zval *z TSRMLS_DC)
 
 	MAKE_STD_ZVAL(retval);
 
-	if (sxe_object_cast(z, retval, IS_STRING, 0 TSRMLS_CC)==FAILURE) {
+	if (sxe_object_cast(z, retval, IS_STRING TSRMLS_CC)==FAILURE) {
 		zend_error(E_ERROR, "Unable to cast node to string");
 		/* FIXME: Should not be fatal */
 	}
@@ -1848,11 +1841,7 @@ php_sxe_register_object(php_sxe_object *intern TSRMLS_DC)
 	zend_object_value rv;
 
 	rv.handle = zend_objects_store_put(intern, sxe_object_dtor, (zend_objects_free_object_storage_t)sxe_object_free_storage, sxe_object_clone TSRMLS_CC);
-	if (EG(ze1_compatibility_mode)) {
-		rv.handlers = (zend_object_handlers *) &sxe_ze1_object_handlers;
-	} else {
-		rv.handlers = (zend_object_handlers *) &sxe_object_handlers;
-	}
+	rv.handlers = (zend_object_handlers *) &sxe_object_handlers;
 
 	return rv;
 }
@@ -1962,7 +1951,7 @@ SXE_METHOD(__construct)
 	long            options = 0;
 	zend_bool       is_url = 0;
 
-	php_set_error_handling(EH_THROW, zend_exception_get_default() TSRMLS_CC);
+	php_set_error_handling(EH_THROW, zend_exception_get_default(TSRMLS_C) TSRMLS_CC);
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lb", &data, &data_len, &options, &is_url) == FAILURE) {
 		php_std_error_handling();
 		return;
@@ -1974,7 +1963,7 @@ SXE_METHOD(__construct)
 
 	if (!docp) {
 		((php_libxml_node_object *)sxe)->document = NULL;
-		zend_throw_exception(zend_exception_get_default(), "String could not be parsed as XML", 0 TSRMLS_CC);
+		zend_throw_exception(zend_exception_get_default(TSRMLS_C), "String could not be parsed as XML", 0 TSRMLS_CC);
 		return;
 	}
 
@@ -2055,10 +2044,13 @@ static xmlNodePtr php_sxe_reset_iterator(php_sxe_object *sxe, int use_data TSRML
 	return NULL;
 }
 
-zend_object_iterator *php_sxe_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
+zend_object_iterator *php_sxe_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
 {
 	php_sxe_iterator *iterator = emalloc(sizeof(php_sxe_iterator));
 
+	if (by_ref) {
+		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+	}
 	object->refcount++;
 	iterator->intern.data = (void*)object;
 	iterator->intern.funcs = &php_sxe_iterator_funcs;
