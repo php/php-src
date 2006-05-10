@@ -1,5 +1,5 @@
 --TEST--
-SPL: RegExIterator
+SPL: RegexIterator
 --SKIPIF--
 <?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
@@ -7,7 +7,7 @@ SPL: RegExIterator
 
 $ar = array(0, "123", 123, 22 => "abc", "a2b", 22, "a2d" => 7, 42);
 
-foreach(new RegExIterator(new ArrayIterator($ar), "/2/") as $k => $v)
+foreach(new RegexIterator(new ArrayIterator($ar), "/2/") as $k => $v)
 {
 	echo "$k=>$v\n";
 }
@@ -16,7 +16,7 @@ foreach(new RegExIterator(new ArrayIterator($ar), "/2/") as $k => $v)
 ===KEY===
 <?php
 
-foreach(new RegExIterator(new ArrayIterator($ar), "/2/", RegExIterator::USE_KEY) as $k => $v)
+foreach(new RegexIterator(new ArrayIterator($ar), "/2/", RegexIterator::USE_KEY) as $k => $v)
 {
 	echo "$k=>$v\n";
 }
