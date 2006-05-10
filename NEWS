@@ -1,6 +1,15 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, PHP 5.2.0
+- Removed ze1 compatibility mode.
+- Added support for constructors in interfaces to force constructor signature
+  checks in implementations. (Marcus)
+- Changed __toString to be called whereever applicable. (Marcus)
+- Improved SPL: (Marcus)
+  . Added RegExIterator and RecursiveRegExIterator
+  . Added full caching support and ArrayAccess to CachingIterator.
+  . Added array functions to ArrayObject/ArrayIterator and made them faster.
+  . Added support for reading csv and skipping empty lines in SplFileObject.
 - Added run-time configurable backtracking/recursion limits for PCRE. (Andrei)
 - Added preg_last_error(). (Andrei)
 - Added support for Apache 2.2 handler in the Windows distro. (Edin)
