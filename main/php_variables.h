@@ -29,6 +29,9 @@
 #define PARSE_GET 1
 #define PARSE_COOKIE 2
 #define PARSE_STRING 3
+#define PARSE_ENV 4
+#define PARSE_SERVER 5
+#define PARSE_SESSION 6
 
 BEGIN_EXTERN_C()
 void php_startup_auto_globals(TSRMLS_D);
