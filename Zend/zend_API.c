@@ -1531,7 +1531,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 	int count=0, unload=0;
 	HashTable *target_function_table = function_table;
 	int error_type;
-	zend_function *ctor = NULL, *dtor = NULL, *clone = NULL, *__get = NULL, *__set = NULL, *__unset = NULL, *__isset = NULL, *__call = NULL, *__tostring = NULL;;
+	zend_function *ctor = NULL, *dtor = NULL, *clone = NULL, *__get = NULL, *__set = NULL, *__unset = NULL, *__isset = NULL, *__call = NULL, *__tostring = NULL;
 	char *lowercase_name;
 	int fname_len;
 	char *lc_class_name = NULL;
