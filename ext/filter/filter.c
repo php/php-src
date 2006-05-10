@@ -441,7 +441,7 @@ static zval * php_filter_get_storage(long arg TSRMLS_DC) /* {{{ */
 			array_ptr = IF_G(server_array);
 			break;
 		case PARSE_ENV:
-            if(jit_initialization) zend_is_auto_global("_ENV", sizeof("_ENV")-1 TSRMLS_CC);
+			if(jit_initialization) zend_is_auto_global("_ENV", sizeof("_ENV")-1 TSRMLS_CC);
 			array_ptr = IF_G(env_array);
 			break;
 	}
