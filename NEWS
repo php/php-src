@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, PHP 5.2.0
+- Added support for getenv() input filtering. (Rasmus)
 - Removed ze1 compatibility mode. (Marcus)
 - Added support for constructors in interfaces to force constructor signature
   checks in implementations. (Marcus)
