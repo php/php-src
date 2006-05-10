@@ -40,6 +40,8 @@ extern zend_module_entry xmlreader_module_entry;
 typedef struct _xmlreader_object {
 	zend_object  std;
 	xmlTextReaderPtr ptr;
+	/* strings must be set in input buffer as copy is required */
+	xmlParserInputBufferPtr input;
 	void *schema;
 	HashTable *prop_handler;
 	zend_object_handle handle;
