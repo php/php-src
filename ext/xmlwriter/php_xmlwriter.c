@@ -4,7 +4,7 @@
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2006 The PHP Group                                |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,     |
+  | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
   | http://www.php.net/license/3_01.txt.                                 |
@@ -246,8 +246,8 @@ char *_xmlwriter_get_valid_file_path(char *source, char *resolved_path, int reso
 	int isFileUri = 0;
 
 	uri = xmlCreateURI();
-	escsource = xmlURIEscapeStr(source, ":");
-	xmlParseURIReference(uri, escsource);
+	escsource = xmlURIEscapeStr((xmlChar *)source, (xmlChar *) ":");
+	xmlParseURIReference(uri, (char *)escsource);
 	xmlFree(escsource);
 
 	if (uri->scheme != NULL) {
@@ -386,7 +386,7 @@ static void php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAMETERS, xmlwriter_rea
 	ptr = intern->ptr;
 
 	if (ptr) {
-		retval = internal_function(ptr, name);
+		retval = internal_function(ptr, (xmlChar *) name);
 		if (retval != -1) {
 			RETURN_TRUE;
 		}
@@ -528,7 +528,7 @@ PHP_FUNCTION(xmlwriter_start_attribute_ns)
 	ptr = intern->ptr;
 
 	if (ptr) {
-		retval = xmlTextWriterStartAttributeNS(ptr, prefix, name, uri);
+		retval = xmlTextWriterStartAttributeNS(ptr, (xmlChar *)prefix, (xmlChar *)name, (xmlChar *)uri);
 		if (retval != -1) {
 			RETURN_TRUE;
 		}
@@ -573,7 +573,7 @@ PHP_FUNCTION(xmlwriter_write_attribute)
 	ptr = intern->ptr;
 
 	if (ptr) {
-		retval = xmlTextWriterWriteAttribute(ptr, name, content);
+		retval = xmlTextWriterWriteAttribute(ptr, (xmlChar *)name, (xmlChar *)content);
 		if (retval != -1) {
 			RETURN_TRUE;
 		}
@@ -618,7 +618,7 @@ PHP_FUNCTION(xmlwriter_write_attribute_ns)
 	ptr = intern->ptr;
 
 	if (ptr) {
-		retval = xmlTextWriterWriteAttributeNS(ptr, prefix, name, uri, content);
+		retval = xmlTextWriterWriteAttributeNS(ptr, (xmlChar *)prefix, (xmlChar *)name, (xmlChar *)uri, (xmlChar *)content);
 		if (retval != -1) {
 			RETURN_TRUE;
 		}
@@ -671,7 +671,7 @@ PHP_FUNCTION(xmlwriter_start_element_ns)
 	ptr = intern->ptr;
 
 	if (ptr) {
-		retval = xmlTextWriterStartElementNS(ptr, prefix, name, uri);
+		retval = xmlTextWriterStartElementNS(ptr, (xmlChar *)prefix, (xmlChar *)name, (xmlChar *)uri);
 		if (retval != -1) {
 			RETURN_TRUE;
 		}
@@ -731,7 +731,7 @@ PHP_FUNCTION(xmlwriter_write_element)
 	ptr = intern->ptr;
 
 	if (ptr) {
-		retval = xmlTextWriterWriteElement(ptr, name, content);
+		retval = xmlTextWriterWriteElement(ptr, (xmlChar *)name, (xmlChar *)content);
 		if (retval != -1) {
 			RETURN_TRUE;
 		}
@@ -775,7 +775,7 @@ PHP_FUNCTION(xmlwriter_write_element_ns)
 	ptr = intern->ptr;
 
 	if (ptr) {
-		retval = xmlTextWriterWriteElementNS(ptr, prefix, name, uri, content);
+		retval = xmlTextWriterWriteElementNS(ptr, (xmlChar *)prefix, (xmlChar *)name, (xmlChar *)uri, (xmlChar *)content);
 		if (retval != -1) {
 			RETURN_TRUE;
 		}
@@ -835,7 +835,7 @@ PHP_FUNCTION(xmlwriter_write_pi)
 	ptr = intern->ptr;
 
 	if (ptr) {
-		retval = xmlTextWriterWritePI(ptr, name, content);
+		retval = xmlTextWriterWritePI(ptr, (xmlChar *)name, (xmlChar *)content);
 		if (retval != -1) {
 			RETURN_TRUE;
 		}
@@ -1045,7 +1045,7 @@ PHP_FUNCTION(xmlwriter_start_dtd)
 	ptr = intern->ptr;
 
 	if (ptr) {
-		retval = xmlTextWriterStartDTD(ptr, name, pubid, sysid);
+		retval = xmlTextWriterStartDTD(ptr, (xmlChar *)name, (xmlChar *)pubid, (xmlChar *)sysid);
 		if (retval != -1) {
 			RETURN_TRUE;
 		}
@@ -1095,7 +1095,7 @@ PHP_FUNCTION(xmlwriter_write_dtd)
 	ptr = intern->ptr;
 
 	if (ptr) {
-		retval = xmlTextWriterWriteDTD(ptr, name, pubid, sysid, subset);
+		retval = xmlTextWriterWriteDTD(ptr, (xmlChar *)name, (xmlChar *)pubid, (xmlChar *)sysid, (xmlChar *)subset);
 		if (retval != -1) {
 			RETURN_TRUE;
 		}
@@ -1154,7 +1154,7 @@ PHP_FUNCTION(xmlwriter_write_dtd_element)
 	ptr = intern->ptr;
 
 	if (ptr) {
-		retval = xmlTextWriterWriteDTDElement(ptr, name, content);
+		retval = xmlTextWriterWriteDTDElement(ptr, (xmlChar *)name, (xmlChar *)content);
 		if (retval != -1) {
 			RETURN_TRUE;
 		}
@@ -1216,7 +1216,7 @@ PHP_FUNCTION(xmlwriter_write_dtd_attlist)
 	ptr = intern->ptr;
 
 	if (ptr) {
-		retval = xmlTextWriterWriteDTDAttlist(ptr, name, content);
+		retval = xmlTextWriterWriteDTDAttlist(ptr, (xmlChar *)name, (xmlChar *)content);
 		if (retval != -1) {
 			RETURN_TRUE;
 		}
@@ -1260,7 +1260,7 @@ PHP_FUNCTION(xmlwriter_start_dtd_entity)
 	ptr = intern->ptr;
 
 	if (ptr) {
-		retval = xmlTextWriterStartDTDEntity(ptr, isparm, name);
+		retval = xmlTextWriterStartDTDEntity(ptr, isparm, (xmlChar *)name);
 		if (retval != -1) {
 			RETURN_TRUE;
 		}
@@ -1312,7 +1312,7 @@ PHP_FUNCTION(xmlwriter_write_dtd_entity)
 	ptr = intern->ptr;
 
 	if (ptr) {
-		retval = xmlTextWriterWriteDTDAttlist(ptr, name, content);
+		retval = xmlTextWriterWriteDTDAttlist(ptr, (xmlChar *)name, (xmlChar *)content);
 		if (retval != -1) {
 			RETURN_TRUE;
 		}
@@ -1492,7 +1492,7 @@ static void php_xmlwriter_flush(INTERNAL_FUNCTION_PARAMETERS, int force_string) 
 		}
 		output_bytes = xmlTextWriterFlush(ptr);
 		if (buffer) {
-			RETVAL_STRING(buffer->content, 1);
+			RETVAL_STRING((char *) buffer->content, 1);
 			if (empty) {
 				xmlBufferEmpty(buffer);
 			}
