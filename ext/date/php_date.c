@@ -1288,7 +1288,7 @@ static void date_object_free_storage_timezone(void *object TSRMLS_DC)
 }
 
 /* Advanced Interface */
-static zval * date_instanciate(zend_class_entry *pce, zval *object TSRMLS_DC)
+static zval * date_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC)
 {
 	if (!object) {
 		ALLOC_ZVAL(object);
@@ -1314,7 +1314,7 @@ PHP_FUNCTION(date_create)
 		RETURN_FALSE;
 	}
 
-	date_instanciate(date_ce_date, return_value TSRMLS_CC);
+	date_instantiate(date_ce_date, return_value TSRMLS_CC);
 	dateobj = (php_date_obj *) zend_object_store_get_object(return_value TSRMLS_CC);
 	dateobj->time = timelib_strtotime(time_str_len ? time_str : "now", time_str_len ? time_str_len : sizeof("now") -1, NULL, DATE_TIMEZONEDB);
 
@@ -1498,7 +1498,7 @@ PHP_FUNCTION(date_timezone_get)
 	}
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
 	if (dateobj->time->is_localtime && dateobj->time->tz_info) {
-		date_instanciate(date_ce_timezone, return_value TSRMLS_CC);
+		date_instantiate(date_ce_timezone, return_value TSRMLS_CC);
 		tzobj = (php_timezone_obj *) zend_object_store_get_object(return_value TSRMLS_CC);
 		tzobj->tz = timelib_tzinfo_clone(dateobj->time->tz_info);
 	} else {
@@ -1622,7 +1622,7 @@ PHP_FUNCTION(timezone_open)
 	}
 	/* If we find it we instantiate the object otherwise, well, we don't and return false */
 	if (tzi) {
-		date_instanciate(date_ce_timezone, return_value TSRMLS_CC);
+		date_instantiate(date_ce_timezone, return_value TSRMLS_CC);
 		tzobj = (php_timezone_obj *) zend_object_store_get_object(return_value TSRMLS_CC);
 		tzobj->tz = tzi;
 	} else {
