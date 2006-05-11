@@ -366,7 +366,6 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 								*p = Z_STRVAL_PP(arg);
 								break;
 							}
-							zval_ptr_dtor(arg);
 						}
 						/* Standard PHP objects */
 						if (Z_OBJ_HT_PP(arg) == &std_object_handlers || !Z_OBJ_HT_PP(arg)->cast_object) {
