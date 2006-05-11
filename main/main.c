@@ -1723,11 +1723,11 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 		} else {
 			append_file_p = NULL;
 		}
-		if (PG(max_input_time) == -1) {
+		if (PG(max_input_time) != -1) {
 #ifdef PHP_WIN32
 			zend_unset_timeout(TSRMLS_C);
 #endif
-			zend_set_timeout(EG(timeout_seconds));
+			zend_set_timeout(INI_INT("max_execution_time"));
 		}
 		retval = (zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 3, prepend_file_p, primary_file, append_file_p) == SUCCESS);
 		
