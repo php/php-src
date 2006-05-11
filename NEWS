@@ -1,4 +1,4 @@
-PHP                                                                        NEWS
+'PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, PHP 5.2.0
 - Added support for getenv() input filtering. (Rasmus)
@@ -16,6 +16,7 @@ PHP                                                                        NEWS
 - Added support for Apache 2.2 handler in the Windows distro. (Edin)
 - Added pg_field_table() function. (Edin)
 - Add implementation of curl_multi_info_read (Brian)
+- Fixed bug #37413 (Rejected versions of flex that don't work). (Ilia)
 - Fixed bug #37394 (substr_compare() returns an error when offset equals 
   string length). (Ilia)
 - Fixed bug #37392 (Unnecessary call to OCITransRollback() at the end of 
