@@ -44,7 +44,7 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC);
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20060409
+#define PDO_DRIVER_API	20060511
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -98,6 +98,7 @@ enum pdo_fetch_type {
 #define PDO_FETCH_UNIQUE    0x00030000  /* fetch into groups assuming first col is unique */
 #define PDO_FETCH_CLASSTYPE 0x00040000  /* fetch class gets its class name from 1st column */
 #define PDO_FETCH_SERIALIZE 0x00080000  /* fetch class instances by calling serialize */
+#define PDO_FETCH_PROPS_LATE 0x00100000  /* fetch props after calling ctor */
 
 /* fetch orientation for scrollable cursors */
 enum pdo_fetch_orientation {
@@ -129,6 +130,7 @@ enum pdo_attribute_type {
 	PDO_ATTR_DRIVER_NAME,		  /* name of the driver (as used in the constructor) */
 	PDO_ATTR_STRINGIFY_FETCHES,	/* converts integer/float types to strings during fetch */
 	PDO_ATTR_MAX_COLUMN_LEN,	/* make database calculate maximum length of data found in a column */
+	PDO_ATTR_DEFAULT_FETCH_MODE, /* Set the default fetch mode */
 	PDO_ATTR_EMULATE_PREPARES,  /* use query emulation rather than native */
 
 	/* this defines the start of the range for driver specific options.
@@ -340,7 +342,7 @@ enum pdo_param_event {
 	PDO_PARAM_EVT_EXEC_POST,
 	PDO_PARAM_EVT_FETCH_PRE,
 	PDO_PARAM_EVT_FETCH_POST,
-	PDO_PARAM_EVT_NORMALIZE
+	PDO_PARAM_EVT_NORMALIZE,
 };
 
 typedef int (*pdo_stmt_param_hook_func)(pdo_stmt_t *stmt, struct pdo_bound_param_data *param, enum pdo_param_event event_type TSRMLS_DC);
@@ -489,6 +491,7 @@ struct _pdo_dbh_t {
 	pdo_driver_t *driver;
 	
 	zend_class_entry *def_stmt_ce;
+
 	zval *def_stmt_ctor_args;
 
 	/* when calling PDO::query(), we need to keep the error
@@ -497,6 +500,9 @@ struct _pdo_dbh_t {
 	 * when PDO::query() fails */
 	pdo_stmt_t *query_stmt;
 	zval query_stmt_zval;
+
+	/* defaults for fetches */
+	enum pdo_fetch_type default_fetch_type;
 };
 
 /* describes a column */
@@ -639,7 +645,8 @@ PDO_API int php_pdo_parse_data_source(const char *data_source,
 		unsigned long data_source_len, struct pdo_data_src_parser *parsed,
 		int nparams);
 
-PDO_API zend_class_entry *php_pdo_get_exception(void);
+PDO_API zend_class_entry *php_pdo_get_dbh_ce();
+PDO_API zend_class_entry *php_pdo_get_exception();
 
 PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, 
 	char **outquery, int *outquery_len TSRMLS_DC);
