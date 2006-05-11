@@ -659,7 +659,6 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 		unsigned int function_name_strlen;
 		zend_bool is_const = (IS_CONST == IS_CONST);
 
-
 		if (is_const) {
 			function_name_strval = Z_UNIVAL(opline->op2.u.constant);
 			function_name_strlen = Z_UNILEN(opline->op2.u.constant);
@@ -1192,8 +1191,6 @@ static int ZEND_FETCH_CLASS_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
 	zval *class_name;
-
-
 
 	if (IS_CV == IS_UNUSED) {
 		EX_T(opline->result.u.var).class_entry = zend_fetch_class(NULL, 0, opline->extended_value TSRMLS_CC);
@@ -5081,8 +5078,8 @@ static int ZEND_ADD_CHAR_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_free_op free_op1;
 
 	add_char_to_string(&EX_T(opline->result.u.var).tmp_var,
-					   _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC),
-					   &opline->op2.u.constant);
+		_get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC),
+		&opline->op2.u.constant);
 	/* FREE_OP is missing intentionally here - we're always working on the same temporary variable */
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -5093,8 +5090,8 @@ static int ZEND_ADD_STRING_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_free_op free_op1;
 
 	add_string_to_string(&EX_T(opline->result.u.var).tmp_var,
-						 _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC),
-						 &opline->op2.u.constant);
+		_get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC),
+		&opline->op2.u.constant);
 	/* FREE_OP is missing intentionally here - we're always working on the same temporary variable */
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -9231,15 +9228,13 @@ static int ZEND_UNSET_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
+						index = (long) Z_DVAL_P(offset);
+						zend_hash_index_del(ht, index);
+						break;
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:
-						if (Z_TYPE_P(offset) == IS_DOUBLE) {
-							index = (long) Z_DVAL_P(offset);
-						} else {
-							index = Z_LVAL_P(offset);
-						}
-
+						index = Z_LVAL_P(offset);
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
@@ -9381,14 +9376,15 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CONST(int prop_dim, 
 
 			switch (Z_TYPE_P(offset)) {
 				case IS_DOUBLE:
+					index = (long) Z_DVAL_P(offset);
+					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
+						isset = 1;
+					}
+					break;
 				case IS_RESOURCE:
 				case IS_BOOL:
 				case IS_LONG:
-					if (Z_TYPE_P(offset) == IS_DOUBLE) {
-						index = (long) Z_DVAL_P(offset);
-					} else {
-						index = Z_LVAL_P(offset);
-					}
+					index = Z_LVAL_P(offset);
 					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
@@ -10714,15 +10710,13 @@ static int ZEND_UNSET_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
+						index = (long) Z_DVAL_P(offset);
+						zend_hash_index_del(ht, index);
+						break;
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:
-						if (Z_TYPE_P(offset) == IS_DOUBLE) {
-							index = (long) Z_DVAL_P(offset);
-						} else {
-							index = Z_LVAL_P(offset);
-						}
-
+						index = Z_LVAL_P(offset);
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
@@ -10864,14 +10858,15 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_TMP(int prop_dim, ZE
 
 			switch (Z_TYPE_P(offset)) {
 				case IS_DOUBLE:
+					index = (long) Z_DVAL_P(offset);
+					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
+						isset = 1;
+					}
+					break;
 				case IS_RESOURCE:
 				case IS_BOOL:
 				case IS_LONG:
-					if (Z_TYPE_P(offset) == IS_DOUBLE) {
-						index = (long) Z_DVAL_P(offset);
-					} else {
-						index = Z_LVAL_P(offset);
-					}
+					index = Z_LVAL_P(offset);
 					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
@@ -12235,15 +12230,13 @@ static int ZEND_UNSET_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
+						index = (long) Z_DVAL_P(offset);
+						zend_hash_index_del(ht, index);
+						break;
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:
-						if (Z_TYPE_P(offset) == IS_DOUBLE) {
-							index = (long) Z_DVAL_P(offset);
-						} else {
-							index = Z_LVAL_P(offset);
-						}
-
+						index = Z_LVAL_P(offset);
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
@@ -12385,14 +12378,15 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_VAR(int prop_dim, ZE
 
 			switch (Z_TYPE_P(offset)) {
 				case IS_DOUBLE:
+					index = (long) Z_DVAL_P(offset);
+					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
+						isset = 1;
+					}
+					break;
 				case IS_RESOURCE:
 				case IS_BOOL:
 				case IS_LONG:
-					if (Z_TYPE_P(offset) == IS_DOUBLE) {
-						index = (long) Z_DVAL_P(offset);
-					} else {
-						index = Z_LVAL_P(offset);
-					}
+					index = Z_LVAL_P(offset);
 					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
@@ -14159,15 +14153,13 @@ static int ZEND_UNSET_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
+						index = (long) Z_DVAL_P(offset);
+						zend_hash_index_del(ht, index);
+						break;
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:
-						if (Z_TYPE_P(offset) == IS_DOUBLE) {
-							index = (long) Z_DVAL_P(offset);
-						} else {
-							index = Z_LVAL_P(offset);
-						}
-
+						index = Z_LVAL_P(offset);
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
@@ -14309,14 +14301,15 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CV(int prop_dim, ZEN
 
 			switch (Z_TYPE_P(offset)) {
 				case IS_DOUBLE:
+					index = (long) Z_DVAL_P(offset);
+					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
+						isset = 1;
+					}
+					break;
 				case IS_RESOURCE:
 				case IS_BOOL:
 				case IS_LONG:
-					if (Z_TYPE_P(offset) == IS_DOUBLE) {
-						index = (long) Z_DVAL_P(offset);
-					} else {
-						index = Z_LVAL_P(offset);
-					}
+					index = Z_LVAL_P(offset);
 					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
@@ -15371,15 +15364,13 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
+						index = (long) Z_DVAL_P(offset);
+						zend_hash_index_del(ht, index);
+						break;
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:
-						if (Z_TYPE_P(offset) == IS_DOUBLE) {
-							index = (long) Z_DVAL_P(offset);
-						} else {
-							index = Z_LVAL_P(offset);
-						}
-
+						index = Z_LVAL_P(offset);
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
@@ -15519,14 +15510,15 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CONST(int prop_di
 
 			switch (Z_TYPE_P(offset)) {
 				case IS_DOUBLE:
+					index = (long) Z_DVAL_P(offset);
+					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
+						isset = 1;
+					}
+					break;
 				case IS_RESOURCE:
 				case IS_BOOL:
 				case IS_LONG:
-					if (Z_TYPE_P(offset) == IS_DOUBLE) {
-						index = (long) Z_DVAL_P(offset);
-					} else {
-						index = Z_LVAL_P(offset);
-					}
+					index = Z_LVAL_P(offset);
 					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
@@ -16465,15 +16457,13 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
+						index = (long) Z_DVAL_P(offset);
+						zend_hash_index_del(ht, index);
+						break;
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:
-						if (Z_TYPE_P(offset) == IS_DOUBLE) {
-							index = (long) Z_DVAL_P(offset);
-						} else {
-							index = Z_LVAL_P(offset);
-						}
-
+						index = Z_LVAL_P(offset);
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
@@ -16613,14 +16603,15 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_TMP(int prop_dim,
 
 			switch (Z_TYPE_P(offset)) {
 				case IS_DOUBLE:
+					index = (long) Z_DVAL_P(offset);
+					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
+						isset = 1;
+					}
+					break;
 				case IS_RESOURCE:
 				case IS_BOOL:
 				case IS_LONG:
-					if (Z_TYPE_P(offset) == IS_DOUBLE) {
-						index = (long) Z_DVAL_P(offset);
-					} else {
-						index = Z_LVAL_P(offset);
-					}
+					index = Z_LVAL_P(offset);
 					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
@@ -17559,15 +17550,13 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
+						index = (long) Z_DVAL_P(offset);
+						zend_hash_index_del(ht, index);
+						break;
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:
-						if (Z_TYPE_P(offset) == IS_DOUBLE) {
-							index = (long) Z_DVAL_P(offset);
-						} else {
-							index = Z_LVAL_P(offset);
-						}
-
+						index = Z_LVAL_P(offset);
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
@@ -17707,14 +17696,15 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_VAR(int prop_dim,
 
 			switch (Z_TYPE_P(offset)) {
 				case IS_DOUBLE:
+					index = (long) Z_DVAL_P(offset);
+					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
+						isset = 1;
+					}
+					break;
 				case IS_RESOURCE:
 				case IS_BOOL:
 				case IS_LONG:
-					if (Z_TYPE_P(offset) == IS_DOUBLE) {
-						index = (long) Z_DVAL_P(offset);
-					} else {
-						index = Z_LVAL_P(offset);
-					}
+					index = Z_LVAL_P(offset);
 					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
@@ -19017,15 +19007,13 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
+						index = (long) Z_DVAL_P(offset);
+						zend_hash_index_del(ht, index);
+						break;
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:
-						if (Z_TYPE_P(offset) == IS_DOUBLE) {
-							index = (long) Z_DVAL_P(offset);
-						} else {
-							index = Z_LVAL_P(offset);
-						}
-
+						index = Z_LVAL_P(offset);
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
@@ -19165,14 +19153,15 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CV(int prop_dim, 
 
 			switch (Z_TYPE_P(offset)) {
 				case IS_DOUBLE:
+					index = (long) Z_DVAL_P(offset);
+					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
+						isset = 1;
+					}
+					break;
 				case IS_RESOURCE:
 				case IS_BOOL:
 				case IS_LONG:
-					if (Z_TYPE_P(offset) == IS_DOUBLE) {
-						index = (long) Z_DVAL_P(offset);
-					} else {
-						index = Z_LVAL_P(offset);
-					}
+					index = Z_LVAL_P(offset);
 					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
@@ -21708,15 +21697,13 @@ static int ZEND_UNSET_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
+						index = (long) Z_DVAL_P(offset);
+						zend_hash_index_del(ht, index);
+						break;
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:
-						if (Z_TYPE_P(offset) == IS_DOUBLE) {
-							index = (long) Z_DVAL_P(offset);
-						} else {
-							index = Z_LVAL_P(offset);
-						}
-
+						index = Z_LVAL_P(offset);
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
@@ -21856,14 +21843,15 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CONST(int prop_dim, Z
 
 			switch (Z_TYPE_P(offset)) {
 				case IS_DOUBLE:
+					index = (long) Z_DVAL_P(offset);
+					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
+						isset = 1;
+					}
+					break;
 				case IS_RESOURCE:
 				case IS_BOOL:
 				case IS_LONG:
-					if (Z_TYPE_P(offset) == IS_DOUBLE) {
-						index = (long) Z_DVAL_P(offset);
-					} else {
-						index = Z_LVAL_P(offset);
-					}
+					index = Z_LVAL_P(offset);
 					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
@@ -23183,15 +23171,13 @@ static int ZEND_UNSET_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
+						index = (long) Z_DVAL_P(offset);
+						zend_hash_index_del(ht, index);
+						break;
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:
-						if (Z_TYPE_P(offset) == IS_DOUBLE) {
-							index = (long) Z_DVAL_P(offset);
-						} else {
-							index = Z_LVAL_P(offset);
-						}
-
+						index = Z_LVAL_P(offset);
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
@@ -23331,14 +23317,15 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_TMP(int prop_dim, ZEN
 
 			switch (Z_TYPE_P(offset)) {
 				case IS_DOUBLE:
+					index = (long) Z_DVAL_P(offset);
+					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
+						isset = 1;
+					}
+					break;
 				case IS_RESOURCE:
 				case IS_BOOL:
 				case IS_LONG:
-					if (Z_TYPE_P(offset) == IS_DOUBLE) {
-						index = (long) Z_DVAL_P(offset);
-					} else {
-						index = Z_LVAL_P(offset);
-					}
+					index = Z_LVAL_P(offset);
 					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
@@ -24695,15 +24682,13 @@ static int ZEND_UNSET_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
+						index = (long) Z_DVAL_P(offset);
+						zend_hash_index_del(ht, index);
+						break;
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:
-						if (Z_TYPE_P(offset) == IS_DOUBLE) {
-							index = (long) Z_DVAL_P(offset);
-						} else {
-							index = Z_LVAL_P(offset);
-						}
-
+						index = Z_LVAL_P(offset);
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
@@ -24843,14 +24828,15 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_VAR(int prop_dim, ZEN
 
 			switch (Z_TYPE_P(offset)) {
 				case IS_DOUBLE:
+					index = (long) Z_DVAL_P(offset);
+					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
+						isset = 1;
+					}
+					break;
 				case IS_RESOURCE:
 				case IS_BOOL:
 				case IS_LONG:
-					if (Z_TYPE_P(offset) == IS_DOUBLE) {
-						index = (long) Z_DVAL_P(offset);
-					} else {
-						index = Z_LVAL_P(offset);
-					}
+					index = Z_LVAL_P(offset);
 					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
@@ -26609,15 +26595,13 @@ static int ZEND_UNSET_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
+						index = (long) Z_DVAL_P(offset);
+						zend_hash_index_del(ht, index);
+						break;
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:
-						if (Z_TYPE_P(offset) == IS_DOUBLE) {
-							index = (long) Z_DVAL_P(offset);
-						} else {
-							index = Z_LVAL_P(offset);
-						}
-
+						index = Z_LVAL_P(offset);
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
@@ -26757,14 +26741,15 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CV(int prop_dim, ZEND
 
 			switch (Z_TYPE_P(offset)) {
 				case IS_DOUBLE:
+					index = (long) Z_DVAL_P(offset);
+					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
+						isset = 1;
+					}
+					break;
 				case IS_RESOURCE:
 				case IS_BOOL:
 				case IS_LONG:
-					if (Z_TYPE_P(offset) == IS_DOUBLE) {
-						index = (long) Z_DVAL_P(offset);
-					} else {
-						index = Z_LVAL_P(offset);
-					}
+					index = Z_LVAL_P(offset);
 					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
