@@ -708,14 +708,18 @@ static PHP_INI_MH(OnUpdate_mbstring_substitute_character)
 	if (new_value != NULL) {
 		if (strcasecmp("none", new_value) == 0) {
 			MBSTRG(filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE;
+			MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE;
 		} else if (strcasecmp("long", new_value) == 0) {
 			MBSTRG(filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG;
+			MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG;
 		} else {
 			MBSTRG(filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
+			MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 			if (new_value_length >0) {
 				c = strtol(new_value, &endptr, 0);
 				if (*endptr == '\0') {
 					MBSTRG(filter_illegal_substchar) = c;
+					MBSTRG(current_filter_illegal_substchar) = c;
 				}
 			}
 		}
@@ -3773,11 +3777,15 @@ PHP_FUNCTION(mb_send_mail)
 PHP_FUNCTION(mb_get_info)
 {
 	char *typ = NULL;
-	int typ_len;
+	int typ_len, n;
 	char *name;
 	const struct mb_overload_def *over_func;
-	zval *row;
+	zval *row1, *row2;
 	const mbfl_language *lang = mbfl_no2language(MBSTRG(current_language));
+	enum mbfl_no_encoding *entry;
+#ifdef ZEND_MULTIBYTE
+	zval *row3;
+#endif /* ZEND_MULTIBYTE */
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &typ, &typ_len) == FAILURE) {
 		RETURN_FALSE;
@@ -3796,15 +3804,15 @@ PHP_FUNCTION(mb_get_info)
 		}
 		if (MBSTRG(func_overload)){
 			over_func = &(mb_ovld[0]);
-			MAKE_STD_ZVAL(row);
-			array_init(row);
+			MAKE_STD_ZVAL(row1);
+			array_init(row1);
 			while (over_func->type > 0) {
 				if ((MBSTRG(func_overload) & over_func->type) == over_func->type ) {
-					add_assoc_string(row, over_func->orig_func, over_func->ovld_func, 1);
+					add_assoc_string(row1, over_func->orig_func, over_func->ovld_func, 1);
 				}
 				over_func++;
 			}
-			add_assoc_zval(return_value, "func_overload", row);
+			add_assoc_zval(return_value, "func_overload", row1);
 		} else {
 			add_assoc_string(return_value, "func_overload", "no overload", 1);
  		}
@@ -3819,6 +3827,57 @@ PHP_FUNCTION(mb_get_info)
 				add_assoc_string(return_value, "mail_body_encoding", name, 1);
 			}
 		}
+		add_assoc_long(return_value, "illegal_chars", MBSTRG(illegalchars));
+		if (MBSTRG(encoding_translation)) {
+			add_assoc_string(return_value, "encoding_translation", "On", 1);
+		} else {
+			add_assoc_string(return_value, "encoding_translation", "Off", 1);
+		}
+		if ((name = (char *)mbfl_no_language2name(MBSTRG(current_language))) != NULL) {
+			add_assoc_string(return_value, "language", name, 1);
+		}		
+		n = MBSTRG(current_detect_order_list_size);
+		entry = MBSTRG(current_detect_order_list);
+		if(n > 0) {
+			MAKE_STD_ZVAL(row2);
+			array_init(row2);
+			while (n > 0) {
+				if ((name = (char *)mbfl_no_encoding2name(*entry)) != NULL) {
+					add_next_index_string(row2, name, 1);
+				}
+				entry++;
+				n--;
+			}
+			add_assoc_zval(return_value, "detect_order", row2);
+		}
+		if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
+			add_assoc_string(return_value, "substitute_character", "none", 1);
+		} else if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG) {
+			add_assoc_string(return_value, "substitute_character", "long", 1);
+		} else {
+			add_assoc_long(return_value, "substitute_character", MBSTRG(current_filter_illegal_substchar));
+		}
+		if (MBSTRG(strict_detection)) {
+			add_assoc_string(return_value, "strict_detection", "On", 1);
+		} else {
+			add_assoc_string(return_value, "strict_detection", "Off", 1);
+		}
+#ifdef ZEND_MULTIBYTE
+		entry = MBSTRG(script_encoding_list);
+		n = MBSTRG(script_encoding_list_size);
+		if(n > 0) {
+			MAKE_STD_ZVAL(row3);
+			array_init(row3);
+			while (n > 0) {
+				if ((name = (char *)mbfl_no_encoding2name(*entry)) != NULL) {
+					add_next_index_string(row3, name, 1);
+				}
+				entry++;
+				n--;
+			}
+			add_assoc_zval(return_value, "script_encoding", row3);
+		}
+#endif /* ZEND_MULTIBYTE */
 	} else if (!strcasecmp("internal_encoding", typ)) {
 		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(current_internal_encoding))) != NULL) {
 			RETVAL_STRING(name, 1);
@@ -3858,7 +3917,63 @@ PHP_FUNCTION(mb_get_info)
 		}
  	} else if (!strcasecmp("illegal_chars", typ)) {
  		RETVAL_LONG(MBSTRG(illegalchars));
+	} else if (!strcasecmp("encoding_translation", typ)) {
+		if (MBSTRG(encoding_translation)) {
+			RETVAL_STRING("On", 1);
+		} else {
+			RETVAL_STRING("Off", 1);
+		}
+	} else if (!strcasecmp("language", typ)) {
+		if ((name = (char *)mbfl_no_language2name(MBSTRG(current_language))) != NULL) {
+			RETVAL_STRING(name, 1);
+		}		
+	} else if (!strcasecmp("detect_order", typ)) {
+		n = MBSTRG(current_detect_order_list_size);
+		entry = MBSTRG(current_detect_order_list);
+		if(n > 0) {
+			array_init(return_value);
+			while (n > 0) {
+				name = (char *)mbfl_no_encoding2name(*entry);
+				if (name) {
+					add_next_index_string(return_value, name, 1);
+				}
+				entry++;
+				n--;
+			}
+		}
+	} else if (!strcasecmp("substitute_character", typ)) {
+		if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
+			RETVAL_STRING("none", 1);
+		} else if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG) {
+			RETVAL_STRING("long", 1);
+		} else {
+			RETVAL_LONG(MBSTRG(current_filter_illegal_substchar));
+		}
+	} else if (!strcasecmp("strict_detection", typ)) {
+		if (MBSTRG(strict_detection)) {
+			RETVAL_STRING("On", 1);
+		} else {
+			RETVAL_STRING("Off", 1);
+		}
 	} else {
+#ifdef ZEND_MULTIBYTE
+	if (!strcasecmp("script_encoding", typ)) {
+		entry = MBSTRG(script_encoding_list);
+		n = MBSTRG(script_encoding_list_size);
+		if(n > 0) {
+			array_init(return_value);
+			while (n > 0) {
+				name = (char *)mbfl_no_encoding2name(*entry);
+				if (name) {
+					add_next_index_string(return_value, name, 1);
+				}
+				entry++;
+				n--;
+			}
+		}
+		return;
+	}
+#endif /* ZEND_MULTIBYTE */
 		RETURN_FALSE;
 	}
 }
