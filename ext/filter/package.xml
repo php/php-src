@@ -26,14 +26,14 @@ of filters and mechanisms that users can use to safely access their input data.
   <state>beta</state>
   <version>0.9.5</version>
   <date>2006-05-01</date>
-  <notes>
+  <notes>- Fixed PECL bug #6136, ini_set should not be able to change the filter.default (Pierre)
 - Fixed PECL bug #6639: uppercase hexadecimal digits are not supported
 - Implemented PECL req #6641: negative values for hexadecimal and octal numbers are not supported.
 - Added support for php pcre expressions (Pierre)
 - Fixed Possible leak in internal sapi_filter (Pierre)
 - Added input_get_args, fetches all input in one call (Pierre)
 - Added FILTER_FLAG_SCALAR and FILTER_FLAG_ARRAY , allows or not array values (Pierre)
-- Fixed PECL bug #6136, ini_set should not be able to change the filter.default (Pierre)
+- Added JIT support
   </notes>
   <filelist>
    <file role="src" name="config.m4"/>
