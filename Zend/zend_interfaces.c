@@ -222,15 +222,14 @@ ZEND_API int zend_user_it_get_current_key(zend_object_iterator *_iter, zstr *str
 			return HASH_KEY_IS_UNICODE;
 
 		case IS_DOUBLE:
+			*int_key = (long)Z_DVAL_P(retval);
+			zval_ptr_dtor(&retval);
+			return HASH_KEY_IS_LONG;
+
 		case IS_RESOURCE:
 		case IS_BOOL:
-		case IS_LONG: {
-				if (Z_TYPE_P(retval) == IS_DOUBLE) {
-					*int_key = (long)Z_DVAL_P(retval);
-				} else {
-					*int_key = Z_LVAL_P(retval);
-				}
-			}
+		case IS_LONG:
+			*int_key = (long)Z_LVAL_P(retval);
 			zval_ptr_dtor(&retval);
 			return HASH_KEY_IS_LONG;
 	}
