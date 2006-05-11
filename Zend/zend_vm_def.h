@@ -1572,8 +1572,8 @@ ZEND_VM_HANDLER(54, ZEND_ADD_CHAR, TMP, CONST)
 	zend_free_op free_op1;
 
 	add_char_to_string(&EX_T(opline->result.u.var).tmp_var,
-					   GET_OP1_ZVAL_PTR(BP_VAR_NA),
-					   &opline->op2.u.constant);
+		GET_OP1_ZVAL_PTR(BP_VAR_NA),
+		&opline->op2.u.constant);
 	/* FREE_OP is missing intentionally here - we're always working on the same temporary variable */
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -1584,8 +1584,8 @@ ZEND_VM_HANDLER(55, ZEND_ADD_STRING, TMP, CONST)
 	zend_free_op free_op1;
 
 	add_string_to_string(&EX_T(opline->result.u.var).tmp_var,
-						 GET_OP1_ZVAL_PTR(BP_VAR_NA),
-						 &opline->op2.u.constant);
+		GET_OP1_ZVAL_PTR(BP_VAR_NA),
+		&opline->op2.u.constant);
 	/* FREE_OP is missing intentionally here - we're always working on the same temporary variable */
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -2894,8 +2894,8 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, ANY)
 						}
 					}
 				}
-  		  ex = ex->prev_execute_data;
-		  } while (ex && ex->symbol_table == target_symbol_table);
+				ex = ex->prev_execute_data;
+			} while (ex && ex->symbol_table == target_symbol_table);
 		}
 	}
 
@@ -2924,15 +2924,13 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
+						index = (long) Z_DVAL_P(offset);
+						zend_hash_index_del(ht, index);
+						break;
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:
-						if (Z_TYPE_P(offset) == IS_DOUBLE) {
-							index = (long) Z_DVAL_P(offset);
-						} else {
-							index = Z_LVAL_P(offset);
-						}
-
+						index = Z_LVAL_P(offset);
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
@@ -3417,14 +3415,15 @@ ZEND_VM_HELPER_EX(zend_isset_isempty_dim_prop_obj_handler, VAR|UNUSED|CV, CONST|
 
 			switch (Z_TYPE_P(offset)) {
 				case IS_DOUBLE:
+					index = (long) Z_DVAL_P(offset);
+					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
+						isset = 1;
+					}
+					break;
 				case IS_RESOURCE:
 				case IS_BOOL:
 				case IS_LONG:
-					if (Z_TYPE_P(offset) == IS_DOUBLE) {
-						index = (long) Z_DVAL_P(offset);
-					} else {
-						index = Z_LVAL_P(offset);
-					}
+					index = Z_LVAL_P(offset);
 					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
