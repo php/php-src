@@ -62,14 +62,17 @@ ZEND_END_MODULE_GLOBALS(pdo)
 # define PDOG(v) (pdo_globals.v)
 #endif
 
-PDO_API void php_pdo_declare_long_constant(const char *const_name, size_t name_len, long value TSRMLS_DC);
-PDO_API void php_pdo_declare_stringl_constant(const char *const_name, size_t name_len, const char *value, size_t value_len TSRMLS_DC);
-
 #define REGISTER_PDO_CLASS_CONST_LONG(const_name, value) \
-	php_pdo_declare_long_constant(const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);
+	zend_declare_class_constant_long(php_pdo_get_dbh_ce(), const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);
+
+#define REGISTER_PDO_CONST_LONG(const_name, value) { \
+	zend_class_entry **pce;	\
+	if (zend_hash_find(CG(class_table), "pdo", sizeof("pdo"), (void **) &pce) != FAILURE)	\
+		zend_declare_class_constant_long(*pce, const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);	\
+}	\
 
 #define REGISTER_PDO_CLASS_CONST_STRING(const_name, value) \
-	php_pdo_declare_stringl_constant(const_name, sizeof(const_name)-1, value, sizeof(value)-1 TSRMLS_CC);
+	zend_declare_class_constant_stringl(php_pdo_get_dbh_ce(), const_name, sizeof(const_name)-1, value, sizeof(value)-1 TSRMLS_CC);
 
 #define PDO_CONSTRUCT_CHECK	\
 	if (!dbh->driver) {	\
