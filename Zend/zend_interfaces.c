@@ -200,8 +200,8 @@ ZEND_API int zend_user_it_get_current_key(zend_object_iterator *_iter, char **st
 		}
 		return HASH_KEY_IS_LONG;
 	}
-	switch (retval->type) {
-		default: 
+	switch (Z_TYPE_P(retval)) {
+		default:
 			zend_error(E_WARNING, "Illegal type returned from %s::key()", iter->ce->name);
 		case IS_NULL:
 			*int_key = 0;
@@ -209,21 +209,20 @@ ZEND_API int zend_user_it_get_current_key(zend_object_iterator *_iter, char **st
 			return HASH_KEY_IS_LONG;
 
 		case IS_STRING:
-			*str_key = estrndup(retval->value.str.val, retval->value.str.len);
-			*str_key_len = retval->value.str.len+1;
+			*str_key = estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
+			*str_key_len = Z_STRLEN_P(retval)+1;
 			zval_ptr_dtor(&retval);
 			return HASH_KEY_IS_STRING;
 
 		case IS_DOUBLE:
+			*int_key = (long)Z_DVAL_P(retval);
+			zval_ptr_dtor(&retval);
+			return HASH_KEY_IS_LONG;
+
 		case IS_RESOURCE:
 		case IS_BOOL:
-		case IS_LONG: {
-				if (retval->type == IS_DOUBLE) {
-					*int_key = (long)retval->value.dval;
-				} else {
-					*int_key = retval->value.lval;
-				}
-			}
+		case IS_LONG:
+			*int_key = (long)Z_LVAL_P(retval);
 			zval_ptr_dtor(&retval);
 			return HASH_KEY_IS_LONG;
 	}
