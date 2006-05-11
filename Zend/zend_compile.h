@@ -342,7 +342,7 @@ ZEND_API char *zend_get_compiled_script_encoding(TSRMLS_D);
 ZEND_API zstr zend_get_compiled_variable_name(zend_op_array *op_array, zend_uint var, int* name_len);
 
 ZEND_API int zend_prepare_scanner_converters(const char *onetime_encoding, int run_time TSRMLS_DC);
-ZEND_API int zend_convert_scanner_output(UChar **target, int *target_len, const char *source, int source_len, UErrorCode *status TSRMLS_DC);
+ZEND_API int zend_convert_scanner_output(UConverter *conv, UChar **target, int *target_len, const char *source, int source_len, UErrorCode *status TSRMLS_DC);
 int zend_unicode_yyinput(zend_file_handle *file_handle, char *buf, size_t len TSRMLS_DC);
 
 #ifdef ZTS
@@ -538,6 +538,7 @@ ZEND_API void zend_file_handle_dtor(zend_file_handle *fh);
 ZEND_API int zend_cleanup_class_data(zend_class_entry **pce TSRMLS_DC);
 ZEND_API int zend_cleanup_function_data(zend_function *function TSRMLS_DC);
 ZEND_API int zend_cleanup_function_data_full(zend_function *function TSRMLS_DC);
+ZEND_API int zend_copy_scanner_string(zval *zendlval, char *str, zend_uint str_len, zend_uchar type, UConverter *conv TSRMLS_DC);
 
 ZEND_API void destroy_zend_function(zend_function *function TSRMLS_DC);
 ZEND_API void zend_function_dtor(zend_function *function);

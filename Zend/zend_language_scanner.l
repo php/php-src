@@ -411,13 +411,13 @@ static inline int zend_parse_charname_sequence(UChar **s, UChar *end, UChar32 *c
 	return 0;
 }
 
-static inline int zend_copy_string_value(zval *zendlval, char *str, zend_uint str_len, zend_uchar type TSRMLS_DC)
+ZEND_API int zend_copy_scanner_string(zval *zendlval, char *str, zend_uint str_len, zend_uchar type, UConverter *conv TSRMLS_DC)
 {
 	UErrorCode status = U_ZERO_ERROR;
 	int consumed = 0;
 
 	if (type == IS_UNICODE) {
-		consumed = zend_convert_scanner_output(&Z_USTRVAL_P(zendlval), &Z_USTRLEN_P(zendlval), str, str_len, &status TSRMLS_CC);
+		consumed = zend_convert_scanner_output(conv, &Z_USTRVAL_P(zendlval), &Z_USTRLEN_P(zendlval), str, str_len, &status TSRMLS_CC);
 
 		if (U_FAILURE(status)) {
 			zend_error(E_COMPILE_WARNING,"Illegal or truncated character in input: offset %d, state=%d", consumed, YYSTATE);
@@ -622,16 +622,16 @@ ZEND_API int zend_prepare_scanner_converters(const char *onetime_encoding, int r
 	return zend_set_converter_encoding(&SCNG(output_conv), encoding);
 }
 
-ZEND_API int zend_convert_scanner_output(UChar **target, int *target_len, const char *source, int source_len, UErrorCode *status TSRMLS_DC)
+ZEND_API int zend_convert_scanner_output(UConverter *conv, UChar **target, int *target_len, const char *source, int source_len, UErrorCode *status TSRMLS_DC)
 {
 	const char *source_consumed = NULL;
 
 	/* set our custom callback with context */
-	ucnv_setToUCallBack(SCNG(output_conv), zend_scanner_output_callback, &source_consumed, NULL, NULL, status);
+	ucnv_setToUCallBack(conv, zend_scanner_output_callback, &source_consumed, NULL, NULL, status);
 
 	/* reset the error and perform conversion */
 	*status = U_ZERO_ERROR;
-	zend_convert_to_unicode(SCNG(output_conv), target, target_len, source, source_len, status);
+	zend_convert_to_unicode(conv, target, target_len, source, source_len, status);
 
 	/* figure out how many source bytes were consumed */
 	if (U_SUCCESS(*status)) {
@@ -1032,7 +1032,7 @@ int zend_scan_unicode_double_string(zval *zendlval TSRMLS_DC)
 
 	HANDLE_NEWLINES(yytext, yyleng);
 
-	if (!zend_copy_string_value(zendlval, yytext+1, yyleng-2, IS_UNICODE TSRMLS_CC)) {
+	if (!zend_copy_scanner_string(zendlval, yytext+1, yyleng-2, IS_UNICODE, SCNG(output_conv) TSRMLS_CC)) {
 		return 0;
 	}
 
@@ -1174,7 +1174,7 @@ int zend_scan_unicode_single_string(zval *zendlval TSRMLS_DC)
 
 	HANDLE_NEWLINES(yytext, yyleng);
 
-	if (!zend_copy_string_value(zendlval, yytext+1, yyleng-2, IS_UNICODE TSRMLS_CC)) {
+	if (!zend_copy_scanner_string(zendlval, yytext+1, yyleng-2, IS_UNICODE, SCNG(output_conv) TSRMLS_CC)) {
 		return 0;
 	}
 
@@ -1558,7 +1558,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_LOOKING_FOR_PROPERTY>{LABEL} {
 	yy_pop_state(TSRMLS_C);
-	if (!zend_copy_string_value(zendlval, yytext, yyleng, UG(unicode)?IS_UNICODE:IS_STRING TSRMLS_CC)) {
+	if (!zend_copy_scanner_string(zendlval, yytext, yyleng, UG(unicode)?IS_UNICODE:IS_STRING, SCNG(output_conv) TSRMLS_CC)) {
 		return 0;
 	}
 	if (UG(unicode) && !zend_check_and_normalize_identifier(zendlval)) {
@@ -1836,7 +1836,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <ST_LOOKING_FOR_VARNAME>{LABEL} {
-	if (!zend_copy_string_value(zendlval, yytext, yyleng, UG(unicode)?IS_UNICODE:IS_STRING TSRMLS_CC)) {
+	if (!zend_copy_scanner_string(zendlval, yytext, yyleng, UG(unicode)?IS_UNICODE:IS_STRING, SCNG(output_conv) TSRMLS_CC)) {
 		return 0;
 	}
 	if (UG(unicode) && !zend_check_and_normalize_identifier(zendlval)) {
@@ -1889,7 +1889,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>{LNUM}|{HNUM} { /* treat numbers (almost) as strings inside encapsulated strings */
-	if (!zend_copy_string_value(zendlval, yytext, yyleng, CG(literal_type) TSRMLS_CC)) {
+	if (!zend_copy_scanner_string(zendlval, yytext, yyleng, CG(literal_type), SCNG(output_conv) TSRMLS_CC)) {
 		return 0;
 	}
 	return T_NUM_STRING;
@@ -2063,7 +2063,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL} {
-	if (!zend_copy_string_value(zendlval, (yytext+1), (yyleng-1), UG(unicode)?IS_UNICODE:IS_STRING TSRMLS_CC)) {
+	if (!zend_copy_scanner_string(zendlval, (yytext+1), (yyleng-1), UG(unicode)?IS_UNICODE:IS_STRING, SCNG(output_conv) TSRMLS_CC)) {
 		return 0;
 	}
 	if (UG(unicode) && !zend_check_and_normalize_identifier(zendlval)) {
@@ -2073,7 +2073,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>{LABEL} {
-	if (!zend_copy_string_value(zendlval, yytext, yyleng, UG(unicode)?IS_UNICODE:IS_STRING TSRMLS_CC)) {
+	if (!zend_copy_scanner_string(zendlval, yytext, yyleng, UG(unicode)?IS_UNICODE:IS_STRING, SCNG(output_conv) TSRMLS_CC)) {
 		return 0;
 	}
 	if (UG(unicode) && !zend_check_and_normalize_identifier(zendlval)) {
@@ -2083,7 +2083,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>{LABEL} {
-	if (!zend_copy_string_value(zendlval, yytext, yyleng, CG(literal_type) TSRMLS_CC)) {
+	if (!zend_copy_scanner_string(zendlval, yytext, yyleng, CG(literal_type), SCNG(output_conv) TSRMLS_CC)) {
 		return 0;
 	}
 	return T_STRING;
@@ -2309,7 +2309,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		return T_END_HEREDOC;
 	} else {
 		CG(zend_lineno)++;
-		if (!zend_copy_string_value(zendlval, yytext, yyleng, CG(literal_type) TSRMLS_CC)) {
+		if (!zend_copy_scanner_string(zendlval, yytext, yyleng, CG(literal_type), SCNG(output_conv) TSRMLS_CC)) {
 			return 0;
 		}
 		return T_STRING;
@@ -2319,14 +2319,14 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>{ESCAPED_AND_WHITESPACE} {
 	HANDLE_NEWLINES(yytext, yyleng);
-	if (!zend_copy_string_value(zendlval, yytext, yyleng, CG(literal_type) TSRMLS_CC)) {
+	if (!zend_copy_scanner_string(zendlval, yytext, yyleng, CG(literal_type), SCNG(output_conv) TSRMLS_CC)) {
 		return 0;
 	}
 	return T_ENCAPSED_AND_WHITESPACE;
 }
 
 <ST_DOUBLE_QUOTES>[`]+ {
-	if (!zend_copy_string_value(zendlval, yytext, yyleng, CG(literal_type) TSRMLS_CC)) {
+	if (!zend_copy_scanner_string(zendlval, yytext, yyleng, CG(literal_type), SCNG(output_conv) TSRMLS_CC)) {
 		return 0;
 	}
 	return T_ENCAPSED_AND_WHITESPACE;
@@ -2334,7 +2334,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <ST_BACKQUOTE>["]+ {
-	if (!zend_copy_string_value(zendlval, yytext, yyleng, CG(literal_type) TSRMLS_CC)) {
+	if (!zend_copy_scanner_string(zendlval, yytext, yyleng, CG(literal_type), SCNG(output_conv) TSRMLS_CC)) {
 		return 0;
 	}
 	return T_ENCAPSED_AND_WHITESPACE;
@@ -2406,7 +2406,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			return 0;
 		}
 	} else {
-		zend_copy_string_value(zendlval, yytext, yyleng, CG(literal_type) TSRMLS_CC);
+		zend_copy_scanner_string(zendlval, yytext, yyleng, CG(literal_type), SCNG(output_conv) TSRMLS_CC);
 		return T_STRING;
 	}
 }
@@ -2432,13 +2432,13 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			return 0;
 		}
 	} else {
-		zend_copy_string_value(zendlval, yytext, yyleng, CG(literal_type) TSRMLS_CC);
+		zend_copy_scanner_string(zendlval, yytext, yyleng, CG(literal_type), SCNG(output_conv) TSRMLS_CC);
 		return T_STRING;
 	}
 }
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\{" {
-	if (!zend_copy_string_value(zendlval, yytext, yyleng, CG(literal_type) TSRMLS_CC)) {
+	if (!zend_copy_scanner_string(zendlval, yytext, yyleng, CG(literal_type), SCNG(output_conv) TSRMLS_CC)) {
 		return 0;
 	}
 	return T_STRING;
@@ -2462,7 +2462,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			Z_LVAL_P(zendlval) = (long) yytext[1];
 			break;
 		default:
-			if (!zend_copy_string_value(zendlval, yytext, yyleng, CG(literal_type) TSRMLS_CC)) {
+			if (!zend_copy_scanner_string(zendlval, yytext, yyleng, CG(literal_type), SCNG(output_conv) TSRMLS_CC)) {
 				return 0;
 			}
 			return T_BAD_CHARACTER;
@@ -2473,7 +2473,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <ST_HEREDOC>["'`]+ {
-	if (!zend_copy_string_value(zendlval, yytext, yyleng, CG(literal_type) TSRMLS_CC)) {
+	if (!zend_copy_scanner_string(zendlval, yytext, yyleng, CG(literal_type), SCNG(output_conv) TSRMLS_CC)) {
 		return 0;
 	}
 	return T_ENCAPSED_AND_WHITESPACE;
