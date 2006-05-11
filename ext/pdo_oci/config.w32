@@ -32,7 +32,6 @@ if (PHP_PDO_OCI != "no") {
 		pdo_oci_inc_dir = FSO.GetParentFolderName(pdo_oci_header);
 
 		EXTENSION('pdo_oci', 'pdo_oci.c oci_driver.c oci_statement.c');
-		ADD_FLAG('CFLAGS_PDO_OCI', "/I ..\\pecl");
 
 		/* probe for some functions not present in older versions */
 		pdo_oci_inc_dir = FSO.GetFolder(pdo_oci_header);
@@ -70,7 +69,6 @@ if (PHP_PDO_OCI8 != "no") {
 		pdo_oci_inc_dir = FSO.GetParentFolderName(pdo_oci_header);
 
 		EXTENSION('pdo_oci8', 'pdo_oci.c oci_driver.c oci_statement.c', null, null, null, "ext\\pdo_oci8");
-		ADD_FLAG('CFLAGS_PDO_OCI8', "/I ..\\pecl");
 
 		/* probe for some functions not present in older versions */
 		pdo_oci_inc_dir = FSO.GetFolder(pdo_oci_header);
