@@ -1,3 +1,82 @@
+2006-05-10  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      tests/bug33771.phpt:
+      change it to be consistent with the others
+
+2006-05-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      tests/array_type_hint_001.phpt
+      tests/bug26166.phpt
+      tests/bug26166.phpt
+      tests/bug28444.phpt
+      tests/bug30791.phpt
+      tests/bug33771.phpt
+      tests/bug33996.phpt:
+      - Fix tests
+
+    * (PHP_5_2)
+      zend.c:
+      - Missing __ToString() sync
+
+    * zend_object_handlers.c
+      zend_object_handlers.c:
+      - Enforece rule of disallowing throw in __toString()
+
+    * zend_compile.c:
+      - MFB missing initialization
+
+    * (PHP_5_2)
+      zend_execute.c:
+      - ze1 cleanup (bjori) /thx
+
+    * (PHP_5_2)
+      zend.c
+      zend_API.c:
+      - Missing __tostring() conversion snippets
+
+2006-05-10  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      tests/error_reporting01.phpt
+      tests/error_reporting02.phpt
+      tests/error_reporting03.phpt
+      tests/error_reporting04.phpt
+      tests/error_reporting05.phpt
+      tests/error_reporting06.phpt
+      tests/error_reporting07.phpt
+      tests/error_reporting08.phpt
+      tests/error_reporting09.phpt
+      tests/error_reporting10.phpt:
+      fix tests
+
+    * (PHP_5_2)
+      zend.c
+      zend_constants.c:
+      add missing parts of E_RECOVERABLE merge
+
+    * (PHP_5_2)
+      zend_compile.c:
+      add missing ZEND_API to the implementation
+
+    * (PHP_5_2)
+      zend_API.c:
+      nuke extra semi-colon
+
+2006-05-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      tests/bug27641.phpt
+      tests/bug30332.phpt
+      tests/bug31828.phpt
+      tests/bug32080.phpt
+      tests/bug32852.phpt
+      tests/bug33243.phpt
+      tests/bug34712.phpt
+      tests/bug34767.phpt:
+      i- ZE1_compat tests are no longer necessary
+
 2006-05-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_2)

@@ -1,3 +1,197 @@
+2006-05-10  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ZendEngine2/tests/bug33771.phpt:
+      change it to be consistent with the others
+
+2006-05-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      ZendEngine2/tests/array_type_hint_001.phpt
+      ZendEngine2/tests/bug26166.phpt
+      ZendEngine2/tests/bug26166.phpt
+      ZendEngine2/tests/bug28444.phpt
+      ZendEngine2/tests/bug30791.phpt
+      ZendEngine2/tests/bug33771.phpt
+      ZendEngine2/tests/bug33996.phpt
+      tests/classes/interfaces_003.phpt:
+      - Fix tests
+
+    * (PHP_5_2)
+      tests/lang/bug22367.phpt:
+      - No more ze1
+
+    * (PHP_5_2)
+      tests/run-test/test005.phpt
+      tests/run-test/test008.phpt
+      tests/run-test/test008a.phpt:
+      - Hardcoded error mode was changed to 8191
+
+2006-05-10  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * main/SAPI.c
+      sapi/apache/mod_php5.c:
+      MFB input filter hook for getenv()
+
+    * main/php_variables.h:
+      MFB filter defines
+
+    * (PHP_5_2)
+      NEWS
+      main/SAPI.c
+      sapi/apache/mod_php5.c:
+      Add input_filter hook call in getenv()
+
+2006-05-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      ZendEngine2/zend.c:
+      - Missing __ToString() sync
+
+    * tests/classes/tostring_003.phpt
+      tests/classes/tostring_003.phpt:
+      
+      - Fix tests
+
+    * ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c:
+      - Enforece rule of disallowing throw in __toString()
+
+2006-05-10  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_2)
+      main/php_variables.h:
+      Now that ext/filter is bundled, we should be defining these in one place
+
+2006-05-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_compile.c:
+      - MFB missing initialization
+
+    * (PHP_5_2)
+      php.ini-dist
+      php.ini-recommended
+      ZendEngine2/zend_execute.c
+      ext/dom/php_dom.c
+      ext/simplexml/simplexml.c:
+      - ze1 cleanup (bjori) /thx
+
+    * (PHP_5_2)
+      ZendEngine2/zend.c
+      ZendEngine2/zend_API.c:
+      - Missing __tostring() conversion snippets
+
+    * (PHP_5_2)
+      NEWS:
+      - Missed my name
+
+2006-05-10  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_5_2)
+      ext/dom/dom_iterators.c:
+      Fix win32 build
+
+2006-05-10  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      ext/com_dotnet/com_extension.c
+      ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_iterator.c
+      ext/com_dotnet/com_saproxy.c
+      ext/com_dotnet/php_com_dotnet_internal.h:
+      - Update after api changes
+
+2006-05-10  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ZendEngine2/tests/error_reporting01.phpt
+      ZendEngine2/tests/error_reporting02.phpt
+      ZendEngine2/tests/error_reporting03.phpt
+      ZendEngine2/tests/error_reporting04.phpt
+      ZendEngine2/tests/error_reporting05.phpt
+      ZendEngine2/tests/error_reporting06.phpt
+      ZendEngine2/tests/error_reporting07.phpt
+      ZendEngine2/tests/error_reporting08.phpt
+      ZendEngine2/tests/error_reporting09.phpt
+      ZendEngine2/tests/error_reporting10.phpt:
+      fix tests
+
+    * (PHP_5_2)
+      ZendEngine2/zend.c
+      ZendEngine2/zend_constants.c
+      main/main.c:
+      add missing parts of E_RECOVERABLE merge
+
+    * (PHP_5_2)
+      ZendEngine2/zend_compile.c:
+      add missing ZEND_API to the implementation
+
+    * (PHP_5_2)
+      ZendEngine2/zend_API.c:
+      nuke extra semi-colon
+
+2006-05-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/string.c:
+      MFB: Fixed bug #37394 (substr_compare() returns an error when offset equals
+      string length).
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/string.c:
+      Fixed bug #37394 (substr_compare() returns an error when offset equals
+      string length).
+
+2006-05-10  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c:
+      MFB
+
+    * (PHP_5_2)
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c:
+      Don't allocate 2 chunks of memory when one can fit. Reduces memory
+      fragmentation. There is one more place that fragments memory but it will
+      complicate the ongoing Unicode upgrade of mysqli so leaving it away for
+      now.
+
+2006-05-10  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      NEWS
+      NEWS
+      ext/oci8/oci8.c
+      ext/oci8/oci8.c:
+      MFH: fix #37392 (Unnecessary call to OCITransRollback() at the end of
+      request)
+
+    * ext/oci8/oci8.c:
+      fix #37392 (Unnecessary call to OCITransRollback() at the end of request)
+
+2006-05-10  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_5_2)
+      NEWS:
+      -** empty log message ***
+
+2006-05-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      ZendEngine2/tests/bug27641.phpt
+      ZendEngine2/tests/bug30332.phpt
+      ZendEngine2/tests/bug31828.phpt
+      ZendEngine2/tests/bug32080.phpt
+      ZendEngine2/tests/bug32852.phpt
+      ZendEngine2/tests/bug33243.phpt
+      ZendEngine2/tests/bug34712.phpt
+      ZendEngine2/tests/bug34767.phpt:
+      i- ZE1_compat tests are no longer necessary
+
+    * (PHP_5_2)
+      ext/pgsql/pgsql.c:
+      - Update after api changes
+
 2006-05-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_2)
