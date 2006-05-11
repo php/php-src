@@ -248,7 +248,6 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 					}
 				}
 				zend_error(EG(exception) ? E_ERROR : E_RECOVERABLE_ERROR, "Object of class %s could not be converted to string", Z_OBJCE_P(expr)->name);
-				zval_dtor(expr_copy);
 				expr_copy->value.str.len = 0;
 				expr_copy->value.str.val = STR_EMPTY_ALLOC();
 			}
