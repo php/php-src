@@ -37,6 +37,8 @@
 
 #include "flatfile.h"
 
+#define _php_stream_gets(stream, buf, len) php_stream_gets(stream, (zstr)((char*)buf), len)
+
 #define FLATFILE_BLOCK_SIZE 1024
 
 /*
@@ -88,7 +90,7 @@ datum flatfile_fetch(flatfile *dba, datum key_datum TSRMLS_DC) {
 	char buf[16];
 
 	if (flatfile_findkey(dba, key_datum TSRMLS_CC)) {
-		if (php_stream_gets(dba->fp, buf, sizeof(buf))) {
+		if (_php_stream_gets(dba->fp, buf, sizeof(buf))) {
 			value_datum.dsize = atoi(buf);
 			value_datum.dptr = safe_emalloc(value_datum.dsize, 1, 1);
 			value_datum.dsize = php_stream_read(dba->fp, value_datum.dptr, value_datum.dsize);
@@ -114,7 +116,7 @@ int flatfile_delete(flatfile *dba, datum key_datum TSRMLS_DC) {
 	php_stream_rewind(dba->fp);
 	while(!php_stream_eof(dba->fp)) {
 		/* read in the length of the key name */
-		if (!php_stream_gets(dba->fp, buf, 15)) {
+		if (!_php_stream_gets(dba->fp, buf, 15)) {
 			break;
 		}
 		num = atoi(buf);
@@ -140,7 +142,7 @@ int flatfile_delete(flatfile *dba, datum key_datum TSRMLS_DC) {
 		}	
 
 		/* read in the length of the value */
-		if (!php_stream_gets(dba->fp, buf, 15)) {
+		if (!_php_stream_gets(dba->fp, buf, 15)) {
 			break;
 		}
 		num = atoi(buf);
@@ -171,7 +173,7 @@ int flatfile_findkey(flatfile *dba, datum key_datum TSRMLS_DC) {
 
 	php_stream_rewind(dba->fp);
 	while (!php_stream_eof(dba->fp)) {
-		if (!php_stream_gets(dba->fp, buf, 15)) {
+		if (!_php_stream_gets(dba->fp, buf, 15)) {
 			break;
 		}
 		num = atoi(buf);
@@ -189,7 +191,7 @@ int flatfile_findkey(flatfile *dba, datum key_datum TSRMLS_DC) {
 				break;
 			}
 		}	
-		if (!php_stream_gets(dba->fp, buf, 15)) {
+		if (!_php_stream_gets(dba->fp, buf, 15)) {
 			break;
 		}
 		num = atoi(buf);
@@ -217,7 +219,7 @@ datum flatfile_firstkey(flatfile *dba TSRMLS_DC) {
 
 	php_stream_rewind(dba->fp);
 	while(!php_stream_eof(dba->fp)) {
-		if (!php_stream_gets(dba->fp, buf, 15)) {
+		if (!_php_stream_gets(dba->fp, buf, 15)) {
 			break;
 		}
 		num = atoi(buf);
@@ -235,7 +237,7 @@ datum flatfile_firstkey(flatfile *dba TSRMLS_DC) {
 			res.dsize = num;
 			return res;
 		}
-		if (!php_stream_gets(dba->fp, buf, 15)) {
+		if (!_php_stream_gets(dba->fp, buf, 15)) {
 			break;
 		}
 		num = atoi(buf);
@@ -265,7 +267,7 @@ datum flatfile_nextkey(flatfile *dba TSRMLS_DC) {
 
 	php_stream_seek(dba->fp, dba->CurrentFlatFilePos, SEEK_SET);
 	while(!php_stream_eof(dba->fp)) {
-		if (!php_stream_gets(dba->fp, buf, 15)) {
+		if (!_php_stream_gets(dba->fp, buf, 15)) {
 			break;
 		}
 		num = atoi(buf);
@@ -277,7 +279,7 @@ datum flatfile_nextkey(flatfile *dba TSRMLS_DC) {
 		if (num < 0)  {
 			break;
 		}
-		if (!php_stream_gets(dba->fp, buf, 15)) {
+		if (!_php_stream_gets(dba->fp, buf, 15)) {
 			break;
 		}
 		num = atoi(buf);

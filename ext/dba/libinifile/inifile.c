@@ -169,7 +169,7 @@ static int inifile_read(inifile *dba, line_type *ln TSRMLS_DC) {
 	char *pos;
 
 	inifile_val_free(&ln->val);
-	while ((fline = php_stream_gets(dba->fp, NULL, 0)) != NULL) {
+	while ((fline = php_stream_gets(dba->fp, NULL_ZSTR, 0)) != NULL) {
 		if (fline) {
 			if (fline[0] == '[') {
 				/* A value name cannot start with '['
