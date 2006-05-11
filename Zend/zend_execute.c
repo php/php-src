@@ -151,10 +151,10 @@ ZEND_API zval** zend_get_compiled_variable_value(zend_execute_data *execute_data
 
 static inline void zend_get_cv_address(zend_compiled_variable *cv, zval ***ptr, temp_variable *Ts TSRMLS_DC)
 {
-   zval *new_zval = &EG(uninitialized_zval);
-   
-   new_zval->refcount++;
-   zend_hash_quick_update(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value, &new_zval, sizeof(zval *), (void **)ptr);
+	zval *new_zval = &EG(uninitialized_zval);
+
+	new_zval->refcount++;
+	zend_hash_quick_update(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value, &new_zval, sizeof(zval *), (void **)ptr);
 }
 
 static inline zval *_get_zval_ptr_tmp(znode *node, temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
@@ -365,7 +365,7 @@ static inline void zend_switch_free(zend_op *opline, temp_variable *Ts TSRMLS_DC
 				PZVAL_UNLOCK_FREE(T->str_offset.str);
 			} else {
 				zval_ptr_dtor(&T(opline->op1.u.var).var.ptr);
-				if (opline->extended_value) { /* foreach() free */
+				if (opline->extended_value & ZEND_FE_RESET_VARIABLE) { /* foreach() free */
 					zval_ptr_dtor(&T(opline->op1.u.var).var.ptr);
 				}
 			}
@@ -434,9 +434,10 @@ static void zend_assign_to_variable_reference(zval **variable_ptr_ptr, zval **va
 static inline void make_real_object(zval **object_ptr TSRMLS_DC)
 {
 /* this should modify object only if it's empty */
-	if ((*object_ptr)->type == IS_NULL
-		|| ((*object_ptr)->type == IS_BOOL && (*object_ptr)->value.lval==0)
-		|| ((*object_ptr)->type == IS_STRING && (*object_ptr)->value.str.len == 0)) {
+	if (Z_TYPE_PP(object_ptr) == IS_NULL
+		|| (Z_TYPE_PP(object_ptr) == IS_BOOL && Z_LVAL_PP(object_ptr)==0)
+		|| (Z_TYPE_PP(object_ptr) == IS_STRING && Z_STRLEN_PP(object_ptr) == 0)) {
+
 		if (!PZVAL_IS_REF(*object_ptr)) {
 			SEPARATE_ZVAL(object_ptr);
 		}
@@ -486,7 +487,7 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 					zend_class_entry *ce = zend_fetch_class(cur_arg_info->class_name, cur_arg_info->class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
 					if (!instanceof_function(Z_OBJCE_P(arg), ce TSRMLS_CC)) {
 						char *error_msg;
-							if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+						if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 							error_msg = "implement interface";
 						} else {
 							error_msg = "be an instance of";
@@ -645,23 +646,23 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 				zend_error(E_WARNING, "Illegal string offset:  %d", T->str_offset.offset);
 				break;
 			}
-			if ((int)T->str_offset.offset >= T->str_offset.str->value.str.len) {
+			if (T->str_offset.offset >= Z_STRLEN_P(T->str_offset.str)) {
 				zend_uint i;
 
-				if (T->str_offset.str->value.str.len==0) {
-					STR_FREE(T->str_offset.str->value.str.val);
-					T->str_offset.str->value.str.val = (char *) emalloc(T->str_offset.offset+1+1);
+				if (Z_STRLEN_P(T->str_offset.str)==0) {
+					STR_FREE(Z_STRVAL_P(T->str_offset.str));
+					Z_STRVAL_P(T->str_offset.str) = (char *) emalloc(T->str_offset.offset+1+1);
 				} else {
-					T->str_offset.str->value.str.val = (char *) erealloc(T->str_offset.str->value.str.val, T->str_offset.offset+1+1);
+					Z_STRVAL_P(T->str_offset.str) = (char *) erealloc(Z_STRVAL_P(T->str_offset.str), T->str_offset.offset+1+1);
 				}
-				for (i=T->str_offset.str->value.str.len; i<T->str_offset.offset; i++) {
-					T->str_offset.str->value.str.val[i] = ' ';
+				for (i=Z_STRLEN_P(T->str_offset.str); i<T->str_offset.offset; i++) {
+					Z_STRVAL_P(T->str_offset.str)[i] = ' ';
 				}
-				T->str_offset.str->value.str.val[T->str_offset.offset+1] = 0;
-				T->str_offset.str->value.str.len = T->str_offset.offset+1;
+				Z_STRVAL_P(T->str_offset.str)[T->str_offset.offset+1] = 0;
+				Z_STRLEN_P(T->str_offset.str) = T->str_offset.offset+1;
 			}
 
-			if (value->type!=IS_STRING) {
+			if (Z_TYPE_P(value)!=IS_STRING) {
 				tmp = *value;
 				if (op2->op_type & (IS_VAR|IS_CV)) {
 					zval_copy_ctor(&tmp);
@@ -670,14 +671,14 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 				final_value = &tmp;
 			}
 
-			T->str_offset.str->value.str.val[T->str_offset.offset] = final_value->value.str.val[0];
-			
+			Z_STRVAL_P(T->str_offset.str)[T->str_offset.offset] = Z_STRVAL_P(final_value)[0];
+
 			if (op2->op_type == IS_TMP_VAR) {
 				if (final_value == &T(op2->u.var).tmp_var) {
 					/* we can safely free final_value here
 					 * because separation is done only
 					 * in case op2->op_type == IS_VAR */
-					STR_FREE(final_value->value.str.val);
+					STR_FREE(Z_STRVAL_P(final_value));
 				}
 			}
 			if (final_value == &tmp) {
@@ -715,11 +716,11 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 		return;
 	}
 
-	if(Z_TYPE_P(variable_ptr) == IS_OBJECT && Z_OBJ_HANDLER_P(variable_ptr, set)) {
+	if (Z_TYPE_P(variable_ptr) == IS_OBJECT && Z_OBJ_HANDLER_P(variable_ptr, set)) {
 		Z_OBJ_HANDLER_P(variable_ptr, set)(variable_ptr_ptr, value TSRMLS_CC);
 		goto done_setting_var;
 	}
-	
+
 	if (PZVAL_IS_REF(variable_ptr)) {
 		if (variable_ptr!=value) {
 			zend_uint refcount = variable_ptr->refcount;
@@ -810,9 +811,7 @@ done_setting_var:
 
 static inline void zend_receive(zval **variable_ptr_ptr, zval *value TSRMLS_DC)
 {
-	zval *variable_ptr = *variable_ptr_ptr;
-
-	variable_ptr->refcount--;
+	(*variable_ptr_ptr)->refcount--;
 	*variable_ptr_ptr = value;
 	value->refcount++;
 }
@@ -904,7 +903,7 @@ fetch_string_dim:
 			}
 			break;
 		case IS_RESOURCE:
-			zend_error(E_STRICT, "Resource ID#%ld used as offset, casting to integer (%ld)", dim->value.lval, dim->value.lval);
+			zend_error(E_STRICT, "Resource ID#%ld used as offset, casting to integer (%ld)", Z_LVAL_P(dim), Z_LVAL_P(dim));
 			/* Fall Through */
 		case IS_DOUBLE:
 		case IS_BOOL:
@@ -977,9 +976,9 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 		return;
 	}
 
-	if (container->type==IS_NULL
-		|| (container->type==IS_BOOL && container->value.lval==0)
-		|| (container->type==IS_STRING && container->value.str.len==0)) {
+	if (Z_TYPE_P(container)==IS_NULL
+		|| (Z_TYPE_P(container)==IS_BOOL && Z_LVAL_P(container)==0)
+		|| (Z_TYPE_P(container)==IS_STRING && Z_STRLEN_P(container)==0)) {
 		switch (type) {
 			case BP_VAR_RW:
 			case BP_VAR_W:
@@ -1149,9 +1148,9 @@ static void zend_fetch_property_address(temp_variable *result, zval **container_
 		return;
 	}
 	/* this should modify object only if it's empty */
-	if (container->type == IS_NULL
-		|| (container->type == IS_BOOL && container->value.lval==0)
-		|| (container->type == IS_STRING && container->value.str.len == 0)) {
+	if (Z_TYPE_P(container) == IS_NULL
+		|| (Z_TYPE_P(container) == IS_BOOL && Z_LVAL_P(container)==0)
+		|| (Z_TYPE_P(container) == IS_STRING && Z_STRLEN_P(container)==0)) {
 		switch (type) {
 			case BP_VAR_RW:
 			case BP_VAR_W:
