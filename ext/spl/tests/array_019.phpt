@@ -28,5 +28,5 @@ int(1)
 int(2)
 int(3)
 int(4)
-int(5)
-===DONE===
+
+Fatal error: An iterator cannot be used with foreach by reference in %sarray_019.php on line %d
