@@ -396,7 +396,7 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 	} else {
 		intern->hasKeys = clone_docu;
 	}
-	
+
 	if ((oldsheetp = (xsltStylesheetPtr)intern->ptr)) { 
 		/* free wrapper */
 		if (((xsltStylesheetPtr) intern->ptr)->_private != NULL) {
@@ -411,7 +411,7 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 /* }}} end xsl_xsltprocessor_import_stylesheet */
 
 
-static xmlDocPtr php_xsl_apply_stylesheet(xsl_object *intern, xsltStylesheetPtr style, zval *docp TSRMLS_DC)
+static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStylesheetPtr style, zval *docp TSRMLS_DC)
 {
 	xmlDocPtr newdocp;
 	xmlDocPtr doc = NULL;
@@ -420,6 +420,8 @@ static xmlDocPtr php_xsl_apply_stylesheet(xsl_object *intern, xsltStylesheetPtr 
 	php_libxml_node_object *object;
 	char **params = NULL;
 	int clone;
+	zval *doXInclude, *member;
+	zend_object_handlers *std_hnd;
 
 	node = php_libxml_import_node(docp TSRMLS_CC);
 	
@@ -453,7 +455,18 @@ static xmlDocPtr php_xsl_apply_stylesheet(xsl_object *intern, xsltStylesheetPtr 
 
 	ctxt = xsltNewTransformContext(style, doc);
 	ctxt->_private = (void *) intern;
-	
+
+	std_hnd = zend_get_std_object_handlers();
+
+	MAKE_STD_ZVAL(member);
+	ZVAL_STRING(member, "doXInclude", 0);
+	doXInclude = std_hnd->read_property(id, member, BP_VAR_IS TSRMLS_CC);
+	if (Z_TYPE_P(doXInclude) != IS_NULL) {
+		convert_to_long(doXInclude);
+		ctxt->xinclude = Z_LVAL_P(doXInclude);
+	}
+	efree(member);
+
 	newdocp = xsltApplyStylesheetUser(style, doc, (const char**) params, NULL, NULL, ctxt);
 
 	xsltFreeTransformContext(ctxt);
@@ -501,7 +514,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_doc)
 		RETURN_FALSE;
 	}
 
-	newdocp = php_xsl_apply_stylesheet(intern, sheetp, docp TSRMLS_CC);
+	newdocp = php_xsl_apply_stylesheet(id, intern, sheetp, docp TSRMLS_CC);
 
 	if (newdocp) {
 		DOM_RET_OBJ(rv, (xmlNodePtr) newdocp, &ret, NULL);
@@ -532,7 +545,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 		RETURN_FALSE;
 	}
 
-	newdocp = php_xsl_apply_stylesheet(intern, sheetp, docp TSRMLS_CC);
+	newdocp = php_xsl_apply_stylesheet(id, intern, sheetp, docp TSRMLS_CC);
 
 	ret = -1;
 	if (newdocp) {
@@ -565,7 +578,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_xml)
 		RETURN_FALSE;
 	}
 
-	newdocp = php_xsl_apply_stylesheet(intern, sheetp, docp TSRMLS_CC);
+	newdocp = php_xsl_apply_stylesheet(id, intern, sheetp, docp TSRMLS_CC);
 
 	ret = -1;
 	if (newdocp) {
