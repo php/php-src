@@ -1,3 +1,102 @@
+2006-05-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      NEWS:
+      - Update
+
+2006-05-11  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ZendEngine2/zend.c:
+      no need to destroy the zval here
+
+2006-05-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      NEWS
+      NEWS
+      main/main.c
+      main/main.c
+      sapi/cli/php_cli.c
+      sapi/cli/php_cli.c:
+      Fixed bug #37306 (max_execution_time = max_input_time)
+
+    * main/main.c
+      sapi/cli/php_cli.c:
+      Fixed bug #37306 (max_execution_time = max_input_time).
+
+2006-05-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * acinclude.m4:
+      MFB: Fixed bug #37413 (Rejected versions of flex that don't work).
+
+    * (PHP_5_2)
+      NEWS
+      acinclude.m4:
+      Fixed bug #37413 (Rejected versions of flex that don't work).
+
+2006-05-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_vm_execute.h:
+      - Drop a few superflous if conditions (now the generated file)
+
+    * ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_vm_def.h:
+      - Drop a few superflous if conditions
+
+    * (PHP_5_2)
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      - MFH missing bits and pieces of the partial sync with head
+
+    * (PHP_5_2)
+      ZendEngine2/zend_API.c:
+      - Drop second superflous zval_ptr_dtor in string arg parsing
+
+    * ext/dba/libflatfile/flatfile.c
+      ext/dba/libinifile/inifile.c:
+      - Fix build
+
+2006-05-11  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_compile.h
+      ZendEngine2/zend_language_scanner.l:
+      Adjust API for scanning INI files as UTF-8.
+
+2006-05-11  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_API.c:
+      fix segfault when passing objects where strings are expected
+
+2006-05-11  Seiji Masugata  <s.masugata@digicom.dnp.co.jp>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.c:
+      fixed all mbstring setting information doesn't return in mb_get_info( ).
+
+2006-05-11  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/tests/objects_001.phpt
+      ZendEngine2/tests/objects_001.phpt:
+      
+      file objects_001.phpt was initially added on branch PHP_5_2.
+
+2006-05-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      ext/mcrypt/mcrypt.c:
+      - Use of E_RECOVERABLE_ERROR
+
+    * main/main.c:
+      - Fix error mode handling
+
 2006-05-10  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
