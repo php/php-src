@@ -122,6 +122,15 @@ for i in $LT_TARGETS; do
   test -f "$i" && mv $i.bak $i
 done
 
+# download pear 
+$ECHO_N "makedist: Attempting to download PEAR's phar archive"
+if test ! -x wget; then
+	wget http://pear.php.net/install-pear-nozlib.phar -nd -P pear/
+else
+	$ECHO_N "Missing wget binary needed for pear download";
+	exit 0;
+fi
+
 cd $MY_OLDPWD
 $ECHO_N "makedist: making gzipped tar archive...$ECHO_C"
 rm -f $ARCHIVE.gz
