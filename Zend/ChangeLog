@@ -1,3 +1,49 @@
+2006-05-11  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend.c:
+      no need to destroy the zval here
+
+2006-05-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_vm_execute.h:
+      - Drop a few superflous if conditions (now the generated file)
+
+    * zend_interfaces.c
+      zend_vm_def.h:
+      - Drop a few superflous if conditions
+
+    * (PHP_5_2)
+      zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_interfaces.c
+      zend_language_parser.y
+      zend_vm_def.h
+      zend_vm_execute.h:
+      - MFH missing bits and pieces of the partial sync with head
+
+    * (PHP_5_2)
+      zend_API.c:
+      - Drop second superflous zval_ptr_dtor in string arg parsing
+
+2006-05-11  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_compile.h
+      zend_language_scanner.l:
+      Adjust API for scanning INI files as UTF-8.
+
+2006-05-11  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend_API.c:
+      fix segfault when passing objects where strings are expected
+
+    * tests/objects_001.phpt
+      tests/objects_001.phpt:
+      
+      file objects_001.phpt was initially added on branch PHP_5_2.
+
 2006-05-10  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
