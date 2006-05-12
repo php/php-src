@@ -221,31 +221,30 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 			{
 				TSRMLS_FETCH();
 
-				if(Z_OBJ_HT_P(expr)->cast_object && Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
+				if(Z_OBJ_HANDLER_P(expr, cast_object) && Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
 					break;
 				}
 				/* Standard PHP objects */
-				if (Z_OBJ_HT_P(expr) == &std_object_handlers || !Z_OBJ_HT_P(expr)->cast_object) {
+				if (Z_OBJ_HT_P(expr) == &std_object_handlers || !Z_OBJ_HANDLER_P(expr, cast_object)) {
 					if (zend_std_cast_object_tostring(expr, expr_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
 						break;
 					}
-				} else {
-					if(Z_OBJ_HANDLER_P(expr, get)) {
-						zval *z = Z_OBJ_HANDLER_P(expr, get)(expr TSRMLS_CC);
+				}
+				if (!Z_OBJ_HANDLER_P(expr, cast_object) && Z_OBJ_HANDLER_P(expr, get)) {
+					zval *z = Z_OBJ_HANDLER_P(expr, get)(expr TSRMLS_CC);
 
-						z->refcount++;
-						if(Z_TYPE_P(z) != IS_OBJECT) {
-							zend_make_printable_zval(z, expr_copy, use_copy);
-							if (*use_copy) {
-								zval_ptr_dtor(&z);
-							} else {
-								ZVAL_ZVAL(expr_copy, z, 0, 1);
-								*use_copy = 1;
-							}
-							return;
+					z->refcount++;
+					if(Z_TYPE_P(z) != IS_OBJECT) {
+						zend_make_printable_zval(z, expr_copy, use_copy);
+						if (*use_copy) {
+							zval_ptr_dtor(&z);
+						} else {
+							ZVAL_ZVAL(expr_copy, z, 0, 1);
+							*use_copy = 1;
 						}
-						zval_ptr_dtor(&z);
+						return;
 					}
+					zval_ptr_dtor(&z);
 				}
 				zend_error(EG(exception) ? E_ERROR : E_RECOVERABLE_ERROR, "Object of class %s could not be converted to string", Z_OBJCE_P(expr)->name);
 				expr_copy->value.str.len = 0;
