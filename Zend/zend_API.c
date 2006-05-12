@@ -368,7 +368,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 							}
 						}
 						/* Standard PHP objects */
-						if (Z_OBJ_HT_PP(arg) == &std_object_handlers || !Z_OBJ_HT_PP(arg)->cast_object) {
+						if (Z_OBJ_HT_PP(arg) == &std_object_handlers || !Z_OBJ_HANDLER_PP(arg, cast_object)) {
 							SEPARATE_ZVAL_IF_NOT_REF(arg);
 							if (zend_std_cast_object_tostring(*arg, *arg, IS_STRING TSRMLS_CC) == SUCCESS) {
 								*pl = Z_STRLEN_PP(arg);
@@ -376,6 +376,26 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 								break;
 							}
 						}
+#if 1||MBO_0
+						if (!Z_OBJ_HANDLER_PP(arg, cast_object) && Z_OBJ_HANDLER_PP(arg, get)) {
+							int use_copy;
+							zval *z = Z_OBJ_HANDLER_PP(arg, get)(*arg TSRMLS_CC);
+			
+							z->refcount++;
+							if(Z_TYPE_P(z) != IS_OBJECT) {
+								zval_dtor(*arg);
+								Z_TYPE_P(*arg) = IS_NULL;
+								zend_make_printable_zval(z, *arg, &use_copy);
+								if (!use_copy) {
+									ZVAL_ZVAL(*arg, z, 1, 1);
+								}
+								*pl = Z_STRLEN_PP(arg);
+								*p = Z_STRVAL_PP(arg);
+								break;
+							}
+							zval_ptr_dtor(&z);
+						}
+#endif
 					}
 
 					case IS_ARRAY:
