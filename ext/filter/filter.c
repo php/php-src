@@ -51,7 +51,7 @@ filter_list_entry filter_list[] = {
 	{ "stripped",        FILTER_SANITIZE_STRING,        php_filter_string          },
 	{ "encoded",         FILTER_SANITIZE_ENCODED,       php_filter_encoded         },
 	{ "special_chars",   FILTER_SANITIZE_SPECIAL_CHARS, php_filter_special_chars   },
-	{ "unsafe_raw",      FILTER_UNSAFE_RAW,    php_filter_unsafe_raw      },
+	{ "unsafe_raw",      FILTER_UNSAFE_RAW,    			php_filter_unsafe_raw      },
 	{ "email",           FILTER_SANITIZE_EMAIL,         php_filter_email           },
 	{ "url",             FILTER_SANITIZE_URL,           php_filter_url             },
 	{ "number_int",      FILTER_SANITIZE_NUMBER_INT,    php_filter_number_int      },
