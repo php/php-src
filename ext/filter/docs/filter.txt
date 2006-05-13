@@ -85,6 +85,20 @@ mixed *filter_data* (mixed *variable*, int *filter* [, mixed *filter_options*, [
 * INPUT_SESSION  6 (not implemented yet)
 
 
+General flags
+=============
+
+* FILTER_FLAG_SCALAR
+* FILTER_FLAG_ARRAY
+
+These two constants define whether to allow arrays in the source values. The
+default value is SCALAR for input_get_args and ARRAY for the other functions
+(< 0.9.5). These constants also insure that the function returns the correct
+type, if you ask for an array, you will get an array even if the source is
+only one value. However, if you ask for a scalar and the source is an array,
+the result will be FALSE (invalid).
+
+
 Logical Filters
 ===============
 
@@ -311,5 +325,6 @@ boolean callback(&$value, $characterset);
     *input_get()* or *input_get_array()*. If the *$characterset* parameter was
     not passed, it defaults to *'null'*.
 
-
+Version: $Id$
 .. vim: et syn=rst tw=78
+
