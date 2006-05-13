@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2006 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -251,6 +251,44 @@ ZEND_API int zend_get_object_classname(zval *object, char **class_name, zend_uin
 	return 0;
 }
 
+static int parse_arg_object_to_string(zval **arg, char **p, int *pl, int type TSRMLS_DC)
+{
+	if (Z_OBJ_HANDLER_PP(arg, cast_object)) {
+		SEPARATE_ZVAL_IF_NOT_REF(arg);
+		if (Z_OBJ_HANDLER_PP(arg, cast_object)(*arg, *arg, type TSRMLS_CC) == SUCCESS) {
+			*pl = Z_STRLEN_PP(arg);
+			*p = Z_STRVAL_PP(arg);
+			return SUCCESS;
+		}
+	}
+	/* Standard PHP objects */
+	if (Z_OBJ_HT_PP(arg) == &std_object_handlers || !Z_OBJ_HANDLER_PP(arg, cast_object)) {
+		SEPARATE_ZVAL_IF_NOT_REF(arg);
+		if (zend_std_cast_object_tostring(*arg, *arg, type TSRMLS_CC) == SUCCESS) {
+			*pl = Z_STRLEN_PP(arg);
+			*p = Z_STRVAL_PP(arg);
+			return SUCCESS;
+		}
+	}
+	if (!Z_OBJ_HANDLER_PP(arg, cast_object) && Z_OBJ_HANDLER_PP(arg, get)) {
+		int use_copy;
+		zval *z = Z_OBJ_HANDLER_PP(arg, get)(*arg TSRMLS_CC);
+		z->refcount++;
+		if(Z_TYPE_P(z) != IS_OBJECT) {
+			zval_dtor(*arg);
+			Z_TYPE_P(*arg) = IS_NULL;
+			zend_make_printable_zval(z, *arg, &use_copy);
+			if (!use_copy) {
+				ZVAL_ZVAL(*arg, z, 1, 1);
+			}
+			*pl = Z_STRLEN_PP(arg);
+			*p = Z_STRVAL_PP(arg);
+			return SUCCESS;
+		}
+		zval_ptr_dtor(&z);
+	}
+	return FAILURE;
+}
 
 static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **spec TSRMLS_DC)
 {
@@ -358,45 +396,10 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 						*pl = Z_STRLEN_PP(arg);
 						break;
 
-					case IS_OBJECT: {
-						if (Z_OBJ_HANDLER_PP(arg, cast_object)) {
-							SEPARATE_ZVAL_IF_NOT_REF(arg);
-							if (Z_OBJ_HANDLER_PP(arg, cast_object)(*arg, *arg, IS_STRING TSRMLS_CC) == SUCCESS) {
-								*pl = Z_STRLEN_PP(arg);
-								*p = Z_STRVAL_PP(arg);
-								break;
-							}
+					case IS_OBJECT:
+						if (parse_arg_object_to_string(arg, p, pl, IS_STRING TSRMLS_CC) == SUCCESS) {
+							break;
 						}
-						/* Standard PHP objects */
-						if (Z_OBJ_HT_PP(arg) == &std_object_handlers || !Z_OBJ_HANDLER_PP(arg, cast_object)) {
-							SEPARATE_ZVAL_IF_NOT_REF(arg);
-							if (zend_std_cast_object_tostring(*arg, *arg, IS_STRING TSRMLS_CC) == SUCCESS) {
-								*pl = Z_STRLEN_PP(arg);
-								*p = Z_STRVAL_PP(arg);
-								break;
-							}
-						}
-#if 1||MBO_0
-						if (!Z_OBJ_HANDLER_PP(arg, cast_object) && Z_OBJ_HANDLER_PP(arg, get)) {
-							int use_copy;
-							zval *z = Z_OBJ_HANDLER_PP(arg, get)(*arg TSRMLS_CC);
-			
-							z->refcount++;
-							if(Z_TYPE_P(z) != IS_OBJECT) {
-								zval_dtor(*arg);
-								Z_TYPE_P(*arg) = IS_NULL;
-								zend_make_printable_zval(z, *arg, &use_copy);
-								if (!use_copy) {
-									ZVAL_ZVAL(*arg, z, 1, 1);
-								}
-								*pl = Z_STRLEN_PP(arg);
-								*p = Z_STRVAL_PP(arg);
-								break;
-							}
-							zval_ptr_dtor(&z);
-						}
-#endif
-					}
 
 					case IS_ARRAY:
 					case IS_RESOURCE:
