@@ -1,3 +1,27 @@
+2006-05-12  Derick Rethans  <php@derickrethans.nl>
+
+    * tests/abstract-static.phpt
+      tests/abstract-static.phpt
+      tests/abstract-static.phpt
+      tests/object-null.phpt
+      tests/object-null.phpt
+      tests/object-null.phpt:
+        1.1.4;
+      - Added tests for BC breaking changes.
+
+2006-05-12  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * (PHP_5_2)
+      zend.h:
+      Bump version.
+
+2006-05-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      zend.c
+      zend_API.c:
+      - Missing __toString() pieces
+
 2006-05-11  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
