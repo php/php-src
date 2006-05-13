@@ -93,219 +93,6 @@ static void php_save_umask(void)
 }
 /* }}} */
 
-static char *php_http2env(pool *a, char *w)
-{
-    char *res = ap_pstrcat(a, "HTTP_", w, NULL);
-    char *cp = res;
-
-    while (*++cp) {
-	if (!ap_isalnum(*cp) && *cp != '_') {
-	    *cp = '_';
-	}
-	else {
-	    *cp = ap_toupper(*cp);
-	}
-    }
-
-    return res;
-}
-
-static char *php_original_uri(request_rec *r)
-{
-    char *first, *last;
-
-    if (r->the_request == NULL) {
-	return (char *) ap_pcalloc(r->pool, 1);
-    }
-
-    first = r->the_request;	/* use the request-line */
-
-    while (*first && !ap_isspace(*first)) {
-	++first;		/* skip over the method */
-    }
-    while (ap_isspace(*first)) {
-	++first;		/*   and the space(s)   */
-    }
-
-    last = first;
-    while (*last && !ap_isspace(*last)) {
-	++last;			/* end at next whitespace */
-    }
-
-    return ap_pstrndup(r->pool, first, last - first);
-}
-
-static void php_populate_subprocess_env(request_rec *r)
-{
-	table *e;
-	server_rec *s = r->server;
-	conn_rec *c = r->connection;
-	const char *rem_logname;
-	char *env_path;
-#if defined(PHP_WIN32) || defined(OS2)
-	char *env_temp;
-#endif
-	const char *host;
-	array_header *hdrs_arr = ap_table_elts(r->headers_in);
-	table_entry *hdrs = (table_entry *) hdrs_arr->elts;
-	int i;
-
-	e = r->subprocess_env;
-
-#if 0
-	/* use a temporary table which we'll overlap onto
-	 * r->subprocess_env later
-	 */
-	e = ap_make_table(r->pool, 25 + hdrs_arr->nelts);
-#endif
-
-	/* First, add environment vars from headers... this is as per
-	 * CGI specs, though other sorts of scripting interfaces see
-	 * the same vars...
-	 */
-
-	for (i = 0; i < hdrs_arr->nelts; ++i) {
-		if (!hdrs[i].key) {
-			continue;
-		}
-
-		/* A few headers are special cased --- Authorization to prevent
-		 * rogue scripts from capturing passwords; content-type and -length
-		 * for no particular reason.
-		 */
-
-		if (!strcasecmp(hdrs[i].key, "Content-type")) {
-			ap_table_addn(e, "CONTENT_TYPE", hdrs[i].val);
-		}
-		else if (!strcasecmp(hdrs[i].key, "Content-length")) {
-			ap_table_addn(e, "CONTENT_LENGTH", hdrs[i].val);
-		}
-		/*
-		 * You really don't want to disable this check, since it leaves you
-		 * wide open to CGIs stealing passwords and people viewing them
-		 * in the environment with "ps -e".  But, if you must...
-		 */
-#ifndef SECURITY_HOLE_PASS_AUTHORIZATION
-		else if (!strcasecmp(hdrs[i].key, "Authorization") 
-				 || !strcasecmp(hdrs[i].key, "Proxy-Authorization")) {
-			continue;
-		}
-#endif
-		else {
-			ap_table_addn(e, php_http2env(r->pool, hdrs[i].key), hdrs[i].val);
-		}
-	}
-
-	if (!(env_path = ap_pstrdup(r->pool, getenv("PATH")))) {
-		env_path = DEFAULT_PATH;
-	}
-
-#ifdef PHP_WIN32
-	if (env_temp = getenv("SystemRoot")) {
-		ap_table_addn(e, "SystemRoot", env_temp);         
-	}
-	if (env_temp = getenv("COMSPEC")) {
-		ap_table_addn(e, "COMSPEC", env_temp);            
-	}
-	if (env_temp = getenv("WINDIR")) {
-		ap_table_addn(e, "WINDIR", env_temp);
-	}
-#endif
-
-#ifdef OS2
-	if ((env_temp = getenv("COMSPEC")) != NULL) {
-		ap_table_addn(e, "COMSPEC", env_temp);            
-	}
-	if ((env_temp = getenv("ETC")) != NULL) {
-		ap_table_addn(e, "ETC", env_temp);            
-	}
-	if ((env_temp = getenv("DPATH")) != NULL) {
-		ap_table_addn(e, "DPATH", env_temp);            
-	}
-	if ((env_temp = getenv("PERLLIB_PREFIX")) != NULL) {
-		ap_table_addn(e, "PERLLIB_PREFIX", env_temp);            
-	}
-#endif
-
-	ap_table_addn(e, "PATH", env_path);
-	ap_table_addn(e, "SERVER_SIGNATURE", ap_psignature("", r));
-	ap_table_addn(e, "SERVER_SOFTWARE", ap_get_server_version());
-	ap_table_addn(e, "SERVER_NAME", 
-				  ap_escape_html(r->pool,ap_get_server_name(r)));
-	ap_table_addn(e, "SERVER_ADDR", r->connection->local_ip);	/* Apache */
-	ap_table_addn(e, "SERVER_PORT",
-				  ap_psprintf(r->pool, "%u", ap_get_server_port(r)));
-	host = ap_get_remote_host(c, r->per_dir_config, REMOTE_HOST);
-	if (host) {
-		ap_table_addn(e, "REMOTE_HOST", host);
-	}
-	ap_table_addn(e, "REMOTE_ADDR", c->remote_ip);
-	ap_table_addn(e, "DOCUMENT_ROOT", ap_document_root(r));	/* Apache */
-	ap_table_addn(e, "SERVER_ADMIN", s->server_admin);	/* Apache */
-	ap_table_addn(e, "SCRIPT_FILENAME", r->filename);	/* Apache */
-
-	ap_table_addn(e, "REMOTE_PORT",
-				  ap_psprintf(r->pool, "%d", ntohs(c->remote_addr.sin_port)));
-
-	if (c->user) {
-		ap_table_addn(e, "REMOTE_USER", c->user);
-	}
-	if (c->ap_auth_type) {
-		ap_table_addn(e, "AUTH_TYPE", c->ap_auth_type);
-	}
-	rem_logname = ap_get_remote_logname(r);
-	if (rem_logname) {
-		ap_table_addn(e, "REMOTE_IDENT", ap_pstrdup(r->pool, rem_logname));
-	}
-
-	/* Apache custom error responses. If we have redirected set two new vars */
-
-	if (r->prev) {
-		if (r->prev->args) {
-			ap_table_addn(e, "REDIRECT_QUERY_STRING", r->prev->args);
-		}
-		if (r->prev->uri) {
-			ap_table_addn(e, "REDIRECT_URL", r->prev->uri);
-		}
-	}
-
-#if 0
-	ap_overlap_tables(r->subprocess_env, e, AP_OVERLAP_TABLES_SET);
-#endif
-
-	ap_table_addn(e, "GATEWAY_INTERFACE", "CGI/1.1");
-	ap_table_addn(e, "SERVER_PROTOCOL", r->protocol);
-	ap_table_setn(e, "REQUEST_METHOD", r->method);
-	ap_table_addn(e, "QUERY_STRING", r->args ? r->args : "");
-	ap_table_addn(e, "REQUEST_URI", php_original_uri(r));
-
-	/* Note that the code below special-cases scripts run from includes,
-	 * because it "knows" that the sub_request has been hacked to have the
-	 * args and path_info of the original request, and not any that may have
-	 * come with the script URI in the include command.  Ugh.
-	 */
-
-	if (!strcmp(r->protocol, "INCLUDED")) {
-		ap_table_addn(e, "SCRIPT_NAME", r->uri);
-		if (r->path_info && *r->path_info) {
-			ap_table_setn(e, "PATH_INFO", r->path_info);
-		}
-	}
-	else if (!r->path_info || !*r->path_info) {
-		ap_table_addn(e, "SCRIPT_NAME", r->uri);
-	}
-	else {
-		int path_info_start = ap_find_path_info(r->uri, r->path_info);
-
-		ap_table_addn(e, "SCRIPT_NAME",
-					  ap_pstrndup(r->pool, r->uri, path_info_start));
-
-		ap_table_addn(e, "PATH_INFO", r->path_info);
-	}
-
-	ap_table_addn(e, "PATH_TRANSLATED", r->filename);
-}
-
 /* {{{ sapi_apache_ub_write
  */
 static int sapi_apache_ub_write(const char *str, uint str_length TSRMLS_DC)
@@ -476,7 +263,6 @@ static void sapi_apache_register_server_variables(zval *track_vars_array TSRMLS_
 		php_register_variable(elts[i].key, val, track_vars_array  TSRMLS_CC);
 	}
 
-#if 0
 	/* If PATH_TRANSLATED doesn't exist, copy it from SCRIPT_FILENAME */
 	if (track_vars_array) {
 		symbol_table = track_vars_array->value.ht;
@@ -491,7 +277,6 @@ static void sapi_apache_register_server_variables(zval *track_vars_array TSRMLS_
 		&& zend_hash_find(symbol_table, "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME"), (void **) &path_translated)==SUCCESS) {
 		php_register_variable("PATH_TRANSLATED", Z_STRVAL_PP(path_translated), track_vars_array TSRMLS_CC);
 	}
-#endif
 
 	php_register_variable("PHP_SELF", ((request_rec *) SG(server_context))->uri, track_vars_array TSRMLS_CC);
 }
@@ -869,11 +654,8 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 		SG(server_context) = r;
 		
 		php_save_umask();
-		php_populate_subprocess_env(r);
-#if 0
 		add_common_vars(r);
 		add_cgi_vars(r);
-#endif
 
 		init_request_info(TSRMLS_C);
 		apache_php_module_main(r, display_source_mode TSRMLS_CC);
