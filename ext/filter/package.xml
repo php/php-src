@@ -33,6 +33,7 @@ of filters and mechanisms that users can use to safely access their input data.
 - Fixed Possible leak in internal sapi_filter (Pierre)
 - Added input_get_args, fetches all input in one call (Pierre)
 - Added FILTER_FLAG_SCALAR and FILTER_FLAG_ARRAY , allows or not array values (Pierre)
+- Basic IPv6 (no option yet, only the syntax is verified) (Pierre)
 - Added JIT support
   </notes>
   <filelist>
