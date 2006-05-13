@@ -1,3 +1,51 @@
+2006-05-12  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      ext/xsl/xsltprocessor.c:
+      MFH: add doXInclude property to allow processor to perform XIncludes
+
+    * ext/xsl/xsltprocessor.c:
+      add doXInclude property to allow processor to perform XIncludes
+
+2006-05-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * makedist
+      makedist
+      makedist:
+      Download pear phar file when making a distribution package
+
+2006-05-12  Derick Rethans  <php@derickrethans.nl>
+
+    * ZendEngine2/tests/abstract-static.phpt
+      ZendEngine2/tests/abstract-static.phpt
+      ZendEngine2/tests/abstract-static.phpt
+      ZendEngine2/tests/object-null.phpt
+      ZendEngine2/tests/object-null.phpt
+      ZendEngine2/tests/object-null.phpt:
+        1.1.4;
+      - Added tests for BC breaking changes.
+
+2006-05-12  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      NEWS
+      NEWS:
+      MFH: fix #37416 (iterator_to_array() hides exceptions thrown in rewind()
+      method)
+
+2006-05-12  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * (PHP_5_2)
+      ZendEngine2/zend.h:
+      Bump version.
+
+2006-05-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      ZendEngine2/zend.c
+      ZendEngine2/zend_API.c:
+      - Missing __toString() pieces
+
 2006-05-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_2)
