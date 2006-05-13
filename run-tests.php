@@ -972,7 +972,7 @@ TEST $file
 		$line = fgets($fp);
 
 		// Match the beginning of a section.
-		if (preg_match('/^--([A-Z_]+)--/', $line, $r)) {
+		if (preg_match('/^--([A-Z]+)--/', $line, $r)) {
 			$section = $r[1];
 			$section_text[$section] = '';
 			$secfile = $section == 'FILE' || $section == 'FILEEOF';
@@ -1236,6 +1236,17 @@ TEST $file
 			// a redirected test never fails
 			$IN_REDIRECT = false;
 			return 'REDIR';
+		} else {
+			$bork_info = "Redirect info must contain exactly one TEST string to be used as redirect directory.";
+			show_result("BORK", $bork_info, '', $temp_filenames);
+			$PHP_FAILED_TESTS['BORKED'][] = array (
+									'name' => $file,
+									'test_name' => '',
+									'output' => '',
+									'diff'   => '',
+									'info'   => "$bork_info [$file]",
+									'unicode'=> $unicode_semantics,
+			);
 		}
 	}
 	if (is_array($org_file) || @count($section_text['REDIRECTTEST']) == 1) {
@@ -1299,13 +1310,14 @@ TEST $file
 
 		$post = trim($section_text['POST']);
 		save_text($tmp_post, $post);
-
 		$content_length = strlen($post);
+
 		$env['REQUEST_METHOD'] = 'POST';
 		$env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded';
 		$env['CONTENT_LENGTH'] = $content_length;
 
 		$cmd = "$php$pass_options$ini_settings -f \"$test_file\" 2>&1 < $tmp_post";
+
 	} else {
 
 		$env['REQUEST_METHOD'] = 'GET';
@@ -1370,8 +1382,47 @@ COMMAND $cmd
 	$output = str_replace("\r\n", "\n", trim($out));
 
 	/* when using CGI, strip the headers from the output */
-	if (isset($old_php) && ($pos = strpos($output, "\n\n")) !== FALSE) {
-		$output = substr($output, ($pos + 2));
+	$headers = "";
+	if (isset($old_php) && preg_match("/^(.*?)\r?\n\r?\n(.*)/s", $out, $match)) {
+		$output = $match[2];
+		$rh = preg_split("/[\n\r]+/",$match[1]);
+		$headers = array();
+		foreach ($rh as $line) {
+			if (strpos($line, ':')!==false) {
+				$line = explode(':', $line, 2);
+				$headers[trim($line[0])] = trim($line[1]);
+			}
+		}
+	}
+
+	$failed_headers = false;
+	if (isset($section_text['EXPECTHEADERS'])) {
+		$want = array();
+		$wanted_headers = array();
+		$lines = preg_split("/[\n\r]+/",$section_text['EXPECTHEADERS']);
+		foreach($lines as $line) {
+			if (strpos($line, ':') !== false) {
+				$line = explode(':', $line, 2);
+				$want[trim($line[0])] = trim($line[1]);
+				$wanted_headers[] = trim($line[0]) . ': ' . trim($line[1]);
+			}
+		}
+		$org_headers = $headers;
+		$headers = array();
+		$output_headers = array();
+		foreach($want as $k => $v) {
+			if (isset($org_headers[$k])) {
+				$headers = $org_headers[$k];
+				$output_headers[] = $k . ': ' . $org_headers[$k];
+			}
+			if (!isset($org_headers[$k]) || $org_headers[$k] != $v) {
+				$failed_headers = true;
+			}
+		}
+		ksort($wanted_headers);
+		$wanted_headers = join("\n", $wanted_headers);
+		ksort($output_headers);
+		$output_headers = join("\n", $output_headers);
 	}
 
 	if (isset($section_text['EXPECTF']) || isset($section_text['EXPECTREGEX'])) {
@@ -1407,7 +1458,7 @@ COMMAND $cmd
 			if (isset($old_php)) {
 				$php = $old_php;
 			}
-			if (!$leaked) {
+			if (!$leaked && !$failed_headers) {
 				show_result("PASS", $tested, $tested_file, '', $temp_filenames);
 				return 'PASSED';
 			}
@@ -1424,7 +1475,7 @@ COMMAND $cmd
 			if (isset($old_php)) {
 				$php = $old_php;
 			}
-			if (!$leaked) {
+			if (!$leaked && !$failed_headers) {
 				show_result("PASS", $tested, $tested_file, '', $temp_filenames);
 				return 'PASSED';
 			}
@@ -1433,7 +1484,15 @@ COMMAND $cmd
 	}
 
 	// Test failed so we need to report details.
-	
+	if ($failed_headers) {
+		$passed = false;
+		$wanted = $wanted_headers . "\n--HEADERS--\n" . $wanted;
+		$output = $output_headers . "\n--HEADERS--\n" . $output;
+		if (isset($wanted_re)) {
+			$wanted_re = $wanted_headers . "\n--HEADERS--\n" . $wanted_re;
+		}
+	}
+
 	if ($leaked) {
 		$restype = 'LEAK';
 	} else if ($warn) {
@@ -1478,7 +1537,7 @@ $output
 						'test_name' => (is_array($IN_REDIRECT) ? $IN_REDIRECT['via'] : '') . $tested . " [$tested_file]",
 						'output' => $output_filename,
 						'diff'   => $diff_filename,
-						'info'   => $info
+						'info'   => $info,
 						);
 
 	if (isset($old_php)) {
