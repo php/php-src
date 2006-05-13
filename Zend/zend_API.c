@@ -271,6 +271,49 @@ ZEND_API int zend_get_object_classname(zval *object, zstr *class_name, zend_uint
 	*pl = Z_USTRLEN_PP(arg); \
 	*type = IS_UNICODE;
 
+static int parse_arg_object_to_string(zval **arg, char **p, int *pl, int type TSRMLS_DC)
+{
+	if (Z_OBJ_HANDLER_PP(arg, cast_object)) {
+		SEPARATE_ZVAL_IF_NOT_REF(arg);
+		if (Z_OBJ_HANDLER_PP(arg, cast_object)(*arg, *arg, type TSRMLS_CC) == SUCCESS) {
+			*pl = Z_STRLEN_PP(arg);
+			*p = Z_STRVAL_PP(arg);
+			return SUCCESS;
+		}
+	}
+	/* Standard PHP objects */
+	if (Z_OBJ_HT_PP(arg) == &std_object_handlers || !Z_OBJ_HANDLER_PP(arg, cast_object)) {
+		SEPARATE_ZVAL_IF_NOT_REF(arg);
+		if (zend_std_cast_object_tostring(*arg, *arg, type TSRMLS_CC) == SUCCESS) {
+			*pl = Z_STRLEN_PP(arg);
+			*p = Z_STRVAL_PP(arg);
+			return SUCCESS;
+		}
+	}
+	if (!Z_OBJ_HANDLER_PP(arg, cast_object) && Z_OBJ_HANDLER_PP(arg, get)) {
+		int use_copy;
+		zval *z = Z_OBJ_HANDLER_PP(arg, get)(*arg TSRMLS_CC);
+		z->refcount++;
+		if(Z_TYPE_P(z) != IS_OBJECT) {
+			zval_dtor(*arg);
+			Z_TYPE_P(*arg) = IS_NULL;
+			if (type == IS_STRING) {
+				zend_make_string_zval(z, *arg, &use_copy);
+			} else {
+				zend_make_unicode_zval(z, *arg, &use_copy);
+			}
+			if (!use_copy) {
+				ZVAL_ZVAL(*arg, z, 1, 1);
+			}
+			*pl = Z_STRLEN_PP(arg);
+			*p = Z_STRVAL_PP(arg);
+			return SUCCESS;
+		}
+		zval_ptr_dtor(&z);
+	}
+	return FAILURE;
+}
+
 static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **spec, char T_arg_type TSRMLS_DC)
 {
 	char *spec_walk = *spec;
@@ -409,22 +452,10 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 						*pl = Z_STRLEN_PP(arg);
 						break;
 
-					case IS_OBJECT: {
-						if (Z_OBJ_HANDLER_PP(arg, cast_object)) {
-							SEPARATE_ZVAL_IF_NOT_REF(arg);
-							if (Z_OBJ_HANDLER_PP(arg, cast_object)(*arg, *arg, IS_STRING TSRMLS_CC) == SUCCESS) {
-								*pl = Z_STRLEN_PP(arg);
-								*p = Z_STRVAL_PP(arg);
-								break;
-							} else {
-								if (UG(unicode)) {
-									return "binary string";
-								} else {
-									return "string";
-								}
-							}
+					case IS_OBJECT:
+						if (parse_arg_object_to_string(arg, p, pl, IS_STRING TSRMLS_CC) == SUCCESS) {
+							break;
 						}
-					}
 
 					case IS_ARRAY:
 					case IS_RESOURCE:
@@ -466,18 +497,10 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 						*pl = Z_USTRLEN_PP(arg);
 						break;
 
-					case IS_OBJECT: {
-						if (Z_OBJ_HANDLER_PP(arg, cast_object)) {
-							SEPARATE_ZVAL_IF_NOT_REF(arg);
-							if (Z_OBJ_HANDLER_PP(arg, cast_object)(*arg, *arg, IS_UNICODE TSRMLS_CC) == SUCCESS) {
-								*pl = Z_USTRLEN_PP(arg);
-								*p = Z_USTRVAL_PP(arg);
-								break;
-							} else {
-								return "Unicode string";
-							}
+					case IS_OBJECT:
+						if (parse_arg_object_to_string(arg, (char**)p, pl, IS_UNICODE TSRMLS_CC) == SUCCESS) {
+							break;
 						}
-					}
 
 					case IS_ARRAY:
 					case IS_RESOURCE:
@@ -525,19 +548,11 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 						}
 						break;
 
-					case IS_OBJECT: {
-						if (Z_OBJ_HANDLER_PP(arg, cast_object)) {
-							SEPARATE_ZVAL_IF_NOT_REF(arg);
-							if (Z_OBJ_HANDLER_PP(arg, cast_object)(*arg, *arg, T_arg_type TSRMLS_CC) == SUCCESS) {
-								/* FIXME: Unicode support??? */
-								*(char**)p = Z_STRVAL_PP(arg);
-								*pl = Z_UNILEN_PP(arg);
-								*type = Z_TYPE_PP(arg);
-								RETURN_AS_UNICODE(arg, p, pl, type);
-								break;
-							}
+					case IS_OBJECT:
+						if (parse_arg_object_to_string(arg, (char**)p, pl, T_arg_type TSRMLS_CC) == SUCCESS) {
+							*type = Z_TYPE_PP(arg);
+							break;
 						}
-					}
 
 					case IS_ARRAY:
 					case IS_RESOURCE:
@@ -584,22 +599,11 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 						RETURN_AS_UNICODE(arg, p, pl, type);
 						break;
 
-					case IS_OBJECT: {
-						if (Z_OBJ_HANDLER_PP(arg, cast_object)) {
-							SEPARATE_ZVAL_IF_NOT_REF(arg);
-							if (UG(unicode)) {
-								if (Z_OBJ_HANDLER_PP(arg, cast_object)(*arg, *arg, IS_UNICODE TSRMLS_CC) == SUCCESS) {
-									RETURN_AS_UNICODE(arg, p, pl, type);
-									break;
-								}
-							} else {
-								if (Z_OBJ_HANDLER_PP(arg, cast_object)(*arg, *arg, IS_STRING TSRMLS_CC) == SUCCESS) {
-									RETURN_AS_STRING(arg, p, pl, type);
-									break;
-								}
-							}
+					case IS_OBJECT:
+						if (parse_arg_object_to_string(arg, (char**)p, pl, UG(unicode) ? IS_UNICODE : IS_STRING TSRMLS_CC) == SUCCESS) {
+							*type = UG(unicode)?IS_UNICODE:IS_STRING;
+							break;
 						}
-					}
 
 					case IS_ARRAY:
 					case IS_RESOURCE:
