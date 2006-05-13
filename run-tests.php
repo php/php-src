@@ -97,6 +97,15 @@ if (getenv('TEST_PHP_EXECUTABLE')) {
 	$environment['TEST_PHP_EXECUTABLE'] = $php;
 }
 
+if (getenv('TEST_PHP_CGI_EXECUTABLE')) {
+	$php_cgi = getenv('TEST_PHP_CGI_EXECUTABLE');
+	if ($php_cgi=='auto') {
+		$php_cgi = $cwd.'/sapi/cgi/php';
+		putenv("TEST_PHP_CGI_EXECUTABLE=$php_cgi");
+	}
+	$environment['TEST_PHP_CGI_EXECUTABLE'] = $php_cgi;
+}
+
 if ($argc !=2 || ($argv[1] != '-h' && $argv[1] != '-help' && $argv != '--help'))
 {
 	if (empty($php) || !file_exists($php)) {
@@ -936,7 +945,11 @@ function run_test($php, $file, $env, $unicode_semantics)
 
 	$temp_filenames = null;
 	$org_file = $file;
-	
+
+	if (isset($env['TEST_PHP_CGI_EXECUTABLE'])) {
+		$php_cgi = $env['TEST_PHP_CGI_EXECUTABLE'];
+	}
+
 	if (is_array($file)) $file = $file[0];
 
 	if ($DETAILED) echo "
@@ -949,7 +962,9 @@ TEST $file
 		'TEST'   => '',
 		'SKIPIF' => '',
 		'GET'    => '',
+		'POST_RAW' => '',
 		'POST'   => '',
+		'UPLOAD' => '',
 		'ARGS'   => '',
 	);
 
@@ -1250,6 +1265,17 @@ TEST $file
 			// a redirected test never fails
 			$IN_REDIRECT = false;
 			return 'REDIR';
+		} else {
+			$bork_info = "Redirect info must contain exactly one TEST string to be used as redirect directory.";
+			show_result("BORK", $bork_info, '', $unicode_semantics, $temp_filenames);
+			$PHP_FAILED_TESTS['BORKED'][] = array (
+									'name' => $file,
+									'test_name' => '',
+									'output' => '',
+									'diff'   => '',
+									'info'   => "$bork_info [$file]",
+									'unicode'=> $unicode_semantics,
+			);
 		}
 	}
 	if (is_array($org_file) || @count($section_text['REDIRECTTEST']) == 1) {
@@ -1311,7 +1337,28 @@ TEST $file
 
 	$args = $section_text['ARGS'] ? ' -- '.$section_text['ARGS'] : '';
 
-	if (array_key_exists('POST', $section_text) && !empty($section_text['POST'])) {
+	if (array_key_exists('POST_RAW', $section_text) && !empty($section_text['POST_RAW'])) {
+		$post = trim($section_text['POST_RAW']);
+		$raw_lines = explode("\n", $post);
+
+		$request = '';
+		foreach ($raw_lines as $line) {
+			if (empty($env['CONTENT_TYPE']) && eregi('^(Content-Type:)(.*)', $line, $res)) {
+				$env['CONTENT_TYPE'] = trim(str_replace("\r", '', $res[2]));
+				continue;
+			}
+			$request .= $line . "\n";
+		}
+
+		$env['CONTENT_LENGTH'] = strlen($request);
+		$env['REQUEST_METHOD'] = 'POST';
+
+		if (empty($request)) {
+			return 'BORKED';
+		}
+		save_text($tmp_post, $request);
+		$cmd = "$php$pass_options$ini_settings -f \"$test_file\" 2>&1 < $tmp_post";
+	} elseif (array_key_exists('POST', $section_text) && !empty($section_text['POST'])) {
 
 		$post = trim($section_text['POST']);
 		save_text($tmp_post, $post);
@@ -1387,8 +1434,47 @@ COMMAND $cmd
 	$output = str_replace("\r\n", "\n", trim($out));
 
 	/* when using CGI, strip the headers from the output */
-	if (isset($old_php) && ($pos = strpos($output, "\n\n")) !== FALSE) {
-		$output = substr($output, ($pos + 2));
+	$headers = "";
+	if (isset($old_php) && preg_match("/^(.*?)\r?\n\r?\n(.*)/s", $out, $match)) {
+		$output = $match[2];
+		$rh = preg_split("/[\n\r]+/",$match[1]);
+		$headers = array();
+		foreach ($rh as $line) {
+			if (strpos($line, ':')!==false) {
+				$line = explode(':', $line, 2);
+				$headers[trim($line[0])] = trim($line[1]);
+			}
+		}
+	}
+
+	$failed_headers = false;
+	if (isset($section_text['EXPECTHEADERS'])) {
+		$want = array();
+		$wanted_headers = array();
+		$lines = preg_split("/[\n\r]+/",$section_text['EXPECTHEADERS']);
+		foreach($lines as $line) {
+			if (strpos($line, ':') !== false) {
+				$line = explode(':', $line, 2);
+				$want[trim($line[0])] = trim($line[1]);
+				$wanted_headers[] = trim($line[0]) . ': ' . trim($line[1]);
+			}
+		}
+		$org_headers = $headers;
+		$headers = array();
+		$output_headers = array();
+		foreach($want as $k => $v) {
+			if (isset($org_headers[$k])) {
+				$headers = $org_headers[$k];
+				$output_headers[] = $k . ': ' . $org_headers[$k];
+			}
+			if (!isset($org_headers[$k]) || $org_headers[$k] != $v) {
+				$failed_headers = true;
+			}
+		}
+		ksort($wanted_headers);
+		$wanted_headers = join("\n", $wanted_headers);
+		ksort($output_headers);
+		$output_headers = join("\n", $output_headers);
 	}
 
 	if (isset($section_text['EXPECTF']) || isset($section_text['EXPECTREGEX'])) {
@@ -1424,7 +1510,7 @@ COMMAND $cmd
 			if (isset($old_php)) {
 				$php = $old_php;
 			}
-			if (!$leaked) {
+			if (!$leaked && !$failed_headers) {
 				show_result("PASS", $tested, $tested_file, $unicode_semantics, '', $temp_filenames);
 				return 'PASSED';
 			}
@@ -1441,7 +1527,7 @@ COMMAND $cmd
 			if (isset($old_php)) {
 				$php = $old_php;
 			}
-			if (!$leaked) {
+			if (!$leaked && !$failed_headers) {
 				show_result("PASS", $tested, $tested_file, $unicode_semantics, '', $temp_filenames);
 				return 'PASSED';
 			}
@@ -1450,7 +1536,15 @@ COMMAND $cmd
 	}
 
 	// Test failed so we need to report details.
-	
+	if ($failed_headers) {
+		$passed = false;
+		$wanted = $wanted_headers . "\n--HEADERS--\n" . $wanted;
+		$output = $output_headers . "\n--HEADERS--\n" . $output;
+		if (isset($wanted_re)) {
+			$wanted_re = $wanted_headers . "\n--HEADERS--\n" . $wanted_re;
+		}
+	}
+
 	if ($leaked) {
 		$restype = 'LEAK';
 	} else if ($warn) {
