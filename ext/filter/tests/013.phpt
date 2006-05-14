@@ -2,7 +2,9 @@
 filter_data() and flags
 --FILE--
 <?php
-
+var_dump(filter_data("  234", FILTER_VALIDATE_INT));
+var_dump(filter_data("234    ", FILTER_VALIDATE_INT));
+var_dump(filter_data("  234  ", FILTER_VALIDATE_INT));
 var_dump(filter_data("0xff", FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_HEX)));
 var_dump(filter_data("0Xff", FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_HEX)));
 var_dump(filter_data("0xFF", FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_HEX)));
@@ -37,6 +39,9 @@ var_dump(filter_data("010", FILTER_VALIDATE_INT));
 echo "Done\n";
 ?>
 --EXPECT--	
+int(234)
+int(234)
+int(234)
 int(255)
 int(255)
 int(255)
