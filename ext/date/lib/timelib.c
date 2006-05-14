@@ -205,6 +205,13 @@ void timelib_dump_date(timelib_time *d, int options)
 		if (d->have_weekday_relative) {
 			printf(" / %d.%d", d->relative.weekday, d->relative.weekday_behavior);
 		}
+		if (d->have_special_relative) {
+			switch (d->special.type) {
+				case TIMELIB_SPECIAL_WEEKDAY:
+					printf(" / %lld weekday", d->special.amount);
+					break;
+			}
+		}
 	}
 	printf("\n");
 }
