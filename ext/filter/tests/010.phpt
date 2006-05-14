@@ -25,9 +25,9 @@ array(7) {
   [3]=>
   int(-23234)
   [4]=>
-  NULL
+  bool(false)
   [5]=>
-  NULL
+  bool(false)
   [6]=>
   array(0) {
   }
@@ -42,9 +42,9 @@ array(7) {
   [3]=>
   float(-23234.123)
   [4]=>
-  NULL
+  bool(false)
   [5]=>
-  NULL
+  bool(false)
   [6]=>
   array(0) {
   }
