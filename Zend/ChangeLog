@@ -1,3 +1,12 @@
+2006-05-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      zend_API.c:
+      - MFH code layout for __toString() use in parameter parsing api
+
+    * zend_API.c:
+      - Support __tostring() in argument parsing
+
 2006-05-12  Derick Rethans  <php@derickrethans.nl>
 
     * tests/abstract-static.phpt
