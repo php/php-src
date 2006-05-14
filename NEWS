@@ -24,7 +24,7 @@ PHP                                                                        NEWS
 - Added support for Apache 2.2 handler in the Windows distro. (Edin)
 - Added pg_field_table() function. (Edin)
 - Added implementation of curl_multi_info_read(). (Brian)
-- Added RFC2397 (data:// stream) support. (Marcus)
+- Added RFC2397 (data: stream) support. (Marcus)
 - Fixed bug #37416 (iterator_to_array() hides exceptions thrown in rewind()
   method). (Tony)
 - Fixed bug #37413 (Rejected versions of flex that don't work). (Ilia)
