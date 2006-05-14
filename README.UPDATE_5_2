@@ -38,3 +38,4 @@ PHP 5.2 Update info or NEWS explained
   NTFS filesystem and making use of meta streams in your application this does
   no longer work for a file with the name 'data' accessed without any path. IF
   you need to do so you have to prefix the filename with the "file:" protocol.
+  For the functionality itself look here http://www.faqs.org/rfcs/rfc2397.html.
