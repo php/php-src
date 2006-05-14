@@ -1520,9 +1520,9 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 		n++;
 	}
 
-	if ((*p == ':') && (n > 1) && !strncmp("://", p, 3)) {
+	if ((*p == ':') && (n > 1) && (!strncmp("//", p+1, 2) || !memcmp("data", path, 4))) {
 		protocol = path;
-	} else if (strncasecmp(path, "zlib:", 5) == 0) {
+	} else if (n == 5 && strncasecmp(path, "zlib:", 5) == 0) {
 		/* BC with older php scripts and zlib wrapper */
 		protocol = "compress.zlib";
 		n = 13;
