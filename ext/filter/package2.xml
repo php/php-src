@@ -22,7 +22,7 @@ of filters and mechanisms that users can use to safely access their input data.
   <email>rasmus@php.net</email>
   <active>yes</active>
  </lead>
- <date>2006-01-23</date>
+ <date>2006-05-14</date>
  <time>10:04:15</time>
  <version>
   <release>0.10.0</release>
@@ -43,6 +43,8 @@ of filters and mechanisms that users can use to safely access their input data.
 - Basic IPv6 (no option yet, only the syntax is verified) (Pierre)
 - Add support for custom decimal separator (Pierre)
 - INT and Float filters trim the values before the validations (spaces only)
+- input_get and input_get_args returns now FALSE when the validation failed
+  and NULL when the variable has not been found
 - Added JIT support
  </notes>
  <contents>
