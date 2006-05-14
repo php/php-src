@@ -21,6 +21,9 @@
 #define _GNU_SOURCE
 #include "php.h"
 
+PHPAPI int php_url_decode(char *str, int len);
+PHPAPI unsigned char *php_base64_decode(const unsigned char *str, int length, int *ret_length);
+
 /* Memory streams use a dynamic memory buffer to emulate a stream.
  * You can use php_stream_memory_open to create a readonly stream
  * from an existing memory buffer.
@@ -564,7 +567,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, cha
 	size_t mlen, dlen, plen, vlen;
 	off_t newoffs;
 	zval *meta = NULL;
-	int base64 = 0;
+	int base64 = 0, ilen;
 
 	if (memcmp(path, "data:", 5)) {
 		return NULL;
@@ -654,7 +657,16 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, cha
 		comma++;
 		dlen--;
 		/* store data */
-		php_stream_temp_write(stream, comma, dlen TSRMLS_CC);
+		if (base64) {
+			comma = (char*)php_base64_decode((const unsigned char *)comma, dlen, &ilen);
+			php_stream_temp_write(stream, comma, ilen TSRMLS_CC);
+			efree(comma);
+		} else {
+			comma = estrndup(comma, dlen);
+			dlen = php_url_decode(comma, dlen);
+			php_stream_temp_write(stream, comma, dlen TSRMLS_CC);
+			efree(comma);
+		}
 		php_stream_temp_seek(stream, 0, SEEK_SET, &newoffs TSRMLS_CC);
 		/* set special stream stuff (enforce exact mode) */
 		vlen = strlen(mode);
