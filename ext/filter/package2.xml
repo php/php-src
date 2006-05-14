@@ -42,6 +42,7 @@ of filters and mechanisms that users can use to safely access their input data.
 - Added FILTER_FLAG_SCALAR and FILTER_FLAG_ARRAY , allows or not array values (Pierre)
 - Basic IPv6 (no option yet, only the syntax is verified) (Pierre)
 - Add support for custom decimal separator (Pierre)
+- INT and Float filters trim the values before the validations (spaces only)
 - Added JIT support
  </notes>
  <contents>
