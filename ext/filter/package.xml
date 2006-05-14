@@ -1,32 +1,32 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?>
+<?xml version="1.0" encoding="ISO-8859-1"?>
 <!DOCTYPE package SYSTEM "../pear/package.dtd">
 <package>
- <name>filter</name>
- <summary>Extension for safely dealing with input parameters</summary>
- <maintainers>
-  <maintainer>
-   <user>derick</user>
-   <name>Derick Rethans</name>
-   <email>derick@php.net</email>
-   <role>lead</role>
-  </maintainer>
-  <maintainer>
-   <user>rasmus</user>
-   <name>Rasmus Lerdorf</name>
-   <email>rasmus@php.net</email>
-   <role>lead</role>
-  </maintainer>
- </maintainers>
- <description>
+  <name>filter</name>
+  <summary>Extension for safely dealing with input parameters</summary>
+  <maintainers>
+    <maintainer>
+      <user>derick</user>
+      <name>Derick Rethans</name>
+      <email>derick@php.net</email>
+      <role>lead</role>
+    </maintainer>
+    <maintainer>
+      <user>rasmus</user>
+      <name>Rasmus Lerdorf</name>
+      <email>rasmus@php.net</email>
+      <role>lead</role>
+    </maintainer>
+  </maintainers>
+  <description>
 The Input Filter extension is meant to address this issue by implementing a set
 of filters and mechanisms that users can use to safely access their input data.
  </description>
- <license>PHP</license>
- <release>
-  <state>beta</state>
-  <version>0.10.0</version>
-  <date>2006-05-14</date>
-  <notes>- Fixed PECL bug #6136, ini_set should not be able to change the filter.default (Pierre)
+  <license>PHP</license>
+  <release>
+    <state>beta</state>
+    <version>0.10.0</version>
+    <date>2006-05-14</date>
+    <notes>- Fixed PECL bug #6136, ini_set should not be able to change the filter.default (Pierre)
 - Fixed PECL bug #6639: uppercase hexadecimal digits are not supported
 - Implemented PECL req #6641: negative values for hexadecimal and octal numbers are not supported.
 - Added support for php pcre expressions (Pierre)
@@ -40,21 +40,56 @@ of filters and mechanisms that users can use to safely access their input data.
   and NULL when the variable has not been found
 - Added JIT support
   </notes>
-  <filelist>
-   <file role="src" name="config.m4"/>
-   <file role="src" name="config.w32"/>
-   <file role="src" name="filter.c"/>
-   <file role="src" name="filter_private.h"/>
-   <file role="src" name="callback_filter.c"/>
-   <file role="src" name="logical_filters.c"/>
-   <file role="src" name="sanitizing_filters.c"/>
-   <file role="src" name="php_filter.h"/>
-   <file role="doc" name="CREDITS"/>
-  </filelist>
-  <deps>
-    <dep type="php" rel="ge" version="5.0.0"/>
-  </deps>
- </release>
+    <filelist>
+      <file role="src" name="config.m4"/>
+      <file role="src" name="config.w32"/>
+      <file role="src" name="filter.c"/>
+      <file role="src" name="filter_private.h"/>
+      <file role="src" name="callback_filter.c"/>
+      <file role="src" name="logical_filters.c"/>
+      <file role="src" name="sanitizing_filters.c"/>
+      <file role="src" name="php_filter.h"/>
+      <file role="doc" name="CREDITS"/>
+      <dir name="tests">
+        <file role="test" name="001.phpt"/>
+        <file role="test" name="002.phpt"/>
+        <file role="test" name="003.phpt"/>
+        <file role="test" name="004.phpt"/>
+        <file role="test" name="005.phpt"/>
+        <file role="test" name="006.phpt"/>
+        <file role="test" name="007.phpt"/>
+        <file role="test" name="008.phpt"/>
+        <file role="test" name="009.phpt"/>
+        <file role="test" name="010.phpt"/>
+        <file role="test" name="011.phpt"/>
+        <file role="test" name="012.phpt"/>
+        <file role="test" name="013.phpt"/>
+        <file role="test" name="014.phpt"/>
+        <file role="test" name="015.phpt"/>
+        <file role="test" name="016.phpt"/>
+        <file role="test" name="017.phpt"/>
+        <file role="test" name="018.phpt"/>
+        <file role="test" name="019.phpt"/>
+        <file role="test" name="020.phpt"/>
+        <file role="test" name="021.phpt"/>
+        <file role="test" name="022.phpt"/>
+        <file role="test" name="023.phpt"/>
+        <file role="test" name="024.phpt"/>
+        <file role="test" name="025.phpt"/>
+        <file role="test" name="026.phpt"/>
+        <file role="test" name="027.phpt"/>
+        <file role="test" name="028.phpt"/>
+        <file role="test" name="029.phpt"/>
+        <file role="test" name="030.phpt"/>
+        <file role="test" name="031.phpt"/>
+        <file role="test" name="032.phpt"/>
+        <file role="test" name="bug7586.phpt"/>
+      </dir>
+    </filelist>
+    <deps>
+      <dep type="php" rel="ge" version="5.0.0"/>
+    </deps>
+  </release>
 </package>
 <!--
 vim:et:ts=1:sw=1
