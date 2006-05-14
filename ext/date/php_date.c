@@ -110,7 +110,7 @@ zend_function_entry date_funcs_timezone[] = {
 	{NULL, NULL, NULL}
 };
 
-static char* guess_timezone(timelib_tzdb *tzdb TSRMLS_DC);
+static char* guess_timezone(const timelib_tzdb *tzdb TSRMLS_DC);
 static void date_register_classes(TSRMLS_D);
 /* }}} */
 
@@ -304,7 +304,7 @@ PHP_MSHUTDOWN_FUNCTION(date)
 /* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(date)
 {
-	timelib_tzdb *tzdb = DATE_TIMEZONEDB;
+	const timelib_tzdb *tzdb = DATE_TIMEZONEDB;
 	
 	php_info_print_table_start();
 	php_info_print_table_row(2, "date/time support", "enabled");
@@ -318,7 +318,7 @@ PHP_MINFO_FUNCTION(date)
 /* }}} */
 
 /* {{{ Timezone Cache functions */
-static timelib_tzinfo *php_date_parse_tzfile(char *formal_tzname, timelib_tzdb *tzdb TSRMLS_DC)
+static timelib_tzinfo *php_date_parse_tzfile(char *formal_tzname, const timelib_tzdb *tzdb TSRMLS_DC)
 {
 	timelib_tzinfo *tzi, **ptzi;
 
@@ -335,7 +335,7 @@ static timelib_tzinfo *php_date_parse_tzfile(char *formal_tzname, timelib_tzdb *
 /* }}} */
 
 /* {{{ Helper functions */
-static char* guess_timezone(timelib_tzdb *tzdb TSRMLS_DC)
+static char* guess_timezone(const timelib_tzdb *tzdb TSRMLS_DC)
 {
 	char *env;
 
@@ -905,7 +905,7 @@ PHP_FUNCTION(idate)
 /* {{{ php_date_set_tzdb - NOT THREADSAFE */
 PHPAPI void php_date_set_tzdb(timelib_tzdb *tzdb)
 {
-	timelib_tzdb *builtin = timelib_builtin_db();
+	const timelib_tzdb *builtin = timelib_builtin_db();
 	
 	if (php_version_compare(tzdb->version, builtin->version) > 0) {
 		php_date_global_timezone_db = tzdb;
@@ -1862,9 +1862,9 @@ PHP_FUNCTION(timezone_transistions_get)
 
 PHP_FUNCTION(timezone_identifiers_list)
 {
-	timelib_tzdb             *tzdb;
-	timelib_tzdb_index_entry *table;
-	int                       i, item_count;
+	const timelib_tzdb             *tzdb;
+	const timelib_tzdb_index_entry *table;
+	int                             i, item_count;
 
 	tzdb = DATE_TIMEZONEDB;
 	item_count = tzdb->index_size;
@@ -1879,8 +1879,8 @@ PHP_FUNCTION(timezone_identifiers_list)
 
 PHP_FUNCTION(timezone_abbreviations_list)
 {
-	timelib_tz_lookup_table *table, *entry;
-	zval                    *element, **abbr_array_pp, *abbr_array;
+	const timelib_tz_lookup_table *table, *entry;
+	zval                          *element, **abbr_array_pp, *abbr_array;
 	
 	table = timelib_timezone_abbreviations_list();
 	array_init(return_value);
