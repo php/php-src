@@ -1,5 +1,5 @@
 --TEST--
-filter_data() and FILTER_CALLBACK
+filter_data() and IPv6 
 --FILE--
 <?php
 $ipv6_test = array(
