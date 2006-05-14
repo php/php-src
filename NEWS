@@ -39,6 +39,7 @@ PHP                                                                        NEWS
 - Fixed bug #37306 (max_execution_time = max_input_time). (Dmitry)
 - Fixed bug #37244 (Added strict flag to base64_decode() that enforces 
   RFC3548 compliance). (Ilia)
+- Fixed bug #36630 (umask not reset at the end of the request). (Ilia)
 
 04 May 2006, PHP 5.1.4
 - Added "capture_peer_cert" and "capture_peer_cert_chain" context options

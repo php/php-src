@@ -1464,6 +1464,10 @@ PHP_FUNCTION(umask)
 
 	oldumask = umask(077);
 
+	if (BG(umask) != -1) {
+		BG(umask) = oldumask;
+	}
+
 	if (arg_count == 0) {
 		umask(oldumask);
 	} else {
@@ -1473,8 +1477,6 @@ PHP_FUNCTION(umask)
 		convert_to_long_ex(arg1);
 		umask(Z_LVAL_PP(arg1));
 	}
-
-	/* XXX we should maybe reset the umask after each request! */
 
 	RETURN_LONG(oldumask);
 }

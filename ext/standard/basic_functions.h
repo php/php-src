@@ -215,6 +215,8 @@ typedef struct _php_basic_globals {
 #if defined(_REENTRANT) && defined(HAVE_MBRLEN) && defined(HAVE_MBSTATE_T)
 	mbstate_t mblen_state;
 #endif
+
+	int umask;
 } php_basic_globals;
 
 #ifdef ZTS
