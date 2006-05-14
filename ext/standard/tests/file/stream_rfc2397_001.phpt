@@ -1,5 +1,5 @@
 --TEST--
-Stream: RFC2397
+Stream: RFC2397 getting the data
 --FILE--
 <?php
 
