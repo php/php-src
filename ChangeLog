@@ -1,3 +1,48 @@
+2006-05-13  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_1)
+      sapi/apache/mod_php5.c:
+      Oh, woops.  The cgi_vars optimization patch snuck in there.  Reverse that
+      part.
+
+    * (PHP_5_2)
+      sapi/apache/mod_php5.c:
+      Switch to a signed int for now.  Will look at moving to a long throughout
+      the code here.
+
+    * sapi/apache/mod_php5.c:
+      We might want to consider moving this to a long throughout the sapi code,
+      but for now switch to a signed int.
+
+    * (PHP_5_1)
+      sapi/apache/mod_php5.c:
+      ap_get_client_block can return a negative value, so don't use an unsigned
+      int here.
+
+    * (PHP_4_4)
+      sapi/apache/mod_php4.c:
+      ap_get_client_block can return -1, so don't use an unsigned int here
+
+2006-05-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/basic_functions.c
+      ext/standard/tests/file/stream_rfc2397_001.phpt
+      ext/standard/tests/file/stream_rfc2397_001.phpt
+      main/php_memory_streams.h
+      main/streams/memory.c:
+      - Initial RFC2397 support
+
+    * run-tests.php:
+      - Add support for --EXPECTHEADERS--
+      - MFB cgi specific stuff
+
+    * (PHP_5_2)
+      ZendEngine2/zend_API.c:
+      - MFH code layout for __toString() use in parameter parsing api
+
+    * ZendEngine2/zend_API.c:
+      - Support __tostring() in argument parsing
+
 2006-05-12  Rob Richards  <rrichards@ctindustries.net>
 
     * (PHP_5_2)
