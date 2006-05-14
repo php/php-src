@@ -1,1 +1,40 @@
-To be filled...
+PHP 5.2 Update info or NEWS explained
+
+- Added new error mode E_RECOVERABLE_ERROR. (Derick, Marcus, Tony)
+
+  This changes a few E_ERROR conditions to something that you can now catch 
+  using a user error handler. If the user error handler does not grab these
+  kind of error they behave as fatal errors just like in any PHP version prior
+  to 5.2. Errors of this type are logged as 'Catchable fatal error'.
+
+- Removed ze1 compatibility mode. (Marcus)
+
+  The backwards compatibility support for the old PHP 4.x object handling that 
+  uses copying by default instead of the 5.x reference handling has been 
+  removed completley.
+
+- Added support for constructors in interfaces to force constructor signature
+  checks in implementations. (Marcus)
+  
+  Starting with PHP 5.2 interfaces can have constructors. If you use this 
+  feature then all implementing classes must implement constructors with a 
+  matching signature, while normally constructors do not need to follow any
+  base class or interface constructor signature. (Signature is the name for 
+  the parameter and return type definition which captures count, reference or 
+  not and any type hints).
+
+- Changed __toString to be called whereever applicable. (Marcus)
+
+  The magic object method __toString() is now called whenever an object is used
+  as a string. The function must not throw an exception or the script will be
+  terminated. The PHP 5.0/%51 fallback to return a string containing the object
+  idetifier has been dropped. Note that the object identifier is never unique. 
+  That measn that if you have used this feature your application has been 
+  flawed. Nonetheless it will now be a catchable fatal error (see above).
+
+- Added RFC2397 (data: stream) support. (Marcus)
+
+  Under windows this can mean a very rare change of behavior. If you are using 
+  NTFS filesystem and making use of meta streams in your application this does
+  no longer work for a file with the name 'data' accessed without any path. IF
+  you need to do so you have to prefix the filename with the "file:" protocol.
