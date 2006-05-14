@@ -7,11 +7,15 @@ PHP                                                                        NEWS
 - Added support for constructors in interfaces to force constructor signature
   checks in implementations. (Marcus)
 - Changed __toString to be called whereever applicable. (Marcus)
+- Improved xmlReader: (Rob)
+  . Added readInnerXml(), xmlReader::setSchema().
+  . Added readInnerXML(), readOuterXML(), readString(), setSchema(). (2.6.20+)
+  . Changed to passing libxml options when loading reader.
 - Improved PDO:
   . Added new attribute ATTR_DEFAULT_FETCH_MODE. (Pierre)
   . Added FETCH_PROPS_LATE. (Marcus)
 - Improved SPL: (Marcus)
-  . Added RegExIterator and RecursiveRegExIterator
+  . Added RegExIterator and RecursiveRegExIterator.
   . Added full caching support and ArrayAccess to CachingIterator.
   . Added array functions to ArrayObject/ArrayIterator and made them faster.
   . Added support for reading csv and skipping empty lines in SplFileObject.
