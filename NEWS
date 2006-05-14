@@ -1,6 +1,7 @@
-'PHP                                                                        NEWS
+PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, PHP 5.2.0
+- Added new error mode E_RECOVERABLE_ERROR. (Derick, Marcus, Tony)
 - Added support for getenv() input filtering. (Rasmus)
 - Removed ze1 compatibility mode. (Marcus)
 - Added support for constructors in interfaces to force constructor signature
@@ -18,7 +19,8 @@
 - Added preg_last_error(). (Andrei)
 - Added support for Apache 2.2 handler in the Windows distro. (Edin)
 - Added pg_field_table() function. (Edin)
-- Add implementation of curl_multi_info_read (Brian)
+- Added implementation of curl_multi_info_read(). (Brian)
+- Added RFC2397 (data:// stream) support. (Marcus)
 - Fixed bug #37416 (iterator_to_array() hides exceptions thrown in rewind()
   method). (Tony)
 - Fixed bug #37413 (Rejected versions of flex that don't work). (Ilia)
@@ -33,7 +35,6 @@
 - Fixed bug #37306 (max_execution_time = max_input_time). (Dmitry)
 - Fixed bug #37244 (Added strict flag to base64_decode() that enforces 
   RFC3548 compliance). (Ilia)
-
 
 04 May 2006, PHP 5.1.4
 - Added "capture_peer_cert" and "capture_peer_cert_chain" context options
