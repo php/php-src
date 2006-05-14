@@ -35,7 +35,7 @@ array(8) {
   ["wrapper_type"]=>
   string(7) "RFC2397"
   ["stream_type"]=>
-  string(4) "TEMP"
+  string(7) "RFC2397"
   ["mode"]=>
   string(1) "r"
   ["unread_bytes"]=>
@@ -58,7 +58,7 @@ array(8) {
   ["wrapper_type"]=>
   string(7) "RFC2397"
   ["stream_type"]=>
-  string(4) "TEMP"
+  string(7) "RFC2397"
   ["mode"]=>
   string(1) "r"
   ["unread_bytes"]=>
@@ -89,7 +89,7 @@ array(9) {
   ["wrapper_type"]=>
   string(7) "RFC2397"
   ["stream_type"]=>
-  string(4) "TEMP"
+  string(7) "RFC2397"
   ["mode"]=>
   string(1) "r"
   ["unread_bytes"]=>
@@ -114,7 +114,7 @@ array(10) {
   ["wrapper_type"]=>
   string(7) "RFC2397"
   ["stream_type"]=>
-  string(4) "TEMP"
+  string(7) "RFC2397"
   ["mode"]=>
   string(1) "r"
   ["unread_bytes"]=>
@@ -141,7 +141,7 @@ array(10) {
   ["wrapper_type"]=>
   string(7) "RFC2397"
   ["stream_type"]=>
-  string(4) "TEMP"
+  string(7) "RFC2397"
   ["mode"]=>
   string(1) "r"
   ["unread_bytes"]=>
@@ -168,7 +168,7 @@ array(11) {
   ["wrapper_type"]=>
   string(7) "RFC2397"
   ["stream_type"]=>
-  string(4) "TEMP"
+  string(7) "RFC2397"
   ["mode"]=>
   string(1) "r"
   ["unread_bytes"]=>
