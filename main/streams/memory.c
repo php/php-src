@@ -560,9 +560,11 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, cha
 {
 	php_stream *stream;
 	php_stream_temp_data *ts;
-	char *comma, *semi;
-	size_t mlen, dlen;
+	char *comma, *semi, *sep, *key;
+	size_t mlen, dlen, plen, vlen;
 	off_t newoffs;
+	zval *meta = NULL;
+	int base64 = 0;
 
 	if (memcmp(path, "data:", 5)) {
 		return NULL;
@@ -581,13 +583,73 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, cha
 		return NULL;
 	}
 
-	if ((stream = php_stream_temp_create_rel(0, ~0u)) != NULL) {
-		if (comma != path) {
-			/* meta info */
-			mlen = comma - path;
-			dlen -= mlen;
-			semi = memchr(path, ';', mlen);
+	if (comma != path) {
+		/* meta info */
+		mlen = comma - path;
+		dlen -= mlen;
+		semi = memchr(path, ';', mlen);
+		sep = memchr(path, '/', mlen);
+		
+		if (!semi && !sep) {
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "rfc2397: illegal media type");
+			return NULL;
 		}
+
+		MAKE_STD_ZVAL(meta);
+		array_init(meta);
+		if (!semi) { /* there is only a mime type */
+			add_assoc_stringl(meta, "mediatype", path, mlen, 1);
+			mlen = 0;
+		} else if (sep && sep < semi) { /* there is a mime type */
+			plen = semi - path;
+			add_assoc_stringl(meta, "mediatype", path, plen, 1);
+			mlen -= plen;
+			path += plen;
+		} else if (semi != path || mlen != sizeof(";base64")-1 || memcmp(path, ";base64", sizeof(";base64")-1)) { /* must be error since parameters are only allowed after mediatype */
+			zval_ptr_dtor(&meta);
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "rfc2397: illegal media type");
+			return NULL;
+		}
+		/* get parameters and potentially ';base64' */
+		while(semi && (semi == path)) {
+			path++;
+			mlen--;
+			sep = memchr(path, '=', mlen);
+			semi = memchr(path, ';', mlen);
+			if (!sep || (semi && semi < sep)) { /* must be ';base64' or failure */
+				if (mlen != sizeof("base64")-1 || memcmp(path, "base64", sizeof("base64")-1)) {
+					/* must be error since parameters are only allowed after mediatype and we have no '=' sign */
+					zval_ptr_dtor(&meta);
+					php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "rfc2397: illegal parameter");
+					return NULL;
+				}
+				base64 = 1;
+				mlen -= sizeof("base64") - 1;
+				path += sizeof("base64") - 1;
+				break;
+			}
+			/* found parameter ... the heart of cs ppl lies in +1/-1 or was it +2 this time? */
+			plen = sep - path;
+			vlen = (semi ? semi - sep : mlen - plen) - 1 /* '=' */;
+			key = estrndup(path, plen);
+			add_assoc_stringl_ex(meta, key, plen + 1, sep + 1, vlen, 1);
+			efree(key);
+			plen += vlen + 1;
+			mlen -= plen;
+			path += plen;
+		}
+		if (mlen) {
+			zval_ptr_dtor(&meta);
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "rfc2397: illegal url");
+			return NULL;
+		}
+	} else {
+		MAKE_STD_ZVAL(meta);
+		array_init(meta);
+	}
+	add_assoc_bool(meta, "base64", base64);
+
+	if ((stream = php_stream_temp_create_rel(0, ~0u)) != NULL) {
 		/* skip ',' */
 		comma++;
 		dlen--;
@@ -597,6 +659,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, cha
 		ts = (php_stream_temp_data*)stream->abstract;
 		assert(ts != NULL);
 		ts->mode = mode && mode[0] == 'r' ? TEMP_STREAM_READONLY : 0;
+		ts->meta = meta;
 	}
 
 	return stream;
