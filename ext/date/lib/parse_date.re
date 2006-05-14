@@ -49,6 +49,7 @@
 #define TIMELIB_MONTH   5
 #define TIMELIB_YEAR    6
 #define TIMELIB_WEEKDAY 7
+#define TIMELIB_SPECIAL 8
 
 #define EOI      257
 #define TIME     258
@@ -101,8 +102,9 @@ typedef unsigned char uchar;
 #define TIMELIB_UNHAVE_TIME() { s->time->have_time = 0; s->time->h = 0; s->time->i = 0; s->time->s = 0; s->time->f = 0; }
 #define TIMELIB_HAVE_DATE() { if (s->time->have_date) { add_error(s, "Double date specification"); timelib_string_free(str); return TIMELIB_ERROR; } else { s->time->have_date = 1; } }
 #define TIMELIB_UNHAVE_DATE() { s->time->have_date = 0; s->time->d = 0; s->time->m = 0; s->time->y = 0; }
-#define TIMELIB_HAVE_RELATIVE() { s->time->have_relative = 1; s->time->relative.weekday_behavior = 0; }
+#define TIMELIB_HAVE_RELATIVE() { s->time->have_relative = 1; s->time->relative.weekday_behavior = 1; }
 #define TIMELIB_HAVE_WEEKDAY_RELATIVE() { s->time->have_weekday_relative = 1; }
+#define TIMELIB_HAVE_SPECIAL_RELATIVE() { s->time->have_special_relative = 1; }
 #define TIMELIB_HAVE_TZ() { s->cur = cursor; if (s->time->have_zone) { add_warning(s, "Double timezone specification"); timelib_string_free(str); return TIMELIB_ERROR; } else { s->time->have_zone = 1; } }
 
 #define TIMELIB_INIT  s->cur = cursor; str = timelib_string(s); ptr = str
@@ -143,7 +145,7 @@ typedef struct Scanner {
 	struct timelib_error_container *errors;
 
 	struct timelib_time *time;
-	timelib_tzdb        *tzdb;
+	const timelib_tzdb  *tzdb;
 } Scanner;
 
 typedef struct _timelib_lookup_table {
@@ -161,17 +163,17 @@ typedef struct _timelib_relunit {
 #define HOUR(a) (int)(a * 60)
 
 /* The timezone table. */
-static timelib_tz_lookup_table timelib_timezone_lookup[] = {
+const static timelib_tz_lookup_table timelib_timezone_lookup[] = {
 #include "timezonemap.h"
 	{ NULL, 0, 0, NULL },
 };
 
-static timelib_tz_lookup_table timelib_timezone_fallbackmap[] = {
+const static timelib_tz_lookup_table timelib_timezone_fallbackmap[] = {
 #include "fallbackmap.h"
 	{ NULL, 0, 0, NULL },
 };
 
-static timelib_tz_lookup_table timelib_timezone_utc[] = {
+const static timelib_tz_lookup_table timelib_timezone_utc[] = {
 	{ "utc", 0, 0, "UTC" },
 };
 
@@ -214,6 +216,8 @@ static timelib_relunit const timelib_relunit_lookup[] = {
 	{ "sunday",      TIMELIB_WEEKDAY, 0 },
 	{ "sun",         TIMELIB_WEEKDAY, 0 },
 
+	{ "weekday",     TIMELIB_SPECIAL, TIMELIB_SPECIAL_WEEKDAY },
+	{ "weekdays",    TIMELIB_SPECIAL, TIMELIB_SPECIAL_WEEKDAY },
 	{ NULL,          0,          0 }
 };
 
@@ -602,14 +606,20 @@ static void timelib_set_relative(char **ptr, timelib_sll amount, int behavior, S
 			s->time->relative.weekday = relunit->multiplier;
 			s->time->relative.weekday_behavior = behavior;
 			break;
+
+		case TIMELIB_SPECIAL:
+			TIMELIB_HAVE_SPECIAL_RELATIVE();
+			TIMELIB_UNHAVE_TIME();
+			s->time->special.type = relunit->multiplier;
+			s->time->special.amount = amount;
 	}
 }
 
-static timelib_tz_lookup_table* zone_search(const char *word, long gmtoffset, int isdst)
+const static timelib_tz_lookup_table* zone_search(const char *word, long gmtoffset, int isdst)
 {
 	int first_found = 0;
-	timelib_tz_lookup_table  *tp, *first_found_elem = NULL;
-	timelib_tz_lookup_table  *fmp;
+	const timelib_tz_lookup_table  *tp, *first_found_elem = NULL;
+	const timelib_tz_lookup_table  *fmp;
 
 	if (strcasecmp("utc", word) == 0 || strcasecmp("gmt", word) == 0) {
 		return timelib_timezone_utc;
@@ -648,7 +658,7 @@ static long timelib_lookup_zone(char **ptr, int *dst, char **tz_abbr, int *found
 	char *word;
 	char *begin = *ptr, *end;
 	long  value = 0;
-	timelib_tz_lookup_table *tp;
+	const timelib_tz_lookup_table *tp;
 
 	while (**ptr != '\0' && **ptr != ')') {
 		++*ptr;
@@ -670,7 +680,7 @@ static long timelib_lookup_zone(char **ptr, int *dst, char **tz_abbr, int *found
 	return value;
 }
 
-static long timelib_get_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_found, timelib_tzdb *tzdb)
+static long timelib_get_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_found, const timelib_tzdb *tzdb)
 {
 	timelib_tzinfo *res;
 	long            retval = 0;
@@ -788,7 +798,8 @@ daylz   = "0" [1-9] | [1-2][0-9] | "3" [01];
 
 dayfull = 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday';
 dayabbr = 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
-daytext = dayfull | dayabbr;
+dayspecial = 'weekday' | 'weekdays';
+daytext = dayfull | dayabbr | dayspecial;
 
 monthfull = 'january' | 'february' | 'march' | 'april' | 'may' | 'june' | 'july' | 'august' | 'september' | 'october' | 'november' | 'december';
 monthabbr = 'jan' | 'feb' | 'mar' | 'apr' | 'may' | 'jun' | 'jul' | 'aug' | 'sep' | 'sept' | 'oct' | 'nov' | 'dec';
@@ -1328,6 +1339,9 @@ relativetext = reltextnumber space? reltextunit;
 		s->time->relative.i = 0 - s->time->relative.i;
 		s->time->relative.s = 0 - s->time->relative.s;
 		s->time->relative.weekday = 0 - s->time->relative.weekday;
+		if (s->time->have_special_relative && s->time->special.type == TIMELIB_SPECIAL_WEEKDAY) {
+			s->time->special.amount = 0 - s->time->special.amount;
+		}
 		TIMELIB_DEINIT;
 		return TIMELIB_AGO;
 	}
@@ -1363,6 +1377,16 @@ relativetext = reltextnumber space? reltextunit;
 		}
 		TIMELIB_DEINIT;
 		return TIMELIB_RELATIVE;
+	}
+
+	monthfull | monthabbr
+	{
+		DEBUG_OUTPUT("monthtext");
+		TIMELIB_INIT;
+		TIMELIB_HAVE_DATE();
+		s->time->m = timelib_lookup_month((char **) &ptr);
+		TIMELIB_DEINIT;
+		return TIMELIB_DATE_TEXT;
 	}
 
 	tzcorrection | tz
@@ -1446,7 +1470,7 @@ relativetext = reltextnumber space? reltextunit;
 
 /*!max:re2c */
 
-timelib_time* timelib_strtotime(char *s, int len, struct timelib_error_container **errors, timelib_tzdb *tzdb)
+timelib_time* timelib_strtotime(char *s, int len, struct timelib_error_container **errors, const timelib_tzdb *tzdb)
 {
 	Scanner in;
 	int t;
@@ -1551,7 +1575,7 @@ void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options)
 
 char *timelib_timezone_id_from_abbr(const char *abbr, long gmtoffset, int isdst)
 {
-	timelib_tz_lookup_table *tp;
+	const timelib_tz_lookup_table *tp;
 
 	tp = zone_search(abbr, gmtoffset, isdst);
 	if (tp) {
@@ -1561,7 +1585,7 @@ char *timelib_timezone_id_from_abbr(const char *abbr, long gmtoffset, int isdst)
 	}
 }
 
-timelib_tz_lookup_table *timelib_timezone_abbreviations_list(void)
+const timelib_tz_lookup_table *timelib_timezone_abbreviations_list(void)
 {
 	return timelib_timezone_lookup;
 }

@@ -192,7 +192,7 @@ void timelib_dump_tzinfo(timelib_tzinfo *tz)
 	}
 }
 
-static int tz_search(char *timezone, int left, int right, timelib_tzdb *tzdb)
+static int tz_search(char *timezone, int left, int right, const timelib_tzdb *tzdb)
 {
 	int mid, cmp;
 
@@ -213,7 +213,7 @@ static int tz_search(char *timezone, int left, int right, timelib_tzdb *tzdb)
 }
 
 
-static int seek_to_tz_position(char **tzf, char *timezone, timelib_tzdb *tzdb)
+static int seek_to_tz_position(const unsigned char **tzf, char *timezone, const timelib_tzdb *tzdb)
 {
 	int	pos;
 	
@@ -227,29 +227,29 @@ static int seek_to_tz_position(char **tzf, char *timezone, timelib_tzdb *tzdb)
 	return 1;
 }
 
-timelib_tzdb *timelib_builtin_db(void)
+const timelib_tzdb *timelib_builtin_db(void)
 {
 	return &timezonedb_builtin;
 }
 
-timelib_tzdb_index_entry *timelib_timezone_builtin_identifiers_list(int *count)
+const timelib_tzdb_index_entry *timelib_timezone_builtin_identifiers_list(int *count)
 {
 	*count = sizeof(timezonedb_idx_builtin) / sizeof(*timezonedb_idx_builtin);
 	return timezonedb_idx_builtin;
 }
 
-int timelib_timezone_id_is_valid(char *timezone, timelib_tzdb *tzdb)
+int timelib_timezone_id_is_valid(char *timezone, const timelib_tzdb *tzdb)
 {
-	char *tzf;
-	return (seek_to_tz_position((char**) &tzf, timezone, tzdb));
+	unsigned char *tzf;
+	return (seek_to_tz_position((unsigned char**) &tzf, timezone, tzdb));
 }
 
-timelib_tzinfo *timelib_parse_tzfile(char *timezone, timelib_tzdb *tzdb)
+timelib_tzinfo *timelib_parse_tzfile(char *timezone, const timelib_tzdb *tzdb)
 {
-	char *tzf;
+	const unsigned char *tzf;
 	timelib_tzinfo *tmp;
 
-	if (seek_to_tz_position((char**) &tzf, timezone, tzdb)) {
+	if (seek_to_tz_position((unsigned char**) &tzf, timezone, tzdb)) {
 		tmp = timelib_tzinfo_ctor(timezone);
 
 		read_header((char**) &tzf, tmp);
