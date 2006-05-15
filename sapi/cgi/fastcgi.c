@@ -18,8 +18,8 @@
 
 /* $Id$ */
 
-#include "fastcgi.h"
 #include "php.h"
+#include "fastcgi.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -125,27 +125,21 @@ typedef union _sa_t {
 } sa_t;
 
 typedef struct _fcgi_mgmt_rec {
-	char* name;
-	char  val;
+	char*  name;
+	size_t name_len;
+	char   val;
 } fcgi_mgmt_rec;
 
 static const fcgi_mgmt_rec fcgi_mgmt_vars[] = {
-	{"FCGI_MAX_CONNS",  1},
-	{"FCGI_MAX_REQS",   1},
-	{"FCGI_MPXS_CONNS", 0}
+	{"FCGI_MAX_CONNS",  sizeof("FCGI_MAX_CONNS")-1,  1},
+	{"FCGI_MAX_REQS",   sizeof("FCGI_MAX_REQS")-1,   1},
+	{"FCGI_MPXS_CONNS", sizeof("FCGI_MPXS_CONNS")-1, 0}
 };
 
 
 static int is_initialized = 0;
 static int is_fastcgi = 0;
 static int in_shutdown = 0;
-
-static inline char* fcgi_strndup(const char *str, int len)
-{
-	char *s = malloc(len+1);
-	memcpy(s, str, len+1);
-	return s;
-}
 
 #ifdef _WIN32
 
@@ -396,8 +390,11 @@ static inline int fcgi_make_header(fcgi_header *hdr, fcgi_request_type type, int
 	return pad;
 }
 
-static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *end, int n)
+static void fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *end)
 {
+	char buf[128];
+	char *tmp = buf;
+	size_t buf_size = sizeof(buf);
 	int name_len, val_len;
 	char *s;
 
@@ -416,35 +413,37 @@ static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *e
 			val_len |= (*p++ << 8);
 			val_len |= *p++;
 		}
-		req->env[n] = s = malloc(name_len + val_len + 2);
-		memcpy(s, p, name_len);
-		p += name_len;
-		s[name_len] = '=';
-		memcpy(s+name_len+1, p, val_len);
-		p += val_len;
-		s[name_len+1+val_len] = '\0';
-		n++;
-		if (n > sizeof(req->env)/sizeof(req->env[0])) {
-			/* TODO: to many environment variables */
-			return n;
+		if (name_len+1 >= buf_size) {
+			buf_size = name_len + 64;
+			tmp = (tmp == buf ? emalloc(buf_size): erealloc(tmp, buf_size));
 		}
+		memcpy(tmp, p, name_len);
+		tmp[name_len] = 0;
+		s = zend_strndup((char*)p + name_len, val_len);
+		zend_hash_update(&req->env, tmp, name_len+1, &s, sizeof(char*), NULL);
+		p += name_len + val_len;
 	}
-	return n;
+	if (tmp != buf && tmp != NULL) {
+		efree(tmp);
+	}
+}
+
+static void fcgi_free_var(char **s)
+{
+	free(*s);
 }
 
 static int fcgi_read_request(fcgi_request *req)
 {
 	fcgi_header hdr;
 	int len, padding;
-	int n = 1;
-	char *s;
 	unsigned char buf[FCGI_MAX_LENGTH+8];
 
 	req->keep = 0;
 	req->in_len = 0;
 	req->out_hdr = NULL;
 	req->out_pos = req->out_buf;
-	memset(req->env, 0, sizeof(req->env));
+	zend_hash_init(&req->env, 0, NULL, (void (*)(void *)) fcgi_free_var, 1);
 
 	if (safe_read(req, &hdr, sizeof(fcgi_header)) != sizeof(fcgi_header) ||
 	    hdr.version < FCGI_VERSION_1) {
@@ -467,6 +466,8 @@ static int fcgi_read_request(fcgi_request *req)
 	req->id = (hdr.requestIdB1 << 8) + hdr.requestIdB0;
 
 	if (hdr.type == FCGI_BEGIN_REQUEST && len == sizeof(fcgi_begin_request)) {
+		char *val;
+
 		if (safe_read(req, buf, len+padding) != len+padding) {
 			return 0;
 		}
@@ -474,13 +475,16 @@ static int fcgi_read_request(fcgi_request *req)
 		req->keep = (((fcgi_begin_request*)buf)->flags & FCGI_KEEP_CONN);
 		switch ((((fcgi_begin_request*)buf)->roleB1 << 8) + ((fcgi_begin_request*)buf)->roleB0) {
 			case FCGI_RESPONDER:
-				req->env[0] = fcgi_strndup("FCGI_ROLE=RESPONDER", sizeof("FCGI_ROLE=RESPONDER")-1);
+				val = strdup("RESPONDER");
+				zend_hash_update(&req->env, "FCGI_ROLE", sizeof("FCGI_ROLE"), &val, sizeof(char*), NULL);
 				break;
 			case FCGI_AUTHORIZER:
-				req->env[0] = fcgi_strndup("FCGI_ROLE=AUTHORIZER", sizeof("FCGI_ROLE=AUTHORIZER")-1);
+				val = strdup("AUTHORIZER");
+				zend_hash_update(&req->env, "FCGI_ROLE", sizeof("FCGI_ROLE"), &val, sizeof(char*), NULL);
 				break;
 			case FCGI_FILTER:
-				req->env[0] = fcgi_strndup("FCGI_ROLE=FILTER", sizeof("FCGI_ROLE=FILTER")-1);
+				val = strdup("FILTER");
+				zend_hash_update(&req->env, "FCGI_ROLE", sizeof("FCGI_ROLE"), val, sizeof(char*), NULL);
 				break;
 			default:
 				return 0;
@@ -499,7 +503,7 @@ static int fcgi_read_request(fcgi_request *req)
 				req->keep = 0;
 				return 0;
 			}
-			n = fcgi_get_params(req, buf, buf+len, n);
+			fcgi_get_params(req, buf, buf+len);
 
 			if (safe_read(req, &hdr, sizeof(fcgi_header)) != sizeof(fcgi_header) ||
 			    hdr.version < FCGI_VERSION_1) {
@@ -510,26 +514,18 @@ static int fcgi_read_request(fcgi_request *req)
 			padding = hdr.paddingLength;
 		}
 	} else if (hdr.type == FCGI_GET_VALUES) {
-		int i, j;
-		int name_len;
+		int j;
 		unsigned char *p = buf + sizeof(fcgi_header);
 
 		if (safe_read(req, buf, len+padding) != len+padding) {
 			return 0;
 		}
-		n = fcgi_get_params(req, buf, buf+len, 0);
-		for (i = 0; i < n; i++) {
-			if ((s = strchr(req->env[i], '=')) != NULL) {
-				*s = '\0';
-				name_len = s - req->env[i];
-			} else {
-				name_len = strlen(req->env[i]);
-			}
-			for (j = 0; j < sizeof(fcgi_mgmt_vars)/sizeof(fcgi_mgmt_vars[0]); j++) {
-				if (strncmp(req->env[i], fcgi_mgmt_vars[j].name, name_len) == 0) {
-	                sprintf((char*)p, "%c%c%s%c", name_len, 1, fcgi_mgmt_vars[j].name, fcgi_mgmt_vars[j].val);
-	                p += name_len+3;
-				}
+		fcgi_get_params(req, buf, buf+len);
+
+		for (j = 0; j < sizeof(fcgi_mgmt_vars)/sizeof(fcgi_mgmt_vars[0]); j++) {
+			if (zend_hash_exists(&req->env, fcgi_mgmt_vars[j].name, fcgi_mgmt_vars[j].name_len+1) == 0) {
+                sprintf((char*)p, "%c%c%s%c", fcgi_mgmt_vars[j].name_len, 1, fcgi_mgmt_vars[j].name, fcgi_mgmt_vars[j].val);
+                p += fcgi_mgmt_vars[j].name_len + 3;
 			}
 		}
 		len = p - buf - sizeof(fcgi_header);
@@ -601,10 +597,7 @@ int fcgi_read(fcgi_request *req, char *str, int len)
 static inline void fcgi_close(fcgi_request *req, int force, int destroy)
 {
 	if (destroy) {
-		char **env = req->env;
-		while (*env) {
-			free(*env++);
-		}
+		zend_hash_destroy(&req->env);
 	}
 	if ((force || !req->keep) && req->fd >= 0) {
 #ifdef _WIN32
@@ -866,62 +859,36 @@ int fcgi_finish_request(fcgi_request *req)
 	return 1;
 }
 
-char* fcgi_getenv_helper(char** env, const char *name, int len)
+char* fcgi_getenv(fcgi_request *req, const char* var, int var_len)
 {
-	if (name && env) {
-		while (*env) {
-			if ((strncmp(name, *env, len) == 0) && ((*env)[len] == '=')) {
-				return *env+len+1;
-			}
-			env++;
+	char **val;
+
+	if (!req) return NULL;
+
+	if (zend_hash_find(&req->env, (char*)var, var_len+1, (void**)&val) == SUCCESS) {
+		return *val;
+	}
+	return NULL;
+}
+
+char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val)
+{
+	if (var && req) {
+		char **ret;
+
+		if (val == NULL) {
+			val = "";
+		}
+		val = strdup(val);
+		if (zend_hash_update(&req->env, var, var_len+1, &val, sizeof(char*), (void**)&ret) == SUCCESS) {
+			return *ret;
 		}
 	}
 	return NULL;
 }
 
-char* fcgi_getenv(fcgi_request *req, const char* var, int var_len)
-{
-	if (!req) return NULL;
-	return fcgi_getenv_helper(req->env, var, var_len);
-}
-
-void fcgi_putenv(fcgi_request *req, char* var, int var_len)
-{
-	if (var && req) {
-		char **env = req->env;
-		char *s = strchr(var, '=');
-		int len;
-
-		if (!s) return ;
-		len = s - var + 1;
-		while (*env) {
-			if ((strncmp(var, *env, len) == 0)) {
-				free(*env);
-				*env = fcgi_strndup(var, var_len);
-				return;
-			}
-			env++;
-		}
-		*env = fcgi_strndup(var, var_len);
-	}
-}
-
-int FCGX_FPrintF(FCGX_Stream stream, const char *format, ...)
-{
-    int result;
-    va_list args;
-    char buf[4096];
-
-    va_start(args, format);
-	result = vsnprintf(buf, sizeof(buf), format, args);
-    va_end(args);
-
-    fcgi_write(stream.req, stream.type, buf, result);
-    return result;
-}
-
 #ifdef _WIN32
-void OS_SetImpersonate(void)
+void fcgi_impersonate(void)
 {
 	char *os_name;
 
