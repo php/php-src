@@ -4,7 +4,7 @@ PHP                                                                        NEWS
 - Optimized require_once/include_once (eliminated fopen() on second usage).
   (Dmitry)
 - Optimized request shutdown sequence. Restoring ini directives now
-  iterated over modified directives only instead of all. (Dmitry)
+  iterates over modified directives only instead of all. (Dmitry)
 - FastCGI SAPI improved. (Dmitry)
   . Removed source compatibility with libfcgi
   . Optimized access to FastCGI environment variables using HashTable instead
