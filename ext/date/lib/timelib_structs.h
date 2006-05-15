@@ -74,6 +74,13 @@ typedef signed long long timelib_sll;
 #define uint32_t unsigned __int32
 #endif
 
+#if defined(_MSC_VER)
+#define TIMELIB_LL_CONST(n) n ## i64
+#else
+#define TIMELIB_LL_CONST(n) n ## ll
+#endif
+
+
 typedef struct ttinfo
 {
 	int32_t      offset;
@@ -189,10 +196,10 @@ typedef struct _timelib_tzdb {
 #define TIMELIB_ZONETYPE_ABBR   2
 #define TIMELIB_ZONETYPE_ID     3
 
-#define SECS_PER_ERA 12622780800LL
-#define SECS_PER_DAY       86400
-#define DAYS_PER_YEAR        365
-#define DAYS_PER_LYEAR       366
+#define SECS_PER_ERA   TIMELIB_LL_CONST(12622780800)
+#define SECS_PER_DAY   86400
+#define DAYS_PER_YEAR    365
+#define DAYS_PER_LYEAR   366
 
 #define timelib_is_leap(y) ((y) % 4 == 0 && ((y) % 100 != 0 || (y) % 400 == 0))
 
