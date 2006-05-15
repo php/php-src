@@ -17,6 +17,7 @@
    |          Zeev Suraski <zeev@zend.com>                                |
    | FastCGI: Ben Mansell <php@slimyhorror.com>                           |
    |          Shane Caraveo <shane@caraveo.com>                           |
+   |          Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
 */
 
@@ -81,9 +82,8 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 
 #if PHP_FASTCGI
 #include "fastcgi.h"
-#ifdef PHP_WIN32
-extern int OS_SetImpersonate(void);
-#else
+
+#ifndef PHP_WIN32
 /* XXX this will need to change later when threaded fastcgi is
    implemented.  shane */
 struct sigaction act, old_term, old_quit, old_int;
@@ -234,9 +234,9 @@ static inline size_t sapi_cgibin_single_write(const char *str, uint str_length T
 #endif
 
 #if PHP_FASTCGI
-	if (!FCGX_IsCGI()) {
-		FCGX_Request *request = (FCGX_Request *) SG(server_context);
-		long ret = FCGX_PutStr(str, str_length, request->out);
+	if (fcgi_is_fastcgi()) {
+		fcgi_request *request = (fcgi_request*) SG(server_context);
+		long ret = fcgi_write(request, FCGI_STDOUT, str, str_length);
 		if (ret <= 0) {
 			return 0;
 		}
@@ -276,13 +276,13 @@ static int sapi_cgibin_ub_write(const char *str, uint str_length TSRMLS_DC)
 static void sapi_cgibin_flush(void *server_context)
 {
 #if PHP_FASTCGI
-	if (!FCGX_IsCGI()) {
-		FCGX_Request *request = (FCGX_Request *) server_context;
+	if (fcgi_is_fastcgi()) {
+		fcgi_request *request = (fcgi_request*) server_context;
 		if (
 #ifndef PHP_WIN32
 		!parent && 
 #endif
-		request && FCGX_FFlush(request->out) == -1) {
+		request && fcgi_flush(request, 0) == -1) {
 			php_handle_aborted_connection();
 		}
 		return;
@@ -349,9 +349,9 @@ static int sapi_cgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 	count_bytes = MIN(count_bytes, (uint) SG(request_info).content_length - SG(read_post_bytes));
 	while (read_bytes < count_bytes) {
 #if PHP_FASTCGI
-		if (!FCGX_IsCGI()) {
-			FCGX_Request *request = (FCGX_Request *) SG(server_context);
-			tmp_read_bytes = FCGX_GetStr(pos, count_bytes - read_bytes, request->in);
+		if (fcgi_is_fastcgi()) {
+			fcgi_request *request = (fcgi_request*) SG(server_context);
+			tmp_read_bytes = fcgi_read(request, pos, count_bytes - read_bytes);
 			pos += tmp_read_bytes;
 		} else {
 			tmp_read_bytes = read(0, buffer + read_bytes, count_bytes - read_bytes);
@@ -375,9 +375,9 @@ static char *sapi_cgibin_getenv(char *name, size_t name_len TSRMLS_DC)
 	   is provided to PHP.  It is always sent to PHP at the start
 	   of a request.  So we have to do our own lookup to get env
 	   vars.  This could probably be faster somehow.  */
-	if (!FCGX_IsCGI()) {
-		FCGX_Request *request = (FCGX_Request *) SG(server_context);
-		return FCGX_GetParam(name,request->envp);
+	if (fcgi_is_fastcgi()) {
+		fcgi_request *request = (fcgi_request*) SG(server_context);
+		return fcgi_getenv(request, name, name_len);
 	}
 #endif
 	/*  if cgi, or fastcgi and not found in fcgi env
@@ -387,31 +387,23 @@ static char *sapi_cgibin_getenv(char *name, size_t name_len TSRMLS_DC)
 
 static char *_sapi_cgibin_putenv(char *name, char *value TSRMLS_DC)
 {
-	int len = 0;
-	char *buf = NULL;
+	int name_len;
+	int len;
+	char *buf;
+	
 	if (!name) {
 		return NULL;
 	}
-	len = strlen(name) + (value ? strlen(value) : 0) + sizeof("=") + 2;
-	buf = (char *) malloc(len);
-	if (buf == NULL) {
-		return getenv(name);
-	}
-	if (value) {
-		snprintf(buf, len - 1, "%s=%s", name, value);
-	} else {
-		snprintf(buf, len - 1, "%s=", name);
-	}
+	name_len = strlen(name);
+
 #if PHP_FASTCGI
 	/* when php is started by mod_fastcgi, no regular environment
 	   is provided to PHP.  It is always sent to PHP at the start
 	   of a request.  So we have to do our own lookup to get env
 	   vars.  This could probably be faster somehow.  */
-	if (!FCGX_IsCGI()) {
-		FCGX_Request *request = (FCGX_Request *) SG(server_context);
-		FCGX_PutEnv(request, buf);
-		free(buf);
-		return sapi_cgibin_getenv(name,0 TSRMLS_CC);
+	if (fcgi_is_fastcgi()) {
+		fcgi_request *request = (fcgi_request*) SG(server_context);
+		return fcgi_putenv(request, name, name_len, value);
 	}
 #endif
 	/*  if cgi, or fastcgi and not found in fcgi env
@@ -419,13 +411,23 @@ static char *_sapi_cgibin_putenv(char *name, char *value TSRMLS_DC)
 		this leaks, but it's only cgi anyway, we'll fix
 		it for 5.0
 	*/
+	len = name_len + (value ? strlen(value) : 0) + sizeof("=") + 2;
+	buf = (char *) malloc(len);
+	if (buf == NULL) {
+		return getenv(name);
+	}
+	if (value) {
+		len = snprintf(buf, len - 1, "%s=%s", name, value);
+	} else {
+		len = snprintf(buf, len - 1, "%s=", name);
+	}
 	putenv(buf);
 	return getenv(name);
 }
 
 static char *sapi_cgi_read_cookies(TSRMLS_D)
 {
-	return sapi_cgibin_getenv((char *) "HTTP_COOKIE", 0 TSRMLS_CC);
+	return sapi_cgibin_getenv((char *) "HTTP_COOKIE", sizeof("HTTP_COOKIE")-1 TSRMLS_CC);
 }
 
 #if PHP_FASTCGI
@@ -446,21 +448,21 @@ void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 	    zval_copy_ctor(array_ptr);
 	    return;
 	}
-	if (!FCGX_IsCGI()) {
-		FCGX_Request *request = (FCGX_Request *) SG(server_context);
-		char **env, *p;
+	if (fcgi_is_fastcgi()) {
+		fcgi_request *request = (fcgi_request*) SG(server_context);
+		HashPosition pos;
 		int magic_quotes_gpc = PG(magic_quotes_gpc);
+		char *var, **val;
+		uint var_len;
+		ulong idx;
 
 		/* turn off magic_quotes while importing environment variables */
 		PG(magic_quotes_gpc) = 0;
-		for (env = request->envp; env != NULL && *env != NULL; env++) {
-			p = strchr(*env, '=');
-			if (!p) {				/* malformed entry? */
-				continue;
-			}
-			*p = 0;
-			php_register_variable(*env, p + 1, array_ptr TSRMLS_CC);
-			*p = '=';
+		for (zend_hash_internal_pointer_reset_ex(&request->env, &pos);
+		     zend_hash_get_current_key_ex(&request->env, &var, &var_len, &idx, 0, &pos) == HASH_KEY_IS_STRING &&
+		     zend_hash_get_current_data_ex(&request->env, (void **) &val, &pos) == SUCCESS;
+		     zend_hash_move_forward_ex(&request->env, &pos)) {
+			php_register_variable(var, *val, array_ptr TSRMLS_CC);
 		}
 		PG(magic_quotes_gpc) = magic_quotes_gpc;
 	}
@@ -482,13 +484,21 @@ static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 static void sapi_cgi_log_message(char *message)
 {
 #if PHP_FASTCGI
-	if (!FCGX_IsCGI() && fcgi_logging) {
-		FCGX_Request *request;
+	if (fcgi_is_fastcgi() && fcgi_logging) {
+		fcgi_request *request;
 		TSRMLS_FETCH();
 		
-		 request = (FCGX_Request *) SG(server_context);
-		if (request) {
-			FCGX_FPrintF(request->err, "%s\n", message);
+		request = (fcgi_request*) SG(server_context);
+		if (request) {			
+			int len = strlen(message);
+			char *buf = malloc(len+2);
+
+			memcpy(buf, message, len);
+			memcpy(buf + len, "\n", sizeof("\n"));
+			fcgi_write(request, FCGI_STDERR, buf, len+1);
+			free(buf);
+		} else {
+			fprintf(stderr, "%s\n", message);
 		}
 		/* ignore return code */
 	} else
@@ -663,8 +673,8 @@ static void php_cgi_usage(char *argv0)
  */
 static void init_request_info(TSRMLS_D)
 {
-	char *env_script_filename = sapi_cgibin_getenv("SCRIPT_FILENAME", 0 TSRMLS_CC);
-	char *env_path_translated = sapi_cgibin_getenv("PATH_TRANSLATED", 0 TSRMLS_CC);
+	char *env_script_filename = sapi_cgibin_getenv("SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME")-1 TSRMLS_CC);
+	char *env_path_translated = sapi_cgibin_getenv("PATH_TRANSLATED", sizeof("PATH_TRANSLATED")-1 TSRMLS_CC);
 	char *script_path_translated = env_script_filename;
 
 #if !DISCARD_PATH
@@ -692,14 +702,14 @@ static void init_request_info(TSRMLS_D)
 	   of the script will be retreived later via argc/argv */
 	if (script_path_translated) {
 		const char *auth;
-		char *content_length = sapi_cgibin_getenv("CONTENT_LENGTH", 0 TSRMLS_CC);
-		char *content_type = sapi_cgibin_getenv("CONTENT_TYPE", 0 TSRMLS_CC);
-		char *env_path_info = sapi_cgibin_getenv("PATH_INFO", 0 TSRMLS_CC);
-		char *env_script_name = sapi_cgibin_getenv("SCRIPT_NAME", 0 TSRMLS_CC);
+		char *content_length = sapi_cgibin_getenv("CONTENT_LENGTH", sizeof("CONTENT_LENGTH")-1 TSRMLS_CC);
+		char *content_type = sapi_cgibin_getenv("CONTENT_TYPE", sizeof("CONTENT_TYPE")-1 TSRMLS_CC);
+		char *env_path_info = sapi_cgibin_getenv("PATH_INFO", sizeof("PATH_INFO")-1 TSRMLS_CC);
+		char *env_script_name = sapi_cgibin_getenv("SCRIPT_NAME", sizeof("SCRIPT_NAME")-1 TSRMLS_CC);
 #if ENABLE_PATHINFO_CHECK
 		struct stat st;
-		char *env_redirect_url = sapi_cgibin_getenv("REDIRECT_URL", 0 TSRMLS_CC);
-		char *env_document_root = sapi_cgibin_getenv("DOCUMENT_ROOT", 0 TSRMLS_CC);
+		char *env_redirect_url = sapi_cgibin_getenv("REDIRECT_URL", sizeof("REDIRECT_URL")-1 TSRMLS_CC);
+		char *env_document_root = sapi_cgibin_getenv("DOCUMENT_ROOT", sizeof("DOCUMENT_ROOT")-1 TSRMLS_CC);
 
 		if (fix_pathinfo) {
 
@@ -849,7 +859,7 @@ static void init_request_info(TSRMLS_D)
 				_sapi_cgibin_putenv("PATH_INFO", NULL TSRMLS_CC);
 				_sapi_cgibin_putenv("PATH_TRANSLATED", NULL TSRMLS_CC);
 			}
-			SG(request_info).request_uri = sapi_cgibin_getenv("SCRIPT_NAME",0 TSRMLS_CC);
+			SG(request_info).request_uri = sapi_cgibin_getenv("SCRIPT_NAME", sizeof("SCRIPT_NAME")-1 TSRMLS_CC);
 		} else {
 #endif
 			/* pre 4.3 behaviour, shouldn't be used but provides BC */
@@ -865,9 +875,9 @@ static void init_request_info(TSRMLS_D)
 #if ENABLE_PATHINFO_CHECK
 		}
 #endif
-		SG(request_info).request_method = sapi_cgibin_getenv("REQUEST_METHOD", 0 TSRMLS_CC);
+		SG(request_info).request_method = sapi_cgibin_getenv("REQUEST_METHOD", sizeof("REQUEST_METHOD")-1 TSRMLS_CC);
 		/* FIXME - Work out proto_num here */
-		SG(request_info).query_string = sapi_cgibin_getenv("QUERY_STRING", 0 TSRMLS_CC);
+		SG(request_info).query_string = sapi_cgibin_getenv("QUERY_STRING", sizeof("QUERY_STRING")-1 TSRMLS_CC);
 		/* some server configurations allow '..' to slip through in the
 		   translated path.   We'll just refuse to handle such a path. */
 		if (script_path_translated && !strstr(script_path_translated, "..")) {
@@ -877,7 +887,7 @@ static void init_request_info(TSRMLS_D)
 		SG(request_info).content_length = (content_length ? atoi(content_length) : 0);
 		
 		/* The CGI RFC allows servers to pass on unvalidated Authorization data */
-		auth = sapi_cgibin_getenv("HTTP_AUTHORIZATION",0 TSRMLS_CC);
+		auth = sapi_cgibin_getenv("HTTP_AUTHORIZATION", sizeof("HTTP_AUTHORIZATION")-1 TSRMLS_CC);
 		php_handle_auth_data(auth TSRMLS_CC);
 	}
 }
@@ -984,12 +994,12 @@ int main(int argc, char *argv[])
 #if PHP_FASTCGI
 	int max_requests = 500;
 	int requests = 0;
-	int fastcgi = !FCGX_IsCGI();
+	int fastcgi = fcgi_is_fastcgi();
 #ifndef PHP_WIN32
 	char *bindpath = NULL;
 #endif
 	int fcgi_fd = 0;
-	FCGX_Request request;
+	fcgi_request request;
 #ifdef PHP_WIN32
 	long impersonate = 0;
 #else
@@ -1169,14 +1179,10 @@ consult the installation file that came with this distribution, or visit \n\
 	/* for windows, socket listening is broken in the fastcgi library itself
 	   so dissabling this feature on windows till time is available to fix it */
 	if (bindpath) {
-		/* this must be done to make FCGX_OpenSocket work correctly 
-		   bug 23664 */
-		close(0);
 		/* Pass on the arg to the FastCGI library, with one exception.
 		 * If just a port is specified, then we prepend a ':' onto the
 		 * path (it's what the fastcgi library expects)
-		 */
-		
+		 */		
 		if (strchr(bindpath, ':') == NULL && is_port_number(bindpath)) {
 			char *tmp;
 
@@ -1184,10 +1190,10 @@ consult the installation file that came with this distribution, or visit \n\
 			tmp[0] = ':';
 			memcpy(tmp + 1, bindpath, strlen(bindpath) + 1);
 
-			fcgi_fd = FCGX_OpenSocket(tmp, 128);
+			fcgi_fd = fcgi_listen(tmp, 128);
 			free(tmp);
 		} else {
-			fcgi_fd = FCGX_OpenSocket(bindpath, 128);
+			fcgi_fd = fcgi_listen(bindpath, 128);
 		}
 		if (fcgi_fd < 0) {
 			fprintf(stderr, "Couldn't create FastCGI listen socket on port %s\n", bindpath);
@@ -1196,14 +1202,14 @@ consult the installation file that came with this distribution, or visit \n\
 #endif
 			return FAILURE;
 		}
-		fastcgi = !FCGX_IsCGI();
+		fastcgi = fcgi_is_fastcgi();
 	}
 #endif
 	if (fastcgi) {
 		/* How many times to run PHP scripts before dying */
 		if (getenv("PHP_FCGI_MAX_REQUESTS")) {
 			max_requests = atoi(getenv("PHP_FCGI_MAX_REQUESTS"));
-			if (!max_requests) {
+			if (max_requests < 0) {
 				fprintf(stderr, "PHP_FCGI_MAX_REQUESTS is not valid\n");
 				return FAILURE;
 			}
@@ -1214,14 +1220,13 @@ consult the installation file that came with this distribution, or visit \n\
 		php_import_environment_variables = cgi_php_import_environment_variables;
 
 		/* library is already initialized, now init our request */
-		FCGX_Init();
-		FCGX_InitRequest(&request, fcgi_fd, 0);
+		fcgi_init_request(&request, fcgi_fd);
 
 #ifndef PHP_WIN32
 	/* Pre-fork, if required */
 	if (getenv("PHP_FCGI_CHILDREN")) {
 		children = atoi(getenv("PHP_FCGI_CHILDREN"));
-		if (!children) {
+		if (children < 0) {
 			fprintf(stderr, "PHP_FCGI_CHILDREN is not valid\n");
 			return FAILURE;
 		}
@@ -1323,10 +1328,10 @@ consult the installation file that came with this distribution, or visit \n\
 			if (cfg_get_long("fastcgi.impersonate", &impersonate) == FAILURE) {
 				impersonate = 0;
 			}
-			if (impersonate) OS_SetImpersonate();
+			if (impersonate) fcgi_impersonate();
 		}
 #endif
-		while (!fastcgi || FCGX_Accept_r(&request) >= 0) {
+		while (!fastcgi || fcgi_accept_request(&request) >= 0) {
 #endif
 
 #if PHP_FASTCGI
@@ -1540,7 +1545,7 @@ consult the installation file that came with this distribution, or visit \n\
 		if (php_request_startup(TSRMLS_C) == FAILURE) {
 #if PHP_FASTCGI
 			if (fastcgi) {
-				FCGX_Finish_r(&request);
+				fcgi_finish_request(&request);
 			}
 #endif
 			php_module_shutdown(TSRMLS_C);
@@ -1679,7 +1684,7 @@ fastcgi_request_done:
 			/* only fastcgi will get here */
 			requests++;
 			if (max_requests && (requests == max_requests)) {
-				FCGX_Finish_r(&request);
+				fcgi_finish_request(&request);
 #ifndef PHP_WIN32
 				if (bindpath) {
 					free(bindpath);
