@@ -1,3 +1,96 @@
+2006-05-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      - Add some update notes
+
+    * (PHP_5_2)
+      NEWS:
+      - We have it now fully RFC compliant
+
+    * (PHP_5_2)
+      main/streams/memory.c:
+      - MFH No need to have this controlled by allow_url_fopen
+
+    * main/streams/memory.c:
+      - No need to have this controlled by allow_url_fopen
+
+    * (PHP_5_2)
+      ZendEngine2/zend_errors.h:
+      - Readd that E_RECOVERABLE_ERROR, dropping it is a bad idea
+
+    * (PHP_5_2)
+      ZendEngine2/zend_errors.h:
+      - Do not include E_RECOVERABLE_ERROR to the default mode E_ALL
+
+    * (PHP_5_2)
+      ext/standard/tests/file/stream_rfc2397_004.phpt
+      ext/standard/tests/file/stream_rfc2397_005.phpt
+      main/streams/streams.c:
+      - MFH Add strict compliant RFC2397 support (no //)
+
+    * ext/standard/tests/file/stream_rfc2397_004.phpt
+      ext/standard/tests/file/stream_rfc2397_004.phpt
+      ext/standard/tests/file/stream_rfc2397_005.phpt
+      ext/standard/tests/file/stream_rfc2397_005.phpt
+      main/streams/streams.c:
+      
+      - Add strict compliant RFC2397 support (no //)
+
+2006-05-14  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      NEWS:
+      MFH:
+      - Implemented Dmitry's const patch.
+      - Added support for "weekday" as relative item.
+      - Fixed bug #37368 (Incorrect timestamp returned for strtotime()).
+
+2006-05-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/file.c:
+      MFH: Fixed bug #36630 (umask not reset at the end of the request).
+
+2006-05-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      NEWS
+      NEWS
+      README.UPDATE_5_2:
+      - Update
+
+    * ext/standard/tests/file/stream_rfc2397_003.gif
+      ext/standard/tests/file/stream_rfc2397_003.gif
+      ext/standard/tests/file/stream_rfc2397_003.phpt
+      ext/standard/tests/file/stream_rfc2397_003.phpt
+      main/streams/memory.c:
+      
+      - RFC2397 add decoding
+
+    * main/streams/memory.c:
+      - Enforce stream mode correct
+
+    * ext/standard/tests/file/stream_rfc2397_001.phpt
+      ext/standard/tests/file/stream_rfc2397_002.phpt
+      ext/standard/tests/file/stream_rfc2397_002.phpt
+      main/streams/memory.c:
+      - Change to use dedicated stream ops
+
+    * ext/standard/tests/file/stream_rfc2397_002.phpt
+      main/streams/memory.c:
+      - RFC 2397 meta data handling
+
+2006-05-14  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * README.UPDATE_5_2
+      README.UPDATE_5_2:
+      
+      file README.UPDATE_5_2 was initially added on branch PHP_5_2.
+
 2006-05-13  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * (PHP_5_1)
