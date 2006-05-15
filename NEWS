@@ -1,6 +1,17 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, PHP 5.2.0
+- Optimized require_once/include_once (eliminated fopen() on second usage).
+  (Dmitry)
+- Optimized request shutdown seequence. Restoring ini directives now does
+  iteration only over modified directives instead of all. (Dmitry)
+- FastCGI SAPI improved. (Dmitry)
+  . Remived source compatibility with libfcgi
+  . Optimized acess to FastCGI environment variables using HashTable instead
+    of linear search
+  . Allowed PHP_FCGI_MAX_REQUESTS=0, that assumes no limit
+  . Allowed PHP_FCGI_CHILDREN=0, that assumes no worker children (FastCGI
+    requests are handled by main process itself).
 - Added new error mode E_RECOVERABLE_ERROR. (Derick, Marcus, Tony)
 - Added support for getenv() input filtering. (Rasmus)
 - Removed ze1 compatibility mode. (Marcus)
