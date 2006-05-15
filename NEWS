@@ -3,11 +3,11 @@ PHP                                                                        NEWS
 ?? ??? 2006, PHP 5.2.0
 - Optimized require_once/include_once (eliminated fopen() on second usage).
   (Dmitry)
-- Optimized request shutdown seequence. Restoring ini directives now does
-  iteration only over modified directives instead of all. (Dmitry)
+- Optimized request shutdown sequence. Restoring ini directives now
+  iterated over modified directives only instead of all. (Dmitry)
 - FastCGI SAPI improved. (Dmitry)
   . Removed source compatibility with libfcgi
-  . Optimized acess to FastCGI environment variables using HashTable instead
+  . Optimized access to FastCGI environment variables using HashTable instead
     of linear search
   . Allowed PHP_FCGI_MAX_REQUESTS=0, that assumes no limit
   . Allowed PHP_FCGI_CHILDREN=0, that assumes no worker children (FastCGI
