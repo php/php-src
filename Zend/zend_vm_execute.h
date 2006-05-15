@@ -1897,16 +1897,29 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	switch (Z_LVAL(opline->op2.u.constant)) {
 		case ZEND_INCLUDE_ONCE:
 		case ZEND_REQUIRE_ONCE: {
-				int dummy = 1;
 				zend_file_handle file_handle;
+				char cwd[MAXPATHLEN];
+				cwd_state state;
 
-				if (SUCCESS == zend_stream_open(Z_STRVAL_P(inc_filename), &file_handle TSRMLS_CC)) {
+				if (IS_ABSOLUTE_PATH(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename))) {
+					cwd[0] = '\0';
+				} else if (!VCWD_GETCWD(cwd, MAXPATHLEN)) {
+					cwd[0] = '\0';
+				}
+
+				state.cwd_length = strlen(cwd);
+				state.cwd = zend_strndup(cwd, state.cwd_length);
+
+				if (!virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
+				    zend_hash_exists(&EG(included_files), state.cwd, state.cwd_length+1)) {
+					failure_retval=1;
+				} else if (SUCCESS == zend_stream_open(Z_STRVAL_P(inc_filename), &file_handle TSRMLS_CC)) {
 
 					if (!file_handle.opened_path) {
-						file_handle.opened_path = estrndup(inc_filename->value.str.val, inc_filename->value.str.len);
+						file_handle.opened_path = estrndup(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename));
 					}
 
-					if (zend_hash_add(&EG(included_files), file_handle.opened_path, strlen(file_handle.opened_path)+1, (void *)&dummy, sizeof(int), NULL)==SUCCESS) {
+					if (zend_hash_add_empty_element(&EG(included_files), file_handle.opened_path, strlen(file_handle.opened_path)+1)==SUCCESS) {
 						new_op_array = zend_compile_file(&file_handle, (Z_LVAL(opline->op2.u.constant)==ZEND_INCLUDE_ONCE?ZEND_INCLUDE:ZEND_REQUIRE) TSRMLS_CC);
 						zend_destroy_file_handle(&file_handle TSRMLS_CC);
 					} else {
@@ -1920,7 +1933,7 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, Z_STRVAL_P(inc_filename));
 					}
 				}
-				break;
+				free(state.cwd);
 			}
 			break;
 		case ZEND_INCLUDE:
@@ -4318,16 +4331,29 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	switch (Z_LVAL(opline->op2.u.constant)) {
 		case ZEND_INCLUDE_ONCE:
 		case ZEND_REQUIRE_ONCE: {
-				int dummy = 1;
 				zend_file_handle file_handle;
+				char cwd[MAXPATHLEN];
+				cwd_state state;
 
-				if (SUCCESS == zend_stream_open(Z_STRVAL_P(inc_filename), &file_handle TSRMLS_CC)) {
+				if (IS_ABSOLUTE_PATH(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename))) {
+					cwd[0] = '\0';
+				} else if (!VCWD_GETCWD(cwd, MAXPATHLEN)) {
+					cwd[0] = '\0';
+				}
+
+				state.cwd_length = strlen(cwd);
+				state.cwd = zend_strndup(cwd, state.cwd_length);
+
+				if (!virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
+				    zend_hash_exists(&EG(included_files), state.cwd, state.cwd_length+1)) {
+					failure_retval=1;
+				} else if (SUCCESS == zend_stream_open(Z_STRVAL_P(inc_filename), &file_handle TSRMLS_CC)) {
 
 					if (!file_handle.opened_path) {
-						file_handle.opened_path = estrndup(inc_filename->value.str.val, inc_filename->value.str.len);
+						file_handle.opened_path = estrndup(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename));
 					}
 
-					if (zend_hash_add(&EG(included_files), file_handle.opened_path, strlen(file_handle.opened_path)+1, (void *)&dummy, sizeof(int), NULL)==SUCCESS) {
+					if (zend_hash_add_empty_element(&EG(included_files), file_handle.opened_path, strlen(file_handle.opened_path)+1)==SUCCESS) {
 						new_op_array = zend_compile_file(&file_handle, (Z_LVAL(opline->op2.u.constant)==ZEND_INCLUDE_ONCE?ZEND_INCLUDE:ZEND_REQUIRE) TSRMLS_CC);
 						zend_destroy_file_handle(&file_handle TSRMLS_CC);
 					} else {
@@ -4341,7 +4367,7 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, Z_STRVAL_P(inc_filename));
 					}
 				}
-				break;
+				free(state.cwd);
 			}
 			break;
 		case ZEND_INCLUDE:
@@ -7321,16 +7347,29 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	switch (Z_LVAL(opline->op2.u.constant)) {
 		case ZEND_INCLUDE_ONCE:
 		case ZEND_REQUIRE_ONCE: {
-				int dummy = 1;
 				zend_file_handle file_handle;
+				char cwd[MAXPATHLEN];
+				cwd_state state;
 
-				if (SUCCESS == zend_stream_open(Z_STRVAL_P(inc_filename), &file_handle TSRMLS_CC)) {
+				if (IS_ABSOLUTE_PATH(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename))) {
+					cwd[0] = '\0';
+				} else if (!VCWD_GETCWD(cwd, MAXPATHLEN)) {
+					cwd[0] = '\0';
+				}
+
+				state.cwd_length = strlen(cwd);
+				state.cwd = zend_strndup(cwd, state.cwd_length);
+
+				if (!virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
+				    zend_hash_exists(&EG(included_files), state.cwd, state.cwd_length+1)) {
+					failure_retval=1;
+				} else if (SUCCESS == zend_stream_open(Z_STRVAL_P(inc_filename), &file_handle TSRMLS_CC)) {
 
 					if (!file_handle.opened_path) {
-						file_handle.opened_path = estrndup(inc_filename->value.str.val, inc_filename->value.str.len);
+						file_handle.opened_path = estrndup(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename));
 					}
 
-					if (zend_hash_add(&EG(included_files), file_handle.opened_path, strlen(file_handle.opened_path)+1, (void *)&dummy, sizeof(int), NULL)==SUCCESS) {
+					if (zend_hash_add_empty_element(&EG(included_files), file_handle.opened_path, strlen(file_handle.opened_path)+1)==SUCCESS) {
 						new_op_array = zend_compile_file(&file_handle, (Z_LVAL(opline->op2.u.constant)==ZEND_INCLUDE_ONCE?ZEND_INCLUDE:ZEND_REQUIRE) TSRMLS_CC);
 						zend_destroy_file_handle(&file_handle TSRMLS_CC);
 					} else {
@@ -7344,7 +7383,7 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, Z_STRVAL_P(inc_filename));
 					}
 				}
-				break;
+				free(state.cwd);
 			}
 			break;
 		case ZEND_INCLUDE:
@@ -19416,16 +19455,29 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	switch (Z_LVAL(opline->op2.u.constant)) {
 		case ZEND_INCLUDE_ONCE:
 		case ZEND_REQUIRE_ONCE: {
-				int dummy = 1;
 				zend_file_handle file_handle;
+				char cwd[MAXPATHLEN];
+				cwd_state state;
 
-				if (SUCCESS == zend_stream_open(Z_STRVAL_P(inc_filename), &file_handle TSRMLS_CC)) {
+				if (IS_ABSOLUTE_PATH(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename))) {
+					cwd[0] = '\0';
+				} else if (!VCWD_GETCWD(cwd, MAXPATHLEN)) {
+					cwd[0] = '\0';
+				}
+
+				state.cwd_length = strlen(cwd);
+				state.cwd = zend_strndup(cwd, state.cwd_length);
+
+				if (!virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
+				    zend_hash_exists(&EG(included_files), state.cwd, state.cwd_length+1)) {
+					failure_retval=1;
+				} else if (SUCCESS == zend_stream_open(Z_STRVAL_P(inc_filename), &file_handle TSRMLS_CC)) {
 
 					if (!file_handle.opened_path) {
-						file_handle.opened_path = estrndup(inc_filename->value.str.val, inc_filename->value.str.len);
+						file_handle.opened_path = estrndup(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename));
 					}
 
-					if (zend_hash_add(&EG(included_files), file_handle.opened_path, strlen(file_handle.opened_path)+1, (void *)&dummy, sizeof(int), NULL)==SUCCESS) {
+					if (zend_hash_add_empty_element(&EG(included_files), file_handle.opened_path, strlen(file_handle.opened_path)+1)==SUCCESS) {
 						new_op_array = zend_compile_file(&file_handle, (Z_LVAL(opline->op2.u.constant)==ZEND_INCLUDE_ONCE?ZEND_INCLUDE:ZEND_REQUIRE) TSRMLS_CC);
 						zend_destroy_file_handle(&file_handle TSRMLS_CC);
 					} else {
@@ -19439,7 +19491,7 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, Z_STRVAL_P(inc_filename));
 					}
 				}
-				break;
+				free(state.cwd);
 			}
 			break;
 		case ZEND_INCLUDE:
