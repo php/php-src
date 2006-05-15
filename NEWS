@@ -6,7 +6,7 @@ PHP                                                                        NEWS
 - Optimized request shutdown seequence. Restoring ini directives now does
   iteration only over modified directives instead of all. (Dmitry)
 - FastCGI SAPI improved. (Dmitry)
-  . Remived source compatibility with libfcgi
+  . Removed source compatibility with libfcgi
   . Optimized acess to FastCGI environment variables using HashTable instead
     of linear search
   . Allowed PHP_FCGI_MAX_REQUESTS=0, that assumes no limit
