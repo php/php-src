@@ -1,3 +1,13 @@
+2006-05-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      zend_errors.h:
+      - Readd that E_RECOVERABLE_ERROR, dropping it is a bad idea
+
+    * (PHP_5_2)
+      zend_errors.h:
+      - Do not include E_RECOVERABLE_ERROR to the default mode E_ALL
+
 2006-05-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_2)
