@@ -220,6 +220,8 @@ struct _zend_executor_globals {
 	int lambda_count;
 
 	HashTable *ini_directives;
+	HashTable *modified_ini_directives;
+
 	zend_objects_store objects_store;
 	zval *exception;
 	zend_op *opline_before_exception;
