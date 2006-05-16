@@ -1,3 +1,41 @@
+2006-05-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      tests/bug37144.phpt:
+      Added test
+
+    * (PHP_5_1)
+      tests/bug37144.phpt:
+      -** empty log message ***
+
+    * tests/bug37144.phpt
+      tests/bug37144.phpt:
+      
+      Added test
+
+    * tests/bug37144.phpt
+      tests/bug37144.phpt:
+      
+      file bug37144.phpt was initially added on branch PHP_5_1.
+
+    * zend_execute.c
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      Optimized require_once/include_once (eliminated fopen() on second usage)
+
+    * zend_globals.h
+      zend_ini.c:
+      Optimized request shutdown sequence to iterate only over modified ini
+      directives
+
+    * (PHP_5_2)
+      zend_globals.h
+      zend_ini.c:
+      Optimized shutdown sequence to iterate only over modified ini directives
+
 2006-05-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_2)
