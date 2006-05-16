@@ -1,7 +1,7 @@
 --TEST--
 Bug #37276 (problems witch $_POST array)
 --SKIPIF--
-<?php if (php_sapi_name()=='cli') echo 'skip'; ?>
+<?php if (php_sapi_name()=='cli') die('skip'); ?>
 --POST_RAW--
 Content-Type: multipart/form-data; boundary=---------------------------20896060251896012921717172737
 -----------------------------20896060251896012921717172737
