@@ -171,7 +171,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 			path += 11;
 			max_memory = strtol(path, NULL, 10);
 			if (max_memory < 0) {
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Max memory must be >= 0");
+				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Max memory must be >= 0");
 				return NULL;
 			}
 		}
