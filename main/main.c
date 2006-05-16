@@ -1097,6 +1097,11 @@ int php_request_startup(TSRMLS_D)
 			zend_set_timeout(PG(max_input_time));
 		}
 
+		/* Disable realpath cache if safe_mode or open_basedir are set */
+		if (PG(safe_mode) || (PG(open_basedir) && *PG(open_basedir))) {
+			CWDG(realpath_cache_size_limit) = 0;
+		}
+
 		if (PG(expose_php)) {
 			sapi_add_header(SAPI_PHP_VERSION_HEADER, sizeof(SAPI_PHP_VERSION_HEADER)-1, 1);
 		}
