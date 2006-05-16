@@ -1100,7 +1100,7 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, char *dir, int mod
 		}
 		else {
 			/* find a top level directory we need to create */
-			while ( (p = strrchr(buf + offset, DEFAULT_SLASH)) || (p = strrchr(buf, DEFAULT_SLASH)) ) {
+			while ( (p = strrchr(buf + offset, DEFAULT_SLASH)) || ( offset !=1 && (p = strrchr(buf, DEFAULT_SLASH))) ) {
 				*p = '\0';
 				if (VCWD_STAT(buf, &sb) == 0) {
 					*p = DEFAULT_SLASH;

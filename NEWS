@@ -38,7 +38,9 @@ PHP                                                                        NEWS
 - Added pg_field_table() function. (Edin)
 - Added implementation of curl_multi_info_read(). (Brian)
 - Added RFC2397 (data: stream) support. (Marcus)
-- Fixed Bug #37457 (Crash when an exception is thrown in accept() method of 
+- Fixed bug #37395 (recursive mkdir() fails to create nonexistent directories 
+  in root dir). (Tony)
+- Fixed bug #37457 (Crash when an exception is thrown in accept() method of 
   FilterIterator). (Marcus)
 - Fixed bug #37416 (iterator_to_array() hides exceptions thrown in rewind()
   method). (Tony)
