@@ -1,3 +1,88 @@
+2006-05-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      ZendEngine2/tests/bug37144.phpt:
+      Added test
+
+    * ZendEngine2/tests/bug37144.phpt
+      ZendEngine2/tests/bug37144.phpt:
+      
+      Added test
+
+    * ZendEngine2/tests/bug37144.phpt
+      ZendEngine2/tests/bug37144.phpt:
+      
+      file bug37144.phpt was initially added on branch PHP_5_1.
+
+2006-05-15  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * (PHP_5_2)
+      NEWS:
+      My bad.
+
+    * (PHP_5_2)
+      NEWS:
+      Fugbix NEWS entries.
+
+    * (PHP_5_2)
+      NEWS:
+      Fugbix typo.
+
+2006-05-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/tests/bug37144.phpt:
+      -** empty log message ***
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h:
+      Optimized require_once/include_once (eliminated fopen() on second usage)
+
+    * ZendEngine2/zend_globals.h
+      ZendEngine2/zend_ini.c:
+      Optimized request shutdown sequence to iterate only over modified ini
+      directives
+
+    * (PHP_5_2)
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_ini.c:
+      Optimized shutdown sequence to iterate only over modified ini directives
+
+    * sapi/cgi/cgi_main.c
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.h:
+      - Removed source compatibility with libfcgi
+      - Optimized access to FastCGI environment using HashTable instead of
+      linear sear
+      ch
+      - Allowed PHP_FCGI_MAX_REQUESTS=0 to disable PHP die
+      - Allowed PHP_FCGI_CHILDREN=0 to disable PHP spawn workers
+
+    * (PHP_5_2)
+      sapi/cgi/cgi_main.c
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.h:
+      - Removed source compatibility with libfcgi
+      - Optimized access to FastCGI environment using HashTable instead of
+      linear search
+      - Allowed PHP_FCGI_MAX_REQUESTS=0 to disable PHP die
+      - Allowed PHP_FCGI_CHILDREN=0 to disable PHP spawn workers
+
+2006-05-15  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      ext/oci8/config.w32
+      ext/oci8/config.w32:
+      MFH: disable OCILobRead2() support on Win32
+
+    * ext/oci8/config.w32:
+      disable OCILobRead2() support on Win32
+
 2006-05-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_2)
