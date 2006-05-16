@@ -1173,7 +1173,9 @@ static inline void spl_filter_it_fetch(zval *zthis, spl_dual_it_object *intern T
 			}
 			zval_ptr_dtor(&retval);
 		}
-
+		if (EG(exception)) {
+			return;
+		}
 		intern->inner.iterator->funcs->move_forward(intern->inner.iterator TSRMLS_CC);
 	}
 	spl_dual_it_free(intern TSRMLS_CC);
@@ -1653,11 +1655,14 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern TSRMLS_DC)
 			zend_call_method_with_0_params(&intern->inner.zobject, intern->inner.ce, NULL, "haschildren", &retval);
 			if (zend_is_true(retval)) {
 				zend_call_method_with_0_params(&intern->inner.zobject, intern->inner.ce, NULL, "getchildren", &zchildren);
-				if (EG(exception) && intern->u.caching.flags & CIT_CATCH_GET_CHILD) {
-					zend_clear_exception(TSRMLS_C);
+				if (EG(exception)) {
 					if (zchildren) {
 						zval_ptr_dtor(&zchildren);
 					}
+					if (intern->u.caching.flags & CIT_CATCH_GET_CHILD) {
+						zend_clear_exception(TSRMLS_C);
+					}
+					return;
 				} else {
 					INIT_PZVAL(&zflags);
 					ZVAL_LONG(&zflags, intern->u.caching.flags & CIT_PUBLIC);
