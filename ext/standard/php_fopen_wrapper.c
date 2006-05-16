@@ -207,7 +207,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 		pathdup = estrndup(path + 6, strlen(path + 6));
 		p = strstr(pathdup, "/resource=");
 		if (!p) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "No URL resource specified.");
+			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "No URL resource specified.");
 			efree(pathdup);
 			return NULL;
 		}
