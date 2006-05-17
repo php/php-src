@@ -1,3 +1,77 @@
+2006-05-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      - '_' is valid in test blocks
+
+2006-05-16  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      tests/basic/021.phpt
+      tests/basic/021.phpt:
+      fix test
+
+2006-05-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/php_fopen_wrapper.c:
+      MFB: Make filters without a resource throw E_RECOVERABLE_ERROR rather then
+      E_ERROR
+
+    * (PHP_5_2)
+      ext/standard/php_fopen_wrapper.c:
+      Make filters without a resource throw E_RECOVERABLE_ERROR rather then
+      E_ERROR
+
+2006-05-16  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/file/mkdir-001.phpt
+      ext/standard/tests/file/mkdir-002.phpt
+      ext/standard/tests/file/mkdir-003.phpt
+      ext/standard/tests/file/mkdir-004.phpt
+      ext/standard/tests/file/mkdir-005.phpt:
+      new mkdir tests
+
+    * ext/standard/tests/file/mkdir-001.phpt
+      ext/standard/tests/file/mkdir-001.phpt
+      ext/standard/tests/file/mkdir-002.phpt
+      ext/standard/tests/file/mkdir-002.phpt
+      ext/standard/tests/file/mkdir-003.phpt
+      ext/standard/tests/file/mkdir-003.phpt
+      ext/standard/tests/file/mkdir-004.phpt
+      ext/standard/tests/file/mkdir-004.phpt
+      ext/standard/tests/file/mkdir-005.phpt
+      ext/standard/tests/file/mkdir-005.phpt:
+      
+      file mkdir-001.phpt was initially added on branch PHP_5_2.
+
+    * main/streams/plain_wrapper.c:
+      MFB: fix #37395 (recursive mkdir() fails to create nonexistent directories
+      in root dir)
+
+    * (PHP_5_2)
+      NEWS
+      main/streams/plain_wrapper.c:
+      fix #37395 (recursive mkdir() fails to create nonexistent directories in
+      root dir)
+
+2006-05-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      NEWS:
+      - MFH Fixed Bug #37457 (Crash when an exception is thrown in accept()
+      method of FilterIterator)
+
+2006-05-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/main.c:
+      MFB: Disable realpath cache when open_basedir or safe_mode are enabled on a
+      per-request basis.
+
+    * (PHP_5_2)
+      NEWS
+      main/main.c:
+      Disable realpath cache when open_basedir or safe_mode are enabled on a
+      per-request basis.
+
 2006-05-15  Dmitry Stogov  <dmitry@zend.com>
 
     * (PHP_5_2)
