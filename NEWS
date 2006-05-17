@@ -42,6 +42,7 @@ PHP                                                                        NEWS
   in root dir). (Tony)
 - Fixed bug #37457 (Crash when an exception is thrown in accept() method of 
   FilterIterator). (Marcus)
+- Fixed bug #37456 (DOMElement->setAttribute() loops forever). (Rob)
 - Fixed bug #37416 (iterator_to_array() hides exceptions thrown in rewind()
   method). (Tony)
 - Fixed bug #37413 (Rejected versions of flex that don't work). (Ilia)
