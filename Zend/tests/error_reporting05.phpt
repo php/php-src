@@ -30,5 +30,5 @@ echo "Done\n";
 Notice: Undefined variable: undef_value in %s on line %d
 
 Notice: Undefined variable: undef_name in %s on line %d
-int(8191)
+int(6143)
 Done
