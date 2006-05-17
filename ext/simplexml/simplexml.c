@@ -1055,7 +1055,7 @@ static int sxe_objects_compare(zval *object1, zval *object2 TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-/* {{{ array SimpleXMLElement::xpath(string path)
+/* {{{ proto array SimpleXMLElement::xpath(string path)
    Runs XPath query on the XML data */
 SXE_METHOD(xpath)
 {
@@ -1142,6 +1142,8 @@ SXE_METHOD(xpath)
 	xmlXPathFreeObject(retval);
 }
 
+/* {{{ proto bool SimpleXMLElement::registerXPathNamespace(string prefix, string ns)
+   Creates a prefix/ns context for the next XPath query */
 SXE_METHOD(registerXPathNamespace)
 {
 	php_sxe_object    *sxe;
