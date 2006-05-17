@@ -30,6 +30,6 @@ var_dump(error_reporting());
 echo "Done\n";
 ?>
 --EXPECTF--	
-int(8191)
-int(8183)
+int(6143)
+int(6135)
 Done
