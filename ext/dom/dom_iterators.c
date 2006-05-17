@@ -162,7 +162,7 @@ static int php_dom_iterator_current_key(zend_object_iterator *iter, char **str_k
 	object = (zval *)iterator->intern.data;
 
 	if (instanceof_function(Z_OBJCE_P(object), dom_nodelist_class_entry TSRMLS_CC)) {
-		*int_key = iter->index - 1;
+		*int_key = iter->index;
 		return HASH_KEY_IS_LONG;
 	} else {
 		curobj = iterator->curobj;
@@ -187,7 +187,7 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC)
 	dom_object *intern;
 	dom_object *nnmap;
 	dom_nnodemap_object *objmap;
-	int ret, previndex=1;
+	int ret, previndex=0;
 	HashTable *nodeht;
 	zval **entry;
 
@@ -228,9 +228,9 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC)
 			}
 		} else {
 			if (objmap->nodetype == XML_ENTITY_NODE) {
-				curnode = php_dom_libxml_hash_iter(objmap->ht, iter->index - 1);
+				curnode = php_dom_libxml_hash_iter(objmap->ht, iter->index);
 			} else {
-				curnode = php_dom_libxml_notation_iter(objmap->ht, iter->index - 1);
+				curnode = php_dom_libxml_notation_iter(objmap->ht, iter->index);
 			}
 		}
 	}
@@ -268,7 +268,7 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
 	}
 	iterator = emalloc(sizeof(php_dom_iterator));
-	
+
 	object->refcount++;
 	iterator->intern.data = (void*)object;
 	iterator->intern.funcs = &php_dom_iterator_funcs;

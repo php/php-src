@@ -860,6 +860,8 @@ void node_list_unlink(xmlNodePtr node TSRMLS_DC)
 		if (wrapper != NULL ) {
 			xmlUnlinkNode(node);
 		} else {
+			if (node->type == XML_ENTITY_REF_NODE)
+				break;
 			node_list_unlink(node->children TSRMLS_CC);
 
 			switch (node->type) {
