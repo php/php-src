@@ -53,12 +53,12 @@ typedef zval **(*zend_object_get_property_ptr_ptr_t)(zval *object, zval *member 
 
 /* Used to set object value. Can be used to override assignments and scalar
    write ops (like ++, +=) on the object */
-typedef void (*zend_object_set_t)(zval **property, zval *value TSRMLS_DC);
+typedef void (*zend_object_set_t)(zval **object, zval *value TSRMLS_DC);
 
 /* Used to get object value. Can be used when converting object value to
  * one of the basic types and when using scalar ops (like ++, +=) on the object
  */
-typedef zval* (*zend_object_get_t)(zval *property TSRMLS_DC);
+typedef zval* (*zend_object_get_t)(zval *object TSRMLS_DC);
 
 /* Used to check if a property of the object exists */
 /* param has_set_exists:
