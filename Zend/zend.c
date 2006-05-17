@@ -1088,7 +1088,7 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 		if (!file_handle) {
 			continue;
 		}
-		EG(active_op_array) = zend_compile_file(file_handle, ZEND_INCLUDE TSRMLS_CC);
+		EG(active_op_array) = zend_compile_file(file_handle, type TSRMLS_CC);
 		if(file_handle->opened_path) {
 			int dummy=1;
 			zend_hash_add(&EG(included_files), file_handle->opened_path, strlen(file_handle->opened_path)+1, (void *)&dummy, sizeof(int), NULL);
