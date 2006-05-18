@@ -78,3 +78,12 @@ Collection::key
 TestFilter::accept
 string(17) "Failure in Accept"
 ===DONE===
+--UEXPECTF--
+Collection::__construct
+Collection::rewind
+Collection::valid
+Collection::current
+Collection::key
+TestFilter::accept
+unicode(17) "Failure in Accept"
+===DONE===
