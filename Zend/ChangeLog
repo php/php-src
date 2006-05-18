@@ -1,3 +1,36 @@
+2006-05-17  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      tests/error_reporting01.phpt
+      tests/error_reporting05.phpt
+      tests/error_reporting06.phpt
+      tests/error_reporting07.phpt
+      tests/error_reporting10.phpt:
+      fix tests
+
+2006-05-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      zend_errors.h:
+      - Fix oversight and drop E_STRICT in 5.x series
+
+2006-05-17  Antony Dovgal  <antony@zend.com>
+
+    * zend_object_handlers.h
+      zend_object_handlers.h:
+      change argument name, it should be "object" not "property"
+
+2006-05-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend.c:
+      Fixed bug #35512 (Lack of read permission on main script results in
+        E_WARNING rather then E_ERROR).
+
+    * (PHP_5_2)
+      zend.c:
+      Fixed bug #35512 (Lack of read permission on main script results in
+      E_WARNING rather then E_ERROR).
+
 2006-05-15  Dmitry Stogov  <dmitry@zend.com>
 
     * (PHP_5_2)
