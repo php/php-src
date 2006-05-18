@@ -432,7 +432,7 @@ int zend_user_serialize(zval *object, unsigned char **buffer, zend_uint *buf_len
 	}
 
 	if (result == FAILURE) {
-		zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "%v::serialize() must return a string or NULL", ce->name);
+		zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "%s::serialize() must return a string or NULL", ce->name);
 	}
 	return result;
 }
