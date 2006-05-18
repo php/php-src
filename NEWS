@@ -4,6 +4,8 @@ PHP 4                                                                      NEWS
 - Updated PCRE to version 6.6. (Andrei)
 - Added overflow checks to wordwrap() function. (Ilia)
 - Added a check for special characters in the session name. (Ilia)
+- Fixed bug #37510 session_regenerate_id changes session_id() even on failure).
+  (Hannes)
 - Fixed bug #34360 (bad gif size) (Pierre)
 - Fixed bug #37348 (make PEAR install ignore open_basedir). (Ilia)
 - Fixed bug #37346 (invalid colormap format) (Pierre)
