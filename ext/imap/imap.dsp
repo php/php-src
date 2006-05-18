@@ -151,10 +151,6 @@ LINK32=link.exe
 
 SOURCE=.\php_imap.c
 # End Source File
-# Begin Source File
-
-SOURCE=..\..\win32\sendmail.c
-# End Source File
 # End Group
 # Begin Group "Header Files"
 
