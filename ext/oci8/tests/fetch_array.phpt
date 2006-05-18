@@ -209,58 +209,100 @@ array(4) {
   ["VALUE"]=>
   string(1) "1"
 }
-array(2) {
+array(4) {
   [0]=>
   string(1) "1"
+  ["ID"]=>
+  string(1) "1"
   [1]=>
+  string(1) "1"
+  ["VALUE"]=>
   string(1) "1"
 }
-array(2) {
+array(4) {
   [0]=>
   string(1) "1"
+  ["ID"]=>
+  string(1) "1"
   [1]=>
+  string(1) "1"
+  ["VALUE"]=>
   string(1) "1"
 }
-array(2) {
+array(4) {
   [0]=>
   string(1) "1"
+  ["ID"]=>
+  string(1) "1"
   [1]=>
+  string(1) "1"
+  ["VALUE"]=>
   string(1) "1"
 }
-array(5) {
+array(10) {
   [0]=>
   string(1) "1"
+  ["ID"]=>
+  string(1) "1"
   [1]=>
+  string(1) "1"
+  ["VALUE"]=>
   string(1) "1"
   [2]=>
   NULL
+  ["BLOB"]=>
+  NULL
   [3]=>
+  NULL
+  ["CLOB"]=>
   NULL
   [4]=>
   NULL
+  ["STRING"]=>
+  NULL
 }
-array(5) {
+array(10) {
   [0]=>
+  string(1) "1"
+  ["ID"]=>
   string(1) "1"
   [1]=>
   string(1) "1"
+  ["VALUE"]=>
+  string(1) "1"
   [2]=>
+  NULL
+  ["BLOB"]=>
   NULL
   [3]=>
   NULL
+  ["CLOB"]=>
+  NULL
   [4]=>
   NULL
+  ["STRING"]=>
+  NULL
 }
-array(5) {
+array(10) {
   [0]=>
+  string(1) "1"
+  ["ID"]=>
   string(1) "1"
   [1]=>
   string(1) "1"
+  ["VALUE"]=>
+  string(1) "1"
   [2]=>
+  NULL
+  ["BLOB"]=>
   NULL
   [3]=>
   NULL
+  ["CLOB"]=>
+  NULL
   [4]=>
+  NULL
+  ["STRING"]=>
   NULL
 }
 Done
