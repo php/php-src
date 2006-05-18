@@ -69,8 +69,10 @@ echo "Done\n";
 int(32)
 bool(true)
 string(32) "some string here. string, I said"
-array(1) {
+array(2) {
   [0]=>
+  string(32) "some string here. string, I said"
+  ["BLOB"]=>
   string(32) "some string here. string, I said"
 }
 Done
