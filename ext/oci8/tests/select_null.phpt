@@ -16,8 +16,10 @@ var_dump(oci_fetch_array($stmt, OCI_RETURN_NULLS));
 echo "Done\n";
 ?>
 --EXPECT--	
-array(1) {
+array(2) {
   [0]=>
+  NULL
+  ["NULL"]=>
   NULL
 }
 Done
