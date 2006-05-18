@@ -32,6 +32,7 @@ PHP                                                                        NEWS
   . Added full caching support and ArrayAccess to CachingIterator.
   . Added array functions to ArrayObject/ArrayIterator and made them faster.
   . Added support for reading csv and skipping empty lines in SplFileObject.
+  . Added CachingIterator::TOSTRING_USE_INNER, calls inner iterator __toString.
 - Added run-time configurable backtracking/recursion limits for PCRE. (Andrei)
 - Added preg_last_error(). (Andrei)
 - Added support for Apache 2.2 handler in the Windows distro. (Edin)
