@@ -835,6 +835,18 @@ int spl_dual_it_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 
 static inline int spl_dual_it_fetch(spl_dual_it_object *intern, int check_more TSRMLS_DC);
 
+static inline int spl_cit_check_flags(int flags)
+{
+	int cnt = 0;
+
+	cnt += (flags & CIT_CALL_TOSTRING) ? 1 : 0;
+	cnt += (flags & CIT_TOSTRING_USE_KEY) ? 1 : 0;
+	cnt += (flags & CIT_TOSTRING_USE_CURRENT) ? 1 : 0;
+	cnt += (flags & CIT_TOSTRING_USE_INNER) ? 1 : 0;
+	
+	return cnt <= 1 ? SUCCESS : FAILURE;
+}
+
 static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce_base, zend_class_entry *ce_inner, dual_it_type dit_type)
 {
 	zval                 *zobject, *retval;
@@ -879,10 +891,9 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 				return NULL;
 			}
-			if (((flags & CIT_CALL_TOSTRING) && (flags & (CIT_TOSTRING_USE_KEY|CIT_TOSTRING_USE_CURRENT)))
-			|| ((flags & (CIT_TOSTRING_USE_KEY|CIT_TOSTRING_USE_CURRENT)) == (CIT_TOSTRING_USE_KEY|CIT_TOSTRING_USE_CURRENT))) {
+			if (spl_cit_check_flags(flags) != SUCCESS) {
 				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
-				zend_throw_exception(spl_ce_InvalidArgumentException, "Flags must contain only one of CATCH_GET_CHILD, CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT", 0 TSRMLS_CC);
+				zend_throw_exception(spl_ce_InvalidArgumentException, "Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_CURRENT", 0 TSRMLS_CC);
 				return NULL;
 			}
 			intern->u.caching.flags |= flags & CIT_PUBLIC;
@@ -1661,8 +1672,9 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern TSRMLS_DC)
 					}
 					if (intern->u.caching.flags & CIT_CATCH_GET_CHILD) {
 						zend_clear_exception(TSRMLS_C);
+					} else {
+						return;
 					}
-					return;
 				} else {
 					INIT_PZVAL(&zflags);
 					ZVAL_LONG(&zflags, intern->u.caching.flags & CIT_PUBLIC);
@@ -1670,49 +1682,26 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern TSRMLS_DC)
 					zval_ptr_dtor(&zchildren);
 				}
 			}
-			zval_ptr_dtor(&retval);		
+			zval_ptr_dtor(&retval);
 		}
-		if (intern->u.caching.flags & CIT_CALL_TOSTRING) {
-			if (Z_TYPE_P(intern->current.data) == IS_OBJECT) {
-				zval expr_copy;
-				if (intern->current.data->value.obj.handlers->cast_object &&
-					intern->current.data->value.obj.handlers->cast_object(intern->current.data, &expr_copy, IS_STRING TSRMLS_CC) == SUCCESS)
-				{
-					ALLOC_ZVAL(intern->u.caching.zstr);
-					*intern->u.caching.zstr = expr_copy;
-					INIT_PZVAL(intern->u.caching.zstr);
-					zval_copy_ctor(intern->u.caching.zstr);
-					zval_dtor(&expr_copy);
-				} else {
-					zend_class_entry *ce_data = spl_get_class_entry(intern->current.data TSRMLS_CC);
-					if (ce_data && zend_hash_exists(&ce_data->function_table, "__tostring", sizeof("__tostring"))) {
-						zend_call_method_with_0_params(&intern->current.data, ce_data, NULL, "__tostring", &intern->u.caching.zstr);
-					} else {
-						ALLOC_ZVAL(intern->u.caching.zstr);
-						*intern->u.caching.zstr = *intern->current.data;
-						zval_copy_ctor(intern->u.caching.zstr);
-						INIT_PZVAL(intern->u.caching.zstr);
-						convert_to_string(intern->u.caching.zstr);
-					}
-				}
+		if (intern->u.caching.flags & (CIT_TOSTRING_USE_INNER|CIT_CALL_TOSTRING)) {
+			int  use_copy;
+			zval expr_copy;
+			ALLOC_ZVAL(intern->u.caching.zstr);
+			if (intern->u.caching.flags & CIT_TOSTRING_USE_INNER) {
+				*intern->u.caching.zstr = *intern->inner.zobject;
 			} else {
-				/* This version requires zend_make_printable_zval() being able to
-				 * call __toString().
-				 */
-				int  use_copy;
-				zval expr_copy;
-				ALLOC_ZVAL(intern->u.caching.zstr);
 				*intern->u.caching.zstr = *intern->current.data;
-				zend_make_printable_zval(intern->u.caching.zstr, &expr_copy, &use_copy);
-				if (use_copy) {
-					*intern->u.caching.zstr = expr_copy;
-					INIT_PZVAL(intern->u.caching.zstr);
-					zval_copy_ctor(intern->u.caching.zstr);
-					zval_dtor(&expr_copy);
-				} else {
-					INIT_PZVAL(intern->u.caching.zstr);
-					zval_copy_ctor(intern->u.caching.zstr);
-				}
+			}
+			zend_make_printable_zval(intern->u.caching.zstr, &expr_copy, &use_copy);
+			if (use_copy) {
+				*intern->u.caching.zstr = expr_copy;
+				INIT_PZVAL(intern->u.caching.zstr);
+				zval_copy_ctor(intern->u.caching.zstr);
+				zval_dtor(&expr_copy);
+			} else {
+				INIT_PZVAL(intern->u.caching.zstr);
+				zval_copy_ctor(intern->u.caching.zstr);
 			}
 		}
 		spl_dual_it_next(intern, 0 TSRMLS_CC);	
@@ -1787,7 +1776,7 @@ SPL_METHOD(CachingIterator, __toString)
 
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	if (!(intern->u.caching.flags & (CIT_CALL_TOSTRING|CIT_TOSTRING_USE_KEY|CIT_TOSTRING_USE_CURRENT)))	{
+	if (!(intern->u.caching.flags & (CIT_CALL_TOSTRING|CIT_TOSTRING_USE_KEY|CIT_TOSTRING_USE_CURRENT|CIT_TOSTRING_USE_INNER)))	{
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "%v does not fetch string value (see CachingIterator::__construct)", Z_OBJCE_P(getThis())->name);
 	}
 	if (intern->u.caching.flags & CIT_TOSTRING_USE_KEY) {
@@ -1799,8 +1788,10 @@ SPL_METHOD(CachingIterator, __toString)
 			return;
 		}
 	} else if (intern->u.caching.flags & CIT_TOSTRING_USE_CURRENT) {
-		RETVAL_ZVAL(intern->current.data, 1, 0);
-		
+		*return_value = *intern->current.data;
+		zval_copy_ctor(return_value);
+		convert_to_string(return_value);
+		INIT_PZVAL(return_value);
 		return;
 	}
 	if (intern->u.caching.zstr) {
@@ -1931,13 +1922,16 @@ SPL_METHOD(CachingIterator, setFlags)
 		return;
 	}
 
-	if (((flags & CIT_CALL_TOSTRING) && (flags & (CIT_TOSTRING_USE_KEY|CIT_TOSTRING_USE_CURRENT)))
-	|| ((flags & (CIT_TOSTRING_USE_KEY|CIT_TOSTRING_USE_CURRENT)) == (CIT_TOSTRING_USE_KEY|CIT_TOSTRING_USE_CURRENT))) {
-		zend_throw_exception(spl_ce_InvalidArgumentException , "Flags must contain only one of CIT_CALL_TOSTRING, CIT_TOSTRING_USE_KEY, CIT_TOSTRING_USE_CURRENT", 0 TSRMLS_CC);
+	if (spl_cit_check_flags(flags) != SUCCESS) {
+		zend_throw_exception(spl_ce_InvalidArgumentException , "Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER", 0 TSRMLS_CC);
 		return;
 	}
-	if ((intern->u.caching.flags & CIT_CALL_TOSTRING) != 0 && (flags & ~CIT_CALL_TOSTRING) == 0) {
+	if ((intern->u.caching.flags & CIT_CALL_TOSTRING) != 0 && (flags & CIT_CALL_TOSTRING) == 0) {
 		zend_throw_exception(spl_ce_InvalidArgumentException, "Unsetting flag CALL_TO_STRING is not possible", 0 TSRMLS_CC);
+		return;
+	}
+	if ((intern->u.caching.flags & CIT_TOSTRING_USE_INNER) != 0 && (flags & CIT_TOSTRING_USE_INNER) == 0) {
+		zend_throw_exception(spl_ce_InvalidArgumentException, "Unsetting flag TOSTRING_USE_INNER is not possible", 0 TSRMLS_CC);
 		return;
 	}
 	if ((flags && CIT_FULL_CACHE) != 0 && (intern->u.caching.flags & CIT_FULL_CACHE) == 0) {
@@ -2535,6 +2529,7 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	REGISTER_SPL_CLASS_CONST_LONG(CachingIterator, "CATCH_GET_CHILD",      CIT_CATCH_GET_CHILD); 
 	REGISTER_SPL_CLASS_CONST_LONG(CachingIterator, "TOSTRING_USE_KEY",     CIT_TOSTRING_USE_KEY);
 	REGISTER_SPL_CLASS_CONST_LONG(CachingIterator, "TOSTRING_USE_CURRENT", CIT_TOSTRING_USE_CURRENT);
+	REGISTER_SPL_CLASS_CONST_LONG(CachingIterator, "TOSTRING_USE_INNER",CIT_TOSTRING_USE_INNER);
 	REGISTER_SPL_CLASS_CONST_LONG(CachingIterator, "FULL_CACHE",           CIT_FULL_CACHE); 
 
 	REGISTER_SPL_SUB_CLASS_EX(RecursiveCachingIterator, CachingIterator, spl_dual_it_new, spl_funcs_RecursiveCachingIterator);
