@@ -686,7 +686,7 @@ ZEND_API void zend_exception_error(zval *exception TSRMLS_DC)
 				file = NULL;
 				line = NULL;
 			}
-			zend_error_va(E_WARNING, file ? Z_STRVAL_P(file) : NULL, line ? Z_LVAL_P(line) : 0, "Uncaught %v in exception handling during call to %v::__tostring()", Z_OBJCE_P(EG(exception))->name, ce_exception->name);
+			zend_error_va(E_WARNING, file ? Z_STRVAL_P(file) : NULL, line ? Z_LVAL_P(line) : 0, "Uncaught %s in exception handling during call to %s::__tostring()", Z_OBJCE_P(EG(exception))->name, ce_exception->name);
 		}
 
 		str = zend_read_property(default_exception_ce, exception, "string", sizeof("string")-1, 1 TSRMLS_CC);
