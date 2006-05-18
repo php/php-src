@@ -1643,6 +1643,16 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 		fetch_mode = mode;
 	}
 
+	if (!(fetch_mode & PHP_OCI_NUM) && !(fetch_mode & PHP_OCI_ASSOC)) {
+		/* none of the modes present, use the default one */
+		if (mode & PHP_OCI_ASSOC) {
+			fetch_mode |= PHP_OCI_ASSOC;
+		} 
+		if (mode & PHP_OCI_NUM) {
+			fetch_mode |= PHP_OCI_NUM;
+		}
+	}
+
 	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
 
 	if (php_oci_statement_fetch(statement, nrows TSRMLS_CC)) {
