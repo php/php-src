@@ -3,7 +3,7 @@
 --SKIPIF--
 <?php 
 	if (!extension_loaded("wddx")) print "skip"; 
-    if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+	if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
@@ -56,7 +56,7 @@ array(1) {
   array(1) {
     ["content_113300831086270200"]=>
     array(1) {
-      ["113301888545229100"]=>
+      [113301888545229100]=>
       array(3) {
         ["max"]=>
         int(10)
