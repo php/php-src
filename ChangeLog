@@ -1,3 +1,76 @@
+2006-05-17  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ZendEngine2/tests/error_reporting01.phpt
+      ZendEngine2/tests/error_reporting05.phpt
+      ZendEngine2/tests/error_reporting06.phpt
+      ZendEngine2/tests/error_reporting07.phpt
+      ZendEngine2/tests/error_reporting10.phpt:
+      fix tests
+
+2006-05-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_errors.h:
+      - Fix oversight and drop E_STRICT in 5.x series
+
+2006-05-17  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/dom/tests/bug37456.phpt
+      ext/dom/tests/dom.ent
+      ext/dom/tests/dom.xml:
+      add tests
+
+    * (PHP_5_2)
+      ext/dom/dom_iterators.c
+      ext/dom/php_dom.c:
+      Synch from HEAD
+      - Fix bug #37456 (DOMElement->setAttribute() loops forever)
+      - update iterators for engine change merged from HEAD
+
+    * ext/dom/tests/bug37456.phpt
+      ext/dom/tests/bug37456.phpt
+      ext/dom/tests/dom.ent
+      ext/dom/tests/dom.ent
+      ext/dom/tests/dom.xml
+      ext/dom/tests/dom.xml:
+      
+      add test
+
+    * ext/dom/php_dom.c:
+      Fix bug #37456 (DOMElement->setAttribute() loops forever)
+
+2006-05-17  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_object_handlers.h:
+      change argument name, it should be "object" not "property"
+
+2006-05-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      Bug fixing news
+
+    * ZendEngine2/zend.c:
+      Fixed bug #35512 (Lack of read permission on main script results in
+        E_WARNING rather then E_ERROR).
+
+    * (PHP_5_2)
+      ZendEngine2/zend.c:
+      Fixed bug #35512 (Lack of read permission on main script results in
+      E_WARNING rather then E_ERROR).
+
+2006-05-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/simplexml.c:
+      - Proto fix/add
+
 2006-05-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * run-tests.php:
