@@ -34,7 +34,7 @@ if (!oci_execute($s)) {
 	die("oci_execute(select) failed!\n");
 }
 
-$row = oci_fetch_array($s, OCI_RETURN_NULLS + OCI_RETURN_LOBS);
+$row = oci_fetch_array($s, OCI_NUM + OCI_RETURN_NULLS + OCI_RETURN_LOBS);
 var_dump($row);
 
 var_dump(oci_field_is_null($s, -1));

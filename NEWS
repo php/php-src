@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, PHP 5.?.?
+- Fixed bug #37487 (oci_fetch_array() array-type should always default to
+  OCI_BOTH). (Tony)
 - Fixed bug #37416 (iterator_to_array() hides exceptions thrown in rewind() 
   method). (Tony) 
 - Fixed bug #37392 (Unnecessary call to OCITransRollback() at the end of 
