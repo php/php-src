@@ -846,7 +846,7 @@ zend_function_entry basic_functions[] = {
 	PHP_FE(output_add_rewrite_var,											NULL)
 	PHP_FE(output_reset_rewrite_vars,										NULL)
 
-	PHP_FE(php_get_tmpdir,						NULL)
+	PHP_FE(sys_get_temp_dir,						NULL)
 
 	{NULL, NULL, NULL}
 };
