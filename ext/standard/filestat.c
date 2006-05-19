@@ -504,7 +504,6 @@ PHP_FUNCTION(touch)
 {
 	zval **filename, **filetime, **fileatime;
 	int ret;
-	struct stat sb;
 	FILE *file;
 	struct utimbuf newtimebuf;
 	struct utimbuf *newtime = NULL;
@@ -537,8 +536,7 @@ PHP_FUNCTION(touch)
 	}
 
 	/* create the file if it doesn't exist already */
-	ret = VCWD_STAT(Z_STRVAL_PP(filename), &sb);
-	if (ret == -1) {
+	if (VCWD_ACCESS(Z_STRVAL_PP(filename), F_OK) != 0) {
 		file = VCWD_FOPEN(Z_STRVAL_PP(filename), "w");
 		if (file == NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create file %s because %s", Z_STRVAL_PP(filename), strerror(errno));
