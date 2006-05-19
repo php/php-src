@@ -318,8 +318,9 @@ PHP_FUNCTION(msg_receive)
 			if (!php_var_unserialize(&tmp, &p, p + result, &var_hash TSRMLS_CC)) {
 				zend_error(E_WARNING, "%s(): message corrupted", get_active_function_name(TSRMLS_C));
 				RETVAL_FALSE;
+			} else {
+				REPLACE_ZVAL_VALUE(&out_message, tmp, 0);
 			}
-			REPLACE_ZVAL_VALUE(&out_message, tmp, 0);
 			FREE_ZVAL(tmp);
 			PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 		} else {
