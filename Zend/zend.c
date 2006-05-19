@@ -1192,14 +1192,14 @@ ZEND_API void _zend_bailout(char *filename, uint lineno)
 {
 	TSRMLS_FETCH();
 
-	if (!EG(bailout_set)) {
+	if (!EG(bailout)) {
 		zend_output_debug_string(1, "%s(%d) : Bailed out without a bailout address!", filename, lineno);
 		exit(-1);
 	}
 	CG(unclean_shutdown) = 1;
 	CG(in_compilation) = EG(in_execution) = 0;
 	EG(current_execute_data) = NULL;
-	longjmp(EG(bailout), FAILURE);
+	longjmp(*EG(bailout), FAILURE);
 }
 END_EXTERN_C()
 
