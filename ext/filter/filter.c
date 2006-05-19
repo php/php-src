@@ -636,6 +636,8 @@ PHP_FUNCTION(input_get_args)
 	HashTable *args_hash;
 	HashPosition pos;
 
+	HashTable * g_hash;
+
 	long args_from = 0;
 	long elm_count;
 	char *key;
@@ -678,11 +680,11 @@ PHP_FUNCTION(input_get_args)
 
 	if (!array_ptr) {
 		RETURN_FALSE;
+	} else {
+		g_hash = HASH_OF(array_ptr);
+		zend_hash_internal_pointer_reset_ex(g_hash, &pos);
+		array_init(return_value);
 	}
-
-	HashTable * g_hash = HASH_OF(array_ptr);
-	zend_hash_internal_pointer_reset_ex(g_hash, &pos);
-	array_init(return_value);
 
 	for (zend_hash_internal_pointer_reset_ex(args_hash, &pos);
 			zend_hash_get_current_data_ex(args_hash, (void **) &element, &pos) == SUCCESS;
