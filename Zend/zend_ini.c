@@ -120,6 +120,7 @@ ZEND_API int zend_copy_ini_directives(TSRMLS_D)
 {
 	zend_ini_entry ini_entry;
 
+	EG(modified_ini_directives) = NULL;
 	EG(ini_directives) = (HashTable *) malloc(sizeof(HashTable));
 	if (zend_hash_init_ex(EG(ini_directives), registered_zend_ini_directives->nNumOfElements, NULL, NULL, 1, 0)==FAILURE) {
 		return FAILURE;
