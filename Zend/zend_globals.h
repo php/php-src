@@ -169,7 +169,7 @@ struct _zend_executor_globals {
 
 	HashTable included_files;	/* files already included */
 
-	jmp_buf bailout;
+	jmp_buf *bailout;
 
 	int error_reporting;
 	int orig_error_reporting;
@@ -192,7 +192,6 @@ struct _zend_executor_globals {
 	zend_bool in_execution;
 	HashTable *in_autoload;
 	zend_function *autoload_func;
-	zend_bool bailout_set;
 	zend_bool full_tables_cleanup;
 
 	/* for extended information support */
