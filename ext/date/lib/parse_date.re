@@ -859,6 +859,8 @@ clf              = day "/" monthabbr "/" year4 ":" hour24lz ":" minutelz ":" sec
 timestamp        = "@" "-"? [0-9]+;
 
 /* To fix some ambiguities */
+dateshortwithtimeshort12  = datenoyear timeshort12;
+dateshortwithtimelong12   = datenoyear timelong12;
 dateshortwithtimeshort  = datenoyear timeshort24;
 dateshortwithtimelong   = datenoyear timelong24;
 dateshortwithtimelongtz = datenoyear iso8601normtz;
@@ -1401,6 +1403,30 @@ relativetext = reltextnumber space? reltextunit;
 		}
 		TIMELIB_DEINIT;
 		return TIMELIB_TIMEZONE;
+	}
+
+	dateshortwithtimeshort12 | dateshortwithtimelong12
+	{
+		DEBUG_OUTPUT("dateshortwithtimeshort12 | dateshortwithtimelong12");
+		TIMELIB_INIT;
+		TIMELIB_HAVE_DATE();
+		s->time->m = timelib_get_month((char **) &ptr);
+		s->time->d = timelib_get_nr((char **) &ptr, 2);
+
+		TIMELIB_HAVE_TIME();
+		s->time->h = timelib_get_nr((char **) &ptr, 2);
+		s->time->i = timelib_get_nr((char **) &ptr, 2);
+		if (*ptr == ':' || *ptr == '.') {
+			s->time->s = timelib_get_nr((char **) &ptr, 2);
+
+			if (*ptr == '.') {
+				s->time->f = timelib_get_frac_nr((char **) &ptr, 8);
+			}
+		}
+
+		s->time->h += timelib_meridian((char **) &ptr, s->time->h);
+		TIMELIB_DEINIT;
+		return TIMELIB_SHORTDATE_WITH_TIME;
 	}
 
 	dateshortwithtimeshort | dateshortwithtimelong | dateshortwithtimelongtz

@@ -40,6 +40,7 @@ PHP                                                                        NEWS
 - Added pg_field_table() function. (Edin)
 - Added implementation of curl_multi_info_read(). (Brian)
 - Added RFC2397 (data: stream) support. (Marcus)
+- Fixed bug #37514 (strtotime doesn't assume year correctly). (Derick)
 - Fixed bug #37510 (session_regenerate_id changes session_id() even on 
   failure). (Hannes)
 - Fixed bug #37505 (touch() truncates large files). (Ilia)
