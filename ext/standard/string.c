@@ -1063,12 +1063,14 @@ PHP_FUNCTION(strtolower)
 PHPAPI char *php_basename(char *s, size_t len, char *suffix, size_t sufflen)
 {
 	char *ret=NULL, *c, *p=NULL, buf='\0', *p2=NULL, buf2='\0';
+	int cnt = len;
 	c = s + len - 1;	
 
 	/* do suffix removal as the unix command does */
 	if (suffix && (len > sufflen)) {
 		if (!strncmp(suffix, c-sufflen+1, sufflen)) {
-			c -= sufflen; 
+			c -= sufflen;
+			cnt -= sufflen;
 			buf2 = *(c + 1); /* Save overwritten char */
 			*(c + 1) = '\0'; /* overwrite char */
 			p2 = c + 1;      /* Save pointer to overwritten char */
@@ -1077,12 +1079,15 @@ PHPAPI char *php_basename(char *s, size_t len, char *suffix, size_t sufflen)
 
 
 	/* strip trailing slashes */
-	while (*c == '/'
+	while (cnt > 0 && (*c == '/'
 #ifdef PHP_WIN32
 		   || (*c == '\\' && !IsDBCSLeadByte(*(c-1)))
 #endif
-		)
+		   )) {
 		c--;
+		cnt--;
+	}
+
 	if (c+1 >= s && c < s+len-1) {
 		buf = *(c + 1);  /* Save overwritten char */
 		*(c + 1) = '\0'; /* overwrite char */
