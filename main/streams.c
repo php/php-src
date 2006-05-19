@@ -445,7 +445,7 @@ PHPAPI int php_stream_filter_unregister_factory(const char *filterpattern TSRMLS
  * charsets (for example) but still be able to provide them all as filters */
 PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, const char *filterparams, int filterparamslen, int persistent TSRMLS_DC)
 {
-	php_stream_filter_factory *factory;
+	php_stream_filter_factory *factory = NULL;
 	php_stream_filter *filter = NULL;
 	int n;
 	char *period;
