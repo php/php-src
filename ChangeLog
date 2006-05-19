@@ -1,3 +1,88 @@
+2006-05-18  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      main/main.c:
+      fix compile warning
+
+    * (PHP_4_4)
+      main/main.c:
+      fix leak (and possible segfault?)
+      see bug #30397 for more details, somebody should really consider doing MFH
+      when fixing such critical things
+
+2006-05-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      ext/session/session.c
+      ext/session/session.c:
+      - MFH Fix bug #37510 session_regenerate_id changes session_id() even on
+      failure
+
+    * ext/session/session.c:
+      - Fix bug #37510 session_regenerate_id changes session_id() even on failure
+
+2006-05-18  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_5_2)
+      ext/pcre/config.w32:
+      Use heap insted of stack for recursion in hope of avoid stack overflow
+      crashes
+
+    * (PHP_5_2)
+      sapi/cgi/config.w32
+      sapi/cli/config.w32:
+      Give exe files 8MB stack (same default as on Linux) instead of Windows
+      default 1MB
+
+2006-05-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      NEWS:
+      - Update
+
+2006-05-18  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_interfaces.c:
+      there is no %v in 5.2
+
+2006-05-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_object_handlers.c:
+      - Fix error message in unicode mode
+
+2006-05-18  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_4_4)
+      ext/imap/.cvsignore
+      ext/imap/imap.dsp:
+      Fix windows build
+
+2006-05-18  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      sapi/cli/php_cli.c:
+      fix leaks
+
+    * (PHP_4_4)
+      ext/wddx/tests/bug35410.phpt
+      ext/wddx/tests/bug35410_64bit.phpt:
+      fix test and add new for 64bit only
+
+    * (PHP_5_1)
+      NEWS
+      NEWS
+      ext/oci8/oci8.c
+      ext/oci8/oci8.c:
+      MFH: fix #37487 (oci_fetch_array() array-type should always default to
+      OCI_BOTH)
+
+    * ext/oci8/oci8.c:
+      fix #37487 (oci_fetch_array() array-type should always default to OCI_BOTH)
+
 2006-05-17  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
