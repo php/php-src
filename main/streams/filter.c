@@ -251,7 +251,7 @@ PHPAPI void php_stream_bucket_unlink(php_stream_bucket *bucket TSRMLS_DC)
 PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval *filterparams, int persistent TSRMLS_DC)
 {
 	HashTable *filter_hash = (FG(stream_filters) ? FG(stream_filters) : &stream_filters_hash);
-	php_stream_filter_factory *factory;
+	php_stream_filter_factory *factory = NULL;
 	php_stream_filter *filter = NULL;
 	int n;
 	char *period;
