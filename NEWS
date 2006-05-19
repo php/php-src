@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2006, PHP 5.2.0
 - Disable realpath cache when open_basedir or safe_mode are enabled on a 
   per-request basis. (Ilia)
+- Optimized zend_try/zend_catch macroses (eliminated memcpy()). (Dmitry)
 - Optimized require_once/include_once (eliminated fopen() on second usage).
   (Dmitry)
 - Optimized request shutdown sequence. Restoring ini directives now

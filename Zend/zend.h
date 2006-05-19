@@ -448,19 +448,19 @@ END_EXTERN_C()
 
 #define zend_try												\
 	{															\
-		jmp_buf orig_bailout;									\
-		zend_bool orig_bailout_set=EG(bailout_set);				\
+		jmp_buf *orig_bailout = EG(bailout);					\
+		jmp_buf bailout;										\
 																\
-		EG(bailout_set) = 1;									\
-		memcpy(&orig_bailout, &EG(bailout), sizeof(jmp_buf));	\
-		if (setjmp(EG(bailout))==0)
+		EG(bailout) = &bailout;									\
+		if (setjmp(bailout)==0) {
 #define zend_catch												\
-		else
+		} else {												\
+			EG(bailout) = orig_bailout;
 #define zend_end_try()											\
-		memcpy(&EG(bailout), &orig_bailout, sizeof(jmp_buf));	\
-		EG(bailout_set) = orig_bailout_set;						\
+		}														\
+		EG(bailout) = orig_bailout;								\
 	}
-#define zend_first_try		EG(bailout_set)=0;	zend_try
+#define zend_first_try		EG(bailout)=NULL; zend_try
 
 BEGIN_EXTERN_C()
 ZEND_API char *get_zend_version(void);
