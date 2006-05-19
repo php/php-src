@@ -43,7 +43,7 @@ PHP_HASH_API php_hash_ops *php_hash_fetch_ops(const char *algo, int algo_len)
 	char *lower = estrndup(algo, algo_len);
 
 	zend_str_tolower(lower, algo_len);
-	if (SUCCESS != zend_hash_find(&php_hash_hashtable, lower, algo_len + 1, (void**)&ops)) {
+	if (SUCCESS != zend_hash_find(&php_hash_hashtable, lower, algo_len + 1, (void*)&ops)) {
 		ops = NULL;
 	}
 	efree(lower);
@@ -97,15 +97,15 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename)
 		int n;
 
 		while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
-			ops->hash_update(context, buf, n);
+			ops->hash_update(context, (unsigned char *) buf, n);
 		}
 		php_stream_close(stream);
 	} else {
-		ops->hash_update(context, data, data_len);
+		ops->hash_update(context, (unsigned char *) data, data_len);
 	}
 
 	digest = emalloc(ops->digest_size + 1);
-	ops->hash_final(digest, context);
+	ops->hash_final((unsigned char *) digest, context);
 	efree(context);
 
 	if (raw_output) {
@@ -114,7 +114,7 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename)
 	} else {
 		char *hex_digest = safe_emalloc(ops->digest_size, 2, 1);
 
-		php_hash_bin2hex(hex_digest, digest, ops->digest_size);
+		php_hash_bin2hex(hex_digest, (unsigned char *) digest, ops->digest_size);
 		hex_digest[2 * ops->digest_size] = 0;
 		efree(digest);
 		RETURN_STRINGL(hex_digest, 2 * ops->digest_size, 0);
@@ -172,8 +172,8 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename)
 
 	if (key_len > ops->block_size) {
 		/* Reduce the key first */
-		ops->hash_update(context, key, key_len);
-		ops->hash_final(K, context);
+		ops->hash_update(context, (unsigned char *) key, key_len);
+		ops->hash_final((unsigned char *) K, context);
 		/* Make the context ready to start over */
 		ops->hash_init(context);
 	} else {
@@ -184,22 +184,22 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename)
 	for(i=0; i < ops->block_size; i++) {
 		K[i] ^= 0x36;
 	}
-	ops->hash_update(context, K, ops->block_size);
+	ops->hash_update(context, (unsigned char *) K, ops->block_size);
 
 	if (isfilename) {
 		char buf[1024];
 		int n;
 
 		while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
-			ops->hash_update(context, buf, n);
+			ops->hash_update(context, (unsigned char *) buf, n);
 		}
 		php_stream_close(stream);
 	} else {
-		ops->hash_update(context, data, data_len);
+		ops->hash_update(context, (unsigned char *) data, data_len);
 	}
 
 	digest = emalloc(ops->digest_size + 1);
-	ops->hash_final(digest, context);
+	ops->hash_final((unsigned char *) digest, context);
 
 	/* Convert K to opad -- 0x6A = 0x36 ^ 0x5C */
 	for(i=0; i < ops->block_size; i++) {
@@ -208,9 +208,9 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename)
 
 	/* Feed this result into the outter hash */
 	ops->hash_init(context);
-	ops->hash_update(context, K, ops->block_size);
-	ops->hash_update(context, digest, ops->digest_size);
-	ops->hash_final(digest, context);
+	ops->hash_update(context, (unsigned char *) K, ops->block_size);
+	ops->hash_update(context, (unsigned char *) digest, ops->digest_size);
+	ops->hash_final((unsigned char *) digest, context);
 
 	/* Zero the key */
 	memset(K, 0, ops->block_size);
@@ -223,7 +223,7 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename)
 	} else {
 		char *hex_digest = safe_emalloc(ops->digest_size, 2, 1);
 
-		php_hash_bin2hex(hex_digest, digest, ops->digest_size);
+		php_hash_bin2hex(hex_digest, (unsigned char *) digest, ops->digest_size);
 		hex_digest[2 * ops->digest_size] = 0;
 		efree(digest);
 		RETURN_STRINGL(hex_digest, 2 * ops->digest_size, 0);
@@ -292,8 +292,8 @@ PHP_FUNCTION(hash_init)
 
 		if (key_len > ops->block_size) {
 			/* Reduce the key first */
-			ops->hash_update(context, key, key_len);
-			ops->hash_final(K, context);
+			ops->hash_update(context, (unsigned char *) key, key_len);
+			ops->hash_final((unsigned char *) K, context);
 			/* Make the context ready to start over */
 			ops->hash_init(context);
 		} else {
@@ -304,8 +304,8 @@ PHP_FUNCTION(hash_init)
 		for(i=0; i < ops->block_size; i++) {
 			K[i] ^= 0x36;
 		}
-		ops->hash_update(context, K, ops->block_size);
-		hash->key = K;
+		ops->hash_update(context, (unsigned char *) K, ops->block_size);
+		hash->key = (unsigned char *) K;
 	}
 
 	ZEND_REGISTER_RESOURCE(return_value, hash, php_hash_le_hash);
@@ -327,7 +327,7 @@ PHP_FUNCTION(hash_update)
 
 	ZEND_FETCH_RESOURCE(hash, php_hash_data*, &zhash, -1, PHP_HASH_RESNAME, php_hash_le_hash);
 
-	hash->ops->hash_update(hash->context, data, data_len);
+	hash->ops->hash_update(hash->context, (unsigned char *) data, data_len);
 
 	RETURN_TRUE;
 }
@@ -361,7 +361,7 @@ PHP_FUNCTION(hash_update_stream)
 			/* Nada mas */
 			RETURN_LONG(didread);
 		}
-		hash->ops->hash_update(hash->context, buf, n);
+		hash->ops->hash_update(hash->context, (unsigned char *) buf, n);
 		length -= n;
 		didread += n;
 	} 
@@ -395,7 +395,7 @@ PHP_FUNCTION(hash_update_file)
 	}
 
 	while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
-		hash->ops->hash_update(hash->context, buf, n);
+		hash->ops->hash_update(hash->context, (unsigned char *) buf, n);
 	}
 	php_stream_close(stream);
 
@@ -422,7 +422,7 @@ PHP_FUNCTION(hash_final)
 
 	digest_len = hash->ops->digest_size;
 	digest = emalloc(digest_len + 1);
-	hash->ops->hash_final(digest, hash->context);
+	hash->ops->hash_final((unsigned char *) digest, hash->context);
 	if (hash->options & PHP_HASH_HMAC) {
 		int i;
 
@@ -433,9 +433,9 @@ PHP_FUNCTION(hash_final)
 
 		/* Feed this result into the outter hash */
 		hash->ops->hash_init(hash->context);
-		hash->ops->hash_update(hash->context, hash->key, hash->ops->block_size);
-		hash->ops->hash_update(hash->context, digest, hash->ops->digest_size);
-		hash->ops->hash_final(digest, hash->context);
+		hash->ops->hash_update(hash->context, (unsigned char *) hash->key, hash->ops->block_size);
+		hash->ops->hash_update(hash->context, (unsigned char *) digest, hash->ops->digest_size);
+		hash->ops->hash_final((unsigned char *) digest, hash->context);
 
 		/* Zero the key */
 		memset(hash->key, 0, hash->ops->block_size);
@@ -447,7 +447,7 @@ PHP_FUNCTION(hash_final)
 	hash->context = NULL;
 
 	/* zend_list_REAL_delete() */
-	if (zend_hash_index_find(&EG(regular_list), Z_RESVAL_P(zhash), (void **) &le)==SUCCESS) {
+	if (zend_hash_index_find(&EG(regular_list), Z_RESVAL_P(zhash), (void *) &le)==SUCCESS) {
 		/* This is a hack to avoid letting the resource hide elsewhere (like in separated vars)
 			FETCH_RESOURCE is intelligent enough to handle dealing with any issues this causes */
 		le->refcount = 1;
@@ -459,7 +459,7 @@ PHP_FUNCTION(hash_final)
 	} else {
 		char *hex_digest = safe_emalloc(digest_len,2,1);
 
-		php_hash_bin2hex(hex_digest, digest, digest_len);
+		php_hash_bin2hex(hex_digest, (unsigned char *) digest, digest_len);
 		hex_digest[2 * digest_len] = 0;
 		efree(digest);
 		RETURN_STRINGL(hex_digest, 2 * digest_len, 0);		
@@ -477,7 +477,8 @@ PHP_FUNCTION(hash_algos)
 	char *str;
 #endif
 	int str_len;
-	long idx, type;
+	ulong idx;
+	long type;
 	HashPosition pos;
 
 	array_init(return_value);
@@ -501,7 +502,7 @@ static void php_hash_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 	/* Just in case the algo has internally allocated resources */
 	if (hash->context) {
-		char *dummy = emalloc(hash->ops->digest_size);
+		unsigned char *dummy = emalloc(hash->ops->digest_size);
 		hash->ops->hash_final(dummy, hash->context);
 		efree(dummy);
 		efree(hash->context);
@@ -587,7 +588,8 @@ PHP_MINFO_FUNCTION(hash)
 	HashPosition pos;
 	char buffer[2048];
 	char *s = buffer, *e = s + sizeof(buffer);
-	long idx, type;
+	ulong idx;
+	long type;
 #if (PHP_MAJOR_VERSION >= 6)
 	zstr str;
 #else
