@@ -24,6 +24,7 @@
 #include "zend_variables.h"
 #include "zend_API.h"
 #include "zend_interfaces.h"
+#include "zend_exceptions.h"
 
 ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce TSRMLS_DC)
 {
@@ -49,7 +50,6 @@ ZEND_API void zend_object_std_dtor(zend_object *object TSRMLS_DC)
 ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handle handle TSRMLS_DC)
 {
 	zend_function *destructor = object->ce->destructor;
-
 
 	if (destructor) {
 		zval zobj, *obj = &zobj;
@@ -96,10 +96,15 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 		 */
 		old_exception = EG(exception);
 		EG(exception) = NULL;
-		zend_call_method_with_0_params(&obj, object->ce, &object->ce->destructor, ZEND_DESTRUCTOR_FUNC_NAME, NULL);
+		zend_call_method_with_0_params(&obj, object->ce, &destructor, ZEND_DESTRUCTOR_FUNC_NAME, NULL);
 		if (old_exception) {
 			if (EG(exception)) {
-				zend_error(E_ERROR, "Ignoring exception from %v::__destruct() while an exception is already active", object->ce->name);
+				zend_class_entry *default_exception_ce = zend_exception_get_default(TSRMLS_C);
+				zval *file = zend_read_property(default_exception_ce, old_exception, "file", sizeof("file")-1, 1 TSRMLS_CC);
+				zval *line = zend_read_property(default_exception_ce, old_exception, "line", sizeof("line")-1, 1 TSRMLS_CC);
+
+				zend_error(E_ERROR, "Ignoring exception from %v::__destruct() while an exception is already active (Uncaught %v in %R on line %d)", 
+					object->ce->name, Z_OBJCE_P(old_exception)->name, Z_TYPE_P(file), Z_UNIVAL_P(file), Z_LVAL_P(line));
 				zval_ptr_dtor(&EG(exception));
 			}
 			EG(exception) = old_exception;
