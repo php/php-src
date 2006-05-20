@@ -1,3 +1,109 @@
+2006-05-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_ini.c
+      ZendEngine2/zend_ini.c:
+      Fixed random crashes in ZTS mode becouse of uninitialized
+      EG(modified_ini_directives).
+
+2006-05-19  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      NEWS:
+      - Fixed bug #37514 (strtotime doesn't assume year correctly).
+
+2006-05-19  Antony Dovgal  <antony@zend.com>
+
+    * tests/lang/bug35239.phpt
+      tests/lang/bug35239.phpt:
+      
+      file bug35239.phpt was initially added on branch PHP_4_4.
+
+    * (PHP_4_4)
+      tests/lang/bug29566.phpt:
+      add new test
+
+    * (PHP_5_1)
+      tests/basic/021.phpt
+      tests/basic/021.phpt:
+      fix test
+
+2006-05-19  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * NEWS
+      ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/file.h:
+      Name change: php_get_tmpdir() renamed to sys_get_temp_dir()
+
+2006-05-19  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      ext/wddx/wddx.c:
+      MFH fix for #34306 (wddx_serialize_value() crashes with long array keys)
+
+    * (PHP_4_4)
+      ext/sysvmsg/sysvmsg.c:
+      MFH: fix possible usage of uninitialized variable
+
+    * main/streams/filter.c:
+      initialize factory
+
+    * (PHP_4_4)
+      ext/standard/string.c:
+      fix invalid read in basename("/.gz", ".gz")
+
+    * (PHP_5_1)
+      ext/standard/tests/array/array_chunk2.phpt
+      ext/standard/tests/array/array_count_values2.phpt
+      ext/standard/tests/array/array_diff_key2.phpt:
+      add new tests by Ligaya Turmelle
+
+    * ext/standard/tests/array/array_chunk2.phpt
+      ext/standard/tests/array/array_chunk2.phpt
+      ext/standard/tests/array/array_count_values2.phpt
+      ext/standard/tests/array/array_count_values2.phpt
+      ext/standard/tests/array/array_diff_key2.phpt
+      ext/standard/tests/array/array_diff_key2.phpt:
+      
+      add new tests by Ligaya Turmelle
+
+    * ext/standard/tests/array/array_chunk2.phpt
+      ext/standard/tests/array/array_chunk2.phpt
+      ext/standard/tests/array/array_count_values2.phpt
+      ext/standard/tests/array/array_count_values2.phpt
+      ext/standard/tests/array/array_diff_key2.phpt
+      ext/standard/tests/array/array_diff_key2.phpt:
+      
+      file array_chunk2.phpt was initially added on branch PHP_5_2.
+
+2006-05-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend.c
+      ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend.h
+      ZendEngine2/zend_extensions.h
+      ZendEngine2/zend_extensions.h
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_globals.h
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.c
+      main/main.c
+      main/main.c:
+      Optimized zend_try/zend_catch macroses (eliminated memcpy())
+
+2006-05-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/filestat.c:
+      MFB: Fixed bug #37505 (touch() truncates large files).
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/filestat.c:
+      Fixed bug #37505 (touch() truncates large files).
+
 2006-05-18  Antony Dovgal  <antony@zend.com>
 
     * (PHP_4_4)
