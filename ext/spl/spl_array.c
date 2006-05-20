@@ -260,7 +260,7 @@ static zval **spl_array_get_dimension_ptr_ptr(int check_inherited, zval *object,
 
 /*  We cannot get the pointer pointer so we don't allow it here for now
 	if (check_inherited && intern->fptr_offset_get) {
-		return zend_call_method_with_1_params(&object, Z_OBJCE_P(object), &intern->fptr_offset_get, "offsetGet", NULL, offset);
+		return zend_call_method_with_1_params(&object, intern->std.ce, &intern->fptr_offset_get, "offsetGet", NULL, offset);
 	}*/
 
 	if (!offset) {
@@ -305,7 +305,7 @@ static zval *spl_array_read_dimension_ex(int check_inherited, zval *object, zval
 		if (intern->fptr_offset_get) {
 			zval *rv;
 			SEPARATE_ARG_IF_REF(offset);
-			zend_call_method_with_1_params(&object, Z_OBJCE_P(object), &intern->fptr_offset_get, "offsetGet", &rv, offset);	
+			zend_call_method_with_1_params(&object, intern->std.ce, &intern->fptr_offset_get, "offsetGet", &rv, offset);	
 			zval_ptr_dtor(&offset);
 			if (rv) {
 				zval_ptr_dtor(&intern->retval);
@@ -335,7 +335,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 		} else {
 			SEPARATE_ARG_IF_REF(offset);
 		}
-		zend_call_method_with_2_params(&object, Z_OBJCE_P(object), &intern->fptr_offset_set, "offsetSet", NULL, offset, value);
+		zend_call_method_with_2_params(&object, intern->std.ce, &intern->fptr_offset_set, "offsetSet", NULL, offset, value);
 		zval_ptr_dtor(&offset);
 		return;
 	}
@@ -390,7 +390,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 
 	if (check_inherited && intern->fptr_offset_del) {
 		SEPARATE_ARG_IF_REF(offset);
-		zend_call_method_with_1_params(&object, Z_OBJCE_P(object), &intern->fptr_offset_del, "offsetUnset", NULL, offset);
+		zend_call_method_with_1_params(&object, intern->std.ce, &intern->fptr_offset_del, "offsetUnset", NULL, offset);
 		zval_ptr_dtor(&offset);
 		return;
 	}
@@ -441,7 +441,7 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 
 	if (check_inherited && intern->fptr_offset_has) {
 		SEPARATE_ARG_IF_REF(offset);
-		zend_call_method_with_1_params(&object, Z_OBJCE_P(object), &intern->fptr_offset_has, "offsetExists", &rv, offset);
+		zend_call_method_with_1_params(&object, intern->std.ce, &intern->fptr_offset_has, "offsetExists", &rv, offset);
 		zval_ptr_dtor(&offset);
 		if (rv && zend_is_true(rv)) {
 			zval_ptr_dtor(&rv);
@@ -527,7 +527,7 @@ void spl_array_iterator_append(zval *object, zval *append_value TSRMLS_DC) /* {{
 	}
 	
 	if (Z_TYPE_P(intern->array) == IS_OBJECT) {
-		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Cannot append properties to objects, use %v::offsetSet() instead", Z_OBJCE_P(object)->name);
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Cannot append properties to objects, use %v::offsetSet() instead", intern->std.ce->name);
 		return;
 	}
 
@@ -920,7 +920,7 @@ SPL_METHOD(Array, __construct)
 		if ((handler != std_object_handlers.get_properties && handler != spl_array_get_properties)
 		|| !spl_array_get_hash_table(intern, 0 TSRMLS_CC)) {
 			php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
-			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "Overloaded object of type %s is not compatible with %s", Z_OBJCE_P(array)->name, intern->std.ce->name);
+			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "Overloaded object of type %s is not compatible with %s", intern->std.ce->name, intern->std.ce->name);
 			return;
 		}
 	}
@@ -1350,11 +1350,11 @@ SPL_METHOD(Array, getChildren)
 		return;
 	}
 
-	if (Z_TYPE_PP(entry) == IS_OBJECT && instanceof_function(Z_OBJCE_PP(entry), Z_OBJCE_P(getThis()) TSRMLS_CC)) {
+	if (Z_TYPE_PP(entry) == IS_OBJECT && instanceof_function(Z_OBJCE_PP(entry), intern->std.ce TSRMLS_CC)) {
 		RETURN_ZVAL(*entry, 0, 0);
 	}
 
-	spl_instantiate_arg_ex1(Z_OBJCE_P(getThis()), &return_value, 0, *entry TSRMLS_CC);
+	spl_instantiate_arg_ex1(intern->std.ce, &return_value, 0, *entry TSRMLS_CC);
 }
 /* }}} */
 
