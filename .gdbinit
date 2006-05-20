@@ -69,7 +69,7 @@ define ____printzv_contents
 		if ! $arg1
 			printf "{\n"
 			set $ind = $ind + 1
-			____print_ht $zvalue->value.ht
+			____print_ht $zvalue->value.ht 0
 			set $ind = $ind - 1
 			set $i = $ind
 			while $i > 0
@@ -103,7 +103,7 @@ define ____printzv_contents
 					printf "(%d): ", $ht->nNumOfElements
 					printf "{\n"
 					set $ind = $ind + 1
-					____print_ht $ht
+					____print_ht $ht 1
 					set $ind = $ind - 1
 					set $i = $ind
 					while $i > 0
@@ -190,6 +190,7 @@ end
 
 define ____print_ht
 	set $ht = $arg0
+	set $obj = $arg1
 	set $p = $ht->pListHead
 
 	while $p != 0
@@ -201,8 +202,20 @@ define ____print_ht
 			set $i = $i - 1
 		end
 
-		if $p->nKeyLength > 0 
-			printf "\"%s\" => ", $p->key.arKey.s
+		if $p->nKeyLength > 0
+			if $obj && $p->key.arKey.s[0] == 0
+				if $p->key.arKey.s[1] == '*'
+					printf "\"protected %s\" => ", $p->key.arKey.s+3
+				else
+					set $n = 1
+					while $n < $p->nKeyLength && $p->key.arKey.s[$n] != 0
+						set $n = $n + 1
+					end
+					printf "\"private %s::%s\" => ", $p->key.arKey.s+1, $p->key.arKey.s+$n+1
+				end
+			else
+				printf "\"%s\" => ", $p->key.arKey.s
+			end
 		else
 			printf "%d => ", $p->h
 		end
@@ -215,7 +228,7 @@ end
 define print_ht
 	set $ind = 1
 	printf "[0x%08x] {\n", $arg0
-	____print_ht $arg0
+	____print_ht $arg0 0
 	printf "}\n"
 end
 
