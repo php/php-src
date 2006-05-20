@@ -1,4 +1,4 @@
-/* 
+/*
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
@@ -24,6 +24,7 @@
 #include "zend_variables.h"
 #include "zend_API.h"
 #include "zend_interfaces.h"
+#include "zend_exceptions.h"
 
 ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce TSRMLS_DC)
 {
@@ -53,7 +54,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 	if (destructor) {
 		zval zobj, *obj = &zobj;
 		zval *old_exception;
-		
+
 		if (destructor->op_array.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
 			if (destructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
 				/* Ensure that if we're calling a private function, we're allowed to do so.
@@ -84,9 +85,9 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 			}
 		}
 
-		zobj.type = IS_OBJECT;
-		zobj.value.obj.handle = handle;
-		zobj.value.obj.handlers = &std_object_handlers;
+		Z_TYPE(zobj) = IS_OBJECT;
+		Z_OBJ_HANDLE(zobj) = handle;
+		Z_OBJ_HT(zobj) = &std_object_handlers;
 		INIT_PZVAL(obj);
 
 		/* Make sure that destructors are protected from previously thrown exceptions.
@@ -95,10 +96,15 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 		 */
 		old_exception = EG(exception);
 		EG(exception) = NULL;
-		zend_call_method_with_0_params(&obj, object->ce, &object->ce->destructor, ZEND_DESTRUCTOR_FUNC_NAME, NULL);
+		zend_call_method_with_0_params(&obj, object->ce, &destructor, ZEND_DESTRUCTOR_FUNC_NAME, NULL);
 		if (old_exception) {
 			if (EG(exception)) {
-				zend_error(E_ERROR, "Ignoring exception from %s::__destruct() while an exception is already active", object->ce->name);
+				zend_class_entry *default_exception_ce = zend_exception_get_default(TSRMLS_C);
+				zval *file = zend_read_property(default_exception_ce, old_exception, "file", sizeof("file")-1, 1 TSRMLS_CC);
+				zval *line = zend_read_property(default_exception_ce, old_exception, "line", sizeof("line")-1, 1 TSRMLS_CC);
+
+				zend_error(E_ERROR, "Ignoring exception from %s::__destruct() while an exception is already active (Uncaught %s in %s on line %ld)", 
+					object->ce->name, Z_OBJCE_P(old_exception)->name, Z_STRVAL_P(file), Z_LVAL_P(line));
 				zval_ptr_dtor(&EG(exception));
 			}
 			EG(exception) = old_exception;
