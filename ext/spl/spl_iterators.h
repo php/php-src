@@ -135,6 +135,10 @@ typedef struct _spl_dual_it_object {
 	} u;
 } spl_dual_it_object;
 
+typedef int (*spl_iterator_apply_func_t)(zend_object_iterator *iter, void *puser TSRMLS_DC);
+
+PHPAPI int spl_iterator_apply(zval *obj, spl_iterator_apply_func_t apply_func, void *puser TSRMLS_DC);
+
 #endif /* SPL_ITERATORS_H */
 
 /*
