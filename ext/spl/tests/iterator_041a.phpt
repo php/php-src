@@ -1,5 +1,5 @@
 --TEST--
-SPL: iterator_to_array() and exceptions
+SPL: iterator_to_array() and exceptions from destruct
 --SKIPIF--
 <?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
@@ -58,13 +58,13 @@ class MyArrayIterator extends ArrayIterator
 
 	function __destruct()
 	{
-//		self::fail(7, __FUNCTION__);
+		self::fail(7, __FUNCTION__);
 	}
 
 	static function test($func, $skip = null)
 	{
 		echo "===$func===\n";
-		self::$fail = 0;
+		self::$fail = 7;
 		while(self::$fail < 10)
 		{
 			try
@@ -96,13 +96,7 @@ MyArrayIterator::test('iterator_count', array(3 => 6));
 <?php exit(0); ?>
 --EXPECT--
 ===iterator_to_array===
-State 0: __construct()
-State 1: __construct()
-State 2: rewind()
-State 3: valid()
-State 4: current()
-State 5: key()
-State 6: next()
+State 7: __destruct()
 array(2) {
   [0]=>
   int(1)
@@ -110,10 +104,6 @@ array(2) {
   int(2)
 }
 ===iterator_count===
-State 0: __construct()
-State 1: __construct()
-State 2: rewind()
-State 3: valid()
-State 6: next()
+State 7: __destruct()
 int(2)
 ===DONE===
