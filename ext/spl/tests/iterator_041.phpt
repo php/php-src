@@ -36,16 +36,16 @@ class MyArrayIterator extends ArrayIterator
 		return parent::valid();
 	}
 
-	function key()
-	{
-		self::fail(4, __FUNCTION__);
-		return parent::key();
-	}
-
 	function current()
 	{
-		self::fail(5, __FUNCTION__);
+		self::fail(4, __FUNCTION__);
 		return parent::current();
+	}
+
+	function key()
+	{
+		self::fail(5, __FUNCTION__);
+		return parent::key();
 	}
 
 	function next()
@@ -59,15 +59,15 @@ class MyArrayIterator extends ArrayIterator
 		self::fail(7, __FUNCTION__);
 	}
 
-	static function test()
+	static function test($func)
 	{
+		echo "===$func===\n";
 		self::$fail = 0;
 		while(self::$fail < 10)
 		{
-			echo '===' . self::$fail . "===\n";
 			try
 			{
-				var_dump(iterator_to_array(new MyArrayIterator()));
+				var_dump($func(new MyArrayIterator()));
 				break;
 			}
 			catch (Exception $e)
@@ -76,73 +76,37 @@ class MyArrayIterator extends ArrayIterator
 			}
 			self::$fail++;
 		}
-
-		self::$fail = 0;
-		while(self::$fail < 10)
-		{
-			echo '===' . self::$fail . "===\n";
-			try
-			{
-				var_dump(iterator_count(new MyArrayIterator()));
-				break;
-			}
-			catch (Exception $e)
-			{
-				var_dump($e->getMessage());
-			}
-			if (self::$fail == 3)
-			{
-				self::$fail = 6;
-			}
-			else
-			{
-				self::$fail++;
-			}
-		}
 	}
 }
 
-MyArrayIterator::test();
+MyArrayIterator::test('iterator_to_array');
+MyArrayIterator::test('iterator_count');
 
 ?>
 ===DONE===
 <?php exit(0); ?>
 --EXPECT--
-===0===
+===iterator_to_array===
 string(22) "State 0: __construct()"
-===1===
 string(22) "State 1: __construct()"
-===2===
 string(17) "State 2: rewind()"
-===3===
 string(16) "State 3: valid()"
-===4===
-string(14) "State 4: key()"
-===5===
-string(18) "State 5: current()"
-===6===
+string(18) "State 4: current()"
+string(14) "State 5: key()"
 string(15) "State 6: next()"
-===7===
 string(21) "State 7: __destruct()"
-===8===
 array(2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
-===0===
+===iterator_count===
 string(22) "State 0: __construct()"
-===1===
 string(22) "State 1: __construct()"
-===2===
 string(17) "State 2: rewind()"
-===3===
 string(16) "State 3: valid()"
-===4===
 string(15) "State 6: next()"
-===7===
 string(21) "State 7: __destruct()"
-===8===
 int(2)
 ===DONE===
