@@ -2233,6 +2233,7 @@ static int ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 static int ZEND_EXIT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+#if 1
 	zend_op *opline = EX(opline);
 	if (IS_CONST != IS_UNUSED) {
 
@@ -2245,6 +2246,7 @@ static int ZEND_EXIT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 
 	}
+#endif
 	zend_bailout();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -4742,6 +4744,7 @@ static int ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 static int ZEND_EXIT_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+#if 1
 	zend_op *opline = EX(opline);
 	if (IS_TMP_VAR != IS_UNUSED) {
 		zend_free_op free_op1;
@@ -4754,6 +4757,7 @@ static int ZEND_EXIT_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 		zval_dtor(free_op1.var);
 	}
+#endif
 	zend_bailout();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -7998,6 +8002,7 @@ static int ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 static int ZEND_EXIT_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+#if 1
 	zend_op *opline = EX(opline);
 	if (IS_VAR != IS_UNUSED) {
 		zend_free_op free_op1;
@@ -8010,6 +8015,7 @@ static int ZEND_EXIT_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 		if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	}
+#endif
 	zend_bailout();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -14541,6 +14547,7 @@ static int ZEND_CLONE_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 static int ZEND_EXIT_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+#if 0
 	zend_op *opline = EX(opline);
 	if (IS_UNUSED != IS_UNUSED) {
 
@@ -14553,6 +14560,7 @@ static int ZEND_EXIT_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 
 	}
+#endif
 	zend_bailout();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -20483,6 +20491,7 @@ static int ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 static int ZEND_EXIT_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+#if 1
 	zend_op *opline = EX(opline);
 	if (IS_CV != IS_UNUSED) {
 
@@ -20495,6 +20504,7 @@ static int ZEND_EXIT_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 
 	}
+#endif
 	zend_bailout();
 	ZEND_VM_NEXT_OPCODE();
 }
