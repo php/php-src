@@ -150,11 +150,16 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 {
 	php_oci_connection *connection = descriptor->connection;
 	ub4 length = 0;
+#if defined(HAVE_OCI_LOB_READ2)
+	oraub8 bytes_read, bytes_total = 0, offset = 0;
+	oraub8 requested_len = read_length; /* this is by default */
+	oraub8 chars_read = 0;
+#else
 	int bytes_read, bytes_total = 0, offset = 0;
 	int requested_len = read_length; /* this is by default */
-#if defined(HAVE_OCI_LOB_READ2)
-	int chars_read = 0, is_clob = 0;
+	int chars_read = 0;
 #endif
+	int is_clob = 0;
 
 	*data_len = 0;
 	*data = NULL;
