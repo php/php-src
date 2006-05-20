@@ -1,3 +1,20 @@
+2006-05-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_ini.c
+      zend_ini.c:
+      Fixed random crashes in ZTS mode becouse of uninitialized
+      EG(modified_ini_directives).
+
+    * zend.c
+      zend.c
+      zend.h
+      zend.h
+      zend_extensions.h
+      zend_extensions.h
+      zend_globals.h
+      zend_globals.h:
+      Optimized zend_try/zend_catch macroses (eliminated memcpy())
+
 2006-05-18  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
