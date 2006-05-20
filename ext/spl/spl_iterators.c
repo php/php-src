@@ -2405,7 +2405,6 @@ PHPAPI int spl_iterator_apply(zval *obj, spl_iterator_apply_func_t apply_func, v
 {
 	zend_object_iterator   *iter;
 
-	obj->refcount++;
 	iter = Z_OBJCE_P(obj)->get_iterator(Z_OBJCE_P(obj), obj, 0 TSRMLS_CC);
 
 	if (EG(exception)) {
@@ -2434,9 +2433,6 @@ PHPAPI int spl_iterator_apply(zval *obj, spl_iterator_apply_func_t apply_func, v
 
 done:
 	iter->funcs->dtor(iter TSRMLS_CC);
-	if (obj->refcount > 0 && !EG(exception)) {
-		zval_ptr_dtor(&obj);
-	}
 	return EG(exception) ? FAILURE : SUCCESS;
 }
 /* }}} */
