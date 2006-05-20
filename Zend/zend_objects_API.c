@@ -135,7 +135,7 @@ ZEND_API void zend_objects_store_add_ref(zval *object TSRMLS_DC)
 #endif
 }
 
-ZEND_API int zend_objects_is_detructor_called(zend_object_handle handle TSRMLS_DC)
+ZEND_API int zend_objects_is_destructor_called(zend_object_handle handle TSRMLS_DC)
 {
 	if (EG(objects_store).object_buckets[handle].valid) {
 		return EG(objects_store).object_buckets[handle].destructor_called;
