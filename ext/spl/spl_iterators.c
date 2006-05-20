@@ -2401,67 +2401,107 @@ static zend_function_entry spl_funcs_AppendIterator[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto array iterator_to_array(Traversable it) 
-   Copy the iterator into an array */
-PHP_FUNCTION(iterator_to_array)
+PHPAPI int spl_iterator_apply(zval *obj, spl_iterator_apply_func_t apply_func, void *puser TSRMLS_DC)
 {
-	zval                   *obj, **data;
 	zend_object_iterator   *iter;
+
+	obj->refcount++;
+	iter = Z_OBJCE_P(obj)->get_iterator(Z_OBJCE_P(obj), obj, 0 TSRMLS_CC);
+
+	if (EG(exception)) {
+		goto done;
+	}
+
+	if (iter->funcs->rewind) {
+		iter->funcs->rewind(iter TSRMLS_CC);
+		if (EG(exception)) {
+			goto done;
+		}
+	}
+
+	while (iter->funcs->valid(iter TSRMLS_CC) == SUCCESS) {
+		if (EG(exception)) {
+			goto done;
+		}
+		if (apply_func(iter, puser TSRMLS_CC) == ZEND_HASH_APPLY_STOP || EG(exception)) {
+			goto done;
+		}
+		iter->funcs->move_forward(iter TSRMLS_CC);
+		if (EG(exception)) {
+			goto done;
+		}
+	}
+
+done:
+	iter->funcs->dtor(iter TSRMLS_CC);
+	if (obj->refcount > 0 && !EG(exception)) {
+		zval_ptr_dtor(&obj);
+	}
+	return EG(exception) ? FAILURE : SUCCESS;
+}
+/* }}} */
+
+static int spl_iterator_to_array_apply(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ */
+{
+	zval                    **data, *return_value = (zval*)puser;
 	zstr                    str_key;
 	uint                    str_key_len;
 	ulong                   int_key;
 	int                     key_type;
 
+	iter->funcs->get_current_data(iter, &data TSRMLS_CC);
+	if (EG(exception)) {
+		return ZEND_HASH_APPLY_STOP;
+	}
+	if (iter->funcs->get_current_key) {
+		key_type = iter->funcs->get_current_key(iter, &str_key, &str_key_len, &int_key TSRMLS_CC);
+		if (EG(exception)) {
+			return ZEND_HASH_APPLY_STOP;
+		}
+		(*data)->refcount++;
+		switch(key_type) {
+			case HASH_KEY_IS_STRING:
+				add_assoc_zval_ex(return_value, str_key.s, str_key_len, *data);
+				efree(str_key.s);
+				break;
+			case HASH_KEY_IS_UNICODE:
+				add_u_assoc_zval_ex(return_value, IS_UNICODE, str_key, str_key_len, *data);
+				efree(str_key.u);
+				break;
+			case HASH_KEY_IS_LONG:
+				add_index_zval(return_value, int_key, *data);
+				break;
+		}
+	} else {
+		(*data)->refcount++;
+		add_next_index_zval(return_value, *data);
+	}
+	return ZEND_HASH_APPLY_KEEP;
+}
+/* }}} */
+
+/* {{{ proto array iterator_to_array(Traversable it) 
+   Copy the iterator into an array */
+PHP_FUNCTION(iterator_to_array)
+{
+	zval                   *obj;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &obj, zend_ce_traversable) == FAILURE) {
 		RETURN_FALSE;
 	}
-	
+
 	array_init(return_value);
 	
-	iter = Z_OBJCE_P(obj)->get_iterator(Z_OBJCE_P(obj), obj, 0 TSRMLS_CC);
+	if (spl_iterator_apply(obj, spl_iterator_to_array_apply, (void*)return_value TSRMLS_CC) != SUCCESS) {
+		zval_dtor(return_value);
+		RETURN_NULL();
+	}
+}
 
-	if (iter->funcs->rewind) {
-		iter->funcs->rewind(iter TSRMLS_CC);
-	}
-	if (EG(exception)) {
-		return;
-	}
-	while (iter->funcs->valid(iter TSRMLS_CC) == SUCCESS) {
-		iter->funcs->get_current_data(iter, &data TSRMLS_CC);
-		if (EG(exception)) {
-			return;
-		}
-		(*data)->refcount++;
-		if (iter->funcs->get_current_key) {
-			key_type = iter->funcs->get_current_key(iter, &str_key, &str_key_len, &int_key TSRMLS_CC);
-			if (EG(exception)) {
-				return;
-			}
-			switch(key_type) {
-				case HASH_KEY_IS_STRING:
-					add_assoc_zval_ex(return_value, str_key.s, str_key_len, *data);
-					efree(str_key.s);
-					break;
-				case HASH_KEY_IS_UNICODE:
-					add_u_assoc_zval_ex(return_value, IS_UNICODE, str_key, str_key_len, *data);
-					efree(str_key.u);
-					break;
-				case HASH_KEY_IS_LONG:
-					add_index_zval(return_value, int_key, *data);
-					break;
-			}
-		} else {
-			add_next_index_zval(return_value, *data);
-		}
-		iter->funcs->move_forward(iter TSRMLS_CC);
-		if (EG(exception)) {
-			return;
-		}
-	}
-	iter->funcs->dtor(iter TSRMLS_CC);
-	if (EG(exception)) {
-		return;
-	}
+static int spl_iterator_count_apply(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ */
+{
+	(*(long*)puser)++;
+	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
 
@@ -2470,37 +2510,15 @@ PHP_FUNCTION(iterator_to_array)
 PHP_FUNCTION(iterator_count)
 {
 	zval                   *obj;
-	zend_object_iterator   *iter;
 	long                    count = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &obj, zend_ce_traversable) == FAILURE) {
 		RETURN_FALSE;
 	}
 	
-	iter = Z_OBJCE_P(obj)->get_iterator(Z_OBJCE_P(obj), obj, 0 TSRMLS_CC);
-
-	if (iter->funcs->rewind) {
-		iter->funcs->rewind(iter TSRMLS_CC);
+	if (spl_iterator_apply(obj, spl_iterator_count_apply, (void*)&count TSRMLS_CC) == SUCCESS) {
+		RETURN_LONG(count);
 	}
-	if (EG(exception)) {
-		return;
-	}
-	while (iter->funcs->valid(iter TSRMLS_CC) == SUCCESS) {
-		if (EG(exception)) {
-			return;
-		}
-		count++;
-		iter->funcs->move_forward(iter TSRMLS_CC);
-		if (EG(exception)) {
-			return;
-		}
-	}
-	iter->funcs->dtor(iter TSRMLS_CC);
-	if (EG(exception)) {
-		return;
-	}
-	
-	RETURN_LONG(count);
 }
 /* }}} */
 
@@ -2562,7 +2580,7 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	REGISTER_SPL_CLASS_CONST_LONG(CachingIterator, "CATCH_GET_CHILD",      CIT_CATCH_GET_CHILD); 
 	REGISTER_SPL_CLASS_CONST_LONG(CachingIterator, "TOSTRING_USE_KEY",     CIT_TOSTRING_USE_KEY);
 	REGISTER_SPL_CLASS_CONST_LONG(CachingIterator, "TOSTRING_USE_CURRENT", CIT_TOSTRING_USE_CURRENT);
-	REGISTER_SPL_CLASS_CONST_LONG(CachingIterator, "TOSTRING_USE_INNER",CIT_TOSTRING_USE_INNER);
+	REGISTER_SPL_CLASS_CONST_LONG(CachingIterator, "TOSTRING_USE_INNER",   CIT_TOSTRING_USE_INNER);
 	REGISTER_SPL_CLASS_CONST_LONG(CachingIterator, "FULL_CACHE",           CIT_FULL_CACHE); 
 
 	REGISTER_SPL_SUB_CLASS_EX(RecursiveCachingIterator, CachingIterator, spl_dual_it_new, spl_funcs_RecursiveCachingIterator);
