@@ -2404,8 +2404,9 @@ static zend_function_entry spl_funcs_AppendIterator[] = {
 PHPAPI int spl_iterator_apply(zval *obj, spl_iterator_apply_func_t apply_func, void *puser TSRMLS_DC)
 {
 	zend_object_iterator   *iter;
+	zend_class_entry       *ce = Z_OBJCE_P(obj);
 
-	iter = Z_OBJCE_P(obj)->get_iterator(Z_OBJCE_P(obj), obj, 0 TSRMLS_CC);
+	iter = ce->get_iterator(ce, obj, 0 TSRMLS_CC);
 
 	if (EG(exception)) {
 		goto done;
