@@ -51,7 +51,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 	zend_function *destructor = object->ce->destructor;
 
 
-	if (destructor && !zend_objects_is_detructor_called(handle TSRMLS_CC)) {
+	if (destructor) {
 		zval zobj, *obj = &zobj;
 		zval *old_exception;
 
