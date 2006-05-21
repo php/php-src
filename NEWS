@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, Version 4.4.3
+- Fixed a possible buffer overflow inside create_named_pipe() for Win32 systems
+  in libmysql.c. (Ilia)
 - Updated PCRE to version 6.6. (Andrei)
 - Added overflow checks to wordwrap() function. (Ilia)
 - Added a check for special characters in the session name. (Ilia)

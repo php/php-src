@@ -213,6 +213,10 @@ HANDLE create_named_pipe(NET *net, uint connect_timeout, char **arg_host,
   if (!host || !strcmp(host,LOCAL_HOST))
     host=LOCAL_HOST_NAMEDPIPE;
 
+  if (sizeof(szPipeName) <= (strlen(host) + strlen(unix_socket) + sizeof("\\\\\\pipe\\"))) {
+	return INVALID_HANDLE_VALUE;
+  }
+
   sprintf( szPipeName, "\\\\%s\\pipe\\%s", host, unix_socket);
   DBUG_PRINT("info",("Server name: '%s'.  Named Pipe: %s",
 		     host, unix_socket));
