@@ -29,14 +29,21 @@ Having said that, here are the organizational rules:
    5. If you don't know how to do something, ask first!
 
    6. Test your changes before committing them. We mean it. Really.
+      To do so use "make test".
+   
+   7. For development use the --enable-maintainer-zts switch to ensure your
+      code handles TSRM correctly and doesn't break for thos who need that.
 
 Currently we have the following branches in use:
-HEAD     Will become PHP 5.1. This CVS branch is for active development.
-PHP_5_0  Is used to release the PHP 5.0.x series. Only minor feature
-		 enhancements may go in here, but please keep that as infrequent as
-		 possible.
-PHP_4_3  Is used to release the PHP 4.3.x series. Only bugfixes are permitted
-         on this branch.
+HEAD     Will become PHP 6.0. This CVS branch is for active development.
+PHP_5_2  Is used to release the PHP 5.2.x series. Only minor feature
+         enhancements may go in here, but please keep that as infrequent as
+         possible.
+PHP_5_1  Is used to release the PHP 5.1.x series. Only bugfixes are permitted
+         on this branch (Consult the releasemaster prior to commit).
+PHP_4_4  Is used to release the PHP 4.4.x series. Only bugfixes are permitted
+         on this branch (Consult the releasemaster prior to commit).
+PHP_4_3  This branch is closed.
 
 The next few rules are more of a technical nature.
 
