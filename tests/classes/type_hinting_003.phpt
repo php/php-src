@@ -57,4 +57,4 @@ array(1) {
   int(25)
 }
 
-Catchable fatal error: Argument 1 passed to Test::f1() must be an array, called in %stype_hinting_003.php on line %d and defined in %stype_hinting_003.php on line %d
+Catchable fatal error: Argument 1 passed to Test::f1() must be an array, integer given, called in %stype_hinting_003.php on line %d and defined in %stype_hinting_003.php on line %d
