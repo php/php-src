@@ -1,6 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2006, Version 4.4.3
+21 May 2006, Version 4.4.3RC1
 - Added control character checks for cURL extension's open_basedir/safe_mode
   checks. (Ilia)
 - Fixed a possible buffer overflow inside create_named_pipe() for Win32 systems
