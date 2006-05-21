@@ -454,7 +454,9 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 {
 	zend_arg_info *cur_arg_info;
 	zend_execute_data *ptr = EG(current_execute_data)->prev_execute_data;
-	char *fclass, *fsep, *fname;
+	char *fsep, *error_msg;
+	char *fclass, *fname;
+	zend_class_entry *ce;
 
 	if (!zf->common.arg_info
 		|| arg_num>zf->common.num_args) {
@@ -469,9 +471,9 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 	if (cur_arg_info->class_name) {
 		if (!arg) {
 			if (ptr && ptr->op_array) {
-				zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %s%s%s() must be an object of class %s, called in %s on line %d and defined", arg_num, fclass, fsep, fname, cur_arg_info->class_name, ptr->op_array->filename, ptr->opline->lineno);
+				zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %s%s%s() must be an object of class %s, none given, called in %s on line %d and defined", arg_num, fclass, fsep, fname, cur_arg_info->class_name, ptr->op_array->filename, ptr->opline->lineno);
 			} else {
-				zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %s%s%s() must be an object of class %s", arg_num, fclass, fsep, fname, cur_arg_info->class_name);
+				zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %s%s%s() must be an object of class %s, none given", arg_num, fclass, fsep, fname, cur_arg_info->class_name);
 			}
 			return 0;
 		}
@@ -479,45 +481,51 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 			case IS_NULL:
 				if (!cur_arg_info->allow_null) {
 					if (ptr && ptr->op_array) {
-						zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %s%s%s() must not be null, called in %s on line %d and defined", arg_num, fclass, fsep, fname, ptr->op_array->filename, ptr->opline->lineno);
+						zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %s%s%s() must be an object of class %s, null given, called in %s on line %d and defined", arg_num, fclass, fsep, fname, cur_arg_info->class_name, ptr->op_array->filename, ptr->opline->lineno);
 					} else {
-						zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %s%s%s() must not be null", arg_num, fclass, fsep, fname);
+						zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %s%s%s() must be an object of class %s, null given", arg_num, fclass, fsep, fname, cur_arg_info->class_name);
 					}
 					return 0;
 				}
 				break;
 			case IS_OBJECT: {
-					zend_class_entry *ce = zend_fetch_class(cur_arg_info->class_name, cur_arg_info->class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
+					ce = zend_fetch_class(cur_arg_info->class_name, cur_arg_info->class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
 					if (!instanceof_function(Z_OBJCE_P(arg), ce TSRMLS_CC)) {
-						char *error_msg;
 						if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 							error_msg = "implement interface";
 						} else {
 							error_msg = "be an instance of";
 						}
 						if (ptr && ptr->op_array) {
-							zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %s%s%s() must %s %s, called in %s on line %d and defined", arg_num, fclass, fsep, fname, error_msg, ce->name, ptr->op_array->filename, ptr->opline->lineno);
+							zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %s%s%s() must %s %s, instance of %s given, called in %s on line %d and defined", arg_num, fclass, fsep, fname, error_msg, ce->name, Z_OBJCE_P(arg)->name, ptr->op_array->filename, ptr->opline->lineno);
 						} else {
-							zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %s%s%s() must %s %s", arg_num, fclass, fsep, fname, error_msg, ce->name);
+							zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %s%s%s() must %s %s, instance of %s given", arg_num, fclass, fsep, fname, error_msg, ce->name, Z_OBJCE_P(arg)->name);
 						}
 						return 0;
 					}
 				}
 				break;
-			default:
-				if (ptr && ptr->op_array) {
-					zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %s%s%s() must be an object of class %s, called in %s on line %d and defined", arg_num, fclass, fsep, fname, cur_arg_info->class_name, ptr->op_array->filename, ptr->opline->lineno);
+			default: {
+				ce = zend_fetch_class(cur_arg_info->class_name, cur_arg_info->class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
+				if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+					error_msg = "implement interface";
 				} else {
-					zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %s%s%s() must be an object of class %s", arg_num, fclass, fsep, fname, cur_arg_info->class_name);
+					error_msg = "be an instance of";
+				}
+				if (ptr && ptr->op_array) {
+					zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %s%s%s() must %s %s, %s given, called in %s on line %d and defined", arg_num, fclass, fsep, fname, error_msg, ce->name, zend_zval_type_name(arg), ptr->op_array->filename, ptr->opline->lineno);
+				} else {
+					zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %s%s%s() must %s %s, %s given", arg_num, fclass, fsep, fname, error_msg, ce->name, zend_zval_type_name(arg));
 				}
 				return 0;
+			}
 		}
 	} else if (cur_arg_info->array_type_hint) {
 		if (!arg) {
 			if (ptr && ptr->op_array) {
-				zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %s%s%s() must be an array, called in %s on line %d and defined", arg_num, fclass, fsep, fname, ptr->op_array->filename, ptr->opline->lineno);
+				zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %s%s%s() must be an array, none given, called in %s on line %d and defined", arg_num, fclass, fsep, fname, ptr->op_array->filename, ptr->opline->lineno);
 			} else {
-				zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %s%s%s() must be an array", arg_num, fclass, fsep, fname);
+				zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %s%s%s() must be an array, none given", arg_num, fclass, fsep, fname);
 			}
 			return 0;
 		}
@@ -525,9 +533,9 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 			case IS_NULL:
 				if (!cur_arg_info->allow_null) {
 					if (ptr && ptr->op_array) {
-						zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %s%s%s() must not be null, called in %s on line %d and defined", arg_num, fclass, fsep, fname, ptr->op_array->filename, ptr->opline->lineno);
+						zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %s%s%s() must be an array, null given, called in %s on line %d and defined", arg_num, fclass, fsep, fname, ptr->op_array->filename, ptr->opline->lineno);
 					} else {
-						zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %s%s%s() must not be null", arg_num, fclass, fsep, fname);
+						zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %s%s%s() must be an array, null given", arg_num, fclass, fsep, fname);
 					}
 					return 0;
 				}
@@ -536,9 +544,9 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 				break;
 			default:
 				if (ptr && ptr->op_array) {
-					zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %s%s%s() must be an array, called in %s on line %d and defined", arg_num, fclass, fsep, fname, ptr->op_array->filename, ptr->opline->lineno);
+					zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %s%s%s() must be an array, %s given, called in %s on line %d and defined", arg_num, fclass, fsep, fname, zend_zval_type_name(arg), ptr->op_array->filename, ptr->opline->lineno);
 				} else {
-					zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %s%s%s() must be an array", arg_num, fclass, fsep, fname);
+					zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %s%s%s() must be an array, %s given", arg_num, fclass, fsep, fname, zend_zval_type_name(arg));
 				}
 				return 0;
 		}
