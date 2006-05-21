@@ -144,10 +144,7 @@ PHPAPI unsigned char *php_base64_decode(const unsigned char *str, int length, in
 	/* this sucks for threaded environments */
 	unsigned char *result;
 	
-	result = (unsigned char *)emalloc(length + 1);
-	if (result == NULL) {
-		return NULL;
-	}
+	result = (unsigned char *)safe_emalloc(length, 1, 1);
 
 	/* run through the whole string, converting as we go */
 	while ((ch = *current++) != '\0' && length-- > 0) {
