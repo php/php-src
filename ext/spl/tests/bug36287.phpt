@@ -11,15 +11,9 @@ $idx = 0;
 foreach($it as $file)
 {
 	echo "First\n";
-	if("." != $file && ".." != $file)
-	{
-		var_Dump($file->getFilename());
-	}
+	var_Dump($file->getFilename());
 	echo "Second\n";
-	if($file != "." && $file != "..")
-	{
-		var_dump($file->getFilename());
-	}
+	var_dump($file->getFilename());
 	if (++$idx > 1)
 	{
 		break;
