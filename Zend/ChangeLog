@@ -1,3 +1,46 @@
+2006-05-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_objects.c:
+      - Z_LVAL is a long so use %ld
+
+2006-05-20  Antony Dovgal  <antony@zend.com>
+
+    * zend_objects_API.c
+      zend_objects_API.h:
+      fix the typo before everybody forgets about it
+
+2006-05-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_objects.c:
+      - Better error message in case of an exception from a dtor while an
+        exception is already pending
+
+    * zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_gen.php:
+      - Fix warning
+
+    * zend_objects.c:
+      - Do not use the protection at this place, we would need another object
+        shutdown state (e.g. destructed == 2). That's probbaly too much.
+
+    * zend_objects.c
+      zend_objects_API.c
+      zend_objects_API.h:
+      - Destructors must not be called twice
+
+    * tests/catch_004.phpt:
+      - Should be static and be called (comitted wrong version)
+
+    * tests/catch_002.phpt
+      tests/catch_002.phpt
+      tests/catch_003.phpt
+      tests/catch_003.phpt
+      tests/catch_004.phpt
+      tests/catch_004.phpt:
+      
+      - Add new tests
+
 2006-05-19  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_ini.c
