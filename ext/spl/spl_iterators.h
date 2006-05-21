@@ -130,6 +130,7 @@ typedef struct _spl_dual_it_object {
 		struct {
 			int              flags;
 			pcre_cache_entry *pce;
+			char             *regex;
 		} regex;
 #endif
 	} u;
