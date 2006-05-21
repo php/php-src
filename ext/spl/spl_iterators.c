@@ -2306,7 +2306,7 @@ SPL_METHOD(AppendIterator, append)
 	
 	APPENDIT_CHECK_CTOR(intern);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &it, zend_ce_iterator) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "O", &it, zend_ce_iterator) == FAILURE) {
 		return;
 	}
 	spl_array_iterator_append(intern->u.append.zarrayit, it TSRMLS_CC);
