@@ -477,8 +477,9 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 {
 	zend_arg_info *cur_arg_info;
 	zend_execute_data *ptr = EG(current_execute_data)->prev_execute_data;
-	char *fsep;
+	char *fsep, *error_msg;
 	zstr fclass, fname;
+	zend_class_entry *ce;
 
 	if (!zf->common.arg_info
 		|| arg_num>zf->common.num_args) {
@@ -511,9 +512,8 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 				}
 				break;
 			case IS_OBJECT: {
-					zend_class_entry *ce = zend_u_fetch_class(UG(unicode) ? IS_UNICODE : IS_STRING, cur_arg_info->class_name, cur_arg_info->class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
+					ce = zend_u_fetch_class(UG(unicode) ? IS_UNICODE : IS_STRING, cur_arg_info->class_name, cur_arg_info->class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
 					if (!instanceof_function(Z_OBJCE_P(arg), ce TSRMLS_CC)) {
-						char *error_msg;
 						if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 							error_msg = "implement interface";
 						} else {
@@ -528,13 +528,20 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 					}
 				}
 				break;
-			default:
-				if (ptr && ptr->op_array) {
-					zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %v%s%v() must be an object of class %v, %s given, called in %s on line %d and defined", arg_num, fclass, fsep, fname, cur_arg_info->class_name, zend_zval_type_name(arg), ptr->op_array->filename, ptr->opline->lineno);
+			default: {
+				ce = zend_u_fetch_class(UG(unicode) ? IS_UNICODE : IS_STRING, cur_arg_info->class_name, cur_arg_info->class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
+				if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+					error_msg = "implement interface";
 				} else {
-					zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %v%s%v() must be an object of class %v, %s given", arg_num, fclass, fsep, fname, cur_arg_info->class_name, zend_zval_type_name(arg));
+					error_msg = "be an instance of";
+				}
+				if (ptr && ptr->op_array) {
+					zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %v%s%v() must %s %v, %s given, called in %s on line %d and defined", arg_num, fclass, fsep, fname, error_msg, ce->name, zend_zval_type_name(arg), ptr->op_array->filename, ptr->opline->lineno);
+				} else {
+					zend_error(E_RECOVERABLE_ERROR, "Argument %d passed to %v%s%v() must %s %v, %s given", arg_num, fclass, fsep, fname, error_msg, ce->name, zend_zval_type_name(arg));
 				}
 				return 0;
+			}
 		}
 	} else if (cur_arg_info->array_type_hint) {
 		if (!arg) {
