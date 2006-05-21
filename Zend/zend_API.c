@@ -314,7 +314,7 @@ static int parse_arg_object_to_string(zval **arg, char **p, int *pl, int type TS
 	return FAILURE;
 }
 
-static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **spec, char T_arg_type TSRMLS_DC)
+static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **spec, char T_arg_type, int* ret_type TSRMLS_DC)
 {
 	char *spec_walk = *spec;
 	char c = *spec_walk++;
@@ -706,9 +706,11 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 				} else {
 					if (Z_TYPE_PP(arg) == IS_NULL && return_null) {
 						*p = NULL;
+					} else if (ce) {
+						*ret_type = UG(unicode)?IS_UNICODE:IS_STRING;
+						return ce->name.s;
 					} else {
-						/* FIXME: Unicode support??? */
-						return ce ? ce->name.s : "object";
+						return "object";
 					}
 				}
 			}
@@ -781,15 +783,16 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 static int zend_parse_arg(int arg_num, zval **arg, va_list *va, char **spec, int quiet, char T_arg_type TSRMLS_DC)
 {
 	char *expected_type = NULL;
+	int ret_type = IS_STRING;
 
-	expected_type = zend_parse_arg_impl(arg_num, arg, va, spec, T_arg_type TSRMLS_CC);
+	expected_type = zend_parse_arg_impl(arg_num, arg, va, spec, T_arg_type, &ret_type TSRMLS_CC);
 	if (expected_type) {
 		if (!quiet && *expected_type) {
 			char *space;
 			zstr class_name = get_active_class_name(&space TSRMLS_CC);
 
-			zend_error(E_WARNING, "%v%s%v() expects parameter %d to be %s, %s given",
-					class_name, space, get_active_function_name(TSRMLS_C), arg_num, expected_type,
+			zend_error(E_WARNING, "%v%s%v() expects parameter %d to be %R, %s given",
+					class_name, space, get_active_function_name(TSRMLS_C), arg_num, ret_type, expected_type,
 					zend_zval_type_name(*arg));
 		}
 		return FAILURE;
