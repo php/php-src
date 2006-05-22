@@ -31,6 +31,7 @@ PHP                                                                        NEWS
   . Added new attribute ATTR_DEFAULT_FETCH_MODE. (Pierre)
   . Added FETCH_PROPS_LATE. (Marcus)
 - Improved SPL: (Marcus)
+  . Made most iterator code exception safe.
   . Added RegExIterator and RecursiveRegExIterator.
   . Added full caching support and ArrayAccess to CachingIterator.
   . Added array functions to ArrayObject/ArrayIterator and made them faster.
