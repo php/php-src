@@ -130,6 +130,7 @@ PHP_METHOD(domdocument, loadXML);
 PHP_FUNCTION(dom_document_savexml);
 PHP_FUNCTION(dom_document_validate);
 PHP_FUNCTION(dom_document_xinclude);
+PHP_METHOD(domdocument, registerNodeClass);
 
 #if defined(LIBXML_HTML_ENABLED)
 PHP_METHOD(domdocument, loadHTML);
