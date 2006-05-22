@@ -259,7 +259,7 @@ static SWFCharacter getCharacter(zval *id TSRMLS_DC)
 		return (SWFCharacter)getPrebuiltClip(id TSRMLS_CC);
 #endif
 	else
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Called object is not an SWFCharacter");
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Called object is not an SWFCharacter");
 		return NULL;
 }
 /* }}} */
@@ -312,7 +312,7 @@ PHP_METHOD(swfaction, __construct)
 	action = compileSWFActionCode(Z_STRVAL_PP(script));
 
 	if (!action) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Couldn't compile actionscript");
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Couldn't compile actionscript");
 	}
 	
 	ret = zend_list_insert(action, le_swfactionp);
@@ -331,7 +331,7 @@ static SWFAction getAction(zval *id TSRMLS_DC)
 	void *action = SWFgetProperty(id, "action", 6, le_swfactionp TSRMLS_CC);
 
 	if (!action) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Called object is not an SWFAction");
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Called object is not an SWFAction");
 	}
 	return (SWFAction)action;
 }
@@ -407,7 +407,7 @@ static SWFBitmap getBitmap(zval *id TSRMLS_DC)
 	void *bitmap = SWFgetProperty(id, "bitmap", 6, le_swfbitmapp TSRMLS_CC);
 
 	if (!bitmap) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Called object is not an SWFBitmap");
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Called object is not an SWFBitmap");
 	}
 	return (SWFBitmap)bitmap;
 }
@@ -465,7 +465,7 @@ static SWFButton getButton(zval *id TSRMLS_DC)
 	void *button = SWFgetProperty(id, "button", 6, le_swfbuttonp TSRMLS_CC);
 
 	if (!button) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Called object is not an SWFButton");
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Called object is not an SWFButton");
 	}
 	return (SWFButton)button;
 }
@@ -664,7 +664,7 @@ PHP_FUNCTION(ming_keypress)
 	convert_to_string_ex(key);
 
 	if (Z_STRLEN_PP(key) > 1) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Only one character expected");
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Only one character expected");
 	}
 	
 	c = Z_STRVAL_PP(key)[0];
@@ -701,7 +701,7 @@ static SWFDisplayItem getDisplayItem(zval *id TSRMLS_DC)
 	void *item = SWFgetProperty(id, "displayitem", 11, le_swfdisplayitemp TSRMLS_CC);
 
 	if (!item) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Called object is not an SWFDisplayItem");
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Called object is not an SWFDisplayItem");
 	}
 
 	return (SWFDisplayItem)item;
@@ -1208,7 +1208,7 @@ static zend_function_entry swfdisplayitem_functions[] = {
    Creates a new SWFFill object */
 PHP_METHOD(swffill, __construct)
 {
-  php_error_docref(NULL TSRMLS_CC, E_ERROR, "Instantiating SWFFill won't do any good- use SWFShape::addFill() instead");
+  php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Instantiating SWFFill won't do any good- use SWFShape::addFill() instead");
 }
 
 static void destroy_SWFFill_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
@@ -1227,7 +1227,7 @@ static SWFFill getFill(zval *id TSRMLS_DC)
 	void *fill = SWFgetProperty(id, "fill", 4, le_swffillp TSRMLS_CC);
 
 	if (!fill) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Called object is not an SWFFill");
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Called object is not an SWFFill");
 	}
 	return (SWFFill)fill;
 }
@@ -1338,7 +1338,7 @@ SWFFontCharacter getFontCharacter(zval *id TSRMLS_DC)
 	void *font = SWFgetProperty(id, "fontcharacter", 13, le_swffontcharp TSRMLS_CC);
 
 	if(!font)
-		php_error(E_ERROR, "called object is not an SWFFontCharacter!");
+		php_error(E_RECOVERABLE_ERROR, "called object is not an SWFFontCharacter!");
 
 	return (SWFFontCharacter)font;
 }
@@ -1398,7 +1398,7 @@ static SWFFont getFont(zval *id TSRMLS_DC)
 	void *font = SWFgetProperty(id, "font", 4, le_swffontp TSRMLS_CC);
 
 	if (!font) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Called object is not an SWFFont");
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Called object is not an SWFFont");
 	}
 	return (SWFFont)font;
 }
@@ -1619,7 +1619,7 @@ static SWFGradient getGradient(zval *id TSRMLS_DC)
 	void *gradient = SWFgetProperty(id, "gradient", 8, le_swfgradientp TSRMLS_CC);
 
 	if (!gradient) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Called object is not an SWFGradient");
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Called object is not an SWFGradient");
 	}
 	return (SWFGradient)gradient;
 }
@@ -1694,7 +1694,7 @@ static SWFMorph getMorph(zval *id TSRMLS_DC)
 	void *morph = SWFgetProperty(id, "morph", 5, le_swfmorphp TSRMLS_CC);
 
 	if (!morph) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Called object is not an SWFMorph");
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Called object is not an SWFMorph");
 	}
 	return (SWFMorph)morph;
 }
@@ -1746,7 +1746,7 @@ SWFSound getSound(zval *id TSRMLS_DC)
 	void *sound = SWFgetProperty(id, "sound", 5, le_swfsoundp TSRMLS_CC);
 
 	if(!sound)
-		php_error(E_ERROR, "called object is not an SWFSound!");
+		php_error(E_RECOVERABLE_ERROR, "called object is not an SWFSound!");
 
 	return (SWFSound)sound;
 }
@@ -1826,7 +1826,7 @@ SWFSoundInstance getSoundInstance(zval *id TSRMLS_DC)
 	void *inst = SWFgetProperty(id, "soundinstance", 13, le_swfsoundinstancep TSRMLS_CC);
 
 	if (!inst)
-		php_error(E_ERROR, "called object is not an SWFSoundInstance!");
+		php_error(E_RECOVERABLE_ERROR, "called object is not an SWFSoundInstance!");
 
 	return (SWFSoundInstance)inst;
 }
@@ -1960,7 +1960,7 @@ static SWFVideoStream getVideoStream(zval *id TSRMLS_DC)
 	void *stream = SWFgetProperty(id, "videostream", 11, le_swfvideostreamp TSRMLS_CC);
 	                                                                                                                                         
 	if(!stream)
-		php_error(E_ERROR, "called object is not an SWFVideoStream!");
+		php_error(E_RECOVERABLE_ERROR, "called object is not an SWFVideoStream!");
 	                                                                                                                                         
 	return (SWFVideoStream)stream;
 }
@@ -1974,7 +1974,7 @@ PHP_METHOD(swfvideostream, setdimension)
 	zval **x, **y;
 	SWFVideoStream stream = getVideoStream(getThis() TSRMLS_CC);
 	if(!stream)
-		 php_error(E_ERROR, "getVideoSTream returned NULL");
+		 php_error(E_RECOVERABLE_ERROR, "getVideoSTream returned NULL");
 
 	if( ZEND_NUM_ARGS() != 2 
 			|| zend_get_parameters_ex(2, &x, &y) == FAILURE )
@@ -2070,7 +2070,7 @@ static SWFPrebuiltClip getPrebuiltClip(zval *id TSRMLS_DC)
 	void *clip = SWFgetProperty(id, "prebuiltclip", 12, le_swfprebuiltclipp TSRMLS_CC);
                                                                      
 	if(!clip)
-		php_error(E_ERROR, "called object is not an SWFPrebuiltClip!");
+		php_error(E_RECOVERABLE_ERROR, "called object is not an SWFPrebuiltClip!");
                                                                                                                                              
 	return (SWFPrebuiltClip)clip;
 }
@@ -2126,7 +2126,7 @@ static SWFMovie getMovie(zval *id TSRMLS_DC)
 	void *movie = SWFgetProperty(id, "movie", 5, le_swfmoviep TSRMLS_CC);
 
 	if (!movie) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Called object is not an SWFMovie");
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Called object is not an SWFMovie");
 	}
 	return (SWFMovie)movie;
 }
@@ -2720,7 +2720,7 @@ static SWFShape getShape(zval *id TSRMLS_DC)
 	void *shape = SWFgetProperty(id, "shape", 5, le_swfshapep TSRMLS_CC);
 
 	if (!shape) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Called object is not an SWFShape");
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Called object is not an SWFShape");
 	}
 
 	return (SWFShape)shape;
@@ -2804,7 +2804,7 @@ PHP_METHOD(swfshape, addFill)
 			}
 			fill = SWFShape_addBitmapFill(getShape(getThis() TSRMLS_CC), getBitmap(*arg1 TSRMLS_CC), flags);
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Argument is not a bitmap nor a gradient");
+			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Argument is not a bitmap nor a gradient");
 		}
 
 	} else if (ZEND_NUM_ARGS() == 3 || ZEND_NUM_ARGS() == 4) {
@@ -2837,7 +2837,7 @@ PHP_METHOD(swfshape, addFill)
 	}
 	
 	if (!fill) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Error adding fill to shape");
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Error adding fill to shape");
 	}
 
 	/* return an SWFFill object */
@@ -3241,7 +3241,7 @@ static SWFMovieClip getSprite(zval *id TSRMLS_DC)
 	void *sprite = SWFgetProperty(id, "sprite", 6, le_swfspritep TSRMLS_CC);
 
 	if (!sprite) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Called object is not an SWFSprite");
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Called object is not an SWFSprite");
 	}
 	return (SWFMovieClip)sprite;
 }
@@ -3426,7 +3426,7 @@ static SWFText getText(zval *id TSRMLS_DC)
 	void *text = SWFgetProperty(id, "text", 4, le_swftextp TSRMLS_CC);
 
 	if (!text) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Called object is not an SWFText");
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Called object is not an SWFText");
 	}
 	return (SWFText)text;
 }
@@ -3721,7 +3721,7 @@ static SWFTextField getTextField(zval *id TSRMLS_DC)
 	void *field = SWFgetProperty(id, "textfield", 9, le_swftextfieldp TSRMLS_CC);
 
 	if (!field) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Called object is not an SWFTextField");
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Called object is not an SWFTextField");
 	}
 	return (SWFTextField)field;
 }
@@ -4024,7 +4024,7 @@ static void php_ming_error(const char *msg, ...)
 	vspprintf(&buffer, 0, msg, args);
 	va_end(args);
 
-	php_error_docref(NULL TSRMLS_CC, E_ERROR, "%s", buffer);
+	php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "%s", buffer);
 	efree(buffer);
 }
 
@@ -4033,7 +4033,7 @@ PHP_RINIT_FUNCTION(ming)
 	/* XXX - this didn't work so well last I tried.. */
 
 	if (Ming_init() != 0) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Error initializing Ming module");
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Error initializing Ming module");
 		return FAILURE;
 	}
 	return SUCCESS;
