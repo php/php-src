@@ -262,7 +262,6 @@ PHP_FUNCTION(dom_attr_is_id)
 	zval *id;
 	dom_object *intern;
 	xmlAttrPtr attrp;
-	xmlNodePtr nodep;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &id, dom_attr_class_entry) == FAILURE) {
 		return;
@@ -270,9 +269,7 @@ PHP_FUNCTION(dom_attr_is_id)
 
 	DOM_GET_OBJ(attrp, id, xmlAttrPtr, intern);
 
-	nodep = attrp->parent;
-
-	if (xmlIsID(attrp->doc, nodep, attrp)) {
+	if (attrp->atype == XML_ATTRIBUTE_ID) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
