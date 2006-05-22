@@ -484,7 +484,7 @@ static int fcgi_read_request(fcgi_request *req)
 				break;
 			case FCGI_FILTER:
 				val = strdup("FILTER");
-				zend_hash_update(&req->env, "FCGI_ROLE", sizeof("FCGI_ROLE"), val, sizeof(char*), NULL);
+				zend_hash_update(&req->env, "FCGI_ROLE", sizeof("FCGI_ROLE"), &val, sizeof(char*), NULL);
 				break;
 			default:
 				return 0;
