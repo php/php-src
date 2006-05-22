@@ -1,3 +1,102 @@
+2006-05-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_4)
+      ext/curl/curl.c:
+      - Fix build
+
+    * (PHP_5_2)
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_gen.php:
+      - MFH Sync vm generation with head
+      - Regenerate vm
+
+2006-05-21  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Back to dev
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Go with 4.4.3RC1
+
+2006-05-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      ext/curl/curl.c
+      ext/curl/interface.c:
+      MFH: Added control character checks for cURL extension's
+      open_basedir/safe_mode checks.
+
+    * (PHP_5_2)
+      NEWS
+      ext/curl/interface.c
+      ext/curl/interface.c:
+      Added control character checks for cURL extension's open_basedir/safe_mode
+      checks.
+
+    * (PHP_4_4)
+      NEWS
+      ext/mysql/libmysql/libmysql.c:
+      Fixed a possible buffer overflow inside create_named_pipe() for Win32
+      systems in libmysql.c.
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      Added a note about E_RECOVERABLE_ERROR being a part of E_ALL.
+
+2006-05-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      ext/standard/tests/file/stream_rfc2397_006.phpt
+      main/streams/memory.c:
+      - MFH Handle corrupt base64 data in data: url
+
+    * ext/standard/tests/file/stream_rfc2397_006.phpt
+      ext/standard/tests/file/stream_rfc2397_006.phpt
+      main/streams/memory.c:
+      
+      - Handle corrupt base64 data in data: url
+
+    * ext/standard/base64.c:
+      - Drop unneccesary check and change to safe_emalloc
+
+    * ZendEngine2/zend_API.c:
+      - Improve error messages (missing unicode todo)
+
+    * ZendEngine2/zend_execute.c
+      tests/lang/bug24658.phpt:
+      - Improve error messages (part 2)
+
+    * tests/lang/catchable_error_002.phpt:
+      - Fix unicode expectations
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/tests/array_type_hint_001.phpt
+      ZendEngine2/tests/bug33996.phpt
+      tests/classes/interfaces_003.phpt
+      tests/classes/type_hinting_001.phpt
+      tests/classes/type_hinting_003.phpt
+      tests/lang/bug24658.phpt
+      tests/lang/catchable_error_001.phpt
+      tests/lang/catchable_error_002.phpt
+      tests/lang/type_hints_001.phpt:
+      - Improved error messages
+
+    * README.CVS-RULES
+      README.CVS-RULES
+      README.CVS-RULES
+      README.CVS-RULES
+      README.CVS-RULES
+      README.CVS-RULES:
+      - Update
+
 2006-05-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_objects.c:

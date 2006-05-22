@@ -1,3 +1,23 @@
+2006-05-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_gen.php:
+      - MFH Sync vm generation with head
+      - Regenerate vm
+
+    * zend_API.c:
+      - Improve error messages (missing unicode todo)
+
+    * zend_execute.c:
+      - Improve error messages (part 2)
+
+    * zend_execute.c
+      tests/array_type_hint_001.phpt
+      tests/bug33996.phpt:
+      - Improved error messages
+
 2006-05-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_objects.c:
