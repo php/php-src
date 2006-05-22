@@ -106,9 +106,15 @@ class PEAR_REST
             }
             return $ret;
         }
-        $headers = $file[2];
-        $lastmodified = $file[1];
-        $content = $file[0];
+        if (is_array($file)) {
+            $headers = $file[2];
+            $lastmodified = $file[1];
+            $content = $file[0];
+        } else {
+            $content = $file;
+            $lastmodified = false;
+            $headers = array();
+        }
         if ($forcestring) {
             $this->saveCache($url, $content, $lastmodified, false, $cacheId);
             return $content;
@@ -133,7 +139,7 @@ class PEAR_REST
         } else {
             // assume XML
             $parser = new PEAR_XMLParser;
-            $parser->parse($file);
+            $parser->parse($content);
             $content = $parser->getData();
         }
         $this->saveCache($url, $content, $lastmodified, false, $cacheId);
@@ -198,10 +204,21 @@ class PEAR_REST
         if ($cacheid === null && $nochange) {
             $cacheid = unserialize(implode('', file($cacheidfile)));
         }
+
         $fp = @fopen($cacheidfile, 'wb');
         if (!$fp) {
-            return false;
+            $cache_dir = $this->config->get('cache_dir');
+            if (!is_dir($cache_dir)) {
+                System::mkdir(array('-p', $cache_dir));
+                $fp = @fopen($cacheidfile, 'wb');
+                if (!$fp) {
+                    return false;
+                }
+            } else {
+                return false;
+            }
         }
+
         if ($nochange) {
             fwrite($fp, serialize(array(
                 'age'        => time(),
@@ -347,7 +364,7 @@ class PEAR_REST
                     return false;
                 }
                 if ($matches[1] != 200) {
-                    return PEAR::raiseError("File http://$host:$port$path not valid (received: $line)");
+                    return PEAR::raiseError("File http://$host:$port$path not valid (received: $line)", (int) $matches[1]);
                 }
             }
         }

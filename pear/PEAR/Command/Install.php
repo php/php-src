@@ -230,11 +230,6 @@ More than one package may be specified at once.
                     'arg' => 'DIR',
                     'doc' => 'root directory used when installing files (ala PHP\'s INSTALL_ROOT), use packagingroot for RPM',
                     ),
-                'packagingroot' => array(
-                    'shortopt' => 'P',
-                    'arg' => 'DIR',
-                    'doc' => 'root directory used when packaging files, like RPM packaging',
-                    ),
                 'ignore-errors' => array(
                     'doc' => 'force install even if there were errors',
                     ),
@@ -376,6 +371,9 @@ Run post-installation scripts in package <package>, if any exist.
                 }
                 $this->config->set('default_channel', $channel);
                 $chan = &$reg->getChannel($channel);
+                if (PEAR::isError($chan)) {
+                    return $this->raiseError($chan);
+                }
                 if ($chan->supportsREST($this->config->get('preferred_mirror')) &&
                       $base = $chan->getBaseURL('REST1.0', $this->config->get('preferred_mirror'))) {
                     $dorest = true;
@@ -541,23 +539,29 @@ Run post-installation scripts in package <package>, if any exist.
                                 $group['attribs']['hint'] . ')');
                         }
                         $extrainfo[] = 'To install use "pear install ' .
-                            $param->getPackage() . '#featurename"';
+                            $reg->parsedPackageNameToString(
+                                array('package' => $param->getPackage(),
+                                      'channel' => $param->getChannel()), true) .
+                                  '#featurename"';
                     }
                 }
                 if (isset($options['installroot'])) {
                     $reg = &$this->config->getRegistry();
                 }
                 $pkg = &$reg->getPackage($param->getPackage(), $param->getChannel());
-                $pkg->setConfig($this->config);
-                if ($list = $pkg->listPostinstallScripts()) {
-                    $pn = $reg->parsedPackageNameToString(array('channel' =>
-                        $param->getChannel(), 'package' => $param->getPackage()), true);
-                    $extrainfo[] = $pn . ' has post-install scripts:';
-                    foreach ($list as $file) {
-                        $extrainfo[] = $file;
+                // $pkg may be NULL if install is a 'fake' install via --packagingroot
+                if (is_object($pkg)) {
+                    $pkg->setConfig($this->config);
+                    if ($list = $pkg->listPostinstallScripts()) {
+                        $pn = $reg->parsedPackageNameToString(array('channel' =>
+                           $param->getChannel(), 'package' => $param->getPackage()), true);
+                        $extrainfo[] = $pn . ' has post-install scripts:';
+                        foreach ($list as $file) {
+                            $extrainfo[] = $file;
+                        }
+                        $extrainfo[] = 'Use "pear run-scripts ' . $pn . '" to run';
+                        $extrainfo[] = 'DO NOT RUN SCRIPTS FROM UNTRUSTED SOURCES';
                     }
-                    $extrainfo[] = 'Use "pear run-scripts ' . $pn . '" to run';
-                    $extrainfo[] = 'DO NOT RUN SCRIPTS FROM UNTRUSTED SOURCES';
                 }
             } else {
                 return $this->raiseError("$command failed");

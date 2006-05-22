@@ -305,6 +305,9 @@ class PEAR_REST_10
         if (PEAR::isError($packagelist)) {
             return $packagelist;
         }
+        if (!is_array($packagelist) || !isset($packagelist['p'])) {
+            return array();
+        }
         if (!is_array($packagelist['p'])) {
             $packagelist['p'] = array($packagelist['p']);
         }

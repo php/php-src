@@ -45,6 +45,10 @@ class PEAR_PackageFile_v2_Validator
     /**
      * @var int
      */
+    var $_filesValid = 0;
+    /**
+     * @var int
+     */
     var $_curState = 0;
     /**
      * @param PEAR_PackageFile_v2
@@ -99,6 +103,15 @@ class PEAR_PackageFile_v2_Validator
             '*changelog',
         );
         $test = $this->_packageInfo;
+        if (isset($test['dependencies']) &&
+              isset($test['dependencies']['required']) &&
+              isset($test['dependencies']['required']['pearinstaller']) &&
+              isset($test['dependencies']['required']['pearinstaller']['min']) &&
+              version_compare('@package_version@',
+                $test['dependencies']['required']['pearinstaller']['min'], '<')) {
+            $this->_pearVersionTooLow($test['dependencies']['required']['pearinstaller']['min']);
+            return false;
+        }
         // ignore post-installation array fields
         if (array_key_exists('filelist', $test)) {
             unset($test['filelist']);
@@ -222,7 +235,7 @@ class PEAR_PackageFile_v2_Validator
         $this->_validateRelease();
         if (!$this->_stack->hasErrors()) {
             $chan = $this->_pf->_registry->getChannel($this->_pf->getChannel(), true);
-            if (!$chan) {
+            if (PEAR::isError($chan)) {
                 $this->_unknownChannel($this->_pf->getChannel());
             } else {
                 $valpack = $chan->getValidationPackage();
@@ -1266,6 +1279,14 @@ class PEAR_PackageFile_v2_Validator
         return in_array($role, PEAR_Installer_Role::getValidRoles($this->_pf->getPackageType()));
     }
 
+    function _pearVersionTooLow($version)
+    {
+        $this->_stack->push(__FUNCTION__, 'error',
+            array('version' => $version),
+            'This package.xml requires PEAR version %version% to parse properly, we are ' .
+            'version @package_version@');
+    }
+
     function _invalidTagOrder($oktags, $actual, $root)
     {
         $this->_stack->push(__FUNCTION__, 'error',
@@ -1709,6 +1730,8 @@ class PEAR_PackageFile_v2_Validator
     function analyzeSourceCode($file, $string = false)
     {
         if (!function_exists("token_get_all")) {
+            $this->_stack->push(__FUNCTION__, 'error', array('file' => $file),
+                'Parser error: token_get_all() function must exist to analyze source code');
             return false;
         }
         if (!defined('T_DOC_COMMENT')) {

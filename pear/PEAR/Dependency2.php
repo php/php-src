@@ -525,7 +525,7 @@ class PEAR_Dependency2
      */
     function getPEARVersion()
     {
-        return '1.4.3';
+        return '1.4.9';
     }
 
     function validatePearinstallerDependency($dep)

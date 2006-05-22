@@ -324,6 +324,20 @@ class PEAR_ChannelFile {
         }
         return $a;
     }
+
+    /**
+     * Unlike {@link fromArray()} this does not do any validation
+     * @param array
+     * @static
+     * @return PEAR_ChannelFile
+     */
+    function &fromArrayWithErrors($data, $compatibility = false,
+                                  $stackClass = 'PEAR_ErrorStack')
+    {
+        $a = new PEAR_ChannelFile($compatibility, $stackClass);
+        $a->_fromArray($data);
+        return $a;
+    }
     
     /**
      * @param array

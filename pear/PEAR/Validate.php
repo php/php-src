@@ -286,6 +286,13 @@ class PEAR_Validate
             case 'beta' :
                 // check for a package that extends a package,
                 // like Foo and Foo2
+                if ($this->_state == PEAR_VALIDATE_PACKAGING) {
+                    if (substr($versioncomponents[2], 1, 2) == 'rc') {
+                        $this->_addFailure('version', 'Release Candidate versions ' .
+                            'must have capital RC, not lower-case rc');
+                        return false;
+                    }
+                }
                 if (!$this->_packagexml->getExtends()) {
                     if ($versioncomponents[0] == '1') {
                         if ($versioncomponents[2]{0} == '0') {
@@ -452,7 +459,7 @@ class PEAR_Validate
             if ($this->_state == PEAR_VALIDATE_PACKAGING &&
                   $this->_packagexml->getDate() != date('Y-m-d')) {
                 $this->_addWarning('date', 'Release Date "' .
-                    $this->_packagexml->getDate() . '"is not today');
+                    $this->_packagexml->getDate() . '" is not today');
             }
         }
         return true;

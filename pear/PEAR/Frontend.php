@@ -34,6 +34,9 @@ $GLOBALS['_PEAR_FRONTEND_SINGLETON'] = null;
 
 /**
  * Singleton-based frontend for PEAR user input/output
+ *
+ * Note that frontend classes must implement userConfirm(), and shoul implement
+ * displayFatalError() and outputData()
  * @category   pear
  * @package    PEAR
  * @author     Greg Beaver <cellog@php.net>
@@ -64,6 +67,15 @@ class PEAR_Frontend extends PEAR
         }
     }
 
+    /**
+     * Set the frontend class that will be used by calls to {@link singleton()}
+     *
+     * Frontends are expected to conform to the PEAR naming standard of
+     * _ => DIRECTORY_SEPARATOR (PEAR_Frontend_CLI is in PEAR/Frontend/CLI.php)
+     * @param string $uiclass full class name
+     * @return PEAR_Frontend
+     * @static
+     */
     function &setFrontendClass($uiclass)
     {
         if (is_object($GLOBALS['_PEAR_FRONTEND_SINGLETON']) &&
@@ -91,6 +103,38 @@ class PEAR_Frontend extends PEAR
         }
         $err = PEAR::raiseError("no such class: $uiclass");
         return $err;
+    }
+
+    /**
+     * Set the frontend class that will be used by calls to {@link singleton()}
+     *
+     * Frontends are expected to be a descendant of PEAR_Frontend
+     * @param PEAR_Frontend
+     * @return PEAR_Frontend
+     * @static
+     */
+    function &setFrontendObject($uiobject)
+    {
+        if (is_object($GLOBALS['_PEAR_FRONTEND_SINGLETON']) &&
+              is_a($GLOBALS['_PEAR_FRONTEND_SINGLETON'], get_class($uiobject))) {
+            return $GLOBALS['_PEAR_FRONTEND_SINGLETON'];
+        }
+        if (!is_a($uiobject, 'PEAR_Frontend')) {
+            $err = PEAR::raiseError('not a valid frontend class: (' .
+                get_class($uiobject) . ')');
+            return $err;
+        }
+        // quick test to see if this class implements a few of the most
+        // important frontend methods
+        if (method_exists($uiobject, 'userConfirm')) {
+            $GLOBALS['_PEAR_FRONTEND_SINGLETON'] = &$uiobject;
+            $GLOBALS['_PEAR_FRONTEND_CLASS'] = get_class($uiobject);
+            return $uiobject;
+        } else {
+            $err = PEAR::raiseError("not a value frontend class: (" . get_class($uiobject)
+                . ')');
+            return $err;
+        }
     }
 
     /**
@@ -135,7 +179,7 @@ class PEAR_Frontend extends PEAR
         $GLOBALS['_PEAR_Common_tempfiles'][] = $file;
     }
 
-    function log($level, $msg, $append_crlf = true)
+    function log($msg, $append_crlf = true)
     {
     }
 }

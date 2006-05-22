@@ -278,6 +278,10 @@ class PEAR_Downloader extends PEAR_Common
             PEAR::staticPushErrorHandling(PEAR_ERROR_RETURN);
             $err = $params[$i]->initialize($param);
             PEAR::staticPopErrorHandling();
+            if (!$err) {
+                // skip parameters that were missed by preferred_state
+                continue;
+            }
             if (PEAR::isError($err)) {
                 if (!isset($this->_options['soft'])) {
                     $this->log(0, $err->getMessage());
@@ -297,6 +301,10 @@ class PEAR_Downloader extends PEAR_Common
                         require_once 'System.php';
                     }
                     $curchannel = &$this->_registry->getChannel($params[$i]->getChannel());
+                    if (PEAR::isError($curchannel)) {
+                        PEAR::staticPopErrorHandling();
+                        return $this->raiseError($curchannel);
+                    }
                     $a = $this->downloadHttp('http://' . $params[$i]->getChannel() .
                         '/channel.xml', $this->ui,
                         System::mktemp(array('-d')), null, $curchannel->lastModified());
@@ -309,7 +317,14 @@ class PEAR_Downloader extends PEAR_Common
                         '" to update');
                 }
                 if ($params[$i] && !isset($this->_options['downloadonly'])) {
-                    $checkdir = $this->config->get('php_dir', null, $params[$i]->getChannel());
+                    if (isset($this->_options['packagingroot'])) {
+                        $checkdir = $this->_prependPath(
+                            $this->config->get('php_dir', null, $params[$i]->getChannel()),
+                            $this->_options['packagingroot']);
+                    } else {
+                        $checkdir = $this->config->get('php_dir',
+                            null, $params[$i]->getChannel());
+                    }
                     while ($checkdir && $checkdir != '/' && !file_exists($checkdir)) {
                         $checkdir = dirname($checkdir);
                     }
@@ -703,10 +718,14 @@ class PEAR_Downloader extends PEAR_Common
                         break;
                     }
                 }
+                $this->configSet('default_channel', $curchannel);
                 return PEAR::raiseError('Unknown remote channel: ' . $remotechannel);
             } while (false);
         }
         $chan = &$this->_registry->getChannel($parr['channel']);
+        if (PEAR::isError($chan)) {
+            return $chan;
+        }
         $version = $this->_registry->packageInfo($parr['package'], 'version',
             $parr['channel']);
         if ($chan->supportsREST($this->config->get('preferred_mirror')) &&
@@ -719,6 +738,7 @@ class PEAR_Downloader extends PEAR_Common
                 $url = $rest->getDownloadURL($base, $parr, $state, false);
             }
             if (PEAR::isError($url)) {
+                $this->configSet('default_channel', $curchannel);
                 return $url;
             }
             if ($parr['channel'] != $curchannel) {
@@ -844,6 +864,9 @@ class PEAR_Downloader extends PEAR_Common
             unset($parr['state']);
         }
         $chan = &$this->_registry->getChannel($remotechannel);
+        if (PEAR::isError($chan)) {
+            return $chan;
+        }
         $version = $this->_registry->packageInfo($dep['name'], 'version',
             $remotechannel);
         if ($chan->supportsREST($this->config->get('preferred_mirror')) &&
@@ -951,6 +974,9 @@ class PEAR_Downloader extends PEAR_Common
             $package = "http://pear.php.net/get/$package";
         } else {
             $chan = $this->_registry->getChannel($channel);
+            if (PEAR::isError($chan)) {
+                return '';
+            }
             $package = "http://" . $chan->getServer() . "/get/$package";
         }
         if (!extension_loaded("zlib")) {
@@ -1277,6 +1303,10 @@ class PEAR_Downloader extends PEAR_Common
     function downloadHttp($url, &$ui, $save_dir = '.', $callback = null, $lastmodified = null,
                           $accept = false)
     {
+        static $redirect = 0;
+        // allways reset , so we are clean case of error
+        $wasredirect = $redirect;
+        $redirect = 0;
         if ($callback) {
             call_user_func($callback, 'setup', array(&$ui));
         }
@@ -1385,16 +1415,31 @@ class PEAR_Downloader extends PEAR_Common
         $request .= "\r\n";
         fwrite($fp, $request);
         $headers = array();
+        $reply = 0;
         while (trim($line = fgets($fp, 1024))) {
             if (preg_match('/^([^:]+):\s+(.*)\s*$/', $line, $matches)) {
                 $headers[strtolower($matches[1])] = trim($matches[2]);
             } elseif (preg_match('|^HTTP/1.[01] ([0-9]{3}) |', $line, $matches)) {
-                if ($matches[1] == 304 && ($lastmodified || ($lastmodified === false))) {
+                $reply = (int) $matches[1];
+                if ($reply == 304 && ($lastmodified || ($lastmodified === false))) {
                     return false;
                 }
-                if ($matches[1] != 200) {
+                if (! in_array($reply, array(200, 301, 302, 303, 305, 307))) {
                     return PEAR::raiseError("File http://$host:$port$path not valid (received: $line)");
                 }
+            }
+        }
+        if ($reply != 200) {
+            if (isset($headers['location'])) {
+                if ($wasredirect < 5) {
+                    $redirect = $wasredirect + 1;
+                    return $this->downloadHttp($headers['location'],
+                            $ui, $save_dir, $callback, $lastmodified, $accept);
+                } else {
+                    return PEAR::raiseError("File http://$host:$port$path not valid (redirection looped more than 5 times)");
+                }
+            } else {
+                return PEAR::raiseError("File http://$host:$port$path not valid (redirected but no location)");
             }
         }
         if (isset($headers['content-disposition']) &&

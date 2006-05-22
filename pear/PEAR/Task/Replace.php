@@ -89,7 +89,7 @@ class PEAR_Task_Replace extends PEAR_Task_Common
             }
         } else {
             return array(PEAR_TASK_ERROR_WRONG_ATTRIB_VALUE, 'type', $xml['attribs']['type'],
-                array('pear-config', 'package-info'));
+                array('pear-config', 'package-info', 'php-const'));
         }
         return true;
     }
@@ -126,7 +126,7 @@ class PEAR_Task_Replace extends PEAR_Task_Common
                 }
                 if ($a['to'] == 'master_server') {
                     $chan = $this->registry->getChannel($pkg->getChannel());
-                    if ($chan) {
+                    if (!PEAR::isError($chan)) {
                         $to = $chan->getServer();
                     } else {
                         $this->logger->log(0, "$dest: invalid pear-config replacement: $a[to]");

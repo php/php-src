@@ -80,10 +80,14 @@ class PEAR_Task_Postinstallscript extends PEAR_Task_Common
                 $fileXml['name'] . '" could not be retrieved for processing!');
         } else {
             $analysis = $pkg->analyzeSourceCode($file, true);
-            if (PEAR::isError($analysis)) {
+            if (!$analysis) {
                 PEAR::popErrorHandling();
+                $warnings = '';
+                foreach ($pkg->getValidationWarnings() as $warn) {
+                    $warnings .= $warn['message'] . "\n";
+                }
                 return array(PEAR_TASK_ERROR_INVALID, 'Analysis of post-install script "' .
-                    $fileXml['name'] . '" failed');
+                    $fileXml['name'] . '" failed: ' . $warnings);
             }
             if (count($analysis['declared_classes']) != 1) {
                 PEAR::popErrorHandling();

@@ -455,12 +455,17 @@ class PEAR_Frontend_CLI extends PEAR_Frontend
             } else {
                 $w = strlen($col);
             }
-            if ($w > @$this->params['widest'][$i]) {
+
+            if (isset($this->params['widest'][$i])) {
+                if ($w > $this->params['widest'][$i]) {
+                    $this->params['widest'][$i] = $w;
+                }
+            } else {
                 $this->params['widest'][$i] = $w;
             }
             $tmp = count_chars($columns[$i], 1);
             // handle unix, mac and windows formats
-            $lines = (isset($tmp[10]) ? $tmp[10] : @$tmp[13]) + 1;
+            $lines = (isset($tmp[10]) ? $tmp[10] : (isset($tmp[13]) ? $tmp[13] : 0)) + 1;
             if ($lines > $highest) {
                 $highest = $lines;
             }

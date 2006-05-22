@@ -295,147 +295,150 @@ class PEAR_Installer extends PEAR_Downloader
         $dest_file = $dest_dir . DIRECTORY_SEPARATOR . '.tmp' . basename($final_dest_file);
         // }}}
 
-        if (!@is_dir($dest_dir)) {
+        if (empty($this->_options['register-only']) && !@is_dir($dest_dir)) {
             if (!$this->mkDirHier($dest_dir)) {
                 return $this->raiseError("failed to mkdir $dest_dir",
                                          PEAR_INSTALLER_FAILED);
             }
             $this->log(3, "+ mkdir $dest_dir");
         }
-        if (empty($atts['replacements'])) {
-            if (!file_exists($orig_file)) {
-                return $this->raiseError("file $orig_file does not exist",
-                                         PEAR_INSTALLER_FAILED);
-            }
-            if (!@copy($orig_file, $dest_file)) {
-                return $this->raiseError("failed to write $dest_file",
-                                         PEAR_INSTALLER_FAILED);
-            }
-            $this->log(3, "+ cp $orig_file $dest_file");
-            if (isset($atts['md5sum'])) {
-                $md5sum = md5_file($dest_file);
-            }
-        } else {
-            // {{{ file with replacements
-            if (!file_exists($orig_file)) {
-                return $this->raiseError("file does not exist",
-                                         PEAR_INSTALLER_FAILED);
-            }
-            if (function_exists('file_get_contents')) {
-                $contents = file_get_contents($orig_file);
+        // pretty much nothing happens if we are only registering the install
+        if (empty($this->_options['register-only'])) {
+            if (empty($atts['replacements'])) {
+                if (!file_exists($orig_file)) {
+                    return $this->raiseError("file $orig_file does not exist",
+                                             PEAR_INSTALLER_FAILED);
+                }
+                if (!@copy($orig_file, $dest_file)) {
+                    return $this->raiseError("failed to write $dest_file",
+                                             PEAR_INSTALLER_FAILED);
+                }
+                $this->log(3, "+ cp $orig_file $dest_file");
+                if (isset($atts['md5sum'])) {
+                    $md5sum = md5_file($dest_file);
+                }
             } else {
-                $fp = fopen($orig_file, "r");
-                $contents = @fread($fp, filesize($orig_file));
-                fclose($fp);
-            }
-            if ($contents === false) {
-                $contents = '';
-            }
-            if (isset($atts['md5sum'])) {
-                $md5sum = md5($contents);
-            }
-            $subst_from = $subst_to = array();
-            foreach ($atts['replacements'] as $a) {
-                $to = '';
-                if ($a['type'] == 'php-const') {
-                    if (preg_match('/^[a-z0-9_]+$/i', $a['to'])) {
-                        eval("\$to = $a[to];");
-                    } else {
-                        if (!isset($options['soft'])) {
-                            $this->log(0, "invalid php-const replacement: $a[to]");
+                // {{{ file with replacements
+                if (!file_exists($orig_file)) {
+                    return $this->raiseError("file does not exist",
+                                             PEAR_INSTALLER_FAILED);
+                }
+                if (function_exists('file_get_contents')) {
+                    $contents = file_get_contents($orig_file);
+                } else {
+                    $fp = fopen($orig_file, "r");
+                    $contents = @fread($fp, filesize($orig_file));
+                    fclose($fp);
+                }
+                if ($contents === false) {
+                    $contents = '';
+                }
+                if (isset($atts['md5sum'])) {
+                    $md5sum = md5($contents);
+                }
+                $subst_from = $subst_to = array();
+                foreach ($atts['replacements'] as $a) {
+                    $to = '';
+                    if ($a['type'] == 'php-const') {
+                        if (preg_match('/^[a-z0-9_]+$/i', $a['to'])) {
+                            eval("\$to = $a[to];");
+                        } else {
+                            if (!isset($options['soft'])) {
+                                $this->log(0, "invalid php-const replacement: $a[to]");
+                            }
+                            continue;
                         }
-                        continue;
-                    }
-                } elseif ($a['type'] == 'pear-config') {
-                    if ($a['to'] == 'master_server') {
-                        $chan = $this->_registry->getChannel($channel);
-                        if ($chan) {
-                            $to = $chan->getServer();
+                    } elseif ($a['type'] == 'pear-config') {
+                        if ($a['to'] == 'master_server') {
+                            $chan = $this->_registry->getChannel($channel);
+                            if (!PEAR::isError($chan)) {
+                                $to = $chan->getServer();
+                            } else {
+                                $to = $this->config->get($a['to'], null, $channel);
+                            }
                         } else {
                             $to = $this->config->get($a['to'], null, $channel);
                         }
-                    } else {
-                        $to = $this->config->get($a['to'], null, $channel);
-                    }
-                    if (is_null($to)) {
-                        if (!isset($options['soft'])) {
-                            $this->log(0, "invalid pear-config replacement: $a[to]");
+                        if (is_null($to)) {
+                            if (!isset($options['soft'])) {
+                                $this->log(0, "invalid pear-config replacement: $a[to]");
+                            }
+                            continue;
                         }
-                        continue;
-                    }
-                } elseif ($a['type'] == 'package-info') {
-                    if ($t = $this->pkginfo->packageInfo($a['to'])) {
-                        $to = $t;
-                    } else {
-                        if (!isset($options['soft'])) {
-                            $this->log(0, "invalid package-info replacement: $a[to]");
+                    } elseif ($a['type'] == 'package-info') {
+                        if ($t = $this->pkginfo->packageInfo($a['to'])) {
+                            $to = $t;
+                        } else {
+                            if (!isset($options['soft'])) {
+                                $this->log(0, "invalid package-info replacement: $a[to]");
+                            }
+                            continue;
                         }
-                        continue;
+                    }
+                    if (!is_null($to)) {
+                        $subst_from[] = $a['from'];
+                        $subst_to[] = $to;
                     }
                 }
-                if (!is_null($to)) {
-                    $subst_from[] = $a['from'];
-                    $subst_to[] = $to;
+                $this->log(3, "doing ".sizeof($subst_from)." substitution(s) for $final_dest_file");
+                if (sizeof($subst_from)) {
+                    $contents = str_replace($subst_from, $subst_to, $contents);
                 }
-            }
-            $this->log(3, "doing ".sizeof($subst_from)." substitution(s) for $final_dest_file");
-            if (sizeof($subst_from)) {
-                $contents = str_replace($subst_from, $subst_to, $contents);
-            }
-            $wp = @fopen($dest_file, "wb");
-            if (!is_resource($wp)) {
-                return $this->raiseError("failed to create $dest_file: $php_errormsg",
-                                         PEAR_INSTALLER_FAILED);
-            }
-            if (fwrite($wp, $contents) === false) {
-                return $this->raiseError("failed writing to $dest_file: $php_errormsg",
-                                         PEAR_INSTALLER_FAILED);
-            }
-            fclose($wp);
-            // }}}
-        }
-        // {{{ check the md5
-        if (isset($md5sum)) {
-            if (strtolower($md5sum) == strtolower($atts['md5sum'])) {
-                $this->log(2, "md5sum ok: $final_dest_file");
-            } else {
-                if (empty($options['force'])) {
-                    // delete the file
-                    @unlink($dest_file);
-                    if (!isset($options['ignore-errors'])) {
-                        return $this->raiseError("bad md5sum for file $final_dest_file",
+                $wp = @fopen($dest_file, "wb");
+                if (!is_resource($wp)) {
+                    return $this->raiseError("failed to create $dest_file: $php_errormsg",
                                              PEAR_INSTALLER_FAILED);
+                }
+                if (fwrite($wp, $contents) === false) {
+                    return $this->raiseError("failed writing to $dest_file: $php_errormsg",
+                                             PEAR_INSTALLER_FAILED);
+                }
+                fclose($wp);
+                // }}}
+            }
+            // {{{ check the md5
+            if (isset($md5sum)) {
+                if (strtolower($md5sum) == strtolower($atts['md5sum'])) {
+                    $this->log(2, "md5sum ok: $final_dest_file");
+                } else {
+                    if (empty($options['force'])) {
+                        // delete the file
+                        @unlink($dest_file);
+                        if (!isset($options['ignore-errors'])) {
+                            return $this->raiseError("bad md5sum for file $final_dest_file",
+                                                 PEAR_INSTALLER_FAILED);
+                        } else {
+                            if (!isset($options['soft'])) {
+                                $this->log(0, "warning : bad md5sum for file $final_dest_file");
+                            }
+                        }
                     } else {
                         if (!isset($options['soft'])) {
                             $this->log(0, "warning : bad md5sum for file $final_dest_file");
                         }
                     }
+                }
+            }
+            // }}}
+            // {{{ set file permissions
+            if (!OS_WINDOWS) {
+                if ($atts['role'] == 'script') {
+                    $mode = 0777 & ~(int)octdec($this->config->get('umask'));
+                    $this->log(3, "+ chmod +x $dest_file");
                 } else {
+                    $mode = 0666 & ~(int)octdec($this->config->get('umask'));
+                }
+                $this->addFileOperation("chmod", array($mode, $dest_file));
+                if (!@chmod($dest_file, $mode)) {
                     if (!isset($options['soft'])) {
-                        $this->log(0, "warning : bad md5sum for file $final_dest_file");
+                        $this->log(0, "failed to change mode of $dest_file");
                     }
                 }
             }
+            // }}}
+            $this->addFileOperation("rename", array($dest_file, $final_dest_file,
+                $atts['role'] == 'ext'));
         }
-        // }}}
-        // {{{ set file permissions
-        if (!OS_WINDOWS) {
-            if ($atts['role'] == 'script') {
-                $mode = 0777 & ~(int)octdec($this->config->get('umask'));
-                $this->log(3, "+ chmod +x $dest_file");
-            } else {
-                $mode = 0666 & ~(int)octdec($this->config->get('umask'));
-            }
-            $this->addFileOperation("chmod", array($mode, $dest_file));
-            if (!@chmod($dest_file, $mode)) {
-                if (!isset($options['soft'])) {
-                    $this->log(0, "failed to change mode of $dest_file");
-                }
-            }
-        }
-        // }}}
-        $this->addFileOperation("rename", array($dest_file, $final_dest_file,
-            $atts['role'] == 'ext'));
         // Store the full path where the file was installed for easy unistall
         $this->addFileOperation("installed_as", array($file, $installed_as,
                                 $save_destdir, dirname(substr($installedas_dest_file, strlen($save_destdir)))));
@@ -491,114 +494,119 @@ class PEAR_Installer extends PEAR_Downloader
         $dest_file = $dest_dir . DIRECTORY_SEPARATOR . '.tmp' . basename($final_dest_file);
         // }}}
 
-        if (!@is_dir($dest_dir)) {
-            if (!$this->mkDirHier($dest_dir)) {
-                return $this->raiseError("failed to mkdir $dest_dir",
-                                         PEAR_INSTALLER_FAILED);
+        if (empty($this->_options['register-only'])) {
+            if (!@is_dir($dest_dir)) {
+                if (!$this->mkDirHier($dest_dir)) {
+                    return $this->raiseError("failed to mkdir $dest_dir",
+                                             PEAR_INSTALLER_FAILED);
+                }
+                $this->log(3, "+ mkdir $dest_dir");
             }
-            $this->log(3, "+ mkdir $dest_dir");
         }
         $attribs = $atts['attribs'];
         unset($atts['attribs']);
-        if (!count($atts)) { // no tasks
-            if (!file_exists($orig_file)) {
-                return $this->raiseError("file $orig_file does not exist",
-                                         PEAR_INSTALLER_FAILED);
-            }
-            if (!@copy($orig_file, $dest_file)) {
-                return $this->raiseError("failed to write $dest_file",
-                                         PEAR_INSTALLER_FAILED);
-            }
-            $this->log(3, "+ cp $orig_file $dest_file");
-            if (isset($attribs['md5sum'])) {
-                $md5sum = md5_file($dest_file);
-            }
-        } else { // file with tasks
-            if (!file_exists($orig_file)) {
-                return $this->raiseError("file $orig_file does not exist",
-                                         PEAR_INSTALLER_FAILED);
-            }
-            if (function_exists('file_get_contents')) {
-                $contents = file_get_contents($orig_file);
-            } else {
-                $fp = fopen($orig_file, "r");
-                $contents = @fread($fp, filesize($orig_file)); // filesize can be 0
-                fclose($fp);
-            }
-            if ($contents === false) {
-                $contents = '';
-            }
-            if (isset($attribs['md5sum'])) {
-                $md5sum = md5($contents);
-            }
-            foreach ($atts as $tag => $raw) {
-                $tag = str_replace($pkg->getTasksNs() . ':', '', $tag);
-                $task = "PEAR_Task_$tag";
-                $task = &new $task($this->config, $this, PEAR_TASK_INSTALL);
-                if (!$task->isScript()) { // scripts are only handled after installation
-                    $task->init($raw, $attribs, $pkg->getLastInstalledVersion());
-                    $res = $task->startSession($pkg, $contents, $final_dest_file);
-                    if ($res === false) {
-                        continue; // skip this file
-                    }
-                    if (PEAR::isError($res)) {
-                        return $res;
-                    }
-                    $contents = $res; // save changes
-                }
-                $wp = @fopen($dest_file, "wb");
-                if (!is_resource($wp)) {
-                    return $this->raiseError("failed to create $dest_file: $php_errormsg",
+        // pretty much nothing happens if we are only registering the install
+        if (empty($this->_options['register-only'])) {
+            if (!count($atts)) { // no tasks
+                if (!file_exists($orig_file)) {
+                    return $this->raiseError("file $orig_file does not exist",
                                              PEAR_INSTALLER_FAILED);
                 }
-                if (fwrite($wp, $contents) === false) {
-                    return $this->raiseError("failed writing to $dest_file: $php_errormsg",
+                if (!@copy($orig_file, $dest_file)) {
+                    return $this->raiseError("failed to write $dest_file",
                                              PEAR_INSTALLER_FAILED);
                 }
-                fclose($wp);
-            }
-        }
-        // {{{ check the md5
-        if (isset($md5sum)) {
-            if (strtolower($md5sum) == strtolower($attribs['md5sum'])) {
-                $this->log(2, "md5sum ok: $final_dest_file");
-            } else {
-                if (empty($options['force'])) {
-                    // delete the file
-                    @unlink($dest_file);
-                    if (!isset($options['ignore-errors'])) {
-                        return $this->raiseError("bad md5sum for file $final_dest_file",
+                $this->log(3, "+ cp $orig_file $dest_file");
+                if (isset($attribs['md5sum'])) {
+                    $md5sum = md5_file($dest_file);
+                }
+            } else { // file with tasks
+                if (!file_exists($orig_file)) {
+                    return $this->raiseError("file $orig_file does not exist",
+                                             PEAR_INSTALLER_FAILED);
+                }
+                if (function_exists('file_get_contents')) {
+                    $contents = file_get_contents($orig_file);
+                } else {
+                    $fp = fopen($orig_file, "r");
+                    $contents = @fread($fp, filesize($orig_file)); // filesize can be 0
+                    fclose($fp);
+                }
+                if ($contents === false) {
+                    $contents = '';
+                }
+                if (isset($attribs['md5sum'])) {
+                    $md5sum = md5($contents);
+                }
+                foreach ($atts as $tag => $raw) {
+                    $tag = str_replace($pkg->getTasksNs() . ':', '', $tag);
+                    $task = "PEAR_Task_$tag";
+                    $task = &new $task($this->config, $this, PEAR_TASK_INSTALL);
+                    if (!$task->isScript()) { // scripts are only handled after installation
+                        $task->init($raw, $attribs, $pkg->getLastInstalledVersion());
+                        $res = $task->startSession($pkg, $contents, $final_dest_file);
+                        if ($res === false) {
+                            continue; // skip this file
+                        }
+                        if (PEAR::isError($res)) {
+                            return $res;
+                        }
+                        $contents = $res; // save changes
+                    }
+                    $wp = @fopen($dest_file, "wb");
+                    if (!is_resource($wp)) {
+                        return $this->raiseError("failed to create $dest_file: $php_errormsg",
                                                  PEAR_INSTALLER_FAILED);
+                    }
+                    if (fwrite($wp, $contents) === false) {
+                        return $this->raiseError("failed writing to $dest_file: $php_errormsg",
+                                                 PEAR_INSTALLER_FAILED);
+                    }
+                    fclose($wp);
+                }
+            }
+            // {{{ check the md5
+            if (isset($md5sum)) {
+                if (strtolower($md5sum) == strtolower($attribs['md5sum'])) {
+                    $this->log(2, "md5sum ok: $final_dest_file");
+                } else {
+                    if (empty($options['force'])) {
+                        // delete the file
+                        @unlink($dest_file);
+                        if (!isset($options['ignore-errors'])) {
+                            return $this->raiseError("bad md5sum for file $final_dest_file",
+                                                     PEAR_INSTALLER_FAILED);
+                        } else {
+                            if (!isset($options['soft'])) {
+                                $this->log(0, "warning : bad md5sum for file $final_dest_file");
+                            }
+                        }
                     } else {
                         if (!isset($options['soft'])) {
                             $this->log(0, "warning : bad md5sum for file $final_dest_file");
                         }
                     }
+                }
+            }
+            // }}}
+            // {{{ set file permissions
+            if (!OS_WINDOWS) {
+                if ($role->isExecutable()) {
+                    $mode = 0777 & ~(int)octdec($this->config->get('umask'));
+                    $this->log(3, "+ chmod +x $dest_file");
                 } else {
+                    $mode = 0666 & ~(int)octdec($this->config->get('umask'));
+                }
+                $this->addFileOperation("chmod", array($mode, $dest_file));
+                if (!@chmod($dest_file, $mode)) {
                     if (!isset($options['soft'])) {
-                        $this->log(0, "warning : bad md5sum for file $final_dest_file");
+                        $this->log(0, "failed to change mode of $dest_file");
                     }
                 }
             }
+            // }}}
+            $this->addFileOperation("rename", array($dest_file, $final_dest_file, $role->isExtension()));
         }
-        // }}}
-        // {{{ set file permissions
-        if (!OS_WINDOWS) {
-            if ($role->isExecutable()) {
-                $mode = 0777 & ~(int)octdec($this->config->get('umask'));
-                $this->log(3, "+ chmod +x $dest_file");
-            } else {
-                $mode = 0666 & ~(int)octdec($this->config->get('umask'));
-            }
-            $this->addFileOperation("chmod", array($mode, $dest_file));
-            if (!@chmod($dest_file, $mode)) {
-                if (!isset($options['soft'])) {
-                    $this->log(0, "failed to change mode of $dest_file");
-                }
-            }
-        }
-        // }}}
-        $this->addFileOperation("rename", array($dest_file, $final_dest_file, $role->isExtension()));
         // Store the full path where the file was installed for easy uninstall
         $this->addFileOperation("installed_as", array($file, $installed_as,
                             $save_destdir, dirname(substr($dest_file, strlen($save_destdir)))));
@@ -995,7 +1003,7 @@ class PEAR_Installer extends PEAR_Downloader
         $channel = $pkg->getChannel();
         if (isset($this->_options['packagingroot'])) {
             $packrootphp_dir = $this->_prependPath(
-                $this->config->get('php_dir', null, 'pear.php.net'),
+                $this->config->get('php_dir', null, $channel),
                 $this->_options['packagingroot']);
         }
 
@@ -1004,6 +1012,7 @@ class PEAR_Installer extends PEAR_Downloader
             $this->_registry = &$this->config->getRegistry();
             $installregistry = &$this->_registry;
             $this->installroot = ''; // all done automagically now
+            $php_dir = $this->config->get('php_dir', null, $channel);
         } else {
             $this->config->setInstallRoot(false);
             $this->_registry = &$this->config->getRegistry();
@@ -1156,71 +1165,69 @@ class PEAR_Installer extends PEAR_Downloader
         $this->source_files = 0;
 
         $savechannel = $this->config->get('default_channel');
-        if (empty($options['register-only'])) {
-            if (!is_dir($php_dir)) {
-                if (PEAR::isError(System::mkdir(array('-p'), $php_dir))) {
-                    return $this->raiseError("no installation destination directory '$php_dir'\n");
-                }
+        if (empty($options['register-only']) && !is_dir($php_dir)) {
+            if (PEAR::isError(System::mkdir(array('-p'), $php_dir))) {
+                return $this->raiseError("no installation destination directory '$php_dir'\n");
             }
+        }
 
-            $tmp_path = dirname($descfile);
-            if (substr($pkgfile, -4) != '.xml') {
-                $tmp_path .= DIRECTORY_SEPARATOR . $pkgname . '-' . $pkg->getVersion();
-            }
+        $tmp_path = dirname($descfile);
+        if (substr($pkgfile, -4) != '.xml') {
+            $tmp_path .= DIRECTORY_SEPARATOR . $pkgname . '-' . $pkg->getVersion();
+        }
 
-            $this->configSet('default_channel', $channel);
-            // {{{ install files
-            
-            if ($pkg->getPackagexmlVersion() == '2.0') {
-                $filelist = $pkg->getInstallationFilelist();
+        $this->configSet('default_channel', $channel);
+        // {{{ install files
+        
+        if ($pkg->getPackagexmlVersion() == '2.0') {
+            $filelist = $pkg->getInstallationFilelist();
+        } else {
+            $filelist = $pkg->getFileList();
+        }
+        if (PEAR::isError($filelist)) {
+            return $filelist;
+        }
+        $pkg->resetFilelist();
+        $pkg->setLastInstalledVersion($installregistry->packageInfo($pkg->getPackage(),
+            'version', $pkg->getChannel()));
+        foreach ($filelist as $file => $atts) {
+            if ($pkg->getPackagexmlVersion() == '1.0') {
+                $this->expectError(PEAR_INSTALLER_FAILED);
+                $res = $this->_installFile($file, $atts, $tmp_path, $options);
+                $this->popExpect();
             } else {
-                $filelist = $pkg->getFileList();
+                $this->expectError(PEAR_INSTALLER_FAILED);
+                $res = $this->_installFile2($pkg, $file, $atts, $tmp_path, $options);
+                $this->popExpect();
             }
-            if (PEAR::isError($filelist)) {
-                return $filelist;
-            }
-            $pkg->resetFilelist();
-            $pkg->setLastInstalledVersion($installregistry->packageInfo($pkg->getPackage(),
-                'version', $pkg->getChannel()));
-            foreach ($filelist as $file => $atts) {
-                if ($pkg->getPackagexmlVersion() == '1.0') {
-                    $this->expectError(PEAR_INSTALLER_FAILED);
-                    $res = $this->_installFile($file, $atts, $tmp_path, $options);
-                    $this->popExpect();
+            if (PEAR::isError($res)) {
+                if (empty($options['ignore-errors'])) {
+                    $this->rollbackFileTransaction();
+                    if ($res->getMessage() == "file does not exist") {
+                        $this->raiseError("file $file in package.xml does not exist");
+                    }
+                    return $this->raiseError($res);
                 } else {
-                    $this->expectError(PEAR_INSTALLER_FAILED);
-                    $res = $this->_installFile2($pkg, $file, $atts, $tmp_path, $options);
-                    $this->popExpect();
-                }
-                if (PEAR::isError($res)) {
-                    if (empty($options['ignore-errors'])) {
-                        $this->rollbackFileTransaction();
-                        if ($res->getMessage() == "file does not exist") {
-                            $this->raiseError("file $file in package.xml does not exist");
-                        }
-                        return $this->raiseError($res);
-                    } else {
-                        if (!isset($options['soft'])) {
-                            $this->log(0, "Warning: " . $res->getMessage());
-                        }
+                    if (!isset($options['soft'])) {
+                        $this->log(0, "Warning: " . $res->getMessage());
                     }
                 }
-                if ($res == PEAR_INSTALLER_OK) {
-                    // Register files that were installed
-                    $pkg->installedFile($file, $atts);
-                }
             }
-            // }}}
-
-            // {{{ compile and install source files
-            if ($this->source_files > 0 && empty($options['nobuild'])) {
-                if (PEAR::isError($err =
-                      $this->_compileSourceFiles($savechannel, $pkg))) {
-                    return $err;
-                }
+            if ($res == PEAR_INSTALLER_OK) {
+                // Register files that were installed
+                $pkg->installedFile($file, $atts);
             }
-            // }}}
         }
+        // }}}
+
+        // {{{ compile and install source files
+        if ($this->source_files > 0 && empty($options['nobuild'])) {
+            if (PEAR::isError($err =
+                  $this->_compileSourceFiles($savechannel, $pkg))) {
+                return $err;
+            }
+        }
+        // }}}
 
         if (isset($backedup)) {
             $this->_removeBackups($backedup);
@@ -1326,27 +1333,34 @@ class PEAR_Installer extends PEAR_Downloader
             }
             $dest = $ext['dest'];
             $this->log(1, "Installing '$ext[file]'");
-            $copyto = $this->_prependPath($dest, $this->installroot);
+            $packagingroot = '';
+            if (isset($this->_options['packagingroot'])) {
+                $packagingroot = $this->_options['packagingroot'];
+            }
+            $copyto = $this->_prependPath($dest, $packagingroot);
             $copydir = dirname($copyto);
-            if (!@is_dir($copydir)) {
-                if (!$this->mkDirHier($copydir)) {
-                    return $this->raiseError("failed to mkdir $copydir",
-                        PEAR_INSTALLER_FAILED);
+            // pretty much nothing happens if we are only registering the install
+            if (empty($this->_options['register-only'])) {
+                if (!@is_dir($copydir)) {
+                    if (!$this->mkDirHier($copydir)) {
+                        return $this->raiseError("failed to mkdir $copydir",
+                            PEAR_INSTALLER_FAILED);
+                    }
+                    $this->log(3, "+ mkdir $copydir");
                 }
-                $this->log(3, "+ mkdir $copydir");
-            }
-            if (!@copy($ext['file'], $copyto)) {
-                return $this->raiseError("failed to write $copyto", PEAR_INSTALLER_FAILED);
-            }
-            $this->log(3, "+ cp $ext[file] $copyto");
-            if (!OS_WINDOWS) {
-                $mode = 0666 & ~(int)octdec($this->config->get('umask'));
-                $this->addFileOperation('chmod', array($mode, $copyto));
-                if (!@chmod($copyto, $mode)) {
-                    $this->log(0, "failed to change mode of $copyto");
+                if (!@copy($ext['file'], $copyto)) {
+                    return $this->raiseError("failed to write $copyto", PEAR_INSTALLER_FAILED);
                 }
+                $this->log(3, "+ cp $ext[file] $copyto");
+                if (!OS_WINDOWS) {
+                    $mode = 0666 & ~(int)octdec($this->config->get('umask'));
+                    $this->addFileOperation('chmod', array($mode, $copyto));
+                    if (!@chmod($copyto, $mode)) {
+                        $this->log(0, "failed to change mode of $copyto");
+                    }
+                }
+                $this->addFileOperation('rename', array($ext['file'], $copyto));
             }
-            $this->addFileOperation('rename', array($ext['file'], $copyto));
 
             if ($filelist->getPackageXmlVersion() == '1.0') {
                 $filelist->installedFile($bn, array(

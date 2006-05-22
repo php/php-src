@@ -1200,6 +1200,10 @@ class PEAR_PackageFile_v1
         }
         if (isset($this->_registry) && $this->_isValid) {
             $chan = $this->_registry->getChannel('pear.php.net');
+            if (PEAR::isError($chan)) {
+                $this->_validateError(PEAR_PACKAGEFILE_ERROR_CHANNELVAL, $chan->getMessage());
+                return $this->_isValid = 0;
+            }
             $validator = $chan->getValidationObject();
             $validator->setPackageFile($this);
             $validator->validate($state);

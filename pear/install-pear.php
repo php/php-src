@@ -4,7 +4,7 @@
 
 error_reporting(E_ALL);
 $pear_dir = dirname(__FILE__);
-ini_set('include_path', $pear_dir);
+ini_set('include_path', '');
 if (function_exists('mb_internal_encoding')) {
     mb_internal_encoding('ASCII');
 }

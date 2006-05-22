@@ -137,7 +137,8 @@ class PEAR_REST_11
                 }
                 if ($latest) {
                     if (isset($packageinfo['deps'])) {
-                        if (!isset($packageinfo['deps'][0])) {
+                        if (!is_array($packageinfo['deps']) ||
+                              !isset($packageinfo['deps'][0])) {
                             $packageinfo['deps'] = array($packageinfo['deps']);
                         }
                     }

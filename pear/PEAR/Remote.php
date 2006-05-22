@@ -151,7 +151,7 @@ class PEAR_Remote extends PEAR
 
         $server_channel = $this->config->get('default_channel');
         $channel = $this->_registry->getChannel($server_channel);
-        if ($channel) {
+        if (!PEAR::isError($channel)) {
             $mirror = $this->config->get('preferred_mirror');
             if ($channel->getMirror($mirror)) {
                 if ($channel->supports('xmlrpc', $method, $mirror)) {
@@ -277,7 +277,7 @@ class PEAR_Remote extends PEAR
         } while (false);
         $server_channel = $this->config->get('default_channel');
         $channel = $this->_registry->getChannel($server_channel);
-        if ($channel) {
+        if (!PEAR::isError($channel)) {
             $mirror = $this->config->get('preferred_mirror');
             if ($channel->getMirror($mirror)) {
                 if ($channel->supports('xmlrpc', $method, $mirror)) {

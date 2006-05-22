@@ -247,6 +247,12 @@ class PEAR
     */
     function registerShutdownFunc($func, $args = array())
     {
+        // if we are called statically, there is a potential
+        // that no shutdown func is registered.  Bug #6445
+        if (!isset($GLOBALS['_PEAR_SHUTDOWN_REGISTERED'])) {
+            register_shutdown_function("_PEAR_call_destructors");
+            $GLOBALS['_PEAR_SHUTDOWN_REGISTERED'] = true;
+        }
         $GLOBALS['_PEAR_shutdown_funcs'][] = array($func, $args);
     }
 

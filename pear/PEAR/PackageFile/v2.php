@@ -128,6 +128,11 @@ class PEAR_PackageFile_v2
     var $_incomplete = true;
 
     /**
+     * @var PEAR_PackageFile_v2_Validator
+     */
+    var $_v2Validator;
+
+    /**
      * The constructor merely sets up the private error stack
      */
     function PEAR_PackageFile_v2()
@@ -658,12 +663,17 @@ class PEAR_PackageFile_v2
             if (isset($this->_packageInfo['contents']['dir']['attribs']['baseinstalldir'])) {
                 if (isset($this->_packageInfo['contents']['dir']['file'][0])) {
                     foreach ($this->_packageInfo['contents']['dir']['file'] as $i => $file) {
+                        if (isset($file['attribs']['baseinstalldir'])) {
+                            continue;
+                        }
                         $this->_packageInfo['contents']['dir']['file'][$i]['attribs']['baseinstalldir']
                             = $this->_packageInfo['contents']['dir']['attribs']['baseinstalldir'];
                     }
                 } else {
-                    $this->_packageInfo['contents']['dir']['file']['attribs']['baseinstalldir']
-                        = $this->_packageInfo['contents']['dir']['attribs']['baseinstalldir'];
+                    if (!isset($this->_packageInfo['contents']['dir']['file']['attribs']['baseinstalldir'])) {
+                       $this->_packageInfo['contents']['dir']['file']['attribs']['baseinstalldir']
+                            = $this->_packageInfo['contents']['dir']['attribs']['baseinstalldir'];
+                    }
                 }
             }
         }
@@ -705,7 +715,7 @@ class PEAR_PackageFile_v2
             foreach ($dir['file'] as $file) {
                 $attrs = $file['attribs'];
                 $name = $attrs['name'];
-                if ($baseinstall) {
+                if ($baseinstall && !isset($attrs['baseinstalldir'])) {
                     $attrs['baseinstalldir'] = $baseinstall;
                 }
                 $attrs['name'] = empty($path) ? $name : $path . '/' . $name;
@@ -725,7 +735,7 @@ class PEAR_PackageFile_v2
 
     function setLogger(&$logger)
     {
-        if ($logger && (!is_object($logger) || !method_exists($logger, 'log'))) {
+        if (!is_object($logger) || !method_exists($logger, 'log')) {
             return PEAR::raiseError('Logger must be compatible with PEAR_Common::log');
         }
         $this->_logger = &$logger;
@@ -827,8 +837,14 @@ class PEAR_PackageFile_v2
     function packageInfo($field)
     {
         $arr = $this->getArray(true);
-        if ($field == 'apiversion') {
+        if ($field == 'state') {
+            return $arr['stability']['release'];
+        }
+        if ($field == 'api-version') {
             return $arr['version']['api'];
+        }
+        if ($field == 'api-state') {
+            return $arr['stability']['api'];
         }
         if (isset($arr['old'][$field])) {
             if (!is_string($arr['old'][$field])) {
@@ -903,7 +919,7 @@ class PEAR_PackageFile_v2
 
     function getMaintainers($raw = false)
     {
-        if (!$this->_isValid && !$this->validate()) {
+        if (!isset($this->_packageInfo['lead'])) {
             return false;
         }
         if ($raw) {
@@ -1642,6 +1658,7 @@ class PEAR_PackageFile_v2
                             if (!isset($dep['min']) &&
                                   !isset($dep['max'])) {
                                 $s['rel'] = 'has';
+                                $s['optional'] = $optional;
                             } elseif (isset($dep['min']) &&
                                   isset($dep['max'])) {
                                 $s['rel'] = 'ge';
@@ -1660,14 +1677,24 @@ class PEAR_PackageFile_v2
                                 $s1['optional'] = $optional;
                                 $ret[] = $s1;
                             } elseif (isset($dep['min'])) {
-                                $s['rel'] = 'ge';
+                                if (isset($dep['exclude']) &&
+                                      $dep['exclude'] == $dep['min']) {
+                                    $s['rel'] = 'gt';
+                                } else {
+                                    $s['rel'] = 'ge';
+                                }
                                 $s['version'] = $dep['min'];
                                 $s['optional'] = $optional;
                                 if ($dtype != 'php') {
                                     $s['name'] = $dep['name'];
                                 }
                             } elseif (isset($dep['max'])) {
-                                $s['rel'] = 'le';
+                                if (isset($dep['exclude']) &&
+                                      $dep['exclude'] == $dep['max']) {
+                                    $s['rel'] = 'lt';
+                                } else {
+                                    $s['rel'] = 'le';
+                                }
                                 $s['version'] = $dep['max'];
                                 $s['optional'] = $optional;
                                 if ($dtype != 'php') {
@@ -1831,7 +1858,8 @@ class PEAR_PackageFile_v2
 
     function analyzeSourceCode($file, $string = false)
     {
-        if (!isset($this->_v2Validator)) {
+        if (!isset($this->_v2Validator) ||
+              !is_a($this->_v2Validator, 'PEAR_PackageFile_v2_Validator')) {
             if (!class_exists('PEAR_PackageFile_v2_Validator')) {
                 require_once 'PEAR/PackageFile/v2/Validator.php';
             }
@@ -1845,7 +1873,8 @@ class PEAR_PackageFile_v2
         if (!isset($this->_packageInfo) || !is_array($this->_packageInfo)) {
             return false;
         }
-        if (!isset($this->_v2Validator)) {
+        if (!isset($this->_v2Validator) ||
+              !is_a($this->_v2Validator, 'PEAR_PackageFile_v2_Validator')) {
             if (!class_exists('PEAR_PackageFile_v2_Validator')) {
                 require_once 'PEAR/PackageFile/v2/Validator.php';
             }

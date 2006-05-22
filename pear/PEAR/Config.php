@@ -1265,6 +1265,9 @@ class PEAR_Config extends PEAR
                         $reg = &$this->getRegistry();
                         if (is_object($reg)) {
                             $chan = &$reg->getChannel($channel);
+                            if (PEAR::isError($chan)) {
+                                return $channel;
+                            }
                             if (!$chan->getMirror($test) && $chan->getName() != $test) {
                                 return $channel; // mirror does not exist
                             }
@@ -1286,6 +1289,9 @@ class PEAR_Config extends PEAR
                 $reg = &$this->getRegistry();
                 if (is_object($reg)) {
                     $chan = &$reg->getChannel($channel);
+                    if (PEAR::isError($chan)) {
+                        return $channel;
+                    }
                     if (!$chan->getMirror($test) && $chan->getName() != $test) {
                         return $channel; // mirror does not exist
                     }
@@ -1329,6 +1335,9 @@ class PEAR_Config extends PEAR
                 $reg = &$this->getRegistry($layer);
                 if (is_object($reg)) {
                     $chan = &$reg->getChannel($channel);
+                    if (PEAR::isError($chan)) {
+                        return $channel;
+                    }
                     if (!$chan->getMirror($ret) && $chan->getName() != $ret) {
                         return $channel; // mirror does not exist
                     }
@@ -1383,6 +1392,9 @@ class PEAR_Config extends PEAR
             $reg = &$this->getRegistry($layer);
             if (is_object($reg)) {
                 $chan = &$reg->getChannel($channel ? $channel : 'pear.php.net');
+                if (PEAR::isError($chan)) {
+                    return false;
+                }
                 if (!$chan->getMirror($value) && $chan->getName() != $value) {
                     return false; // mirror does not exist
                 }
