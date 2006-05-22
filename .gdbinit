@@ -33,13 +33,62 @@ document dump_bt
 	dumps the current execution stack. usage: dump_bt executor_globals.current_execute_data
 end
 
+define printztype
+	____printz_type $arg0
+	printf "\n"
+end
+
+document printztype
+	prints the type name of a zval type
+end
+
+define ____printz_type
+	set $type = $arg0
+	if $type == 0
+		printf "NULL"
+	end
+	if $type == 1
+		printf "long"
+	end
+	if $type == 2
+		printf "double"
+	end
+	if $type == 3
+		printf "bool"
+	end
+	if $type == 4
+		printf "array"
+	end
+	if $type == 5
+		printf "object"
+	end
+	if $type == 6
+		printf "string"
+	end
+	if $type == 7
+		printf "resource"
+	end
+	if $type == 8 
+		printf "constant"
+	end
+	if $type == 9
+		printf "const_array"
+	end
+	if $type == 10
+		printf "unicode string"
+	end
+	if $type > 10
+		printf "unknown type %d", $type
+	end
+end
+
 define printzv
 	set $ind = 1
 	____printzv $arg0 0 
 end
 
 document printzv
-	prints content of zval 
+	prints zval contents
 end
 
 define ____printzv_contents
@@ -50,22 +99,22 @@ define ____printzv_contents
 	if $type == 0
 		printf "NULL"
 	end
+	____printz_type $type
 	if $type == 1
-		printf "long: %ld", $zvalue->value.lval
+		printf ": %ld", $zvalue->value.lval
 	end
 	if $type == 2
-		printf "double: %lf", $zvalue->value.dval
+		printf ": %lf", $zvalue->value.dval
 	end
 	if $type == 3
-		printf "bool: "
 		if $zvalue->value.lval
-			printf "true"
+			printf ": true"
 		else
-			printf "false"
+			printf ": false"
 		end
 	end
 	if $type == 4
-		printf "array(%d): ", $zvalue->value.ht->nNumOfElements
+		printf "(%d): ", $zvalue->value.ht->nNumOfElements
 		if ! $arg1
 			printf "{\n"
 			set $ind = $ind + 1
@@ -81,7 +130,6 @@ define ____printzv_contents
 		set $type = 0
 	end
 	if $type == 5
-		printf "object"
 		____executor_globals
 		set $handle = $zvalue->value.obj.handle
 		set $handlers = $zvalue->value.obj.handlers
@@ -119,22 +167,19 @@ define ____printzv_contents
 		set $type = 0
 	end
 	if $type == 6
-		printf "string(%d): \"%s\"", $zvalue->value.str.len, $zvalue->value.str.val
+		printf "(%d): \"%s\"", $zvalue->value.str.len, $zvalue->value.str.val
 	end
 	if $type == 7
-		printf "resource: #%d", $zvalue->value.lval
+		printf ": #%d", $zvalue->value.lval
 	end
 	if $type == 8 
-		printf "constant"
 	end
 	if $type == 9
-		printf "const_array"
 	end
 	if $type == 10
-		printf "unicode string(%d): [%p]", $zvalue->value.str.len, $zvalue->value.str.val
+		printf "(%d): [%p]", $zvalue->value.str.len, $zvalue->value.str.val
 	end
 	if $type > 10
-		printf"unknown type %d", $type
 	end
 	printf "\n"
 end
