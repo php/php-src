@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, Version 4.4.3
+- Fixed handling of extremely long paths inside tempnam() function. (Ilia)
 
 21 May 2006, Version 4.4.3RC1
 - Added control character checks for cURL extension's open_basedir/safe_mode
