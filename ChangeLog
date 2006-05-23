@@ -1,3 +1,96 @@
+2006-05-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * .gdbinit:
+      - Provide user func printztype to retrieve the name of a zval type
+
+    * (PHP_5_2)
+      NEWS:
+      - Update
+
+2006-05-22  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      ext/dom/attr.c
+      ext/dom/document.c
+      ext/dom/dom_fe.h
+      ext/dom/php_dom.c
+      ext/dom/php_dom.h
+      ext/dom/xml_common.h
+      ext/dom/tests/regsiter_node_class.phpt:
+      MFH: add registerNodeClass() method
+       - update attribute isID functionality
+       - add test
+
+    * ext/dom/tests/regsiter_node_class.phpt
+      ext/dom/tests/regsiter_node_class.phpt:
+      
+      add test
+
+2006-05-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/ming/ming.c:
+      MFB: E_ERROR > E_RECOVERABLE_ERROR
+
+    * (PHP_5_2)
+      ext/ming/ming.c:
+      E_ERROR > E_RECOVERABLE_ERROR
+
+2006-05-22  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_4_4)
+      pear/install-pear.php
+      pear/PEAR/Downloader.php
+      pear/PEAR/REST.php:
+      fix PEAR build
+
+    * pear/packages/PEAR-1.4.9.tar
+      pear/packages/PEAR-1.4.9.tar:
+      
+      file PEAR-1.4.9.tar was initially added on branch PHP_4_4.
+
+    * (PHP_4_4)
+      pear/PEAR.php
+      pear/System.php
+      pear/install-pear.php
+      pear/PEAR/ChannelFile.php
+      pear/PEAR/Common.php
+      pear/PEAR/Config.php
+      pear/PEAR/Dependency2.php
+      pear/PEAR/Downloader.php
+      pear/PEAR/Frontend.php
+      pear/PEAR/Installer.php
+      pear/PEAR/PackageFile.php
+      pear/PEAR/REST.php
+      pear/PEAR/Registry.php
+      pear/PEAR/Remote.php
+      pear/PEAR/Validate.php
+      pear/PEAR/Command/Install.php
+      pear/PEAR/Frontend/CLI.php
+      pear/packages/PEAR-1.4.6.tar:
+      sync to PEAR 1.4.9
+      add PEAR 1.4.9 to installed tarballs
+
+2006-05-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c:
+      Fixed bug #37496 (FastCGI output buffer overrun)
+
+2006-05-22  Antony Dovgal  <antony@zend.com>
+
+    * sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c:
+      fix typo
+
+    * (PHP_5_1)
+      ext/oci8/config.w32
+      ext/oci8/config.w32:
+      re-enable OCILobRead2() support
+
+    * ext/oci8/config.w32:
+      re-enable OCILobRead2() support on win32
+
 2006-05-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_4_4)
