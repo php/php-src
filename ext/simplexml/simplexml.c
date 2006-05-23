@@ -1837,12 +1837,10 @@ PHP_FUNCTION(simplexml_load_file)
 	char           *filename;
 	int             filename_len;
 	xmlDocPtr       docp;
-	char           *classname = "";
-	int             classname_len = 0;
 	long            options = 0;
 	zend_class_entry *ce= sxe_class_entry;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sl", &filename, &filename_len, &classname, &classname_len, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|Cl", &filename, &filename_len, &ce, &options) == FAILURE) {
 		return;
 	}
 
@@ -1850,14 +1848,6 @@ PHP_FUNCTION(simplexml_load_file)
 
 	if (! docp) {
 		RETURN_FALSE;
-	}
-
-	if (classname_len) {
-		zend_class_entry **pce;
-		if (zend_lookup_class(classname, classname_len, &pce TSRMLS_CC) == FAILURE) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s does not exist", classname);
-		}
-		ce = *pce;
 	}
 
 	sxe = php_sxe_object_new(ce TSRMLS_CC);
@@ -1877,12 +1867,10 @@ PHP_FUNCTION(simplexml_load_string)
 	char           *data;
 	int             data_len;
 	xmlDocPtr       docp;
-	char           *classname = "";
-	int             classname_len = 0;
 	long            options = 0;
 	zend_class_entry *ce= sxe_class_entry;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sl", &data, &data_len, &classname, &classname_len, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|Cl", &data, &data_len, &ce, &options) == FAILURE) {
 		return;
 	}
 
@@ -1890,14 +1878,6 @@ PHP_FUNCTION(simplexml_load_string)
 
 	if (! docp) {
 		RETURN_FALSE;
-	}
-
-	if (classname_len) {
-		zend_class_entry **pce;
-		if (zend_lookup_class(classname, classname_len, &pce TSRMLS_CC) == FAILURE) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s does not exist", classname);
-		}
-		ce = *pce;
 	}
 
 	sxe = php_sxe_object_new(ce TSRMLS_CC);
@@ -2131,11 +2111,9 @@ PHP_FUNCTION(simplexml_import_dom)
 	zval *node;
 	php_libxml_node_object *object;
 	xmlNodePtr		nodep = NULL;
-	char           *classname = "";
-	int             classname_len = 0;
 	zend_class_entry *ce= sxe_class_entry;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o|s", &node, &classname, &classname_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o|C", &node, &ce) == FAILURE) {
 		return;
 	}
 
@@ -2154,14 +2132,6 @@ PHP_FUNCTION(simplexml_import_dom)
 	}
 
 	if (nodep && nodep->type == XML_ELEMENT_NODE) {
-		if (classname_len) {
-			zend_class_entry **pce;
-			if (zend_lookup_class(classname, classname_len, &pce TSRMLS_CC) == FAILURE) {
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s does not exist", classname);
-			}
-			ce = *pce;
-		}
-
 		sxe = php_sxe_object_new(ce TSRMLS_CC);
 		sxe->document = object->document;
 		php_libxml_increment_doc_ref((php_libxml_node_object *)sxe, nodep->doc TSRMLS_CC);
