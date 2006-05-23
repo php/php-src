@@ -579,7 +579,7 @@ static int zend_parse_arg(int arg_num, zval **arg, va_list *va, char **spec, int
 
 	expected_type = zend_parse_arg_impl(arg_num, arg, va, spec TSRMLS_CC);
 	if (expected_type) {
-		if (!quiet) {
+		if (!quiet && *expected_type) {
 			char *space;
 			char *class_name = get_active_class_name(&space TSRMLS_CC);
 
