@@ -15,7 +15,6 @@ PHP                                                                        NEWS
   . "register_globals" support. (Pierre)
   . "register_long_arrays" ini option. (Dmitry)
   . "safe_mode" support. (Ilia, Andi)
-  . "zend.ze1_compatibility_mode" ini option. (Dmitry)
   . "allow_call_time_pass_reference", added E_STRICT error message. (Dmitry)
   . session_register(), session_unregister() and session_is_registered()
     (needed only with "register_globals=On").
