@@ -721,6 +721,10 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 				zend_class_entry **lookup, **pce = va_arg(*va, zend_class_entry **);
 				zend_class_entry *ce_base = *pce;
 
+				if (return_null && Z_TYPE_PP(arg) == IS_NULL) {
+					*pce = NULL;
+					break;
+				}
 				convert_to_text_ex(arg);
 				if (zend_u_lookup_class(Z_TYPE_PP(arg), Z_UNIVAL_PP(arg), Z_UNILEN_PP(arg), &lookup TSRMLS_CC) == FAILURE) {
 					*pce = NULL;
@@ -738,7 +742,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 						return "";
 					}
 				}
-				if (!*pce && !return_null) {
+				if (!*pce) {
 					char *space;
 					zstr class_name = get_active_class_name(&space TSRMLS_CC);
 					zend_error(E_WARNING, "%v%s%v() expects parameter %d to be a valid class name, '%v' given",
