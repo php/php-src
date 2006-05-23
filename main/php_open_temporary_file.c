@@ -114,17 +114,16 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 
 	path_len = strlen(path);
 
-	if (!(opened_path = emalloc(MAXPATHLEN))) {
-		return -1;
-	}
-
 	if (!path_len || IS_SLASH(path[path_len - 1])) {
 		trailing_slash = "";
 	} else {
 		trailing_slash = "/";
 	}
 
-	(void)snprintf(opened_path, MAXPATHLEN, "%s%s%sXXXXXX", path, trailing_slash, pfx);
+	if (spprintf(&opened_path, 0, "%s%s%sXXXXXX", path, trailing_slash, pfx) >= MAXPATHLEN) {
+		efree(opened_path);
+		return -1;
+	}
 
 #ifdef PHP_WIN32
 	if (GetTempFileName(path, pfx, 0, opened_path)) {
