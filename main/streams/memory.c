@@ -88,16 +88,15 @@ static size_t php_stream_memory_read(php_stream *stream, char *buf, size_t count
 	php_stream_memory_data *ms = (php_stream_memory_data*)stream->abstract;
 	assert(ms != NULL);
 
-	if (ms->fpos + count > ms->fsize) {
+	if (ms->fpos + count >= ms->fsize) {
 		count = ms->fsize - ms->fpos;
+		stream->eof = 1;
 	}
 	if (count) {
 		assert(ms->data!= NULL);
 		assert(buf!= NULL);
 		memcpy(buf, ms->data+ms->fpos, count);
 		ms->fpos += count;
-	} else {
-		stream->eof = 1;
 	}
 	return count;
 }
@@ -147,6 +146,7 @@ static int php_stream_memory_seek(php_stream *stream, off_t offset, int whence, 
 				} else {
 					ms->fpos = ms->fpos + offset;
 					*newoffs = ms->fpos;
+					stream->eof = 0;
 					return 0;
 				}
 			} else {
@@ -157,6 +157,7 @@ static int php_stream_memory_seek(php_stream *stream, off_t offset, int whence, 
 				} else {
 					ms->fpos = ms->fpos + offset;
 					*newoffs = ms->fpos;
+					stream->eof = 0;
 					return 0;
 				}
 			}
@@ -168,6 +169,7 @@ static int php_stream_memory_seek(php_stream *stream, off_t offset, int whence, 
 			} else {
 				ms->fpos = offset;
 				*newoffs = ms->fpos;
+				stream->eof = 0;
 				return 0;
 			}
 		case SEEK_END:
@@ -182,6 +184,7 @@ static int php_stream_memory_seek(php_stream *stream, off_t offset, int whence, 
 			} else {
 				ms->fpos = ms->fsize + offset;
 				*newoffs = ms->fpos;
+				stream->eof = 0;
 				return 0;
 			}
 		default:
@@ -359,9 +362,7 @@ static size_t php_stream_temp_read(php_stream *stream, char *buf, size_t count T
 	
 	got = php_stream_read(ts->innerstream, buf, count);
 	
-	if (!got) {
-		stream->eof |= ts->innerstream->eof;
-	}
+	stream->eof = ts->innerstream->eof;
 	
 	return got;
 }
@@ -418,6 +419,7 @@ static int php_stream_temp_seek(php_stream *stream, off_t offset, int whence, of
 	}
 	ret = php_stream_seek(ts->innerstream, offset, whence);
 	*newoffs = php_stream_tell(ts->innerstream);
+	stream->eof = ts->innerstream->eof;
 	
 	return ret;
 }
