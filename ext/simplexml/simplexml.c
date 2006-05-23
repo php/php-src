@@ -1836,7 +1836,7 @@ PHP_FUNCTION(simplexml_load_file)
 	zend_class_entry *ce= sxe_class_entry;
 	zend_bool       isprefix = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|Clsb", &filename, &filename_len, &ce, &options, &ns, &ns_len, &isprefix) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|C!lsb", &filename, &filename_len, &ce, &options, &ns, &ns_len, &isprefix) == FAILURE) {
 		return;
 	}
 
@@ -1846,6 +1846,9 @@ PHP_FUNCTION(simplexml_load_file)
 		RETURN_FALSE;
 	}
 
+	if (!ce) {
+		ce = sxe_class_entry;
+	}
 	sxe = php_sxe_object_new(ce TSRMLS_CC);
 	sxe->iter.nsprefix = ns_len ? xmlStrdup(ns) : NULL;
 	sxe->iter.isprefix = isprefix;
@@ -1871,7 +1874,7 @@ PHP_FUNCTION(simplexml_load_string)
 	zend_class_entry *ce= sxe_class_entry;
 	zend_bool       isprefix = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|Clsb", &data, &data_len, &ce, &options, &ns, &ns_len, &isprefix) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|C!lsb", &data, &data_len, &ce, &options, &ns, &ns_len, &isprefix) == FAILURE) {
 		return;
 	}
 
@@ -1881,6 +1884,9 @@ PHP_FUNCTION(simplexml_load_string)
 		RETURN_FALSE;
 	}
 
+	if (!ce) {
+		ce = sxe_class_entry;
+	}
 	sxe = php_sxe_object_new(ce TSRMLS_CC);
 	sxe->iter.nsprefix = ns_len ? xmlStrdup(ns) : NULL;
 	sxe->iter.isprefix = isprefix;
@@ -2130,7 +2136,7 @@ PHP_FUNCTION(simplexml_import_dom)
 	xmlNodePtr		nodep = NULL;
 	zend_class_entry *ce= sxe_class_entry;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o|C", &node, &ce) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o|C!", &node, &ce) == FAILURE) {
 		return;
 	}
 
@@ -2149,6 +2155,9 @@ PHP_FUNCTION(simplexml_import_dom)
 	}
 
 	if (nodep && nodep->type == XML_ELEMENT_NODE) {
+		if (!ce) {
+			ce = sxe_class_entry;
+		}
 		sxe = php_sxe_object_new(ce TSRMLS_CC);
 		sxe->document = object->document;
 		php_libxml_increment_doc_ref((php_libxml_node_object *)sxe, nodep->doc TSRMLS_CC);
