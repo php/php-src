@@ -37,7 +37,8 @@ Change Log
 General Considerations
 ======================
 * If the filter's expected input data mask does not match the provided data
-  for logical filters the filter function returns "null".
+  for logical filters the filter function returns "false". If the data was
+  not found, "null" is returned.
 * Character filters always return a string.
 * With the input filter extension enabled, and the
   input_filter.paranoid_admin_default_filter is set to something != 'raw',
