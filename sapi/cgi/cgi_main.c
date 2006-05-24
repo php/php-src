@@ -282,7 +282,7 @@ static void sapi_cgibin_flush(void *server_context)
 #ifndef PHP_WIN32
 		!parent && 
 #endif
-		request && fcgi_flush(request, 0) == -1) {
+		request && !fcgi_flush(request, 0)) {
 			php_handle_aborted_connection();
 		}
 		return;
