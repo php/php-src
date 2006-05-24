@@ -40,6 +40,7 @@ extern zend_module_entry tidy_module_entry;
 #define TIDY_ATTR_ME(name, param) TIDY_METHOD_MAP(name, tam_ ##name, param)
 
 PHP_MINIT_FUNCTION(tidy);
+PHP_MSHUTDOWN_FUNCTION(tidy);
 PHP_RINIT_FUNCTION(tidy);
 PHP_MINFO_FUNCTION(tidy);
 

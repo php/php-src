@@ -326,7 +326,7 @@ zend_module_entry tidy_module_entry = {
 	"tidy",
 	tidy_functions,
 	PHP_MINIT(tidy),
-	NULL,
+	PHP_MSHUTDOWN(tidy),
 	PHP_RINIT(tidy),
 	NULL,
 	PHP_MINFO(tidy),
@@ -997,6 +997,17 @@ PHP_RINIT_FUNCTION(tidy)
 		}
 	}
 
+	return SUCCESS;
+}
+
+PHP_MSHUTDOWN_FUNCTION(tidy)
+{
+#ifdef ZTS
+	ts_free_id(tidy_globals_id);
+#else
+	tidy_globals_dtor(&tidy_globals TSRMLS_CC);
+#endif
+	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
 
