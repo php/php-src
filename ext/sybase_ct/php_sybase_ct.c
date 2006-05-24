@@ -442,6 +442,11 @@ PHP_RINIT_FUNCTION(sybase)
 PHP_MSHUTDOWN_FUNCTION(sybase)
 {
 	UNREGISTER_INI_ENTRIES();
+#ifdef ZTS
+	ts_free_id(sybase_globals_id);
+#else
+	php_sybase_destroy_globals(&sybase_globals TSRMLS_CC);
+#endif
 #if 0
 	ct_exit(context, CS_UNUSED);
 	cs_ctx_drop(context);
