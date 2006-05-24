@@ -1384,7 +1384,7 @@ COMMAND $cmd
 	/* when using CGI, strip the headers from the output */
 	$headers = "";
 	if (isset($old_php) && preg_match("/^(.*?)\r?\n\r?\n(.*)/s", $out, $match)) {
-		$output = $match[2];
+		$output = trim($match[2]);
 		$rh = preg_split("/[\n\r]+/",$match[1]);
 		$headers = array();
 		foreach ($rh as $line) {
