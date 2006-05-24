@@ -59,6 +59,8 @@ PHP                                                                        NEWS
 - Fixed bug #37457 (Crash when an exception is thrown in accept() method of 
   FilterIterator). (Marcus)
 - Fixed bug #37456 (DOMElement->setAttribute() loops forever). (Rob)
+- Fixed bug #37428 (PHP crashes on windows if there are startup errors
+  and event log is used for logging them). (Edin)
 - Fixed bug #37418 (tidy module crashes on shutdown). (Tony)
 - Fixed bug #37416 (iterator_to_array() hides exceptions thrown in rewind()
   method). (Tony)
