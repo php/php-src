@@ -46,6 +46,7 @@ PHP                                                                        NEWS
 - Added RFC2397 (data: stream) support. (Marcus)
 - Fixed bug #37565 (Using reflection::export with simplexml causing a crash).
   (Marcus)
+- Fixed bug #37563 (array_key_exists performance is poor for &$array). (Ilia)
 - Fixed bug #37514 (strtotime doesn't assume year correctly). (Derick)
 - Fixed bug #37510 (session_regenerate_id changes session_id() even on 
   failure). (Hannes)

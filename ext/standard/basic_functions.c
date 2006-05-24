@@ -815,7 +815,7 @@ zend_function_entry basic_functions[] = {
 	PHP_FE(array_map,														NULL)
 	PHP_FE(array_chunk,														NULL)
 	PHP_FE(array_combine,													NULL)
-	PHP_FE(array_key_exists,												NULL)
+	PHP_FE(array_key_exists,												all_args_prefer_ref)
 
 	/* aliases from array.c */
 	PHP_FALIAS(pos, 				current, 				 first_arg_force_ref)
