@@ -50,6 +50,8 @@ PHP                                                                        NEWS
 - Fixed bug #37510 (session_regenerate_id changes session_id() even on 
   failure). (Hannes)
 - Fixed bug #37505 (touch() truncates large files). (Ilia)
+- Fixed bug #37499 (CLI segmentation faults during cleanup with sybase-ct 
+  extension enabled). (Tony)
 - Fixed bug #37487 (oci_fetch_array() array-type should always default to
   OCI_BOTH). (Tony)
 - Fixed bug #37395 (recursive mkdir() fails to create nonexistent directories 
@@ -57,6 +59,7 @@ PHP                                                                        NEWS
 - Fixed bug #37457 (Crash when an exception is thrown in accept() method of 
   FilterIterator). (Marcus)
 - Fixed bug #37456 (DOMElement->setAttribute() loops forever). (Rob)
+- Fixed bug #37418 (tidy module crashes on shutdown). (Tony)
 - Fixed bug #37416 (iterator_to_array() hides exceptions thrown in rewind()
   method). (Tony)
 - Fixed bug #37413 (Rejected versions of flex that don't work). (Ilia)
