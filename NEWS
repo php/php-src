@@ -7,6 +7,8 @@ PHP                                                                        NEWS
   method). (Tony) 
 - Fixed bug #37392 (Unnecessary call to OCITransRollback() at the end of 
   request). (Tony)
+- Fixed bug #37341 ($_SERVER in included file is shortened to two entries,
+  if $_ENV gets used). (Dmitry)
 - Fixed bug #37313 (sigemptyset() used without including <signal.h>).
   (jdolecek)
 - Fixed bug #37346 (invalid colormap format) (Pierre)
