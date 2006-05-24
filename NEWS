@@ -72,6 +72,7 @@ PHP                                                                        NEWS
 - Fixed bug #37313 (sigemptyset() used without including <signal.h>).
   (jdolecek)
 - Fixed bug #37306 (max_execution_time = max_input_time). (Dmitry)
+- Fixed bug #37256 (php-fastcgi dosen't handle connection abort). (Dmitry)
 - Fixed bug #37244 (Added strict flag to base64_decode() that enforces 
   RFC3548 compliance). (Ilia)
 - Fixed bug #36630 (umask not reset at the end of the request). (Ilia)
