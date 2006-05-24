@@ -160,7 +160,7 @@ typedef struct _FCGX_Request {
 
 #define FCGX_PutStr(str, len, stream)		fcgi_write((stream).req, (stream).type, str, len)
 #define FCGX_PutS(str, len, stream)			fcgi_write((stream).req, (stream).type, str, len)
-#define FCGX_FFlush(stream)                 fcgi_flush((stream).req, 0)
+#define FCGX_FFlush(stream)                 (fcgi_flush((stream).req, 0)?0:-1)
 #define FCGX_GetStr(str, len, stream)       fcgi_read((stream).req, str, len)
 
 #define FCGX_GetParam(var, envp)			fcgi_getenv_helper(envp, var, strlen(var));

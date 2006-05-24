@@ -14,6 +14,7 @@ PHP                                                                        NEWS
 - Fixed bug #37346 (invalid colormap format) (Pierre)
 - Fixed bug #37360 (invalid gif size) (Pierre)
 - Fixed bug #37306 (max_execution_time = max_input_time). (Dmitry)
+- Fixed bug #37256 (php-fastcgi dosen't handle connection abort). (Dmitry)
 
 04 May 2006, PHP 5.1.4
 - Added "capture_peer_cert" and "capture_peer_cert_chain" context options
