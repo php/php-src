@@ -104,4 +104,4 @@ State 4: current()
 State 5: key()
 State 6: next()
 
-Fatal error: Ignoring exception from MyArrayIterator::__destruct() while an exception is already active (Uncaught Exception in /usr/src/php-cvs/ext/spl/tests/iterator_041b.phpt on line 17) in %siterator_041b.php on line %d
+Fatal error: Ignoring exception from MyArrayIterator::__destruct() while an exception is already active (Uncaught Exception in %s on line %d) in %siterator_041b.php on line %d
