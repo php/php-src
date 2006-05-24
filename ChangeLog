@@ -1,3 +1,90 @@
+2006-05-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      ext/standard/tests/array/array_combine.phpt
+      ext/standard/tests/array/array_combine.phpt
+      ext/standard/tests/array/array_diff_assoc.phpt
+      ext/standard/tests/array/array_diff_assoc.phpt:
+      - MFH Add more tests from Ligaya Turmelle
+
+    * ext/standard/tests/array/array_combine.phpt
+      ext/standard/tests/array/array_combine.phpt
+      ext/standard/tests/array/array_combine.phpt
+      ext/standard/tests/array/array_diff_assoc.phpt
+      ext/standard/tests/array/array_diff_assoc.phpt
+      ext/standard/tests/array/array_diff_assoc.phpt:
+        1.1.4;
+      - Add more tests from Ligaya Turmelle
+
+2006-05-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      main/php_open_temporary_file.c
+      main/php_open_temporary_file.c:
+      MFH: Fixed handling of extremely long paths inside tempnam() function.
+
+    * main/php_open_temporary_file.c:
+      MFB: Fixed handling of extremely long paths inside tempnam() function.
+
+    * (PHP_5_2)
+      NEWS
+      main/php_open_temporary_file.c:
+      Fixed handling of extremely long paths inside tempnam() function.
+
+2006-05-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      ext/standard/tests/file/stream_rfc2397_007.phpt:
+      file stream_rfc2397_007.phpt was added on branch PHP_5_2 on 2006-05-23
+      22:31:24 +0000
+
+    * main/streams/memory.c:
+      - Fix feof() with temp/memory streams
+
+    * (PHP_5_2)
+      ext/simplexml/php_simplexml.h
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/profile12.phpt
+      ext/simplexml/tests/profile13.phpt:
+      - MFH Sync with head (namespace prefix handling)
+
+    * NEWS:
+      - Done in 5.2
+
+    * ext/simplexml/simplexml.c:
+      - Readd NULL as allowed classname to skip parameter
+
+    * (PHP_5_2)
+      ZendEngine2/zend_API.c:
+      - MFH Handle NULL in C argument parsing correct
+
+    * ZendEngine2/zend_API.c:
+      - Handle NULL in C argument parsing correct
+
+    * ext/simplexml/tests/bug37565.phpt
+      ext/simplexml/tests/bug37565.phpt
+      ext/standard/tests/file/stream_rfc2397_007.phpt:
+      
+      - Add new test
+
+    * (PHP_5_2)
+      ZendEngine2/zend_API.c:
+      - Fix double error raising issue
+
+    * ext/simplexml/simplexml.c:
+      - Fix SEGV in case class to generate is not derived from SimpleXMLElement
+        by issueing an error
+
+2006-05-23  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * (PHP_5_2)
+      ZendEngine2/acinclude.m4:
+      MFH: Add bison 2.2 to the list of supported versions.
+
+    * ZendEngine2/acinclude.m4:
+      Add bison 2.2 to the list of supported versions.
+
 2006-05-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * .gdbinit:

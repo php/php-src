@@ -1,3 +1,25 @@
+2006-05-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      zend_API.c:
+      - MFH Handle NULL in C argument parsing correct
+
+    * zend_API.c:
+      - Handle NULL in C argument parsing correct
+
+    * (PHP_5_2)
+      zend_API.c:
+      - Fix double error raising issue
+
+2006-05-23  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * (PHP_5_2)
+      acinclude.m4:
+      MFH: Add bison 2.2 to the list of supported versions.
+
+    * acinclude.m4:
+      Add bison 2.2 to the list of supported versions.
+
 2006-05-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_2)
