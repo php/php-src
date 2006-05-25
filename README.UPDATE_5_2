@@ -1,6 +1,6 @@
 PHP 5.2 Update info or NEWS explained
 
-- As of PHP 5.2 the E_ALL error reporting mode includes the E_RECOVERABLE_ERROR.
+- Changed E_ALL error reporting mode to includes E_RECOVERABLE_ERROR. (Marcus)
 
   This changes means that the value of the E_ALL constant had changed to 6143
   from its previous value of 2047. If you are setting your error reporting mode
