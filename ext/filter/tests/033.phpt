@@ -2,7 +2,7 @@
 Test all filters returned by input_filters_list()
 --FILE--
 <?php
-include './033.php';
+include dirname(__FILE__) . '/033_run.php';
 ?>
 --EXPECT--     
 int                      1                                               123                                               
