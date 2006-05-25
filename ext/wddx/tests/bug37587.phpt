@@ -1,0 +1,41 @@
+--TEST--
+Bug #37587 (var without attribute causes segfault)
+--FILE--
+<?php
+
+var_dump(wddx_deserialize(file_get_contents(<<<EOF
+data:,<wddxPacket version='1.0'>
+<header/>
+<data>
+  <array length='1'>
+    <var>
+      <struct>
+        <var name='test'><string>Hello World</string></var>
+      </struct>
+    </var>
+  </array>
+</data>
+</wddxPacket>
+EOF
+)));
+
+?>
+===DONE===
+--EXPECT--
+array(1) {
+  [0]=>
+  array(1) {
+    ["test"]=>
+    string(11) "Hello World"
+  }
+}
+===DONE===
+--UEXPECT--
+array(1) {
+  [0]=>
+  array(1) {
+    [u"test"]=>
+    string(11) "Hello World"
+  }
+}
+===DONE===

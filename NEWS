@@ -44,6 +44,7 @@ PHP                                                                        NEWS
 - Added implementation of curl_multi_info_read(). (Brian)
 - Added RFC2397 (data: stream) support. (Marcus)
 - Fixed handling of extremely long paths inside tempnam() function. (Ilia)
+- Fixed bug #37587 (var without attribute causes segfault). (Marcus)
 - Fixed bug #37565 (Using reflection::export with simplexml causing a crash).
   (Marcus)
 - Fixed bug #37563 (array_key_exists performance is poor for &$array). (Ilia)
