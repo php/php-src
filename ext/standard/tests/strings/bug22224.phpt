@@ -4,7 +4,12 @@ Bug #22224 (implode changes object references in array)
 error_reporting=0
 --FILE--
 <?php
-class foo {
+class foo
+{
+	function __toString()
+	{
+		return "Object";
+	}
 }
 
 
