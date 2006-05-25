@@ -289,6 +289,7 @@ ZEND_API zval *zend_read_static_property(zend_class_entry *scope, char *name, in
 ZEND_API zend_class_entry *zend_get_class_entry(zval *zobject TSRMLS_DC);
 ZEND_API int zend_get_object_classname(zval *object, zstr *class_name, zend_uint *class_name_len TSRMLS_DC);
 ZEND_API zend_uchar zend_get_unified_string_type(int num_args TSRMLS_DC, ...);
+ZEND_API char *zend_get_type_by_const(int type);
 
 #define getThis() (this_ptr)
 

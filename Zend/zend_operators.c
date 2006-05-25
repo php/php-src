@@ -318,10 +318,11 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 		zval dst;																			\
 		if (Z_OBJ_HT_P(op)->cast_object(op, &dst, ctype TSRMLS_CC) == FAILURE) {			\
 			zend_error(E_RECOVERABLE_ERROR, 												\
-			"Object of class %v could not be converted to " # ctype, Z_OBJCE_P(op)->name);	\
+			"Object of class %v could not be converted to %s", Z_OBJCE_P(op)->name,			\
+			zend_get_type_by_const(ctype));													\
 		} else {																			\
 			zval_dtor(op);																	\
-			Z_TYPE_P(op) = ctype;																\
+			Z_TYPE_P(op) = ctype;															\
 			op->value = dst.value;															\
 		}																					\
 	} else {																				\

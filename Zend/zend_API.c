@@ -194,19 +194,15 @@ ZEND_API void zend_wrong_param_count(TSRMLS_D)
 
 
 /* Argument parsing API -- andrei */
-
-ZEND_API char *zend_zval_type_name(zval *arg)
+ZEND_API char *zend_get_type_by_const(int type)
 {
-	switch (Z_TYPE_P(arg)) {
-		case IS_NULL:
-			return "null";
-
+	switch(type) {
+		case IS_BOOL:
+			return "boolean";
 		case IS_LONG:
 			return "integer";
-
 		case IS_DOUBLE:
 			return "double";
-
 		case IS_STRING:
 		{
 			TSRMLS_FETCH();
@@ -217,24 +213,24 @@ ZEND_API char *zend_zval_type_name(zval *arg)
 				return "string";
 			}
 		}
-		case IS_ARRAY:
-			return "array";
-
 		case IS_OBJECT:
 			return "object";
-
-		case IS_BOOL:
-			return "boolean";
-
 		case IS_RESOURCE:
 			return "resource";
-
+		case IS_NULL:
+			return "null";
+		case IS_ARRAY:
+			return "array";
 		case IS_UNICODE:
 			return "Unicode string";
-
 		default:
 			return "unknown";
 	}
+}
+
+ZEND_API char *zend_zval_type_name(zval *arg)
+{
+	return zend_get_type_by_const(Z_TYPE_P(arg));
 }
 
 ZEND_API zend_class_entry *zend_get_class_entry(zval *zobject TSRMLS_DC)
