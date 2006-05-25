@@ -34,3 +34,28 @@ array(1) {
     }
   }
 }
+--UEXPECT--
+array(2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    unicode(1) "1"
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    unicode(1) "3"
+  }
+}
+array(1) {
+  [u"a"]=>
+  array(1) {
+    [u"b"]=>
+    array(2) {
+      [u"c"]=>
+      unicode(1) "1"
+      [u"d"]=>
+      unicode(1) "1"
+    }
+  }
+}

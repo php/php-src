@@ -13,3 +13,8 @@ array(1) {
   [0]=>
   string(1) "5"
 }
+--UEXPECT--
+array(1) {
+  [0]=>
+  unicode(1) "5"
+}

@@ -15,3 +15,10 @@ array(2) {
   ["b"]=>
   string(1) "3"
 }
+--UEXPECT--
+array(2) {
+  [u"a"]=>
+  unicode(1) "1"
+  [u"b"]=>
+  unicode(1) "3"
+}
