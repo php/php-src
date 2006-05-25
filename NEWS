@@ -1,7 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, PHP 5.2.0
-- Fixed handling of extremely long paths inside tempnam() function. (Ilia)
 - Added control character checks for cURL extension's open_basedir/safe_mode
   checks. (Ilia)
 - Disable realpath cache when open_basedir or safe_mode are enabled on a 
@@ -44,6 +43,7 @@ PHP                                                                        NEWS
 - Added pg_field_table() function. (Edin)
 - Added implementation of curl_multi_info_read(). (Brian)
 - Added RFC2397 (data: stream) support. (Marcus)
+- Fixed handling of extremely long paths inside tempnam() function. (Ilia)
 - Fixed bug #37565 (Using reflection::export with simplexml causing a crash).
   (Marcus)
 - Fixed bug #37563 (array_key_exists performance is poor for &$array). (Ilia)
