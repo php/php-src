@@ -798,6 +798,7 @@ int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int l
 	limit = sizeof(req->out_buf) - (req->out_pos - req->out_buf);
 	if (!req->out_hdr) {
 		limit -= sizeof(fcgi_header);
+		if (limit < 0) limit = 0;
 	}
 
 	if (len < limit) {
@@ -810,8 +811,10 @@ int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int l
 		if (!req->out_hdr) {
 			open_packet(req, type);
 		}
-		memcpy(req->out_pos, str, limit);
-		req->out_pos += limit;
+		if (limit > 0) {
+			memcpy(req->out_pos, str, limit);
+			req->out_pos += limit;
+		}
 		if (!fcgi_flush(req, 0)) {
 			return -1;
 		}
