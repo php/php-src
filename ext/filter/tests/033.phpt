@@ -19,7 +19,7 @@ special_chars       PHP  1  foo@bar.com    http://a.b.c        1.2.3.4   123  12
 unsafe_raw          PHP  1  foo@bar.com    http://a.b.c        1.2.3.4   123  123abc<>()          O'Henry        하퍼    
 email               PHP  1  foo@bar.com    http//a.b.c         1.2.3.4   123  123abc              O'Henry                  
 url                 PHP  1  foo@bar.com    http://a.b.c        1.2.3.4   123  123abc<>()          O'Henry                  
-number_int               1                                               123  123                                          
-number_float             1                                               123  123                                          
+number_int               1                                     1234      123  123                                          
+number_float             1                                     1.2.3.4   123  123                                          
 magic_quotes        PHP  1  foo@bar.com    http://a.b.c        1.2.3.4   123  123abc<>()          O\'Henry       하퍼    
 callback            PHP  1  FOO@BAR.COM    HTTP://A.B.C        1.2.3.4   123  123ABC<>()          O'HENRY        하퍼  
