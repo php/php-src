@@ -260,7 +260,6 @@ dbhead_t *dbf_open(char *dp, int o_flags TSRMLS_DC)
 	}
 
 	if ((dbh = get_dbf_head(fd)) ==	NULL) {
-		fprintf(stderr, "Unable to get header\n");
 		return NULL;
 	}
 	dbh->db_name = cp;
