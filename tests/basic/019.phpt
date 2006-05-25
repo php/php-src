@@ -17,3 +17,12 @@ array(3) {
   ["["]=>
   string(1) "4"
 }
+--UEXPECT--
+array(3) {
+  [0]=>
+  unicode(1) "1"
+  [1]=>
+  unicode(1) "3"
+  [u"["]=>
+  unicode(1) "4"
+}
