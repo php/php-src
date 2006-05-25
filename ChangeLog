@@ -1,3 +1,67 @@
+2006-05-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/basic_functions.c:
+      MFB: Fixed bug #37563 (array_key_exists performance is poor for &$array).
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/basic_functions.c:
+      Fixed bug #37563 (array_key_exists performance is poor for &$array).
+
+2006-05-24  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * main/main.c:
+      MFB: Initialize windows globals, fixes #37428
+
+    * (PHP_5_2)
+      main/main.c:
+      Initialize windows globals, fixes #37428
+
+2006-05-24  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * ext/sybase_ct/php_sybase_ct.c:
+      MFB: fix #37499 (CLI segmentation faults during cleanup (only with
+      sybase-ct extension enabled))
+
+    * (PHP_5_2)
+      ext/sybase_ct/php_sybase_ct.c:
+      fix #37499 (CLI segmentation faults during cleanup (only with sybase-ct
+      extension enabled))
+
+2006-05-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * run-tests.php:
+      Fixed CGI tests
+
+    * (PHP_5_2)
+      run-tests.php:
+      Fixed CGI tests.
+
+    * (PHP_5_1)
+      NEWS
+      NEWS
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c
+      sapi/cgi/fastcgi.h:
+      Fixed bug #37256 (php-fastcgi dosen't handle connection abort)
+
+    * (PHP_5_1)
+      NEWS
+      NEWS
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      Fixed bug #37341 ($_SERVER in included file is shortened to two entries, if
+      $_ENV gets used).
+
 2006-05-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
