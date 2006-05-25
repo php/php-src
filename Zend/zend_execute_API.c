@@ -1446,6 +1446,7 @@ void zend_shutdown_timeout_thread()
 	/* Wait for thread termination */
 	WaitForSingleObject(timeout_thread_handle, 5000);
 	CloseHandle(timeout_thread_handle);
+	timeout_thread_initialized = 0;
 }
 
 #endif
