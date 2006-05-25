@@ -401,7 +401,7 @@ static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *e
 	int name_len, val_len;
 	char *s;
 
-	while (p < end) {
+	while (p < end && n < FCGI_MAX_ENV_VARS - 1) {
 		name_len = *p++;
 		if (name_len >= 128) {
 			name_len = ((name_len & 0x7f) << 24);
@@ -424,10 +424,6 @@ static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *e
 		p += val_len;
 		s[name_len+1+val_len] = '\0';
 		n++;
-		if (n > sizeof(req->env)/sizeof(req->env[0])) {
-			/* TODO: to many environment variables */
-			return n;
-		}
 	}
 	return n;
 }
@@ -915,7 +911,9 @@ void fcgi_putenv(fcgi_request *req, char* var, int var_len)
 			}
 			env++;
 		}
-		*env = fcgi_strndup(var, var_len);
+		if (env != &req->env[FCGI_MAX_ENV_VARS - 1]) {
+			*env = fcgi_strndup(var, var_len);
+		}
 	}
 }
 
