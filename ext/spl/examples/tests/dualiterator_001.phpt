@@ -26,6 +26,10 @@ test(array(1,array(21,22),3), array(1,array(21,22),3));
 test(array(1,array(21,22),3), array(1,array(21,22,23),3));
 test(array(1,array(21,22),3), array(1,array(21,22,3)));
 test(array(1,array(21,22),3), array(1,array(21),array(22),3));
+test(array(1,2,3), array(1,"2",3), false);
+test(array(1,2,3), array(1,"2",3), true);
+test(array(1,array(21,22),3), array(1,array(21,"22"),3), false);
+test(array(1,array(21,22),3), array(1,array(21,"22"),3), true);
 
 ?>
 ===DONE===
@@ -35,5 +39,9 @@ bool(false)
 bool(true)
 bool(false)
 bool(false)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
 bool(false)
 ===DONE===

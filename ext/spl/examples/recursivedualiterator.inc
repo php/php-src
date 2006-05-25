@@ -47,7 +47,7 @@ class RecursiveDualIterator extends DualIterator implements RecursiveIterator
 			$this->ref = new ReflectionClass($this);
 		}
 		return $this->ref->newInstance(
-					$this->getLHS()->current(), $this->getRHS()->current(), $this->flags);
+					$this->getLHS()->getChildren(), $this->getRHS()->getChildren(), $this->getFlags());
 	}
 
 	/** @return whether both inner iterators are valid, have same hasChildren()
