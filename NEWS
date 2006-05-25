@@ -81,6 +81,7 @@ PHP                                                                        NEWS
 - Fixed bug #37313 (sigemptyset() used without including <signal.h>).
   (jdolecek)
 - Fixed bug #37306 (max_execution_time = max_input_time). (Dmitry)
+- Fixed Bug #37278 (SOAP not respecting uri in __soapCall). (Dmitry)
 - Fixed bug #37256 (php-fastcgi dosen't handle connection abort). (Dmitry)
 - Fixed bug #37244 (Added strict flag to base64_decode() that enforces 
   RFC3548 compliance). (Ilia)
