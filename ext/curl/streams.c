@@ -87,31 +87,32 @@ static size_t on_header_available(char *data, size_t size, size_t nmemb, void *c
 	php_curl_stream *curlstream = (php_curl_stream *) stream->abstract;
 	TSRMLS_FETCH();
 
-	MAKE_STD_ZVAL(header);
-	Z_STRLEN_P(header) = length;
-	Z_STRVAL_P(header) = estrndup(data, length);
-	if (Z_STRVAL_P(header)[length-1] == '\n') {
-		Z_STRVAL_P(header)[length-1] = '\0';
-		Z_STRLEN_P(header)--;
-		
-		if (Z_STRVAL_P(header)[length-2] == '\r') {
-			Z_STRVAL_P(header)[length-2] = '\0';
+	if (!(length == 2 && data[0] == '\r' && data[1] == '\n')) {
+		MAKE_STD_ZVAL(header);
+		Z_STRLEN_P(header) = length;
+		Z_STRVAL_P(header) = estrndup(data, length);
+		if (Z_STRVAL_P(header)[length-1] == '\n') {
+			Z_STRVAL_P(header)[length-1] = '\0';
 			Z_STRLEN_P(header)--;
+			
+			if (Z_STRVAL_P(header)[length-2] == '\r') {
+				Z_STRVAL_P(header)[length-2] = '\0';
+				Z_STRLEN_P(header)--;
+			}
+		}
+		Z_TYPE_P(header) = IS_STRING;
+		zend_hash_next_index_insert(Z_ARRVAL_P(curlstream->headers), &header, sizeof(zval *), NULL);
+		
+		/* based on the header, we might need to trigger a notification */
+		if (!strncasecmp(data, "Location: ", 10)) {
+			php_stream_notify_info(stream->context, PHP_STREAM_NOTIFY_REDIRECTED, data + 10, 0);
+		} else if (!strncasecmp(data, "Content-Type: ", 14)) {
+			php_stream_notify_info(stream->context, PHP_STREAM_NOTIFY_MIME_TYPE_IS, data + 14, 0);
+		} else if (!strncasecmp(data, "Context-Length: ", 16)) {
+			php_stream_notify_file_size(stream->context, atoi(data + 16), data, 0);
+			php_stream_notify_progress_init(stream->context, 0, 0);
 		}
 	}
-	Z_TYPE_P(header) = IS_STRING;
-	zend_hash_next_index_insert(Z_ARRVAL_P(curlstream->headers), &header, sizeof(zval *), NULL);
-
-	/* based on the header, we might need to trigger a notification */
-	if (!strncasecmp(data, "Location: ", 10)) {
-		php_stream_notify_info(stream->context, PHP_STREAM_NOTIFY_REDIRECTED, data + 10, 0);
-	} else if (!strncasecmp(data, "Content-Type: ", 14)) {
-		php_stream_notify_info(stream->context, PHP_STREAM_NOTIFY_MIME_TYPE_IS, data + 14, 0);
-	} else if (!strncasecmp(data, "Context-Length: ", 16)) {
-		php_stream_notify_file_size(stream->context, atoi(data + 16), data, 0);
-		php_stream_notify_progress_init(stream->context, 0, 0);
-	}
-	
 	return length;
 	
 }
@@ -251,7 +252,7 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 {
 	php_stream *stream;
 	php_curl_stream *curlstream;
-	zval *tmp;
+	zval *tmp, **ctx_opt = NULL;
 
 	curlstream = emalloc(sizeof(php_curl_stream));
 	memset(curlstream, 0, sizeof(php_curl_stream));
@@ -288,9 +289,6 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 	curl_easy_setopt(curlstream->curl, CURLOPT_HEADERFUNCTION, on_header_available);
 	curl_easy_setopt(curlstream->curl, CURLOPT_WRITEHEADER, stream);
 
-	/* currently buggy (bug is in curl) */
-	curl_easy_setopt(curlstream->curl, CURLOPT_FOLLOWLOCATION, 1);
-	
 	curl_easy_setopt(curlstream->curl, CURLOPT_ERRORBUFFER, curlstream->errstr);
 	curl_easy_setopt(curlstream->curl, CURLOPT_VERBOSE, 0);
 
@@ -302,6 +300,63 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 	curl_easy_setopt(curlstream->curl, CURLOPT_USERAGENT, FG(user_agent) ? FG(user_agent) : "PHP/" PHP_VERSION);
 	
 	/* TODO: read cookies and options from context */
+	if (!strncasecmp(filename, "http", sizeof("http")-1)) {
+		/* HTTP(S) */
+		if (SUCCESS == php_stream_context_get_option(context, "http", "user_agent", &ctx_opt) && Z_TYPE_PP(ctx_opt) == IS_STRING) {
+			curl_easy_setopt(curlstream->curl, CURLOPT_USERAGENT, Z_STRVAL_PP(ctx_opt));
+		}
+		if (SUCCESS == php_stream_context_get_option(context, "http", "header", &ctx_opt) && Z_TYPE_PP(ctx_opt) == IS_ARRAY) {
+			HashPosition pos;
+			zval **header = NULL;
+			struct curl_slist *hl = NULL;
+			
+			for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(ctx_opt), &pos);
+				SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_PP(ctx_opt), (void *)&header, &pos);
+				zend_hash_move_forward_ex(Z_ARRVAL_PP(ctx_opt), &pos)) {
+				if (Z_TYPE_PP(header) == IS_STRING) {
+					hl = curl_slist_append(hl, Z_STRVAL_PP(header));
+				}
+			}
+			if (hl) {
+				curl_easy_setopt(curlstream->curl, CURLOPT_HTTPHEADER, hl);
+			}
+		}
+		if (SUCCESS == php_stream_context_get_option(context, "http", "method", &ctx_opt) && Z_TYPE_PP(ctx_opt) == IS_STRING) {
+			if (strcasecmp(Z_STRVAL_PP(ctx_opt), "get")) {
+				if (!strcasecmp(Z_STRVAL_PP(ctx_opt), "head")) {
+					curl_easy_setopt(curlstream->curl, CURLOPT_NOBODY, 1);
+				} else {
+					if (!strcasecmp(Z_STRVAL_PP(ctx_opt), "post")) {
+						curl_easy_setopt(curlstream->curl, CURLOPT_POST, 1);
+					} else {
+						curl_easy_setopt(curlstream->curl, CURLOPT_CUSTOMREQUEST, Z_STRVAL_PP(ctx_opt));
+					}
+					if (SUCCESS == php_stream_context_get_option(context, "http", "content", &ctx_opt) && Z_TYPE_PP(ctx_opt) == IS_STRING) {
+						curl_easy_setopt(curlstream->curl, CURLOPT_POSTFIELDS, Z_STRVAL_PP(ctx_opt));
+						curl_easy_setopt(curlstream->curl, CURLOPT_POSTFIELDSIZE, (long)Z_STRLEN_PP(ctx_opt));
+					}
+				}
+			}
+		}
+		if (SUCCESS == php_stream_context_get_option(context, "http", "proxy", &ctx_opt) && Z_TYPE_PP(ctx_opt) == IS_STRING) {
+			curl_easy_setopt(curlstream->curl, CURLOPT_PROXY, Z_STRVAL_PP(ctx_opt));
+		}
+		if (SUCCESS == php_stream_context_get_option(context, "http", "max_redirects", &ctx_opt)) {
+			long mr = 20;
+			if (Z_TYPE_PP(ctx_opt) != IS_STRING || !is_numeric_string(Z_STRVAL_PP(ctx_opt), Z_STRLEN_PP(ctx_opt), &mr, NULL, 1)) {
+				if (Z_TYPE_PP(ctx_opt) == IS_LONG) {
+					mr = Z_LVAL_PP(ctx_opt);
+				}
+			}
+			if (mr > 1) {
+				curl_easy_setopt(curlstream->curl, CURLOPT_FOLLOWLOCATION, 1L);
+				curl_easy_setopt(curlstream->curl, CURLOPT_MAXREDIRS, mr);
+			}
+		} else {
+			curl_easy_setopt(curlstream->curl, CURLOPT_FOLLOWLOCATION, 1L);
+			curl_easy_setopt(curlstream->curl, CURLOPT_MAXREDIRS, 20L);
+		}
+	}
 
 	/* prepare for "pull" mode */
 	curl_multi_add_handle(curlstream->multi, curlstream->curl);
