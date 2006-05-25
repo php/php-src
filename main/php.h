@@ -330,6 +330,7 @@ END_EXTERN_C()
 
 /* PHP-named Zend macro wrappers */
 #define PHP_FN					ZEND_FN
+#define PHP_MN					ZEND_MN
 #define PHP_NAMED_FUNCTION		ZEND_NAMED_FUNCTION
 #define PHP_FUNCTION			ZEND_FUNCTION
 #define PHP_METHOD  			ZEND_METHOD
