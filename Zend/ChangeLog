@@ -1,3 +1,31 @@
+2006-05-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c
+      zend_API.h:
+      - Ease writing functions that deal with php function 'pointers'
+
+2006-05-25  Antony Dovgal  <antony@zend.com>
+
+    * zend_API.c
+      zend_API.h
+      zend_operators.c:
+      MFB: fix error messages when converting objects to other types
+
+    * (PHP_5_2)
+      zend_API.c
+      zend_API.h
+      zend_operators.c:
+      fix error messages when converting objects to other types
+      add new function
+      MFB will follow soon
+
+2006-05-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute_API.c
+      zend_execute_API.c:
+      Fixed bug #37558 (timeout functionality doesn't work after a second PHP
+      starup on the same thread). (p dot desarnaud at wanadoo dot fr)
+
 2006-05-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_2)
