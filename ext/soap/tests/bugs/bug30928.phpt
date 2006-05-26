@@ -44,7 +44,7 @@ var_dump($x->test(new foo()));
 echo "ok\n";
 ?>
 --EXPECTF--
-object(stdClass)#4 (3) {
+object(stdClass)#%d (3) {
   ["a"]=>
   string(1) "a"
   ["b"]=>
@@ -52,7 +52,7 @@ object(stdClass)#4 (3) {
   ["c"]=>
   string(1) "c"
 }
-object(foo)#2 (3) {
+object(foo)#%d (3) {
   ["a"]=>
   string(1) "a"
   ["b":"foo":private]=>
