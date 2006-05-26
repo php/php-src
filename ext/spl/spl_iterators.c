@@ -2682,8 +2682,9 @@ PHP_FUNCTION(iterator_apply)
 {
 	spl_iterator_apply_info  apply_info;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Of|a", &apply_info.obj, zend_ce_traversable, &apply_info.fci, &apply_info.fcc, &apply_info.args) == FAILURE) {
-		RETURN_FALSE;
+	apply_info.args = NULL;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Of|a!", &apply_info.obj, zend_ce_traversable, &apply_info.fci, &apply_info.fcc, &apply_info.args) == FAILURE) {
+		return;
 	}
 
 	apply_info.count = 0;
