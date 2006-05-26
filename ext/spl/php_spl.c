@@ -628,7 +628,7 @@ static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_iterator_apply, 0, 0, 2)
 	ZEND_ARG_OBJ_INFO(0, iterator, Traversable, 0)
 	ZEND_ARG_INFO(0, function)
-	ZEND_ARG_ARRAY_INFO(0, args, 0)
+	ZEND_ARG_ARRAY_INFO(0, args, 1)
 ZEND_END_ARG_INFO();
 
 /* {{{ spl_functions
