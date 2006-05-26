@@ -2612,7 +2612,7 @@ static int spl_iterator_to_array_apply(zend_object_iterator *iter, void *puser T
    Copy the iterator into an array */
 PHP_FUNCTION(iterator_to_array)
 {
-	zval                   *obj;
+	zval  *obj;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &obj, zend_ce_traversable) == FAILURE) {
 		RETURN_FALSE;
@@ -2637,8 +2637,8 @@ static int spl_iterator_count_apply(zend_object_iterator *iter, void *puser TSRM
    Count the elements in an iterator */
 PHP_FUNCTION(iterator_count)
 {
-	zval                   *obj;
-	long                    count = 0;
+	zval  *obj;
+	long  count = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &obj, zend_ce_traversable) == FAILURE) {
 		RETURN_FALSE;
@@ -2647,6 +2647,53 @@ PHP_FUNCTION(iterator_count)
 	if (spl_iterator_apply(obj, spl_iterator_count_apply, (void*)&count TSRMLS_CC) == SUCCESS) {
 		RETURN_LONG(count);
 	}
+}
+/* }}} */
+
+typedef struct {
+	zval                   *obj;
+	zval                   *args;
+	long                   count;
+	zend_fcall_info        fci;
+	zend_fcall_info_cache  fcc;
+} spl_iterator_apply_info;
+
+static int spl_iterator_func_apply(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ */
+{
+	zval *retval;
+	spl_iterator_apply_info  *apply_info = (spl_iterator_apply_info*)puser;
+	int result;
+
+	apply_info->count++;
+	zend_fcall_info_call(&apply_info->fci, &apply_info->fcc, &retval, NULL TSRMLS_CC);
+	if (retval) {
+		result = zend_is_true(retval) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_STOP;
+		zval_ptr_dtor(&retval);
+	} else {
+		result = ZEND_HASH_APPLY_STOP;
+	}
+	return result;
+}
+/* }}} */
+
+/* {{{ proto int iterator_apply(Traversable it, mixed function [, mixed params])
+   Calls a function for every element in an iterator */
+PHP_FUNCTION(iterator_apply)
+{
+	spl_iterator_apply_info  apply_info;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Of|a", &apply_info.obj, zend_ce_traversable, &apply_info.fci, &apply_info.fcc, &apply_info.args) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	apply_info.count = 0;
+	zend_fcall_info_args(&apply_info.fci, apply_info.args TSRMLS_CC);
+	if (spl_iterator_apply(apply_info.obj, spl_iterator_func_apply, (void*)&apply_info TSRMLS_CC) == SUCCESS) {
+		RETVAL_LONG(apply_info.count);
+	} else {
+		RETVAL_FALSE;
+	}
+	zend_fcall_info_args(&apply_info.fci, NULL TSRMLS_CC);
 }
 /* }}} */
 
