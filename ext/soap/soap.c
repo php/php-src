@@ -3912,7 +3912,6 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 
 	if (use == SOAP_ENCODED) {
 		xmlNewNs(envelope, XSD_NAMESPACE, XSD_NS_PREFIX);
-		xmlNewNs(envelope, XSI_NAMESPACE, XSI_NS_PREFIX);
 		if (version == SOAP_1_1) {
 			xmlNewNs(envelope, SOAP_1_1_ENC_NAMESPACE, SOAP_1_1_ENC_NS_PREFIX);
 			xmlSetNsProp(envelope, envelope->ns, "encodingStyle", SOAP_1_1_ENC_NAMESPACE);
@@ -4124,7 +4123,6 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 
 	if (use == SOAP_ENCODED) {
 		xmlNewNs(envelope, XSD_NAMESPACE, XSD_NS_PREFIX);
-		xmlNewNs(envelope, XSI_NAMESPACE, XSI_NS_PREFIX);
 		if (version == SOAP_1_1) {
 			xmlNewNs(envelope, SOAP_1_1_ENC_NAMESPACE, SOAP_1_1_ENC_NS_PREFIX);
 			xmlSetNsProp(envelope, envelope->ns, "encodingStyle", SOAP_1_1_ENC_NAMESPACE);

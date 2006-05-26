@@ -42,5 +42,5 @@ echo "ok\n";
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
-<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ns1="http://testuri.org"><SOAP-ENV:Header><ns1:Test1 xsi:type="xsd:string">Hello Header!</ns1:Test1><ns1:Test2 xsi:type="xsd:string">Hello Header!</ns1:Test2></SOAP-ENV:Header><SOAP-ENV:Body><ns1:testResponse><result>Hello Body!</result></ns1:testResponse></SOAP-ENV:Body></SOAP-ENV:Envelope>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ns1="http://testuri.org"><SOAP-ENV:Header><ns1:Test1 xsi:type="xsd:string">Hello Header!</ns1:Test1><ns1:Test2 xsi:type="xsd:string">Hello Header!</ns1:Test2></SOAP-ENV:Header><SOAP-ENV:Body><ns1:testResponse><result>Hello Body!</result></ns1:testResponse></SOAP-ENV:Body></SOAP-ENV:Envelope>
 ok
