@@ -44,6 +44,7 @@ PHP                                                                        NEWS
 - Added pg_field_table() function. (Edin)
 - Added implementation of curl_multi_info_read(). (Brian)
 - Added RFC2397 (data: stream) support. (Marcus)
+- Fixed memory leaks in openssl streams context options (Pierre)
 - Fixed handling of extremely long paths inside tempnam() function. (Ilia)
 - Fixed bug #37587 (var without attribute causes segfault). (Marcus)
 - Fixed bug #37569 (WDDX incorrectly encodes high-ascii characters). (Ilia)
