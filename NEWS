@@ -53,6 +53,8 @@ PHP                                                                        NEWS
 - Fixed bug #37563 (array_key_exists performance is poor for &$array). (Ilia)
 - Fixed bug #37558 (timeout functionality doesn't work after a second PHP
   starup on the same thread). (p dot desarnaud at wanadoo dot fr)
+- Fixed bug #37523 (namespaces added too late, leads to missing xsi:type
+  attributes. incompatibility with libxml2-2.6.24). (Dmitry)
 - Fixed bug #37514 (strtotime doesn't assume year correctly). (Derick)
 - Fixed bug #37510 (session_regenerate_id changes session_id() even on 
   failure). (Hannes)

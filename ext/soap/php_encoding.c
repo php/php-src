@@ -88,6 +88,10 @@ static encodePtr get_array_type(xmlNodePtr node, zval *array, smart_str *out_typ
 
 static xmlNodePtr check_and_resolve_href(xmlNodePtr data);
 
+static void set_ns_prop(xmlNodePtr node, char *ns, char *name, char *val);
+static void set_xsi_nil(xmlNodePtr node);
+static void set_xsi_type(xmlNodePtr node, char *type);
+
 static void get_type_str(xmlNodePtr node, const char* ns, const char* type, smart_str* ret);
 static void set_ns_and_type_ex(xmlNodePtr node, char *ns, char *type);
 
@@ -113,7 +117,7 @@ static void set_ns_and_type(xmlNodePtr node, encodeTypePtr type);
 { \
 	if (!zval || Z_TYPE_P(zval) == IS_NULL) { \
 	  if (style == SOAP_ENCODED) {\
-			xmlSetProp(xml, "xsi:nil", "true"); \
+			set_xsi_nil(xml); \
 		} \
 		return xml; \
 	} \
@@ -307,9 +311,6 @@ xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr par
 
 		if (style == SOAP_ENCODED || (SOAP_GLOBAL(sdl) && encode != enc)) {
 			if (zend_hash_find(ht, "enc_stype", sizeof("enc_stype"), (void **)&zstype) == SUCCESS) {
-				if (style == SOAP_LITERAL) {
-					encode_add_ns(node, XSI_NAMESPACE);
-				}
 				if (zend_hash_find(ht, "enc_ns", sizeof("enc_ns"), (void **)&zns) == SUCCESS) {
 					set_ns_and_type_ex(node, Z_STRVAL_PP(zns), Z_STRVAL_PP(zstype));
 				} else {
@@ -1015,7 +1016,7 @@ static xmlNodePtr to_xml_null(encodeTypePtr type, zval *data, int style, xmlNode
 	ret = xmlNewNode(NULL,"BOGUS");
 	xmlAddChild(parent, ret);
 	if (style == SOAP_ENCODED) {
-		xmlSetProp(ret, "xsi:nil", "true");
+		set_xsi_nil(ret);
 	}
 	return ret;
 }
@@ -1428,12 +1429,7 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 						if (Z_TYPE_PP(val) == IS_NULL && model->u.element->nillable) {
 							property = xmlNewNode(NULL,"BOGUS");
 							xmlAddChild(node, property);
-							if (style == SOAP_ENCODED) {
-								xmlSetProp(property, "xsi:nil", "true");
-							} else {
-							  xmlNsPtr xsi = encode_add_ns(property,XSI_NAMESPACE);
-								xmlSetNsProp(property, xsi, "nil", "true");
-							}
+							set_xsi_nil(property);
 						} else {
 							property = master_to_xml(enc, *val, style, node);
 							if (property->children && property->children->content &&
@@ -1454,12 +1450,7 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 					if (Z_TYPE_P(data) == IS_NULL && model->u.element->nillable) {
 						property = xmlNewNode(NULL,"BOGUS");
 						xmlAddChild(node, property);
-						if (style == SOAP_ENCODED) {
-							xmlSetProp(property, "xsi:nil", "true");
-						} else {
-						  xmlNsPtr xsi = encode_add_ns(property,XSI_NAMESPACE);
-							xmlSetNsProp(property, xsi, "nil", "true");
-						}
+						set_xsi_nil(property);
 					} else {
 						property = master_to_xml(enc, data, style, node);
 						if (property->children && property->children->content &&
@@ -1479,12 +1470,7 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 			} else if (strict && model->u.element->nillable && model->min_occurs > 0) {
 				property = xmlNewNode(NULL,model->u.element->name);
 				xmlAddChild(node, property);
-				if (style == SOAP_ENCODED) {
-					xmlSetProp(property, "xsi:nil", "true");
-				} else {
-					xmlNsPtr xsi = encode_add_ns(property,XSI_NAMESPACE);
-					xmlSetNsProp(property, xsi, "nil", "true");
-				}
+				set_xsi_nil(property);
 				if (style == SOAP_LITERAL &&
 				    model->u.element->namens &&
 				    model->u.element->form == XSD_FORM_QUALIFIED) {
@@ -1619,7 +1605,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 		xmlParam = xmlNewNode(NULL,"BOGUS");
 		xmlAddChild(parent, xmlParam);
 		if (style == SOAP_ENCODED) {
-			xmlSetProp(xmlParam, "xsi:nil", "true");
+			set_xsi_nil(xmlParam);
 		}
 		return xmlParam;
 	}
@@ -1699,12 +1685,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 					if (Z_TYPE_PP(val) == IS_NULL && array_el->nillable) {
 						property = xmlNewNode(NULL,"BOGUS");
 						xmlAddChild(xmlParam, property);
-						if (style == SOAP_ENCODED) {
-							xmlSetProp(property, "xsi:nil", "true");
-						} else {
-						  xmlNsPtr xsi = encode_add_ns(property,XSI_NAMESPACE);
-							xmlSetNsProp(property, xsi, "nil", "true");
-						}
+						set_xsi_nil(property);
 					} else {
 						property = master_to_xml(array_el->encode, *val, style, xmlParam);
 					}
@@ -2165,7 +2146,7 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 				smart_str_append(&array_type, &array_size);
 				smart_str_appendc(&array_type, ']');
 				smart_str_0(&array_type);
-				xmlSetProp(xmlParam, SOAP_1_1_ENC_NS_PREFIX":arrayType", array_type.c);
+				set_ns_prop(xmlParam, SOAP_1_1_ENC_NAMESPACE, "arrayType", array_type.c);
 			} else {
 				int i = 0;
 				while (i < array_size.len) {
@@ -2174,8 +2155,8 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 				}
 				smart_str_0(&array_type);
 				smart_str_0(&array_size);
-				xmlSetProp(xmlParam, SOAP_1_2_ENC_NS_PREFIX":itemType", array_type.c);
-				xmlSetProp(xmlParam, SOAP_1_2_ENC_NS_PREFIX":arraySize", array_size.c);
+				set_ns_prop(xmlParam, SOAP_1_2_ENC_NAMESPACE, "itemType", array_type.c);
+				set_ns_prop(xmlParam, SOAP_1_2_ENC_NAMESPACE, "arraySize", array_size.c);
 			}
 		}
 		smart_str_free(&array_type);
@@ -2431,7 +2412,7 @@ static xmlNodePtr to_xml_map(encodeTypePtr type, zval *data, int style, xmlNodeP
 				xmlAddChild(item,key);
 				if (zend_hash_get_current_key(data->value.ht, &key_val, (long *)&int_val, FALSE) == HASH_KEY_IS_STRING) {
 					if (style == SOAP_ENCODED) {
-						xmlSetProp(key, "xsi:type", "xsd:string");
+						set_xsi_type(key, "xsd:string");
 					}
 					xmlNodeSetContent(key, key_val);
 				} else {
@@ -2440,7 +2421,7 @@ static xmlNodePtr to_xml_map(encodeTypePtr type, zval *data, int style, xmlNodeP
 					smart_str_0(&tmp);
 
 					if (style == SOAP_ENCODED) {
-						xmlSetProp(key, "xsi:type", "xsd:int");
+						set_xsi_type(key, "xsd:int");
 					}
 					xmlNodeSetContentLen(key, tmp.c, tmp.len);
 
@@ -2518,7 +2499,6 @@ static xmlNodePtr guess_xml_convert(encodeTypePtr type, zval *data, int style, x
 	ret = master_to_xml(enc, data, style, parent);
 /*
 	if (style == SOAP_LITERAL && SOAP_GLOBAL(sdl)) {
-		encode_add_ns(node, XSI_NAMESPACE);
 		set_ns_and_type(ret, &enc->details);
 	}
 */
@@ -3050,7 +3030,7 @@ static void set_ns_and_type_ex(xmlNodePtr node, char *ns, char *type)
 {
 	smart_str nstype = {0};
 	get_type_str(node, ns, type, &nstype);
-	xmlSetProp(node, "xsi:type", nstype.c);
+	set_xsi_type(node, nstype.c);
 	smart_str_free(&nstype);
 }
 
@@ -3081,6 +3061,21 @@ xmlNsPtr encode_add_ns(xmlNodePtr node, const char* ns)
 		}
 	}
 	return xmlns;
+}
+
+static void set_ns_prop(xmlNodePtr node, char *ns, char *name, char *val)
+{
+	xmlSetNsProp(node, encode_add_ns(node, ns), name, val);
+}
+
+static void set_xsi_nil(xmlNodePtr node)
+{
+	set_ns_prop(node, XSI_NAMESPACE, "nil", "true");
+}
+
+static void set_xsi_type(xmlNodePtr node, char *type)
+{
+	set_ns_prop(node, XSI_NAMESPACE, "type", type);
 }
 
 void encode_reset_ns()
@@ -3142,7 +3137,7 @@ static encodePtr get_array_type(xmlNodePtr node, zval *array, smart_str *type TS
 	char *prev_stype = NULL, *cur_stype = NULL, *prev_ns = NULL, *cur_ns = NULL;
 
 	if (!array || Z_TYPE_P(array) != IS_ARRAY) {
-		smart_str_appendl(type, "xsd:anyType", 11);
+		smart_str_appendl(type, "xsd:anyType", sizeof("xsd:anyType")-1);
 		return get_conversion(XSD_ANYTYPE);
 	}
 
@@ -3204,7 +3199,7 @@ static encodePtr get_array_type(xmlNodePtr node, zval *array, smart_str *type TS
 	}
 
 	if (different || count == 0) {
-		smart_str_appendl(type, "xsd:anyType", 11);
+		smart_str_appendl(type, "xsd:anyType", sizeof("xsd:anyType")-1);
 		return get_conversion(XSD_ANYTYPE);
 	} else {
 		encodePtr enc;
