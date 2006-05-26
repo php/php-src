@@ -53,6 +53,8 @@ zend_function_entry php_dom_node_class_functions[] = {
 	PHP_FALIAS(getFeature, dom_node_get_feature, NULL)
 	PHP_FALIAS(setUserData, dom_node_set_user_data, NULL)
 	PHP_FALIAS(getUserData, dom_node_get_user_data, NULL)
+	PHP_ME(domnode, C14N, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(domnode, C14NFile, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -1669,4 +1671,189 @@ PHP_FUNCTION(dom_node_get_user_data)
  DOM_NOT_IMPLEMENTED();
 }
 /* }}} end dom_node_get_user_data */
+
+
+static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode)
+{
+	zval *id;
+	zval *xpath_array=NULL, *ns_prefixes=NULL;
+	xmlNodePtr nodep;
+	xmlDocPtr docp;
+	xmlNodeSetPtr nodeset = NULL;
+	dom_object *intern;
+	long exclusive=0, with_comments=0, file_len=0;
+	xmlChar **inclusive_ns_prefixes = NULL;
+	char *file = NULL;
+    int ret = -1;
+    xmlOutputBufferPtr buf;
+	xmlXPathContextPtr ctxp=NULL;
+	xmlXPathObjectPtr xpathobjp=NULL;
+
+	if (mode == 0) {
+		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), 
+			"O|bba!a!", &id, dom_node_class_entry, &exclusive, &with_comments, 
+			&xpath_array, &ns_prefixes) == FAILURE) {
+			return;
+		}
+	} else {
+		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), 
+			"Os|bba!a!", &id, dom_node_class_entry, &file, &file_len, &exclusive, 
+			&with_comments, &xpath_array, &ns_prefixes) == FAILURE) {
+			return;
+		}
+	}
+
+	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
+
+	docp = nodep->doc;
+
+	if (! docp) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Node must be associated with a document");
+		RETURN_FALSE;
+	}
+
+	if (xpath_array == NULL) {
+		if (nodep->type != XML_DOCUMENT_NODE) {
+			ctxp = xmlXPathNewContext(docp);
+			ctxp->node = nodep;
+			xpathobjp = xmlXPathEvalExpression("(.//. | .//@* | .//namespace::*)", ctxp);
+			ctxp->node = NULL;
+			if (xpathobjp && xpathobjp->type == XPATH_NODESET) {
+				nodeset = xpathobjp->nodesetval;
+			} else {
+				if (xpathobjp) {
+					xmlXPathFreeObject(xpathobjp);
+				}
+				xmlXPathFreeContext(ctxp);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "XPath query did not return a nodeset.");
+				RETURN_FALSE;
+			}
+		}
+	} else {
+		/*xpath query from xpath_array */
+		HashTable *ht = Z_ARRVAL_P(xpath_array);
+		zval **tmp;
+		char *xquery;
+
+		if (zend_hash_find(ht, "query", sizeof("query"), (void**)&tmp) == SUCCESS &&
+		    Z_TYPE_PP(tmp) == IS_STRING) {
+			xquery = Z_STRVAL_PP(tmp);
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "'query' missing from xpath array or is not a string");
+			RETURN_FALSE;
+		}
+
+		ctxp = xmlXPathNewContext(docp);
+		ctxp->node = nodep;
+
+		if (zend_hash_find(ht, "namespaces", sizeof("namespaces"), (void**)&tmp) == SUCCESS &&
+		    Z_TYPE_PP(tmp) == IS_ARRAY) {
+			zval **tmpns;
+			while (zend_hash_get_current_data(Z_ARRVAL_PP(tmp), (void **)&tmpns) == SUCCESS) {
+				if (Z_TYPE_PP(tmpns) == IS_STRING) {
+					char *prefix;
+					ulong idx;
+					int prefix_key_len;
+
+					if (zend_hash_get_current_key_ex(Z_ARRVAL_PP(tmp), 
+						&prefix, &prefix_key_len, &idx, 0, NULL) == HASH_KEY_IS_STRING) {
+						xmlXPathRegisterNs(ctxp, prefix, Z_STRVAL_PP(tmpns));
+					}
+				}
+				zend_hash_move_forward(Z_ARRVAL_PP(tmp));
+			}
+		}
+
+		xpathobjp = xmlXPathEvalExpression(xquery, ctxp);
+		ctxp->node = NULL;
+		if (xpathobjp && xpathobjp->type == XPATH_NODESET) {
+			nodeset = xpathobjp->nodesetval;
+		} else {
+			if (xpathobjp) {
+				xmlXPathFreeObject(xpathobjp);
+			}
+			xmlXPathFreeContext(ctxp);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "XPath query did not return a nodeset.");
+			RETURN_FALSE;
+		}
+	}
+
+	if (ns_prefixes != NULL) {
+		if (exclusive) {
+			zval **tmpns;
+			int nscount = 0;
+
+			inclusive_ns_prefixes = safe_emalloc(zend_hash_num_elements(Z_ARRVAL_P(ns_prefixes)) + 1,
+				sizeof(xmlChar *), 0);
+			while (zend_hash_get_current_data(Z_ARRVAL_P(ns_prefixes), (void **)&tmpns) == SUCCESS) {
+				if (Z_TYPE_PP(tmpns) == IS_STRING) {
+					inclusive_ns_prefixes[nscount++] = Z_STRVAL_PP(tmpns);
+				}
+				zend_hash_move_forward(Z_ARRVAL_P(ns_prefixes));
+			}
+			inclusive_ns_prefixes[nscount] = NULL;
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, 
+				"Inclusive namespace prefixes only allowed in exlcusive mode.");
+		}
+	}
+
+	if (mode == 1) {
+		buf = xmlOutputBufferCreateFilename(file, NULL, 0);
+	} else {
+		buf = xmlAllocOutputBuffer(NULL);
+	}
+
+    if (buf != NULL) {
+		ret = xmlC14NDocSaveTo(docp, nodeset, exclusive, inclusive_ns_prefixes,
+			with_comments, buf);
+	}
+
+	if (inclusive_ns_prefixes != NULL) {
+		efree(inclusive_ns_prefixes);
+	}
+	if (xpathobjp != NULL) {
+		xmlXPathFreeObject(xpathobjp);
+	}
+	if (ctxp != NULL) {
+		xmlXPathFreeContext(ctxp);
+	}
+
+    if (buf == NULL || ret < 0) {
+        RETVAL_FALSE;
+    } else {
+		if (mode == 0) {
+			ret = buf->buffer->use;
+			if (ret > 0) {
+				RETVAL_STRINGL((char *) buf->buffer->content, ret, 1);
+			} else {
+				RETVAL_EMPTY_STRING();
+			}
+		}
+    }
+
+	if (buf) {
+		int bytes;
+
+		bytes = xmlOutputBufferClose(buf);
+		if (mode == 1 && (ret >= 0)) {
+			RETURN_LONG(bytes);
+		}
+	}
+}
+
+/* {{{ proto string DOMNode::C14N([bool exclusive [, bool with_comments [, array xpath [, array ns_prefixes]]]])
+   Canonicalize nodes to a string */
+PHP_METHOD(domnode, C14N)
+{
+	dom_canonicalization(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+
+/* {{{ proto int DOMNode::C14NFile(string uri [, bool exclusive [, bool with_comments [, array xpath [, array ns_prefixes]]]])
+   Canonicalize nodes to a file */
+PHP_METHOD(domnode, C14NFile)
+{
+	dom_canonicalization(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
+
 #endif

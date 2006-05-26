@@ -165,6 +165,8 @@ PHP_FUNCTION(dom_node_is_equal_node);
 PHP_FUNCTION(dom_node_get_feature);
 PHP_FUNCTION(dom_node_set_user_data);
 PHP_FUNCTION(dom_node_get_user_data);
+PHP_METHOD(domnode, C14N);
+PHP_METHOD(domnode, C14NFile);
 
 /* domnodelist methods */
 PHP_FUNCTION(dom_nodelist_item);
