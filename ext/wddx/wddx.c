@@ -22,10 +22,6 @@
 #include "config.h"
 #endif
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "php.h"
 #include "php_wddx.h"
 
@@ -408,9 +404,9 @@ static void php_wddx_serialize_string(wddx_packet *packet, zval *var)
 					break;
 
 				default:
-					if (iscntrl((int)*(unsigned char *)p)) {
+					if (iscntrl((int)*(unsigned char *)p) || (int)*(unsigned char *)p >= 127) {
 						FLUSH_BUF();
-						sprintf(control_buf, WDDX_CHAR, *p);
+						sprintf(control_buf, WDDX_CHAR, (int)*(unsigned char *)p);
 						php_wddx_add_chunk(packet, control_buf);
 					} else
 						buf[l++] = *p;
