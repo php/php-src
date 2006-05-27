@@ -150,7 +150,7 @@ static int zend_verify_property_access(zend_property_info *property_info, zend_c
 		case ZEND_ACC_PUBLIC:
 			return 1;
 		case ZEND_ACC_PROTECTED:
-			return zend_check_protected(ce, EG(scope));
+			return zend_check_protected(property_info->ce, EG(scope));
 		case ZEND_ACC_PRIVATE:
 			if (ce==EG(scope) && EG(scope)) {
 				return 1;
@@ -239,6 +239,7 @@ ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce
 		EG(std_property_info).name = Z_UNIVAL_P(member);
 		EG(std_property_info).name_length = Z_UNILEN_P(member);
 		EG(std_property_info).h = h;
+		EG(std_property_info).ce = ce;;
 		property_info = &EG(std_property_info);
 	}
 	return property_info;
@@ -866,6 +867,7 @@ ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, zend_uchar ty
 		std_property_info.name = property_name;
 		std_property_info.name_length = property_name_len;
 		std_property_info.h = zend_u_get_hash_value(UG(unicode)?IS_UNICODE:IS_STRING, std_property_info.name, std_property_info.name_length+1);
+		std_property_info.ce = ce;
 		property_info = &std_property_info;
 	}
 

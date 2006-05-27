@@ -153,6 +153,7 @@ typedef struct _zend_property_info {
 	ulong h;
 	char *doc_comment;
 	int doc_comment_len;
+	zend_class_entry *ce;
 } zend_property_info;
 
 
