@@ -1,3 +1,19 @@
+2006-05-26  Sara Golemon  <sara@golemon.com>
+
+    * zend_API.c:
+      Fix ZTS build, call with TSRMLS_CC not DC
+
+2006-05-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      zend_execute.c
+      tests/bug33996.phpt:
+      - MFH Sync error messages and simplify error message generation code
+
+    * zend_execute.c
+      tests/bug33996.phpt:
+      - Sync error messages and simplify error message generation code
+
 2006-05-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.c

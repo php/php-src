@@ -1,3 +1,64 @@
+2006-05-26  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      ext/dom/dom_fe.h
+      ext/dom/node.c
+      ext/dom/tests/canonicalization.phpt:
+      MFH: add C14N() and C14NFile() methods to perform XML canonicalization
+      add test
+
+    * ext/dom/dom_fe.h
+      ext/dom/node.c
+      ext/dom/tests/canonicalization.phpt
+      ext/dom/tests/canonicalization.phpt:
+      add C14N() and C14NFile() methods to perform XML canonicalization
+      add test
+
+2006-05-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      Fixed bug #37523 (namespaces added too late, leads to missing xsi:type
+      attributes. incompatibility with libxml2-2.6.24)
+
+2006-05-26  Sara Golemon  <sara@golemon.com>
+
+    * ZendEngine2/zend_API.c:
+      Fix ZTS build, call with TSRMLS_CC not DC
+
+2006-05-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/wddx/wddx.c
+      ext/wddx/wddx.c:
+      Corrected previous patch
+
+2006-05-26  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/openssl/xp_ssl.c:
+      - MFB: fix leaks in openssl context options
+
+2006-05-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_execute.c
+      ZendEngine2/tests/bug33996.phpt
+      tests/classes/interfaces_003.phpt:
+      - MFH Sync error messages and simplify error message generation code
+
+2006-05-26  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/openssl/xp_ssl.c:
+      - fix leaks in openssl context options
+
+2006-05-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/tests/bug33996.phpt
+      tests/classes/interfaces_003.phpt:
+      - Sync error messages and simplify error message generation code
+
 2006-05-25  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/wddx/wddx.c
