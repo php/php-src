@@ -617,7 +617,8 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 	if (!variable_ptr_ptr) {
 		temp_variable *T = &T(op1->u.var);
 
-		if (T->str_offset.str->type == IS_STRING) do {
+		if (Z_TYPE_P(T->str_offset.str) == IS_STRING)
+		do {
 			zval tmp;
 			zval *final_value = value;
 
