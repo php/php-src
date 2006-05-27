@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2006 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -149,6 +149,7 @@ typedef struct _zend_property_info {
 	ulong h;
 	char *doc_comment;
 	int doc_comment_len;
+	zend_class_entry *ce;
 } zend_property_info;
 
 
