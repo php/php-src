@@ -499,8 +499,10 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 				} else {
 					if (Z_TYPE_PP(arg) == IS_NULL && return_null) {
 						*p = NULL;
+					} else if (ce) {
+						return ce->name;
 					} else {
-						return ce ? ce->name : "object";
+						return "object";
 					}
 				}
 			}
@@ -544,6 +546,22 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 
 			}
 			break;
+
+		case 'f':
+			{
+				zend_fcall_info       *fci = va_arg(*va, zend_fcall_info *);
+				zend_fcall_info_cache *fcc = va_arg(*va, zend_fcall_info_cache *);
+
+				if (zend_fcall_info_init(*arg, fci, fcc TSRMLS_CC) == SUCCESS) {
+					break;
+				} else if (return_null) {
+					fci->size = 0;
+					fcc->initialized = 0;
+					break;
+				} else {
+					return "function";
+				}
+			}
 
 		case 'z':
 			{
@@ -614,6 +632,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 			case 'o': case 'O':
 			case 'z': case 'Z':
 			case 'C': case 'h':
+			case 'f':
 				max_num_args++;
 				break;
 
@@ -664,7 +683,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 
 	if (num_args > arg_count) {
 		zend_error(E_WARNING, "%s(): could not obtain parameters for parsing",
-				   get_active_function_name(TSRMLS_C));
+			get_active_function_name(TSRMLS_C));
 		return FAILURE;
 	}
 
@@ -2378,7 +2397,7 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, char *name, int name
 	property_info.doc_comment_len = doc_comment_len;
 
 	property_info.ce = ce;
-	
+
 	zend_hash_update(&ce->properties_info, name, name_length + 1, &property_info, sizeof(zend_property_info), NULL);
 
 	return SUCCESS;
