@@ -221,7 +221,7 @@ ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce
 	if (EG(scope) != ce
 		&& is_derived_class(ce, EG(scope))
 		&& EG(scope)
-	  && zend_u_hash_quick_find(&EG(scope)->properties_info, Z_TYPE_P(member), Z_UNIVAL_P(member), Z_UNILEN_P(member)+1, h, (void **) &scope_property_info)==SUCCESS
+		&& zend_u_hash_quick_find(&EG(scope)->properties_info, Z_TYPE_P(member), Z_UNIVAL_P(member), Z_UNILEN_P(member)+1, h, (void **) &scope_property_info)==SUCCESS
 		&& scope_property_info->flags & ZEND_ACC_PRIVATE) {
 		return scope_property_info;
 	} else if (property_info) {
@@ -239,7 +239,7 @@ ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce
 		EG(std_property_info).name = Z_UNIVAL_P(member);
 		EG(std_property_info).name_length = Z_UNILEN_P(member);
 		EG(std_property_info).h = h;
-		EG(std_property_info).ce = ce;;
+		EG(std_property_info).ce = ce;
 		property_info = &EG(std_property_info);
 	}
 	return property_info;

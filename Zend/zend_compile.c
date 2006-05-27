@@ -3318,6 +3318,7 @@ static int zend_constant_ct_subst(znode *result, zval *const_name TSRMLS_DC)
 	return 0;
 }
 
+
 void zend_do_fetch_constant(znode *result, znode *constant_container, znode *constant_name, int mode TSRMLS_DC)
 {
 	switch (mode) {
