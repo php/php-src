@@ -46,6 +46,7 @@ PHP                                                                        NEWS
 - Added RFC2397 (data: stream) support. (Marcus)
 - Fixed memory leaks in openssl streams context options (Pierre)
 - Fixed handling of extremely long paths inside tempnam() function. (Ilia)
+- Fixed bug #37614 (Class name lowercased in error message). (Johannes)
 - Fixed bug #37587 (var without attribute causes segfault). (Marcus)
 - Fixed bug #37569 (WDDX incorrectly encodes high-ascii characters). (Ilia)
 - Fixed bug #37565 (Using reflection::export with simplexml causing a crash).
