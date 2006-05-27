@@ -547,21 +547,6 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 			}
 			break;
 
-		case 'f':
-			{
-				zend_fcall_info       *fci = va_arg(*va, zend_fcall_info *);
-				zend_fcall_info_cache *fcc = va_arg(*va, zend_fcall_info_cache *);
-
-				if (zend_fcall_info_init(*arg, fci, fcc TSRMLS_CC) == SUCCESS) {
-					break;
-				} else if (return_null) {
-					fci->size = 0;
-					fcc->initialized = 0;
-					break;
-				} else {
-					return "function";
-				}
-			}
 
 		case 'z':
 			{
