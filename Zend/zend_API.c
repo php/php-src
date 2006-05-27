@@ -2903,6 +2903,9 @@ ZEND_API int zend_fcall_info_args(zend_fcall_info *fci, zval *args TSRMLS_DC)
 	zval         **arg, ***params;
 
 	if (fci->params) {
+		while (fci->param_count) {
+			zval_ptr_dtor(fci->params[--fci->param_count]);
+		}
 		efree(fci->params);
 	}
 	fci->params = NULL;
@@ -2923,6 +2926,7 @@ ZEND_API int zend_fcall_info_args(zend_fcall_info *fci, zval *args TSRMLS_DC)
 
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(args), (void **) &arg, &pos) == SUCCESS) {
 		*params++ = arg;
+		(*arg)->refcount++;
 		zend_hash_move_forward_ex(Z_ARRVAL_P(args), &pos);
 	}
 	return SUCCESS;
@@ -2931,11 +2935,13 @@ ZEND_API int zend_fcall_info_args(zend_fcall_info *fci, zval *args TSRMLS_DC)
 
 ZEND_API int zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_cache *fcc, zval **retval_ptr_ptr, zval *args TSRMLS_DC)
 {
-	zval *retval;
-	int  result;
+	zval *retval, ***org_params;
+	int  result, org_count;
 
 	fci->retval_ptr_ptr = retval_ptr_ptr ? retval_ptr_ptr : &retval;
 	if (args) {
+		org_params = fci->params;
+		org_count = fci->param_count;
 		zend_fcall_info_args(fci, args TSRMLS_CC);
 	}
 	result = zend_call_function(fci, fcc TSRMLS_CC);
@@ -2943,8 +2949,10 @@ ZEND_API int zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_cache *f
 	if (!retval_ptr_ptr && retval) {
 		zval_ptr_dtor(&retval);
 	}
-	if (args && fci->params) {
-		efree(fci->params);
+	if (args) {
+		zend_fcall_info_args(fci, NULL TSRMLS_CC);
+		fci->params = org_params;
+		fci->param_count = org_count;
 	}
 	return result;
 }
