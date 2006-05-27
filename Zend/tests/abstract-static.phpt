@@ -2,23 +2,12 @@
 Test for abstract static classes
 --FILE--
 <?php
-abstract class ezcDbHandler extends PDO
+abstract class Test
 {
-    public function __construct( $dbParams, $dsn )
-    {
-        $user          = null;
-        $pass          = null;
-        $driverOptions = null;
-    }
-
     abstract static public function getName();
-
-    static public function hasFeature( $feature )
-    {
-        return false;
-    }
 }
 ?>
 DONE
---EXPECT--
-DONE
+--EXPECTF--
+
+Fatal error: Static function Test::getName() cannot be abstract in %sabstract-static.php on line %d
