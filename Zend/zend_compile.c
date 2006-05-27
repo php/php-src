@@ -2445,7 +2445,7 @@ ZEND_API zend_class_entry *do_bind_class(zend_op *opline, HashTable *class_table
 			 * so we shut up about it.  This allows the if (!defined('FOO')) { return; }
 			 * approach to work.
 			 */
-			zend_error(E_COMPILE_ERROR, "Cannot redeclare class %R", Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant));
+			zend_error(E_COMPILE_ERROR, "Cannot redeclare class %v", ce->name);
 		}
 		return NULL;
 	} else {
@@ -2471,7 +2471,7 @@ ZEND_API zend_class_entry *do_bind_inherited_class(zend_op *opline, HashTable *c
 			 * so we shut up about it.  This allows the if (!defined('FOO')) { return; }
 			 * approach to work.
 			 */
-			zend_error(E_COMPILE_ERROR, "Cannot redeclare class %R", Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant));
+			zend_error(E_COMPILE_ERROR, "Cannot redeclare class %v", ce->name);
 		}
 		return NULL;
 	} else {
@@ -2488,7 +2488,7 @@ ZEND_API zend_class_entry *do_bind_inherited_class(zend_op *opline, HashTable *c
 
 	/* Register the derived class */
 	if (zend_u_hash_add(class_table, Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant)+1, pce, sizeof(zend_class_entry *), NULL)==FAILURE) {
-		zend_error(E_COMPILE_ERROR, "Cannot redeclare class %R", Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant));
+		zend_error(E_COMPILE_ERROR, "Cannot redeclare class %v", ce->name);
 		ce->refcount--;
 		zend_hash_destroy(&ce->function_table);
 		zend_hash_destroy(&ce->default_properties);
