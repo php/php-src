@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, PHP 5.2.0
+- Changed Apache 2 Handler SAPI to call ap_set_content_type() once only. (Mike)
 - Changed E_ALL error reporting mode to includes E_RECOVERABLE_ERROR. (Marcus)
 - Added control character checks for cURL extension's open_basedir/safe_mode
   checks. (Ilia)
