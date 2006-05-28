@@ -105,8 +105,10 @@ php_apache_sapi_header_handler(sapi_header_struct *sapi_header,sapi_headers_stru
 	} while (*val == ' ');
 
 	if (!strcasecmp(sapi_header->header, "content-type")) {
-		val = apr_pstrdup(ctx->r->pool, val);
-		ap_set_content_type(ctx->r, val);
+		if (ctx->content_type) {
+			efree(ctx->content_type);
+		}
+		ctx->content_type = estrdup(val);
 	} else if (sapi_header->replace) {
 		apr_table_set(ctx->r->headers_out, sapi_header->header, val);
 	} else {
@@ -131,6 +133,15 @@ php_apache_sapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 		&& sline[8] == ' ') {
 		ctx->r->status_line = apr_pstrdup(ctx->r->pool, sline + 9);
 	}
+	
+	/*	call ap_set_content_type only once, else each time we call it, 
+		configured output filters for that content type will be added */
+	if (!ctx->content_type) {
+		ctx->content_type = sapi_get_default_content_type(TSRMLS_C);
+	}
+	ap_set_content_type(ctx->r, apr_pstrdup(ctx->r->pool, ctx->content_type));
+	efree(ctx->content_type);
+	ctx->content_type = NULL;
 
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
@@ -417,10 +428,6 @@ static int php_apache_request_ctor(request_rec *r, php_struct *ctx TSRMLS_DC)
 	SG(request_info).request_uri = apr_pstrdup(r->pool, r->uri);
 	SG(request_info).path_translated = apr_pstrdup(r->pool, r->filename);
 	r->no_local_copy = 1;
-
-	content_type = sapi_get_default_content_type(TSRMLS_C);
-	ap_set_content_type(r, apr_pstrdup(r->pool, content_type));
-	efree(content_type);
 
 	content_length = (char *) apr_table_get(r->headers_in, "Content-Length");
 	SG(request_info).content_length = (content_length ? atoi(content_length) : 0);
