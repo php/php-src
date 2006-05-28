@@ -1,3 +1,64 @@
+2006-05-27  Johannes Schlüter  <schlueter@phpbar.de>
+
+    * main/main.c:
+      - nitpicking "PHP6" vs. "PHP 6"
+
+2006-05-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_API.c:
+      - Revert until there is an ok for the full patch
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h:
+      - Take care of refcounting in zend_fcall_info_*() functions
+      - Add docu
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_object_handlers.c:
+      - WS
+
+    * (PHP_5_2)
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/bug37212.phpt:
+      - MFH: Fix bug #37212 (Access to protected property of common base class)
+        By adding "zend_class_entry *ce" to struct zend_property_info;
+
+2006-05-27  Johannes Schlüter  <schlueter@phpbar.de>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_compile.c:
+      - MFH Fix #37614 (Class name lowercased in error message)
+
+2006-05-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_execute.c:
+      - WS/CS
+
+2006-05-27  Johannes Schlüter  <schlueter@phpbar.de>
+
+    * ZendEngine2/zend_compile.c:
+      - Fix #37614 (Class name lowercased in error message)
+
+2006-05-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/bug37212.phpt
+      ZendEngine2/tests/bug37212.phpt:
+      - Fix bug #37212 (Access to protected property of common base class)
+        By adding "zend_class_entry *ce" to struct zend_property_info;
+
+    * ZendEngine2/tests/abstract-static.phpt:
+      - There are no abstract static methods in classes, use interfaces
+
 2006-05-26  Rob Richards  <rrichards@ctindustries.net>
 
     * (PHP_5_2)
