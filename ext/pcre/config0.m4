@@ -43,8 +43,8 @@ if test "$PHP_PCRE_REGEX" != "no"; then
       pcre_minor="$pcre_minor"0
     fi
     pcre_version=$pcre_major$pcre_minor
-    if test "$pcre_version" -lt 208; then
-      AC_MSG_ERROR([The PCRE extension requires PCRE library version >= 2.08])
+    if test "$pcre_version" -lt 660; then
+      AC_MSG_ERROR([The PCRE extension requires PCRE library version >= 6.6])
     fi
 
     PHP_ADD_LIBRARY_WITH_PATH(pcre, $PCRE_LIBDIR, PCRE_SHARED_LIBADD)

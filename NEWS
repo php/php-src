@@ -48,6 +48,8 @@ PHP                                                                        NEWS
 - Fixed handling of extremely long paths inside tempnam() function. (Ilia)
 - Fixed bug #37614 (Class name lowercased in error message). (Johannes)
 - Fixed bug #37587 (var without attribute causes segfault). (Marcus)
+- Fixed bug #37586 (Bumped minimum PCRE version to 6.6, needed for recurssion
+  limit support). (Ilia)
 - Fixed bug #37569 (WDDX incorrectly encodes high-ascii characters). (Ilia)
 - Fixed bug #37565 (Using reflection::export with simplexml causing a crash).
   (Marcus)
