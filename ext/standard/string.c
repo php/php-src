@@ -4925,6 +4925,7 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 			switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(subject), &string_key,
 												&string_key_len, &num_key, 0, NULL)) {
 				case HASH_KEY_IS_STRING:
+				case HASH_KEY_IS_UNICODE:
 					add_assoc_zval_ex(return_value, string_key.s, string_key_len, result);
 					break;
 
