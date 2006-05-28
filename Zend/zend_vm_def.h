@@ -1759,7 +1759,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, ANY, CONST|TMP|VAR|UNUSED|CV)
 		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
-			zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
+			zend_error(E_STRICT, "Non-static method %v::%v() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
 
 		}
 		if ((EX(object) = EG(This))) {

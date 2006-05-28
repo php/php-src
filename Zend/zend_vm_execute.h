@@ -694,7 +694,7 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
-			zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
+			zend_error(E_STRICT, "Non-static method %v::%v() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
 
 		}
 		if ((EX(object) = EG(This))) {
@@ -912,7 +912,7 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
-			zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
+			zend_error(E_STRICT, "Non-static method %v::%v() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
 
 		}
 		if ((EX(object) = EG(This))) {
@@ -1045,7 +1045,7 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
-			zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
+			zend_error(E_STRICT, "Non-static method %v::%v() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
 
 		}
 		if ((EX(object) = EG(This))) {
@@ -1177,7 +1177,7 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
-			zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
+			zend_error(E_STRICT, "Non-static method %v::%v() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
 
 		}
 		if ((EX(object) = EG(This))) {
@@ -1267,7 +1267,7 @@ static int ZEND_INIT_STATIC_METHOD_CALL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
-			zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
+			zend_error(E_STRICT, "Non-static method %v::%v() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
 
 		}
 		if ((EX(object) = EG(This))) {
