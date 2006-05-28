@@ -1,3 +1,58 @@
+2006-05-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      zend_API.c:
+      - Revert until there is an ok for the full patch
+
+    * zend_API.c
+      zend_API.h:
+      - Take care of refcounting in zend_fcall_info_*() functions
+      - Add docu
+
+    * zend_API.c
+      zend_API.c
+      zend_compile.c
+      zend_object_handlers.c:
+      - WS
+
+    * (PHP_5_2)
+      zend_API.c
+      zend_compile.h
+      zend_object_handlers.c
+      tests/bug37212.phpt:
+      - MFH: Fix bug #37212 (Access to protected property of common base class)
+        By adding "zend_class_entry *ce" to struct zend_property_info;
+
+2006-05-27  Johannes Schlüter  <schlueter@phpbar.de>
+
+    * (PHP_5_2)
+      zend_compile.c:
+      - MFH Fix #37614 (Class name lowercased in error message)
+
+2006-05-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      zend_execute.c:
+      - WS/CS
+
+2006-05-27  Johannes Schlüter  <schlueter@phpbar.de>
+
+    * zend_compile.c:
+      - Fix #37614 (Class name lowercased in error message)
+
+2006-05-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c
+      zend_compile.h
+      zend_object_handlers.c
+      tests/bug37212.phpt
+      tests/bug37212.phpt:
+      - Fix bug #37212 (Access to protected property of common base class)
+        By adding "zend_class_entry *ce" to struct zend_property_info;
+
+    * tests/abstract-static.phpt:
+      - There are no abstract static methods in classes, use interfaces
+
 2006-05-26  Sara Golemon  <sara@golemon.com>
 
     * zend_API.c:
