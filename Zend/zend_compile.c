@@ -2028,8 +2028,9 @@ static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_f
 	if (parent_flags & ZEND_ACC_ABSTRACT) {
 		child->common.fn_flags |= ZEND_ACC_IMPLEMENTED_ABSTRACT;
 		child->common.prototype = parent;
-	} else {
-		child->common.prototype = parent->common.prototype;
+	} else if (!(parent->common.fn_flags & ZEND_ACC_CTOR) || (parent->common.prototype && parent->common.prototype->common.scope->ce_flags && ZEND_ACC_INTERFACE)) {
+		/* ctors only have a prototype if it comes from an interface */
+		child->common.prototype = parent->common.prototype ? parent->common.prototype : parent;
 	}
 
 
