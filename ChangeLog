@@ -1,3 +1,43 @@
+2006-05-28  Johannes Schlüter  <schlueter@phpbar.de>
+
+    * ext/standard/string.c:
+      - Fix str_replace with unicode strings as key
+
+2006-05-28  Michael Wallner  <mike@iworks.at>
+
+    * (PHP_5_2)
+      NEWS:
+      - news entry for apache2handler ap_set_content_type() fix
+
+    * (PHP_5_2)
+      sapi/apache2handler/php_apache.h
+      sapi/apache2handler/sapi_apache2.c:
+      MFH: call ap_set_content_type() only once, else each time we call it,
+           configured output filters for that content type will be added
+
+    * sapi/apache2handler/php_apache.h
+      sapi/apache2handler/sapi_apache2.c:
+      - call ap_set_content_type() only once, else each time we call it,
+        configured output filters for that content type will be added
+
+2006-05-28  Johannes Schlüter  <schlueter@phpbar.de>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      - Fix printf modifier
+
+2006-05-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pcre/config0.m4:
+      MFB: Fixed bug #37586 (Bumped minimum PCRE version to 6.6, needed for
+      recurssion limit support).
+
+    * (PHP_5_2)
+      NEWS
+      ext/pcre/config0.m4:
+      Fixed bug #37586 (Bumped minimum PCRE version to 6.6, needed for recurssion
+      limit support).
+
 2006-05-27  Johannes Schlüter  <schlueter@phpbar.de>
 
     * main/main.c:

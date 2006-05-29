@@ -1,3 +1,9 @@
+2006-05-28  Johannes Schlüter  <schlueter@phpbar.de>
+
+    * zend_vm_def.h
+      zend_vm_execute.h:
+      - Fix printf modifier
+
 2006-05-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_2)
