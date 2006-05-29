@@ -1115,10 +1115,8 @@ PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
 			}
 		} else {
 			pcre_handle_exec_error(count TSRMLS_CC);
-			if (result) {
-				efree(result);
-				result = NULL;
-			}
+			efree(result);
+			result = NULL;
 			break;
 		}
 			
