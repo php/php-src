@@ -588,10 +588,15 @@ PHP_FUNCTION(file_put_contents)
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 	char mode[3] = { 'w', 0, 0 };
+	php_stream *srcstream;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tz/|lr!", &filename, &filename_len, &filename_type,
 				&data, &flags, &zcontext) == FAILURE) {
 		return;
+	}
+
+	if (Z_TYPE_P(data) == IS_RESOURCE) {
+		php_stream_from_zval(srcstream, &data);
 	}
 
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
@@ -627,14 +632,8 @@ PHP_FUNCTION(file_put_contents)
 
 	switch (Z_TYPE_P(data)) {
 		case IS_RESOURCE:
-		{
-			php_stream *srcstream;
-			php_stream_from_zval(srcstream, &data);
-
 			numchars = php_stream_copy_to_stream(srcstream, stream, PHP_STREAM_COPY_ALL);
-
 			break;
-		}
 		case IS_ARRAY:
 			if (zend_hash_num_elements(Z_ARRVAL_P(data))) {
 				zval **tmp;
