@@ -571,7 +571,7 @@ PHP_FUNCTION(file_put_contents)
 	long flags = 0;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
-	php_stream *srcstream;
+	php_stream *srcstream = NULL;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/|lr!", &filename, &filename_len, 
 				&data, &flags, &zcontext) == FAILURE) {
