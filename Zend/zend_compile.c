@@ -2472,7 +2472,7 @@ ZEND_API zend_class_entry *do_bind_inherited_class(zend_op *opline, HashTable *c
 			 * so we shut up about it.  This allows the if (!defined('FOO')) { return; }
 			 * approach to work.
 			 */
-			zend_error(E_COMPILE_ERROR, "Cannot redeclare class %v", ce->name);
+			zend_error(E_COMPILE_ERROR, "Cannot redeclare class %R", Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant));
 		}
 		return NULL;
 	} else {
