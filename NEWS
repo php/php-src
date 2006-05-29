@@ -97,6 +97,7 @@ PHP                                                                        NEWS
 - Fixed bug #37256 (php-fastcgi dosen't handle connection abort). (Dmitry)
 - Fixed bug #37244 (Added strict flag to base64_decode() that enforces 
   RFC3548 compliance). (Ilia)
+- Fixed bug #36949 (invalid internal mysqli objects dtor). (Mike)
 - Fixed bug #36630 (umask not reset at the end of the request). (Ilia)
 - Fixed bug #35512 (Lack of read permission on main script results in 
   E_WARNING rather then E_ERROR). (Ilia)
