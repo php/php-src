@@ -732,6 +732,12 @@ ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 }
 
 
+static inline zend_class_entry * zend_get_function_root_class(zend_function *fbc)
+{
+	return fbc->common.prototype ? fbc->common.prototype->common.scope : fbc->common.scope;
+}
+
+
 static union _zend_function *zend_std_get_method(zval **object_ptr, zstr method_name, int method_len TSRMLS_DC)
 {
 	zend_object *zobj;
@@ -799,7 +805,7 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, zstr method_
 	} else if ((fbc->common.fn_flags & ZEND_ACC_PROTECTED)) {
 		/* Ensure that if we're calling a protected function, we're allowed to do so.
 		 */
-		if (!zend_check_protected(fbc->common.scope, EG(scope))) {
+		if (!zend_check_protected(zend_get_function_root_class(fbc), EG(scope))) {
 			zend_error(E_ERROR, "Call to %s method %v::%v() from context '%v'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : EMPTY_ZSTR);
 		}
 	}
@@ -846,7 +852,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zstr fu
 	} else if ((fbc->common.fn_flags & ZEND_ACC_PROTECTED)) {
 		/* Ensure that if we're calling a protected function, we're allowed to do so.
 		 */
-		if (!zend_check_protected(EG(scope), fbc->common.scope)) {
+		if (!zend_check_protected(zend_get_function_root_class(fbc), EG(scope))) {
 			zend_error(E_ERROR, "Call to %s method %v::%v() from context '%v'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), fbc->common.function_name, EG(scope) ? EG(scope)->name : EMPTY_ZSTR);
 		}
 	}
@@ -921,8 +927,10 @@ static union _zend_function *zend_std_get_constructor(zval *object TSRMLS_DC)
 			}
 		} else if ((constructor->common.fn_flags & ZEND_ACC_PROTECTED)) {
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
+			 * Constructors only have prototype if they are defined by an interface but
+			 * it is the compilers responsibility to take care of the prototype.
 			 */
-			if (!zend_check_protected(constructor->common.scope, EG(scope))) {
+			if (!zend_check_protected(zend_get_function_root_class(constructor), EG(scope))) {
 				zend_error(E_ERROR, "Call to protected %v::%v() from context '%v'", constructor->common.scope->name, constructor->common.function_name, EG(scope) ? EG(scope)->name : EMPTY_ZSTR);
 			}
 		}
