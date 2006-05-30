@@ -176,6 +176,7 @@ static const struct mb_overload_def mb_ovld[] = {
 	{MB_OVERLOAD_STRING, "strripos", "mb_strripos", "mb_orig_stripos"},
 	{MB_OVERLOAD_STRING, "strstr", "mb_strstr", "mb_orig_strstr"},
 	{MB_OVERLOAD_STRING, "strrchr", "mb_strrchr", "mb_orig_strrchr"},
+	{MB_OVERLOAD_STRING, "stristr", "mb_stristr", "mb_orig_stristr"},
 	{MB_OVERLOAD_STRING, "substr", "mb_substr", "mb_orig_substr"},
 	{MB_OVERLOAD_STRING, "strtolower", "mb_strtolower", "mb_orig_strtolower"},
 	{MB_OVERLOAD_STRING, "strtoupper", "mb_strtoupper", "mb_orig_strtoupper"},
@@ -212,6 +213,8 @@ zend_function_entry mbstring_functions[] = {
 	PHP_FE(mb_strripos,				NULL)
 	PHP_FE(mb_strstr,				NULL)
 	PHP_FE(mb_strrchr,				NULL)
+	PHP_FE(mb_stristr,				NULL)
+	PHP_FE(mb_strrichr,				NULL)
 	PHP_FE(mb_substr_count,			NULL)
 	PHP_FE(mb_substr,				NULL)
 	PHP_FE(mb_strcut,				NULL)
@@ -1860,6 +1863,110 @@ PHP_FUNCTION(mb_strrchr)
 	}
 }
 /* }}} */
+
+/* {{{ proto string mb_stristr(string haystack, string needle[, bool part[, string encoding]])
+   Finds first occurrence of a string within another, case insensitive */
+PHP_FUNCTION(mb_stristr)
+{
+	zend_bool part = 0;
+	int n, from_encoding_len, len, mblen;
+	mbfl_string haystack, needle, result, *ret = NULL;
+	char *from_encoding = (char*)mbfl_no2preferred_mime_name(MBSTRG(current_internal_encoding));
+	mbfl_string_init(&haystack);
+	mbfl_string_init(&needle);
+	haystack.no_language = MBSTRG(current_language);
+	haystack.no_encoding = MBSTRG(current_internal_encoding);
+	needle.no_language = MBSTRG(current_language);
+	needle.no_encoding = MBSTRG(current_internal_encoding);
+
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|bs", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &part, &from_encoding, &from_encoding_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(from_encoding);
+	if (haystack.no_encoding == mbfl_no_encoding_invalid) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", from_encoding);
+		RETURN_FALSE;
+	}
+
+ n = php_mb_stripos(0, haystack.val, haystack.len, needle.val, needle.len, 0, from_encoding TSRMLS_CC);
+
+	if (n <0) {
+		RETURN_FALSE;
+	}
+
+	mblen = mbfl_strlen(&haystack);
+
+	if (part) {
+		ret = mbfl_substr(&haystack, &result, 0, n);
+		if (ret != NULL) {
+			RETVAL_STRINGL((char *)ret->val, ret->len, 0);
+		} else {
+			RETVAL_FALSE;
+		}
+	} else {
+		len = (mblen - n);
+		ret = mbfl_substr(&haystack, &result, n, len);
+		if (ret != NULL) {
+			RETVAL_STRINGL((char *)ret->val, ret->len, 0);
+		} else {
+			RETVAL_FALSE;
+		}
+	}
+}
+
+/* {{{ proto string mb_strrichr(string haystack, string needle[, bool part[, string encoding]])
+   Finds the last occurrence of a character in a string within another, case insensitive */
+PHP_FUNCTION(mb_strrichr)
+{
+	zend_bool part = 0;
+	int n, from_encoding_len, len, mblen;
+	mbfl_string haystack, needle, result, *ret = NULL;
+	char *from_encoding = (char*)mbfl_no2preferred_mime_name(MBSTRG(current_internal_encoding));
+	mbfl_string_init(&haystack);
+	mbfl_string_init(&needle);
+	haystack.no_language = MBSTRG(current_language);
+	haystack.no_encoding = MBSTRG(current_internal_encoding);
+	needle.no_language = MBSTRG(current_language);
+	needle.no_encoding = MBSTRG(current_internal_encoding);
+
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|bs", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &part, &from_encoding, &from_encoding_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(from_encoding);
+	if (haystack.no_encoding == mbfl_no_encoding_invalid) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", from_encoding);
+		RETURN_FALSE;
+	}
+
+ n = php_mb_stripos(1, haystack.val, haystack.len, needle.val, needle.len, 0, from_encoding TSRMLS_CC);
+
+	if (n <0) {
+		RETURN_FALSE;
+	}
+
+	mblen = mbfl_strlen(&haystack);
+
+	if (part) {
+		ret = mbfl_substr(&haystack, &result, 0, n);
+		if (ret != NULL) {
+			RETVAL_STRINGL((char *)ret->val, ret->len, 0);
+		} else {
+			RETVAL_FALSE;
+		}
+	} else {
+		len = (mblen - n);
+		ret = mbfl_substr(&haystack, &result, n, len);
+		if (ret != NULL) {
+			RETVAL_STRINGL((char *)ret->val, ret->len, 0);
+		} else {
+			RETVAL_FALSE;
+		}
+	}
+}
 
 /* {{{ proto int mb_substr_count(string haystack, string needle [, string encoding])
    Count the number of substring occurrences */
