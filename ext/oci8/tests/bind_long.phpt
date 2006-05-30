@@ -7,19 +7,19 @@ bind LONG field
 
 require dirname(__FILE__)."/connect.inc";
 
-$stmt = oci_parse($c, "create table phptestlng( id number(10), fileimage long)");
+$stmt = oci_parse($c, "create table phptestlng( id number(10), filetxt long)");
 oci_execute($stmt);
 
-$stmt = oci_parse ($c, "insert into phptestlng (id, fileimage) values (:id, :fileimage)");
+$stmt = oci_parse ($c, "insert into phptestlng (id, filetxt) values (:id, :filetxt)");
 $i=1;
-$fileimage = file_get_contents( dirname(__FILE__)."/test.gif");
+$filetxt = file_get_contents( dirname(__FILE__)."/test.txt");
 
 oci_bind_by_name( $stmt, ":id", $i, -1);
-oci_bind_by_name( $stmt, ":fileimage", $fileimage, -1, SQLT_LNG);
+oci_bind_by_name( $stmt, ":filetxt", $filetxt, -1, SQLT_LNG);
 oci_execute($stmt, OCI_DEFAULT);
 oci_commit($c);
 
-$stmt = oci_parse($c, "SELECT fileimage FROM phptestlng");
+$stmt = oci_parse($c, "SELECT filetxt FROM phptestlng");
 oci_execute($stmt);
 
 $row = oci_fetch_row($stmt);
@@ -33,6 +33,6 @@ echo "Done\n";
 
 ?>
 --EXPECT--
-string(32) "d04e7036e2f4221abc88fd14e960a45b"
-int(2523)
+string(32) "da852396d08c9ef9fbdf914db1d6d5bb"
+int(276)
 Done
