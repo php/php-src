@@ -94,7 +94,7 @@ MyArrayIterator::test('iterator_count', array(3 => 6));
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECT--
+--EXPECTF--
 ===iterator_to_array===
 State 0: __construct()
 State 1: __construct()
