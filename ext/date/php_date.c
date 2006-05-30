@@ -347,10 +347,10 @@ PHP_MINIT_FUNCTION(date)
 
 /*
  * RFC4287, Section 3.3: http://www.ietf.org/rfc/rfc4287.txt
- *  A Date construct is an element whose content MUST conform to the
- *  "date-time" production in [RFC3339].  In addition, an uppercase "T"
- *  character MUST be used to separate date and time, and an uppercase
- *  "Z" character MUST be present in the absence of a numeric time zone offset.
+ *   A Date construct is an element whose content MUST conform to the
+ *   "date-time" production in [RFC3339].  In addition, an uppercase "T"
+ *   character MUST be used to separate date and time, and an uppercase
+ *   "Z" character MUST be present in the absence of a numeric time zone offset.
  */
 	REGISTER_STRING_CONSTANT("DATE_ATOM",    DATE_FORMAT_RFC3339, CONST_CS | CONST_PERSISTENT);
 /*
@@ -369,9 +369,10 @@ PHP_MINIT_FUNCTION(date)
  	REGISTER_STRING_CONSTANT("DATE_RFC3339", DATE_FORMAT_RFC3339, CONST_CS | CONST_PERSISTENT);
 /*
  * RSS 2.0 Specification: http://blogs.law.harvard.edu/tech/rss
- * "All date-times in RSS conform to the Date and Time Specification of RFC 822"
+ *   "All date-times in RSS conform to the Date and Time Specification of RFC 822,
+ *   with the exception that the year may be expressed with two characters or four characters (four preferred)"
  */
-	REGISTER_STRING_CONSTANT("DATE_RSS",     DATE_FORMAT_RFC822,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("DATE_RSS",     DATE_FORMAT_RFC1123, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_W3C",     DATE_FORMAT_RFC3339, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("SUNFUNCS_RET_TIMESTAMP", SUNFUNCS_RET_TIMESTAMP, CONST_CS | CONST_PERSISTENT);
@@ -1438,7 +1439,7 @@ static void date_register_classes(TSRMLS_D)
 	REGISTER_DATE_CLASS_CONST_STRING("RFC1123", DATE_FORMAT_RFC1123);
 	REGISTER_DATE_CLASS_CONST_STRING("RFC2822", DATE_FORMAT_RFC2822);
 	REGISTER_DATE_CLASS_CONST_STRING("RFC3339", DATE_FORMAT_RFC3339);
-	REGISTER_DATE_CLASS_CONST_STRING("RSS",     DATE_FORMAT_RFC822);
+	REGISTER_DATE_CLASS_CONST_STRING("RSS",     DATE_FORMAT_RFC1123);
 	REGISTER_DATE_CLASS_CONST_STRING("W3C",     DATE_FORMAT_RFC3339);
 
 
