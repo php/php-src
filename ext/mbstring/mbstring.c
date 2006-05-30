@@ -172,6 +172,8 @@ static const struct mb_overload_def mb_ovld[] = {
 	{MB_OVERLOAD_STRING, "strlen", "mb_strlen", "mb_orig_strlen"},
 	{MB_OVERLOAD_STRING, "strpos", "mb_strpos", "mb_orig_strpos"},
 	{MB_OVERLOAD_STRING, "strrpos", "mb_strrpos", "mb_orig_strrpos"},
+	{MB_OVERLOAD_STRING, "stripos", "mb_stripos", "mb_orig_stripos"},
+	{MB_OVERLOAD_STRING, "strripos", "mb_strripos", "mb_orig_stripos"},
 	{MB_OVERLOAD_STRING, "substr", "mb_substr", "mb_orig_substr"},
 	{MB_OVERLOAD_STRING, "strtolower", "mb_strtolower", "mb_orig_strtolower"},
 	{MB_OVERLOAD_STRING, "strtoupper", "mb_strtoupper", "mb_orig_strtoupper"},
@@ -204,6 +206,8 @@ zend_function_entry mbstring_functions[] = {
 	PHP_FE(mb_strlen,				NULL)
 	PHP_FE(mb_strpos,				NULL)
 	PHP_FE(mb_strrpos,				NULL)
+	PHP_FE(mb_stripos,				NULL)
+	PHP_FE(mb_strripos,				NULL)
 	PHP_FE(mb_substr_count,			NULL)
 	PHP_FE(mb_substr,				NULL)
 	PHP_FE(mb_strcut,				NULL)
@@ -1669,6 +1673,58 @@ PHP_FUNCTION(mb_strrpos)
 		RETURN_FALSE;
 	}
 	n = mbfl_strpos(&haystack, &needle, 0, 1);
+	if (n >= 0) {
+		RETVAL_LONG(n);
+	} else {
+		RETVAL_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto int mb_stripos(string haystack, string needle [, int offset [, string encoding]])
+   Finds position of first occurrence of a string within another, case insensitive */
+PHP_FUNCTION(mb_stripos)
+{
+	int n;
+	long offset;
+	char *old_haystack, *old_needle;
+	char *from_encoding = (char*)mbfl_no2preferred_mime_name(MBSTRG(current_internal_encoding));
+	int old_haystack_len, old_needle_len, from_encoding_len;
+	n = -1;
+	offset = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ls", &old_haystack, &old_haystack_len, &old_needle, &old_needle_len, &offset, &from_encoding, &from_encoding_len ) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+ n = php_mb_stripos(0, old_haystack, old_haystack_len, old_needle, old_needle_len, offset, from_encoding TSRMLS_CC);
+
+	if (n >= 0) {
+		RETVAL_LONG(n);
+	} else {
+		RETVAL_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto int mb_strripos(string haystack, string needle [, int offset [, string encoding]])
+   Finds position of last occurrence of a string within another, case insensitive */
+PHP_FUNCTION(mb_strripos)
+{
+	int n;
+	long offset;
+	char *old_haystack, *old_needle;
+	char *from_encoding = (char*)mbfl_no2preferred_mime_name(MBSTRG(current_internal_encoding));
+	int old_haystack_len, old_needle_len, from_encoding_len;
+	n = -1;
+	offset = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ls", &old_haystack, &old_haystack_len, &old_needle, &old_needle_len, &offset, &from_encoding, &from_encoding_len ) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+ n = php_mb_stripos(1, old_haystack, old_haystack_len, old_needle, old_needle_len, offset, from_encoding TSRMLS_CC);
+
 	if (n >= 0) {
 		RETVAL_LONG(n);
 	} else {
@@ -3994,6 +4050,71 @@ MBSTRING_API int php_mb_gpc_encoding_detector(char **arg_string, int *arg_length
 	} else {
 		return FAILURE;
 	}
+}
+/* }}} */
+
+/* {{{ MBSTRING_API int php_mb_stripos()
+ */
+
+MBSTRING_API int php_mb_stripos(int mode, char *old_haystack, int old_haystack_len, char *old_needle, int old_needle_len, long offset, char *from_encoding TSRMLS_DC)
+{
+	int n;
+	mbfl_string haystack, needle;
+	n = -1;
+
+	mbfl_string_init(&haystack);
+	mbfl_string_init(&needle);
+	haystack.no_language = MBSTRG(current_language);
+	haystack.no_encoding = MBSTRG(current_internal_encoding);
+	needle.no_language = MBSTRG(current_language);
+	needle.no_encoding = MBSTRG(current_internal_encoding);
+
+	do {
+		haystack.val = php_unicode_convert_case(PHP_UNICODE_CASE_UPPER, old_haystack, (size_t) old_haystack_len, &haystack.len, from_encoding TSRMLS_CC);
+
+		if (!haystack.val) {
+			break;
+		}
+
+		if (haystack.len <= 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty haystack");
+			break;
+		}
+
+		needle.val = php_unicode_convert_case(PHP_UNICODE_CASE_UPPER, old_needle, (size_t) old_needle_len, &needle.len, from_encoding TSRMLS_CC);
+
+		if (!needle.val) {
+			break;
+		}
+
+		if (needle.len <= 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty needle");
+			break;
+		}
+
+		haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(from_encoding);
+		if (haystack.no_encoding == mbfl_no_encoding_invalid) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", from_encoding);
+			break;
+		}
+
+		if (offset < 0 || (unsigned long)offset > haystack.len) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is out of range");
+			break;
+		}
+
+		n = mbfl_strpos(&haystack, &needle, offset, mode);
+	} while(0);
+
+	if(haystack.val){
+		efree(haystack.val);
+	}
+
+	if(needle.val){
+		efree(needle.val);
+	}
+
+ return n;
 }
 /* }}} */
 
