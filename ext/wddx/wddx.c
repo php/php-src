@@ -657,7 +657,7 @@ void php_wddx_serialize_var(wddx_packet *packet, zval *var, char *name, int name
 		case IS_ARRAY:
 			ht = Z_ARRVAL_P(var);
 			if (ht->nApplyCount > 1) {
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "WDDX doesn't support circular references");
+				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "WDDX doesn't support circular references");
 				return;
 			}
 			ht->nApplyCount++;															
@@ -668,7 +668,7 @@ void php_wddx_serialize_var(wddx_packet *packet, zval *var, char *name, int name
 		case IS_OBJECT:
 			ht = Z_OBJPROP_P(var);
 			if (ht->nApplyCount > 1) {
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "WDDX doesn't support circular references");
+				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "WDDX doesn't support circular references");
 				return;
 			}
 			ht->nApplyCount++;
