@@ -1154,6 +1154,12 @@ PHP_FUNCTION(memory_get_usage) {
 	RETURN_LONG(AG(allocated_memory));
 }
 /* }}} */
+/* {{{ proto int memory_get_peak_usage()
+    Returns the peak allocated by PHP memory */
+PHP_FUNCTION(memory_get_peak_usage) {
+	RETURN_LONG(AG(allocated_memory_peak));
+}
+/* }}} */
 #endif
 
 /*

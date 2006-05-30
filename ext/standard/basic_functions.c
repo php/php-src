@@ -464,6 +464,7 @@ zend_function_entry basic_functions[] = {
 	PHP_FE(print_r,															NULL)
 #if MEMORY_LIMIT 
 	PHP_FE(memory_get_usage,												NULL)
+	PHP_FE(memory_get_peak_usage,												NULL)
 #endif
 
 	PHP_FE(register_shutdown_function,										NULL)
