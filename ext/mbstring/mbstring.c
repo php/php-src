@@ -212,6 +212,8 @@ zend_function_entry mbstring_functions[] = {
 	PHP_FE(mb_convert_encoding,		NULL)
 	PHP_FE(mb_detect_encoding,		NULL)
 	PHP_FE(mb_list_encodings,		NULL)
+	PHP_FE(mb_list_encodings_alias_names,		NULL)
+	PHP_FE(mb_list_mime_names,		NULL)
 	PHP_FE(mb_convert_kana,			NULL)
 	PHP_FE(mb_encode_mimeheader,	NULL)
 	PHP_FE(mb_decode_mimeheader,	NULL)
@@ -2357,6 +2359,122 @@ PHP_FUNCTION(mb_list_encodings)
 		name = (char *)mbfl_no_encoding2name(no_encoding);
 		if (name != NULL) {
 			RETURN_STRING(name, 1);
+		} else {
+			RETURN_FALSE;
+		}
+	}
+}
+/* }}} */
+
+/* {{{ proto array mb_list_encodings_alias_names([string encoding])
+   Returns an array of all supported alias encodings */
+PHP_FUNCTION(mb_list_encodings_alias_names)
+{
+	const mbfl_encoding **encodings;
+	const mbfl_encoding *encoding;
+	enum mbfl_no_encoding no_encoding;
+	int i, j;
+	zval *row;
+	char *name = NULL;
+	int name_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (name == NULL) {
+		array_init(return_value);
+		i = 0;
+		encodings = mbfl_get_supported_encodings();
+		while ((encoding = encodings[i++]) != NULL) {
+			MAKE_STD_ZVAL(row);
+			array_init(row);
+			if (encoding->aliases != NULL) {
+				j = 0;
+				while ((*encoding->aliases)[j] != NULL) {
+					add_next_index_string(row, (char *)(*encoding->aliases)[j], 1);
+					j++;
+				}
+			}
+			add_assoc_zval(return_value, (char *) encoding->name, row);
+		}
+	} else {
+		no_encoding = mbfl_name2no_encoding(name);
+		if (no_encoding == mbfl_no_encoding_invalid) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", name);
+			RETURN_FALSE;
+		}
+
+		name = (char *)mbfl_no_encoding2name(no_encoding);
+		if (name != NULL) {
+			i = 0;
+			encodings = mbfl_get_supported_encodings();
+			while ((encoding = encodings[i++]) != NULL) {
+				if (strcmp(encoding->name, name) != 0){ continue; }
+
+				array_init(return_value);
+				if (encoding->aliases != NULL) {
+					j = 0;
+					while ((*encoding->aliases)[j] != NULL) {
+						add_next_index_string(return_value, (char *)(*encoding->aliases)[j], 1);
+						j++;
+					}
+				}
+
+				break;
+			}
+		} else {
+			RETURN_FALSE;
+		}
+	}
+}
+/* }}} */
+
+/* {{{ proto mixed mb_list_mime_names([string encoding])
+   Returns an array or string of all supported mime names */
+PHP_FUNCTION(mb_list_mime_names)
+{
+	const mbfl_encoding **encodings;
+	const mbfl_encoding *encoding;
+	enum mbfl_no_encoding no_encoding;
+	int i;
+	char *name = NULL;
+	int name_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (name == NULL) {
+		array_init(return_value);
+		i = 0;
+		encodings = mbfl_get_supported_encodings();
+		while ((encoding = encodings[i++]) != NULL) {
+			if(encoding->mime_name != NULL) {
+				add_assoc_string(return_value, (char *) encoding->name, (char *) encoding->mime_name, 1);
+			} else{
+				add_assoc_string(return_value, (char *) encoding->name, "", 1);
+			}
+		}
+	} else {
+		no_encoding = mbfl_name2no_encoding(name);
+		if (no_encoding == mbfl_no_encoding_invalid) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", name);
+			RETURN_FALSE;
+		}
+
+		name = (char *)mbfl_no_encoding2name(no_encoding);
+		if (name != NULL) {
+			i = 0;
+			encodings = mbfl_get_supported_encodings();
+			while ((encoding = encodings[i++]) != NULL) {
+				if (strcmp(encoding->name, name) != 0){ continue; }
+				if(encoding->mime_name != NULL) {
+					RETURN_STRING((char *) encoding->mime_name, 1);
+				}
+				break;
+			}
+			RETURN_STRING("", 1);
 		} else {
 			RETURN_FALSE;
 		}

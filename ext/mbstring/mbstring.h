@@ -112,6 +112,8 @@ PHP_FUNCTION(mb_strimwidth);
 PHP_FUNCTION(mb_convert_encoding);
 PHP_FUNCTION(mb_detect_encoding);
 PHP_FUNCTION(mb_list_encodings);
+PHP_FUNCTION(mb_list_encodings_alias_names);
+PHP_FUNCTION(mb_list_mime_names);
 PHP_FUNCTION(mb_convert_kana);
 PHP_FUNCTION(mb_encode_mimeheader);
 PHP_FUNCTION(mb_decode_mimeheader);
