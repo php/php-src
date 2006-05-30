@@ -2325,19 +2325,41 @@ PHP_FUNCTION(mb_detect_encoding)
 }
 /* }}} */
 
-/* {{{ proto array mb_list_encodings()
-   Returns an array of all supported encodings */
+/* {{{ proto mixed mb_list_encodings([string alias_encoding])
+   Returns an array of all supported entity encodings or Returns the entity encoding as a string */
 PHP_FUNCTION(mb_list_encodings)
 {
 	const mbfl_encoding **encodings;
 	const mbfl_encoding *encoding;
+	enum mbfl_no_encoding no_encoding;
 	int i;
+	char *name = NULL;
+	int name_len;
 
-	array_init(return_value);
-	i = 0;
-	encodings = mbfl_get_supported_encodings();
-	while ((encoding = encodings[i++]) != NULL) {
-		add_next_index_string(return_value, (char *) encoding->name, 1);
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (name == NULL) {
+		array_init(return_value);
+		i = 0;
+		encodings = mbfl_get_supported_encodings();
+		while ((encoding = encodings[i++]) != NULL) {
+			add_next_index_string(return_value, (char *) encoding->name, 1);
+		}
+	} else {
+		no_encoding = mbfl_name2no_encoding(name);
+		if (no_encoding == mbfl_no_encoding_invalid) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", name);
+			RETURN_FALSE;
+		}
+
+		name = (char *)mbfl_no_encoding2name(no_encoding);
+		if (name != NULL) {
+			RETURN_STRING(name, 1);
+		} else {
+			RETURN_FALSE;
+		}
 	}
 }
 /* }}} */
