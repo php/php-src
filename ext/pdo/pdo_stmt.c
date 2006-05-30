@@ -703,8 +703,8 @@ static int do_fetch_class_prepare(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 
 static int make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * fci, zend_fcall_info_cache * fcc, int num_args TSRMLS_DC) /* {{{ */
 {
-	zval **object = NULL, **method;
-	char *fname, *cname;
+	zval **object = NULL, **method = NULL;
+	char *fname = NULL, *cname;
 	zend_class_entry * ce = NULL, **pce;
 	zend_function *function_handler;
 	
@@ -739,8 +739,11 @@ static int make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * 
 		method = &callable;
 	}
 	
-	if (!zend_is_callable(callable, 0, &fname)) {
+	if (!method || !zend_is_callable(callable, 0, &fname)) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied function must be a valid callback" TSRMLS_CC);
+		if (fname) {
+			efree(fname);
+		}
 		return 0;
 	}
 	
