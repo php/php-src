@@ -12,13 +12,13 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-Warning: oci_connect(): ORA-12154: TNS:could not resolve service name in %s on line %d
+Warning: oci_connect(): ORA-12154: TNS:could not resolve %s in %s on line %d
 bool(false)
 array(4) {
   ["code"]=>
   int(12154)
   ["message"]=>
-  string(45) "ORA-12154: TNS:could not resolve service name"
+  string(%d) "ORA-12154: TNS:could not resolve %s"
   ["offset"]=>
   int(0)
   ["sqltext"]=>
