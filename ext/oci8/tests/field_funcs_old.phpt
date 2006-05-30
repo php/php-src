@@ -54,7 +54,7 @@ require dirname(__FILE__).'/drop_table.inc';
 echo "Done\n";
 
 ?>
---EXPECT--
+--EXPECTF--
 array(5) {
   [0]=>
   string(1) "1"
@@ -71,14 +71,14 @@ bool(false)
 string(2) "ID"
 string(6) "NUMBER"
 int(2)
-int(0)
+int(%d)
 int(0)
 int(22)
 bool(false)
 string(5) "VALUE"
 string(6) "NUMBER"
 int(2)
-int(0)
+int(%d)
 int(0)
 int(22)
 bool(true)
