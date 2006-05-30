@@ -2168,7 +2168,6 @@ static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_f
 		child->common.prototype = parent->common.prototype ? parent->common.prototype : parent;
 	}
 
-
 	if (child->common.prototype) {
 		if (!zend_do_perform_implementation_check(child, child->common.prototype TSRMLS_CC)) {
 			zend_error(E_COMPILE_ERROR, "Declaration of %v::%v() must be compatible with that of %v::%v()", ZEND_FN_SCOPE_NAME(child), child->common.function_name, ZEND_FN_SCOPE_NAME(child->common.prototype), child->common.prototype->common.function_name);
