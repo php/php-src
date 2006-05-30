@@ -1,3 +1,114 @@
+2006-05-29  Antony Dovgal  <antony@zend.com>
+
+    * ext/pcre/php_pcre.c:
+      no need to check it for not-NULL (as was pointed by Nuno)
+
+    * (PHP_5_2)
+      ZendEngine2/zend_compile.c:
+      MFH: there is no ce at this point, revert this line to its previous state
+
+    * ZendEngine2/zend_compile.c:
+      there is no ce at this point, revert this line to its previous state
+      See also: http://news.php.net/php.zend-engine.cvs/4931
+
+    * (PHP_5_2)
+      ext/mbstring/tests/common.inc
+      ext/mbstring/tests/mb_strlen.phpt:
+      fix tests
+
+    * (PHP_5_2)
+      ext/pcre/tests/invalid_utf8.phpt
+      ext/standard/tests/file/file_put_contents.phpt:
+      add test
+
+    * ext/pcre/tests/invalid_utf8.phpt
+      ext/pcre/tests/invalid_utf8.phpt
+      ext/standard/tests/file/file_put_contents.phpt:
+      
+      add test
+
+    * ext/pcre/php_pcre.c:
+      return NULL in case of error (and fix leak/non-null-terminated string
+      error)
+
+2006-05-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      NEWS:
+      - BFN
+
+    * (PHP_5_2)
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/bug37632.phpt:
+      - MFH Bugfix #37632 (Protected method access problem)
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/bug37632.phpt
+      ZendEngine2/tests/bug37632.phpt:
+      - Bugfix #37632 (Protected method access problem)
+
+2006-05-29  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/config.m4:
+      improve sed expressions
+
+2006-05-29  Michael Wallner  <mike@iworks.at>
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/tests/bug36949.phpt:
+      MFB: Fixed bug #36949 (invalid internal mysqli objects dtor)
+
+    * (PHP_5_2)
+      NEWS
+      ext/mysqli/mysqli.c
+      ext/mysqli/tests/bug36949.phpt
+      ext/mysqli/tests/bug36949.phpt:
+      - Fixed bug #36949 (invalid internal mysqli objects dtor)
+
+2006-05-29  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/oci8/oci8.c:
+      MFH: fix #37531 (oci8 persistent connection corruption)
+
+    * ext/oci8/oci8.c:
+      fix #37531 (oci8 persistent connection corruption)
+
+    * (PHP_5_2)
+      ext/standard/tests/file/file_put_contents.phpt:
+      file file_put_contents.phpt was added on branch PHP_5_2 on 2006-05-29
+      10:42:54 +0000
+
+    * ext/standard/file.c:
+      initialize srcstream
+      use different variable in local scope
+
+    * (PHP_5_2)
+      ext/standard/file.c:
+      initialize srcstream
+
+    * (PHP_5_2)
+      ext/standard/file.c:
+      MFH: prevent resource leaking when passing invalid stream resource as
+      second argument
+
+    * ext/standard/file.c:
+      prevent resource leaking when passing invalid stream resource as second
+      argument
+
+2006-05-29  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/mysqli/mysqli_api.c:
+      Fix for bug #37620
+
 2006-05-28  Johannes Schlüter  <schlueter@phpbar.de>
 
     * ext/standard/string.c:

@@ -1,3 +1,27 @@
+2006-05-29  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend_compile.c:
+      MFH: there is no ce at this point, revert this line to its previous state
+
+    * zend_compile.c:
+      there is no ce at this point, revert this line to its previous state
+      See also: http://news.php.net/php.zend-engine.cvs/4931
+
+2006-05-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      zend_compile.c
+      zend_object_handlers.c
+      tests/bug37632.phpt:
+      - MFH Bugfix #37632 (Protected method access problem)
+
+    * zend_compile.c
+      zend_object_handlers.c
+      tests/bug37632.phpt
+      tests/bug37632.phpt:
+      - Bugfix #37632 (Protected method access problem)
+
 2006-05-28  Johannes Schlüter  <schlueter@phpbar.de>
 
     * zend_vm_def.h
