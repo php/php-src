@@ -31,6 +31,7 @@ PHP_FUNCTION(serialize);
 PHP_FUNCTION(unserialize);
 #if MEMORY_LIMIT 
 PHP_FUNCTION(memory_get_usage);
+PHP_FUNCTION(memory_get_peak_usage);
 #endif
 
 PHPAPI void php_var_dump(zval **struc, int level, int verbose TSRMLS_DC);
