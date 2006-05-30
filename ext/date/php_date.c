@@ -243,11 +243,87 @@ PHP_RSHUTDOWN_FUNCTION(date)
 
 #define DATE_TIMEZONEDB      php_date_global_timezone_db ? php_date_global_timezone_db : timelib_builtin_db()
 
-#define DATE_FORMAT_RFC3339  "Y-m-d\\TH:i:sP"
-#define DATE_FORMAT_ISO8601  "Y-m-d\\TH:i:sO"
-#define DATE_FORMAT_RFC1036  "l, d-M-y H:i:s T"
-#define DATE_FORMAT_RFC1123  "D, d M Y H:i:s T"
+/*
+ * RFC822, Section 5.1: http://www.ietf.org/rfc/rfc822.txt
+ *  date-time   =  [ day "," ] date time        ; dd mm yy hh:mm:ss zzz
+ *  day         =  "Mon"  / "Tue" /  "Wed"  / "Thu"  /  "Fri"  / "Sat" /  "Sun"
+ *  date        =  1*2DIGIT month 2DIGIT        ; day month year e.g. 20 Jun 82
+ *  month       =  "Jan"  /  "Feb" /  "Mar"  /  "Apr"  /  "May"  /  "Jun" /  "Jul"  /  "Aug"  /  "Sep"  /  "Oct" /  "Nov"  /  "Dec"
+ *  time        =  hour zone                    ; ANSI and Military
+ *  hour        =  2DIGIT ":" 2DIGIT [":" 2DIGIT] ; 00:00:00 - 23:59:59
+ *  zone        =  "UT"  / "GMT"  /  "EST" / "EDT"  /  "CST" / "CDT"  /  "MST" / "MDT"  /  "PST" / "PDT"  /  1ALPHA  / ( ("+" / "-") 4DIGIT )
+ */
+#define DATE_FORMAT_RFC822   "D, d M y H:i:s O"
+
+/*
+ * RFC850, Section 2.1.4: http://www.ietf.org/rfc/rfc850.txt
+ *  Format must be acceptable both to the ARPANET and to the getdate routine.
+ *  One format that is acceptable to both is Weekday, DD-Mon-YY HH:MM:SS TIMEZONE
+ *  TIMEZONE can be any timezone name (3 or more letters)
+ */
+#define DATE_FORMAT_RFC850   "l, d-M-y H:i:s T"
+
+/*
+ * RFC1036, Section 2.1.2: http://www.ietf.org/rfc/rfc1036.txt
+ *  Its format must be acceptable both in RFC-822 and to the getdate(3)
+ *  Wdy, DD Mon YY HH:MM:SS TIMEZONE
+ *  There is no hope of having a complete list of timezones.  Universal
+ *  Time (GMT), the North American timezones (PST, PDT, MST, MDT, CST,
+ *  CDT, EST, EDT) and the +/-hhmm offset specifed in RFC-822 should be supported.
+ */
+#define DATE_FORMAT_RFC1036  "D, d M y H:i:s O"
+
+/*
+ * RFC1123, Section 5.2.14: http://www.ietf.org/rfc/rfc1123.txt
+ *  RFC-822 Date and Time Specification: RFC-822 Section 5
+ *  The syntax for the date is hereby changed to: date = 1*2DIGIT month 2*4DIGIT
+ */
+#define DATE_FORMAT_RFC1123  "D, d M Y H:i:s O"
+
+/*
+ * RFC2822, Section 3.3: http://www.ietf.org/rfc/rfc2822.txt
+ *  FWS             =       ([*WSP CRLF] 1*WSP) /   ; Folding white space
+ *  CFWS            =       *([FWS] comment) (([FWS] comment) / FWS)
+ *  
+ *  date-time       =       [ day-of-week "," ] date FWS time [CFWS]
+ *  day-of-week     =       ([FWS] day-name)
+ *  day-name        =       "Mon" / "Tue" / "Wed" / "Thu" / "Fri" / "Sat" / "Sun"
+ *  date            =       day month year
+ *  year            =       4*DIGIT
+ *  month           =       (FWS month-name FWS)
+ *  month-name      =       "Jan" / "Feb" / "Mar" / "Apr" / "May" / "Jun" / "Jul" / "Aug" / "Sep" / "Oct" / "Nov" / "Dec"
+ *  day             =       ([FWS] 1*2DIGIT)
+ *  time            =       time-of-day FWS zone
+ *  time-of-day     =       hour ":" minute [ ":" second ]
+ *  hour            =       2DIGIT
+ *  minute          =       2DIGIT
+ *  second          =       2DIGIT
+ *  zone            =       (( "+" / "-" ) 4DIGIT)
+ */
 #define DATE_FORMAT_RFC2822  "D, d M Y H:i:s O"
+/*
+ * RFC3339, Section 5.6: http://www.ietf.org/rfc/rfc3339.txt
+ *  date-fullyear   = 4DIGIT
+ *  date-month      = 2DIGIT  ; 01-12
+ *  date-mday       = 2DIGIT  ; 01-28, 01-29, 01-30, 01-31 based on month/year
+ *  
+ *  time-hour       = 2DIGIT  ; 00-23
+ *  time-minute     = 2DIGIT  ; 00-59
+ *  time-second     = 2DIGIT  ; 00-58, 00-59, 00-60 based on leap second rules
+ *  
+ *  time-secfrac    = "." 1*DIGIT
+ *  time-numoffset  = ("+" / "-") time-hour ":" time-minute
+ *  time-offset     = "Z" / time-numoffset
+ *  
+ *  partial-time    = time-hour ":" time-minute ":" time-second [time-secfrac]
+ *  full-date       = date-fullyear "-" date-month "-" date-mday
+ *  full-time       = partial-time time-offset
+ *  
+ *  date-time       = full-date "T" full-time
+ */
+#define DATE_FORMAT_RFC3339  "Y-m-d\\TH:i:sP"
+
+#define DATE_FORMAT_ISO8601  "Y-m-d\\TH:i:sO"
 
 #define DATE_TZ_ERRMSG \
 	"It is not safe to rely on the system's timezone settings. Please use " \
@@ -272,8 +348,8 @@ PHP_MINIT_FUNCTION(date)
 	REGISTER_STRING_CONSTANT("DATE_ATOM",    DATE_FORMAT_RFC3339, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_COOKIE",  DATE_FORMAT_RFC1123, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_ISO8601", DATE_FORMAT_ISO8601, CONST_CS | CONST_PERSISTENT);
-	REGISTER_STRING_CONSTANT("DATE_RFC822",  DATE_FORMAT_RFC1123, CONST_CS | CONST_PERSISTENT);
-	REGISTER_STRING_CONSTANT("DATE_RFC850",  DATE_FORMAT_RFC1036, CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("DATE_RFC822",  DATE_FORMAT_RFC822,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("DATE_RFC850",  DATE_FORMAT_RFC850,  CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_RFC1036", DATE_FORMAT_RFC1036, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_RFC1123", DATE_FORMAT_RFC1123, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_RFC2822", DATE_FORMAT_RFC2822, CONST_CS | CONST_PERSISTENT);
@@ -1339,14 +1415,14 @@ static void date_register_classes(TSRMLS_D)
 	REGISTER_DATE_CLASS_CONST_STRING("ATOM",    DATE_FORMAT_RFC3339);
 	REGISTER_DATE_CLASS_CONST_STRING("COOKIE",  DATE_FORMAT_RFC1123);
 	REGISTER_DATE_CLASS_CONST_STRING("ISO8601", DATE_FORMAT_ISO8601);
-	REGISTER_DATE_CLASS_CONST_STRING("RFC822",  DATE_FORMAT_RFC1123);
-	REGISTER_DATE_CLASS_CONST_STRING("RFC850",  DATE_FORMAT_RFC1036);
+	REGISTER_DATE_CLASS_CONST_STRING("RFC822",  DATE_FORMAT_RFC822);
+	REGISTER_DATE_CLASS_CONST_STRING("RFC850",  DATE_FORMAT_RFC850);
 	REGISTER_DATE_CLASS_CONST_STRING("RFC1036", DATE_FORMAT_RFC1036);
 	REGISTER_DATE_CLASS_CONST_STRING("RFC1123", DATE_FORMAT_RFC1123);
 	REGISTER_DATE_CLASS_CONST_STRING("RFC2822", DATE_FORMAT_RFC2822);
 	REGISTER_DATE_CLASS_CONST_STRING("RFC3339", DATE_FORMAT_RFC3339);
 	REGISTER_DATE_CLASS_CONST_STRING("RSS",     DATE_FORMAT_RFC1123);
-	REGISTER_DATE_CLASS_CONST_STRING("W3C",     DATE_FORMAT_ISO8601);
+	REGISTER_DATE_CLASS_CONST_STRING("W3C",     DATE_FORMAT_RFC3339);
 
 
 	INIT_CLASS_ENTRY(ce_timezone, "timezone", date_funcs_timezone);
