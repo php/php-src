@@ -49,10 +49,11 @@ PHP                                                                        NEWS
 - Added RFC2397 (data: stream) support. (Marcus)
 - Fixed memory leaks in openssl streams context options (Pierre)
 - Fixed handling of extremely long paths inside tempnam() function. (Ilia)
+- Fixed bug #37635 (parameter of pcntl signal handler is trashed). (Mike)
 - Fixed bug #37632 (Protected method access problem). (Marcus)
-- Fixed bug #37616: DATE_RFC822 does not product RFC 822 dates. (Hannes
-  Magnusson, Derick)
 - Fixed bug #37620 (mysqli_ssl_set validation is innappropriate). (Georg)
+- Fixed bug #37616 (DATE_RFC822 does not product RFC 822 dates).
+  (Hannes Magnusson, Derick)
 - Fixed bug #37614 (Class name lowercased in error message). (Johannes)
 - Fixed bug #37587 (var without attribute causes segfault). (Marcus)
 - Fixed bug #37586 (Bumped minimum PCRE version to 6.6, needed for recursion
