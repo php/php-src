@@ -1,3 +1,44 @@
-<code><span style="color: #000000">
---TEST--<br />Date&nbsp;constants<br />--FILE--<br /><span style="color: #0000BB">&lt;?php<br />&nbsp;&nbsp;&nbsp;&nbsp;date_default_timezone_set</span><span style="color: #007700">(</span><span style="color: #DD0000">"Europe/Oslo"</span><span style="color: #007700">);<br />&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #0000BB">$constants&nbsp;</span><span style="color: #007700">=&nbsp;array(<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #0000BB">DATE_ATOM</span><span style="color: #007700">,<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #0000BB">DATE_COOKIE</span><span style="color: #007700">,<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #0000BB">DATE_ISO8601</span><span style="color: #007700">,<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #0000BB">DATE_RFC822</span><span style="color: #007700">,<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #0000BB">DATE_RFC850</span><span style="color: #007700">,<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #0000BB">DATE_RFC1036</span><span style="color: #007700">,<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #0000BB">DATE_RFC1123</span><span style="color: #007700">,<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #0000BB">DATE_RFC2822</span><span style="color: #007700">,<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #0000BB">DATE_RSS</span><span style="color: #007700">,<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #0000BB">DATE_W3C<br />&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #007700">);<br />&nbsp;&nbsp;&nbsp;&nbsp;<br />&nbsp;&nbsp;&nbsp;&nbsp;foreach(</span><span style="color: #0000BB">$constants&nbsp;</span><span style="color: #007700">as&nbsp;</span><span style="color: #0000BB">$const</span><span style="color: #007700">)&nbsp;{<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #0000BB">var_dump</span><span style="color: #007700">(</span><span style="color: #0000BB">date</span><span style="color: #007700">(</span><span style="color: #0000BB">$const</span><span style="color: #007700">,&nbsp;</span><span style="color: #0000BB">strtotime</span><span style="color: #007700">(</span><span style="color: #DD0000">"1&nbsp;Jul&nbsp;06&nbsp;14:27:30&nbsp;+0200"</span><span style="color: #007700">)));<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #0000BB">var_dump</span><span style="color: #007700">(</span><span style="color: #0000BB">date</span><span style="color: #007700">(</span><span style="color: #0000BB">$const</span><span style="color: #007700">,&nbsp;</span><span style="color: #0000BB">strtotime</span><span style="color: #007700">(</span><span style="color: #DD0000">"2006-05-30T14:32:13+02:00"</span><span style="color: #007700">)));<br />&nbsp;&nbsp;&nbsp;&nbsp;}<br /></span><span style="color: #0000BB">?&gt;<br /></span>--EXPECT--<br />string(25)&nbsp;"2006-07-01T14:27:30+02:00"<br />string(25)&nbsp;"2006-05-30T14:32:13+02:00"<br />string(31)&nbsp;"Sat,&nbsp;01&nbsp;Jul&nbsp;2006&nbsp;14:27:30&nbsp;+0200"<br />string(31)&nbsp;"Tue,&nbsp;30&nbsp;May&nbsp;2006&nbsp;14:32:13&nbsp;+0200"<br />string(24)&nbsp;"2006-07-01T14:27:30+0200"<br />string(24)&nbsp;"2006-05-30T14:32:13+0200"<br />string(29)&nbsp;"Sat,&nbsp;01&nbsp;Jul&nbsp;06&nbsp;14:27:30&nbsp;+0200"<br />string(29)&nbsp;"Tue,&nbsp;30&nbsp;May&nbsp;06&nbsp;14:32:13&nbsp;+0200"<br />string(33)&nbsp;"Saturday,&nbsp;01-Jul-06&nbsp;14:27:30&nbsp;CEST"<br />string(32)&nbsp;"Tuesday,&nbsp;30-May-06&nbsp;14:32:13&nbsp;CEST"<br />string(29)&nbsp;"Sat,&nbsp;01&nbsp;Jul&nbsp;06&nbsp;14:27:30&nbsp;+0200"<br />string(29)&nbsp;"Tue,&nbsp;30&nbsp;May&nbsp;06&nbsp;14:32:13&nbsp;+0200"<br />string(31)&nbsp;"Sat,&nbsp;01&nbsp;Jul&nbsp;2006&nbsp;14:27:30&nbsp;+0200"<br />string(31)&nbsp;"Tue,&nbsp;30&nbsp;May&nbsp;2006&nbsp;14:32:13&nbsp;+0200"<br />string(31)&nbsp;"Sat,&nbsp;01&nbsp;Jul&nbsp;2006&nbsp;14:27:30&nbsp;+0200"<br />string(31)&nbsp;"Tue,&nbsp;30&nbsp;May&nbsp;2006&nbsp;14:32:13&nbsp;+0200"<br />string(31)&nbsp;"Sat,&nbsp;01&nbsp;Jul&nbsp;2006&nbsp;14:27:30&nbsp;+0200"<br />string(31)&nbsp;"Tue,&nbsp;30&nbsp;May&nbsp;2006&nbsp;14:32:13&nbsp;+0200"<br />string(25)&nbsp;"2006-07-01T14:27:30+02:00"<br />string(25)&nbsp;"2006-05-30T14:32:13+02:00"<br /></span>
-</code>
+--TEST--
+Date constants
+--FILE--
+<?php
+    date_default_timezone_set("Europe/Oslo");
+    $constants = array(
+        DATE_ATOM,
+        DATE_COOKIE,
+        DATE_ISO8601,
+        DATE_RFC822,
+        DATE_RFC850,
+        DATE_RFC1036,
+        DATE_RFC1123,
+        DATE_RFC2822,
+        DATE_RSS,
+        DATE_W3C
+    );
+    
+    foreach($constants as $const) {
+        var_dump(date($const, strtotime("1 Jul 06 14:27:30 +0200")));
+        var_dump(date($const, strtotime("2006-05-30T14:32:13+02:00")));
+    }
+?>
+--EXPECT--
+string(25) "2006-07-01T14:27:30+02:00"
+string(25) "2006-05-30T14:32:13+02:00"
+string(31) "Sat, 01 Jul 2006 14:27:30 +0200"
+string(31) "Tue, 30 May 2006 14:32:13 +0200"
+string(24) "2006-07-01T14:27:30+0200"
+string(24) "2006-05-30T14:32:13+0200"
+string(29) "Sat, 01 Jul 06 14:27:30 +0200"
+string(29) "Tue, 30 May 06 14:32:13 +0200"
+string(33) "Saturday, 01-Jul-06 14:27:30 CEST"
+string(32) "Tuesday, 30-May-06 14:32:13 CEST"
+string(29) "Sat, 01 Jul 06 14:27:30 +0200"
+string(29) "Tue, 30 May 06 14:32:13 +0200"
+string(31) "Sat, 01 Jul 2006 14:27:30 +0200"
+string(31) "Tue, 30 May 2006 14:32:13 +0200"
+string(31) "Sat, 01 Jul 2006 14:27:30 +0200"
+string(31) "Tue, 30 May 2006 14:32:13 +0200"
+string(31) "Sat, 01 Jul 2006 14:27:30 +0200"
+string(31) "Tue, 30 May 2006 14:32:13 +0200"
+string(25) "2006-07-01T14:27:30+02:00"
+string(25) "2006-05-30T14:32:13+02:00"

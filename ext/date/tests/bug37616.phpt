@@ -1,3 +1,9 @@
-<code><span style="color: #000000">
---TEST--<br />Bug&nbsp;#37616&nbsp;(DATE_RFC822&nbsp;does&nbsp;not&nbsp;product&nbsp;RFC&nbsp;822&nbsp;dates)<br />--FILE--<br /><span style="color: #0000BB">&lt;?php<br />&nbsp;&nbsp;&nbsp;&nbsp;date_default_timezone_set</span><span style="color: #007700">(</span><span style="color: #DD0000">"Europe/Oslo"</span><span style="color: #007700">);<br />&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #0000BB">var_dump</span><span style="color: #007700">(</span><span style="color: #0000BB">date</span><span style="color: #007700">(</span><span style="color: #0000BB">DATE_RFC822</span><span style="color: #007700">,&nbsp;</span><span style="color: #0000BB">strtotime</span><span style="color: #007700">(</span><span style="color: #DD0000">"1&nbsp;Jul&nbsp;06&nbsp;14:27:30&nbsp;+0200"</span><span style="color: #007700">)));<br /></span><span style="color: #0000BB">?&gt;<br /></span>--EXPECT--<br />string(29)&nbsp;"Sat,&nbsp;01&nbsp;Jul&nbsp;06&nbsp;14:27:30&nbsp;+0200"<br /></span>
-</code>
+--TEST--
+Bug #37616 (DATE_RFC822 does not product RFC 822 dates)
+--FILE--
+<?php
+    date_default_timezone_set("Europe/Oslo");
+    var_dump(date(DATE_RFC822, strtotime("1 Jul 06 14:27:30 +0200")));
+?>
+--EXPECT--
+string(29) "Sat, 01 Jul 06 14:27:30 +0200"
