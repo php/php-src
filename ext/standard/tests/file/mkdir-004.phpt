@@ -1,7 +1,7 @@
 --TEST--
 recursive mkdir() tests
 --SKIPIF--
-<?
+<?php
 chdir("/");
 if (!@mkdir("testtmpskipifdir")) {
 	die("skip for root only");
