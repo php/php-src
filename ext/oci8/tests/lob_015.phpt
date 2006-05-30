@@ -18,10 +18,11 @@ $ora_sql = "INSERT INTO
 $statement = oci_parse($c,$ora_sql);
 $blob = oci_new_descriptor($c,OCI_D_LOB,1,2,3);
 $blob = oci_new_descriptor($c);
+$int = 1;
 oci_bind_by_name($statement,":v_blob", $blob,-1,OCI_B_BLOB,4);
 oci_bind_by_name($statement,":v_blob", $blob,-1,OCI_B_BLOB,4,5);
-oci_bind_by_name($statement,":v_blob", $blob,-1);
-oci_bind_by_name($statement,":v_blob", $blob);
+oci_bind_by_name($statement,":v_blob", $int,-1);
+oci_bind_by_name($statement,":v_blob", $int);
 oci_bind_by_name($statement,":v_blob");
 oci_bind_by_name($statement);
 oci_execute($statement, OCI_DEFAULT);
@@ -34,18 +35,19 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-Warning: oci_new_descriptor() expects at most 2 parameters, 5 given in %slob_015.php on line %d
+Warning: oci_new_descriptor() expects at most 2 parameters, 5 given in %s on line %d
 
-Warning: oci_bind_by_name() expects at most 5 parameters, 6 given in %slob_015.php on line %d
+Warning: oci_bind_by_name() expects at most 5 parameters, 6 given in %s on line %d
 
-Warning: oci_bind_by_name() expects at most 5 parameters, 7 given in %slob_015.php on line %d
+Warning: oci_bind_by_name() expects at most 5 parameters, 7 given in %s on line %d
 
-Notice: Object of class OCI-Lob to string conversion in %slob_015.php on line %d
+Warning: oci_bind_by_name() expects at least 3 parameters, 2 given in %s on line %d
 
-Warning: oci_bind_by_name() expects at least 3 parameters, 2 given in %slob_015.php on line %d
+Warning: oci_bind_by_name() expects at least 3 parameters, 1 given in %s on line %d
 
-Warning: oci_bind_by_name() expects at least 3 parameters, 1 given in %slob_015.php on line %d
-
-Warning: oci_execute(): ORA-00932: inconsistent datatypes: expected NUMBER got BLOB in %slob_015.php on line %d
-string(6) "Object"
+Warning: oci_execute(): ORA-00932: inconsistent datatypes: expected NUMBER got BLOB in %s on line %d
+object(OCI-Lob)#%d (1) {
+  ["descriptor"]=>
+  resource(%d) of type (oci8 descriptor)
+}
 Done

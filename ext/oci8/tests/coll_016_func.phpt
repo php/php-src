@@ -37,7 +37,7 @@ require dirname(__FILE__)."/drop_type.inc";
 --EXPECTF--
 bool(true)
 
-Warning: oci_collection_element_assign(): OCI-22165: given index [4294967295] must be in the range of 0 to [0] in %s on line %d
+Warning: oci_collection_element_assign(): OCI-22165: given index [%d] must be in the range of 0 to [0] in %s on line %d
 bool(false)
 
 Warning: oci_collection_element_assign(): OCI-22165: given index [5000] must be in the range of 0 to [0] in %s on line %d
