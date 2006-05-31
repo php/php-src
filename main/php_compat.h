@@ -29,6 +29,7 @@
 
 #if defined(HAVE_BUNDLED_PCRE) || !defined(PHP_VERSION)
 #define pcre_compile 			php_pcre_compile
+#define pcre_compile2 			php_pcre_compile2
 #define pcre_copy_substring		php_pcre_copy_substring
 #define pcre_exec				php_pcre_exec
 #define pcre_get_substring		php_pcre_substring
