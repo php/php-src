@@ -759,7 +759,12 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 				MessageBox(NULL, buffer, error_type_str, MB_OK|ZEND_SERVICE_MB_STYLE);
 			}
 #endif
-			spprintf(&log_buffer, 0, "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
+			if (SG(request_info).request_uri) {
+				char *query_string = SG(request_info).query_string;
+				spprintf(&log_buffer, 0, "PHP %s:  %s in %s on line %d [%s%s%s]", error_type_str, buffer, error_filename, error_lineno, SG(request_info).request_uri, query_string?"?":"", STR_PRINT(query_string));
+			} else {
+				spprintf(&log_buffer, 0, "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
+			}
 			php_log_err(log_buffer TSRMLS_CC);
 			efree(log_buffer);
 		}
@@ -781,13 +786,23 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 					if (type == E_ERROR) {
 						int len;
 						char *buf = php_escape_html_entities(buffer, buffer_len, &len, 0, ENT_COMPAT, NULL TSRMLS_CC);
-						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buf, error_filename, error_lineno, STR_PRINT(append_string));
+						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b>", STR_PRINT(prepend_string), error_type_str, buf, error_filename, error_lineno);
 						efree(buf);
 					} else {
-						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
+						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b>", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno);
 					}
+					if (SG(request_info).request_uri) {
+						char *query_string = SG(request_info).query_string;
+						php_printf(" [<b>%s%s%s</b>]", SG(request_info).request_uri, query_string?"?":"", STR_PRINT(query_string));
+					}
+					php_printf("<br />\n%s", STR_PRINT(append_string));
 				} else {
-					php_printf("%s\n%s: %s in %s on line %d\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
+					php_printf("%s\n%s: %s in %s on line %d", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno);
+					if (SG(request_info).request_uri) {
+						char *query_string = SG(request_info).query_string;
+						php_printf(" [%s%s%s]", SG(request_info).request_uri, query_string?"?":"", STR_PRINT(query_string));
+					}
+					php_printf("\n%s", STR_PRINT(append_string));
 				}
 			}
 		}
