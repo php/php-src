@@ -1,3 +1,15 @@
+2006-05-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_compile.c:
+      - Fix test logic
+
+    * (PHP_5_2)
+      zend_compile.c:
+      - Switch back to old severities and still keep bugfix for
+
+    * zend_compile.c:
+      - WS
+
 2006-05-29  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
