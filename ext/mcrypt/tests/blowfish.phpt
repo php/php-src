@@ -36,7 +36,19 @@ foreach($vectors as $data) {
             ($crypt==$guess ? "OK" : "BAD")
         );  
     }   
-}   
+}
+
+// Longer test case from http://www.schneier.com/code/vectors.txt
+$td = mcrypt_module_open ("blowfish", "", MCRYPT_MODE_CBC, "");
+
+$key = hex2bin( "0123456789ABCDEFF0E1D2C3B4A59687" );
+$iv = hex2bin( "FEDCBA9876543210" );
+$plain = hex2bin( "37363534333231204E6F77206973207468652074696D6520666F722000" );
+
+mcrypt_generic_init( $td, $key, $iv );
+$guess = bin2hex( mcrypt_generic( $td, $plain ) );
+
+echo "\n", $guess, "\n";
 ?>
 --EXPECT--
 key               plain             crypt             guess             stat
@@ -73,3 +85,5 @@ E0FEE0FEF1FEF1FE  0123456789ABCDEF  c39e072d9fac631d  c39e072d9fac631d  OK
 FFFFFFFFFFFFFFFF  0000000000000000  f21e9a77b71c49bc  f21e9a77b71c49bc  OK
 0123456789ABCDEF  0000000000000000  245946885754369a  245946885754369a  OK
 FEDCBA9876543210  FFFFFFFFFFFFFFFF  6b5c5a9c5d9e0a5a  6b5c5a9c5d9e0a5a  OK
+
+6b77b4d63006dee605b156e27403979358deb9e7154616d959f1652bd5ff92cc
