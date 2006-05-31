@@ -1708,9 +1708,13 @@ static zval *debug_backtrace_get_args(void ***curpos TSRMLS_DC)
 
 	while (--arg_count >= 0) {
 		arg = (zval **) p++;
-		SEPARATE_ZVAL_TO_MAKE_IS_REF(arg);
-		(*arg)->refcount++;
-		add_next_index_zval(arg_array, *arg);
+		if (*arg) {
+			SEPARATE_ZVAL_TO_MAKE_IS_REF(arg);
+			(*arg)->refcount++;
+			add_next_index_zval(arg_array, *arg);
+		} else {
+			add_next_index_null(arg_array);
+		}
 	}
 
 	/* skip args from incomplete frames */
