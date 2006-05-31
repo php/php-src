@@ -173,6 +173,7 @@ ZEND_API void zend_objects_store_del_ref(zval *zobject TSRMLS_DC)
 ZEND_API void zend_objects_store_del_ref_by_handle(zend_object_handle handle TSRMLS_DC)
 {
 	struct _store_object *obj;
+	int failure = 0;
 
 	if (!EG(objects_store).object_buckets) {
 		return;
@@ -190,12 +191,20 @@ ZEND_API void zend_objects_store_del_ref_by_handle(zend_object_handle handle TSR
 				EG(objects_store).object_buckets[handle].destructor_called = 1;
 
 				if (obj->dtor) {
-					obj->dtor(obj->object, handle TSRMLS_CC);
+					zend_try {
+						obj->dtor(obj->object, handle TSRMLS_CC);
+					} zend_catch {
+						failure = 1;
+					} zend_end_try();
 				}
 			}
 			if (obj->refcount == 1) {
 				if (obj->free_storage) {
-					obj->free_storage(obj->object TSRMLS_CC);
+					zend_try {
+						obj->free_storage(obj->object TSRMLS_CC);
+					} zend_catch {
+						failure = 1;
+					} zend_end_try();
 				}
 				ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST();
 			}
@@ -211,6 +220,9 @@ ZEND_API void zend_objects_store_del_ref_by_handle(zend_object_handle handle TSR
 		fprintf(stderr, "Decreased refcount of object id #%d\n", handle);
 	}
 #endif
+	if (failure) {
+		zend_bailout();
+	}
 }
 
 ZEND_API zend_object_value zend_objects_store_clone_obj(zval *zobject TSRMLS_DC)
