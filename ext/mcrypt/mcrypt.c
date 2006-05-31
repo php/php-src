@@ -496,7 +496,7 @@ PHP_FUNCTION(mcrypt_generic)
 	/* Check blocksize */
 	if (mcrypt_enc_is_block_mode(pm->td) == 1) { /* It's a block algorithm */
 		block_size = mcrypt_enc_get_block_size(pm->td);
-		data_size = (((Z_STRLEN_PP(data) - 1) / block_size) + 1) * block_size;
+		data_size = ((Z_STRLEN_PP(data) / block_size) + 1) * block_size;
 		data_s = emalloc(data_size + 1);
 		memset(data_s, 0, data_size);
 		memcpy(data_s, Z_STRVAL_PP(data), Z_STRLEN_PP(data));
