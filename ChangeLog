@@ -1,3 +1,127 @@
+2006-05-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      tests/classes/inheritance_003.phpt
+      tests/classes/inheritance_004.phpt:
+      - Add new tests
+
+    * tests/classes/inheritance_003.phpt
+      tests/classes/inheritance_003.phpt
+      tests/classes/inheritance_004.phpt
+      tests/classes/inheritance_004.phpt:
+      
+      - Add new tests
+
+    * ZendEngine2/zend_compile.c:
+      - Fix test logic
+
+    * (PHP_5_2)
+      ZendEngine2/zend_compile.c:
+      - Switch back to old severities and still keep bugfix for
+
+2006-05-30  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/oci8_collection.c:
+      fix compilation on some b0rked systems that must have collections support
+      but they don't
+
+2006-05-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_compile.c:
+      - WS
+
+2006-05-30  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/tests/file/mkdir-004.phpt
+      ext/standard/tests/file/mkdir-005.phpt:
+      Minor fixes (bjori)
+
+2006-05-30  Michael Wallner  <mike@iworks.at>
+
+    * ext/pcntl/pcntl.c:
+      MFB: fix bug 37635 (argument to pcntl signal handler is trashed)
+
+    * (PHP_5_2)
+      NEWS
+      ext/pcntl/pcntl.c:
+      - fix bug #37635 (parameter of pcntl signal handler is trashed)
+
+2006-05-30  Seiji Masugata  <s.masugata@digicom.dnp.co.jp>
+
+    * (PHP_5_2)
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+      added mb_stristr( ), mb_strrichr( ).
+
+    * (PHP_5_2)
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+      added mb_strstr( ), mb_strrchr( ).
+
+    * (PHP_5_2)
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+      added mb_stripos( ), mb_strripos( ).
+
+    * (PHP_5_2)
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+      added mb_list_encodings_alias_names( ), mb_list_mime_names( ).
+
+    * (PHP_5_2)
+      ext/mbstring/mbstring.c:
+      added option parameter mb_list_encodings( ).
+
+2006-05-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_var.h
+      ext/standard/var.c:
+      MFB: Added memory_get_peak_usage() function for retrieving peak memory
+      usage of a PHP script.
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/php_var.h
+      ext/standard/var.c:
+      Added memory_get_peak_usage() function for retrieving peak memory usage of
+      a PHP script.
+
+2006-05-30  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      ext/oci8/config.m4:
+      merge the last change in 4.4 and allow ext/oci8 to be built against basic
+      lite package
+      (as Derick requested)
+
+    * (PHP_5_2)
+      ext/oci8/config.m4:
+      MFH: don't require libociei, this allows us to build ext/oci8 against
+      basiclite OIC package
+
+    * ext/oci8/config.m4:
+      don't require libociei, this allows us to build ext/oci8 against basiclite
+      OIC package
+
+2006-05-30  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      NEWS:
+      - MFH: Fixed bug #37616: DATE_RFC822 does not product RFC 822 dates. (Patch
+      by
+        Hannes Magnusson)
+
+2006-05-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/wddx/wddx.c:
+      MFB: Convert E_ERROR to E_RECOVERABLE_ERROR
+
+    * (PHP_5_2)
+      ext/wddx/wddx.c:
+      Convert E_ERROR to E_RECOVERABLE_ERROR
+
 2006-05-29  Antony Dovgal  <antony@zend.com>
 
     * ext/pcre/php_pcre.c:
