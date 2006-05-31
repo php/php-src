@@ -4,7 +4,7 @@ PHP                                                                        NEWS
 - Added memory_get_peak_usage() function for retrieving peak memory usage of
   a PHP script. (Ilia)
 - Changed Apache 2 Handler SAPI to call ap_set_content_type() once only. (Mike)
-- Changed E_ALL error reporting mode to includes E_RECOVERABLE_ERROR. (Marcus)
+- Changed E_ALL error reporting mode to include E_RECOVERABLE_ERROR. (Marcus)
 - Added control character checks for cURL extension's open_basedir/safe_mode
   checks. (Ilia)
 - Disable realpath cache when open_basedir or safe_mode are enabled on a 
