@@ -9,7 +9,7 @@ PHP                                                                        NEWS
   checks. (Ilia)
 - Disable realpath cache when open_basedir or safe_mode are enabled on a 
   per-request basis. (Ilia)
-- Optimized zend_try/zend_catch macroses (eliminated memcpy()). (Dmitry)
+- Optimized zend_try/zend_catch macros (eliminated memcpy()). (Dmitry)
 - Optimized require_once/include_once (eliminated fopen() on second usage).
   (Dmitry)
 - Optimized request shutdown sequence. Restoring ini directives now
@@ -26,7 +26,7 @@ PHP                                                                        NEWS
 - Removed ze1 compatibility mode. (Marcus)
 - Added support for constructors in interfaces to force constructor signature
   checks in implementations. (Marcus)
-- Changed __toString to be called whereever applicable. (Marcus)
+- Changed __toString to be called wherever applicable. (Marcus)
 - Improved xmlReader: (Rob)
   . Added readInnerXml(), xmlReader::setSchema().
   . Added readInnerXML(), readOuterXML(), readString(), setSchema(). (2.6.20+)
@@ -51,7 +51,7 @@ PHP                                                                        NEWS
 - Fixed handling of extremely long paths inside tempnam() function. (Ilia)
 - Fixed bug #37635 (parameter of pcntl signal handler is trashed). (Mike)
 - Fixed bug #37632 (Protected method access problem). (Marcus)
-- Fixed bug #37620 (mysqli_ssl_set validation is innappropriate). (Georg)
+- Fixed bug #37620 (mysqli_ssl_set validation is inappropriate). (Georg)
 - Fixed bug #37616 (DATE_RFC822 does not product RFC 822 dates).
   (Hannes Magnusson, Derick)
 - Fixed bug #37614 (Class name lowercased in error message). (Johannes)
@@ -63,7 +63,7 @@ PHP                                                                        NEWS
   (Marcus)
 - Fixed bug #37563 (array_key_exists performance is poor for &$array). (Ilia)
 - Fixed bug #37558 (timeout functionality doesn't work after a second PHP
-  starup on the same thread). (p dot desarnaud at wanadoo dot fr)
+  startup on the same thread). (p dot desarnaud at wanadoo dot fr)
 - Fixed bug #37531 (oci8 persistent connection corruption). (Tony)
 - Fixed bug #37523 (namespaces added too late, leads to missing xsi:type
   attributes. incompatibility with libxml2-2.6.24). (Dmitry)
@@ -100,7 +100,7 @@ PHP                                                                        NEWS
   (jdolecek)
 - Fixed bug #37306 (max_execution_time = max_input_time). (Dmitry)
 - Fixed Bug #37278 (SOAP not respecting uri in __soapCall). (Dmitry)
-- Fixed bug #37256 (php-fastcgi dosen't handle connection abort). (Dmitry)
+- Fixed bug #37256 (php-fastcgi doesn't handle connection abort). (Dmitry)
 - Fixed bug #37244 (Added strict flag to base64_decode() that enforces 
   RFC3548 compliance). (Ilia)
 - Fixed bug #36949 (invalid internal mysqli objects dtor). (Mike)
