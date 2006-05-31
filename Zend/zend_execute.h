@@ -152,7 +152,9 @@ static inline void zend_ptr_stack_clear_multiple(TSRMLS_D)
 
 	EG(argument_stack).top -= (delete_count+2);
 	while (--delete_count>=0) {
-		zval_ptr_dtor((zval **) --p);
+		zval *q = *(zval **)(--p);
+		*p = NULL;
+		zval_ptr_dtor(&q);
 	}
 	EG(argument_stack).top_element = p;
 }
