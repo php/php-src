@@ -66,7 +66,7 @@ if test "$PHP_PDO_MYSQL" != "no"; then
       PDO_MYSQL_INC_DIR=$PDO_MYSQL_DIR/include/mysql
     else
       PDO_MYSQL_INC_DIR=$PDO_MYSQL_DIR/include
-    fi      
+    fi
     if test -r $PDO_MYSQL_DIR/lib/mysql; then
       PDO_MYSQL_LIB_DIR=$PDO_MYSQL_DIR/lib/mysql
     else
@@ -87,9 +87,7 @@ if test "$PHP_PDO_MYSQL" != "no"; then
 
   AC_DEFINE_UNQUOTED(PDO_MYSQL_UNIX_ADDR, "$PDO_MYSQL_SOCKET", [ ])
 
-  
-  _SAVE_LIBS=$LIBS
-  LIBS="$LIBS $PDO_MYSQL_LIBS"
+
   PHP_CHECK_LIBRARY(mysqlclient, mysql_query,
   [
     PHP_EVAL_LIBLINE($PDO_MYSQL_LIBS, PDO_MYSQL_SHARED_LIBADD)
@@ -98,6 +96,8 @@ if test "$PHP_PDO_MYSQL" != "no"; then
   ],[
     $PDO_MYSQL_LIBS
   ])
+  _SAVE_LIBS=$LIBS
+  LIBS="$LIBS $PDO_MYSQL_LIBS"
   AC_CHECK_FUNCS([mysql_commit mysql_stmt_prepare mysql_next_result mysql_sqlstate]) 
   LIBS=$_SAVE_LIBS
 
@@ -124,8 +124,7 @@ if test "$PHP_PDO_MYSQL" != "no"; then
     PHP_ADD_EXTENSION_DEP(pdo_mysql, pdo)
   ])
   PDO_MYSQL_MODULE_TYPE=external
- 
-  PDO_MYSQL_SHARED_LIBADD=$PDO_MYSQL_LIBS
+
   PHP_SUBST(PDO_MYSQL_SHARED_LIBADD)
   PHP_SUBST_OLD(PDO_MYSQL_MODULE_TYPE)
 fi
