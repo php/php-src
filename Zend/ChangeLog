@@ -1,3 +1,70 @@
+2006-05-31  Antony Dovgal  <antony@zend.com>
+
+    * zend_interfaces.c:
+      fix error message in Unicode mode
+
+    * tests/objects_010.phpt
+      tests/objects_011.phpt
+      tests/strict_001.phpt
+      tests/strict_002.phpt:
+      add more tests
+
+    * tests/objects_010.phpt
+      tests/objects_010.phpt
+      tests/objects_011.phpt
+      tests/objects_011.phpt
+      tests/strict_001.phpt
+      tests/strict_001.phpt
+      tests/strict_002.phpt
+      tests/strict_002.phpt:
+      
+      file objects_010.phpt was initially added on branch PHP_5_2.
+
+    * tests/objects_001.phpt
+      tests/objects_002.phpt
+      tests/objects_003.phpt
+      tests/objects_004.phpt
+      tests/objects_005.phpt
+      tests/objects_006.phpt
+      tests/objects_007.phpt
+      tests/objects_008.phpt
+      tests/objects_009.phpt:
+      add tests for new E_FATALs
+
+    * tests/objects_002.phpt
+      tests/objects_002.phpt
+      tests/objects_003.phpt
+      tests/objects_003.phpt
+      tests/objects_004.phpt
+      tests/objects_004.phpt
+      tests/objects_005.phpt
+      tests/objects_005.phpt
+      tests/objects_006.phpt
+      tests/objects_006.phpt
+      tests/objects_007.phpt
+      tests/objects_007.phpt
+      tests/objects_008.phpt
+      tests/objects_008.phpt
+      tests/objects_009.phpt
+      tests/objects_009.phpt:
+      
+      file objects_002.phpt was initially added on branch PHP_5_2.
+
+2006-05-31  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_builtin_functions.c
+      zend_builtin_functions.c
+      zend_execute.h
+      zend_execute.h:
+      Keeping consistent arg_stack during arguments freeing (Exception from
+      destructor may use inconsistent arg_stack for backtrace).
+
+    * zend_objects.c
+      zend_objects.c
+      zend_objects_API.c
+      zend_objects_API.c:
+      Support for nested exceptions and fatal errors in destructors
+
 2006-05-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_compile.c:
