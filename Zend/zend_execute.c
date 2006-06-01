@@ -1112,6 +1112,20 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 				}
 
 				if (Z_TYPE_P(dim) != IS_LONG) {
+					switch(Z_TYPE_P(dim)) {
+						/* case IS_LONG: */
+						case IS_STRING:
+						case IS_UNICODE:
+						case IS_DOUBLE:
+						case IS_NULL:
+						case IS_BOOL:
+							/* do nothing */
+							break;
+						default:
+							zend_error(E_WARNING, "Illegal offset type");
+							break;
+					}
+
 					tmp = *dim;
 					zval_copy_ctor(&tmp);
 					convert_to_long(&tmp);
