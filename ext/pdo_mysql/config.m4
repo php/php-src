@@ -5,7 +5,7 @@ dnl
 if test "$PHP_PDO" != "no"; then
 
 AC_DEFUN([PDO_MYSQL_LIB_CHK], [
-  str="$PDO_MYSQL_DIR/$1/libmysqlclient.*"
+  str="$PDO_MYSQL_DIR/$1/libmysqlclient*"
   for j in `echo $str`; do
     if test -r $j; then
       PDO_MYSQL_LIB_DIR=$MYSQL_DIR/$1
@@ -53,8 +53,14 @@ if test "$PHP_PDO_MYSQL" != "no"; then
     if test "x$SED" = "x"; then
       AC_PATH_PROG(SED, sed)
     fi
+    if test "$enable_maintainer_zts" = "yes"; then
+      PDO_MYSQL_LIBNAME=mysqlclient_r
+      PDO_MYSQL_LIBS=`$PDO_MYSQL_CONFIG --libs_r | $SED -e "s/'//g"`
+    else
+      PDO_MYSQL_LIBNAME=mysqlclient
+      PDO_MYSQL_LIBS=`$PDO_MYSQL_CONFIG --libs | $SED -e "s/'//g"`
+    fi
     PDO_MYSQL_INCLUDE=`$PDO_MYSQL_CONFIG --cflags | $SED -e "s/'//g"`
-    PDO_MYSQL_LIBS=`$PDO_MYSQL_CONFIG --libs | $SED -e "s/'//g"`
     PDO_MYSQL_SOCKET=`$PDO_MYSQL_CONFIG --socket` 
   elif test -z "$PDO_MYSQL_DIR"; then
     AC_MSG_RESULT([not found])
@@ -80,7 +86,7 @@ if test "$PHP_PDO_MYSQL" != "no"; then
       AC_MSG_ERROR([Unable to find your mysql installation])
     fi
 
-    PHP_ADD_LIBRARY_WITH_PATH(mysqlclient, $PDO_MYSQL_LIB_DIR, PDO_MYSQL_SHARED_LIBADD)
+    PHP_ADD_LIBRARY_WITH_PATH($PDO_MYSQL_LIBNAME, $PDO_MYSQL_LIB_DIR, PDO_MYSQL_SHARED_LIBADD)
     PHP_ADD_INCLUDE($PDO_MYSQL_INC_DIR)
     PDO_MYSQL_INCLUDE=-I$PDO_MYSQL_INC_DIR
   fi
@@ -88,7 +94,7 @@ if test "$PHP_PDO_MYSQL" != "no"; then
   AC_DEFINE_UNQUOTED(PDO_MYSQL_UNIX_ADDR, "$PDO_MYSQL_SOCKET", [ ])
 
 
-  PHP_CHECK_LIBRARY(mysqlclient, mysql_query,
+  PHP_CHECK_LIBRARY($PDO_MYSQL_LIBNAME, mysql_query,
   [
     PHP_EVAL_LIBLINE($PDO_MYSQL_LIBS, PDO_MYSQL_SHARED_LIBADD)
   ],[

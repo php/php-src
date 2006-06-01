@@ -86,7 +86,11 @@ if test "$PHP_MYSQL" != "no"; then
 Note that the MySQL client library is not bundled anymore!])
   fi
 
-  MYSQL_LIBNAME=mysqlclient
+  if test "$enable_maintainer_zts" = "yes"; then
+    MYSQL_LIBNAME=mysqlclient_r
+  else
+    MYSQL_LIBNAME=mysqlclient
+  fi
   case $host_alias in
     *netware*[)]
       MYSQL_LIBNAME=mysql

@@ -51,6 +51,8 @@ PHP                                                                        NEWS
 - Fixed handling of extremely long paths inside tempnam() function. (Ilia)
 - Fixed bug #37635 (parameter of pcntl signal handler is trashed). (Mike)
 - Fixed bug #37632 (Protected method access problem). (Marcus)
+- Fixed bug #37630 (MySQL extensions should link against thread safe client
+  libs if built with ZTS). (Mike)
 - Fixed bug #37620 (mysqli_ssl_set validation is inappropriate). (Georg)
 - Fixed bug #37616 (DATE_RFC822 does not product RFC 822 dates).
   (Hannes Magnusson, Derick)
