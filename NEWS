@@ -76,8 +76,6 @@ PHP                                                                        NEWS
 - Fixed bug #37496 (FastCGI output buffer overrun). (Piotr, Dmitry)
 - Fixed bug #37487 (oci_fetch_array() array-type should always default to
   OCI_BOTH). (Tony)
-- Fixed bug #37395 (recursive mkdir() fails to create nonexistent directories 
-  in root dir). (Tony)
 - Fixed bug #37457 (Crash when an exception is thrown in accept() method of 
   FilterIterator). (Marcus)
 - Fixed bug #37456 (DOMElement->setAttribute() loops forever). (Rob)
@@ -87,6 +85,8 @@ PHP                                                                        NEWS
 - Fixed bug #37416 (iterator_to_array() hides exceptions thrown in rewind()
   method). (Tony)
 - Fixed bug #37413 (Rejected versions of flex that don't work). (Ilia)
+- Fixed bug #37395 (recursive mkdir() fails to create nonexistent directories 
+  in root dir). (Tony)
 - Fixed bug #37394 (substr_compare() returns an error when offset equals 
   string length). (Ilia)
 - Fixed bug #37392 (Unnecessary call to OCITransRollback() at the end of 
