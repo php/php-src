@@ -2926,7 +2926,7 @@ ZEND_METHOD(reflection_class, getMethod)
 /* }}} */
 
 /* {{{ _addmethod */
-static int _addmethod(zend_function *mptr, int num_args, va_list args, zend_hash_key *hash_key TSRMLS_DC)
+static int _addmethod(zend_function *mptr, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	zval *method;
 	zend_class_entry *ce = *va_arg(args, zend_class_entry**);
@@ -2934,6 +2934,7 @@ static int _addmethod(zend_function *mptr, int num_args, va_list args, zend_hash
 	long filter = va_arg(args, long);
 
 	if (mptr->common.fn_flags & filter) {
+		TSRMLS_FETCH();
 		ALLOC_ZVAL(method);
 		reflection_method_factory(ce, mptr, method TSRMLS_CC);
 		add_next_index_zval(retval, method);
@@ -3055,7 +3056,7 @@ ZEND_METHOD(reflection_class, getProperty)
 /* }}} */
 
 /* {{{ _addproperty */
-static int _addproperty(zend_property_info *pptr, int num_args, va_list args, zend_hash_key *hash_key TSRMLS_DC)
+static int _addproperty(zend_property_info *pptr, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	zval *property;
 	zend_class_entry *ce = *va_arg(args, zend_class_entry**);
@@ -3067,6 +3068,7 @@ static int _addproperty(zend_property_info *pptr, int num_args, va_list args, ze
 	}
 	
 	if (pptr->flags	& filter) {
+		TSRMLS_FETCH();
 		ALLOC_ZVAL(property);
 		reflection_property_factory(ce, pptr, property TSRMLS_CC);
 		add_next_index_zval(retval, property);
