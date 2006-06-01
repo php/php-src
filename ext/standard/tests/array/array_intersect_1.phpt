@@ -2,7 +2,7 @@
 Test of the *intersect* bunch of functions (both assoc and non-assoc)
 --FILE--
 <?php
-error_reporting(E_ALL);
+error_reporting(E_ALL|E_STRICT);
 class cr {
 	private $priv_member;
 	public  $public_member;
@@ -13,6 +13,10 @@ class cr {
 	static function comp_func_cr($a, $b) {
 		if ($a->priv_member === $b->priv_member) return 0;
 		return ($a->priv_member > $b->priv_member)? 1:-1;
+	}
+
+	function __toString() {
+		return "Object";
 	}
 }
 
@@ -35,7 +39,7 @@ echo "begin ------------ array_intersect() ----------------------------\n";
 echo '$a='.var_export($a,TRUE).";\n";
 echo '$b='.var_export($b,TRUE).";\n";
 echo 'var_dump(array_intersect($a, $b);'."\n";
-var_dump(@array_intersect($a, $b));
+var_dump(array_intersect($a, $b));
 echo "end   ------------ array_intersect() ----------------------------\n";
 
 /* array_uintersect() */
@@ -51,7 +55,7 @@ echo "begin ------------ array_intersect_assoc() ----------------------\n";
 echo '$a='.var_export($a,TRUE).";\n";
 echo '$b='.var_export($b,TRUE).";\n";
 echo 'var_dump(array_intersect_assoc($a, $b));'."\n";
-var_dump(@array_intersect_assoc($a, $b));
+var_dump(array_intersect_assoc($a, $b));
 echo "end   ------------ array_intersect_assoc() ----------------------\n";
 
 /* array_uintersect_assoc() */
@@ -67,7 +71,7 @@ echo "begin ------------ array_intersect_uassoc() ---------------------\n";
 echo '$a='.var_export($a,TRUE).";\n";
 echo '$b='.var_export($b,TRUE).";\n";
 echo 'var_dump(array_intersect_uassoc($a, $b, "comp_func"));'."\n";
-var_dump(@array_intersect_uassoc($a, $b, "comp_func"));
+var_dump(array_intersect_uassoc($a, $b, "comp_func"));
 echo "end   ------------ array_intersect_uassoc() ---------------------\n";
 
 /* array_uintersect_uassoc() - with ordinary function */
@@ -143,7 +147,42 @@ $b=array (
   )),
 );
 var_dump(array_intersect($a, $b);
-array(0) {
+array(5) {
+  ["0.1"]=>
+  object(cr)#%d (2) {
+    ["priv_member:private"]=>
+    int(9)
+    ["public_member"]=>
+    int(9)
+  }
+  ["0.5"]=>
+  object(cr)#%d (2) {
+    ["priv_member:private"]=>
+    int(12)
+    ["public_member"]=>
+    int(12)
+  }
+  [0]=>
+  object(cr)#%d (2) {
+    ["priv_member:private"]=>
+    int(23)
+    ["public_member"]=>
+    int(23)
+  }
+  [1]=>
+  object(cr)#%d (2) {
+    ["priv_member:private"]=>
+    int(4)
+    ["public_member"]=>
+    int(4)
+  }
+  [2]=>
+  object(cr)#%d (2) {
+    ["priv_member:private"]=>
+    int(-15)
+    ["public_member"]=>
+    int(-15)
+  }
 }
 end   ------------ array_intersect() ----------------------------
 begin ------------ array_uintersect() ---------------------------
@@ -204,21 +243,21 @@ $b=array (
 var_dump(array_uintersect($a, $b, "comp_func_cr"));
 array(3) {
   ["0.1"]=>
-  object(cr)#1 (2) {
+  object(cr)#%d (2) {
     ["priv_member:private"]=>
     int(9)
     ["public_member"]=>
     int(9)
   }
   [1]=>
-  object(cr)#4 (2) {
+  object(cr)#%d (2) {
     ["priv_member:private"]=>
     int(4)
     ["public_member"]=>
     int(4)
   }
   [2]=>
-  object(cr)#5 (2) {
+  object(cr)#%d (2) {
     ["priv_member:private"]=>
     int(-15)
     ["public_member"]=>
@@ -282,7 +321,35 @@ $b=array (
   )),
 );
 var_dump(array_intersect_assoc($a, $b));
-array(0) {
+array(4) {
+  ["0.5"]=>
+  object(cr)#%d (2) {
+    ["priv_member:private"]=>
+    int(12)
+    ["public_member"]=>
+    int(12)
+  }
+  [0]=>
+  object(cr)#%d (2) {
+    ["priv_member:private"]=>
+    int(23)
+    ["public_member"]=>
+    int(23)
+  }
+  [1]=>
+  object(cr)#%d (2) {
+    ["priv_member:private"]=>
+    int(4)
+    ["public_member"]=>
+    int(4)
+  }
+  [2]=>
+  object(cr)#%d (2) {
+    ["priv_member:private"]=>
+    int(-15)
+    ["public_member"]=>
+    int(-15)
+  }
 }
 end   ------------ array_intersect_assoc() ----------------------
 begin ------------ array_uintersect_assoc() ---------------------
@@ -343,14 +410,14 @@ $b=array (
 var_dump(array_uintersect_assoc($a, $b, "comp_func_cr"));
 array(2) {
   [1]=>
-  object(cr)#4 (2) {
+  object(cr)#%d (2) {
     ["priv_member:private"]=>
     int(4)
     ["public_member"]=>
     int(4)
   }
   [2]=>
-  object(cr)#5 (2) {
+  object(cr)#%d (2) {
     ["priv_member:private"]=>
     int(-15)
     ["public_member"]=>
@@ -414,7 +481,35 @@ $b=array (
   )),
 );
 var_dump(array_intersect_uassoc($a, $b, "comp_func"));
-array(0) {
+array(4) {
+  ["0.5"]=>
+  object(cr)#%d (2) {
+    ["priv_member:private"]=>
+    int(12)
+    ["public_member"]=>
+    int(12)
+  }
+  [0]=>
+  object(cr)#%d (2) {
+    ["priv_member:private"]=>
+    int(23)
+    ["public_member"]=>
+    int(23)
+  }
+  [1]=>
+  object(cr)#%d (2) {
+    ["priv_member:private"]=>
+    int(4)
+    ["public_member"]=>
+    int(4)
+  }
+  [2]=>
+  object(cr)#%d (2) {
+    ["priv_member:private"]=>
+    int(-15)
+    ["public_member"]=>
+    int(-15)
+  }
 }
 end   ------------ array_intersect_uassoc() ---------------------
 begin ------------ array_uintersect_uassoc() with ordinary func -
@@ -475,14 +570,14 @@ $b=array (
 var_dump(array_uintersect_uassoc($a, $b, "comp_func_cr", "comp_func"));
 array(2) {
   [1]=>
-  object(cr)#4 (2) {
+  object(cr)#%d (2) {
     ["priv_member:private"]=>
     int(4)
     ["public_member"]=>
     int(4)
   }
   [2]=>
-  object(cr)#5 (2) {
+  object(cr)#%d (2) {
     ["priv_member:private"]=>
     int(-15)
     ["public_member"]=>
@@ -548,14 +643,14 @@ $b=array (
 var_dump(array_uintersect_uassoc($a, $b, array("cr", "comp_func_cr"), "comp_func"));
 array(2) {
   [1]=>
-  object(cr)#4 (2) {
+  object(cr)#%d (2) {
     ["priv_member:private"]=>
     int(4)
     ["public_member"]=>
     int(4)
   }
   [2]=>
-  object(cr)#5 (2) {
+  object(cr)#%d (2) {
     ["priv_member:private"]=>
     int(-15)
     ["public_member"]=>
