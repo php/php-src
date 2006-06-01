@@ -41,3 +41,27 @@ array(8) {
   [0]=>
   int(1)
 }
+--UEXPECTF--
+Warning: array_count_values(): Can only count STRING and INTEGER values! in %s on line %d
+
+Warning: array_count_values(): Can only count STRING and INTEGER values! in %s on line %d
+
+Warning: array_count_values(): Can only count STRING and INTEGER values! in %s on line %d
+array(8) {
+  [1]=>
+  int(2)
+  [u"hello"]=>
+  int(2)
+  [u"world"]=>
+  int(1)
+  [u""]=>
+  int(1)
+  [u"rabbit"]=>
+  int(1)
+  [u"foo"]=>
+  int(1)
+  [u"Foo"]=>
+  int(1)
+  [0]=>
+  int(1)
+}
