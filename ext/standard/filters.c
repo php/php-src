@@ -547,7 +547,6 @@ static php_conv_err_t php_conv_base64_encode_convert(php_conv_base64_encode *ins
 	register size_t ocnt, icnt;
 	register unsigned char *ps, *pd;
 	register unsigned int line_ccnt;
-	size_t nbytes_written;
 
 	if (in_pp == NULL || in_left_p == NULL) { 
 		return php_conv_base64_encode_flush(inst, in_pp, in_left_p, out_pp, out_left_p);
@@ -558,7 +557,6 @@ static php_conv_err_t php_conv_base64_encode_convert(php_conv_base64_encode *ins
 	ps = (unsigned char *)(*in_pp);
 	icnt = *in_left_p;
 	line_ccnt = inst->line_ccnt;
-	nbytes_written = 0;
 
 	/* consume the remainder first */
 	switch (inst->erem_len) {
