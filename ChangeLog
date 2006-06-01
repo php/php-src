@@ -1,3 +1,136 @@
+2006-05-31  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      spelling corrections
+
+2006-05-31  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_5_2)
+      main/main.c:
+      Revert accidentally committed internal patch
+
+2006-05-31  Antony Dovgal  <antony@zend.com>
+
+    * ext/mcrypt/tests/bug37595.phpt:
+      add expected warning to the test
+
+2006-05-31  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/mcrypt/mcrypt.c
+      ext/mcrypt/tests/blowfish.phpt
+      ext/mcrypt/tests/bug37595.phpt:
+      - MF52: There was nothing wrong here, bug report #37595 is bogus.
+      - MF52: Added a new test case to demonstrate a longer plain text.
+
+    * (PHP_5_2)
+      NEWS
+      ext/mcrypt/mcrypt.c
+      ext/mcrypt/tests/blowfish.phpt
+      ext/mcrypt/tests/bug37595.phpt:
+      - There was nothing wrong here, bug report #37595 is bogus.
+      - Added a new test case to demonstrate a longer plain text.
+
+2006-05-31  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_interfaces.c:
+      fix error message in Unicode mode
+
+    * ZendEngine2/tests/objects_010.phpt
+      ZendEngine2/tests/objects_011.phpt
+      ZendEngine2/tests/strict_001.phpt
+      ZendEngine2/tests/strict_002.phpt:
+      add more tests
+
+    * ZendEngine2/tests/objects_010.phpt
+      ZendEngine2/tests/objects_010.phpt
+      ZendEngine2/tests/objects_011.phpt
+      ZendEngine2/tests/objects_011.phpt
+      ZendEngine2/tests/strict_001.phpt
+      ZendEngine2/tests/strict_001.phpt
+      ZendEngine2/tests/strict_002.phpt
+      ZendEngine2/tests/strict_002.phpt:
+      
+      file objects_010.phpt was initially added on branch PHP_5_2.
+
+2006-05-31  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_5_2)
+      main/main.c
+      main/php_compat.h
+      main/php_compat.h:
+      MFB
+
+    * (PHP_4_4)
+      main/php_compat.h:
+      Add pcre_compile2() to the list of aliases.
+
+2006-05-31  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/tests/objects_001.phpt
+      ZendEngine2/tests/objects_002.phpt
+      ZendEngine2/tests/objects_003.phpt
+      ZendEngine2/tests/objects_004.phpt
+      ZendEngine2/tests/objects_005.phpt
+      ZendEngine2/tests/objects_006.phpt
+      ZendEngine2/tests/objects_007.phpt
+      ZendEngine2/tests/objects_008.phpt
+      ZendEngine2/tests/objects_009.phpt:
+      add tests for new E_FATALs
+
+    * ZendEngine2/tests/objects_002.phpt
+      ZendEngine2/tests/objects_002.phpt
+      ZendEngine2/tests/objects_003.phpt
+      ZendEngine2/tests/objects_003.phpt
+      ZendEngine2/tests/objects_004.phpt
+      ZendEngine2/tests/objects_004.phpt
+      ZendEngine2/tests/objects_005.phpt
+      ZendEngine2/tests/objects_005.phpt
+      ZendEngine2/tests/objects_006.phpt
+      ZendEngine2/tests/objects_006.phpt
+      ZendEngine2/tests/objects_007.phpt
+      ZendEngine2/tests/objects_007.phpt
+      ZendEngine2/tests/objects_008.phpt
+      ZendEngine2/tests/objects_008.phpt
+      ZendEngine2/tests/objects_009.phpt
+      ZendEngine2/tests/objects_009.phpt:
+      
+      file objects_002.phpt was initially added on branch PHP_5_2.
+
+2006-05-31  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute.h:
+      Keeping consistent arg_stack during arguments freeing (Exception from
+      destructor may use inconsistent arg_stack for backtrace).
+
+    * ZendEngine2/zend_objects.c
+      ZendEngine2/zend_objects.c
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.c:
+      Support for nested exceptions and fatal errors in destructors
+
+2006-05-31  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/mcrypt/mcrypt.c
+      ext/mcrypt/tests/bug37595.phpt:
+      MFH: fix #37595 (mcrypt_generic calculates data length in wrong way)
+
+    * ext/mcrypt/mcrypt.c
+      ext/mcrypt/tests/bug37595.phpt
+      ext/mcrypt/tests/bug37595.phpt:
+      fix #37595 (mcrypt_generic calculates data length in wrong way)
+
+2006-05-31  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - Fix typo
+
 2006-05-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_2)
