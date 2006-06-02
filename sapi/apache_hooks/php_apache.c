@@ -1731,7 +1731,7 @@ PHP_FUNCTION(virtual)
 		RETURN_FALSE;
 	}
 
-	php_end_ob_buffers(1 TSRMLS_CC);
+	php_output_end_all();
 	php_header(TSRMLS_C);
 
 	if (run_sub_req(rr)) {

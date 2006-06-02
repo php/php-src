@@ -2858,7 +2858,7 @@ PHP_FUNCTION(pg_lo_read_all)
 
 	tbytes = 0;
 	while ((nbytes = lo_read((PGconn *)pgsql->conn, pgsql->lofd, buf, PGSQL_LO_READ_BUF_SIZE))>0) {
-		php_body_write(buf, nbytes TSRMLS_CC);
+		PHPWRITE(buf, nbytes);
 		tbytes += nbytes;
 	}
 	RETURN_LONG(tbytes);

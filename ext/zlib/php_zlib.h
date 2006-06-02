@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
-   |          Stefan Röhrich <sr@linux.de>                                |
+   |          Stefan Rï¿½rich <sr@linux.de>                                |
    +----------------------------------------------------------------------+
 */
 
@@ -55,7 +55,7 @@ PHP_FUNCTION(ob_gzhandler);
 PHP_FUNCTION(zlib_get_coding_type);
 
 int php_enable_output_compression(int buffer_size TSRMLS_DC);
-int php_ob_gzhandler_check(TSRMLS_D);
+int php_ob_gzhandler_check(zval *handler_name TSRMLS_DC);
 
 php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 extern php_stream_ops php_stream_gzio_ops;

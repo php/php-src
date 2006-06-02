@@ -1482,7 +1482,7 @@ PHP_METHOD(SoapServer, handle)
 		}
 	}
 
-	if (php_start_ob_buffer(NULL, 0, 0 TSRMLS_CC) != SUCCESS) {
+	if (php_output_start_default() != SUCCESS) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR,"ob_start failed");
 	}
 
@@ -1609,7 +1609,7 @@ PHP_METHOD(SoapServer, handle)
 					php_error_docref(NULL TSRMLS_CC, E_ERROR, "Error calling constructor");
 				}
 				if (EG(exception)) {
-					php_end_ob_buffer(0, 0 TSRMLS_CC);
+					php_output_discard();
 					if (Z_TYPE_P(EG(exception)) == IS_OBJECT &&
 					    instanceof_function(Z_OBJCE_P(EG(exception)), soap_fault_class_entry TSRMLS_CC)) {
 						soap_server_fault_ex(function, EG(exception), NULL TSRMLS_CC);
@@ -1642,7 +1642,7 @@ PHP_METHOD(SoapServer, handle)
 					}
 #ifdef ZEND_ENGINE_2
 					if (EG(exception)) {
-						php_end_ob_buffer(0, 0 TSRMLS_CC);
+						php_output_discard();
 						if (Z_TYPE_P(EG(exception)) == IS_OBJECT &&
 						    instanceof_function(Z_OBJCE_P(EG(exception)), soap_fault_class_entry TSRMLS_CC)) {
 							soap_server_fault_ex(function, EG(exception), NULL TSRMLS_CC);
@@ -1721,14 +1721,14 @@ PHP_METHOD(SoapServer, handle)
 					    Z_TYPE_PP(tmp) != IS_NULL) {
 						headerfault = *tmp;
 					}
-					php_end_ob_buffer(0, 0 TSRMLS_CC);
+					php_output_discard();
 					soap_server_fault_ex(function, &h->retval, h TSRMLS_CC);
 					efree(fn_name);
 					if (soap_obj) {zval_ptr_dtor(&soap_obj);}
 					goto fail;
 #ifdef ZEND_ENGINE_2
 				} else if (EG(exception)) {
-					php_end_ob_buffer(0, 0 TSRMLS_CC);
+					php_output_discard();
 					if (Z_TYPE_P(EG(exception)) == IS_OBJECT &&
 					    instanceof_function(Z_OBJCE_P(EG(exception)), soap_fault_class_entry TSRMLS_CC)) {
 						zval *headerfault = NULL, **tmp;
@@ -1774,7 +1774,7 @@ PHP_METHOD(SoapServer, handle)
 
 #ifdef ZEND_ENGINE_2
 	if (EG(exception)) {
-		php_end_ob_buffer(0, 0 TSRMLS_CC);
+		php_output_discard();
 		if (Z_TYPE_P(EG(exception)) == IS_OBJECT &&
 		    instanceof_function(Z_OBJCE_P(EG(exception)), soap_fault_class_entry TSRMLS_CC)) {
 			soap_server_fault_ex(function, EG(exception), NULL TSRMLS_CC);
@@ -1794,7 +1794,7 @@ PHP_METHOD(SoapServer, handle)
 
 		if (Z_TYPE(retval) == IS_OBJECT &&
 		    instanceof_function(Z_OBJCE(retval), soap_fault_class_entry TSRMLS_CC)) {
-			php_end_ob_buffer(0, 0 TSRMLS_CC);
+			php_output_discard();
 			soap_server_fault_ex(function, &retval, NULL TSRMLS_CC);
 			goto fail;
 		}
@@ -1815,7 +1815,7 @@ PHP_METHOD(SoapServer, handle)
 	}
 
 	/* Flush buffer */
-	php_end_ob_buffer(0, 0 TSRMLS_CC);
+	php_output_discard();
 
 	if (doc_return) {
 		/* xmlDocDumpMemoryEnc(doc_return, &buf, &size, XML_CHAR_ENCODING_UTF8); */
@@ -2083,11 +2083,11 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 				code = "Server";
 			}
 			/* Get output buffer and send as fault detials */
-			if (php_ob_get_length(&outbuflen TSRMLS_CC) != FAILURE && Z_LVAL(outbuflen) != 0) {
+			if (php_output_get_length(&outbuflen) != FAILURE && Z_LVAL(outbuflen) != 0) {
 				ALLOC_INIT_ZVAL(outbuf);
-		    php_ob_get_buffer(outbuf TSRMLS_CC);
+				php_output_get_contents(outbuf TSRMLS_CC);
 			}
-			php_end_ob_buffer(0, 0 TSRMLS_CC);
+			php_output_discard();
 
 			INIT_ZVAL(fault_obj);
 			set_soap_fault(&fault_obj, NULL, code, buffer, NULL, outbuf, NULL TSRMLS_CC);

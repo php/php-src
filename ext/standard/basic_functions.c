@@ -2406,7 +2406,7 @@ PHP_FUNCTION(highlight_file)
 	}
 
 	if (i) {
-		php_start_ob_buffer (NULL, 0, 1 TSRMLS_CC);
+		php_output_start_default();
 	}
 
 	php_get_highlight_struct(&syntax_highlighter_ini);
@@ -2416,8 +2416,8 @@ PHP_FUNCTION(highlight_file)
 	}
 
 	if (i) {
-		php_ob_get_buffer (return_value TSRMLS_CC);
-		php_end_ob_buffer (0, 0 TSRMLS_CC);
+		php_output_get_contents(return_value);
+		php_output_discard();
 	} else {
 		RETURN_TRUE;
 	}
@@ -2437,7 +2437,7 @@ PHP_FUNCTION(php_strip_whitespace)
 		RETURN_FALSE;
 	}
 
-	php_start_ob_buffer(NULL, 0, 1 TSRMLS_CC);
+	php_output_start_default();
 
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.filename = filename;
@@ -2453,8 +2453,8 @@ PHP_FUNCTION(php_strip_whitespace)
 	zend_destroy_file_handle(&file_handle TSRMLS_CC);
 	zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
 
-	php_ob_get_buffer(return_value TSRMLS_CC);
-	php_end_ob_buffer(0, 0 TSRMLS_CC);
+	php_output_get_contents(return_value);
+	php_output_discard();
 
 	return;
 }
@@ -2476,7 +2476,7 @@ PHP_FUNCTION(highlight_string)
 	convert_to_string(expr);
 
 	if (i) {
-		php_start_ob_buffer (NULL, 0, 1 TSRMLS_CC);
+		php_output_start_default();
 	}
 
 	EG(error_reporting) = E_ERROR;
@@ -2494,8 +2494,8 @@ PHP_FUNCTION(highlight_string)
 	EG(error_reporting) = old_error_reporting;
 
 	if (i) {
-		php_ob_get_buffer (return_value TSRMLS_CC);
-		php_end_ob_buffer (0, 0 TSRMLS_CC);
+		php_output_get_contents(return_value);
+		php_output_discard();
 	} else {
 		RETURN_TRUE;
 	}
@@ -2739,14 +2739,14 @@ PHP_FUNCTION(print_r)
 	}
 	
 	if (i) {
-		php_start_ob_buffer (NULL, 0, 1 TSRMLS_CC);
+		php_output_start_default();
 	}
 
 	zend_print_zval_r(var, 0 TSRMLS_CC);
 
 	if (i) {
-		php_ob_get_buffer (return_value TSRMLS_CC);
-		php_end_ob_buffer (0, 0 TSRMLS_CC);
+		php_output_get_contents(return_value);
+		php_output_discard();
 	} else {
 		RETURN_TRUE;
 	}
