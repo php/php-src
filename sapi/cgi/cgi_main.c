@@ -1266,11 +1266,10 @@ consult the installation file that came with this distribution, or visit \n\
 				case 'h':
 				case '?':
 					no_headers = 1;
-					php_output_startup();
-					php_output_activate(TSRMLS_C);
+					php_output_tearup();
 					SG(headers_sent) = 1;
 					php_cgi_usage(argv[0]);
-					php_end_ob_buffers(1 TSRMLS_CC);
+					php_output_teardown();
 					exit(1);
 					break;
 			}
@@ -1299,11 +1298,10 @@ consult the installation file that came with this distribution, or visit \n\
 			if (!cgi && !fastcgi) {
 				if (cgi_sapi_module.php_ini_path_override && cgi_sapi_module.php_ini_ignore) {
 					no_headers = 1;
-					php_output_startup();
-					php_output_activate(TSRMLS_C);
+					php_output_tearup();
 					SG(headers_sent) = 1;
 					php_printf("You cannot use both -n and -c switch. Use -h for help.\n");
-					php_end_ob_buffers(1 TSRMLS_CC);
+					php_output_teardown();
 					exit(1);
 				}
 
@@ -1349,7 +1347,7 @@ consult the installation file that came with this distribution, or visit \n\
 								SG(request_info).no_headers = 1;
 							}
 							php_print_info(0xFFFFFFFF TSRMLS_CC);
-							php_end_ob_buffers(1 TSRMLS_CC);
+							php_output_teardown();
 							exit(0);
 							break;
 
@@ -1359,15 +1357,14 @@ consult the installation file that came with this distribution, or visit \n\
 							break;
 
 						case 'm': /* list compiled in modules */
-							php_output_startup();
-							php_output_activate(TSRMLS_C);
+							php_output_tearup();
 							SG(headers_sent) = 1;
 							php_printf("[PHP Modules]\n");
 							print_modules(TSRMLS_C);
 							php_printf("\n[Zend Modules]\n");
 							print_extensions(TSRMLS_C);
 							php_printf("\n");
-							php_end_ob_buffers(1 TSRMLS_CC);
+							php_output_teardown();
 							exit(0);
 							break;
 
@@ -1400,7 +1397,7 @@ consult the installation file that came with this distribution, or visit \n\
 #else
 							php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2006 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 #endif
-							php_end_ob_buffers(1 TSRMLS_CC);
+							php_output_teardown();
 							exit(0);
 							break;
 
@@ -1562,7 +1559,7 @@ consult the installation file that came with this distribution, or visit \n\
 					if (open_file_for_scanning(&file_handle TSRMLS_CC) == SUCCESS) {
 						zend_strip(TSRMLS_C);
 						fclose(file_handle.handle.fp);
-						php_end_ob_buffers(1 TSRMLS_CC);
+						php_output_teardown();
 					}
 					return SUCCESS;
 					break;
@@ -1574,7 +1571,7 @@ consult the installation file that came with this distribution, or visit \n\
 							php_get_highlight_struct(&syntax_highlighter_ini);
 							zend_highlight(&syntax_highlighter_ini TSRMLS_CC);
 							fclose(file_handle.handle.fp);
-							php_end_ob_buffers(1 TSRMLS_CC);
+							php_output_teardown();
 						}
 						return SUCCESS;
 					}
@@ -1585,6 +1582,7 @@ consult the installation file that came with this distribution, or visit \n\
 					open_file_for_scanning(&file_handle TSRMLS_CC);
 					zend_indent();
 					fclose(file_handle.handle.fp);
+					php_output_teardown();
 					return SUCCESS;
 					break;
 #endif

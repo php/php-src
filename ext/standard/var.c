@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Jani Lehtimäki <jkl@njet.net>                               |
+   | Authors: Jani Lehtimï¿½i <jkl@njet.net>                               |
    |          Thies C. Arntzen <thies@thieso.net>                         |
    |          Sascha Schumann <sascha@schumann.cx>                        |
    +----------------------------------------------------------------------+
@@ -602,7 +602,7 @@ PHP_FUNCTION(var_export)
 	}
 	
 	if (return_output) {
-		php_start_ob_buffer (NULL, 0, 1 TSRMLS_CC);
+		php_output_start_default();
 	}
 	
 	/* UTODO
@@ -614,8 +614,8 @@ PHP_FUNCTION(var_export)
 	php_var_export(&var, 1 TSRMLS_CC);
 
 	if (return_output) {
-		php_ob_get_buffer (return_value TSRMLS_CC);
-		php_end_ob_buffer (0, 0 TSRMLS_CC);
+		php_output_get_contents(return_value);
+		php_output_discard();
 	}
 }
 /* }}} */

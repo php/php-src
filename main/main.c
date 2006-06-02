@@ -234,8 +234,8 @@ static ZEND_INI_MH(OnUpdateOutputEncoding)
 
 #define PHP_INI_OPTION_HEADERS_SENT(option_name)                                                                                                                       \
 		if (SG(headers_sent)) {                                                                                                                                 \
-			char *output_start_filename = php_get_output_start_filename(TSRMLS_C);                                                                              \
-			int output_start_lineno = php_get_output_start_lineno(TSRMLS_C);                                                                                    \
+			char *output_start_filename = php_output_get_start_filename();                                                                              \
+			int output_start_lineno = php_output_get_start_lineno();                                                                                    \
 			if (output_start_filename) {                                                                                                                        \
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Option " #option_name " cannot be changed after headers have been sent (output started at %s:%d)", \
 																					output_start_filename, output_start_lineno);                                \
@@ -870,14 +870,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			php_log_err(log_buffer TSRMLS_CC);
 			efree(log_buffer);
 		}
-		if (PG(display_errors)
-			&& ((module_initialized && !PG(during_request_startup))
-				|| (PG(display_startup_errors)
-					&& (OG(php_body_write)==php_default_output_func || OG(php_body_write)==php_ub_body_write_no_header || OG(php_body_write)==php_ub_body_write)
-					)
-				)
-			) {
-
+		if (PG(display_errors) && ((module_initialized && !PG(during_request_startup)) || (PG(display_startup_errors)))) {
 			if (PG(xmlrpc_errors)) {
 				php_printf("<?xml version=\"1.0\"?><methodResponse><fault><value><struct><member><name>faultCode</name><value><int>%ld</int></value></member><member><name>faultString</name><value><string>%s:%s in %s on line %d</string></value></member></struct></value></fault></methodResponse>", PG(xmlrpc_error_number), error_type_str, buffer, error_filename, error_lineno);
 			} else {
@@ -1182,7 +1175,7 @@ int php_request_startup(TSRMLS_D)
 	zend_try {
 		PG(during_request_startup) = 1;
 
-		php_output_activate(TSRMLS_C);
+		php_output_activate();
 
 		/* initialize global variables */
 		PG(modules_activated) = 0;
@@ -1208,15 +1201,16 @@ int php_request_startup(TSRMLS_D)
 		}
 
 		if (PG(output_handler) && PG(output_handler)[0]) {
-			php_start_ob_buffer_named(PG(output_handler), 0, 1 TSRMLS_CC);
+			zval *oh;
+			
+			MAKE_STD_ZVAL(oh);
+			ZVAL_ASCII_STRING(oh, PG(output_handler), ZSTR_DUPLICATE);
+			php_output_start_user(oh, 0, PHP_OUTPUT_HANDLER_STDFLAGS);
+			zval_ptr_dtor(&oh);
 		} else if (PG(output_buffering)) {
-			if (PG(output_buffering)>1) {
-				php_start_ob_buffer(NULL, PG(output_buffering), 1 TSRMLS_CC);
-			} else {
-				php_start_ob_buffer(NULL, 0, 1 TSRMLS_CC);
-			}
+			php_output_start_user(NULL, PG(output_buffering) > 1 ? PG(output_buffering) : 0, PHP_OUTPUT_HANDLER_STDFLAGS);
 		} else if (PG(implicit_flush)) {
-			php_start_implicit_flush(TSRMLS_C);
+			php_output_set_implicit_flush(1);
 		}
 
 		/* We turn this off in php_execute_script() */
@@ -1246,13 +1240,12 @@ int php_request_startup(TSRMLS_D)
 		return FAILURE;
 	}
 
-	php_output_activate(TSRMLS_C);
+	php_output_activate();
 	sapi_activate(TSRMLS_C);
 	php_hash_environment(TSRMLS_C);
 
 	zend_try {
 		PG(during_request_startup) = 1;
-		php_output_activate(TSRMLS_C);
 		if (PG(expose_php)) {
 			sapi_add_header(SAPI_PHP_VERSION_HEADER, sizeof(SAPI_PHP_VERSION_HEADER)-1, 1);
 		}
@@ -1279,7 +1272,7 @@ int php_request_startup_for_hook(TSRMLS_D)
 		return FAILURE;
 	}
 
-	php_output_activate(TSRMLS_C);
+	php_output_activate();
 	sapi_activate_headers_only(TSRMLS_C);
 	php_hash_environment(TSRMLS_C);
 
@@ -1372,7 +1365,12 @@ void php_request_shutdown(void *dummy)
 
 	/* 3. Flush all output buffers */
 	zend_try {
-		php_end_ob_buffers((zend_bool)(SG(request_info).headers_only?0:1) TSRMLS_CC);
+		if (SG(request_info).headers_only) {
+			php_output_discard_all();
+		} else {
+			php_output_end_all();
+		}
+		php_output_deactivate();
 	} zend_end_try();
 
 	/* 4. Send the set HTTP headers (note: This must be done AFTER php_end_ob_buffers() !!) */
@@ -1432,12 +1430,12 @@ void php_request_shutdown(void *dummy)
 /* }}} */
 
 
-/* {{{ php_body_write_wrapper
+/* {{{ php_output_wrapper
  */
-static int php_body_write_wrapper(const char *str, uint str_length)
+static int php_output_wrapper(const char *str, uint str_length)
 {
 	TSRMLS_FETCH();
-	return php_body_write(str, str_length TSRMLS_CC);
+	return php_output_write(str, str_length);
 }
 /* }}} */
 
@@ -1523,7 +1521,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 	zuf.error_function = php_error_cb;
 	zuf.printf_function = php_printf;
-	zuf.write_function = php_body_write_wrapper;
+	zuf.write_function = php_output_wrapper;
 	zuf.fopen_function = php_fopen_wrapper_for_zend;
 	zuf.message_handler = php_message_handler_for_zend;
 	zuf.block_interruptions = sapi_module.block_interruptions;
@@ -1667,7 +1665,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	REGISTER_MAIN_STRINGL_CONSTANT("PHP_EOL", PHP_EOL, sizeof(PHP_EOL)-1, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("PHP_INT_MAX", LONG_MAX, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("PHP_INT_SIZE", sizeof(long), CONST_PERSISTENT | CONST_CS);
-	php_output_register_constants(TSRMLS_C);
+	php_output_register_constants();
 	php_rfc1867_register_constants(TSRMLS_C);
 
 	if (php_startup_ticks(TSRMLS_C) == FAILURE) {
@@ -1784,6 +1782,8 @@ void php_module_shutdown(TSRMLS_D)
 #else
 	zend_ini_global_shutdown(TSRMLS_C);
 #endif
+
+	php_output_shutdown();
 
 	module_initialized = 0;
 	if (PG(last_error_message)) {
@@ -1946,7 +1946,7 @@ PHPAPI void php_handle_aborted_connection(void)
 	TSRMLS_FETCH();
 
 	PG(connection_status) = PHP_CONNECTION_ABORTED;
-	php_output_set_status(0 TSRMLS_CC);
+	php_output_set_status(PHP_OUTPUT_DISABLED);
 
 	if (!PG(ignore_user_abort)) {
 		zend_bailout();

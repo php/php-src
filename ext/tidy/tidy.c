@@ -985,9 +985,13 @@ PHP_MINIT_FUNCTION(tidy)
 PHP_RINIT_FUNCTION(tidy)
 {
 	if (INI_BOOL("tidy.clean_output") == TRUE) {
-		if (php_start_ob_buffer_named("ob_tidyhandler", 0, 1 TSRMLS_CC) == FAILURE) {
+		zval *name;
+		MAKE_STD_ZVAL(name);
+		ZVAL_ASCII_STRINGL(name, "ob_tidyhandler", sizeof("ob_tidyhandler"), ZSTR_DUPLICATE);
+		if (php_output_start_user(name, 0, PHP_OUTPUT_HANDLER_STDFLAGS) == FAILURE) {
 			zend_error(E_NOTICE, "Failure installing Tidy output buffering.");
 		}
+		zval_ptr_dtor(&name);
 	}
 
 	return SUCCESS;

@@ -453,7 +453,7 @@ int php_url_scanner_add_var(char *name, int name_len, char *value, int value_len
 	
 	if (! BG(url_adapt_state_ex).active) {
 		php_url_scanner_ex_activate(TSRMLS_C);
-		php_ob_set_internal_handler(php_url_scanner_output_handler, 0, "URL-Rewriter", 1 TSRMLS_CC);
+		php_output_start_internal("URL-Rewriter", php_url_scanner_output_handler, 0, PHP_OUTPUT_HANDLER_STDFLAGS);
 		BG(url_adapt_state_ex).active = 1;
 	}
 

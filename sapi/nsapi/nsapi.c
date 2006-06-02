@@ -347,7 +347,7 @@ PHP_FUNCTION(nsapi_virtual)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include uri '%s' - Sub-requests do not work with zlib.output_compression", (*uri)->value.str.val);
 		RETURN_FALSE;
 	} else {
-		php_end_ob_buffers(1 TSRMLS_CC);
+		php_output_end_all();
 		php_header(TSRMLS_C);
 
 		/* do the sub-request */

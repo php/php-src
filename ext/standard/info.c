@@ -70,7 +70,7 @@ static int php_info_write_wrapper(const char *str, uint str_length)
 
 	elem_esc = php_escape_html_entities((char *)str, str_length, &new_len, 0, ENT_QUOTES, NULL TSRMLS_CC);
 
-	written = php_body_write(elem_esc, new_len TSRMLS_CC);
+	written = PHPWRITE(elem_esc, new_len);
 
 	efree(elem_esc);
 
@@ -351,7 +351,7 @@ PHPAPI void php_print_info_htmlhead(TSRMLS_D)
 	}
 
 #if HAVE_MBSTRING
-	if (php_ob_handler_used("mb_output_handler" TSRMLS_CC)) {
+	if (php_output_handler_started("mb_output_handler")) {
 		if (MBSTRG(current_http_output_encoding) == mbfl_no_encoding_pass) {
 			charset = "US-ASCII";
 		} else {
@@ -361,7 +361,7 @@ PHPAPI void php_print_info_htmlhead(TSRMLS_D)
 #endif   
 
 #if HAVE_ICONV
-	if (php_ob_handler_used("ob_iconv_handler" TSRMLS_CC)) {
+	if (php_output_handler_started("ob_iconv_handler")) {
 		charset = ICONVG(output_encoding);
 	}
 #endif
@@ -999,9 +999,9 @@ PHP_FUNCTION(phpinfo)
 	}
 
 	/* Andale!  Andale!  Yee-Hah! */
-	php_start_ob_buffer(NULL, 4096, 0 TSRMLS_CC);
+	php_output_start_default();
 	php_print_info(flag TSRMLS_CC);
-	php_end_ob_buffer(1, 0 TSRMLS_CC);
+	php_output_end();
 
 	RETURN_TRUE;
 }
