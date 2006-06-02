@@ -40,3 +40,32 @@ array(7) {
   }
 }
 ===DONE===
+--UEXPECTF--
+array(7) {
+  [u"FileName"]=>
+  string(12) "bug34704.jpg"
+  [u"FileDateTime"]=>
+  int(1128867104)
+  [u"FileSize"]=>
+  int(9976)
+  [u"FileType"]=>
+  int(2)
+  [u"MimeType"]=>
+  string(10) "image/jpeg"
+  [u"SectionsFound"]=>
+  string(4) "IFD0"
+  [u"COMPUTED"]=>
+  array(5) {
+    [u"html"]=>
+    string(24) "width="386" height="488""
+    [u"Height"]=>
+    int(488)
+    [u"Width"]=>
+    int(386)
+    [u"IsColor"]=>
+    int(1)
+    [u"ByteOrderMotorola"]=>
+    int(0)
+  }
+}
+===DONE===
