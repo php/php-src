@@ -7,3 +7,5 @@ Bug #37616 (DATE_RFC822 does not product RFC 822 dates)
 ?>
 --EXPECT--
 string(29) "Sat, 01 Jul 06 14:27:30 +0200"
+--UEXPECT--
+unicode(29) "Sat, 01 Jul 06 14:27:30 +0200"

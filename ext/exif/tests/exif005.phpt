@@ -20,3 +20,10 @@ array(2) {
   ["DateTime"]=>
   string(19) "2002:10:18 20:06:00"
 }
+--UEXPECTF--
+array(2) {
+  [u"ImageDescription"]=>
+  string(11) "Ifd00000009"
+  [u"DateTime"]=>
+  string(19) "2002:10:18 20:06:00"
+}
