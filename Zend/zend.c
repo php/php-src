@@ -871,7 +871,7 @@ static void zend_new_thread_end_handler(THREAD_T thread_id TSRMLS_DC)
 
 static void alloc_globals_dtor(zend_alloc_globals *alloc_globals_p TSRMLS_DC)
 {
-	shutdown_memory_manager(0, 1 TSRMLS_CC);
+	shutdown_memory_manager(1, 1 TSRMLS_CC);
 }
 #endif
 
