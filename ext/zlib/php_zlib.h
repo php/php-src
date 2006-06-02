@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
-   |          Stefan Rï¿½rich <sr@linux.de>                                |
+   |          Stefan Röhrich <sr@linux.de>                                |
    +----------------------------------------------------------------------+
 */
 
