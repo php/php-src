@@ -1,3 +1,36 @@
+2006-06-01  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      tests/offset_array.phpt
+      tests/offset_bool.phpt
+      tests/offset_long.phpt
+      tests/offset_null.phpt
+      tests/offset_object.phpt
+      tests/offset_string.phpt:
+      add new tests
+
+    * tests/offset_array.phpt
+      tests/offset_array.phpt
+      tests/offset_bool.phpt
+      tests/offset_bool.phpt
+      tests/offset_long.phpt
+      tests/offset_long.phpt
+      tests/offset_null.phpt
+      tests/offset_null.phpt
+      tests/offset_object.phpt
+      tests/offset_object.phpt
+      tests/offset_string.phpt
+      tests/offset_string.phpt:
+      
+      add new tests
+
+    * (PHP_5_2)
+      zend_execute.c:
+      MFH: throw a warning when using invalid offset types with strings
+
+    * zend_execute.c:
+      throw a warning when using invalid offset types with strings
+
 2006-05-31  Antony Dovgal  <antony@zend.com>
 
     * zend_interfaces.c:
