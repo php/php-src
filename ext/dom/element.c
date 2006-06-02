@@ -954,7 +954,7 @@ PHP_FUNCTION(dom_element_set_id_attribute)
 	}
 
 	attrp = xmlHasNsProp(nodep, name, NULL);
-	if (attrp == NULL) {
+	if (attrp == NULL || attrp->type == XML_ATTRIBUTE_DECL) {
 		php_dom_throw_error(NOT_FOUND_ERR, dom_get_strict_error(intern->document) TSRMLS_CC);
 	} else {
 		php_set_attribute_id(attrp, is_id);
@@ -991,7 +991,7 @@ PHP_FUNCTION(dom_element_set_id_attribute_ns)
 	}
 
 	attrp = xmlHasNsProp(elemp, name, uri);
-	if (attrp == NULL) {
+	if (attrp == NULL || attrp->type == XML_ATTRIBUTE_DECL) {
 		php_dom_throw_error(NOT_FOUND_ERR, dom_get_strict_error(intern->document) TSRMLS_CC);
 	} else {
 		php_set_attribute_id(attrp, is_id);
