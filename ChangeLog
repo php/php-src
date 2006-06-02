@@ -1,3 +1,94 @@
+2006-06-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/filters.c:
+      MFB: fixed compiler warning
+
+    * (PHP_5_2)
+      ext/standard/filters.c:
+      Fixed compiler warning
+
+2006-06-01  Michael Wallner  <mike@iworks.at>
+
+    * ext/mysql/config.m4
+      ext/mysql/php_mysql.c
+      ext/mysqli/config.m4:
+      MFB: #37630 MySQL extensions should link against thread safe client libs if
+      built with ZTS
+
+    * (PHP_5_2)
+      NEWS
+      ext/mysql/config.m4
+      ext/mysql/php_mysql.c
+      ext/mysqli/config.m4:
+      - Fix bug #37630: MySQL extensions should link against thread safe client
+      libs if built with ZTS
+
+    * (PHP_5_2)
+      NEWS:
+      - fix order
+
+    * (PHP_5_2)
+      NEWS:
+      - Fixed bug #37363 (PDO_MYSQL does not build if no other mysql extension is
+        enabled)
+
+2006-06-01  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      main/safe_mode.c:
+      no need to do TSRMLS_FETCH() twice
+
+    * (PHP_5_2)
+      ext/standard/proc_open.c:
+      MFH: suppress_errors is used only on Win32, no need to look for it on other
+      systems
+
+    * ext/standard/proc_open.c:
+      suppress_errors is used only on Win32, no need to look for it on other
+      systems
+
+    * ext/standard/filters.c:
+      nuke unused variable
+
+    * (PHP_5_2)
+      ext/standard/tests/array/007.phpt
+      ext/standard/tests/array/array_chunk2.phpt
+      ext/standard/tests/array/array_count_values2.phpt
+      ext/standard/tests/array/array_diff_key2.phpt
+      ext/standard/tests/array/array_intersect_1.phpt:
+      fix tests
+
+    * (PHP_5_2)
+      ZendEngine2/tests/offset_array.phpt
+      ZendEngine2/tests/offset_bool.phpt
+      ZendEngine2/tests/offset_long.phpt
+      ZendEngine2/tests/offset_null.phpt
+      ZendEngine2/tests/offset_object.phpt
+      ZendEngine2/tests/offset_string.phpt:
+      add new tests
+
+    * ZendEngine2/tests/offset_array.phpt
+      ZendEngine2/tests/offset_array.phpt
+      ZendEngine2/tests/offset_bool.phpt
+      ZendEngine2/tests/offset_bool.phpt
+      ZendEngine2/tests/offset_long.phpt
+      ZendEngine2/tests/offset_long.phpt
+      ZendEngine2/tests/offset_null.phpt
+      ZendEngine2/tests/offset_null.phpt
+      ZendEngine2/tests/offset_object.phpt
+      ZendEngine2/tests/offset_object.phpt
+      ZendEngine2/tests/offset_string.phpt
+      ZendEngine2/tests/offset_string.phpt:
+      
+      add new tests
+
+    * (PHP_5_2)
+      ZendEngine2/zend_execute.c:
+      MFH: throw a warning when using invalid offset types with strings
+
+    * ZendEngine2/zend_execute.c:
+      throw a warning when using invalid offset types with strings
+
 2006-05-31  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
