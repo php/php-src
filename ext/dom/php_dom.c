@@ -307,7 +307,7 @@ zval *dom_read_property(zval *object, zval *member, int type TSRMLS_DC)
 	if (obj->prop_handler != NULL) {
 		ret = zend_u_hash_find(obj->prop_handler, Z_TYPE_P(member), Z_UNIVAL_P(member), Z_UNILEN_P(member)+1, (void **) &hnd);
 	} else if (instanceof_function(obj->std.ce, dom_node_class_entry TSRMLS_CC)) {
-		php_error(E_WARNING, "Couldn't fetch %s. Node no longer exists", obj->std.ce->name);
+		php_error(E_WARNING, "Couldn't fetch %v. Node no longer exists", obj->std.ce->name);
 	}
 	if (ret == SUCCESS) {
 		ret = hnd->read_func(obj, &retval TSRMLS_CC);
