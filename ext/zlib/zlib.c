@@ -219,7 +219,7 @@ PHP_MINIT_FUNCTION(zlib)
 	php_stream_filter_register_factory("zlib.*", &php_zlib_filter_factory TSRMLS_CC);
 	INIT_PZVAL(&tmp);
 	ZVAL_ASCII_STRINGL(&tmp, "ob_gzhandler", sizeof("ob_gzhandler")-1, 0);
-	php_output_handler_conflict_register(&tmp, php_ob_gzhandler_check);
+	php_output_handler_conflict_register(&tmp, php_ob_gzhandler_check TSRMLS_CC);
 
 	REGISTER_LONG_CONSTANT("FORCE_GZIP", CODING_GZIP, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FORCE_DEFLATE", CODING_DEFLATE, CONST_CS | CONST_PERSISTENT);
@@ -835,30 +835,30 @@ PHP_FUNCTION(gzencode)
 int php_ob_gzhandler_check(zval *handler_name TSRMLS_DC)
 {
 	/* check for wrong usages */
-	if (php_output_get_level() > 0) {
+	if (php_output_get_level(TSRMLS_C) > 0) {
 		zval tmp;
 		
-		if (php_output_handler_started(handler_name)) {
+		if (php_output_handler_started(handler_name TSRMLS_CC)) {
 			php_error_docref("ref.outcontrol" TSRMLS_CC, E_WARNING, "output handler 'ob_gzhandler' cannot be used twice");
 			return FAILURE;
 		}
 		INIT_PZVAL(&tmp);
 		ZVAL_ASCII_STRINGL(&tmp, "mb_output_handler", sizeof("mb_output_handler")-1, ZSTR_DUPLICATE);
-		if (php_output_handler_started(&tmp)) {
+		if (php_output_handler_started(&tmp TSRMLS_CC)) {
 			zval_dtor(&tmp);
 			php_error_docref("ref.outcontrol" TSRMLS_CC, E_WARNING, "output handler 'ob_gzhandler' cannot be used after 'mb_output_handler'");
 			return FAILURE;
 		}
 		zval_dtor(&tmp);
 		ZVAL_ASCII_STRINGL(&tmp, "URL-Reqriter", sizeof("URL-Rewriter")-1, ZSTR_DUPLICATE);
-		if (php_output_handler_started(&tmp)) {
+		if (php_output_handler_started(&tmp TSRMLS_CC)) {
 			zval_dtor(&tmp);
 			php_error_docref("ref.outcontrol" TSRMLS_CC, E_WARNING, "output handler 'ob_gzhandler' cannot be used after 'URL-Rewriter'");
 			return FAILURE;
 		}
 		zval_dtor(&tmp);
 		ZVAL_ASCII_STRINGL(&tmp, "zlib output compression", sizeof("zlib output compression")-1, ZSTR_DUPLICATE);
-		if (php_output_handler_conflict(handler_name, &tmp)) {
+		if (php_output_handler_conflict(handler_name, &tmp TSRMLS_CC)) {
 			zval_dtor(&tmp);
 			return FAILURE;
 		}
@@ -907,7 +907,7 @@ PHP_FUNCTION(ob_gzhandler)
 	
 	if (ZLIBG(ob_gzhandler_status == -1)) {
 		/* don't call this handler any more */
-		php_output_handler_hook(PHP_OUTPUT_HANDLER_HOOK_DISABLE, NULL);
+		php_output_handler_hook(PHP_OUTPUT_HANDLER_HOOK_DISABLE, NULL TSRMLS_CC);
 		RETURN_FALSE;
 	}
 	
@@ -952,12 +952,12 @@ PHP_FUNCTION(ob_gzhandler)
 
 	if (return_original) {
 		/* don't call this handler any more */
-		php_output_handler_hook(PHP_OUTPUT_HANDLER_HOOK_DISABLE, NULL);
+		php_output_handler_hook(PHP_OUTPUT_HANDLER_HOOK_DISABLE, NULL TSRMLS_CC);
 		/* return the original string */
 		RETURN_STRINGL(string, string_len, 1);
 	} else {
 		/* don't allow cleaning and removing any longer */
-		php_output_handler_hook(PHP_OUTPUT_HANDLER_HOOK_IMMUTABLE, NULL);
+		php_output_handler_hook(PHP_OUTPUT_HANDLER_HOOK_IMMUTABLE, NULL TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -1006,13 +1006,13 @@ int php_enable_output_compression(int buffer_size TSRMLS_DC)
 
 	MAKE_STD_ZVAL(output_handler);
 	ZVAL_ASCII_STRINGL(output_handler, "zlib output compression", sizeof("zlib output compression")-1, ZSTR_DUPLICATE);
-	php_output_start_internal(output_handler, php_gzip_output_handler, buffer_size, PHP_OUTPUT_HANDLER_STDFLAGS);
+	php_output_start_internal(output_handler, php_gzip_output_handler, buffer_size, PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC);
 	zval_ptr_dtor(&output_handler);
 	
 	if (ZLIBG(output_handler) && *ZLIBG(output_handler)) {
 		MAKE_STD_ZVAL(output_handler);
 		ZVAL_ASCII_STRING(output_handler, ZLIBG(output_handler), ZSTR_DUPLICATE);
-		php_output_start_user(output_handler, 0, PHP_OUTPUT_HANDLER_STDFLAGS);
+		php_output_start_user(output_handler, 0, PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC);
 		zval_ptr_dtor(&output_handler);
 	}
 	return SUCCESS;

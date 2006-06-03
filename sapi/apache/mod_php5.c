@@ -315,7 +315,7 @@ static void php_apache_request_shutdown(void *dummy)
 {
 	TSRMLS_FETCH();
 
-	php_output_set_status(PHP_OUTPUT_DISABLED);
+	php_output_set_status(PHP_OUTPUT_DISABLED TSRMLS_CC);
 	if (AP(in_request)) {
 		AP(in_request) = 0;
 		php_request_shutdown(dummy);

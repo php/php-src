@@ -434,7 +434,7 @@ static void php_apache_request_shutdown(void *dummy)
 {
 	TSRMLS_FETCH();
 	AP(current_hook) = AP_CLEANUP;
-	php_output_set_status(PHP_OUTPUT_DISABLED);
+	php_output_set_status(PHP_OUTPUT_DISABLED TSRMLS_CC);
 	SG(server_context) = NULL; /* The server context (request) is invalid by the time run_cleanups() is called */
 	if(SG(sapi_started)) {
 		php_request_shutdown(dummy);

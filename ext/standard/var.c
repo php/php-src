@@ -602,7 +602,7 @@ PHP_FUNCTION(var_export)
 	}
 	
 	if (return_output) {
-		php_output_start_default();
+		php_output_start_default(TSRMLS_C);
 	}
 	
 	/* UTODO
@@ -614,8 +614,8 @@ PHP_FUNCTION(var_export)
 	php_var_export(&var, 1 TSRMLS_CC);
 
 	if (return_output) {
-		php_output_get_contents(return_value);
-		php_output_discard();
+		php_output_get_contents(return_value TSRMLS_CC);
+		php_output_discard(TSRMLS_C);
 	}
 }
 /* }}} */

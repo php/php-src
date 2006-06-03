@@ -987,8 +987,8 @@ PHP_RINIT_FUNCTION(tidy)
 	if (INI_BOOL("tidy.clean_output") == TRUE) {
 		zval *name;
 		MAKE_STD_ZVAL(name);
-		ZVAL_ASCII_STRINGL(name, "ob_tidyhandler", sizeof("ob_tidyhandler"), ZSTR_DUPLICATE);
-		if (php_output_start_user(name, 0, PHP_OUTPUT_HANDLER_STDFLAGS) == FAILURE) {
+		ZVAL_ASCII_STRINGL(name, "ob_tidyhandler", sizeof("ob_tidyhandler")-1, ZSTR_DUPLICATE);
+		if (php_output_start_user(name, 0, PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC) == FAILURE) {
 			zend_error(E_NOTICE, "Failure installing Tidy output buffering.");
 		}
 		zval_ptr_dtor(&name);

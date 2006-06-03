@@ -999,9 +999,9 @@ PHP_FUNCTION(phpinfo)
 	}
 
 	/* Andale!  Andale!  Yee-Hah! */
-	php_output_start_default();
+	php_output_start_default(TSRMLS_C);
 	php_print_info(flag TSRMLS_CC);
-	php_output_end();
+	php_output_end(TSRMLS_C);
 
 	RETURN_TRUE;
 }
