@@ -122,7 +122,6 @@ static const opt_struct OPTIONS[] = {
 	{'e', 0, "profile-info"},
 	{'F', 1, "process-file"},
 	{'f', 1, "file"},
-	{'g', 1, "global"},
 	{'h', 0, "help"},
 	{'i', 0, "info"},
 	{'l', 0, "syntax-check"},
@@ -415,7 +414,7 @@ static void php_cli_usage(char *argv0)
 				"  -n               No php.ini file will be used\n"
 				"  -d foo[=bar]     Define INI entry foo with value 'bar'\n"
 				"  -e               Generate extended information for debugger/profiler\n"
-				"  -f <file>        Parse <file>.\n"
+				"  -f <file>        Parse and execute <file>.\n"
 				"  -h               This help\n"
 				"  -i               PHP information\n"
 				"  -l               Syntax check only (lint)\n"
@@ -466,21 +465,6 @@ static void define_command_line_ini_entry(char *arg TSRMLS_DC)
 	}
 }
 
-
-static void php_register_command_line_global_vars(char **arg TSRMLS_DC)
-{
-	char *var, *val;
-
-	var = *arg;
-	val = strchr(var, '=');
-	if (!val) {
-		printf("No value specified for variable '%s'\n", var);
-	} else {
-		*val++ = '\0';
-		php_register_variable(var, val, NULL TSRMLS_CC);
-	}
-	efree(*arg);
-}
 
 static php_stream *s_in_process = NULL;
 
@@ -591,7 +575,6 @@ int main(int argc, char *argv[])
 	char *orig_optarg=php_optarg;
 	char *arg_free=NULL, **arg_excp=&arg_free;
 	char *script_file=NULL;
-	zend_llist global_vars;
 	int interactive=0;
 	int module_started = 0;
 	int lineno = 0;
@@ -690,8 +673,6 @@ int main(int argc, char *argv[])
 	module_started = 1;
 
 	zend_first_try {
-		zend_llist_init(&global_vars, sizeof(char *), NULL, 0);
-
 		zend_uv.html_errors = 0; /* tell the engine we're in non-html mode */
 		CG(in_compilation) = 0; /* not initialized but needed for several options */
 		EG(uninitialized_zval_ptr) = NULL;
@@ -786,12 +767,11 @@ int main(int argc, char *argv[])
 
 			case 'a':	/* interactive mode */
 				if (!interactive) {
-#if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
-					printf("Interactive shell\n\n");
-#else
-					printf("Interactive mode enabled\n\n");
-#endif
-					fflush(stdout);
+					if (behavior != PHP_MODE_STANDARD) {
+						param_error = param_mode_conflict;
+						break;
+					}
+
 					interactive=1;
 				}
 				break;
@@ -829,14 +809,6 @@ int main(int argc, char *argv[])
 				script_file = php_optarg;
 				break;
 
-			case 'g': /* define global variables on command line */
-				{
-					char *arg = estrdup(php_optarg);
-
-					zend_llist_add_element(&global_vars, &arg);
-				}
-				break;
-
 			case 'l': /* syntax check mode */
 				if (behavior != PHP_MODE_STANDARD) {
 					break;
@@ -864,7 +836,7 @@ int main(int argc, char *argv[])
 						param_error = "You can use -r only once.\n";
 						break;
 					}
-				} else if (behavior != PHP_MODE_STANDARD) {
+				} else if (behavior != PHP_MODE_STANDARD || interactive) {
 					param_error = param_mode_conflict;
 					break;
 				}
@@ -892,7 +864,7 @@ int main(int argc, char *argv[])
 						param_error = "You can use -B only once.\n";
 						break;
 					}
-				} else if (behavior != PHP_MODE_STANDARD) {
+				} else if (behavior != PHP_MODE_STANDARD || interactive) {
 					param_error = param_mode_conflict;
 					break;
 				}
@@ -906,7 +878,7 @@ int main(int argc, char *argv[])
 						param_error = "You can use -E only once.\n";
 						break;
 					}
-				} else if (behavior != PHP_MODE_STANDARD) {
+				} else if (behavior != PHP_MODE_STANDARD || interactive) {
 					param_error = param_mode_conflict;
 					break;
 				}
@@ -960,6 +932,15 @@ int main(int argc, char *argv[])
 			PUTS(param_error);
 			exit_status=1;
 			goto err;
+		}
+
+		if (interactive) {
+#if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
+			printf("Interactive shell\n\n");
+#else
+			printf("Interactive mode enabled\n\n");
+#endif
+			fflush(stdout);
 		}
 
 		CG(interactive) = interactive;
@@ -1018,10 +999,7 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		/* This actually destructs the elements of the list - ugly hack */
 		zend_is_auto_global("_SERVER", sizeof("_SERVER")-1 TSRMLS_CC);
-		zend_llist_apply(&global_vars, (llist_apply_func_t) php_register_command_line_global_vars TSRMLS_CC);
-		zend_llist_destroy(&global_vars);
 
 		PG(during_request_startup) = 0;
 		switch (behavior) {
@@ -1037,6 +1015,19 @@ int main(int argc, char *argv[])
 				char *code = emalloc(size);
 				char *prompt = "php > ";
 				char *history_file;
+
+				if (PG(auto_prepend_file) && PG(auto_prepend_file)[0]) {
+					zend_file_handle *prepend_file_p;
+					zend_file_handle prepend_file = {0};
+
+					prepend_file.filename = PG(auto_prepend_file);
+					prepend_file.opened_path = NULL;
+					prepend_file.free_filename = 0;
+					prepend_file.type = ZEND_HANDLE_FILENAME;
+					prepend_file_p = &prepend_file;
+
+					zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 1, prepend_file_p);
+				}
 
 				history_file = tilde_expand("~/.php_history");
 				rl_attempted_completion_function = cli_code_completion;
@@ -1081,6 +1072,11 @@ int main(int argc, char *argv[])
 					if (php_last_char != '\0' && php_last_char != '\n') {
 						sapi_cli_single_write("\n", 1);
 					}
+
+					if (EG(exception)) {
+						zend_exception_error(EG(exception) TSRMLS_CC);
+					}
+
 					php_last_char = '\0';
 				}
 				write_history(history_file);

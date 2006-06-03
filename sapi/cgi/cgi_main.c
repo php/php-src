@@ -130,7 +130,6 @@ static const opt_struct OPTIONS[] = {
 	{'d', 1, "define"},
 	{'e', 0, "profile-info"},
 	{'f', 1, "file"},
-	{'g', 1, "global"},
 	{'h', 0, "help"},
 	{'i', 0, "info"},
 	{'l', 0, "syntax-check"},
@@ -912,22 +911,6 @@ static void define_command_line_ini_entry(char *arg)
 	zend_alter_ini_entry(name, strlen(name) + 1, value, strlen(value), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
 }
 
-
-static void php_register_command_line_global_vars(char **arg TSRMLS_DC)
-{
-	char *var, *val;
-
-	var = *arg;
-	val = strchr(var, '=');
-	if (!val) {
-		printf("No value specified for variable '%s'\n", var);
-	} else {
-		*val++ = '\0';
-		php_register_variable(var, val, NULL TSRMLS_CC);
-	}
-	efree(*arg);
-}
-
 #if PHP_FASTCGI
 /**
  * Clean up child processes upon exit
@@ -980,7 +963,6 @@ int main(int argc, char *argv[])
 	int orig_optind = php_optind;
 	char *orig_optarg = php_optarg;
 	char *script_file = NULL;
-	zend_llist global_vars;
 #if FORCE_CGI_REDIRECT
 	long force_redirect = 1;
 	char *redirect_status_env = NULL;
@@ -1344,7 +1326,6 @@ consult the installation file that came with this distribution, or visit \n\
 		SG(server_context) = (void *) 1; /* avoid server_context==NULL checks */
 #endif
 		init_request_info(TSRMLS_C);
-		zend_llist_init(&global_vars, sizeof(char *), NULL, 0);
 		CG(interactive) = 0;
 
 		if (!cgi
@@ -1387,14 +1368,6 @@ consult the installation file that came with this distribution, or visit \n\
 						/* arguments after the file are considered script args */
 						SG(request_info).argc = argc - (php_optind - 1);
 						SG(request_info).argv = &argv[php_optind - 1];
-						break;
-
-  				case 'g': /* define global variables on command line */
-						{
-							char *arg = estrdup(php_optarg);
-
-							zend_llist_add_element(&global_vars, &arg);
-						}
 						break;
 
 				case 'i': /* php info & quit */
@@ -1559,10 +1532,6 @@ consult the installation file that came with this distribution, or visit \n\
 			SG(headers_sent) = 1;
 			SG(request_info).no_headers = 1;
 		}
-
-		/* This actually destructs the elements of the list - ugly hack */
-		zend_llist_apply(&global_vars, (llist_apply_func_t) php_register_command_line_global_vars TSRMLS_CC);
-		zend_llist_destroy(&global_vars);
 
 		/* 
 			at this point path_translated will be set if:
