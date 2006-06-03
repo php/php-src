@@ -70,11 +70,6 @@
 )
 #define PHP_OUTPUT_HANDLER_ALIGNTO_SIZE		0x1000
 #define PHP_OUTPUT_HANDLER_DEFAULT_SIZE		0x4000
-#define PHP_OUTPUT_HANDLER_DEFAULT_NAME		"default output handler"
-#define PHP_OUTPUT_HANDLER_DEVNULL_NAME		"null output handler"
-
-PHPAPI zval php_output_handler_default;
-PHPAPI zval php_output_handler_devnull;
 
 typedef struct _php_output_buffer {
 	char *data;
