@@ -1,3 +1,80 @@
+2006-06-02  Antony Dovgal  <antony@zend.com>
+
+    * ext/exif/tests/bug34704.phpt
+      ext/exif/tests/exif001.phpt
+      ext/exif/tests/exif005.phpt
+      tests/classes/serialize_001.phpt:
+      fix tests in unicode mode
+
+    * ext/dom/php_dom.c
+      ext/dom/xml_common.h:
+      fix error messages in Unicode mode
+
+2006-06-02  Michael Wallner  <mike@iworks.at>
+
+    * ext/standard/var.c
+      ext/zlib/php_zlib.h
+      ext/zlib/zlib.c:
+      - fix encoding
+
+    * README.NEW-OUTPUT-API
+      ext/pgsql/pgsql.c
+      ext/session/session.c
+      ext/standard/basic_functions.c
+      ext/standard/head.c
+      ext/standard/info.c
+      ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re
+      ext/standard/var.c
+      ext/zlib/php_zlib.h
+      ext/zlib/zlib.c
+      main/SAPI.c
+      main/main.c
+      main/output.c
+      main/php.h
+      main/php_output.h
+      sapi/apache/mod_php5.c
+      sapi/apache/php_apache.c
+      sapi/apache2handler/php_functions.c
+      sapi/apache_hooks/mod_php5.c
+      sapi/apache_hooks/php_apache.c
+      sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c
+      sapi/milter/php_milter.c
+      sapi/nsapi/nsapi.c:
+      - new output control code
+      
+
+2006-06-02  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      ext/dom/element.c:
+      MFH: add setIdAttribute, setIdAttributeNS and setIdAttributeNode
+      functionality
+
+    * (BEFORE_NEW_OUTPUT_API)
+      ext/dom/element.c:
+      idness not valid for attribute declarations
+
+2006-06-02  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * (PHP_5_1)
+      ZendEngine2/acinclude.m4:
+      MFH: Add bison 2.2 to the list of supported versions.
+
+2006-06-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * (BEFORE_NEW_OUTPUT_API)
+      ZendEngine2/zend.c:
+      SAPI globals are destroied at this point and reporting errors about memory
+      leaks
+       can cause crash.
+
+    * (PHP_5_2)
+      ZendEngine2/zend.c:
+      SAPI globals are destroied at this point and reporting errors about memory
+      leaks can cause crash.
+
 2006-06-01  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/filters.c:

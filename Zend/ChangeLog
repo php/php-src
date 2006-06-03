@@ -1,3 +1,22 @@
+2006-06-02  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * (PHP_5_1)
+      acinclude.m4:
+      MFH: Add bison 2.2 to the list of supported versions.
+
+2006-06-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * (BEFORE_NEW_OUTPUT_API)
+      zend.c:
+      SAPI globals are destroied at this point and reporting errors about memory
+      leaks
+       can cause crash.
+
+    * (PHP_5_2)
+      zend.c:
+      SAPI globals are destroied at this point and reporting errors about memory
+      leaks can cause crash.
+
 2006-06-01  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
