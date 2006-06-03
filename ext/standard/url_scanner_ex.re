@@ -450,11 +450,15 @@ int php_url_scanner_add_var(char *name, int name_len, char *value, int value_len
 	char *encoded;
 	int encoded_len;
 	smart_str val;
+	zval *ob_name;
 	
 	if (! BG(url_adapt_state_ex).active) {
+		MAKE_STD_ZVAL(ob_name);
+		ZVAL_ASCII_STRING(ob_name, "URL-Rewriter", ZSTR_DUPLICATE);
 		php_url_scanner_ex_activate(TSRMLS_C);
-		php_output_start_internal("URL-Rewriter", php_url_scanner_output_handler, 0, PHP_OUTPUT_HANDLER_STDFLAGS);
+		php_output_start_internal(ob_name, php_url_scanner_output_handler, 0, PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC);
 		BG(url_adapt_state_ex).active = 1;
+		zval_ptr_dtor(&ob_name);
 	}
 
 
