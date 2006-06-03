@@ -382,7 +382,7 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 			Z_STRVAL_P(expr_copy) = estrndup("Array", Z_STRLEN_P(expr_copy));
 			break;
 		case IS_OBJECT:
-			if(Z_OBJ_HT_P(expr)->cast_object && Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, UG(unicode)?IS_UNICODE:IS_STRING TSRMLS_CC) == SUCCESS) {
+			if(Z_OBJ_HT_P(expr)->cast_object && Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
 				break;
 			}
 			if (Z_OBJ_HANDLER_P(expr, get)) {
