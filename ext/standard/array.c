@@ -87,6 +87,8 @@
 
 #define DOUBLE_DRIFT_FIX	0.000000000000001
 
+ZEND_DECLARE_MODULE_GLOBALS(array)
+
 /* {{{ php_array_init_globals
  */
 static void php_array_init_globals(zend_array_globals *array_globals)
