@@ -1,3 +1,63 @@
+2006-06-03  Johannes Schlüter  <schlueter@phpbar.de>
+
+    * sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c:
+      - Removed useless -g command line option from CGI and CLI
+      - Fixed conflicting behaviour if -B and -a are set with CLI
+      - Fixed handling of auto_prepend and exceptions in readline-a-mode
+
+2006-06-03  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/php_array.h
+      ext/standard/php_array.h:
+      MFB
+
+    * (PHP_5_2)
+      ext/standard/array.c
+      ext/standard/php_array.h:
+      I swear it wasn't me.
+
+2006-06-03  Michael Wallner  <mike@iworks.at>
+
+    * main/php_output.h:
+      - remove obsolete cruft
+
+2006-06-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend.c:
+      - Revert - Needs further discussing
+
+2006-06-03  Michael Wallner  <mike@iworks.at>
+
+    * README.NEW-OUTPUT-API:
+      - update TS macro usage
+
+    * ext/session/session.c
+      ext/standard/basic_functions.c
+      ext/standard/head.c
+      ext/standard/info.c
+      ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re
+      ext/standard/var.c
+      ext/zlib/zlib.c
+      main/SAPI.c
+      main/main.c
+      main/output.c
+      main/php_output.h
+      sapi/apache/mod_php5.c
+      sapi/apache2handler/php_functions.c
+      sapi/apache_hooks/mod_php5.c
+      sapi/cli/php_cli.c
+      sapi/nsapi/nsapi.c:
+      - explicit usage of TS macros
+
+2006-06-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend.c:
+      - Printable is supposed to return nativ/unicode depending on ini setting
+
 2006-06-02  Antony Dovgal  <antony@zend.com>
 
     * ext/exif/tests/bug34704.phpt
