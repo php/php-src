@@ -4415,8 +4415,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflection_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "Reflector", reflector_functions);
-	reflector_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
-	reflector_ptr->ce_flags = ZEND_ACC_ABSTRACT | ZEND_ACC_INTERFACE;
+	reflector_ptr = zend_register_internal_interface(&_reflection_entry TSRMLS_CC);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionFunction", reflection_function_functions);
 	_reflection_entry.create_object = reflection_objects_new;
