@@ -180,6 +180,8 @@ PHP_FUNCTION(class_implements)
 	SPL_ADD_CLASS(RecursiveFilterIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(RecursiveIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(RecursiveIteratorIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(RecursiveRegexIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(RegexIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(RuntimeException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(SeekableIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(SimpleXMLIterator, z_list, sub, allow, ce_flags); \
