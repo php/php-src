@@ -213,6 +213,10 @@ SOURCE=..\main\php_scandir.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\main\php_sprintf.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\main\php_ticks.c
 # End Source File
 # Begin Source File
@@ -388,28 +392,83 @@ SOURCE=..\main\win95nt.h
 # PROP Default_Filter ".c"
 # Begin Source File
 
-SOURCE=..\ext\pcre\pcrelib\chartables.c
-# ADD CPP /D "STATIC" /D "SUPPORT_UTF8"
+SOURCE=..\ext\pcre\pcrelib\pcre_chartables.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\pcre\pcrelib\get.c
-# ADD CPP /D "STATIC" /D "SUPPORT_UTF8" /D LINK_SIZE=2
+SOURCE=..\ext\pcre\pcrelib\pcre_compile.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\pcre\pcrelib\maketables.c
-# ADD CPP /D "STATIC" /D "SUPPORT_UTF8" /D LINK_SIZE=2
+SOURCE=..\ext\pcre\pcrelib\pcre_exec.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\pcre\pcrelib\pcre.c
-# ADD CPP /D "STATIC" /D "SUPPORT_UTF8" /D LINK_SIZE=2
+SOURCE=..\ext\pcre\pcrelib\pcre_fullinfo.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\pcre\pcrelib\study.c
-# ADD CPP /D "STATIC" /D "SUPPORT_UTF8" /D LINK_SIZE=2
+SOURCE=..\ext\pcre\pcrelib\pcre_get.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_globals.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_info.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_maketables.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_ord2utf8.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_study.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_tables.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_try_flipped.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_ucp_searchfuncs.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_valid_utf8.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_version.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_xclass.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
 # End Source File
 # End Group
 # Begin Group "Header Files No. 3"
@@ -702,58 +761,6 @@ SOURCE=..\ext\ftp\ftp.h
 # Begin Source File
 
 SOURCE=..\ext\ftp\php_ftp.h
-# End Source File
-# End Group
-# End Group
-# Begin Group "Calendar"
-
-# PROP Default_Filter ""
-# Begin Group "Source Files No. 7"
-
-# PROP Default_Filter ".c"
-# Begin Source File
-
-SOURCE=..\ext\calendar\cal_unix.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\calendar\calendar.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\calendar\dow.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\calendar\easter.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\calendar\french.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\calendar\gregor.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\calendar\jewish.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\calendar\julian.c
-# End Source File
-# End Group
-# Begin Group "Header Files No. 7"
-
-# PROP Default_Filter ".h"
-# Begin Source File
-
-SOURCE=..\ext\calendar\php_calendar.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\calendar\sdncal.h
 # End Source File
 # End Group
 # End Group
@@ -1753,10 +1760,6 @@ SOURCE=..\ext\standard\strnatcmp.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\standard\sunfuncs.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\ext\standard\syslog.c
 # End Source File
 # Begin Source File
@@ -2020,6 +2023,151 @@ SOURCE=..\ext\libxml\php_libxml.h
 # Begin Source File
 
 SOURCE=..\ext\libxml\libxml.c
+# End Source File
+# End Group
+# End Group
+# Begin Group "Date"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 10"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\date\lib\astro.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\dow.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\parse_date.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\parse_tz.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\php_date.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\timelib.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\tm2unixtime.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\unixtime2tm.c
+# End Source File
+# End Group
+# Begin Group "Header Files No. 7"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\date\lib\astro.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\fallbackmap.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\php_date.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\timelib_config.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\timelib_structs.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\timezonedb.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\timezonemap.h
+# End Source File
+# End Group
+# End Group
+# Begin Group "Calendar"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 7"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\calendar\cal_unix.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\calendar\calendar.c
+
+# PROP Intermediate_Dir "calendar"
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\calendar\dow.c
+
+# PROP Intermediate_Dir "calendar"
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\calendar\easter.c
+
+# PROP Intermediate_Dir "calendar"
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\calendar\french.c
+
+# PROP Intermediate_Dir "calendar"
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\calendar\gregor.c
+
+# PROP Intermediate_Dir "calendar"
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\calendar\jewish.c
+
+# PROP Intermediate_Dir "calendar"
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\calendar\julian.c
+
+# PROP Intermediate_Dir "calendar"
+
+# End Source File
+# End Group
+# Begin Group "Header Files No. 11"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\calendar\php_calendar.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\calendar\sdncal.h
 # End Source File
 # End Group
 # End Group
