@@ -547,7 +547,6 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 			}
 			break;
 
-
 		case 'z':
 			{
 				zval **p = va_arg(*va, zval **);
@@ -1635,6 +1634,9 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 					/* This time we set the flag for the keyword 'abstratc'. */
 					scope->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
 				}
+			}
+			if (ptr->flags & ZEND_ACC_STATIC && (!scope || !(scope->ce_flags & ZEND_ACC_INTERFACE))) {
+				zend_error(error_type, "Static function %s%s%s() cannot be abstract", scope ? scope->name : "", scope ? "::" : "", ptr->fname);
 			}
 		} else {
 			if (scope && (scope->ce_flags & ZEND_ACC_INTERFACE)) {
