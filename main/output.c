@@ -1181,6 +1181,7 @@ static inline int php_output_stack_pop(int discard, int shutdown TSRMLS_DC)
 			/* signal that we're cleaning up */
 			if (discard) {
 				context.op |= PHP_OUTPUT_HANDLER_CLEAN;
+				orphan->buffer.used = 0;
 			}
 			php_output_handler_op(orphan, &context);
 		}
