@@ -1,3 +1,32 @@
+2006-06-04  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      ZendEngine2/ZendTS.dsp
+      win32/php5dllts.dsp:
+      fix .dsp build
+
+2006-06-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mysqli/mysqli_api.c:
+      MFB: Fixed bug #37671 (MySQLi extension fails to recognize BIT column).
+
+    * (PHP_5_2)
+      NEWS
+      ext/mysqli/mysqli_api.c:
+      Fixed bug #37671 (MySQLi extension fails to recognize BIT column).
+
+2006-06-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c:
+      - Fix function flag check
+
+2006-06-04  Michael Wallner  <mike@iworks.at>
+
+    * main/output.c:
+      - fix output handler seeing buffered data when it gets discarded
+      - add test
+
 2006-06-03  Johannes Schlüter  <schlueter@phpbar.de>
 
     * sapi/cgi/cgi_main.c

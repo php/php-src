@@ -1,3 +1,15 @@
+2006-06-04  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      ZendTS.dsp:
+      fix .dsp build
+
+2006-06-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c
+      zend_API.c:
+      - Fix function flag check
+
 2006-06-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend.c:
