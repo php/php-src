@@ -154,6 +154,25 @@ ZEND_API int _zend_get_parameters_array_ex(int param_count, zval ***argument_arr
 	while (param_count-->0) {
 		zval **value = (zval**)(p-arg_count);
 
+		if (EG(ze1_compatibility_mode) && Z_TYPE_PP(value) == IS_OBJECT) {
+			zval *value_ptr;
+			char *class_name;
+			zend_uint class_name_len;
+			int dup;
+			
+			dup = zend_get_object_classname(*value, &class_name, &class_name_len TSRMLS_CC);
+
+			ALLOC_ZVAL(value_ptr);
+			*value_ptr = **value;
+			INIT_PZVAL(value_ptr);
+			zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);
+			if(!dup) {
+				efree(class_name);
+			}
+			value_ptr->value.obj = Z_OBJ_HANDLER_PP(value, clone_obj)(*value TSRMLS_CC);
+			zval_ptr_dtor(value);
+			*value = value_ptr;
+		}
 		*(argument_array++) = value;
 		arg_count--;
 	}
