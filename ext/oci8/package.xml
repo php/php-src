@@ -30,16 +30,13 @@
  <license>PHP</license>
  <release>
   <state>stable</state>
-  <version>1.2.1</version>
-  <date>2006-05-02</date>
+  <version>1.2.2</version>
+  <date>2006-06-07</date>
   <notes>
-   Added support for BINARY_DOUBLE and BINARY_FLOAT (see #36764)
-   Changed oci_field_type() to return VARCHAR2 instead of VARCHAR (according to feature request #36800)
-   Fixed bug #37059 (oci_bind_by_name() doesn't support RAW and LONG RAW fields)
-   Fixed bug #37055 (incorrect reference counting for persistent OCI8 connections)
-   Fixed bug #36934 (OCILob->read() doesn't move internal pointer when reading 0's)
-   Fixed bug #36851 (Documentation and code discrepancies for NULL data)
-   Fixed bug #36820 (Privileged connection with an Oracle password file fails)
+   Fixed bug #37531 (oci8 persistent connection corruption)
+   Fixed bug #37487 (oci_fetch_array() array-type should always default to OCI_BOTH)
+   Fixed bug #37392 (Unnecessary call to OCITransRollback() at the end of request)
+   Fixed bug #34005 (oci_password_change() fails). Patch by pholdaway at technocom-wireless dot com.
   </notes>
  </release>
  <filelist>
@@ -180,6 +177,20 @@
   <configureoption name="with-oci8" default="autodetect" prompt="Please provide the path to ORACLE_HOME dir. Use 'instantclient,/path/to/instant/client/lib' if you're compiling against Oracle Instant Client"/>
  </configureoptions>
  <changelog>
+  <release>
+   <state>stable</state>
+   <version>1.2.1</version>
+   <date>2006-05-02</date>
+   <notes>
+    Added support for BINARY_DOUBLE and BINARY_FLOAT (see #36764)
+    Changed oci_field_type() to return VARCHAR2 instead of VARCHAR (according to feature request #36800)
+    Fixed bug #37059 (oci_bind_by_name() doesn't support RAW and LONG RAW fields)
+    Fixed bug #37055 (incorrect reference counting for persistent OCI8 connections)
+    Fixed bug #36934 (OCILob->read() doesn't move internal pointer when reading 0's)
+    Fixed bug #36851 (Documentation and code discrepancies for NULL data)
+    Fixed bug #36820 (Privileged connection with an Oracle password file fails)
+   </notes>
+  </release>
   <release>
    <state>stable</state>
    <version>1.2.0</version>
