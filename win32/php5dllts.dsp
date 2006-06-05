@@ -213,6 +213,10 @@ SOURCE=..\main\php_scandir.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\main\php_sprintf.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\main\php_ticks.c
 # End Source File
 # Begin Source File
@@ -388,28 +392,83 @@ SOURCE=..\main\win95nt.h
 # PROP Default_Filter ".c"
 # Begin Source File
 
-SOURCE=..\ext\pcre\pcrelib\chartables.c
-# ADD CPP /D "STATIC" /D "SUPPORT_UTF8"
+SOURCE=..\ext\pcre\pcrelib\pcre_chartables.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\pcre\pcrelib\get.c
-# ADD CPP /D "STATIC" /D "SUPPORT_UTF8" /D LINK_SIZE=2
+SOURCE=..\ext\pcre\pcrelib\pcre_compile.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\pcre\pcrelib\maketables.c
-# ADD CPP /D "STATIC" /D "SUPPORT_UTF8" /D LINK_SIZE=2
+SOURCE=..\ext\pcre\pcrelib\pcre_exec.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\pcre\pcrelib\pcre.c
-# ADD CPP /D "STATIC" /D "SUPPORT_UTF8" /D LINK_SIZE=2
+SOURCE=..\ext\pcre\pcrelib\pcre_fullinfo.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\pcre\pcrelib\study.c
-# ADD CPP /D "STATIC" /D "SUPPORT_UTF8" /D LINK_SIZE=2
+SOURCE=..\ext\pcre\pcrelib\pcre_get.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_globals.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_info.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_maketables.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_ord2utf8.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_study.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_tables.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_try_flipped.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_ucp_searchfuncs.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_valid_utf8.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_version.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_xclass.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP"
 # End Source File
 # End Group
 # Begin Group "Header Files No. 3"
@@ -714,34 +773,42 @@ SOURCE=..\ext\ftp\php_ftp.h
 # Begin Source File
 
 SOURCE=..\ext\calendar\cal_unix.c
+# PROP Intermediate_Dir "calendar"
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\calendar\calendar.c
+# PROP Intermediate_Dir "calendar"
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\calendar\dow.c
+# PROP Intermediate_Dir "calendar"
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\calendar\easter.c
+# PROP Intermediate_Dir "calendar"
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\calendar\french.c
+# PROP Intermediate_Dir "calendar"
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\calendar\gregor.c
+# PROP Intermediate_Dir "calendar"
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\calendar\jewish.c
+# PROP Intermediate_Dir "calendar"
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\calendar\julian.c
+# PROP Intermediate_Dir "calendar"
 # End Source File
 # End Group
 # Begin Group "Header Files No. 7"
@@ -754,6 +821,171 @@ SOURCE=..\ext\calendar\php_calendar.h
 # Begin Source File
 
 SOURCE=..\ext\calendar\sdncal.h
+# End Source File
+# End Group
+# End Group
+# Begin Group "SPL"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 11"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\spl\php_spl.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_array.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_directory.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_engine.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_exceptions.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_functions.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_iterators.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_observer.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_sxe.c
+# End Source File
+# End Group
+# Begin Group "Header Files No. 12"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\spl\php_spl.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_array.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_directory.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_engine.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_exceptions.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_functions.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_iterators.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_observer.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_sxe.h
+# End Source File
+# End Group
+# End Group
+# Begin Group "Reflection"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 12"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\reflection\php_reflection.c
+# End Source File
+# End Group
+# Begin Group "Header Files No. 13"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\reflection\php_reflection.h
+# End Source File
+# End Group
+# End Group
+# Begin Group "XMLReader"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 13"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\xmlreader\php_xmlreader.c
+# End Source File
+# End Group
+# Begin Group "Header Files No. 14"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\xmlreader\php_xmlreader.h
+# End Source File
+# End Group
+# End Group
+# Begin Group "XMLwriter"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 14"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\xmlwriter\php_xmlwriter.c
+# End Source File
+# End Group
+# Begin Group "Header Files No. 15"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\xmlwriter\php_xmlwriter.h
+# End Source File
+# End Group
+# End Group
+# Begin Group "IConv"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 15"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\iconv\iconv.c
+# ADD CPP /D "PHP_ICONV_EXPORTS"
+# End Source File
+# End Group
+# Begin Group "Header Files No. 16"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\iconv\php_iconv.h
 # End Source File
 # End Group
 # End Group
@@ -1753,10 +1985,6 @@ SOURCE=..\ext\standard\strnatcmp.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\standard\sunfuncs.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\ext\standard\syslog.c
 # End Source File
 # Begin Source File
@@ -2023,6 +2251,74 @@ SOURCE=..\ext\libxml\libxml.c
 # End Source File
 # End Group
 # End Group
+# Begin Group "Date"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 10"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\date\lib\astro.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\dow.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\parse_date.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\parse_tz.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\php_date.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\timelib.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\tm2unixtime.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\unixtime2tm.c
+# End Source File
+# End Group
+# Begin Group "Header Files No. 11"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\date\lib\astro.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\fallbackmap.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\php_date.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\timelib.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\timezonedb.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\timezonemap.h
+# End Source File
+# End Group
+# End Group
 # End Group
 # Begin Group "Win32"
 
@@ -2081,6 +2377,21 @@ SOURCE=..\win32\winutil.c
 # Begin Source File
 
 SOURCE=..\win32\wsyslog.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\build\wsyslog.mc
+
+# Begin Custom Build
+InputDir=.\build
+IntDir=.\Release_TSDbg
+InputPath=.\build\wsyslog.mc
+
+"wsyslog.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	mc -h $(InputDir)/.. -r $(InputDir) -x $(IntDir) $(InputPath)
+
+# End Custom Build
+
 # End Source File
 # End Group
 # Begin Group "Header Files No. 2"

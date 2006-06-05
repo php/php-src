@@ -48,6 +48,7 @@
 #include "ext/standard/php_lcg.h"
 #include "ext/standard/php_array.h"
 #include "ext/standard/php_assert.h"
+#include "ext/reflection/php_reflection.h"
 #if HAVE_BCMATH
 #include "ext/bcmath/php_bcmath.h"
 #endif
@@ -57,8 +58,14 @@
 #if HAVE_CTYPE
 #include "ext/ctype/php_ctype.h"
 #endif
+#if HAVE_DATE
+#include "ext/date/php_date.h"
+#endif
 #if HAVE_FTP
 #include "ext/ftp/php_ftp.h"
+#endif
+#if HAVE_ICONV
+#include "ext/iconv/php_iconv.h"
 #endif
 #include "ext/standard/reg.h"
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
@@ -98,6 +105,15 @@
 #include "ext/sqlite/php_sqlite.h"
 #endif
 #include "ext/com_dotnet/php_com_dotnet.h"
+#ifdef HAVE_SPL
+#include "ext/spl/php_spl.h"
+#endif
+#if HAVE_XML && HAVE_XMLREADER
+#include "ext/xmlreader/php_xmlreader.h"
+#endif
+#if HAVE_XML && HAVE_XMLWRITER
+#include "ext/xmlwriter/php_xmlwriter.h"
+#endif
 /* }}} */
 
 /* {{{ php_builtin_extensions[]
@@ -114,8 +130,17 @@ zend_module_entry *php_builtin_extensions[] = {
 #if HAVE_CTYPE
 	,phpext_ctype_ptr
 #endif
+#if HAVE_DATE
+	,phpext_date_ptr
+#endif
 #if HAVE_FTP
 	,phpext_ftp_ptr
+#endif
+#if HAVE_HASH
+	,phpext_hash_ptr
+#endif
+#if HAVE_ICONV
+	,phpext_iconv_ptr
 #endif
 #if HAVE_MBSTRING
 	,phpext_mbstring_ptr
@@ -126,6 +151,7 @@ zend_module_entry *php_builtin_extensions[] = {
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 	,phpext_pcre_ptr
 #endif
+	,phpext_reflection_ptr
 #if HAVE_PHP_SESSION
 	,phpext_session_ptr
 #endif
@@ -152,6 +178,15 @@ zend_module_entry *php_builtin_extensions[] = {
 #endif
 #if HAVE_SQLITE
 	,phpext_sqlite_ptr
+#endif
+#if HAVE_SPL
+	,phpext_spl_ptr
+#endif
+#if HAVE_XML && HAVE_XMLREADER
+	,phpext_xmlreader_ptr
+#endif
+#if HAVE_XML && HAVE_XMLWRITER
+	,phpext_xmlwriter_ptr
 #endif
 };
 /* }}} */
