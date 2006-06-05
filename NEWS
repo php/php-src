@@ -114,6 +114,8 @@ PHP                                                                        NEWS
   E_WARNING rather then E_ERROR). (Ilia)
 - Fixed bug #34180 (--with-curlwrappers causes PHP to disregard some HTTP 
   stream context options). (Mike)
+- Fixed bug #34005 (oci_password_change() fails). 
+  (pholdaway at technocom-wireless dot com, Tony)
 
 04 May 2006, PHP 5.1.4
 - Added "capture_peer_cert" and "capture_peer_cert_chain" context options
