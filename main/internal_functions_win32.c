@@ -108,10 +108,10 @@
 #ifdef HAVE_SPL
 #include "ext/spl/php_spl.h"
 #endif
-#ifdef HAVE_XML && HAVE_XMLREADER
+#if HAVE_XML && HAVE_XMLREADER
 #include "ext/xmlreader/php_xmlreader.h"
 #endif
-#ifdef HAVE_XML && HAVE_XMLWRITER
+#if HAVE_XML && HAVE_XMLWRITER
 #include "ext/xmlwriter/php_xmlwriter.h"
 #endif
 /* }}} */
