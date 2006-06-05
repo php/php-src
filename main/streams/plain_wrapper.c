@@ -1272,11 +1272,6 @@ not_relative_path:
 #endif
 
 	if (!path || (path && !*path)) {
-
-		if (((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) && php_check_open_basedir(path TSRMLS_CC)) {
-			return NULL;
-		}
-
 		if (PG(safe_mode) && (!php_checkuid(filename, mode, CHECKUID_CHECK_MODE_PARAM))) {
 			return NULL;
 		}
