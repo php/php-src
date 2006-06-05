@@ -340,7 +340,14 @@ ZEND_API void convert_to_long_base(zval *op, int base)
 					return;
 				}
 
-				zend_error(E_NOTICE, "Object of class %s could not be converted to int", Z_OBJCE_P(op)->name);
+				if (EG(ze1_compatibility_mode)) {
+					HashTable *ht = Z_OBJPROP_P(op);
+					if (ht) {
+						retval = (zend_hash_num_elements(ht)?1:0);
+					}
+				} else {
+					zend_error(E_NOTICE, "Object of class %s could not be converted to int", Z_OBJCE_P(op)->name);
+				}
 				zval_dtor(op);
 				ZVAL_LONG(op, retval);
 				return;
@@ -399,7 +406,15 @@ ZEND_API void convert_to_double(zval *op)
 					return;
 				}
 
-				zend_error(E_NOTICE, "Object of class %s could not be converted to double", Z_OBJCE_P(op)->name);
+				if (EG(ze1_compatibility_mode)) {
+					HashTable *ht = Z_OBJPROP_P(op);
+					if (ht) {
+						retval = (zend_hash_num_elements(ht)?1.0:0.0);
+					}
+				} else {
+					zend_error(E_NOTICE, "Object of class %s could not be converted to double", Z_OBJCE_P(op)->name);
+				}
+
 				zval_dtor(op);
 				ZVAL_DOUBLE(op, retval);
 				break;
@@ -486,6 +501,13 @@ ZEND_API void convert_to_boolean(zval *op)
 					return;
 				}
 					
+				if (EG(ze1_compatibility_mode)) {
+					HashTable *ht = Z_OBJPROP_P(op);
+					if (ht) {
+						retval = (zend_hash_num_elements(ht)?1:0);
+					}
+				}
+				
 				zval_dtor(op);
 				ZVAL_BOOL(op, retval);
 				break;
@@ -1452,7 +1474,15 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 			break;
 		case IS_OBJECT:
 			if (Z_OBJ_HT_P(op1) == Z_OBJ_HT_P(op2)) {
-				result->value.lval = (Z_OBJ_HANDLE_P(op1) == Z_OBJ_HANDLE_P(op2));
+				if (EG(ze1_compatibility_mode)) {
+					zend_compare_objects(result, op1, op2 TSRMLS_CC);
+					/* comparison returns 0 in case of equality and
+					 * 1 in case of ineqaulity, we need to reverse it
+					 */
+					result->value.lval = !result->value.lval;
+				} else {
+					result->value.lval = (Z_OBJ_HANDLE_P(op1) == Z_OBJ_HANDLE_P(op2));
+				}
 			} else {
 				result->value.lval = 0;
 			}

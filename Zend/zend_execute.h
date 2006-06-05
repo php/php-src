@@ -116,8 +116,15 @@ static inline int i_zend_is_true(zval *op)
 						break;
 					}
 				}
+			
+				if(EG(ze1_compatibility_mode)) {
+					result = (zend_hash_num_elements(Z_OBJPROP_P(op))?1:0);
+				} else {
+					result = 1;
+				}
+			} else {
+				result = 1;
 			}
-			result = 1;
 			break;
 		default:
 			result = 0;
