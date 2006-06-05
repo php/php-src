@@ -391,6 +391,8 @@ PHP_MINFO_FUNCTION(pdo)
 
 	if (drivers) {
 		efree(drivers);
+	} else {
+		efree(ldrivers);
 	}
 
 	php_info_print_table_end();
