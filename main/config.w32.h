@@ -72,9 +72,13 @@
 #define HAVE_DOM 1
 #define HAVE_SIMPLEXML 1
 #define HAVE_XML 1
+#define HAVE_XMLREADER 1
+#define HAVE_XMLWRITER 1
+#define HAVE_LIBXML_PARSER_H 1
 
 /* Enable / Disable ZLIB extension (default: enabled) */
 #define HAVE_ZLIB 1
+#define HAVE_ZLIB_H 1
 
 /* Enable / Disable SQLite extension (default: enabled) */
 #define HAVE_SQLITE 1
@@ -190,7 +194,6 @@
 #define HAVE_SQLDATASOURCES
 #define POSIX_MALLOC_THRESHOLD 10
 
-
 /*
  * defining HAVE_SOCKLEN_T prevents PHP from building with the latest platform SDK...
  * #define HAVE_SOCKLEN_T
@@ -203,3 +206,44 @@
 #define PHP_CAN_SUPPORT_PROC_OPEN 1
 
 #define HAVE_MBLEN
+
+#undef HAVE_ATOF_ACCEPTS_NAN
+#undef HAVE_ATOF_ACCEPTS_INF
+#define HAVE_HUGE_VAL_NAN 1
+
+/* vs.net 2005 has a 64-bit time_t.  This will likely break
+ * 3rdParty libs that were built with older compilers; switch
+ * back to 32-bit */
+#define _USE_32BIT_TIME_T 1
+#define HAVE_STDLIB_H 1
+/* have the arpa\nameser.h header file */
+#define HAVE_ARPA_NAMESER_H 1
+
+/* undefined */
+#define PHP_FASTCGI 1
+
+/* Have COM_DOTNET support */
+#define HAVE_COM_DOTNET 1
+
+/* Have date/time support */
+#define HAVE_DATE 1
+
+/* GD support */
+#define HAVE_LIBGD 1
+/* undefined */
+#define HAVE_HASH_EXT 1
+
+/* Define if iconv extension is enabled */
+#define HAVE_ICONV 1
+
+/* Define if libiconv is available */
+#define HAVE_LIBICONV 1
+
+/* Which iconv implementation to use */
+#define PHP_ICONV_IMPL "\"libiconv\""
+
+/* Whether iconv supports errno or not */
+#define ICONV_SUPPORTS_ERRNO 1
+
+/* SPL support */
+#define HAVE_SPL 1
