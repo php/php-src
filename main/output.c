@@ -561,7 +561,7 @@ PHPAPI int php_output_handler_started(zval *name TSRMLS_DC)
 	int i, count = php_output_get_level(TSRMLS_C);
 	
 	if (count) {
-		handlers = *(php_output_handler ***) zend_stack_base(&OG(handlers));
+		handlers = (php_output_handler **) zend_stack_base(&OG(handlers));
 		
 		for (i = 0; i < count; ++i) {
 			if (!zend_binary_zval_strcmp(handlers[i]->name, name)) {
