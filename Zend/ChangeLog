@@ -1,3 +1,26 @@
+2006-06-05  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_5_2)
+      zend.c
+      zend_API.c
+      zend_execute.c
+      zend_execute.h
+      zend_execute_API.c
+      zend_globals.h
+      zend_objects.c
+      zend_operators.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/bug30332.phpt
+      tests/bug31828.phpt
+      tests/bug32080.phpt
+      tests/bug32852.phpt
+      tests/bug33243.phpt
+      tests/bug34712.phpt
+      tests/bug34767.phpt:
+      Restore ZE1 compatibility mode (Zend Engine part - the modules patches
+      will follow later today)
+
 2006-06-04  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_5_2)

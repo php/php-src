@@ -1,3 +1,115 @@
+2006-06-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sysvmsg/sysvmsg.c:
+      MFB: Fixed bug #37705 (Semaphore constants not available).
+
+    * (PHP_5_2)
+      NEWS
+      ext/sysvmsg/sysvmsg.c:
+      Fixed bug #37705 (Semaphore constants not available).
+
+2006-06-05  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      main/streams/plain_wrapper.c:
+      MFH: no need to check if non-existing include_path complies with
+      open_basedir setting
+
+    * main/streams/plain_wrapper.c:
+      no need to check if non-existing include_path complies with open_basedir
+      setting
+      the only result we can get is segfault
+
+2006-06-05  Edin Kadribasic  <edink@emini.dk>
+
+    * main/streams/plain_wrapper.c:
+      MFB
+
+    * (PHP_5_2)
+      NEWS
+      main/streams/plain_wrapper.c:
+      Fixed bug #35886 (nlopes)
+
+2006-06-05  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_5_2)
+      ext/dom/php_dom.c
+      ext/simplexml/simplexml.c:
+      Final ze1_compat restoration - it was mostly done by hand, so if anybody
+      spots any (new) problems, let me know.  Test wise, the same tests that
+      failed before are failing now.
+
+    * (PHP_5_2)
+      php.ini-dist
+      php.ini-recommended:
+      ze1 restoration
+
+    * (PHP_5_2)
+      ZendEngine2/zend.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_objects.c
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug30332.phpt
+      ZendEngine2/tests/bug31828.phpt
+      ZendEngine2/tests/bug32080.phpt
+      ZendEngine2/tests/bug32852.phpt
+      ZendEngine2/tests/bug33243.phpt
+      ZendEngine2/tests/bug34712.phpt
+      ZendEngine2/tests/bug34767.phpt:
+      Restore ZE1 compatibility mode (Zend Engine part - the modules patches
+      will follow later today)
+
+2006-06-05  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/package.xml:
+      add new changelog entries
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+2006-06-05  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_1)
+      main/timelib_config.h:
+      not for cvs
+
+    * (PHP_5_1)
+      main/internal_functions_win32.c:
+      fix typo
+
+    * (PHP_5_1)
+      main/config.w32.h
+      main/config.w32.h
+      main/internal_functions_win32.c
+      main/internal_functions_win32.c
+      main/timelib_config.h
+      main/timelib_config.h
+      win32/php5dllts.dsp
+      win32/php5dllts.dsp:
+      improve .dsp build
+
+2006-06-05  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/oci8/oci8.c
+      ext/oci8/oci8_interface.c:
+      MFH: fix OCIPasswordChange() parameters (patch by pholdaway at
+      technocom-wireless dot com)
+      prevent username, password and new password from being empty
+
+    * ext/oci8/oci8.c
+      ext/oci8/oci8_interface.c:
+      fix OCIPasswordChange() parameters (patch by pholdaway at
+      technocom-wireless dot com)
+      prevent username. password and new password from being empty
+
 2006-06-04  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_5_2)
