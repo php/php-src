@@ -2247,17 +2247,6 @@ static zend_bool do_inherit_constant_check(HashTable *child_constants_table, zva
 
 ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface TSRMLS_DC)
 {
-	zend_uint i, if_num = ce->num_interfaces, cnt = 0;
-
-	for (i = 0; i < if_num; i++) {
-		if (ce->interfaces[i] != NULL && ce->interfaces[i]->name_length == iface->name_length && !memcmp(ce->interfaces[i]->name, iface->name, iface->name_length)) {
-			cnt++;
-			if (cnt > 1) {
-				zend_error(E_COMPILE_ERROR, "Cannot implement previously implemented interface %s", iface->name);
-			}
-		}
-	}
-
 	zend_hash_merge_ex(&ce->constants_table, &iface->constants_table, (copy_ctor_func_t) zval_add_ref, sizeof(zval *), (merge_checker_func_t) do_inherit_constant_check, iface);
 	zend_hash_merge_ex(&ce->function_table, &iface->function_table, (copy_ctor_func_t) do_inherit_method, sizeof(zend_function), (merge_checker_func_t) do_inherit_method_check, ce);
 
