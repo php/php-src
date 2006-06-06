@@ -661,6 +661,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, cha
 	if (base64) {
 		comma = (char*)php_base64_decode((const unsigned char *)comma, dlen, &ilen);
 		if (!comma) {
+			zval_ptr_dtor(&meta);
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "rfc2397: unable to decode");
 			return NULL;
 		}
