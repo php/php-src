@@ -300,7 +300,7 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 	curl_easy_setopt(curlstream->curl, CURLOPT_USERAGENT, FG(user_agent) ? FG(user_agent) : "PHP/" PHP_VERSION);
 	
 	/* TODO: read cookies and options from context */
-	if (!strncasecmp(filename, "http", sizeof("http")-1)) {
+	if (context && !strncasecmp(filename, "http", sizeof("http")-1)) {
 		/* HTTP(S) */
 		if (SUCCESS == php_stream_context_get_option(context, "http", "user_agent", &ctx_opt) && Z_TYPE_PP(ctx_opt) == IS_STRING) {
 			curl_easy_setopt(curlstream->curl, CURLOPT_USERAGENT, Z_STRVAL_PP(ctx_opt));
