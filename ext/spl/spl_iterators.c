@@ -1785,6 +1785,7 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern TSRMLS_DC)
 						if (intern->u.caching.flags & CIT_CATCH_GET_CHILD) {
 							zend_clear_exception(TSRMLS_C);
 						} else {
+							zval_ptr_dtor(&retval);
 							return;
 						}
 					} else {
