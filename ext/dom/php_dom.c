@@ -510,7 +510,6 @@ static zend_object_handlers* dom_get_obj_handlers(TSRMLS_D) {
 	} else {
 		return &dom_object_handlers;
 	}
-	return &dom_object_handlers;
 }
 
 static zend_module_dep dom_deps[] = {
