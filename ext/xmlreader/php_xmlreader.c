@@ -35,6 +35,7 @@
 zend_class_entry *xmlreader_class_entry;
 
 static zend_object_handlers xmlreader_object_handlers;
+static zend_object_handlers xmlreader_object_handlers_ze1;
 
 static HashTable xmlreader_prop_handlers;
 
@@ -351,6 +352,14 @@ void xmlreader_objects_clone(void *object, void **object_clone TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ xmlreader_objects_ze1_clone_obj */
+zend_object_value xmlreader_objects_ze1_clone_obj(zval *object TSRMLS_DC)
+{
+	php_error(E_ERROR, "Cannot clone object of class %s due to 'zend.ze1_compatibility_mode'", Z_OBJCE_P(object)->name);
+	return object->value.obj;
+}
+/* }}} */
+
 /* {{{ xmlreader_free_resources */
 static void xmlreader_free_resources(xmlreader_object *intern) {
 	if (intern) {
@@ -404,7 +413,7 @@ zend_object_value xmlreader_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) xmlreader_objects_free_storage, xmlreader_objects_clone TSRMLS_CC);
 	intern->handle = retval.handle;
-	retval.handlers = &xmlreader_object_handlers;
+	retval.handlers = EG(ze1_compatibility_mode) ? &xmlreader_object_handlers_ze1 : &xmlreader_object_handlers;
 	return retval;
 }
 /* }}} */
@@ -1198,6 +1207,12 @@ PHP_MINIT_FUNCTION(xmlreader)
 	xmlreader_object_handlers.read_property = xmlreader_read_property;
 	xmlreader_object_handlers.write_property = xmlreader_write_property;
 	xmlreader_object_handlers.get_property_ptr_ptr = xmlreader_get_property_ptr_ptr;
+
+	memcpy(&xmlreader_object_handlers_ze1, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	xmlreader_object_handlers_ze1.read_property = xmlreader_read_property;
+	xmlreader_object_handlers_ze1.write_property = xmlreader_write_property;
+	xmlreader_object_handlers_ze1.get_property_ptr_ptr = xmlreader_get_property_ptr_ptr;
+	xmlreader_object_handlers_ze1.clone_obj = xmlreader_objects_ze1_clone_obj;
 
 	INIT_CLASS_ENTRY(ce, "XMLReader", xmlreader_functions);
 	ce.create_object = xmlreader_objects_new;
