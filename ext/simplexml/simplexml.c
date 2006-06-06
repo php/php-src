@@ -1848,7 +1848,11 @@ php_sxe_register_object(php_sxe_object *intern TSRMLS_DC)
 	zend_object_value rv;
 
 	rv.handle = zend_objects_store_put(intern, sxe_object_dtor, (zend_objects_free_object_storage_t)sxe_object_free_storage, sxe_object_clone TSRMLS_CC);
-	rv.handlers = (zend_object_handlers *) &sxe_object_handlers;
+	if (EG(ze1_compatibility_mode)) {
+		rv.handlers = (zend_object_handlers *) &sxe_ze1_object_handlers;
+	} else {
+		rv.handlers = (zend_object_handlers *) &sxe_object_handlers;
+	}
 
 	return rv;
 }
