@@ -1258,7 +1258,7 @@ PHP_FUNCTION(ob_start)
 	long chunk_size = 0;
 	long flags = PHP_OUTPUT_HANDLER_CLEANABLE|PHP_OUTPUT_HANDLER_REMOVABLE;
 	
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|zlb", &output_handler, &chunk_size, &flags)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|z/lb", &output_handler, &chunk_size, &flags)) {
 		RETURN_FALSE;
 	}
 	if (chunk_size < 0) {
