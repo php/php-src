@@ -2394,7 +2394,7 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 			if (i < parent_iface_num) {
 				ignore = 1;
 			} else {
-				zend_error(E_COMPILE_ERROR, "Class %s cannot implement previously implemented interface %s", ce->name, iface->name);
+				zend_error(E_COMPILE_ERROR, "Class %v cannot implement previously implemented interface %v", ce->name, iface->name);
 			}
 		}
 	}
