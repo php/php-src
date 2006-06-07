@@ -150,6 +150,9 @@ zend_module_entry pdo_module_entry = {
 };
 /* }}} */
 
+/* TODO: visit persistent handles: for each persistent statement handle,
+ * remove bound parameter associations */
+
 #ifdef COMPILE_DL_PDO
 ZEND_GET_MODULE(pdo)
 #endif
