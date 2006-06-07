@@ -3441,6 +3441,26 @@ ZEND_METHOD(reflection_class, getInterfaces)
 }
 /* }}} */
 
+/* {{{ proto public String[] ReflectionClass::getInterfaceNames()
+   Returns an array of names of interfaces this class implements */
+ZEND_METHOD(reflection_class, getInterfaceNames)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+	zend_uint i;
+
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
+	GET_REFLECTION_OBJECT_PTR(ce);
+
+	/* Return an empty array if this class implements no interfaces */
+	array_init(return_value);
+
+   	for (i=0; i < ce->num_interfaces; i++) {
+		add_next_index_textl(return_value, ce->interfaces[i]->name, ce->interfaces[i]->name_length, 1);
+	}
+}
+/* }}} */
+
 /* {{{ proto public ReflectionClass ReflectionClass::getParentClass()
    Returns the class' parent class, or, if none exists, FALSE */
 ZEND_METHOD(reflection_class, getParentClass)
@@ -4176,8 +4196,7 @@ static int add_extension_class(zend_class_entry **pce, int num_args, va_list arg
 			/* FIXME: Unicode support??? */
 			add_assoc_zval_ex(class_array, (*pce)->name.s, (*pce)->name_length + 1, zclass);
 		} else {
-			/* FIXME: Unicode support??? */
-			add_next_index_stringl(class_array, (*pce)->name.s, (*pce)->name_length, 1);
+			add_next_index_textl(class_array, (*pce)->name, (*pce)->name_length, 1);
 		}
 	}
 	return ZEND_HASH_APPLY_KEEP;
@@ -4352,6 +4371,7 @@ static zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, getConstants, NULL, 0)
 	ZEND_ME(reflection_class, getConstant, NULL, 0)
 	ZEND_ME(reflection_class, getInterfaces, NULL, 0)
+	ZEND_ME(reflection_class, getInterfaceNames, NULL, 0)
 	ZEND_ME(reflection_class, isInterface, NULL, 0)
 	ZEND_ME(reflection_class, isAbstract, NULL, 0)
 	ZEND_ME(reflection_class, isFinal, NULL, 0)
