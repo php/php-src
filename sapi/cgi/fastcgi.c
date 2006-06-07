@@ -665,12 +665,14 @@ int fcgi_accept_request(fcgi_request *req)
 				}
 				FCGI_UNLOCK(req->listen_socket);
 #else
+				{
 				sa_t sa;
 				socklen_t len = sizeof(sa);
 
 				FCGI_LOCK(req->listen_socket);
 				req->fd = accept(req->listen_socket, (struct sockaddr *)&sa, &len);
 				FCGI_UNLOCK(req->listen_socket);
+				}
 #endif
 
 				if (req->fd < 0 && (in_shutdown || errno != EINTR)) {
