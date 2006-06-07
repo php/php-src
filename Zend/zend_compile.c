@@ -2382,11 +2382,38 @@ static zend_bool do_inherit_constant_check(HashTable *child_constants_table, zva
 
 ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface TSRMLS_DC)
 {
-	zend_hash_merge_ex(&ce->constants_table, &iface->constants_table, (copy_ctor_func_t) zval_add_ref, sizeof(zval *), (merge_checker_func_t) do_inherit_constant_check, iface);
-	zend_hash_merge_ex(&ce->function_table, &iface->function_table, (copy_ctor_func_t) do_inherit_method, sizeof(zend_function), (merge_checker_func_t) do_inherit_method_check, ce);
+	zend_uint i, ignore = 0;
+	zend_uint current_iface_num = ce->num_interfaces;
+	zend_uint parent_iface_num  = ce->parent ? ce->parent->num_interfaces : 0;
 
-	do_implement_interface(ce, iface TSRMLS_CC);
-	zend_do_inherit_interfaces(ce, iface TSRMLS_CC);
+	for (i = 0; i < ce->num_interfaces; i++) {
+		if (ce->interfaces[i] == NULL) {
+			memmove(ce->interfaces + i, ce->interfaces + i + 1, sizeof(zend_class_entry*) * (--ce->num_interfaces - i));
+			i--;
+		} else if (ce->interfaces[i] == iface) {
+			if (i < parent_iface_num) {
+				ignore = 1;
+			} else {
+				zend_error(E_COMPILE_ERROR, "Class %s cannot implement previously implemented interface %s", ce->name, iface->name);
+			}
+		}
+	}
+	if (!ignore) {
+		if (ce->num_interfaces >= current_iface_num) {
+			if (ce->type == ZEND_INTERNAL_CLASS) {
+				ce->interfaces = (zend_class_entry **) realloc(ce->interfaces, sizeof(zend_class_entry *) * (++current_iface_num));
+			} else {
+				ce->interfaces = (zend_class_entry **) erealloc(ce->interfaces, sizeof(zend_class_entry *) * (++current_iface_num));
+			}
+		}
+		ce->interfaces[ce->num_interfaces++] = iface;
+	
+		zend_hash_merge_ex(&ce->constants_table, &iface->constants_table, (copy_ctor_func_t) zval_add_ref, sizeof(zval *), (merge_checker_func_t) do_inherit_constant_check, iface);
+		zend_hash_merge_ex(&ce->function_table, &iface->function_table, (copy_ctor_func_t) do_inherit_method, sizeof(zend_function), (merge_checker_func_t) do_inherit_method_check, ce);
+	
+		do_implement_interface(ce, iface TSRMLS_CC);
+		zend_do_inherit_interfaces(ce, iface TSRMLS_CC);
+	}
 }
 
 
@@ -2965,17 +2992,18 @@ void zend_do_end_class_declaration(znode *class_token, znode *parent_token TSRML
 
 	ce->line_end = zend_get_compiled_lineno(TSRMLS_C);
 
-	/* Inherit interfaces */
-	if (ce->num_interfaces > 0) {
-		ce->interfaces = (zend_class_entry **) emalloc(sizeof(zend_class_entry *)*ce->num_interfaces);
-		memset(ce->interfaces, 0, sizeof(zend_class_entry *)*ce->num_interfaces);
-	}
 	if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))
 		&& ((parent_token->op_type != IS_UNUSED) || (ce->num_interfaces > 0))) {
 		zend_verify_abstract_class(ce TSRMLS_CC);
 		if (ce->parent || ce->num_interfaces) {
 			do_verify_abstract_class(TSRMLS_C);
 		}
+	}
+	/* Inherit interfaces; reset number to zero, we need it for above check and
+	 * will restore it during actual implementation. */
+	if (ce->num_interfaces > 0) {
+		ce->interfaces = NULL;
+		ce->num_interfaces = 0;
 	}
 	CG(active_class_entry) = NULL;
 }
