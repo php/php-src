@@ -1,3 +1,31 @@
+2006-06-06  Antony Dovgal  <antony@zend.com>
+
+    * zend_compile.c
+      zend_compile.c:
+      revert by Andi's request
+
+    * tests/bug33732.phpt
+      tests/bug33732.phpt:
+      fix test
+
+    * (PHP_5_2)
+      zend_compile.c
+      tests/objects_012.phpt
+      tests/objects_013.phpt
+      tests/objects_014.phpt:
+      MFH: do not allow to implement the same interface twice
+      add tests
+
+    * zend_compile.c
+      tests/objects_012.phpt
+      tests/objects_012.phpt
+      tests/objects_013.phpt
+      tests/objects_013.phpt
+      tests/objects_014.phpt
+      tests/objects_014.phpt:
+      do not allow to implement the same interface twice
+      add tests
+
 2006-06-05  Zeev Suraski  <zeev@zend.com>
 
     * (PHP_5_2)
