@@ -144,25 +144,92 @@ int php_oci_lob_get_length (php_oci_descriptor *descriptor, ub4 *length TSRMLS_D
 	return 0;	
 } /* }}} */
 
+/* {{{ php_oci_lob_callback()
+   Append LOB portion to a memory buffer */
+#if defined(HAVE_OCI_LOB_READ2)
+sb4 php_oci_lob_callback (dvoid *ctxp, CONST dvoid *bufxp, oraub8 len, ub1 piece, dvoid **changed_bufpp, oraub8 *changed_lenp)
+#else
+sb4 php_oci_lob_callback (dvoid *ctxp, CONST dvoid *bufxp, ub4 len, ub1 piece)
+#endif
+{
+	ub4 lenp = (ub4) len;
+	php_oci_lob_ctx *ctx = (php_oci_lob_ctx *)ctxp;
+
+	switch (piece)
+	{
+		case OCI_LAST_PIECE:
+			*(ctx->lob_data) = erealloc(*(ctx->lob_data), (size_t) (*(ctx->lob_len) + lenp + 1));
+			memcpy(*(ctx->lob_data) + *(ctx->lob_len), bufxp, (size_t) lenp);
+			*(ctx->lob_len) += lenp;
+			*(*(ctx->lob_data) + *(ctx->lob_len)) = 0x00;
+			return OCI_CONTINUE;
+
+		case OCI_FIRST_PIECE:
+		case OCI_NEXT_PIECE:
+			*(ctx->lob_data) = erealloc(*(ctx->lob_data), (size_t) (*(ctx->lob_len) + lenp));
+			memcpy(*(ctx->lob_data) + *(ctx->lob_len), bufxp, (size_t) lenp);
+			*(ctx->lob_len) += lenp;
+			return OCI_CONTINUE;
+
+		default: {
+			TSRMLS_FETCH();
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unexpected LOB piece id received (value:%d)", piece);
+			efree(*(ctx->lob_data));
+			*(ctx->lob_data) = NULL;
+			*(ctx->lob_len) = 0;
+			return OCI_ERROR;
+		}
+	}
+}
+/* }}} */
+
+/* {{{ php_oci_lob_calculate_buffer() */
+static inline int php_oci_lob_calculate_buffer(php_oci_descriptor *descriptor, long read_length TSRMLS_DC)
+{
+	php_oci_connection *connection = descriptor->connection;
+	ub4 chunk_size;
+		
+	if (!descriptor->chunk_size) {
+		connection->errcode = PHP_OCI_CALL(OCILobGetChunkSize, (connection->svc, connection->err, descriptor->descriptor, &chunk_size));
+
+		if (connection->errcode != OCI_SUCCESS) {
+			php_oci_error(connection->err, connection->errcode TSRMLS_CC);
+			PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
+			return read_length; /* we have to return original length here */
+		}
+		descriptor->chunk_size = chunk_size;
+	}
+	
+	if ((read_length % descriptor->chunk_size) != 0) {
+		return descriptor->chunk_size * ((read_length / descriptor->chunk_size) + 1);
+	}
+	return read_length;
+}
+/* }}} */
+
 /* {{{ php_oci_lob_read() 
  Read specified portion of the LOB into the buffer */
 int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long initial_offset, char **data, ub4 *data_len TSRMLS_DC)
 {
 	php_oci_connection *connection = descriptor->connection;
 	ub4 length = 0;
+	int buffer_size = PHP_OCI_LOB_BUFFER_SIZE;
+	php_oci_lob_ctx ctx;
+	ub1 *bufp;
 #if defined(HAVE_OCI_LOB_READ2)
-	oraub8 bytes_read, bytes_total = 0, offset = 0;
+	oraub8 bytes_read, offset = 0;
 	oraub8 requested_len = read_length; /* this is by default */
 	oraub8 chars_read = 0;
-#else
-	int bytes_read, bytes_total = 0, offset = 0;
-	int requested_len = read_length; /* this is by default */
-	int chars_read = 0;
-#endif
 	int is_clob = 0;
+#else
+	int bytes_read, offset = 0;
+	int requested_len = read_length; /* this is by default */
+#endif
 
 	*data_len = 0;
 	*data = NULL;
+	ctx.lob_len = data_len;
+	ctx.lob_data = data;
 
 	if (php_oci_lob_get_length(descriptor, &length TSRMLS_CC)) {
 		return 1;
@@ -188,6 +255,8 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 	if (requested_len <= 0) {
 		return 0;
 	}
+	
+	offset = initial_offset;
 
 	if (descriptor->type == OCI_DTYPE_FILE) {
 		connection->errcode = PHP_OCI_CALL(OCILobFileOpen, (connection->svc, connection->err, descriptor->descriptor, OCI_FILE_READONLY));
@@ -214,82 +283,70 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 			is_clob = 1;
 		}
 	}
-#endif
 
-	*data = (char *)emalloc(requested_len + 1);
-	bytes_read = requested_len;
-	offset = initial_offset;
-		
-	/* TODO
-	 * We need to make sure this function works with Unicode LOBs
-	 * */
-
-#if defined(HAVE_OCI_LOB_READ2)
-
-	do {
+	if (is_clob) {
+		chars_read = requested_len;
+		bytes_read = 0;
+	} else {
 		chars_read = 0;
-		connection->errcode = PHP_OCI_CALL(OCILobRead2, 
-			(
-				connection->svc, 
-				connection->err, 
-				descriptor->descriptor, 
-				(oraub8 *)&bytes_read,								/* IN/OUT bytes toread/read */
-				(oraub8 *)&chars_read,
-				(oraub8) offset + 1,								/* offset (starts with 1) */ 
-				(dvoid *) ((char *) *data + *data_len),	
-				(oraub8) requested_len,									/* size of buffer */ 
-				0, 
-				NULL,
-				(OCICallbackLobRead2) 0,					/* callback... */ 
-				(ub2) connection->charset,	/* The character set ID of the buffer data. */ 
-				(ub1) SQLCS_IMPLICIT					/* The character set form of the buffer data. */
-			)
-		);
+		bytes_read = requested_len;
+	}
 
-		bytes_total += bytes_read;
-		if (is_clob) {
-			offset += chars_read;
-		} else {
-			offset += bytes_read;
-		}
-		
-		*data_len += bytes_read;
-		
-		if (connection->errcode != OCI_NEED_DATA) {
-			break;
-		}
-		*data = erealloc(*data, *data_len + PHP_OCI_LOB_BUFFER_SIZE + 1);	
-	} while (connection->errcode == OCI_NEED_DATA);
+	buffer_size = (requested_len < buffer_size ) ? requested_len : buffer_size;		/* optimize buffer size */
+	buffer_size = php_oci_lob_calculate_buffer(descriptor, buffer_size TSRMLS_CC);	/* use chunk size */
+
+	bufp = (ub1 *) ecalloc(1, buffer_size);
+	connection->errcode = PHP_OCI_CALL(OCILobRead2,
+		(
+			connection->svc,
+			connection->err,
+			descriptor->descriptor,
+			(oraub8 *)&bytes_read,                          /* IN/OUT bytes toread/read */
+			(oraub8 *)&chars_read,                          /* IN/OUT chars toread/read */
+			(oraub8) offset + 1,                            /* offset (starts with 1) */
+			(dvoid *) bufp,
+			(oraub8) buffer_size,                           /* size of buffer */
+			OCI_FIRST_PIECE,
+			(dvoid *)&ctx,
+			(OCICallbackLobRead2) php_oci_lob_callback,             /* callback... */
+			(ub2) connection->charset,              /* The character set ID of the buffer data. */
+			(ub1) SQLCS_IMPLICIT                    /* The character set form of the buffer data. */
+		)
+	);
+	
+	efree(bufp);
+	
+	if (is_clob) {
+		offset = descriptor->lob_current_position + chars_read;
+	} else {
+		offset = descriptor->lob_current_position + bytes_read;
+	}
 
 #else
 
-	do {
-		connection->errcode = PHP_OCI_CALL(OCILobRead, 
-			(
-				connection->svc, 
-				connection->err, 
-				descriptor->descriptor, 
-				&bytes_read,								/* IN/OUT bytes toread/read */ 
-				offset + 1,								/* offset (starts with 1) */ 
-				(dvoid *) ((char *) *data + *data_len),	
-				requested_len,									/* size of buffer */ 
-				(dvoid *)0, 
-				(OCICallbackLobRead) 0,					/* callback... */ 
-				(ub2) connection->charset,	/* The character set ID of the buffer data. */ 
-				(ub1) SQLCS_IMPLICIT					/* The character set form of the buffer data. */
-			)
-		);
+	bytes_read = requested_len;
+	buffer_size = (requested_len < buffer_size ) ? requested_len : buffer_size;		/* optimize buffer size */
+	buffer_size = php_oci_lob_calculate_buffer(descriptor, buffer_size TSRMLS_CC);	/* use chunk size */
 
-		bytes_total += bytes_read;
-		offset += bytes_read;
-		
-		*data_len += bytes_read;
-		
-		if (connection->errcode != OCI_NEED_DATA) {
-			break;
-		}
-		*data = erealloc(*data, *data_len + PHP_OCI_LOB_BUFFER_SIZE + 1);	
-	} while (connection->errcode == OCI_NEED_DATA);
+	bufp = (ub1 *) ecalloc(1, buffer_size);
+	connection->errcode = PHP_OCI_CALL(OCILobRead,
+		(
+			 connection->svc,
+			 connection->err,
+			 descriptor->descriptor,
+			 &bytes_read,                                /* IN/OUT bytes toread/read */
+			 offset + 1,                             /* offset (starts with 1) */
+			 (dvoid *) bufp,
+			 (ub4) buffer_size,                          /* size of buffer */
+			 (dvoid *)&ctx,
+			 (OCICallbackLobRead) php_oci_lob_callback,              /* callback... */
+			 (ub2) connection->charset,              /* The character set ID of the buffer data. */
+			 (ub1) SQLCS_IMPLICIT                    /* The character set form of the buffer data. */
+		)
+	);
+	
+	efree(bufp);
+	offset = descriptor->lob_current_position + bytes_read;
 
 #endif
 	
@@ -298,10 +355,11 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 		PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 		efree(*data);
 		*data = NULL;
+		*data_len = 0;
 		return 1;
 	}
 	
-	descriptor->lob_current_position = offset; 
+	descriptor->lob_current_position = (int)offset; 
 
 	if (descriptor->type == OCI_DTYPE_FILE) {
 		connection->errcode = PHP_OCI_CALL(OCILobFileClose, (connection->svc, connection->err, descriptor->descriptor));
@@ -311,12 +369,10 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 			PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 			efree(*data);
 			*data = NULL;
+			*data_len = 0;
 			return 1;
 		}
 	}
-
-	*data = erealloc(*data, *data_len + 1);
-	(*data)[ *data_len ] = 0;
 
 	return 0;
 } /* }}} */
