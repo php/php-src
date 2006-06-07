@@ -1040,8 +1040,6 @@ static PHP_METHOD(PDO, query)
 		/* something broke */
 	}
 
-	PDO_HANDLE_STMT_ERR();
-		
 	/* kill the object handle for the stmt here */
 	zval_dtor(return_value);
 
