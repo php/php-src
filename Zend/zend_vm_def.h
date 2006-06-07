@@ -3627,8 +3627,6 @@ ZEND_VM_HANDLER(144, ZEND_ADD_INTERFACE, ANY, ANY)
 		zend_error_noreturn(E_ERROR, "%s cannot implement %s - it is not an interface", ce->name, iface->name);
 	}
 
-	ce->interfaces[opline->extended_value] = iface;
-
 	zend_do_implement_interface(ce, iface TSRMLS_CC);
 
 	ZEND_VM_NEXT_OPCODE();
