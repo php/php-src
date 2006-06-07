@@ -385,6 +385,26 @@ typedef struct _zend_fcall_info_cache {
 BEGIN_EXTERN_C()
 ZEND_API extern zend_fcall_info_cache empty_fcall_info_cache;
 
+/** Build zend_call_info/cache from a zval*
+ *
+ * Caller is responsible to provide a return value, otherwise the we will crash. 
+ * fci->retval_ptr_ptr = NULL;
+ * In order to pass parameters the following members need to be set:
+ * fci->param_count = 0;
+ * fci->params = NULL;
+ */
+ZEND_API int zend_fcall_info_init(zval *callable, zend_fcall_info *fci, zend_fcall_info_cache *fcc TSRMLS_DC);
+
+/** Set or clear the arguments in the zend_call_info struct taking care of
+ * refcount. If args is NULL and arguments are set then those are cleared.
+ */
+ZEND_API int zend_fcall_info_args(zend_fcall_info *fci, zval *args TSRMLS_DC);
+
+/** Call a function using information created by zend_fcall_info_init()/args().
+ * If args is given then those replace the arguement info in fci is temporarily.
+ */
+ZEND_API int zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_cache *fcc, zval **retval, zval *args TSRMLS_DC);
+
 ZEND_API int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TSRMLS_DC);
 
 
