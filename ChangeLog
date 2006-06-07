@@ -1,3 +1,69 @@
+2006-06-06  Michael Wallner  <mike@iworks.at>
+
+    * main/output.c:
+      - fix SEGV in php_output_handler_started()
+
+    * ext/curl/streams.c:
+      MFB: only try to fetch stream context options if context is set
+
+    * (PHP_5_2)
+      ext/curl/streams.c:
+      - only try to fetch stream context options if context is set
+
+2006-06-06  Antony Dovgal  <antony@zend.com>
+
+    * NEWS:
+      this function also exists in 5.2, no need for this news entry in HEAD
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c:
+      revert by Andi's request
+
+    * main/streams/memory.c:
+      don't leak when decoding failed
+
+2006-06-06  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      ext/dom/php_dom.c:
+      nuke unused call
+
+    * (PHP_5_2)
+      ext/simplexml/simplexml.c:
+      restore missing ze1 compat code
+
+2006-06-06  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/tests/bug33732.phpt
+      ZendEngine2/tests/bug33732.phpt:
+      fix test
+
+2006-06-06  Michael Wallner  <mike@iworks.at>
+
+    * main/output.c:
+      - fix regression with bug #22690 (ob_start() with create_function() output
+      handler)
+
+2006-06-06  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/objects_012.phpt
+      ZendEngine2/tests/objects_013.phpt
+      ZendEngine2/tests/objects_014.phpt:
+      MFH: do not allow to implement the same interface twice
+      add tests
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/tests/objects_012.phpt
+      ZendEngine2/tests/objects_012.phpt
+      ZendEngine2/tests/objects_013.phpt
+      ZendEngine2/tests/objects_013.phpt
+      ZendEngine2/tests/objects_014.phpt
+      ZendEngine2/tests/objects_014.phpt:
+      do not allow to implement the same interface twice
+      add tests
+
 2006-06-05  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/sysvmsg/sysvmsg.c:
