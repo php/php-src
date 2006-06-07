@@ -48,8 +48,6 @@ extern zend_module_entry pdo_module_entry;
 
 PHP_MINIT_FUNCTION(pdo);
 PHP_MSHUTDOWN_FUNCTION(pdo);
-PHP_RINIT_FUNCTION(pdo);
-PHP_RSHUTDOWN_FUNCTION(pdo);
 PHP_MINFO_FUNCTION(pdo);
 
 ZEND_BEGIN_MODULE_GLOBALS(pdo)
