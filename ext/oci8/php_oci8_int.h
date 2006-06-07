@@ -78,7 +78,7 @@ extern zend_class_entry *oci_coll_class_entry_ptr;
 #define PHP_OCI_MAX_NAME_LEN  64
 #define PHP_OCI_MAX_DATA_SIZE INT_MAX
 #define PHP_OCI_PIECE_SIZE    (64*1024)-1
-#define PHP_OCI_LOB_BUFFER_SIZE 32768 
+#define PHP_OCI_LOB_BUFFER_SIZE 1048576l  /* 1Mb seems to be the most reasonable buffer size for LOB reading */
 
 #define PHP_OCI_ASSOC               1<<0
 #define PHP_OCI_NUM                 1<<1
@@ -126,7 +126,13 @@ typedef struct { /* php_oci_descriptor {{{ */
 	int lob_current_position;		/* LOB internal pointer */ 
 	int lob_size;					/* cached LOB size. -1 = Lob wasn't initialized yet */
 	int buffering;					/* cached buffering flag. 0 - off, 1 - on, 2 - on and buffer was used */
+	ub4 chunk_size;					/* chunk size of the LOB. 0 - unknown */
 } php_oci_descriptor; /* }}} */
+
+typedef struct { /* php_oci_lob_ctx {{{ */
+	char **lob_data;            /* address of pointer to LOB data */
+	ub4 *lob_len;               /* address of LOB length variable (bytes) */
+} php_oci_lob_ctx; /* }}} */
 
 typedef struct { /* php_oci_collection {{{ */
 	int id;
@@ -318,6 +324,11 @@ int php_oci_lob_append (php_oci_descriptor *, php_oci_descriptor * TSRMLS_DC);
 int php_oci_lob_truncate (php_oci_descriptor *, long TSRMLS_DC);
 int php_oci_lob_erase (php_oci_descriptor *, long, long, ub4 * TSRMLS_DC);
 int php_oci_lob_is_equal (php_oci_descriptor *, php_oci_descriptor *, boolean * TSRMLS_DC);
+#if defined(HAVE_OCI_LOB_READ2)
+sb4 php_oci_lob_callback (dvoid *ctxp, CONST dvoid *bufxp, oraub8 len, ub1 piece, dvoid **changed_bufpp, oraub8 *changed_lenp);
+#else
+sb4 php_oci_lob_callback (dvoid *ctxp, CONST dvoid *bufxp, ub4 len, ub1 piece);
+#endif
 
 /* }}} */
 
