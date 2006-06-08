@@ -49,6 +49,7 @@ PHP                                                                        NEWS
 - Added RFC2397 (data: stream) support. (Marcus)
 - Fixed memory leaks in openssl streams context options (Pierre)
 - Fixed handling of extremely long paths inside tempnam() function. (Ilia)
+- Fixed bug #37747 (strtotime segfaults when given "nextyear"). (Derick)
 - Fixed bug #37709 (Possible crash in PDO::errorCode()). (Ilia)
 - Fixed bug #37707 (clone without assigning leaks memory). (Ilia, Nuno)
 - Fixed bug #37705 (Semaphore constants not available). (Ilia)
