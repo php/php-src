@@ -873,7 +873,7 @@ reltextunit = (('sec'|'second'|'min'|'minute'|'hour'|'day'|'week'|'fortnight'|'f
 
 relnumber = ([+-]?[ \t]*[0-9]+);
 relative = relnumber space? reltextunit;
-relativetext = reltextnumber space? reltextunit;
+relativetext = reltextnumber space reltextunit;
 
 */
 
