@@ -37,6 +37,9 @@ php_lcov.info: lcov-test
 		if test -f "$(top_srcdir)/$$y.c"; then \
 			ln -f -s $(top_srcdir)/$$y.c lcov_data/$$y.c; \
 		fi; \
+		if test -f "$(top_srcdir)/$$y.h"; then \
+			ln -f -s $(top_srcdir)/$$y.h lcov_data/$$y.h; \
+		fi; \
 		if test -f "$(top_srcdir)/$$y.re"; then \
 			ln -f -s $(top_srcdir)/$$y.re lcov_data/$$y.re; \
 		fi; \
