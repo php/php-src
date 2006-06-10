@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, PHP 5.2.0
+- Improved performance of str_replace() when doing 1 char to 1 char or 1 char
+  to many chars replacement by 30-40%. (Ilia)
 - Added memory_get_peak_usage() function for retrieving peak memory usage of
   a PHP script. (Ilia)
 - Changed Apache 2 Handler SAPI to call ap_set_content_type() once only. (Mike)
