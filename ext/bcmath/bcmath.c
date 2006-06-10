@@ -33,17 +33,87 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(bcmath);
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_bcadd, 0, 0, 2)
+	ZEND_ARG_INFO(0, left_operand)
+	ZEND_ARG_INFO(0, right_operand)
+	ZEND_ARG_INFO(0, scale)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_bcsub, 0, 0, 2)
+	ZEND_ARG_INFO(0, left_operand)
+	ZEND_ARG_INFO(0, right_operand)
+	ZEND_ARG_INFO(0, scale)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_bcmul, 0, 0, 2)
+	ZEND_ARG_INFO(0, left_operand)
+	ZEND_ARG_INFO(0, right_operand)
+	ZEND_ARG_INFO(0, scale)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_bcdiv, 0, 0, 2)
+	ZEND_ARG_INFO(0, left_operand)
+	ZEND_ARG_INFO(0, right_operand)
+	ZEND_ARG_INFO(0, scale)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_bcmod, 0)
+	ZEND_ARG_INFO(0, left_operand)
+	ZEND_ARG_INFO(0, right_operand)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_bcpowmod, 0, 0, 3)
+	ZEND_ARG_INFO(0, x)
+	ZEND_ARG_INFO(0, y)
+	ZEND_ARG_INFO(0, mod)
+	ZEND_ARG_INFO(0, scale)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_bcpow, 0, 0, 2)
+	ZEND_ARG_INFO(0, x)
+	ZEND_ARG_INFO(0, y)
+	ZEND_ARG_INFO(0, scale)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_bcsqrt, 0, 0, 1)
+	ZEND_ARG_INFO(0, operand)
+	ZEND_ARG_INFO(0, scale)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_bccomp, 0, 0, 2)
+	ZEND_ARG_INFO(0, left_operand)
+	ZEND_ARG_INFO(0, right_operand)
+	ZEND_ARG_INFO(0, scale)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_bcscale, 0)
+	ZEND_ARG_INFO(0, scale)
+ZEND_END_ARG_INFO()
+
+/* }}} */
+
 zend_function_entry bcmath_functions[] = {
-	PHP_FE(bcadd,									NULL)
-	PHP_FE(bcsub,									NULL)
-	PHP_FE(bcmul,									NULL)
-	PHP_FE(bcdiv,									NULL)
-	PHP_FE(bcmod,									NULL)
-	PHP_FE(bcpow,									NULL)
-	PHP_FE(bcsqrt,									NULL)
-	PHP_FE(bcscale,									NULL)
-	PHP_FE(bccomp,									NULL)
-	PHP_FE(bcpowmod,								NULL)
+	PHP_FE(bcadd,									arginfo_bcadd)
+	PHP_FE(bcsub,									arginfo_bcsub)
+	PHP_FE(bcmul,									arginfo_bcmul)
+	PHP_FE(bcdiv,									arginfo_bcdiv)
+	PHP_FE(bcmod,									arginfo_bcmod)
+	PHP_FE(bcpow,									arginfo_bcpow)
+	PHP_FE(bcsqrt,									arginfo_bcsqrt)
+	PHP_FE(bcscale,									arginfo_bcscale)
+	PHP_FE(bccomp,									arginfo_bccomp)
+	PHP_FE(bcpowmod,								arginfo_bcpowmod)
 	{NULL, NULL, NULL}
 };
 

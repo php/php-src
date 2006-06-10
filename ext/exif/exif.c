@@ -98,19 +98,43 @@ typedef unsigned char uchar;
 
 #define MAX_IFD_NESTING_LEVEL 100
 
+/* {{{ arginfo */
 static
-ZEND_BEGIN_ARG_INFO(exif_thumbnail_force_ref, 1)
-	ZEND_ARG_PASS_INFO(0)
-ZEND_END_ARG_INFO();
+ZEND_BEGIN_ARG_INFO(arginfo_exif_tagname, 0)
+	ZEND_ARG_INFO(0, index)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_exif_read_data, 0, 0, 1)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, sections_needed)
+	ZEND_ARG_INFO(0, sub_arrays)
+	ZEND_ARG_INFO(0, read_thumbnail)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_exif_thumbnail, 0, 0, 1)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(1, width)
+	ZEND_ARG_INFO(1, height)
+	ZEND_ARG_INFO(1, imagetype)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_exif_imagetype, 0)
+	ZEND_ARG_INFO(0, imagefile)
+ZEND_END_ARG_INFO()
+
+/* }}} */
 
 /* {{{ exif_functions[]
  */
 zend_function_entry exif_functions[] = {
-	PHP_FE(exif_read_data, NULL)
-	PHP_FALIAS(read_exif_data, exif_read_data, NULL)
-	PHP_FE(exif_tagname, NULL)
-	PHP_FE(exif_thumbnail, exif_thumbnail_force_ref)
-	PHP_FE(exif_imagetype, NULL)
+	PHP_FE(exif_read_data, arginfo_exif_read_data)
+	PHP_FALIAS(read_exif_data, exif_read_data, arginfo_exif_read_data)
+	PHP_FE(exif_tagname, arginfo_exif_tagname)
+	PHP_FE(exif_thumbnail, arginfo_exif_thumbnail)
+	PHP_FE(exif_imagetype, arginfo_exif_imagetype)
 	{NULL, NULL, NULL}
 };
 /* }}} */

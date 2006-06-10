@@ -30,24 +30,141 @@
 #include <time.h>
 #include <unicode/udat.h>
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date, 0, 0, 1)
+	ZEND_ARG_INFO(0, format)
+	ZEND_ARG_INFO(0, timestamp)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gmdate, 0, 0, 1)
+	ZEND_ARG_INFO(0, format)
+	ZEND_ARG_INFO(0, timestamp)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_idate, 0, 0, 1)
+	ZEND_ARG_INFO(0, format)
+	ZEND_ARG_INFO(0, timestamp)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_strtotime, 0, 0, 1)
+	ZEND_ARG_INFO(0, time)
+	ZEND_ARG_INFO(0, now)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mktime, 0, 0, 0)
+	ZEND_ARG_INFO(0, hour)
+	ZEND_ARG_INFO(0, min)
+	ZEND_ARG_INFO(0, sec)
+	ZEND_ARG_INFO(0, mon)
+	ZEND_ARG_INFO(0, day)
+	ZEND_ARG_INFO(0, year)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gmmktime, 0, 0, 0)
+	ZEND_ARG_INFO(0, hour)
+	ZEND_ARG_INFO(0, min)
+	ZEND_ARG_INFO(0, sec)
+	ZEND_ARG_INFO(0, mon)
+	ZEND_ARG_INFO(0, day)
+	ZEND_ARG_INFO(0, year)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_checkdate, 0)
+	ZEND_ARG_INFO(0, month)
+	ZEND_ARG_INFO(0, day)
+	ZEND_ARG_INFO(0, year)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_strftime, 0, 0, 1)
+	ZEND_ARG_INFO(0, format)
+	ZEND_ARG_INFO(0, timestamp)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gmstrftime, 0, 0, 1)
+	ZEND_ARG_INFO(0, format)
+	ZEND_ARG_INFO(0, timestamp)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_time, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_localtime, 0, 0, 0)
+	ZEND_ARG_INFO(0, timestamp)
+	ZEND_ARG_INFO(0, associative_array)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_getdate, 0, 0, 0)
+	ZEND_ARG_INFO(0, timestamp)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_date_default_timezone_set, 0)
+	ZEND_ARG_INFO(0, timezone_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_date_default_timezone_get, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_sunrise, 0, 0, 1)
+	ZEND_ARG_INFO(0, mixed time)
+	ZEND_ARG_INFO(0, format)
+	ZEND_ARG_INFO(0, latitude)
+	ZEND_ARG_INFO(0, longitude)
+	ZEND_ARG_INFO(0, zenith)
+	ZEND_ARG_INFO(0, gmt_offset)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_sunset, 0, 0, 1)
+	ZEND_ARG_INFO(0, mixed time)
+	ZEND_ARG_INFO(0, format)
+	ZEND_ARG_INFO(0, latitude)
+	ZEND_ARG_INFO(0, longitude)
+	ZEND_ARG_INFO(0, zenith)
+	ZEND_ARG_INFO(0, gmt_offset)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_date_sun_info, 0)
+	ZEND_ARG_INFO(0, time)
+	ZEND_ARG_INFO(0, latitude)
+	ZEND_ARG_INFO(0, longitude)
+ZEND_END_ARG_INFO()
+
+/* }}} */
+
 /* {{{ Function table */
 zend_function_entry date_functions[] = {
-	PHP_FE(strtotime, NULL)
-	PHP_FE(date, NULL)
-	PHP_FE(idate, NULL)
-	PHP_FE(gmdate, NULL)
-	PHP_FE(mktime, NULL)
-	PHP_FE(gmmktime, NULL)
-	PHP_FE(checkdate, NULL)
+	PHP_FE(strtotime, arginfo_strtotime)
+	PHP_FE(date, arginfo_date)
+	PHP_FE(idate, arginfo_idate)
+	PHP_FE(gmdate, arginfo_gmdate)
+	PHP_FE(mktime, arginfo_mktime)
+	PHP_FE(gmmktime, arginfo_gmmktime)
+	PHP_FE(checkdate, arginfo_checkdate)
 
 #ifdef HAVE_STRFTIME
-	PHP_FE(strftime, NULL)
-	PHP_FE(gmstrftime, NULL)
+	PHP_FE(strftime, arginfo_strtotime)
+	PHP_FE(gmstrftime, arginfo_gmstrftime)
 #endif
 
-	PHP_FE(time, NULL)
-	PHP_FE(localtime, NULL)
-	PHP_FE(getdate, NULL)
+	PHP_FE(time, arginfo_time)
+	PHP_FE(localtime, arginfo_localtime)
+	PHP_FE(getdate, arginfo_getdate)
 
 #ifdef EXPERIMENTAL_DATE_SUPPORT
 	/* Advanced Interface */
@@ -74,13 +191,13 @@ zend_function_entry date_functions[] = {
 #endif
 
 	/* Options and Configuration */
-	PHP_FE(date_default_timezone_set, NULL)
-	PHP_FE(date_default_timezone_get, NULL)
+	PHP_FE(date_default_timezone_set, arginfo_date_default_timezone_set)
+	PHP_FE(date_default_timezone_get, arginfo_date_default_timezone_get)
 
 	/* Astronomical functions */
-	PHP_FE(date_sunrise, NULL)
-	PHP_FE(date_sunset, NULL)
-	PHP_FE(date_sun_info, NULL)
+	PHP_FE(date_sunrise, arginfo_date_sunrise)
+	PHP_FE(date_sunset, arginfo_date_sunset)
+	PHP_FE(date_sun_info, arginfo_date_sun_info)
 	{NULL, NULL, NULL}
 };
 
@@ -1183,7 +1300,7 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 }
 /* }}} */
 
-/* {{{ proto int mktime(int hour, int min, int sec, int mon, int day, int year)
+/* {{{ proto int mktime([int hour [, int min [, int sec [, int mon [, int day [, int year]]]]]])
    Get UNIX timestamp for a date */
 PHP_FUNCTION(mktime)
 {
@@ -1191,7 +1308,7 @@ PHP_FUNCTION(mktime)
 }
 /* }}} */
 
-/* {{{ proto int gmmktime(int hour, int min, int sec, int mon, int day, int year)
+/* {{{ proto int gmmktime([int hour [, int min [, int sec [, int mon [, int day [, int year]]]]]])
    Get UNIX timestamp for a GMT date */
 PHP_FUNCTION(gmmktime)
 {
@@ -1665,6 +1782,7 @@ PHP_FUNCTION(date_parse)
 	}
 	timelib_time_dtor(parsed_time);
 }
+/* }}} */
 
 PHP_FUNCTION(date_format)
 {

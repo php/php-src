@@ -68,7 +68,7 @@ PHP_FUNCTION(curl_multi_init)
 }
 /* }}} */
 
-/* {{{ proto int curl_multi_add_handle(resource multi, resource ch)
+/* {{{ proto int curl_multi_add_handle(resource mh, resource ch)
    Add a normal cURL handle to a cURL multi handle */
 PHP_FUNCTION(curl_multi_add_handle)
 {
@@ -214,8 +214,9 @@ PHP_FUNCTION(curl_multi_getcontent)
 		RETURN_STRINGL(ch->handlers->write->buf.c, ch->handlers->write->buf.len, 1);
 	}
 }
+/* }}} */
 
-/* {{{ proto array curl_multi_info_read(resource mh)
+/* {{{ proto array curl_multi_info_read(resource mh [, long msgs_in_queue])
    Get information about the current transfers */
 PHP_FUNCTION(curl_multi_info_read)
 {

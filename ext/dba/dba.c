@@ -51,24 +51,115 @@
 #include "php_inifile.h"
 #include "php_qdbm.h"
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dba_popen, 0, 0, 2)
+	ZEND_ARG_INFO(0, path)
+	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, handlername)
+	ZEND_ARG_INFO(0, ...)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dba_open, 0, 0, 2)
+	ZEND_ARG_INFO(0, path)
+	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, handlername)
+	ZEND_ARG_INFO(0, ...)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_dba_close, 0)
+	ZEND_ARG_INFO(0, handle)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_dba_exists, 0)
+	ZEND_ARG_INFO(0, key)
+	ZEND_ARG_INFO(0, handle)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dba_fetch, 0, 0, 2)
+	ZEND_ARG_INFO(0, key)
+	ZEND_ARG_INFO(0, skip)
+	ZEND_ARG_INFO(0, handle)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_dba_key_split, 0)
+	ZEND_ARG_INFO(0, key)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_dba_firstkey, 0)
+	ZEND_ARG_INFO(0, handle)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_dba_nextkey, 0)
+	ZEND_ARG_INFO(0, handle)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_dba_delete, 0)
+	ZEND_ARG_INFO(0, key)
+	ZEND_ARG_INFO(0, handle)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_dba_insert, 0)
+	ZEND_ARG_INFO(0, key)
+	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_INFO(0, handle)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_dba_replace, 0)
+	ZEND_ARG_INFO(0, key)
+	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_INFO(0, handle)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_dba_optimize, 0)
+	ZEND_ARG_INFO(0, handle)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_dba_sync, 0)
+	ZEND_ARG_INFO(0, handle)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dba_handlers, 0, 0, 0)
+	ZEND_ARG_INFO(0, full_info)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_dba_list, 0)
+ZEND_END_ARG_INFO()
+
+/* }}} */
+
 /* {{{ dba_functions[]
  */
 zend_function_entry dba_functions[] = {
-	PHP_FE(dba_open, NULL)
-	PHP_FE(dba_popen, NULL)
-	PHP_FE(dba_close, NULL)
-	PHP_FE(dba_delete, NULL)
-	PHP_FE(dba_exists, NULL)
-	PHP_FE(dba_fetch, NULL)
-	PHP_FE(dba_insert, NULL)
-	PHP_FE(dba_replace, NULL)
-	PHP_FE(dba_firstkey, NULL)
-	PHP_FE(dba_nextkey, NULL)
-	PHP_FE(dba_optimize, NULL)
-	PHP_FE(dba_sync, NULL)
-	PHP_FE(dba_handlers, NULL)
-	PHP_FE(dba_list, NULL)
-	PHP_FE(dba_key_split, NULL)
+	PHP_FE(dba_open, arginfo_dba_open)
+	PHP_FE(dba_popen, arginfo_dba_popen)
+	PHP_FE(dba_close, arginfo_dba_close)
+	PHP_FE(dba_delete, arginfo_dba_delete)
+	PHP_FE(dba_exists, arginfo_dba_exists)
+	PHP_FE(dba_fetch, arginfo_dba_fetch)
+	PHP_FE(dba_insert, arginfo_dba_insert)
+	PHP_FE(dba_replace, arginfo_dba_replace)
+	PHP_FE(dba_firstkey, arginfo_dba_firstkey)
+	PHP_FE(dba_nextkey, arginfo_dba_nextkey)
+	PHP_FE(dba_optimize, arginfo_dba_optimize)
+	PHP_FE(dba_sync, arginfo_dba_sync)
+	PHP_FE(dba_handlers, arginfo_dba_handlers)
+	PHP_FE(dba_list, arginfo_dba_list)
+	PHP_FE(dba_key_split, arginfo_dba_key_split)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -302,6 +393,7 @@ ZEND_DECLARE_MODULE_GLOBALS(dba)
 
 static int le_db;
 static int le_pdb;
+/* }}} */
 
 /* {{{ dba_fetch_resource
 PHPAPI void dba_fetch_resource(dba_info **pinfo, zval **id TSRMLS_DC)
