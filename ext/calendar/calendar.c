@@ -35,25 +35,137 @@
 
 #include <stdio.h>
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_unixtojd, 0, 0, 0)
+	ZEND_ARG_INFO(0, timestamp)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_jdtounix, 0)
+	ZEND_ARG_INFO(0, jday)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cal_info, 0, 0, 0)
+	ZEND_ARG_INFO(0, calendar)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_cal_days_in_month, 0)
+	ZEND_ARG_INFO(0, calendar)
+	ZEND_ARG_INFO(0, month)
+	ZEND_ARG_INFO(0, year)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_cal_to_jd, 0)
+	ZEND_ARG_INFO(0, calendar)
+	ZEND_ARG_INFO(0, month)
+	ZEND_ARG_INFO(0, day)
+	ZEND_ARG_INFO(0, year)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_cal_from_jd, 0)
+	ZEND_ARG_INFO(0, jd)
+	ZEND_ARG_INFO(0, calendar)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_jdtogregorian, 0)
+	ZEND_ARG_INFO(0, juliandaycount)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gregoriantojd, 0)
+	ZEND_ARG_INFO(0, month)
+	ZEND_ARG_INFO(0, day)
+	ZEND_ARG_INFO(0, year)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_jdtojulian, 0)
+	ZEND_ARG_INFO(0, juliandaycount)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_juliantojd, 0)
+	ZEND_ARG_INFO(0, month)
+	ZEND_ARG_INFO(0, day)
+	ZEND_ARG_INFO(0, year)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_jdtojewish, 0, 0, 1)
+	ZEND_ARG_INFO(0, juliandaycount)
+	ZEND_ARG_INFO(0, hebrew)
+	ZEND_ARG_INFO(0, fl)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_jewishtojd, 0)
+	ZEND_ARG_INFO(0, month)
+	ZEND_ARG_INFO(0, day)
+	ZEND_ARG_INFO(0, year)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_jdtofrench, 0)
+	ZEND_ARG_INFO(0, juliandaycount)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_frenchtojd, 0)
+	ZEND_ARG_INFO(0, month)
+	ZEND_ARG_INFO(0, day)
+	ZEND_ARG_INFO(0, year)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_jddayofweek, 0, 0, 1)
+	ZEND_ARG_INFO(0, juliandaycount)
+	ZEND_ARG_INFO(0, mode)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_jdmonthname, 0)
+	ZEND_ARG_INFO(0, juliandaycount)
+	ZEND_ARG_INFO(0, mode)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_easter_date, 0, 0, 0)
+	ZEND_ARG_INFO(0, year)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_easter_days, 0, 0, 0)
+	ZEND_ARG_INFO(0, year)
+	ZEND_ARG_INFO(0, method)
+ZEND_END_ARG_INFO()
+
+/* }}} */
+
 zend_function_entry calendar_functions[] = {
-	PHP_FE(jdtogregorian, NULL)
-	PHP_FE(gregoriantojd, NULL)
-	PHP_FE(jdtojulian, NULL)
-	PHP_FE(juliantojd, NULL)
-	PHP_FE(jdtojewish, NULL)
-	PHP_FE(jewishtojd, NULL)
-	PHP_FE(jdtofrench, NULL)
-	PHP_FE(frenchtojd, NULL)
-	PHP_FE(jddayofweek, NULL)
-	PHP_FE(jdmonthname, NULL)
-	PHP_FE(easter_date, NULL)
-	PHP_FE(easter_days, NULL)
-	PHP_FE(unixtojd, NULL)
-	PHP_FE(jdtounix, NULL)
-	PHP_FE(cal_to_jd, NULL)
-	PHP_FE(cal_from_jd, NULL)
-	PHP_FE(cal_days_in_month, NULL)
-	PHP_FE(cal_info, NULL)
+	PHP_FE(jdtogregorian, arginfo_jdtogregorian)
+	PHP_FE(gregoriantojd, arginfo_gregoriantojd)
+	PHP_FE(jdtojulian, arginfo_jdtojulian)
+	PHP_FE(juliantojd, arginfo_juliantojd)
+	PHP_FE(jdtojewish, arginfo_jdtojewish)
+	PHP_FE(jewishtojd, arginfo_jewishtojd)
+	PHP_FE(jdtofrench, arginfo_jdtofrench)
+	PHP_FE(frenchtojd, arginfo_frenchtojd)
+	PHP_FE(jddayofweek, arginfo_jddayofweek)
+	PHP_FE(jdmonthname, arginfo_jdmonthname)
+	PHP_FE(easter_date, arginfo_easter_date) 
+	PHP_FE(easter_days, arginfo_easter_days)
+	PHP_FE(unixtojd, arginfo_unixtojd)
+	PHP_FE(jdtounix, arginfo_jdtounix)
+	PHP_FE(cal_to_jd, arginfo_cal_to_jd)
+	PHP_FE(cal_from_jd, arginfo_cal_from_jd)
+	PHP_FE(cal_days_in_month, arginfo_cal_days_in_month)
+	PHP_FE(cal_info, arginfo_cal_info)
 	{NULL, NULL, NULL}
 };
 
@@ -189,7 +301,7 @@ static void _php_cal_info(int cal, zval **ret)
 	
 }
 
-/* {{{ proto array cal_info(int calendar)
+/* {{{ proto array cal_info([int calendar])
    Returns information about a particular calendar */
 PHP_FUNCTION(cal_info)
 {
