@@ -135,154 +135,938 @@ static int _php_image_type(char data[8]);
 static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type);
 static void _php_image_bw_convert(gdImagePtr im_org, gdIOCtx *out, int threshold);
 
-/* {{{ gd_functions[]
- */
-zend_function_entry gd_functions[] = {
-	PHP_FE(gd_info,                                 NULL)
-	PHP_FE(imagearc,								NULL)
-	PHP_FE(imageellipse,							NULL)
-	PHP_FE(imagechar,								NULL)
-	PHP_FE(imagecharup,								NULL)
-	PHP_FE(imagecolorat,							NULL)
-	PHP_FE(imagecolorallocate,						NULL)
-	PHP_FE(imagepalettecopy,						NULL)
-	PHP_FE(imagecreatefromstring,					NULL)
-	PHP_FE(imagecolorclosest,						NULL)
-#if HAVE_COLORCLOSESTHWB
-	PHP_FE(imagecolorclosesthwb,					NULL)
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gd_info, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imageloadfont, 0)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagesetstyle, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_ARRAY_INFO(0, styles, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecreatetruecolor, 0)
+	ZEND_ARG_INFO(0, x_size)
+	ZEND_ARG_INFO(0, y_size)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imageistruecolor, 0)
+	ZEND_ARG_INFO(0, im)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagetruecolortopalette, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, ditherFlag)
+	ZEND_ARG_INFO(0, colorsWanted)
+ZEND_END_ARG_INFO()
+
+#if HAVE_GD_BUNDLED
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecolormatch, 0)
+	ZEND_ARG_INFO(0, im1)
+	ZEND_ARG_INFO(0, im2)
+ZEND_END_ARG_INFO()
 #endif
-	PHP_FE(imagecolordeallocate,					NULL)
-	PHP_FE(imagecolorresolve,						NULL)
-	PHP_FE(imagecolorexact,							NULL)
-	PHP_FE(imagecolorset,							NULL)
-	PHP_FE(imagecolortransparent,					NULL)
-	PHP_FE(imagecolorstotal,						NULL)
-	PHP_FE(imagecolorsforindex,						NULL)
-	PHP_FE(imagecopy,								NULL)
-	PHP_FE(imagecopymerge,							NULL)
-	PHP_FE(imagecopymergegray,						NULL)
-	PHP_FE(imagecopyresized,						NULL)
-	PHP_FE(imagecreate,								NULL)
-	PHP_FE(imagecreatetruecolor,					NULL)
-	PHP_FE(imageistruecolor,						NULL)
-	PHP_FE(imagetruecolortopalette,					NULL)
-	PHP_FE(imagesetthickness,						NULL)
-	PHP_FE(imagefilledarc,							NULL)
-	PHP_FE(imagefilledellipse,						NULL)
-	PHP_FE(imagealphablending,						NULL)
-	PHP_FE(imagesavealpha,							NULL)
-	PHP_FE(imagecolorallocatealpha,					NULL)
-	PHP_FE(imagecolorresolvealpha, 					NULL)
-	PHP_FE(imagecolorclosestalpha,					NULL)
-	PHP_FE(imagecolorexactalpha,					NULL)
-	PHP_FE(imagecopyresampled,						NULL)
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagesetthickness, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, thickness)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagefilledellipse, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, cx)
+	ZEND_ARG_INFO(0, cy)
+	ZEND_ARG_INFO(0, w)
+	ZEND_ARG_INFO(0, h)
+	ZEND_ARG_INFO(0, color)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagefilledarc, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, cx)
+	ZEND_ARG_INFO(0, cy)
+	ZEND_ARG_INFO(0, w)
+	ZEND_ARG_INFO(0, h)
+	ZEND_ARG_INFO(0, s)
+	ZEND_ARG_INFO(0, e)
+	ZEND_ARG_INFO(0, col)
+	ZEND_ARG_INFO(0, style)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagealphablending, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, blend)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagesavealpha, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, save)
+ZEND_END_ARG_INFO()
+
+#if HAVE_GD_BUNDLED
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagelayereffect, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, effect)
+ZEND_END_ARG_INFO()
+#endif
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecolorallocatealpha, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, red)
+	ZEND_ARG_INFO(0, green)
+	ZEND_ARG_INFO(0, blue)
+	ZEND_ARG_INFO(0, alpha)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecolorresolvealpha, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, red)
+	ZEND_ARG_INFO(0, green)
+	ZEND_ARG_INFO(0, blue)
+	ZEND_ARG_INFO(0, alpha)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecolorclosestalpha, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, red)
+	ZEND_ARG_INFO(0, green)
+	ZEND_ARG_INFO(0, blue)
+	ZEND_ARG_INFO(0, alpha)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecolorexactalpha, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, red)
+	ZEND_ARG_INFO(0, green)
+	ZEND_ARG_INFO(0, blue)
+	ZEND_ARG_INFO(0, alpha)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecopyresampled, 0)
+	ZEND_ARG_INFO(0, dst_im)
+	ZEND_ARG_INFO(0, src_im)
+	ZEND_ARG_INFO(0, dst_x)
+	ZEND_ARG_INFO(0, dst_y)
+	ZEND_ARG_INFO(0, src_x)
+	ZEND_ARG_INFO(0, src_y)
+	ZEND_ARG_INFO(0, dst_w)
+	ZEND_ARG_INFO(0, dst_h)
+	ZEND_ARG_INFO(0, src_w)
+	ZEND_ARG_INFO(0, src_h)
+ZEND_END_ARG_INFO()
 
 #ifdef HAVE_GD_BUNDLED
-	PHP_FE(imagerotate,     						NULL)
-	PHP_FE(imageantialias,							NULL)
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imagerotate, 0, 0, 3)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, angle)
+	ZEND_ARG_INFO(0, bgdcolor)
+	ZEND_ARG_INFO(0, ignoretransparent)
+ZEND_END_ARG_INFO()
 #endif
 
 #if HAVE_GD_IMAGESETTILE
-	PHP_FE(imagesettile,							NULL)
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagesettile, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, tile)
+ZEND_END_ARG_INFO()
 #endif
 
 #if HAVE_GD_IMAGESETBRUSH
-	PHP_FE(imagesetbrush,							NULL)
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagesetbrush, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, brush)
+ZEND_END_ARG_INFO()
 #endif
 
-	PHP_FE(imagesetstyle,							NULL)
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecreate, 0)
+	ZEND_ARG_INFO(0, x_size)
+	ZEND_ARG_INFO(0, y_size)
+ZEND_END_ARG_INFO()
 
-#ifdef HAVE_GD_PNG
-	PHP_FE(imagecreatefrompng,						NULL)
-#endif
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagetypes, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefromstring, 0)
+	ZEND_ARG_INFO(0, image)
+ZEND_END_ARG_INFO()
+
 #ifdef HAVE_GD_GIF_READ
-	PHP_FE(imagecreatefromgif,						NULL)
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefromgif, 0)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
 #endif
-#ifdef HAVE_GD_JPG
-	PHP_FE(imagecreatefromjpeg,						NULL)
-#endif
-	PHP_FE(imagecreatefromwbmp,						NULL)
-#ifdef HAVE_GD_XBM
-	PHP_FE(imagecreatefromxbm,						NULL)
-#endif
-#if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
-	PHP_FE(imagecreatefromxpm,						NULL)
-#endif
-	PHP_FE(imagecreatefromgd,						NULL)
-	PHP_FE(imagecreatefromgd2,						NULL)
-	PHP_FE(imagecreatefromgd2part,					NULL)
-#ifdef HAVE_GD_PNG
-	PHP_FE(imagepng,								NULL)
-#endif
-#ifdef HAVE_GD_GIF_CREATE
-	PHP_FE(imagegif,								NULL)
-#endif
-#ifdef HAVE_GD_JPG
-	PHP_FE(imagejpeg,								NULL)
-#endif
-	PHP_FE(imagewbmp,                               NULL)
-	PHP_FE(imagegd,									NULL)
-	PHP_FE(imagegd2,								NULL)
 
-	PHP_FE(imagedestroy,							NULL)
-	PHP_FE(imagegammacorrect,						NULL)
-	PHP_FE(imagefill,								NULL)
-	PHP_FE(imagefilledpolygon,						NULL)
-	PHP_FE(imagefilledrectangle,					NULL)
-	PHP_FE(imagefilltoborder,						NULL)
-	PHP_FE(imagefontwidth,							NULL)
-	PHP_FE(imagefontheight,							NULL)
-	PHP_FE(imageinterlace,							NULL)
-	PHP_FE(imageline,								NULL)
-	PHP_FE(imageloadfont,							NULL)
-	PHP_FE(imagepolygon,							NULL)
-	PHP_FE(imagerectangle,							NULL)
-	PHP_FE(imagesetpixel,							NULL)
-	PHP_FE(imagestring,								NULL)
-	PHP_FE(imagestringup,							NULL)
-	PHP_FE(imagesx,									NULL)
-	PHP_FE(imagesy,									NULL)
-	PHP_FE(imagedashedline,							NULL)
+#ifdef HAVE_GD_JPG
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefromjpeg, 0)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+#endif
+
+#ifdef HAVE_GD_PNG
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefrompng, 0)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+#endif
+
+#ifdef HAVE_GD_XBM
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefromxbm, 0)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefromxpm, 0)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+#endif
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefromwbmp, 0)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefromgd, 0)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefromgd2, 0)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefromgd2part, 0)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, srcX)
+	ZEND_ARG_INFO(0, srcY)
+	ZEND_ARG_INFO(0, width)
+	ZEND_ARG_INFO(0, height)
+ZEND_END_ARG_INFO()
+
+#if HAVE_GD_BUNDLED
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imagexbm, 0, 0, 2)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, foreground)
+ZEND_END_ARG_INFO()
+#endif
+
+#ifdef HAVE_GD_GIF_CREATE
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imagegif, 0, 0, 1)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+#endif
+
+#ifdef HAVE_GD_PNG
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imagepng, 0, 0, 2)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, quality)
+ZEND_END_ARG_INFO()
+#endif
+
+#ifdef HAVE_GD_JPG
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imagejpeg, 0, 0, 2)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, quality)
+ZEND_END_ARG_INFO()
+#endif
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imagewbmp, 0, 0, 1)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, foreground)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imagegd, 0, 0, 1)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imagegd2, 0, 0, 1)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, chunk_size)
+	ZEND_ARG_INFO(0, type)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagedestroy, 0)
+	ZEND_ARG_INFO(0, im)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecolorallocate, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, red)
+	ZEND_ARG_INFO(0, green)
+	ZEND_ARG_INFO(0, blue)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagepalettecopy, 0)
+	ZEND_ARG_INFO(0, dst)
+	ZEND_ARG_INFO(0, src)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecolorat, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, x)
+	ZEND_ARG_INFO(0, y)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecolorclosest, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, red)
+	ZEND_ARG_INFO(0, green)
+	ZEND_ARG_INFO(0, blue)
+ZEND_END_ARG_INFO()
+
+#if HAVE_COLORCLOSESTHWB
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecolorclosesthwb, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, red)
+	ZEND_ARG_INFO(0, green)
+	ZEND_ARG_INFO(0, blue)
+ZEND_END_ARG_INFO()
+#endif
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecolordeallocate, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, index)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecolorresolve, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, red)
+	ZEND_ARG_INFO(0, green)
+	ZEND_ARG_INFO(0, blue)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecolorexact, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, red)
+	ZEND_ARG_INFO(0, green)
+	ZEND_ARG_INFO(0, blue)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecolorset, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, color)
+	ZEND_ARG_INFO(0, red)
+	ZEND_ARG_INFO(0, green)
+	ZEND_ARG_INFO(0, blue)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecolorsforindex, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, index)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagegammacorrect, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, inputgamma)
+	ZEND_ARG_INFO(0, outputgamma)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagesetpixel, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, x)
+	ZEND_ARG_INFO(0, y)
+	ZEND_ARG_INFO(0, col)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imageline, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, x1)
+	ZEND_ARG_INFO(0, y1)
+	ZEND_ARG_INFO(0, x2)
+	ZEND_ARG_INFO(0, y2)
+	ZEND_ARG_INFO(0, col)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagedashedline, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, x1)
+	ZEND_ARG_INFO(0, y1)
+	ZEND_ARG_INFO(0, x2)
+	ZEND_ARG_INFO(0, y2)
+	ZEND_ARG_INFO(0, col)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagerectangle, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, x1)
+	ZEND_ARG_INFO(0, y1)
+	ZEND_ARG_INFO(0, x2)
+	ZEND_ARG_INFO(0, y2)
+	ZEND_ARG_INFO(0, col)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagefilledrectangle, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, x1)
+	ZEND_ARG_INFO(0, y1)
+	ZEND_ARG_INFO(0, x2)
+	ZEND_ARG_INFO(0, y2)
+	ZEND_ARG_INFO(0, col)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagearc, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, cx)
+	ZEND_ARG_INFO(0, cy)
+	ZEND_ARG_INFO(0, w)
+	ZEND_ARG_INFO(0, h)
+	ZEND_ARG_INFO(0, s)
+	ZEND_ARG_INFO(0, e)
+	ZEND_ARG_INFO(0, col)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imageellipse, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, cx)
+	ZEND_ARG_INFO(0, cy)
+	ZEND_ARG_INFO(0, w)
+	ZEND_ARG_INFO(0, h)
+	ZEND_ARG_INFO(0, color)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagefilltoborder, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, x)
+	ZEND_ARG_INFO(0, y)
+	ZEND_ARG_INFO(0, border)
+	ZEND_ARG_INFO(0, col)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagefill, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, x)
+	ZEND_ARG_INFO(0, y)
+	ZEND_ARG_INFO(0, col)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecolorstotal, 0)
+	ZEND_ARG_INFO(0, im)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imagecolortransparent, 0, 0, 1)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, col)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imageinterlace, 0, 0, 1)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, interlace)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagepolygon, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_ARRAY_INFO(0, points, 0)
+	ZEND_ARG_INFO(0, num_pos)
+	ZEND_ARG_INFO(0, col)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagefilledpolygon, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_ARRAY_INFO(0, points, 0)
+	ZEND_ARG_INFO(0, num_pos)
+	ZEND_ARG_INFO(0, col)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagefontwidth, 0)
+	ZEND_ARG_INFO(0, font)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagefontheight, 0)
+	ZEND_ARG_INFO(0, font)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagechar, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, font)
+	ZEND_ARG_INFO(0, x)
+	ZEND_ARG_INFO(0, y)
+	ZEND_ARG_INFO(0, c)
+	ZEND_ARG_INFO(0, col)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecharup, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, font)
+	ZEND_ARG_INFO(0, x)
+	ZEND_ARG_INFO(0, y)
+	ZEND_ARG_INFO(0, c)
+	ZEND_ARG_INFO(0, col)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagestring, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, font)
+	ZEND_ARG_INFO(0, x)
+	ZEND_ARG_INFO(0, y)
+	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, col)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagestringup, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, font)
+	ZEND_ARG_INFO(0, x)
+	ZEND_ARG_INFO(0, y)
+	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, col)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecopy, 0)
+	ZEND_ARG_INFO(0, dst_im)
+	ZEND_ARG_INFO(0, src_im)
+	ZEND_ARG_INFO(0, dst_x)
+	ZEND_ARG_INFO(0, dst_y)
+	ZEND_ARG_INFO(0, src_x)
+	ZEND_ARG_INFO(0, src_y)
+	ZEND_ARG_INFO(0, src_w)
+	ZEND_ARG_INFO(0, src_h)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecopymerge, 0)
+	ZEND_ARG_INFO(0, src_im)
+	ZEND_ARG_INFO(0, dst_im)
+	ZEND_ARG_INFO(0, dst_x)
+	ZEND_ARG_INFO(0, dst_y)
+	ZEND_ARG_INFO(0, src_x)
+	ZEND_ARG_INFO(0, src_y)
+	ZEND_ARG_INFO(0, src_w)
+	ZEND_ARG_INFO(0, src_h)
+	ZEND_ARG_INFO(0, pct)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecopymergegray, 0)
+	ZEND_ARG_INFO(0, src_im)
+	ZEND_ARG_INFO(0, dst_im)
+	ZEND_ARG_INFO(0, dst_x)
+	ZEND_ARG_INFO(0, dst_y)
+	ZEND_ARG_INFO(0, src_x)
+	ZEND_ARG_INFO(0, src_y)
+	ZEND_ARG_INFO(0, src_w)
+	ZEND_ARG_INFO(0, src_h)
+	ZEND_ARG_INFO(0, pct)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagecopyresized, 0)
+	ZEND_ARG_INFO(0, dst_im)
+	ZEND_ARG_INFO(0, src_im)
+	ZEND_ARG_INFO(0, dst_x)
+	ZEND_ARG_INFO(0, dst_y)
+	ZEND_ARG_INFO(0, src_x)
+	ZEND_ARG_INFO(0, src_y)
+	ZEND_ARG_INFO(0, dst_w)
+	ZEND_ARG_INFO(0, dst_h)
+	ZEND_ARG_INFO(0, src_w)
+	ZEND_ARG_INFO(0, src_h)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagesx, 0)
+	ZEND_ARG_INFO(0, im)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagesy, 0)
+	ZEND_ARG_INFO(0, im)
+ZEND_END_ARG_INFO()
 
 #ifdef ENABLE_GD_TTF
-	PHP_FE(imagettfbbox,							NULL)
-	PHP_FE(imagettftext,							NULL)
 #if HAVE_LIBFREETYPE && HAVE_GD_STRINGFTEX
-	PHP_FE(imageftbbox,								NULL)
-	PHP_FE(imagefttext,								NULL)
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imageftbbox, 0, 0, 4)
+	ZEND_ARG_INFO(0, float size)
+	ZEND_ARG_INFO(0, float angle)
+	ZEND_ARG_INFO(0, font_file)
+	ZEND_ARG_INFO(0, text)
+	ZEND_ARG_ARRAY_INFO(0, extrainfo, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imagefttext, 0, 0, 8)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, float size)
+	ZEND_ARG_INFO(0, float angle)
+	ZEND_ARG_INFO(0, x)
+	ZEND_ARG_INFO(0, y)
+	ZEND_ARG_INFO(0, col)
+	ZEND_ARG_INFO(0, font_file)
+	ZEND_ARG_INFO(0, text)
+	ZEND_ARG_ARRAY_INFO(0, extrainfo, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagettfbbox, 0)
+	ZEND_ARG_INFO(0, size)
+	ZEND_ARG_INFO(0, angle)
+	ZEND_ARG_INFO(0, font_file)
+	ZEND_ARG_INFO(0, text)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagettftext, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, float size)
+	ZEND_ARG_INFO(0, float angle)
+	ZEND_ARG_INFO(0, x)
+	ZEND_ARG_INFO(0, y)
+	ZEND_ARG_INFO(0, col)
+	ZEND_ARG_INFO(0, font_file)
+	ZEND_ARG_INFO(0, text)
+ZEND_END_ARG_INFO()
+#endif
+
+#ifdef HAVE_LIBT1
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagepsloadfont, 0)
+	ZEND_ARG_INFO(0, pathname)
+ZEND_END_ARG_INFO()
+
+/*
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagepscopyfont, 0)
+	ZEND_ARG_INFO(0, font_index)
+ZEND_END_ARG_INFO()
+*/
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagepsfreefont, 0)
+	ZEND_ARG_INFO(0, font_index)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagepsencodefont, 0)
+	ZEND_ARG_INFO(0, font_index)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagepsextendfont, 0)
+	ZEND_ARG_INFO(0, font_index)
+	ZEND_ARG_INFO(0, extend)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imagepsslantfont, 0)
+	ZEND_ARG_INFO(0, font_index)
+	ZEND_ARG_INFO(0, slant)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imagepstext, 0, 0, 8)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, text)
+	ZEND_ARG_INFO(0, font)
+	ZEND_ARG_INFO(0, size)
+	ZEND_ARG_INFO(0, foreground)
+	ZEND_ARG_INFO(0, background)
+	ZEND_ARG_INFO(0, xcoord)
+	ZEND_ARG_INFO(0, ycoord)
+	ZEND_ARG_INFO(0, space)
+	ZEND_ARG_INFO(0, tightness)
+	ZEND_ARG_INFO(0, angle)
+	ZEND_ARG_INFO(0, antialias)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imagepsbbox, 0, 0, 3)
+	ZEND_ARG_INFO(0, text)
+	ZEND_ARG_INFO(0, font)
+	ZEND_ARG_INFO(0, size)
+	ZEND_ARG_INFO(0, space)
+	ZEND_ARG_INFO(0, tightness)
+	ZEND_ARG_INFO(0, angle)
+ZEND_END_ARG_INFO()
+#endif
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_image2wbmp, 0, 0, 1)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, threshold)
+ZEND_END_ARG_INFO()
+
+#if defined(HAVE_GD_JPG)
+static
+ZEND_BEGIN_ARG_INFO(arginfo_jpeg2wbmp, 0)
+	ZEND_ARG_INFO(0, f_org)
+	ZEND_ARG_INFO(0, f_dest)
+	ZEND_ARG_INFO(0, d_height)
+	ZEND_ARG_INFO(0, d_width)
+	ZEND_ARG_INFO(0, d_threshold)
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(HAVE_GD_PNG)
+static
+ZEND_BEGIN_ARG_INFO(arginfo_png2wbmp, 0)
+	ZEND_ARG_INFO(0, f_org)
+	ZEND_ARG_INFO(0, f_dest)
+	ZEND_ARG_INFO(0, d_height)
+	ZEND_ARG_INFO(0, d_width)
+	ZEND_ARG_INFO(0, d_threshold)
+ZEND_END_ARG_INFO()
+#endif
+
+#ifdef HAVE_GD_BUNDLED
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imagefilter, 0, 0, 2)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, filtertype)
+	ZEND_ARG_INFO(0, arg1)
+	ZEND_ARG_INFO(0, arg2)
+	ZEND_ARG_INFO(0, arg3)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imageconvolution, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_ARRAY_INFO(0, matrix3x3, 0)
+	ZEND_ARG_INFO(0, div)
+	ZEND_ARG_INFO(0, offset)
+ZEND_END_ARG_INFO()
+#endif
+
+#ifdef HAVE_GD_BUNDLED
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imageantialias, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, on)
+ZEND_END_ARG_INFO()
+#endif
+
+/* }}} */
+
+/* {{{ gd_functions[]
+ */
+zend_function_entry gd_functions[] = {
+	PHP_FE(gd_info,                                 arginfo_gd_info)
+	PHP_FE(imagearc,								arginfo_imagearc)
+	PHP_FE(imageellipse,							arginfo_imageellipse)
+	PHP_FE(imagechar,								arginfo_imagechar)
+	PHP_FE(imagecharup,								arginfo_imagecharup)
+	PHP_FE(imagecolorat,							arginfo_imagecolorat)
+	PHP_FE(imagecolorallocate,						arginfo_imagecolorallocate)
+	PHP_FE(imagepalettecopy,						arginfo_imagepalettecopy)
+	PHP_FE(imagecreatefromstring,					arginfo_imagecreatefromstring)
+	PHP_FE(imagecolorclosest,						arginfo_imagecolorclosest)
+#if HAVE_COLORCLOSESTHWB
+	PHP_FE(imagecolorclosesthwb,					arginfo_imagecolorclosesthwb)
+#endif
+	PHP_FE(imagecolordeallocate,					arginfo_imagecolordeallocate)
+	PHP_FE(imagecolorresolve,						arginfo_imagecolorresolve)
+	PHP_FE(imagecolorexact,							arginfo_imagecolorexact)
+	PHP_FE(imagecolorset,							arginfo_imagecolorset)
+	PHP_FE(imagecolortransparent,					arginfo_imagecolortransparent)
+	PHP_FE(imagecolorstotal,						arginfo_imagecolorstotal)
+	PHP_FE(imagecolorsforindex,						arginfo_imagecolorsforindex)
+	PHP_FE(imagecopy,								arginfo_imagecopy)
+	PHP_FE(imagecopymerge,							arginfo_imagecopymerge)
+	PHP_FE(imagecopymergegray,						arginfo_imagecopymergegray)
+	PHP_FE(imagecopyresized,						arginfo_imagecopyresized)
+	PHP_FE(imagecreate,								arginfo_imagecreate)
+	PHP_FE(imagecreatetruecolor,					arginfo_imagecreatetruecolor)
+	PHP_FE(imageistruecolor,						arginfo_imageistruecolor)
+	PHP_FE(imagetruecolortopalette,					arginfo_imagetruecolortopalette)
+	PHP_FE(imagesetthickness,						arginfo_imagesetthickness)
+	PHP_FE(imagefilledarc,							arginfo_imagefilledarc)
+	PHP_FE(imagefilledellipse,						arginfo_imagefilledellipse)
+	PHP_FE(imagealphablending,						arginfo_imagealphablending)
+	PHP_FE(imagesavealpha,							arginfo_imagesavealpha)
+	PHP_FE(imagecolorallocatealpha,					arginfo_imagecolorallocatealpha)
+	PHP_FE(imagecolorresolvealpha, 					arginfo_imagecolorresolvealpha)
+	PHP_FE(imagecolorclosestalpha,					arginfo_imagecolorclosestalpha)
+	PHP_FE(imagecolorexactalpha,					arginfo_imagecolorexactalpha)
+	PHP_FE(imagecopyresampled,						arginfo_imagecopyresampled)
+
+#ifdef HAVE_GD_BUNDLED
+	PHP_FE(imagerotate,     						arginfo_imagerotate)
+	PHP_FE(imageantialias,							arginfo_imageantialias)
+#endif
+
+#if HAVE_GD_IMAGESETTILE
+	PHP_FE(imagesettile,							arginfo_imagesettile)
+#endif
+
+#if HAVE_GD_IMAGESETBRUSH
+	PHP_FE(imagesetbrush,							arginfo_imagesetbrush)
+#endif
+
+	PHP_FE(imagesetstyle,							arginfo_imagesetstyle)
+
+#ifdef HAVE_GD_PNG
+	PHP_FE(imagecreatefrompng,						arginfo_imagecreatefrompng)
+#endif
+#ifdef HAVE_GD_GIF_READ
+	PHP_FE(imagecreatefromgif,						arginfo_imagecreatefromgif)
+#endif
+#ifdef HAVE_GD_JPG
+	PHP_FE(imagecreatefromjpeg,						arginfo_imagecreatefromjpeg)
+#endif
+	PHP_FE(imagecreatefromwbmp,						arginfo_imagecreatefromwbmp)
+#ifdef HAVE_GD_XBM
+	PHP_FE(imagecreatefromxbm,						arginfo_imagecreatefromxbm)
+#endif
+#if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
+	PHP_FE(imagecreatefromxpm,						arginfo_imagecreatefromxpm)
+#endif
+	PHP_FE(imagecreatefromgd,						arginfo_imagecreatefromgd)
+	PHP_FE(imagecreatefromgd2,						arginfo_imagecreatefromgd2)
+	PHP_FE(imagecreatefromgd2part,					arginfo_imagecreatefromgd2part)
+#ifdef HAVE_GD_PNG
+	PHP_FE(imagepng,								arginfo_imagepng)
+#endif
+#ifdef HAVE_GD_GIF_CREATE
+	PHP_FE(imagegif,								arginfo_imagegif)
+#endif
+#ifdef HAVE_GD_JPG
+	PHP_FE(imagejpeg,								arginfo_imagejpeg)
+#endif
+	PHP_FE(imagewbmp,                               arginfo_imagewbmp)
+	PHP_FE(imagegd,									arginfo_imagegd)
+	PHP_FE(imagegd2,								arginfo_imagegd2)
+
+	PHP_FE(imagedestroy,							arginfo_imagedestroy)
+	PHP_FE(imagegammacorrect,						arginfo_imagegammacorrect)
+	PHP_FE(imagefill,								arginfo_imagefill)
+	PHP_FE(imagefilledpolygon,						arginfo_imagefilledpolygon)
+	PHP_FE(imagefilledrectangle,					arginfo_imagefilledrectangle)
+	PHP_FE(imagefilltoborder,						arginfo_imagefilltoborder)
+	PHP_FE(imagefontwidth,							arginfo_imagefontwidth)
+	PHP_FE(imagefontheight,							arginfo_imagefontheight)
+	PHP_FE(imageinterlace,							arginfo_imageinterlace)
+	PHP_FE(imageline,								arginfo_imageline)
+	PHP_FE(imageloadfont,							arginfo_imageloadfont)
+	PHP_FE(imagepolygon,							arginfo_imagepolygon)
+	PHP_FE(imagerectangle,							arginfo_imagerectangle)
+	PHP_FE(imagesetpixel,							arginfo_imagesetpixel)
+	PHP_FE(imagestring,								arginfo_imagestring)
+	PHP_FE(imagestringup,							arginfo_imagestringup)
+	PHP_FE(imagesx,									arginfo_imagesx)
+	PHP_FE(imagesy,									arginfo_imagesy)
+	PHP_FE(imagedashedline,							arginfo_imagedashedline)
+
+#ifdef ENABLE_GD_TTF
+	PHP_FE(imagettfbbox,							arginfo_imagettfbbox)
+	PHP_FE(imagettftext,							arginfo_imagettftext)
+#if HAVE_LIBFREETYPE && HAVE_GD_STRINGFTEX
+	PHP_FE(imageftbbox,								arginfo_imageftbbox)
+	PHP_FE(imagefttext,								arginfo_imagefttext)
 #endif
 #endif
 
 #ifdef HAVE_LIBT1
-	PHP_FE(imagepsloadfont,							NULL)
+	PHP_FE(imagepsloadfont,							arginfo_imagepsloadfont)
 	/*
-	PHP_FE(imagepscopyfont,							NULL)
+	PHP_FE(imagepscopyfont,							arginfo_imagepscopyfont)
 	*/
-	PHP_FE(imagepsfreefont,							NULL)
-	PHP_FE(imagepsencodefont,						NULL)
-	PHP_FE(imagepsextendfont,						NULL)
-	PHP_FE(imagepsslantfont,						NULL)
-	PHP_FE(imagepstext,								NULL)
-	PHP_FE(imagepsbbox,								NULL)
+	PHP_FE(imagepsfreefont,							arginfo_imagepsfreefont)
+	PHP_FE(imagepsencodefont,						arginfo_imagepsencodefont)
+	PHP_FE(imagepsextendfont,						arginfo_imagepsextendfont)
+	PHP_FE(imagepsslantfont,						arginfo_imagepsslantfont)
+	PHP_FE(imagepstext,								arginfo_imagepstext)
+	PHP_FE(imagepsbbox,								arginfo_imagepsbbox)
 #endif
-	PHP_FE(imagetypes,								NULL)
+	PHP_FE(imagetypes,								arginfo_imagetypes)
 
 #if defined(HAVE_GD_JPG)
-	PHP_FE(jpeg2wbmp,								NULL)
+	PHP_FE(jpeg2wbmp,								arginfo_jpeg2wbmp)
 #endif
 #if defined(HAVE_GD_PNG)
-	PHP_FE(png2wbmp,								NULL)
+	PHP_FE(png2wbmp,								arginfo_png2wbmp)
 #endif
-	PHP_FE(image2wbmp,								NULL)
+	PHP_FE(image2wbmp,								arginfo_image2wbmp)
 #if HAVE_GD_BUNDLED
-	PHP_FE(imagelayereffect,						NULL)
-	PHP_FE(imagecolormatch,							NULL)
-	PHP_FE(imagexbm,                                NULL)
+	PHP_FE(imagelayereffect,						arginfo_imagelayereffect)
+	PHP_FE(imagecolormatch,							arginfo_imagecolormatch)
+	PHP_FE(imagexbm,                                arginfo_imagexbm)
 #endif
 /* gd filters */
 #ifdef HAVE_GD_BUNDLED
-	PHP_FE(imagefilter,     						NULL)
-	PHP_FE(imageconvolution,						NULL)
+	PHP_FE(imagefilter,     						arginfo_imagefilter)
+	PHP_FE(imageconvolution,						arginfo_imageconvolution)
 #endif
 
 	{NULL, NULL, NULL}
@@ -963,6 +1747,7 @@ PHP_FUNCTION(imagesavealpha)
 
 	RETURN_TRUE;
 }
+/* }}} */
 
 #if HAVE_GD_BUNDLED
 /* {{{ proto bool imagelayereffect(resource im, int effect)
@@ -1114,7 +1899,7 @@ PHP_FUNCTION(imagecopyresampled)
 /* }}} */
 
 #ifdef HAVE_GD_BUNDLED
-/* {{{ proto resource imagerotate(resource src_im, float angle, int bgdcolor)
+/* {{{ proto resource imagerotate(resource src_im, float angle, int bgdcolor [, int ignoretransparent])
    Rotate an image using a custom angle */
 PHP_FUNCTION(imagerotate)
 {
@@ -1763,7 +2548,7 @@ PHP_FUNCTION(imagegd)
 }
 /* }}} */
 
-/* {{{ proto bool imagegd2(resource im [, string filename, [, int chunk_size, [, int type]]])
+/* {{{ proto bool imagegd2(resource im [, string filename [, int chunk_size [, int type]]])
    Output GD2 image to browser or file */
 PHP_FUNCTION(imagegd2)
 {
@@ -3252,7 +4037,7 @@ PHP_FUNCTION(imagepsslantfont)
 }
 /* }}} */
 
-/* {{{ proto array imagepstext(resource image, string text, resource font, int size, int xcoord, int ycoord [, int space, int tightness, float angle, int antialias])
+/* {{{ proto array imagepstext(resource image, string text, resource font, int size, int foreground, int background, int xcoord, int ycoord [, int space, int tightness, float angle, int antialias])
    Rasterize a string over an image */
 PHP_FUNCTION(imagepstext)
 {
