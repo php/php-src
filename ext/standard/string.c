@@ -894,11 +894,23 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value)
 
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(arr), (void **) &tmp, &pos) == SUCCESS) {
 		if ((*tmp)->type != IS_STRING) {
-			SEPARATE_ZVAL(tmp);
-			convert_to_string(*tmp);
+			if ((*tmp)->type == IS_OBJECT) {
+				int copy;
+				zval expr;
+				zend_make_printable_zval(*tmp, &expr, &copy);
+				smart_str_appendl(&implstr, Z_STRVAL(expr), Z_STRLEN(expr));
+				if (copy) {
+					zval_dtor(&expr);
+				}
+				goto next;
+			} else {
+				SEPARATE_ZVAL(tmp);
+				convert_to_string(*tmp);
+			}
 		} 
 		
 		smart_str_appendl(&implstr, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+next:
 		if (++i != numelems) {
 			smart_str_appendl(&implstr, Z_STRVAL_P(delim), Z_STRLEN_P(delim));
 		}
@@ -916,6 +928,7 @@ PHP_FUNCTION(implode)
 {
 	zval **arg1 = NULL, **arg2 = NULL, *delim, *arr;
 	int argc = ZEND_NUM_ARGS();
+	HashPosition pos;
 
 	if (argc < 1 || argc > 2 ||
 		zend_get_parameters_ex(argc, &arg1, &arg2) == FAILURE) {
@@ -936,12 +949,10 @@ PHP_FUNCTION(implode)
 		arr = *arg1;
 	} else {
 		if (Z_TYPE_PP(arg1) == IS_ARRAY) {
-			SEPARATE_ZVAL(arg1);
 			arr = *arg1;
 			convert_to_string_ex(arg2);
 			delim = *arg2;
 		} else if (Z_TYPE_PP(arg2) == IS_ARRAY) {
-			SEPARATE_ZVAL(arg2);
 			arr = *arg2;
 			convert_to_string_ex(arg1);
 			delim = *arg1;
@@ -951,7 +962,11 @@ PHP_FUNCTION(implode)
 		}
 	}
 
+	pos = Z_ARRVAL_P(arr)->pInternalPointer;
+	
 	php_implode(delim, arr, return_value);
+
+	Z_ARRVAL_P(arr)->pInternalPointer = pos;
 
 	if (argc == 1) {
 		FREE_ZVAL(delim);
