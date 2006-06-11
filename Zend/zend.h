@@ -502,7 +502,9 @@ END_EXTERN_C()
 
 /* output support */
 #define ZEND_WRITE(str, str_len)		zend_write((str), (str_len))
+#define ZEND_WRITE_EX(str, str_len)		write_func((str), (str_len))
 #define ZEND_PUTS(str)					zend_write((str), strlen((str)))
+#define ZEND_PUTS_EX(str)				write_func((str), strlen((str)))
 #define ZEND_PUTC(c)					zend_write(&(c), 1), (c)
 
 
