@@ -157,7 +157,7 @@ zend_function_entry date_functions[] = {
 	PHP_FE(checkdate, arginfo_checkdate)
 
 #ifdef HAVE_STRFTIME
-	PHP_FE(strftime, arginfo_strtotime)
+	PHP_FE(strftime, arginfo_strftime)
 	PHP_FE(gmstrftime, arginfo_gmstrftime)
 #endif
 
