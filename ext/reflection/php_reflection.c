@@ -717,23 +717,27 @@ static void _function_string(string *str, zend_function *fptr, zend_class_entry 
 		string_printf(str, "static ");
 	}
 
-	/* These are mutually exclusive */
-	switch (fptr->common.fn_flags & ZEND_ACC_PPP_MASK) {
-		case ZEND_ACC_PUBLIC:
-			string_printf(str, "public ");
-			break;
-		case ZEND_ACC_PRIVATE:
-			string_printf(str, "private ");
-			break;
-		case ZEND_ACC_PROTECTED:
-			string_printf(str, "protected ");
-			break;
-		default:
-		    string_printf(str, "<visibility error> ");
-		    break;
+	if (fptr->common.scope) {
+		/* These are mutually exclusive */
+		switch (fptr->common.fn_flags & ZEND_ACC_PPP_MASK) {
+			case ZEND_ACC_PUBLIC:
+				string_printf(str, "public ");
+				break;
+			case ZEND_ACC_PRIVATE:
+				string_printf(str, "private ");
+				break;
+			case ZEND_ACC_PROTECTED:
+				string_printf(str, "protected ");
+				break;
+			default:
+			    string_printf(str, "<visibility error> ");
+			    break;
+		}
+		string_printf(str, "method ");
+	} else {
+		string_printf(str, "function ");
 	}
 
-	string_printf(str, fptr->common.scope ? "method " : "function ");
 	if (fptr->op_array.return_reference) {
 		string_printf(str, "&");
 	}
