@@ -3520,7 +3520,7 @@ PHPAPI char *php_strtr(char *str, int len, char *str_from, char *str_to, int trl
  */
 PHPAPI UChar *php_u_strtr(UChar *str, int len, UChar *str_from, int str_from_len, UChar *str_to, int str_to_len, int trlen, int *outlen TSRMLS_DC)
 {
-	int i, j;
+	int i;
 	int can_optimize = 1;
 	
 	if ((trlen < 1) || (len < 1)) {
