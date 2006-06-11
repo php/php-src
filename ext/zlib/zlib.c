@@ -285,7 +285,7 @@ PHP_FUNCTION(gzfile)
 	char *filename;
 	int filename_len;
 	long flags = 0;
-	char *slashed, buf[8192];
+	char buf[8192];
 	register int i = 0;
 	int use_include_path = 0;
 	php_stream *stream;

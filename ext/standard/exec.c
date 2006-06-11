@@ -59,7 +59,7 @@
 int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
 {
 	FILE *fp;
-	char *buf, *tmp=NULL;
+	char *buf;
 	int l, pclose_return;
 	char *cmd_p, *b, *d=NULL;
 	php_stream *stream;

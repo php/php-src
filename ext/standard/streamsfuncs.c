@@ -387,7 +387,7 @@ PHP_FUNCTION(stream_get_contents)
 	php_stream *stream;
 	zval *zsrc;
 	long maxlen = PHP_STREAM_COPY_ALL, pos = 0;
-	int len, newlen;
+	int len;
 	char *contents = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|ll", &zsrc, &maxlen, &pos) == FAILURE) {
