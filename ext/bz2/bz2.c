@@ -40,17 +40,60 @@
 #define PHP_BZ_ERRSTR  1
 #define PHP_BZ_ERRBOTH 2
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_bzread, 0, 0, 1)
+	ZEND_ARG_INFO(0, bz)
+	ZEND_ARG_INFO(0, length)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_bzopen, 0)
+	ZEND_ARG_INFO(0, file)
+	ZEND_ARG_INFO(0, mode)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_bzerrno, 0)
+	ZEND_ARG_INFO(0, bz)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_bzerrstr, 0)
+	ZEND_ARG_INFO(0, bz)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_bzerror, 0)
+	ZEND_ARG_INFO(0, bz)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_bzcompress, 0, 0, 2)
+	ZEND_ARG_INFO(0, source)
+	ZEND_ARG_INFO(0, blocksize)
+	ZEND_ARG_INFO(0, workfactor)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_bzdecompress, 0, 0, 1)
+	ZEND_ARG_INFO(0, source)
+	ZEND_ARG_INFO(0, small)
+ZEND_END_ARG_INFO()
+
+/* }}} */
+
 zend_function_entry bz2_functions[] = {
-	PHP_FE(bzopen,       NULL)
-	PHP_FE(bzread,       NULL)
+	PHP_FE(bzopen,       arginfo_bzopen)
+	PHP_FE(bzread,       arginfo_bzread)
 	PHP_FALIAS(bzwrite,   fwrite,		NULL)
 	PHP_FALIAS(bzflush,   fflush,		NULL)
 	PHP_FALIAS(bzclose,   fclose,		NULL)
-	PHP_FE(bzerrno,      NULL)
-	PHP_FE(bzerrstr,     NULL)
-	PHP_FE(bzerror,      NULL)
-	PHP_FE(bzcompress,   NULL)
-	PHP_FE(bzdecompress, NULL)
+	PHP_FE(bzerrno,      arginfo_bzerrno)
+	PHP_FE(bzerrstr,     arginfo_bzerrstr)
+	PHP_FE(bzerror,      arginfo_bzerror)
+	PHP_FE(bzcompress,   arginfo_bzcompress)
+	PHP_FE(bzdecompress, arginfo_bzdecompress)
 	{NULL, NULL, NULL}
 };
 
@@ -262,7 +305,7 @@ PHP_MINFO_FUNCTION(bz2)
 	php_info_print_table_end();
 }
 
-/* {{{ proto string bzread(int bz[, int length])
+/* {{{ proto string bzread(resource bz[, int length])
    Reads up to length bytes from a BZip2 stream, or 1024 bytes if length is not specified */
 PHP_FUNCTION(bzread)
 {
