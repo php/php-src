@@ -44,50 +44,273 @@
 static int	le_ftpbuf;
 #define le_ftpbuf_name "FTP Buffer"
 
+/* {{{ arginfo */
 static
-    ZEND_BEGIN_ARG_INFO(third_and_rest_force_ref, 1)
-        ZEND_ARG_PASS_INFO(0)
-        ZEND_ARG_PASS_INFO(0)
-        ZEND_ARG_PASS_INFO(1)
-    ZEND_END_ARG_INFO()
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_connect, 0, 0, 1)
+	ZEND_ARG_INFO(0, host)
+	ZEND_ARG_INFO(0, port)
+	ZEND_ARG_INFO(0, timeout)
+ZEND_END_ARG_INFO()
+
+#if HAVE_OPENSSL_EXT
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_ssl_connect, 0, 0, 1)
+	ZEND_ARG_INFO(0, host)
+	ZEND_ARG_INFO(0, port)
+	ZEND_ARG_INFO(0, timeout)
+ZEND_END_ARG_INFO()
+#endif
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_ftp_login, 0)
+	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_INFO(0, username)
+	ZEND_ARG_INFO(0, password)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_ftp_pwd, 0)
+	ZEND_ARG_INFO(0, ftp)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_ftp_cdup, 0)
+	ZEND_ARG_INFO(0, ftp)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_ftp_chdir, 0)
+	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_INFO(0, directory)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_ftp_exec, 0)
+	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_INFO(0, command)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_ftp_raw, 0)
+	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_INFO(0, command)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_ftp_mkdir, 0)
+	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_INFO(0, directory)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_ftp_rmdir, 0)
+	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_INFO(0, directory)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_ftp_chmod, 0)
+	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_alloc, 0, 0, 2)
+	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_INFO(0, size)
+	ZEND_ARG_INFO(1, response)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_ftp_nlist, 0)
+	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_INFO(0, directory)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_rawlist, 0, 0, 2)
+	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_INFO(0, directory)
+	ZEND_ARG_INFO(0, recursive)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_ftp_systype, 0)
+	ZEND_ARG_INFO(0, ftp)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_fget, 0, 0, 4)
+	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_INFO(0, fp)
+	ZEND_ARG_INFO(0, remote_file)
+	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, resumepos)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_nb_fget, 0, 0, 4)
+	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_INFO(0, fp)
+	ZEND_ARG_INFO(0, remote_file)
+	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, resumepos)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_ftp_pasv, 0)
+	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_INFO(0, pasv)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_get, 0, 0, 4)
+	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_INFO(0, local_file)
+	ZEND_ARG_INFO(0, remote_file)
+	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, resume_pos)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_nb_get, 0, 0, 4)
+	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_INFO(0, local_file)
+	ZEND_ARG_INFO(0, remote_file)
+	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, resume_pos)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_ftp_nb_continue, 0)
+	ZEND_ARG_INFO(0, ftp)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_fput, 0, 0, 4)
+	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_INFO(0, remote_file)
+	ZEND_ARG_INFO(0, fp)
+	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, startpos)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_nb_fput, 0, 0, 4)
+	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_INFO(0, remote_file)
+	ZEND_ARG_INFO(0, fp)
+	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, startpos)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_put, 0, 0, 4)
+	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_INFO(0, remote_file)
+	ZEND_ARG_INFO(0, local_file)
+	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, startpos)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_nb_put, 0, 0, 4)
+	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_INFO(0, remote_file)
+	ZEND_ARG_INFO(0, local_file)
+	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, startpos)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_ftp_size, 0)
+	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_ftp_mdtm, 0)
+	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_ftp_rename, 0)
+	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_INFO(0, src)
+	ZEND_ARG_INFO(0, dest)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_ftp_delete, 0)
+	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_INFO(0, file)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_ftp_site, 0)
+	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_INFO(0, cmd)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_ftp_close, 0)
+	ZEND_ARG_INFO(0, ftp)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_ftp_set_option, 0)
+	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_INFO(0, option)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_ftp_get_option, 0)
+	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_INFO(0, option)
+ZEND_END_ARG_INFO()
+
+/* }}} */
 
 zend_function_entry php_ftp_functions[] = {
-	PHP_FE(ftp_connect,			NULL)
+	PHP_FE(ftp_connect,			arginfo_ftp_connect)
 #if HAVE_OPENSSL_EXT
-	PHP_FE(ftp_ssl_connect,		NULL)
+	PHP_FE(ftp_ssl_connect,		arginfo_ftp_ssl_connect)
 #endif	
-	PHP_FE(ftp_login,			NULL)
-	PHP_FE(ftp_pwd,				NULL)
-	PHP_FE(ftp_cdup,			NULL)
-	PHP_FE(ftp_chdir,			NULL)
-	PHP_FE(ftp_exec,			NULL)
-	PHP_FE(ftp_raw,				NULL)
-	PHP_FE(ftp_mkdir,			NULL)
-	PHP_FE(ftp_rmdir,			NULL)
-	PHP_FE(ftp_chmod,			NULL)
-	PHP_FE(ftp_alloc,			third_and_rest_force_ref)
-	PHP_FE(ftp_nlist,			NULL)
-	PHP_FE(ftp_rawlist,			NULL)
-	PHP_FE(ftp_systype,			NULL)
-	PHP_FE(ftp_pasv,			NULL)
-	PHP_FE(ftp_get,				NULL)
-	PHP_FE(ftp_fget,			NULL)
-	PHP_FE(ftp_put,				NULL)
-	PHP_FE(ftp_fput,			NULL)
-	PHP_FE(ftp_size,			NULL)
-	PHP_FE(ftp_mdtm,			NULL)
-	PHP_FE(ftp_rename,			NULL)
-	PHP_FE(ftp_delete,			NULL)
-	PHP_FE(ftp_site,			NULL)
-	PHP_FE(ftp_close,			NULL)
-	PHP_FE(ftp_set_option,		NULL)
-	PHP_FE(ftp_get_option,		NULL)
-	PHP_FE(ftp_nb_fget,			NULL)
-	PHP_FE(ftp_nb_get,			NULL)
-	PHP_FE(ftp_nb_continue,		NULL)
-	PHP_FE(ftp_nb_put,			NULL)
-	PHP_FE(ftp_nb_fput,			NULL)
-	PHP_FALIAS(ftp_quit, ftp_close, NULL)
+	PHP_FE(ftp_login,			arginfo_ftp_login)
+	PHP_FE(ftp_pwd,				arginfo_ftp_pwd)
+	PHP_FE(ftp_cdup,			arginfo_ftp_cdup)
+	PHP_FE(ftp_chdir,			arginfo_ftp_chdir)
+	PHP_FE(ftp_exec,			arginfo_ftp_exec)
+	PHP_FE(ftp_raw,				arginfo_ftp_raw)
+	PHP_FE(ftp_mkdir,			arginfo_ftp_mkdir)
+	PHP_FE(ftp_rmdir,			arginfo_ftp_rmdir)
+	PHP_FE(ftp_chmod,			arginfo_ftp_chmod)
+	PHP_FE(ftp_alloc,			arginfo_ftp_alloc)
+	PHP_FE(ftp_nlist,			arginfo_ftp_nlist)
+	PHP_FE(ftp_rawlist,			arginfo_ftp_rawlist)
+	PHP_FE(ftp_systype,			arginfo_ftp_systype)
+	PHP_FE(ftp_pasv,			arginfo_ftp_pasv)
+	PHP_FE(ftp_get,				arginfo_ftp_get)
+	PHP_FE(ftp_fget,			arginfo_ftp_fget)
+	PHP_FE(ftp_put,				arginfo_ftp_put)
+	PHP_FE(ftp_fput,			arginfo_ftp_fput)
+	PHP_FE(ftp_size,			arginfo_ftp_size)
+	PHP_FE(ftp_mdtm,			arginfo_ftp_mdtm)
+	PHP_FE(ftp_rename,			arginfo_ftp_rename)
+	PHP_FE(ftp_delete,			arginfo_ftp_delete)
+	PHP_FE(ftp_site,			arginfo_ftp_site)
+	PHP_FE(ftp_close,			arginfo_ftp_close)
+	PHP_FE(ftp_set_option,		arginfo_ftp_set_option)
+	PHP_FE(ftp_get_option,		arginfo_ftp_get_option)
+	PHP_FE(ftp_nb_fget,			arginfo_ftp_nb_fget)
+	PHP_FE(ftp_nb_get,			arginfo_ftp_nb_get)
+	PHP_FE(ftp_nb_continue,		arginfo_ftp_nb_continue)
+	PHP_FE(ftp_nb_put,			arginfo_ftp_nb_put)
+	PHP_FE(ftp_nb_fput,			arginfo_ftp_nb_fput)
+	PHP_FALIAS(ftp_quit, ftp_close, arginfo_ftp_close)
 	{NULL, NULL, NULL}
 };
 
