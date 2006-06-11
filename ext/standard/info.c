@@ -156,7 +156,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 			if (Z_TYPE_PP(tmp) == IS_ARRAY) {
 				if (!sapi_module.phpinfo_as_text) {
 					PUTS("<pre>");
-					zend_print_zval_ex((zend_write_func_t) php_info_write_wrapper, *tmp, 0);
+					zend_print_zval_r_ex((zend_write_func_t) php_info_write_wrapper, *tmp, 0);
 					PUTS("</pre>");
 				} else {
 					zend_print_zval_r(*tmp, 0 TSRMLS_CC);
