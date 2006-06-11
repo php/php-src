@@ -34,3 +34,8 @@ DBA CDB_MAKE handler test
 database handler: cdb_make
 string(32) "12fc5ba2b9dcfef2480e5324eeb5f3e5"
 string(32) "12fc5ba2b9dcfef2480e5324eeb5f3e5"
+--UEXPECT--
+database handler: cdb_make
+unicode(32) "12fc5ba2b9dcfef2480e5324eeb5f3e5"
+unicode(32) "12fc5ba2b9dcfef2480e5324eeb5f3e5"
+
