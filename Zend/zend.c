@@ -1170,6 +1170,9 @@ void zend_shutdown(TSRMLS_D)
 	unicode_globals_dtor(&unicode_globals TSRMLS_CC);
 #endif
 	zend_destroy_rsrc_list_dtors();
+
+	/* free ICU cache and any open ICU item (collators, converters, ...) */
+	u_cleanup();
 }
 
 
