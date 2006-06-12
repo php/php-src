@@ -110,7 +110,7 @@ typedef struct _php_output_handler {
 	union {
 		zval *user;
 		php_output_handler_context_func_t internal;
-	};
+	} func;
 } php_output_handler;
 
 ZEND_BEGIN_MODULE_GLOBALS(output)

@@ -486,7 +486,7 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 			if (zend_is_callable(output_handler, 0, handler_name)) {
 				handler = php_output_handler_init(handler_name, chunk_size, (flags & ~0xf) | PHP_OUTPUT_HANDLER_USER);
 				ZVAL_ADDREF(output_handler);
-				handler->user = output_handler;
+				handler->func.user = output_handler;
 			}
 			zval_ptr_dtor(&handler_name);
 			return handler;
@@ -503,7 +503,7 @@ PHPAPI php_output_handler *php_output_handler_create_internal(zval *name, php_ou
 	php_output_handler *handler;
 	
 	handler = php_output_handler_init(name, chunk_size, (flags & ~0xf) | PHP_OUTPUT_HANDLER_INTERNAL);
-	handler->internal = output_handler;
+	handler->func.internal = output_handler;
 	
 	return handler;
 }
@@ -679,7 +679,7 @@ PHPAPI void php_output_handler_dtor(php_output_handler *handler TSRMLS_DC)
 	zval_ptr_dtor(&handler->name);
 	STR_FREE(handler->buffer.data);
 	if (handler->flags & PHP_OUTPUT_HANDLER_USER) {
-		zval_ptr_dtor(&handler->user);
+		zval_ptr_dtor(&handler->func.user);
 	}
 	if (handler->dtor && handler->opaq) {
 		handler->dtor(handler->opaq TSRMLS_CC);
@@ -913,7 +913,7 @@ static inline int php_output_handler_op(php_output_handler *handler, php_output_
 			params[0] = &input;
 			params[1] = &flags;
 			
-			if (	(SUCCESS == call_user_function_ex(CG(function_table), NULL, handler->user, &retval, 2, params, 1, NULL TSRMLS_CC)) &&
+			if (	(SUCCESS == call_user_function_ex(CG(function_table), NULL, handler->func.user, &retval, 2, params, 1, NULL TSRMLS_CC)) &&
 						retval && (Z_TYPE_P(retval) != IS_NULL) && (Z_TYPE_P(retval) != IS_BOOL || Z_BVAL_P(retval))) {
 				/* user handler may have returned TRUE */
 				status = PHP_OUTPUT_HANDLER_NO_DATA;
@@ -941,7 +941,7 @@ static inline int php_output_handler_op(php_output_handler *handler, php_output_
 			context->in.used = handler->buffer.used;
 			context->in.free = 0;
 			
-			if (SUCCESS == handler->internal(&handler->opaq, context)) {
+			if (SUCCESS == handler->func.internal(&handler->opaq, context)) {
 				if (context->out.used) {
 					status = PHP_OUTPUT_HANDLER_SUCCESS;
 				} else {
