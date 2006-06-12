@@ -471,6 +471,9 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 #define OE_IS_OBJECT	(1<<1)
 #define OE_IS_METHOD	(1<<2)
 
+/* default engine string type */
+#define ZEND_STR_TYPE (UG(unicode)?IS_UNICODE:IS_STRING)
+
 int zend_startup(zend_utility_functions *utility_functions, char **extensions, int start_builtin_functions);
 void zend_shutdown(TSRMLS_D);
 void zend_register_standard_ini_entries(TSRMLS_D);

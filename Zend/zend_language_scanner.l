@@ -428,7 +428,7 @@ ZEND_API int zend_copy_scanner_string(zval *zendlval, char *str, zend_uint str_l
 	} else {
 		Z_STRVAL_P(zendlval) = (char *)estrndup(str, str_len);
 		Z_STRLEN_P(zendlval) = str_len;
-		Z_TYPE_P(zendlval) = type;
+		Z_TYPE_P(zendlval) = IS_STRING;
 	}
 
 	return 1;
