@@ -1192,7 +1192,7 @@ ZEND_API int zend_u_eval_string(zend_uchar type, zstr string, zval *retval_ptr, 
 
 	original_handle_op_arrays = CG(handle_op_arrays);
 	CG(handle_op_arrays) = 0;
-	new_op_array = compile_string(&pv, string_name TSRMLS_CC);
+	new_op_array = zend_compile_string(&pv, string_name TSRMLS_CC);
 	CG(handle_op_arrays) = original_handle_op_arrays;
 
 	if (new_op_array) {

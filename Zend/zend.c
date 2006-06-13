@@ -1004,6 +1004,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	zend_getenv = utility_functions->getenv_function;
 
 	zend_compile_file = compile_file;
+	zend_compile_string = compile_string;
 	zend_execute = execute;
 	zend_execute_internal = NULL;
 	zend_throw_exception_hook = NULL;
