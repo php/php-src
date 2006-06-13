@@ -20,6 +20,7 @@
 #include "php_unicode.h"
 #include "zend_unicode.h"
 #include "php_property.h"
+#include "php_transform.h"
 
 void php_register_unicode_iterators(TSRMLS_D);
 
@@ -297,6 +298,10 @@ zend_function_entry unicode_functions[] = {
 
 	PHP_FE(char_enum_names, NULL)
 	PHP_FE(char_enum_types, NULL)
+
+	/* text transformation functions */
+
+	PHP_FE(transliterate, NULL)
 
 	{ NULL, NULL, NULL }
 };
