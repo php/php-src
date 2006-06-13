@@ -2766,7 +2766,7 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|VAR|CV, ANY)
 		case ZEND_EVAL: {
 				char *eval_desc = zend_make_compiled_string_description("eval()'d code" TSRMLS_CC);
 
-				new_op_array = compile_string(inc_filename, eval_desc TSRMLS_CC);
+				new_op_array = zend_compile_string(inc_filename, eval_desc TSRMLS_CC);
 				efree(eval_desc);
 			}
 			break;

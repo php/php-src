@@ -1960,7 +1960,7 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		case ZEND_EVAL: {
 				char *eval_desc = zend_make_compiled_string_description("eval()'d code" TSRMLS_CC);
 
-				new_op_array = compile_string(inc_filename, eval_desc TSRMLS_CC);
+				new_op_array = zend_compile_string(inc_filename, eval_desc TSRMLS_CC);
 				efree(eval_desc);
 			}
 			break;
@@ -4460,7 +4460,7 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		case ZEND_EVAL: {
 				char *eval_desc = zend_make_compiled_string_description("eval()'d code" TSRMLS_CC);
 
-				new_op_array = compile_string(inc_filename, eval_desc TSRMLS_CC);
+				new_op_array = zend_compile_string(inc_filename, eval_desc TSRMLS_CC);
 				efree(eval_desc);
 			}
 			break;
@@ -7542,7 +7542,7 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		case ZEND_EVAL: {
 				char *eval_desc = zend_make_compiled_string_description("eval()'d code" TSRMLS_CC);
 
-				new_op_array = compile_string(inc_filename, eval_desc TSRMLS_CC);
+				new_op_array = zend_compile_string(inc_filename, eval_desc TSRMLS_CC);
 				efree(eval_desc);
 			}
 			break;
@@ -19764,7 +19764,7 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		case ZEND_EVAL: {
 				char *eval_desc = zend_make_compiled_string_description("eval()'d code" TSRMLS_CC);
 
-				new_op_array = compile_string(inc_filename, eval_desc TSRMLS_CC);
+				new_op_array = zend_compile_string(inc_filename, eval_desc TSRMLS_CC);
 				efree(eval_desc);
 			}
 			break;
