@@ -93,6 +93,8 @@ static PHP_MINFO_FUNCTION(mcrypt);
 static PHP_MINIT_FUNCTION(mcrypt);
 static PHP_MSHUTDOWN_FUNCTION(mcrypt);
 
+ZEND_DECLARE_MODULE_GLOBALS(mcrypt)
+
 zend_module_entry mcrypt_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"mcrypt", 
@@ -101,10 +103,12 @@ zend_module_entry mcrypt_module_entry = {
 	NULL, NULL,
 	PHP_MINFO(mcrypt),
 	NO_VERSION_YET,
-	STANDARD_MODULE_PROPERTIES,
+	PHP_MODULE_GLOBALS(mcrypt),
+	NULL,
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
-
-ZEND_DECLARE_MODULE_GLOBALS(mcrypt)
 
 #ifdef COMPILE_DL_MCRYPT
 ZEND_GET_MODULE(mcrypt)
@@ -245,11 +249,6 @@ static void php_mcrypt_module_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
     
 static PHP_MINIT_FUNCTION(mcrypt)
 {
-#if defined(ZTS)
-    ZEND_INIT_MODULE_GLOBALS(mcrypt, NULL, NULL);
-    Z_TYPE(mcrypt_module_entry) = type;
-#endif
-	
 	le_mcrypt = zend_register_list_destructors_ex(php_mcrypt_module_dtor, NULL, "mcrypt", module_number);
     
 	/* modes for mcrypt_??? routines */

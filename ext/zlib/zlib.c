@@ -112,6 +112,8 @@ zend_function_entry php_zlib_functions[] = {
 };
 /* }}} */
 
+ZEND_DECLARE_MODULE_GLOBALS(zlib)
+
 /* {{{ php_zlib_module_entry
  */
 zend_module_entry php_zlib_module_entry = {
@@ -124,11 +126,13 @@ zend_module_entry php_zlib_module_entry = {
 	NULL,
 	PHP_MINFO(zlib),
 	"1.1",
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(zlib),
+	NULL,
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
-
-ZEND_DECLARE_MODULE_GLOBALS(zlib)
 
 #ifdef COMPILE_DL_ZLIB
 ZEND_GET_MODULE(php_zlib)
@@ -198,23 +202,12 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("zlib.output_handler",             "", PHP_INI_ALL, OnUpdate_zlib_output_handler,           output_handler,           zend_zlib_globals, zlib_globals)
 PHP_INI_END()
 
-#ifdef ZTS
-/* {{{ php_zlib_init_globals
- */
-static void php_zlib_init_globals(zend_zlib_globals *zlib_globals_p TSRMLS_DC)
-{
-}
-/* }}} */
-#endif
-
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(zlib)
 {
 	zval tmp;
-#ifdef ZTS
-	ts_allocate_id(&zlib_globals_id, sizeof(zend_zlib_globals), (ts_allocate_ctor) php_zlib_init_globals, NULL);
-#endif
+
 	php_register_url_stream_wrapper("compress.zlib", &php_stream_gzip_wrapper TSRMLS_CC);
 	php_stream_filter_register_factory("zlib.*", &php_zlib_filter_factory TSRMLS_CC);
 	INIT_PZVAL(&tmp);

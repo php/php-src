@@ -33,6 +33,7 @@
 #include "zend_exceptions.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(dblib)
+static PHP_GINIT_FUNCTION(dblib)
 
 zend_function_entry pdo_dblib_functions[] = {
 	{NULL, NULL, NULL}
@@ -66,7 +67,11 @@ zend_module_entry pdo_dblib_module_entry = {
 	PHP_RSHUTDOWN(pdo_dblib),
 	PHP_MINFO(pdo_dblib),
 	"0.9",
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBASLS(dblib),
+	PHP_GINIT(dblib),
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 
 #if defined(COMPILE_DL_PDO_DBLIB) || defined(COMPILE_DL_PDO_MSSQL)
@@ -146,11 +151,10 @@ int msg_handler(DBPROCESS *dbproc, DBINT msgno, int msgstate,
 	return 0;
 }
 
-static int init_dblib_globals(zend_dblib_globals *g)
+static PHP_GINIT_FUNCTION(dblib)
 {
-	memset(g, 0, sizeof(*g));
-	g->err.sqlstate = g->sqlstate;
-	return SUCCESS;
+	memset(dblib_globals, 0, sizeof(*dblib_globals));
+	dblib_globals->err.sqlstate = dblib_globals->sqlstate;
 }
 
 PHP_RSHUTDOWN_FUNCTION(pdo_dblib)
@@ -180,8 +184,6 @@ PHP_MINIT_FUNCTION(pdo_dblib)
 		return FAILURE;
 	}
 	
-	ZEND_INIT_MODULE_GLOBALS(dblib, init_dblib_globals, NULL);
-
 	/* TODO: 
 	
 	dbsetifile()

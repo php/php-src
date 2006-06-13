@@ -30,6 +30,8 @@
 #include "Zend/zend_exceptions.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(com_dotnet)
+static PHP_GINIT_FUNCTION(com_dotnet);
+
 TsHashTable php_com_typelibraries;
 
 zend_class_entry
@@ -86,7 +88,11 @@ zend_module_entry com_dotnet_module_entry = {
 	PHP_RSHUTDOWN(com_dotnet),
 	PHP_MINFO(com_dotnet),
 	"0.1",
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(com_dotnet),
+	PHP_GINIT(com_dotnet),
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
 
@@ -170,9 +176,9 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
-/* {{{ php_com_dotnet_init_globals
+/* {{{ PHP_GINIT_FUNCTION
  */
-static void php_com_dotnet_init_globals(zend_com_dotnet_globals *com_dotnet_globals)
+static PHP_GINIT_FUNCTION(com_dotnet)
 {
 	memset(com_dotnet_globals, 0, sizeof(*com_dotnet_globals));
 	com_dotnet_globals->code_page = CP_ACP;
@@ -185,7 +191,6 @@ PHP_MINIT_FUNCTION(com_dotnet)
 {
 	zend_class_entry ce, *tmp;
 
-	ZEND_INIT_MODULE_GLOBALS(com_dotnet, php_com_dotnet_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
 
 	php_com_wrapper_minit(INIT_FUNC_ARGS_PASSTHRU);

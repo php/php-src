@@ -144,10 +144,10 @@ PHP_INI_END()
 */
 /* }}} */
 
-/* {{{ php_tokenizer_init_globals
+/* {{{ PHP_GINIT_FUNCTION
  */
 /* Uncomment this function if you have INI entries
-static void php_tokenizer_init_globals(zend_tokenizer_globals *tokenizer_globals)
+static PHP_GINIT_FUNCTION(tokenizer)
 {
 	tokenizer_globals->global_value = 0;
 	tokenizer_globals->global_string = NULL;
@@ -160,7 +160,6 @@ static void php_tokenizer_init_globals(zend_tokenizer_globals *tokenizer_globals
 PHP_MINIT_FUNCTION(tokenizer)
 {
 	/* If you have INI entries, uncomment these lines 
-	ZEND_INIT_MODULE_GLOBALS(tokenizer, php_tokenizer_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
 	*/
 

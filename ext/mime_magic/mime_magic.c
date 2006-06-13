@@ -212,7 +212,7 @@ static magic_req_rec *magic_set_config(void);
 static void magic_free_config(magic_req_rec *);
 
 ZEND_DECLARE_MODULE_GLOBALS(mime_magic)
-
+static PHP_GINIT_FUNCTION(mime_magic);
 
 /* True global resources - no need for thread safety here */
 static magic_server_config_rec mime_global;
@@ -240,7 +240,15 @@ zend_module_entry mime_magic_module_entry = {
 #if ZEND_MODULE_API_NO >= 20010901
 	"0.1", 
 #endif
+#if ZEND_MODULE_API_NO >= 20060613
+	PHP_MODULE_GLOBALS(mime_magic),
+	PHP_GINIT(mime_magic),
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
+#else
 	STANDARD_MODULE_PROPERTIES
+#endif
 };
 /* }}} */
 
@@ -256,9 +264,9 @@ STD_PHP_INI_BOOLEAN("mime_magic.debug", "0", PHP_INI_SYSTEM, OnUpdateBool, debug
 PHP_INI_END()
 /* }}} */
 
-/* {{{ php_mime_magic_init_globals
+/* {{{ PHP_GINIT_FUNCTION
  */
-static void php_mime_magic_init_globals(zend_mime_magic_globals *mime_magic_globals)
+static PHP_GINIT_FUNCTION(mime_magic)
 {
 	memset(mime_magic_globals, 0, sizeof(zend_mime_magic_globals));
 	mime_global.magic = NULL;
@@ -270,7 +278,6 @@ static void php_mime_magic_init_globals(zend_mime_magic_globals *mime_magic_glob
  */
 PHP_MINIT_FUNCTION(mime_magic)
 {
-	ZEND_INIT_MODULE_GLOBALS(mime_magic, php_mime_magic_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
 
 	if (MIME_MAGIC_G(magicfile)) {

@@ -107,6 +107,7 @@
 #define SNMP_VALUE_OBJECT	2
 
 ZEND_DECLARE_MODULE_GLOBALS(snmp)
+static PHP_GINIT_FUNCTION(snmp);
 
 /* constant - can be shared among threads */
 static oid objid_mib[] = {1, 3, 6, 1, 2, 1};
@@ -164,7 +165,11 @@ zend_module_entry snmp_module_entry = {
 	NULL,
 	PHP_MINFO(snmp),
 	NO_VERSION_YET,
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(snmp),
+	PHP_GINIT(snmp),
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
 
@@ -174,9 +179,9 @@ ZEND_GET_MODULE(snmp)
 
 /* THREAD_LS snmp_module php_snmp_module; - may need one of these at some point */
 
-/* {{{ php_snmp_init_globals
+/* {{{ PHP_GINIT_FUNCTION
  */
-static void php_snmp_init_globals(zend_snmp_globals *snmp_globals)
+static PHP_GINIT_FUNCTION(snmp)
 {
 	snmp_globals->valueretrieval = 0;
 }
@@ -192,8 +197,6 @@ PHP_MINIT_FUNCTION(snmp)
 	/* Prevent update of the snmpapp.conf file */
 	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_PERSIST_STATE, 1);
 #endif
-
-	ZEND_INIT_MODULE_GLOBALS(snmp, php_snmp_init_globals, NULL);
 
 	REGISTER_LONG_CONSTANT("SNMP_VALUE_LIBRARY", SNMP_VALUE_LIBRARY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SNMP_VALUE_PLAIN", SNMP_VALUE_PLAIN, CONST_CS | CONST_PERSISTENT);

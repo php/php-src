@@ -37,6 +37,10 @@ static int le_link, le_plink, le_result;
 
 #if HAVE_SYBASE_CT
 
+ZEND_DECLARE_MODULE_GLOBALS(sybase)
+static PHP_GINIT_FUNCTION(sybase);
+static PHP_GSHUTDOWN_FUNCTION(sybase);
+
 zend_function_entry sybase_functions[] = {
 	PHP_FE(sybase_connect, NULL)
 	PHP_FE(sybase_pconnect, NULL)
@@ -93,10 +97,21 @@ zend_function_entry sybase_functions[] = {
 
 zend_module_entry sybase_module_entry = {
 	STANDARD_MODULE_HEADER,
-	"sybase_ct", sybase_functions, PHP_MINIT(sybase), PHP_MSHUTDOWN(sybase), PHP_RINIT(sybase), PHP_RSHUTDOWN(sybase), PHP_MINFO(sybase), NO_VERSION_YET, STANDARD_MODULE_PROPERTIES
+	"sybase_ct",
+	sybase_functions,
+	PHP_MINIT(sybase),
+	PHP_MSHUTDOWN(sybase),
+	PHP_RINIT(sybase),
+	PHP_RSHUTDOWN(sybase),
+	PHP_MINFO(sybase),
+	NO_VERSION_YET,
+	PHP_MODULE_GLOBALS(sybase),
+	PHP_GINIT(sybase),
+	PHP_GSHUTDOWN(sybase),
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 
-ZEND_DECLARE_MODULE_GLOBALS(sybase)
 /* static CS_CONTEXT *context; */
 
 #ifdef COMPILE_DL_SYBASE_CT
@@ -356,7 +371,7 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 
 
-static void php_sybase_init_globals(zend_sybase_globals *sybase_globals)
+static PHP_GINIT_FUNCTION(sybase)
 {
 	long opt;
 	TSRMLS_FETCH();
@@ -407,7 +422,7 @@ static void php_sybase_init_globals(zend_sybase_globals *sybase_globals)
 }
 
 
-static void php_sybase_destroy_globals(zend_sybase_globals *sybase_globals)
+static PHP_GSHUTDOWN_FUNCTION(sybase)
 {
 	ct_exit(sybase_globals->context, CS_UNUSED);
 	cs_ctx_drop(sybase_globals->context);
@@ -415,8 +430,6 @@ static void php_sybase_destroy_globals(zend_sybase_globals *sybase_globals)
 
 PHP_MINIT_FUNCTION(sybase)
 {
-	ZEND_INIT_MODULE_GLOBALS(sybase, php_sybase_init_globals, php_sybase_destroy_globals);
-
 	REGISTER_INI_ENTRIES();
 
 	le_link = zend_register_list_destructors_ex(_close_sybase_link, NULL, "sybase-ct link", module_number);
@@ -442,11 +455,6 @@ PHP_RINIT_FUNCTION(sybase)
 PHP_MSHUTDOWN_FUNCTION(sybase)
 {
 	UNREGISTER_INI_ENTRIES();
-#ifdef ZTS
-	ts_free_id(sybase_globals_id);
-#else
-	php_sybase_destroy_globals(&sybase_globals TSRMLS_CC);
-#endif
 #if 0
 	ct_exit(context, CS_UNUSED);
 	cs_ctx_drop(context);

@@ -109,6 +109,9 @@ static int le_result, le_link, le_plink;
 	(mysql_field_count(mysql)>0)
 #endif
 
+ZEND_DECLARE_MODULE_GLOBALS(mysql)
+static PHP_GINIT_FUNCTION(mysql);
+
 typedef struct _php_mysql_conn {
 	MYSQL conn;
 	int active_result_id;
@@ -212,11 +215,13 @@ zend_module_entry mysql_module_entry = {
 	PHP_RSHUTDOWN(mysql),
 	PHP_MINFO(mysql),
 	NO_VERSION_YET,
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(mysql),
+	PHP_GINIT(mysql),
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
-
-ZEND_DECLARE_MODULE_GLOBALS(mysql)
 
 #ifdef COMPILE_DL_MYSQL
 ZEND_GET_MODULE(mysql)
@@ -346,9 +351,9 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
-/* {{{ php_mysql_init_globals
+/* {{{ PHP_GINIT_FUNCTION
  */
-static void php_mysql_init_globals(zend_mysql_globals *mysql_globals)
+static PHP_GINIT_FUNCTION(mysql)
 {
 	mysql_globals->num_persistent = 0;
 	mysql_globals->default_socket = NULL;
@@ -367,8 +372,6 @@ static void php_mysql_init_globals(zend_mysql_globals *mysql_globals)
  */
 ZEND_MODULE_STARTUP_D(mysql)
 {
-	ZEND_INIT_MODULE_GLOBALS(mysql, php_mysql_init_globals, NULL);
-
 	REGISTER_INI_ENTRIES();
 	le_result = zend_register_list_destructors_ex(_free_mysql_result, NULL, "mysql result", module_number);
 	le_link = zend_register_list_destructors_ex(_close_mysql_link, NULL, "mysql link", module_number);

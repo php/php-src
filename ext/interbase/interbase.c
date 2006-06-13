@@ -43,6 +43,9 @@
 #define COMMIT			1
 #define RETAIN			2
 
+ZEND_DECLARE_MODULE_GLOBALS(ibase)
+static PHP_GINIT_FUNCTION(ibase);
+
 /* {{{ extension definition structures */
 zend_function_entry ibase_functions[] = {
 	PHP_FE(ibase_connect, NULL)
@@ -178,7 +181,11 @@ zend_module_entry ibase_module_entry = {
 	PHP_RSHUTDOWN(ibase),
 	PHP_MINFO(ibase),
 	NO_VERSION_YET,
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(ibase),
+	PHP_GINIT(ibase),
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 
 #ifdef COMPILE_DL_INTERBASE
@@ -187,8 +194,6 @@ ZEND_GET_MODULE(ibase)
 
 /* True globals, no need for thread safety */
 int le_link, le_plink, le_trans;
-
-ZEND_DECLARE_MODULE_GLOBALS(ibase)
 
 /* }}} */
 
@@ -448,7 +453,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("ibase.timeformat", IB_DEF_TIME_FMT, PHP_INI_ALL, NULL)
 PHP_INI_END()
 
-static void php_ibase_init_globals(zend_ibase_globals *ibase_globals)
+static PHP_GINIT_FUNCTION(ibase)
 {
 	ibase_globals->num_persistent = ibase_globals->num_links = 0;
 	ibase_globals->sql_code = *ibase_globals->errmsg = 0;
@@ -457,8 +462,6 @@ static void php_ibase_init_globals(zend_ibase_globals *ibase_globals)
 
 PHP_MINIT_FUNCTION(ibase)
 {
-	ZEND_INIT_MODULE_GLOBALS(ibase, php_ibase_init_globals, NULL);
-
 	REGISTER_INI_ENTRIES();
 
 	le_link = zend_register_list_destructors_ex(_php_ibase_close_link, NULL, LE_LINK, module_number);

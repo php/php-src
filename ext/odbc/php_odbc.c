@@ -130,6 +130,9 @@ zend_function_entry odbc_functions[] = {
 };
 /* }}} */
 
+ZEND_DECLARE_MODULE_GLOBALS(odbc);
+static PHP_GINIT_FUNCTION(odbc);
+
 /* {{{ odbc_module_entry
  */
 zend_module_entry odbc_module_entry = {
@@ -142,15 +145,13 @@ zend_module_entry odbc_module_entry = {
 	PHP_RSHUTDOWN(odbc), 
 	PHP_MINFO(odbc), 
 	"1.0",
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(odbc),
+	PHP_GINIT(odbc),
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
-
-#ifdef ZTS
-int odbc_globals_id;
-#else
-ZEND_API php_odbc_globals odbc_globals;
-#endif
 
 #ifdef COMPILE_DL_ODBC
 ZEND_GET_MODULE(odbc)
@@ -403,12 +404,10 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
-#ifdef ZTS
-static void php_odbc_init_globals(php_odbc_globals *odbc_globals_p TSRMLS_DC)
+static PHP_GINIT_FUNCTION(odbc)
 {
-	ODBCG(num_persistent) = 0;
+	odbc_globals->num_persistent = 0;
 }
-#endif
 
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(odbc)
@@ -416,12 +415,6 @@ PHP_MINIT_FUNCTION(odbc)
 #ifdef SQLANY_BUG
 	ODBC_SQL_CONN_T foobar;
 	RETCODE rc;
-#endif
-
-#ifdef ZTS
-	ts_allocate_id(&odbc_globals_id, sizeof(php_odbc_globals), php_odbc_init_globals, NULL);
-#else
-	ODBCG(num_persistent) = 0;
 #endif
 
 	REGISTER_INI_ENTRIES();

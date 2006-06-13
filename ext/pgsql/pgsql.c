@@ -81,6 +81,9 @@
 
 #define CHECK_DEFAULT_LINK(x) if ((x) == -1) { php_error_docref(NULL TSRMLS_CC, E_WARNING, "No PostgreSQL link opened yet"); }
 
+ZEND_DECLARE_MODULE_GLOBALS(pgsql)
+static PHP_GINIT_FUNCTION(pgsql);
+
 /* {{{ pgsql_functions[]
  */
 zend_function_entry pgsql_functions[] = {
@@ -248,7 +251,11 @@ zend_module_entry pgsql_module_entry = {
 	PHP_RSHUTDOWN(pgsql),
 	PHP_MINFO(pgsql),
 	NO_VERSION_YET,
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(pgsql),
+	PHP_GINIT(pgsql),
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
 
@@ -257,8 +264,6 @@ ZEND_GET_MODULE(pgsql)
 #endif
 
 static int le_link, le_plink, le_result, le_lofp, le_string;
-
-ZEND_DECLARE_MODULE_GLOBALS(pgsql)
 
 /* {{{ _php_pgsql_trim_message */
 static char * _php_pgsql_trim_message(const char *message, int *len)
@@ -446,9 +451,9 @@ STD_PHP_INI_BOOLEAN( "pgsql.log_notice",            "0",  PHP_INI_ALL,    OnUpda
 PHP_INI_END()
 /* }}} */
 
-/* {{{ php_pgsql_init_globals
+/* {{{ PHP_GINIT_FUNCTION
  */
-static void php_pgsql_init_globals(zend_pgsql_globals *pgsql_globals)
+static PHP_GINIT_FUNCTION(pgsql)
 {
 	memset(pgsql_globals, 0, sizeof(zend_pgsql_globals));
 	/* Initilize notice message hash at MINIT only */
@@ -460,8 +465,6 @@ static void php_pgsql_init_globals(zend_pgsql_globals *pgsql_globals)
  */
 PHP_MINIT_FUNCTION(pgsql)
 {
-	ZEND_INIT_MODULE_GLOBALS(pgsql, php_pgsql_init_globals, NULL);
-
 	REGISTER_INI_ENTRIES();
 	
 	le_link = zend_register_list_destructors_ex(_close_pgsql_link, NULL, "pgsql link", module_number);
