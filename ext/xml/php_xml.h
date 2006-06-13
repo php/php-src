@@ -45,9 +45,9 @@ extern zend_module_entry xml_module_entry;
 #error "UTF-16 Unicode support not implemented!"
 #endif
 
-typedef struct {
+ZEND_BEGIN_MODULE_GLOBALS(xml)
 	XML_Char *default_encoding;
-} php_xml_globals;
+ZEND_END_MODULE_GLOBALS(xml)
 
 typedef struct {
 	int index;
@@ -147,7 +147,7 @@ PHPAPI char *xml_utf8_decode(const XML_Char *, int, int *, const XML_Char *);
 #define phpext_xml_ptr xml_module_ptr
 
 #ifdef ZTS
-#define XML(v) TSRMG(xml_globals_id, php_xml_globals *, v)
+#define XML(v) TSRMG(xml_globals_id, zend_xml_globals *, v)
 #else
 #define XML(v) (xml_globals.v)
 #endif

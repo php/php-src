@@ -49,6 +49,7 @@
 #endif
 
 ZEND_DECLARE_MODULE_GLOBALS(posix)
+static PHP_MINFO_FUNCTION(posix);
 
 /* {{{ posix_functions[]
  */
@@ -148,7 +149,7 @@ static PHP_MINFO_FUNCTION(posix)
 }
 /* }}} */
 
-static void php_posix_init_globals(zend_posix_globals *posix_globals TSRMLS_DC)
+static PHP_GINIT_FUNCTION(posix)
 {
 	posix_globals->last_error = 0;
 }
@@ -157,7 +158,6 @@ static void php_posix_init_globals(zend_posix_globals *posix_globals TSRMLS_DC)
  */
 static PHP_MINIT_FUNCTION(posix)
 {
-	ZEND_INIT_MODULE_GLOBALS(posix, php_posix_init_globals, NULL);
 	REGISTER_LONG_CONSTANT("POSIX_F_OK", F_OK, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("POSIX_X_OK", X_OK, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("POSIX_W_OK", W_OK, CONST_CS | CONST_PERSISTENT);
@@ -182,8 +182,6 @@ static PHP_MINIT_FUNCTION(posix)
 }
 /* }}} */
 
-static PHP_MINFO_FUNCTION(posix);
-
 /* {{{ posix_module_entry
  */
 zend_module_entry posix_module_entry = {
@@ -195,8 +193,12 @@ zend_module_entry posix_module_entry = {
 	NULL,
 	NULL, 
 	PHP_MINFO(posix),
-    NO_VERSION_YET,
-	STANDARD_MODULE_PROPERTIES
+	NO_VERSION_YET,
+	PHP_MODULE_GLOBALS(posix),
+	PHP_GINIT(posix),
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
 

@@ -32,6 +32,7 @@
 #include "libbcmath/src/bcmath.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(bcmath);
+static PHP_GINIT_FUNCTION(bcmath);
 
 /* {{{ arginfo */
 static
@@ -127,7 +128,11 @@ zend_module_entry bcmath_module_entry = {
 	PHP_RSHUTDOWN(bcmath),
 	PHP_MINFO(bcmath),
 	NO_VERSION_YET,
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(bcmath),
+	PHP_GINIT(bcmath),
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 
 #ifdef COMPILE_DL_BCMATH
@@ -140,9 +145,9 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
-/* {{{ php_bcmath_init_globals
+/* {{{ PHP_GINIT_FUNCTION
  */
-static void php_bcmath_init_globals(zend_bcmath_globals *bcmath_globals)
+static PHP_GINIT_FUNCTION(bcmath)
 {
 	bcmath_globals->bc_precision = 0;
 }
@@ -152,8 +157,6 @@ static void php_bcmath_init_globals(zend_bcmath_globals *bcmath_globals)
  */
 PHP_MINIT_FUNCTION(bcmath)
 {
-	ZEND_INIT_MODULE_GLOBALS(bcmath, php_bcmath_init_globals, NULL);
-
 	REGISTER_INI_ENTRIES();
 
 	return SUCCESS;

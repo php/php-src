@@ -77,7 +77,6 @@ static void php_extname_init_globals(zend_extname_globals *extname_globals)
 PHP_MINIT_FUNCTION(extname)
 {
 	/* If you have INI entries, uncomment these lines 
-	ZEND_INIT_MODULE_GLOBALS(extname, php_extname_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
 	*/
 	return SUCCESS;

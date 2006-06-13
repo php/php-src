@@ -91,6 +91,9 @@ zend_function_entry fdf_functions[] = {
 };
 /* }}} */
 
+ZEND_DECLARE_MODULE_GLOBALS(fdf)
+static PHP_GINIT_FUNCTION(fdf);
+
 zend_module_entry fdf_module_entry = {
     STANDARD_MODULE_HEADER,
 	"fdf", 
@@ -101,14 +104,16 @@ zend_module_entry fdf_module_entry = {
 	NULL,
 	PHP_MINFO(fdf), 
     NO_VERSION_YET,
-	STANDARD_MODULE_PROPERTIES
+    PHP_MODULE_GLOBALS(fdf),
+    PHP_GINIT(fdf),
+    NULL,
+    NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 
 #ifdef COMPILE_DL_FDF
 ZEND_GET_MODULE(fdf)
 #endif
-
-ZEND_DECLARE_MODULE_GLOBALS(fdf)
 
 #define FDF_SUCCESS do { FDF_G(error)=FDFErcOK; RETURN_TRUE;} while(0)
 #define FDF_FAILURE(err)  do { FDF_G(error)=err; RETURN_FALSE;} while(0)
@@ -129,7 +134,7 @@ static sapi_post_entry php_fdf_post_entry =	{
 	fdf_post_handler
 };
 
-static void php_fdf_init_globals(zend_fdf_globals *fdf_globals)
+static PHP_GINIT_FUNCTION(fdf)
 {
 	memset(fdf_globals, 0, sizeof(*fdf_globals));
 }
@@ -140,8 +145,6 @@ static void php_fdf_init_globals(zend_fdf_globals *fdf_globals)
  */
 PHP_MINIT_FUNCTION(fdf)
 {
-	ZEND_INIT_MODULE_GLOBALS(fdf, php_fdf_init_globals, NULL);
-
 	le_fdf = zend_register_list_destructors_ex(phpi_FDFClose, NULL, "fdf", module_number);
 
  	/* add handler for Acrobat FDF form post requests */

@@ -80,6 +80,8 @@ unsigned long find_rightmost_bit(unsigned long *valptr);
 void fs_give(void **block);
 void *fs_get(size_t size);
 
+ZEND_DECLARE_MODULE_GLOBALS(imap)
+static PHP_GINIT_FUNCTION(imap);
 
 /* {{{ imap_functions[]
  */
@@ -175,11 +177,13 @@ zend_module_entry imap_module_entry = {
 	PHP_RSHUTDOWN(imap),
 	PHP_MINFO(imap),
 	NO_VERSION_YET,
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(imap),
+	PHP_GINIT(imap),
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
-
-ZEND_DECLARE_MODULE_GLOBALS(imap)
 
 #ifdef COMPILE_DL_IMAP
 ZEND_GET_MODULE(imap)
@@ -397,9 +401,9 @@ void mail_getacl(MAILSTREAM *stream, char *mailbox, ACLLIST *alist)
 #endif
 
 
-/* {{{ php_imap_init_globals
+/* {{{ PHP_GINIT_FUNCTION
  */
-static void php_imap_init_globals(zend_imap_globals *imap_globals)
+static PHP_GINIT_FUNCTION(imap)
 {
 	imap_globals->imap_user = NIL;
 	imap_globals->imap_password = NIL;
@@ -432,8 +436,6 @@ static void php_imap_init_globals(zend_imap_globals *imap_globals)
 PHP_MINIT_FUNCTION(imap)
 {
 	unsigned long sa_all =	SA_MESSAGES | SA_RECENT | SA_UNSEEN | SA_UIDNEXT | SA_UIDVALIDITY;
-
-	ZEND_INIT_MODULE_GLOBALS(imap, php_imap_init_globals, NULL)
 
 #ifndef PHP_WIN32
 	mail_link(&unixdriver);		/* link in the unix driver */
