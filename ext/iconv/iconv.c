@@ -107,6 +107,15 @@ zend_module_entry iconv_module_entry = {
 ZEND_GET_MODULE(iconv)
 #endif
 
+/* {{{ PHP_GINIT_FUNCTION */
+static PHP_GINIT_FUNCTION(iconv)
+{
+	iconv_globals->input_encoding = NULL;
+	iconv_globals->output_encoding = NULL;
+	iconv_globals->internal_encoding = NULL;
+}
+/* }}} */
+
 #ifdef HAVE_LIBICONV
 #define iconv libiconv
 #endif
@@ -154,15 +163,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("iconv.output_encoding",   ICONV_OUTPUT_ENCODING,   PHP_INI_ALL, OnUpdateString, output_encoding,   zend_iconv_globals, iconv_globals)
 	STD_PHP_INI_ENTRY("iconv.internal_encoding", ICONV_INTERNAL_ENCODING, PHP_INI_ALL, OnUpdateString, internal_encoding, zend_iconv_globals, iconv_globals)
 PHP_INI_END()
-/* }}} */
-
-/* {{{ PHP_GINIT_FUNCTION */
-static PHP_GINIT_FUNCTION(iconv)
-{
-	iconv_globals->input_encoding = NULL;
-	iconv_globals->output_encoding = NULL;
-	iconv_globals->internal_encoding = NULL;
-}
 /* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION */
