@@ -532,7 +532,7 @@ ZEND_METHOD(exception, __toString)
  * that gives the user anything to accomplish this.
  */
 static
-ZEND_BEGIN_ARG_INFO(arginfo_exception___construct, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_exception___construct, 0, 0, 0)
 	ZEND_ARG_INFO(0, message)
 	ZEND_ARG_INFO(0, code)
 ZEND_END_ARG_INFO();
@@ -551,7 +551,7 @@ static zend_function_entry default_exception_functions[] = {
 };
 
 static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_error_exception___construct, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_error_exception___construct, 0, 0, 0)
 	ZEND_ARG_INFO(0, message)
 	ZEND_ARG_INFO(0, code)
 	ZEND_ARG_INFO(0, severity)
