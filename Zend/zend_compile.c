@@ -28,6 +28,7 @@
 #include "zend_fast_cache.h"
 
 ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
+ZEND_API zend_op_array *(*zend_compile_string)(zval *source_string, char *filename TSRMLS_DC);
 
 
 #ifndef ZTS
