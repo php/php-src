@@ -971,11 +971,11 @@ Since: DOM Level 3
 */
 PHP_FUNCTION(dom_element_set_id_attribute_ns)
 {
-	zval *id, *rv = NULL;
+	zval *id;
 	xmlNodePtr elemp;
 	xmlAttrPtr attrp;
 	dom_object *intern;
-	int uri_len, name_len, ret;
+	int uri_len, name_len;
 	char *uri, *name;
 	zend_bool is_id;
 
@@ -1012,8 +1012,6 @@ PHP_FUNCTION(dom_element_set_id_attribute_node)
 	xmlNode *nodep;
 	xmlAttrPtr attrp;
 	dom_object *intern, *attrobj;
-	char *name;
-	int name_len;
 	zend_bool is_id;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OOb", &id, dom_element_class_entry, &node, dom_attr_class_entry, &is_id) == FAILURE) {
