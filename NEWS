@@ -33,6 +33,7 @@ PHP                                                                        NEWS
   . Added curl_setopt_array() which allows setting of multiple cURL options.
   . Added CURLINFO_HEADER_OUT constant to facilitate request retrieval.
 
+- Added automatic module globals management. (Dmitry)
 - Added "jump label" operator (limited "goto"). (Dmitry, Sara)
 - Added E_STRICT to E_ALL. (Dmitry)
 - Added gmp_nextprime() function. (Tony, patch by ants dot aasma at gmail dot com) 

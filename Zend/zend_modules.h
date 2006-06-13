@@ -39,7 +39,7 @@ extern struct _zend_arg_info fourth_arg_force_ref[5];
 extern struct _zend_arg_info fifth_arg_force_ref[6];
 extern struct _zend_arg_info all_args_by_ref[1];
 
-#define ZEND_MODULE_API_NO 20050922
+#define ZEND_MODULE_API_NO 20060613
 #ifdef ZTS
 #define USING_ZTS 1
 #else
@@ -52,10 +52,18 @@ extern struct _zend_arg_info all_args_by_ref[1];
 #define ZE2_STANDARD_MODULE_HEADER \
 	STANDARD_MODULE_HEADER_EX, ini_entries, NULL
 
-#define STANDARD_MODULE_PROPERTIES_EX 0, 0, 0, NULL, 0
+#define STANDARD_MODULE_PROPERTIES_EX 0, 0, NULL, 0
+
+#define NO_MODULE_GLOBASLS 0, NULL, NULL, NULL
+
+#ifdef ZTS
+# define ZEND_MODULE_GLOBALS(module_name) sizeof(zend_##module_name##_globals), &module_name##_globals_id
+#else
+# define ZEND_MODULE_GLOBALS(module_name) sizeof(zend_##module_name##_globals), &module_name##_globals
+#endif
 
 #define STANDARD_MODULE_PROPERTIES \
-	NULL, STANDARD_MODULE_PROPERTIES_EX
+	NO_MODULE_GLOBASLS, NULL, STANDARD_MODULE_PROPERTIES_EX
 
 #define NO_VERSION_YET NULL
 
@@ -81,8 +89,15 @@ struct _zend_module_entry {
 	int (*request_shutdown_func)(SHUTDOWN_FUNC_ARGS);
 	void (*info_func)(ZEND_MODULE_INFO_FUNC_ARGS);
 	char *version;
+	size_t globals_size;
+#ifdef ZTS
+	ts_rsrc_id* globals_id_ptr;
+#else
+	void* globals_ptr;
+#endif
+	void (*globals_ctor)(void *global TSRMLS_DC);
+	void (*globals_dtor)(void *global TSRMLS_DC);
 	int (*post_deactivate_func)(void);
-	int globals_id;
 	int module_started;
 	unsigned char type;
 	void *handle;
