@@ -321,6 +321,7 @@ void shutdown_compiler(TSRMLS_D);
 void zend_init_compiler_data_structures(TSRMLS_D);
 
 extern ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
+extern ZEND_API zend_op_array *(*zend_compile_string)(zval *source_string, char *filename TSRMLS_DC);
 
 ZEND_API int lex_scan(zval *zendlval TSRMLS_DC);
 void startup_scanner(TSRMLS_D);
