@@ -1,7 +1,7 @@
 --TEST--
 Localized match
 --SKIPIF--
-<?php if (!function_exists('setlocale')) die('setlocale() not available'); ?>
+<?php if (!function_exists('setlocale')) die('skip: setlocale() not available'); ?>
 --FILE--
 <?php
 
