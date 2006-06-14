@@ -1007,7 +1007,7 @@ zend_object_iterator *sqlite_get_iterator(zend_class_entry *ce, zval *object, in
 	sqlite_object *obj = (sqlite_object*) zend_object_store_get_object(object TSRMLS_CC);
 
 	if (by_ref) {
-		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+		zend_error(E_RECOVERABLE_ERROR, "An iterator cannot be used with foreach by reference");
 	}
 
 	iterator = emalloc(sizeof(sqlite_object_iterator));
