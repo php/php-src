@@ -231,8 +231,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 				}
 				break;
 			default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "php:function object type %d is not supported yet", obj->type);
-			ZVAL_STRING(args[i], "", 0);
+			ZVAL_STRING(args[i], xmlXPathCastToString(obj), 1);
 		}
 		xmlXPathFreeObject(obj);
 		fci.params[i] = &args[i];
