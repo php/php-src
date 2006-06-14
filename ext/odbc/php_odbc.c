@@ -384,23 +384,23 @@ static PHP_INI_DISP(display_lrl)
  */
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("odbc.allow_persistent", "1", PHP_INI_SYSTEM, OnUpdateLong,
-			allow_persistent, php_odbc_globals, odbc_globals)
+			allow_persistent, zend_odbc_globals, odbc_globals)
 	STD_PHP_INI_ENTRY_EX("odbc.max_persistent",  "-1", PHP_INI_SYSTEM, OnUpdateLong,
-			max_persistent, php_odbc_globals, odbc_globals, display_link_nums)
+			max_persistent, zend_odbc_globals, odbc_globals, display_link_nums)
 	STD_PHP_INI_ENTRY_EX("odbc.max_links", "-1", PHP_INI_SYSTEM, OnUpdateLong,
-			max_links, php_odbc_globals, odbc_globals, display_link_nums)
+			max_links, zend_odbc_globals, odbc_globals, display_link_nums)
 	STD_PHP_INI_ENTRY("odbc.default_db", NULL, PHP_INI_ALL, OnUpdateString,
-			defDB, php_odbc_globals, odbc_globals)
+			defDB, zend_odbc_globals, odbc_globals)
 	STD_PHP_INI_ENTRY("odbc.default_user", NULL, PHP_INI_ALL, OnUpdateString,
-			defUser, php_odbc_globals, odbc_globals)
+			defUser, zend_odbc_globals, odbc_globals)
 	STD_PHP_INI_ENTRY_EX("odbc.default_pw", NULL, PHP_INI_ALL, OnUpdateString,
-			defPW, php_odbc_globals, odbc_globals, display_defPW)
+			defPW, zend_odbc_globals, odbc_globals, display_defPW)
 	STD_PHP_INI_ENTRY_EX("odbc.defaultlrl", "4096", PHP_INI_ALL, OnUpdateLong,
-			defaultlrl, php_odbc_globals, odbc_globals, display_lrl)
+			defaultlrl, zend_odbc_globals, odbc_globals, display_lrl)
 	STD_PHP_INI_ENTRY_EX("odbc.defaultbinmode", "1", PHP_INI_ALL, OnUpdateLong,
-			defaultbinmode, php_odbc_globals, odbc_globals, display_binmode)
+			defaultbinmode, zend_odbc_globals, odbc_globals, display_binmode)
 	STD_PHP_INI_BOOLEAN("odbc.check_persistent", "1", PHP_INI_SYSTEM, OnUpdateLong,
-			check_persistent, php_odbc_globals, odbc_globals)
+			check_persistent, zend_odbc_globals, odbc_globals)
 PHP_INI_END()
 /* }}} */
 
