@@ -37,48 +37,279 @@
 /* True global resources - no need for thread safety here */
 static int le_gmp;
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_init, 0, 0, 1)
+	ZEND_ARG_INFO(0, number)
+	ZEND_ARG_INFO(0, base)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_intval, 0)
+	ZEND_ARG_INFO(0, gmpnumber)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_strval, 0, 0, 1)
+	ZEND_ARG_INFO(0, gmpnumber)
+	ZEND_ARG_INFO(0, base)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_add, 0)
+	ZEND_ARG_INFO(0, a)
+	ZEND_ARG_INFO(0, b)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_sub, 0)
+	ZEND_ARG_INFO(0, a)
+	ZEND_ARG_INFO(0, b)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_mul, 0)
+	ZEND_ARG_INFO(0, a)
+	ZEND_ARG_INFO(0, b)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_div_qr, 0, 0, 2)
+	ZEND_ARG_INFO(0, a)
+	ZEND_ARG_INFO(0, b)
+	ZEND_ARG_INFO(0, round)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_div_r, 0, 0, 2)
+	ZEND_ARG_INFO(0, a)
+	ZEND_ARG_INFO(0, b)
+	ZEND_ARG_INFO(0, round)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_div_q, 0, 0, 2)
+	ZEND_ARG_INFO(0, a)
+	ZEND_ARG_INFO(0, b)
+	ZEND_ARG_INFO(0, round)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_mod, 0)
+	ZEND_ARG_INFO(0, a)
+	ZEND_ARG_INFO(0, b)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_divexact, 0)
+	ZEND_ARG_INFO(0, a)
+	ZEND_ARG_INFO(0, b)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_neg, 0)
+	ZEND_ARG_INFO(0, a)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_abs, 0)
+	ZEND_ARG_INFO(0, a)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_fact, 0)
+	ZEND_ARG_INFO(0, a)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_pow, 0)
+	ZEND_ARG_INFO(0, base)
+	ZEND_ARG_INFO(0, exp)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_powm, 0)
+	ZEND_ARG_INFO(0, base)
+	ZEND_ARG_INFO(0, exp)
+	ZEND_ARG_INFO(0, mod)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_sqrt, 0)
+	ZEND_ARG_INFO(0, a)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_sqrtrem, 0)
+	ZEND_ARG_INFO(0, a)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_perfect_square, 0)
+	ZEND_ARG_INFO(0, a)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_prob_prime, 0, 0, 1)
+	ZEND_ARG_INFO(0, a)
+	ZEND_ARG_INFO(0, reps)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_gcd, 0)
+	ZEND_ARG_INFO(0, a)
+	ZEND_ARG_INFO(0, b)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_gcdext, 0)
+	ZEND_ARG_INFO(0, a)
+	ZEND_ARG_INFO(0, b)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_invert, 0)
+	ZEND_ARG_INFO(0, a)
+	ZEND_ARG_INFO(0, b)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_jacobi, 0)
+	ZEND_ARG_INFO(0, a)
+	ZEND_ARG_INFO(0, b)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_legendre, 0)
+	ZEND_ARG_INFO(0, a)
+	ZEND_ARG_INFO(0, b)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_cmp, 0)
+	ZEND_ARG_INFO(0, a)
+	ZEND_ARG_INFO(0, b)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_sign, 0)
+	ZEND_ARG_INFO(0, a)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_random, 0, 0, 0)
+	ZEND_ARG_INFO(0, limiter)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_and, 0)
+	ZEND_ARG_INFO(0, a)
+	ZEND_ARG_INFO(0, b)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_or, 0)
+	ZEND_ARG_INFO(0, a)
+	ZEND_ARG_INFO(0, b)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_com, 0)
+	ZEND_ARG_INFO(0, a)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_nextprime, 0)
+	ZEND_ARG_INFO(0, a)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_xor, 0)
+	ZEND_ARG_INFO(0, a)
+	ZEND_ARG_INFO(0, b)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_setbit, 0, 0, 2)
+	ZEND_ARG_INFO(1, a)
+	ZEND_ARG_INFO(0, index)
+	ZEND_ARG_INFO(0, set_clear)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_clrbit, 0)
+	ZEND_ARG_INFO(1, a)
+	ZEND_ARG_INFO(0, index)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_popcount, 0)
+	ZEND_ARG_INFO(0, a)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_hamdist, 0)
+	ZEND_ARG_INFO(0, a)
+	ZEND_ARG_INFO(0, b)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_scan0, 0)
+	ZEND_ARG_INFO(0, a)
+	ZEND_ARG_INFO(0, start)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_scan1, 0)
+	ZEND_ARG_INFO(0, a)
+	ZEND_ARG_INFO(0, start)
+ZEND_END_ARG_INFO()
+
+/* }}} */
+
 /* {{{ gmp_functions[]
  */
 zend_function_entry gmp_functions[] = {
-	ZEND_FE(gmp_init,	NULL)
-	ZEND_FE(gmp_intval,	NULL)
-	ZEND_FE(gmp_strval,	NULL)
-	ZEND_FE(gmp_add,	    NULL)
-	ZEND_FE(gmp_sub,	    NULL)
-	ZEND_FE(gmp_mul,	    NULL)
-	ZEND_FE(gmp_div_qr,	NULL)
-	ZEND_FE(gmp_div_q,	NULL)
-	ZEND_FE(gmp_div_r,	NULL)
-	ZEND_FALIAS(gmp_div,	gmp_div_q, NULL)
-	ZEND_FE(gmp_mod,	NULL)
-	ZEND_FE(gmp_divexact,	NULL)
-	ZEND_FE(gmp_neg,	NULL)
-	ZEND_FE(gmp_abs,	NULL)
-	ZEND_FE(gmp_fact,	NULL)
-	ZEND_FE(gmp_sqrt,	NULL)
-	ZEND_FE(gmp_sqrtrem,	NULL)
-	ZEND_FE(gmp_pow,	NULL)
-	ZEND_FE(gmp_powm,	NULL)
-	ZEND_FE(gmp_perfect_square,	NULL)
-	ZEND_FE(gmp_prob_prime,	NULL)
-	ZEND_FE(gmp_gcd,	NULL)
-	ZEND_FE(gmp_gcdext,	NULL)
-	ZEND_FE(gmp_invert,	NULL)
-	ZEND_FE(gmp_jacobi,	NULL)
-	ZEND_FE(gmp_legendre,	NULL)
-	ZEND_FE(gmp_cmp,	NULL)
-	ZEND_FE(gmp_sign,	NULL)
-	ZEND_FE(gmp_random,	NULL)
-	ZEND_FE(gmp_and,	NULL)
-	ZEND_FE(gmp_or,	NULL)
-	ZEND_FE(gmp_com,	NULL)
-	ZEND_FE(gmp_xor,	NULL)
-	ZEND_FE(gmp_setbit,	first_arg_force_ref)
-	ZEND_FE(gmp_clrbit,	first_arg_force_ref)
-	ZEND_FE(gmp_scan0, NULL)
-	ZEND_FE(gmp_scan1, NULL)
-	ZEND_FE(gmp_popcount, NULL)
-	ZEND_FE(gmp_hamdist, NULL)
+	ZEND_FE(gmp_init,	arginfo_gmp_init)
+	ZEND_FE(gmp_intval,	arginfo_gmp_intval)
+	ZEND_FE(gmp_strval,	arginfo_gmp_strval)
+	ZEND_FE(gmp_add,	    arginfo_gmp_add)
+	ZEND_FE(gmp_sub,	    arginfo_gmp_sub)
+	ZEND_FE(gmp_mul,	    arginfo_gmp_mul)
+	ZEND_FE(gmp_div_qr,	arginfo_gmp_div_qr)
+	ZEND_FE(gmp_div_q,	arginfo_gmp_div_q)
+	ZEND_FE(gmp_div_r,	arginfo_gmp_div_r)
+	ZEND_FALIAS(gmp_div,	gmp_div_q, arginfo_gmp_div_q)
+	ZEND_FE(gmp_mod,	arginfo_gmp_mod)
+	ZEND_FE(gmp_divexact,	arginfo_gmp_divexact)
+	ZEND_FE(gmp_neg,	arginfo_gmp_neg)
+	ZEND_FE(gmp_abs,	arginfo_gmp_abs)
+	ZEND_FE(gmp_fact,	arginfo_gmp_fact)
+	ZEND_FE(gmp_sqrt,	arginfo_gmp_sqrt)
+	ZEND_FE(gmp_sqrtrem,	arginfo_gmp_sqrtrem)
+	ZEND_FE(gmp_pow,	arginfo_gmp_pow)
+	ZEND_FE(gmp_powm,	arginfo_gmp_powm)
+	ZEND_FE(gmp_perfect_square,	arginfo_gmp_perfect_square)
+	ZEND_FE(gmp_prob_prime,	arginfo_gmp_prob_prime)
+	ZEND_FE(gmp_gcd,	arginfo_gmp_gcd)
+	ZEND_FE(gmp_gcdext,	arginfo_gmp_gcdext)
+	ZEND_FE(gmp_invert,	arginfo_gmp_invert)
+	ZEND_FE(gmp_jacobi,	arginfo_gmp_jacobi)
+	ZEND_FE(gmp_legendre,	arginfo_gmp_legendre)
+	ZEND_FE(gmp_cmp,	arginfo_gmp_cmp)
+	ZEND_FE(gmp_sign,	arginfo_gmp_sign)
+	ZEND_FE(gmp_random,	arginfo_gmp_random)
+	ZEND_FE(gmp_and,	arginfo_gmp_and)
+	ZEND_FE(gmp_or,	arginfo_gmp_or)
+	ZEND_FE(gmp_com,	arginfo_gmp_com)
+	ZEND_FE(gmp_xor,	arginfo_gmp_xor)
+	ZEND_FE(gmp_setbit,	arginfo_gmp_setbit)
+	ZEND_FE(gmp_clrbit,	arginfo_gmp_clrbit)
+	ZEND_FE(gmp_scan0, arginfo_gmp_scan0)
+	ZEND_FE(gmp_scan1, arginfo_gmp_scan1)
+	ZEND_FE(gmp_popcount, arginfo_gmp_popcount)
+	ZEND_FE(gmp_hamdist, arginfo_gmp_hamdist)
+	ZEND_FE(gmp_nextprime, arginfo_gmp_nextprime)
 	{NULL, NULL, NULL}	/* Must be the last line in gmp_functions[] */
 };
 /* }}} */
@@ -1374,6 +1605,6 @@ static void _php_gmpnum_free(zend_rsrc_list_entry *rsrc TSRMLS_DC)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
  */
