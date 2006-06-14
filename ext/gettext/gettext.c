@@ -30,27 +30,96 @@
 #include "ext/standard/info.h"
 #include "php_gettext.h"
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO(arginfo_textdomain, 0)
+	ZEND_ARG_INFO(0, domain)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gettext, 0)
+	ZEND_ARG_INFO(0, msgid)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_dgettext, 0)
+	ZEND_ARG_INFO(0, domain_name)
+	ZEND_ARG_INFO(0, msgid)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_dcgettext, 0)
+	ZEND_ARG_INFO(0, domain_name)
+	ZEND_ARG_INFO(0, msgid)
+	ZEND_ARG_INFO(0, category)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_bindtextdomain, 0)
+	ZEND_ARG_INFO(0, domain_name)
+	ZEND_ARG_INFO(0, dir)
+ZEND_END_ARG_INFO()
+
+#if HAVE_NGETTEXT
+static
+ZEND_BEGIN_ARG_INFO(arginfo_ngettext, 0)
+	ZEND_ARG_INFO(0, msgid1)
+	ZEND_ARG_INFO(0, msgid2)
+	ZEND_ARG_INFO(0, count)
+ZEND_END_ARG_INFO()
+#endif
+
+#if HAVE_DNGETTEXT
+static
+ZEND_BEGIN_ARG_INFO(arginfo_dngettext, 0)
+	ZEND_ARG_INFO(0, domain)
+	ZEND_ARG_INFO(0, msgid1)
+	ZEND_ARG_INFO(0, msgid2)
+	ZEND_ARG_INFO(0, count)
+ZEND_END_ARG_INFO()
+#endif
+
+#if HAVE_DCNGETTEXT
+static
+ZEND_BEGIN_ARG_INFO(arginfo_dcngettext, 0)
+	ZEND_ARG_INFO(0, domain)
+	ZEND_ARG_INFO(0, msgid1)
+	ZEND_ARG_INFO(0, msgid2)
+	ZEND_ARG_INFO(0, count)
+	ZEND_ARG_INFO(0, category)
+ZEND_END_ARG_INFO()
+#endif
+
+#if HAVE_BIND_TEXTDOMAIN_CODESET
+static
+ZEND_BEGIN_ARG_INFO(arginfo_bind_textdomain_codeset, 0)
+	ZEND_ARG_INFO(0, domain)
+	ZEND_ARG_INFO(0, codeset)
+ZEND_END_ARG_INFO()
+#endif
+/* }}} */
+
 /* {{{ php_gettext_functions[]
  */
 zend_function_entry php_gettext_functions[] = {
-	PHP_NAMED_FE(textdomain,		zif_textdomain,		NULL)
-	PHP_NAMED_FE(gettext,			zif_gettext,		NULL)
+	PHP_NAMED_FE(textdomain,		zif_textdomain,		arginfo_textdomain)
+	PHP_NAMED_FE(gettext,			zif_gettext,		arginfo_gettext)
 	/* Alias for gettext() */
-	PHP_NAMED_FE(_,					zif_gettext,		NULL)
-	PHP_NAMED_FE(dgettext,			zif_dgettext,		NULL)
-	PHP_NAMED_FE(dcgettext,			zif_dcgettext,		NULL)
-	PHP_NAMED_FE(bindtextdomain,	zif_bindtextdomain,	NULL)
+	PHP_NAMED_FE(_,					zif_gettext,		arginfo_gettext)
+	PHP_NAMED_FE(dgettext,			zif_dgettext,		arginfo_dgettext)
+	PHP_NAMED_FE(dcgettext,			zif_dcgettext,		arginfo_dcgettext)
+	PHP_NAMED_FE(bindtextdomain,	zif_bindtextdomain,	arginfo_bindtextdomain)
 #if HAVE_NGETTEXT
-	PHP_NAMED_FE(ngettext,			zif_ngettext,		NULL)
+	PHP_NAMED_FE(ngettext,			zif_ngettext,		arginfo_ngettext)
 #endif
 #if HAVE_DNGETTEXT
-	PHP_NAMED_FE(dngettext,			zif_dngettext,		NULL)
+	PHP_NAMED_FE(dngettext,			zif_dngettext,		arginfo_dngettext)
 #endif
 #if HAVE_DCNGETTEXT
-	PHP_NAMED_FE(dcngettext,		zif_dcngettext,		NULL)
+	PHP_NAMED_FE(dcngettext,		zif_dcngettext,		arginfo_dcngettext)
 #endif
 #if HAVE_BIND_TEXTDOMAIN_CODESET
-	PHP_NAMED_FE(bind_textdomain_codeset,	zif_bind_textdomain_codeset,	NULL)
+	PHP_NAMED_FE(bind_textdomain_codeset,	zif_bind_textdomain_codeset,	arginfo_bind_textdomain_codeset)
 #endif
     {NULL, NULL, NULL}
 };

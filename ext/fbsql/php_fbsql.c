@@ -184,77 +184,430 @@ char *DigestPassword(char *user, char *password)
 	return digest;
 }
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_connect, 0, 0, 0)
+	ZEND_ARG_INFO(0, hostname)
+	ZEND_ARG_INFO(0, username)
+	ZEND_ARG_INFO(0, password)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_pconnect, 0, 0, 0)
+	ZEND_ARG_INFO(0, username)
+	ZEND_ARG_INFO(0, hostname)
+	ZEND_ARG_INFO(0, password)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_close, 0, 0, 0)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_fbsql_set_transaction, 0)
+	ZEND_ARG_INFO(0, link_identifier)
+	ZEND_ARG_INFO(0, locking)
+	ZEND_ARG_INFO(0, isolation)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_autocommit, 0, 0, 1)
+	ZEND_ARG_INFO(0, link_identifier)
+	ZEND_ARG_INFO(0, OnOff)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_commit, 0, 0, 0)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_rollback, 0, 0, 0)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_create_blob, 0, 0, 1)
+	ZEND_ARG_INFO(0, blob_data)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_create_clob, 0, 0, 1)
+	ZEND_ARG_INFO(0, clob_data)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_fbsql_set_lob_mode, 0)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, lob_mode)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_read_blob, 0, 0, 1)
+	ZEND_ARG_INFO(0, blob_handle)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_read_clob, 0, 0, 1)
+	ZEND_ARG_INFO(0, clob_handle)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_blob_size, 0, 0, 1)
+	ZEND_ARG_INFO(0, blob_handle)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_clob_size, 0, 0, 1)
+	ZEND_ARG_INFO(0, clob_handle)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_hostname, 0, 0, 1)
+	ZEND_ARG_INFO(0, link_identifier)
+	ZEND_ARG_INFO(0, host_name)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_database, 0, 0, 1)
+	ZEND_ARG_INFO(0, link_identifier)
+	ZEND_ARG_INFO(0, database)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_database_password, 0, 0, 1)
+	ZEND_ARG_INFO(0, link_identifier)
+	ZEND_ARG_INFO(0, database_password)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_username, 0, 0, 1)
+	ZEND_ARG_INFO(0, link_identifier)
+	ZEND_ARG_INFO(0, username)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_password, 0, 0, 1)
+	ZEND_ARG_INFO(0, link_identifier)
+	ZEND_ARG_INFO(0, password)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_fbsql_set_password, 0)
+	ZEND_ARG_INFO(0, link_identifier)
+	ZEND_ARG_INFO(0, user)
+	ZEND_ARG_INFO(0, password)
+	ZEND_ARG_INFO(0, old_password)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_select_db, 0, 0, 0)
+	ZEND_ARG_INFO(0, database_name)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_set_characterset, 0, 0, 2)
+	ZEND_ARG_INFO(0, link_identifier)
+	ZEND_ARG_INFO(0, charcterset)
+	ZEND_ARG_INFO(0, in_out_both)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_change_user, 0, 0, 2)
+	ZEND_ARG_INFO(0, user)
+	ZEND_ARG_INFO(0, password)
+	ZEND_ARG_INFO(0, database)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_create_db, 0, 0, 1)
+	ZEND_ARG_INFO(0, database_name)
+	ZEND_ARG_INFO(0, link_identifier)
+	ZEND_ARG_INFO(0, database_options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_drop_db, 0, 0, 1)
+	ZEND_ARG_INFO(0, database_name)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_start_db, 0, 0, 1)
+	ZEND_ARG_INFO(0, database_name)
+	ZEND_ARG_INFO(0, link_identifier)
+	ZEND_ARG_INFO(0, database_options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_stop_db, 0, 0, 1)
+	ZEND_ARG_INFO(0, database_name)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_db_status, 0, 0, 1)
+	ZEND_ARG_INFO(0, database_name)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_query, 0, 0, 1)
+	ZEND_ARG_INFO(0, query)
+	ZEND_ARG_INFO(0, link_identifier)
+	ZEND_ARG_INFO(0, batch_size)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_db_query, 0, 0, 2)
+	ZEND_ARG_INFO(0, database_name)
+	ZEND_ARG_INFO(0, query)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_list_dbs, 0, 0, 0)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_list_tables, 0, 0, 1)
+	ZEND_ARG_INFO(0, database)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_list_fields, 0, 0, 2)
+	ZEND_ARG_INFO(0, database_name)
+	ZEND_ARG_INFO(0, table_name)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_error, 0, 0, 0)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_errno, 0, 0, 0)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_warnings, 0, 0, 0)
+	ZEND_ARG_INFO(0, flag)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_affected_rows, 0, 0, 0)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_fbsql_rows_fetched, 0)
+	ZEND_ARG_INFO(0, result)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_insert_id, 0, 0, 0)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_result, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, row)
+	ZEND_ARG_INFO(0, field)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_fbsql_next_result, 0)
+	ZEND_ARG_INFO(0, result)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_fbsql_num_rows, 0)
+	ZEND_ARG_INFO(0, result)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_fbsql_num_fields, 0)
+	ZEND_ARG_INFO(0, result)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_fbsql_fetch_row, 0)
+	ZEND_ARG_INFO(0, result)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_fbsql_fetch_assoc, 0)
+	ZEND_ARG_INFO(0, result)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_fetch_object, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, result_type)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_fetch_array, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, result_type)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_fbsql_data_seek, 0)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, row_number)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_fbsql_fetch_lengths, 0)
+	ZEND_ARG_INFO(0, result)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_fetch_field, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, field_index)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_field_seek, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, field_index)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_field_name, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, field_index)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_field_table, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, field_index)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_field_len, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, field_index)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_field_type, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, field_index)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_field_flags, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, field_index)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_fbsql_table_name, 0)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, index)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_fbsql_free_result, 0)
+	ZEND_ARG_INFO(0, result)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_get_autostart_info, 0, 0, 0)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+/* }}} */
+
 /* {{{ fbsql_functions[]
  */
 zend_function_entry fbsql_functions[] = {
-	PHP_FE(fbsql_connect,			NULL)
-	PHP_FE(fbsql_pconnect,			NULL)
-	PHP_FE(fbsql_close,				NULL)
-	PHP_FE(fbsql_select_db,			NULL)
-	PHP_FE(fbsql_set_characterset,	NULL)
-	PHP_FE(fbsql_create_db,			NULL)
-	PHP_FE(fbsql_drop_db,			NULL)
-	PHP_FE(fbsql_start_db,			NULL)
-	PHP_FE(fbsql_stop_db,			NULL)
-	PHP_FE(fbsql_db_status,			NULL)
-	PHP_FE(fbsql_query,				NULL)
-	PHP_FE(fbsql_db_query,			NULL)
-	PHP_FE(fbsql_list_dbs,			NULL)
-	PHP_FE(fbsql_list_tables,		NULL)
-	PHP_FE(fbsql_list_fields,		NULL)
-	PHP_FE(fbsql_error,				NULL)
-	PHP_FE(fbsql_errno,				NULL)
-	PHP_FE(fbsql_affected_rows,		NULL)
-	PHP_FE(fbsql_rows_fetched,		NULL)
-	PHP_FE(fbsql_insert_id,			NULL)
-	PHP_FE(fbsql_result,			NULL)
-	PHP_FE(fbsql_next_result,		NULL)
-	PHP_FE(fbsql_num_rows,			NULL)
-	PHP_FE(fbsql_num_fields,		NULL)
-	PHP_FE(fbsql_fetch_row,			NULL)
-	PHP_FE(fbsql_fetch_array,		NULL)
-	PHP_FE(fbsql_fetch_assoc,		NULL)
-	PHP_FE(fbsql_fetch_object,		NULL)
-	PHP_FE(fbsql_data_seek,			NULL)
-	PHP_FE(fbsql_fetch_lengths,		NULL)
-	PHP_FE(fbsql_fetch_field,		NULL)
-	PHP_FE(fbsql_field_seek,		NULL)
-	PHP_FE(fbsql_free_result,		NULL)
-	PHP_FE(fbsql_field_name,		NULL)
-	PHP_FE(fbsql_field_table,		NULL)
-	PHP_FE(fbsql_field_len,			NULL)
-	PHP_FE(fbsql_field_type,		NULL)
-	PHP_FE(fbsql_field_flags,		NULL) 
-	PHP_FE(fbsql_table_name,		NULL) 
+	PHP_FE(fbsql_connect,			arginfo_fbsql_connect)
+	PHP_FE(fbsql_pconnect,			arginfo_fbsql_pconnect)
+	PHP_FE(fbsql_close,				arginfo_fbsql_close)
+	PHP_FE(fbsql_select_db,			arginfo_fbsql_select_db)
+	PHP_FE(fbsql_set_characterset,	arginfo_fbsql_set_characterset)
+	PHP_FE(fbsql_create_db,			arginfo_fbsql_create_db)
+	PHP_FE(fbsql_drop_db,			arginfo_fbsql_drop_db)
+	PHP_FE(fbsql_start_db,			arginfo_fbsql_start_db)
+	PHP_FE(fbsql_stop_db,			arginfo_fbsql_stop_db)
+	PHP_FE(fbsql_db_status,			arginfo_fbsql_db_status)
+	PHP_FE(fbsql_query,				arginfo_fbsql_query)
+	PHP_FE(fbsql_db_query,			arginfo_fbsql_db_query)
+	PHP_FE(fbsql_list_dbs,			arginfo_fbsql_list_dbs)
+	PHP_FE(fbsql_list_tables,		arginfo_fbsql_list_tables)
+	PHP_FE(fbsql_list_fields,		arginfo_fbsql_list_fields)
+	PHP_FE(fbsql_error,				arginfo_fbsql_error)
+	PHP_FE(fbsql_errno,				arginfo_fbsql_errno)
+	PHP_FE(fbsql_affected_rows,		arginfo_fbsql_affected_rows)
+	PHP_FE(fbsql_rows_fetched,		arginfo_fbsql_rows_fetched)
+	PHP_FE(fbsql_insert_id,			arginfo_fbsql_insert_id)
+	PHP_FE(fbsql_result,			arginfo_fbsql_result)
+	PHP_FE(fbsql_next_result,		arginfo_fbsql_next_result)
+	PHP_FE(fbsql_num_rows,			arginfo_fbsql_num_rows)
+	PHP_FE(fbsql_num_fields,		arginfo_fbsql_num_fields)
+	PHP_FE(fbsql_fetch_row,			arginfo_fbsql_fetch_row)
+	PHP_FE(fbsql_fetch_array,		arginfo_fbsql_fetch_array)
+	PHP_FE(fbsql_fetch_assoc,		arginfo_fbsql_fetch_assoc)
+	PHP_FE(fbsql_fetch_object,		arginfo_fbsql_fetch_object)
+	PHP_FE(fbsql_data_seek,			arginfo_fbsql_data_seek)
+	PHP_FE(fbsql_fetch_lengths,		arginfo_fbsql_fetch_lengths)
+	PHP_FE(fbsql_fetch_field,		arginfo_fbsql_fetch_field)
+	PHP_FE(fbsql_field_seek,		arginfo_fbsql_field_seek)
+	PHP_FE(fbsql_free_result,		arginfo_fbsql_free_result)
+	PHP_FE(fbsql_field_name,		arginfo_fbsql_field_name)
+	PHP_FE(fbsql_field_table,		arginfo_fbsql_field_table)
+	PHP_FE(fbsql_field_len,			arginfo_fbsql_field_len)
+	PHP_FE(fbsql_field_type,		arginfo_fbsql_field_type)
+	PHP_FE(fbsql_field_flags,		arginfo_fbsql_field_flags)
+	PHP_FE(fbsql_table_name,		arginfo_fbsql_table_name)
 
 /*	Fontbase additions:  */
-	PHP_FE(fbsql_set_transaction,	NULL)
-	PHP_FE(fbsql_autocommit,		NULL)
-	PHP_FE(fbsql_commit,			NULL)
-	PHP_FE(fbsql_rollback,			NULL)
+	PHP_FE(fbsql_set_transaction,	arginfo_fbsql_set_transaction)
+	PHP_FE(fbsql_autocommit,		arginfo_fbsql_autocommit)
+	PHP_FE(fbsql_commit,			arginfo_fbsql_commit)
+	PHP_FE(fbsql_rollback,			arginfo_fbsql_rollback)
 
-	PHP_FE(fbsql_create_blob,		NULL)
-	PHP_FE(fbsql_create_clob,		NULL)
-	PHP_FE(fbsql_set_lob_mode,		NULL)
-	PHP_FE(fbsql_read_blob,			NULL)
-	PHP_FE(fbsql_read_clob,			NULL)
-	PHP_FE(fbsql_blob_size,			NULL)
-	PHP_FE(fbsql_clob_size,			NULL)
+	PHP_FE(fbsql_create_blob,		arginfo_fbsql_create_blob)
+	PHP_FE(fbsql_create_clob,		arginfo_fbsql_create_clob)
+	PHP_FE(fbsql_set_lob_mode,		arginfo_fbsql_set_lob_mode)
+	PHP_FE(fbsql_read_blob,			arginfo_fbsql_read_blob)
+	PHP_FE(fbsql_read_clob,			arginfo_fbsql_read_clob)
+	PHP_FE(fbsql_blob_size,			arginfo_fbsql_blob_size)
+	PHP_FE(fbsql_clob_size,			arginfo_fbsql_clob_size)
 
-	PHP_FE(fbsql_hostname,			NULL)
-	PHP_FE(fbsql_database,			NULL)
-	PHP_FE(fbsql_database_password,	NULL)
-	PHP_FE(fbsql_username,			NULL)
-	PHP_FE(fbsql_password,			NULL)
-	PHP_FE(fbsql_warnings,			NULL)
-	PHP_FE(fbsql_set_password,		NULL)
+	PHP_FE(fbsql_hostname,			arginfo_fbsql_hostname)
+	PHP_FE(fbsql_database,			arginfo_fbsql_database)
+	PHP_FE(fbsql_database_password,	arginfo_fbsql_database_password)
+	PHP_FE(fbsql_username,			arginfo_fbsql_username)
+	PHP_FE(fbsql_password,			arginfo_fbsql_password)
+	PHP_FE(fbsql_warnings,			arginfo_fbsql_warnings)
+	PHP_FE(fbsql_set_password,		arginfo_fbsql_set_password)
 
-	PHP_FE(fbsql_get_autostart_info,	NULL)
+	PHP_FE(fbsql_get_autostart_info,	arginfo_fbsql_get_autostart_info)
 /*	PHP_FE(fbsql_set_autostart_info,	NULL) */
 
 /*	Aliases:  */
-	PHP_FALIAS(fbsql, 			fbsql_db_query,		NULL)
-	PHP_FALIAS(fbsql_tablename,	fbsql_table_name,	NULL)
+	PHP_FALIAS(fbsql, 			fbsql_db_query,		arginfo_fbsql_db_query)
+	PHP_FALIAS(fbsql_tablename,	fbsql_table_name,	arginfo_fbsql_table_name)
 
 	{NULL, NULL, NULL}
 };
@@ -1488,6 +1841,7 @@ PHP_FUNCTION(fbsql_set_characterset)
 		fbcdcSetOutputCharacterSet(phpLink->connection, charset);
 	}
 }
+/* }}} */
 
 /* {{{ proto int fbsql_change_user(string user, string password [, string database [, resource link_identifier]])
    Change the user for a session */
@@ -1550,7 +1904,7 @@ PHP_FUNCTION(fbsql_change_user)
 }
 /* }}} */
 
-/* {{{ proto bool fbsql_create_db(string database_name [, resource link_identifier])
+/* {{{ proto bool fbsql_create_db(string database_name [, resource link_identifier [, string database_options]])
    Create a new database on the server */
 PHP_FUNCTION(fbsql_create_db)
 {
@@ -2374,7 +2728,7 @@ PHP_FUNCTION(fbsql_affected_rows)
 }
 /* }}} */
 
-/* {{{ proto int fbsql_affected_rows([resource link_identifier])
+/* {{{ proto int fbsql_rows_fetched(resource result)
    Get the number of rows affected by the last statement */
 PHP_FUNCTION(fbsql_rows_fetched)
 {
