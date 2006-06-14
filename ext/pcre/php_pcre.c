@@ -335,6 +335,9 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
 	if (re == NULL) {
 		php_error_docref(NULL TSRMLS_CC,E_WARNING, "Compilation failed: %s at offset %d", error, erroffset);
 		efree(pattern);
+		if (tables) {
+			pefree((void*)tables, 1);
+		}
 		return NULL;
 	}
 
