@@ -1,40 +1,31 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, PHP 5.2.0
-- Improved performance of the implode() function on associated arrays by 
-  200-300%. (Ilia)
-- Improved performance of str_replace() when doing 1 char to 1 char or 1 char
-  to many chars replacement by 30-40%. (Ilia)
-- Added memory_get_peak_usage() function for retrieving peak memory usage of
-  a PHP script. (Ilia)
-- Changed Apache 2 Handler SAPI to call ap_set_content_type() once only. (Mike)
+- Changed __toString() to be called wherever applicable. (Marcus)
 - Changed E_ALL error reporting mode to include E_RECOVERABLE_ERROR. (Marcus)
-- Added control character checks for cURL extension's open_basedir/safe_mode
-  checks. (Ilia)
-- Disable realpath cache when open_basedir or safe_mode are enabled on a 
-  per-request basis. (Ilia)
-- Optimized zend_try/zend_catch macros (eliminated memcpy()). (Dmitry)
-- Optimized require_once/include_once (eliminated fopen() on second usage).
-  (Dmitry)
-- Optimized request shutdown sequence. Restoring ini directives now
-  iterates over modified directives only instead of all. (Dmitry)
-- FastCGI SAPI improved. (Dmitry)
-  . Removed source compatibility with libfcgi
-  . Optimized access to FastCGI environment variables using HashTable instead
-    of linear search
-  . Allowed PHP_FCGI_MAX_REQUESTS=0, that assumes no limit
-  . Allowed PHP_FCGI_CHILDREN=0, that assumes no worker children (FastCGI
-    requests are handled by main process itself).
-- Added new error mode E_RECOVERABLE_ERROR. (Derick, Marcus, Tony)
-- Added support for getenv() input filtering. (Rasmus)
-- Removed ze1 compatibility mode. (Marcus)
-- Added support for constructors in interfaces to force constructor signature
-  checks in implementations. (Marcus)
-- Changed __toString to be called wherever applicable. (Marcus)
-- Improved xmlReader: (Rob)
-  . Added readInnerXml(), xmlReader::setSchema().
-  . Added readInnerXML(), readOuterXML(), readString(), setSchema(). (2.6.20+)
-  . Changed to passing libxml options when loading reader.
+- Changed realpath cache to be disabled when "open_basedir" or "safe_mode"
+  are enabled on per-request basis. (Ilia)
+
+- Improved performance of the implode() function on associated arrays. (Ilia)
+- Improved performance of str_replace() when doing 1 char to 1 char or 1 char
+  to many chars replacement. (Ilia)
+- Improved apache2handler SAPI:
+  . Changed ap_set_content_type() to be called only once. (Mike)
+  . Added support for Apache 2.2 handler in the Windows distribution. (Edin)
+- Improved FastCGI SAPI: (Dmitry)
+  . Removed source compatibility with libfcgi.
+  . Optimized access to FastCGI environment variables by using HashTable
+    instead of linear search.
+  . Allowed PHP_FCGI_MAX_REQUESTS=0 that assumes no limit.
+  . Allowed PHP_FCGI_CHILDREN=0 that assumes no worker children. (FastCGI
+    requests are handled by main process itself)
+- Improved CURL: 
+  . Added control character checks for "open_basedir" and "safe_mode" checks.
+    (Ilia)
+  . Added implementation of curl_multi_info_read(). (Brian)
+- Improved PCRE: (Andrei)
+  . Added run-time configurable backtracking/recursion limits.
+  . Added preg_last_error(). (Andrei)
 - Improved PDO:
   . Added new attribute ATTR_DEFAULT_FETCH_MODE. (Pierre)
   . Added FETCH_PROPS_LATE. (Marcus)
@@ -45,13 +36,27 @@ PHP                                                                        NEWS
   . Added array functions to ArrayObject/ArrayIterator and made them faster.
   . Added support for reading csv and skipping empty lines in SplFileObject.
   . Added CachingIterator::TOSTRING_USE_INNER, calls inner iterator __toString.
-- Added run-time configurable backtracking/recursion limits for PCRE. (Andrei)
-- Added preg_last_error(). (Andrei)
-- Added support for Apache 2.2 handler in the Windows distro. (Edin)
-- Added pg_field_table() function. (Edin)
-- Added implementation of curl_multi_info_read(). (Brian)
+- Improved xmlReader: (Rob)
+  . Added readInnerXml(), xmlReader::setSchema().
+  . Added readInnerXML(), readOuterXML(), readString(), setSchema(). (2.6.20+)
+  . Changed to passing libxml options when loading reader.
+
 - Added RFC2397 (data: stream) support. (Marcus)
-- Fixed memory leaks in openssl streams context options (Pierre)
+- Added new error mode E_RECOVERABLE_ERROR. (Derick, Marcus, Tony)
+- Added support for getenv() input filtering. (Rasmus)
+- Added support for constructors in interfaces to force constructor signature
+  checks in implementations. (Marcus)
+- Added memory_get_peak_usage() function for retrieving peak memory usage of
+  a PHP script. (Ilia)
+- Added pg_field_table() function. (Edin)
+
+- Optimized zend_try/zend_catch macros by eliminating memcpy(3). (Dmitry)
+- Optimized require_once() and include_once() by eliminating fopen(3)
+  on second usage. (Dmitry)
+- Optimized request shutdown sequence. Restoring ini directives now iterates
+  only over modified directives instead of all. (Dmitry)
+
+- Fixed memory leaks in openssl streams context options. (Pierre)
 - Fixed handling of extremely long paths inside tempnam() function. (Ilia)
 - Fixed bug #37747 (strtotime segfaults when given "nextyear"). (Derick)
 - Fixed bug #37720 (merge_php_config scrambles values). (Mike,
