@@ -81,6 +81,9 @@ zend_function_entry mssql_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+ZEND_DECLARE_MODULE_GLOBALS(mssql)
+static PHP_GINIT_FUNCTION(mssql);
+
 zend_module_entry mssql_module_entry = 
 {
 	STANDARD_MODULE_HEADER,
@@ -91,11 +94,13 @@ zend_module_entry mssql_module_entry =
 	PHP_RINIT(mssql), 
 	PHP_RSHUTDOWN(mssql), 
 	PHP_MINFO(mssql), 
-        NO_VERSION_YET,
-	STANDARD_MODULE_PROPERTIES
+	NO_VERSION_YET,
+	PHP_MODULE_GLOBALS(mssql),
+	PHP_GINIT(mssql),
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
-
-ZEND_DECLARE_MODULE_GLOBALS(mssql)
 
 #ifdef COMPILE_DL_MSSQL
 ZEND_GET_MODULE(mssql)
@@ -273,7 +278,7 @@ static void _mssql_bind_hash_dtor(void *data)
    	zval_ptr_dtor(&(bind->zval));
 }
 
-static void php_mssql_init_globals(zend_mssql_globals *mssql_globals)
+static PHP_GINIT_FUNCTION(mssql)
 {
 	long compatability_mode;
 
@@ -288,8 +293,6 @@ static void php_mssql_init_globals(zend_mssql_globals *mssql_globals)
 
 PHP_MINIT_FUNCTION(mssql)
 {
-	ZEND_INIT_MODULE_GLOBALS(mssql, php_mssql_init_globals, NULL);
-
 	REGISTER_INI_ENTRIES();
 
 	le_statement = zend_register_list_destructors_ex(_free_mssql_statement, NULL, "mssql statement", module_number);

@@ -62,6 +62,7 @@ extern pdo_driver_t pdo_sqlite2_driver;
 #endif
 
 ZEND_DECLARE_MODULE_GLOBALS(sqlite)
+static PHP_GINIT_FUNCTION(sqlite);
 
 #if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
 extern ps_module ps_mod_sqlite;
@@ -300,7 +301,15 @@ zend_module_entry sqlite_module_entry = {
 #if ZEND_MODULE_API_NO >= 20010901
 	PHP_SQLITE_MODULE_VERSION,
 #endif
+#if ZEND_MODULE_API_NO >= 20060613
+	PHP_MODULE_GLOBALS(sqlite),
+	PHP_GINIT(sqlite),
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
+#else
 	STANDARD_MODULE_PROPERTIES
+#endif
 };
 
 
@@ -1016,10 +1025,9 @@ zend_object_iterator *sqlite_get_iterator(zend_class_entry *ce, zval *object, in
 }
 /* }}} */
 
-static int init_sqlite_globals(zend_sqlite_globals *g)
+static PHP_GINIT_FUNCTION(sqlite)
 {
-	g->assoc_case = 0;
-	return SUCCESS;
+	sqlite_globals->assoc_case = 0;
 }
 
 PHP_MINIT_FUNCTION(sqlite)
@@ -1050,8 +1058,6 @@ PHP_MINIT_FUNCTION(sqlite)
 #endif
 	sqlite_ce_query->get_iterator = sqlite_get_iterator;
 	sqlite_ce_query->iterator_funcs.funcs = &sqlite_query_iterator_funcs;
-
-	ZEND_INIT_MODULE_GLOBALS(sqlite, init_sqlite_globals, NULL);
 
 	REGISTER_INI_ENTRIES();
 

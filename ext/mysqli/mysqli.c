@@ -35,6 +35,8 @@
 #define MYSQLI_USE_RESULT 1
 
 ZEND_DECLARE_MODULE_GLOBALS(mysqli)
+static PHP_GINIT_FUNCTION(mysqli);
+
 static zend_object_handlers mysqli_object_handlers;
 static HashTable classes;
 static HashTable mysqli_driver_properties;
@@ -367,7 +369,11 @@ zend_module_entry mysqli_module_entry = {
 	PHP_RSHUTDOWN(mysqli),
 	PHP_MINFO(mysqli),
 	"0.1", /* Replace with version number for your extension */
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(mysqli),
+	PHP_GINIT(mysqli),
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
 
@@ -389,9 +395,9 @@ PHP_INI_END()
 
 /* }}} */
 
-/* {{{ php_mysqli_init_globals
+/* {{{ PHP_GINIT_FUNCTION
  */
-static void php_mysqli_init_globals(zend_mysqli_globals *mysqli_globals)
+static PHP_GINIT_FUNCTION(mysqli)
 {
 	mysqli_globals->num_links = 0;
 	mysqli_globals->max_links = 0;
@@ -418,7 +424,6 @@ PHP_MINIT_FUNCTION(mysqli)
 	zend_class_entry *ce,cex;
 	zend_object_handlers *std_hnd = zend_get_std_object_handlers();
 	
-	ZEND_INIT_MODULE_GLOBALS(mysqli, php_mysqli_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
 
 	memcpy(&mysqli_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));

@@ -81,8 +81,9 @@
 /* }}} */
 
 /* {{{ prototypes */
-static void _php_mb_globals_ctor(zend_mbstring_globals *pglobals TSRMLS_DC);
-static void _php_mb_globals_dtor(zend_mbstring_globals *pglobals TSRMLS_DC);
+ZEND_DECLARE_MODULE_GLOBALS(mbstring)
+static PHP_GINIT_FUNCTION(mbstring);
+static PHP_GSHUTDOWN_FUNCTION(mbstring);
 /* }}} */
 
 /* {{{ php_mb_default_identify_list */
@@ -252,7 +253,11 @@ zend_module_entry mbstring_module_entry = {
 	PHP_RSHUTDOWN(mbstring),
 	PHP_MINFO(mbstring),
     NO_VERSION_YET,
-	STANDARD_MODULE_PROPERTIES
+    PHP_MODULE_GLOBALS(mbstring),
+    PHP_GINIT(mbstring),
+    PHP_GSHUTDOWN(mbstring),
+    NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
 
@@ -263,8 +268,6 @@ static sapi_post_entry php_post_entries[] = {
 	{ NULL, 0, NULL, NULL }
 };
 /* }}} */
-
-ZEND_DECLARE_MODULE_GLOBALS(mbstring)
 
 #ifdef COMPILE_DL_MBSTRING
 ZEND_GET_MODULE(mbstring)
@@ -774,7 +777,7 @@ PHP_INI_END()
 /* }}} */
 
 /* {{{ module global initialize handler */
-static void _php_mb_globals_ctor(zend_mbstring_globals *pglobals TSRMLS_DC)
+static PHP_GINIT_FUNCTION(mbstring)
 {
 	MBSTRG(language) = mbfl_no_language_uni;
 	MBSTRG(current_language) = MBSTRG(language);
@@ -807,18 +810,18 @@ static void _php_mb_globals_ctor(zend_mbstring_globals *pglobals TSRMLS_DC)
 	MBSTRG(func_overload) = 0;
 	MBSTRG(encoding_translation) = 0;
 	MBSTRG(strict_detection) = 0;
-	pglobals->outconv = NULL;
+	mbstring_globals->outconv = NULL;
 #if HAVE_MBREGEX
-	_php_mb_regex_globals_ctor(pglobals TSRMLS_CC);
+	_php_mb_regex_globals_ctor(mbstring_globals TSRMLS_CC);
 #endif
 }
 /* }}} */
 
-/* {{{ static void _php_mb_globals_dtor() */
-static void _php_mb_globals_dtor(zend_mbstring_globals *pglobals TSRMLS_DC)
+/* {{{ PHP_GSHUTDOWN_FUNCTION */
+static PHP_GSHUTDOWN_FUNCTION(mbstring)
 {
 #if HAVE_MBREGEX
-	_php_mb_regex_globals_dtor(pglobals TSRMLS_CC);
+	_php_mb_regex_globals_dtor(mbstring_globals TSRMLS_CC);
 #endif
 }
 /* }}} */
@@ -827,14 +830,6 @@ static void _php_mb_globals_dtor(zend_mbstring_globals *pglobals TSRMLS_DC)
 PHP_MINIT_FUNCTION(mbstring)
 {
 	__mbfl_allocators = &_php_mb_allocators;
-
-#ifdef ZTS
-	ts_allocate_id(&mbstring_globals_id, sizeof(zend_mbstring_globals),
-		(ts_allocate_ctor) _php_mb_globals_ctor,
-		(ts_allocate_dtor) _php_mb_globals_dtor);
-#else
-	_php_mb_globals_ctor(&mbstring_globals TSRMLS_CC);
-#endif
 
 	REGISTER_INI_ENTRIES();
 
@@ -877,12 +872,6 @@ PHP_MSHUTDOWN_FUNCTION(mbstring)
 
 #if HAVE_MBREGEX
 	PHP_MSHUTDOWN(mb_regex) (INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
-#ifdef ZTS
-	ts_free_id(mbstring_globals_id);
-#else
-	_php_mb_globals_dtor(&mbstring_globals TSRMLS_CC);
 #endif
 
 	return SUCCESS;

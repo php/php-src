@@ -130,6 +130,9 @@ zend_function_entry odbc_functions[] = {
 };
 /* }}} */
 
+ZEND_DECLARE_MODULE_GLOBALS(odbc);
+static PHP_GINIT_FUNCTION(odbc);
+
 /* {{{ odbc_module_entry
  */
 zend_module_entry odbc_module_entry = {
@@ -142,15 +145,13 @@ zend_module_entry odbc_module_entry = {
 	PHP_RSHUTDOWN(odbc), 
 	PHP_MINFO(odbc), 
 	"1.0",
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(odbc),
+	PHP_GINIT(odbc),
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
-
-#ifdef ZTS
-int odbc_globals_id;
-#else
-ZEND_API php_odbc_globals odbc_globals;
-#endif
 
 #ifdef COMPILE_DL_ODBC
 ZEND_GET_MODULE(odbc)
@@ -383,32 +384,30 @@ static PHP_INI_DISP(display_lrl)
  */
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("odbc.allow_persistent", "1", PHP_INI_SYSTEM, OnUpdateLong,
-			allow_persistent, php_odbc_globals, odbc_globals)
+			allow_persistent, zend_odbc_globals, odbc_globals)
 	STD_PHP_INI_ENTRY_EX("odbc.max_persistent",  "-1", PHP_INI_SYSTEM, OnUpdateLong,
-			max_persistent, php_odbc_globals, odbc_globals, display_link_nums)
+			max_persistent, zend_odbc_globals, odbc_globals, display_link_nums)
 	STD_PHP_INI_ENTRY_EX("odbc.max_links", "-1", PHP_INI_SYSTEM, OnUpdateLong,
-			max_links, php_odbc_globals, odbc_globals, display_link_nums)
+			max_links, zend_odbc_globals, odbc_globals, display_link_nums)
 	STD_PHP_INI_ENTRY("odbc.default_db", NULL, PHP_INI_ALL, OnUpdateString,
-			defDB, php_odbc_globals, odbc_globals)
+			defDB, zend_odbc_globals, odbc_globals)
 	STD_PHP_INI_ENTRY("odbc.default_user", NULL, PHP_INI_ALL, OnUpdateString,
-			defUser, php_odbc_globals, odbc_globals)
+			defUser, zend_odbc_globals, odbc_globals)
 	STD_PHP_INI_ENTRY_EX("odbc.default_pw", NULL, PHP_INI_ALL, OnUpdateString,
-			defPW, php_odbc_globals, odbc_globals, display_defPW)
+			defPW, zend_odbc_globals, odbc_globals, display_defPW)
 	STD_PHP_INI_ENTRY_EX("odbc.defaultlrl", "4096", PHP_INI_ALL, OnUpdateLong,
-			defaultlrl, php_odbc_globals, odbc_globals, display_lrl)
+			defaultlrl, zend_odbc_globals, odbc_globals, display_lrl)
 	STD_PHP_INI_ENTRY_EX("odbc.defaultbinmode", "1", PHP_INI_ALL, OnUpdateLong,
-			defaultbinmode, php_odbc_globals, odbc_globals, display_binmode)
+			defaultbinmode, zend_odbc_globals, odbc_globals, display_binmode)
 	STD_PHP_INI_BOOLEAN("odbc.check_persistent", "1", PHP_INI_SYSTEM, OnUpdateLong,
-			check_persistent, php_odbc_globals, odbc_globals)
+			check_persistent, zend_odbc_globals, odbc_globals)
 PHP_INI_END()
 /* }}} */
 
-#ifdef ZTS
-static void php_odbc_init_globals(php_odbc_globals *odbc_globals_p TSRMLS_DC)
+static PHP_GINIT_FUNCTION(odbc)
 {
-	ODBCG(num_persistent) = 0;
+	odbc_globals->num_persistent = 0;
 }
-#endif
 
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(odbc)
@@ -416,12 +415,6 @@ PHP_MINIT_FUNCTION(odbc)
 #ifdef SQLANY_BUG
 	ODBC_SQL_CONN_T foobar;
 	RETCODE rc;
-#endif
-
-#ifdef ZTS
-	ts_allocate_id(&odbc_globals_id, sizeof(php_odbc_globals), php_odbc_init_globals, NULL);
-#else
-	ODBCG(num_persistent) = 0;
 #endif
 
 	REGISTER_INI_ENTRIES();

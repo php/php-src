@@ -57,11 +57,7 @@
  * - Weird things happen with <![CDATA[]]> sections.
  */
 
-#ifdef ZTS
-int xml_globals_id;
-#else
-PHP_XML_API php_xml_globals xml_globals;
-#endif
+ZEND_DECLARE_MODULE_GLOBALS(xml)
 
 /* {{{ dynamically loadable module stuff */
 #ifdef COMPILE_DL_XML
@@ -75,6 +71,7 @@ ZEND_GET_MODULE(xml)
 /* {{{ function prototypes */
 PHP_MINIT_FUNCTION(xml);
 PHP_MINFO_FUNCTION(xml);
+static PHP_GINIT_FUNCTION(xml);
 
 static void xml_parser_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 static void xml_set_handler(zval **, zval **);
@@ -161,7 +158,11 @@ zend_module_entry xml_module_entry = {
 	NULL,                 /* per-request shutdown function */
 	PHP_MINFO(xml),       /* information function */
     NO_VERSION_YET,
-	STANDARD_MODULE_PROPERTIES
+    PHP_MODULE_GLOBALS(xml), /* globals descriptor */
+    PHP_GINIT(xml),          /* globals ctor */
+    NULL,                    /* globals dtor */
+    NULL,                    /* post deactivate */
+	STANDARD_MODULE_PROPERTIES_EX
 };
 
 /* All the encoding functions are set to NULL right now, since all
@@ -182,12 +183,10 @@ static int le_xml_parser;
 /* }}} */
 
 /* {{{ startup, shutdown and info functions */
-#ifdef ZTS
-static void php_xml_init_globals(php_xml_globals *xml_globals_p TSRMLS_DC)
+static PHP_GINIT_FUNCTION(xml)
 {
-	XML(default_encoding) = "UTF-8";
+	xml_globals->default_encoding = "UTF-8";
 }
-#endif
 
 static void *php_xml_malloc_wrapper(size_t sz)
 {
@@ -209,12 +208,6 @@ static void php_xml_free_wrapper(void *ptr)
 PHP_MINIT_FUNCTION(xml)
 {
 	le_xml_parser =	zend_register_list_destructors_ex(xml_parser_dtor, NULL, "xml", module_number);
-
-#ifdef ZTS
-	ts_allocate_id(&xml_globals_id, sizeof(php_xml_globals), (ts_allocate_ctor) php_xml_init_globals, NULL);
-#else
-	XML(default_encoding) = "UTF-8";
-#endif
 
 	REGISTER_LONG_CONSTANT("XML_ERROR_NONE", XML_ERROR_NONE, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XML_ERROR_NO_MEMORY", XML_ERROR_NO_MEMORY, CONST_CS|CONST_PERSISTENT);

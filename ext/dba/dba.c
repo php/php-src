@@ -168,6 +168,21 @@ PHP_MINIT_FUNCTION(dba);
 PHP_MSHUTDOWN_FUNCTION(dba);
 PHP_MINFO_FUNCTION(dba);
 
+ZEND_BEGIN_MODULE_GLOBALS(dba)
+	char *default_handler;
+	dba_handler *default_hptr;
+ZEND_END_MODULE_GLOBALS(dba) 
+
+ZEND_DECLARE_MODULE_GLOBALS(dba)
+
+#ifdef ZTS
+#define DBA_G(v) TSRMG(dba_globals_id, zend_dba_globals *, v)
+#else
+#define DBA_G(v) (dba_globals.v)
+#endif 
+
+static PHP_GINIT_FUNCTION(dba);
+
 zend_module_entry dba_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"dba",
@@ -178,7 +193,11 @@ zend_module_entry dba_module_entry = {
 	NULL,
 	PHP_MINFO(dba),
 	NO_VERSION_YET,
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(dba),
+	PHP_GINIT(dba),
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 
 #ifdef COMPILE_DL_DBA
@@ -378,19 +397,6 @@ static dba_handler handler[] = {
 #endif
 /* cdb/cdb_make and ini are no option here */
 
-ZEND_BEGIN_MODULE_GLOBALS(dba)
-	char *default_handler;
-	dba_handler *default_hptr;
-ZEND_END_MODULE_GLOBALS(dba) 
-
-ZEND_DECLARE_MODULE_GLOBALS(dba)
-
-#ifdef ZTS
-#define DBA_G(v) TSRMG(dba_globals_id, zend_dba_globals *, v)
-#else
-#define DBA_G(v) (dba_globals.v)
-#endif 
-
 static int le_db;
 static int le_pdb;
 /* }}} */
@@ -499,9 +505,9 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
  
-/* {{{ php_dba_init_globals
+/* {{{ PHP_GINIT_FUNCTION
  */
-static void php_dba_init_globals(zend_dba_globals *dba_globals)
+static PHP_GINIT_FUNCTION(dba)
 {
 	dba_globals->default_handler = "";
 	dba_globals->default_hptr    = NULL;
@@ -512,7 +518,6 @@ static void php_dba_init_globals(zend_dba_globals *dba_globals)
  */
 PHP_MINIT_FUNCTION(dba)
 {
-	ZEND_INIT_MODULE_GLOBALS(dba, php_dba_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
 	le_db = zend_register_list_destructors_ex(dba_close_rsrc, NULL, "dba", module_number);
 	le_pdb = zend_register_list_destructors_ex(dba_close_pe_rsrc, dba_close_rsrc, "dba persistent", module_number);

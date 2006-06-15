@@ -206,9 +206,9 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
  
-/* {{{ php_extname_init_globals
+/* {{{ PHP_GINIT_FUNCTION
  */
-static void php_exif_init_globals(zend_exif_globals *exif_globals)
+static PHP_GINIT_FUNCTION(exif)
 {
 	exif_globals->encode_unicode    = NULL;
 	exif_globals->decode_unicode_be = NULL;
@@ -223,7 +223,6 @@ static void php_exif_init_globals(zend_exif_globals *exif_globals)
    Get the size of an image as 4-element array */
 PHP_MINIT_FUNCTION(exif)
 {
-	ZEND_INIT_MODULE_GLOBALS(exif, php_exif_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
 	REGISTER_LONG_CONSTANT("EXIF_USE_MBSTRING", EXIF_USE_MBSTRING, CONST_CS | CONST_PERSISTENT); 
 	return SUCCESS;
@@ -254,7 +253,15 @@ zend_module_entry exif_module_entry = {
 #if ZEND_MODULE_API_NO >= 20010901
 	EXIF_VERSION,
 #endif
+#if ZEND_MODULE_API_NO >= 20060613
+	PHP_MODULE_GLOBALS(exif),
+	PHP_GINIT(exif),
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
+#else	
 	STANDARD_MODULE_PROPERTIES
+#endif
 };
 /* }}} */
 
