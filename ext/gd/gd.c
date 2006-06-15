@@ -148,7 +148,7 @@ ZEND_END_ARG_INFO()
 static
 ZEND_BEGIN_ARG_INFO(arginfo_imagesetstyle, 0)
 	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_ARRAY_INFO(0, styles, 0)
+	ZEND_ARG_INFO(0, styles) /* ARRAY_INFO(0, styles, 0) */
 ZEND_END_ARG_INFO()
 
 static
@@ -627,7 +627,7 @@ ZEND_END_ARG_INFO()
 static
 ZEND_BEGIN_ARG_INFO(arginfo_imagepolygon, 0)
 	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_ARRAY_INFO(0, points, 0)
+	ZEND_ARG_INFO(0, points) /* ARRAY_INFO(0, points, 0) */
 	ZEND_ARG_INFO(0, num_pos)
 	ZEND_ARG_INFO(0, col)
 ZEND_END_ARG_INFO()
@@ -635,7 +635,7 @@ ZEND_END_ARG_INFO()
 static
 ZEND_BEGIN_ARG_INFO(arginfo_imagefilledpolygon, 0)
 	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_ARRAY_INFO(0, points, 0)
+	ZEND_ARG_INFO(0, points) /* ARRAY_INFO(0, points, 0) */
 	ZEND_ARG_INFO(0, num_pos)
 	ZEND_ARG_INFO(0, col)
 ZEND_END_ARG_INFO()
@@ -760,7 +760,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imageftbbox, 0, 0, 4)
 	ZEND_ARG_INFO(0, float angle)
 	ZEND_ARG_INFO(0, font_file)
 	ZEND_ARG_INFO(0, text)
-	ZEND_ARG_ARRAY_INFO(0, extrainfo, 0)
+	ZEND_ARG_INFO(0, extrainfo) /* ARRAY_INFO(0, extrainfo, 0) */
 ZEND_END_ARG_INFO()
 
 static
@@ -773,7 +773,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imagefttext, 0, 0, 8)
 	ZEND_ARG_INFO(0, col)
 	ZEND_ARG_INFO(0, font_file)
 	ZEND_ARG_INFO(0, text)
-	ZEND_ARG_ARRAY_INFO(0, extrainfo, 0)
+	ZEND_ARG_INFO(0, extrainfo) /* ARRAY_INFO(0, extrainfo, 0) */
 ZEND_END_ARG_INFO()
 #endif
 
@@ -903,7 +903,7 @@ ZEND_END_ARG_INFO()
 static
 ZEND_BEGIN_ARG_INFO(arginfo_imageconvolution, 0)
 	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_ARRAY_INFO(0, matrix3x3, 0)
+	ZEND_ARG_INFO(0, matrix3x3) /* ARRAY_INFO(0, matrix3x3, 0) */
 	ZEND_ARG_INFO(0, div)
 	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
