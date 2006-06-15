@@ -41,6 +41,7 @@ PHP                                                                        NEWS
   . Added readInnerXML(), readOuterXML(), readString(), setSchema(). (2.6.20+)
   . Changed to passing libxml options when loading reader.
 
+- Added automatic module globals management. (Dmitry)
 - Added RFC2397 (data: stream) support. (Marcus)
 - Added new error mode E_RECOVERABLE_ERROR. (Derick, Marcus, Tony)
 - Added support for getenv() input filtering. (Rasmus)
