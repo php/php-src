@@ -79,6 +79,8 @@ typedef struct _zend_function_entry {
 #define ZEND_MODULE_DEACTIVATE_N(module)	zm_deactivate_##module
 #define ZEND_MODULE_POST_ZEND_DEACTIVATE_N(module)	zm_post_zend_deactivate_##module
 #define ZEND_MODULE_INFO_N(module)			zm_info_##module
+#define ZEND_MODULE_GLOBALS_CTOR_N(module)  zm_globals_ctor_##module
+#define ZEND_MODULE_GLOBALS_DTOR_N(module)  zm_globals_dtor_##module
 
 /* Declaration macros */
 #define ZEND_MODULE_STARTUP_D(module)		int ZEND_MODULE_STARTUP_N(module)(INIT_FUNC_ARGS)
@@ -87,6 +89,8 @@ typedef struct _zend_function_entry {
 #define ZEND_MODULE_DEACTIVATE_D(module)	int ZEND_MODULE_DEACTIVATE_N(module)(SHUTDOWN_FUNC_ARGS)
 #define ZEND_MODULE_POST_ZEND_DEACTIVATE_D(module)	int ZEND_MODULE_POST_ZEND_DEACTIVATE_N(module)(void)
 #define ZEND_MODULE_INFO_D(module)			void ZEND_MODULE_INFO_N(module)(ZEND_MODULE_INFO_FUNC_ARGS)
+#define ZEND_MODULE_GLOBALS_CTOR_D(module)  void ZEND_MODULE_GLOBALS_CTOR_N(module)(zend_##module##_globals *module##_globals TSRMLS_DC)
+#define ZEND_MODULE_GLOBALS_DTOR_D(module)  void ZEND_MODULE_GLOBALS_DTOR_N(module)(zend_##module##_globals *module##_globals TSRMLS_DC)
 
 #define ZEND_GET_MODULE(name) \
     BEGIN_EXTERN_C()\
@@ -611,12 +615,16 @@ END_EXTERN_C()
 #define ZEND_RINIT			ZEND_MODULE_ACTIVATE_N
 #define ZEND_RSHUTDOWN		ZEND_MODULE_DEACTIVATE_N
 #define ZEND_MINFO			ZEND_MODULE_INFO_N
+#define ZEND_GINIT(module)		((void (*)(void* TSRMLS_DC))(ZEND_MODULE_GLOBALS_CTOR_N(module)))
+#define ZEND_GSHUTDOWN(module)	((void (*)(void* TSRMLS_DC))(ZEND_MODULE_GLOBALS_DTOR_N(module)))
 
 #define ZEND_MINIT_FUNCTION			ZEND_MODULE_STARTUP_D
 #define ZEND_MSHUTDOWN_FUNCTION		ZEND_MODULE_SHUTDOWN_D
 #define ZEND_RINIT_FUNCTION			ZEND_MODULE_ACTIVATE_D
 #define ZEND_RSHUTDOWN_FUNCTION		ZEND_MODULE_DEACTIVATE_D
 #define ZEND_MINFO_FUNCTION			ZEND_MODULE_INFO_D
+#define ZEND_GINIT_FUNCTION			ZEND_MODULE_GLOBALS_CTOR_D
+#define ZEND_GSHUTDOWN_FUNCTION		ZEND_MODULE_GLOBALS_DTOR_D
 
 END_EXTERN_C()
 
