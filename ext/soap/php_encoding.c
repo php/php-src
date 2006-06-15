@@ -779,7 +779,7 @@ static xmlNodePtr to_xml_string(encodeTypePtr type, zval *data, int style, xmlNo
 
 static xmlNodePtr to_xml_base64(encodeTypePtr type, zval *data, int style, xmlNodePtr parent)
 {
-	xmlNodePtr ret;
+	xmlNodePtr ret, text;
 	unsigned char *str;
 	int str_len;
 
@@ -789,7 +789,8 @@ static xmlNodePtr to_xml_base64(encodeTypePtr type, zval *data, int style, xmlNo
 
 	if (Z_TYPE_P(data) == IS_STRING) {
 		str = php_base64_encode((unsigned char*)Z_STRVAL_P(data), Z_STRLEN_P(data), &str_len);
-		xmlNodeSetContentLen(ret, str, str_len);
+		text = xmlNewTextLen(str, str_len);
+		xmlAddChild(ret, text);
 		efree(str);
 	} else {
 		zval tmp = *data;
@@ -797,7 +798,8 @@ static xmlNodePtr to_xml_base64(encodeTypePtr type, zval *data, int style, xmlNo
 		zval_copy_ctor(&tmp);
 		convert_to_string(&tmp);
 		str = php_base64_encode((unsigned char*)Z_STRVAL(tmp), Z_STRLEN(tmp), &str_len);
-		xmlNodeSetContentLen(ret, str, str_len);
+		text = xmlNewTextLen(str, str_len);
+		xmlAddChild(ret, text);
 		efree(str);
 		zval_dtor(&tmp);
 	}
@@ -811,7 +813,7 @@ static xmlNodePtr to_xml_base64(encodeTypePtr type, zval *data, int style, xmlNo
 static xmlNodePtr to_xml_hexbin(encodeTypePtr type, zval *data, int style, xmlNodePtr parent)
 {
 	static char hexconvtab[] = "0123456789ABCDEF";
-	xmlNodePtr ret;
+	xmlNodePtr ret, text;
 	unsigned char *str;
 	zval tmp;
 	int i, j;
@@ -834,7 +836,8 @@ static xmlNodePtr to_xml_hexbin(encodeTypePtr type, zval *data, int style, xmlNo
 	}
 	str[j] = '\0';
 
-	xmlNodeSetContentLen(ret, str, Z_STRLEN_P(data) * 2 * sizeof(char));
+	text = xmlNewTextLen(str, Z_STRLEN_P(data) * 2 * sizeof(char));
+	xmlAddChild(ret, text);
 	efree(str);
 	if (data == &tmp) {
 		zval_dtor(&tmp);
