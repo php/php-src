@@ -63,7 +63,7 @@ PHP_FUNCTION(transliterate)
 	}
 
 	if (id_len < 0) {
-		php_error_docref("", E_WARNING, "Transliterator ID too long");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Transliterator ID too long");
 		return;
 	}
 
@@ -71,7 +71,7 @@ PHP_FUNCTION(transliterate)
 
 	trans = utrans_openU(id, id_len, UTRANS_FORWARD, NULL, 0, NULL, &status);
 	if (U_FAILURE(status)) {
-		php_error_docref("", E_WARNING, "Failed to create transliterator");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to create transliterator");
 		return;
 	}
 
