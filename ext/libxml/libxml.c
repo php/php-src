@@ -60,11 +60,8 @@ typedef struct _php_libxml_func_handler {
 
 static HashTable php_libxml_exports;
 
-#ifdef ZTS
-int libxml_globals_id;
-#else
-PHP_LIBXML_API php_libxml_globals libxml_globals;
-#endif
+ZEND_DECLARE_MODULE_GLOBALS(libxml)
+static PHP_GINIT_FUNCTION(libxml);
 
 zend_class_entry *libxmlerror_class_entry;
 
@@ -106,7 +103,11 @@ zend_module_entry libxml_module_entry = {
 	PHP_RSHUTDOWN(libxml),   /* per-request shutdown function */
 	PHP_MINFO(libxml),       /* information function */
     NO_VERSION_YET,
-	STANDARD_MODULE_PROPERTIES
+    PHP_MODULE_GLOBALS(libxml), /* globals descriptor */
+    PHP_GINIT(libxml),          /* globals ctor */
+    NULL,                       /* globals dtor */
+    NULL,                       /* post deactivate */
+	STANDARD_MODULE_PROPERTIES_EX
 };
 
 /* }}} */
@@ -237,14 +238,12 @@ static void php_libxml_node_free_list(xmlNodePtr node TSRMLS_DC)
 /* }}} */
 
 /* {{{ startup, shutdown and info functions */
-#ifdef ZTS
-static void php_libxml_init_globals(php_libxml_globals *libxml_globals_p TSRMLS_DC)
+static PHP_GINIT_FUNCTION(libxml)
 {
-	LIBXML(stream_context) = NULL;
-	LIBXML(error_buffer).c = NULL;
-	LIBXML(error_list) = NULL;
+	libxml_globals->stream_context = NULL;
+	libxml_globals->error_buffer.c = NULL;
+	libxml_globals->error_list = NULL;
 }
-#endif
 
 /* Channel libxml file io layer through the PHP streams subsystem.
  * This allows use of ftps:// and https:// urls */
@@ -574,14 +573,6 @@ PHP_MINIT_FUNCTION(libxml)
 	zend_class_entry ce;
 
 	php_libxml_initialize();
-
-#ifdef ZTS
-	ts_allocate_id(&libxml_globals_id, sizeof(php_libxml_globals), (ts_allocate_ctor) php_libxml_init_globals, NULL);
-#else
-	LIBXML(stream_context) = NULL;
-	LIBXML(error_buffer).c = NULL;
-	LIBXML(error_list) = NULL;
-#endif
 
 	REGISTER_LONG_CONSTANT("LIBXML_VERSION",			LIBXML_VERSION,			CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("LIBXML_DOTTED_VERSION",	LIBXML_DOTTED_VERSION,	CONST_CS | CONST_PERSISTENT);

@@ -36,6 +36,7 @@
 static zend_class_entry *spl_ce_RuntimeException;
 
 ZEND_DECLARE_MODULE_GLOBALS(pdo)
+static PHP_GINIT_FUNCTION(pdo);
 
 /* True global resources - no need for thread safety here */
 
@@ -146,7 +147,11 @@ zend_module_entry pdo_module_entry = {
 	NULL,
 	PHP_MINFO(pdo),
 	"1.0.4dev",
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(pdo),
+	PHP_GINIT(pdo),
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
 
@@ -163,8 +168,8 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
-/* {{{ php_pdo_init_globals */
-static void php_pdo_init_globals(zend_pdo_globals *pdo_globals)
+/* {{{ PHP_GINIT_FUNCTION */
+static PHP_GINIT_FUNCTION(pdo)
 {
 	pdo_globals->global_value = 0;
 }
@@ -321,7 +326,6 @@ PHP_MINIT_FUNCTION(pdo)
 
 	spl_ce_RuntimeException = NULL;
 
-	ZEND_INIT_MODULE_GLOBALS(pdo, php_pdo_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
 
 	if (FAILURE == pdo_sqlstate_init_error_table()) {

@@ -82,6 +82,7 @@ zend_function_entry session_functions[] = {
 /* }}} */
 
 PHPAPI ZEND_DECLARE_MODULE_GLOBALS(ps);
+static PHP_GINIT_FUNCTION(ps);
 
 static ps_module *_php_find_ps_module(char *name TSRMLS_DC);
 static const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC);
@@ -257,7 +258,11 @@ zend_module_entry session_module_entry = {
 	PHP_RINIT(session), PHP_RSHUTDOWN(session),
 	PHP_MINFO(session),
 	NO_VERSION_YET,
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(ps),
+	PHP_GINIT(ps),
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 
 #ifdef COMPILE_DL_SESSION
@@ -1831,7 +1836,7 @@ PHP_RSHUTDOWN_FUNCTION(session)
 }
 /* }}} */
 
-static void php_minit_session_globals(php_ps_globals *ps_globals)
+static PHP_GINIT_FUNCTION(ps)
 {
 	ps_globals->save_path = NULL;
 	ps_globals->session_name = NULL;
@@ -1844,15 +1849,6 @@ static void php_minit_session_globals(php_ps_globals *ps_globals)
 
 PHP_MINIT_FUNCTION(session)
 {
-#ifdef ZTS
-	php_ps_globals *ps_globals;
-
-	ts_allocate_id(&ps_globals_id, sizeof(php_ps_globals), (ts_allocate_ctor) php_minit_session_globals, NULL);
-	ps_globals = ts_resource(ps_globals_id);
-#else 
-	php_minit_session_globals(&ps_globals);
-#endif
-
 	zend_register_auto_global("_SESSION", sizeof("_SESSION")-1, NULL TSRMLS_CC);
 
 	PS(module_number) = module_number; /* if we really need this var we need to init it in zts mode as well! */

@@ -267,6 +267,9 @@ ZEND_END_ARG_INFO()
 
 /* }}} */
 
+ZEND_DECLARE_MODULE_GLOBALS(gmp)
+static ZEND_GINIT_FUNCTION(gmp);
+
 /* {{{ gmp_functions[]
  */
 zend_function_entry gmp_functions[] = {
@@ -326,11 +329,13 @@ zend_module_entry gmp_module_entry = {
 	ZEND_MODULE_DEACTIVATE_N(gmp),
 	ZEND_MODULE_INFO_N(gmp),
 	NO_VERSION_YET,
-	STANDARD_MODULE_PROPERTIES
+	ZEND_MODULE_GLOBALS(gmp),
+	ZEND_GINIT(gmp),
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
-
-ZEND_DECLARE_MODULE_GLOBALS(gmp)
 
 #ifdef COMPILE_DL_GMP
 ZEND_GET_MODULE(gmp)
@@ -371,9 +376,9 @@ static void gmp_efree(void *ptr, size_t size)
 }
 /* }}} */
 
-/* {{{ php_gmp_init_globals
+/* {{{ ZEND_GINIT_FUNCTION
  */
-static void php_gmp_init_globals(zend_gmp_globals *gmp_globals)
+static ZEND_GINIT_FUNCTION(gmp)
 {
 	gmp_globals->rand_initialized = 0;
 }
@@ -383,8 +388,6 @@ static void php_gmp_init_globals(zend_gmp_globals *gmp_globals)
  */
 ZEND_MODULE_STARTUP_D(gmp)
 {
-	ZEND_INIT_MODULE_GLOBALS(gmp, php_gmp_init_globals, NULL);
-
 	le_gmp = zend_register_list_destructors_ex(_php_gmpnum_free, NULL, GMP_RESOURCE_NAME, module_number);
 	REGISTER_LONG_CONSTANT("GMP_ROUND_ZERO", GMP_ROUND_ZERO, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("GMP_ROUND_PLUSINF", GMP_ROUND_PLUSINF, CONST_CS | CONST_PERSISTENT);

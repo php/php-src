@@ -97,7 +97,7 @@ static void php_free_pcre_cache(void *data)
 }
 
 
-static void php_pcre_init_globals(zend_pcre_globals *pcre_globals TSRMLS_DC)
+static PHP_GINIT_FUNCTION(pcre)
 {
 	zend_hash_init(&pcre_globals->pcre_cache, 0, NULL, php_free_pcre_cache, 1);
 	pcre_globals->backtrack_limit = 0;
@@ -105,7 +105,7 @@ static void php_pcre_init_globals(zend_pcre_globals *pcre_globals TSRMLS_DC)
 	pcre_globals->error_code      = PHP_PCRE_NO_ERROR;
 }
 
-static void php_pcre_shutdown_globals(zend_pcre_globals *pcre_globals TSRMLS_DC)
+static PHP_GSHUTDOWN_FUNCTION(pcre)
 {
 	zend_hash_destroy(&pcre_globals->pcre_cache);
 }
@@ -129,8 +129,6 @@ static PHP_MINFO_FUNCTION(pcre)
 /* {{{ PHP_MINIT_FUNCTION(pcre) */
 static PHP_MINIT_FUNCTION(pcre)
 {
-	ZEND_INIT_MODULE_GLOBALS(pcre, php_pcre_init_globals, php_pcre_shutdown_globals);
-
 	REGISTER_INI_ENTRIES();
 	
 	REGISTER_LONG_CONSTANT("PREG_PATTERN_ORDER", PREG_PATTERN_ORDER, CONST_CS | CONST_PERSISTENT);
@@ -154,12 +152,6 @@ static PHP_MINIT_FUNCTION(pcre)
 /* {{{ PHP_MSHUTDOWN_FUNCTION(pcre) */
 static PHP_MSHUTDOWN_FUNCTION(pcre)
 {
-#ifdef ZTS
-	ts_free_id(pcre_globals_id);	
-#else
-	php_pcre_shutdown_globals(&pcre_globals TSRMLS_CC);
-#endif
-
 	UNREGISTER_INI_ENTRIES();
 
 	return SUCCESS;
@@ -1779,7 +1771,11 @@ zend_module_entry pcre_module_entry = {
 	NULL,
 	PHP_MINFO(pcre),
 	NO_VERSION_YET,
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(pcre),
+	PHP_GINIT(pcre),
+	PHP_GSHUTDOWN(pcre),
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 
 #ifdef COMPILE_DL_PCRE

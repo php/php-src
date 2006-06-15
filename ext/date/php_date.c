@@ -227,6 +227,7 @@ static char* guess_timezone(const timelib_tzdb *tzdb TSRMLS_DC);
 /* }}} */
 
 ZEND_DECLARE_MODULE_GLOBALS(date)
+static PHP_GINIT_FUNCTION(date);
 
 /* True global */
 timelib_tzdb *php_date_global_timezone_db;
@@ -305,13 +306,17 @@ zend_module_entry date_module_entry = {
 	PHP_RSHUTDOWN(date),        /* request shutdown */
 	PHP_MINFO(date),            /* extension info */
 	PHP_VERSION,                /* extension version */
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(date),   /* globals descriptor */
+	PHP_GINIT(date),            /* globals ctor */
+	NULL,                       /* globals dtor */
+	NULL,                       /* post deactivate */
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
 
 
-/* {{{ php_date_init_globals */
-static void php_date_init_globals(zend_date_globals *date_globals)
+/* {{{ PHP_GINIT_FUNCTION */
+static PHP_GINIT_FUNCTION(date)
 {
 	date_globals->default_timezone = NULL;
 	date_globals->timezone = NULL;
@@ -451,7 +456,6 @@ PHP_RSHUTDOWN_FUNCTION(date)
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(date)
 {
-	ZEND_INIT_MODULE_GLOBALS(date, php_date_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
 #ifdef EXPERIMENTAL_DATE_SUPPORT
 	date_register_classes(TSRMLS_C);
