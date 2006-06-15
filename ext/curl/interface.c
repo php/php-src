@@ -205,7 +205,7 @@ ZEND_END_ARG_INFO()
 static
 ZEND_BEGIN_ARG_INFO(arginfo_curl_setopt_array, 0)
 	ZEND_ARG_INFO(0, ch)
-	ZEND_ARG_INFO(0, options)/* ARRAY_INFO(0, options, 0) */
+	ZEND_ARG_ARRAY_INFO(0, options, 0)
 ZEND_END_ARG_INFO()
 
 static

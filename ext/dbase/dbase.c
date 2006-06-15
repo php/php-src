@@ -261,10 +261,6 @@ PHP_FUNCTION(dbase_add_record)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(dbh_id);
-	if (Z_TYPE_PP(fields) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expected array as second parameter");
-		RETURN_FALSE;
-	}
 
 	dbh = zend_list_find(Z_LVAL_PP(dbh_id), &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
@@ -332,10 +328,6 @@ PHP_FUNCTION(dbase_replace_record)
 	}
 	convert_to_long_ex(dbh_id);
 	convert_to_long_ex(recnum);
-	if (Z_TYPE_PP(fields) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expected array as second parameter");
-		RETURN_FALSE;
-	}
 
 	dbh = zend_list_find(Z_LVAL_PP(dbh_id), &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
@@ -581,11 +573,6 @@ PHP_FUNCTION(dbase_create)
 	}
 	convert_to_string_ex(filename);
 
-	if (Z_TYPE_PP(fields) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expected array as second parameter");
-		RETURN_FALSE;
-	}
-	
 	if (php_check_open_basedir(Z_STRVAL_PP(filename) TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
@@ -634,12 +621,6 @@ PHP_FUNCTION(dbase_create)
 		/* look up the first field */
 		if (zend_hash_index_find(Z_ARRVAL_PP(fields), i, (void **)&field) == FAILURE) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to find field %d", i);
-			free_dbf_head(dbh);
-			RETURN_FALSE;
-		}
-
-		if (Z_TYPE_PP (field) != IS_ARRAY) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "second parameter must be array of arrays");
 			free_dbf_head(dbh);
 			RETURN_FALSE;
 		}
@@ -749,13 +730,13 @@ ZEND_END_ARG_INFO()
 static
 ZEND_BEGIN_ARG_INFO(arginfo_dbase_add_record, 0)
 	ZEND_ARG_INFO(0, identifier)
-	ZEND_ARG_INFO(0, data) /* ARRAY_INFO(0, data, 0) */
+	ZEND_ARG_ARRAY_INFO(0, data, 0)
 ZEND_END_ARG_INFO()
 
 static
 ZEND_BEGIN_ARG_INFO(arginfo_dbase_replace_record, 0)
 	ZEND_ARG_INFO(0, identifier)
-	ZEND_ARG_INFO(0, data) /* ARRAY_INFO(0, data, 0) */
+	ZEND_ARG_ARRAY_INFO(0, data, 0)
 	ZEND_ARG_INFO(0, recnum)
 ZEND_END_ARG_INFO()
 
@@ -780,7 +761,7 @@ ZEND_END_ARG_INFO()
 static
 ZEND_BEGIN_ARG_INFO(arginfo_dbase_create, 0)
 	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, fields) /* ARRAY_INFO(0, fields, 0) */
+	ZEND_ARG_ARRAY_INFO(0, fields, 0)
 ZEND_END_ARG_INFO()
 
 static
