@@ -1448,6 +1448,17 @@ ZEND_API int zend_startup_module_ex(zend_module_entry *module TSRMLS_DC)
 		}
 	}
 
+	/* Initialize module globals */
+	if (module->globals_size) {
+#ifdef ZTS
+		ts_allocate_id(module->globals_id_ptr, module->globals_size, (ts_allocate_ctor) module->globals_ctor, (ts_allocate_dtor) module->globals_dtor);
+#else
+		if (module->globals_ctor) {
+			module->globals_ctor(module->globals_ptr TSRMLS_CC);
+		}
+#endif
+	}
+
 	if (module->module_startup_func) {
 		EG(current_module) = module;
 		if (module->module_startup_func(module->type, module->module_number TSRMLS_CC)==FAILURE) {
@@ -1881,6 +1892,18 @@ void module_destructor(zend_module_entry *module)
 #endif
 		module->module_shutdown_func(module->type, module->module_number TSRMLS_CC);
 	}
+	
+	/* Deinitilaise module globals */
+	if (module->globals_size) {
+#ifdef ZTS
+		ts_free_id(*module->globals_id_ptr);
+#else
+		if (module->globals_dtor) {
+			module->globals_dtor(module->globals_ptr TSRMLS_CC);
+		}
+#endif
+	}
+
 	module->module_started=0;
 	if (module->functions) {
 		zend_unregister_functions(module->functions, -1, NULL TSRMLS_CC);
