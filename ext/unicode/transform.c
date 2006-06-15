@@ -18,7 +18,7 @@
 
 #include "php_unicode.h"
 
-PHP_FUNCTION(transliterate)
+PHP_FUNCTION(str_transliterate)
 {
 	UChar	   *str, *from, *to, *variant = NULL;
 	int			str_len, from_len, to_len, variant_len = 0;
@@ -29,26 +29,6 @@ PHP_FUNCTION(transliterate)
 	UTransliterator *trans = NULL;
 	UErrorCode	status = U_ZERO_ERROR;
 	int32_t		capacity, start, limit;
-
-	/*
-	{
-
-		char *str;
-		int32_t str_len;
-		UEnumeration *ids;
-
-		ids = utrans_openIDs(&status);
-		printf("%d\n", uenum_count(ids, &status));
-		str = (char*)uenum_next(ids, &str_len, &status);
-		while (str) {
-			printf("id: %s\n", str);
-			str = (char*)uenum_next(ids, &str_len, &status);
-		}
-		uenum_close(ids);
-	}
-
-	return;
-	*/
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "uuu|u", &str,
 							  &str_len, &from, &from_len, &to, &to_len,

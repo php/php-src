@@ -301,7 +301,7 @@ zend_function_entry unicode_functions[] = {
 
 	/* text transformation functions */
 
-	PHP_FE(transliterate, NULL)
+	PHP_FE(str_transliterate, NULL)
 
 	{ NULL, NULL, NULL }
 };

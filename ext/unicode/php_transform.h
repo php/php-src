@@ -19,7 +19,7 @@
 #ifndef PHP_TRANSFORM_H
 #define PHP_TRANSFORM_H
 
-PHP_FUNCTION(transliterate);
+PHP_FUNCTION(str_transliterate);
 
 #endif /* PHP_TRANSFORM_H */
 
