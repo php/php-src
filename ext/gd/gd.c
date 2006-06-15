@@ -148,7 +148,7 @@ ZEND_END_ARG_INFO()
 static
 ZEND_BEGIN_ARG_INFO(arginfo_imagesetstyle, 0)
 	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_INFO(0, styles) /* ARRAY_INFO(0, styles, 0) */
+	ZEND_ARG_ARRAY_INFO(0, styles, 0)
 ZEND_END_ARG_INFO()
 
 static
@@ -627,7 +627,7 @@ ZEND_END_ARG_INFO()
 static
 ZEND_BEGIN_ARG_INFO(arginfo_imagepolygon, 0)
 	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_INFO(0, points) /* ARRAY_INFO(0, points, 0) */
+	ZEND_ARG_ARRAY_INFO(0, points, 0)
 	ZEND_ARG_INFO(0, num_pos)
 	ZEND_ARG_INFO(0, col)
 ZEND_END_ARG_INFO()
@@ -635,7 +635,7 @@ ZEND_END_ARG_INFO()
 static
 ZEND_BEGIN_ARG_INFO(arginfo_imagefilledpolygon, 0)
 	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_INFO(0, points) /* ARRAY_INFO(0, points, 0) */
+	ZEND_ARG_ARRAY_INFO(0, points, 0)
 	ZEND_ARG_INFO(0, num_pos)
 	ZEND_ARG_INFO(0, col)
 ZEND_END_ARG_INFO()
@@ -760,7 +760,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imageftbbox, 0, 0, 4)
 	ZEND_ARG_INFO(0, float angle)
 	ZEND_ARG_INFO(0, font_file)
 	ZEND_ARG_INFO(0, text)
-	ZEND_ARG_INFO(0, extrainfo) /* ARRAY_INFO(0, extrainfo, 0) */
+	ZEND_ARG_ARRAY_INFO(0, extrainfo, 0)
 ZEND_END_ARG_INFO()
 
 static
@@ -773,7 +773,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imagefttext, 0, 0, 8)
 	ZEND_ARG_INFO(0, col)
 	ZEND_ARG_INFO(0, font_file)
 	ZEND_ARG_INFO(0, text)
-	ZEND_ARG_INFO(0, extrainfo) /* ARRAY_INFO(0, extrainfo, 0) */
+	ZEND_ARG_ARRAY_INFO(0, extrainfo, 0)
 ZEND_END_ARG_INFO()
 #endif
 
@@ -903,7 +903,7 @@ ZEND_END_ARG_INFO()
 static
 ZEND_BEGIN_ARG_INFO(arginfo_imageconvolution, 0)
 	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_INFO(0, matrix3x3) /* ARRAY_INFO(0, matrix3x3, 0) */
+	ZEND_ARG_ARRAY_INFO(0, matrix3x3, 0)
 	ZEND_ARG_INFO(0, div)
 	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
@@ -3226,11 +3226,6 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 	npoints = Z_LVAL_PP(NPOINTS);
 	col = Z_LVAL_PP(COL);
 
-	if (Z_TYPE_PP(POINTS) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "2nd argument to imagepolygon not an array");
-		RETURN_FALSE;
-	}
-
 	nelem = zend_hash_num_elements(Z_ARRVAL_PP(POINTS));
 	if (nelem < 6) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "You must have at least 3 points in your array");
@@ -4796,7 +4791,7 @@ PHP_FUNCTION(imageconvolution)
 
 	for (i=0; i<3; i++) {
 		if (zend_hash_index_find(Z_ARRVAL_P(hash_matrix), (i), (void **) &var) == SUCCESS) {
-			if (Z_TYPE_PP(var) != IS_ARRAY || zend_hash_num_elements(Z_ARRVAL_PP(var)) != 3 ) {
+			if (zend_hash_num_elements(Z_ARRVAL_PP(var)) != 3 ) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "You must have 3x3 array");
 				RETURN_FALSE;
 			}
