@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 - Changed realpath cache to be disabled when "open_basedir" or "safe_mode"
   are enabled on per-request basis. (Ilia)
 
+- New crypt() implementation for win32 which is about 10 times faster and has 
+  more friendly license. (Frank, Dmitry)
 - Improved performance of the implode() function on associated arrays. (Ilia)
 - Improved performance of str_replace() when doing 1 char to 1 char or 1 char
   to many chars replacement. (Ilia)
