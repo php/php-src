@@ -67,3 +67,28 @@ string(31) "Fri, 16 Jun 2006 20:06:00 +0100"
 string(31) "Mon, 16 Jun 1986 22:51:59 +0100"
 string(31) "Mon, 16 Jan 2006 00:00:00 +0000"
 string(31) "Mon, 16 Jan 2006 00:00:00 +0000"
+--UEXPECT--
+bool(false)
+bool(false)
+unicode(31) "Thu, 15 Jun 2006 00:00:00 +0100"
+unicode(31) "Fri, 16 Jun 2006 22:49:12 +0100"
+bool(false)
+unicode(31) "Fri, 16 Jun 2006 23:49:12 +0100"
+bool(false)
+unicode(31) "Fri, 16 Jun 2006 02:22:00 +0100"
+bool(false)
+unicode(31) "Fri, 16 Jun 2006 02:22:33 +0100"
+bool(false)
+unicode(31) "Tue, 02 Mar 2004 00:00:00 +0000"
+unicode(31) "Tue, 02 Mar 2004 00:00:00 +0000"
+unicode(31) "Sun, 12 Feb 2006 23:12:23 +0000"
+bool(false)
+unicode(31) "Fri, 16 Jun 2006 00:00:00 +0100"
+unicode(31) "Sun, 15 Jan 2006 00:00:00 +0000"
+unicode(31) "Sun, 15 Jan 2006 00:00:00 +0000"
+unicode(31) "Tue, 10 Oct 2000 13:55:36 +0100"
+bool(false)
+unicode(31) "Fri, 16 Jun 2006 20:06:00 +0100"
+unicode(31) "Mon, 16 Jun 1986 22:51:59 +0100"
+unicode(31) "Mon, 16 Jan 2006 00:00:00 +0000"
+unicode(31) "Mon, 16 Jan 2006 00:00:00 +0000"
