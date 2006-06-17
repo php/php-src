@@ -385,6 +385,18 @@ static char *_sapi_cgibin_putenv(char *name, char *value TSRMLS_DC)
 		return fcgi_putenv(request, name, name_len, value);
 	}
 
+#if HAVE_SETENV
+	if (value) {
+		setenv(name, value, 1);
+	}
+#endif
+#if HAVE_UNSETENV
+	if (!value) {
+		unsetenv(name);
+	}
+#endif
+
+#if !HAVE_SETENV || !HAVE_UNSETENV
 	/*  if cgi, or fastcgi and not found in fcgi env
 		check the regular environment 
 		this leaks, but it's only cgi anyway, we'll fix
@@ -395,12 +407,19 @@ static char *_sapi_cgibin_putenv(char *name, char *value TSRMLS_DC)
 	if (buf == NULL) {
 		return getenv(name);
 	}
+#endif
+#if !HAVE_SETENV
 	if (value) {
 		len = snprintf(buf, len - 1, "%s=%s", name, value);
-	} else {
-		len = snprintf(buf, len - 1, "%s=", name);
+		putenv(buf);
 	}
-	putenv(buf);
+#endif
+#if !HAVE_UNSETENV
+	if (!value) {
+		len = snprintf(buf, len - 1, "%s=", name);
+		putenv(buf);
+	}
+#endif
 	return getenv(name);
 }
 

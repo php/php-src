@@ -502,6 +502,7 @@ scandir \
 setitimer \
 setlocale \
 localeconv \
+setenv \
 setpgid \
 setsockopt \
 setvbuf \
