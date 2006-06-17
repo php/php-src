@@ -2,7 +2,7 @@
 strtotime() function
 --FILE--
 <?php
-date_default_timezone_set('Portugal');
+date_default_timezone_set('Europe/Lisbon');
 $time = 1150494719; // 16/June/2006
 
 $strs = array(
@@ -27,6 +27,7 @@ $strs = array(
 	'10/Oct/2000:13:55:36 +0100', //clf
 	'10/Oct/2000:13:55:36 +00100', //clf
 	'2006',
+	'1986', // year
 	'JAN',
 	'January',
 );
@@ -63,5 +64,6 @@ string(31) "Sun, 15 Jan 2006 00:00:00 +0000"
 string(31) "Tue, 10 Oct 2000 13:55:36 +0100"
 bool(false)
 string(31) "Fri, 16 Jun 2006 20:06:00 +0100"
+string(31) "Mon, 16 Jun 1986 22:51:59 +0100"
 string(31) "Mon, 16 Jan 2006 00:00:00 +0000"
 string(31) "Mon, 16 Jan 2006 00:00:00 +0000"
