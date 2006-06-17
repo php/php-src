@@ -596,32 +596,130 @@ PHP_MINFO_FUNCTION(hash)
 }
 /* }}} */
 
+/* {{{ arginfo */
+#ifdef PHP_HASH_MD5_NOT_IN_CORE
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_md5, 0, 0, 1)
+	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, raw_output)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_md5_file, 0, 0, 1)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, raw_output)
+ZEND_END_ARG_INFO()
+#endif
+
+#ifdef PHP_HASH_SHA1_NOT_IN_CORE
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_sha1, 0, 0, 1)
+	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, raw_output)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_sha1_file, 0, 0, 1)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, raw_output)
+ZEND_END_ARG_INFO()
+#endif
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_hash, 0, 0, 2)
+	ZEND_ARG_INFO(0, algo)
+	ZEND_ARG_INFO(0, data)
+	ZEND_ARG_INFO(0, raw_output)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_file, 0, 0, 2)
+	ZEND_ARG_INFO(0, algo)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, raw_output)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_hmac, 0, 0, 3)
+	ZEND_ARG_INFO(0, algo)
+	ZEND_ARG_INFO(0, data)
+	ZEND_ARG_INFO(0, key)
+	ZEND_ARG_INFO(0, raw_output)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_hmac_file, 0, 0, 3)
+	ZEND_ARG_INFO(0, algo)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, key)
+	ZEND_ARG_INFO(0, raw_output)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_init, 0, 0, 1)
+	ZEND_ARG_INFO(0, algo)
+	ZEND_ARG_INFO(0, options)
+	ZEND_ARG_INFO(0, key)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_hash_update, 0)
+	ZEND_ARG_INFO(0, context)
+	ZEND_ARG_INFO(0, data)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_update_stream, 0, 0, 2)
+	ZEND_ARG_INFO(0, context)
+	ZEND_ARG_INFO(0, handle)
+	ZEND_ARG_INFO(0, length)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_update_file, 0, 0, 2)
+	ZEND_ARG_INFO(0, context)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, context)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_final, 0, 0, 1)
+	ZEND_ARG_INFO(0, context)
+	ZEND_ARG_INFO(0, raw_output)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_hash_algos, 0)
+ZEND_END_ARG_INFO()
+
+/* }}} */
+
 /* {{{ hash_functions[]
  */
 zend_function_entry hash_functions[] = {
-	PHP_FE(hash,									NULL)
-	PHP_FE(hash_file,								NULL)
+	PHP_FE(hash,									arginfo_hash)
+	PHP_FE(hash_file,								arginfo_hash_file)
 
-	PHP_FE(hash_hmac,								NULL)
-	PHP_FE(hash_hmac_file,							NULL)
+	PHP_FE(hash_hmac,								arginfo_hash_hmac)
+	PHP_FE(hash_hmac_file,							arginfo_hash_hmac_file)
 
-	PHP_FE(hash_init,								NULL)
-	PHP_FE(hash_update,								NULL)
-	PHP_FE(hash_update_stream,						NULL)
-	PHP_FE(hash_update_file,						NULL)
-	PHP_FE(hash_final,								NULL)
+	PHP_FE(hash_init,								arginfo_hash_init)
+	PHP_FE(hash_update,								arginfo_hash_update)
+	PHP_FE(hash_update_stream,						arginfo_hash_update_stream)
+	PHP_FE(hash_update_file,						arginfo_hash_update_file)
+	PHP_FE(hash_final,								arginfo_hash_final)
 
-	PHP_FE(hash_algos,								NULL)
+	PHP_FE(hash_algos,								arginfo_hash_algos)
 
 	/* BC Land */
 #ifdef PHP_HASH_MD5_NOT_IN_CORE
-	PHP_NAMED_FE(md5, php_if_md5,					NULL)
-	PHP_NAMED_FE(md5_file, php_if_md5_file,			NULL)
+	PHP_NAMED_FE(md5, php_if_md5,					arginfo_hash_md5)
+	PHP_NAMED_FE(md5_file, php_if_md5_file,			arginfo_hash_md5_file)
 #endif /* PHP_HASH_MD5_NOT_IN_CORE */
 
 #ifdef PHP_HASH_SHA1_NOT_IN_CORE
-	PHP_NAMED_FE(sha1, php_if_sha1,					NULL)
-	PHP_NAMED_FE(sha1_file, php_if_sha1_file,		NULL)
+	PHP_NAMED_FE(sha1, php_if_sha1,					arginfo_hash_sha1)
+	PHP_NAMED_FE(sha1_file, php_if_sha1_file,		arginfo_hash_sha1_file)
 #endif /* PHP_HASH_SHA1_NOT_IN_CORE */
 
 	{NULL, NULL, NULL}
