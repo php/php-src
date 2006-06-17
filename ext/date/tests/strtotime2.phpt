@@ -2,6 +2,8 @@
 strtotime() on date constants
 --FILE--
 <?php
+
+date_default_timezone_set("Europe/Oslo");
 $time = time();
 
 $constants = array(
