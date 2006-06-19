@@ -11,5 +11,5 @@ if test "$PHP_POSIX" = "yes"; then
 
   AC_CHECK_HEADERS(sys/mkdev.h)
 
-  AC_CHECK_FUNCS(seteuid setegid setsid getsid setpgid getpgid ctermid mkfifo mknod getrlimit getlogin getgroups makedev)
+  AC_CHECK_FUNCS(seteuid setegid setsid getsid setpgid getpgid ctermid mkfifo mknod getrlimit getlogin getgroups makedev initgroups)
 fi

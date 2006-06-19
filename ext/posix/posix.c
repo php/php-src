@@ -134,6 +134,9 @@ zend_function_entry posix_functions[] = {
 	PHP_FE(posix_get_last_error,					NULL)
 	PHP_FALIAS(posix_errno, posix_get_last_error,	NULL)
 	PHP_FE(posix_strerror,							NULL)
+#ifdef HAVE_INITGROUPS
+	PHP_FE(posix_initgroups,	NULL)
+#endif
 
 	{NULL, NULL, NULL}
 };
@@ -1049,6 +1052,22 @@ PHP_FUNCTION(posix_strerror)
 /* }}} */
 
 #endif
+
+/* {{{ proto bool initgroups(string name, int base_group_id)
+   Calculate the group access list for the user specified in name. */
+PHP_FUNCTION(posix_initgroups)
+{
+	long basegid;
+	char *name;
+	int name_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl", &name, &name_len, &basegid) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	RETURN_BOOL(!initgroups((const char *)name, basegid));
+}
+/* }}} */
 
 /*
  * Local variables:
