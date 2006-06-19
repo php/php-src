@@ -110,6 +110,10 @@ PHP_FUNCTION(posix_getpwuid);
 PHP_FUNCTION(posix_getrlimit);
 #endif
 
+#ifdef HAVE_INITGROUPS
+PHP_FUNCTION(posix_initgroups);
+#endif
+
 PHP_FUNCTION(posix_get_last_error);
 PHP_FUNCTION(posix_strerror);
 
