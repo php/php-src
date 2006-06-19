@@ -973,6 +973,7 @@ static int is_port_number(const char *bindpath)
  */
 int main(int argc, char *argv[])
 {
+	int free_query_string = 0;
 	int exit_status = SUCCESS;
 	int cgi = 0, c, i, len;
 	zend_file_handle file_handle;
@@ -1503,7 +1504,7 @@ consult the installation file that came with this distribution, or visit \n\
 					len += strlen(argv[i]) + 1;
 				}
 
-				s = malloc(len + 1);	/* leak - but only for command line version, so ok */
+				s = malloc(len + 1);
 				*s = '\0';			/* we are pretending it came from the environment  */
 				for (i = php_optind, len = 0; i < argc; i++) {
 					strcat(s, argv[i]);
@@ -1512,6 +1513,7 @@ consult the installation file that came with this distribution, or visit \n\
 					}
 				}
 				SG(request_info).query_string = s;
+				free_query_string = 1;
 			}
 		} /* end !cgi && !fastcgi */
 
@@ -1671,6 +1673,11 @@ fastcgi_request_done:
 				free(SG(request_info).path_translated);
 				SG(request_info).path_translated = NULL;
 			}
+			if (free_query_string && SG(request_info).query_string) {
+				free(SG(request_info).query_string);
+				SG(request_info).query_string = NULL;
+			}
+
 		}
 
 #if PHP_FASTCGI
