@@ -287,7 +287,7 @@ void odbc_sql_error(ODBC_SQL_ERROR_PARAMS);
 # define ODBCG(v) TSRMG(odbc_globals_id, zend_odbc_globals *, v)
 #else
 # define ODBCG(v) (odbc_globals.v)
-extern ZEND_API php_odbc_globals odbc_globals;
+extern ZEND_API zend_odbc_globals odbc_globals;
 #endif
 
 #endif /* HAVE_UODBC */
