@@ -9,7 +9,7 @@ interface iA {
 class A implements iA {
 }
 
-class B extends A {
+class B extends A implements iA {
 }
 
 echo iA::cA;
@@ -27,7 +27,7 @@ interface iB2 extends iA2 {
 class A2 implements iA2 {
 }
 
-class B2 extends A2 {
+class B2 extends A2 implements iA2 {
 }
 
 echo iA2::cA;
