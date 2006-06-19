@@ -63,6 +63,8 @@ PHP                                                                        NEWS
 
 - Fixed memory leaks in openssl streams context options. (Pierre)
 - Fixed handling of extremely long paths inside tempnam() function. (Ilia)
+- Fixed bug #37780 (memory leak trying to execute a non existing file (CLI)).
+  (Mike)
 - Fixed bug #37747 (strtotime segfaults when given "nextyear"). (Derick)
 - Fixed bug #37720 (merge_php_config scrambles values). (Mike,
   pumuckel at metropolis dot de)
