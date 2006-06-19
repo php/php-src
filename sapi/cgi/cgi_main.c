@@ -387,9 +387,11 @@ static char *sapi_cgibin_getenv(char *name, size_t name_len TSRMLS_DC)
 static char *_sapi_cgibin_putenv(char *name, char *value TSRMLS_DC)
 {
 	int name_len;
+#if !HAVE_SETENV || !HAVE_UNSETENV
 	int len;
 	char *buf;
-	
+#endif
+
 	if (!name) {
 		return NULL;
 	}
