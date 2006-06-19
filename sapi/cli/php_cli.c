@@ -305,6 +305,14 @@ static char* sapi_cli_read_cookies(TSRMLS_D)
 	return NULL;
 }
 
+static int sapi_cli_header_handler(sapi_header_struct *h, sapi_headers_struct *s TSRMLS_DC)
+{
+	/* free allocated header line */
+	efree(h->header);
+	/* avoid pushing headers into SAPI headers list */
+	return 0;
+}
+
 static int sapi_cli_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
 	/* We do nothing here, this function is needed to prevent that the fallback
@@ -370,7 +378,7 @@ static sapi_module_struct cli_sapi_module = {
 
 	php_error,						/* error handler */
 
-	NULL,							/* header handler */
+	sapi_cli_header_handler,		/* header handler */
 	sapi_cli_send_headers,			/* send headers handler */
 	sapi_cli_send_header,			/* send header handler */
 
@@ -1255,6 +1263,7 @@ out_err:
 	exit(exit_status);
 
 err:
+	sapi_deactivate(TSRMLS_C);
 	zend_ini_deactivate(TSRMLS_C);
 	exit_status = 1;
 	goto out_err;
