@@ -1059,6 +1059,7 @@ PHP_FUNCTION(posix_strerror)
 
 #endif
 
+#ifdef HAVE_INITGROUPS
 /* {{{ proto bool initgroups(string name, int base_group_id)
    Calculate the group access list for the user specified in name. */
 PHP_FUNCTION(posix_initgroups)
@@ -1074,6 +1075,7 @@ PHP_FUNCTION(posix_initgroups)
 	RETURN_BOOL(!initgroups((const char *)name, basegid));
 }
 /* }}} */
+#endif
 
 /*
  * Local variables:
