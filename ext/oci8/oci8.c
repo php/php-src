@@ -371,7 +371,7 @@ zend_module_entry oci8_module_entry = {
 	PHP_RINIT(oci),       /* per-request startup function */
 	PHP_RSHUTDOWN(oci),   /* per-request shutdown function */
 	PHP_MINFO(oci),       /* information function */
-	"1.1",
+	"1.2.1",
 	PHP_MODULE_GLOBALS(oci),  /* globals descriptor */
 	PHP_GINIT(oci),           /* globals ctor */
 	NULL,                     /* globals dtor */
@@ -651,6 +651,7 @@ PHP_MINFO_FUNCTION(oci)
 
 	php_info_print_table_start();
 	php_info_print_table_row(2, "OCI8 Support", "enabled");
+	php_info_print_table_row(2, "Version", "1.2.1");
 	php_info_print_table_row(2, "Revision", "$Revision$");
 
 	sprintf(buf, "%ld", OCI_G(num_persistent));
