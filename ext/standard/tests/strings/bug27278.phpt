@@ -21,5 +21,5 @@ string(2) "02"
 string(2) "02"
 --UEXPECT--
 unicode(2) "02"
-unicode(2) "02"
+string(2) "02"
 unicode(2) "02"
