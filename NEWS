@@ -63,6 +63,7 @@ PHP                                                                        NEWS
 
 - Fixed memory leaks in openssl streams context options. (Pierre)
 - Fixed handling of extremely long paths inside tempnam() function. (Ilia)
+- Fixed bug #37864 (file_get_contents() leaks on empty file). (Hannes)
 - Fixed bug #37807 (segmentation fault during SOAP schema import). (Tony)
 - Fixed bug #37780 (memory leak trying to execute a non existing file (CLI)).
   (Mike)
