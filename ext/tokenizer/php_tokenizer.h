@@ -35,9 +35,6 @@ extern zend_module_entry tokenizer_module_entry;
 #endif
 
 PHP_MINIT_FUNCTION(tokenizer);
-PHP_MSHUTDOWN_FUNCTION(tokenizer);
-PHP_RINIT_FUNCTION(tokenizer);
-PHP_RSHUTDOWN_FUNCTION(tokenizer);
 PHP_MINFO_FUNCTION(tokenizer);
 
 PHP_FUNCTION(confirm_tokenizer_compiled);	/* For testing, remove later. */
