@@ -1635,7 +1635,7 @@ PHPAPI size_t _php_stream_copy_to_mem_ex(php_stream *src, zend_uchar rettype, vo
 
 		p = php_stream_mmap_range(src, php_stream_tell(src), maxlen, PHP_STREAM_MAP_MODE_SHARED_READONLY, &mapped);
 
-		if (p) {
+		if (p && mapped) {
 			*buf = pemalloc_rel_orig(mapped + 1, persistent);
 
 			if (*buf) {
