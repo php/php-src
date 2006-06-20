@@ -26,7 +26,7 @@ foreach ($strings as $str) {
 $i = 0;
 $r = sqlite_query("SELECT * from strings", $db);
 while ($row = sqlite_fetch_array($r, SQLITE_NUM)) {
-	if ($row[0] !== $strings[$i]) {
+	if ($row[0] != $strings[$i]) {
 		echo "FAIL!\n";
 		var_dump($row[0]);
 		var_dump($strings[$i]);
