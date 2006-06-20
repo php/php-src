@@ -2415,8 +2415,8 @@ ZEND_API int zend_fcall_info_args(zend_fcall_info *fci, zval *args TSRMLS_DC)
 
 ZEND_API int zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_cache *fcc, zval **retval_ptr_ptr, zval *args TSRMLS_DC)
 {
-	zval *retval, ***org_params;
-	int  result, org_count;
+	zval *retval, ***org_params = NULL;
+	int  result, org_count = 0;
 
 	fci->retval_ptr_ptr = retval_ptr_ptr ? retval_ptr_ptr : &retval;
 	if (args) {
