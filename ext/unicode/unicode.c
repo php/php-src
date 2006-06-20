@@ -232,6 +232,66 @@ PHP_FUNCTION(unicode_get_subst_char)
 }
 /* }}} */
 
+PHP_FUNCTION(unicode_set_error_handler)
+{
+	zval	   *error_handler;
+	zend_bool	had_orig_error_handler=0;
+	zval		error_handler_name;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &error_handler) == FAILURE) {
+		return;
+	}
+
+	if (Z_TYPE_P(error_handler) != IS_NULL) { /* NULL == unset */
+		if (!zend_is_callable(error_handler, 0, &error_handler_name)) {
+			zend_error(E_WARNING, "%v() expects the argument (%R) to be a valid callback",
+					   get_active_function_name(TSRMLS_C), Z_TYPE(error_handler_name), Z_UNIVAL(error_handler_name));
+			zval_dtor(&error_handler_name);
+			return;
+		}
+		zval_dtor(&error_handler_name);
+	}
+
+	if (UG(conv_error_handler)) {
+		had_orig_error_handler = 1;
+		*return_value = *UG(conv_error_handler);
+		zval_copy_ctor(return_value);
+		zend_ptr_stack_push(&UG(conv_error_handlers), UG(conv_error_handler));
+	}
+	ALLOC_ZVAL(UG(conv_error_handler));
+
+	if (Z_TYPE_P(error_handler) == IS_NULL) { /* unset user-defined handler */
+		FREE_ZVAL(UG(conv_error_handler));
+		UG(conv_error_handler) = NULL;
+		zval_dtor(return_value);
+		RETURN_TRUE;
+	}
+
+	*UG(conv_error_handler) = *error_handler;
+	zval_copy_ctor(UG(conv_error_handler));
+
+	if (!had_orig_error_handler) {
+		RETURN_NULL();
+	}
+}
+
+PHP_FUNCTION(unicode_restore_error_handler)
+{
+	if (UG(conv_error_handler)) {
+		zval *ceh = UG(conv_error_handler);
+
+		UG(conv_error_handler) = NULL;
+		zval_ptr_dtor(&ceh);
+	}
+
+	if (zend_ptr_stack_num_elements(&UG(conv_error_handlers))==0) {
+		UG(conv_error_handler) = NULL;
+	} else {
+		UG(conv_error_handler) = zend_ptr_stack_pop(&UG(conv_error_handlers));
+	}
+	RETURN_TRUE;
+}
+
 /* {{{ unicode_functions[] */
 zend_function_entry unicode_functions[] = {
 	PHP_FE(locale_get_default, NULL)
@@ -239,6 +299,8 @@ zend_function_entry unicode_functions[] = {
 	PHP_FE(unicode_decode, NULL)
 	PHP_FE(unicode_semantics, NULL)
 	PHP_FE(unicode_encode, NULL)
+	PHP_FE(unicode_set_error_handler, NULL)
+	PHP_FE(unicode_restore_error_handler, NULL)
 	PHP_FE(unicode_set_error_mode, NULL)
 	PHP_FE(unicode_set_subst_char, NULL)
 	PHP_FE(unicode_get_error_mode, NULL)
@@ -306,7 +368,6 @@ zend_function_entry unicode_functions[] = {
 	{ NULL, NULL, NULL }
 };
 /* }}} */
-
 
 /* {{{ unicode_module_entry
  */

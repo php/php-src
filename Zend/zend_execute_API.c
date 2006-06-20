@@ -187,6 +187,7 @@ void init_executor(TSRMLS_D)
 	zend_stack_init(&EG(user_error_handlers_error_reporting));
 	zend_ptr_stack_init(&EG(user_error_handlers));
 	zend_ptr_stack_init(&EG(user_exception_handlers));
+	zend_ptr_stack_init(&UG(conv_error_handlers));
 
 	zend_objects_store_init(&EG(objects_store), 1024);
 
@@ -251,10 +252,18 @@ void shutdown_executor(TSRMLS_D)
 			FREE_ZVAL(zeh);
 		}
 
+		if (UG(conv_error_handler)) {
+			zeh = UG(conv_error_handler);
+			UG(conv_error_handler) = NULL;
+			zval_dtor(zeh);
+			FREE_ZVAL(zeh);
+		}
+
 		zend_stack_destroy(&EG(user_error_handlers_error_reporting));
 		zend_stack_init(&EG(user_error_handlers_error_reporting));
 		zend_ptr_stack_clean(&EG(user_error_handlers), ZVAL_DESTRUCTOR, 1);
 		zend_ptr_stack_clean(&EG(user_exception_handlers), ZVAL_DESTRUCTOR, 1);
+		zend_ptr_stack_clean(&UG(conv_error_handlers), ZVAL_DESTRUCTOR, 1);
 	} zend_end_try();
 
 	zend_try {
@@ -308,6 +317,7 @@ void shutdown_executor(TSRMLS_D)
 		zend_stack_destroy(&EG(user_error_handlers_error_reporting));
 		zend_ptr_stack_destroy(&EG(user_error_handlers));
 		zend_ptr_stack_destroy(&EG(user_exception_handlers));
+		zend_ptr_stack_destroy(&UG(conv_error_handlers));
 		zend_objects_store_destroy(&EG(objects_store));
 		if (EG(in_autoload)) {
 			zend_hash_destroy(EG(in_autoload));
