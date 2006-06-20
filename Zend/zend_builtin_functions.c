@@ -1327,6 +1327,7 @@ ZEND_FUNCTION(set_exception_handler)
 	if (Z_TYPE_PP(exception_handler) == IS_NULL) { /* unset user-defined handler */
 		FREE_ZVAL(EG(user_exception_handler));
 		EG(user_exception_handler) = NULL;
+		zval_dtor(return_value);
 		RETURN_TRUE;
 	}
 
