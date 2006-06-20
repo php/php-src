@@ -1416,7 +1416,7 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, int optio
 	php_libxml_ref_obj *document = NULL;
 	int validate, recover, resolve_externals, keep_blanks, substitute_ent;
 	int resolved_path_len;
-	int old_error_reporting;
+	int old_error_reporting = 0;
 	char *directory=NULL, resolved_path[MAXPATHLEN];
 
 	if (id != NULL) {
@@ -1607,7 +1607,7 @@ PHP_FUNCTION(dom_document_save)
 {
 	zval *id;
 	xmlDoc *docp;
-	int file_len = 0, bytes, format, saveempty;
+	int file_len = 0, bytes, format, saveempty = 0;
 	dom_object *intern;
 	dom_doc_propsptr doc_props;
 	char *file;
@@ -1656,7 +1656,7 @@ PHP_FUNCTION(dom_document_savexml)
 	xmlChar *mem;
 	dom_object *intern, *nodeobj;
 	dom_doc_propsptr doc_props;
-	int size, format, saveempty;
+	int size, format, saveempty = 0;
 	long options = 0;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|O!l", &id, dom_document_class_entry, &nodep, dom_node_class_entry, &options) == FAILURE) {
@@ -2174,7 +2174,6 @@ PHP_METHOD(domdocument, registerNodeClass)
 	int baseclass_len = 0, extendedclass_len = 0;
 	zend_class_entry *basece = NULL, *ce = NULL;
 	dom_object *intern;
-	zend_uchar type1, type2;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oss!", &id, dom_document_class_entry, &baseclass, &baseclass_len, &extendedclass, &extendedclass_len) == FAILURE) {
 		return;
