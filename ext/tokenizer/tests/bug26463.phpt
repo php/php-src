@@ -20,7 +20,7 @@ array(19) {
   [0]=>
   array(2) {
     [0]=>
-    int(369)
+    int(370)
     [1]=>
     string(6) "<?php
 "
@@ -28,7 +28,7 @@ array(19) {
   [1]=>
   array(2) {
     [0]=>
-    int(310)
+    int(311)
     [1]=>
     string(2) "$x"
   }
@@ -37,7 +37,7 @@ array(19) {
   [3]=>
   array(2) {
     [0]=>
-    int(373)
+    int(374)
     [1]=>
     string(6) "<<<DD
 "
@@ -45,7 +45,7 @@ array(19) {
   [4]=>
   array(2) {
     [0]=>
-    int(308)
+    int(309)
     [1]=>
     string(13) "jhdsjkfhjdsh
 "
@@ -53,14 +53,14 @@ array(19) {
   [5]=>
   array(2) {
     [0]=>
-    int(374)
+    int(375)
     [1]=>
     string(2) "DD"
   }
   [6]=>
   array(2) {
     [0]=>
-    int(372)
+    int(373)
     [1]=>
     string(1) "
 "
@@ -70,7 +70,7 @@ array(19) {
   [8]=>
   array(2) {
     [0]=>
-    int(316)
+    int(317)
     [1]=>
     string(2) """"
   }
@@ -79,7 +79,7 @@ array(19) {
   [10]=>
   array(2) {
     [0]=>
-    int(372)
+    int(373)
     [1]=>
     string(1) "
 "
@@ -87,7 +87,7 @@ array(19) {
   [11]=>
   array(2) {
     [0]=>
-    int(310)
+    int(311)
     [1]=>
     string(2) "$a"
   }
@@ -96,7 +96,7 @@ array(19) {
   [13]=>
   array(2) {
     [0]=>
-    int(373)
+    int(374)
     [1]=>
     string(8) "<<<DDDD
 "
@@ -104,7 +104,7 @@ array(19) {
   [14]=>
   array(2) {
     [0]=>
-    int(308)
+    int(309)
     [1]=>
     string(13) "jhdsjkfhjdsh
 "
@@ -112,7 +112,7 @@ array(19) {
   [15]=>
   array(2) {
     [0]=>
-    int(374)
+    int(375)
     [1]=>
     string(4) "DDDD"
   }
@@ -121,7 +121,7 @@ array(19) {
   [17]=>
   array(2) {
     [0]=>
-    int(372)
+    int(373)
     [1]=>
     string(1) "
 "
@@ -129,7 +129,126 @@ array(19) {
   [18]=>
   array(2) {
     [0]=>
-    int(371)
+    int(372)
+    [1]=>
+    string(2) "?>"
+  }
+}
+--UEXPECTF--
+array(19) {
+  [0]=>
+  array(2) {
+    [0]=>
+    int(370)
+    [1]=>
+    string(6) "<?php
+"
+  }
+  [1]=>
+  array(2) {
+    [0]=>
+    int(311)
+    [1]=>
+    string(2) "$x"
+  }
+  [2]=>
+  string(1) "="
+  [3]=>
+  array(2) {
+    [0]=>
+    int(374)
+    [1]=>
+    string(6) "<<<DD
+"
+  }
+  [4]=>
+  array(2) {
+    [0]=>
+    int(309)
+    [1]=>
+    string(13) "jhdsjkfhjdsh
+"
+  }
+  [5]=>
+  array(2) {
+    [0]=>
+    int(375)
+    [1]=>
+    string(2) "DD"
+  }
+  [6]=>
+  array(2) {
+    [0]=>
+    int(373)
+    [1]=>
+    string(1) "
+"
+  }
+  [7]=>
+  string(1) "."
+  [8]=>
+  array(2) {
+    [0]=>
+    int(317)
+    [1]=>
+    string(2) """"
+  }
+  [9]=>
+  string(1) ";"
+  [10]=>
+  array(2) {
+    [0]=>
+    int(373)
+    [1]=>
+    string(1) "
+"
+  }
+  [11]=>
+  array(2) {
+    [0]=>
+    int(311)
+    [1]=>
+    string(2) "$a"
+  }
+  [12]=>
+  string(1) "="
+  [13]=>
+  array(2) {
+    [0]=>
+    int(374)
+    [1]=>
+    string(8) "<<<DDDD
+"
+  }
+  [14]=>
+  array(2) {
+    [0]=>
+    int(309)
+    [1]=>
+    string(13) "jhdsjkfhjdsh
+"
+  }
+  [15]=>
+  array(2) {
+    [0]=>
+    int(375)
+    [1]=>
+    string(4) "DDDD"
+  }
+  [16]=>
+  string(1) ";"
+  [17]=>
+  array(2) {
+    [0]=>
+    int(373)
+    [1]=>
+    string(1) "
+"
+  }
+  [18]=>
+  array(2) {
+    [0]=>
+    int(372)
     [1]=>
     string(2) "?>"
   }
