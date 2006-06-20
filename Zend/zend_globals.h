@@ -312,6 +312,9 @@ struct _zend_unicode_globals {
 	zend_collator *default_collator;
 
 	HashTable flex_compatible;			 /* table of flex-compatible encodings */
+
+	zval *conv_error_handler;			 /* user-defined conversion error handler */
+	zend_ptr_stack conv_error_handlers;  /* stack for user error handlers */
 };
 
 #endif /* ZEND_GLOBALS_H */

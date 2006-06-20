@@ -920,6 +920,7 @@ static void unicode_globals_ctor(zend_unicode_globals *unicode_globals TSRMLS_DC
 	memset(unicode_globals->from_subst_char, 0, 3 * sizeof(UChar));
 	zend_codepoint_to_uchar(0x3f, unicode_globals->from_subst_char);
 	unicode_globals->to_error_mode = ZEND_CONV_ERROR_STOP;
+	unicode_globals->conv_error_handler = NULL;
 
 	zend_hash_init_ex(&unicode_globals->flex_compatible, 0, NULL, NULL, 1, 0);
 }
