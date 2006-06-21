@@ -378,6 +378,18 @@ PHP_FUNCTION(bzopen)
 
 		php_stream_from_zval(stream, file);
 
+		if (!memchr(stream->mode, Z_STRVAL_PP(mode)[0], strlen(stream->mode))) {
+			switch (Z_STRVAL_PP(mode)[0]) {
+				case 'r':
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot read from a stream opened in write only mode");
+					break;
+				case 'w':
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot write to a stream opened in read only mode");
+					break;
+			}
+			RETURN_FALSE;
+		}
+
 		if (FAILURE == php_stream_cast(stream, PHP_STREAM_AS_FD, (void *) &fd, REPORT_ERRORS)) {
 			RETURN_FALSE;
 		}
