@@ -1221,7 +1221,7 @@ static size_t _php_stream_write_buffer(php_stream *stream, int buf_type, zstr bu
 		/* Use runtime_encoding to map to binary */
 		num_conv = zend_convert_from_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &str, &len, buf.u, buflen, &status);
 		if (U_FAILURE(status)) {
-			zend_raise_conversion_error_ex("Unable to convert data to be writen", ZEND_U_CONVERTER(UG(runtime_encoding_conv)),
+			zend_raise_conversion_error_ex("Unable to convert data to be written", ZEND_U_CONVERTER(UG(runtime_encoding_conv)),
 									ZEND_FROM_UNICODE, num_conv, (UG(from_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%d character unicode buffer downcoded for binary stream runtime_encoding", ulen);
@@ -1579,7 +1579,7 @@ PHPAPI size_t _php_stream_passthru(php_stream * stream STREAMS_DC TSRMLS_DC)
 			if (U_FAILURE(status)) {
 				/* Memory overflow isn't a problem becuase MAX_BYTES_FOR_STRING was allocated,
 				   anything else is a more serious problem */
-				zend_raise_conversion_error_ex("Unable to convert unicode character using output_encoding, at least one character was lost",
+				zend_raise_conversion_error_ex("Unable to convert Unicode character using output_encoding, at least one character was lost",
 									conv, ZEND_FROM_UNICODE, len, (UG(from_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
 			}
 			if (outbuf > outbuf_start) {
