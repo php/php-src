@@ -353,7 +353,7 @@ PHP_FUNCTION(bzopen)
 	}
 	convert_to_string_ex(mode);
 
-	if (Z_STRVAL_PP(mode)[0] != 'r' && Z_STRVAL_PP(mode)[0] != 'w' && Z_STRVAL_PP(mode)[1] != '\0') {
+	if (Z_STRLEN_PP(mode) != 1 || (Z_STRVAL_PP(mode)[0] != 'r' && Z_STRVAL_PP(mode)[0] != 'w')) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "'%s' is not a valid mode for bzopen(). Only 'w' and 'r' are supported.", Z_STRVAL_PP(mode));
 		RETURN_FALSE;
 	}
@@ -361,6 +361,12 @@ PHP_FUNCTION(bzopen)
 	/* If it's not a resource its a string containing the filename to open */
 	if (Z_TYPE_PP(file) != IS_RESOURCE) {
 		convert_to_string_ex(file);
+
+		if (Z_STRLEN_PP(file) == 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "filename cannot be empty");
+			RETURN_FALSE;
+		}
+
 		stream = php_stream_bz2open(NULL,
 									Z_STRVAL_PP(file), 
 									Z_STRVAL_PP(mode), 
