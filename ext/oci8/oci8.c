@@ -50,7 +50,9 @@
 #include "php_oci8_int.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(oci)
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
 static PHP_GINIT_FUNCTION(oci);
+#endif
 
 /* True globals, no need for thread safety */
 int le_connection;
@@ -372,11 +374,15 @@ zend_module_entry oci8_module_entry = {
 	PHP_RSHUTDOWN(oci),   /* per-request shutdown function */
 	PHP_MINFO(oci),       /* information function */
 	"1.2.1",
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
 	PHP_MODULE_GLOBALS(oci),  /* globals descriptor */
 	PHP_GINIT(oci),           /* globals ctor */
 	NULL,                     /* globals dtor */
 	NULL,                     /* post deactivate */
 	STANDARD_MODULE_PROPERTIES_EX
+#else
+	STANDARD_MODULE_PROPERTIES
+#endif
 };
 /* }}} */
 
@@ -462,7 +468,11 @@ static void php_oci_cleanup_global_handles(TSRMLS_D)
 /* {{{ PHP_GINIT_FUNCTION
  Zerofill globals during module init
 */
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
 static PHP_GINIT_FUNCTION(oci)
+#else
+static void php_oci_init_globals(zend_oci_globals *oci_globals TSRMLS_DC)
+#endif
 {
 	memset(oci_globals, 0, sizeof(zend_oci_globals));
 }
@@ -491,6 +501,11 @@ PHP_MINIT_FUNCTION(oci)
 	OCIInitialize(PHP_OCI_INIT_MODE, NULL, NULL, NULL, NULL);
 #endif
 
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
+	/* this is handled by new globals management code */
+#else
+	ZEND_INIT_MODULE_GLOBALS(oci, php_oci_init_globals, NULL);
+#endif
 	REGISTER_INI_ENTRIES();
 
 	le_statement = zend_register_list_destructors_ex(php_oci_statement_list_dtor, NULL, "oci8 statement", module_number);
