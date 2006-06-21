@@ -381,19 +381,39 @@ PHP_FUNCTION(bzopen)
 	} else {
 		/* If it is a resource, than its a stream resource */
 		int fd;
+		int stream_mode_len;
 
 		php_stream_from_zval(stream, file);
-
-		if (!memchr(stream->mode, Z_STRVAL_PP(mode)[0], strlen(stream->mode))) {
-			switch (Z_STRVAL_PP(mode)[0]) {
-				case 'r':
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot read from a stream opened in write only mode");
-					break;
-				case 'w':
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot write to a stream opened in read only mode");
-					break;
-			}
+		stream_mode_len = strlen(stream->mode);
+		
+		if (stream_mode_len != 1 && !(stream_mode_len == 2 && memchr(stream->mode, 'b', 2))) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot use stream opened in mode '%s'", stream->mode);
 			RETURN_FALSE;
+		} else if (stream_mode_len == 1 && stream->mode[0] != 'r' && stream->mode[0] != 'w' && stream->mode[0] != 'a' && stream->mode[0] != 'x') {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot use stream opened in mode '%s'", stream->mode);
+			RETURN_FALSE;
+		}
+
+		switch(Z_STRVAL_PP(mode)[0]) {
+			case 'r':
+				/* only "r" and "rb" are supported */
+				if (stream->mode[0] != Z_STRVAL_PP(mode)[0] && !(stream_mode_len == 2 && stream->mode[1] != Z_STRVAL_PP(mode)[0])) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot read from a stream opened in write only mode");
+					RETURN_FALSE;
+				}
+				break;
+			case 'w':
+				/* support only "w"(b), "a"(b), "x"(b) */
+				if (stream->mode[0] != Z_STRVAL_PP(mode)[0] && !(stream_mode_len == 2 && stream->mode[1] != Z_STRVAL_PP(mode)[0])
+					&& stream->mode[0] != 'a' && !(stream_mode_len == 2 && stream->mode[1] != 'a')
+					&& stream->mode[0] != 'x' && !(stream_mode_len == 2 && stream->mode[1] != 'x')) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot write to a stream opened in read only mode");
+					RETURN_FALSE;
+				}
+				break;
+			default:
+				/* not reachable */
+				break;
 		}
 
 		if (FAILURE == php_stream_cast(stream, PHP_STREAM_AS_FD, (void *) &fd, REPORT_ERRORS)) {
