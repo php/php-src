@@ -390,23 +390,14 @@ ZEND_API char* zend_unicode_to_ascii(const UChar *us, int us_len TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ zend_raise_conversion_error_ex */
-ZEND_API void zend_raise_conversion_error_ex(char *message, UConverter *conv, zend_conv_direction dir, int error_char_offset, int use_exception TSRMLS_DC)
+/* {{{ zend_default_conversion_error_handler */
+static void zend_default_conversion_error_handler(char *message, UConverter *conv, zend_conv_direction dir, int error_char_offset TSRMLS_DC)
 {
 	const char *conv_name;
 	UErrorCode status = U_ZERO_ERROR;
 
 	if (!message)
 		return;
-
-	if (!conv) {
-		if (use_exception) {
-			zend_throw_exception_ex(unicodeConversionException, 0 TSRMLS_CC, "%s", message);
-		} else {
-			zend_error(E_WARNING, "%s", message);
-		}
-		return;
-	}
 
 	conv_name = ucnv_getName(conv, &status);
 	/*
@@ -426,11 +417,7 @@ ZEND_API void zend_raise_conversion_error_ex(char *message, UConverter *conv, ze
 		ucnv_getInvalidUChars(conv, err_char, &err_char_len, &status);
 		codepoint = (err_char_len < 2) ? err_char[0] : U16_GET_SUPPLEMENTARY(err_char[0], err_char[1]);
 
-		if (use_exception) {
-			zend_throw_exception_ex(unicodeConversionException, 0 TSRMLS_CC, message_fmt, message, conv_name?conv_name:"<unknown>", codepoint, error_char_offset-1);
-		} else {
-			zend_error(E_WARNING, message_fmt, message, conv_name?conv_name:"", codepoint, error_char_offset-1);
-		}
+		zend_error(E_WARNING, message_fmt, message, conv_name?conv_name:"", codepoint, error_char_offset-1);
 	} else {
 		char err_char[8]; /* UTF-8 uses up to 8 bytes */
 		char buf[32];     /* 4x number of error bytes */
@@ -446,11 +433,106 @@ ZEND_API void zend_raise_conversion_error_ex(char *message, UConverter *conv, ze
 			p += 5;
 		}
 
-		if (use_exception) {
-			zend_throw_exception_ex(unicodeConversionException, 0 TSRMLS_CC, message_fmt, message, conv_name?conv_name:"<unknown>", buf, error_char_offset-err_char_len);
-		} else {
-			zend_error(E_WARNING, message_fmt, message, conv_name?conv_name:"", buf, error_char_offset-err_char_len);
+		zend_error(E_WARNING, message_fmt, message, conv_name?conv_name:"", buf, error_char_offset-err_char_len);
+	}
+}
+/* }}} */
+
+/* {{{ zend_call_conversion_error_handler */
+static void zend_call_conversion_error_handler(char *message, UConverter *conv, zend_conv_direction dir, int error_char_offset TSRMLS_DC)
+{
+	zval *z_message, *z_dir, *z_encoding, *z_char, *z_offset;
+	zval ***params;
+	zval *retval;
+	zval *orig_user_error_handler;
+	const char *conv_name;
+	UErrorCode status = U_ZERO_ERROR;
+
+	ALLOC_INIT_ZVAL(z_message);
+	ALLOC_INIT_ZVAL(z_dir);
+	ALLOC_INIT_ZVAL(z_encoding);
+	ALLOC_INIT_ZVAL(z_char);
+	ALLOC_INIT_ZVAL(z_offset);
+
+	if (message) {
+		ZVAL_STRING(z_message, message, 1);
+	} else {
+		ZVAL_NULL(z_message);
+	}
+
+	ZVAL_LONG(z_dir, dir);
+
+	conv_name = ucnv_getName(conv, &status);
+	/*
+	 * UTODO
+	 * use some other standard than MIME? or fallback onto IANA? or use
+	 * internal converter name? ponder
+	 * maybe pass Converter object, when it's implemented?
+	 */
+	conv_name = ucnv_getStandardName(conv_name, "MIME", &status);
+	ZVAL_STRING(z_encoding, (char *) conv_name, 1);
+
+	if (dir == ZEND_FROM_UNICODE) {
+		UChar err_char[U16_MAX_LENGTH];
+		int8_t err_char_len = sizeof(err_char);
+
+		ucnv_getInvalidUChars(conv, err_char, &err_char_len, &status);
+		ZVAL_UNICODEL(z_char, err_char, err_char_len, 1);
+		ZVAL_LONG(z_offset, error_char_offset-1);
+	} else {
+		char err_char[8]; /* UTF-8 uses up to 8 bytes */
+		int8_t err_char_len = sizeof(err_char);
+
+		ucnv_getInvalidChars(conv, err_char, &err_char_len, &status);
+		ZVAL_STRINGL(z_char, err_char, err_char_len, 1);
+		ZVAL_LONG(z_offset, error_char_offset-err_char_len);
+	}
+
+	params = (zval ***) emalloc(sizeof(zval **) * 6);
+	params[0] = &z_dir;
+	params[1] = &z_encoding;
+	params[2] = &z_char;
+	params[3] = &z_offset;
+	params[4] = &z_message;
+
+	orig_user_error_handler = UG(conv_error_handler);
+	UG(conv_error_handler) = NULL;
+
+	if (call_user_function_ex(EG(function_table), NULL, orig_user_error_handler, &retval, 5, params, 1, NULL TSRMLS_CC)==SUCCESS) {
+		if (retval) {
+			/* user error handler returned 'false', use built-in error handler */
+			if (Z_TYPE_P(retval) == IS_BOOL && Z_LVAL_P(retval) == 0) {
+				zend_default_conversion_error_handler(message, conv, dir, error_char_offset TSRMLS_CC);
+			}
+			zval_ptr_dtor(&retval);
 		}
+	} else if (!EG(exception)) {
+		/* The user error handler failed, use built-in error handler */
+		zend_default_conversion_error_handler(message, conv, dir, error_char_offset TSRMLS_CC);
+	}
+
+	if (!UG(conv_error_handler)) {
+		UG(conv_error_handler) = orig_user_error_handler;
+	} else {
+		zval_ptr_dtor(&orig_user_error_handler);
+	}
+
+	efree(params);
+	zval_ptr_dtor(&z_dir);
+	zval_ptr_dtor(&z_encoding);
+	zval_ptr_dtor(&z_char);
+	zval_ptr_dtor(&z_offset);
+	zval_ptr_dtor(&z_message);
+}
+/* }}} */
+
+/* {{{ zend_raise_conversion_error_ex */
+ZEND_API void zend_raise_conversion_error_ex(char *message, UConverter *conv, zend_conv_direction dir, int error_char_offset TSRMLS_DC)
+{
+	if (UG(conv_error_handler)) {
+		zend_call_conversion_error_handler(message, conv, dir, error_char_offset TSRMLS_CC);
+	} else {
+		zend_default_conversion_error_handler(message, conv, dir, error_char_offset TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -471,7 +553,7 @@ ZEND_API int zval_unicode_to_string(zval *string, UConverter *conv TSRMLS_DC)
 	if (U_FAILURE(status)) {
 		int32_t offset = u_countChar32(u, num_conv);
 
-		zend_raise_conversion_error_ex("Could not convert Unicode string to binary string", conv, ZEND_FROM_UNICODE, offset, (UG(from_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
+		zend_raise_conversion_error_ex("Could not convert Unicode string to binary string", conv, ZEND_FROM_UNICODE, offset TSRMLS_CC);
 		if (s) {
 			efree(s);
 		}
@@ -500,7 +582,7 @@ ZEND_API int zval_string_to_unicode_ex(zval *string, UConverter *conv TSRMLS_DC)
 	num_conv = zend_convert_to_unicode(conv, &u, &u_len, s, s_len, &status);
 
 	if (U_FAILURE(status)) {
-		zend_raise_conversion_error_ex("Could not convert binary string to Unicode string", conv, ZEND_TO_UNICODE, num_conv, (UG(to_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
+		zend_raise_conversion_error_ex("Could not convert binary string to Unicode string", conv, ZEND_TO_UNICODE, num_conv TSRMLS_CC);
 		if (u) {
 			efree(u);
 		}

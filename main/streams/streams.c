@@ -1222,7 +1222,7 @@ static size_t _php_stream_write_buffer(php_stream *stream, int buf_type, zstr bu
 		num_conv = zend_convert_from_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &str, &len, buf.u, buflen, &status);
 		if (U_FAILURE(status)) {
 			zend_raise_conversion_error_ex("Unable to convert data to be written", ZEND_U_CONVERTER(UG(runtime_encoding_conv)),
-									ZEND_FROM_UNICODE, num_conv, (UG(from_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
+									ZEND_FROM_UNICODE, num_conv TSRMLS_CC);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%d character unicode buffer downcoded for binary stream runtime_encoding", ulen);
 		}
@@ -1270,7 +1270,7 @@ static size_t _php_stream_write_buffer(php_stream *stream, int buf_type, zstr bu
 		} else {
 			/* Figure out how didwrite corresponds to the input buffer */
 			char *tmp = emalloc(didwrite + 1), *t = tmp;
-			UChar *s = buf_orig;
+			const UChar *s = buf_orig;
 			UErrorCode status = U_ZERO_ERROR;
 
 			ucnv_resetFromUnicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)));
@@ -1570,7 +1570,7 @@ PHPAPI size_t _php_stream_passthru(php_stream * stream STREAMS_DC TSRMLS_DC)
 
 		while ((b = php_stream_read_unicode(stream, inbuf_start, sizeof(inbuf_start))) > 0) {
 			char *outbuf = outbuf_start;
-			UChar *inbuf = inbuf_start;
+			const UChar *inbuf = inbuf_start;
 			UErrorCode status = U_ZERO_ERROR;
 			int len;
 
@@ -1580,7 +1580,7 @@ PHPAPI size_t _php_stream_passthru(php_stream * stream STREAMS_DC TSRMLS_DC)
 				/* Memory overflow isn't a problem becuase MAX_BYTES_FOR_STRING was allocated,
 				   anything else is a more serious problem */
 				zend_raise_conversion_error_ex("Unable to convert Unicode character using output_encoding, at least one character was lost",
-									conv, ZEND_FROM_UNICODE, len, (UG(from_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
+											   conv, ZEND_FROM_UNICODE, len TSRMLS_CC);
 			}
 			if (outbuf > outbuf_start) {
 				PHPWRITE(outbuf_start, outbuf - outbuf_start);
@@ -2594,8 +2594,7 @@ PHPAPI int _php_stream_path_encode(php_stream_wrapper *wrapper,
 			num_conv = zend_convert_from_unicode(UG(utf8_conv), &scheme, &scheme_len, path, (p - path) + delim_len, &status);
 			if (U_FAILURE(status)) {
 				if (options & REPORT_ERRORS) {
-					zend_raise_conversion_error_ex("Unable to convert filepath", UG(utf8_conv), ZEND_FROM_UNICODE,
-											num_conv, (UG(from_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
+					zend_raise_conversion_error_ex("Unable to convert filepath", UG(utf8_conv), ZEND_FROM_UNICODE, num_conv TSRMLS_CC);
 				}
 				*pathenc = NULL;
 				*pathenc_len = 0;
@@ -2634,7 +2633,7 @@ PHPAPI int _php_stream_path_encode(php_stream_wrapper *wrapper,
 	if (U_FAILURE(status)) {
 		if (options & REPORT_ERRORS) {
 			zend_raise_conversion_error_ex("Unable to convert filepath", ZEND_U_CONVERTER(UG(filesystem_encoding_conv)),
-							ZEND_FROM_UNICODE, num_conv, (UG(from_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
+							ZEND_FROM_UNICODE, num_conv TSRMLS_CC);
 		}
 
 		*pathenc = NULL;
@@ -2676,7 +2675,7 @@ PHPAPI int _php_stream_path_decode(php_stream_wrapper *wrapper,
 	if (U_FAILURE(status)) {
 		if (options & REPORT_ERRORS) {
 			zend_raise_conversion_error_ex("Unable to convert filepath", ZEND_U_CONVERTER(UG(filesystem_encoding_conv)),
-							ZEND_TO_UNICODE, num_conv, (UG(to_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
+							ZEND_TO_UNICODE, num_conv TSRMLS_CC);
 		}
 
 		*pathdec = NULL;

@@ -750,7 +750,7 @@ PHPAPI int _php_stream_bucket_convert(php_stream_bucket *bucket, unsigned char t
 			if (U_FAILURE(status)) {
 				int32_t offset = u_countChar32(bucket->buf.u, num_conv);
 
-				zend_raise_conversion_error_ex("Could not convert Unicode string to binary string", conv, ZEND_FROM_UNICODE, offset, (UG(from_error_mode) & ZEND_CONV_ERROR_EXCEPTION) TSRMLS_CC);
+				zend_raise_conversion_error_ex("Could not convert Unicode string to binary string", conv, ZEND_FROM_UNICODE, offset TSRMLS_CC);
 			}
 
 			if (bucket->own_buf) {
