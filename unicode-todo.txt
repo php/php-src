@@ -8,9 +8,6 @@
 * Should we apply identifier validity checks in functions that deal with
   identifiers, such as define(), get_class(), etc?
 
-* Resolve the differences in %G output format. sprintf() removes trailing
-  zeroes from the fractional part, and u_sprintf() doesn't.
-
 * Determine how to deal with filesystem and filenames when Unicode is
   involved. This concerns both the extension functions and things like
   compile_file(), open_file_for_scanning(), etc.
