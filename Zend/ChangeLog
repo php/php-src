@@ -1,3 +1,154 @@
+2006-06-21  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_constants.c
+      zend_unicode.c
+      zend_unicode.h:
+      Implement user conversion error handler support. Works as normal error
+      handler, in that it can return false to make the default one take over.
+      Handler signature is:
+        user_handler($direction, $encoding, $char_byte, $offset, $message)
+      
+      Also removed support for using exceptions in default error handler.
+
+2006-06-20  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend.c
+      zend_execute_API.c
+      zend_globals.h:
+      Implement unicode_set_error_handler() / unicode_restore_error_handler().
+      The error handler doesn't do anything yet. (vaporware)
+
+    * zend_builtin_functions.c:
+      Plug memory leak in set_exception_handler().
+
+2006-06-20  Antony Dovgal  <antony@zend.com>
+
+    * zend_API.c:
+      init variables
+
+    * (PHP_5_2)
+      tests/objects_013.phpt:
+      fix test
+
+    * tests/objects_013.phpt
+      tests/objects_014.phpt:
+      fix tests
+
+2006-06-19  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      tests/bug33732.phpt
+      tests/objects_014.phpt:
+      fix tests
+
+2006-06-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      zend_API.c
+      zend_API.h
+      zend_modules.h:
+      MFH: Added automatic module globals management.
+
+2006-06-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_exceptions.c:
+      - Arginfo fix (Hannes)
+
+2006-06-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_API.c
+      zend_API.h
+      zend_modules.h:
+      Added automatic module globals management.
+
+2006-06-13  Stefan Esser  <php@nopiracy.de>
+
+    * zend.c
+      zend_compile.c
+      zend_compile.h
+      zend_execute_API.c
+      zend_vm_def.h
+      zend_vm_execute.h:
+      Added hook for compile_string()
+
+2006-06-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend.c:
+      - Fix memleaks (by nuno)
+
+2006-06-12  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend.h
+      zend_language_scanner.l:
+      Be more explicit.
+
+2006-06-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      zend.c
+      zend.h:
+      Make zend_print_zval_r_ex() use the write callback function.
+
+2006-06-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug37707.phpt
+      tests/bug37707.phpt:
+      Proper fix for bug #37707 ("clone $x" must call __clone() enven if result
+      value is not used)
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_gen.php
+      zend_vm_gen.php:
+      Wrap "wrong" unreachable code with "#if 0"
+
+2006-06-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_vm_def.h
+      zend_vm_execute.h
+      tests/bug37707.phpt:
+      MFB: Fixed bug #37707 clone without assigning leaks memory
+
+    * tests/bug37707.phpt
+      tests/bug37707.phpt:
+      
+      file bug37707.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      zend_vm_def.h
+      zend_vm_execute.h:
+      Fixed bug #37707 clone without assigning leaks memory
+      
+
+2006-06-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      zend_API.c
+      zend_API.h:
+      - MFH zend_fcall_info_*() and parameter parsing option 'f'
+
+    * zend_vm_execute.h
+      zend_vm_execute.h:
+      - Regenerated after zend_vm_def.h change
+
+    * (PHP_5_2)
+      zend_API.c
+      zend_compile.c
+      zend_vm_def.h:
+      - MFH Fix issue with interfaces being inherited multiple times
+
+    * zend_API.c
+      zend_compile.c
+      zend_compile.c
+      zend_vm_def.h:
+      - Fix issue with interfaces being inherited multiple times
+
 2006-06-06  Antony Dovgal  <antony@zend.com>
 
     * zend_compile.c
