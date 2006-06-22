@@ -1185,6 +1185,10 @@ PHP_FUNCTION(strtotime)
 		RETURN_FALSE;
 	}
 
+	if (!time_len) {
+		RETURN_FALSE;
+	}
+
 	t = timelib_strtotime(times, time_len, &error, DATE_TIMEZONEDB);
 	error1 = error->error_count;
 	timelib_error_container_dtor(error);
