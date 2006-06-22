@@ -1,3 +1,881 @@
+2006-06-21  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_constants.c
+      ZendEngine2/zend_unicode.c
+      ZendEngine2/zend_unicode.h
+      main/streams/filter.c
+      main/streams/streams.c:
+      Implement user conversion error handler support. Works as normal error
+      handler, in that it can return false to make the default one take over.
+      Handler signature is:
+        user_handler($direction, $encoding, $char_byte, $offset, $message)
+      
+      Also removed support for using exceptions in default error handler.
+
+    * main/streams/streams.c:
+      Typos.
+
+2006-06-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/bz2/bz2_filter.c:
+      MFB: Fixed compiler warnings.
+
+    * (PHP_5_2)
+      ext/bz2/bz2_filter.c:
+      Fixed compiler warnings.
+
+2006-06-21  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/bz2/bz2.c
+      ext/bz2/tests/001.phpt
+      ext/bz2/tests/002.phpt:
+      MFH: improve check for stream mode, add tests
+
+    * ext/bz2/bz2.c
+      ext/bz2/tests/001.phpt
+      ext/bz2/tests/001.phpt
+      ext/bz2/tests/002.phpt
+      ext/bz2/tests/002.phpt:
+      improve check for stream mode, add tests
+
+    * (PHP_5_2)
+      ext/bz2/bz2.c:
+      MFH: don't try to read or write from/to a stream if it was open in
+      different mode (leads to segfault in libbz2)
+
+    * ext/bz2/bz2.c:
+      don't try to read or write from/to a stream if it was open in different
+      mode (leads to segfault in libbz2)
+
+    * (PHP_5_2)
+      ext/bz2/bz2.c:
+      MFH: fix invalid read with bzopen("","") and prevent filename from being
+      empty (which causes endless loop somewhere is libbz2)
+
+    * ext/bz2/bz2.c:
+      fix invalid read with bzopen("","") and prevent filename from being empty
+      (which causes endless loop somewhere is libbz2)
+      tests will follow
+
+    * ext/oci8/oci8.c:
+      fix compile failure with <s>ancient</s> older PHP versions caused by new
+      globals management code
+
+2006-06-20  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h:
+      Implement unicode_set_error_handler() / unicode_restore_error_handler().
+      The error handler doesn't do anything yet. (vaporware)
+
+    * ZendEngine2/zend_builtin_functions.c:
+      Plug memory leak in set_exception_handler().
+
+2006-06-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/tokenizer/php_tokenizer.h
+      ext/tokenizer/tokenizer.c:
+      MFB: Removed pointless callbacks.
+
+    * (PHP_5_2)
+      ext/tokenizer/php_tokenizer.h
+      ext/tokenizer/tokenizer.c:
+      Removed pointless callbacks.
+
+2006-06-20  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/standard/tests/file/bug37864.phpt:
+      MFB 5.2
+
+    * (PHP_5_2)
+      ext/standard/tests/file/bug37864.phpt:
+      make sure the test outputs what we want
+
+2006-06-20  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      Bug fix news...
+
+    * (PHP_5_2)
+      ext/standard/tests/file/file_get_contents.phpt:
+      Renamed to bug37864.phpt
+
+    * ext/standard/tests/file/file_get_contents.phpt:
+      Renamed file to bug37864.phpt
+
+    * ext/standard/tests/file/bug37864.phpt
+      ext/standard/tests/file/bug37864.phpt:
+      
+      Test for bug #37864 (file_get_contents() leaks on empty file)
+
+2006-06-20  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/file/file_get_contents.phpt
+      ext/standard/tests/file/file_get_contents.phpt:
+      don't leave garbage in tmp dir
+
+2006-06-20  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/file/file_get_contents.phpt:
+      MFH: test for file_get_contents leaking on empty file
+
+    * ext/standard/tests/file/file_get_contents.phpt
+      ext/standard/tests/file/file_get_contents.phpt:
+      
+      add test for file_get_contents() leaking on empty file
+
+    * main/streams/streams.c:
+      Plug memleak (leaks on empty files)
+
+    * ext/dom/php_dom.h:
+      Add missing header include
+
+2006-06-20  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_API.c:
+      init variables
+
+    * (PHP_5_2)
+      ext/dom/document.c:
+      MFH: nuke unused variables and init variables when needed
+
+    * ext/dom/document.c:
+      nuke unused variables and init variables when needed
+
+    * ext/standard/tests/general_functions/sunfuncts.phpt:
+      fix test to work on all platforms
+
+    * (PHP_5_2)
+      ZendEngine2/tests/objects_013.phpt
+      ext/simplexml/tests/031.phpt
+      ext/simplexml/tests/bug37565.phpt
+      ext/simplexml/tests/bug37565.phpt
+      ext/sqlite/tests/sqlite_004.phpt
+      ext/standard/tests/general_functions/sunfuncts.phpt
+      ext/standard/tests/math/bug27646.phpt:
+      fix test
+
+    * sapi/cli/php_cli.c:
+      initialize pointers
+
+    * ZendEngine2/tests/objects_013.phpt
+      ZendEngine2/tests/objects_014.phpt
+      ext/standard/tests/strings/bug23894.phpt
+      ext/standard/tests/strings/bug25671.phpt
+      ext/standard/tests/strings/bug27278.phpt
+      ext/standard/tests/strings/str_shuffle.phpt
+      ext/standard/tests/strings/substr_compare.phpt
+      ext/standard/tests/strings/url_t.phpt:
+      fix tests
+
+2006-06-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/posix/posix.c:
+      MFB: Added missing ifdef block.
+
+    * (PHP_5_2)
+      ext/posix/posix.c:
+      Added missing ifdef block.
+      
+
+2006-06-19  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/oci8.c:
+      display oci8 version in phpinfo()
+
+    * (PHP_5_2)
+      sapi/cgi/cgi_main.c:
+      MFH: plug leak in CGI SAPI when running scripts with query string in
+      console
+
+    * sapi/cgi/cgi_main.c:
+      plug leak in CGI SAPI when running scripts with query string in console
+
+    * (PHP_5_2)
+      ZendEngine2/tests/bug33732.phpt
+      ZendEngine2/tests/objects_014.phpt:
+      fix tests
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * ext/odbc/php_odbc_includes.h:
+      MFB: fix #37848 (ext/odbc compile failure)
+
+    * (PHP_5_2)
+      ext/odbc/php_odbc_includes.h:
+      fix #37848 (ext/odbc compile failure)
+
+2006-06-19  Michael Wallner  <mike@iworks.at>
+
+    * sapi/cli/php_cli.c:
+      MFB52: Fix Bug #37780 memory leak trying to execute a non existing file
+      (CLI)
+
+    * (PHP_5_2)
+      NEWS
+      sapi/cli/php_cli.c:
+      - Fix Bug #37780 memory leak trying to execute a non existing file (CLI)
+
+2006-06-19  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      sapi/cgi/cgi_main.c:
+      MFH: add missing ifdef and avoid "unused variable" warning
+
+    * sapi/cgi/cgi_main.c:
+      add missing ifdef and avoid "unused variable" warning
+
+2006-06-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/posix/config.m4
+      ext/posix/php_posix.h
+      ext/posix/posix.c:
+      MFB: Added posix_initgroups() function.
+
+    * (PHP_5_2)
+      NEWS
+      ext/posix/config.m4
+      ext/posix/php_posix.h
+      ext/posix/posix.c:
+      Added posix_initgroups() function.
+
+2006-06-17  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/iconv/iconv.c:
+      Added argument info
+      Fixed protos
+      Fixed vim folding
+
+2006-06-17  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * configure.in
+      sapi/cgi/cgi_main.c:
+      MFB
+
+    * (PHP_5_2)
+      configure.in
+      sapi/cgi/cgi_main.c:
+      plug memory leak in sapi_putenv, by using setenv(), that doesnt need any
+      malloc
+
+2006-06-16  Seiji Masugata  <s.masugata@digicom.dnp.co.jp>
+
+    * (PHP_5_2)
+      ext/mbstring/mbstring.c:
+      changed GINIT definition.
+
+2006-06-16  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_2)
+      NEWS
+      php.ini-dist
+      main/main.c
+      main/php_globals.h
+      main/streams/streams.c:
+      MFH: Backported allow_url_include from HEAD.  This directive allows
+      separate control of URL handling in includes/requires allowing sites to
+      enable allow_url_fopen without enabling remote includes.
+
+2006-06-16  Stefan Esser  <php@nopiracy.de>
+
+    * (PHP_5_2)
+      acinclude.m4:
+      MFH: Only care about wrong flex version, when needed.
+
+    * acinclude.m4:
+      Fixed that configure bails out on wrong flex version. Now a wrong flex
+      version
+      will issue a warning and when flex is needed during the make process the
+      make
+      process will die with an error message.
+
+2006-06-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * win32/crypt_win32.c
+      win32/crypt_win32.h:
+      New crypt() implementation for win32 which is about 10 times faster and has
+      more friendly license.
+
+    * (PHP_5_2)
+      NEWS
+      win32/crypt_win32.c
+      win32/crypt_win32.h:
+      New crypt() implementation for win32 which is about 10 times faster and has
+       more friendly license.
+
+2006-06-16  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      ext/gmp/gmp.c:
+      Fix build. (gmp_nextprime() was added in PHP 6!)
+
+2006-06-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      ext/sybase_ct/php_sybase_ct.c
+      ext/tokenizer/tokenizer.c
+      ext/xml/php_xml.h
+      ext/xml/xml.c
+      ext/zlib/zlib.c:
+      Added automatic module globals management
+
+    * (PHP_5_2)
+      ext/mssql/php_mssql.c
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli.c
+      ext/oci8/oci8.c
+      ext/odbc/php_odbc.c
+      ext/odbc/php_odbc_includes.h
+      ext/pcntl/pcntl.c
+      ext/pcre/php_pcre.c
+      ext/pgsql/pgsql.c
+      ext/posix/posix.c
+      ext/recode/recode.c
+      ext/session/session.c
+      ext/skeleton/skeleton.c
+      ext/snmp/snmp.c
+      ext/sockets/sockets.c
+      ext/sqlite/sqlite.c:
+      Added automatic module globals management
+
+    * (PHP_5_2)
+      ext/bcmath/bcmath.c
+      ext/com_dotnet/com_extension.c
+      ext/dba/dba.c
+      ext/exif/exif.c
+      ext/fbsql/php_fbsql.c
+      ext/fdf/fdf.c
+      ext/gmp/gmp.c
+      ext/iconv/iconv.c
+      ext/imap/php_imap.c
+      ext/interbase/interbase.c
+      ext/ldap/ldap.c
+      ext/mbstring/mbstring.c
+      ext/mcrypt/mcrypt.c
+      ext/mime_magic/mime_magic.c:
+      Added automatic module globals management
+
+2006-06-15  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/curl/interface.c
+      ext/dbase/dbase.c
+      ext/gd/gd.c:
+      Add array type hinting
+      Remove unnecessary array checkes
+
+2006-06-15  Seiji Masugata  <s.masugata@digicom.dnp.co.jp>
+
+    * ext/mbstring/mbstring.c:
+      changed GINIT definition.
+
+2006-06-15  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/pcre/php_pcre.c
+      ext/pcre/tests/bug37800.phpt:
+      MFB: fix bug #37800
+
+    * (PHP_5_2)
+      ext/pcre/php_pcre.c
+      ext/pcre/tests/bug37800.phpt
+      ext/pcre/tests/bug37800.phpt:
+      fix bug #37800: preg_replace() limit parameter odd behaviour
+
+2006-06-15  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/curl/interface.c
+      ext/dbase/dbase.c
+      ext/gd/gd.c:
+      Revert array type hinting
+
+2006-06-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      main/php.h:
+      Added automatic module globals management
+
+    * (PHP_5_2)
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_modules.h:
+      MFH: Added automatic module globals management.
+
+2006-06-15  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      NEWS:
+      fix news. gaps left intentionally..
+
+2006-06-14  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/fbsql/php_fbsql.c
+      ext/fdf/fdf.c
+      ext/gettext/gettext.c
+      ext/gmp/gmp.c:
+      Added arg info
+      Fixed protos
+
+    * ext/standard/tests/strings/str_word_count.phpt:
+      Fixed test
+
+2006-06-14  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/pcre/tests/delimiters.phpt
+      ext/pcre/tests/dollar_endonly.phpt
+      ext/pcre/tests/locales.phpt
+      ext/pcre/tests/match_flags.phpt
+      ext/pcre/tests/match_flags2.phpt
+      ext/pcre/tests/pcre_anchored.phpt
+      ext/pcre/tests/pcre_extended.phpt
+      ext/pcre/tests/pcre_extra.phpt
+      ext/pcre/tests/ungreedy.phpt:
+      MFB
+
+    * ext/pcre/php_pcre.c:
+      MFB: fix mem leak
+
+    * (PHP_5_2)
+      ext/pcre/php_pcre.c:
+      fix memory leak uncovered by the pcre_extra.phpt test
+
+    * (PHP_5_2)
+      ext/pcre/tests/delimiters.phpt
+      ext/pcre/tests/dollar_endonly.phpt
+      ext/pcre/tests/dollar_endonly.phpt
+      ext/pcre/tests/locales.phpt
+      ext/pcre/tests/match_flags.phpt
+      ext/pcre/tests/match_flags.phpt
+      ext/pcre/tests/match_flags2.phpt
+      ext/pcre/tests/match_flags2.phpt
+      ext/pcre/tests/pcre_anchored.phpt
+      ext/pcre/tests/pcre_anchored.phpt
+      ext/pcre/tests/pcre_extended.phpt
+      ext/pcre/tests/pcre_extended.phpt
+      ext/pcre/tests/pcre_extra.phpt
+      ext/pcre/tests/pcre_extra.phpt
+      ext/pcre/tests/ungreedy.phpt
+      ext/pcre/tests/ungreedy.phpt:
+      more tests (and fix 2 from yesterday)
+
+    * ext/pcre/config.w32
+      ext/pcre/config0.m4
+      ext/pcre/pcrelib/pcre_dfa_exec.c:
+      MFB: remove pcre_dfa_exec.c
+
+    * (PHP_5_2)
+      ext/pcre/config.w32
+      ext/pcre/config0.m4
+      ext/pcre/pcrelib/pcre_dfa_exec.c:
+      remove the pcre_dfa_exec.c file, as it is needed (we dont expose that API)
+
+    * ext/pcre/pcrelib/.cvsignore:
+      MFB
+
+    * (PHP_5_2)
+      ext/pcre/pcrelib/.cvsignore:
+      missing newline
+
+2006-06-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sqlite/sqlite.c:
+      MFB: E_ERROR -> E_RECOVERABLE_ERROR
+
+    * (PHP_5_2)
+      ext/sqlite/sqlite.c:
+      E_ERROR -> E_RECOVERABLE_ERROR
+
+2006-06-14  Christian Stocker  <chregu@bitflux.ch>
+
+    * (PHP_5_1)
+      ext/xsl/xsltprocessor.c:
+      MFH
+      Fix a segfault, when an unknown type was given support all known xpath
+      object types
+
+    * (PHP_5_2)
+      ext/xsl/xsltprocessor.c:
+      MFH
+      Fix a segfault, when an unknown type was given and support all known xpath
+      object types
+
+    * ext/xsl/xsltprocessor.c:
+      Fix a segfault, when an unknown type was given support all known xpath
+      object types
+
+2006-06-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/odbc/php_odbc.c
+      ext/odbc/php_odbc_includes.h:
+      Fixed compilation (automatic module globals management).
+
+2006-06-13  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/pcre/tests/backtrack_limit.phpt
+      ext/pcre/tests/cache_limit.phpt
+      ext/pcre/tests/delimiters.phpt
+      ext/pcre/tests/grep.phpt
+      ext/pcre/tests/locales.phpt
+      ext/pcre/tests/multiline.phpt
+      ext/pcre/tests/recursion_limit.phpt
+      ext/pcre/tests/study.phpt:
+      MFB
+
+    * (PHP_5_2)
+      .cvsignore:
+      also ignore lcov generated files
+
+    * ext/pcre/tests/backtrack_limit.phpt
+      ext/pcre/tests/backtrack_limit.phpt
+      ext/pcre/tests/cache_limit.phpt
+      ext/pcre/tests/cache_limit.phpt
+      ext/pcre/tests/delimiters.phpt
+      ext/pcre/tests/delimiters.phpt
+      ext/pcre/tests/grep.phpt
+      ext/pcre/tests/grep.phpt
+      ext/pcre/tests/locales.phpt
+      ext/pcre/tests/locales.phpt
+      ext/pcre/tests/multiline.phpt
+      ext/pcre/tests/multiline.phpt
+      ext/pcre/tests/recursion_limit.phpt
+      ext/pcre/tests/recursion_limit.phpt
+      ext/pcre/tests/study.phpt
+      ext/pcre/tests/study.phpt:
+      
+      file backtrack_limit.phpt was initially added on branch PHP_5_2.
+
+2006-06-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_exceptions.c:
+      - Arginfo fix (Hannes)
+
+2006-06-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/dom/element.c:
+      MFB: Removed unused variables.
+
+    * (PHP_5_2)
+      ext/dom/element.c:
+      Removed unused variables.
+
+2006-06-13  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/iconv/iconv.c:
+      Move GINIT definition above re-definition of iconv. Gah.
+
+2006-06-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      Removed warnings
+
+    * sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c:
+      Removed warning
+
+    * ext/sybase_ct/php_sybase_ct.c
+      ext/tokenizer/tokenizer.c
+      ext/xml/php_xml.h
+      ext/xml/xml.c
+      ext/zlib/zlib.c:
+      Added automatic module globals management
+
+    * ext/mssql/php_mssql.c
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli.c
+      ext/oci8/oci8.c
+      ext/odbc/php_odbc.c
+      ext/pcntl/pcntl.c
+      ext/pcre/php_pcre.c
+      ext/pgsql/pgsql.c
+      ext/posix/posix.c
+      ext/recode/recode.c
+      ext/session/session.c
+      ext/skeleton/skeleton.c
+      ext/snmp/snmp.c
+      ext/sockets/sockets.c
+      ext/sqlite/sqlite.c:
+      Added automatic module globals management
+
+    * ext/bcmath/bcmath.c
+      ext/com_dotnet/com_extension.c
+      ext/dba/dba.c
+      ext/exif/exif.c
+      ext/fbsql/php_fbsql.c
+      ext/fdf/fdf.c
+      ext/gmp/gmp.c
+      ext/iconv/iconv.c
+      ext/imap/php_imap.c
+      ext/interbase/interbase.c
+      ext/ldap/ldap.c
+      ext/mbstring/mbstring.c
+      ext/mcrypt/mcrypt.c
+      ext/mime_magic/mime_magic.c
+      main/php.h:
+      Added automatic module globals management
+
+    * NEWS
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_modules.h:
+      Added automatic module globals management.
+
+2006-06-13  Stefan Esser  <php@nopiracy.de>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      Added hook for compile_string()
+
+2006-06-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/zlib/zlib_filter.c:
+      MFB: Fixed compiler warning
+
+    * (PHP_5_2)
+      ext/zlib/zlib_filter.c:
+      Fixed compiler warning
+
+2006-06-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend.c:
+      - Fix memleaks (by nuno)
+
+2006-06-12  Michael Wallner  <mike@iworks.at>
+
+    * main/output.c
+      main/php_output.h:
+      - don't use anonymous union
+
+2006-06-12  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend_language_scanner.l:
+      Be more explicit.
+
+2006-06-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/string.c:
+      Improved performance of the implode() function on associated arrays by
+      200-300%.
+
+    * ext/standard/info.c:
+      MFB: Fixed ZTS build
+
+    * (PHP_5_2)
+      ext/standard/info.c:
+      Fixed ZTS build
+
+2006-06-11  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/standard/exec.c
+      ext/standard/streamsfuncs.c
+      ext/standard/string.c
+      ext/zlib/zlib.c:
+      Nuke unused var
+
+    * ext/ftp/php_ftp.c
+      ext/gd/gd.c:
+      Added argument info
+      Fixed protos & vim folding
+
+2006-06-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ZendEngine2/zend.c
+      ZendEngine2/zend.h:
+      Make zend_print_zval_r_ex() use the write callback function.
+
+    * ext/standard/info.c:
+      MFB: Fully print array() in phpinfo().
+
+    * (PHP_5_2)
+      ext/standard/info.c:
+      Fully print array() in phpinfo().
+
+2006-06-11  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/dba/tests/dba_cdb.phpt
+      ext/dba/tests/dba_cdb_make.phpt
+      ext/dba/tests/dba_flatfile.phpt
+      ext/dba/tests/dba_inifile.phpt:
+      Fixed tests in unicode mode
+
+2006-06-10  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/bcmath/bcmath.c
+      ext/bz2/bz2.c
+      ext/calendar/calendar.c
+      ext/ctype/ctype.c
+      ext/curl/interface.c
+      ext/curl/multi.c
+      ext/dba/dba.c
+      ext/dbase/dbase.c
+      ext/exif/exif.c:
+      Added argument info
+      Fixed protos
+      Fixed vim folding
+
+2006-06-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/string.c:
+      MFB: Improved performance of str_replace() when doing 1 char to 1 char or 1
+      char to many chars replacement by 30-40%.
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/string.c:
+      Improved performance of str_replace() when doing 1 char to 1 char or 1 char
+      to many chars replacement by 30-40%.
+
+2006-06-09  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * Makefile.gcov:
+      Patch from Nuno
+
+2006-06-09  Michael Wallner  <mike@iworks.at>
+
+    * sapi/apache2filter/apache_config.c
+      sapi/apache2filter/apache_config.c
+      sapi/apache2filter/apache_config.c
+      sapi/apache2filter/apache_config.c:
+      - sync with apache2handler
+
+    * (PHP_4_4)
+      NEWS
+      NEWS:
+      BFN: - Fixed bug #37720 (merge_php_config scrambles values). (Mike,
+             pumuckel at metropolis dot de)
+
+    * (PHP_4_4)
+      sapi/apache2handler/apache_config.c
+      sapi/apache2handler/apache_config.c
+      sapi/apache2handler/apache_config.c:
+      MFH: fix bug #37720 (merge_php_config scrambles values)
+
+    * sapi/apache2handler/apache_config.c:
+      - fix bug #37720 (merge_php_config scrambles values)
+
+2006-06-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      Update credits
+
+2006-06-08  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      NEWS:
+      - Fixed bug #37747 (strtotime segfaults when given "nextyear").
+
+2006-06-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug37707.phpt
+      ZendEngine2/tests/bug37707.phpt:
+      Proper fix for bug #37707 ("clone $x" must call __clone() enven if result
+      value is not used)
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_gen.php
+      ZendEngine2/zend_vm_gen.php:
+      Wrap "wrong" unreachable code with "#if 0"
+
+2006-06-07  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_1)
+      sapi/cgi/fastcgi.c:
+      fix compiling with "more strict" compilers
+
+2006-06-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      Bug fixing news
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug37707.phpt:
+      MFB: Fixed bug #37707 clone without assigning leaks memory
+
+    * ZendEngine2/tests/bug37707.phpt
+      ZendEngine2/tests/bug37707.phpt:
+      
+      file bug37707.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      Fixed bug #37707 clone without assigning leaks memory
+      
+
+2006-06-07  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/oci8/oci8_lob.c
+      ext/oci8/php_oci8_int.h:
+      MFH:
+      fix Unicode LOB problems using callbacks to read LOBs
+      using chunk_size*X buffer should speed up LOB reading a bit
+      
+      many thanks to Massimo Squillace <msquillace at sogei dot it> for the
+      patch.
+
+    * ext/oci8/oci8_lob.c
+      ext/oci8/php_oci8_int.h:
+      happy birthday commit, yay =)
+      this patch should fix Unicode LOB problems using callbacks to read LOBs
+      the patch also includes an optimization: using chunk_size*X buffer should
+      speed up LOB reading a bit
+      
+      many thanks to Massimo Squillace <msquillace at sogei dot it> for the
+      patch.
+
+2006-06-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h:
+      - MFH zend_fcall_info_*() and parameter parsing option 'f'
+
+    * ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h:
+      - Regenerated after zend_vm_def.h change
+
+    * (PHP_5_2)
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_vm_def.h:
+      - MFH Fix issue with interfaces being inherited multiple times
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_vm_def.h:
+      - Fix issue with interfaces being inherited multiple times
+
+2006-06-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      Fixed bug #37709 (Possible crash in PDO::errorCode()).
+
 2006-06-06  Michael Wallner  <mike@iworks.at>
 
     * main/output.c:
