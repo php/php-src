@@ -54,7 +54,7 @@ extern struct _zend_arg_info all_args_by_ref[1];
 
 #define STANDARD_MODULE_PROPERTIES_EX 0, 0, NULL, 0
 
-#define NO_MODULE_GLOBASLS 0, NULL, NULL, NULL
+#define NO_MODULE_GLOBALS 0, NULL, NULL, NULL
 
 #ifdef ZTS
 # define ZEND_MODULE_GLOBALS(module_name) sizeof(zend_##module_name##_globals), &module_name##_globals_id
@@ -63,7 +63,7 @@ extern struct _zend_arg_info all_args_by_ref[1];
 #endif
 
 #define STANDARD_MODULE_PROPERTIES \
-	NO_MODULE_GLOBASLS, NULL, STANDARD_MODULE_PROPERTIES_EX
+	NO_MODULE_GLOBALS, NULL, STANDARD_MODULE_PROPERTIES_EX
 
 #define NO_VERSION_YET NULL
 
