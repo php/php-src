@@ -632,7 +632,7 @@ PHP_FUNCTION(input_get_args)
 	int         filter_flags = FILTER_FLAG_SCALAR;
 	zval       *options = NULL, *temparray = NULL;
 
-	zval *args_array, *values;
+	zval *args_array, *values = NULL;
 	HashTable *args_hash;
 	HashPosition pos;
 
@@ -675,6 +675,17 @@ PHP_FUNCTION(input_get_args)
 		case PARSE_SESSION:
 			/* FIXME: Implement session source */
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "INPUT_SESSION not implemented");
+			break;
+
+		case PARSE_REQUEST:
+			/* FIXME: Implement session source */
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "INPUT_REQUEST not implemented");
+			return;
+			break;
+
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown INPUT method");
+			return;
 			break;
 	}
 
