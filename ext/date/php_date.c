@@ -670,6 +670,26 @@ static char *english_suffix(timelib_sll number)
 }
 /* }}} */
 
+/* {{{ day of week helpers */
+char *php_date_full_day_name(timelib_sll y, timelib_sll m, timelib_sll d)
+{
+	timelib_sll day_of_week = timelib_day_of_week(y, m, d);
+	if (day_of_week < 0) {
+		return "Unknown";
+	} 
+	return day_full_names[day_of_week];	
+}
+
+char *php_date_short_day_name(timelib_sll y, timelib_sll m, timelib_sll d)
+{
+	timelib_sll day_of_week = timelib_day_of_week(y, m, d);
+	if (day_of_week < 0) {
+		return "Unknown";
+	} 
+	return day_short_names[day_of_week];	
+}
+/* }}} */
+
 /* {{{ date_format - (gm)date helper */
 static char *date_format(char *format, int format_len, timelib_time *t, int localtime)
 {
@@ -712,9 +732,9 @@ static char *date_format(char *format, int format_len, timelib_time *t, int loca
 		switch (format[i]) {
 			/* day */
 			case 'd': snprintf(buffer, 32, "%02d", (int) t->d); break;
-			case 'D': snprintf(buffer, 32, "%s", day_short_names[timelib_day_of_week(t->y, t->m, t->d)]); break;
+			case 'D': snprintf(buffer, 32, "%s", php_date_short_day_name(t->y, t->m, t->d)); break;
 			case 'j': snprintf(buffer, 32, "%d", (int) t->d); break;
-			case 'l': snprintf(buffer, 32, "%s", day_full_names[timelib_day_of_week(t->y, t->m, t->d)]); break;
+			case 'l': snprintf(buffer, 32, "%s", php_date_full_day_name(t->y, t->m, t->d)); break;
 			case 'S': snprintf(buffer, 32, "%s", english_suffix(t->d)); break;
 			case 'w': snprintf(buffer, 32, "%d", (int) timelib_day_of_week(t->y, t->m, t->d)); break;
 			case 'N': snprintf(buffer, 32, "%d", (int) timelib_iso_day_of_week(t->y, t->m, t->d)); break;
@@ -779,7 +799,7 @@ static char *date_format(char *format, int format_len, timelib_time *t, int loca
 							  );
 					  break;
 			case 'r': snprintf(buffer, 32, "%3s, %02d %3s %04d %02d:%02d:%02d %c%02d%02d",
-							                day_short_names[timelib_day_of_week(t->y, t->m, t->d)],
+							                php_date_short_day_name(t->y, t->m, t->d),
 											(int) t->d, mon_short_names[t->m - 1],
 											(int) t->y, (int) t->h, (int) t->i, (int) t->s,
 											localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
@@ -1405,7 +1425,7 @@ PHP_FUNCTION(getdate)
 	add_assoc_long(return_value, "mon", ts->m);
 	add_assoc_long(return_value, "year", ts->y);
 	add_assoc_long(return_value, "yday", timelib_day_of_year(ts->y, ts->m, ts->d));
-	add_assoc_string(return_value, "weekday", day_full_names[timelib_day_of_week(ts->y, ts->m, ts->d)], 1);
+	add_assoc_string(return_value, "weekday", php_date_full_day_name(ts->y, ts->m, ts->d), 1);
 	add_assoc_string(return_value, "month", mon_full_names[ts->m - 1], 1);
 	add_index_long(return_value, 0, timestamp);
 
