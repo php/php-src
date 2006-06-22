@@ -38,6 +38,9 @@
    Fixed bug #37392 (Unnecessary call to OCITransRollback() at the end of request)
    Fixed bug #34005 (oci_password_change() fails). Patch by pholdaway at technocom-wireless dot com.
   </notes>
+  <deps>
+   <dep type="php" rel="ge" version="4.3.10"/>
+  </deps>
  </release>
  <filelist>
   <file role="doc" name="CREDITS"/>
