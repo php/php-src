@@ -30,3 +30,10 @@
   stuff happens.
 
 * Control of fallback mappings in conversions.
+
+* Introduce ability to request strings in a specific encoding in parameter
+parsing API, e.g.:
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s(ASCII)",
+            &locale, &locale_len) == FAILURE) {
+    }
