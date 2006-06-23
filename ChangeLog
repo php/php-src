@@ -1,3 +1,19 @@
+2006-06-22  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-todo.txt:
+      Fixed in ICU 3.6.
+
+2006-06-22  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_modules.h
+      ZendEngine2/zend_modules.h:
+      fix typo
+
+    * ext/oci8/config.m4
+      ext/oci8/package.xml:
+      add 4.3.10 dependency to package.xml
+      add check for PHP version in ./configure
+
 2006-06-21  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ZendEngine2/zend_constants.c
