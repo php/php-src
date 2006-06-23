@@ -992,7 +992,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 
 #if HAVE_OCI_ENV_NLS_CREATE
 	if (charset && *charset) {
-		smart_str_appends_ex(&hashed_details, charset, 1);
+		smart_str_appends_ex(&hashed_details, charset, 0);
 	}
 	else {
 		size_t rsize = 0;
