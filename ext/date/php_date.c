@@ -1206,6 +1206,7 @@ PHP_FUNCTION(strtotime)
 	}
 
 	if (!time_len) {
+		timelib_time_dtor(now);	
 		RETURN_FALSE;
 	}
 
