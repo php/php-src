@@ -1,3 +1,9 @@
+2006-06-22  Antony Dovgal  <antony@zend.com>
+
+    * zend_modules.h
+      zend_modules.h:
+      fix typo
+
 2006-06-21  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_constants.c
