@@ -3078,6 +3078,28 @@ static int _addproperty(zend_property_info *pptr, int num_args, va_list args, ze
 }
 /* }}} */
 
+/* {{{ _adddynproperty */
+static int _adddynproperty(zval **pptr, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	zval *property;
+	zend_class_entry *ce = *va_arg(args, zend_class_entry**);
+	zval *retval = va_arg(args, zval*), member;
+	TSRMLS_FETCH();
+
+	if (hash_key->arKey[0] == '\0') {
+		return 0; /* non public cannot be dynamic */
+	}
+
+	ZVAL_STRINGL(&member, hash_key->arKey, hash_key->nKeyLength-1, 0);
+	if (zend_get_property_info(ce, &member, 1 TSRMLS_CC) == &EG(std_property_info)) {
+		ALLOC_ZVAL(property);
+		reflection_property_factory(ce, &EG(std_property_info), property TSRMLS_CC);
+		add_next_index_zval(retval, property);
+	}
+	return 0;
+}
+/* }}} */
+
 /* {{{ proto public ReflectionProperty[] ReflectionClass::getProperties()
    Returns an array of this class' properties */
 ZEND_METHOD(reflection_class, getProperties)
@@ -3101,6 +3123,11 @@ ZEND_METHOD(reflection_class, getProperties)
 
 	array_init(return_value);
 	zend_hash_apply_with_arguments(&ce->properties_info, (apply_func_args_t) _addproperty, 3, &ce, return_value, filter);
+
+	if (intern->obj && (filter & ZEND_ACC_PUBLIC) != 0 && Z_OBJ_HT_P(intern->obj)->get_properties) {
+		HashTable *properties = Z_OBJ_HT_P(intern->obj)->get_properties(intern->obj TSRMLS_CC);
+		zend_hash_apply_with_arguments(properties, (apply_func_args_t) _adddynproperty, 2, &ce, return_value);
+	}
 }
 /* }}} */
 
