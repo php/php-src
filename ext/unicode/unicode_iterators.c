@@ -19,6 +19,7 @@
 /*
  * TODO
  *
+ * - test with empty and 1 character strings
  * - optimize current() to pass return_value to the handler so that it fills it
  *   in directly instead of creating a new zval
  * - implement Countable (or count_elements handler) and Seekable interfaces
@@ -51,20 +52,23 @@ typedef struct {
 	size_t			current_alloc;
 	long			flags;
 	union {
-		int32_t		start;
 		struct {
-			int32_t start;
+			int32_t offset;
+			int32_t cp_offset;
 			int32_t index;
 		} cp;
 		struct {
 			int32_t start;
 			int32_t end;
 			int32_t index;
+			int32_t start_cp_offset;
+			int32_t end_cp_offset;
 		} cs;
 		struct {
 			int32_t start;
 			int32_t end;
 			int32_t index;
+			int32_t cp_offset;
 			UBreakIterator *iter;
 		} brk;
 	} u;
@@ -77,11 +81,12 @@ static inline text_iter_obj* text_iter_to_obj(zend_object_iterator *iter)
 }
 
 typedef struct {
-	int  (*valid)  (text_iter_obj* object TSRMLS_DC);
-	void (*current)(text_iter_obj* object TSRMLS_DC);
-	int  (*key)    (text_iter_obj* object TSRMLS_DC);
-	void (*next)   (text_iter_obj* object TSRMLS_DC);
-	void (*rewind) (text_iter_obj* object TSRMLS_DC);
+	int  (*valid)  (text_iter_obj* object, long flags TSRMLS_DC);
+	void (*current)(text_iter_obj* object, long flags TSRMLS_DC);
+	int  (*key)    (text_iter_obj* object, long flags TSRMLS_DC);
+	int  (*offset) (text_iter_obj* object, long flags TSRMLS_DC);
+	void (*next)   (text_iter_obj* object, long flags TSRMLS_DC);
+	void (*rewind) (text_iter_obj* object, long flags TSRMLS_DC);
 } text_iter_ops;
 
 enum UBreakIteratorType brk_type_map[] = {
@@ -97,52 +102,65 @@ PHPAPI zend_class_entry* rev_text_iterator_ce;
 
 /* Code point ops */
 
-static int text_iter_cp_valid(text_iter_obj* object TSRMLS_DC)
+static int text_iter_cp_valid(text_iter_obj* object, long flags TSRMLS_DC)
 {
-	if (object->flags & ITER_REVERSE) {
-		return (object->u.cp.start > 0);
+	if (flags & ITER_REVERSE) {
+		return (object->u.cp.offset > 0);
 	} else {
-		return (object->u.cp.start < object->text_len);
+		return (object->u.cp.offset < object->text_len);
 	}
 }
 
-static void text_iter_cp_current(text_iter_obj* object TSRMLS_DC)
+static void text_iter_cp_current(text_iter_obj* object, long flags TSRMLS_DC)
 {
-	UChar32 cp;
-	int32_t tmp, buf_len;
+	UChar32 cp = 0;
+	int32_t tmp, buf_len = 0;
 
-	tmp = object->u.cp.start;
-	if (object->flags & ITER_REVERSE) {
-		U16_PREV(object->text, 0, tmp, cp);
-	} else {
-		U16_NEXT(object->text, tmp, object->text_len, cp);
+	if (text_iter_cp_valid(object, flags TSRMLS_CC)) {
+		tmp = object->u.cp.offset;
+		if (flags & ITER_REVERSE) {
+			U16_PREV(object->text, 0, tmp, cp);
+		} else {
+			U16_NEXT(object->text, tmp, object->text_len, cp);
+		}
+		buf_len = zend_codepoint_to_uchar(cp, Z_USTRVAL_P(object->current));
 	}
-	buf_len = zend_codepoint_to_uchar(cp, Z_USTRVAL_P(object->current));
 	Z_USTRVAL_P(object->current)[buf_len] = 0;
 	Z_USTRLEN_P(object->current) = buf_len;
 }
 
-static int text_iter_cp_key(text_iter_obj* object TSRMLS_DC)
+static int text_iter_cp_key(text_iter_obj* object, long flags TSRMLS_DC)
 {
 	return object->u.cp.index;
 }
 
-static void text_iter_cp_next(text_iter_obj* object TSRMLS_DC)
+static int text_iter_cp_offset(text_iter_obj* object, long flags TSRMLS_DC)
 {
-	if (object->flags & ITER_REVERSE) {
-		U16_BACK_1(object->text, 0, object->u.cp.start);
-	} else {
-		U16_FWD_1(object->text, object->u.cp.start, object->text_len);
-	}
-	object->u.cp.index++;
+	return object->u.cp.cp_offset;
 }
 
-static void text_iter_cp_rewind(text_iter_obj *object TSRMLS_DC)
+static void text_iter_cp_next(text_iter_obj* object, long flags TSRMLS_DC)
 {
-	if (object->flags & ITER_REVERSE) {
-		object->u.cp.start = object->text_len;
+	if (text_iter_cp_valid(object, flags TSRMLS_CC)) {
+		if (flags & ITER_REVERSE) {
+			U16_BACK_1(object->text, 0, object->u.cp.offset);
+			object->u.cp.cp_offset--;
+		} else {
+			U16_FWD_1(object->text, object->u.cp.offset, object->text_len);
+			object->u.cp.cp_offset++;
+		}
+		object->u.cp.index++;
+	}
+}
+
+static void text_iter_cp_rewind(text_iter_obj *object, long flags TSRMLS_DC)
+{
+	if (flags & ITER_REVERSE) {
+		object->u.cp.offset = object->text_len;
+		object->u.cp.cp_offset = u_countChar32(object->text, object->text_len);
 	} else {
-		object->u.cp.start = 0;
+		object->u.cp.offset = 0;
+		object->u.cp.cp_offset = 0;
 	}
 	object->u.cp.index  = 0;
 }
@@ -151,25 +169,26 @@ static text_iter_ops text_iter_cp_ops = {
 	text_iter_cp_valid,
 	text_iter_cp_current,
 	text_iter_cp_key,
+	text_iter_cp_offset,
 	text_iter_cp_next,
 	text_iter_cp_rewind,
 };
 
 /* Combining sequence ops */
 
-static int text_iter_cs_valid(text_iter_obj* object TSRMLS_DC)
+static int text_iter_cs_valid(text_iter_obj* object, long flags TSRMLS_DC)
 {
-	if (object->flags & ITER_REVERSE) {
+	if (flags & ITER_REVERSE) {
 		return (object->u.cs.end > 0);
 	} else {
 		return (object->u.cs.end <= object->text_len);
 	}
 }
 
-static void text_iter_cs_current(text_iter_obj* object TSRMLS_DC)
+static void text_iter_cs_current(text_iter_obj* object, long flags TSRMLS_DC)
 {
 	uint32_t length = object->u.cs.end - object->u.cs.start;
-	if (length > object->current_alloc) {
+	if (length+1 > object->current_alloc) {
 		object->current_alloc = length+1;
 		Z_USTRVAL_P(object->current) = eurealloc(Z_USTRVAL_P(object->current), object->current_alloc);
 	}
@@ -178,50 +197,68 @@ static void text_iter_cs_current(text_iter_obj* object TSRMLS_DC)
 	Z_USTRLEN_P(object->current) = length;
 }
 
-static int text_iter_cs_key(text_iter_obj* object TSRMLS_DC)
+static int text_iter_cs_key(text_iter_obj* object, long flags TSRMLS_DC)
 {
 	return object->u.cs.index;
 }
 
-static void text_iter_cs_next(text_iter_obj* object TSRMLS_DC)
+static int text_iter_cs_offset(text_iter_obj* object, long flags TSRMLS_DC)
+{
+	return object->u.cs.start_cp_offset;
+}
+
+static void text_iter_cs_next(text_iter_obj* object, long flags TSRMLS_DC)
 {
 	UChar32 cp;
-	uint32_t tmp;
+	int32_t tmp, tmp2;
 
-	if (object->flags & ITER_REVERSE) {
-		object->u.cs.end = object->u.cs.start;
-		U16_PREV(object->text, 0, object->u.cs.start, cp);
-		if (u_getCombiningClass(cp) != 0) {
-			do {
-				U16_PREV(object->text, 0, object->u.cs.start, cp);
-			} while (object->u.cs.start > 0 && u_getCombiningClass(cp) != 0);
-		}
-	} else {
-		object->u.cs.start = object->u.cs.end;
-		U16_NEXT(object->text, object->u.cs.end, object->text_len, cp);
-		if (u_getCombiningClass(cp) == 0) {
-			tmp = object->u.cs.end;
-			while (tmp < object->text_len) {
-				U16_NEXT(object->text, tmp, object->text_len, cp);
-				if (u_getCombiningClass(cp) == 0) {
-					break;
-				} else {
-					object->u.cs.end = tmp;
+	if (text_iter_cs_valid(object, flags TSRMLS_CC)) {
+		if (flags & ITER_REVERSE) {
+			object->u.cs.end = object->u.cs.start;
+			object->u.cs.end_cp_offset = object->u.cs.start_cp_offset;
+			U16_PREV(object->text, 0, object->u.cs.start, cp);
+			object->u.cs.start_cp_offset--;
+			if (u_getCombiningClass(cp) != 0) {
+				do {
+					U16_PREV(object->text, 0, object->u.cs.start, cp);
+					object->u.cs.start_cp_offset--;
+				} while (object->u.cs.start > 0 && u_getCombiningClass(cp) != 0);
+			}
+		} else {
+			object->u.cs.start = object->u.cs.end;
+			object->u.cs.start_cp_offset = object->u.cs.end_cp_offset;
+			U16_NEXT(object->text, object->u.cs.end, object->text_len, cp);
+			object->u.cs.end_cp_offset++;
+			if (u_getCombiningClass(cp) == 0) {
+				tmp = object->u.cs.end;
+				tmp2 = object->u.cs.end_cp_offset;
+				while (tmp < object->text_len) {
+					U16_NEXT(object->text, tmp, object->text_len, cp);
+					tmp2++;
+					if (u_getCombiningClass(cp) == 0) {
+						break;
+					} else {
+						object->u.cs.end = tmp;
+						object->u.cs.end_cp_offset = tmp2;
+					}
 				}
 			}
 		}
+		object->u.cs.index++;
 	}
-	object->u.cs.index++;
 }
 
-static void text_iter_cs_rewind(text_iter_obj *object TSRMLS_DC)
+static void text_iter_cs_rewind(text_iter_obj *object, long flags TSRMLS_DC)
 {
-	if (object->flags & ITER_REVERSE) {
+	if (flags & ITER_REVERSE) {
 		object->u.cs.start = object->u.cs.end = object->text_len;
+		object->u.cs.start_cp_offset = object->u.cs.end_cp_offset =
+				u_countChar32(object->text, object->text_len);
 	} else {
 		object->u.cs.start = object->u.cs.end = 0;
+		object->u.cs.start_cp_offset = object->u.cs.end_cp_offset = 0;
 	}
-	text_iter_cs_next(object TSRMLS_CC); /* find first sequence */
+	text_iter_cs_next(object, flags TSRMLS_CC); /* find first sequence */
 	object->u.cs.index = 0; /* because _next increments index */
 }
 
@@ -229,6 +266,7 @@ static text_iter_ops text_iter_cs_ops = {
 	text_iter_cs_valid,
 	text_iter_cs_current,
 	text_iter_cs_key,
+	text_iter_cs_offset,
 	text_iter_cs_next,
 	text_iter_cs_rewind,
 };
@@ -236,70 +274,86 @@ static text_iter_ops text_iter_cs_ops = {
 
 /* UBreakIterator Character Ops */
 
-static int text_iter_brk_char_valid(text_iter_obj* object TSRMLS_DC)
+static int text_iter_brk_char_valid(text_iter_obj* object, long flags TSRMLS_DC)
 {
-	if (object->flags & ITER_REVERSE) {
+	if (flags & ITER_REVERSE) {
 		return (object->u.brk.start != UBRK_DONE);
 	} else {
 		return (object->u.brk.end != UBRK_DONE);
 	}
 }
 
-static void text_iter_brk_char_current(text_iter_obj* object TSRMLS_DC)
+static void text_iter_brk_char_current(text_iter_obj* object, long flags TSRMLS_DC)
 {
 	uint32_t length;
 	int32_t start = object->u.brk.start;
 	int32_t end = object->u.brk.end;
 
-	if (object->flags & ITER_REVERSE) {
-		if (end == UBRK_DONE) {
-			end = object->text_len;
+	if (start != UBRK_DONE && end != UBRK_DONE) {
+		length = end - start;
+		if (length+1 > object->current_alloc) {
+			object->current_alloc = length+1;
+			Z_USTRVAL_P(object->current) = eurealloc(Z_USTRVAL_P(object->current), object->current_alloc);
 		}
+		u_memcpy(Z_USTRVAL_P(object->current), object->text + start, length);
 	} else {
-		if (start == UBRK_DONE) {
-			start = 0;
-		}
+		length = 0;
 	}
-	length = end - start;
-	if (length > object->current_alloc-1) {
-		object->current_alloc = length+1;
-		Z_USTRVAL_P(object->current) = eurealloc(Z_USTRVAL_P(object->current), object->current_alloc);
-	}
-	u_memcpy(Z_USTRVAL_P(object->current), object->text + start, length);
+
 	Z_USTRVAL_P(object->current)[length] = 0;
 	Z_USTRLEN_P(object->current) = length;
 }
 
-static int text_iter_brk_char_key(text_iter_obj* object TSRMLS_DC)
+static int text_iter_brk_char_key(text_iter_obj* object, long flags TSRMLS_DC)
 {
 	return object->u.brk.index;
 }
 
-static void text_iter_brk_char_next(text_iter_obj* object TSRMLS_DC)
+static int text_iter_brk_char_offset(text_iter_obj* object, long flags TSRMLS_DC)
 {
-	if (object->flags & ITER_REVERSE) {
-		if (object->u.brk.start != UBRK_DONE) {
+	return object->u.brk.cp_offset;
+}
+
+static void text_iter_brk_char_next(text_iter_obj* object, long flags TSRMLS_DC)
+{
+	if (text_iter_brk_char_valid(object, flags TSRMLS_CC)) {
+		if (flags & ITER_REVERSE) {
 			object->u.brk.end = object->u.brk.start;
 			object->u.brk.start = ubrk_previous(object->u.brk.iter);
-			object->u.brk.index++;
-		}
-	} else {
-		if (object->u.brk.end != UBRK_DONE) {
+			if (object->u.brk.end - object->u.brk.start > 1) {
+				object->u.brk.cp_offset -= u_countChar32(object->text, object->u.brk.end - object->u.brk.start);
+			} else {
+				object->u.brk.cp_offset--;
+			}
+			if (object->u.brk.start == UBRK_DONE) {
+				object->u.brk.end = UBRK_DONE;
+			}
+		} else {
+			if (object->u.brk.end - object->u.brk.start > 1) {
+				object->u.brk.cp_offset += u_countChar32(object->text, object->u.brk.end - object->u.brk.start);
+			} else {
+				object->u.brk.cp_offset++;
+			}
 			object->u.brk.start = object->u.brk.end;
 			object->u.brk.end = ubrk_next(object->u.brk.iter);
-			object->u.brk.index++;
+			if (object->u.brk.end == UBRK_DONE) {
+				object->u.brk.start = UBRK_DONE;
+			}
 		}
+		object->u.brk.index++;
 	}
 }
 
-static void text_iter_brk_char_rewind(text_iter_obj *object TSRMLS_DC)
+static void text_iter_brk_char_rewind(text_iter_obj *object, long flags TSRMLS_DC)
 {
-	if (object->flags & ITER_REVERSE) {
-		object->u.brk.end   = ubrk_last(object->u.brk.iter);
-		object->u.brk.start = ubrk_previous(object->u.brk.iter);
+	if (flags & ITER_REVERSE) {
+		object->u.brk.end   	= ubrk_last(object->u.brk.iter);
+		object->u.brk.start 	= ubrk_previous(object->u.brk.iter);
+		object->u.brk.cp_offset = u_countChar32(object->text, object->u.brk.start);
 	} else {
-		object->u.brk.start = ubrk_first(object->u.brk.iter);
-		object->u.brk.end   = ubrk_next(object->u.brk.iter);
+		object->u.brk.start 	= ubrk_first(object->u.brk.iter);
+		object->u.brk.end   	= ubrk_next(object->u.brk.iter);
+		object->u.brk.cp_offset = 0;
 	}
 	object->u.brk.index = 0;
 }
@@ -308,6 +362,7 @@ static text_iter_ops text_iter_brk_ops = {
 	text_iter_brk_char_valid,
 	text_iter_brk_char_current,
 	text_iter_brk_char_key,
+	text_iter_brk_char_offset,
 	text_iter_brk_char_next,
 	text_iter_brk_char_rewind,
 };
@@ -338,7 +393,7 @@ static int text_iter_valid(zend_object_iterator* iter TSRMLS_DC)
 {
 	text_iter_obj* obj = text_iter_to_obj(iter);
 
-	if (iter_ops[obj->type]->valid(obj TSRMLS_CC)) {
+	if (iter_ops[obj->type]->valid(obj, obj->flags TSRMLS_CC)) {
 		return SUCCESS;
 	} else {
 		return FAILURE;
@@ -349,7 +404,7 @@ static void text_iter_get_current_data(zend_object_iterator* iter, zval*** data 
 {
 	text_iter_obj* obj = text_iter_to_obj(iter);
 
-	iter_ops[obj->type]->current(obj TSRMLS_CC);
+	iter_ops[obj->type]->current(obj, obj->flags TSRMLS_CC);
 	*data = &obj->current;
 }
 
@@ -357,7 +412,7 @@ static int text_iter_get_current_key(zend_object_iterator* iter, zstr *str_key, 
 {
 	text_iter_obj* obj = text_iter_to_obj(iter);
 
-	*int_key = iter_ops[obj->type]->key(obj TSRMLS_CC);
+	*int_key = iter_ops[obj->type]->key(obj, obj->flags TSRMLS_CC);
 	return HASH_KEY_IS_LONG;
 }
 
@@ -365,14 +420,14 @@ static void text_iter_move_forward(zend_object_iterator* iter TSRMLS_DC)
 {
 	text_iter_obj* obj = text_iter_to_obj(iter);
 
-	iter_ops[obj->type]->next(obj TSRMLS_CC);
+	iter_ops[obj->type]->next(obj, obj->flags TSRMLS_CC);
 }
 
 static void text_iter_rewind(zend_object_iterator* iter TSRMLS_DC)
 {
 	text_iter_obj* obj = text_iter_to_obj(iter);
 
-	iter_ops[obj->type]->rewind(obj TSRMLS_CC);
+	iter_ops[obj->type]->rewind(obj, obj->flags TSRMLS_CC);
 }
 
 zend_object_iterator_funcs text_iter_funcs = {
@@ -488,7 +543,7 @@ PHP_METHOD(TextIterator, __construct)
 		}
 	}
 
-	iter_ops[intern->type]->rewind(intern TSRMLS_CC);
+	iter_ops[intern->type]->rewind(intern, intern->flags TSRMLS_CC);
 }
 
 PHP_METHOD(TextIterator, current)
@@ -496,7 +551,7 @@ PHP_METHOD(TextIterator, current)
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
-	iter_ops[intern->type]->current(intern TSRMLS_CC);
+	iter_ops[intern->type]->current(intern, intern->flags TSRMLS_CC);
 	RETURN_UNICODEL(Z_USTRVAL_P(intern->current), Z_USTRLEN_P(intern->current), 1);
 }
 
@@ -505,7 +560,12 @@ PHP_METHOD(TextIterator, next)
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
-	iter_ops[intern->type]->next(intern TSRMLS_CC);
+	iter_ops[intern->type]->next(intern, intern->flags TSRMLS_CC);
+	if (iter_ops[intern->type]->valid(intern, intern->flags TSRMLS_CC)) {
+		RETURN_LONG(iter_ops[intern->type]->offset(intern, intern->flags TSRMLS_CC));
+	} else {
+		RETURN_LONG((long)UBRK_DONE);
+	}
 }
 
 PHP_METHOD(TextIterator, key)
@@ -513,7 +573,7 @@ PHP_METHOD(TextIterator, key)
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
-	RETURN_LONG(iter_ops[intern->type]->key(intern TSRMLS_CC));
+	RETURN_LONG(iter_ops[intern->type]->key(intern, intern->flags TSRMLS_CC));
 }
 
 PHP_METHOD(TextIterator, valid)
@@ -521,7 +581,7 @@ PHP_METHOD(TextIterator, valid)
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
-	RETURN_BOOL(iter_ops[intern->type]->valid(intern TSRMLS_CC));
+	RETURN_BOOL(iter_ops[intern->type]->valid(intern, intern->flags TSRMLS_CC));
 }
 
 PHP_METHOD(TextIterator, rewind)
@@ -529,7 +589,8 @@ PHP_METHOD(TextIterator, rewind)
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
-	iter_ops[intern->type]->rewind(intern TSRMLS_CC);
+	iter_ops[intern->type]->rewind(intern, intern->flags TSRMLS_CC);
+	RETURN_LONG(iter_ops[intern->type]->offset(intern, intern->flags TSRMLS_CC));
 }
 
 PHP_METHOD(TextIterator, offset)
@@ -537,7 +598,22 @@ PHP_METHOD(TextIterator, offset)
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
-	RETURN_LONG(intern->u.start);
+	RETURN_LONG(iter_ops[intern->type]->offset(intern, intern->flags TSRMLS_CC));
+}
+
+PHP_METHOD(TextIterator, previous)
+{
+	long flags;
+	zval *object = getThis();
+	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
+
+	flags = intern->flags | ITER_REVERSE;
+	iter_ops[intern->type]->next(intern, flags TSRMLS_CC);
+	if (iter_ops[intern->type]->valid(intern, flags TSRMLS_CC)) {
+		RETURN_LONG(iter_ops[intern->type]->offset(intern, flags TSRMLS_CC));
+	} else {
+		RETURN_LONG((long)UBRK_DONE);
+	}
 }
 
 static zend_function_entry text_iterator_funcs[] = {
@@ -551,6 +627,7 @@ static zend_function_entry text_iterator_funcs[] = {
 	PHP_ME(TextIterator, rewind,      NULL, ZEND_ACC_PUBLIC)
 
 	PHP_ME(TextIterator, offset,	  NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(TextIterator, previous,	  NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -578,6 +655,8 @@ void php_register_unicode_iterators(TSRMLS_D)
 	zend_declare_class_constant_long(text_iterator_ce, "WORD", sizeof("WORD")-1, ITER_WORD TSRMLS_CC);
 	zend_declare_class_constant_long(text_iterator_ce, "LINE", sizeof("LINE")-1, ITER_LINE TSRMLS_CC);
 	zend_declare_class_constant_long(text_iterator_ce, "SENTENCE", sizeof("SENTENCE")-1, ITER_SENTENCE TSRMLS_CC);
+
+	zend_declare_class_constant_long(text_iterator_ce, "DONE", sizeof("DONE")-1, UBRK_DONE TSRMLS_CC);
 }
 
 /*
