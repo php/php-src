@@ -1,3 +1,36 @@
+2006-06-23  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-todo.txt:
+      -** empty log message ***
+
+2006-06-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/assert.c:
+      MFB: Change E_ERROR to E_RECOVERABLE_ERROR
+
+    * (PHP_5_2)
+      ext/standard/assert.c:
+      Change E_ERROR to E_RECOVERABLE_ERROR
+
+2006-06-23  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/oci8.c:
+      fix typo and bug #37886
+
+2006-06-23  Michael Wallner  <mike@iworks.at>
+
+    * ext/bz2/bz2_filter.c:
+      MFB: use %zu to format size_t
+
+    * (PHP_5_2)
+      ext/bz2/bz2_filter.c:
+      - use %zu to format size_t
+
+2006-06-23  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-todo.txt:
+      Update.
+
 2006-06-22  Andrei Zmievski  <andrei@gravitonic.com>
 
     * unicode-todo.txt:
