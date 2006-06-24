@@ -21,7 +21,6 @@
  *
  * - optimize current() to pass return_value to the handler so that it fills it
  *   in directly instead of creating a new zval
- * - return code units as binary strings? integers? or leave as unicode strings?
  * - implement Countable (or count_elements handler) and Seekable interfaces
  */
 
@@ -31,7 +30,6 @@
 #include <unicode/ubrk.h>
 
 typedef enum {
-	ITER_CODE_UNIT,
 	ITER_CODE_POINT,
 	ITER_COMB_SEQUENCE,
 	ITER_CHARACTER,
@@ -53,23 +51,21 @@ typedef struct {
 	size_t			current_alloc;
 	long			flags;
 	union {
+		int32_t		start;
 		struct {
+			int32_t start;
 			int32_t index;
-			int32_t offset;
 		} cp;
 		struct {
-			int32_t index;
-		} cu;
-		struct {
-			int32_t index;
 			int32_t start;
 			int32_t end;
+			int32_t index;
 		} cs;
 		struct {
-			UBreakIterator *iter;
-			int32_t index;
 			int32_t start;
 			int32_t end;
+			int32_t index;
+			UBreakIterator *iter;
 		} brk;
 	} u;
 	zend_object_iterator iter;
@@ -99,71 +95,14 @@ PHPAPI zend_class_entry* text_iterator_aggregate_ce;
 PHPAPI zend_class_entry* text_iterator_ce;
 PHPAPI zend_class_entry* rev_text_iterator_ce;
 
-/* Code unit ops */
-
-static int text_iter_cu_valid(text_iter_obj* object TSRMLS_DC)
-{
-	if (object->flags & ITER_REVERSE) {
-		return (object->u.cu.index >= 0);
-	} else {
-		return (object->u.cu.index < object->text_len);
-	}
-}
-
-static void text_iter_cu_current(text_iter_obj* object TSRMLS_DC)
-{
-	u_memcpy(Z_USTRVAL_P(object->current), object->text + object->u.cu.index, 1);
-	Z_USTRVAL_P(object->current)[1] = 0;
-	Z_USTRLEN_P(object->current) = 1;
-}
-
-static int text_iter_cu_key(text_iter_obj* object TSRMLS_DC)
-{
-	if (object->flags & ITER_REVERSE) {
-		return object->text_len - object->u.cu.index - 1;
-	} else {
-		return object->u.cu.index;
-	}
-}
-
-static void text_iter_cu_next(text_iter_obj* object TSRMLS_DC)
-{
-	if (object->flags & ITER_REVERSE) {
-		if (object->u.cu.index >= 0) {
-			object->u.cu.index--;
-		}
-	} else {
-		if (object->u.cu.index < object->text_len) {
-			object->u.cu.index++;
-		}
-	}
-}
-
-static void text_iter_cu_rewind(text_iter_obj *object TSRMLS_DC)
-{
-	if (object->flags & ITER_REVERSE) {
-		object->u.cu.index = object->text_len-1;
-	} else {
-		object->u.cu.index = 0;
-	}
-}
-
-static text_iter_ops text_iter_cu_ops = {
-	text_iter_cu_valid,
-	text_iter_cu_current,
-	text_iter_cu_key,
-	text_iter_cu_next,
-	text_iter_cu_rewind,
-};
-
 /* Code point ops */
 
 static int text_iter_cp_valid(text_iter_obj* object TSRMLS_DC)
 {
 	if (object->flags & ITER_REVERSE) {
-		return (object->u.cp.offset > 0);
+		return (object->u.cp.start > 0);
 	} else {
-		return (object->u.cp.offset < object->text_len);
+		return (object->u.cp.start < object->text_len);
 	}
 }
 
@@ -172,7 +111,7 @@ static void text_iter_cp_current(text_iter_obj* object TSRMLS_DC)
 	UChar32 cp;
 	int32_t tmp, buf_len;
 
-	tmp = object->u.cp.offset;
+	tmp = object->u.cp.start;
 	if (object->flags & ITER_REVERSE) {
 		U16_PREV(object->text, 0, tmp, cp);
 	} else {
@@ -191,9 +130,9 @@ static int text_iter_cp_key(text_iter_obj* object TSRMLS_DC)
 static void text_iter_cp_next(text_iter_obj* object TSRMLS_DC)
 {
 	if (object->flags & ITER_REVERSE) {
-		U16_BACK_1(object->text, 0, object->u.cp.offset);
+		U16_BACK_1(object->text, 0, object->u.cp.start);
 	} else {
-		U16_FWD_1(object->text, object->u.cp.offset, object->text_len);
+		U16_FWD_1(object->text, object->u.cp.start, object->text_len);
 	}
 	object->u.cp.index++;
 }
@@ -201,9 +140,9 @@ static void text_iter_cp_next(text_iter_obj* object TSRMLS_DC)
 static void text_iter_cp_rewind(text_iter_obj *object TSRMLS_DC)
 {
 	if (object->flags & ITER_REVERSE) {
-		object->u.cp.offset = object->text_len;
+		object->u.cp.start = object->text_len;
 	} else {
-		object->u.cp.offset = 0;
+		object->u.cp.start = 0;
 	}
 	object->u.cp.index  = 0;
 }
@@ -377,7 +316,6 @@ static text_iter_ops text_iter_brk_ops = {
 /* Ops array */
 
 static text_iter_ops* iter_ops[] = {
-	&text_iter_cu_ops,
 	&text_iter_cp_ops,
 	&text_iter_cs_ops,
 	&text_iter_brk_ops,
@@ -514,9 +452,11 @@ PHP_METHOD(TextIterator, __construct)
 	zval *object = getThis();
 	text_iter_obj *intern;
 	text_iter_type ti_type;
+	char *locale = NULL;
+	int locale_len;
 	long flags = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "u|l", &text, &text_len, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "u|ls", &text, &text_len, &flags, &locale, &locale_len) == FAILURE) {
 		return;
 	}
 
@@ -540,9 +480,10 @@ PHP_METHOD(TextIterator, __construct)
 
 	if (intern->type >= ITER_CHARACTER && intern->type < ITER_TYPE_LAST) {
 		UErrorCode status = U_ZERO_ERROR;
-		intern->u.brk.iter = ubrk_open(brk_type_map[intern->type - ITER_CHARACTER], UG(default_locale), text, text_len, &status);
+		locale = locale ? locale : UG(default_locale);
+		intern->u.brk.iter = ubrk_open(brk_type_map[intern->type - ITER_CHARACTER], locale, text, text_len, &status);
 		if (!U_SUCCESS(status)) {
-			php_error(E_RECOVERABLE_ERROR, "Could not create UBreakIterator: %s", u_errorName(status));
+			php_error(E_RECOVERABLE_ERROR, "Could not create UBreakIterator for '%s' locale: %s", locale, u_errorName(status));
 			return;
 		}
 	}
@@ -591,13 +532,25 @@ PHP_METHOD(TextIterator, rewind)
 	iter_ops[intern->type]->rewind(intern TSRMLS_CC);
 }
 
+PHP_METHOD(TextIterator, offset)
+{
+	zval *object = getThis();
+	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
+
+	RETURN_LONG(intern->u.start);
+}
+
 static zend_function_entry text_iterator_funcs[] = {
 	PHP_ME(TextIterator, __construct, NULL, ZEND_ACC_PUBLIC)
+
+	/* Iterator interface methods */
 	PHP_ME(TextIterator, current,  	  NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(TextIterator, next,        NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(TextIterator, key,         NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(TextIterator, valid,       NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(TextIterator, rewind,      NULL, ZEND_ACC_PUBLIC)
+
+	PHP_ME(TextIterator, offset,	  NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -610,16 +563,15 @@ void php_register_unicode_iterators(TSRMLS_D)
 	text_iterator_ce->create_object = text_iterator_new;
 	text_iterator_ce->get_iterator  = text_iter_get_iterator;
 	text_iterator_ce->ce_flags |= ZEND_ACC_FINAL_CLASS;
-	zend_class_implements(text_iterator_ce TSRMLS_CC, 1, zend_ce_traversable);
+	zend_class_implements(text_iterator_ce TSRMLS_CC, 1, zend_ce_iterator);
 
 	INIT_CLASS_ENTRY(ce, "ReverseTextIterator", text_iterator_funcs);
 	rev_text_iterator_ce = zend_register_internal_class(&ce TSRMLS_CC);
 	rev_text_iterator_ce->create_object = text_iterator_new;
 	rev_text_iterator_ce->get_iterator  = text_iter_get_iterator;
 	rev_text_iterator_ce->ce_flags |= ZEND_ACC_FINAL_CLASS;
-	zend_class_implements(rev_text_iterator_ce TSRMLS_CC, 1, zend_ce_traversable);
+	zend_class_implements(rev_text_iterator_ce TSRMLS_CC, 1, zend_ce_iterator);
 
-	zend_declare_class_constant_long(text_iterator_ce, "CODE_UNIT", sizeof("CODE_UNIT")-1, ITER_CODE_UNIT TSRMLS_CC);
 	zend_declare_class_constant_long(text_iterator_ce, "CODE_POINT", sizeof("CODE_POINT")-1, ITER_CODE_POINT TSRMLS_CC);
 	zend_declare_class_constant_long(text_iterator_ce, "COMB_SEQUENCE", sizeof("COMB_SEQUENCE")-1, ITER_COMB_SEQUENCE TSRMLS_CC);
 	zend_declare_class_constant_long(text_iterator_ce, "CHARACTER", sizeof("CHARACTER")-1, ITER_CHARACTER TSRMLS_CC);
