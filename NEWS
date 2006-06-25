@@ -44,6 +44,7 @@ PHP                                                                        NEWS
   . Changed to passing libxml options when loading reader.
 
 - Added posix_initgroups() function. (Ilia)
+- Added image_type_to_extension() function. (Hannes, Ilia)
 - Added allow_url_include ini directive to complement allow_url_fopen. (Rasmus)
 - Added automatic module globals management. (Dmitry)
 - Added RFC2397 (data: stream) support. (Marcus)
