@@ -1148,29 +1148,58 @@ PHP_FUNCTION(image_type_to_extension)
 	switch (image_type) {
 		case IMAGE_FILETYPE_GIF:
 			temp = ".gif";
+			break;
+			
 		case IMAGE_FILETYPE_JPEG:
 			temp = ".jpeg";
+			break;
+			
 		case IMAGE_FILETYPE_PNG:
 			temp = ".png";
+			break;
+			
 		case IMAGE_FILETYPE_SWF:
 		case IMAGE_FILETYPE_SWC:
 			temp = ".swf";
+			break;
+			
 		case IMAGE_FILETYPE_PSD:
 			temp = ".psd";
+			break;
+			
 		case IMAGE_FILETYPE_BMP:
 		case IMAGE_FILETYPE_WBMP:
 			temp = ".bmp";
+			break;
+			
 		case IMAGE_FILETYPE_TIFF_II:
 		case IMAGE_FILETYPE_TIFF_MM:
 			temp = ".tiff";
+			break;
+			
 		case IMAGE_FILETYPE_IFF:
 			temp = ".iff";
+			break;
+			
 		case IMAGE_FILETYPE_JPC:
 			temp = ".jpc";
+			break;
+			
 		case IMAGE_FILETYPE_JP2:
 			temp = ".jp2";
+			break;
+			
+		case IMAGE_FILETYPE_JPX:
+			temp = ".jpx";
+			break;
+
+		case IMAGE_FILETYPE_JB2:
+			temp = ".jb2";
+			break;
+			
 		case IMAGE_FILETYPE_XBM:
 			temp = ".xbm";
+			break;
 	}
 	if (temp) {
 		RETURN_ASCII_STRING(temp + !inc_dot, 1);
