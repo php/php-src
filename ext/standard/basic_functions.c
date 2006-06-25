@@ -196,6 +196,7 @@ zend_function_entry basic_functions[] = {
 	PHP_FE(iptcembed,														NULL)
 	PHP_FE(getimagesize,			second_arg_force_ref)
 	PHP_FE(image_type_to_mime_type,											NULL)
+	PHP_FE(image_type_to_extension,											NULL)
 
 	PHP_FE(phpinfo,															NULL)
 	PHP_FE(phpversion,														NULL)
