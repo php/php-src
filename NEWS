@@ -44,6 +44,10 @@ PHP                                                                        NEWS
   . Changed to passing libxml options when loading reader.
 
 - Added posix_initgroups() function. (Ilia)
+- Added an optional parameter to parse_url() to allow retrieval of distinct URL
+  components. (Ilia)
+- Added optional parameter to http_build_query() to allow specification of
+  string separator. (Ilia)
 - Added image_type_to_extension() function. (Hannes, Ilia)
 - Added allow_url_include ini directive to complement allow_url_fopen. (Rasmus)
 - Added automatic module globals management. (Dmitry)
