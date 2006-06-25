@@ -559,9 +559,15 @@ static sapi_module_struct cgi_sapi_module = {
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 /* }}} */
+/* {{{ arginfo ext/standard/dl.c */
+static
+ZEND_BEGIN_ARG_INFO(arginfo_dl, 0)
+	ZEND_ARG_INFO(0, extension_filename)
+ZEND_END_ARG_INFO()
+/* }}} */
 
 static zend_function_entry additional_functions[] = {
-	ZEND_FE(dl, NULL)
+	ZEND_FE(dl, arginfo_dl)
 	{NULL, NULL, NULL}
 };
 
