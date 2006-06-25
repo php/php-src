@@ -54,11 +54,26 @@ static int le_bucket;
 PHP_FUNCTION(user_filter_nop)
 {
 }
+static
+ZEND_BEGIN_ARG_INFO(arginfo_php_user_filter_filter, 0)
+	ZEND_ARG_INFO(0, in)
+	ZEND_ARG_INFO(0, out)
+	ZEND_ARG_INFO(1, consumed)
+	ZEND_ARG_INFO(0, closing)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_php_user_filter_onCreate, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_php_user_filter_onClose, 0)
+ZEND_END_ARG_INFO()
 
 static zend_function_entry user_filter_class_funcs[] = {
-	PHP_NAMED_FE(filter,	PHP_FN(user_filter_nop),		NULL)
-	PHP_NAMED_FE(onCreate,	PHP_FN(user_filter_nop),		NULL)
-	PHP_NAMED_FE(onClose,	PHP_FN(user_filter_nop),		NULL)
+	PHP_NAMED_FE(filter,	PHP_FN(user_filter_nop),		arginfo_php_user_filter_filter)
+	PHP_NAMED_FE(onCreate,	PHP_FN(user_filter_nop),		arginfo_php_user_filter_onCreate)
+	PHP_NAMED_FE(onClose,	PHP_FN(user_filter_nop),		arginfo_php_user_filter_onClose)
 	{ NULL, NULL, NULL }
 };
 
@@ -66,11 +81,14 @@ static zend_class_entry user_filter_class_entry;
 
 PHP_MINIT_FUNCTION(user_filters)
 {
+	zend_class_entry *php_user_filter;
 	/* init the filter class ancestor */
 	INIT_CLASS_ENTRY(user_filter_class_entry, "php_user_filter", user_filter_class_funcs);
-	if (NULL == zend_register_internal_class(&user_filter_class_entry TSRMLS_CC)) {
+	if ((php_user_filter = zend_register_internal_class(&user_filter_class_entry TSRMLS_CC)) == NULL) {
 		return FAILURE;
 	}
+	zend_declare_property_string(php_user_filter, "filtername", sizeof("filtername")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
+	zend_declare_property_string(php_user_filter, "params", sizeof("params")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
 
 	/* init the filter resource; it has no dtor, as streams will always clean it up
 	 * at the correct time */
