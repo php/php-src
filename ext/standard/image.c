@@ -1165,10 +1165,10 @@ PHP_FUNCTION(image_type_to_extension)
 			RETURN_STRING(".jpc" + !inc_dot, 1);
 		case IMAGE_FILETYPE_JP2:
 			RETURN_STRING(".jp2" + !inc_dot, 1);
-        case IMAGE_FILETYPE_JPX:
-            RETURN_STRING(".jpx" + !inc_dot, 1);
-        case IMAGE_FILETYPE_JB2:
-            RETURN_STRING(".jb2" + !inc_dot, 1);
+		case IMAGE_FILETYPE_JPX:
+			RETURN_STRING(".jpx" + !inc_dot, 1);
+		case IMAGE_FILETYPE_JB2:
+			RETURN_STRING(".jb2" + !inc_dot, 1);
 		case IMAGE_FILETYPE_XBM:
 			RETURN_STRING(".xbm" + !inc_dot, 1);
 	}
