@@ -853,6 +853,7 @@ PHP_FUNCTION(fprintf)
 
 	RETURN_LONG(len);
 }
+/* }}} */
 
 /* {{{ proto int vfprintf(resource stream, string format, array args)
    Output a formatted string into a stream */
@@ -883,7 +884,7 @@ PHP_FUNCTION(vfprintf)
 
 	RETURN_LONG(len);
 }
-
+/* }}} */
 
 
 /*
