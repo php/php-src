@@ -28,8 +28,16 @@ image_type_to_extension()
     foreach($constants as $name => $constant) {
         printf("Constant: %s\n\tWith dot: %s\n\tWithout dot: %s\n", $name, image_type_to_extension($constant), image_type_to_extension($constant, false));
     }
+
+	var_dump(image_type_to_extension(-1, array()));
+	var_dump(image_type_to_extension(new stdclass));
+	var_dump(image_type_to_extension(1000000, NULL));
+	var_dump(image_type_to_extension());
+	var_dump(image_type_to_extension(0));
+	var_dump(image_type_to_extension(0, 0, 0));
 ?>
---EXPECT--
+Done
+--EXPECTF--
 Constant: IMAGETYPE_GIF
 	With dot: .gif
 	Without dot: gif
@@ -78,3 +86,18 @@ Constant: IMAGETYPE_JPEG2000
 Constant: IMAGETYPE_XBM
 	With dot: .xbm
 	Without dot: xbm
+
+Warning: image_type_to_extension() expects parameter 2 to be boolean, array given in %s on line %d
+bool(false)
+
+Warning: image_type_to_extension() expects parameter 1 to be long, object given in %s on line %d
+bool(false)
+bool(false)
+
+Warning: image_type_to_extension() expects at least 1 parameter, 0 given in %s on line %d
+bool(false)
+bool(false)
+
+Warning: image_type_to_extension() expects at most 2 parameters, 3 given in %s on line %d
+bool(false)
+Done
