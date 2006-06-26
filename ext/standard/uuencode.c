@@ -183,7 +183,7 @@ err:
 	return -1;
 }
 
-/* {{{ proto string uuencode(string data) 
+/* {{{ proto string convert_uuencode(string data) 
    uuencode a string */
 PHP_FUNCTION(convert_uuencode)
 {
@@ -200,7 +200,7 @@ PHP_FUNCTION(convert_uuencode)
 }
 /* }}} */
 
-/* {{{ proto string uudecode(string data)
+/* {{{ proto string convert_uudecode(string data)
    decode a uuencoded string */
 PHP_FUNCTION(convert_uudecode)
 {

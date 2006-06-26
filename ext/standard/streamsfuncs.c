@@ -1117,6 +1117,7 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
 
 /* {{{ proto resource stream_filter_prepend(resource stream, string filtername[, int read_write[, string filterparams]])
    Prepend a filter to a stream */
