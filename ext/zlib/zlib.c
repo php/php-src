@@ -528,6 +528,10 @@ PHP_FUNCTION(gzinflate)
 		return;
 	}
 
+	if (!data_len) {
+		RETURN_FALSE;
+	}
+
 	if (limit < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "length (%ld) must be greater or equal zero", limit);
 		RETURN_FALSE;
