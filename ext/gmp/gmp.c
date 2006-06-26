@@ -339,9 +339,6 @@ zend_module_entry gmp_module_entry = {
 
 #ifdef COMPILE_DL_GMP
 ZEND_GET_MODULE(gmp)
-# ifdef PHP_WIN32
-# include "zend_arg_defs.c"
-# endif
 #endif
 
 static void _php_gmpnum_free(zend_rsrc_list_entry *rsrc TSRMLS_DC);
