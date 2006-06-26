@@ -456,8 +456,8 @@ zend_function_entry basic_functions[] = {
 	PHP_FE(error_log,														NULL)
 	PHP_FE(call_user_func,													NULL)
 	PHP_FE(call_user_func_array,											NULL)
-	PHP_FE(call_user_method,		second_arg_force_ref)
-	PHP_FE(call_user_method_array,	second_arg_force_ref)
+	PHP_DEP_FE(call_user_method,		second_arg_force_ref)
+	PHP_DEP_FE(call_user_method_array,	second_arg_force_ref)
 	PHP_FE(serialize,														NULL)
 	PHP_FE(unserialize,														NULL)
 
@@ -612,7 +612,7 @@ zend_function_entry basic_functions[] = {
 	PHP_FE(stream_set_write_buffer,											NULL)
 	PHP_FALIAS(set_file_buffer, stream_set_write_buffer,					NULL)
 
-	PHP_FE(set_socket_blocking,												NULL)
+	PHP_DEP_FALIAS(set_socket_blocking, stream_set_blocking,				NULL)
 	PHP_FE(stream_set_blocking,												NULL)
 	PHP_FALIAS(socket_set_blocking, stream_set_blocking,					NULL)
 
@@ -2175,8 +2175,6 @@ PHP_FUNCTION(call_user_func_array)
 }
 /* }}} */
 
-#define _CUM_DEPREC "This function is deprecated, use the call_user_func variety with the array(&$obj, \"method\") syntax instead"
-
 /* {{{ proto mixed call_user_method(string method_name, mixed object [, mixed parameter] [, mixed ...])
    Call a user method on a specific object or class */
 PHP_FUNCTION(call_user_method)
@@ -2184,8 +2182,6 @@ PHP_FUNCTION(call_user_method)
 	zval ***params;
 	zval *retval_ptr;
 	int arg_count = ZEND_NUM_ARGS();
-
-	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s", _CUM_DEPREC);
 
 	if (arg_count < 2) {
 		WRONG_PARAM_COUNT;
@@ -2221,8 +2217,6 @@ PHP_FUNCTION(call_user_method_array)
 	zval **method_name,	**obj, **params, ***method_args = NULL, *retval_ptr;
 	HashTable *params_ar;
 	int num_elems, element = 0;
-
-	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s", _CUM_DEPREC);
 
 	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &method_name, &obj, &params) == FAILURE) {
 		WRONG_PARAM_COUNT;

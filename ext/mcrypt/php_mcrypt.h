@@ -52,7 +52,6 @@ PHP_FUNCTION(mcrypt_module_open);
 PHP_FUNCTION(mcrypt_generic_init);
 PHP_FUNCTION(mcrypt_generic);
 PHP_FUNCTION(mdecrypt_generic);
-PHP_FUNCTION(mcrypt_generic_end);
 PHP_FUNCTION(mcrypt_generic_deinit);
 
 PHP_FUNCTION(mcrypt_enc_self_test);
