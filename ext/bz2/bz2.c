@@ -205,7 +205,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 	if (strncasecmp("compress.bzip2://", path, 17) == 0) {
 		path += 17;
 	}
-	if (mode[0] != 'w' && mode[0] != 'r' && mode[1] != '\0') {
+	if (mode[0] == '\0' || (mode[0] != 'w' && mode[0] != 'r' && mode[1] != '\0')) {
 		return NULL;
 	}
 
