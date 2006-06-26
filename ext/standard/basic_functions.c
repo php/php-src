@@ -2394,12 +2394,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_stream_set_blocking, 0)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
-static
-ZEND_BEGIN_ARG_INFO(arginfo_set_socket_blocking, 0)
-	ZEND_ARG_INFO(0, socket)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
 #if HAVE_SYS_TIME_H || defined(PHP_WIN32)
 static
 ZEND_BEGIN_ARG_INFO(arginfo_stream_set_timeout, 0)
@@ -3377,8 +3371,8 @@ zend_function_entry basic_functions[] = {
 	PHP_FE(error_log,														arginfo_error_log)
 	PHP_FE(call_user_func,													arginfo_call_user_func)
 	PHP_FE(call_user_func_array,											arginfo_call_user_func_array)
-	PHP_FE(call_user_method,												arginfo_call_user_method)
-	PHP_FE(call_user_method_array,											arginfo_call_user_method_array)
+	PHP_DEP_FE(call_user_method,											arginfo_call_user_method)
+	PHP_DEP_FE(call_user_method_array,										arginfo_call_user_method_array)
 	PHP_FE(serialize,														arginfo_serialize)
 	PHP_FE(unserialize,														arginfo_unserialize)
 
@@ -3535,7 +3529,7 @@ zend_function_entry basic_functions[] = {
 	PHP_FE(stream_set_write_buffer,											arginfo_stream_set_write_buffer)
 	PHP_FALIAS(set_file_buffer, stream_set_write_buffer,					arginfo_stream_set_write_buffer)
 
-	PHP_FE(set_socket_blocking,												arginfo_set_socket_blocking)
+	PHP_DEP_FALIAS(set_socket_blocking, stream_set_blocking,				arginfo_stream_set_blocking)
 	PHP_FE(stream_set_blocking,												arginfo_stream_set_blocking)
 	PHP_FALIAS(socket_set_blocking, stream_set_blocking,					arginfo_stream_set_blocking)
 
@@ -5050,8 +5044,6 @@ PHP_FUNCTION(call_user_func_array)
 }
 /* }}} */
 
-#define _CUM_DEPREC "This function is deprecated, use the call_user_func variety with the array(&$obj, \"method\") syntax instead"
-
 /* {{{ proto mixed call_user_method(string method_name, mixed object [, mixed parameter] [, mixed ...])
    Call a user method on a specific object or class */
 PHP_FUNCTION(call_user_method)
@@ -5059,8 +5051,6 @@ PHP_FUNCTION(call_user_method)
 	zval ***params;
 	zval *retval_ptr;
 	int arg_count = ZEND_NUM_ARGS();
-
-	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s", _CUM_DEPREC);
 
 	if (arg_count < 2) {
 		WRONG_PARAM_COUNT;
@@ -5099,7 +5089,6 @@ PHP_FUNCTION(call_user_method_array)
 	HashTable *params_ar;
 	int num_elems, element = 0;
 
-	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s", _CUM_DEPREC);
 
 	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &method_name, &obj, &params) == FAILURE) {
 		WRONG_PARAM_COUNT;

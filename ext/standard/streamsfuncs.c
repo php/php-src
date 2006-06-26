@@ -1343,15 +1343,6 @@ PHP_FUNCTION(stream_set_blocking)
 
 /* }}} */
 
-/* {{{ proto bool set_socket_blocking(resource socket, int mode)
-   Set blocking/non-blocking mode on a socket */
-PHP_FUNCTION(set_socket_blocking)
-{
-	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "This function is deprecated, use stream_set_blocking() instead");
-	PHP_FN(stream_set_blocking)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-}
-/* }}} */
-
 /* {{{ proto bool stream_set_timeout(resource stream, int seconds, int microseconds)
    Set timeout on stream read to seconds + microseonds */
 #if HAVE_SYS_TIME_H || defined(PHP_WIN32)
