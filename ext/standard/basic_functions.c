@@ -1427,12 +1427,9 @@ PHP_FUNCTION(getenv)
 		RETURN_FALSE;
 	}
 	ptr = sapi_getenv(str, str_len TSRMLS_CC);
-	if (! ptr) {
-		ptr = getenv(str);
-	}
-	if (ptr) {
-		RETURN_STRING(ptr, 1);
-	}
+	if(ptr) RETURN_STRING(ptr, 0);
+	ptr = getenv(str);
+	if(ptr) RETURN_STRING(ptr, 1);
 	RETURN_FALSE;
 }
 /* }}} */
