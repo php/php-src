@@ -11,7 +11,7 @@ Localized match
 setlocale(LC_ALL, 'C', 'POSIX');
 var_dump(preg_match('/^\w{6}$/', 'aאבחיט'));
 
-setlocale(LC_ALL, 'pt_PT', 'pt', 'portuguese');
+setlocale(LC_ALL, 'pt_PT', 'pt', 'pt_PT.ISO8859-1', 'portuguese');
 var_dump(preg_match('/^\w{6}$/', 'aאבחיט'));
 
 setlocale(LC_ALL, 'C', 'POSIX');
