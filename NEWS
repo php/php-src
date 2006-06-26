@@ -59,6 +59,8 @@ PHP                                                                        NEWS
 - Added memory_get_peak_usage() function for retrieving peak memory usage of
   a PHP script. (Ilia)
 - Added pg_field_table() function. (Edin)
+- Added SimpleXMLElement::saveXML() as an alias for SimpleXMLElement::asXML().
+  (Hannes)
 
 - Optimized zend_try/zend_catch macros by eliminating memcpy(3). (Dmitry)
 - Optimized require_once() and include_once() by eliminating fopen(3)
