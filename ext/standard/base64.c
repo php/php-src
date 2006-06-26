@@ -34,22 +34,22 @@ static const char base64_table[] =
 static const char base64_pad = '=';
 
 static const short base64_reverse_table[256] = {
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63,
-	52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1,
-	-1,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14,
-	15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1,
-	-1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-	41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1,
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+	-2, -2, -2, -2, -2, -2, -2, -2, -2, -1, -1, -2, -2, -1, -2, -2,
+	-2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2,
+	-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, 62, -2, -2, -2, 63,
+	52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -2, -2, -2, -2, -2, -2,
+	-2,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14,
+	15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -2, -2, -2, -2, -2,
+	-2, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+	41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -2, -2, -2, -2, -2,
+	-2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2,
+	-2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2,
+	-2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2,
+	-2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2,
+	-2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2,
+	-2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2,
+	-2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2,
+	-2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2
 };
 /* }}} */
 
@@ -135,9 +135,14 @@ void php_base64_init()
 */
 /* }}} */
 
+PHPAPI unsigned char *php_base64_decode(const unsigned char *str, int length, int *ret_length)
+{
+	return php_base64_decode_ex(str, length, ret_length, 0);
+}
+
 /* {{{ php_base64_decode */
 /* as above, but backwards. :) */
-PHPAPI unsigned char *php_base64_decode(const unsigned char *str, int length, int *ret_length)
+PHPAPI unsigned char *php_base64_decode_ex(const unsigned char *str, int length, int *ret_length, zend_bool strict)
 {
 	const unsigned char *current = str;
 	int ch, i = 0, j = 0, k;
@@ -145,13 +150,18 @@ PHPAPI unsigned char *php_base64_decode(const unsigned char *str, int length, in
 	unsigned char *result;
 	
 	result = (unsigned char *)safe_emalloc(length, 1, 1);
-
+	
 	/* run through the whole string, converting as we go */
 	while ((ch = *current++) != '\0' && length-- > 0) {
 		if (ch == base64_pad) break;
 
 		ch = base64_reverse_table[ch];
-		if (ch < 0) continue;
+		if ((!strict && ch < 0) || ch == -1) { /* a space or some other separator character, we simply skip over */
+			continue;
+		} else if (ch == -2) {
+			efree(result);
+			return NULL;
+		}
 
 		switch(i % 4) {
 		case 0:
@@ -214,18 +224,19 @@ PHP_FUNCTION(base64_encode)
 /* }}} */
 
 
-/* {{{ proto string base64_decode(string str)
+/* {{{ proto string base64_decode(string str[, bool strict])
    Decodes string using MIME base64 algorithm */
 PHP_FUNCTION(base64_decode)
 {
 	char *str;
 	unsigned char *result;
+	zend_bool strict = 0;
 	int str_len, ret_length;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &str, &str_len, &strict) == FAILURE) {
 		return;
 	}
-	result = php_base64_decode((unsigned char*)str, str_len, &ret_length);
+	result = php_base64_decode_ex(str, str_len, &ret_length, strict);
 	if (result != NULL) {
 		RETVAL_STRINGL((char*)result, ret_length, 0);
 	} else {
