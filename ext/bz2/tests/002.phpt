@@ -1,5 +1,7 @@
 --TEST--
 bzopen() using fd opened in wrong mode
+--SKIPIF--
+<?php if (!extension_loaded("bz2")) print "skip"; ?>
 --FILE--
 <?php
 
