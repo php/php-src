@@ -2193,7 +2193,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 			    zend_hash_find(&tmp_bindings,(char*)&(*tmp)->binding,sizeof((*tmp)->binding), (void**)&binding_num) != SUCCESS) {
 			}
 			WSDL_CACHE_PUT_INT(*binding_num, out);
-			if (binding_num >= 0) {
+			if (*binding_num >= 0) {
 				if ((*tmp)->binding->bindingType == BINDING_SOAP && (*tmp)->bindingAttributes != NULL) {
 					sdlSoapBindingFunctionPtr binding = (sdlSoapBindingFunctionPtr)(*tmp)->bindingAttributes;
 					WSDL_CACHE_PUT_1(binding->style, out);
