@@ -224,7 +224,7 @@ static int array_reverse_key_compare(const void *a, const void *b TSRMLS_DC)
 	return array_key_compare(a, b TSRMLS_CC) * -1;
 }
 
-/* {{{ proto bool krsort(array array_arg [, int sort_flags])
+/* {{{ proto bool krsort(array &array_arg [, int sort_flags])
    Sort an array by key value in reverse order */
 PHP_FUNCTION(krsort)
 {
@@ -246,7 +246,7 @@ PHP_FUNCTION(krsort)
 }
 /* }}} */
 
-/* {{{ proto bool ksort(array array_arg [, int sort_flags])
+/* {{{ proto bool ksort(array &array_arg [, int sort_flags])
    Sort an array by key */
 PHP_FUNCTION(ksort)
 {
@@ -459,7 +459,7 @@ static void php_natsort(INTERNAL_FUNCTION_PARAMETERS, int fold_case)
 }
 
 
-/* {{{ proto void natsort(array array_arg)
+/* {{{ proto void natsort(array &array_arg)
    Sort an array using natural sort */
 PHP_FUNCTION(natsort)
 {
@@ -468,7 +468,7 @@ PHP_FUNCTION(natsort)
 /* }}} */
 
 
-/* {{{ proto void natcasesort(array array_arg)
+/* {{{ proto void natcasesort(array &array_arg)
    Sort an array using case-insensitive natural sort */
 PHP_FUNCTION(natcasesort)
 {
@@ -477,7 +477,7 @@ PHP_FUNCTION(natcasesort)
 /* }}} */
 
 
-/* {{{ proto bool asort(array array_arg [, int sort_flags])
+/* {{{ proto bool asort(array &array_arg [, int sort_flags])
    Sort an array and maintain index association */
 PHP_FUNCTION(asort)
 {
@@ -499,7 +499,7 @@ PHP_FUNCTION(asort)
 }
 /* }}} */
 
-/* {{{ proto bool arsort(array array_arg [, int sort_flags])
+/* {{{ proto bool arsort(array &array_arg [, int sort_flags])
    Sort an array in reverse order and maintain index association */
 PHP_FUNCTION(arsort)
 {
@@ -521,7 +521,7 @@ PHP_FUNCTION(arsort)
 }
 /* }}} */
 
-/* {{{ proto bool sort(array array_arg [, int sort_flags])
+/* {{{ proto bool sort(array &array_arg [, int sort_flags])
    Sort an array */
 PHP_FUNCTION(sort)
 {
@@ -543,7 +543,7 @@ PHP_FUNCTION(sort)
 }
 /* }}} */
 
-/* {{{ proto bool rsort(array array_arg [, int sort_flags])
+/* {{{ proto bool rsort(array &array_arg [, int sort_flags])
    Sort an array in reverse order */
 PHP_FUNCTION(rsort)
 {
@@ -2151,7 +2151,7 @@ PHP_FUNCTION(array_splice)
 /* }}} */
 
 
-/* {{{ proto array array_slice(array input, int offset [, int length])
+/* {{{ proto array array_slice(array input, int offset [, int length [, bool preserve_keys]])
    Returns elements specified by offset and length */
 PHP_FUNCTION(array_slice)
 {
@@ -3179,6 +3179,7 @@ PHP_FUNCTION(array_intersect_key)
 	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_KEY,
 				INTERSECT_COMP_DATA_INTERNAL, INTERSECT_COMP_KEY_INTERNAL);
 }
+/* }}} */
 
 /* {{{ proto array array_intersect_ukey(array arr1, array arr2 [, array ...], callback key_compare_func)
    Returns the entries of arr1 that have keys which are present in all the other arguments. Kind of equivalent to array_diff(array_keys($arr1), array_keys($arr2)[,array_keys(...)]). The comparison of the keys is performed by a user supplied function. Equivalent of array_intersect_uassoc() but does not do compare of the data. */
@@ -3187,7 +3188,7 @@ PHP_FUNCTION(array_intersect_ukey)
 	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_KEY,
 				INTERSECT_COMP_DATA_INTERNAL, INTERSECT_COMP_KEY_USER);
 }
-
+/* }}} */
 
 /* {{{ proto array array_intersect(array arr1, array arr2 [, array ...])
    Returns the entries of arr1 that have values which are present in all the other arguments */

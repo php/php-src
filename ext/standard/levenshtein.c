@@ -79,7 +79,7 @@ static int custom_levdist(char *str1, char *str2, char *callback_name TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto int levenshtein(string str1, string str2)
+/* {{{ proto int levenshtein(string str1, string str2[, int cost_ins, int cost_rep, int cost_del])
    Calculate Levenshtein distance between two strings */
 PHP_FUNCTION(levenshtein)
 {

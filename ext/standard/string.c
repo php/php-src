@@ -1333,7 +1333,7 @@ PHP_FUNCTION(dirname)
 }
 /* }}} */
 
-/* {{{ proto array pathinfo(string path)
+/* {{{ proto array pathinfo(string path[, int options])
    Returns information about a certain string */
 PHP_FUNCTION(pathinfo)
 {
@@ -2503,7 +2503,7 @@ static void php_strtr_array(zval *return_value, char *str, int slen, HashTable *
 }
 /* }}} */
 
-/* {{{ proto string strtr(string str, string from, string to)
+/* {{{ proto string strtr(string str, string from[, string to])
    Translates characters in str using given translation tables */
 PHP_FUNCTION(strtr)
 {								
