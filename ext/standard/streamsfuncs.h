@@ -33,7 +33,6 @@ PHP_FUNCTION(stream_socket_sendto);
 PHP_FUNCTION(stream_copy_to_stream);
 PHP_FUNCTION(stream_get_contents);
 
-PHP_FUNCTION(set_socket_blocking); /* deprecated */
 PHP_FUNCTION(stream_set_blocking);
 PHP_FUNCTION(stream_select);
 PHP_FUNCTION(stream_set_timeout);
