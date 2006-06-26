@@ -1,3 +1,69 @@
+2006-06-25  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      MFH http_build_query() & parse_url() news
+
+    * NEWS:
+      curl_setopt_array() was added in 5.1.3
+      http_build_query() & parse_url in 5.2
+
+    * ext/standard/user_filters.c
+      ext/standard/tests/filters/php_user_filter_01.phpt
+      ext/standard/tests/filters/php_user_filter_02.phpt
+      ext/standard/tests/filters/php_user_filter_03.phpt:
+      Added argument info
+      (forces user-space filters to register correct arguments)
+      Added tests
+
+2006-06-25  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/image/image_type_to_extension.phpt:
+      MFB: improve test
+
+    * (PHP_5_2)
+      ext/standard/tests/image/image_type_to_extension.phpt:
+      improve test file
+      don't forget to test invalid parameters etc.
+
+2006-06-25  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      Added image_type_to_extension()
+
+    * (PHP_5_2)
+      ext/standard/image.c:
+      WS fix
+
+    * ext/standard/basic_functions.c
+      ext/standard/tests/image/image_type_to_extension.phpt
+      ext/standard/tests/image/image_type_to_extension.phpt:
+      Enabled image_type_to_extension() which has been in cvs for 2,5 years now..
+      Added test
+
+    * ext/standard/image.c:
+      Fixed image_type_to_extension()
+      Added support for IMAGETYPE_JPX & IMAGETYPE_JB2
+
+    * ext/standard/array.c
+      ext/standard/formatted_print.c
+      ext/standard/levenshtein.c
+      ext/standard/metaphone.c
+      ext/standard/streamsfuncs.c
+      ext/standard/string.c
+      ext/standard/url.c
+      ext/standard/uuencode.c
+      ext/standard/versioning.c:
+      Updated protos
+      Fixed vim folding
+
+    * ext/standard/basic_functions.c
+      sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c
+      sapi/embed/php_embed.c:
+      Argument info
+
 2006-06-23  Andrei Zmievski  <andrei@gravitonic.com>
 
     * unicode-todo.txt:
