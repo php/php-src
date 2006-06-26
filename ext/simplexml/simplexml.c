@@ -48,6 +48,7 @@ ZEND_API zend_class_entry *sxe_get_element_class_entry()
 }
 
 #define SXE_ME(func, arg_info, flags) PHP_ME(simplexml_element, func, arg_info, flags)
+#define SXE_MALIAS(func, alias, arg_info, flags) PHP_MALIAS(simplexml_element, func, alias, arg_info, flags)
 
 #define SXE_METHOD(func) PHP_METHOD(simplexml_element, func)
 
@@ -2246,6 +2247,7 @@ ZEND_GET_MODULE(simplexml)
 static zend_function_entry sxe_functions[] = {
 	SXE_ME(__construct,            NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL) /* must be called */
 	SXE_ME(asXML,                  NULL, ZEND_ACC_PUBLIC)
+	SXE_MALIAS(saveXML, asXML,	   NULL, ZEND_ACC_PUBLIC)
 	SXE_ME(xpath,                  NULL, ZEND_ACC_PUBLIC)
 	SXE_ME(registerXPathNamespace, NULL, ZEND_ACC_PUBLIC)
 	SXE_ME(attributes,             NULL, ZEND_ACC_PUBLIC)
