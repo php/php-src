@@ -932,6 +932,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_import_request_variables, 0, 0, 1)
 	ZEND_ARG_INFO(0, types)
 	ZEND_ARG_INFO(0, prefix)
 ZEND_END_ARG_INFO()
+
+#ifdef HAVE_GETLOADAVG
+static
+ZEND_BEGIN_ARG_INFO(arginfo_sys_getloadavg, 0)
+ZEND_END_ARG_INFO()
+#endif
 /* }}} */
 /* {{{ assert.c */
 static
@@ -952,8 +958,9 @@ ZEND_BEGIN_ARG_INFO(arginfo_base64_encode, 0)
 ZEND_END_ARG_INFO()
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_base64_decode, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_base64_decode, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, strict)
 ZEND_END_ARG_INFO()
 
 /* }}} */
@@ -3344,7 +3351,7 @@ zend_function_entry basic_functions[] = {
 	PHP_FE(getopt,															arginfo_getopt)
 #endif
 #ifdef HAVE_GETLOADAVG
-	PHP_FE(sys_getloadavg,													NULL)
+	PHP_FE(sys_getloadavg,													arginfo_sys_getloadavg)
 #endif
 #ifdef HAVE_GETTIMEOFDAY
 	PHP_FE(microtime,														arginfo_microtime)
