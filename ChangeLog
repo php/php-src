@@ -1,3 +1,174 @@
+2006-06-26  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/pcre/tests/locales.phpt:
+      Fix test
+
+2006-06-26  Antony Dovgal  <antony@zend.com>
+
+    * ext/zlib/tests/004.phpt
+      ext/zlib/tests/004.txt.gz
+      ext/zlib/tests/005.phpt
+      ext/zlib/tests/006.phpt
+      ext/zlib/tests/007.phpt:
+      add new tests
+
+    * ext/zlib/tests/004.phpt
+      ext/zlib/tests/004.phpt
+      ext/zlib/tests/004.txt.gz
+      ext/zlib/tests/004.txt.gz
+      ext/zlib/tests/005.phpt
+      ext/zlib/tests/005.phpt
+      ext/zlib/tests/006.phpt
+      ext/zlib/tests/006.phpt
+      ext/zlib/tests/007.phpt
+      ext/zlib/tests/007.phpt:
+      
+      file 004.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/zlib/zlib.c:
+      MFH: zero-terminate strings produced with FORCE_DEFLATE
+
+    * ext/zlib/zlib.c:
+      zero-terminate strings produced with FORCE_DEFLATE
+
+    * ext/zlib/zlib.c:
+      MFB: don't try to inflate empty strings
+
+    * (PHP_5_2)
+      ext/zlib/zlib.c:
+      don't try to inflate empty strings (and stop segfaulting!)
+
+2006-06-26  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ext/standard/basic_functions.c:
+      nuke obsolete arginfo
+
+2006-06-26  Antony Dovgal  <antony@zend.com>
+
+    * ext/bz2/tests/001.phpt
+      ext/bz2/tests/001.phpt
+      ext/bz2/tests/002.phpt
+      ext/bz2/tests/002.phpt
+      ext/bz2/tests/003.phpt
+      ext/bz2/tests/003.txt.bz2
+      ext/bz2/tests/004.phpt
+      ext/bz2/tests/004_1.txt.bz2
+      ext/bz2/tests/004_2.txt.bz2
+      ext/bz2/tests/005.phpt:
+      add new tests, improve the old ones
+
+2006-06-26  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/standard/basic_functions.c:
+      Add arginfo for sys_getloadavg()
+      iUpdate arginfo for base64_decode()
+
+    * ext/standard/base64.c
+      ext/standard/base64.h
+      ext/standard/tests/strings/bug37244.phpt
+      ext/standard/tests/strings/bug37244.phpt:
+      MFB: bug #37244 (base64_decode violates RFC 3548)
+      -Add test
+
+2006-06-26  Antony Dovgal  <antony@zend.com>
+
+    * ext/bz2/tests/003.phpt
+      ext/bz2/tests/003.phpt
+      ext/bz2/tests/003.txt.bz2
+      ext/bz2/tests/003.txt.bz2
+      ext/bz2/tests/004.phpt
+      ext/bz2/tests/004.phpt
+      ext/bz2/tests/004_1.txt.bz2
+      ext/bz2/tests/004_1.txt.bz2
+      ext/bz2/tests/004_2.txt.bz2
+      ext/bz2/tests/004_2.txt.bz2
+      ext/bz2/tests/005.phpt
+      ext/bz2/tests/005.phpt:
+      
+      file 003.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/bz2/bz2.c:
+      MFH: detect empty mode string and avoid off-by-one
+
+    * ext/bz2/bz2.c:
+      detect empty mode string and avoid off-by-one
+
+2006-06-26  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * configure.in
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+      MFB: sys_getloadavg()
+
+    * (PHP_5_2)
+      ext/standard/array.c
+      ext/standard/formatted_print.c
+      ext/standard/levenshtein.c
+      ext/standard/metaphone.c
+      ext/standard/streamsfuncs.c
+      ext/standard/string.c
+      ext/standard/url.c
+      ext/standard/uuencode.c
+      ext/standard/versioning.c:
+      Updated protos & vim folding
+
+    * (PHP_5_2)
+      ext/standard/user_filters.c
+      ext/standard/tests/filters/php_user_filter_01.phpt
+      ext/standard/tests/filters/php_user_filter_02.phpt
+      ext/standard/tests/filters/php_user_filter_03.phpt:
+      MFH: argument info for php_user_filter
+      Add tests
+
+    * (PHP_5_2)
+      ext/mcrypt/mcrypt.c
+      ext/mcrypt/php_mcrypt.h
+      ext/mysql/php_mysql.c
+      ext/standard/basic_functions.c
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.h:
+      MFH: use the ZEND_ACC_DEPRECATED flag rather than custom warnings
+
+    * ext/simplexml/simplexml.c:
+      MFB: saveXML() -> asXML() alias
+
+    * ext/curl/interface.c
+      ext/gmp/gmp.c:
+      Removed obsolete arg_info include
+
+    * (PHP_5_2)
+      NEWS
+      ext/simplexml/simplexml.c:
+      Added SimpleXMLElement::saveXML() as an alias for SimpleXMLElement::asXML()
+
+2006-06-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      Fixed bug #37862 (Integer pointer comparison to numeric value)
+
+2006-06-26  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/standard/basic_functions.c:
+      Cleaner fix
+
+    * ext/standard/basic_functions.c:
+      sapi_getenv() estrdups the returned string now, so we need to free it
+
+2006-06-26  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/mcrypt/mcrypt.c
+      ext/mcrypt/php_mcrypt.h
+      ext/mysql/php_mysql.c
+      ext/standard/basic_functions.c
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.h:
+      Removed custom deprecate error messages
+      Use the fancy ZEND_ACC_DEPRECATED flag.
+
 2006-06-25  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * (PHP_5_2)
