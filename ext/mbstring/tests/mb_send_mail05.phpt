@@ -2,7 +2,7 @@
 mb_send_mail() test 5 (lang=Simplified Chinese)
 --SKIPIF--
 <?php
-if (@mb_send_mail() === false || !mb_language("Simplified Chinese")) {
+if (!function_exists("mb_send_mail") || !mb_language("Simplified Chinese")) {
 	die("skip mb_send_mail() not available");
 }
 if (!@mb_internal_encoding('GB2312')) {

@@ -2,7 +2,7 @@
 mb_send_mail() test 7 (lang=Korean)
 --SKIPIF--
 <?php
-if (@mb_send_mail() === false || !mb_language("Korean")) {
+if (!function_exists("mb_send_mail") || !mb_language("Korean")) {
 	die("skip mb_send_mail() not available");
 }
 if (!@mb_internal_encoding('ISO-2022-KR')) {

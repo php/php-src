@@ -2,7 +2,7 @@
 mb_send_mail() test 1 (lang=neutral)
 --SKIPIF--
 <?php
-if (@mb_send_mail() === false || !mb_language("neutral")) {
+if (!function_exists("mb_send_mail") || !mb_language("neutral")) {
 	die("skip mb_send_mail() not available");
 }
 ?>

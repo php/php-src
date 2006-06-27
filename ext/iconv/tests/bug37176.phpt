@@ -1,5 +1,7 @@
 --TEST--
 Bug #37176 (iconv_strpos() fails to find a string)
+--SKIPIF--
+<?php include('skipif.inc'); ?>
 --FILE--
 <?php
 var_dump(iconv_strpos('11--','1-',0,'UTF-8'));

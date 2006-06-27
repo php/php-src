@@ -2,7 +2,7 @@
 mb_send_mail() test 4 (lang=German)
 --SKIPIF--
 <?php
-if (@mb_send_mail() === false || !mb_language("german")) {
+if (!function_exists("mb_send_mail") || !mb_language("german")) {
 	die("skip mb_send_mail() not available");
 }
 ?>
