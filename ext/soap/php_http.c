@@ -237,6 +237,7 @@ int make_http_soap_request(zval  *this_ptr,
 	int http_status;
 	int content_type_xml = 0;
 	char *content_encoding;
+	char *http_msg = NULL;
 	zend_bool old_allow_url_fopen;
 
 	if (this_ptr == NULL || Z_TYPE_P(this_ptr) != IS_OBJECT) {
@@ -729,6 +730,14 @@ try_again:
 				tmp++;
 				http_status = atoi(tmp);
 			}
+			tmp = strstr(tmp," ");
+			if (tmp != NULL) {
+				tmp++;
+				if (http_msg) {
+					efree(http_msg);
+				}
+				http_msg = estrdup(tmp);
+			}
 			efree(http_version);
 
 			/* Try and get headers again */
@@ -842,6 +851,9 @@ try_again:
 		zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
 		zend_hash_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy"));
 		add_soap_fault(this_ptr, "HTTP", "Error Fetching http body, No Content-Length, connection closed or chunked data", NULL, NULL TSRMLS_CC);
+		if (http_msg) {
+			efree(http_msg);
+		}
 		return FALSE;
 	}
 
@@ -1044,6 +1056,9 @@ try_again:
 			efree(content_encoding);
 			efree(http_headers);
 			efree(http_body);
+			if (http_msg) {
+				efree(http_msg);
+			}
 			add_soap_fault(this_ptr, "HTTP", "Unknown Content-Encoding", NULL, NULL TSRMLS_CC);
 			return FALSE;
 		}
@@ -1057,6 +1072,9 @@ try_again:
 			efree(http_headers);
 			efree(http_body);
 			add_soap_fault(this_ptr, "HTTP", "Can't uncompress compressed response", NULL, NULL TSRMLS_CC);
+			if (http_msg) {
+				efree(http_msg);
+			}
 			return FALSE;
 		}
 		efree(content_encoding);
@@ -1087,25 +1105,14 @@ try_again:
 
 		if (error) {
 			efree(*buffer);
-			if (http_status == 400) {
-				add_soap_fault(this_ptr, "HTTP", "Bad Request", NULL, NULL TSRMLS_CC);
-			} else if (http_status == 401) {
-				add_soap_fault(this_ptr, "HTTP", "Unauthorized Request", NULL, NULL TSRMLS_CC);
-			} else if (http_status == 405) {
-				add_soap_fault(this_ptr, "HTTP", "Method not allowed", NULL, NULL TSRMLS_CC);
-			} else if (http_status == 415) {
-				add_soap_fault(this_ptr, "HTTP", "Unsupported Media Type", NULL, NULL TSRMLS_CC);
-			} else if (http_status >= 400 && http_status < 500) {
-				add_soap_fault(this_ptr, "HTTP", "Client Error", NULL, NULL TSRMLS_CC);
-			} else if (http_status == 500) {
-				add_soap_fault(this_ptr, "HTTP", "Internal Server Error", NULL, NULL TSRMLS_CC);
-			} else if (http_status >= 500 && http_status < 600) {
-				add_soap_fault(this_ptr, "HTTP", "Server Error", NULL, NULL TSRMLS_CC);
-			} else {
-				add_soap_fault(this_ptr, "HTTP", "Unsupported HTTP status code", NULL, NULL TSRMLS_CC);
-			}
+			add_soap_fault(this_ptr, "HTTP", http_msg, NULL, NULL TSRMLS_CC);
+			efree(http_msg);
 			return FALSE;
 		}
+	}
+
+	if (http_msg) {
+		efree(http_msg);
 	}
 
 	return TRUE;
