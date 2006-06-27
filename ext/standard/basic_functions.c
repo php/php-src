@@ -2368,7 +2368,6 @@ ZEND_END_ARG_INFO()
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_context_create, 0, 0, 0)
 	ZEND_ARG_INFO(0, options) /* ARRAY_INFO(0, options, 1) */
-	ZEND_ARG_INFO(0, params) /* ARRAY_INFO(0, params, 1) */
 ZEND_END_ARG_INFO()
 
 static
@@ -2541,13 +2540,11 @@ static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_stristr, 0, 0, 1)
 	ZEND_ARG_INFO(0, haystack)
 	ZEND_ARG_INFO(0, needle)
-	ZEND_ARG_INFO(0, part)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_strstr, 0, 0, 1)
 	ZEND_ARG_INFO(0, haystack)
 	ZEND_ARG_INFO(0, needle)
-	ZEND_ARG_INFO(0, part)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_strpos, 0, 0, 2)
