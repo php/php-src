@@ -70,6 +70,7 @@ PHP                                                                        NEWS
 
 - Fixed memory leaks in openssl streams context options. (Pierre)
 - Fixed handling of extremely long paths inside tempnam() function. (Ilia)
+- Fixed bug #37920 (compilation problems on z/OS). (Tony)
 - Fixed bug #37864 (file_get_contents() leaks on empty file). (Hannes)
 - Fixed bug #37862 (Integer pointer comparison to numeric value).
   (bugs-php at thewrittenword dot com)
