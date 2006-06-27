@@ -545,12 +545,12 @@ static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file,
 	/* #!php support */
 	c = fgetc(file_handle->handle.fp);
 	if (c == '#') {
-		while (c != 10 && c != 13) {
+		while (c != '\n' && c != '\r') {
 			c = fgetc(file_handle->handle.fp);	/* skip to end of line */
 		}
 		/* handle situations where line is terminated by \r\n */
-		if (c == 13) {
-			if (fgetc(file_handle->handle.fp) != 10) {
+		if (c == '\r') {
+			if (fgetc(file_handle->handle.fp) != '\n') {
 				long pos = ftell(file_handle->handle.fp);
 				fseek(file_handle->handle.fp, pos - 1, SEEK_SET);
 			}
