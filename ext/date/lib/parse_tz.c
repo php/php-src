@@ -240,8 +240,8 @@ const timelib_tzdb_index_entry *timelib_timezone_builtin_identifiers_list(int *c
 
 int timelib_timezone_id_is_valid(char *timezone, const timelib_tzdb *tzdb)
 {
-	const unsigned char *tzf;
-	return (seek_to_tz_position(&tzf, timezone, tzdb));
+	unsigned char *tzf;
+	return (seek_to_tz_position((unsigned char**) &tzf, timezone, tzdb));
 }
 
 timelib_tzinfo *timelib_parse_tzfile(char *timezone, const timelib_tzdb *tzdb)
@@ -249,7 +249,7 @@ timelib_tzinfo *timelib_parse_tzfile(char *timezone, const timelib_tzdb *tzdb)
 	const unsigned char *tzf;
 	timelib_tzinfo *tmp;
 
-	if (seek_to_tz_position(&tzf, timezone, tzdb)) {
+	if (seek_to_tz_position((unsigned char**) &tzf, timezone, tzdb)) {
 		tmp = timelib_tzinfo_ctor(timezone);
 
 		read_header((char**) &tzf, tmp);

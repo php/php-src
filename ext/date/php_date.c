@@ -230,8 +230,8 @@ ZEND_DECLARE_MODULE_GLOBALS(date)
 static PHP_GINIT_FUNCTION(date);
 
 /* True global */
-static timelib_tzdb *php_date_global_timezone_db;
-static int php_date_global_timezone_db_enabled;
+timelib_tzdb *php_date_global_timezone_db;
+int php_date_global_timezone_db_enabled;
 
 #define DATE_DEFAULT_LATITUDE "31.7667"
 #define DATE_DEFAULT_LONGITUDE "35.2333"
@@ -637,25 +637,25 @@ PHPAPI timelib_tzinfo *get_timezone_info(TSRMLS_D)
 /* {{{ date() and gmdate() data */
 #include "ext/standard/php_smart_str.h"
 
-static const char *mon_full_names[] = {
+static char *mon_full_names[] = {
 	"January", "February", "March", "April",
 	"May", "June", "July", "August",
 	"September", "October", "November", "December"
 };
 
-static const char *mon_short_names[] = {
+static char *mon_short_names[] = {
 	"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 };
 
-static const char *day_full_names[] = {
+static char *day_full_names[] = {
 	"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
 };
 
-static const char *day_short_names[] = {
+static char *day_short_names[] = {
 	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 };
 
-static const char *english_suffix(timelib_sll number)
+static char *english_suffix(timelib_sll number)
 {
 	if (number >= 10 && number <= 19) {
 		return "th";
@@ -671,16 +671,16 @@ static const char *english_suffix(timelib_sll number)
 /* }}} */
 
 /* {{{ day of week helpers */
-static const char *php_date_full_day_name(timelib_sll y, timelib_sll m, timelib_sll d)
+char *php_date_full_day_name(timelib_sll y, timelib_sll m, timelib_sll d)
 {
 	timelib_sll day_of_week = timelib_day_of_week(y, m, d);
 	if (day_of_week < 0) {
 		return "Unknown";
 	} 
-	return day_full_names[day_of_week];
+	return day_full_names[day_of_week];	
 }
 
-static const char *php_date_short_day_name(timelib_sll y, timelib_sll m, timelib_sll d)
+char *php_date_short_day_name(timelib_sll y, timelib_sll m, timelib_sll d)
 {
 	timelib_sll day_of_week = timelib_day_of_week(y, m, d);
 	if (day_of_week < 0) {
