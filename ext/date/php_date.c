@@ -873,7 +873,7 @@ static char *date_format(char *format, int format_len, int *return_len, timelib_
 					retval += 1000;
 				}
 				retval = retval % 1000;
-				date_spprintf(&buffer, 32 TSRMLS_CC, "%03d", retval);
+				length = date_spprintf(&buffer, 32 TSRMLS_CC, "%03d", retval);
 				break;
 			}
 			case 'g': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", (t->h % 12) ? (int) t->h % 12 : 12); break;
