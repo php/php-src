@@ -2,7 +2,7 @@
 mb_send_mail() test 6 (lang=Traditional Chinese)
 --SKIPIF--
 <?php
-if (@mb_send_mail() === false || !mb_language("Traditional Chinese")) {
+if (!function_exists("mb_send_mail") || !mb_language("Traditional Chinese")) {
 	die("skip mb_send_mail() not available");
 }
 if (!@mb_internal_encoding('BIG5')) {
