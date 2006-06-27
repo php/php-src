@@ -2537,16 +2537,18 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pathinfo, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_stristr, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_stristr, 0)
 	ZEND_ARG_INFO(0, haystack)
 	ZEND_ARG_INFO(0, needle)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_strstr, 0, 0, 1)
+static
+ZEND_BEGIN_ARG_INFO(arginfo_strstr, 0)
 	ZEND_ARG_INFO(0, haystack)
 	ZEND_ARG_INFO(0, needle)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_strpos, 0, 0, 2)
 	ZEND_ARG_INFO(0, haystack)
 	ZEND_ARG_INFO(0, needle)
@@ -2560,18 +2562,21 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_stripos, 0, 0, 2)
 	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_strrpos, 0, 0, 2)
 	ZEND_ARG_INFO(0, haystack)
 	ZEND_ARG_INFO(0, needle)
 	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_strripos, 0, 0, 2)
 	ZEND_ARG_INFO(0, haystack)
 	ZEND_ARG_INFO(0, needle)
 	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_strrchr, 0)
 	ZEND_ARG_INFO(0, haystack)
 	ZEND_ARG_INFO(0, needle)
