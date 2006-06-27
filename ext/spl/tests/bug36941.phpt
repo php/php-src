@@ -1,5 +1,7 @@
 --TEST--
 Bug #36941 (ArrayIterator does not clone itself)
+--SKIPIF--
+<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 ===ArrayObject===
 <?php

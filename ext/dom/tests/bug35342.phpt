@@ -1,7 +1,7 @@
 --TEST--
 Bug # 35342: isset(DOMNodeList->length) returns false
 --SKIPIF--
-<?php require_once('skipif.php'); ?>
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 $dom = new DOMDocument();

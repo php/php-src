@@ -1,5 +1,7 @@
 --TEST--
 Bug #37457 (Crash when an exception is thrown in accept() method of FilterIterator)
+--SKIPIF--
+<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 
