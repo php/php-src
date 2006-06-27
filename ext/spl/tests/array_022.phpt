@@ -1,5 +1,7 @@
 --TEST--
 SPL: ArrayObject/Iterator and reference to self
+--SKIPIF--
+<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 ==ArrayObject===
 <?php

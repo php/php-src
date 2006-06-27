@@ -1,5 +1,7 @@
 --TEST--
 Bug #37587 (var without attribute causes segfault)
+--SKIPIF--
+<?php if (!extension_loaded("wddx")) print "skip"; ?>
 --FILE--
 <?php
 

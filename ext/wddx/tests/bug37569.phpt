@@ -1,5 +1,7 @@
 --TEST--
 Bug #37569 (WDDX incorrectly encodes high-ascii characters)
+--SKIPIF--
+<?php if (!extension_loaded("wddx")) print "skip"; ?>
 --FILE--
 <?php
 echo wddx_serialize_value(chr(1))."\n";

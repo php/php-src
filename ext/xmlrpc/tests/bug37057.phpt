@@ -1,5 +1,7 @@
 --TEST--
 Bug #37057 (xmlrpc_decode() may produce arrays with numeric string keys which are unaccessible)
+--SKIPIF--
+<?php if (!extension_loaded("xmlrpc")) print "skip"; ?>
 --FILE--
 <?php
 $response='<?xml version="1.0"?>
