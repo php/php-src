@@ -544,7 +544,8 @@ ZEND_FUNCTION(get_class)
 		if (EG(scope)) {
 			RETURN_STRINGL(EG(scope)->name, EG(scope)->name_length, 1);
 		} else {
-			zend_error(E_ERROR, "get_class() called without object from outside a class");
+			zend_error(E_WARNING, "get_class() called without object from outside a class");
+			RETURN_FALSE;
 		}
 	}
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &arg)==FAILURE) {
