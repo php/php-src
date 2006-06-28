@@ -2,10 +2,10 @@
 pspell basic tests (warning: may fail with pspell/aspell < GNU Aspell 0.50.3)
 --SKIPIF--
 <?php 
-	if (!extension_loaded("pspell")) print "skip"; 
-	if (!@pspell_new ("en", "", "", "", (PSPELL_FAST|PSPELL_RUN_TOGETHER))) {
-		die("skip English dictionary is not available");
-	}
+if (!extension_loaded("pspell")) die("skip");
+if (!@pspell_new ("en", "", "", "", (PSPELL_FAST|PSPELL_RUN_TOGETHER))) {
+	die("skip English dictionary is not available");
+}
 ?>
 --FILE--
 <?php // $Id$
