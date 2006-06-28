@@ -1,7 +1,7 @@
 --TEST--
 declare script encoding (ISO-2022-KR)
 --INI--
-unicode_semantics=on
+unicode.semantics=on
 unicode.output_encoding=CP866
 --FILE--
 <?php

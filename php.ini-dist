@@ -370,7 +370,7 @@ default_mimetype = "text/html"
 ; Unicode settings ;
 ;;;;;;;;;;;;;;;;;;;;
 
-unicode_semantics = off
+unicode.semantics = off
 unicode.runtime_encoding = iso-8859-1
 unicode.script_encoding = utf-8
 unicode.output_encoding = utf-8

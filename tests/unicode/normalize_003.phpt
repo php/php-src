@@ -1,7 +1,7 @@
 --TEST--
 Unicode identifiers normalization (indirect function call)
 --INI--
-unicode_semantics=on
+unicode.semantics=on
 --FILE--
 <?php
 declare(encoding = "ISO-8859-1");

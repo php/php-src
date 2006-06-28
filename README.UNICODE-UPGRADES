@@ -12,7 +12,7 @@ Working in Unicode World
 Strings
 -------
 
-A lot of internal functionality is controlled by the unicode_semantics
+A lot of internal functionality is controlled by the unicode.semantics
 switch. Its value is found in the Unicode globals variable, UG(unicode). It
 is either on or off for the entire request.
 

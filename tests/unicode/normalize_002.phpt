@@ -1,7 +1,7 @@
 --TEST--
 Unicode identifiers normalization ($$)
 --INI--
-unicode_semantics=on
+unicode.semantics=on
 --FILE--
 <?php
 $a = "\u212B";

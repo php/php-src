@@ -240,7 +240,7 @@ Unicode at all and that no Unicode string can exist. It only affects certain
 aspects of the language, and Unicode strings can always be created
 programmatically.
 
-    unicode_semantics = On
+    unicode.semantics = On
 
  [TODO: list areas that are affected by this switch]
 

@@ -1,7 +1,7 @@
 --TEST--
 Script encoding (JIS)
 --INI--
-unicode_semantics=on
+unicode.semantics=on
 unicode.output_encoding=CP866
 --FILE--
 <?php

@@ -170,7 +170,7 @@ PHP_SAPI    : " , PHP_SAPI , "
 PHP_VERSION : " , phpversion() , "
 ZEND_VERSION: " , zend_version() , "
 PHP_OS      : " , PHP_OS , " - " , php_uname() , "
-UNICODE     : " , (ini_get("unicode_semantics") ? "ON" : "OFF") , "
+UNICODE     : " , (ini_get("unicode.semantics") ? "ON" : "OFF") , "
 INI actual  : " , realpath(get_cfg_var("cfg_file_path")) , "
 More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n","", php_ini_scanned_files()) : "** not determined **"); ?>';
 	save_text($info_file, $php_info);
@@ -181,7 +181,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 	@unlink($info_file);
 	define('TESTED_PHP_VERSION', `$php -r 'echo PHP_VERSION;'`);
 
-	$unicode = `$php $pass_options $info_params -r 'echo ini_get("unicode_semantics");'`;
+	$unicode = `$php $pass_options $info_params -r 'echo ini_get("unicode.semantics");'`;
 	define('TESTED_UNICODE', strcasecmp($unicode,"on") == 0 || $unicode == 1);
 
 	// load list of enabled extensions
@@ -376,7 +376,7 @@ if (isset($argc) && $argc > 1) {
 					// break;
 				case 'u':
 					$unicode_testing = true;
-					$ini_overwrites[] = 'unicode_semantics=1';
+					$ini_overwrites[] = 'unicode.semantics=1';
 					$ini_overwrites[] = 'unicode.runtime_encoding=iso-8859-1';
 					$ini_overwrites[] = 'unicode.script_encoding=utf-8';
 					$ini_overwrites[] = 'unicode.output_encoding=utf-8';
@@ -430,13 +430,13 @@ Options:
     -d foo=bar  Pass -d option to the php binary (Define INI entry foo
                 with value 'bar').
 
-    -u          Test with unicode_semantics set on.
+    -u          Test with unicode.semantics set on.
 
     -U          Test in unicode and non unicode mode.
 
     -m          Test for memory leaks with Valgrind.
     
-    -N          Test with unicode_semantics set off.
+    -N          Test with unicode.semantics set off.
     
     -s <file>   Write output to <file>.
 
@@ -1163,7 +1163,7 @@ TEST $file
 	settings2array($ini_overwrites, $ini_settings);
 	// is this unicode/native per run-tests.php switch?
 	if ($unicode_and_native) {
-		$ini_settings["unicode_semantics"] = $unicode_semantics ? '1' : '0';
+		$ini_settings["unicode.semantics"] = $unicode_semantics ? '1' : '0';
 	}
 	// Any special ini settings 
 	// these may overwrite the test defaults...
@@ -1172,8 +1172,8 @@ TEST $file
 			$section_text['INI'] = str_replace('{PWD}', dirname($file), $section_text['INI']);
 		}
 		settings2array(preg_split( "/[\n\r]+/", $section_text['INI']), $ini_settings);
-		if (isset($ini_settings["unicode_semantics"])) {
-			$unicode_test = strcasecmp($ini_settings["unicode_semantics"],"on") == 0 || $ini_settings["unicode_semantics"] == 1;
+		if (isset($ini_settings["unicode.semantics"])) {
+			$unicode_test = strcasecmp($ini_settings["unicode.semantics"],"on") == 0 || $ini_settings["unicode.semantics"] == 1;
 		} else {
 			$unicode_test = TESTED_UNICODE;
 		}

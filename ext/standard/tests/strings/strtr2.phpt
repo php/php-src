@@ -1,7 +1,7 @@
 --TEST--
 strtr() function (with unicode chars and combining sequences)
 --SKIPIF--
-<?php if (!unicode_semantics()) die('skip unicode_semantics=off'); ?>
+<?php if (!unicode_semantics()) die('skip unicode.semantics=off'); ?>
 --FILE--
 <?php
 	declare(encoding="utf8");
