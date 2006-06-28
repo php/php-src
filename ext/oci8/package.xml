@@ -33,6 +33,7 @@
   <version>1.2.2</version>
   <date>2006-06-07</date>
   <notes>
+   Fixed bug #37931 (possible crash after database restart when using persistent connections)
    Fixed bug #37531 (oci8 persistent connection corruption)
    Fixed bug #37487 (oci_fetch_array() array-type should always default to OCI_BOTH)
    Fixed bug #37392 (Unnecessary call to OCITransRollback() at the end of request)
