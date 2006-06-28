@@ -105,11 +105,7 @@ PHPAPI zend_class_entry* rev_text_iterator_ce;
 
 static int text_iter_cp_valid(text_iter_obj* object, long flags TSRMLS_DC)
 {
-	if (flags & ITER_REVERSE) {
-		return (object->u.cp.offset > 0);
-	} else {
-		return (object->u.cp.offset < object->text_len);
-	}
+	return (object->u.cp.offset != UBRK_DONE);
 }
 
 static void text_iter_cp_current(text_iter_obj* object, long flags TSRMLS_DC)
@@ -117,14 +113,18 @@ static void text_iter_cp_current(text_iter_obj* object, long flags TSRMLS_DC)
 	UChar32 cp = 0;
 	int32_t tmp, buf_len = 0;
 
-	if (text_iter_cp_valid(object, flags TSRMLS_CC)) {
-		tmp = object->u.cp.offset;
-		if (flags & ITER_REVERSE) {
+	tmp = object->u.cp.offset;
+
+	if (flags & ITER_REVERSE) {
+		if (object->u.cp.offset != UBRK_DONE && object->u.cp.offset > 0) {
 			U16_PREV(object->text, 0, tmp, cp);
-		} else {
-			U16_NEXT(object->text, tmp, object->text_len, cp);
+			buf_len = zend_codepoint_to_uchar(cp, Z_USTRVAL_P(object->current));
 		}
-		buf_len = zend_codepoint_to_uchar(cp, Z_USTRVAL_P(object->current));
+	} else {
+		if (object->u.cp.offset != UBRK_DONE && object->u.cp.offset < object->text_len) {
+			U16_NEXT(object->text, tmp, object->text_len, cp);
+			buf_len = zend_codepoint_to_uchar(cp, Z_USTRVAL_P(object->current));
+		}
 	}
 	Z_USTRVAL_P(object->current)[buf_len] = 0;
 	Z_USTRLEN_P(object->current) = buf_len;
@@ -145,10 +145,18 @@ static void text_iter_cp_next(text_iter_obj* object, long flags TSRMLS_DC)
 	if (text_iter_cp_valid(object, flags TSRMLS_CC)) {
 		if (flags & ITER_REVERSE) {
 			U16_BACK_1(object->text, 0, object->u.cp.offset);
-			object->u.cp.cp_offset--;
+			if (object->u.cp.offset <= object->text_len) {
+				object->u.cp.cp_offset--;
+			} else {
+				object->u.cp.offset = object->u.cp.cp_offset = UBRK_DONE;
+			}
 		} else {
 			U16_FWD_1(object->text, object->u.cp.offset, object->text_len);
-			object->u.cp.cp_offset++;
+			if (object->u.cp.offset <= object->text_len) {
+				object->u.cp.cp_offset++;
+			} else {
+				object->u.cp.offset = object->u.cp.cp_offset = UBRK_DONE;
+			}
 		}
 		object->u.cp.index++;
 	}
@@ -275,7 +283,7 @@ static text_iter_ops text_iter_cs_ops = {
 
 /* UBreakIterator Character Ops */
 
-static int text_iter_brk_char_valid(text_iter_obj* object, long flags TSRMLS_DC)
+static int text_iter_brk_valid(text_iter_obj* object, long flags TSRMLS_DC)
 {
 	if (flags & ITER_REVERSE) {
 		return (object->u.brk.bound != UBRK_DONE);
@@ -284,7 +292,7 @@ static int text_iter_brk_char_valid(text_iter_obj* object, long flags TSRMLS_DC)
 	}
 }
 
-static void text_iter_brk_char_current(text_iter_obj* object, long flags TSRMLS_DC)
+static void text_iter_brk_current(text_iter_obj* object, long flags TSRMLS_DC)
 {
 	UChar *start;
 	int32_t length = -1;
@@ -319,17 +327,17 @@ static void text_iter_brk_char_current(text_iter_obj* object, long flags TSRMLS_
 	Z_USTRLEN_P(object->current) = length;
 }
 
-static int text_iter_brk_char_key(text_iter_obj* object, long flags TSRMLS_DC)
+static int text_iter_brk_key(text_iter_obj* object, long flags TSRMLS_DC)
 {
 	return object->u.brk.index;
 }
 
-static int text_iter_brk_char_offset(text_iter_obj* object, long flags TSRMLS_DC)
+static int text_iter_brk_offset(text_iter_obj* object, long flags TSRMLS_DC)
 {
 	return object->u.brk.cp_offset;
 }
 
-static void text_iter_brk_char_next(text_iter_obj* object, long flags TSRMLS_DC)
+static void text_iter_brk_next(text_iter_obj* object, long flags TSRMLS_DC)
 {
 	int32_t tmp = object->u.brk.bound;
 
@@ -365,7 +373,7 @@ static void text_iter_brk_char_next(text_iter_obj* object, long flags TSRMLS_DC)
 	object->u.brk.index++;
 }
 
-static void text_iter_brk_char_rewind(text_iter_obj *object, long flags TSRMLS_DC)
+static void text_iter_brk_rewind(text_iter_obj *object, long flags TSRMLS_DC)
 {
 	if (flags & ITER_REVERSE) {
 		object->u.brk.bound   	= ubrk_last(object->u.brk.iter);
@@ -380,12 +388,12 @@ static void text_iter_brk_char_rewind(text_iter_obj *object, long flags TSRMLS_D
 }
 
 static text_iter_ops text_iter_brk_ops = {
-	text_iter_brk_char_valid,
-	text_iter_brk_char_current,
-	text_iter_brk_char_key,
-	text_iter_brk_char_offset,
-	text_iter_brk_char_next,
-	text_iter_brk_char_rewind,
+	text_iter_brk_valid,
+	text_iter_brk_current,
+	text_iter_brk_key,
+	text_iter_brk_offset,
+	text_iter_brk_next,
+	text_iter_brk_rewind,
 };
 
 
