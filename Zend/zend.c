@@ -174,7 +174,7 @@ ZEND_INI_BEGIN()
 	ZEND_INI_ENTRY("error_reporting",			NULL,		ZEND_INI_ALL,		OnUpdateErrorReporting)
 
 	/* Unicode .ini entries */
-	STD_ZEND_INI_BOOLEAN("unicode_semantics", "0", ZEND_INI_SYSTEM, OnUpdateBool, unicode, zend_unicode_globals, unicode_globals)
+	STD_ZEND_INI_BOOLEAN("unicode.semantics", "0", ZEND_INI_SYSTEM, OnUpdateBool, unicode, zend_unicode_globals, unicode_globals)
 	STD_ZEND_INI_ENTRY("unicode.fallback_encoding", NULL, ZEND_INI_ALL, OnUpdateEncoding,   fallback_encoding_conv, zend_unicode_globals, unicode_globals)
 	STD_ZEND_INI_ENTRY("unicode.runtime_encoding",  NULL, ZEND_INI_ALL, OnUpdateEncoding,   runtime_encoding_conv, zend_unicode_globals, unicode_globals)
 	STD_ZEND_INI_ENTRY("unicode.script_encoding",  NULL, ZEND_INI_ALL, OnUpdateEncoding,   script_encoding_conv, zend_unicode_globals, unicode_globals)
