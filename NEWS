@@ -1,7 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2006, Version 4.4.3
+?? Jun 2006, Version 4.4.3RC2
 - Fixed handling of extremely long paths inside tempnam() function. (Ilia)
+- Fixed XSS inside phpinfo() with long inputs. (Ilia)
 - Fixed bug #37720 (merge_php_config scrambles values). (Mike,
   pumuckel at metropolis dot de)
 - Fixed bug #37569 (WDDX incorrectly encodes high-ascii characters). (Ilia)
