@@ -1,3 +1,116 @@
+2006-06-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      Improved the error reporting in SOAP extension on request failure.
+
+2006-06-27  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ext/standard/basic_functions.c:
+      arginof fixes
+
+    * ext/standard/basic_functions.c:
+      arginfo fixes
+
+    * (PHP_5_2)
+      ext/standard/basic_functions.c:
+      Fix arg info (php6 features)
+
+2006-06-27  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ZendEngine2/tests/001.phpt
+      ZendEngine2/tests/002.phpt
+      ZendEngine2/tests/003.phpt
+      ZendEngine2/tests/004.phpt
+      ZendEngine2/tests/005.phpt
+      ZendEngine2/tests/006.phpt
+      ZendEngine2/tests/007.phpt
+      ZendEngine2/tests/008.phpt
+      ZendEngine2/tests/009.phpt
+      ZendEngine2/tests/010.phpt
+      ZendEngine2/tests/011.phpt
+      ZendEngine2/tests/012.phpt
+      ZendEngine2/tests/013.phpt
+      ZendEngine2/tests/014.inc
+      ZendEngine2/tests/014.phpt
+      ZendEngine2/tests/015.phpt:
+      add new tests
+
+    * ZendEngine2/tests/001.phpt
+      ZendEngine2/tests/001.phpt
+      ZendEngine2/tests/002.phpt
+      ZendEngine2/tests/002.phpt
+      ZendEngine2/tests/003.phpt
+      ZendEngine2/tests/003.phpt
+      ZendEngine2/tests/004.phpt
+      ZendEngine2/tests/004.phpt
+      ZendEngine2/tests/005.phpt
+      ZendEngine2/tests/005.phpt
+      ZendEngine2/tests/006.phpt
+      ZendEngine2/tests/006.phpt
+      ZendEngine2/tests/007.phpt
+      ZendEngine2/tests/007.phpt
+      ZendEngine2/tests/008.phpt
+      ZendEngine2/tests/008.phpt
+      ZendEngine2/tests/009.phpt
+      ZendEngine2/tests/009.phpt
+      ZendEngine2/tests/010.phpt
+      ZendEngine2/tests/010.phpt
+      ZendEngine2/tests/011.phpt
+      ZendEngine2/tests/011.phpt
+      ZendEngine2/tests/012.phpt
+      ZendEngine2/tests/012.phpt
+      ZendEngine2/tests/013.phpt
+      ZendEngine2/tests/013.phpt
+      ZendEngine2/tests/014.inc
+      ZendEngine2/tests/014.inc
+      ZendEngine2/tests/014.phpt
+      ZendEngine2/tests/014.phpt
+      ZendEngine2/tests/015.phpt
+      ZendEngine2/tests/015.phpt:
+      
+      add new tests
+
+    * ZendEngine2/zend_builtin_functions.c:
+      no need to throw E_ERROR here, E_WARNING is more than enough
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c:
+      MFH: fix #37920 (compilation problems on z/OS)
+
+    * sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c:
+      fix #37920 (compilation problems on z/OS)
+
+2006-06-27  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/dom/tests/bug34276.phpt
+      ext/dom/tests/bug35342.phpt
+      ext/dom/tests/dom002.phpt
+      ext/iconv/tests/bug37176.phpt
+      ext/mbstring/tests/mb_send_mail01.phpt
+      ext/mbstring/tests/mb_send_mail02.phpt
+      ext/mbstring/tests/mb_send_mail03.phpt
+      ext/mbstring/tests/mb_send_mail04.phpt
+      ext/mbstring/tests/mb_send_mail05.phpt
+      ext/mbstring/tests/mb_send_mail06.phpt
+      ext/mbstring/tests/mb_send_mail07.phpt
+      ext/simplexml/tests/bug35785.phpt
+      ext/simplexml/tests/bug36611.phpt
+      ext/simplexml/tests/bug37565.phpt
+      ext/simplexml/tests/profile12.phpt
+      ext/simplexml/tests/profile13.phpt
+      ext/wddx/tests/bug37569.phpt
+      ext/wddx/tests/bug37587.phpt:
+      Fix/add SKIPIF
+
 2006-06-26  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * ext/pcre/tests/locales.phpt:
