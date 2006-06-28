@@ -1089,8 +1089,8 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 						}
 					}
 					/* server died */
+					connection->is_open = 0;
 					zend_hash_del(&EG(persistent_list), hashed_details.c, hashed_details.len+1);
-					php_oci_connection_close(connection TSRMLS_CC);
 					connection = NULL;
 					goto open;
 				}
