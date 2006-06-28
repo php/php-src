@@ -65,11 +65,12 @@ typedef struct {
 			int32_t end_cp_offset;
 		} cs;
 		struct {
-			int32_t start;
-			int32_t end;
+			int32_t bound;
+			int32_t next;
 			int32_t index;
 			int32_t cp_offset;
 			UBreakIterator *iter;
+			UBreakIterator *n_iter;
 		} brk;
 	} u;
 	zend_object_iterator iter;
@@ -277,27 +278,41 @@ static text_iter_ops text_iter_cs_ops = {
 static int text_iter_brk_char_valid(text_iter_obj* object, long flags TSRMLS_DC)
 {
 	if (flags & ITER_REVERSE) {
-		return (object->u.brk.start != UBRK_DONE);
+		return (object->u.brk.bound != UBRK_DONE);
 	} else {
-		return (object->u.brk.end != UBRK_DONE);
+		return (object->u.brk.bound != UBRK_DONE);
 	}
 }
 
 static void text_iter_brk_char_current(text_iter_obj* object, long flags TSRMLS_DC)
 {
-	uint32_t length;
-	int32_t start = object->u.brk.start;
-	int32_t end = object->u.brk.end;
+	UChar *start;
+	int32_t length = -1;
 
-	if (start != UBRK_DONE && end != UBRK_DONE) {
-		length = end - start;
+	if (flags & ITER_REVERSE) {
+		if (object->u.brk.next == object->u.brk.bound) {
+			object->u.brk.next = ubrk_preceding(object->u.brk.n_iter, object->u.brk.bound);
+		}
+		start = object->text + object->u.brk.next;
+	} else {
+		if (object->u.brk.next == object->u.brk.bound) {
+			object->u.brk.next = ubrk_following(object->u.brk.n_iter, object->u.brk.bound);
+		}
+		start = object->text + object->u.brk.bound;
+	}
+
+	if (object->u.brk.next == UBRK_DONE) {
+		length = 0;
+	} else {
+		length = abs(object->u.brk.next - object->u.brk.bound);
+	}
+
+	if (length != 0) {
 		if (length+1 > object->current_alloc) {
 			object->current_alloc = length+1;
 			Z_USTRVAL_P(object->current) = eurealloc(Z_USTRVAL_P(object->current), object->current_alloc);
 		}
-		u_memcpy(Z_USTRVAL_P(object->current), object->text + start, length);
-	} else {
-		length = 0;
+		u_memcpy(Z_USTRVAL_P(object->current), start, length);
 	}
 
 	Z_USTRVAL_P(object->current)[length] = 0;
@@ -316,43 +331,49 @@ static int text_iter_brk_char_offset(text_iter_obj* object, long flags TSRMLS_DC
 
 static void text_iter_brk_char_next(text_iter_obj* object, long flags TSRMLS_DC)
 {
-	if (text_iter_brk_char_valid(object, flags TSRMLS_CC)) {
-		if (flags & ITER_REVERSE) {
-			object->u.brk.end = object->u.brk.start;
-			object->u.brk.start = ubrk_previous(object->u.brk.iter);
-			if (object->u.brk.end - object->u.brk.start > 1) {
-				object->u.brk.cp_offset -= u_countChar32(object->text, object->u.brk.end - object->u.brk.start);
+	int32_t tmp = object->u.brk.bound;
+
+	if (object->u.brk.bound == UBRK_DONE) {
+		return;
+	}
+
+	if (flags & ITER_REVERSE) {
+		object->u.brk.bound = ubrk_previous(object->u.brk.iter);
+		object->u.brk.next  = object->u.brk.bound;
+		if (object->u.brk.bound != UBRK_DONE) {
+			if (tmp - object->u.brk.bound > 1) {
+				object->u.brk.cp_offset -= u_countChar32(object->text, tmp - object->u.brk.bound);
 			} else {
 				object->u.brk.cp_offset--;
 			}
-			if (object->u.brk.start == UBRK_DONE) {
-				object->u.brk.end = UBRK_DONE;
-			}
 		} else {
-			if (object->u.brk.end - object->u.brk.start > 1) {
-				object->u.brk.cp_offset += u_countChar32(object->text, object->u.brk.end - object->u.brk.start);
+			object->u.brk.cp_offset = UBRK_DONE;
+		}
+	} else {
+		object->u.brk.bound = ubrk_next(object->u.brk.iter);
+		object->u.brk.next  = object->u.brk.bound;
+		if (object->u.brk.bound != UBRK_DONE) {
+			if (object->u.brk.bound - tmp > 1) {
+				object->u.brk.cp_offset += u_countChar32(object->text, object->u.brk.bound - tmp);
 			} else {
 				object->u.brk.cp_offset++;
 			}
-			object->u.brk.start = object->u.brk.end;
-			object->u.brk.end = ubrk_next(object->u.brk.iter);
-			if (object->u.brk.end == UBRK_DONE) {
-				object->u.brk.start = UBRK_DONE;
-			}
+		} else {
+			object->u.brk.cp_offset = UBRK_DONE;
 		}
-		object->u.brk.index++;
 	}
+	object->u.brk.index++;
 }
 
 static void text_iter_brk_char_rewind(text_iter_obj *object, long flags TSRMLS_DC)
 {
 	if (flags & ITER_REVERSE) {
-		object->u.brk.end   	= ubrk_last(object->u.brk.iter);
-		object->u.brk.start 	= ubrk_previous(object->u.brk.iter);
-		object->u.brk.cp_offset = u_countChar32(object->text, object->u.brk.start);
+		object->u.brk.bound   	= ubrk_last(object->u.brk.iter);
+		object->u.brk.next		= ubrk_last(object->u.brk.n_iter);
+		object->u.brk.cp_offset = u_countChar32(object->text, object->u.brk.bound);
 	} else {
-		object->u.brk.start 	= ubrk_first(object->u.brk.iter);
-		object->u.brk.end   	= ubrk_next(object->u.brk.iter);
+		object->u.brk.bound 	= ubrk_first(object->u.brk.iter);
+		object->u.brk.next		= ubrk_first(object->u.brk.n_iter);
 		object->u.brk.cp_offset = 0;
 	}
 	object->u.brk.index = 0;
@@ -465,8 +486,13 @@ static void text_iterator_free_storage(void *object TSRMLS_DC)
 	if (intern->text) {
 		efree(intern->text);
 	}
-	if (intern->type > ITER_CHARACTER && intern->u.brk.iter) {
-		ubrk_close(intern->u.brk.iter);
+	if (intern->type > ITER_CHARACTER) {
+		if (intern->u.brk.iter) {
+			ubrk_close(intern->u.brk.iter);
+		}
+		if (intern->u.brk.n_iter) {
+			ubrk_close(intern->u.brk.n_iter);
+		}
 	}
 	zval_ptr_dtor(&intern->current);
 	efree(object);
@@ -535,9 +561,11 @@ PHP_METHOD(TextIterator, __construct)
 
 	if (intern->type >= ITER_CHARACTER && intern->type < ITER_TYPE_LAST) {
 		UErrorCode status = U_ZERO_ERROR;
+		UErrorCode status2 = U_ZERO_ERROR;
 		locale = locale ? locale : UG(default_locale);
 		intern->u.brk.iter = ubrk_open(brk_type_map[intern->type - ITER_CHARACTER], locale, text, text_len, &status);
-		if (!U_SUCCESS(status)) {
+		intern->u.brk.n_iter = ubrk_open(brk_type_map[intern->type - ITER_CHARACTER], locale, text, text_len, &status);
+		if (!U_SUCCESS(status) || !U_SUCCESS(status2)) {
 			php_error(E_RECOVERABLE_ERROR, "Could not create UBreakIterator for '%s' locale: %s", locale, u_errorName(status));
 			return;
 		}
@@ -561,11 +589,7 @@ PHP_METHOD(TextIterator, next)
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
 	iter_ops[intern->type]->next(intern, intern->flags TSRMLS_CC);
-	if (iter_ops[intern->type]->valid(intern, intern->flags TSRMLS_CC)) {
-		RETURN_LONG(iter_ops[intern->type]->offset(intern, intern->flags TSRMLS_CC));
-	} else {
-		RETURN_LONG((long)UBRK_DONE);
-	}
+	RETURN_LONG(iter_ops[intern->type]->offset(intern, intern->flags TSRMLS_CC));
 }
 
 PHP_METHOD(TextIterator, key)
@@ -593,6 +617,17 @@ PHP_METHOD(TextIterator, rewind)
 	RETURN_LONG(iter_ops[intern->type]->offset(intern, intern->flags TSRMLS_CC));
 }
 
+PHP_METHOD(TextIterator, last)
+{
+	long flags;
+	zval *object = getThis();
+	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
+
+	flags = intern->flags ^ ITER_REVERSE;
+	iter_ops[intern->type]->rewind(intern, flags TSRMLS_CC);
+	RETURN_LONG(iter_ops[intern->type]->offset(intern, flags TSRMLS_CC));
+}
+
 PHP_METHOD(TextIterator, offset)
 {
 	zval *object = getThis();
@@ -607,13 +642,9 @@ PHP_METHOD(TextIterator, previous)
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
-	flags = intern->flags | ITER_REVERSE;
+	flags = intern->flags ^ ITER_REVERSE;
 	iter_ops[intern->type]->next(intern, flags TSRMLS_CC);
-	if (iter_ops[intern->type]->valid(intern, flags TSRMLS_CC)) {
-		RETURN_LONG(iter_ops[intern->type]->offset(intern, flags TSRMLS_CC));
-	} else {
-		RETURN_LONG((long)UBRK_DONE);
-	}
+	RETURN_LONG(iter_ops[intern->type]->offset(intern, flags TSRMLS_CC));
 }
 
 static zend_function_entry text_iterator_funcs[] = {
@@ -628,6 +659,9 @@ static zend_function_entry text_iterator_funcs[] = {
 
 	PHP_ME(TextIterator, offset,	  NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(TextIterator, previous,	  NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(TextIterator, last,		  NULL, ZEND_ACC_PUBLIC)
+
+	PHP_MALIAS(TextIterator, first, rewind, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
