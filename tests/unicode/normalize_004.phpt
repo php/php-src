@@ -1,7 +1,7 @@
 --TEST--
 Unicode identifiers normalization ($GLOBALS[])
 --INI--
-unicode_semantics=on
+unicode.semantics=on
 --FILE--
 <?php
 $GLOBALS["\u212B"] = "ok\n";

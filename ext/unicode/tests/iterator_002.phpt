@@ -1,7 +1,7 @@
 --TEST--
 Unicode: Iterator and key()
 --SKIPIF--
-<?php if (!unicode_semantics()) die('skip unicode_semantics=off'); ?>
+<?php if (!unicode_semantics()) die('skip unicode.semantics=off'); ?>
 --FILE--
 <?php
 
