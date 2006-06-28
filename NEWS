@@ -6,6 +6,7 @@ PHP                                                                        NEWS
 - Changed realpath cache to be disabled when "open_basedir" or "safe_mode"
   are enabled on per-request basis. (Ilia)
 
+- Improved safe_mode check for the error_log() function. (Ilia)
 - Improved the error reporting in SOAP extension on request failure. (Ilia)
 - New crypt() implementation for win32 which is about 10 times faster and has 
   more friendly license. (Frank, Dmitry)
