@@ -47,3 +47,24 @@ array(1) {
     string(13) "A bient&244;t"
   }
 }
+--UEXPECTF--
+array(1) {
+  [0]=>
+  array(5) {
+    [u"tag"]=>
+    string(8) "resource"
+    [u"type"]=>
+    string(8) "complete"
+    [u"level"]=>
+    int(1)
+    [u"attributes"]=>
+    array(2) {
+      [u"key"]=>
+      string(7) "rSeeYou"
+      [u"type"]=>
+      string(7) "literal"
+    }
+    [u"value"]=>
+    string(13) "A bient&244;t"
+  }
+}
