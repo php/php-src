@@ -187,21 +187,30 @@ static text_iter_ops text_iter_cp_ops = {
 
 static int text_iter_cs_valid(text_iter_obj* object, long flags TSRMLS_DC)
 {
-	if (flags & ITER_REVERSE) {
-		return (object->u.cs.end > 0);
-	} else {
-		return (object->u.cs.end <= object->text_len);
-	}
+	return (object->u.cs.start != UBRK_DONE);
 }
 
 static void text_iter_cs_current(text_iter_obj* object, long flags TSRMLS_DC)
 {
-	uint32_t length = object->u.cs.end - object->u.cs.start;
-	if (length+1 > object->current_alloc) {
-		object->current_alloc = length+1;
-		Z_USTRVAL_P(object->current) = eurealloc(Z_USTRVAL_P(object->current), object->current_alloc);
+	uint32_t length;
+	UChar *start;
+
+	if (object->u.cs.start == UBRK_DONE || object->u.cs.end == UBRK_DONE) {
+		length = 0;
+	} else {
+		if (flags & ITER_REVERSE) {
+			start = object->text + object->u.cs.end;
+		} else {
+			start = object->text + object->u.cs.start;
+		}
+		length = abs(object->u.cs.end - object->u.cs.start);
+		if (length+1 > object->current_alloc) {
+			object->current_alloc = length+1;
+			Z_USTRVAL_P(object->current) = eurealloc(Z_USTRVAL_P(object->current), object->current_alloc);
+		}
+		u_memcpy(Z_USTRVAL_P(object->current), start, length);
 	}
-	u_memcpy(Z_USTRVAL_P(object->current), object->text + object->u.cs.start, length);
+   
 	Z_USTRVAL_P(object->current)[length] = 0;
 	Z_USTRLEN_P(object->current) = length;
 }
@@ -213,7 +222,11 @@ static int text_iter_cs_key(text_iter_obj* object, long flags TSRMLS_DC)
 
 static int text_iter_cs_offset(text_iter_obj* object, long flags TSRMLS_DC)
 {
-	return object->u.cs.start_cp_offset;
+	if (flags & ITER_REVERSE) {
+		return object->u.cs.end_cp_offset;
+	} else {
+		return object->u.cs.start_cp_offset;
+	}
 }
 
 static void text_iter_cs_next(text_iter_obj* object, long flags TSRMLS_DC)
@@ -221,21 +234,31 @@ static void text_iter_cs_next(text_iter_obj* object, long flags TSRMLS_DC)
 	UChar32 cp;
 	int32_t tmp, tmp2;
 
-	if (text_iter_cs_valid(object, flags TSRMLS_CC)) {
-		if (flags & ITER_REVERSE) {
-			object->u.cs.end = object->u.cs.start;
-			object->u.cs.end_cp_offset = object->u.cs.start_cp_offset;
-			U16_PREV(object->text, 0, object->u.cs.start, cp);
-			object->u.cs.start_cp_offset--;
+	if (object->u.cs.start == UBRK_DONE) {
+		return;
+	}
+
+	object->u.cs.start = object->u.cs.end;
+	object->u.cs.start_cp_offset = object->u.cs.end_cp_offset;
+	if (flags & ITER_REVERSE) {
+		if (object->u.cs.end == 0) {
+			object->u.cs.end = UBRK_DONE;
+			object->u.cs.end_cp_offset = UBRK_DONE;
+		} else {
+			U16_PREV(object->text, 0, object->u.cs.end, cp);
+			object->u.cs.end_cp_offset--;
 			if (u_getCombiningClass(cp) != 0) {
 				do {
-					U16_PREV(object->text, 0, object->u.cs.start, cp);
-					object->u.cs.start_cp_offset--;
-				} while (object->u.cs.start > 0 && u_getCombiningClass(cp) != 0);
+					U16_PREV(object->text, 0, object->u.cs.end, cp);
+					object->u.cs.end_cp_offset--;
+				} while (object->u.cs.end > 0 && u_getCombiningClass(cp) != 0);
 			}
+		}
+	} else {
+		if (object->u.cs.end == object->text_len) {
+			object->u.cs.end = UBRK_DONE;
+			object->u.cs.end_cp_offset = UBRK_DONE;
 		} else {
-			object->u.cs.start = object->u.cs.end;
-			object->u.cs.start_cp_offset = object->u.cs.end_cp_offset;
 			U16_NEXT(object->text, object->u.cs.end, object->text_len, cp);
 			object->u.cs.end_cp_offset++;
 			if (u_getCombiningClass(cp) == 0) {
@@ -253,8 +276,8 @@ static void text_iter_cs_next(text_iter_obj* object, long flags TSRMLS_DC)
 				}
 			}
 		}
-		object->u.cs.index++;
 	}
+	object->u.cs.index++;
 }
 
 static void text_iter_cs_rewind(text_iter_obj *object, long flags TSRMLS_DC)
@@ -281,15 +304,11 @@ static text_iter_ops text_iter_cs_ops = {
 };
 
 
-/* UBreakIterator Character Ops */
+/* UBreakIterator Ops */
 
 static int text_iter_brk_valid(text_iter_obj* object, long flags TSRMLS_DC)
 {
-	if (flags & ITER_REVERSE) {
-		return (object->u.brk.bound != UBRK_DONE);
-	} else {
-		return (object->u.brk.bound != UBRK_DONE);
-	}
+	return (object->u.brk.bound != UBRK_DONE);
 }
 
 static void text_iter_brk_current(text_iter_obj* object, long flags TSRMLS_DC)
@@ -297,22 +316,26 @@ static void text_iter_brk_current(text_iter_obj* object, long flags TSRMLS_DC)
 	UChar *start;
 	int32_t length = -1;
 
-	if (flags & ITER_REVERSE) {
-		if (object->u.brk.next == object->u.brk.bound) {
-			object->u.brk.next = ubrk_preceding(object->u.brk.n_iter, object->u.brk.bound);
+	if (object->u.brk.bound != UBRK_DONE) {
+		if (flags & ITER_REVERSE) {
+			if (object->u.brk.next == object->u.brk.bound) {
+				object->u.brk.next = ubrk_preceding(object->u.brk.n_iter, object->u.brk.bound);
+			}
+			start = object->text + object->u.brk.next;
+		} else {
+			if (object->u.brk.next == object->u.brk.bound) {
+				object->u.brk.next = ubrk_following(object->u.brk.n_iter, object->u.brk.bound);
+			}
+			start = object->text + object->u.brk.bound;
 		}
-		start = object->text + object->u.brk.next;
-	} else {
-		if (object->u.brk.next == object->u.brk.bound) {
-			object->u.brk.next = ubrk_following(object->u.brk.n_iter, object->u.brk.bound);
-		}
-		start = object->text + object->u.brk.bound;
-	}
 
-	if (object->u.brk.next == UBRK_DONE) {
-		length = 0;
+		if (object->u.brk.next == UBRK_DONE) {
+			length = 0;
+		} else {
+			length = abs(object->u.brk.next - object->u.brk.bound);
+		}
 	} else {
-		length = abs(object->u.brk.next - object->u.brk.bound);
+		length = 0;
 	}
 
 	if (length != 0) {
@@ -350,7 +373,7 @@ static void text_iter_brk_next(text_iter_obj* object, long flags TSRMLS_DC)
 		object->u.brk.next  = object->u.brk.bound;
 		if (object->u.brk.bound != UBRK_DONE) {
 			if (tmp - object->u.brk.bound > 1) {
-				object->u.brk.cp_offset -= u_countChar32(object->text, tmp - object->u.brk.bound);
+				object->u.brk.cp_offset -= u_countChar32(object->text + object->u.brk.bound, tmp - object->u.brk.bound);
 			} else {
 				object->u.brk.cp_offset--;
 			}
@@ -362,7 +385,7 @@ static void text_iter_brk_next(text_iter_obj* object, long flags TSRMLS_DC)
 		object->u.brk.next  = object->u.brk.bound;
 		if (object->u.brk.bound != UBRK_DONE) {
 			if (object->u.brk.bound - tmp > 1) {
-				object->u.brk.cp_offset += u_countChar32(object->text, object->u.brk.bound - tmp);
+				object->u.brk.cp_offset += u_countChar32(object->text + tmp, object->u.brk.bound - tmp);
 			} else {
 				object->u.brk.cp_offset++;
 			}
