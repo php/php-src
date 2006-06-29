@@ -29,3 +29,20 @@ array(1) {
     }
   }
 }
+--UEXPECT--
+array(1) {
+  [0]=>
+  array(4) {
+    [u"tag"]=>
+    string(4) "TEST"
+    [u"type"]=>
+    string(8) "complete"
+    [u"level"]=>
+    int(1)
+    [u"attributes"]=>
+    array(1) {
+      [u"ATTR"]=>
+      string(13) "angle<bracket"
+    }
+  }
+}
