@@ -584,7 +584,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, cha
 	}
 
 	if ((comma = memchr(path, ',', dlen)) == NULL) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "rfc2397: no comma in url");
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "rfc2397: no comma in URL");
 		return NULL;
 	}
 
@@ -645,7 +645,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, cha
 		}
 		if (mlen) {
 			zval_ptr_dtor(&meta);
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "rfc2397: illegal url");
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "rfc2397: illegal URL");
 			return NULL;
 		}
 	} else {
