@@ -51,7 +51,7 @@ array(8) {
 }
 NULL
 
-Warning: fopen(data://): failed to open stream: rfc2397: no comma in url in %sstream_rfc2397_002.php on line %d
+Warning: fopen(data://): failed to open stream: rfc2397: no comma in URL in %sstream_rfc2397_002.php on line %d
 bool(false)
 NULL
 array(8) {
@@ -74,7 +74,7 @@ array(8) {
 }
 NULL
 
-Warning: fopen(data://;base64): failed to open stream: rfc2397: no comma in url in %sstream_rfc2397_002.php on line %d
+Warning: fopen(data://;base64): failed to open stream: rfc2397: no comma in URL in %sstream_rfc2397_002.php on line %d
 bool(false)
 NULL
 
@@ -161,7 +161,7 @@ array(10) {
 }
 string(3) "bar"
 
-Warning: fopen(data://text/plain;foo=bar;bar=baz): failed to open stream: rfc2397: no comma in url in %sstream_rfc2397_002.php on line %d
+Warning: fopen(data://text/plain;foo=bar;bar=baz): failed to open stream: rfc2397: no comma in URL in %sstream_rfc2397_002.php on line %d
 bool(false)
 NULL
 array(11) {
@@ -186,6 +186,166 @@ array(11) {
   ["bar"]=>
   string(3) "baz"
   ["base64"]=>
+  bool(false)
+}
+string(3) "bar"
+===DONE===
+--UEXPECTF--
+array(8) {
+  [u"wrapper_type"]=>
+  string(7) "RFC2397"
+  [u"stream_type"]=>
+  string(7) "RFC2397"
+  [u"mode"]=>
+  string(1) "r"
+  [u"unread_bytes"]=>
+  int(0)
+  [u"unread_chars"]=>
+  int(0)
+  [u"seekable"]=>
+  bool(true)
+  [u"uri"]=>
+  string(8) "data://,"
+  [u"base64"]=>
+  bool(false)
+}
+NULL
+
+Warning: fopen(data://): failed to open stream: rfc2397: no comma in URL in %sstream_rfc2397_002.php on line %d
+bool(false)
+NULL
+array(8) {
+  [u"wrapper_type"]=>
+  string(7) "RFC2397"
+  [u"stream_type"]=>
+  string(7) "RFC2397"
+  [u"mode"]=>
+  string(1) "r"
+  [u"unread_bytes"]=>
+  int(0)
+  [u"unread_chars"]=>
+  int(0)
+  [u"seekable"]=>
+  bool(true)
+  [u"uri"]=>
+  string(15) "data://;base64,"
+  [u"base64"]=>
+  bool(true)
+}
+NULL
+
+Warning: fopen(data://;base64): failed to open stream: rfc2397: no comma in URL in %sstream_rfc2397_002.php on line %d
+bool(false)
+NULL
+
+Warning: fopen(data://foo,): failed to open stream: rfc2397: illegal media type in %sstream_rfc2397_002.php on line %d
+bool(false)
+NULL
+
+Warning: fopen(data://foo=bar,): failed to open stream: rfc2397: illegal media type in %sstream_rfc2397_002.php on line %d
+bool(false)
+NULL
+array(9) {
+  [u"wrapper_type"]=>
+  string(7) "RFC2397"
+  [u"stream_type"]=>
+  string(7) "RFC2397"
+  [u"mode"]=>
+  string(1) "r"
+  [u"unread_bytes"]=>
+  int(0)
+  [u"unread_chars"]=>
+  int(0)
+  [u"seekable"]=>
+  bool(true)
+  [u"uri"]=>
+  string(18) "data://text/plain,"
+  [u"mediatype"]=>
+  string(10) "text/plain"
+  [u"base64"]=>
+  bool(false)
+}
+NULL
+
+Warning: fopen(data://text/plain;foo,): failed to open stream: rfc2397: illegal parameter in %sstream_rfc2397_002.php on line %d
+bool(false)
+NULL
+array(10) {
+  [u"wrapper_type"]=>
+  string(7) "RFC2397"
+  [u"stream_type"]=>
+  string(7) "RFC2397"
+  [u"mode"]=>
+  string(1) "r"
+  [u"unread_bytes"]=>
+  int(0)
+  [u"unread_chars"]=>
+  int(0)
+  [u"seekable"]=>
+  bool(true)
+  [u"uri"]=>
+  string(26) "data://text/plain;foo=bar,"
+  [u"mediatype"]=>
+  string(10) "text/plain"
+  [u"foo"]=>
+  string(3) "bar"
+  [u"base64"]=>
+  bool(false)
+}
+string(3) "bar"
+
+Warning: fopen(data://text/plain;foo=bar;bla,): failed to open stream: rfc2397: illegal parameter in %sstream_rfc2397_002.php on line %d
+bool(false)
+NULL
+array(10) {
+  [u"wrapper_type"]=>
+  string(7) "RFC2397"
+  [u"stream_type"]=>
+  string(7) "RFC2397"
+  [u"mode"]=>
+  string(1) "r"
+  [u"unread_bytes"]=>
+  int(0)
+  [u"unread_chars"]=>
+  int(0)
+  [u"seekable"]=>
+  bool(true)
+  [u"uri"]=>
+  string(33) "data://text/plain;foo=bar;base64,"
+  [u"mediatype"]=>
+  string(10) "text/plain"
+  [u"foo"]=>
+  string(3) "bar"
+  [u"base64"]=>
+  bool(true)
+}
+string(3) "bar"
+
+Warning: fopen(data://text/plain;foo=bar;bar=baz): failed to open stream: rfc2397: no comma in URL in %sstream_rfc2397_002.php on line %d
+bool(false)
+NULL
+array(11) {
+  [u"wrapper_type"]=>
+  string(7) "RFC2397"
+  [u"stream_type"]=>
+  string(7) "RFC2397"
+  [u"mode"]=>
+  string(1) "r"
+  [u"unread_bytes"]=>
+  int(0)
+  [u"unread_chars"]=>
+  int(0)
+  [u"seekable"]=>
+  bool(true)
+  [u"uri"]=>
+  string(34) "data://text/plain;foo=bar;bar=baz,"
+  [u"mediatype"]=>
+  string(10) "text/plain"
+  [u"foo"]=>
+  string(3) "bar"
+  [u"bar"]=>
+  string(3) "baz"
+  [u"base64"]=>
   bool(false)
 }
 string(3) "bar"
