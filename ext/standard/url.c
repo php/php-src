@@ -344,7 +344,7 @@ PHP_FUNCTION(parse_url)
 
 	resource = php_url_parse_ex(str, str_len);
 	if (resource == NULL) {
-		php_error_docref1(NULL TSRMLS_CC, str, E_WARNING, "Unable to parse url");
+		php_error_docref1(NULL TSRMLS_CC, str, E_WARNING, "Unable to parse URL");
 		RETURN_FALSE;
 	}
 
@@ -375,7 +375,7 @@ PHP_FUNCTION(parse_url)
 				if (resource->fragment != NULL) RETVAL_STRING(resource->fragment, 1);
 				break;
 			default:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid url component identifier %ld.", key);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid URL component identifier %ld.", key);
 				RETVAL_FALSE;
 		}
 		goto done;
