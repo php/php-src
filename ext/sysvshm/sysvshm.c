@@ -408,6 +408,10 @@ static long php_check_shm_data(sysvshm_chunk_head *ptr, long key)
 			return pos;
 		}	
 		pos += shm_var->next;
+
+		if (shm_var->next <= 0 || pos < ptr->start) {
+			return -1;
+		}
 	}
 	return -1;
 }
