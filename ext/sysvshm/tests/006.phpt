@@ -46,3 +46,24 @@ bool(false)
 Warning: shm_get_var(): variable key 1 doesn't exist in %s on line %d
 bool(false)
 Done
+--UEXPECTF--
+Warning: Wrong parameter count for shm_remove_var() in %s on line %d
+NULL
+
+Warning: shm_remove_var(): -1 is not a SysV shared memory index in %s on line %d
+bool(false)
+
+Warning: shm_remove_var(): variable key -10 doesn't exist in %s on line %d
+bool(false)
+unicode(11) "test string"
+bool(true)
+
+Warning: shm_get_var(): variable key 1 doesn't exist in %s on line %d
+bool(false)
+
+Warning: shm_remove_var(): variable key 1 doesn't exist in %s on line %d
+bool(false)
+
+Warning: shm_get_var(): variable key 1 doesn't exist in %s on line %d
+bool(false)
+Done

@@ -66,3 +66,32 @@ bool(false)
 NULL
 NULL
 Done
+--UEXPECTF--
+Warning: Wrong parameter count for shm_get_var() in %s on line %d
+NULL
+
+Warning: shm_get_var(): -1 is not a SysV shared memory index in %s on line %d
+bool(false)
+
+Warning: shm_get_var(): variable key 1000 doesn't exist in %s on line %d
+bool(false)
+
+Warning: shm_get_var(): variable key -10000 doesn't exist in %s on line %d
+bool(false)
+object(stdClass)#%d (0) {
+}
+unicode(11) "test string"
+object(stdClass)#%d (0) {
+}
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+bool(false)
+NULL
+NULL
+Done
