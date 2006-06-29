@@ -163,12 +163,12 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 		php_url *tmp_url; 																		\
 															\
 		if (!(tmp_url = php_url_parse_ex(str, len))) {											\
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid url '%s'", str);				\
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid URL '%s'", str);				\
 			RETURN_FALSE; 																		\
 		} 																						\
 															\
 		if (php_memnstr(str, tmp_url->path, strlen(tmp_url->path), str + len)) {				\
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Url '%s' contains unencoded control characters.", str);	\
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "URL '%s' contains unencoded control characters.", str);	\
 			RETURN_FALSE;											\
 		}													\
 																								\
