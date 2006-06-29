@@ -49,7 +49,7 @@ array(7) {
 }
 NULL
 
-Warning: fopen(data://): failed to open stream: rfc2397: no comma in url in %sstream_rfc2397_002.php on line %d
+Warning: fopen(data://): failed to open stream: rfc2397: no comma in URL in %sstream_rfc2397_002.php on line %d
 bool(false)
 NULL
 array(7) {
@@ -70,7 +70,7 @@ array(7) {
 }
 NULL
 
-Warning: fopen(data://;base64): failed to open stream: rfc2397: no comma in url in %sstream_rfc2397_002.php on line %d
+Warning: fopen(data://;base64): failed to open stream: rfc2397: no comma in URL in %sstream_rfc2397_002.php on line %d
 bool(false)
 NULL
 
@@ -151,7 +151,7 @@ array(9) {
 }
 string(3) "bar"
 
-Warning: fopen(data://text/plain;foo=bar;bar=baz): failed to open stream: rfc2397: no comma in url in %sstream_rfc2397_002.php on line %d
+Warning: fopen(data://text/plain;foo=bar;bar=baz): failed to open stream: rfc2397: no comma in URL in %sstream_rfc2397_002.php on line %d
 bool(false)
 NULL
 array(10) {
