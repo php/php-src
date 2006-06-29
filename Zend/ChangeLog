@@ -1,3 +1,8 @@
+2006-06-28  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend.c:
+      Rename unicode_semantics to unicode.semantics.
+
 2006-06-27  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)

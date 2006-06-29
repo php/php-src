@@ -1,3 +1,88 @@
+2006-06-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS:
+      bug fixing news
+
+    * (PHP_4_4)
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.c:
+      MFH: Improved safe_mode check for the error_log() function.
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/basic_functions.c:
+      Improved safe_mode check for the error_log() function.
+
+2006-06-28  Antony Dovgal  <antony@zend.com>
+
+    * README.UNICODE
+      README.UNICODE-UPGRADES
+      php.ini-dist
+      php.ini-recommended
+      run-tests.php
+      ext/simplexml/tests/000.phpt
+      ext/standard/tests/strings/strtr2.phpt:
+      unicode_semantics -> unicode.semantics
+
+    * ext/oci8/package.xml:
+      update changelog
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/oci8/oci8.c:
+      MFH: fix #37931 (possible crash after database restart when using
+      persistent connections)
+
+    * ext/oci8/oci8.c:
+      fix #37931 (possible crash after database restart when using persistent
+      connections)
+
+2006-06-28  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/pspell/tests/.cvsignore
+      ext/pspell/tests/001.phpt
+      ext/pspell/tests/002.phpt
+      ext/pspell/tests/003.phpt
+      ext/pspell/tests/004.phpt
+      ext/pspell/tests/005.phpt
+      ext/pspell/tests/01pspell_basic.phpt
+      ext/pspell/tests/wordlist.txt:
+      MFB
+
+    * (PHP_5_2)
+      ext/pspell/tests/.cvsignore
+      ext/pspell/tests/001.phpt
+      ext/pspell/tests/001.phpt
+      ext/pspell/tests/002.phpt
+      ext/pspell/tests/002.phpt
+      ext/pspell/tests/003.phpt
+      ext/pspell/tests/003.phpt
+      ext/pspell/tests/004.phpt
+      ext/pspell/tests/004.phpt
+      ext/pspell/tests/005.phpt
+      ext/pspell/tests/005.phpt
+      ext/pspell/tests/01pspell_basic.phpt
+      ext/pspell/tests/wordlist.txt
+      ext/pspell/tests/wordlist.txt:
+      new tests (001.phpt is just a rename from the older one)
+      increases coverage from 20% to 70%
+
+2006-06-28  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend.c:
+      Rename unicode_semantics to unicode.semantics.
+
+2006-06-28  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS
+      ext/standard/info.c:
+      - MF51: Fixed XSS inside phpinfo() with long inputs.
+
 2006-06-27  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
