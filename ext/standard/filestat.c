@@ -78,6 +78,10 @@
 # endif
 #endif
 
+#ifdef PHP_WIN32
+#include "win32/winutil.h"
+#endif
+
 #include "basic_functions.h"
 #include "php_filestat.h"
 
@@ -169,7 +173,10 @@ PHP_FUNCTION(disk_total_space)
 			if (func(Z_STRVAL_PP(path),
 				&FreeBytesAvailableToCaller,
 				&TotalNumberOfBytes,
-				&TotalNumberOfFreeBytes) == 0) RETURN_FALSE;
+				&TotalNumberOfFreeBytes) == 0) { 
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", php_win_err());
+				RETURN_FALSE;
+			}
 
 			/* i know - this is ugly, but i works <thies@thieso.net> */
 			bytestotal  = TotalNumberOfBytes.HighPart *
@@ -180,7 +187,10 @@ PHP_FUNCTION(disk_total_space)
 		else {
 			if (GetDiskFreeSpace(Z_STRVAL_PP(path),
 				&SectorsPerCluster, &BytesPerSector,
-				&NumberOfFreeClusters, &TotalNumberOfClusters) == 0) RETURN_FALSE;
+				&NumberOfFreeClusters, &TotalNumberOfClusters) == 0) { 
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", php_win_err());
+				RETURN_FALSE; 
+			}
 			bytestotal = (double)TotalNumberOfClusters * (double)SectorsPerCluster * (double)BytesPerSector;
 		}
 	}
@@ -199,7 +209,10 @@ PHP_FUNCTION(disk_total_space)
 	}
 #else /* WINDOWS, OS/2 */
 #if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
-	if (statvfs(Z_STRVAL_PP(path), &buf)) RETURN_FALSE;
+	if (statvfs(Z_STRVAL_PP(path), &buf)) { 
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
+		RETURN_FALSE; 
+	}
 	if (buf.f_frsize) {
 		bytestotal = (((double)buf.f_blocks) * ((double)buf.f_frsize));
 	} else {
@@ -207,7 +220,10 @@ PHP_FUNCTION(disk_total_space)
 	}
 
 #elif (defined(HAVE_SYS_STATFS_H) || defined(HAVE_SYS_MOUNT_H)) && defined(HAVE_STATFS)
-	if (statfs(Z_STRVAL_PP(path), &buf)) RETURN_FALSE;
+	if (statfs(Z_STRVAL_PP(path), &buf)) { 
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
+		RETURN_FALSE;
+	}
 	bytestotal = (((double)buf.f_bsize) * ((double)buf.f_blocks));
 #endif
 #endif /* WINDOWS */
@@ -272,7 +288,10 @@ PHP_FUNCTION(disk_free_space)
 			if (func(Z_STRVAL_PP(path),
 				&FreeBytesAvailableToCaller,
 				&TotalNumberOfBytes,
-				&TotalNumberOfFreeBytes) == 0) RETURN_FALSE;
+				&TotalNumberOfFreeBytes) == 0) { 
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", php_win_err());
+				RETURN_FALSE;
+			}
 
 			/* i know - this is ugly, but i works <thies@thieso.net> */
 			bytesfree  = FreeBytesAvailableToCaller.HighPart *
@@ -283,7 +302,10 @@ PHP_FUNCTION(disk_free_space)
 		else {
 			if (GetDiskFreeSpace(Z_STRVAL_PP(path),
 				&SectorsPerCluster, &BytesPerSector,
-				&NumberOfFreeClusters, &TotalNumberOfClusters) == 0) RETURN_FALSE;
+				&NumberOfFreeClusters, &TotalNumberOfClusters) == 0) { 
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", php_win_err());
+				RETURN_FALSE;
+			}
 			bytesfree = (double)NumberOfFreeClusters * (double)SectorsPerCluster * (double)BytesPerSector;
 		}
 	}
@@ -302,14 +324,20 @@ PHP_FUNCTION(disk_free_space)
 	}
 #else /* WINDOWS, OS/2 */
 #if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
-	if (statvfs(Z_STRVAL_PP(path), &buf)) RETURN_FALSE;
+	if (statvfs(Z_STRVAL_PP(path), &buf)) { 
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
+		RETURN_FALSE;
+	}
 	if (buf.f_frsize) {
 		bytesfree = (((double)buf.f_bavail) * ((double)buf.f_frsize));
 	} else {
 		bytesfree = (((double)buf.f_bavail) * ((double)buf.f_bsize));
 	}
 #elif (defined(HAVE_SYS_STATFS_H) || defined(HAVE_SYS_MOUNT_H)) && defined(HAVE_STATFS)
-	if (statfs(Z_STRVAL_PP(path), &buf)) RETURN_FALSE;
+	if (statfs(Z_STRVAL_PP(path), &buf)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
+		RETURN_FALSE;
+	}
 #ifdef NETWARE
 	bytesfree = (((double)buf.f_bsize) * ((double)buf.f_bfree));
 #else
