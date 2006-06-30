@@ -4448,7 +4448,7 @@ PHPAPI UChar *php_u_addslashes_ex(UChar *str, int length, int *new_length, int s
 		return str;
 	}
 
-	buf = eumalloc(length * 2);
+	buf = eumalloc(length * 2 + 1);
 
 	while (i < length) {
 		U16_NEXT(str, i, length, ch);
