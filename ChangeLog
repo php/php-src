@@ -1,3 +1,54 @@
+2006-06-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pspell/tests/002.phpt:
+      MFB: Fixed test for situations where pspell_clear_session() is unavailable.
+
+    * (PHP_5_2)
+      ext/pspell/tests/002.phpt:
+      Fixed test for situations where pspell_clear_session() is unavailable.
+
+    * ext/pspell/tests/003.phpt:
+      MFB: Fixed test
+
+    * (PHP_5_2)
+      ext/pspell/tests/003.phpt:
+      Fixed test
+
+2006-06-29  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/standard/tests/file/stream_rfc2397_002.phpt
+      ext/standard/tests/file/stream_rfc2397_002.phpt:
+      fix test
+
+    * ext/standard/http_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c
+      main/streams/memory.c
+      main/streams/memory.c:
+      url->URL
+
+    * ext/curl/interface.c
+      ext/standard/url.c:
+      MFB: url -> URL
+
+    * (PHP_5_2)
+      ext/curl/interface.c
+      ext/standard/url.c:
+      Bug #37961 (url should be URL)
+
+2006-06-29  Antony Dovgal  <antony@zend.com>
+
+    * ext/xml/tests/bug26528.phpt
+      ext/xml/tests/bug35447.phpt:
+      fix tests
+
+    * (PHP_5_2)
+      ext/sysvshm/sysvshm.c:
+      MFH: make sure we won't get into endless loop
+
+    * ext/sysvshm/sysvshm.c:
+      make sure we won't get into endless loop if value shm_var->next is
+      corrupted
+
 2006-06-28  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_4)
