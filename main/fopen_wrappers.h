@@ -31,7 +31,7 @@ PHPAPI int php_check_open_basedir(const char *path TSRMLS_DC);
 PHPAPI int php_check_open_basedir_ex(const char *path, int warn TSRMLS_DC);
 PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path TSRMLS_DC);
 
-PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **opened_path TSRMLS_DC);
+PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const char *path, char **opened_path TSRMLS_DC);
 
 PHPAPI int php_is_url(char *path);
 PHPAPI char *php_strip_url_passwd(char *path);
