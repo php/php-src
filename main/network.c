@@ -103,7 +103,7 @@ int inet_aton(const char *, struct in_addr *);
 #  define PHP_GAI_STRERROR(x) (php_gai_strerror(x))
 /* {{{ php_gai_strerror
  */
-static char *php_gai_strerror(int code)
+static const char *php_gai_strerror(int code)
 {
         static struct {
                 int code;
