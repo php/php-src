@@ -152,7 +152,10 @@ PHP_FUNCTION(assert)
 		if (zend_eval_string(myeval, &retval, compiled_string_description TSRMLS_CC) == FAILURE) {
 			efree(compiled_string_description);
 			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Failure evaluating code: %s%s", PHP_EOL, myeval);
-			/* php_error_docref() does not return in this case. */
+			if (ASSERTG(bail)) {
+				zend_bailout();
+			}
+			RETURN_FALSE;
 		}
 		efree(compiled_string_description);
 
