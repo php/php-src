@@ -33,8 +33,8 @@
 #define CHECKUID_NO_ERRORS	0x01
 
 BEGIN_EXTERN_C()
-PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode);
-PHPAPI int php_checkuid_ex(const char *filename, char *fopen_mode, int mode, int flags);
+PHPAPI int php_checkuid(const char *filename, const char *fopen_mode, int mode);
+PHPAPI int php_checkuid_ex(const char *filename, const char *fopen_mode, int mode, int flags);
 PHPAPI char *php_get_current_user(void);
 END_EXTERN_C()
 
