@@ -1,3 +1,26 @@
+2006-06-30  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/standard/basic_functions.c:
+      Do not force pass by-ref, these functions only prefer by-ref
+
+2006-06-30  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      news
+
+    * (PHP_5_2)
+      ext/standard/filestat.c:
+      MFH: add error messages to disk_free_space() & disk_total_space() (feature
+      request #37971)
+
+    * ext/standard/filestat.c:
+      add error messages to disk_free_space() & disk_total_space() (feature
+      request #37971)
+
+    * ext/standard/string.c:
+      fix off-by-one in addslashes() in Unicode mode
+
 2006-06-29  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/pspell/tests/002.phpt:
