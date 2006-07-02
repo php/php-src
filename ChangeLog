@@ -1,3 +1,28 @@
+2006-07-01  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/standard/assert.c
+      ext/standard/tests/assert/assert02.phpt:
+      MFB5.2: fix assert() problems
+
+    * (PHP_5_2)
+      ext/standard/assert.c
+      ext/standard/tests/assert/assert02.phpt
+      ext/standard/tests/assert/assert02.phpt:
+      fixed segfaults and such things within the new assert02.phpt test
+
+    * main/fopen_wrappers.c
+      main/fopen_wrappers.h
+      main/network.c:
+      MFB5.2: const keywording
+
+    * (PHP_5_2)
+      main/fopen_wrappers.c
+      main/fopen_wrappers.h
+      main/network.c
+      main/safe_mode.c
+      main/safe_mode.h:
+      add const keywords
+
 2006-06-30  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * ext/standard/basic_functions.c:
