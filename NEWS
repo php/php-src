@@ -74,6 +74,7 @@ PHP                                                                        NEWS
 
 - Fixed memory leaks in openssl streams context options. (Pierre)
 - Fixed handling of extremely long paths inside tempnam() function. (Ilia)
+- Fixed bug #37987 (invalid return of file_exists() in safe mode). (Ilia)
 - Fixed bug #37931 (possible crash in OCI8 after database restart 
   when using persistent connections). (Tony)
 - Fixed bug #37920 (compilation problems on z/OS). (Tony)
