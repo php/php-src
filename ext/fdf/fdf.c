@@ -186,7 +186,7 @@ ZEND_END_ARG_INFO()
 
 static
 ZEND_BEGIN_ARG_INFO(arginfo_fdf_set_submit_form_action, 0)
-	ZEND_ARG_INFO(0, resource fdfdoc)
+	ZEND_ARG_INFO(0, fdfdoc)
 	ZEND_ARG_INFO(0, fieldname)
 	ZEND_ARG_INFO(0, whichtrigger)
 	ZEND_ARG_INFO(0, url)

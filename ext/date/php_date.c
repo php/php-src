@@ -120,7 +120,7 @@ ZEND_END_ARG_INFO()
 
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date_sunrise, 0, 0, 1)
-	ZEND_ARG_INFO(0, mixed time)
+	ZEND_ARG_INFO(0, time)
 	ZEND_ARG_INFO(0, format)
 	ZEND_ARG_INFO(0, latitude)
 	ZEND_ARG_INFO(0, longitude)
@@ -130,7 +130,7 @@ ZEND_END_ARG_INFO()
 
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date_sunset, 0, 0, 1)
-	ZEND_ARG_INFO(0, mixed time)
+	ZEND_ARG_INFO(0, time)
 	ZEND_ARG_INFO(0, format)
 	ZEND_ARG_INFO(0, latitude)
 	ZEND_ARG_INFO(0, longitude)
