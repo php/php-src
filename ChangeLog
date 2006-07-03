@@ -1,3 +1,17 @@
+2006-07-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/filestat.c:
+      Fixed bug #37987 (invalid return of file_exists() in safe mode).
+
+2006-07-02  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/fdf/fdf.c
+      ext/gd/gd.c
+      ext/standard/basic_functions.c:
+      nuke types in arginfo
+
 2006-07-01  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * ext/standard/assert.c
