@@ -29,30 +29,30 @@ Notice: Undefined variable: a in %sassert02.php(12) : assert code on line 1
 
 Warning: assert(): Assertion "$a" failed in %sassert02.php on line 12
 
-Parse error: syntax error, unexpected '=' in %sassert02.php(14) : assert code on line 1
+Parse error: parse error, unexpected '=' in %sassert02.php(14) : assert code on line 1
 in handler()
 string(61) "assert(): Failure evaluating code: 
 aa=sd+as+safsafasfasafsaf"
 
 Warning: assert(): Assertion "0" failed in %sassert02.php on line 16
 
-Parse error: syntax error, unexpected '=' in %sassert02.php(19) : assert code on line 1
+Parse error: parse error, unexpected '=' in %sassert02.php(19) : assert code on line 1
 in handler()
 string(61) "assert(): Failure evaluating code: 
 aa=sd+as+safsafasfasafsaf"
---EXPECTUF--
+--UEXPECTF--
 Notice: Undefined variable: a in %sassert02.php(12) : assert code on line 1
 
 Warning: assert(): Assertion "$a" failed in %sassert02.php on line 12
 
-Parse error: syntax error, unexpected '=' in %sassert02.php(14) : assert code on line 1
+Parse error: parse error, unexpected '=' in %sassert02.php(14) : assert code on line 1
 in handler()
 unicode(61) "assert(): Failure evaluating code: 
 aa=sd+as+safsafasfasafsaf"
 
 Warning: assert(): Assertion "0" failed in %sassert02.php on line 16
 
-Parse error: syntax error, unexpected '=' in %sassert02.php(19) : assert code on line 1
+Parse error: parse error, unexpected '=' in %sassert02.php(19) : assert code on line 1
 in handler()
 unicode(61) "assert(): Failure evaluating code: 
 aa=sd+as+safsafasfasafsaf"
