@@ -39,6 +39,7 @@
 
 #include "apr_strings.h"
 #include "ap_config.h"
+#include "apr_buckets.h"
 #include "util_filter.h"
 #include "httpd.h"
 #include "http_config.h"
@@ -73,7 +74,7 @@ php_apache_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
 
 	ctx = SG(server_context);
 	f = ctx->f;
-
+	
 	if (str_length == 0) return 0;
 	
 	ba = f->c->bucket_alloc;
@@ -82,15 +83,6 @@ php_apache_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
 	b = apr_bucket_transient_create(str, str_length, ba);
 	APR_BRIGADE_INSERT_TAIL(bb, b);
 
-#if 0
-	/* Add a Flush bucket to the end of this brigade, so that
-	 * the transient buckets above are more likely to make it out
-	 * the end of the filter instead of having to be copied into
-	 * someone's setaside. */
-	b = apr_bucket_flush_create(ba);
-	APR_BRIGADE_INSERT_TAIL(bb, b);
-#endif
-	
 	if (ap_pass_brigade(f->next, bb) != APR_SUCCESS || ctx->r->connection->aborted) {
 		php_handle_aborted_connection();
 	}
@@ -366,7 +358,7 @@ static int php_input_filter(ap_filter_t *f, apr_bucket_brigade *bb,
 	}
 
 	for (b = APR_BRIGADE_FIRST(bb); b != APR_BRIGADE_SENTINEL(bb); b = APR_BUCKET_NEXT(b)) {
-		apr_bucket_read(b, &str, &n, 1);
+		apr_bucket_read(b, &str, &n, APR_NONBLOCK_READ);
 		if (n > 0) {
 			old_index = ctx->post_len;
 			ctx->post_len += n;
@@ -420,6 +412,8 @@ static void php_apache_request_ctor(ap_filter_t *f, php_struct *ctx TSRMLS_DC)
 
 static void php_apache_request_dtor(ap_filter_t *f TSRMLS_DC)
 {
+	php_apr_bucket_brigade *pbb = (php_apr_bucket_brigade *)f->ctx;
+	
 	php_request_shutdown(NULL);
 
 	if (SG(request_info).query_string) {
@@ -431,16 +425,20 @@ static void php_apache_request_dtor(ap_filter_t *f TSRMLS_DC)
 	if (SG(request_info).path_translated) {
 		free(SG(request_info).path_translated);
 	}
+	
+	apr_brigade_destroy(pbb->bb);
 }
 
 static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 {
 	php_struct *ctx;
-	apr_bucket *b;
 	void *conf = ap_get_module_config(f->r->per_dir_config, &php5_module);
 	char *p = get_php_config(conf, "engine", sizeof("engine"));
 	TSRMLS_FETCH();
-
+	zend_file_handle zfd;
+	php_apr_bucket_brigade *pbb;
+	apr_bucket *b;
+	
 	if (f->r->proxyreq) {
 		zend_try {
 			zend_ini_deactivate(TSRMLS_C);
@@ -454,8 +452,28 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 			zend_ini_deactivate(TSRMLS_C);
 		} zend_end_try();
 		return ap_pass_brigade(f->next, bb);
+	}	
+	
+	if(f->ctx) {
+		pbb = (php_apr_bucket_brigade *)f->ctx;
+	} else {
+		pbb = f->ctx = apr_palloc(f->r->pool, sizeof(*pbb));
+		pbb->bb = apr_brigade_create(f->r->pool, f->c->bucket_alloc);
+		pbb->total_len = 0;
 	}
 
+	if(ap_save_brigade(NULL, &pbb->bb, &bb, f->r->pool) != APR_SUCCESS) {
+		// Bad
+	}
+	
+	apr_brigade_cleanup(bb);
+	
+	// Check to see if the last bucket in this brigade, it not
+	// we have to wait until then.
+	if(!APR_BUCKET_IS_EOS(APR_BRIGADE_LAST(pbb->bb))) {
+		return 0;
+	}	
+	
 	/* Setup the CGI variables if this is the main request.. */
 	if (f->r->main == NULL || 
 		/* .. or if the sub-request envinronment differs from the main-request. */
@@ -475,7 +493,8 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 		} zend_end_try();
         return HTTP_INTERNAL_SERVER_ERROR;
 	}
-	ctx->f = f; /* save whatever filters are after us in the chain. */
+	
+	ctx->f = f->next; /* save whatever filters are after us in the chain. */
 
 	if (ctx->request_processed) {
 		zend_try {
@@ -484,78 +503,46 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 		return ap_pass_brigade(f->next, bb);
 	}
 
-	for (b = APR_BRIGADE_FIRST(bb); b != APR_BRIGADE_SENTINEL(bb); b = APR_BUCKET_NEXT(b)) {
-		zend_file_handle zfd;
+	php_apache_request_ctor(f, ctx TSRMLS_CC);
+	
+	// It'd be nice if we could highlight based of a zend_file_handle here....
+	// ...but we can't.
+	
+	zfd.type = ZEND_HANDLE_STREAM;
+	
+	zfd.handle.stream.handle = pbb;
+	zfd.handle.stream.reader = php_apache_read_stream;
+	zfd.handle.stream.closer = php_apache_close_stream;
+	zfd.handle.stream.fteller = php_apache_fteller_stream;
+	zfd.handle.stream.interactive = 0;
+	
+	zfd.filename = f->r->filename;
+	zfd.opened_path = NULL;
+	zfd.free_filename = 0;
+	
+	php_execute_script(&zfd TSRMLS_CC);
 
-		if (!ctx->request_processed && APR_BUCKET_IS_FILE(b)) {
-			const char *path;
-			apr_bucket_brigade *prebb = bb;
-
-			/* Split the brigade into two brigades before and after
-			 * the file bucket. Leave the "after the FILE" brigade
-			 * in the original bb, so it gets passed outside of this
-			 * loop. */
-			bb = apr_brigade_split(prebb, b);
-
-			/* Pass the "before the FILE" brigade here
-			 * (if it's non-empty). */
-			if (!APR_BRIGADE_EMPTY(prebb)) {
-				apr_status_t rv;
-				rv = ap_pass_brigade(f->next, prebb);
-				/* XXX: destroy the prebb, since we know we're
-				 * done with it? */
-				if (rv != APR_SUCCESS || ctx->r->connection->aborted) {
-					php_handle_aborted_connection();
-				}
-			}
-
-			apply_config(conf);
-			php_apache_request_ctor(f, ctx TSRMLS_CC);
-
-			apr_file_name_get(&path, ((apr_bucket_file *) b->data)->fd);
-			
-			/* Determine if we need to parse the file or show the source */
-			if (strncmp(ctx->r->handler, "application/x-httpd-php-source", sizeof("application/x-httpd-php-source"))) { 
-				zfd.type = ZEND_HANDLE_FILENAME;
-				zfd.filename = (char *) path;
-				zfd.free_filename = 0;
-				zfd.opened_path = NULL;
-
-				php_execute_script(&zfd TSRMLS_CC);
 #if MEMORY_LIMIT
-				{
-					char *mem_usage;
- 
-					mem_usage = apr_psprintf(ctx->r->pool, "%u", AG(allocated_memory_peak));
-					AG(allocated_memory_peak) = 0;
-					apr_table_set(ctx->r->notes, "mod_php_memory_usage", mem_usage);
-				}
-#endif
-			} else { 
-				zend_syntax_highlighter_ini syntax_highlighter_ini;
-				
-				php_get_highlight_struct(&syntax_highlighter_ini);
-				
- 				highlight_file((char *)path, &syntax_highlighter_ini TSRMLS_CC);
-			}	
-			
-			php_apache_request_dtor(f TSRMLS_CC);
-			
-			if (!f->r->main) {
-				ctx->request_processed = 1;
-			}
+	{
+		char *mem_usage;
 
-			/* Delete the FILE bucket from the brigade. */
-			apr_bucket_delete(b);
-
-			/* We won't handle any more buckets in this brigade, so
-			 * it's ok to break out now. */
-			break;
-		}
+		mem_usage = apr_psprintf(ctx->r->pool, "%u", AG(allocated_memory_peak));
+		AG(allocated_memory_peak) = 0;
+		apr_table_set(ctx->r->notes, "mod_php_memory_usage", mem_usage);
 	}
-
+#endif
+		
+	php_apache_request_dtor(f TSRMLS_CC);
+		
+	if (!f->r->main) {
+		ctx->request_processed = 1;
+	}
+	
+	b = apr_bucket_eos_create(f->c->bucket_alloc);
+	APR_BRIGADE_INSERT_TAIL(pbb->bb,  b);
+	
 	/* Pass whatever is left on the brigade. */
-	return ap_pass_brigade(f->next, bb);
+	return ap_pass_brigade(f->next, pbb->bb);
 }
 
 static apr_status_t
@@ -702,6 +689,38 @@ static void php_register_hook(apr_pool_t *p)
 	ap_hook_post_read_request(php_post_read_request, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_register_output_filter("PHP", php_output_filter, php_apache_disable_caching, AP_FTYPE_RESOURCE);
 	ap_register_input_filter("PHP", php_input_filter, php_apache_disable_caching, AP_FTYPE_RESOURCE);
+}
+
+static size_t php_apache_read_stream(void *handle, char *buf, size_t wantlen TSRMLS_DC)
+{
+	php_apr_bucket_brigade *pbb = (php_apr_bucket_brigade *)handle;
+	apr_bucket_brigade *rbb;
+	apr_size_t readlen;
+	apr_bucket *b = NULL;
+	
+	rbb = pbb->bb;
+	
+	if((apr_brigade_partition(pbb->bb, wantlen, &b) == APR_SUCCESS) && b){
+		pbb->bb = apr_brigade_split(rbb, b);
+	} 	
+
+	readlen = wantlen;
+	apr_brigade_flatten(rbb, buf, &readlen);
+	apr_brigade_cleanup(rbb);
+	pbb->total_len += readlen;
+	
+	return readlen;
+}
+
+static void php_apache_close_stream(void *handle TSRMLS_DC)
+{
+	return;	
+}
+
+static long php_apache_fteller_stream(void *handle TSRMLS_DC)
+{
+	php_apr_bucket_brigade *pbb = (php_apr_bucket_brigade *)handle;
+	return pbb->total_len;
 }
 
 AP_MODULE_DECLARE_DATA module php5_module = {
