@@ -2,10 +2,11 @@
 Localized match
 --SKIPIF--
 <?php if (!function_exists('setlocale')) die('skip: setlocale() not available'); ?>
+<?php if (!@setlocale(LC_ALL, 'pt_PT', 'pt', 'pt_PT.ISO8859-1', 'portuguese')) die('skip pt locale not available');
 --FILE--
 <?php
 
-declare(encoding=latin1);
+declare(encoding='latin1');
 
 // this tests if the cache is working correctly, as the char tables
 // must be rebuilt after the locale change
