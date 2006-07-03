@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, PHP 5.2.0
+- Reimplementation of Apache2Filter, PHP can now be an arbitrary filter 
+  in the chain and will read the script from the Apache stream. (John)
 - Changed __toString() to be called wherever applicable. (Marcus)
 - Changed E_ALL error reporting mode to include E_RECOVERABLE_ERROR. (Marcus)
 - Changed realpath cache to be disabled when "open_basedir" or "safe_mode"
