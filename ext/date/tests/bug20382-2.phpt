@@ -166,5 +166,5 @@ wanted = Monday            00:00:00
 
 Asia/Baku
 ts     = Monday 1995-12-25 17:17:17 AZT
-result = Monday 1996-01-01 01:00:00 AZST
+result = Monday 1996-01-01 00:00:00 AZT
 wanted = Monday            00:00:00

@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2006, PHP 5.2.0
 - Reimplementation of Apache2Filter, PHP can now be an arbitrary filter 
   in the chain and will read the script from the Apache stream. (John)
+- Updated timezonedb to version 2006.7. (Derick)
 - Changed priority of PHPRC environment variable on win32 to be higher then
   value from registry. (Dmitry)
 - Changed __toString() to be called wherever applicable. (Marcus)
