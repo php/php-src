@@ -2969,7 +2969,7 @@ static int _addmethod(zend_function *mptr, int num_args, va_list args, zend_hash
 }
 /* }}} */
 
-/* {{{ proto public ReflectionMethod[] ReflectionClass::getMethods()
+/* {{{ proto public ReflectionMethod[] ReflectionClass::getMethods([long $filter])
    Returns an array of this class' methods */
 ZEND_METHOD(reflection_class, getMethods)
 {
@@ -3134,7 +3134,7 @@ static int _adddynproperty(zval **pptr, int num_args, va_list args, zend_hash_ke
 }
 /* }}} */
 
-/* {{{ proto public ReflectionProperty[] ReflectionClass::getProperties()
+/* {{{ proto public ReflectionProperty[] ReflectionClass::getProperties([long $filter])
    Returns an array of this class' properties */
 ZEND_METHOD(reflection_class, getProperties)
 {
@@ -3383,7 +3383,7 @@ ZEND_METHOD(reflection_class, newInstance)
 }
 /* }}} */
 
-/* {{{ proto public stdclass ReflectionClass::newInstanceArgs(array args)
+/* {{{ proto public stdclass ReflectionClass::newInstanceArgs([array args])
    Returns an instance of this class */
 ZEND_METHOD(reflection_class, newInstanceArgs)
 {
@@ -4484,6 +4484,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_getMethod, 0)
 ZEND_END_ARG_INFO()
 
 static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_class_getMethods, 0, 0, 0)
+	ZEND_ARG_INFO(0, $filter)
+ZEND_END_ARG_INFO()
+
+static
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_hasProperty, 0)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
@@ -4491,6 +4496,11 @@ ZEND_END_ARG_INFO()
 static
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_getProperty, 0)
 	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_getProperties, 0, 0, 0)
+	ZEND_ARG_INFO(0, filter)
 ZEND_END_ARG_INFO()
 
 static
@@ -4514,7 +4524,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_newInstance, 0)
 ZEND_END_ARG_INFO()
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_newInstanceArgs, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_class_newInstanceArgs, 0, 0, 0)
 	ZEND_ARG_ARRAY_INFO(0, args, 0)
 ZEND_END_ARG_INFO()
 
@@ -4544,10 +4554,10 @@ static zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, getConstructor, NULL, 0)
 	ZEND_ME(reflection_class, hasMethod, arginfo_reflection_class_hasMethod, 0)
 	ZEND_ME(reflection_class, getMethod, arginfo_reflection_class_getMethod, 0)
-	ZEND_ME(reflection_class, getMethods, NULL, 0)
+	ZEND_ME(reflection_class, getMethods, arginfo_reflection_class_getMethods, 0)
 	ZEND_ME(reflection_class, hasProperty, arginfo_reflection_class_hasProperty, 0)
 	ZEND_ME(reflection_class, getProperty, arginfo_reflection_class_getProperty, 0)
-	ZEND_ME(reflection_class, getProperties, NULL, 0)
+	ZEND_ME(reflection_class, getProperties, arginfo_reflection_class_getProperties, 0)
 	ZEND_ME(reflection_class, hasConstant, arginfo_reflection_class_hasConstant, 0)
 	ZEND_ME(reflection_class, getConstants, NULL, 0)
 	ZEND_ME(reflection_class, getConstant, arginfo_reflection_class_getConstant, 0)
