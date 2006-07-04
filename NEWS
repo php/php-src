@@ -1,6 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Jun 2006, Version 4.4.3RC2
+04 Jul 2006, Version 4.4.3RC2
 - Improved safe_mode check for the error_log() function. (Ilia)
 - Fixed handling of extremely long paths inside tempnam() function. (Ilia)
 - Fixed XSS inside phpinfo() with long inputs. (Ilia)
