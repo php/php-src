@@ -4499,7 +4499,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_getProperty, 0)
 ZEND_END_ARG_INFO()
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_getProperties, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_class_getProperties, 0, 0, 0)
 	ZEND_ARG_INFO(0, filter)
 ZEND_END_ARG_INFO()
 
