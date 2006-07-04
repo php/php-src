@@ -1266,11 +1266,13 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 			ZEND_VERIFY_RESOURCE(what);
 
 			if (FAILURE == php_stream_cast((php_stream *) what, PHP_STREAM_AS_STDIO, (void *) &fp, REPORT_ERRORS)) {
-				RETURN_FALSE;
+				RETVAL_FALSE;
+				return 1;
 			}
 
 			if (!fp) {
-				RETURN_FALSE;
+				RETVAL_FALSE;
+				return 1;
 			}
 
 			error = CURLE_OK;
@@ -1365,7 +1367,8 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 				postfields = HASH_OF(*zvalue);
 				if (! postfields) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't get HashTable in CURLOPT_POSTFIELDS"); 
-					RETURN_FALSE;
+					RETVAL_FALSE;
+					return 1;
 				}
 
 				for (zend_hash_internal_pointer_reset(postfields);
@@ -1387,7 +1390,8 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 						++postval;
 						/* open_basedir check */
 						if (php_check_open_basedir(postval TSRMLS_CC)) {
-							RETURN_FALSE;
+							RETVAL_FALSE;
+							return 1;
 						}
 						error = curl_formadd(&first, &last, 
 											 CURLFORM_COPYNAME, string_key,
@@ -1406,7 +1410,8 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 
 				SAVE_CURL_ERROR(ch, error);
 				if (error != CURLE_OK) {
-					RETURN_FALSE;
+					RETVAL_FALSE
+					return 1;
 				}
 
 				zend_llist_add_element(&ch->to_free.post, &first);
@@ -1434,7 +1439,8 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 			ph = HASH_OF(*zvalue);
 			if (!ph) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "You must pass either an object or an array with the CURLOPT_HTTPHEADER, CURLOPT_QUOTE, CURLOPT_HTTP200ALIASES and CURLOPT_POSTQUOTE arguments");
-				RETURN_FALSE;
+				RETVAL_FALSE;
+				return 1;
 			}
 
 			for (zend_hash_internal_pointer_reset(ph);
@@ -1451,7 +1457,8 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 				if (!slist) {
 					efree(indiv);
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not build curl_slist"); 
-					RETURN_FALSE;
+					RETVAL_FALSE;
+					return 1;
 				}
 				zend_llist_add_element(&ch->to_free.str, &indiv);
 			}
@@ -1473,7 +1480,8 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 			convert_to_string_ex(zvalue);
 
 			if (php_check_open_basedir(Z_STRVAL_PP(zvalue) TSRMLS_CC)) {
-				RETURN_FALSE;			
+				RETVAL_FALSE;			
+				return 1;
 			}
 
 			copystr = estrndup(Z_STRVAL_PP(zvalue), Z_STRLEN_PP(zvalue));
