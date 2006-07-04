@@ -657,6 +657,10 @@ PHP_RSHUTDOWN_FUNCTION(libxml)
 	xmlParserInputBufferCreateFilenameDefault(NULL);
 	xmlOutputBufferCreateFilenameDefault(NULL);
 
+	if (LIBXML(stream_context)) {
+		zval_ptr_dtor(&LIBXML(stream_context));
+		LIBXML(stream_context) = NULL;
+	}
 	smart_str_free(&LIBXML(error_buffer));
 	if (LIBXML(error_list)) {
 		zend_llist_destroy(LIBXML(error_list));
