@@ -1,3 +1,66 @@
+2006-07-03  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/assert/assert02.phpt:
+      Make everyone happy
+
+    * ext/standard/tests/assert/assert02.phpt:
+      make everyone happy
+
+2006-07-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/standard/tests/assert/assert02.phpt:
+      Fixed test
+
+2006-07-03  John Coggeshall  <john@coggeshall.org>
+
+    * (PHP_5_2)
+      NEWS:
+      Adding Apache2Filter news
+
+    * (PHP_5_2)
+      sapi/apache2filter/php_apache.h
+      sapi/apache2filter/sapi_apache2.c:
+      Reimplementation of the way Apache 2 Filter works. Instead of ripping the
+      source from a file (thus bypassing any previous filters in the chain).
+      This
+      implementation wraps Zend's internal stream mechanism, allowing ZE to read
+      from Apache's streams instead.
+
+2006-07-03  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/pcre/tests/preg_replace_callback2.phpt
+      ext/pcre/tests/preg_replace_callback2.phpt
+      ext/standard/tests/assert/assert02.phpt
+      ext/standard/tests/assert/assert02.phpt:
+      fix tests
+
+2006-07-03  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/pcre/tests/locales.phpt
+      ext/pcre/tests/match_flags3.phpt
+      ext/pcre/tests/preg_replace.phpt
+      ext/pcre/tests/preg_replace_callback.phpt
+      ext/pcre/tests/preg_replace_callback2.phpt:
+      MFB
+
+    * (PHP_5_2)
+      ext/pcre/tests/match_flags3.phpt
+      ext/pcre/tests/preg_replace_callback2.phpt
+      ext/pcre/tests/preg_replace_callback2.phpt:
+      more testing
+
+    * (PHP_5_2)
+      ext/pcre/tests/locales.phpt
+      ext/pcre/tests/match_flags3.phpt
+      ext/pcre/tests/match_flags3.phpt
+      ext/pcre/tests/preg_replace.phpt
+      ext/pcre/tests/preg_replace.phpt
+      ext/pcre/tests/preg_replace_callback.phpt
+      ext/pcre/tests/preg_replace_callback.phpt:
+      new tests and fix the locales test where the pt local isnt available.
+
 2006-07-02  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
