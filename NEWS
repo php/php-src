@@ -1,5 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2006, Version 4.4.3
+	
 04 Jul 2006, Version 4.4.3RC2
 - Improved safe_mode check for the error_log() function. (Ilia)
 - Fixed handling of extremely long paths inside tempnam() function. (Ilia)
