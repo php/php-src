@@ -1,0 +1,331 @@
+Input Filter Extension
+~~~~~~~~~~~~~~~~~~~~~~
+
+Introduction
+============
+We all know that you should always check input variables, but PHP does not
+offer really good functionality for doing this in a safe way. The Input Filter
+extension is meant to address this issue by implementing a set of filters and
+mechanisms that users can use to safely access their input data. 
+
+
+Change Log
+==========
+2005-10-27
+    * Updated filter_data prototype
+    * Added filter constants
+    * Fixed minor problems
+    * Changes by David Tulloh
+
+2005-10-05
+    * Changed "input_filter.paranoid_admin_default_filter" to
+      "filter.default".
+    * Updated API prototypes to reflect implementation.
+    * Added 'on' and 'off' to the boolean filter.
+    * Removed min_range and max_range flags from the float filter.
+    * Added validate_url, validate_email and validate_ip filters.
+    * Updated allows flags for all filters.
+
+2005-08-15
+    * Unmade *source* a bitmask, it doesn't make sense to do.
+    * Changed return value of filters which got invalid data from 'false' to
+      'null.
+    * Failed filters do not throw an E_NOTICE any longer.
+    * Added a magic_quotes sanitizing filter.
+
+
+General Considerations
+======================
+* If the filter's expected input data mask does not match the provided data
+  for logical filters the filter function returns "false". If the data was
+  not found, "null" is returned.
+* Character filters always return a string.
+* With the input filter extension enabled, and the
+  input_filter.paranoid_admin_default_filter is set to something != 'raw',
+  then all entries in the affected super globals will be passed through the
+  configured filter. The 'callback' filter can not be used here, as that
+  requieres a PHP script to be running already.
+* As the input filter acts on input data before the magic quotes function
+  mangles data, all access through the filter() function will not have any
+  quotes or slashes added - it will be the pure data as send by the browser.
+* All flags mentioned here should be prepended with `FILTER_FLAG_` when used
+  with PHP.
+
+  
+API
+===
+mixed *input_get* (int *source*, string *name*, [, int *filter* [, mixed *filter_options*, [ string *characterset* ] ]);
+    Returns the filtered variable *$name* from source *$source*. It uses the
+    filter as specified in *$filter* with a constant, and additional options
+    to the filter through *$filter_options*.
+
+mixed *input_get_args* (array *definitions*, int *source*, [, array *data*]);
+    Returns an array with all filtered variables defined in 'definition'.
+    The keys are used as the name of the argument. The value can be either
+    an integer (flags) or an array of options. This array can contain 
+    the 'filter' type, the 'flags', the 'otptions' or the 'charset'
+
+bool *input_has_variable (int *source*, string *name*);
+    Returns *true* if the variable with the name *name* exists in *source*, or
+    *false* otherwise.
+
+array *input_filters_list* ();
+    Returns a list with all supported filter names.
+
+mixed *filter_data* (mixed *variable*, int *filter* [, mixed *filter_options*, [ string *characterset* ] ]);
+    Filters the user supplied variable *$variable* in the same manner as
+    *input_get*.
+
+*$source*:
+
+* INPUT_POST     0
+* INPUT_GET      1
+* INPUT_COOKIE   2
+* INPUT_ENV      4
+* INPUT_SERVER   5 (not implemented yet)
+* INPUT_SESSION  6 (not implemented yet)
+
+
+General flags
+=============
+
+* FILTER_FLAG_SCALAR
+* FILTER_FLAG_ARRAY
+
+These two constants define whether to allow arrays in the source values. The
+default value is SCALAR for input_get_args and ARRAY for the other functions
+(< 0.9.5). These constants also insure that the function returns the correct
+type, if you ask for an array, you will get an array even if the source is
+only one value. However, if you ask for a scalar and the source is an array,
+the result will be FALSE (invalid).
+
+
+Logical Filters
+===============
+
+These filters check whether passed data was valid, and do never mangle input
+variables, but ofcourse they can deny the whole input variable getting to the
+application by returning false.
+
+The constants should be prepended by `FILTER_VALIDATE_` when used with php.
+
+================ ========== =========== ==================================================
+Name             Constant   Return Type Description      
+================ ========== =========== ==================================================
+int              INT        integer     Returns the input variable as an integer
+
+                                        $filter_options - an array with the optional
+                                        elements:
+
+                                        * min_range: Minimal number that is allowed
+                                          (inclusive)
+                                        * max_range: Maximum number that is allowed
+                                          (inclusive)
+                                        * flags: A bitmask supporting the following flags:
+                          
+                                          - ALLOW_OCTAL: allow octal numbers with the format
+                                            0nn as input too.
+                                          - ALLOW_HEX: allow hexadecimal numbers with the
+                                            format 0xnn or 0Xnn too.
+
+boolean          BOOLEAN    boolean     Returns *true* for '1', 'on' and 'true' and *false*
+                                        for '0', 'off' and 'false'
+
+float            FLOAT      float       Returns the input variable as a floating point value
+
+validate_regexp  REGEXP     string      Matches the input value as a string against the
+                                        regular expression. If there is a match then the
+                                        string is returned, otherwise the filter returns
+                                        *null*.
+                                        Remarks: Only available if pcre has been compiled
+                                        into PHP.
+
+validate_url     URL        string      Validates an URL's format.
+
+                                        $filter_options - an bitmask that supports the
+                                        following flags:
+           
+                                        * SCHEME_REQUIRED: The 'schema' part of the URL
+                                          needs to in the passed URL.
+                                        * HOST_REQUIRED: The 'host' part of the URL
+                                          needs to in the passed URL.
+                                        * PATH_REQUIRED: The 'path' part of the URL
+                                          needs to in the passed URL.
+                                        * QUERY_REQUIRED: The 'query' part of the URL
+                                          needs to in the passed URL.
+
+validate_email   EMAIL      string      Validates the passed string against a reasonably
+                                        good regular expression for validating an email
+                                        address.
+
+validate_ip      IP         string      Validates a string representing an IP address.
+
+                                        $filter_options - an bitmask that supports the
+                                        following flags:
+
+                                        * IPV4: Allows IPv4 addresses.
+                                        * IPV6: Allows IPv6 addresses.
+                                        * NO_RES_RANGE: Disallows addresses in reversed
+                                          ranges (IPv4 only)
+                                        * NO_PRIV_RANGE: Disallows addresses in private
+                                          ranges (IPv4 only)
+================ ========== =========== ==================================================
+
+
+Sanitizing Filters
+==================
+
+These filters remove data, or change data depending on the filter, and the
+set rules for this specific filter. Instead of taking an *options* array, they
+use this parameter for flags for the specific filter.
+
+The constants should be prepended by `FILTER_SANITIZE_` when used with php.
+                         
+============= ================ =========== =====================================================
+Name          Constant         Return Type Description      
+============= ================ =========== =====================================================
+string        STRING           string      Returns the input variable as a string after it has
+                                           been stripped of XML/HTML tags and other evil things
+                                           that can cause XSS problems.
+
+                                           $filter_options - an bitmask that supports the
+                                           following flags:
+                 
+                                           * NO_ENCODE_QUOTES: Prevents single and double
+                                             quotes from being encoded as numerical HTML
+                                             entities.
+                                           * STRIP_LOW: excludes all characters < 0x20 from the
+                                             allowed character list
+                                           * STRIP_HIGH: excludes all characters >= 0x80 from
+                                             the allowed character list
+                                           * ENCODE_LOW: allows characters < 0x20 but encodes
+                                             them as numerical HTML entities
+                                           * ENCODE_HIGH: allows characters >= 0x80 but encodes
+                                             them as numerical HTML entities
+                                           * ENCODE_AMP: encodes & as &amp;
+
+                                           The flags STRIP_LOW and ENCODE_LOW are mutual
+                                           exclusive, and so are STRIP_HIGH and ENCODE_HIGH. In
+                                           the case they clash, the characters will be
+                                           stripped.
+
+stripped      STRIPPED         string      Alias for 'string'.
+
+encoded       ENCODED          string      Encodes all characters outside the range
+                                           "a-zA-Z0-9-._" as URL encoded values.
+
+                                           $filter_options - an bitmask that supports the
+                                           following flags:
+
+                                           * STRIP_LOW: excludes all characters < 0x20 from the
+                                             allowed character list
+                                           * STRIP_HIGH: excludes all characters >= 0x80 from
+                                             the allowed character list
+                                           * ENCODE_LOW: allows characters < 0x20 but encodes
+                                             them as numerical HTML entities
+                                           * ENCODE_HIGH: allows characters >= 0x80 but encodes
+                                             them as numerical HTML entities
+
+special_chars SPECIAL_CHARS    string      Encodes the 'special' characters ' " < > &, \0 and
+                                           everything below 0x20 as numerical HTML entities.
+                 
+                                           $filter_options - an bitmask that supports the
+                                           following flags:
+                 
+                                           * STRIP_LOW: excludes all characters < 0x20 from the
+                                             allowed character list. If this is not set, then
+                                             those characters are encoded as numerical HTML
+                                             entities
+                                           * STRIP_HIGH: excludes all characters >= 0x80 from
+                                             the allowed character list
+                                           * ENCODE_HIGH: allows characters >= 0x80 but encodes
+                                             them as numerical HTML entities
+
+unsafe_raw    UNSAFE_RAW       string      Returns the input variable as a string without
+                                           XML/HTML being stripped from the input value.
+                 
+                                           $filter_options - an bitmask that supports the
+                                           following flags:
+                 
+                                           * STRIP_LOW: excludes all characters < 0x20 from the
+                                             allowed character list
+                                           * STRIP_HIGH: excludes all characters >= 0x80 from
+                                             the allowed character list
+                                           * ENCODE_LOW: allows characters < 0x20 but encodes
+                                             them as numerical HTML entities
+                                           * ENCODE_HIGH: allows characters >= 0x80 but encodes
+                                             them as numerical HTML entities
+                                           * ENCODE_AMP: encodes & as &amp;
+                 
+                                           The flags STRIP_LOW and ENCODE_LOW are mutual
+                                           exclusive, and so are STRIP_HIGH and ENCODE_HIGH. In
+                                           the case they clash, the characters will be
+                                           stripped.
+
+email         EMAIL            string      Removes all characters that can not be part of a
+                                           correctly formed e-mail address (exception are
+                                           comments in the email address) (a-z A-Z 0-9 " ! # $
+                                           % & ' * + - / = ? ^ _ ` { | } ~ @ . [ ]). This
+                                           filter does `not` validate if the e-mail address has
+                                           the correct format, use the validate_email filter
+                                           for that.
+                 
+url           URL              string      Removes all characters that can not be part of a
+                                           correctly formed URI. (a-z A-Z 0-9 $ - _ . + ! * ' (
+                                           ) , { } | \ ^ ~ [ ] ` < > # % " ; / ? : @ & =) This
+                                           filter does `not` validate if a URI has the correct
+                                           format, use the validate_url filter for that.
+                 
+number_int    NUMBER_INT       int         Removes all characters that are [^0-9+-].
+
+number_float  NUMBER_FLOAT     float       Removes all characters that are [^0-9+-].
+
+                                           $filter_options - an bitmask that supports the
+                                           following flags:
+                 
+                                           * ALLOW_FRACTION: adds "." to the characters that
+                                             are not stripped.
+                                           * ALLOW_THOUSAND: adds "," to the characters that
+                                             are not stripped.
+                                           * ALLOW_SCIENTIFIC: adds "eE" to the characters that
+                                             are not stripped.
+
+magic_quotes  MAGIC_QUOTES     string      BC filter for people who like magic quotes.
+============= ================ =========== =====================================================
+
+
+Callback Filter
+===============
+
+This filter will callback to the specified callback function as specified with
+the *filter_options* parameter. All variants of callback functions are
+supported:
+
+* function with *'functionname'*
+* static method with *array('classname', 'methodname')*
+* dynamic method with *array(&$this, 'methodname')*
+
+The constants should be prepended by `FILTER_` when used with php.
+
+============= =========== =========== =====================================================
+Name          Constant    Return Type Description      
+============= =========== =========== =====================================================
+callback      CALLBACK    mixed       Calls the callback function/method with the input
+                                      variable's value by reference which can do filtering
+                                      and modifying of the input value. If the callback
+                                      function returns "false" then the input value is
+                                      supposed to be incorrect and the returned value will
+                                      be 'false' (and an E_NOTICE will be raised).
+============= =========== =========== =====================================================
+
+The callback function's prototype is:
+
+boolean callback(&$value, $characterset);
+    With *$value* being a reference to the input variable and *$characterset*
+    containing the same value as this parameter's value in the call to
+    *input_get()* or *input_get_array()*. If the *$characterset* parameter was
+    not passed, it defaults to *'null'*.
+
+Version: $Id$
+.. vim: et syn=rst tw=78
+
