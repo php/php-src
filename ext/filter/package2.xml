@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" packagerversion="1.4.6" version="2.0" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+  <name>filter</name>
+  <channel>pecl.php.net</channel>
+  <summary>Extension for safely dealing with input parameters</summary>
+  <description>The Input Filter extension is meant to address this issue by implementing a set
+of filters and mechanisms that users can use to safely access their input data.
+ 
+ </description>
+  <lead>
+    <name>Derick Rethans</name>
+    <user>derick</user>
+    <email>derick@php.net</email>
+    <active>yes</active>
+  </lead>
+  <lead>
+    <name>Rasmus Lerdorf</name>
+    <user>rasmus</user>
+    <email>rasmus@php.net</email>
+    <active>yes</active>
+  </lead>
+  <date>2006-05-14</date>
+  <time>10:04:15</time>
+  <version>
+    <release>0.10.0</release>
+    <api>0.10.0</api>
+  </version>
+  <stability>
+    <release>beta</release>
+    <api>beta</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>- Fixed PECL bug #6136, ini_set should not be able to change the filter.default (Pierre)
+- Fixed PECL bug #6639: uppercase hexadecimal digits are not supported
+- Fixed PECL bug #7733, Float exponential weird result (Pierre)
+- Fixed PECL bug #7715, Input_get float error (Pierre)
+- Implemented PECL req #6641: negative values for hexadecimal and octal numbers are not supported.
+- Added support for php pcre expressions (Pierre)
+- Fixed Possible leak in internal sapi_filter (Pierre)
+- Added input_get_args, fetches all input in one call (Pierre)
+- Added FILTER_FLAG_SCALAR and FILTER_FLAG_ARRAY , allows or not array values (Pierre)
+- Basic IPv6 (no option yet, only the syntax is verified) (Pierre)
+- Add support for custom decimal separator (Pierre)
+- INT and Float filters trim the values before the validations (spaces only) (Pierre)
+- input_get and input_get_args returns now FALSE when the validation failed
+  and NULL when the variable has not been found (Pierre)
+- Added JIT support
+ </notes>
+  <contents>
+    <dir name="/">
+      <file name="callback_filter.c" role="src"/>
+      <file name="config.m4" role="src"/>
+      <file name="config.w32" role="src"/>
+      <file name="CREDITS" role="doc"/>
+      <file name="filter.c" role="src"/>
+      <file name="filter_private.h" role="src"/>
+      <file name="logical_filters.c" role="src"/>
+      <file name="php_filter.h" role="src"/>
+      <file name="sanitizing_filters.c" role="src"/>
+      <dir name="tests">
+        <file role="test" name="001.phpt"/>
+        <file role="test" name="002.phpt"/>
+        <file role="test" name="003.phpt"/>
+        <file role="test" name="004.phpt"/>
+        <file role="test" name="005.phpt"/>
+        <file role="test" name="006.phpt"/>
+        <file role="test" name="007.phpt"/>
+        <file role="test" name="008.phpt"/>
+        <file role="test" name="009.phpt"/>
+        <file role="test" name="010.phpt"/>
+        <file role="test" name="011.phpt"/>
+        <file role="test" name="012.phpt"/>
+        <file role="test" name="013.phpt"/>
+        <file role="test" name="014.phpt"/>
+        <file role="test" name="015.phpt"/>
+        <file role="test" name="016.phpt"/>
+        <file role="test" name="017.phpt"/>
+        <file role="test" name="018.phpt"/>
+        <file role="test" name="019.phpt"/>
+        <file role="test" name="020.phpt"/>
+        <file role="test" name="021.phpt"/>
+        <file role="test" name="022.phpt"/>
+        <file role="test" name="023.phpt"/>
+        <file role="test" name="024.phpt"/>
+        <file role="test" name="025.phpt"/>
+        <file role="test" name="026.phpt"/>
+        <file role="test" name="027.phpt"/>
+        <file role="test" name="028.phpt"/>
+        <file role="test" name="029.phpt"/>
+        <file role="test" name="030.phpt"/>
+        <file role="test" name="031.phpt"/>
+        <file role="test" name="032.phpt"/>
+        <file role="test" name="bug7586.phpt"/>
+      </dir>
+    </dir>
+<!-- / -->
+  </contents>
+  <dependencies>
+    <required>
+      <php>
+        <min>5.0.0</min>
+      </php>
+      <pearinstaller>
+        <min>1.4.0b1</min>
+      </pearinstaller>
+    </required>
+  </dependencies>
+  <providesextension>filter</providesextension>
+  <extsrcrelease/>
+  <changelog>
+    <release>
+      <date>2006-01-23</date>
+      <time>10:04:15</time>
+      <version>
+        <release>0.9.4</release>
+        <api>0.9.4</api>
+      </version>
+      <stability>
+        <release>beta</release>
+        <api>beta</api>
+      </stability>
+      <notes>- Reimplement php_filter_callback() as exception-safe and without memleaks
+- Renamed all constants.
+- Fixed PECL bug #6124: Crash on HTML tags when using FS_STRING</notes>
+    </release>
+  </changelog>
+</package>
