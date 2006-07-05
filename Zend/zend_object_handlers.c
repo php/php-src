@@ -910,9 +910,9 @@ ZEND_API union _zend_function *zend_std_get_constructor(zval *object TSRMLS_DC)
 			 */
 			if (!zend_check_protected(zend_get_function_root_class(constructor), EG(scope))) {
 				if (EG(scope)) {
-					zend_error(E_ERROR, "Call to private %s::%s() from context '%s'", constructor->common.scope->name, constructor->common.function_name, EG(scope)->name);
+					zend_error(E_ERROR, "Call to protected %s::%s() from context '%s'", constructor->common.scope->name, constructor->common.function_name, EG(scope)->name);
 				} else {
-					zend_error(E_ERROR, "Call to private %s::%s() from invalid context", constructor->common.scope->name, constructor->common.function_name);
+					zend_error(E_ERROR, "Call to protected %s::%s() from invalid context", constructor->common.scope->name, constructor->common.function_name);
 				}
 			}
 		}
