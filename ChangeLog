@@ -1,3 +1,40 @@
+2006-07-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/curl/interface.c:
+      MFB: Eliminate some compiler warnings
+
+    * (PHP_5_2)
+      ext/curl/interface.c:
+      Eliminate some compiler warnings
+
+2006-07-04  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      NEWS:
+      - MFH: Updated timezonedb to version 2006.7.
+      - MFH: Fixed test cases because of new constant values for the formats.
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Back to dev.
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Go with RC2.
+
+2006-07-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      main/php_ini.c
+      main/php_ini.c:
+      Changed priority of PHPRC environment variable on win32 to be higher then
+      value from registry.
+
 2006-07-03  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * (PHP_5_2)
