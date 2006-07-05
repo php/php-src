@@ -887,7 +887,7 @@ ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, char *pr
 }
 
 
-static union _zend_function *zend_std_get_constructor(zval *object TSRMLS_DC)
+ZEND_API union _zend_function *zend_std_get_constructor(zval *object TSRMLS_DC)
 {
 	zend_object *zobj = Z_OBJ_P(object);
 	zend_function *constructor = zobj->ce->constructor;
