@@ -3,6 +3,9 @@ PHP                                                                        NEWS
 ?? ??? 2006, PHP 5.2.0
 - Reimplementation of Apache2Filter, PHP can now be an arbitrary filter 
   in the chain and will read the script from the Apache stream. (John)
+- Added support for Apache2Filter in the Windows build including binary 
+  support for both Apache 2.0.x (php5apache2_filter.dll) and 
+  Apache 2.2.x (php5apache2_2_filter.dll). (Edin)
 - Updated timezonedb to version 2006.7. (Derick)
 - Changed priority of PHPRC environment variable on win32 to be higher then
   value from registry. (Dmitry)
