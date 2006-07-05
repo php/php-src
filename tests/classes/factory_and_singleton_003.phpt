@@ -15,4 +15,4 @@ $obj = new test;
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Call to protected test::__construct() from context '' %sfactory_and_singleton_003.php on line %d
+Fatal error: Call to protected test::__construct() from invalid context in %s on line %d
