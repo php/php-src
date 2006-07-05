@@ -140,6 +140,7 @@ BEGIN_EXTERN_C()
 ZEND_API union _zend_function *zend_std_get_static_method(zend_class_entry *ce, zstr function_name_strval, int function_name_strlen TSRMLS_DC);
 ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, zend_uchar type, zstr property_name, int property_name_len, zend_bool silent TSRMLS_DC);
 ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, zend_uchar type, zstr property_name, int property_name_len TSRMLS_DC);
+ZEND_API union _zend_function *zend_std_get_constructor(zval *object TSRMLS_DC);
 ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce, zval *member, int silent TSRMLS_DC);
 
 ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type TSRMLS_DC);
