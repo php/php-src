@@ -15,4 +15,4 @@ $obj = new test;
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Call to private test::__construct() from context '' %sfactory_and_singleton_004.php on line %d
+Fatal error: Call to private test::__construct() from invalid context %s on line %d
