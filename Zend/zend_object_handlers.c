@@ -899,13 +899,21 @@ static union _zend_function *zend_std_get_constructor(zval *object TSRMLS_DC)
 			/* Ensure that if we're calling a private function, we're allowed to do so.
 			 */
 			if (Z_OBJ_HANDLER_P(object, get_class_entry)(object TSRMLS_CC) != EG(scope)) {
-				zend_error(E_ERROR, "Call to private %s::%s() from context '%s'", constructor->common.scope->name, constructor->common.function_name, EG(scope) ? EG(scope)->name : "");
+				if (EG(scope)) {
+					zend_error(E_ERROR, "Call to private %s::%s() from context '%s'", constructor->common.scope->name, constructor->common.function_name, EG(scope)->name);
+				} else {
+					zend_error(E_ERROR, "Call to private %s::%s() from invalid context", constructor->common.scope->name, constructor->common.function_name);
+				}
 			}
 		} else if ((constructor->common.fn_flags & ZEND_ACC_PROTECTED)) {
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
 			 */
 			if (!zend_check_protected(zend_get_function_root_class(constructor), EG(scope))) {
-				zend_error(E_ERROR, "Call to protected %s::%s() from context '%s'", constructor->common.scope->name, constructor->common.function_name, EG(scope) ? EG(scope)->name : "");
+				if (EG(scope)) {
+					zend_error(E_ERROR, "Call to private %s::%s() from context '%s'", constructor->common.scope->name, constructor->common.function_name, EG(scope)->name);
+				} else {
+					zend_error(E_ERROR, "Call to private %s::%s() from invalid context", constructor->common.scope->name, constructor->common.function_name);
+				}
 			}
 		}
 	}
