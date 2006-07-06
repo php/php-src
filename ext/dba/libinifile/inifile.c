@@ -538,7 +538,7 @@ static int inifile_delete_replace_append(inifile *dba, const key_type *key, cons
 			php_stream_seek(fp_tmp, 0, SEEK_SET);
 			php_stream_seek(dba->fp, 0, SEEK_END);
 			if (!php_stream_copy_to_stream(fp_tmp, dba->fp, PHP_STREAM_COPY_ALL)) {
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not copy from temporary stream - ini file truncated");
+				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Could not copy from temporary stream - ini file truncated");
 				ret = FAILURE;
 			}
 		}
