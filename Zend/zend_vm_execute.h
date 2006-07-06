@@ -8835,7 +8835,9 @@ static int zend_fetch_property_address_read_helper_SPEC_VAR_CONST(int type, ZEND
 
 
 	if (Z_TYPE_P(container) != IS_OBJECT || !Z_OBJ_HT_P(container)->read_property) {
-		zend_error(E_NOTICE, "Trying to get property of non-object");
+		if (type != BP_VAR_IS) {
+			zend_error(E_NOTICE, "Trying to get property of non-object");
+		}
 		*retval = EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
@@ -10267,7 +10269,9 @@ static int zend_fetch_property_address_read_helper_SPEC_VAR_TMP(int type, ZEND_O
 
 
 	if (Z_TYPE_P(container) != IS_OBJECT || !Z_OBJ_HT_P(container)->read_property) {
-		zend_error(E_NOTICE, "Trying to get property of non-object");
+		if (type != BP_VAR_IS) {
+			zend_error(E_NOTICE, "Trying to get property of non-object");
+		}
 		*retval = EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
@@ -11702,7 +11706,9 @@ static int zend_fetch_property_address_read_helper_SPEC_VAR_VAR(int type, ZEND_O
 
 
 	if (Z_TYPE_P(container) != IS_OBJECT || !Z_OBJ_HT_P(container)->read_property) {
-		zend_error(E_NOTICE, "Trying to get property of non-object");
+		if (type != BP_VAR_IS) {
+			zend_error(E_NOTICE, "Trying to get property of non-object");
+		}
 		*retval = EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
@@ -13591,7 +13597,9 @@ static int zend_fetch_property_address_read_helper_SPEC_VAR_CV(int type, ZEND_OP
 
 
 	if (Z_TYPE_P(container) != IS_OBJECT || !Z_OBJ_HT_P(container)->read_property) {
-		zend_error(E_NOTICE, "Trying to get property of non-object");
+		if (type != BP_VAR_IS) {
+			zend_error(E_NOTICE, "Trying to get property of non-object");
+		}
 		*retval = EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
@@ -14797,7 +14805,9 @@ static int zend_fetch_property_address_read_helper_SPEC_UNUSED_CONST(int type, Z
 
 
 	if (Z_TYPE_P(container) != IS_OBJECT || !Z_OBJ_HT_P(container)->read_property) {
-		zend_error(E_NOTICE, "Trying to get property of non-object");
+		if (type != BP_VAR_IS) {
+			zend_error(E_NOTICE, "Trying to get property of non-object");
+		}
 		*retval = EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
@@ -15882,7 +15892,9 @@ static int zend_fetch_property_address_read_helper_SPEC_UNUSED_TMP(int type, ZEN
 
 
 	if (Z_TYPE_P(container) != IS_OBJECT || !Z_OBJ_HT_P(container)->read_property) {
-		zend_error(E_NOTICE, "Trying to get property of non-object");
+		if (type != BP_VAR_IS) {
+			zend_error(E_NOTICE, "Trying to get property of non-object");
+		}
 		*retval = EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
@@ -16928,7 +16940,9 @@ static int zend_fetch_property_address_read_helper_SPEC_UNUSED_VAR(int type, ZEN
 
 
 	if (Z_TYPE_P(container) != IS_OBJECT || !Z_OBJ_HT_P(container)->read_property) {
-		zend_error(E_NOTICE, "Trying to get property of non-object");
+		if (type != BP_VAR_IS) {
+			zend_error(E_NOTICE, "Trying to get property of non-object");
+		}
 		*retval = EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
@@ -18348,7 +18362,9 @@ static int zend_fetch_property_address_read_helper_SPEC_UNUSED_CV(int type, ZEND
 
 
 	if (Z_TYPE_P(container) != IS_OBJECT || !Z_OBJ_HT_P(container)->read_property) {
-		zend_error(E_NOTICE, "Trying to get property of non-object");
+		if (type != BP_VAR_IS) {
+			zend_error(E_NOTICE, "Trying to get property of non-object");
+		}
 		*retval = EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
@@ -20914,7 +20930,9 @@ static int zend_fetch_property_address_read_helper_SPEC_CV_CONST(int type, ZEND_
 
 
 	if (Z_TYPE_P(container) != IS_OBJECT || !Z_OBJ_HT_P(container)->read_property) {
-		zend_error(E_NOTICE, "Trying to get property of non-object");
+		if (type != BP_VAR_IS) {
+			zend_error(E_NOTICE, "Trying to get property of non-object");
+		}
 		*retval = EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
@@ -22338,7 +22356,9 @@ static int zend_fetch_property_address_read_helper_SPEC_CV_TMP(int type, ZEND_OP
 
 
 	if (Z_TYPE_P(container) != IS_OBJECT || !Z_OBJ_HT_P(container)->read_property) {
-		zend_error(E_NOTICE, "Trying to get property of non-object");
+		if (type != BP_VAR_IS) {
+			zend_error(E_NOTICE, "Trying to get property of non-object");
+		}
 		*retval = EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
@@ -23765,7 +23785,9 @@ static int zend_fetch_property_address_read_helper_SPEC_CV_VAR(int type, ZEND_OP
 
 
 	if (Z_TYPE_P(container) != IS_OBJECT || !Z_OBJ_HT_P(container)->read_property) {
-		zend_error(E_NOTICE, "Trying to get property of non-object");
+		if (type != BP_VAR_IS) {
+			zend_error(E_NOTICE, "Trying to get property of non-object");
+		}
 		*retval = EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
@@ -25644,7 +25666,9 @@ static int zend_fetch_property_address_read_helper_SPEC_CV_CV(int type, ZEND_OPC
 
 
 	if (Z_TYPE_P(container) != IS_OBJECT || !Z_OBJ_HT_P(container)->read_property) {
-		zend_error(E_NOTICE, "Trying to get property of non-object");
+		if (type != BP_VAR_IS) {
+			zend_error(E_NOTICE, "Trying to get property of non-object");
+		}
 		*retval = EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
