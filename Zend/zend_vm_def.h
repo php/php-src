@@ -1176,7 +1176,9 @@ ZEND_VM_HELPER_EX(zend_fetch_property_address_read_helper, VAR|UNUSED|CV, CONST|
 
 
 	if (Z_TYPE_P(container) != IS_OBJECT || !Z_OBJ_HT_P(container)->read_property) {
-		zend_error(E_NOTICE, "Trying to get property of non-object");
+		if (type != BP_VAR_IS) {
+			zend_error(E_NOTICE, "Trying to get property of non-object");
+		}
 		*retval = EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
