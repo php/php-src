@@ -1,3 +1,16 @@
+2006-07-05  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend_object_handlers.c:
+      oops.. fix copy/paste typo
+
+    * zend_object_handlers.c
+      zend_object_handlers.h:
+      export zend_std_get_constructor()
+
+    * zend_object_handlers.c:
+      improve error messages
+
 2006-06-28  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend.c:

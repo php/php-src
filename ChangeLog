@@ -1,3 +1,65 @@
+2006-07-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/standard/php_fopen_wrapper.c:
+      E_ERROR > E_RECOVERABLE_ERROR
+
+2006-07-05  Antony Dovgal  <antony@zend.com>
+
+    * ext/mysqli/tests/bug38003.phpt:
+      add test
+
+    * ext/mysqli/tests/bug38003.phpt
+      ext/mysqli/tests/bug38003.phpt:
+      
+      file bug38003.phpt was initially added on branch PHP_5_2.
+
+    * tests/classes/factory_and_singleton_003.phpt
+      tests/classes/factory_and_singleton_004.phpt:
+      fix tests (take #2)
+
+    * tests/classes/factory_and_singleton_003.phpt
+      tests/classes/factory_and_singleton_003.phpt
+      tests/classes/factory_and_singleton_004.phpt
+      tests/classes/factory_and_singleton_004.phpt:
+      fix tests
+
+    * (PHP_5_2)
+      ZendEngine2/zend_object_handlers.c:
+      oops.. fix copy/paste typo
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/mysqli/mysqli.c:
+      MFH: fix bug #38003(in classes inherited from mysqli it's possible to call
+      private constructors from invalid context)
+
+    * ext/mysqli/mysqli.c:
+      fix bug #38003(in classes inherited from mysqli it's possible to call
+      private constructors from invalid context)
+      also, use appropriate macro instead of accessing structure elements
+      directly
+
+    * ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h:
+      export zend_std_get_constructor()
+
+    * ZendEngine2/zend_object_handlers.c:
+      improve error messages
+
+2006-07-05  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_5_2)
+      NEWS:
+      apache2filter on windows news
+
+    * sapi/apache2filter/config.w32:
+      Added windows build support for apach2filter, supporting apache 2.0.x and
+      2.2.x
+
 2006-07-04  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/curl/interface.c:
