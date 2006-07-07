@@ -20,7 +20,7 @@
 
 #define CONTEXT_TYPE_IMAGE_GIF "Content-Type: image/gif"
 
-unsigned char zend_logo[] = {
+static const unsigned char zend_logo[] = {
 	 71,  73,  70,  56,  57,  97, 113,   0,  72,   0, 
 	213,   0,   0,  13,  13,  14,   1,   3,   6,   2, 
 	  5,   9,  46,  68,  94,  21,  29,  39,   5,  15, 
@@ -237,7 +237,7 @@ unsigned char zend_logo[] = {
 	 46, 143, 167,  96, 131,  23, 221, 120, 200,  72, 
 	214,  74,  16,   0,   0,  59  }; 
 
-unsigned char php_logo[] = {
+static const unsigned char php_logo[] = {
 	 71,  73,  70,  56,  57,  97, 120,   0,  67,   0, 
 	230, 106,   0, 127, 130, 184,  57,  55,  71,  40, 
 	 37,  42, 204, 205, 226, 161, 164, 203, 211, 213, 
@@ -492,7 +492,7 @@ unsigned char php_logo[] = {
 	 21, 116, 187, 251, 221, 240, 142, 119, 188,   3, 
 	  1,   0,  59,   0 };
 
-unsigned char php_egg_logo[] = {
+static const unsigned char php_egg_logo[] = {
 	 71,  73,  70,  56,  57,  97, 120,   0,  67,   0, 
 	247,   0,   0,   0, 255,   0, 107, 114, 178,   0, 
 	  0,   0,  31,  31,  31, 255, 255, 255, 106, 113, 
