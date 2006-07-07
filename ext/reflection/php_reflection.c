@@ -1429,6 +1429,19 @@ ZEND_METHOD(reflection_function, isUserDefined)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionFunction::isDisabled()
+   Returns whether this function has been disabled or not */
+ZEND_METHOD(reflection_function, isDisabled)
+{
+	reflection_object *intern;
+	zend_function *fptr;
+
+	METHOD_NOTSTATIC(reflection_function_ptr);
+	GET_REFLECTION_OBJECT_PTR(fptr);
+	RETURN_BOOL(fptr->type == ZEND_INTERNAL_FUNCTION && fptr->internal_function.handler == zif_display_disabled_function);
+}
+/* }}} */
+
 /* {{{ proto public string ReflectionFunction::getFileName()
    Returns the filename of the file this function was declared in */
 ZEND_METHOD(reflection_function, getFileName)
@@ -4399,6 +4412,7 @@ static zend_function_entry reflection_function_abstract_functions[] = {
 
 static zend_function_entry reflection_function_functions[] = {
 	ZEND_ME(reflection_function, export, arginfo_reflection_function_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
+	ZEND_ME(reflection_function, isDisabled, NULL, 0)
 	ZEND_ME(reflection_function, invoke, arginfo_reflection_function_invoke, 0)
 	ZEND_ME(reflection_function, invokeArgs, arginfo_reflection_function_invokeArgs, 0)
 	{NULL, NULL, NULL}
