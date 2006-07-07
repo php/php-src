@@ -1,3 +1,27 @@
+2006-07-06  Antony Dovgal  <antony@zend.com>
+
+    * tests/016.phpt:
+      add test
+
+    * tests/016.phpt
+      tests/016.phpt:
+      
+      file 016.phpt was initially added on branch PHP_5_2.
+
+2006-07-06  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_5_1)
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      MFH (def.h rev:1.121, execute.h rev:1.120)
+      Silence FETCH_OBJ_IS / undefined notices
+
+    * zend_vm_def.h
+      zend_vm_execute.h:
+      Silence FETCH_OBJ_IS / undefined notices
+
 2006-07-05  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
