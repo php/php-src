@@ -176,6 +176,51 @@ static void text_iter_cp_rewind(text_iter_obj *object, long flags TSRMLS_DC)
 	object->u.cp.index  = 0;
 }
 
+static void text_iter_cp_following(text_iter_obj *object, int32_t offset, long flags TSRMLS_DC)
+{
+}
+
+static zend_bool text_iter_cp_isBoundary(text_iter_obj *object, int32_t offset, long flags TSRMLS_DC)
+{
+	int32_t k;
+
+	if (offset < 0) {
+		offset = 0;
+	}
+
+	/*
+	 * On invalid iterator we always want to start looking for the code unit
+	 * offset from the beginning of the string.
+	 */
+	if (object->u.cp.cp_offset == UBRK_DONE) {
+		object->u.cp.cp_offset	= 0;
+		object->u.cp.offset 	= 0;
+	}
+
+	/*
+	 * Try to locate the code unit position relative to the last known codepoint
+	 * offset.
+	 */
+	k = object->u.cp.offset;
+	if (offset > object->u.cp.cp_offset) {
+		U16_FWD_N(object->text, k, object->text_len, offset - object->u.cp.cp_offset);
+	} else {
+		U16_BACK_N(object->text, 0, k, object->u.cp.cp_offset - offset);
+	}
+
+	if (k == object->text_len) {
+		object->u.cp.cp_offset += u_countChar32(object->text + object->u.cp.offset, k - object->u.cp.offset);
+	} else {
+		object->u.cp.cp_offset = offset;
+	}
+	object->u.cp.offset = k;
+
+	/*
+	 * Every codepoint is a boundary.
+	 */
+	return TRUE;
+}
+
 static text_iter_ops text_iter_cp_ops = {
 	text_iter_cp_valid,
 	text_iter_cp_current,
@@ -183,6 +228,8 @@ static text_iter_ops text_iter_cp_ops = {
 	text_iter_cp_offset,
 	text_iter_cp_next,
 	text_iter_cp_rewind,
+	text_iter_cp_following,
+	text_iter_cp_isBoundary,
 };
 
 /* Combining sequence ops */
