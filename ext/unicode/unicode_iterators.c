@@ -82,12 +82,13 @@ static inline text_iter_obj* text_iter_to_obj(zend_object_iterator *iter)
 }
 
 typedef struct {
-	int  (*valid)  (text_iter_obj* object, long flags TSRMLS_DC);
-	void (*current)(text_iter_obj* object, long flags TSRMLS_DC);
-	int  (*key)    (text_iter_obj* object, long flags TSRMLS_DC);
-	int  (*offset) (text_iter_obj* object, long flags TSRMLS_DC);
-	void (*next)   (text_iter_obj* object, long flags TSRMLS_DC);
-	void (*rewind) (text_iter_obj* object, long flags TSRMLS_DC);
+	int  (*valid)     (text_iter_obj* object, long flags TSRMLS_DC);
+	void (*current)   (text_iter_obj* object, long flags TSRMLS_DC);
+	int  (*key)       (text_iter_obj* object, long flags TSRMLS_DC);
+	int  (*offset)    (text_iter_obj* object, long flags TSRMLS_DC);
+	void (*next)      (text_iter_obj* object, long flags TSRMLS_DC);
+	void (*rewind)    (text_iter_obj* object, long flags TSRMLS_DC);
+	void (*following) (text_iter_obj* object, int32_t offset, long flags TSRMLS_DC);
 } text_iter_ops;
 
 enum UBreakIteratorType brk_type_map[] = {
@@ -410,6 +411,73 @@ static void text_iter_brk_rewind(text_iter_obj *object, long flags TSRMLS_DC)
 	object->u.brk.index = 0;
 }
 
+static void text_iter_brk_following(text_iter_obj *object, int32_t offset, long flags TSRMLS_DC)
+{
+	int32_t k, tmp;
+
+	if (offset < 0) {
+		offset = 0;
+	}
+
+	/*
+	 * On invalid iterator we always want to start looking for the code unit
+	 * offset from the beginning of the string.
+	 */
+	if (object->u.brk.cp_offset == UBRK_DONE) {
+		object->u.brk.cp_offset	= 0;
+		object->u.brk.bound 	= 0;
+	}
+
+	/*
+	 * Try to locate the code unit position relative to the last known codepoint
+	 * offset.
+	 */
+	k = tmp = object->u.brk.bound;
+	if (offset > object->u.brk.cp_offset) {
+		U16_FWD_N(object->text, k, object->text_len, offset - object->u.brk.cp_offset);
+	} else {
+		U16_BACK_N(object->text, 0, k, object->u.brk.cp_offset - offset);
+	}
+
+	/*
+	 * Locate the actual boundary.
+	 */
+	if (flags & ITER_REVERSE) {
+		object->u.brk.bound = ubrk_preceding(object->u.brk.iter, k);
+	} else {
+		object->u.brk.bound = ubrk_following(object->u.brk.iter, k);
+	}
+	object->u.brk.next  = object->u.brk.bound;
+
+	/*
+	 * If boundary is the same one as where we were at before, simply return.
+	 */
+	if (object->u.brk.bound == tmp) {
+		return;
+	}
+
+	/*
+	 * Adjust the internal codepoint offset based on how far we've moved.
+	 */
+	if (object->u.brk.bound != UBRK_DONE) {
+		if (object->u.brk.bound > tmp) {
+			if (object->u.brk.bound - tmp > 1) {
+				object->u.brk.cp_offset += u_countChar32(object->text + tmp, object->u.brk.bound - tmp);
+			} else {
+				object->u.brk.cp_offset++;
+			}
+		} else {
+			if (tmp - object->u.brk.bound > 1) {
+				object->u.brk.cp_offset -= u_countChar32(object->text + object->u.brk.bound, tmp - object->u.brk.bound);
+			} else {
+				object->u.brk.cp_offset--;
+			}
+		}
+	} else {
+		object->u.brk.cp_offset = UBRK_DONE;
+	}
+}
+
 static text_iter_ops text_iter_brk_ops = {
 	text_iter_brk_valid,
 	text_iter_brk_current,
@@ -417,6 +485,7 @@ static text_iter_ops text_iter_brk_ops = {
 	text_iter_brk_offset,
 	text_iter_brk_next,
 	text_iter_brk_rewind,
+	text_iter_brk_following,
 };
 
 
@@ -678,7 +747,39 @@ PHP_METHOD(TextIterator, previous)
 	RETURN_LONG(iter_ops[intern->type]->offset(intern, flags TSRMLS_CC));
 }
 
+PHP_METHOD(TextIterator, following)
+{
+	long flags, offset;
+	zval *object = getThis();
+	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &offset) == FAILURE) {
+		return;
+	}
+
+	iter_ops[intern->type]->following(intern, offset, flags TSRMLS_CC);
+	RETURN_LONG(iter_ops[intern->type]->offset(intern, flags TSRMLS_CC));
+}
+
+PHP_METHOD(TextIterator, preceding)
+{
+	long flags, offset;
+	zval *object = getThis();
+	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &offset) == FAILURE) {
+		return;
+	}
+
+	/*
+	 * ReverseTextIterator will behave the same as the normal one.
+	 */
+	flags = intern->flags | ITER_REVERSE;
+	iter_ops[intern->type]->following(intern, offset, flags TSRMLS_CC);
+	RETURN_LONG(iter_ops[intern->type]->offset(intern, flags TSRMLS_CC));
+}
 static zend_function_entry text_iterator_funcs[] = {
+
 	PHP_ME(TextIterator, __construct, NULL, ZEND_ACC_PUBLIC)
 
 	/* Iterator interface methods */
@@ -691,6 +792,8 @@ static zend_function_entry text_iterator_funcs[] = {
 	PHP_ME(TextIterator, offset,	  NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(TextIterator, previous,	  NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(TextIterator, last,		  NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(TextIterator, following,	  NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(TextIterator, preceding,	  NULL, ZEND_ACC_PUBLIC)
 
 	PHP_MALIAS(TextIterator, first, rewind, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
