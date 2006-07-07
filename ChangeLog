@@ -1,3 +1,38 @@
+2006-07-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/dba/dba.c
+      ext/dba/libinifile/inifile.c:
+      MFB: E_ERROR > E_RECOVERABLE_ERROR
+
+    * (PHP_5_2)
+      ext/dba/dba.c
+      ext/dba/libinifile/inifile.c:
+      E_ERROR > E_RECOVERABLE_ERROR
+
+2006-07-06  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/tests/016.phpt:
+      add test
+
+    * ZendEngine2/tests/016.phpt
+      ZendEngine2/tests/016.phpt:
+      
+      file 016.phpt was initially added on branch PHP_5_2.
+
+2006-07-06  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_5_1)
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h:
+      MFH (def.h rev:1.121, execute.h rev:1.120)
+      Silence FETCH_OBJ_IS / undefined notices
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      Silence FETCH_OBJ_IS / undefined notices
+
 2006-07-05  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
