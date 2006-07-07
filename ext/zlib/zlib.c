@@ -271,26 +271,36 @@ PHP_MINFO_FUNCTION(zlib)
 }
 /* }}} */
 
-/* {{{ proto array gzfile(string filename [, int use_include_path])
-   Read und uncompress entire .gz-file into an array */
+/* {{{ proto array gzfile(string filename [, int use_include_path]) U
+   Read and uncompress entire .gz-file into an array */
 PHP_FUNCTION(gzfile)
 {
 	char *filename;
 	int filename_len;
+	zend_uchar filename_type;
 	long flags = 0;
 	char buf[8192];
 	register int i = 0;
 	int use_include_path = 0;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &filename, &filename_len, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|l", &filename, &filename_len, &filename_type, &flags) == FAILURE) {
 		return;
 	}
 
 	use_include_path = flags ? USE_PATH : 0;
 
+	if (filename_type == IS_UNICODE) {
+		if (php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, NULL) == FAILURE) {
+			RETURN_FALSE;
+		}
+	}
+
 	/* using a stream here is a bit more efficient (resource wise) than php_gzopen_wrapper */
 	stream = php_stream_gzopen(NULL, filename, "rb", use_include_path | REPORT_ERRORS, NULL, NULL STREAMS_CC TSRMLS_CC);
+	if (filename_type == IS_UNICODE) {
+		efree(filename);
+	}
 	if (stream == NULL) {
 		/* Error reporting is already done by stream code */
 		RETURN_FALSE;
@@ -309,24 +319,34 @@ PHP_FUNCTION(gzfile)
 }
 /* }}} */
 
-/* {{{ proto resource gzopen(string filename, string mode [, int use_include_path])
+/* {{{ proto resource gzopen(string filename, string mode [, int use_include_path]) U
    Open a .gz-file and return a .gz-file pointer */
 PHP_FUNCTION(gzopen)
 {
 	char *filename, *mode;
 	int filename_len, mode_len;
+	zend_uchar filename_type;
 	long flags = 0;
 	php_stream *stream;
 	int use_include_path = 0;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &filename, &filename_len, &mode, &mode_len, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ts|l", &filename, &filename_len, &filename_type, &mode, &mode_len, &flags) == FAILURE) {
 		return;
 	}
 
 	use_include_path = flags ? USE_PATH : 0;
 
+	if (filename_type == IS_UNICODE) {
+		if (php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, NULL) == FAILURE) {
+			RETURN_FALSE;
+		}
+	}
+
 	stream = php_stream_gzopen(NULL, filename, mode, use_include_path | REPORT_ERRORS, NULL, NULL STREAMS_CC TSRMLS_CC);
 
+	if (filename_type == IS_UNICODE) {
+		efree(filename);
+	}
 	if (!stream) {
 		RETURN_FALSE;
 	}
@@ -337,24 +357,34 @@ PHP_FUNCTION(gzopen)
 /*
  * Read a file and write the ouput to stdout
  */
-/* {{{ proto int readgzfile(string filename [, int use_include_path])
+/* {{{ proto int readgzfile(string filename [, int use_include_path]) U
    Output a .gz-file */
 PHP_FUNCTION(readgzfile)
 {
 	char *filename;
 	int filename_len;
+	zend_uchar filename_type;
 	long flags = 0;
 	php_stream *stream;
 	int size;
 	int use_include_path = 0;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &filename, &filename_len, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|l", &filename, &filename_len, &filename_type, &flags) == FAILURE) {
 		return;
 	}
 
 	use_include_path = flags ? USE_PATH : 0;
 
+	if (filename_type == IS_UNICODE) {
+		if (php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, NULL) == FAILURE) {
+			RETURN_FALSE;
+		}
+	}
+
 	stream = php_stream_gzopen(NULL, filename, "rb", use_include_path, NULL, NULL STREAMS_CC TSRMLS_CC);
+	if (filename_type == IS_UNICODE) {
+		efree(filename);
+	}
 	if (!stream) {
 		RETURN_FALSE;
 	}
@@ -593,16 +623,16 @@ PHP_FUNCTION(gzinflate)
 }
 /* }}} */
 
-/* {{{ proto string zlib_get_coding_type(void)
+/* {{{ proto string zlib_get_coding_type(void) U
    Returns the coding type used for output compression */
 PHP_FUNCTION(zlib_get_coding_type)
 {
 	switch (ZLIBG(compression_coding)) {
 		case CODING_GZIP:
-			RETURN_STRINGL("gzip", sizeof("gzip") - 1, 1);
+			RETURN_ASCII_STRINGL("gzip", sizeof("gzip") - 1, 1);
 
 		case CODING_DEFLATE:
-			RETURN_STRINGL("deflate", sizeof("deflate") - 1, 1);
+			RETURN_ASCII_STRINGL("deflate", sizeof("deflate") - 1, 1);
 	}
 
 	RETURN_FALSE;
