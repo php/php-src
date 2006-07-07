@@ -33,6 +33,8 @@
   <version>1.2.2</version>
   <date>2006-06-07</date>
   <notes>
+   Reimplemented oci_lob_read() utilities using patch from Massimo Squillace (msquillace at sogei dot it), which should fix Unicode LOB problems.
+   Fixed bug #37886 (oci_connect may crash when charset parameter is given)
    Fixed bug #37931 (possible crash after database restart when using persistent connections)
    Fixed bug #37531 (oci8 persistent connection corruption)
    Fixed bug #37487 (oci_fetch_array() array-type should always default to OCI_BOTH)
