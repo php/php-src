@@ -178,6 +178,78 @@ static void text_iter_cp_rewind(text_iter_obj *object, long flags TSRMLS_DC)
 
 static void text_iter_cp_following(text_iter_obj *object, int32_t offset, long flags TSRMLS_DC)
 {
+	int32_t k;
+
+	if (offset < 0) {
+		offset = 0;
+	}
+
+	/*
+	 * On invalid iterator we always want to start looking for the code unit
+	 * offset from the beginning of the string.
+	 */
+	if (object->u.cp.cp_offset == UBRK_DONE) {
+		object->u.cp.cp_offset	= 0;
+		object->u.cp.offset 	= 0;
+	}
+
+	/*
+	 * Try to locate the code unit position relative to the last known codepoint
+	 * offset.
+	 */
+	k = object->u.cp.offset;
+	if (offset > object->u.cp.cp_offset) {
+		U16_FWD_N(object->text, k, object->text_len, offset - object->u.cp.cp_offset);
+	} else {
+		U16_BACK_N(object->text, 0, k, object->u.cp.cp_offset - offset);
+	}
+
+	/*
+	 * Locate the actual boundary.
+	 */
+	if (flags & ITER_REVERSE) {
+		if (k == 0) {
+			object->u.cp.cp_offset = UBRK_DONE;
+			object->u.cp.offset = UBRK_DONE;
+			return;
+		} else {
+			U16_BACK_1(object->text, 0, k);
+		}
+	} else {
+		if (k == object->text_len) {
+			object->u.cp.cp_offset = UBRK_DONE;
+			object->u.cp.offset = UBRK_DONE;
+			return;
+		} else {
+			U16_FWD_1(object->text, k, object->text_len);
+		}
+	}
+
+	/*
+	 * If boundary is the same one as where we were at before, simply return.
+	 */
+	if (k == object->u.cp.offset) {
+		return;
+	}
+
+	/*
+	 * Adjust the internal codepoint offset based on how far we've moved.
+	 */
+	if (k > object->u.cp.offset) {
+		if (k - object->u.cp.offset > 1) {
+			object->u.cp.cp_offset += u_countChar32(object->text + object->u.cp.offset, k - object->u.cp.offset);
+		} else {
+			object->u.cp.cp_offset++;
+		}
+	} else {
+		if (object->u.cp.offset - k > 1) {
+			object->u.cp.cp_offset -= u_countChar32(object->text + k, object->u.cp.offset - k);
+		} else {
+			object->u.cp.cp_offset--;
+		}
+	}
+
+	object->u.cp.offset = k;
 }
 
 static zend_bool text_iter_cp_isBoundary(text_iter_obj *object, int32_t offset, long flags TSRMLS_DC)
@@ -863,7 +935,7 @@ PHP_METHOD(TextIterator, previous)
 
 PHP_METHOD(TextIterator, following)
 {
-	long flags, offset;
+	long offset;
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
@@ -871,8 +943,8 @@ PHP_METHOD(TextIterator, following)
 		return;
 	}
 
-	iter_ops[intern->type]->following(intern, offset, flags TSRMLS_CC);
-	RETURN_LONG(iter_ops[intern->type]->offset(intern, flags TSRMLS_CC));
+	iter_ops[intern->type]->following(intern, offset, intern->flags TSRMLS_CC);
+	RETURN_LONG(iter_ops[intern->type]->offset(intern, intern->flags TSRMLS_CC));
 }
 
 PHP_METHOD(TextIterator, preceding)
