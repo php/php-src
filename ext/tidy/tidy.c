@@ -315,10 +315,6 @@ zend_function_entry tidy_funcs_node[] = {
 	{NULL, NULL, NULL}
 };
 
-zend_function_entry tidy_funcs_exception[] = {
-	{NULL, NULL, NULL}
-};
-
 zend_class_entry *tidy_ce_doc, *tidy_ce_node, *tidy_ce_exception;
 
 static zend_object_handlers tidy_object_handlers_doc;
@@ -346,22 +342,22 @@ zend_module_entry tidy_module_entry = {
 ZEND_GET_MODULE(tidy)
 #endif
 
-void* TIDY_CALL php_tidy_malloc(size_t len)
+static void* TIDY_CALL php_tidy_malloc(size_t len)
 {
 	return emalloc(len);
 }
 
-void* TIDY_CALL php_tidy_realloc(void *buf, size_t len)
+static void* TIDY_CALL php_tidy_realloc(void *buf, size_t len)
 {
 	return erealloc(buf, len);
 }
 
-void TIDY_CALL php_tidy_free(void *buf)
+static void TIDY_CALL php_tidy_free(void *buf)
 {
 	efree(buf);
 }
 
-void TIDY_CALL php_tidy_panic(ctmbstr msg)
+static void TIDY_CALL php_tidy_panic(ctmbstr msg)
 {
 	TSRMLS_FETCH();
 	php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not allocate memory for tidy! (Reason: %s)", (char *)msg);
@@ -466,8 +462,6 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	tidyOptSetBool(doc, TidyMark, no);
 	
 	TIDY_SET_DEFAULT_CONFIG(doc);
-	
-	/* We can't use TIDY_APPLY_CONFIG_ZVAL() here, it uses RETURN_FALSE */
 
 	if (ZEND_NUM_ARGS() > 1) {
 		TIDY_APPLY_CONFIG_ZVAL(doc, config);
