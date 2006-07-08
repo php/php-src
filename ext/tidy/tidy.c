@@ -91,9 +91,13 @@
         } else { \
             convert_to_string_ex(&_val); \
             TIDY_SAFE_MODE_CHECK(Z_STRVAL_P(_val)); \
-            if (tidyLoadConfig(_doc, Z_STRVAL_P(_val)) < 0) { \
+            switch (tidyLoadConfig(_doc, Z_STRVAL_P(_val))) { \
+              case -1: \
                 php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not load configuration file '%s'", Z_STRVAL_P(_val)); \
-                RETURN_FALSE; \
+                break; \
+              case 1: \
+                php_error_docref(NULL TSRMLS_CC, E_NOTICE, "There were errors while parsing the configuration file '%s'", Z_STRVAL_P(_val)); \
+                break; \
             } \
         } \
     }
@@ -311,10 +315,6 @@ zend_function_entry tidy_funcs_node[] = {
 	{NULL, NULL, NULL}
 };
 
-zend_function_entry tidy_funcs_exception[] = {
-	{NULL, NULL, NULL}
-};
-
 zend_class_entry *tidy_ce_doc, *tidy_ce_node, *tidy_ce_exception;
 
 static zend_object_handlers tidy_object_handlers_doc;
@@ -342,22 +342,22 @@ zend_module_entry tidy_module_entry = {
 ZEND_GET_MODULE(tidy)
 #endif
 
-void* TIDY_CALL php_tidy_malloc(size_t len)
+static void* TIDY_CALL php_tidy_malloc(size_t len)
 {
 	return emalloc(len);
 }
 
-void* TIDY_CALL php_tidy_realloc(void *buf, size_t len)
+static void* TIDY_CALL php_tidy_realloc(void *buf, size_t len)
 {
 	return erealloc(buf, len);
 }
 
-void TIDY_CALL php_tidy_free(void *buf)
+static void TIDY_CALL php_tidy_free(void *buf)
 {
 	efree(buf);
 }
 
-void TIDY_CALL php_tidy_panic(ctmbstr msg)
+static void TIDY_CALL php_tidy_panic(ctmbstr msg)
 {
 	TSRMLS_FETCH();
 	php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not allocate memory for tidy! (Reason: %s)", (char *)msg);
@@ -463,19 +463,8 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	
 	TIDY_SET_DEFAULT_CONFIG(doc);
 	
-	/* We can't use TIDY_APPLY_CONFIG_ZVAL() here, it uses RETURN_FALSE */
-
 	if (ZEND_NUM_ARGS() > 1) {
-		if(Z_TYPE_P(config) == IS_ARRAY) {
-			_php_tidy_apply_config_array(doc, HASH_OF(config) TSRMLS_CC);
-		} else {
-			convert_to_string_ex(&config);
-			TIDY_SAFE_MODE_CHECK(Z_STRVAL_P(config));
-			if (tidyLoadConfig(doc, Z_STRVAL_P(config)) < 0) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not load configuration file '%s'", Z_STRVAL_P(config));
-				RETVAL_FALSE;
-			}
-		}
+		TIDY_APPLY_CONFIG_ZVAL(doc, config);
 	}
 
 	if(enc_len) {
