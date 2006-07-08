@@ -1,3 +1,20 @@
+2006-07-07  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_2)
+      main/logos.h:
+      static + const keywords
+
+    * ext/zlib/zlib.c:
+      upgrade a couple of functions to Unicode
+
+    * main/logos.h:
+      static+const keywords
+
+2006-07-07  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/package.xml:
+      add missing items to the changelog
+
 2006-07-06  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/dba/dba.c
