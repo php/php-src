@@ -229,7 +229,7 @@ STATUS:              Working
 SINCE:               5.0
 -------------------------------------------------------------------------------
 EXTENSION:           simplexml
-PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
+PRIMARY MAINTAINER:  Marcus Boerger <helly@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.0
