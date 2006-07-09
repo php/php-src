@@ -6,8 +6,6 @@ PHP                                                                        NEWS
 - Changed dl() to be disabled by default. Enabled only when explicitly 
   registered by the SAPI layer. Enabled only with CLI, CGI and EMBED. (Dmitry)
 - Changed return "new" by reference to throw an E_STRICT error. (Dmitry)
-- Changed __toString() behavior to call it in all necessary places
-  (Marcus, Dmitry)
 - Changed "instanceof" and "catch" operators, is_a() and is_subclass_of()
   functions to not call __autoload(). (Dmitry)
 
