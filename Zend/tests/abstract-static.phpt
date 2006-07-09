@@ -2,12 +2,12 @@
 Test for abstract static classes
 --FILE--
 <?php
-abstract class Test
+abstract class TestClass
 {
     abstract static public function getName();
 }
 ?>
-DONE
+===DONE===
 --EXPECTF--
 
-Fatal error: Static function Test::getName() cannot be abstract in %sabstract-static.php on line %d
+Fatal error: Static function TestClass::getName() cannot be abstract in %sabstract-static.php on line %d
