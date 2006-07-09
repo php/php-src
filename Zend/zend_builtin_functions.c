@@ -488,7 +488,7 @@ ZEND_FUNCTION(error_reporting)
    Define a new constant */
 ZEND_FUNCTION(define)
 {
-	zval **var, **val, **non_cs;
+	zval **var, **val, **non_cs, *val_free = NULL;
 	int case_sensitive;
 	zend_constant c;
 
@@ -515,6 +515,7 @@ ZEND_FUNCTION(define)
 			break;
 	}
 
+repeat:
 	switch (Z_TYPE_PP(val)) {
 		case IS_LONG:
 		case IS_DOUBLE:
@@ -524,10 +525,26 @@ ZEND_FUNCTION(define)
 		case IS_RESOURCE:
 		case IS_NULL:
 			break;
+		case IS_OBJECT:
+			if (!val_free) {
+				if (Z_OBJ_HT_PP(val)->get) {
+					val_free = *val = Z_OBJ_HT_PP(val)->get(*val TSRMLS_CC);
+					goto repeat;
+				} else if (Z_OBJ_HT_PP(val)->cast_object) {
+					ALLOC_INIT_ZVAL(val_free);
+					if (Z_OBJ_HT_PP(val)->cast_object(*val, val_free, UG(unicode)?IS_UNICODE:IS_STRING TSRMLS_CC) == SUCCESS) {
+						val = &val_free;
+						break;
+					}
+				}
+			}
+			/* no break */
 		default:
 			zend_error(E_WARNING,"Constants may only evaluate to scalar values");
+			if (val_free) {
+				zval_ptr_dtor(&val_free);
+			}
 			RETURN_FALSE;
-			break;
 	}
 
 	if (Z_TYPE_PP(var) != (UG(unicode)?IS_UNICODE:IS_STRING)) {
@@ -536,6 +553,9 @@ ZEND_FUNCTION(define)
 
 	c.value = **val;
 	zval_copy_ctor(&c.value);
+	if (val_free) {
+		zval_ptr_dtor(&val_free);
+	}
 	c.flags = case_sensitive; /* non persistent */
 	if (Z_TYPE_PP(var) == IS_UNICODE) {
 		c.name.u = zend_ustrndup(Z_USTRVAL_PP(var), Z_USTRLEN_PP(var));
