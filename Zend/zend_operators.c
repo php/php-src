@@ -1557,14 +1557,8 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 
 		if (Z_TYPE_P(op1) == IS_UNICODE || Z_TYPE_P(op2) == IS_UNICODE) {
 			zendi_u_smart_strcmp(result, op1, op2);
-		} else if (Z_TYPE_P(op1) == IS_STRING || Z_TYPE_P(op2) == IS_STRING) {
-			zendi_smart_strcmp(result, op1, op2);
 		} else {
-			/* FIXME
-			 * Will we ever get here? This might be dead code.
-			 */
-			Z_LVAL_P(result) = zend_binary_zval_strcmp(op1, op2);
-			ZVAL_LONG(result, ZEND_NORMALIZE_BOOL(Z_LVAL_P(result)));
+			zendi_smart_strcmp(result, op1, op2);
 		}
 		COMPARE_RETURN_AND_FREE(SUCCESS);
 	}
