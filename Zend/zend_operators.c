@@ -1499,8 +1499,10 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 	zval *op1_free, *op2_free;
 	int op1_obj = Z_TYPE_P(op1) == IS_OBJECT;
 	int op2_obj = Z_TYPE_P(op2) == IS_OBJECT;
+	int eq_comp = op1_obj && op2_obj && (Z_OBJ_HANDLER_P(op1,compare_objects) 
+	                                  == Z_OBJ_HANDLER_P(op2,compare_objects));
 
-	if (op1_obj) {
+	if (op1_obj && !eq_comp) {
 		if (Z_TYPE_P(op2) == IS_NULL) {
 			ZVAL_LONG(result, 1);
 			return SUCCESS;
@@ -1517,10 +1519,13 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 		} else {
 			op1_free = NULL;
 		}
+		op1_obj = Z_TYPE_P(op1) == IS_OBJECT;
+		eq_comp = op1_obj && op2_obj && (Z_OBJ_HANDLER_P(op1,compare_objects) 
+	                                  == Z_OBJ_HANDLER_P(op2,compare_objects));
 	} else {
 		op1_free = NULL;
 	}
-	if (op2_obj) {
+	if (op2_obj && !eq_comp) {
 		if (Z_TYPE_P(op1) == IS_NULL) {
 			op2_free = NULL;
 			ZVAL_LONG(result, -1);
@@ -1537,6 +1542,9 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 		} else {
 			op2_free = NULL;
 		}
+		op2_obj = Z_TYPE_P(op2) == IS_OBJECT;
+		eq_comp = op1_obj && op2_obj && (Z_OBJ_HANDLER_P(op1,compare_objects) 
+	                                  == Z_OBJ_HANDLER_P(op2,compare_objects));
 	} else {
 		op2_free = NULL;
 	}
@@ -1571,14 +1579,10 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 		COMPARE_RETURN_AND_FREE(SUCCESS);
 	}
 
-	if (Z_TYPE_P(op1)==IS_OBJECT && Z_TYPE_P(op2)==IS_OBJECT) {
-		/* If the handlers array is not identical, fall through
-		 * and perform get() or cast() if implemented
-		 */
-		if (Z_OBJ_HT_P(op1) == Z_OBJ_HT_P(op2)) {
-			zend_compare_objects(result, op1, op2 TSRMLS_CC);
-			COMPARE_RETURN_AND_FREE(SUCCESS);
-		}
+	/* If both are objects share the same comparision handler then use is */
+	if (eq_comp) {
+		ZVAL_LONG(result, Z_OBJ_HT_P(op1)->compare_objects(op1, op2 TSRMLS_CC));
+		COMPARE_RETURN_AND_FREE(SUCCESS);
 	}
 
 	zendi_convert_scalar_to_number(op1, op1_copy, result);
