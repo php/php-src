@@ -1579,7 +1579,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 		COMPARE_RETURN_AND_FREE(SUCCESS);
 	}
 
-	/* If both are objects share the same comparision handler then use is */
+	/* If both are objects sharing the same comparision handler then use is */
 	if (eq_comp) {
 		ZVAL_LONG(result, Z_OBJ_HT_P(op1)->compare_objects(op1, op2 TSRMLS_CC));
 		COMPARE_RETURN_AND_FREE(SUCCESS);
