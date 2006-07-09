@@ -464,6 +464,11 @@ PRIMARY MAINTAINER:  Kristian Köhntopp <kris@koehntopp.de>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
+EXTENSION:           reflection
+PRIMARY MAINTAINER:  Marcus Börger <helly@php.net>, Johannes Schlüter <johannes@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Working
+-------------------------------------------------------------------------------
 EXTENSION:           session
 PRIMARY MAINTAINER:  Sascha Schumann <sascha@schumann.cx>, Ilia Alshanetsky <iliaa@php.net>
 MAINTENANCE:         Maintained
