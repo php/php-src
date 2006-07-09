@@ -1,3 +1,8 @@
+2006-07-08  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/zlib/zlib.c:
+      change char* to void* when using the 't' parameter (as noted by Andrei)
+
 2006-07-07  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * (PHP_5_2)
