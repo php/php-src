@@ -3960,7 +3960,7 @@ ZEND_METHOD(reflection_property, setValue)
 	METHOD_NOTSTATIC(reflection_property_ptr);
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	if (ref->prop->flags & ~(ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)) {
+	if (!(ref->prop->flags & ZEND_ACC_PUBLIC)) {
 		_DO_THROW("Cannot access non-public member");
 		/* Returns from this function */
 	}
