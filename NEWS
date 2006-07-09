@@ -91,6 +91,7 @@ PHP                                                                        NEWS
 - Fixed bug #37864 (file_get_contents() leaks on empty file). (Hannes)
 - Fixed bug #37862 (Integer pointer comparison to numeric value).
   (bugs-php at thewrittenword dot com)
+- Fixed bug #37811 (define not using toString on objects). (Marcus)
 - Fixed bug #37807 (segmentation fault during SOAP schema import). (Tony)
 - Fixed bug #37806 (weird behavior of object type and comparison). (Marcus)
 - Fixed bug #37780 (memory leak trying to execute a non existing file (CLI)).
