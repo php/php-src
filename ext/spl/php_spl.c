@@ -36,6 +36,7 @@
 #include "spl_observer.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
+#include "ext/standard/md5.h"
 
 #ifdef COMPILE_DL_SPL
 ZEND_GET_MODULE(spl)
@@ -577,6 +578,32 @@ PHP_FUNCTION(spl_autoload_functions)
 	add_next_index_text(return_value, EG(autoload_func)->common.function_name, 1);
 } /* }}} */
 
+/* {{{ proto string spl_object_hash(object obj)
+ Return hash id for given object */
+PHP_FUNCTION(spl_object_hash)
+{
+	zval *obj;
+	int len;
+	char *hash;
+	char md5str[33];
+	PHP_MD5_CTX context;
+	unsigned char digest[16];
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &obj) == FAILURE) {
+		return;
+	}
+
+	len = spprintf(&hash, 0, "%p:%d", Z_OBJ_HT_P(obj), Z_OBJ_HANDLE_P(obj));
+	
+	md5str[0] = '\0';
+	PHP_MD5Init(&context);
+	PHP_MD5Update(&context, (unsigned char*)hash, len);
+	PHP_MD5Final(digest, &context);
+	make_digest(md5str, digest);
+	RETVAL_STRING(md5str, 1);
+	efree(hash);
+}
+
 int spl_build_class_list_string(zval **entry, char **list TSRMLS_DC) /* {{{ */
 {
 	char *res;
@@ -643,6 +670,7 @@ zend_function_entry spl_functions[] = {
 	PHP_FE(spl_autoload_call,       NULL)
 	PHP_FE(class_parents,           NULL)
 	PHP_FE(class_implements,        NULL)
+	PHP_FE(spl_object_hash,         NULL)
 #ifdef SPL_ITERATORS_H
 	PHP_FE(iterator_to_array,       arginfo_iterator)
 	PHP_FE(iterator_count,          arginfo_iterator)
