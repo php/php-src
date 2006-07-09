@@ -4,7 +4,7 @@ jddayofweek()
 <?php include 'skipif.inc'; ?>
 --FILE--
 <?php
-foreach (array(2440588, 2452162, 2453926) as $jd) {
+foreach (array(2440588, 2452162, 2453926, -1000) as $jd) {
   echo "### JD $jd ###\n";
   for ($mode = 0; $mode <= 2; $mode++) {
     echo "--- mode $mode ---\n";
@@ -99,3 +99,32 @@ Thu
 Fri
 Sat
 Sun
+### JD -1000 ###
+--- mode 0 ---
+2
+3
+4
+5
+6
+0
+1
+2
+--- mode 1 ---
+Tuesday
+Wednesday
+Thursday
+Friday
+Saturday
+Sunday
+Monday
+Tuesday
+--- mode 2 ---
+Tue
+Wed
+Thu
+Fri
+Sat
+Sun
+Mon
+Tue
+
