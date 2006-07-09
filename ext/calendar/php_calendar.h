@@ -7,8 +7,6 @@ extern zend_module_entry calendar_module_entry;
 /* Functions */
 
 PHP_MINIT_FUNCTION(calendar);
-PHP_RINIT_FUNCTION(calendar);
-PHP_RSHUTDOWN_FUNCTION(calendar);
 PHP_MINFO_FUNCTION(calendar);
 
 PHP_FUNCTION(jdtogregorian);
