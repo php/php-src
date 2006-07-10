@@ -65,9 +65,9 @@ class PDOTest {
 	}
 
 	static function detect_transactional_mysql_engine($db) {
-		foreach ($db->query('show engines') as $row) {
-			if ($row[1] == 'YES' && ($row[0] == 'INNOBASE' || $row[0] == 'BDB')) {
-				return $row[0];
+		foreach ($db->query("show variables like 'have%'") as $row) {
+			if ($row[1] == 'YES' && ($row[0] == 'have_innodb' || $row[0] == 'have_bdb')) {
+				return str_replace("have_", "", $row[0]);
 			}
 		}
 		return false;
