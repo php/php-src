@@ -105,6 +105,7 @@ PHP                                                                        NEWS
 - Fixed bug #37707 (clone without assigning leaks memory). (Ilia, Nuno, Dmitri)
 - Fixed bug #37705 (Semaphore constants not available). (Ilia)
 - Fixed bug #37671 (MySQLi extension fails to recognize BIT column). (Ilia)
+- Fixed bug #37667 (Object is not added into array returned by __get). (Marcus)
 - Fixed bug #37635 (parameter of pcntl signal handler is trashed). (Mike)
 - Fixed bug #37632 (Protected method access problem). (Marcus)
 - Fixed bug #37630 (MySQL extensions should link against thread safe client
