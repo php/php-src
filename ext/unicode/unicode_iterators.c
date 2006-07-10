@@ -107,7 +107,15 @@ PHPAPI zend_class_entry* rev_text_iterator_ce;
 
 static int text_iter_cp_valid(text_iter_obj* object, long flags TSRMLS_DC)
 {
-	return (object->u.cp.offset != UBRK_DONE);
+	if (object->u.cp.offset == UBRK_DONE) {
+		return 0;
+	}
+
+	if (flags & ITER_REVERSE) {
+		return (object->u.cp.offset != 0);
+	} else {
+		return (object->u.cp.offset != object->text_len);
+	}
 }
 
 static void text_iter_cp_current(text_iter_obj* object, long flags TSRMLS_DC)
@@ -144,24 +152,26 @@ static int text_iter_cp_offset(text_iter_obj* object, long flags TSRMLS_DC)
 
 static void text_iter_cp_next(text_iter_obj* object, long flags TSRMLS_DC)
 {
-	if (text_iter_cp_valid(object, flags TSRMLS_CC)) {
-		if (flags & ITER_REVERSE) {
-			U16_BACK_1(object->text, 0, object->u.cp.offset);
-			if (object->u.cp.offset <= object->text_len) {
-				object->u.cp.cp_offset--;
-			} else {
-				object->u.cp.offset = object->u.cp.cp_offset = UBRK_DONE;
-			}
-		} else {
-			U16_FWD_1(object->text, object->u.cp.offset, object->text_len);
-			if (object->u.cp.offset <= object->text_len) {
-				object->u.cp.cp_offset++;
-			} else {
-				object->u.cp.offset = object->u.cp.cp_offset = UBRK_DONE;
-			}
-		}
-		object->u.cp.index++;
+	if (object->u.cp.offset == UBRK_DONE) {
+		return;
 	}
+
+	if (flags & ITER_REVERSE) {
+		U16_BACK_1(object->text, 0, object->u.cp.offset);
+		if (object->u.cp.offset <= object->text_len) {
+			object->u.cp.cp_offset--;
+		} else {
+			object->u.cp.offset = object->u.cp.cp_offset = UBRK_DONE;
+		}
+	} else {
+		U16_FWD_1(object->text, object->u.cp.offset, object->text_len);
+		if (object->u.cp.offset <= object->text_len) {
+			object->u.cp.cp_offset++;
+		} else {
+			object->u.cp.offset = object->u.cp.cp_offset = UBRK_DONE;
+		}
+	}
+	object->u.cp.index++;
 }
 
 static void text_iter_cp_rewind(text_iter_obj *object, long flags TSRMLS_DC)
@@ -361,7 +371,15 @@ static void text_iter_helper_move(zend_bool forward, UChar *text, int32_t text_l
 
 static int text_iter_cs_valid(text_iter_obj* object, long flags TSRMLS_DC)
 {
-	return (object->u.cs.start != UBRK_DONE);
+	if (object->u.cs.start == UBRK_DONE) {
+		return 0;
+	}
+
+	if (flags & ITER_REVERSE) {
+		return (object->u.cs.start != 0);
+	} else {
+		return (object->u.cs.start != object->text_len);
+	}
 }
 
 static void text_iter_cs_current(text_iter_obj* object, long flags TSRMLS_DC)
@@ -373,7 +391,7 @@ static void text_iter_cs_current(text_iter_obj* object, long flags TSRMLS_DC)
 		if (flags & ITER_REVERSE) {
 			if (object->u.cs.end == object->u.cs.start) {
 				text_iter_helper_move(0, object->text, object->text_len,
-									  &object->u.cs.start, &object->u.cs.start_cp_offset);
+									  &object->u.cs.end, &object->u.cs.end_cp_offset);
 			}
 			start = object->text + object->u.cs.end;
 		} else {
@@ -567,7 +585,15 @@ static text_iter_ops text_iter_cs_ops = {
 
 static int text_iter_brk_valid(text_iter_obj* object, long flags TSRMLS_DC)
 {
-	return (object->u.brk.bound != UBRK_DONE);
+	if (object->u.brk.bound == UBRK_DONE) {
+		return 0;
+	}
+
+	if (flags & ITER_REVERSE) {
+		return (object->u.brk.bound != 0);
+	} else {
+		return (object->u.brk.bound != object->text_len);
+	}
 }
 
 static void text_iter_brk_current(text_iter_obj* object, long flags TSRMLS_DC)
