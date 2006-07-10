@@ -1,3 +1,43 @@
+2006-07-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_builtin_functions.c
+      zend_builtin_functions.c
+      tests/bug37811.phpt
+      tests/bug37811.phpt
+      tests/bug37811.phpt:
+      - Fixed Bug #37811 define not using toString on objects
+
+    * (PHP_5_2)
+      zend_operators.c:
+      - MFH Fix issue with comparing objects with objects
+
+    * zend_operators.c:
+      - Reword comment
+
+    * zend_operators.c:
+      - Fix issue with comparing objects with objects
+
+    * zend_operators.c:
+      - Drop dead code
+
+    * tests/objects_015.phpt
+      tests/objects_015.phpt:
+      
+      - Add new test
+
+    * (PHP_5_2)
+      zend_operators.c:
+      - MFH:
+        . Fix comparision edgecases involving objects (Tony, Marcus)
+        . Use ZVAL_LONG() where appropriate
+
+    * zend_operators.c:
+      - Fix comparision edgecases involving objects (Tony, Marcus)
+      - Use ZVAL_LONG() where appropriate
+
+    * tests/abstract-static.phpt:
+      - Fix test
+
 2006-07-06  Antony Dovgal  <antony@zend.com>
 
     * tests/016.phpt:
