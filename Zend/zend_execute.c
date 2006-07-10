@@ -919,7 +919,7 @@ static inline HashTable *zend_get_target_symbol_table(zend_op *opline, temp_vari
 
 static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, zval *dim, int type TSRMLS_DC)
 {
-	zval **retval, dim_copy;
+	zval **retval;
 	zstr offset_key;
 	int offset_key_length;
 	zend_uchar ztype = Z_TYPE_P(dim);
