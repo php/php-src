@@ -3907,24 +3907,25 @@ ZEND_METHOD(reflection_property, getValue)
 {
 	reflection_object *intern;
 	property_reference *ref;
-	zval *object;
+	zval *object, name;
 	zval **member= NULL;
 	zend_uchar utype = UG(unicode)?IS_UNICODE:IS_STRING;
 
 	METHOD_NOTSTATIC(reflection_property_ptr);
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-#if MBO_0
 	if (!(ref->prop->flags & ZEND_ACC_PUBLIC)) {
-		_DO_THROW("Cannot access non-public member");
-		/* Returns from this function */
+		_default_get_entry(getThis(), "name", sizeof("name"), &name TSRMLS_CC);
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
+			"Cannot access non-public member %v::%v", intern->ce->name, Z_UNIVAL(name));
+		zval_dtor(&name);
+		return;
 	}
-#endif
 
 	if ((ref->prop->flags & ZEND_ACC_STATIC)) {
 		zend_update_class_constants(intern->ce TSRMLS_CC);
 		if (zend_u_hash_quick_find(CE_STATIC_MEMBERS(intern->ce), utype, ref->prop->name, ref->prop->name_length + 1, ref->prop->h, (void **) &member) == FAILURE) {
-			zend_error(E_ERROR, "Internal error: Could not find the property %v", ref->prop->name);
+			zend_error(E_ERROR, "Internal error: Could not find the property %v::%v", intern->ce->name, ref->prop->name);
 			/* Bails out */
 		}
 	} else {
@@ -3932,7 +3933,7 @@ ZEND_METHOD(reflection_property, getValue)
 			return;
 		}
 		if (zend_u_hash_quick_find(Z_OBJPROP_P(object), utype, ref->prop->name, ref->prop->name_length + 1, ref->prop->h, (void **) &member) == FAILURE) {
-			zend_error(E_ERROR, "Internal error: Could not find the property %v", ref->prop->name);
+			zend_error(E_ERROR, "Internal error: Could not find the property %v::%v", intern->ce->name, ref->prop->name);
 			/* Bails out */
 		}
 	}
@@ -3950,7 +3951,7 @@ ZEND_METHOD(reflection_property, setValue)
 	reflection_object *intern;
 	property_reference *ref;
 	zval **variable_ptr;
-	zval *object;
+	zval *object, name;
 	zval *value;
 	int setter_done = 0;
 	zval *tmp;
@@ -3961,8 +3962,11 @@ ZEND_METHOD(reflection_property, setValue)
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	if (!(ref->prop->flags & ZEND_ACC_PUBLIC)) {
-		_DO_THROW("Cannot access non-public member");
-		/* Returns from this function */
+		_default_get_entry(getThis(), "name", sizeof("name"), &name TSRMLS_CC);
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
+			"Cannot access non-public member %v::%v", intern->ce->name, Z_UNIVAL(name));
+		zval_dtor(&name);
+		return;
 	}
 
 	if ((ref->prop->flags & ZEND_ACC_STATIC)) {
@@ -3981,7 +3985,7 @@ ZEND_METHOD(reflection_property, setValue)
 	}
 
 	if (zend_u_hash_quick_find(prop_table, utype, ref->prop->name, ref->prop->name_length + 1, ref->prop->h, (void **) &variable_ptr) == FAILURE) {
-		zend_error(E_ERROR, "Internal error: Could not find the property %v", ref->prop->name);
+		zend_error(E_ERROR, "Internal error: Could not find the property %v::%v", intern->ce->name, ref->prop->name);
 		/* Bails out */
 	}
 	if (*variable_ptr == value) {
