@@ -3731,20 +3731,12 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 				efree(str);
 			}
 			if (zend_hash_find(prop, "faultstring", sizeof("faultstring"), (void**)&tmp) == SUCCESS) {
-				int new_len;
-				xmlNodePtr node = xmlNewNode(NULL, "faultstring");
-				char *str = php_escape_html_entities(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), &new_len, 0, 0, NULL TSRMLS_CC);
-				xmlAddChild(param, node);
-				xmlNodeSetContentLen(node, str, new_len);
-				efree(str);
+				xmlNodePtr node = master_to_xml(get_conversion(IS_STRING), *tmp, SOAP_LITERAL, param);
+				xmlNodeSetName(node, "faultstring");
 			}
 			if (zend_hash_find(prop, "faultactor", sizeof("faultactor"), (void**)&tmp) == SUCCESS) {
-				int new_len;
-				xmlNodePtr node = xmlNewNode(NULL, "faultactor");
-				char *str = php_escape_html_entities(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), &new_len, 0, 0, NULL TSRMLS_CC);
-				xmlAddChild(param, node);
-				xmlNodeSetContentLen(node, str, new_len);
-				efree(str);
+				xmlNodePtr node = master_to_xml(get_conversion(IS_STRING), *tmp, SOAP_LITERAL, param);
+				xmlNodeSetName(node, "faultactor");
 			}
 			detail_name = "detail";
 		} else {
@@ -3762,12 +3754,10 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 				efree(str);
 			}
 			if (zend_hash_find(prop, "faultstring", sizeof("faultstring"), (void**)&tmp) == SUCCESS) {
-				int new_len;
 				xmlNodePtr node = xmlNewChild(param, ns, "Reason", NULL);
-				char *str = php_escape_html_entities(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), &new_len, 0, 0, NULL TSRMLS_CC);
-				node = xmlNewChild(node, ns, "Text", NULL);
-				xmlNodeSetContentLen(node, str, new_len);
-				efree(str);
+				node = master_to_xml(get_conversion(IS_STRING), *tmp, SOAP_LITERAL, node);
+				xmlNodeSetName(node, "Text");
+				xmlSetNs(node, ns);
 			}
 			detail_name = SOAP_1_2_ENV_NS_PREFIX":Detail";
 		}
