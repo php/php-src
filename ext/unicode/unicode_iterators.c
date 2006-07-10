@@ -1146,6 +1146,25 @@ PHP_METHOD(TextIterator, isBoundary)
 	RETURN_BOOL(iter_ops[intern->type]->isBoundary(intern, offset, flags TSRMLS_CC));
 }
 
+PHP_METHOD(TextIterator, getAvailableLocales)
+{
+	int32_t count, i;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+		return;
+	}
+
+	if (!return_value_used) {
+		return;
+	}
+
+	array_init(return_value);
+	count = ubrk_countAvailable();
+	for (i = 0; i < count; i++) {
+		add_next_index_ascii_string(return_value, (char*)ubrk_getAvailable(i), ZSTR_DUPLICATE);
+	}
+}
+
 static zend_function_entry text_iterator_funcs[] = {
 
 	PHP_ME(TextIterator, __construct, NULL, ZEND_ACC_PUBLIC)
@@ -1163,6 +1182,8 @@ static zend_function_entry text_iterator_funcs[] = {
 	PHP_ME(TextIterator, following,	  NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(TextIterator, preceding,	  NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(TextIterator, isBoundary,  NULL, ZEND_ACC_PUBLIC)
+
+	PHP_ME(TextIterator, getAvailableLocales, NULL, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 
 	PHP_MALIAS(TextIterator, first, rewind, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
