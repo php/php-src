@@ -1,5 +1,5 @@
 --TEST--
-Bug #37278 (SOAP not respecting uri in __soapCall)
+Bug #38004 (Parameters in SoapServer are decoded twice)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
