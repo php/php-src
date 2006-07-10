@@ -82,6 +82,7 @@ PHP                                                                        NEWS
 
 - Fixed memory leaks in openssl streams context options. (Pierre)
 - Fixed handling of extremely long paths inside tempnam() function. (Ilia)
+- Fixed bug #38004 Parameters in SoapServer are decoded twice. (Dmitry)
 - Fixed bug #38003 (in classes inherited from MySQLi it's possible to call 
   private constructors from invalid context). (Tony)
 - Fixed bug #37987 (invalid return of file_exists() in safe mode). (Ilia)
