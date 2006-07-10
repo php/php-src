@@ -56,8 +56,17 @@ $db->rollBack();
 
 echo countRows('rollback');
 
+$db->beginTransaction();
+$delete->execute();
+echo countRows('delete');
+$db->commit();
+
+echo countRows('commit');
+
 ?>
 --EXPECT--
 Counted 3 rows after insert.
 Counted 0 rows after delete.
 Counted 3 rows after rollback.
+Counted 0 rows after delete.
+Counted 0 rows after commit.
