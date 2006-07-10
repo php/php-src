@@ -946,6 +946,7 @@ static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, zval *dim
 			offset_key = "";
 			offset_key_length = 0;
 			goto fetch_string_dim;
+
 		case IS_STRING:
 			
 			offset_key = dim->value.str.val;
@@ -1266,7 +1267,7 @@ static void zend_fetch_property_address(temp_variable *result, zval **container_
 			zval *ptr;
 
 			if (Z_OBJ_HT_P(container)->read_property &&
-				(ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, BP_VAR_W TSRMLS_CC)) != NULL) {
+				(ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, type TSRMLS_CC)) != NULL) {
 				if (result) {
 					result->var.ptr = ptr;
 					result->var.ptr_ptr = &result->var.ptr;
@@ -1279,7 +1280,7 @@ static void zend_fetch_property_address(temp_variable *result, zval **container_
 		}
 	} else if (Z_OBJ_HT_P(container)->read_property) {
 		if (result) {
-			result->var.ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, BP_VAR_W TSRMLS_CC);
+			result->var.ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, type TSRMLS_CC);
 			result->var.ptr_ptr = &result->var.ptr;
 		}
 	} else {
