@@ -82,6 +82,7 @@ PHP                                                                        NEWS
 
 - Fixed memory leaks in openssl streams context options. (Pierre)
 - Fixed handling of extremely long paths inside tempnam() function. (Ilia)
+- Fixed bug #38055 (Wrong interpretation of boolean parameters). (Dmitry)
 - Fixed bug #38019 (segfault extending mysqli class). (Dmitry)
 - Fixed bug #38005 (SoapFault faultstring doesn't follow encoding rules).
   (Dmitry)
