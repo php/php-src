@@ -254,8 +254,8 @@ static zend_object_value spl_filesystem_object_clone(zval *zobject TSRMLS_DC)
 
 	switch (source->type) {
 	case SPL_FS_INFO:
-		source->path_len = source->path_len;
-		source->path = estrndup(source->path, source->path_len);
+		intern->path_len = source->path_len;
+		intern->path = estrndup(source->path, source->path_len);
 		intern->file_name_len = source->file_name_len;
 		intern->file_name = estrndup(source->file_name, intern->file_name_len);
 		break;
