@@ -357,6 +357,9 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC)
 		zval_ptr_dtor(&tmp_member);
 		(*retval)->refcount--;
 	}
+	if (*retval && (type == BP_VAR_W || type == BP_VAR_RW) && Z_TYPE_PP(retval) == IS_ARRAY) {
+		zend_error(E_ERROR, "Cannot use array returned from %v::__get('%R') in write context", zobj->ce->name, Z_TYPE_P(member), Z_STRVAL_P(member));
+	}
 	return *retval;
 }
 
