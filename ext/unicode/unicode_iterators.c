@@ -306,6 +306,59 @@ static text_iter_ops text_iter_cp_ops = {
 
 /* Combining sequence ops */
 
+static void text_iter_helper_move(zend_bool forward, UChar *text, int32_t text_len, int32_t *offset, int32_t *cp_offset)
+{
+	UChar32 cp;
+	int32_t tmp, tmp2;
+
+	if (*offset == UBRK_DONE) {
+		return;
+	}
+
+	if (forward) {
+		if (*offset == text_len) {
+			*offset    = UBRK_DONE;
+			*cp_offset = UBRK_DONE;
+		} else {
+			U16_NEXT(text, (*offset), text_len, cp);
+			(*cp_offset)++;
+
+			if (u_getCombiningClass(cp) == 0) {
+				tmp = *offset;
+				tmp2 = *cp_offset;
+				/*
+				 * At the end of the string cp will be 0 because of the NULL
+				 * terminating NULL, so combining class will be 0 as well.
+				 */
+				while (tmp < text_len) {
+					U16_NEXT(text, tmp, text_len, cp);
+					tmp2++;
+					if (u_getCombiningClass(cp) == 0) {
+						break;
+					} else {
+						*offset    = tmp;
+						*cp_offset = tmp2;
+					}
+				}
+			}
+		}
+	} else {
+		if (*offset == 0) {
+			*offset    = UBRK_DONE;
+			*cp_offset = UBRK_DONE;
+		} else {
+			U16_PREV(text, 0, (*offset), cp);
+			(*cp_offset)--;
+			if (u_getCombiningClass(cp) != 0) {
+				do {
+					U16_PREV(text, 0, (*offset), cp);
+					(*cp_offset)--;
+				} while (*offset > 0 && u_getCombiningClass(cp) != 0);
+			}
+		}
+	}
+}
+
 static int text_iter_cs_valid(text_iter_obj* object, long flags TSRMLS_DC)
 {
 	return (object->u.cs.start != UBRK_DONE);
@@ -313,25 +366,41 @@ static int text_iter_cs_valid(text_iter_obj* object, long flags TSRMLS_DC)
 
 static void text_iter_cs_current(text_iter_obj* object, long flags TSRMLS_DC)
 {
-	uint32_t length;
 	UChar *start;
+	int32_t length = -1;
 
-	if (object->u.cs.start == UBRK_DONE || object->u.cs.end == UBRK_DONE) {
-		length = 0;
-	} else {
+	if (object->u.cs.start != UBRK_DONE) {
 		if (flags & ITER_REVERSE) {
+			if (object->u.cs.end == object->u.cs.start) {
+				text_iter_helper_move(0, object->text, object->text_len,
+									  &object->u.cs.start, &object->u.cs.start_cp_offset);
+			}
 			start = object->text + object->u.cs.end;
 		} else {
+			if (object->u.cs.end == object->u.cs.start) {
+				text_iter_helper_move(1, object->text, object->text_len,
+									  &object->u.cs.end, &object->u.cs.end_cp_offset);
+			}
 			start = object->text + object->u.cs.start;
 		}
-		length = abs(object->u.cs.end - object->u.cs.start);
+
+		if (object->u.cs.end == UBRK_DONE) {
+			length = 0;
+		} else {
+			length = abs(object->u.cs.end - object->u.cs.start);
+		}
+	} else {
+		length = 0;
+	}
+   
+	if (length != 0) {
 		if (length+1 > object->current_alloc) {
 			object->current_alloc = length+1;
 			Z_USTRVAL_P(object->current) = eurealloc(Z_USTRVAL_P(object->current), object->current_alloc);
 		}
 		u_memcpy(Z_USTRVAL_P(object->current), start, length);
 	}
-   
+
 	Z_USTRVAL_P(object->current)[length] = 0;
 	Z_USTRLEN_P(object->current) = length;
 }
@@ -343,60 +412,23 @@ static int text_iter_cs_key(text_iter_obj* object, long flags TSRMLS_DC)
 
 static int text_iter_cs_offset(text_iter_obj* object, long flags TSRMLS_DC)
 {
-	if (flags & ITER_REVERSE) {
-		return object->u.cs.end_cp_offset;
-	} else {
-		return object->u.cs.start_cp_offset;
-	}
+	return object->u.cs.start_cp_offset;
 }
 
 static void text_iter_cs_next(text_iter_obj* object, long flags TSRMLS_DC)
 {
-	UChar32 cp;
-	int32_t tmp, tmp2;
-
 	if (object->u.cs.start == UBRK_DONE) {
 		return;
 	}
 
-	object->u.cs.start = object->u.cs.end;
-	object->u.cs.start_cp_offset = object->u.cs.end_cp_offset;
 	if (flags & ITER_REVERSE) {
-		if (object->u.cs.end == 0) {
-			object->u.cs.end = UBRK_DONE;
-			object->u.cs.end_cp_offset = UBRK_DONE;
-		} else {
-			U16_PREV(object->text, 0, object->u.cs.end, cp);
-			object->u.cs.end_cp_offset--;
-			if (u_getCombiningClass(cp) != 0) {
-				do {
-					U16_PREV(object->text, 0, object->u.cs.end, cp);
-					object->u.cs.end_cp_offset--;
-				} while (object->u.cs.end > 0 && u_getCombiningClass(cp) != 0);
-			}
-		}
+		text_iter_helper_move(0, object->text, object->text_len,
+							  &object->u.cs.start, &object->u.cs.start_cp_offset);
+		object->u.cs.end = object->u.cs.start;
 	} else {
-		if (object->u.cs.end == object->text_len) {
-			object->u.cs.end = UBRK_DONE;
-			object->u.cs.end_cp_offset = UBRK_DONE;
-		} else {
-			U16_NEXT(object->text, object->u.cs.end, object->text_len, cp);
-			object->u.cs.end_cp_offset++;
-			if (u_getCombiningClass(cp) == 0) {
-				tmp = object->u.cs.end;
-				tmp2 = object->u.cs.end_cp_offset;
-				while (tmp < object->text_len) {
-					U16_NEXT(object->text, tmp, object->text_len, cp);
-					tmp2++;
-					if (u_getCombiningClass(cp) == 0) {
-						break;
-					} else {
-						object->u.cs.end = tmp;
-						object->u.cs.end_cp_offset = tmp2;
-					}
-				}
-			}
-		}
+		text_iter_helper_move(1, object->text, object->text_len,
+							  &object->u.cs.start, &object->u.cs.start_cp_offset);
+		object->u.cs.end = object->u.cs.start;
 	}
 	object->u.cs.index++;
 }
@@ -411,7 +443,6 @@ static void text_iter_cs_rewind(text_iter_obj *object, long flags TSRMLS_DC)
 		object->u.cs.start = object->u.cs.end = 0;
 		object->u.cs.start_cp_offset = object->u.cs.end_cp_offset = 0;
 	}
-	text_iter_cs_next(object, flags TSRMLS_CC); /* find first sequence */
 	object->u.cs.index = 0; /* because _next increments index */
 }
 
