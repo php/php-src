@@ -23,7 +23,7 @@ if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'mysql') {
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/'); 
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
@@ -56,8 +56,17 @@ $db->rollBack();
 
 echo countRows('rollback');
 
+$db->beginTransaction();
+$delete->execute();
+echo countRows('delete');
+$db->commit();
+
+echo countRows('commit');
+
 ?>
 --EXPECT--
 Counted 3 rows after insert.
 Counted 0 rows after delete.
 Counted 3 rows after rollback.
+Counted 0 rows after delete.
+Counted 0 rows after commit.
