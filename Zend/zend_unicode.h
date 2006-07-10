@@ -21,6 +21,7 @@
 
 #include "zend.h"
 #include <unicode/utypes.h>
+#include <unicode/uclean.h>
 #include <unicode/ustring.h>
 #include <unicode/ucnv.h>
 #include <unicode/ustdio.h>
