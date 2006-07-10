@@ -1100,49 +1100,47 @@ PHP_FUNCTION(serialize)
 
 PHP_FUNCTION(unserialize)
 {
-	zval **buf;
+	unsigned char *buf;
+	char *str = NULL;
+	int buf_len;
+	zend_uchar buf_type;
+	const unsigned char *p;
+
 	php_unserialize_data_t var_hash;
 	
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &buf) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-
-	if (Z_TYPE_PP(buf) == IS_UNICODE) {
-		/* ASCII unicode string to binary string conversion */
-		char *str = emalloc(Z_USTRLEN_PP(buf)+1);
-		int i;
-
-		for (i = 0; i < Z_UNILEN_PP(buf); i++) {
-			if (Z_USTRVAL_PP(buf)[i] > 128) {
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Error at offset %d of %d bytes", i, Z_USTRLEN_PP(buf));				
-			}
-			str[i] = Z_USTRVAL_PP(buf)[i];
-		}
-		str[i] = '\0';
-		efree(Z_USTRVAL_PP(buf));
-		Z_STRVAL_PP(buf) = str;
-		Z_TYPE_PP(buf) = IS_STRING;
-	}
-
-	if (Z_TYPE_PP(buf) == IS_STRING) {
-		const unsigned char *p = (unsigned char*)Z_STRVAL_PP(buf);
-
-		if (Z_STRLEN_PP(buf) == 0) {
-			RETURN_FALSE;
-		}
-
-		PHP_VAR_UNSERIALIZE_INIT(var_hash);
-		if (!php_var_unserialize(&return_value, &p, p + Z_STRLEN_PP(buf),  &var_hash TSRMLS_CC)) {
-			PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-			zval_dtor(return_value);
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Error at offset %ld of %d bytes", (long)((char*)p - Z_STRVAL_PP(buf)), Z_STRLEN_PP(buf));
-			RETURN_FALSE;
-		}
-		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-	} else {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Argument is not a string");
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "T",
+							  &buf, &buf_len, &buf_type) == FAILURE) {
 		RETURN_FALSE;
 	}
+
+	if (buf_len == 0) {
+		RETURN_FALSE;
+	}
+
+	if (buf_type == IS_UNICODE) {
+		/* ASCII unicode string to binary string conversion */
+		int i;
+
+		str = emalloc(buf_len+1);
+		for (i = 0; i < buf_len; i++) {
+			if (buf[i] > 128) {
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Error at offset %d of %d bytes", i, buf_len);				
+			}
+			str[i] = buf[i];
+		}
+		str[i] = '\0';
+		buf = str;
+	}
+	
+	p = (const unsigned char*)buf;
+	PHP_VAR_UNSERIALIZE_INIT(var_hash);
+	if (!php_var_unserialize(&return_value, &p, p + buf_len,  &var_hash TSRMLS_CC)) {
+		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+		zval_dtor(return_value);
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Error at offset %ld of %d bytes", (long)((unsigned char*)p - buf), buf_len);
+		RETURN_FALSE;
+	}
+	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 }
 
 /* }}} */
