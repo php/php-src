@@ -134,9 +134,10 @@ void php_clear_mysql(MY_MYSQL *mysql) {
 
 /* {{{ mysqli_objects_free_storage
  */
-static void mysqli_objects_free_storage(zend_object *object TSRMLS_DC)
+static void mysqli_objects_free_storage(void *object TSRMLS_DC)
 {
-	mysqli_object 	*intern = (mysqli_object *)object;
+	zend_object *zo = (zend_object *)object;
+	mysqli_object 	*intern = (mysqli_object *)zo;
 	MYSQLI_RESOURCE	*my_res = (MYSQLI_RESOURCE *)intern->ptr;
 
 	my_efree(my_res);	
@@ -147,9 +148,10 @@ static void mysqli_objects_free_storage(zend_object *object TSRMLS_DC)
 
 /* {{{ mysqli_link_free_storage
  */
-static void mysqli_link_free_storage(zend_object *object TSRMLS_DC)
+static void mysqli_link_free_storage(void *object TSRMLS_DC)
 {
-	mysqli_object 	*intern = (mysqli_object *)object;
+	zend_object *zo = (zend_object *)object;
+	mysqli_object 	*intern = (mysqli_object *)zo;
 	MYSQLI_RESOURCE	*my_res = (MYSQLI_RESOURCE *)intern->ptr;
 
 	if (my_res && my_res->ptr) {
@@ -166,9 +168,10 @@ static void mysqli_link_free_storage(zend_object *object TSRMLS_DC)
 
 /* {{{ mysqli_stmt_free_storage
  */
-static void mysqli_stmt_free_storage(zend_object *object TSRMLS_DC)
+static void mysqli_stmt_free_storage(void *object TSRMLS_DC)
 {
-	mysqli_object 	*intern = (mysqli_object *)object;
+	zend_object *zo = (zend_object *)object;
+	mysqli_object 	*intern = (mysqli_object *)zo;
 	MYSQLI_RESOURCE	*my_res = (MYSQLI_RESOURCE *)intern->ptr;
 
 	if (my_res && my_res->ptr) {
@@ -181,9 +184,10 @@ static void mysqli_stmt_free_storage(zend_object *object TSRMLS_DC)
 
 /* {{{ mysqli_result_free_storage
  */
-static void mysqli_result_free_storage(zend_object *object TSRMLS_DC)
+static void mysqli_result_free_storage(void *object TSRMLS_DC)
 {
-	mysqli_object 	*intern = (mysqli_object *)object;
+	zend_object *zo = (zend_object *)object;
+	mysqli_object 	*intern = (mysqli_object *)zo;
 	MYSQLI_RESOURCE	*my_res = (MYSQLI_RESOURCE *)intern->ptr;
 
 	if (my_res && my_res->ptr) {
@@ -195,9 +199,10 @@ static void mysqli_result_free_storage(zend_object *object TSRMLS_DC)
 
 /* {{{ mysqli_warning_free_storage
  */
-static void mysqli_warning_free_storage(zend_object *object TSRMLS_DC)
+static void mysqli_warning_free_storage(void *object TSRMLS_DC)
 {
-	mysqli_object 	*intern = (mysqli_object *)object;
+	zend_object *zo = (zend_object *)object;
+	mysqli_object 	*intern = (mysqli_object *)zo;
 	MYSQLI_RESOURCE	*my_res = (MYSQLI_RESOURCE *)intern->ptr;
 
 	if (my_res && my_res->ptr) {
