@@ -67,3 +67,19 @@ array(2) {
 string(5) "first"
 string(6) "second"
 Done
+--UEXPECTF--
+array(2) {
+  [u"LOB_1"]=>
+  object(OCI-Lob)#%d (1) {
+    [u"descriptor"]=>
+    resource(%d) of type (oci8 descriptor)
+  }
+  [u"LOB_2"]=>
+  object(OCI-Lob)#%d (1) {
+    [u"descriptor"]=>
+    resource(%d) of type (oci8 descriptor)
+  }
+}
+string(5) "first"
+string(6) "second"
+Done

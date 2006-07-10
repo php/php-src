@@ -36,3 +36,7 @@ echo "Done\n";
 string(32) "614fcbba1effb7caa27ef0ef25c27fcf"
 int(2523)
 Done
+--UEXPECTF--
+unicode(32) "614fcbba1effb7caa27ef0ef25c27fcf"
+int(2523)
+Done

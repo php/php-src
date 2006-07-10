@@ -50,3 +50,18 @@ array(2) {
 }
 bool(true)
 Done
+--UEXPECTF--
+array(2) {
+  [0]=>
+  object(OCI-Lob)#%d (1) {
+    [u"descriptor"]=>
+    resource(%d) of type (oci8 descriptor)
+  }
+  [u"BLOB"]=>
+  object(OCI-Lob)#%d (1) {
+    [u"descriptor"]=>
+    resource(%d) of type (oci8 descriptor)
+  }
+}
+bool(true)
+Done

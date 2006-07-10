@@ -80,3 +80,41 @@ object(stdClass)#%d (5) {
   NULL
 }
 Done
+--UEXPECTF--
+object(stdClass)#%d (5) {
+  [u"ID"]=>
+  string(1) "1"
+  [u"VALUE"]=>
+  string(1) "1"
+  [u"BLOB"]=>
+  NULL
+  [u"CLOB"]=>
+  NULL
+  [u"STRING"]=>
+  NULL
+}
+object(stdClass)#%d (5) {
+  [u"ID"]=>
+  string(1) "1"
+  [u"VALUE"]=>
+  string(1) "1"
+  [u"BLOB"]=>
+  NULL
+  [u"CLOB"]=>
+  NULL
+  [u"STRING"]=>
+  NULL
+}
+object(stdClass)#%d (5) {
+  [u"ID"]=>
+  string(1) "1"
+  [u"VALUE"]=>
+  string(1) "1"
+  [u"BLOB"]=>
+  NULL
+  [u"CLOB"]=>
+  NULL
+  [u"STRING"]=>
+  NULL
+}
+Done

@@ -306,3 +306,233 @@ array(10) {
   NULL
 }
 Done
+--UEXPECT--
+array(10) {
+  [0]=>
+  string(1) "1"
+  [u"ID"]=>
+  string(1) "1"
+  [1]=>
+  string(1) "1"
+  [u"VALUE"]=>
+  string(1) "1"
+  [2]=>
+  NULL
+  [u"BLOB"]=>
+  NULL
+  [3]=>
+  NULL
+  [u"CLOB"]=>
+  NULL
+  [4]=>
+  NULL
+  [u"STRING"]=>
+  NULL
+}
+array(10) {
+  [0]=>
+  string(1) "1"
+  [u"ID"]=>
+  string(1) "1"
+  [1]=>
+  string(1) "1"
+  [u"VALUE"]=>
+  string(1) "1"
+  [2]=>
+  NULL
+  [u"BLOB"]=>
+  NULL
+  [3]=>
+  NULL
+  [u"CLOB"]=>
+  NULL
+  [4]=>
+  NULL
+  [u"STRING"]=>
+  NULL
+}
+array(10) {
+  [0]=>
+  string(1) "1"
+  [u"ID"]=>
+  string(1) "1"
+  [1]=>
+  string(1) "1"
+  [u"VALUE"]=>
+  string(1) "1"
+  [2]=>
+  NULL
+  [u"BLOB"]=>
+  NULL
+  [3]=>
+  NULL
+  [u"CLOB"]=>
+  NULL
+  [4]=>
+  NULL
+  [u"STRING"]=>
+  NULL
+}
+array(2) {
+  [0]=>
+  string(1) "1"
+  [1]=>
+  string(1) "1"
+}
+array(2) {
+  [0]=>
+  string(1) "1"
+  [1]=>
+  string(1) "1"
+}
+array(2) {
+  [0]=>
+  string(1) "1"
+  [1]=>
+  string(1) "1"
+}
+array(2) {
+  [u"ID"]=>
+  string(1) "1"
+  [u"VALUE"]=>
+  string(1) "1"
+}
+array(2) {
+  [u"ID"]=>
+  string(1) "1"
+  [u"VALUE"]=>
+  string(1) "1"
+}
+array(2) {
+  [u"ID"]=>
+  string(1) "1"
+  [u"VALUE"]=>
+  string(1) "1"
+}
+array(4) {
+  [0]=>
+  string(1) "1"
+  [u"ID"]=>
+  string(1) "1"
+  [1]=>
+  string(1) "1"
+  [u"VALUE"]=>
+  string(1) "1"
+}
+array(4) {
+  [0]=>
+  string(1) "1"
+  [u"ID"]=>
+  string(1) "1"
+  [1]=>
+  string(1) "1"
+  [u"VALUE"]=>
+  string(1) "1"
+}
+array(4) {
+  [0]=>
+  string(1) "1"
+  [u"ID"]=>
+  string(1) "1"
+  [1]=>
+  string(1) "1"
+  [u"VALUE"]=>
+  string(1) "1"
+}
+array(4) {
+  [0]=>
+  string(1) "1"
+  [u"ID"]=>
+  string(1) "1"
+  [1]=>
+  string(1) "1"
+  [u"VALUE"]=>
+  string(1) "1"
+}
+array(4) {
+  [0]=>
+  string(1) "1"
+  [u"ID"]=>
+  string(1) "1"
+  [1]=>
+  string(1) "1"
+  [u"VALUE"]=>
+  string(1) "1"
+}
+array(4) {
+  [0]=>
+  string(1) "1"
+  [u"ID"]=>
+  string(1) "1"
+  [1]=>
+  string(1) "1"
+  [u"VALUE"]=>
+  string(1) "1"
+}
+array(10) {
+  [0]=>
+  string(1) "1"
+  [u"ID"]=>
+  string(1) "1"
+  [1]=>
+  string(1) "1"
+  [u"VALUE"]=>
+  string(1) "1"
+  [2]=>
+  NULL
+  [u"BLOB"]=>
+  NULL
+  [3]=>
+  NULL
+  [u"CLOB"]=>
+  NULL
+  [4]=>
+  NULL
+  [u"STRING"]=>
+  NULL
+}
+array(10) {
+  [0]=>
+  string(1) "1"
+  [u"ID"]=>
+  string(1) "1"
+  [1]=>
+  string(1) "1"
+  [u"VALUE"]=>
+  string(1) "1"
+  [2]=>
+  NULL
+  [u"BLOB"]=>
+  NULL
+  [3]=>
+  NULL
+  [u"CLOB"]=>
+  NULL
+  [4]=>
+  NULL
+  [u"STRING"]=>
+  NULL
+}
+array(10) {
+  [0]=>
+  string(1) "1"
+  [u"ID"]=>
+  string(1) "1"
+  [1]=>
+  string(1) "1"
+  [u"VALUE"]=>
+  string(1) "1"
+  [2]=>
+  NULL
+  [u"BLOB"]=>
+  NULL
+  [3]=>
+  NULL
+  [u"CLOB"]=>
+  NULL
+  [4]=>
+  NULL
+  [u"STRING"]=>
+  NULL
+}
+Done

@@ -147,3 +147,101 @@ array(5) {
   }
 }
 Done
+--UEXPECT--
+int(3)
+array(5) {
+  [u"ID"]=>
+  array(3) {
+    [0]=>
+    string(1) "1"
+    [1]=>
+    string(1) "1"
+    [2]=>
+    string(1) "1"
+  }
+  [u"VALUE"]=>
+  array(3) {
+    [0]=>
+    string(1) "1"
+    [1]=>
+    string(1) "1"
+    [2]=>
+    string(1) "1"
+  }
+  [u"BLOB"]=>
+  array(3) {
+    [0]=>
+    NULL
+    [1]=>
+    NULL
+    [2]=>
+    NULL
+  }
+  [u"CLOB"]=>
+  array(3) {
+    [0]=>
+    NULL
+    [1]=>
+    NULL
+    [2]=>
+    NULL
+  }
+  [u"STRING"]=>
+  array(3) {
+    [0]=>
+    NULL
+    [1]=>
+    NULL
+    [2]=>
+    NULL
+  }
+}
+int(3)
+array(5) {
+  [u"ID"]=>
+  array(3) {
+    [0]=>
+    string(1) "1"
+    [1]=>
+    string(1) "1"
+    [2]=>
+    string(1) "1"
+  }
+  [u"VALUE"]=>
+  array(3) {
+    [0]=>
+    string(1) "1"
+    [1]=>
+    string(1) "1"
+    [2]=>
+    string(1) "1"
+  }
+  [u"BLOB"]=>
+  array(3) {
+    [0]=>
+    NULL
+    [1]=>
+    NULL
+    [2]=>
+    NULL
+  }
+  [u"CLOB"]=>
+  array(3) {
+    [0]=>
+    NULL
+    [1]=>
+    NULL
+    [2]=>
+    NULL
+  }
+  [u"STRING"]=>
+  array(3) {
+    [0]=>
+    NULL
+    [1]=>
+    NULL
+    [2]=>
+    NULL
+  }
+}
+Done

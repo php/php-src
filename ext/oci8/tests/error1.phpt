@@ -25,3 +25,17 @@ array(4) {
   string(0) ""
 }
 Done
+--UEXPECTF--
+Warning: oci_connect(): ORA-12154: TNS:could not resolve service name in %s on line %d
+bool(false)
+array(4) {
+  [u"code"]=>
+  int(12154)
+  [u"message"]=>
+  string(45) "ORA-12154: TNS:could not resolve service name"
+  [u"offset"]=>
+  int(0)
+  [u"sqltext"]=>
+  string(0) ""
+}
+Done

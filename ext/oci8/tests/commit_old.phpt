@@ -144,3 +144,83 @@ array(5) {
   }
 }
 Done
+--UEXPECTF--
+bool(true)
+int(0)
+array(5) {
+  [u"ID"]=>
+  array(0) {
+  }
+  [u"VALUE"]=>
+  array(0) {
+  }
+  [u"BLOB"]=>
+  array(0) {
+  }
+  [u"CLOB"]=>
+  array(0) {
+  }
+  [u"STRING"]=>
+  array(0) {
+  }
+}
+bool(true)
+int(4)
+array(5) {
+  [u"ID"]=>
+  array(4) {
+    [0]=>
+    string(1) "1"
+    [1]=>
+    string(1) "1"
+    [2]=>
+    string(1) "1"
+    [3]=>
+    string(1) "1"
+  }
+  [u"VALUE"]=>
+  array(4) {
+    [0]=>
+    string(1) "1"
+    [1]=>
+    string(1) "1"
+    [2]=>
+    string(1) "1"
+    [3]=>
+    string(1) "1"
+  }
+  [u"BLOB"]=>
+  array(4) {
+    [0]=>
+    NULL
+    [1]=>
+    NULL
+    [2]=>
+    NULL
+    [3]=>
+    NULL
+  }
+  [u"CLOB"]=>
+  array(4) {
+    [0]=>
+    NULL
+    [1]=>
+    NULL
+    [2]=>
+    NULL
+    [3]=>
+    NULL
+  }
+  [u"STRING"]=>
+  array(4) {
+    [0]=>
+    NULL
+    [1]=>
+    NULL
+    [2]=>
+    NULL
+    [3]=>
+    NULL
+  }
+}
+Done

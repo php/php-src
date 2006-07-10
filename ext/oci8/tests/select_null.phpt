@@ -23,3 +23,11 @@ array(2) {
   NULL
 }
 Done
+--UEXPECT--
+array(2) {
+  [0]=>
+  NULL
+  [u"NULL"]=>
+  NULL
+}
+Done
