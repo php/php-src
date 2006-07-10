@@ -572,7 +572,6 @@ ZEND_API int zval_unicode_to_string(zval *string, UConverter *conv TSRMLS_DC)
 ZEND_API int zval_string_to_unicode_ex(zval *string, UConverter *conv TSRMLS_DC)
 {
 	UErrorCode status = U_ZERO_ERROR;
-	int retval = TRUE;
 	UChar *u = NULL;
 	int u_len, num_conv;
 
