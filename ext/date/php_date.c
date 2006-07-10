@@ -797,7 +797,7 @@ static char *date_format(char *format, int format_len, int *return_len, timelib_
 	smart_str            string = {0};
 	int                  i, no_free, length;
 	char                *buffer;
-	timelib_time_offset *offset;
+	timelib_time_offset *offset = NULL;
 	timelib_sll          isoweek, isoyear;
 	php_locale_data *loc_dat;
 	int                  rfc_colon = 0;
@@ -1000,7 +1000,7 @@ PHPAPI int php_idate(char format, time_t ts, int localtime)
 	timelib_time   *t;
 	timelib_tzinfo *tzi;
 	int retval = -1;
-	timelib_time_offset *offset;
+	timelib_time_offset *offset = NULL;
 	timelib_sll isoweek, isoyear;
 
 	t = timelib_time_ctor();
@@ -1242,7 +1242,7 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 {
 	long hou, min, sec, mon, day, yea, dst = -1;
 	timelib_time *now;
-	timelib_tzinfo *tzi;
+	timelib_tzinfo *tzi = NULL;
 	long ts, adjust_seconds = 0;
 	int error;
 
@@ -1375,7 +1375,7 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	size_t               buf_len = 64, real_len;
 	timelib_time        *ts;
 	timelib_tzinfo      *tzi;
-	timelib_time_offset *offset;
+	timelib_time_offset *offset = NULL;
 
 	timestamp = (long) time(NULL);
 
