@@ -1,5 +1,5 @@
 --TEST--
-#37667 (Object is not added into array returned by __get)
+Bug #37667 (Object is not added into array returned by __get)
 --FILE--
 <?php
 
