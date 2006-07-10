@@ -132,43 +132,6 @@ void php_clear_mysql(MY_MYSQL *mysql) {
 }
 /* }}} */
 
-/* {{{ mysqli_objects_destroy_object
- */
-static void mysqli_objects_destroy_object(zend_object *object, zend_object_handle handle TSRMLS_DC)
-{
-	mysqli_object 	*intern = (mysqli_object *)object;
-	MYSQLI_RESOURCE	*my_res = (MYSQLI_RESOURCE *)intern->ptr;
-
-	zend_objects_destroy_object(object, handle TSRMLS_CC);
-
-	/* link object */
-	if (instanceof_function(intern->zo.ce, mysqli_link_class_entry TSRMLS_CC)) {
-		if (my_res && my_res->ptr) {
-			MY_MYSQL *mysql = (MY_MYSQL *)my_res->ptr;
-			if (mysql->mysql) {
-				mysql_close(mysql->mysql);
-			}
-			php_clear_mysql(mysql);
-			efree(mysql);
-			my_res->ptr = NULL;
-		}
-	} else if (instanceof_function(intern->zo.ce, mysqli_stmt_class_entry TSRMLS_CC)) { /* stmt object */
-		if (my_res && my_res->ptr) {
-			MY_STMT *stmt = (MY_STMT *)my_res->ptr;
-			php_clear_stmt_bind(stmt);
-		}
-	} else if (instanceof_function(intern->zo.ce, mysqli_result_class_entry TSRMLS_CC)) { /* result object */
-		if (my_res && my_res->ptr) {
-			mysql_free_result(my_res->ptr);
-		}
-	} else if (instanceof_function(intern->zo.ce, mysqli_warning_class_entry TSRMLS_CC)) { /* warning object */
-		if (my_res && my_res->ptr) {
-			php_clear_warnings((MYSQLI_WARNING *)my_res->info);
-		}
-	}
-}
-/* }}} */
-
 /* {{{ mysqli_objects_free_storage
  */
 static void mysqli_objects_free_storage(zend_object *object TSRMLS_DC)
@@ -179,6 +142,69 @@ static void mysqli_objects_free_storage(zend_object *object TSRMLS_DC)
 	my_efree(my_res);	
 	zend_object_std_dtor(&intern->zo TSRMLS_CC);
 	efree(intern);
+}
+/* }}} */
+
+/* {{{ mysqli_link_free_storage
+ */
+static void mysqli_link_free_storage(zend_object *object TSRMLS_DC)
+{
+	mysqli_object 	*intern = (mysqli_object *)object;
+	MYSQLI_RESOURCE	*my_res = (MYSQLI_RESOURCE *)intern->ptr;
+
+	if (my_res && my_res->ptr) {
+		MY_MYSQL *mysql = (MY_MYSQL *)my_res->ptr;
+		if (mysql->mysql) {
+			mysql_close(mysql->mysql);
+		}
+		php_clear_mysql(mysql);
+		efree(mysql);
+	}
+	mysqli_objects_free_storage(object TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ mysqli_stmt_free_storage
+ */
+static void mysqli_stmt_free_storage(zend_object *object TSRMLS_DC)
+{
+	mysqli_object 	*intern = (mysqli_object *)object;
+	MYSQLI_RESOURCE	*my_res = (MYSQLI_RESOURCE *)intern->ptr;
+
+	if (my_res && my_res->ptr) {
+		MY_STMT *stmt = (MY_STMT *)my_res->ptr;
+		php_clear_stmt_bind(stmt);
+	}
+	mysqli_objects_free_storage(object TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ mysqli_result_free_storage
+ */
+static void mysqli_result_free_storage(zend_object *object TSRMLS_DC)
+{
+	mysqli_object 	*intern = (mysqli_object *)object;
+	MYSQLI_RESOURCE	*my_res = (MYSQLI_RESOURCE *)intern->ptr;
+
+	if (my_res && my_res->ptr) {
+		mysql_free_result(my_res->ptr);
+	}
+	mysqli_objects_free_storage(object TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ mysqli_warning_free_storage
+ */
+static void mysqli_warning_free_storage(zend_object *object TSRMLS_DC)
+{
+	mysqli_object 	*intern = (mysqli_object *)object;
+	MYSQLI_RESOURCE	*my_res = (MYSQLI_RESOURCE *)intern->ptr;
+
+	if (my_res && my_res->ptr) {
+		php_clear_warnings((MYSQLI_WARNING *)my_res->info);
+		my_res->ptr = NULL;
+	}
+	mysqli_objects_free_storage(object TSRMLS_CC);
 }
 /* }}} */
 
@@ -343,6 +369,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 	mysqli_object *intern;
 	zval *tmp;
 	zend_class_entry *mysqli_base_class;
+	zend_objects_free_object_storage_t free_storage;
 
 	intern = emalloc(sizeof(mysqli_object));
 	memset(intern, 0, sizeof(mysqli_object));
@@ -361,7 +388,20 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref,
 					(void *) &tmp, sizeof(zval *));
 
-	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t) mysqli_objects_destroy_object, (zend_objects_free_object_storage_t) mysqli_objects_free_storage, NULL TSRMLS_CC);
+	/* link object */
+	if (instanceof_function(class_type, mysqli_link_class_entry TSRMLS_CC)) {
+		free_storage = mysqli_link_free_storage;
+	} else if (instanceof_function(class_type, mysqli_stmt_class_entry TSRMLS_CC)) { /* stmt object */
+		free_storage = mysqli_stmt_free_storage;
+	} else if (instanceof_function(class_type, mysqli_result_class_entry TSRMLS_CC)) { /* result object */
+		free_storage = mysqli_result_free_storage;
+	} else if (instanceof_function(class_type, mysqli_warning_class_entry TSRMLS_CC)) { /* warning object */
+		free_storage = mysqli_warning_free_storage;
+	} else {
+		free_storage = mysqli_objects_free_storage;
+	}
+
+	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t) zend_objects_destroy_object, free_storage, NULL TSRMLS_CC);
 	retval.handlers = &mysqli_object_handlers;
 
 	return retval;
