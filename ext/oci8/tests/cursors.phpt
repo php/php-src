@@ -63,3 +63,22 @@ Warning: oci_fetch_assoc(): ORA-01002: fetch out of sequence in %s on line %d
 bool(false)
 bool(true)
 Done
+--UEXPECTF--
+array(5) {
+  [u"ID"]=>
+  string(1) "1"
+  [u"VALUE"]=>
+  string(1) "1"
+  [u"BLOB"]=>
+  NULL
+  [u"CLOB"]=>
+  NULL
+  [u"STRING"]=>
+  NULL
+}
+bool(true)
+
+Warning: oci_fetch_assoc(): ORA-01002: fetch out of sequence in %s on line %d
+bool(false)
+bool(true)
+Done

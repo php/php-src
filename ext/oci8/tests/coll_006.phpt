@@ -28,3 +28,13 @@ bool(true)
 Warning: OCI-Collection::size(): %d is not a valid oci8 collection resource in %s on line %d
 bool(false)
 Done
+--UEXPECTF--
+object(OCI-Collection)#%d (1) {
+  [u"collection"]=>
+  resource(%d) of type (oci8 collection)
+}
+bool(true)
+
+Warning: OCI-Collection::size(): %d is not a valid oci8 collection resource in %s on line %d
+bool(false)
+Done

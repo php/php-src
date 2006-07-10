@@ -47,3 +47,12 @@ array(1) {
   }
 }
 Done
+--UEXPECTF--
+array(1) {
+  [u"BLOB"]=>
+  object(OCI-Lob)#%d (1) {
+    [u"descriptor"]=>
+    resource(%d) of type (oci8 descriptor)
+  }
+}
+Done

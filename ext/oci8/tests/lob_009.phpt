@@ -67,3 +67,30 @@ file for
 test lob_009.phpt
 "
 Done
+--UEXPECTF--
+object(OCI-Lob)#%d (1) {
+  [u"descriptor"]=>
+  resource(%d) of type (oci8 descriptor)
+}
+bool(true)
+bool(true)
+array(2) {
+  [0]=>
+  object(OCI-Lob)#%d (1) {
+    [u"descriptor"]=>
+    resource(%d) of type (oci8 descriptor)
+  }
+  [u"BLOB"]=>
+  object(OCI-Lob)#%d (1) {
+    [u"descriptor"]=>
+    resource(%d) of type (oci8 descriptor)
+  }
+}
+string(43) "this
+is
+a 
+test
+file for
+test lob_009.phpt
+"
+Done

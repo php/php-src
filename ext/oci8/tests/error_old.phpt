@@ -38,3 +38,20 @@ array(4) {
   string(12) "WRONG SYNTAX"
 }
 Done
+--UEXPECTF--
+resource(%d) of type (oci8 connection)
+resource(%d) of type (oci8 statement)
+
+Warning: ociexecute(): ORA-00900: invalid SQL statement in %s on line %d
+bool(false)
+array(4) {
+  [u"code"]=>
+  int(900)
+  [u"message"]=>
+  string(32) "ORA-00900: invalid SQL statement"
+  [u"offset"]=>
+  int(0)
+  [u"sqltext"]=>
+  string(12) "WRONG SYNTAX"
+}
+Done
