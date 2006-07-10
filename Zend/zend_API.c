@@ -939,10 +939,24 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 	return SUCCESS;
 }
 
+#define ENSURE_ZERO_ARGS(num_args, type_spec, quiet)  { \
+	int __num_args = (num_args); \
+    if (0 == (type_spec)[0] && 0 != __num_args && !(quiet)) { \
+		char *__space; \
+		zstr __class_name = get_active_class_name(&__space TSRMLS_CC); \
+		zend_error(E_WARNING, "%v%s%v() expects exactly 0 parameters, %d given", \
+				   __class_name, __space, \
+				   get_active_function_name(TSRMLS_C), __num_args); \
+        return FAILURE; \
+    }\
+}    
+
 ZEND_API int zend_parse_parameters_ex(int flags, int num_args TSRMLS_DC, char *type_spec, ...)
 {
 	va_list va;
 	int retval;
+
+	ENSURE_ZERO_ARGS(num_args, type_spec, flags & ZEND_PARSE_PARAMS_QUIET);
 
 	va_start(va, type_spec);
 	retval = zend_parse_va_args(num_args, type_spec, &va, flags TSRMLS_CC);
@@ -955,6 +969,8 @@ ZEND_API int zend_parse_parameters(int num_args TSRMLS_DC, char *type_spec, ...)
 {
 	va_list va;
 	int retval;
+
+	ENSURE_ZERO_ARGS(num_args, type_spec, 0);
 
 	va_start(va, type_spec);
 	retval = zend_parse_va_args(num_args, type_spec, &va, 0 TSRMLS_CC);
@@ -972,11 +988,15 @@ ZEND_API int zend_parse_method_parameters(int num_args TSRMLS_DC, zval *this_ptr
 	zend_class_entry *ce;
 
 	if (!this_ptr) {
+		ENSURE_ZERO_ARGS(num_args, p, 0);
+
 		va_start(va, type_spec);
 		retval = zend_parse_va_args(num_args, type_spec, &va, 0 TSRMLS_CC);
 		va_end(va);
 	} else {
 		p++;
+		ENSURE_ZERO_ARGS(num_args-1, p, 0);
+
 		va_start(va, type_spec);
 
 		object = va_arg(va, zval **);
@@ -1004,11 +1024,15 @@ ZEND_API int zend_parse_method_parameters_ex(int flags, int num_args TSRMLS_DC, 
 	int quiet = flags & ZEND_PARSE_PARAMS_QUIET;
 
 	if (!this_ptr) {
+		ENSURE_ZERO_ARGS(num_args, p, quiet);
+
 		va_start(va, type_spec);
 		retval = zend_parse_va_args(num_args, type_spec, &va, 0 TSRMLS_CC);
 		va_end(va);
 	} else {
 		p++;
+		ENSURE_ZERO_ARGS(num_args-1, p, quiet);
+
 		va_start(va, type_spec);
 
 		object = va_arg(va, zval **);
