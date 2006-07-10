@@ -963,8 +963,13 @@ static zval *to_zval_bool(encodeTypePtr type, xmlNodePtr data)
 				stricmp(data->children->content,"t") == 0 ||
 				strcmp(data->children->content,"1") == 0) {
 				ZVAL_BOOL(ret, 1);
-			} else {
+			} else if (stricmp(data->children->content,"false") == 0 ||
+				stricmp(data->children->content,"f") == 0 ||
+				strcmp(data->children->content,"0") == 0) {
 				ZVAL_BOOL(ret, 0);
+			} else {
+				ZVAL_STRING(ret, data->children->content, 1);
+				convert_to_boolean(ret);
 			}
 		} else {
 			soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
@@ -978,27 +983,15 @@ static zval *to_zval_bool(encodeTypePtr type, xmlNodePtr data)
 static xmlNodePtr to_xml_bool(encodeTypePtr type, zval *data, int style, xmlNodePtr parent)
 {
 	xmlNodePtr ret;
-	zval tmp;
 
 	ret = xmlNewNode(NULL,"BOGUS");
 	xmlAddChild(parent, ret);
 	FIND_ZVAL_NULL(data, ret, style);
 
-	if (Z_TYPE_P(data) != IS_BOOL) {
-		tmp = *data;
-		zval_copy_ctor(&tmp);
-		convert_to_boolean(data);
-		data = &tmp;
-	}
-
-	if (data->value.lval == 1) {
+	if (zend_is_true(data)) {
 		xmlNodeSetContent(ret, "true");
 	} else {
 		xmlNodeSetContent(ret, "false");
-	}
-
-	if (data == &tmp) {
-		zval_dtor(&tmp);
 	}
 
 	if (style == SOAP_ENCODED) {
