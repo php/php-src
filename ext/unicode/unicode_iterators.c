@@ -424,12 +424,12 @@ static void text_iter_cs_next(text_iter_obj* object, long flags TSRMLS_DC)
 	if (flags & ITER_REVERSE) {
 		text_iter_helper_move(0, object->text, object->text_len,
 							  &object->u.cs.start, &object->u.cs.start_cp_offset);
-		object->u.cs.end = object->u.cs.start;
 	} else {
 		text_iter_helper_move(1, object->text, object->text_len,
 							  &object->u.cs.start, &object->u.cs.start_cp_offset);
-		object->u.cs.end = object->u.cs.start;
 	}
+	object->u.cs.end = object->u.cs.start;
+	object->u.cs.end_cp_offset = object->u.cs.start_cp_offset;
 	object->u.cs.index++;
 }
 
@@ -446,6 +446,64 @@ static void text_iter_cs_rewind(text_iter_obj *object, long flags TSRMLS_DC)
 	object->u.cs.index = 0; /* because _next increments index */
 }
 
+static void text_iter_cs_following(text_iter_obj *object, int32_t offset, long flags TSRMLS_DC)
+{
+	int32_t k, tmp;
+
+	if (offset < 0) {
+		offset = 0;
+	}
+
+	/*
+	 * On invalid iterator we always want to start looking for the code unit
+	 * offset from the beginning of the string.
+	 */
+	if (object->u.cs.start_cp_offset == UBRK_DONE) {
+		object->u.cs.start_cp_offset = 0;
+		object->u.cs.start = 0;
+	}
+
+	/*
+	 * Try to locate the code unit position relative to the last known codepoint
+	 * offset.
+	 */
+	k = object->u.cs.start;
+	if (offset > object->u.cs.start_cp_offset) {
+		U16_FWD_N(object->text, k, object->text_len, offset - object->u.cs.start_cp_offset);
+	} else {
+		U16_BACK_N(object->text, 0, k, object->u.cs.start_cp_offset - offset);
+	}
+
+	/*
+	 * Locate the actual boundary.
+	 */
+	if (flags & ITER_REVERSE) {
+		/*
+		 * If offset was at or beyond the length of text, we need to adjust it
+		 * to the number of codepoints in the text.
+		 */
+		if (k == object->text_len) {
+			offset = u_countChar32(object->text, object->text_len);
+		}
+		text_iter_helper_move(0, object->text, object->text_len, &k, &offset);
+	} else {
+		text_iter_helper_move(1, object->text, object->text_len, &k, &offset);
+	}
+
+	if (k == object->u.cs.start) {
+		return;
+	}
+
+	object->u.cs.start = k;
+	object->u.cs.start_cp_offset = offset;
+	object->u.cs.end = object->u.cs.start;
+}
+
+static zend_bool text_iter_cs_isBoundary(text_iter_obj *object, int32_t offset, long flags TSRMLS_DC)
+{
+	return 1;
+}
+
 static text_iter_ops text_iter_cs_ops = {
 	text_iter_cs_valid,
 	text_iter_cs_current,
@@ -453,6 +511,8 @@ static text_iter_ops text_iter_cs_ops = {
 	text_iter_cs_offset,
 	text_iter_cs_next,
 	text_iter_cs_rewind,
+	text_iter_cs_following,
+	text_iter_cs_isBoundary,
 };
 
 
@@ -598,7 +658,6 @@ static void text_iter_brk_following(text_iter_obj *object, int32_t offset, long 
 	} else {
 		object->u.brk.bound = ubrk_following(object->u.brk.iter, k);
 	}
-	object->u.brk.next  = object->u.brk.bound;
 
 	/*
 	 * If boundary is the same one as where we were at before, simply return.
@@ -606,6 +665,8 @@ static void text_iter_brk_following(text_iter_obj *object, int32_t offset, long 
 	if (object->u.brk.bound == tmp) {
 		return;
 	}
+
+	object->u.brk.next  = object->u.brk.bound;
 
 	/*
 	 * Adjust the internal codepoint offset based on how far we've moved.
