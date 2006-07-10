@@ -191,12 +191,16 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 
 			tmp = get_node(fault->children,"faultstring");
 			if (tmp != NULL && tmp->children != NULL) {
-				faultstring = tmp->children->content;
+				zval *zv = master_to_zval(get_conversion(IS_STRING), tmp);
+				faultstring = Z_STRVAL_P(zv);
+				FREE_ZVAL(zv);
 			}
 
 			tmp = get_node(fault->children,"faultactor");
 			if (tmp != NULL && tmp->children != NULL) {
-				faultactor = tmp->children->content;
+				zval *zv = master_to_zval(get_conversion(IS_STRING), tmp);
+				faultactor = Z_STRVAL_P(zv);
+				FREE_ZVAL(zv);
 			}
 
 			tmp = get_node(fault->children,"detail");
@@ -217,7 +221,9 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 				/* TODO: lang attribute */
 				tmp = get_node(tmp->children,"Text");
 				if (tmp != NULL && tmp->children != NULL) {
-					faultstring = tmp->children->content;
+					zval *zv = master_to_zval(get_conversion(IS_STRING), tmp);
+					faultstring = Z_STRVAL_P(zv);
+					FREE_ZVAL(zv);
 				}
 			}
 
@@ -227,6 +233,12 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 			}
 		}
 		add_soap_fault(this_ptr, faultcode, faultstring, faultactor, details TSRMLS_CC);
+		if (faultstring) {
+			efree(faultstring);
+		}
+		if (faultactor) {
+			efree(faultactor);
+		}
 #ifdef ZEND_ENGINE_2
 		if (details) {
 			details->refcount--;
