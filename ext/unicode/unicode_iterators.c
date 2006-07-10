@@ -448,7 +448,7 @@ static void text_iter_cs_rewind(text_iter_obj *object, long flags TSRMLS_DC)
 
 static void text_iter_cs_following(text_iter_obj *object, int32_t offset, long flags TSRMLS_DC)
 {
-	int32_t k, tmp;
+	int32_t k;
 
 	if (offset < 0) {
 		offset = 0;
@@ -501,7 +501,54 @@ static void text_iter_cs_following(text_iter_obj *object, int32_t offset, long f
 
 static zend_bool text_iter_cs_isBoundary(text_iter_obj *object, int32_t offset, long flags TSRMLS_DC)
 {
-	return 1;
+	UChar32 cp;
+	int32_t k, tmp;
+	zend_bool result;
+
+	if (offset < 0) {
+		offset = 0;
+	}
+
+	/*
+	 * On invalid iterator we always want to start looking for the code unit
+	 * offset from the beginning of the string.
+	 */
+	if (object->u.cs.start_cp_offset == UBRK_DONE) {
+		object->u.cs.start_cp_offset = 0;
+		object->u.cs.start = 0;
+	}
+
+	/*
+	 * Try to locate the code unit position relative to the last known codepoint
+	 * offset.
+	 */
+	k = object->u.cs.start;
+	if (offset > object->u.cs.start_cp_offset) {
+		U16_FWD_N(object->text, k, object->text_len, offset - object->u.cs.start_cp_offset);
+	} else {
+		U16_BACK_N(object->text, 0, k, object->u.cs.start_cp_offset - offset);
+	}
+
+	/* end of the text is always a boundary */
+	if (k == object->text_len) {
+		offset = u_countChar32(object->text, object->text_len);
+		result = 1;
+	} else {
+	/* if the next codepoint is a base character, it's a boundary */
+		tmp = k;
+		U16_NEXT(object->text, tmp, object->text_len, cp);
+		result = (u_getCombiningClass(cp) == 0);
+	}
+
+	if (k == object->u.cs.start) {
+		return result;
+	}
+
+	object->u.cs.start = k;
+	object->u.cs.start_cp_offset = offset;
+	object->u.cs.end = object->u.cs.start;
+
+	return result;
 }
 
 static text_iter_ops text_iter_cs_ops = {
