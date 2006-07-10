@@ -255,7 +255,7 @@ zval *mysqli_read_property(zval *object, zval *member, int type TSRMLS_DC)
 	}
 
 	if (ret == SUCCESS) {
-		if (strcmp(obj->zo.ce->name.s, "mysqli_driver") &&
+		if (strcmp(obj->zo.ce->name, "mysqli_driver") &&
             (!obj->ptr || ((MYSQLI_RESOURCE *)(obj->ptr))->status < MYSQLI_STATUS_INITIALIZED)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", obj->zo.ce->name );
 			retval = EG(uninitialized_zval_ptr);
@@ -359,7 +359,7 @@ static union _zend_function *php_mysqli_constructor_get(zval *object TSRMLS_DC)
 		} else if (obj->zo.ce == mysqli_driver_class_entry) {
 			f.handler = ZEND_FN(mysqli_driver_construct);
 		} else if (obj->zo.ce == mysqli_warning_class_entry) {
-			f.handler = ZEND_FN(mysqli_warning_construct);
+			f.handler = ZEND_MN(mysqli_warning___construct);
 		}
 	
 		return (union _zend_function*)&f;
@@ -387,7 +387,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 		mysqli_base_class = mysqli_base_class->parent;
 	}
 
-	zend_hash_find(&classes, mysqli_base_class->name.s, mysqli_base_class->name_length + 1, 
+	zend_hash_find(&classes, mysqli_base_class->name, mysqli_base_class->name_length + 1, 
 					(void **) &intern->prop_handler);
 
 	zend_object_std_init(&intern->zo, class_type TSRMLS_CC);
@@ -506,33 +506,33 @@ PHP_MINIT_FUNCTION(mysqli)
 	ce = mysqli_driver_class_entry;
 	zend_hash_init(&mysqli_driver_properties, 0, NULL, NULL, 1);
 	MYSQLI_ADD_PROPERTIES(&mysqli_driver_properties, mysqli_driver_property_entries);
-	zend_hash_add(&classes, ce->name.s, ce->name_length+1, &mysqli_driver_properties, sizeof(mysqli_driver_properties), NULL);
+	zend_hash_add(&classes, ce->name, ce->name_length+1, &mysqli_driver_properties, sizeof(mysqli_driver_properties), NULL);
 	ce->ce_flags |= ZEND_ACC_FINAL_CLASS;
 
 	REGISTER_MYSQLI_CLASS_ENTRY("mysqli", mysqli_link_class_entry, mysqli_link_methods);
 	ce = mysqli_link_class_entry;
 	zend_hash_init(&mysqli_link_properties, 0, NULL, NULL, 1);
 	MYSQLI_ADD_PROPERTIES(&mysqli_link_properties, mysqli_link_property_entries);
-	zend_hash_add(&classes, ce->name.s, ce->name_length+1, &mysqli_link_properties, sizeof(mysqli_link_properties), NULL);
+	zend_hash_add(&classes, ce->name, ce->name_length+1, &mysqli_link_properties, sizeof(mysqli_link_properties), NULL);
 
 	REGISTER_MYSQLI_CLASS_ENTRY("mysqli_warning", mysqli_warning_class_entry, mysqli_warning_methods);
 	ce = mysqli_warning_class_entry;
 	ce->ce_flags |= ZEND_ACC_FINAL_CLASS | ZEND_ACC_PROTECTED;
 	zend_hash_init(&mysqli_warning_properties, 0, NULL, NULL, 1);
 	MYSQLI_ADD_PROPERTIES(&mysqli_warning_properties, mysqli_warning_property_entries);
-	zend_hash_add(&classes, ce->name.s, ce->name_length+1, &mysqli_warning_properties, sizeof(mysqli_warning_properties), NULL);
+	zend_hash_add(&classes, ce->name, ce->name_length+1, &mysqli_warning_properties, sizeof(mysqli_warning_properties), NULL);
 
 	REGISTER_MYSQLI_CLASS_ENTRY("mysqli_result", mysqli_result_class_entry, mysqli_result_methods);
 	ce = mysqli_result_class_entry;
 	zend_hash_init(&mysqli_result_properties, 0, NULL, NULL, 1);
 	MYSQLI_ADD_PROPERTIES(&mysqli_result_properties, mysqli_result_property_entries);
-	zend_hash_add(&classes, ce->name.s, ce->name_length+1, &mysqli_result_properties, sizeof(mysqli_result_properties), NULL);
+	zend_hash_add(&classes, ce->name, ce->name_length+1, &mysqli_result_properties, sizeof(mysqli_result_properties), NULL);
 
 	REGISTER_MYSQLI_CLASS_ENTRY("mysqli_stmt", mysqli_stmt_class_entry, mysqli_stmt_methods);
 	ce = mysqli_stmt_class_entry;
 	zend_hash_init(&mysqli_stmt_properties, 0, NULL, NULL, 1);
 	MYSQLI_ADD_PROPERTIES(&mysqli_stmt_properties, mysqli_stmt_property_entries);
-	zend_hash_add(&classes, ce->name.s, ce->name_length+1, &mysqli_stmt_properties, sizeof(mysqli_stmt_properties), NULL);
+	zend_hash_add(&classes, ce->name, ce->name_length+1, &mysqli_stmt_properties, sizeof(mysqli_stmt_properties), NULL);
 	
 	/* mysqli_options */
 	REGISTER_LONG_CONSTANT("MYSQLI_READ_DEFAULT_GROUP", MYSQL_READ_DEFAULT_GROUP, CONST_CS | CONST_PERSISTENT);
