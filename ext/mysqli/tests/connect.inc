@@ -18,8 +18,7 @@
 					"--innodb_data_file_path=ibdata1:10M:autoextend",
 					"--log-error=$path/testrun.log"
 				);
-		$x = $driver->embedded_server_start(TRUE, $args, NULL);
-		var_dump($x);
+		$driver->embedded_server_start(TRUE, $args, NULL);
 	}
 
 ?>
