@@ -99,7 +99,6 @@ enum UBreakIteratorType brk_type_map[] = {
 	UBRK_SENTENCE,
 };
 
-PHPAPI zend_class_entry* text_iterator_aggregate_ce;
 PHPAPI zend_class_entry* text_iterator_ce;
 PHPAPI zend_class_entry* rev_text_iterator_ce;
 
@@ -1123,7 +1122,7 @@ PHP_METHOD(TextIterator, preceding)
 	}
 
 	/*
-	 * ReverseTextIterator will behave the same as the normal one.
+	 * ReverseTextIterator will behave in the same way as the normal one.
 	 */
 	flags = intern->flags | ITER_REVERSE;
 	iter_ops[intern->type]->following(intern, offset, flags TSRMLS_CC);
@@ -1141,7 +1140,7 @@ PHP_METHOD(TextIterator, isBoundary)
 	}
 
 	/*
-	 * ReverseTextIterator will behave the same as the normal one.
+	 * ReverseTextIterator will behave in the same way as the normal one.
 	 */
 	RETURN_BOOL(iter_ops[intern->type]->isBoundary(intern, offset, intern->flags TSRMLS_CC));
 }
@@ -1154,14 +1153,60 @@ PHP_METHOD(TextIterator, getAvailableLocales)
 		return;
 	}
 
-	if (!return_value_used) {
-		return;
-	}
-
 	array_init(return_value);
 	count = ubrk_countAvailable();
 	for (i = 0; i < count; i++) {
 		add_next_index_ascii_string(return_value, (char*)ubrk_getAvailable(i), ZSTR_DUPLICATE);
+	}
+}
+
+PHP_METHOD(TextIterator, getRuleStatus)
+{
+	zval *object = getThis();
+	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+		return;
+	}
+
+	if (intern->type >= ITER_CHARACTER && intern->type < ITER_TYPE_LAST) {
+		RETURN_LONG(ubrk_getRuleStatus(intern->u.brk.iter));
+	} else {
+		RETURN_LONG(0);
+	}
+}
+
+PHP_METHOD(TextIterator, getRuleStatusArray)
+{
+	int32_t status_vec[32], *vec_ptr = status_vec;
+	int32_t vec_size, i;
+	zval *object = getThis();
+	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
+	UErrorCode status = U_ZERO_ERROR;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+		return;
+	}
+
+	array_init(return_value);
+	if (intern->type < ITER_CHARACTER) {
+		add_next_index_long(return_value, 0);
+	} else {
+		vec_size = sizeof(status_vec) / sizeof(status_vec[0]);
+		vec_size = ubrk_getRuleStatusVec(intern->u.brk.iter, vec_ptr, vec_size, &status);
+		if (status == U_BUFFER_OVERFLOW_ERROR) {
+			vec_ptr = safe_emalloc(vec_size, sizeof(int32_t), 0);
+			status = U_ZERO_ERROR;
+			vec_size = ubrk_getRuleStatusVec(intern->u.brk.iter, vec_ptr, vec_size, &status);
+		}
+
+		for (i = 0; i < vec_size; i++) {
+			add_next_index_long(return_value, vec_ptr[i]);
+		}
+
+		if (vec_ptr != status_vec) {
+			efree(vec_ptr);
+		}
 	}
 }
 
@@ -1182,6 +1227,9 @@ static zend_function_entry text_iterator_funcs[] = {
 	PHP_ME(TextIterator, following,	  NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(TextIterator, preceding,	  NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(TextIterator, isBoundary,  NULL, ZEND_ACC_PUBLIC)
+
+	PHP_ME(TextIterator, getRuleStatus,      NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(TextIterator, getRuleStatusArray, NULL, ZEND_ACC_PUBLIC)
 
 	PHP_ME(TextIterator, getAvailableLocales, NULL, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 
@@ -1207,14 +1255,35 @@ void php_register_unicode_iterators(TSRMLS_D)
 	rev_text_iterator_ce->ce_flags |= ZEND_ACC_FINAL_CLASS;
 	zend_class_implements(rev_text_iterator_ce TSRMLS_CC, 1, zend_ce_iterator);
 
-	zend_declare_class_constant_long(text_iterator_ce, "CODE_POINT", sizeof("CODE_POINT")-1, ITER_CODE_POINT TSRMLS_CC);
-	zend_declare_class_constant_long(text_iterator_ce, "COMB_SEQUENCE", sizeof("COMB_SEQUENCE")-1, ITER_COMB_SEQUENCE TSRMLS_CC);
-	zend_declare_class_constant_long(text_iterator_ce, "CHARACTER", sizeof("CHARACTER")-1, ITER_CHARACTER TSRMLS_CC);
-	zend_declare_class_constant_long(text_iterator_ce, "WORD", sizeof("WORD")-1, ITER_WORD TSRMLS_CC);
-	zend_declare_class_constant_long(text_iterator_ce, "LINE", sizeof("LINE")-1, ITER_LINE TSRMLS_CC);
-	zend_declare_class_constant_long(text_iterator_ce, "SENTENCE", sizeof("SENTENCE")-1, ITER_SENTENCE TSRMLS_CC);
+    zend_declare_class_constant_long(text_iterator_ce, "CODE_POINT",    sizeof("CODE_POINT")-1,    ITER_CODE_POINT TSRMLS_CC);
+    zend_declare_class_constant_long(text_iterator_ce, "COMB_SEQUENCE", sizeof("COMB_SEQUENCE")-1, ITER_COMB_SEQUENCE TSRMLS_CC);
+    zend_declare_class_constant_long(text_iterator_ce, "CHARACTER",     sizeof("CHARACTER")-1,     ITER_CHARACTER TSRMLS_CC);
+    zend_declare_class_constant_long(text_iterator_ce, "WORD",          sizeof("WORD")-1,          ITER_WORD TSRMLS_CC);
+    zend_declare_class_constant_long(text_iterator_ce, "LINE",          sizeof("LINE")-1,          ITER_LINE TSRMLS_CC);
+    zend_declare_class_constant_long(text_iterator_ce, "SENTENCE",      sizeof("SENTENCE")-1,      ITER_SENTENCE TSRMLS_CC);
 
-	zend_declare_class_constant_long(text_iterator_ce, "DONE", sizeof("DONE")-1, UBRK_DONE TSRMLS_CC);
+    zend_declare_class_constant_long(text_iterator_ce, "DONE", sizeof("DONE")-1, UBRK_DONE TSRMLS_CC);
+
+    zend_declare_class_constant_long(text_iterator_ce, "WORD_NONE",         sizeof("WORD_NONE")-1,         UBRK_WORD_NONE TSRMLS_CC);
+    zend_declare_class_constant_long(text_iterator_ce, "WORD_NONE_LIMIT",   sizeof("WORD_NONE_LIMIT")-1,   UBRK_WORD_NONE_LIMIT TSRMLS_CC);
+    zend_declare_class_constant_long(text_iterator_ce, "WORD_NUMBER",       sizeof("WORD_NUMBER")-1,       UBRK_WORD_NUMBER TSRMLS_CC);
+    zend_declare_class_constant_long(text_iterator_ce, "WORD_NUMBER_LIMIT", sizeof("WORD_NUMBER_LIMIT")-1, UBRK_WORD_NUMBER_LIMIT TSRMLS_CC);
+    zend_declare_class_constant_long(text_iterator_ce, "WORD_LETTER",       sizeof("WORD_LETTER")-1,       UBRK_WORD_LETTER TSRMLS_CC);
+    zend_declare_class_constant_long(text_iterator_ce, "WORD_LETTER_LIMIT", sizeof("WORD_LETTER_LIMIT")-1, UBRK_WORD_LETTER_LIMIT TSRMLS_CC);
+    zend_declare_class_constant_long(text_iterator_ce, "WORD_KANA",         sizeof("WORD_KANA")-1,         UBRK_WORD_KANA TSRMLS_CC);
+    zend_declare_class_constant_long(text_iterator_ce, "WORD_KANA_LIMIT",   sizeof("WORD_KANA_LIMIT")-1,   UBRK_WORD_KANA_LIMIT TSRMLS_CC);
+    zend_declare_class_constant_long(text_iterator_ce, "WORD_IDEO",         sizeof("WORD_IDEO")-1,         UBRK_WORD_IDEO TSRMLS_CC);
+    zend_declare_class_constant_long(text_iterator_ce, "WORD_IDEO_LIMIT",   sizeof("WORD_IDEO_LIMIT")-1,   UBRK_WORD_IDEO_LIMIT TSRMLS_CC);
+
+    zend_declare_class_constant_long(text_iterator_ce, "LINE_SOFT",         sizeof("LINE_SOFT")-1,         UBRK_LINE_SOFT TSRMLS_CC);
+    zend_declare_class_constant_long(text_iterator_ce, "LINE_SOFT_LIMIT",   sizeof("LINE_SOFT_LIMIT")-1,   UBRK_LINE_SOFT_LIMIT TSRMLS_CC);
+    zend_declare_class_constant_long(text_iterator_ce, "LINE_HARD",         sizeof("LINE_HARD")-1,         UBRK_LINE_HARD TSRMLS_CC);
+    zend_declare_class_constant_long(text_iterator_ce, "LINE_HARD_LIMIT",   sizeof("LINE_HARD_LIMIT")-1,   UBRK_LINE_HARD_LIMIT TSRMLS_CC);
+
+    zend_declare_class_constant_long(text_iterator_ce, "SENTENCE_TERM",       sizeof("SENTENCE_TERM")-1,       UBRK_SENTENCE_TERM TSRMLS_CC);
+    zend_declare_class_constant_long(text_iterator_ce, "SENTENCE_TERM_LIMIT", sizeof("SENTENCE_TERM_LIMIT")-1, UBRK_SENTENCE_TERM_LIMIT TSRMLS_CC);
+    zend_declare_class_constant_long(text_iterator_ce, "SENTENCE_SEP",        sizeof("SENTENCE_SEP")-1,        UBRK_SENTENCE_SEP TSRMLS_CC);
+    zend_declare_class_constant_long(text_iterator_ce, "SENTENCE_SEP_LIMIT",  sizeof("SENTENCE_SEP_LIMIT")-1,  UBRK_SENTENCE_SEP_LIMIT TSRMLS_CC);
 }
 
 /*
