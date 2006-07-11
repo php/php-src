@@ -2130,6 +2130,11 @@ static int ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			if (EG(exception)) {
 				array_ptr->refcount--;
 				zval_ptr_dtor(&array_ptr);
+				if (opline->extended_value & ZEND_FE_RESET_VARIABLE) {
+
+				} else {
+
+				}
 				ZEND_VM_NEXT_OPCODE();
 			}
 		}
@@ -2137,6 +2142,11 @@ static int ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (EG(exception)) {
 			array_ptr->refcount--;
 			zval_ptr_dtor(&array_ptr);
+			if (opline->extended_value & ZEND_FE_RESET_VARIABLE) {
+
+			} else {
+
+			}
 			ZEND_VM_NEXT_OPCODE();
 		}
 		iter->index = -1; /* will be set to 0 before using next handler */
@@ -4686,6 +4696,11 @@ static int ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			if (EG(exception)) {
 				array_ptr->refcount--;
 				zval_ptr_dtor(&array_ptr);
+				if (opline->extended_value & ZEND_FE_RESET_VARIABLE) {
+
+				} else {
+
+				}
 				ZEND_VM_NEXT_OPCODE();
 			}
 		}
@@ -4693,6 +4708,11 @@ static int ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (EG(exception)) {
 			array_ptr->refcount--;
 			zval_ptr_dtor(&array_ptr);
+			if (opline->extended_value & ZEND_FE_RESET_VARIABLE) {
+
+			} else {
+
+			}
 			ZEND_VM_NEXT_OPCODE();
 		}
 		iter->index = -1; /* will be set to 0 before using next handler */
@@ -7839,6 +7859,11 @@ static int ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			if (EG(exception)) {
 				array_ptr->refcount--;
 				zval_ptr_dtor(&array_ptr);
+				if (opline->extended_value & ZEND_FE_RESET_VARIABLE) {
+					if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+				} else {
+					if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+				}
 				ZEND_VM_NEXT_OPCODE();
 			}
 		}
@@ -7846,6 +7871,11 @@ static int ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (EG(exception)) {
 			array_ptr->refcount--;
 			zval_ptr_dtor(&array_ptr);
+			if (opline->extended_value & ZEND_FE_RESET_VARIABLE) {
+				if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+			} else {
+				if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+			}
 			ZEND_VM_NEXT_OPCODE();
 		}
 		iter->index = -1; /* will be set to 0 before using next handler */
@@ -20588,6 +20618,11 @@ static int ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			if (EG(exception)) {
 				array_ptr->refcount--;
 				zval_ptr_dtor(&array_ptr);
+				if (opline->extended_value & ZEND_FE_RESET_VARIABLE) {
+
+				} else {
+
+				}
 				ZEND_VM_NEXT_OPCODE();
 			}
 		}
@@ -20595,6 +20630,11 @@ static int ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (EG(exception)) {
 			array_ptr->refcount--;
 			zval_ptr_dtor(&array_ptr);
+			if (opline->extended_value & ZEND_FE_RESET_VARIABLE) {
+
+			} else {
+
+			}
 			ZEND_VM_NEXT_OPCODE();
 		}
 		iter->index = -1; /* will be set to 0 before using next handler */

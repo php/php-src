@@ -3166,6 +3166,11 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 			if (EG(exception)) {
 				array_ptr->refcount--;
 				zval_ptr_dtor(&array_ptr);
+				if (opline->extended_value & ZEND_FE_RESET_VARIABLE) {
+					FREE_OP1_VAR_PTR();
+				} else {
+					FREE_OP1_IF_VAR();
+				}
 				ZEND_VM_NEXT_OPCODE();
 			}
 		}
@@ -3173,6 +3178,11 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		if (EG(exception)) {
 			array_ptr->refcount--;
 			zval_ptr_dtor(&array_ptr);
+			if (opline->extended_value & ZEND_FE_RESET_VARIABLE) {
+				FREE_OP1_VAR_PTR();
+			} else {
+				FREE_OP1_IF_VAR();
+			}
 			ZEND_VM_NEXT_OPCODE();
 		}
 		iter->index = -1; /* will be set to 0 before using next handler */
