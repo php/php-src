@@ -1035,11 +1035,25 @@ PHP_METHOD(TextIterator, current)
 
 PHP_METHOD(TextIterator, next)
 {
+	long i, step = 1;
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
-	iter_ops[intern->type]->next(intern, intern->flags TSRMLS_CC);
-	RETURN_LONG(iter_ops[intern->type]->offset(intern, intern->flags TSRMLS_CC));
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &step) == FAILURE) {
+		return;
+	}
+
+	if (step <= 0) {
+		step = 1;
+	}
+
+	for (i = 0; i < step; i++) {
+		iter_ops[intern->type]->next(intern, intern->flags TSRMLS_CC);
+	}
+
+	if (return_value_used) {
+		RETURN_LONG(iter_ops[intern->type]->offset(intern, intern->flags TSRMLS_CC));
+	}
 }
 
 PHP_METHOD(TextIterator, key)
@@ -1088,13 +1102,26 @@ PHP_METHOD(TextIterator, offset)
 
 PHP_METHOD(TextIterator, previous)
 {
-	long flags;
+	long flags, i, step = 1;
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &step) == FAILURE) {
+		return;
+	}
+
+	if (step <= 0) {
+		step = 1;
+	}
 	flags = intern->flags ^ ITER_REVERSE;
-	iter_ops[intern->type]->next(intern, flags TSRMLS_CC);
-	RETURN_LONG(iter_ops[intern->type]->offset(intern, flags TSRMLS_CC));
+
+	for (i = 0; i < step; i++) {
+		iter_ops[intern->type]->next(intern, flags TSRMLS_CC);
+	}
+
+	if (return_value_used) {
+		RETURN_LONG(iter_ops[intern->type]->offset(intern, flags TSRMLS_CC));
+	}
 }
 
 PHP_METHOD(TextIterator, following)
