@@ -1,5 +1,5 @@
 --TEST--
-mysqli kill
+mysqli thread_id & kill
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
@@ -8,15 +8,9 @@ mysqli kill
 
 	$mysql = new mysqli($host, $user, $passwd, "test");
 
-	$result = $mysql->query("SELECT CONNECTION_ID() AS id");
-
-	$row = $result->fetch_assoc();
-
-    $result->free();
-	
 	var_dump($mysql->ping());
 
-	var_dump($mysql->kill($row["id"]));
+	var_dump($mysql->kill($mysql->thread_id));
 
 	var_dump($mysql->ping());
 
