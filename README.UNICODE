@@ -68,15 +68,13 @@ Legend:
   --------
     * HTTP input request decoding
 
-    + Fixing remaining string-aware operators (assignment to {}, etc)
+    + Fixing remaining string-aware operators (assignment to [] etc)
 
-    + Comparison (collation) of Unicode strings with built-in operators
-
-    * Support for Unicode and binary strings in PHP streams
+    + Support for Unicode and binary strings in PHP streams
 
     + Support for Unicode identifiers
 
-    * Configurable handling of conversion failures
+    + Configurable handling of conversion failures
 
     + \C{} escape sequence in strings
 
@@ -85,7 +83,7 @@ Legend:
   ---------
     * Exposing ICU API
 
-    - Porting all remaining functions to support Unicode and/or binary
+    * Porting all remaining functions to support Unicode and/or binary
       strings
 
 
@@ -94,6 +92,24 @@ Encoding Names
 All the encoding settings discussed in this document accept any valid
 encoding name supported by ICU. See ICU online documentation for the full
 list of encodings.
+
+
+Unicode Semantics Switch
+========================
+
+Obviously, PHP cannot simply impose new Unicode support on everyone. There
+are many applications that do not care about Unicode and do not need it.
+Consequently, there is a switch that enables certain fundamental language
+changes related to Unicode. This switch is available only as a site-wide (per
+virtual server) INI setting.
+
+Note that having switch turned off does not imply that PHP is unaware of Unicode
+at all and that no Unicode strings can exist. It only affects certain aspects of
+the language, and Unicode strings can always be created programmatically. All
+the functions and operators will still support Unicode strings and work
+appropriately.
+
+    unicode.semantics = On
 
 
 Internal Encoding
@@ -115,7 +131,7 @@ a specific encoding setting is not set, PHP defaults it to the fallback
 encoding. If the fallback_encoding is not specified either, it is set to
 UTF-8.
 
-  fallback_encoding = "iso-8859-1"
+  unicode.fallback_encoding = "iso-8859-1"
 
 
 Runtime Encoding
@@ -123,69 +139,77 @@ Runtime Encoding
 
 Currently PHP neither specifies nor cares what the encoding of its strings
 is. However, the Unicode implementation needs to know what this encoding is
-for several reasons, including type coersion and encoding conversion for
-strings generated at runtime via function calls and casting. This setting
-specifies this runtime encoding.
+for several reasons, including explicit (casting) and implicit (concatenation,
+comparison, parameter passing) type coersions. This setting specifies the
+runtime encoding.
 
-  runtime_encoding = "iso-8859-1"
+  unicode.runtime_encoding = "iso-8859-1"
 
 
 Output Encoding
 ===============
 
 Automatic output encoding conversion is supported on the standard output
-stream.  Therefore, command such as 'print' and 'echo' automatically convert
+stream.  Therefore, commands such as 'print' and 'echo' automatically convert
 their arguments to the specified encoding. No automatic output encoding is
 performed for anything else. Therefore, when writing to files or external
 resources, the developer has to manually encode the data using functions
-provided by the unicode extension or rely on stream encoding filters. The
-unicode extension provides necessary stream filters to make developers'
-lives easier.
+provided by the unicode extension or rely on stream encoding features
 
 The existing default_charset setting so far has been used only for
 specifying the charset portion of the Content-Type MIME header. For several
 reasons, this setting is deprecated. Now it is only used when the Unicode
 semantics switch is disabled and does not affect the actual transcoding of
 the output stream. The output encoding setting takes precedence in all other
-cases.
+cases. If the output encoding is set, PHP will automatically add 'charset'
+portion to the Conten-Type header.
 
-  output_encoding = "utf-8"
+  unicode.output_encoding = "utf-8"
 
 
 HTTP Input Encoding
 ===================
 
-To make accessing HTTP input variables easier, PHP automatically decodes
-HTTP GET and POST requests based on the specified encoding. If the HTTP
-request contains the encoding specification in the headers, then it will be
-used instead of this setting. If the HTTP input encoding setting is not
-specified, PHP falls back onto the output encoding setting, because modern
-browsers are supposed to return the data in the same encoding as they
-received it in.
+There will be no explicit input encoding setting. Instead, PHP will rely on a
+couple of heuristics to determine what encoding the incoming request might be
+in. Firstly, PHP will attempt to decode the input using the value of the
+unicode.output_encoding setting, because that is the most logical choice if we
+assume that the clients send the data back in the encoding that the page with
+the form was in. If that is unsuccessful, we could fallback on the "_charset_"
+form parameter, if present. This parameter is sent by IE (and possibly Firefox)
+along with the form data and indicates the encoding of the request. Note that
+this parameter will be present only if the form contains a hidden field named
+"_charset_".
 
-If the actual encoding is passed in the request itself or is found
-elsewhere, then the application can ask PHP to re-decode the raw input
-explicitly.
-
-  http_input_encoding = "utf-8"
+The variables that are decoded successfully will be put into the request arrays
+as Unicode strings, those that fail -- as binary strings. PHP will set a
+flag (probably in the $_SERVER array) indicating that there were problems during
+the conversion. The user will have access to the raw input in case of
+failure via the input filter extension and can to access the request parameters
+via input_get_arg() function. The input filter extension always looks in
+the raw input data and not in the request arrays, and input_get_arg() has a
+'charset' parameter that can be specified to tell PHP what charset the incoming
+data is in. This kills two birds with one stone: users have access to request
+arrays data on successful decoding as well as a standard and secure way to get
+at the data in case of failed decoding.
 
 
 Script Encoding
 ===============
 
 PHP scripts may be written in any encoding supported by ICU. The encoding
-of the scripts can be specified site-wide via an INI directive
-script_encoding, or with a 'declare' pragma at the beginning of the script.
-The reason for pragma is that an application written in Shift-JIS, for
-example, should be executable on a system where the INI directive cannot be
-changed by the application itself. The pragma setting is valid only for the
-script it occurs in, and does not propagate to the included files.
+of the scripts can be specified site-wide via an INI directive, or with a
+'declare' pragma at the beginning of the script.  The reason for pragma is that
+an application written in Shift-JIS, for example, should be executable on a
+system where the INI directive cannot be changed by the application itself. The
+pragma setting is valid only for the script it occurs in, and does not propagate
+to the included files.
 
   pragma:
    <?php declare(encoding = 'utf-8'); ?>
 
   INI setting:
-   script_encoding = utf-8
+   unicode.script_encoding = utf-8
 
 
 Conversion Semantics
@@ -199,50 +223,32 @@ ISO-8859-1. When upconverting to Unicode, if an encoding has a character
 which cannot be converted into Unicode, that sequence is replaced by the
 Unicode substitution character (U+FFFD).
 
-The conversion failure behavior can be customized:
+The conversion error behavior can be customized:
 
-  - perform substitution as described above with a custom substitution
-    character
+  - stop the conversion and return an empty string
   - skip any invalid characters
-  - stop the conversion, raise an error, and return partial conversion
-    results
-  - replace the missing character with a diagnostic character and continue,
-    e.g. [U+hhhh]
+  - substibute invalid characters with a custom substitution character
+  - escape the invalid character in various formats
 
-There are two INI settings that control this.
+The global conversion error settings can be controlled with these two functions:
 
-  unicode.from_error_mode = U_INVALID_SUBSTITUTE
-                            U_INVALID_SKIP
-                            U_INVALID_STOP
-                            U_INVALID_ESCAPE
+  unicode_set_error_mode(int direction, int mode)
+  unicode_set_subst_char(unicode char)
 
-  unicode.from_error_subst_char = a2
+Where direction is either FROM_UNICODE or TO_UNICODE, and mode is one of these
+constants:
 
-The second setting is supposed to contain the Unicode code point value for
-the substitution character. This value has to be representable in the target
-encoding.
+  U_CONV_ERROR_STOP
+  U_CONV_ERROR_SKIP 
+  U_CONV_ERROR_SUBST
+  U_CONV_ERROR_ESCAPE_UNICODE
+  U_CONV_ERROR_ESCAPE_ICU
+  U_CONV_ERROR_ESCAPE_JAVA
+  U_CONV_ERROR_ESCAPE_XML_DEC
+  U_CONV_ERROR_ESCAPE_XML_HEX
 
-Note that PHP always tries to convert as much as of the data as possible and
-returns the converted results even if an error happens.
-
-
-Unicode Switch
-==============
-
-Obviously, PHP cannot simply impose new Unicode support on everyone. There
-are many applications that do not care about Unicode and do not need it.
-Consequently, there is a switch that enables certain fundamental language
-changes related to Unicode. This switch is available as a site-wide, or
-per-dir INI setting only.
-
-Note that having switch turned off does not imply that PHP is unaware of
-Unicode at all and that no Unicode string can exist. It only affects certain
-aspects of the language, and Unicode strings can always be created
-programmatically.
-
-    unicode.semantics = On
-
- [TODO: list areas that are affected by this switch]
+Substitution character can be set only for FROM_UNICODE direction and has to
+exist in the target character set.
 
 
 Unicode String Type
@@ -260,39 +266,25 @@ units, each of which is a 16-bit word. Working on the code point level is
 necessary because doing otherwise would mean offloading the processing of
 surrogate pairs onto PHP users, and that is less than desirable.
 
-The repercussions are that one cannot expect code point N to be at offset
-N in the Unicode string. Instead, one has to iterate from the beginning from
-the string using U16_FWD() macro until the desired codepoint is reached.
+The repercussions are that one cannot expect code point N to be at offset N in
+the Unicode string. Instead, one has to iterate from the beginning from the
+string using U16_FWD() macro until the desired codepoint is reached. This will
+be transparent to the end user who will work only with "character" offsets.
 
 The codepoint access is one of the primary areas targeted for optimization.
-
-
-Native Encoding String Type
-===========================
-
-Native encoding string type (IS_STRING) serves two purposes: backwards
-compatibility when Unicode semantics switch is off, and for representing
-strings in non-Unicode encodings (native encodings) when it is on. It is
-processsed on the byte level.
 
 
 Binary String Type
 ==================
 
-Binary string type (IS_BINARY) can be used for storing images, PDFs, or
-other binary data intended to be processed on a byte-level and that cannot
-be intepreted as text.
+Binary string type (IS_STRING) serves two purposes: backwards compatibility and
+representing non-Unicode strings and binary data. When Unicode semantics switch
+is off, it is used for all strings in PHP, same in previous versions. When the
+switch is on, this type will be used to store text in other encodings as well as
+true binary data such as images, PDFs, etc.
 
-Binary data type does not participate in implicit conversions, and cannot be
-explicitly upconverted to other string types, although the inverse is
-possible.
-
-Printing binary data to the standard output passes it through as-is,
-independent of the output encoding.
-
-When Unicode semantics switch is off, binary string literals and binary
-strings returned by functions actually resolve to IS_STRING type, for
-backwards compatibility reasons.
+Printing binary data to the standard output passes it through as-is, independent
+of the output encoding.
 
 
 Zval Structure Changes
@@ -334,12 +326,26 @@ For IS_UNICODE type, we need to add another structure to the union:
     ....
         struct {
             UChar *val;            /* Unicode string value */
-            int32_t len;           /* number of UChar's */
+            int len;               /* number of UChar's */
     ....
     } value;
 
 This cleanly separates the two types of strings and helps preserve backwards
-compatibility. For IS_BINARY type, we can re-use the str union.
+compatibility.
+
+To optimize access to IS_STRING and IS_UNICODE storage at runtime, we need yet
+another structure:
+
+    union {
+    ....
+        struct {                    /* Universal string type */
+            zstr val;
+            int len;
+        } uni;
+    ....
+    } value;
+
+Where zstr ia union of char*, UChar*, and void*.
 
 
 Language Modifications
@@ -398,36 +404,30 @@ IS_BINARY types. In more detail:
 
   - The concatenation (.) operator has been changed to automatically coerce
     IS_STRING type to the more precise IS_UNICODE if its operands are of two
-    different string types. It does not perform coersion for IS_BINARY type,
-    however, since binary data is not considered to be in any encoding.  To
-    concatenate string with binary data, strings have to be cast to binary
-    type first. The coersion uses the conversion matrix specified later in
-    this document.
+    different string types.
 
   - The concatenation assignment operator (.=) has been changed similarly.
 
-  - The string indexing operators {}/[] have been changed to accomodate
-    IS_UNICODE type strings and extract the specified character. Note that
-    the index specifies a code point, not a byte, or a code unit, thus
-    supporting supplementary characters as well.
+  - The string indexing operator [] has been changed to accomodate IS_UNICODE
+    type strings and extract the specified character. Note that the index
+    specifies a code point, not a byte, or a code unit, thus supporting
+    supplementary characters.
 
-  - Both Unicode and binary string types can be used as array keys.  If the
-    Unicode switch is on, the native encoding strings are converted to
-    Unicode, if they are used as hash keys, but binary strings are not.
-    Note that this means if Unicode switch is off, then Unicode string "abc"
-    and native string "abc" do not hash to the same value.
+  - Both Unicode and binary string types can be used as array keys. If the
+    Unicode switch is on, the binary keys are converted to Unicode.
 
   - Bitwise operators and increment/decrement operators do not work on
     Unicode strings. They do work on binary strings.
 
-  - Two new casting operators are introduced, (unicode) and (binary).
-    They use the conversion matrix specified later in this document.
+  - Two new casting operators are introduced, (unicode) and (binary). The
+    (string) operator will cast to Unicode type if the Unicode semantics switch is
+    on, and to binary type otherwise.
 
   - The comparison operators when applied to Unicode strings, perform
     comparison in binary code point order. They also do appropriate coersion
     if the strings are of differing types.
 
-  - The arithmetic operators use the same semantic as today for converting
+  - The arithmetic operators use the same semantics as today for converting
     strings to numbers. A Unicode string is considered numeric if it
     represents a long or a double number in en_US_POSIX locale.
 
@@ -480,9 +480,9 @@ There are now three new specifiers: 't', 'u', and 'T'.
 
   't' specifier
   -------------
-  This specifier indicates that the caller requires the incoming parameter
-  to be string data (IS_STRING, IS_UNICODE, IS_BINARY). The caller has to provide
-  the storage for string value, length, and type.
+  This specifier indicates that the caller requires the incoming parameter to be
+  string data (IS_STRING, IS_UNICODE). The caller has to provide the storage for
+  string value, length, and type.
 
     void *str;
     int len;
@@ -492,29 +492,27 @@ There are now three new specifiers: 't', 'u', and 'T'.
         return;
     }
     if (type == IS_UNICODE) {
-       /* process UTF-16 data */
+       /* process Unicode string */
     } else {
-       /* process native string or binary data */
+       /* process binary string */
     }
 
-  For IS_STRING and IS_BINARY types, the length represents the number of
-  bytes, and for IS_UNICODE the number of UChar's. When converting other
-  types (numbers, booleans, etc) to strings, the exact behavior depends on
-  the Unicode semantics switch: if on, they are converted to IS_UNICODE,
-  otherwise to IS_STRING.
+  For IS_STRING type, the length represents the number of bytes, and for
+  IS_UNICODE the number of UChar's. When converting other types (numbers,
+  booleans, etc) to strings, the exact behavior depends on the Unicode semantics
+  switch: if on, they are converted to IS_UNICODE, otherwise to IS_STRING.
 
 
   'u' specifier
   -------------
   This specifier indicates that the caller requires the incoming parameter
-  to be a Unicode UTF-16 encoded string. If a non-Unicode string is passed,
-  the engine creates a copy of the string and automatically convert it
-  to Unicode type before passing it to the internal function. No such
-  conversion is necessary for Unicode strings, obviously. Binary type cannot
-  be upconverted, and the engine issues an error in such case.
+  to be a Unicode encoded string. If a non-Unicode string is passed, the engine
+  creates a copy of the string and automatically convert it to Unicode type before
+  passing it to the internal function. No such conversion is necessary for Unicode
+  strings, obviously.
 
     UChar *str;
-    int32_t len;
+    int len;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "u", &str, &len) == FAILURE) {
         return;
@@ -530,36 +528,35 @@ There are now three new specifiers: 't', 'u', and 'T'.
   checks need to be performed in order to do anything. All parameters
   marked by the 'T' specifier are promoted to the same type.
   
-  Binary type is generally speaking the most precise one. However, we do not
-  want to convert Unicode strings to binary ones, so an error is thrown
-  if the incoming list of parameters has both Unicode and binary strings in
-  it.
-
-  If there are no binary strings, and at least one of the strings is of
-  Unicode type, then all the rest of the strings are upconverted to Unicode.
-
-  Otherwise the promotion is to IS_STRING type.
+  If at least one of the 'T' parameters is of Unicode type, then the rest of
+  them are converted to IS_UNICODE. Otherwise all 'T' parameters are conveted to
+  IS_STRING type.
 
 
-  void *str1, *str2;
-  int len1, len2;
-  zend_uchar type1, type2;
+    void *str1, *str2;
+    int len1, len2;
+    zend_uchar type1, type2;
 
-  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT", &str1, &len1,
-                           &type1, &str2, &len2, &type2) == FAILURE) {
-     return;
-  }
-  if (type1 == IS_UNICODE) {
-     /* process as Unicode, str2 is guaranteed to be Unicode as well */
-  } else {
-     /* process as native string, str2 is guaranteed to be the same */
-  }
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT", &str1, &len1,
+                             &type1, &str2, &len2, &type2) == FAILURE) {
+       return;
+    }
+    if (type1 == IS_UNICODE) {
+       /* process as Unicode, str2 is guaranteed to be Unicode as well */
+    } else {
+       /* process as native string, str2 is guaranteed to be the same */
+    }
 
 
 The existing 's' specifier has been modified as well. If a Unicode string is
 passed in, it automatically copies and converts the string to the runtime
 encoding, and issues a warning. If a binary type is passed-in, no conversion
 is necessary.
+
+The 'U' and 'S' specifiers are similar to 'u' and 's' but they are more strict
+about the type of the passed-in parameter. If 'U' is specified and the binary
+string is passed in, the engine will issue a warning instead of doing automatic
+conversion. The converse applies to the 'S' specifier.
 
 
 Upgrading Existing Functions
@@ -581,61 +578,11 @@ For example, strlen() returns the number of code points in the string.
 Function upgrade guidelines are available in a separate document.
 
 
-Unicode Extension
-=================
-
-There will be one or more extensions that provide Unicode and i18n services
-to PHP. In phase I only the conversion service is necessary. The Unicode
-extension is 'ext/unicode' and its functions should be prefixed with 'unicode'
-or 'icu'.
-
-  Conversion Functions
-  --------------------
-
-  string unicode_encode(unicode $input, text $encoding)
-    
-    Takes a UTF-16 Unicode string and converts it to the the target
-    encoding, returning the result.
-
-  unicode unicode_decode(string $input, text $encoding)
-  
-    Takes a string in the source encoding and converts it to a UTF-16
-    Unicode string, returning the result.
-
-
-Type Conversion Matrix
-======================
-
-         to |   IS_STRING     |   IS_UNICODE     |   IS_BINARY
-from        |                 |                  |
--------------------------------------------------------------------
-            |                 |                  |
-IS_STRING   |      n/a        |   implicit=yes   |   explicit=yes
-            |                 |   explicit=yes   |   implicit=no
-            |                 |                  |
--------------------------------------------------------------------
-            |                 |                  |
-IS_UNICODE  |   explicit=yes  |       n/a        |   explicit=yes
-            |   implicit=no   |                  |   implicit=no
-            |                 |                  |
-------------------------------|------------------------------------
-            |                 |                  |
-IS_BINARY   |   explicit=no   |   explicit=no    |       n/a
-            |   implicit=no   |   implicit=no    |
-            |                 |                  |
-
-explicit = casting
-implicit = for concatenation, etc
-
-IS_STRING  <-> IS_UNICODE uses runtime-encoding
-IS_UNICODE  -> IS_BINARY converts to runtime encoding first, then to binary
-
-
-Implementation Details That Need Expanding
+Document TODO
 ==========================================
-- Streams support for Unicode - What stream filters will we be providing?
-- Conversion errors behavior - Need to define the default.
-- INI files encoding - Do we support BOMs?
+- Streams support for Unicode - What stream filters will be provided?
+- User conversion error handler
+- INI files encoding - UTF-8? Do we support BOMs?
 - There are likely to be other issues which are missing from this document
 
 
@@ -654,6 +601,10 @@ and bundle it with PHP.
 
 Document History
 ================
+  0.6: Remove notion of native encoding string, only 2 string types are used
+       now. Update conversion error behavior section and parameter parsing.
+       Bring the document up-to-date with reality in general.
+
   0.5: Updated per latest discussions. Removed tentative language in several
        places, since we have decided on everything described here already.
        Clarified details according to Phase II progress.
