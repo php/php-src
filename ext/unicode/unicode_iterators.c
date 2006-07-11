@@ -1132,7 +1132,7 @@ PHP_METHOD(TextIterator, preceding)
 
 PHP_METHOD(TextIterator, isBoundary)
 {
-	long flags, offset;
+	long offset;
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
@@ -1143,7 +1143,7 @@ PHP_METHOD(TextIterator, isBoundary)
 	/*
 	 * ReverseTextIterator will behave the same as the normal one.
 	 */
-	RETURN_BOOL(iter_ops[intern->type]->isBoundary(intern, offset, flags TSRMLS_CC));
+	RETURN_BOOL(iter_ops[intern->type]->isBoundary(intern, offset, intern->flags TSRMLS_CC));
 }
 
 PHP_METHOD(TextIterator, getAvailableLocales)
