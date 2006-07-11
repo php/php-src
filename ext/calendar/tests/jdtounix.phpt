@@ -1,5 +1,7 @@
 --TEST--
 jdtounix()
+--INI--
+date.timezone=UTC
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
 --FILE--
