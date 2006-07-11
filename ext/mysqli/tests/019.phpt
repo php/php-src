@@ -20,12 +20,13 @@ mysqli fetch (bind_param + bind_result)
                                                        col10 varchar(50),
                                                        col11 char(20))");
   
-	$stmt=  mysqli_prepare($link,"INSERT INTO insert_read(col1,col10, col11) VALUES(?,?,?)");
-	mysqli_bind_param($stmt, "iss", $c1, $c2, $c3);
+	$stmt=  mysqli_prepare($link,"INSERT INTO insert_read(col1,col10, col11, col6) VALUES(?,?,?,?)");
+	mysqli_bind_param($stmt, "issd", $c1, $c2, $c3, $c4);
 
 	$c1 = 1;
 	$c2 = "foo";
 	$c3 = "foobar";
+	$c4 = 3.14;
 
 	mysqli_execute($stmt);
 	mysqli_stmt_close($stmt);
@@ -56,7 +57,7 @@ array(11) {
   [4]=>
   NULL
   [5]=>
-  NULL
+  float(3.14)
   [6]=>
   NULL
   [7]=>
