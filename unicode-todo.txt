@@ -38,3 +38,6 @@ parsing API, e.g.:
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s(ASCII)",
             &locale, &locale_len) == FAILURE) {
     }
+
+* Review the decision to coerce binary strings to Unicode when used as array
+  keys.
