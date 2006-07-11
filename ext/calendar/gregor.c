@@ -154,6 +154,13 @@ void SdnToGregorian(
 	}
 	temp = (sdn + GREGOR_SDN_OFFSET) * 4 - 1;
 
+	if (temp < 0) {
+		*pYear = 0;
+		*pMonth = 0;
+		*pDay = 0;
+		return;
+	}
+
 	/* Calculate the century (year/100). */
 	century = temp / DAYS_PER_400_YEARS;
 
