@@ -36,9 +36,3 @@ string(3) "Bar"
 int(2)
 string(6) "FooBar"
 ===DONE===
---UEXPECTF--
-int(0)
-unicode(3) "Bar"
-int(2)
-unicode(6) "FooBar"
-===DONE===

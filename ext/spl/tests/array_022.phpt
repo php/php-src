@@ -70,27 +70,3 @@ object(MyArrayIterator)#%d (2) {
   string(3) "Foo"
 }
 ===DONE===
---UEXPECTF--
-==ArrayObject===
-object(MyArrayObject)#%d (1) {
-  [u"bar"]=>
-  unicode(3) "baz"
-}
-object(MyArrayObject)#%d (2) {
-  [u"bar"]=>
-  unicode(3) "baz"
-  [u"baz"]=>
-  unicode(3) "Foo"
-}
-==ArrayIterator===
-object(MyArrayIterator)#%d (1) {
-  [u"bar"]=>
-  unicode(3) "baz"
-}
-object(MyArrayIterator)#%d (2) {
-  [u"bar"]=>
-  unicode(3) "baz"
-  [u"baz"]=>
-  unicode(3) "Foo"
-}
-===DONE===
