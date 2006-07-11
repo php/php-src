@@ -1,3 +1,111 @@
+2006-07-10  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-todo.txt:
+      -** empty log message ***
+
+    * ZendEngine2/zend_API.c:
+      Optimize zero-arg case for parameter parsing. No more need for manual
+      checks.
+
+    * ZendEngine2/zend_unicode.h:
+      Include uclean.h header.
+
+2006-07-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/var.c
+      ext/standard/var.c
+      ext/standard/tests/serialize/bug37947.phpt
+      ext/standard/tests/serialize/bug37947.phpt
+      ext/standard/tests/serialize/bug37947.phpt:
+      Fixed bug #37947 (zend_ptr_stack reallocation problem)
+
+2006-07-10  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_unicode.c:
+      nuke unused variable
+
+2006-07-10  Michael Wallner  <mike@iworks.at>
+
+    * ext/mysqli/mysqli.c:
+      - revert messed up patch
+
+    * ext/mysqli/mysqli.c:
+      - fix 5.2 build
+
+2006-07-10  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/mysqli/mysqli.c:
+      MFH: fix mysqli_*_free_storage() funcs to conform with their prototypes
+
+    * ext/mysqli/mysqli.c:
+      fix mysqli_*_free_storage() funcs to conform with their prototypes
+
+2006-07-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli.c:
+      Another fix for #38019
+
+    * (PHP_5_2)
+      NEWS:
+      Fixed bug #38055 (Wrong interpretation of boolean parameters)
+
+    * (PHP_5_2)
+      NEWS
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli.c:
+      Fixed bug #38019 (segfault extending mysqli class)
+
+    * (PHP_5_2)
+      NEWS:
+      Fixed bug #38005 (SoapFault faultstring doesn't follow encoding rules)
+
+    * (PHP_5_2)
+      NEWS:
+      Fixed bug #38004 Parameters in SoapServer are decoded twice
+
+2006-07-10  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/calendar/tests/easter_date.phpt:
+      fix test on non-Harmut machine :)
+
+2006-07-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      NEWS:
+      - BFN
+
+    * (PHP_5_2)
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/bug37667.phpt:
+      - MFH Fixed Bug #37667 (Object is not added into array returned by __get)
+
+    * ZendEngine2/tests/bug37667.phpt
+      ZendEngine2/tests/bug37667.phpt:
+      
+      - Add missing test name prefix
+
+    * ZendEngine2/zend_execute.c:
+      - Drop unused var
+
+    * (PHP_5_2)
+      NEWS:
+      - MFH Fixed bug #37816 (ReflectionProperty does not throw exception when
+      accessing protected attribute)
+
+    * ZendEngine2/tests/bug37667.phpt:
+      - Add new test
+
+    * ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_object_handlers.c:
+      - Fix issues with __get() returning arrays (might need to be revised)
+
 2006-07-09  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/calendar/php_calendar.h:
