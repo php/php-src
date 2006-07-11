@@ -985,6 +985,8 @@ static zend_object_value text_iterator_new(zend_class_entry *class_type TSRMLS_D
 	return retval;
 }
 
+/* {{{ proto void TextIterator::__construct(unicode text [, int flags = TextIterator::CODEPOINT [, string locale ]]) U
+   TextIterator constructor */
 PHP_METHOD(TextIterator, __construct)
 {
 	UChar *text;
@@ -1032,16 +1034,26 @@ PHP_METHOD(TextIterator, __construct)
 
 	iter_ops[intern->type]->rewind(intern, intern->flags TSRMLS_CC);
 }
+/* }}} */
 
+/* {{{ proto unicode TextIterator::current() U
+   Returns the element at the current boundary */
 PHP_METHOD(TextIterator, current)
 {
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+		return;
+	}
+
 	iter_ops[intern->type]->current(intern, intern->flags TSRMLS_CC);
 	RETURN_UNICODEL(Z_USTRVAL_P(intern->current), Z_USTRLEN_P(intern->current), 1);
 }
+/* }}} */
 
+/* {{{ proto int TextIterator::next([int n]) U
+   Advances to the n'th text boundary following the current one and returns its offset */
 PHP_METHOD(TextIterator, next)
 {
 	long i, step = 1;
@@ -1066,28 +1078,49 @@ PHP_METHOD(TextIterator, next)
 		RETURN_LONG(cp_offset);
 	}
 }
+/* }}} */
 
+/* {{{ proto int TextIterator::key() U
+   Returns the number boundaries iterated through */
 PHP_METHOD(TextIterator, key)
 {
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+		return;
+	}
+
 	RETURN_LONG(iter_ops[intern->type]->key(intern, intern->flags TSRMLS_CC));
 }
+/* }}} */
 
+/* {{{ proto bool TextIterator::valid() U
+   Determines validity of the iterator */
 PHP_METHOD(TextIterator, valid)
 {
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+		return;
+	}
+
 	RETURN_BOOL(iter_ops[intern->type]->valid(intern, intern->flags TSRMLS_CC));
 }
+/* }}} */
 
+/* {{{ proto int TextIterator::first() U
+   Positions iterator at the first character in the text and returns the offset */
 PHP_METHOD(TextIterator, rewind)
 {
 	int32_t cp_offset;
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+		return;
+	}
 
 	iter_ops[intern->type]->rewind(intern, intern->flags TSRMLS_CC);
 
@@ -1096,13 +1129,20 @@ PHP_METHOD(TextIterator, rewind)
 		RETURN_LONG(cp_offset);
 	}
 }
+/* }}} */
 
+/* {{{ proto int TextIterator::last() U
+   Positions iterator beyond the last character in the text and returns the offset */
 PHP_METHOD(TextIterator, last)
 {
 	long flags;
 	int32_t cp_offset;
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+		return;
+	}
 
 	flags = intern->flags ^ ITER_REVERSE;
 	iter_ops[intern->type]->rewind(intern, flags TSRMLS_CC);
@@ -1112,17 +1152,27 @@ PHP_METHOD(TextIterator, last)
 		RETURN_LONG(cp_offset);
 	}
 }
+/* }}} */
 
+/* {{{ proto int TextIterator::offset() U
+   Returns the offset of the current text boundary */
 PHP_METHOD(TextIterator, offset)
 {
 	int32_t cp_offset;
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+		return;
+	}
+
 	iter_ops[intern->type]->offset(intern, intern->flags, &cp_offset TSRMLS_CC);
 	RETURN_LONG(cp_offset);
 }
+/* }}} */
 
+/* {{{ proto int TextIterator::previous([int n]) U
+   Advances to the n'th text boundary preceding the current one and returns its offset */
 PHP_METHOD(TextIterator, previous)
 {
 	long flags, i, step = 1;
@@ -1148,7 +1198,10 @@ PHP_METHOD(TextIterator, previous)
 		RETURN_LONG(cp_offset);
 	}
 }
+/* }}} */
 
+/* {{{ proto int TextIterator::following(int offset) U
+   Advances to the text boundary following the specified offset and returns its offset */
 PHP_METHOD(TextIterator, following)
 {
 	long offset;
@@ -1164,7 +1217,10 @@ PHP_METHOD(TextIterator, following)
 	iter_ops[intern->type]->offset(intern, intern->flags, &cp_offset TSRMLS_CC);
 	RETURN_LONG(cp_offset);
 }
+/* }}} */
 
+/* {{{ proto int TextIterator::preceding(int offset) U
+   Advances to the text boundary preceding the specified offset and returns its offset */
 PHP_METHOD(TextIterator, preceding)
 {
 	long flags, offset;
@@ -1184,7 +1240,10 @@ PHP_METHOD(TextIterator, preceding)
 	iter_ops[intern->type]->offset(intern, flags, &cp_offset TSRMLS_CC);
 	RETURN_LONG(cp_offset);
 }
+/* }}} */
 
+/* {{{ proto bool TextIterator::isBoundary(int offset) U
+   Determines whether specified offset is a text boundary */
 PHP_METHOD(TextIterator, isBoundary)
 {
 	long offset;
@@ -1200,7 +1259,10 @@ PHP_METHOD(TextIterator, isBoundary)
 	 */
 	RETURN_BOOL(iter_ops[intern->type]->isBoundary(intern, offset, intern->flags TSRMLS_CC));
 }
+/* }}} */
 
+/* {{{ proto array TextIterator::getAvailableLocales() U
+   Returns locales for which text boundary information is available */
 PHP_METHOD(TextIterator, getAvailableLocales)
 {
 	int32_t count, i;
@@ -1215,7 +1277,10 @@ PHP_METHOD(TextIterator, getAvailableLocales)
 		add_next_index_ascii_string(return_value, (char*)ubrk_getAvailable(i), ZSTR_DUPLICATE);
 	}
 }
+/* }}} */
 
+/* {{{ proto int TextIterator::getRuleStatus() U
+   Return the status from the break rule that determined the most recent boundary */
 PHP_METHOD(TextIterator, getRuleStatus)
 {
 	zval *object = getThis();
@@ -1231,7 +1296,10 @@ PHP_METHOD(TextIterator, getRuleStatus)
 		RETURN_LONG(0);
 	}
 }
+/* }}} */
 
+/* {{{ proto array TextIterator::getRuleStatusArray() U
+   Return the statuses from the break rules that determined the most recent boundary */
 PHP_METHOD(TextIterator, getRuleStatusArray)
 {
 	int32_t status_vec[32], *vec_ptr = status_vec;
@@ -1265,7 +1333,10 @@ PHP_METHOD(TextIterator, getRuleStatusArray)
 		}
 	}
 }
+/* }}} */
 
+/* {{{ proto array TextIterator::getAll() U
+   Return all text pieces determined by the text boundaries */
 PHP_METHOD(TextIterator, getAll)
 {
 	int32_t start, end;
@@ -1290,7 +1361,9 @@ PHP_METHOD(TextIterator, getAll)
 		}
 	}
 }
+/* }}} */
 
+/* {{{ TextIterator function entry table */
 static zend_function_entry text_iterator_funcs[] = {
 
 	PHP_ME(TextIterator, __construct, NULL, ZEND_ACC_PUBLIC)
@@ -1319,6 +1392,7 @@ static zend_function_entry text_iterator_funcs[] = {
 	PHP_MALIAS(TextIterator, first, rewind, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
+/* }}} */
 
 void php_register_unicode_iterators(TSRMLS_D)
 {
