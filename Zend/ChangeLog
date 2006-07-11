@@ -1,3 +1,42 @@
+2006-07-10  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.c:
+      Optimize zero-arg case for parameter parsing. No more need for manual
+      checks.
+
+    * zend_unicode.h:
+      Include uclean.h header.
+
+2006-07-10  Antony Dovgal  <antony@zend.com>
+
+    * zend_unicode.c:
+      nuke unused variable
+
+2006-07-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      zend_exceptions.c
+      zend_execute.c
+      zend_object_handlers.c
+      tests/bug37667.phpt:
+      - MFH Fixed Bug #37667 (Object is not added into array returned by __get)
+
+    * tests/bug37667.phpt
+      tests/bug37667.phpt:
+      
+      - Add missing test name prefix
+
+    * zend_execute.c:
+      - Drop unused var
+
+    * tests/bug37667.phpt:
+      - Add new test
+
+    * zend_exceptions.c
+      zend_execute.c
+      zend_object_handlers.c:
+      - Fix issues with __get() returning arrays (might need to be revised)
+
 2006-07-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_builtin_functions.c
