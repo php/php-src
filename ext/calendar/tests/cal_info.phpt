@@ -1,5 +1,7 @@
 --TEST--
 cal_info()
+--INI--
+date.timezone=UTC
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
 --FILE--
@@ -8,7 +10,7 @@ cal_info()
   print_r(cal_info(1));
   print_r(cal_info(99999));
 ?>
---EXPECT--
+--EXPECTF--
 Array
 (
     [0] => Array
@@ -211,4 +213,4 @@ Array
     [calsymbol] => CAL_JULIAN
 )
 
-Warning: cal_info(): invalid calendar ID 99999. in /home/hartmut/projects/php/dev/head/ext/calendar/tests/cal_info.php on line 4
+Warning: cal_info(): invalid calendar ID 99999. in %s on line %d
