@@ -46,7 +46,7 @@ static int schema_restriction_var_char(xmlNodePtr val, sdlRestrictionCharPtr *va
 
 static void schema_type_fixup(sdlCtx *ctx, sdlTypePtr type);
 
-static encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const char *ns, const char *type)
+static encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const xmlChar *ns, const xmlChar *type)
 {
 	smart_str nscat = {0};
 	encodePtr enc, *enc_ptr;
@@ -55,9 +55,9 @@ static encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const char *ns,
 		sdl->encoders = emalloc(sizeof(HashTable));
 		zend_hash_init(sdl->encoders, 0, NULL, delete_encoder, 0);
 	}
-	smart_str_appends(&nscat, ns);
+	smart_str_appends(&nscat, (char*)ns);
 	smart_str_appendc(&nscat, ':');
-	smart_str_appends(&nscat, type);
+	smart_str_appends(&nscat, (char*)type);
 	smart_str_0(&nscat);
 	if (zend_hash_find(sdl->encoders, nscat.c, nscat.len + 1, (void**)&enc_ptr) == SUCCESS) {
 		enc = *enc_ptr;
@@ -73,8 +73,8 @@ static encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const char *ns,
 	}
 	memset(enc, 0, sizeof(encode));
 
-	enc->details.ns = estrdup(ns);
-	enc->details.type_str = estrdup(type);
+	enc->details.ns = estrdup((char*)ns);
+	enc->details.type_str = estrdup((char*)type);
 	enc->details.sdl_type = cur_type;
 	enc->to_xml = sdl_guess_convert_xml;
 	enc->to_zval = sdl_guess_convert_zval;
@@ -86,9 +86,9 @@ static encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const char *ns,
 	return enc;
 }
 
-static encodePtr get_create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const char *ns, const char *type)
+static encodePtr get_create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const xmlChar *ns, const xmlChar *type)
 {
-	encodePtr enc = get_encoder(sdl, ns, type);
+	encodePtr enc = get_encoder(sdl, (char*)ns, (char*)type);
 	if (enc == NULL) {
 		enc = create_encoder(sdl, cur_type, ns, type);
 	}
@@ -97,12 +97,12 @@ static encodePtr get_create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const char 
 
 static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location, xmlAttrPtr tns, int import TSRMLS_DC) {
 	if (location != NULL &&
-	    !zend_hash_exists(&ctx->docs, location, strlen(location)+1)) {
+	    !zend_hash_exists(&ctx->docs, (char*)location, xmlStrlen(location)+1)) {
 		xmlDocPtr doc;
 		xmlNodePtr schema;
 		xmlAttrPtr new_tns;
 
-		doc = soap_xmlParseFile(location TSRMLS_CC);
+		doc = soap_xmlParseFile((char*)location TSRMLS_CC);
 		if (doc == NULL) {
 			soap_error1(E_ERROR, "Parsing Schema: can't import schema from '%s'", location);
 		}
@@ -113,7 +113,7 @@ static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location, xmlA
 		}
 		new_tns = get_attribute(schema->properties, "targetNamespace");
 		if (import) {
-			if (ns != NULL && (new_tns == NULL || strcmp(ns->children->content,new_tns->children->content) != 0)) {
+			if (ns != NULL && (new_tns == NULL || xmlStrcmp(ns->children->content, new_tns->children->content) != 0)) {
 				xmlFreeDoc(doc);
 				soap_error2(E_ERROR, "Parsing Schema: can't import schema from '%s', unexpected 'targetNamespace'='%s'", location, ns->children->content);
 			}
@@ -125,14 +125,14 @@ static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location, xmlA
 			new_tns = get_attribute(schema->properties, "targetNamespace");
 			if (new_tns == NULL) {
 				if (tns != NULL) {
-					xmlSetProp(schema, "targetNamespace", tns->children->content);
+					xmlSetProp(schema, BAD_CAST("targetNamespace"), tns->children->content);
 				}
-			} else if (tns != NULL && strcmp(tns->children->content,new_tns->children->content) != 0) {
+			} else if (tns != NULL && xmlStrcmp(tns->children->content, new_tns->children->content) != 0) {
 				xmlFreeDoc(doc);
 				soap_error1(E_ERROR, "Parsing Schema: can't include schema from '%s', different 'targetNamespace'", location);
 			}
 		}
-		zend_hash_add(&ctx->docs, location, strlen(location)+1, (void**)&doc, sizeof(xmlDocPtr), NULL);
+		zend_hash_add(&ctx->docs, (char*)location, xmlStrlen(location)+1, (void**)&doc, sizeof(xmlDocPtr), NULL);
 		load_schema(ctx, schema TSRMLS_CC);
 	}
 }
@@ -177,8 +177,8 @@ int load_schema(sdlCtx *ctx, xmlNodePtr schema TSRMLS_DC)
 
 	tns = get_attribute(schema->properties, "targetNamespace");
 	if (tns == NULL) {
-		tns = xmlSetProp(schema, "targetNamespace", "");
-		xmlNewNs(schema, "", NULL);
+		tns = xmlSetProp(schema, BAD_CAST("targetNamespace"), BAD_CAST(""));
+		xmlNewNs(schema, BAD_CAST(""), NULL);
 	}
 
 	trav = schema->children;
@@ -231,7 +231,7 @@ int load_schema(sdlCtx *ctx, xmlNodePtr schema TSRMLS_DC)
 			ns = get_attribute(trav->properties, "namespace");
 			location = get_attribute(trav->properties, "schemaLocation");
 
-			if (ns != NULL && tns != NULL && strcmp(ns->children->content,tns->children->content) == 0) {
+			if (ns != NULL && tns != NULL && xmlStrcmp(ns->children->content, tns->children->content) == 0) {
 				if (location) {
 					soap_error1(E_ERROR, "Parsing Schema: can't import schema from '%s', namespace must not match the enclosing schema 'targetNamespace'", location->children->content);
 				} else {
@@ -318,8 +318,8 @@ static int schema_simpleType(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr simpleType, 
 		memset(newType, 0, sizeof(sdlType));
 		newType->kind = XSD_TYPEKIND_SIMPLE;
 		if (name != NULL) {
-			newType->name = estrdup(name->children->content);
-			newType->namens = estrdup(ns->children->content);
+			newType->name = estrdup((char*)name->children->content);
+			newType->namens = estrdup((char*)ns->children->content);
 		} else {
 			newType->name = estrdup(cur_type->name);
 			newType->namens = estrdup(cur_type->namens);
@@ -348,8 +348,8 @@ static int schema_simpleType(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr simpleType, 
 		newType = emalloc(sizeof(sdlType));
 		memset(newType, 0, sizeof(sdlType));
 		newType->kind = XSD_TYPEKIND_SIMPLE;
-		newType->name = estrdup(name->children->content);
-		newType->namens = estrdup(ns->children->content);
+		newType->name = estrdup((char*)name->children->content);
+		newType->namens = estrdup((char*)ns->children->content);
 
 		if (cur_type == NULL) {
 			zend_hash_next_index_insert(sdl->types,  &newType, sizeof(sdlTypePtr), (void **)&ptr);
@@ -416,7 +416,7 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr listType, sdlTypeP
 		xmlNsPtr nsptr;
 
 		parse_namespace(itemType->children->content, &type, &ns);
-		nsptr = xmlSearchNs(listType->doc, listType, ns);
+		nsptr = xmlSearchNs(listType->doc, listType, BAD_CAST(ns));
 		if (nsptr != NULL) {
 			sdlTypePtr newType, *tmp;
 
@@ -424,9 +424,9 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr listType, sdlTypeP
 			memset(newType, 0, sizeof(sdlType));
 
 			newType->name = estrdup(type);
-			newType->namens = estrdup(nsptr->href);
+			newType->namens = estrdup((char*)nsptr->href);
 
-			newType->encode = get_create_encoder(sdl, newType, (char *)nsptr->href, type);
+			newType->encode = get_create_encoder(sdl, newType, nsptr->href, BAD_CAST(type));
 
 			if (cur_type->elements == NULL) {
 				cur_type->elements = emalloc(sizeof(HashTable));
@@ -454,7 +454,7 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr listType, sdlTypeP
 		memset(newType, 0, sizeof(sdlType));
 
 		newType->name = estrdup("anonymous");
-		newType->namens = estrdup(tns->children->content);
+		newType->namens = estrdup((char*)tns->children->content);
 
 		if (cur_type->elements == NULL) {
 			cur_type->elements = emalloc(sizeof(HashTable));
@@ -490,8 +490,8 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType, sdlTyp
 		char *type, *ns;
 		xmlNsPtr nsptr;
 
-		str = estrdup(memberTypes->children->content);
-		whiteSpace_collapse(str);
+		str = estrdup((char*)memberTypes->children->content);
+		whiteSpace_collapse(BAD_CAST(str));
 		start = str;
 		while (start != NULL && *start != '\0') {
 			end = strchr(start,' ');
@@ -502,8 +502,8 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType, sdlTyp
 				next = end+1;
 			}
 
-			parse_namespace(start, &type, &ns);
-			nsptr = xmlSearchNs(unionType->doc, unionType, ns);
+			parse_namespace(BAD_CAST(start), &type, &ns);
+			nsptr = xmlSearchNs(unionType->doc, unionType, BAD_CAST(ns));
 			if (nsptr != NULL) {
 				sdlTypePtr newType, *tmp;
 
@@ -511,9 +511,9 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType, sdlTyp
 				memset(newType, 0, sizeof(sdlType));
 
 				newType->name = estrdup(type);
-				newType->namens = estrdup(nsptr->href);
+				newType->namens = estrdup((char*)nsptr->href);
 
-				newType->encode = get_create_encoder(sdl, newType, (char *)nsptr->href, type);
+				newType->encode = get_create_encoder(sdl, newType, nsptr->href, BAD_CAST(type));
 
 				if (cur_type->elements == NULL) {
 					cur_type->elements = emalloc(sizeof(HashTable));
@@ -542,7 +542,7 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType, sdlTyp
 			memset(newType, 0, sizeof(sdlType));
 
 			newType->name = estrdup("anonymous");
-			newType->namens = estrdup(tns->children->content);
+			newType->namens = estrdup((char*)tns->children->content);
 
 			if (cur_type->elements == NULL) {
 				cur_type->elements = emalloc(sizeof(HashTable));
@@ -626,9 +626,9 @@ static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodeP
 		xmlNsPtr nsptr;
 
 		parse_namespace(base->children->content, &type, &ns);
-		nsptr = xmlSearchNs(restType->doc, restType, ns);
+		nsptr = xmlSearchNs(restType->doc, restType, BAD_CAST(ns));
 		if (nsptr != NULL) {
-			cur_type->encode = get_create_encoder(sdl, cur_type, (char *)nsptr->href, type);
+			cur_type->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(type));
 		}
 		if (type) {efree(type);}
 		if (ns) {efree(ns);}
@@ -729,9 +729,9 @@ static int schema_restriction_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNode
 		xmlNsPtr nsptr;
 
 		parse_namespace(base->children->content, &type, &ns);
-		nsptr = xmlSearchNs(restType->doc, restType, ns);
+		nsptr = xmlSearchNs(restType->doc, restType, BAD_CAST(ns));
 		if (nsptr != NULL) {
-			cur_type->encode = get_create_encoder(sdl, cur_type, (char *)nsptr->href, type);
+			cur_type->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(type));
 		}
 		if (type) {efree(type);}
 		if (ns) {efree(ns);}
@@ -792,8 +792,8 @@ static int schema_restriction_var_int(xmlNodePtr val, sdlRestrictionIntPtr *valp
 	fixed = get_attribute(val->properties, "fixed");
 	(*valptr)->fixed = FALSE;
 	if (fixed != NULL) {
-		if (!strncmp(fixed->children->content, "true", sizeof("true")) ||
-			!strncmp(fixed->children->content, "1", sizeof("1")))
+		if (!strncmp((char*)fixed->children->content, "true", sizeof("true")) ||
+			!strncmp((char*)fixed->children->content, "1", sizeof("1")))
 			(*valptr)->fixed = TRUE;
 	}
 
@@ -802,7 +802,7 @@ static int schema_restriction_var_int(xmlNodePtr val, sdlRestrictionIntPtr *valp
 		soap_error0(E_ERROR, "Parsing Schema: missing restriction value");
 	}
 
-	(*valptr)->value = atoi(value->children->content);
+	(*valptr)->value = atoi((char*)value->children->content);
 
 	return TRUE;
 }
@@ -819,8 +819,8 @@ static int schema_restriction_var_char(xmlNodePtr val, sdlRestrictionCharPtr *va
 	fixed = get_attribute(val->properties, "fixed");
 	(*valptr)->fixed = FALSE;
 	if (fixed != NULL) {
-		if (!strncmp(fixed->children->content, "true", sizeof("true")) ||
-		    !strncmp(fixed->children->content, "1", sizeof("1"))) {
+		if (!strncmp((char*)fixed->children->content, "true", sizeof("true")) ||
+		    !strncmp((char*)fixed->children->content, "1", sizeof("1"))) {
 			(*valptr)->fixed = TRUE;
 		}
 	}
@@ -830,7 +830,7 @@ static int schema_restriction_var_char(xmlNodePtr val, sdlRestrictionCharPtr *va
 		soap_error0(E_ERROR, "Parsing Schema: missing restriction value");
 	}
 
-	(*valptr)->value = estrdup(value->children->content);
+	(*valptr)->value = estrdup((char*)value->children->content);
 	return TRUE;
 }
 
@@ -854,9 +854,9 @@ static int schema_extension_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr
 		xmlNsPtr nsptr;
 
 		parse_namespace(base->children->content, &type, &ns);
-		nsptr = xmlSearchNs(extType->doc, extType, ns);
+		nsptr = xmlSearchNs(extType->doc, extType, BAD_CAST(ns));
 		if (nsptr != NULL) {
-			cur_type->encode = get_create_encoder(sdl, cur_type, (char *)nsptr->href, type);
+			cur_type->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(type));
 		}
 		if (type) {efree(type);}
 		if (ns) {efree(ns);}
@@ -909,9 +909,9 @@ static int schema_extension_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePt
 		xmlNsPtr nsptr;
 
 		parse_namespace(base->children->content, &type, &ns);
-		nsptr = xmlSearchNs(extType->doc, extType, ns);
+		nsptr = xmlSearchNs(extType->doc, extType, BAD_CAST(ns));
 		if (nsptr != NULL) {
-			cur_type->encode = get_create_encoder(sdl, cur_type, (char *)nsptr->href, type);
+			cur_type->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(type));
 		}
 		if (type) {efree(type);}
 		if (ns) {efree(ns);}
@@ -959,6 +959,28 @@ static int schema_extension_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePt
 	return TRUE;
 }
 
+void schema_min_max(xmlNodePtr node, sdlContentModelPtr model)
+{
+	xmlAttrPtr attr = get_attribute(node->properties, "minOccurs");
+
+	if (attr) {
+		model->min_occurs = atoi((char*)attr->children->content);
+	} else {
+		model->min_occurs = 1;
+	}
+
+	attr = get_attribute(node->properties, "maxOccurs");
+	if (attr) {
+		if (!strncmp((char*)attr->children->content, "unbounded", sizeof("unbounded"))) {
+			model->max_occurs = -1;
+		} else {
+			model->max_occurs = atoi((char*)attr->children->content);
+		}
+	} else {
+		model->max_occurs = 1;
+	}
+}
+
 /*
 <all
   id = ID
@@ -971,7 +993,6 @@ static int schema_extension_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePt
 static int schema_all(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr all, sdlTypePtr cur_type, sdlContentModelPtr model)
 {
 	xmlNodePtr trav;
-	xmlAttrPtr attr;
 	sdlContentModelPtr newModel;
 
 	newModel = emalloc(sizeof(sdlContentModel));
@@ -984,22 +1005,7 @@ static int schema_all(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr all, sdlTypePtr cur
 		zend_hash_next_index_insert(model->u.content,&newModel,sizeof(sdlContentModelPtr), NULL);
 	}
 
-	newModel->min_occurs = 1;
-	newModel->max_occurs = 1;
-
-	attr = get_attribute(all->properties, "minOccurs");
-	if (attr) {
-		newModel->min_occurs = atoi(attr->children->content);
-	}
-
-	attr = get_attribute(all->properties, "maxOccurs");
-	if (attr) {
-		if (!strncmp(attr->children->content, "unbounded", sizeof("unbounded"))) {
-			newModel->max_occurs = -1;
-		} else {
-			newModel->max_occurs = atoi(attr->children->content);
-		}
-	}
+	schema_min_max(all, newModel);
 
 	trav = all->children;
 	if (trav != NULL && node_is_equal(trav,"annotation")) {
@@ -1031,7 +1037,6 @@ static int schema_all(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr all, sdlTypePtr cur
 static int schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType, sdlTypePtr cur_type, sdlContentModelPtr model)
 {
 	xmlNodePtr trav;
-	xmlAttrPtr attr;
 	xmlAttrPtr ns, name, ref = NULL;
 	sdlContentModelPtr newModel;
 
@@ -1053,9 +1058,9 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType, sdlTyp
 			xmlNsPtr nsptr;
 
 			parse_namespace(ref->children->content, &type, &ns);
-			nsptr = xmlSearchNs(groupType->doc, groupType, ns);
+			nsptr = xmlSearchNs(groupType->doc, groupType, BAD_CAST(ns));
 			if (nsptr != NULL) {
-				smart_str_appends(&key, nsptr->href);
+				smart_str_appends(&key, (char*)nsptr->href);
 				smart_str_appendc(&key, ':');
 			}
 			smart_str_appends(&key, type);
@@ -1073,9 +1078,9 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType, sdlTyp
 			newModel->u.content = emalloc(sizeof(HashTable));
 			zend_hash_init(newModel->u.content, 0, NULL, delete_model, 0);
 
-			smart_str_appends(&key, ns->children->content);
+			smart_str_appends(&key, (char*)ns->children->content);
 			smart_str_appendc(&key, ':');
-			smart_str_appends(&key, name->children->content);
+			smart_str_appends(&key, (char*)name->children->content);
 			smart_str_0(&key);
 		}
 
@@ -1106,22 +1111,7 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType, sdlTyp
 		soap_error0(E_ERROR, "Parsing Schema: group has no 'name' nor 'ref' attributes");
 	}
 
-	newModel->min_occurs = 1;
-	newModel->max_occurs = 1;
-
-	attr = get_attribute(groupType->properties, "minOccurs");
-	if (attr) {
-		newModel->min_occurs = atoi(attr->children->content);
-	}
-
-	attr = get_attribute(groupType->properties, "maxOccurs");
-	if (attr) {
-		if (!strncmp(attr->children->content, "unbounded", sizeof("unbounded"))) {
-			newModel->max_occurs = -1;
-		} else {
-			newModel->max_occurs = atoi(attr->children->content);
-		}
-	}
+	schema_min_max(groupType, newModel);
 
 	trav = groupType->children;
 	if (trav != NULL && node_is_equal(trav,"annotation")) {
@@ -1171,7 +1161,6 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType, sdlTyp
 static int schema_choice(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr choiceType, sdlTypePtr cur_type, sdlContentModelPtr model)
 {
 	xmlNodePtr trav;
-	xmlAttrPtr attr;
 	sdlContentModelPtr newModel;
 
 	newModel = emalloc(sizeof(sdlContentModel));
@@ -1184,22 +1173,7 @@ static int schema_choice(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr choiceType, sdlT
 		zend_hash_next_index_insert(model->u.content,&newModel,sizeof(sdlContentModelPtr), NULL);
 	}
 
-	newModel->min_occurs = 1;
-	newModel->max_occurs = 1;
-
-	attr = get_attribute(choiceType->properties, "minOccurs");
-	if (attr) {
-		newModel->min_occurs = atoi(attr->children->content);
-	}
-
-	attr = get_attribute(choiceType->properties, "maxOccurs");
-	if (attr) {
-		if (!strncmp(attr->children->content, "unbounded", sizeof("unbounded"))) {
-			newModel->max_occurs = -1;
-		} else {
-			newModel->max_occurs = atoi(attr->children->content);
-		}
-	}
+	schema_min_max(choiceType, newModel);
 
 	trav = choiceType->children;
 	if (trav != NULL && node_is_equal(trav,"annotation")) {
@@ -1237,7 +1211,6 @@ static int schema_choice(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr choiceType, sdlT
 static int schema_sequence(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr seqType, sdlTypePtr cur_type, sdlContentModelPtr model)
 {
 	xmlNodePtr trav;
-	xmlAttrPtr attr;
 	sdlContentModelPtr newModel;
 
 	newModel = emalloc(sizeof(sdlContentModel));
@@ -1250,22 +1223,7 @@ static int schema_sequence(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr seqType, sdlTy
 		zend_hash_next_index_insert(model->u.content,&newModel,sizeof(sdlContentModelPtr), NULL);
 	}
 
-	newModel->min_occurs = 1;
-	newModel->max_occurs = 1;
-
-	attr = get_attribute(seqType->properties, "minOccurs");
-	if (attr) {
-		newModel->min_occurs = atoi(attr->children->content);
-	}
-
-	attr = get_attribute(seqType->properties, "maxOccurs");
-	if (attr) {
-		if (!strncmp(attr->children->content, "unbounded", sizeof("unbounded"))) {
-			newModel->max_occurs = -1;
-		} else {
-			newModel->max_occurs = atoi(attr->children->content);
-		}
-	}
+	schema_min_max(seqType, newModel);
 
 	trav = seqType->children;
 	if (trav != NULL && node_is_equal(trav,"annotation")) {
@@ -1306,26 +1264,11 @@ static int schema_any(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr anyType, sdlTypePtr
 {
 	if (model != NULL) {
 		sdlContentModelPtr newModel;
-		xmlAttrPtr attr;
 
 		newModel = emalloc(sizeof(sdlContentModel));
 		newModel->kind = XSD_CONTENT_ANY;
-		newModel->min_occurs = 1;
-		newModel->max_occurs = 1;
 
-		attr = get_attribute(anyType->properties, "minOccurs");
-		if (attr) {
-			newModel->min_occurs = atoi(attr->children->content);
-		}
-
-		attr = get_attribute(anyType->properties, "maxOccurs");
-		if (attr) {
-			if (!strncmp(attr->children->content, "unbounded", sizeof("unbounded"))) {
-				newModel->max_occurs = -1;
-			} else {
-				newModel->max_occurs = atoi(attr->children->content);
-			}
-		}
+		schema_min_max(anyType, newModel);
 
 		zend_hash_next_index_insert(model->u.content, &newModel, sizeof(sdlContentModelPtr), NULL);
 	}
@@ -1403,8 +1346,8 @@ static int schema_complexType(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr compType, s
 		memset(newType, 0, sizeof(sdlType));
 		newType->kind = XSD_TYPEKIND_COMPLEX;
 		if (name != NULL) {
-			newType->name = estrdup(name->children->content);
-			newType->namens = estrdup(ns->children->content);
+			newType->name = estrdup((char*)name->children->content);
+			newType->namens = estrdup((char*)ns->children->content);
 		} else {
 			newType->name = estrdup(cur_type->name);
 			newType->namens = estrdup(cur_type->namens);
@@ -1433,8 +1376,8 @@ static int schema_complexType(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr compType, s
 		newType = emalloc(sizeof(sdlType));
 		memset(newType, 0, sizeof(sdlType));
 		newType->kind = XSD_TYPEKIND_COMPLEX;
-		newType->name = estrdup(name->children->content);
-		newType->namens = estrdup(ns->children->content);
+		newType->name = estrdup((char*)name->children->content);
+		newType->namens = estrdup((char*)ns->children->content);
 
 		zend_hash_next_index_insert(sdl->types,  &newType, sizeof(sdlTypePtr), (void **)&ptr);
 
@@ -1542,11 +1485,11 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 			xmlNsPtr nsptr;
 
 			parse_namespace(ref->children->content, &type, &ns);
-			nsptr = xmlSearchNs(element->doc, element, ns);
+			nsptr = xmlSearchNs(element->doc, element, BAD_CAST(ns));
 			if (nsptr != NULL) {
-				smart_str_appends(&nscat, nsptr->href);
+				smart_str_appends(&nscat, (char*)nsptr->href);
 				smart_str_appendc(&nscat, ':');
-				newType->namens = estrdup(nsptr->href);
+				newType->namens = estrdup((char*)nsptr->href);
 			}
 			smart_str_appends(&nscat, type);
 			newType->name = estrdup(type);
@@ -1556,8 +1499,8 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 			newType->ref = estrdup(nscat.c);
 			smart_str_free(&nscat);
 		} else {
-			newType->name = estrdup(name->children->content);
-			newType->namens = estrdup(ns->children->content);
+			newType->name = estrdup((char*)name->children->content);
+			newType->namens = estrdup((char*)ns->children->content);
 		}
 
 		newType->nillable = FALSE;
@@ -1595,22 +1538,9 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 
 			newModel->kind = XSD_CONTENT_ELEMENT;
 			newModel->u.element = newType;
-			newModel->min_occurs = 1;
-			newModel->max_occurs = 1;
 
-			attr = get_attribute(attrs, "maxOccurs");
-			if (attr) {
-				if (!strncmp(attr->children->content, "unbounded", sizeof("unbounded"))) {
-					newModel->max_occurs = -1;
-				} else {
-					newModel->max_occurs = atoi(attr->children->content);
-				}
-			}
+			schema_min_max(element, newModel);
 
-			attr = get_attribute(attrs, "minOccurs");
-			if (attr) {
-				newModel->min_occurs = atoi(attr->children->content);
-			}
 
 			zend_hash_next_index_insert(model->u.content, &newModel, sizeof(sdlContentModelPtr), NULL);
 		}
@@ -1626,8 +1556,8 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 		if (ref != NULL) {
 			soap_error0(E_ERROR, "Parsing Schema: element has both 'ref' and 'nillable' attributes");
 		}
-		if (!stricmp(attr->children->content, "true") ||
-			!stricmp(attr->children->content, "1")) {
+		if (!stricmp((char*)attr->children->content, "true") ||
+			!stricmp((char*)attr->children->content, "1")) {
 			cur_type->nillable = TRUE;
 		} else {
 			cur_type->nillable = FALSE;
@@ -1641,7 +1571,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 		if (ref != NULL) {
 			soap_error0(E_ERROR, "Parsing Schema: element has both 'ref' and 'fixed' attributes");
 		}
-		cur_type->fixed = estrdup(attr->children->content);
+		cur_type->fixed = estrdup((char*)attr->children->content);
 	}
 
 	attr = get_attribute(attrs, "default");
@@ -1651,15 +1581,15 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 		} else if (ref != NULL) {
 			soap_error0(E_ERROR, "Parsing Schema: element has both 'default' and 'fixed' attributes");
 		}
-		cur_type->def = estrdup(attr->children->content);
+		cur_type->def = estrdup((char*)attr->children->content);
 	}
 
 	/* form */
 	attr = get_attribute(attrs, "form");
 	if (attr) {
-		if (strncmp(attr->children->content,"qualified",sizeof("qualified")) == 0) {
+		if (strncmp((char*)attr->children->content, "qualified", sizeof("qualified")) == 0) {
 		  cur_type->form = XSD_FORM_QUALIFIED;
-		} else if (strncmp(attr->children->content,"unqualified",sizeof("unqualified")) == 0) {
+		} else if (strncmp((char*)attr->children->content, "unqualified", sizeof("unqualified")) == 0) {
 		  cur_type->form = XSD_FORM_UNQUALIFIED;
 		} else {
 		  cur_type->form = XSD_FORM_DEFAULT;
@@ -1673,7 +1603,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 			if (node_is_equal_ex(parent, "schema", SCHEMA_NAMESPACE)) {
 				xmlAttrPtr def;
 				def = get_attribute(parent->properties, "elementFormDefault");
-				if(def == NULL || strncmp(def->children->content, "qualified", sizeof("qualified"))) {
+				if(def == NULL || strncmp((char*)def->children->content, "qualified", sizeof("qualified"))) {
 					cur_type->form = XSD_FORM_UNQUALIFIED;
 				} else {
 					cur_type->form = XSD_FORM_QUALIFIED;
@@ -1697,9 +1627,9 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 			soap_error0(E_ERROR, "Parsing Schema: element has both 'ref' and 'type' attributes");
 		}
 		parse_namespace(type->children->content, &cptype, &str_ns);
-		nsptr = xmlSearchNs(element->doc, element, str_ns);
+		nsptr = xmlSearchNs(element->doc, element, BAD_CAST(str_ns));
 		if (nsptr != NULL) {
-			cur_type->encode = get_create_encoder(sdl, cur_type, (char *)nsptr->href, (char *)cptype);
+			cur_type->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(cptype));
 		}
 		if (str_ns) {efree(str_ns);}
 		if (cptype) {efree(cptype);}
@@ -1781,11 +1711,11 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 			xmlNsPtr nsptr;
 
 			parse_namespace(ref->children->content, &attr_name, &ns);
-			nsptr = xmlSearchNs(attrType->doc, attrType, ns);
+			nsptr = xmlSearchNs(attrType->doc, attrType, BAD_CAST(ns));
 			if (nsptr != NULL) {
-				smart_str_appends(&key, nsptr->href);
+				smart_str_appends(&key, (char*)nsptr->href);
 				smart_str_appendc(&key, ':');
-				newAttr->namens = estrdup(nsptr->href);
+				newAttr->namens = estrdup((char*)nsptr->href);
 			}
 			smart_str_appends(&key, attr_name);
 			smart_str_0(&key);
@@ -1800,11 +1730,11 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 				ns = tns;
 			}
 			if (ns != NULL) {
-				smart_str_appends(&key, ns->children->content);
+				smart_str_appends(&key, (char*)ns->children->content);
 				smart_str_appendc(&key, ':');
-				newAttr->namens = estrdup(ns->children->content);
+				newAttr->namens = estrdup((char*)ns->children->content);
 			}
-			smart_str_appends(&key, name->children->content);
+			smart_str_appends(&key, (char*)name->children->content);
 			smart_str_0(&key);
 		}
 
@@ -1836,9 +1766,9 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 			soap_error0(E_ERROR, "Parsing Schema: attribute has both 'ref' and 'type' attributes");
 		}
 		parse_namespace(type->children->content, &cptype, &str_ns);
-		nsptr = xmlSearchNs(attrType->doc, attrType, str_ns);
+		nsptr = xmlSearchNs(attrType->doc, attrType, BAD_CAST(str_ns));
 		if (nsptr != NULL) {
-			newAttr->encode = get_create_encoder(sdl, cur_type, (char *)nsptr->href, (char *)cptype);
+			newAttr->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(cptype));
 		}
 		if (str_ns) {efree(str_ns);}
 		if (cptype) {efree(cptype);}
@@ -1847,13 +1777,13 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 	attr = attrType->properties;
 	while (attr != NULL) {
 		if (attr_is_equal_ex(attr, "default", SCHEMA_NAMESPACE)) {
-			newAttr->def = estrdup(attr->children->content);
+			newAttr->def = estrdup((char*)attr->children->content);
 		} else if (attr_is_equal_ex(attr, "fixed", SCHEMA_NAMESPACE)) {
-			newAttr->fixed = estrdup(attr->children->content);
+			newAttr->fixed = estrdup((char*)attr->children->content);
 		} else if (attr_is_equal_ex(attr, "form", SCHEMA_NAMESPACE)) {
-			if (strncmp(attr->children->content,"qualified",sizeof("qualified")) == 0) {
+			if (strncmp((char*)attr->children->content, "qualified", sizeof("qualified")) == 0) {
 			  newAttr->form = XSD_FORM_QUALIFIED;
-			} else if (strncmp(attr->children->content,"unqualified",sizeof("unqualified")) == 0) {
+			} else if (strncmp((char*)attr->children->content, "unqualified", sizeof("unqualified")) == 0) {
 			  newAttr->form = XSD_FORM_UNQUALIFIED;
 			} else {
 			  newAttr->form = XSD_FORM_DEFAULT;
@@ -1861,17 +1791,17 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 		} else if (attr_is_equal_ex(attr, "id", SCHEMA_NAMESPACE)) {
 			/* skip */
 		} else if (attr_is_equal_ex(attr, "name", SCHEMA_NAMESPACE)) {
-			newAttr->name = estrdup(attr->children->content);
+			newAttr->name = estrdup((char*)attr->children->content);
 		} else if (attr_is_equal_ex(attr, "ref", SCHEMA_NAMESPACE)) {
 			/* already processed */
 		} else if (attr_is_equal_ex(attr, "type", SCHEMA_NAMESPACE)) {
 			/* already processed */
 		} else if (attr_is_equal_ex(attr, "use", SCHEMA_NAMESPACE)) {
-			if (strncmp(attr->children->content,"prohibited",sizeof("prohibited")) == 0) {
+			if (strncmp((char*)attr->children->content, "prohibited", sizeof("prohibited")) == 0) {
 			  newAttr->use = XSD_USE_PROHIBITED;
-			} else if (strncmp(attr->children->content,"required",sizeof("required")) == 0) {
+			} else if (strncmp((char*)attr->children->content, "required", sizeof("required")) == 0) {
 			  newAttr->use = XSD_USE_REQUIRED;
-			} else if (strncmp(attr->children->content,"optional",sizeof("optional")) == 0) {
+			} else if (strncmp((char*)attr->children->content, "optional", sizeof("optional")) == 0) {
 			  newAttr->use = XSD_USE_OPTIONAL;
 			} else {
 			  newAttr->use = XSD_USE_DEFAULT;
@@ -1879,7 +1809,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 		} else {
 			xmlNsPtr nsPtr = attr_find_ns(attr);
 
-			if (strncmp(nsPtr->href, SCHEMA_NAMESPACE, sizeof(SCHEMA_NAMESPACE))) {
+			if (strncmp((char*)nsPtr->href, SCHEMA_NAMESPACE, sizeof(SCHEMA_NAMESPACE))) {
 				smart_str key2 = {0};
 				sdlExtraAttributePtr ext;
 				xmlNsPtr nsptr;
@@ -1888,12 +1818,12 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 				ext = emalloc(sizeof(sdlExtraAttribute));
 				memset(ext, 0, sizeof(sdlExtraAttribute));
 				parse_namespace(attr->children->content, &value, &ns);
-				nsptr = xmlSearchNs(attr->doc, attr->parent, ns);
+				nsptr = xmlSearchNs(attr->doc, attr->parent, BAD_CAST(ns));
 				if (nsptr) {
-					ext->ns = estrdup(nsptr->href);
+					ext->ns = estrdup((char*)nsptr->href);
 					ext->val = estrdup(value);
 				} else {
-					ext->val = estrdup(attr->children->content);
+					ext->val = estrdup((char*)attr->children->content);
 				}
 				if (ns) {efree(ns);}
 				efree(value);
@@ -1903,9 +1833,9 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 					zend_hash_init(newAttr->extraAttributes, 0, NULL, delete_extra_attribute, 0);
 				}
 
-				smart_str_appends(&key2, nsPtr->href);
+				smart_str_appends(&key2, (char*)nsPtr->href);
 				smart_str_appendc(&key2, ':');
-				smart_str_appends(&key2, attr->name);
+				smart_str_appends(&key2, (char*)attr->name);
 				smart_str_0(&key2);
 				zend_hash_add(newAttr->extraAttributes, key2.c, key2.len + 1, &ext, sizeof(sdlExtraAttributePtr), NULL);
 				smart_str_free(&key2);
@@ -1919,7 +1849,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 			if (node_is_equal_ex(parent, "schema", SCHEMA_NAMESPACE)) {
 				xmlAttrPtr def;
 				def = get_attribute(parent->properties, "attributeFormDefault");
-				if(def == NULL || strncmp(def->children->content, "qualified", sizeof("qualified"))) {
+				if(def == NULL || strncmp((char*)def->children->content, "qualified", sizeof("qualified"))) {
 					newAttr->form = XSD_FORM_UNQUALIFIED;
 				} else {
 					newAttr->form = XSD_FORM_QUALIFIED;
@@ -1948,7 +1878,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 			dummy_type = emalloc(sizeof(sdlType));
 			memset(dummy_type, 0, sizeof(sdlType));
 			dummy_type->name = estrdup("anonymous");
-			dummy_type->namens = estrdup(tns->children->content);
+			dummy_type->namens = estrdup((char*)tns->children->content);
 			schema_simpleType(sdl, tns, trav, dummy_type);
 			newAttr->encode = dummy_type->encode;
 			delete_type(&dummy_type);
@@ -1983,8 +1913,8 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrGrou
 			}
 			newType = emalloc(sizeof(sdlType));
 			memset(newType, 0, sizeof(sdlType));
-			newType->name = estrdup(name->children->content);
-			newType->namens = estrdup(ns->children->content);
+			newType->name = estrdup((char*)name->children->content);
+			newType->namens = estrdup((char*)ns->children->content);
 
 			smart_str_appends(&key, newType->namens);
 			smart_str_appendc(&key, ':');
@@ -2010,9 +1940,9 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrGrou
 			memset(newAttr, 0, sizeof(sdlAttribute));
 
 			parse_namespace(ref->children->content, &group_name, &ns);
-			nsptr = xmlSearchNs(attrGroup->doc, attrGroup, ns);
+			nsptr = xmlSearchNs(attrGroup->doc, attrGroup, BAD_CAST(ns));
 			if (nsptr != NULL) {
-				smart_str_appends(&key, nsptr->href);
+				smart_str_appends(&key, (char*)nsptr->href);
 				smart_str_appendc(&key, ':');
 			}
 			smart_str_appends(&key, group_name);
