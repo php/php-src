@@ -85,7 +85,7 @@ typedef struct {
 	int  (*valid)     (text_iter_obj* object, long flags TSRMLS_DC);
 	void (*current)   (text_iter_obj* object, long flags TSRMLS_DC);
 	int  (*key)       (text_iter_obj* object, long flags TSRMLS_DC);
-	int  (*offset)    (text_iter_obj* object, long flags TSRMLS_DC);
+	int  (*offset)    (text_iter_obj* object, long flags, int32_t *cp_offset TSRMLS_DC);
 	void (*next)      (text_iter_obj* object, long flags TSRMLS_DC);
 	void (*rewind)    (text_iter_obj* object, long flags TSRMLS_DC);
 	void (*following) (text_iter_obj* object, int32_t offset, long flags TSRMLS_DC);
@@ -144,9 +144,12 @@ static int text_iter_cp_key(text_iter_obj* object, long flags TSRMLS_DC)
 	return object->u.cp.index;
 }
 
-static int text_iter_cp_offset(text_iter_obj* object, long flags TSRMLS_DC)
+static int text_iter_cp_offset(text_iter_obj* object, long flags, int32_t *cp_offset TSRMLS_DC)
 {
-	return object->u.cp.cp_offset;
+	if (cp_offset) {
+		*cp_offset = object->u.cp.cp_offset;
+	}
+	return object->u.cp.offset;
 }
 
 static void text_iter_cp_next(text_iter_obj* object, long flags TSRMLS_DC)
@@ -427,9 +430,12 @@ static int text_iter_cs_key(text_iter_obj* object, long flags TSRMLS_DC)
 	return object->u.cs.index;
 }
 
-static int text_iter_cs_offset(text_iter_obj* object, long flags TSRMLS_DC)
+static int text_iter_cs_offset(text_iter_obj* object, long flags, int32_t *cp_offset TSRMLS_DC)
 {
-	return object->u.cs.start_cp_offset;
+	if (cp_offset) {
+		*cp_offset = object->u.cs.start_cp_offset;
+	}
+	return object->u.cs.start;
 }
 
 static void text_iter_cs_next(text_iter_obj* object, long flags TSRMLS_DC)
@@ -639,9 +645,12 @@ static int text_iter_brk_key(text_iter_obj* object, long flags TSRMLS_DC)
 	return object->u.brk.index;
 }
 
-static int text_iter_brk_offset(text_iter_obj* object, long flags TSRMLS_DC)
+static int text_iter_brk_offset(text_iter_obj* object, long flags, int32_t *cp_offset TSRMLS_DC)
 {
-	return object->u.brk.cp_offset;
+	if (cp_offset) {
+		*cp_offset = object->u.brk.cp_offset;
+	}
+	return object->u.brk.bound;
 }
 
 static void text_iter_brk_next(text_iter_obj* object, long flags TSRMLS_DC)
@@ -1036,6 +1045,7 @@ PHP_METHOD(TextIterator, current)
 PHP_METHOD(TextIterator, next)
 {
 	long i, step = 1;
+	int32_t cp_offset;
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
@@ -1052,7 +1062,8 @@ PHP_METHOD(TextIterator, next)
 	}
 
 	if (return_value_used) {
-		RETURN_LONG(iter_ops[intern->type]->offset(intern, intern->flags TSRMLS_CC));
+		iter_ops[intern->type]->offset(intern, intern->flags, &cp_offset TSRMLS_CC);
+		RETURN_LONG(cp_offset);
 	}
 }
 
@@ -1074,35 +1085,48 @@ PHP_METHOD(TextIterator, valid)
 
 PHP_METHOD(TextIterator, rewind)
 {
+	int32_t cp_offset;
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
 	iter_ops[intern->type]->rewind(intern, intern->flags TSRMLS_CC);
-	RETURN_LONG(iter_ops[intern->type]->offset(intern, intern->flags TSRMLS_CC));
+
+	if (return_value_used) {
+		iter_ops[intern->type]->offset(intern, intern->flags, &cp_offset TSRMLS_CC);
+		RETURN_LONG(cp_offset);
+	}
 }
 
 PHP_METHOD(TextIterator, last)
 {
 	long flags;
+	int32_t cp_offset;
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
 	flags = intern->flags ^ ITER_REVERSE;
 	iter_ops[intern->type]->rewind(intern, flags TSRMLS_CC);
-	RETURN_LONG(iter_ops[intern->type]->offset(intern, flags TSRMLS_CC));
+
+	if (return_value_used) {
+		iter_ops[intern->type]->offset(intern, flags, &cp_offset TSRMLS_CC);
+		RETURN_LONG(cp_offset);
+	}
 }
 
 PHP_METHOD(TextIterator, offset)
 {
+	int32_t cp_offset;
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
-	RETURN_LONG(iter_ops[intern->type]->offset(intern, intern->flags TSRMLS_CC));
+	iter_ops[intern->type]->offset(intern, intern->flags, &cp_offset TSRMLS_CC);
+	RETURN_LONG(cp_offset);
 }
 
 PHP_METHOD(TextIterator, previous)
 {
 	long flags, i, step = 1;
+	int32_t cp_offset;
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
@@ -1120,13 +1144,15 @@ PHP_METHOD(TextIterator, previous)
 	}
 
 	if (return_value_used) {
-		RETURN_LONG(iter_ops[intern->type]->offset(intern, flags TSRMLS_CC));
+		iter_ops[intern->type]->offset(intern, flags, &cp_offset TSRMLS_CC);
+		RETURN_LONG(cp_offset);
 	}
 }
 
 PHP_METHOD(TextIterator, following)
 {
 	long offset;
+	int32_t cp_offset;
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
@@ -1135,12 +1161,14 @@ PHP_METHOD(TextIterator, following)
 	}
 
 	iter_ops[intern->type]->following(intern, offset, intern->flags TSRMLS_CC);
-	RETURN_LONG(iter_ops[intern->type]->offset(intern, intern->flags TSRMLS_CC));
+	iter_ops[intern->type]->offset(intern, intern->flags, &cp_offset TSRMLS_CC);
+	RETURN_LONG(cp_offset);
 }
 
 PHP_METHOD(TextIterator, preceding)
 {
 	long flags, offset;
+	int32_t cp_offset;
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
@@ -1153,7 +1181,8 @@ PHP_METHOD(TextIterator, preceding)
 	 */
 	flags = intern->flags | ITER_REVERSE;
 	iter_ops[intern->type]->following(intern, offset, flags TSRMLS_CC);
-	RETURN_LONG(iter_ops[intern->type]->offset(intern, flags TSRMLS_CC));
+	iter_ops[intern->type]->offset(intern, flags, &cp_offset TSRMLS_CC);
+	RETURN_LONG(cp_offset);
 }
 
 PHP_METHOD(TextIterator, isBoundary)
@@ -1237,6 +1266,31 @@ PHP_METHOD(TextIterator, getRuleStatusArray)
 	}
 }
 
+PHP_METHOD(TextIterator, getAll)
+{
+	int32_t start, end;
+	zval *object = getThis();
+	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
+	text_iter_ops *ops = iter_ops[intern->type];
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+		return;
+	}
+
+	array_init(return_value);
+	ops->rewind(intern, intern->flags TSRMLS_CC);
+	start = ops->offset(intern, intern->flags, NULL TSRMLS_CC);
+	for (ops->next(intern, intern->flags TSRMLS_CC), end = ops->offset(intern, intern->flags, NULL TSRMLS_CC);
+		 end != UBRK_DONE;
+		 start = end, ops->next(intern, intern->flags TSRMLS_CC), end = ops->offset(intern, intern->flags, NULL TSRMLS_CC)) {
+		if (end > start) {
+			add_next_index_unicodel(return_value, intern->text + start, end - start, 1);
+		} else {
+			add_next_index_unicodel(return_value, intern->text + end, start - end, 1);
+		}
+	}
+}
+
 static zend_function_entry text_iterator_funcs[] = {
 
 	PHP_ME(TextIterator, __construct, NULL, ZEND_ACC_PUBLIC)
@@ -1254,6 +1308,8 @@ static zend_function_entry text_iterator_funcs[] = {
 	PHP_ME(TextIterator, following,	  NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(TextIterator, preceding,	  NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(TextIterator, isBoundary,  NULL, ZEND_ACC_PUBLIC)
+
+	PHP_ME(TextIterator, getAll,      NULL, ZEND_ACC_PUBLIC)
 
 	PHP_ME(TextIterator, getRuleStatus,      NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(TextIterator, getRuleStatusArray, NULL, ZEND_ACC_PUBLIC)
