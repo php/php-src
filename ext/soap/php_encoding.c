@@ -2404,7 +2404,7 @@ static xmlNodePtr to_xml_map(encodeTypePtr type, zval *data, int style, xmlNodeP
 			xmlNodePtr key;
 			zval **temp_data;
 			char *key_val;
-			int int_val;
+			ulong int_val;
 
 			zend_hash_get_current_data(data->value.ht, (void **)&temp_data);
 			if (Z_TYPE_PP(temp_data) != IS_NULL) {
@@ -2412,7 +2412,7 @@ static xmlNodePtr to_xml_map(encodeTypePtr type, zval *data, int style, xmlNodeP
 				xmlAddChild(xmlParam, item);
 				key = xmlNewNode(NULL, BAD_CAST("key"));
 				xmlAddChild(item,key);
-				if (zend_hash_get_current_key(data->value.ht, &key_val, (long *)&int_val, FALSE) == HASH_KEY_IS_STRING) {
+				if (zend_hash_get_current_key(data->value.ht, &key_val, &int_val, FALSE) == HASH_KEY_IS_STRING) {
 					if (style == SOAP_ENCODED) {
 						set_xsi_type(key, "xsd:string");
 					}
