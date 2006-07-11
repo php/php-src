@@ -15,7 +15,8 @@
 					"--datadir=$path", 
 					"--innodb_data_home_dir=$path",
 					"--innodb_data_file_path=ibdata1:10M:autoextend",
-					"--log-error=$path/testrun.log"
+					"--log-error=$path/testrun.log",
+					"--init-connect='CREATE DATABASE IF NOT EXISTS test;'"
 				);
 		$driver->embedded_server_start(TRUE, $args, NULL);
 	}
