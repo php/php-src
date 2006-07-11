@@ -476,7 +476,7 @@ obtain the parameters passed to them by the user. For example:
 This forces the input parameter to be a string, and its value and length are
 stored in the variables specified by the caller.
 
-There are now three new specifiers: 't', 'u', and 'T'.
+There are now five new specifiers: 'u', 't', 'T', 'U', and 'S'.
 
   't' specifier
   -------------
@@ -517,7 +517,7 @@ There are now three new specifiers: 't', 'u', and 'T'.
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "u", &str, &len) == FAILURE) {
         return;
     }
-    /* process UTF-16 data */
+    /* process Unicode string */
 
     
   'T' specifier
@@ -544,7 +544,7 @@ There are now three new specifiers: 't', 'u', and 'T'.
     if (type1 == IS_UNICODE) {
        /* process as Unicode, str2 is guaranteed to be Unicode as well */
     } else {
-       /* process as native string, str2 is guaranteed to be the same */
+       /* process as binary string, str2 is guaranteed to be the same */
     }
 
 
