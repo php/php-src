@@ -60,7 +60,7 @@ void proxy_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_DC)
 	zval **login, **password;
 
 	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_login", sizeof("_proxy_login"), (void **)&login) == SUCCESS) {
-		char* buf;
+		unsigned char* buf;
 		int len;
 		smart_str auth = {0};
 
@@ -70,9 +70,9 @@ void proxy_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_DC)
 			smart_str_appendl(&auth, Z_STRVAL_PP(password), Z_STRLEN_PP(password));
 		}
 		smart_str_0(&auth);
-		buf = php_base64_encode(auth.c, auth.len, &len);
+		buf = php_base64_encode((unsigned char*)auth.c, auth.len, &len);
 		smart_str_append_const(soap_headers, "Proxy-Authorization: Basic ");
-		smart_str_appendl(soap_headers, buf, len);
+		smart_str_appendl(soap_headers, (char*)buf, len);
 		smart_str_append_const(soap_headers, "\r\n");
 		efree(buf);
 		smart_str_free(&auth);
@@ -86,7 +86,7 @@ void basic_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_DC)
 
 	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_login", sizeof("_login"), (void **)&login) == SUCCESS &&
 			!zend_hash_exists(Z_OBJPROP_P(this_ptr), "_digest", sizeof("_digest"))) {
-		char* buf;
+		unsigned char* buf;
 		int len;
 		smart_str auth = {0};
 
@@ -96,9 +96,9 @@ void basic_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_DC)
 			smart_str_appendl(&auth, Z_STRVAL_PP(password), Z_STRLEN_PP(password));
 		}
 		smart_str_0(&auth);
-		buf = php_base64_encode(auth.c, auth.len, &len);
+		buf = php_base64_encode((unsigned char*)auth.c, auth.len, &len);
 		smart_str_append_const(soap_headers, "Authorization: Basic ");
-		smart_str_appendl(soap_headers, buf, len);
+		smart_str_appendl(soap_headers, (char*)buf, len);
 		smart_str_append_const(soap_headers, "\r\n");
 		efree(buf);
 		smart_str_free(&auth);
@@ -470,7 +470,7 @@ try_again:
 
 					PHP_MD5Init(&md5ctx);
 					sprintf(cnonce, "%d", rand());
-					PHP_MD5Update(&md5ctx, cnonce, strlen(cnonce));
+					PHP_MD5Update(&md5ctx, (unsigned char*)cnonce, strlen(cnonce));
 					PHP_MD5Final(hash, &md5ctx);
 					make_digest(cnonce, hash);
 
@@ -484,16 +484,16 @@ try_again:
 					}
 
 					PHP_MD5Init(&md5ctx);
-					PHP_MD5Update(&md5ctx, Z_STRVAL_PP(login), Z_STRLEN_PP(login));
-					PHP_MD5Update(&md5ctx, ":", 1);
+					PHP_MD5Update(&md5ctx, (unsigned char*)Z_STRVAL_PP(login), Z_STRLEN_PP(login));
+					PHP_MD5Update(&md5ctx, (unsigned char*)":", 1);
 					if (zend_hash_find(Z_ARRVAL_PP(digest), "realm", sizeof("realm"), (void **)&tmp) == SUCCESS &&
 					    Z_TYPE_PP(tmp) == IS_STRING) {
-						PHP_MD5Update(&md5ctx, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+						PHP_MD5Update(&md5ctx, (unsigned char*)Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
 					}
-					PHP_MD5Update(&md5ctx, ":", 1);
+					PHP_MD5Update(&md5ctx, (unsigned char*)":", 1);
 					if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_password", sizeof("_password"), (void **)&password) == SUCCESS &&
 					    Z_TYPE_PP(password) == IS_STRING) {
-						PHP_MD5Update(&md5ctx, Z_STRVAL_PP(password), Z_STRLEN_PP(password));
+						PHP_MD5Update(&md5ctx, (unsigned char*)Z_STRVAL_PP(password), Z_STRLEN_PP(password));
 					}
 					PHP_MD5Final(hash, &md5ctx);
 					make_digest(HA1, hash);
@@ -502,26 +502,26 @@ try_again:
 					    Z_STRLEN_PP(tmp) == sizeof("md5-sess")-1 &&
 					    stricmp(Z_STRVAL_PP(tmp), "md5-sess") == 0) {
 						PHP_MD5Init(&md5ctx);
-						PHP_MD5Update(&md5ctx, HA1, 32);
-						PHP_MD5Update(&md5ctx, ":", 1);
+						PHP_MD5Update(&md5ctx, (unsigned char*)HA1, 32);
+						PHP_MD5Update(&md5ctx, (unsigned char*)":", 1);
 						if (zend_hash_find(Z_ARRVAL_PP(digest), "nonce", sizeof("nonce"), (void **)&tmp) == SUCCESS &&
 						    Z_TYPE_PP(tmp) == IS_STRING) {
-							PHP_MD5Update(&md5ctx, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+							PHP_MD5Update(&md5ctx, (unsigned char*)Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
 						}
-						PHP_MD5Update(&md5ctx, ":", 1);
-						PHP_MD5Update(&md5ctx, cnonce, 8);
+						PHP_MD5Update(&md5ctx, (unsigned char*)":", 1);
+						PHP_MD5Update(&md5ctx, (unsigned char*)cnonce, 8);
 						PHP_MD5Final(hash, &md5ctx);
 						make_digest(HA1, hash);
 					}
 
 					PHP_MD5Init(&md5ctx);
-					PHP_MD5Update(&md5ctx, "POST:", sizeof("POST:")-1);
+					PHP_MD5Update(&md5ctx, (unsigned char*)"POST:", sizeof("POST:")-1);
 					if (phpurl->path) {
-						PHP_MD5Update(&md5ctx, phpurl->path, strlen(phpurl->path));
+						PHP_MD5Update(&md5ctx, (unsigned char*)phpurl->path, strlen(phpurl->path));
 					}
 					if (phpurl->query) {
-						PHP_MD5Update(&md5ctx, "?", 1);
-						PHP_MD5Update(&md5ctx, phpurl->query, strlen(phpurl->query));
+						PHP_MD5Update(&md5ctx, (unsigned char*)"?", 1);
+						PHP_MD5Update(&md5ctx, (unsigned char*)phpurl->query, strlen(phpurl->query));
 					}
 
 					/* TODO: Support for qop="auth-int" */
@@ -538,24 +538,24 @@ try_again:
 					make_digest(HA2, hash);
 
 					PHP_MD5Init(&md5ctx);
-					PHP_MD5Update(&md5ctx, HA1, 32);
-					PHP_MD5Update(&md5ctx, ":", 1);
+					PHP_MD5Update(&md5ctx, (unsigned char*)HA1, 32);
+					PHP_MD5Update(&md5ctx, (unsigned char*)":", 1);
 					if (zend_hash_find(Z_ARRVAL_PP(digest), "nonce", sizeof("nonce"), (void **)&tmp) == SUCCESS &&
 					    Z_TYPE_PP(tmp) == IS_STRING) {
-						PHP_MD5Update(&md5ctx, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+						PHP_MD5Update(&md5ctx, (unsigned char*)Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
 					}
-					PHP_MD5Update(&md5ctx, ":", 1);
+					PHP_MD5Update(&md5ctx, (unsigned char*)":", 1);
 					if (zend_hash_find(Z_ARRVAL_PP(digest), "qop", sizeof("qop"), (void **)&tmp) == SUCCESS &&
 					    Z_TYPE_PP(tmp) == IS_STRING) {
-						PHP_MD5Update(&md5ctx, nc, 8);
-						PHP_MD5Update(&md5ctx, ":", 1);
-						PHP_MD5Update(&md5ctx, cnonce, 8);
-						PHP_MD5Update(&md5ctx, ":", 1);
+						PHP_MD5Update(&md5ctx, (unsigned char*)nc, 8);
+						PHP_MD5Update(&md5ctx, (unsigned char*)":", 1);
+						PHP_MD5Update(&md5ctx, (unsigned char*)cnonce, 8);
+						PHP_MD5Update(&md5ctx, (unsigned char*)":", 1);
 						/* TODO: Support for qop="auth-int" */
-						PHP_MD5Update(&md5ctx, "auth", sizeof("auth")-1);
-						PHP_MD5Update(&md5ctx, ":", 1);
+						PHP_MD5Update(&md5ctx, (unsigned char*)"auth", sizeof("auth")-1);
+						PHP_MD5Update(&md5ctx, (unsigned char*)":", 1);
 					}
-					PHP_MD5Update(&md5ctx, HA2, 32);
+					PHP_MD5Update(&md5ctx, (unsigned char*)HA2, 32);
 					PHP_MD5Final(hash, &md5ctx);
 					make_digest(response, hash);
 	
@@ -602,7 +602,7 @@ try_again:
 					smart_str_append_const(&soap_headers, "\"\r\n");
 				}
 			} else {
-				char* buf;
+				unsigned char* buf;
 				int len;
 
 				smart_str auth = {0};
@@ -613,9 +613,9 @@ try_again:
 					smart_str_appendl(&auth, Z_STRVAL_PP(password), Z_STRLEN_PP(password));
 				}
 				smart_str_0(&auth);
-				buf = php_base64_encode(auth.c, auth.len, &len);
+				buf = php_base64_encode((unsigned char*)auth.c, auth.len, &len);
 				smart_str_append_const(&soap_headers, "Authorization: Basic ");
-				smart_str_appendl(&soap_headers, buf, len);
+				smart_str_appendl(&soap_headers, (char*)buf, len);
 				smart_str_append_const(&soap_headers, "\r\n");
 				efree(buf);
 				smart_str_free(&auth);
