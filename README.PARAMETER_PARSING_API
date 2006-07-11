@@ -41,11 +41,13 @@ Type specifiers
  l	- long (long)
  d	- double (double)
  s	- string (with possible null bytes) and its length (char*, int)
- u	- unicode (UChar*, int)
+ u	- Unicode (UChar*, int)
  t	- text (void * (char*/Uchar*), int (length), zend_uchar (IS_STRING/..))
-  	  actual type is controled by ini unicode setting
+      accepts either Unicode or binary string
  T	- text (void * (char*/Uchar*), int (length), zend_uchar (IS_STRING/..))
-  	  actual type controlled by first s or u
+      coalesces all T parameters to common type (Unicode or binary)
+ U  - Unicode string, does not allow conversion from binary strings
+ S  - binary string, does not allow conversion from Unicode strings
  b	- boolean (zend_bool)
  r	- resource (zval*)
  a	- array (zval*)
@@ -107,7 +109,47 @@ if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a/!",
 }
 
 
-/* Get only the first three parameters (useful for varargs functions). */
+/* Gets a Unicode string */
+UChar *str;
+int len;
+
+if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "u", &str, &len) == FAILURE) {
+	return;
+}
+
+
+/* Gets a Unicode or binary string */
+void *str;
+int len;
+zend_uchar type;
+
+if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &len, &type) == FAILURE) {
+	return;
+}
+if (type == IS_UNICODE) {
+   /* process Unicode string */
+} else {
+   /* process binary string */
+}
+
+
+/* Gets two string parameters, both of which will be guaranteed to be of the same type */
+void *str1, *str2;
+int len1, len2;
+zend_uchar type1, type2;
+
+if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT", &str1, &len1,
+  	 					  &type1, &str2, &len2, &type2) == FAILURE) {
+	return;
+}
+if (type1 == IS_UNICODE) {
+	/* process as Unicode, str2 is guaranteed to be Unicode as well */
+} else {
+	/* process as binary string, str2 is guaranteed to be the same */
+}
+
+
+/* Gets only the first three parameters (useful for varargs functions). */
 zval *z;
 zend_bool b;
 zval *r;
@@ -140,3 +182,4 @@ if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
 
 	return;
 }
+
