@@ -90,7 +90,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 				add_soap_fault(this_ptr, "Client", "encodingStyle cannot be specified on the Envelope", NULL, NULL TSRMLS_CC);
 				xmlFreeDoc(response);
 				return FALSE;
-			} else if (strcmp(attr->children->content,SOAP_1_1_ENC_NAMESPACE) != 0) {
+			} else if (strcmp((char*)attr->children->content, SOAP_1_1_ENC_NAMESPACE) != 0) {
 				add_soap_fault(this_ptr, "Client", "Unknown data encoding style", NULL, NULL TSRMLS_CC);
 				xmlFreeDoc(response);
 				return FALSE;
@@ -140,7 +140,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 				add_soap_fault(this_ptr, "Client", "encodingStyle cannot be specified on the Body", NULL, NULL TSRMLS_CC);
 				xmlFreeDoc(response);
 				return FALSE;
-			} else if (strcmp(attr->children->content,SOAP_1_1_ENC_NAMESPACE) != 0) {
+			} else if (strcmp((char*)attr->children->content, SOAP_1_1_ENC_NAMESPACE) != 0) {
 				add_soap_fault(this_ptr, "Client", "Unknown data encoding style", NULL, NULL TSRMLS_CC);
 				xmlFreeDoc(response);
 				return FALSE;
@@ -166,7 +166,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 					add_soap_fault(this_ptr, "Client", "encodingStyle cannot be specified on the Header", NULL, NULL TSRMLS_CC);
 					xmlFreeDoc(response);
 					return FALSE;
-				} else if (strcmp(attr->children->content,SOAP_1_1_ENC_NAMESPACE) != 0) {
+				} else if (strcmp((char*)attr->children->content, SOAP_1_1_ENC_NAMESPACE) != 0) {
 					add_soap_fault(this_ptr, "Client", "Unknown data encoding style", NULL, NULL TSRMLS_CC);
 					xmlFreeDoc(response);
 					return FALSE;
@@ -184,35 +184,35 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 		xmlNodePtr tmp;
 
 		if (soap_version == SOAP_1_1) {
-			tmp = get_node(fault->children,"faultcode");
+			tmp = get_node(fault->children, "faultcode");
 			if (tmp != NULL && tmp->children != NULL) {
-				faultcode = tmp->children->content;
+				faultcode = (char*)tmp->children->content;
 			}
 
-			tmp = get_node(fault->children,"faultstring");
+			tmp = get_node(fault->children, "faultstring");
 			if (tmp != NULL && tmp->children != NULL) {
 				zval *zv = master_to_zval(get_conversion(IS_STRING), tmp);
 				faultstring = Z_STRVAL_P(zv);
 				FREE_ZVAL(zv);
 			}
 
-			tmp = get_node(fault->children,"faultactor");
+			tmp = get_node(fault->children, "faultactor");
 			if (tmp != NULL && tmp->children != NULL) {
 				zval *zv = master_to_zval(get_conversion(IS_STRING), tmp);
 				faultactor = Z_STRVAL_P(zv);
 				FREE_ZVAL(zv);
 			}
 
-			tmp = get_node(fault->children,"detail");
+			tmp = get_node(fault->children, "detail");
 			if (tmp != NULL) {
 				details = master_to_zval(NULL, tmp);
 			}
 		} else {
-			tmp = get_node(fault->children,"Code");
+			tmp = get_node(fault->children, "Code");
 			if (tmp != NULL && tmp->children != NULL) {
-				tmp = get_node(tmp->children,"Value");
+				tmp = get_node(tmp->children, "Value");
 				if (tmp != NULL && tmp->children != NULL) {
-					faultcode = tmp->children->content;
+					faultcode = (char*)tmp->children->content;
 				}
 			}
 
@@ -394,10 +394,10 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 					sdlSoapBindingFunctionHeaderPtr *hdr;
 
 					if (trav->ns) {
-						smart_str_appends(&key,trav->ns->href);
+						smart_str_appends(&key, (char*)trav->ns->href);
 						smart_str_appendc(&key,':');
 					}
-					smart_str_appends(&key,trav->name);
+					smart_str_appends(&key, (char*)trav->name);
 					smart_str_0(&key);
 					if (zend_hash_find(hdrs, key.c, key.len+1, (void**)&hdr) == SUCCESS) {
 						enc = (*hdr)->encode;

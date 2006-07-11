@@ -26,7 +26,7 @@
 /* Channel libxml file io layer through the PHP streams subsystem.
  * This allows use of ftps:// and https:// urls */
 
-static int is_blank(const char* str)
+static int is_blank(const xmlChar* str)
 {
 	while (*str != '\0') {
 		if (*str != ' '  && *str != 0x9 && *str != 0xa && *str != 0xd) {
@@ -101,7 +101,7 @@ xmlDocPtr soap_xmlParseFile(const char *filename TSRMLS_DC)
 		if (ctxt->wellFormed) {
 			ret = ctxt->myDoc;
 			if (ret->URL == NULL && ctxt->directory != NULL) {
-				ret->URL = xmlStrdup(ctxt->directory);
+				ret->URL = xmlCharStrdup(ctxt->directory);
 			}
 		} else {
 			ret = NULL;
@@ -142,7 +142,7 @@ xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size)
 		if (ctxt->wellFormed) {
 			ret = ctxt->myDoc;
 			if (ret->URL == NULL && ctxt->directory != NULL) {
-				ret->URL = xmlStrdup(ctxt->directory);
+				ret->URL = xmlCharStrdup(ctxt->directory);
 			}
 		} else {
 			ret = NULL;
@@ -214,11 +214,11 @@ xmlNsPtr node_find_ns(xmlNodePtr node)
 
 int attr_is_equal_ex(xmlAttrPtr node, char *name, char *ns)
 {
-	if (name == NULL || strcmp(node->name, name) == 0) {
+	if (name == NULL || strcmp((char*)node->name, name) == 0) {
 		if (ns) {
 			xmlNsPtr nsPtr = attr_find_ns(node);
 			if (nsPtr) {
-				return (strcmp(nsPtr->href, ns) == 0);
+				return (strcmp((char*)nsPtr->href, ns) == 0);
 			} else {
 				return FALSE;
 			}
@@ -230,11 +230,11 @@ int attr_is_equal_ex(xmlAttrPtr node, char *name, char *ns)
 
 int node_is_equal_ex(xmlNodePtr node, char *name, char *ns)
 {
-	if (name == NULL || strcmp(node->name, name) == 0) {
+	if (name == NULL || strcmp((char*)node->name, name) == 0) {
 		if (ns) {
 			xmlNsPtr nsPtr = node_find_ns(node);
 			if (nsPtr) {
-				return (strcmp(nsPtr->href, ns) == 0);
+				return (strcmp((char*)nsPtr->href, ns) == 0);
 			} else {
 				return FALSE;
 			}
@@ -296,7 +296,7 @@ xmlNodePtr get_node_with_attribute_ex(xmlNodePtr node, char *name, char *name_ns
 		}
 
 		attr = get_attribute_ex(node->properties, attribute, attr_ns);
-		if (attr != NULL && strcmp(attr->children->content, value) == 0) {
+		if (attr != NULL && strcmp((char*)attr->children->content, value) == 0) {
 			return node;
 		}
 		node = node->next;
@@ -309,7 +309,7 @@ xmlNodePtr get_node_with_attribute_recursive_ex(xmlNodePtr node, char *name, cha
 	while (node != NULL) {
 		if (node_is_equal_ex(node, name, name_ns)) {
 			xmlAttrPtr attr = get_attribute_ex(node->properties, attribute, attr_ns);
-			if (attr != NULL && strcmp(attr->children->content, value) == 0) {
+			if (attr != NULL && strcmp((char*)attr->children->content, value) == 0) {
 				return node;
 			}
 		}
@@ -324,15 +324,15 @@ xmlNodePtr get_node_with_attribute_recursive_ex(xmlNodePtr node, char *name, cha
 	return NULL;
 }
 
-int parse_namespace(const char *inval, char **value, char **namespace)
+int parse_namespace(const xmlChar *inval, char **value, char **namespace)
 {
-	char *found = strrchr(inval, ':');
+	char *found = strrchr((char*)inval, ':');
 
-	if (found != NULL && found != inval) {
-		(*namespace) = estrndup(inval, found - inval);
+	if (found != NULL && found != (char*)inval) {
+		(*namespace) = estrndup((char*)inval, found - (char*)inval);
 		(*value) = estrdup(++found);
 	} else {
-		(*value) = estrdup(inval);
+		(*value) = estrdup((char*)inval);
 		(*namespace) = NULL;
 	}
 

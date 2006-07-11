@@ -207,8 +207,8 @@ zval *to_zval_user(encodeTypePtr type, xmlNodePtr node);
 zval *to_zval_after_user(encodeTypePtr type, zval *data);
 #endif
 
-void whiteSpace_replace(char* str);
-void whiteSpace_collapse(char* str);
+void whiteSpace_replace(xmlChar* str);
+void whiteSpace_collapse(xmlChar* str);
 
 xmlNodePtr sdl_guess_convert_xml(encodeTypePtr enc, zval* data, int style, xmlNodePtr parent);
 zval *sdl_guess_convert_zval(encodeTypePtr enc, xmlNodePtr data);
