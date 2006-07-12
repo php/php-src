@@ -841,7 +841,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 			case 'r': case 'a':
 			case 'o': case 'O':
 			case 'z': case 'Z':
-			case 't': case 'u'
+			case 't': case 'u':
 		   	case 'C': case 'h':
 			case 'U': case 'S':
 			case 'f':
