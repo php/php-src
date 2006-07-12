@@ -503,6 +503,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals TSRMLS
 	EG(in_autoload) = NULL;
 	EG(current_execute_data) = NULL;
 	EG(current_module) = NULL;
+	EG(exit_status) = 0;
 }
 
 
