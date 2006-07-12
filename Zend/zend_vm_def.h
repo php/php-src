@@ -2748,7 +2748,7 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|VAR|CV, ANY)
 	zend_op *opline = EX(opline);
 	zend_op_array *new_op_array=NULL;
 	zval **original_return_value = EG(return_value_ptr_ptr);
-	int return_value_used;
+	int return_value_used = RETURN_VALUE_USED(opline);
 	zend_free_op free_op1;
 	zval *inc_filename = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	zval tmp_inc_filename;
@@ -2779,8 +2779,6 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|VAR|CV, ANY)
 		convert_to_string(&tmp_inc_filename);
 		inc_filename = &tmp_inc_filename;
 	}
-
-	return_value_used = RETURN_VALUE_USED(opline);
 
 	switch (Z_LVAL(opline->op2.u.constant)) {
 		case ZEND_INCLUDE_ONCE:
