@@ -573,6 +573,11 @@ PHP_FUNCTION(dbase_create)
 	}
 	convert_to_string_ex(filename);
 
+	if (Z_TYPE_PP(fields) != IS_ARRAY) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expected array as second parameter");
+		RETURN_FALSE;
+	}
+
 	if (php_check_open_basedir(Z_STRVAL_PP(filename) TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
@@ -685,6 +690,8 @@ PHP_FUNCTION(dbase_create)
 			break;
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unknown field type '%c'", cur_f->db_type);
+			free_dbf_head(dbh);
+			RETURN_FALSE;
 		}
 		cur_f->db_foffset = rlen;
 		rlen += cur_f->db_flen;
