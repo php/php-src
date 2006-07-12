@@ -125,7 +125,8 @@ PHP_MINFO_FUNCTION(assert)
 PHP_FUNCTION(assert)
 {
 	zval **assertion;	
-	int val;
+	zval tmp;
+	int val, free_tmp = 0;
 	char *myeval = NULL;
 	char *compiled_string_description;
 	
@@ -139,9 +140,7 @@ PHP_FUNCTION(assert)
 
 	if (Z_TYPE_PP(assertion) == IS_STRING || Z_TYPE_PP(assertion) == IS_UNICODE) {
 		zval retval;
-		zval tmp;
 		int old_error_reporting = 0; /* shut up gcc! */
-		int free_tmp = 0;
 
 		if (Z_TYPE_PP(assertion) == IS_UNICODE) {
 			tmp = **assertion;
@@ -166,9 +165,6 @@ PHP_FUNCTION(assert)
 				zend_bailout();
 			}
 			RETURN_FALSE;
-		}
-		if (free_tmp) {
-			zval_dtor(&tmp);
 		}
 		efree(compiled_string_description);
 
@@ -224,6 +220,10 @@ PHP_FUNCTION(assert)
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Assertion failed");
 		}
+	}
+
+	if (free_tmp) {
+		zval_dtor(&tmp);
 	}
 
 	if (ASSERTG(bail)) {
