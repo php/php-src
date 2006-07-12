@@ -78,7 +78,8 @@ ZEND_API char* zend_unicode_to_ascii(const UChar *us, int us_len TSRMLS_DC);
 
 ZEND_API int zval_string_to_unicode_ex(zval *string, UConverter *conv TSRMLS_DC);
 ZEND_API int zval_string_to_unicode(zval *string TSRMLS_DC);
-ZEND_API int zval_unicode_to_string(zval *string, UConverter *conv TSRMLS_DC);
+ZEND_API int zval_unicode_to_string_ex(zval *string, UConverter *conv TSRMLS_DC);
+ZEND_API int zval_unicode_to_string(zval *string TSRMLS_DC);
 
 ZEND_API int zend_cmp_unicode_and_string(UChar *ustr, char* str, uint len);
 ZEND_API int zend_cmp_unicode_and_literal(UChar *ustr, int ulen, char* str, int slen);

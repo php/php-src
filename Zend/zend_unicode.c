@@ -537,8 +537,8 @@ ZEND_API void zend_raise_conversion_error_ex(char *message, UConverter *conv, ze
 }
 /* }}} */
 
-/* {{{ zval_unicode_to_string */
-ZEND_API int zval_unicode_to_string(zval *string, UConverter *conv TSRMLS_DC)
+/* {{{ zval_unicode_to_string_ex */
+ZEND_API int zval_unicode_to_string_ex(zval *string, UConverter *conv TSRMLS_DC)
 {
 	UErrorCode status = U_ZERO_ERROR;
 	char *s = NULL;
@@ -565,6 +565,13 @@ ZEND_API int zval_unicode_to_string(zval *string, UConverter *conv TSRMLS_DC)
 		efree((UChar*)u);
 		return SUCCESS;
 	}
+}
+/* }}} */
+
+/* {{{ zval_unicode_to_string */
+ZEND_API int zval_unicode_to_string(zval *string TSRMLS_DC)
+{
+	return zval_unicode_to_string_ex(string, ZEND_U_CONVERTER(UG(runtime_encoding_conv)) TSRMLS_CC);
 }
 /* }}} */
 

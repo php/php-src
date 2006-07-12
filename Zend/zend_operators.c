@@ -581,6 +581,12 @@ ZEND_API void convert_to_boolean(zval *op)
 
 ZEND_API void _convert_to_unicode(zval *op TSRMLS_DC ZEND_FILE_LINE_DC)
 {
+    TSRMLS_FETCH();
+    _convert_to_unicode_with_converter(op, ZEND_U_CONVERTER(UG(runtime_encoding_conv)) TSRMLS_CC ZEND_FILE_LINE_CC);
+}
+
+ZEND_API void _convert_to_unicode_with_converter(zval *op, UConverter *conv TSRMLS_DC ZEND_FILE_LINE_DC)
+{
 	switch (Z_TYPE_P(op)) {
 		case IS_NULL:
 			Z_USTRVAL_P(op) = USTR_MAKE_REL("");
@@ -589,7 +595,7 @@ ZEND_API void _convert_to_unicode(zval *op TSRMLS_DC ZEND_FILE_LINE_DC)
 		case IS_UNICODE:
 			break;
 		case IS_STRING:
-			zval_string_to_unicode(op TSRMLS_CC);
+			zval_string_to_unicode_ex(op, conv TSRMLS_CC);
 			return;
 		case IS_BOOL:
 			if (Z_LVAL_P(op)) {
@@ -669,7 +675,7 @@ ZEND_API void _convert_to_string_with_converter(zval *op, UConverter *conv TSRML
 		case IS_STRING:
 			return;
 		case IS_UNICODE:
-			zval_unicode_to_string(op, conv TSRMLS_CC);
+			zval_unicode_to_string_ex(op, conv TSRMLS_CC);
 			break;
 		case IS_BOOL:
 			if (Z_LVAL_P(op)) {
