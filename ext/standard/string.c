@@ -2429,8 +2429,13 @@ PHP_FUNCTION(stripos)
 	}
 
 	haystack_len = Z_UNILEN_P(haystack);
+
+	if (haystack_len == 0) {
+		RETURN_FALSE;
+	}
+
 	if (Z_TYPE_P(needle) == IS_UNICODE || Z_TYPE_P(needle) == IS_STRING) {
-		if (!Z_UNILEN_P(needle)) {
+		if (!Z_UNILEN_P(needle) || Z_UNILEN_P(needle) > haystack_len) {
 			RETURN_FALSE;
 		}
 		if (Z_TYPE_P(haystack) != Z_TYPE_P(needle)) {
