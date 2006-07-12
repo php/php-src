@@ -126,8 +126,8 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
 	zval **original_return_value;
-	zend_class_entry *current_scope;
-	zval *current_this;
+	zend_class_entry *current_scope = NULL;
+	zval *current_this = NULL;
 	int return_value_used = RETURN_VALUE_USED(opline);
 	zend_bool should_change_scope;
 	zend_op *ctor_opline;
@@ -7832,7 +7832,7 @@ static int ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	ulong int_key;
 	HashTable *fe_ht;
 	zend_object_iterator *iter = NULL;
-	int key_type;
+	int key_type = 0;
 	zend_bool use_key = (zend_bool)(opline->extended_value & ZEND_FE_FETCH_WITH_KEY);
 
 	PZVAL_LOCK(array);
