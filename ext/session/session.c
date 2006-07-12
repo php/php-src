@@ -942,6 +942,8 @@ static void php_session_send_cookie(TSRMLS_D)
 
 	smart_str_0(&ncookie);
 	
+	/*	'replace' must be 0 here, else a previous Set-Cookie
+		header, probably sent with setcookie() will be replaced! */
 	sapi_add_header_ex(ncookie.c, ncookie.len, 0, 0 TSRMLS_CC);
 }
 
