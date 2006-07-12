@@ -1,3 +1,27 @@
+2006-07-11  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.c:
+      Remove unused 'y' specifier.
+
+    * zend_API.c:
+      Rename to a more explanatory macro.
+
+2006-07-11  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      tests/bug28444.phpt
+      tests/bug30791.phpt:
+      there is no Unicode in 5_2
+
+2006-07-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      Fixed memory leak in case of exception in iterator callbacks in
+      'foreach(new Iterator()...' (spl/tests/iterator_047.phpt).
+
 2006-07-10  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_API.c:

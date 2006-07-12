@@ -1,3 +1,224 @@
+2006-07-11  Hartmut Holzgraefe  <hartmut@mysql.com>
+
+    * (PHP_5_2)
+      ext/mysqli/tests/connect.inc:
+      MFH make sure that embedded database is correctly initialized
+
+    * (PHP_5_2)
+      ext/mysqli/tests/connect.inc:
+      debug output was breaking all tests
+
+    * ext/mysqli/tests/connect.inc
+      ext/mysqli/tests/skipifnotemb.inc
+      ext/mysqli/tests/skipifnotemb.inc:
+      make sure embedded server is correctly initialized
+
+    * ext/mysqli/tests/bug33263.phpt:
+      skip when testing embedded server
+
+    * ext/mysqli/tests/071.phpt
+      ext/mysqli/tests/071.phpt:
+      
+      no need to test ping and kill with embedded server
+
+2006-07-11  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * README.PARAMETER_PARSING_API:
+      Explain new specifiers
+
+    * README.UNICODE:
+      Typos
+
+    * README.UNICODE:
+      Update design doc.
+
+    * ZendEngine2/zend_API.c:
+      Remove unused 'y' specifier.
+
+    * unicode-todo.txt:
+      -** empty log message ***
+
+2006-07-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/standard/tests/assert/assert02.phpt:
+      Fixed test
+
+2006-07-11  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/array/array_fill.phpt
+      ext/standard/tests/array/array_filter.phpt
+      ext/standard/tests/array/array_flip.phpt:
+      add new tests by Ligaya Turmelle
+
+    * ext/standard/tests/array/array_fill.phpt
+      ext/standard/tests/array/array_fill.phpt
+      ext/standard/tests/array/array_filter.phpt
+      ext/standard/tests/array/array_filter.phpt
+      ext/standard/tests/array/array_flip.phpt
+      ext/standard/tests/array/array_flip.phpt:
+      
+      add new tests by Ligaya Turmelle
+
+    * (PHP_5_2)
+      ext/standard/tests/file/bug24313.phpt:
+      MFH: /tmp is often a symlink, use /bin instead
+
+    * ext/standard/tests/file/bug24313.phpt:
+      /tmp is often a symlink, use /bin instead
+
+2006-07-11  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/unicode/unicode_iterators.c:
+      Protos.
+
+    * ext/unicode/unicode_iterators.c:
+      Implement getAll() that can be used to get all the pieces defined by the
+      boundaries.
+
+    * ext/unicode/unicode_iterators.c:
+      Make next() and previous() take optional step parameter and optimize
+      return value usage.
+
+    * ext/unicode/unicode_iterators.c:
+      Implement getRuleStatus() and getRuleStatusArray() as well as related
+      constants.
+
+    * ZendEngine2/zend_API.c:
+      Rename to a more explanatory macro.
+
+2006-07-11  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/xmlwriter/php_xmlwriter.c
+      ext/xmlwriter/tests/010.phpt
+      ext/xmlwriter/tests/010.phpt:
+      fix typo, add new test
+
+    * ext/xmlwriter/010.phpt
+      ext/xmlwriter/php_xmlwriter.c:
+      fix typo
+      add test with error messages
+
+2006-07-11  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/unicode/unicode_iterators.c:
+      Use object flags.
+
+2006-07-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/php_encoding.c
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.h
+      ext/soap/php_encoding.h
+      ext/soap/php_http.c
+      ext/soap/php_http.c
+      ext/soap/php_packet_soap.c
+      ext/soap/php_packet_soap.c
+      ext/soap/php_schema.c
+      ext/soap/php_schema.c
+      ext/soap/php_sdl.c
+      ext/soap/php_sdl.c
+      ext/soap/php_sdl.h
+      ext/soap/php_sdl.h
+      ext/soap/php_xml.c
+      ext/soap/php_xml.c
+      ext/soap/php_xml.h
+      ext/soap/php_xml.h
+      ext/soap/soap.c
+      ext/soap/soap.c
+      ext/soap/soap.c
+      ext/soap/soap.c:
+      Nuke signed/unsigned compiler warnings
+
+2006-07-11  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/calendar/gregor.c
+      ext/calendar/tests/jdtomonthname.phpt:
+      fix segfault in jdmonthname(), add test
+
+    * ext/calendar/gregor.c
+      ext/calendar/tests/cal_info.phpt
+      ext/calendar/tests/easter_date.phpt
+      ext/calendar/tests/jdtomonthname.phpt
+      ext/calendar/tests/jdtomonthname.phpt
+      ext/calendar/tests/jdtounix.phpt:
+      fix segfault in jfmonthname(), add test
+      fix tests (I don't have /home/hartmut here =))
+
+    * ext/date/lib/parse_tz.c:
+      MFB: eliminate compile warnings
+
+    * (PHP_5_2)
+      ext/date/lib/parse_tz.c:
+      eliminate compile warnings
+
+    * (PHP_5_2)
+      ZendEngine2/tests/bug28444.phpt
+      ZendEngine2/tests/bug30791.phpt
+      ext/pdo/tests/bug_36428.phpt
+      ext/pdo/tests/pdo_030.phpt
+      ext/spl/tests/array_022.phpt
+      ext/spl/tests/iterator_027.phpt
+      ext/spl/tests/iterator_038.phpt
+      ext/spl/tests/iterator_045.phpt
+      ext/spl/tests/iterator_046.phpt
+      ext/spl/tests/iterator_048.phpt
+      ext/wddx/tests/bug37587.phpt
+      tests/classes/tostring_001.phpt:
+      there is no Unicode in 5_2
+
+2006-07-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h:
+      Fixed memory leak in case of exception in iterator callbacks in
+      'foreach(new Iterator()...' (spl/tests/iterator_047.phpt).
+
+2006-07-11  Hartmut Holzgraefe  <hartmut@mysql.com>
+
+    * ext/mysqli/tests/071.phpt:
+      check both OO and procedural style as "thread_id" is a property and not
+      a method in the OO interface
+
+    * ext/mysqli/tests/071.phpt:
+      modified test to use (and cover) mysqli->thread_id
+
+    * ext/mysqli/tests/071.phpt:
+      test kill()
+
+    * ext/mysqli/tests/070.phpt:
+      test ping()
+
+    * ext/mysqli/tests/069.phpt:
+      test multi_query(), next_result(), more_results()
+      (only partially covered by a bug testcase yet)
+
+    * ext/mysqli/tests/068.phpt:
+      get_client_info() test
+
+    * ext/mysqli/tests/047.phpt:
+      test was only covering fetch_fields(), added fetch_field() and
+      fetch_field_direct()
+
+    * ext/mysqli/tests/019.phpt:
+      test was not covering DOUBLE bindings
+
+2006-07-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/apache2handler/EXPERIMENTAL:
+      MFB: apache2handler sapi is no longer experimental
+
+    * (PHP_5_2)
+      sapi/apache2handler/EXPERIMENTAL:
+      apache2handler sapi is no longer experimental
+
 2006-07-10  Andrei Zmievski  <andrei@gravitonic.com>
 
     * unicode-todo.txt:
