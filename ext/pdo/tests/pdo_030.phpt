@@ -135,8 +135,8 @@ array(3) {
   string(3) "tsr"
 }
 ===DONE===
-PDODatabase::__destruct()
 PDOStatementX::__destruct()
+PDODatabase::__destruct()
 --UEXPECTF--
 unicode(11) "PDODatabase"
 unicode(12) "PDOStatement"
@@ -185,5 +185,5 @@ array(3) {
   unicode(3) "tsr"
 }
 ===DONE===
-PDODatabase::__destruct()
 PDOStatementX::__destruct()
+PDODatabase::__destruct()
