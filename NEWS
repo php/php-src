@@ -82,6 +82,8 @@ PHP                                                                        NEWS
 
 - Fixed memory leaks in openssl streams context options. (Pierre)
 - Fixed handling of extremely long paths inside tempnam() function. (Ilia)
+- Fixed bug #38072 (boolean arg for mysqli_autocommit() is always true on 
+  Solaris). (Tony)
 - Fixed bug #38067 (Parameters are not decoded from utf-8 when using encoding
   option). (Dmitry)
 - Fixed bug #38055 (Wrong interpretation of boolean parameters). (Dmitry)
