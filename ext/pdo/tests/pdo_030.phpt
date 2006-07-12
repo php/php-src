@@ -135,5 +135,5 @@ array(3) {
   string(3) "tsr"
 }
 ===DONE===
-PDODatabase::__destruct()
 PDOStatementX::__destruct()
+PDODatabase::__destruct()
