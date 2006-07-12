@@ -5,35 +5,168 @@ ext/standard
 ------------
   Status: In Progress
 
-  Completed:
-        addslashes()
-        bin2hex()
-        chr()
-        explode()
-        implode()
-        levenshtein()
-        ord()
-        range()
-        similar_text()
-        str_pad()
-        str_repeat()
-        strip_tags()
-        strcspn()
-        stripslashes()
-        strpbrk()
-        strpos()
-        strrchr()
-        strrev()
-        strrpos()
-        strspn()
-        strstr()
-        strtok()
-        substr()
-        substr_count()
-        substr_replace()
-        trim()
-        ucfirst()
-        ucwords()
+  array.c
+  -------
+    Need to fix string_compare_function() to compare Unicode strings
+    directly in code point order
+
+    array_change_key_case()
+        Params API, test
+
+    array_chunk()
+        Test
+
+    array_combine()
+        Handle IS_UNICODE/IS_STRING keys via add_u_assoc_zval()
+
+    array_count_values()
+        Params API, minor Unicode updates, test
+
+    array_diff(), array_udiff()
+    array_diff_assoc(), array_diff_uassoc(), array_udiff_assoc(), array_udiff_uassoc()
+    array_diff_key(), array_diff_ukey()
+        Should work with minor cleanups provided that underlying comparison
+        functions are fixed, FCI cache, test
+
+    array_fill()
+        Params API, test
+
+    array_filter()
+        Params API, FCI cache, test
+
+    array_flip()
+        Params API, test
+
+    array_intersect(), array_uintersect()
+    array_intersect_assoc(), array_uintersect_assoc(), array_intersect_uassoc(), array_uintersect_uassoc()
+    array_intersect_key(), array_intersect_ukey()
+        Should work with minor cleanups provided that underlying comparison
+        functions are fixed, FCI cache, test
+
+    array_key_exists()
+        Params API, test
+
+    array_keys()
+        Params API, test
+
+    array_map()
+        Params API, FCI cache, test
+
+    array_merge(), array_merge_recursive()
+        Test
+
+    array_multisort()
+        Add SORT_LOCALE_STRING, test
+
+    array_pad()
+        Params API, test
+
+    array_product()
+        Params API, test
+
+    array_push(), array_pop(), array_shift(), array_unshift()
+        Params API, test
+
+    array_rand()
+        Params API, test
+
+    array_reduce()
+        Params API, FCI cache, test
+
+    array_reverse()
+        Params API, test
+
+    array_search(), in_array()
+        Params API, test
+
+    array_splice()
+        Params API, test
+
+    array_slice()
+        Params API, test
+
+    array_sum()
+        Params API, test
+
+    array_unique()
+        Params API, test
+
+    array_values()
+        Params API, test
+
+    array_walk()
+        Params API, is_callable check, FCI cache, test
+
+    array_walk_recursive()
+        Params API, is_callable check, FCI cache, test
+
+    end(), prev(), next(), reset(), current(), key()
+        Params API, test
+
+    extract()
+        Params API, fix php_valid_var_name(), test
+
+    compact()
+        Test
+
+    min(), max()
+        Test
+
+    natsort(), natcasesort()
+        Params API
+        Either port strnatcmp() to support Unicode or maybe use ICU's numeric collation
+
+    range()
+        Test
+
+    shuffle()
+        Test
+
+    sort(), rsort()
+    asort(), arsort()
+    ksort(), krsort() 
+    usort(), uasort(), uksort()
+        Test, make sure SORT_LOCALE_STRING uses default collator
+
+
+  Completed
+  =========
+  
+  array.c
+  -------
+    count()
+
+
+  string.c
+  --------
+    addslashes()
+    bin2hex()
+    chr()
+    explode()
+    implode()
+    levenshtein()
+    ord()
+    range()
+    similar_text()
+    str_pad()
+    str_repeat()
+    strcspn()
+    strip_tags()
+    stripslashes()
+    strpbrk()
+    strpos()
+    strrchr()
+    strrev()
+    strrpos()
+    strspn()
+    strstr()
+    strtok()
+    substr()
+    substr_count()
+    substr_replace()
+    trim()
+    ucfirst()
+    ucwords()
 
 
 Zend Engine
