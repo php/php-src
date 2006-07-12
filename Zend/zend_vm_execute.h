@@ -1857,7 +1857,7 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_op *opline = EX(opline);
 	zend_op_array *new_op_array=NULL;
 	zval **original_return_value = EG(return_value_ptr_ptr);
-	int return_value_used;
+	int return_value_used = RETURN_VALUE_USED(opline);
 
 	zval *inc_filename = &opline->op1.u.constant;
 	zval tmp_inc_filename;
@@ -1888,8 +1888,6 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		convert_to_string(&tmp_inc_filename);
 		inc_filename = &tmp_inc_filename;
 	}
-
-	return_value_used = RETURN_VALUE_USED(opline);
 
 	switch (Z_LVAL(opline->op2.u.constant)) {
 		case ZEND_INCLUDE_ONCE:
@@ -4437,7 +4435,7 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_op *opline = EX(opline);
 	zend_op_array *new_op_array=NULL;
 	zval **original_return_value = EG(return_value_ptr_ptr);
-	int return_value_used;
+	int return_value_used = RETURN_VALUE_USED(opline);
 	zend_free_op free_op1;
 	zval *inc_filename = _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 	zval tmp_inc_filename;
@@ -4468,8 +4466,6 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		convert_to_string(&tmp_inc_filename);
 		inc_filename = &tmp_inc_filename;
 	}
-
-	return_value_used = RETURN_VALUE_USED(opline);
 
 	switch (Z_LVAL(opline->op2.u.constant)) {
 		case ZEND_INCLUDE_ONCE:
@@ -7614,7 +7610,7 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_op *opline = EX(opline);
 	zend_op_array *new_op_array=NULL;
 	zval **original_return_value = EG(return_value_ptr_ptr);
-	int return_value_used;
+	int return_value_used = RETURN_VALUE_USED(opline);
 	zend_free_op free_op1;
 	zval *inc_filename = _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 	zval tmp_inc_filename;
@@ -7645,8 +7641,6 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		convert_to_string(&tmp_inc_filename);
 		inc_filename = &tmp_inc_filename;
 	}
-
-	return_value_used = RETURN_VALUE_USED(opline);
 
 	switch (Z_LVAL(opline->op2.u.constant)) {
 		case ZEND_INCLUDE_ONCE:
@@ -20387,7 +20381,7 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_op *opline = EX(opline);
 	zend_op_array *new_op_array=NULL;
 	zval **original_return_value = EG(return_value_ptr_ptr);
-	int return_value_used;
+	int return_value_used = RETURN_VALUE_USED(opline);
 
 	zval *inc_filename = _get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
 	zval tmp_inc_filename;
@@ -20418,8 +20412,6 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		convert_to_string(&tmp_inc_filename);
 		inc_filename = &tmp_inc_filename;
 	}
-
-	return_value_used = RETURN_VALUE_USED(opline);
 
 	switch (Z_LVAL(opline->op2.u.constant)) {
 		case ZEND_INCLUDE_ONCE:
