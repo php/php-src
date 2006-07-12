@@ -31,14 +31,17 @@ resources cannot be auto-converted.
 
 Type specifiers
 ---------------
- l	- long
- d	- double
- s	- string (with possible null bytes) and its length
- b	- boolean, stored in zend_bool
- r	- resource (stored in zval)
  a	- array
+ b	- boolean, stored in zend_bool
+ d	- double
+ f	- function or array containing php method call info (returned as 
+	  zend_fcall_info* and zend_fcall_info_cache*)
+ h	- array (returned as HashTable*)
+ l	- long
  o	- object (of any type)
  O	- object (of specific type, specified by class entry)
+ r	- resource (stored in zval)
+ s	- string (with possible null bytes) and its length
  z	- the actual zval
 
  The following characters also have a meaning in the specifier string:
