@@ -190,8 +190,22 @@ void init_executor(TSRMLS_D)
 	EG(This) = NULL;
 }
 
+static int zval_call_destructor(zval **zv TSRMLS_DC)
+{
+	if (Z_TYPE_PP(zv) == IS_OBJECT && (*zv)->refcount == 1) {
+		return ZEND_HASH_APPLY_REMOVE;
+	} else {
+		return ZEND_HASH_APPLY_KEEP;
+	}
+}
+
 void shutdown_destructors(TSRMLS_D) {
 	zend_try {
+		int symbols;
+		do {
+			symbols = zend_hash_num_elements(&EG(symbol_table));
+			zend_hash_reverse_apply(&EG(symbol_table), (apply_func_t) zval_call_destructor TSRMLS_CC);
+		} while (symbols != zend_hash_num_elements(&EG(symbol_table)));
 		zend_objects_store_call_destructors(&EG(objects_store) TSRMLS_CC);
 	} zend_catch {
 		/* if we couldn't destruct cleanly, mark all objects as destructed anyway */

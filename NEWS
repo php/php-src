@@ -171,6 +171,8 @@ PHP                                                                        NEWS
 - Fixed bug #37244 (Added strict flag to base64_decode() that enforces 
   RFC3548 compliance). (Ilia)
 - Fixed bug #36949 (invalid internal mysqli objects dtor). (Mike)
+- Fixed bug #36759 (Objects destructors are invoked in wrong order when script
+  is finished). (Dmitry)
 - Fixed bug #36630 (umask not reset at the end of the request). (Ilia)
 - Fixed bug #35886 (file_get_contents() fails with some
   combinations of offset & maxlen). (Nuno)
