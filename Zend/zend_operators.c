@@ -581,7 +581,6 @@ ZEND_API void convert_to_boolean(zval *op)
 
 ZEND_API void _convert_to_unicode(zval *op TSRMLS_DC ZEND_FILE_LINE_DC)
 {
-    TSRMLS_FETCH();
     _convert_to_unicode_with_converter(op, ZEND_U_CONVERTER(UG(runtime_encoding_conv)) TSRMLS_CC ZEND_FILE_LINE_CC);
 }
 
