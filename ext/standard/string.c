@@ -1627,10 +1627,19 @@ PHP_FUNCTION(stripos)
 		RETURN_FALSE;
 	}
 
+	if (haystack_len == 0) {
+		RETURN_FALSE;
+	}
+
 	haystack_dup = estrndup(haystack, haystack_len);
 	php_strtolower(haystack_dup, haystack_len);
 
 	if (Z_TYPE_P(needle) == IS_STRING) {
+		if (Z_STRLEN_P(needle) == 0 || Z_STRLEN_P(needle) > haystack_len) {
+			efree(haystack_dup);
+			RETURN_FALSE;
+		}
+
 		needle_dup = estrndup(Z_STRVAL_P(needle), Z_STRLEN_P(needle));
 		php_strtolower(needle_dup, Z_STRLEN_P(needle));
 		found = php_memnstr(haystack_dup + offset, needle_dup, Z_STRLEN_P(needle), haystack_dup + haystack_len);
