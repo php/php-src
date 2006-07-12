@@ -57,14 +57,14 @@ PHP_FUNCTION(mysqli_autocommit)
 {
 	MY_MYSQL 		*mysql;
 	zval  			*mysql_link;
-	unsigned long	automode;
+	zend_bool		automode;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ob", &mysql_link, mysqli_link_class_entry, &automode) == FAILURE) {
 		return;	
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
-	if (mysql_autocommit(mysql->mysql, automode)) {
+	if (mysql_autocommit(mysql->mysql, (my_bool)automode)) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
