@@ -2761,7 +2761,19 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|VAR|CV, ANY)
 			convert_to_unicode(&tmp_inc_filename);
 			inc_filename = &tmp_inc_filename;
 		}
-	} else if (Z_TYPE_P(inc_filename)!=IS_STRING) {
+	} else if (Z_TYPE_P(inc_filename) == IS_UNICODE) {
+		char *encpath;
+		int encpath_len;
+
+		if (FAILURE == zend_path_encode(&encpath, &encpath_len, Z_USTRVAL_P(inc_filename), Z_USTRLEN_P(inc_filename) TSRMLS_CC)) {
+			failure_retval = 0;
+			zend_error(E_ERROR, "Failure converting '%R' to filesystem encoding", IS_UNICODE, Z_USTRVAL_P(inc_filename));
+			goto skip_compile;
+		}
+
+		ZVAL_STRINGL(&tmp_inc_filename, encpath, encpath_len, 0);
+		inc_filename = &tmp_inc_filename;
+	} else if (Z_TYPE_P(inc_filename) != IS_STRING) {
 		tmp_inc_filename = *inc_filename;
 		zval_copy_ctor(&tmp_inc_filename);
 		convert_to_string(&tmp_inc_filename);
@@ -2824,6 +2836,8 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|VAR|CV, ANY)
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
+
+skip_compile:
 	if (inc_filename==&tmp_inc_filename) {
 		zval_dtor(&tmp_inc_filename);
 	}
