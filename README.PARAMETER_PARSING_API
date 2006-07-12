@@ -38,23 +38,25 @@ Type specifiers
  has to be provided on input and is used to verify the PHP parameter is an 
  instance of that class.
 
- l	- long (long)
+ a	- array (zval*)
+ b	- boolean (zend_bool)
+ C	- class (zend_class_entry*)
  d	- double (double)
+ f	- function or array containing php method call info (returned as 
+	  zend_fcall_info* and zend_fcall_info_cache*)
+ h	- array (returned as HashTable*)
+ l	- long (long)
+ o	- object of any type (zval*)
+ O	- object of specific type given by class entry (zval*, zend_class_entry)
+ r	- resource (zval*)
  s	- string (with possible null bytes) and its length (char*, int)
- u	- Unicode (UChar*, int)
+ S	- binary string, does not allow conversion from Unicode strings
  t	- text (void * (char*/Uchar*), int (length), zend_uchar (IS_STRING/..))
       accepts either Unicode or binary string
  T	- text (void * (char*/Uchar*), int (length), zend_uchar (IS_STRING/..))
       coalesces all T parameters to common type (Unicode or binary)
- U  - Unicode string, does not allow conversion from binary strings
- S  - binary string, does not allow conversion from Unicode strings
- b	- boolean (zend_bool)
- r	- resource (zval*)
- a	- array (zval*)
- h	- array (returned as HashTable*)
- o	- object of any type (zval*)
- O	- object of specific type given by class entry (zval*, zend_class_entry)
- C	- class (zend_class_entry*)
+ u	- unicode (UChar*, int)
+ U	- Unicode string, does not allow conversion from binary strings
  z	- the actual zval (zval*)
  Z	- the actual zval (zval**)
 
