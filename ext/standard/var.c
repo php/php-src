@@ -45,9 +45,9 @@
 static void php_var_dump_unicode(UChar *ustr, int length, int verbose, char *quote, int escape TSRMLS_DC)
 {
 	UChar32 c;
-	int32_t i;
+	int i;
 	UErrorCode status = U_ZERO_ERROR;
-	int32_t clen;
+	int clen;
 	char *out = NULL;
 
 	if (length == 0) {
@@ -56,16 +56,8 @@ static void php_var_dump_unicode(UChar *ustr, int length, int verbose, char *quo
 		return;
 	}
 
-	clen = length * ucnv_getMaxCharSize(ZEND_U_CONVERTER(UG(output_encoding_conv))) + 1;
-	while (1) {
-		status = U_ZERO_ERROR;
-		out = erealloc(out, clen+1);
-		clen = ucnv_fromUChars(ZEND_U_CONVERTER(UG(output_encoding_conv)), out, clen+1, ustr, length, &status);
-		if (status != U_BUFFER_OVERFLOW_ERROR) {
-			break;
-		}
-	}
-	if(U_FAILURE(status) || status==U_STRING_NOT_TERMINATED_WARNING) {
+	zend_convert_from_unicode(ZEND_U_CONVERTER(UG(output_encoding_conv)), &out, &clen, ustr, length, &status);
+	if(U_FAILURE(status)) {
 		php_printf("problem converting string from Unicode: %s\n", u_errorName(status));
 		efree(out);
 		return;
