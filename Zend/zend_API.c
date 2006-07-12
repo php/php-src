@@ -995,7 +995,7 @@ ZEND_API int zend_parse_method_parameters(int num_args TSRMLS_DC, zval *this_ptr
 		va_end(va);
 	} else {
 		p++;
-		RETURN_IF_ZERO_ARGS(num_args-1, p, 0);
+		RETURN_IF_ZERO_ARGS(num_args, p, 0);
 
 		va_start(va, type_spec);
 
