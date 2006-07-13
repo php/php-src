@@ -27,13 +27,13 @@
 typedef struct _php_info_logo { 
 	char *mimetype;
 	int mimelen;
-	unsigned char *data; 
+	const unsigned char *data; 
 	int size; 
 } php_info_logo;
 
 HashTable phpinfo_logo_hash;
 
-PHPAPI int php_register_info_logo(char *logo_string, char *mimetype, unsigned char *data, int size)
+PHPAPI int php_register_info_logo(char *logo_string, char *mimetype, const unsigned char *data, int size)
 {
 	php_info_logo info_logo;
 
