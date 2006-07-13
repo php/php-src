@@ -42,3 +42,11 @@ object(book)#2 (2) {
   string(3) "aap"
 }
 ok
+--UEXPECT--
+object(book)#2 (2) {
+  [u"a"]=>
+  unicode(5) "Blaat"
+  [u"b"]=>
+  unicode(3) "aap"
+}
+ok

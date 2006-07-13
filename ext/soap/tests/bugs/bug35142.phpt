@@ -133,3 +133,49 @@ object(IVREvents)#%d (6) {
     }
   }
 }
+--UEXPECTF--
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://testurl/Message"><SOAP-ENV:Body><ns1:ivrEvents version="1.0" activityId="101" messageId="12345" source="IVR"><ns1:logOffEvent audienceMemberId="34567" timestamp="2005-11-08T11:22:07+03:00" smokeStatus="Smoked" callInitiator="IVR"/><ns1:logOffEvent audienceMemberId="34568" timestamp="2005-11-08T11:22:07+03:00" smokeStatus="SmokeFree" callInitiator="IVR"/><ns1:logOnEvent audienceMemberId="34567" timestamp="2005-11-08T11:22:07+03:00"/></ns1:ivrEvents></SOAP-ENV:Body></SOAP-ENV:Envelope>
+
+object(IVREvents)#%d (6) {
+  [u"version"]=>
+  unicode(3) "1.0"
+  [u"activityId"]=>
+  int(101)
+  [u"messageId"]=>
+  int(12345)
+  [u"source"]=>
+  unicode(3) "IVR"
+  [u"logOnEvent"]=>
+  object(LogOnEvent)#%d (2) {
+    [u"audienceMemberId"]=>
+    int(34567)
+    [u"timestamp"]=>
+    unicode(25) "2005-11-08T11:22:07+03:00"
+  }
+  [u"logOffEvent"]=>
+  array(2) {
+    [0]=>
+    object(LogOffEvent)#%d (4) {
+      [u"audienceMemberId"]=>
+      int(34567)
+      [u"timestamp"]=>
+      unicode(25) "2005-11-08T11:22:07+03:00"
+      [u"smokeStatus"]=>
+      unicode(6) "Smoked"
+      [u"callInitiator"]=>
+      unicode(3) "IVR"
+    }
+    [1]=>
+    object(LogOffEvent)#%d (4) {
+      [u"audienceMemberId"]=>
+      int(34568)
+      [u"timestamp"]=>
+      unicode(25) "2005-11-08T11:22:07+03:00"
+      [u"smokeStatus"]=>
+      unicode(9) "SmokeFree"
+      [u"callInitiator"]=>
+      unicode(3) "IVR"
+    }
+  }
+}

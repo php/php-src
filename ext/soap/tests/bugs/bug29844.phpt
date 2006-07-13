@@ -34,3 +34,5 @@ var_dump($client->hello('davey'));
 ?>
 --EXPECT--
 string(11) "Hello davey"
+--UEXPECT--
+unicode(11) "Hello davey"
