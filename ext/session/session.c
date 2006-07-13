@@ -446,7 +446,7 @@ PS_SERIALIZER_DECODE_FUNC(php_binary)
 		
 		if (has_value) {
 			ALLOC_INIT_ZVAL(current);
-			if (php_var_unserialize(&current, (const unsigned char **) &p, endptr, &var_hash TSRMLS_CC)) {
+			if (php_var_unserialize(&current, (const unsigned char **) &p, (const unsigned char *) endptr, &var_hash TSRMLS_CC)) {
 				php_set_session_var(name, namelen, current, &var_hash  TSRMLS_CC);
 			}
 			zval_ptr_dtor(&current);
@@ -526,7 +526,7 @@ PS_SERIALIZER_DECODE_FUNC(php)
 		
 		if (has_value) {
 			ALLOC_INIT_ZVAL(current);
-			if (php_var_unserialize(&current, (const unsigned char **) &q, endptr, &var_hash TSRMLS_CC)) {
+			if (php_var_unserialize(&current, (const unsigned char **) &q, (const unsigned char *) endptr, &var_hash TSRMLS_CC)) {
 				php_set_session_var(name, namelen, current, &var_hash TSRMLS_CC);
 			}
 			zval_ptr_dtor(&current);
@@ -616,8 +616,8 @@ static char *bin_to_readable(char *in, size_t inlen, char *out, char nbits)
 	int mask;
 	int have;
 	
-	p = in;
-	q = in + inlen;
+	p = (unsigned char *) in;
+	q = (unsigned char *)in + inlen;
 
 	w = 0;
 	have = 0;
@@ -673,17 +673,17 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS)
 
 	/* maximum 15+19+19+10 bytes */	
 	sprintf(buf, "%.15s%ld%ld%0.8f", remote_addr ? remote_addr : "", 
-			tv.tv_sec, tv.tv_usec, php_combined_lcg(TSRMLS_C) * 10);
+			tv.tv_sec, (long int)tv.tv_usec, php_combined_lcg(TSRMLS_C) * 10);
 
 	switch (PS(hash_func)) {
 	case PS_HASH_FUNC_MD5:
 		PHP_MD5Init(&md5_context);
-		PHP_MD5Update(&md5_context, buf, strlen(buf));
+		PHP_MD5Update(&md5_context, (unsigned char *) buf, strlen(buf));
 		digest_len = 16;
 		break;
 	case PS_HASH_FUNC_SHA1:
 		PHP_SHA1Init(&sha1_context);
-		PHP_SHA1Update(&sha1_context, buf, strlen(buf));
+		PHP_SHA1Update(&sha1_context, (unsigned char *) buf, strlen(buf));
 		digest_len = 20;
 		break;
 	default:
@@ -734,7 +734,7 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS)
 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The ini setting hash_bits_per_character is out of range (should be 4, 5, or 6) - using 4 for now");
 	}
-	j = (int) (bin_to_readable(digest, digest_len, buf, PS(hash_bits_per_character)) - buf);
+	j = (int) (bin_to_readable((char *)digest, digest_len, buf, PS(hash_bits_per_character)) - buf);
 	
 	if (newlen) 
 		*newlen = j;
