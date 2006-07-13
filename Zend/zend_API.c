@@ -3657,7 +3657,6 @@ ZEND_API zend_uchar zend_get_unified_string_type(int num_args TSRMLS_DC, ...)
 
 	/* We do not allow mixing binary and Unicode types */
 	if (seen_string && seen_unicode) {
-		zend_error(E_WARNING, "Cannot mix binary and Unicode parameters");
 		return (zend_uchar)-1;
 	}
 

@@ -1691,7 +1691,7 @@ PHP_FUNCTION(array_fill)
 /* }}} */
 
 
-/* {{{ proto array range(mixed low, mixed high[, int step])
+/* {{{ proto array range(mixed low, mixed high[, int step]) U
    Create an array containing the range of integers or characters from low to high (inclusive) */
 PHP_FUNCTION(range)
 {
@@ -1723,6 +1723,7 @@ PHP_FUNCTION(range)
 	/* Unify types */
 	str_type = zend_get_unified_string_type(2 TSRMLS_CC, Z_TYPE_P(zlow), Z_TYPE_P(zhigh));
 	if (str_type == (zend_uchar)-1) {
+		zend_error(E_WARNING, "Cannot mix binary and Unicode parameters");
 		return;
 	}
 	convert_to_explicit_type(zlow, str_type);
@@ -1946,7 +1947,7 @@ static void array_data_shuffle(zval *array TSRMLS_DC)
 	efree(elems);
 }
 
-/* {{{ proto bool shuffle(array array_arg)
+/* {{{ proto bool shuffle(array array_arg) U
    Randomly shuffle the contents of an array */
 PHP_FUNCTION(shuffle)
 {
@@ -2533,7 +2534,7 @@ static void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMETERS, int recursive)
 }
 
 
-/* {{{ proto array array_merge(array arr1, array arr2 [, array ...])
+/* {{{ proto array array_merge(array arr1, array arr2 [, array ...]) U
    Merges elements from passed arrays into one array */
 PHP_FUNCTION(array_merge)
 {
@@ -2542,7 +2543,7 @@ PHP_FUNCTION(array_merge)
 /* }}} */
 
 
-/* {{{ proto array array_merge_recursive(array arr1, array arr2 [, array ...])
+/* {{{ proto array array_merge_recursive(array arr1, array arr2 [, array ...]) U
    Recursively merges elements from passed arrays into one array */
 PHP_FUNCTION(array_merge_recursive)
 {
