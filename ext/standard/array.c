@@ -4142,31 +4142,25 @@ PHP_FUNCTION(array_rand)
 }
 /* }}} */
 
-/* {{{ proto mixed array_sum(array input)
+/* {{{ proto mixed array_sum(array input) U
    Returns the sum of the array entries */
 PHP_FUNCTION(array_sum)
 {
-	zval **input,
+	zval *input,
 		 **entry,
 		 entry_n;
-	int argc = ZEND_NUM_ARGS();
 	HashPosition pos;
 	double dval;
 	
-	if (argc != 1 || zend_get_parameters_ex(argc, &input) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-
-	if (Z_TYPE_PP(input) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &input) == FAILURE) {
 		return;
 	}
 
 	ZVAL_LONG(return_value, 0);
 
-	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(input), &pos);
-		 zend_hash_get_current_data_ex(Z_ARRVAL_PP(input), (void **)&entry, &pos) == SUCCESS;
-		 zend_hash_move_forward_ex(Z_ARRVAL_PP(input), &pos)) {
+	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(input), &pos);
+		 zend_hash_get_current_data_ex(Z_ARRVAL_P(input), (void **)&entry, &pos) == SUCCESS;
+		 zend_hash_move_forward_ex(Z_ARRVAL_P(input), &pos)) {
 		
 		if (Z_TYPE_PP(entry) == IS_ARRAY || Z_TYPE_PP(entry) == IS_OBJECT)
 			continue;
@@ -4189,34 +4183,28 @@ PHP_FUNCTION(array_sum)
 }
 /* }}} */
 
-/* {{{ proto mixed array_product(array input)
+/* {{{ proto mixed array_product(array input) U
    Returns the product of the array entries */
 PHP_FUNCTION(array_product)
 {
-	zval **input,
+	zval *input,
 		 **entry,
 		 entry_n;
-	int argc = ZEND_NUM_ARGS();
 	HashPosition pos;
 	double dval;
 	
-	if (argc != 1 || zend_get_parameters_ex(argc, &input) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-
-	if (Z_TYPE_PP(input) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &input) == FAILURE) {
 		return;
 	}
 
-	if (!zend_hash_num_elements(Z_ARRVAL_PP(input))) {
+	if (!zend_hash_num_elements(Z_ARRVAL_P(input))) {
 		RETURN_LONG(0);
 	}
 	ZVAL_LONG(return_value, 1);
 
-	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(input), &pos);
-		 zend_hash_get_current_data_ex(Z_ARRVAL_PP(input), (void **)&entry, &pos) == SUCCESS;
-		 zend_hash_move_forward_ex(Z_ARRVAL_PP(input), &pos)) {
+	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(input), &pos);
+		 zend_hash_get_current_data_ex(Z_ARRVAL_P(input), (void **)&entry, &pos) == SUCCESS;
+		 zend_hash_move_forward_ex(Z_ARRVAL_P(input), &pos)) {
 		
 		if (Z_TYPE_PP(entry) == IS_ARRAY || Z_TYPE_PP(entry) == IS_OBJECT)
 			continue;
