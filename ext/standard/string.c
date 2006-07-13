@@ -2133,6 +2133,7 @@ PHP_FUNCTION(stristr)
 		if (Z_TYPE_P(haystack) != Z_TYPE_P(needle)) {
 			str_type = zend_get_unified_string_type(2 TSRMLS_CC, Z_TYPE_P(haystack), Z_TYPE_P(needle));
 			if (str_type == (zend_uchar)-1) {
+				zend_error(E_WARNING, "Cannot mix binary and Unicode parameters");
 				return;
 			}
 			convert_to_explicit_type(haystack, str_type);
@@ -2441,6 +2442,7 @@ PHP_FUNCTION(stripos)
 		if (Z_TYPE_P(haystack) != Z_TYPE_P(needle)) {
 			str_type = zend_get_unified_string_type(2 TSRMLS_CC, Z_TYPE_P(haystack), Z_TYPE_P(needle));
 			if (str_type == (zend_uchar)-1) {
+				zend_error(E_WARNING, "Cannot mix binary and Unicode parameters");
 				return;
 			}
 			convert_to_explicit_type(haystack, str_type);
@@ -2554,6 +2556,7 @@ PHP_FUNCTION(strrpos)
 		if (Z_TYPE_P(zneedle) != Z_TYPE_P(zhaystack)) {
 			str_type = zend_get_unified_string_type(2 TSRMLS_CC, Z_TYPE_P(zhaystack), Z_TYPE_P(zneedle));
 			if (str_type == (zend_uchar)-1) {
+				zend_error(E_WARNING, "Cannot mix binary and Unicode parameters");
 				return;
 			}
 			convert_to_explicit_type(zhaystack, str_type);
@@ -2777,6 +2780,7 @@ PHP_FUNCTION(strrchr)
 		if (Z_TYPE_P(needle) != Z_TYPE_P(haystack)) {
 			str_type = zend_get_unified_string_type(2 TSRMLS_CC, Z_TYPE_P(haystack), Z_TYPE_P(needle));
 			if (str_type == (zend_uchar)-1) {
+				zend_error(E_WARNING, "Cannot mix binary and Unicode parameters");
 				return;
 			}
 			convert_to_explicit_type(haystack, str_type);
@@ -3144,6 +3148,7 @@ PHP_FUNCTION(substr_replace)
 			if (tmp_repl && Z_TYPE_PP(str) != Z_TYPE_PP(tmp_repl)) {
 				str_type = zend_get_unified_string_type(2 TSRMLS_CC, Z_TYPE_PP(str), Z_TYPE_PP(tmp_repl));
 				if (str_type == (zend_uchar)-1) {
+					zend_error(E_WARNING, "Cannot mix binary and Unicode types");
 					return;
 				}
 				convert_to_explicit_type_ex(str, str_type);
@@ -3221,6 +3226,7 @@ PHP_FUNCTION(substr_replace)
 			if (tmp_repl && Z_TYPE_PP(tmp_str) != Z_TYPE_PP(tmp_repl)) {
 				str_type = zend_get_unified_string_type(2 TSRMLS_CC, Z_TYPE_PP(tmp_str), Z_TYPE_PP(tmp_repl));
 				if (str_type == (zend_uchar)-1) {
+					zend_error(E_WARNING, "Cannot mix binary and Unicode types");
 					return;
 				}
 				convert_to_explicit_type_ex(tmp_str, str_type);
@@ -4087,6 +4093,7 @@ PHP_FUNCTION(similar_text)
 	}
 	str_type = zend_get_unified_string_type(2 TSRMLS_CC, Z_TYPE_PP(t1), Z_TYPE_PP(t2));
 	if (str_type == (zend_uchar)-1) {
+		zend_error(E_WARNING, "Cannot mix binary and Unicode parameters");
 		return;
 	}
 	convert_to_explicit_type_ex(t1, str_type);

@@ -49,9 +49,6 @@ ext/standard
     array_map()
         Params API, FCI cache, test
 
-    array_merge(), array_merge_recursive()
-        Test
-
     array_multisort()
         Add SORT_LOCALE_STRING, test
 
@@ -107,12 +104,6 @@ ext/standard
         Params API
         Either port strnatcmp() to support Unicode or maybe use ICU's numeric collation
 
-    range()
-        Test
-
-    shuffle()
-        Test
-
     sort(), rsort()
     asort(), arsort()
     ksort(), krsort() 
@@ -126,10 +117,14 @@ ext/standard
   array.c
   -------
     array_chunk() 
+    array_merge()
+    array_merge_recursive()
     compact()
     count()
     min()
     max()
+    range()
+    shuffle()
 
 
   string.c
