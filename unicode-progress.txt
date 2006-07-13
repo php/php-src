@@ -13,9 +13,6 @@ ext/standard
     array_change_key_case()
         Params API, test
 
-    array_chunk()
-        Test
-
     array_combine()
         Handle IS_UNICODE/IS_STRING keys via add_u_assoc_zval()
 
@@ -106,12 +103,6 @@ ext/standard
     extract()
         Params API, fix php_valid_var_name(), test
 
-    compact()
-        Test
-
-    min(), max()
-        Test
-
     natsort(), natcasesort()
         Params API
         Either port strnatcmp() to support Unicode or maybe use ICU's numeric collation
@@ -134,7 +125,11 @@ ext/standard
   
   array.c
   -------
+    array_chunk() 
+    compact()
     count()
+    min()
+    max()
 
 
   string.c

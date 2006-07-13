@@ -291,14 +291,14 @@ static int php_count_recursive(zval *array, long mode TSRMLS_DC)
 	return cnt;
 }
 
-/* {{{ proto int count(mixed var [, int mode])
+/* {{{ proto int count(mixed var [, int mode]) U
    Count the number of elements in a variable (usually an array) */
 PHP_FUNCTION(count)
 {
 	zval *array;
 	long mode = COUNT_NORMAL;
 	
-	if (zend_parse_parameters (ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &array, &mode) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &array, &mode) == FAILURE)
 		return;
 	
 	switch (Z_TYPE_P(array)) {
@@ -955,7 +955,7 @@ PHP_FUNCTION(key)
 }
 /* }}} */
 
-/* {{{ proto mixed min(mixed arg1 [, mixed arg2 [, mixed ...]])
+/* {{{ proto mixed min(mixed arg1 [, mixed arg2 [, mixed ...]]) U
    Return the lowest value in an array or a series of arguments */
 PHP_FUNCTION(min)
 {
@@ -1005,7 +1005,7 @@ PHP_FUNCTION(min)
 }
 /* }}} */
 
-/* {{{ proto mixed max(mixed arg1 [, mixed arg2 [, mixed ...]])
+/* {{{ proto mixed max(mixed arg1 [, mixed arg2 [, mixed ...]]) U
    Return the highest value in an array or a series of arguments */
 PHP_FUNCTION(max)
 {
@@ -1567,20 +1567,41 @@ PHP_FUNCTION(extract)
 
 static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_value, zval *entry)
 {
+	zstr key;
+	int key_len;
+	zend_bool free_key = 0;
 	zval **value_ptr, *value, *data;
-	
-	if (Z_TYPE_P(entry) == IS_STRING ||
-	    Z_TYPE_P(entry) == IS_UNICODE) {
-		if (zend_u_hash_find(eg_active_symbol_table, Z_TYPE_P(entry), Z_UNIVAL_P(entry),
-						   Z_UNILEN_P(entry)+1, (void **)&value_ptr) != FAILURE) {
+
+	if (Z_TYPE_P(entry) == IS_STRING || Z_TYPE_P(entry) == IS_UNICODE) {
+		key = Z_UNIVAL_P(entry);
+		key_len = Z_UNILEN_P(entry);
+
+		if (Z_TYPE_P(entry) == IS_UNICODE) {
+			/* Identifier normalization */
+			UChar *norm;
+			int norm_len;
+
+			if (!zend_normalize_identifier(&norm, &norm_len, key.u, key_len, 0)) {
+				zend_error(E_WARNING, "Could not normalize variable name: %r", key);
+			} else if (norm != key.u) {
+				key.u = norm;
+				key_len = norm_len;
+				free_key = 1;
+			} 
+		}
+		if (zend_u_hash_find(eg_active_symbol_table, Z_TYPE_P(entry), key,
+							 key_len+1, (void **)&value_ptr) != FAILURE) {
 			value = *value_ptr;
 			ALLOC_ZVAL(data);
 			*data = *value;
 			zval_copy_ctor(data);
 			INIT_PZVAL(data);
 			
-			zend_u_hash_update(Z_ARRVAL_P(return_value), Z_TYPE_P(entry), Z_UNIVAL_P(entry),
-							 Z_UNILEN_P(entry)+1, &data, sizeof(zval *), NULL);
+			zend_u_hash_update(Z_ARRVAL_P(return_value), Z_TYPE_P(entry), key,
+							   key_len+1, &data, sizeof(zval *), NULL);
+		}
+		if (free_key) {
+			efree(key.v);
 		}
 	}
 	else if (Z_TYPE_P(entry) == IS_ARRAY) {
@@ -1597,7 +1618,7 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 }
 
 
-/* {{{ proto array compact(mixed var_names [, mixed ...])
+/* {{{ proto array compact(mixed var_names [, mixed ...]) U
    Creates a hash containing variables and their values */
 PHP_FUNCTION(compact)
 {
@@ -4624,7 +4645,7 @@ PHP_FUNCTION(array_key_exists)
 /* }}} */
 
 
-/* {{{ proto array array_chunk(array input, int size [, bool preserve_keys])
+/* {{{ proto array array_chunk(array input, int size [, bool preserve_keys]) U
    Split array into chunks */
 PHP_FUNCTION(array_chunk)
 {
