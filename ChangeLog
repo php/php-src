@@ -1,3 +1,185 @@
+2006-07-12  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-progress.txt:
+      Make notes about array.c functions.
+
+2006-07-12  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/assert.c:
+      fix assert() in Unicode mode
+
+    * (PHP_5_2)
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      MFH: init variables and get rid of annoying warnings
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      get rid of more "might be uninitialized" warnings
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      make sure return_value_used is always initialized
+
+    * ZendEngine2/zend.c:
+      initialize EG(exit_status)
+
+2006-07-12  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_operators.c:
+      No need for TSRMLS_FETCH().
+
+2006-07-12  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ZendEngine2/zend.c:
+      MFH: initialize EG(exit_status) in ZTS mode
+
+2006-07-12  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_operators.c
+      ZendEngine2/zend_unicode.c
+      ZendEngine2/zend_unicode.h:
+      Implement convert_to_unicode_with_converter() and adjust zval_* APIs.
+
+    * ext/standard/var.c:
+      Use zend_convert_from_unicode() in var_dump().
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      main/main.c:
+      Commit Sara's patch for supporting filesystem enccoding in
+      include/require.
+
+2006-07-12  Michael Wallner  <mike@iworks.at>
+
+    * (PHP_5_2)
+      ext/session/session.c:
+      MFH: add note why replace is 0, so that I don't wonder again in 2 months
+           why session_regenerate_id() sends the session cookie twice
+
+    * ext/session/session.c:
+      - add note why replace is 0, so that I don't wonder again in 2 months
+        why session_regenerate_id() sends the session cookie twice
+
+2006-07-12  Antony Dovgal  <antony@zend.com>
+
+    * ext/dbase/dbase.c
+      ext/dbase/tests/001.phpt:
+      restore missing check and prevent segfaulting
+      MFB and add test
+
+    * (PHP_5_2)
+      ext/dbase/dbase.c
+      ext/dbase/tests/001.phpt
+      ext/dbase/tests/001.phpt:
+      bailout on error and don't try to create fields of unknown type
+      add test
+
+    * (PHP_5_2)
+      ext/standard/streamsfuncs.c:
+      it's usually good idea to initialize variables
+      especially if you rely on their values
+
+    * (PHP_5_2)
+      ext/standard/string.c
+      ext/standard/tests/strings/stripos.phpt:
+      fix invalid read - no need to compare strings if haystack is "" or shorter
+      than needle
+      add test
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/stripos.phpt
+      ext/standard/tests/strings/stripos.phpt:
+      don't try to compare strings if haystack is "" or shorter than needle
+      add test
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/tests/074.phpt:
+      MFB: fix #38072 (boolean arg for mysqli_autocommit() is always true on
+      Solaris)
+
+    * ZendEngine2/zend_API.c:
+      fix argument parsing utilities
+      test before commit?
+
+    * (PHP_5_2)
+      NEWS
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/tests/068.phpt:
+      fix #38072 (boolean arg for mysqli_autocommit() is always true on Solaris)
+
+    * (PHP_5_2)
+      ext/mysqli/mysqli.c:
+      fix TSRM build
+
+2006-07-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c
+      ext/soap/tests/bugs/bug38067.phpt
+      ext/soap/tests/bugs/bug38067.phpt
+      ext/soap/tests/bugs/bug38067.phpt
+      ext/soap/tests/bugs/bug38067.wsdl
+      ext/soap/tests/bugs/bug38067.wsdl
+      ext/soap/tests/bugs/bug38067.wsdl:
+      Fixed bug #38067 (Parameters are not decoded from utf-8 when using encoding
+      option)
+
+2006-07-12  Hartmut Holzgraefe  <hartmut@mysql.com>
+
+    * ext/mysqli/tests/072.phpt
+      ext/mysqli/tests/072.phpt
+      ext/mysqli/tests/073.phpt
+      ext/mysqli/tests/073.phpt:
+      
+      new test cases for mysqli_warnings and mysql_driver properties
+
+2006-07-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/pdo/tests/pdo_026.phpt
+      ext/pdo/tests/pdo_026.phpt
+      ext/pdo/tests/pdo_029.phpt
+      ext/pdo/tests/pdo_029.phpt
+      ext/pdo/tests/pdo_030.phpt
+      ext/pdo/tests/pdo_030.phpt:
+      Destructors call order is changed (Fixed bug #36759 - Objects destructors
+      are invoked in wrong order when script is finished)
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/tests/bug36759.phpt:
+      Fixed bug #36759 (Objects destructors are invoked in wrong order when
+      script is finished)
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/tests/bug36759.phpt
+      ZendEngine2/tests/bug36759.phpt:
+      Fixed bug #36759 (Objects destructors are invoked in wrong order when
+      script is finished).
+
+2006-07-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * README.PARAMETER_PARSING_API
+      README.PARAMETER_PARSING_API:
+      - Reorder and add missing
+
+2006-07-12  Hartmut Holzgraefe  <hartmut@mysql.com>
+
+    * ext/mysqli/mysqli_embedded.c
+      ext/mysqli/mysqli_embedded.c:
+      fixed C&P errors in groups handling, activated groups feature
+
+2006-07-12  Sara Golemon  <sara@golemon.com>
+
+    * ZendEngine2/zend_API.c:
+      Fix typo/Syntax error
+
 2006-07-11  Hartmut Holzgraefe  <hartmut@mysql.com>
 
     * (PHP_5_2)

@@ -1,3 +1,71 @@
+2006-07-12  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend_vm_def.h
+      zend_vm_execute.h:
+      MFH: init variables and get rid of annoying warnings
+
+    * zend_vm_def.h
+      zend_vm_execute.h:
+      get rid of more "might be uninitialized" warnings
+
+    * zend_vm_def.h
+      zend_vm_execute.h:
+      make sure return_value_used is always initialized
+
+    * zend.c:
+      initialize EG(exit_status)
+
+2006-07-12  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_operators.c:
+      No need for TSRMLS_FETCH().
+
+2006-07-12  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend.c:
+      MFH: initialize EG(exit_status) in ZTS mode
+
+2006-07-12  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_operators.c
+      zend_unicode.c
+      zend_unicode.h:
+      Implement convert_to_unicode_with_converter() and adjust zval_* APIs.
+
+    * zend.c
+      zend.h
+      zend_vm_def.h
+      zend_vm_execute.h:
+      Commit Sara's patch for supporting filesystem enccoding in
+      include/require.
+
+2006-07-12  Antony Dovgal  <antony@zend.com>
+
+    * zend_API.c:
+      fix argument parsing utilities
+      test before commit?
+
+2006-07-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute_API.c
+      tests/bug36759.phpt:
+      Fixed bug #36759 (Objects destructors are invoked in wrong order when
+      script is finished)
+
+    * (PHP_5_2)
+      zend_execute_API.c
+      tests/bug36759.phpt
+      tests/bug36759.phpt:
+      Fixed bug #36759 (Objects destructors are invoked in wrong order when
+      script is finished).
+
+2006-07-12  Sara Golemon  <sara@golemon.com>
+
+    * zend_API.c:
+      Fix typo/Syntax error
+
 2006-07-11  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_API.c:
