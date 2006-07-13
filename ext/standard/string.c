@@ -4065,6 +4065,7 @@ static int php_u_similar_char(const UChar *txt1, int len1, const UChar *txt2, in
 			sum += php_u_similar_char(txt1, pos1, txt2, pos2);
 		}
 		if ((pos1 + end1 < len1) && (pos2 + end2 < len2)) {
+			/* FIXME should this be calling php_u_similar_char? */
 			sum += php_similar_char((UChar *)txt1+pos1+end1, len1-pos1-end1,
 									(UChar *)txt2+pos2+end2, len2-pos2-end2);
 		}
