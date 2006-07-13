@@ -23,7 +23,7 @@
 #define _PHP_LOGOS_H
 
 BEGIN_EXTERN_C()
-PHPAPI int php_register_info_logo(char *logo_string, char *mimetype, unsigned char *data, int size);
+PHPAPI int php_register_info_logo(char *logo_string, char *mimetype, const unsigned char *data, int size);
 PHPAPI int php_unregister_info_logo(char *logo_string);
 END_EXTERN_C()
 
