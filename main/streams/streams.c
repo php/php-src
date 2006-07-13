@@ -1348,11 +1348,7 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 				writeptr += didwrite;
 			}
 		} else {
-			if (maxlen == 0) {
-				return haveread;
-			} else {
-				return 0; /* error */
-			}
+			return haveread;
 		}
 
 		if (maxlen - haveread == 0) {

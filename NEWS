@@ -82,6 +82,8 @@ PHP                                                                        NEWS
 
 - Fixed memory leaks in openssl streams context options. (Pierre)
 - Fixed handling of extremely long paths inside tempnam() function. (Ilia)
+- Fixed bug #38086 (stream_copy_to_stream() returns 0 when maxlen is bigger 
+  than the actual length). (Tony)
 - Fixed bug #38072 (boolean arg for mysqli_autocommit() is always true on 
   Solaris). (Tony)
 - Fixed bug #38067 (Parameters are not decoded from utf-8 when using encoding
