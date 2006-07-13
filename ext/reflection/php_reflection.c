@@ -1866,10 +1866,12 @@ ZEND_METHOD(reflection_parameter, __construct)
 		zend_uint i;
 
 		position= -1;
-		convert_to_string_ex(&parameter);
+		convert_to_text_ex(&parameter);
 		for (i = 0; i < fptr->common.num_args; i++) {
-			/* FIXME: Unicode support??? */
-			if (arg_info[i].name.s && strcmp(arg_info[i].name.s, Z_STRVAL_P(parameter)) == 0) {
+			if (Z_TYPE_P(parameter) == IS_STRING && arg_info[i].name.s && strcmp(arg_info[i].name.s, Z_STRVAL_P(parameter)) == 0) {
+				position= i;
+				break;
+			} else if (Z_TYPE_P(parameter) == IS_UNICODE && arg_info[i].name.u && u_strcmp(arg_info[i].name.u, Z_USTRVAL_P(parameter)) == 0) {
 				position= i;
 				break;
 			}
