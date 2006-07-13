@@ -55,9 +55,6 @@ ext/standard
     array_pad()
         Params API, test
 
-    array_product()
-        Params API, test
-
     array_push(), array_pop(), array_shift(), array_unshift()
         Params API, test
 
@@ -77,9 +74,6 @@ ext/standard
         Params API, test
 
     array_slice()
-        Params API, test
-
-    array_sum()
         Params API, test
 
     array_unique()
@@ -105,7 +99,7 @@ ext/standard
         Either port strnatcmp() to support Unicode or maybe use ICU's numeric collation
 
     usort(), uasort(), uksort()
-        function name normalization, FCI cache
+        Params API, callback name normalization, FCI cache
 
 
   Completed
@@ -116,6 +110,8 @@ ext/standard
     array_chunk() 
     array_merge()
     array_merge_recursive()
+    array_product()
+    array_sum()
     compact()
     count()
     min()
