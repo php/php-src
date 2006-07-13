@@ -17,7 +17,11 @@ bug #36802 : crashes with mysql_init
 	$mysql = mysqli_init();
 
 	/* following operations should not work */
-	$x[0] = @$mysql->set_charset('utf8');
+	if (method_exists($mysql, 'set_charset')) {
+		$x[0] = @$mysql->set_charset('utf8');
+	} else {
+		$x[0] = NULL;
+	}
 	$x[1] = @$mysql->query("SELECT 'foo' FROM DUAL");
 
 	/* following operations should work */ 
