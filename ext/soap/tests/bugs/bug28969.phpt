@@ -2,6 +2,9 @@
 Bug #28969 (Wrong data encoding of special characters)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+unicode.script_encoding=ISO-8859-1
+unicode.output_encoding=ISO-8859-1
 --FILE--
 <?php
 function test() {
@@ -31,8 +34,14 @@ $x = new LocalSoapClient(NULL,array('location'=>'test://',
                                     'uri'=>'http://testuri.org',
                                     'encoding'=>'ISO-8859-1')); 
 var_dump($x->test());
+var_dump("¦è¥");
 echo "ok\n";
 ?>
 --EXPECT--
 string(3) "¦è¥"
+string(3) "¦è¥"
+ok
+--UEXPECT--
+unicode(3) "¦è¥"
+unicode(3) "¦è¥"
 ok

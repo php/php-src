@@ -16,3 +16,12 @@ array(3) {
   [2]=>
   string(19) "string HelloWorld()"
 }
+--UEXPECT--
+array(3) {
+  [0]=>
+  unicode(53) "HelloWorldResponse HelloWorld(HelloWorld $parameters)"
+  [1]=>
+  unicode(19) "string HelloWorld()"
+  [2]=>
+  unicode(19) "string HelloWorld()"
+}

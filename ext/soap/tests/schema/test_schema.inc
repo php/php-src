@@ -52,7 +52,7 @@ EOF;
 
   $fname = tempnam ("./", "wsdl");
   $f = fopen($fname,"w");
-  fwrite($f,$wsdl);
+  @fwrite($f,$wsdl);
   fclose($f);
   ini_set("soap.wsdl_cache_enabled",0);
   $x = new SoapClient($fname, array("trace"=>1,"exceptions"=>0));

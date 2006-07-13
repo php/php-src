@@ -222,4 +222,6 @@ zval* add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *faul
 #define soap_error3(severity, format, param1, param2, param3) \
 	php_error(severity, "SOAP-ERROR: " format, param1, param2, param3)
 
+char* soap_unicode_to_string(UChar *ustr, int ustr_len TSRMLS_DC);
+
 #endif

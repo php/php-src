@@ -27,3 +27,11 @@ array(2) {
   string(4) "test"
 }
 ok
+--UEXPECT--
+array(2) {
+  [0]=>
+  unicode(3) "Foo"
+  [1]=>
+  unicode(4) "test"
+}
+ok

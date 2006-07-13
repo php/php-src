@@ -61,3 +61,21 @@ object(foo)#%d (3) {
   string(1) "c"
 }
 ok
+--UEXPECTF--
+object(stdClass)#%d (3) {
+  [u"a"]=>
+  unicode(1) "a"
+  [u"b"]=>
+  unicode(1) "b"
+  [u"c"]=>
+  unicode(1) "c"
+}
+object(foo)#%d (3) {
+  [u"a"]=>
+  unicode(1) "a"
+  [u"b":u"foo":private]=>
+  unicode(1) "b"
+  [u"c":protected]=>
+  unicode(1) "c"
+}
+ok

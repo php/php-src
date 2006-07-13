@@ -81,3 +81,32 @@ object(stdClass)#8 (1) {
     }
   }
 }
+--UEXPECT--
+object(stdClass)#5 (1) {
+  [u"inputAny"]=>
+  object(stdClass)#6 (1) {
+    [u"any"]=>
+    object(SOAPComplexType)#7 (3) {
+      [u"varInt"]=>
+      int(34)
+      [u"varString"]=>
+      unicode(3) "arg"
+      [u"varFloat"]=>
+      float(325.325)
+    }
+  }
+}
+object(stdClass)#8 (1) {
+  [u"return"]=>
+  object(stdClass)#9 (1) {
+    [u"any"]=>
+    object(SOAPComplexType)#10 (3) {
+      [u"varInt"]=>
+      int(34)
+      [u"varString"]=>
+      unicode(3) "arg"
+      [u"varFloat"]=>
+      float(325.325)
+    }
+  }
+}

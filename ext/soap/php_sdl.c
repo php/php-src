@@ -1063,7 +1063,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri TSRMLS_DC)
 	return ctx.sdl;
 }
 
-#define WSDL_CACHE_VERSION 0x0e
+#define WSDL_CACHE_VERSION 0x2e
 
 #define WSDL_CACHE_GET(ret,type,buf)   memcpy(&ret,*buf,sizeof(type)); *buf += sizeof(type);
 #define WSDL_CACHE_GET_INT(ret,buf)    ret = ((unsigned char)(*buf)[0])|((unsigned char)(*buf)[1]<<8)|((unsigned char)(*buf)[2]<<16)|((int)(*buf)[3]<<24); *buf += 4;
@@ -1686,13 +1686,13 @@ static void sdl_serialize_string(const char *str, smart_str *out)
 
 static void sdl_serialize_key(HashTable *ht, smart_str *out)
 {
-	char *key;
+	zstr  key;
 	uint  key_len;
 	ulong index;
 
 	if (zend_hash_get_current_key_ex(ht, &key, &key_len, &index, 0, NULL) == HASH_KEY_IS_STRING) {
 		WSDL_CACHE_PUT_INT(key_len, out);
-		WSDL_CACHE_PUT_N(key, key_len, out);
+		WSDL_CACHE_PUT_N(key.s, key_len, out);
 	} else {
 		WSDL_CACHE_PUT_INT(0, out);
 	}
@@ -2330,7 +2330,7 @@ static HashTable* make_persistent_sdl_function_headers(HashTable *headers, HashT
 	encodePtr *penc;
 	sdlTypePtr *ptype;
 	ulong index;
-	char *key;
+	zstr key;
 	uint key_len;
 
 	pheaders = malloc(sizeof(HashTable));
@@ -2367,7 +2367,7 @@ static HashTable* make_persistent_sdl_function_headers(HashTable *headers, HashT
 		}
 
 		if (zend_hash_get_current_key_ex(headers, &key, &key_len, &index, 0, NULL) == HASH_KEY_IS_STRING) {
-			zend_hash_add(pheaders, key, key_len, (void*)&pheader, sizeof(sdlSoapBindingFunctionHeaderPtr), NULL);
+			zend_hash_add(pheaders, key.s, key_len, (void*)&pheader, sizeof(sdlSoapBindingFunctionHeaderPtr), NULL);
 		} else {
 			zend_hash_next_index_insert(pheaders, (void*)&pheader, sizeof(sdlSoapBindingFunctionHeaderPtr), NULL);
 		}
@@ -2398,7 +2398,7 @@ static HashTable* make_persistent_sdl_parameters(HashTable *params, HashTable *p
 	sdlTypePtr *ptype;
 	encodePtr *penc;
 	ulong index;
-	char *key;
+	zstr key;
 	uint key_len;
 
 	pparams = malloc(sizeof(HashTable));
@@ -2428,7 +2428,7 @@ static HashTable* make_persistent_sdl_parameters(HashTable *params, HashTable *p
 		}
 
 		if (zend_hash_get_current_key_ex(params, &key, &key_len, &index, 0, NULL) == HASH_KEY_IS_STRING) {
-			zend_hash_add(pparams, key, key_len, (void*)&pparam, sizeof(sdlParamPtr), NULL);
+			zend_hash_add(pparams, key.s, key_len, (void*)&pparam, sizeof(sdlParamPtr), NULL);
 		} else {
 			zend_hash_next_index_insert(pparams, (void*)&pparam, sizeof(sdlParamPtr), NULL);
 		}
@@ -2445,7 +2445,7 @@ static HashTable* make_persistent_sdl_function_faults(sdlFunctionPtr func, HashT
 	HashTable *pfaults;
 	sdlFaultPtr  *tmp, pfault;
 	ulong index;
-	char *key;
+	zstr key;
 	uint key_len;
 
 	pfaults = malloc(sizeof(HashTable));
@@ -2477,7 +2477,7 @@ static HashTable* make_persistent_sdl_function_faults(sdlFunctionPtr func, HashT
 		}
 
 		if (zend_hash_get_current_key_ex(faults, &key, &key_len, &index, 0, NULL) == HASH_KEY_IS_STRING) {
-			zend_hash_add(pfaults, key, key_len, (void*)&pfault, sizeof(sdlParamPtr), NULL);
+			zend_hash_add(pfaults, key.s, key_len, (void*)&pfault, sizeof(sdlParamPtr), NULL);
 		} else {
 			zend_hash_next_index_insert(pfaults, (void*)&pfault, sizeof(sdlParamPtr), NULL);
 		}
@@ -2494,7 +2494,7 @@ static sdlAttributePtr make_persistent_sdl_attribute(sdlAttributePtr attr, HashT
 {
 	sdlAttributePtr pattr;
 	ulong index;
-	char *key;
+	zstr key;
 	uint key_len;
 
 	pattr = malloc(sizeof(sdlAttribute));
@@ -2541,7 +2541,7 @@ static sdlAttributePtr make_persistent_sdl_attribute(sdlAttributePtr attr, HashT
 			}
 
 			if (zend_hash_get_current_key_ex(attr->extraAttributes, &key, &key_len, &index, 0, NULL) == HASH_KEY_IS_STRING) {
-				zend_hash_add(pattr->extraAttributes, key, key_len, (void*)&pextra, sizeof(sdlExtraAttributePtr), NULL);
+				zend_hash_add(pattr->extraAttributes, key.s, key_len, (void*)&pextra, sizeof(sdlExtraAttributePtr), NULL);
 			}
 
 			zend_hash_move_forward(attr->extraAttributes);
@@ -2605,7 +2605,7 @@ static sdlContentModelPtr make_persistent_sdl_model(sdlContentModelPtr model, Ha
 static sdlTypePtr make_persistent_sdl_type(sdlTypePtr type, HashTable *ptr_map, HashTable *bp_types, HashTable *bp_encoders)
 {
 	ulong index;
-	char *key;
+	zstr key;
 	uint key_len;
 	sdlTypePtr ptype = NULL;
 
@@ -2693,7 +2693,7 @@ static sdlTypePtr make_persistent_sdl_type(sdlTypePtr type, HashTable *ptr_map, 
 		while (zend_hash_get_current_data(type->elements, (void **)&tmp) == SUCCESS) {
 			pelem = make_persistent_sdl_type(*tmp, ptr_map, bp_types, bp_encoders);
 			if (zend_hash_get_current_key_ex(type->elements, &key, &key_len, &index, 0, NULL) == HASH_KEY_IS_STRING) {
-				zend_hash_add(ptype->elements, key, key_len, (void*)&pelem, sizeof(sdlTypePtr), NULL);
+				zend_hash_add(ptype->elements, key.s, key_len, (void*)&pelem, sizeof(sdlTypePtr), NULL);
 			} else {
 				zend_hash_next_index_insert(ptype->elements, (void*)&pelem, sizeof(sdlTypePtr), NULL);
 			}
@@ -2712,7 +2712,7 @@ static sdlTypePtr make_persistent_sdl_type(sdlTypePtr type, HashTable *ptr_map, 
 		while (zend_hash_get_current_data(type->attributes, (void **)&tmp) == SUCCESS) {
 			pattr = make_persistent_sdl_attribute(*tmp, ptr_map, bp_types, bp_encoders);
 			if (zend_hash_get_current_key_ex(type->attributes, &key, &key_len, &index, 0, NULL) == HASH_KEY_IS_STRING) {
-				zend_hash_add(ptype->attributes, key, key_len, (void*)&pattr, sizeof(sdlAttributePtr), NULL);
+				zend_hash_add(ptype->attributes, key.s, key_len, (void*)&pattr, sizeof(sdlAttributePtr), NULL);
 			} else {
 				zend_hash_next_index_insert(ptype->attributes, (void*)&pattr, sizeof(sdlAttributePtr), NULL);
 			}
@@ -2839,7 +2839,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl TSRMLS_DC)
 	HashTable ptr_map;
 	HashTable bp_types, bp_encoders;
 	ulong index;
-	char *key;
+	zstr key;
 	uint key_len;
 
 	zend_hash_init(&bp_types, 0, NULL, NULL, 0);
@@ -2867,7 +2867,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl TSRMLS_DC)
 		while (zend_hash_get_current_data(sdl->groups, (void **)&tmp) == SUCCESS) {
 			ptype = make_persistent_sdl_type(*tmp, &ptr_map, &bp_types, &bp_encoders);
 			if (zend_hash_get_current_key_ex(sdl->groups, &key, &key_len, &index, 0, NULL) == HASH_KEY_IS_STRING) {
-				zend_hash_add(psdl->groups, key, key_len, (void*)&ptype, sizeof(sdlTypePtr), NULL);
+				zend_hash_add(psdl->groups, key.s, key_len, (void*)&ptype, sizeof(sdlTypePtr), NULL);
 			} else {
 				zend_hash_next_index_insert(psdl->groups, (void*)&ptype, sizeof(sdlTypePtr), NULL);
 			}
@@ -2887,7 +2887,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl TSRMLS_DC)
 		while (zend_hash_get_current_data(sdl->types, (void **)&tmp) == SUCCESS) {
 			ptype = make_persistent_sdl_type(*tmp, &ptr_map, &bp_types, &bp_encoders);
 			if (zend_hash_get_current_key_ex(sdl->types, &key, &key_len, &index, 0, NULL) == HASH_KEY_IS_STRING) {
-				zend_hash_add(psdl->types, key, key_len, (void*)&ptype, sizeof(sdlTypePtr), NULL);
+				zend_hash_add(psdl->types, key.s, key_len, (void*)&ptype, sizeof(sdlTypePtr), NULL);
 			} else {
 				zend_hash_next_index_insert(psdl->types, (void*)&ptype, sizeof(sdlTypePtr), NULL);
 			}
@@ -2907,7 +2907,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl TSRMLS_DC)
 		while (zend_hash_get_current_data(sdl->elements, (void **)&tmp) == SUCCESS) {
 			ptype = make_persistent_sdl_type(*tmp, &ptr_map, &bp_types, &bp_encoders);
 			if (zend_hash_get_current_key_ex(sdl->elements, &key, &key_len, &index, 0, NULL) == HASH_KEY_IS_STRING) {
-				zend_hash_add(psdl->elements, key, key_len, (void*)&ptype, sizeof(sdlTypePtr), NULL);
+				zend_hash_add(psdl->elements, key.s, key_len, (void*)&ptype, sizeof(sdlTypePtr), NULL);
 			} else {
 				zend_hash_next_index_insert(psdl->elements, (void*)&ptype, sizeof(sdlTypePtr), NULL);
 			}
@@ -2927,7 +2927,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl TSRMLS_DC)
 		while (zend_hash_get_current_data(sdl->encoders, (void **)&tmp) == SUCCESS) {
 			penc = make_persistent_sdl_encoder(*tmp, &ptr_map, &bp_types, &bp_encoders);
 			if (zend_hash_get_current_key_ex(sdl->encoders, &key, &key_len, &index, 0, NULL) == HASH_KEY_IS_STRING) {
-				zend_hash_add(psdl->encoders, key, key_len, (void*)&penc, sizeof(encodePtr), NULL);
+				zend_hash_add(psdl->encoders, key.s, key_len, (void*)&penc, sizeof(encodePtr), NULL);
 			} else {
 				zend_hash_next_index_insert(psdl->encoders, (void*)&penc, sizeof(encodePtr), NULL);
 			}
@@ -2974,7 +2974,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl TSRMLS_DC)
 		while (zend_hash_get_current_data(sdl->bindings, (void **)&tmp) == SUCCESS) {
 			pbind = make_persistent_sdl_binding(*tmp, &ptr_map);
 			if (zend_hash_get_current_key_ex(sdl->bindings, &key, &key_len, &index, 0, NULL) == HASH_KEY_IS_STRING) {
-				zend_hash_add(psdl->bindings, key, key_len, (void*)&pbind, sizeof(sdlBindingPtr), NULL);
+				zend_hash_add(psdl->bindings, key.s, key_len, (void*)&pbind, sizeof(sdlBindingPtr), NULL);
 			} else {
 				zend_hash_next_index_insert(psdl->bindings, (void*)&pbind, sizeof(sdlBindingPtr), NULL);
 			}
@@ -2992,7 +2992,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl TSRMLS_DC)
 		while (zend_hash_get_current_data(&sdl->functions, (void **)&tmp) == SUCCESS) {
 			pfunc = make_persistent_sdl_function(*tmp, &ptr_map);
 			if (zend_hash_get_current_key_ex(&sdl->functions, &key, &key_len, &index, 0, NULL) == HASH_KEY_IS_STRING) {
-				zend_hash_add(&psdl->functions, key, key_len, (void*)&pfunc, sizeof(sdlFunctionPtr), NULL);
+				zend_hash_add(&psdl->functions, key.s, key_len, (void*)&pfunc, sizeof(sdlFunctionPtr), NULL);
 			} else {
 				zend_hash_next_index_insert(&psdl->functions, (void*)&pfunc, sizeof(sdlFunctionPtr), NULL);
 			}
@@ -3015,7 +3015,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl TSRMLS_DC)
 			}
 			*tmp = *preq;
 			if (zend_hash_get_current_key_ex(sdl->requests, &key, &key_len, &index, 0, NULL) == HASH_KEY_IS_STRING) {
-				zend_hash_add(psdl->requests, key, key_len, (void*)&preq, sizeof(sdlFunctionPtr), NULL);
+				zend_hash_add(psdl->requests, key.s, key_len, (void*)&preq, sizeof(sdlFunctionPtr), NULL);
 			}
 			zend_hash_move_forward(sdl->requests);
 		}
@@ -3237,7 +3237,7 @@ cache_in_memory:
 					 zend_hash_move_forward_ex(SOAP_GLOBAL(mem_cache), &pos)) {
 					if (q->time < latest) {
 						latest = q->time;
-						zend_hash_get_current_key_ex(SOAP_GLOBAL(mem_cache), &key, &key_len, &idx, 0, &pos);
+						zend_hash_get_current_key_ex(SOAP_GLOBAL(mem_cache), (zstr*)&key, &key_len, &idx, 0, &pos);
 					}
 				}
 				if (key) {

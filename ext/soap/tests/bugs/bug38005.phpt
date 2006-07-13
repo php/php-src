@@ -2,6 +2,9 @@
 Bug #38005 (SoapFault faultstring doesn't follow encoding rules)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+unicode.script_encoding=ISO-8859-1
+unicode.output_encoding=ISO-8859-1
 --FILE--
 <?php
 function Test($param) {

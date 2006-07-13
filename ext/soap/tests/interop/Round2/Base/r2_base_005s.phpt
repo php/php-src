@@ -5,7 +5,7 @@ SOAP Interop Round2 base 005 (soap/direct): echoString(utf-8)
 --FILE--
 <?php
 $client = new SoapClient(NULL,array("location"=>"test://","uri"=>"http://soapinterop.org/","trace"=>1,"exceptions"=>0));
-$client->__soapCall("echoString", array(new SoapParam(new SoapVar(utf8_encode('ỗÈéóÒ₧⅜ỗỸ'),XSD_STRING),"inputString")), array("soapaction"=>"http://soapinterop.org/","uri"=>"http://soapinterop.org/"));
+$client->__soapCall("echoString", array(new SoapParam(new SoapVar(utf8_encode(b'ỗÈéóÒ₧⅜ỗỸ'),XSD_STRING),"inputString")), array("soapaction"=>"http://soapinterop.org/","uri"=>"http://soapinterop.org/"));
 echo $client->__getlastrequest();
 $HTTP_RAW_POST_DATA = $client->__getlastrequest();
 include("round2_base.inc");
