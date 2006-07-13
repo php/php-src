@@ -1326,7 +1326,7 @@ PHP_FUNCTION(strtok)
 	UChar *u_token, *u_p, *u_pe;
 
 	UChar32 ch, th;
-	int32_t start, end, i, j, rem_len;
+	int32_t start = 0, end, i, j, rem_len;
 	int delim_found, token_present;
 	int skipped = 0;
 
@@ -2111,7 +2111,7 @@ PHP_FUNCTION(stristr)
 	char needle_char[2];
 	UChar u_needle_char[3];
 	int needle_len;
-	char *haystack_copy;
+	char *haystack_copy = NULL;
 	zstr target;
 	void *found = NULL;
 	int found_offset;
@@ -2411,9 +2411,9 @@ PHP_FUNCTION(stripos)
 	zend_uchar str_type;
 	void *haystack_dup, *needle_dup = NULL;
 	char needle_char[2];
-	char c;
+	char c = 0;
 	UChar u_needle_char[3];
-	UChar32 ch;
+	UChar32 ch = 0;
 	void *found = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz|l", &haystack, &needle, &offset) == FAILURE) {
@@ -3908,10 +3908,10 @@ PHP_FUNCTION(strtr)
 PHP_FUNCTION(strrev)
 {
 	zval **str;
-	char *s, *e, *n, *p;
+	char *s, *e, *n = NULL, *p;
 	int32_t i, x1, x2;
 	UChar32 ch;
-	UChar *u_s, *u_n, *u_p;
+	UChar *u_s, *u_n = NULL, *u_p;
 	
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -6316,7 +6316,7 @@ PHP_FUNCTION(substr_count)
 	int ac = ZEND_NUM_ARGS();
 	int count = 0;
 	void *p, *endp, *tmp;
-	int32_t i, j;
+	int32_t i = 0, j;
 	char cmp;
 
 	if (zend_parse_parameters(ac TSRMLS_CC, "TT|ll",
@@ -6798,7 +6798,7 @@ PHP_FUNCTION(strpbrk)
 
 	if (haystack_type == IS_UNICODE) {
 		int32_t i, j;
-		UChar32 ch1, ch2;
+		UChar32 ch1, ch2 = 0;
 
 		for (i = 0 ; i < haystack_len ; ) {
 			U16_NEXT((UChar *)haystack, i, haystack_len, ch1);

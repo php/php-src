@@ -534,7 +534,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	zstr function = NULL_ZSTR;
 	char *origin;
 	char *message;
-	char *stage;
+	char *stage = "Unknown";
 	int function_name_is_string = 1;
 
 	/* get error text into buffer and escape for html if necessary */
