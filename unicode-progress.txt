@@ -104,11 +104,8 @@ ext/standard
         Params API
         Either port strnatcmp() to support Unicode or maybe use ICU's numeric collation
 
-    sort(), rsort()
-    asort(), arsort()
-    ksort(), krsort() 
     usort(), uasort(), uksort()
-        Test, make sure SORT_LOCALE_STRING uses default collator
+        function name normalization, FCI cache
 
 
   Completed
@@ -125,6 +122,10 @@ ext/standard
     max()
     range()
     shuffle()
+
+    sort(), rsort()
+    asort(), arsort()
+    ksort(), krsort() 
 
 
   string.c
