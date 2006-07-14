@@ -791,21 +791,18 @@ PHP_FUNCTION(uksort)
 }
 /* }}} */
 
-/* {{{ proto mixed end(array array_arg)
+/* {{{ proto mixed end(array array_arg) U
    Advances array argument's internal pointer to the last element and return it */
 PHP_FUNCTION(end)
 {
-	zval **array, **entry;
+	zval *array, **entry;
 	HashTable *target_hash;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &array) == FAILURE) {
+		return;
 	}
-	target_hash = HASH_OF(*array);
-	if (!target_hash) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Passed variable is not an array or object");
-		RETURN_FALSE;
-	}
+
+	target_hash = HASH_OF(array);
 	zend_hash_internal_pointer_end(target_hash);
 
 	if (return_value_used) {	
@@ -818,21 +815,18 @@ PHP_FUNCTION(end)
 }
 /* }}} */
 
-/* {{{ proto mixed prev(array array_arg)
+/* {{{ proto mixed prev(array array_arg) U
    Move array argument's internal pointer to the previous element and return it */
 PHP_FUNCTION(prev)
 {
-	zval **array, **entry;
+	zval *array, **entry;
 	HashTable *target_hash;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &array) == FAILURE) {
+		return;
 	}
-	target_hash = HASH_OF(*array);
-	if (!target_hash) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Passed variable is not an array or object");
-		RETURN_FALSE;
-	}
+
+	target_hash = HASH_OF(array);
 	zend_hash_move_backwards(target_hash);
 
 	if (return_value_used) {	
@@ -845,21 +839,18 @@ PHP_FUNCTION(prev)
 }
 /* }}} */
 
-/* {{{ proto mixed next(array array_arg)
+/* {{{ proto mixed next(array array_arg) U
    Move array argument's internal pointer to the next element and return it */
 PHP_FUNCTION(next)
 {
-	zval **array, **entry;
+	zval *array, **entry;
 	HashTable *target_hash;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &array) == FAILURE) {
+		return;
 	}
-	target_hash = HASH_OF(*array);
-	if (!target_hash) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Passed variable is not an array or object");
-		RETURN_FALSE;
-	}
+
+	target_hash = HASH_OF(array);
 	zend_hash_move_forward(target_hash);
 
 	if (return_value_used) {
@@ -872,21 +863,18 @@ PHP_FUNCTION(next)
 }
 /* }}} */
 
-/* {{{ proto mixed reset(array array_arg)
+/* {{{ proto mixed reset(array array_arg) U
    Set array argument's internal pointer to the first element and return it */	
 PHP_FUNCTION(reset)
 {
-	zval **array, **entry;
+	zval *array, **entry;
 	HashTable *target_hash;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &array) == FAILURE) {
+		return;
 	}
-	target_hash = HASH_OF(*array);
-	if (!target_hash) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Passed variable is not an array or object");
-		RETURN_FALSE;
-	}
+
+	target_hash = HASH_OF(array);
 	zend_hash_internal_pointer_reset(target_hash);
 
 	if (return_value_used) {	
@@ -899,21 +887,18 @@ PHP_FUNCTION(reset)
 }
 /* }}} */
 
-/* {{{ proto mixed current(array array_arg)
+/* {{{ proto mixed current(array array_arg) U
    Return the element currently pointed to by the internal array pointer */
 PHP_FUNCTION(current)
 {
-	zval **array, **entry;
+	zval *array, **entry;
 	HashTable *target_hash;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &array) == FAILURE) {
+		return;
 	}
-	target_hash = HASH_OF(*array);
-	if (!target_hash) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Passed variable is not an array or object");
-		RETURN_FALSE;
-	}
+
+	target_hash = HASH_OF(array);
 	if (zend_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -921,24 +906,21 @@ PHP_FUNCTION(current)
 }
 /* }}} */
 
-/* {{{ proto mixed key(array array_arg)
+/* {{{ proto mixed key(array array_arg) U
    Return the key of the element currently pointed to by the internal array pointer */
 PHP_FUNCTION(key)
 {
-	zval **array;
+	zval *array;
 	zstr string_key;
 	uint string_length;
 	ulong num_key;
 	HashTable *target_hash;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &array) == FAILURE) {
+		return;
 	}
-	target_hash = HASH_OF(*array);
-	if (!target_hash) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Passed variable is not an array or object");
-		RETURN_FALSE;
-	}
+
+	target_hash = HASH_OF(array);
 	switch (zend_hash_get_current_key_ex(target_hash, &string_key, &string_length, &num_key, 0, NULL)) {
 		case HASH_KEY_IS_STRING:
 			RETVAL_STRINGL(string_key.s, string_length - 1, 1);
@@ -1926,7 +1908,7 @@ PHP_FUNCTION(shuffle)
 {
 	zval *array;
 
-	if (zend_parse_parameters(1 TSRMLS_CC, "a", &array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &array) == FAILURE) {
 		RETURN_FALSE;
 	}
 
