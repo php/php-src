@@ -1,3 +1,206 @@
+2006-07-13  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/string.c:
+      FIXME note
+
+    * unicode-progress.txt
+      ext/standard/array.c:
+      Update array_sum() and array_product() (U).
+
+    * unicode-progress.txt
+      ext/standard/array.c:
+      Mark a few more funcs.
+
+    * unicode-progress.txt
+      ZendEngine2/zend_API.c
+      ext/standard/array.c
+      ext/standard/string.c:
+      - Let the caller output a warning instead of having
+        zend_get_unified_string_type() do it.
+      - Mark a few more functions are Unicode compatible.
+
+    * unicode-progress.txt
+      ext/standard/array.c:
+      - Make compact() normalize variablem name before checking symtable.
+      - Mark tested/upgraded functions with 'U' flag.
+
+2006-07-13  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/string.c
+      main/main.c:
+      initialize variables
+
+    * main/php_logos.h
+      main/php_logos.h:
+      fix build
+
+2006-07-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/php_encoding.c
+      ext/soap/php_http.c
+      ext/soap/php_packet_soap.c
+      ext/soap/php_schema.c
+      ext/soap/php_sdl.c
+      ext/soap/php_soap.h
+      ext/soap/soap.c
+      ext/soap/tests/any.phpt
+      ext/soap/tests/classmap002.phpt
+      ext/soap/tests/server007.phpt
+      ext/soap/tests/server008.phpt
+      ext/soap/tests/bugs/bug27722.phpt
+      ext/soap/tests/bugs/bug27742.phpt
+      ext/soap/tests/bugs/bug28751.phpt
+      ext/soap/tests/bugs/bug28969.phpt
+      ext/soap/tests/bugs/bug28985.phpt
+      ext/soap/tests/bugs/bug29061.phpt
+      ext/soap/tests/bugs/bug29109.phpt
+      ext/soap/tests/bugs/bug29236.phpt
+      ext/soap/tests/bugs/bug29795.phpt
+      ext/soap/tests/bugs/bug29830.phpt
+      ext/soap/tests/bugs/bug29839.phpt
+      ext/soap/tests/bugs/bug29844.phpt
+      ext/soap/tests/bugs/bug30045.phpt
+      ext/soap/tests/bugs/bug30106.phpt
+      ext/soap/tests/bugs/bug30175.phpt
+      ext/soap/tests/bugs/bug30799.phpt
+      ext/soap/tests/bugs/bug30928.phpt
+      ext/soap/tests/bugs/bug30994.phpt
+      ext/soap/tests/bugs/bug31422.phpt
+      ext/soap/tests/bugs/bug31695.phpt
+      ext/soap/tests/bugs/bug31755.phpt
+      ext/soap/tests/bugs/bug32776.phpt
+      ext/soap/tests/bugs/bug34449.phpt
+      ext/soap/tests/bugs/bug34453.phpt
+      ext/soap/tests/bugs/bug34643.phpt
+      ext/soap/tests/bugs/bug35142.phpt
+      ext/soap/tests/bugs/bug36226.phpt
+      ext/soap/tests/bugs/bug36575.phpt
+      ext/soap/tests/bugs/bug36629.phpt
+      ext/soap/tests/bugs/bug36908.phpt
+      ext/soap/tests/bugs/bug37278.phpt
+      ext/soap/tests/bugs/bug38004.phpt
+      ext/soap/tests/bugs/bug38005.phpt
+      ext/soap/tests/bugs/bug38055.phpt
+      ext/soap/tests/bugs/bug38067.phpt
+      ext/soap/tests/interop/Round2/Base/r2_base_005p.phpt
+      ext/soap/tests/interop/Round2/Base/r2_base_005s.phpt
+      ext/soap/tests/interop/Round2/Base/r2_base_005w.phpt
+      ext/soap/tests/interop/Round3/GroupE/r3_groupE_list_001w.phpt
+      ext/soap/tests/interop/Round3/GroupE/r3_groupE_list_002w.phpt
+      ext/soap/tests/interop/Round3/GroupE/r3_groupE_list_003w.phpt
+      ext/soap/tests/interop/Round3/GroupE/r3_groupE_list_005w.phpt
+      ext/soap/tests/interop/Round3/GroupE/r3_groupE_list_006w.phpt
+      ext/soap/tests/interop/Round4/GroupI/r4_groupI_xsd_006w.phpt
+      ext/soap/tests/schema/schema004.phpt
+      ext/soap/tests/schema/schema009.phpt
+      ext/soap/tests/schema/schema010.phpt
+      ext/soap/tests/schema/schema011.phpt
+      ext/soap/tests/schema/schema012.phpt
+      ext/soap/tests/schema/schema013.phpt
+      ext/soap/tests/schema/schema014.phpt
+      ext/soap/tests/schema/schema015.phpt
+      ext/soap/tests/schema/schema016.phpt
+      ext/soap/tests/schema/schema017.phpt
+      ext/soap/tests/schema/schema018.phpt
+      ext/soap/tests/schema/schema019.phpt
+      ext/soap/tests/schema/schema020.phpt
+      ext/soap/tests/schema/schema021.phpt
+      ext/soap/tests/schema/schema022.phpt
+      ext/soap/tests/schema/schema030.phpt
+      ext/soap/tests/schema/schema031.phpt
+      ext/soap/tests/schema/schema032.phpt
+      ext/soap/tests/schema/schema033.phpt
+      ext/soap/tests/schema/schema034.phpt
+      ext/soap/tests/schema/schema035.phpt
+      ext/soap/tests/schema/schema036.phpt
+      ext/soap/tests/schema/schema037.phpt
+      ext/soap/tests/schema/schema038.phpt
+      ext/soap/tests/schema/schema039.phpt
+      ext/soap/tests/schema/schema040.phpt
+      ext/soap/tests/schema/schema041.phpt
+      ext/soap/tests/schema/schema042.phpt
+      ext/soap/tests/schema/schema043.phpt
+      ext/soap/tests/schema/schema044.phpt
+      ext/soap/tests/schema/schema045.phpt
+      ext/soap/tests/schema/schema046.phpt
+      ext/soap/tests/schema/schema047.phpt
+      ext/soap/tests/schema/schema048.phpt
+      ext/soap/tests/schema/schema049.phpt
+      ext/soap/tests/schema/schema050.phpt
+      ext/soap/tests/schema/schema051.phpt
+      ext/soap/tests/schema/schema052.phpt
+      ext/soap/tests/schema/schema053.phpt
+      ext/soap/tests/schema/schema054.phpt
+      ext/soap/tests/schema/schema055.phpt
+      ext/soap/tests/schema/schema062.phpt
+      ext/soap/tests/schema/schema064.phpt
+      ext/soap/tests/schema/schema065.phpt
+      ext/soap/tests/schema/schema066.phpt
+      ext/soap/tests/schema/schema067.phpt
+      ext/soap/tests/schema/schema069.phpt
+      ext/soap/tests/schema/schema070.phpt
+      ext/soap/tests/schema/schema074.phpt
+      ext/soap/tests/schema/schema075.phpt
+      ext/soap/tests/schema/schema076.phpt
+      ext/soap/tests/schema/schema077.phpt
+      ext/soap/tests/schema/schema078.phpt
+      ext/soap/tests/schema/schema079.phpt
+      ext/soap/tests/schema/schema080.phpt
+      ext/soap/tests/schema/test_schema.inc:
+      Unicode support (not finished)
+
+2006-07-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mysqli/tests/bug36802.phpt:
+      MFB: Fixed test for systems where set_charset() method is unavailable.
+
+    * (PHP_5_2)
+      ext/mysqli/tests/bug36802.phpt:
+      Fixed test for systems where set_charset() method is unavailable.
+
+2006-07-13  Antony Dovgal  <antony@zend.com>
+
+    * ext/reflection/php_reflection.c:
+      Unicode support in ReflectionParameter::__construct()
+
+    * main/rfc1867.c:
+      fix C++ comments in C code and comment out unused variable
+
+    * ext/unicode/transform.c:
+      nuke unused variable
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/tests/file/bug38086.phpt
+      ext/standard/tests/file/bug38086.txt
+      ext/standard/tests/file/stream_copy_to_stream.phpt
+      main/streams/streams.c:
+      MFH: fix #38086 (stream_copy_to_stream() returns 0 when maxlen is bigger
+      than the actual length)
+      add tests
+
+    * ext/standard/tests/file/bug38086.phpt
+      ext/standard/tests/file/bug38086.phpt
+      ext/standard/tests/file/bug38086.txt
+      ext/standard/tests/file/bug38086.txt
+      ext/standard/tests/file/stream_copy_to_stream.phpt
+      ext/standard/tests/file/stream_copy_to_stream.phpt
+      main/streams/streams.c:
+      
+      fix #38086 (stream_copy_to_stream() returns 0 when maxlen is bigger than
+      the actual length)
+
+2006-07-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/session/session.c
+      main/php_logos.c:
+      MFB: Fixed compiler warnings.
+
+    * (PHP_5_2)
+      ext/session/session.c
+      main/php_logos.c:
+      Fixed compiler warnings.
+
 2006-07-12  Andrei Zmievski  <andrei@gravitonic.com>
 
     * unicode-progress.txt:
