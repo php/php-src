@@ -10,12 +10,6 @@ ext/standard
     Need to fix string_compare_function() to compare Unicode strings
     directly in code point order
 
-    array_combine()
-        Handle IS_UNICODE/IS_STRING keys via add_u_assoc_zval()
-
-    array_count_values()
-        Params API, minor Unicode updates, test
-
     array_diff(), array_udiff()
     array_diff_assoc(), array_diff_uassoc(), array_udiff_assoc(), array_udiff_uassoc()
     array_diff_key(), array_diff_ukey()
@@ -38,9 +32,6 @@ ext/standard
         Add SORT_LOCALE_STRING, test
 
     array_pad()
-        Params API, test
-
-    array_rand()
         Params API, test
 
     array_reduce()
@@ -76,6 +67,8 @@ ext/standard
   -------
     array_change_key_case()
     array_chunk() 
+    array_combine()
+    array_count_values()
     array_fill()
     array_flip()
     array_key_exists()
@@ -84,6 +77,7 @@ ext/standard
     array_merge_recursive()
     array_product()
     array_push(), array_pop(), array_shift(), array_unshift()
+    array_rand()
     array_search()
     array_slice()
     array_splice()
