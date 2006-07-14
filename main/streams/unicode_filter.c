@@ -56,7 +56,7 @@ static php_stream_filter_status_t php_unicode_to_string_filter(
 		UChar *src = bucket->buf.u;
 
 		php_stream_bucket_unlink(bucket TSRMLS_CC);
-		if (!bucket->buf_type == IS_UNICODE) {
+		if (bucket->buf_type != IS_UNICODE) {
 			/* Already ASCII, can't really do anything with it */
 			consumed += bucket->buflen;
 			php_stream_bucket_append(buckets_out, bucket TSRMLS_CC);
