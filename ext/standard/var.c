@@ -1116,10 +1116,8 @@ PHP_FUNCTION(unserialize)
 		str = emalloc(buf_len+1);
 		for (i = 0; i < buf_len; i++) {
 			if (buf.u[i] > 128) {
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Error at offset %d of %d bytes", i, buf_len);				
-				if (str) {
-					efree(str);
-				}
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Error at offset %d of %d bytes", i, buf_len);
+				STR_FREE(str);
 				RETURN_FALSE;
 			}
 			str[i] = buf.u[i];
@@ -1134,15 +1132,11 @@ PHP_FUNCTION(unserialize)
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 		zval_dtor(return_value);
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Error at offset %ld of %d bytes", (long)((char*)p - buf.s), buf_len);
-		if (str) {
-			efree(str);
-		}
+		STR_FREE(str);
 		RETURN_FALSE;
 	}
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-	if (str) {
-		efree(str);
-	}
+	STR_FREE(str);
 }
 
 /* }}} */
