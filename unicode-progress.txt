@@ -25,14 +25,8 @@ ext/standard
         Should work with minor cleanups provided that underlying comparison
         functions are fixed, FCI cache, test
 
-    array_fill()
-        Params API, test
-
     array_filter()
         Params API, FCI cache, test
-
-    array_flip()
-        Params API, test
 
     array_intersect(), array_uintersect()
     array_intersect_assoc(), array_uintersect_assoc(), array_intersect_uassoc(), array_uintersect_uassoc()
@@ -53,9 +47,6 @@ ext/standard
         Add SORT_LOCALE_STRING, test
 
     array_pad()
-        Params API, test
-
-    array_push(), array_pop(), array_shift(), array_unshift()
         Params API, test
 
     array_rand()
@@ -108,9 +99,12 @@ ext/standard
   array.c
   -------
     array_chunk() 
+    array_fill()
+    array_flip()
     array_merge()
     array_merge_recursive()
     array_product()
+    array_push(), array_pop(), array_shift(), array_unshift()
     array_sum()
     compact()
     count()
