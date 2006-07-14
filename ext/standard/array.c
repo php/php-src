@@ -1642,50 +1642,32 @@ PHP_FUNCTION(compact)
 }
 /* }}} */
 
-/* {{{ proto array array_fill(int start_key, int num, mixed val)
+/* {{{ proto array array_fill(int start_key, int num, mixed val) U
    Create an array containing num elements starting with index start_key each initialized to val */
 PHP_FUNCTION(array_fill)
 {
-	zval **start_key, **num, **val, *newval;
-	long i;
+	zval *val;
+	long start_key, num;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &start_key, &num, &val) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "llz", &start_key, &num, &val) == FAILURE) {
+		return;
 	}
 
-	switch (Z_TYPE_PP(start_key)) {
-		case IS_STRING:
-		case IS_UNICODE:
-		case IS_LONG:
-		case IS_DOUBLE:
-			/* allocate an array for return */
-			array_init(return_value);
-			
-			if (PZVAL_IS_REF(*val)) {
-				SEPARATE_ZVAL(val);
-			}
-			convert_to_long_ex(start_key);
-			zval_add_ref(val);
-			zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_PP(start_key), val, sizeof(val), NULL);
-			break;
-		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Wrong data type for start key");
-			RETURN_FALSE;
-			break;
-	}	
-
-	convert_to_long_ex(num);
-	i = Z_LVAL_PP(num) - 1;	
-	if (i < 0) {
-		zend_hash_destroy(Z_ARRVAL_P(return_value));
-		efree(Z_ARRVAL_P(return_value));
+	num--;
+	if (num < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of elements must be positive");
 		RETURN_FALSE;
 	}
-	newval = *val;
-	while (i--) {
-		zval_add_ref(&newval);
-		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &newval, sizeof(zval *), NULL);
+
+	/* allocate an array for return */
+	array_init(return_value);
+
+	zval_add_ref(&val);
+	zend_hash_index_update(Z_ARRVAL_P(return_value), start_key, &val, sizeof(zval *), NULL);
+
+	while (num--) {
+		zval_add_ref(&val);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &val, sizeof(zval *), NULL);
 	}
 }
 /* }}} */
@@ -2065,15 +2047,15 @@ HashTable* php_splice(HashTable *in_hash, int offset, int length,
 /* }}} */
 
 
-/* {{{ proto int array_push(array stack, mixed var [, mixed ...])
+/* {{{ proto int array_push(array stack, mixed var [, mixed ...]) U
    Pushes elements onto the end of the array */
 PHP_FUNCTION(array_push)
 {
-	zval	  ***args,		/* Function arguments array */
-		    *stack,		/* Input array */
-		    *new_var;		/* Variable to be pushed */
-	int          i,			/* Loop counter */
-		     argc;		/* Number of function arguments */
+	zval    ***args,        /* Function arguments array */
+			  *stack,       /* Input array */
+			  *new_var;     /* Variable to be pushed */
+	int        i,           /* Loop counter */
+			   argc;        /* Number of function arguments */
 
 	/* Get the argument count and check it */
 	argc = ZEND_NUM_ARGS();
@@ -2111,53 +2093,47 @@ PHP_FUNCTION(array_push)
 /* }}} */
 
 
-/* {{{ void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int which_end) */
+/* {{{ void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end) */
 static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 {
-	zval **stack,			/* Input stack */
+	zval *stack,		/* Input stack */
 	     **val;			/* Value to be popped */
 	zstr key = NULL_ZSTR;
 	uint key_len = 0;
 	ulong index;
 	zend_uchar key_type;
 	
-	/* Get the arguments and do error-checking */
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &stack) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	
-	if (Z_TYPE_PP(stack) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &stack) == FAILURE) {
 		return;
 	}
 
-	if (zend_hash_num_elements(Z_ARRVAL_PP(stack)) == 0) {
+	if (zend_hash_num_elements(Z_ARRVAL_P(stack)) == 0) {
 		return;
 	}
 		
 	/* Get the first or last value and copy it into the return value */
 	if (off_the_end)
-		zend_hash_internal_pointer_end(Z_ARRVAL_PP(stack));
+		zend_hash_internal_pointer_end(Z_ARRVAL_P(stack));
 	else
-		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(stack));
-	zend_hash_get_current_data(Z_ARRVAL_PP(stack), (void **)&val);
+		zend_hash_internal_pointer_reset(Z_ARRVAL_P(stack));
+	zend_hash_get_current_data(Z_ARRVAL_P(stack), (void **)&val);
 	RETVAL_ZVAL(*val, 1, 0);
 	
 	/* Delete the first or last value */
-	key_type = zend_hash_get_current_key_ex(Z_ARRVAL_PP(stack), &key, &key_len, &index, 0, NULL);
-	if (key.v && Z_ARRVAL_PP(stack) == &EG(symbol_table)) {
+	key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(stack), &key, &key_len, &index, 0, NULL);
+	if (key.v && Z_ARRVAL_P(stack) == &EG(symbol_table)) {
 		if (key_type == HASH_KEY_IS_UNICODE) key_type = IS_UNICODE;
 		else key_type = IS_STRING;
 		zend_u_delete_global_variable(key_type, key, key_len-1 TSRMLS_CC);
 	} else {
-		zend_u_hash_del_key_or_index(Z_ARRVAL_PP(stack), key_type, key, key_len, index, (key.v) ? HASH_DEL_KEY : HASH_DEL_INDEX);
+		zend_u_hash_del_key_or_index(Z_ARRVAL_P(stack), key_type, key, key_len, index, (key.v) ? HASH_DEL_KEY : HASH_DEL_INDEX);
 	}
 	
 	/* If we did a shift... re-index like it did before */
 	if (!off_the_end) {
 		unsigned int k = 0;
 		int should_rehash = 0;
-		Bucket *p = Z_ARRVAL_PP(stack)->pListHead;
+		Bucket *p = Z_ARRVAL_P(stack)->pListHead;
 		while (p != NULL) {
 			if (p->nKeyLength == 0) {
 				if (p->h != k) {
@@ -2169,19 +2145,19 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 			}
 			p = p->pListNext;
 		}
-		Z_ARRVAL_PP(stack)->nNextFreeElement = k;
+		Z_ARRVAL_P(stack)->nNextFreeElement = k;
 		if (should_rehash) {
-			zend_hash_rehash(Z_ARRVAL_PP(stack));
+			zend_hash_rehash(Z_ARRVAL_P(stack));
 		}
 	} else if (!key_len) {
-		Z_ARRVAL_PP(stack)->nNextFreeElement = Z_ARRVAL_PP(stack)->nNextFreeElement - 1;
+		Z_ARRVAL_P(stack)->nNextFreeElement = Z_ARRVAL_P(stack)->nNextFreeElement - 1;
 	}
 
-	zend_hash_internal_pointer_reset(Z_ARRVAL_PP(stack));
+	zend_hash_internal_pointer_reset(Z_ARRVAL_P(stack));
 }
 /* }}} */
 
-/* {{{ proto mixed array_pop(array stack)
+/* {{{ proto mixed array_pop(array stack) U
    Pops an element off the end of the array */
 PHP_FUNCTION(array_pop)
 {
@@ -2190,7 +2166,7 @@ PHP_FUNCTION(array_pop)
 /* }}} */
 
 
-/* {{{ proto mixed array_shift(array stack)
+/* {{{ proto mixed array_shift(array stack) U
    Pops an element off the beginning of the array */
 PHP_FUNCTION(array_shift)
 {
@@ -2199,14 +2175,14 @@ PHP_FUNCTION(array_shift)
 /* }}} */
 
 
-/* {{{ proto int array_unshift(array stack, mixed var [, mixed ...])
+/* {{{ proto int array_unshift(array stack, mixed var [, mixed ...]) U
    Pushes elements onto the beginning of the array */
 PHP_FUNCTION(array_unshift)
 {
-	zval	  ***args,		/* Function arguments array */
-		    *stack;		/* Input stack */
-	HashTable   *new_hash;		/* New hashtable for the stack */
-	int	     argc;		/* Number of function arguments */
+	zval     ***args,      /* Function arguments array */
+			   *stack;     /* Input stack */
+	HashTable  *new_hash;  /* New hashtable for the stack */
+	int         argc;      /* Number of function arguments */
 	
 
 	/* Get the argument count and check it */	
@@ -2886,27 +2862,22 @@ PHP_FUNCTION(array_pad)
 }
 /* }}} */
 
-/* {{{ proto array array_flip(array input)
+/* {{{ proto array array_flip(array input) U
    Return array with key <-> value flipped */
 PHP_FUNCTION(array_flip)
 {
-	zval **array, **entry, *data;
+	zval *array, **entry, *data;
 	HashTable *target_hash;
 	zstr string_key;
 	uint str_key_len;
 	ulong num_key;
 	HashPosition pos;
 					
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &array) == FAILURE) {
+		return;
 	}
 
-	target_hash = HASH_OF(*array);
-	if (!target_hash) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
-		RETURN_FALSE;
-	}
-	
+	target_hash = HASH_OF(array);
 	array_init(return_value);
 
 	zend_hash_internal_pointer_reset_ex(target_hash, &pos);

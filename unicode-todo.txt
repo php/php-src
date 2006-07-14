@@ -41,3 +41,10 @@ parsing API, e.g.:
 
 * Review the decision to coerce binary strings to Unicode when used as array
   keys.
+
+* Figure out generic approach to locale validation/fallback.
+
+* Relax requirement on mixing unicode/binary strings in parameters
+  (zend_get_unified_string_type() callers and others)
+
+* Constant registration/fetching should do identifier normalization.
