@@ -10,9 +10,6 @@ ext/standard
     Need to fix string_compare_function() to compare Unicode strings
     directly in code point order
 
-    array_change_key_case()
-        Params API, test
-
     array_combine()
         Handle IS_UNICODE/IS_STRING keys via add_u_assoc_zval()
 
@@ -86,6 +83,7 @@ ext/standard
   
   array.c
   -------
+    array_change_key_case()
     array_chunk() 
     array_fill()
     array_flip()
