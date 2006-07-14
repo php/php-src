@@ -1,3 +1,10 @@
+2006-07-13  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.c:
+      - Let the caller output a warning instead of having
+        zend_get_unified_string_type() do it.
+      - Mark a few more functions are Unicode compatible.
+
 2006-07-12  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
