@@ -2528,41 +2528,30 @@ PHP_FUNCTION(array_merge_recursive)
 /* }}} */
 
 
-/* {{{ proto array array_keys(array input [, mixed search_value[, bool strict]])
+/* {{{ proto array array_keys(array input [, mixed search_value[, bool strict]]) U
    Return just the keys from the input array, optionally only for the specified search_value */
 PHP_FUNCTION(array_keys)
 {
-	zval **input,		/* Input array */
-	     **search_value,	/* Value to search for */
+	zval *input,		/* Input array */
+	     *search_value = NULL, /* Value to search for */
 	     **entry,		/* An entry in the input array */
-	       res,		/* Result of comparison */
-	     **strict,		/* be strict */
+	       res,			/* Result of comparison */
 	      *new_val;		/* New value */
 	int    add_key;		/* Flag to indicate whether a key should be added */
 	zstr   string_key;	/* String key */
 	uint   string_key_len;
 	ulong  num_key;		/* Numeric key */
+	zend_bool strict = 0; /* do strict comparison */
 	HashPosition pos;
 	int (*is_equal_func)(zval *, zval *, zval * TSRMLS_DC) = is_equal_function;
 
-
-	search_value = NULL;
-	
-	/* Get arguments and do error-checking */
-	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 3 ||
-		zend_get_parameters_ex(ZEND_NUM_ARGS(), &input, &search_value, &strict) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	
-	if (Z_TYPE_PP(input) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The first argument should be an array");
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|zb", &input,
+							  &search_value, &strict) == FAILURE) {
 		return;
 	}
-	if (ZEND_NUM_ARGS() == 3) {
-		convert_to_boolean_ex(strict);
-		if (Z_LVAL_PP(strict)) {
-			is_equal_func = is_identical_function;
-		}
+
+	if (strict) {
+		is_equal_func = is_identical_function;
 	}
 	
 	/* Initialize return array */
@@ -2570,17 +2559,17 @@ PHP_FUNCTION(array_keys)
 	add_key = 1;
 	
 	/* Go through input array and add keys to the return array */
-	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(input), &pos);
-	while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(input), (void **)&entry, &pos) == SUCCESS) {
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(input), &pos);
+	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(input), (void **)&entry, &pos) == SUCCESS) {
 		if (search_value != NULL) {
-	 		is_equal_func(&res, *search_value, *entry TSRMLS_CC);
+	 		is_equal_func(&res, search_value, *entry TSRMLS_CC);
 			add_key = zval_is_true(&res);
 		}
 	
-		if (add_key) {	
+		if (add_key) {
 			MAKE_STD_ZVAL(new_val);
 
-			switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(input), &string_key, &string_key_len, &num_key, 1, &pos)) {
+			switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(input), &string_key, &string_key_len, &num_key, 1, &pos)) {
 				case HASH_KEY_IS_STRING:
 					ZVAL_STRINGL(new_val, string_key.s, string_key_len-1, 0);
 					goto ukey;
@@ -2600,42 +2589,34 @@ ukey:
 			}
 		}
 
-		zend_hash_move_forward_ex(Z_ARRVAL_PP(input), &pos);
+		zend_hash_move_forward_ex(Z_ARRVAL_P(input), &pos);
 	}
 }
 /* }}} */
 
 
-/* {{{ proto array array_values(array input)
+/* {{{ proto array array_values(array input) U
    Return just the values from the input array */
 PHP_FUNCTION(array_values)
 {
-	zval	**input,		/* Input array */
-		**entry;		/* An entry in the input array */
+	zval	 *input,		/* Input array */
+			**entry;		/* An entry in the input array */
 	HashPosition pos;
 	
-	/* Get arguments and do error-checking */
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &input) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	
-	if (Z_TYPE_PP(input) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &input) == FAILURE) {
 		return;
 	}
-	
+
 	/* Initialize return array */
 	array_init(return_value);
 
 	/* Go through input array and add values to the return array */	
-	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(input), &pos);
-	while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(input), (void **)&entry, &pos) == SUCCESS) {
-		
-		(*entry)->refcount++;
-		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), entry,
-											sizeof(zval *), NULL);
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(input), &pos);
+	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(input), (void **)&entry, &pos) == SUCCESS) {
+		zval_add_ref(entry);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), entry, sizeof(zval *), NULL);
 
-		zend_hash_move_forward_ex(Z_ARRVAL_PP(input), &pos);
+		zend_hash_move_forward_ex(Z_ARRVAL_P(input), &pos);
 	}
 }
 /* }}} */
