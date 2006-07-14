@@ -31,17 +31,8 @@ ext/standard
     array_multisort()
         Add SORT_LOCALE_STRING, test
 
-    array_pad()
-        Params API, test
-
     array_reduce()
         Params API, FCI cache, test
-
-    array_reverse()
-        Params API, test
-
-    array_unique()
-        Params API, test
 
     array_walk()
         Params API, is_callable check, FCI cache, test
@@ -77,12 +68,15 @@ ext/standard
     array_merge_recursive()
     array_product()
     array_push(), array_pop(), array_shift(), array_unshift()
+    array_pad()
     array_rand()
+    array_reverse()
     array_search()
     array_slice()
     array_splice()
     array_sum()
     array_values()
+    array_unique()
     compact()
     count()
     in_array()

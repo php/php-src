@@ -2631,44 +2631,33 @@ PHP_FUNCTION(array_count_values)
 /* }}} */
 
 
-/* {{{ proto array array_reverse(array input [, bool preserve keys])
+/* {{{ proto array array_reverse(array input [, bool preserve keys]) U
    Return input as a new array with the order of the entries reversed */
 PHP_FUNCTION(array_reverse)
 {
-	zval	**input,			  /* Input array */
-		**z_preserve_keys, /* Flag: whether to preserve keys */
-		**entry;			  /* An entry in the input array */
+	zval	 *input,			  /* Input array */
+			**entry;			  /* An entry in the input array */
 	zstr	  string_key;
 	uint	  string_key_len;
 	ulong	  num_key;
-	zend_bool preserve_keys = 0;
+	zend_bool preserve_keys = 0; /* whether to preserve keys */
 	HashPosition pos;
 	
-	/* Get arguments and do error-checking */
-	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &input, &z_preserve_keys) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	
-	if (Z_TYPE_PP(input) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|b", &input,
+							  &preserve_keys) == FAILURE) {
 		return;
 	}
 
-	if (ZEND_NUM_ARGS() > 1) {
-		convert_to_boolean_ex(z_preserve_keys);
-		preserve_keys = Z_BVAL_PP(z_preserve_keys);
-	}
-	
 	/* Initialize return array */
 	array_init(return_value);
 	
-	zend_hash_internal_pointer_end_ex(Z_ARRVAL_PP(input), &pos);
-	while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(input), (void **)&entry, &pos) == SUCCESS) {
+	zend_hash_internal_pointer_end_ex(Z_ARRVAL_P(input), &pos);
+	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(input), (void **)&entry, &pos) == SUCCESS) {
 		zend_uchar utype;
 		 
-		(*entry)->refcount++;
+		zval_add_ref(entry);
 		
-		switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(input), &string_key, &string_key_len, &num_key, 0, &pos)) {
+		switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(input), &string_key, &string_key_len, &num_key, 0, &pos)) {
 			case HASH_KEY_IS_STRING:
 				utype = IS_STRING;
 				goto ukey;
@@ -2687,46 +2676,38 @@ ukey:
 				break;
 		}
 		
-		zend_hash_move_backwards_ex(Z_ARRVAL_PP(input), &pos);
+		zend_hash_move_backwards_ex(Z_ARRVAL_P(input), &pos);
 	}
 }
 /* }}} */
 
 
-/* {{{ proto array array_pad(array input, int pad_size, mixed pad_value)
+/* {{{ proto array array_pad(array input, int pad_size, mixed pad_value) U
    Returns a copy of input array padded with pad_value to size pad_size */
 PHP_FUNCTION(array_pad)
 {
-	zval  **input;		/* Input array */
-	zval  **pad_size;	/* Size to pad to */
-	zval  **pad_value;	/* Padding value obviously */
+	zval  *input;		/* Input array */
+	zval  *pad_value;	/* Padding value obviously */
 	zval ***pads;		/* Array to pass to splice */
-	HashTable *new_hash;	/* Return value from splice */
-	int	input_size;	/* Size of the input array */
-	int	pad_size_abs;	/* Absolute value of pad_size */
-	int	num_pads;	/* How many pads do we need */
-	int	do_pad;		/* Whether we should do padding at all */
+	HashTable *new_hash;/* Return value from splice */
+	long  pad_size;		/* Size to pad to */
+	long pad_size_abs;	/* Absolute value of pad_size */
+	int	input_size;		/* Size of the input array */
+	int	num_pads;		/* How many pads do we need */
+	int	do_pad;			/* Whether we should do padding at all */
 	int	i;
 	
-	/* Get arguments and do error-checking */
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &input, &pad_size, &pad_value) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	
-	/* Make sure arguments are of the proper type */
-	if (Z_TYPE_PP(input) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|lz", &input, &pad_size, &pad_value) == FAILURE) {
 		return;
 	}
-	convert_to_long_ex(pad_size);
-	
+
 	/* Do some initial calculations */
-	input_size = zend_hash_num_elements(Z_ARRVAL_PP(input));
-	pad_size_abs = abs(Z_LVAL_PP(pad_size));
+	input_size = zend_hash_num_elements(Z_ARRVAL_P(input));
+	pad_size_abs = abs(pad_size);
 	do_pad = (input_size >= pad_size_abs) ? 0 : 1;
 	
 	/* Copy the original array */
-	RETVAL_ZVAL(*input, 1, 0);
+	RETVAL_ZVAL(input, 1, 0);
 	
 	/* If no need to pad, no need to continue */
 	if (!do_pad) {
@@ -2735,17 +2716,17 @@ PHP_FUNCTION(array_pad)
 
 	/* Populate the pads array */
 	num_pads = pad_size_abs - input_size;
-	if(num_pads > 1048576) {
+	if (num_pads > 1048576) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "You may only pad up to 1048576 elements at a time");
 		RETURN_FALSE;
 	}
 	pads = (zval ***)safe_emalloc(num_pads, sizeof(zval **), 0);
 	for (i = 0; i < num_pads; i++) {
-		pads[i] = pad_value;
+		pads[i] = &pad_value;
 	}
 
 	/* Pad on the right or on the left */
-	if (Z_LVAL_PP(pad_size) > 0) {
+	if (pad_size > 0) {
 		new_hash = php_splice(Z_ARRVAL_P(return_value), input_size, 0, pads, num_pads, NULL);
 	} else {
 		new_hash = php_splice(Z_ARRVAL_P(return_value), 0, 0, pads, num_pads, NULL);
@@ -2867,11 +2848,11 @@ PHP_FUNCTION(array_change_key_case)
 }
 /* }}} */
 
-/* {{{ proto array array_unique(array input)
+/* {{{ proto array array_unique(array input) U
    Removes duplicate values from array */
 PHP_FUNCTION(array_unique)
 {
-	zval **array;
+	zval *array;
 	HashTable *target_hash;
 	Bucket *p;
 	struct bucketindex {
@@ -2881,17 +2862,14 @@ PHP_FUNCTION(array_unique)
 	struct bucketindex *arTmp, *cmpdata, *lastkept;
 	unsigned int i;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	target_hash = HASH_OF(*array);
-	if (!target_hash) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
-		RETURN_FALSE;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &array) == FAILURE) {
+		return;
 	}
 
+	target_hash = HASH_OF(array);
+
 	/* copy the argument array */
-	RETVAL_ZVAL(*array, 1, 0);
+	RETVAL_ZVAL(array, 1, 0);
 
 	if (target_hash->nNumOfElements <= 1) {	/* nothing to do */
 		return;
@@ -2900,6 +2878,7 @@ PHP_FUNCTION(array_unique)
 	/* create and sort array with pointers to the target_hash buckets */
 	arTmp = (struct bucketindex *) pemalloc((target_hash->nNumOfElements + 1) * sizeof(struct bucketindex), target_hash->persistent);
 	if (!arTmp) {
+		zval_dtor(return_value);
 		RETURN_FALSE;
 	}
 	for (i = 0, p = target_hash->pListHead; p; i++, p = p->pListNext) {
