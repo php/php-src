@@ -1517,7 +1517,8 @@ COMMAND $cmd
 		}
 	} else {
 		$wanted = trim($section_text['EXPECT']);
-		if ($unicode_semantics) {
+		var_dump($wanted, $unicode_semantics);
+		if ($unicode_semantics && is_unicode($wanted)) {
 			/* workaround until preg_replace() or str_replace() are upgraded */
 			$wanted = unicode_encode($wanted, ini_get('unicode.output_encoding'));
 		}
