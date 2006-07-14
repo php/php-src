@@ -2303,7 +2303,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 	/* Output encoding on text mode streams defaults to utf8 unless specified in context parameter */
 	if (stream && strchr(implicit_mode, 't') && UG(unicode)) {
 		/* Only apply implicit unicode.to. filter if the wrapper didn't do it for us */
-		if ((php_stream_filter_product(&stream->writefilters, IS_UNICODE) == IS_STRING) && 
+		if ((php_stream_filter_product(&stream->writefilters, IS_UNICODE) == IS_UNICODE) && 
 			(strchr(implicit_mode, 'w') || strchr(implicit_mode, 'a') || strchr(implicit_mode, '+'))) {
 			char *encoding = (context && context->output_encoding) ? context->output_encoding : "utf8";
 
