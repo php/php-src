@@ -2866,42 +2866,30 @@ PHP_FUNCTION(array_flip)
 /* }}} */
 
 
-/* {{{ proto array array_change_key_case(array input [, int case=CASE_LOWER])
+/* {{{ proto array array_change_key_case(array input [, int case=CASE_LOWER]) U
    Retuns an array with all string keys lowercased [or uppercased] */
 PHP_FUNCTION(array_change_key_case)
 {
-	zval **array, **entry, **to_upper;
+	zval *array, **entry;
 	zstr string_key;
 	zstr new_key;
 	uint str_key_len;
 	int str_len;
 	ulong num_key;
-	ulong change_to_upper=0;
-
+	long change_to_upper=0;
 	HashPosition pos;
 					
-	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2 || 
-		zend_get_parameters_ex(ZEND_NUM_ARGS(), &array, &to_upper) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-
-	if (ZEND_NUM_ARGS() > 1) {
-		convert_to_long_ex(to_upper);
-		change_to_upper = Z_LVAL_PP(to_upper);
-	}
-
-	if (Z_TYPE_PP(array) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
-		RETURN_FALSE;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|l", &array, &change_to_upper) == FAILURE) {
+		return;
 	}
 
 	array_init(return_value);
 
-	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(array), &pos);
-	while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(array), (void **)&entry, &pos) == SUCCESS) {
-		(*entry)->refcount++; 
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(array), &pos);
+	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(array), (void **)&entry, &pos) == SUCCESS) {
+		zval_add_ref(entry);
 
-		switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(array), &string_key, &str_key_len, &num_key, 0, &pos)) {
+		switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(array), &string_key, &str_key_len, &num_key, 0, &pos)) {
 			case HASH_KEY_IS_LONG:
 				zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, entry, sizeof(entry), NULL);
 				break;
@@ -2926,7 +2914,7 @@ PHP_FUNCTION(array_change_key_case)
 				break;
 		}
 
-		zend_hash_move_forward_ex(Z_ARRVAL_PP(array), &pos);
+		zend_hash_move_forward_ex(Z_ARRVAL_P(array), &pos);
 	}
 }
 /* }}} */
