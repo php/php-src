@@ -70,9 +70,6 @@ ext/standard
     array_walk_recursive()
         Params API, is_callable check, FCI cache, test
 
-    end(), prev(), next(), reset(), current(), key()
-        Params API, test
-
     extract()
         Params API, fix php_valid_var_name(), test
 
@@ -107,6 +104,8 @@ ext/standard
     max()
     range()
     shuffle()
+
+    end(), prev(), next(), reset(), current(), key()
 
     sort(), rsort()
     asort(), arsort()
