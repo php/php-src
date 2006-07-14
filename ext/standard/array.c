@@ -2196,59 +2196,37 @@ PHP_FUNCTION(array_unshift)
 /* }}} */
 
 
-/* {{{ proto array array_splice(array input, int offset [, int length [, array replacement]])
+/* {{{ proto array array_splice(array input, int offset [, int length [, array replacement]]) U
    Removes the elements designated by offset and length and replace them with supplied array */
 PHP_FUNCTION(array_splice)
 {
-	zval	***args,				/* Function arguments array */
-		  *array,				/* Input array */
-		***repl = NULL;				/* Replacement elements */
-	HashTable	*new_hash = NULL;		/* Output array's hash */
-	Bucket		*p;				/* Bucket used for traversing hash */
-	int		 argc,				/* Number of function arguments */
-			 i,
+	zval	 *array,				/* Input array */
+			 *repl_array, 			/* Replacement array */
+	   	   ***repl = NULL;			/* Replacement elements */
+	HashTable	*new_hash = NULL;	/* Output array's hash */
+	Bucket		*p;					/* Bucket used for traversing hash */
+	long	 i,
 			 offset,
 			 length,
 			 repl_num = 0;			/* Number of replacement elements */
 
-	/* Get the argument count and check it */
-	argc = ZEND_NUM_ARGS();
-	if (argc < 2 || argc > 4) {
-		WRONG_PARAM_COUNT;
-	}
-	
-	/* Allocate arguments array and get the arguments, checking for errors. */
-	args = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
-	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
-		efree(args);
-		WRONG_PARAM_COUNT;
-	}	
-
-	/* Get first argument and check that it's an array */
-	array = *args[0];
-	if (Z_TYPE_P(array) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The first argument should be an array");
-		efree(args);
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "al|lz/", &array,
+							  &offset, &length, &repl_array) == FAILURE) {
 		return;
 	}
 	
-	/* Get the next two arguments.  If length is omitted, it's assumed to be until the end of the array */
-	convert_to_long_ex(args[1]);
-	offset = Z_LVAL_PP(args[1]);
-	if (argc > 2) {
-		convert_to_long_ex(args[2]);
-		length = Z_LVAL_PP(args[2]);
-	} else
+	if (ZEND_NUM_ARGS() < 3) {
 		length = zend_hash_num_elements(Z_ARRVAL_P(array));
+	}
 
-	if (argc == 4) {
+	if (ZEND_NUM_ARGS() == 4) {
 		/* Make sure the last argument, if passed, is an array */
-		convert_to_array_ex(args[3]);
+		convert_to_array(repl_array);
 		
 		/* Create the array of replacement elements */
-		repl_num = zend_hash_num_elements(Z_ARRVAL_PP(args[3]));
+		repl_num = zend_hash_num_elements(Z_ARRVAL_P(repl_array));
 		repl = (zval ***)safe_emalloc(repl_num, sizeof(zval **), 0);
-		for (p=Z_ARRVAL_PP(args[3])->pListHead, i=0; p; p=p->pListNext, i++) {
+		for (p = Z_ARRVAL_P(repl_array)->pListHead, i = 0; p; p = p->pListNext, i++) {
 			repl[i] = ((zval **)p->pData);
 		}
 	}
@@ -2258,9 +2236,9 @@ PHP_FUNCTION(array_splice)
 	
 	/* Perform splice */
 	new_hash = php_splice(Z_ARRVAL_P(array), offset, length,
-							repl, repl_num,
-							&Z_ARRVAL_P(return_value));
-	
+						  repl, repl_num,
+						  &Z_ARRVAL_P(return_value));
+
 	/* Replace input array's hashtable with the new one */
 	zend_hash_destroy(Z_ARRVAL_P(array));
 	if (Z_ARRVAL_P(array) == &EG(symbol_table)) {
@@ -2270,99 +2248,75 @@ PHP_FUNCTION(array_splice)
 	FREE_HASHTABLE(new_hash);
 	
 	/* Clean up */
-	if (argc == 4)
+	if (ZEND_NUM_ARGS() == 4)
 		efree(repl);
-	efree(args);
 }
 /* }}} */
 
 
-/* {{{ proto array array_slice(array input, int offset [, int length [, bool preserve_keys]])
+/* {{{ proto array array_slice(array input, int offset [, int length [, bool preserve_keys]]) U
    Returns elements specified by offset and length */
 PHP_FUNCTION(array_slice)
 {
-	zval	   **input,		/* Input array */
-		   **offset,		/* Offset to get elements from */
-		   **length,		/* How many elements to get */
-		   **entry,			/* An array entry */
-		   **z_preserve_keys; /* Whether to preserve keys while copying to the new array or not */
-	int	     offset_val,	/* Value of the offset argument */
-		     length_val,	/* Value of the length argument */
-		     num_in,		/* Number of elements in the input array */
-		     pos,		/* Current position in the array */
-		     argc;		/* Number of function arguments */
-				 
+	zval	 *input,		/* Input array */
+			**entry;		/* An array entry */
+	long	 offset,		/* Offset to get elements from */
+		     length;		/* How many elements to get */
+	zend_bool preserve_keys = 0; /* Whether to preserve keys while copying to the new array or not */
+	int		 num_in,		/* Number of elements in the input array */
+		     pos;			/* Current position in the array */
 	zstr string_key;
-	uint string_key_len;
+	int string_key_len;
 	ulong num_key;
 	HashPosition hpos;
-	zend_bool	 preserve_keys = 0;
 
-	/* Get the arguments and do error-checking */	
-	argc = ZEND_NUM_ARGS();
-	if (argc < 2 || argc > 4 || zend_get_parameters_ex(argc, &input, &offset, &length, &z_preserve_keys)) {
-		WRONG_PARAM_COUNT;
-	}
-	
-	if (Z_TYPE_PP(input) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The first argument should be an array");
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "al|lb", &input,
+							  &offset, &length, &preserve_keys) == FAILURE) {
 		return;
 	}
 	
-	/* Make sure offset and length are integers and assume
-	   we want all entries from offset to the end if length
-	   is not passed */
-	convert_to_long_ex(offset);
-	offset_val = Z_LVAL_PP(offset);
-	if (argc >= 3) {
-		convert_to_long_ex(length);
-		length_val = Z_LVAL_PP(length);
-	} else {
-		length_val = zend_hash_num_elements(Z_ARRVAL_PP(input));
+	/* Get number of entries in the input hash */
+	num_in = zend_hash_num_elements(Z_ARRVAL_P(input));
+	
+	/* We want all entries from offset to the end if length is not passed */
+	if (ZEND_NUM_ARGS() < 3) {
+		length = num_in;
 	}
 
-	if (ZEND_NUM_ARGS() > 3) {
-		convert_to_boolean_ex(z_preserve_keys);
-		preserve_keys = Z_BVAL_PP(z_preserve_keys);
-	}
-	
 	/* Initialize returned array */
 	array_init(return_value);
 	
-	/* Get number of entries in the input hash */
-	num_in = zend_hash_num_elements(Z_ARRVAL_PP(input));
-	
 	/* Clamp the offset.. */
-	if (offset_val > num_in)
+	if (offset > num_in)
 		return;
-	else if (offset_val < 0 && (offset_val=num_in+offset_val) < 0)
-		offset_val = 0;
+	else if (offset < 0 && (offset=num_in+offset) < 0)
+		offset = 0;
 	
 	/* ..and the length */
-	if (length_val < 0) {
-		length_val = num_in-offset_val+length_val;
-	} else if (((unsigned) offset_val + (unsigned) length_val) > num_in) {
-		length_val = num_in-offset_val;
+	if (length < 0) {
+		length = num_in-offset+length;
+	} else if (((unsigned) offset + (unsigned) length) > num_in) {
+		length = num_in-offset;
 	}
 	
-	if (length_val == 0)
+	if (length == 0)
 		return;
 	
 	/* Start at the beginning and go until we hit offset */
 	pos = 0;
-	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(input), &hpos);
-	while (pos < offset_val && zend_hash_get_current_data_ex(Z_ARRVAL_PP(input), (void **)&entry, &hpos) == SUCCESS) {
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(input), &hpos);
+	while (pos < offset && zend_hash_get_current_data_ex(Z_ARRVAL_P(input), (void **)&entry, &hpos) == SUCCESS) {
 		pos++;
-		zend_hash_move_forward_ex(Z_ARRVAL_PP(input), &hpos);
+		zend_hash_move_forward_ex(Z_ARRVAL_P(input), &hpos);
 	}
 	
 	/* Copy elements from input array to the one that's returned */
-	while (pos < offset_val+length_val && zend_hash_get_current_data_ex(Z_ARRVAL_PP(input), (void **)&entry, &hpos) == SUCCESS) {
+	while (pos < offset+length && zend_hash_get_current_data_ex(Z_ARRVAL_P(input), (void **)&entry, &hpos) == SUCCESS) {
 		zend_uchar utype;
 		
-		(*entry)->refcount++;
+		zval_add_ref(entry);
 
-		switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(input), &string_key, &string_key_len, &num_key, 0, &hpos)) {
+		switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(input), &string_key, &string_key_len, &num_key, 0, &hpos)) {
 			case HASH_KEY_IS_STRING:
 				utype = IS_STRING;
 				goto ukey;
@@ -2370,7 +2324,7 @@ PHP_FUNCTION(array_slice)
 				utype = IS_UNICODE;
 ukey:
 				zend_u_hash_update(Z_ARRVAL_P(return_value), utype, string_key, string_key_len,
-								 entry, sizeof(zval *), NULL);
+								   entry, sizeof(zval *), NULL);
 				break;
 	
 			case HASH_KEY_IS_LONG:
@@ -2383,7 +2337,7 @@ ukey:
 				break;
 		}
 		pos++;
-		zend_hash_move_forward_ex(Z_ARRVAL_PP(input), &hpos);
+		zend_hash_move_forward_ex(Z_ARRVAL_P(input), &hpos);
 	}
 }
 /* }}} */
@@ -4503,37 +4457,36 @@ ukey:
 /* }}} */
 
 
-/* {{{ proto bool array_key_exists(mixed key, array search)
+/* {{{ proto bool array_key_exists(mixed key, array search) U
    Checks if the given key or index exists in the array */
 PHP_FUNCTION(array_key_exists)
 {
-	zval **key,					/* key to check for */
-		 **array;				/* array to check in */
+	zval *key,					/* key to check for */
+		 *array;				/* array to check in */
 
-	if (ZEND_NUM_ARGS() != 2 ||
-		zend_get_parameters_ex(ZEND_NUM_ARGS(), &key, &array) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &key, &array) == FAILURE) {
+		return;
 	}
 
-	if (Z_TYPE_PP(array) != IS_ARRAY && Z_TYPE_PP(array) != IS_OBJECT) {
+	if (Z_TYPE_P(array) != IS_ARRAY && Z_TYPE_P(array) != IS_OBJECT) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The second argument should be either an array or an object");
 		RETURN_FALSE;
 	}
 
-	switch (Z_TYPE_PP(key)) {
+	switch (Z_TYPE_P(key)) {
 		case IS_STRING:
 		case IS_UNICODE:
-			if (zend_u_symtable_exists(HASH_OF(*array), Z_TYPE_PP(key), Z_UNIVAL_PP(key), Z_UNILEN_PP(key)+1)) {
+			if (zend_u_symtable_exists(HASH_OF(array), Z_TYPE_P(key), Z_UNIVAL_P(key), Z_UNILEN_P(key)+1)) {
 				RETURN_TRUE;
 			}
 			RETURN_FALSE;
 		case IS_LONG:
-			if (zend_hash_index_exists(HASH_OF(*array), Z_LVAL_PP(key))) {
+			if (zend_hash_index_exists(HASH_OF(array), Z_LVAL_P(key))) {
 				RETURN_TRUE;
 			}
 			RETURN_FALSE;
 		case IS_NULL:
-			if (zend_hash_exists(HASH_OF(*array), "", 1)) {
+			if (zend_hash_exists(HASH_OF(array), "", 1)) {
 				RETURN_TRUE;
 			}
 			RETURN_FALSE;
@@ -4542,7 +4495,6 @@ PHP_FUNCTION(array_key_exists)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The first argument should be either a string or an integer");
 			RETURN_FALSE;
 	}
-
 }
 /* }}} */
 
