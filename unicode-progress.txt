@@ -37,9 +37,6 @@ ext/standard
     array_key_exists()
         Params API, test
 
-    array_keys()
-        Params API, test
-
     array_map()
         Params API, FCI cache, test
 
@@ -70,9 +67,6 @@ ext/standard
     array_unique()
         Params API, test
 
-    array_values()
-        Params API, test
-
     array_walk()
         Params API, is_callable check, FCI cache, test
 
@@ -101,11 +95,13 @@ ext/standard
     array_chunk() 
     array_fill()
     array_flip()
+    array_keys()
     array_merge()
     array_merge_recursive()
     array_product()
     array_push(), array_pop(), array_shift(), array_unshift()
     array_sum()
+    array_values()
     compact()
     count()
     min()
