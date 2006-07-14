@@ -697,12 +697,14 @@ PHP_FUNCTION(file_put_contents)
 		case IS_UNICODE:
 			if (Z_USTRLEN_P(data)) {
 				int ustrlen = u_countChar32(Z_USTRVAL_P(data), Z_USTRLEN_P(data));
-				numchars = php_stream_write_unicode(stream, Z_USTRVAL_P(data), Z_USTRLEN_P(data));
-				if (numchars < 0) {
+				int wrote_u16 = php_stream_write_unicode(stream, Z_USTRVAL_P(data), Z_USTRLEN_P(data));
+
+				numchars = ustrlen;
+				if (wrote_u16 < 0) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %d characters to %s", ustrlen, filename);
 					numchars = -1;
-				} else if (numchars != ustrlen) {
-					int written_numchars = u_countChar32(Z_USTRVAL_P(data), numchars);
+				} else if (wrote_u16 != Z_USTRLEN_P(data)) {
+					int written_numchars = u_countChar32(Z_USTRVAL_P(data), wrote_u16);
 
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d characters written, possibly out of free disk space", written_numchars, ustrlen);
 					numchars = -1;
