@@ -31,9 +31,6 @@ ext/standard
         Should work with minor cleanups provided that underlying comparison
         functions are fixed, FCI cache, test
 
-    array_key_exists()
-        Params API, test
-
     array_map()
         Params API, FCI cache, test
 
@@ -50,12 +47,6 @@ ext/standard
         Params API, FCI cache, test
 
     array_reverse()
-        Params API, test
-
-    array_splice()
-        Params API, test
-
-    array_slice()
         Params API, test
 
     array_unique()
@@ -87,12 +78,15 @@ ext/standard
     array_chunk() 
     array_fill()
     array_flip()
+    array_key_exists()
     array_keys()
     array_merge()
     array_merge_recursive()
     array_product()
     array_push(), array_pop(), array_shift(), array_unshift()
     array_search()
+    array_slice()
+    array_splice()
     array_sum()
     array_values()
     compact()
