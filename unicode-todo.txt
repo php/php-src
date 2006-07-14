@@ -48,3 +48,5 @@ parsing API, e.g.:
   (zend_get_unified_string_type() callers and others)
 
 * Constant registration/fetching should do identifier normalization.
+
+* Identifier normalization in callbacks (zend_is_callable/zend_u_lookup_class)
