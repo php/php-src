@@ -1225,40 +1225,31 @@ PHP_FUNCTION(array_walk_recursive)
  */
 static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 {
- 	zval **value,				/* value to check for */
-		 **array,				/* array to check in */
-		 **strict,				/* strict comparison or not */
+ 	zval *value,				/* value to check for */
+		 *array,				/* array to check in */
 		 **entry,				/* pointer to array entry */
 		  res;					/* comparison result */
 	HashTable *target_hash;		/* array hashtable */
 	HashPosition pos;			/* hash iterator */
+	zend_bool strict = 0;		/* strict comparison or not */
    	ulong num_key;
 	uint str_key_len;
 	zstr string_key;
 	int (*is_equal_func)(zval *, zval *, zval * TSRMLS_DC) = is_equal_function;
 
-	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 3 ||
-		zend_get_parameters_ex(ZEND_NUM_ARGS(), &value, &array, &strict) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "za|b", &value, &array,
+							  &strict) == FAILURE) {
+		return;
 	}
 
-	
-	if (Z_TYPE_PP(array) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Wrong datatype for second argument");
-		RETURN_FALSE;
+	if (strict) {
+		is_equal_func = is_identical_function;
 	}
 
-	if (ZEND_NUM_ARGS() == 3) {
-		convert_to_boolean_ex(strict);
-		if (Z_LVAL_PP(strict)) {
-			is_equal_func = is_identical_function;
-		}
-	}
-
-	target_hash = HASH_OF(*array);
+	target_hash = HASH_OF(array);
 	zend_hash_internal_pointer_reset_ex(target_hash, &pos);
 	while (zend_hash_get_current_data_ex(target_hash, (void **)&entry, &pos) == SUCCESS) {
-	 	is_equal_func(&res, *value, *entry TSRMLS_CC);
+	 	is_equal_func(&res, value, *entry TSRMLS_CC);
 		if (Z_LVAL(res)) {
 			if (behavior == 0) {		 
 				RETURN_TRUE;
@@ -1285,7 +1276,7 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 }
 
 
-/* {{{ proto bool in_array(mixed needle, array haystack [, bool strict])
+/* {{{ proto bool in_array(mixed needle, array haystack [, bool strict]) U
    Checks if the given value exists in the array */
 PHP_FUNCTION(in_array)
 {
@@ -1293,7 +1284,7 @@ PHP_FUNCTION(in_array)
 }
 /* }}} */
 
-/* {{{ proto mixed array_search(mixed needle, array haystack [, bool strict])
+/* {{{ proto mixed array_search(mixed needle, array haystack [, bool strict]) U
    Searches the array for a given value and returns the corresponding key if successful */
 PHP_FUNCTION(array_search)
 {

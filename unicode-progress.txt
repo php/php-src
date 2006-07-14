@@ -55,9 +55,6 @@ ext/standard
     array_reverse()
         Params API, test
 
-    array_search(), in_array()
-        Params API, test
-
     array_splice()
         Params API, test
 
@@ -100,10 +97,12 @@ ext/standard
     array_merge_recursive()
     array_product()
     array_push(), array_pop(), array_shift(), array_unshift()
+    array_search()
     array_sum()
     array_values()
     compact()
     count()
+    in_array()
     min()
     max()
     range()
