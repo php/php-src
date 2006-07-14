@@ -2549,23 +2549,17 @@ PHP_FUNCTION(array_values)
 /* }}} */
 
 
-/* {{{ proto array array_count_values(array input)
+/* {{{ proto array array_count_values(array input) U
    Return the value as key and the frequency of that value in input as value */
 PHP_FUNCTION(array_count_values)
 {
-	zval	**input,		/* Input array */
-		**entry,		/* An entry in the input array */
-		**tmp;
+	zval	*input,			/* Input array */
+			**entry,		/* An entry in the input array */
+			**tmp;
 	HashTable *myht;
 	HashPosition pos;
 	
-	/* Get arguments and do error-checking */
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &input) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	
-	if (Z_TYPE_PP(input) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &input) == FAILURE) {
 		return;
 	}
 	
@@ -2573,7 +2567,7 @@ PHP_FUNCTION(array_count_values)
 	array_init(return_value);
 
 	/* Go through input array and add values to the return array */	
-	myht = Z_ARRVAL_PP(input);
+	myht = Z_ARRVAL_P(input);
 	zend_hash_internal_pointer_reset_ex(myht, &pos);
 	while (zend_hash_get_current_data_ex(myht, (void **)&entry, &pos) == SUCCESS) {
 		if (Z_TYPE_PP(entry) == IS_LONG) {
@@ -3933,52 +3927,43 @@ PHP_FUNCTION(array_multisort)
 /* }}} */
 
 
-/* {{{ proto mixed array_rand(array input [, int num_req])
+/* {{{ proto mixed array_rand(array input [, int num_req]) U
    Return key/keys for random entry/entries in the array */
 PHP_FUNCTION(array_rand)
 {
-	zval **input, **num_req;
-	long randval;
-	int num_req_val, num_avail, key_type;
+	zval *input;
+	long randval, num_req = 1;
+	int num_avail, key_type;
 	zstr string_key;
 	uint string_key_len;
 	ulong num_key;
 	HashPosition pos;
 
-	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2 ||
-		zend_get_parameters_ex(ZEND_NUM_ARGS(), &input, &num_req) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-
-	if (Z_TYPE_PP(input) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "First argument has to be an array");
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|l", &input, &num_req) == FAILURE) {
 		return;
 	}
 
-	num_avail = zend_hash_num_elements(Z_ARRVAL_PP(input));
+	num_avail = zend_hash_num_elements(Z_ARRVAL_P(input));
 
 	if (ZEND_NUM_ARGS() > 1) {
-		convert_to_long_ex(num_req);
-		num_req_val = Z_LVAL_PP(num_req);
-		if (num_req_val <= 0 || num_req_val > num_avail) {
+		if (num_req <= 0 || num_req > num_avail) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Second argument has to be between 1 and the number of elements in the array");
 			return;
 		}
-	} else
-		num_req_val = 1;
+	}
 
 	/* Make the return value an array only if we need to pass back more than one result. */
-	if (num_req_val > 1) {
+	if (num_req > 1) {
 		array_init(return_value);
 	}
 
 	/* We can't use zend_hash_index_find() because the array may have string keys or gaps. */
-	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(input), &pos);
-	while (num_req_val && (key_type = zend_hash_get_current_key_ex(Z_ARRVAL_PP(input), &string_key, &string_key_len, &num_key, 0, &pos)) != HASH_KEY_NON_EXISTANT) {
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(input), &pos);
+	while (num_req && (key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(input), &string_key, &string_key_len, &num_key, 0, &pos)) != HASH_KEY_NON_EXISTANT) {
 
 		randval = php_rand(TSRMLS_C);
 
-		if ((double)(randval/(PHP_RAND_MAX+1.0)) < (double)num_req_val/(double)num_avail) {
+		if ((double)(randval/(PHP_RAND_MAX+1.0)) < (double)num_req/(double)num_avail) {
 			/* If we are returning a single result, just do it. */
 			if (Z_TYPE_P(return_value) != IS_ARRAY) {
 				if (key_type == HASH_KEY_IS_STRING) {
@@ -3997,13 +3982,13 @@ PHP_FUNCTION(array_rand)
 				else
 					add_next_index_long(return_value, num_key);
 			}
-			num_req_val--;
+			num_req--;
 		}
 		num_avail--;
-		zend_hash_move_forward_ex(Z_ARRVAL_PP(input), &pos);
+		zend_hash_move_forward_ex(Z_ARRVAL_P(input), &pos);
 	}
 
-	if (num_req_val == num_avail) {
+	if (num_req == num_avail) {
 		array_data_shuffle(return_value TSRMLS_CC);
 	}
 }
@@ -4577,24 +4562,28 @@ ukey:
 }
 /* }}} */
 
-/* {{{ proto array array_combine(array keys, array values)
-   Creates an array by using the elements of the first parameter as keys and the elements of the second as correspoding keys */
+/* {{{ proto array array_combine(array keys, array values) U
+   Creates an array by using the elements of the first parameter as keys and the elements of the second as the correspoding values */
 PHP_FUNCTION(array_combine)
 {
 	zval *values, *keys;
 	HashPosition pos_values, pos_keys;
 	zval **entry_keys, **entry_values;
+	int num_keys, num_values;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "aa", &keys, &values) == FAILURE) {
 		return;
 	}
 
-	if (zend_hash_num_elements(Z_ARRVAL_P(keys)) != zend_hash_num_elements(Z_ARRVAL_P(values))) {
+	num_keys = zend_hash_num_elements(Z_ARRVAL_P(keys));
+	num_values = zend_hash_num_elements(Z_ARRVAL_P(values));
+
+	if (num_keys != num_values) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Both parameters should have equal number of elements");
 		RETURN_FALSE;
 	}
 
-	if (!zend_hash_num_elements(Z_ARRVAL_P(keys))) {
+	if (!num_keys) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Both parameters should have at least 1 element");
 		RETURN_FALSE;
 	}
@@ -4605,24 +4594,30 @@ PHP_FUNCTION(array_combine)
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(values), &pos_values);
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(keys), (void **)&entry_keys, &pos_keys) == SUCCESS &&
 		 zend_hash_get_current_data_ex(Z_ARRVAL_P(values), (void **)&entry_values, &pos_values) == SUCCESS) {
-		if (Z_TYPE_PP(entry_keys) == IS_STRING) {
-			zval_add_ref(entry_values);
-			add_assoc_zval(return_value, Z_STRVAL_PP(entry_keys), *entry_values);
-		} else if (Z_TYPE_PP(entry_keys) == IS_LONG) {
+
+		if (Z_TYPE_PP(entry_keys) == IS_LONG) {
 			zval_add_ref(entry_values);
 			add_index_zval(return_value, Z_LVAL_PP(entry_keys), *entry_values);
 		} else {
-			zval key;
+			zval key, *key_ptr = *entry_keys;
 
-			key = **entry_keys;
-			zval_copy_ctor(&key);
-			convert_to_string(&key);
+			if (Z_TYPE_PP(entry_keys) != IS_STRING &&
+				Z_TYPE_PP(entry_keys) != IS_UNICODE) {
+
+				key = **entry_keys;
+				zval_copy_ctor(&key);
+				convert_to_text(&key);
+				key_ptr = &key;
+			}
 
 			zval_add_ref(entry_values);
-			add_assoc_zval(return_value, Z_STRVAL(key), *entry_values);
+			add_u_assoc_zval(return_value, Z_TYPE_P(key_ptr), Z_UNIVAL_P(key_ptr), *entry_values);
 
-			zval_dtor(&key);
+			if (key_ptr != *entry_keys) {
+				zval_dtor(&key);
+			}
 		}
+
 		zend_hash_move_forward_ex(Z_ARRVAL_P(keys), &pos_keys);
 		zend_hash_move_forward_ex(Z_ARRVAL_P(values), &pos_values);
 	}
