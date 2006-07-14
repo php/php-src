@@ -1517,6 +1517,8 @@ COMMAND $cmd
 		}
 	} else {
 		$wanted = trim($section_text['EXPECT']);
+		/* workaround until preg_replace() or str_replace() are upgraded */
+		$wanted = unicode_encode($wanted, ini_get('unicode.output_encoding'));
 		$wanted = preg_replace('/\r\n/',"\n",$wanted);
 		// compare and leave on success
 		if (!strcmp($output, $wanted)) {
