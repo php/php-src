@@ -29,7 +29,7 @@ var_dump(pspell_config_ignore($cfg, PHP_INT_MAX));
 --EXPECTF--
 bool(false)
 
-Warning: pspell_new_config(): PSPELL couldn't open the dictionary. reason: The encoding "b0rked" is not known. This could also mean that the file "%s/b0rked.%s" could not be opened for reading or does not exist.  in %s003.php on line 9
+Warning: pspell_new_config(): PSPELL couldn't open the dictionary. reason: The encoding "b0rked" is not known.%sThis could also mean that the file "%sb0rked.%s" could not be opened for reading or does not exist.  in %s003.php on line 9
 
 Warning: pspell_check(): 0 is not a PSPELL result index in %s003.php on line 10
 bool(false)
