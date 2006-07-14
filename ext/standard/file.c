@@ -545,7 +545,7 @@ PHP_FUNCTION(file_get_contents)
 	}
 
 	if (offset > 0 && php_stream_seek(stream, offset, SEEK_SET) < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to seek to %ld position in the stream.", offset);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to seek to position %ld in the stream.", offset);
 		RETURN_FALSE;
 	}
 
