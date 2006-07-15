@@ -1,3 +1,8 @@
+2006-07-14  Antony Dovgal  <antony@zend.com>
+
+    * zend_unicode.h:
+      add USTR_VAL() access zstr value
+
 2006-07-13  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_API.c:
