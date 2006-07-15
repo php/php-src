@@ -2054,17 +2054,14 @@ PHP_FUNCTION(fputcsv)
 /* UTODO: Accept unicode contents */
 PHP_FUNCTION(fgetcsv)
 {
-	char *temp, *tptr, *bptr, *line_end, *limit;
 	char delimiter = ',';	/* allow this to be set as parameter */
 	char enclosure = '"';	/* allow this to be set as parameter */
-	const char escape_char = '\\';
 	/* first section exactly as php_fgetss */
 
 	long len = 0;
-	size_t buf_len, temp_len, line_end_len;
+	size_t buf_len;
 	char *buf;
 	php_stream *stream;
-	int inc_len;
 
 	{
 		zval *fd, **len_zv = NULL;
@@ -2126,6 +2123,22 @@ PHP_FUNCTION(fgetcsv)
 			RETURN_FALSE;
 		}
 	}
+
+	php_fgetcsv(stream, delimiter, enclosure, buf_len, buf, return_value TSRMLS_CC);
+}
+/* }}} */
+
+PHPAPI void php_fgetcsv(php_stream *stream, /* {{{ */
+		char delimiter, char enclosure, 
+		size_t buf_len, char *buf,
+		zval *return_value TSRMLS_DC)
+{
+	char *temp, *tptr, *bptr, *line_end, *limit;
+	const char escape_char = '\\';
+
+	size_t temp_len, line_end_len;
+	int inc_len;
+
 	/* initialize internal state */
 	php_mblen(NULL, 0);
 
