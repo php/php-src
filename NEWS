@@ -55,6 +55,7 @@ PHP                                                                        NEWS
   . Added readInnerXML(), readOuterXML(), readString(), setSchema(). (2.6.20+)
   . Changed to passing libxml options when loading reader.
 
+- Added array_fill_keys(). (Marcus, Mathew W)
 - Added posix_initgroups() function. (Ilia)
 - Added an optional parameter to parse_url() to allow retrieval of distinct URL
   components. (Ilia)
