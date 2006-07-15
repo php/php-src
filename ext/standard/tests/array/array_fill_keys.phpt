@@ -10,8 +10,8 @@ basic array_fill_keys test
 ?>
 --EXPECTF--
 
-Warning: array_fill_keys(): First parameter must be an array in %s on line %d
-bool(false)
+Warning: array_fill_keys() expects parameter 1 to be array, string given in %s on line %d
+NULL
 array(0) {
 }
 array(2) {
@@ -42,8 +42,8 @@ array(4) {
 }
 --UEXPECTF--
 
-Warning: array_fill_keys(): First parameter must be an array in %s on line %d
-bool(false)
+Warning: array_fill_keys() expects parameter 1 to be array, Unicode string given in %s on line %d
+NULL
 array(0) {
 }
 array(2) {
