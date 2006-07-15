@@ -1646,6 +1646,8 @@ PHP_FUNCTION(array_fill)
 /* }}} */
 
 
+/* {{{ proto array array_fill_keys(array keys, mixed val) U
+   Create an array using the elements of the first parameter as keys each initialized to val */
 PHP_FUNCTION(array_fill_keys)
 {
 	zval *keys, *val, **entry;
