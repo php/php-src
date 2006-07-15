@@ -207,7 +207,7 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 
 	if (!intern->file_name_len || !intern->u.file.stream) {
 		if (!EG(exception)) {
-			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Cannot open file '%s'", intern->file_name);
+			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Cannot open file '%s'", intern->file_name_len ? intern->file_name : "");
 		}
 		intern->file_name = NULL; /* until here it is not a copy */
 		intern->u.file.open_mode = NULL;
@@ -232,6 +232,9 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 	/* avoid reference counting in debug mode, thus do it manually */
 	ZVAL_RESOURCE(&intern->u.file.zresource, php_stream_get_resource_id(intern->u.file.stream));
 	intern->u.file.zresource.refcount = 1;
+	
+	intern->u.file.delimiter = ',';
+	intern->u.file.enclosure = '"';
 
 	zend_hash_find(&intern->std.ce->function_table, "getcurrentline", sizeof("getcurrentline"), (void **) &intern->u.file.func_getCurr);
 
@@ -1435,17 +1438,21 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 	spl_filesystem_file_call(intern, func_ptr, pass_num_args, return_value, arg2 TSRMLS_CC); \
 }
 
-static void spl_filesystem_file_read_csv(zval * this_ptr, spl_filesystem_object *intern, int pass_num_args, zval *return_value TSRMLS_DC) /* {{{ */
+static int spl_filesystem_file_read_csv(spl_filesystem_object *intern, char delimiter, char enclosure, zval *return_value TSRMLS_DC) /* {{{ */
 {
-	zval *arg2 = NULL;
-	MAKE_STD_ZVAL(arg2);
-	ZVAL_LONG(arg2, intern->u.file.max_line_len);
+	int ret = SUCCESS;
+	
+	do {
+		ret = spl_filesystem_file_read(intern, 1 TSRMLS_CC);
+	} while (ret == SUCCESS && !intern->u.file.current_line_len && (intern->flags & SPL_FILE_OBJECT_SKIP_EMPTY));
+	
+	if (ret == SUCCESS) {
+		size_t buf_len = intern->u.file.current_line_len;
+		char *buf = estrndup(intern->u.file.current_line, buf_len);
 
-	spl_filesystem_file_free_line(intern TSRMLS_CC);
-
-	FileFunctionCall(fgetcsv, pass_num_args, arg2);
-
-	zval_ptr_dtor(&arg2);
+		php_fgetcsv(intern->u.file.stream, delimiter, enclosure, buf_len, buf, return_value TSRMLS_CC);
+	}
+	return ret;
 }
 /* }}} */
 
@@ -1463,7 +1470,7 @@ static int spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesystem_obje
 		}
 		if (intern->flags & SPL_FILE_OBJECT_READ_CSV) {
 			MAKE_STD_ZVAL(retval);
-			spl_filesystem_file_read_csv(this_ptr, intern, 0, retval TSRMLS_CC);
+			return spl_filesystem_file_read_csv(intern, intern->u.file.delimiter, intern->u.file.enclosure, retval TSRMLS_CC);
 		} else {
 			zend_call_method_with_0_params(&this_ptr, Z_OBJCE_P(getThis()), &intern->u.file.func_getCurr, "getCurrentLine", &retval);
 		}
@@ -1790,9 +1797,32 @@ SPL_METHOD(SplFileObject, func_name) \
 SPL_METHOD(SplFileObject, fgetcsv)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	char delimiter = intern->u.file.delimiter, enclosure = intern->u.file.enclosure;
+	char *delim, *enclo;
+	int d_len, e_len;
 	
-	spl_filesystem_file_read_csv(getThis(), intern, ZEND_NUM_ARGS(), return_value TSRMLS_CC);
-	intern->u.file.current_line_num++;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ss", &delim, &d_len, &enclo, &e_len) == SUCCESS) {
+		switch(ZEND_NUM_ARGS())
+		{
+			case 2:
+				if (e_len != 1) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "enclosure must be a character");
+					RETURN_FALSE;
+				}
+				enclosure = enclo[0];
+				/* no break */
+			case 1:
+				if (d_len != 1) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "delimiter must be a character");
+					RETURN_FALSE;
+				}
+				delimiter = delim[0];
+				/* no break */
+			case 0:
+				break;
+		}
+		spl_filesystem_file_read_csv(intern, delimiter, enclosure, return_value TSRMLS_CC);
+	}
 }
 /* }}} */
 
