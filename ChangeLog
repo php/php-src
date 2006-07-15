@@ -1,3 +1,122 @@
+2006-07-14  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * run-tests.php:
+      remove debugging
+
+    * run-tests.php:
+      run-tests.php maintainers, rise up!
+
+    * run-tests.php:
+      Do this workaround only for unicode mode.
+
+    * ext/standard/tests/array/compact.phpt:
+      Add test for compact().
+
+    * run-tests.php:
+      Encode $wanted in output_encoding for comparison (workaround).
+
+    * unicode-progress.txt
+      ext/standard/array.c:
+      Adjust array_pad(), array_reverse(), and array_unique() for params API
+      and mark them with U.
+
+2006-07-14  Sara Golemon  <sara@golemon.com>
+
+    * main/streams/unicode_filter.c:
+      Logic fix:  (!a == b) != (a != b)
+
+2006-07-14  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-progress.txt
+      ext/standard/array.c:
+      - Simplify array_combine() and adjust for params API
+      - Adjust array_count_values() and array_rand() for params API and mark
+        with U
+
+    * unicode-progress.txt
+      ext/standard/array.c:
+      Adjust array_key_exists(), array_slice(), and array_splice() for params
+      API and mark them with U.
+
+2006-07-14  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/file.c:
+      
+
+2006-07-14  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/file.c
+      ext/standard/streamsfuncs.c:
+      MFB: rephrase the error message (fixes #38106)
+
+    * (PHP_5_2)
+      ext/standard/file.c
+      ext/standard/streamsfuncs.c:
+      rephrase the error message (fixes #38106)
+
+2006-07-14  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-progress.txt
+      ext/standard/array.c:
+      Make array_change_key_case() -- a candidate for the quite possibly the
+      most useless function ever -- use params API and mark it with U.
+
+2006-07-14  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/file.c:
+      
+
+    * main/streams/unicode_filter.c:
+      
+
+    * main/streams/streams.c:
+      
+
+2006-07-14  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-progress.txt
+      ext/standard/array.c:
+      Update end(), prev(), next(), reset(), current(), and key() for params
+      API and mark with U.
+
+    * unicode-todo.txt:
+      -** empty log message ***
+
+    * unicode-progress.txt
+      ext/standard/array.c:
+      Update array_search()/in_array() for params API and mark with U.
+
+    * unicode-progress.txt
+      ext/standard/array.c:
+      Update array_keys() and array_values() for params API and mark with U.
+
+    * unicode-progress.txt
+      unicode-todo.txt
+      ext/standard/array.c:
+      - Simplify array_fill().
+      - Do params API for a couple of funcs and mark them as Unicode
+        compliant.
+
+2006-07-14  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_2)
+      ext/pspell/tests/003.phpt:
+      fix test with some aspell versions
+
+2006-07-14  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_unicode.h:
+      add USTR_VAL() access zstr value
+
+    * ext/standard/var.c:
+      WS and CS fixes
+      I suppose STR_FREE() is better than if(..) {efree (..);}
+
+2006-07-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/var.c:
+      Fixed unserialize() in unicode mode
+
 2006-07-13  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ext/standard/string.c:
