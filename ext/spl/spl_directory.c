@@ -1826,6 +1826,60 @@ SPL_METHOD(SplFileObject, fgetcsv)
 }
 /* }}} */
 
+/* {{{ proto void SplFileObject::setCsvControl([string delimiter = ',' [, string enclosure = '"']])
+   Set the delimiter and enclosure character used in fgetcsv */
+SPL_METHOD(SplFileObject, setCsvControl)
+{
+	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	char delimiter = ',', enclosure = '"';
+	char *delim, *enclo;
+	int d_len, e_len;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ss", &delim, &d_len, &enclo, &e_len) == SUCCESS) {
+		switch(ZEND_NUM_ARGS())
+		{
+			case 2:
+				if (e_len != 1) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "enclosure must be a character");
+					RETURN_FALSE;
+				}
+				enclosure = enclo[0];
+				/* no break */
+			case 1:
+				if (d_len != 1) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "delimiter must be a character");
+					RETURN_FALSE;
+				}
+				delimiter = delim[0];
+				/* no break */
+			case 0:
+				break;
+		}
+		intern->u.file.delimiter = delimiter;
+		intern->u.file.enclosure = enclosure;
+	}
+}
+/* }}} */
+
+/* {{{ proto array SplFileObject::getCsvControl()
+   Get the delimiter and enclosure character used in fgetcsv */
+SPL_METHOD(SplFileObject, getCsvControl)
+{
+	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	char delimiter[2], enclosure[2];
+
+	array_init(return_value);
+	
+	delimiter[0] = intern->u.file.delimiter;
+	delimiter[1] = '\0';
+	enclosure[0] = intern->u.file.enclosure;
+	enclosure[1] = '\0';
+
+	add_next_index_ascii_string(return_value, delimiter, ZSTR_DUPLICATE);
+	add_next_index_ascii_string(return_value, enclosure, ZSTR_DUPLICATE);
+}
+/* }}} */
+
 /* {{{ proto bool SplFileObject::flock(int operation [, int &wouldblock])
    Portable file locking */
 FileFunction(flock)
@@ -2074,6 +2128,8 @@ static zend_function_entry spl_SplFileObject_functions[] = {
 	SPL_ME(SplFileObject, valid,          NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, fgets,          NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, fgetcsv,        arginfo_file_object_fgetcsv,       ZEND_ACC_PUBLIC)
+	SPL_ME(SplFileObject, setCsvControl,  arginfo_file_object_fgetcsv,       ZEND_ACC_PUBLIC)
+	SPL_ME(SplFileObject, getCsvControl,  NULL,                              ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, flock,          arginfo_file_object_flock,         ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, fflush,         NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, ftell,          NULL, ZEND_ACC_PUBLIC)
