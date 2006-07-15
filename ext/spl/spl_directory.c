@@ -1450,6 +1450,10 @@ static int spl_filesystem_file_read_csv(spl_filesystem_object *intern, char deli
 		size_t buf_len = intern->u.file.current_line_len;
 		char *buf = estrndup(intern->u.file.current_line, buf_len);
 
+		if (Z_TYPE_P(return_value) != IS_NULL) {
+			zval_dtor(return_value);
+			ZVAL_NULL(return_value);
+		}
 		php_fgetcsv(intern->u.file.stream, delimiter, enclosure, buf_len, buf, return_value TSRMLS_CC);
 	}
 	return ret;
