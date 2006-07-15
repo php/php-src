@@ -205,9 +205,9 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 	intern->u.file.context = php_stream_context_from_zval(intern->u.file.zcontext, 0);
 	intern->u.file.stream = php_stream_open_wrapper_ex(intern->file_name, intern->u.file.open_mode, (use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, intern->u.file.context);
 
-	if (intern->u.file.stream == NULL) {
+	if (!intern->file_name_len || !intern->u.file.stream) {
 		if (!EG(exception)) {
-			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Cannot open file %s", intern->file_name);
+			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Cannot open file '%s'", intern->file_name_len ? intern->file_name : "");
 		}
 		intern->file_name = NULL; /* until here it is not a copy */
 		intern->u.file.open_mode = NULL;
@@ -216,6 +216,14 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 
 	if (intern->u.file.zcontext) {
 		zend_list_addref(Z_RESVAL_P(intern->u.file.zcontext));
+	}
+
+	if (intern->file_name[intern->file_name_len-1] == '/'
+#if defined(PHP_WIN32) || defined(NETWARE)
+	  ||intern->file_name[intern->file_name_len-1] == '\\'
+#endif
+	) {
+		intern->file_name_len--;
 	}
 
 	intern->file_name = estrndup(intern->file_name, intern->file_name_len);
