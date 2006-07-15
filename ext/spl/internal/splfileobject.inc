@@ -12,7 +12,7 @@
 /** @ingroup SPL
  * @brief   Object representation for any stream
  * @author  Marcus Boerger
- * @version 1.0
+ * @version 1.1
  * @since PHP 5.1
  */
 class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIterator
@@ -26,6 +26,8 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
 	private $lnum     = 0;
 	private $max_len  = 0;
 	private $flags    = 0;
+	private $delimiter= ',';
+	private $enclosure= '"';
 	
 	/**
 	 * Constructs a new file object
@@ -80,11 +82,41 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
 	 * @param enclosure  end of 
 	 * @return array containing read data
 	 */
-	function fgetcsv($delimiter = ';', $enclosure = '')
+	function fgetcsv($delimiter = NULL, $enclosure = NULL)
 	{
 		$this->freeLine();
 		$this->lnum++;
+		switch(fun_num_args())
+		{
+			case 0:
+				$delimiter = $this->delimiter;
+			case 1:
+				$enclosure = $this->enclosure;
+			default:
+			case 2:
+				break;
+		}
 		return fgetcsv($this->fp, $this->max_len, $delimiter, $enclosure); 
+	}
+
+	/**
+	 * Set the delimiter and enclosure character used in fgetcsv
+	 *
+	 * @param delimiter new delimiter, defaults to ','
+	 * @param enclosure new enclosure, defaults to '"'
+	 */
+	function setCsvControl($delimiter = ';', $enclosure = '"')
+	{
+		$this->delimiter = $delimiter;
+		$this->enclosure = $enclosure;
+	}
+
+	/**
+	 * @return array(delimiter, enclosure) as used in fgetcsv
+	 */
+	function getCsvControl($delimiter = ',', $enclosure = '"')
+	{
+		return array($this->delimiter, $this->enclosure);
 	}
 
 	/**
