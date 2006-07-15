@@ -380,6 +380,12 @@ ZEND_BEGIN_ARG_INFO(arginfo_array_fill, 0)
 ZEND_END_ARG_INFO()
 
 static
+ZEND_BEGIN_ARG_INFO(arginfo_array_fill_keys, 0)
+	ZEND_ARG_INFO(0, keys) /* ARRAY_INFO(0, keys, 0) */
+	ZEND_ARG_INFO(0, val)
+ZEND_END_ARG_INFO()
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_range, 0, 0, 2)
 	ZEND_ARG_INFO(0, low)
 	ZEND_ARG_INFO(0, high)
@@ -3708,6 +3714,7 @@ zend_function_entry basic_functions[] = {
 	PHP_FE(extract,															arginfo_extract)
 	PHP_FE(compact,															arginfo_compact)
 	PHP_FE(array_fill,														arginfo_array_fill)
+	PHP_FE(array_fill_keys,													arginfo_array_fill_keys)
 	PHP_FE(range,															arginfo_range)
 	PHP_FE(array_multisort,													arginfo_array_multisort)
 	PHP_FE(array_push,														arginfo_array_push)
