@@ -50,6 +50,7 @@ PHP                                                                        NEWS
   . Added array functions to ArrayObject/ArrayIterator and made them faster.
   . Added support for reading csv and skipping empty lines in SplFileObject.
   . Added CachingIterator::TOSTRING_USE_INNER, calls inner iterator __toString.
+  . Added ability to set the CSV separator per SplFileObject.
 - Improved xmlReader: (Rob)
   . Added readInnerXml(), xmlReader::setSchema().
   . Added readInnerXML(), readOuterXML(), readString(), setSchema(). (2.6.20+)

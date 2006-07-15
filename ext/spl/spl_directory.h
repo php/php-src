@@ -82,6 +82,8 @@ struct _spl_filesystem_object {
 			long               current_line_num;
 			zval               zresource;
 			zend_function      *func_getCurr;
+			char               delimiter;
+			char               enclosure;
 		} file;
 	} u;
 };
