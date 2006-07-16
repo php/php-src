@@ -10,7 +10,7 @@
  */
 
 /**
- * @brief   Regular expression filter for string iterators
+ * @brief   Abstract filter for iterators
  * @author  Marcus Boerger
  * @version 1.1
  * @since PHP 5.0
@@ -28,11 +28,9 @@ abstract class FilterIterator implements OuterIterator
 	private $it;
 
 	/**
-	 * Constructs a filter around an iterator whose elemnts are strings.
-	 * If the given iterator is of type spl_sequence then its rewind()
-	 * method is called.
+	 * Constructs a filter around another iterator.
 	 *
-	 * @param it     Object that implements at least spl_forward
+	 * @param it     Iterator to filter
 	 */
 	function __construct(Iterator $it) {
 		$this->it = $it;

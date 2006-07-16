@@ -46,6 +46,8 @@
  * - class EmptyIterator implements Iterator
  * - class InfiniteIterator extends IteratorIterator
  * - class AppendIterator implements OuterIterator
+ * - class RegexIterator extends FilterIterator
+ * - class RegursiveRegexIterator extends RegexIterator implements RecursiveIterator
  * 
  * 2) Directories and Files
  * 
