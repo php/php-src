@@ -1870,15 +1870,12 @@ PHP_METHOD(domnode, getNodePath)
 	char *value;
 	
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &id, dom_node_class_entry) == FAILURE) {
-		return;
-	}
-
-	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
+	
+	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
 	value = xmlGetNodePath(nodep);
 	if (value == NULL) {
-		RETURN_EMPTY_STRING();
+		RETURN_NULL();
 	} else {
 		RETVAL_STRING(value, 1);
 		xmlFree(value);
