@@ -23,7 +23,13 @@ class RecursiveRegexIterator extends RegexIterator implements RecursiveIterator
 	 * Constructs a regular expression filter around an iterator whose 
 	 * elemnts or keys are strings.
 	 *
-	 * @param it     Object that implements at least
+	 * @param it          inner iterator
+	 * @param regex       the regular expression to match
+	 * @param flags       special flags (self::USE_KEY)
+	 * @param mode        operation mode (one of self::MATCH, self::GET_MATCH, 
+	 *                    self::ALL_MATCHES, self::SPLIT)
+	 * @param preg_flags  global PREG_* flags, see preg_match(), 
+	 *                    preg_match_all(), preg_split()
 	 */
 	function __construct(RecursiveIterator $it, $regex, $flags = 0, $mode = 0, $preg_flags = 0) {
 		parent::__construct($it, $regex, $flags, $mode, $preg_flags);
