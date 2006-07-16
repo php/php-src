@@ -77,6 +77,7 @@ PHP                                                                        NEWS
 - Added pg_field_table() function. (Edin)
 - Added SimpleXMLElement::saveXML() as an alias for SimpleXMLElement::asXML().
   (Hannes)
+- Added DOMNode::getNodePath() for getting an XPath for a node. (Christian)
 
 - Optimized zend_try/zend_catch macros by eliminating memcpy(3). (Dmitry)
 - Optimized require_once() and include_once() by eliminating fopen(3)
