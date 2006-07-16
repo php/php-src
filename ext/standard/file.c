@@ -2422,7 +2422,7 @@ PHP_FUNCTION(realpath)
 			UChar *path;
 			int path_len;
 
-			if (php_stream_path_decode(&php_plain_files_wrapper, &path, &path_len, filename, filename_len, REPORT_ERRORS, FG(default_context) TSRMLS_CC) == SUCCESS) {
+			if (php_stream_path_decode(&php_plain_files_wrapper, &path, &path_len, filename, filename_len, REPORT_ERRORS, FG(default_context)) == SUCCESS) {
 				RETVAL_UNICODEL(path, path_len, 0);
 			} else {
 				RETVAL_FALSE;
