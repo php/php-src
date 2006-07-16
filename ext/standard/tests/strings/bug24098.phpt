@@ -14,4 +14,6 @@ array(3) {
   string(8) "dsds.asa"
   ["extension"]=>
   string(3) "asa"
+  ["filename"]=>
+  string(4) "dsds"
 }
