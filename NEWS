@@ -192,6 +192,7 @@ PHP                                                                        NEWS
   stream context options). (Mike)
 - Fixed bug #34005 (oci_password_change() fails). 
   (pholdaway at technocom-wireless dot com, Tony)
+- Fixed bug #29538 (number_format and problem with 0). (Matthew Wilmas)
 
 04 May 2006, PHP 5.1.4
 - Added "capture_peer_cert" and "capture_peer_cert_chain" context options
