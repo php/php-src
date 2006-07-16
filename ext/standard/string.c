@@ -62,7 +62,8 @@
 #define PHP_PATHINFO_DIRNAME 	1
 #define PHP_PATHINFO_BASENAME 	2
 #define PHP_PATHINFO_EXTENSION 	4
-#define PHP_PATHINFO_ALL	(PHP_PATHINFO_DIRNAME | PHP_PATHINFO_BASENAME | PHP_PATHINFO_EXTENSION)
+#define PHP_PATHINFO_FILENAME 	8
+#define PHP_PATHINFO_ALL	(PHP_PATHINFO_DIRNAME | PHP_PATHINFO_BASENAME | PHP_PATHINFO_EXTENSION | PHP_PATHINFO_FILENAME)
 
 #define STR_STRSPN				0
 #define STR_STRCSPN				1
@@ -1943,6 +1944,26 @@ PHP_FUNCTION(pathinfo)
 			idx = p - ret;
 			add_assoc_rt_stringl(tmp, "extension", ret + idx + 1, ret_len - idx - 1, 1);
 		}
+
+		if (!have_basename) {
+			efree(ret);
+		}
+	}
+	
+	if ((opt & PHP_PATHINFO_FILENAME) == PHP_PATHINFO_FILENAME) {
+		char *p;
+		int idx;
+		int have_basename = ((opt & PHP_PATHINFO_BASENAME) == PHP_PATHINFO_BASENAME);
+
+		/* Have we alrady looked up the basename? */
+		if (!have_basename) {
+			php_basename(path, path_len, NULL, 0, &ret, &ret_len TSRMLS_CC);
+		}
+
+		p = strrchr(ret, '.');
+
+		idx = p ? (p - ret) : ret_len;
+		add_assoc_stringl(tmp, "filename", ret, idx, 1);
 
 		if (!have_basename) {
 			efree(ret);

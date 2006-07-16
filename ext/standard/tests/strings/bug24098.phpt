@@ -14,6 +14,8 @@ array(3) {
   string(8) "dsds.asa"
   ["extension"]=>
   string(3) "asa"
+  ["filename"]=>
+  string(4) "dsds"
 }
 --UEXPECT--
 array(3) {
@@ -23,4 +25,6 @@ array(3) {
   unicode(8) "dsds.asa"
   [u"extension"]=>
   unicode(3) "asa"
+  [u"filename"]=>
+  string(4) "dsds"
 }
