@@ -7,7 +7,7 @@ Bug #24098 (pathinfo() crash)
 	var_dump(pathinfo("/dsds.asa"));
 ?>
 --EXPECT--
-array(3) {
+array(4) {
   ["dirname"]=>
   string(1) "/"
   ["basename"]=>
@@ -18,7 +18,7 @@ array(3) {
   string(4) "dsds"
 }
 --UEXPECT--
-array(3) {
+array(4) {
   [u"dirname"]=>
   unicode(1) "/"
   [u"basename"]=>
