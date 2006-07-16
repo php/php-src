@@ -1,3 +1,8 @@
+2006-07-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_builtin_functions.c:
+      - Provide defined value for autoload flag
+
 2006-07-14  Antony Dovgal  <antony@zend.com>
 
     * zend_unicode.h:

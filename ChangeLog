@@ -1,3 +1,75 @@
+2006-07-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      - Provide defined value for autoload flag
+
+    * (PHP_5_2)
+      NEWS
+      ext/spl/spl_directory.c
+      ext/spl/spl_directory.h
+      ext/spl/internal/splfileobject.inc
+      ext/standard/file.c
+      ext/standard/file.h:
+      - MFH Implement todo: SplFileObject: ability to set the CSV separator per
+      object
+
+    * ext/spl/internal/splfileobject.inc:
+      - Update docu
+
+    * ext/spl/spl_directory.c:
+      - Be on the safe side
+
+    * ext/spl/spl_directory.c:
+      - Implement todo: SplFileObject: ability to set the CSV separator per
+      object, part 2
+
+    * ext/spl/spl_directory.c
+      ext/spl/spl_directory.h
+      ext/standard/file.c
+      ext/standard/file.h:
+      - Implement todo: SplFileObject: ability to set the CSV separator per
+      object
+
+    * (PHP_5_2)
+      ext/spl/spl_directory.c
+      ext/spl/tests/fileobject_003.phpt:
+      - MFH Fix issue with SplFileObject and directories
+
+    * ext/spl/spl_directory.c
+      ext/spl/tests/fileobject_003.phpt:
+      - Fix issue with SplFileObject and directories
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/array.c
+      ext/standard/tests/array/array_fill_keys.phpt:
+      - MFH array_fill_keys, better unicode support, use new param parsing API
+
+    * ext/standard/array.c:
+      - Readd proto
+
+    * ext/standard/array.c
+      ext/standard/tests/array/array_fill_keys.phpt:
+      - Update array_fill_keys, better unicode support, use new param parsing API
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/php_array.h
+      ext/standard/tests/array/array_fill_keys.phpt:
+      - MFH Added array_fill_keys(). (Marcus, Mathew W)
+
+    * ext/standard/tests/array/array_fill_keys.phpt
+      ext/standard/tests/array/array_fill_keys.phpt:
+      
+      - Add array_fill_keys() (Matt W, php_lists at realplain com)
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/php_array.h:
+      - Add array_fill_keys() (Matt W, php_lists at realplain com)
+
 2006-07-14  Andrei Zmievski  <andrei@gravitonic.com>
 
     * run-tests.php:
