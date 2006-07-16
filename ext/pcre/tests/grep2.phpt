@@ -1,0 +1,45 @@
+--TEST--
+preg_grep() 2nd test
+--FILE--
+<?php
+
+var_dump(preg_grep(1,array(),3,4));
+var_dump(preg_grep(1, 2));
+var_dump(preg_grep('/+/', array()));
+
+$array = array(5=>'a', 'x' => '1', 'xyz'=>'q6', 'h20');
+
+var_dump(preg_grep('@^[a-z]+@', $array));
+var_dump(preg_grep('@^[a-z]+@', $array, PREG_GREP_INVERT));
+
+ini_set('pcre.recursion_limit', 1);
+var_dump(preg_last_error() == PREG_NO_ERROR);
+var_dump(preg_grep('@^[a-z]+@', $array));
+var_dump(preg_last_error() == PREG_RECURSION_LIMIT_ERROR);
+
+?>
+--EXPECTF--
+Warning: Wrong parameter count for preg_grep() in %sgrep2.php on line 3
+NULL
+
+Warning: preg_grep(): Second argument to preg_grep() should be an array in %sgrep2.php on line 4
+NULL
+
+Warning: preg_grep(): Compilation failed: nothing to repeat at offset 0 in %sgrep2.php on line 5
+bool(false)
+array(3) {
+  [5]=>
+  string(1) "a"
+  ["xyz"]=>
+  string(2) "q6"
+  [6]=>
+  string(3) "h20"
+}
+array(1) {
+  ["x"]=>
+  string(1) "1"
+}
+bool(true)
+array(0) {
+}
+bool(true)
