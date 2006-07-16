@@ -7,7 +7,7 @@ Bug #24098 (pathinfo() crash)
 	var_dump(pathinfo("/dsds.asa"));
 ?>
 --EXPECT--
-array(3) {
+array(4) {
   ["dirname"]=>
   string(1) "/"
   ["basename"]=>
