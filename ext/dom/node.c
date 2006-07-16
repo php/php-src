@@ -53,6 +53,7 @@ zend_function_entry php_dom_node_class_functions[] = {
 	PHP_FALIAS(getFeature, dom_node_get_feature, NULL)
 	PHP_FALIAS(setUserData, dom_node_set_user_data, NULL)
 	PHP_FALIAS(getUserData, dom_node_get_user_data, NULL)
+	PHP_ME(domnode, getNodePath, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(domnode, C14N, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(domnode, C14NFile, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
@@ -1857,3 +1858,32 @@ PHP_METHOD(domnode, C14NFile)
 }
 
 #endif
+
+/* {{{ proto int DOMNode::getNodePath()
+   Gets an xpath for a node */
+
+PHP_METHOD(domnode, getNodePath)
+{
+	zval *id;
+	xmlNode *nodep;
+	dom_object *intern;
+	char *value;
+	
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &id, dom_node_class_entry) == FAILURE) {
+		return;
+	}
+
+	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
+
+	value = xmlGetNodePath(nodep);
+	if (value == NULL) {
+		RETURN_EMPTY_STRING();
+	} else {
+		RETVAL_STRING(value, 1);
+		xmlFree(value);
+	}
+
+	
+}
+
