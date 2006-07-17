@@ -1632,11 +1632,12 @@ PHP_FUNCTION(mb_strpos)
 }
 /* }}} */
 
-/* {{{ proto int mb_strrpos(string haystack, string needle [, string encoding])
+/* {{{ proto int mb_strrpos(string haystack, string needle [, int offset [, string encoding]])
    Find position of last occurrence of a string within another */
 PHP_FUNCTION(mb_strrpos)
 {
 	int n;
+	long offset = 0;
 	mbfl_string haystack, needle;
 	char *enc_name = NULL;
 	int enc_name_len;
@@ -1648,7 +1649,7 @@ PHP_FUNCTION(mb_strrpos)
 	needle.no_language = MBSTRG(current_language);
 	needle.no_encoding = MBSTRG(current_internal_encoding);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|s", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &enc_name, &enc_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ls", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &offset, &enc_name, &enc_name_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1668,7 +1669,7 @@ PHP_FUNCTION(mb_strrpos)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Empty needle");
 		RETURN_FALSE;
 	}
-	n = mbfl_strpos(&haystack, &needle, 0, 1);
+	n = mbfl_strpos(&haystack, &needle, offset, 1);
 	if (n >= 0) {
 		RETVAL_LONG(n);
 	} else {
