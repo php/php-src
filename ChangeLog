@@ -1,3 +1,174 @@
+2006-07-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/spl.php:
+      -Typo
+
+    * (PHP_5_2)
+      ext/spl/spl.php
+      ext/spl/spl_iterators.c
+      ext/spl/spl_iterators.h
+      ext/spl/internal/filteriterator.inc
+      ext/spl/internal/recursiveregexiterator.inc
+      ext/spl/internal/regexiterator.inc
+      ext/spl/tests/iterator_049.phpt
+      ext/spl/tests/iterator_050.phpt
+      ext/spl/tests/iterator_051.phpt
+      ext/spl/tests/iterator_052.phpt
+      ext/spl/tests/iterator_053.phpt
+      ext/spl/tests/iterator_054.phpt
+      ext/spl/tests/iterator_055.phpt:
+      - MFH:
+        . Upgrade RegexIterator capabilities, see docu
+        . Update docu
+        . Add test (which fails right now: iterator_049.phpt)
+        . Add tests for new functionality
+
+    * (PHP_5_2)
+      ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.h:
+      - MFH: Little bit refactoring: Two new PHPAPI functions:
+        . php_pcre_match
+        . php_pcre_split
+
+    * ext/pcre/php_pcre.h:
+      - TSRM Fix
+
+    * ext/spl/spl_iterators.c
+      ext/spl/spl_iterators.h
+      ext/spl/internal/regexiterator.inc
+      ext/spl/internal/regexiterator.inc
+      ext/spl/tests/iterator_050.phpt
+      ext/spl/tests/iterator_050.phpt
+      ext/spl/tests/iterator_051.phpt
+      ext/spl/tests/iterator_051.phpt
+      ext/spl/tests/iterator_052.phpt
+      ext/spl/tests/iterator_052.phpt
+      ext/spl/tests/iterator_053.phpt
+      ext/spl/tests/iterator_053.phpt
+      ext/spl/tests/iterator_054.phpt
+      ext/spl/tests/iterator_054.phpt
+      ext/spl/tests/iterator_055.phpt
+      ext/spl/tests/iterator_055.phpt:
+      - Upgrade RegexIterator capabilities, see docu
+
+    * ext/spl/tests/iterator_049.phpt
+      ext/spl/tests/iterator_049.phpt:
+      
+      - This test fails right now and requires a zend API change to fix
+
+2006-07-16  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/pcre/tests/grep2.phpt
+      ext/pcre/tests/split.phpt
+      ext/pcre/tests/split2.phpt:
+      MFB
+
+    * ext/pcre/tests/grep2.phpt
+      ext/pcre/tests/grep2.phpt
+      ext/pcre/tests/split.phpt
+      ext/pcre/tests/split.phpt
+      ext/pcre/tests/split2.phpt
+      ext/pcre/tests/split2.phpt:
+      
+      file grep2.phpt was initially added on branch PHP_5_2.
+
+2006-07-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.h
+      ext/pcre/pcrelib/.cvsignore:
+      - Little bit refactoring: Two new PHPAPI functions:
+        . php_pcre_match
+        . php_pcre_split
+
+    * ext/spl/spl.php
+      ext/spl/internal/filteriterator.inc
+      ext/spl/internal/recursiveregexiterator.inc
+      ext/spl/internal/recursiveregexiterator.inc
+      ext/spl/internal/recursiveregexiterator.inc
+      ext/spl/internal/regexiterator.inc
+      ext/spl/internal/regexiterator.inc:
+      - Update docu
+
+    * ext/spl/tests/iterator_048.phpt:
+      - Correct test name
+
+2006-07-16  Christian Stocker  <chregu@bitflux.ch>
+
+    * ext/dom/node.c:
+      MFB
+      improved code (after suggestion by helly)
+
+    * (PHP_5_2)
+      ext/dom/node.c:
+      improved code (after suggestion by helly)
+
+2006-07-16  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/bug24098.phpt:
+      fix test
+
+    * ext/standard/tests/strings/bug24098.phpt:
+      3+1 != 3  =)
+
+2006-07-16  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/standard/string.c:
+      - MFB: PATHINFO_FILENAME constant registration (Sara)
+
+2006-07-16  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/file.c:
+      all stream functions are actually macros that already have TSRMLS_CC,
+      no need to pass it manually
+
+2006-07-16  Christian Stocker  <chregu@bitflux.ch>
+
+    * ext/dom/dom_fe.h
+      ext/dom/node.c:
+      Added DOMNode::getNodePath() for getting an XPath for a node.
+      (MFB)
+
+    * (PHP_5_2)
+      NEWS
+      ext/dom/dom_fe.h
+      ext/dom/node.c:
+      Added DOMNode::getNodePath() for getting an XPath for a node.
+
+2006-07-16  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd_gif_in.c:
+      - #38112, corrupt GIF segfaults, test will follow
+
+2006-07-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      ext/standard/math.c
+      ext/standard/math.c
+      ext/standard/tests/strings/bug29538.phpt
+      ext/standard/tests/strings/bug29538.phpt:
+      - MFH Fixed Bug #29538 number_format and problem with 0
+
+    * ext/standard/math.c
+      ext/standard/tests/strings/bug29538.phpt
+      ext/standard/tests/strings/bug29538.phpt
+      ext/standard/tests/strings/bug29538.phpt:
+      - Fixed Bug #29538 number_format and problem with 0
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/string.c
+      ext/standard/tests/strings/bug24098.phpt:
+      - MFH Pathinfo allows to get filename (Toby S, Christian S)
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/bug24098.phpt:
+      - Pathinfo allows to get filename (Toby S, Christian S)
+
 2006-07-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_builtin_functions.c:
