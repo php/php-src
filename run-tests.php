@@ -1328,7 +1328,7 @@ TEST $file
 	}
 
 	if ($leak_check) {
-		$cmd = "valgrind -q --tool=memcheck --log-file-exactly=$memcheck_filename $cmd";
+		$cmd = "valgrind -q --tool=memcheck --trace-children=yes --log-file-exactly=$memcheck_filename $cmd";
 	}
 
 	if ($DETAILED) echo "
