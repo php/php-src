@@ -1457,6 +1457,25 @@ static void core_globals_ctor(php_core_globals *core_globals TSRMLS_DC)
 /* }}} */
 #endif
 
+/* {{{ core_globals_dtor
+ */
+static void core_globals_dtor(php_core_globals *core_globals TSRMLS_DC)
+{
+	if (core_globals->last_error_message) {
+		free(core_globals->last_error_message);
+	}
+	if (core_globals->last_error_file) {
+		free(core_globals->last_error_file);
+	}
+	if (core_globals->disable_functions) {
+		free(core_globals->disable_functions);
+	}
+	if (core_globals->disable_classes) {
+		free(core_globals->disable_classes);
+	}
+}
+/* }}} */
+
 /* {{{ php_register_extensions
  */
 int php_register_extensions(zend_module_entry **ptr, int count TSRMLS_DC)
@@ -1545,7 +1564,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 #ifdef ZTS
 	executor_globals = ts_resource(executor_globals_id);
-	ts_allocate_id(&core_globals_id, sizeof(php_core_globals), (ts_allocate_ctor) core_globals_ctor, NULL);
+	ts_allocate_id(&core_globals_id, sizeof(php_core_globals), (ts_allocate_ctor) core_globals_ctor, (ts_allocate_dtor) core_globals_dtor);
 	core_globals = ts_resource(core_globals_id);
 #ifdef PHP_WIN32
 	ts_allocate_id(&php_win32_core_globals_id, sizeof(php_win32_core_globals), (ts_allocate_ctor) php_win32_core_globals_ctor, NULL);
@@ -1795,18 +1814,12 @@ void php_module_shutdown(TSRMLS_D)
 	php_output_shutdown();
 
 	module_initialized = 0;
-	if (PG(last_error_message)) {
-		free(PG(last_error_message));
-	}
-	if (PG(last_error_file)) {
-		free(PG(last_error_file));
-	}
-	if (PG(disable_functions)) {
-		free(PG(disable_functions));
-	}
-	if (PG(disable_classes)) {
-		free(PG(disable_classes));
-	}
+
+#ifndef ZTS
+	core_globals_dtor(&core_globals TSRMLS_CC);
+#else
+	ts_free_id(core_globals_id);	
+#endif
 }
 /* }}} */
 
