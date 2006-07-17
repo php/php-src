@@ -4089,43 +4089,29 @@ PHP_FUNCTION(array_product)
 /* }}} */
 
 
-/* {{{ proto mixed array_reduce(array input, mixed callback [, int initial])
+/* {{{ proto mixed array_reduce(array input, mixed callback [, int initial]) U
    Iteratively reduce the array to a single value via the callback. */
 PHP_FUNCTION(array_reduce)
 {
-	zval **input, **callback, **initial;
+	zval *input;
 	zval **args[2];
 	zval **operand;
 	zval *result = NULL;
 	zval *retval;
+	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
-	zval callback_name;
+	long initial;
 	HashPosition pos;
 	HashTable *htbl;
 	
-	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 3 ||
-		zend_get_parameters_ex(ZEND_NUM_ARGS(), &input, &callback, &initial) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-
-	if (Z_TYPE_PP(input) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The first argument should be an array");
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "af|l", &input, &fci, &fci_cache, &initial) == FAILURE) {
 		return;
 	}
-
-	if (!zend_is_callable(*callback, 0, &callback_name)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The second argument, '%R', should be a valid callback", Z_TYPE(callback_name), Z_UNIVAL(callback_name));
-		zval_dtor(&callback_name);
-		return;
-	}
-	zval_dtor(&callback_name);
-
+	
 	if (ZEND_NUM_ARGS() > 2) {
 		ALLOC_ZVAL(result);
-		*result = **initial;
-		zval_copy_ctor(result);
-		convert_to_long(result);
 		INIT_PZVAL(result);
+		ZVAL_LONG(result, initial);
 	} else {
 		MAKE_STD_ZVAL(result);
 		ZVAL_NULL(result);
@@ -4135,7 +4121,7 @@ PHP_FUNCTION(array_reduce)
 	 * the base pointer of which is subject to change.
 	 * thus we need to keep the pointer to the hashtable for safety */
 
-	htbl = Z_ARRVAL_PP(input);
+	htbl = Z_ARRVAL_P(input);
 	
 	if (zend_hash_num_elements(htbl) == 0) {
 		if (result) {
@@ -4144,23 +4130,17 @@ PHP_FUNCTION(array_reduce)
 		return;
 	}
 
+	fci.retval_ptr_ptr = &retval;
+	fci.param_count = 2;
+	fci.no_separation = 0;
+
 	zend_hash_internal_pointer_reset_ex(htbl, &pos);
 	while (zend_hash_get_current_data_ex(htbl, (void **)&operand, &pos) == SUCCESS) {
-		if (result) {
-			zend_fcall_info fci;
 
+		if (result) {
 			args[0] = &result;
 			args[1] = operand;
-
-			fci.size = sizeof(fci);
-			fci.function_table = EG(function_table);
-			fci.function_name = *callback;
-			fci.symbol_table = NULL;
-			fci.object_pp = NULL;
-			fci.retval_ptr_ptr = &retval;
-			fci.param_count = 2;
 			fci.params = args;
-			fci.no_separation = 0;
 
 			if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && retval) {
 				zval_ptr_dtor(&result);
@@ -4182,46 +4162,36 @@ PHP_FUNCTION(array_reduce)
 /* }}} */
 
 
-/* {{{ proto array array_filter(array input [, mixed callback])
+/* {{{ proto array array_filter(array input [, mixed callback]) U
    Filters elements from the array via the callback. */
 PHP_FUNCTION(array_filter)
 {
-	zval **input, **callback = NULL;
-	zval *array, *func = NULL;
+	zval *array;
 	zval **operand;
 	zval **args[1];
 	zval *retval = NULL;
-	zval callback_name;
+	zend_bool have_callback = 0;
 	zstr string_key;
+	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
 	uint string_key_len;
 	ulong num_key;
 	HashPosition pos;
-	
-	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2 ||
-		zend_get_parameters_ex(ZEND_NUM_ARGS(), &input, &callback) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
 
-	if (Z_TYPE_PP(input) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The first argument should be an array");
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|f", &array, &fci, &fci_cache) == FAILURE) {
 		return;
 	}
-	array = *input;
-
-	if (ZEND_NUM_ARGS() > 1) {
-		func = *callback;
-		if (!zend_is_callable(func, 0, &callback_name)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The second argument, '%R', should be a valid callback", Z_TYPE(callback_name), Z_UNIVAL(callback_name));
-			zval_dtor(&callback_name);
-			return;
-		}
-		zval_dtor(&callback_name);
-	}
-
+	
 	array_init(return_value);
 	if (zend_hash_num_elements(Z_ARRVAL_P(array)) == 0) {
 		return;
+	}
+
+	if (ZEND_NUM_ARGS() > 1) {
+		have_callback = 1;
+		fci.no_separation = 0;
+		fci.retval_ptr_ptr = &retval;
+		fci.param_count = 1;
 	}
 
 	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(array), &pos);
@@ -4229,20 +4199,9 @@ PHP_FUNCTION(array_filter)
 		 zend_hash_move_forward_ex(Z_ARRVAL_P(array), &pos)) {
 		zend_uchar utype;
 
-		if (func) {
-			zend_fcall_info fci;
-
+		if (have_callback) {
 			args[0] = operand;
-
-			fci.size = sizeof(fci);
-			fci.function_table = EG(function_table);
-			fci.function_name = func;
-			fci.symbol_table = NULL;
-			fci.object_pp = NULL;
-			fci.retval_ptr_ptr = &retval;
-			fci.param_count = 1;
 			fci.params = args;
-			fci.no_separation = 0;
 
 			if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && retval) {
 				if (!zend_is_true(retval)) {
