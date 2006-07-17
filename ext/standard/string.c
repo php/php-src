@@ -1901,7 +1901,7 @@ PHP_FUNCTION(pathinfo)
 {
 	zval *tmp;
 	char *path, *ret = NULL;
-	int path_len;
+	int path_len, have_basename;
 	size_t ret_len;
 	long opt = PHP_PATHINFO_ALL;
 
@@ -1909,6 +1909,8 @@ PHP_FUNCTION(pathinfo)
 		return;
 	}
 
+	have_basename = ((opt & PHP_PATHINFO_BASENAME) == PHP_PATHINFO_BASENAME);
+	
 	MAKE_STD_ZVAL(tmp);
 	array_init(tmp);
 
@@ -1919,22 +1921,18 @@ PHP_FUNCTION(pathinfo)
 			add_assoc_rt_string(tmp, "dirname", ret, 1);
 		}
 		efree(ret);
+		ret = NULL;
 	}
 
-	if ((opt & PHP_PATHINFO_BASENAME) == PHP_PATHINFO_BASENAME) {
+	if (have_basename) {
 		php_basename(path, path_len, NULL, 0, &ret, &ret_len TSRMLS_CC);
 		add_assoc_rt_stringl(tmp, "basename", ret, ret_len, 0);
-		if (UG(unicode)) {
-			efree(ret);
-		}
 	}
 
 	if ((opt & PHP_PATHINFO_EXTENSION) == PHP_PATHINFO_EXTENSION) {
 		char *p;
 		int idx;
-		int have_basename = ((opt & PHP_PATHINFO_BASENAME) == PHP_PATHINFO_BASENAME);
 
-		/* Have we alrady looked up the basename? */
 		if (!have_basename) {
 			php_basename(path, path_len, NULL, 0, &ret, &ret_len TSRMLS_CC);
 		}
@@ -1945,19 +1943,14 @@ PHP_FUNCTION(pathinfo)
 			idx = p - ret;
 			add_assoc_rt_stringl(tmp, "extension", ret + idx + 1, ret_len - idx - 1, 1);
 		}
-
-		if (!have_basename) {
-			efree(ret);
-		}
 	}
 
 	if ((opt & PHP_PATHINFO_FILENAME) == PHP_PATHINFO_FILENAME) {
 		char *p;
 		int idx;
-		int have_basename = ((opt & PHP_PATHINFO_BASENAME) == PHP_PATHINFO_BASENAME);
 
 		/* Have we alrady looked up the basename? */
-		if (!have_basename) {
+		if (!have_basename && !ret) {
 			php_basename(path, path_len, NULL, 0, &ret, &ret_len TSRMLS_CC);
 		}
 
@@ -1965,10 +1958,10 @@ PHP_FUNCTION(pathinfo)
 
 		idx = p ? (p - ret) : ret_len;
 		add_assoc_stringl(tmp, "filename", ret, idx, 1);
+	}
 
-		if (!have_basename) {
-			efree(ret);
-		}
+	if (!have_basename && ret) {
+		efree(ret);
 	}
 
 	if (opt == PHP_PATHINFO_ALL) {
