@@ -1401,7 +1401,7 @@ SPL_METHOD(RegexIterator, accept)
 			use_copy = 0;
 		} else if (intern->current.key_type == HASH_KEY_IS_UNICODE) {
 			subject_len = intern->current.str_key_len - 1;
-			subject = zend_unicode_to_ascii(intern->current.str_key.u, subject_len TSRMLS_DC);
+			subject = zend_unicode_to_ascii(intern->current.str_key.u, subject_len TSRMLS_CC);
 			if (!subject) {
 				/* FIXME: Unicode support??? : how to handle this error, with that exception? */
 				if (intern->u.regex.mode != REGIT_MODE_MATCH) {
