@@ -16,9 +16,6 @@ ext/standard
         Should work with minor cleanups provided that underlying comparison
         functions are fixed, FCI cache, test
 
-    array_filter()
-        Params API, FCI cache, test
-
     array_intersect(), array_uintersect()
     array_intersect_assoc(), array_uintersect_assoc(), array_intersect_uassoc(), array_uintersect_uassoc()
     array_intersect_key(), array_intersect_ukey()
@@ -30,9 +27,6 @@ ext/standard
 
     array_multisort()
         Add SORT_LOCALE_STRING, test
-
-    array_reduce()
-        Params API, FCI cache, test
 
     array_walk()
         Params API, is_callable check, FCI cache, test
@@ -58,6 +52,7 @@ ext/standard
     array_combine()
     array_count_values()
     array_fill()
+    array_filter()
     array_flip()
     array_key_exists()
     array_keys()
@@ -67,6 +62,7 @@ ext/standard
     array_push(), array_pop(), array_shift(), array_unshift()
     array_pad()
     array_rand()
+    array_reduce()
     array_reverse()
     array_search()
     array_slice()
