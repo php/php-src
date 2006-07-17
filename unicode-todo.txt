@@ -50,3 +50,6 @@ parsing API, e.g.:
 * Constant registration/fetching should do identifier normalization.
 
 * Identifier normalization in callbacks (zend_is_callable/zend_u_lookup_class)
+
+* Make zend_u_str_case_fold() do only case-folding and nothing else. The
+  normalization should be done by zend_normalize_identifier().
