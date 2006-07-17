@@ -39,6 +39,7 @@ ZEND_API void (*zend_execute)(zend_op_array *op_array TSRMLS_DC);
 ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC);
 
 /* true globals */
+ZEND_API zend_fcall_info empty_fcall_info = { sizeof(zend_fcall_info), NULL, NULL, NULL, 0, NULL, NULL, 0 };
 ZEND_API zend_fcall_info_cache empty_fcall_info_cache = { 0, NULL, NULL, NULL };
 
 #ifdef ZEND_WIN32

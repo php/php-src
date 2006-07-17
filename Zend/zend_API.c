@@ -763,7 +763,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 					fcc->initialized = 0;
 					break;
 				} else {
-					return "function";
+					return "valid callback";
 				}
 			}
 

@@ -165,6 +165,7 @@ typedef struct _php_basic_globals {
 	char str_ebuf[40];
 	zval **array_walk_func_name;
 	zval **user_compare_func_name;
+	zend_fcall_info user_compare_fci;
 	zend_fcall_info_cache user_compare_fci_cache;
 	zend_llist *user_tick_functions;
 
