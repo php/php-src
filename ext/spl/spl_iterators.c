@@ -1641,7 +1641,7 @@ SPL_METHOD(CachingIterator, __toString)
 	}
 	if (intern->u.caching.flags & CIT_TOSTRING_USE_KEY) {
 		if (intern->current.key_type == HASH_KEY_IS_STRING) {
-			RETURN_STRINGL(intern->current.str_key, intern->current.str_key_len, 1);
+			RETURN_STRINGL(intern->current.str_key, intern->current.str_key_len-1, 1);
 		} else {
 			RETVAL_LONG(intern->current.int_key);
 			convert_to_string(return_value);
