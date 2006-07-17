@@ -658,35 +658,29 @@ PHP_FUNCTION(usort)
 }
 /* }}} */
 
-/* {{{ proto bool uasort(array array_arg, string cmp_function)
+/* {{{ proto bool uasort(array array_arg, mixed comparator) U
    Sort an array with a user-defined comparison function and maintain index association */
 PHP_FUNCTION(uasort)
 {
-	zval **array;
+	zval *array;
 	HashTable *target_hash;
 	PHP_ARRAY_CMP_FUNC_VARS;
 
 	PHP_ARRAY_CMP_FUNC_BACKUP();
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &array, &BG(user_compare_func_name)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "af", &array,
+							  &BG(user_compare_fci), &BG(user_compare_fci_cache)) == FAILURE) {
 		PHP_ARRAY_CMP_FUNC_RESTORE();
-		WRONG_PARAM_COUNT;
-	}
-	target_hash = HASH_OF(*array);
-	if (!target_hash) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
-		PHP_ARRAY_CMP_FUNC_RESTORE();
-		RETURN_FALSE;
+		return;
 	}
 
-	PHP_ARRAY_CMP_FUNC_CHECK(BG(user_compare_func_name))
+	target_hash = HASH_OF(array);
 
 	if (zend_hash_sort(target_hash, zend_qsort, array_user_compare, 0 TSRMLS_CC) == FAILURE) {
 		PHP_ARRAY_CMP_FUNC_RESTORE();
 		RETURN_FALSE;
 	}
 	PHP_ARRAY_CMP_FUNC_RESTORE();
-
 	RETURN_TRUE;
 }
 /* }}} */
@@ -696,12 +690,13 @@ static int array_user_key_compare(const void *a, const void *b TSRMLS_DC)
 	Bucket *f;
 	Bucket *s;
 	zval key1, key2;
-	zval *args[2];
-	zval retval;
-	int status;
+	zval *key1_ptr = &key1, *key2_ptr = &key2;
+	zval **args[2];
+	zval *retval_ptr = NULL;
+	long result;
 
-	args[0] = &key1;
-	args[1] = &key2;
+	args[0] = &key1_ptr;
+	args[1] = &key2_ptr;
 	INIT_PZVAL(&key1);
 	INIT_PZVAL(&key2);
 	
@@ -733,43 +728,43 @@ static int array_user_key_compare(const void *a, const void *b TSRMLS_DC)
 		Z_TYPE(key2) = s->key.type;
  	}
 
-	status = call_user_function(EG(function_table), NULL, *BG(user_compare_func_name), &retval, 2, args TSRMLS_CC);
+	BG(user_compare_fci).param_count = 2;
+	BG(user_compare_fci).params = args;
+	BG(user_compare_fci).retval_ptr_ptr = &retval_ptr;
+	BG(user_compare_fci).no_separation = 0;
+	if (zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache) TSRMLS_CC)== SUCCESS
+		&& retval_ptr) {
+
+		convert_to_long_ex(&retval_ptr);
+		result = Z_LVAL_P(retval_ptr);
+		zval_ptr_dtor(&retval_ptr);
+	} else {
+		result = 0;
+	}
 	
 	zval_dtor(&key1);
 	zval_dtor(&key2);
 	
-	if (status == SUCCESS) {
-		convert_to_long(&retval);
-		return Z_LVAL(retval);
-	} else {
-		return 0;
-	}
+	return result;
 }
 
-/* {{{ proto bool uksort(array array_arg, string cmp_function)
+/* {{{ proto bool uksort(array array_arg, mixed comparator) U
    Sort an array by keys using a user-defined comparison function */
 PHP_FUNCTION(uksort)
 {
-	zval **array;
+	zval *array;
 	HashTable *target_hash;
 	PHP_ARRAY_CMP_FUNC_VARS;
 
-
 	PHP_ARRAY_CMP_FUNC_BACKUP();
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &array, &BG(user_compare_func_name)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "af", &array,
+							  &BG(user_compare_fci), &BG(user_compare_fci_cache)) == FAILURE) {
 		PHP_ARRAY_CMP_FUNC_RESTORE();
-		WRONG_PARAM_COUNT;
-	}
-	target_hash = HASH_OF(*array);
-	if (!target_hash) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
-		PHP_ARRAY_CMP_FUNC_RESTORE();
-
-		RETURN_FALSE;
+		return;
 	}
 
-	PHP_ARRAY_CMP_FUNC_CHECK(BG(user_compare_func_name))
+	target_hash = HASH_OF(array);
 
 	if (zend_hash_sort(target_hash, zend_qsort, array_user_key_compare, 0 TSRMLS_CC) == FAILURE) {
 		PHP_ARRAY_CMP_FUNC_RESTORE();
