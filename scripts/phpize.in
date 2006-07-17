@@ -104,16 +104,17 @@ phpize_check_autotools()
   
   if ! test -x "`$php_shtool path $PHP_AUTOCONF`"; then
     cat <<EOF
-Cannot find autoconf. Please check your autoconf installation and the \$PHP_AUTOCONF 
-environment variable is set correctly and then rerun this script. 
+Cannot find autoconf. Please check your autoconf installation and the
+\$PHP_AUTOCONF environment variable is set correctly and then rerun this script.
 
 EOF
     exit 1
   fi
   if ! test -x "`$php_shtool path $PHP_AUTOHEADER`"; then
     cat <<EOF
-Cannot find autoheader. Please check your autoconf installation and the \$PHP_AUTOHEADER 
-environment variable is set correctly and then rerun this script. 
+Cannot find autoheader. Please check your autoconf installation and the
+\$PHP_AUTOHEADER environment variable is set correctly and then rerun this
+script.
 
 EOF
     exit 1
