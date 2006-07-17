@@ -4177,16 +4177,15 @@ PHP_MINFO_FUNCTION(basic)
    Given the name of a constant this function will return the constants associated value */
 PHP_FUNCTION(constant)
 {
-	zval* const_name;
+	zstr const_name;
+	int const_name_len, const_type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &const_name) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "T", &const_name, &const_name_len, &const_type) == FAILURE) {
 		return;
 	}
 
-	convert_to_text_ex(&const_name);
-
-	if (!zend_u_get_constant(Z_TYPE_P(const_name), Z_UNIVAL_P(const_name), Z_UNILEN_P(const_name), return_value TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't find constant %s", Z_STRVAL_P(const_name));
+	if (!zend_u_get_constant(const_type, const_name, const_name_len, return_value TSRMLS_CC)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't find constant %v", const_name);
 		RETURN_NULL();
 	}
 }
