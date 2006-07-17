@@ -655,6 +655,7 @@ typedef struct _zend_fcall_info_cache {
 } zend_fcall_info_cache;
 
 BEGIN_EXTERN_C()
+ZEND_API extern zend_fcall_info empty_fcall_info;
 ZEND_API extern zend_fcall_info_cache empty_fcall_info_cache;
 
 /** Build zend_call_info/cache from a zval*

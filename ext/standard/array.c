@@ -571,8 +571,7 @@ static int array_user_compare(const void *a, const void *b TSRMLS_DC)
 	Bucket *f;
 	Bucket *s;
 	zval **args[2];
-	zval *retval_ptr;
-	zend_fcall_info fci;
+	zval *retval_ptr = NULL;
 
 	f = *((Bucket **) a);
 	s = *((Bucket **) b);
@@ -580,17 +579,11 @@ static int array_user_compare(const void *a, const void *b TSRMLS_DC)
 	args[0] = (zval **) f->pData;
 	args[1] = (zval **) s->pData;
 
-	fci.size = sizeof(fci);
-	fci.function_table = EG(function_table);
-	fci.function_name = *BG(user_compare_func_name);
-	fci.symbol_table = NULL;
-	fci.object_pp = NULL;
-	fci.retval_ptr_ptr = &retval_ptr;
-	fci.param_count = 2;
-	fci.params = args;
-	fci.no_separation = 0;
-
-	if (zend_call_function(&fci, &BG(user_compare_fci_cache) TSRMLS_CC)== SUCCESS
+	BG(user_compare_fci).param_count = 2;
+	BG(user_compare_fci).params = args;
+	BG(user_compare_fci).retval_ptr_ptr = &retval_ptr;
+	BG(user_compare_fci).no_separation = 0;
+	if (zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache) TSRMLS_CC)== SUCCESS
 		&& retval_ptr) {
 		long retval;
 
@@ -607,6 +600,7 @@ static int array_user_compare(const void *a, const void *b TSRMLS_DC)
 #define PHP_ARRAY_CMP_FUNC_CHECK(func_name)	\
 	if (!zend_is_callable(*func_name, 0, NULL)) {	\
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid comparison function.");	\
+        BG(user_compare_fci) = old_user_compare_fci; \
         BG(user_compare_fci_cache) = old_user_compare_fci_cache; \
 		BG(user_compare_func_name) = old_compare_func;	\
 		RETURN_FALSE;	\
@@ -622,41 +616,38 @@ static int array_user_compare(const void *a, const void *b TSRMLS_DC)
 
 #define PHP_ARRAY_CMP_FUNC_VARS \
     zval **old_compare_func; \
+    zend_fcall_info old_user_compare_fci; \
     zend_fcall_info_cache old_user_compare_fci_cache \
 
 #define PHP_ARRAY_CMP_FUNC_BACKUP() \
     old_compare_func = BG(user_compare_func_name); \
+    old_user_compare_fci = BG(user_compare_fci); \
     old_user_compare_fci_cache = BG(user_compare_fci_cache); \
     BG(user_compare_fci_cache) = empty_fcall_info_cache; \
 
 #define PHP_ARRAY_CMP_FUNC_RESTORE() \
+        BG(user_compare_fci) = old_user_compare_fci; \
         BG(user_compare_fci_cache) = old_user_compare_fci_cache; \
         BG(user_compare_func_name) = old_compare_func; \
 
 
-/* {{{ proto bool usort(array array_arg, string cmp_function)
+/* {{{ proto bool usort(array array_arg, mixed comparator) U
    Sort an array by values using a user-defined comparison function */
 PHP_FUNCTION(usort)
 {
-	zval **array;
+	zval *array;
 	HashTable *target_hash;
 	PHP_ARRAY_CMP_FUNC_VARS;
 
 	PHP_ARRAY_CMP_FUNC_BACKUP();
 
-
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &array, &BG(user_compare_func_name)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "af", &array,
+							  &BG(user_compare_fci), &BG(user_compare_fci_cache)) == FAILURE) {
 		PHP_ARRAY_CMP_FUNC_RESTORE();
-		WRONG_PARAM_COUNT;
-	}
-	target_hash = HASH_OF(*array);
-	if (!target_hash) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
-		PHP_ARRAY_CMP_FUNC_RESTORE();
-		RETURN_FALSE;
+		return;
 	}
 
-	PHP_ARRAY_CMP_FUNC_CHECK(BG(user_compare_func_name))
+	target_hash = HASH_OF(array);
 	
 	if (zend_hash_sort(target_hash, zend_qsort, array_user_compare, 1 TSRMLS_CC) == FAILURE) {
 		PHP_ARRAY_CMP_FUNC_RESTORE();

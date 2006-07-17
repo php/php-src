@@ -3858,6 +3858,7 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p TSRMLS_DC)
 	BG(left) = -1;
 	BG(user_tick_functions) = NULL;
 	BG(user_filter_map) = NULL;
+	BG(user_compare_fci) = empty_fcall_info;
 	BG(user_compare_fci_cache) = empty_fcall_info_cache;
 	zend_hash_init(&BG(sm_protected_env_vars), 5, NULL, NULL, 1);
 	BG(sm_allowed_env_vars) = NULL;
