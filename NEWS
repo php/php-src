@@ -6,6 +6,7 @@ PHP 4                                                                      NEWS
 - Improved safe_mode check for the error_log() function. (Ilia)
 - Fixed handling of extremely long paths inside tempnam() function. (Ilia)
 - Fixed XSS inside phpinfo() with long inputs. (Ilia)
+- Fixed bug #38112 (corrupted gif segfaults) (Pierre)
 - Fixed bug #37720 (merge_php_config scrambles values). (Mike,
   pumuckel at metropolis dot de)
 - Fixed bug #37569 (WDDX incorrectly encodes high-ascii characters). (Ilia)
