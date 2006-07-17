@@ -47,9 +47,6 @@ ext/standard
         Params API
         Either port strnatcmp() to support Unicode or maybe use ICU's numeric collation
 
-    usort(), uasort(), uksort()
-        Params API, callback name normalization, FCI cache
-
 
   Completed
   =========
@@ -90,6 +87,7 @@ ext/standard
     sort(), rsort()
     asort(), arsort()
     ksort(), krsort() 
+    usort(), uasort(), uksort()
 
 
   string.c
