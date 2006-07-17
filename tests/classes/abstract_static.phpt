@@ -1,5 +1,5 @@
 --TEST--
-ZE2 A static abstrcat methods
+ZE2 A static abstract methods
 --FILE--
 <?php
 
