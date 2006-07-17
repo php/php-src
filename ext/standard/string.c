@@ -1730,7 +1730,12 @@ PHPAPI void php_basename(char *s, size_t len, char *suffix, size_t sufflen, char
 						state = 1;
 					}
 				}
+				break;
 			default:
+				if (state == 0) {
+					comp = c;
+					state = 1;
+				}
 				break;
 		}
 		c += inc_len;
