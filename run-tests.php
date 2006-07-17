@@ -768,7 +768,7 @@ function mail_qa_team($data, $compression, $status = FALSE)
 	$url_bits = parse_url(QA_SUBMISSION_PAGE);
 	if (empty($url_bits['port'])) $url_bits['port'] = 80;
 	
-	$data = "php_test_data=" . urlencode(base64_encode(str_replace("[\\x00]", "[0x0]", $data)));
+	$data = "php_test_data=" . urlencode(base64_encode(str_replace("\00", '[0x0]', $data)));
 	$data_length = strlen($data);
 	
 	$fs = fsockopen($url_bits['host'], $url_bits['port'], $errno, $errstr, 10);
