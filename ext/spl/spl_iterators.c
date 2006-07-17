@@ -1253,7 +1253,7 @@ SPL_METHOD(ParentIterator, getChildren)
 } /* }}} */
 
 /* {{{ spl_dual_it_free_storage */
-static inline void spl_dual_it_free_storage(void *_object TSRMLS_DC)
+static void spl_dual_it_free_storage(void *_object TSRMLS_DC)
 {
 	spl_dual_it_object        *object = (spl_dual_it_object *)_object;
 

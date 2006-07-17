@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, PHP 5.1.5
+- Fixed bug #38125 (undefined reference to spl_dual_it_free_storage). (Marcus)
 - Fixed bug #37587 (var without attribute causes segfault). (Marcus)
 - Fixed bug #37576 (FastCGI env (cgi vars) table overflow). (Piotr)
 - Fixed bug #37496 (FastCGI output buffer overrun). (Piotr, Dmitry)
