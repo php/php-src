@@ -1632,7 +1632,7 @@ PHP_FUNCTION(mb_strpos)
 }
 /* }}} */
 
-/* {{{ proto int mb_strrpos(string haystack, string needle [, string encoding])
+/* {{{ proto int mb_strrpos(string haystack, string needle [, int offset [, string encoding]])
    Find the last occurrence of a character in a string within another */
 PHP_FUNCTION(mb_strrpos)
 {
@@ -1640,6 +1640,10 @@ PHP_FUNCTION(mb_strrpos)
 	mbfl_string haystack, needle;
 	char *enc_name = NULL;
 	int enc_name_len;
+	zval *zoffset;
+	long offset = 0, str_flg;
+	char *enc_name2 = NULL;
+	int enc_name_len2;
 
 	mbfl_string_init(&haystack);
 	mbfl_string_init(&needle);
@@ -1648,8 +1652,49 @@ PHP_FUNCTION(mb_strrpos)
 	needle.no_language = MBSTRG(current_language);
 	needle.no_encoding = MBSTRG(current_internal_encoding);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|s", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &enc_name, &enc_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|zs", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &zoffset, &enc_name, &enc_name_len) == FAILURE) {
 		RETURN_FALSE;
+	}
+
+	if(ZEND_NUM_ARGS() >= 3) {
+		if (Z_TYPE_P(zoffset) == IS_STRING) {
+			enc_name2     = Z_STRVAL_P(zoffset);
+			enc_name_len2 = Z_STRLEN_P(zoffset);
+			str_flg       = 1;
+
+			if (enc_name2 != NULL) {
+				switch (*enc_name2) {
+				case '0':
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
+				case '8':
+				case '9':
+				case ' ':
+				case '-':
+				case '.':
+					break;
+				default :
+					str_flg = 0;
+					break;
+				}
+			}
+
+			if(str_flg) {
+					convert_to_long(zoffset);
+					offset   = Z_LVAL_P(zoffset);
+			} else {
+				enc_name     = enc_name2;
+				enc_name_len = enc_name_len2;
+			}
+		} else {
+			convert_to_long(zoffset);
+			offset = Z_LVAL_P(zoffset);
+		}
 	}
 
 	if (enc_name != NULL) {
@@ -1668,7 +1713,7 @@ PHP_FUNCTION(mb_strrpos)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Empty needle");
 		RETURN_FALSE;
 	}
-	n = mbfl_strpos(&haystack, &needle, 0, 1);
+	n = mbfl_strpos(&haystack, &needle, offset, 1);
 	if (n >= 0) {
 		RETVAL_LONG(n);
 	} else {
