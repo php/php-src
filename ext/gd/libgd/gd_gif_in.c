@@ -522,7 +522,7 @@ static void ReadImage(gdImagePtr im, gdIOCtx *fd, int len, int height, unsigned 
 		return;
 	}
 
-	if (c > 8) {
+	if (c > MAX_LWZ_BITS) {
 		return;	
 	}
 
