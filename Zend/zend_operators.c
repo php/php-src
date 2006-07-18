@@ -2108,14 +2108,21 @@ ZEND_API zstr zend_u_str_case_fold(zend_uchar type, zstr source, unsigned int le
 	zstr ret;
 
 	if (type == IS_UNICODE) {
-		int ret_len;
+		int ret_len = length;
 
 		if (normalize) {
-			zend_normalize_identifier(&ret.u, &ret_len, source.u, length, 1);
+			if (zend_normalize_identifier(&ret.u, &ret_len, source.u, length, 1) == FAILURE) {
+				zend_error(E_NOTICE, "Could not normalize identifier");
+				ret.u = eustrndup(source.u, length);
+			}
 		} else {
 			UErrorCode status = U_ZERO_ERROR;
 
 			zend_case_fold_string(&ret.u, &ret_len, source.u, length, U_FOLD_CASE_DEFAULT, &status);
+			if (U_FAILURE(status)) {
+				zend_error(E_NOTICE, "Could not case-fold string");
+				ret.u = eustrndup(source.u, length);
+			}
 		}
 
 		*new_len = ret_len;

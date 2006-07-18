@@ -702,7 +702,7 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 
 	convert_to_text_ex(class_name);
 
-	if (zend_u_lookup_class_ex(Z_TYPE_PP(class_name), Z_UNIVAL_PP(class_name), Z_UNILEN_PP(class_name), (instance_ce != NULL) ? 1 : 0, &ce TSRMLS_CC) == FAILURE) {
+	if (zend_u_lookup_class_ex(Z_TYPE_PP(class_name), Z_UNIVAL_PP(class_name), Z_UNILEN_PP(class_name), (instance_ce != NULL) ? 1 : 0, 1, &ce TSRMLS_CC) == FAILURE) {
 		retval = 0;
 	} else {
 		if (only_subclass) {

@@ -2578,10 +2578,9 @@ ZEND_API int zend_disable_class(char *class_name, uint class_name_length TSRMLS_
 static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, zend_class_entry *ce_org, zval *callable, zend_class_entry **ce_ptr, zend_function **fptr_ptr TSRMLS_DC)
 {
 	int retval;
-	zstr lcname, lmname, mname, colon;
+	zstr lmname, mname, colon;
 	unsigned int clen, mlen;
 	zend_function *fptr;
-	zend_class_entry **pce;
 	HashTable *ftable;
 
 	*ce_ptr = NULL;
@@ -2601,18 +2600,7 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 		}
 	}
 	if (colon.v != NULL) {
-		lcname = zend_u_str_case_fold(Z_TYPE_P(callable), Z_UNIVAL_P(callable), clen, 0, &clen);
-		/* caution: lcname is not '\0' terminated */
-		if (clen == sizeof("self") - 1 &&
-		    ZEND_U_EQUAL(Z_TYPE_P(callable), lcname, clen, "self", sizeof("self")-1)) {
-			*ce_ptr = EG(scope);
-		} else if (clen == sizeof("parent") - 1 &&
-		    ZEND_U_EQUAL(Z_TYPE_P(callable), lcname, clen, "parent", sizeof("parent")-1)) {
-			*ce_ptr = EG(scope) ? EG(scope)->parent : NULL;
-		} else if (zend_u_lookup_class(Z_TYPE_P(callable), Z_UNIVAL_P(callable), clen, &pce TSRMLS_CC) == SUCCESS) {
-			*ce_ptr = *pce;
-		}
-		efree(lcname.v);
+		*ce_ptr = zend_u_fetch_class(Z_TYPE_P(callable), Z_UNIVAL_P(callable), clen, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
 		if (!*ce_ptr) {
 			return 0;
 		}
@@ -2620,9 +2608,9 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 		if (ce_org && !instanceof_function(ce_org, *ce_ptr TSRMLS_CC)) {
 			return 0;
 		}
-		lmname = zend_u_str_case_fold(Z_TYPE_P(callable), mname, mlen, 0, &mlen);
+		lmname = zend_u_str_case_fold(Z_TYPE_P(callable), mname, mlen, 1, &mlen);
 	} else {
-		lmname = zend_u_str_case_fold(Z_TYPE_P(callable), Z_UNIVAL_P(callable), Z_UNILEN_P(callable), 0, &mlen);
+		lmname = zend_u_str_case_fold(Z_TYPE_P(callable), Z_UNIVAL_P(callable), Z_UNILEN_P(callable), 1, &mlen);
 		if (ce_org) {
 			ftable = &ce_org->function_table;
 			*ce_ptr = ce_org;

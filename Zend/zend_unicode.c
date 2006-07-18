@@ -736,7 +736,7 @@ ZEND_API int zend_normalize_identifier(UChar **dest, int *dest_len, UChar *ident
 	if (unorm_quickCheck(ident, ident_len, UNORM_NFKC, &status) != UNORM_YES) {
 		zend_normalize_string(&buffer, &buffer_len, ident, ident_len, &status);
 		if (U_FAILURE(status)) {
-			return 0;
+			return FAILURE;
 		}
 		ident = buffer;
 		ident_len = buffer_len;
@@ -748,7 +748,7 @@ ZEND_API int zend_normalize_identifier(UChar **dest, int *dest_len, UChar *ident
 			efree(ident);
 		}
 		if (U_FAILURE(status)) {
-			return 0;
+			return FAILURE;
 		}
 		ident = buffer;
 		ident_len = buffer_len;
@@ -759,7 +759,7 @@ ZEND_API int zend_normalize_identifier(UChar **dest, int *dest_len, UChar *ident
 				efree(ident);
 			}
 			if (U_FAILURE(status)) {
-				return 0;
+				return FAILURE;
 			}
 			ident = buffer;
 			ident_len = buffer_len;
@@ -768,7 +768,7 @@ ZEND_API int zend_normalize_identifier(UChar **dest, int *dest_len, UChar *ident
 
 	*dest = ident;
 	*dest_len = ident_len;
-	return 1;
+	return SUCCESS;
 }
 /* }}} */
 

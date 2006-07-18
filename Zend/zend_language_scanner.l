@@ -444,7 +444,7 @@ static inline int zend_check_and_normalize_identifier(zval *zendlval)
 		efree(Z_USTRVAL_P(zendlval));
 		return 0;
 	}
-	if (!zend_normalize_identifier(&norm, &norm_len, Z_USTRVAL_P(zendlval), Z_USTRLEN_P(zendlval), 0)) {
+	if (zend_normalize_identifier(&norm, &norm_len, Z_USTRVAL_P(zendlval), Z_USTRLEN_P(zendlval), 0) == FAILURE) {
 		zend_error(E_COMPILE_WARNING, "Could not normalize identifier: %r", Z_USTRVAL_P(zendlval));
 		efree(Z_USTRVAL_P(zendlval));
 		return 0;
