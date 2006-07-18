@@ -943,7 +943,7 @@ fetch_string_dim:
 				UChar *norm;
 				int norm_len;
 
-				if (!zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_key_length, 0)) {
+				if (zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_key_length, 0) == FAILURE) {
 					zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
 				} else if (norm != offset_key.u) {
 					offset_key.u = norm;
