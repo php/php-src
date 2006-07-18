@@ -75,6 +75,7 @@ ZEND_FUNCTION(gmp_scan0);
 ZEND_FUNCTION(gmp_scan1);
 ZEND_FUNCTION(gmp_popcount);
 ZEND_FUNCTION(gmp_hamdist);
+ZEND_FUNCTION(gmp_nextprime);
 
 ZEND_BEGIN_MODULE_GLOBALS(gmp)
 	zend_bool rand_initialized;

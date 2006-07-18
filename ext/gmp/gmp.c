@@ -260,6 +260,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_gmp_scan1, 0)
 	ZEND_ARG_INFO(0, start)
 ZEND_END_ARG_INFO()
 
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_nextprime, 0)
+	ZEND_ARG_INFO(0, a)
+ZEND_END_ARG_INFO()
+
 /* }}} */
 
 ZEND_DECLARE_MODULE_GLOBALS(gmp)
@@ -307,6 +312,7 @@ zend_function_entry gmp_functions[] = {
 	ZEND_FE(gmp_scan1, arginfo_gmp_scan1)
 	ZEND_FE(gmp_popcount, arginfo_gmp_popcount)
 	ZEND_FE(gmp_hamdist, arginfo_gmp_hamdist)
+	ZEND_FE(gmp_nextprime, arginfo_gmp_nextprime)
 	{NULL, NULL, NULL}	/* Must be the last line in gmp_functions[] */
 };
 /* }}} */
@@ -1421,6 +1427,14 @@ ZEND_FUNCTION(gmp_or)
 ZEND_FUNCTION(gmp_com)
 {
 	gmp_unary_op(mpz_com);
+}
+/* }}} */
+
+/* {{{ proto resource gmp_nextprime(resource a)
+   Finds next prime of a */
+ZEND_FUNCTION(gmp_nextprime)
+{
+   gmp_unary_op(mpz_nextprime);
 }
 /* }}} */
 
