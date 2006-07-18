@@ -165,7 +165,6 @@ zend_function_entry date_functions[] = {
 	PHP_FE(localtime, arginfo_localtime)
 	PHP_FE(getdate, arginfo_getdate)
 
-#ifdef EXPERIMENTAL_DATE_SUPPORT
 	/* Advanced Interface */
 	PHP_FE(date_create, NULL)
 	PHP_FE(date_parse, NULL)
@@ -186,7 +185,6 @@ zend_function_entry date_functions[] = {
 	PHP_FE(timezone_transistions_get, NULL)
 	PHP_FE(timezone_identifiers_list, NULL)
 	PHP_FE(timezone_abbreviations_list, NULL)
-#endif
 
 	/* Options and Configuration */
 	PHP_FE(date_default_timezone_set, arginfo_date_default_timezone_set)
@@ -199,7 +197,6 @@ zend_function_entry date_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-#ifdef EXPERIMENTAL_DATE_SUPPORT
 zend_function_entry date_funcs_date[] = {
 	ZEND_NAMED_FE(format, ZEND_FN(date_format), NULL)
 	ZEND_NAMED_FE(modify, ZEND_FN(date_modify), NULL)
@@ -222,7 +219,6 @@ zend_function_entry date_funcs_timezone[] = {
 };
 
 static void date_register_classes(TSRMLS_D);
-#endif
 static char* guess_timezone(const timelib_tzdb *tzdb TSRMLS_DC);
 /* }}} */
 
@@ -252,7 +248,6 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
-#ifdef EXPERIMENTAL_DATE_SUPPORT
 zend_class_entry *date_ce_date, *date_ce_timezone;
 
 static zend_object_handlers date_object_handlers_date;
@@ -293,7 +288,6 @@ static void date_object_free_storage_date(void *object TSRMLS_DC);
 static void date_object_free_storage_timezone(void *object TSRMLS_DC);
 static zend_object_value date_object_new_date(zend_class_entry *class_type TSRMLS_DC);
 static zend_object_value date_object_new_timezone(zend_class_entry *class_type TSRMLS_DC);
-#endif
 
 /* {{{ Module struct */
 zend_module_entry date_module_entry = {
@@ -457,9 +451,7 @@ PHP_RSHUTDOWN_FUNCTION(date)
 PHP_MINIT_FUNCTION(date)
 {
 	REGISTER_INI_ENTRIES();
-#ifdef EXPERIMENTAL_DATE_SUPPORT
 	date_register_classes(TSRMLS_C);
-#endif
 /*
  * RFC4287, Section 3.3: http://www.ietf.org/rfc/rfc4287.txt
  *   A Date construct is an element whose content MUST conform to the
@@ -1434,7 +1426,6 @@ PHP_FUNCTION(getdate)
 }
 /* }}} */
 
-#ifdef EXPERIMENTAL_DATE_SUPPORT
 static void date_register_classes(TSRMLS_D)
 {
 	zend_class_entry ce_date, ce_timezone;
@@ -1995,7 +1986,6 @@ PHP_FUNCTION(timezone_abbreviations_list)
 		entry++;
 	} while (entry->name);
 }
-#endif
 
 
 /* {{{ proto bool date_default_timezone_set(string timezone_identifier)
