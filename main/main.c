@@ -829,7 +829,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			if (module_initialized) {
 #if MEMORY_LIMIT
 				/* restore memory limit */
-				AG(memory_limit) = PG(memory_limit); 
+				zend_set_memory_limit(PG(memory_limit));
 #endif
 				efree(buffer);
 				zend_objects_store_mark_destructed(&EG(objects_store) TSRMLS_CC);
@@ -964,10 +964,9 @@ static void php_message_handler_for_zend(long message, void *data)
 				char memory_leak_buf[512];
 
 				if (message==ZMSG_MEMORY_LEAK_DETECTED) {
-					zend_mem_header *t = (zend_mem_header *) data;
-					void *ptr = (void *)((char *)t+sizeof(zend_mem_header)+MEM_HEADER_PADDING);
+					zend_leak_info *t = (zend_leak_info *) data;
 
-					snprintf(memory_leak_buf, 512, "%s(%d) :  Freeing 0x%.8lX (%d bytes), script=%s\n", t->filename, t->lineno, (unsigned long)ptr, t->size, SAFE_FILENAME(SG(request_info).path_translated));
+					snprintf(memory_leak_buf, 512, "%s(%d) :  Freeing 0x%.8lX (%d bytes), script=%s\n", t->filename, t->lineno, (unsigned long)t->addr, t->size, SAFE_FILENAME(SG(request_info).path_translated));
 					if (t->orig_filename) {
 						char relay_buf[512];
 
@@ -1600,6 +1599,8 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	module_initialized = 1;
 	sapi_deactivate(TSRMLS_C);
 	module_startup = 0;
+
+	shutdown_memory_manager(1, 0 TSRMLS_CC);
 
 	/* we're done */
 	return SUCCESS;

@@ -526,8 +526,7 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 	{
 		char *mem_usage;
 
-		mem_usage = apr_psprintf(ctx->r->pool, "%u", AG(allocated_memory_peak));
-		AG(allocated_memory_peak) = 0;
+		mem_usage = apr_psprintf(ctx->r->pool, "%u", zend_memory_peak_usage(TSRMLS_C));
 		apr_table_set(ctx->r->notes, "mod_php_memory_usage", mem_usage);
 	}
 #endif

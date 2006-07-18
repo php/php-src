@@ -25,52 +25,16 @@
 #include <stdio.h>
 
 #include "../TSRM/TSRM.h"
-#include "zend_globals_macros.h"
+#include "zend.h"
 
-#include "zend_mm.h"
-
-#define MEM_BLOCK_START_MAGIC	0x7312F8DCL
-#define MEM_BLOCK_END_MAGIC		0x2A8FCC84L
-#define MEM_BLOCK_FREED_MAGIC	0x99954317L
-#define MEM_BLOCK_CACHED_MAGIC	0xFB8277DCL
-
-typedef struct _zend_mem_header {
-#if ZEND_DEBUG
-	long magic;
+typedef struct _zend_leak_info {
+	void *addr;
+	size_t size;
 	char *filename;
 	uint lineno;
-	int reported;
 	char *orig_filename;
 	uint orig_lineno;
-# ifdef ZTS
-	THREAD_T thread_id;
-# endif
-#endif
-#if ZEND_DEBUG || !defined(ZEND_MM)
-    struct _zend_mem_header *pNext;
-    struct _zend_mem_header *pLast;
-#endif
-	unsigned int size;
-} zend_mem_header;
-
-typedef union _align_test {
-	void *ptr;
-	double dbl;
-	long lng;
-} align_test;
-
-#define MAX_CACHED_MEMORY	11
-#define MAX_CACHED_ENTRIES	256
-#define PRE_INIT_CACHE_ENTRIES	32
-
-#if ZEND_GCC_VERSION >= 2000
-# define PLATFORM_ALIGNMENT (__alignof__ (align_test))
-#else
-# define PLATFORM_ALIGNMENT (sizeof(align_test))
-#endif
-
-#define MEM_HEADER_PADDING (((PLATFORM_ALIGNMENT-sizeof(zend_mem_header))%PLATFORM_ALIGNMENT+PLATFORM_ALIGNMENT)%PLATFORM_ALIGNMENT)
-
+} zend_leak_info;
 
 BEGIN_EXTERN_C()
 
@@ -84,28 +48,29 @@ ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LI
 ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
 ZEND_API char *_estrndup(const char *s, unsigned int length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
-
-#if USE_ZEND_ALLOC
+ZEND_API size_t _zend_mem_block_size(void *ptr TSRMLS_DC ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 
 /* Standard wrapper macros */
-#define emalloc(size)					_emalloc((size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
-#define safe_emalloc(nmemb, size, offset)       _safe_emalloc((nmemb), (size), (offset) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
-#define efree(ptr)						_efree((ptr) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
-#define ecalloc(nmemb, size)			_ecalloc((nmemb), (size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
-#define erealloc(ptr, size)				_erealloc((ptr), (size), 0 ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
-#define erealloc_recoverable(ptr, size)	_erealloc((ptr), (size), 1 ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
-#define estrdup(s)						_estrdup((s) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
-#define estrndup(s, length)				_estrndup((s), (length) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+#define emalloc(size)						_emalloc((size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+#define safe_emalloc(nmemb, size, offset)	_safe_emalloc((nmemb), (size), (offset) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+#define efree(ptr)							_efree((ptr) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+#define ecalloc(nmemb, size)				_ecalloc((nmemb), (size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+#define erealloc(ptr, size)					_erealloc((ptr), (size), 0 ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+#define erealloc_recoverable(ptr, size)		_erealloc((ptr), (size), 1 ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+#define estrdup(s)							_estrdup((s) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+#define estrndup(s, length)					_estrndup((s), (length) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+#define zend_mem_block_size(ptr)			_zend_mem_block_size((ptr) TSRMLS_CC ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 
 /* Relay wrapper macros */
-#define emalloc_rel(size)					_emalloc((size) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
-#define safe_emalloc_rel(nmemb, size, offset)   _safe_emalloc((nmemb), (size), (offset) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
-#define efree_rel(ptr)						_efree((ptr) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
-#define ecalloc_rel(nmemb, size)			_ecalloc((nmemb), (size) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
-#define erealloc_rel(ptr, size)				_erealloc((ptr), (size), 0 ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
-#define erealloc_recoverable_rel(ptr, size)	_erealloc((ptr), (size), 1 ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
-#define estrdup_rel(s)						_estrdup((s) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
-#define estrndup_rel(s, length)				_estrndup((s), (length) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
+#define emalloc_rel(size)						_emalloc((size) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
+#define safe_emalloc_rel(nmemb, size, offset)	_safe_emalloc((nmemb), (size), (offset) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
+#define efree_rel(ptr)							_efree((ptr) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
+#define ecalloc_rel(nmemb, size)				_ecalloc((nmemb), (size) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
+#define erealloc_rel(ptr, size)					_erealloc((ptr), (size), 0 ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
+#define erealloc_recoverable_rel(ptr, size)		_erealloc((ptr), (size), 1 ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
+#define estrdup_rel(s)							_estrdup((s) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
+#define estrndup_rel(s, length)					_estrndup((s), (length) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
+#define zend_mem_block_size_rel(ptr)			_zend_mem_block_size((ptr) TSRMLS_CC ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
 
 /* Selective persistent/non persistent allocation macros */
 #define pemalloc(size, persistent) ((persistent)?malloc(size):emalloc(size))
@@ -122,51 +87,6 @@ ZEND_API char *_estrndup(const char *s, unsigned int length ZEND_FILE_LINE_DC ZE
 #define perealloc_rel(ptr, size, persistent) ((persistent)?realloc((ptr), (size)):erealloc_rel((ptr), (size)))
 #define perealloc_recoverable_rel(ptr, size, persistent) ((persistent)?realloc((ptr), (size)):erealloc_recoverable_rel((ptr), (size)))
 #define pestrdup_rel(s, persistent) ((persistent)?strdup(s):estrdup_rel(s))
-
-#else
-
-#undef _GNU_SOURCE
-#define _GNU_SOURCE
-#include <string.h>
-#undef _GNU_SOURCE
-
-/* Standard wrapper macros */
-#define emalloc(size)					malloc(size)
-#define safe_emalloc(nmemb, size, offset)		malloc((nmemb) * (size) + (offset))
-#define efree(ptr)						free(ptr)
-#define ecalloc(nmemb, size)			calloc((nmemb), (size))
-#define erealloc(ptr, size)				realloc((ptr), (size))
-#define erealloc_recoverable(ptr, size)	realloc((ptr), (size))
-#define estrdup(s)						strdup(s)
-#define estrndup(s, length)				zend_strndup((s), (length))
-
-/* Relay wrapper macros */
-#define emalloc_rel(size)					malloc(size)
-#define safe_emalloc_rel(nmemb, size, offset)		malloc((nmemb) * (size) + (offset))
-#define efree_rel(ptr)						free(ptr)
-#define ecalloc_rel(nmemb, size)			calloc((nmemb), (size))
-#define erealloc_rel(ptr, size)				realloc((ptr), (size))
-#define erealloc_recoverable_rel(ptr, size)	realloc((ptr), (size))
-#define estrdup_rel(s)						strdup(s)
-#define estrndup_rel(s, length)				zend_strndup((s), (length))
-
-/* Selective persistent/non persistent allocation macros */
-#define pemalloc(size, persistent)		malloc(size)
-#define safe_pemalloc(nmemb, size, offset, persistent)		malloc((nmemb) * (size) + (offset))
-#define pefree(ptr, persistent)			free(ptr)
-#define pecalloc(nmemb, size, persistent)		calloc((nmemb), (size))
-#define perealloc(ptr, size, persistent)		realloc((ptr), (size))
-#define perealloc_recoverable(ptr, size, persistent)	realloc((ptr), (size))
-#define pestrdup(s, persistent)			strdup(s)
-
-#define pemalloc_rel(size, persistent)		malloc(size)
-#define pefree_rel(ptr, persistent)			free(ptr)
-#define pecalloc_rel(nmemb, size, persistent)		calloc((nmemb), (size))
-#define perealloc_rel(ptr, size, persistent)		realloc((ptr), (size))
-#define perealloc_recoverable_rel(ptr, size, persistent)	realloc((ptr), (size))
-#define pestrdup_rel(s, persistent)			strdup(s)
-
-#endif /* !USE_ZEND_ALLOC */
 
 #define safe_estrdup(ptr)  ((ptr)?(estrdup(ptr)):STR_EMPTY_ALLOC())
 #define safe_estrndup(ptr, len) ((ptr)?(estrndup((ptr), (len))):STR_EMPTY_ALLOC())
@@ -187,7 +107,96 @@ void zend_debug_alloc_output(char *format, ...);
 #define full_mem_check(silent)
 #endif
 
+#if MEMORY_LIMIT
+ZEND_API size_t zend_memory_usage(TSRMLS_D);
+ZEND_API size_t zend_memory_peak_usage(TSRMLS_D);
+#endif
+
 END_EXTERN_C()
+
+/* Macroses for zend_fast_cache.h compatibility */
+
+#define ZEND_FAST_ALLOC(p, type, fc_type)	\
+	(p) = (type *) emalloc(sizeof(type))
+
+#define ZEND_FAST_FREE(p, fc_type)	\
+	efree(p)
+
+#define ZEND_FAST_ALLOC_REL(p, type, fc_type)	\
+	(p) = (type *) emalloc_rel(sizeof(type))
+
+#define ZEND_FAST_FREE_REL(p, fc_type)	\
+	efree_rel(p)
+
+/* fast cache for zval's */
+#define ALLOC_ZVAL(z)	\
+	ZEND_FAST_ALLOC(z, zval, ZVAL_CACHE_LIST)
+
+#define FREE_ZVAL(z)	\
+	ZEND_FAST_FREE(z, ZVAL_CACHE_LIST)
+
+#define ALLOC_ZVAL_REL(z)	\
+	ZEND_FAST_ALLOC_REL(z, zval, ZVAL_CACHE_LIST)
+
+#define FREE_ZVAL_REL(z)	\
+	ZEND_FAST_FREE_REL(z, ZVAL_CACHE_LIST)
+
+/* fast cache for HashTables */
+#define ALLOC_HASHTABLE(ht)	\
+	ZEND_FAST_ALLOC(ht, HashTable, HASHTABLE_CACHE_LIST)
+
+#define FREE_HASHTABLE(ht)	\
+	ZEND_FAST_FREE(ht, HASHTABLE_CACHE_LIST)
+
+#define ALLOC_HASHTABLE_REL(ht)	\
+	ZEND_FAST_ALLOC_REL(ht, HashTable, HASHTABLE_CACHE_LIST)
+
+#define FREE_HASHTABLE_REL(ht)	\
+	ZEND_FAST_FREE_REL(ht, HASHTABLE_CACHE_LIST)
+
+/* Heap functions */
+typedef struct _zend_mm_heap zend_mm_heap;
+
+ZEND_API zend_mm_heap *zend_mm_startup(void);
+ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, int full_shutdown, int silent);
+ZEND_API void *_zend_mm_alloc(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
+ZEND_API void _zend_mm_free(zend_mm_heap *heap, void *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
+ZEND_API void *_zend_mm_realloc(zend_mm_heap *heap, void *p, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
+ZEND_API size_t _zend_mm_block_size(zend_mm_heap *heap, void *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
+
+#define zend_mm_alloc(heap, size)			_zend_mm_alloc((heap), (size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+#define zend_mm_free(heap, p)				_zend_mm_free((heap), (p) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+#define zend_mm_realloc(heap, p, size)		_zend_mm_realloc((heap), (p), (size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+#define zend_mm_block_size(heap, p)			_zend_mm_block_size((heap), (p), ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+
+#define zend_mm_alloc_rel(heap, size)		_zend_mm_alloc((heap), (size) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
+#define zend_mm_free_rel(heap, p)			_zend_mm_free((heap), (p) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
+#define zend_mm_realloc_rel(heap, p, size)	_zend_mm_realloc((heap), (p), (size) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
+#define zend_mm_block_size_rel(heap, p)		_zend_mm_block_size((heap), (p), ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+
+/* Heaps with user defined storage */
+typedef struct _zend_mm_storage zend_mm_storage;
+
+typedef struct _zend_mm_segment {
+	size_t	size;
+	struct _zend_mm_segment *next_segment;
+} zend_mm_segment;
+
+typedef struct _zend_mm_mem_handlers {
+	const char *name;
+	zend_mm_storage* (*init)(void *params);
+	void (*dtor)(zend_mm_storage *storage);
+	zend_mm_segment* (*_alloc)(zend_mm_storage *storage, size_t size);
+	zend_mm_segment* (*_realloc)(zend_mm_storage *storage, zend_mm_segment *ptr, size_t size);
+	void (*_free)(zend_mm_storage *storage, zend_mm_segment *ptr);
+} zend_mm_mem_handlers;
+
+struct _zend_mm_storage {
+	const zend_mm_mem_handlers *handlers;
+};
+
+ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_mem_handlers *handlers, size_t block_size, void *params);
+ZEND_API zend_mm_heap *zend_mm_set_heap(zend_mm_heap *new_heap TSRMLS_DC);
 
 #endif
 

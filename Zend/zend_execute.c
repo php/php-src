@@ -31,7 +31,6 @@
 #include "zend_ptr_stack.h"
 #include "zend_constants.h"
 #include "zend_extensions.h"
-#include "zend_fast_cache.h"
 #include "zend_ini.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"

@@ -18,7 +18,7 @@
 */
 
 /* $Id$ */
-
+#if 0
 #ifndef _ZEND_MM_H
 #define _ZEND_MM_H
 
@@ -75,7 +75,7 @@ void zend_mm_free(zend_mm_heap *heap, void *p);
 void *zend_mm_realloc(zend_mm_heap *heap, void *p, size_t size);
 
 #endif /* _ZEND_MM_H */
-
+#endif
 /*
  * Local variables:
  * tab-width: 4
