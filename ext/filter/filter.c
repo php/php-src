@@ -425,7 +425,11 @@ static void php_zval_filter_recursive(zval *value, long filter, long flags, zval
 static zval * php_filter_get_storage(long arg TSRMLS_DC) /* {{{ */
 {
 	zval * array_ptr = NULL;
-	zend_bool jit_initialization = (PG(auto_globals_jit) && !PG(register_globals) && !PG(register_long_arrays));
+	zend_bool jit_initialization = (PG(auto_globals_jit)
+#if PHP_MAJOR_VERSION < 6
+		&& !PG(register_globals) && !PG(register_long_arrays)
+#endif
+		);
 	switch (arg) {
 		case PARSE_GET:
 			array_ptr = IF_G(get_array);
