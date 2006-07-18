@@ -1445,7 +1445,6 @@ SPL_METHOD(RegexIterator, accept)
 		}
 		zval_ptr_dtor(&intern->current.data);
 		MAKE_STD_ZVAL(intern->current.data);
-		array_init(intern->current.data);
 		php_pcre_match(regex, extra, subject, subject_len, &zcount, 
 			intern->current.data, intern->u.regex.mode == REGIT_MODE_ALL_MATCHES, 0, 0, 0, 0 TSRMLS_CC);
 		count = zend_hash_num_elements(Z_ARRVAL_P(intern->current.data));
@@ -1459,7 +1458,6 @@ SPL_METHOD(RegexIterator, accept)
 		}
 		zval_ptr_dtor(&intern->current.data);
 		MAKE_STD_ZVAL(intern->current.data);
-		array_init(intern->current.data);
 		php_pcre_split(regex, extra, subject, subject_len, intern->current.data, 0, -1, 0, 0, 0 TSRMLS_CC);
 		count = zend_hash_num_elements(Z_ARRVAL_P(intern->current.data));
 		RETVAL_BOOL(count > 1);
