@@ -7,6 +7,7 @@ PHP                                                                        NEWS
 - Added support for Apache2Filter in the Windows build including binary 
   support for both Apache 2.0.x (php5apache2_filter.dll) and 
   Apache 2.2.x (php5apache2_2_filter.dll). (Edin)
+- Added gmp_nextprime() function. (ants dot aasma at gmail dot com, Tony)
 - Updated timezonedb to version 2006.7. (Derick)
 - Changed priority of PHPRC environment variable on win32 to be higher then
   value from registry. (Dmitry)
