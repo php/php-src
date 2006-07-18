@@ -18,7 +18,7 @@
 */
 
 /* $Id$ */
-
+#if 0
 #ifndef ZEND_FAST_CACHE_H
 #define ZEND_FAST_CACHE_H
 
@@ -131,7 +131,7 @@ typedef struct _zend_fast_cache_list_entry {
 	ZEND_FAST_FREE_REL(ht, HASHTABLE_CACHE_LIST)
 
 #endif /* ZEND_FAST_CACHE_H */
-
+#endif
 /*
  * Local variables:
  * tab-width: 4

@@ -18,7 +18,7 @@
 */
 
 /* $Id$ */
-
+#if 0
 #include "zend.h"
 #include "zend_mm.h"
 
@@ -465,7 +465,7 @@ void *zend_mm_realloc(zend_mm_heap *heap, void *p, size_t size)
 
 	return p;
 }
-
+#endif
 /*
  * Local variables:
  * tab-width: 4

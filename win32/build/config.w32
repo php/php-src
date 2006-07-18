@@ -293,8 +293,10 @@ ADD_FLAG("CFLAGS", "/D FD_SETSIZE=" + parseInt(PHP_FD_SETSIZE));
 ARG_ENABLE("memory-limit", "Enable memory limit checking code", "no");
 AC_DEFINE('MEMORY_LIMIT', PHP_MEMORY_LIMIT == "yes" ? 1 : 0);
 
-ARG_ENABLE("memory-manager", "Enable Zend memory manager", "yes");
-AC_DEFINE('USE_ZEND_ALLOC', PHP_MEMORY_MANAGER == "yes" ? 1 : 0);
+ARG_ENABLE("malloc-mm", "Use environment variable for run-time malloc/emalloc selection", "");
+if (PHP_MALLOC_MM.length) {
+	AC_DEFINE('ZEND_USE_MALLOC_MM', PHP_MALLOC_MM == "yes" ? 1 : 0);
+}
 
 ARG_ENABLE("zend-multibyte", "Enable Zend multibyte encoding support", "no");
 if (PHP_ZEND_MULTIBYTE == "yes") {

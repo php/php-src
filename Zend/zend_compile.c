@@ -25,7 +25,6 @@
 #include "zend_constants.h"
 #include "zend_llist.h"
 #include "zend_API.h"
-#include "zend_fast_cache.h"
 
 #ifdef ZEND_MULTIBYTE
 #include "zend_multibyte.h"

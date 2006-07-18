@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, PHP 5.2.0
+- New memory manager. (Dmitry)
 - Reimplementation of Apache2Filter, PHP can now be an arbitrary filter 
   in the chain and will read the script from the Apache stream. (John)
 - Added support for Apache2Filter in the Windows build including binary 

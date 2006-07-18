@@ -24,7 +24,6 @@
 
 typedef struct _zend_compiler_globals zend_compiler_globals;
 typedef struct _zend_executor_globals zend_executor_globals;
-typedef struct _zend_alloc_globals zend_alloc_globals;
 typedef struct _zend_scanner_globals zend_scanner_globals;
 
 /* Compiler */
@@ -47,16 +46,6 @@ int zendparse(void);
 # define EG(v) (executor_globals.v)
 extern ZEND_API zend_executor_globals executor_globals;
 #endif
-
-
-/* Memory Manager */
-#ifdef ZTS
-# define AG(v) TSRMG(alloc_globals_id, zend_alloc_globals *, v)
-#else
-# define AG(v) (alloc_globals.v)
-extern ZEND_API zend_alloc_globals alloc_globals;
-#endif
-
 
 /* Language Scanner */
 #ifdef ZTS
