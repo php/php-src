@@ -33,7 +33,6 @@ PHP                                                                        NEWS
 - Added automatic module globals management. (Dmitry)
 - Added "jump label" operator (limited "goto"). (Dmitry, Sara)
 - Added E_STRICT to E_ALL. (Dmitry)
-- Added gmp_nextprime() function. (Tony, patch by ants dot aasma at gmail dot com) 
 - Added "allow_url_include" ini option to be able to turn off remote url
   code execution separately from the "allow_url_fopen" setting. (Rasmus)
 - Added --rclass and --rextension CLI parameters to reflect internal classes
