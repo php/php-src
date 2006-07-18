@@ -1,5 +1,5 @@
 --TEST--
-mysqli fetch mixed / mysql_query 
+mysqli fetch mixed / mysql_query (may fail when using 4.1 library with 5.x server)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
