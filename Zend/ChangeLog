@@ -1,3 +1,11 @@
+2006-07-17  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.c
+      zend_API.h
+      zend_execute_API.c:
+      - Upgrade usort() to support Unicode (including valid Unicode callbacks).
+      - Make usort() use 'f' specifier for function call info/cache.
+
 2006-07-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_builtin_functions.c:

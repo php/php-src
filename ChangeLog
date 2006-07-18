@@ -1,3 +1,198 @@
+2006-07-17  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-progress.txt
+      unicode-todo.txt:
+      -** empty log message ***
+
+    * ext/standard/array.c:
+      Update array_filter() and array_reduce() to use params API with FCI
+      cache and mark them with U.
+
+    * unicode-progress.txt
+      ext/standard/array.c:
+      Upgrade uasort() and uksort() to use params API with FCI cache and mark
+      them with U.
+
+2006-07-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      NEWS
+      NEWS
+      ext/spl/spl_iterators.c
+      ext/spl/spl_iterators.c:
+      - MFH Fix #38125 undefined reference to spl_dual_it_free_storage
+
+    * (PHP_5_1)
+      ext/spl/spl_iterators.c:
+      - Fix key handling
+
+    * ext/spl/spl_iterators.c:
+      - Fix #38125 undefined reference to spl_dual_it_free_storage
+
+2006-07-17  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_execute_API.c
+      ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+      - Upgrade usort() to support Unicode (including valid Unicode callbacks).
+      - Make usort() use 'f' specifier for function call info/cache.
+
+2006-07-17  Michael Wallner  <mike@iworks.at>
+
+    * ext/standard/string.c:
+      MFB52: fix bug #37945 pathinfo() cannot handle argument with special
+             characters like german "Umlaute"
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/string.c:
+      - fix bug #37945 pathinfo() cannot handle argument with special characters
+        like german "Umlaute"
+
+2006-07-17  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/basic_functions.c:
+      - Use zend_uchar for param type
+      - %v is for UG() - dependent strings, which is not the case here
+      - 'T' is only useful for multiple parameters, so use 't' instead
+
+2006-07-17  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/libgd/gd_gif_in.c
+      ext/gd/tests/bug38112.gif
+      ext/gd/tests/bug38112.gif
+      ext/gd/tests/bug38112.phpt
+      ext/gd/tests/bug38112.phpt:
+      - MFB: #38112, corrupt GIF Image segfault
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd_gif_in.c
+      ext/gd/tests/bug38112.gif
+      ext/gd/tests/bug38112.gif
+      ext/gd/tests/bug38112.phpt
+      ext/gd/tests/bug38112.phpt:
+      - #38112, add test and use MAX_LWZ_BITS instead of the value
+
+    * (PHP_5_2)
+      ext/gd/tests/colorat.phpt
+      ext/gd/tests/colorclosest.phpt
+      ext/gd/tests/colorexact.phpt
+      ext/gd/tests/colorresolve.phpt
+      ext/gd/tests/copy.phpt
+      ext/gd/tests/copyresized.phpt
+      ext/gd/tests/createfromgd2.phpt
+      ext/gd/tests/createfromwbmp.phpt
+      ext/gd/tests/dashedlines.phpt
+      ext/gd/tests/gif.phpt
+      ext/gd/tests/imagewbmp.phpt
+      ext/gd/tests/lines.phpt
+      ext/gd/tests/src.gd2
+      ext/gd/tests/src.wbmp
+      ext/gd/tests/test_gif_2.gif
+      ext/gd/tests/test_gif_2.gif
+      ext/gd/tests/truecolor.phpt
+      ext/gd/tests/types.phpt:
+      - sync tests with HEAD
+
+2006-07-17  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * run-tests.php:
+      MFB: valgrind args change
+
+    * (PHP_5_2)
+      run-tests.php:
+      make valgrind trace child processes. useful for the PCNTL extension
+      (fork()), for example
+
+    * ext/pcre/tests/preg_replace2.phpt:
+      MFB
+
+    * ext/pcre/tests/preg_replace2.phpt
+      ext/pcre/tests/preg_replace2.phpt:
+      
+      file preg_replace2.phpt was initially added on branch PHP_5_2.
+
+    * run-tests.php:
+      MFB 5.2
+
+    * (PHP_5_2)
+      run-tests.php:
+      now they are really equivalent..
+
+2006-07-17  Antony Dovgal  <antony@zend.com>
+
+    * tests/classes/abstract_static.phpt
+      tests/classes/abstract_static.phpt:
+      typofix
+
+2006-07-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * main/main.c:
+      Fixed memory leaks in ZTS mode
+
+    * (PHP_5_2)
+      main/main.c:
+      Fixed memory leaks in ZTS mode.
+
+2006-07-17  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/basic_functions.c:
+      tweak constant() to use the brand new unicode parameters API
+
+    * ext/standard/basic_functions.c:
+      make use of new param parsing API
+      use convert_to_text(), which makes constant() unicode aware
+      finally nuke invalid reads
+
+2006-07-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/spl/spl_iterators.c:
+      ZTS fix
+
+2006-07-17  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/pathinfo.phpt
+      ext/standard/tests/strings/pathinfo.phpt:
+      fix access to freed memory in pathinfo()
+      add test
+
+2006-07-17  Seiji Masugata  <s.masugata@digicom.dnp.co.jp>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.c:
+      added option parameter mb_strrpos( ).
+
+2006-07-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * run-tests.php:
+      MFB: Don't use regex where none is needed.
+
+    * (PHP_5_2)
+      run-tests.php:
+      Don't use regex where none is needed.
+
+2006-07-17  Jon Parise  <jon+php@csh.rit.edu>
+
+    * scripts/phpize.in:
+      If the $PHP_AUTOCONF and $PHP_AUTOHEADER environmental variables are set
+      to full paths, the `shtool path` test would fail (because it only tests
+      for the existence of a bare filename in the current $PATH).  We now test
+      the the executability of $PHP_AUTOCONF and $PHP_AUTOHEADER before falling
+      back to the `shtool path` test.
+      
+      Later on, phpize will execute $PHP_AUTOCONF and $PHP_AUTOHEADER directly,
+      so they will work fine as either absolute paths or files within $PATH.
+      
+      Also, improving the grammar of the error messages in the failure cases.
+
+    * scripts/phpize.in:
+      Wrapping the $PHP_AUTOCONF and $PHP_AUTOHEADER error messages to fit
+      within 80 columns.
+
 2006-07-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/spl/spl.php:
