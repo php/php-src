@@ -305,7 +305,7 @@ array(6) {
   }
 }
 
-Warning: preg_last_error() expects exactly 0 parameters, 1 given in /cvs/php5/ext/pcre/tests/split2.php on line 11
+Warning: preg_last_error() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 bool(true)
 array(1) {
