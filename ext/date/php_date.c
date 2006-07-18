@@ -166,7 +166,6 @@ zend_function_entry date_functions[] = {
 	PHP_FE(localtime, arginfo_localtime)
 	PHP_FE(getdate, arginfo_getdate)
 
-#ifdef EXPERIMENTAL_DATE_SUPPORT
 	/* Advanced Interface */
 	PHP_FE(date_create, NULL)
 	PHP_FE(date_parse, NULL)
@@ -188,7 +187,6 @@ zend_function_entry date_functions[] = {
 	PHP_FE(timezone_transistions_get, NULL)
 	PHP_FE(timezone_identifiers_list, NULL)
 	PHP_FE(timezone_abbreviations_list, NULL)
-#endif
 
 	/* Options and Configuration */
 	PHP_FE(date_default_timezone_set, arginfo_date_default_timezone_set)
@@ -203,7 +201,6 @@ zend_function_entry date_functions[] = {
 
 
 zend_function_entry date_funcs_date[] = {
-#ifdef EXPERIMENTAL_DATE_SUPPORT
 	ZEND_NAMED_FE(format, ZEND_FN(date_format), NULL)
 	ZEND_NAMED_FE(modify, ZEND_FN(date_modify), NULL)
 	ZEND_NAMED_FE(getTimezone, ZEND_FN(date_timezone_get), NULL)
@@ -212,18 +209,15 @@ zend_function_entry date_funcs_date[] = {
 	ZEND_NAMED_FE(setTime, ZEND_FN(date_time_set), NULL)
 	ZEND_NAMED_FE(setDate, ZEND_FN(date_date_set), NULL)
 	ZEND_NAMED_FE(setISODate, ZEND_FN(date_isodate_set), NULL)
-#endif	
 	{NULL, NULL, NULL}
 };
 
 zend_function_entry date_funcs_timezone[] = {
-#ifdef EXPERIMENTAL_DATE_SUPPORT
 	ZEND_NAMED_FE(getName, ZEND_FN(timezone_name_get), NULL)
 	ZEND_NAMED_FE(getOffset, ZEND_FN(timezone_offset_get), NULL)
 	ZEND_NAMED_FE(getTransistions, ZEND_FN(timezone_transistions_get), NULL)
 	ZEND_FENTRY(listAbbreviations, zif_timezone_abbreviations_list, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FENTRY(listIdentifiers, zif_timezone_identifiers_list, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-#endif
 	{NULL, NULL, NULL}
 };
 
@@ -275,7 +269,6 @@ struct _php_timezone_obj {
 	timelib_tzinfo *tz;
 };
 
-#ifdef EXPERIMENTAL_DATE_SUPPORT
 #define DATE_SET_CONTEXT \
 	zval *object; \
 	object = getThis(); \
@@ -293,8 +286,6 @@ struct _php_timezone_obj {
 		}	\
 	}	\
 	obj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);	\
-
-#endif
 
 static void date_object_free_storage_date(void *object TSRMLS_DC);
 static void date_object_free_storage_timezone(void *object TSRMLS_DC);
@@ -1655,7 +1646,6 @@ static void date_object_free_storage_timezone(void *object TSRMLS_DC)
 	efree(object);
 }
 
-#ifdef EXPERIMENTAL_DATE_SUPPORT
 /* Advanced Interface */
 static zval * date_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC)
 {
@@ -2149,7 +2139,6 @@ PHP_FUNCTION(timezone_abbreviations_list)
 		entry++;
 	} while (entry->name);
 }
-#endif
 
 
 /* {{{ proto bool date_default_timezone_set(string timezone_identifier)
