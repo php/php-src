@@ -353,11 +353,13 @@ xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr par
 					zend_uchar utype = zend_hash_get_current_key_ex(SOAP_GLOBAL(class_map), &type_name, &type_len, &idx, 0, &pos);
 				    
 				    if (utype == HASH_KEY_IS_STRING || utype == HASH_KEY_IS_UNICODE) {
+				    	encodePtr enc;
+
 						if (utype == HASH_KEY_IS_UNICODE) {
 							type_name.s = soap_unicode_to_string(type_name.u, type_len TSRMLS_CC);
 						}
 					    /* TODO: namespace isn't stored */
-				    	encodePtr enc = get_encoder(SOAP_GLOBAL(sdl), SOAP_GLOBAL(sdl)->target_ns, type_name.s);
+				    	enc = get_encoder(SOAP_GLOBAL(sdl), SOAP_GLOBAL(sdl)->target_ns, type_name.s);
 				    	if (enc) {
 				    		encode = enc;
 						} else if (SOAP_GLOBAL(sdl)) {
