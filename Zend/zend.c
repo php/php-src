@@ -187,7 +187,6 @@ ZEND_INI_END()
 #ifdef ZTS
 ZEND_API int compiler_globals_id;
 ZEND_API int executor_globals_id;
-ZEND_API int alloc_globals_id;
 static HashTable *global_function_table = NULL;
 static HashTable *global_class_table = NULL;
 static HashTable *global_constants_table = NULL;
@@ -885,18 +884,7 @@ static void zend_new_thread_end_handler(THREAD_T thread_id TSRMLS_DC)
 	zend_copy_ini_directives(TSRMLS_C);
 	zend_ini_refresh_caches(ZEND_INI_STAGE_STARTUP TSRMLS_CC);
 }
-
-static void alloc_globals_dtor(zend_alloc_globals *alloc_globals_p TSRMLS_DC)
-{
-	shutdown_memory_manager(1, 1 TSRMLS_CC);
-}
 #endif
-
-static void alloc_globals_ctor(zend_alloc_globals *alloc_globals_p TSRMLS_DC)
-{
-	start_memory_manager(TSRMLS_C);
-}
-
 
 #if defined(__FreeBSD__) || defined(__DragonFly__)
 /* FreeBSD and DragonFly floating point precision fix */
@@ -990,11 +978,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	empty_zstr.u = EMPTY_STR;
 #endif
 
-#ifdef ZTS
-	ts_allocate_id(&alloc_globals_id, sizeof(zend_alloc_globals), (ts_allocate_ctor) alloc_globals_ctor, (ts_allocate_dtor) alloc_globals_dtor);
-#else
-	alloc_globals_ctor(&alloc_globals TSRMLS_CC);
-#endif
+	start_memory_manager(TSRMLS_C);
 
 #if defined(__FreeBSD__) || defined(__DragonFly__)
 	/* FreeBSD and DragonFly floating point precision fix */

@@ -22,8 +22,6 @@
 #ifndef ZEND_CONFIG_W32_H
 #define ZEND_CONFIG_W32_H
 
-#define USE_ZEND_ALLOC 1
-
 #include <../main/config.w32.h>
 
 #define _CRTDBG_MAP_ALLOC
