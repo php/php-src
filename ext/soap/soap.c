@@ -748,10 +748,11 @@ PHP_FUNCTION(soap_encode_to_zval)
 PHP_METHOD(SoapParam, SoapParam)
 {
 	zval *data;
-	char *name;
+	zstr name;
 	int name_length;
+	zend_uchar name_type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &data, &name, &name_length) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zt", &data, &name, &name_length, &name_type) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
 	}
 	if (name_length == 0) {
@@ -761,7 +762,11 @@ PHP_METHOD(SoapParam, SoapParam)
 #ifndef ZEND_ENGINE_2
 	zval_add_ref(&data);
 #endif
-	add_property_stringl(this_ptr, "param_name", name, name_length, 1);
+	if (name_type == IS_STRING) {
+		add_property_stringl(this_ptr, "param_name", name.s, name_length, 1);
+	} else {
+		add_property_unicodel(this_ptr, "param_name", name.u, name_length, 1);
+	}
 	add_property_zval(this_ptr, "param_data", data);
 }
 /* }}} */
@@ -772,11 +777,14 @@ PHP_METHOD(SoapParam, SoapParam)
 PHP_METHOD(SoapHeader, SoapHeader)
 {
 	zval *data = NULL, *actor = NULL;
-	char *name, *ns;
+	zstr name, ns;
 	int name_len, ns_len;
+	zend_uchar name_type, ns_type;
 	zend_bool must_understand = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|zbz", &ns, &ns_len, &name, &name_len, &data, &must_understand, &actor) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tt|zbz", 
+			&ns, &ns_len, &ns_type, &name, &name_len, &name_type,
+			&data, &must_understand, &actor) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
 	}
 	if (ns_len == 0) {
@@ -786,8 +794,16 @@ PHP_METHOD(SoapHeader, SoapHeader)
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid header name.");
 	}
 
-	add_property_stringl(this_ptr, "namespace", ns, ns_len, 1);
-	add_property_stringl(this_ptr, "name", name, name_len, 1);
+	if (ns_type == IS_STRING) {
+		add_property_stringl(this_ptr, "namespace", ns.s, ns_len, 1);
+	} else {
+		add_property_unicodel(this_ptr, "namespace", ns.u, ns_len, 1);
+	}
+	if (name_type == IS_STRING) {
+		add_property_stringl(this_ptr, "name", name.s, name_len, 1);
+	} else {
+		add_property_unicodel(this_ptr, "name", name.u, name_len, 1);
+	}
 	if (data) {
 #ifndef ZEND_ENGINE_2
 		zval_add_ref(&data);
@@ -803,6 +819,8 @@ PHP_METHOD(SoapHeader, SoapHeader)
 		add_property_long(this_ptr, "actor", Z_LVAL_P(actor));
 	} else if (Z_TYPE_P(actor) == IS_STRING && Z_STRLEN_P(actor) > 0) {
 		add_property_stringl(this_ptr, "actor", Z_STRVAL_P(actor), Z_STRLEN_P(actor), 1);
+	} else if (Z_TYPE_P(actor) == IS_UNICODE && Z_USTRLEN_P(actor) > 0) {
+		add_property_unicodel(this_ptr, "actor", Z_USTRVAL_P(actor), Z_USTRLEN_P(actor), 1);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid actor.");
 	}
@@ -954,10 +972,16 @@ PHP_METHOD(SoapFault, __toString)
 PHP_METHOD(SoapVar, SoapVar)
 {
 	zval *data, *type;
-	char *stype = NULL, *ns = NULL, *name = NULL, *namens = NULL;
+	zstr stype = NULL_ZSTR, ns = NULL_ZSTR, name = NULL_ZSTR, namens = NULL_ZSTR;
 	int stype_len, ns_len, name_len, namens_len;
+	zend_uchar stype_type, ns_type, name_type, namens_type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z!z|ssss", &data, &type, &stype, &stype_len, &ns, &ns_len, &name, &name_len, &namens, &namens_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z!z|tttt", 
+			&data, &type,
+			&stype, &stype_len, &stype_type,
+			&ns, &ns_len, &ns_type,
+			&name, &name_len, &name_type,
+			&namens, &namens_len, &namens_type) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
 	}
 
@@ -978,17 +1002,33 @@ PHP_METHOD(SoapVar, SoapVar)
 		add_property_zval(this_ptr, "enc_value", data);
 	}
 
-	if (stype && stype_len > 0) {
-		add_property_stringl(this_ptr, "enc_stype", stype, stype_len, 1);
+	if (stype.v && stype_len > 0) {
+		if (stype_type == IS_STRING) {
+			add_property_stringl(this_ptr, "enc_stype", stype.s, stype_len, 1);
+		} else if (stype_type == IS_UNICODE) {
+			add_property_unicodel(this_ptr, "enc_stype", stype.u, stype_len, 1);
+		}
 	}
-	if (ns && ns_len > 0) {
-		add_property_stringl(this_ptr, "enc_ns", ns, ns_len, 1);
+	if (ns.v && ns_len > 0) {
+		if (ns_type == IS_STRING) {
+			add_property_stringl(this_ptr, "enc_ns", ns.s, ns_len, 1);
+		} else if (ns_type == IS_UNICODE) {
+			add_property_unicodel(this_ptr, "enc_ns", ns.u, ns_len, 1);
+		}
 	}
-	if (name && name_len > 0) {
-		add_property_stringl(this_ptr, "enc_name", name, name_len, 1);
+	if (name.v && name_len > 0) {
+		if (name_type == IS_STRING) {
+			add_property_stringl(this_ptr, "enc_name", name.s, name_len, 1);
+		} else if (name_type == IS_UNICODE) {
+			add_property_unicodel(this_ptr, "enc_name", name.u, name_len, 1);
+		}
 	}
-	if (namens && namens_len > 0) {
-		add_property_stringl(this_ptr, "enc_namens", namens, namens_len, 1);
+	if (namens.v && namens_len > 0) {
+		if (namens_type == IS_STRING) {
+			add_property_stringl(this_ptr, "enc_namens", namens.s, namens_len, 1);
+		} else if (namens_type == IS_UNICODE) {
+			add_property_unicodel(this_ptr, "enc_namens", namens.u, namens_len, 1);
+		}
 	}
 }
 /* }}} */
@@ -3816,6 +3856,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 			zval *hdr_ret  = *tmp;
 			char *hdr_ns   = headers->hdr?headers->hdr->ns:NULL;
 			char *hdr_name = Z_STRVAL(headers->function_name);
+			int free_ns = 0, free_name = 0;
 
 			head = xmlNewChild(envelope, ns, BAD_CAST("Header"), NULL);
 			if (Z_TYPE_P(hdr_ret) == IS_OBJECT &&
@@ -3825,16 +3866,31 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 				sdlSoapBindingFunctionHeaderPtr *hdr;
 				smart_str key = {0};
 
-				if (zend_hash_find(ht, "namespace", sizeof("namespace"), (void**)&tmp) == SUCCESS &&
-			      Z_TYPE_PP(tmp) == IS_STRING) {
-					smart_str_appendl(&key, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
-					smart_str_appendc(&key, ':');
-					hdr_ns = Z_STRVAL_PP(tmp);
+				if (zend_hash_find(ht, "namespace", sizeof("namespace"), (void**)&tmp) == SUCCESS) {
+					if (Z_TYPE_PP(tmp) == IS_STRING) {
+						smart_str_appendl(&key, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+						smart_str_appendc(&key, ':');
+						hdr_ns = Z_STRVAL_PP(tmp);
+					} else if (Z_TYPE_PP(tmp) == IS_UNICODE) {
+						char *str = soap_unicode_to_string(Z_USTRVAL_PP(tmp), Z_USTRLEN_PP(tmp) TSRMLS_CC);
+
+						smart_str_appends(&key, str);
+						smart_str_appendc(&key, ':');
+						hdr_ns = str;
+						free_ns = 1;
+					}
 				}
-				if (zend_hash_find(ht, "name", sizeof("name"), (void**)&tmp) == SUCCESS &&
-				    Z_TYPE_PP(tmp) == IS_STRING) {
-					smart_str_appendl(&key, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
-					hdr_name = Z_STRVAL_PP(tmp);
+				if (zend_hash_find(ht, "name", sizeof("name"), (void**)&tmp) == SUCCESS) {
+					if (Z_TYPE_PP(tmp) == IS_STRING) {
+						smart_str_appendl(&key, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+						hdr_name = Z_STRVAL_PP(tmp);
+					} else if (Z_TYPE_PP(tmp) == IS_UNICODE) {
+						char *str = soap_unicode_to_string(Z_USTRVAL_PP(tmp), Z_USTRLEN_PP(tmp) TSRMLS_CC);
+
+						smart_str_appends(&key, str);
+						hdr_name = str;
+						free_name = 1;
+					}
 				}
 				smart_str_0(&key);
 				if (headers->hdr && headers->hdr->headerfaults &&
@@ -3863,6 +3919,13 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 					xmlNsPtr nsptr = encode_add_ns(xmlHdr, hdr_ns);
 					xmlSetNs(xmlHdr, nsptr);
 				}
+			}
+
+			if (free_ns) {
+				efree(hdr_ns);
+			}
+			if (free_name) {
+				efree(hdr_name);
 			}
 		}
 
@@ -4033,7 +4096,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 					zval *hdr_ret = &h->retval;
 					char *hdr_ns   = h->hdr?h->hdr->ns:NULL;
 					char *hdr_name = Z_STRVAL(h->function_name);
-
+					int free_ns = 0, free_name = 0;
 
 					if (Z_TYPE(h->retval) == IS_OBJECT &&
 					    instanceof_function(Z_OBJCE(h->retval), soap_header_class_entry TSRMLS_CC)) {
@@ -4042,16 +4105,31 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 						sdlSoapBindingFunctionHeaderPtr *hdr;
 						smart_str key = {0};
 
-						if (zend_hash_find(ht, "namespace", sizeof("namespace"), (void**)&tmp) == SUCCESS &&
-					      Z_TYPE_PP(tmp) == IS_STRING) {
-							smart_str_appendl(&key, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
-							smart_str_appendc(&key, ':');
-							hdr_ns = Z_STRVAL_PP(tmp);
+						if (zend_hash_find(ht, "namespace", sizeof("namespace"), (void**)&tmp) == SUCCESS) {
+					    	if (Z_TYPE_PP(tmp) == IS_STRING) {
+								smart_str_appendl(&key, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+								smart_str_appendc(&key, ':');
+								hdr_ns = Z_STRVAL_PP(tmp);
+							} else if (Z_TYPE_PP(tmp) == IS_UNICODE) {
+								char *str = soap_unicode_to_string(Z_USTRVAL_PP(tmp), Z_USTRLEN_PP(tmp) TSRMLS_CC);
+
+								smart_str_appends(&key, str);
+								smart_str_appendc(&key, ':');
+								hdr_ns = str;
+								free_ns = 1;
+							}
 						}
-						if (zend_hash_find(ht, "name", sizeof("name"), (void**)&tmp) == SUCCESS &&
-						    Z_TYPE_PP(tmp) == IS_STRING) {
-							smart_str_appendl(&key, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
-							hdr_name = Z_STRVAL_PP(tmp);
+						if (zend_hash_find(ht, "name", sizeof("name"), (void**)&tmp) == SUCCESS) {
+							if (Z_TYPE_PP(tmp) == IS_STRING) {
+								smart_str_appendl(&key, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+								hdr_name = Z_STRVAL_PP(tmp);
+							} else if (Z_TYPE_PP(tmp) == IS_UNICODE) {
+								char *str = soap_unicode_to_string(Z_USTRVAL_PP(tmp), Z_USTRLEN_PP(tmp) TSRMLS_CC);
+
+								smart_str_appends(&key, str);
+								hdr_name = str;
+								free_name = 1;
+							}
 						}
 						smart_str_0(&key);
 						if (function && function->binding && function->binding->bindingType == BINDING_SOAP) {
@@ -4084,6 +4162,13 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 							xmlNsPtr nsptr = encode_add_ns(xmlHdr,hdr_ns);
 							xmlSetNs(xmlHdr, nsptr);
 						}
+					}
+
+					if (free_ns) {
+						efree(hdr_ns);
+					}
+					if (free_name) {
+						efree(hdr_name);
 					}
 				}
 				h = h->next;
@@ -4242,21 +4327,36 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 			zval **name, **ns, **tmp;
 
 			if (zend_hash_find(ht, "name", sizeof("name"), (void**)&name) == SUCCESS &&
-			    Z_TYPE_PP(name) == IS_STRING &&
+			    (Z_TYPE_PP(name) == IS_STRING || Z_TYPE_PP(name) == IS_UNICODE) &&
 			    zend_hash_find(ht, "namespace", sizeof("namespace"), (void**)&ns) == SUCCESS &&
-			    Z_TYPE_PP(ns) == IS_STRING) {
+			    (Z_TYPE_PP(ns) == IS_STRING || Z_TYPE_PP(ns) == IS_UNICODE)) {
 				xmlNodePtr h;
-				xmlNsPtr nsptr;
+				xmlNsPtr nsptr = NULL;
 				int hdr_use = SOAP_LITERAL;
 				encodePtr enc = NULL;
+				char *name_str = NULL, *ns_str = NULL;
 
 				if (hdrs) {
 					smart_str key = {0};
 					sdlSoapBindingFunctionHeaderPtr *hdr;
 
-					smart_str_appendl(&key, Z_STRVAL_PP(ns), Z_STRLEN_PP(ns));
+					if (Z_TYPE_PP(ns) == IS_STRING) {
+						smart_str_appendl(&key, Z_STRVAL_PP(ns), Z_STRLEN_PP(ns));
+					} else {
+						char *str = soap_unicode_to_string(Z_USTRVAL_PP(ns), Z_USTRLEN_PP(ns) TSRMLS_CC);
+
+						smart_str_appends(&key, str);
+						ns_str = str;
+					}
 					smart_str_appendc(&key, ':');
-					smart_str_appendl(&key, Z_STRVAL_PP(name), Z_STRLEN_PP(name));
+					if (Z_TYPE_PP(name) == IS_STRING) {
+						smart_str_appendl(&key, Z_STRVAL_PP(name), Z_STRLEN_PP(name));
+					} else {
+						char *str = soap_unicode_to_string(Z_USTRVAL_PP(name), Z_USTRLEN_PP(name) TSRMLS_CC);
+
+						smart_str_appends(&key, str);
+						name_str = str;
+					}
 					smart_str_0(&key);
 					if (zend_hash_find(hdrs, key.c, key.len+1,(void**)&hdr) == SUCCESS) {
 						hdr_use = (*hdr)->use;
@@ -4266,17 +4366,32 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 						}
 					}
 					smart_str_free(&key);
+				} else {
+					if (Z_TYPE_PP(ns) == IS_UNICODE) {
+						ns_str = soap_unicode_to_string(Z_USTRVAL_PP(ns), Z_USTRLEN_PP(ns) TSRMLS_CC);
+					}
+					if (Z_TYPE_PP(name) == IS_UNICODE) {
+						name_str = soap_unicode_to_string(Z_USTRVAL_PP(name), Z_USTRLEN_PP(name) TSRMLS_CC);
+					}
 				}
 
 				if (zend_hash_find(ht, "data", sizeof("data"), (void**)&tmp) == SUCCESS) {
 					h = master_to_xml(enc, *tmp, hdr_use, head);
-					xmlNodeSetName(h, BAD_CAST(Z_STRVAL_PP(name)));
+					xmlNodeSetName(h, BAD_CAST(name_str?name_str:Z_STRVAL_PP(name)));
 				} else {
-					h = xmlNewNode(NULL, BAD_CAST(Z_STRVAL_PP(name)));
+					h = xmlNewNode(NULL, BAD_CAST(name_str?name_str:Z_STRVAL_PP(name)));
 					xmlAddChild(head, h);
 				}
-				nsptr = encode_add_ns(h, Z_STRVAL_PP(ns));
+
+				nsptr = encode_add_ns(h, ns_str?ns_str:Z_STRVAL_PP(ns));
 				xmlSetNs(h, nsptr);
+
+				if (name_str) {
+					efree(name_str);
+				}
+				if (ns_str) {
+					efree(ns_str);
+				}
 
 				if (zend_hash_find(ht, "mustUnderstand", sizeof("mustUnderstand"), (void**)&tmp) == SUCCESS &&
 				    Z_TYPE_PP(tmp) == IS_BOOL && Z_LVAL_PP(tmp)) {
@@ -4293,6 +4408,15 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 						} else {
 							xmlSetProp(h, BAD_CAST(SOAP_1_2_ENV_NS_PREFIX":role"), BAD_CAST(Z_STRVAL_PP(tmp)));
 						}
+					} else if (Z_TYPE_PP(tmp) == IS_UNICODE) {
+						char *str = soap_unicode_to_string(Z_USTRVAL_PP(tmp), Z_STRLEN_PP(tmp) TSRMLS_CC);
+
+						if (version == SOAP_1_1) {
+							xmlSetProp(h, BAD_CAST(SOAP_1_1_ENV_NS_PREFIX":actor"), BAD_CAST(str));
+						} else {
+							xmlSetProp(h, BAD_CAST(SOAP_1_2_ENV_NS_PREFIX":role"), BAD_CAST(str));
+						}
+						efree(str);
 					} else if (Z_TYPE_PP(tmp) == IS_LONG) {
 						if (version == SOAP_1_1) {
 							if (Z_LVAL_PP(tmp) == SOAP_ACTOR_NEXT) {
@@ -4335,6 +4459,7 @@ static xmlNodePtr serialize_parameter(sdlParamPtr param, zval *param_val, int in
 	char *paramName;
 	xmlNodePtr xmlParam;
 	char paramNameBuf[10];
+	int free_name = 0;
 
 	if (param_val &&
 	    Z_TYPE_P(param_val) == IS_OBJECT &&
@@ -4343,9 +4468,15 @@ static xmlNodePtr serialize_parameter(sdlParamPtr param, zval *param_val, int in
 		zval **param_data;
 
 		if (zend_hash_find(Z_OBJPROP_P(param_val), "param_name", sizeof("param_name"), (void **)&param_name) == SUCCESS &&
+			(Z_TYPE_PP(param_name) == IS_STRING || Z_TYPE_PP(param_name) == IS_UNICODE) &&
 		    zend_hash_find(Z_OBJPROP_P(param_val), "param_data", sizeof("param_data"), (void **)&param_data) == SUCCESS) {
 			param_val = *param_data;
-			name = Z_STRVAL_PP(param_name);
+			if (Z_TYPE_PP(param_name) == IS_STRING) {
+				name = Z_STRVAL_PP(param_name);
+			} else {
+				name = soap_unicode_to_string(Z_USTRVAL_PP(param_name), Z_USTRLEN_PP(param_name) TSRMLS_CC);
+				free_name = 1;
+			}
 		}
 	}
 
@@ -4361,6 +4492,10 @@ static xmlNodePtr serialize_parameter(sdlParamPtr param, zval *param_val, int in
 	}
 
 	xmlParam = serialize_zval(param_val, param, paramName, style, parent TSRMLS_CC);
+
+	if (free_name) {
+		efree(name);
+	}
 
 	return xmlParam;
 }
