@@ -110,8 +110,9 @@ static void zend_mm_mem_dummy_dtor(zend_mm_storage *storage)
 
 static zend_mm_segment* zend_mm_mem_mmap_realloc(zend_mm_storage *storage, zend_mm_segment* segment, size_t size)
 {
+	zend_mm_segment *ret;
 #ifdef HAVE_MREMAP
-	zend_mm_segment *ret = (zend_mm_segment*)mremap(segment, segment->size, size, MREMAP_MAYMOVE);
+	ret = (zend_mm_segment*)mremap(segment, segment->size, size, MREMAP_MAYMOVE);
 	if (ret == MAP_FAILED) {
 #endif
 		ret = storage->handlers->_alloc(storage, size);
