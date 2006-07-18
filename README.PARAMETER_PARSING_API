@@ -59,6 +59,7 @@ Type specifiers
  U	- Unicode string, does not allow conversion from binary strings
  z	- the actual zval (zval*)
  Z	- the actual zval (zval**)
+ *  - variable arguments list
 
  The following characters also have a meaning in the specifier string:
 	| - indicates that the remaining parameters are optional, they
@@ -183,5 +184,43 @@ if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
 	/* output error */
 
 	return;
+}
+
+
+/* Function that accepts only varargs */
+
+int i, num_varargs;
+zval ***varargs = NULL;
+
+
+if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "*", &varargs, &num_varargs) == FAILURE) {
+	return;
+}
+
+for (i = 0; i < num_varargs; i++) {
+    /* do something with varargs[i] */
+}
+
+if (varargs) {
+	efree(varargs);
+}
+
+
+/* Function that takes an array, followed by varargs, and ending with a long */
+long num;
+zval *array;
+int i, num_varargs;
+zval ***varargs = NULL;
+
+if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a*l", &array, &varargs, &num_varargs, &num) == FAILURE) {
+	return;
+}
+
+for (i = 0; i < num_varargs; i++) {
+    /* do something with varargs[i] */
+}
+
+if (varargs) {
+	efree(varargs);
 }
 

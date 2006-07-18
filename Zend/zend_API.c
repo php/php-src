@@ -823,12 +823,16 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 	int c, i;
 	int min_num_args = -1;
 	int max_num_args = 0;
+	int post_varargs = 0;
 	zval **arg;
 	void **p;
 	int arg_count;
 	int quiet = flags & ZEND_PARSE_PARAMS_QUIET;
+	zend_bool have_varargs = 0;
 	zend_bool T_present = 0;
 	char T_arg_type = -1;
+	zval ****varargs = NULL;
+	int *n_varargs = NULL;
 
 	for (spec_walk = type_spec; *spec_walk; spec_walk++) {
 		c = *spec_walk;
@@ -857,13 +861,27 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 				/* Pass */
 				break;
 
+			case '*':
+				if (have_varargs) {
+					if (!quiet) {
+						char *space;
+						zstr class_name = get_active_class_name(&space TSRMLS_CC);
+						zend_error(E_WARNING, "%v%s%v(): only one varargs specifier '*' is permitted",
+								   class_name, space, get_active_function_name(TSRMLS_C));
+					}
+					return FAILURE;
+				}
+				have_varargs = 1;
+				/* mark the beginning of varargs */
+				post_varargs = max_num_args;
+				break;
+
 			default:
 				if (!quiet) {
 					char *space;
 					zstr class_name = get_active_class_name(&space TSRMLS_CC);
 					zend_error(E_WARNING, "%v%s%v(): bad type specifier while parsing parameters",
-							class_name, space,
-							get_active_function_name(TSRMLS_C));
+							class_name, space, get_active_function_name(TSRMLS_C));
 				}
 				return FAILURE;
 		}
@@ -873,7 +891,13 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 		min_num_args = max_num_args;
 	}
 
-	if (num_args < min_num_args || num_args > max_num_args) {
+	if (have_varargs) {
+		/* calculate how many required args are at the end of the specifier list */
+		post_varargs = max_num_args - post_varargs;
+		max_num_args = -1;
+	}
+
+	if (num_args < min_num_args || (num_args > max_num_args && max_num_args > 0)) {
 		if (!quiet) {
 			char *space;
 			zstr class_name = get_active_class_name(&space TSRMLS_CC);
@@ -917,6 +941,10 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 					/* pass */
 					break;
 
+				case '*':
+					i = arg_count - post_varargs;
+					break;
+
 				default:
 					i++;
 					break;
@@ -926,11 +954,46 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 
 	i = 0;
 	while (num_args-- > 0) {
-		arg = (zval **) p - (arg_count-i);
 		if (*type_spec == '|') {
 			type_spec++;
 		}
+
+		if (*type_spec == '*') {
+			int num_varargs = num_args + 1 - post_varargs;
+
+			/* eat up the passed in storage even if it won't be filled in with varargs */
+			varargs   = va_arg(*va, zval ****);
+			n_varargs = va_arg(*va, int *);
+			type_spec++;
+
+			if (num_varargs > 0) {
+				int iv = 0;
+				*n_varargs = num_varargs;
+
+				/* allocate space for array and store args */
+				*varargs = safe_emalloc(num_varargs, sizeof(zval **), 0);
+				while (num_varargs-- > 0) {
+					(*varargs)[iv++] = (zval **) p - (arg_count-i);
+					i++;
+				}
+
+				/* adjust how many args we have left and restart loop */
+				num_args = num_args + 1 - iv;
+				continue;
+			} else {
+				*varargs = NULL;
+				*n_varargs = 0;
+			}
+		}
+
+		arg = (zval **) p - (arg_count-i);
+
 		if (zend_parse_arg(i+1, arg, va, &type_spec, quiet, T_arg_type TSRMLS_CC) == FAILURE) {
+			/* clean up varargs array if it was used */
+			if (varargs && *varargs) {
+				efree(*varargs);
+				*varargs = NULL;
+			}
 			return FAILURE;
 		}
 		i++;
