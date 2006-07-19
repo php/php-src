@@ -963,7 +963,6 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 #ifdef ZTS
 	zend_compiler_globals *compiler_globals;
 	zend_executor_globals *executor_globals;
-	void ***tsrm_ls;
 	extern ZEND_API ts_rsrc_id ini_scanner_globals_id;
 	extern ZEND_API ts_rsrc_id language_scanner_globals_id;
 	extern ZEND_API ts_rsrc_id unicode_globals_id;
@@ -972,6 +971,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	extern zend_scanner_globals language_scanner_globals;
 	extern zend_unicode_globals unicode_globals;
 #endif
+	TSRMLS_FETCH();
 
 #ifndef __GNUC__
 	null_zstr.v = NULL;
