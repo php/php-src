@@ -22,21 +22,16 @@
 
 void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL)
 {
-	char *name = NULL;
 	zval *retval_ptr;
 	zval ***args;
 	int status;
 
-	if (!option_array || !zend_is_callable(option_array, IS_CALLABLE_CHECK_NO_ACCESS, &name)) {
+	if (!option_array || !zend_is_callable(option_array, IS_CALLABLE_CHECK_NO_ACCESS, NULL)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "First argument is expected to be a valid callback");
-		if (name) {
-			efree(name);
-		}
 		zval_dtor(value);
 		Z_TYPE_P(value) = IS_NULL;
 		return;
 	}
-	efree(name);
 
 	args = safe_emalloc(sizeof(zval **), 1, 0);
 	args[0] = &value;
