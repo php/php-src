@@ -33,9 +33,7 @@
 /* If you declare any globals in php_json.h uncomment this:
 ZEND_DECLARE_MODULE_GLOBALS(json)
 */
-
-/* True global resources - no need for thread safety here */
-static int le_json;
+static char digits[] = "0123456789abcdef";
 
 /* {{{ json_functions[]
  *
