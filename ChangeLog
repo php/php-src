@@ -1,3 +1,169 @@
+2006-07-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/filter/filter.c:
+      - CS
+
+    * ext/filter/filter.c
+      ext/filter/php_filter.h:
+      - Fix build
+
+2006-07-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/spl/spl_iterators.c:
+      MFB: Fixed memory leak
+
+    * (PHP_5_2)
+      ext/spl/spl_iterators.c:
+      Fixed memory leak
+
+2006-07-18  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * README.PARAMETER_PARSING_API
+      ZendEngine2/zend_API.c:
+      Implement varargs parameter parsing. See README for examples.
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_unicode.c
+      ext/reflection/php_reflection.c:
+      Callable checks and class fetching and lookup should support identifer
+      normalization now. (Marcus, Andrei)
+
+2006-07-18  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/README.ZEND_MM:
+      - Capture Dmitry's Zend MM email for later reference
+
+2006-07-18  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_alloc.c:
+      MFH: fix build on platforms without mremap()
+
+    * ZendEngine2/zend_alloc.c:
+      fix build on platforms without mremap()
+
+2006-07-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/php_encoding.c
+      ext/soap/soap.c:
+      Unicode support (not finished)
+
+2006-07-18  Antony Dovgal  <antony@zend.com>
+
+    * NEWS:
+      patch merged into 5_2
+
+    * (PHP_5_2)
+      NEWS:
+      news entry
+
+    * (PHP_5_2)
+      ext/gmp/gmp.c
+      ext/gmp/php_gmp.h
+      ext/gmp/tests/gmp_nextprime.phpt:
+      MFH: add gmp_nextprime()
+      patch by ants dot aasma at gmail dot com
+
+2006-07-18  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      ext/date/php_date.c
+      ext/date/php_date.h:
+      - Enable all new date functions and classes
+
+    * ext/date/php_date.c
+      ext/date/php_date.h:
+      - Enable all methods in the already existing Date and Timezone classes
+
+2006-07-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/php_encoding.c:
+      Fixed compilation error
+
+2006-07-18  Antony Dovgal  <antony@zend.com>
+
+    * ext/pcre/tests/split2.phpt
+      ext/pcre/tests/split2.phpt:
+      fix test
+
+2006-07-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/Zend.m4
+      ZendEngine2/Zend.m4
+      ZendEngine2/zend.c
+      ZendEngine2/zend.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h
+      ZendEngine2/zend_alloc.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_config.w32.h
+      ZendEngine2/zend_config.w32.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_fast_cache.h
+      ZendEngine2/zend_fast_cache.h
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_globals_macros.h
+      ZendEngine2/zend_globals_macros.h
+      ZendEngine2/zend_mm.c
+      ZendEngine2/zend_mm.c
+      ZendEngine2/zend_mm.h
+      ZendEngine2/zend_mm.h
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.c
+      ext/standard/var.c
+      ext/standard/var.c
+      main/main.c
+      main/main.c
+      sapi/apache/mod_php5.c
+      sapi/apache/mod_php5.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c
+      sapi/apache_hooks/mod_php5.c
+      sapi/apache_hooks/mod_php5.c
+      win32/build/config.w32
+      win32/build/config.w32:
+      New memory manager
+
+2006-07-18  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.c:
+      fix logic
+
+    * (PHP_5_2)
+      ZendEngine2/zend_operators.c:
+      MFH: fix DVAL_TO_LVAL() on AIX with old gcc
+
+    * ZendEngine2/zend_operators.c:
+      fix DVAL_TO_LVAL() macro, which doesn't seem to work correctly on AIX & GCC
+      < 3.5
+
+2006-07-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mysqli/tests/013.phpt:
+      MFB: Added possible failure note.
+
+    * (PHP_5_2)
+      ext/mysqli/tests/013.phpt:
+      Added possible failure note.
+
 2006-07-17  Andrei Zmievski  <andrei@gravitonic.com>
 
     * unicode-progress.txt

@@ -1,3 +1,80 @@
+2006-07-18  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.c:
+      Implement varargs parameter parsing. See README for examples.
+
+    * zend_API.c
+      zend_builtin_functions.c
+      zend_compile.h
+      zend_execute.c
+      zend_execute.h
+      zend_execute_API.c
+      zend_language_scanner.l
+      zend_operators.c
+      zend_unicode.c:
+      Callable checks and class fetching and lookup should support identifer
+      normalization now. (Marcus, Andrei)
+
+2006-07-18  Andi Gutmans  <andi@zend.com>
+
+    * README.ZEND_MM:
+      - Capture Dmitry's Zend MM email for later reference
+
+2006-07-18  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend_alloc.c:
+      MFH: fix build on platforms without mremap()
+
+    * zend_alloc.c:
+      fix build on platforms without mremap()
+
+2006-07-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * Zend.m4
+      Zend.m4
+      zend.c
+      zend.c
+      zend_API.h
+      zend_API.h
+      zend_alloc.c
+      zend_alloc.c
+      zend_alloc.h
+      zend_alloc.h
+      zend_compile.c
+      zend_compile.c
+      zend_config.w32.h
+      zend_config.w32.h
+      zend_execute.c
+      zend_execute.c
+      zend_fast_cache.h
+      zend_fast_cache.h
+      zend_globals.h
+      zend_globals.h
+      zend_globals_macros.h
+      zend_globals_macros.h
+      zend_mm.c
+      zend_mm.c
+      zend_mm.h
+      zend_mm.h
+      zend_operators.c
+      zend_operators.c:
+      New memory manager
+
+2006-07-18  Antony Dovgal  <antony@zend.com>
+
+    * zend_operators.c
+      zend_operators.c:
+      fix logic
+
+    * (PHP_5_2)
+      zend_operators.c:
+      MFH: fix DVAL_TO_LVAL() on AIX with old gcc
+
+    * zend_operators.c:
+      fix DVAL_TO_LVAL() macro, which doesn't seem to work correctly on AIX & GCC
+      < 3.5
+
 2006-07-17  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_API.c
