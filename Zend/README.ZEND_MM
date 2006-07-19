@@ -1,0 +1,13 @@
+The goal of the new memory manager (PHP 5.2 and later) is reducing memory allocation overhead and speedup memory management.
+
+The new manager's "configure" has no "--disable-zend-memory-manager" option, but it has "--enable-malloc-mm" instead. It is enabled by default in DEBUG build and disabled by default in RELEASE built. It allows select malloc/emalloc at runtime.  So you can use internal and external memory debuggers without recompilation.
+
+$ sapi/cli/php -r 'leak();'
+
+$ USE_ZEND_ALLOC=0 valgrind --leak-check=full -r 'leak();'
+
+The patch allows tweaking memory manager with ZEND_MM_MEM_TYPE and ZEND_MM_SEG_SIZE environment variables. Default values are "malloc" and "256K". Dependent on target system you can also use "mmap_anon", "mmap_zero"
+and "win32" storage managers.
+
+$ ZEND_MM_MEM_TYPE=mmap_anon ZEND_MM_SEG_SIZE=1M sapi/cli/php
+
