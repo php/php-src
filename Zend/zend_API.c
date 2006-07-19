@@ -634,14 +634,14 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 		case 'r':
 			{
 				zval **p = va_arg(*va, zval **);
-				if (Z_TYPE_PP(arg) != IS_RESOURCE) {
-					if (Z_TYPE_PP(arg) == IS_NULL && return_null) {
-						*p = NULL;
-					} else {
-						return "resource";
-					}
-				} else {
+				if (return_null) {
+					*p = NULL;
+					break;
+				}
+				if (Z_TYPE_PP(arg) == IS_RESOURCE) {
 					*p = *arg;
+				} else {
+					return "resource";
 				}
 			}
 			break;
@@ -649,14 +649,14 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 		case 'a':
 			{
 				zval **p = va_arg(*va, zval **);
-				if (Z_TYPE_PP(arg) != IS_ARRAY) {
-					if (Z_TYPE_PP(arg) == IS_NULL && return_null) {
-						*p = NULL;
-					} else {
-						return "array";
-					}
-				} else {
+				if (return_null) {
+					*p = NULL;
+					break;
+				}
+				if (Z_TYPE_PP(arg) == IS_ARRAY) {
 					*p = *arg;
+				} else {
+					return "array";
 				}
 			}
 			break;
@@ -664,14 +664,14 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 		case 'h':
 			{
 				HashTable **p = va_arg(*va, HashTable **);
-				if (Z_TYPE_PP(arg) != IS_ARRAY) {
-					if (Z_TYPE_PP(arg) == IS_NULL && return_null) {
-						*p = NULL;
-					} else {
-						return "array";
-					}
-				} else {
+				if (return_null) {
+					*p = NULL;
+					break;
+				}
+				if (Z_TYPE_PP(arg) == IS_ARRAY) {
 					*p = Z_ARRVAL_PP(arg);
+				} else {
+					return "array";
 				}
 			}
 			break;
@@ -679,14 +679,14 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 		case 'o':
 			{
 				zval **p = va_arg(*va, zval **);
-				if (Z_TYPE_PP(arg) != IS_OBJECT) {
-					if (Z_TYPE_PP(arg) == IS_NULL && return_null) {
-						*p = NULL;
-					} else {
-						return "object";
-					}
-				} else {
+				if (return_null) {
+					*p = NULL;
+					break;
+				}
+				if (Z_TYPE_PP(arg) == IS_OBJECT) {
 					*p = *arg;
+				} else {
+					return "object";
 				}
 			}
 			break;
@@ -696,15 +696,17 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 				zval **p = va_arg(*va, zval **);
 				zend_class_entry *ce = va_arg(*va, zend_class_entry *);
 
+				if (return_null) {
+					*p = NULL;
+					break;
+				}
 				if (Z_TYPE_PP(arg) == IS_OBJECT &&
 						(!ce || instanceof_function(Z_OBJCE_PP(arg), ce TSRMLS_CC))) {
 					*p = *arg;
 				} else {
-					if (Z_TYPE_PP(arg) == IS_NULL && return_null) {
-						*p = NULL;
-					} else if (ce) {
+					if (ce) {
 						*ret_type = UG(unicode)?IS_UNICODE:IS_STRING;
-						return ce->name.s;
+						return ce->name.v;
 					} else {
 						return "object";
 					}
@@ -717,7 +719,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 				zend_class_entry **lookup, **pce = va_arg(*va, zend_class_entry **);
 				zend_class_entry *ce_base = *pce;
 
-				if (return_null && Z_TYPE_PP(arg) == IS_NULL) {
+				if (return_null) {
 					*pce = NULL;
 					break;
 				}
@@ -728,7 +730,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 					*pce = *lookup;
 				}
 				if (ce_base) {
-					if ((!*pce || !instanceof_function(*pce, ce_base TSRMLS_CC)) && !return_null) {
+					if ((!*pce || !instanceof_function(*pce, ce_base TSRMLS_CC))) {
 						char *space;
 						zstr class_name = get_active_class_name(&space TSRMLS_CC);
 						zend_error(E_WARNING, "%v%s%v() expects parameter %d to be a class name derived from %v, '%v' given",
@@ -756,11 +758,13 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 				zend_fcall_info       *fci = va_arg(*va, zend_fcall_info *);
 				zend_fcall_info_cache *fcc = va_arg(*va, zend_fcall_info_cache *);
 
-				if (zend_fcall_info_init(*arg, fci, fcc TSRMLS_CC) == SUCCESS) {
-					break;
-				} else if (return_null) {
+				if (return_null) {
 					fci->size = 0;
 					fcc->initialized = 0;
+					break;
+				} 
+
+				if (zend_fcall_info_init(*arg, fci, fcc TSRMLS_CC) == SUCCESS) {
 					break;
 				} else {
 					return "valid callback";
@@ -770,23 +774,25 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 		case 'z':
 			{
 				zval **p = va_arg(*va, zval **);
-				if (Z_TYPE_PP(arg) == IS_NULL && return_null) {
+				if (return_null) {
 					*p = NULL;
 				} else {
 					*p = *arg;
 				}
 			}
 			break;
+
 		case 'Z':
 			{
 				zval ***p = va_arg(*va, zval ***);
-				if (Z_TYPE_PP(arg) == IS_NULL && return_null) {
+				if (return_null) {
 					*p = NULL;
 				} else {
 					*p = arg;
 				}
 			}
 			break;
+
 		default:
 			return "unknown";
 	}
