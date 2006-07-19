@@ -35,7 +35,6 @@ bool(true)
 bool(false)
 bool(false)
 bool(false)
-PHP Warning:  input_has_variable() expects parameter 2 to be string, array given in %s on line %d
 
 Warning: input_has_variable() expects parameter 2 to be string, array given in %s on line %d
 NULL
@@ -44,24 +43,19 @@ bool(true)
 bool(false)
 bool(false)
 bool(false)
-PHP Warning:  input_has_variable() expects parameter 2 to be string, array given in %s on line %d
 
 Warning: input_has_variable() expects parameter 2 to be string, array given in %s on line %d
 NULL
 bool(false)
-PHP Warning:  input_has_variable() expects parameter 1 to be long, string given in %s on line %d
 
 Warning: input_has_variable() expects parameter 1 to be long, string given in %s on line %d
 NULL
-PHP Warning:  input_has_variable() expects parameter 1 to be long, array given in %s on line %d
 
 Warning: input_has_variable() expects parameter 1 to be long, array given in %s on line %d
 NULL
-PHP Warning:  input_has_variable() expects parameter 1 to be long, array given in %s on line %d
 
 Warning: input_has_variable() expects parameter 1 to be long, array given in %s on line %d
 NULL
-PHP Warning:  input_has_variable() expects parameter 1 to be long, string given in %s on line %d
 
 Warning: input_has_variable() expects parameter 1 to be long, string given in %s on line %d
 NULL

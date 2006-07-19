@@ -28,22 +28,19 @@ echo "Done\n";
 string(4) "test"
 string(18) "http://example.com"
 string(27) "&#60;b&#62;test&#60;/b&#62;"
-NULL
+bool(false)
 string(6) "string"
 float(12345.7)
 string(29) "&#60;p&#62;string&#60;/p&#62;"
-NULL
-PHP Warning:  input_get() expects parameter 1 to be long, object given in %s on line %d
+bool(false)
 
 Warning: input_get() expects parameter 1 to be long, object given in %s on line %d
 NULL
-PHP Warning:  input_get() expects parameter 3 to be long, string given in %s on line %d
 
 Warning: input_get() expects parameter 3 to be long, string given in %s on line %d
 NULL
-PHP Warning:  input_get() expects parameter 1 to be long, string given in %s on line %d
 
 Warning: input_get() expects parameter 1 to be long, string given in %s on line %d
 NULL
-bool(false)
+NULL
 Done
