@@ -772,6 +772,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_error_log, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_error_get_last, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_call_user_func, 0, 0, 1)
 	ZEND_ARG_INFO(0, function_name)
 	ZEND_ARG_INFO(0, parmeter)
@@ -3389,6 +3393,7 @@ zend_function_entry basic_functions[] = {
 	
 	PHP_FE(import_request_variables,										arginfo_import_request_variables)
 	PHP_FE(error_log,														arginfo_error_log)
+	PHP_FE(error_get_last,													arginfo_error_get_last)
 	PHP_FE(call_user_func,													arginfo_call_user_func)
 	PHP_FE(call_user_func_array,											arginfo_call_user_func_array)
 	PHP_DEP_FE(call_user_method,											arginfo_call_user_method)
@@ -4934,6 +4939,23 @@ PHPAPI char *php_get_current_user()
 	
 	return SG(request_info).current_user;		
 }	
+
+/* {{{ proto array error_get_last()
+	Get the last occurred error as associative array. Returns NULL if there hasn't been an error yet. */
+PHP_FUNCTION(error_get_last)
+{
+	if (ZEND_NUM_ARGS()) {
+		WRONG_PARAM_COUNT;
+	}
+	if (PG(last_error_message)) {
+		array_init(return_value);
+		add_assoc_long_ex(return_value, "type", sizeof("type"), PG(last_error_type));
+		add_assoc_string_ex(return_value, "message", sizeof("message"), PG(last_error_message), 1);
+		add_assoc_string_ex(return_value, "file", sizeof("file"), PG(last_error_file)?PG(last_error_file):"-", 1 );
+		add_assoc_long_ex(return_value, "line", sizeof("line"), PG(last_error_lineno));
+	}
+}
+/* }}} */
 
 /* {{{ proto mixed call_user_func(string function_name [, mixed parmeter] [, mixed ...])
    Call a user function which is the first parameter */
