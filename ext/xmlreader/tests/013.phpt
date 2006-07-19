@@ -50,3 +50,10 @@ string(3) "456"
 
 Warning: XMLReader::read(): Element 'foo': %s
 ===DONE===
+--UEXPECTF--
+unicode(3) "123"
+unicode(3) "456"
+===FAIL===
+
+Warning: XMLReader::read(): Element 'foo': %s
+===DONE===

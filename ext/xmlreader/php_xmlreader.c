@@ -92,9 +92,9 @@ static int xmlreader_property_reader(xmlreader_object *obj, xmlreader_prop_handl
 	switch (hnd->type) {
 		case IS_STRING:
 			if (retchar) {
-				ZVAL_STRING(*retval, (xmlChar *) retchar, 1);
+				ZVAL_XML_STRING(*retval, (char *) retchar, ZSTR_DUPLICATE);
 			} else {
-				ZVAL_EMPTY_STRING(*retval);
+				ZVAL_EMPTY_TEXT(*retval);
 			}
 			break;
 		case IS_BOOL:
@@ -121,17 +121,17 @@ zval **xmlreader_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC)
 	zend_object_handlers *std_hnd;
 	int ret = FAILURE;
 
- 	if (member->type != IS_STRING) {
+ 	if (member->type != IS_STRING && member->type != IS_UNICODE) {
 		tmp_member = *member;
 		zval_copy_ctor(&tmp_member);
-		convert_to_string(&tmp_member);
+		convert_to_text(&tmp_member);
 		member = &tmp_member;
 	}
 
 	obj = (xmlreader_object *)zend_objects_get_address(object TSRMLS_CC);
 
 	if (obj->prop_handler != NULL) {
-		ret = zend_hash_find(obj->prop_handler, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &hnd);
+		ret = zend_u_hash_find(obj->prop_handler, Z_TYPE_P(member), Z_UNIVAL_P(member), Z_UNILEN_P(member)+1, (void **) &hnd);
 	}
 	if (ret == FAILURE) {
 		std_hnd = zend_get_std_object_handlers();
@@ -155,10 +155,10 @@ zval *xmlreader_read_property(zval *object, zval *member, int type TSRMLS_DC)
 	zend_object_handlers *std_hnd;
 	int ret;
 
- 	if (member->type != IS_STRING) {
+ 	if (member->type != IS_STRING && member->type != IS_UNICODE) {
 		tmp_member = *member;
 		zval_copy_ctor(&tmp_member);
-		convert_to_string(&tmp_member);
+		convert_to_text(&tmp_member);
 		member = &tmp_member;
 	}
 
@@ -166,7 +166,7 @@ zval *xmlreader_read_property(zval *object, zval *member, int type TSRMLS_DC)
 	obj = (xmlreader_object *)zend_objects_get_address(object TSRMLS_CC);
 
 	if (obj->prop_handler != NULL) {
-		ret = zend_hash_find(obj->prop_handler, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &hnd);
+		ret = zend_u_hash_find(obj->prop_handler, Z_TYPE_P(member), Z_UNIVAL_P(member), Z_UNILEN_P(member)+1, (void **) &hnd);
 	}
 	if (ret == SUCCESS) {
 		ret = xmlreader_property_reader(obj, hnd, &retval TSRMLS_CC);
@@ -197,10 +197,10 @@ void xmlreader_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 	zend_object_handlers *std_hnd;
 	int ret;
 
- 	if (member->type != IS_STRING) {
+ 	if (member->type != IS_STRING && member->type != IS_UNICODE) {
 		tmp_member = *member;
 		zval_copy_ctor(&tmp_member);
-		convert_to_string(&tmp_member);
+		convert_to_text(&tmp_member);
 		member = &tmp_member;
 	}
 
@@ -208,7 +208,7 @@ void xmlreader_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 	obj = (xmlreader_object *)zend_objects_get_address(object TSRMLS_CC);
 
 	if (obj->prop_handler != NULL) {
-		ret = zend_hash_find((HashTable *)obj->prop_handler, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &hnd);
+		ret = zend_u_hash_find(obj->prop_handler, Z_TYPE_P(member), Z_UNIVAL_P(member), Z_UNILEN_P(member)+1, (void **) &hnd);
 	}
 	if (ret == SUCCESS) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot write to read-only property");
@@ -233,8 +233,8 @@ char *_xmlreader_get_valid_file_path(char *source, char *resolved_path, int reso
 	int isFileUri = 0;
 
 	uri = xmlCreateURI();
-	escsource = xmlURIEscapeStr(source, ":");
-	xmlParseURIReference(uri, escsource);
+	escsource = xmlURIEscapeStr((xmlChar *) source, (xmlChar *) ":");
+	xmlParseURIReference(uri, (char *)escsource);
 	xmlFree(escsource);
 
 	if (uri->scheme != NULL) {
@@ -420,13 +420,19 @@ zend_object_value xmlreader_objects_new(zend_class_entry *class_type TSRMLS_DC)
 static void php_xmlreader_string_arg(INTERNAL_FUNCTION_PARAMETERS, xmlreader_read_one_char_t internal_function) {
 	zval *id;
 	int name_len = 0;
-	char *retchar = NULL;
+	xmlChar *retchar = NULL;
 	xmlreader_object *intern;
 	char *name;
+	UConverter *orig_runtime_conv;
+
+	orig_runtime_conv = ZEND_U_CONVERTER(UG(runtime_encoding_conv));
+	UG(runtime_encoding_conv) = UG(utf8_conv);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
+		UG(runtime_encoding_conv) = orig_runtime_conv;
 		return;
 	}
+	UG(runtime_encoding_conv) = orig_runtime_conv;
 
 	if (!name_len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument cannot be an empty string");
@@ -437,10 +443,10 @@ static void php_xmlreader_string_arg(INTERNAL_FUNCTION_PARAMETERS, xmlreader_rea
 
 	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
 	if (intern && intern->ptr) {
-		retchar = internal_function(intern->ptr, name);
+		retchar = internal_function(intern->ptr, (xmlChar *)name);
 	}
 	if (retchar) {
-		RETVAL_STRING(retchar, 1);
+		RETVAL_XML_STRING((char *)retchar, ZSTR_DUPLICATE);
 		xmlFree(retchar);
 		return;
 	} else {
@@ -472,7 +478,7 @@ static void php_xmlreader_no_arg(INTERNAL_FUNCTION_PARAMETERS, xmlreader_read_in
 /* {{{ php_xmlreader_no_arg_string */
 static void php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAMETERS, xmlreader_read_char_t internal_function) {
 	zval *id;
-	char *retchar = NULL;
+	xmlChar *retchar = NULL;
 	xmlreader_object *intern;
 
 	id = getThis();
@@ -482,7 +488,7 @@ static void php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAMETERS, xmlreader_
 		retchar = internal_function(intern->ptr);
 	}
 	if (retchar) {
-		RETVAL_STRING(retchar, 1);
+		RETVAL_XML_STRING((char *)retchar, ZSTR_DUPLICATE);
 		xmlFree(retchar);
 		return;
 	} else {
@@ -577,7 +583,7 @@ PHP_METHOD(xmlreader, getAttributeNo)
 {
 	zval *id;
 	long attr_pos;
-	char *retchar = NULL;
+	xmlChar *retchar = NULL;
 	xmlreader_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &attr_pos) == FAILURE) {
@@ -591,11 +597,11 @@ PHP_METHOD(xmlreader, getAttributeNo)
 		retchar = xmlTextReaderGetAttributeNo(intern->ptr,attr_pos);
 	}
 	if (retchar) {
-		RETVAL_STRING(retchar, 1);
+		RETVAL_XML_STRING((char *)retchar, ZSTR_DUPLICATE);
 		xmlFree(retchar);
 		return;
 	} else {
-		RETURN_EMPTY_STRING();
+		RETURN_EMPTY_TEXT();
 	}
 }
 /* }}} */
@@ -607,11 +613,18 @@ PHP_METHOD(xmlreader, getAttributeNs)
 	zval *id;
 	int name_len = 0, ns_uri_len = 0;
 	xmlreader_object *intern;
-	char *name, *ns_uri, *retchar = NULL;
+	xmlChar *retchar = NULL;
+	char *name, *ns_uri;
+	UConverter *orig_runtime_conv;
+
+	orig_runtime_conv = ZEND_U_CONVERTER(UG(runtime_encoding_conv));
+	UG(runtime_encoding_conv) = UG(utf8_conv);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &name, &name_len, &ns_uri, &ns_uri_len) == FAILURE) {
+		UG(runtime_encoding_conv) = orig_runtime_conv;
 		return;
 	}
+	UG(runtime_encoding_conv) = orig_runtime_conv;
 
 	if (name_len == 0 || ns_uri_len == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attribute Name and Namespace URI cannot be empty");
@@ -622,14 +635,14 @@ PHP_METHOD(xmlreader, getAttributeNs)
 
 	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
 	if (intern && intern->ptr) {
-		retchar = xmlTextReaderGetAttributeNs(intern->ptr, name, ns_uri);
+		retchar = xmlTextReaderGetAttributeNs(intern->ptr, (xmlChar *)name, (xmlChar *)ns_uri);
 	}
 	if (retchar) {
-		RETVAL_STRING(retchar, 1);
+		RETVAL_XML_STRING((char *)retchar, ZSTR_DUPLICATE);
 		xmlFree(retchar);
 		return;
 	} else {
-		RETURN_EMPTY_STRING();
+		RETURN_EMPTY_TEXT();
 	}
 }
 /* }}} */
@@ -688,10 +701,16 @@ PHP_METHOD(xmlreader, moveToAttribute)
 	int name_len = 0, retval;
 	xmlreader_object *intern;
 	char *name;
+	UConverter *orig_runtime_conv;
+
+	orig_runtime_conv = ZEND_U_CONVERTER(UG(runtime_encoding_conv));
+	UG(runtime_encoding_conv) = UG(utf8_conv);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
+		UG(runtime_encoding_conv) = orig_runtime_conv;
 		return;
 	}
+	UG(runtime_encoding_conv) = orig_runtime_conv;
 
 	if (name_len == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attribute Name is required");
@@ -702,7 +721,7 @@ PHP_METHOD(xmlreader, moveToAttribute)
 
 	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
 	if (intern && intern->ptr) {
-		retval = xmlTextReaderMoveToAttribute(intern->ptr, name);
+		retval = xmlTextReaderMoveToAttribute(intern->ptr, (xmlChar *)name);
 		if (retval == 1) {
 			RETURN_TRUE;
 		}
@@ -749,10 +768,17 @@ PHP_METHOD(xmlreader, moveToAttributeNs)
 	int name_len=0, ns_uri_len=0, retval;
 	xmlreader_object *intern;
 	char *name, *ns_uri;
+	UConverter *orig_runtime_conv;
+
+	orig_runtime_conv = ZEND_U_CONVERTER(UG(runtime_encoding_conv));
+	UG(runtime_encoding_conv) = UG(utf8_conv);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &name, &name_len, &ns_uri, &ns_uri_len) == FAILURE) {
+		UG(runtime_encoding_conv) = orig_runtime_conv;
 		return;
 	}
+
+	UG(runtime_encoding_conv) = orig_runtime_conv;
 
 	if (name_len == 0 || ns_uri_len == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attribute Name and Namespace URI cannot be empty");
@@ -763,7 +789,7 @@ PHP_METHOD(xmlreader, moveToAttributeNs)
 
 	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
 	if (intern && intern->ptr) {
-		retval = xmlTextReaderMoveToAttributeNs(intern->ptr, name, ns_uri);
+		retval = xmlTextReaderMoveToAttributeNs(intern->ptr, (xmlChar *)name, (xmlChar *)ns_uri);
 		if (retval == 1) {
 			RETURN_TRUE;
 		}
@@ -830,10 +856,16 @@ PHP_METHOD(xmlreader, next)
 	int retval, name_len=0;
 	xmlreader_object *intern;
 	char *name = NULL;
+	UConverter *orig_runtime_conv;
+
+	orig_runtime_conv = ZEND_U_CONVERTER(UG(runtime_encoding_conv));
+	UG(runtime_encoding_conv) = UG(utf8_conv);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
+		UG(runtime_encoding_conv) = orig_runtime_conv;
 		return;
 	}
+	UG(runtime_encoding_conv) = orig_runtime_conv;
 
 	id = getThis();
 	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
@@ -846,7 +878,7 @@ PHP_METHOD(xmlreader, next)
 #endif
 		retval = xmlTextReaderNext(intern->ptr);
 		while (name != NULL && retval == 1) {
-			if (xmlStrEqual(xmlTextReaderConstLocalName(intern->ptr), name)) {
+			if (xmlStrEqual(xmlTextReaderConstLocalName(intern->ptr), (xmlChar *)name)) {
 				RETURN_TRUE;
 			}
 			retval = xmlTextReaderNext(intern->ptr); 
@@ -876,10 +908,17 @@ PHP_METHOD(xmlreader, open)
 	char *encoding = NULL;
 	char resolved_path[MAXPATHLEN + 1];
 	xmlTextReaderPtr reader = NULL;
+	UConverter *orig_runtime_conv;
+
+	orig_runtime_conv = ZEND_U_CONVERTER(UG(runtime_encoding_conv));
+	UG(runtime_encoding_conv) = UG(utf8_conv);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!l", &source, &source_len, &encoding, &encoding_len, &options) == FAILURE) {
+		UG(runtime_encoding_conv) = orig_runtime_conv;
 		return;
 	}
+
+	UG(runtime_encoding_conv) = orig_runtime_conv;
 
 	id = getThis();
 	if (id != NULL) {
@@ -1059,7 +1098,7 @@ PHP_METHOD(xmlreader, XML)
 	int resolved_path_len;
 	char *directory=NULL, resolved_path[MAXPATHLEN];
 	xmlParserInputBufferPtr inputbfr;
-	xmlTextReaderPtr reader;
+	xmlTextReaderPtr reader = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!l", &source, &source_len, &encoding, &encoding_len, &options) == FAILURE) {
 		return;
@@ -1210,7 +1249,8 @@ PHP_MINIT_FUNCTION(xmlreader)
 	ce.create_object = xmlreader_objects_new;
 	xmlreader_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 
-	zend_hash_init(&xmlreader_prop_handlers, 0, NULL, NULL, 1);
+	zend_u_hash_init(&xmlreader_prop_handlers, 0, NULL, NULL, 1, (zend_bool)zend_ini_long("unicode.semantics", sizeof("unicode.semantics"), 1));
+
 	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "attributeCount", xmlTextReaderAttributeCount, NULL, IS_LONG TSRMLS_CC);
 	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "baseURI", NULL, xmlTextReaderConstBaseUri, IS_STRING TSRMLS_CC);
 	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "depth", xmlTextReaderDepth, NULL, IS_LONG TSRMLS_CC);
