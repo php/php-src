@@ -70,8 +70,8 @@ dnl
 dnl Main config
 dnl
 
-PHP_ARG_WITH(json, whether to enable JavaScript Object Serialization support,
-[  --with-json       Enable JavaScript Object Serialization support])
+PHP_ARG_ENABLE(json, whether to enable JavaScript Object Serialization support,
+[  --disable-json       Disable JavaScript Object Serialization support], yes)
 
 if test "$PHP_JSON" != "no"; then  
   AC_DEFINE([HAVE_JSON],1,[whether to have JavaScript Object Serialization support])
