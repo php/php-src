@@ -258,12 +258,12 @@ ZEND_API int zend_get_object_classname(zval *object, zstr *class_name, zend_uint
 }
 
 #define RETURN_AS_STRING(arg, p, pl, type) \
-	*(char**)p = Z_STRVAL_PP(arg); \
+	(*p).s = Z_STRVAL_PP(arg); \
 	*pl = Z_STRLEN_PP(arg); \
 	*type = IS_STRING;
 
 #define RETURN_AS_UNICODE(arg, p, pl, type) \
-	*(UChar**)p = Z_USTRVAL_PP(arg); \
+	(*p).u = Z_USTRVAL_PP(arg); \
 	*pl = Z_USTRLEN_PP(arg); \
 	*type = IS_UNICODE;
 
@@ -509,13 +509,13 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 		case 'T':
 			if (T_arg_type != -1)
 			{
-				void **p = va_arg(*va, void **);
+				zstr *p = va_arg(*va, void *);
 				int *pl = va_arg(*va, int *);
 				zend_uchar *type = va_arg(*va, zend_uchar *);
 				switch (Z_TYPE_PP(arg)) {
 					case IS_NULL:
 						if (return_null) {
-							*p = NULL;
+							*p = NULL_ZSTR;
 							*pl = 0;
 							*type = T_arg_type;
 							break;
@@ -562,13 +562,13 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 
 		case 't':
 			{
-				void **p = va_arg(*va, void **);
+				zstr *p = va_arg(*va, zstr *);
 				int *pl = va_arg(*va, int *);
 				zend_uchar *type = va_arg(*va, zend_uchar *);
 				switch (Z_TYPE_PP(arg)) {
 					case IS_NULL:
 						if (return_null) {
-							*p = NULL;
+							*p = NULL_ZSTR;
 							*pl = 0;
 							*type = UG(unicode)?IS_UNICODE:IS_STRING;
 							break;
