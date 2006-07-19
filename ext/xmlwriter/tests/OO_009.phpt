@@ -7,7 +7,9 @@ if (!extension_loaded("xmlwriter")) die("skip");
 --FILE--
 <?php 
 /* $Id$ */
-
+/*
+Libxml 2.6.24 and up adds a new line after a processing instruction (PI)
+*/
 $xw = new XMLWriter();
 $xw->openMemory();
 $xw->setIndent(TRUE);
@@ -32,12 +34,12 @@ $xw->endDocument();
 $output = $xw->flush(true);
 print $output;
 ?>
---EXPECT--
+--EXPECTF--
 <?xml version="1.0" encoding="UTF-8"?>
 <root id="elem1">
  <elem1 attr1="first">
   <!--start PI-->
-  <pi><?php echo "hello world"; ?></pi>
+  <pi><?php echo "hello world"; ?>%w</pi>
   <cdata><![CDATA[<>&"]]></cdata>
  </elem1>
 </root>
