@@ -187,13 +187,33 @@ if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
 }
 
 
-/* Function that accepts only varargs */
+/* Function that accepts only varargs (0 or more) */
 
 int i, num_varargs;
 zval ***varargs = NULL;
 
 
 if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "*", &varargs, &num_varargs) == FAILURE) {
+	return;
+}
+
+for (i = 0; i < num_varargs; i++) {
+    /* do something with varargs[i] */
+}
+
+if (varargs) {
+	efree(varargs);
+}
+
+
+/* Function that accepts a string, followed by varargs (1 or more) */
+
+char *str;
+int str_len;
+int i, num_varargs;
+zval ***varargs = NULL;
+
+if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s+", &str, &str_len, &varargs, &num_varargs) == FAILURE) {
 	return;
 }
 

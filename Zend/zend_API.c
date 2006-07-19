@@ -862,16 +862,21 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 				break;
 
 			case '*':
+			case '+':
 				if (have_varargs) {
 					if (!quiet) {
 						char *space;
 						zstr class_name = get_active_class_name(&space TSRMLS_CC);
-						zend_error(E_WARNING, "%v%s%v(): only one varargs specifier '*' is permitted",
+						zend_error(E_WARNING, "%v%s%v(): only one varargs specifier (* or +) is permitted",
 								   class_name, space, get_active_function_name(TSRMLS_C));
 					}
 					return FAILURE;
 				}
 				have_varargs = 1;
+				/* we expect at least one parameter in varargs */
+				if (c == '+') {
+					max_num_args++;
+				}
 				/* mark the beginning of varargs */
 				post_varargs = max_num_args;
 				break;
@@ -942,6 +947,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 					break;
 
 				case '*':
+				case '+':
 					i = arg_count - post_varargs;
 					break;
 
@@ -958,7 +964,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 			type_spec++;
 		}
 
-		if (*type_spec == '*') {
+		if (*type_spec == '*' || *type_spec == '+') {
 			int num_varargs = num_args + 1 - post_varargs;
 
 			/* eat up the passed in storage even if it won't be filled in with varargs */
