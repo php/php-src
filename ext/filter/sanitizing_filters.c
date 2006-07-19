@@ -67,7 +67,7 @@ static void php_filter_encode_html_high_low(zval *value, long flags)
 	for (x = 0, y = 0; len--; x++, y++) {
 		if (((flags & FILTER_FLAG_ENCODE_LOW) && (s[x] < 32)) || ((flags & FILTER_FLAG_ENCODE_HIGH) && (s[x] > 127))) {
 			smart_str_appendl(&str, "&#", 2);
-			smart_str_append_long(&str, s[x]);
+			smart_str_append_unsigned(&str, s[x]);
 			smart_str_appendc(&str, ';');
 		} else {
 			smart_str_appendc(&str, s[x]);
