@@ -1,13 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, PHP 5.2.0
-- New memory manager. (Dmitry)
-- Reimplementation of Apache2Filter, PHP can now be an arbitrary filter 
-  in the chain and will read the script from the Apache stream. (John)
-- Added support for Apache2Filter in the Windows build including binary 
-  support for both Apache 2.0.x (php5apache2_filter.dll) and 
-  Apache 2.2.x (php5apache2_2_filter.dll). (Edin)
 - Updated timezonedb to version 2006.7. (Derick)
+
 - Changed priority of PHPRC environment variable on win32 to be higher then
   value from registry. (Dmitry)
 - Changed __toString() to be called wherever applicable. (Marcus)
@@ -15,15 +10,26 @@ PHP                                                                        NEWS
 - Changed realpath cache to be disabled when "open_basedir" or "safe_mode"
   are enabled on per-request basis. (Ilia)
 
-- Implemented feature request #37971 (added error messages to disk_free_space() 
-  & disk_total_space()). (Tony)
+- Improved the Zend memory manager: (Dmitry)
+  . Removed unnecessary "--disable-zend-memory-manager" configure option.
+  . Added "--enable-malloc-mm" configure option which is enabled by default
+    in debug builds to allow using internal and external memory debuggers.
+  . Allow tweaking the memory manager with ZEND_MM_MEM_TYPE and ZEND_MM_SEG_SIZE 
+    environment variables.
+  . For more information: Zend/README.ZEND_MM
 - Improved safe_mode check for the error_log() function. (Ilia)
 - Improved the error reporting in SOAP extension on request failure. (Ilia)
-- New crypt() implementation for win32 which is about 10 times faster and has 
-  more friendly license. (Frank, Dmitry)
+- Improved crypt() on win32 to be about 10 times faster and to have friendlier
+  license. (Frank, Dmitry)
 - Improved performance of the implode() function on associated arrays. (Ilia)
 - Improved performance of str_replace() when doing 1 char to 1 char or 1 char
   to many chars replacement. (Ilia)
+- Improved apache2filter SAPI:
+  . Allowed PHP to be an arbitrary filter in the chain and read the script
+    from the Apache stream. (John)
+  . Added support for apache2filter in the Windows build including binary
+    support for both Apache 2.0.x (php5apache2_filter.dll) and Apache 2.2.x
+    (php5apache2_2_filter.dll). (Edin)
 - Improved apache2handler SAPI:
   . Changed ap_set_content_type() to be called only once. (Mike)
   . Added support for Apache 2.2 handler in the Windows distribution. (Edin)
@@ -57,9 +63,11 @@ PHP                                                                        NEWS
   . Added readInnerXML(), readOuterXML(), readString(), setSchema(). (2.6.20+)
   . Changed to passing libxml options when loading reader.
 
-- Added PATHINFO_FILENAME option to pathinfo() to get the filename. (Toby S., 
-  Christian S.)
-- Added array_fill_keys(). (Marcus, Matthew Wilmas)
+- Added error messages to disk_free_space() and disk_total_space()
+  functions. FR #37971 (Tony)
+- Added PATHINFO_FILENAME option to pathinfo() to get the filename. (Toby S. 
+  and Christian S.)
+- Added array_fill_keys() function. (Marcus, Matthew Wilmas)
 - Added posix_initgroups() function. (Ilia)
 - Added an optional parameter to parse_url() to allow retrieval of distinct URL
   components. (Ilia)
