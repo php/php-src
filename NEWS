@@ -186,6 +186,8 @@ PHP                                                                        NEWS
 - Fixed bug #37256 (php-fastcgi doesn't handle connection abort). (Dmitry)
 - Fixed bug #37244 (Added strict flag to base64_decode() that enforces 
   RFC3548 compliance). (Ilia)
+- Fixed bug #37144 (PHP crashes trying to assign into property of dead object).
+  (Dmitry)
 - Fixed bug #36949 (invalid internal mysqli objects dtor). (Mike)
 - Fixed bug #36759 (Objects destructors are invoked in wrong order when script
   is finished). (Dmitry)
