@@ -128,6 +128,7 @@ struct _php_core_globals {
 	zend_bool always_populate_raw_post_data;
 	zend_bool report_zend_debug;
 
+	int last_error_type;
 	char *last_error_message;
 	char *last_error_file;
 	int  last_error_lineno;
