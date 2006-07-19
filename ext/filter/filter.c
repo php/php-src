@@ -771,7 +771,7 @@ PHP_FUNCTION(input_get_args)
 			} else {
 				php_zval_filter(*tmp, filter, filter_flags, options, charset TSRMLS_CC);
 			}
-
+			zval_add_ref(tmp);
 			add_assoc_zval(return_value, key, *tmp);
 		} else {
 			add_assoc_null(return_value, key);
