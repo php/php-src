@@ -41,6 +41,7 @@
 #define FETCH_STRING_OPTION(var_name, option_name)                                                                       \
 	var_name = NULL;                                                                                                     \
 	var_name##_set = 0;                                                                                                  \
+	var_name##_len = 0;                                                                                                  \
 	if (option_array) {                                                                                                  \
 		if (zend_hash_find(HASH_OF(option_array), option_name, sizeof(option_name), (void **) &option_val) == SUCCESS) { \
 			convert_to_string(*option_val);                                                                              \
@@ -248,7 +249,7 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	zval **option_val;
 	char *decimal;
-	char dec_sep;
+	char dec_sep = '\0';
 
 	const char default_decimal[] = ".";
 	int decimal_set, decimal_len;
@@ -260,7 +261,7 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	int sign = 1;
 
-	double ret_val;
+	double ret_val = 0;
 	double factor;
 
 	int exp_value = 0, exp_multiply = 1;

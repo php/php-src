@@ -323,7 +323,7 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 {
 	zval  new_var, raw_var;
 	zval *array_ptr = NULL, *orig_array_ptr = NULL;
-	char *orig_var;
+	char *orig_var = NULL;
 	int retval = 0;
 
 	assert(*val != NULL);
