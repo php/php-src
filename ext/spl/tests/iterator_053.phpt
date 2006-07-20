@@ -1,5 +1,5 @@
 --TEST--
-SPL: RegexIterator::ALL_MATCHES, USE_KEY
+SPL: RegexIterator::ALL_MATCHES
 --SKIPIF--
 <?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
@@ -7,6 +7,15 @@ SPL: RegexIterator::ALL_MATCHES, USE_KEY
 
 class MyRegexIterator extends RegexIterator
 {
+	public $uk, $re;
+	
+	function __construct($it, $re, $flags, $mode)
+	{
+		$this->uk = $flags & self::USE_KEY;
+		$this->re = $re;
+		parent::__construct($it, $re, $flags, $mode);
+	}
+
 	function show()
 	{
 		foreach($this as $k => $v)
@@ -15,9 +24,17 @@ class MyRegexIterator extends RegexIterator
 			var_dump($v);
 		}
 	}
+	
+	function accept()
+	{
+		@preg_match_all($this->re, (string)($this->uk ? $this->key() : $this->current()), $sub);
+		$ret = parent::accept();
+		var_dump($sub == $this->current());
+		return $ret;
+	}
 }
 
-$ar = new ArrayIterator(array('1'=>0,'1,2'=>1,'1,2,3'=>2,0=>3,'FooBar'=>4,','=>5,',,'=>6));
+$ar = new ArrayIterator(array('1','1,2','1,2,3','',NULL,array(),'FooBar',',',',,'));
 $it = new MyRegexIterator($ar, '/(\d),(\d)/', RegexIterator::USE_KEY, RegexIterator::ALL_MATCHES);
 $it->show();
 
@@ -30,208 +47,268 @@ var_dump($ar);
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
-string(3) "1,2"
-array(1) {
-  [0]=>
-  array(3) {
-    [0]=>
-    string(3) "1,2"
-    [1]=>
-    string(1) "1"
-    [2]=>
-    string(1) "2"
-  }
-}
-string(5) "1,2,3"
-array(1) {
-  [0]=>
-  array(3) {
-    [0]=>
-    string(3) "1,2"
-    [1]=>
-    string(1) "1"
-    [2]=>
-    string(1) "2"
-  }
-}
-int(1)
-array(1) {
-  [0]=>
-  array(2) {
-    [0]=>
-    string(1) "1"
-    [1]=>
-    string(1) "1"
-  }
-}
-string(3) "1,2"
-array(2) {
-  [0]=>
-  array(2) {
-    [0]=>
-    string(1) "1"
-    [1]=>
-    string(1) "1"
-  }
-  [1]=>
-  array(2) {
-    [0]=>
-    string(1) "2"
-    [1]=>
-    string(1) "2"
-  }
-}
-string(5) "1,2,3"
+bool(true)
+int(0)
 array(3) {
   [0]=>
-  array(2) {
-    [0]=>
-    string(1) "1"
-    [1]=>
-    string(1) "1"
+  array(0) {
   }
   [1]=>
-  array(2) {
-    [0]=>
-    string(1) "2"
-    [1]=>
-    string(1) "2"
+  array(0) {
   }
   [2]=>
-  array(2) {
-    [0]=>
-    string(1) "3"
-    [1]=>
-    string(1) "3"
+  array(0) {
   }
 }
-int(0)
-array(1) {
-  [0]=>
-  array(2) {
-    [0]=>
-    string(1) "0"
-    [1]=>
-    string(1) "0"
-  }
-}
-object(ArrayIterator)#%d (7) {
-  [1]=>
-  int(0)
-  ["1,2"]=>
-  int(1)
-  ["1,2,3"]=>
-  int(2)
-  [0]=>
-  int(3)
-  ["FooBar"]=>
-  int(4)
-  [","]=>
-  int(5)
-  [",,"]=>
-  int(6)
-}
-===DONE===
---UEXPECTF--
-unicode(3) "1,2"
-array(1) {
-  [0]=>
-  array(3) {
-    [0]=>
-    string(3) "1,2"
-    [1]=>
-    string(1) "1"
-    [2]=>
-    string(1) "2"
-  }
-}
-unicode(5) "1,2,3"
-array(1) {
-  [0]=>
-  array(3) {
-    [0]=>
-    string(3) "1,2"
-    [1]=>
-    string(1) "1"
-    [2]=>
-    string(1) "2"
-  }
-}
+bool(true)
 int(1)
-array(1) {
-  [0]=>
-  array(2) {
-    [0]=>
-    string(1) "1"
-    [1]=>
-    string(1) "1"
-  }
-}
-unicode(3) "1,2"
-array(2) {
-  [0]=>
-  array(2) {
-    [0]=>
-    string(1) "1"
-    [1]=>
-    string(1) "1"
-  }
-  [1]=>
-  array(2) {
-    [0]=>
-    string(1) "2"
-    [1]=>
-    string(1) "2"
-  }
-}
-unicode(5) "1,2,3"
 array(3) {
   [0]=>
-  array(2) {
-    [0]=>
-    string(1) "1"
-    [1]=>
-    string(1) "1"
+  array(0) {
   }
   [1]=>
-  array(2) {
-    [0]=>
-    string(1) "2"
-    [1]=>
-    string(1) "2"
+  array(0) {
   }
   [2]=>
-  array(2) {
-    [0]=>
-    string(1) "3"
-    [1]=>
-    string(1) "3"
+  array(0) {
   }
 }
-int(0)
-array(1) {
+bool(true)
+int(2)
+array(3) {
   [0]=>
-  array(2) {
-    [0]=>
-    string(1) "0"
-    [1]=>
-    string(1) "0"
+  array(0) {
   }
-}
-object(ArrayIterator)#%d (7) {
   [1]=>
-  int(0)
-  [u"1,2"]=>
-  int(1)
-  [u"1,2,3"]=>
-  int(2)
+  array(0) {
+  }
+  [2]=>
+  array(0) {
+  }
+}
+bool(true)
+int(3)
+array(3) {
   [0]=>
-  int(3)
-  [u"FooBar"]=>
-  int(4)
-  [u","]=>
-  int(5)
-  [u",,"]=>
-  int(6)
+  array(0) {
+  }
+  [1]=>
+  array(0) {
+  }
+  [2]=>
+  array(0) {
+  }
+}
+bool(true)
+int(4)
+array(3) {
+  [0]=>
+  array(0) {
+  }
+  [1]=>
+  array(0) {
+  }
+  [2]=>
+  array(0) {
+  }
+}
+bool(true)
+int(5)
+array(3) {
+  [0]=>
+  array(0) {
+  }
+  [1]=>
+  array(0) {
+  }
+  [2]=>
+  array(0) {
+  }
+}
+bool(true)
+int(6)
+array(3) {
+  [0]=>
+  array(0) {
+  }
+  [1]=>
+  array(0) {
+  }
+  [2]=>
+  array(0) {
+  }
+}
+bool(true)
+int(7)
+array(3) {
+  [0]=>
+  array(0) {
+  }
+  [1]=>
+  array(0) {
+  }
+  [2]=>
+  array(0) {
+  }
+}
+bool(true)
+int(8)
+array(3) {
+  [0]=>
+  array(0) {
+  }
+  [1]=>
+  array(0) {
+  }
+  [2]=>
+  array(0) {
+  }
+}
+bool(true)
+int(0)
+array(2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    string(1) "0"
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    string(1) "0"
+  }
+}
+bool(true)
+int(1)
+array(2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    string(1) "1"
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    string(1) "1"
+  }
+}
+bool(true)
+int(2)
+array(2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    string(1) "2"
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    string(1) "2"
+  }
+}
+bool(true)
+int(3)
+array(2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    string(1) "3"
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    string(1) "3"
+  }
+}
+bool(true)
+int(4)
+array(2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    string(1) "4"
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    string(1) "4"
+  }
+}
+bool(true)
+int(5)
+array(2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    string(1) "5"
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    string(1) "5"
+  }
+}
+bool(true)
+int(6)
+array(2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    string(1) "6"
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    string(1) "6"
+  }
+}
+bool(true)
+int(7)
+array(2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    string(1) "7"
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    string(1) "7"
+  }
+}
+bool(true)
+int(8)
+array(2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    string(1) "8"
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    string(1) "8"
+  }
+}
+object(ArrayIterator)#%d (9) {
+  [0]=>
+  %s(1) "1"
+  [1]=>
+  %s(3) "1,2"
+  [2]=>
+  %s(5) "1,2,3"
+  [3]=>
+  %s(0) ""
+  [4]=>
+  NULL
+  [5]=>
+  array(0) {
+  }
+  [6]=>
+  %s(6) "FooBar"
+  [7]=>
+  %s(1) ","
+  [8]=>
+  %s(2) ",,"
 }
 ===DONE===

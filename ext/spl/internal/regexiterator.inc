@@ -12,7 +12,7 @@
 /**
  * @brief   Regular expression filter for iterators
  * @author  Marcus Boerger
- * @version 1.1
+ * @version 1.0
  * @since PHP 5.1
  *
  * This filter iterator assumes that the inner iterator 
@@ -26,6 +26,7 @@ class RegexIterator implements FilterIterator
 	const GET_MATCH   = 1; /**< Mode: Return the first matche (if any) */
 	const ALL_MATCHES = 2; /**< Mode: Return all matches (if any)      */
 	const SPLIT       = 3; /**< Mode: Return the split values (if any) */
+	const REPLACE     = 4; /**< Mode: Replace the input key or current */
 	
 	private $regex;     /**< the regular expression to match against */
 	private $flags;     /**< special flags (self::USE_KEY) */
