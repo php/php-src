@@ -1025,13 +1025,12 @@ PHP_FUNCTION(max)
 static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive TSRMLS_DC)
 {
 	zval **args[3],			/* Arguments to userland function */
-		  *retval_ptr,			/* Return value - unused */
-		  *key=NULL;				/* Entry key */
+		  *retval_ptr,		/* Return value - unused */
+		  *key=NULL;		/* Entry key */
 	zstr string_key;
 	uint   string_key_len;
 	ulong  num_key;
 	HashPosition pos;
-	zend_fcall_info_cache array_walk_fci_cache = empty_fcall_info_cache;
 
 	/* Set up known arguments */
 	args[1] = &key;
@@ -1039,10 +1038,17 @@ static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive
 
 	zend_hash_internal_pointer_reset_ex(target_hash, &pos);
 
+	BG(array_walk_fci).retval_ptr_ptr = &retval_ptr;
+	BG(array_walk_fci).param_count = userdata ? 3 : 2;
+	BG(array_walk_fci).params = args;
+	BG(array_walk_fci).no_separation = 0;
+
 	/* Iterate through hash */
 	while (!EG(exception) && zend_hash_get_current_data_ex(target_hash, (void **)&args[0], &pos) == SUCCESS) {
 		if (recursive && Z_TYPE_PP(args[0]) == IS_ARRAY) {
 			HashTable *thash;
+			zend_fcall_info orig_array_walk_fci;
+			zend_fcall_info_cache orig_array_walk_fci_cache;
 
 			SEPARATE_ZVAL_TO_MAKE_IS_REF(args[0]);
 			thash = HASH_OF(*(args[0]));
@@ -1050,10 +1056,17 @@ static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
 				return 0;
 			}
-			php_array_walk(thash, userdata, recursive TSRMLS_CC);
-		} else {
-			zend_fcall_info fci;
 
+			/* backup the fcall info and cache */
+			orig_array_walk_fci = BG(array_walk_fci);
+			orig_array_walk_fci_cache = BG(array_walk_fci_cache);
+
+			php_array_walk(thash, userdata, recursive TSRMLS_CC);
+
+			/* restore the fcall info and cache */
+			BG(array_walk_fci) = orig_array_walk_fci;
+			BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
+		} else {
 			/* Allocate space for key */
 			MAKE_STD_ZVAL(key);
 
@@ -1071,29 +1084,14 @@ static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive
 					break;
 			}
 
-			fci.size = sizeof(fci);
-			fci.function_table = EG(function_table);
-			fci.function_name = *BG(array_walk_func_name);
-			fci.symbol_table = NULL;
-			fci.object_pp = NULL;
-			fci.retval_ptr_ptr = &retval_ptr;
-			fci.param_count = userdata ? 3 : 2;
-			fci.params = args;
-			fci.no_separation = 0;
-
 			/* Call the userland function */
-			if (zend_call_function(&fci, &array_walk_fci_cache TSRMLS_CC) == SUCCESS) {
+			if (zend_call_function(&BG(array_walk_fci), &BG(array_walk_fci_cache) TSRMLS_CC) == SUCCESS) {
 				if (retval_ptr) {
 					zval_ptr_dtor(&retval_ptr);
 				}
 			} else {
 				zval func_name;
 
-				if (zend_is_callable(*BG(array_walk_func_name), 0, &func_name)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %R()", Z_TYPE(func_name), Z_UNIVAL(func_name));
-				} else {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %R() - function does not exist", Z_TYPE(func_name), Z_UNIVAL(func_name));
-				}
 				if (key) {
 					zval_ptr_dtor(&key);
 					key = NULL;
@@ -1113,75 +1111,54 @@ static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive
 	return 0;
 }
 
-/* {{{ proto bool array_walk(array input, string funcname [, mixed userdata])
+/* {{{ proto bool array_walk(array input, mixed callback [, mixed userdata]) U
    Apply a user function to every member of an array */
 PHP_FUNCTION(array_walk)
 {
-	int	argc;
-	zval **array,
-		 **userdata = NULL,
-		 **old_walk_func_name;
-	HashTable *target_hash;
+	zval *array,
+		 **userdata = NULL;
+	zend_fcall_info orig_array_walk_fci;
+	zend_fcall_info_cache orig_array_walk_fci_cache;
 
-	argc = ZEND_NUM_ARGS();
-	old_walk_func_name = BG(array_walk_func_name);
-	if (argc < 2 || argc > 3 ||
-		zend_get_parameters_ex(argc, &array, &BG(array_walk_func_name), &userdata) == FAILURE) {
-		BG(array_walk_func_name) = old_walk_func_name;
-		WRONG_PARAM_COUNT;
+	orig_array_walk_fci = BG(array_walk_fci);
+	orig_array_walk_fci_cache = BG(array_walk_fci_cache);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_DC, "af|Z", &array,
+							  &BG(array_walk_fci), &BG(array_walk_fci_cache), &userdata) == FAILURE) {
+		BG(array_walk_fci) = orig_array_walk_fci;
+		BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
+		return;
 	}
-	target_hash = HASH_OF(*array);
-	if (!target_hash) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
-		BG(array_walk_func_name) = old_walk_func_name;
-		RETURN_FALSE;
-	}
-	if (Z_TYPE_PP(BG(array_walk_func_name)) != IS_ARRAY && 
-		Z_TYPE_PP(BG(array_walk_func_name)) != IS_STRING &&
-		Z_TYPE_PP(BG(array_walk_func_name)) != IS_UNICODE) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Wrong syntax for function name");
-		BG(array_walk_func_name) = old_walk_func_name;
-		RETURN_FALSE;
-	}
-	php_array_walk(target_hash, userdata, 0 TSRMLS_CC);
-	BG(array_walk_func_name) = old_walk_func_name;
+
+	php_array_walk(HASH_OF(array), userdata, 0 TSRMLS_CC);
+	BG(array_walk_fci) = orig_array_walk_fci;
+	BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool array_walk_recursive(array input, string funcname [, mixed userdata])
+/* {{{ proto bool array_walk_recursive(array input, mixed callback [, mixed userdata]) U
    Apply a user function recursively to every member of an array */
 PHP_FUNCTION(array_walk_recursive)
 {
-	int	argc;
-	zval **array,
-		 **userdata = NULL,
-		 **old_walk_func_name;
-	HashTable *target_hash;
+	zval *array,
+		 **userdata = NULL;
+	zend_fcall_info orig_array_walk_fci;
+	zend_fcall_info_cache orig_array_walk_fci_cache;
 
-	argc = ZEND_NUM_ARGS();
-	old_walk_func_name = BG(array_walk_func_name);
+	orig_array_walk_fci = BG(array_walk_fci);
+	orig_array_walk_fci_cache = BG(array_walk_fci_cache);
 
-	if (argc < 2 || argc > 3 ||
-		zend_get_parameters_ex(argc, &array, &BG(array_walk_func_name), &userdata) == FAILURE) {
-		BG(array_walk_func_name) = old_walk_func_name;
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_DC, "af|Z", &array,
+							  &BG(array_walk_fci), &BG(array_walk_fci_cache), &userdata) == FAILURE) {
+		BG(array_walk_fci) = orig_array_walk_fci;
+		BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
+		return;
 	}
-	target_hash = HASH_OF(*array);
-	if (!target_hash) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
-		BG(array_walk_func_name) = old_walk_func_name;
-		RETURN_FALSE;
-	}
-	if (Z_TYPE_PP(BG(array_walk_func_name)) != IS_ARRAY &&
-	    Z_TYPE_PP(BG(array_walk_func_name)) != IS_STRING &&
-	    Z_TYPE_PP(BG(array_walk_func_name)) != IS_UNICODE) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Wrong syntax for function name");
-		BG(array_walk_func_name) = old_walk_func_name;
-		RETURN_FALSE;
-	}
-	php_array_walk(target_hash, userdata, 1 TSRMLS_CC);
-	BG(array_walk_func_name) = old_walk_func_name;
+
+	php_array_walk(HASH_OF(array), userdata, 1 TSRMLS_CC);
+	BG(array_walk_fci) = orig_array_walk_fci;
+	BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
 	RETURN_TRUE;
 }
 /* }}} */
@@ -3332,6 +3309,7 @@ PHP_FUNCTION(array_uintersect_uassoc)
 /* }}} */
 
 
+/* {{{ php_array_diff */
 static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_compare_type, int key_compare_type)
 {
 	zval ***args = NULL;
@@ -3634,6 +3612,7 @@ out:
 	efree(lists);
 	efree(args);
 }
+/* }}} */
 
 
 /* {{{ proto array array_diff_key(array arr1, array arr2 [, array ...]) U
