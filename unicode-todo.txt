@@ -53,3 +53,5 @@ parsing API, e.g.:
 
 * Make zend_u_str_case_fold() do only case-folding and nothing else. The
   normalization should be done by zend_normalize_identifier().
+
+* Look at performance implications of identifier normalization.
