@@ -18,8 +18,9 @@ var_dump(preg_match('/(?P<3>)/', ''));
 
 ?>
 --EXPECTF--
-Warning: Wrong value for parameter 4 in call to preg_match() in %smatch_flags3.php on line 3
-NULL
+
+Warning: preg_match(): Empty regular expression in %smatch_flags3.php on line 3
+bool(false)
 int(1)
 array(1) {
   [0]=>
@@ -41,5 +42,5 @@ array(1) {
   }
 }
 
-Warning: preg_match: numeric named subpatterns are not allowed in %smatch_flags3.php on line 14
+Warning: preg_match(): Numeric named subpatterns are not allowed in %smatch_flags3.php on line 14
 bool(false)
