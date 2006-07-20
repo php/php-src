@@ -1243,15 +1243,15 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 				   **subject,
 				   **limit,
 				   **subject_entry,
-                   **zcount;
+				   **zcount;
 	char			*result;
 	int				 result_len;
 	int				 limit_val = -1;
 	zstr			 string_key;
 	ulong			 num_key;
 	zval			 callback_name;
-    int				replace_count=0;
-    int             *replace_count_ptr=NULL; 
+	int				 replace_count=0;
+	int				*replace_count_ptr=NULL; 
 	
 	/* Get function parameters and do error-checking. */
 	if (ZEND_NUM_ARGS() < 3 || ZEND_NUM_ARGS() > 5 ||
@@ -1557,7 +1557,7 @@ PHP_FUNCTION(preg_quote)
 		 	*p,				/* Iterator for input string */
 			*q,				/* Iterator for output string */
 			 delim_char=0,	/* Delimiter character to be quoted */
-		 	 c;				/* Current character */
+			 c;				/* Current character */
 	zend_bool quote_delim = 0; /* Whether to quote additional delim char */
 	
 	/* Get the arguments and check for errors */
@@ -1657,12 +1657,12 @@ PHP_FUNCTION(preg_grep)
 PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return_value,
 	long flags TSRMLS_DC)
 {
-	zval	   	   **entry;				/* An entry in the input array */
+	zval		   **entry;				/* An entry in the input array */
 	pcre_extra		*extra = pce->extra;/* Holds results of studying */
 	pcre_extra		 extra_data;		/* Used locally for exec options */
-	int			 	*offsets;			/* Array of subpattern offsets */
-	int			 	 size_offsets;		/* Size of the offsets array */
-	int			 	 count = 0;			/* Count of matched subpatterns */
+	int				*offsets;			/* Array of subpattern offsets */
+	int				 size_offsets;		/* Size of the offsets array */
+	int				 count = 0;			/* Count of matched subpatterns */
 	zstr			 string_key;
 	ulong			 num_key;
 	zend_bool		 invert;			/* Whether to return non-matching
