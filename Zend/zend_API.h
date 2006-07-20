@@ -453,8 +453,26 @@ ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
 		add_assoc_stringl(arg, key, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
 	}
 
+ZEND_API int add_u_assoc_long_ex(zval *arg, zend_uchar type, zstr key, uint key_len, long n);
+ZEND_API int add_u_assoc_null_ex(zval *arg, zend_uchar type, zstr key, uint key_len);
+ZEND_API int add_u_assoc_bool_ex(zval *arg, zend_uchar type, zstr key, uint key_len, int b);
+ZEND_API int add_u_assoc_resource_ex(zval *arg, zend_uchar type, zstr key, uint key_len, int r);
+ZEND_API int add_u_assoc_double_ex(zval *arg, zend_uchar type, zstr key, uint key_len, double d);
+ZEND_API int add_u_assoc_string_ex(zval *arg, zend_uchar type, zstr key, uint key_len, char *str, int duplicate);
+ZEND_API int add_u_assoc_stringl_ex(zval *arg, zend_uchar type, zstr key, uint key_len, char *str, uint length, int duplicate);
+ZEND_API int add_u_assoc_unicode_ex(zval *arg, zend_uchar type, zstr key, uint key_len, UChar *str, int duplicate);
+ZEND_API int add_u_assoc_unicodel_ex(zval *arg, zend_uchar type, zstr key, uint key_len, UChar *str, uint length, int duplicate);
 ZEND_API int add_u_assoc_zval_ex(zval *arg, zend_uchar type, zstr key, uint key_len, zval *value);
 
+#define add_u_assoc_long(__arg, __type, __key, __n) add_u_assoc_long_ex(__arg, __type, __key, (((__type)==IS_UNICODE)?u_strlen((__key).u):strlen((__key).s))+1, __n)
+#define add_u_assoc_null(__arg, __type, __key) add_u_assoc_null_ex(__arg, __type, __key, (((__type)==IS_UNICODE)?u_strlen((__key).u):strlen((__key).s))+1)
+#define add_u_assoc_bool(__arg, __type, __key, __b) add_u_assoc_bool_ex(__arg, __type, __key, (((__type)==IS_UNICODE)?u_strlen((__key).u):strlen((__key).s))+1, __b)
+#define add_u_assoc_resource(__arg, __type, __key, __r) add_u_assoc_resource_ex(__arg, __type, __key, (((__type)==IS_UNICODE)?u_strlen((__key).u):strlen((__key).s))+1, __r)
+#define add_u_assoc_double(__arg, __type, __key, __d) add_u_assoc_double_ex(__arg, __type, __key, (((__type)==IS_UNICODE)?u_strlen((__key).u):strlen((__key).s))+1, __d)
+#define add_u_assoc_string(__arg, __type, __key, __str, __duplicate) add_u_assoc_string_ex(__arg, __type, __key, (((__type)==IS_UNICODE)?u_strlen((__key).u):strlen((__key).s))+1, __str, __duplicate)
+#define add_u_assoc_stringl(__arg, __type, __key, __str, __length, __duplicate) add_u_assoc_stringl_ex(__arg, __type, __key, (((__type)==IS_UNICODE)?u_strlen((__key).u):strlen((__key).s))+1, __str, __length, __duplicate)
+#define add_u_assoc_unicode(__arg, __type, __key, __str, __duplicate) add_u_assoc_unicode_ex(__arg, __type, __key, (((__type)==IS_UNICODE)?u_strlen((__key).u):strlen((__key).s))+1, __str, __duplicate)
+#define add_u_assoc_unicodel(__arg, __type, __key, __str, __length, __duplicate) add_u_assoc_unicodel_ex(__arg, __type, __key, (((__type)==IS_UNICODE)?u_strlen((__key).u):strlen((__key).s))+1, __str, __length, __duplicate)
 #define add_u_assoc_zval(__arg, __type, __key, __value) add_u_assoc_zval_ex(__arg, __type, __key, (((__type)==IS_UNICODE)?u_strlen((__key).u):strlen((__key).s))+1, __value)
 
 /* unset() functions are only suported for legacy modules and null() functions should be used */
