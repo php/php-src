@@ -31,7 +31,7 @@
 
 #define eucjp_islead(c)    ((UChar )((c) - 0xa1) > 0xfe - 0xa1)
 
-static int EncLen_EUCJP[] = {
+static const int EncLen_EUCJP[] = {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -158,20 +158,16 @@ eucjp_is_mbc_ambiguous(OnigAmbigType flag, const UChar** pp, const UChar* end)
 static int
 eucjp_is_code_ctype(OnigCodePoint code, unsigned int ctype)
 {
-  if ((ctype & ONIGENC_CTYPE_WORD) != 0) {
-    if (code < 128)
-      return ONIGENC_IS_ASCII_CODE_CTYPE(code, ctype);
-    else
-      return (eucjp_code_to_mbclen(code) > 1 ? TRUE : FALSE);
-
-    ctype &= ~ONIGENC_CTYPE_WORD;
-    if (ctype == 0) return FALSE;
-  }
-
   if (code < 128)
     return ONIGENC_IS_ASCII_CODE_CTYPE(code, ctype);
-  else
-    return FALSE;
+  else {
+    if ((ctype & (ONIGENC_CTYPE_WORD |
+                  ONIGENC_CTYPE_GRAPH | ONIGENC_CTYPE_PRINT)) != 0) {
+      return (eucjp_code_to_mbclen(code) > 1 ? TRUE : FALSE);
+    }
+  }
+
+  return FALSE;
 }
 
 static UChar*

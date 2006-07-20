@@ -56,8 +56,6 @@ static int numhash(long);
 static struct st_hash_type type_numhash = {
     numcmp,
     numhash,
-    st_nothing_key_free,
-    st_nothing_key_clone
 };
 
 /* extern int strcmp(const char *, const char *); */
@@ -65,20 +63,6 @@ static int strhash(const char *);
 static struct st_hash_type type_strhash = {
     strcmp,
     strhash,
-    st_nothing_key_free,
-    st_nothing_key_clone
-};
-
-static int strend_cmp(st_strend_key*, st_strend_key*);
-static int strend_hash(st_strend_key*);
-static int strend_key_free(st_data_t key);
-static st_data_t strend_key_clone(st_data_t x);
-
-static struct st_hash_type type_strend_hash = {
-    strend_cmp,
-    strend_hash,
-    strend_key_free,
-    strend_key_clone
 };
 
 static void rehash(st_table *);
@@ -100,7 +84,7 @@ static void rehash(st_table *);
 /*
 Table of prime numbers 2^n+a, 2<=n<=30.
 */
-static long primes[] = {
+static const long primes[] = {
 	8 + 3,
 	16 + 3,
 	32 + 5,
@@ -228,13 +212,6 @@ st_init_strtable_with_size(size)
     return st_init_table_with_size(&type_strhash, size);
 }
 
-st_table*
-st_init_strend_table_with_size(size)
-    int size;
-{
-    return st_init_table_with_size(&type_strend_hash, size);
-}
-
 void
 st_free_table(table)
     st_table *table;
@@ -246,7 +223,6 @@ st_free_table(table)
 	ptr = table->bins[i];
 	while (ptr != 0) {
 	    next = ptr->next;
-            table->type->key_free(ptr->key);
 	    free(ptr);
 	    ptr = next;
 	}
@@ -297,21 +273,6 @@ st_lookup(table, key, value)
     }
 }
 
-int
-st_lookup_strend(table, str_key, end_key, value)
-    st_table *table;
-    const unsigned char* str_key;
-    const unsigned char* end_key;
-    st_data_t *value;
-{
-  st_strend_key key;
-
-  key.s   = (unsigned char* )str_key;
-  key.end = (unsigned char* )end_key;
-
-  return st_lookup(table, (st_data_t )(&key), value);
-}
-
 #define ADD_DIRECT(table, key, value, hash_val, bin_pos)\
 do {\
     st_table_entry *entry;\
@@ -352,22 +313,6 @@ st_insert(table, key, value)
     }
 }
 
-int
-st_insert_strend(table, str_key, end_key, value)
-     st_table *table;
-     const unsigned char* str_key;
-     const unsigned char* end_key;
-     st_data_t value;
-{
-  st_strend_key* key;
-
-  key = alloc(st_strend_key);
-  key->s   = (unsigned char* )str_key;
-  key->end = (unsigned char* )end_key;
-
-  return st_insert(table, (st_data_t )key, value);
-}
-
 void
 st_add_direct(table, key, value)
     st_table *table;
@@ -379,21 +324,6 @@ st_add_direct(table, key, value)
     hash_val = do_hash(key, table);
     bin_pos = hash_val % table->num_bins;
     ADD_DIRECT(table, key, value, hash_val, bin_pos);
-}
-
-void
-st_add_direct_strend(table, str_key, end_key, value)
-    st_table *table;
-    const unsigned char* str_key;
-    const unsigned char* end_key;
-    st_data_t value;
-{
-  st_strend_key* key;
-
-  key = alloc(st_strend_key);
-  key->s   = (unsigned char* )str_key;
-  key->end = (unsigned char* )end_key;
-  st_add_direct(table, (st_data_t )key, value);
 }
 
 static void
@@ -455,7 +385,6 @@ st_copy(old_table)
 		return 0;
 	    }
 	    *entry = *ptr;
-            entry->key  = old_table->type->key_clone(ptr->key);
 	    entry->next = new_table->bins[i];
 	    new_table->bins[i] = entry;
 	    ptr = ptr->next;
@@ -556,7 +485,7 @@ st_cleanup_safe(table, never)
     table->num_entries = num_entries;
 }
 
-void
+int
 st_foreach(table, func, arg)
     st_table *table;
     int (*func)();
@@ -569,7 +498,7 @@ st_foreach(table, func, arg)
     for(i = 0; i < table->num_bins; i++) {
 	last = 0;
 	for(ptr = table->bins[i]; ptr != 0;) {
-	    retval = (*func)(ptr->key, ptr->record, arg, 0);
+	    retval = (*func)(ptr->key, ptr->record, arg);
 	    switch (retval) {
 	    case ST_CHECK:	/* check if hash is modified during iteration */
 	        tmp = 0;
@@ -580,8 +509,7 @@ st_foreach(table, func, arg)
 		}
 		if (!tmp) {
 		    /* call func with error notice */
-		    retval = (*func)(0, 0, arg, 1);
-		    return;
+		    return 1;
 		}
 		/* fall through */
 	    case ST_CONTINUE:
@@ -589,7 +517,7 @@ st_foreach(table, func, arg)
 		ptr = ptr->next;
 		break;
 	    case ST_STOP:
-		return;
+	        return 0;
 	    case ST_DELETE:
 		tmp = ptr;
 		if (last == 0) {
@@ -599,12 +527,12 @@ st_foreach(table, func, arg)
 		    last->next = ptr->next;
 		}
 		ptr = ptr->next;
-                table->type->key_free(tmp->key);
 		free(tmp);
 		table->num_entries--;
 	    }
 	}
     }
+    return 0;
 }
 
 static int
@@ -658,60 +586,4 @@ numhash(n)
     long n;
 {
     return n;
-}
-
-extern int
-st_nothing_key_free(st_data_t key) { return 0; }
-
-extern st_data_t
-st_nothing_key_clone(st_data_t x) { return x; } 
-
-static int strend_cmp(st_strend_key* x, st_strend_key* y)
-{
-  unsigned char *p, *q;
-  int c;
-
-  if ((x->end - x->s) != (y->end - y->s))
-    return 1;
-
-  p = x->s;
-  q = y->s;
-  while (p < x->end) {
-    c = (int )*p - (int )*q;
-    if (c != 0) return c;
-
-    p++; q++;
-  }
-
-  return 0;
-}
-
-static int strend_hash(st_strend_key* x)
-{
-  int val;
-  unsigned char *p;
-
-  val = 0;
-  p = x->s;
-  while (p < x->end) {
-    val = val * 997 + (int )*p++;
-  }
-
-  return val + (val >> 5);
-}
-
-static int strend_key_free(st_data_t x)
-{
-  xfree((void* )x);
-  return 0;
-}
-
-static st_data_t strend_key_clone(st_data_t x)
-{
-  st_strend_key* new_key;
-  st_strend_key* key = (st_strend_key* )x;
-
-  new_key = alloc(st_strend_key);
-  *new_key = *key;
-  return (st_data_t )new_key;
 }

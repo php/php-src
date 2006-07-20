@@ -4,7 +4,7 @@
   regparse.h -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2005  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2006  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,7 +67,7 @@
 #define CTYPE_XDIGIT            (1<<6)
 #define CTYPE_NOT_XDIGIT        (1<<7)
 
-#define ANCHOR_ANYCHAR_STAR_MASK (ANCHOR_ANYCHAR_STAR | ANCHOR_ANYCHAR_STAR_PL)
+#define ANCHOR_ANYCHAR_STAR_MASK (ANCHOR_ANYCHAR_STAR | ANCHOR_ANYCHAR_STAR_ML)
 #define ANCHOR_END_BUF_MASK      (ANCHOR_END_BUF | ANCHOR_SEMI_END_BUF)
 
 #define EFFECT_MEMORY           (1<<0)
@@ -76,7 +76,7 @@
 
 #define NODE_STR_MARGIN         16
 #define NODE_STR_BUF_SIZE       24  /* sizeof(CClassNode) - sizeof(int)*4 */
-#define NODE_BACKREFS_SIZE       7
+#define NODE_BACKREFS_SIZE       6
 
 #define NSTR_RAW                (1<<0) /* by backslashed number */
 #define NSTR_AMBIG              (1<<1)
@@ -145,6 +145,7 @@ typedef struct {
 #define NST_NAMED_GROUP           (1<<10)
 #define NST_NAME_REF              (1<<11)
 #define NST_IN_REPEAT             (1<<12) /* STK_REPEAT is nested in stack. */
+#define NST_NEST_LEVEL            (1<<13)
 
 #define SET_EFFECT_STATUS(node,f)      (node)->u.effect.state |=  (f)
 #define CLEAR_EFFECT_STATUS(node,f)    (node)->u.effect.state &= ~(f)
@@ -165,6 +166,7 @@ typedef struct {
 #define IS_CALL_RECURSION(cn)          (((cn)->state & NST_RECURSION)  != 0)
 #define IS_CALL_NAME_REF(cn)           (((cn)->state & NST_NAME_REF)   != 0)
 #define IS_BACKREF_NAME_REF(bn)        (((bn)->state & NST_NAME_REF)   != 0)
+#define IS_BACKREF_NEST_LEVEL(bn)      (((bn)->state & NST_NEST_LEVEL) != 0)
 #define IS_QUALIFIER_IN_REPEAT(qn)     (((qn)->state & NST_IN_REPEAT)  != 0)
 
 typedef struct {
@@ -212,6 +214,7 @@ typedef struct {
   int     back_num;
   int     back_static[NODE_BACKREFS_SIZE];
   int*    back_dynamic;
+  int     nest_level;
 } BackrefNode;
 
 typedef struct {
@@ -290,7 +293,6 @@ typedef struct {
 extern int    onig_renumber_name_table P_((regex_t* reg, GroupNumRemap* map));
 #endif
 
-extern int    onig_is_code_in_cc P_((OnigEncoding enc, OnigCodePoint code, CClassNode* cc));
 extern int    onig_strncmp P_((const UChar* s1, const UChar* s2, int n));
 extern void   onig_scan_env_set_error_string P_((ScanEnv* env, int ecode, UChar* arg, UChar* arg_end));
 extern int    onig_scan_unsigned_number P_((UChar** src, const UChar* end, OnigEncoding enc));

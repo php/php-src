@@ -30,7 +30,7 @@
 #include "regenc.h"
 
 
-unsigned short OnigEnc_Unicode_ISO_8859_1_CtypeTable[256] = {
+const unsigned short OnigEnc_Unicode_ISO_8859_1_CtypeTable[256] = {
   0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008,
   0x2008, 0x228c, 0x2289, 0x2288, 0x2288, 0x2288, 0x2008, 0x2008,
   0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008,
@@ -65,7 +65,7 @@ unsigned short OnigEnc_Unicode_ISO_8859_1_CtypeTable[256] = {
   0x10e2, 0x10e2, 0x10e2, 0x10e2, 0x10e2, 0x10e2, 0x10e2, 0x10e2
 };
 
-static OnigCodePoint CRAlnum[] = {
+static const OnigCodePoint CRAlnum[] = {
 #ifdef USE_UNICODE_FULL_RANGE_CTYPE
   414,
 #else
@@ -490,7 +490,7 @@ static OnigCodePoint CRAlnum[] = {
 #endif /* USE_UNICODE_FULL_RANGE_CTYPE */
 }; /* end of CRAlnum */
 
-static OnigCodePoint CRAlpha[] = {
+static const OnigCodePoint CRAlpha[] = {
 #ifdef USE_UNICODE_FULL_RANGE_CTYPE
   396,
 #else
@@ -897,7 +897,7 @@ static OnigCodePoint CRAlpha[] = {
 #endif /* USE_UNICODE_FULL_RANGE_CTYPE */
 }; /* end of CRAlpha */
 
-static OnigCodePoint CRBlank[] = {
+static const OnigCodePoint CRBlank[] = {
 #ifdef USE_UNICODE_FULL_RANGE_CTYPE
   9,
 #else
@@ -917,7 +917,7 @@ static OnigCodePoint CRBlank[] = {
 #endif /* USE_UNICODE_FULL_RANGE_CTYPE */
 }; /* end of CRBlank */
 
-static OnigCodePoint CRCntrl[] = {
+static const OnigCodePoint CRCntrl[] = {
 #ifdef USE_UNICODE_FULL_RANGE_CTYPE
   19,
 #else
@@ -947,7 +947,7 @@ static OnigCodePoint CRCntrl[] = {
 #endif /* USE_UNICODE_FULL_RANGE_CTYPE */
 }; /* end of CRCntrl */
 
-static OnigCodePoint CRDigit[] = {
+static const OnigCodePoint CRDigit[] = {
 #ifdef USE_UNICODE_FULL_RANGE_CTYPE
   23,
 #else
@@ -981,7 +981,7 @@ static OnigCodePoint CRDigit[] = {
 #endif /* USE_UNICODE_FULL_RANGE_CTYPE */
 }; /* end of CRDigit */
 
-static OnigCodePoint CRGraph[] = {
+static const OnigCodePoint CRGraph[] = {
 #ifdef USE_UNICODE_FULL_RANGE_CTYPE
   405,
 #else
@@ -1397,7 +1397,7 @@ static OnigCodePoint CRGraph[] = {
 #endif /* USE_UNICODE_FULL_RANGE_CTYPE */
 }; /* end of CRGraph */
 
-static OnigCodePoint CRLower[] = {
+static const OnigCodePoint CRLower[] = {
 #ifdef USE_UNICODE_FULL_RANGE_CTYPE
   424,
 #else
@@ -1832,7 +1832,7 @@ static OnigCodePoint CRLower[] = {
 #endif /* USE_UNICODE_FULL_RANGE_CTYPE */
 }; /* end of CRLower */
 
-static OnigCodePoint CRPrint[] = {
+static const OnigCodePoint CRPrint[] = {
 #ifdef USE_UNICODE_FULL_RANGE_CTYPE
   405,
 #else
@@ -2248,7 +2248,7 @@ static OnigCodePoint CRPrint[] = {
 #endif /* USE_UNICODE_FULL_RANGE_CTYPE */
 }; /* end of CRPrint */
 
-static OnigCodePoint CRPunct[] = {
+static const OnigCodePoint CRPunct[] = {
 #ifdef USE_UNICODE_FULL_RANGE_CTYPE
   86,
 #else
@@ -2345,7 +2345,7 @@ static OnigCodePoint CRPunct[] = {
 #endif /* USE_UNICODE_FULL_RANGE_CTYPE */
 }; /* end of CRPunct */
 
-static OnigCodePoint CRSpace[] = {
+static const OnigCodePoint CRSpace[] = {
 #ifdef USE_UNICODE_FULL_RANGE_CTYPE
   11,
 #else
@@ -2367,7 +2367,7 @@ static OnigCodePoint CRSpace[] = {
 #endif /* USE_UNICODE_FULL_RANGE_CTYPE */
 }; /* end of CRSpace */
 
-static OnigCodePoint CRUpper[] = {
+static const OnigCodePoint CRUpper[] = {
 #ifdef USE_UNICODE_FULL_RANGE_CTYPE
   421,
 #else
@@ -2799,7 +2799,7 @@ static OnigCodePoint CRUpper[] = {
 #endif /* USE_UNICODE_FULL_RANGE_CTYPE */
 }; /* end of CRUpper */
 
-static OnigCodePoint CRXDigit[] = {
+static const OnigCodePoint CRXDigit[] = {
 #ifdef USE_UNICODE_FULL_RANGE_CTYPE
   3,
 #else
@@ -2810,7 +2810,7 @@ static OnigCodePoint CRXDigit[] = {
   0x0061, 0x0066
 };
 
-static OnigCodePoint CRASCII[] = {
+static const OnigCodePoint CRASCII[] = {
 #ifdef USE_UNICODE_FULL_RANGE_CTYPE
   1,
 #else
@@ -2819,7 +2819,7 @@ static OnigCodePoint CRASCII[] = {
   0x0000, 0x007f
 };
 
-static OnigCodePoint CRWord[] = {
+static const OnigCodePoint CRWord[] = {
 #ifdef USE_UNICODE_FULL_RANGE_CTYPE
   436,
 #else
@@ -3320,6 +3320,9 @@ onigenc_unicode_is_code_ctype(OnigCodePoint code, unsigned int ctype)
   case ONIGENC_CTYPE_ALNUM:
     return onig_is_in_code_range((UChar* )CRAlnum, code);
     break;
+  case ONIGENC_CTYPE_NEWLINE:
+    return FALSE;
+    break;
 
   default:
     return ONIGENCERR_TYPE_BUG;
@@ -3337,9 +3340,9 @@ onigenc_unicode_is_code_ctype(OnigCodePoint code, unsigned int ctype)
 
 extern int
 onigenc_unicode_get_ctype_code_range(int ctype,
-		  OnigCodePoint* sbr[], OnigCodePoint* mbr[])
+		  const OnigCodePoint* sbr[], const OnigCodePoint* mbr[])
 {
-  static OnigCodePoint EmptyRange[] = { 0 };
+  static const OnigCodePoint EmptyRange[] = { 0 };
 
 #define CR_SET(list) do { \
   *mbr = list; \

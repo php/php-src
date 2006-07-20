@@ -175,7 +175,7 @@ onigenc_str_bytelen_null(OnigEncoding enc, const UChar* s)
 
 #define USE_APPLICATION_TO_LOWER_CASE_TABLE
 
-unsigned short OnigEnc_Unicode_ISO_8859_1_CtypeTable[256] = {
+const unsigned short OnigEnc_Unicode_ISO_8859_1_CtypeTable[256] = {
   0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008,
   0x2008, 0x228c, 0x2289, 0x2288, 0x2288, 0x2288, 0x2008, 0x2008,
   0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008,
@@ -251,7 +251,7 @@ static const UChar BuiltInAsciiToLowerCaseTable[] = {
 #endif /* not USE_APPLICATION_TO_LOWER_CASE_TABLE */
 
 #ifdef USE_UPPER_CASE_TABLE
-UChar OnigEncAsciiToUpperCaseTable[256] = {
+const UChar OnigEncAsciiToUpperCaseTable[256] = {
   '\000', '\001', '\002', '\003', '\004', '\005', '\006', '\007',
   '\010', '\011', '\012', '\013', '\014', '\015', '\016', '\017',
   '\020', '\021', '\022', '\023', '\024', '\025', '\026', '\027',
@@ -287,7 +287,7 @@ UChar OnigEncAsciiToUpperCaseTable[256] = {
 };
 #endif
 
-unsigned short OnigEncAsciiCtypeTable[256] = {
+const unsigned short OnigEncAsciiCtypeTable[256] = {
   0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008,
   0x2008, 0x220c, 0x2209, 0x2208, 0x2208, 0x2208, 0x2008, 0x2008,
   0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008,
@@ -323,7 +323,7 @@ unsigned short OnigEncAsciiCtypeTable[256] = {
   0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
 };
 
-UChar OnigEncISO_8859_1_ToLowerCaseTable[256] = {
+const UChar OnigEncISO_8859_1_ToLowerCaseTable[256] = {
   '\000', '\001', '\002', '\003', '\004', '\005', '\006', '\007',
   '\010', '\011', '\012', '\013', '\014', '\015', '\016', '\017',
   '\020', '\021', '\022', '\023', '\024', '\025', '\026', '\027',
@@ -359,7 +359,7 @@ UChar OnigEncISO_8859_1_ToLowerCaseTable[256] = {
 };
 
 #ifdef USE_UPPER_CASE_TABLE
-UChar OnigEncISO_8859_1_ToUpperCaseTable[256] = {
+const UChar OnigEncISO_8859_1_ToUpperCaseTable[256] = {
   '\000', '\001', '\002', '\003', '\004', '\005', '\006', '\007',
   '\010', '\011', '\012', '\013', '\014', '\015', '\016', '\017',
   '\020', '\021', '\022', '\023', '\024', '\025', '\026', '\027',
@@ -417,7 +417,7 @@ onigenc_get_left_adjust_char_head(OnigEncoding enc, const UChar* start, const UC
   return ONIGENC_LEFT_ADJUST_CHAR_HEAD(enc, start, s);
 }
 
-OnigPairAmbigCodes OnigAsciiPairAmbigCodes[] = {
+const OnigPairAmbigCodes OnigAsciiPairAmbigCodes[] = {
   { 0x41, 0x61 },
   { 0x42, 0x62 },
   { 0x43, 0x63 },
@@ -475,7 +475,7 @@ OnigPairAmbigCodes OnigAsciiPairAmbigCodes[] = {
 
 extern int
 onigenc_ascii_get_all_pair_ambig_codes(OnigAmbigType flag,
-                                       OnigPairAmbigCodes** ccs)
+                                       const OnigPairAmbigCodes** ccs)
 {
   if (flag == ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE) {
     *ccs = OnigAsciiPairAmbigCodes;
@@ -488,16 +488,16 @@ onigenc_ascii_get_all_pair_ambig_codes(OnigAmbigType flag,
 
 extern int
 onigenc_nothing_get_all_comp_ambig_codes(OnigAmbigType flag,
-                                         OnigCompAmbigCodes** ccs)
+                                         const OnigCompAmbigCodes** ccs)
 {
   return 0;
 }
 
 extern int
 onigenc_iso_8859_1_get_all_pair_ambig_codes(OnigAmbigType flag,
-                                            OnigPairAmbigCodes** ccs)
+                                            const OnigPairAmbigCodes** ccs)
 {
-  static OnigPairAmbigCodes cc[] = {
+  static const OnigPairAmbigCodes cc[] = {
     { 0xc0, 0xe0 },
     { 0xc1, 0xe1 },
     { 0xc2, 0xe2 },
@@ -577,9 +577,9 @@ onigenc_iso_8859_1_get_all_pair_ambig_codes(OnigAmbigType flag,
 
 extern int
 onigenc_ess_tsett_get_all_comp_ambig_codes(OnigAmbigType flag,
-                                           OnigCompAmbigCodes** ccs)
+                                           const OnigCompAmbigCodes** ccs)
 {
-  static OnigCompAmbigCodes folds[] = {
+  static const OnigCompAmbigCodes folds[] = {
     { 2, 0xdf, {{ 2, { 0x53, 0x53 } }, { 2, { 0x73, 0x73} } } }
   };
 
@@ -593,7 +593,7 @@ onigenc_ess_tsett_get_all_comp_ambig_codes(OnigAmbigType flag,
 
 extern int
 onigenc_not_support_get_ctype_code_range(int ctype,
-                             OnigCodePoint* sbr[], OnigCodePoint* mbr[])
+                             const OnigCodePoint* sbr[], const OnigCodePoint* mbr[])
 {
   return ONIG_NO_SUPPORT_CONFIG;
 }
@@ -830,10 +830,10 @@ onigenc_mb4_code_to_mbc(OnigEncoding enc, OnigCodePoint code, UChar *buf)
   if ((code & 0xff000000) != 0) {
     *p++ = (UChar )((code >> 24) & 0xff);
   }
-  if ((code & 0xff0000) != 0) {
+  if ((code & 0xff0000) != 0 || p != buf) {
     *p++ = (UChar )((code >> 16) & 0xff);
   }
-  if ((code & 0xff00) != 0) {
+  if ((code & 0xff00) != 0 || p != buf) {
     *p++ = (UChar )((code >> 8) & 0xff);
   }
   *p++ = (UChar )(code & 0xff);
@@ -849,40 +849,32 @@ extern int
 onigenc_mb2_is_code_ctype(OnigEncoding enc, OnigCodePoint code,
 			  unsigned int ctype)
 {
-  if ((ctype & ONIGENC_CTYPE_WORD) != 0) {
-    if (code < 128)
-      return ONIGENC_IS_ASCII_CODE_CTYPE(code, ctype);
-    else
-      return (ONIGENC_CODE_TO_MBCLEN(enc, code) > 1 ? TRUE : FALSE);
-
-    ctype &= ~ONIGENC_CTYPE_WORD;
-    if (ctype == 0) return FALSE;
-  }
-
   if (code < 128)
     return ONIGENC_IS_ASCII_CODE_CTYPE(code, ctype);
-  else
-    return FALSE;
+  else {
+    if ((ctype & (ONIGENC_CTYPE_WORD |
+                  ONIGENC_CTYPE_GRAPH | ONIGENC_CTYPE_PRINT)) != 0) {
+      return (ONIGENC_CODE_TO_MBCLEN(enc, code) > 1 ? TRUE : FALSE);
+    }
+  }
+
+  return FALSE;
 }
 
 extern int
 onigenc_mb4_is_code_ctype(OnigEncoding enc, OnigCodePoint code,
 			  unsigned int ctype)
 {
-  if ((ctype & ONIGENC_CTYPE_WORD) != 0) {
-    if (code < 128)
-      return ONIGENC_IS_ASCII_CODE_CTYPE(code, ctype);
-    else
-      return (ONIGENC_CODE_TO_MBCLEN(enc, code) > 1 ? TRUE : FALSE);
-
-    ctype &= ~ONIGENC_CTYPE_WORD;
-    if (ctype == 0) return FALSE;
-  }
-
   if (code < 128)
     return ONIGENC_IS_ASCII_CODE_CTYPE(code, ctype);
-  else
-    return FALSE;
+  else {
+    if ((ctype & (ONIGENC_CTYPE_WORD |
+                  ONIGENC_CTYPE_GRAPH | ONIGENC_CTYPE_PRINT)) != 0) {
+      return (ONIGENC_CODE_TO_MBCLEN(enc, code) > 1 ? TRUE : FALSE);
+    }
+  }
+
+  return FALSE;
 }
 
 extern int

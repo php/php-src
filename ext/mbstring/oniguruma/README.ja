@@ -1,4 +1,4 @@
-README.ja  2005/02/04
+README.ja  2006/05/15
 
 鬼車  ----   (C) K.Kosako <sndgk393 AT ybb DOT ne DOT jp>
 
@@ -14,11 +14,12 @@ http://www.freebsd.org/cgi/cvsweb.cgi/ports/devel/oniguruma/
 
   ASCII, UTF-8, UTF-16BE, UTF-16LE, UTF-32BE, UTF-32LE,
   EUC-JP, EUC-TW, EUC-KR, EUC-CN,
-  Shift_JIS, Big5, KOI8-R, KOI8 (*),
+  Shift_JIS, Big5, GB 18030, KOI8-R, KOI8,
   ISO-8859-1, ISO-8859-2, ISO-8859-3, ISO-8859-4, ISO-8859-5,
   ISO-8859-6, ISO-8859-7, ISO-8859-8, ISO-8859-9, ISO-8859-10,
   ISO-8859-11, ISO-8859-13, ISO-8859-14, ISO-8859-15, ISO-8859-16
 
+* GB 18030: 久保健洋氏提供
 * KOI8はデフォルトのセットアップではライブラリの中に含まれない。
   (必要であればMakefileを編集すること)
 ------------------------------------------------------------
@@ -31,15 +32,21 @@ http://www.freebsd.org/cgi/cvsweb.cgi/ports/devel/oniguruma/
    2. make
    3. make install
 
-    ライブラリファイル: libonig.a
-
-   動作テスト (ASCII/EUC-JP)
-
-     make ctest
-
    アンインストール
 
      make uninstall
+
+   動作テスト (ASCII/EUC-JP)
+
+     make atest
+
+
+   構成確認
+
+     onig-config --cflags
+     onig-config --libs
+     onig-config --prefix
+     onig-config --exec-prefix
 
 
 
@@ -71,8 +78,28 @@ http://www.freebsd.org/cgi/cvsweb.cgi/ports/devel/oniguruma/
 
 使用方法
 
-  使用するプログラムで、oniguruma.hをインクルードする(Native APIの場合)。
-  Native APIについては、doc/API.jaを参照。
+  使用するプログラムで、oniguruma.hをインクルードする(Oniguruma APIの場合)。
+  Oniguruma APIについては、doc/API.jaを参照。
+
+  oniguruma.hで定義されている型名UChar(== unsigned char)を無効にしたい場合
+  には、ONIG_ESCAPE_UCHAR_COLLISIONをdefineしてからoniguruma.hをインクルード
+  すること。このときにはUCharは定義されず、OnigUCharという名前の定義のみが
+  有効になる。
+
+  oniguruma.hで定義されている型名regex_tを無効にしたい場合には、
+  ONIG_ESCAPE_REGEX_T_COLLISIONをdefineしてからoniguruma.hをインクルード
+  すること。このときにはregex_tは定義されず、OnigRegexType, OnigRegexという
+  名前の定義のみが有効になる。
+
+  Unix/Cygwin上でコンパイル、リンクする場合の例：
+  (prefixが/usr/localのとき)
+  cc sample.c -L/usr/local/lib -lonig
+
+  GNU libtoolを使用しているので、プラットフォームが共有ライブラリをサポートして
+  いれば、使用できるようになっている。
+  静的ライブラリと共有ライブラリのどちらを使用するかを指定する方法、実行時点での
+  環境設定方法につては、自分で調べて下さい。
+
 
   Win32でスタティックリンクライブラリ(onig_s.lib)をリンクする場合には、
   コンパイルするときに -DONIG_EXTERN=extern をコンパイル引数に追加すること。
@@ -80,18 +107,19 @@ http://www.freebsd.org/cgi/cvsweb.cgi/ports/devel/oniguruma/
 
 使用例プログラム
 
-  sample/simple.c    最小例 (native API)
+  sample/simple.c    最小例 (Oniguruma API)
   sample/names.c     名前付きグループコールバック使用例
   sample/encode.c    幾つかの文字エンコーディング使用例
   sample/listcap.c   捕獲履歴機能の使用例
   sample/posix.c     POSIX API使用例
   sample/sql.c       可変メタ文字機能使用例 (SQL-like パターン)
-  sample/syntax.c    PerlとJava文法のテスト
+  sample/syntax.c    Perl、Java、ASIS文法のテスト
 
 
 ソースファイル
 
   oniguruma.h        鬼車APIヘッダ (公開)
+  onig-config.in     onig-configプログラム テンプレート
 
   regenc.h           文字エンコーディング枠組みヘッダ
   regint.h           内部宣言
@@ -122,6 +150,7 @@ http://www.freebsd.org/cgi/cvsweb.cgi/ports/devel/oniguruma/
   enc/euc_kr.c       EUC-KR, EUC-CN エンコーディング
   enc/sjis.c         Shift_JIS エンコーディング
   enc/big5.c         Big5 エンコーディング
+  enc/gb18030.c      GB 18030 エンコーディング (久保健洋氏 提供)
   enc/koi8.c         KOI8 エンコーディング
   enc/koi8_r.c       KOI8-R エンコーディング
   enc/iso8859_1.c    ISO-8859-1  (Latin-1)
@@ -155,7 +184,6 @@ http://www.freebsd.org/cgi/cvsweb.cgi/ports/devel/oniguruma/
 Ruby 1.8/1.6の日本語化GNU regexとのAPIの違い
 
    + re_compile_fastmap()   は削除された。
-   + re_recompile_pattern() が追加された。
    + re_alloc_pattern()     が追加された。
 
 
@@ -165,7 +193,6 @@ Ruby 1.8/1.6の日本語化GNU regexとのAPIの違い
   ? Unicodeプロパティ
   ? ambig-flag Katakana <-> Hiragana
   ? ONIG_OPTION_NOTBOS/NOTEOS追加 (\A, \z, \Z)
-  ? ONIG_SYNTAX_ASIS追加
  ?? \X (== \PM\pM*)
  ?? 文法要素 ONIG_SYN_CONTEXT_INDEP_ANCHORSの実装
  ?? 改行文字(文字列)を変更できる
@@ -174,4 +201,4 @@ Ruby 1.8/1.6の日本語化GNU regexとのAPIの違い
 and I'm thankful to Akinori MUSHA.
 
 
-Mail Address: K.Kosako <sndgk393 AT ybb DOT ne DOT jp>
+アドレス: K.Kosako <sndgk393 AT ybb DOT ne DOT jp>

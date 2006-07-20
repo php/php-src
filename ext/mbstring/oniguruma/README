@@ -1,4 +1,4 @@
-README  2005/02/04
+README  2006/05/15
 
 Oniguruma  ----   (C) K.Kosako <sndgk393 AT ybb DOT ne DOT jp>
 
@@ -14,11 +14,12 @@ Supported character encodings:
 
   ASCII, UTF-8, UTF-16BE, UTF-16LE, UTF-32BE, UTF-32LE,
   EUC-JP, EUC-TW, EUC-KR, EUC-CN,
-  Shift_JIS, Big5, KOI8-R, KOI8 (*),
+  Shift_JIS, Big5, GB 18030, KOI8-R, KOI8,
   ISO-8859-1, ISO-8859-2, ISO-8859-3, ISO-8859-4, ISO-8859-5,
   ISO-8859-6, ISO-8859-7, ISO-8859-8, ISO-8859-9, ISO-8859-10,
   ISO-8859-11, ISO-8859-13, ISO-8859-14, ISO-8859-15, ISO-8859-16
 
+* GB 18030: contributed by KUBO Takehiro
 * KOI8 is not included in library archive by default setup.
   (need to edit Makefile if you want to use it.)
 ------------------------------------------------------------
@@ -31,15 +32,20 @@ Install
    2. make
    3. make install
 
-     library file: libonig.a
-
-   test (ASCII/EUC-JP)
-
-     make ctest
-
-   uninstall
+   * uninstall
 
      make uninstall
+
+   * test (ASCII/EUC-JP)
+
+     make atest
+
+   * configuration check
+
+     onig-config --cflags
+     onig-config --libs
+     onig-config --prefix
+     onig-config --exec-prefix
 
 
 
@@ -73,8 +79,21 @@ Regular Expressions
 
 Usage
 
-  Include oniguruma.h in your program. (native API)
-  See doc/API for native API.
+  Include oniguruma.h in your program. (Oniguruma API)
+  See doc/API for Oniguruma API.
+
+  If you want to disable UChar type (== unsigned char) definition
+  in oniguruma.h, define ONIG_ESCAPE_UCHAR_COLLISION and then 
+  include oniguruma.h.
+
+  If you want to disable regex_t type definition in oniguruma.h,
+  define ONIG_ESCAPE_REGEX_T_COLLISION and then include oniguruma.h.
+
+  Example of the compiling/linking command line in Unix or Cygwin,
+  (prefix == /usr/local case)
+
+    cc sample.c -L/usr/local/lib -lonig
+
 
   If you want to use static link library(onig_s.lib) in Win32,
   add option -DONIG_EXTERN=extern to C compiler.
@@ -83,19 +102,20 @@ Usage
 
 Sample Programs
 
-  sample/simple.c    example of the minimum (native API)
+  sample/simple.c    example of the minimum (Oniguruma API)
   sample/names.c     example of the named group callback.
   sample/encode.c    example of some encodings.
   sample/listcap.c   example of the capture history.
   sample/posix.c     POSIX API sample.
   sample/sql.c       example of the variable meta characters.
                      (SQL-like pattern matching)
-  sample/syntax.c    Perl and Java syntax test.
+  sample/syntax.c    Perl, Java and ASIS syntax test.
 
 
 Source Files
 
   oniguruma.h        Oniguruma API header file. (public)
+  onig-config.in     configuration check program template.
 
   regenc.h           character encodings framework header file.
   regint.h           internal definitions
@@ -125,9 +145,10 @@ Source Files
   enc/euc_tw.c       EUC-TW encoding.
   enc/euc_kr.c       EUC-KR, EUC-CN encoding.
   enc/sjis.c         Shift_JIS encoding.
-  enc/big5.c         Big5   encoding.
-  enc/koi8.c         KOI8   encoding.
-  enc/koi8_r.c       KOI8-R encoding.
+  enc/big5.c         Big5      encoding.
+  enc/gb18030.c      GB 18030  encoding  (contributed by KUBO Takehiro)
+  enc/koi8.c         KOI8      encoding.
+  enc/koi8_r.c       KOI8-R    encoding.
   enc/iso8859_1.c    ISO-8859-1  encoding. (Latin-1)
   enc/iso8859_2.c    ISO-8859-2  encoding. (Latin-2)
   enc/iso8859_3.c    ISO-8859-3  encoding. (Latin-3)
@@ -159,7 +180,6 @@ Source Files
 API differences with Japanized GNU regex(version 0.12) of Ruby 1.8/1.6
 
    + re_compile_fastmap() is removed.
-   + re_recompile_pattern() is added.
    + re_alloc_pattern() is added.
 
 
@@ -169,7 +189,6 @@ ToDo
   ? Unicode Property.
   ? ambig-flag Katakana <-> Hiragana.
   ? add ONIG_OPTION_NOTBOS/NOTEOS. (\A, \z, \Z)
-  ? add ONIG_SYNTAX_ASIS.
  ?? \X (== \PM\pM*)
  ?? implement syntax behavior ONIG_SYN_CONTEXT_INDEP_ANCHORS.
  ?? variable line separator.
