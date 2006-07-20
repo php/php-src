@@ -757,7 +757,7 @@ static char *date_format(char *format, int format_len, timelib_time *t, int loca
 					retval += 1000;
 				}
 				retval = retval % 1000;
-				snprintf(buffer, 32, "%03d", retval); break;
+				snprintf(buffer, 32, "%03d", retval);
 				break;
 			}
 			case 'g': snprintf(buffer, 32, "%d", (t->h % 12) ? (int) t->h % 12 : 12); break;
