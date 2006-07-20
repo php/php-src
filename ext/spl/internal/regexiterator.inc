@@ -34,6 +34,7 @@ class RegexIterator implements FilterIterator
 	                         self::GET_MATCH, self::ALL_MATCHES, self::SPLIT) */
 	private $preg_flags;/**< PREG_* flags, see preg_match(), preg_match_all(), 
 	                         preg_split() */ 
+	private $key;       /**< the value used for key() */
 	private $current;   /**< the value used for current() */
 
 	/**
@@ -67,9 +68,10 @@ class RegexIterator implements FilterIterator
 	function accept()
 	{
 		$matches       = array();
+		$this->key     = parent::key();
 		$this->current = parent::current();
 		/* note that we use $this->current, rather than calling parent::current() */
-		$subject = ($this->flags & self::USE_KEY) ? parent::key() : $this->current;
+		$subject = ($this->flags & self::USE_KEY) ? $this->key : $this->current;
 		switch($this->mode)
 		{
 			case self::MATCH:
@@ -86,7 +88,26 @@ class RegexIterator implements FilterIterator
 			case self::SPLIT:
 				$this->current = array();
 				preg_split($this->regex, $subject, $this->current, $this->preg_flags) > 1;
+
+			case self::REPLACE:
+				$this->current = array();
+				$result = preg_replace($this->regex, $this->replacement, $subject);
+				if ($this->flags & self::USE_KEY)
+				{
+					$this->key = $result;
+				}
+				else
+				{
+					$this->current = $result;
+				}
 		}
+	}
+
+	/** @return the key after accept has been called
+	 */
+	function key()
+	{
+		return $this->key;
 	}
 
 	/** @return the current value after accept has been called
