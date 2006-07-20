@@ -135,6 +135,11 @@ static void json_encode_array(smart_str *buf, zval **val TSRMLS_DC) {
         r = 1;
     }
 
+    if (myht && myht->nApplyCount > 1) {
+        php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "recursion detected");
+        return;
+    }
+
     if (r == 0)
     {
         smart_str_appendc(buf, '[');
@@ -151,6 +156,7 @@ static void json_encode_array(smart_str *buf, zval **val TSRMLS_DC) {
         ulong index;
         uint key_len;
         HashPosition pos;
+        HashTable *tmp_ht;
         int need_comma = 0;
 
         zend_hash_internal_pointer_reset_ex(myht, &pos);
@@ -160,6 +166,11 @@ static void json_encode_array(smart_str *buf, zval **val TSRMLS_DC) {
                 break;
 
             if (zend_hash_get_current_data_ex(myht, (void **) &data, &pos) == SUCCESS) {
+                tmp_ht = HASH_OF(*data);
+                if (tmp_ht) {
+                    tmp_ht->nApplyCount++;
+                }
+
                 if (r == 0) {
                     if (need_comma) {
                         smart_str_appendc(buf, ',');
@@ -199,6 +210,10 @@ static void json_encode_array(smart_str *buf, zval **val TSRMLS_DC) {
 
                         json_encode_r(buf, *data TSRMLS_CC);
                     }
+                }
+
+                if (tmp_ht) {
+                    tmp_ht->nApplyCount--;
                 }
             }
         }
