@@ -38,3 +38,20 @@ array(1) {
   string(7) "'A'rray"
 }
 string(3) "aBC"
+--UEXPECTF--
+Warning: preg_replace_callback(): Unable to call custom replacement function in %spreg_replace_callback2.php on line %d
+array(3) {
+  [0]=>
+  string(12) "'a' 'b3' bcd"
+  [u"v"]=>
+  string(6) "aksfjk"
+  [12]=>
+  string(9) "'aa' 'bb'"
+}
+
+Notice: Array to string conversion in %spreg_replace_callback2.php on line 17
+array(1) {
+  [0]=>
+  string(7) "'A'rray"
+}
+string(3) "aBC"
