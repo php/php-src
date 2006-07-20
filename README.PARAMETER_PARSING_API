@@ -51,9 +51,9 @@ Type specifiers
  r	- resource (zval*)
  s	- string (with possible null bytes) and its length (char*, int)
  S	- binary string, does not allow conversion from Unicode strings
- t	- text (void * (char*/Uchar*), int (length), zend_uchar (IS_STRING/..))
+ t	- text (zstr (string union), int (length), zend_uchar (IS_STRING/..))
       accepts either Unicode or binary string
- T	- text (void * (char*/Uchar*), int (length), zend_uchar (IS_STRING/..))
+ T	- text (zstr (string union), int (length), zend_uchar (IS_STRING/..))
       coalesces all T parameters to common type (Unicode or binary)
  u	- unicode (UChar*, int)
  U	- Unicode string, does not allow conversion from binary strings
