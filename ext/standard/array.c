@@ -4238,72 +4238,54 @@ ukey:
 /* }}} */
 
 
-/* {{{ proto array array_map(mixed callback, array input1 [, array input2 ,...])
+/* {{{ proto array array_map(mixed callback, array input1 [, array input2 ,...]) U
    Applies the callback to the elements in given arrays. */
 PHP_FUNCTION(array_map)
 {
-	zval ***pargs = NULL;
+	zval ***arrays = NULL;
+	int n_arrays = 0;
 	zval ***params;
-	zval *callback;
 	zval *result, *null;
 	HashPosition *array_pos;
 	zval **args;
-	zval callback_name;
+	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
 	int i, k, maxlen = 0;
 	int *array_len;
 
-	if (ZEND_NUM_ARGS() < 2) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "f!+", &fci, &fci_cache, &arrays, &n_arrays) == FAILURE) {
+		return;
 	}
 
 	RETVAL_NULL();
 
-	pargs = (zval ***)safe_emalloc(ZEND_NUM_ARGS(), sizeof(zval **), 0);
-	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), pargs) == FAILURE) {
-		efree(pargs);
-		WRONG_PARAM_COUNT;
-	}
+	args = (zval **)safe_emalloc(n_arrays, sizeof(zval *), 0);
+	array_len = (int *)safe_emalloc(n_arrays, sizeof(int), 0);
+	array_pos = (HashPosition *)safe_emalloc(n_arrays, sizeof(HashPosition), 0);
 
-	callback = *pargs[0];
-
-	if (Z_TYPE_P(callback) != IS_NULL) {
-		if (!zend_is_callable(callback, 0, &callback_name)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The first argument, '%R', should be either NULL or a valid callback", Z_TYPE(callback_name), Z_UNIVAL(callback_name));
-			zval_dtor(&callback_name);
-			efree(pargs);
-			return;
-		}
-		zval_dtor(&callback_name);
-	}
-
-	args = (zval **)safe_emalloc(ZEND_NUM_ARGS(), sizeof(zval *), 0);
-	array_len = (int *)safe_emalloc(ZEND_NUM_ARGS(), sizeof(int), 0);
-	array_pos = (HashPosition *)safe_emalloc(ZEND_NUM_ARGS(), sizeof(HashPosition), 0);
-
-	for (i = 1; i < ZEND_NUM_ARGS(); i++) {
-		if (Z_TYPE_PP(pargs[i]) != IS_ARRAY) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument #%d should be an array", i + 1);
-			efree(pargs);
+	for (i = 0; i < n_arrays; i++) {
+		if (Z_TYPE_PP(arrays[i]) != IS_ARRAY) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument #%d should be an array", i + 2);
+			efree(arrays);
 			efree(args);
 			efree(array_len);
 			efree(array_pos);
 			return;
 		}
-		SEPARATE_ZVAL_IF_NOT_REF(pargs[i]);
-		args[i] = *pargs[i];
-		array_len[i] = zend_hash_num_elements(Z_ARRVAL_PP(pargs[i]));
+		SEPARATE_ZVAL_IF_NOT_REF(arrays[i]);
+		args[i] = *arrays[i];
+		array_len[i] = zend_hash_num_elements(Z_ARRVAL_PP(arrays[i]));
 		if (array_len[i] > maxlen) {
 			maxlen = array_len[i];
 		}
-		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(pargs[i]), &array_pos[i]);
+		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(arrays[i]), &array_pos[i]);
 	}
 
-	efree(pargs);
+	efree(arrays);
 
 	/* Short-circuit: if no callback and only one array, just return it. */
-	if (Z_TYPE_P(callback) == IS_NULL && ZEND_NUM_ARGS() == 2) {
-		RETVAL_ZVAL(args[1], 1, 0);
+	if (!ZEND_FCI_INITIALIZED(fci) && n_arrays == 1) {
+		RETVAL_ZVAL(args[0], 1, 0);
 		efree(array_len);
 		efree(array_pos);
 		efree(args);
@@ -4311,7 +4293,7 @@ PHP_FUNCTION(array_map)
 	}
 
 	array_init(return_value);
-	params = (zval ***)safe_emalloc(ZEND_NUM_ARGS(), sizeof(zval **), 0);
+	params = (zval ***)safe_emalloc(n_arrays, sizeof(zval **), 0);
 	MAKE_STD_ZVAL(null);
 	ZVAL_NULL(null);
 
@@ -4326,14 +4308,14 @@ PHP_FUNCTION(array_map)
 		 * If no callback, the result will be an array, consisting of current
 		 * entries from all arrays.
 		 */
-		if (Z_TYPE_P(callback) == IS_NULL) {
+		if (!ZEND_FCI_INITIALIZED(fci)) {
 			MAKE_STD_ZVAL(result);
 			array_init(result);
 		}
 
-		for (i = 1; i < ZEND_NUM_ARGS(); i++) {
+		for (i = 0; i < n_arrays; i++) {
 			/*
-			 * If this array still hash elements, add the current one to the
+			 * If this array still has elements, add the current one to the
 			 * parameter list, otherwise use null value.
 			 */
 			if (k < array_len[i]) {
@@ -4343,8 +4325,8 @@ PHP_FUNCTION(array_map)
 				 * It is safe to store only last value of key type, because
 				 * this loop will run just once if there is only 1 array.
 				 */
-				if (ZEND_NUM_ARGS() == 2) {
-					key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(args[1]), &str_key, &str_key_len, &num_key, 0, &array_pos[i]);
+				if (n_arrays == 1) {
+					key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(args[0]), &str_key, &str_key_len, &num_key, 0, &array_pos[i]);
 				}
 															
 				zend_hash_move_forward_ex(Z_ARRVAL_P(args[i]), &array_pos[i]);
@@ -4352,23 +4334,16 @@ PHP_FUNCTION(array_map)
 				params[i] = &null;
 			}
 
-			if (Z_TYPE_P(callback) == IS_NULL) {
+			if (!ZEND_FCI_INITIALIZED(fci)) {
 				zval_add_ref(params[i]);
 				add_next_index_zval(result, *params[i]);
 			}
 		}
 
-		if (Z_TYPE_P(callback) != IS_NULL) {
-			zend_fcall_info fci;
-
-			fci.size = sizeof(fci);
-			fci.function_table = EG(function_table);
-			fci.function_name = callback;
-			fci.symbol_table = NULL;
-			fci.object_pp = NULL;
+		if (ZEND_FCI_INITIALIZED(fci)) {
 			fci.retval_ptr_ptr = &result;
-			fci.param_count = ZEND_NUM_ARGS()-1;
-			fci.params = &params[1];
+			fci.param_count = n_arrays;
+			fci.params = params;
 			fci.no_separation = 0;
 
 			if (zend_call_function(&fci, &fci_cache TSRMLS_CC) != SUCCESS || !result) {
@@ -4381,7 +4356,7 @@ PHP_FUNCTION(array_map)
 			}
 		}
 
-		if (ZEND_NUM_ARGS() > 2) {
+		if (n_arrays > 1) {
 			add_next_index_zval(return_value, result);
 		} else {
 			zend_uchar utype;

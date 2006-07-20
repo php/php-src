@@ -22,9 +22,6 @@ ext/standard
         Should work with minor cleanups provided that underlying comparison
         functions are fixed, FCI cache, test
 
-    array_map()
-        Params API, FCI cache, test
-
     array_multisort()
         Add SORT_LOCALE_STRING, test
 
@@ -56,6 +53,7 @@ ext/standard
     array_flip()
     array_key_exists()
     array_keys()
+    array_map()
     array_merge()
     array_merge_recursive()
     array_product()
