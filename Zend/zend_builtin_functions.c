@@ -982,7 +982,6 @@ ZEND_FUNCTION(property_exists)
 			RETURN_FALSE; /* shouldn't happen */
 		}
 		RETURN_BOOL(EG(scope) == ce);
-		RETURN_FALSE;
 
 	case IS_OBJECT:
 		if (Z_OBJ_HANDLER_PP(object, has_property) && Z_OBJ_HANDLER_PP(object, has_property)(*object, *property, 2 TSRMLS_CC)) {
