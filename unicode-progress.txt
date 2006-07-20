@@ -11,19 +11,14 @@ ext/standard
     directly in code point order
 
     array_intersect(), array_uintersect()
-    array_intersect_assoc(), array_uintersect_assoc(), array_intersect_uassoc(), array_uintersect_uassoc()
+    array_intersect_assoc(), array_uintersect_assoc()
+    array_intersect_uassoc(), array_uintersect_uassoc()
     array_intersect_key(), array_intersect_ukey()
         Should work with minor cleanups provided that underlying comparison
         functions are fixed, FCI cache, test
 
     array_multisort()
         Add SORT_LOCALE_STRING, test
-
-    array_walk()
-        Params API, is_callable check, FCI cache, test
-
-    array_walk_recursive()
-        Params API, is_callable check, FCI cache, test
 
     extract()
         Params API, fix php_valid_var_name(), test
@@ -62,6 +57,8 @@ ext/standard
     array_sum()
     array_values()
     array_unique()
+    array_walk()
+    array_walk_recursive()
     compact()
     count()
     in_array()
