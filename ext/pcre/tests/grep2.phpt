@@ -19,10 +19,10 @@ var_dump(preg_last_error() == PREG_RECURSION_LIMIT_ERROR);
 
 ?>
 --EXPECTF--
-Warning: Wrong parameter count for preg_grep() in %sgrep2.php on line 3
+Warning: preg_grep() expects at most 3 parameters, 4 given in %sgrep2.php on line 3
 NULL
 
-Warning: preg_grep(): Second argument to preg_grep() should be an array in %sgrep2.php on line 4
+Warning: preg_grep() expects parameter 2 to be array, integer given in %sgrep2.php on line 4
 NULL
 
 Warning: preg_grep(): Compilation failed: nothing to repeat at offset 0 in %sgrep2.php on line 5
