@@ -43,3 +43,28 @@ bool(true)
 array(0) {
 }
 bool(true)
+--UEXPECTF--
+Warning: preg_grep() expects at most 3 parameters, 4 given in %sgrep2.php on line 3
+NULL
+
+Warning: preg_grep() expects parameter 2 to be array, integer given in %sgrep2.php on line 4
+NULL
+
+Warning: preg_grep(): Compilation failed: nothing to repeat at offset 0 in %sgrep2.php on line 5
+bool(false)
+array(3) {
+  [5]=>
+  string(1) "a"
+  [u"xyz"]=>
+  string(2) "q6"
+  [6]=>
+  string(3) "h20"
+}
+array(1) {
+  [u"x"]=>
+  string(1) "1"
+}
+bool(true)
+array(0) {
+}
+bool(true)
