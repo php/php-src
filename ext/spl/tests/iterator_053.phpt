@@ -9,11 +9,11 @@ class MyRegexIterator extends RegexIterator
 {
 	public $uk, $re;
 	
-	function __construct($it, $re, $flags, $mode)
+	function __construct($it, $re, $mode, $flags = 0)
 	{
 		$this->uk = $flags & self::USE_KEY;
 		$this->re = $re;
-		parent::__construct($it, $re, $flags, $mode);
+		parent::__construct($it, $re, $mode, $flags);
 	}
 
 	function show()
@@ -35,10 +35,10 @@ class MyRegexIterator extends RegexIterator
 }
 
 $ar = new ArrayIterator(array('1','1,2','1,2,3','',NULL,array(),'FooBar',',',',,'));
-$it = new MyRegexIterator($ar, '/(\d),(\d)/', RegexIterator::USE_KEY, RegexIterator::ALL_MATCHES);
+$it = new MyRegexIterator($ar, '/(\d),(\d)/', RegexIterator::ALL_MATCHES, RegexIterator::USE_KEY);
 $it->show();
 
-$it = new MyRegexIterator($ar, '/(\d)/', RegexIterator::USE_KEY, RegexIterator::ALL_MATCHES);
+$it = new MyRegexIterator($ar, '/(\d)/', RegexIterator::ALL_MATCHES, RegexIterator::USE_KEY);
 $it->show();
 
 var_dump($ar);
