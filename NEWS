@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, PHP 5.2.0
+- Updated bundled MySQL client library to version 5.0.22 in the Windows
+  distribution. (Edin)
 - Updated timezonedb to version 2006.7. (Derick)
 
 - Changed priority of PHPRC environment variable on win32 to be higher then
