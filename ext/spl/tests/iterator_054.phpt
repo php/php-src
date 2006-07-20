@@ -18,7 +18,7 @@ class MyRegexIterator extends RegexIterator
 }
 
 $ar = new ArrayIterator(array('1','1,2','1,2,3','',NULL,array(),'FooBar',',',',,'));
-$it = new MyRegexIterator($ar, '/,/', 0, RegexIterator::SPLIT);
+$it = new MyRegexIterator($ar, '/,/', RegexIterator::SPLIT);
 
 $it->show();
 

@@ -12,7 +12,7 @@
 /**
  * @brief   Regular expression filter for iterators
  * @author  Marcus Boerger
- * @version 1.1
+ * @version 1.0
  * @since PHP 5.1
  *
  * This filter iterator assumes that the inner iterator 
@@ -26,6 +26,7 @@ class RegexIterator implements FilterIterator
 	const GET_MATCH   = 1; /**< Mode: Return the first matche (if any) */
 	const ALL_MATCHES = 2; /**< Mode: Return all matches (if any)      */
 	const SPLIT       = 3; /**< Mode: Return the split values (if any) */
+	const REPLACE     = 4; /**< Mode: Replace the input key or current */
 	
 	private $regex;     /**< the regular expression to match against */
 	private $flags;     /**< special flags (self::USE_KEY) */
@@ -33,6 +34,7 @@ class RegexIterator implements FilterIterator
 	                         self::GET_MATCH, self::ALL_MATCHES, self::SPLIT) */
 	private $preg_flags;/**< PREG_* flags, see preg_match(), preg_match_all(), 
 	                         preg_split() */ 
+	private $key;       /**< the value used for key() */
 	private $current;   /**< the value used for current() */
 
 	/**
@@ -41,13 +43,13 @@ class RegexIterator implements FilterIterator
 	 *
 	 * @param it          inner iterator
 	 * @param regex       the regular expression to match
-	 * @param flags       special flags (self::USE_KEY)
 	 * @param mode        operation mode (one of self::MATCH, self::GET_MATCH, 
 	 *                    self::ALL_MATCHES, self::SPLIT)
+	 * @param flags       special flags (self::USE_KEY)
 	 * @param preg_flags  global PREG_* flags, see preg_match(), 
 	 *                    preg_match_all(), preg_split()
 	 */
-	function __construct(Iterator $it, $regex, $flags = 0, $mode = 0, $preg_flags = 0) {
+	function __construct(Iterator $it, $regex, $mode = 0, $flags = 0, $preg_flags = 0) {
 		parent::__construct($it);
 		$this->regex = $regex;
 		$this->flags = $flags;
@@ -66,9 +68,10 @@ class RegexIterator implements FilterIterator
 	function accept()
 	{
 		$matches       = array();
+		$this->key     = parent::key();
 		$this->current = parent::current();
 		/* note that we use $this->current, rather than calling parent::current() */
-		$subject = ($this->flags & self::USE_KEY) ? parent::key() : $this->current;
+		$subject = ($this->flags & self::USE_KEY) ? $this->key : $this->current;
 		switch($this->mode)
 		{
 			case self::MATCH:
@@ -85,7 +88,26 @@ class RegexIterator implements FilterIterator
 			case self::SPLIT:
 				$this->current = array();
 				preg_split($this->regex, $subject, $this->current, $this->preg_flags) > 1;
+
+			case self::REPLACE:
+				$this->current = array();
+				$result = preg_replace($this->regex, $this->replacement, $subject);
+				if ($this->flags & self::USE_KEY)
+				{
+					$this->key = $result;
+				}
+				else
+				{
+					$this->current = $result;
+				}
 		}
+	}
+
+	/** @return the key after accept has been called
+	 */
+	function key()
+	{
+		return $this->key;
 	}
 
 	/** @return the current value after accept has been called

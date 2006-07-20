@@ -18,10 +18,10 @@ class MyRegexIterator extends RegexIterator
 }
 
 $ar = new ArrayIterator(array('1','1,2','1,2,3','',NULL,array(),'FooBar',',',',,'));
-$it = new MyRegexIterator($ar, '/(\d),(\d)/', 0, RegexIterator::GET_MATCH);
+$it = new MyRegexIterator($ar, '/(\d),(\d)/', RegexIterator::GET_MATCH);
 $it->show();
 
-$it = new MyRegexIterator($ar, '/(\d)/', 0, RegexIterator::GET_MATCH);
+$it = new MyRegexIterator($ar, '/(\d)/', RegexIterator::GET_MATCH);
 $it->show();
 
 var_dump($ar);
