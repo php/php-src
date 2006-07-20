@@ -43,13 +43,13 @@ class RegexIterator implements FilterIterator
 	 *
 	 * @param it          inner iterator
 	 * @param regex       the regular expression to match
-	 * @param flags       special flags (self::USE_KEY)
 	 * @param mode        operation mode (one of self::MATCH, self::GET_MATCH, 
 	 *                    self::ALL_MATCHES, self::SPLIT)
+	 * @param flags       special flags (self::USE_KEY)
 	 * @param preg_flags  global PREG_* flags, see preg_match(), 
 	 *                    preg_match_all(), preg_split()
 	 */
-	function __construct(Iterator $it, $regex, $flags = 0, $mode = 0, $preg_flags = 0) {
+	function __construct(Iterator $it, $regex, $mode = 0, $flags = 0, $preg_flags = 0) {
 		parent::__construct($it);
 		$this->regex = $regex;
 		$this->flags = $flags;
