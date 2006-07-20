@@ -463,7 +463,7 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 }
 
 PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subject_len, zval *return_value,
-	zval *subpats, int global, int use_flags, long flags, long start_offset TSRMLS_DC)
+	zval *subpats, int global, int use_flags, long flags, long start_offset TSRMLS_CC)
 {
 	zval			*result_set,		/* Holds a set of subpatterns after
 										   a global match */
@@ -926,7 +926,7 @@ PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
 	}
 
 	return php_pcre_replace_impl(pce, subject, subject_len, replace_val, 
-		is_callable_replace, result_len, limit, replace_count TSRMLS_DC);
+		is_callable_replace, result_len, limit, replace_count TSRMLS_CC);
 }
 
 PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int subject_len, zval *replace_val, 
