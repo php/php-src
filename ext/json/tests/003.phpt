@@ -25,4 +25,6 @@ array(1) {
   }
 }
 
-Catchable fatal error: json_encode(): recursion detected in %s on line %d
+Warning: json_encode(): recursion detected in %s on line %d
+string(8) "[[null]]"
+Done

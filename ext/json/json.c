@@ -136,7 +136,8 @@ static void json_encode_array(smart_str *buf, zval **val TSRMLS_DC) {
     }
 
     if (myht && myht->nApplyCount > 1) {
-        php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "recursion detected");
+        php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
+        smart_str_appendl(buf, "null", 4);
         return;
     }
 
