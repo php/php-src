@@ -2,7 +2,7 @@
   utf8.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2005  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2006  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,7 @@
 
 #define utf8_islead(c)     ((UChar )((c) & 0xc0) != 0x80)
 
-static int EncLen_UTF8[] = {
+static const int EncLen_UTF8[] = {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -63,6 +63,29 @@ static int
 utf8_mbc_enc_len(const UChar* p)
 {
   return EncLen_UTF8[*p];
+}
+
+static int
+utf8_is_mbc_newline(const UChar* p, const UChar* end)
+{
+  if (p < end) {
+    if (*p == 0x0a) return 1;
+
+#ifdef USE_UNICODE_ALL_LINE_TERMINATORS
+    if (*p == 0x0d) return 1;
+    if (p + 1 < end) {
+      if (*(p+1) == 0x85 && *p == 0xc2) /* U+0085 */
+	return 1;
+      if (p + 2 < end) {
+	if ((*(p+2) == 0xa8 || *(p+2) == 0xa9)
+	    && *(p+1) == 0x80 && *p == 0xe2)  /* U+2028, U+2029 */
+	  return 1;
+      }
+    }
+#endif
+  }
+
+  return 0;
 }
 
 static OnigCodePoint
@@ -307,16 +330,16 @@ utf8_is_mbc_ambiguous(OnigAmbigType flag, const UChar** pp, const UChar* end)
 }
 
 
-static OnigCodePoint EmptyRange[] = { 0 };
+static const OnigCodePoint EmptyRange[] = { 0 };
 
-static OnigCodePoint SBAlnum[] = {
+static const OnigCodePoint SBAlnum[] = {
   3,
   0x0030, 0x0039,
   0x0041, 0x005a,
   0x0061, 0x007a
 };
 
-static OnigCodePoint MBAlnum[] = {
+static const OnigCodePoint MBAlnum[] = {
 #ifdef USE_UNICODE_FULL_RANGE_CTYPE
   411,
 #else
@@ -738,13 +761,13 @@ static OnigCodePoint MBAlnum[] = {
 #endif /* USE_UNICODE_FULL_RANGE_CTYPE */
 }; /* end of MBAlnum */
 
-static OnigCodePoint SBAlpha[] = {
+static const OnigCodePoint SBAlpha[] = {
   2,
   0x0041, 0x005a,
   0x0061, 0x007a
 };
 
-static OnigCodePoint MBAlpha[] = {
+static const OnigCodePoint MBAlpha[] = {
 #ifdef USE_UNICODE_FULL_RANGE_CTYPE
   394,
 #else
@@ -1149,13 +1172,13 @@ static OnigCodePoint MBAlpha[] = {
 #endif /* USE_UNICODE_FULL_RANGE_CTYPE */
 }; /* end of MBAlpha */
 
-static OnigCodePoint SBBlank[] = {
+static const OnigCodePoint SBBlank[] = {
   2,
   0x0009, 0x0009,
   0x0020, 0x0020
 };
 
-static OnigCodePoint MBBlank[] = {
+static const OnigCodePoint MBBlank[] = {
 #ifdef USE_UNICODE_FULL_RANGE_CTYPE
   7,
 #else
@@ -1173,13 +1196,13 @@ static OnigCodePoint MBBlank[] = {
 #endif /* USE_UNICODE_FULL_RANGE_CTYPE */
 }; /* end of MBBlank */
 
-static OnigCodePoint SBCntrl[] = {
+static const OnigCodePoint SBCntrl[] = {
   2,
   0x0000, 0x001f,
   0x007f, 0x007f
 };
 
-static OnigCodePoint MBCntrl[] = {
+static const OnigCodePoint MBCntrl[] = {
 #ifdef USE_UNICODE_FULL_RANGE_CTYPE
   18,
 #else
@@ -1208,12 +1231,12 @@ static OnigCodePoint MBCntrl[] = {
 #endif /* USE_UNICODE_FULL_RANGE_CTYPE */
 }; /* end of MBCntrl */
 
-static OnigCodePoint SBDigit[] = {
+static const OnigCodePoint SBDigit[] = {
   1,
   0x0030, 0x0039
 };
 
-static OnigCodePoint MBDigit[] = {
+static const OnigCodePoint MBDigit[] = {
 #ifdef USE_UNICODE_FULL_RANGE_CTYPE
   22,
 #else
@@ -1245,12 +1268,12 @@ static OnigCodePoint MBDigit[] = {
 #endif /* USE_UNICODE_FULL_RANGE_CTYPE */
 }; /* end of MBDigit */
 
-static OnigCodePoint SBGraph[] = {
+static const OnigCodePoint SBGraph[] = {
   1,
   0x0021, 0x007e
 };
 
-static OnigCodePoint MBGraph[] = {
+static const OnigCodePoint MBGraph[] = {
 #ifdef USE_UNICODE_FULL_RANGE_CTYPE
   404,
 #else
@@ -1665,12 +1688,12 @@ static OnigCodePoint MBGraph[] = {
 #endif /* USE_UNICODE_FULL_RANGE_CTYPE */
 }; /* end of MBGraph */
 
-static OnigCodePoint SBLower[] = {
+static const OnigCodePoint SBLower[] = {
   1,
   0x0061, 0x007a
 };
 
-static OnigCodePoint MBLower[] = {
+static const OnigCodePoint MBLower[] = {
 #ifdef USE_UNICODE_FULL_RANGE_CTYPE
   423,
 #else
@@ -2104,13 +2127,13 @@ static OnigCodePoint MBLower[] = {
 #endif /* USE_UNICODE_FULL_RANGE_CTYPE */
 }; /* end of MBLower */
 
-static OnigCodePoint SBPrint[] = {
+static const OnigCodePoint SBPrint[] = {
   2,
   0x0009, 0x000d,
   0x0020, 0x007e
 };
 
-static OnigCodePoint MBPrint[] = {
+static const OnigCodePoint MBPrint[] = {
 #ifdef USE_UNICODE_FULL_RANGE_CTYPE
   403,
 #else
@@ -2524,7 +2547,7 @@ static OnigCodePoint MBPrint[] = {
 #endif /* USE_UNICODE_FULL_RANGE_CTYPE */
 }; /* end of MBPrint */
 
-static OnigCodePoint SBPunct[] = {
+static const OnigCodePoint SBPunct[] = {
   9,
   0x0021, 0x0023,
   0x0025, 0x002a,
@@ -2537,7 +2560,7 @@ static OnigCodePoint SBPunct[] = {
   0x007d, 0x007d
 }; /* end of SBPunct */
 
-static OnigCodePoint MBPunct[] = {
+static const OnigCodePoint MBPunct[] = {
 #ifdef USE_UNICODE_FULL_RANGE_CTYPE
   77,
 #else
@@ -2625,13 +2648,13 @@ static OnigCodePoint MBPunct[] = {
 #endif /* USE_UNICODE_FULL_RANGE_CTYPE */
 }; /* end of MBPunct */
 
-static OnigCodePoint SBSpace[] = {
+static const OnigCodePoint SBSpace[] = {
   2,
   0x0009, 0x000d,
   0x0020, 0x0020
 };
 
-static OnigCodePoint MBSpace[] = {
+static const OnigCodePoint MBSpace[] = {
 #ifdef USE_UNICODE_FULL_RANGE_CTYPE
   9,
 #else
@@ -2651,12 +2674,12 @@ static OnigCodePoint MBSpace[] = {
 #endif /* USE_UNICODE_FULL_RANGE_CTYPE */
 }; /* end of MBSpace */
 
-static OnigCodePoint SBUpper[] = {
+static const OnigCodePoint SBUpper[] = {
   1,
   0x0041, 0x005a
 };
 
-static OnigCodePoint MBUpper[] = {
+static const OnigCodePoint MBUpper[] = {
 #ifdef USE_UNICODE_FULL_RANGE_CTYPE
   420,
 #else
@@ -3087,19 +3110,19 @@ static OnigCodePoint MBUpper[] = {
 #endif /* USE_UNICODE_FULL_RANGE_CTYPE */
 }; /* end of MBUpper */
 
-static OnigCodePoint SBXDigit[] = {
+static const OnigCodePoint SBXDigit[] = {
   3,
   0x0030, 0x0039,
   0x0041, 0x0046,
   0x0061, 0x0066
 };
 
-static OnigCodePoint SBASCII[] = {
+static const OnigCodePoint SBASCII[] = {
   1,
   0x0000, 0x007f
 };
 
-static OnigCodePoint SBWord[] = {
+static const OnigCodePoint SBWord[] = {
   4,
   0x0030, 0x0039,
   0x0041, 0x005a,
@@ -3107,7 +3130,7 @@ static OnigCodePoint SBWord[] = {
   0x0061, 0x007a
 };
 
-static OnigCodePoint MBWord[] = {
+static const OnigCodePoint MBWord[] = {
 #ifdef USE_UNICODE_FULL_RANGE_CTYPE
   432,
 #else
@@ -3554,7 +3577,7 @@ static OnigCodePoint MBWord[] = {
 
 static int
 utf8_get_ctype_code_range(int ctype,
-                          OnigCodePoint* sbr[], OnigCodePoint* mbr[])
+                          const OnigCodePoint* sbr[], const OnigCodePoint* mbr[])
 {
 #define CR_SET(sbl,mbl) do { \
   *sbr = sbl; \
@@ -3622,7 +3645,7 @@ static int
 utf8_is_code_ctype(OnigCodePoint code, unsigned int ctype)
 {
 #ifdef USE_UNICODE_FULL_RANGE_CTYPE
-  OnigCodePoint *range;
+  const OnigCodePoint *range;
 #endif
 
   if (code < 256) {
@@ -3674,6 +3697,9 @@ utf8_is_code_ctype(OnigCodePoint code, unsigned int ctype)
   case ONIGENC_CTYPE_ALNUM:
     range = MBAlnum;
     break;
+  case ONIGENC_CTYPE_NEWLINE:
+    return FALSE;
+    break;
 
   default:
     return ONIGENCERR_TYPE_BUG;
@@ -3723,7 +3749,7 @@ OnigEncodingType OnigEncodingUTF8 = {
     , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* one or more time '+' */
     , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* anychar anytime */
   },
-  onigenc_is_mbc_newline_0x0a,
+  utf8_is_mbc_newline,
   utf8_mbc_to_code,
   utf8_code_to_mbclen,
   utf8_code_to_mbc,

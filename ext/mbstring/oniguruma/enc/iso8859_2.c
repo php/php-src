@@ -33,7 +33,7 @@
 #define ENC_IS_ISO_8859_2_CTYPE(code,ctype) \
   ((EncISO_8859_2_CtypeTable[code] & ctype) != 0)
 
-static UChar EncISO_8859_2_ToLowerCaseTable[256] = {
+static const UChar EncISO_8859_2_ToLowerCaseTable[256] = {
   '\000', '\001', '\002', '\003', '\004', '\005', '\006', '\007',
   '\010', '\011', '\012', '\013', '\014', '\015', '\016', '\017',
   '\020', '\021', '\022', '\023', '\024', '\025', '\026', '\027',
@@ -68,7 +68,7 @@ static UChar EncISO_8859_2_ToLowerCaseTable[256] = {
   '\370', '\371', '\372', '\373', '\374', '\375', '\376', '\377'
 };
 
-static unsigned short EncISO_8859_2_CtypeTable[256] = {
+static const unsigned short EncISO_8859_2_CtypeTable[256] = {
   0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008,
   0x2008, 0x220c, 0x2209, 0x2208, 0x2208, 0x2208, 0x2008, 0x2008,
   0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008,
@@ -177,9 +177,9 @@ iso_8859_2_is_mbc_ambiguous(OnigAmbigType flag,
 
 static int
 iso_8859_2_get_all_pair_ambig_codes(OnigAmbigType flag,
-                                    OnigPairAmbigCodes** ccs)
+                                    const OnigPairAmbigCodes** ccs)
 {
-  static OnigPairAmbigCodes cc[] = {
+  static const OnigPairAmbigCodes cc[] = {
     { 0xa1, 0xb1 },
     { 0xa3, 0xb3 },
     { 0xa5, 0xb5 },

@@ -1,4 +1,4 @@
-OniGuruma LICENSE
+Oniguruma LICENSE
 -----------------
 
 When this software is partly used or it is distributed with Ruby, 
@@ -6,7 +6,7 @@ this of Ruby follows the license of Ruby.
 It follows the BSD license in the case of the one except for it.
 
 /*-
- * Copyright (c) 2002-2004  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2006  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without

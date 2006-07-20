@@ -33,7 +33,7 @@
 #define ENC_IS_KOI8_CTYPE(code,ctype) \
   ((EncKOI8_CtypeTable[code] & ctype) != 0)
 
-static UChar EncKOI8_ToLowerCaseTable[256] = {
+static const UChar EncKOI8_ToLowerCaseTable[256] = {
   '\000', '\001', '\002', '\003', '\004', '\005', '\006', '\007',
   '\010', '\011', '\012', '\013', '\014', '\015', '\016', '\017',
   '\020', '\021', '\022', '\023', '\024', '\025', '\026', '\027',
@@ -68,7 +68,7 @@ static UChar EncKOI8_ToLowerCaseTable[256] = {
   '\330', '\331', '\332', '\333', '\334', '\335', '\336', '\337'
 };
 
-static unsigned short EncKOI8_CtypeTable[256] = {
+static const unsigned short EncKOI8_CtypeTable[256] = {
   0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008,
   0x2008, 0x220c, 0x2209, 0x2208, 0x2208, 0x2208, 0x2008, 0x2008,
   0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008,
@@ -105,9 +105,9 @@ static unsigned short EncKOI8_CtypeTable[256] = {
 
 static int
 koi8_mbc_to_normalize(OnigAmbigType flag,
-                            const UChar** pp, const UChar* end, UChar* lower)
+                            const OnigUChar** pp, const OnigUChar* end, OnigUChar* lower)
 {
-  UChar* p = (UChar *)*pp;
+  const OnigUChar* p = *pp;
 
   if (((flag & ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE) != 0 &&
        ONIGENC_IS_MBC_ASCII(p)) ||
@@ -123,9 +123,9 @@ koi8_mbc_to_normalize(OnigAmbigType flag,
 }
 
 static int
-koi8_is_mbc_ambiguous(OnigAmbigType flag, const UChar** pp, const UChar* end)
+koi8_is_mbc_ambiguous(OnigAmbigType flag, const OnigUChar** pp, const OnigUChar* end)
 {
-  UChar* p = (UChar *)*pp;
+  const OnigUChar* p = *pp;
 
   (*pp)++;
   if (((flag & ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE) != 0 &&
@@ -151,9 +151,9 @@ koi8_is_code_ctype(OnigCodePoint code, unsigned int ctype)
 
 static int
 koi8_get_all_pair_ambig_codes(OnigAmbigType flag,
-                              OnigPairAmbigCodes** ccs)
+                              const OnigPairAmbigCodes** ccs)
 {
-  static OnigPairAmbigCodes cc[] = {
+  static const OnigPairAmbigCodes cc[] = {
     { 0xc0, 0xe0 },
     { 0xc1, 0xe1 },
     { 0xc2, 0xe2 },

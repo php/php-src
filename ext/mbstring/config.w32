@@ -61,7 +61,7 @@ if (PHP_MBSTRING == "yes") {
 			iso8859_7.c iso8859_8.c iso8859_9.c iso8859_10.c \
 			iso8859_11.c iso8859_13.c iso8859_14.c iso8859_15.c iso8859_16.c \
 			koi8.c koi8_r.c sjis.c utf8.c unicode.c utf16_be.c utf16_le.c \
-			utf32_be.c utf32_le.c", "mbstring");
+			utf32_be.c utf32_le.c gb18030.c", "mbstring");
 		ADD_SOURCES("ext/mbstring", "php_mbregex.c", "mbstring");
 	}
 }

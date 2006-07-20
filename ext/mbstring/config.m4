@@ -149,6 +149,7 @@ esac
       oniguruma/enc/utf16_le.c
       oniguruma/enc/utf32_be.c
       oniguruma/enc/utf32_le.c
+      oniguruma/enc/gb18030.c
     ])
   fi
 ])

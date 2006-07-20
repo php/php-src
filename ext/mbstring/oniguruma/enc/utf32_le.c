@@ -2,7 +2,7 @@
   utf32_le.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2005  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2006  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,14 @@ utf32le_is_mbc_newline(const UChar* p, const UChar* end)
   if (p + 3 < end) {
     if (*p == 0x0a && *(p+1) == 0 && *(p+2) == 0 && *(p+3) == 0)
       return 1;
+#ifdef USE_UNICODE_ALL_LINE_TERMINATORS
+    if ((*p == 0x0d || *p == 0x85) && *(p+1) == 0x00
+	&& (p+2) == 0x00 && *(p+3) == 0x00)
+      return 1;
+    if (*(p+1) == 0x20 && (*p == 0x29 || *p == 0x28)
+	&& *(p+2) == 0x00 && *(p+3) == 0x00)
+      return 1;
+#endif
   }
   return 0;
 }

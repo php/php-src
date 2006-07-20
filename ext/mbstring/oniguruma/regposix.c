@@ -55,7 +55,7 @@ typedef struct {
 static int
 onig2posix_error_code(int code)
 {
-  static O2PERR o2p[] = {
+  static const O2PERR o2p[] = {
     { ONIG_MISMATCH,                                      REG_NOMATCH },
     { ONIG_NO_SUPPORT_CONFIG,                             REG_EONIG_INTERNAL },
     { ONIGERR_MEMORY,                                     REG_ESPACE  },
