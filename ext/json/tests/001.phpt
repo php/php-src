@@ -1,5 +1,7 @@
 --TEST--
 json_decode() tests
+--SKIPIF--
+<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
 
