@@ -1313,6 +1313,16 @@ ZEND_API int add_assoc_long_ex(zval *arg, char *key, uint key_len, long n)
 	return zend_symtable_update(Z_ARRVAL_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
 }
 
+ZEND_API int add_u_assoc_long_ex(zval *arg, zend_uchar type, zstr key, uint key_len, long n)
+{
+	zval *tmp;
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_LONG(tmp, n);
+
+	return zend_u_symtable_update(Z_ARRVAL_P(arg), type, key, key_len, (void *) &tmp, sizeof(zval *), NULL);
+}
+
 ZEND_API int add_assoc_null_ex(zval *arg, char *key, uint key_len)
 {
 	zval *tmp;
@@ -1321,6 +1331,16 @@ ZEND_API int add_assoc_null_ex(zval *arg, char *key, uint key_len)
 	ZVAL_NULL(tmp);
 
 	return zend_symtable_update(Z_ARRVAL_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
+}
+
+ZEND_API int add_u_assoc_null_ex(zval *arg, zend_uchar type, zstr key, uint key_len)
+{
+	zval *tmp;
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_NULL(tmp);
+
+	return zend_u_symtable_update(Z_ARRVAL_P(arg), type, key, key_len, (void *) &tmp, sizeof(zval *), NULL);
 }
 
 ZEND_API int add_assoc_bool_ex(zval *arg, char *key, uint key_len, int b)
@@ -1333,6 +1353,16 @@ ZEND_API int add_assoc_bool_ex(zval *arg, char *key, uint key_len, int b)
 	return zend_symtable_update(Z_ARRVAL_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
 }
 
+ZEND_API int add_u_assoc_bool_ex(zval *arg, zend_uchar type, zstr key, uint key_len, int b)
+{
+	zval *tmp;
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_BOOL(tmp, b);
+
+	return zend_u_symtable_update(Z_ARRVAL_P(arg), type, key, key_len, (void *) &tmp, sizeof(zval *), NULL);
+}
+
 ZEND_API int add_assoc_resource_ex(zval *arg, char *key, uint key_len, int r)
 {
 	zval *tmp;
@@ -1341,6 +1371,17 @@ ZEND_API int add_assoc_resource_ex(zval *arg, char *key, uint key_len, int r)
 	ZVAL_RESOURCE(tmp, r);
 
 	return zend_symtable_update(Z_ARRVAL_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
+}
+
+
+ZEND_API int add_u_assoc_resource_ex(zval *arg, zend_uchar type, zstr key, uint key_len, int r)
+{
+	zval *tmp;
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_RESOURCE(tmp, r);
+
+	return zend_u_symtable_update(Z_ARRVAL_P(arg), type, key, key_len, (void *) &tmp, sizeof(zval *), NULL);
 }
 
 
@@ -1355,6 +1396,17 @@ ZEND_API int add_assoc_double_ex(zval *arg, char *key, uint key_len, double d)
 }
 
 
+ZEND_API int add_u_assoc_double_ex(zval *arg, zend_uchar type, zstr key, uint key_len, double d)
+{
+	zval *tmp;
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_DOUBLE(tmp, d);
+
+	return zend_u_symtable_update(Z_ARRVAL_P(arg), type, key, key_len, (void *) &tmp, sizeof(zval *), NULL);
+}
+
+
 ZEND_API int add_assoc_string_ex(zval *arg, char *key, uint key_len, char *str, int duplicate)
 {
 	zval *tmp;
@@ -1363,6 +1415,17 @@ ZEND_API int add_assoc_string_ex(zval *arg, char *key, uint key_len, char *str, 
 	ZVAL_STRING(tmp, str, duplicate);
 
 	return zend_symtable_update(Z_ARRVAL_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
+}
+
+
+ZEND_API int add_u_assoc_string_ex(zval *arg, zend_uchar type, zstr key, uint key_len, char *str, int duplicate)
+{
+	zval *tmp;
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_STRING(tmp, str, duplicate);
+
+	return zend_u_symtable_update(Z_ARRVAL_P(arg), type, key, key_len, (void *) &tmp, sizeof(zval *), NULL);
 }
 
 
@@ -1376,6 +1439,16 @@ ZEND_API int add_assoc_stringl_ex(zval *arg, char *key, uint key_len, char *str,
 	return zend_symtable_update(Z_ARRVAL_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
 }
 
+ZEND_API int add_u_assoc_stringl_ex(zval *arg, zend_uchar type, zstr key, uint key_len, char *str, uint length, int duplicate)
+{
+	zval *tmp;
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_STRINGL(tmp, str, length, duplicate);
+
+	return zend_u_symtable_update(Z_ARRVAL_P(arg), type, key, key_len, (void *) &tmp, sizeof(zval *), NULL);
+}
+
 ZEND_API int add_assoc_unicode_ex(zval *arg, char *key, uint key_len, UChar *str, int duplicate)
 {
 	zval *tmp;
@@ -1387,6 +1460,17 @@ ZEND_API int add_assoc_unicode_ex(zval *arg, char *key, uint key_len, UChar *str
 }
 
 
+ZEND_API int add_u_assoc_unicode_ex(zval *arg, zend_uchar type, zstr key, uint key_len, UChar *str, int duplicate)
+{
+	zval *tmp;
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_UNICODE(tmp, str, duplicate);
+
+	return zend_u_symtable_update(Z_ARRVAL_P(arg), type, key, key_len, (void *) &tmp, sizeof(zval *), NULL);
+}
+
+
 ZEND_API int add_assoc_unicodel_ex(zval *arg, char *key, uint key_len, UChar *str, uint length, int duplicate)
 {
 	zval *tmp;
@@ -1395,6 +1479,16 @@ ZEND_API int add_assoc_unicodel_ex(zval *arg, char *key, uint key_len, UChar *st
 	ZVAL_UNICODEL(tmp, str, length, duplicate);
 
 	return zend_symtable_update(Z_ARRVAL_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
+}
+
+ZEND_API int add_u_assoc_unicodel_ex(zval *arg, zend_uchar type, zstr key, uint key_len, UChar *str, uint length, int duplicate)
+{
+	zval *tmp;
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_UNICODEL(tmp, str, length, duplicate);
+
+	return zend_u_symtable_update(Z_ARRVAL_P(arg), type, key, key_len, (void *) &tmp, sizeof(zval *), NULL);
 }
 
 ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value)
