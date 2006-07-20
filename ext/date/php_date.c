@@ -1430,7 +1430,7 @@ static void date_register_classes(TSRMLS_D)
 {
 	zend_class_entry ce_date, ce_timezone;
 
-	INIT_CLASS_ENTRY(ce_date, "date", date_funcs_date);
+	INIT_CLASS_ENTRY(ce_date, "DateTime", date_funcs_date);
 	ce_date.create_object = date_object_new_date;
 	date_ce_date = zend_register_internal_class_ex(&ce_date, NULL, NULL TSRMLS_CC);
 	memcpy(&date_object_handlers_date, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
@@ -1452,7 +1452,7 @@ static void date_register_classes(TSRMLS_D)
 	REGISTER_DATE_CLASS_CONST_STRING("W3C",     DATE_FORMAT_RFC3339);
 
 
-	INIT_CLASS_ENTRY(ce_timezone, "timezone", date_funcs_timezone);
+	INIT_CLASS_ENTRY(ce_timezone, "DateTimeZone", date_funcs_timezone);
 	ce_timezone.create_object = date_object_new_timezone;
 	date_ce_timezone = zend_register_internal_class_ex(&ce_timezone, NULL, NULL TSRMLS_CC);
 	memcpy(&date_object_handlers_timezone, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
