@@ -162,6 +162,8 @@ typedef struct _zend_function_entry {
 #	define CE_STATIC_MEMBERS(ce) ((ce)->static_members)
 #endif
 
+#define ZEND_FCI_INITIALIZED(fci) ((fci).size != 0)
+
 int zend_next_free_module(void);
 
 BEGIN_EXTERN_C()
