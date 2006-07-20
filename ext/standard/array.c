@@ -3336,157 +3336,149 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 {
 	zval ***args = NULL;
 	HashTable *hash;
-	int argc, arr_argc, i, c;
+	int arr_argc, i, c;
 	Bucket ***lists, **list, ***ptrs, *p;
-	zval callback_name;
+	int req_args;
+	char *param_spec;
+	zend_fcall_info fci1, fci2;
+	zend_fcall_info_cache fci1_cache = empty_fcall_info_cache, fci2_cache = empty_fcall_info_cache;
+	zend_fcall_info *fci_key, *fci_data;
+	zend_fcall_info_cache *fci_key_cache, *fci_data_cache;
 	
 	PHP_ARRAY_CMP_FUNC_VARS;
 
 	int (*diff_key_compare_func)(const void *, const void * TSRMLS_DC);
 	int (*diff_data_compare_func)(const void *, const void * TSRMLS_DC);
 	
-
-	/* Get the argument count */
-	argc = ZEND_NUM_ARGS();
-	/* Allocate arguments array and get the arguments, checking for errors. */
-	args = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
-	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
-		efree(args);
-		WRONG_PARAM_COUNT;
-	}
-
 	PHP_ARRAY_CMP_FUNC_BACKUP();
 
 	if (behavior == DIFF_NORMAL) {
 		diff_key_compare_func = array_key_compare;
+
 		if (data_compare_type == DIFF_COMP_DATA_INTERNAL) {
 			/* array_diff */
 			
-			if (argc < 2) {
-				efree(args);
-				WRONG_PARAM_COUNT;
-			}
-			arr_argc = argc;
+			req_args = 2;
+			param_spec = "+";
 			diff_data_compare_func = php_array_data_compare;
 		} else if (data_compare_type == DIFF_COMP_DATA_USER) {
 			/* array_udiff */
-			if (argc < 3) {
-				efree(args);
-				WRONG_PARAM_COUNT;
-			}
-			arr_argc = argc - 1;
-			diff_data_compare_func = array_user_compare;
-			if (!zend_is_callable(*args[arr_argc], 0, &callback_name)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %R", Z_TYPE(callback_name), Z_UNIVAL(callback_name));
-				zval_dtor(&callback_name);
-				efree(args);
-				return;
-			}
-			zval_dtor(&callback_name);
 
-			BG(user_compare_func_name) = args[arr_argc];
+			req_args = 3;
+			param_spec = "+f";
+			diff_data_compare_func = array_user_compare;
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "data_compare_type is %d. This should never happen. Please report as a bug", data_compare_type);
 			return;		
 		}
+
+		if (ZEND_NUM_ARGS() < req_args) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "at least %d parameters are required, %d given", req_args, ZEND_NUM_ARGS());
+			PHP_ARRAY_CMP_FUNC_RESTORE();
+			efree(args);
+			return;
+		}
+
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, param_spec, &args,
+								  &arr_argc, &fci1, &fci1_cache) == FAILURE) {
+			PHP_ARRAY_CMP_FUNC_RESTORE();
+			return;
+		}
+		fci_data = &fci1;
+		fci_data_cache = &fci1_cache;
+
 	} else if (behavior & DIFF_ASSOC) { /* triggered also if DIFF_KEY */
 		/*
 			DIFF_KEY is subset of DIFF_ASSOC. When having the former
 			no comparison of the data is done (part of DIFF_ASSOC)
 		*/
 		diff_key_compare_func = array_key_compare;
+
 		if (data_compare_type == DIFF_COMP_DATA_INTERNAL 
-				&& 
+			&& 
 			key_compare_type == DIFF_COMP_KEY_INTERNAL) {
 			/* array_diff_assoc() or array_diff_key() */
 			
-			if (argc < 2) {
-				efree(args);
-				WRONG_PARAM_COUNT;
-			}
-			arr_argc = argc;
+			req_args = 2;
+			param_spec = "+";
+
 			diff_key_compare_func = array_key_compare;
 			diff_data_compare_func = php_array_data_compare;
 		} else if (data_compare_type == DIFF_COMP_DATA_USER 
-				&& 
-			key_compare_type == DIFF_COMP_KEY_INTERNAL) {
+				   && 
+				   key_compare_type == DIFF_COMP_KEY_INTERNAL) {
 			/* array_udiff_assoc() */
 
-			if (argc < 3) {
-				efree(args);
-				WRONG_PARAM_COUNT;
-			}
-			arr_argc = argc - 1;
-			if (!zend_is_callable(*args[arr_argc], 0, &callback_name)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %R", Z_TYPE(callback_name), Z_UNIVAL(callback_name));
-				zval_dtor(&callback_name);
-				efree(args);
-				return;
-			}
-			zval_dtor(&callback_name);
+			req_args = 3;
+			param_spec = "+f";
+
 			diff_key_compare_func = array_key_compare;
 			diff_data_compare_func = array_user_compare;
+			fci_data = &fci1;
+			fci_data_cache = &fci1_cache;
 		} else if (data_compare_type == DIFF_COMP_DATA_INTERNAL 
-				&& 
-			key_compare_type == DIFF_COMP_KEY_USER) {
+				   && 
+				   key_compare_type == DIFF_COMP_KEY_USER) {
 			/* array_diff_uassoc() or array_diff_ukey() */
 			
-			if (argc < 3) {
-				efree(args);
-				WRONG_PARAM_COUNT;
-			}
-			arr_argc = argc - 1;
-			if (!zend_is_callable(*args[arr_argc], 0, &callback_name)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %R", Z_TYPE(callback_name), Z_UNIVAL(callback_name));
-				zval_dtor(&callback_name);
-				efree(args);
-				return;
-			}
-			zval_dtor(&callback_name);
+			req_args = 3;
+			param_spec = "+f";
+
 			diff_key_compare_func = array_user_key_compare;
 			diff_data_compare_func = php_array_data_compare;
-			BG(user_compare_func_name) = args[arr_argc];
+			fci_key = &fci1;
+			fci_key_cache = &fci1_cache;
 		} else if (data_compare_type == DIFF_COMP_DATA_USER 
-				&& 
-			key_compare_type == DIFF_COMP_KEY_USER) {
+				   && 
+				   key_compare_type == DIFF_COMP_KEY_USER) {
 			/* array_udiff_uassoc() */
 			
-			if (argc < 4) {
-				efree(args);
-				WRONG_PARAM_COUNT;
-			}
-			arr_argc = argc - 2;
-			if (!zend_is_callable(*args[arr_argc], 0, &callback_name)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %R", Z_TYPE(callback_name), Z_UNIVAL(callback_name));
-				zval_dtor(&callback_name);
-				efree(args);
-				return;
-			}
-			zval_dtor(&callback_name);
-			if (!zend_is_callable(*args[arr_argc + 1], 0, &callback_name)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %R", Z_TYPE(callback_name), Z_UNIVAL(callback_name));
-				zval_dtor(&callback_name);
-				efree(args);
-				return;
-			}
-			zval_dtor(&callback_name);
+			req_args = 4;
+			param_spec = "+ff";
+
 			diff_key_compare_func = array_user_key_compare;
 			diff_data_compare_func = array_user_compare;
-			BG(user_compare_func_name) = args[arr_argc + 1];/* data - key*/
+			fci_data = &fci1;
+			fci_data_cache = &fci1_cache;
+			fci_key = &fci2;
+			fci_key_cache = &fci2_cache;
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "data_compare_type is %d. key_compare_type is %d. This should never happen. Please report as a bug", data_compare_type, key_compare_type);
 			return;	
 		}			
+
+		if (ZEND_NUM_ARGS() < req_args) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "at least %d parameters are required, %d given", req_args, ZEND_NUM_ARGS());
+			PHP_ARRAY_CMP_FUNC_RESTORE();
+			efree(args);
+			return;
+		}
+
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, param_spec, &args, &arr_argc,
+								  &fci1, &fci1_cache, &fci2, &fci2_cache) == FAILURE) {
+			PHP_ARRAY_CMP_FUNC_RESTORE();
+			efree(args);
+			return;
+		}
+
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "behavior is %d. This should never happen. Please report as a bug", behavior);
 		return;	
 	}
 
-	
 	/* for each argument, create and sort list with pointers to the hash buckets */
 	lists = (Bucket ***)safe_emalloc(arr_argc, sizeof(Bucket **), 0);
 	ptrs = (Bucket ***)safe_emalloc(arr_argc, sizeof(Bucket **), 0);
 	php_set_compare_func(SORT_STRING TSRMLS_CC);
+
+	if (behavior == DIFF_NORMAL && data_compare_type == DIFF_COMP_DATA_USER) {
+		BG(user_compare_fci) = *fci_data;
+		BG(user_compare_fci_cache) = *fci_data_cache;
+	} else if (behavior & DIFF_ASSOC && key_compare_type == DIFF_COMP_KEY_USER) {
+		BG(user_compare_fci) = *fci_key;
+		BG(user_compare_fci_cache) = *fci_key_cache;
+	}
+
 	for (i = 0; i < arr_argc; i++) {
 		if (Z_TYPE_PP(args[i]) != IS_ARRAY) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument #%d is not an array", i + 1);
@@ -3496,6 +3488,11 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 		hash = HASH_OF(*args[i]);
 		list = (Bucket **) pemalloc((hash->nNumOfElements + 1) * sizeof(Bucket *), hash->persistent);
 		if (!list) {
+			PHP_ARRAY_CMP_FUNC_RESTORE();
+
+			efree(ptrs);
+			efree(lists);
+			efree(args);
 			RETURN_FALSE;
 		}
 		lists[i] = list;
@@ -3523,18 +3520,14 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 		return_value->value.ht = ht;		
 	}
 
-	if (behavior == DIFF_NORMAL && data_compare_type == DIFF_COMP_DATA_USER) {
-		/* array_udiff() */
-		BG(user_compare_func_name) = args[arr_argc];
-	}
-	
 	/* go through the lists and look for values of ptr[0] that are not in the others */
 	while (*ptrs[0]) {
 		if ((behavior & DIFF_ASSOC) /* triggered also when DIFF_KEY */
-				&&
+			&&
 			key_compare_type == DIFF_COMP_KEY_USER) {
 			
-			BG(user_compare_func_name) = args[argc - 1];
+			BG(user_compare_fci) = *fci_key;
+			BG(user_compare_fci_cache) = *fci_key_cache;
 		}
 		c = 1;
 		for (i = 1; i < arr_argc; i++) {
@@ -3560,13 +3553,15 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 					*/
 					if (*ptrs[i]) {
 						if (data_compare_type == DIFF_COMP_DATA_USER) {
-							BG(user_compare_func_name) = args[arr_argc];
+							BG(user_compare_fci) = *fci_data;
+							BG(user_compare_fci_cache) = *fci_data_cache;
 						}
 						if (diff_data_compare_func(ptrs[0], ptrs[i] TSRMLS_CC) != 0) {
 							/* the data is not the same */
 							c = -1;
 							if (key_compare_type == DIFF_COMP_KEY_USER) {
-								BG(user_compare_func_name) = args[argc - 1];
+								BG(user_compare_fci) = *fci_key;
+								BG(user_compare_fci_cache) = *fci_key_cache;
 							}
 						} else {
 							break;
@@ -3635,14 +3630,13 @@ out:
 
 	PHP_ARRAY_CMP_FUNC_RESTORE();
 
-	
 	efree(ptrs);
 	efree(lists);
 	efree(args);
 }
 
 
-/* {{{ proto array array_diff_key(array arr1, array arr2 [, array ...])
+/* {{{ proto array array_diff_key(array arr1, array arr2 [, array ...]) U
    Returns the entries of arr1 that have keys which are not present in any of the others arguments. This function is like array_diff() but works on the keys instead of the values. The associativity is preserved. */
 PHP_FUNCTION(array_diff_key)
 {
@@ -3651,7 +3645,7 @@ PHP_FUNCTION(array_diff_key)
 }
 /* }}} */
 
-/* {{{ proto array array_diff_ukey(array arr1, array arr2 [, array ...], callback key_comp_func)
+/* {{{ proto array array_diff_ukey(array arr1, array arr2 [, array ...], callback key_comp_func) U
    Returns the entries of arr1 that have keys which are not present in any of the others arguments. User supplied function is used for comparing the keys. This function is like array_udiff() but works on the keys instead of the values. The associativity is preserved. */
 PHP_FUNCTION(array_diff_ukey)
 {
@@ -3661,7 +3655,7 @@ PHP_FUNCTION(array_diff_ukey)
 /* }}} */
 
 
-/* {{{ proto array array_diff(array arr1, array arr2 [, array ...])
+/* {{{ proto array array_diff(array arr1, array arr2 [, array ...]) U
    Returns the entries of arr1 that have values which are not present in any of the others arguments. */
 PHP_FUNCTION(array_diff)
 {
@@ -3670,7 +3664,7 @@ PHP_FUNCTION(array_diff)
 }
 /* }}} */
 
-/* {{{ proto array array_udiff(array arr1, array arr2 [, array ...], callback data_comp_func)
+/* {{{ proto array array_udiff(array arr1, array arr2 [, array ...], callback data_comp_func) U
    Returns the entries of arr1 that have values which are not present in any of the others arguments. Elements are compared by user supplied function. */
 PHP_FUNCTION(array_udiff)
 {
@@ -3680,7 +3674,7 @@ PHP_FUNCTION(array_udiff)
 /* }}} */
 
 
-/* {{{ proto array array_diff_assoc(array arr1, array arr2 [, array ...])
+/* {{{ proto array array_diff_assoc(array arr1, array arr2 [, array ...]) U
    Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal */
 PHP_FUNCTION(array_diff_assoc)
 {
@@ -3689,7 +3683,7 @@ PHP_FUNCTION(array_diff_assoc)
 }
 /* }}} */
 
-/* {{{ proto array array_diff_uassoc(array arr1, array arr2 [, array ...], callback data_comp_func)
+/* {{{ proto array array_diff_uassoc(array arr1, array arr2 [, array ...], callback key_comp_func) U
    Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal. Elements are compared by user supplied function. */
 PHP_FUNCTION(array_diff_uassoc)
 {
@@ -3699,8 +3693,8 @@ PHP_FUNCTION(array_diff_uassoc)
 /* }}} */
 
 
-/* {{{ proto array array_udiff_assoc(array arr1, array arr2 [, array ...], callback key_comp_func)
-   Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal. Keys are compared by user supplied function. */
+/* {{{ proto array array_udiff_assoc(array arr1, array arr2 [, array ...], callback data_comp_func) U
+   Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal. Entries are compared by user supplied function. */
 PHP_FUNCTION(array_udiff_assoc)
 {
 	php_array_diff(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIFF_ASSOC,
@@ -3708,7 +3702,7 @@ PHP_FUNCTION(array_udiff_assoc)
 }
 /* }}} */
 
-/* {{{ proto array array_udiff_uassoc(array arr1, array arr2 [, array ...], callback data_comp_func, callback key_comp_func)
+/* {{{ proto array array_udiff_uassoc(array arr1, array arr2 [, array ...], callback data_comp_func, callback key_comp_func) U
    Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal. Keys and elements are compared by user supplied functions. */
 PHP_FUNCTION(array_udiff_uassoc)
 {

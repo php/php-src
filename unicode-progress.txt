@@ -10,12 +10,6 @@ ext/standard
     Need to fix string_compare_function() to compare Unicode strings
     directly in code point order
 
-    array_diff(), array_udiff()
-    array_diff_assoc(), array_diff_uassoc(), array_udiff_assoc(), array_udiff_uassoc()
-    array_diff_key(), array_diff_ukey()
-        Should work with minor cleanups provided that underlying comparison
-        functions are fixed, FCI cache, test
-
     array_intersect(), array_uintersect()
     array_intersect_assoc(), array_uintersect_assoc(), array_intersect_uassoc(), array_uintersect_uassoc()
     array_intersect_key(), array_intersect_ukey()
@@ -83,6 +77,10 @@ ext/standard
     ksort(), krsort() 
     usort(), uasort(), uksort()
 
+    array_diff(), array_udiff()
+    array_diff_assoc(), array_diff_uassoc(),
+    array_udiff_assoc(), array_udiff_uassoc()
+    array_diff_key(), array_diff_ukey()
 
   string.c
   --------
