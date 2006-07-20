@@ -994,13 +994,13 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 		case DIT_RegexIterator:
 		case DIT_RecursiveRegexIterator: {
 			char *regex;
-			int len, poptions, coptions;
-			pcre_extra *extra = NULL;
+			int regex_len;
 			long mode = REGIT_MODE_MATCH;
 
+			intern->u.regex.use_flags = ZEND_NUM_ARGS() >= 5;
 			intern->u.regex.flags = 0;
 			intern->u.regex.preg_flags = 0;
-			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Os|lll", &zobject, ce_inner, &regex, &len, &intern->u.regex.flags, &mode, &intern->u.regex.preg_flags) == FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Os|lll", &zobject, ce_inner, &regex, &regex_len, &mode, &intern->u.regex.flags, &intern->u.regex.preg_flags) == FAILURE) {
 				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 				return NULL;
 			}
@@ -1010,8 +1010,8 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 				return NULL;
 			}
 			intern->u.regex.mode = mode;
-			intern->u.regex.regex = estrndup(regex, len);
-			intern->u.regex.pce = pcre_get_compiled_regex_cache(regex, len, &extra, &poptions, &coptions TSRMLS_CC);
+			intern->u.regex.regex = estrndup(regex, regex_len);
+			intern->u.regex.pce = pcre_get_compiled_regex_cache(regex, regex_len TSRMLS_CC);
 			intern->u.regex.pce->refcount++;
 			break;;
 		}
@@ -1365,7 +1365,7 @@ SPL_METHOD(ParentIterator, getChildren)
 } /* }}} */
 
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
-/* {{{ proto void RegexIterator::__construct(Iterator it, string regex [, int flags [, int mode [, int preg_flags]]]) 
+/* {{{ proto void RegexIterator::__construct(Iterator it, string regex [, int mode [, int flags [, int preg_flags]]]) 
    Create an RegexIterator from another iterator and a regular expression */
 SPL_METHOD(RegexIterator, __construct)
 {
@@ -1377,11 +1377,9 @@ SPL_METHOD(RegexIterator, __construct)
 SPL_METHOD(RegexIterator, accept)
 {
 	spl_dual_it_object *intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	char       *subject, tmp[32];
-	int        subject_len, use_copy, count;
-	zval       subject_copy, zcount;
-	pcre       *regex = intern->u.regex.pce->re;
-	pcre_extra *extra = intern->u.regex.pce->extra;
+	char       *subject, tmp[32], *result;
+	int        subject_len, use_copy, count, result_len;
+	zval       subject_copy, zcount, *replacement;
 
 	if (intern->u.regex.flags & REGIT_USE_KEY) {
 		if (intern->current.key_type == HASH_KEY_IS_LONG) {
@@ -1408,7 +1406,7 @@ SPL_METHOD(RegexIterator, accept)
 	{
 	case REGIT_MODE_MAX: /* won't happen but makes compiler happy */
 	case REGIT_MODE_MATCH:
-		count = pcre_exec(regex, extra, subject, subject_len, 0, 0, NULL, 0);
+		count = pcre_exec(intern->u.regex.pce->re, intern->u.regex.pce->extra, subject, subject_len, 0, 0, NULL, 0);
 		RETVAL_BOOL(count >= 0);
 		break;
 
@@ -1419,9 +1417,9 @@ SPL_METHOD(RegexIterator, accept)
 			use_copy = 1;
 		}
 		zval_ptr_dtor(&intern->current.data);
-		MAKE_STD_ZVAL(intern->current.data);
-		php_pcre_match(regex, extra, subject, subject_len, &zcount, 
-			intern->current.data, intern->u.regex.mode == REGIT_MODE_ALL_MATCHES, 0, 0, 0, 0 TSRMLS_CC);
+		ALLOC_INIT_ZVAL(intern->current.data);
+		php_pcre_match_impl(intern->u.regex.pce, subject, subject_len, &zcount, 
+			intern->current.data, intern->u.regex.mode == REGIT_MODE_ALL_MATCHES, intern->u.regex.use_flags, intern->u.regex.preg_flags, 0 TSRMLS_CC);
 		count = zend_hash_num_elements(Z_ARRVAL_P(intern->current.data));
 		RETVAL_BOOL(count > 0);
 		break;
@@ -1432,11 +1430,28 @@ SPL_METHOD(RegexIterator, accept)
 			use_copy = 1;
 		}
 		zval_ptr_dtor(&intern->current.data);
-		MAKE_STD_ZVAL(intern->current.data);
-		php_pcre_split(regex, extra, subject, subject_len, intern->current.data, 0, -1, 0, 0, 0 TSRMLS_CC);
+		ALLOC_INIT_ZVAL(intern->current.data);
+		php_pcre_split_impl(intern->u.regex.pce, subject, subject_len, intern->current.data, -1, intern->u.regex.preg_flags TSRMLS_CC);
 		count = zend_hash_num_elements(Z_ARRVAL_P(intern->current.data));
 		RETVAL_BOOL(count > 1);
 		break;
+
+	case REGIT_MODE_REPLACE:
+		replacement = zend_read_property(intern->std.ce, getThis(), "replacement", sizeof("replacement")-1, 1 TSRMLS_CC);
+		result = php_pcre_replace_impl(intern->u.regex.pce, subject, subject_len, replacement, 0, &result_len, 0, NULL TSRMLS_CC);
+		
+		if (intern->u.regex.flags & REGIT_USE_KEY) {
+			if (intern->current.key_type != HASH_KEY_IS_LONG) {
+				efree(intern->current.str_key);
+			}
+			intern->current.key_type = HASH_KEY_IS_STRING;
+			intern->current.str_key = result;
+			intern->current.str_key_len = result_len + 1;
+		} else {
+			zval_ptr_dtor(&intern->current.data);
+			MAKE_STD_ZVAL(intern->current.data);
+			ZVAL_STRINGL(intern->current.data, result, result_len, 0);
+		}
 	}
 
 	if (use_copy) {
@@ -1444,7 +1459,7 @@ SPL_METHOD(RegexIterator, accept)
 	}
 } /* }}} */
 
-/* {{{ proto void RecursiveRegexIterator::__construct(RecursiveIterator it, string regex [, int flags [, int mode [, int preg_flags]]]) 
+/* {{{ proto void RecursiveRegexIterator::__construct(RecursiveIterator it, string regex [, int mode [, int flags [, int preg_flags]]]) 
    Create an RecursiveRegexIterator from another recursive iterator and a regular expression */
 SPL_METHOD(RecursiveRegexIterator, __construct)
 {
@@ -1584,8 +1599,8 @@ static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_regex_it___construct, 0, 0, 2) 
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
 	ZEND_ARG_INFO(0, regex)
-	ZEND_ARG_INFO(0, flags)
 	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, flags)
 	ZEND_ARG_INFO(0, preg_flags)
 ZEND_END_ARG_INFO();
 
@@ -2779,6 +2794,8 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	REGISTER_SPL_CLASS_CONST_LONG(RegexIterator, "GET_MATCH",   REGIT_MODE_GET_MATCH);
 	REGISTER_SPL_CLASS_CONST_LONG(RegexIterator, "ALL_MATCHES", REGIT_MODE_ALL_MATCHES);
 	REGISTER_SPL_CLASS_CONST_LONG(RegexIterator, "SPLIT",       REGIT_MODE_SPLIT);
+	REGISTER_SPL_CLASS_CONST_LONG(RegexIterator, "REPLACE",     REGIT_MODE_REPLACE);
+	REGISTER_SPL_PROPERTY(RegexIterator, "replacement", 0);
 	REGISTER_SPL_SUB_CLASS_EX(RecursiveRegexIterator, RegexIterator, spl_dual_it_new, spl_funcs_RecursiveRegexIterator);
 	REGISTER_SPL_IMPLEMENTS(RecursiveRegexIterator, RecursiveIterator);
 #else
