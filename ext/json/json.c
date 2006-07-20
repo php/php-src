@@ -82,7 +82,7 @@ PHP_MINFO_FUNCTION(json)
 /* }}} */
 
 static void json_encode_r(smart_str *buf, zval *val TSRMLS_DC);
-static void json_escape_string(smart_str *buf, char *s, int len TSRMLS_DC);
+static void json_escape_string(smart_str *buf, char *s, int len);
 
 static int json_determine_array_type(zval **val TSRMLS_DC) {
     int i;
@@ -181,7 +181,7 @@ static void json_encode_array(smart_str *buf, zval **val TSRMLS_DC) {
                             need_comma = 1;
                         }
 
-                        json_escape_string(buf, key, key_len - 1 TSRMLS_CC);
+                        json_escape_string(buf, key, key_len - 1);
                         smart_str_appendc(buf, ':');
 
                         json_encode_r(buf, *data TSRMLS_CC);
@@ -216,7 +216,7 @@ static void json_encode_array(smart_str *buf, zval **val TSRMLS_DC) {
 
 #define REVERSE16(us) (((us & 0xf) << 12) | (((us >> 4) & 0xf) << 8) | (((us >> 8) & 0xf) << 4) | ((us >> 12) & 0xf))
 
-static void json_escape_string(smart_str *buf, char *s, int len TSRMLS_DC)
+static void json_escape_string(smart_str *buf, char *s, int len)
 {
     int pos = 0;
     unsigned short us;
@@ -359,7 +359,7 @@ static void json_encode_r(smart_str *buf, zval *val TSRMLS_DC) {
             }
             break;
         case IS_STRING:
-            json_escape_string(buf, Z_STRVAL_P(val), Z_STRLEN_P(val) TSRMLS_CC);
+            json_escape_string(buf, Z_STRVAL_P(val), Z_STRLEN_P(val));
             break;
         case IS_ARRAY:
         case IS_OBJECT:
