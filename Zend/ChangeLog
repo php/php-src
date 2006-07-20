@@ -1,3 +1,43 @@
+2006-07-19  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.c:
+      Fix usage of 'return_null' option in parameter parsing.
+
+    * zend_API.c:
+      Make 't' and 'T' use zstr for storage type.
+
+    * zend_API.c:
+      Add '+' varargs specifier that requires at least one arg.
+
+2006-07-19  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      README.ZEND_MM:
+      Missing file..
+
+2006-07-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/bug37144.phpt:
+      Fixed bug #37144 (PHP crashes trying to assign into property of dead
+      object)
+
+2006-07-19  Antony Dovgal  <antony@zend.com>
+
+    * zend.c:
+      MFB: fetch tsrm_ls, don't use it uninitialized
+
+    * (PHP_5_2)
+      zend.c:
+      fetch tsrm_ls, don't use it uninitialized
+
+2006-07-19  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.c:
+      Initialize some vars.
+
 2006-07-18  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_API.c:
