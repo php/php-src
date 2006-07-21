@@ -4522,7 +4522,7 @@ PHP_FUNCTION(array_chunk)
 /* }}} */
 
 /* {{{ proto array array_combine(array keys, array values)
-   Creates an array by using the elements of the first parameter as keys and the elements of the second as correspoding keys */
+   Creates an array by using the elements of the first parameter as keys and the elements of the second as corresponding keys */
 PHP_FUNCTION(array_combine)
 {
 	zval *values, *keys;
@@ -4534,7 +4534,7 @@ PHP_FUNCTION(array_combine)
 	}
 
 	if (zend_hash_num_elements(Z_ARRVAL_P(keys)) != zend_hash_num_elements(Z_ARRVAL_P(values))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Both parameters should have equal number of elements");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Both parameters should have an equal number of elements");
 		RETURN_FALSE;
 	}
 
@@ -4563,7 +4563,7 @@ PHP_FUNCTION(array_combine)
 			convert_to_string(&key);
 
 			zval_add_ref(entry_values);
-			add_assoc_zval(return_value, Z_STRVAL(key), *entry_values);
+			add_assoc_zval_ex(return_value, Z_STRVAL(key), Z_STRLEN(key)+1, *entry_values);
 
 			zval_dtor(&key);
 		}
