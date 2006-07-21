@@ -313,7 +313,7 @@ typedef struct _zend_object {
 typedef union _zvalue_value {
 	long lval;					/* long value */
 	double dval;				/* double value */
-	struct {                    /* 8-bit legacy string type */
+	struct {                    /* 8-bit binary string type */
 		char *val;
 		int len;
 	} str;
