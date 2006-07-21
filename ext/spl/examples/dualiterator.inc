@@ -1,6 +1,6 @@
 <?php
 
-/** @file DualIterator.inc
+/** @file dualiterator.inc
  * @ingroup Examples
  * @brief class DualIterator
  * @author  Marcus Boerger
