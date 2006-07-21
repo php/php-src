@@ -29,9 +29,9 @@ class RegexIterator implements FilterIterator
 	const REPLACE     = 4; /**< Mode: Replace the input key or current */
 	
 	private $regex;     /**< the regular expression to match against */
-	private $flags;     /**< special flags (self::USE_KEY) */
 	private $mode;      /**< operation mode (one of self::MATCH, 
 	                         self::GET_MATCH, self::ALL_MATCHES, self::SPLIT) */
+	private $flags;     /**< special flags (self::USE_KEY) */
 	private $preg_flags;/**< PREG_* flags, see preg_match(), preg_match_all(), 
 	                         preg_split() */ 
 	private $key;       /**< the value used for key() */
@@ -115,6 +115,55 @@ class RegexIterator implements FilterIterator
 	function current()
 	{
 		return $this->current;
+	}
+
+	/** @return current operation mode
+	 */
+	function getMode()
+	{
+		return $this->mode;
+	}
+
+	/** @param mode new operaion mode
+	 */
+	function setMode($mode)
+	{
+		$this->mode = $mode;
+	}
+
+	/** @return current operation flags
+	 */
+	function getFlags()
+	{
+		return $this->flags;
+	}
+
+	/** @param flags new operaion flags
+	 */
+	function setFlags($flags)
+	{
+		$this->flags = $flags;
+	}
+
+	/** @param mode new operaion mode
+	 */
+	function setMode($mode)
+	{
+		$this->mode = $mode;
+	}
+
+	/** @return current PREG flags
+	 */
+	function getPregFlags()
+	{
+		return $this->preg_flags;
+	}
+
+	/** @param flags new PREG flags
+	 */
+	function setPregFlags($preg_flags)
+	{
+		$this->preg_flags = $preg_flags;
 	}
 }
 

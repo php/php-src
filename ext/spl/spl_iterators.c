@@ -1484,6 +1484,85 @@ SPL_METHOD(RegexIterator, accept)
 	}
 } /* }}} */
 
+/* {{{ proto bool RegexIterator::getMode()
+   Returns current operation mode */
+SPL_METHOD(RegexIterator, getMode)
+{
+	spl_dual_it_object *intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	RETURN_LONG(intern->u.regex.mode);
+} /* }}} */
+
+/* {{{ proto bool RegexIterator::setMode(int new_mode)
+   Set new operation mode */
+SPL_METHOD(RegexIterator, setMode)
+{
+	spl_dual_it_object *intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	long mode;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &mode) == FAILURE) {
+		return;
+	}
+
+	if (mode < 0 || mode >= REGIT_MODE_MAX) {
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "Illegal mode %ld", mode);
+		return;// NULL
+	}
+
+	intern->u.regex.mode = mode;
+} /* }}} */
+
+/* {{{ proto bool RegexIterator::getFlags()
+   Returns current operation flags */
+SPL_METHOD(RegexIterator, getFlags)
+{
+	spl_dual_it_object *intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	RETURN_LONG(intern->u.regex.flags);
+} /* }}} */
+
+/* {{{ proto bool RegexIterator::setFlags(int new_flags)
+   Set operation flags */
+SPL_METHOD(RegexIterator, setFlags)
+{
+	spl_dual_it_object *intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	long flags;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &flags) == FAILURE) {
+		return;
+	}
+
+	intern->u.regex.flags = flags;
+} /* }}} */
+
+/* {{{ proto bool RegexIterator::getFlags()
+   Returns current PREG flags (if in use or NULL) */
+SPL_METHOD(RegexIterator, getPregFlags)
+{
+	spl_dual_it_object *intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (intern->u.regex.use_flags) {
+		RETURN_LONG(intern->u.regex.preg_flags);
+	} else {
+		return;
+	}
+} /* }}} */
+
+/* {{{ proto bool RegexIterator::setFlags(int new_flags)
+   Set PREG flags */
+SPL_METHOD(RegexIterator, setPregFlags)
+{
+	spl_dual_it_object *intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	long preg_flags;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &preg_flags) == FAILURE) {
+		return;
+	}
+
+	intern->u.regex.preg_flags = preg_flags;
+	intern->u.regex.use_flags = 1;
+} /* }}} */
+
 /* {{{ proto void RecursiveRegexIterator::__construct(RecursiveIterator it, string regex [, int mode [, int flags [, int preg_flags]]]) 
    Create an RecursiveRegexIterator from another recursive iterator and a regular expression */
 SPL_METHOD(RecursiveRegexIterator, __construct)
@@ -1629,9 +1708,30 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_regex_it___construct, 0, 0, 2)
 	ZEND_ARG_INFO(0, preg_flags)
 ZEND_END_ARG_INFO();
 
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_regex_it_set_mode, 0, 0, 1) 
+	ZEND_ARG_INFO(0, mode)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_regex_it_set_flags, 0, 0, 1) 
+	ZEND_ARG_INFO(0, flags)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_regex_it_set_preg_flags, 0, 0, 1) 
+	ZEND_ARG_INFO(0, preg_flags)
+ZEND_END_ARG_INFO();
+
 static zend_function_entry spl_funcs_RegexIterator[] = {
-	SPL_ME(RegexIterator,   __construct,      arginfo_regex_it___construct, ZEND_ACC_PUBLIC)
-	SPL_ME(RegexIterator,   accept,           NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RegexIterator,   __construct,      arginfo_regex_it___construct,    ZEND_ACC_PUBLIC)
+	SPL_ME(RegexIterator,   accept,           NULL,                            ZEND_ACC_PUBLIC)
+	SPL_ME(RegexIterator,   getMode,          NULL,                            ZEND_ACC_PUBLIC)
+	SPL_ME(RegexIterator,   setMode,          arginfo_regex_it_set_mode,       ZEND_ACC_PUBLIC)
+	SPL_ME(RegexIterator,   getFlags,         NULL,                            ZEND_ACC_PUBLIC)
+	SPL_ME(RegexIterator,   setFlags,         arginfo_regex_it_set_flags,      ZEND_ACC_PUBLIC)
+	SPL_ME(RegexIterator,   getPregFlags,     NULL,                            ZEND_ACC_PUBLIC)
+	SPL_ME(RegexIterator,   setPregFlags,     arginfo_regex_it_set_preg_flags, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
