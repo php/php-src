@@ -602,7 +602,6 @@ static int array_user_compare(const void *a, const void *b TSRMLS_DC)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid comparison function.");	\
         BG(user_compare_fci) = old_user_compare_fci; \
         BG(user_compare_fci_cache) = old_user_compare_fci_cache; \
-		BG(user_compare_func_name) = old_compare_func;	\
 		RETURN_FALSE;	\
 	}	\
 
@@ -615,12 +614,10 @@ static int array_user_compare(const void *a, const void *b TSRMLS_DC)
     */
 
 #define PHP_ARRAY_CMP_FUNC_VARS \
-    zval **old_compare_func; \
     zend_fcall_info old_user_compare_fci; \
     zend_fcall_info_cache old_user_compare_fci_cache \
 
 #define PHP_ARRAY_CMP_FUNC_BACKUP() \
-    old_compare_func = BG(user_compare_func_name); \
     old_user_compare_fci = BG(user_compare_fci); \
     old_user_compare_fci_cache = BG(user_compare_fci_cache); \
     BG(user_compare_fci_cache) = empty_fcall_info_cache; \
@@ -628,7 +625,6 @@ static int array_user_compare(const void *a, const void *b TSRMLS_DC)
 #define PHP_ARRAY_CMP_FUNC_RESTORE() \
         BG(user_compare_fci) = old_user_compare_fci; \
         BG(user_compare_fci_cache) = old_user_compare_fci_cache; \
-        BG(user_compare_func_name) = old_compare_func; \
 
 
 /* {{{ proto bool usort(array array_arg, mixed comparator) U
@@ -3106,11 +3102,6 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 		return_value->value.ht = ht;		
 	}
 
-	if ((behavior & INTERSECT_NORMAL) && data_compare_type == INTERSECT_COMP_DATA_USER) {
-		/* array_uintersect() */
-		BG(user_compare_func_name) = args[arr_argc];
-	}
-	
 	/* go through the lists and look for common values */
 	while (*ptrs[0]) {
 		if ((behavior & INTERSECT_ASSOC) /* triggered also when INTERSECT_KEY */

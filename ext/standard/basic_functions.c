@@ -4080,7 +4080,6 @@ PHP_RINIT_FUNCTION(basic)
 	BG(strtok_string) = NULL;
 	BG(strtok_zval) = NULL;
 	BG(locale_string) = NULL;
-	BG(user_compare_func_name) = NULL;
 	BG(array_walk_fci) = empty_fcall_info;
 	BG(array_walk_fci_cache) = empty_fcall_info_cache;
 	BG(user_compare_fci) = empty_fcall_info;
