@@ -3759,7 +3759,7 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, char *n
 
 	MAKE_STD_ZVAL(property);
 	ZVAL_ASCII_STRINGL(property, name, name_length, 1);
-	value = Z_OBJ_HT_P(object)->read_property(object, property, silent TSRMLS_CC);
+	value = Z_OBJ_HT_P(object)->read_property(object, property, silent?BP_VAR_IS:BP_VAR_R TSRMLS_CC);
 	zval_ptr_dtor(&property);
 
 	EG(scope) = old_scope;
