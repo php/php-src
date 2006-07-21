@@ -1714,7 +1714,9 @@ static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_rec_regex_it___construct, 0, 0, 2) 
 	ZEND_ARG_OBJ_INFO(0, iterator, RecursiveIterator, 0)
 	ZEND_ARG_INFO(0, regex)
+	ZEND_ARG_INFO(0, mode)
 	ZEND_ARG_INFO(0, flags)
+	ZEND_ARG_INFO(0, preg_flags)
 ZEND_END_ARG_INFO();
 
 static zend_function_entry spl_funcs_RecursiveRegexIterator[] = {
@@ -2853,6 +2855,7 @@ PHP_MINIT_FUNCTION(spl_iterators)
 
 	REGISTER_SPL_STD_CLASS_EX(IteratorIterator, spl_dual_it_new, spl_funcs_IteratorIterator);
 	REGISTER_SPL_ITERATOR(IteratorIterator);
+	REGISTER_SPL_IMPLEMENTS(IteratorIterator, OuterIterator);
 
 	REGISTER_SPL_SUB_CLASS_EX(FilterIterator, IteratorIterator, spl_dual_it_new, spl_funcs_FilterIterator);
 	spl_ce_FilterIterator->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
