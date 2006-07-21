@@ -145,13 +145,6 @@ class RegexIterator implements FilterIterator
 		$this->flags = $flags;
 	}
 
-	/** @param mode new operaion mode
-	 */
-	function setMode($mode)
-	{
-		$this->mode = $mode;
-	}
-
 	/** @return current PREG flags
 	 */
 	function getPregFlags()
@@ -159,7 +152,7 @@ class RegexIterator implements FilterIterator
 		return $this->preg_flags;
 	}
 
-	/** @param flags new PREG flags
+	/** @param preg_flags new PREG flags
 	 */
 	function setPregFlags($preg_flags)
 	{
