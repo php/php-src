@@ -4459,7 +4459,7 @@ ukey:
 /* }}} */
 
 /* {{{ proto array array_combine(array keys, array values) U
-   Creates an array by using the elements of the first parameter as keys and the elements of the second as the correspoding values */
+   Creates an array by using the elements of the first parameter as keys and the elements of the second as the corresponding values */
 PHP_FUNCTION(array_combine)
 {
 	zval *values, *keys;
@@ -4475,7 +4475,7 @@ PHP_FUNCTION(array_combine)
 	num_values = zend_hash_num_elements(Z_ARRVAL_P(values));
 
 	if (num_keys != num_values) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Both parameters should have equal number of elements");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Both parameters should have an equal number of elements");
 		RETURN_FALSE;
 	}
 
@@ -4507,7 +4507,7 @@ PHP_FUNCTION(array_combine)
 			}
 
 			zval_add_ref(entry_values);
-			add_u_assoc_zval(return_value, Z_TYPE_P(key_ptr), Z_UNIVAL_P(key_ptr), *entry_values);
+			add_u_assoc_zval_ex(return_value, Z_TYPE_P(key_ptr), Z_UNIVAL_P(key_ptr), Z_UNILEN_P(key_ptr)+1, *entry_values);
 
 			if (key_ptr != *entry_keys) {
 				zval_dtor(&key);
