@@ -492,7 +492,7 @@ static void php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAMETERS, xmlreader_
 		xmlFree(retchar);
 		return;
 	} else {
-		RETVAL_EMPTY_STRING();
+		RETURN_EMPTY_TEXT();
 	}
 }
 /* }}} */
