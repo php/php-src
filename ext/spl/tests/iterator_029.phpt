@@ -16,7 +16,7 @@ foreach(new RegexIterator(new ArrayIterator($ar), "/2/") as $k => $v)
 ===KEY===
 <?php
 
-foreach(new RegexIterator(new ArrayIterator($ar), "/2/", RegexIterator::USE_KEY) as $k => $v)
+foreach(new RegexIterator(new ArrayIterator($ar), "/2/", 0, RegexIterator::USE_KEY) as $k => $v)
 {
 	echo "$k=>$v\n";
 }
