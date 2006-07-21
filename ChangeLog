@@ -1,3 +1,329 @@
+2006-07-20  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-progress.txt
+      ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+      Make array_walk(_recursive) use params API with FCI cache and mark them
+      with U.
+
+2006-07-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      ext/spl/doxygen.cfg
+      ext/spl/spl_functions.c
+      ext/spl/spl_functions.h
+      ext/spl/spl_iterators.c
+      ext/spl/spl_iterators.h
+      ext/spl/internal/regexiterator.inc
+      ext/spl/tests/iterator_050.phpt
+      ext/spl/tests/iterator_051.phpt
+      ext/spl/tests/iterator_052.phpt
+      ext/spl/tests/iterator_053.phpt
+      ext/spl/tests/iterator_054.phpt
+      ext/spl/tests/iterator_055.phpt:
+      - Synch RegexIterator with HEAD
+
+    * (PHP_5_2)
+      ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.h
+      ext/pcre/tests/grep2.phpt
+      ext/pcre/tests/match_flags3.phpt
+      ext/pcre/tests/preg_replace.phpt
+      ext/pcre/tests/split.phpt:
+      - MFH Clean up (after consulting Andrei)
+        . Change the handlers SPL uses to
+      php_pcre_*_impl(pcre_cache_entry*,....)
+        . All refactored funcs (match, split, replace, grep) use the above
+        . Change (zend|php)_error() to php_error_docref()
+        . Move from old to new param parsing api
+        . Fix memleaks in unicode mode
+
+    * ext/spl/spl_iterators.c:
+      - Need to initialized zvals completley
+
+2006-07-20  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-progress.txt
+      ext/standard/array.c:
+      Make all array_*diff* functions use params API (along with FCI cache)
+      and mark them with U.
+      
+
+2006-07-20  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/pcre/php_pcre.c:
+      tsrmls fix
+
+2006-07-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/spl_iterators.c
+      ext/spl/internal/regexiterator.inc
+      ext/spl/tests/iterator_050.phpt
+      ext/spl/tests/iterator_051.phpt
+      ext/spl/tests/iterator_052.phpt
+      ext/spl/tests/iterator_053.phpt
+      ext/spl/tests/iterator_054.phpt
+      ext/spl/tests/iterator_055.phpt:
+      - Change order of ctor args
+
+2006-07-20  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_5_2)
+      NEWS:
+      Lib update
+
+2006-07-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/pcre/php_pcre.c:
+      - TSRM fixes
+
+    * ext/spl/internal/regexiterator.inc:
+      - Update docu
+
+    * ext/pcre/php_pcre.c:
+      - WS
+
+    * ext/pcre/tests/grep2.phpt:
+      - Fix unicode expectations
+
+    * ext/spl/spl_iterators.c:
+      
+
+    * ext/spl/doxygen.cfg
+      ext/spl/spl_functions.c
+      ext/spl/spl_functions.h
+      ext/spl/spl_iterators.c
+      ext/spl/spl_iterators.h
+      ext/spl/internal/regexiterator.inc
+      ext/spl/tests/iterator_052.phpt
+      ext/spl/tests/iterator_053.phpt:
+      - Update RegexIterator
+
+    * ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.h
+      ext/pcre/tests/grep2.phpt
+      ext/pcre/tests/match_flags3.phpt
+      ext/pcre/tests/preg_replace.phpt
+      ext/pcre/tests/preg_replace_callback2.phpt
+      ext/pcre/tests/split.phpt:
+      - Clean up (after consulting Andrei)
+       . Change the handlers SPL uses to php_pcre_*_impl(pcre_cache_entry*,....)
+       . All refactored funcs (match, split, replace, grep) use the above
+       . Change (zend|php)_error() to php_error_docref()
+       . Move from old to new param parsing api
+       . Fix memleaks in unicode mode
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h:
+      - Add new unicode functions: add_u_assoc_*[_ex]() which allow to add values
+        using a unicode key.
+
+2006-07-20  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-progress.txt
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_execute_API.c
+      ext/standard/array.c:
+      Rewrite array_map() to use params API with fci cache and mark it with U.
+
+    * unicode-todo.txt:
+      -** empty log message ***
+
+2006-07-20  Seiji Masugata  <s.masugata@digicom.dnp.co.jp>
+
+    * ext/mbstring/oniguruma/enc/gb18030.c
+      ext/mbstring/oniguruma/enc/gb18030.c:
+      
+      file gb18030.c was initially added on branch PHP_5_2.
+
+2006-07-20  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      ext/date/php_date.c
+      ext/date/tests/date_create-1.phpt:
+      - MFH: Rename date classes to DateTime and DateTimeZone
+
+    * ext/date/php_date.c
+      ext/date/tests/date_create-1.phpt:
+      - Rename date classes to DateTime and DateTimeZone
+
+2006-07-20  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * README.PARAMETER_PARSING_API:
+      Fix void* -> zstr
+
+2006-07-20  Seiji Masugata  <s.masugata@digicom.dnp.co.jp>
+
+    * (PHP_5_2)
+      ext/mbstring/config.m4
+      ext/mbstring/config.w32
+      ext/mbstring/oniguruma/COPYING
+      ext/mbstring/oniguruma/HISTORY
+      ext/mbstring/oniguruma/README
+      ext/mbstring/oniguruma/README.ja
+      ext/mbstring/oniguruma/config.h.in
+      ext/mbstring/oniguruma/index.html
+      ext/mbstring/oniguruma/onigcmpt200.h
+      ext/mbstring/oniguruma/oniggnu.h
+      ext/mbstring/oniguruma/oniguruma.h
+      ext/mbstring/oniguruma/regcomp.c
+      ext/mbstring/oniguruma/regenc.c
+      ext/mbstring/oniguruma/regenc.h
+      ext/mbstring/oniguruma/regerror.c
+      ext/mbstring/oniguruma/regexec.c
+      ext/mbstring/oniguruma/regext.c
+      ext/mbstring/oniguruma/reggnu.c
+      ext/mbstring/oniguruma/regint.h
+      ext/mbstring/oniguruma/regparse.c
+      ext/mbstring/oniguruma/regparse.h
+      ext/mbstring/oniguruma/regposix.c
+      ext/mbstring/oniguruma/regsyntax.c
+      ext/mbstring/oniguruma/regversion.c
+      ext/mbstring/oniguruma/st.c
+      ext/mbstring/oniguruma/st.h
+      ext/mbstring/oniguruma/enc/big5.c
+      ext/mbstring/oniguruma/enc/euc_jp.c
+      ext/mbstring/oniguruma/enc/euc_kr.c
+      ext/mbstring/oniguruma/enc/euc_tw.c
+      ext/mbstring/oniguruma/enc/iso8859_1.c
+      ext/mbstring/oniguruma/enc/iso8859_10.c
+      ext/mbstring/oniguruma/enc/iso8859_11.c
+      ext/mbstring/oniguruma/enc/iso8859_13.c
+      ext/mbstring/oniguruma/enc/iso8859_14.c
+      ext/mbstring/oniguruma/enc/iso8859_15.c
+      ext/mbstring/oniguruma/enc/iso8859_16.c
+      ext/mbstring/oniguruma/enc/iso8859_2.c
+      ext/mbstring/oniguruma/enc/iso8859_3.c
+      ext/mbstring/oniguruma/enc/iso8859_4.c
+      ext/mbstring/oniguruma/enc/iso8859_5.c
+      ext/mbstring/oniguruma/enc/iso8859_6.c
+      ext/mbstring/oniguruma/enc/iso8859_7.c
+      ext/mbstring/oniguruma/enc/iso8859_8.c
+      ext/mbstring/oniguruma/enc/iso8859_9.c
+      ext/mbstring/oniguruma/enc/koi8.c
+      ext/mbstring/oniguruma/enc/koi8_r.c
+      ext/mbstring/oniguruma/enc/sjis.c
+      ext/mbstring/oniguruma/enc/unicode.c
+      ext/mbstring/oniguruma/enc/utf16_be.c
+      ext/mbstring/oniguruma/enc/utf16_le.c
+      ext/mbstring/oniguruma/enc/utf32_be.c
+      ext/mbstring/oniguruma/enc/utf32_le.c
+      ext/mbstring/oniguruma/enc/utf8.c
+      ext/mbstring/oniguruma/win32/config.h:
+      Updated bundled oniguruma library (used for multibyte regular expression)
+      to 4.2.0.
+
+2006-07-20  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/filter/package.xml:
+      - update changelog
+
+    * ext/filter/logical_filters.c
+      ext/filter/tests/034.phpt:
+      - MFB:
+       - make boolean logical filter works like int/float and php itself
+       - add more tests for boolean input
+
+    * ext/filter/tests/034.phpt
+      ext/filter/tests/034.phpt:
+      
+      file 034.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/filter/logical_filters.c:
+      - make boolean logical filter works like int/float and php itself
+      - add more tests for boolean input
+
+2006-07-20  Antony Dovgal  <antony@zend.com>
+
+    * ext/json/config.m4
+      ext/json/config.m4:
+      rephrase
+
+2006-07-20  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/json/config.m4:
+      Simplify configure, no need to have dozen macros which have no use
+
+    * ext/standard/credits_ext.h
+      ext/standard/credits_ext.h:
+      update
+
+    * ext/json/CREDITS
+      ext/json/CREDITS:
+      
+      missing credits file
+
+2006-07-20  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/json/json.c
+      ext/json/tests/003.phpt
+      ext/json/tests/004.phpt
+      ext/json/tests/005.phpt:
+      MFH: use E_WARNING on recursion and add null to the result to keep it valid
+
+    * ext/json/json.c
+      ext/json/tests/003.phpt
+      ext/json/tests/004.phpt
+      ext/json/tests/005.phpt:
+      use E_WARNING on recursion and add null to the result to keep it valid
+
+    * ext/json/JSON_parser.c:
+      ZTS fix
+
+    * (PHP_5_2)
+      ext/json/tests/.cvsignore:
+      add missing .cvsignore
+
+    * ext/json/tests/.cvsignore
+      ext/json/tests/.cvsignore:
+      
+      add missing .cvsignore
+
+    * (PHP_5_2)
+      ext/json/json.c
+      ext/json/tests/001.phpt
+      ext/json/tests/002.phpt
+      ext/json/tests/003.phpt
+      ext/json/tests/004.phpt
+      ext/json/tests/005.phpt:
+      MFH: add recursion protection to json_encode() and new tests
+
+    * ext/json/json.c
+      ext/json/tests/001.phpt
+      ext/json/tests/002.phpt
+      ext/json/tests/002.phpt
+      ext/json/tests/003.phpt
+      ext/json/tests/003.phpt
+      ext/json/tests/004.phpt
+      ext/json/tests/004.phpt
+      ext/json/tests/005.phpt
+      ext/json/tests/005.phpt:
+      add recursion protection to json_encode() and new tests
+
+    * (PHP_5_2)
+      ext/json/JSON_parser.c
+      ext/json/tests/001.phpt:
+      fix segfault, add test
+
+    * ext/json/JSON_parser.c
+      ext/json/tests/001.phpt
+      ext/json/tests/001.phpt:
+      fix segfault caused by empty keys is JSON data
+      add test
+
+    * ext/json/json.c:
+      json_escape_string() doesn't use tsrm_ls, so no need to pass it
+
+    * ZendEngine2/zend_builtin_functions.c:
+      no need to return bool and false in the same time =)
+
+    * (PHP_5_2)
+      ext/date/php_date.c:
+      break; break; -> break;
+
 2006-07-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/pcre/php_pcre.h:

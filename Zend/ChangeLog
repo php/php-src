@@ -1,3 +1,21 @@
+2006-07-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c
+      zend_API.h:
+      - Add new unicode functions: add_u_assoc_*[_ex]() which allow to add values
+        using a unicode key.
+
+2006-07-20  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.h
+      zend_execute_API.c:
+      Rewrite array_map() to use params API with fci cache and mark it with U.
+
+2006-07-20  Antony Dovgal  <antony@zend.com>
+
+    * zend_builtin_functions.c:
+      no need to return bool and false in the same time =)
+
 2006-07-19  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_API.c:
