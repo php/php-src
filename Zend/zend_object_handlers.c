@@ -334,6 +334,18 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC)
 
 			if (rv) {
 				retval = &rv;
+				if ((type == BP_VAR_W || type == BP_VAR_RW  || type == BP_VAR_UNSET) && rv->refcount > 0) {
+					zval *tmp = rv;
+
+					ALLOC_ZVAL(rv);
+					*rv = *tmp;
+					zval_copy_ctor(rv);
+					rv->is_ref = 0;
+					rv->refcount = 0;
+					if (Z_TYPE_P(rv) != IS_OBJECT) {
+						zend_error(E_NOTICE, "Indirect modification of overloaded property %s::$%s has no effect", zobj->ce->name, Z_STRVAL_P(member));
+					}
+				}
 			} else {
 				retval = &EG(uninitialized_zval_ptr);
 			}
@@ -349,9 +361,9 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC)
 		zval_ptr_dtor(&tmp_member);
 		(*retval)->refcount--;
 	}
-	if (*retval && (type == BP_VAR_W || type == BP_VAR_RW) && Z_TYPE_PP(retval) == IS_ARRAY) {
-		zend_error(E_ERROR, "Cannot use array returned from %s::__get('%s') in write context", zobj->ce->name, Z_STRVAL_P(member));
-	}
+//	if (*retval && (type == BP_VAR_W || type == BP_VAR_RW) && Z_TYPE_PP(retval) == IS_ARRAY) {
+//		zend_error(E_ERROR, "Cannot use array returned from %s::__get('%s') in write context", zobj->ce->name, Z_STRVAL_P(member));
+//	}
 	return *retval;
 }
 

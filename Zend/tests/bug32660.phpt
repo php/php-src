@@ -28,9 +28,12 @@ $b = "much longer";
 print_r($a);
 ?>
 --EXPECTF--
+Notice: Indirect modification of overloaded property A::$whatever has no effect in %sbug32660.php on line 20
 A Object
 (
-    [q] => long
+    [q] => 3
 )
+
+Notice: Indirect modification of overloaded property A::$whatever has no effect in %sbug32660.php on line 23
 
 Fatal error: Cannot assign by reference to overloaded object in %sbug32660.php on line 23
