@@ -505,9 +505,16 @@ static void php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAMETERS, int t
 	xmlreader_object *intern;
 	xmlRelaxNGPtr schema = NULL;
 	char *source;
+	zend_uchar source_type = IS_STRING;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!", &source, &source_len) == FAILURE) {
-		return;
+	if (type == XMLREADER_LOAD_FILE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t!", &source, &source_len, &source_type) == FAILURE) {
+			return;
+		}
+	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!", &source, &source_len) == FAILURE) {
+			return;
+		}
 	}
 
 	if (source != NULL && !source_len) {
@@ -520,9 +527,17 @@ static void php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAMETERS, int t
 	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
 	if (intern && intern->ptr) {
 		if (source) {
+			if (source_type == IS_UNICODE) {
+				if (php_stream_path_encode(NULL, &source, &source_len, (UChar*)source, source_len, REPORT_ERRORS, NULL) == FAILURE) {
+					RETURN_FALSE;
+				}
+			}
 			schema =  _xmlreader_get_relaxNG(source, source_len, type, NULL, NULL TSRMLS_CC);
 			if (schema) {
 				retval = xmlTextReaderRelaxNGSetSchema(intern->ptr, schema);
+			}
+			if (source_type == IS_UNICODE) {
+				efree(source);
 			}
 		} else {
 			/* unset the associated relaxNG context and schema if one exists */
@@ -902,6 +917,7 @@ PHP_METHOD(xmlreader, open)
 {
 	zval *id;
 	int source_len = 0, encoding_len = 0;
+	zend_uchar source_type;
 	long options = 0;
 	xmlreader_object *intern = NULL;
 	char *source, *valid_file = NULL;
@@ -913,7 +929,7 @@ PHP_METHOD(xmlreader, open)
 	orig_runtime_conv = ZEND_U_CONVERTER(UG(runtime_encoding_conv));
 	UG(runtime_encoding_conv) = UG(utf8_conv);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!l", &source, &source_len, &encoding, &encoding_len, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|s!l", &source, &source_len, &source_type, &encoding, &encoding_len, &options) == FAILURE) {
 		UG(runtime_encoding_conv) = orig_runtime_conv;
 		return;
 	}
@@ -935,10 +951,20 @@ PHP_METHOD(xmlreader, open)
 		RETURN_FALSE;
 	}
 
+	if (source_type == IS_UNICODE) {
+		if (php_stream_path_encode(NULL, &source, &source_len, (UChar*)source, source_len, REPORT_ERRORS, NULL) == FAILURE) {
+			RETURN_FALSE;
+		}
+	}
+
 	valid_file = _xmlreader_get_valid_file_path(source, resolved_path, MAXPATHLEN  TSRMLS_CC);
 
 	if (valid_file) {
 		reader = xmlReaderForFile(valid_file, encoding, options);
+	}
+
+	if (source_type == IS_UNICODE) {
+		efree(source);
 	}
 
 	if (reader == NULL) {
@@ -1001,8 +1027,9 @@ PHP_METHOD(xmlreader, setSchema)
 	int source_len = 0, retval = -1;
 	xmlreader_object *intern;
 	char *source;
+	zend_uchar source_type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!", &source, &source_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t!", &source, &source_len, &source_type) == FAILURE) {
 		return;
 	}
 
@@ -1015,7 +1042,16 @@ PHP_METHOD(xmlreader, setSchema)
 
 	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
 	if (intern && intern->ptr) {
+		if (source_type == IS_UNICODE) {
+			if (php_stream_path_encode(NULL, &source, &source_len, (UChar*)source, source_len, REPORT_ERRORS, NULL) == FAILURE) {
+				RETURN_FALSE;
+			}
+		}
 		retval = xmlTextReaderSchemaValidate(intern->ptr, source);
+
+		if (source_type == IS_UNICODE) {
+			efree(source);
+		}
 
 		if (retval == 0) {
 			RETURN_TRUE;
