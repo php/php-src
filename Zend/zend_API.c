@@ -2104,6 +2104,7 @@ ZEND_API int zend_disable_class(char *class_name, uint class_name_length TSRMLS_
 	}
 	INIT_CLASS_ENTRY((*disabled_class), class_name, disabled_class_new);
 	disabled_class->create_object = display_disabled_class;
+	disabled_class->name_length = class_name_length;
 	zend_register_internal_class(disabled_class TSRMLS_CC);
 	return 1;
 }
