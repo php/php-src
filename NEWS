@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, Version 4.4.3
+- Fixed bug #38183 (disable_classes=Foobar causes disabled class to be
+  called Foo). (Jani)
 	
 04 Jul 2006, Version 4.4.3RC2
 - Improved safe_mode check for the error_log() function. (Ilia)
