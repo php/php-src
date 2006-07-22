@@ -179,9 +179,9 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 	settings2params($info_params);
 	$php_info = `$php $pass_options $info_params $info_file`;
 	@unlink($info_file);
-	define('TESTED_PHP_VERSION', `$php -r 'echo PHP_VERSION;'`);
+	define('TESTED_PHP_VERSION', `$php -r "echo PHP_VERSION;"`);
 
-	$unicode = `$php $pass_options $info_params -r 'echo ini_get("unicode.semantics");'`;
+	$unicode = `$php $pass_options $info_params -r "echo ini_get('unicode.semantics');"`;
 	define('TESTED_UNICODE', strcasecmp($unicode,"on") == 0 || $unicode == 1);
 
 	// load list of enabled extensions
@@ -333,6 +333,7 @@ if (isset($argc) && $argc > 1) {
 				case 'N':
 					$unicode_and_native = false;
 					$unicode_testing = false;
+					$ini_overwrites[] = 'unicode.semantics=0';
 					break;
 				case '--no-clean':
 					$no_clean = true;
