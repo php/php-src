@@ -58,7 +58,7 @@ static void php_filter_encode_html_high_low(zval *value, long flags)
 	register int x, y;
 	smart_str str = {0};
 	int len = Z_STRLEN_P(value);
-	unsigned char *s = Z_STRVAL_P(value);
+	unsigned char *s = (unsigned char *)Z_STRVAL_P(value);
 
 	if (Z_STRLEN_P(value) == 0) {
 		return;
@@ -106,7 +106,7 @@ static void php_filter_encode_url(zval *value, char* chars, int high, int low, i
 	}
 	str[y] = '\0';
 	efree(Z_STRVAL_P(value));
-	Z_STRVAL_P(value) = str;
+	Z_STRVAL_P(value) = (char *)str;
 	Z_STRLEN_P(value) = y;
 }
 
@@ -120,7 +120,7 @@ static void php_filter_strip(zval *value, long flags)
 		return;
 	}
 
-	str = Z_STRVAL_P(value);
+	str = (unsigned char *)Z_STRVAL_P(value);
 	buf = safe_emalloc(1, Z_STRLEN_P(value) + 1, 1);
 	c = 0;
 	for (i = 0; i < Z_STRLEN_P(value); i++) {
@@ -134,7 +134,7 @@ static void php_filter_strip(zval *value, long flags)
 	/* update zval string data */
 	buf[c] = '\0';
 	efree(Z_STRVAL_P(value));
-	Z_STRVAL_P(value) = buf;
+	Z_STRVAL_P(value) = (char *)buf;
 	Z_STRLEN_P(value) = c;
 }
 /* }}} */
@@ -149,7 +149,7 @@ static void filter_map_update(filter_map *map, int flag, unsigned char *allowed_
 {
 	int l, i;
 
-	l = strlen(allowed_list);
+	l = strlen((char*)allowed_list);
 	for (i = 0; i < l; ++i) {
 		(*map)[allowed_list[i]] = flag;
 	}
@@ -160,7 +160,7 @@ static void filter_map_apply(zval *value, filter_map *map)
 	unsigned char *buf, *str;
 	int   i, c;
 	
-	str = Z_STRVAL_P(value);
+	str = (unsigned char *)Z_STRVAL_P(value);
 	buf = safe_emalloc(1, Z_STRLEN_P(value) + 1, 1);
 	c = 0;
 	for (i = 0; i < Z_STRLEN_P(value); i++) {
@@ -172,7 +172,7 @@ static void filter_map_apply(zval *value, filter_map *map)
 	/* update zval string data */
 	buf[c] = '\0';
 	efree(Z_STRVAL_P(value));
-	Z_STRVAL_P(value) = buf;
+	Z_STRVAL_P(value) = (char *)buf;
 	Z_STRLEN_P(value) = c;
 }
 /* }}} */
@@ -255,7 +255,7 @@ void php_filter_unsafe_raw(PHP_INPUT_FILTER_PARAM_DECL)
 void php_filter_email(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	/* Check section 6 of rfc 822 http://www.faqs.org/rfcs/rfc822.html */
-	unsigned char *allowed_list = LOWALPHA HIALPHA DIGIT "!#$%&'*+-/=?^_`{|}~@.[]";
+	unsigned char allowed_list[] = LOWALPHA HIALPHA DIGIT "!#$%&'*+-/=?^_`{|}~@.[]";
 	filter_map     map;
 
 	filter_map_init(&map);
@@ -269,7 +269,7 @@ void php_filter_url(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	/* Strip all chars not part of section 5 of
 	 * http://www.faqs.org/rfcs/rfc1738.html */
-	unsigned char *allowed_list = LOWALPHA HIALPHA DIGIT SAFE EXTRA NATIONAL PUNCTUATION RESERVED;
+	unsigned char allowed_list[] = LOWALPHA HIALPHA DIGIT SAFE EXTRA NATIONAL PUNCTUATION RESERVED;
 	filter_map     map;
 
 	filter_map_init(&map);
@@ -282,7 +282,7 @@ void php_filter_url(PHP_INPUT_FILTER_PARAM_DECL)
 void php_filter_number_int(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	/* strip everything [^0-9+-] */
-	unsigned char *allowed_list = "+-" DIGIT;
+	unsigned char allowed_list[] = "+-" DIGIT;
 	filter_map     map;
 
 	filter_map_init(&map);
@@ -295,7 +295,7 @@ void php_filter_number_int(PHP_INPUT_FILTER_PARAM_DECL)
 void php_filter_number_float(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	/* strip everything [^0-9+-] */
-	unsigned char *allowed_list = "+-" DIGIT;
+	unsigned char allowed_list[] = "+-" DIGIT;
 	filter_map     map;
 
 	filter_map_init(&map);
@@ -303,13 +303,13 @@ void php_filter_number_float(PHP_INPUT_FILTER_PARAM_DECL)
 
 	/* depending on flags, strip '.', 'e', ",", "'" */
 	if (flags & FILTER_FLAG_ALLOW_FRACTION) {
-		filter_map_update(&map, 2, ".");
+		filter_map_update(&map, 2, (unsigned char *) ".");
 	}
 	if (flags & FILTER_FLAG_ALLOW_THOUSAND) {
-		filter_map_update(&map, 3, ",");
+		filter_map_update(&map, 3,  (unsigned char *) ",");
 	}
 	if (flags & FILTER_FLAG_ALLOW_SCIENTIFIC) {
-		filter_map_update(&map, 4, "eE");
+		filter_map_update(&map, 4,  (unsigned char *) "eE");
 	}
 	filter_map_apply(value, &map);
 }
