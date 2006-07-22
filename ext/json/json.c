@@ -33,7 +33,7 @@
 /* If you declare any globals in php_json.h uncomment this:
 ZEND_DECLARE_MODULE_GLOBALS(json)
 */
-static char digits[] = "0123456789abcdef";
+static const char digits[] = "0123456789abcdef";
 
 /* {{{ json_functions[]
  *
