@@ -27,7 +27,7 @@ $args = array(
                         )
 
 );
-$out = input_get_args($args, INPUT_DATA, $data);
+$out = input_get_args(INPUT_DATA, $args, $data);
 var_dump($out);
 ?>
 --EXPECTF--	

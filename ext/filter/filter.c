@@ -629,8 +629,8 @@ PHP_FUNCTION(input_get)
 }
 /* }}} */
 
-/* {{{ proto mixed input_get_args(array definition, constant type [, array data])
- * Returns an array with all arguments defined in 'definition'.
+/* {{{ proto mixed input_get_args(constant type, array definition, [, array data])
+ * Returns an array with all arguments defined in 'definition'. INPUT_DATA will use the data given as last argument. 
  */
 PHP_FUNCTION(input_get_args)
 {
@@ -656,7 +656,7 @@ PHP_FUNCTION(input_get_args)
 	zval       *array_ptr = NULL;
 	zval **element;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "al|a", &args_array, &args_from, &values) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "la|a", &args_from, &args_array, &values) == FAILURE) {
 		RETURN_FALSE;
 	}
 
