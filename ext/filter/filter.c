@@ -648,7 +648,7 @@ PHP_FUNCTION(input_get_args)
 	zval       *array_ptr = NULL;
 	zval **element;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "al|a", &args_array, &args_from, &values) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "la|a", &args_array, &args_from, &values) == FAILURE) {
 		RETURN_FALSE;
 	}
 
