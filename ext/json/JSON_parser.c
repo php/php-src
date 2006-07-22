@@ -139,7 +139,7 @@ SOFTWARE.
     This table maps the 128 ASCII characters into the 32 character classes.
     The remaining Unicode characters should be mapped to S_ETC.
 */
-static int ascii_class[128] = {
+static const int ascii_class[128] = {
     S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR,
     S_ERR, S_WSP, S_WSP, S_ERR, S_ERR, S_WSP, S_ERR, S_ERR,
     S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR,
@@ -168,7 +168,7 @@ static int ascii_class[128] = {
     0 and 29. An action is a negative number between -1 and -9. A JSON text is
     accepted if the end of the text is in state 9 and mode is MODE_DONE.
 */
-static int state_transition_table[30][31] = {
+static const int state_transition_table[30][31] = {
 /* 0*/ { 0, 0,-8,-1,-6,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
 /* 1*/ { 1, 1,-1,-9,-1,-1,-1,-1, 3,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
 /* 2*/ { 2, 2,-8,-1,-6,-5,-1,-1, 3,-1,-1,-1,20,-1,21,22,-1,-1,-1,-1,-1,13,-1,17,-1,-1,10,-1,-1,-1,-1},
