@@ -1,3 +1,35 @@
+2006-07-21  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend.h:
+      It's not legacy - it's binary.
+
+2006-07-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_execute.h
+      tests/bug37144.phpt:
+      MTH: Fixed bug #37144 (PHP craches trying to assign into property of dead
+      object)
+
+    * zend_object_handlers.c
+      zend_object_handlers.c
+      tests/bug32660.phpt
+      tests/bug32660.phpt
+      tests/bug37667.phpt
+      tests/bug37667.phpt:
+      Changed error message (E_ERROR -> E_NOTICE) in case of indirect
+      modification of overloaded property.
+
+    * zend_API.c
+      zend_API.c
+      zend_exceptions.c
+      zend_exceptions.c
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      Fixed wrong "type" argument to read_property() handler
+
 2006-07-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.c
