@@ -1,7 +1,7 @@
 // $Id$
 // vim:ft=javascript
 
-ARG_WITH("json", "JavaScript Object Serialization support", "no");
+ARG_ENABLE("json", "JavaScript Object Serialization support", "yes");
 
 if (PHP_JSON != "no") {
 	EXTENSION('json', 'json.c', PHP_JSON_SHARED, "");
