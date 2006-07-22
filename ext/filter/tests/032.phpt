@@ -29,7 +29,7 @@ $args = array(
 
 );
 
-$myinputs = input_get_args($args, INPUT_DATA, $data);
+$myinputs = input_get_args(INPUT_DATA, $args, $data);
 var_dump($myinputs);
 ?>
 --EXPECT--

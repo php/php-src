@@ -1,5 +1,5 @@
 --TEST--
-input_get_args() filter not reseted between elements
+filter_data() Float exponential weird result
 --FILE--
 <?php
 $data = array(
