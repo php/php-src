@@ -65,6 +65,7 @@ PHP                                                                        NEWS
   . Added readInnerXML(), readOuterXML(), readString(), setSchema(). (2.6.20+)
   . Changed to passing libxml options when loading reader.
 
+- Added RFC1867 fileupload processing hook. (Stefan E.)
 - Added JSON and Filter extensions. (Derick, Rasmus)
 - Added error messages to disk_free_space() and disk_total_space()
   functions. FR #37971 (Tony)

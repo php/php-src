@@ -35,6 +35,8 @@
 
 #define DEBUG_FILE_UPLOAD ZEND_DEBUG
 
+PHPAPI int (*php_rfc1867_callback)(unsigned int event, void *event_data, void **extra TSRMLS_DC) = NULL;
+
 #if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
 #include "ext/mbstring/mbstring.h"
 
@@ -132,6 +134,7 @@ void php_mb_gpc_stack_variable(char *param, char *value, char ***pval_list, int 
 #define UPLOAD_ERROR_D    4  /* No file uploaded */
 #define UPLOAD_ERROR_E    6  /* Missing /tmp or similar directory */
 #define UPLOAD_ERROR_F    7  /* Failed to write file to disk */
+#define UPLOAD_ERROR_X    8  /* File upload stopped by extension */
 
 void php_rfc1867_register_constants(TSRMLS_D)
 {
@@ -142,6 +145,7 @@ void php_rfc1867_register_constants(TSRMLS_D)
 	REGISTER_MAIN_LONG_CONSTANT("UPLOAD_ERR_NO_FILE",    UPLOAD_ERROR_D,  CONST_CS | CONST_PERSISTENT);
 	REGISTER_MAIN_LONG_CONSTANT("UPLOAD_ERR_NO_TMP_DIR", UPLOAD_ERROR_E,  CONST_CS | CONST_PERSISTENT);
 	REGISTER_MAIN_LONG_CONSTANT("UPLOAD_ERR_CANT_WRITE", UPLOAD_ERROR_F,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_MAIN_LONG_CONSTANT("UPLOAD_ERR_EXTENSION",  UPLOAD_ERROR_X,  CONST_CS | CONST_PERSISTENT);
 }
 
 static void normalize_protected_variable(char *varname TSRMLS_DC)
@@ -791,6 +795,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	zval *array_ptr = (zval *) arg;
 	int fd=-1;
 	zend_llist header;
+	void *event_extra_data = NULL;
 
 	if (SG(request_info).content_length > SG(post_max_size)) {
 		sapi_module.sapi_error(E_WARNING, "POST Content-Length of %ld bytes exceeds the limit of %ld bytes", SG(request_info).content_length, SG(post_max_size));
@@ -849,16 +854,26 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 #endif
 	zend_llist_init(&header, sizeof(mime_header_entry), (llist_dtor_func_t) php_free_hdr_entry, 0);
 
+	if (php_rfc1867_callback != NULL) {
+		multipart_event_start event_start;
+
+		event_start.content_length = SG(request_info).content_length;
+		if (php_rfc1867_callback(MULTIPART_EVENT_START, &event_start, &event_extra_data TSRMLS_CC) == FAILURE) {
+			goto fileupload_done;
+		}
+	}
+
 	while (!multipart_buffer_eof(mbuff TSRMLS_CC))
 	{
 		char buff[FILLUNIT];
 		char *cd=NULL,*param=NULL,*filename=NULL, *tmp=NULL;
-		int blen=0, wlen=0;
+		size_t blen=0, wlen=0;
+		off_t offset;
 
 		zend_llist_clean(&header);
 
 		if (!multipart_buffer_headers(mbuff, &header TSRMLS_CC)) {
-			SAFE_RETURN;
+			goto fileupload_done;
 		}
 
 		if ((cd = php_mime_get_hdr_value(header, "Content-Disposition"))) {
@@ -909,6 +924,23 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				}
 
 				if (sapi_module.input_filter(PARSE_POST, param, &value, strlen(value), &new_val_len TSRMLS_CC)) {
+					if (php_rfc1867_callback != NULL) {
+						multipart_event_formdata event_formdata;
+						size_t newlength = 0;
+
+						event_formdata.post_bytes_processed = SG(read_post_bytes);
+						event_formdata.name = param;
+						event_formdata.value = &value;
+						event_formdata.length = new_val_len;
+						event_formdata.newlength = &newlength;
+						if (php_rfc1867_callback(MULTIPART_EVENT_FORMDATA, &event_formdata, &event_extra_data TSRMLS_CC) == FAILURE) {
+							efree(param);
+							efree(value);
+							continue;
+						}
+						new_val_len = newlength;
+					}
+					
 #if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
 					if (php_mb_encoding_translation(TSRMLS_C)) {
 						php_mb_gpc_stack_variable(param, value, &val_list, &len_list, 
@@ -937,7 +969,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			/* Return with an error if the posted data is garbled */
 			if (!param && !filename) {
 				sapi_module.sapi_error(E_WARNING, "File Upload Mime headers garbled");
-				SAFE_RETURN;
+				goto fileupload_done;
 			}
 			
 			if (!param) {
@@ -981,11 +1013,24 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					cancel_upload = UPLOAD_ERROR_E;
 				}
 			}
+			
+			if (php_rfc1867_callback != NULL) {
+				multipart_event_file_start event_file_start;
+
+				event_file_start.post_bytes_processed = SG(read_post_bytes);
+				event_file_start.name = param;
+				event_file_start.filename = &filename;
+				if (php_rfc1867_callback(MULTIPART_EVENT_FILE_START, &event_file_start, &event_extra_data TSRMLS_CC) == FAILURE) {
+					skip_upload = 1;
+				}
+			}
+
+			
 			if (skip_upload) {
 				efree(param);
 				efree(filename);
 				continue;
-			}	
+			}
 
 			if(strlen(filename) == 0) {
 #if DEBUG_FILE_UPLOAD
@@ -994,9 +1039,25 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				cancel_upload = UPLOAD_ERROR_D;
 			}
 
+			offset = 0;
 			end = 0;
 			while (!cancel_upload && (blen = multipart_buffer_read(mbuff, buff, sizeof(buff), &end TSRMLS_CC)))
 			{
+				if (php_rfc1867_callback != NULL) {
+					multipart_event_file_data event_file_data;
+
+					event_file_data.post_bytes_processed = SG(read_post_bytes);
+					event_file_data.offset = offset;
+					event_file_data.data = buff;
+					event_file_data.length = blen;
+					event_file_data.newlength = &blen;
+					if (php_rfc1867_callback(MULTIPART_EVENT_FILE_DATA, &event_file_data, &event_extra_data TSRMLS_CC) == FAILURE) {
+						cancel_upload = UPLOAD_ERROR_X;
+						continue;
+					}
+				}
+				
+			
 				if (PG(upload_max_filesize) > 0 && total_bytes > PG(upload_max_filesize)) {
 #if DEBUG_FILE_UPLOAD
 					sapi_module.sapi_error(E_NOTICE, "upload_max_filesize of %ld bytes exceeded - file [%s=%s] not saved", PG(upload_max_filesize), param, filename);
@@ -1008,6 +1069,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 #endif
 					cancel_upload = UPLOAD_ERROR_B;
 				} else if (blen > 0) {
+				
 					wlen = write(fd, buff, blen);
 			
 					if (wlen < blen) {
@@ -1018,6 +1080,8 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					} else {
 						total_bytes += wlen;
 					}
+					
+					offset += wlen;
 				} 
 			}
 			if (fd!=-1) { /* may not be initialized if file could not be created */
@@ -1035,6 +1099,17 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				cancel_upload = 5;
 			}
 #endif		
+
+			if (php_rfc1867_callback != NULL) {
+				multipart_event_file_end event_file_end;
+
+				event_file_end.post_bytes_processed = SG(read_post_bytes);
+				event_file_end.temp_filename = temp_filename;
+				event_file_end.cancel_upload = cancel_upload;
+				if (php_rfc1867_callback(MULTIPART_EVENT_FILE_END, &event_file_end, &event_extra_data TSRMLS_CC) == FAILURE) {
+					cancel_upload = UPLOAD_ERROR_X;
+				}
+			}
 
 			if (cancel_upload) {
 				if (temp_filename) {
@@ -1242,7 +1317,14 @@ filedone:
 			efree(param);
 		}
 	}
-
+fileupload_done:
+	if (php_rfc1867_callback != NULL) {
+		multipart_event_end event_end;
+		
+		event_end.post_bytes_processed = SG(read_post_bytes);
+		php_rfc1867_callback(MULTIPART_EVENT_END, &event_end, &event_extra_data TSRMLS_CC);
+	}
+	
 	SAFE_RETURN;
 }
 
