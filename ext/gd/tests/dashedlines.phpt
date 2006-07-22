@@ -45,7 +45,11 @@ $p3 = imagecolorat($im, 2,2) == $r;
 $p4 = imagecolorat($im, 2,3) == $b;
 $p5 = imagecolorat($im, 2,4) == $r;
 $p6 = imagecolorat($im, 2,5) == $b;
-imagepng($im, 'b.png');
+
+ob_start();
+imagepng($im);
+echo base64_encode(ob_get_clean()), "\n";
+
 if ($p1 && $p2 && $p3 && $p4 && $p5 && $p6) {
 	echo "Vertical: ok\n";
 }
@@ -75,5 +79,6 @@ imagedestroy($im);
 ?>
 --EXPECTF--
 Horizontal: ok
+iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAIAAABvrngfAAAAJ0lEQVQImWP8//8/AwMDAyMjA4TBwMAEoRgZoHyE0H8GRnQh0lUBABMDCgml3gqkAAAAAElFTkSuQmCC
 Vertical: ok
 Diagonal: ok
