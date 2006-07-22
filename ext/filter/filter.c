@@ -31,7 +31,7 @@ ZEND_DECLARE_MODULE_GLOBALS(filter)
 #include "filter_private.h"
 
 typedef struct filter_list_entry {
-	char  *name;
+	const char *name;
 	int    id;
 	void (*function)(PHP_INPUT_FILTER_PARAM_DECL);
 } filter_list_entry;

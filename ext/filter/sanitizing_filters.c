@@ -27,7 +27,7 @@ typedef unsigned long filter_map[256];
 /* }}} */
 
 /* {{{ HELPER FUNCTIONS */
-static void php_filter_encode_html(zval *value, char* chars, int encode_nul)
+static void php_filter_encode_html(zval *value, const char* chars, int encode_nul)
 {
 	register int x, y;
 	smart_str str = {0};
@@ -79,7 +79,7 @@ static void php_filter_encode_html_high_low(zval *value, long flags)
 	Z_STRLEN_P(value) = str.len;
 }
 
-static unsigned char hexchars[] = "0123456789ABCDEF";
+static const unsigned char hexchars[] = "0123456789ABCDEF";
 
 #define LOWALPHA    "abcdefghijklmnopqrstuvwxyz"
 #define HIALPHA     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -87,7 +87,7 @@ static unsigned char hexchars[] = "0123456789ABCDEF";
 
 #define DEFAULT_URL_ENCODE    LOWALPHA HIALPHA DIGIT "-._"
 
-static void php_filter_encode_url(zval *value, char* chars, int high, int low, int encode_nul)
+static void php_filter_encode_url(zval *value, const char* chars, int high, int low, int encode_nul)
 {
 	register int x, y;
 	unsigned char *str;
@@ -145,11 +145,11 @@ static void filter_map_init(filter_map *map)
 	memset(map, 0, sizeof(filter_map));
 }
 
-static void filter_map_update(filter_map *map, int flag, unsigned char *allowed_list)
+static void filter_map_update(filter_map *map, int flag, const unsigned char *allowed_list)
 {
 	int l, i;
 
-	l = strlen((char*)allowed_list);
+	l = strlen((const char*)allowed_list);
 	for (i = 0; i < l; ++i) {
 		(*map)[allowed_list[i]] = flag;
 	}
@@ -255,7 +255,7 @@ void php_filter_unsafe_raw(PHP_INPUT_FILTER_PARAM_DECL)
 void php_filter_email(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	/* Check section 6 of rfc 822 http://www.faqs.org/rfcs/rfc822.html */
-	unsigned char allowed_list[] = LOWALPHA HIALPHA DIGIT "!#$%&'*+-/=?^_`{|}~@.[]";
+	const unsigned char allowed_list[] = LOWALPHA HIALPHA DIGIT "!#$%&'*+-/=?^_`{|}~@.[]";
 	filter_map     map;
 
 	filter_map_init(&map);
@@ -269,7 +269,7 @@ void php_filter_url(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	/* Strip all chars not part of section 5 of
 	 * http://www.faqs.org/rfcs/rfc1738.html */
-	unsigned char allowed_list[] = LOWALPHA HIALPHA DIGIT SAFE EXTRA NATIONAL PUNCTUATION RESERVED;
+	const unsigned char allowed_list[] = LOWALPHA HIALPHA DIGIT SAFE EXTRA NATIONAL PUNCTUATION RESERVED;
 	filter_map     map;
 
 	filter_map_init(&map);
@@ -282,7 +282,7 @@ void php_filter_url(PHP_INPUT_FILTER_PARAM_DECL)
 void php_filter_number_int(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	/* strip everything [^0-9+-] */
-	unsigned char allowed_list[] = "+-" DIGIT;
+	const unsigned char allowed_list[] = "+-" DIGIT;
 	filter_map     map;
 
 	filter_map_init(&map);
@@ -295,7 +295,7 @@ void php_filter_number_int(PHP_INPUT_FILTER_PARAM_DECL)
 void php_filter_number_float(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	/* strip everything [^0-9+-] */
-	unsigned char allowed_list[] = "+-" DIGIT;
+	const unsigned char allowed_list[] = "+-" DIGIT;
 	filter_map     map;
 
 	filter_map_init(&map);
