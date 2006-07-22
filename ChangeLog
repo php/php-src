@@ -1,3 +1,84 @@
+2006-07-21  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/array.c:
+      Apply Matt W's patch (with a fix) for array_combine() binary key safety.
+
+    * ZendEngine2/zend.h:
+      It's not legacy - it's binary.
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+      Remove references to BG(user_compare_fnnc_name).
+      
+
+    * unicode-progress.txt
+      ext/standard/array.c:
+      Make array_*intersect* functions use params API with FCI cache and mark
+      them with U.
+
+2006-07-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/examples/dualiterator.inc
+      ext/spl/internal/regexiterator.inc:
+      - Update docu
+
+    * ext/spl/spl_iterators.c
+      ext/spl/internal/recursiveregexiterator.inc:
+      - Match code with docu
+
+    * (PHP_5_2)
+      ext/spl/spl_iterators.c
+      ext/spl/internal/regexiterator.inc
+      ext/spl/tests/iterator_029.phpt:
+      - MFH Update RegexIterator, Docu & Tests
+
+    * ext/spl/tests/iterator_029.phpt
+      ext/spl/tests/spl_004.phpt:
+      - Update tests
+
+    * ext/spl/spl_iterators.c
+      ext/spl/internal/regexiterator.inc:
+      - Add control functions to RegexIterator
+
+2006-07-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug37144.phpt:
+      MTH: Fixed bug #37144 (PHP craches trying to assign into property of dead
+      object)
+
+    * ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/bug32660.phpt
+      ZendEngine2/tests/bug32660.phpt
+      ZendEngine2/tests/bug37667.phpt
+      ZendEngine2/tests/bug37667.phpt:
+      Changed error message (E_ERROR -> E_NOTICE) in case of indirect
+      modification of overloaded property.
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h:
+      Fixed wrong "type" argument to read_property() handler
+
+    * ext/standard/array.c:
+      ZTS fix
+
+2006-07-21  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xmlreader/php_xmlreader.c:
+      return EMPTY_TEXT here
+
+    * ext/xmlreader/php_xmlreader.c:
+      unicode support for handling filenames
+
 2006-07-20  Andrei Zmievski  <andrei@gravitonic.com>
 
     * unicode-progress.txt
