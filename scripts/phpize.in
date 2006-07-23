@@ -102,7 +102,7 @@ phpize_check_autotools()
   test -z "$PHP_AUTOCONF" && PHP_AUTOCONF=autoconf
   test -z "$PHP_AUTOHEADER" && PHP_AUTOHEADER=autoheader
   
-  if ! text -x $PHP_AUTOCONF && ! test -x "`$php_shtool path $PHP_AUTOCONF`"; then
+  if ! test -x $PHP_AUTOCONF && ! test -x "`$php_shtool path $PHP_AUTOCONF`"; then
     cat <<EOF
 Cannot find autoconf. Please check your autoconf installation and the
 \$PHP_AUTOCONF environment variable. Then, rerun this script.
