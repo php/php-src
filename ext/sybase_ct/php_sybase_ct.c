@@ -374,7 +374,6 @@ PHP_INI_END()
 static PHP_GINIT_FUNCTION(sybase)
 {
 	long opt;
-	TSRMLS_FETCH();
 
 	if (cs_ctx_alloc(CTLIB_VERSION, &sybase_globals->context)!=CS_SUCCEED || ct_init(sybase_globals->context, CTLIB_VERSION)!=CS_SUCCEED) {
 		return;
@@ -477,11 +476,10 @@ PHP_RSHUTDOWN_FUNCTION(sybase)
 }
 
 
-static int php_sybase_do_connect_internal(sybase_link *sybase, char *host, char *user, char *passwd, char *charset, char *appname)
+static int php_sybase_do_connect_internal(sybase_link *sybase, char *host, char *user, char *passwd, char *charset, char *appname TSRMLS_DC)
 {
 	CS_LOCALE *tmp_locale;
 	long packetsize;
-	TSRMLS_FETCH();
 
 	/* set a CS_CONNECTION record */
 	if (ct_con_alloc(SybCtG(context), &sybase->connection)!=CS_SUCCEED) {
@@ -708,7 +706,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 
 			sybase_ptr = (sybase_link *) malloc(sizeof(sybase_link));
-			if (!php_sybase_do_connect_internal(sybase_ptr, host, user, passwd, charset, appname)) {
+			if (!php_sybase_do_connect_internal(sybase_ptr, host, user, passwd, charset, appname TSRMLS_CC)) {
 				free(sybase_ptr);
 				efree(hashed_details);
 				RETURN_FALSE;
@@ -762,7 +760,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				 * NULL before trying to use it elsewhere . . .)
 				 */
 				memcpy(&sybase, sybase_ptr, sizeof(sybase_link));
-				if (!php_sybase_do_connect_internal(sybase_ptr, host, user, passwd, charset, appname)) {
+				if (!php_sybase_do_connect_internal(sybase_ptr, host, user, passwd, charset, appname TSRMLS_CC)) {
 					memcpy(sybase_ptr, &sybase, sizeof(sybase_link));
 					efree(hashed_details);
 					RETURN_FALSE;
@@ -806,7 +804,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 
 		sybase_ptr = (sybase_link *) emalloc(sizeof(sybase_link));
-		if (!php_sybase_do_connect_internal(sybase_ptr, host, user, passwd, charset, appname)) {
+		if (!php_sybase_do_connect_internal(sybase_ptr, host, user, passwd, charset, appname TSRMLS_CC)) {
 			efree(sybase_ptr);
 			efree(hashed_details);
 			RETURN_FALSE;
@@ -1022,12 +1020,11 @@ PHP_FUNCTION(sybase_select_db)
 
 /* }}} */
 
-static int php_sybase_finish_results (sybase_result *result) 
+static int php_sybase_finish_results(sybase_result *result TSRMLS_DC) 
 {
 	int i, fail;
 	CS_RETCODE retcode;
 	CS_INT restype;
-	TSRMLS_FETCH();
 	
 	efree(result->datafmt);
 	efree(result->lengths);
@@ -1209,7 +1206,7 @@ static int php_sybase_fetch_result_row (sybase_result *result, int numrows)
 	result->last_retcode= retcode;
 	switch (retcode) {
 		case CS_END_DATA:
-			retcode = php_sybase_finish_results(result);
+			retcode = php_sybase_finish_results(result TSRMLS_CC);
 			break;
 			
 		case CS_ROW_FAIL:
@@ -1434,7 +1431,7 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 		*/
 		#if O_TIMM
 		if (result) {
-			php_sybase_finish_results(result);
+			php_sybase_finish_results(result TSRMLS_CC);
 		}
 		#endif
 		
@@ -1669,7 +1666,7 @@ PHP_FUNCTION(sybase_free_result)
 	if (result->last_retcode != CS_END_DATA && result->last_retcode != CS_END_RESULTS) {
 		/* php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Cancelling the rest of the results"); */
 		ct_cancel(NULL, result->sybase_ptr->cmd, CS_CANCEL_ALL);
-		php_sybase_finish_results(result);
+		php_sybase_finish_results(result TSRMLS_CC);
 	}
 	
 	zend_list_delete(Z_LVAL_PP(sybase_result_index));
