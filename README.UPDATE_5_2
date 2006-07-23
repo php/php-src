@@ -14,12 +14,6 @@ PHP 5.2 Update info or NEWS explained
   kind of error they behave as fatal errors just like in any PHP version prior
   to 5.2. Errors of this type are logged as 'Catchable fatal error'.
 
-- Removed ze1 compatibility mode. (Marcus)
-
-  The backwards compatibility support for the old PHP 4.x object handling that 
-  uses copying by default instead of the 5.x reference handling has been 
-  removed completley.
-
 - Added support for constructors in interfaces to force constructor signature
   checks in implementations. (Marcus)
   
