@@ -1,3 +1,14 @@
+2006-07-22  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      zend_API.c:
+      MFH:- Fixed bug #38183 (disable_classes=Foobar causes disabled class to be
+      called Foo)
+
+    * zend_API.c:
+      - Fixed bug #38183 (disable_classes=Foobar causes disabled class to be
+      called Foo)
+
 2006-07-21  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend.h:
