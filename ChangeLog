@@ -1,3 +1,121 @@
+2006-07-22  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/xmlreader/php_xmlreader.c:
+      Mark XMLReader methods with U.
+
+    * (PHP_5_2)
+      ext/standard/array.c:
+      Gah.
+
+    * (PHP_5_2)
+      ext/standard/array.c:
+      Matt should be happy now.
+
+2006-07-22  Stefan Esser  <php@nopiracy.de>
+
+    * (PHP_5_2)
+      NEWS
+      main/rfc1867.c
+      main/rfc1867.h:
+      Added RFC1867 fileupload processing hook.
+
+2006-07-22  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      Zend/zend_API.c
+      ZendEngine2/zend_API.c:
+      MFH:- Fixed bug #38183 (disable_classes=Foobar causes disabled class to be
+      called Foo)
+
+    * ZendEngine2/zend_API.c:
+      - Fixed bug #38183 (disable_classes=Foobar causes disabled class to be
+      called Foo)
+
+2006-07-22  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/json/config.w32:
+      enable by default
+
+2006-07-22  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_2)
+      ext/json/JSON_parser.c
+      ext/json/json.c:
+      more const keywording
+
+    * (PHP_5_2)
+      ext/gd/tests/dashedlines.phpt
+      ext/gd/tests/lines.phpt:
+      dont create images in the php source root. output them instead
+
+2006-07-22  Rob Richards  <rrichards@ctindustries.net>
+
+    * win32/build/Makefile:
+      enable native and unicode tests
+      add ntest and utest build targets
+
+    * run-tests.php:
+      force unicode off in native mode (-N switch)
+      swap usage of single and double quotes for win32 compat
+
+2006-07-22  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/filter/sanitizing_filters.c:
+      - MFB: fix compiler warnings
+
+    * (PHP_5_2)
+      ext/filter/sanitizing_filters.c:
+      - hopla, before I got more conflicts ;)
+        (fix compiler warnings with latest const char changes)
+
+2006-07-22  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/filter/filter.c
+      ext/filter/logical_filters.c
+      ext/filter/sanitizing_filters.c
+      ext/gd/tests/dashedlines.phpt
+      ext/gd/tests/lines.phpt
+      ext/json/JSON_parser.c
+      ext/json/json.c:
+      MFB
+
+    * (PHP_5_2)
+      ext/filter/filter.c
+      ext/filter/logical_filters.c
+      ext/filter/sanitizing_filters.c:
+      use const keyword where possible
+
+2006-07-22  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/filter/filter.c
+      ext/filter/sanitizing_filters.c
+      ext/filter/tests/032.phpt
+      ext/filter/tests/bug7586.phpt
+      ext/filter/tests/bug7733.phpt:
+      MFB:
+      - API Shake up #1, change input_get_args argument order
+      - silent compiler warnings
+      - update tests
+
+    * (PHP_5_2)
+      ext/filter/filter.c
+      ext/filter/sanitizing_filters.c:
+      - silent compiler warnings (char/unsigned char)
+
+    * (PHP_5_2)
+      ext/filter/filter.c:
+      - api shake #1, parse_pararameter has to be changed too
+
+    * (PHP_5_2)
+      ext/filter/filter.c
+      ext/filter/tests/032.phpt
+      ext/filter/tests/bug7586.phpt
+      ext/filter/tests/bug7733.phpt:
+      - API Shake up #1, use input type as first argument in input_get_args
+        (INPUT_GET/POST)
+
 2006-07-21  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ext/standard/array.c:
