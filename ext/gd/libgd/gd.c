@@ -2190,7 +2190,7 @@ void gdImageCopy (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, 
 				for (x = 0; (x < w); x++) {
 					int c = gdImageGetPixel (src, srcX + x, srcY + y);
 					if (c != src->transparent) {
-						gdImageSetPixel (dst, dstX + x, dstY + y, gdTrueColor(src->red[c], src->green[c], src->blue[c]));
+						gdImageSetPixel(dst, dstX + x, dstY + y, gdTrueColorAlpha(src->red[c], src->green[c], src->blue[c], src->alpha[c]));
 					}
 				}
 			}
