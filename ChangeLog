@@ -1,3 +1,45 @@
+2006-07-23  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/fdf/fdf.c:
+      fix another compile failure. (bjori: TEST before commit!)
+
+    * (PHP_5_2)
+      ext/sybase_ct/php_sybase_ct.c:
+      MFH: fix compile failure and remove unnecessary TSRMLS_FETCH calls
+
+    * ext/sybase_ct/php_sybase_ct.c:
+      fix compile failure and remove unnecessary TSRMLS_FETCH calls
+
+    * scripts/phpize.in:
+      typofix
+
+2006-07-23  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/libgd/gd.c
+      ext/gd/tests/38179.phpt:
+      - MFB: #38179, imagecopy, palette to truecolor must use alpha channel too
+
+    * ext/gd/tests/38179.phpt
+      ext/gd/tests/38179.phpt:
+      
+      file 38179.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd.c:
+      - #38179, imagecopy, palette to truecolor must use alpha channel too
+
+2006-07-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      - This was reintroduced by Zeev
+
+    * ext/standard/http.c:
+      - Tiny piece of unicode support
+
+    * ext/pdo_pgsql/pdo_pgsql.c:
+      -fix a bunch of warnings
+
 2006-07-22  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ext/xmlreader/php_xmlreader.c:
