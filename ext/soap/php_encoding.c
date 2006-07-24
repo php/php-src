@@ -1769,7 +1769,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 					if (Z_TYPE_P(data) == IS_OBJECT) {
 						char *class_name;
 
-						zend_unmangle_property_name_ex(str_key, str_key_len, &class_name, &prop_name);
+						zend_unmangle_property_name(str_key, str_key_len-1, &class_name, &prop_name);
 					} else {
 						prop_name = str_key;
 					}
