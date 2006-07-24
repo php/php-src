@@ -781,7 +781,7 @@ static void _property_string(string *str, zend_property_info *prop, char *prop_n
 			string_printf(str, "static ");
 		}
 
-		zend_unmangle_property_name(prop->name, &class_name, &prop_name);
+		zend_unmangle_property_name(prop->name, prop->name_length, &class_name, &prop_name);
 		string_printf(str, "$%s", prop_name);
 	}
 
@@ -1103,7 +1103,7 @@ static void reflection_property_factory(zend_class_entry *ce, zend_property_info
 	property_reference *reference;
 	char *class_name, *prop_name;
 
-	zend_unmangle_property_name(prop->name, &class_name, &prop_name);
+	zend_unmangle_property_name(prop->name, prop->name_length, &class_name, &prop_name);
 
 	if (!(prop->flags & ZEND_ACC_PRIVATE)) {
 		/* we have to seach the class hierarchy for this (implicit) public or protected property */
@@ -2733,7 +2733,7 @@ ZEND_METHOD(reflection_class, getDefaultProperties)
 
 			zend_hash_get_current_key_ex(&ce->default_properties, &key, &key_len, &num_index, 0, &pos);
 			zend_hash_move_forward_ex(&ce->default_properties, &pos);
-			zend_unmangle_property_name(key, &class_name, &prop_name);
+			zend_unmangle_property_name(key, key_len-1, &class_name, &prop_name);
 			if (class_name && class_name[0] != '*' && strcmp(class_name, ce->name)) {
 				/* filter privates from base classes */
 				continue;
@@ -3729,7 +3729,7 @@ ZEND_METHOD(reflection_property, __construct)
 	ZVAL_STRINGL(classname, ce->name, ce->name_length, 1);
 	zend_hash_update(Z_OBJPROP_P(object), "class", sizeof("class"), (void **) &classname, sizeof(zval *), NULL);
 	
-	zend_unmangle_property_name(property_info->name, &class_name, &prop_name);
+	zend_unmangle_property_name(property_info->name, property_info->name_length, &class_name, &prop_name);
 	MAKE_STD_ZVAL(propname);
 	ZVAL_STRING(propname, prop_name, 1);
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &propname, sizeof(zval *), NULL);

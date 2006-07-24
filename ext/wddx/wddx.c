@@ -529,7 +529,7 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 			if (zend_hash_get_current_key_ex(HASH_OF(obj), &key, &key_len, &idx, 0, NULL) == HASH_KEY_IS_STRING) {
 				char *class_name, *prop_name;
 				
-				zend_unmangle_property_name_ex(key, key_len, &class_name, &prop_name);
+				zend_unmangle_property_name(key, key_len-1, &class_name, &prop_name);
 				php_wddx_serialize_var(packet, *ent, prop_name, strlen(prop_name)+1 TSRMLS_CC);
 			} else {
 				key_len = sprintf(tmp_buf, "%ld", idx);
