@@ -33,7 +33,7 @@
 #include "zend_exceptions.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(dblib)
-static PHP_GINIT_FUNCTION(dblib)
+static PHP_GINIT_FUNCTION(dblib);
 
 zend_function_entry pdo_dblib_functions[] = {
 	{NULL, NULL, NULL}
@@ -67,7 +67,7 @@ zend_module_entry pdo_dblib_module_entry = {
 	PHP_RSHUTDOWN(pdo_dblib),
 	PHP_MINFO(pdo_dblib),
 	"1.0.1",
-	PHP_MODULE_GLOBASLS(dblib),
+	PHP_MODULE_GLOBALS(dblib),
 	PHP_GINIT(dblib),
 	NULL,
 	NULL,
