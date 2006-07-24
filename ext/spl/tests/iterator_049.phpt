@@ -6,14 +6,14 @@ SPL: ArrayIterator with NULL key
 <?php
 
 $ar = new ArrayIterator(array(NULL=>NULL));
-var_dump($ar);
+@var_dump($ar);
 var_dump($ar->getArrayCopy());
 
 ?>
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
-object(ArrayIterator)#1 (1) {
+object(ArrayIterator)#%d (1) {
   [""]=>
   NULL
 }
