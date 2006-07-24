@@ -33,7 +33,7 @@
 #include "zend_exceptions.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(dblib)
-static PHP_GINIT_FUNCTION(dblib)
+static PHP_GINIT_FUNCTION(dblib);
 
 zend_function_entry pdo_dblib_functions[] = {
 	{NULL, NULL, NULL}
