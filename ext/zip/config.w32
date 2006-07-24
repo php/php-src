@@ -1,0 +1,37 @@
+// $Id$
+// vim:ft=javascript
+
+ARG_ENABLE("zip", "ZIP support", "no");
+
+if (PHP_ZIP != "no") {
+
+	if (CHECK_HEADER_ADD_INCLUDE("zlib.h", "CFLAGS_ZIP", "..\\zlib;" + php_usual_include_suspects + ";" + PHP_ZIP)) {
+		if (PHP_ZLIB_SHARED) {
+			CHECK_LIB("zlib.lib", "zip", PHP_ZIP);
+		}
+		EXTENSION('zip', 'php_zip.c zip_stream.c');
+		ADD_SOURCES(configure_module_dirname + "/lib", "zip_add.c zip_error.c zip_fclose.c \
+                     zip_fread.c zip_open.c zip_source_filep.c  \
+                     zip_strerror.c zip_close.c zip_error_get.c \
+                     zip_file_error_get.c zip_free.c zip_rename.c \
+                     zip_source_free.c zip_unchange_all.c zip_delete.c \
+                     zip_error_get_sys_type.c zip_file_get_offset.c \
+                     zip_get_name.c zip_replace.c zip_source_function.c \
+                     zip_unchange.c zip_dirent.c zip_error_strerror.c \
+                     zip_file_strerror.c zip_get_num_files.c \
+                     zip_set_name.c zip_source_zip.c zip_unchange_data.c \
+                     zip_entry_free.c zip_error_to_str.c zip_fopen.c \
+                     zip_name_locate.c zip_source_buffer.c zip_stat.c \
+                     zip_entry_new.c zip_err_str.c zip_fopen_index.c \
+                     zip_new.c zip_source_file.c zip_stat_index.c \
+                     zip_get_archive_comment.c zip_get_file_comment.c \
+                     zip_set_archive_comment.c zip_set_file_comment.c \
+                     zip_unchange_archive.c zip_memdup.c", "zip");
+
+		AC_DEFINE('HAVE_ZLIB', 1);
+		AC_DEFINE('HAVE_ZIP', 1);
+	} else {
+		WARNING("zip not enabled; libraries and headers not found");
+	}
+}
+

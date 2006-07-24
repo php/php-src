@@ -1,0 +1,4 @@
+- add pattern support to extract or add files
+- stream to add or modify entries
+- crypt support for zip (read and write)
+- Iterators
