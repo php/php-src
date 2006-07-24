@@ -4551,7 +4551,7 @@ PHP_FUNCTION(array_combine)
 		 zend_hash_get_current_data_ex(Z_ARRVAL_P(values), (void **)&entry_values, &pos_values) == SUCCESS) {
 		if (Z_TYPE_PP(entry_keys) == IS_STRING) {
 			zval_add_ref(entry_values);
-			add_assoc_zval_ex(return_value, Z_STRVAL_PP(entry_keys), Z_STRLEN_PP(entry_keys), *entry_values);
+			add_assoc_zval_ex(return_value, Z_STRVAL_PP(entry_keys), Z_STRLEN_PP(entry_keys)+1, *entry_values);
 		} else if (Z_TYPE_PP(entry_keys) == IS_LONG) {
 			zval_add_ref(entry_values);
 			add_index_zval(return_value, Z_LVAL_PP(entry_keys), *entry_values);
