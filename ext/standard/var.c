@@ -76,8 +76,8 @@ static int php_object_property_dump(zval **zv, int num_args, va_list args, zend_
 	if (hash_key->nKeyLength ==0 ) { /* numeric key */
 		php_printf("%*c[%ld]=>\n", level + 1, ' ', hash_key->h);
 	} else { /* string key */
-		zend_unmangle_property_name(hash_key->arKey, hash_key->nKeyLength-1, &class_name, &prop_name);
-		if (class_name) {
+		int unmangle = zend_unmangle_property_name(hash_key->arKey, hash_key->nKeyLength-1, &class_name, &prop_name);
+		if (class_name && unmangle == SUCCESS) {
 			php_printf("%*c[\"%s", level + 1, ' ', prop_name);
 			if (class_name[0]=='*') {
 				ZEND_PUTS(":protected");
@@ -85,7 +85,8 @@ static int php_object_property_dump(zval **zv, int num_args, va_list args, zend_
 				ZEND_PUTS(":private");
 			}
 		} else {
-			php_printf("%*c[\"%s", level + 1, ' ', hash_key->arKey);
+			php_printf("%*c[\"", level + 1, ' ');
+			PHPWRITE(hash_key->arKey, hash_key->nKeyLength - 1);
 #ifdef ANDREY_0
 			ZEND_PUTS(":public");
 #endif
