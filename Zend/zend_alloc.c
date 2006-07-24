@@ -667,7 +667,7 @@ static long zend_mm_find_leaks(zend_mm_segment *segment, zend_mm_block *b)
 			} else if (p->magic == MEM_BLOCK_CACHED) {
 				/* skip it */
 #endif
-			} else {
+			} else if (p->magic != MEM_BLOCK_LEAK) {
 			    zend_mm_panic("zend_mm_heap corrupted");
 			}
 		}
