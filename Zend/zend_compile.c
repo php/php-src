@@ -2252,7 +2252,7 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 						if (Z_TYPE_PP(new_prop) != IS_NULL && Z_TYPE_PP(prop) != IS_NULL) {
 							zstr prop_name, tmp;
 
-							zend_u_unmangle_property_name(utype, child_info->name, &tmp, &prop_name);
+							zend_u_unmangle_property_name(utype, child_info->name, child_info->name_length, &tmp, &prop_name);
 							zend_error(E_COMPILE_ERROR, "Cannot change initial value of property static protected %v::$%v in class %v",
 								parent_ce->name, prop_name, ce->name);
 						}
@@ -3077,36 +3077,79 @@ ZEND_API void zend_u_mangle_property_name(zstr *dest, int *dest_length, zend_uch
 	}
 }
 
-ZEND_API void zend_unmangle_property_name(char *mangled_property, char **class_name, char **prop_name)
+static int zend_strnlen(const char* s, int maxlen)
 {
-	*prop_name = *class_name = NULL;
+	int len = 0;
+	while (*s++ && maxlen--) len++;
+	return len;
+}
+
+static int zend_u_strnlen(const UChar* s, int maxlen)
+{
+	int len = 0;
+	while (*s++ && maxlen--) len++;
+	return len;
+}
+
+ZEND_API int zend_unmangle_property_name(char *mangled_property, int len, char **class_name, char **prop_name)
+{
+	int class_name_len;
+
+	*class_name = NULL;
 
 	if (mangled_property[0]!=0) {
 		*prop_name = mangled_property;
-		return;
+		return SUCCESS;
+	}
+	if (len < 3) {
+		zend_error(E_NOTICE, "Illegal member variable name");
+		*prop_name = mangled_property;
+		return FAILURE;
 	}
 
+	class_name_len = zend_strnlen(mangled_property+1, --len - 1) + 1;
+	if (class_name_len >= len || mangled_property[class_name_len]!=0) {
+		zend_error(E_NOTICE, "Corrupt member variable name");
+		*prop_name = mangled_property;
+		return FAILURE;
+	}
 	*class_name = mangled_property+1;
-	*prop_name = (*class_name)+strlen(*class_name)+1;
+	*prop_name = (*class_name)+class_name_len;
+	return SUCCESS;
 }
 
-ZEND_API void zend_u_unmangle_property_name(zend_uchar type, zstr mangled_property, zstr *class_name, zstr *prop_name)
+ZEND_API int zend_u_unmangle_property_name(zend_uchar type, zstr mangled_property, int len, zstr *class_name, zstr *prop_name)
 {
 	if (type == IS_UNICODE) {
-		prop_name->v = class_name->v = NULL;
+		int class_name_len;
+
+		class_name->v = NULL;
 
 		if ((mangled_property.u)[0]!=0) {
 			*prop_name = mangled_property;
-			return;
+			return SUCCESS;
+		}
+		if (len < 3) {
+			zend_error(E_NOTICE, "Illegal member variable name");
+			*prop_name = mangled_property;
+			return FAILURE;
+		}
+
+		class_name_len = zend_u_strnlen(mangled_property.u+1, --len - 1) + 1;
+		if (class_name_len >= len || mangled_property.u[class_name_len]!=0) {
+			zend_error(E_NOTICE, "Corrupt member variable name");
+			*prop_name = mangled_property;
+			return FAILURE;
 		}
 
 		class_name->u = mangled_property.u + 1;
-		prop_name->u = class_name->u + u_strlen(class_name->u)+1;
+		prop_name->u = class_name->u + class_name_len+1;
 		if (class_name->u[0] == '*') {
 			class_name->s = "*";
 		}
+		return SUCCESS;
 	} else {
-		zend_unmangle_property_name(mangled_property.s, &class_name->s, &prop_name->s);
+		return zend_unmangle_property_name(mangled_property.s, len, &class_name->s, &prop_name->s);
 	}
 }
 

@@ -246,13 +246,13 @@ ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce
 }
 
 
-ZEND_API int zend_check_property_access(zend_object *zobj, zend_uchar utype, zstr prop_info_name TSRMLS_DC)
+ZEND_API int zend_check_property_access(zend_object *zobj, zend_uchar utype, zstr prop_info_name, int prop_info_name_len TSRMLS_DC)
 {
 	zend_property_info *property_info;
 	zstr class_name, prop_name;
 	zval member;
 
-	zend_u_unmangle_property_name(utype, prop_info_name, &class_name, &prop_name);
+	zend_u_unmangle_property_name(utype, prop_info_name, prop_info_name_len, &class_name, &prop_name);
 	if (utype == IS_UNICODE) {
 		ZVAL_UNICODE(&member, prop_name.u, 0);
 	} else {

@@ -548,10 +548,10 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce);
 void zend_class_add_ref(zend_class_entry **ce);
 
 ZEND_API void zend_mangle_property_name(char **dest, int *dest_length, char *src1, int src1_length, char *src2, int src2_length, int internal);
-ZEND_API void zend_unmangle_property_name(char *mangled_property, char **prop_name, char **class_name);
+ZEND_API int zend_unmangle_property_name(char *mangled_property, int len, char **prop_name, char **class_name);
 
 ZEND_API void zend_u_mangle_property_name(zstr *dest, int *dest_length, zend_uchar type, zstr src1, int src1_length, zstr src2, int src2_length, int internal);
-ZEND_API void zend_u_unmangle_property_name(zend_uchar type, zstr mangled_property, zstr *prop_name, zstr *class_name);
+ZEND_API int zend_u_unmangle_property_name(zend_uchar type, zstr mangled_property, int len, zstr *prop_name, zstr *class_name);
 
 
 #define ZEND_FUNCTION_DTOR (void (*)(void *)) zend_function_dtor

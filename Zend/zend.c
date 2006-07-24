@@ -239,7 +239,7 @@ str_type:
 				if (is_object) {
 					zstr prop_name, class_name;
 
-					zend_u_unmangle_property_name(ztype, string_key, &class_name, &prop_name);
+					zend_u_unmangle_property_name(ztype, string_key, str_len - 1, &class_name, &prop_name);
 
 					if (class_name.v) {
 						if (class_name.s[0]=='*') {
