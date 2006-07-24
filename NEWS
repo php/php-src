@@ -104,6 +104,8 @@ PHP                                                                        NEWS
 - Fixed handling of extremely long paths inside tempnam() function. (Ilia)
 - Fixed bug #38183 (disable_classes=Foobar causes disabled class to be
   called Foo). (Jani)
+- Fixed bug #38146 (Cannot use array returned from foo::__get('bar') in write
+  context). (Dmitry)
 - Fixed bug #38125 (undefined reference to spl_dual_it_free_storage). (Marcus)
 - Fixed bug #38086 (stream_copy_to_stream() returns 0 when maxlen is bigger 
   than the actual length). (Tony)
