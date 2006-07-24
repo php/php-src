@@ -149,17 +149,24 @@ static int php_object_property_dump(zval **zv, int num_args, va_list args, zend_
 	} else { /* string key */
 		int is_unicode = hash_key->type == IS_UNICODE;
 
-		zend_u_unmangle_property_name(hash_key->type, hash_key->arKey, hash_key->nKeyLength-1, &class_name, &prop_name);
+		int unmangle = zend_u_unmangle_property_name(hash_key->type, hash_key->arKey, hash_key->nKeyLength-1, &class_name, &prop_name);
 		php_printf("%*c[", level + 1, ' ');
 
-		if (class_name.s) {
+		if (class_name.s && unmangle == SUCCESS) {
 			if (class_name.s[0]=='*') {
 				php_printf("%s\"%R\":protected", is_unicode ? "u" : "", hash_key->type, prop_name);
 			} else {
 				php_printf("%s\"%R\":%s\"%R\":private", is_unicode ? "u" : "", hash_key->type, prop_name, is_unicode ? "u" : "", hash_key->type, class_name);
 			}
 		} else {
-			php_printf("%s\"%R\"", is_unicode ? "u" : "", hash_key->type, prop_name);
+			if (is_unicode) {
+				php_printf("u");
+				php_var_dump_unicode(hash_key->arKey.u, hash_key->nKeyLength-1, verbose, "\"", 0 TSRMLS_CC);
+			} else {
+				php_printf("\"");
+				PHPWRITE(hash_key->arKey.s, hash_key->nKeyLength - 1);
+				php_printf("\"");
+			}
 		}
 		ZEND_PUTS("]=>\n");
 	}
