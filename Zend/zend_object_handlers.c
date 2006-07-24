@@ -245,13 +245,13 @@ ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce
 }
 
 
-ZEND_API int zend_check_property_access(zend_object *zobj, char *prop_info_name TSRMLS_DC)
+ZEND_API int zend_check_property_access(zend_object *zobj, char *prop_info_name, int prop_info_name_len TSRMLS_DC)
 {
 	zend_property_info *property_info;
 	char *class_name, *prop_name;
 	zval member;
 
-	zend_unmangle_property_name(prop_info_name, &class_name, &prop_name);
+	zend_unmangle_property_name(prop_info_name, prop_info_name_len, &class_name, &prop_name);
 	ZVAL_STRING(&member, prop_name, 0);
 	property_info = zend_get_property_info(zobj->ce, &member, 1 TSRMLS_CC);
 	if (!property_info) {
