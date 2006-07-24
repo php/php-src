@@ -2918,7 +2918,7 @@ ZEND_API int zend_unmangle_property_name(char *mangled_property, int len, char *
 		*prop_name = mangled_property;
 		return SUCCESS;
 	}
-	if (len < 3) {
+	if (len < 3 || mangled_property[1]==0) {
 		zend_error(E_NOTICE, "Illegal member variable name");
 		*prop_name = mangled_property;
 		return FAILURE;
