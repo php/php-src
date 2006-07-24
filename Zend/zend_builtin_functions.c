@@ -768,7 +768,7 @@ static void add_class_vars(zend_class_entry *ce, HashTable *properties, zval *re
 
 			key_type = zend_hash_get_current_key_ex(properties, &key, &key_len, &num_index, 0, &pos);
 			zend_hash_move_forward_ex(properties, &pos);
-			zend_u_unmangle_property_name(key_type, key, &class_name, &prop_name);
+			zend_u_unmangle_property_name(key_type, key, key_len-1, &class_name, &prop_name);
 			if (class_name.v) {
 				/* UTODO: Fix this to support Unicode */
 				if (class_name.s[0] != '*' && strcmp(class_name.s, ce->name.s)) {
@@ -862,7 +862,7 @@ ZEND_FUNCTION(get_object_vars)
 
 	while (zend_hash_get_current_data_ex(properties, (void **) &value, &pos) == SUCCESS) {
 		if (zend_hash_get_current_key_ex(properties, &key, &key_len, &num_index, 0, &pos) == (UG(unicode)?HASH_KEY_IS_UNICODE:HASH_KEY_IS_STRING)) {
-			zend_u_unmangle_property_name(UG(unicode)?IS_UNICODE:IS_STRING, key, &class_name, &prop_name);
+			zend_u_unmangle_property_name(UG(unicode)?IS_UNICODE:IS_STRING, key, key_len-1, &class_name, &prop_name);
 			if (class_name.v == NULL) {
 				/* Not separating references */
 				(*value)->refcount++;
@@ -1027,7 +1027,7 @@ ZEND_FUNCTION(property_exists)
 		if (property_info->flags & ZEND_ACC_PUBLIC) {
 			RETURN_TRUE;
 		}
-		zend_u_unmangle_property_name(Z_TYPE_PP(property), property_info->name, &class_name, &prop_name);
+		zend_u_unmangle_property_name(Z_TYPE_PP(property), property_info->name, property_info->name_length, &class_name, &prop_name);
 		/* UTODO: Fix this??? */
 		if (class_name.s[0] ==  '*') {
 			if (instanceof_function(EG(scope), ce TSRMLS_CC)) {
