@@ -149,7 +149,7 @@ static int php_object_property_dump(zval **zv, int num_args, va_list args, zend_
 	} else { /* string key */
 		int is_unicode = hash_key->type == IS_UNICODE;
 
-		zend_u_unmangle_property_name(hash_key->type, hash_key->arKey, &class_name, &prop_name);
+		zend_u_unmangle_property_name(hash_key->type, hash_key->arKey, hash_key->nKeyLength-1, &class_name, &prop_name);
 		php_printf("%*c[", level + 1, ' ');
 
 		if (class_name.s) {
@@ -345,7 +345,7 @@ static int zval_object_property_dump(zval **zv, int num_args, va_list args, zend
 	} else { /* string key */
 		int is_unicode = hash_key->type == IS_UNICODE;
 
-		zend_u_unmangle_property_name(hash_key->type, hash_key->arKey, &class_name, &prop_name);
+		zend_u_unmangle_property_name(hash_key->type, hash_key->arKey, hash_key->nKeyLength-1, &class_name, &prop_name);
 		php_printf("%*c[", level + 1, ' ');
 
 		if (class_name.s) {
@@ -506,7 +506,7 @@ static int php_object_element_export(zval **zv, int num_args, va_list args, zend
 
 	if (hash_key->nKeyLength != 0) {
 		php_printf("%*c", level + 1, ' ');
-		zend_u_unmangle_property_name(hash_key->type, hash_key->arKey, &class_name, &prop_name);
+		zend_u_unmangle_property_name(hash_key->type, hash_key->arKey, hash_key->nKeyLength-1, &class_name, &prop_name);
 		php_printf(" '%R' => ", hash_key->type, prop_name);
 		php_var_export(zv, level + 2 TSRMLS_CC);
 		PUTS (",\n");

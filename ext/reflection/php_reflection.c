@@ -791,7 +791,7 @@ static void _property_string(string *str, zend_property_info *prop, char *sz_pro
 			string_printf(str, "static ");
 		}
 
-		zend_u_unmangle_property_name(UG(unicode)?IS_UNICODE:IS_STRING, prop->name, &class_name, &prop_name);
+		zend_u_unmangle_property_name(UG(unicode)?IS_UNICODE:IS_STRING, prop->name, prop->name_length, &class_name, &prop_name);
 		string_printf(str, "$%v", prop_name);
 	}
 
@@ -1115,7 +1115,7 @@ static void reflection_property_factory(zend_class_entry *ce, zend_property_info
 	zstr class_name, prop_name;
 	zend_uchar utype = UG(unicode) ? IS_UNICODE : IS_STRING;
 
-	zend_u_unmangle_property_name(utype, prop->name, &class_name, &prop_name);
+	zend_u_unmangle_property_name(utype, prop->name, prop->name_length, &class_name, &prop_name);
 	
 	if (!(prop->flags & ZEND_ACC_PRIVATE)) {
 		/* we have to seach the class hierarchy for this (implicit) public or protected property */
@@ -2755,7 +2755,7 @@ ZEND_METHOD(reflection_class, getDefaultProperties)
 
 			zend_hash_get_current_key_ex(&ce->default_properties, &key, &key_len, &num_index, 0, &pos);
 			zend_hash_move_forward_ex(&ce->default_properties, &pos);
-			zend_u_unmangle_property_name(UG(unicode)?IS_UNICODE:IS_STRING, key, &class_name, &prop_name);
+			zend_u_unmangle_property_name(UG(unicode)?IS_UNICODE:IS_STRING, key, key_len-1, &class_name, &prop_name);
 			/* FIXME: Unicode support??? */
 			if (class_name.s && class_name.s[0] != '*' && strcmp(class_name.s, ce->name.s)) {
 				/* filter privates from base classes */
@@ -3770,7 +3770,7 @@ ZEND_METHOD(reflection_property, __construct)
 	ZVAL_TEXTL(classname, ce->name, ce->name_length, 1);
 	zend_hash_update(Z_OBJPROP_P(object), "class", sizeof("class"), (void **) &classname, sizeof(zval *), NULL);
 	
-	zend_u_unmangle_property_name(UG(unicode)?IS_UNICODE:IS_STRING, property_info->name, &class_name, &prop_name);
+	zend_u_unmangle_property_name(UG(unicode)?IS_UNICODE:IS_STRING, property_info->name, property_info->name_length, &class_name, &prop_name);
 	MAKE_STD_ZVAL(propname);
 	ZVAL_TEXT(propname, prop_name, 1);
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &propname, sizeof(zval *), NULL);
