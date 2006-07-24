@@ -40,3 +40,12 @@ PHP 5.2 Update info or NEWS explained
   no longer work for a file with the name 'data' accessed without any path. IF
   you need to do so you have to prefix the filename with the "file:" protocol.
   For the functionality itself look here http://www.faqs.org/rfcs/rfc2397.html.
+
+- Added allow_url_include ini directive to complement allow_url_fopen. (Rasmus)
+
+  With this option one can now distinguish between standard file operations on
+  remote files and inclusion of remote files.  While the former is usually
+  desired, the latter implies security risks if used naivly.  Starting with
+  PHP-5.2 it is now possible to allow standard file operations while
+  dissalowing inclusion of remote files, which will also be the default
+  configuration.
