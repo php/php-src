@@ -798,7 +798,7 @@ PHP_FUNCTION(input_filters_list)
 
 	array_init(return_value);
 	for (i = 0; i < size; ++i) {
-		add_next_index_string(return_value, filter_list[i].name, 1);
+		add_next_index_string(return_value, (char *)filter_list[i].name, 1);
 	}
 }
 /* }}} */
