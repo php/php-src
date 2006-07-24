@@ -71,11 +71,11 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 			zstr tmp;
 
 			zend_object *zobj = zend_objects_get_address(type TSRMLS_CC);
-			if (zend_check_property_access(zobj, IS_STRING, key TSRMLS_CC) != SUCCESS) {
+			if (zend_check_property_access(zobj, IS_STRING, key, key_len TSRMLS_CC) != SUCCESS) {
 				/* private or protected property access outside of the class */
 				continue;
 			}
-			zend_u_unmangle_property_name(key_type, key, &tmp, &key);
+			zend_u_unmangle_property_name(key_type, key, key_len, &tmp, &key);
 			key_len = strlen(key.s);		
 		}
 
