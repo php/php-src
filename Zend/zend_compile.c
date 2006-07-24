@@ -2116,7 +2116,7 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 					if (zend_hash_find(&ce->default_static_members, child_info->name, child_info->name_length+1, (void**)&new_prop) == SUCCESS) {
 						if (Z_TYPE_PP(new_prop) != IS_NULL && Z_TYPE_PP(prop) != IS_NULL) {
 							char *prop_name, *tmp;
-							zend_unmangle_property_name_ex(child_info->name, child_info->name_length, &tmp, &prop_name);
+							zend_unmangle_property_name(child_info->name, child_info->name_length, &tmp, &prop_name);
 						
 							zend_error(E_COMPILE_ERROR, "Cannot change initial value of property static protected %s::$%s in class %s", 
 								parent_ce->name, prop_name, ce->name);
@@ -2901,29 +2901,38 @@ ZEND_API void zend_mangle_property_name(char **dest, int *dest_length, char *src
 }
 
 
-ZEND_API void zend_unmangle_property_name_ex(char *mangled_property, int mangled_property_len, char **class_name, char **prop_name)
+static int zend_strnlen(const char* s, int maxlen)
 {
-	*prop_name = *class_name = NULL;
-
-	if (mangled_property_len < 2) { /* do not try to unmangle empty strings */
-		*prop_name = mangled_property;
-		return;
-	}
-	
-	zend_unmangle_property_name(mangled_property, class_name, prop_name);
+	int len = 0;
+	while (*s++ && maxlen--) len++;
+	return len;
 }
 
-ZEND_API void zend_unmangle_property_name(char *mangled_property, char **class_name, char **prop_name)
+ZEND_API int zend_unmangle_property_name(char *mangled_property, int len, char **class_name, char **prop_name)
 {
-	*prop_name = *class_name = NULL;
+	int class_name_len;
+
+	*class_name = NULL;
 
 	if (mangled_property[0]!=0) {
 		*prop_name = mangled_property;
-		return;
+		return SUCCESS;
+	}
+	if (len < 3) {
+		zend_error(E_NOTICE, "Illegal member variable name");
+		*prop_name = mangled_property;
+		return FAILURE;
 	}
 
+	class_name_len = zend_strnlen(mangled_property+1, --len - 1) + 1;
+	if (class_name_len >= len || mangled_property[class_name_len]!=0) {
+		zend_error(E_NOTICE, "Corrupt member variable name");
+		*prop_name = mangled_property;
+		return FAILURE;
+	}
 	*class_name = mangled_property+1;
-	*prop_name = (*class_name)+strlen(*class_name)+1;
+	*prop_name = (*class_name)+class_name_len;
+	return SUCCESS;
 }
 
 void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_type TSRMLS_DC)
