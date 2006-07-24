@@ -65,6 +65,7 @@ PHP                                                                        NEWS
   . Added readInnerXML(), readOuterXML(), readString(), setSchema(). (2.6.20+)
   . Changed to passing libxml options when loading reader.
 
+- Added Zip Archive extension. (Pierre)
 - Added RFC1867 fileupload processing hook. (Stefan E.)
 - Added JSON and Filter extensions. (Derick, Rasmus)
 - Added error messages to disk_free_space() and disk_total_space()
@@ -104,6 +105,8 @@ PHP                                                                        NEWS
 - Fixed handling of extremely long paths inside tempnam() function. (Ilia)
 - Fixed bug #38183 (disable_classes=Foobar causes disabled class to be
   called Foo). (Jani)
+- Fixed bug #38179 (imagecopy from a palette to a truecolor image loose
+  alpha channel) (Pierre)
 - Fixed bug #38146 (Cannot use array returned from foo::__get('bar') in write
   context). (Dmitry)
 - Fixed bug #38125 (undefined reference to spl_dual_it_free_storage). (Marcus)
