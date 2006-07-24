@@ -425,7 +425,7 @@ static void php_xmlreader_string_arg(INTERNAL_FUNCTION_PARAMETERS, xmlreader_rea
 	char *name;
 	UConverter *orig_runtime_conv;
 
-	orig_runtime_conv = ZEND_U_CONVERTER(UG(runtime_encoding_conv));
+	orig_runtime_conv = UG(runtime_encoding_conv);
 	UG(runtime_encoding_conv) = UG(utf8_conv);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
@@ -632,7 +632,7 @@ PHP_METHOD(xmlreader, getAttributeNs)
 	char *name, *ns_uri;
 	UConverter *orig_runtime_conv;
 
-	orig_runtime_conv = ZEND_U_CONVERTER(UG(runtime_encoding_conv));
+	orig_runtime_conv = UG(runtime_encoding_conv);
 	UG(runtime_encoding_conv) = UG(utf8_conv);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &name, &name_len, &ns_uri, &ns_uri_len) == FAILURE) {
@@ -718,7 +718,7 @@ PHP_METHOD(xmlreader, moveToAttribute)
 	char *name;
 	UConverter *orig_runtime_conv;
 
-	orig_runtime_conv = ZEND_U_CONVERTER(UG(runtime_encoding_conv));
+	orig_runtime_conv = UG(runtime_encoding_conv);
 	UG(runtime_encoding_conv) = UG(utf8_conv);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
@@ -785,7 +785,7 @@ PHP_METHOD(xmlreader, moveToAttributeNs)
 	char *name, *ns_uri;
 	UConverter *orig_runtime_conv;
 
-	orig_runtime_conv = ZEND_U_CONVERTER(UG(runtime_encoding_conv));
+	orig_runtime_conv = UG(runtime_encoding_conv);
 	UG(runtime_encoding_conv) = UG(utf8_conv);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &name, &name_len, &ns_uri, &ns_uri_len) == FAILURE) {
@@ -873,7 +873,7 @@ PHP_METHOD(xmlreader, next)
 	char *name = NULL;
 	UConverter *orig_runtime_conv;
 
-	orig_runtime_conv = ZEND_U_CONVERTER(UG(runtime_encoding_conv));
+	orig_runtime_conv = UG(runtime_encoding_conv);
 	UG(runtime_encoding_conv) = UG(utf8_conv);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
@@ -926,7 +926,7 @@ PHP_METHOD(xmlreader, open)
 	xmlTextReaderPtr reader = NULL;
 	UConverter *orig_runtime_conv;
 
-	orig_runtime_conv = ZEND_U_CONVERTER(UG(runtime_encoding_conv));
+	orig_runtime_conv = UG(runtime_encoding_conv);
 	UG(runtime_encoding_conv) = UG(utf8_conv);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|s!l", &source, &source_len, &source_type, &encoding, &encoding_len, &options) == FAILURE) {
