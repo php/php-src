@@ -126,17 +126,22 @@ There are a few tuning parameters that can be tweaked to control the
 performance of FastCGI PHP. The following are environment variables that can
 be set before running the PHP binary:
 
-PHP_FCGI_CHILDREN  (default value: 8)
+PHP_FCGI_CHILDREN  (default value: 0)
 
 This controls how many child processes the PHP process spawns. When the
 fastcgi starts, it creates a number of child processes which handle one
-page request at a time. So by default, you will be able to handle 8
-concurrent PHP page requests. Further requests will be queued.
-Increasing this number will allow for better concurrency, especially if you
-have pages that take a significant time to create, or supply a lot of data
-(e.g. downloading huge files via PHP). On the other hand, having more
-processes running will use more RAM, and letting too many PHP pages be
-generated concurrently will mean that each request will be slow.
+page request at a time. Value 0 means that PHP willnot start additional
+processes and main process will handle FastCGI requests by itself. Note that
+this process may die (because of PHP_FCGI_MAX_REQUESTS) and it willnot
+respawned automatic. Values 1 and above force PHP start additioanl processes
+those will handle requests. The main process will restart children in case of
+their death. So by default, you will be able to handle 1 concurrent PHP page
+requests. Further requests will be queued. Increasing this number will allow
+for better concurrency, especially if you have pages that take a significant
+time to create, or supply a lot of data (e.g. downloading huge files via PHP).
+On the other hand, having more processes running will use more RAM, and letting
+too many PHP pages be generated concurrently will mean that each request will
+be slow.
 
 PHP_FCGI_MAX_REQUESTS (default value: 500)
 
