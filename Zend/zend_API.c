@@ -2212,7 +2212,7 @@ ZEND_API void zend_check_magic_method_implementation(zend_class_entry *ce, zend_
 
 	if (lcname_len == sizeof(ZEND_DESTRUCTOR_FUNC_NAME) - 1 &&
 	    ZEND_U_EQUAL(utype, lcname, lcname_len, ZEND_DESTRUCTOR_FUNC_NAME, sizeof(ZEND_DESTRUCTOR_FUNC_NAME)-1) && fptr->common.num_args != 0) {
-		zend_error(error_type, "Destuctor %v::%s() cannot take arguments", ce->name, ZEND_DESTRUCTOR_FUNC_NAME);
+		zend_error(error_type, "Destructor %v::%s() cannot take arguments", ce->name, ZEND_DESTRUCTOR_FUNC_NAME);
 	} else if (lcname_len == sizeof(ZEND_CLONE_FUNC_NAME) - 1 &&
 	    ZEND_U_EQUAL(utype, lcname, lcname_len, ZEND_CLONE_FUNC_NAME, sizeof(ZEND_CLONE_FUNC_NAME)-1) && fptr->common.num_args != 0) {
 		zend_error(error_type, "Method %v::%s() cannot accept any arguments", ce->name, ZEND_CLONE_FUNC_NAME);
