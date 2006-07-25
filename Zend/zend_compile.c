@@ -3143,7 +3143,7 @@ ZEND_API int zend_u_unmangle_property_name(zend_uchar type, zstr mangled_propert
 		}
 
 		class_name->u = mangled_property.u + 1;
-		prop_name->u = class_name->u + class_name_len+1;
+		prop_name->u = class_name->u + class_name_len;
 		if (class_name->u[0] == '*') {
 			class_name->s = "*";
 		}
