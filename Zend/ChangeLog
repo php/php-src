@@ -1,3 +1,48 @@
+2006-07-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      zend_compile.c:
+      - MFH Yet another problematic case with mangled properties
+
+    * zend_compile.c:
+      - Yet another rproblematic case with mangled properties
+
+    * (PHP_5_2)
+      zend.c
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_compile.h
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_vm_def.h
+      zend_vm_execute.h:
+      - Better fix for #34505 and related, drop zend_unmangle_property_name_ex()
+
+    * zend.c
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_compile.h
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_vm_def.h
+      zend_vm_execute.h:
+      - Fix for #34505 and repated (improved version of what is in 5.2, 5.1)
+
+2006-07-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_alloc.c
+      zend_alloc.c:
+      Fixed memory leaks detection
+
+    * tests/bug38146.phpt:
+      Test for bug #38146 (Cannot use array returned from foo::__get('bar') in
+      write context)
+
+    * tests/bug38146.phpt
+      tests/bug38146.phpt:
+      
+      file bug38146.phpt was initially added on branch PHP_5_2.
+
 2006-07-22  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * (PHP_5_2)

@@ -1,3 +1,250 @@
+2006-07-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      ext/standard/var.c:
+      - MFH Correctly handle binary proeprty names which are not mangled
+
+    * ext/spl/tests/iterator_049.phpt
+      ext/spl/tests/iterator_049b.phpt
+      ext/spl/tests/iterator_049b.phpt:
+      - Update tests
+
+    * ext/standard/var.c:
+      - Correctly handle binary proeprty names which are not mangled
+
+    * (PHP_5_2)
+      ZendEngine2/zend_compile.c:
+      - MFH Yet another problematic case with mangled properties
+
+    * ZendEngine2/zend_compile.c:
+      - Yet another rproblematic case with mangled properties
+
+2006-07-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      back to dev
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      5.2.0RC1
+
+2006-07-24  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - #38179 and zip entry
+
+2006-07-24  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_5_2)
+      ext/standard/array.c:
+      +1 for keys
+
+2006-07-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      ext/reflection/php_reflection.c
+      ext/soap/php_encoding.c
+      ext/standard/http.c
+      ext/standard/var.c
+      ext/wddx/wddx.c:
+      - MFH zend_unmangle_property_name(), drop zend_unmangle_property_name_ex()
+
+    * (PHP_5_2)
+      ZendEngine2/zend.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      - Better fix for #34505 and related, drop zend_unmangle_property_name_ex()
+
+    * ext/reflection/php_reflection.c
+      ext/soap/php_encoding.c
+      ext/standard/http.c
+      ext/standard/var.c
+      ext/wddx/wddx.c:
+      - zend_(u_)_unmangle_property_name() has changed
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      - Fix for #34505 and repated (improved version of what is in 5.2, 5.1)
+
+2006-07-24  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xmlreader/php_xmlreader.c:
+      fix segfault
+
+2006-07-24  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/lib/zip_close.c:
+      - missing file
+
+    * ext/zip/lib/zip_close.c
+      ext/zip/lib/zip_close.c:
+      
+      file zip_close.c was initially added on branch PHP_5_2.
+
+    * (php_5_2_0RC1)
+      ext/zip/CREDITS
+      ext/zip/TODO
+      ext/zip/config.m4
+      ext/zip/config.w32
+      ext/zip/package.xml
+      ext/zip/php_zip.c
+      ext/zip/php_zip.h
+      ext/zip/zip_stream.c
+      ext/zip/examples/comment.php
+      ext/zip/examples/create.php
+      ext/zip/examples/dir.php
+      ext/zip/examples/extract.php
+      ext/zip/examples/extractAll.php
+      ext/zip/examples/fopen.php
+      ext/zip/examples/get_set_comments.php
+      ext/zip/examples/im.php
+      ext/zip/examples/odt.php
+      ext/zip/examples/oldapi.php
+      ext/zip/examples/test.odt
+      ext/zip/examples/test.zip
+      ext/zip/examples/test1.zip
+      ext/zip/examples/test_im.zip
+      ext/zip/examples/test_with_comment.zip
+      ext/zip/examples/too.php
+      ext/zip/lib/mkstemp.c
+      ext/zip/lib/unistd.h
+      ext/zip/lib/zip.h
+      ext/zip/lib/zip.h.orig
+      ext/zip/lib/zip_add.c
+      ext/zip/lib/zip_delete.c
+      ext/zip/lib/zip_dirent.c
+      ext/zip/lib/zip_entry_free.c
+      ext/zip/lib/zip_entry_new.c
+      ext/zip/lib/zip_err_str.c
+      ext/zip/lib/zip_error.c
+      ext/zip/lib/zip_error_get.c
+      ext/zip/lib/zip_error_get_sys_type.c
+      ext/zip/lib/zip_error_strerror.c
+      ext/zip/lib/zip_error_to_str.c
+      ext/zip/lib/zip_fclose.c
+      ext/zip/lib/zip_file_error_get.c
+      ext/zip/lib/zip_file_get_offset.c
+      ext/zip/lib/zip_file_strerror.c
+      ext/zip/lib/zip_fopen.c
+      ext/zip/lib/zip_fopen_index.c
+      ext/zip/lib/zip_fread.c
+      ext/zip/lib/zip_free.c
+      ext/zip/lib/zip_get_archive_comment.c
+      ext/zip/lib/zip_get_file_comment.c
+      ext/zip/lib/zip_get_name.c
+      ext/zip/lib/zip_get_num_files.c
+      ext/zip/lib/zip_memdup.c
+      ext/zip/lib/zip_name_locate.c
+      ext/zip/lib/zip_new.c
+      ext/zip/lib/zip_open.c
+      ext/zip/lib/zip_rename.c
+      ext/zip/lib/zip_replace.c
+      ext/zip/lib/zip_set_archive_comment.c
+      ext/zip/lib/zip_set_file_comment.c
+      ext/zip/lib/zip_set_name.c
+      ext/zip/lib/zip_source_buffer.c
+      ext/zip/lib/zip_source_file.c
+      ext/zip/lib/zip_source_filep.c
+      ext/zip/lib/zip_source_free.c
+      ext/zip/lib/zip_source_function.c
+      ext/zip/lib/zip_source_zip.c
+      ext/zip/lib/zip_stat.c
+      ext/zip/lib/zip_stat_index.c
+      ext/zip/lib/zip_strerror.c
+      ext/zip/lib/zip_unchange.c
+      ext/zip/lib/zip_unchange_all.c
+      ext/zip/lib/zip_unchange_archive.c
+      ext/zip/lib/zip_unchange_data.c
+      ext/zip/lib/zip_win32.h
+      ext/zip/lib/zipint.h
+      ext/zip/tests/001.phpt
+      ext/zip/tests/binarynull.zip
+      ext/zip/tests/bug7214.phpt
+      ext/zip/tests/bug7658.odt
+      ext/zip/tests/bug7658.phpt
+      ext/zip/tests/bug7658.xml
+      ext/zip/tests/bug8009.phpt
+      ext/zip/tests/bug8009.zip
+      ext/zip/tests/oo_addfile.phpt
+      ext/zip/tests/oo_close.phpt
+      ext/zip/tests/oo_delete.phpt
+      ext/zip/tests/oo_ext_zip.phpt
+      ext/zip/tests/oo_namelocate.phpt
+      ext/zip/tests/oo_open.phpt
+      ext/zip/tests/oo_rename.phpt
+      ext/zip/tests/test.zip
+      ext/zip/tests/test_procedural.zip
+      ext/zip/tests/utils.php
+      ext/zip/tests/zip_close.phpt
+      ext/zip/tests/zip_entry_compressedsize.phpt
+      ext/zip/tests/zip_entry_compressionmethod.phpt
+      ext/zip/tests/zip_entry_filesize.phpt
+      ext/zip/tests/zip_entry_name.phpt
+      ext/zip/tests/zip_entry_open.phpt
+      ext/zip/tests/zip_entry_read.phpt
+      ext/zip/tests/zip_open.phpt
+      ext/zip/tests/zip_read.phpt:
+      - reimport (cannot symlink without replacing 4.4 and 5.0 versions)
+
+2006-07-24  Michael Wallner  <mike@iworks.at>
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      - note about allow_url_include
+
+2006-07-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c:
+      Fixed memory leaks detection
+
+    * ZendEngine2/tests/bug38146.phpt
+      ZendEngine2/tests/bug38146.phpt:
+      
+      file bug38146.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/tests/bug38146.phpt:
+      Test for bug #38146 (Cannot use array returned from foo::__get('bar') in
+      write context)
+
+2006-07-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/filter/filter.c:
+      MFB: Fixed compiler warning.
+
+    * (PHP_5_2)
+      ext/filter/filter.c:
+      Fixed compiler warning.
+
+2006-07-24  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      ext/pdo_dblib/pdo_dblib.c:
+      fix build and typo after another lazy ass who does not test before commit:
+      Dmitry
+
+    * ext/pdo_dblib/pdo_dblib.c:
+      fix build
+
 2006-07-23  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * ext/fdf/fdf.c:
