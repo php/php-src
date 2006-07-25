@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Aug 2006, PHP 5.2.0RC2
+- Moved extensions to PECL:
+  . ext/filepro (Derick, Tony)
+
 - Fixed bug #38194 (ReflectionClass::isSubclassOf() returns TRUE for the class
   itself). (Ilia)
 
