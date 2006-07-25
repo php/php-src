@@ -3054,11 +3054,13 @@ ZEND_END_ARG_INFO()
 
 #if MEMORY_LIMIT
 static
-ZEND_BEGIN_ARG_INFO(arginfo_memory_get_usage, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_memory_get_usage, 0, 0, 0)
+	ZEND_ARG_INFO(0, real_usage)
 ZEND_END_ARG_INFO()
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_memory_get_peak_usage, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_memory_get_peak_usage, 0, 0, 0)
+	ZEND_ARG_INFO(0, real_usage)
 ZEND_END_ARG_INFO()
 #endif
 /* }}} */
