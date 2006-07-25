@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Aug 2006, PHP 5.2.0RC2
+- Changed memory_get_usage() and memory_get_peak_usage(). Optional boolean
+  argument allows get memory size allocated by emalloc() (by default) or
+  real size of memory allocated from system. (Dmitry)
+
 - Moved extensions to PECL:
   . ext/filepro (Derick, Tony)
   . ext/hwapi (Derick, Tony)
