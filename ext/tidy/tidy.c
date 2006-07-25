@@ -479,7 +479,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 		TidyBuffer buf = {0};
 		
 		tidyBufInit(&buf);
-		tidyBufAttach(&buf, data, data_len);
+		tidyBufAttach(&buf, (byte *) data, data_len);
 		
 		if (tidyParseBuffer(doc, &buf) < 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errbuf->bp);
@@ -490,7 +490,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 
 				tidySaveBuffer (doc, &output);
 				FIX_BUFFER(&output);
-				RETVAL_STRINGL(output.bp, output.size-1, 0);
+				RETVAL_STRINGL((char *) output.bp, output.size-1, 0);
 			} else {
 				RETVAL_FALSE;
 			}
@@ -514,7 +514,7 @@ static char *php_tidy_file_to_mem(char *filename, zend_bool use_include_path, in
 	if (!(stream = php_stream_open_wrapper(filename, "rb", (use_include_path ? USE_PATH : 0), NULL))) {
 		return NULL;
 	}
-	if ((*len = (int) php_stream_copy_to_mem(stream, (void**)&data, PHP_STREAM_COPY_ALL, 0)) == 0) {
+	if ((*len = (int) php_stream_copy_to_mem(stream, (void*) &data, PHP_STREAM_COPY_ALL, 0)) == 0) {
 		data = estrdup("");
 		*len = 0;
 	}
@@ -661,7 +661,7 @@ static int tidy_doc_cast_handler(zval *in, zval *out, int type TSRMLS_DC)
 		case IS_STRING:
 			obj = (PHPTidyObj *)zend_object_store_get_object(in TSRMLS_CC);
 			tidySaveBuffer (obj->ptdoc->doc, &output);
-			ZVAL_STRINGL(out, output.bp, output.size, 0);
+			ZVAL_STRINGL(out, (char *) output.bp, output.size, 0);
 			break;
 
 		default:
@@ -692,7 +692,7 @@ static int tidy_node_cast_handler(zval *in, zval *out, int type TSRMLS_DC)
 		case IS_STRING:
 			obj = (PHPTidyObj *)zend_object_store_get_object(in TSRMLS_CC);
 			tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
-			ZVAL_STRINGL(out, buf.bp, buf.size, 0);
+			ZVAL_STRINGL(out, (char *) buf.bp, buf.size, 0);
 			break;
 
 		default:
@@ -712,13 +712,13 @@ static void tidy_doc_update_properties(PHPTidyObj *obj TSRMLS_DC)
 	
 	if (output.size) {
 		MAKE_STD_ZVAL(temp);
-		ZVAL_STRINGL(temp, output.bp, output.size, 0);
+		ZVAL_STRINGL(temp, (char *) output.bp, output.size, 0);
 		zend_hash_update(obj->std.properties, "value", sizeof("value"), (void *)&temp, sizeof(zval *), NULL);
 	}
 
 	if (obj->ptdoc->errbuf->size) {
 		MAKE_STD_ZVAL(temp);
-		ZVAL_STRINGL(temp, obj->ptdoc->errbuf->bp, obj->ptdoc->errbuf->size-1, TRUE);
+		ZVAL_STRINGL(temp, (char *) obj->ptdoc->errbuf->bp, obj->ptdoc->errbuf->size-1, TRUE);
 		zend_hash_update(obj->std.properties, "errorBuffer", sizeof("errorBuffer"), (void *)&temp, sizeof(zval *), NULL);
 	}
 }
@@ -884,7 +884,7 @@ static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options TSRML
 	zend_bool clear_str;
 
 	for (zend_hash_internal_pointer_reset(ht_options);
-		 zend_hash_get_current_data(ht_options, (void **)&opt_val) == SUCCESS;
+		 zend_hash_get_current_data(ht_options, (void *) &opt_val) == SUCCESS;
 		 zend_hash_move_forward(ht_options)) {
 		
 		switch (zend_hash_get_current_key_ex(ht_options, &opt_name, &opt_name_len, &opt_indx, FALSE, NULL)) {
@@ -930,7 +930,7 @@ static int php_tidy_parse_string(PHPTidyObj *obj, char *string, int len, char *e
 	}
 	
 	tidyBufInit(&buf);
-	tidyBufAttach(&buf, string, len);
+	tidyBufAttach(&buf, (byte *) string, len);
 	if (tidyParseBuffer(obj->ptdoc->doc, &buf) < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", obj->ptdoc->errbuf->bp);
 		return FAILURE;
@@ -1024,7 +1024,7 @@ PHP_FUNCTION(ob_tidyhandler)
 		TidyBuffer buf = {0};
 		
 		tidyBufInit(&buf);
-		tidyBufAttach(&buf, input, input_len);
+		tidyBufAttach(&buf, (byte *) input, input_len);
 		
 		if (tidyParseBuffer(doc, &buf) < 0 || tidyCleanAndRepair(doc) < 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errbuf.bp);
@@ -1035,7 +1035,7 @@ PHP_FUNCTION(ob_tidyhandler)
 
 			tidySaveBuffer(doc, &output);
 			FIX_BUFFER(&output);
-			RETVAL_STRINGL(output.bp, output.size-1, 0);
+			RETVAL_STRINGL((char *) output.bp, output.size-1, 0);
 		}
 	} else {
 		RETVAL_NULL();
@@ -1082,7 +1082,7 @@ PHP_FUNCTION(tidy_get_error_buffer)
 	TIDY_FETCH_OBJECT;
 
 	if (obj->ptdoc->errbuf && obj->ptdoc->errbuf->bp) {
-		RETURN_STRINGL(obj->ptdoc->errbuf->bp, obj->ptdoc->errbuf->size-1, 1);
+		RETURN_STRINGL((char *) obj->ptdoc->errbuf->bp, obj->ptdoc->errbuf->size-1, 1);
 	} else {
 		RETURN_FALSE;
 	}
@@ -1098,7 +1098,7 @@ PHP_FUNCTION(tidy_get_output)
 
 	tidySaveBuffer(obj->ptdoc->doc, &output);
 	FIX_BUFFER(&output);
-	RETVAL_STRINGL(output.bp, output.size-1, 0);
+	RETVAL_STRINGL((char *) output.bp, output.size-1, 0);
 }
 /* }}} */
 
