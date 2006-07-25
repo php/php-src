@@ -388,7 +388,7 @@ JSON_parser(zval *z, unsigned short p[], int length, int assoc TSRMLS_DC)
     smart_str key = {0};
 
     int type = -1;
-    unsigned short utf16;
+    unsigned short utf16 = 0;
 
     JSON(the_top) = -1;
     push(&the_json, z, MODE_DONE);
