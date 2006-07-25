@@ -161,7 +161,7 @@ static void _free_sybase_result(sybase_result *result)
 }
 
 /* Forward declaration */
-static int php_sybase_finish_results (sybase_result *result);
+static int php_sybase_finish_results (sybase_result *result TSRMLS_DC);
 
 static void php_free_sybase_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
@@ -172,7 +172,7 @@ static void php_free_sybase_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 		if (result->sybase_ptr->cmd) {
 			ct_cancel(NULL, result->sybase_ptr->cmd, CS_CANCEL_ALL);
 		}
-		php_sybase_finish_results(result);
+		php_sybase_finish_results(result TSRMLS_CC);
 	}
 
 	_free_sybase_result(result);
