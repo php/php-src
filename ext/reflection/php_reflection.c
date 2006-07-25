@@ -3574,8 +3574,7 @@ ZEND_METHOD(reflection_class, isSubclassOf)
 			return;
 	}
 
-
-	RETURN_BOOL(instanceof_function(ce, class_ce TSRMLS_CC));
+	RETURN_BOOL((ce != class_ce && instanceof_function(ce, class_ce TSRMLS_CC)));
 }
 /* }}} */
 
