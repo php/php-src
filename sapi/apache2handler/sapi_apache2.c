@@ -593,7 +593,7 @@ zend_first_try {
 		{
 			char *mem_usage;
 
-			mem_usage = apr_psprintf(ctx->r->pool, "%u", zend_memory_peak_usage(TSRMLS_C));
+			mem_usage = apr_psprintf(ctx->r->pool, "%u", zend_memory_peak_usage(1 TSRMLS_CC));
 			apr_table_set(r->notes, "mod_php_memory_usage", mem_usage);
 		}
 #endif
