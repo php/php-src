@@ -329,7 +329,7 @@ PHP_FUNCTION(virtual)
 		RETURN_FALSE;
 	}
 
-	php_output_end_all();
+	php_output_end_all(TSRMLS_C);
 	php_header(TSRMLS_C);
 
 	if (run_sub_req(rr)) {
