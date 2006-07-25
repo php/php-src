@@ -2625,8 +2625,8 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
-        HashPosition pos;
-        zval **value;
+	HashPosition pos;
+	zval **value;
 
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);	
 	GET_REFLECTION_OBJECT_PTR(ce);
@@ -2656,7 +2656,7 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 			}
 
 			zend_hash_update(Z_ARRVAL_P(return_value), key, key_len, value, sizeof(zval *), NULL);
-                }
+		}
 		zend_hash_move_forward_ex(CE_STATIC_MEMBERS(ce), &pos);
 	}
 }
