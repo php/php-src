@@ -2623,17 +2623,42 @@ ZEND_METHOD(reflection_class, __construct)
    Returns an associative array containing all static property values of the class */
 ZEND_METHOD(reflection_class, getStaticProperties)
 {
-	zval *tmp_copy;
 	reflection_object *intern;
 	zend_class_entry *ce;
-	
+        HashPosition pos;
+        zval **value;
+
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);	
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	zend_update_class_constants(ce TSRMLS_CC);
 
 	array_init(return_value);
-	zend_hash_copy(Z_ARRVAL_P(return_value), CE_STATIC_MEMBERS(ce), (copy_ctor_func_t) zval_add_ref, (void *) &tmp_copy, sizeof(zval *));
+
+	zend_hash_internal_pointer_reset_ex(CE_STATIC_MEMBERS(ce), &pos);
+
+	while (zend_hash_get_current_data_ex(CE_STATIC_MEMBERS(ce), (void **) &value, &pos) == SUCCESS) {
+		uint key_len;
+		char *key;
+		ulong num_index;
+
+		if (zend_hash_get_current_key_ex(CE_STATIC_MEMBERS(ce), &key, &key_len, &num_index, 0, &pos) != FAILURE && key) {
+			zval_add_ref(value);
+
+			if (*key == '\0') {
+				*key++;
+				key_len--;
+				
+			}
+			if (*key == '*' && *(key+1) == '\0') {
+				*(key+1) = *key++;
+				key_len--;
+			}
+
+			zend_hash_update(Z_ARRVAL_P(return_value), key, key_len, value, sizeof(zval *), NULL);
+                }
+		zend_hash_move_forward_ex(CE_STATIC_MEMBERS(ce), &pos);
+	}
 }
 /* }}} */
 

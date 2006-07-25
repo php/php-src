@@ -11,6 +11,8 @@ PHP                                                                        NEWS
 
 - Fixed bug #38194 (ReflectionClass::isSubclassOf() returns TRUE for the class
   itself). (Ilia)
+- Fixed bug #38132 (ReflectionClass::getStaticProperties() retains \0 in key
+  names). (Ilia)
 
 24 Jul 2006, PHP 5.2.0RC1
 - Updated bundled MySQL client library to version 5.0.22 in the Windows
