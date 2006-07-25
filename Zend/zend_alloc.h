@@ -108,8 +108,8 @@ void zend_debug_alloc_output(char *format, ...);
 #endif
 
 #if MEMORY_LIMIT
-ZEND_API size_t zend_memory_usage(TSRMLS_D);
-ZEND_API size_t zend_memory_peak_usage(TSRMLS_D);
+ZEND_API size_t zend_memory_usage(int real_usage TSRMLS_DC);
+ZEND_API size_t zend_memory_peak_usage(int real_usage TSRMLS_DC);
 #endif
 
 END_EXTERN_C()
