@@ -701,7 +701,9 @@ PHP_FUNCTION(input_get_args)
 		RETURN_FALSE;
 	} else {
 		g_hash = HASH_OF(array_ptr);
-		zend_hash_internal_pointer_reset_ex(g_hash, &pos);
+		if (g_hash) {
+			zend_hash_internal_pointer_reset(g_hash);
+		}
 		array_init(return_value);
 	}
 
