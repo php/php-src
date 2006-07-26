@@ -1,9 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Aug 2006, PHP 5.2.0RC2
-- Changed memory_get_usage() and memory_get_peak_usage(). Optional boolean
-  argument allows get memory size allocated by emalloc() (by default) or
-  real size of memory allocated from system. (Dmitry)
+- Added an optional boolean parameter to memory_get_usage() and 
+  memory_get_peak_usage() to get memory size allocated by emalloc() or real
+  size of memory allocated from system. (Dmitry)
 
 - Moved extensions to PECL:
   . ext/filepro (Derick, Tony)
@@ -11,6 +11,9 @@ PHP                                                                        NEWS
 
 - Fixed bug #38217 (ReflectionClass::newInstanceArgs() tries to allocate too 
   much memory). (Tony)
+- Fixed bug #38214 (gif interlace output cannot work). (Pierre)
+- Fixed bug #38212 (Segfault on invalid imagecreatefromgd2part() parameters).
+  (Pierre)
 - Fixed bug #38211 (variable name and cookie name match breaks script
   execution). (Dmitry)
 - Fixed bug #38194 (ReflectionClass::isSubclassOf() returns TRUE for the class
@@ -121,9 +124,6 @@ PHP                                                                        NEWS
 
 - Fixed memory leaks in openssl streams context options. (Pierre)
 - Fixed handling of extremely long paths inside tempnam() function. (Ilia)
-- Fixed bug #38214 (gif interlace output cannot work) (Pierre)
-- Fixed bug #38212 (Segfault on invalid imagecreatefromgd2part() parameters)
-  (Pierre)
 - Fixed bug #38183 (disable_classes=Foobar causes disabled class to be
   called Foo). (Jani)
 - Fixed bug #38179 (imagecopy from a palette to a truecolor image loose
