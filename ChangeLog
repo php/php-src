@@ -1,3 +1,136 @@
+2006-07-25  Michael Wallner  <mike@iworks.at>
+
+    * ext/tidy/tidy.c:
+      - fix compiler warnings
+
+    * ext/tidy/tidy.c:
+      - reduce memory footprint
+
+    * sapi/apache/php_apache.c:
+      - fix TS issue found by Jani
+
+2006-07-25  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ext/standard/basic_functions.c
+      ext/standard/var.c:
+      MFH: Update protos & arginfo for memory_get_usage() &
+      memory_get_peak_usage()
+
+    * ext/standard/basic_functions.c
+      ext/standard/var.c:
+      Update protos & arginfo for memory_get_usage() & memory_get_peak_usage()
+
+2006-07-25  Michael Wallner  <mike@iworks.at>
+
+    * (PHP_5_2)
+      ext/reflection/php_reflection.c:
+      - ws
+
+2006-07-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/reflection/tests/bug38132.phpt
+      ext/reflection/tests/bug38132.phpt:
+      
+      file bug38132.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/reflection/php_reflection.c:
+      Fixed bug #38132 (ReflectionClass::getStaticProperties() retains \0 in key
+      names).
+
+2006-07-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h
+      ZendEngine2/zend_alloc.h
+      ext/standard/var.c
+      ext/standard/var.c
+      sapi/apache/mod_php5.c
+      sapi/apache/mod_php5.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c
+      sapi/apache_hooks/mod_php5.c
+      sapi/apache_hooks/mod_php5.c:
+      Changed memory_get_usage() and memory_get_peak_usage(). Optional boolean
+      argument allows get memory size allocated by emalloc() (by default) or
+      real size of memory allocated from system.
+
+2006-07-25  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      news entry
+
+    * (PHP_5_2)
+      NEWS:
+      ext/filepro moved to PECL
+
+2006-07-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/tests/bug38194.phpt:
+      MFB: Fixed bug #38194 (ReflectionClass::isSubclassOf() returns TRUE for the
+      class itself).
+
+    * (PHP_5_2)
+      NEWS
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/bug38194.phpt
+      ext/reflection/tests/bug38194.phpt:
+      Fixed bug #38194 (ReflectionClass::isSubclassOf() returns TRUE for the
+      class itself).
+
+2006-07-25  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/filter/filter.c:
+      MFH: check g_hash for NULL before resetting it
+
+    * ext/filter/filter.c:
+      check g_hash for NULL before resetting it
+
+2006-07-25  Uwe Schindler  <uwe@thetaphi.de>
+
+    * (PHP_5_2)
+      ext/sybase_ct/php_sybase_ct.c:
+      MFH: Fix compilation with TSRM (now correct)
+
+    * (PHP_5_2)
+      ext/sybase_ct/php_sybase_ct.c:
+      revert shitty whitespace patch (forgot to reconfigure my editor after
+      reinstallation)
+
+    * ext/sybase_ct/php_sybase_ct.c
+      ext/sybase_ct/php_sybase_ct.c:
+      Fix compilation with TSRM
+
+2006-07-25  Antony Dovgal  <antony@zend.com>
+
+    * ext/json/JSON_parser.c
+      ext/json/JSON_parser.c:
+      initialize variable
+
+2006-07-25  Derick Rethans  <php@derickrethans.nl>
+
+    * ZendEngine2/zend_API.c:
+      - MFB: Fixed typo
+
+    * (PHP_5_2)
+      ZendEngine2/zend_API.c:
+      - Fixed typo.
+
+2006-07-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_compile.c:
+      - Fix off by one copy'n'paste error
+
 2006-07-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_2)

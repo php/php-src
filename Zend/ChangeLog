@@ -1,3 +1,27 @@
+2006-07-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_alloc.c
+      zend_alloc.c
+      zend_alloc.h
+      zend_alloc.h:
+      Changed memory_get_usage() and memory_get_peak_usage(). Optional boolean
+      argument allows get memory size allocated by emalloc() (by default) or
+      real size of memory allocated from system.
+
+2006-07-25  Derick Rethans  <php@derickrethans.nl>
+
+    * zend_API.c:
+      - MFB: Fixed typo
+
+    * (PHP_5_2)
+      zend_API.c:
+      - Fixed typo.
+
+2006-07-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_compile.c:
+      - Fix off by one copy'n'paste error
+
 2006-07-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_2)
