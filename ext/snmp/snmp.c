@@ -834,10 +834,14 @@ static int netsnmp_session_set_sec_protocol(struct snmp_session *s, char *prot T
 * 
 * As we want this extension to compile on both versions, we use the latter
 * symbol on purpose, as it's defined to be the same as the former.
+*
+* However, in 5.2 the type of usmAES128PrivProtocol is a pointer, not an
+* array, so we cannot use the OIDSIZE macro because it uses sizeof().
+*
 */
 			|| !strcasecmp(prot, "AES")) {
 			s->securityPrivProto = usmAES128PrivProtocol;
-			s->securityPrivProtoLen = OIDSIZE(usmAES128PrivProtocol);
+			s->securityPrivProtoLen = USM_PRIV_PROTO_AES128_LEN;
 			return (0);
 #else			
 		) {

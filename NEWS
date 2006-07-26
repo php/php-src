@@ -21,6 +21,8 @@ PHP                                                                        NEWS
   itself). (Ilia)
 - Fixed bug #38132 (ReflectionClass::getStaticProperties() retains \0 in key
   names). (Ilia)
+- Fixed bug #37564 (AES privacy encryption not possible due to net-snmp 5.2
+  compatibility issue). (Jani, patch by scott dot moynes+php at gmail dot com)
 
 24 Jul 2006, PHP 5.2.0RC1
 - Updated bundled MySQL client library to version 5.0.22 in the Windows
