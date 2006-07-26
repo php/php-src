@@ -2877,12 +2877,14 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, ANY)
 		zval_copy_ctor(&tmp);
 		convert_to_string(&tmp);
 		varname = &tmp;
+	} else if (OP1_TYPE == IS_CV || OP1_TYPE == IS_VAR) {
+		varname->refcount++;
 	}
 
 	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
 		zend_std_unset_static_property(EX_T(opline->op2.u.var).class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname) TSRMLS_CC);
 	} else {
-		target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), BP_VAR_IS, varname TSRMLS_CC);		
+		target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), BP_VAR_IS, varname TSRMLS_CC);
 		if (zend_hash_del(target_symbol_table, varname->value.str.val, varname->value.str.len+1) == SUCCESS) {		
 			zend_execute_data *ex = EXECUTE_DATA; 
 			ulong hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
@@ -2907,6 +2909,8 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, ANY)
 
 	if (varname == &tmp) {
 		zval_dtor(&tmp);
+	} else if (OP1_TYPE == IS_CV || OP1_TYPE == IS_VAR) {
+		zval_ptr_dtor(&varname);
 	}
 	FREE_OP1();
 	ZEND_VM_NEXT_OPCODE();
@@ -2940,6 +2944,9 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
+						if (OP2_TYPE == IS_CV || OP2_TYPE == IS_VAR) {
+							offset->refcount++;
+						}
 						if (zend_symtable_del(ht, offset->value.str.val, offset->value.str.len+1) == SUCCESS &&
 					    ht == &EG(symbol_table)) {
 							zend_execute_data *ex;
@@ -2959,6 +2966,9 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 									}
 								}
 							}
+						}
+						if (OP2_TYPE == IS_CV || OP2_TYPE == IS_VAR) {
+							zval_ptr_dtor(&offset);
 						}
 						break;
 					case IS_NULL:
