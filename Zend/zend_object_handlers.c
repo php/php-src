@@ -378,7 +378,6 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 	zend_object *zobj;
 	zval *tmp_member = NULL;
 	zval **variable_ptr;
-	int setter_done = 0;
 	zend_property_info *property_info;
 
 	zobj = Z_OBJ_P(object);
@@ -395,10 +394,8 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 	property_info = zend_get_property_info(zobj->ce, member, (zobj->ce->__set != NULL) TSRMLS_CC);
 
 	if (property_info && zend_u_hash_quick_find(zobj->properties, Z_TYPE_P(member), property_info->name, property_info->name_length+1, property_info->h, (void **) &variable_ptr) == SUCCESS) {
-		if (*variable_ptr == value) {
-			/* if we already have this value there, we don't actually need to do anything */
-			setter_done = 1;
-		} else {
+		/* if we already have this value there, we don't actually need to do anything */
+		if (*variable_ptr != value) {
 			/* if we are assigning reference, we shouldn't move it, but instead assign variable
 			   to the same pointer */
 			if (PZVAL_IS_REF(*variable_ptr)) {
@@ -411,10 +408,20 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 					zval_copy_ctor(*variable_ptr);
 				}
 				zval_dtor(&garbage);
-				setter_done = 1;
+			} else {
+				zval *garbage = *variable_ptr;
+
+				/* if we assign referenced variable, we should separate it */
+				value->refcount++;
+				if (PZVAL_IS_REF(value)) {
+					SEPARATE_ZVAL(&value);
+				}
+				*variable_ptr = value;
+				zval_ptr_dtor(&garbage);
 			}
 		}
 	} else {
+		int setter_done = 0;
 		zend_guard *guard;
 
 		if (zobj->ce->__set &&
@@ -427,18 +434,18 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 			setter_done = 1;
 			guard->in_set = 0;
 		}
-	}
+		if (!setter_done) {
+			zval **foo;
 
-	if (!setter_done) {
-		zval **foo;
-
-		/* if we assign referenced variable, we should separate it */
-		value->refcount++;
-		if (PZVAL_IS_REF(value)) {
-			SEPARATE_ZVAL(&value);
+			/* if we assign referenced variable, we should separate it */
+			value->refcount++;
+			if (PZVAL_IS_REF(value)) {
+				SEPARATE_ZVAL(&value);
+			}
+			zend_u_hash_quick_update(zobj->properties, Z_TYPE_P(member), property_info->name, property_info->name_length+1, property_info->h, &value, sizeof(zval *), (void **) &foo);
 		}
-		zend_u_hash_quick_update(zobj->properties, Z_TYPE_P(member), property_info->name, property_info->name_length+1, property_info->h, &value, sizeof(zval *), (void **) &foo);
 	}
+
 	if (tmp_member) {
 		zval_ptr_dtor(&tmp_member);
 	}
