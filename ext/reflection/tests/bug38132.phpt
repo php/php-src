@@ -12,22 +12,23 @@ class foo {
 $class = new ReflectionClass('foo');
 $properties = $class->getStaticProperties();
 var_dump($properties, array_keys($properties));
-var_dump(isset($properties['*bar'])); // false
-var_dump(isset($properties["\0*\0bar"])); // true
-
+var_dump(isset($properties['*bar']));
+var_dump(isset($properties["\0*\0bar"]));
+var_dump(isset($properties["bar"]));
 ?>
 --EXPECT--
 array(2) {
-  ["*bar"]=>
+  ["bar"]=>
   string(3) "baz"
   ["a"]=>
   string(1) "a"
 }
 array(2) {
   [0]=>
-  string(4) "*bar"
+  string(3) "bar"
   [1]=>
   string(1) "a"
 }
-bool(true)
 bool(false)
+bool(false)
+bool(true)
