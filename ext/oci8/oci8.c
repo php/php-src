@@ -1056,7 +1056,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 						 * 1) next_ping > 0, which means that ping_interval is not -1 (aka "Off")
 						 * 2) current_timestamp > next_ping, which means "it's time to check if it's still alive"
 						 * */
-						if ( (connection->next_ping > 0) && (timestamp > connection->next_ping) && !php_oci_connection_ping(connection TSRMLS_CC)) {
+						if ( (connection->next_ping > 0) && (timestamp >= connection->next_ping) && !php_oci_connection_ping(connection TSRMLS_CC)) {
 							/* server died */
 						}
 						else {
