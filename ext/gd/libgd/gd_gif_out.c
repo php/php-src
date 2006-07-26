@@ -264,10 +264,12 @@ GIFEncode(gdIOCtxPtr fp, int GWidth, int GHeight, int GInterlace, int Background
         int ColorMapSize;
         int InitCodeSize;
         int i;
-	GifCtx ctx;
+		GifCtx ctx;
+
+		memset(&ctx, 0, sizeof(ctx));
         ctx.Interlace = GInterlace;
-	ctx.in_count = 1;
-	memset(&ctx, 0, sizeof(ctx));
+		ctx.in_count = 1;
+
         ColorMapSize = 1 << BitsPerPixel;
 
         RWidth = ctx.Width = GWidth;
