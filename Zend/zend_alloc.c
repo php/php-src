@@ -417,12 +417,14 @@ struct _zend_mm_heap {
 
 # define ZEND_MM_SET_END_MAGIC(block) do { \
 		long *p = ZEND_MM_END_MAGIC_PTR(block); \
-		*p = MEM_BLOCK_END_MAGIC; \
+		memcpy(p, &_mem_block_end_magic, END_MAGIC_SIZE); \
 	} while (0)
 
 # define MEM_BLOCK_END_MAGIC 0x2A8FCC84L
 
 # define END_MAGIC_SIZE sizeof(long)
+
+static long _mem_block_end_magic = MEM_BLOCK_END_MAGIC;
 
 #else
 
@@ -896,14 +898,13 @@ static int zend_mm_check_ptr(zend_mm_heap *heap, void *ptr, int silent ZEND_FILE
 			zend_debug_alloc_output("%10s\t", "End:");
 			zend_debug_alloc_output("Unknown\n");
 		}
-	} else if (*end_magic == MEM_BLOCK_END_MAGIC) {
+	} else if (memcmp(end_magic, &_mem_block_end_magic, END_MAGIC_SIZE)==0) {
 		if (!silent) {
 			zend_debug_alloc_output("%10s\t", "End:");
 			zend_debug_alloc_output("OK\n");
 		}
 	} else {
-		static long mem_block_end_magic = MEM_BLOCK_END_MAGIC;
-		char *overflow_ptr, *magic_ptr=(char *) &mem_block_end_magic;
+		char *overflow_ptr, *magic_ptr=(char *) &_mem_block_end_magic;
 		int overflows=0;
 		long i;
 
