@@ -25,7 +25,7 @@ php - PHP Command Line Interface 'CLI'
 .B PHP
 is a widely\-used general\-purpose scripting language that is especially suited for 
 Web development and can be embedded into HTML. This is the command line interface
-that enables you to the following:
+that enables you to do the following:
 .P
 You can parse and execute files by using parameter \-f followed by the name of the 
 .IR file 
