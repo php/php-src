@@ -121,6 +121,9 @@ PHP                                                                        NEWS
 
 - Fixed memory leaks in openssl streams context options. (Pierre)
 - Fixed handling of extremely long paths inside tempnam() function. (Ilia)
+- Fixed bug #38214 (gif interlace output cannot work) (Pierre)
+- Fixed bug #38212 (Segfault on invalid imagecreatefromgd2part() parameters)
+  (Pierre)
 - Fixed bug #38183 (disable_classes=Foobar causes disabled class to be
   called Foo). (Jani)
 - Fixed bug #38179 (imagecopy from a palette to a truecolor image loose
