@@ -374,6 +374,7 @@ sys/vfs.h \
 sys/sysexits.h \
 sys/varargs.h \
 sys/wait.h \
+sys/loadavg.h \
 termios.h \
 unistd.h \
 unix.h \

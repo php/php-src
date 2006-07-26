@@ -78,6 +78,10 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 # include <sys/mman.h>
 #endif
 
+#if HAVE_SYS_LOADAVG_H
+# include <sys/loadavg.h>
+#endif
+
 #ifdef HARTMUT_0
 #include <getopt.h>
 #endif
