@@ -2643,19 +2643,13 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 		ulong num_index;
 
 		if (zend_hash_get_current_key_ex(CE_STATIC_MEMBERS(ce), &key, &key_len, &num_index, 0, &pos) != FAILURE && key) {
+			char *prop_name, *class_name;
+
+			zend_unmangle_property_name(key, key_len-1, &class_name, &prop_name);
+
 			zval_add_ref(value);
 
-			if (*key == '\0') {
-				*key++;
-				key_len--;
-				
-			}
-			if (*key == '*' && *(key+1) == '\0') {
-				*(key+1) = *key++;
-				key_len--;
-			}
-
-			zend_hash_update(Z_ARRVAL_P(return_value), key, key_len, value, sizeof(zval *), NULL);
+			zend_hash_update(Z_ARRVAL_P(return_value), prop_name, strlen(prop_name)+1, value, sizeof(zval *), NULL);
 		}
 		zend_hash_move_forward_ex(CE_STATIC_MEMBERS(ce), &pos);
 	}
