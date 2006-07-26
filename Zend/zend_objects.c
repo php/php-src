@@ -52,7 +52,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 	zend_function *destructor = object->ce->destructor;
 
 	if (destructor) {
-		zval zobj, *obj = &zobj;
+		zval *obj;
 		zval *old_exception;
 
 		if (destructor->op_array.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
@@ -85,10 +85,12 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 			}
 		}
 
-		Z_TYPE(zobj) = IS_OBJECT;
-		Z_OBJ_HANDLE(zobj) = handle;
-		Z_OBJ_HT(zobj) = &std_object_handlers;
-		INIT_PZVAL(obj);
+		MAKE_STD_ZVAL(obj);
+		Z_TYPE_P(obj) = IS_OBJECT;
+		Z_OBJ_HANDLE_P(obj) = handle;
+		/* TODO: We cannot set proper handlers. */
+		Z_OBJ_HT_P(obj) = &std_object_handlers; 
+		zval_copy_ctor(obj);
 
 		/* Make sure that destructors are protected from previously thrown exceptions.
 		 * For example, if an exception was thrown in a function and when the function's
@@ -103,6 +105,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 				zval *file = zend_read_property(default_exception_ce, old_exception, "file", sizeof("file")-1, 1 TSRMLS_CC);
 				zval *line = zend_read_property(default_exception_ce, old_exception, "line", sizeof("line")-1, 1 TSRMLS_CC);
 
+				zval_ptr_dtor(&obj);
 				zval_ptr_dtor(&EG(exception));
 				EG(exception) = old_exception;
 				zend_error(E_ERROR, "Ignoring exception from %s::__destruct() while an exception is already active (Uncaught %s in %s on line %ld)", 
@@ -110,6 +113,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 			}
 			EG(exception) = old_exception;
 		}
+		zval_ptr_dtor(&obj);
 	}
 }
 
