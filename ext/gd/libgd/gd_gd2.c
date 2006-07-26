@@ -430,6 +430,10 @@ gdImagePtr gdImageCreateFromGd2PartCtx (gdIOCtx * in, int srcx, int srcy, int w,
 
 	gdImagePtr im;
 
+	if (w<1 || h <1) {
+		return 0;
+	}
+
 	/* The next few lines are basically copied from gd2CreateFromFile
 	 * we change the file size, so don't want to use the code directly.
 	 * but we do need to know the file size.
