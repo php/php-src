@@ -1381,7 +1381,7 @@ TEST $file
 	}
 
 	if ($leak_check) {
-		$cmd = "valgrind -q --tool=memcheck --trace-children=yes --log-file-exactly=$memcheck_filename $cmd";
+		$cmd = "USE_ZEND_ALLOC=0 valgrind -q --tool=memcheck --trace-children=yes --leak-check=yes --log-file-exactly=$memcheck_filename $cmd";
 	}
 
 	if ($DETAILED) echo "
