@@ -11,6 +11,8 @@ PHP                                                                        NEWS
 
 - Fixed bug #38217 (ReflectionClass::newInstanceArgs() tries to allocate too 
   much memory). (Tony)
+- Fixed bug #38211 (variable name and cookie name match breaks script
+  execution). (Dmitry)
 - Fixed bug #38194 (ReflectionClass::isSubclassOf() returns TRUE for the class
   itself). (Ilia)
 - Fixed bug #38132 (ReflectionClass::getStaticProperties() retains \0 in key

@@ -2037,6 +2037,8 @@ static int ZEND_UNSET_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zval_copy_ctor(&tmp);
 		convert_to_string(&tmp);
 		varname = &tmp;
+	} else if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+		varname->refcount++;
 	}
 
 	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
@@ -2067,6 +2069,8 @@ static int ZEND_UNSET_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (varname == &tmp) {
 		zval_dtor(&tmp);
+	} else if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+		zval_ptr_dtor(&varname);
 	}
 
 	ZEND_VM_NEXT_OPCODE();
@@ -4547,6 +4551,8 @@ static int ZEND_UNSET_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zval_copy_ctor(&tmp);
 		convert_to_string(&tmp);
 		varname = &tmp;
+	} else if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+		varname->refcount++;
 	}
 
 	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
@@ -4577,6 +4583,8 @@ static int ZEND_UNSET_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (varname == &tmp) {
 		zval_dtor(&tmp);
+	} else if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+		zval_ptr_dtor(&varname);
 	}
 	zval_dtor(free_op1.var);
 	ZEND_VM_NEXT_OPCODE();
@@ -7639,6 +7647,8 @@ static int ZEND_UNSET_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zval_copy_ctor(&tmp);
 		convert_to_string(&tmp);
 		varname = &tmp;
+	} else if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+		varname->refcount++;
 	}
 
 	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
@@ -7669,6 +7679,8 @@ static int ZEND_UNSET_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (varname == &tmp) {
 		zval_dtor(&tmp);
+	} else if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+		zval_ptr_dtor(&varname);
 	}
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	ZEND_VM_NEXT_OPCODE();
@@ -9305,6 +9317,9 @@ static int ZEND_UNSET_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
+						if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+							offset->refcount++;
+						}
 						if (zend_symtable_del(ht, offset->value.str.val, offset->value.str.len+1) == SUCCESS &&
 					    ht == &EG(symbol_table)) {
 							zend_execute_data *ex;
@@ -9324,6 +9339,9 @@ static int ZEND_UNSET_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 									}
 								}
 							}
+						}
+						if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+							zval_ptr_dtor(&offset);
 						}
 						break;
 					case IS_NULL:
@@ -10774,6 +10792,9 @@ static int ZEND_UNSET_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
+						if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+							offset->refcount++;
+						}
 						if (zend_symtable_del(ht, offset->value.str.val, offset->value.str.len+1) == SUCCESS &&
 					    ht == &EG(symbol_table)) {
 							zend_execute_data *ex;
@@ -10793,6 +10814,9 @@ static int ZEND_UNSET_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 									}
 								}
 							}
+						}
+						if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+							zval_ptr_dtor(&offset);
 						}
 						break;
 					case IS_NULL:
@@ -12281,6 +12305,9 @@ static int ZEND_UNSET_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
+						if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+							offset->refcount++;
+						}
 						if (zend_symtable_del(ht, offset->value.str.val, offset->value.str.len+1) == SUCCESS &&
 					    ht == &EG(symbol_table)) {
 							zend_execute_data *ex;
@@ -12300,6 +12327,9 @@ static int ZEND_UNSET_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 									}
 								}
 							}
+						}
+						if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+							zval_ptr_dtor(&offset);
 						}
 						break;
 					case IS_NULL:
@@ -14211,6 +14241,9 @@ static int ZEND_UNSET_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
+						if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+							offset->refcount++;
+						}
 						if (zend_symtable_del(ht, offset->value.str.val, offset->value.str.len+1) == SUCCESS &&
 					    ht == &EG(symbol_table)) {
 							zend_execute_data *ex;
@@ -14230,6 +14263,9 @@ static int ZEND_UNSET_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 									}
 								}
 							}
+						}
+						if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+							zval_ptr_dtor(&offset);
 						}
 						break;
 					case IS_NULL:
@@ -15394,6 +15430,9 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
+						if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+							offset->refcount++;
+						}
 						if (zend_symtable_del(ht, offset->value.str.val, offset->value.str.len+1) == SUCCESS &&
 					    ht == &EG(symbol_table)) {
 							zend_execute_data *ex;
@@ -15413,6 +15452,9 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 									}
 								}
 							}
+						}
+						if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+							zval_ptr_dtor(&offset);
 						}
 						break;
 					case IS_NULL:
@@ -16458,6 +16500,9 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
+						if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+							offset->refcount++;
+						}
 						if (zend_symtable_del(ht, offset->value.str.val, offset->value.str.len+1) == SUCCESS &&
 					    ht == &EG(symbol_table)) {
 							zend_execute_data *ex;
@@ -16477,6 +16522,9 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 									}
 								}
 							}
+						}
+						if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+							zval_ptr_dtor(&offset);
 						}
 						break;
 					case IS_NULL:
@@ -17522,6 +17570,9 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
+						if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+							offset->refcount++;
+						}
 						if (zend_symtable_del(ht, offset->value.str.val, offset->value.str.len+1) == SUCCESS &&
 					    ht == &EG(symbol_table)) {
 							zend_execute_data *ex;
@@ -17541,6 +17592,9 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 									}
 								}
 							}
+						}
+						if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+							zval_ptr_dtor(&offset);
 						}
 						break;
 					case IS_NULL:
@@ -18958,6 +19012,9 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
+						if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+							offset->refcount++;
+						}
 						if (zend_symtable_del(ht, offset->value.str.val, offset->value.str.len+1) == SUCCESS &&
 					    ht == &EG(symbol_table)) {
 							zend_execute_data *ex;
@@ -18977,6 +19034,9 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 									}
 								}
 							}
+						}
+						if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+							zval_ptr_dtor(&offset);
 						}
 						break;
 					case IS_NULL:
@@ -20091,6 +20151,8 @@ static int ZEND_UNSET_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zval_copy_ctor(&tmp);
 		convert_to_string(&tmp);
 		varname = &tmp;
+	} else if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+		varname->refcount++;
 	}
 
 	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
@@ -20121,6 +20183,8 @@ static int ZEND_UNSET_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (varname == &tmp) {
 		zval_dtor(&tmp);
+	} else if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+		zval_ptr_dtor(&varname);
 	}
 
 	ZEND_VM_NEXT_OPCODE();
@@ -21611,6 +21675,9 @@ static int ZEND_UNSET_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
+						if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+							offset->refcount++;
+						}
 						if (zend_symtable_del(ht, offset->value.str.val, offset->value.str.len+1) == SUCCESS &&
 					    ht == &EG(symbol_table)) {
 							zend_execute_data *ex;
@@ -21630,6 +21697,9 @@ static int ZEND_UNSET_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 									}
 								}
 							}
+						}
+						if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+							zval_ptr_dtor(&offset);
 						}
 						break;
 					case IS_NULL:
@@ -23072,6 +23142,9 @@ static int ZEND_UNSET_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
+						if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+							offset->refcount++;
+						}
 						if (zend_symtable_del(ht, offset->value.str.val, offset->value.str.len+1) == SUCCESS &&
 					    ht == &EG(symbol_table)) {
 							zend_execute_data *ex;
@@ -23091,6 +23164,9 @@ static int ZEND_UNSET_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 									}
 								}
 							}
+						}
+						if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+							zval_ptr_dtor(&offset);
 						}
 						break;
 					case IS_NULL:
@@ -24570,6 +24646,9 @@ static int ZEND_UNSET_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
+						if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+							offset->refcount++;
+						}
 						if (zend_symtable_del(ht, offset->value.str.val, offset->value.str.len+1) == SUCCESS &&
 					    ht == &EG(symbol_table)) {
 							zend_execute_data *ex;
@@ -24589,6 +24668,9 @@ static int ZEND_UNSET_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 									}
 								}
 							}
+						}
+						if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+							zval_ptr_dtor(&offset);
 						}
 						break;
 					case IS_NULL:
@@ -26490,6 +26572,9 @@ static int ZEND_UNSET_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
+						if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+							offset->refcount++;
+						}
 						if (zend_symtable_del(ht, offset->value.str.val, offset->value.str.len+1) == SUCCESS &&
 					    ht == &EG(symbol_table)) {
 							zend_execute_data *ex;
@@ -26509,6 +26594,9 @@ static int ZEND_UNSET_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 									}
 								}
 							}
+						}
+						if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+							zval_ptr_dtor(&offset);
 						}
 						break;
 					case IS_NULL:
