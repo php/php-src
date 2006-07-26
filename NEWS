@@ -9,6 +9,7 @@ PHP                                                                        NEWS
   . ext/filepro (Derick, Tony)
   . ext/hwapi (Derick, Tony)
 
+- Fixed bug #38220 (Crash on some object operations). (Dmitry)
 - Fixed bug #38217 (ReflectionClass::newInstanceArgs() tries to allocate too 
   much memory). (Tony)
 - Fixed bug #38214 (gif interlace output cannot work). (Pierre)
