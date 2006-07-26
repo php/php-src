@@ -3405,7 +3405,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 	zval *retval_ptr;
 	reflection_object *intern;
 	zend_class_entry *ce;
-	int argc;
+	int argc = 0;
 	HashTable *args;
 	
 	
@@ -3415,11 +3415,13 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|h", &args) == FAILURE) {
 		return;
 	}
-	argc = args->nNumOfElements;
+	if (ZEND_NUM_ARGS() > 0) {
+		argc = args->nNumOfElements;
+	}
 	
 	/* Run the constructor if there is one */
 	if (ce->constructor) {
-		zval ***params;
+		zval ***params = NULL;
 		zend_fcall_info fci;
 		zend_fcall_info_cache fcc;
 
@@ -3427,10 +3429,12 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Access to non-public constructor of class %v", ce->name);
 			return;
 		}
-
-		params = safe_emalloc(sizeof(zval **), argc, 0);
-		zend_hash_apply_with_argument(args, (apply_func_arg_t)_zval_array_to_c_array, &params TSRMLS_CC);	
-		params -= argc;
+		
+		if (argc) {
+			params = safe_emalloc(sizeof(zval **), argc, 0);
+			zend_hash_apply_with_argument(args, (apply_func_arg_t)_zval_array_to_c_array, &params TSRMLS_CC);	
+			params -= argc;
+		}
 
 		object_init_ex(return_value, ce);
 
@@ -3450,7 +3454,9 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 		fcc.object_pp = &return_value;
 
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
-			efree(params);
+			if (params) {
+				efree(params);
+			}
 			zval_ptr_dtor(&retval_ptr);
 			zend_error(E_WARNING, "Invocation of %v's constructor failed", ce->name);
 			RETURN_NULL();
@@ -3458,7 +3464,9 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 		if (retval_ptr) {
 			zval_ptr_dtor(&retval_ptr);
 		}
-		efree(params);
+		if (params) {
+			efree(params);
+		}
 	} else if (!ZEND_NUM_ARGS()) {
 		object_init_ex(return_value, ce);
 	} else {
