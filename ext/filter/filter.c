@@ -368,17 +368,23 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 		php_register_variable_ex(var, &raw_var, array_ptr TSRMLS_CC);
 	}
 
-	/* Register mangled variable */
-	/* FIXME: Should not use php_register_variable_ex as that also registers
-	 * globals when register_globals is turned on */
-	Z_STRLEN(new_var) = val_len;
-	Z_STRVAL(new_var) = estrndup(*val, val_len + 1);
-	Z_TYPE(new_var) = IS_STRING;
-
 	if (val_len) {
-		if (! (IF_G(default_filter) == FILTER_UNSAFE_RAW)) {
+		/* Register mangled variable */
+		/* FIXME: Should not use php_register_variable_ex as that also registers
+		 * globals when register_globals is turned on */
+		Z_STRLEN(new_var) = val_len;
+		Z_TYPE(new_var) = IS_STRING;
+
+		if (!(IF_G(default_filter) == FILTER_UNSAFE_RAW)) {
+			Z_STRVAL(new_var) = estrndup(*val, val_len + 1);
 			php_zval_filter(&new_var, IF_G(default_filter), IF_G(default_filter_flags), NULL, NULL/*charset*/ TSRMLS_CC);
+		} else if (PG(magic_quotes_gpc)) {
+			Z_STRVAL(new_var) = php_addslashes(*val, Z_STRLEN(new_var), &Z_STRLEN(new_var), 0 TSRMLS_CC);
+		} else {
+			Z_STRVAL(new_var) = estrndup(*val, val_len + 1);
 		}
+	} else { /* empty string */
+		ZVAL_EMPTY_STRING(&new_var);
 	}
 
 	if (orig_array_ptr) {
