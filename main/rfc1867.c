@@ -50,7 +50,7 @@
 #if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
 #include "ext/mbstring/mbstring.h"
 
-static void safe_php_register_variable(char *var, char *strval, zval *track_vars_array, zend_bool override_protection TSRMLS_DC);
+static void safe_php_register_variable(char *var, char *strval, int val_len, zval *track_vars_array, zend_bool override_protection TSRMLS_DC);
 
 void php_mb_flush_gpc_variables(int num_vars, char **val_list, int *len_list, zval *array_ptr  TSRMLS_DC)
 {
@@ -61,7 +61,7 @@ void php_mb_flush_gpc_variables(int num_vars, char **val_list, int *len_list, zv
 			php_mb_gpc_encoding_converter(val_list, len_list, num_vars, NULL, NULL TSRMLS_CC);
 		}
 		for (i=0; i<num_vars; i+=2){
-			safe_php_register_variable(val_list[i], val_list[i+1], array_ptr, 0 TSRMLS_CC);
+			safe_php_register_variable(val_list[i], val_list[i+1], len_list[i+1], array_ptr, 0 TSRMLS_CC);
 			efree(val_list[i]);
 			efree(val_list[i+1]);
 		} 
@@ -282,10 +282,10 @@ static zend_bool is_u_protected_variable(UChar *varname TSRMLS_DC)
 }
 
 
-static void safe_php_register_variable(char *var, char *strval, zval *track_vars_array, zend_bool override_protection TSRMLS_DC)
+static void safe_php_register_variable(char *var, char *strval, int val_len, zval *track_vars_array, zend_bool override_protection TSRMLS_DC)
 {
 	if (override_protection || !is_protected_variable(var TSRMLS_CC)) {
-		php_register_variable(var, strval, track_vars_array TSRMLS_CC);
+		php_register_variable_safe(var, strval, val_len, track_vars_array TSRMLS_CC);
 	}
 }
 
@@ -316,7 +316,7 @@ static void safe_u_php_register_variable_ex(UChar *var, zval *val, zval *track_v
 
 static void register_http_post_files_variable(char *strvar, char *val, zval *http_post_files, zend_bool override_protection TSRMLS_DC)
 {
-	safe_php_register_variable(strvar, val, http_post_files, override_protection TSRMLS_CC);
+	safe_php_register_variable(strvar, val, strlen(val), http_post_files, override_protection TSRMLS_CC);
 }
 
 
@@ -980,7 +980,7 @@ static int multipart_buffer_read(multipart_buffer *self, char *buf, int bytes, i
   XXX: this is horrible memory-usage-wise, but we only expect
   to do this on small pieces of form data.
 */
-static char *multipart_buffer_read_body(multipart_buffer *self TSRMLS_DC)
+static char *multipart_buffer_read_body(multipart_buffer *self, unsigned int *len TSRMLS_DC)
 {
 	char buf[FILLUNIT], *out=NULL;
 	int total_bytes=0, read_bytes=0;
@@ -992,6 +992,7 @@ static char *multipart_buffer_read_body(multipart_buffer *self TSRMLS_DC)
 	}
 
 	if (out) out[total_bytes] = '\0';
+	*len = total_bytes;
 
 	return out;
 }
@@ -1142,14 +1143,15 @@ static SAPI_POST_HANDLER_FUNC(rfc1867_post_handler_unicode)
 			if (!filename && param) {
 				UChar *u_val;
 				int32_t u_val_len;
+				unsigned int value_len;
 				UErrorCode status = U_ZERO_ERROR;
 
-				char *value = multipart_buffer_read_body(mbuff TSRMLS_CC);
+				char *value = multipart_buffer_read_body(mbuff, &value_len TSRMLS_CC);
 				/* unsigned int new_val_len;  Dummy variable */
 
 				if (value) {
 					/* UTODO use 'charset' parameter for conversion */
-					zend_convert_to_unicode(input_conv, &u_val, &u_val_len, value, strlen(value), &status);
+					zend_convert_to_unicode(input_conv, &u_val, &u_val_len, value, value_len, &status);
 					if (U_FAILURE(status)) {
 						/* UTODO set a user-accessible flag to indicate that conversion failed? */
 						goto var_done;
@@ -1597,24 +1599,24 @@ static SAPI_POST_HANDLER_FUNC(rfc1867_post_handler_legacy)
 
 			/* Normal form variable, safe to read all data into memory */
 			if (!filename && param) {
-
-				char *value = multipart_buffer_read_body(mbuff TSRMLS_CC);
+				unsigned int value_len; 
+				char *value = multipart_buffer_read_body(mbuff, &value_len TSRMLS_CC);
 				unsigned int new_val_len; /* Dummy variable */
 
 				if (!value) {
 					value = estrdup("");
 				}
 
-				if (sapi_module.input_filter(PARSE_POST, param, &value, strlen(value), &new_val_len TSRMLS_CC)) {
+				if (sapi_module.input_filter(PARSE_POST, param, &value, value_len, &new_val_len TSRMLS_CC)) {
 #if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
 					if (php_mb_encoding_translation(TSRMLS_C)) {
 						php_mb_gpc_stack_variable(param, value, &val_list, &len_list, 
 												  &num_vars, &num_vars_max TSRMLS_CC);
 					} else {
-						safe_php_register_variable(param, value, array_ptr, 0 TSRMLS_CC);
+						safe_php_register_variable(param, value, value_len, array_ptr, 0 TSRMLS_CC);
 					}
 #else
-					safe_php_register_variable(param, value, array_ptr, 0 TSRMLS_CC);
+					safe_php_register_variable(param, value, value_len, array_ptr, 0 TSRMLS_CC);
 #endif
 				}
 				if (!strcasecmp(param, "MAX_FILE_SIZE")) {
@@ -1814,9 +1816,9 @@ filedone:
 
 			if (!is_anonymous) {
 				if (s && s > filename) {
-					safe_php_register_variable(lbuf, s+1, NULL, 0 TSRMLS_CC);
+					safe_php_register_variable(lbuf, s+1, strlen(s+1), NULL, 0 TSRMLS_CC);
 				} else {
-					safe_php_register_variable(lbuf, filename, NULL, 0 TSRMLS_CC);
+					safe_php_register_variable(lbuf, filename, strlen(filename), NULL, 0 TSRMLS_CC);
 				}
 			}
 
@@ -1852,7 +1854,7 @@ filedone:
 				sprintf(lbuf, "%s_type", param);
 			}
 			if (!is_anonymous) {
-				safe_php_register_variable(lbuf, cd, NULL, 0 TSRMLS_CC);
+				safe_php_register_variable(lbuf, cd, strlen(cd), NULL, 0 TSRMLS_CC);
 			}
 
 			/* Add $foo[type] */
@@ -1874,7 +1876,7 @@ filedone:
 
 			/* if param is of form xxx[.*] this will cut it to xxx */
 			if (!is_anonymous) {
-				safe_php_register_variable(param, temp_filename, NULL, 1 TSRMLS_CC);
+				safe_php_register_variable(param, temp_filename, strlen(temp_filename), NULL, 1 TSRMLS_CC);
 			}
 
 			/* Add $foo[tmp_name] */
