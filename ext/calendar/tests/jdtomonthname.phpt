@@ -10,7 +10,7 @@ $jd_days = Array(
     2440588,
     -1,
     array(),
-    1000000000
+    10000000
     );
 
 foreach ($jd_days as $jd_day) {
@@ -62,10 +62,10 @@ bool(false)
 
 Warning: jdmonthname() expects parameter 1 to be long, array given in %s on line %d
 bool(false)
-string(0) ""
-string(0) ""
-string(0) ""
-string(0) ""
-string(6) "AdarII"
+string(3) "Dec"
+string(8) "December"
+string(3) "Jul"
+string(4) "July"
+string(6) "Tishri"
 string(0) ""
 Done
