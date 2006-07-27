@@ -829,6 +829,7 @@ americanshort    = month "/" day;
 american         = month "/" day "/" year;
 iso8601dateslash = year4 "/" monthlz "/" daylz "/"?;
 dateslash        = year4 "/" month "/" day;
+gnudateshorter   = year4 "-" month;
 gnudateshort     = year "-" month "-" day;
 iso8601date      = year4 "-" monthlz "-" daylz;
 pointeddate      = day [.\t-] month [.-] year;
@@ -1090,6 +1091,18 @@ relativetext = reltextnumber space reltextunit;
 		s->time->y = timelib_get_nr((char **) &ptr, 4);
 		s->time->m = timelib_get_nr((char **) &ptr, 2);
 		s->time->d = timelib_get_nr((char **) &ptr, 2);
+		TIMELIB_DEINIT;
+		return TIMELIB_ISO_DATE;
+	}
+
+	gnudateshorter
+	{
+		DEBUG_OUTPUT("gnudateshorter");
+		TIMELIB_INIT;
+		TIMELIB_HAVE_DATE();
+		s->time->y = timelib_get_nr((char **) &ptr, 4);
+		s->time->m = timelib_get_nr((char **) &ptr, 2);
+		TIMELIB_PROCESS_YEAR(s->time->y);
 		TIMELIB_DEINIT;
 		return TIMELIB_ISO_DATE;
 	}
