@@ -216,31 +216,37 @@ plain_var:
 
 SAPI_API SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 {
-	char *var, *val;
-	char *strtok_buf = NULL;
+	char *var, *val, *e, *s, *p;
 	zval *array_ptr = (zval *) arg;
 
 	if (SG(request_info).post_data == NULL) {
 		return;
 	}	
 
-	var = php_strtok_r(SG(request_info).post_data, "&", &strtok_buf);
+	s = SG(request_info).post_data;
+	e = s + SG(request_info).post_data_length;
 
-	while (var) {
-		val = strchr(var, '=');
-		if (val) { /* have a value */
+	while (s < e && (p = memchr(s, '&', (e - s)))) {
+last_value:
+		if ((val = memchr(s, '=', (p - s)))) { /* have a value */
 			unsigned int val_len, new_val_len;
 
-			*val++ = '\0';
-			php_url_decode(var, strlen(var));
-			val_len = php_url_decode(val, strlen(val));
+			var = s;
+
+			php_url_decode(var, (val - s));
+			val++;
+			val_len = php_url_decode(val, (p - val));
 			val = estrndup(val, val_len);
 			if (sapi_module.input_filter(PARSE_POST, var, &val, val_len, &new_val_len TSRMLS_CC)) {
 				php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
 			}
 			efree(val);
 		}
-		var = php_strtok_r(NULL, "&", &strtok_buf);
+		s = p + 1;
+	}
+	if (s < e) {
+		p = e;
+		goto last_value;
 	}
 }
 
