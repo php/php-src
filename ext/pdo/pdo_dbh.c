@@ -274,7 +274,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 	/* is this supposed to be a persistent connection ? */
 	if (options) {
 		zval **v;
-		int plen;
+		int plen = 0;
 		char *hashkey = NULL;
 		zend_rsrc_list_entry *le;
 		pdo_dbh_t *pdbh = NULL;
