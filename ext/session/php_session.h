@@ -123,6 +123,7 @@ typedef struct _php_ps_globals {
 	long hash_bits_per_character;
 	int send_cookie;
 	int define_sid;
+	zend_bool invalid_session_id;	/* allows the driver to report about an invalid session id and request id regeneration */
 } php_ps_globals;
 
 typedef php_ps_globals zend_ps_globals;

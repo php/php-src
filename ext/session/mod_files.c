@@ -152,6 +152,7 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 		
 		if (!ps_files_valid_key(key)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The session id contains illegal characters, valid characters are a-z, A-Z, 0-9 and '-,'");
+			PS(invalid_session_id) = 1;
 			return;
 		}
 		if (!ps_files_path_create(buf, sizeof(buf), data, key))

@@ -653,7 +653,6 @@ static void php_session_initialize(TSRMLS_D)
 {
 	char *val;
 	int vallen;
-	zend_bool make_new = 0;
 
 	/* check session name for invalid characters */
 	if (PS(id) && strpbrk(PS(id), "\r\n\t <>'\"\\")) {
@@ -679,7 +678,6 @@ new_session:
 		if (PS(use_cookies)) {
 			PS(send_cookie) = 1;
 		}
-		make_new = 1;
 	}
 	
 	/* Read data */
@@ -689,10 +687,13 @@ new_session:
 	 * session information
 	 */
 	php_session_track_init(TSRMLS_C);
+	PS(invalid_session_id) = 0;
 	if (PS(mod)->s_read(&PS(mod_data), PS(id), &val, &vallen TSRMLS_CC) == SUCCESS) {
 		php_session_decode(val, vallen TSRMLS_CC);
 		efree(val);
-	} else if (!make_new) {
+	} else if (PS(invalid_session_id)) { /* address instances where the session read fails due to an invalid id */
+		PS(invalid_session_id) = 0;
+		efree(PS(id));
 		goto new_session;
 	}
 }
