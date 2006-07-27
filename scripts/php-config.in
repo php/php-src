@@ -3,6 +3,7 @@
 prefix="@prefix@"
 exec_prefix="@exec_prefix@"
 version="@PHP_VERSION@"
+version_id="@PHP_VERSION_ID@"
 includedir="@includedir@/php"
 includes="-I$includedir -I$includedir/main -I$includedir/TSRM -I$includedir/Zend -I$includedir/ext -I$includedir/ext/date/lib"
 ldflags="@PHP_LDFLAGS@"
@@ -30,8 +31,10 @@ case "$1" in
 	echo $php_binary;;
 --version)
 	echo $version;;
+--vernum)
+	echo $version_id;;
 *)
-	echo "Usage: $0 [--prefix|--includes|--ldflags|--libs|--extension-dir|--include-dir|--php-binary|--version]"
+	echo "Usage: $0 [--prefix|--includes|--ldflags|--libs|--extension-dir|--include-dir|--php-binary|--version|--vernum]"
 	exit 1;;
 esac
 
