@@ -9,6 +9,12 @@ PHP                                                                        NEWS
   . ext/filepro (Derick, Tony)
   . ext/hwapi (Derick, Tony)
 
+- Improved SNMP extension: (Jani)
+  . Renamed snmp_set_oid_numeric_print() to snmp_set_oid_output_format().
+  . Added 2 new constants: SNMP_OID_OUTPUT_FULL and SNMP_OID_OUTPUT_NUMERIC
+  . Fixed bug #37564 (AES privacy encryption not possible due to net-snmp 5.2
+    compatibility issue). (Patch: scott dot moynes+php at gmail dot com)
+
 - Fixed bug #38220 (Crash on some object operations). (Dmitry)
 - Fixed bug #38217 (ReflectionClass::newInstanceArgs() tries to allocate too 
   much memory). (Tony)
