@@ -276,7 +276,7 @@ onig_snprintf_with_pattern(buf, bufsize, enc, pat, pat_end, fmt, va_alist)
   UChar bs[6];
   va_list args;
 
-  va_init_list(args, (const char* )fmt);
+  va_init_list(args, fmt);
   n = vsnprintf((char* )buf, bufsize, (const char* )fmt, args);
   va_end(args);
 
