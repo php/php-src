@@ -275,7 +275,7 @@ PHP_MINFO_FUNCTION(zlib)
    Read and uncompress entire .gz-file into an array */
 PHP_FUNCTION(gzfile)
 {
-	void *filename;
+	zstr filename;
 	int filename_len;
 	zend_uchar filename_type;
 	long flags = 0;
@@ -291,15 +291,15 @@ PHP_FUNCTION(gzfile)
 	use_include_path = flags ? USE_PATH : 0;
 
 	if (filename_type == IS_UNICODE) {
-		if (php_stream_path_encode(NULL, (char**)&filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, NULL) == FAILURE) {
+		if (php_stream_path_encode(NULL, &filename.s, &filename_len, filename.u, filename_len, REPORT_ERRORS, NULL) == FAILURE) {
 			RETURN_FALSE;
 		}
 	}
 
 	/* using a stream here is a bit more efficient (resource wise) than php_gzopen_wrapper */
-	stream = php_stream_gzopen(NULL, filename, "rb", use_include_path | REPORT_ERRORS, NULL, NULL STREAMS_CC TSRMLS_CC);
+	stream = php_stream_gzopen(NULL, filename.s, "rb", use_include_path | REPORT_ERRORS, NULL, NULL STREAMS_CC TSRMLS_CC);
 	if (filename_type == IS_UNICODE) {
-		efree(filename);
+		efree(filename.s);
 	}
 	if (stream == NULL) {
 		/* Error reporting is already done by stream code */
@@ -323,7 +323,7 @@ PHP_FUNCTION(gzfile)
    Open a .gz-file and return a .gz-file pointer */
 PHP_FUNCTION(gzopen)
 {
-	void *filename;
+	zstr filename;
 	char *mode;
 	int filename_len, mode_len;
 	zend_uchar filename_type;
@@ -338,15 +338,15 @@ PHP_FUNCTION(gzopen)
 	use_include_path = flags ? USE_PATH : 0;
 
 	if (filename_type == IS_UNICODE) {
-		if (php_stream_path_encode(NULL, (char**)&filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, NULL) == FAILURE) {
+		if (php_stream_path_encode(NULL, &filename.s, &filename_len, filename.u, filename_len, REPORT_ERRORS, NULL) == FAILURE) {
 			RETURN_FALSE;
 		}
 	}
 
-	stream = php_stream_gzopen(NULL, filename, mode, use_include_path | REPORT_ERRORS, NULL, NULL STREAMS_CC TSRMLS_CC);
+	stream = php_stream_gzopen(NULL, filename.s, mode, use_include_path | REPORT_ERRORS, NULL, NULL STREAMS_CC TSRMLS_CC);
 
 	if (filename_type == IS_UNICODE) {
-		efree(filename);
+		efree(filename.s);
 	}
 	if (!stream) {
 		RETURN_FALSE;
@@ -362,7 +362,7 @@ PHP_FUNCTION(gzopen)
    Output a .gz-file */
 PHP_FUNCTION(readgzfile)
 {
-	char *filename;
+	zstr filename;
 	int filename_len;
 	zend_uchar filename_type;
 	long flags = 0;
@@ -377,14 +377,14 @@ PHP_FUNCTION(readgzfile)
 	use_include_path = flags ? USE_PATH : 0;
 
 	if (filename_type == IS_UNICODE) {
-		if (php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, NULL) == FAILURE) {
+		if (php_stream_path_encode(NULL, &filename.s, &filename_len, filename.u, filename_len, REPORT_ERRORS, NULL) == FAILURE) {
 			RETURN_FALSE;
 		}
 	}
 
-	stream = php_stream_gzopen(NULL, filename, "rb", use_include_path, NULL, NULL STREAMS_CC TSRMLS_CC);
+	stream = php_stream_gzopen(NULL, filename.s, "rb", use_include_path, NULL, NULL STREAMS_CC TSRMLS_CC);
 	if (filename_type == IS_UNICODE) {
-		efree(filename);
+		efree(filename.s);
 	}
 	if (!stream) {
 		RETURN_FALSE;
