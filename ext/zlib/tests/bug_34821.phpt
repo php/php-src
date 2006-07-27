@@ -21,9 +21,9 @@ foreach ($b as $size) {
 	for ($i = 0; $i <= $size; ++$i) {
 		$s .= chr(rand(0,255));
 	}
-	var_dump($s == gzinflate(gzdeflate($s)));
-	var_dump($s == gzuncompress(gzcompress($s)));
-	var_dump($s == gzinflate(substr(gzencode($s), 10, -8)));
+	var_dump($s == gzinflate(gzdeflate((binary)$s)));
+	var_dump($s == gzuncompress(gzcompress((binary)$s)));
+	var_dump($s == gzinflate(substr(gzencode((binary)$s), 10, -8)));
 }
 ?>
 --EXPECT--
