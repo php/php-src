@@ -166,32 +166,6 @@ xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size)
 	return ret;
 }
 
-#ifndef ZEND_ENGINE_2
-int php_stream_xmlIO_match_wrapper(const char *filename)
-{
-	TSRMLS_FETCH();
-	return php_stream_locate_url_wrapper(filename, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ? 1 : 0;
-}
-
-void *php_stream_xmlIO_open_wrapper(const char *filename)
-{
-	TSRMLS_FETCH();
-	return php_stream_open_wrapper((char*)filename, "rb", REPORT_ERRORS, NULL);
-}
-
-int php_stream_xmlIO_read(void *context, char *buffer, int len)
-{
-	TSRMLS_FETCH();
-	return php_stream_read((php_stream*)context, buffer, len);
-}
-
-int php_stream_xmlIO_close(void *context)
-{
-	TSRMLS_FETCH();
-	return php_stream_close((php_stream*)context);
-}
-#endif
-
 xmlNsPtr attr_find_ns(xmlAttrPtr node)
 {
 	if (node->ns) {
