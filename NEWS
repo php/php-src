@@ -17,6 +17,7 @@ PHP                                                                        NEWS
 
 - Fixed bug #38234 (Exception in __clone makes memory leak). (Dmitry, Nuno)
 - Fixed bug #38229 (strtotime() does not parse YYYY-MM format). (Ilia)
+- Fixed bug #38224 (session extension can't handle broken cookies). (Ilia)
 - Fixed bug #38220 (Crash on some object operations). (Dmitry)
 - Fixed bug #38217 (ReflectionClass::newInstanceArgs() tries to allocate too 
   much memory). (Tony)
