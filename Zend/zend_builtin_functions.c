@@ -1935,7 +1935,23 @@ ZEND_FUNCTION(debug_print_backtrace)
 		if (filename) {
 			zend_printf(") called at [%s:%d]\n", filename, lineno);
 		} else {
-			ZEND_PUTS(")\n");
+			zend_execute_data *prev = skip->prev_execute_data;
+
+			while (prev) {
+				if (prev->function_state.function &&
+					prev->function_state.function->common.type != ZEND_USER_FUNCTION) {
+					prev = NULL;
+					break;
+				}				    
+				if (prev->op_array) {
+					zend_printf(") called at [%s:%d]\n", prev->op_array->filename, prev->opline->lineno);
+					break;
+				}
+				prev = prev->prev_execute_data;
+			}
+			if (!prev) {
+				ZEND_PUTS(")\n");
+			}
 		}
 		include_filename = filename;
 		ptr = skip->prev_execute_data;
@@ -2029,6 +2045,20 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			 * and debug_baktrace() might have been called by the error_handler. in this case we don't
 			 * want to pop anything of the argument-stack */
 		} else {
+			zend_execute_data *prev = skip->prev_execute_data;
+
+			while (prev) {
+				if (prev->function_state.function &&
+					prev->function_state.function->common.type != ZEND_USER_FUNCTION) {
+					break;
+				}				    
+				if (prev->op_array) {
+					add_assoc_string_ex(stack_frame, "file", sizeof("file"), prev->op_array->filename, 1);
+					add_assoc_long_ex(stack_frame, "line", sizeof("line"), prev->opline->lineno);
+					break;
+				}
+				prev = prev->prev_execute_data;
+			}
 			filename = NULL;
 		}
 
