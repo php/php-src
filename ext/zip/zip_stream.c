@@ -10,6 +10,7 @@
 
 #include "php_streams.h"
 #include "ext/standard/file.h"
+#include "ext/standard/php_string.h"
 #include "fopen_wrappers.h"
 
 #include "ext/standard/url.h"
@@ -47,8 +48,6 @@ static size_t php_zip_ops_read(php_stream *stream, char *buf, size_t count TSRML
 /* {{{ php_zip_ops_write */
 static size_t php_zip_ops_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
-	STREAM_DATA_FROM_STREAM();
-
 	if (!stream) {
 		return 0;
 	}
@@ -74,9 +73,6 @@ static int php_zip_ops_close(php_stream *stream, int close_handle TSRMLS_DC)
 /* {{{ php_zip_ops_flush */
 static int php_zip_ops_flush(php_stream *stream TSRMLS_DC)
 {
-
-	STREAM_DATA_FROM_STREAM();
-
 	if (!stream) {
 		return 0;
 	}
