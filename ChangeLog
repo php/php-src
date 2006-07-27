@@ -1,3 +1,164 @@
+2006-07-26  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      NEWS
+      ext/snmp/snmp.c:
+      MFH: - Fixed bug #37564 (AES privacy encryption not possible due to
+      net-snmp 5.2 compatibility issue)
+
+    * ext/snmp/snmp.c:
+      - Fixed bug #37564 (AES privacy encryption not possible due to net-snmp 5.2
+      compatibility issue)
+
+2006-07-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/reflection/tests/bug38132.phpt:
+      Added test for bug #38132
+
+2006-07-26  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/filter/tests/033.phpt
+      ext/filter/tests/033.phpt
+      ext/filter/tests/033_run.inc:
+      - fix test
+
+    * (PHP_5_2)
+      ext/filter/tests/033_run.inc:
+      - readability
+
+2006-07-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/bug38132.phpt:
+      Improved fix for bug #38132
+
+2006-07-26  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      sapi/cli/php.1.in:
+      fix typo (#38223)
+
+2006-07-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_objects.c
+      ZendEngine2/zend_objects.c
+      ZendEngine2/tests/bug38220.phpt
+      ZendEngine2/tests/bug38220.phpt
+      ZendEngine2/tests/bug38220.phpt:
+      Fixed bug #38220 (Crash on some object operations)
+
+2006-07-26  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      main/rfc1867.h:
+      eliminate compilation warnings on AIX
+
+2006-07-26  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      NEWS:
+      fix news
+
+2006-07-26  Antony Dovgal  <antony@zend.com>
+
+    * run-tests.php
+      run-tests.php:
+      turn Off Zend MM and check for leaks when running tests through valgrind
+
+    * sapi/apache2handler/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c:
+      nuke unused variable
+
+2006-07-26  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - 38212 & 38214
+
+    * ext/gd/libgd/gd_gif_out.c:
+      - MFB #38214, gif interlace never worked
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd_gif_out.c:
+      - #38214, gif interlace never works
+
+2006-07-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug38211.phpt
+      ZendEngine2/tests/bug38211.phpt:
+      
+      file bug38211.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug38211.phpt:
+      Fixed bug #38211 (variable name and cookie name match breaks script
+      execution)
+
+2006-07-26  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/tests/38179.phpt
+      ext/gd/tests/bug38179.phpt
+      ext/gd/tests/bug38179.phpt:
+      - mv 38179.phpt to bug38179.phpt
+
+2006-07-26  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      configure.in
+      ext/standard/basic_functions.c:
+      MFH: fix compile warning on Solaris, getloadavg() is in sys/loadavg.h there
+
+    * configure.in
+      ext/standard/basic_functions.c:
+      fix compile warning on Solaris, getloadavg() is in sys/loadavg.h there
+
+2006-07-26  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd_gd2.c
+      ext/gd/tests/bug38212.phpt:
+      - MFH #38212, Segfault on invalid imagecreatefromgd2part() parameters
+
+    * ext/gd/libgd/gd_gd2.c
+      ext/gd/tests/bug38212.phpt
+      ext/gd/tests/bug38212.phpt:
+      - #38212, Segfault on invalid imagecreatefromgd2part() parameters
+
+2006-07-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c:
+      Fixed crash of DEBUG version on SPARC CPU because of unaligned pointers.
+
+2006-07-26  Antony Dovgal  <antony@zend.com>
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/tests/bug38217.phpt:
+      fix bug #38217 (ReflectionClass::newInstanceArgs() tries to allocate too
+      much memory)
+
+    * (PHP_5_2)
+      NEWS
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/bug38217.phpt
+      ext/reflection/tests/bug38217.phpt:
+      MFH: fix bug #38217 (ReflectionClass::newInstanceArgs() tries to allocate
+      too much memory)
+
+    * ext/oci8/oci8.c
+      ext/oci8/oci8.c:
+      improve connection timeout check (implements FR #38210)
+
 2006-07-25  Michael Wallner  <mike@iworks.at>
 
     * ext/tidy/tidy.c:
