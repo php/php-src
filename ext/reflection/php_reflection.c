@@ -2645,8 +2645,8 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
-        HashPosition pos;
-        zval **value;
+	HashPosition pos;
+	zval **value;
 	
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);	
 	GET_REFLECTION_OBJECT_PTR(ce);
@@ -2663,13 +2663,14 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 
 		if (zend_hash_get_current_key_ex(CE_STATIC_MEMBERS(ce), &key, &key_len, &num_index, 0, &pos) != FAILURE) {
 			zstr prop_name, class_name;
-			int prop_name_len = UG(unicode) ? u_strlen(prop_name.u) : strlen(prop_name.s);
+			int prop_name_len;
 
 			zend_u_unmangle_property_name(UG(unicode)?IS_UNICODE:IS_STRING, key, key_len-1, &class_name, &prop_name);
+			prop_name_len = UG(unicode) ? u_strlen(prop_name.u) : strlen(prop_name.s);
 
 			zval_add_ref(value);
 
-			zend_u_hash_update(Z_ARRVAL_P(return_value), UG(unicode)?IS_UNICODE:IS_STRING, prop_name, prop_name_len, value, sizeof(zval *), NULL);
+			zend_u_hash_update(Z_ARRVAL_P(return_value), UG(unicode)?IS_UNICODE:IS_STRING, prop_name, prop_name_len+1, value, sizeof(zval *), NULL);
 		}
 		zend_hash_move_forward_ex(CE_STATIC_MEMBERS(ce), &pos);
 	}
