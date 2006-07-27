@@ -676,7 +676,6 @@ static void php_session_initialize(TSRMLS_D)
 	if (!PS(id)) {
 new_session:
 		PS(id) = PS(mod)->s_create_sid(&PS(mod_data), NULL TSRMLS_CC);
-php_error_docref(NULL TSRMLS_CC, E_WARNING, "Making a new session %s.", PS(id));
 		if (PS(use_cookies)) {
 			PS(send_cookie) = 1;
 		}
