@@ -2326,8 +2326,8 @@ static int ZEND_U_NORMALIZE_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zval_dtor(result);
 			*result = var_copy;
 		}
-		if (!zend_normalize_identifier(&norm, &norm_len,
-		                               Z_USTRVAL_P(result), Z_USTRLEN_P(result), 0)) {
+		if (zend_normalize_identifier(&norm, &norm_len,
+		                               Z_USTRVAL_P(result), Z_USTRLEN_P(result), 0) == FAILURE) {
 			zend_error(E_WARNING, "Could not normalize identifier: %r", Z_USTRVAL_P(result));
 		} else if (norm != Z_USTRVAL_P(result)) {
 			efree(Z_USTRVAL_P(result));
@@ -4931,8 +4931,8 @@ static int ZEND_U_NORMALIZE_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zval_dtor(result);
 			*result = var_copy;
 		}
-		if (!zend_normalize_identifier(&norm, &norm_len,
-		                               Z_USTRVAL_P(result), Z_USTRLEN_P(result), 0)) {
+		if (zend_normalize_identifier(&norm, &norm_len,
+		                               Z_USTRVAL_P(result), Z_USTRLEN_P(result), 0) == FAILURE) {
 			zend_error(E_WARNING, "Could not normalize identifier: %r", Z_USTRVAL_P(result));
 		} else if (norm != Z_USTRVAL_P(result)) {
 			efree(Z_USTRVAL_P(result));
@@ -8243,8 +8243,8 @@ static int ZEND_U_NORMALIZE_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zval_dtor(result);
 			*result = var_copy;
 		}
-		if (!zend_normalize_identifier(&norm, &norm_len,
-		                               Z_USTRVAL_P(result), Z_USTRLEN_P(result), 0)) {
+		if (zend_normalize_identifier(&norm, &norm_len,
+		                               Z_USTRVAL_P(result), Z_USTRLEN_P(result), 0) == FAILURE) {
 			zend_error(E_WARNING, "Could not normalize identifier: %r", Z_USTRVAL_P(result));
 		} else if (norm != Z_USTRVAL_P(result)) {
 			efree(Z_USTRVAL_P(result));
@@ -9505,8 +9505,8 @@ static int ZEND_UNSET_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							UChar *norm;
 							int norm_len;
 
-							if (!zend_normalize_identifier(&norm, &norm_len,
-							                               offset_key.u, offset_len, 0)) {
+							if (zend_normalize_identifier(&norm, &norm_len,
+							                               offset_key.u, offset_len, 0) == FAILURE) {
 								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key.u);
 							} else if (norm != offset_key.u) {
 								offset_key.u = norm;
@@ -9661,7 +9661,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CONST(int prop_dim, 
 						UChar *norm;
 						int norm_len;
 
-						if (!zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0)) {
+						if (zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0) == FAILURE) {
 							zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
 						} else if (norm != offset_key.u) {
 							offset_key.u = norm;
@@ -11034,8 +11034,8 @@ static int ZEND_UNSET_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							UChar *norm;
 							int norm_len;
 
-							if (!zend_normalize_identifier(&norm, &norm_len,
-							                               offset_key.u, offset_len, 0)) {
+							if (zend_normalize_identifier(&norm, &norm_len,
+							                               offset_key.u, offset_len, 0) == FAILURE) {
 								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key.u);
 							} else if (norm != offset_key.u) {
 								offset_key.u = norm;
@@ -11190,7 +11190,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_TMP(int prop_dim, ZE
 						UChar *norm;
 						int norm_len;
 
-						if (!zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0)) {
+						if (zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0) == FAILURE) {
 							zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
 						} else if (norm != offset_key.u) {
 							offset_key.u = norm;
@@ -12601,8 +12601,8 @@ static int ZEND_UNSET_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							UChar *norm;
 							int norm_len;
 
-							if (!zend_normalize_identifier(&norm, &norm_len,
-							                               offset_key.u, offset_len, 0)) {
+							if (zend_normalize_identifier(&norm, &norm_len,
+							                               offset_key.u, offset_len, 0) == FAILURE) {
 								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key.u);
 							} else if (norm != offset_key.u) {
 								offset_key.u = norm;
@@ -12757,7 +12757,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_VAR(int prop_dim, ZE
 						UChar *norm;
 						int norm_len;
 
-						if (!zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0)) {
+						if (zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0) == FAILURE) {
 							zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
 						} else if (norm != offset_key.u) {
 							offset_key.u = norm;
@@ -14592,8 +14592,8 @@ static int ZEND_UNSET_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							UChar *norm;
 							int norm_len;
 
-							if (!zend_normalize_identifier(&norm, &norm_len,
-							                               offset_key.u, offset_len, 0)) {
+							if (zend_normalize_identifier(&norm, &norm_len,
+							                               offset_key.u, offset_len, 0) == FAILURE) {
 								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key.u);
 							} else if (norm != offset_key.u) {
 								offset_key.u = norm;
@@ -14748,7 +14748,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CV(int prop_dim, ZEN
 						UChar *norm;
 						int norm_len;
 
-						if (!zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0)) {
+						if (zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0) == FAILURE) {
 							zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
 						} else if (norm != offset_key.u) {
 							offset_key.u = norm;
@@ -15837,8 +15837,8 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							UChar *norm;
 							int norm_len;
 
-							if (!zend_normalize_identifier(&norm, &norm_len,
-							                               offset_key.u, offset_len, 0)) {
+							if (zend_normalize_identifier(&norm, &norm_len,
+							                               offset_key.u, offset_len, 0) == FAILURE) {
 								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key.u);
 							} else if (norm != offset_key.u) {
 								offset_key.u = norm;
@@ -15991,7 +15991,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CONST(int prop_di
 						UChar *norm;
 						int norm_len;
 
-						if (!zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0)) {
+						if (zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0) == FAILURE) {
 							zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
 						} else if (norm != offset_key.u) {
 							offset_key.u = norm;
@@ -16961,8 +16961,8 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							UChar *norm;
 							int norm_len;
 
-							if (!zend_normalize_identifier(&norm, &norm_len,
-							                               offset_key.u, offset_len, 0)) {
+							if (zend_normalize_identifier(&norm, &norm_len,
+							                               offset_key.u, offset_len, 0) == FAILURE) {
 								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key.u);
 							} else if (norm != offset_key.u) {
 								offset_key.u = norm;
@@ -17115,7 +17115,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_TMP(int prop_dim,
 						UChar *norm;
 						int norm_len;
 
-						if (!zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0)) {
+						if (zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0) == FAILURE) {
 							zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
 						} else if (norm != offset_key.u) {
 							offset_key.u = norm;
@@ -18085,8 +18085,8 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							UChar *norm;
 							int norm_len;
 
-							if (!zend_normalize_identifier(&norm, &norm_len,
-							                               offset_key.u, offset_len, 0)) {
+							if (zend_normalize_identifier(&norm, &norm_len,
+							                               offset_key.u, offset_len, 0) == FAILURE) {
 								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key.u);
 							} else if (norm != offset_key.u) {
 								offset_key.u = norm;
@@ -18239,7 +18239,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_VAR(int prop_dim,
 						UChar *norm;
 						int norm_len;
 
-						if (!zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0)) {
+						if (zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0) == FAILURE) {
 							zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
 						} else if (norm != offset_key.u) {
 							offset_key.u = norm;
@@ -19582,8 +19582,8 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							UChar *norm;
 							int norm_len;
 
-							if (!zend_normalize_identifier(&norm, &norm_len,
-							                               offset_key.u, offset_len, 0)) {
+							if (zend_normalize_identifier(&norm, &norm_len,
+							                               offset_key.u, offset_len, 0) == FAILURE) {
 								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key.u);
 							} else if (norm != offset_key.u) {
 								offset_key.u = norm;
@@ -19736,7 +19736,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CV(int prop_dim, 
 						UChar *norm;
 						int norm_len;
 
-						if (!zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0)) {
+						if (zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0) == FAILURE) {
 							zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
 						} else if (norm != offset_key.u) {
 							offset_key.u = norm;
@@ -21102,8 +21102,8 @@ static int ZEND_U_NORMALIZE_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zval_dtor(result);
 			*result = var_copy;
 		}
-		if (!zend_normalize_identifier(&norm, &norm_len,
-		                               Z_USTRVAL_P(result), Z_USTRLEN_P(result), 0)) {
+		if (zend_normalize_identifier(&norm, &norm_len,
+		                               Z_USTRVAL_P(result), Z_USTRLEN_P(result), 0) == FAILURE) {
 			zend_error(E_WARNING, "Could not normalize identifier: %r", Z_USTRVAL_P(result));
 		} else if (norm != Z_USTRVAL_P(result)) {
 			efree(Z_USTRVAL_P(result));
@@ -22360,8 +22360,8 @@ static int ZEND_UNSET_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							UChar *norm;
 							int norm_len;
 
-							if (!zend_normalize_identifier(&norm, &norm_len,
-							                               offset_key.u, offset_len, 0)) {
+							if (zend_normalize_identifier(&norm, &norm_len,
+							                               offset_key.u, offset_len, 0) == FAILURE) {
 								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key.u);
 							} else if (norm != offset_key.u) {
 								offset_key.u = norm;
@@ -22514,7 +22514,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CONST(int prop_dim, Z
 						UChar *norm;
 						int norm_len;
 
-						if (!zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0)) {
+						if (zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0) == FAILURE) {
 							zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
 						} else if (norm != offset_key.u) {
 							offset_key.u = norm;
@@ -23881,8 +23881,8 @@ static int ZEND_UNSET_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							UChar *norm;
 							int norm_len;
 
-							if (!zend_normalize_identifier(&norm, &norm_len,
-							                               offset_key.u, offset_len, 0)) {
+							if (zend_normalize_identifier(&norm, &norm_len,
+							                               offset_key.u, offset_len, 0) == FAILURE) {
 								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key.u);
 							} else if (norm != offset_key.u) {
 								offset_key.u = norm;
@@ -24035,7 +24035,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_TMP(int prop_dim, ZEN
 						UChar *norm;
 						int norm_len;
 
-						if (!zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0)) {
+						if (zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0) == FAILURE) {
 							zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
 						} else if (norm != offset_key.u) {
 							offset_key.u = norm;
@@ -25439,8 +25439,8 @@ static int ZEND_UNSET_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							UChar *norm;
 							int norm_len;
 
-							if (!zend_normalize_identifier(&norm, &norm_len,
-							                               offset_key.u, offset_len, 0)) {
+							if (zend_normalize_identifier(&norm, &norm_len,
+							                               offset_key.u, offset_len, 0) == FAILURE) {
 								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key.u);
 							} else if (norm != offset_key.u) {
 								offset_key.u = norm;
@@ -25593,7 +25593,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_VAR(int prop_dim, ZEN
 						UChar *norm;
 						int norm_len;
 
-						if (!zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0)) {
+						if (zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0) == FAILURE) {
 							zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
 						} else if (norm != offset_key.u) {
 							offset_key.u = norm;
@@ -27420,8 +27420,8 @@ static int ZEND_UNSET_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 							UChar *norm;
 							int norm_len;
 
-							if (!zend_normalize_identifier(&norm, &norm_len,
-							                               offset_key.u, offset_len, 0)) {
+							if (zend_normalize_identifier(&norm, &norm_len,
+							                               offset_key.u, offset_len, 0) == FAILURE) {
 								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key.u);
 							} else if (norm != offset_key.u) {
 								offset_key.u = norm;
@@ -27574,7 +27574,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CV(int prop_dim, ZEND
 						UChar *norm;
 						int norm_len;
 
-						if (!zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0)) {
+						if (zend_normalize_identifier(&norm, &norm_len, offset_key.u, offset_len, 0) == FAILURE) {
 							zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
 						} else if (norm != offset_key.u) {
 							offset_key.u = norm;
