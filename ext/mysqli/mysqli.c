@@ -1149,11 +1149,15 @@ void php_local_infile_end(void *ptr)
 
 	data= (mysqli_local_infile *)ptr;
 
-	if (!(mysql = data->userdata)) {
+	if (!data || !(mysql = data->userdata)) {
+		if (data) {
+			free(data);
+		}
 		return;
 	}
 
 	php_stream_close(mysql->li_stream);
+	free(data);
 	return;	
 }
 /* }}} */
