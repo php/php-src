@@ -32,3 +32,19 @@ array(2) {
 bool(false)
 bool(false)
 bool(true)
+--UEXPECT--
+array(2) {
+  [u"bar"]=>
+  unicode(3) "baz"
+  [u"a"]=>
+  unicode(1) "a"
+}
+array(2) {
+  [0]=>
+  unicode(3) "bar"
+  [1]=>
+  unicode(1) "a"
+}
+bool(false)
+bool(false)
+bool(true)
