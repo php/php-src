@@ -7,14 +7,14 @@ gzencode() and invalid params
 
 var_dump(gzencode());
 var_dump(gzencode(1,1,1,1));
-var_dump(gzencode("", -10));
-var_dump(gzencode("", 100));
-var_dump(gzencode("", 1, 100));
+var_dump(gzencode(b"", -10));
+var_dump(gzencode(b"", 100));
+var_dump(gzencode(b"", 1, 100));
 
-var_dump(gzencode("", -1, 1));
-var_dump(gzencode("", 9, 2));
+var_dump(gzencode(b"", -1, 1));
+var_dump(gzencode(b"", 9, 2));
 
-$string = "Light of my sun
+$string = b"Light of my sun
 Light in this temple
 Light in my truth
 Lies in the darkness";
