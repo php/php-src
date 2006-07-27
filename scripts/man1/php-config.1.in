@@ -43,6 +43,10 @@ Full path to php CLI/CGI binary
 .B \-\-version
 PHP version
 .TP
+.PD 0
+.B \-\-vernum
+PHP version as integer
+.TP
 .PD 1
 .P
 .SH SEE ALSO
