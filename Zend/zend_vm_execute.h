@@ -1759,7 +1759,11 @@ static int ZEND_CLONE_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	clone = ce ? ce->clone : NULL;
 	clone_call =  Z_OBJ_HT_P(obj)->clone_obj;
 	if (!clone_call) {
-		zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v", ce->name);
+		if (ce) {
+			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v", ce->name);
+		} else {
+			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object");
+		}
 		EX_T(opline->result.u.var).var.ptr = EG(error_zval_ptr);
 		EX_T(opline->result.u.var).var.ptr->refcount++;
 	}
@@ -1787,7 +1791,7 @@ static int ZEND_CLONE_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		Z_TYPE_P(EX_T(opline->result.u.var).var.ptr) = IS_OBJECT;
 		EX_T(opline->result.u.var).var.ptr->refcount=1;
 		EX_T(opline->result.u.var).var.ptr->is_ref=1;
-		if (!RETURN_VALUE_USED(opline)) {
+		if (!RETURN_VALUE_USED(opline) || EG(exception)) {
 			zval_ptr_dtor(&EX_T(opline->result.u.var).var.ptr);
 		}
 	}
@@ -4341,7 +4345,11 @@ static int ZEND_CLONE_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	clone = ce ? ce->clone : NULL;
 	clone_call =  Z_OBJ_HT_P(obj)->clone_obj;
 	if (!clone_call) {
-		zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v", ce->name);
+		if (ce) {
+			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v", ce->name);
+		} else {
+			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object");
+		}
 		EX_T(opline->result.u.var).var.ptr = EG(error_zval_ptr);
 		EX_T(opline->result.u.var).var.ptr->refcount++;
 	}
@@ -4369,7 +4377,7 @@ static int ZEND_CLONE_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		Z_TYPE_P(EX_T(opline->result.u.var).var.ptr) = IS_OBJECT;
 		EX_T(opline->result.u.var).var.ptr->refcount=1;
 		EX_T(opline->result.u.var).var.ptr->is_ref=1;
-		if (!RETURN_VALUE_USED(opline)) {
+		if (!RETURN_VALUE_USED(opline) || EG(exception)) {
 			zval_ptr_dtor(&EX_T(opline->result.u.var).var.ptr);
 		}
 	}
@@ -7520,7 +7528,11 @@ static int ZEND_CLONE_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	clone = ce ? ce->clone : NULL;
 	clone_call =  Z_OBJ_HT_P(obj)->clone_obj;
 	if (!clone_call) {
-		zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v", ce->name);
+		if (ce) {
+			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v", ce->name);
+		} else {
+			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object");
+		}
 		EX_T(opline->result.u.var).var.ptr = EG(error_zval_ptr);
 		EX_T(opline->result.u.var).var.ptr->refcount++;
 	}
@@ -7548,7 +7560,7 @@ static int ZEND_CLONE_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		Z_TYPE_P(EX_T(opline->result.u.var).var.ptr) = IS_OBJECT;
 		EX_T(opline->result.u.var).var.ptr->refcount=1;
 		EX_T(opline->result.u.var).var.ptr->is_ref=1;
-		if (!RETURN_VALUE_USED(opline)) {
+		if (!RETURN_VALUE_USED(opline) || EG(exception)) {
 			zval_ptr_dtor(&EX_T(opline->result.u.var).var.ptr);
 		}
 	}
@@ -14888,7 +14900,11 @@ static int ZEND_CLONE_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	clone = ce ? ce->clone : NULL;
 	clone_call =  Z_OBJ_HT_P(obj)->clone_obj;
 	if (!clone_call) {
-		zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v", ce->name);
+		if (ce) {
+			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v", ce->name);
+		} else {
+			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object");
+		}
 		EX_T(opline->result.u.var).var.ptr = EG(error_zval_ptr);
 		EX_T(opline->result.u.var).var.ptr->refcount++;
 	}
@@ -14916,7 +14932,7 @@ static int ZEND_CLONE_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		Z_TYPE_P(EX_T(opline->result.u.var).var.ptr) = IS_OBJECT;
 		EX_T(opline->result.u.var).var.ptr->refcount=1;
 		EX_T(opline->result.u.var).var.ptr->is_ref=1;
-		if (!RETURN_VALUE_USED(opline)) {
+		if (!RETURN_VALUE_USED(opline) || EG(exception)) {
 			zval_ptr_dtor(&EX_T(opline->result.u.var).var.ptr);
 		}
 	}
@@ -20531,7 +20547,11 @@ static int ZEND_CLONE_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	clone = ce ? ce->clone : NULL;
 	clone_call =  Z_OBJ_HT_P(obj)->clone_obj;
 	if (!clone_call) {
-		zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v", ce->name);
+		if (ce) {
+			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v", ce->name);
+		} else {
+			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object");
+		}
 		EX_T(opline->result.u.var).var.ptr = EG(error_zval_ptr);
 		EX_T(opline->result.u.var).var.ptr->refcount++;
 	}
@@ -20559,7 +20579,7 @@ static int ZEND_CLONE_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		Z_TYPE_P(EX_T(opline->result.u.var).var.ptr) = IS_OBJECT;
 		EX_T(opline->result.u.var).var.ptr->refcount=1;
 		EX_T(opline->result.u.var).var.ptr->is_ref=1;
-		if (!RETURN_VALUE_USED(opline)) {
+		if (!RETURN_VALUE_USED(opline) || EG(exception)) {
 			zval_ptr_dtor(&EX_T(opline->result.u.var).var.ptr);
 		}
 	}
