@@ -114,7 +114,6 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 	char *string_key;
 	uint string_len;
 	ulong num_key;
-	char *elem_esc = NULL;
 
 	zend_is_auto_global(name, name_length TSRMLS_CC);
 
@@ -134,11 +133,9 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 			switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(data), &string_key, &string_len, &num_key, 0, NULL)) {
 				case HASH_KEY_IS_STRING:
 					if (!sapi_module.phpinfo_as_text) {
-						elem_esc = php_info_html_esc(string_key TSRMLS_CC);
-						PUTS(elem_esc);
-						efree(elem_esc);
+						php_info_html_esc_write(string_key, string_len TSRMLS_CC);
 					} else {
-						PUTS(string_key);
+						PHPWRITE(string_key, string_len);
 					}	
 					break;
 				case HASH_KEY_IS_LONG:
@@ -167,12 +164,10 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 					if (Z_STRLEN(tmp2) == 0) {
 						PUTS("<i>no value</i>");
 					} else {
-						elem_esc = php_info_html_esc(Z_STRVAL(tmp2) TSRMLS_CC);
-						PUTS(elem_esc);
-						efree(elem_esc);
+						php_info_html_esc_write(Z_STRVAL(tmp2), Z_STRLEN(tmp2) TSRMLS_CC);
 					} 
 				} else {
-					PUTS(Z_STRVAL(tmp2));
+					PHPWRITE(Z_STRVAL(tmp2), Z_STRLEN(tmp2));
 				}	
 				zval_dtor(&tmp2);
 			} else {
@@ -180,12 +175,10 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 					if (Z_STRLEN_PP(tmp) == 0) {
 						PUTS("<i>no value</i>");
 					} else {
-						elem_esc = php_info_html_esc(Z_STRVAL_PP(tmp) TSRMLS_CC);
-						PUTS(elem_esc);
-						efree(elem_esc);
+						php_info_html_esc_write(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp) TSRMLS_CC);
 					}
 				} else {
-					PUTS(Z_STRVAL_PP(tmp));
+					PHPWRITE(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
 				}	
 			}
 			if (!sapi_module.phpinfo_as_text) {
@@ -209,6 +202,17 @@ void php_info_print_style(TSRMLS_D)
 }
 /* }}} */
 
+/* {{{ php_info_html_esc_write
+ */
+PHPAPI void php_info_html_esc_write(char *string, int str_len TSRMLS_DC)
+{
+	int new_len;
+	char *ret = php_escape_html_entities(string, str_len, &new_len, 0, ENT_QUOTES, NULL TSRMLS_CC);
+
+	PHPWRITE(ret, new_len);
+	efree(ret);
+}
+/* }}} */
 
 /* {{{ php_info_html_esc
  */

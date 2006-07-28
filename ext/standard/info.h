@@ -67,6 +67,7 @@ PHP_FUNCTION(php_sapi_name);
 PHP_FUNCTION(php_uname);
 PHP_FUNCTION(php_ini_scanned_files);
 PHPAPI char *php_info_html_esc(char *string TSRMLS_DC);
+PHPAPI void php_info_html_esc_write(char *string, int str_len TSRMLS_DC);
 PHPAPI void php_print_info_htmlhead(TSRMLS_D);
 PHPAPI void php_print_info(int flag TSRMLS_DC);
 PHPAPI void php_print_style(void);
