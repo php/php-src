@@ -872,7 +872,7 @@ PHP_FUNCTION(wordwrap)
 				lastspace = current;
 			} else if (current - laststart >= linelength && laststart != lastspace) {
 				newtext[lastspace] = breakchar[0];
-				laststart = lastspace;
+				laststart = lastspace + 1;
 			}
 		}
 
