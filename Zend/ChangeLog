@@ -1,3 +1,33 @@
+2006-07-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug38234.phpt:
+      Fixed bug #38234 (Exception in __clone makes memory leak)
+
+    * tests/bug38234.phpt
+      tests/bug38234.phpt:
+      
+      file bug38234.phpt was initially added on branch PHP_5_2.
+
+    * zend_vm_def.h
+      zend_vm_execute.h:
+      Fixed mess with semantic of zend_normalize_identifier()'s return value
+      (SUCCESS != 1)
+
+    * zend_builtin_functions.c
+      zend_builtin_functions.c
+      tests/bug38047.phpt:
+      Fixed bug #38047 ("file" and "line" sometimes not set in backtrace from
+      inside error handler)
+
+    * tests/bug38047.phpt
+      tests/bug38047.phpt:
+      
+      file bug38047.phpt was initially added on branch PHP_5_2.
+
 2006-07-26  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_object_handlers.c

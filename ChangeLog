@@ -1,3 +1,242 @@
+2006-07-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/filter/filter.c:
+      MFB: Fixed a bug in the filter extension that prevented magic_quotes_gpc
+      from being applied when RAW filter is used.
+
+    * (PHP_5_2)
+      NEWS
+      ext/filter/filter.c:
+      Fixed a bug in the filter extension that prevented magic_quotes_gpc from
+      being applied when RAW filter is used.
+
+    * main/php_variables.c
+      main/rfc1867.c:
+      MFB: Fixed bug #38236 (Binary data gets corrupted on multipart/formdata
+      POST).
+
+    * (PHP_5_2)
+      main/rfc1867.c:
+      Binary safe multipart request handling
+
+2006-07-27  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/zlib/php_zlib.h
+      ext/zlib/zlib.c
+      ext/zlib/tests/001.phpt
+      ext/zlib/tests/002.phpt
+      ext/zlib/tests/003.phpt
+      ext/zlib/tests/005.phpt
+      ext/zlib/tests/006.phpt
+      ext/zlib/tests/007.phpt
+      ext/zlib/tests/bug_34821.phpt:
+      upgrade the rest of the functions to Unicode (except ob_gzhandler, that I
+      leave for Mike).
+      also update tests to force binary data to be passed
+
+    * ext/zlib/zlib.c:
+      convert void* to zstr when using the 't' parameter type
+
+2006-07-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      main/php_variables.c:
+      Fixed bug #38236 (Binary data gets corrupted on multipart/formdata POST).
+
+    * ext/session/mod_files.c
+      ext/session/php_session.h
+      ext/session/session.c:
+      MFB: An improved fix for bug #38224
+
+    * (PHP_5_2)
+      ext/session/mod_files.c
+      ext/session/php_session.h
+      ext/session/session.c:
+      An improved fix for bug #38224
+
+2006-07-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/php_encoding.c
+      ext/soap/php_packet_soap.c
+      ext/soap/php_xml.c
+      ext/soap/php_xml.h
+      ext/soap/soap.c:
+      Removed deprecated #ifdef ZEND_ENGINE_2
+
+    * ext/soap/soap.c:
+      Unicode support (not finished)
+
+2006-07-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/session/session.c:
+      MFB: make C++ compilers happy
+
+    * (PHP_5_2)
+      ext/session/session.c:
+      make C++ compilers happy
+
+    * ext/session/session.c:
+      Removed debug code
+
+    * (PHP_5_2)
+      ext/session/session.c:
+      removed debug code
+
+    * ext/session/session.c:
+      MFB: Fixed bug #38224 (session extension can't handle broken cookies).
+
+    * (PHP_5_2)
+      NEWS
+      ext/session/session.c:
+      Fixed bug #38224 (session extension can't handle broken cookies).
+
+    * ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/tests/bug38229.phpt:
+      MFB: Fixed bug #38229 (strtotime() does not parse YYYY-MM format).
+
+    * ext/date/tests/bug38229.phpt
+      ext/date/tests/bug38229.phpt:
+      
+      file bug38229.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      Fixed bug #38229 (strtotime() does not parse YYYY-MM format).
+
+2006-07-27  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/mysqli/mysqli.c:
+      MFH: fix leak in php_local_infile_init() handler
+
+    * ext/mysqli/mysqli.c:
+      fix leak in php_local_infile_init() handler
+
+2006-07-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug38234.phpt
+      ZendEngine2/tests/bug38234.phpt:
+      
+      file bug38234.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug38234.phpt:
+      Fixed bug #38234 (Exception in __clone makes memory leak)
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      Fixed mess with semantic of zend_normalize_identifier()'s return value
+      (SUCCESS != 1)
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/tests/bug38132.phpt:
+      Fix usage of uninitialized value and unicode support
+
+2006-07-27  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      configure.in
+      main/php_version.h
+      scripts/php-config.in
+      scripts/man1/php-config.1.in:
+      MFH: - Added PHP_VERSION_ID == PHP_VERSION as integer.
+
+    * configure.in
+      main/php_version.h:
+      - Removed unnecessary quotes
+
+    * configure.in
+      main/php_version.h
+      scripts/php-config.in
+      scripts/man1/php-config.1.in:
+      - Added PHP_VERSION_ID == PHP_VERSION as integer value.
+
+2006-07-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/tests/bug38047.phpt
+      ZendEngine2/tests/bug38047.phpt
+      ZendEngine2/tests/bug38047.phpt:
+      Fixed bug #38047 ("file" and "line" sometimes not set in backtrace from
+      inside error handler)
+
+2006-07-27  Antony Dovgal  <antony@zend.com>
+
+    * ext/calendar/tests/jdtomonthname.phpt:
+      MFB: fix test on 64bit machines
+
+    * (PHP_5_2)
+      ext/calendar/tests/jdtomonthname.phpt:
+      fix test on 64bit machines
+
+    * (PHP_5_2)
+      ext/pdo/pdo_dbh.c:
+      initialize var
+
+    * (PHP_5_2)
+      ext/mbstring/oniguruma/regerror.c:
+      fix build with Intel C Compiler
+
+2006-07-27  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      NEWS
+      ext/snmp/php_snmp.h
+      ext/snmp/snmp.c:
+      MFH: - Fixed bug #37164 (snmp_set_oid_numeric_print() misbehaves)
+      MFH:   . Renamed the function to snmp_set_oid_output_format() which
+      describes
+      MFH:     it's behaviour better. Old one was left as an alias for it.
+      MFH:   . Added 2 new constants: SNMP_OID_OUTPUT_FULL and
+      SNMP_OID_OUTPUT_NUMERIC
+      MFH: - Fixed some memleaks
+
+    * ext/snmp/snmp.c:
+      - Fixed bug #37164 (snmp_set_oid_numeric_print() misbehaves)
+        . Renamed the function to snmp_set_oid_output_format() which describes
+          it's behaviour better. Old one was left as an alias for it.
+        . Added 2 new constants: SNMP_OID_OUTPUT_FULL and
+      SNMP_OID_OUTPUT_NUMERIC
+      - Fixed some memleaks
+
+    * (PHP_5_2)
+      ext/standard/credits_ext.h:
+      update credits
+
+    * (PHP_5_2)
+      scripts/php-config.in:
+      MFH:- Fix build with ext/date/lib with shared extensions
+
+    * scripts/php-config.in:
+      - Fix build with ext/date/lib with shared extensions
+
+    * ext/wddx/config.m4:
+      - Fix phpize build
+
+2006-07-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/zip/zip_stream.c:
+      MFB: Fixed compiler warnings.
+
+    * (PHP_5_2)
+      ext/zip/zip_stream.c:
+      Fixed compiler warnings.
+
+    * ext/reflection/php_reflection.c:
+      MFB:   Improved fix for bug #38132
+
 2006-07-26  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * (PHP_5_2)
