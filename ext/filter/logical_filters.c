@@ -330,6 +330,7 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		}
 		i++;
 		str[i] = '\0';
+		end = str + i - 1;
 	}
 
 	if (*str == '-') {
@@ -423,6 +424,9 @@ stateExp:
 	}
 
 stateT:
+	if ((str -1) != end) {
+		goto stateError;
+	}
 	if (exp_value) {
 		exp_value *= exp_multiply;
 		ret_val *= pow(10, exp_value);
