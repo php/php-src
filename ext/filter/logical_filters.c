@@ -119,6 +119,7 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		}
 		i++;
 		p[i] = '\0';
+		end = p + i - 1;
 	}
 
 	/* state 0 */
@@ -189,7 +190,7 @@ stateH1: /* state "hex 1" */
 	}
 
 stateT: /* state "tail" */
-	if (*p != '\0') {
+	if (*p != '\0' || (p-1) != end) {
 		goto stateE;
 	} else {
 		goto stateR;
