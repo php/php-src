@@ -1824,6 +1824,9 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 		return NULL;
 	} else {
 		/* force it to be a string and check if it refers to a file */
+		if (Z_TYPE_PP(val) == IS_LONG || Z_TYPE_PP(val) == IS_BOOL) {
+			return NULL;
+		}
 		convert_to_string_ex(val);
 
 		if (Z_STRLEN_PP(val) > 7 && memcmp(Z_STRVAL_PP(val), "file://", sizeof("file://") - 1) == 0) {
