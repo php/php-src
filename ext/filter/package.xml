@@ -26,10 +26,11 @@ of filters and mechanisms that users can use to safely access their input data.
     <state>beta</state>
     <version>0.10.0</version>
     <date>2006-05-14</date>
-    <notes>- Fixed PECL bug #6136, ini_set should not be able to change the filter.default (Pierre)
-- Fixed PECL bug #6639: uppercase hexadecimal digits are not supported
+    <notes>- Fixed PECL bug #8315, NULL character stops the validation (Pierre)
 - Fixed PECL bug #7733, Float exponential weird result (Pierre)
 - Fixed PECL bug #7715, Input_get float error (Pierre)
+- Fixed PECL bug #6639: uppercase hexadecimal digits are not supported
+- Fixed PECL bug #6136, ini_set should not be able to change the filter.default (Pierre)
 - Implemented PECL req #6641: negative values for hexadecimal and octal numbers are not supported.
 - Added support for php pcre expressions (Pierre)
 - Fixed Possible leak in internal sapi_filter (Pierre)
