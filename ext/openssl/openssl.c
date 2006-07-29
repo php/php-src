@@ -563,6 +563,30 @@ static int php_openssl_write_rand_file(const char * file, int egdsocket, int see
 	}
 	return SUCCESS;
 }
+
+static EVP_MD * php_openssl_get_evp_md_from_algo(long algo) { /* {{{ */
+	EVP_MD *mdtype;
+
+	switch (algo) {
+		case OPENSSL_ALGO_SHA1:
+			mdtype = (EVP_MD *) EVP_sha1();
+			break;
+		case OPENSSL_ALGO_MD5:
+			mdtype = (EVP_MD *) EVP_md5();
+			break;
+		case OPENSSL_ALGO_MD4:
+			mdtype = (EVP_MD *) EVP_md4();
+			break;
+		case OPENSSL_ALGO_MD2:
+			mdtype = (EVP_MD *) EVP_md2();
+			break;
+		default:
+			return NULL;
+			break;
+	}
+	return mdtype;
+}
+/* }}} */
 /* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION
@@ -2860,7 +2884,7 @@ PHP_FUNCTION(openssl_error_string)
 }
 /* }}} */
 
-/* {{{ proto bool openssl_sign(string data, &string signature, mixed key)
+/* {{{ proto bool openssl_sign(string data, &string signature, mixed key[, int signature_alg])
    Signs data */
 PHP_FUNCTION(openssl_sign)
 {
@@ -2884,23 +2908,10 @@ PHP_FUNCTION(openssl_sign)
 		RETURN_FALSE;
 	}
 
-	switch (signature_algo) {
-		case OPENSSL_ALGO_SHA1:
-			mdtype = (EVP_MD *) EVP_sha1();
-			break;
-		case OPENSSL_ALGO_MD5:
-			mdtype = (EVP_MD *) EVP_md5();
-			break;
-		case OPENSSL_ALGO_MD4:
-			mdtype = (EVP_MD *) EVP_md4();
-			break;
-		case OPENSSL_ALGO_MD2:
-			mdtype = (EVP_MD *) EVP_md2();
-			break;
-		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown signature algorithm.");
-			RETURN_FALSE;
-			break;
+	mdtype = php_openssl_get_evp_md_from_algo(signature_algo);
+	if (!mdtype) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown signature algorithm.");
+		RETURN_FALSE;
 	}
 
 	siglen = EVP_PKEY_size(pkey);
@@ -2931,21 +2942,29 @@ PHP_FUNCTION(openssl_verify)
 	EVP_PKEY *pkey;
 	int err;
 	EVP_MD_CTX     md_ctx;
+	EVP_MD *mdtype;
 	long keyresource = -1;
 	char * data;	int data_len;
 	char * signature;	int signature_len;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssz", &data, &data_len, &signature, &signature_len, &key) == FAILURE) {
+	long signature_algo = OPENSSL_ALGO_SHA1;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssz|l", &data, &data_len, &signature, &signature_len, &key, &signature_algo) == FAILURE) {
 		return;
 	}
-	
+
+	mdtype = php_openssl_get_evp_md_from_algo(signature_algo);
+	if (!mdtype) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown signature algorithm.");
+		RETURN_FALSE;
+	}
+
 	pkey = php_openssl_evp_from_zval(&key, 1, NULL, 0, &keyresource TSRMLS_CC);
 	if (pkey == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "supplied key param cannot be coerced into a public key");
 		RETURN_FALSE;
 	}
 
-	EVP_VerifyInit   (&md_ctx, EVP_sha1());
+	EVP_VerifyInit   (&md_ctx, mdtype);
 	EVP_VerifyUpdate (&md_ctx, data, data_len);
 	err = EVP_VerifyFinal (&md_ctx, signature, signature_len, pkey);
 
