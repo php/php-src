@@ -1,3 +1,65 @@
+2006-07-28  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/date/tests/date_constants.phpt:
+      MFB: Update test
+
+    * (PHP_5_2)
+      ext/date/php_date.c
+      ext/date/tests/date_constants.phpt:
+      Fix DateTime::RSS
+      Update tests
+
+2006-07-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/hash/hash.c:
+      MFB: cleanup of the phpinfo() output.
+
+    * (PHP_5_2)
+      ext/hash/hash.c:
+      cleanup of the phpinfo() output.
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/info.c
+      ext/standard/info.h:
+      ext/standard/info.c ext/standard/info.h
+
+    * ext/zip/php_zip.c:
+      MFB: Cleanup phpinfo() output
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c:
+      Cleanup phpinfo() output
+
+2006-07-28  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/file/bug24313.phpt:
+      fix test
+
+    * ext/standard/tests/file/bug24313.phpt:
+      fix test
+      I really hope there are no systems where /dev is a symlink
+
+    * run-tests.php:
+      enabling --leak-check was bad idea, since there are way too much false
+      positives caused by the absence of Zend MM
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/string.c:
+      MFH: patch for #37846 (wordwrap() wraps incorrectly)
+      by Dmitry Kononov <ddk at krasn dot ru>
+
+    * ext/standard/string.c:
+      patch for #37846 (wordwrap() wraps incorrectly)
+      by Dmitry Kononov <ddk at krasn dot ru>
+
+2006-07-28  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/filter/filter.c:
+      - HEAD does not suppot magic_gpc
+
 2006-07-27  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/filter/filter.c:
