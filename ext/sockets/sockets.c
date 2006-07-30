@@ -536,6 +536,7 @@ static int php_sock_array_to_fd_set(zval *sock_array, fd_set *fds, PHP_SOCKET *m
 {
 	zval		**element;
 	php_socket	*php_sock;
+	int			num = 0;
 	
 	if (Z_TYPE_P(sock_array) != IS_ARRAY) return 0;
 
@@ -550,9 +551,10 @@ static int php_sock_array_to_fd_set(zval *sock_array, fd_set *fds, PHP_SOCKET *m
 		if (php_sock->bsd_socket > *max_fd) {
 			*max_fd = php_sock->bsd_socket;
 		}
+		num++;
 	}
 
-	return 1;
+	return num ? 1 : 0;
 }
 
 static int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds TSRMLS_DC)
@@ -561,6 +563,7 @@ static int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds TSRMLS_DC)
 	zval		**dest_element;
 	php_socket	*php_sock;
 	HashTable	*new_hash;
+	int			num = 0;
 
 	if (Z_TYPE_P(sock_array) != IS_ARRAY) return 0;
 
@@ -578,6 +581,7 @@ static int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds TSRMLS_DC)
 			zend_hash_next_index_insert(new_hash, (void *)element, sizeof(zval *), (void **)&dest_element);
 			if (dest_element) zval_add_ref(dest_element);
 		}
+		num++;
 	}
 
 	/* Destroy old array, add new one */
@@ -587,7 +591,7 @@ static int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds TSRMLS_DC)
 	zend_hash_internal_pointer_reset(new_hash);
 	Z_ARRVAL_P(sock_array) = new_hash;
 
-	return 1;
+	return num ? 1 : 0;
 }
 
 /* {{{ proto int socket_select(array &read_fds, array &write_fds, &array except_fds, int tv_sec[, int tv_usec])
