@@ -770,6 +770,11 @@ static X509 * php_openssl_x509_from_zval(zval ** val, int makeresource, long * r
 
 		return NULL;
 	}
+
+	if (!(Z_TYPE_PP(val) == IS_STRING || Z_TYPE_PP(val) == IS_OBJECT)) {
+		return NULL;
+	}
+
 	/* force it to be a string and check if it refers to a file */
 	convert_to_string_ex(val);
 
