@@ -31,9 +31,10 @@
  <release>
   <state>stable</state>
   <version>1.2.2</version>
-  <date>2006-06-07</date>
+  <date>2006-08-07</date>
   <notes>
    Reimplemented oci_lob_read() utilities using patch from Massimo Squillace (msquillace at sogei dot it), which should fix Unicode LOB problems.
+   Fixed bug #38173 (Freeing nested cursors causes OCI8 to segfault)
    Fixed bug #37886 (oci_connect may crash when charset parameter is given)
    Fixed bug #37931 (possible crash after database restart when using persistent connections)
    Fixed bug #37531 (oci8 persistent connection corruption)
@@ -69,6 +70,7 @@
   <file role="test" name="tests/bug27303.phpt"/>
   <file role="test" name="tests/bug32325.phpt"/>
   <file role="test" name="tests/bug36096.phpt"/>
+  <file role="test" name="tests/bug38173.phpt"/>
   <file role="test" name="tests/close.phpt"/>
   <file role="test" name="tests/coll_001.phpt"/>
   <file role="test" name="tests/coll_002_func.phpt"/>
