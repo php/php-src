@@ -1,3 +1,89 @@
+2006-07-29  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/openssl/openssl.c:
+      - MFH: make the test more obvious and add an explanation
+
+    * ext/openssl/openssl.c:
+      - make the test more obvious and add an explanation
+
+    * (PHP_5_2)
+      ext/openssl/openssl.c:
+      - vi happiness++
+
+2006-07-29  Antony Dovgal  <antony@zend.com>
+
+    * ext/openssl/tests/bug38255.phpt:
+      MFB: improve test
+
+    * (PHP_5_2)
+      ext/openssl/tests/bug38255.phpt:
+      improve test
+
+2006-07-29  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/openssl/openssl.c
+      ext/openssl/openssl.c:
+      - #38255, fails on array as well
+
+    * (PHP_5_2)
+      NEWS:
+      - entry for #37820 and leak
+
+    * (PHP_5_2)
+      ext/openssl/tests/bug37820.phpt
+      ext/openssl/tests/bug37820cert.pem
+      ext/openssl/tests/bug37820key.pem
+      ext/openssl/tests/bug38255.phpt:
+      - forgot the tests
+
+    * ext/openssl/openssl.c
+      ext/openssl/tests/bug38255.phpt
+      ext/openssl/tests/bug38255.phpt:
+      - MFH: #38255, fix possible leak in php_openssl_evp_from_zval
+
+    * (PHP_5_2)
+      ext/openssl/openssl.c:
+      - fix leak when the key is not a valid key (like false or an array)
+
+    * ext/openssl/openssl.c
+      ext/openssl/tests/bug37820.phpt
+      ext/openssl/tests/bug37820.phpt
+      ext/openssl/tests/bug37820cert.pem
+      ext/openssl/tests/bug37820cert.pem
+      ext/openssl/tests/bug37820key.pem
+      ext/openssl/tests/bug37820key.pem:
+      - #37820, add support for algorithm type in openssl_verify()
+
+2006-07-29  Seiji Masugata  <s.masugata@digicom.dnp.co.jp>
+
+    * ext/mbstring/tests/mb_strlen.phpt
+      ext/mbstring/tests/mb_strlen.phpt
+      ext/mbstring/tests/mb_strlen.phpt
+      ext/mbstring/tests/mb_substr.phpt
+      ext/mbstring/tests/mb_substr.phpt
+      ext/mbstring/tests/mb_substr.phpt:
+      fix tests.
+
+2006-07-29  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/filter/logical_filters.c
+      ext/filter/tests/bug8315.phpt:
+      - #8315, flaot is affected too
+
+    * ext/filter/logical_filters.c
+      ext/filter/package.xml
+      ext/filter/tests/bug8315.phpt:
+      - MFH: #8315, NULL character stops the validation
+
+    * (PHP_5_2)
+      ext/filter/logical_filters.c
+      ext/filter/package.xml
+      ext/filter/tests/bug8315.phpt
+      ext/filter/tests/bug8315.phpt:
+      - #8315, NULL character stops the validation
+
 2006-07-28  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * ext/date/tests/date_constants.phpt:
