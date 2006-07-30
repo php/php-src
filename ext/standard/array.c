@@ -2328,7 +2328,7 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS
 				} else {
 					(*src_entry)->refcount++;
 
-					zend_hash_update(dest, string_key, strlen(string_key)+1,
+					zend_hash_update(dest, string_key, string_key_len,
 									 src_entry, sizeof(zval *), NULL);
 				}
 				break;
