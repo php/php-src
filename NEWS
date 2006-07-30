@@ -20,6 +20,7 @@ PHP                                                                        NEWS
 - Fixed a bug in the filter extension that prevented magic_quotes_gpc from
   being applied when RAW filter is used. (Ilia)
 - Fixed bug #38255 (openssl possible leaks while passing keys) (Pierre)
+- Fixed bug #38253 (PDO produces segfault with default fetch mode). (Tony)
 - Fixed bug #38236 (Binary data gets corrupted on multipart/formdata POST).
   (Ilia)
 - Fixed bug #38234 (Exception in __clone makes memory leak). (Dmitry, Nuno)
