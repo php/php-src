@@ -94,6 +94,7 @@ php_oci_statement *php_oci_statement_create (php_oci_connection *connection, cha
 
 	statement->connection = connection;
 	statement->has_data = 0;
+	statement->nested = 0;
 
 	if (OCI_G(default_prefetch) > 0) {
 		php_oci_statement_set_prefetch(statement, OCI_G(default_prefetch) TSRMLS_CC);
@@ -443,6 +444,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 				case SQLT_RSET:
 					outcol->statement = php_oci_statement_create(statement->connection, NULL, 0, 0 TSRMLS_CC);
 					outcol->stmtid = outcol->statement->id;
+					outcol->statement->nested = 1;
 
 					define_type = SQLT_RSET;
 					outcol->is_cursor = 1;

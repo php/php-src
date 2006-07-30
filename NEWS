@@ -40,6 +40,7 @@ PHP                                                                        NEWS
   execution). (Dmitry)
 - Fixed bug #38194 (ReflectionClass::isSubclassOf() returns TRUE for the class
   itself). (Ilia)
+- Fixed bug #38173 (Freeing nested cursors causes OCI8 to segfault). (Tony)
 - Fixed bug #38132 (ReflectionClass::getStaticProperties() retains \0 in key
   names). (Ilia)
 - Fixed bug #38047 ("file" and "line" sometimes not set in backtrace from
