@@ -1479,7 +1479,10 @@ PHP_FUNCTION(oci_free_statement)
 	}
 
 	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
-	zend_list_delete(statement->id);
+	if (!statement->nested) {
+		/* nested cursors cannot be freed, they are allocated once and used during the fetch */
+		zend_list_delete(statement->id);
+	}
 	
 	RETURN_TRUE;
 }
