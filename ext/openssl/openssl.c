@@ -940,6 +940,9 @@ PHP_FUNCTION(openssl_x509_parse)
 	zend_bool useshortnames = 1;
 	char * tmpstr;
 	zval * subitem;
+	X509_EXTENSION *extension;
+	ASN1_OCTET_STRING *extdata;
+	char *extname;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &zcert, &useshortnames) == FAILURE) {
 		return;
@@ -1013,6 +1016,18 @@ PHP_FUNCTION(openssl_x509_parse)
 		add_index_zval(subitem, id, subsub);
 	}
 	add_assoc_zval(return_value, "purposes", subitem);
+
+	MAKE_STD_ZVAL(subitem);
+	array_init(subitem);
+
+
+	for (i = 0; i < X509_get_ext_count(cert); i++) {
+		extension = X509_get_ext(cert, i);
+		extdata = X509_EXTENSION_get_data(extension);
+		extname = strdup(OBJ_nid2sn(OBJ_obj2nid(X509_EXTENSION_get_object(extension))));
+		add_assoc_asn1_string(subitem, extname, extdata);
+	}
+	add_assoc_zval(return_value, "extensions", subitem);
 
 	if (certresource == -1 && cert) {
 		X509_free(cert);
