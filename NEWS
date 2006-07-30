@@ -1,7 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Aug 2006, PHP 5.2.0RC2
-- Added support for custom algorithm in openssl_verify (Pierre)
 - Added an optional boolean parameter to memory_get_usage() and 
   memory_get_peak_usage() to get memory size allocated by emalloc() or real
   size of memory allocated from system. (Dmitry)
@@ -16,11 +15,15 @@ PHP                                                                        NEWS
   . Fixed bug #37564 (AES privacy encryption not possible due to net-snmp 5.2
     compatibility issue). (Patch: scott dot moynes+php at gmail dot com)
 
+- Improved OpenSSL extension: (Pierre)
+  . Added support for all supported algorithms in openssl_verify
+  . Fixed bug #28382 (openssl_x509_parse() extensions support)
+  . Fixed bug #38261 (openssl_x509_parse() leaks with invalid cert)
+  . Fixed bug #38255 (openssl possible leaks while passing keys)
+
 - Fixed phpinfo() cutoff of variables at \0. (Ilia)
 - Fixed a bug in the filter extension that prevented magic_quotes_gpc from
   being applied when RAW filter is used. (Ilia)
-- Fixed bug #38261 (openssl_x509_parse() leaks with invalid cert) (Pierre)
-- Fixed bug #38255 (openssl possible leaks while passing keys) (Pierre)
 - Fixed bug #38253 (PDO produces segfault with default fetch mode). (Tony)
 - Fixed bug #38236 (Binary data gets corrupted on multipart/formdata POST).
   (Ilia)
