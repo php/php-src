@@ -156,10 +156,11 @@ static int le_x509;
 static int le_csr;
 static int ssl_stream_data_index;
 
-int php_openssl_get_x509_list_id(void)
+int php_openssl_get_x509_list_id(void) /* {{{ */
 {
 	return le_x509;
 }
+/* }}} */
 
 /* {{{ resource destructors */
 static void php_pkey_free(zend_rsrc_list_entry *rsrc TSRMLS_DC)
@@ -216,7 +217,7 @@ static X509_REQ * php_openssl_csr_from_zval(zval ** val, int makeresource, long 
 static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req TSRMLS_DC);
 
 
-static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int shortname TSRMLS_DC)
+static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int shortname TSRMLS_DC) /* {{{ */
 {
 	zval *subitem, *subentries;
 	int i, j = -1, last = -1, obj_cnt = 0;
@@ -271,13 +272,15 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 	}
 	zend_hash_update(HASH_OF(val), key, strlen(key) + 1, (void *)&subitem, sizeof(subitem), NULL);
 }
+/* }}} */
 
-static void add_assoc_asn1_string(zval * val, char * key, ASN1_STRING * str)
+static void add_assoc_asn1_string(zval * val, char * key, ASN1_STRING * str) /* {{{ */
 {
 	add_assoc_stringl(val, key, str->data, str->length, 1);
 }
+/* }}} */
 
-static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr TSRMLS_DC)
+static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr TSRMLS_DC) /* {{{ */
 {
 /*
 	This is how the time string is formatted:
@@ -345,12 +348,14 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr TSRMLS_DC)
 
 	return ret;
 }
+/* }}} */
 
 static inline int php_openssl_config_check_syntax(
 		const char * section_label,
 		const char * config_filename,
 		const char * section,
-		LHASH * config TSRMLS_DC)
+		LHASH * config TSRMLS_DC
+		) /* {{{ */
 {
 	X509V3_CTX ctx;
 	
@@ -365,8 +370,9 @@ static inline int php_openssl_config_check_syntax(
 	}
 	return SUCCESS;
 }
+/* }}} */
 
-static int add_oid_section(struct php_x509_request * req TSRMLS_DC)
+static int add_oid_section(struct php_x509_request * req TSRMLS_DC) /* {{{ */
 {
 	char * str;
 	STACK_OF(CONF_VALUE) * sktmp;
@@ -391,6 +397,7 @@ static int add_oid_section(struct php_x509_request * req TSRMLS_DC)
 	}
 	return SUCCESS;
 }
+/* }}} */
 
 #define PHP_SSL_REQ_INIT(req)		memset(req, 0, sizeof(*req))
 #define PHP_SSL_REQ_DISPOSE(req)	php_openssl_dispose_config(req TSRMLS_CC)
@@ -417,7 +424,7 @@ static int php_openssl_parse_config(
 		struct php_x509_request * req,
 		zval * optional_args
 		TSRMLS_DC
-		)
+		) /* {{{ */
 {
 	char * str;
 	zval ** item;
@@ -495,8 +502,9 @@ static int php_openssl_parse_config(
 	
 	return SUCCESS;
 }
+/* }}} */
 
-static void php_openssl_dispose_config(struct php_x509_request * req TSRMLS_DC)
+static void php_openssl_dispose_config(struct php_x509_request * req TSRMLS_DC) /* {{{ */
 {
 	if (req->priv_key) {
 		EVP_PKEY_free(req->priv_key);
@@ -511,8 +519,9 @@ static void php_openssl_dispose_config(struct php_x509_request * req TSRMLS_DC)
 		req->req_config = NULL;
 	}
 }
+/* }}} */
 
-static int php_openssl_load_rand_file(const char * file, int *egdsocket, int *seeded)
+static int php_openssl_load_rand_file(const char * file, int *egdsocket, int *seeded) /* {{{ */
 {
 	char buffer[MAXPATHLEN];
 
@@ -542,8 +551,9 @@ static int php_openssl_load_rand_file(const char * file, int *egdsocket, int *se
 	*seeded = 1;
 	return SUCCESS;
 }
+/* }}} */
 
-static int php_openssl_write_rand_file(const char * file, int egdsocket, int seeded)
+static int php_openssl_write_rand_file(const char * file, int egdsocket, int seeded) /* {{{ */
 {
 	char buffer[MAXPATHLEN];
 
@@ -563,6 +573,7 @@ static int php_openssl_write_rand_file(const char * file, int egdsocket, int see
 	}
 	return SUCCESS;
 }
+/* }}} */
 
 static EVP_MD * php_openssl_get_evp_md_from_algo(long algo) { /* {{{ */
 	EVP_MD *mdtype;
@@ -3146,7 +3157,7 @@ PHP_FUNCTION(openssl_open)
 #define GET_VER_OPT(name)               (stream->context && SUCCESS == php_stream_context_get_option(stream->context, "ssl", name, &val))
 #define GET_VER_OPT_STRING(name, str)   if (GET_VER_OPT(name)) { convert_to_string_ex(val); str = Z_STRVAL_PP(val); }
 
-static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx)
+static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) /* {{{ */
 {
 	php_stream *stream;
 	SSL *ssl;
@@ -3183,8 +3194,9 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx)
 	return ret;
 
 }
+/* }}} */
 
-int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stream TSRMLS_DC)
+int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stream TSRMLS_DC) /* {{{ */
 {
 	zval **val = NULL;
 	char *cnmatch = NULL;
@@ -3252,8 +3264,9 @@ int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stre
 
 	return SUCCESS;
 }
+/* }}} */
 
-static int passwd_callback(char *buf, int num, int verify, void *data)
+static int passwd_callback(char *buf, int num, int verify, void *data) /* {{{ */
 {
     php_stream *stream = (php_stream *)data;
     zval **val = NULL;
@@ -3270,8 +3283,9 @@ static int passwd_callback(char *buf, int num, int verify, void *data)
     }
     return 0;
 }
+/* }}} */
 
-SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC)
+SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{ */
 {
 	zval **val = NULL;
 	char *cafile = NULL;
@@ -3361,7 +3375,7 @@ SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC)
 
 	return NULL;
 }
-
+/* }}} */
 
 /*
  * Local variables:
