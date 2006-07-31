@@ -1,25 +1,24 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Jun 2006, Version 4.4.3RC2
+03 Aug 2006, Version 4.4.3
+- Added control character checks for cURL extension's open_basedir/safe_mode
+  checks. (Ilia)
+- Added overflow checks to wordwrap() function. (Ilia)
+- Added a check for special characters in the session name. (Ilia)
+- Improved safe_mode check for the error_log() function. (Ilia)
+- Updated PCRE to version 6.6. (Andrei)
 - Fixed handling of extremely long paths inside tempnam() function. (Ilia)
 - Fixed XSS inside phpinfo() with long inputs. (Ilia)
+- Fixed a possible buffer overflow inside create_named_pipe() for Win32 systems
+  in libmysql.c. (Ilia)
 - Fixed bug #37720 (merge_php_config scrambles values). (Mike,
   pumuckel at metropolis dot de)
 - Fixed bug #37569 (WDDX incorrectly encodes high-ascii characters). (Ilia)
-
-21 May 2006, Version 4.4.3RC1
-- Added control character checks for cURL extension's open_basedir/safe_mode
-  checks. (Ilia)
-- Fixed a possible buffer overflow inside create_named_pipe() for Win32 systems
-  in libmysql.c. (Ilia)
-- Updated PCRE to version 6.6. (Andrei)
-- Added overflow checks to wordwrap() function. (Ilia)
-- Added a check for special characters in the session name. (Ilia)
-- Fixed bug #37510 session_regenerate_id changes session_id() even on failure).
+- Fixed bug #37510 (session_regenerate_id changes session_id() even on failure).
   (Hannes)
-- Fixed bug #34360 (bad gif size) (Pierre)
-- Fixed bug #37348 (make PEAR install ignore open_basedir). (Ilia)
-- Fixed bug #37346 (invalid colormap format) (Pierre)
+- Fixed bug #37360 (Memory errors with a corrupt GIF file) (Pierre)
+- Fixed bug #37348 (Make PEAR install ignore open_basedir). (Ilia)
+- Fixed bug #37346 (Crashes when using an invalid colormap format). (Pierre)
 - Fixed bug #37162 (wddx does not build as a shared extension).  
   (jdolecek at NetBSD dot org, Ilia)
 - Fixed bug #37046 (foreach breaks static scope). (Dmitry)
