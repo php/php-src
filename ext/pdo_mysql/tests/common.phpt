@@ -22,7 +22,7 @@ if (false !== getenv('PDO_MYSQL_TEST_DSN')) {
 } else {
 	$config['ENV']['PDOTEST_DSN'] = 'mysql:host=localhost;dbname=test';
 	$config['ENV']['PDOTEST_USER'] = 'root';
-	$config['ENV']['PDOTEST_PASS'] = '';
+	$config['ENV']['PDOTEST_PASS'] = 'asukasmysql';
 }
 
 return $config;
