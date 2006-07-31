@@ -1,3 +1,104 @@
+2006-07-30  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/package.xml:
+      update changelog
+
+    * (PHP_5_2)
+      NEWS
+      ext/oci8/oci8_interface.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/bug38173.phpt:
+      MFH: fix #38173 (Freeing nested cursors causes OCI8 to segfault)
+
+    * ext/oci8/oci8_interface.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h:
+      fix #38173 (Freeing nested cursors causes OCI8 to segfault)
+
+    * ext/oci8/tests/bug38173.phpt
+      ext/oci8/tests/bug38173.phpt:
+      
+      fix #38173 (Freeing nested cursors causes OCI8 to segfault)
+
+    * (PHP_4_4)
+      ext/sockets/sockets.c:
+      temporarily revert the patch by request of Derick
+
+2006-07-30  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - group openssl entries
+
+    * ext/openssl/openssl.c
+      ext/openssl/openssl.c
+      ext/openssl/tests/bug28382.phpt
+      ext/openssl/tests/bug28382.phpt
+      ext/openssl/tests/bug28382.phpt
+      ext/openssl/tests/bug28382cert.txt
+      ext/openssl/tests/bug28382cert.txt
+      ext/openssl/tests/bug28382cert.txt:
+      - #28382, add support for x509 extensions
+
+    * ext/openssl/openssl.c
+      ext/openssl/tests/bug38261.phpt:
+      - MFB: #38261, openssl_x509_parse leaks with invalid certs
+
+    * (PHP_5_2)
+      NEWS
+      ext/openssl/openssl.c
+      ext/openssl/tests/bug38261.phpt
+      ext/openssl/tests/bug38261.phpt:
+      - 38261: openssl_x509_parse leaks with invalid certs
+
+2006-07-30  Antony Dovgal  <antony@zend.com>
+
+    * ext/sockets/sockets.c
+      ext/sockets/sockets.c:
+      improve checks and fix #38251
+
+    * ext/xmlrpc/libxmlrpc/xml_element.c:
+      fix compile warnings (#38257)
+
+    * ext/pdo/pdo_stmt.c
+      ext/pdo/tests/bug_38253.phpt:
+      MFB: bug #38253 (PDO produces segfault with default fetch mode)
+      add test
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_stmt.c
+      ext/pdo/tests/bug_38253.phpt
+      ext/pdo/tests/bug_38253.phpt:
+      fix bug #38253 (PDO produces segfault with default fetch mode)
+      add test
+
+2006-07-30  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/tests/bug37090.phpt
+      ext/mysqli/tests/bug37090.phpt:
+      
+      file bug37090.phpt was initially added on branch PHP_5_2.
+
+2006-07-30  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/openssl/openssl.c:
+      - MFB: silent compiler warnins (signess)
+
+    * (PHP_5_2)
+      ext/openssl/openssl.c:
+      - silent compiler warnings (signess)
+
+    * ext/openssl/openssl.c:
+      - MFB: vi happiness
+
+2006-07-30  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_5_2)
+      ext/standard/array.c:
+      Make array_merge(_recursive) handle binary keys safely. (Patch by Matt W)
+
 2006-07-29  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * (PHP_5_2)
