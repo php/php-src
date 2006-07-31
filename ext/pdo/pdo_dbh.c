@@ -575,6 +575,7 @@ static PHP_METHOD(PDO, prepare)
 	stmt->dbh = dbh;
 	/* give it a reference to me */
 	zend_objects_store_add_ref(getThis() TSRMLS_CC);
+	php_pdo_dbh_addref(dbh TSRMLS_CC);
 	stmt->database_object_handle = *getThis();
 	/* we haven't created a lazy object yet */
 	ZVAL_NULL(&stmt->lazy_object_ref);
@@ -1013,6 +1014,7 @@ static PHP_METHOD(PDO, query)
 	stmt->dbh = dbh;
 	/* give it a reference to me */
 	zend_objects_store_add_ref(getThis() TSRMLS_CC);
+	php_pdo_dbh_addref(dbh TSRMLS_CC);
 	stmt->database_object_handle = *getThis();
 	/* we haven't created a lazy object yet */
 	ZVAL_NULL(&stmt->lazy_object_ref);
