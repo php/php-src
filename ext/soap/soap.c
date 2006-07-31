@@ -2923,7 +2923,7 @@ PHP_METHOD(SoapClient, __setCookie)
    If no value is specified, all of the headers are removed. */
 PHP_METHOD(SoapClient, __setSoapHeaders)
 {
-	zval *headers;
+	zval *headers = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|z", &headers) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
@@ -2944,7 +2944,9 @@ PHP_METHOD(SoapClient, __setSoapHeaders)
 		zval *default_headers;
 		ALLOC_INIT_ZVAL(default_headers);
 		array_init(default_headers);
+		headers->refcount++;
 		add_next_index_zval(default_headers, headers);
+		default_headers->refcount--;
 		add_property_zval(this_ptr, "__default_headers", default_headers);
 	} else{
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid SOAP header");
