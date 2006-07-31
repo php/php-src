@@ -54,6 +54,8 @@ PHP                                                                        NEWS
   SQLT_AFC, AVC). (Tony)
 - Fixed bug #37564 (AES privacy encryption not possible due to net-snmp 5.2
   compatibility issue). (Jani, patch by scott dot moynes+php at gmail dot com)
+- Fixed bug #37445 (Fixed crash in pdo_mysql resulting from premature object
+  destruction). (Ilia)
 
 24 Jul 2006, PHP 5.2.0RC1
 - Updated bundled MySQL client library to version 5.0.22 in the Windows
