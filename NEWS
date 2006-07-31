@@ -17,13 +17,16 @@ PHP                                                                        NEWS
 
 - Improved OpenSSL extension: (Pierre)
   . Added support for all supported algorithms in openssl_verify
-  . Fixed bug #28382 (openssl_x509_parse() extensions support)
-  . Fixed bug #38261 (openssl_x509_parse() leaks with invalid cert)
-  . Fixed bug #38255 (openssl possible leaks while passing keys)
+  . Implement #36732 (req/x509 extensions support for openssl_csr_new and
+    openssl_csr_sign) (ben at psc dot edu, Pierre)
+  . Implement #28382 (openssl_x509_parse() extensions support)
 
+- Fixed leaks in openssl_csr_sign and openssl_csr_new (Pierre)
 - Fixed phpinfo() cutoff of variables at \0. (Ilia)
 - Fixed a bug in the filter extension that prevented magic_quotes_gpc from
   being applied when RAW filter is used. (Ilia)
+- Fixed bug #38261 (openssl_x509_parse() leaks with invalid cert) (Pierre)
+- Fixed bug #38255 (openssl possible leaks while passing keys) (Pierre)
 - Fixed bug #38253 (PDO produces segfault with default fetch mode). (Tony)
 - Fixed bug #38236 (Binary data gets corrupted on multipart/formdata POST).
   (Ilia)
