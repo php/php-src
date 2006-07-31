@@ -406,6 +406,7 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 	}
 
 	php_xsl_set_object(id, sheetp TSRMLS_CC);
+	RETURN_TRUE;
 }
 /* }}} end xsl_xsltprocessor_import_stylesheet */
 
