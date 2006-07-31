@@ -238,7 +238,7 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 	char *sname;
 	int nid;
 	X509_NAME_ENTRY * ne;
-	ASN1_STRING * str;
+	ASN1_STRING * str = NULL;
 	ASN1_OBJECT * obj;
 
 	MAKE_STD_ZVAL(subitem);
@@ -279,7 +279,7 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 		} else {
 			zval_dtor(subentries);
 			FREE_ZVAL(subentries);
-			if (obj_cnt) {
+			if (obj_cnt && str) {
 				add_assoc_stringl(subitem, sname, (char *)str->data, str->length, 1);
 			}
 		}
