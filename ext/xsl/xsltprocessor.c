@@ -351,7 +351,7 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 	}
 	if (doc == NULL) {
 		php_error(E_WARNING, "Invalid Document");
-		RETURN_NULL();
+		RETURN_FALSE;
 	}
 
 	/* libxslt uses _private, so we must copy the imported 
@@ -406,7 +406,7 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 	}
 
 	php_xsl_set_object(id, sheetp TSRMLS_CC);
-	RETURN_TRUE;
+	RETVAL_TRUE;
 }
 /* }}} end xsl_xsltprocessor_import_stylesheet */
 
