@@ -468,8 +468,8 @@ static int php_openssl_parse_config(
 		CONF_get_string(req->req_config, req->section_name, "default_md"));
 	SET_OPTIONAL_STRING_ARG("x509_extensions", req->extensions_section,
 		CONF_get_string(req->req_config, req->section_name, "x509_extensions"));
-	SET_OPTIONAL_STRING_ARG("req_extensions", req->extensions_section,
-		CONF_get_string(req->req_config, req->request_extensions_section, "req_extensions"));
+	SET_OPTIONAL_STRING_ARG("req_extensions", req->request_extensions_section,
+		CONF_get_string(req->req_config, req->section_name, "req_extensions"));
 	SET_OPTIONAL_LONG_ARG("private_key_bits", req->priv_key_bits,
 		CONF_get_number(req->req_config, req->section_name, "default_bits"));
 
@@ -509,9 +509,6 @@ static int php_openssl_parse_config(
 		return FAILURE;
 	}
 
-	if (req->request_extensions_section == NULL) {
-		req->request_extensions_section = CONF_get_string(req->req_config, req->section_name, "req_extensions");
-	}
 	PHP_SSL_CONFIG_SYNTAX_CHECK(request_extensions_section);
 	
 	return SUCCESS;
@@ -879,8 +876,6 @@ PHP_FUNCTION(openssl_x509_export)
 	zend_bool notext = 1;
 	BIO * bio_out;
 	long certresource;
-	char * bio_mem_ptr;
-	long bio_mem_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz|b", &zcert, &zout, &notext) == FAILURE) {
 		return;
@@ -897,12 +892,15 @@ PHP_FUNCTION(openssl_x509_export)
 	if (!notext) {
 		X509_print(bio_out, cert);
 	}
-	PEM_write_bio_X509(bio_out, cert);
+	if (PEM_write_bio_X509(bio_out, cert))  {
+		BUF_MEM *bio_buf;
 
-	bio_mem_len = BIO_get_mem_data(bio_out, &bio_mem_ptr);
-	ZVAL_STRINGL(zout, bio_mem_ptr, bio_mem_len, 1);
+		zval_dtor(zout);
+		BIO_get_mem_ptr(bio_out, &bio_buf);
+		ZVAL_STRINGL(zout, bio_buf->data, bio_buf->length, 1);
 
-	RETVAL_TRUE;
+		RETVAL_TRUE;
+	}
 
 	if (certresource == -1 && cert) {
 		X509_free(cert);
@@ -1531,9 +1529,8 @@ PHP_FUNCTION(openssl_csr_export)
 	zval * zcsr = NULL, *zout=NULL;
 	zend_bool notext = 1;
 	BIO * bio_out;
+
 	long csr_resource;
-	char * bio_mem_ptr;
-	long bio_mem_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz|b", &zcsr, &zout, &notext) == FAILURE) {
 		return;
@@ -1552,12 +1549,16 @@ PHP_FUNCTION(openssl_csr_export)
 	if (!notext) {
 		X509_REQ_print(bio_out, csr);
 	}
-	PEM_write_bio_X509_REQ(bio_out, csr);
 
-	bio_mem_len = BIO_get_mem_data(bio_out, &bio_mem_ptr);
-	ZVAL_STRINGL(zout, bio_mem_ptr, bio_mem_len, 1);
+	if (PEM_write_bio_X509_REQ(bio_out, csr)) {
+		BUF_MEM *bio_buf;
 
-	RETVAL_TRUE;
+		BIO_get_mem_ptr(bio_out, &bio_buf);
+		zval_dtor(zout);
+		ZVAL_STRINGL(zout, bio_buf->data, bio_buf->length, 1);
+
+		RETVAL_TRUE;
+	}
 
 	if (csr_resource == -1 && csr) {
 		X509_REQ_free(csr);
@@ -1655,12 +1656,12 @@ PHP_FUNCTION(openssl_csr_sign)
 	if (!i) {
 		goto cleanup;
 	}
-	if (req.request_extensions_section) {
+	if (req.extensions_section) {
 		X509V3_CTX ctx;
 		
 		X509V3_set_ctx(&ctx, cert, new_cert, csr, NULL, 0);
 		X509V3_set_conf_lhash(&ctx, req.req_config);
-		if (!X509V3_EXT_add_conf(req.req_config, &ctx, req.request_extensions_section, new_cert)) {
+		if (!X509V3_EXT_add_conf(req.req_config, &ctx, req.extensions_section, new_cert)) {
 			goto cleanup;
 		}
 	}
