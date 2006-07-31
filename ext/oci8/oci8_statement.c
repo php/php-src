@@ -664,6 +664,8 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 		zval **entry;
 		HashTable *hash = HASH_OF(bind->zval);
 	
+		zend_hash_internal_pointer_reset(hash);
+
 		switch (bind->array.type) {
 			case SQLT_NUM:
 			case SQLT_INT:
@@ -731,7 +733,8 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 			case SQLT_STR:
 			case SQLT_LVC:
 				for (i = 0; i < bind->array.current_length; i++) {
-					int curr_element_length = strlen(((text *)bind->array.elements)+i*bind->array.max_length);
+					/* int curr_element_length = strlen(((text *)bind->array.elements)+i*bind->array.max_length); */
+					int curr_element_length = bind->array.element_lengths[i];
 					if ((i < bind->array.old_length) && (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE)) {
 						zval_dtor(*entry);
 						ZVAL_STRINGL(*entry, ((text *)bind->array.elements)+i*bind->array.max_length, curr_element_length, 1);
@@ -1174,7 +1177,7 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, int nam
 								(sb4) bind->array.max_length,
 								type,
 								(dvoid *)0, /* bindp->array.indicators, */
-								(ub2 *)0, /* bindp->array.element_lengths, */
+								(ub2 *)bind->array.element_lengths,
 								(ub2 *)0, /* bindp->array.retcodes, */
 								(ub4) max_table_length,
 								(ub4 *) &(bindp->array.current_length),
@@ -1220,6 +1223,19 @@ php_oci_bind *php_oci_bind_array_helper_string(zval* var, long max_table_length,
 	bind->array.current_length	= zend_hash_num_elements(Z_ARRVAL_P(var));
 	bind->array.old_length		= bind->array.current_length;
 	bind->array.max_length		= maxlength;
+	bind->array.element_lengths	= ecalloc(1, max_table_length * sizeof(ub2));
+	
+	zend_hash_internal_pointer_reset(hash);
+	
+	for (i = 0; i < bind->array.current_length; i++) {
+		if (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE) {
+			convert_to_string_ex(entry);
+			bind->array.element_lengths[i] = Z_STRLEN_PP(entry); 
+			zend_hash_move_forward(hash);
+		} else {
+			break;
+		}
+	}
 
 	zend_hash_internal_pointer_reset(hash);
 	for (i = 0; i < max_table_length; i++) {
@@ -1259,9 +1275,13 @@ php_oci_bind *php_oci_bind_array_helper_number(zval* var, long max_table_length 
 	bind->array.current_length	= zend_hash_num_elements(Z_ARRVAL_P(var));
 	bind->array.old_length		= bind->array.current_length;
 	bind->array.max_length		= sizeof(ub4);
+	bind->array.element_lengths	= ecalloc(1, max_table_length * sizeof(ub2));
 	
 	zend_hash_internal_pointer_reset(hash);
 	for (i = 0; i < max_table_length; i++) {
+		if (i < bind->array.current_length) {
+			bind->array.element_lengths[i] = sizeof(ub4);
+		}
 		if ((i < bind->array.current_length) && (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE)) {
 			convert_to_long_ex(entry);
 			((ub4 *)bind->array.elements)[i] = (ub4) Z_LVAL_PP(entry);
@@ -1292,9 +1312,13 @@ php_oci_bind *php_oci_bind_array_helper_double(zval* var, long max_table_length 
 	bind->array.current_length	= zend_hash_num_elements(Z_ARRVAL_P(var));
 	bind->array.old_length		= bind->array.current_length;
 	bind->array.max_length		= sizeof(double);
+	bind->array.element_lengths	= ecalloc(1, max_table_length * sizeof(ub2));
 	
 	zend_hash_internal_pointer_reset(hash);
 	for (i = 0; i < max_table_length; i++) {
+		if (i < bind->array.current_length) {
+			bind->array.element_lengths[i] = sizeof(double);
+		}
 		if ((i < bind->array.current_length) && (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE)) {
 			convert_to_double_ex(entry);
 			((double *)bind->array.elements)[i] = (double) Z_DVAL_PP(entry);
@@ -1325,10 +1349,14 @@ php_oci_bind *php_oci_bind_array_helper_date(zval* var, long max_table_length, p
 	bind->array.current_length	= zend_hash_num_elements(Z_ARRVAL_P(var));
 	bind->array.old_length		= bind->array.current_length;
 	bind->array.max_length		= sizeof(OCIDate);
+	bind->array.element_lengths	= ecalloc(1, max_table_length * sizeof(ub2));
 
 	zend_hash_internal_pointer_reset(hash);
 	for (i = 0; i < max_table_length; i++) {
 		OCIDate oci_date;
+		if (i < bind->array.current_length) {
+			bind->array.element_lengths[i] = sizeof(OCIDate);
+		}
 		if ((i < bind->array.current_length) && (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE)) {
 			
 			convert_to_string_ex(entry);

@@ -775,9 +775,10 @@ void php_oci_bind_hash_dtor(void *data)
 	if (bind->array.elements) {
 		efree(bind->array.elements);
 	}
-/*		if (bind->array.element_lengths) {
+	if (bind->array.element_lengths) {
 		efree(bind->array.element_lengths);
 	}
+/*
 	if (bind->array.indicators) {
 		efree(bind->array.indicators);
 	} 
