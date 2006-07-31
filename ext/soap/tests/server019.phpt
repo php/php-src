@@ -13,8 +13,8 @@ function test() {
 $server = new soapserver(null,array('uri'=>"http://testuri.org"));
 $server->addfunction("test");
 
-$HTTP_RAW_POST_DATA = gzencode(<<<EOF
-<?xml version="1.0" encoding="ISO-8859-1"?>
+$HTTP_RAW_POST_DATA = gzencode(
+b'<?xml version="1.0" encoding="ISO-8859-1"?>
 <SOAP-ENV:Envelope
   SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
   xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
@@ -25,8 +25,7 @@ $HTTP_RAW_POST_DATA = gzencode(<<<EOF
     <ns1:test xmlns:ns1="http://testuri.org" />
   </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>
-EOF
-, 9, FORCE_GZIP);
+', 9, FORCE_GZIP);
 $_SERVER['HTTP_CONTENT_ENCODING'] = "gzip";
 $server->handle();
 echo "ok\n";

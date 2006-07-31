@@ -49,8 +49,6 @@
 # define stricmp strcasecmp
 #endif
 
-extern int le_url;
-
 typedef struct _encodeType encodeType, *encodeTypePtr;
 typedef struct _encode encode, *encodePtr;
 
@@ -68,7 +66,6 @@ typedef struct _sdlSoapBindingFunction sdlSoapBindingFunction, *sdlSoapBindingFu
 typedef struct _sdlSoapBindingFunctionBody sdlSoapBindingFunctionBody, *sdlSoapBindingFunctionBodyPtr;
 
 typedef struct _soapMapping soapMapping, *soapMappingPtr;
-typedef struct _soapService soapService, *soapServicePtr;
 
 #include "php_xml.h"
 #include "php_encoding.h"
@@ -99,8 +96,16 @@ struct _soapMapping {
 
 struct _soapHeader;
 
-struct _soapService {
-	sdlPtr sdl;
+typedef struct _soap_server_object {
+	zend_object zo;
+
+	sdlPtr     sdl;
+	char      *uri;
+	HashTable *mapping;
+	int        version;
+	HashTable *class_map;
+	int        features;
+	xmlCharEncodingHandlerPtr encoding;
 
 	struct _soap_functions {
 		HashTable *ft;
@@ -114,16 +119,63 @@ struct _soapService {
 		int persistance;
 	} soap_class;
 
-	HashTable *mapping;
-	int        version;
 	int        type;
 	char      *actor;
+	struct _soapHeader **soap_headers_ptr;
+} soap_server_object;
+
+typedef struct _soap_client_object {
+	zend_object zo;
+
+	sdlPtr     sdl;
 	char      *uri;
-	xmlCharEncodingHandlerPtr encoding;
+	HashTable *mapping;
+	int        version;
 	HashTable *class_map;
 	int        features;
-	struct _soapHeader **soap_headers_ptr;
-};
+	xmlCharEncodingHandlerPtr encoding;
+
+	int style;
+	int use;
+	char *location;
+
+	char *login;
+	char *password;
+	
+	long digest;
+	long digest_nc;
+	char *digest_realm;
+	char *digest_algorithm;
+	char *digest_nonce;
+	char *digest_qop;
+	char *digest_opaque;
+
+	char *proxy_host;
+	long proxy_port;
+	char *proxy_login;
+	char *proxy_password;
+	
+	char *user_agent;
+
+	long connection_timeout;
+	long compression;
+
+	php_stream_context *stream_context;
+	php_stream *stream;
+	php_url *url;
+	zend_bool use_proxy;
+
+	zend_bool exceptions;
+	zend_bool trace;
+	char *last_request_headers;
+	char *last_request;
+	char *last_response_headers;
+	char *last_response;
+
+	zval *default_headers;
+	zval *cookies;
+	zval *fault;
+} soap_client_object;
 
 #define SOAP_CLASS 1
 #define SOAP_FUNCTIONS 2
