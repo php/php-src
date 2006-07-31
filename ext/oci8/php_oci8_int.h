@@ -178,9 +178,9 @@ typedef struct { /* php_oci_bind {{{ */
 	php_oci_statement *parent_statement;     /* pointer to the parent statement */
 	struct {
 		void *elements;
-/*		ub2 *indicators;
+/*		ub2 *indicators; */
 		ub2 *element_lengths;
-		ub2 *retcodes;		*/
+/*		ub2 *retcodes;		*/
 		long current_length;
 		long old_length;
 		long max_length;
