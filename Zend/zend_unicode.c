@@ -710,7 +710,7 @@ ZEND_API void zend_case_fold_string(UChar **dest, int *dest_len, UChar *src, int
 	while (1) {
 		*status = U_ZERO_ERROR;
 		buffer = eurealloc(buffer, buffer_len+1);
-		buffer_len = u_strFoldCase(buffer, buffer_len, src, src_len, options, status);
+		buffer_len = u_strFoldCase(buffer, buffer_len+1, src, src_len, options, status);
 		if (*status != U_BUFFER_OVERFLOW_ERROR) {
 			break;
 		}
