@@ -1,5 +1,11 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2006, Version 4.4.4
+- Fixed bug #38183 (disable_classes=Foobar causes disabled class to be
+  called Foo). (Jani)
+- Fixed bug #38112 (corrupted gif segfaults) (Pierre)
+- Fixed bug #29538 (number_format and problem with 0). (Matthew Wilmas)
+
 03 Aug 2006, Version 4.4.3
 - Added control character checks for cURL extension's open_basedir/safe_mode
   checks. (Ilia)
