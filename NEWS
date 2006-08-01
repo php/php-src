@@ -3,6 +3,7 @@ PHP 4                                                                      NEWS
 ?? ??? 2006, Version 4.4.4
 - Fixed bug #38278 (session_cache_expire()'s value does not match phpinfo's 
   session.cache_expire). (Tony)
+- Fixed bug #38251 (socket_select() and invalid arguments). (Tony)
 - Fixed bug #38183 (disable_classes=Foobar causes disabled class to be
   called Foo). (Jani)
 - Fixed bug #38112 (corrupted gif segfaults) (Pierre)
