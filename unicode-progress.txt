@@ -10,9 +10,6 @@ ext/standard
     Need to fix string_compare_function() to compare Unicode strings
     directly in code point order
 
-    array_multisort()
-        Add SORT_LOCALE_STRING, test
-
     natsort(), natcasesort()
         Params API
         Either port strnatcmp() to support Unicode or maybe use ICU's numeric collation
@@ -35,6 +32,7 @@ ext/standard
     array_map()
     array_merge()
     array_merge_recursive()
+    array_multisort()
     array_product()
     array_push(), array_pop(), array_shift(), array_unshift()
     array_pad()
