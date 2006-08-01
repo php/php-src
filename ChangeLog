@@ -1,3 +1,140 @@
+2006-07-31  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo/pdo_dbh.c
+      ext/pdo/pdo_stmt.c
+      ext/pdo_mysql/tests/bug_37445.phpt:
+      MFB: Fixed bug #37445 (Fixed crash in pdo_mysql resulting from premature
+      object destruction).
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_dbh.c
+      ext/pdo/pdo_stmt.c
+      ext/pdo_mysql/tests/bug_37445.phpt
+      ext/pdo_mysql/tests/bug_37445.phpt
+      ext/pdo_mysql/tests/common.phpt:
+      Fixed bug #37445 (Fixed crash in pdo_mysql resulting from premature object
+      destruction).
+
+    * (PHP_5_2)
+      ext/pdo_mysql/tests/bug_33689.phpt
+      ext/pdo_mysql/tests/common.phpt
+      ext/pdo_mysql/tests/last_insert_id.phpt
+      ext/pdo_mysql/tests/pecl_bug_5200.phpt
+      ext/pdo_mysql/tests/pecl_bug_5780.phpt
+      ext/pdo_mysql/tests/pecl_bug_5802.phpt
+      ext/pdo_mysql/tests/show_tables.phpt:
+      Fixed tests from being always skipped.
+
+2006-07-31  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/php_http.c
+      ext/soap/php_sdl.c
+      ext/soap/php_soap.h
+      ext/soap/soap.c
+      ext/soap/tests/server019.phpt
+      ext/soap/tests/server020.phpt
+      ext/soap/tests/setheaders.phpt:
+      Reimplemented SoapServer and SoapClient classes using ZE2 object API.
+      All internal properties are hidden now.
+
+    * (PHP_5_2)
+      ext/soap/soap.c:
+      Prevented possible double call in case of fault
+
+2006-07-31  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Go with 4.4.3.
+
+2006-07-31  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/tests/setheaders.phpt
+      ext/soap/tests/setheaders.phpt:
+      
+      file setheaders.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/soap/soap.c:
+      Fixed crash in SoapClient::__setSoapHeaders()
+
+2006-07-31  Christian Stocker  <chregu@bitflux.ch>
+
+    * ext/xsl/xsltprocessor.c:
+      return false instead of null, if it's an invalid document
+      (MFB)
+
+    * (PHP_5_2)
+      ext/xsl/xsltprocessor.c:
+      return false instead of null, if it's an invalid document
+
+    * (PHP_5_2)
+      NEWS:
+      make a NEWS entry about
+      - Fixed XSLTProcessor::importStylesheet() to return TRUE on success
+
+    * ext/xsl/xsltprocessor.c
+      ext/xsl/xsltprocessor.c:
+      return true, if xsl import did work
+
+2006-07-31  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/oci8/oci8.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/array_bind_005.phpt:
+      MFH: fix #37581 (oci_bind_array_by_name clobbers input array when using
+      SQLT_AFC, AVC)
+
+    * ext/oci8/tests/bug37581.phpt
+      ext/oci8/tests/bug37581.phpt:
+      
+      file bug37581.phpt was initially added on branch PHP_5_2.
+
+    * ext/oci8/bug37581.phpt
+      ext/oci8/oci8.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/array_bind_005.phpt:
+      fix #37581 (oci_bind_array_by_name clobbers input array when using
+      SQLT_AFC, AVC)
+
+2006-07-31  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/openssl/openssl.c:
+      MFB: Fixed compiler warning.
+
+    * (PHP_5_2)
+      ext/openssl/openssl.c:
+      Fixed compiler warning.
+
+2006-07-31  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - #36732 entry
+      - move openssl bug fixes
+
+    * ext/openssl/openssl.c
+      ext/openssl/tests/bug36732.phpt:
+      - MFB: #36732, add req_extensions support to openssl_csr_new and _sign
+         (ben at psc dot edu)
+      - MFB: fix leaks in openssl_csr_new and sig
+
+    * (PHP_5_2)
+      ext/openssl/openssl.c
+      ext/openssl/tests/bug36732.phpt
+      ext/openssl/tests/bug36732.phpt:
+      
+      - #36732, add req_extensions support to openssl_csr_new and _sign
+        (ben at psc dot edu)
+      - fix leaks in openssl_csr_new and sign
+
 2006-07-30  Antony Dovgal  <antony@zend.com>
 
     * ext/oci8/package.xml:
