@@ -13,9 +13,6 @@ ext/standard
     array_multisort()
         Add SORT_LOCALE_STRING, test
 
-    extract()
-        Params API, fix php_valid_var_name(), test
-
     natsort(), natcasesort()
         Params API
         Either port strnatcmp() to support Unicode or maybe use ICU's numeric collation
@@ -54,6 +51,7 @@ ext/standard
     array_walk_recursive()
     compact()
     count()
+    extract()
     in_array()
     min()
     max()
