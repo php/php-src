@@ -1452,7 +1452,11 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 	}
 
 	ZVAL_ADDREF(param.parameter);
-	return really_register_bound_param(&param, stmt, is_param TSRMLS_CC);
+	if (!really_register_bound_param(&param, stmt, is_param TSRMLS_CC)) {
+		zval_ptr_dtor(&(param.parameter));
+		return 0;
+	}
+	return 1;
 } /* }}} */
 
 /* {{{ proto bool PDOStatement::bindValue(mixed $paramno, mixed $param [, int $type ])
@@ -1481,7 +1485,11 @@ static PHP_METHOD(PDOStatement, bindValue)
 	}
 	
 	ZVAL_ADDREF(param.parameter);
-	RETURN_BOOL(really_register_bound_param(&param, stmt, TRUE TSRMLS_CC));
+	if (!really_register_bound_param(&param, stmt, TRUE TSRMLS_CC)) {
+		zval_ptr_dtor(&(param.parameter));
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
 }
 /* }}} */
 
