@@ -184,7 +184,7 @@ zend_function_entry date_functions[] = {
 	PHP_FE(timezone_name_get, NULL)
 	PHP_FE(timezone_name_from_abbr, NULL)
 	PHP_FE(timezone_offset_get, NULL)
-	PHP_FE(timezone_transistions_get, NULL)
+	PHP_FE(timezone_transitions_get, NULL)
 	PHP_FE(timezone_identifiers_list, NULL)
 	PHP_FE(timezone_abbreviations_list, NULL)
 
@@ -201,6 +201,7 @@ zend_function_entry date_functions[] = {
 
 
 zend_function_entry date_funcs_date[] = {
+	PHP_ME(DateTime, __construct, NULL, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
 	ZEND_NAMED_FE(format, ZEND_FN(date_format), NULL)
 	ZEND_NAMED_FE(modify, ZEND_FN(date_modify), NULL)
 	ZEND_NAMED_FE(getTimezone, ZEND_FN(date_timezone_get), NULL)
@@ -213,9 +214,10 @@ zend_function_entry date_funcs_date[] = {
 };
 
 zend_function_entry date_funcs_timezone[] = {
+	PHP_ME(DateTimeZone, __construct, NULL, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
 	ZEND_NAMED_FE(getName, ZEND_FN(timezone_name_get), NULL)
 	ZEND_NAMED_FE(getOffset, ZEND_FN(timezone_offset_get), NULL)
-	ZEND_NAMED_FE(getTransistions, ZEND_FN(timezone_transistions_get), NULL)
+	ZEND_NAMED_FE(getTransitions, ZEND_FN(timezone_transitions_get), NULL)
 	ZEND_FENTRY(listAbbreviations, zif_timezone_abbreviations_list, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FENTRY(listIdentifiers, zif_timezone_identifiers_list, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	{NULL, NULL, NULL}
@@ -286,6 +288,12 @@ struct _php_timezone_obj {
 		}	\
 	}	\
 	obj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);	\
+
+#define DATE_CHECK_INITIALIZED(member, class_name) \
+	if (!(member)) { \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The " #class_name " object has not been correctly initialized by its constructor"); \
+		RETURN_FALSE; \
+	}
 
 static void date_object_free_storage_date(void *object TSRMLS_DC);
 static void date_object_free_storage_timezone(void *object TSRMLS_DC);
@@ -1656,25 +1664,16 @@ static zval * date_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC)
 	Z_TYPE_P(object) = IS_OBJECT;
 	object_init_ex(object, pce);
 	object->refcount = 1;
-	object->is_ref = 1;
+	object->is_ref = 0;
 	return object;
 }
 
-PHP_FUNCTION(date_create)
+static void date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, int time_str_len, zval *timezone_object TSRMLS_DC)
 {
-	php_date_obj   *dateobj;
-	zval           *timezone_object = NULL;
 	timelib_time   *now;
 	timelib_tzinfo *tzi;
-	char           *time_str;
-	int             time_str_len = 0, free_tzi = 0;;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sO", &time_str, &time_str_len, &timezone_object, date_ce_timezone) == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	date_instantiate(date_ce_date, return_value TSRMLS_CC);
-	dateobj = (php_date_obj *) zend_object_store_get_object(return_value TSRMLS_CC);
+	int free_tzi = 0;
+	
 	dateobj->time = timelib_strtotime(time_str_len ? time_str : "now", time_str_len ? time_str_len : sizeof("now") -1, NULL, DATE_TIMEZONEDB);
 
 	if (timezone_object) {
@@ -1705,6 +1704,32 @@ PHP_FUNCTION(date_create)
 		timelib_tzinfo_dtor(tzi);
 	}
 	timelib_time_dtor(now);	
+}
+
+PHP_FUNCTION(date_create)
+{
+	zval           *timezone_object = NULL;
+	char           *time_str = NULL;
+	int             time_str_len = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sO", &time_str, &time_str_len, &timezone_object, date_ce_timezone) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	date_instantiate(date_ce_date, return_value TSRMLS_CC);
+	date_initialize(zend_object_store_get_object(return_value TSRMLS_CC), time_str, time_str_len, timezone_object TSRMLS_CC);
+}
+
+PHP_METHOD(DateTime, __construct)
+{
+	zval *timezone_object = NULL;
+	char *time_str = NULL;
+	int time_str_len = 0;
+	
+	if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sO", &time_str, &time_str_len, &timezone_object, date_ce_timezone)) {
+		/* TODO: throw Exception on unparseable dates */
+		date_initialize(zend_object_store_get_object(getThis() TSRMLS_CC), time_str, time_str_len, timezone_object TSRMLS_CC);
+	}
 }
 
 PHP_FUNCTION(date_parse)
@@ -1814,6 +1839,7 @@ PHP_FUNCTION(date_format)
 		RETURN_FALSE;
 	}
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
+	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
 	str = date_format(format, format_len, &length, dateobj->time, dateobj->time->is_localtime, 0 TSRMLS_CC);
 	if (UG(unicode)) {
 		RETURN_UNICODEL((UChar*) str, length, 0);
@@ -1854,6 +1880,7 @@ PHP_FUNCTION(date_modify)
 		RETURN_FALSE;
 	}
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
+	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
 
 	tmp_time = timelib_strtotime(modify, modify_len, NULL, DATE_TIMEZONEDB);
 	dateobj->time->relative.y = tmp_time->relative.y;
@@ -1882,6 +1909,7 @@ PHP_FUNCTION(date_timezone_get)
 		RETURN_FALSE;
 	}
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
+	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
 	if (dateobj->time->is_localtime && dateobj->time->tz_info) {
 		date_instantiate(date_ce_timezone, return_value TSRMLS_CC);
 		tzobj = (php_timezone_obj *) zend_object_store_get_object(return_value TSRMLS_CC);
@@ -1902,6 +1930,7 @@ PHP_FUNCTION(date_timezone_set)
 		RETURN_FALSE;
 	}
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
+	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
 	tzobj = (php_timezone_obj *) zend_object_store_get_object(timezone_object TSRMLS_CC);
 	if (dateobj->time->tz_info) {
 		timelib_tzinfo_dtor(dateobj->time->tz_info);
@@ -1920,6 +1949,7 @@ PHP_FUNCTION(date_offset_get)
 		RETURN_FALSE;
 	}
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
+	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
 	if (dateobj->time->is_localtime && dateobj->time->tz_info) {
 		offset = timelib_get_time_zone_info(dateobj->time->sse, dateobj->time->tz_info);
 		RETVAL_LONG(offset->offset);
@@ -1940,6 +1970,7 @@ PHP_FUNCTION(date_time_set)
 		RETURN_FALSE;
 	}
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
+	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
 	dateobj->time->h = h;
 	dateobj->time->i = i;
 	dateobj->time->s = s;
@@ -1956,6 +1987,7 @@ PHP_FUNCTION(date_date_set)
 		RETURN_FALSE;
 	}
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
+	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
 	dateobj->time->y = y;
 	dateobj->time->m = m;
 	dateobj->time->d = d;
@@ -1972,6 +2004,7 @@ PHP_FUNCTION(date_isodate_set)
 		RETURN_FALSE;
 	}
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
+	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
 	dateobj->time->y = y;
 	dateobj->time->m = 1;
 	dateobj->time->d = 1;
@@ -1982,9 +2015,28 @@ PHP_FUNCTION(date_isodate_set)
 }
 
 
+static int timezone_initialize(timelib_tzinfo **tzi, /*const*/ char *tz TSRMLS_DC)
+{
+	char *tzid;
+	
+	*tzi = NULL;
+	
+	if ((tzid = timelib_timezone_id_from_abbr(tz, -1, 0))) {
+		*tzi = php_date_parse_tzfile(tzid, DATE_TIMEZONEDB TSRMLS_CC);
+	} else {
+		*tzi = php_date_parse_tzfile(tz, DATE_TIMEZONEDB TSRMLS_CC);
+	}
+	
+	if (*tzi) {
+		return SUCCESS;
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown or bad timezone (%s)", tz);
+		return FAILURE;
+	}
+}
+
 PHP_FUNCTION(timezone_open)
 {
-	php_timezone_obj *tzobj;
 	char *tz;
 	int   tz_len;
 	timelib_tzinfo *tzi = NULL;
@@ -1992,26 +2044,24 @@ PHP_FUNCTION(timezone_open)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &tz, &tz_len) == FAILURE) {
 		RETURN_FALSE;
 	}
-	/* Try finding the tz information as "Timezone Abbreviation" */
-	if (!tzi) {
-		char *tzid;
-		
-		tzid = timelib_timezone_id_from_abbr(tz, -1, 0);
-		if (tzid) {
-			tzi = php_date_parse_tzfile(tzid, DATE_TIMEZONEDB TSRMLS_CC);
-		}
-	}
-	/* Try finding the tz information as "Timezone Identifier" */
-	if (!tzi) {
-		tzi = php_date_parse_tzfile(tz, DATE_TIMEZONEDB TSRMLS_CC);
-	}
-	/* If we find it we instantiate the object otherwise, well, we don't and return false */
-	if (tzi) {
-		date_instantiate(date_ce_timezone, return_value TSRMLS_CC);
-		tzobj = (php_timezone_obj *) zend_object_store_get_object(return_value TSRMLS_CC);
-		tzobj->tz = tzi;
-	} else {
+	if (SUCCESS != timezone_initialize(&tzi, tz TSRMLS_CC)) {
 		RETURN_FALSE;
+	}
+	((php_timezone_obj *) zend_object_store_get_object(date_instantiate(date_ce_timezone, return_value TSRMLS_CC) TSRMLS_CC))->tz = tzi;
+}
+
+PHP_METHOD(DateTimeZone, __construct)
+{
+	char *tz;
+	int tz_len;
+	timelib_tzinfo *tzi = NULL;
+	
+	if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &tz, &tz_len)) {
+		php_set_error_handling(EH_THROW, NULL TSRMLS_CC);
+		if (SUCCESS == timezone_initialize(&tzi, tz TSRMLS_CC)) {
+			((php_timezone_obj *) zend_object_store_get_object(getThis() TSRMLS_CC))->tz = tzi;
+		}
+		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 	}
 }
 
@@ -2024,6 +2074,7 @@ PHP_FUNCTION(timezone_name_get)
 		RETURN_FALSE;
 	}
 	tzobj = (php_timezone_obj *) zend_object_store_get_object(object TSRMLS_CC);
+	DATE_CHECK_INITIALIZED(tzobj->tz, DateTimeZone);
 
 	RETURN_STRING(tzobj->tz->name, 1);
 }
@@ -2059,14 +2110,16 @@ PHP_FUNCTION(timezone_offset_get)
 		RETURN_FALSE;
 	}
 	tzobj = (php_timezone_obj *) zend_object_store_get_object(object TSRMLS_CC);
+	DATE_CHECK_INITIALIZED(tzobj->tz, DateTimeZone);
 	dateobj = (php_date_obj *) zend_object_store_get_object(dateobject TSRMLS_CC);
+	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
 
 	offset = timelib_get_time_zone_info(dateobj->time->sse, tzobj->tz);
 	RETVAL_LONG(offset->offset);
 	timelib_time_offset_dtor(offset);
 }
 
-PHP_FUNCTION(timezone_transistions_get)
+PHP_FUNCTION(timezone_transitions_get)
 {
 	zval                *object, *element;
 	php_timezone_obj    *tzobj;
@@ -2076,6 +2129,7 @@ PHP_FUNCTION(timezone_transistions_get)
 		RETURN_FALSE;
 	}
 	tzobj = (php_timezone_obj *) zend_object_store_get_object(object TSRMLS_CC);
+	DATE_CHECK_INITIALIZED(tzobj->tz, DateTimeZone);
 
 	array_init(return_value);
 	for (i = 0; i < tzobj->tz->timecnt; ++i) {
