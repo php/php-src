@@ -3693,7 +3693,7 @@ int multisort_compare(const void *a, const void *b TSRMLS_DC)
 	efree(args);							\
 	RETURN_FALSE;
 
-/* {{{ proto bool array_multisort(array ar1 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING]] [, array ar2 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING]], ...])
+/* {{{ proto bool array_multisort(array ar1 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING]] [, array ar2 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING]], ...]) U
    Sort multiple arrays at once similar to how ORDER BY clause works in SQL */
 PHP_FUNCTION(array_multisort)
 {
@@ -3770,6 +3770,7 @@ PHP_FUNCTION(array_multisort)
 				case SORT_REGULAR:
 				case SORT_NUMERIC:
 				case SORT_STRING:
+				case SORT_LOCALE_STRING:
 					/* flag allowed here */
 					if (parse_state[MULTISORT_TYPE] == 1) {
 						/* Save the flag and make sure then next arg is not the current flag. */
