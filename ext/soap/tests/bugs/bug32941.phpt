@@ -35,7 +35,50 @@ $client = new TestSoapClient(dirname(__FILE__).'/bug32941.wsdl', array("trace" =
 $ahoj = $client->echoString('exception');
 $client = new TestSoapClient(dirname(__FILE__).'/bug32941.wsdl', array("trace" => 1, 'exceptions' => 0));
 $ahoj = $client->echoString('exception');
+var_dump($ahoj->detail);
 echo "ok\n";
 ?>
 --EXPECT--
+object(stdClass)#1 (2) {
+  ["service.EchoServiceException"]=>
+  object(SoapVar)#8 (4) {
+    ["enc_type"]=>
+    int(0)
+    ["enc_value"]=>
+    object(stdClass)#7 (2) {
+      ["intParameter"]=>
+      int(105)
+      ["parameter"]=>
+      string(12) "string param"
+    }
+    ["enc_stype"]=>
+    string(20) "EchoServiceException"
+    ["enc_ns"]=>
+    string(23) "urn:service.EchoService"
+  }
+  ["hostname"]=>
+  string(9) "steckovic"
+}
+ok
+--UEXPECT--
+object(stdClass)#1 (2) {
+  [u"service.EchoServiceException"]=>
+  object(SoapVar)#8 (4) {
+    [u"enc_type"]=>
+    int(0)
+    [u"enc_value"]=>
+    object(stdClass)#7 (2) {
+      [u"intParameter"]=>
+      int(105)
+      [u"parameter"]=>
+      unicode(12) "string param"
+    }
+    [u"enc_stype"]=>
+    unicode(20) "EchoServiceException"
+    [u"enc_ns"]=>
+    unicode(23) "urn:service.EchoService"
+  }
+  [u"hostname"]=>
+  unicode(9) "steckovic"
+}
 ok
