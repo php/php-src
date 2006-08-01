@@ -1672,9 +1672,22 @@ static void date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, int
 {
 	timelib_time   *now;
 	timelib_tzinfo *tzi;
+	timelib_error_container *err = NULL;
 	int free_tzi = 0;
 	
-	dateobj->time = timelib_strtotime(time_str_len ? time_str : "now", time_str_len ? time_str_len : sizeof("now") -1, NULL, DATE_TIMEZONEDB);
+	if (dateobj->time) {
+		if (dateobj->time->tz_info) {
+			timelib_tzinfo_dtor(dateobj->time->tz_info);
+		}
+		timelib_time_dtor(dateobj->time);
+	}
+	dateobj->time = timelib_strtotime(time_str_len ? time_str : "now", time_str_len ? time_str_len : sizeof("now") -1, &err, DATE_TIMEZONEDB);
+	if (err) {
+		if (err->error_count) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to parse time string (%s)", time_str);
+		}
+		timelib_error_container_dtor(err);
+	}
 
 	if (timezone_object) {
 		php_timezone_obj *tzobj;
@@ -1727,8 +1740,9 @@ PHP_METHOD(DateTime, __construct)
 	int time_str_len = 0;
 	
 	if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sO", &time_str, &time_str_len, &timezone_object, date_ce_timezone)) {
-		/* TODO: throw Exception on unparseable dates */
+		php_set_error_handling(EH_THROW, NULL TSRMLS_CC);
 		date_initialize(zend_object_store_get_object(getThis() TSRMLS_CC), time_str, time_str_len, timezone_object TSRMLS_CC);
+		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 	}
 }
 
