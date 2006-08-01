@@ -1189,7 +1189,11 @@ open:
 
 	if (OCI_G(errcode) != OCI_SUCCESS) {
 #ifdef HAVE_OCI_INSTANT_CLIENT
+# ifdef PHP_WIN32
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, PHP_OCI_INIT_FUNC_NAME "() failed. There is something wrong with your system - please check that PATH includes the directory with Oracle Instant Client libraries");
+# else
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, PHP_OCI_INIT_FUNC_NAME "() failed. There is something wrong with your system - please check that LD_LIBRARY_PATH includes the directory with Oracle Instant Client libraries");
+# endif
 #else
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, PHP_OCI_INIT_FUNC_NAME "() failed. There is something wrong with your system - please check that ORACLE_HOME is set and points to the right directory");
 #endif
