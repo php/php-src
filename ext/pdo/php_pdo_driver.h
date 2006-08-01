@@ -651,6 +651,9 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 PDO_API void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt,
 	const char *sqlstate, const char *supp TSRMLS_DC);
 
+PDO_API void php_pdo_dbh_addref(pdo_dbh_t *dbh TSRMLS_DC);
+PDO_API void php_pdo_dbh_delref(pdo_dbh_t *dbh TSRMLS_DC);
+
 #endif /* PHP_PDO_DRIVER_H */
 /*
  * Local variables:
