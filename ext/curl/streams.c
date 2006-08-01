@@ -396,15 +396,33 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 		/* fire up the connection; we need to detect a connection error here,
 		 * otherwise the curlstream we return ends up doing nothing useful. */
 		CURLMcode m;
+		CURLMsg *msg;
+		int msgs_left, msg_found = 0;
 
 		while (CURLM_CALL_MULTI_PERFORM == (m = curl_multi_perform(curlstream->multi, &curlstream->pending))) {
 			; /* spin */
 		}
 
 		if (m != CURLM_OK) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "There was an error mcode=%d", m);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", curl_multi_strerror(m));
+			php_stream_close(stream);
+			return NULL;
 		}
-
+		
+		/* we have only one curl handle here, even though we use multi syntax, 
+		 * so it's ok to fail on any error */
+		while ((msg = curl_multi_info_read(curlstream->multi, &msgs_left))) {
+			if (msg->data.result == CURLE_OK) {
+				continue;
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", curl_easy_strerror(msg->data.result));
+				msg_found++;
+			}
+		}
+		if (msg_found) {
+			php_stream_close(stream);
+			return NULL;
+		}
 	}
 	
 	return stream;
