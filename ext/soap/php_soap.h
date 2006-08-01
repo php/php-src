@@ -275,5 +275,8 @@ zval* add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *faul
 	php_error(severity, "SOAP-ERROR: " format, param1, param2, param3)
 
 char* soap_unicode_to_string(UChar *ustr, int ustr_len TSRMLS_DC);
+void soap_decode_string(zval *ret, char* str TSRMLS_DC);
+char* soap_encode_string(zval *data, int* len TSRMLS_DC);
+char* soap_encode_string_ex(zend_uchar type, zstr data, int len TSRMLS_DC);
 
 #endif

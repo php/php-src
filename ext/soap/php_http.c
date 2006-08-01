@@ -602,7 +602,9 @@ try_again:
 		if (client->cookies) {
 			zval **data;
 			zstr key;
+			uint key_len;
 			int i, n;
+			zend_uchar key_type;
 
 			n = zend_hash_num_elements(Z_ARRVAL_P(client->cookies));
 			if (n > 0) {
@@ -610,23 +612,42 @@ try_again:
 				smart_str_append_const(&soap_headers, "Cookie: ");
 				for (i = 0; i < n; i++) {
 					zend_hash_get_current_data(Z_ARRVAL_P(client->cookies), (void **)&data);
-					/* TODO: unicode support */
-					zend_hash_get_current_key(Z_ARRVAL_P(client->cookies), &key, NULL, FALSE);
+					key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(client->cookies), &key, &key_len, NULL, FALSE, NULL);
 
 					if (Z_TYPE_PP(data) == IS_ARRAY) {
 						zval** value;
 
 						if (zend_hash_index_find(Z_ARRVAL_PP(data), 0, (void**)&value) == SUCCESS &&
-						    Z_TYPE_PP(value) == IS_STRING) {
+						    (Z_TYPE_PP(value) == IS_STRING || Z_TYPE_PP(value) == IS_UNICODE)) {
 						  zval **tmp;
 						  if ((zend_hash_index_find(Z_ARRVAL_PP(data), 1, (void**)&tmp) == FAILURE ||
 						       strncmp(phpurl->path?phpurl->path:"/",Z_STRVAL_PP(tmp),Z_STRLEN_PP(tmp)) == 0) &&
 						      (zend_hash_index_find(Z_ARRVAL_PP(data), 2, (void**)&tmp) == FAILURE ||
 						       in_domain(phpurl->host,Z_STRVAL_PP(tmp))) &&
 						      (use_ssl || zend_hash_index_find(Z_ARRVAL_PP(data), 3, (void**)&tmp) == FAILURE)) {
-								smart_str_appendl(&soap_headers, key.s, strlen(key.s));
+								if (key_type == IS_STRING) {
+									smart_str_appendl(&soap_headers, key.s, key_len-1);
+								} else {
+									UErrorCode status = U_ZERO_ERROR;
+									char *res;
+									int res_len;
+
+									zend_convert_from_unicode(UG(utf8_conv), &res, &res_len, key.u, key_len-1, &status);
+									smart_str_appendl(&soap_headers, res, res_len);
+									efree(res);
+								}
 								smart_str_appendc(&soap_headers, '=');
-								smart_str_appendl(&soap_headers, Z_STRVAL_PP(value), Z_STRLEN_PP(value));
+								if (Z_TYPE_PP(value) == IS_STRING) {
+									smart_str_appendl(&soap_headers, Z_STRVAL_PP(value), Z_STRLEN_PP(value));
+								} else {
+									UErrorCode status = U_ZERO_ERROR;
+									char *res;
+									int res_len;
+
+									zend_convert_from_unicode(UG(utf8_conv), &res, &res_len, Z_USTRVAL_PP(value), Z_USTRLEN_PP(value), &status);
+									smart_str_appendl(&soap_headers, res, res_len);
+									efree(res);
+								}
 								smart_str_appendc(&soap_headers, ';');
 							}
 						}
@@ -751,6 +772,7 @@ try_again:
 			smart_str name = {0};
 			int cookie_len;
 			zval *zcookie;
+			zval *zvalue;
 
 			if (sempos != NULL) {
 				cookie_len = sempos-(eqpos+1);
@@ -763,7 +785,12 @@ try_again:
 
 			ALLOC_INIT_ZVAL(zcookie);
 			array_init(zcookie);
-			add_index_stringl(zcookie, 0, eqpos + 1, cookie_len, 1);
+			MAKE_STD_ZVAL(zvalue);
+			ZVAL_STRINGL(zvalue, eqpos + 1, cookie_len, 1);
+			if (UG(unicode)) {
+				zval_string_to_unicode_ex(zvalue, UG(utf8_conv) TSRMLS_CC);
+			}
+			add_index_zval(zcookie, 0, zvalue);
 
 			if (sempos != NULL) {
 				char *options = cookie + cookie_len+1;

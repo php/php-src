@@ -284,26 +284,15 @@ xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr par
 		encodePtr enc = NULL;
 		HashTable *ht = Z_OBJPROP_P(data);
 		char *stype_str = NULL, *ns_str = NULL;
-		int free_stype = 0, free_ns = 0;
 
 		if (zend_hash_find(ht, "enc_type", sizeof("enc_type"), (void **)&ztype) == FAILURE) {
 			soap_error0(E_ERROR, "Encoding: SoapVar hasn't 'enc_type' propery");
 		}
 
 		if (zend_hash_find(ht, "enc_stype", sizeof("enc_stype"), (void **)&zstype) == SUCCESS) {
-			if (Z_TYPE_PP(zstype) == IS_STRING) {
-				stype_str = Z_STRVAL_PP(zstype);
-			} else if (Z_TYPE_PP(zstype) == IS_UNICODE) {
-				stype_str = soap_unicode_to_string(Z_USTRVAL_PP(zstype), Z_USTRLEN_PP(zstype) TSRMLS_CC);
-				free_stype = 1;
-			}
+			stype_str = soap_encode_string(*zstype, NULL TSRMLS_CC);
 			if (stype_str && zend_hash_find(ht, "enc_ns", sizeof("enc_ns"), (void **)&zns) == SUCCESS) {
-				if (Z_TYPE_PP(zns) == IS_STRING) {
-					ns_str = Z_STRVAL_PP(zns);
-				} else if (Z_TYPE_PP(zns) == IS_UNICODE) {
-					ns_str = soap_unicode_to_string(Z_USTRVAL_PP(zns), Z_USTRLEN_PP(zns) TSRMLS_CC);
-					free_ns = 1;
-				}
+				ns_str = soap_encode_string(*zns, NULL TSRMLS_CC);
 			}
 		}
 
@@ -334,35 +323,26 @@ xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr par
 				set_ns_and_type_ex(node, ns_str, stype_str);
 			}
 		}
-
-		if (free_stype) {
+		
+		if (stype_str) {
 			efree(stype_str);
 		}
-		if (free_ns) {
+		if (ns_str) {
 			efree(ns_str);
 		}
 
 		if (zend_hash_find(ht, "enc_name", sizeof("enc_name"), (void **)&zname) == SUCCESS) {
-			if (Z_TYPE_PP(zname) == IS_STRING) {
-				xmlNodeSetName(node, BAD_CAST(Z_STRVAL_PP(zname)));
-			} else if (Z_TYPE_PP(zname) == IS_UNICODE) {
-				char *str = soap_unicode_to_string(Z_USTRVAL_PP(zname), Z_USTRLEN_PP(zname) TSRMLS_CC);
+			char *str = soap_encode_string(*zname, NULL TSRMLS_CC);
 
-				xmlNodeSetName(node, BAD_CAST(str));
-				efree(str);
-			}
+			xmlNodeSetName(node, BAD_CAST(str));
+			efree(str);
 		}
 		if (zend_hash_find(ht, "enc_namens", sizeof("enc_namens"), (void **)&znamens) == SUCCESS) {
-			if (Z_TYPE_PP(znamens) == IS_STRING) {
-				xmlNsPtr nsp = encode_add_ns(node, Z_STRVAL_PP(znamens));
-				xmlSetNs(node, nsp);
-			} if (Z_TYPE_PP(znamens) == IS_UNICODE) {
-				char *str = soap_unicode_to_string(Z_USTRVAL_PP(znamens), Z_USTRLEN_PP(znamens) TSRMLS_CC);
+			char *str = soap_encode_string(*znamens, NULL TSRMLS_CC);
+			xmlNsPtr nsp = encode_add_ns(node, str);
 
-				xmlNsPtr nsp = encode_add_ns(node, str);
-				efree(str);
-				xmlSetNs(node, nsp);
-			}
+			efree(str);
+			xmlSetNs(node, nsp);
 		}
 	} else {
 		if (SOAP_GLOBAL(class_map) && data &&
@@ -392,9 +372,8 @@ xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr par
 				    if (utype == HASH_KEY_IS_STRING || utype == HASH_KEY_IS_UNICODE) {
 				    	encodePtr enc;
 
-						if (utype == HASH_KEY_IS_UNICODE) {
-							type_name.s = soap_unicode_to_string(type_name.u, type_len TSRMLS_CC);
-						}
+				    	type_name.s = soap_encode_string_ex(utype, type_name, type_len TSRMLS_CC);
+
 					    /* TODO: namespace isn't stored */
 				    	enc = get_encoder(SOAP_GLOBAL(sdl), SOAP_GLOBAL(sdl)->target_ns, type_name.s);
 				    	if (enc) {
@@ -405,9 +384,7 @@ xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr par
 								encode = enc;
 							}
 						}
-						if (utype == HASH_KEY_IS_UNICODE) {
-							efree(type_name.v);
-						}
+						efree(type_name.v);
 				        break;
 				    }
 				}
@@ -612,25 +589,7 @@ static zval *to_zval_string(encodeTypePtr type, xmlNodePtr data)
 		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
 			TSRMLS_FETCH();
 
-			if (UG(unicode)) {
-				/* TODO: unicode support */
-				ZVAL_STRING(ret, (char*)data->children->content, 1);
-				zval_string_to_unicode_ex(ret, UG(utf8_conv) TSRMLS_CC);
-			} else if (SOAP_GLOBAL(encoding) != NULL) {
-				xmlBufferPtr in  = xmlBufferCreateStatic(data->children->content, xmlStrlen(data->children->content));
-				xmlBufferPtr out = xmlBufferCreate();
-				int n = xmlCharEncOutFunc(SOAP_GLOBAL(encoding), out, in);
-
-				if (n >= 0) {
-					ZVAL_STRING(ret, (char*)xmlBufferContent(out), 1);
-				} else {
-					ZVAL_STRING(ret, (char*)data->children->content, 1);
-				}
-				xmlBufferFree(out);
-				xmlBufferFree(in);
-			} else {
-				ZVAL_STRING(ret, (char*)data->children->content, 1);
-			}
+			soap_decode_string(ret, (char*)data->children->content TSRMLS_CC);
 		} else if (data->children->type == XML_CDATA_SECTION_NODE && data->children->next == NULL) {
 			ZVAL_STRING(ret, (char*)data->children->content, 1);
 		} else {
@@ -652,25 +611,7 @@ static zval *to_zval_stringr(encodeTypePtr type, xmlNodePtr data)
 			TSRMLS_FETCH();
 
 			whiteSpace_replace(data->children->content);
-			if (UG(unicode)) {
-				/* TODO: unicode support */
-				ZVAL_STRING(ret, (char*)data->children->content, 1);
-				zval_string_to_unicode_ex(ret, UG(utf8_conv) TSRMLS_CC);
-			} else if (SOAP_GLOBAL(encoding) != NULL) {
-				xmlBufferPtr in  = xmlBufferCreateStatic(data->children->content, xmlStrlen(data->children->content));
-				xmlBufferPtr out = xmlBufferCreate();
-				int n = xmlCharEncOutFunc(SOAP_GLOBAL(encoding), out, in);
-
-				if (n >= 0) {
-					ZVAL_STRING(ret, (char*)xmlBufferContent(out), 1);
-				} else {
-					ZVAL_STRING(ret, (char*)data->children->content, 1);
-				}
-				xmlBufferFree(out);
-				xmlBufferFree(in);
-			} else {
-				ZVAL_STRING(ret, (char*)data->children->content, 1);
-			}
+			soap_decode_string(ret, (char*)data->children->content TSRMLS_CC);
 		} else if (data->children->type == XML_CDATA_SECTION_NODE && data->children->next == NULL) {
 			ZVAL_STRING(ret, (char*)data->children->content, 1);
 		} else {
@@ -692,25 +633,7 @@ static zval *to_zval_stringc(encodeTypePtr type, xmlNodePtr data)
 			TSRMLS_FETCH();
 
 			whiteSpace_collapse(data->children->content);
-			if (UG(unicode)) {
-				/* TODO: unicode support */
-				ZVAL_STRING(ret, (char*)data->children->content, 1);
-				zval_string_to_unicode_ex(ret, UG(utf8_conv) TSRMLS_CC);
-			} else if (SOAP_GLOBAL(encoding) != NULL) {
-				xmlBufferPtr in  = xmlBufferCreateStatic(data->children->content, xmlStrlen(data->children->content));
-				xmlBufferPtr out = xmlBufferCreate();
-				int n = xmlCharEncOutFunc(SOAP_GLOBAL(encoding), out, in);
-
-				if (n >= 0) {
-					ZVAL_STRING(ret, (char*)xmlBufferContent(out), 1);
-				} else {
-					ZVAL_STRING(ret, (char*)data->children->content, 1);
-				}
-				xmlBufferFree(out);
-				xmlBufferFree(in);
-			} else {
-				ZVAL_STRING(ret, (char*)data->children->content, 1);
-			}
+			soap_decode_string(ret, (char*)data->children->content TSRMLS_CC);
 		} else if (data->children->type == XML_CDATA_SECTION_NODE && data->children->next == NULL) {
 			ZVAL_STRING(ret, (char*)data->children->content, 1);
 		} else {
@@ -802,41 +725,7 @@ static xmlNodePtr to_xml_string(encodeTypePtr type, zval *data, int style, xmlNo
 	xmlAddChild(parent, ret);
 	FIND_ZVAL_NULL(data, ret, style);
 
-	if (Z_TYPE_P(data) == IS_UNICODE) {
-		str = soap_unicode_to_string(Z_USTRVAL_P(data), Z_USTRLEN_P(data) TSRMLS_CC);
-		new_len = strlen(str);
-	} else {
-		if (Z_TYPE_P(data) == IS_STRING) {
-			str = estrndup(Z_STRVAL_P(data), Z_STRLEN_P(data));
-			new_len = Z_STRLEN_P(data);
-		} else {
-			zval tmp = *data;
-
-			zval_copy_ctor(&tmp);
-			convert_to_string(&tmp);
-			str = estrndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
-			new_len = Z_STRLEN(tmp);
-			zval_dtor(&tmp);
-		}
-
-		if (SOAP_GLOBAL(encoding) != NULL) {
-			xmlBufferPtr in  = xmlBufferCreateStatic(str, new_len);
-			xmlBufferPtr out = xmlBufferCreate();
-			int n = xmlCharEncInFunc(SOAP_GLOBAL(encoding), out, in);
-
-			if (n >= 0) {
-				efree(str);
-				str = estrdup((char*)xmlBufferContent(out));
-				new_len = n;
-			} else if (!php_libxml_xmlCheckUTF8(BAD_CAST(str))) {
-				soap_error1(E_ERROR,  "Encoding: string '%s' is not a valid utf-8 string", str);
-			}
-			xmlBufferFree(out);
-			xmlBufferFree(in);
-		} else if (!php_libxml_xmlCheckUTF8(BAD_CAST(str))) {
-			soap_error1(E_ERROR,  "Encoding: string '%s' is not a valid utf-8 string", str);
-		}
-	}
+	str = soap_encode_string(data, &new_len TSRMLS_CC);
 	text = xmlNewTextLen(BAD_CAST(str), new_len);
 	xmlAddChild(ret, text);
 	efree(str);
@@ -1836,9 +1725,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 				if (key_type != HASH_KEY_IS_LONG) {
 					char *prop_name;
 
-					if (key_type == IS_UNICODE) {
-						key.s = soap_unicode_to_string(key.u, key_len TSRMLS_CC);
-					}
+					key.s = soap_encode_string_ex(key_type, key, key_len TSRMLS_CC);
 					if (Z_TYPE_P(data) == IS_OBJECT) {
 						char *class_name;
 
@@ -1849,9 +1736,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 					if (prop_name) {
 						xmlNodeSetName(property, BAD_CAST(prop_name));
 					}
-					if (key_type == IS_UNICODE) {
-						efree(key.v);
-					}
+					efree(key.s);
 				}
 				zend_hash_move_forward(prop);
 			}
@@ -2490,19 +2375,14 @@ static xmlNodePtr to_xml_map(encodeTypePtr type, zval *data, int style, xmlNodeP
 				key = xmlNewNode(NULL, BAD_CAST("key"));
 				xmlAddChild(item,key);
 				key_type = zend_hash_get_current_key_ex(data->value.ht, &key_val, &key_len, &int_val, FALSE, NULL);
-				if (key_type == HASH_KEY_IS_STRING) {
-					if (style == SOAP_ENCODED) {
-						set_xsi_type(key, "xsd:string");
-					}
-					xmlNodeSetContent(key, BAD_CAST(key_val.s));
-				} else if (key_type == HASH_KEY_IS_UNICODE) {
+				if (key_type == HASH_KEY_IS_STRING || key_type == HASH_KEY_IS_UNICODE) {
 					char *str;
 					TSRMLS_FETCH();
 
 					if (style == SOAP_ENCODED) {
 						set_xsi_type(key, "xsd:string");
 					}
-					str = soap_unicode_to_string(key_val.u, key_len TSRMLS_CC);
+					str = soap_encode_string_ex(key_type, key_val, key_len TSRMLS_CC);
 					xmlNodeSetContent(key, BAD_CAST(str));
 					efree(str);
 				} else {
@@ -2610,9 +2490,9 @@ static zval *guess_zval_convert(encodeTypePtr type, xmlNodePtr data)
 	} else if (data->properties && get_attribute_ex(data->properties, "nil", XSI_NAMESPACE)) {
 		enc = get_conversion(IS_NULL);
 	} else {
-		tmpattr = get_attribute_ex(data->properties,"type", XSI_NAMESPACE);
+		tmpattr = get_attribute_ex(data->properties, "type", XSI_NAMESPACE);
 		if (tmpattr != NULL) {
-		  type_name = tmpattr->children->content;
+			type_name = tmpattr->children->content;
 			enc = get_encoder_from_prefix(SOAP_GLOBAL(sdl), data, tmpattr->children->content);
 			if (enc && type == &enc->details) {
 				enc = NULL;
@@ -2669,12 +2549,12 @@ static zval *guess_zval_convert(encodeTypePtr type, xmlNodePtr data)
 		parse_namespace(type_name, &cptype, &ns);
 		nsptr = xmlSearchNs(data->doc, data, BAD_CAST(ns));	
 		MAKE_STD_ZVAL(tmp);
-		ZVAL_STRING(tmp, cptype, 1);
+		soap_decode_string(tmp, cptype TSRMLS_CC);
 		tmp->refcount--;
 		add_property_zval(soapvar, "enc_stype", tmp);
 		if (nsptr) {
 			MAKE_STD_ZVAL(tmp);
-			ZVAL_STRING(tmp, (char*)nsptr->href, 1);
+			soap_decode_string(tmp, (char*)nsptr->href TSRMLS_CC);
 			tmp->refcount--;
 			add_property_zval(soapvar, "enc_ns", tmp);
 		}
@@ -2737,13 +2617,11 @@ static xmlNodePtr to_xml_datetime_ex(encodeTypePtr type, zval *data, char *forma
 
 		xmlNodeSetContent(xmlParam, BAD_CAST(buf));
 		efree(buf);
-	} else if (Z_TYPE_P(data) == IS_STRING) {
-		xmlNodeSetContentLen(xmlParam, BAD_CAST(Z_STRVAL_P(data)), Z_STRLEN_P(data));
-	} else if (Z_TYPE_P(data) == IS_UNICODE) {
+	} else if (Z_TYPE_P(data) == IS_STRING || Z_TYPE_P(data) == IS_UNICODE) {
 		char *str;
 		TSRMLS_FETCH();
 		
-		str = soap_unicode_to_string(Z_USTRVAL_P(data), Z_USTRLEN_P(data) TSRMLS_CC);
+		str = soap_encode_string(data, NULL TSRMLS_CC);
 		xmlNodeSetContent(xmlParam, BAD_CAST(str));
 		efree(str);
 	}
@@ -2915,10 +2793,7 @@ static zval *to_zval_any(encodeTypePtr type, xmlNodePtr data)
 	buf = xmlBufferCreate();
 	xmlNodeDump(buf, NULL, data, 0, 0);
 	MAKE_STD_ZVAL(ret);
-	ZVAL_STRING(ret, (char*)xmlBufferContent(buf), 1);
-	if (UG(unicode)) {
-		zval_string_to_unicode_ex(ret, UG(utf8_conv) TSRMLS_CC);
-	}
+	soap_decode_string(ret, (char*)xmlBufferContent(buf) TSRMLS_CC);
 	xmlBufferFree(buf);
 	return ret;
 }
