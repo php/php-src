@@ -578,6 +578,226 @@ ZEND_API void convert_to_boolean(zval *op)
 	Z_TYPE_P(op) = IS_BOOL;
 }
 
+#define NUM_BUF_SIZE 512
+
+/* rewrite of ap_php_conv_10 for UChar support */
+static UChar* zend_u_format_long(long lnum, UChar *result_end, int *result_len)
+{
+	UChar *p = result_end;
+	unsigned long magnitude;
+
+	*--p = 0;
+
+	if (lnum < 0) {
+		long t = lnum + 1;
+		magnitude = ((unsigned long) - t) + 1;
+	} else {
+		magnitude = (unsigned long) lnum;
+	}
+
+	do {
+		unsigned long new_magnitude = magnitude / 10;
+
+		*--p = (UChar)(magnitude - new_magnitude * 10 + 0x30 /*'0'*/);
+		magnitude = new_magnitude;
+	}
+	while (magnitude);
+
+	if (lnum < 0) {
+		*--p = (UChar) 0x2d /*'-'*/;
+	}
+
+	*result_len = result_end - p - 1;
+	return p;
+}
+
+#define NDIG 320
+
+/* rewrite of ap_php_cvt for UChar support */
+static UChar* zend_u_format_double(double arg, int ndigits, int *decpt, int *sign, int eflag, UChar *buf)
+{
+	register int r2;
+	int mvl;
+	double fi, fj;
+	register UChar *p, *p1;
+
+	if (ndigits >= NDIG - 1)
+		ndigits = NDIG - 2;
+	r2 = 0;
+	*sign = 0;
+	p = &buf[0];
+	if (arg < 0) {
+		*sign = 1;
+		arg = -arg;
+	}
+	arg = modf(arg, &fi);
+	p1 = &buf[NDIG];
+	/*
+	 * Do integer part
+	 */
+	if (fi != 0) {
+		while (fi != 0) {
+			fj = modf(fi / 10, &fi);
+			if (p1 <= &buf[0]) {
+				mvl = NDIG - ndigits;
+				if (ndigits > 0) {
+					memmove(&buf[mvl], &buf[0], (NDIG-mvl-1) * sizeof(UChar));
+				}
+				p1 += mvl;
+			}
+			*--p1 = (UChar) ((fj + .03) * 10) + 0x30 /*'0'*/;
+			r2++;
+		}
+		while (p1 < &buf[NDIG]) {
+			*p++ = *p1++;
+		}
+	} else if (arg > 0) {
+		while ((fj = arg * 10) < 1) {
+			if (!eflag && (r2 * -1) < ndigits) {
+				break;
+			}
+			arg = fj;
+			r2--;
+		}
+	}
+	p1 = &buf[ndigits];
+	if (eflag == 0)
+		p1 += r2;
+	*decpt = r2;
+	if (p1 < &buf[0]) {
+		buf[0] = 0;
+		return (buf);
+	}
+	if (p <= p1 && p < &buf[NDIG]) {
+		arg = modf(arg * 10, &fj);
+		if ((int)fj==10) {
+			*p++ = (UChar) 0x31 /*'1'*/;
+			fj = 0;
+			*decpt = ++r2;
+		}
+		while (p <= p1 && p < &buf[NDIG]) {
+			*p++ = (UChar) fj + 0x30 /*'0'*/;
+			arg = modf(arg * 10, &fj);
+		}
+	}
+	if (p1 >= &buf[NDIG]) {
+		buf[NDIG - 1] = 0;
+		return (buf);
+	}
+	p = p1;
+	*p1 += 5;
+	while (*p1 > (UChar) 0x39 /*'9'*/) {
+		*p1 = (UChar) 0x30 /*'0'*/;
+		if (p1 > buf)
+			++ * --p1;
+		else {
+			*p1 = (UChar) 0x31 /*'1'*/;
+			(*decpt)++;
+			if (eflag == 0) {
+				if (p > buf)
+					*p = (UChar) 0x30 /*'0'*/;
+				p++;
+			}
+		}
+	}
+	*p = 0;
+	return (buf);
+}
+
+/* rewrite of ap_php_gcvt for UChar support */
+static UChar* zend_u_format_gdouble(double dnum, int ndigit, UChar *result)
+{
+	int sign, decpt;
+	register UChar *p1, *p2;
+	register int i;
+	UChar buf1[NDIG];
+	static zend_bool did_string_init = FALSE;
+	U_STRING_DECL(u_nan, "NAN", 3);
+	U_STRING_DECL(u_inf, "INF", 3);
+	U_STRING_DECL(u_ninf, "-INF", 4);
+
+	if (!did_string_init) {
+		U_STRING_INIT(u_nan, "NAN", 3);
+		U_STRING_INIT(u_inf, "INF", 3);
+		U_STRING_INIT(u_ninf, "-INF", 4);
+		did_string_init = TRUE;
+	}
+
+	/* check for out-of-bounds numbers */
+	if (zend_isnan(dnum)) {
+		u_memcpy(result, u_nan, 3);
+		result[3] = 0;
+		return result;
+	} else if (zend_isinf(dnum)) {
+		if (dnum > 0) {
+			u_memcpy(result, u_inf, 3);
+			result[3] = 0;
+		} else {
+			u_memcpy(result, u_ninf, 3);
+			result[4] = 0;
+		}
+		return result;
+	}
+
+	if (ndigit >= NDIG - 1) {
+		ndigit = NDIG - 2;	
+	}
+
+	p1 = zend_u_format_double(dnum, ndigit, &decpt, &sign, 1, buf1);
+	p2 = result;
+	if (sign)
+		*p2++ = (UChar) 0x2d /*'-'*/;
+	for (i = ndigit - 1; i > 0 && p1[i] == (UChar) 0x30  /*'0'*/; i--)
+		ndigit--;
+	if ((decpt >= 0 && decpt - ndigit > 4)
+		|| (decpt < 0 && decpt < -3)) {		/* use E-style */
+		decpt--;
+		*p2++ = *p1++;
+		*p2++ = (UChar) 0x2e /*'.'*/;
+		for (i = 1; i < ndigit; i++)
+			*p2++ = *p1++;
+		if (*(p2 - 1) == (UChar) 0x2e /*'.'*/) {
+			*p2++ = (UChar) 0x30 /*'0'*/;
+		}	
+		*p2++ = (UChar) 0x45 /*'E'*/;
+		if (decpt < 0) {
+			decpt = -decpt;
+			*p2++ = (UChar) 0x2d /*'-'*/;
+		} else
+			*p2++ = (UChar) 0x2b /*'+'*/;
+		if (decpt / 100 > 0)
+			*p2++ = (UChar) (decpt / 100 + 0x30 /*'0'*/);
+		if (decpt / 10 > 0)
+			*p2++ = (UChar) ((decpt % 100) / 10 + 0x30 /*'0'*/);
+		*p2++ = (UChar) (decpt % 10 + 0x30 /*'0'*/);
+	} else {
+		if (decpt <= 0) {
+			if (*p1 != (UChar) 0x30 /*'0'*/) {
+				*p2++ = (UChar) 0x30 /*'0'*/;
+				*p2++ = (UChar) 0x2e /*'.'*/;
+			}
+			while (decpt < 0) {
+				decpt++;
+				*p2++ = (UChar) 0x30 /*'0'*/;
+			}
+		}
+		for (i = 1; i <= ndigit; i++) {
+			*p2++ = *p1++;
+			if (i == decpt)
+				*p2++ = (UChar) 0x2e /*'.'*/;
+		}
+		if (ndigit < decpt) {
+			while (ndigit++ < decpt)
+				*p2++ = (UChar) 0x30 /*'0'*/;
+			*p2++ = (UChar) 0x2e /*'.'*/;
+		}
+	}
+	if (p2[-1] == (UChar) 0x2e /*'.'*/)
+		p2--;
+	*p2 = 0;
+	return (result);
+}
+
 ZEND_API void _convert_to_unicode(zval *op TSRMLS_DC ZEND_FILE_LINE_DC)
 {
     _convert_to_unicode_with_converter(op, ZEND_U_CONVERTER(UG(runtime_encoding_conv)) TSRMLS_CC ZEND_FILE_LINE_CC);
@@ -605,25 +825,42 @@ ZEND_API void _convert_to_unicode_with_converter(zval *op, UConverter *conv TSRM
 			}
 			break;
 		case IS_RESOURCE: {
-			long tmp = Z_LVAL_P(op);
+			UChar num_buf[NUM_BUF_SIZE], *result;
+			int result_len, rstr_len;
+			long rval = Z_LVAL_P(op);
 
 			zend_list_delete(Z_LVAL_P(op));
-			Z_USTRVAL_P(op) = eumalloc_rel(sizeof("Resource id #")-1 + MAX_LENGTH_OF_LONG + 1);
-			Z_USTRLEN_P(op) = u_sprintf(Z_USTRVAL_P(op), "Resource id #%ld", tmp);
+			result = zend_u_format_long(rval, &num_buf[NUM_BUF_SIZE], &result_len);
+
+			rstr_len = sizeof("Resource id #")-1;
+			Z_USTRLEN_P(op) = rstr_len + result_len;
+			Z_USTRVAL_P(op) = eumalloc_rel(Z_USTRLEN_P(op) + 1);
+			u_charsToUChars("Resource id #", Z_USTRVAL_P(op), rstr_len);
+			/* result_len+1 takes care of terminating NULL */
+			u_memcpy(Z_USTRVAL_P(op) + rstr_len, result, result_len+1);
 			break;
 		}
 		case IS_LONG: {
+			UChar num_buf[NUM_BUF_SIZE], *result;
+			int result_len;
 			long lval = Z_LVAL_P(op);
 
-			Z_USTRVAL_P(op) = eumalloc_rel(MAX_LENGTH_OF_LONG + 1);
-			Z_USTRLEN_P(op) = u_sprintf(Z_USTRVAL_P(op), "%ld", lval);
+			result = zend_u_format_long(lval, &num_buf[NUM_BUF_SIZE], &result_len);
+
+			Z_USTRVAL_P(op) = eustrndup(result, result_len);
+			Z_USTRLEN_P(op) = result_len;
 			break;
 	    }
 		case IS_DOUBLE: {
+			UChar num_buf[NUM_BUF_SIZE], *result;
 			double dval = Z_DVAL_P(op);
 
-			Z_USTRVAL_P(op) = eumalloc_rel(MAX_LENGTH_OF_DOUBLE + EG(precision) + 1);
-			Z_USTRLEN_P(op) = u_sprintf(Z_USTRVAL_P(op), "%.*G", (int) EG(precision), dval);
+			result = zend_u_format_gdouble(dval, (int) EG(precision), &num_buf[1]);
+			if (*result == (UChar) 0x2b /*'+'*/) {
+				result++;
+			}
+			Z_USTRLEN_P(op) = u_strlen(result);
+			Z_USTRVAL_P(op) = eustrndup(result, Z_USTRLEN_P(op));
 			break;
 		}
 		case IS_ARRAY:
