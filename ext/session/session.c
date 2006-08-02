@@ -285,9 +285,13 @@ typedef struct {
 PHPAPI void php_add_session_var(char *name, size_t namelen TSRMLS_DC)
 {
 	zval **sym_track = NULL;
-	
-	zend_hash_find(Z_ARRVAL_P(PS(http_session_vars)), name, namelen + 1, 
-			(void *) &sym_track);
+
+	IF_SESSION_VARS() {
+		zend_hash_find(Z_ARRVAL_P(PS(http_session_vars)), name, namelen + 1, 
+				(void *) &sym_track);
+	} else {
+		return;
+	}
 
 	/*
 	 * Set up a proper reference between $_SESSION["x"] and $x.
