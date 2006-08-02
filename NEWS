@@ -45,6 +45,8 @@ PHP                                                                        NEWS
 - Fixed bug #38217 (ReflectionClass::newInstanceArgs() tries to allocate too 
   much memory). (Tony)
 - Fixed bug #38214 (gif interlace output cannot work). (Pierre)
+- Fixed bug #38213, #37611, #37571 (wddx encoding fails to handle certain 
+  characters). (Ilia)
 - Fixed bug #38212 (Segfault on invalid imagecreatefromgd2part() parameters).
   (Pierre)
 - Fixed bug #38211 (variable name and cookie name match breaks script
