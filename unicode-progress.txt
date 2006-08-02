@@ -7,12 +7,12 @@ ext/standard
 
   array.c
   -------
-    Need to fix string_compare_function() to compare Unicode strings
-    directly in code point order
-
     natsort(), natcasesort()
         Params API
         Either port strnatcmp() to support Unicode or maybe use ICU's numeric collation
+
+  string.c
+  --------
 
 
   Completed
