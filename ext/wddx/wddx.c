@@ -366,7 +366,7 @@ void php_wddx_packet_end(wddx_packet *packet)
 
 /* {{{ php_wddx_serialize_string
  */
-static void php_wddx_serialize_string(wddx_packet *packet, zval *var)
+static void php_wddx_serialize_string(wddx_packet *packet, zval *var TSRMLS_DC)
 {
 	php_wddx_add_chunk_static(packet, WDDX_STRING_S);
 
@@ -607,7 +607,7 @@ void php_wddx_serialize_var(wddx_packet *packet, zval *var, char *name, int name
 	
 	switch(Z_TYPE_P(var)) {
 		case IS_STRING:
-			php_wddx_serialize_string(packet, var);
+			php_wddx_serialize_string(packet, var TSRMLS_CC);
 			break;
 			
 		case IS_LONG:
