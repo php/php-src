@@ -205,10 +205,7 @@ PHP_FUNCTION(bin2hex)
 		RETURN_FALSE;
 	}
 
-	RETVAL_ASCII_STRINGL(result, newlen, 0);
-	if (UG(unicode)) {
-		efree(result);
-	}
+	RETVAL_ASCII_STRINGL(result, newlen, ZSTR_AUTOFREE);
 }
 /* }}} */
 
@@ -1108,12 +1105,8 @@ PHP_FUNCTION(explode)
 	long		limit = -1;
 	int			argc = ZEND_NUM_ARGS();
 
-	if ( argc < 2 || argc > 3 ) {
-		WRONG_PARAM_COUNT;
-	}
-
-	if ( zend_parse_parameters(argc TSRMLS_CC, "TT|l", &delim, &delim_len, &delim_type,
-							   &str, &str_len, &str_type, &limit) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "TT|l", &delim, &delim_len, &delim_type,
+							  &str, &str_len, &str_type, &limit) == FAILURE) {
 		return;
 	}
 
@@ -1156,7 +1149,7 @@ PHP_FUNCTION(explode)
 }
 /* }}} */
 
-/* {{{ proto string join([string glue,] array pieces)
+/* {{{ proto string join([string glue,] array pieces) U
    An alias for implode */
 /* }}} */
 
@@ -1332,9 +1325,6 @@ PHP_FUNCTION(strtok)
 	int delim_found, token_present;
 	int skipped = 0;
 
-	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2) {
-		WRONG_PARAM_COUNT;
-	}
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "T|T",
 							  &str, &str_len, &str_type,
 							  &tok, &tok_len, &tok_type) == FAILURE) {
@@ -1528,7 +1518,7 @@ PHPAPI UChar* php_u_strtoupper(UChar **s, int *len, const char* locale)
 }
 /* }}} */
 
-/* {{{ proto string strtoupper(string str)
+/* {{{ proto string strtoupper(string str) U
    Makes a string uppercase */
 PHP_FUNCTION(strtoupper)
 {
@@ -1597,7 +1587,7 @@ PHPAPI char *php_strtolower(char *s, size_t len)
 }
 /* }}} */
 
-/* {{{ proto string strtolower(string str)
+/* {{{ proto string strtolower(string str) U
    Makes a string lowercase */
 PHP_FUNCTION(strtolower)
 {
@@ -1663,7 +1653,7 @@ PHPAPI UChar* php_u_strtotitle(UChar **s, int32_t *len, const char* locale)
 /* }}} */
 
 
-/* {{{ proto string strtotitle(string str)
+/* {{{ proto string strtotitle(string str) U
    Makes a string titlecase */
 PHP_FUNCTION(strtotitle)
 {
@@ -2324,7 +2314,7 @@ PHP_FUNCTION(strstr)
 }
 /* }}} */
 
-/* {{{ proto string strchr(string haystack, string needle[, bool part])
+/* {{{ proto string strchr(string haystack, string needle[, bool part]) U
    An alias for strstr */
 /* }}} */
 
@@ -4085,8 +4075,7 @@ static int php_u_similar_char(const UChar *txt1, int len1, const UChar *txt2, in
 			sum += php_u_similar_char(txt1, pos1, txt2, pos2);
 		}
 		if ((pos1 + end1 < len1) && (pos2 + end2 < len2)) {
-			/* FIXME should this be calling php_u_similar_char? */
-			sum += php_similar_char((UChar *)txt1+pos1+end1, len1-pos1-end1,
+			sum += php_u_similar_char((UChar *)txt1+pos1+end1, len1-pos1-end1,
 									(UChar *)txt2+pos2+end2, len2-pos2-end2);
 		}
 	}
