@@ -1,3 +1,172 @@
+2006-08-01  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/gd/gd.c
+      ext/gd/gd_ctx.c:
+      MFH: implement my own FR #36995
+      add missing ifdefs
+
+    * ext/gd/gd.c
+      ext/gd/gd_ctx.c:
+      implement my own FR #36995
+      nuke unused variable
+
+2006-08-01  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-progress.txt
+      ext/standard/array.c:
+      Add SORT_LOCALE_STRING support to array_multisort() and mark it with U.
+
+    * unicode-progress.txt
+      ext/standard/array.c:
+      Whew. Fix up extract to params API, Unicode support, and simplify it as
+      well.
+
+    * ZendEngine2/zend_unicode.c:
+      Fix off-by-one error in zend_case_fold_string().
+
+    * ZendEngine2/zend_operators.c:
+      Rewrite IS_LONG, IS_DOUBLE, and IS_RESOURCE to IS_UNICODE conversion to
+      use custom functions instead of u_sprintf() which is terribly slow at
+      the moment (for numbers). Now long-to-unicode is only 8% slower than
+      long-to-binary and double-to-unicode is actually 6% faster.
+
+2006-08-01  Michael Wallner  <mike@iworks.at>
+
+    * ext/date/tests/oo_001.phpt
+      ext/date/tests/oo_001.phpt:
+      - update test
+
+    * (PHP_5_2)
+      ext/date/php_date.c:
+      MFH: use library error message on time string parse failure
+
+    * ext/date/php_date.c:
+      - use library error message on time string parse failure
+
+2006-08-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo/pdo_dbh.c
+      ext/pdo/php_pdo_driver.h:
+      Fixed build (added missing functions)
+
+    * ext/pdo_pgsql/pgsql_statement.c:
+      MFB: Fixed bug #38168 (Crash in pdo_pgsql on missing bound parameters).
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo_pgsql/pgsql_statement.c:
+      Fixed bug #38168 (Crash in pdo_pgsql on missing bound parameters).
+
+2006-08-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/php_encoding.c
+      ext/soap/php_http.c
+      ext/soap/php_soap.h
+      ext/soap/soap.c
+      ext/soap/tests/cookie.phpt
+      ext/soap/tests/bugs/bug32941.phpt:
+      Unicode support
+
+2006-08-01  Michael Wallner  <mike@iworks.at>
+
+    * (PHP_5_2)
+      ext/date/php_date.c:
+      MFH:
+       - fix leaks on multiple calls to DateTime::__construct()
+       - throw exception on unparseable time strings in DateTime::__construct()
+
+    * ext/date/php_date.c:
+      - fix leaks on multiple calls to DateTime::__construct()
+      - throw exception on unparseable time strings in DateTime::__construct()
+
+2006-08-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo/pdo_stmt.c:
+      MFB: Fixed memory leak on unused bound name parameters.
+
+    * (PHP_5_2)
+      ext/pdo/pdo_stmt.c:
+      Fixed memory leak on unused bound name parameters.
+
+2006-08-01  Michael Wallner  <mike@iworks.at>
+
+    * (PHP_5_2)
+      ext/date/php_date.c
+      ext/date/php_date.h
+      ext/date/tests/oo_001.phpt:
+      MFH:
+       - OO fixes:
+        . no is_ref for objects in PHP5+
+        . initialize objects when created with the `new` operator
+        . check for proper initialization in child classes
+       - fix typo: transistion -> transition
+       - add test
+
+2006-08-01  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/curl/streams.c:
+      MFH: fix #38269 (fopen wrapper doesn't fail on invalid hostname with
+      curlwrappers enabled)
+
+2006-08-01  Michael Wallner  <mike@iworks.at>
+
+    * ext/date/php_date.c
+      ext/date/php_date.h
+      ext/date/tests/oo_001.phpt
+      ext/date/tests/oo_001.phpt:
+      - OO fixes:
+        . no is_ref for objects in PHP5+
+        . initialize objects when created with the `new` operator
+        . check for proper initialization in child classes
+      - fix typo: transistion -> transition
+      - add test
+
+2006-08-01  Antony Dovgal  <antony@zend.com>
+
+    * ext/curl/streams.c:
+      fix #38269 (fopen wrapper doesn't fail on invalid hostname with
+      curlwrappers enabled)
+
+    * ext/oci8/oci8.c
+      ext/oci8/oci8.c:
+      improve error message on Win32
+
+    * (PHP_4_4)
+      NEWS
+      ext/sockets/sockets.c:
+      re-apply fix for #38251 (socket_select() and invalid arguments)
+
+    * (PHP_4_4)
+      tests/lang/bug35239.phpt:
+      fix test (but it still fails)
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      NEWS:
+      BFN
+
+    * (PHP_4_4)
+      ext/session/session.c
+      ext/session/session.c:
+      MFH: fix #38278 (session_cache_expire()'s value does not match phpinfo's
+      session.cache_expire)
+
+    * ext/session/session.c:
+      fix #38278 (session_cache_expire()'s value does not match phpinfo's
+      session.cache_expire)
+
+2006-08-01  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Back to dev
+
 2006-07-31  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/pdo/pdo_dbh.c
