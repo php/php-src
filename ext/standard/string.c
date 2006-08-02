@@ -195,7 +195,7 @@ PHP_FUNCTION(bin2hex)
 	char *result;
 	size_t newlen;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &data, &data_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &data, &data_len) == FAILURE) {
 		return;
 	}
 
