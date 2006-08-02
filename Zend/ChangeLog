@@ -1,3 +1,14 @@
+2006-08-01  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_unicode.c:
+      Fix off-by-one error in zend_case_fold_string().
+
+    * zend_operators.c:
+      Rewrite IS_LONG, IS_DOUBLE, and IS_RESOURCE to IS_UNICODE conversion to
+      use custom functions instead of u_sprintf() which is terribly slow at
+      the moment (for numbers). Now long-to-unicode is only 8% slower than
+      long-to-binary and double-to-unicode is actually 6% faster.
+
 2006-07-27  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_vm_def.h
