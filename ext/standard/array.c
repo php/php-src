@@ -1290,6 +1290,7 @@ static int php_extract_prefix_varname(zval *result, zval *prefix, zstr var_name,
 				Z_USTRVAL_P(result) = eurealloc(Z_USTRVAL_P(result), Z_USTRLEN_P(result)+1);
 			}
 			u_memcpy(Z_USTRVAL_P(result)+Z_USTRLEN_P(prefix)+1, buf, buf_len+1);
+			efree(buf);
 		}
 	} else {
 		Z_TYPE_P(result) = IS_STRING;
@@ -1316,6 +1317,7 @@ static int php_extract_prefix_varname(zval *result, zval *prefix, zstr var_name,
 				Z_STRVAL_P(result) = erealloc(Z_STRVAL_P(result), Z_STRLEN_P(result)+1);
 			}
 			memcpy(Z_STRVAL_P(result)+Z_STRLEN_P(prefix)+1, buf, buf_len+1);
+			efree(buf);
 		}
 	}
 
