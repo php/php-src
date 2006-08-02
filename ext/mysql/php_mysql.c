@@ -1893,7 +1893,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 	mysql_row_length_type *mysql_row_lengths;
 	int i;
 	zval            *res, *ctor_params = NULL;
-	zend_class_entry *ce;
+	zend_class_entry *ce = NULL;
 
 #ifdef ZEND_ENGINE_2
 	if (into_object) {
