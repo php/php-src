@@ -367,7 +367,7 @@ void php_wddx_packet_end(wddx_packet *packet)
 
 /* {{{ php_wddx_serialize_string
  */
-static void php_wddx_serialize_string(wddx_packet *packet, zval *var)
+static void php_wddx_serialize_string(wddx_packet *packet, zval *var TSRMLS_DC)
 {
 	php_wddx_add_chunk_static(packet, WDDX_STRING_S);
 
@@ -608,7 +608,7 @@ void php_wddx_serialize_var(wddx_packet *packet, zval *var, char *name, int name
 	
 	switch(Z_TYPE_P(var)) {
 		case IS_STRING:
-			php_wddx_serialize_string(packet, var);
+			php_wddx_serialize_string(packet, var TSRMLS_CC);
 			break;
 			
 		case IS_LONG:
@@ -1329,7 +1329,7 @@ PHP_FUNCTION(wddx_unserialize)
 	else if (Z_TYPE_P(packet) == IS_RESOURCE) {
 		php_stream_from_zval(stream, &packet);
 		if (stream) {
-			payload_len = php_stream_copy_to_mem(stream, &payload, PHP_STREAM_COPY_ALL, 0);
+			payload_len = php_stream_copy_to_mem(stream, (void **)&payload, PHP_STREAM_COPY_ALL, 0);
 		}
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expecting parameter 1 to be a string or a stream");
