@@ -435,7 +435,16 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 						/* break omitted intentionally */
 
 					case IS_UNICODE:
-						if (c == 'S') {
+						/* handle conversion of Unicode to binary with a specific converter */
+						if (c == 's' && *spec_walk == '&') {
+							UConverter *conv = va_arg(*va, UConverter *);
+							SEPARATE_ZVAL_IF_NOT_REF(arg);
+							convert_to_string_with_converter(*arg, conv);
+							*p = Z_STRVAL_PP(arg);
+							*pl = Z_STRLEN_PP(arg);
+							spec_walk++;
+							break;
+						} else if (c == 'S') {
 							return "definitely a binary string";
 						}
 						/* fall through */
@@ -862,8 +871,8 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 				min_num_args = max_num_args;
 				break;
 
-			case '/':
-			case '!':
+			case '/': case '!':
+			case '&':
 				/* Pass */
 				break;
 
@@ -948,7 +957,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 					break;
 
 				case '|': case '!':
-				case '/':
+				case '/': case '&':
 					/* pass */
 					break;
 
