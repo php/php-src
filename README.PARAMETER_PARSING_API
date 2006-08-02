@@ -38,38 +38,40 @@ Type specifiers
  has to be provided on input and is used to verify the PHP parameter is an 
  instance of that class.
 
- a	- array (zval*)
- b	- boolean (zend_bool)
- C	- class (zend_class_entry*)
- d	- double (double)
- f	- function or array containing php method call info (returned as 
-	  zend_fcall_info* and zend_fcall_info_cache*)
- h	- array (returned as HashTable*)
- l	- long (long)
- o	- object of any type (zval*)
- O	- object of specific type given by class entry (zval*, zend_class_entry)
- r	- resource (zval*)
- s	- string (with possible null bytes) and its length (char*, int)
- S	- binary string, does not allow conversion from Unicode strings
- t	- text (zstr (string union), int (length), zend_uchar (IS_STRING/..))
+ a  - array (zval*)
+ b  - boolean (zend_bool)
+ C  - class (zend_class_entry*)
+ d  - double (double)
+ f  - function or array containing php method call info (returned as 
+      zend_fcall_info* and zend_fcall_info_cache*)
+ h  - array (returned as HashTable*)
+ l  - long (long)
+ o  - object of any type (zval*)
+ O  - object of specific type given by class entry (zval*, zend_class_entry)
+ r  - resource (zval*)
+ s  - string (with possible null bytes) and its length (char*, int)
+ S  - binary string, does not allow conversion from Unicode strings
+ t  - text (zstr (string union), int (length), zend_uchar (IS_STRING/..))
       accepts either Unicode or binary string
- T	- text (zstr (string union), int (length), zend_uchar (IS_STRING/..))
+ T  - text (zstr (string union), int (length), zend_uchar (IS_STRING/..))
       coalesces all T parameters to common type (Unicode or binary)
- u	- unicode (UChar*, int)
- U	- Unicode string, does not allow conversion from binary strings
- z	- the actual zval (zval*)
- Z	- the actual zval (zval**)
+ u  - unicode (UChar*, int)
+ U  - Unicode string, does not allow conversion from binary strings
+ z  - the actual zval (zval*)
+ Z  - the actual zval (zval**)
  *  - variable arguments list
 
  The following characters also have a meaning in the specifier string:
-	| - indicates that the remaining parameters are optional, they
-	    should be initialized to default values by the extension since they
-	    will not be touched by the parsing function if they are not
-	    passed to it.
-	/ - use SEPARATE_ZVAL_IF_NOT_REF() on the parameter it follows
-	! - the parameter it follows can be of specified type or NULL (only applies
-	    to 'a', 'o', 'O', 'r', and 'z'). If NULL is passed, the results
-	    pointer is set to NULL as well.
+    | - indicates that the remaining parameters are optional, they
+        should be initialized to default values by the extension since they
+        will not be touched by the parsing function if they are not
+        passed to it.
+    / - use SEPARATE_ZVAL_IF_NOT_REF() on the parameter it follows
+    ! - the parameter it follows can be of specified type or NULL (only applies
+        to 'a', 'o', 'O', 'r', and 'z'). If NULL is passed, the results
+        pointer is set to NULL as well.
+    & - alternate format (currently used for 's' only to specify a converter to
+        use when converting from Unicode strings)
 
 Examples
 --------
@@ -79,8 +81,8 @@ char *s;
 int s_len;
 zval *param;
 if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lsz",
-						  &l, &s, &s_len, &param) == FAILURE) {
-	return;
+                          &l, &s, &s_len, &param) == FAILURE) {
+    return;
 }
 
 
@@ -89,8 +91,8 @@ zval *obj;
 double d = 0.5;
 zend_class_entry my_ce;
 if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|d",
-						  &obj, my_ce, &d) == FAILURE) {
-	return;
+                          &obj, my_ce, &d) == FAILURE) {
+    return;
 }
 
 
@@ -99,16 +101,25 @@ if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|d",
 zval *obj;
 zval *arr;
 if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o!a",
-						  &obj, &arr) == FAILURE) {
-	return;
+                          &obj, &arr) == FAILURE) {
+    return;
 }
 
 
 /* Gets a separated array which can also be null. */
 zval *arr;
 if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a/!",
-						  &arr) == FAILURE) {
-	return;
+                          &arr) == FAILURE) {
+    return;
+}
+
+
+/* Gets a binary string in UTF-8 */
+char *str;
+int str_len;
+
+if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &str, &str_len, UG(utf8_conv)) == FAILURE) {
+    return;
 }
 
 
@@ -117,7 +128,7 @@ UChar *str;
 int len;
 
 if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "u", &str, &len) == FAILURE) {
-	return;
+    return;
 }
 
 
@@ -127,7 +138,7 @@ int len;
 zend_uchar type;
 
 if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &len, &type) == FAILURE) {
-	return;
+    return;
 }
 if (type == IS_UNICODE) {
    /* process str.u as Unicode string */
@@ -142,13 +153,13 @@ int len1, len2;
 zend_uchar type1, type2;
 
 if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT", &str1, &len1,
-  	 					  &type1, &str2, &len2, &type2) == FAILURE) {
-	return;
+                          &type1, &str2, &len2, &type2) == FAILURE) {
+    return;
 }
 if (type1 == IS_UNICODE) {
-	/* process as Unicode, str2 is guaranteed to be Unicode as well */
+    /* process as Unicode, str2 is guaranteed to be Unicode as well */
 } else {
-	/* process as binary string, str2 is guaranteed to be the same */
+    /* process as binary string, str2 is guaranteed to be the same */
 }
 
 
@@ -165,15 +176,15 @@ char *s;
 int length;
 
 if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
-							 "lll", &l1, &l2, &l3) == SUCCESS) {
-	/* manipulate longs */
+                             "lll", &l1, &l2, &l3) == SUCCESS) {
+    /* manipulate longs */
 } else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
-									"s", &s, &length) == SUCCESS) {
-	/* manipulate string */
+                                    "s", &s, &length) == SUCCESS) {
+    /* manipulate string */
 } else {
-	/* output error */
+    /* output error */
 
-	return;
+    return;
 }
 
 
@@ -184,7 +195,7 @@ zval ***varargs = NULL;
 
 
 if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "*", &varargs, &num_varargs) == FAILURE) {
-	return;
+    return;
 }
 
 for (i = 0; i < num_varargs; i++) {
@@ -192,7 +203,7 @@ for (i = 0; i < num_varargs; i++) {
 }
 
 if (varargs) {
-	efree(varargs);
+    efree(varargs);
 }
 
 
@@ -204,7 +215,7 @@ int i, num_varargs;
 zval ***varargs = NULL;
 
 if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s+", &str, &str_len, &varargs, &num_varargs) == FAILURE) {
-	return;
+    return;
 }
 
 for (i = 0; i < num_varargs; i++) {
@@ -212,7 +223,7 @@ for (i = 0; i < num_varargs; i++) {
 }
 
 if (varargs) {
-	efree(varargs);
+    efree(varargs);
 }
 
 
@@ -223,7 +234,7 @@ int i, num_varargs;
 zval ***varargs = NULL;
 
 if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a*l", &array, &varargs, &num_varargs, &num) == FAILURE) {
-	return;
+    return;
 }
 
 for (i = 0; i < num_varargs; i++) {
@@ -231,6 +242,6 @@ for (i = 0; i < num_varargs; i++) {
 }
 
 if (varargs) {
-	efree(varargs);
+    efree(varargs);
 }
 
