@@ -369,51 +369,20 @@ void php_wddx_packet_end(wddx_packet *packet)
  */
 static void php_wddx_serialize_string(wddx_packet *packet, zval *var)
 {
-	char *buf,
-		 *p,
-		 *vend,
-		 control_buf[WDDX_BUF_LEN];
-	int l;
-
 	php_wddx_add_chunk_static(packet, WDDX_STRING_S);
 
 	if (Z_STRLEN_P(var) > 0) {
-		l = 0;
-		vend = Z_STRVAL_P(var) + Z_STRLEN_P(var);
-		buf = (char *)emalloc(Z_STRLEN_P(var) + 1);
+		char *buf, *enc;
+		int buf_len, enc_len;
 
-		for(p = Z_STRVAL_P(var); p != vend; p++) {
-			switch (*p) {
-				case '<':
-					FLUSH_BUF();
-					php_wddx_add_chunk_static(packet, "&lt;");
-					break;
+		buf = php_escape_html_entities(Z_STRVAL_P(var), Z_STRLEN_P(var), &buf_len, 0, ENT_QUOTES, NULL TSRMLS_CC);
+		enc = xml_utf8_encode(buf, buf_len, &enc_len, "ISO-8859-1");
 
-				case '&':
-					FLUSH_BUF();
-					php_wddx_add_chunk_static(packet, "&amp;");
-					break;
+		php_wddx_add_chunk_ex(packet, enc, enc_len);
 
-				case '>':
-					FLUSH_BUF();
-					php_wddx_add_chunk_static(packet, "&gt;");
-					break;
-
-				default:
-					if (iscntrl((int)*(unsigned char *)p) || (int)*(unsigned char *)p >= 127) {
-						FLUSH_BUF();
-						sprintf(control_buf, WDDX_CHAR, (int)*(unsigned char *)p);
-						php_wddx_add_chunk(packet, control_buf);
-					} else
-						buf[l++] = *p;
-					break;
-			}
-		}
-
-		FLUSH_BUF();
 		efree(buf);
+		efree(enc);
 	}
-	
 	php_wddx_add_chunk_static(packet, WDDX_STRING_E);
 }
 /* }}} */
