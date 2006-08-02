@@ -5,30 +5,22 @@
 * Discuss putting ZEND_ATTRIBUTE_FORMAT back on zend_error() or create a new
   zend_error_ex() function that supports new specifiers
 
-* Determine how to deal with filesystem and filenames when Unicode is
-  involved. This concerns both the extension functions and things like
-  compile_file(), open_file_for_scanning(), etc.
-
-* Measure performance difference when doing quickCheck + normalize versus
-  simple normalize.
-
 * Find all instances where unicode strings are compared with memcmp() and
   replace either with u_memcmpCodePointOrder() or ucol_strcoll()
 
-* Opening a collator may return U_USING_DEFAULT_WARNING,
-  U_USING_FALLBACK_WARNING
+* Opening a collator may return U_USING_DEFAULT_WARNING, U_USING_FALLBACK_WARNING
 
 * Need to finish making HTTP input work as described in the design doc. It
   is almost there, but needs to handle conversion errors and provide a way to
-  explicitly re-decode raw data with specified encoding. Also check for
-  _charset_ request field which might be present.
+  explicitly re-decode raw data with specified encoding (input filter,
+  perhaps?). Also check for _charset_ request field which might be present.
 
 * Optimize T_INLINE_HTML blocks conversion by either creating a converter
   cache or remembering the last used converter in the executor globals.
 
 * What to do with binary string literals and runtime casting? Literals are in
   script_encoding, casting uses runtime_encoding. If they are different, bad
-  stuff happens.
+  stuff happens. Maybe those who do that stuff should suffer anyway.
 
 * Control of fallback mappings in conversions.
 
@@ -42,9 +34,12 @@
 
 * Constant registration/fetching should do identifier normalization.
 
-* Identifier normalization in callbacks (zend_is_callable/zend_u_lookup_class)
-
 * Make zend_u_str_case_fold() do only case-folding and nothing else. The
   normalization should be done by zend_normalize_identifier().
 
-* Look at performance implications of identifier normalization.
+* Look at performance implications of identifier normalization. Measure
+  performance difference when doing quickCheck + normalize versus simple
+  normalize.
+
+* UG(unicode) is turned off during MINIT() currently. We need to figure out
+  a way to avoid turning it off.
