@@ -9,10 +9,140 @@ ext/standard
   -------
     natsort(), natcasesort()
         Params API
-        Either port strnatcmp() to support Unicode or maybe use ICU's numeric collation
+        Either port strnatcmp() to support Unicode or maybe use ICU's
+        numeric collation. Update: can't seem to get the right collation
+        parameters to duplicate strnatcmp() functionality. Conclusion: port
+        to support Unicode.
 
   string.c
   --------
+    addcslashes()
+        Params API. Figure out how to escape characters > 255.
+
+    basename()
+        Create php_u_basename() without mbstring stuff
+
+    chunk_split()
+        Params API, Unicode upgrades. Split on codepoint level.
+
+    count_chars()
+        Params API. Do we really want to go through the whole Unicode table?
+        May need to use hashtable instead of array.
+
+    dirname()
+        Create php_u_dirname()
+
+    hebrev(), hebrevc()
+        Figure out if this is something we can use ICU for, internally.
+
+    localeconv()
+        Params API, update to use *_rt_* API.
+
+    money_format()
+        Just IS_UNICODE support with *_rt_* API.
+
+    nl_langinfo()
+        Params API, otherwise leave alone
+
+    nl2br()
+        Params API, IS_UNICODE support
+
+    pathinfo()
+        Simple upgrade, based on php_u_basename/php_u_dirname
+
+    parse_str()
+        Params API. How do we deal with encoding of the data?
+
+    quotemeta()
+        Params API, IS_UNICODE upgrade
+
+    similar_text()
+        Params API
+
+    sscanf()
+        Params API. Rest - no idea yet.
+
+    str_replace()
+        Params API, IS_UNICODE upgrade
+
+    stri_replace()
+        Params API, IS_UNICODE upgrade. Case-folding should be handled
+        similar to stristr().
+
+    str_rot13()
+        Params API, IS_UNICODE support
+
+    str_shuffle()
+        Params API, IS_UNICODE support
+
+    str_split()
+        IS_UNICODE support, split on codepoint level.
+
+    str_word_count()
+        Params API, IS_UNICODE support, using u_isalpha(), etc.
+    
+    strcoll()
+        Params API, upgrade to use Collator if TT == IS_UNICODE, test
+
+    stripcslashes()
+        Params API. Depends on how addcslashes() is implemented.
+
+    stristr()
+        This is the problematic one. There are a few approaches:
+
+            1. Case-fold both need and haystack and then do simple search.
+
+            2. Look at the implementation behind functions like
+               u_strcasecmp() and try to adapt it to a string search. The
+               implementation case-folds both strings incrementally. For
+               a search, one would want to case-fold the pattern beforehand,
+               but not the text in which you are searching.
+
+            3. Take the first character in the pattern and get the set of
+               all characters that have the same case folding (see the
+               UnicodeSet/USet API). Then search in the string for the
+               occurrence of any one of the set items (which include
+               strings!).  Then do a case-insensitive comparison, allowing
+               a match that does not end with the end of the text.
+
+               The problematic cases are of course those ß->ss and similar.
+
+        All other approaches bite.
+
+    stripos()
+        Review. Probably needs the same approach as stristr().
+
+    strnatcmp(), strnatcasecmp()
+        Params API. The rest depends on porting of strnatcmp.c
+
+    strripos()
+        Probably needs the same approach as stristr().
+
+    strrchr()
+        Needs update so that it doesn't try to find half of a surrogate
+        pair.
+
+    strrev()
+        Params API
+
+    strtoupper(), strtolower(), strtotitle()
+        Params API
+
+    strtr()
+        Check on Derick's progress.
+
+    substr_compare()
+        IS_UNICODE support, case folding based on the same algorithm as
+        stristr().
+
+    substr_replace()
+        Params API, test
+
+    wordwrap()
+        Upgrade, do wordwrapping on glyph level, maybe use additional
+        whitespace chars instead of just space.
+
+
 
 
   Completed
@@ -157,4 +287,4 @@ Zend Engine
         zend_thread_id()
         zend_version()
 
-vim: set et ts=4 sts:
+vim: set et ts=4 sts=4:
