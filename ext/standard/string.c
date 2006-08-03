@@ -1489,7 +1489,7 @@ PHPAPI char *php_strtoupper(char *s, size_t len)
 
 /* {{{ php_u_strtoupper
  */
-PHPAPI UChar* php_u_strtoupper(UChar **s, int *len, const char* locale)
+PHPAPI UChar* php_u_strtoupper(UChar *s, int *len, const char* locale)
 {
 	UChar *dest = NULL;
 	int dest_len;
@@ -1499,22 +1499,20 @@ PHPAPI UChar* php_u_strtoupper(UChar **s, int *len, const char* locale)
 	while (1) {
 		status = U_ZERO_ERROR;
 		dest = eurealloc(dest, dest_len+1);
-		dest_len = u_strToUpper(dest, dest_len, *s, *len, locale, &status);
+		dest_len = u_strToUpper(dest, dest_len, s, *len, locale, &status);
 		if (status != U_BUFFER_OVERFLOW_ERROR) {
 			break;
 		}
 	}
 
 	if (U_SUCCESS(status)) {
-		efree(*s);
 		dest[dest_len] = 0;
-		*s = dest;
 		*len = dest_len;
+		return dest;
 	} else {
 		efree(dest);
+		return NULL;
 	}
-
-	return *s;
 }
 /* }}} */
 
@@ -1522,19 +1520,23 @@ PHPAPI UChar* php_u_strtoupper(UChar **s, int *len, const char* locale)
    Makes a string uppercase */
 PHP_FUNCTION(strtoupper)
 {
-	zval **arg;
+	zstr str;
+	int str_len;
+	zend_uchar str_type;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg)) {
-		WRONG_PARAM_COUNT;
-	}
-	if (Z_TYPE_PP(arg) != IS_STRING && Z_TYPE_PP(arg) != IS_UNICODE) {
-		convert_to_text_ex(arg);
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len, &str_type) == FAILURE) {
+		return;
 	}
 
-	RETVAL_ZVAL(*arg, 1, 0);
-	if (Z_TYPE_P(return_value) == IS_UNICODE) {
-		php_u_strtoupper(&Z_USTRVAL_P(return_value), &Z_USTRLEN_P(return_value), UG(default_locale));
+	if (str_type == IS_UNICODE) {
+		UChar *result;
+		if ((result = php_u_strtoupper(str.u, &str_len, UG(default_locale)))) {
+			RETURN_UNICODEL(result, str_len, 0);
+		} else {
+			RETURN_EMPTY_UNICODE();
+		}
 	} else {
+		RETVAL_STRINGL(str.s, str_len, 1);
 		php_strtoupper(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value));
 	}
 }
@@ -1542,7 +1544,7 @@ PHP_FUNCTION(strtoupper)
 
 /* {{{ php_u_strtolower
  */
-PHPAPI UChar *php_u_strtolower(UChar **s, int *len, const char* locale)
+PHPAPI UChar *php_u_strtolower(UChar *s, int *len, const char* locale)
 {
 	UChar *dest = NULL;
 	int dest_len;
@@ -1552,21 +1554,20 @@ PHPAPI UChar *php_u_strtolower(UChar **s, int *len, const char* locale)
 	while (1) {
 		status = U_ZERO_ERROR;
 		dest = eurealloc(dest, dest_len+1);
-		dest_len = u_strToLower(dest, dest_len, *s, *len, locale, &status);
+		dest_len = u_strToLower(dest, dest_len, s, *len, locale, &status);
 		if (status != U_BUFFER_OVERFLOW_ERROR) {
 			break;
 		}
 	}
 
 	if (U_SUCCESS(status)) {
-		efree(*s);
 		dest[dest_len] = 0;
-		*s = dest;
 		*len = dest_len;
+		return dest;
 	} else {
 		efree(dest);
+		return NULL;
 	}
-	return *s;
 }
 /* }}} */
 
@@ -1591,19 +1592,23 @@ PHPAPI char *php_strtolower(char *s, size_t len)
    Makes a string lowercase */
 PHP_FUNCTION(strtolower)
 {
-	zval **str;
+	zstr str;
+	int str_len;
+	zend_uchar str_type;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str)) {
-		WRONG_PARAM_COUNT;
-	}
-	if (Z_TYPE_PP(str) != IS_STRING && Z_TYPE_PP(str) != IS_UNICODE) {
-		convert_to_text_ex(str);
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len, &str_type) == FAILURE) {
+		return;
 	}
 
-	RETVAL_ZVAL(*str, 1, 0);
-	if (Z_TYPE_P(return_value) == IS_UNICODE) {
-		php_u_strtolower(&Z_USTRVAL_P(return_value), &Z_USTRLEN_P(return_value), UG(default_locale));
+	if (str_type == IS_UNICODE) {
+		UChar *result;
+		if ((result = php_u_strtolower(str.u, &str_len, UG(default_locale)))) {
+			RETURN_UNICODEL(result, str_len, 0);
+		} else {
+			RETURN_EMPTY_UNICODE();
+		}
 	} else {
+		RETVAL_STRINGL(str.s, str_len, 1);
 		php_strtolower(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value));
 	}
 }
@@ -1620,7 +1625,7 @@ PHPAPI char *php_strtotitle(char *s, size_t len)
 
 /* {{{ php_u_strtotitle
  */
-PHPAPI UChar* php_u_strtotitle(UChar **s, int32_t *len, const char* locale)
+PHPAPI UChar* php_u_strtotitle(UChar *s, int32_t *len, const char* locale)
 {
 	UChar *dest = NULL;
 	int32_t dest_len;
@@ -1628,11 +1633,11 @@ PHPAPI UChar* php_u_strtotitle(UChar **s, int32_t *len, const char* locale)
 	UBreakIterator *brkiter;
 
 	dest_len = *len;
-	brkiter = ubrk_open(UBRK_WORD, locale, *s, *len, &status);
+	brkiter = ubrk_open(UBRK_WORD, locale, s, *len, &status);
 	while (1) {
 		status = U_ZERO_ERROR;
 		dest = eurealloc(dest, dest_len+1);
-		dest_len = u_strToTitle(dest, dest_len, *s, *len, NULL, locale, &status);
+		dest_len = u_strToTitle(dest, dest_len, s, *len, NULL, locale, &status);
 		if (status != U_BUFFER_OVERFLOW_ERROR) {
 			break;
 		}
@@ -1640,15 +1645,13 @@ PHPAPI UChar* php_u_strtotitle(UChar **s, int32_t *len, const char* locale)
 	ubrk_close(brkiter);
 
 	if (U_SUCCESS(status)) {
-		efree(*s);
 		dest[dest_len] = 0;
-		*s = dest;
 		*len = dest_len;
+		return dest;
 	} else {
 		efree(dest);
+		return NULL;
 	}
-
-	return *s;
 }
 /* }}} */
 
@@ -1657,26 +1660,29 @@ PHPAPI UChar* php_u_strtotitle(UChar **s, int32_t *len, const char* locale)
    Makes a string titlecase */
 PHP_FUNCTION(strtotitle)
 {
-	zval **str;
+	zstr str;
+	int str_len;
+	zend_uchar str_type;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str)) {
-		WRONG_PARAM_COUNT;
-	}
-	if (Z_TYPE_PP(str) != IS_STRING && Z_TYPE_PP(str) != IS_UNICODE) {
-		convert_to_text_ex(str);
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len, &str_type) == FAILURE) {
+		return;
 	}
 
-	if (Z_TYPE_PP(str) == IS_UNICODE && !Z_USTRLEN_PP(str)) {
+	if (str_type == IS_UNICODE && str_len == 0) {
 		RETURN_EMPTY_UNICODE();
-	} else if (!Z_STRLEN_PP(str)) {
+	} else if (str_len == 0) {
 		RETURN_EMPTY_STRING();
 	}
 
-	if (Z_TYPE_PP(str) == IS_UNICODE) {
-		RETVAL_ZVAL(*str, 1, 0);
-		php_u_strtotitle(&Z_USTRVAL_P(return_value), &Z_USTRLEN_P(return_value), UG(default_locale));
+	if (str_type == IS_UNICODE) {
+		UChar *result;
+		if ((result = php_u_strtotitle(str.u, &str_len, UG(default_locale)))) {
+			RETURN_UNICODEL(result, str_len, 0);
+		} else {
+			RETURN_EMPTY_UNICODE();
+		}
 	} else {
-		ZVAL_STRINGL(return_value, Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);
+		RETVAL_STRINGL(str.s, str_len, 1);
 		php_ucwords(return_value);
 	}
 }
@@ -2460,10 +2466,8 @@ PHP_FUNCTION(stripos)
 		}
 		needle_len = Z_UNILEN_P(needle);
 		if (Z_TYPE_P(haystack) == IS_UNICODE) {
-			haystack_dup = eustrndup(Z_USTRVAL_P(haystack), haystack_len);
-			php_u_strtolower((UChar **)&haystack_dup, &haystack_len, UG(default_locale));
-			needle_dup = eustrndup(Z_USTRVAL_P(needle), needle_len);
-			php_u_strtolower((UChar **)&needle_dup, &needle_len, UG(default_locale));
+			haystack_dup = php_u_strtolower(Z_USTRVAL_P(haystack), &haystack_len, UG(default_locale));
+			needle_dup = php_u_strtolower(Z_USTRVAL_P(needle), &needle_len, UG(default_locale));
 			found = zend_u_memnstr((UChar *)haystack_dup + offset,
 								   (UChar *)needle_dup, needle_len,
 								   (UChar *)haystack_dup + haystack_len);
@@ -2508,8 +2512,7 @@ PHP_FUNCTION(stripos)
 				u_needle_char[needle_len++] = U16_TRAIL(ch);
 				u_needle_char[needle_len]   = 0;
 			}
-			haystack_dup = eustrndup(Z_USTRVAL_P(haystack), haystack_len);
-			php_u_strtolower((UChar **)&haystack_dup, &haystack_len, UG(default_locale));
+			haystack_dup = php_u_strtolower(haystack_dup, &haystack_len, UG(default_locale));
 			found = zend_u_memnstr((UChar *)haystack_dup + offset,
 								   (UChar *)u_needle_char, needle_len,
 								   (UChar *)haystack_dup + haystack_len);
@@ -3923,26 +3926,24 @@ PHP_FUNCTION(strtr)
    Reverse a string */
 PHP_FUNCTION(strrev)
 {
-	zval **str;
+	zstr str;
+	int str_len;
+	zend_uchar str_type;
 	char *s, *e, *n = NULL, *p;
 	int32_t i, x1, x2;
 	UChar32 ch;
 	UChar *u_s, *u_n = NULL, *u_p;
 
-	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &str) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len, &str_type) == FAILURE) {
+		return;
 	}
 
-	if (Z_TYPE_PP(str) != IS_UNICODE && Z_TYPE_PP(str) != IS_STRING) {
-		convert_to_text_ex(str);
-	}
-
-	if (Z_TYPE_PP(str) == IS_UNICODE) {
-		u_n = eumalloc(Z_USTRLEN_PP(str)+1);
+	if (str_type == IS_UNICODE) {
+		u_n = eumalloc(str_len+1);
 		u_p = u_n;
-		u_s = Z_USTRVAL_PP(str);
+		u_s = str.u;
 
-		i = Z_USTRLEN_PP(str);
+		i = str_len;
 		while (i > 0) {
 			U16_PREV(u_s, 0, i, ch);
 			if (u_getCombiningClass(ch) == 0) {
@@ -3954,17 +3955,17 @@ PHP_FUNCTION(strrev)
 				} while (u_getCombiningClass(ch) != 0);
 				x1 = i;
 				while (x1 <= x2) {
-					U16_NEXT(u_s, x1, Z_USTRLEN_PP(str), ch);
+					U16_NEXT(u_s, x1, str_len, ch);
 					u_p += zend_codepoint_to_uchar(ch, u_p);
 				}
 			}
 		}
 		*u_p = 0;
 	} else {
-		n = emalloc(Z_STRLEN_PP(str)+1);
+		n = emalloc(str_len+1);
 		p = n;
-		s = Z_STRVAL_PP(str);
-		e = s + Z_STRLEN_PP(str);
+		s = str.s;
+		e = s + str_len;
 
 		while (--e >= s) {
 			*(p++) = *e;
@@ -3972,10 +3973,10 @@ PHP_FUNCTION(strrev)
 		*p = '\0';
 	}
 
-	if (Z_TYPE_PP(str) == IS_UNICODE) {
-		RETVAL_UNICODEL(u_n, Z_USTRLEN_PP(str), 0);
+	if (str_type == IS_UNICODE) {
+		RETVAL_UNICODEL(u_n, str_len, 0);
 	} else {
-		RETVAL_STRINGL(n, Z_STRLEN_PP(str), 0);
+		RETVAL_STRINGL(n, str_len, 0);
 	}
 }
 /* }}} */
@@ -5603,8 +5604,7 @@ PHPAPI int php_u_strip_tags(UChar *rbuf, int len, int *stateptr, UChar *allow, i
 	buf = eustrndup(rbuf, len);
 	rp = rbuf;
 	if (allow_len != 0) {
-		allow = eustrndup(allow, allow_len);
-		php_u_strtolower(&allow, &allow_len, UG(default_locale));
+		allow = php_u_strtolower(allow, &allow_len, UG(default_locale));
 		tbuf = eumalloc(PHP_TAG_BUF_SIZE+1);
 		tp = tbuf;
 	}
