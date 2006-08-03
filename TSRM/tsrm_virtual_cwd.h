@@ -57,6 +57,9 @@ typedef unsigned short mode_t;
 #define IS_SLASH_P(c)	(*(c) == '/' || \
         (*(c) == '\\' && !IsDBCSLeadByte(*(c-1))))
 
+#define IS_U_SLASH(c)	((UChar32)(c) == (UChar32)0x2f /*'/'*/ || (UChar32)(c) == (UChar32)0x5c /*'\\'*/)
+#define IS_U_SLASH_P(c)	IS_SLASH(*(c))
+
 /* COPY_WHEN_ABSOLUTE is 2 under Win32 because by chance both regular absolute paths
    in the file system and UNC paths need copying of two characters */
 #define COPY_WHEN_ABSOLUTE(path) 2
@@ -74,6 +77,10 @@ typedef unsigned short mode_t;
 #define DEFAULT_DIR_SEPARATOR	';'
 #define IS_SLASH(c)	((c) == '/' || (c) == '\\')
 #define IS_SLASH_P(c)	IS_SLASH(*(c))
+
+#define IS_U_SLASH(c)	((UChar32)(c) == (UChar32)0x2f /*'/'*/ || (UChar32)(c) == (UChar32)0x5c /*'\\'*/)
+#define IS_U_SLASH_P(c)	IS_U_SLASH(*(c))
+
 /* Colon indicates volume name, either first character should be forward slash or backward slash */
 #define IS_ABSOLUTE_PATH(path, len) \
     ((strchr(path, ':') != NULL) || ((len >= 1) && ((path[0] == '/') || (path[0] == '\\'))))
@@ -91,8 +98,11 @@ typedef unsigned short mode_t;
 #define DEFAULT_DIR_SEPARATOR  ':'
 #endif
 
-#define IS_SLASH(c)	((c) == '/')
-#define IS_SLASH_P(c)	(*(c) == '/')
+#define IS_SLASH(c)		((c) == '/')
+#define IS_SLASH_P(c)	IS_SLASH(*(c))
+
+#define IS_U_SLASH(c)	((UChar32)(c) == (UChar32)0x2f /*'/'*/)
+#define IS_U_SLASH_P(c)	IS_U_SLASH(*(c))
 
 #endif
 
