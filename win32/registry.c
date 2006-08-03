@@ -1,7 +1,60 @@
 #include "php.h"
 #include "php_ini.h"
 
-#define PHP_REGISTRY_KEY "SOFTWARE\\PHP"
+#define PHP_REGISTRY_KEY              "SOFTWARE\\PHP"
+
+#define PHP_VER1(V1)                  #V1
+#define PHP_VER2(V1,V2)               #V1"."#V2
+#define PHP_VER3(V1,V2,V3)            #V1"."#V2"."#V3
+
+#define PHP_REGISTRY_KEYV(VER)        PHP_REGISTRY_KEY"\\"VER
+#define PHP_REGISTRY_KEY1(V1)         PHP_REGISTRY_KEY"\\"PHP_VER1(V1)
+#define PHP_REGISTRY_KEY2(V1,V2)      PHP_REGISTRY_KEY"\\"PHP_VER2(V1,V2)
+#define PHP_REGISTRY_KEY3(V1,V2,V3)   PHP_REGISTRY_KEY"\\"PHP_VER3(V1,V2,V3)
+
+static const char* registry_keys[] = {
+	PHP_REGISTRY_KEYV(PHP_VERSION),
+	PHP_REGISTRY_KEY3(PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION),
+	PHP_REGISTRY_KEY2(PHP_MAJOR_VERSION, PHP_MINOR_VERSION),
+	PHP_REGISTRY_KEY1(PHP_MAJOR_VERSION),
+	PHP_REGISTRY_KEY,
+	NULL
+};
+
+static int OpenPhpRegistryKey(char* sub_key, HKEY *hKey)
+{
+	const char **key_name = registry_keys;
+
+	if (sub_key) {
+		int main_key_len;
+		int sub_key_len = strlen(sub_key);
+		char *reg_key;
+
+		while (*key_name) {
+			LONG ret;
+
+			main_key_len = strlen(*key_name);
+			reg_key = emalloc(main_key_len + sub_key_len + 1);
+			memcpy(reg_key, *key_name, main_key_len);
+			memcpy(reg_key + main_key_len, sub_key, sub_key_len + 1);			
+			ret = RegOpenKeyEx(HKEY_LOCAL_MACHINE, reg_key, 0, KEY_READ, hKey);
+			efree(reg_key);
+			
+			if (ret == ERROR_SUCCESS) {
+				return 1;
+			}
+			++key_name;
+		}
+	} else {
+		while (*key_name) {
+			if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, *key_name, 0, KEY_READ, hKey) == ERROR_SUCCESS) {
+				return 1;
+			}
+			++key_name;
+		}
+	}
+	return 0;
+}
 
 void UpdateIniFromRegistry(char *path TSRMLS_DC)
 {
@@ -9,7 +62,7 @@ void UpdateIniFromRegistry(char *path TSRMLS_DC)
 	HKEY MainKey;
 	char *strtok_buf = NULL;
 
-	if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, PHP_REGISTRY_KEY "\\Per Directory Values", 0, KEY_READ, &MainKey)!=ERROR_SUCCESS) {
+	if (!OpenPhpRegistryKey("\\Per Directory Values", &MainKey)) {
 		return;
 	}
 
@@ -100,7 +153,7 @@ char *GetIniPathFromRegistry()
 	char *reg_location = NULL;
 	HKEY hKey;
 	
-	if(RegOpenKeyEx(HKEY_LOCAL_MACHINE, PHP_REGISTRY_KEY, 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
+	if (OpenPhpRegistryKey(NULL, &hKey)) {
 		DWORD buflen = MAXPATHLEN;
 		reg_location = emalloc(MAXPATHLEN+1);
 		if(RegQueryValueEx(hKey, PHPRC_REGISTRY_NAME, 0, NULL, reg_location, &buflen) != ERROR_SUCCESS) {
