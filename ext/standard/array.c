@@ -2827,12 +2827,11 @@ PHP_FUNCTION(array_change_key_case)
 				efree(new_key.s);
 				break;
 			case HASH_KEY_IS_UNICODE:
-				new_key.u = eustrndup(string_key.u, str_key_len - 1);
 				str_len = str_key_len - 1;
 				if (change_to_upper)
-					new_key.u = php_u_strtoupper(&new_key.u, &str_len, UG(default_locale));
+					new_key.u = php_u_strtoupper(string_key.u, &str_len, UG(default_locale));
 				else
-					new_key.u = php_u_strtolower(&new_key.u, &str_len, UG(default_locale));
+					new_key.u = php_u_strtolower(string_key.u, &str_len, UG(default_locale));
 				zend_u_hash_update(Z_ARRVAL_P(return_value), IS_UNICODE, new_key, str_len+1, entry, sizeof(entry), NULL);
 				efree(new_key.u);
 				break;

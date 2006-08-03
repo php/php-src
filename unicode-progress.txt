@@ -123,9 +123,6 @@ ext/standard
     strrev()
         Params API
 
-    strtoupper(), strtolower(), strtotitle()
-        Params API
-
     strtr()
         Check on Derick's progress.
 
@@ -226,6 +223,8 @@ ext/standard
     strspn()
     strstr()
     strtok()
+    strtolower()
+    strtoupper()
     substr()
     substr_count()
     substr_replace()

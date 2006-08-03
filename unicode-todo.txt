@@ -43,3 +43,5 @@
 
 * UG(unicode) is turned off during MINIT() currently. We need to figure out
   a way to avoid turning it off.
+
+* USTR_MAKE("") should be EMPTY_STR
