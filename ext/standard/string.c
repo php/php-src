@@ -1688,6 +1688,55 @@ PHP_FUNCTION(strtotitle)
 }
 /* }}} */
 
+/* {{{ php_u_basename
+ */
+PHPAPI void php_u_basename(UChar *s, int len, UChar *suffix, int sufflen, UChar **p_ret, int *p_len TSRMLS_DC)
+{
+	UChar *ret = NULL, *end, *c, *comp, *cend;
+	int state;
+
+	c = comp = cend = s;
+	end = s + len;
+	state = 0;
+	while (c < end) {
+#if defined(PHP_WIN32) || defined(NETWARE)
+		if (*c == (UChar) 0x2f /*'/'*/ || *c == (UChar) 0x5c /*'\\'*/) {
+#else
+		if (*c == (UChar) 0x2f /*'/'*/) {
+#endif
+			if (state == 1) {
+				state = 0;
+				cend = c;
+			}
+		} else {
+			if (state == 0) {
+				comp = c;
+				state = 1;
+			}
+		}
+		c++;
+	}
+
+	if (state == 1) {
+		cend = c;
+	}
+	if (suffix != NULL && sufflen < (cend - comp) &&
+			u_memcmp(cend - sufflen, suffix, sufflen) == 0) {
+		cend -= sufflen;
+	}
+
+	len = cend - comp;
+	ret = eustrndup(comp, len);
+
+	if (p_ret) {
+		*p_ret = ret;
+	}
+	if (p_len) {
+		*p_len = len;
+	}
+}
+/* }}} */
+
 /* {{{ php_basename
  */
 PHPAPI void php_basename(char *s, size_t len, char *suffix, size_t sufflen, char **p_ret, size_t *p_len TSRMLS_DC)
@@ -1761,20 +1810,26 @@ quit_loop:
 }
 /* }}} */
 
-/* {{{ proto string basename(string path [, string suffix])
+/* {{{ proto string basename(string path [, string suffix]) U
    Returns the filename component of the path */
 PHP_FUNCTION(basename)
 {
-	char *string, *suffix = NULL, *ret;
-	int   string_len, suffix_len = 0;
-	size_t ret_len;
+	zstr string, suffix = NULL_ZSTR, ret;
+	int string_len, suffix_len = 0;
+	zend_uchar string_type, suffix_type;
+	int ret_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &string, &string_len, &suffix, &suffix_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "T|T", &string, &string_len, &string_type, &suffix, &suffix_len, &suffix_type) == FAILURE) {
 		return;
 	}
 
-	php_basename(string, string_len, suffix, suffix_len, &ret, &ret_len TSRMLS_CC);
-	RETURN_STRINGL(ret, (int)ret_len, 0);
+	if (string_type == IS_UNICODE) {
+		php_u_basename(string.u, string_len, suffix.u, suffix_len, &ret.u, &ret_len TSRMLS_CC);
+		RETURN_UNICODEL(ret.u, ret_len, 0);
+	} else {
+		php_basename(string.s, string_len, suffix.s, suffix_len, &ret.s, &ret_len TSRMLS_CC);
+		RETURN_STRINGL(ret.s, ret_len, 0);
+	}
 }
 /* }}} */
 
