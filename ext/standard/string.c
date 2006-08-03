@@ -4087,50 +4087,42 @@ static int php_u_similar_char(const UChar *txt1, int len1, const UChar *txt2, in
    Calculates the similarity between two strings */
 PHP_FUNCTION(similar_text)
 {
-	zval **t1, **t2, **percent;
-	int ac = ZEND_NUM_ARGS();
+	zstr t1, t2;
+	int t1_len, t2_len;
+	zend_uchar t1_type, t2_type;
+	zval *percent = NULL;
 	int sim;
-	zend_uchar str_type;
 
-	if (ac < 2 || ac > 3 || zend_get_parameters_ex(ac, &t1, &t2, &percent) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	if (Z_TYPE_PP(t1) != IS_UNICODE && Z_TYPE_PP(t1) != IS_STRING) {
-		convert_to_text_ex(t1);
-	}
-	if (Z_TYPE_PP(t2) != IS_UNICODE && Z_TYPE_PP(t2) != IS_STRING) {
-		convert_to_text_ex(t2);
-	}
-	str_type = zend_get_unified_string_type(2 TSRMLS_CC, Z_TYPE_PP(t1), Z_TYPE_PP(t2));
-	if (str_type == (zend_uchar)-1) {
-		zend_error(E_WARNING, "Cannot mix binary and Unicode parameters");
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT|z", &t1, &t1_len,
+							  &t1_type, &t2, &t2_len, &t2_type, &percent) == FAILURE)  {
 		return;
 	}
-	convert_to_explicit_type_ex(t1, str_type);
-	convert_to_explicit_type_ex(t2, str_type);
-	if (ac > 2) {
-		convert_to_double_ex(percent);
+
+	if (percent) {
+		zval_dtor(percent);
+		Z_TYPE_P(percent) = IS_DOUBLE;
 	}
 
-	if (Z_UNILEN_PP(t1) + Z_UNILEN_PP(t2) == 0) {
-		if (ac > 2) {
-			Z_DVAL_PP(percent) = 0;
+	if (t1_len + t2_len == 0) {
+		if (percent) {
+			Z_DVAL_P(percent) = 0;
 		}
 
 		RETURN_LONG(0);
 	}
 
-	if (str_type == IS_UNICODE) {
-		sim = php_u_similar_char(Z_USTRVAL_PP(t1), Z_USTRLEN_PP(t1), Z_USTRVAL_PP(t2), Z_USTRLEN_PP(t2));
+	/* t1_type and t2_type are guaranteed to be the same */
+	if (t1_type == IS_UNICODE) {
+		sim = php_u_similar_char(t1.u, t1_len, t2.u, t2_len);
 	} else {
-		sim = php_similar_char(Z_STRVAL_PP(t1), Z_STRLEN_PP(t1), Z_STRVAL_PP(t2), Z_STRLEN_PP(t2));
+		sim = php_similar_char(t1.s, t1_len, t2.s, t2_len);
 	}
 
-	if (ac > 2) {
-		if (str_type == IS_UNICODE) {
-			Z_DVAL_PP(percent) = sim * 200.0 / (Z_USTRCPLEN_PP(t1) + Z_USTRCPLEN_PP(t2));
+	if (percent) {
+		if (t1_type == IS_UNICODE) {
+			Z_DVAL_P(percent) = sim * 200.0 / (u_countChar32(t1.u, t1_len) + u_countChar32(t2.u, t2_len));
 		} else {
-			Z_DVAL_PP(percent) = sim * 200.0 / (Z_STRLEN_PP(t1) + Z_STRLEN_PP(t2));
+			Z_DVAL_P(percent) = sim * 200.0 / (t1_len + t2_len);
 		}
 	}
 

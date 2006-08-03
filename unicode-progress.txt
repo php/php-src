@@ -34,6 +34,7 @@ ext/standard
 
     hebrev(), hebrevc()
         Figure out if this is something we can use ICU for, internally.
+        Check with Zeev.
 
     localeconv()
         Params API, update to use *_rt_* API.
@@ -55,9 +56,6 @@ ext/standard
 
     quotemeta()
         Params API, IS_UNICODE upgrade
-
-    similar_text()
-        Params API
 
     sscanf()
         Params API. Rest - no idea yet.
