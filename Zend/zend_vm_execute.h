@@ -1602,7 +1602,7 @@ static int ZEND_DO_FCALL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (zend_u_hash_find(EG(function_table), Z_TYPE_P(fname), Z_UNIVAL_P(fname), Z_UNILEN_P(fname)+1, (void **) &EX(function_state).function)==FAILURE) {
 		/* FIXME: output identifiers properly */
-		zend_error_noreturn(E_ERROR, "Call to undefined function:  %R()", Z_TYPE_P(fname), Z_UNIVAL_P(fname));
+		zend_error_noreturn(E_ERROR, "Call to undefined function %R()", Z_TYPE_P(fname), Z_UNIVAL_P(fname));
 	}
 	EX(object) = NULL;
 
