@@ -211,10 +211,25 @@ int spl_autoload(const char *class_name, const char * lc_name, int class_name_le
 	zend_file_handle file_handle;
 	zend_op_array *new_op_array;
 	zval *result = NULL;
+	zval err_mode;
+	int ret;
 
 	class_file_len = spprintf(&class_file, 0, "%s%s", lc_name, file_extension);
 
-	if (zend_stream_open(class_file, &file_handle TSRMLS_CC) == SUCCESS) {
+	ZVAL_LONG(&err_mode, EG(error_reporting));
+	if (Z_LVAL(err_mode)) {
+		php_alter_ini_entry("error_reporting", sizeof("error_reporting"), "0", 1, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
+	}
+
+	ret = zend_stream_open(class_file, &file_handle TSRMLS_CC);
+
+	if (!EG(error_reporting) && Z_LVAL(err_mode) != EG(error_reporting)) {
+		convert_to_string(&err_mode);
+		zend_alter_ini_entry("error_reporting", sizeof("error_reporting"), Z_STRVAL(err_mode), Z_STRLEN(err_mode), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
+		zendi_zval_dtor(err_mode);
+	}
+
+	if (ret == SUCCESS) {
 		if (!file_handle.opened_path) {
 			file_handle.opened_path = estrndup(class_file, class_file_len);
 		}
@@ -228,7 +243,7 @@ int spl_autoload(const char *class_name, const char * lc_name, int class_name_le
 		if (new_op_array) {
 			EG(return_value_ptr_ptr) = &result;
 			EG(active_op_array) = new_op_array;
-	
+
 			zend_execute(new_op_array TSRMLS_CC);
 	
 			destroy_op_array(new_op_array TSRMLS_CC);
@@ -258,14 +273,10 @@ PHP_FUNCTION(spl_autoload)
 	zend_op **original_opline_ptr = EG(opline_ptr);
 	zend_op_array *original_active_op_array = EG(active_op_array);
 	zend_function_state *original_function_state_ptr = EG(function_state_ptr);
-	zval err_mode;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &class_name, &class_name_len, &file_exts, &file_exts_len) == FAILURE) {
 		RETURN_FALSE;
 	}
-
-	ZVAL_LONG(&err_mode, EG(error_reporting));
-	php_alter_ini_entry("error_reporting", sizeof("error_reporting"), "0", 1, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME); 
 
 	copy = pos1 = estrdup(ZEND_NUM_ARGS() > 1 ? file_exts : SPL_G(autoload_extensions));
 	lc_name = zend_str_tolower_dup(class_name, class_name_len);
@@ -285,12 +296,6 @@ PHP_FUNCTION(spl_autoload)
 	efree(lc_name);
 	if (copy) {
 		efree(copy);
-	}
-
-	if (!EG(error_reporting) && Z_LVAL(err_mode) != EG(error_reporting)) {
-		convert_to_string(&err_mode);
-		zend_alter_ini_entry("error_reporting", sizeof("error_reporting"), Z_STRVAL(err_mode), Z_STRLEN(err_mode), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
-		zendi_zval_dtor(err_mode);
 	}
 
 	EG(return_value_ptr_ptr) = original_return_value;
