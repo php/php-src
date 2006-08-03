@@ -1,3 +1,13 @@
+2006-08-02  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_operators.c:
+      Make string comparison functions conver to unicode or printable strings
+      depending on unicode.semantics and do the right thing.
+
+    * zend_API.c:
+      Add '&' modifier (for 's' type) that will apply the specified converter
+      during conversion of Unicode strings.
+
 2006-08-01  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_unicode.c:

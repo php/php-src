@@ -1,3 +1,91 @@
+2006-08-02  Antony Dovgal  <antony@zend.com>
+
+    * ext/date/tests/oo_001.phpt
+      ext/date/tests/oo_001.phpt:
+      fix test
+
+    * (PHP_5_2)
+      ext/wddx/wddx.c:
+      fix ZTS build
+
+    * ext/wddx/wddx.c:
+      fix build
+
+2006-08-02  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/string.c:
+      A few fixes noted during analysis.
+
+    * unicode-progress.txt:
+      Notes after analyzing remainder of string.c.
+
+    * ext/standard/string.c:
+      bin2hex() should accept only binary strings.
+
+    * ZendEngine2/zend_operators.c:
+      Make string comparison functions conver to unicode or printable strings
+      depending on unicode.semantics and do the right thing.
+
+    * unicode-todo.txt:
+      Some updates.
+
+    * README.PARAMETER_PARSING_API
+      unicode-progress.txt
+      unicode-todo.txt:
+      -** empty log message ***
+
+    * ZendEngine2/zend_API.c:
+      Add '&' modifier (for 's' type) that will apply the specified converter
+      during conversion of Unicode strings.
+
+2006-08-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/wddx/wddx.c
+      ext/wddx/tests/bug37569.phpt:
+      MFB: Fixed bug #38213, #37611, #37571 (wddx encoding fails to handle
+      certain
+      characters).
+
+    * (PHP_5_2)
+      NEWS
+      ext/wddx/wddx.c
+      ext/wddx/tests/bug37569.phpt:
+      Fixed bug #38213, #37611, #37571 (wddx encoding fails to handle certain
+      characters).
+
+    * ext/xml/php_xml.h
+      ext/xml/xml.c:
+      MFB: Expose the xml_utf8_encode function.
+
+    * (PHP_5_2)
+      ext/xml/php_xml.h
+      ext/xml/xml.c:
+      Expose the xml_utf8_encode function.
+
+2006-08-02  Antony Dovgal  <antony@zend.com>
+
+    * ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.c:
+      init variable, eliminate compile warning
+
+    * (PHP_5_2)
+      NEWS
+      ext/session/session.c:
+      MFH: fix #38289 (segfault in session_decode() when _SESSION is NULL)
+
+    * ext/session/session.c:
+      fix #38289 (segfault in session_decode() when _SESSION is NULL)
+
+2006-08-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/array.c:
+      zts fix
+
+2006-08-02  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/array.c:
+      Fix leaks.
+
 2006-08-01  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
