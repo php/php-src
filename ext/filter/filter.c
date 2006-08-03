@@ -401,10 +401,10 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 		efree(*val);
 		if (Z_STRLEN(new_var)) {
 			*val = estrndup(Z_STRVAL(new_var), Z_STRLEN(new_var) + 1);
-			zval_dtor(&new_var);
 		} else {
 			*val = estrdup("");
 		}
+		zval_dtor(&new_var);
 	}
 
 	return retval;
