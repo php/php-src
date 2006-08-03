@@ -34,6 +34,8 @@ PHP                                                                        NEWS
   (Tony)
 - Fixed bug #38278 (session_cache_expire()'s value does not match phpinfo's 
   session.cache_expire). (Tony)
+- Fixed bug #38276 (file_exists() works incorrectly with long filenames 
+  on Windows). (Ilia, Tony)
 - Fixed bug #38269 (fopen wrapper doesn't fail on invalid hostname with 
   curlwrappers enabled). (Tony)
 - Fixed bug #38261 (openssl_x509_parse() leaks with invalid cert) (Pierre)
