@@ -423,16 +423,10 @@ static void php_xmlreader_string_arg(INTERNAL_FUNCTION_PARAMETERS, xmlreader_rea
 	xmlChar *retchar = NULL;
 	xmlreader_object *intern;
 	char *name;
-	UConverter *orig_runtime_conv;
 
-	orig_runtime_conv = UG(runtime_encoding_conv);
-	UG(runtime_encoding_conv) = UG(utf8_conv);
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
-		UG(runtime_encoding_conv) = orig_runtime_conv;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &name, &name_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
-	UG(runtime_encoding_conv) = orig_runtime_conv;
 
 	if (!name_len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument cannot be an empty string");
@@ -630,16 +624,10 @@ PHP_METHOD(xmlreader, getAttributeNs)
 	xmlreader_object *intern;
 	xmlChar *retchar = NULL;
 	char *name, *ns_uri;
-	UConverter *orig_runtime_conv;
 
-	orig_runtime_conv = UG(runtime_encoding_conv);
-	UG(runtime_encoding_conv) = UG(utf8_conv);
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &name, &name_len, &ns_uri, &ns_uri_len) == FAILURE) {
-		UG(runtime_encoding_conv) = orig_runtime_conv;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&", &name, &name_len, UG(utf8_conv), &ns_uri, &ns_uri_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
-	UG(runtime_encoding_conv) = orig_runtime_conv;
 
 	if (name_len == 0 || ns_uri_len == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attribute Name and Namespace URI cannot be empty");
@@ -716,16 +704,10 @@ PHP_METHOD(xmlreader, moveToAttribute)
 	int name_len = 0, retval;
 	xmlreader_object *intern;
 	char *name;
-	UConverter *orig_runtime_conv;
 
-	orig_runtime_conv = UG(runtime_encoding_conv);
-	UG(runtime_encoding_conv) = UG(utf8_conv);
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
-		UG(runtime_encoding_conv) = orig_runtime_conv;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &name, &name_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
-	UG(runtime_encoding_conv) = orig_runtime_conv;
 
 	if (name_len == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attribute Name is required");
@@ -783,17 +765,10 @@ PHP_METHOD(xmlreader, moveToAttributeNs)
 	int name_len=0, ns_uri_len=0, retval;
 	xmlreader_object *intern;
 	char *name, *ns_uri;
-	UConverter *orig_runtime_conv;
 
-	orig_runtime_conv = UG(runtime_encoding_conv);
-	UG(runtime_encoding_conv) = UG(utf8_conv);
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &name, &name_len, &ns_uri, &ns_uri_len) == FAILURE) {
-		UG(runtime_encoding_conv) = orig_runtime_conv;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&", &name, &name_len, UG(utf8_conv), &ns_uri, &ns_uri_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
-
-	UG(runtime_encoding_conv) = orig_runtime_conv;
 
 	if (name_len == 0 || ns_uri_len == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attribute Name and Namespace URI cannot be empty");
@@ -871,16 +846,10 @@ PHP_METHOD(xmlreader, next)
 	int retval, name_len=0;
 	xmlreader_object *intern;
 	char *name = NULL;
-	UConverter *orig_runtime_conv;
 
-	orig_runtime_conv = UG(runtime_encoding_conv);
-	UG(runtime_encoding_conv) = UG(utf8_conv);
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
-		UG(runtime_encoding_conv) = orig_runtime_conv;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&", &name, &name_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
-	UG(runtime_encoding_conv) = orig_runtime_conv;
 
 	id = getThis();
 	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
@@ -924,17 +893,10 @@ PHP_METHOD(xmlreader, open)
 	char *encoding = NULL;
 	char resolved_path[MAXPATHLEN + 1];
 	xmlTextReaderPtr reader = NULL;
-	UConverter *orig_runtime_conv;
 
-	orig_runtime_conv = UG(runtime_encoding_conv);
-	UG(runtime_encoding_conv) = UG(utf8_conv);
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|s!l", &source, &source_len, &source_type, &encoding, &encoding_len, &options) == FAILURE) {
-		UG(runtime_encoding_conv) = orig_runtime_conv;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|s!&l", &source, &source_len, &source_type, &encoding, &encoding_len, UG(utf8_conv), &options) == FAILURE) {
 		return;
 	}
-
-	UG(runtime_encoding_conv) = orig_runtime_conv;
 
 	id = getThis();
 	if (id != NULL) {
