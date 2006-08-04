@@ -706,9 +706,7 @@ CWD_API FILE *virtual_fopen(const char *path, const char *mode TSRMLS_DC)
 	}
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	if (virtual_file_ex(&new_state, path, NULL, 1)) {
-		return -1;
-	}
+	virtual_file_ex(&new_state, path, NULL, 1);
 
 	f = fopen(new_state.cwd, mode);
 
