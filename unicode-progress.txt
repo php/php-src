@@ -29,9 +29,6 @@ ext/standard
         Params API. Do we really want to go through the whole Unicode table?
         May need to use hashtable instead of array.
 
-    dirname()
-        Create php_u_dirname()
-
     hebrev(), hebrevc()
         Figure out if this is something we can use ICU for, internally.
         Check with Zeev.
@@ -47,9 +44,6 @@ ext/standard
 
     nl2br()
         Params API, IS_UNICODE support
-
-    pathinfo()
-        Simple upgrade, based on php_u_basename/php_u_dirname
 
     parse_str()
         Params API. How do we deal with encoding of the data?
@@ -204,10 +198,12 @@ ext/standard
     addslashes()
     bin2hex()
     chr()
+    dirname()
     explode()
     implode()
     levenshtein()
     ord()
+    pathinfo()
     range()
     similar_text()
     str_pad()
