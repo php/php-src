@@ -111,7 +111,7 @@ PHP_FUNCTION(dom_xpath_register_ns)
 	dom_object *intern;
 	unsigned char *prefix, *ns_uri;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oss", &id, dom_xpath_class_entry, &prefix, &prefix_len, &ns_uri, &ns_uri_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&s&", &id, dom_xpath_class_entry, &prefix, &prefix_len, UG(utf8_conv), &ns_uri, &ns_uri_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
 
@@ -150,8 +150,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) {
 	xmlDoc *docp = NULL;
 	xmlNsPtr *ns;
 
-
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|O", &id, dom_xpath_class_entry, &expr, &expr_len, &context, dom_node_class_entry) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&|O", &id, dom_xpath_class_entry, &expr, &expr_len, UG(utf8_conv), &context, dom_node_class_entry) == FAILURE) {
 		return;
 	}
 

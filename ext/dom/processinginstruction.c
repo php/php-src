@@ -51,11 +51,10 @@ PHP_METHOD(domprocessinginstruction, __construct)
 	int name_len, value_len, name_valid;
 
 	php_set_error_handling(EH_THROW, dom_domexception_class_entry TSRMLS_CC);
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|s", &id, dom_processinginstruction_class_entry, &name, &name_len, &value, &value_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&|s&", &id, dom_processinginstruction_class_entry, &name, &name_len, UG(utf8_conv), &value, &value_len, UG(utf8_conv)) == FAILURE) {
 		php_std_error_handling();
 		return;
 	}
-
 	php_std_error_handling();
 
 	name_valid = xmlValidateName((xmlChar *) name, 0);
@@ -99,7 +98,7 @@ int dom_processinginstruction_target_read(dom_object *obj, zval **retval TSRMLS_
 	}
 
 	ALLOC_ZVAL(*retval);
-	ZVAL_STRING(*retval, (char *) (nodep->name), 1);
+	ZVAL_XML_STRING(*retval, (char *) (nodep->name), ZSTR_DUPLICATE);
 
 	return SUCCESS;
 }
@@ -129,10 +128,10 @@ int dom_processinginstruction_data_read(dom_object *obj, zval **retval TSRMLS_DC
 
 	
 	if ((content = xmlNodeGetContent(nodep)) != NULL) {
-		ZVAL_STRING(*retval, content, 1);
+		ZVAL_XML_STRING(*retval, content, ZSTR_DUPLICATE);
 		xmlFree(content);
 	} else {
-		ZVAL_EMPTY_STRING(*retval);
+		ZVAL_EMPTY_TEXT(*retval);
 	}
 
 	return SUCCESS;
@@ -156,7 +155,7 @@ int dom_processinginstruction_data_write(dom_object *obj, zval *newval TSRMLS_DC
 			zval_copy_ctor(&value_copy);
 			newval = &value_copy;
 		}
-		convert_to_string(newval);
+		convert_to_string_with_converter(newval, UG(utf8_conv));
 	}
 
 	xmlNodeSetContentLen(nodep, Z_STRVAL_P(newval), Z_STRLEN_P(newval) + 1);

@@ -55,12 +55,12 @@ PHP_METHOD(domattr, __construct)
 	int name_len, value_len, name_valid;
 
 	php_set_error_handling(EH_THROW, dom_domexception_class_entry TSRMLS_CC);
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|s", &id, dom_attr_class_entry, &name, &name_len, &value, &value_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&|s&", &id, dom_attr_class_entry, &name, &name_len, UG(utf8_conv), &value, &value_len, UG(utf8_conv)) == FAILURE) {
 		php_std_error_handling();
 		return;
 	}
-
 	php_std_error_handling();
+
 	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
 
 	name_valid = xmlValidateName((xmlChar *) name, 0);
@@ -69,7 +69,7 @@ PHP_METHOD(domattr, __construct)
 		RETURN_FALSE;
 	}
 
-	nodep = xmlNewProp(NULL, (xmlChar *) name, value);
+	nodep = xmlNewProp(NULL, (xmlChar *) name, (xmlChar *) value);
 
 	if (!nodep) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1 TSRMLS_CC);
@@ -105,7 +105,7 @@ int dom_attr_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 	}
 
 	ALLOC_ZVAL(*retval);
-	ZVAL_STRING(*retval, (char *) (attrp->name), 1);
+	ZVAL_XML_STRING(*retval, (char *) (attrp->name), ZSTR_DUPLICATE);
 
 	return SUCCESS;
 }
@@ -152,10 +152,10 @@ int dom_attr_value_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	
 	if ((content = xmlNodeGetContent((xmlNodePtr) attrp)) != NULL) {
-		ZVAL_STRING(*retval, content, 1);
+		ZVAL_XML_STRING(*retval, (char *)content, ZSTR_DUPLICATE);
 		xmlFree(content);
 	} else {
-		ZVAL_EMPTY_STRING(*retval);
+		ZVAL_EMPTY_TEXT(*retval);
 	}
 
 	return SUCCESS;
@@ -184,10 +184,10 @@ int dom_attr_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 			zval_copy_ctor(&value_copy);
 			newval = &value_copy;
 		}
-		convert_to_string(newval);
+		convert_to_string_with_converter(newval, UG(utf8_conv));
 	}
 
-	xmlNodeSetContentLen((xmlNodePtr) attrp, Z_STRVAL_P(newval), Z_STRLEN_P(newval) + 1);
+	xmlNodeSetContentLen((xmlNodePtr) attrp, (xmlChar *) Z_STRVAL_P(newval), Z_STRLEN_P(newval) + 1);
 
 	if (newval == &value_copy) {
 		zval_dtor(newval);

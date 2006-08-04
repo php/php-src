@@ -150,7 +150,7 @@ int dom_node_node_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 	ALLOC_ZVAL(*retval);
 
 	if(str != NULL) {
-		ZVAL_RT_STRING(*retval, str, 1);
+		ZVAL_XML_STRING(*retval, str, ZSTR_DUPLICATE);
 	} else {
 		ZVAL_EMPTY_TEXT(*retval);
 	}
@@ -205,7 +205,7 @@ int dom_node_node_value_read(dom_object *obj, zval **retval TSRMLS_DC)
 	ALLOC_ZVAL(*retval);
 
 	if(str != NULL) {
-		ZVAL_RT_STRING(*retval, str, 1);
+		ZVAL_XML_STRING(*retval, str, ZSTR_DUPLICATE);
 		xmlFree(str);
 	} else {
 		ZVAL_NULL(*retval);
@@ -245,7 +245,7 @@ int dom_node_node_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 					zval_copy_ctor(&value_copy);
 					newval = &value_copy;
 				}
-				convert_to_string(newval);
+				convert_to_string_with_converter(newval, UG(utf8_conv));
 			}
 			xmlNodeSetContentLen(nodep, Z_STRVAL_P(newval), Z_STRLEN_P(newval) + 1);
 			if (newval == &value_copy) {
@@ -619,7 +619,7 @@ int dom_node_namespace_uri_read(dom_object *obj, zval **retval TSRMLS_DC)
 	ALLOC_ZVAL(*retval);
 
 	if(str != NULL) {
-		ZVAL_STRING(*retval, str, 1);
+		ZVAL_XML_STRING(*retval, str, ZSTR_DUPLICATE);
 	} else {
 		ZVAL_NULL(*retval);
 	}
@@ -666,9 +666,9 @@ int dom_node_prefix_read(dom_object *obj, zval **retval TSRMLS_DC)
 	ALLOC_ZVAL(*retval);
 
 	if (str == NULL) {
-		ZVAL_EMPTY_STRING(*retval);
+		ZVAL_EMPTY_TEXT(*retval);
 	} else {
-		ZVAL_STRING(*retval, str, 1);
+		ZVAL_XML_STRING(*retval, str, ZSTR_DUPLICATE);
 	}
 	return SUCCESS;
 
@@ -705,7 +705,7 @@ int dom_node_prefix_write(dom_object *obj, zval *newval TSRMLS_DC)
 					zval_copy_ctor(&value_copy);
 					newval = &value_copy;
 				}
-				convert_to_string(newval);
+				convert_to_string_with_converter(newval, UG(utf8_conv));
 			}
 			prefix = Z_STRVAL_P(newval);
 			if (nsnode && nodep->ns != NULL && !xmlStrEqual(nodep->ns->prefix, (xmlChar *)prefix)) {
@@ -774,7 +774,7 @@ int dom_node_local_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 	ALLOC_ZVAL(*retval);
 
 	if (nodep->type == XML_ELEMENT_NODE || nodep->type == XML_ATTRIBUTE_NODE || nodep->type == XML_NAMESPACE_DECL) {
-		ZVAL_STRING(*retval, (char *) (nodep->name), 1);
+		ZVAL_XML_STRING(*retval, (char *) (nodep->name), ZSTR_DUPLICATE);
 	} else {
 		ZVAL_NULL(*retval);
 	}
@@ -807,7 +807,7 @@ int dom_node_base_uri_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	baseuri = xmlNodeGetBase(nodep->doc, nodep);
 	if (baseuri) {
-		ZVAL_STRING(*retval, (char *) (baseuri), 1);
+		ZVAL_XML_STRING(*retval, (char *) (baseuri), ZSTR_DUPLICATE);
 		xmlFree(baseuri);
 	} else {
 		ZVAL_NULL(*retval);
@@ -842,10 +842,10 @@ int dom_node_text_content_read(dom_object *obj, zval **retval TSRMLS_DC)
 	ALLOC_ZVAL(*retval);
 
 	if(str != NULL) {
-		ZVAL_STRING(*retval, str, 1);
+		ZVAL_XML_STRING(*retval, str, ZSTR_DUPLICATE);
 		xmlFree(str);
 	} else {
-		ZVAL_EMPTY_STRING(*retval);
+		ZVAL_EMPTY_TEXT(*retval);
 	}
 
 	return SUCCESS;
@@ -1530,7 +1530,7 @@ PHP_FUNCTION(dom_node_lookup_prefix)
 	int uri_len = 0;
 	char *uri;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_node_class_entry, &uri, &uri_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&", &id, dom_node_class_entry, &uri, &uri_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
 
@@ -1558,7 +1558,8 @@ PHP_FUNCTION(dom_node_lookup_prefix)
 
 		if (lookupp != NULL && (nsptr = xmlSearchNsByHref(lookupp->doc, lookupp, uri))) {
 			if (nsptr->prefix != NULL) {
-				RETURN_STRING((char *) nsptr->prefix, 1);
+				RETVAL_XML_STRING((char *) nsptr->prefix, ZSTR_DUPLICATE);
+				return;
 			}
 		}
 	}
@@ -1581,7 +1582,7 @@ PHP_FUNCTION(dom_node_is_default_namespace)
 	int uri_len = 0;
 	char *uri;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_node_class_entry, &uri, &uri_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&", &id, dom_node_class_entry, &uri, &uri_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
 
@@ -1612,7 +1613,7 @@ PHP_FUNCTION(dom_node_lookup_namespace_uri)
 	int prefix_len = 0;
 	char *prefix;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_node_class_entry, &prefix, &prefix_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&", &id, dom_node_class_entry, &prefix, &prefix_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
 
@@ -1621,7 +1622,8 @@ PHP_FUNCTION(dom_node_lookup_namespace_uri)
 	if (prefix_len > 0) {
 		nsptr = xmlSearchNs(nodep->doc, nodep, prefix);
 		if (nsptr && nsptr->href != NULL) {
-			RETURN_STRING((char *) nsptr->href, 1);
+			RETVAL_XML_STRING((char *) nsptr->href, ZSTR_DUPLICATE);
+			return;
 		}
 	}
 
@@ -1689,6 +1691,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode)
     xmlOutputBufferPtr buf;
 	xmlXPathContextPtr ctxp=NULL;
 	xmlXPathObjectPtr xpathobjp=NULL;
+	zend_uchar file_type = IS_STRING;
 
 	if (mode == 0) {
 		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), 
@@ -1698,7 +1701,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		}
 	} else {
 		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), 
-			"Os|bba!a!", &id, dom_node_class_entry, &file, &file_len, &exclusive, 
+			"Ot|bba!a!", &id, dom_node_class_entry, &file, &file_len, &file_type, &exclusive, 
 			&with_comments, &xpath_array, &ns_prefixes) == FAILURE) {
 			return;
 		}
@@ -1711,6 +1714,12 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	if (! docp) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Node must be associated with a document");
 		RETURN_FALSE;
+	}
+
+	if (file_type == IS_UNICODE) {
+		if (php_stream_path_encode(NULL, &file, &file_len, (UChar*)file, file_len, REPORT_ERRORS, NULL) == FAILURE) {
+			RETURN_FALSE;
+		}
 	}
 
 	if (xpath_array == NULL) {
@@ -1726,6 +1735,9 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode)
 					xmlXPathFreeObject(xpathobjp);
 				}
 				xmlXPathFreeContext(ctxp);
+				if (file_type == IS_UNICODE) {
+					efree(file);
+				}
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "XPath query did not return a nodeset.");
 				RETURN_FALSE;
 			}
@@ -1733,13 +1745,24 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	} else {
 		/*xpath query from xpath_array */
 		HashTable *ht = Z_ARRVAL_P(xpath_array);
-		zval **tmp;
+		zval **tmp, **zxquery;
 		char *xquery;
+		int xquery_len;
 
 		if (zend_hash_find(ht, "query", sizeof("query"), (void**)&tmp) == SUCCESS &&
-		    Z_TYPE_PP(tmp) == IS_STRING) {
-			xquery = Z_STRVAL_PP(tmp);
+		    Z_TYPE_PP(tmp) == IS_STRING || Z_TYPE_PP(tmp) == IS_UNICODE) {
+				zxquery = tmp;
+/*
+			if (Z_TYPE_PP(tmp) == IS_STRING) {
+				xquery = Z_STRVAL_PP(tmp);
+			} else {
+				
+			}
+*/
 		} else {
+			if (file_type == IS_UNICODE) {
+				efree(file);
+			}
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "'query' missing from xpath array or is not a string");
 			RETURN_FALSE;
 		}
@@ -1750,26 +1773,66 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		if (zend_hash_find(ht, "namespaces", sizeof("namespaces"), (void**)&tmp) == SUCCESS &&
 		    Z_TYPE_PP(tmp) == IS_ARRAY) {
 			zval **tmpns;
-			while (zend_hash_get_current_data(Z_ARRVAL_PP(tmp), (void **)&tmpns) == SUCCESS) {
-				if (Z_TYPE_PP(tmpns) == IS_STRING) {
-					char *prefix;
-					ulong idx;
-					int prefix_key_len;
+			char *nschar;
+			int nschar_len;
 
-					if (zend_hash_get_current_key_ex(Z_ARRVAL_PP(tmp), 
-						&prefix, &prefix_key_len, &idx, 0, NULL) == HASH_KEY_IS_STRING) {
-						xmlXPathRegisterNs(ctxp, prefix, Z_STRVAL_PP(tmpns));
+			while (zend_hash_get_current_data(Z_ARRVAL_PP(tmp), (void **)&tmpns) == SUCCESS) {
+				if (Z_TYPE_PP(tmpns) == IS_STRING || Z_TYPE_PP(tmpns) == IS_UNICODE) {
+					zstr prefix = NULL_ZSTR;
+					ulong idx;
+					uint prefix_key_len;
+					zend_uchar htype;
+					UErrorCode errCode = 0;
+
+					if (Z_TYPE_PP(tmpns) == IS_UNICODE) {
+						zend_convert_from_unicode(UG(utf8_conv), &nschar, &nschar_len, Z_USTRVAL_PP(tmpns), Z_USTRLEN_PP(tmpns), &errCode);
+					} else {
+						nschar = Z_STRVAL_PP(tmpns);
+					}
+
+					htype = zend_hash_get_current_key_ex(Z_ARRVAL_PP(tmp), 
+						&prefix, &prefix_key_len, &idx, 0, NULL);
+					if (htype == HASH_KEY_IS_STRING) {
+						xmlXPathRegisterNs(ctxp, (xmlChar *)prefix.s, (xmlChar *)nschar);
+					} else
+						if (htype == HASH_KEY_IS_UNICODE) {
+							char *tmp_prefix;
+							int tmp_prefix_len;
+							errCode = 0;
+
+							zend_convert_from_unicode(UG(utf8_conv), &tmp_prefix, &tmp_prefix_len, prefix.u, prefix_key_len, &errCode);
+							xmlXPathRegisterNs(ctxp, (xmlChar *)tmp_prefix, (xmlChar *)nschar);
+							efree(tmp_prefix);
+						}
+
+					if (Z_TYPE_PP(tmpns) == IS_UNICODE) {
+						efree(nschar);
 					}
 				}
 				zend_hash_move_forward(Z_ARRVAL_PP(tmp));
 			}
 		}
 
+		if (Z_TYPE_PP(zxquery) == IS_UNICODE) {
+			UErrorCode errCode = 0;
+			zend_convert_from_unicode(UG(utf8_conv), &xquery, &xquery_len, Z_USTRVAL_PP(zxquery), Z_USTRLEN_PP(zxquery), &errCode);
+		} else {
+			xquery = Z_STRVAL_PP(zxquery);
+		}
+
 		xpathobjp = xmlXPathEvalExpression(xquery, ctxp);
+
+		if (Z_TYPE_PP(zxquery) == IS_UNICODE) {
+			efree(xquery);
+		}
+
 		ctxp->node = NULL;
 		if (xpathobjp && xpathobjp->type == XPATH_NODESET) {
 			nodeset = xpathobjp->nodesetval;
 		} else {
+			if (file_type == IS_UNICODE) {
+				efree(file);
+			}
 			if (xpathobjp) {
 				xmlXPathFreeObject(xpathobjp);
 			}
@@ -1788,7 +1851,14 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode)
 				sizeof(xmlChar *), 0);
 			while (zend_hash_get_current_data(Z_ARRVAL_P(ns_prefixes), (void **)&tmpns) == SUCCESS) {
 				if (Z_TYPE_PP(tmpns) == IS_STRING) {
-					inclusive_ns_prefixes[nscount++] = Z_STRVAL_PP(tmpns);
+					inclusive_ns_prefixes[nscount++] = estrndup(Z_STRVAL_PP(tmpns), strlen(Z_STRVAL_PP(tmpns)));
+				} else {
+					UErrorCode errCode = 0;
+					char *prefix;
+					int prfeix_len;
+
+					zend_convert_from_unicode(UG(utf8_conv), &prefix, &prfeix_len, Z_USTRVAL_PP(tmpns), Z_USTRLEN_PP(tmpns), &errCode);
+					inclusive_ns_prefixes[nscount++] = prefix;
 				}
 				zend_hash_move_forward(Z_ARRVAL_P(ns_prefixes));
 			}
@@ -1810,7 +1880,15 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode)
 			with_comments, buf);
 	}
 
+	if (file_type == IS_UNICODE) {
+		efree(file);
+	}
+
 	if (inclusive_ns_prefixes != NULL) {
+		int nscount = 0;
+		while(inclusive_ns_prefixes[nscount] != NULL) {
+			efree(inclusive_ns_prefixes[nscount++]);
+		}
 		efree(inclusive_ns_prefixes);
 	}
 	if (xpathobjp != NULL) {
@@ -1873,11 +1951,11 @@ PHP_METHOD(domnode, getNodePath)
 	
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
-	value = xmlGetNodePath(nodep);
+	value = (char *)xmlGetNodePath(nodep);
 	if (value == NULL) {
 		RETURN_NULL();
 	} else {
-		RETVAL_STRING(value, 1);
+		RETVAL_XML_STRING(value, ZSTR_DUPLICATE);
 		xmlFree(value);
 	}
 

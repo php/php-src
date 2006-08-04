@@ -55,12 +55,12 @@ PHP_METHOD(domtext, __construct)
 	int value_len;
 
 	php_set_error_handling(EH_THROW, dom_domexception_class_entry TSRMLS_CC);
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|s", &id, dom_text_class_entry, &value, &value_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|s&", &id, dom_text_class_entry, &value, &value_len, UG(utf8_conv)) == FAILURE) {
 		php_std_error_handling();
 		return;
 	}
-
 	php_std_error_handling();
+
 	nodep = xmlNewText((xmlChar *) value);
 
 	if (!nodep) {
@@ -98,7 +98,7 @@ int dom_text_whole_text_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	ALLOC_ZVAL(*retval);
 	wholetext = xmlNodeListGetString(node->doc, node, 1);
-	ZVAL_STRING(*retval, wholetext, 1);
+	ZVAL_XML_STRING(*retval, wholetext, ZSTR_DUPLICATE);
 
 	xmlFree(wholetext);
 

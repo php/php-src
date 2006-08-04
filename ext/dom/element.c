@@ -72,12 +72,12 @@ PHP_METHOD(domelement, __construct)
 	xmlNsPtr nsptr = NULL;
 
 	php_set_error_handling(EH_THROW, dom_domexception_class_entry TSRMLS_CC);
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|s!s", &id, dom_element_class_entry, &name, &name_len, &value, &value_len, &uri, &uri_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&|s!&s&", &id, dom_element_class_entry, &name, &name_len, UG(utf8_conv), &value, &value_len, UG(utf8_conv), &uri, &uri_len, UG(utf8_conv)) == FAILURE) {
 		php_std_error_handling();
 		return;
 	}
-
 	php_std_error_handling();
+
 	name_valid = xmlValidateName((xmlChar *) name, 0);
 	if (name_valid != 0) {
 		php_dom_throw_error(INVALID_CHARACTER_ERR, 1 TSRMLS_CC);
@@ -161,10 +161,10 @@ int dom_element_tag_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 		qname = xmlStrdup(ns->prefix);
 		qname = xmlStrcat(qname, ":");
 		qname = xmlStrcat(qname, nodep->name);
-		ZVAL_STRING(*retval, qname, 1);
+		ZVAL_XML_STRING(*retval, qname, ZSTR_DUPLICATE);
 		xmlFree(qname);
 	} else {
-		ZVAL_STRING(*retval, (char *) nodep->name, 1);
+		ZVAL_XML_STRING(*retval, (char *) nodep->name, ZSTR_DUPLICATE);
 	}
 
 	return SUCCESS;
@@ -210,9 +210,9 @@ PHP_FUNCTION(dom_element_get_attribute)
 
 	value = xmlGetProp(nodep, name);
 	if (value == NULL) {
-		RETURN_EMPTY_STRING();
+		RETURN_EMPTY_TEXT();
 	} else {
-		RETVAL_STRING(value, 1);
+		RETVAL_XML_STRING(value, ZSTR_DUPLICATE);
 		xmlFree(value);
 	}
 }
@@ -232,8 +232,7 @@ PHP_FUNCTION(dom_element_set_attribute)
 	dom_object *intern;
 	char *name, *value;
 
-
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oss", &id, dom_element_class_entry, &name, &name_len, &value, &value_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&s&", &id, dom_element_class_entry, &name, &name_len, UG(utf8_conv), &value, &value_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
 
@@ -278,7 +277,7 @@ PHP_FUNCTION(dom_element_remove_attribute)
 	int name_len;
 	char *name;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_element_class_entry, &name, &name_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&", &id, dom_element_class_entry, &name, &name_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
 
@@ -322,7 +321,7 @@ PHP_FUNCTION(dom_element_get_attribute_node)
 	dom_object *intern;
 	char *name;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_element_class_entry, &name, &name_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&", &id, dom_element_class_entry, &name, &name_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
 
@@ -452,7 +451,7 @@ PHP_FUNCTION(dom_element_get_elements_by_tag_name)
 	char *name;
 	xmlChar *local;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_element_class_entry, &name, &name_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&", &id, dom_element_class_entry, &name, &name_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
 
@@ -479,7 +478,7 @@ PHP_FUNCTION(dom_element_get_attribute_ns)
 	int uri_len = 0, name_len = 0;
 	char *uri, *name, *strattr;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!s", &id, dom_element_class_entry, &uri, &uri_len, &name, &name_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!&s&", &id, dom_element_class_entry, &uri, &uri_len, UG(utf8_conv), &name, &name_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
 
@@ -488,18 +487,18 @@ PHP_FUNCTION(dom_element_get_attribute_ns)
 	strattr = xmlGetNsProp(elemp, name, uri);
 
 	if (strattr != NULL) {
-		RETVAL_STRING(strattr, 1);
+		RETVAL_XML_STRING(strattr, ZSTR_DUPLICATE);
 		xmlFree(strattr);
 	} else {
 		if (xmlStrEqual(uri, DOM_XMLNS_NAMESPACE)) {
 			nsptr = dom_get_nsdecl(elemp, name);
 			if (nsptr != NULL) {
-				RETVAL_STRING((char *) nsptr->href, 1);
+				RETVAL_XML_STRING((char *) nsptr->href, ZSTR_DUPLICATE);
 			} else {
-				RETVAL_EMPTY_STRING();
+				RETVAL_EMPTY_TEXT();
 			}
 		} else {
-			RETVAL_EMPTY_STRING();
+			RETVAL_EMPTY_TEXT();
 		}
 	}
 
@@ -559,7 +558,7 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 	dom_object *intern;
 	int errorcode = 0, stricterror, is_xmlns = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!ss", &id, dom_element_class_entry, &uri, &uri_len, &name, &name_len, &value, &value_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!&s&s&", &id, dom_element_class_entry, &uri, &uri_len, UG(utf8_conv), &name, &name_len, UG(utf8_conv), &value, &value_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
 
@@ -668,7 +667,7 @@ PHP_FUNCTION(dom_element_remove_attribute_ns)
 	int name_len, uri_len;
 	char *name, *uri;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!s", &id, dom_element_class_entry, &uri, &uri_len, &name, &name_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!&s&", &id, dom_element_class_entry, &uri, &uri_len, UG(utf8_conv), &name, &name_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
 
@@ -725,7 +724,7 @@ PHP_FUNCTION(dom_element_get_attribute_node_ns)
 	int uri_len, name_len, ret;
 	char *uri, *name;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!s", &id, dom_element_class_entry, &uri, &uri_len, &name, &name_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!&s&", &id, dom_element_class_entry, &uri, &uri_len, UG(utf8_conv), &name, &name_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
 
@@ -827,7 +826,7 @@ PHP_FUNCTION(dom_element_get_elements_by_tag_name_ns)
 	char *uri, *name;
 	xmlChar *local, *nsuri;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oss", &id, dom_element_class_entry, &uri, &uri_len, &name, &name_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&s&", &id, dom_element_class_entry, &uri, &uri_len, UG(utf8_conv), &name, &name_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
 
@@ -855,7 +854,7 @@ PHP_FUNCTION(dom_element_has_attribute)
 	char *name, *value;
 	int name_len;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_element_class_entry, &name, &name_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&", &id, dom_element_class_entry, &name, &name_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
 
@@ -885,7 +884,7 @@ PHP_FUNCTION(dom_element_has_attribute_ns)
 	int uri_len, name_len;
 	char *uri, *name, *value;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!s", &id, dom_element_class_entry, &uri, &uri_len, &name, &name_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!&s&", &id, dom_element_class_entry, &uri, &uri_len, UG(utf8_conv), &name, &name_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
 
@@ -942,7 +941,7 @@ PHP_FUNCTION(dom_element_set_id_attribute)
 	int name_len;
 	zend_bool is_id;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Osb", &id, dom_element_class_entry, &name, &name_len, &is_id) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&b", &id, dom_element_class_entry, &name, &name_len, UG(utf8_conv), &is_id) == FAILURE) {
 		return;
 	}
 
@@ -979,7 +978,7 @@ PHP_FUNCTION(dom_element_set_id_attribute_ns)
 	char *uri, *name;
 	zend_bool is_id;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ossb", &id, dom_element_class_entry, &uri, &uri_len, &name, &name_len, &is_id) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&s&b", &id, dom_element_class_entry, &uri, &uri_len, UG(utf8_conv), &name, &name_len, UG(utf8_conv), &is_id) == FAILURE) {
 		return;
 	}
 

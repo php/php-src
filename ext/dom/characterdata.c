@@ -64,10 +64,10 @@ int dom_characterdata_data_read(dom_object *obj, zval **retval TSRMLS_DC)
 	ALLOC_ZVAL(*retval);
 	
 	if ((content = xmlNodeGetContent(nodep)) != NULL) {
-		ZVAL_STRING(*retval, content, 1);
+		ZVAL_XML_STRING(*retval, content, ZSTR_DUPLICATE);
 		xmlFree(content);
 	} else {
-		ZVAL_EMPTY_STRING(*retval);
+		ZVAL_EMPTY_TEXT(*retval);
 	}
 
 	return SUCCESS;
@@ -91,7 +91,7 @@ int dom_characterdata_data_write(dom_object *obj, zval *newval TSRMLS_DC)
 			zval_copy_ctor(&value_copy);
 			newval = &value_copy;
 		}
-		convert_to_string(newval);
+		convert_to_string_with_converter(newval, UG(utf8_conv));
 	}
 
 	xmlNodeSetContentLen(nodep, Z_STRVAL_P(newval), Z_STRLEN_P(newval) + 1);
@@ -181,10 +181,10 @@ PHP_FUNCTION(dom_characterdata_substring_data)
 	xmlFree(cur);
 
 	if (substring) {
-		RETVAL_STRING(substring, 1);
+		RETVAL_XML_STRING(substring, ZSTR_DUPLICATE);
 		xmlFree(substring);
 	} else {
-		RETVAL_EMPTY_STRING();
+		RETVAL_EMPTY_TEXT();
 	}
 }
 /* }}} end dom_characterdata_substring_data */
@@ -202,7 +202,7 @@ PHP_FUNCTION(dom_characterdata_append_data)
 	char *arg;
 	int arg_len;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_characterdata_class_entry, &arg, &arg_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&", &id, dom_characterdata_class_entry, &arg, &arg_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
 
@@ -229,7 +229,7 @@ PHP_FUNCTION(dom_characterdata_insert_data)
 	int         length, arg_len;
 	dom_object	*intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ols", &id, dom_characterdata_class_entry, &offset, &arg, &arg_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ols&", &id, dom_characterdata_class_entry, &offset, &arg, &arg_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
 
@@ -334,7 +334,7 @@ PHP_FUNCTION(dom_characterdata_replace_data)
 	int         length, arg_len;
 	dom_object	*intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Olls", &id, dom_characterdata_class_entry, &offset, &count, &arg, &arg_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Olls&", &id, dom_characterdata_class_entry, &offset, &count, &arg, &arg_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
 
