@@ -39,7 +39,7 @@ var_dump($people2 == $people1);
 ?>
 ===DONE===
 --EXPECTF--
-bool(true)
+bool(false)
 bool(false)
 bool(false)
 ===DONE===
