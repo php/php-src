@@ -1739,7 +1739,7 @@ PHPAPI void php_u_basename(UChar *s, int len, UChar *suffix, int sufflen, UChar 
 
 /* {{{ php_basename
  */
-PHPAPI void php_basename(char *s, size_t len, char *suffix, size_t sufflen, char **p_ret, size_t *p_len TSRMLS_DC)
+PHPAPI void php_basename(char *s, int len, char *suffix, int sufflen, char **p_ret, int *p_len TSRMLS_DC)
 {
 	char *ret = NULL, *c, *comp, *cend;
 	size_t inc_len, cnt;
@@ -1833,9 +1833,104 @@ PHP_FUNCTION(basename)
 }
 /* }}} */
 
+/* {{{ php_u_dirname
+   Returns directory name component of path */
+PHPAPI int php_u_dirname(UChar *path, int len)
+{
+	register UChar *end = path + len - 1;
+	unsigned int len_adjust = 0;
+
+#ifdef PHP_WIN32
+	/* Note that on Win32 CWD is per drive (heritage from CP/M).
+	 * This means dirname("c:foo") maps to "c:." or "c:" - which means CWD on C: drive.
+	 */
+	if ((2 <= len) && u_isalpha((UChar32)path[0]) && ((UChar)0x3a /*':'*/ == path[1])) {
+		/* Skip over the drive spec (if any) so as not to change */
+		path += 2;
+		len_adjust += 2;
+		if (2 == len) {
+			/* Return "c:" on Win32 for dirname("c:").
+			 * It would be more consistent to return "c:."
+			 * but that would require making the string *longer*.
+			 */
+			return len;
+		}
+	}
+#elif defined(NETWARE)
+	/*
+	 * Find the first occurence of : from the left
+	 * move the path pointer to the position just after :
+	 * increment the len_adjust to the length of path till colon character(inclusive)
+	 * If there is no character beyond : simple return len
+	 */
+	UChar *colonpos = NULL;
+	colonpos = u_strchr(path, (UChar) 0x3a /*':'*/);
+	if(colonpos != NULL) {
+		len_adjust = ((colonpos - path) + 1);
+		path += len_adjust;
+		if(len_adjust == len) {
+		return len;
+		}
+    	}
+#endif
+
+	if (len == 0) {
+		/* Illegal use of this function */
+		return 0;
+	}
+
+	/* Strip trailing slashes */
+	while (end >= path && IS_U_SLASH_P(end)) {
+		end--;
+	}
+	if (end < path) {
+		/* The path only contained slashes */
+		path[0] = DEFAULT_U_SLASH;
+		path[1] = 0;
+		return 1 + len_adjust;
+	}
+
+	/* Strip filename */
+	while (end >= path && !IS_U_SLASH_P(end)) {
+		end--;
+	}
+	if (end < path) {
+		/* No slash found, therefore return '.' */
+#ifdef NETWARE
+		if(len_adjust == 0) {
+			path[0] = (UChar) 0x2e /*'.'*/;
+			path[1] = 0;
+			return 1; //only one character
+		}
+		else {
+			path[0] = 0;
+			return len_adjust;
+		}
+#else
+		path[0] = (UChar) 0x2e /*'.'*/;
+		path[1] = 0;
+		return 1 + len_adjust;
+#endif
+	}
+
+	/* Strip slashes which came before the file name */
+	while (end >= path && IS_U_SLASH_P(end)) {
+		end--;
+	}
+	if (end < path) {
+		path[0] = DEFAULT_U_SLASH;
+		path[1] = 0;
+		return 1 + len_adjust;
+	}
+	*(end+1) = 0;
+
+	return (size_t)(end + 1 - path) + len_adjust;
+}
+/* }}} */
+
 /* {{{ php_dirname
    Returns directory name component of path */
-PHPAPI size_t php_dirname(char *path, size_t len)
+PHPAPI int php_dirname(char *path, int len)
 {
 	register char *end = path + len - 1;
 	unsigned int len_adjust = 0;
@@ -1928,26 +2023,30 @@ PHPAPI size_t php_dirname(char *path, size_t len)
 }
 /* }}} */
 
-/* {{{ proto string dirname(string path)
+/* {{{ proto string dirname(string path) U
    Returns the directory name component of the path */
 PHP_FUNCTION(dirname)
 {
-	zval **str;
-	char *ret;
-	size_t ret_len;
+	zstr str;
+	int str_len;
+	zend_uchar str_type;
+	zstr ret;
+	int ret_len;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len,
+							  &str_type) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(str);
 
-	ret = estrndup(Z_STRVAL_PP(str), Z_STRLEN_PP(str));
-	ret_len = php_dirname(ret, Z_STRLEN_PP(str));
-
-	RETVAL_RT_STRINGL(ret, ret_len, 0);
-	if (UG(unicode)) {
-		efree(ret);
+	if (str_type == IS_UNICODE) {
+		ret.u = eustrndup(str.u, str_len);
+		ret_len = php_u_dirname(ret.u, str_len);
+	} else {
+		ret.s = estrndup(str.s, str_len);
+		ret_len = php_dirname(ret.s, str_len);
 	}
+
+	RETURN_ZSTRL(ret, ret_len, str_type, 0);
 }
 /* }}} */
 
@@ -3048,7 +3147,6 @@ PHP_FUNCTION(substr)
 }
 /* }}} */
 
-
 /* {{{ php_adjust_limits
  */
 PHPAPI void php_adjust_limits(zval **str, int *f, int *l)
@@ -3314,9 +3412,6 @@ PHP_FUNCTION(substr_replace)
 	} /* if */
 }
 /* }}} */
-
-
-
 
 /* {{{ proto string quotemeta(string str)
    Quotes meta characters */
