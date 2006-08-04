@@ -425,6 +425,13 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 			{
 				char **p = va_arg(*va, char **);
 				int *pl = va_arg(*va, int *);
+				UConverter *conv = NULL;
+
+				if (c == 's' && *spec_walk == '&') {
+					conv = va_arg(*va, UConverter *);
+					spec_walk++;
+				}
+
 				switch (Z_TYPE_PP(arg)) {
 					case IS_NULL:
 						if (return_null) {
@@ -436,13 +443,11 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 
 					case IS_UNICODE:
 						/* handle conversion of Unicode to binary with a specific converter */
-						if (c == 's' && *spec_walk == '&') {
-							UConverter *conv = va_arg(*va, UConverter *);
+						if (conv != NULL) {
 							SEPARATE_ZVAL_IF_NOT_REF(arg);
 							convert_to_string_with_converter(*arg, conv);
 							*p = Z_STRVAL_PP(arg);
 							*pl = Z_STRLEN_PP(arg);
-							spec_walk++;
 							break;
 						} else if (c == 'S') {
 							return "definitely a binary string";
@@ -518,7 +523,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 		case 'T':
 			if (T_arg_type != -1)
 			{
-				zstr *p = va_arg(*va, void *);
+				zstr *p = va_arg(*va, zstr *);
 				int *pl = va_arg(*va, int *);
 				zend_uchar *type = va_arg(*va, zend_uchar *);
 				switch (Z_TYPE_PP(arg)) {
@@ -542,14 +547,6 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 						} else if (T_arg_type == IS_STRING) {
 							convert_to_string_ex(arg);
 							RETURN_AS_STRING(arg, p, pl, type);
-						} else {
-							if (Z_TYPE_PP(arg) == IS_UNICODE) {
-								char *space;
-								zstr class_name = get_active_class_name(&space TSRMLS_CC);
-								zend_error(E_WARNING, "%v%s%v() does not allow mixing binary and Unicode parameters",
-										   class_name, space, get_active_function_name(TSRMLS_C));
-								return "";
-							}
 						}
 						break;
 
