@@ -1,3 +1,15 @@
+2006-08-03  Antony Dovgal  <antony@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      make it consistent
+
+    * zend_vm_def.h
+      zend_vm_execute.h:
+      improve error message
+
 2006-08-02  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_operators.c:
