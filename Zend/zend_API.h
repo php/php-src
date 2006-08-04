@@ -332,6 +332,8 @@ ZEND_API int add_assoc_string_ex(zval *arg, char *key, uint key_len, char *str, 
 ZEND_API int add_assoc_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, int duplicate);
 ZEND_API int add_assoc_unicode_ex(zval *arg, char *key, uint key_len, UChar *str, int duplicate);
 ZEND_API int add_assoc_unicodel_ex(zval *arg, char *key, uint key_len, UChar *str, uint length, int duplicate);
+ZEND_API int add_assoc_zstr_ex(zval *arg, char *key, uint key_len, zend_uchar str_type, zstr str, int duplicate);
+ZEND_API int add_assoc_zstrl_ex(zval *arg, char *key, uint key_len, zend_uchar str_type, zstr str, uint str_len, int duplicate);
 ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
 
 #define ZSTR_DUPLICATE	(1<<0)
@@ -412,6 +414,8 @@ ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
 #define add_assoc_stringl(__arg, __key, __str, __length, __duplicate) add_assoc_stringl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate)
 #define add_assoc_unicode(__arg, __key, __str, __duplicate) add_assoc_unicode_ex(__arg, __key, strlen(__key)+1, __str, __duplicate)
 #define add_assoc_unicodel(__arg, __key, __str, __length, __duplicate) add_assoc_unicodel_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate)
+#define add_assoc_zstr(__arg, __key, __type, __str, __duplicate) add_assoc_zstr_ex(__arg, __key, strlen(__key)+1, __type, __str, __duplicate)
+#define add_assoc_zstrl(__arg, __key, __type, __str, __length, __duplicate) add_assoc_zstrl_ex(__arg, __key, strlen(__key)+1, __type, __str, __length, __duplicate)
 #define add_assoc_zval(__arg, __key, __value) add_assoc_zval_ex(__arg, __key, strlen(__key)+1, __value)
 #define add_assoc_rt_string(__arg, __key, __str, __duplicate) add_assoc_rt_string_ex(__arg, __key, strlen(__key)+1, __str, __duplicate)
 #define add_assoc_rt_stringl(__arg, __key, __str, __length, __duplicate) add_assoc_rt_stringl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate)
@@ -853,7 +857,7 @@ END_EXTERN_C()
 
 #define ZVAL_ZSTR(z, zs, type, duplicate) { \
 		zstr __s=(zs); 					    \
-		Z_UNILEN_P(z) = (type==IS_UNICODE)?u_strlen(__s):strlen(__s); \
+		Z_UNILEN_P(z) = (type==IS_UNICODE)?u_strlen(__s.u):strlen(__s.s); \
 		Z_UNIVAL_P(z) = ZSTR(duplicate?     \
 					   ((type==IS_UNICODE)? \
 							(void*)eustrndup(__s.u, Z_UNILEN_P(z))  \

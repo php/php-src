@@ -1504,6 +1504,26 @@ ZEND_API int add_u_assoc_unicodel_ex(zval *arg, zend_uchar type, zstr key, uint 
 	return zend_u_symtable_update(Z_ARRVAL_P(arg), type, key, key_len, (void *) &tmp, sizeof(zval *), NULL);
 }
 
+ZEND_API int add_assoc_zstr_ex(zval *arg, char *key, uint key_len, zend_uchar type, zstr str, int duplicate)
+{
+	zval *tmp;
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_ZSTR(tmp, str, type, duplicate);
+
+	return zend_symtable_update(Z_ARRVAL_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
+}
+
+ZEND_API int add_assoc_zstrl_ex(zval *arg, char *key, uint key_len, zend_uchar type, zstr str, uint length, int duplicate)
+{
+	zval *tmp;
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_ZSTRL(tmp, str, length, type, duplicate);
+
+	return zend_symtable_update(Z_ARRVAL_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
+}
+
 ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value)
 {
 	return zend_symtable_update(Z_ARRVAL_P(arg), key, key_len, (void *) &value, sizeof(zval *), NULL);
