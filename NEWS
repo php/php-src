@@ -9,6 +9,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #38183 (disable_classes=Foobar causes disabled class to be
   called Foo). (Jani)
 - Fixed bug #38112 (corrupted gif segfaults) (Pierre)
+- Fixed bug #37265 (Added missing safe_mode & open_basedir checks to
+  imap_body()). (Ilia)
 - Fixed bug #29538 (number_format and problem with 0). (Matthew Wilmas)
 
 03 Aug 2006, Version 4.4.3
