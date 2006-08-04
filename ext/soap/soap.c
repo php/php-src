@@ -2467,8 +2467,9 @@ PHP_METHOD(SoapClient, SoapClient)
 	zend_bool cache_wsdl;
 	soap_client_object *client;
 
-	client = (soap_client_object*)zend_object_store_get_object(this_ptr TSRMLS_CC);
 	SOAP_CLIENT_BEGIN_CODE();
+
+	client = (soap_client_object*)zend_object_store_get_object(this_ptr TSRMLS_CC);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|a", &zwsdl, &options) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
@@ -2819,8 +2820,9 @@ static void do_soap_call(zval* this_ptr,
 	int old_features;
 	soap_client_object *client;
 
-	client = (soap_client_object*)zend_object_store_get_object(this_ptr TSRMLS_CC);
 	SOAP_CLIENT_BEGIN_CODE();
+
+	client = (soap_client_object*)zend_object_store_get_object(this_ptr TSRMLS_CC);
 
 	if (client->trace) {
 		if (client->last_request) {
