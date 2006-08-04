@@ -437,7 +437,6 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 
 				if (c == 's' && alternate_form) {
 					conv = va_arg(*va, UConverter *);
-					spec_walk++;
 				}
 
 				switch (Z_TYPE_PP(arg)) {
