@@ -1,3 +1,96 @@
+2006-08-03  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * TSRM/tsrm_virtual_cwd.h:
+      Add IS_U_SLASH_* macros to test for path separator chars.
+
+    * ext/standard/string.c:
+      Upgraded basename() to work on IS_UNICODE strings as well.
+
+    * unicode-progress.txt
+      unicode-todo.txt
+      ext/standard/array.c
+      ext/standard/php_string.h
+      ext/standard/string.c:
+      - Adjusted php_u_strtoupper/php_u_strtolower/php_u_strtotitle API to be
+        more sane.
+      - Upgrade strtoupper(), strtolower(), strtotitle() to use params API.
+
+    * unicode-progress.txt
+      ext/standard/string.c:
+      Update similar_text() to use params API.
+
+2006-08-03  Antony Dovgal  <antony@zend.com>
+
+    * ext/filter/filter.c
+      ext/filter/filter.c:
+      fix leak in php_sapi_filter()
+
+2006-08-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/php_packet_soap.c
+      ext/soap/soap.c:
+      Unicode support.
+
+2006-08-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/spl/php_spl.c:
+      MFB:  Fixed bug #38303 (spl_autoload_register() supress all errors
+      silently).
+
+    * (PHP_5_2)
+      NEWS
+      ext/spl/php_spl.c:
+      Fixed bug #38303 (spl_autoload_register() supress all errors silently).
+
+2006-08-03  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      TSRM/tsrm_virtual_cwd.c:
+      MFH: fix #38276 (file_exists() works incorrectly with long filenames on
+      Windows)
+
+    * TSRM/tsrm_virtual_cwd.c:
+      fix #38276 (file_exists() works incorrectly with long filenames on Windows)
+      aka "Ilia forgot to MFB fix for #31347"
+
+2006-08-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      win32/registry.c
+      win32/registry.c:
+      Added version specific registry keys to allow different configurations for
+      different php version.
+
+    * (PHP_5_2)
+      NEWS
+      main/php_ini.c
+      main/php_ini.c:
+      In addtion to path to php.ini, PHPRC now may specify full file name
+
+2006-08-03  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h:
+      make it consistent
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      improve error message
+
+2006-08-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      sapi/apache/mod_php5.c
+      sapi/apache/mod_php5.c
+      sapi/apache_hooks/mod_php5.c
+      sapi/apache_hooks/mod_php5.c:
+      Added "PHPINIDir" Apache directive to apache and apache_hooks SAPIs
+
 2006-08-02  Antony Dovgal  <antony@zend.com>
 
     * ext/date/tests/oo_001.phpt
