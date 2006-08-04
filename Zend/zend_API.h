@@ -851,6 +851,28 @@ END_EXTERN_C()
 		Z_TYPE_P(z) = IS_UNICODE;		    \
 }
 
+#define ZVAL_ZSTR(z, zs, type, duplicate) { \
+		zstr __s=(zs); 					    \
+		Z_UNILEN_P(z) = (type==IS_UNICODE)?u_strlen(__s):strlen(__s); \
+		Z_UNIVAL_P(z) = ZSTR(duplicate?     \
+					   ((type==IS_UNICODE)? \
+							(void*)eustrndup(__s.u, Z_UNILEN_P(z))  \
+							:(void*)estrndup(__s.s, Z_UNILEN_P(z))) \
+					   :__s.v);			   \
+		Z_TYPE_P(z) = type; 			   \
+}
+
+#define ZVAL_ZSTRL(z, zs, l, type, duplicate) { \
+		zstr __s=(zs); int __l=l;				\
+		Z_UNILEN_P(z) = __l;					\
+		Z_UNIVAL_P(z) = ZSTR(duplicate? 		\
+					   ((type==IS_UNICODE)?		\
+							(void*)eustrndup(__s.u, __l)  \
+							:(void*)estrndup(__s.s, __l)) \
+					   :__s.v);				   \
+		Z_TYPE_P(z) = type; 				   \
+}
+
 #define ZVAL_UCHAR32(z, ch) { 							\
 		UChar buf[3];									\
 		int buf_len = zend_codepoint_to_uchar(ch, buf); \
@@ -939,6 +961,8 @@ END_EXTERN_C()
 #define RETVAL_TEXT(t, duplicate) ZVAL_TEXT(return_value, t, duplicate)
 #define RETVAL_TEXTL(t, l, duplicate) ZVAL_TEXTL(return_value, t, l, duplicate)
 #define RETVAL_EMPTY_TEXT() 			ZVAL_EMPTY_TEXT(return_value)
+#define RETVAL_ZSTR(s, type, duplicate) ZVAL_ZSTR(return_value, s, type, duplicate)
+#define RETVAL_ZSTRL(s, l, type, duplicate) ZVAL_ZSTRL(return_value, s, l, type, duplicate)
 
 #define RETURN_RESOURCE(l) 				{ RETVAL_RESOURCE(l); return; }
 #define RETURN_BOOL(b) 					{ RETVAL_BOOL(b); return; }
@@ -964,6 +988,8 @@ END_EXTERN_C()
 #define RETURN_U_STRINGL(conv, t, l, flags)	{ RETVAL_U_STRINGL(conv, t, l, flags); return; }
 #define RETURN_RT_STRING(t, flags)		{ RETVAL_RT_STRING(t, flags); return; }
 #define RETURN_RT_STRINGL(t, l, flags)	{ RETVAL_RT_STRINGL(t, l, flags); return; }
+#define RETURN_ZSTR(s, type, duplicate) 	{ RETVAL_ZSTR(s, type, duplicate); return; }
+#define RETURN_ZSTRL(s, l, type, duplicate) { RETVAL_ZSTRL(s, l, type, duplicate); return; }
 
 #define SET_VAR_STRING(n, v) {																				\
 								{																			\
