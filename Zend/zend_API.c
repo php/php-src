@@ -315,12 +315,20 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 	char *spec_walk = *spec;
 	char c = *spec_walk++;
 	int return_null = 0;
+	int alternate_form = 0;
 
-	while (*spec_walk == '/' || *spec_walk == '!') {
+	/* scan through modifiers */
+	while (1) {
 		if (*spec_walk == '/') {
 			SEPARATE_ZVAL_IF_NOT_REF(arg);
-		} else if (*spec_walk == '!' && Z_TYPE_PP(arg) == IS_NULL) {
-			return_null = 1;
+		} else if (*spec_walk == '&') {
+			alternate_form = 1;
+		} else if (*spec_walk == '!') {
+			if (Z_TYPE_PP(arg) == IS_NULL) {
+				return_null = 1;
+			}
+		} else {
+			break;
 		}
 		spec_walk++;
 	}
@@ -427,7 +435,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 				int *pl = va_arg(*va, int *);
 				UConverter *conv = NULL;
 
-				if (c == 's' && *spec_walk == '&') {
+				if (c == 's' && alternate_form) {
 					conv = va_arg(*va, UConverter *);
 					spec_walk++;
 				}
