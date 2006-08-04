@@ -1,0 +1,13 @@
+--TEST--
+Bug #38322 (reading past array in sscanf() leads to segfault/arbitary code execution)
+--FILE--
+<?php
+
+$str = "a b c d e";
+var_dump(sscanf("a ",'%1$s',$str));
+
+echo "Done\n";
+?>
+--EXPECTF--	
+int(1)
+Done
