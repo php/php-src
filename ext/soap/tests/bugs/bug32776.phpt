@@ -48,8 +48,8 @@ ok
 --UEXPECT--
 NULL
 unicode(5) "Hello"
-string(459) "<?xml version="1.0" encoding="UTF-8"?>
+unicode(459) "<?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><SOAP-ENV:Body><SOAP-ENV:test><x xsi:type="xsd:string">Hello</x></SOAP-ENV:test></SOAP-ENV:Body></SOAP-ENV:Envelope>
 "
-string(0) ""
+unicode(0) ""
 ok
