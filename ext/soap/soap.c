@@ -926,7 +926,7 @@ PHP_FUNCTION(soap_encode_to_zval)
 }
 #endif
 
-/* {{{ proto object SoapParam::SoapParam ( mixed data, string name)
+/* {{{ proto object SoapParam::SoapParam ( mixed data, string name) U
    SoapParam constructor */
 PHP_METHOD(SoapParam, SoapParam)
 {
@@ -952,7 +952,7 @@ PHP_METHOD(SoapParam, SoapParam)
 /* }}} */
 
 
-/* {{{ proto object SoapHeader::SoapHeader ( string namespace, string name [, mixed data [, bool mustUnderstand [, mixed actor]]])
+/* {{{ proto object SoapHeader::SoapHeader ( string namespace, string name [, mixed data [, bool mustUnderstand [, mixed actor]]]) U
    SoapHeader constructor */
 PHP_METHOD(SoapHeader, SoapHeader)
 {
@@ -1003,7 +1003,7 @@ PHP_METHOD(SoapHeader, SoapHeader)
 	}
 }
 
-/* {{{ proto object SoapFault::SoapFault ( string faultcode, string faultstring [, string faultactor [, mixed detail [, string faultname [, mixed headerfault]]]])
+/* {{{ proto object SoapFault::SoapFault ( string faultcode, string faultstring [, string faultactor [, mixed detail [, string faultname [, mixed headerfault]]]]) U
    SoapFault constructor */
 PHP_METHOD(SoapFault, SoapFault)
 {
@@ -1084,7 +1084,7 @@ PHP_METHOD(SoapFault, SoapFault)
 /* }}} */
 
 
-/* {{{ proto object SoapFault::__toString ()
+/* {{{ proto object SoapFault::__toString () U
  */
 PHP_METHOD(SoapFault, __toString)
 {
@@ -1133,7 +1133,7 @@ PHP_METHOD(SoapFault, __toString)
 }
 /* }}} */
 
-/* {{{ proto object SoapVar::SoapVar ( mixed data, int encoding [, string type_name [, string type_namespace [, string node_name [, string node_namespace]]]])
+/* {{{ proto object SoapVar::SoapVar ( mixed data, int encoding [, string type_name [, string type_namespace [, string node_name [, string node_namespace]]]]) U
    SoapVar constructor */
 PHP_METHOD(SoapVar, SoapVar)
 {
@@ -1197,7 +1197,7 @@ PHP_METHOD(SoapVar, SoapVar)
 /* }}} */
 
 
-/* {{{ proto object SoapServer::SoapServer ( mixed wsdl [, array options])
+/* {{{ proto object SoapServer::SoapServer ( mixed wsdl [, array options]) U
    SoapServer constructor */
 PHP_METHOD(SoapServer, SoapServer)
 {
@@ -1446,7 +1446,7 @@ PHP_FUNCTION(PHP_SOAP_SERVER_CLASS, map)
 #endif
 
 
-/* {{{ proto object SoapServer::setPersistence ( int mode )
+/* {{{ proto object SoapServer::setPersistence ( int mode ) U
    Sets persistence mode of SoapServer */
 PHP_METHOD(SoapServer, setPersistence)
 {
@@ -1475,7 +1475,7 @@ PHP_METHOD(SoapServer, setPersistence)
 /* }}} */
 
 
-/* {{{ proto void SoapServer::setClass(string class_name [, mixed args])
+/* {{{ proto void SoapServer::setClass(string class_name [, mixed args]) U
    Sets class which will handle SOAP requests */
 PHP_METHOD(SoapServer, setClass)
 {
@@ -1525,7 +1525,7 @@ PHP_METHOD(SoapServer, setClass)
 /* }}} */
 
 
-/* {{{ proto array SoapServer::getFunctions(void)
+/* {{{ proto array SoapServer::getFunctions(void) U
    Returns list of defined functions */
 PHP_METHOD(SoapServer, getFunctions)
 {
@@ -1569,7 +1569,7 @@ PHP_METHOD(SoapServer, getFunctions)
 /* }}} */
 
 
-/* {{{ proto void SoapServer::addFunction(mixed functions)
+/* {{{ proto void SoapServer::addFunction(mixed functions) U
    Adds one or several functions those will handle SOAP requests */
 PHP_METHOD(SoapServer, addFunction)
 {
@@ -1660,7 +1660,7 @@ PHP_METHOD(SoapServer, addFunction)
 /* }}} */
 
 
-/* {{{ proto void SoapServer::handle ( [string soap_request])
+/* {{{ proto void SoapServer::handle ( [string soap_request]) U
    Handles a SOAP request */
 PHP_METHOD(SoapServer, handle)
 {
@@ -1789,8 +1789,9 @@ PHP_METHOD(SoapServer, handle)
 			} else {
 				/* unicode */
 				/* TODO: remove unicode->string conversion */
-				char *str_req = soap_unicode_to_string(Z_USTRVAL_PP(raw_post), Z_USTRLEN_PP(raw_post) TSRMLS_CC);
-				doc_request = soap_xmlParseMemory(str_req, strlen(str_req));
+				int str_req_len;
+				char *str_req = soap_encode_string(*raw_post, &str_req_len TSRMLS_CC);
+				doc_request = soap_xmlParseMemory(str_req, str_req_len);
 				efree(str_req);
 
 			}
@@ -2154,7 +2155,7 @@ fail:
 /* }}} */
 
 
-/* {{{ proto SoapServer::fault ( staring code, string string [, string actor [, mixed details [, string name]]] )
+/* {{{ proto SoapServer::fault ( staring code, string string [, string actor [, mixed details [, string name]]] ) U
    Issue SoapFault indicating an error */
 PHP_METHOD(SoapServer, fault)
 {
@@ -2205,6 +2206,8 @@ PHP_METHOD(SoapServer, fault)
 }
 /* }}} */
 
+/* {{{ proto SoapServer::addSoapHeader ( SoapHeader header ) U
+   Adds one SOAP header into response */
 PHP_METHOD(SoapServer, addSoapHeader)
 {
 	soap_server_object *service;
@@ -2235,6 +2238,7 @@ PHP_METHOD(SoapServer, addSoapHeader)
 
 	SOAP_SERVER_END_CODE();
 }
+/* }}} */
 
 static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeader *hdr TSRMLS_DC)
 {
@@ -2419,6 +2423,9 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 	}
 }
 
+/* {{{ proto use_soap_error_handler ( [bool on] ) U
+   Enable or disable SOAP's error handler, that translates PHP errors into 
+   SOAP faults */
 PHP_FUNCTION(use_soap_error_handler)
 {
 	zend_bool handler = 1;
@@ -2428,7 +2435,10 @@ PHP_FUNCTION(use_soap_error_handler)
 		SOAP_GLOBAL(use_soap_error_handler) = handler;
 	}
 }
+/* }}} */
 
+/* {{{ proto bool is_soap_fault ( mixed object ) U
+   Checks if given value is a SoapFault object */
 PHP_FUNCTION(is_soap_fault)
 {
 	zval *fault;
@@ -2440,10 +2450,11 @@ PHP_FUNCTION(is_soap_fault)
 	}
 	RETURN_FALSE
 }
+/* }}} */
 
 /* SoapClient functions */
 
-/* {{{ proto object SoapClient::SoapClient ( mixed wsdl [, array options])
+/* {{{ proto object SoapClient::SoapClient ( mixed wsdl [, array options]) U
    SoapClient constructor */
 PHP_METHOD(SoapClient, SoapClient)
 {
@@ -2971,7 +2982,7 @@ static void verify_soap_headers_array(HashTable *ht TSRMLS_DC)
 }
 
 
-/* {{{ proto mixed SoapClient::__call ( string function_name [, array arguments [, array options [, array input_headers [, array output_headers]]]])
+/* {{{ proto mixed SoapClient::__call ( string function_name [, array arguments [, array options [, array input_headers [, array output_headers]]]]) U
    Calls a SOAP function */
 PHP_METHOD(SoapClient, __call)
 {
@@ -3117,7 +3128,7 @@ PHP_METHOD(SoapClient, __call)
 /* }}} */
 
 
-/* {{{ proto array SoapClient::__getFunctions ( void )
+/* {{{ proto array SoapClient::__getFunctions ( void ) U
    Returns list of SOAP functions */
 PHP_METHOD(SoapClient, __getFunctions)
 {
@@ -3144,7 +3155,7 @@ PHP_METHOD(SoapClient, __getFunctions)
 /* }}} */
 
 
-/* {{{ proto array SoapClient::__getTypes ( void )
+/* {{{ proto array SoapClient::__getTypes ( void ) U
    Returns list of SOAP types */
 PHP_METHOD(SoapClient, __getTypes)
 {
@@ -3173,7 +3184,7 @@ PHP_METHOD(SoapClient, __getTypes)
 /* }}} */
 
 
-/* {{{ proto string SoapClient::__getLastRequest ( void )
+/* {{{ proto string SoapClient::__getLastRequest ( void ) U
    Returns last SOAP request */
 PHP_METHOD(SoapClient, __getLastRequest)
 {
@@ -3181,14 +3192,15 @@ PHP_METHOD(SoapClient, __getLastRequest)
 
 	client = (soap_client_object*)zend_object_store_get_object(this_ptr TSRMLS_CC);
 	if (client->last_request) {
-		RETURN_STRING(client->last_request, 1);
+		soap_decode_string(return_value, client->last_request TSRMLS_CC);
+		return;
 	}
 	RETURN_NULL();
 }
 /* }}} */
 
 
-/* {{{ proto object SoapClient::__getLastResponse ( void )
+/* {{{ proto object SoapClient::__getLastResponse ( void ) U
    Returns last SOAP response */
 PHP_METHOD(SoapClient, __getLastResponse)
 {
@@ -3196,14 +3208,15 @@ PHP_METHOD(SoapClient, __getLastResponse)
 
 	client = (soap_client_object*)zend_object_store_get_object(this_ptr TSRMLS_CC);
 	if (client->last_response) {
-		RETURN_STRING(client->last_response, 1);
+		soap_decode_string(return_value, client->last_response TSRMLS_CC);
+		return;
 	}
 	RETURN_NULL();
 }
 /* }}} */
 
 
-/* {{{ proto string SoapClient::__getLastRequestHeaders(void)
+/* {{{ proto string SoapClient::__getLastRequestHeaders(void) U
    Returns last SOAP request headers */
 PHP_METHOD(SoapClient, __getLastRequestHeaders)
 {
@@ -3211,14 +3224,15 @@ PHP_METHOD(SoapClient, __getLastRequestHeaders)
 
 	client = (soap_client_object*)zend_object_store_get_object(this_ptr TSRMLS_CC);
 	if (client->last_request_headers) {
-		RETURN_STRING(client->last_request_headers, 1);
+		soap_decode_string(return_value, client->last_request_headers TSRMLS_CC);
+		return;
 	}
 	RETURN_NULL();
 }
 /* }}} */
 
 
-/* {{{ proto string SoapClient::__getLastResponseHeaders(void)
+/* {{{ proto string SoapClient::__getLastResponseHeaders(void) U
    Returns last SOAP response headers */
 PHP_METHOD(SoapClient, __getLastResponseHeaders)
 {
@@ -3226,14 +3240,15 @@ PHP_METHOD(SoapClient, __getLastResponseHeaders)
 
 	client = (soap_client_object*)zend_object_store_get_object(this_ptr TSRMLS_CC);
 	if (client->last_response_headers) {
-		RETURN_STRING(client->last_response_headers, 1);
+		soap_decode_string(return_value, client->last_response_headers TSRMLS_CC);
+		return;
 	}
 	RETURN_NULL();
 }
 /* }}} */
 
 
-/* {{{ proto string SoapClient::__doRequest()
+/* {{{ proto string SoapClient::__doRequest() U
    SoapClient::__doRequest() */
 PHP_METHOD(SoapClient, __doRequest)
 {
@@ -3286,7 +3301,7 @@ PHP_METHOD(SoapClient, __doRequest)
 }
 /* }}} */
 
-/* {{{ proto void SoapClient::__setCookie(string name [, strung value])
+/* {{{ proto void SoapClient::__setCookie(string name [, strung value]) U
    Sets cookie thet will sent with SOAP request.
    The call to this function will effect all folowing calls of SOAP methods.
    If value is not specified cookie is removed. */
@@ -3329,7 +3344,7 @@ PHP_METHOD(SoapClient, __setCookie)
 }
 /* }}} */
 
-/* {{{ proto array SoapClient::__getCookies()
+/* {{{ proto array SoapClient::__getCookies() U
    Returns array of cookies. */
 PHP_METHOD(SoapClient, __getCookies)
 {
@@ -3347,7 +3362,7 @@ PHP_METHOD(SoapClient, __getCookies)
 }
 /* }}} */
 
-/* {{{ proto void SoapClient::__setSoapHeaders(array SoapHeaders)
+/* {{{ proto void SoapClient::__setSoapHeaders(array SoapHeaders) U
    Sets SOAP headers for subsequent calls (replaces any previous
    values).
    If no value is specified, all of the headers are removed. */
@@ -3388,7 +3403,7 @@ PHP_METHOD(SoapClient, __setSoapHeaders)
 
 
 
-/* {{{ proto string SoapClient::__setLocation([string new_location])
+/* {{{ proto string SoapClient::__setLocation([string new_location]) U
    Sets the location option (the endpoint URL that will be touched by the
    following SOAP requests).
    If new_location is not specified or null then SoapClient will use endpoint
