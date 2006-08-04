@@ -76,6 +76,8 @@ PHP                                                                        NEWS
   compatibility issue). (Jani, patch by scott dot moynes+php at gmail dot com)
 - Fixed bug #37445 (Fixed crash in pdo_mysql resulting from premature object
   destruction). (Ilia)
+- Fixed bug #37265 (Added missing safe_mode & open_basedir checks to
+  imap_body()). (Ilia)
 
 24 Jul 2006, PHP 5.2.0RC1
 - Updated bundled MySQL client library to version 5.0.22 in the Windows
