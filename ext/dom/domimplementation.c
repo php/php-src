@@ -77,7 +77,7 @@ PHP_METHOD(domimplementation, createDocumentType)
 	xmlChar *pch1 = NULL, *pch2 = NULL, *localname = NULL;
 	xmlURIPtr uri;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sss", &name, &name_len, &publicid, &publicid_len, &systemid, &systemid_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&s&s&", &name, &name_len, UG(utf8_conv), &publicid, &publicid_len, UG(utf8_conv), &systemid, &systemid_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
 
@@ -136,7 +136,7 @@ PHP_METHOD(domimplementation, createDocument)
 	char *prefix = NULL, *localname = NULL;
 	dom_object *doctobj;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ssO", &uri, &uri_len, &name, &name_len, &node, dom_documenttype_class_entry) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&s&O", &uri, &uri_len, UG(utf8_conv), &name, &name_len, UG(utf8_conv), &node, dom_documenttype_class_entry) == FAILURE) {
 		return;
 	}
 

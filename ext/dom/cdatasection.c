@@ -51,12 +51,12 @@ PHP_METHOD(domcdatasection, __construct)
 	int value_len;
 
 	php_set_error_handling(EH_THROW, dom_domexception_class_entry TSRMLS_CC);
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_cdatasection_class_entry, &value, &value_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&", &id, dom_cdatasection_class_entry, &value, &value_len, UG(utf8_conv)) == FAILURE) {
 		php_std_error_handling();
 		return;
 	}
-
 	php_std_error_handling();
+
 	nodep = xmlNewCDataBlock(NULL, (xmlChar *) value, value_len);
 
 	if (!nodep) {
