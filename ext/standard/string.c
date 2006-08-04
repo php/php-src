@@ -2931,23 +2931,6 @@ PHP_FUNCTION(strripos)
 }
 /* }}} */
 
-/* {{{ php_u_strrchr
- */
-UChar *php_u_strrchr(UChar *s, UChar32 ch, int s_len)
-{
-	UChar32 ch1;
-	int32_t i = s_len;
-
-	while (i > 0) {
-		U16_PREV(s, 0, i, ch1);
-		if (ch1 == ch) {
-			return (s+i);
-		}
-	}
-	return NULL;
-}
-/* }}} */
-
 /* {{{ proto string strrchr(string haystack, string needle) U
    Finds the last occurrence of a character in a string within another */
 PHP_FUNCTION(strrchr)
@@ -2958,37 +2941,37 @@ PHP_FUNCTION(strrchr)
 	void *found = NULL;
 	int found_offset;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_parse_parameters(2 TSRMLS_CC, "zz", &haystack, &needle) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/z/", &haystack, &needle) == FAILURE) {
+		return;
 	}
 	if (Z_TYPE_P(haystack) != IS_UNICODE || Z_TYPE_P(haystack) != IS_STRING) {
-		convert_to_string(haystack);
+		convert_to_text(haystack);
 	}
 
 	if (Z_TYPE_P(needle) == IS_UNICODE || Z_TYPE_P(needle) == IS_STRING) {
 		if (Z_TYPE_P(needle) != Z_TYPE_P(haystack)) {
 			str_type = zend_get_unified_string_type(2 TSRMLS_CC, Z_TYPE_P(haystack), Z_TYPE_P(needle));
-			if (str_type == (zend_uchar)-1) {
-				zend_error(E_WARNING, "Cannot mix binary and Unicode parameters");
-				return;
-			}
 			convert_to_explicit_type(haystack, str_type);
 			convert_to_explicit_type(needle, str_type);
 		}
+		if (Z_USTRLEN_P(needle) == 0) {
+			RETURN_FALSE;
+		}
 		if (Z_TYPE_P(haystack) == IS_UNICODE) {
-			U16_GET(Z_USTRVAL_P(needle), 0, 0, Z_USTRLEN_P(needle), ch);
-			found = php_u_strrchr(Z_USTRVAL_P(haystack), ch, Z_USTRLEN_P(haystack));
+			ch = zend_get_codepoint_at(Z_USTRVAL_P(needle), Z_USTRLEN_P(needle), 0);
+			found = u_memrchr32(Z_USTRVAL_P(haystack), ch, Z_USTRLEN_P(haystack));
 		} else {
 			found = strrchr(Z_STRVAL_P(haystack), *Z_STRVAL_P(needle));
 		}
 	} else {
 		convert_to_long(needle);
 		if (Z_TYPE_P(haystack) == IS_UNICODE) {
-			if (Z_LVAL_P(needle) < 0 || Z_LVAL_P(needle) > 0x10FFFF) {
+			UChar32 ch = (UChar32)Z_LVAL_P(needle);
+			if (ch < 0 || ch > 0x10FFFF) {
 				php_error(E_WARNING, "Needle argument codepoint value out of range (0 - 0x10FFFF)");
 				RETURN_FALSE;
 			}
-			found = php_u_strrchr(Z_USTRVAL_P(haystack), (UChar32)Z_LVAL_P(needle), Z_USTRLEN_P(haystack));
+			found = u_memrchr32(Z_USTRVAL_P(haystack), ch, Z_USTRLEN_P(haystack));
 		} else {
 			found = strrchr(Z_STRVAL_P(haystack), (char)Z_LVAL_P(needle));
 		}
