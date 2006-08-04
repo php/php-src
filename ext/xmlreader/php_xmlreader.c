@@ -1098,7 +1098,7 @@ PHP_METHOD(xmlreader, XML)
 	xmlParserInputBufferPtr inputbfr;
 	xmlTextReaderPtr reader = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!l", &source, &source_len, &encoding, &encoding_len, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|s!l", &source, &source_len, &encoding, &encoding_len, &options) == FAILURE) {
 		return;
 	}
 
