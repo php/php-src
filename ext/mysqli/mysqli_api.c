@@ -294,9 +294,6 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 			case MYSQL_TYPE_LONG:
 			case MYSQL_TYPE_INT24:
 			case MYSQL_TYPE_YEAR:
-#if MYSQL_VERSION_ID > 50002
-			case MYSQL_TYPE_BIT:
-#endif
 				convert_to_long_ex(args[i]);
 				stmt->result.buf[ofs].type = IS_LONG;
 				/* don't set stmt->result.buf[ofs].buflen to 0, we used ecalloc */
@@ -308,10 +305,13 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 				break;
 
 			case MYSQL_TYPE_LONGLONG:
+#if MYSQL_VERSION_ID > 50002
+			case MYSQL_TYPE_BIT:
+#endif
 				stmt->result.buf[ofs].type = IS_STRING; 
 				stmt->result.buf[ofs].buflen = sizeof(my_ulonglong); 
 				stmt->result.buf[ofs].val = (char *)emalloc(stmt->result.buf[ofs].buflen);
-				bind[ofs].buffer_type = MYSQL_TYPE_LONGLONG;
+				bind[ofs].buffer_type = col_type;
 				bind[ofs].buffer = stmt->result.buf[ofs].val;
 				bind[ofs].is_null = &stmt->result.is_null[ofs];
 				bind[ofs].buffer_length = stmt->result.buf[ofs].buflen;
@@ -715,7 +715,14 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 							} else {
 								ZVAL_LONG(stmt->result.vars[i], llval);
 							}
-						} else {
+						} 
+#if MYSQL_VERSION_ID > 50002
+						else if (stmt->stmt->bind[i].buffer_type == MYSQL_TYPE_BIT) {
+							llval = *(my_ulonglong *)stmt->result.buf[i].val;
+							ZVAL_LONG(stmt->result.vars[i], llval);
+						}
+#endif
+						else {
 							ZVAL_STRINGL(stmt->result.vars[i], stmt->result.buf[i].val, stmt->result.buf[i].buflen, 1);
 						}
 						break;
