@@ -6,7 +6,7 @@ Bug # 37277 (cloning Dom Documents or Nodes does not work)
 <?php
 $dom1 = new DomDocument('1.0', 'UTF-8');
 
-$xml = '<foo />';
+$xml = b'<foo />';
 $dom1->loadXml($xml);
 
 $node = clone $dom1->documentElement;

@@ -5,12 +5,12 @@ Test: setAttributeNode()
 --FILE--
 <?php
 
-$xml = <<<HERE
+$xml = b<<<HERE
 <?xml version="1.0" ?>
 <root a="b" />
 HERE;
 
-$xml2 = <<<HERE
+$xml2 = b<<<HERE
 <?xml version="1.0" ?>
 <doc2 />
 HERE;

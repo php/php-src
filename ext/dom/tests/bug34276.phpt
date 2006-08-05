@@ -4,7 +4,7 @@ Bug # 34276: setAttributeNS and default namespace
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-$xml = <<<HERE
+$xml = b<<<HERE
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <foo xmlns="http://www.example.com/ns/foo"
      xmlns:fubar="http://www.example.com/ns/fubar" attra="attra" />
