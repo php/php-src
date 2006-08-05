@@ -1,3 +1,161 @@
+2006-08-04  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/string.c:
+      Simplify strrchr().
+
+2006-08-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mysqli/mysqli_api.c:
+      MFB: Improved fix for bug #37671
+
+    * (PHP_5_2)
+      ext/mysqli/mysqli_api.c:
+      Improved fix for bug #37671
+
+2006-08-04  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-progress.txt
+      ext/standard/string.c:
+      Upgrade pathinfo() to Unicode support.
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h:
+      Add add_assoc_zstr_ex() and related.
+
+    * ext/xmlreader/php_xmlreader.c:
+      I believe Rob indicated that XML() should take strictly a binary string.
+
+2006-08-04  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      TSRM/tsrm_virtual_cwd.c:
+      revert previous patch
+
+    * TSRM/tsrm_virtual_cwd.c:
+      revert previous patch, it's wrong
+
+2006-08-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      ext/imap/php_imap.c
+      ext/imap/php_imap.c
+      ext/imap/php_imap.c:
+      MFB: Fixed bug #37265 (Added missing safe_mode & open_basedir checks to
+      imap_body()).
+
+    * (PHP_5_2)
+      NEWS
+      ext/imap/php_imap.c:
+      Fixed bug #37265 (Added missing safe_mode & open_basedir checks to
+      imap_body()).
+
+2006-08-04  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/attr.c
+      ext/dom/cdatasection.c
+      ext/dom/characterdata.c
+      ext/dom/comment.c
+      ext/dom/document.c
+      ext/dom/documentfragment.c
+      ext/dom/domimplementation.c
+      ext/dom/element.c
+      ext/dom/entity.c
+      ext/dom/entityreference.c
+      ext/dom/namednodemap.c
+      ext/dom/node.c
+      ext/dom/notation.c
+      ext/dom/processinginstruction.c
+      ext/dom/text.c
+      ext/dom/xpath.c
+      ext/dom/tests/bug34276.phpt:
+      add unicode support
+      update test
+
+    * ext/xmlreader/php_xmlreader.c:
+      updated to use new modifier to specify converter
+
+2006-08-04  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/php_string.h
+      ext/standard/string.c:
+      Upgrade dirname() to support IS_UNICODE.
+
+    * ZendEngine2/zend_API.h:
+      Add macros to be able to initialize/return values based on zstr.
+
+    * ZendEngine2/zend_API.c:
+      One fewer walks needed.
+
+    * TSRM/tsrm_virtual_cwd.h:
+      Add Unicode constants for default slash and directory separator.
+
+    * ZendEngine2/zend_API.c:
+      Scan through all the modifiers at once, setting flags.
+
+    * ZendEngine2/zend_API.c:
+      Fix '&' handling. (patch by Rob R)
+
+2006-08-04  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      ext/standard/tests/strings/bug38322.phpt
+      ext/standard/tests/strings/bug38322.phpt:
+      add new test
+
+    * ext/standard/tests/strings/bug38322.phpt
+      ext/standard/tests/strings/bug38322.phpt
+      ext/standard/tests/strings/bug38322.phpt:
+        1.1.4;
+      add new test
+
+2006-08-04  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/soap/soap.c:
+      fix compile
+
+2006-08-04  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      NEWS
+      ext/standard/scanf.c
+      ext/standard/scanf.c
+      ext/standard/scanf.c:
+      MFH: fix #38322 (reading past array in sscanf() leads to arbitary code
+      execution)
+
+    * ext/standard/scanf.c:
+      fix #38322 (reading past array in sscanf() leads to arbitary code
+      execution)
+
+    * (PHP_5_2)
+      ext/simplexml/tests/032.phpt:
+      fix test
+
+    * ext/simplexml/tests/032.phpt:
+      comparing libxml documents and nodes is not yet possible and we can't fix
+      it
+      fix test instead
+
+2006-08-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/soap.c
+      ext/soap/tests/bugs/bug32776.phpt
+      ext/soap/tests/bugs/bug38005.phpt:
+      Unicode support
+
+2006-08-04  Derick Rethans  <php@derickrethans.nl>
+
+    * ZendEngine2/acinclude.m4:
+      - MFB: Bison 2.3 is working as well.
+
+    * (PHP_5_1)
+      ZendEngine2/acinclude.m4
+      ZendEngine2/acinclude.m4:
+      - There is a 2.3 now as well.
+
 2006-08-03  Andrei Zmievski  <andrei@gravitonic.com>
 
     * TSRM/tsrm_virtual_cwd.h:

@@ -1,3 +1,31 @@
+2006-08-04  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.c
+      zend_API.h:
+      Add add_assoc_zstr_ex() and related.
+
+    * zend_API.h:
+      Add macros to be able to initialize/return values based on zstr.
+
+    * zend_API.c:
+      One fewer walks needed.
+
+    * zend_API.c:
+      Scan through all the modifiers at once, setting flags.
+
+    * zend_API.c:
+      Fix '&' handling. (patch by Rob R)
+
+2006-08-04  Derick Rethans  <php@derickrethans.nl>
+
+    * acinclude.m4:
+      - MFB: Bison 2.3 is working as well.
+
+    * (PHP_5_1)
+      acinclude.m4
+      acinclude.m4:
+      - There is a 2.3 now as well.
+
 2006-08-03  Antony Dovgal  <antony@zend.com>
 
     * zend_vm_def.h
