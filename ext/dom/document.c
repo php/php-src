@@ -1544,7 +1544,7 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 			return;
 		}
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &source, &source_len, &options) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|l", &source, &source_len, &options) == FAILURE) {
 			return;
 		}
 	}
@@ -1871,11 +1871,11 @@ _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 	zend_uchar source_type = IS_STRING;
 
 	if (type == DOM_LOAD_FILE) {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_document_class_entry, &source, &source_len, &source_type) == FAILURE) {
+		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ot", &id, dom_document_class_entry, &source, &source_len, &source_type) == FAILURE) {
 			return;
 		}
 	} else {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_document_class_entry, &source, &source_len) == FAILURE) {
+		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OS", &id, dom_document_class_entry, &source, &source_len) == FAILURE) {
 			return;
 		}
 	}
@@ -1981,11 +1981,11 @@ _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 	zend_uchar source_type = IS_STRING;
 
 	if (type == DOM_LOAD_FILE) {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_document_class_entry, &source, &source_len, &source_type) == FAILURE) {
+		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ot", &id, dom_document_class_entry, &source, &source_len, &source_type) == FAILURE) {
 			return;
 		}
 	} else {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_document_class_entry, &source, &source_len) == FAILURE) {
+		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OS", &id, dom_document_class_entry, &source, &source_len) == FAILURE) {
 			return;
 		}
 	}
@@ -2090,11 +2090,11 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	id = getThis();
 
 	if (mode == DOM_LOAD_FILE) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &source, &source_len, &source_type) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &source, &source_len, &source_type) == FAILURE) {
 			return;
 		}
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &source, &source_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &source, &source_len) == FAILURE) {
 			return;
 		}
 	}
@@ -2194,9 +2194,9 @@ PHP_FUNCTION(dom_document_save_html_file)
 	dom_object *intern;
 	dom_doc_propsptr doc_props;
 	char *file;
-	zend_uchar file_type = IS_STRING;
+	zend_uchar file_type;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_document_class_entry, &file, &file_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ot", &id, dom_document_class_entry, &file, &file_len, &file_type) == FAILURE) {
 		return;
 	}
 
