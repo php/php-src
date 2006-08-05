@@ -9,7 +9,7 @@ if (!method_exists($reader, 'setRelaxNGSchema')) print "skip";
 <?php 
 /* $Id$ */
 
-$xmlstring = '<TEI.2>hello</TEI.2>';
+$xmlstring = b'<TEI.2>hello</TEI.2>';
 $relaxngfile = dirname(__FILE__) . '/relaxNG.rng'; 
 $file = dirname(__FILE__) . '/__007.xml';
 file_put_contents($file, $xmlstring);
