@@ -6,7 +6,7 @@ XMLReader: libxml2 XML Reader, string data
 <?php 
 /* $Id$ */
 
-$xmlstring = '<?xml version="1.0" encoding="UTF-8"?>
+$xmlstring = b'<?xml version="1.0" encoding="UTF-8"?>
 <books></books>';
 
 $reader = new XMLReader();
@@ -16,7 +16,7 @@ $reader->XML($xmlstring);
 while ($reader->read()) {
 	echo $reader->name."\n";
 }
-$xmlstring = '';
+$xmlstring = b'';
 $reader = new XMLReader();
 $reader->XML($xmlstring);
 ?>

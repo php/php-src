@@ -6,7 +6,7 @@ XMLReader: libxml2 XML Reader, next
 <?php 
 /* $Id$ */
 
-$xmlstring = '<?xml version="1.0" encoding="UTF-8"?>
+$xmlstring = b'<?xml version="1.0" encoding="UTF-8"?>
 <books><book num="1"><test /></book><book num="2" /></books>';
 
 $reader = new XMLReader();

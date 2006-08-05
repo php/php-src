@@ -7,7 +7,7 @@ XMLReader: Schema validation
 <?php 
 /* $Id$ */
 
-$xml =<<<EOF
+$xml =b<<<EOF
 <?xml version="1.0" encoding="UTF-8" ?>
 <items>
   <item>123</item>
@@ -17,7 +17,7 @@ EOF;
 
 $reader = new XMLReader();
 $reader->XML($xml);
-$reader->setSchema(dirname(__FILE__) . '/013.xsd');
+$reader->setSchema(dirname(__FILE__) . b'/013.xsd');
 while($reader->read()) {
 	if ($reader->nodeType == XMLReader::ELEMENT && $reader->name == 'item') {
 		$reader->read();
@@ -30,14 +30,14 @@ $reader->close();
 ===FAIL===
 <?php
 
-$xml =<<<EOF
+$xml =b<<<EOF
 <?xml version="1.0" encoding="UTF-8" ?>
 <foo/>
 EOF;
 
 $reader = new XMLReader();
 $reader->XML($xml);
-$reader->setSchema(dirname(__FILE__) . '/013.xsd');
+$reader->setSchema(dirname(__FILE__) . b'/013.xsd');
 while($reader->read() && $reader->nodeType != XMLReader::ELEMENT);
 $reader->close();
 
