@@ -4,7 +4,7 @@ Test: Canonicalization - C14N()
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-$xml = <<<EOXML
+$xml = b<<<EOXML
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <foo xmlns="http://www.example.com/ns/foo"
      xmlns:fubar="http://www.example.com/ns/fubar" xmlns:test="urn::test"><contain>
