@@ -195,6 +195,9 @@ static xmlNodePtr sxe_get_element_by_name(php_sxe_object *sxe, xmlNodePtr node, 
 
 	if (sxe->iter.type == SXE_ITER_ELEMENT) {
 		orgnode = sxe_find_element_by_name(sxe, node, sxe->iter.name TSRMLS_CC);
+		if (!orgnode) {
+			return NULL;
+		}
 		node = orgnode->children;
 	}
 

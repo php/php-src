@@ -976,8 +976,8 @@ int php_libxml_decrement_doc_ref(php_libxml_node_object *object TSRMLS_DC) {
 				efree(object->document->doc_props);
 			}
 			efree(object->document);
+			object->document = NULL;
 		}
-		object->document = NULL;
 	}
 
 	return ret_refcount;
@@ -1035,6 +1035,8 @@ void php_libxml_node_decrement_resource(php_libxml_node_object *object TSRMLS_DC
 				obj_node->_private = NULL;
 			}
 		}
+	}
+	if (object != NULL && object->document != NULL) {
 		/* Safe to call as if the resource were freed then doc pointer is NULL */
 		php_libxml_decrement_doc_ref(object TSRMLS_CC);
 	}
