@@ -23,8 +23,6 @@ string(101) "<?xml version="1.0"?>
 	<a href="javascript:alert('1');"><strong>Item Two</strong></a>
 </code>
 "
-string(66) "<a href="javascript:alert('1');">
-  <strong>Item Two</strong>
-</a>"
+string(62) "<a href="javascript:alert('1');"><strong>Item Two</strong></a>"
 string(25) "<strong>Item Two</strong>"
 Done
