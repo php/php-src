@@ -1,3 +1,49 @@
+2006-08-05  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/oci8/oci8.c:
+      fix PECL bug #7827
+      add small optimization
+
+    * ext/oci8/oci8.c:
+      fix PECL bug #7827
+      add small optimization - no need to do anything if hash lookup failed,
+      just move along
+
+    * TSRM/tsrm_virtual_cwd.c:
+      yet another appempt to fix Windows bug
+      thanks Rob for the patch
+
+2006-08-05  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/tests/bug34276.phpt
+      ext/dom/tests/bug35342.phpt
+      ext/dom/tests/bug36756.phpt
+      ext/dom/tests/bug37277.phpt
+      ext/dom/tests/canonicalization.phpt
+      ext/dom/tests/dom002.phpt
+      ext/dom/tests/dom007.phpt
+      ext/dom/tests/dom_set_attr_node.phpt
+      ext/dom/tests/dom_test.inc:
+      update tests
+      use binary strings for loadXML() method
+
+    * ext/dom/document.c:
+      unicode changes
+
+    * ext/xmlreader/tests/001.phpt
+      ext/xmlreader/tests/005.phpt
+      ext/xmlreader/tests/006.phpt
+      ext/xmlreader/tests/007.phpt
+      ext/xmlreader/tests/008.phpt
+      ext/xmlreader/tests/009.phpt
+      ext/xmlreader/tests/010.phpt
+      ext/xmlreader/tests/011.phpt
+      ext/xmlreader/tests/012.phpt
+      ext/xmlreader/tests/013.phpt:
+      update tests
+      use binary strings for XML() method
+
 2006-08-04  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ext/standard/string.c:
