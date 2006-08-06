@@ -676,6 +676,10 @@ PHP_ARG_ENABLE(debug, whether to include debugging symbols,
 if test "$PHP_DEBUG" = "yes"; then
   PHP_DEBUG=1
   ZEND_DEBUG=yes
+  changequote({,})
+  CFLAGS=`echo "$CFLAGS" | $SED -e 's/-O[0-9]*//g'`
+  changequote([,])
+  CFLAGS="$CFLAGS -O0"
 else
   PHP_DEBUG=0
   ZEND_DEBUG=no
