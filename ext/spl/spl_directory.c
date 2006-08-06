@@ -1456,11 +1456,19 @@ static int spl_filesystem_file_read_csv(spl_filesystem_object *intern, char deli
 		size_t buf_len = intern->u.file.current_line_len;
 		char *buf = estrndup(intern->u.file.current_line, buf_len);
 
-		if (Z_TYPE_P(return_value) != IS_NULL) {
-			zval_dtor(return_value);
-			ZVAL_NULL(return_value);
+		if (intern->u.file.current_zval) {
+			zval_ptr_dtor(&intern->u.file.current_zval);
 		}
-		php_fgetcsv(intern->u.file.stream, delimiter, enclosure, buf_len, buf, return_value TSRMLS_CC);
+		ALLOC_INIT_ZVAL(intern->u.file.current_zval);
+
+		php_fgetcsv(intern->u.file.stream, delimiter, enclosure, buf_len, buf, intern->u.file.current_zval TSRMLS_CC);
+		if (return_value) {
+			if (Z_TYPE_P(return_value) != IS_NULL) {
+				zval_dtor(return_value);
+				ZVAL_NULL(return_value);
+			}
+			ZVAL_ZVAL(return_value, intern->u.file.current_zval, 1, 0);
+		}
 	}
 	return ret;
 }
@@ -1479,8 +1487,7 @@ static int spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesystem_obje
 			return FAILURE;
 		}
 		if (intern->flags & SPL_FILE_OBJECT_READ_CSV) {
-			MAKE_STD_ZVAL(retval);
-			return spl_filesystem_file_read_csv(intern, intern->u.file.delimiter, intern->u.file.enclosure, retval TSRMLS_CC);
+			return spl_filesystem_file_read_csv(intern, intern->u.file.delimiter, intern->u.file.enclosure, NULL TSRMLS_CC);
 		} else {
 			zend_call_method_with_0_params(&this_ptr, Z_OBJCE_P(getThis()), &intern->u.file.func_getCurr, "getCurrentLine", &retval);
 		}
@@ -1696,7 +1703,7 @@ SPL_METHOD(SplFileObject, current)
 	if (!intern->u.file.current_line && !intern->u.file.current_zval) {
 		spl_filesystem_file_read_line(getThis(), intern, 1 TSRMLS_CC);
 	}
-	if (intern->u.file.current_line) {
+	if (intern->u.file.current_line && (!(intern->flags & SPL_FILE_OBJECT_READ_CSV) || !intern->u.file.current_zval)) {
 		RETURN_STRINGL(intern->u.file.current_line, intern->u.file.current_line_len, 1);
 	} else if (intern->u.file.current_zval) {
 		RETURN_ZVAL(intern->u.file.current_zval, 1, 0);
