@@ -1205,7 +1205,7 @@ SXE_METHOD(asXML)
 					RETURN_FALSE;
 				}
 
-				xmlNodeDumpOutput(outbuf, (xmlDocPtr) sxe->document->ptr, node, 0, 1, NULL);
+				xmlNodeDumpOutput(outbuf, (xmlDocPtr) sxe->document->ptr, node, 0, 0, NULL);
 				xmlOutputBufferClose(outbuf);
 				RETURN_TRUE;
 			}
@@ -1229,7 +1229,7 @@ SXE_METHOD(asXML)
 				RETURN_FALSE;
 			}
 
-			xmlNodeDumpOutput(outbuf, (xmlDocPtr) sxe->document->ptr, node, 0, 1, ((xmlDocPtr) sxe->document->ptr)->encoding);
+			xmlNodeDumpOutput(outbuf, (xmlDocPtr) sxe->document->ptr, node, 0, 0, ((xmlDocPtr) sxe->document->ptr)->encoding);
 			xmlOutputBufferFlush(outbuf);
 			strval = xmlStrndup(outbuf->buffer->content, outbuf->buffer->use);
 			strval_len = outbuf->buffer->use;
