@@ -1230,10 +1230,11 @@ SXE_METHOD(asXML)
 			xmlNodeDumpOutput(outbuf, (xmlDocPtr) sxe->document->ptr, node, 0, 1, ((xmlDocPtr) sxe->document->ptr)->encoding);
 			xmlOutputBufferFlush(outbuf);
 			strval = xmlStrndup(outbuf->buffer->content, outbuf->buffer->use);
+			strval_len = outbuf->buffer->use;
 			xmlOutputBufferClose(outbuf);
 		}
 
-		RETVAL_STRINGL(strval, strlen(strval), 1);
+		RETVAL_STRINGL(strval, strval_len, 1);
 		xmlFree(strval);
 	} else {
 		RETVAL_FALSE;
