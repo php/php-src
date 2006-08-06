@@ -1042,11 +1042,10 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 		else if (!persistent && zend_hash_find(&EG(regular_list), hashed_details.c, hashed_details.len+1, (void **) &le) == SUCCESS) {
 			found = 1;
 			if (le->type == le_index_ptr) {
-				int type;
-				long link;
+				int type, link;
 				void *ptr;
 
-				link = (long) le->ptr;
+				link = (int) le->ptr;
 				ptr = zend_list_find(link,&type);
 				if (ptr && (type == le_connection)) {
 					connection = (php_oci_connection *)ptr;
