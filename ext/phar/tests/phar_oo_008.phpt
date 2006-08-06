@@ -13,6 +13,7 @@ $phar = new Phar($fname);
 $phar->setFileClass('SplFileObject');
 
 $f = $phar['a.csv'];
+echo "===1===\n";
 foreach($f as $k => $v)
 {
 	echo "$k=>$v\n";
@@ -20,6 +21,7 @@ foreach($f as $k => $v)
 
 $f->setFlags(SplFileObject::DROP_NEW_LINE);
 
+echo "===2===\n";
 foreach($f as $k => $v)
 {
 	echo "$k=>$v\n";
@@ -36,11 +38,21 @@ class MyCSVFile extends SplFileObject
 $phar->setFileClass('MyCSVFile');
 $v = $phar['a.csv'];
 
+echo "===3===\n";
 while(!$v->eof())
 {
 	echo $v->key() . "=>" . join('|',$v->fgetcsv()) . "\n";
 }
 
+echo "===4===\n";
+$v->rewind();
+while(!$v->eof())
+{
+	$l = $v->fgetcsv();
+	echo $v->key() . "=>" . join('|',$l) . "\n";
+}
+
+echo "===5===\n";
 foreach($v as $k => $d)
 {
 	echo "$k=>" . join('|',$d) . "\n";
@@ -58,6 +70,7 @@ class MyCSVFile2 extends SplFileObject
 $phar->setFileClass('MyCSVFile2');
 $v = $phar['a.csv'];
 
+echo "===6===\n";
 foreach($v as $k => $d)
 {
 	echo "$k=>" . join('|',$d) . "\n";
@@ -71,20 +84,29 @@ unlink(dirname(__FILE__) . '/phar_oo_test.phar.php');
 __halt_compiler();
 ?>
 --EXPECTF--
+===1===
 0=>1,2,3
 
 1=>2,a,b
 
 2=>3,"c","'e'"
+===2===
 0=>1,2,3
 1=>2,a,b
 2=>3,"c","'e'"
+===3===
+0=>1|2|3
+0=>2|a|b
+1=>3|c|'e'
+===4===
 0=>1|2|3
 1=>2|a|b
 2=>3|c|'e'
-1=>1|2|3
-3=>2|a|b
-5=>3|c|'e'
+===5===
+0=>1|2|3
+1=>2|a|b
+2=>3|c|'e'
+===6===
 MyCSVFile2::getCurrentLine
 1=>1|2|3
 MyCSVFile2::getCurrentLine
