@@ -493,7 +493,7 @@ AC_ARG_WITH(cdb,
     PHP_DBA_STD_ATTACH
   fi
 ],[
-  if test "$PHP_DBA" != "no" || test "$HAVE_DBA" = "1"; then
+  if test "$PHP_DBA" != "no" && test "$HAVE_DBA" = "1"; then
     PHP_DBA_BUILTIN_CDB
   fi
 ])
@@ -511,7 +511,7 @@ AC_ARG_WITH(inifile,
     PHP_DBA_BUILTIN_INI
   fi
 ],[
-  if test "$PHP_DBA" != "no" || test "$HAVE_DBA" = "1"; then
+  if test "$PHP_DBA" != "no" && test "$HAVE_DBA" = "1"; then
     PHP_DBA_BUILTIN_INI
   fi
 ])
@@ -532,7 +532,7 @@ AC_ARG_WITH(flatfile,
     PHP_DBA_BUILTIN_FLATFILE
   fi
 ],[
-  if test "$PHP_DBA" != "no" || test "$HAVE_DBA" = "1"; then
+  if test "$PHP_DBA" != "no" && test "$HAVE_DBA" = "1"; then
     PHP_DBA_BUILTIN_FLATFILE
   fi
 ])
