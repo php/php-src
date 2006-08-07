@@ -89,7 +89,7 @@ array(5) {
     [u"FileName"]=>
     string(9) "test2.jpg"
     [u"FileDateTime"]=>
-    int(1115993416)
+    int(%d)
     [u"FileSize"]=>
     int(1240)
     [u"FileType"]=>
