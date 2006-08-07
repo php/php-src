@@ -73,6 +73,7 @@ PHP                                                                        NEWS
 - Fixed bug #38168 (Crash in pdo_pgsql on missing bound parameters). (Ilia)
 - Fixed bug #38132 (ReflectionClass::getStaticProperties() retains \0 in key
   names). (Ilia)
+- Fixed bug #38064 (ignored constructor visibility). (Marcus)
 - Fixed bug #38047 ("file" and "line" sometimes not set in backtrace from
   inside error handler). (Dmitry)
 - Fixed bug #37846 (wordwrap() wraps incorrectly). (ddk at krasn dot ru, Tony)
