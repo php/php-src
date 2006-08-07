@@ -1682,11 +1682,11 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	xmlDocPtr docp;
 	xmlNodeSetPtr nodeset = NULL;
 	dom_object *intern;
-	long exclusive=0, with_comments=0, file_len=0;
+	zend_bool exclusive=0, with_comments=0;
 	xmlChar **inclusive_ns_prefixes = NULL;
 	char *file = NULL;
-    int ret = -1;
-    xmlOutputBufferPtr buf;
+	int ret = -1, file_len = 0;
+	xmlOutputBufferPtr buf;
 	xmlXPathContextPtr ctxp=NULL;
 	xmlXPathObjectPtr xpathobjp=NULL;
 
