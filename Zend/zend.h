@@ -640,6 +640,11 @@ END_EXTERN_C()
 		varptr->refcount++; \
 	}
 
+#define READY_TO_DESTROY(zv) \
+	((zv)->refcount == 1 && \
+	 (Z_TYPE_P(zv) != IS_OBJECT || \
+	  zend_objects_store_get_refcount(zv TSRMLS_CC) == 1))
+
 
 #define ZEND_MAX_RESERVED_RESOURCES	4
 

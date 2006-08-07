@@ -125,6 +125,13 @@ ZEND_API zend_object_handle zend_objects_store_put(void *object, zend_objects_st
 	return handle;
 }
 
+ZEND_API zend_uint zend_objects_store_get_refcount(zval *object TSRMLS_DC)
+{
+	zend_object_handle handle = Z_OBJ_HANDLE_P(object);
+
+	return EG(objects_store).object_buckets[handle].bucket.obj.refcount;
+}
+
 ZEND_API void zend_objects_store_add_ref(zval *object TSRMLS_DC)
 {
 	zend_object_handle handle = Z_OBJ_HANDLE_P(object);
