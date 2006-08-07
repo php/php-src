@@ -5,8 +5,8 @@ date_create() function [3]
 --FILE--
 <?php
 date_default_timezone_set("GMT");
-echo date_format(date_create("Dec31 2005 +0100"), date::ISO8601), "\n";
-echo date(date::ISO8601, strtotime("Dec31 2005 +0100")), "\n";
+echo date_format(date_create("Dec31 2005 +0100"), DateTime::ISO8601), "\n";
+echo date(DateTime::ISO8601, strtotime("Dec31 2005 +0100")), "\n";
 ?>
 --EXPECT--
 2005-12-31T00:00:00+0100
