@@ -28,10 +28,14 @@ PHP 5.2 Update info or NEWS explained
 
   The magic object method __toString() is now called whenever an object is used
   as a string. The function must not throw an exception or the script will be
-  terminated. The PHP 5.0/%51 fallback to return a string containing the object
+  terminated. The PHP 5.0/5.1 fallback to return a string containing the object
   idetifier has been dropped. Note that the object identifier is never unique. 
   That measn that if you have used this feature your application has been 
   flawed. Nonetheless it will now be a catchable fatal error (see above).
+  
+  Even with __toString objects cannot be used as keys to arrays. We might add
+  built-in hash support for this. But for 5.2 you would need to either provide
+  your own hashing or use new function spl_object_hash()
 
 - Added RFC2397 (data: stream) support. (Marcus)
 
@@ -49,3 +53,8 @@ PHP 5.2 Update info or NEWS explained
   PHP-5.2 it is now possible to allow standard file operations while
   dissalowing inclusion of remote files, which will also be the default
   configuration.
+
+- Dropped abstract static class functions. (Marcus)
+
+  Due to an oversight PHP 5.0, 5.1 allowed abstract static functions. In PHP 
+  5.2 only interfaces can have abstract static functions.
