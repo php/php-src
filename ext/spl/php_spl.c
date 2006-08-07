@@ -275,7 +275,6 @@ PHP_FUNCTION(spl_autoload)
 	zend_op **original_opline_ptr = EG(opline_ptr);
 	zend_op_array *original_active_op_array = EG(active_op_array);
 	zend_function_state *original_function_state_ptr = EG(function_state_ptr);
-	zval err_mode;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &class_name, &class_name_len, &file_exts, &file_exts_len) == FAILURE) {
 		RETURN_FALSE;
