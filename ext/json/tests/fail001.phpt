@@ -1,6 +1,5 @@
 --TEST--
-JSON Test Pattern fail1 -> fail24
-http://www.crockford.com/JSON/JSON_checker/test/fail*.json
+JSON (http://www.crockford.com/JSON/JSON_checker/test/fail*.json)
 --SKIPIF--
 <?php
   if (!extension_loaded('json')) die('skip: json extension not available');
