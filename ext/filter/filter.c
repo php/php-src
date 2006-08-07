@@ -362,7 +362,7 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 		/* FIXME: Should not use php_register_variable_ex as that also registers
 		 * globals when register_globals is turned on */
 		Z_STRLEN(raw_var) = val_len;
-		Z_STRVAL(raw_var) = estrndup(*val, val_len + 1);
+		Z_STRVAL(raw_var) = estrndup(*val, val_len);
 		Z_TYPE(raw_var) = IS_STRING;
 
 		php_register_variable_ex(var, &raw_var, array_ptr TSRMLS_CC);
@@ -376,12 +376,12 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 		Z_TYPE(new_var) = IS_STRING;
 
 		if (!(IF_G(default_filter) == FILTER_UNSAFE_RAW)) {
-			Z_STRVAL(new_var) = estrndup(*val, val_len + 1);
+			Z_STRVAL(new_var) = estrndup(*val, val_len);
 			php_zval_filter(&new_var, IF_G(default_filter), IF_G(default_filter_flags), NULL, NULL/*charset*/ TSRMLS_CC);
 		} else if (PG(magic_quotes_gpc)) {
 			Z_STRVAL(new_var) = php_addslashes(*val, Z_STRLEN(new_var), &Z_STRLEN(new_var), 0 TSRMLS_CC);
 		} else {
-			Z_STRVAL(new_var) = estrndup(*val, val_len + 1);
+			Z_STRVAL(new_var) = estrndup(*val, val_len);
 		}
 	} else { /* empty string */
 		ZVAL_EMPTY_STRING(&new_var);
@@ -400,7 +400,7 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 		}
 		efree(*val);
 		if (Z_STRLEN(new_var)) {
-			*val = estrndup(Z_STRVAL(new_var), Z_STRLEN(new_var) + 1);
+			*val = estrndup(Z_STRVAL(new_var), Z_STRLEN(new_var));
 		} else {
 			*val = estrdup("");
 		}
