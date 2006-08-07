@@ -239,7 +239,7 @@ $pass_option_n = false;
 $pass_options = '';
 
 $compression = 0;
-$output_file = $CUR_DIR . '/php_test_results_' . date('Ymd_Hi') . '.txt';
+$output_file = $CUR_DIR . '/php_test_results_' . @date('Ymd_Hi') . '.txt';
 if ($compression) {
 	$output_file = 'compress.zlib://' . $output_file . '.gz';
 }
@@ -710,7 +710,9 @@ if ($just_save_results || !getenv('NO_INTERACTION')) {
 
 			/* Use shtool to find out if there is glibtool present (MacOSX) */
 			$sys_libtool_path = shell_exec(dirname(__FILE__) . '/build/shtool path glibtool libtool');
-			$sys_libtool = shell_exec(str_replace("\n", "", $sys_libtool_path) . ' --version');
+			if ($sys_libtool_path) {
+				$sys_libtool = shell_exec(str_replace("\n", "", $sys_libtool_path) . ' --version');
+			}
 
 			/* Try the most common flags for 'version' */
 			$flags = array('-v', '-V', '--version');
@@ -1802,10 +1804,10 @@ function show_start($start_time)
 
 	if ($html_output)
 	{
-		fwrite($html_file, "<h2>Time Start: " . date('Y-m-d H:i:s', $start_time) . "</h2>\n");
+		fwrite($html_file, "<h2>Time Start: " . @date('Y-m-d H:i:s', $start_time) . "</h2>\n");
 		fwrite($html_file, "<table>\n");
 	}
-	echo "TIME START " . date('Y-m-d H:i:s', $start_time) . "\n=====================================================================\n";
+	echo "TIME START " . @date('Y-m-d H:i:s', $start_time) . "\n=====================================================================\n";
 }
 
 function show_end($end_time)
@@ -1815,9 +1817,9 @@ function show_end($end_time)
 	if ($html_output)
 	{
 		fwrite($html_file, "</table>\n");
-		fwrite($html_file, "<h2>Time End: " . date('Y-m-d H:i:s', $end_time) . "</h2>\n");
+		fwrite($html_file, "<h2>Time End: " . @date('Y-m-d H:i:s', $end_time) . "</h2>\n");
 	}
-	echo "=====================================================================\nTIME END " . date('Y-m-d H:i:s', $end_time) . "\n";
+	echo "=====================================================================\nTIME END " . @date('Y-m-d H:i:s', $end_time) . "\n";
 }
 
 function show_summary()
