@@ -1763,6 +1763,9 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, ANY, CONST|TMP|VAR|UNUSED|CV)
 		if(!ce->constructor) {
 			zend_error_noreturn(E_ERROR, "Can not call constructor");
 		}
+		if (Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+			zend_error(E_COMPILE_ERROR, "Cannot call private %s::__constrcut()", ce->name);
+		}
 		EX(fbc) = ce->constructor;
 	}
 
