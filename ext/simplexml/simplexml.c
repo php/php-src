@@ -1200,9 +1200,9 @@ SXE_METHOD(asXML)
 				int bytes;
 				bytes = xmlSaveFile(filename, (xmlDocPtr) sxe->document->ptr);
 				if (bytes == -1) {
-					RETVAL_FALSE;
+					RETURN_FALSE;
 				} else {
-					RETVAL_TRUE;
+					RETURN_TRUE;
 				}
 			} else {
 				outbuf = xmlOutputBufferCreateFilename(filename, NULL, 0);
