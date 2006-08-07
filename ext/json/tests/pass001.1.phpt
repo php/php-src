@@ -1,16 +1,16 @@
 --TEST--
-JSON Test Pattern pass1.1
-Modified to test unescaped UNICODE as keys and values.
-Modified to test numbers with exponents without a decimal point.
-Modified to test empty string values.
-Modified to test a mix of integers and strings as keys.
-http://www.crockford.com/JSON/JSON_checker/test/pass1.json
+JSON (http://www.crockford.com/JSON/JSON_checker/test/pass1.json)
 --SKIPIF--
 <?php
   if (!extension_loaded('json')) die('skip: json extension not available');
 ?>
 --FILE--
 <?php
+/* Modified to test unescaped UNICODE as keys and values.
+ * Modified to test numbers with exponents without a decimal point.
+ * Modified to test empty string values.
+ * Modified to test a mix of integers and strings as keys.
+ */
 // Expect warnings about INF.
 ini_set("error_reporting", E_ALL & ~E_WARNING);
 
