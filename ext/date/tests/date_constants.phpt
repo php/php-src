@@ -90,7 +90,21 @@ unicode(31) "Sat, 01 Jul 2006 14:27:30 +0200"
 unicode(31) "Tue, 30 May 2006 14:32:13 +0200"
 unicode(31) "Sat, 01 Jul 2006 14:27:30 +0200"
 unicode(31) "Tue, 30 May 2006 14:32:13 +0200"
+unicode(25) "2006-07-01T14:27:30+02:00"
+unicode(25) "2006-05-30T14:32:13+02:00"
 unicode(31) "Sat, 01 Jul 2006 14:27:30 +0200"
 unicode(31) "Tue, 30 May 2006 14:32:13 +0200"
 unicode(25) "2006-07-01T14:27:30+02:00"
 unicode(25) "2006-05-30T14:32:13+02:00"
+
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
