@@ -41,6 +41,7 @@ PHP                                                                        NEWS
   (Marcus)
 - Fixed bug #38289 (segfault in session_decode() when _SESSION is NULL). 
   (Tony)
+- Fixed Bug #38287 (static variables mess up global vars). (Dmitry)
 - Fixed bug #38278 (session_cache_expire()'s value does not match phpinfo's 
   session.cache_expire). (Tony)
 - Fixed bug #38276 (file_exists() works incorrectly with long filenames 
