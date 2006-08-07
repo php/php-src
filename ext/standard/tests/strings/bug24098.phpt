@@ -26,5 +26,5 @@ array(4) {
   [u"extension"]=>
   unicode(3) "asa"
   [u"filename"]=>
-  string(4) "dsds"
+  unicode(4) "dsds"
 }
