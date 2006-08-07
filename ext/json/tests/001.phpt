@@ -69,3 +69,47 @@ object(stdClass)#1 (1) {
 NULL
 NULL
 Done
+--UEXPECTF--
+Warning: json_decode() expects at least 1 parameter, 0 given in %s on line %d
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+object(stdClass)#1 (1) {
+  [u"test"]=>
+  object(stdClass)#2 (1) {
+    [u"foo"]=>
+    string(3) "bar"
+  }
+}
+object(stdClass)#1 (1) {
+  [u"test"]=>
+  object(stdClass)#2 (1) {
+    [u"foo"]=>
+    string(0) ""
+  }
+}
+object(stdClass)#1 (1) {
+  [u"_empty_"]=>
+  object(stdClass)#2 (1) {
+    [u"foo"]=>
+    string(0) ""
+  }
+}
+object(stdClass)#1 (1) {
+  [u"_empty_"]=>
+  object(stdClass)#2 (1) {
+    [u"_empty_"]=>
+    string(0) ""
+  }
+}
+NULL
+NULL
+Done
