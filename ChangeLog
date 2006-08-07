@@ -1,3 +1,73 @@
+2006-08-06  Antony Dovgal  <antony@zend.com>
+
+    * configure.in
+      configure.in:
+      use -O0 with --enable-debug
+
+    * ext/simplexml/tests/bug38354.phpt
+      ext/simplexml/tests/bug38354.phpt:
+      fix test
+
+    * (PHP_5_2)
+      ext/simplexml/tests/bug38354.phpt:
+      add test
+
+    * ext/simplexml/tests/bug38354.phpt
+      ext/simplexml/tests/bug38354.phpt:
+      
+      add test
+
+2006-08-06  Christian Stocker  <chregu@bitflux.ch>
+
+    * ext/simplexml/simplexml.c:
+      Fix #38354 (Unwanted reformatting of XML when using AsXML)
+      (MFB)
+
+    * (PHP_5_2)
+      NEWS
+      ext/simplexml/simplexml.c:
+      
+      Fix #38354 (Unwanted reformatting of XML when using AsXML)
+
+2006-08-06  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/libxml/libxml.c
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug38347.phpt:
+      MFH: fix #38347 (Segmentation fault when using foreach with an
+      unknown/empty SimpleXMLElement)
+
+    * ext/libxml/libxml.c
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug38347.phpt
+      ext/simplexml/tests/bug38347.phpt:
+      fix #38347 (Segmentation fault when using foreach with an unknown/empty
+      SimpleXMLElement)
+
+    * ext/oci8/oci8.c
+      ext/oci8/oci8.c:
+      long -> int
+
+2006-08-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      ext/spl/spl_directory.c:
+      - MFH Fix cvs access through SplFileObject
+
+    * ext/spl/spl_directory.c:
+      - Fix cvs access through SplFileObject
+
+2006-08-06  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/simplexml/simplexml.c:
+      avoid extra strlen() call
+
+    * ext/simplexml/simplexml.c:
+      avoid extra strlen() call, we have the length of the data
+
 2006-08-05  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
