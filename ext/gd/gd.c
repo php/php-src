@@ -3677,7 +3677,7 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		ch = (int)((unsigned char)*(Z_STRVAL_PP(C)));
 	} else {
 		str = (unsigned char *) estrndup(Z_STRVAL_PP(C), Z_STRLEN_PP(C));
-		l = strlen(str);
+		l = strlen((char *)str);
 	}
 
 	y = Z_LVAL_PP(Y);
@@ -4044,7 +4044,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 	{
 		char tmp_font_path[MAXPATHLEN];
 
-		if (VCWD_REALPATH(fontname, tmp_font_path)) {
+		if (VCWD_REALPATH((char *)fontname, tmp_font_path)) {
 			fontname = (unsigned char *) fontname;
 		} else {
 			fontname = NULL;
@@ -4054,18 +4054,18 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 	fontname = (unsigned char *) fontname;
 #endif
 
-	PHP_GD_CHECK_OPEN_BASEDIR(fontname, "Invalid font filename");
+	PHP_GD_CHECK_OPEN_BASEDIR((char *)fontname, "Invalid font filename");
 	
 #ifdef USE_GD_IMGSTRTTF
 # if HAVE_GD_STRINGFTEX
 	if (extended) {
-		error = gdImageStringFTEx(im, brect, col, fontname, ptsize, angle, x, y, str, &strex);
+		error = gdImageStringFTEx(im, brect, col, (char *)fontname, ptsize, angle, x, y, (char *)str, &strex);
 	}
 	else
 # endif
 
 # if HAVE_GD_STRINGFT
-	error = gdImageStringFT(im, brect, col, fontname, ptsize, angle, x, y, str);
+	error = gdImageStringFT(im, brect, col, (char *)fontname, ptsize, angle, x, y, (char *)str);
 # elif HAVE_GD_STRINGTTF
 	error = gdImageStringTTF(im, brect, col, fontname, ptsize, angle, x, y, str);
 # endif

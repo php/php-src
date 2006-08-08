@@ -544,7 +544,7 @@ gdImagePtr gdImageCreateFromGd2PartCtx (gdIOCtx * in, int srcx, int srcy, int w,
 				chunkNum = cx + cy * ncx;
 
 				chunkLen = chunkMax;
-				if (!_gd2ReadChunk (chunkIdx[chunkNum].offset, compBuf, chunkIdx[chunkNum].size, chunkBuf, &chunkLen, in)) {
+				if (!_gd2ReadChunk (chunkIdx[chunkNum].offset, compBuf, chunkIdx[chunkNum].size, (char *)chunkBuf, &chunkLen, in)) {
 					php_gd_error("Error reading comproessed chunk");
 					goto fail2;
 				}
@@ -558,7 +558,7 @@ gdImagePtr gdImageCreateFromGd2PartCtx (gdIOCtx * in, int srcx, int srcy, int w,
 				for (x = xlo; x < xhi; x++) {
 					if (!gd2_compressed(fmt)) {
 						if (im->trueColor) {
-							if (!gdGetInt(&ch, in)) {
+							if (!gdGetInt((int *)&ch, in)) {
 								ch = 0;
 							}
 						} else {
