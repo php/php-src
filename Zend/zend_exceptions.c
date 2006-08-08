@@ -145,7 +145,7 @@ ZEND_METHOD(exception, __construct)
 			UChar *u_str;
 			int u_len;
 
-			zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, message, message_len, &status);
+			zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, message, message_len, &status);
 			zend_update_property_unicodel(default_exception_ce, object, "message", sizeof("message")-1, u_str, u_len TSRMLS_CC);
 			efree(u_str);
 		} else {
@@ -184,7 +184,7 @@ ZEND_METHOD(error_exception, __construct)
 			UChar *u_str;
 			int u_len;
 
-			zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, message, message_len, &status);
+			zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, message, message_len, &status);
 			zend_update_property_unicodel(default_exception_ce, object, "message", sizeof("message")-1, u_str, u_len TSRMLS_CC);
 			efree(u_str);
 		} else {

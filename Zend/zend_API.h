@@ -382,7 +382,7 @@ ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
 		UChar *u_str; \
 		int u_len; \
 		int length = strlen(str); \
-		zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, str, length, &status); \
+		zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, str, length, &status); \
 		if ((flags) & ZSTR_AUTOFREE) { \
 			efree(str); \
 		} \
@@ -396,7 +396,7 @@ ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
     UErrorCode status = U_ZERO_ERROR; \
 		UChar *u_str; \
 		int u_len; \
-		zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, str, length, &status); \
+		zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, str, length, &status); \
 		if ((flags) & ZSTR_AUTOFREE) { \
 			efree(str); \
 		} \
@@ -587,7 +587,7 @@ ZEND_API int add_next_index_zval(zval *arg, zval *value);
 		UChar *u_str; \
 		int u_len; \
 		int length = strlen(str); \
-		zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, str, length, &status); \
+		zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, str, length, &status); \
 		if ((flags) & ZSTR_AUTOFREE) { \
 			efree(str); \
 		} \
@@ -601,7 +601,7 @@ ZEND_API int add_next_index_zval(zval *arg, zval *value);
     UErrorCode status = U_ZERO_ERROR; \
 		UChar *u_str; \
 		int u_len; \
-		zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, str, length, &status); \
+		zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, str, length, &status); \
 		if ((flags) & ZSTR_AUTOFREE) { \
 			efree(str); \
 		} \
@@ -806,7 +806,7 @@ END_EXTERN_C()
 		UChar *u_str; \
 		int u_len; \
 		uint length = strlen(s); \
-		zend_convert_to_unicode(conv, &u_str, &u_len, s, length, &status); \
+		zend_string_to_unicode_ex(conv, &u_str, &u_len, s, length, &status); \
 		if ((flags) & ZSTR_AUTOFREE) { \
 			efree(s); \
 		} \
@@ -823,7 +823,7 @@ END_EXTERN_C()
 		UErrorCode status = U_ZERO_ERROR; \
 		UChar *u_str; \
 		int u_len; \
-		zend_convert_to_unicode(conv, &u_str, &u_len, s, l, &status); \
+		zend_string_to_unicode_ex(conv, &u_str, &u_len, s, l, &status); \
 		if ((flags) & ZSTR_AUTOFREE) { \
 			efree(s); \
 		} \

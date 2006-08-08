@@ -631,7 +631,7 @@ ZEND_API int zend_convert_scanner_output(UConverter *conv, UChar **target, int *
 
 	/* reset the error and perform conversion */
 	*status = U_ZERO_ERROR;
-	zend_convert_to_unicode(conv, target, target_len, source, source_len, status);
+	zend_string_to_unicode_ex(conv, target, target_len, source, source_len, status);
 
 	/* figure out how many source bytes were consumed */
 	if (U_SUCCESS(*status)) {
