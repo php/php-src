@@ -233,6 +233,29 @@ zend_memnstr(char *haystack, char *needle, int needle_len, char *end)
 	return NULL;
 }
 
+#ifdef HAVE_MEMRCHR
+# ifndef __USE_GNU
+#  define __USE_GNU
+# endif
+
+#include <string.h>
+#define zend_memrchr memrchr
+
+#else
+
+static inline void *zend_memrchr(const void *s, int c, size_t n)
+{
+	register unsigned char *e = (unsigned char *)s + n;
+
+	for (e--; e >= (unsigned char *)s; e--) {
+		if (*e == (unsigned char)c) {
+			return (void *)e;
+		}
+	}
+
+	return NULL;
+}
+#endif
 
 BEGIN_EXTERN_C()
 ZEND_API int increment_function(zval *op1);
