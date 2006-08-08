@@ -1,3 +1,34 @@
+2006-08-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      zend_vm_def.h
+      zend_vm_execute.h:
+      - MFH Fixed Bug #38064 ignored constructor visibility
+
+    * zend_vm_def.h
+      zend_vm_execute.h:
+      - Fixed Bug #38064 ignored constructor visibility
+
+2006-08-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.h
+      zend.h
+      zend_objects_API.c
+      zend_objects_API.c
+      zend_objects_API.h
+      zend_objects_API.h
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug38287.phpt:
+      Fixed bug #38287 (static variables mess up global vars)
+
+    * tests/bug38287.phpt
+      tests/bug38287.phpt:
+      
+      file bug38287.phpt was initially added on branch PHP_5_2.
+
 2006-08-04  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_API.c
