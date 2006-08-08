@@ -4,7 +4,7 @@ SimpleXML: adding/removing attributes (second)
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
 <?php 
-$xml =<<<EOF
+$xml =b<<<EOF
 <people>
    <person name="Joe"></person>
    <person name="Boe"></person>

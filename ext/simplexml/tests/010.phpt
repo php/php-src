@@ -9,7 +9,7 @@ class simplexml_inherited extends SimpleXMLElement
 {
 }
 
-$xml =<<<EOF
+$xml =b<<<EOF
 <?xml version='1.0'?>
 <!DOCTYPE sxe SYSTEM "notfound.dtd">
 <sxe id="elem1">

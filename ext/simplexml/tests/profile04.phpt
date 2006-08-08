@@ -4,7 +4,7 @@ SimpleXML [profile]: Accessing a namespaced element
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
 <?php 
-$root = simplexml_load_string('<?xml version="1.0"?>
+$root = simplexml_load_string(b'<?xml version="1.0"?>
 <root xmlns:reserved="reserved-ns">
  <reserved:child>Hello</reserved:child>
 </root>

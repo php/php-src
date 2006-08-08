@@ -5,7 +5,7 @@ SimpleXML: Attributes
 --FILE--
 <?php 
 
-$xml =<<<EOF
+$xml =b<<<EOF
 <?xml version='1.0'?>
 <!DOCTYPE sxe SYSTEM "notfound.dtd">
 <sxe id="elem1">

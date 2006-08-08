@@ -6,7 +6,7 @@ Bug #26976 (Can not access array elements using array indices)
 <?php
 
 $root = simplexml_load_string(
-'<?xml version="1.0"?>
+b'<?xml version="1.0"?>
 <root>
  <child>a</child>
  <child>b</child>

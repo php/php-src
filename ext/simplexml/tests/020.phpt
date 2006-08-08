@@ -4,8 +4,7 @@ SimpleXML: Attribute compared to string
 <?php if (!extension_loaded("simplexml")) print "skip"; ?> 
 --FILE--
 <?php
-
-$doc = simplexml_load_string('<root><name attr="foo">bar</name></root>');
+$doc = simplexml_load_string(b'<root><name attr="foo">bar</name></root>');
 print $doc->name["attr"];
 print "\n";
 if ($doc->name["attr"] == "foo") {

@@ -4,7 +4,7 @@ SimpleXML: Adding an elements
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
 <?php 
-$xml =<<<EOF
+$xml =b<<<EOF
 <people></people>
 EOF;
 

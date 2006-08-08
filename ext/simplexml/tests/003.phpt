@@ -5,7 +5,7 @@ SimpleXML: Entities
 --FILE--
 <?php 
 
-$xml =<<<EOF
+$xml =b<<<EOF
 <?xml version='1.0'?>
 <!DOCTYPE sxe SYSTEM "notfound.dtd" [
 <!ENTITY included-entity "This is text included from an entity">

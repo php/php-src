@@ -4,7 +4,7 @@ SimpleXML: isset and unset by offset
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
 <?php 
-$xml =<<<EOF
+$xml =b<<<EOF
 <root s:att1="b" att1="a" 
       xmlns:s="urn::test" xmlns:t="urn::test-t">
    <child1>test</child1>

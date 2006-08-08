@@ -5,7 +5,7 @@ SimpleXML [profile]: Accessing by namespace prefix
 --FILE--
 <?php
 
-$xml =<<<EOF
+$xml =b<<<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <soap:Envelope
 xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" 

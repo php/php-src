@@ -5,7 +5,7 @@ SimpleXML: Attributes inside foreach
 --FILE--
 <?php 
 
-$xml =<<<EOF
+$xml =b<<<EOF
 <?xml version='1.0'?>
 <pres><content><file glob="slide_*.xml"/></content></pres>
 EOF;

@@ -7,7 +7,7 @@ SimpleXML: Split text content
 --FILE--
 <?php 
 
-$xml =<<<EOF
+$xml =b<<<EOF
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <foo>bar<baz/>bar</foo>
 EOF;

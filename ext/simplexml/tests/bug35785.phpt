@@ -5,13 +5,13 @@ Bug #35785 (SimpleXML memory read error)
 --FILE--
 <?php
 
-$xml = simplexml_load_string("<root></root>");
+$xml = simplexml_load_string(b"<root></root>");
 $xml->bla->posts->name = "FooBar";
 echo $xml->asXML();
 
 echo "===FAIL===\n";
 
-$xml = simplexml_load_string("<root></root>");
+$xml = simplexml_load_string(b"<root></root>");
 $count = count($xml->bla->posts);
 var_dump($count);
 $xml->bla->posts[++$count]->name = "FooBar";

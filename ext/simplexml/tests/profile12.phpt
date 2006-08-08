@@ -5,7 +5,7 @@ SimpleXML [profile]: Accessing namespaced root and non namespaced children
 --FILE--
 <?php
 
-$xml =<<<EOF
+$xml =b<<<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <soap:Envelope
 xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" 
@@ -75,7 +75,7 @@ object(SimpleXMLElement)#%s (2) {
 --UEXPECTF--
 array(1) {
   [u"soap"]=>
-  string(41) "http://schemas.xmlsoap.org/soap/envelope/"
+  unicode(41) "http://schemas.xmlsoap.org/soap/envelope/"
 }
 object(SimpleXMLElement)#%s (0) {
 }

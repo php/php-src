@@ -6,7 +6,7 @@ Bug #38354 (Unwanted reformatting of XML when using AsXML)
 <?php
 
 $xml = simplexml_load_string(
-'<code>
+b'<code>
 	<a href="javascript:alert(\'1\');"><strong>Item Two</strong></a>
 </code>'
 );
