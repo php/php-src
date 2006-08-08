@@ -66,7 +66,7 @@ static int php_info_write_wrapper(const char *str, uint str_length)
 
 	TSRMLS_FETCH();
 
-	elem_esc = php_escape_html_entities((char *)str, str_length, &new_len, 0, ENT_QUOTES, NULL TSRMLS_CC);
+	elem_esc = php_escape_html_entities((unsigned char *)str, str_length, &new_len, 0, ENT_QUOTES, NULL TSRMLS_CC);
 
 	written = php_body_write(elem_esc, new_len TSRMLS_CC);
 
@@ -207,7 +207,7 @@ void php_info_print_style(TSRMLS_D)
 PHPAPI void php_info_html_esc_write(char *string, int str_len TSRMLS_DC)
 {
 	int new_len;
-	char *ret = php_escape_html_entities(string, str_len, &new_len, 0, ENT_QUOTES, NULL TSRMLS_CC);
+	char *ret = php_escape_html_entities((unsigned char *)string, str_len, &new_len, 0, ENT_QUOTES, NULL TSRMLS_CC);
 
 	PHPWRITE(ret, new_len);
 	efree(ret);
@@ -219,7 +219,7 @@ PHPAPI void php_info_html_esc_write(char *string, int str_len TSRMLS_DC)
 PHPAPI char *php_info_html_esc(char *string TSRMLS_DC)
 {
 	int new_len;
-	return php_escape_html_entities(string, strlen(string), &new_len, 0, ENT_QUOTES, NULL TSRMLS_CC);
+	return php_escape_html_entities((unsigned char *)string, strlen(string), &new_len, 0, ENT_QUOTES, NULL TSRMLS_CC);
 }
 /* }}} */
 
@@ -509,7 +509,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 			if ((url_stream_wrappers_hash = php_stream_get_url_stream_wrappers_hash())) {
 				for (zend_hash_internal_pointer_reset(url_stream_wrappers_hash);
-						zend_hash_get_current_key_ex(url_stream_wrappers_hash, &stream_protocol, &stream_protocol_len, &num_key, 0, NULL) == HASH_KEY_IS_STRING;
+						zend_hash_get_current_key_ex(url_stream_wrappers_hash, &stream_protocol, (uint *)&stream_protocol_len, &num_key, 0, NULL) == HASH_KEY_IS_STRING;
 						zend_hash_move_forward(url_stream_wrappers_hash)) {
 					stream_protocols_buf = erealloc(stream_protocols_buf, stream_protocols_buf_len + stream_protocol_len + 2 + 1);
 					memcpy(stream_protocols_buf + stream_protocols_buf_len, stream_protocol, stream_protocol_len);
@@ -540,7 +540,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 			if ((stream_xport_hash = php_stream_xport_get_hash())) {
 				for(zend_hash_internal_pointer_reset(stream_xport_hash);
-					zend_hash_get_current_key_ex(stream_xport_hash, &xport_name, &xport_name_len, &num_key, 0, NULL) == HASH_KEY_IS_STRING;
+					zend_hash_get_current_key_ex(stream_xport_hash, &xport_name, (uint *)&xport_name_len, &num_key, 0, NULL) == HASH_KEY_IS_STRING;
 					zend_hash_move_forward(stream_xport_hash)) {
 					if (xport_buf_len + xport_name_len + 3 > xport_buf_size) {
 						while (xport_buf_len + xport_name_len + 3 > xport_buf_size) {
@@ -581,7 +581,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 			if ((stream_filter_hash = php_get_stream_filters_hash())) {
 				for(zend_hash_internal_pointer_reset(stream_filter_hash);
-					zend_hash_get_current_key_ex(stream_filter_hash, &filter_name, &filter_name_len, &num_key, 0, NULL) == HASH_KEY_IS_STRING;
+					zend_hash_get_current_key_ex(stream_filter_hash, &filter_name, (uint *)&filter_name_len, &num_key, 0, NULL) == HASH_KEY_IS_STRING;
 					zend_hash_move_forward(stream_filter_hash)) {
 					if (filter_buf_len + filter_name_len + 3 > filter_buf_size) {
 						while (filter_buf_len + filter_name_len + 3 > filter_buf_size) {
