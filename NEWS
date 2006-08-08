@@ -30,6 +30,8 @@ PHP                                                                        NEWS
 - Fixed phpinfo() cutoff of variables at \0. (Ilia)
 - Fixed a bug in the filter extension that prevented magic_quotes_gpc from
   being applied when RAW filter is used. (Ilia)
+- Fixed bug #38377 (session_destroy() gives warning after
+  session_regenerate_id()). (Ilia)
 - Fixed bug #38354 (Unwanted reformatting of XML when using AsXML). (Christian)
 - Fixed bug #38347 (Segmentation fault when using foreach with an unknown/empty 
   SimpleXMLElement). (Tony)
