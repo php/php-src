@@ -106,7 +106,7 @@ static inline UChar32 zend_get_codepoint_at(UChar *str, int length, int n)
 	if (n > 0) {
 		U16_FWD_N(str, offset, length, n);
 	}
-	U16_GET(str, 0, offset, length, c);
+	U16_NEXT(str, offset, length, c);
 
 	return c;
 }
