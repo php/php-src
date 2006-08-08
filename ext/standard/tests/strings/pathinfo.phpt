@@ -113,7 +113,7 @@ array(2) {
   [u"basename"]=>
   unicode(0) ""
   [u"filename"]=>
-  string(0) ""
+  unicode(0) ""
 }
 array(4) {
   [u"dirname"]=>
@@ -123,7 +123,7 @@ array(4) {
   [u"extension"]=>
   unicode(0) ""
   [u"filename"]=>
-  string(0) ""
+  unicode(0) ""
 }
 array(4) {
   [u"dirname"]=>
@@ -133,7 +133,7 @@ array(4) {
   [u"extension"]=>
   unicode(0) ""
   [u"filename"]=>
-  string(1) "."
+  unicode(1) "."
 }
 array(3) {
   [u"dirname"]=>
@@ -141,7 +141,7 @@ array(3) {
   [u"basename"]=>
   unicode(0) ""
   [u"filename"]=>
-  string(0) ""
+  unicode(0) ""
 }
 array(4) {
   [u"dirname"]=>
@@ -151,7 +151,7 @@ array(4) {
   [u"extension"]=>
   unicode(0) ""
   [u"filename"]=>
-  string(0) ""
+  unicode(0) ""
 }
 array(4) {
   [u"dirname"]=>
@@ -161,7 +161,7 @@ array(4) {
   [u"extension"]=>
   unicode(0) ""
   [u"filename"]=>
-  string(0) ""
+  unicode(0) ""
 }
 array(4) {
   [u"dirname"]=>
@@ -171,10 +171,10 @@ array(4) {
   [u"extension"]=>
   unicode(9) "cvsignore"
   [u"filename"]=>
-  string(0) ""
+  unicode(0) ""
 }
 unicode(12) "pathinfo.php"
-string(8) "pathinfo"
+unicode(8) "pathinfo"
 unicode(3) "php"
 unicode(%d) "%s/strings"
 unicode(%d) "%s/strings"
