@@ -110,7 +110,16 @@ PHP_LIBXML_API void php_libxml_shutdown();
 	ZVAL_U_STRING(libxml_utf_conv, z, s, flags);					\
 }
 
+#define ZVAL_XML_STRING_LEN(z, s, l, flags) {								\
+	UConverter *libxml_utf_conv = NULL;								\
+	if (UG(unicode)) {												\
+		libxml_utf_conv = UG(utf8_conv);							\
+	}																\
+	ZVAL_U_STRINGL(libxml_utf_conv, z, s, l, flags);					\
+}
+
 #define RETVAL_XML_STRING(s, flags)			ZVAL_XML_STRING(return_value, s, flags)
+#define RETVAL_XML_STRING_LEN(s, l, flags)	ZVAL_XML_STRING_LEN(return_value, s, l, flags)
 
 #ifdef ZTS
 #define LIBXML(v) TSRMG(libxml_globals_id, zend_libxml_globals *, v)
