@@ -372,8 +372,8 @@ last_value:
 				php_url_decode(var, var_len);
 				val++;
 				val_len = php_url_decode(val, (p - val));
-				zend_convert_to_unicode(input_conv, &u_var, &u_var_len, var, var_len, &status1);
-				zend_convert_to_unicode(input_conv, &u_val, &u_val_len, val, val_len, &status2);
+				zend_string_to_unicode_ex(input_conv, &u_var, &u_var_len, var, var_len, &status1);
+				zend_string_to_unicode_ex(input_conv, &u_val, &u_val_len, val, val_len, &status2);
 				if (U_SUCCESS(status1) && U_SUCCESS(status2)) {
 					/* UTODO add input filtering */
 					php_u_register_variable_safe(u_var, u_val, u_val_len, array_ptr TSRMLS_CC);
@@ -515,7 +515,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 			int u_var_len, u_val_len;
 			UErrorCode status = U_ZERO_ERROR;
 
-			zend_convert_to_unicode(input_conv, &u_var, &u_var_len, var, var_len, &status);
+			zend_string_to_unicode_ex(input_conv, &u_var, &u_var_len, var, var_len, &status);
 			if (U_FAILURE(status)) {
 				/* UTODO set a user-accessible flag to indicate that conversion failed? */
 				efree(u_var);
@@ -527,7 +527,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 				unsigned int new_val_len;
 
 				val_len = php_url_decode(val, strlen(val));
-				zend_convert_to_unicode(input_conv, &u_val, &u_val_len, val, val_len, &status);
+				zend_string_to_unicode_ex(input_conv, &u_val, &u_val_len, val, val_len, &status);
 				if (U_FAILURE(status)) {
 					/* UTODO set a user-accessible flag to indicate that conversion failed? */
 					efree(u_var);

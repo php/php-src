@@ -56,7 +56,7 @@ static void php_var_dump_unicode(UChar *ustr, int length, int verbose, char *quo
 		return;
 	}
 
-	zend_convert_from_unicode(ZEND_U_CONVERTER(UG(output_encoding_conv)), &out, &clen, ustr, length, &status);
+	zend_unicode_to_string_ex(ZEND_U_CONVERTER(UG(output_encoding_conv)), &out, &clen, ustr, length, &status);
 	if(U_FAILURE(status)) {
 		php_printf("problem converting string from Unicode: %s\n", u_errorName(status));
 		efree(out);

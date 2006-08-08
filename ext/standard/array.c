@@ -1277,7 +1277,7 @@ static int php_extract_prefix_varname(zval *result, zval *prefix, zstr var_name,
 			int buf_len;
 			UErrorCode status = U_ZERO_ERROR;
 
-			zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)),
+			zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)),
 									&buf, &buf_len, var_name.s, var_name_len, &status);
 			if (U_FAILURE(status)) {
 				zval_dtor(result);
@@ -1304,7 +1304,7 @@ static int php_extract_prefix_varname(zval *result, zval *prefix, zstr var_name,
 			int buf_len;
 			UErrorCode status = U_ZERO_ERROR;
 
-			zend_convert_from_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)),
+			zend_unicode_to_string_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)),
 									  &buf, &buf_len, var_name.u, var_name_len, &status);
 			if (U_FAILURE(status)) {
 				zval_dtor(result);

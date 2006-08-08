@@ -243,7 +243,7 @@ PHPAPI int php_output_write_unicode(const UChar *str, size_t len TSRMLS_DC)
 		return 0;
 	}
 	
-	zend_convert_from_unicode(UG(output_encoding_conv), &buf_str, &buf_len, str, len, &status);
+	zend_unicode_to_string_ex(UG(output_encoding_conv), &buf_str, &buf_len, str, len, &status);
 	if (U_ZERO_ERROR == status) {
 		php_output_op(PHP_OUTPUT_HANDLER_WRITE, buf_str, buf_len TSRMLS_CC);
 	}

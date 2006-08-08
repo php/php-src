@@ -632,7 +632,7 @@ try_again:
 									char *res;
 									int res_len;
 
-									zend_convert_from_unicode(UG(utf8_conv), &res, &res_len, key.u, key_len-1, &status);
+									zend_unicode_to_string_ex(UG(utf8_conv), &res, &res_len, key.u, key_len-1, &status);
 									smart_str_appendl(&soap_headers, res, res_len);
 									efree(res);
 								}
@@ -644,7 +644,7 @@ try_again:
 									char *res;
 									int res_len;
 
-									zend_convert_from_unicode(UG(utf8_conv), &res, &res_len, Z_USTRVAL_PP(value), Z_USTRLEN_PP(value), &status);
+									zend_unicode_to_string_ex(UG(utf8_conv), &res, &res_len, Z_USTRVAL_PP(value), Z_USTRLEN_PP(value), &status);
 									smart_str_appendl(&soap_headers, res, res_len);
 									efree(res);
 								}
