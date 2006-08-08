@@ -2104,13 +2104,13 @@ PHP_FUNCTION(pathinfo)
 		int ext_len;
 
 		if (path_type == IS_UNICODE) {
-			ext.u = u_strrchr(ret.u, (UChar) 0x2e /*'.'*/);
+			ext.u = u_memrchr32(ret.u, (UChar) 0x2e /*'.'*/, ret_len);
 			if (ext.u) {
 				ext.u++;
 				ext_len = ret_len - (ext.u - ret.u);
 			}
 		} else {
-			ext.s = strrchr(ret.s, '.');
+			ext.s = zend_memrchr(ret.s, '.', ret_len);
 			if (ext.s) {
 				ext.s++;
 				ext_len = ret_len - (ext.s - ret.s);
@@ -2127,10 +2127,10 @@ PHP_FUNCTION(pathinfo)
 		int idx;
 
 		if (path_type == IS_UNICODE) {
-			p.u = u_strrchr(ret.u, (UChar) 0x2e /*'.'*/);
+			p.u = u_memrchr32(ret.u, (UChar) 0x2e /*'.'*/, ret_len);
 			idx = p.u ? (p.u - ret.u) : ret_len;
 		} else {
-			p.s = strrchr(ret.s, '.');
+			p.s = zend_memrchr(ret.s, '.', ret_len);
 			idx = p.s ? (p.s - ret.s) : ret_len;
 		}
 
@@ -2961,7 +2961,7 @@ PHP_FUNCTION(strrchr)
 			ch = zend_get_codepoint_at(Z_USTRVAL_P(needle), Z_USTRLEN_P(needle), 0);
 			found = u_memrchr32(Z_USTRVAL_P(haystack), ch, Z_USTRLEN_P(haystack));
 		} else {
-			found = strrchr(Z_STRVAL_P(haystack), *Z_STRVAL_P(needle));
+			found = zend_memrchr(Z_STRVAL_P(haystack), *Z_STRVAL_P(needle), Z_STRLEN_P(haystack));
 		}
 	} else {
 		convert_to_long(needle);
@@ -2973,7 +2973,7 @@ PHP_FUNCTION(strrchr)
 			}
 			found = u_memrchr32(Z_USTRVAL_P(haystack), ch, Z_USTRLEN_P(haystack));
 		} else {
-			found = strrchr(Z_STRVAL_P(haystack), (char)Z_LVAL_P(needle));
+			found = zend_memrchr(Z_STRVAL_P(haystack), (char)Z_LVAL_P(needle), Z_STRLEN_P(haystack));
 		}
 	}
 
