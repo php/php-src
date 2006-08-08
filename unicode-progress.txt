@@ -19,9 +19,6 @@ ext/standard
     addcslashes()
         Params API. Figure out how to escape characters > 255.
 
-    basename()
-        Create php_u_basename() without mbstring stuff
-
     chunk_split()
         Params API, Unicode upgrades. Split on codepoint level.
 
@@ -41,9 +38,6 @@ ext/standard
 
     nl_langinfo()
         Params API, otherwise leave alone
-
-    nl2br()
-        Params API, IS_UNICODE support
 
     parse_str()
         Params API. How do we deal with encoding of the data?
@@ -113,9 +107,6 @@ ext/standard
     strrchr()
         Needs update so that it doesn't try to find half of a surrogate
         pair.
-
-    strrev()
-        Params API
 
     strtr()
         Check on Derick's progress.
@@ -196,12 +187,14 @@ ext/standard
   string.c
   --------
     addslashes()
+    basename()
     bin2hex()
     chr()
     dirname()
     explode()
     implode()
     levenshtein()
+    nl2br()
     ord()
     pathinfo()
     range()

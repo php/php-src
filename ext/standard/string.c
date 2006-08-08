@@ -5363,78 +5363,127 @@ PHP_FUNCTION(hebrevc)
 /* }}} */
 
 
-/* {{{ proto string nl2br(string str)
+/* {{{ proto string nl2br(string str) U
    Converts newlines to HTML line breaks */
 PHP_FUNCTION(nl2br)
 {
 	/* in brief this inserts <br /> before matched regexp \n\r?|\r\n? */
-	zval	**zstr;
-	char	*tmp, *str;
-	int	new_length;
-	char	*end, *target;
-	int	repl_cnt = 0;
+	zstr	str;
+	int 	str_len;
+	zend_uchar str_type;
+	zstr	p, end, tmp, target;
+	int		new_length;
+	int		repl_cnt = 0;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zstr) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len, &str_type) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(zstr);
-
-	str = Z_STRVAL_PP(zstr);
-	end = str + Z_STRLEN_PP(zstr);
+	p = str;
 
 	/* it is really faster to scan twice and allocate mem once insted scanning once
 	   and constantly reallocing */
-	while (str < end) {
-		if (*str == '\r') {
-			if (*(str+1) == '\n') {
-				str++;
+	if (str_type == IS_UNICODE) {
+		end.u = p.u + str_len;
+		while (p.u < end.u) {
+			if (*p.u == (UChar) 0x0d /*'\r'*/) {
+				if (*(p.u+1) == (UChar) 0x0a /*'\n'*/) {
+					p.u++;
+				}
+				repl_cnt++;
+			} else if (*p.u == (UChar) 0x0a /*'\n'*/) {
+				if (*(p.u+1) == (UChar) 0x0d /*'\r'*/) {
+					p.u++;
+				}
+				repl_cnt++;
 			}
-			repl_cnt++;
-		} else if (*str == '\n') {
-			if (*(str+1) == '\r') {
-				str++;
-			}
-			repl_cnt++;
-		}
 
-		str++;
+			p.u++;
+		}
+	} else {
+		end.s = p.s + str_len;
+		while (p.s < end.s) {
+			if (*p.s == '\r') {
+				if (*(p.s+1) == '\n') {
+					p.s++;
+				}
+				repl_cnt++;
+			} else if (*p.s == '\n') {
+				if (*(p.s+1) == '\r') {
+					p.s++;
+				}
+				repl_cnt++;
+			}
+
+			p.s++;
+		}
 	}
 
 	if (repl_cnt == 0) {
-		RETURN_STRINGL(Z_STRVAL_PP(zstr), Z_STRLEN_PP(zstr), 1);
+		RETURN_ZSTRL(str, str_len, str_type, 1);
 	}
 
-	new_length = Z_STRLEN_PP(zstr) + repl_cnt * (sizeof("<br />") - 1);
-	tmp = target = emalloc(new_length + 1);
+	new_length = str_len + repl_cnt * (sizeof("<br />") - 1);
 
-	str = Z_STRVAL_PP(zstr);
+	if (str_type == IS_UNICODE) {
+		tmp.u = target.u = eumalloc(new_length + 1);
+		p = str;
 
-	while (str < end) {
-		switch (*str) {
-			case '\r':
-			case '\n':
-				*target++ = '<';
-				*target++ = 'b';
-				*target++ = 'r';
-				*target++ = ' ';
-				*target++ = '/';
-				*target++ = '>';
+		while (p.u < end.u) {
+			switch (*p.u) {
+				case 0x0d /*'\r'*/:
+				case 0x0a /*'\n'*/:
+					*target.u++ = (UChar) 0x3c /*'<'*/;
+					*target.u++ = (UChar) 0x62 /*'b'*/;
+					*target.u++ = (UChar) 0x72 /*'r'*/;
+					*target.u++ = (UChar) 0x20 /*' '*/;
+					*target.u++ = (UChar) 0x2f /*'/'*/;
+					*target.u++ = (UChar) 0x3e /*'>'*/;
 
-				if ((*str == '\r' && *(str+1) == '\n') || (*str == '\n' && *(str+1) == '\r')) {
-					*target++ = *str++;
-				}
-				/* lack of a break; is intentional */
-			default:
-				*target++ = *str;
+					if ((*p.u == (UChar) 0x0d /*'\r'*/ && *(p.u+1) == (UChar) 0x0a /*'\n'*/)
+						|| (*p.u == (UChar) 0x0a /*'\n'*/ && *(p.u+1) == (UChar) 0x0d /*'\r'*/)) {
+						*target.u++ = *p.u++;
+					}
+					/* lack of a break; is intentional */
+				default:
+					*target.u++ = *p.u;
+			}
+
+			p.u++;
 		}
 
-		str++;
+		*target.u = 0;
+	} else {
+		tmp.s = target.s = emalloc(new_length + 1);
+		p = str;
+
+		while (p.s < end.s) {
+			switch (*p.s) {
+				case '\r':
+				case '\n':
+					*target.s++ = '<';
+					*target.s++ = 'b';
+					*target.s++ = 'r';
+					*target.s++ = ' ';
+					*target.s++ = '/';
+					*target.s++ = '>';
+
+					if ((*p.s == '\r' && *(p.s+1) == '\n') || (*p.s == '\n' && *(p.s+1) == '\r')) {
+						*target.s++ = *p.s++;
+					}
+					/* lack of a break; is intentional */
+				default:
+					*target.s++ = *p.s;
+			}
+
+			p.s++;
+		}
+
+		*target.s = '\0';
 	}
 
-	*target = '\0';
 
-	RETURN_STRINGL(tmp, new_length, 0);
+	RETURN_ZSTRL(tmp, new_length, str_type, 0);
 }
 /* }}} */
 
