@@ -82,7 +82,7 @@ array(5) {
     string(13) "Comment #3end"
   }
 }
---UEXPECT--
+--UEXPECTF--
 array(5) {
   [u"FILE"]=>
   array(6) {
