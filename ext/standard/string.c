@@ -698,7 +698,7 @@ static int php_expand_u_trim_range(UChar **range, int *range_len TSRMLS_DC)
 static UChar *php_u_trim(UChar *c, int len, UChar *what, int what_len, zval *return_value, int mode TSRMLS_DC)
 {
 	int32_t	i,j;
-	UChar	ch,wh;
+	UChar	ch = 0, wh = 0;
 	int32_t	start = 0, end = len;
 
 	/*
