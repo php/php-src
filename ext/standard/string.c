@@ -2688,7 +2688,7 @@ PHP_FUNCTION(stripos)
 				u_needle_char[needle_len++] = U16_TRAIL(ch);
 				u_needle_char[needle_len]   = 0;
 			}
-			haystack_dup = php_u_strtolower(haystack_dup, &haystack_len, UG(default_locale));
+			haystack_dup = php_u_strtolower(Z_USTRVAL_P(haystack), &haystack_len, UG(default_locale));
 			found = zend_u_memnstr((UChar *)haystack_dup + offset,
 								   (UChar *)u_needle_char, needle_len,
 								   (UChar *)haystack_dup + haystack_len);
