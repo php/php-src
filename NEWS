@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, Version 4.4.4
+- Fixed bug #38377 (session_destroy() gives warning after
+  session_regenerate_id()). (Ilia)
 - Fixed bug #38322 (reading past array in sscanf() leads to arbitary code 
   execution). (Tony)
 - Fixed bug #38278 (session_cache_expire()'s value does not match phpinfo's 
