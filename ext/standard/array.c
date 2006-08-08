@@ -1504,7 +1504,7 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 			UChar *norm;
 			int norm_len;
 
-			if (!zend_normalize_identifier(&norm, &norm_len, key.u, key_len, 0)) {
+			if (zend_normalize_identifier(&norm, &norm_len, key.u, key_len, 0) == FAILURE) {
 				zend_error(E_WARNING, "Could not normalize variable name: %r", key);
 			} else if (norm != key.u) {
 				key.u = norm;
