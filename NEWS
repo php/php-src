@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 - Added an optional boolean parameter to memory_get_usage() and 
   memory_get_peak_usage() to get memory size allocated by emalloc() or real
   size of memory allocated from system. (Dmitry)
+- Implemented #38357 (dbase_open can't open DBase 3 dbf file).
+  (rodrigo at fabricadeideias dot com, Mike)
 
 - Moved extensions to PECL:
   . ext/filepro (Derick, Tony)

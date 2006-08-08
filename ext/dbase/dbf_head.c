@@ -148,6 +148,7 @@ int get_dbf_field(dbhead_t *dbh, dbfield_t *dbf)
 	dbf->db_type = dbfield.dbf_type;
 	switch (dbf->db_type) {
 	    case 'N':
+	    case 'F':
 		dbf->db_flen = dbfield.dbf_flen[0];
 		dbf->db_fdc = dbfield.dbf_flen[1];
 		break;
@@ -231,6 +232,7 @@ char *get_dbf_f_fmt(dbfield_t *dbf)
 	   case 'N':
 	   case 'L':
 	   case 'D':
+	   case 'F':
 		sprintf(format, "%%%ds", dbf->db_flen);
 		break;
 	   case 'M':

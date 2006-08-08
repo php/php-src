@@ -503,6 +503,13 @@ static void php_dbase_get_record(INTERNAL_FUNCTION_PARAMETERS, int assoc)
 					}
 				}
 				break;
+			case 'F':
+				if (!assoc) {
+					add_next_index_double(return_value, atof(str_value));
+				} else {
+					add_assoc_double(return_value, cur_f->db_fname, atof(str_value));
+				}
+				break;
 			case 'L':	/* we used to FALL THROUGH, but now we check for T/Y and F/N
 						   and insert 1 or 0, respectively.  db_fdc is the number of
 						   decimals, which we don't care about.      3/14/2001 LEW */
@@ -690,6 +697,9 @@ PHP_FUNCTION(dbase_create)
 		case 'D':
 			cur_f->db_flen = 8;
 			break;
+		case 'F':
+			cur_f->db_flen = 20;
+			break;
 		case 'N':
 		case 'C':
 			/* field length */
@@ -862,6 +872,7 @@ PHP_FUNCTION(dbase_get_header_info)
 			case 'N': add_assoc_string(row, "type", "number", 1); 		break;
 			case 'L': add_assoc_string(row, "type", "boolean", 1);		break;
 			case 'M': add_assoc_string(row, "type", "memo", 1);			break;
+			case 'F': add_assoc_string(row, "type", "float", 1);     break;
 			default:  add_assoc_string(row, "type", "unknown", 1);		break;
 		}
 		
