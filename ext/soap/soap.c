@@ -308,7 +308,7 @@ char* soap_unicode_to_string(UChar *ustr, int ustr_len TSRMLS_DC)
 	char *tmp;
 	int tmp_len;
 
-	zend_convert_from_unicode(UG(utf8_conv), &tmp, &tmp_len, ustr, ustr_len, &errCode);
+	zend_unicode_to_string_ex(UG(utf8_conv), &tmp, &tmp_len, ustr, ustr_len, &errCode);
 	return tmp;
 }
 

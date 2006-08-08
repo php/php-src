@@ -365,7 +365,7 @@ static inline UChar *php_ap_to_unicode(char *in, int32_t in_len, int32_t *out_le
 	}
 
 	input_conv = ZEND_U_CONVERTER(UG(output_encoding_conv));
-	zend_convert_to_unicode(input_conv, &buf, &buf_len, in, in_len, &status);
+	zend_string_to_unicode_ex(input_conv, &buf, &buf_len, in, in_len, &status);
 	if (U_SUCCESS(status)) {
 		if (out_len)
 			*out_len = buf_len;
@@ -1151,7 +1151,7 @@ static SAPI_POST_HANDLER_FUNC(rfc1867_post_handler_unicode)
 
 				if (value) {
 					/* UTODO use 'charset' parameter for conversion */
-					zend_convert_to_unicode(input_conv, &u_val, &u_val_len, value, value_len, &status);
+					zend_string_to_unicode_ex(input_conv, &u_val, &u_val_len, value, value_len, &status);
 					if (U_FAILURE(status)) {
 						/* UTODO set a user-accessible flag to indicate that conversion failed? */
 						goto var_done;

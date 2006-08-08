@@ -1785,7 +1785,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode)
 					UErrorCode errCode = 0;
 
 					if (Z_TYPE_PP(tmpns) == IS_UNICODE) {
-						zend_convert_from_unicode(UG(utf8_conv), &nschar, &nschar_len, Z_USTRVAL_PP(tmpns), Z_USTRLEN_PP(tmpns), &errCode);
+						zend_unicode_to_string_ex(UG(utf8_conv), &nschar, &nschar_len, Z_USTRVAL_PP(tmpns), Z_USTRLEN_PP(tmpns), &errCode);
 					} else {
 						nschar = Z_STRVAL_PP(tmpns);
 					}
@@ -1800,7 +1800,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode)
 							int tmp_prefix_len;
 							errCode = 0;
 
-							zend_convert_from_unicode(UG(utf8_conv), &tmp_prefix, &tmp_prefix_len, prefix.u, prefix_key_len, &errCode);
+							zend_unicode_to_string_ex(UG(utf8_conv), &tmp_prefix, &tmp_prefix_len, prefix.u, prefix_key_len, &errCode);
 							xmlXPathRegisterNs(ctxp, (xmlChar *)tmp_prefix, (xmlChar *)nschar);
 							efree(tmp_prefix);
 						}
@@ -1815,7 +1815,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 		if (Z_TYPE_PP(zxquery) == IS_UNICODE) {
 			UErrorCode errCode = 0;
-			zend_convert_from_unicode(UG(utf8_conv), &xquery, &xquery_len, Z_USTRVAL_PP(zxquery), Z_USTRLEN_PP(zxquery), &errCode);
+			zend_unicode_to_string_ex(UG(utf8_conv), &xquery, &xquery_len, Z_USTRVAL_PP(zxquery), Z_USTRLEN_PP(zxquery), &errCode);
 		} else {
 			xquery = Z_STRVAL_PP(zxquery);
 		}
@@ -1857,7 +1857,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode)
 					char *prefix;
 					int prfeix_len;
 
-					zend_convert_from_unicode(UG(utf8_conv), &prefix, &prfeix_len, Z_USTRVAL_PP(tmpns), Z_USTRLEN_PP(tmpns), &errCode);
+					zend_unicode_to_string_ex(UG(utf8_conv), &prefix, &prfeix_len, Z_USTRVAL_PP(tmpns), Z_USTRLEN_PP(tmpns), &errCode);
 					inclusive_ns_prefixes[nscount++] = prefix;
 				}
 				zend_hash_move_forward(Z_ARRVAL_P(ns_prefixes));

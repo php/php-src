@@ -727,13 +727,13 @@ PHPAPI int _php_stream_bucket_convert(php_stream_bucket *bucket, unsigned char t
 			UChar *dest;
 			int destlen;
 
-			zend_convert_to_unicode(conv, &dest, &destlen, bucket->buf.s, bucket->buflen, &status);
+			zend_string_to_unicode_ex(conv, &dest, &destlen, bucket->buf.s, bucket->buflen, &status);
 
 			if (bucket->own_buf) {
 				pefree(bucket->buf.s, bucket->is_persistent);
 			}
 
-			/* Might be dangerous, double check this (or, better, get a persistent version of zend_convert_to_unicode() */
+			/* Might be dangerous, double check this (or, better, get a persistent version of zend_string_to_unicode_ex() */
 			bucket->is_persistent = 0;
 
 			bucket->buf_type = IS_UNICODE;
@@ -746,7 +746,7 @@ PHPAPI int _php_stream_bucket_convert(php_stream_bucket *bucket, unsigned char t
 			char *dest;
 			int destlen, num_conv;
 
-			num_conv = zend_convert_from_unicode(conv, &dest, &destlen, bucket->buf.u, bucket->buflen, &status);
+			num_conv = zend_unicode_to_string_ex(conv, &dest, &destlen, bucket->buf.u, bucket->buflen, &status);
 			if (U_FAILURE(status)) {
 				int32_t offset = u_countChar32(bucket->buf.u, num_conv);
 

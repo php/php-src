@@ -1219,7 +1219,7 @@ static size_t _php_stream_write_buffer(php_stream *stream, int buf_type, zstr bu
 		UErrorCode status = U_ZERO_ERROR;
 
 		/* Use runtime_encoding to map to binary */
-		num_conv = zend_convert_from_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &str, &len, buf.u, buflen, &status);
+		num_conv = zend_unicode_to_string_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &str, &len, buf.u, buflen, &status);
 		if (U_FAILURE(status)) {
 			zend_raise_conversion_error_ex("Unable to convert data to be written", ZEND_U_CONVERTER(UG(runtime_encoding_conv)),
 									ZEND_FROM_UNICODE, num_conv TSRMLS_CC);
@@ -2587,7 +2587,7 @@ PHPAPI int _php_stream_path_encode(php_stream_wrapper *wrapper,
 			int scheme_len = 0;
 
 			/* Convert just the scheme using utf8 in order to look it up in the registry */
-			num_conv = zend_convert_from_unicode(UG(utf8_conv), &scheme, &scheme_len, path, (p - path) + delim_len, &status);
+			num_conv = zend_unicode_to_string_ex(UG(utf8_conv), &scheme, &scheme_len, path, (p - path) + delim_len, &status);
 			if (U_FAILURE(status)) {
 				if (options & REPORT_ERRORS) {
 					zend_raise_conversion_error_ex("Unable to convert filepath", UG(utf8_conv), ZEND_FROM_UNICODE, num_conv TSRMLS_CC);
@@ -2624,7 +2624,7 @@ PHPAPI int _php_stream_path_encode(php_stream_wrapper *wrapper,
 	/* Otherwise, fallback on filesystem_encoding */
 	status = U_ZERO_ERROR;
 
-	num_conv = zend_convert_from_unicode(ZEND_U_CONVERTER(UG(filesystem_encoding_conv)),
+	num_conv = zend_unicode_to_string_ex(ZEND_U_CONVERTER(UG(filesystem_encoding_conv)),
 				pathenc, pathenc_len, path, path_len, &status);
 	if (U_FAILURE(status)) {
 		if (options & REPORT_ERRORS) {
@@ -2666,7 +2666,7 @@ PHPAPI int _php_stream_path_decode(php_stream_wrapper *wrapper,
 	}
 
 	/* Otherwise fallback on filesystem_encoding */
-	num_conv = zend_convert_to_unicode(ZEND_U_CONVERTER(UG(filesystem_encoding_conv)),
+	num_conv = zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(filesystem_encoding_conv)),
 				pathdec, pathdec_len, path, path_len, &status);
 	if (U_FAILURE(status)) {
 		if (options & REPORT_ERRORS) {

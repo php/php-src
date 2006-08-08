@@ -2080,7 +2080,7 @@ static int php_sxe_iterator_current_key(zend_object_iterator *iter, zstr *str_ke
 		int u_len;
 
 		namelen = xmlStrlen(curnode->name);
-		zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &str_key->u, &u_len, (char*)curnode->name, namelen, &status);
+		zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &str_key->u, &u_len, (char*)curnode->name, namelen, &status);
 		*str_key_len = u_len + 1;
 		return HASH_KEY_IS_UNICODE;
 	} else {
