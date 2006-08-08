@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? Aug 2006, PHP 5.2.0RC2
 - Added version specific registry keys to allow different configurations for
   different php version. (Richard, Dmitry)
-- In addtion to path to php.ini, PHPRC now may specify full file name. (Dmitry)
+- In addition to path to php.ini, PHPRC now may specify full file name. (Dmitry)
 - Added "PHPINIDir" Apache directive to apache and apache_hooks SAPIs. (Dmitry)
 - Added an optional boolean parameter to memory_get_usage() and 
   memory_get_peak_usage() to get memory size allocated by emalloc() or real
