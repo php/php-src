@@ -14,7 +14,7 @@ $location_vars = array("c\u0327ity", "state");
 
 $result = compact("event", $location_vars);
 var_dump($result);
-
+?>
 --EXPECT--
 array(2) {
   ["event"]=>
