@@ -491,7 +491,6 @@ lchown \
 lrand48 \
 memcpy \
 memmove \
-memrchr \
 mkstemp \
 mmap \
 nl_langinfo \
