@@ -4,7 +4,7 @@ SimpleXML: comparing instances
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
 <?php 
-$xml =<<<EOF
+$xml =b<<<EOF
 <people>
   <person name="Joe"/>
   <person name="John">
@@ -16,7 +16,7 @@ $xml =<<<EOF
 </people>
 EOF;
 
-$xml1 =<<<EOF
+$xml1 =b<<<EOF
 <people>
   <person name="John">
     <children>

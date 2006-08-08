@@ -4,13 +4,13 @@ SimpleXML: accessing singular subnode as array
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
 <?php 
-$xml =<<<EOF
+$xml =b<<<EOF
 <people>
    <person name="Joe"></person>
 </people>
 EOF;
 
-$xml2 =<<<EOF
+$xml2 =b<<<EOF
 <people>
    <person name="Joe"></person>
    <person name="Boe"></person>

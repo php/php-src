@@ -4,7 +4,7 @@ SimpleXML: concatenating attributes
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
 <?php 
-$xml =<<<EOF
+$xml =b<<<EOF
 <people>
    <person name="Foo"></person>
 </people>

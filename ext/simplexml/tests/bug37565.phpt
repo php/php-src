@@ -14,7 +14,7 @@ class Setting extends ReflectionObject
 {
 }
 
-Reflection::export(simplexml_load_string('<test/>', 'Setting'));
+Reflection::export(simplexml_load_string(b'<test/>', 'Setting'));
 
 Reflection::export(simplexml_load_file('data:,<test/>', 'Setting'));
 

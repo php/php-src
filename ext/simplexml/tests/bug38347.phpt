@@ -13,7 +13,7 @@ function iterate($xml)
     }
 }
 
-$xmlstr = "<xml><item>Item 1</item><item>Item 2</item></xml>";
+$xmlstr = b"<xml><item>Item 1</item><item>Item 2</item></xml>";
 $xml = simplexml_load_string($xmlstr);
 iterate($xml->unknown);
 

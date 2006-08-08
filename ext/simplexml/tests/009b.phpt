@@ -4,7 +4,7 @@ SimpleXML: foreach
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
 <?php 
-$sxe = simplexml_load_string(<<<EOF
+$sxe = simplexml_load_string(b<<<EOF
 <?xml version='1.0'?>
 <!DOCTYPE sxe SYSTEM "notfound.dtd">
 <sxe id="elem1">

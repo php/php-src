@@ -5,7 +5,7 @@ Bug #36611 (assignment to SimpleXML object attribute changes argument type to st
 --FILE--
 <?php
 
-$xml_str = <<<EOD
+$xml_str = b<<<EOD
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <c_fpobel >
   <pos >

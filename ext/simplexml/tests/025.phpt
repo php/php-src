@@ -5,7 +5,7 @@ SimpleXML: getting namespaces
 --FILE--
 <?php
 
-$xml =<<<EOF
+$xml =b<<<EOF
 <?xml version='1.0'?>
 <xhtml:html xmlns:html='http://www.w3.org/1999/xhtml' xmlns:xhtml='http://www.w3.org/TR/REC-html40'>
 <xhtml:head><xhtml:title xmlns:xhtml='http://www.w3.org/TR/REC-html401'>bla</xhtml:title></xhtml:head>
@@ -23,7 +23,7 @@ var_dump($sxe->getNamespaces(true));
 var_dump($sxe->getDocNamespaces());
 var_dump($sxe->getDocNamespaces(true));
 
-$xml =<<<EOF
+$xml =b<<<EOF
 <?xml version='1.0'?>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head><title xmlns='http://www.w3.org/TR/REC-html40'>bla</title></head>
@@ -35,7 +35,7 @@ $sxe = simplexml_load_string($xml);
 var_dump($sxe->getNamespaces());
 var_dump($sxe->getDocNamespaces());
 
-$xml =<<<EOF
+$xml =b<<<EOF
 <?xml version='1.0'?>
 <root/>
 EOF;
@@ -93,39 +93,39 @@ array(0) {
 --UEXPECTF--
 array(1) {
   [u"xhtml"]=>
-  string(31) "http://www.w3.org/TR/REC-html40"
+  unicode(31) "http://www.w3.org/TR/REC-html40"
 }
 array(3) {
   [u"xhtml"]=>
-  string(31) "http://www.w3.org/TR/REC-html40"
+  unicode(31) "http://www.w3.org/TR/REC-html40"
   [u"html"]=>
-  string(28) "http://www.w3.org/1999/xhtml"
+  unicode(28) "http://www.w3.org/1999/xhtml"
   [u"foo"]=>
-  string(6) "foobar"
+  unicode(6) "foobar"
 }
 array(2) {
   [u"html"]=>
-  string(28) "http://www.w3.org/1999/xhtml"
+  unicode(28) "http://www.w3.org/1999/xhtml"
   [u"xhtml"]=>
-  string(31) "http://www.w3.org/TR/REC-html40"
+  unicode(31) "http://www.w3.org/TR/REC-html40"
 }
 array(4) {
   [u"html"]=>
-  string(28) "http://www.w3.org/1999/xhtml"
+  unicode(28) "http://www.w3.org/1999/xhtml"
   [u"xhtml"]=>
-  string(31) "http://www.w3.org/TR/REC-html40"
+  unicode(31) "http://www.w3.org/TR/REC-html40"
   [u"foo"]=>
-  string(6) "foobar"
+  unicode(6) "foobar"
   [u"baz"]=>
-  string(9) "foobarbaz"
+  unicode(9) "foobarbaz"
 }
 array(1) {
   [u""]=>
-  string(28) "http://www.w3.org/1999/xhtml"
+  unicode(28) "http://www.w3.org/1999/xhtml"
 }
 array(1) {
   [u""]=>
-  string(28) "http://www.w3.org/1999/xhtml"
+  unicode(28) "http://www.w3.org/1999/xhtml"
 }
 array(0) {
 }

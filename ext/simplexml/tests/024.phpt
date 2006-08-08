@@ -5,7 +5,7 @@ SimpleXML: XPath and attributes
 --FILE--
 <?php
 
-$xml =<<<EOF
+$xml =b<<<EOF
 <?xml version='1.0'?>
 <root>
 <elem attr1='11' attr2='12' attr3='13'/>

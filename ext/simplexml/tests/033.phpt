@@ -5,7 +5,7 @@ SimpleXML: casting instances
 --FILE--
 <?php
 
-$xml =<<<EOF
+$xml =b<<<EOF
 <people>
 test
   <person name="Joe"/>
@@ -18,7 +18,7 @@ test
 </people>
 EOF;
 
-$foo = simplexml_load_string( "<foo />" );
+$foo = simplexml_load_string( b"<foo />" );
 $people = simplexml_load_string($xml);
 
 var_dump((bool)$foo);

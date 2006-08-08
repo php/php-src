@@ -5,7 +5,7 @@ SimpleXML: Attributes with entities
 --FILE--
 <?php 
 
-$xml =<<<EOF
+$xml =b<<<EOF
 <?xml version='1.0'?>
 <!DOCTYPE talks SYSTEM "nbsp.dtd" [
 <!ELEMENT root  EMPTY>
