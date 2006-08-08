@@ -524,7 +524,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 
 			if (val) { /* have a value */
 				int val_len;
-				unsigned int new_val_len;
+				/* unsigned int new_val_len; see below */
 
 				val_len = php_url_decode(val, strlen(val));
 				zend_string_to_unicode_ex(input_conv, &u_val, &u_val_len, val, val_len, &status);
