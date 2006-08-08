@@ -66,6 +66,15 @@ ZEND_API zend_bool instanceof_function_ex(zend_class_entry *instance_ce, zend_cl
 ZEND_API zend_bool instanceof_function(zend_class_entry *instance_ce, zend_class_entry *ce TSRMLS_DC);
 END_EXTERN_C()
 
+/**
+ * Checks whether the string "str" with the length "length" is a numeric string.
+ *
+ * The function returns 0 if the string did not contain a string; IS_LONG if
+ * the string contained a number that fits in the integer range and IS_DOUBLE
+ * in case it did not. The long value is returned into the pointer *lval if
+ * that pointer was not NULL or into the pointer *dval if that pointer was not
+ * NULL.
+ */
 static inline zend_bool is_numeric_string(char *str, int length, long *lval, double *dval, int allow_errors)
 {
 	long local_lval;
