@@ -23,8 +23,18 @@ foreach ($tests as $v) {
 }
 ?>
 --EXPECTF--	
-
-Warning: array_product(): The argument should be an array in %s on line %d
+Warning: array_product() expects parameter 1 to be array, string given in %s on line %d
+NULL
+int(0)
+int(0)
+int(3)
+int(9)
+float(1)
+int(9999999800000001)
+float(2.8404260053903E+20)
+int(8589934590)
+--UEXPECTF--
+Warning: array_product() expects parameter 1 to be array, Unicode string given in %s on line %d
 NULL
 int(0)
 int(0)
