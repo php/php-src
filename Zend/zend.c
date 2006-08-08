@@ -611,7 +611,7 @@ static int zend_path_encode_wrapper(char **encpath, int *encpath_len, const UCha
 {
 	UErrorCode status = U_ZERO_ERROR;
 
-	zend_convert_from_unicode(ZEND_U_CONVERTER(UG(filesystem_encoding_conv)), encpath, encpath_len, path, path_len, &status);
+	zend_unicode_to_string_ex(ZEND_U_CONVERTER(UG(filesystem_encoding_conv)), encpath, encpath_len, path, path_len, &status);
 
 	if (U_FAILURE(status)) {
 		efree(*encpath);

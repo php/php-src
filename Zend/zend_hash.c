@@ -53,7 +53,7 @@
 		UChar *u = NULL; \
 		int u_len; \
 		TSRMLS_FETCH(); \
-		zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u, &u_len, arKey.s, nKeyLength-1, &status); \
+		zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u, &u_len, arKey.s, nKeyLength-1, &status); \
 		if (U_FAILURE(status)) { \
 			/* UTODO: */ \
 		} \
@@ -1747,7 +1747,7 @@ ZEND_API void zend_hash_to_unicode(HashTable *ht, apply_func_t apply_func TSRMLS
 			int u_len;
 			Bucket *q;
 
-			zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u, &u_len, (*p)->key.arKey.s, (*p)->nKeyLength-1, &status);
+			zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u, &u_len, (*p)->key.arKey.s, (*p)->nKeyLength-1, &status);
 
 			q = (Bucket *) pemalloc(sizeof(Bucket)-sizeof(q->key.arKey)+((u_len+1)*2), ht->persistent);
 			memcpy(q, *p, sizeof(Bucket)-sizeof(q->key.arKey));

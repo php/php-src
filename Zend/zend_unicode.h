@@ -71,10 +71,13 @@ void zend_collator_destroy(zend_collator *zcoll);
 
 /* API functions */
 
-ZEND_API int zend_convert_to_unicode(UConverter *conv, UChar **target, int *target_len, const char *source, int source_len, UErrorCode *status);
-ZEND_API int zend_convert_from_unicode(UConverter *conv, char **target, int *target_len, const UChar *source, int source_len, UErrorCode *status);
 ZEND_API void zend_convert_encodings(UConverter *target_conv, UConverter *source_conv, char **target, int *target_len, const char *source, int source_len, UErrorCode *status);
 ZEND_API char* zend_unicode_to_ascii(const UChar *us, int us_len TSRMLS_DC);
+
+ZEND_API int zend_string_to_unicode_ex(UConverter *conv, UChar **target, int *target_len, const char *source, int source_len, UErrorCode *status);
+ZEND_API int zend_string_to_unicode(UConverter *conv, UChar **u, int *u_len, char *s, int s_len TSRMLS_DC);
+ZEND_API int zend_unicode_to_string_ex(UConverter *conv, char **s, int *s_len, const UChar *u, int u_len, UErrorCode *status);
+ZEND_API int zend_unicode_to_string(UConverter *conv, char **s, int *s_len, const UChar *u, int u_len TSRMLS_DC);
 
 ZEND_API int zval_string_to_unicode_ex(zval *string, UConverter *conv TSRMLS_DC);
 ZEND_API int zval_string_to_unicode(zval *string TSRMLS_DC);

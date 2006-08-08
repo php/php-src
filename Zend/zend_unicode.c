@@ -209,8 +209,8 @@ int zend_copy_converter(UConverter **target, UConverter *source)
 }
 /* }}} */
 
-/* {{{ zend_convert_to_unicode */
-ZEND_API int zend_convert_to_unicode(UConverter *conv, UChar **target, int *target_len, const char *source, int source_len, UErrorCode *status)
+/* {{{ zend_string_to_unicode_ex */
+ZEND_API int zend_string_to_unicode_ex(UConverter *conv, UChar **target, int *target_len, const char *source, int source_len, UErrorCode *status)
 {
 	UChar *buffer = NULL;
 	UChar *output;
@@ -281,8 +281,8 @@ ZEND_API int zend_convert_to_unicode(UConverter *conv, UChar **target, int *targ
 }
 /* }}} */
 
-/* {{{ zend_convert_from_unicode */
-ZEND_API int zend_convert_from_unicode(UConverter *conv, char **target, int *target_len, const UChar *source, int source_len, UErrorCode *status)
+/* {{{ zend_unicode_to_string_ex */
+ZEND_API int zend_unicode_to_string_ex(UConverter *conv, char **target, int *target_len, const UChar *source, int source_len, UErrorCode *status)
 {
 	char *buffer = NULL;
 	char *output;
@@ -380,12 +380,11 @@ ZEND_API char* zend_unicode_to_ascii(const UChar *us, int us_len TSRMLS_DC)
 	int   cs_len;
 	UErrorCode status = U_ZERO_ERROR;
 
-	zend_convert_from_unicode(UG(ascii_conv), &cs, &cs_len, us, us_len, &status);
+	zend_unicode_to_string_ex(UG(ascii_conv), &cs, &cs_len, us, us_len, &status);
 	if (U_FAILURE(status)) {
 		efree(cs);
 		return NULL;
 	}
-
 	return cs;
 }
 /* }}} */
@@ -537,31 +536,48 @@ ZEND_API void zend_raise_conversion_error_ex(char *message, UConverter *conv, ze
 }
 /* }}} */
 
-/* {{{ zval_unicode_to_string_ex */
-ZEND_API int zval_unicode_to_string_ex(zval *string, UConverter *conv TSRMLS_DC)
+/* {{{ zend_unicode_to_string */
+ZEND_API int zend_unicode_to_string(UConverter *conv, char **s, int *s_len, const UChar *u, int u_len TSRMLS_DC)
 {
 	UErrorCode status = U_ZERO_ERROR;
-	char *s = NULL;
-	int s_len;
 	int num_conv;
 
-	UChar *u = Z_USTRVAL_P(string);
-	int u_len = Z_USTRLEN_P(string);
+	if (conv == NULL) {
+		conv = UG(runtime_encoding_conv);
+	}
 
-	num_conv = zend_convert_from_unicode(conv, &s, &s_len, u, u_len, &status);
+	num_conv = zend_unicode_to_string_ex(conv, s, s_len, u, u_len, &status);
 
 	if (U_FAILURE(status)) {
 		int32_t offset = u_countChar32(u, num_conv);
 
 		zend_raise_conversion_error_ex("Could not convert Unicode string to binary string", conv, ZEND_FROM_UNICODE, offset TSRMLS_CC);
-		if (s) {
-			efree(s);
+		if (*s) {
+			efree(*s);
 		}
-		ZVAL_EMPTY_STRING(string);
+		*s = NULL;
+		*s_len = 0;
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ zval_unicode_to_string_ex */
+ZEND_API int zval_unicode_to_string_ex(zval *string, UConverter *conv TSRMLS_DC)
+{
+	char *s = NULL;
+	int s_len;
+
+	UChar *u = Z_USTRVAL_P(string);
+	int u_len = Z_USTRLEN_P(string);
+
+	if (zend_unicode_to_string(conv, &s, &s_len, u, u_len TSRMLS_CC) == SUCCESS) {
+		ZVAL_STRINGL(string, s, s_len, 0);
 		efree((UChar*)u);
 		return FAILURE;
 	} else {
-		ZVAL_STRINGL(string, s, s_len, 0);
+		ZVAL_EMPTY_STRING(string);
 		efree((UChar*)u);
 		return SUCCESS;
 	}
@@ -575,30 +591,48 @@ ZEND_API int zval_unicode_to_string(zval *string TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ zend_string_to_unicode */
+ZEND_API int zend_string_to_unicode(UConverter *conv, UChar **u, int *u_len, char *s, int s_len TSRMLS_DC)
+{
+	UErrorCode status = U_ZERO_ERROR;
+	int num_conv;
+
+	if (conv == NULL) {
+		conv = UG(runtime_encoding_conv);
+	}
+
+	num_conv = zend_string_to_unicode_ex(conv, u, u_len, s, s_len, &status);
+
+	if (U_FAILURE(status)) {
+		zend_raise_conversion_error_ex("Could not convert binary string to Unicode string", conv, ZEND_TO_UNICODE, num_conv TSRMLS_CC);
+		if (*u) {
+			efree(*u);
+		}
+		*u = NULL;
+		*u_len = 0;
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ zval_string_to_unicode_ex */
 ZEND_API int zval_string_to_unicode_ex(zval *string, UConverter *conv TSRMLS_DC)
 {
-	UErrorCode status = U_ZERO_ERROR;
 	UChar *u = NULL;
-	int u_len, num_conv;
+	int u_len;
 
 	char *s = Z_STRVAL_P(string);
 	int s_len = Z_STRLEN_P(string);
 
-	num_conv = zend_convert_to_unicode(conv, &u, &u_len, s, s_len, &status);
-
-	if (U_FAILURE(status)) {
-		zend_raise_conversion_error_ex("Could not convert binary string to Unicode string", conv, ZEND_TO_UNICODE, num_conv TSRMLS_CC);
-		if (u) {
-			efree(u);
-		}
-		ZVAL_EMPTY_UNICODE(string);
-		efree(s);
-		return FAILURE;
-	} else {
+	if (zend_string_to_unicode(conv, &u, &u_len, s, s_len TSRMLS_CC) == SUCCESS) {
 		ZVAL_UNICODEL(string, u, u_len, 0);
 		efree(s);
 		return SUCCESS;
+	} else {
+		ZVAL_EMPTY_UNICODE(string);
+		efree(s);
+		return FAILURE;
 	}
 }
 /* }}} */
@@ -613,16 +647,13 @@ ZEND_API int zval_string_to_unicode(zval *string TSRMLS_DC)
 /* {{{ zend_cmp_unicode_and_string */
 ZEND_API int zend_cmp_unicode_and_string(UChar *ustr, char* str, uint len)
 {
-	UErrorCode status = U_ZERO_ERROR;
 	UChar *u = NULL;
 	int u_len;
 	int retval = TRUE;
 	TSRMLS_FETCH();
 
-	zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u, &u_len, str, len, &status);
-	if (U_FAILURE(status)) {
-		efree(u);
-		return FALSE;
+	if (zend_string_to_unicode(NULL, &u, &u_len, str, len TSRMLS_CC) == FAILURE) {
+		return FAILURE;
 	}
 	retval = u_memcmp(ustr, u, u_len);
 	efree(u);
