@@ -1382,7 +1382,7 @@ PHP_FUNCTION(pathinfo)
 			php_basename(path, path_len, NULL, 0, &ret, &ret_len TSRMLS_CC);
 		}
 
-		p = strrchr(ret, '.');
+		p = zend_memrchr(ret, '.', ret_len);
 
 		if (p) {
 			idx = p - ret;
@@ -1399,7 +1399,7 @@ PHP_FUNCTION(pathinfo)
 			php_basename(path, path_len, NULL, 0, &ret, &ret_len TSRMLS_CC);
 		}
 
-		p = strrchr(ret, '.');
+		p = zend_memrchr(ret, '.', ret_len);
 
 		idx = p ? (p - ret) : ret_len;
 		add_assoc_stringl(tmp, "filename", ret, idx, 1);
@@ -1871,10 +1871,10 @@ PHP_FUNCTION(strrchr)
 	convert_to_string_ex(haystack);
 
 	if (Z_TYPE_PP(needle) == IS_STRING) {
-		found = strrchr(Z_STRVAL_PP(haystack), *Z_STRVAL_PP(needle));
+		found = zend_memrchr(Z_STRVAL_PP(haystack), *Z_STRVAL_PP(needle), Z_STRLEN_PP(haystack));
 	} else {
 		convert_to_long_ex(needle);
-		found = strrchr(Z_STRVAL_PP(haystack), (char) Z_LVAL_PP(needle));
+		found = zend_memrchr(Z_STRVAL_PP(haystack), (char) Z_LVAL_PP(needle), Z_STRLEN_PP(haystack));
 	}
 
 	if (found) {
