@@ -1,3 +1,151 @@
+2006-08-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/json/tests/fail001.phpt
+      ext/json/tests/pass001.1.phpt
+      ext/json/tests/pass001.phpt
+      ext/json/tests/pass002.phpt
+      ext/json/tests/pass003.phpt:
+      - MFB Test name must not be more than a single line
+
+    * (PHP_5_2)
+      ext/json/tests/fail001.phpt
+      ext/json/tests/pass001.1.phpt
+      ext/json/tests/pass001.phpt
+      ext/json/tests/pass002.phpt
+      ext/json/tests/pass003.phpt:
+      - Test name must not be more than a single line
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      tests/classes/ctor_visibility.phpt:
+      - MFH Fixed Bug #38064 ignored constructor visibility
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      - Fixed Bug #38064 ignored constructor visibility
+
+    * tests/classes/ctor_visibility.phpt
+      tests/classes/ctor_visibility.phpt:
+      
+      - Add new test
+
+2006-08-07  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/strings/basename.phpt:
+      fix test in unicode mode
+
+    * ext/json/tests/001.phpt:
+      add missing UEXPECTF section
+
+    * ext/exif/tests/exif001.phpt
+      ext/standard/tests/strings/bin2hex.phpt
+      ext/standard/tests/strings/bug24098.phpt
+      ext/wddx/tests/001.phpt:
+      fix test
+
+    * ext/date/tests/date_constants.phpt
+      ext/date/tests/oo_001.phpt:
+      fix tests
+
+    * run-tests.php
+      run-tests.php:
+      suppress errors from date() if no date.timezone set
+      don't try to look for libtool if $sys_libtool_path is empty
+
+    * ext/date/tests/date_create-3.phpt:
+      fix test - class Date has been renamed
+      the test still fails, though...
+
+2006-08-07  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/lib/zip.h.orig
+      ext/zip/lib/zip.h.orig:
+      - should not have been commited
+
+2006-08-07  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/dom/node.c:
+      fix types of the variables
+
+    * ext/dom/node.c:
+      fix types, add missing parentheses
+
+2006-08-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo/pdo_dbh.c:
+      MFB: Fixed memory leak with persistent connections
+
+    * (PHP_5_2)
+      ext/pdo/pdo_dbh.c:
+      Fixed memory leak with persistent connections
+
+    * ext/filter/filter.c
+      ext/filter/filter.c:
+      Removed extra byte
+
+2006-08-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug38287.phpt
+      ZendEngine2/tests/bug38287.phpt:
+      
+      file bug38287.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend.h
+      ZendEngine2/zend.h
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.h
+      ZendEngine2/zend_objects_API.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug38287.phpt:
+      Fixed bug #38287 (static variables mess up global vars)
+
+2006-08-07  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      ext/simplexml/simplexml.c:
+      should be RETURN_ not RETVAL_
+
+    * ext/simplexml/php_simplexml.h
+      ext/simplexml/simplexml.c:
+      MFB: asXML() needs to return bool when serializing doc and filename is
+      passed in
+      do not copy the content of the outputbuffer twice in asXML()
+      fix compiler warnings
+
+    * (PHP_5_2)
+      ext/simplexml/php_simplexml.h
+      ext/simplexml/simplexml.c:
+      asXML() needs to return bool when serializing doc and filename is passed in
+      do not copy the content of the outputbuffer twice in asXML()
+      fix compiler warnings
+
+2006-08-07  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/spl/php_spl.c:
+      nuke unused variable
+
+2006-08-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      - Update
+
+    * (PHP_5_2)
+      NEWS
+      ext/dba/config.m4
+      ext/dba/config.m4:
+      - Fix bug #38290
+
 2006-08-06  Antony Dovgal  <antony@zend.com>
 
     * configure.in
