@@ -86,6 +86,8 @@ php_oci_descriptor *php_oci_lob_create (php_oci_connection *connection, long typ
 	descriptor->lob_current_position = 0;
 	descriptor->lob_size = -1;				/* we should set it to -1 to know, that it's just not initialized */
 	descriptor->buffering = PHP_OCI_LOB_BUFFER_DISABLED;				/* buffering is off by default */
+	descriptor->charset_form = SQLCS_IMPLICIT;	/* default value */
+	descriptor->charset_id = connection->charset;
 
 	if (descriptor->type == OCI_DTYPE_LOB || descriptor->type == OCI_DTYPE_FILE) {
 		/* add Lobs & Files to hash. we'll flush them at the end */
@@ -309,8 +311,8 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 			OCI_FIRST_PIECE,
 			(dvoid *)&ctx,
 			(OCICallbackLobRead2) php_oci_lob_callback,             /* callback... */
-			(ub2) connection->charset,              /* The character set ID of the buffer data. */
-			(ub1) SQLCS_IMPLICIT                    /* The character set form of the buffer data. */
+			(ub2) descriptor->charset_id,              /* The character set ID of the buffer data. */
+			(ub1) descriptor->charset_form                    /* The character set form of the buffer data. */
 		)
 	);
 	
@@ -340,8 +342,8 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 			 (ub4) buffer_size,                          /* size of buffer */
 			 (dvoid *)&ctx,
 			 (OCICallbackLobRead) php_oci_lob_callback,              /* callback... */
-			 (ub2) connection->charset,              /* The character set ID of the buffer data. */
-			 (ub1) SQLCS_IMPLICIT                    /* The character set form of the buffer data. */
+			 (ub2) descriptor->charset_id,              /* The character set ID of the buffer data. */
+			 (ub1) descriptor->charset_form                    /* The character set form of the buffer data. */
 		)
 	);
 	
@@ -353,8 +355,10 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 	if (connection->errcode != OCI_SUCCESS) {
 		php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 		PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
-		efree(*data);
-		*data = NULL;
+		if (*data) {
+			efree(*data);
+			*data = NULL;
+		}
 		*data_len = 0;
 		return 1;
 	}
@@ -367,8 +371,10 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 		if (connection->errcode != OCI_SUCCESS) {
 			php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 			PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
-			efree(*data);
-			*data = NULL;
+			if (*data) {
+				efree(*data);
+				*data = NULL;
+			}
 			*data_len = 0;
 			return 1;
 		}
@@ -402,7 +408,22 @@ int php_oci_lob_write (php_oci_descriptor *descriptor, ub4 offset, char *data, i
 		offset = descriptor->lob_current_position;
 	}
 	
-	connection->errcode = PHP_OCI_CALL(OCILobWrite, (connection->svc, connection->err, lob, (ub4 *)&data_len, (ub4) offset + 1, (dvoid *) data, (ub4) data_len, OCI_ONE_PIECE, (dvoid *)0, (OCICallbackLobWrite) 0, (ub2) 0, (ub1) SQLCS_IMPLICIT));
+	connection->errcode = PHP_OCI_CALL(OCILobWrite, 
+			(
+				connection->svc, 
+				connection->err, 
+				lob, 
+				(ub4 *)&data_len, 
+				(ub4) offset + 1, 
+				(dvoid *) data, 
+				(ub4) data_len, 
+				OCI_ONE_PIECE, 
+				(dvoid *)0, 
+				(OCICallbackLobWrite) 0, 
+				(ub2) descriptor->charset_id, 
+				(ub1) descriptor->charset_form
+			)
+		);
 
 	if (connection->errcode) {
 		php_oci_error(connection->err, connection->errcode TSRMLS_CC);
@@ -643,8 +664,8 @@ int php_oci_lob_import (php_oci_descriptor *descriptor, char *filename TSRMLS_DC
 					OCI_ONE_PIECE, 
 					(dvoid *)0, 
 					(OCICallbackLobWrite) 0, 
-					(ub2) 0, 
-					(ub1) SQLCS_IMPLICIT
+					(ub2) descriptor->charset_id, 
+					(ub1) descriptor->charset_form
 				)
 		);
 
