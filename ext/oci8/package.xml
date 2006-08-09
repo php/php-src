@@ -41,6 +41,7 @@
    Fixed bug #37531 (oci8 persistent connection corruption)
    Fixed bug #37487 (oci_fetch_array() array-type should always default to OCI_BOTH)
    Fixed bug #37392 (Unnecessary call to OCITransRollback() at the end of request)
+   Fixed bug #35973 (Error ORA-24806 occurs when trying to fetch a NCLOB field)
    Fixed bug #34005 (oci_password_change() fails). Patch by pholdaway at technocom-wireless dot com.
    Fixed PECL bug #8112 (Persistent connections misbehave when Apache process times out)
   </notes>
@@ -71,6 +72,7 @@
   <file role="test" name="tests/bug27303_4.phpt"/>
   <file role="test" name="tests/bug27303.phpt"/>
   <file role="test" name="tests/bug32325.phpt"/>
+  <file role="test" name="tests/bug35973.phpt"/>
   <file role="test" name="tests/bug36096.phpt"/>
   <file role="test" name="tests/bug37581.phpt"/>
   <file role="test" name="tests/bug38161.phpt"/>
