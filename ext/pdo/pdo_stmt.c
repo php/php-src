@@ -392,6 +392,12 @@ static PHP_METHOD(PDOStatement, execute)
 		zval **tmp;
 		uint str_length;
 		ulong num_index;
+	
+		if (stmt->bound_params) {	
+			zend_hash_destroy(stmt->bound_params);
+			FREE_HASHTABLE(stmt->bound_params);
+			stmt->bound_params = NULL;
+		}
 
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(input_params));
 		while (SUCCESS == zend_hash_get_current_data(Z_ARRVAL_P(input_params), (void*)&tmp)) {
