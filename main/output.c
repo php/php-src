@@ -524,6 +524,7 @@ PHPAPI void php_output_handler_set_context(php_output_handler *handler, void *op
 	Starts the set up output handler and pushes it on top of the stack. Checks for any conflicts regarding the output handler to start */
 PHPAPI int php_output_handler_start(php_output_handler *handler TSRMLS_DC)
 {
+	HashPosition pos;
 	HashTable *rconflicts;
 	php_output_handler_conflict_check_t *conflict;
 	
@@ -536,9 +537,9 @@ PHPAPI int php_output_handler_start(php_output_handler *handler TSRMLS_DC)
 		}
 	}
 	if (SUCCESS == zend_u_hash_find(&php_output_handler_reverse_conflicts, Z_TYPE_P(handler->name), Z_UNIVAL_P(handler->name), Z_UNILEN_P(handler->name), (void *) &rconflicts)) {
-		for (	zend_hash_internal_pointer_reset(rconflicts);
-				zend_hash_get_current_data(rconflicts, (void *) &conflict) == SUCCESS;
-				zend_hash_move_forward(rconflicts)) {
+		for (	zend_hash_internal_pointer_reset_ex(rconflicts, &pos);
+				zend_hash_get_current_data_ex(rconflicts, (void *) &conflict, &pos) == SUCCESS;
+				zend_hash_move_forward_ex(rconflicts, &pos)) {
 			if (SUCCESS != (*conflict)(handler->name TSRMLS_CC)) {
 				return FAILURE;
 			}
@@ -1208,7 +1209,7 @@ static inline int php_output_stack_pop(int discard, int shutdown TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ static SUCCESS|FAILURE php_output_handler_compat_func(void *ctx, int op, const char *in, size_t in_len, char **out, size_t *out_len TSRMLS_DC)
+/* {{{ static SUCCESS|FAILURE php_output_handler_compat_func(void *ctx, php_output_context *)
 	php_output_handler_context_func_t for php_output_handler_func_t output handlers */
 static int php_output_handler_compat_func(void **handler_context, php_output_context *output_context)
 {
@@ -1224,7 +1225,7 @@ static int php_output_handler_compat_func(void **handler_context, php_output_con
 }
 /* }}} */
 
-/* {{{ static SUCCESS|FAILURE php_output_handler_default_func(void *ctx, int op, const char *in, size_t in_len, char **out, size_t *out_len TSRMLS_DC)
+/* {{{ static SUCCESS|FAILURE php_output_handler_default_func(void *ctx, php_output_context *)
 	Default output handler */
 static int php_output_handler_default_func(void **handler_context, php_output_context *output_context)
 {
@@ -1238,7 +1239,7 @@ static int php_output_handler_default_func(void **handler_context, php_output_co
 }
 /* }}} */
 
-/* {{{ static SUCCESS|FAILURE php_output_handler_devnull_func(void *ctx, int op, const char *in, size_t in_len, char **out, size_t *out_len TSRMLS_DC)
+/* {{{ static SUCCESS|FAILURE php_output_handler_devnull_func(void *ctx, php_output_context *)
 	Null output handler */
 static int php_output_handler_devnull_func(void **handler_context, php_output_context *output_context)
 {
