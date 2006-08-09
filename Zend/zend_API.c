@@ -457,7 +457,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 							*pl = Z_STRLEN_PP(arg);
 							break;
 						} else if (c == 'S') {
-							return "definitely a binary string";
+							return "strictly a binary string";
 						}
 						/* fall through */
 					case IS_STRING:
@@ -502,7 +502,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 
 					case IS_STRING:
 						if (c == 'U') {
-							return "definitely a Unicode string";
+							return "strictly a Unicode string";
 						}
 						/* fall through */
 					case IS_LONG:
