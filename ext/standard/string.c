@@ -4360,31 +4360,28 @@ PHPAPI void php_stripslashes(char *str, int *len TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto string addcslashes(string str, string charlist)
+/* {{{ proto binary addcslashes(binary str, binary charlist) U
    Escapes all chars mentioned in charlist with backslash. It creates octal representations if asked to backslash characters with 8th bit set or with ASCII<32 (except '\n', '\r', '\t' etc...) */
 PHP_FUNCTION(addcslashes)
 {
-	zval **str, **what;
+	char *str, *what;
+	int str_len, what_len;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &str, &what) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_DC, "SS", &str, &str_len,
+							  &what, &what_len) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(str);
-	convert_to_string_ex(what);
 
-	if (Z_STRLEN_PP(str) == 0) {
+	if (str_len == 0) {
 		RETURN_EMPTY_STRING();
 	}
 
-	if (Z_STRLEN_PP(what) == 0) {
-		RETURN_STRINGL(Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);
+	if (what_len == 0) {
+		RETURN_STRINGL(str, str_len, 1);
 	}
 
-	RETURN_STRING(php_addcslashes(Z_STRVAL_PP(str),
-	                              Z_STRLEN_PP(str),
-	                              &Z_STRLEN_P(return_value), 0,
-	                              Z_STRVAL_PP(what),
-	                              Z_STRLEN_PP(what) TSRMLS_CC), 0);
+	RETURN_STRING(php_addcslashes(str, str_len, &Z_STRLEN_P(return_value), 0,
+								  what, what_len TSRMLS_CC), 0);
 }
 /* }}} */
 
@@ -4419,18 +4416,18 @@ PHP_FUNCTION(addslashes)
 }
 /* }}} */
 
-/* {{{ proto string stripcslashes(string str)
+/* {{{ proto binary stripcslashes(binary str) U
    Strips backslashes from a string. Uses C-style conventions */
 PHP_FUNCTION(stripcslashes)
 {
-	zval **str;
+	char *str;
+	int str_len;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_DC, "S", &str, &str_len) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(str);
 
-	ZVAL_STRINGL(return_value, Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);
+	ZVAL_STRINGL(return_value, str, str_len, 1);
 	php_stripcslashes(Z_STRVAL_P(return_value), &Z_STRLEN_P(return_value));
 }
 /* }}} */
@@ -5362,7 +5359,6 @@ PHP_FUNCTION(hebrevc)
 }
 /* }}} */
 
-
 /* {{{ proto string nl2br(string str) U
    Converts newlines to HTML line breaks */
 PHP_FUNCTION(nl2br)
@@ -5486,7 +5482,6 @@ PHP_FUNCTION(nl2br)
 	RETURN_ZSTRL(tmp, new_length, str_type, 0);
 }
 /* }}} */
-
 
 /* {{{ proto string strip_tags(string str [, string allowable_tags]) U
    Strips HTML and PHP tags from a string */

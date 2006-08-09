@@ -16,9 +16,6 @@ ext/standard
 
   string.c
   --------
-    addcslashes()
-        Params API. Figure out how to escape characters > 255.
-
     chunk_split()
         Params API, Unicode upgrades. Split on codepoint level.
 
@@ -69,9 +66,6 @@ ext/standard
     
     strcoll()
         Params API, upgrade to use Collator if TT == IS_UNICODE, test
-
-    stripcslashes()
-        Params API. Depends on how addcslashes() is implemented.
 
     stristr()
         This is the problematic one. There are a few approaches:
@@ -186,6 +180,7 @@ ext/standard
 
   string.c
   --------
+    addcslashes()
     addslashes()
     basename()
     bin2hex()
@@ -203,6 +198,7 @@ ext/standard
     str_repeat()
     strcspn()
     strip_tags()
+    stripcslashes()
     stripslashes()
     strpbrk()
     strpos()
