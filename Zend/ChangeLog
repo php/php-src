@@ -1,3 +1,54 @@
+2006-08-08  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.c:
+      Adjust zend_get_unified_string_type() to give correct types.
+
+    * zend_unicode.h:
+      Should be slightly faster to use U16_NEXT here.
+
+2006-08-08  Antony Dovgal  <antony@zend.com>
+
+    * zend.c
+      zend_API.h
+      zend_exceptions.c
+      zend_hash.c
+      zend_language_scanner.l
+      zend_unicode.c
+      zend_unicode.h:
+      implement zend_unicode_to_string() and zend_string_to_unicode()
+      part #1 (of 2)
+
+    * zend_operators.h
+      zend_operators.h:
+      there is no realiable way to detect memrchr() presence because of a mess in
+      glibc
+      so let's use our own implementation
+
+    * zend_vm_def.h
+      zend_vm_execute.h:
+      %s -> %v
+      ce names are in Unicode
+
+2006-08-08  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      zend_operators.h:
+      - Added some docs here so that nobody needs to figure it out once more.
+
+2006-08-08  Antony Dovgal  <antony@zend.com>
+
+    * zend_operators.h
+      zend_operators.h:
+      add zend_memrchr()
+
+2006-08-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      - Speling
+
 2006-08-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_2)

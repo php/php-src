@@ -1,3 +1,280 @@
+2006-08-08  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/string.c:
+      initialize vars
+
+    * ext/standard/tests/array/compact.phpt
+      ext/standard/tests/strings/trim.phpt:
+      fix tests to be able to run just .phpt's
+
+2006-08-08  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-progress.txt
+      ext/standard/string.c:
+      Convert nl2br() to suppor IS_UNICODE.
+      
+
+2006-08-08  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/002.phpt
+      ext/simplexml/tests/003.phpt
+      ext/simplexml/tests/004.phpt
+      ext/simplexml/tests/005.phpt
+      ext/simplexml/tests/006.phpt
+      ext/simplexml/tests/007.phpt
+      ext/simplexml/tests/008.phpt
+      ext/simplexml/tests/009.phpt
+      ext/simplexml/tests/009b.phpt
+      ext/simplexml/tests/010.phpt
+      ext/simplexml/tests/011.phpt
+      ext/simplexml/tests/012.phpt
+      ext/simplexml/tests/013.phpt
+      ext/simplexml/tests/014.phpt
+      ext/simplexml/tests/014a.phpt
+      ext/simplexml/tests/014b.phpt
+      ext/simplexml/tests/015.phpt
+      ext/simplexml/tests/016.phpt
+      ext/simplexml/tests/016a.phpt
+      ext/simplexml/tests/017.phpt
+      ext/simplexml/tests/018.phpt
+      ext/simplexml/tests/019.phpt
+      ext/simplexml/tests/020.phpt
+      ext/simplexml/tests/021.phpt
+      ext/simplexml/tests/022.phpt
+      ext/simplexml/tests/023.phpt
+      ext/simplexml/tests/024.phpt
+      ext/simplexml/tests/025.phpt
+      ext/simplexml/tests/026.phpt
+      ext/simplexml/tests/027.phpt
+      ext/simplexml/tests/028.phpt
+      ext/simplexml/tests/029.phpt
+      ext/simplexml/tests/030.phpt
+      ext/simplexml/tests/031.phpt
+      ext/simplexml/tests/032.phpt
+      ext/simplexml/tests/033.phpt
+      ext/simplexml/tests/bug26976.phpt
+      ext/simplexml/tests/bug27010.phpt
+      ext/simplexml/tests/bug35785.phpt
+      ext/simplexml/tests/bug36611.phpt
+      ext/simplexml/tests/bug37565.phpt
+      ext/simplexml/tests/bug38347.phpt
+      ext/simplexml/tests/bug38354.phpt
+      ext/simplexml/tests/profile01.phpt
+      ext/simplexml/tests/profile02.phpt
+      ext/simplexml/tests/profile03.phpt
+      ext/simplexml/tests/profile04.phpt
+      ext/simplexml/tests/profile05.phpt
+      ext/simplexml/tests/profile06.phpt
+      ext/simplexml/tests/profile07.phpt
+      ext/simplexml/tests/profile08.phpt
+      ext/simplexml/tests/profile09.phpt
+      ext/simplexml/tests/profile10.phpt
+      ext/simplexml/tests/profile11.phpt
+      ext/simplexml/tests/profile12.phpt
+      ext/simplexml/tests/profile13.phpt:
+      add unicode support
+      update tests (binary string must be passed to simplexml_load_string)
+
+    * ext/libxml/php_libxml.h:
+      additional unicode/xml macros
+
+2006-08-08  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/array/bug35014.phpt
+      ext/standard/tests/array/bug35014_64bit.phpt
+      ext/standard/tests/filters/bug22538.phpt:
+      fix tests
+
+    * ext/standard/array.c:
+      fix logic and memleak
+
+    * ext/exif/tests/exif001.phpt
+      ext/iconv/tests/iconv001.phpt
+      ext/standard/tests/array/array_filter.phpt
+      ext/standard/tests/strings/nl2br.phpt
+      ext/standard/tests/strings/pathinfo.phpt:
+      fix test
+
+2006-08-08  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_API.c:
+      Adjust zend_get_unified_string_type() to give correct types.
+
+    * ZendEngine2/zend_unicode.h:
+      Should be slightly faster to use U16_NEXT here.
+
+2006-08-08  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/assert.c:
+      fix leak in assert()
+
+    * main/php_variables.c:
+      unused variable
+
+    * ext/dom/node.c
+      ext/pdo/pdo_stmt.c
+      ext/simplexml/simplexml.c
+      ext/soap/php_encoding.c
+      ext/soap/php_http.c
+      ext/soap/soap.c
+      ext/sqlite/sqlite.c
+      ext/standard/array.c
+      ext/standard/streamsfuncs.c
+      ext/standard/var.c
+      ext/unicode/unicode.c
+      main/output.c
+      main/php_variables.c
+      main/rfc1867.c
+      main/spprintf.c
+      main/streams/filter.c
+      main/streams/streams.c
+      sapi/cli/php_cli_readline.c:
+      implement zend_unicode_to_string() and zend_string_to_unicode()
+      part #2 (of 2)
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_hash.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_unicode.c
+      ZendEngine2/zend_unicode.h:
+      implement zend_unicode_to_string() and zend_string_to_unicode()
+      part #1 (of 2)
+
+2006-08-08  Michael Wallner  <mike@iworks.at>
+
+    * (PHP_5_2)
+      NEWS
+      ext/dbase/dbase.c
+      ext/dbase/dbf_head.c:
+      MFH: implement #38357 (dbase_open can't open DBase 3 dbf file)
+
+    * ext/dbase/dbase.c
+      ext/dbase/dbf_head.c:
+      - implement #38357 (dbase_open can't open DBase 3 dbf file)
+
+2006-08-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/session/mod_files.c
+      ext/session/tests/bug38377.phpt:
+      MFB: Fixed bug #38377 (session_destroy() gives warning after
+      session_regenerate_id()).
+
+    * (PHP_4_4)
+      NEWS
+      ext/session/mod_files.c
+      ext/session/tests/bug38377.phpt:
+      MFH: Fixed bug #38377 (session_destroy() gives warning after
+      session_regenerate_id()).
+
+    * (PHP_5_2)
+      NEWS
+      ext/session/mod_files.c
+      ext/session/tests/bug38377.phpt
+      ext/session/tests/bug38377.phpt
+      ext/session/tests/bug38377.phpt:
+      Fixed bug #38377 (session_destroy() gives warning after
+      session_regenerate_id()).
+
+2006-08-08  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      tix fypo
+
+2006-08-08  Stanislav Malyshev  <stas@zend.com>
+
+    * sapi/apache2handler/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c:
+      fix bug with variables clobbered by longjmp
+
+2006-08-08  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/info.c:
+      zend_hash_get_current_key_ex() returns string_len + 1, so we need to
+      subtract 1 to get the real length
+
+2006-08-08  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/gd/gd.c
+      ext/gd/libgd/gd_gd2.c:
+      - fix compiler warnings
+
+2006-08-08  Antony Dovgal  <antony@zend.com>
+
+    * configure.in
+      configure.in
+      ZendEngine2/zend_operators.h
+      ZendEngine2/zend_operators.h:
+      there is no realiable way to detect memrchr() presence because of a mess in
+      glibc
+      so let's use our own implementation
+
+2006-08-08  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/standard/info.c:
+      - compiler warnings
+
+2006-08-08  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/string.c
+      ext/standard/tests/strings/strings001.phpt:
+      use memrchr/zend_memrchr instead of strrchr
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      %s -> %v
+      ce names are in Unicode
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/strrchr.phpt:
+      add new test
+
+    * ext/standard/tests/strings/strrchr.phpt
+      ext/standard/tests/strings/strrchr.phpt:
+      
+      add new test
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/strings001.phpt:
+      use memrchr/zend_memrchr instead of strrchr
+      fix wrong test
+
+2006-08-08  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_operators.h:
+      - Added some docs here so that nobody needs to figure it out once more.
+
+2006-08-08  Antony Dovgal  <antony@zend.com>
+
+    * configure.in
+      configure.in
+      ZendEngine2/zend_operators.h
+      ZendEngine2/zend_operators.h:
+      add zend_memrchr()
+
+    * ext/standard/string.c:
+      fix typo and invalid read
+
+2006-08-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      tests/classes/ctor_visibility.phpt
+      tests/classes/ctor_visibility.phpt:
+      - Speling
+
 2006-08-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/json/tests/fail001.phpt
