@@ -388,6 +388,26 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 				return 1;
 			}
 
+			/* get character set form  */
+			statement->errcode = PHP_OCI_CALL(OCIAttrGet, ((dvoid *)param, OCI_DTYPE_PARAM, (dvoid *)&outcol->charset_form, (ub4 *)0, OCI_ATTR_CHARSET_FORM, statement->err));
+
+			if (statement->errcode != OCI_SUCCESS) {
+				PHP_OCI_CALL(OCIDescriptorFree, (param, OCI_DTYPE_PARAM));
+				php_oci_error(statement->err, statement->errcode TSRMLS_CC);
+				PHP_OCI_HANDLE_ERROR(statement->connection, statement->errcode);
+				return 1;
+			}
+	
+			/* get character set id  */
+			statement->errcode = PHP_OCI_CALL(OCIAttrGet, ((dvoid *)param, OCI_DTYPE_PARAM, (dvoid *)&outcol->charset_id, (ub4 *)0, OCI_ATTR_CHARSET_ID, statement->err));
+
+			if (statement->errcode != OCI_SUCCESS) {
+				PHP_OCI_CALL(OCIDescriptorFree, (param, OCI_DTYPE_PARAM));
+				php_oci_error(statement->err, statement->errcode TSRMLS_CC);
+				PHP_OCI_HANDLE_ERROR(statement->connection, statement->errcode);
+				return 1;
+			}
+	
 			/* get size of the column */
 			statement->errcode = PHP_OCI_CALL(OCIAttrGet, ((dvoid *)param, OCI_DTYPE_PARAM, (dvoid *)&outcol->data_size, (dvoid *)0, OCI_ATTR_DATA_SIZE, statement->err));
 			
@@ -478,6 +498,8 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 					}
 					outcol->descid = descr->id;
 					buf = &(descr->descriptor);
+					descr->charset_form = outcol->charset_form;
+					descr->charset_id = outcol->charset_id;
 					break;
 
 				case SQLT_LNG:
