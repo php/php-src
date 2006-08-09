@@ -826,9 +826,11 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 		case SQLT_LNG:
 		case SQLT_CHR:
 			/* this is the default case when type was not specified */
-			convert_to_string(var);
+			if (Z_TYPE_P(var) != IS_NULL) {
+				convert_to_string(var);
+			}
 			if (maxlength == -1) {
-				value_sz = Z_STRLEN_P(var);
+				value_sz = (Z_TYPE_P(var) == IS_STRING) ? Z_STRLEN_P(var) : 0;
 			}
 			else {
 				value_sz = maxlength;
@@ -1003,7 +1005,7 @@ sb4 php_oci_bind_out_callback(
 		zval_dtor(val);
 		
 		Z_STRLEN_P(val) = PHP_OCI_PIECE_SIZE; /* 64K-1 is max XXX */
-		Z_STRVAL_P(val) = emalloc(Z_STRLEN_P(phpbind->zval));
+		Z_STRVAL_P(val) = ecalloc(1, Z_STRLEN_P(phpbind->zval) + 1);
 		
 		/* XXX we assume that zend-zval len has 4 bytes */
 		*alenpp = (ub4*) &Z_STRLEN_P(phpbind->zval); 

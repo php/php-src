@@ -186,7 +186,7 @@ typedef struct { /* php_oci_bind {{{ */
 		long max_length;
 		long type;
 	} array;
-	sb2 indicator;			/*  */
+	sb2 indicator;			/* -1 means NULL */
 	ub2 retcode;			/*  */
 } php_oci_bind; /* }}} */
 

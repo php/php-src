@@ -75,6 +75,8 @@ PHP                                                                        NEWS
   itself). (Ilia)
 - Fixed bug #38173 (Freeing nested cursors causes OCI8 to segfault). (Tony)
 - Fixed bug #38168 (Crash in pdo_pgsql on missing bound parameters). (Ilia)
+- Fixed bug #38161 (oci_bind_by_name() returns garbage when Oracle didn't set 
+  the variable). (Tony)
 - Fixed bug #38132 (ReflectionClass::getStaticProperties() retains \0 in key
   names). (Ilia)
 - Fixed bug #38064 (ignored constructor visibility). (Marcus)
