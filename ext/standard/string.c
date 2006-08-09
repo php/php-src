@@ -6821,46 +6821,55 @@ PHP_FUNCTION(str_rot13)
 /* }}} */
 
 
-static void php_string_shuffle(char *str, long len TSRMLS_DC)
+static void php_string_shuffle(zstr str, int len, zend_uchar str_type TSRMLS_DC)
 {
-	long n_elems, rnd_idx, n_left;
+	int rnd_idx, n_left;
 	char temp;
+	UChar u_temp;
 	/* The implementation is stolen from array_data_shuffle       */
 	/* Thus the characteristics of the randomization are the same */
-	n_elems = len;
 
-	if (n_elems <= 1) {
+	if (len <= 1) {
 		return;
 	}
 
-	n_left = n_elems;
+	n_left = len;
 
 	while (--n_left) {
 		rnd_idx = php_rand(TSRMLS_C);
 		RAND_RANGE(rnd_idx, 0, n_left, PHP_RAND_MAX);
-		if (rnd_idx != n_left) {
-			temp = str[n_left];
-			str[n_left] = str[rnd_idx];
-			str[rnd_idx] = temp;
+		if (str_type == IS_UNICODE) {
+			if (rnd_idx != n_left) {
+				u_temp = str.u[n_left];
+				str.u[n_left] = str.u[rnd_idx];
+				str.u[rnd_idx] = u_temp;
+			}
+		} else {
+			if (rnd_idx != n_left) {
+				temp = str.s[n_left];
+				str.s[n_left] = str.s[rnd_idx];
+				str.s[rnd_idx] = temp;
+			}
 		}
 	}
 }
 
 
-/* {{{ proto void str_shuffle(string str)
+/* {{{ proto void str_shuffle(string str) U
    Shuffles string. One permutation of all possible is created */
 PHP_FUNCTION(str_shuffle)
 {
-	zval **arg;
+	zstr str;
+	int str_len;
+	zend_uchar str_type;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg)) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len, &str_type) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(arg);
-	RETVAL_ZVAL(*arg, 1, 0);
-	if (Z_STRLEN_P(return_value) > 1) {
-		php_string_shuffle(Z_STRVAL_P(return_value), (long) Z_STRLEN_P(return_value) TSRMLS_CC);
+	RETVAL_ZSTRL(str, str_len, str_type, 1);
+	if (Z_UNILEN_P(return_value) > 1) {
+		php_string_shuffle(Z_UNIVAL_P(return_value), Z_UNILEN_P(return_value), Z_TYPE_P(return_value) TSRMLS_CC);
 	}
 }
 /* }}} */
