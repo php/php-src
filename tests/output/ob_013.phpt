@@ -39,7 +39,7 @@ Array
 (
     [name] => d
     [type] => 1
-    [flags] => 4145
+    [flags] => 4209
     [level] => 4
     [chunk_size] => 0
     [buffer_size] => 16384
@@ -51,7 +51,7 @@ Array
         (
             [name] => default output handler
             [type] => 0
-            [flags] => 48
+            [flags] => 112
             [level] => 0
             [chunk_size] => 0
             [buffer_size] => 16384
@@ -62,7 +62,7 @@ Array
         (
             [name] => a
             [type] => 1
-            [flags] => 49
+            [flags] => 113
             [level] => 1
             [chunk_size] => 0
             [buffer_size] => 16384
@@ -73,7 +73,7 @@ Array
         (
             [name] => b
             [type] => 1
-            [flags] => 49
+            [flags] => 113
             [level] => 2
             [chunk_size] => 0
             [buffer_size] => 16384
@@ -84,7 +84,7 @@ Array
         (
             [name] => c
             [type] => 1
-            [flags] => 49
+            [flags] => 113
             [level] => 3
             [chunk_size] => 0
             [buffer_size] => 16384
@@ -95,7 +95,7 @@ Array
         (
             [name] => d
             [type] => 1
-            [flags] => 4145
+            [flags] => 4209
             [level] => 4
             [chunk_size] => 0
             [buffer_size] => 16384

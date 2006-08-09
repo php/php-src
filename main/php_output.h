@@ -38,8 +38,9 @@
 
 /* handler ability flags */
 #define PHP_OUTPUT_HANDLER_CLEANABLE	0x0010
-#define PHP_OUTPUT_HANDLER_REMOVABLE	0x0020
-#define PHP_OUTPUT_HANDLER_STDFLAGS		0x0030
+#define PHP_OUTPUT_HANDLER_FLUSHABLE	0x0020
+#define PHP_OUTPUT_HANDLER_REMOVABLE	0x0040
+#define PHP_OUTPUT_HANDLER_STDFLAGS		0x0070
 
 /* handler status flags */
 #define PHP_OUTPUT_HANDLER_STARTED		0x1000
@@ -60,8 +61,9 @@
 /* handler hooks */
 #define PHP_OUTPUT_HANDLER_HOOK_GET_OPAQ	1
 #define PHP_OUTPUT_HANDLER_HOOK_GET_FLAGS	2
-#define PHP_OUTPUT_HANDLER_HOOK_IMMUTABLE	3
-#define PHP_OUTPUT_HANDLER_HOOK_DISABLE		4
+#define PHP_OUTPUT_HANDLER_HOOK_GET_LEVEL	3
+#define PHP_OUTPUT_HANDLER_HOOK_IMMUTABLE	4
+#define PHP_OUTPUT_HANDLER_HOOK_DISABLE		5
 
 #define PHP_OUTPUT_HANDLER_INITBUF_SIZE(s) \
 ( (s) ? \
@@ -183,7 +185,7 @@ PHPAPI int php_output_write_unicode(const UChar *str, size_t len TSRMLS_DC);
 PHPAPI int php_output_write_ascii(const char *str, size_t len TSRMLS_DC);
 PHPAPI int php_output_write(const char *str, size_t len TSRMLS_DC);
 
-PHPAPI void php_output_flush(TSRMLS_D);
+PHPAPI int php_output_flush(TSRMLS_D);
 PHPAPI void php_output_flush_all(TSRMLS_D);
 PHPAPI int php_output_clean(TSRMLS_D);
 PHPAPI void php_output_clean_all(TSRMLS_D);
