@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 6                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2006 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -1251,13 +1251,13 @@ static int php_output_handler_devnull_func(void **handler_context, php_output_co
  * USERLAND (nearly 1:1 of old output.c)
  */
 
-/* {{{ proto bool ob_start([ string|array user_function [, int chunk_size [, int flags]]])
+/* {{{ proto bool ob_start([string|array user_function [, int chunk_size [, int flags]]]) U
    Turn on Output Buffering (specifying an optional output handler). */
 PHP_FUNCTION(ob_start)
 {
 	zval *output_handler = NULL;
 	long chunk_size = 0;
-	long flags = PHP_OUTPUT_HANDLER_CLEANABLE|PHP_OUTPUT_HANDLER_REMOVABLE;
+	long flags = PHP_OUTPUT_HANDLER_STDFLAGS;
 	
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|z/lb", &output_handler, &chunk_size, &flags)) {
 		RETURN_FALSE;
@@ -1267,14 +1267,14 @@ PHP_FUNCTION(ob_start)
 	}
 	
 	if (SUCCESS != php_output_start_user(output_handler, chunk_size, flags TSRMLS_CC)) {
-		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to create buffer.");
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to create buffer");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool ob_flush(void)
+/* {{{ proto bool ob_flush(void) U
    Flush (send) contents of the output buffer. The last buffer content is sent to next buffer */
 PHP_FUNCTION(ob_flush)
 {
@@ -1283,7 +1283,7 @@ PHP_FUNCTION(ob_flush)
 	}
 	
 	if (!OG(active)) {
-		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to flush buffer. No buffer to flush.");
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to flush buffer. No buffer to flush");
 		RETURN_FALSE;
 	}
 	
@@ -1293,7 +1293,7 @@ PHP_FUNCTION(ob_flush)
 /* }}} */
 
 
-/* {{{ proto bool ob_clean(void)
+/* {{{ proto bool ob_clean(void) U
    Clean (delete) the current output buffer */
 PHP_FUNCTION(ob_clean)
 {
@@ -1302,18 +1302,18 @@ PHP_FUNCTION(ob_clean)
 	}
 	
 	if (!OG(active)) {
-		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer. No buffer to delete.");
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer. No buffer to delete");
 		RETURN_FALSE;
 	}
 	if (SUCCESS != php_output_clean(TSRMLS_C)) {
-		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer %s.", OG(active)->name);
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer of %v", Z_UNIVAL_P(OG(active)->name));
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool ob_end_flush(void)
+/* {{{ proto bool ob_end_flush(void) U
    Flush (send) the output buffer, and delete current output buffer */
 PHP_FUNCTION(ob_end_flush)
 {
@@ -1322,18 +1322,18 @@ PHP_FUNCTION(ob_end_flush)
 	}
 	
 	if (!OG(active)) {
-		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete and flush buffer. No buffer to delete or flush.");
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete and flush buffer. No buffer to delete or flush");
 		RETURN_FALSE;
 	}
 	if (SUCCESS != php_output_end(TSRMLS_C)) {
-		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer %s.", OG(active)->name);
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer of %v", Z_UNIVAL_P(OG(active)->name));
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool ob_end_clean(void)
+/* {{{ proto bool ob_end_clean(void) U
    Clean the output buffer, and delete current output buffer */
 PHP_FUNCTION(ob_end_clean)
 {
@@ -1342,18 +1342,18 @@ PHP_FUNCTION(ob_end_clean)
 	}
 	
 	if (!OG(active)) {
-		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer. No buffer to delete.");
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer. No buffer to delete");
 		RETURN_FALSE;
 	}
 	if (SUCCESS != php_output_discard(TSRMLS_C)) {
-		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer %s.", OG(active)->name);
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer of %v", Z_UNIVAL_P(OG(active)->name));
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool ob_get_flush(void)
+/* {{{ proto bool ob_get_flush(void) U
    Get current buffer contents, flush (send) the output buffer, and delete current output buffer */
 PHP_FUNCTION(ob_get_flush)
 {
@@ -1362,16 +1362,16 @@ PHP_FUNCTION(ob_get_flush)
 	}
 	
 	if (SUCCESS != php_output_get_contents(return_value TSRMLS_CC)) {
-		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete and flush buffer. No buffer to delete or flush.");
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete and flush buffer. No buffer to delete or flush");
 		RETURN_FALSE;
 	}
 	if (SUCCESS != php_output_end(TSRMLS_C)) {
-		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer %s.", OG(active)->name);
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer of %v", Z_UNIVAL_P(OG(active)->name));
 	}
 }
 /* }}} */
 
-/* {{{ proto bool ob_get_clean(void)
+/* {{{ proto bool ob_get_clean(void) U
    Get current buffer contents and delete current output buffer */
 PHP_FUNCTION(ob_get_clean)
 {
@@ -1380,16 +1380,16 @@ PHP_FUNCTION(ob_get_clean)
 	}
 	
 	if (SUCCESS != php_output_get_contents(return_value TSRMLS_CC)) {
-		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer. No buffer to delete.");
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer. No buffer to delete");
 		RETURN_FALSE;
 	}
 	if (SUCCESS != php_output_discard(TSRMLS_C)) {
-		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer %s.", OG(active)->name);
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer of %v", Z_UNIVAL_P(OG(active)->name));
 	}
 }
 /* }}} */
 
-/* {{{ proto string ob_get_contents(void)
+/* {{{ proto string ob_get_contents(void) U
    Return the contents of the output buffer */
 PHP_FUNCTION(ob_get_contents)
 {
@@ -1402,7 +1402,7 @@ PHP_FUNCTION(ob_get_contents)
 }
 /* }}} */
 
-/* {{{ proto int ob_get_level(void)
+/* {{{ proto int ob_get_level(void) U
    Return the nesting level of the output buffer */
 PHP_FUNCTION(ob_get_level)
 {
@@ -1413,7 +1413,7 @@ PHP_FUNCTION(ob_get_level)
 }
 /* }}} */
 
-/* {{{ proto int ob_get_length(void)
+/* {{{ proto int ob_get_length(void) U
    Return the length of the output buffer */
 PHP_FUNCTION(ob_get_length)
 {
@@ -1426,7 +1426,7 @@ PHP_FUNCTION(ob_get_length)
 }
 /* }}} */
 
-/* {{{ proto false|array ob_list_handlers()
+/* {{{ proto false|array ob_list_handlers() U
  *  List all output_buffers in an array 
  */
 PHP_FUNCTION(ob_list_handlers)
