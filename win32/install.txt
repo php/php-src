@@ -54,9 +54,9 @@ Chapter 1. General Installation Considerations
    want to use PHP for. There are three main fields you can use PHP, as
    described in the What can PHP do? section:
 
-     * Server-side scripting
+     * Websites and web applications (server-side scripting)
      * Command line scripting
-     * Client-side GUI applications
+     * Desktop (GUI) applications
 
    For the first and most common form, you need three things: PHP itself,
    a web server and a web browser. You probably already have a web
@@ -66,15 +66,15 @@ Chapter 1. General Installation Considerations
    set up anything on your own, only write your PHP scripts, upload it to
    the server you rent, and see the results in your browser.
 
-   While setting up the server and PHP on your own, you have two choices
-   for the method of connecting PHP to the server. For many servers PHP
-   has a direct module interface (also called SAPI). These servers
-   include Apache, Microsoft Internet Information Server, Netscape and
-   iPlanet servers. Many other servers have support for ISAPI, the
-   Microsoft module interface (OmniHTTPd for example). If PHP has no
-   module support for your web server, you can always use it as a CGI or
-   FastCGI processor. This means you set up your server to use the CGI
-   executable of PHP to process all PHP file requests on the server.
+   In case of setting up the server and PHP on your own, you have two
+   choices for the method of connecting PHP to the server. For many
+   servers PHP has a direct module interface (also called SAPI). These
+   servers include Apache, Microsoft Internet Information Server,
+   Netscape and iPlanet servers. Many other servers have support for
+   ISAPI, the Microsoft module interface (OmniHTTPd for example). If PHP
+   has no module support for your web server, you can always use it as a
+   CGI or FastCGI processor. This means you set up your server to use the
+   CGI executable of PHP to process all PHP file requests on the server.
 
    If you are also interested to use PHP for command line scripting (e.g.
    write scripts autogenerating some images for you offline, or
@@ -486,7 +486,7 @@ Microsoft IIS / PWS
    yourself from those attacks.
      _________________________________________________________________
 
-General considerations for all installations of PHP with IIS
+General considerations for all installations of PHP with IIS or PWS
 
      * First, read the Manual Installation Instructions. Do not skip this
        step as it provides crucial information for installing PHP on
@@ -697,7 +697,8 @@ Apache 1.3.x on Microsoft Windows
      Note: Remember that when adding path values in the Apache
      configuration files on Windows, all backslashes such as
      c:\directory\file.ext must be converted to forward slashes, as
-     c:/directory/file.ext.
+     c:/directory/file.ext. A trailing slash may also be necessary for
+     directories.
      _________________________________________________________________
 
 Installing as an Apache module
@@ -777,6 +778,11 @@ Apache 2.0.x on Microsoft Windows
 
      Note: You should read the manual installation steps first!
 
+     Apache 2.2.x Support: Users of Apache 2.2.x may use the
+     documentation below except the appropriate DLL file is named
+     php5apache2_2.dll and it only exists as of PHP 5.2.0. See also
+     http://snaps.php.net/
+
    Warning
 
    We do not recommend using a threaded MPM in production with Apache2.
@@ -825,7 +831,8 @@ Apache 2.0.x on Microsoft Windows
      Note: Remember that when adding path values in the Apache
      configuration files on Windows, all backslashes such as
      c:\directory\file.ext must be converted to forward slashes, as
-     c:/directory/file.ext.
+     c:/directory/file.ext. A trailing slash may also be necessary for
+     directories.
      _________________________________________________________________
 
 Installing as a CGI binary
@@ -1365,7 +1372,7 @@ $ cvs -d:pserver:cvsread@cvs.php.net:/repository co pecl/extname
        Windows users may find compiled PECL binaries by downloading the
        Collection of PECL modules from the PHP Downloads page, and by
        retrieving a PECL Snapshot. To compile PHP under Windows, read the
-       Win32 Build README.
+       appropriate chapter.
      _________________________________________________________________
 
 PECL for Windows users
@@ -1424,6 +1431,14 @@ $ make
    A successful install will have created extname.so and put it into the
    PHP extensions directory. You'll need to and adjust php.ini and add an
    extension=extname.so line before you can use the extension.
+
+   If the system is missing the phpize command, and precompiled packages
+   (like RPM's) are used, be sure to also install the appropriate devel
+   version of the PHP package as they often include the phpize command
+   along with the appropriate header files to build PHP and its
+   extensions.
+
+   Execute phpize --help to display additional usage information.
      _________________________________________________________________
 
 Compiling PECL extensions statically into PHP
@@ -1518,9 +1533,10 @@ The configuration file
      * SAPI module specific location (PHPIniDir directive in Apache 2, -c
        command line option in CGI and CLI, php_ini parameter in NSAPI,
        PHP_INI_PATH environment variable in THTTPD)
+     * The PHPRC environment variable. Before PHP 5.2.0 this was checked
+       after the registry key mentioned below.
      * HKEY_LOCAL_MACHINE\SOFTWARE\PHP\IniFilePath (Windows Registry
        location)
-     * The PHPRC environment variable
      * Current working directory (for CLI)
      * The web server's directory (for SAPI modules), or directory of PHP
        (otherwise in Windows)
@@ -1664,9 +1680,7 @@ Chapter 6. Installation FAQ
    is available for almost any OS (except maybe for MacOS before OSX),
    and almost any web server.
 
-   To install PHP, follow the instructions in the INSTALL file located in
-   the distribution. Windows users should also read the install.txt file.
-   There are also some helpful hints for Windows users here.
+   To install PHP, follow the instructions in Installing PHP.
 
    1. Why shouldn't I use Apache2 with a threaded MPM in a production
           environment?

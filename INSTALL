@@ -15,7 +15,6 @@ Installing PHP
         HP-UX specific installation notes
         OpenBSD installation notes
         Solaris specific installation tips
-        Gentoo installation notes
         Debian GNU/Linux installation notes
 
    3. Installation on Mac OS X
@@ -60,9 +59,9 @@ Chapter 1. General Installation Considerations
    want to use PHP for. There are three main fields you can use PHP, as
    described in the What can PHP do? section:
 
-     * Server-side scripting
+     * Websites and web applications (server-side scripting)
      * Command line scripting
-     * Client-side GUI applications
+     * Desktop (GUI) applications
 
    For the first and most common form, you need three things: PHP itself,
    a web server and a web browser. You probably already have a web
@@ -72,15 +71,15 @@ Chapter 1. General Installation Considerations
    set up anything on your own, only write your PHP scripts, upload it to
    the server you rent, and see the results in your browser.
 
-   While setting up the server and PHP on your own, you have two choices
-   for the method of connecting PHP to the server. For many servers PHP
-   has a direct module interface (also called SAPI). These servers
-   include Apache, Microsoft Internet Information Server, Netscape and
-   iPlanet servers. Many other servers have support for ISAPI, the
-   Microsoft module interface (OmniHTTPd for example). If PHP has no
-   module support for your web server, you can always use it as a CGI or
-   FastCGI processor. This means you set up your server to use the CGI
-   executable of PHP to process all PHP file requests on the server.
+   In case of setting up the server and PHP on your own, you have two
+   choices for the method of connecting PHP to the server. For many
+   servers PHP has a direct module interface (also called SAPI). These
+   servers include Apache, Microsoft Internet Information Server,
+   Netscape and iPlanet servers. Many other servers have support for
+   ISAPI, the Microsoft module interface (OmniHTTPd for example). If PHP
+   has no module support for your web server, you can always use it as a
+   CGI or FastCGI processor. This means you set up your server to use the
+   CGI executable of PHP to process all PHP file requests on the server.
 
    If you are also interested to use PHP for command line scripting (e.g.
    write scripts autogenerating some images for you offline, or
@@ -996,111 +995,6 @@ Using Packages
    install most of your needed components.
      _________________________________________________________________
 
-Gentoo installation notes
-
-   This section contains notes and hints specific to installing PHP on
-   Gentoo Linux.
-     _________________________________________________________________
-
-Using Portage (emerge)
-
-   While you can just download the PHP source and compile it yourself,
-   using Gentoo's packaging system is the simplest and cleanest method of
-   installing PHP. If you are not familiar with building software on
-   Linux, this is the way to go.
-
-   If you have built your Gentoo system so far, you are probably used to
-   Portage already. Installing Apache and PHP is no different than the
-   other system tools.
-
-   The first decision you need to make is whether you want to install
-   Apache 1.3.x or Apache 2.x. While both can be used with PHP, the steps
-   given below will use Apache 1.3.x. Another thing to consider is
-   whether your local Portage tree is up to date. If you have not updated
-   it recently, you need to run emerge sync before anything else. This
-   way, you will be using the most recent stable version of Apache and
-   PHP.
-
-   Now that everything is in place, you can use the following example to
-   install Apache and PHP:
-
-   Example 2-7. Gentoo Install Example with Apache 1.3
-# emerge \<apache-2
-# USE="-*" emerge php mod_php
-# ebuild /var/db/pkg/dev-php/mod_php-<your PHP version>/mod_php-<your PHP versi
-on>.ebuild config
-# nano /etc/conf.d/apache
-  Add "-D PHP4" to APACHE_OPTS
-
-# rc-update add apache default
-# /etc/init.d/apache start
-
-   You can read more about emerge in the excellent Portage Manual
-   provided on the Gentoo website.
-
-   If you need to use Apache 2, you can simply use emerge apache in the
-   last example.
-     _________________________________________________________________
-
-Better control on configuration
-
-   In the last section, PHP was emerged without any activated modules. As
-   of this writing, the only module activated by default with Portage is
-   XML which is needed by PEAR. This may not be what you want and you
-   will soon discover that you need more activated modules, like MySQL,
-   gettext, GD, etc.
-
-   When you compile PHP from source yourself, you need to activate
-   modules via the configure command. With Gentoo, you can simply provide
-   USE flags which will be passed to the configure script automatically.
-   To see which USE flags to use with emerge, you can try:
-
-   Example 2-8. Getting the list of valid USE flags
-# USE="-*" emerge -pv php
-
-[ebuild  N    ] dev-php/php-4.3.6-r1  -X -berkdb -crypt -curl -debug -doc
--fdftk -firebird -flash -freetds -gd -gd-external -gdbm -gmp -hardenedphp
--imap -informix -ipv6 -java -jpeg -kerberos -ldap -mcal -memlimit -mssql
--mysql -ncurses -nls -oci8 -odbc -pam -pdflib -png -postgres -qt -readline
--snmp -spell -ssl -tiff -truetype -xml2 -yaz  3,876 kB
-
-   As you can see from the last output, PHP considers a lot of USE flags.
-   Look at them closely and choose what you need. If you choose a flag
-   and you do not have the proper libraries, Portage will compile them
-   for you. It is a good idea to use emerge -pv again to see what Portage
-   will compile in accordance to your USE flags. As an example, if you do
-   not have X installed and you choose to include X in the USE flags,
-   Portage will compile X prior to PHP, which can take a couple of hours.
-
-   If you choose to compile PHP with MySQL, cURL and GD support, the
-   command will look something like this:
-
-   Example 2-9. Install PHP with USE flags
-   # USE="-* curl mysql gd" emerge php mod_php
-
-   As in the last example, do not forget to emerge php as well as
-   mod_php. php is responsible for the command line version of PHP as
-   mod_php is for the Apache module version of PHP.
-     _________________________________________________________________
-
-Common Problems
-
-     * If you see the PHP source instead of the result the script should
-       produce, you have probably forgot to edit /etc/conf.d/apache.
-       Apache needs to be started with the -D PHP4 flag. To see if the
-       flag is present, you should be able to see it when using ps ax |
-       grep apache while Apache is running.
-     * Due to slotting problems, you might end up with more than one
-       version of PHP installed on your system. If this is the case, you
-       need to unmerge the old versions manually by using emerge unmerge
-       mod_php-<old version>.
-     * If you cannot emerge PHP because of Java, try putting -* in front
-       of your USE flags like in the above examples.
-     * If you are having problems configuring Apache and PHP, you can
-       always search the Gentoo Forums. Try searching with the keywords
-       "Apache PHP".
-     _________________________________________________________________
-
 Debian GNU/Linux installation notes
 
    This section contains notes and hints specific to installing PHP on
@@ -1135,7 +1029,7 @@ Using APT
    versions of PHP 4 and PHP 5. To use it, just add the to following two
    lines to your /etc/apt/sources.lists and run apt-get update :
 
-   Example 2-10. The two Dotdeb related lines
+   Example 2-7. The two Dotdeb related lines
 deb http://packages.dotdeb.org stable all
 deb-src http://packages.dotdeb.org stable all
 
@@ -1147,7 +1041,7 @@ deb-src http://packages.dotdeb.org stable all
    Now that everything is in place, you can use the following example to
    install Apache and PHP:
 
-   Example 2-11. Debian Install Example with Apache 1.3
+   Example 2-8. Debian Install Example with Apache 1.3
    # apt-get install libapache-mod-php4
 
    APT will automatically install the PHP 4 module for Apache 1.3, and
@@ -1155,7 +1049,7 @@ deb-src http://packages.dotdeb.org stable all
    restart Apache during the install process, you'll have to do it
    manually :
 
-   Example 2-12. Stopping and starting Apache once PHP 4 is installed
+   Example 2-9. Stopping and starting Apache once PHP 4 is installed
 # /etc/init.d/apache stop
 # /etc/init.d/apache start
      _________________________________________________________________
@@ -1171,7 +1065,7 @@ Better control on configuration
    additional packages. They're all named 'php4-*' (or 'php5-*' if you
    installed PHP 5 from a third party repository).
 
-   Example 2-13. Getting the list of PHP additional packages
+   Example 2-10. Getting the list of PHP additional packages
    # dpkg -l 'php4-*'
 
    As you can see from the last output, there's a lot of PHP modules that
@@ -1183,13 +1077,13 @@ Better control on configuration
    If you choose to add the MySQL, cURL and GD support to PHP the command
    will look something like this:
 
-   Example 2-14. Install PHP with MySQL, cURL and GD
+   Example 2-11. Install PHP with MySQL, cURL and GD
    # apt-get install php4-mysql php4-curl php4-gd
 
    APT will automatically add the appropriate lines to your different
    php.ini (/etc/php4/apache/php.ini, /etc/php4/cgi/php.ini, etc).
 
-   Example 2-15. These lines activate MySQL, cURL and GD into PHP
+   Example 2-12. These lines activate MySQL, cURL and GD into PHP
 extension=mysql.so
 extension=curl.so
 extension=gd.so
@@ -1206,7 +1100,7 @@ Common Problems
        line is present in your /etc/apache/httpd.conf file then
        stop/start Apache:
 
-   Example 2-16. This line activates PHP 4 into Apache
+   Example 2-13. This line activates PHP 4 into Apache
 # Include /etc/apache/conf.d/
 
      * If you installed an additional module and if its functions are not
@@ -1387,7 +1281,7 @@ $ cvs -d:pserver:cvsread@cvs.php.net:/repository co pecl/extname
        Windows users may find compiled PECL binaries by downloading the
        Collection of PECL modules from the PHP Downloads page, and by
        retrieving a PECL Snapshot. To compile PHP under Windows, read the
-       Win32 Build README.
+       appropriate chapter.
      _________________________________________________________________
 
 PECL for Windows users
@@ -1446,6 +1340,14 @@ $ make
    A successful install will have created extname.so and put it into the
    PHP extensions directory. You'll need to and adjust php.ini and add an
    extension=extname.so line before you can use the extension.
+
+   If the system is missing the phpize command, and precompiled packages
+   (like RPM's) are used, be sure to also install the appropriate devel
+   version of the PHP package as they often include the phpize command
+   along with the appropriate header files to build PHP and its
+   extensions.
+
+   Execute phpize --help to display additional usage information.
      _________________________________________________________________
 
 Compiling PECL extensions statically into PHP
@@ -1540,9 +1442,10 @@ The configuration file
      * SAPI module specific location (PHPIniDir directive in Apache 2, -c
        command line option in CGI and CLI, php_ini parameter in NSAPI,
        PHP_INI_PATH environment variable in THTTPD)
+     * The PHPRC environment variable. Before PHP 5.2.0 this was checked
+       after the registry key mentioned below.
      * HKEY_LOCAL_MACHINE\SOFTWARE\PHP\IniFilePath (Windows Registry
        location)
-     * The PHPRC environment variable
      * Current working directory (for CLI)
      * The web server's directory (for SAPI modules), or directory of PHP
        (otherwise in Windows)
@@ -1686,9 +1589,7 @@ Chapter 7. Installation FAQ
    is available for almost any OS (except maybe for MacOS before OSX),
    and almost any web server.
 
-   To install PHP, follow the instructions in the INSTALL file located in
-   the distribution. Windows users should also read the install.txt file.
-   There are also some helpful hints for Windows users here.
+   To install PHP, follow the instructions in Installing PHP.
 
    1. Why shouldn't I use Apache2 with a threaded MPM in a production
           environment?
