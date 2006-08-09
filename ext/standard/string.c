@@ -3741,7 +3741,9 @@ PHPAPI UChar *php_u_strtr(UChar *str, int len, UChar *str_from, int str_from_len
 		}
 
 		for (i = 0; i < len; i++) {
-			tmp_str[i] = xlat[str[i]];
+			if (str[i] < 256) {
+				tmp_str[i] = xlat[str[i]];
+			}
 		}
 
 		*outlen = len;
@@ -3753,13 +3755,15 @@ PHPAPI UChar *php_u_strtr(UChar *str, int len, UChar *str_from, int str_from_len
 		HashTable *tmp_hash;
 		int minlen = 128*1024, maxlen;
 		zval *tmp;
+		UChar x[2] = { 0, };
 
 		tmp_hash = emalloc(sizeof(HashTable));
 		zend_hash_init(tmp_hash, 0, NULL, NULL, 0);
 
 		/* Loop over the two strings and prepare the hash entries */
 		MAKE_STD_ZVAL(tmp);
-		ZVAL_UNICODEL(tmp, "X", 1, 1);
+		x[0] = (UChar) 0x58 /*'X'*/;
+		ZVAL_UNICODEL(tmp, x, 1, 1);
 		minlen = maxlen = 1;
 		zend_u_hash_add(tmp_hash, IS_UNICODE, ZSTR("a"), 2, &tmp, sizeof(zval *), NULL);
 
@@ -6783,21 +6787,36 @@ PHP_FUNCTION(sscanf)
 
 static char rot13_from[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 static char rot13_to[] = "nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKLM";
+U_STRING_DECL(u_rot13_from, rot13_from, sizeof(rot13_from)-1);
+U_STRING_DECL(u_rot13_to, rot13_to, sizeof(rot13_to)-1);
 
-/* {{{ proto string str_rot13(string str)
+/* {{{ proto string str_rot13(string str) U
    Perform the rot13 transform on a string */
 PHP_FUNCTION(str_rot13)
 {
-	zval **arg;
+	static int did_init_strings = FALSE;
+	zstr str;
+	int str_len;
+	zend_uchar str_type;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg)) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len, &str_type) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(arg);
-	RETVAL_ZVAL(*arg, 1, 0);
+	if (!did_init_strings) {
+		U_STRING_INIT(u_rot13_from, rot13_from, sizeof(rot13_from)-1);
+		U_STRING_INIT(u_rot13_to, rot13_to, sizeof(rot13_to)-1);
+		did_init_strings = TRUE;
+	}
 
-	php_strtr(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value), rot13_from, rot13_to, 52);
+
+	if (str_type == IS_UNICODE) {
+		RETVAL_UNICODEL(str.u, str_len, 0);
+		Z_USTRVAL_P(return_value) = php_u_strtr(Z_USTRVAL_P(return_value), Z_USTRLEN_P(return_value), u_rot13_from, 52, u_rot13_to, 52, 52, &Z_USTRLEN_P(return_value));
+	} else {
+		RETVAL_STRINGL(str.s, str_len, 1);
+		php_strtr(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value), rot13_from, rot13_to, 52);
+	}
 }
 /* }}} */
 

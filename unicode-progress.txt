@@ -52,9 +52,6 @@ ext/standard
         Params API, IS_UNICODE upgrade. Case-folding should be handled
         similar to stristr().
 
-    str_rot13()
-        Params API, IS_UNICODE support
-
     str_shuffle()
         Params API, IS_UNICODE support
 
@@ -196,6 +193,7 @@ ext/standard
     similar_text()
     str_pad()
     str_repeat()
+    str_rot13()
     strcspn()
     strip_tags()
     stripcslashes()
