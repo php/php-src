@@ -1364,6 +1364,7 @@ php_oci_bind *php_oci_bind_array_helper_date(zval* var, long max_table_length, p
 
 			if (connection->errcode != OCI_SUCCESS) {
 				/* failed to convert string to date */
+				efree(bind->array.element_lengths);
 				efree(bind->array.elements);
 				efree(bind);
 				php_oci_error(connection->err, connection->errcode TSRMLS_CC);
@@ -1378,6 +1379,7 @@ php_oci_bind *php_oci_bind_array_helper_date(zval* var, long max_table_length, p
 
 			if (connection->errcode != OCI_SUCCESS) {
 				/* failed to convert string to date */
+				efree(bind->array.element_lengths);
 				efree(bind->array.elements);
 				efree(bind);
 				php_oci_error(connection->err, connection->errcode TSRMLS_CC);
