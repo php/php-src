@@ -2,16 +2,16 @@
 addcslashes() and stripcslashes() function
 --FILE--
 <?php
-echo addcslashes("", "")."\n";
-echo addcslashes("", "burp")."\n";
-echo addcslashes("kaboemkara!", "")."\n";
-echo addcslashes("foobarbaz", 'bar')."\n";
-echo addcslashes('foo[ ]', 'A..z')."\n";
-echo @addcslashes("zoo['.']", 'z..A')."\n";
-echo addcslashes('abcdefghijklmnopqrstuvwxyz', "a\145..\160z")."\n";
-echo "\n\r" == stripcslashes('\n\r'),"\n";
-echo stripcslashes('\065\x64')."\n";
-echo stripcslashes('')."\n";
+echo addcslashes(b"", b"")."\n";
+echo addcslashes(b"", b"burp")."\n";
+echo addcslashes(b"kaboemkara!", b"")."\n";
+echo addcslashes(b"foobarbaz", b'bar')."\n";
+echo addcslashes(b'foo[ ]', b'A..z')."\n";
+echo @addcslashes(b"zoo['.']", b'z..A')."\n";
+echo addcslashes(b'abcdefghijklmnopqrstuvwxyz', b"a\145..\160z")."\n";
+echo "\n\r" == stripcslashes(b'\n\r'),"\n";
+echo stripcslashes(b'\065\x64')."\n";
+echo stripcslashes(b'')."\n";
 ?>
 --EXPECT--
 
