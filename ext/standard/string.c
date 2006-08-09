@@ -4367,7 +4367,7 @@ PHP_FUNCTION(addcslashes)
 	char *str, *what;
 	int str_len, what_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_DC, "SS", &str, &str_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &str, &str_len,
 							  &what, &what_len) == FAILURE) {
 		return;
 	}
@@ -4423,7 +4423,7 @@ PHP_FUNCTION(stripcslashes)
 	char *str;
 	int str_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_DC, "S", &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &str, &str_len) == FAILURE) {
 		return;
 	}
 
