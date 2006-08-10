@@ -115,6 +115,7 @@
   <file role="test" name="tests/connect.inc"/>
   <file role="test" name="tests/connect_old.phpt"/>
   <file role="test" name="tests/connect.phpt"/>
+  <file role="test" name="tests/connect_with_charset_001.phpt"/>
   <file role="test" name="tests/connect_without_oracle_home_old.phpt"/>
   <file role="test" name="tests/connect_without_oracle_home.phpt"/>
   <file role="test" name="tests/create_table.inc"/>
