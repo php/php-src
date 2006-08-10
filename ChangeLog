@@ -1,3 +1,149 @@
+2006-08-09  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_4_4)
+      ext/standard/var_unserializer.c:
+      regenerate file so that #line directives become correct (aka fix lcov
+      builds)
+
+    * (PHP_5_2)
+      INSTALL
+      win32/install.txt:
+      sync install instructions with the phpdoc xml sources
+
+2006-08-09  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/strings/add-and-stripcslashes.phpt:
+      fix test
+
+    * ext/standard/string.c:
+      fix ZTS build
+
+2006-08-09  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-progress.txt
+      ext/standard/string.c:
+      Unicode support for str_shuffle().
+
+    * unicode-progress.txt
+      ext/standard/string.c:
+      Upgrade str_rot13() to work with IS_UNICODE type.
+
+2006-08-09  Antony Dovgal  <antony@zend.com>
+
+    * ext/xmlwriter/010.phpt
+      ext/xmlwriter/tests/010.phpt:
+      wrong directory
+
+2006-08-09  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/standard/string.c:
+      Fix ZTS builds
+
+2006-08-09  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-progress.txt
+      ext/standard/string.c:
+      addcslashes() and stripcslashes() should work only on binary strings.
+
+    * ZendEngine2/zend_API.c:
+      Make params API sound less like Raymond Babbitt.
+
+2006-08-09  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * ext/oci8/package.xml:
+      update
+
+    * ext/oci8/oci8_lob.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/bug35973.phpt
+      ext/oci8/tests/bug35973.phpt
+      ext/oci8/tests/bug35973.phpt:
+      add support for NCLOBs
+      fix #35973 (Error ORA-24806 occurs when trying to fetch a NCLOB field)
+
+2006-08-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo/pdo_stmt.c
+      ext/pdo/tests/bug_38394.phpt:
+      MFB: Fixed bug #38394 (PDO fails to recover from failed prepared statement
+      execution).
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_stmt.c
+      ext/pdo/tests/bug_38394.phpt
+      ext/pdo/tests/bug_38394.phpt:
+      Fixed bug #38394 (PDO fails to recover from failed prepared statement
+      execution).
+
+2006-08-09  Michael Wallner  <mike@iworks.at>
+
+    * main/output.c
+      main/php_output.h
+      tests/output/ob_013.phpt
+      tests/output/ob_018.phpt
+      tests/output/ob_019.phpt:
+      - error message enhancements
+      - avoid duplicate error messages
+      - add PHP_OUTPUT_HANDLER_FLUSHABLE
+      - add PHP_OUTPUT_HANDLER_HOOK_GET_LEVEL
+      - add more tests
+
+2006-08-09  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/package.xml:
+      update changelog and file list
+
+    * (PHP_5_2)
+      NEWS
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/bug38161.phpt:
+      MFH: fix #38161 (oci_bind_by_name() returns garbage when Oracle didn't set
+      the variable)
+
+    * ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/bug37581.phpt
+      ext/oci8/tests/bug38161.phpt
+      ext/oci8/tests/bug38161.phpt:
+      fix #38161 (oci_bind_by_name() returns garbage when Oracle didn't set the
+      variable)
+
+    * ext/oci8/bug37581.phpt:
+      oops, wrong directory
+
+    * ext/oci8/oci8_statement.c
+      ext/oci8/oci8_statement.c:
+      fix leak on failure
+
+2006-08-09  Michael Wallner  <mike@iworks.at>
+
+    * main/output.c:
+      - mark unicode safe functions
+
+    * main/output.c:
+      - use HashPosition for traversal of registered reverse conflicts
+      - fix protos
+
+2006-08-09  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/oci8/oci8.c:
+      MFH: fix #8112 (Persistent connections misbehave when Apache process times
+      out)
+
+    * ext/oci8/oci8.c:
+      fix #8112 (Persistent connections misbehave when Apache process times out)
+
 2006-08-08  Antony Dovgal  <antony@zend.com>
 
     * ext/standard/string.c:
