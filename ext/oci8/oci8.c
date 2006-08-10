@@ -981,6 +981,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	time_t timestamp;
 #if HAVE_OCI_ENV_NLS_CREATE
 	ub2 charsetid = 0;
+	ub2 charsetid_nls_lang = 0;
 #endif
 	
 	switch (session_mode) {
@@ -1014,15 +1015,31 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	}
 	smart_str_appendl_ex(&hashed_details, "__", sizeof("__") - 1, 0);
 
+	/* Initialize global handles if the weren't initialized before */
+	if (OCI_G(env) == NULL) {
+		php_oci_init_global_handles(TSRMLS_C);
+	}
+
 #if HAVE_OCI_ENV_NLS_CREATE
 	if (charset && *charset) {
-		smart_str_appends_ex(&hashed_details, charset, 0);
+		charsetid = PHP_OCI_CALL(OCINlsCharSetNameToId, (OCI_G(env), charset));
+		if (!charsetid) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid character set name: %s", charset);
+		} else {
+			smart_str_append_unsigned_ex(&hashed_details, charsetid, 0);
+		}
 	}
-	else {
-		size_t rsize = 0;
 
-		PHP_OCI_CALL(OCINlsEnvironmentVariableGet, (&charsetid, 2, OCI_NLS_CHARSET_ID, 0, &rsize));
-		smart_str_append_unsigned_ex(&hashed_details, charsetid, 0);
+	/* use NLS_LANG if no or invalid charset specified */
+	if (!charsetid) {
+		size_t rsize = 0;
+		sword result;
+
+		result = PHP_OCI_CALL(OCINlsEnvironmentVariableGet, (&charsetid_nls_lang, 0, OCI_NLS_CHARSET_ID, 0, &rsize))
+		if (result != OCI_SUCCESS) {
+			charsetid_nls_lang = 0;
+		}
+		smart_str_append_unsigned_ex(&hashed_details, charsetid_nls_lang, 0);
 	}
 #else
 	if (charset && *charset) {
@@ -1037,12 +1054,6 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 
 	/* make it lowercase */
 	php_strtolower(hashed_details.c, hashed_details.len);
-	
-	/* Initialize global handles if the weren't initialized before */
-	
-	if (OCI_G(env) == NULL) {
-		php_oci_init_global_handles(TSRMLS_C);
-	}
 	
 	if (!exclusive && !new_password) {
 		zend_bool found = 0;
@@ -1173,16 +1184,14 @@ open:
 #if HAVE_OCI_ENV_NLS_CREATE
 #define PHP_OCI_INIT_FUNC_NAME "OCIEnvNlsCreate"
 	
-	if (charset && *charset) {
-		charsetid = PHP_OCI_CALL(OCINlsCharSetNameToId, (OCI_G(env), charset));
+	if (charsetid) {
 		connection->charset = charsetid;
-	}
-	else if (charsetid) {
-		connection->charset = charsetid;
+	} else {
+		connection->charset = charsetid_nls_lang;
 	}
 
 	/* create an environment using the character set id, Oracle 9i+ ONLY */
-	OCI_G(errcode) = PHP_OCI_CALL(OCIEnvNlsCreate, (&(connection->env), PHP_OCI_INIT_MODE, 0, NULL, NULL, NULL, 0, NULL, charsetid, charsetid));
+	OCI_G(errcode) = PHP_OCI_CALL(OCIEnvNlsCreate, (&(connection->env), PHP_OCI_INIT_MODE, 0, NULL, NULL, NULL, 0, NULL, connection->charset, connection->charset));
 
 #elif HAVE_OCI_ENV_CREATE
 #define PHP_OCI_INIT_FUNC_NAME "OCIEnvCreate"
