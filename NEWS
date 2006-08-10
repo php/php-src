@@ -1,6 +1,10 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, Version 4.4.4
+- Fixed memory_limit on 64bit systems. (Stefan E.)
+- Fixed overflow on 64bit systems in str_repeat() and wordwrap(). (Stefan E.)
+- Disabled CURLOPT_FOLLOWLOCATION in curl when open_basedir or safe_mode are
+  enabled. (Stefan E.)
 - Fixed bug #38377 (session_destroy() gives warning after
   session_regenerate_id()). (Ilia)
 - Fixed bug #38322 (reading past array in sscanf() leads to arbitary code 
