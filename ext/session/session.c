@@ -165,6 +165,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("session.cookie_path",        "/",         PHP_INI_ALL, OnUpdateString, cookie_path,        php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.cookie_domain",      "",          PHP_INI_ALL, OnUpdateString, cookie_domain,      php_ps_globals,    ps_globals)
 	STD_PHP_INI_BOOLEAN("session.cookie_secure",    "",          PHP_INI_ALL, OnUpdateBool,   cookie_secure,      php_ps_globals,    ps_globals)
+	STD_PHP_INI_BOOLEAN("session.cookie_httponly",  "",          PHP_INI_ALL, OnUpdateBool,   cookie_httponly,    php_ps_globals,    ps_globals)
 	STD_PHP_INI_BOOLEAN("session.use_cookies",      "1",         PHP_INI_ALL, OnUpdateBool,   use_cookies,        php_ps_globals,    ps_globals)
 	STD_PHP_INI_BOOLEAN("session.use_only_cookies", "0",         PHP_INI_ALL, OnUpdateBool,   use_only_cookies,   php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.referer_check",      "",          PHP_INI_ALL, OnUpdateString, extern_referer_chk, php_ps_globals,    ps_globals)
@@ -1012,6 +1013,7 @@ static int php_session_cache_limiter(TSRMLS_D)
 #define COOKIE_PATH		"; path="
 #define COOKIE_DOMAIN	"; domain="
 #define COOKIE_SECURE	"; secure"
+#define COOKIE_HTTPONLY	"; HttpOnly"
 
 static void php_session_send_cookie(TSRMLS_D)
 {
@@ -1063,6 +1065,10 @@ static void php_session_send_cookie(TSRMLS_D)
 
 	if (PS(cookie_secure)) {
 		smart_str_appends(&ncookie, COOKIE_SECURE);
+	}
+
+	if (PS(cookie_httponly)) {
+		smart_str_appends(&ncookie, COOKIE_HTTPONLY);
 	}
 
 	smart_str_0(&ncookie);
@@ -1296,13 +1302,13 @@ static zend_bool php_session_destroy(TSRMLS_D)
    Set session cookie parameters */
 PHP_FUNCTION(session_set_cookie_params)
 {
-	zval **lifetime, **path, **domain, **secure;
+	zval **lifetime, **path, **domain, **secure,  **httponly;
 
 	if (!PS(use_cookies))
 		return;
 
-	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 4 ||
-		zend_get_parameters_ex(ZEND_NUM_ARGS(), &lifetime, &path, &domain, &secure) == FAILURE)
+	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 5 ||
+		zend_get_parameters_ex(ZEND_NUM_ARGS(), &lifetime, &path, &domain, &secure, &httponly) == FAILURE)
 		WRONG_PARAM_COUNT;
 
 	convert_to_string_ex(lifetime);
@@ -1319,6 +1325,10 @@ PHP_FUNCTION(session_set_cookie_params)
 				convert_to_long_ex(secure);
 				zend_alter_ini_entry("session.cookie_secure", sizeof("session.cookie_secure"), Z_BVAL_PP(secure)?"1":"0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 			}
+			    if (ZEND_NUM_ARGS() > 4) {
+			    	    convert_to_long_ex(httponly);
+				    zend_alter_ini_entry("session.cookie_httponly", sizeof("session.cookie_httponly"), Z_BVAL_PP(httponly)?"1":"0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+			    }
 		}
 	}
 }
@@ -1338,6 +1348,7 @@ PHP_FUNCTION(session_get_cookie_params)
 	add_assoc_string(return_value, "path", PS(cookie_path), 1);
 	add_assoc_string(return_value, "domain", PS(cookie_domain), 1);
 	add_assoc_bool(return_value, "secure", PS(cookie_secure));
+	add_assoc_bool(return_value, "httponly", PS(cookie_httponly));
 }
 /* }}} */
 

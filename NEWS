@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Aug 2006, PHP 5.2.0RC2
+- Added support for httpOnly flag for session extension and cookie setting
+  functions. (Scott MacVicar, Ilia)
 - Added version specific registry keys to allow different configurations for
   different php version. (Richard, Dmitry)
 - In addition to path to php.ini, PHPRC now may specify full file name. (Dmitry)

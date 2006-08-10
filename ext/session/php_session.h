@@ -103,6 +103,7 @@ typedef struct _php_ps_globals {
 	char *cookie_path;
 	char *cookie_domain;
 	zend_bool  cookie_secure;
+	zend_bool  cookie_httponly;
 	ps_module *mod;
 	void *mod_data;
 	php_session_status session_status;
