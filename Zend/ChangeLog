@@ -1,3 +1,8 @@
+2006-08-09  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.c:
+      Make params API sound less like Raymond Babbitt.
+
 2006-08-08  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_API.c:
