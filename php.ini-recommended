@@ -970,6 +970,9 @@ session.cookie_path = /
 ; The domain for which the cookie is valid.
 session.cookie_domain =
 
+; Whether or not to add the httpOnly flag to the cookie, which makes it inaccessible to browser scripting languages such as JavaScript.
+session.cookie_httponly = 
+
 ; Handler used to serialize data.  php is the standard serializer of PHP.
 session.serialize_handler = php
 
