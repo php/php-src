@@ -15,5 +15,5 @@ function test: mysqli_character_set_name
 
 	mysqli_close($link);
 ?>
---EXPECT--
-string(6) "latin1"
+--EXPECTF--
+string(%d) "%s"

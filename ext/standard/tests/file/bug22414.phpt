@@ -14,7 +14,6 @@ output_handler=
 	echo "\n";
 
 	/* Binary Data Test */
-	@unlink($pwd . '/passthru_test');
 	
 	$cmd = $php . ' -n -r \"readfile(@getenv(\'TEST_PHP_EXECUTABLE\')); \"';
 	$cmd = $php . ' -n -r \' passthru("'.$cmd.'"); \' > '.$tmpfile ;
