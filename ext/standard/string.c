@@ -834,7 +834,8 @@ PHP_FUNCTION(wordwrap)
 {
 	const char *text, *breakchar = "\n";
 	char *newtext;
-	int textlen, breakcharlen = 1, newtextlen, alloced, chk;
+	int textlen, breakcharlen = 1, newtextlen, chk;
+	size_t alloced;
 	long current = 0, laststart = 0, lastspace = 0;
 	long linelength = 75;
 	zend_bool docut = 0;
@@ -6246,8 +6247,8 @@ PHP_FUNCTION(str_repeat)
 	zend_uchar	input_str_type;
 	long		mult;			/* Multiplier */
 	void		*result;		/* Resulting string */
-	int			result_len;		/* Length of the resulting string, in bytes */
-	int			result_chars;	/* Chars/UChars in resulting string */
+	size_t			result_len;		/* Length of the resulting string, in bytes */
+	size_t			result_chars;	/* Chars/UChars in resulting string */
 
 	if ( zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tl", &input_str,
 							   &input_str_chars, &input_str_type, &mult) == FAILURE ) {
@@ -6273,23 +6274,12 @@ PHP_FUNCTION(str_repeat)
 	if ( input_str_type == IS_UNICODE ) {
 		input_str_len = UBYTES(input_str_chars);
 		result_len = UBYTES(result_chars);
-		if ( result_chars < 1 || result_chars > (2147483647/UBYTES(1)) ) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "You may not create strings longer than %ld characters", 2147483647/UBYTES(1));
-			RETURN_FALSE;
-		}
+		result = (char *)safe_emalloc(UBYTES(input_str_chars), UBYTES(mult), UBYTES(1));
 	} else {
 		input_str_len = input_str_chars;
 		result_len = result_chars;
-		if ( result_chars < 1 || result_chars > 2147483647 ) {
-			if ( input_str_type == IS_STRING ) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "You may not create strings longer than 2147483647 characters");
-			} else {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "You may not create strings longer than 2147483647 bytes");
-			}
-			RETURN_FALSE;
-		}
+		result = (char *)safe_emalloc(input_str_chars, mult, 1);
 	}
-	result = emalloc(result_len);
 
 	/* Heavy optimization for situations where input string is 1 byte long */
 	if ( input_str_len == 1 ) {
