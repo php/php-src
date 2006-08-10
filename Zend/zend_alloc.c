@@ -72,7 +72,15 @@ static long mem_block_end_magic = MEM_BLOCK_END_MAGIC;
 #define CHECK_MEMORY_LIMIT(s, rs)	_CHECK_MEMORY_LIMIT(s, rs, NULL, 0)
 #  endif
 
-#define _CHECK_MEMORY_LIMIT(s, rs, file, lineno) { AG(allocated_memory) += rs;\
+#define _CHECK_MEMORY_LIMIT(s, rs, file, lineno) { if ((ssize_t)(rs) > (ssize_t)(INT_MAX - AG(allocated_memory))) { \
+									if (file) { \
+										fprintf(stderr, "Integer overflow in memory_limit check detected at %s:%d\n", file, lineno); \
+									} else { \
+										fprintf(stderr, "Integer overflow in memory_limit check detected\n"); \
+									} \
+									exit(1); \
+								} \
+								AG(allocated_memory) += rs;\
 								if (AG(memory_limit)<AG(allocated_memory)) {\
 									int php_mem_limit = AG(memory_limit); \
 									AG(allocated_memory) -= rs; \
@@ -127,7 +135,7 @@ static long mem_block_end_magic = MEM_BLOCK_END_MAGIC;
 #endif
 
 #define DECLARE_CACHE_VARS()	\
-	unsigned int real_size;		\
+	size_t real_size;		\
 	unsigned int cache_index
 
 #define REAL_SIZE(size) ((size+7) & ~0x7)
@@ -142,11 +150,15 @@ static long mem_block_end_magic = MEM_BLOCK_END_MAGIC;
 
 ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	zend_mem_header *p;
+	zend_mem_header *p = NULL;
 	DECLARE_CACHE_VARS();
 	TSRMLS_FETCH();
 
 	CALCULATE_REAL_SIZE_AND_CACHE_INDEX(size);
+
+	if (size > INT_MAX || SIZE < size) {
+		goto emalloc_error;
+	}
 
 #if !ZEND_DISABLE_MEMORY_CACHE
 	if ((CACHE_INDEX < MAX_CACHED_MEMORY) && (AG(cache_count)[CACHE_INDEX] > 0)) {
@@ -183,6 +195,8 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 #if !ZEND_DISABLE_MEMORY_CACHE
 	}
 #endif
+
+emalloc_error:
 
 	HANDLE_BLOCK_INTERRUPTIONS();
 
@@ -357,6 +371,13 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 	CALCULATE_REAL_SIZE_AND_CACHE_INDEX(size);
 
 	HANDLE_BLOCK_INTERRUPTIONS();
+
+	if (size > INT_MAX || SIZE < size) {
+		REMOVE_POINTER_FROM_LIST(p);
+		p = NULL;
+		goto erealloc_error;
+	}
+
 #if MEMORY_LIMIT
 	CHECK_MEMORY_LIMIT(size - p->size, SIZE - REAL_SIZE(p->size));
 	if (AG(allocated_memory) > AG(allocated_memory_peak)) {
@@ -365,6 +386,7 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 #endif
 	REMOVE_POINTER_FROM_LIST(p);
 	p = (zend_mem_header *) ZEND_DO_REALLOC(p, sizeof(zend_mem_header)+MEM_HEADER_PADDING+SIZE+END_MAGIC_SIZE);
+erealloc_error:
 	if (!p) {
 		if (!allow_failure) {
 			fprintf(stderr,"FATAL:  erealloc():  Unable to allocate %ld bytes\n", (long) size);
