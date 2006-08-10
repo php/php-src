@@ -29,6 +29,9 @@ PHP                                                                        NEWS
     openssl_csr_sign) (ben at psc dot edu, Pierre)
   . Implement #28382 (openssl_x509_parse() extensions support)
 
+- Fixed overflow on 64bit systems in str_repeat() and wordwrap(). (Stefan E.)
+- Disabled CURLOPT_FOLLOWLOCATION in curl when open_basedir or safe_mode are
+  enabled. (Stefan E., Ilia)
 - Fixed XSLTProcessor::importStylesheet() to return TRUE on success (Christian)
 - Fixed leaks in openssl_csr_sign and openssl_csr_new (Pierre)
 - Fixed phpinfo() cutoff of variables at \0. (Ilia)
@@ -83,6 +86,7 @@ PHP                                                                        NEWS
   the variable). (Tony)
 - Fixed bug #38132 (ReflectionClass::getStaticProperties() retains \0 in key
   names). (Ilia)
+- Fixed bug #38112 (corrupted gif segfaults) (Pierre)
 - Fixed bug #38064 (ignored constructor visibility). (Marcus)
 - Fixed bug #38047 ("file" and "line" sometimes not set in backtrace from
   inside error handler). (Dmitry)
