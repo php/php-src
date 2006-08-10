@@ -185,18 +185,15 @@ gdImageCreateFromGifCtx(gdIOCtxPtr fd)
 
                bitPixel = 1<<((buf[8]&0x07)+1);
 
+		if (!(im = gdImageCreate(imw, imh))) {
+			return 0;
+		}
 
-               if (! useGlobalColormap) {
-                       if (ReadColorMap(fd, bitPixel, localColorMap)) {
-                                 return 0;
-                       }
-			   }
-
-			   if (!(im = gdImageCreate(imw, imh))) {
-				   return 0;
-			   }
                im->interlace = BitSet(buf[8], INTERLACE);
                if (! useGlobalColormap) {
+		       if (ReadColorMap(fd, bitPixel, localColorMap)) {
+                                 return 0;
+                       }
                        ReadImage(im, fd, imw, imh, localColorMap,
                                  BitSet(buf[8], INTERLACE));
                                  /*1.4//imageCount != imageNumber); */
@@ -217,6 +214,10 @@ terminated:
        if (!im) {
 		return 0;
        }
+	if (!im->colorsTotal) {
+		gdImageDestroy(im);
+		return 0;
+	}
        /* Check for open colors at the end, so
           we can reduce colorsTotal and ultimately
           BitsPerPixel */
@@ -507,6 +508,18 @@ ReadImage(gdImagePtr im, gdIOCtx *fd, int len, int height, unsigned char (*cmap)
        int             v;
        int             xpos = 0, ypos = 0, pass = 0;
        int i;
+
+       /*
+       **  Initialize the Compression routines
+       */
+       if (! ReadOK(fd,&c,1)) {
+               return;
+       }
+
+	if (c > MAX_LWZ_BITS) {
+		return;
+	}
+
        /* Stash the color map into the image */
        for (i=0; (i<gdMaxColors); i++) {
                im->red[i] = cmap[CM_RED][i];
@@ -516,12 +529,7 @@ ReadImage(gdImagePtr im, gdIOCtx *fd, int len, int height, unsigned char (*cmap)
        }
        /* Many (perhaps most) of these colors will remain marked open. */
        im->colorsTotal = gdMaxColors;
-       /*
-       **  Initialize the Compression routines
-       */
-       if (! ReadOK(fd,&c,1)) {
-               return;
-       }
+
        if (LWZReadByte(fd, TRUE, c) < 0) {
                return;
        }
