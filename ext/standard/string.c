@@ -2101,7 +2101,7 @@ PHP_FUNCTION(pathinfo)
 
 	if (have_ext) {
 		zstr ext;
-		int ext_len;
+		int ext_len = 0;
 
 		if (path_type == IS_UNICODE) {
 			ext.u = u_memrchr32(ret.u, (UChar) 0x2e /*'.'*/, ret_len);
