@@ -232,12 +232,12 @@ php_apache_sapi_register_variables(zval *track_vars_array TSRMLS_DC)
 	php_struct *ctx = SG(server_context);
 	const apr_array_header_t *arr = apr_table_elts(ctx->r->subprocess_env);
 	char *key, *val;
-	
+
 	APR_ARRAY_FOREACH_OPEN(arr, key, val)
 		if (!val) val = "";
 		php_register_variable(key, val, track_vars_array TSRMLS_CC);
 	APR_ARRAY_FOREACH_CLOSE()
-		
+
 	php_register_variable("PHP_SELF", ctx->r->uri, track_vars_array TSRMLS_CC);
 }
 
@@ -530,7 +530,7 @@ normal:
 
 	/* Setup the CGI variables if this is the main request */
 	if (r->main == NULL ||
-		/* .. or if the sub-request envinronment differs from the main-request. */
+		/* .. or if the sub-request environment differs from the main-request. */
 		r->subprocess_env != r->main->subprocess_env
 	) {
 		/* setup standard CGI variables */
