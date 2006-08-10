@@ -1621,7 +1621,7 @@ PHP_FUNCTION(stripos)
 	php_strtolower(haystack_dup, haystack_len);
 
 	if (Z_TYPE_P(needle) == IS_STRING) {
-		if ((Z_STRLEN_P(needle) == 0 || Z_STRLEN_P(needle) > haystack_len) { 
+		if (Z_STRLEN_P(needle) == 0 || Z_STRLEN_P(needle) > haystack_len) {
 			efree(haystack_dup); 
 			RETURN_FALSE; 
 		} 
