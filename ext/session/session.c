@@ -1298,7 +1298,7 @@ static zend_bool php_session_destroy(TSRMLS_D)
 }
 
 
-/* {{{ proto void session_set_cookie_params(int lifetime [, string path [, string domain [, bool secure]]])
+/* {{{ proto void session_set_cookie_params(int lifetime [, string path [, string domain [, bool secure[, bool httponly]]]])
    Set session cookie parameters */
 PHP_FUNCTION(session_set_cookie_params)
 {
