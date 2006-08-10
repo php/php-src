@@ -634,7 +634,8 @@ PHP_FUNCTION(wordwrap)
 {
 	const char *text, *breakchar = "\n";
 	char *newtext;
-	int textlen, breakcharlen = 1, newtextlen, alloced, chk;
+	int textlen, breakcharlen = 1, newtextlen, chk;
+	size_t alloced;
 	long current = 0, laststart = 0, lastspace = 0;
 	long linelength = 75;
 	zend_bool docut = 0;
@@ -4265,7 +4266,7 @@ PHP_FUNCTION(str_repeat)
 	zval		**input_str;		/* Input string */
 	zval		**mult;			/* Multiplier */
 	char		*result;		/* Resulting string */
-	int		result_len;		/* Length of the resulting string */
+	size_t		result_len;		/* Length of the resulting string */
 	
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &input_str, &mult) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -4290,11 +4291,7 @@ PHP_FUNCTION(str_repeat)
 	
 	/* Initialize the result string */	
 	result_len = Z_STRLEN_PP(input_str) * Z_LVAL_PP(mult);
-	if (result_len < 1 || result_len > 2147483647) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "You may not create strings longer than 2147483647 bytes");
-		RETURN_FALSE;
-	}
-	result = (char *)emalloc(result_len + 1);
+	result = (char *)safe_emalloc(Z_STRLEN_PP(input_str), Z_LVAL_PP(mult), 1);
 	
 	/* Heavy optimization for situations where input string is 1 byte long */
 	if (Z_STRLEN_PP(input_str) == 1) {
