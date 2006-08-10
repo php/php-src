@@ -289,7 +289,11 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 	curl_easy_setopt(curlstream->curl, CURLOPT_WRITEHEADER, stream);
 
 	/* currently buggy (bug is in curl) */
-	curl_easy_setopt(curlstream->curl, CURLOPT_FOLLOWLOCATION, 1);
+	if ((PG(open_basedir) && *PG(open_basedir)) || PG(safe_mode)) {
+		curl_easy_setopt(curlstream->curl, CURLOPT_FOLLOWLOCATION, 0);
+	} else {
+		curl_easy_setopt(curlstream->curl, CURLOPT_FOLLOWLOCATION, 1);
+	}
 	
 	curl_easy_setopt(curlstream->curl, CURLOPT_ERRORBUFFER, curlstream->errstr);
 	curl_easy_setopt(curlstream->curl, CURLOPT_VERBOSE, 0);
