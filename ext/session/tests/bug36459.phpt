@@ -2,13 +2,13 @@
 bug #31454 (Incorrect adding PHPSESSID to links, which contains \r\n)
 --SKIPIF--
 <?php include('skipif.inc'); ?>
+--INI--
+session.use_trans_sid=1
+session.use_cookies=0
+session.name=sid
 --FILE--
 <?php
 error_reporting(E_ALL);
-
-ini_set('session.use_trans_sid', 1);
-ini_set('session.use_cookies', 0);
-ini_set('session.name', 'sid');
 
 session_start();
 
