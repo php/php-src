@@ -371,9 +371,10 @@ PS_DESTROY_FUNC(files)
 			/* This is a little safety check for instances when we are dealing with a regenerated session
 			 * that was not yet written to disk
 			 */
-			if (!VCWD_ACCESS(buf, F_OK)) {
+#ifndef PHP_WIN32
+			if (!VCWD_ACCESS(buf, F_OK))
+#endif
 				return FAILURE;
-			}
 		}
 	}
 
