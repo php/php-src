@@ -7,6 +7,7 @@ PHP 4                                                                      NEWS
   enabled. (Stefan E.)
 - Fixed a memory corruption error with an invalid foreach() call. (Stefan E.,
   Dmitry, Derick)
+- Fixed bug #38431 (xmlrpc_get_type() crashes PHP on objects). (Tony)
 - Fixed bug #38377 (session_destroy() gives warning after
   session_regenerate_id()). (Ilia)
 - Fixed bug #38322 (reading past array in sscanf() leads to arbitary code 

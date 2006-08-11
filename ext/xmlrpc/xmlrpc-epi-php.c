@@ -1492,7 +1492,7 @@ PHP_FUNCTION(xmlrpc_get_type)
 
    type = get_zval_xmlrpc_type(arg, 0);
    if (type == xmlrpc_vector) {
-      vtype = determine_vector_type(Z_ARRVAL_P(arg));
+      vtype = determine_vector_type((Z_TYPE_P(arg) == IS_OBJECT) ? Z_OBJPROP_P(arg) : Z_ARRVAL_P(arg));
    }
    
    RETURN_STRING((char*) xmlrpc_type_as_str(type, vtype), 1);
