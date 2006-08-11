@@ -794,6 +794,14 @@ PHP_FUNCTION(imap_reopen)
 		}
 		imap_le_struct->flags = cl_flags;	
 	}
+
+	/* local filename, need to perform open_basedir and safe_mode checks */
+	if (Z_STRVAL_PP(mailbox)[0] != '{' && 
+			(php_check_open_basedir(Z_STRVAL_PP(mailbox) TSRMLS_CC) || 
+			(PG(safe_mode) && !php_checkuid(Z_STRVAL_PP(mailbox), NULL, CHECKUID_CHECK_FILE_AND_DIR)))) {
+		RETURN_FALSE;
+	}
+
 	imap_stream = mail_open(imap_le_struct->imap_stream, Z_STRVAL_PP(mailbox), flags);
 	if (imap_stream == NIL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't re-open stream");
