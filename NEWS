@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Fixed overflow on 64bit systems in str_repeat() and wordwrap(). (Stefan E.)
 - Disabled CURLOPT_FOLLOWLOCATION in curl when open_basedir or safe_mode are
   enabled. (Stefan E., Ilia)
+- Fixed bug #38431 (xmlrpc_get_type() crashes PHP on objects). (Tony)
 - Fixed bug #38322 (reading past array in sscanf() leads to arbitrary code
   execution). (Tony)
 - Fixed bug #38125 (undefined reference to spl_dual_it_free_storage). (Marcus)
