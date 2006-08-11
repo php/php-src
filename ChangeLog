@@ -1,3 +1,117 @@
+2006-08-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      main/main.c:
+      disable realpath cache for safe_mode & open_basedir
+
+    * (PHP_5_1)
+      ext/standard/filestat.c:
+      MFB: missing safe_mode check
+
+    * ext/session/session.c:
+      MFB: fix proto
+
+    * (PHP_5_2)
+      ext/session/session.c:
+      Fixed proto
+
+    * ext/curl/interface.c
+      ext/curl/streams.c
+      ext/standard/string.c:
+      MFB: Various security fixes
+
+    * (PHP_5_2)
+      NEWS:
+      missing bug fixing news
+
+    * (PHP_5_1)
+      NEWS
+      ext/gd/libgd/gd.c
+      ext/gd/libgd/gd_gd2.c
+      ext/gd/libgd/gd_gif_in.c
+      ext/gd/libgd/gd_gif_out.c:
+      MFH: Fixed bug #38112 (corrupted gif segfaults) (Pierre)
+
+    * (PHP_5_1)
+      ext/standard/string.c:
+      Fixed typo
+
+    * (PHP_5_1)
+      NEWS
+      ext/curl/interface.c
+      ext/curl/streams.c
+      ext/standard/string.c:
+      Various security fixes backported from 5.2
+      
+
+    * (PHP_5_1)
+      ZendEngine2/zend_alloc.c:
+      Various security fixes backported from 5.2
+      
+
+    * (PHP_5_2)
+      ext/curl/streams.c:
+      Fixed condition
+
+    * (PHP_5_2)
+      ext/curl/interface.c
+      ext/curl/streams.c
+      ext/standard/string.c:
+      Fixed overflow on 64bit systems in str_repeat() and wordwrap().
+      Disabled CURLOPT_FOLLOWLOCATION in curl when open_basedir or safe_mode are
+      enabled.
+      
+
+    * php.ini-dist
+      php.ini-recommended
+      ext/session/php_session.h
+      ext/session/session.c
+      ext/standard/head.c
+      ext/standard/head.h:
+      MFB: Added support for httpOnly flag for session extension and cookie
+      setting functions.
+
+    * (PHP_5_2)
+      NEWS
+      php.ini-dist
+      php.ini-recommended
+      ext/session/php_session.h
+      ext/session/session.c
+      ext/standard/head.c
+      ext/standard/head.h:
+      Added support for httpOnly flag for session extension and cookie setting
+      functions.
+      
+
+2006-08-10  Antony Dovgal  <antony@zend.com>
+
+    * ext/mysqli/tests/028.phpt
+      ext/mysqli/tests/028.phpt
+      ext/standard/tests/file/bug22414.phpt
+      ext/standard/tests/file/bug22414.phpt
+      sapi/apache2handler/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c:
+      typos in comments and other minor improvements
+
+    * (PHP_4_4)
+      ext/standard/tests/file/bug22414.phpt:
+      nuke extra line
+
+    * ext/oci8/package.xml:
+      add test
+
+    * ext/oci8/oci8.c
+      ext/oci8/oci8.c
+      ext/oci8/tests/connect_with_charset_001.phpt
+      ext/oci8/tests/connect_with_charset_001.phpt
+      ext/oci8/tests/connect_with_charset_001.phpt:
+      improve connection character set detection:
+      * output a warning if invalid character set was passed to the function
+      * use NLS_LANG by default
+
+    * ext/standard/string.c:
+      initialize variable
+
 2006-08-09  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * (PHP_4_4)

@@ -1,3 +1,10 @@
+2006-08-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      zend_alloc.c:
+      Various security fixes backported from 5.2
+      
+
 2006-08-09  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_API.c:
