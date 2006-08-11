@@ -485,8 +485,8 @@ SPL_METHOD(Array, offsetExists)
 	RETURN_BOOL(spl_array_has_dimension_ex(0, getThis(), index, 1 TSRMLS_CC));
 } /* }}} */
 
-/* {{{ proto bool ArrayObject::offsetGet(mixed $index)
-       proto bool ArrayIterator::offsetGet(mixed $index)
+/* {{{ proto mixed ArrayObject::offsetGet(mixed $index)
+       proto mixed ArrayIterator::offsetGet(mixed $index)
  Returns the value at the specified $index. */
 SPL_METHOD(Array, offsetGet)
 {
