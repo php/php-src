@@ -56,8 +56,6 @@ static int _zip_cdir_set_comment(struct zip_cdir *, struct zip *);
 static int _zip_changed(struct zip *, int *);
 static char *_zip_create_temp_output(struct zip *, FILE **);
 
-
-
 int
 zip_close(struct zip *za)
 {
