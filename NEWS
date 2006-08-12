@@ -1,6 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2006, Version 4.4.4
+12 Aug 2006, Version 4.4.4RC1
 - Fixed memory_limit on 64bit systems. (Stefan E.)
 - Fixed overflow on 64bit systems in str_repeat() and wordwrap(). (Stefan E.)
 - Disabled CURLOPT_FOLLOWLOCATION in curl when open_basedir or safe_mode are
