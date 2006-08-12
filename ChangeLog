@@ -1,3 +1,86 @@
+2006-08-11  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      one bugfix less
+
+    * (PHP_5_1)
+      ext/xmlrpc/xmlrpc-epi-php.c:
+      revert fix for a segfault
+
+2006-08-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/imap/php_imap.c:
+      PHP 6 does not have safe_mode
+
+2006-08-11  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      NEWS
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xmlrpc/tests/bug38431.phpt
+      ext/xmlrpc/tests/bug38431.phpt
+      ext/xmlrpc/tests/bug38431.phpt:
+      MFH: fix #38431 (xmlrpc_get_type() crashes PHP on objects)
+
+    * ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xmlrpc/tests/bug38431.phpt
+      ext/xmlrpc/tests/bug38431.phpt
+      ext/xmlrpc/tests/bug38431.phpt
+      ext/xmlrpc/tests/bug38431.phpt:
+      fix #38431 (xmlrpc_get_type() crashes PHP on objects)
+
+2006-08-11  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/spl/spl_array.c:
+      MFB5.2: fix #38402 (wrong proto for Array*::offsetGet())
+
+    * (PHP_5_2)
+      ext/spl/spl_array.c:
+      fix #38402: wrong proto for Array*::offsetGet()
+
+2006-08-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/imap/php_imap.c
+      ext/imap/php_imap.c
+      ext/imap/php_imap.c:
+      MFB: Extend safe_mode/open_basedir checks to imap_reopen() as well.
+
+    * (PHP_4_4)
+      ext/imap/php_imap.c:
+      Extend safe_mode/open_basedir checks to imap_reopen() as well.
+
+    * (PHP_4_4)
+      ext/session/mod_files.c:
+      VCWD_ACCESS does not work on win32 :/
+
+2006-08-11  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS
+      Zend/zend_execute.c:
+      - Fixed a memory corruption error with an invalid foreach() call.
+
+2006-08-11  Antony Dovgal  <antony@zend.com>
+
+    * ext/session/tests/bug36459.phpt
+      ext/session/tests/bug36459.phpt
+      ext/session/tests/bug36459.phpt
+      ext/session/tests/bug36459.phpt:
+      fix test
+
+2006-08-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS
+      configure.in
+      main/php_version.h:
+      5.1.5RC1
+
 2006-08-10  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_1)
