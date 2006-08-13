@@ -956,6 +956,7 @@ ZIPARCHIVE_METHOD(addFile)
 	int entry_name_len = 0;
 	struct zip_source *zs;
 	long offset_start = 0, offset_len = 0;
+	int cur_idx;
 
 	if (!this) {
 		RETURN_FALSE;
@@ -987,7 +988,23 @@ ZIPARCHIVE_METHOD(addFile)
 	if (!zs) {
 		RETURN_FALSE;
 	}
-	if (zip_add(intern, entry_name, zs) < 0) {
+
+	cur_idx = zip_name_locate(intern, (const char *)entry_name, 0);
+	/* TODO: fix  _zip_replace */
+	if (cur_idx<0) {
+		/* reset the error */
+		if (intern->error.str) {
+			_zip_error_fini(&intern->error);
+		}
+		_zip_error_init(&intern->error);
+
+	} else {
+		if (zip_delete(intern, cur_idx) == -1) {
+			RETURN_FALSE;
+		}
+	}
+
+	if (zip_add(intern, entry_name, zs) == -1) {
 		RETURN_FALSE;
 	} else {
 		RETURN_TRUE;
@@ -1006,6 +1023,7 @@ ZIPARCHIVE_METHOD(addFromString)
 	ze_zip_object *ze_obj;
 	struct zip_source *zs;
 	int pos = 0;
+	int cur_idx;
 
 	if (!this) {
 		RETURN_FALSE;
@@ -1037,8 +1055,25 @@ ZIPARCHIVE_METHOD(addFromString)
 		RETURN_FALSE;
 	}
 
+	cur_idx = zip_name_locate(intern, (const char *)name, 0);
+	/* TODO: fix  _zip_replace */
+	if (cur_idx<0) {
+		/* reset the error */
+		if (intern->error.str) {
+			_zip_error_fini(&intern->error);
+		}
+		_zip_error_init(&intern->error);
+
+	} else {
+		if (zip_delete(intern, cur_idx) == -1) {
+			RETURN_FALSE;
+		}
+	}
+
 	if (zip_add(intern, name, zs) == -1) {
 		RETURN_FALSE;
+	} else {
+		RETURN_TRUE;
 	}
 }
 /* }}} */
