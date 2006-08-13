@@ -134,7 +134,7 @@ PHP_FUNCTION(dom_nodelist_item)
 						zval_copy_ctor(return_value);
 						return;
 					}
-				} else {
+				} else if (objmap->baseobj) {
 					nodep = dom_object_get_node(objmap->baseobj);
 					if (nodep) {
 						if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
