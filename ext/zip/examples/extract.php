@@ -1,8 +1,4 @@
 <?php
-if (!extension_loaded('zip')) {
-    dl('zip.so');
-}
-
 $zip = new ZipArchive();
 
 echo $zip->filename . "\n";
