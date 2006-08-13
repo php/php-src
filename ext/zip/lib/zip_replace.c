@@ -66,11 +66,14 @@ _zip_replace(struct zip *za, int idx, const char *name,
 			return -1;
 		idx = za->nentry - 1;
 	}
-    
+
+   
     _zip_unchange_data(za->entry+idx);
 
     if (name && _zip_set_name(za, idx, name) != 0)
 		return -1;
+ 
+
     za->entry[idx].state = ((za->cdir == NULL || idx >= za->cdir->nentry)
 			    ? ZIP_ST_ADDED : ZIP_ST_REPLACED);
     za->entry[idx].source = source;
