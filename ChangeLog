@@ -1,3 +1,27 @@
+2006-08-12  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_2)
+      main/internal_functions.c.in
+      main/internal_functions_nw.c
+      main/internal_functions_win32.c
+      main/php_logos.c
+      main/php_logos.h:
+      const/static keywording
+
+2006-08-12  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Back to -dev
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Go with RC1.
+
 2006-08-11  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_1)
