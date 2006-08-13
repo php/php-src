@@ -1072,7 +1072,7 @@ TEST $file
 		}
 	}
 
-	show_test($test_idx, $shortname);
+	show_test($test_idx, $shortname, $unicode_semantics);
 
 	if (is_array($IN_REDIRECT)) {
 		$temp_dir = $test_dir = $IN_REDIRECT['dir'];
@@ -1913,11 +1913,12 @@ function show_redirect_ends($tests, $tested, $tested_file)
 	echo "---> $tests ($tested [$tested_file]) done\n";
 }
 
-function show_test($test_idx, $shortname)
+function show_test($test_idx, $shortname, $unicode_semantics)
 {
 	global $test_cnt;
 
-	echo "TEST $test_idx/$test_cnt [$shortname]\r";
+	$kind = $unicode_semantics ? ':U' : ':N';
+	echo "TEST$kind $test_idx/$test_cnt [$shortname]\r";
 	flush();
 }
 
@@ -1925,7 +1926,7 @@ function show_result($result, $tested, $tested_file, $unicode_semantics, $extra 
 {
 	global $html_output, $html_file, $temp_target, $temp_urlbase, $unicode_and_native;
 
-	$kind = $unicode_and_native ? ($unicode_semantics ? ':U' : ':N') : '';
+	$kind = $unicode_semantics ? ':U' : ':N';
 
 	echo "$result$kind $tested [$tested_file] $extra\n";
 
