@@ -1,8 +1,5 @@
 <?php
 error_reporting(E_ALL);
-if (!extension_loaded('zip')) {
-    dl('zip.so');
-}
 $thisdir = dirname(__FILE__);
 unlink("./test112.zip");
 $zip = new ZipArchive();
