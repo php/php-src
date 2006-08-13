@@ -112,6 +112,7 @@
  * c-code.
  * 
  * 9) Some articles about SPL:
+ * - <a href="http://www.phpro.org/tutorials/Introduction-to-SPL.html">Introduction to Standard PHP Library (SPL)</a>
  * - <a href="http://www.sitepoint.com/article/php5-standard-library/1">Introducing PHP 5's Standard Library</a>
  * - <a href="http://www.ramikayyali.com/archives/2005/02/25/iterators">Iterators in PHP5</a>
  * - <a href="http://www.phpriot.com/d/articles/php/oop/oop-with-spl-php-5-1/index.html">Advanced OOP with SPL in PHP 5</a>
