@@ -39,8 +39,14 @@ static int le_zip_entry;
 /* }}} */
 
 /* {{{ SAFEMODE_CHECKFILE(filename) */
+#if (PHP_MAJOR_VERSION < 6)
 #define SAFEMODE_CHECKFILE(filename) \
-	(PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(filename TSRMLS_CC)
+	if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(filename TSRMLS_CC) { \
+		RETURN_FALSE; \
+	} 
+#else 
+#define SAFEMODE_CHECKFILE(filename);
+#endif
 /* }}} */
 
 /* {{{ PHP_ZIP_STAT_INDEX(za, index, flags, sb) */
@@ -111,7 +117,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file TSRMLS_D
 		len = spprintf(&file_dirname_fullpath, 0, "%s", dest);
 	}
 
-	php_basename(file, file_len, NULL, 0, &file_basename, &file_basename_len TSRMLS_CC);
+	php_basename(file, file_len, NULL, 0, &file_basename, (int *)&file_basename_len TSRMLS_CC);
 
 	SAFEMODE_CHECKFILE(file_dirname_fullpath);
 
@@ -152,8 +158,11 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file TSRMLS_D
 		efree(file_basename);
 		return 0;
 	}
-
+#if (PHP_MAJOR_VERSION < 6)
 	stream = php_stream_open_wrapper(fullpath, "w+b", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
+#else
+	stream = php_stream_open_wrapper(fullpath, "w+b", REPORT_ERRORS, NULL);
+#endif
 	n = 0;
 	if (stream) {
 		while ((n=zip_fread(zf, b, sizeof(b))) > 0) php_stream_write(stream, b, n);
@@ -613,9 +622,8 @@ PHP_FUNCTION(zip_open)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &filename, &filename_len, &mode) == FAILURE) {
 		return;
 	}
-	if (SAFEMODE_CHECKFILE(filename)) {
-		RETURN_FALSE;
-	}
+
+	SAFEMODE_CHECKFILE(filename);
 
 	rsrc_int = (zip_rsrc *)emalloc(sizeof(zip_rsrc));
 
@@ -956,6 +964,7 @@ ZIPARCHIVE_METHOD(addFile)
 	int entry_name_len = 0;
 	struct zip_source *zs;
 	long offset_start = 0, offset_len = 0;
+	int cur_idx;
 
 	if (!this) {
 		RETURN_FALSE;
@@ -979,15 +988,29 @@ ZIPARCHIVE_METHOD(addFile)
 		entry_name_len = filename_len;
 	}
 
-	if (SAFEMODE_CHECKFILE(filename)) {
-		RETURN_FALSE;
-	}
+	SAFEMODE_CHECKFILE(filename);
 
 	zs = zip_source_file(intern, filename, 0, 0);
 	if (!zs) {
 		RETURN_FALSE;
 	}
-	if (zip_add(intern, entry_name, zs) < 0) {
+
+	cur_idx = zip_name_locate(intern, (const char *)entry_name, 0);
+	/* TODO: fix  _zip_replace */
+	if (cur_idx<0) {
+		/* reset the error */
+		if (intern->error.str) {
+			_zip_error_fini(&intern->error);
+		}
+		_zip_error_init(&intern->error);
+
+	} else {
+		if (zip_delete(intern, cur_idx) == -1) {
+			RETURN_FALSE;
+		}
+	}
+
+	if (zip_add(intern, entry_name, zs) == -1) {
 		RETURN_FALSE;
 	} else {
 		RETURN_TRUE;
@@ -1006,6 +1029,7 @@ ZIPARCHIVE_METHOD(addFromString)
 	ze_zip_object *ze_obj;
 	struct zip_source *zs;
 	int pos = 0;
+	int cur_idx;
 
 	if (!this) {
 		RETURN_FALSE;
@@ -1037,8 +1061,25 @@ ZIPARCHIVE_METHOD(addFromString)
 		RETURN_FALSE;
 	}
 
+	cur_idx = zip_name_locate(intern, (const char *)name, 0);
+	/* TODO: fix  _zip_replace */
+	if (cur_idx<0) {
+		/* reset the error */
+		if (intern->error.str) {
+			_zip_error_fini(&intern->error);
+		}
+		_zip_error_init(&intern->error);
+
+	} else {
+		if (zip_delete(intern, cur_idx) == -1) {
+			RETURN_FALSE;
+		}
+	}
+
 	if (zip_add(intern, name, zs) == -1) {
 		RETURN_FALSE;
+	} else {
+		RETURN_TRUE;
 	}
 }
 /* }}} */
@@ -1845,6 +1886,8 @@ PHP_MINIT_FUNCTION(zip)
 	REGISTER_ZIP_CLASS_CONST_LONG("CREATE", ZIP_CREATE);
 	REGISTER_ZIP_CLASS_CONST_LONG("EXCL", ZIP_EXCL);
 	REGISTER_ZIP_CLASS_CONST_LONG("CHECKCONS", ZIP_CHECKCONS);
+	REGISTER_ZIP_CLASS_CONST_LONG("OVERWRITE", ZIP_OVERWRITE);
+
 	REGISTER_ZIP_CLASS_CONST_LONG("FL_NOCASE", ZIP_FL_NOCASE);
 	REGISTER_ZIP_CLASS_CONST_LONG("FL_NODIR", ZIP_FL_NODIR);
 	REGISTER_ZIP_CLASS_CONST_LONG("FL_COMPRESSED", ZIP_FL_COMPRESSED);

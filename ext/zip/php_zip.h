@@ -37,7 +37,7 @@ extern zend_module_entry zip_module_entry;
 #include "lib/zip.h"
 
 #ifndef ZEND_ENGINE_2_1
-# if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 0)
+# if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 0) || PHP_MAJOR_VERSION == 6
 #  define ZEND_ENGINE_2_1
 # endif
 #endif

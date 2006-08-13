@@ -74,9 +74,9 @@ zip_open(const char *fn, int flags, int *zep)
 	set_error(zep, NULL, ZIP_ER_INVAL);
 	return NULL;
     }
-    
-    if (stat(fn, &st) != 0) {
-	if (flags & ZIP_CREATE) {
+
+    if (flags & ZIP_OVERWRITE || stat(fn, &st) != 0) {
+	if ((flags & ZIP_CREATE) || (flags & ZIP_OVERWRITE)) {
 	    if ((za=_zip_new(&error)) == NULL) {
 		set_error(zep, &error, 0);
 		return NULL;
@@ -99,14 +99,15 @@ zip_open(const char *fn, int flags, int *zep)
 	set_error(zep, NULL, ZIP_ER_EXISTS);
 	return NULL;
     }
+
+
     /* ZIP_CREATE gets ignored if file exists and not ZIP_EXCL,
        just like open() */
-    
-    if ((fp=fopen(fn, "rb")) == NULL) {
-	set_error(zep, NULL, ZIP_ER_OPEN);
-	return NULL;
-    }
-    
+	if ((fp=fopen(fn, "rb")) == NULL) {
+		set_error(zep, NULL, ZIP_ER_OPEN);
+		return NULL;
+	}
+
     clearerr(fp);
     fseek(fp, 0, SEEK_END);
     len = ftell(fp);
