@@ -38,17 +38,6 @@ static int le_zip_entry;
 #define le_zip_entry_name "Zip Entry"
 /* }}} */
 
-/* {{{ SAFEMODE_CHECKFILE(filename) */
-#if (PHP_MAJOR_VERSION < 6)
-#define SAFEMODE_CHECKFILE(filename) \
-	if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(filename TSRMLS_CC) { \
-		RETURN_FALSE; \
-	} 
-#else 
-#define SAFEMODE_CHECKFILE(filename);
-#endif
-/* }}} */
-
 /* {{{ PHP_ZIP_STAT_INDEX(za, index, flags, sb) */
 #define PHP_ZIP_STAT_INDEX(za, index, flags, sb) \
 	if (zip_stat_index(za, index, flags, &sb) != 0) { \
@@ -119,8 +108,6 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file TSRMLS_D
 
 	php_basename(file, file_len, NULL, 0, &file_basename, (int *)&file_basename_len TSRMLS_CC);
 
-	SAFEMODE_CHECKFILE(file_dirname_fullpath);
-
 	/* let see if the path already exists */
 	if (php_stream_stat_path(file_dirname_fullpath, &ssb) < 0) {
 		ret = php_stream_mkdir(file_dirname_fullpath, 0777,  PHP_STREAM_MKDIR_RECURSIVE, NULL);
@@ -145,12 +132,6 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file TSRMLS_D
 		return 0;
 	}
 
-	/* check again the full path, not sure if it
-	 * is required, does a file can have a different
-	 * safemode status as its parent folder?
-	 */
-	SAFEMODE_CHECKFILE(fullpath);
-
 	zf = zip_fopen(za, file, 0);
 	if (zf == NULL) {
 		efree(fullpath);
@@ -158,11 +139,9 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file TSRMLS_D
 		efree(file_basename);
 		return 0;
 	}
-#if (PHP_MAJOR_VERSION < 6)
-	stream = php_stream_open_wrapper(fullpath, "w+b", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
-#else
+
 	stream = php_stream_open_wrapper(fullpath, "w+b", REPORT_ERRORS, NULL);
-#endif
+
 	n = 0;
 	if (stream) {
 		while ((n=zip_fread(zf, b, sizeof(b))) > 0) php_stream_write(stream, b, n);
@@ -623,8 +602,6 @@ PHP_FUNCTION(zip_open)
 		return;
 	}
 
-	SAFEMODE_CHECKFILE(filename);
-
 	rsrc_int = (zip_rsrc *)emalloc(sizeof(zip_rsrc));
 
 	rsrc_int->za = zip_open(filename, mode, &err);
@@ -987,8 +964,6 @@ ZIPARCHIVE_METHOD(addFile)
 		entry_name = filename;
 		entry_name_len = filename_len;
 	}
-
-	SAFEMODE_CHECKFILE(filename);
 
 	zs = zip_source_file(intern, filename, 0, 0);
 	if (!zs) {
