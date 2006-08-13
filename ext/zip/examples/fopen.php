@@ -1,8 +1,4 @@
 <?php
-if (!extension_loaded('zip')) {
-    dl('zip.so');
-}
-
 
 $fp = fopen('zip://' . dirname(__FILE__) . '/test.zip#test', 'r');
 if (!$fp) {
