@@ -113,7 +113,11 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file TSRMLS_D
 
 	php_basename(file, file_len, NULL, 0, &file_basename, &file_basename_len TSRMLS_CC);
 
-	SAFEMODE_CHECKFILE(file_dirname_fullpath);
+	if (SAFEMODE_CHECKFILE(file_dirname_fullpath)) {
+		efree(file_dirname_fullpath);
+		efree(file_basename);
+		return 0;
+	}
 
 	/* let see if the path already exists */
 	if (php_stream_stat_path(file_dirname_fullpath, &ssb) < 0) {
@@ -143,7 +147,11 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file TSRMLS_D
 	 * is required, does a file can have a different
 	 * safemode status as its parent folder?
 	 */
-	SAFEMODE_CHECKFILE(fullpath);
+	if (SAFEMODE_CHECKFILE(fullpath)) {
+		efree(file_dirname_fullpath);
+		efree(file_basename);
+		return 0;
+	}
 
 	zf = zip_fopen(za, file, 0);
 	if (zf == NULL) {
@@ -1880,6 +1888,8 @@ PHP_MINIT_FUNCTION(zip)
 	REGISTER_ZIP_CLASS_CONST_LONG("CREATE", ZIP_CREATE);
 	REGISTER_ZIP_CLASS_CONST_LONG("EXCL", ZIP_EXCL);
 	REGISTER_ZIP_CLASS_CONST_LONG("CHECKCONS", ZIP_CHECKCONS);
+	REGISTER_ZIP_CLASS_CONST_LONG("OVERWRITE", ZIP_OVERWRITE);
+
 	REGISTER_ZIP_CLASS_CONST_LONG("FL_NOCASE", ZIP_FL_NOCASE);
 	REGISTER_ZIP_CLASS_CONST_LONG("FL_NODIR", ZIP_FL_NODIR);
 	REGISTER_ZIP_CLASS_CONST_LONG("FL_COMPRESSED", ZIP_FL_COMPRESSED);
