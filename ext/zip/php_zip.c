@@ -1153,6 +1153,7 @@ ZIPARCHIVE_METHOD(locateName)
 	char *name;
 	int name_len;
 	long flags = 0;
+	long idx = -1;
 
 	if (!this) {
 		RETURN_FALSE;
@@ -1169,7 +1170,18 @@ ZIPARCHIVE_METHOD(locateName)
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG((long)zip_name_locate(intern, (const char *)name, flags))
+	idx = (long)zip_name_locate(intern, (const char *)name, flags);
+
+	if (idx<0) {
+		/* reset the error */
+		if (intern->error.str) {
+			_zip_error_fini(&intern->error);
+		}
+		_zip_error_init(&intern->error);
+		RETURN_FALSE;
+	} else {
+		RETURN_LONG(idx);
+	}
 }
 /* }}} */
 
