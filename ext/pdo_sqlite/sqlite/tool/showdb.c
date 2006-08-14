@@ -13,6 +13,7 @@
 static int pagesize = 1024;
 static int db = -1;
 static int mxPage = 0;
+static int perLine = 32;
 
 static void out_of_memory(void){
   fprintf(stderr,"Out of memory...\n");
@@ -27,12 +28,12 @@ static print_page(int iPg){
   lseek(db, (iPg-1)*pagesize, SEEK_SET);
   read(db, aData, pagesize);
   fprintf(stdout, "Page %d:\n", iPg);
-  for(i=0; i<pagesize; i += 16){
+  for(i=0; i<pagesize; i += perLine){
     fprintf(stdout, " %03x: ",i);
-    for(j=0; j<16; j++){
+    for(j=0; j<perLine; j++){
       fprintf(stdout,"%02x ", aData[i+j]);
     }
-    for(j=0; j<16; j++){
+    for(j=0; j<perLine; j++){
       fprintf(stdout,"%c", isprint(aData[i+j]) ? aData[i+j] : '.');
     }
     fprintf(stdout,"\n");

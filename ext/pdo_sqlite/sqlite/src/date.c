@@ -105,18 +105,20 @@ static int getDigits(const char *zDate, ...){
     val = 0;
     while( N-- ){
       if( !isdigit(*(u8*)zDate) ){
-        return cnt;
+        goto end_getDigits;
       }
       val = val*10 + *zDate - '0';
       zDate++;
     }
     if( val<min || val>max || (nextC!=0 && nextC!=*zDate) ){
-      return cnt;
+      goto end_getDigits;
     }
     *pVal = val;
     zDate++;
     cnt++;
   }while( nextC );
+end_getDigits:
+  va_end(ap);
   return cnt;
 }
 
@@ -236,7 +238,7 @@ static void computeJD(DateTime *p){
   if( p->validHMS ){
     p->rJD += (p->h*3600.0 + p->m*60.0 + p->s)/86400.0;
     if( p->validTZ ){
-      p->rJD += p->tz*60/86400.0;
+      p->rJD -= p->tz*60/86400.0;
       p->validHMS = 0;
       p->validTZ = 0;
     }
@@ -639,10 +641,10 @@ static int isDate(int argc, sqlite3_value **argv, DateTime *p){
   int i;
   if( argc==0 ) return 1;
   if( SQLITE_NULL==sqlite3_value_type(argv[0]) || 
-      parseDateOrTime(sqlite3_value_text(argv[0]), p) ) return 1;
+      parseDateOrTime((char*)sqlite3_value_text(argv[0]), p) ) return 1;
   for(i=1; i<argc; i++){
     if( SQLITE_NULL==sqlite3_value_type(argv[i]) || 
-        parseModifier(sqlite3_value_text(argv[i]), p) ) return 1;
+        parseModifier((char*)sqlite3_value_text(argv[i]), p) ) return 1;
   }
   return 0;
 }
@@ -755,7 +757,7 @@ static void strftimeFunc(
   DateTime x;
   int n, i, j;
   char *z;
-  const char *zFmt = sqlite3_value_text(argv[0]);
+  const char *zFmt = (const char*)sqlite3_value_text(argv[0]);
   char zBuf[100];
   if( zFmt==0 || isDate(argc-1, argv+1, &x) ) return;
   for(i=0, n=1; zFmt[i]; i++, n++){
@@ -816,20 +818,20 @@ static void strftimeFunc(
         case 'H':  sprintf(&z[j],"%02d",x.h); j+=2; break;
         case 'W': /* Fall thru */
         case 'j': {
-          int n;             /* Number of days since 1st day of year */
+          int nDay;             /* Number of days since 1st day of year */
           DateTime y = x;
           y.validJD = 0;
           y.M = 1;
           y.D = 1;
           computeJD(&y);
-          n = x.rJD - y.rJD;
+          nDay = x.rJD - y.rJD;
           if( zFmt[i]=='W' ){
             int wd;   /* 0=Monday, 1=Tuesday, ... 6=Sunday */
             wd = ((int)(x.rJD+0.5)) % 7;
-            sprintf(&z[j],"%02d",(n+7-wd)/7);
+            sprintf(&z[j],"%02d",(nDay+7-wd)/7);
             j += 2;
           }else{
-            sprintf(&z[j],"%03d",n+1);
+            sprintf(&z[j],"%03d",nDay+1);
             j += 3;
           }
           break;
@@ -974,7 +976,7 @@ void sqlite3RegisterDateTimeFunctions(sqlite3 *db){
   int i;
 
   for(i=0; i<sizeof(aFuncs)/sizeof(aFuncs[0]); i++){
-    sqlite3_create_function(db, aFuncs[i].zName, aFuncs[i].nArg,
+    sqlite3CreateFunc(db, aFuncs[i].zName, aFuncs[i].nArg,
         SQLITE_UTF8, 0, aFuncs[i].xFunc, 0, 0);
   }
 #else
@@ -989,7 +991,7 @@ void sqlite3RegisterDateTimeFunctions(sqlite3 *db){
   int i;
 
   for(i=0; i<sizeof(aFuncs)/sizeof(aFuncs[0]); i++){
-    sqlite3_create_function(db, aFuncs[i].zName, 0, SQLITE_UTF8, 
+    sqlite3CreateFunc(db, aFuncs[i].zName, 0, SQLITE_UTF8, 
         aFuncs[i].zFormat, currentTimeFunc, 0, 0);
   }
 #endif

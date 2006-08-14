@@ -36,10 +36,12 @@
 */
 typedef struct Btree Btree;
 typedef struct BtCursor BtCursor;
+typedef struct BtShared BtShared;
 
 
 int sqlite3BtreeOpen(
   const char *zFilename,   /* Name of database file to open */
+  sqlite3 *db,             /* Associated database connection */
   Btree **,                /* Return open Btree* here */
   int flags                /* Flags */
 );
@@ -57,7 +59,7 @@ int sqlite3BtreeOpen(
 int sqlite3BtreeClose(Btree*);
 int sqlite3BtreeSetBusyHandler(Btree*,BusyHandler*);
 int sqlite3BtreeSetCacheSize(Btree*,int);
-int sqlite3BtreeSetSafetyLevel(Btree*,int);
+int sqlite3BtreeSetSafetyLevel(Btree*,int,int);
 int sqlite3BtreeSyncDisabled(Btree*);
 int sqlite3BtreeSetPageSize(Btree*,int,int);
 int sqlite3BtreeGetPageSize(Btree*);
@@ -73,8 +75,11 @@ int sqlite3BtreeRollbackStmt(Btree*);
 int sqlite3BtreeCreateTable(Btree*, int*, int flags);
 int sqlite3BtreeIsInTrans(Btree*);
 int sqlite3BtreeIsInStmt(Btree*);
+int sqlite3BtreeIsInReadTrans(Btree*);
 int sqlite3BtreeSync(Btree*, const char *zMaster);
-int sqlite3BtreeReset(Btree *);
+void *sqlite3BtreeSchema(Btree *, int, void(*)(void *));
+int sqlite3BtreeSchemaLocked(Btree *);
+int sqlite3BtreeLockTable(Btree *, int, u8);
 
 const char *sqlite3BtreeGetFilename(Btree *);
 const char *sqlite3BtreeGetDirname(Btree *);
