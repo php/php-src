@@ -16,9 +16,11 @@
 ** These routines are in a separate files so that they will not be linked
 ** if they are not used.
 */
+#include "sqliteInt.h"
 #include <stdlib.h>
 #include <string.h>
-#include "sqliteInt.h"
+
+#ifndef SQLITE_OMIT_GET_TABLE
 
 /*
 ** This structure is used to pass data from sqlite3_get_table() through
@@ -57,7 +59,7 @@ static int sqlite3_get_table_cb(void *pArg, int nCol, char **argv, char **colv){
   if( p->nData + need >= p->nAlloc ){
     char **azNew;
     p->nAlloc = p->nAlloc*2 + need + 1;
-    azNew = realloc( p->azResult, sizeof(char*)*p->nAlloc );
+    azNew = sqlite3_realloc( p->azResult, sizeof(char*)*p->nAlloc );
     if( azNew==0 ) goto malloc_failed;
     p->azResult = azNew;
   }
@@ -69,11 +71,9 @@ static int sqlite3_get_table_cb(void *pArg, int nCol, char **argv, char **colv){
     p->nColumn = nCol;
     for(i=0; i<nCol; i++){
       if( colv[i]==0 ){
-        z = 0;
+        z = sqlite3_mprintf("");
       }else{
-        z = malloc( strlen(colv[i])+1 );
-        if( z==0 ) goto malloc_failed;
-        strcpy(z, colv[i]);
+        z = sqlite3_mprintf("%s", colv[i]);
       }
       p->azResult[p->nData++] = z;
     }
@@ -92,7 +92,7 @@ static int sqlite3_get_table_cb(void *pArg, int nCol, char **argv, char **colv){
       if( argv[i]==0 ){
         z = 0;
       }else{
-        z = malloc( strlen(argv[i])+1 );
+        z = sqlite3_malloc( strlen(argv[i])+1 );
         if( z==0 ) goto malloc_failed;
         strcpy(z, argv[i]);
       }
@@ -138,18 +138,19 @@ int sqlite3_get_table(
   res.nData = 1;
   res.nAlloc = 20;
   res.rc = SQLITE_OK;
-  res.azResult = malloc( sizeof(char*)*res.nAlloc );
+  res.azResult = sqlite3_malloc( sizeof(char*)*res.nAlloc );
   if( res.azResult==0 ) return SQLITE_NOMEM;
   res.azResult[0] = 0;
   rc = sqlite3_exec(db, zSql, sqlite3_get_table_cb, &res, pzErrMsg);
   if( res.azResult ){
+    assert( sizeof(res.azResult[0])>= sizeof(res.nData) );
     res.azResult[0] = (char*)res.nData;
   }
   if( rc==SQLITE_ABORT ){
     sqlite3_free_table(&res.azResult[1]);
     if( res.zErrMsg ){
       if( pzErrMsg ){
-        free(*pzErrMsg);
+        sqlite3_free(*pzErrMsg);
         *pzErrMsg = sqlite3_mprintf("%s",res.zErrMsg);
       }
       sqliteFree(res.zErrMsg);
@@ -164,7 +165,7 @@ int sqlite3_get_table(
   }
   if( res.nAlloc>res.nData ){
     char **azNew;
-    azNew = realloc( res.azResult, sizeof(char*)*(res.nData+1) );
+    azNew = sqlite3_realloc( res.azResult, sizeof(char*)*(res.nData+1) );
     if( azNew==0 ){
       sqlite3_free_table(&res.azResult[1]);
       return SQLITE_NOMEM;
@@ -189,7 +190,9 @@ void sqlite3_free_table(
     azResult--;
     if( azResult==0 ) return;
     n = (int)azResult[0];
-    for(i=1; i<n; i++){ if( azResult[i] ) free(azResult[i]); }
-    free(azResult);
+    for(i=1; i<n; i++){ if( azResult[i] ) sqlite3_free(azResult[i]); }
+    sqlite3_free(azResult);
   }
 }
+
+#endif /* SQLITE_OMIT_GET_TABLE */

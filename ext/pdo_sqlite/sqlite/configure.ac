@@ -123,6 +123,7 @@ dnl show in in configure.
 #
 AC_PROG_LIBTOOL
 AC_PROG_INSTALL
+AC_PROG_AWK
 
 #########
 # Set up an appropriate program prefix
@@ -152,7 +153,7 @@ AC_SUBST(VERSION_NUMBER)
 # $system is the result of uname -s.
 #
 AC_ARG_WITH(hints,
-  [  --with-hints=FILE       Read configuration options from FILE],
+  AC_HELP_STRING([--with-hints=FILE],[Read configuration options from FILE]),
   hints=$withval)
 if test "$hints" = ""; then
   host=`hostname | sed 's/\..*//'`
@@ -278,7 +279,7 @@ fi
 # Do we want to support multithreaded use of sqlite
 #
 AC_ARG_ENABLE(threadsafe, 
-[  --enable-threadsafe           Support threadsafe operation],,enable_threadsafe=no)
+AC_HELP_STRING([--enable-threadsafe],[Support threadsafe operation]),,enable_threadsafe=no)
 AC_MSG_CHECKING([whether to support threadsafe operation])
 if test "$enable_threadsafe" = "no"; then
   THREADSAFE=0
@@ -300,10 +301,45 @@ fi
 AC_SUBST(TARGET_THREAD_LIB)
 
 ##########
+# Do we want to allow a connection created in one thread to be used
+# in another thread.  This does not work on many Linux systems (ex: RedHat 9)
+# due to bugs in the threading implementations.  This is thus off by default.
+#
+AC_ARG_ENABLE(cross-thread-connections, 
+AC_HELP_STRING([--enable-cross-thread-connections],[Allow connection sharing across threads]),,enable_xthreadconnect=no)
+AC_MSG_CHECKING([whether to allow connections to be shared across threads])
+if test "$enable_xthreadconnect" = "no"; then
+  XTHREADCONNECT=''
+  AC_MSG_RESULT([no])
+else
+  XTHREADCONNECT='-DSQLITE_ALLOW_XTHREAD_CONNECT=1'
+  AC_MSG_RESULT([yes])
+fi
+AC_SUBST(XTHREADCONNECT)
+
+##########
+# Do we want to set threadsOverrideEachOthersLocks variable to be 1 (true) by
+# default. Normally, a test at runtime is performed to determine the
+# appropriate value of this variable. Use this option only if you're sure that
+# threads can safely override each others locks in all runtime situations.
+#
+AC_ARG_ENABLE(threads-override-locks, 
+AC_HELP_STRING([--enable-threads-override-locks],[Threads can override each others locks]),,enable_threads_override_locks=no)
+AC_MSG_CHECKING([whether threads can override each others locks])
+if test "$enable_threads_override_locks" = "no"; then
+  THREADSOVERRIDELOCKS='-1'
+  AC_MSG_RESULT([no])
+else
+  THREADSOVERRIDELOCKS='1'
+  AC_MSG_RESULT([yes])
+fi
+AC_SUBST(THREADSOVERRIDELOCKS)
+
+##########
 # Do we want to support release
 #
 AC_ARG_ENABLE(releasemode, 
-[  --enable-releasemode           Support libtool link to release mode],,enable_releasemode=no)
+AC_HELP_STRING([--enable-releasemode],[Support libtool link to release mode]),,enable_releasemode=no)
 AC_MSG_CHECKING([whether to support shared library linked as release mode or not])
 if test "$enable_releasemode" = "no"; then
   ALLOWRELEASE=""
@@ -318,7 +354,7 @@ AC_SUBST(ALLOWRELEASE)
 # Do we want temporary databases in memory
 #
 AC_ARG_ENABLE(tempstore, 
-[  --enable-tempstore     Use an in-ram database for temporary tables (never,no,yes,always)],,enable_tempstore=yes)
+AC_HELP_STRING([--enable-tempstore],[Use an in-ram database for temporary tables (never,no,yes,always)]),,enable_tempstore=no)
 AC_MSG_CHECKING([whether to use an in-ram database for temporary tables])
 case "$enable_tempstore" in
   never ) 
@@ -333,8 +369,12 @@ case "$enable_tempstore" in
      TEMP_STORE=3
     AC_MSG_RESULT([always])
   ;;
+  yes ) 
+     TEMP_STORE=3
+    AC_MSG_RESULT([always])
+  ;;
   * ) 
-    TEMP_STORE=2
+    TEMP_STORE=1
     AC_MSG_RESULT([yes])
   ;;
 esac
@@ -367,13 +407,26 @@ else
   TARGET_EXEEXT=$config_TARGET_EXEEXT
 fi
 if test "$TARGET_EXEEXT" = ".exe"; then
-  OS_UNIX=0
-  OS_WIN=1
-  tclsubdir=win
-  TARGET_CFLAGS="$TARGET_CFLAGS -DOS_WIN=1"
+  if test $OS2_SHELL ; then
+    OS_UNIX=0
+    OS_WIN=0
+    OS_OS2=1
+    TARGET_CFLAGS="$TARGET_CFLAGS -DOS_OS2=1"
+    if test "$ac_compiler_gnu" == "yes" ; then
+      TARGET_CFLAGS="$TARGET_CFLAGS -Zomf -Zexe -Zmap"
+      BUILD_CFLAGS="$BUILD_CFLAGS -Zomf -Zexe"
+    fi
+  else
+    OS_UNIX=0
+    OS_WIN=1
+    OS_OS2=0
+    tclsubdir=win
+    TARGET_CFLAGS="$TARGET_CFLAGS -DOS_WIN=1"
+  fi
 else
   OS_UNIX=1
   OS_WIN=0
+  OS_OS2=0
   tclsubdir=unix
   TARGET_CFLAGS="$TARGET_CFLAGS -DOS_UNIX=1"
 fi
@@ -381,6 +434,7 @@ fi
 AC_SUBST(BUILD_EXEEXT)
 AC_SUBST(OS_UNIX)
 AC_SUBST(OS_WIN)
+AC_SUBST(OS_OS2)
 AC_SUBST(TARGET_EXEEXT)
 
 ##########
@@ -391,7 +445,6 @@ if test "$config_TARGET_LIBS" != ""; then
 else
   TARGET_LIBS=""
 fi
-AC_SUBST(TARGET_LIBS)
 
 ##########
 # Figure out all the parameters needed to compile against Tcl.
@@ -401,10 +454,10 @@ AC_SUBST(TARGET_LIBS)
 # Those macros could not be used directly since we have to make some
 # minor changes to accomodate systems that do not have TCL installed.
 #
-AC_ARG_ENABLE(tcl, [  --disable-tcl       do not build TCL extension],
+AC_ARG_ENABLE(tcl, AC_HELP_STRING([--disable-tcl],[do not build TCL extension]),
       [use_tcl=$enableval],[use_tcl=yes])
 if test "${use_tcl}" = "yes" ; then
-  AC_ARG_WITH(tcl, [  --with-tcl=DIR          directory containing tcl configuration (tclConfig.sh)], with_tclconfig=${withval})
+  AC_ARG_WITH(tcl, AC_HELP_STRING([--with-tcl=DIR],[directory containing tcl configuration (tclConfig.sh)]), with_tclconfig=${withval})
   AC_MSG_CHECKING([for Tcl configuration])
   AC_CACHE_VAL(ac_cv_c_tclconfig,[
     # First check to see if --with-tcl was specified.
@@ -551,6 +604,15 @@ fi
 AC_SUBST(TARGET_READLINE_LIBS)
 
 ##########
+# Figure out what C libraries are required to compile programs
+# that use "fdatasync()" function.
+#
+CC=$TARGET_CC
+LIBS=$TARGET_LIBS
+AC_SEARCH_LIBS(fdatasync, [rt])
+TARGET_LIBS="$LIBS"
+
+##########
 # Figure out where to get the READLINE header files.
 #
 AC_MSG_CHECKING([readline header files])
@@ -593,10 +655,10 @@ AC_SUBST(TARGET_HAVE_READLINE)
 
 #########
 # check for debug enabled
-AC_ARG_ENABLE(debug, [  --enable-debug         enable debugging & verbose explain],
+AC_ARG_ENABLE(debug, AC_HELP_STRING([--enable-debug],[enable debugging & verbose explain]),
       [use_debug=$enableval],[use_debug=no])
 if test "${use_debug}" = "yes" ; then
-  TARGET_DEBUG=""
+  TARGET_DEBUG="-DSQLITE_DEBUG=1"
 else
   TARGET_DEBUG="-DNDEBUG"
 fi
@@ -606,6 +668,17 @@ AC_SUBST(TARGET_DEBUG)
 # Figure out whether or not we have a "usleep()" function.
 #
 AC_CHECK_FUNC(usleep, [TARGET_CFLAGS="$TARGET_CFLAGS -DHAVE_USLEEP=1"])
+
+#--------------------------------------------------------------------
+# Redefine fdatasync as fsync on systems that lack fdatasync
+#--------------------------------------------------------------------
+
+AC_CHECK_FUNC(fdatasync, [TARGET_CFLAGS="$TARGET_CFLAGS -DHAVE_FDATASYNC=1"])
+
+#########
+# Put out accumulated miscellaneous LIBRARIES
+#
+AC_SUBST(TARGET_LIBS)
 
 #########
 # Generate the output files.

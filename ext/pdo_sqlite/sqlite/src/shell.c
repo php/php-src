@@ -21,7 +21,7 @@
 #include "sqlite3.h"
 #include <ctype.h>
 
-#if !defined(_WIN32) && !defined(WIN32) && !defined(__MACOS__)
+#if !defined(_WIN32) && !defined(WIN32) && !defined(__MACOS__) && !defined(__OS2__)
 # include <signal.h>
 # include <pwd.h>
 # include <unistd.h>
@@ -35,6 +35,10 @@
 # include <extras.h>
 # include <Files.h>
 # include <Folders.h>
+#endif
+
+#ifdef __OS2__
+# include <unistd.h>
 #endif
 
 #if defined(HAVE_READLINE) && HAVE_READLINE==1
@@ -62,7 +66,7 @@ static sqlite3 *db = 0;
 /*
 ** True if an interrupt (Control-C) has been received.
 */
-static int seenInterrupt = 0;
+static volatile int seenInterrupt = 0;
 
 /*
 ** This is the name of our program. It is set in main(), used
@@ -81,7 +85,7 @@ static char continuePrompt[20]; /* Continuation prompt. default: "   ...> " */
 /*
 ** Determines if a string is a number of not.
 */
-static int isNumber(const unsigned char *z, int *realnum){
+static int isNumber(const char *z, int *realnum){
   if( *z=='-' || *z=='+' ) z++;
   if( !isdigit(*z) ){
     return 0;
@@ -197,7 +201,7 @@ static char *one_input_line(const char *zPrior, FILE *in){
   }
   zResult = readline(zPrompt);
 #if defined(HAVE_READLINE) && HAVE_READLINE==1
-  if( zResult ) add_history(zResult);
+  if( zResult && *zResult ) add_history(zResult);
 #endif
   return zResult;
 }
@@ -247,7 +251,7 @@ struct callback_data {
 #define MODE_Csv      7  /* Quote strings, numbers are plain */
 #define MODE_NUM_OF   8  /* The number of modes (not a mode itself) */
 
-char *modeDescr[MODE_NUM_OF] = {
+static const char *modeDescr[MODE_NUM_OF] = {
   "line",
   "column",
   "list",
@@ -384,12 +388,12 @@ static int callback(void *pArg, int nArg, char **azArg, char **azCol){
       int w = 5;
       if( azArg==0 ) break;
       for(i=0; i<nArg; i++){
-        int len = strlen(azCol[i]);
+        int len = strlen(azCol[i] ? azCol[i] : "");
         if( len>w ) w = len;
       }
       if( p->cnt++>0 ) fprintf(p->out,"\n");
       for(i=0; i<nArg; i++){
-        fprintf(p->out,"%*s = %s\n", w, azCol[i], 
+        fprintf(p->out,"%*s = %s\n", w, azCol[i],
                 azArg[i] ? azArg[i] : p->nullvalue);
       }
       break;
@@ -486,7 +490,7 @@ static int callback(void *pArg, int nArg, char **azArg, char **azCol){
     case MODE_Tcl: {
       if( p->cnt++==0 && p->showHeader ){
         for(i=0; i<nArg; i++){
-          output_c_string(p->out,azCol[i]);
+          output_c_string(p->out,azCol[i] ? azCol[i] : "");
           fprintf(p->out, "%s", p->separator);
         }
         fprintf(p->out,"\n");
@@ -502,7 +506,7 @@ static int callback(void *pArg, int nArg, char **azArg, char **azCol){
     case MODE_Csv: {
       if( p->cnt++==0 && p->showHeader ){
         for(i=0; i<nArg; i++){
-          output_csv(p, azCol[i], i<nArg-1);
+          output_csv(p, azCol[i] ? azCol[i] : "", i<nArg-1);
         }
         fprintf(p->out,"\n");
       }
@@ -690,8 +694,9 @@ static int dump_callback(void *pArg, int nArg, char **azArg, char **azCol){
     zSelect = appendText(zSelect, " || ' VALUES(' || ", 0);
     rc = sqlite3_step(pTableInfo);
     while( rc==SQLITE_ROW ){
+      const char *zText = (const char *)sqlite3_column_text(pTableInfo, 1);
       zSelect = appendText(zSelect, "quote(", 0);
-      zSelect = appendText(zSelect, sqlite3_column_text(pTableInfo, 1), '"');
+      zSelect = appendText(zSelect, zText, '"');
       rc = sqlite3_step(pTableInfo);
       if( rc==SQLITE_ROW ){
         zSelect = appendText(zSelect, ") || ', ' || ", 0);
@@ -758,6 +763,9 @@ static char zHelp[] =
   ".help                  Show this message\n"
   ".import FILE TABLE     Import data from FILE into TABLE\n"
   ".indices TABLE         Show names of all indices on TABLE\n"
+#ifndef SQLITE_OMIT_LOAD_EXTENSION
+  ".load FILE ?ENTRY?     Load an extension library\n"
+#endif
   ".mode MODE ?TABLE?     Set output mode where MODE is one of:\n"
   "                         csv      Comma-separated values\n"
   "                         column   Left-aligned columns.  (See .width)\n"
@@ -773,9 +781,6 @@ static char zHelp[] =
   ".prompt MAIN CONTINUE  Replace the standard prompts\n"
   ".quit                  Exit this program\n"
   ".read FILENAME         Execute SQL in FILENAME\n"
-#ifdef SQLITE_HAS_CODEC
-  ".rekey OLD NEW NEW     Change the encryption key\n"
-#endif
   ".schema ?TABLE?        Show the CREATE statements\n"
   ".separator STRING      Change separator used by output mode and .import\n"
   ".show                  Show the current values for various settings\n"
@@ -795,9 +800,6 @@ static void open_db(struct callback_data *p){
   if( p->db==0 ){
     sqlite3_open(p->zDbFilename, &p->db);
     db = p->db;
-#ifdef SQLITE_HAS_CODEC
-    sqlite3_key(p->db, p->zKey, p->zKey ? strlen(p->zKey) : 0);
-#endif
     sqlite3_create_function(db, "shellstatic", 0, SQLITE_UTF8, 0,
         shellstaticFunc, 0, 0);
     if( SQLITE_OK!=sqlite3_errcode(db) ){
@@ -805,6 +807,9 @@ static void open_db(struct callback_data *p){
           p->zDbFilename, sqlite3_errmsg(db));
       exit(1);
     }
+#ifndef SQLITE_OMIT_LOAD_EXTENSION
+    sqlite3_enable_load_extension(p->db, 1);
+#endif
   }
 }
 
@@ -829,7 +834,7 @@ static void resolve_backslashes(char *z){
       }else if( c=='r' ){
         c = '\r';
       }else if( c>='0' && c<='7' ){
-        c =- '0';
+        c -= '0';
         if( z[i+1]>='0' && z[i+1]<='7' ){
           i++;
           c = (c<<3) + z[i] - '0';
@@ -1037,6 +1042,7 @@ static int do_meta_command(char *zLine, struct callback_data *p){
     FILE *in;                   /* The input file */
     int lineno = 0;             /* Line number of input file */
 
+    open_db(p);
     nSep = strlen(p->separator);
     if( nSep==0 ){
       fprintf(stderr, "non-null separator required for import\n");
@@ -1045,7 +1051,7 @@ static int do_meta_command(char *zLine, struct callback_data *p){
     zSql = sqlite3_mprintf("SELECT * FROM '%q'", zTable);
     if( zSql==0 ) return 0;
     nByte = strlen(zSql);
-    rc = sqlite3_prepare(p->db, zSql, 0, &pStmt, 0);
+    rc = sqlite3_prepare(p->db, zSql, -1, &pStmt, 0);
     sqlite3_free(zSql);
     if( rc ){
       fprintf(stderr,"Error: %s\n", sqlite3_errmsg(db));
@@ -1065,7 +1071,7 @@ static int do_meta_command(char *zLine, struct callback_data *p){
     }
     zSql[j++] = ')';
     zSql[j] = 0;
-    rc = sqlite3_prepare(p->db, zSql, 0, &pStmt, 0);
+    rc = sqlite3_prepare(p->db, zSql, -1, &pStmt, 0);
     free(zSql);
     if( rc ){
       fprintf(stderr, "Error: %s\n", sqlite3_errmsg(db));
@@ -1079,7 +1085,10 @@ static int do_meta_command(char *zLine, struct callback_data *p){
       return 0;
     }
     azCol = malloc( sizeof(azCol[0])*(nCol+1) );
-    if( azCol==0 ) return 0;
+    if( azCol==0 ){
+      fclose(in);
+      return 0;
+    }
     sqlite3_exec(p->db, "BEGIN", 0, 0, 0);
     zCommit = "COMMIT";
     while( (zLine = local_getline(0, in))!=0 ){
@@ -1145,6 +1154,22 @@ static int do_meta_command(char *zLine, struct callback_data *p){
       sqlite3_free(zErrMsg);
     }
   }else
+
+#ifndef SQLITE_OMIT_LOAD_EXTENSION
+  if( c=='l' && strncmp(azArg[0], "load", n)==0 && nArg>=2 ){
+    const char *zFile, *zProc;
+    char *zErrMsg = 0;
+    int rc;
+    zFile = azArg[1];
+    zProc = nArg>=3 ? azArg[2] : 0;
+    open_db(p);
+    rc = sqlite3_load_extension(p->db, zFile, zProc, &zErrMsg);
+    if( rc!=SQLITE_OK ){
+      fprintf(stderr, "%s\n", zErrMsg);
+      sqlite3_free(zErrMsg);
+    }
+  }else
+#endif
 
   if( c=='m' && strncmp(azArg[0], "mode", n)==0 && nArg>=2 ){
     int n2 = strlen(azArg[1]);
@@ -1225,22 +1250,6 @@ static int do_meta_command(char *zLine, struct callback_data *p){
       fclose(alt);
     }
   }else
-
-#ifdef SQLITE_HAS_CODEC
-  if( c=='r' && strncmp(azArg[0],"rekey", n)==0 && nArg==4 ){
-    char *zOld = p->zKey;
-    if( zOld==0 ) zOld = "";
-    if( strcmp(azArg[1],zOld) ){
-      fprintf(stderr,"old key is incorrect\n");
-    }else if( strcmp(azArg[2], azArg[3]) ){
-      fprintf(stderr,"2nd copy of new key does not match the 1st\n");
-    }else{
-      sqlite3_free(p->zKey);
-      p->zKey = sqlite3_mprintf("%s", azArg[2]);
-      sqlite3_rekey(p->db, p->zKey, strlen(p->zKey));
-    }
-  }else
-#endif
 
   if( c=='s' && strncmp(azArg[0], "schema", n)==0 ){
     struct callback_data data;
@@ -1392,6 +1401,7 @@ static int do_meta_command(char *zLine, struct callback_data *p){
 
   if( c=='w' && strncmp(azArg[0], "width", n)==0 ){
     int j;
+    assert( nArg<=ArraySize(azArg) );
     for(j=1; j<nArg && j<ArraySize(p->colWidth); j++){
       p->colWidth[j-1] = atoi(azArg[j]);
     }
@@ -1488,6 +1498,10 @@ static void process_input(struct callback_data *p, FILE *in){
       if( zLine[i]!=0 ){
         nSql = strlen(zLine);
         zSql = malloc( nSql+1 );
+        if( zSql==0 ){
+          fprintf(stderr, "out of memory\n");
+          exit(1);
+        }
         strcpy(zSql, zLine);
       }
     }else{
@@ -1507,7 +1521,7 @@ static void process_input(struct callback_data *p, FILE *in){
       open_db(p);
       rc = sqlite3_exec(p->db, zSql, callback, p, &zErrMsg);
       if( rc || zErrMsg ){
-        if( in!=0 && !p->echoOn ) printf("%s\n",zSql);
+        /* if( in!=0 && !p->echoOn ) printf("%s\n",zSql); */
         if( zErrMsg!=0 ){
           printf("SQL error: %s\n", zErrMsg);
           sqlite3_free(zErrMsg);
@@ -1536,7 +1550,7 @@ static void process_input(struct callback_data *p, FILE *in){
 static char *find_home_dir(void){
   char *home_dir = NULL;
 
-#if !defined(_WIN32) && !defined(WIN32) && !defined(__MACOS__)
+#if !defined(_WIN32) && !defined(WIN32) && !defined(__MACOS__) && !defined(__OS2__)
   struct passwd *pwent;
   uid_t uid = getuid();
   if( (pwent=getpwuid(uid)) != NULL) {
@@ -1556,7 +1570,7 @@ static char *find_home_dir(void){
     }
   }
 
-#if defined(_WIN32) || defined(WIN32)
+#if defined(_WIN32) || defined(WIN32) || defined(__OS2__)
   if (!home_dir) {
     home_dir = "c:";
   }
@@ -1581,7 +1595,7 @@ static void process_sqliterc(
 ){
   char *home_dir = NULL;
   const char *sqliterc = sqliterc_override;
-  char *zBuf;
+  char *zBuf = 0;
   FILE *in = NULL;
 
   if (sqliterc == NULL) {
@@ -1607,6 +1621,7 @@ static void process_sqliterc(
     process_input(p,in);
     fclose(in);
   }
+  free(zBuf);
   return;
 }
 
@@ -1619,9 +1634,6 @@ static const char zOptions[] =
   "   -[no]header          turn headers on or off\n"
   "   -column              set output mode to 'column'\n"
   "   -html                set output mode to HTML\n"
-#ifdef SQLITE_HAS_CODEC
-  "   -key KEY             encryption key\n"
-#endif                 
   "   -line                set output mode to 'line'\n"
   "   -list                set output mode to 'list'\n"
   "   -separator 'x'       set output field separator (|)\n"
@@ -1642,7 +1654,7 @@ static void usage(int showDetail){
 /*
 ** Initialize the state information in data
 */
-void main_init(struct callback_data *data) {
+static void main_init(struct callback_data *data) {
   memset(data, 0, sizeof(*data));
   data->mode = MODE_List;
   strcpy(data->separator,"|");
@@ -1755,7 +1767,7 @@ int main(int argc, char **argv){
       data.echoOn = 1;
     }else if( strcmp(z,"-version")==0 ){
       printf("%s\n", sqlite3_libversion());
-      return 1;
+      return 0;
     }else if( strcmp(z,"-help")==0 ){
       usage(1);
     }else{
@@ -1802,12 +1814,18 @@ int main(int argc, char **argv){
       if( zHistory ){
         stifle_history(100);
         write_history(zHistory);
+        free(zHistory);
       }
+      free(zHome);
     }else{
       process_input(&data, stdin);
     }
   }
   set_table_name(&data, 0);
-  if( db ) sqlite3_close(db);
+  if( db ){
+    if( sqlite3_close(db)!=SQLITE_OK ){
+      fprintf(stderr,"error closing database: %s\n", sqlite3_errmsg(db));
+    }
+  }
   return 0;
 }

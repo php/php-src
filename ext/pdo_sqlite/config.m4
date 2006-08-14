@@ -72,14 +72,14 @@ if test "$PHP_PDO_SQLITE" != "no"; then
     pdo_sqlite_sources="sqlite/src/attach.c sqlite/src/auth.c sqlite/src/btree.c \
       sqlite/src/build.c sqlite/src/callback.c sqlite/src/date.c sqlite/src/delete.c sqlite/src/expr.c \
       sqlite/src/func.c sqlite/src/hash.c sqlite/src/insert.c sqlite/src/legacy.c \
-      sqlite/src/main.c sqlite/src/os_mac.c sqlite/src/os_unix.c sqlite/src/os_win.c \
+      sqlite/src/main.c sqlite/src/os_unix.c sqlite/src/os_win.c sqlite/src/os.c \
       sqlite/src/pager.c sqlite/src/pragma.c sqlite/src/prepare.c \
       sqlite/src/printf.c sqlite/src/random.c sqlite/src/select.c \
-      sqlite/src/table.c sqlite/src/tokenize.c sqlite/src/analyze.c \
+      sqlite/src/table.c sqlite/src/tokenize.c sqlite/src/analyze.c sqlite/src/complete.c \
       sqlite/src/trigger.c sqlite/src/update.c sqlite/src/utf.c sqlite/src/util.c \
       sqlite/src/vacuum.c sqlite/src/vdbeapi.c sqlite/src/vdbeaux.c sqlite/src/vdbe.c \
       sqlite/src/vdbemem.c sqlite/src/where.c sqlite/src/parse.c sqlite/src/opcodes.c \
-      sqlite/src/alter.c sqlite/src/vdbefifo.c sqlite/src/experimental.c"
+      sqlite/src/alter.c sqlite/src/vdbefifo.c sqlite/src/vtab.c sqlite/src/loadext.c"
 
       PHP_NEW_EXTENSION(pdo_sqlite,
         $php_pdo_sqlite_sources_core $pdo_sqlite_sources,
