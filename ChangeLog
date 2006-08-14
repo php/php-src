@@ -1,3 +1,85 @@
+2006-08-13  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c
+      ext/zip/tests/oo_namelocate.phpt:
+      - MFH: locateName should not change the state/error, can be used to test
+        an entry
+
+    * ext/zip/php_zip.c
+      ext/zip/tests/oo_namelocate.phpt:
+      - locateName should not change the state/error, can be used to test
+        an entry
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c
+      ext/zip/lib/zip.h
+      ext/zip/lib/zip_open.c
+      ext/zip/lib/zip_replace.c:
+      - MFP:
+       - add overwrite mode to ZipArchive::open, always starts a new archive
+       - Fix safe mode checks on extract
+       - Fix possible leaks when a safe mode error has been raised
+
+    * ext/zip/php_zip.c:
+      - remove all safe mode checks instead of borking the sources...Y
+
+    * (PHP_5_2)
+      ext/zip/package.xml:
+      - remove package.xml, not needed in php-src but only in pecl
+
+    * ext/zip/package.xml:
+      - package.xml is not needed here, only in pecl
+
+    * ext/zip/php_zip.c
+      ext/zip/php_zip.h
+      ext/zip/lib/zip.h
+      ext/zip/lib/zip_open.c
+      ext/zip/lib/zip_replace.c:
+      - add overwrite mode to ZipArchive::open, always starts a new archive
+      - fix build with php6
+      - remove safemode when built against php6
+
+    * ext/zip/examples/create.php
+      ext/zip/examples/dir.php
+      ext/zip/examples/extract.php
+      ext/zip/examples/fopen.php:
+      - remove dl() usage
+
+2006-08-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      - Always show unicode_semantics state (required for our gcov stuff)
+
+2006-08-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/dom/nodelist.c
+      ext/dom/tests/bug38438.phpt:
+      MFB: Fixed bug #38438 (DOMNodeList->item(0) segfault on empty NodeList)
+
+    * ext/dom/tests/bug38438.phpt
+      ext/dom/tests/bug38438.phpt:
+      
+      file bug38438.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/dom/nodelist.c:
+      Fixed bug #38438 (DOMNodeList->item(0) segfault on empty NodeList)
+
+2006-08-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/spl/spl.php:
+      - Add link
+
+2006-08-13  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/zip/TODO
+      ext/zip/php_zip.c:
+      - temp fix for a segfault happening when one adds two entries with
+        the same name
+
 2006-08-12  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * (PHP_5_2)
