@@ -770,7 +770,6 @@ static void add_class_vars(zend_class_entry *ce, HashTable *properties, zval *re
 			zend_hash_move_forward_ex(properties, &pos);
 			zend_u_unmangle_property_name(key_type, key, key_len-1, &class_name, &prop_name);
 			if (class_name.v) {
-				/* UTODO: Fix this to support Unicode */
 				if (class_name.s[0] != '*' && strcmp(class_name.s, ce->name.s)) {
 					/* filter privates from base classes */
 					continue;
@@ -799,7 +798,7 @@ static void add_class_vars(zend_class_entry *ce, HashTable *properties, zval *re
 /* }}} */
 
 
-/* {{{ proto array get_class_vars(string class_name)
+/* {{{ proto array get_class_vars(string class_name) U
    Returns an array of default properties of the class. */
 ZEND_FUNCTION(get_class_vars)
 {
@@ -824,7 +823,7 @@ ZEND_FUNCTION(get_class_vars)
 /* }}} */
 
 
-/* {{{ proto array get_object_vars(object obj)
+/* {{{ proto array get_object_vars(object obj) U
    Returns an array of object properties */
 ZEND_FUNCTION(get_object_vars)
 {
@@ -868,7 +867,6 @@ ZEND_FUNCTION(get_object_vars)
 				(*value)->refcount++;
 				add_u_assoc_zval_ex(return_value, UG(unicode)?IS_UNICODE:IS_STRING, key, key_len, *value);
 			} else if (instanceof) {
-				/* UTODO: Fix this to support Unicode*/
 				if (class_name.s[0] == '*' ||
 				    (Z_OBJCE_P(EG(This)) == Z_OBJCE_PP(obj) &&
 				    UG(unicode)?!u_strcmp(Z_OBJCE_P(EG(This))->name.u, class_name.u):!strcmp(Z_OBJCE_P(EG(This))->name.s, class_name.s))) {
@@ -986,7 +984,7 @@ ZEND_FUNCTION(method_exists)
 }
 /* }}} */
 
-/* {{{ proto bool property_exists(mixed object_or_class, string property_name)
+/* {{{ proto bool property_exists(mixed object_or_class, string property_name) U
    Checks if the object or class has a property */
 ZEND_FUNCTION(property_exists)
 {
@@ -1028,7 +1026,6 @@ ZEND_FUNCTION(property_exists)
 			RETURN_TRUE;
 		}
 		zend_u_unmangle_property_name(Z_TYPE_PP(property), property_info->name, property_info->name_length, &class_name, &prop_name);
-		/* UTODO: Fix this??? */
 		if (class_name.s[0] ==  '*') {
 			if (instanceof_function(EG(scope), ce TSRMLS_CC)) {
 				RETURN_TRUE;
