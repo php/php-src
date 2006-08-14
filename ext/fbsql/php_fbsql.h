@@ -108,23 +108,23 @@ static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent);
 
 ZEND_BEGIN_MODULE_GLOBALS(fbsql)
-   zend_bool allowPersistent;
-   zend_bool generateWarnings;
-   zend_bool autoCommit;
-   long maxPersistent;
-   long maxLinks;
-   long maxConnections;
-   long maxResults;
-   long batchSize;
-   char *hostName;
-   char *databaseName;
-   char *databasePassword;
-   char *userName;
-   char *userPassword;
-   long persistentCount;
-   long linkCount;
-   long linkIndex;
-
+	zend_bool allowPersistent;
+	zend_bool generateWarnings;
+	zend_bool autoCommit;
+	zend_bool showTimestampDecimals;
+	long maxPersistent;
+	long maxLinks;
+	long maxConnections;
+	long maxResults;
+	long batchSize;
+	char *hostName;
+	char *databaseName;
+	char *databasePassword;
+	char *userName;
+	char *userPassword;
+	long persistentCount;
+	long linkCount;
+	long linkIndex;
 ZEND_END_MODULE_GLOBALS(fbsql)
 
 #ifdef ZTS
