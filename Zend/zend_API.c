@@ -975,6 +975,10 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 					break;
 			}
 		}
+		
+		if (T_arg_type == -1) {
+			T_arg_type == ZEND_STR_TYPE;
+		}
 	}
 
 	i = 0;
