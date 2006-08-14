@@ -32,7 +32,7 @@ TCC = @TARGET_CC@ @TARGET_CFLAGS@ -I. -I${TOP}/src
 # Omitting the define will cause extra debugging code to be inserted and
 # includes extra comments when "EXPLAIN stmt" is used.
 #
-TCC += @TARGET_DEBUG@
+TCC += @TARGET_DEBUG@ @XTHREADCONNECT@
 
 # Compiler options needed for programs that use the TCL library.
 #
@@ -57,6 +57,13 @@ TCC += -DTHREADSAFE=@THREADSAFE@
 # The pthreads library if needed
 #
 LIBPTHREAD=@TARGET_THREAD_LIB@
+
+# Do threads override each others locks by default (1), or do we test (-1)
+#
+TCC += -DSQLITE_THREAD_OVERRIDE_LOCK=@THREADSOVERRIDELOCKS@
+
+# The fdatasync library
+TLIBS = @TARGET_LIBS@
 
 # Flags controlling use of the in memory btree implementation
 #
@@ -104,9 +111,12 @@ LTCOMPILE = $(LIBTOOL) --mode=compile $(TCC)
 LTLINK = $(LIBTOOL) --mode=link $(TCC)
 LTINSTALL = $(LIBTOOL) --mode=install $(INSTALL)
 
+# nawk compatible awk.
+NAWK = @AWK@
+
 # You should not have to change anything below this line
 ###############################################################################
-
+OPTS = 
 OPTS += -DSQLITE_OMIT_CURSOR          # Cursors do not work at this time
 TCC += -DSQLITE_OMIT_CURSOR
 
@@ -114,13 +124,13 @@ TCC += -DSQLITE_OMIT_CURSOR
 #
 LIBOBJ = alter.lo analyze.lo attach.lo auth.lo btree.lo build.lo \
          callback.lo complete.lo date.lo \
-         delete.lo expr.lo func.lo hash.lo insert.lo \
-         main.lo opcodes.lo os_unix.lo os_win.lo \
+         delete.lo expr.lo func.lo hash.lo insert.lo loadext.lo \
+         main.lo opcodes.lo os.lo os_unix.lo os_win.lo os_os2.lo \
          pager.lo parse.lo pragma.lo prepare.lo printf.lo random.lo \
          select.lo table.lo tokenize.lo trigger.lo update.lo \
          util.lo vacuum.lo \
          vdbe.lo vdbeapi.lo vdbeaux.lo vdbefifo.lo vdbemem.lo \
-         where.lo utf.lo legacy.lo
+         where.lo utf.lo legacy.lo vtab.lo
 
 # All of the source code files.
 #
@@ -142,9 +152,12 @@ SRC = \
   $(TOP)/src/hash.h \
   $(TOP)/src/insert.c \
   $(TOP)/src/legacy.c \
+  $(TOP)/src/loadext.c \
   $(TOP)/src/main.c \
+  $(TOP)/src/os.c \
   $(TOP)/src/os_unix.c \
   $(TOP)/src/os_win.c \
+  $(TOP)/src/os_os2.c \
   $(TOP)/src/pager.c \
   $(TOP)/src/pager.h \
   $(TOP)/src/parse.y \
@@ -171,6 +184,7 @@ SRC = \
   $(TOP)/src/vdbefifo.c \
   $(TOP)/src/vdbemem.c \
   $(TOP)/src/vdbeInt.h \
+  $(TOP)/src/vtab.c \
   $(TOP)/src/where.c
 
 # Source code to the test files.
@@ -179,8 +193,10 @@ TESTSRC = \
   $(TOP)/src/btree.c \
   $(TOP)/src/date.c \
   $(TOP)/src/func.c \
+  $(TOP)/src/os.c \
   $(TOP)/src/os_unix.c \
   $(TOP)/src/os_win.c \
+  $(TOP)/src/os_os2.c \
   $(TOP)/src/pager.c \
   $(TOP)/src/pragma.c \
   $(TOP)/src/printf.c \
@@ -189,10 +205,17 @@ TESTSRC = \
   $(TOP)/src/test3.c \
   $(TOP)/src/test4.c \
   $(TOP)/src/test5.c \
+  $(TOP)/src/test6.c \
+  $(TOP)/src/test7.c \
+  $(TOP)/src/test8.c \
+  $(TOP)/src/test_async.c \
+  $(TOP)/src/test_md5.c \
+  $(TOP)/src/test_schema.c \
+  $(TOP)/src/test_server.c \
+  $(TOP)/src/test_tclvar.c \
   $(TOP)/src/utf.c \
   $(TOP)/src/util.c \
   $(TOP)/src/vdbe.c \
-  $(TOP)/src/md5.c \
   $(TOP)/src/where.c
 
 # Header files used by all library source files.
@@ -204,8 +227,7 @@ HDR = \
    opcodes.h \
    $(TOP)/src/os.h \
    $(TOP)/src/os_common.h \
-   $(TOP)/src/os_unix.h \
-   $(TOP)/src/os_win.h \
+   $(TOP)/src/sqlite3ext.h \
    $(TOP)/src/sqliteInt.h  \
    $(TOP)/src/vdbe.h \
    parse.h
@@ -228,8 +250,8 @@ Makefile: $(TOP)/Makefile.in
 # of the most recently modified source code file
 #
 last_change:	$(SRC)
-	cat $(SRC) | grep '$$Id: ' | sort +4 | tail -1 \
-          | awk '{print $$5,$$6}' >last_change
+	cat $(SRC) | grep '$$Id: ' | sort -k 5 | tail -1 \
+          | $(NAWK) '{print $$5,$$6}' >last_change
 
 libsqlite3.la:	$(LIBOBJ)
 	$(LTLINK) -o libsqlite3.la $(LIBOBJ) $(LIBPTHREAD) \
@@ -243,7 +265,8 @@ libtclsqlite3.la:	tclsqlite.lo libsqlite3.la
 
 sqlite3$(TEXE):	$(TOP)/src/shell.c libsqlite3.la sqlite3.h
 	$(LTLINK) $(READLINE_FLAGS) $(LIBPTHREAD) \
-		-o sqlite3 $(TOP)/src/shell.c libsqlite3.la $(LIBREADLINE)
+		-o $@ $(TOP)/src/shell.c libsqlite3.la \
+		$(LIBREADLINE) $(TLIBS)
 
 # This target creates a directory named "tsrc" and fills it with
 # copies of all of the C source code and header files needed to
@@ -313,6 +336,9 @@ insert.lo:	$(TOP)/src/insert.c $(HDR)
 legacy.lo:	$(TOP)/src/legacy.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/legacy.c
 
+loadext.lo:	$(TOP)/src/loadext.c $(HDR)
+	$(LTCOMPILE) -c $(TOP)/src/loadext.c
+
 main.lo:	$(TOP)/src/main.c $(HDR)
 	$(LTCOMPILE) $(TEMP_STORE) -c $(TOP)/src/main.c
 
@@ -323,10 +349,13 @@ opcodes.lo:	opcodes.c
 	$(LTCOMPILE) -c opcodes.c
 
 opcodes.c:	opcodes.h $(TOP)/mkopcodec.awk
-	sort -n -b +2 opcodes.h | awk -f $(TOP)/mkopcodec.awk >opcodes.c
+	sort -n -b -k 3 opcodes.h | $(NAWK) -f $(TOP)/mkopcodec.awk >opcodes.c
 
 opcodes.h:	parse.h $(TOP)/src/vdbe.c $(TOP)/mkopcodeh.awk
-	cat parse.h $(TOP)/src/vdbe.c | awk -f $(TOP)/mkopcodeh.awk >opcodes.h
+	cat parse.h $(TOP)/src/vdbe.c | $(NAWK) -f $(TOP)/mkopcodeh.awk >opcodes.h
+
+os.lo:	$(TOP)/src/os.c $(HDR)
+	$(LTCOMPILE) -c $(TOP)/src/os.c
 
 os_unix.lo:	$(TOP)/src/os_unix.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/os_unix.c
@@ -334,14 +363,19 @@ os_unix.lo:	$(TOP)/src/os_unix.c $(HDR)
 os_win.lo:	$(TOP)/src/os_win.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/os_win.c
 
+os_os2.lo:	$(TOP)/src/os_os2.c $(HDR)
+	$(LTCOMPILE) -c $(TOP)/src/os_os2.c
+
 parse.lo:	parse.c $(HDR)
 	$(LTCOMPILE) -c parse.c
 
 parse.h:	parse.c
 
-parse.c:	$(TOP)/src/parse.y lemon$(BEXE)
+parse.c:	$(TOP)/src/parse.y lemon$(BEXE) $(TOP)/addopcodes.awk
 	cp $(TOP)/src/parse.y .
 	./lemon $(OPTS) parse.y
+	mv parse.h parse.h.temp
+	awk -f $(TOP)/addopcodes.awk parse.h.temp >parse.h
 
 pragma.lo:	$(TOP)/src/pragma.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/pragma.c
@@ -405,6 +439,9 @@ vdbefifo.lo:	$(TOP)/src/vdbefifo.c $(VDBEHDR)
 vdbemem.lo:	$(TOP)/src/vdbemem.c $(VDBEHDR)
 	$(LTCOMPILE) -c $(TOP)/src/vdbemem.c
 
+vtab.lo:	$(TOP)/src/vtab.c $(VDBEHDR)
+	$(LTCOMPILE) -c $(TOP)/src/vtab.c
+
 where.lo:	$(TOP)/src/where.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/where.c
 
@@ -419,19 +456,12 @@ tclsqlite3:	tclsqlite-shell.lo libsqlite3.la
 		 libsqlite3.la $(LIBTCL)
 
 testfixture$(TEXE):	$(TOP)/src/tclsqlite.c libsqlite3.la $(TESTSRC)
-	$(LTLINK) -DTCLSH=1 -DSQLITE_TEST=1 $(TEMP_STORE) \
-		-o testfixture $(TESTSRC) $(TOP)/src/tclsqlite.c \
-		libsqlite3.la $(LIBTCL)
-
-crashtest$(TEXE):	$(TOP)/src/tclsqlite.c libsqlite3.la $(TESTSRC) $(TOP)/src/os_test.c
-	$(LTLINK) -DOS_TEST=1 -DTCLSH=1 -DSQLITE_TEST=1 \
-		-o crashtest \
-		$(TESTSRC) $(TOP)/src/os_test.c $(TOP)/src/tclsqlite.c \
+	$(LTLINK) -DTCLSH=1 -DSQLITE_TEST=1 -DSQLITE_CRASH_TEST=1 \
+		$(TEMP_STORE) -o testfixture $(TESTSRC) $(TOP)/src/tclsqlite.c \
 		libsqlite3.la $(LIBTCL)
 
 
-
-fulltest:	testfixture$(TEXE) sqlite3$(TEXE) crashtest$(TEXE)
+fulltest:	testfixture$(TEXE) sqlite3$(TEXE)
 	./testfixture $(TOP)/test/all.test
 
 test:	testfixture$(TEXE) sqlite3$(TEXE)

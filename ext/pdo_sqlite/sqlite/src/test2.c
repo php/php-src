@@ -524,7 +524,7 @@ static int fake_big_file(
   int rc;
   int n;
   i64 offset;
-  OsFile fd;
+  OsFile *fd = 0;
   int readOnly = 0;
   if( argc!=3 ){
     Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
@@ -532,7 +532,6 @@ static int fake_big_file(
     return TCL_ERROR;
   }
   if( Tcl_GetInt(interp, argv[1], &n) ) return TCL_ERROR;
-  memset(&fd, 0, sizeof(fd));
   rc = sqlite3OsOpenReadWrite(argv[2], &fd, &readOnly);
   if( rc ){
     Tcl_AppendResult(interp, "open failed: ", errorName(rc), 0);
@@ -540,12 +539,12 @@ static int fake_big_file(
   }
   offset = n;
   offset *= 1024*1024;
-  rc = sqlite3OsSeek(&fd, offset);
+  rc = sqlite3OsSeek(fd, offset);
   if( rc ){
     Tcl_AppendResult(interp, "seek failed: ", errorName(rc), 0);
     return TCL_ERROR;
   }
-  rc = sqlite3OsWrite(&fd, "Hello, World!", 14);
+  rc = sqlite3OsWrite(fd, "Hello, World!", 14);
   sqlite3OsClose(&fd);
   if( rc ){
     Tcl_AppendResult(interp, "write failed: ", errorName(rc), 0);
@@ -560,6 +559,7 @@ static int fake_big_file(
 */
 int Sqlitetest2_Init(Tcl_Interp *interp){
   extern int sqlite3_io_error_pending;
+  extern int sqlite3_io_error_hit;
   extern int sqlite3_diskfull_pending;
   extern int sqlite3_diskfull;
   static struct {
@@ -592,6 +592,8 @@ int Sqlitetest2_Init(Tcl_Interp *interp){
   }
   Tcl_LinkVar(interp, "sqlite_io_error_pending",
      (char*)&sqlite3_io_error_pending, TCL_LINK_INT);
+  Tcl_LinkVar(interp, "sqlite_io_error_hit",
+     (char*)&sqlite3_io_error_hit, TCL_LINK_INT);
   Tcl_LinkVar(interp, "sqlite_diskfull_pending",
      (char*)&sqlite3_diskfull_pending, TCL_LINK_INT);
   Tcl_LinkVar(interp, "sqlite_diskfull",

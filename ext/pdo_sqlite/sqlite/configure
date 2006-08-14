@@ -463,7 +463,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT EGREP LN_S ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB STRIP ac_ct_STRIP CPP CXX CXXFLAGS ac_ct_CXX CXXCPP F77 FFLAGS ac_ct_F77 LIBTOOL INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA program_prefix VERSION RELEASE VERSION_NUMBER BUILD_CC BUILD_CFLAGS BUILD_LIBS TARGET_CC TARGET_CFLAGS TARGET_LINK TARGET_LFLAGS TARGET_RANLIB TARGET_AR THREADSAFE TARGET_THREAD_LIB ALLOWRELEASE TEMP_STORE BUILD_EXEEXT OS_UNIX OS_WIN TARGET_EXEEXT TARGET_LIBS TCL_VERSION TCL_BIN_DIR TCL_SRC_DIR TCL_LIBS TCL_INCLUDE_SPEC TCL_LIB_FILE TCL_LIB_FLAG TCL_LIB_SPEC TCL_STUB_LIB_FILE TCL_STUB_LIB_FLAG TCL_STUB_LIB_SPEC HAVE_TCL TARGET_READLINE_LIBS TARGET_READLINE_INC TARGET_HAVE_READLINE TARGET_DEBUG LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT EGREP LN_S ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB STRIP ac_ct_STRIP CPP CXX CXXFLAGS ac_ct_CXX CXXCPP F77 FFLAGS ac_ct_F77 LIBTOOL INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK program_prefix VERSION RELEASE VERSION_NUMBER BUILD_CC BUILD_CFLAGS BUILD_LIBS TARGET_CC TARGET_CFLAGS TARGET_LINK TARGET_LFLAGS TARGET_RANLIB TARGET_AR THREADSAFE TARGET_THREAD_LIB XTHREADCONNECT THREADSOVERRIDELOCKS ALLOWRELEASE TEMP_STORE BUILD_EXEEXT OS_UNIX OS_WIN OS_OS2 TARGET_EXEEXT TCL_VERSION TCL_BIN_DIR TCL_SRC_DIR TCL_LIBS TCL_INCLUDE_SPEC TCL_LIB_FILE TCL_LIB_FLAG TCL_LIB_SPEC TCL_STUB_LIB_FILE TCL_STUB_LIB_FLAG TCL_STUB_LIB_SPEC HAVE_TCL TARGET_READLINE_LIBS TARGET_READLINE_INC TARGET_HAVE_READLINE TARGET_DEBUG TARGET_LIBS LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -1025,11 +1025,16 @@ Optional Features:
   --enable-fast-install[=PKGS]
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
-  --enable-threadsafe           Support threadsafe operation
-  --enable-releasemode           Support libtool link to release mode
-  --enable-tempstore     Use an in-ram database for temporary tables (never,no,yes,always)
-  --disable-tcl       do not build TCL extension
-  --enable-debug         enable debugging & verbose explain
+  --enable-threadsafe     Support threadsafe operation
+  --enable-cross-thread-connections
+                          Allow connection sharing across threads
+  --enable-threads-override-locks
+                          Threads can override each others locks
+  --enable-releasemode    Support libtool link to release mode
+  --enable-tempstore      Use an in-ram database for temporary tables
+                          (never,no,yes,always)
+  --disable-tcl           do not build TCL extension
+  --enable-debug          enable debugging & verbose explain
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -1040,7 +1045,8 @@ Optional Packages:
   --with-tags[=TAGS]
                           include additional configurations [automatic]
   --with-hints=FILE       Read configuration options from FILE
-  --with-tcl=DIR          directory containing tcl configuration (tclConfig.sh)
+  --with-tcl=DIR          directory containing tcl configuration
+                          (tclConfig.sh)
 
 Some influential environment variables:
   CC          C compiler command
@@ -3055,7 +3061,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 3058 "configure"' > conftest.$ac_ext
+  echo '#line 3064 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -4518,7 +4524,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:4521:" \
+echo "$as_me:4527:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -5552,11 +5558,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:5555: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:5561: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:5559: \$? = $ac_status" >&5
+   echo "$as_me:5565: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -5785,11 +5791,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:5788: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:5794: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:5792: \$? = $ac_status" >&5
+   echo "$as_me:5798: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -5845,11 +5851,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:5848: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:5854: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:5852: \$? = $ac_status" >&5
+   echo "$as_me:5858: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -8029,7 +8035,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 8032 "configure"
+#line 8038 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -8127,7 +8133,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 8130 "configure"
+#line 8136 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10306,11 +10312,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10309: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10315: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10313: \$? = $ac_status" >&5
+   echo "$as_me:10319: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -10366,11 +10372,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10369: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10375: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:10373: \$? = $ac_status" >&5
+   echo "$as_me:10379: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11727,7 +11733,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11730 "configure"
+#line 11736 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11825,7 +11831,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11828 "configure"
+#line 11834 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12652,11 +12658,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12655: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12661: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:12659: \$? = $ac_status" >&5
+   echo "$as_me:12665: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -12712,11 +12718,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12715: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12721: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:12719: \$? = $ac_status" >&5
+   echo "$as_me:12725: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14746,11 +14752,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14749: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14755: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14753: \$? = $ac_status" >&5
+   echo "$as_me:14759: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -14979,11 +14985,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14982: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14988: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14986: \$? = $ac_status" >&5
+   echo "$as_me:14992: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -15039,11 +15045,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15042: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15048: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:15046: \$? = $ac_status" >&5
+   echo "$as_me:15052: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -17223,7 +17229,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 17226 "configure"
+#line 17232 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -17321,7 +17327,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 17324 "configure"
+#line 17330 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -18414,6 +18420,46 @@ test -z "$INSTALL_SCRIPT" && INSTALL_SCRIPT='${INSTALL}'
 
 test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
 
+for ac_prog in gawk mawk nawk awk
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_prog_AWK+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$AWK"; then
+  ac_cv_prog_AWK="$AWK" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_AWK="$ac_prog"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+fi
+fi
+AWK=$ac_cv_prog_AWK
+if test -n "$AWK"; then
+  echo "$as_me:$LINENO: result: $AWK" >&5
+echo "${ECHO_T}$AWK" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+  test -n "$AWK" && break
+done
+
 
 #########
 # Set up an appropriate program prefix
@@ -19500,6 +19546,57 @@ fi
 
 
 ##########
+# Do we want to allow a connection created in one thread to be used
+# in another thread.  This does not work on many Linux systems (ex: RedHat 9)
+# due to bugs in the threading implementations.  This is thus off by default.
+#
+# Check whether --enable-cross-thread-connections or --disable-cross-thread-connections was given.
+if test "${enable_cross_thread_connections+set}" = set; then
+  enableval="$enable_cross_thread_connections"
+
+else
+  enable_xthreadconnect=no
+fi;
+echo "$as_me:$LINENO: checking whether to allow connections to be shared across threads" >&5
+echo $ECHO_N "checking whether to allow connections to be shared across threads... $ECHO_C" >&6
+if test "$enable_xthreadconnect" = "no"; then
+  XTHREADCONNECT=''
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+else
+  XTHREADCONNECT='-DSQLITE_ALLOW_XTHREAD_CONNECT=1'
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+fi
+
+
+##########
+# Do we want to set threadsOverrideEachOthersLocks variable to be 1 (true) by
+# default. Normally, a test at runtime is performed to determine the
+# appropriate value of this variable. Use this option only if you're sure that
+# threads can safely override each others locks in all runtime situations.
+#
+# Check whether --enable-threads-override-locks or --disable-threads-override-locks was given.
+if test "${enable_threads_override_locks+set}" = set; then
+  enableval="$enable_threads_override_locks"
+
+else
+  enable_threads_override_locks=no
+fi;
+echo "$as_me:$LINENO: checking whether threads can override each others locks" >&5
+echo $ECHO_N "checking whether threads can override each others locks... $ECHO_C" >&6
+if test "$enable_threads_override_locks" = "no"; then
+  THREADSOVERRIDELOCKS='-1'
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+else
+  THREADSOVERRIDELOCKS='1'
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+fi
+
+
+##########
 # Do we want to support release
 #
 # Check whether --enable-releasemode or --disable-releasemode was given.
@@ -19530,7 +19627,7 @@ if test "${enable_tempstore+set}" = set; then
   enableval="$enable_tempstore"
 
 else
-  enable_tempstore=yes
+  enable_tempstore=no
 fi;
 echo "$as_me:$LINENO: checking whether to use an in-ram database for temporary tables" >&5
 echo $ECHO_N "checking whether to use an in-ram database for temporary tables... $ECHO_C" >&6
@@ -19550,8 +19647,13 @@ echo "${ECHO_T}no" >&6
     echo "$as_me:$LINENO: result: always" >&5
 echo "${ECHO_T}always" >&6
   ;;
+  yes )
+     TEMP_STORE=3
+    echo "$as_me:$LINENO: result: always" >&5
+echo "${ECHO_T}always" >&6
+  ;;
   * )
-    TEMP_STORE=2
+    TEMP_STORE=1
     echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
   ;;
@@ -19593,13 +19695,26 @@ else
   TARGET_EXEEXT=$config_TARGET_EXEEXT
 fi
 if test "$TARGET_EXEEXT" = ".exe"; then
-  OS_UNIX=0
-  OS_WIN=1
-  tclsubdir=win
-  TARGET_CFLAGS="$TARGET_CFLAGS -DOS_WIN=1"
+  if test $OS2_SHELL ; then
+    OS_UNIX=0
+    OS_WIN=0
+    OS_OS2=1
+    TARGET_CFLAGS="$TARGET_CFLAGS -DOS_OS2=1"
+    if test "$ac_compiler_gnu" == "yes" ; then
+      TARGET_CFLAGS="$TARGET_CFLAGS -Zomf -Zexe -Zmap"
+      BUILD_CFLAGS="$BUILD_CFLAGS -Zomf -Zexe"
+    fi
+  else
+    OS_UNIX=0
+    OS_WIN=1
+    OS_OS2=0
+    tclsubdir=win
+    TARGET_CFLAGS="$TARGET_CFLAGS -DOS_WIN=1"
+  fi
 else
   OS_UNIX=1
   OS_WIN=0
+  OS_OS2=0
   tclsubdir=unix
   TARGET_CFLAGS="$TARGET_CFLAGS -DOS_UNIX=1"
 fi
@@ -19617,7 +19732,6 @@ if test "$config_TARGET_LIBS" != ""; then
 else
   TARGET_LIBS=""
 fi
-
 
 ##########
 # Figure out all the parameters needed to compile against Tcl.
@@ -20000,6 +20114,140 @@ fi
 
 
 ##########
+# Figure out what C libraries are required to compile programs
+# that use "fdatasync()" function.
+#
+CC=$TARGET_CC
+LIBS=$TARGET_LIBS
+echo "$as_me:$LINENO: checking for library containing fdatasync" >&5
+echo $ECHO_N "checking for library containing fdatasync... $ECHO_C" >&6
+if test "${ac_cv_search_fdatasync+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+ac_cv_search_fdatasync=no
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char fdatasync ();
+int
+main ()
+{
+fdatasync ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_search_fdatasync="none required"
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+if test "$ac_cv_search_fdatasync" = no; then
+  for ac_lib in rt; do
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+    cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char fdatasync ();
+int
+main ()
+{
+fdatasync ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_search_fdatasync="-l$ac_lib"
+break
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+  done
+fi
+LIBS=$ac_func_search_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_search_fdatasync" >&5
+echo "${ECHO_T}$ac_cv_search_fdatasync" >&6
+if test "$ac_cv_search_fdatasync" != no; then
+  test "$ac_cv_search_fdatasync" = "none required" || LIBS="$ac_cv_search_fdatasync $LIBS"
+
+fi
+
+TARGET_LIBS="$LIBS"
+
+##########
 # Figure out where to get the READLINE header files.
 #
 echo "$as_me:$LINENO: checking readline header files" >&5
@@ -20236,7 +20484,7 @@ else
   use_debug=no
 fi;
 if test "${use_debug}" = "yes" ; then
-  TARGET_DEBUG=""
+  TARGET_DEBUG="-DSQLITE_DEBUG=1"
 else
   TARGET_DEBUG="-DNDEBUG"
 fi
@@ -20338,6 +20586,110 @@ echo "${ECHO_T}$ac_cv_func_usleep" >&6
 if test $ac_cv_func_usleep = yes; then
   TARGET_CFLAGS="$TARGET_CFLAGS -DHAVE_USLEEP=1"
 fi
+
+
+#--------------------------------------------------------------------
+# Redefine fdatasync as fsync on systems that lack fdatasync
+#--------------------------------------------------------------------
+
+echo "$as_me:$LINENO: checking for fdatasync" >&5
+echo $ECHO_N "checking for fdatasync... $ECHO_C" >&6
+if test "${ac_cv_func_fdatasync+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+/* Define fdatasync to an innocuous variant, in case <limits.h> declares fdatasync.
+   For example, HP-UX 11i <limits.h> declares gettimeofday.  */
+#define fdatasync innocuous_fdatasync
+
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char fdatasync (); below.
+    Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
+    <limits.h> exists even on freestanding compilers.  */
+
+#ifdef __STDC__
+# include <limits.h>
+#else
+# include <assert.h>
+#endif
+
+#undef fdatasync
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char fdatasync ();
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_fdatasync) || defined (__stub___fdatasync)
+choke me
+#else
+char (*f) () = fdatasync;
+#endif
+#ifdef __cplusplus
+}
+#endif
+
+int
+main ()
+{
+return f != fdatasync;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_func_fdatasync=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_func_fdatasync=no
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: $ac_cv_func_fdatasync" >&5
+echo "${ECHO_T}$ac_cv_func_fdatasync" >&6
+if test $ac_cv_func_fdatasync = yes; then
+  TARGET_CFLAGS="$TARGET_CFLAGS -DHAVE_FDATASYNC=1"
+fi
+
+
+#########
+# Put out accumulated miscellaneous LIBRARIES
+#
 
 
 #########
@@ -21016,6 +21368,7 @@ s,@LIBTOOL@,$LIBTOOL,;t t
 s,@INSTALL_PROGRAM@,$INSTALL_PROGRAM,;t t
 s,@INSTALL_SCRIPT@,$INSTALL_SCRIPT,;t t
 s,@INSTALL_DATA@,$INSTALL_DATA,;t t
+s,@AWK@,$AWK,;t t
 s,@program_prefix@,$program_prefix,;t t
 s,@VERSION@,$VERSION,;t t
 s,@RELEASE@,$RELEASE,;t t
@@ -21031,13 +21384,15 @@ s,@TARGET_RANLIB@,$TARGET_RANLIB,;t t
 s,@TARGET_AR@,$TARGET_AR,;t t
 s,@THREADSAFE@,$THREADSAFE,;t t
 s,@TARGET_THREAD_LIB@,$TARGET_THREAD_LIB,;t t
+s,@XTHREADCONNECT@,$XTHREADCONNECT,;t t
+s,@THREADSOVERRIDELOCKS@,$THREADSOVERRIDELOCKS,;t t
 s,@ALLOWRELEASE@,$ALLOWRELEASE,;t t
 s,@TEMP_STORE@,$TEMP_STORE,;t t
 s,@BUILD_EXEEXT@,$BUILD_EXEEXT,;t t
 s,@OS_UNIX@,$OS_UNIX,;t t
 s,@OS_WIN@,$OS_WIN,;t t
+s,@OS_OS2@,$OS_OS2,;t t
 s,@TARGET_EXEEXT@,$TARGET_EXEEXT,;t t
-s,@TARGET_LIBS@,$TARGET_LIBS,;t t
 s,@TCL_VERSION@,$TCL_VERSION,;t t
 s,@TCL_BIN_DIR@,$TCL_BIN_DIR,;t t
 s,@TCL_SRC_DIR@,$TCL_SRC_DIR,;t t
@@ -21054,6 +21409,7 @@ s,@TARGET_READLINE_LIBS@,$TARGET_READLINE_LIBS,;t t
 s,@TARGET_READLINE_INC@,$TARGET_READLINE_INC,;t t
 s,@TARGET_HAVE_READLINE@,$TARGET_HAVE_READLINE,;t t
 s,@TARGET_DEBUG@,$TARGET_DEBUG,;t t
+s,@TARGET_LIBS@,$TARGET_LIBS,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t
 CEOF

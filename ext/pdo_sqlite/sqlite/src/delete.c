@@ -42,8 +42,12 @@ Table *sqlite3SrcListLookup(Parse *pParse, SrcList *pSrc){
 ** writable return 0;
 */
 int sqlite3IsReadOnly(Parse *pParse, Table *pTab, int viewOk){
-  if( pTab->readOnly && (pParse->db->flags & SQLITE_WriteSchema)==0
-        && pParse->nested==0 ){
+  if( (pTab->readOnly && (pParse->db->flags & SQLITE_WriteSchema)==0
+        && pParse->nested==0) 
+#ifndef SQLITE_OMIT_VIRTUALTABLE
+      || (pTab->pMod && pTab->pMod->pModule->xUpdate==0)
+#endif
+  ){
     sqlite3ErrorMsg(pParse, "table %s may not be modified", pTab->zName);
     return 1;
   }
@@ -59,14 +63,21 @@ int sqlite3IsReadOnly(Parse *pParse, Table *pTab, int viewOk){
 /*
 ** Generate code that will open a table for reading.
 */
-void sqlite3OpenTableForReading(
-  Vdbe *v,        /* Generate code into this VDBE */
+void sqlite3OpenTable(
+  Parse *p,       /* Generate code into this VDBE */
   int iCur,       /* The cursor number of the table */
-  Table *pTab     /* The table to be opened */
+  int iDb,        /* The database index in sqlite3.aDb[] */
+  Table *pTab,    /* The table to be opened */
+  int opcode      /* OP_OpenRead or OP_OpenWrite */
 ){
-  sqlite3VdbeAddOp(v, OP_Integer, pTab->iDb, 0);
+  Vdbe *v;
+  if( IsVirtual(pTab) ) return;
+  v = sqlite3GetVdbe(p);
+  assert( opcode==OP_OpenWrite || opcode==OP_OpenRead );
+  sqlite3TableLock(p, iDb, pTab->tnum, (opcode==OP_OpenWrite), pTab->zName);
+  sqlite3VdbeAddOp(v, OP_Integer, iDb, 0);
   VdbeComment((v, "# %s", pTab->zName));
-  sqlite3VdbeAddOp(v, OP_OpenRead, iCur, pTab->tnum);
+  sqlite3VdbeAddOp(v, opcode, iCur, pTab->tnum);
   sqlite3VdbeAddOp(v, OP_SetNumColumns, iCur, pTab->nCol);
 }
 
@@ -95,6 +106,7 @@ void sqlite3DeleteFrom(
   AuthContext sContext;  /* Authorization context */
   int oldIdx = -1;       /* Cursor for the OLD table of AFTER triggers */
   NameContext sNC;       /* Name context to resolve expressions in */
+  int iDb;
 
 #ifndef SQLITE_OMIT_TRIGGER
   int isView;                  /* True if attempting to delete from a view */
@@ -102,7 +114,7 @@ void sqlite3DeleteFrom(
 #endif
 
   sContext.pParse = 0;
-  if( pParse->nErr || sqlite3_malloc_failed ){
+  if( pParse->nErr || sqlite3MallocFailed() ){
     goto delete_from_cleanup;
   }
   db = pParse->db;
@@ -134,15 +146,16 @@ void sqlite3DeleteFrom(
   if( sqlite3IsReadOnly(pParse, pTab, triggers_exist) ){
     goto delete_from_cleanup;
   }
-  assert( pTab->iDb<db->nDb );
-  zDb = db->aDb[pTab->iDb].zName;
+  iDb = sqlite3SchemaToIndex(db, pTab->pSchema);
+  assert( iDb<db->nDb );
+  zDb = db->aDb[iDb].zName;
   if( sqlite3AuthCheck(pParse, SQLITE_DELETE, pTab->zName, 0, zDb) ){
     goto delete_from_cleanup;
   }
 
   /* If pTab is really a view, make sure it has been initialized.
   */
-  if( isView && sqlite3ViewGetColumnNames(pParse, pTab) ){
+  if( sqlite3ViewGetColumnNames(pParse, pTab) ){
     goto delete_from_cleanup;
   }
 
@@ -176,14 +189,14 @@ void sqlite3DeleteFrom(
     goto delete_from_cleanup;
   }
   if( pParse->nested==0 ) sqlite3VdbeCountChanges(v);
-  sqlite3BeginWriteOperation(pParse, triggers_exist, pTab->iDb);
+  sqlite3BeginWriteOperation(pParse, triggers_exist, iDb);
 
   /* If we are trying to delete from a view, realize that view into
   ** a ephemeral table.
   */
   if( isView ){
     Select *pView = sqlite3SelectDup(pTab->pSelect);
-    sqlite3Select(pParse, pView, SRT_VirtualTab, iCur, 0, 0, 0, 0);
+    sqlite3Select(pParse, pView, SRT_EphemTab, iCur, 0, 0, 0, 0);
     sqlite3SelectDelete(pView);
   }
 
@@ -198,40 +211,36 @@ void sqlite3DeleteFrom(
   ** It is easier just to erase the whole table.  Note, however, that
   ** this means that the row change count will be incorrect.
   */
-  if( pWhere==0 && !triggers_exist ){
+  if( pWhere==0 && !triggers_exist && !IsVirtual(pTab) ){
     if( db->flags & SQLITE_CountRows ){
       /* If counting rows deleted, just count the total number of
       ** entries in the table. */
       int endOfLoop = sqlite3VdbeMakeLabel(v);
-      int addr;
+      int addr2;
       if( !isView ){
-        sqlite3OpenTableForReading(v, iCur, pTab);
+        sqlite3OpenTable(pParse, iCur, iDb, pTab, OP_OpenRead);
       }
       sqlite3VdbeAddOp(v, OP_Rewind, iCur, sqlite3VdbeCurrentAddr(v)+2);
-      addr = sqlite3VdbeAddOp(v, OP_AddImm, 1, 0);
-      sqlite3VdbeAddOp(v, OP_Next, iCur, addr);
+      addr2 = sqlite3VdbeAddOp(v, OP_AddImm, 1, 0);
+      sqlite3VdbeAddOp(v, OP_Next, iCur, addr2);
       sqlite3VdbeResolveLabel(v, endOfLoop);
       sqlite3VdbeAddOp(v, OP_Close, iCur, 0);
     }
     if( !isView ){
-      sqlite3VdbeAddOp(v, OP_Clear, pTab->tnum, pTab->iDb);
+      sqlite3VdbeAddOp(v, OP_Clear, pTab->tnum, iDb);
+      if( !pParse->nested ){
+        sqlite3VdbeChangeP3(v, -1, pTab->zName, P3_STATIC);
+      }
       for(pIdx=pTab->pIndex; pIdx; pIdx=pIdx->pNext){
-        sqlite3VdbeAddOp(v, OP_Clear, pIdx->tnum, pIdx->iDb);
+        assert( pIdx->pSchema==pTab->pSchema );
+        sqlite3VdbeAddOp(v, OP_Clear, pIdx->tnum, iDb);
       }
     }
-  }
-
+  } 
   /* The usual case: There is a WHERE clause so we have to scan through
   ** the table and pick which records to delete.
   */
   else{
-    /* Ensure all required collation sequences are available. */
-    for(pIdx=pTab->pIndex; pIdx; pIdx=pIdx->pNext){
-      if( sqlite3CheckIndexCollSeq(pParse, pIdx) ){
-        goto delete_from_cleanup;
-      }
-    }
-
     /* Begin the database scan
     */
     pWInfo = sqlite3WhereBegin(pParse, pTabList, pWhere, 0);
@@ -239,7 +248,7 @@ void sqlite3DeleteFrom(
 
     /* Remember the rowid of every item to be deleted.
     */
-    sqlite3VdbeAddOp(v, OP_Rowid, iCur, 0);
+    sqlite3VdbeAddOp(v, IsVirtual(pTab) ? OP_VRowid : OP_Rowid, iCur, 0);
     sqlite3VdbeAddOp(v, OP_FifoWrite, 0, 0);
     if( db->flags & SQLITE_CountRows ){
       sqlite3VdbeAddOp(v, OP_AddImm, 1, 0);
@@ -269,7 +278,7 @@ void sqlite3DeleteFrom(
       addr = sqlite3VdbeAddOp(v, OP_FifoRead, 0, end);
       if( !isView ){
         sqlite3VdbeAddOp(v, OP_Dup, 0, 0);
-        sqlite3OpenTableForReading(v, iCur, pTab);
+        sqlite3OpenTable(pParse, iCur, iDb, pTab, OP_OpenRead);
       }
       sqlite3VdbeAddOp(v, OP_MoveGe, iCur, 0);
       sqlite3VdbeAddOp(v, OP_Rowid, iCur, 0);
@@ -300,7 +309,15 @@ void sqlite3DeleteFrom(
       }
 
       /* Delete the row */
-      sqlite3GenerateRowDelete(db, v, pTab, iCur, pParse->nested==0);
+#ifndef SQLITE_OMIT_VIRTUALTABLE
+      if( IsVirtual(pTab) ){
+        pParse->pVirtualLock = pTab;
+        sqlite3VdbeOp3(v, OP_VUpdate, 0, 1, (const char*)pTab->pVtab, P3_VTAB);
+      }else
+#endif
+      {
+        sqlite3GenerateRowDelete(db, v, pTab, iCur, pParse->nested==0);
+      }
     }
 
     /* If there are row triggers, close all cursors then invoke
@@ -323,7 +340,7 @@ void sqlite3DeleteFrom(
     sqlite3VdbeResolveLabel(v, end);
 
     /* Close the cursors after the loop if there are no row triggers */
-    if( !triggers_exist ){
+    if( !triggers_exist && !IsVirtual(pTab) ){
       for(i=1, pIdx=pTab->pIndex; pIdx; i++, pIdx=pIdx->pNext){
         sqlite3VdbeAddOp(v, OP_Close, iCur + i, pIdx->tnum);
       }
@@ -339,7 +356,7 @@ void sqlite3DeleteFrom(
   if( db->flags & SQLITE_CountRows && pParse->nested==0 && !pParse->trigStack ){
     sqlite3VdbeAddOp(v, OP_Callback, 1, 0);
     sqlite3VdbeSetNumCols(v, 1);
-    sqlite3VdbeSetColName(v, 0, "rows deleted", P3_STATIC);
+    sqlite3VdbeSetColName(v, 0, COLNAME_NAME, "rows deleted", P3_STATIC);
   }
 
 delete_from_cleanup:
@@ -378,8 +395,11 @@ void sqlite3GenerateRowDelete(
 ){
   int addr;
   addr = sqlite3VdbeAddOp(v, OP_NotExists, iCur, 0);
-  sqlite3GenerateRowIndexDelete(db, v, pTab, iCur, 0);
+  sqlite3GenerateRowIndexDelete(v, pTab, iCur, 0);
   sqlite3VdbeAddOp(v, OP_Delete, iCur, (count?OPFLAG_NCHANGE:0));
+  if( count ){
+    sqlite3VdbeChangeP3(v, -1, pTab->zName, P3_STATIC);
+  }
   sqlite3VdbeJumpHere(v, addr);
 }
 
@@ -400,7 +420,6 @@ void sqlite3GenerateRowDelete(
 **       deleted.
 */
 void sqlite3GenerateRowIndexDelete(
-  sqlite3 *db,       /* The database containing the index */
   Vdbe *v,           /* Generate code into this VDBE */
   Table *pTab,       /* Table containing the row to be deleted */
   int iCur,          /* Cursor number for the table */

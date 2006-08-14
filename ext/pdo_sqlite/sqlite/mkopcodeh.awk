@@ -14,14 +14,28 @@
 # the OP_ is the same as the TK_ value.  If missing, the OP_ value is assigned
 # a small integer that is different from every other OP_ value.
 #
-# We go to the trouble of making some OP_ value the same as TK_ values
+# We go to the trouble of making some OP_ values the same as TK_ values
 # as an optimization.  During parsing, things like expression operators
 # are coded with TK_ values such as TK_ADD, TK_DIVIDE, and so forth.  Later
 # during code generation, we need to generate corresponding opcodes like
 # OP_Add and OP_Divide.  By making TK_ADD==OP_Add and TK_DIVIDE==OP_Divide,
-# code to translation from one to the other is avoided.  This makes the
+# code to translate from one to the other is avoided.  This makes the
 # code generator run (infinitesimally) faster and more importantly it makes
-# the total library smaller.
+# the library footprint smaller.
+#
+# This script also scans for lines of the form:
+#
+#       case OP_aaaa:       /* no-push */
+#
+# When the no-push comment is found on an opcode, it means that that
+# opcode does not leave a result on the stack.  By identifying which
+# opcodes leave results on the stack it is possible to determine a
+# much smaller upper bound on the size of the stack.  This allows
+# a smaller stack to be allocated, which is important to embedded
+# systems with limited memory space.  This script generates a series
+# of "NOPUSH_MASK" defines that contain bitmaps of opcodes that leave
+# results on the stack.  The NOPUSH_MASK defines are used in vdbeaux.c
+# to help determine the maximum stack size.
 #
 
 
@@ -104,7 +118,10 @@ END {
     }
   }
   printf "\n"
+  print "/* Opcodes that are guaranteed to never push a value onto the stack"
+  print "** contain a 1 their corresponding position of the following mask"
+  print "** set.  See the opcodeNoPush() function in vdbeaux.c  */"
   for(i=0; i<10; i++){
-    printf "#define NOPUSH_MASK_%d %d\n", i, nopush[i]
+    printf "#define NOPUSH_MASK_%d 0x%04x\n", i, nopush[i]
   }
 }

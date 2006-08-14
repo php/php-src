@@ -139,6 +139,7 @@
 <file role="src" name="vdbeInt.h"/>
 <file role="src" name="vdbemem.c"/>
 <file role="src" name="where.c"/>
+<file role="src" name="sqlite3ext.h"/>
 </dir>
 
 <dir name="tool">

@@ -23,6 +23,39 @@
 #include <stdlib.h>
 
 /*
+** The charMap() macro maps alphabetic characters into their
+** lower-case ASCII equivalent.  On ASCII machines, this is just
+** an upper-to-lower case map.  On EBCDIC machines we also need
+** to adjust the encoding.  Only alphabetic characters and underscores
+** need to be translated.
+*/
+#ifdef SQLITE_ASCII
+# define charMap(X) sqlite3UpperToLower[(unsigned char)X]
+#endif
+#ifdef SQLITE_EBCDIC
+# define charMap(X) ebcdicToAscii[(unsigned char)X]
+const unsigned char ebcdicToAscii[] = {
+/* 0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F */
+   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  /* 0x */
+   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  /* 1x */
+   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  /* 2x */
+   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  /* 3x */
+   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  /* 4x */
+   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  /* 5x */
+   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 95,  0,  0,  /* 6x */
+   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  /* 7x */
+   0, 97, 98, 99,100,101,102,103,104,105,  0,  0,  0,  0,  0,  0,  /* 8x */
+   0,106,107,108,109,110,111,112,113,114,  0,  0,  0,  0,  0,  0,  /* 9x */
+   0,  0,115,116,117,118,119,120,121,122,  0,  0,  0,  0,  0,  0,  /* Ax */
+   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  /* Bx */
+   0, 97, 98, 99,100,101,102,103,104,105,  0,  0,  0,  0,  0,  0,  /* Cx */
+   0,106,107,108,109,110,111,112,113,114,  0,  0,  0,  0,  0,  0,  /* Dx */
+   0,  0,115,116,117,118,119,120,121,122,  0,  0,  0,  0,  0,  0,  /* Ex */
+   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  /* Fx */
+};
+#endif
+
+/*
 ** The sqlite3KeywordCode function looks up an identifier to determine if
 ** it is a keyword.  If it is a keyword, the token code of that keyword is 
 ** returned.  If the input is not a keyword, TK_ID is returned.
@@ -37,24 +70,22 @@
 
 
 /*
-** If X is a character that can be used in an identifier and
-** X&0x80==0 then sqlite3IsIdChar[X] will be 1.  If X&0x80==0x80 then
-** X is always an identifier character.  (Hence all UTF-8
-** characters can be part of an identifier).  sqlite3IsIdChar[X] will
-** be 0 for every character in the lower 128 ASCII characters
-** that cannot be used as part of an identifier.
+** If X is a character that can be used in an identifier then
+** IdChar(X) will be true.  Otherwise it is false.
 **
-** In this implementation, an identifier can be a string of
-** alphabetic characters, digits, and "_" plus any character
-** with the high-order bit set.  The latter rule means that
-** any sequence of UTF-8 characters or characters taken from
-** an extended ISO8859 character set can form an identifier.
+** For ASCII, any character with the high-order bit set is
+** allowed in an identifier.  For 7-bit characters, 
+** sqlite3IsIdChar[X] must be 1.
+**
+** For EBCDIC, the rules are more complex but have the same
+** end result.
 **
 ** Ticket #1066.  the SQL standard does not allow '$' in the
 ** middle of identfiers.  But many SQL implementations do. 
 ** SQLite will allow '$' in identifiers for compatibility.
 ** But the feature is undocumented.
 */
+#ifdef SQLITE_ASCII
 const char sqlite3IsIdChar[] = {
 /* x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 xA xB xC xD xE xF */
     0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  /* 2x */
@@ -64,8 +95,27 @@ const char sqlite3IsIdChar[] = {
     0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  /* 6x */
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,  /* 7x */
 };
-
 #define IdChar(C)  (((c=C)&0x80)!=0 || (c>0x1f && sqlite3IsIdChar[c-0x20]))
+#endif
+#ifdef SQLITE_EBCDIC
+const char sqlite3IsIdChar[] = {
+/* x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 xA xB xC xD xE xF */
+    0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,  /* 4x */
+    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0,  /* 5x */
+    0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0,  /* 6x */
+    0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,  /* 7x */
+    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0,  /* 8x */
+    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0,  /* 9x */
+    1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0,  /* Ax */
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  /* Bx */
+    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1,  /* Cx */
+    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1,  /* Dx */
+    0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1,  /* Ex */
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0,  /* Fx */
+};
+#define IdChar(C)  (((c=C)>=0x42 && sqlite3IsIdChar[c-0x40]))
+#endif
+
 
 /*
 ** Return the length of the token that begins at z[0]. 
@@ -196,9 +246,13 @@ static int getToken(const unsigned char *z, int *tokenType){
           }
         }
       }
-      if( c ) i++;
-      *tokenType = TK_STRING;
-      return i;
+      if( c ){
+        *tokenType = TK_STRING;
+        return i+1;
+      }else{
+        *tokenType = TK_ILLEGAL;
+        return i;
+      }
     }
     case '.': {
 #ifndef SQLITE_OMIT_FLOATING_POINT
@@ -231,6 +285,10 @@ static int getToken(const unsigned char *z, int *tokenType){
         *tokenType = TK_FLOAT;
       }
 #endif
+      while( IdChar(z[i]) ){
+        *tokenType = TK_ILLEGAL;
+        i++;
+      }
       return i;
     }
     case '[': {
@@ -257,6 +315,7 @@ static int getToken(const unsigned char *z, int *tokenType){
 #ifndef SQLITE_OMIT_TCL_VARIABLE
     case '$':
 #endif
+    case '@':  /* For compatibility with MS SQL Server */
     case ':': {
       int n = 0;
       *tokenType = TK_VARIABLE;
@@ -339,12 +398,13 @@ int sqlite3RunParser(Parse *pParse, const char *zSql, char **pzErrMsg){
   extern void sqlite3ParserFree(void*, void(*)(void*));
   extern int sqlite3Parser(void*, int, Token, Parse*);
 
-  db->flags &= ~SQLITE_Interrupt;
+  if( db->activeVdbeCnt==0 ){
+    db->u1.isInterrupted = 0;
+  }
   pParse->rc = SQLITE_OK;
   i = 0;
   pEngine = sqlite3ParserAlloc((void*(*)(int))sqlite3MallocX);
   if( pEngine==0 ){
-    sqlite3SetString(pzErrMsg, "out of memory", (char*)0);
     return SQLITE_NOMEM;
   }
   assert( pParse->sLastToken.dyn==0 );
@@ -355,16 +415,16 @@ int sqlite3RunParser(Parse *pParse, const char *zSql, char **pzErrMsg){
   assert( pParse->nVarExprAlloc==0 );
   assert( pParse->apVarExpr==0 );
   pParse->zTail = pParse->zSql = zSql;
-  while( sqlite3_malloc_failed==0 && zSql[i]!=0 ){
+  while( !sqlite3MallocFailed() && zSql[i]!=0 ){
     assert( i>=0 );
-    pParse->sLastToken.z = &zSql[i];
+    pParse->sLastToken.z = (u8*)&zSql[i];
     assert( pParse->sLastToken.dyn==0 );
     pParse->sLastToken.n = getToken((unsigned char*)&zSql[i],&tokenType);
     i += pParse->sLastToken.n;
     switch( tokenType ){
       case TK_SPACE:
       case TK_COMMENT: {
-        if( (db->flags & SQLITE_Interrupt)!=0 ){
+        if( db->u1.isInterrupted ){
           pParse->rc = SQLITE_INTERRUPT;
           sqlite3SetString(pzErrMsg, "interrupt", (char*)0);
           goto abort_parse;
@@ -403,12 +463,11 @@ abort_parse:
     sqlite3Parser(pEngine, 0, pParse->sLastToken, pParse);
   }
   sqlite3ParserFree(pEngine, sqlite3FreeX);
-  if( sqlite3_malloc_failed ){
+  if( sqlite3MallocFailed() ){
     pParse->rc = SQLITE_NOMEM;
   }
   if( pParse->rc!=SQLITE_OK && pParse->rc!=SQLITE_DONE && pParse->zErrMsg==0 ){
-    sqlite3SetString(&pParse->zErrMsg, sqlite3ErrStr(pParse->rc),
-                    (char*)0);
+    sqlite3SetString(&pParse->zErrMsg, sqlite3ErrStr(pParse->rc), (char*)0);
   }
   if( pParse->zErrMsg ){
     if( pzErrMsg && *pzErrMsg==0 ){
@@ -423,7 +482,22 @@ abort_parse:
     sqlite3VdbeDelete(pParse->pVdbe);
     pParse->pVdbe = 0;
   }
-  sqlite3DeleteTable(pParse->db, pParse->pNewTable);
+#ifndef SQLITE_OMIT_SHARED_CACHE
+  if( pParse->nested==0 ){
+    sqliteFree(pParse->aTableLock);
+    pParse->aTableLock = 0;
+    pParse->nTableLock = 0;
+  }
+#endif
+
+  if( !IN_DECLARE_VTAB ){
+    /* If the pParse->declareVtab flag is set, do not delete any table 
+    ** structure built up in pParse->pNewTable. The calling code (see vtab.c)
+    ** will take responsibility for freeing the Table structure.
+    */
+    sqlite3DeleteTable(pParse->db, pParse->pNewTable);
+  }
+
   sqlite3DeleteTrigger(pParse->pNewTrigger);
   sqliteFree(pParse->apVarExpr);
   if( nErr>0 && (pParse->rc==SQLITE_OK || pParse->rc==SQLITE_DONE) ){

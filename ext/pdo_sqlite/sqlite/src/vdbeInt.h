@@ -60,6 +60,7 @@ typedef unsigned char Bool;
 */
 struct Cursor {
   BtCursor *pCursor;    /* The cursor structure of the backend */
+  int iDb;              /* Index of cursor database in db->aDb[] (or -1) */
   i64 lastRowid;        /* Last rowid from a Next or NextIdx operation */
   i64 nextRowid;        /* Next rowid returned by OP_NewRowid */
   Bool zeroed;          /* True if zeroed out and ready for reuse */
@@ -82,12 +83,15 @@ struct Cursor {
   KeyInfo *pKeyInfo;    /* Info about index keys needed by index cursors */
   int nField;           /* Number of fields in the header */
   i64 seqCount;         /* Sequence counter */
+  sqlite3_vtab_cursor *pVtabCursor;  /* The cursor for a virtual table */
+  const sqlite3_module *pModule;     /* Module for cursor pVtabCursor */
 
   /* Cached information about the header for the data record that the
   ** cursor is currently pointing to.  Only valid if cacheValid is true.
-  ** zRow might point to (ephemeral) data for the current row, or it might
-  ** be NULL. */
-  Bool cacheValid;      /* True if the cache is valid */
+  ** aRow might point to (ephemeral) data for the current row, or it might
+  ** be NULL.
+  */
+  int cacheStatus;      /* Cache is valid if this matches Vdbe.cacheCtr */
   int payloadSize;      /* Total number of bytes in the record */
   u32 *aType;           /* Type values for all entries in the record */
   u32 *aOffset;         /* Cached offsets to the start of each columns data */
@@ -101,6 +105,11 @@ typedef struct Cursor Cursor;
 ** For Strings.
 */
 #define NBFS 32
+
+/*
+** A value for Cursor.cacheValid that means the cache is always invalid.
+*/
+#define CACHE_STALE 0
 
 /*
 ** Internally, the vdbe manipulates nearly all SQL values as Mem
@@ -250,7 +259,7 @@ struct Fifo {
 */
 typedef struct Context Context;
 struct Context {
-  int lastRowid;    /* Last insert rowid (sqlite3.lastRowid) */
+  i64 lastRowid;    /* Last insert rowid (sqlite3.lastRowid) */
   int nChange;      /* Statement changes (Vdbe.nChanges)     */
   Fifo sFifo;       /* Records that will participate in a DELETE or UPDATE */
 };
@@ -261,6 +270,14 @@ struct Context {
 **
 ** The "sqlite3_stmt" structure pointer that is returned by sqlite3_compile()
 ** is really a pointer to an instance of this structure.
+**
+** The Vdbe.inVtabMethod variable is set to non-zero for the duration of
+** any virtual table method invocations made by the vdbe program. It is
+** set to 2 for xDestroy method calls and 1 for all other methods. This
+** variable is used for two purposes: to allow xDestroy methods to execute
+** "DROP TABLE" statements and to prevent some nasty side effects of
+** malloc failure when SQLite is invoked recursively by a virtual table 
+** method function.
 */
 struct Vdbe {
   sqlite3 *db;        /* The whole database */
@@ -286,6 +303,7 @@ struct Vdbe {
   int nMem;               /* Number of memory locations currently allocated */
   Mem *aMem;              /* The memory locations */
   int nCallback;          /* Number of callbacks invoked so far */
+  int cacheCtr;           /* Cursor row cache generation counter */
   Fifo sFifo;             /* A list of ROWIDs */
   int contextStackTop;    /* Index of top element in the context stack */
   int contextStackDepth;  /* The size of the "context" stack */
@@ -306,8 +324,14 @@ struct Vdbe {
   u8 changeCntOn;         /* True to update the change-counter */
   u8 aborted;             /* True if ROLLBACK in another VM causes an abort */
   u8 expired;             /* True if the VM needs to be recompiled */
+  u8 minWriteFileFormat;  /* Minimum file format for writable database files */
+  u8 inVtabMethod;        /* See comments above */
   int nChange;            /* Number of db changes made since last reset */
   i64 startTime;          /* Time when query started - used for profiling */
+#ifdef SQLITE_SSE
+  int fetchId;          /* Statement number used by sqlite3_fetch_statement */
+  int lru;              /* Counter used for LRU cache replacement */
+#endif
 };
 
 /*
@@ -321,7 +345,7 @@ struct Vdbe {
 /*
 ** Function prototypes
 */
-void sqlite3VdbeFreeCursor(Cursor*);
+void sqlite3VdbeFreeCursor(Vdbe *, Cursor*);
 void sqliteVdbePopStack(Vdbe*,int);
 int sqlite3VdbeCursorMoveto(Cursor*);
 #if defined(SQLITE_DEBUG) || defined(VDBE_PROFILE)
@@ -331,8 +355,8 @@ void sqlite3VdbePrintOp(FILE*, int, Op*);
 void sqlite3VdbePrintSql(Vdbe*);
 #endif
 int sqlite3VdbeSerialTypeLen(u32);
-u32 sqlite3VdbeSerialType(Mem*);
-int sqlite3VdbeSerialPut(unsigned char*, Mem*);
+u32 sqlite3VdbeSerialType(Mem*, int);
+int sqlite3VdbeSerialPut(unsigned char*, Mem*, int);
 int sqlite3VdbeSerialGet(const unsigned char*, u32, Mem*);
 void sqlite3VdbeDeleteAuxData(VdbeFunc*, int);
 
@@ -341,7 +365,7 @@ int sqlite3VdbeIdxKeyCompare(Cursor*, int , const unsigned char*, int*);
 int sqlite3VdbeIdxRowid(BtCursor *, i64 *);
 int sqlite3MemCompare(const Mem*, const Mem*, const CollSeq*);
 int sqlite3VdbeRecordCompare(void*,int,const void*,int, const void*);
-int sqlite3VdbeIdxRowidLen(int,const u8*);
+int sqlite3VdbeIdxRowidLen(const u8*);
 int sqlite3VdbeExec(Vdbe*);
 int sqlite3VdbeList(Vdbe*);
 int sqlite3VdbeHalt(Vdbe*);
@@ -360,16 +384,18 @@ int sqlite3VdbeMemStringify(Mem*, int);
 i64 sqlite3VdbeIntValue(Mem*);
 int sqlite3VdbeMemIntegerify(Mem*);
 double sqlite3VdbeRealValue(Mem*);
+void sqlite3VdbeIntegerAffinity(Mem*);
 int sqlite3VdbeMemRealify(Mem*);
+int sqlite3VdbeMemNumerify(Mem*);
 int sqlite3VdbeMemFromBtree(BtCursor*,int,int,int,Mem*);
 void sqlite3VdbeMemRelease(Mem *p);
-void sqlite3VdbeMemFinalize(Mem*, FuncDef*);
+int sqlite3VdbeMemFinalize(Mem*, FuncDef*);
 #ifndef NDEBUG
-void sqlite3VdbeMemSanity(Mem*, u8);
+void sqlite3VdbeMemSanity(Mem*);
 int sqlite3VdbeOpcodeNoPush(u8);
 #endif
 int sqlite3VdbeMemTranslate(Mem*, u8);
-void sqlite3VdbeMemPrettyPrint(Mem *pMem, char *zBuf, int nBuf);
+void sqlite3VdbeMemPrettyPrint(Mem *pMem, char *zBuf);
 int sqlite3VdbeMemHandleBom(Mem *pMem);
 void sqlite3VdbeFifoInit(Fifo*);
 int sqlite3VdbeFifoPush(Fifo*, i64);
