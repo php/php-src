@@ -16,6 +16,9 @@
 ** @(#) $Id$
 */
 
+#ifndef _PAGER_H_
+#define _PAGER_H_
+
 /*
 ** The default size of a database page.
 */
@@ -95,16 +98,18 @@ int sqlite3pager_stmt_commit(Pager*);
 int sqlite3pager_stmt_rollback(Pager*);
 void sqlite3pager_dont_rollback(void*);
 void sqlite3pager_dont_write(Pager*, Pgno);
+int sqlite3pager_refcount(Pager*);
 int *sqlite3pager_stats(Pager*);
-void sqlite3pager_set_safety_level(Pager*,int);
+void sqlite3pager_set_safety_level(Pager*,int,int);
 const char *sqlite3pager_filename(Pager*);
 const char *sqlite3pager_dirname(Pager*);
 const char *sqlite3pager_journalname(Pager*);
 int sqlite3pager_nosync(Pager*);
 int sqlite3pager_rename(Pager*, const char *zNewName);
-void sqlite3pager_set_codec(Pager*,void(*)(void*,void*,Pgno,int),void*);
+void sqlite3pager_set_codec(Pager*,void*(*)(void*,void*,Pgno,int),void*);
 int sqlite3pager_movepage(Pager*,void*,Pgno);
 int sqlite3pager_reset(Pager*);
+int sqlite3pager_release_memory(int);
 
 #if defined(SQLITE_DEBUG) || defined(SQLITE_TEST)
 int sqlite3pager_lockstate(Pager*);
@@ -114,3 +119,5 @@ int sqlite3pager_lockstate(Pager*);
 void sqlite3pager_refdump(Pager*);
 int pager3_refinfo_enable;
 #endif
+
+#endif /* _PAGER_H_ */

@@ -69,6 +69,9 @@ typedef struct VdbeOpList VdbeOpList;
 #define P3_KEYINFO  (-6)  /* P3 is a pointer to a KeyInfo structure */
 #define P3_VDBEFUNC (-7)  /* P3 is a pointer to a VdbeFunc structure */
 #define P3_MEM      (-8)  /* P3 is a pointer to a Mem*    structure */
+#define P3_TRANSIENT (-9) /* P3 is a pointer to a transient string */
+#define P3_VTAB     (-10) /* P3 is a pointer to an sqlite3_vtab structure */
+#define P3_MPRINTF  (-11) /* P3 is a string obtained from sqlite3_mprintf() */
 
 /* When adding a P3 argument using P3_KEYINFO, a copy of the KeyInfo structure
 ** is made.  That copy is freed when the Vdbe is finalized.  But if the
@@ -78,6 +81,17 @@ typedef struct VdbeOpList VdbeOpList;
 ** function should *not* try to free the KeyInfo.
 */
 #define P3_KEYINFO_HANDOFF (-9)
+
+/*
+** The Vdbe.aColName array contains 5n Mem structures, where n is the 
+** number of columns of data returned by the statement.
+*/
+#define COLNAME_NAME     0
+#define COLNAME_DECLTYPE 1
+#define COLNAME_DATABASE 2
+#define COLNAME_TABLE    3
+#define COLNAME_COLUMN   4
+#define COLNAME_N        5      /* Number of COLNAME_xxx symbols */
 
 /*
 ** The following macro converts a relative address in the p2 field
@@ -105,6 +119,7 @@ int sqlite3VdbeAddOpList(Vdbe*, int nOp, VdbeOpList const *aOp);
 void sqlite3VdbeChangeP1(Vdbe*, int addr, int P1);
 void sqlite3VdbeChangeP2(Vdbe*, int addr, int P2);
 void sqlite3VdbeJumpHere(Vdbe*, int addr);
+void sqlite3VdbeChangeToNoop(Vdbe*, int addr, int N);
 void sqlite3VdbeChangeP3(Vdbe*, int addr, const char *zP1, int N);
 VdbeOp *sqlite3VdbeGetOp(Vdbe*, int);
 int sqlite3VdbeMakeLabel(Vdbe*);
@@ -117,7 +132,7 @@ void sqlite3VdbeTrace(Vdbe*,FILE*);
 int sqlite3VdbeReset(Vdbe*);
 int sqliteVdbeSetVariables(Vdbe*,int,const char**);
 void sqlite3VdbeSetNumCols(Vdbe*,int);
-int sqlite3VdbeSetColName(Vdbe*, int, const char *, int);
+int sqlite3VdbeSetColName(Vdbe*, int, int, const char *, int);
 void sqlite3VdbeCountChanges(Vdbe*);
 sqlite3 *sqlite3VdbeDb(Vdbe*);
 

@@ -69,7 +69,7 @@ static int btree_open(
   }
   if( Tcl_GetInt(interp, argv[2], &nCache) ) return TCL_ERROR;
   if( Tcl_GetInt(interp, argv[3], &flags) ) return TCL_ERROR;
-  rc = sqlite3BtreeOpen(argv[1], &pBt, flags);
+  rc = sqlite3BtreeOpen(argv[1], 0, &pBt, flags);
   if( rc!=SQLITE_OK ){
     Tcl_AppendResult(interp, errorName(rc), 0);
     return TCL_ERROR;
@@ -585,6 +585,7 @@ static int btree_integrity_check(
 #else
   zResult = 0;
 #endif
+  free(aRoot);
   if( zResult ){
     Tcl_AppendResult(interp, zResult, 0);
     sqliteFree(zResult); 
@@ -597,6 +598,7 @@ static int btree_integrity_check(
 **
 ** Print information about all cursors to standard output for debugging.
 */
+#ifdef SQLITE_DEBUG
 static int btree_cursor_list(
   void *NotUsed,
   Tcl_Interp *interp,    /* The TCL interpreter that invoked this command */
@@ -614,6 +616,7 @@ static int btree_cursor_list(
   sqlite3BtreeCursorList(pBt);
   return SQLITE_OK;
 }
+#endif
 
 /*
 ** Usage:   btree_cursor ID TABLENUM WRITEABLE
@@ -972,7 +975,7 @@ static int btree_keysize(
     return TCL_ERROR;
   }
   pCur = sqlite3TextToPtr(argv[1]);
-  sqlite3BtreeKeySize(pCur, &n);
+  sqlite3BtreeKeySize(pCur, (i64*)&n);
   sqlite3_snprintf(sizeof(zBuf),zBuf, "%llu", n);
   Tcl_AppendResult(interp, zBuf, 0);
   return SQLITE_OK;
@@ -1000,7 +1003,7 @@ static int btree_key(
     return TCL_ERROR;
   }
   pCur = sqlite3TextToPtr(argv[1]);
-  sqlite3BtreeKeySize(pCur, &n);
+  sqlite3BtreeKeySize(pCur, (i64*)&n);
   if( sqlite3BtreeFlags(pCur) & BTREE_INTKEY ){
     char zBuf2[60];
     sqlite3_snprintf(sizeof(zBuf2),zBuf2, "%llu", n);
@@ -1084,7 +1087,7 @@ static int btree_fetch_key(
   }
   pCur = sqlite3TextToPtr(argv[1]);
   if( Tcl_GetInt(interp, argv[2], &n) ) return TCL_ERROR;
-  sqlite3BtreeKeySize(pCur, &nKey);
+  sqlite3BtreeKeySize(pCur, (i64*)&nKey);
   zBuf = sqlite3BtreeKeyFetch(pCur, &amt);
   if( zBuf && amt>=n ){
     assert( nKey<sizeof(zStatic) );
@@ -1159,9 +1162,9 @@ static int btree_payload_size(
   if( sqlite3BtreeFlags(pCur) & BTREE_INTKEY ){
     n1 = 0;
   }else{
-    sqlite3BtreeKeySize(pCur, &n1);
+    sqlite3BtreeKeySize(pCur, (i64*)&n1);
   }
-  sqlite3BtreeDataSize(pCur, &n2);
+  sqlite3BtreeDataSize(pCur, (u32*)&n2);
   sqlite3_snprintf(sizeof(zBuf),zBuf, "%d", (int)(n1+n2));
   Tcl_AppendResult(interp, zBuf, 0);
   return SQLITE_OK;
@@ -1184,6 +1187,7 @@ static int btree_payload_size(
 **   aResult[8] =  Local payload size
 **   aResult[9] =  Parent page number
 */
+#ifdef SQLITE_DEBUG
 static int btree_cursor_info(
   void *NotUsed,
   Tcl_Interp *interp,    /* The TCL interpreter that invoked this command */
@@ -1221,6 +1225,7 @@ static int btree_cursor_info(
   Tcl_AppendResult(interp, &zBuf[1], 0);
   return SQLITE_OK;
 }
+#endif
 
 /*
 ** The command is provided for the purpose of setting breakpoints.
@@ -1428,8 +1433,6 @@ int Sqlitetest3_Init(Tcl_Interp *interp){
      { "btree_payload_size",       (Tcl_CmdProc*)btree_payload_size       },
      { "btree_first",              (Tcl_CmdProc*)btree_first              },
      { "btree_last",               (Tcl_CmdProc*)btree_last               },
-     { "btree_cursor_info",        (Tcl_CmdProc*)btree_cursor_info        },
-     { "btree_cursor_list",        (Tcl_CmdProc*)btree_cursor_list        },
      { "btree_integrity_check",    (Tcl_CmdProc*)btree_integrity_check    },
      { "btree_breakpoint",         (Tcl_CmdProc*)btree_breakpoint         },
      { "btree_varint_test",        (Tcl_CmdProc*)btree_varint_test        },
@@ -1438,6 +1441,10 @@ int Sqlitetest3_Init(Tcl_Interp *interp){
      { "btree_rollback_statement", (Tcl_CmdProc*)btree_rollback_statement },
      { "btree_from_db",            (Tcl_CmdProc*)btree_from_db            },
      { "btree_set_cache_size",     (Tcl_CmdProc*)btree_set_cache_size     },
+#ifdef SQLITE_DEBUG
+     { "btree_cursor_info",        (Tcl_CmdProc*)btree_cursor_info        },
+     { "btree_cursor_list",        (Tcl_CmdProc*)btree_cursor_list        },
+#endif
   };
   int i;
 

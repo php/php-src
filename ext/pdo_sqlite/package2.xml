@@ -57,7 +57,6 @@ http://pecl4win.php.net/ext.php/php_pdo_sqlite.dll
      <file name="callback.c" role="src" />
      <file name="date.c" role="src" />
      <file name="delete.c" role="src" />
-     <file name="experimental.c" role="src" />
      <file name="expr.c" role="src" />
      <file name="func.c" role="src" />
      <file name="hash.c" role="src" />
@@ -70,9 +69,8 @@ http://pecl4win.php.net/ext.php/php_pdo_sqlite.dll
      <file name="opcodes.c" role="src" />
      <file name="opcodes.h" role="src" />
      <file name="os.h" role="src" />
+     <file name="os.c" role="src" />
      <file name="os_common.h" role="src" />
-     <file name="os_mac.c" role="src" />
-     <file name="os_mac.h" role="src" />
      <file name="os_test.c" role="src" />
      <file name="os_test.h" role="src" />
      <file name="os_unix.c" role="src" />
@@ -113,6 +111,9 @@ http://pecl4win.php.net/ext.php/php_pdo_sqlite.dll
      <file name="vdbeInt.h" role="src" />
      <file name="vdbemem.c" role="src" />
      <file name="where.c" role="src" />
+     <file name="vtab.c" role="src" />
+     <file name="loadext.c" role="src" />
+     <file name="complete.c" role="src" />
     </dir> <!-- //sqlite/src -->
     <dir name="tool">
      <file name="diffdb.c" role="src" />

@@ -151,7 +151,7 @@ ltmain="$ac_aux_dir/ltmain.sh"
 ofile="$default_ofile"
 with_gnu_ld="$lt_cv_prog_gnu_ld"
 
-AC_CHECK_TOOL(AR, ar, false)
+AC_CHECK_TOOL(AR, ar, AC_CHECK_TOOL(AR, emxomfar, false))
 AC_CHECK_TOOL(RANLIB, ranlib, :)
 AC_CHECK_TOOL(STRIP, strip, :)
 

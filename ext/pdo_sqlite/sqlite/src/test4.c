@@ -97,6 +97,7 @@ static void *thread_main(void *pArg){
     p->zErr = 0;
   }
   p->completed++;
+  sqlite3_thread_cleanup();
   return 0;
 }
 
@@ -495,7 +496,7 @@ static void do_step(Thread *p){
   if( p->rc==SQLITE_ROW ){
     p->argc = sqlite3_column_count(p->pStmt);
     for(i=0; i<sqlite3_data_count(p->pStmt); i++){
-      p->argv[i] = sqlite3_column_text(p->pStmt, i);
+      p->argv[i] = (char*)sqlite3_column_text(p->pStmt, i);
     }
     for(i=0; i<p->argc; i++){
       p->colv[i] = sqlite3_column_name(p->pStmt, i);
@@ -615,6 +616,73 @@ static int tcl_thread_swap(
 }
 
 /*
+** Usage: thread_db_get ID
+**
+** Return the database connection pointer for the given thread.  Then
+** remove the pointer from the thread itself.  Afterwards, the thread
+** can be stopped and the connection can be used by the main thread.
+*/
+static int tcl_thread_db_get(
+  void *NotUsed,
+  Tcl_Interp *interp,    /* The TCL interpreter that invoked this command */
+  int argc,              /* Number of arguments */
+  const char **argv      /* Text of each argument */
+){
+  int i;
+  char zBuf[100];
+  extern int sqlite3TestMakePointerStr(Tcl_Interp*, char*, void*);
+  if( argc!=2 ){
+    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+       " ID", 0);
+    return TCL_ERROR;
+  }
+  i = parse_thread_id(interp, argv[1]);
+  if( i<0 ) return TCL_ERROR;
+  if( !threadset[i].busy ){
+    Tcl_AppendResult(interp, "no such thread", 0);
+    return TCL_ERROR;
+  }
+  thread_wait(&threadset[i]);
+  sqlite3TestMakePointerStr(interp, zBuf, threadset[i].db);
+  threadset[i].db = 0;
+  Tcl_AppendResult(interp, zBuf, (char*)0);
+  return TCL_OK;
+}
+
+/*
+** Usage: thread_stmt_get ID
+**
+** Return the database stmt pointer for the given thread.  Then
+** remove the pointer from the thread itself. 
+*/
+static int tcl_thread_stmt_get(
+  void *NotUsed,
+  Tcl_Interp *interp,    /* The TCL interpreter that invoked this command */
+  int argc,              /* Number of arguments */
+  const char **argv      /* Text of each argument */
+){
+  int i;
+  char zBuf[100];
+  extern int sqlite3TestMakePointerStr(Tcl_Interp*, char*, void*);
+  if( argc!=2 ){
+    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+       " ID", 0);
+    return TCL_ERROR;
+  }
+  i = parse_thread_id(interp, argv[1]);
+  if( i<0 ) return TCL_ERROR;
+  if( !threadset[i].busy ){
+    Tcl_AppendResult(interp, "no such thread", 0);
+    return TCL_ERROR;
+  }
+  thread_wait(&threadset[i]);
+  sqlite3TestMakePointerStr(interp, zBuf, threadset[i].pStmt);
+  threadset[i].pStmt = 0;
+  Tcl_AppendResult(interp, zBuf, (char*)0);
+  return TCL_OK;
+}
+
+/*
 ** Register commands with the TCL interpreter.
 */
 int Sqlitetest4_Init(Tcl_Interp *interp){
@@ -634,6 +702,8 @@ int Sqlitetest4_Init(Tcl_Interp *interp){
      { "thread_step",       (Tcl_CmdProc*)tcl_thread_step       },
      { "thread_finalize",   (Tcl_CmdProc*)tcl_thread_finalize   },
      { "thread_swap",       (Tcl_CmdProc*)tcl_thread_swap       },
+     { "thread_db_get",     (Tcl_CmdProc*)tcl_thread_db_get     },
+     { "thread_stmt_get",   (Tcl_CmdProc*)tcl_thread_stmt_get   },
   };
   int i;
 

@@ -255,7 +255,7 @@ int sqlite3VdbeMemTranslate(Mem *pMem, u8 desiredEnc){
 #if defined(TRANSLATE_TRACE) && defined(SQLITE_DEBUG)
   {
     char zBuf[100];
-    sqlite3VdbeMemPrettyPrint(pMem, zBuf, 100);
+    sqlite3VdbeMemPrettyPrint(pMem, zBuf);
     fprintf(stderr, "INPUT:  %s\n", zBuf);
   }
 #endif
@@ -272,7 +272,7 @@ int sqlite3VdbeMemTranslate(Mem *pMem, u8 desiredEnc){
       assert( rc==SQLITE_NOMEM );
       return SQLITE_NOMEM;
     }
-    zIn = pMem->z;
+    zIn = (u8*)pMem->z;
     zTerm = &zIn[pMem->n];
     while( zIn<zTerm ){
       temp = *zIn;
@@ -287,11 +287,11 @@ int sqlite3VdbeMemTranslate(Mem *pMem, u8 desiredEnc){
   /* Set len to the maximum number of bytes required in the output buffer. */
   if( desiredEnc==SQLITE_UTF8 ){
     /* When converting from UTF-16, the maximum growth results from
-    ** translating a 2-byte character to a 3-byte UTF-8 character (i.e.
-    ** code-point 0xFFFC). A single byte is required for the output string
+    ** translating a 2-byte character to a 4-byte UTF-8 character.
+    ** A single byte is required for the output string
     ** nul-terminator.
     */
-    len = (pMem->n/2) * 3 + 1;
+    len = pMem->n * 2 + 1;
   }else{
     /* When converting from UTF-8 to UTF-16 the maximum growth is caused
     ** when a 1-byte UTF-8 character is translated into a 2-byte UTF-16
@@ -308,7 +308,7 @@ int sqlite3VdbeMemTranslate(Mem *pMem, u8 desiredEnc){
   ** obtained from malloc(), or Mem.zShort, if it large enough and not in
   ** use, or the zShort array on the stack (see above).
   */
-  zIn = pMem->z;
+  zIn = (u8*)pMem->z;
   zTerm = &zIn[pMem->n];
   if( len>NBFS ){
     zOut = sqliteMallocRaw(len);
@@ -360,18 +360,18 @@ int sqlite3VdbeMemTranslate(Mem *pMem, u8 desiredEnc){
   pMem->enc = desiredEnc;
   if( zOut==zShort ){
     memcpy(pMem->zShort, zOut, len);
-    zOut = pMem->zShort;
+    zOut = (u8*)pMem->zShort;
     pMem->flags |= (MEM_Term|MEM_Short);
   }else{
     pMem->flags |= (MEM_Term|MEM_Dyn);
   }
-  pMem->z = zOut;
+  pMem->z = (char*)zOut;
 
 translate_out:
 #if defined(TRANSLATE_TRACE) && defined(SQLITE_DEBUG)
   {
     char zBuf[100];
-    sqlite3VdbeMemPrettyPrint(pMem, zBuf, 100);
+    sqlite3VdbeMemPrettyPrint(pMem, zBuf);
     fprintf(stderr, "OUTPUT: %s\n", zBuf);
   }
 #endif
@@ -451,6 +451,23 @@ int sqlite3utf8CharLen(const char *z, int nByte){
 
 #ifndef SQLITE_OMIT_UTF16
 /*
+** Convert a UTF-16 string in the native encoding into a UTF-8 string.
+** Memory to hold the UTF-8 string is obtained from malloc and must be
+** freed by the calling function.
+**
+** NULL is returned if there is an allocation error.
+*/
+char *sqlite3utf16to8(const void *z, int nByte){
+  Mem m;
+  memset(&m, 0, sizeof(m));
+  sqlite3VdbeMemSetStr(&m, z, nByte, SQLITE_UTF16NATIVE, SQLITE_STATIC);
+  sqlite3VdbeChangeEncoding(&m, SQLITE_UTF8);
+  assert( (m.flags & MEM_Term)!=0 || sqlite3MallocFailed() );
+  assert( (m.flags & MEM_Str)!=0 || sqlite3MallocFailed() );
+  return (m.flags & MEM_Dyn)!=0 ? m.z : sqliteStrDup(m.z);
+}
+
+/*
 ** pZ is a UTF-16 encoded unicode string. If nChar is less than zero,
 ** return the number of bytes up to (but not including), the first pair
 ** of consecutive 0x00 bytes in pZ. If nChar is not less than zero,
@@ -462,6 +479,15 @@ int sqlite3utf16ByteLen(const void *zIn, int nChar){
   char const *z = zIn;
   int n = 0;
   if( SQLITE_UTF16NATIVE==SQLITE_UTF16BE ){
+    /* Using an "if (SQLITE_UTF16NATIVE==SQLITE_UTF16BE)" construct here
+    ** and in other parts of this file means that at one branch will
+    ** not be covered by coverage testing on any single host. But coverage
+    ** will be complete if the tests are run on both a little-endian and 
+    ** big-endian host. Because both the UTF16NATIVE and SQLITE_UTF16BE
+    ** macros are constant at compile time the compiler can determine
+    ** which branch will be followed. It is therefore assumed that no runtime
+    ** penalty is paid for this "if" statement.
+    */
     while( c && ((nChar<0) || n<nChar) ){
       READ_UTF16BE(z, c);
       n++;

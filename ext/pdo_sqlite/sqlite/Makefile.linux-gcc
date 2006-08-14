@@ -41,6 +41,11 @@ THREADSAFE = -DTHREADSAFE=0
 #THREADLIB = -lpthread
 THREADLIB = 
 
+#### Specify any extra libraries needed to access required functions.
+#
+#TLIBS = -lrt    # fdatasync on Solaris 8
+TLIBS = 
+
 #### Leave SQLITE_DEBUG undefined for maximum speed.  Use SQLITE_DEBUG=1
 #    to check for memory leaks.  Use SQLITE_DEBUG=2 to print a log of all
 #    malloc()s and free()s in order to track down memory leaks.
@@ -53,6 +58,7 @@ THREADLIB =
 #OPTS = -DSQLITE_DEBUG=1
 #OPTS = 
 OPTS = -DNDEBUG=1
+OPTS += -DHAVE_FDATASYNC=1
 
 #### The suffix to add to executable files.  ".exe" for windows.
 #    Nothing for unix.
@@ -76,6 +82,12 @@ AR = ar cr
 #AR = /opt/mingw/bin/i386-mingw32-ar cr
 RANLIB = ranlib
 #RANLIB = /opt/mingw/bin/i386-mingw32-ranlib
+
+MKSHLIB = gcc -shared
+SO = so
+SHPREFIX = lib
+# SO = dll
+# SHPREFIX =
 
 #### Extra compiler options needed for programs that use the TCL library.
 #
@@ -106,6 +118,12 @@ LIBREADLINE =
 #
 # ENCODING  = UTF8
 ENCODING = ISO8859
+
+
+#### Which "awk" program provides nawk compatibilty
+#
+# NAWK = nawk
+NAWK = awk
 
 # You should not have to change anything below this line
 ###############################################################################

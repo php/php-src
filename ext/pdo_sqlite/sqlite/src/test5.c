@@ -41,7 +41,7 @@ static int binarize(
   assert(objc==2);
 
   bytes = Tcl_GetStringFromObj(objv[1], &len);
-  pRet = Tcl_NewByteArrayObj(bytes, len+1);
+  pRet = Tcl_NewByteArrayObj((u8*)bytes, len+1);
   Tcl_SetObjResult(interp, pRet);
   return TCL_OK;
 }
@@ -85,7 +85,7 @@ static int test_value_overhead(
 
   for(i=0; i<repeat_count; i++){
     if( do_calls ){
-      zVal = sqlite3_value_text(&val);
+      zVal = (char*)sqlite3_value_text(&val);
     }
   }
 
@@ -159,7 +159,7 @@ static int test_translate(
     }
     sqlite3ValueSetStr(pVal, -1, z, enc_from, xDel);
   }else{
-    z = Tcl_GetByteArrayFromObj(objv[1], &len);
+    z = (char*)Tcl_GetByteArrayFromObj(objv[1], &len);
     if( objc==5 ){
       char *zTmp = z;
       z = sqliteMalloc(len);
@@ -170,7 +170,7 @@ static int test_translate(
 
   z = (char *)sqlite3ValueText(pVal, enc_to);
   len = sqlite3ValueBytes(pVal, enc_to) + (enc_to==SQLITE_UTF8?1:2);
-  Tcl_SetObjResult(interp, Tcl_NewByteArrayObj(z, len));
+  Tcl_SetObjResult(interp, Tcl_NewByteArrayObj((u8*)z, len));
 
   sqlite3ValueFree(pVal);
 

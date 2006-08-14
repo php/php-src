@@ -198,6 +198,7 @@ proc report {} {
     lappend summarymap($stack) $bytes
   }
 
+  set sorted [list]
   foreach stack [array names summarymap] {
     set allocs $summarymap($stack)
     set sum 0

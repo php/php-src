@@ -42,7 +42,8 @@
 # LIBREADLINE      Linker options needed by programs using readline() must
 #                  link against.
 #
-# ENCODING         "UTF8" or "ISO8859"
+# NAWK             Nawk compatible awk program.  Older (obsolete?) solaris
+#                  systems need this to avoid using the original AT&T AWK.
 #
 # Once the macros above are defined, the rest of this make script will
 # build the SQLite library and testing tools.
@@ -56,13 +57,13 @@ TCCX = $(TCC) $(OPTS) $(THREADSAFE) $(USLEEP) -I. -I$(TOP)/src
 #
 LIBOBJ+= alter.o analyze.o attach.o auth.o btree.o build.o \
          callback.o complete.o date.o delete.o \
-         expr.o func.o hash.o insert.o \
-         main.o opcodes.o os_unix.o os_win.o \
+         expr.o func.o hash.o insert.o loadext.o \
+         main.o opcodes.o os.o os_os2.o os_unix.o os_win.o \
          pager.o parse.o pragma.o prepare.o printf.o random.o \
          select.o table.o tclsqlite.o tokenize.o trigger.o \
          update.o util.o vacuum.o \
          vdbe.o vdbeapi.o vdbeaux.o vdbefifo.o vdbemem.o \
-         where.o utf.o legacy.o
+         where.o utf.o legacy.o vtab.o
 
 # All of the source code files.
 #
@@ -84,7 +85,10 @@ SRC = \
   $(TOP)/src/hash.h \
   $(TOP)/src/insert.c \
   $(TOP)/src/legacy.c \
+  $(TOP)/src/loadext.c \
   $(TOP)/src/main.c \
+  $(TOP)/src/os.c \
+  $(TOP)/src/os_os2.c \
   $(TOP)/src/os_unix.c \
   $(TOP)/src/os_win.c \
   $(TOP)/src/pager.c \
@@ -113,6 +117,7 @@ SRC = \
   $(TOP)/src/vdbefifo.c \
   $(TOP)/src/vdbemem.c \
   $(TOP)/src/vdbeInt.h \
+  $(TOP)/src/vtab.c \
   $(TOP)/src/where.c
 
 # Source code to the test files.
@@ -121,6 +126,8 @@ TESTSRC = \
   $(TOP)/src/btree.c \
   $(TOP)/src/date.c \
   $(TOP)/src/func.c \
+  $(TOP)/src/os.c \
+  $(TOP)/src/os_os2.c \
   $(TOP)/src/os_unix.c \
   $(TOP)/src/os_win.c \
   $(TOP)/src/pager.c \
@@ -131,10 +138,17 @@ TESTSRC = \
   $(TOP)/src/test3.c \
   $(TOP)/src/test4.c \
   $(TOP)/src/test5.c \
+  $(TOP)/src/test6.c \
+  $(TOP)/src/test7.c \
+  $(TOP)/src/test8.c \
+  $(TOP)/src/test_async.c \
+  $(TOP)/src/test_md5.c \
+  $(TOP)/src/test_schema.c \
+  $(TOP)/src/test_server.c \
+  $(TOP)/src/test_tclvar.c \
   $(TOP)/src/utf.c \
   $(TOP)/src/util.c \
   $(TOP)/src/vdbe.c \
-  $(TOP)/src/md5.c \
   $(TOP)/src/where.c
 
 # Header files used by all library source files.
@@ -146,8 +160,7 @@ HDR = \
    opcodes.h \
    $(TOP)/src/os.h \
    $(TOP)/src/os_common.h \
-   $(TOP)/src/os_unix.h \
-   $(TOP)/src/os_win.h \
+   $(TOP)/src/sqlite3ext.h \
    $(TOP)/src/sqliteInt.h  \
    $(TOP)/src/vdbe.h \
    parse.h
@@ -167,8 +180,8 @@ all:	sqlite3.h libsqlite3.a sqlite3$(EXE)
 # of the most recently modified source code file
 #
 last_change:	$(SRC)
-	cat $(SRC) | grep '$$Id: ' | sort +4 | tail -1 \
-          | awk '{print $$5,$$6}' >last_change
+	cat $(SRC) | grep '$$Id: ' | sort -k 5 | tail -1 \
+          | $(NAWK) '{print $$5,$$6}' >last_change
 
 libsqlite3.a:	$(LIBOBJ)
 	$(AR) libsqlite3.a $(LIBOBJ)
@@ -176,7 +189,7 @@ libsqlite3.a:	$(LIBOBJ)
 
 sqlite3$(EXE):	$(TOP)/src/shell.c libsqlite3.a sqlite3.h
 	$(TCCX) $(READLINE_FLAGS) -o sqlite3$(EXE) $(TOP)/src/shell.c \
-		libsqlite3.a $(LIBREADLINE) $(THREADLIB)
+		libsqlite3.a $(LIBREADLINE) $(TLIBS) $(THREADLIB)
 
 objects: $(LIBOBJ_ORIG)
 
@@ -247,6 +260,9 @@ insert.o:	$(TOP)/src/insert.c $(HDR)
 legacy.o:	$(TOP)/src/legacy.c $(HDR)
 	$(TCCX) -c $(TOP)/src/legacy.c
 
+loadext.o:	$(TOP)/src/loadext.c $(HDR)
+	$(TCCX) -c $(TOP)/src/loadext.c
+
 main.o:	$(TOP)/src/main.c $(HDR)
 	$(TCCX) -c $(TOP)/src/main.c
 
@@ -257,10 +273,16 @@ opcodes.o:	opcodes.c
 	$(TCCX) -c opcodes.c
 
 opcodes.c:	opcodes.h $(TOP)/mkopcodec.awk
-	sort -n -b +2 opcodes.h | awk -f $(TOP)/mkopcodec.awk >opcodes.c
+	sort -n -b -k 3 opcodes.h | $(NAWK) -f $(TOP)/mkopcodec.awk >opcodes.c
 
 opcodes.h:	parse.h $(TOP)/src/vdbe.c $(TOP)/mkopcodeh.awk
-	cat parse.h $(TOP)/src/vdbe.c | awk -f $(TOP)/mkopcodeh.awk >opcodes.h
+	cat parse.h $(TOP)/src/vdbe.c | $(NAWK) -f $(TOP)/mkopcodeh.awk >opcodes.h
+
+os.o:	$(TOP)/src/os.c $(HDR)
+	$(TCCX) -c $(TOP)/src/os.c
+
+os_os2.o:	$(TOP)/src/os_os2.c $(HDR)
+	$(TCCX) -c $(TOP)/src/os_os2.c
 
 os_unix.o:	$(TOP)/src/os_unix.c $(HDR)
 	$(TCCX) -c $(TOP)/src/os_unix.c
@@ -273,9 +295,11 @@ parse.o:	parse.c $(HDR)
 
 parse.h:	parse.c
 
-parse.c:	$(TOP)/src/parse.y lemon
+parse.c:	$(TOP)/src/parse.y lemon $(TOP)/addopcodes.awk
 	cp $(TOP)/src/parse.y .
 	./lemon $(OPTS) parse.y
+	mv parse.h parse.h.temp
+	awk -f $(TOP)/addopcodes.awk parse.h.temp >parse.h
 
 pragma.o:	$(TOP)/src/pragma.c $(HDR)
 	$(TCCX) $(TCL_FLAGS) -c $(TOP)/src/pragma.c
@@ -294,7 +318,7 @@ select.o:	$(TOP)/src/select.c $(HDR)
 
 sqlite3.h:	$(TOP)/src/sqlite.h.in 
 	sed -e s/--VERS--/`cat ${TOP}/VERSION`/ \
-	    -e s/--VERSION-NUMBER--/`cat ${TOP}/VERSION | sed 's/[^0-9]/ /g' | awk '{printf "%d%03d%03d",$$1,$$2,$$3}'`/ \
+	    -e s/--VERSION-NUMBER--/`cat ${TOP}/VERSION | sed 's/[^0-9]/ /g' | $(NAWK) '{printf "%d%03d%03d",$$1,$$2,$$3}'`/ \
                  $(TOP)/src/sqlite.h.in >sqlite3.h
 
 table.o:	$(TOP)/src/table.c $(HDR)
@@ -340,6 +364,9 @@ vdbefifo.o:	$(TOP)/src/vdbefifo.c $(VDBEHDR)
 vdbemem.o:	$(TOP)/src/vdbemem.c $(VDBEHDR)
 	$(TCCX) -c $(TOP)/src/vdbemem.c
 
+vtab.o:	$(TOP)/src/vtab.c $(VDBEHDR)
+	$(TCCX) -c $(TOP)/src/vtab.c
+
 where.o:	$(TOP)/src/where.c $(HDR)
 	$(TCCX) -c $(TOP)/src/where.c
 
@@ -350,17 +377,12 @@ tclsqlite3:	$(TOP)/src/tclsqlite.c libsqlite3.a
 		$(TOP)/src/tclsqlite.c libsqlite3.a $(LIBTCL) $(THREADLIB)
 
 testfixture$(EXE):	$(TOP)/src/tclsqlite.c libsqlite3.a $(TESTSRC)
-	$(TCCX) $(TCL_FLAGS) -DTCLSH=1 -DSQLITE_TEST=1 -o testfixture$(EXE) \
+	$(TCCX) $(TCL_FLAGS) -DTCLSH=1 -DSQLITE_TEST=1 -DSQLITE_CRASH_TEST=1 \
+		-DSQLITE_SERVER=1 -o testfixture$(EXE) \
 		$(TESTSRC) $(TOP)/src/tclsqlite.c \
 		libsqlite3.a $(LIBTCL) $(THREADLIB)
 
-crashtest:	$(TOP)/src/tclsqlite.c libsqlite3.a $(TESTSRC) $(TOP)/src/os_test.c
-	$(TCCX) $(TCL_FLAGS) -DOS_TEST=1 -DTCLSH=1 -DSQLITE_TEST=1 \
-		-o crashtest \
-		$(TESTSRC) $(TOP)/src/os_test.c $(TOP)/src/tclsqlite.c \
-		libsqlite3.a $(LIBTCL) $(THREADLIB)
-
-fulltest:	testfixture$(EXE) sqlite3$(EXE) crashtest
+fulltest:	testfixture$(EXE) sqlite3$(EXE)
 	./testfixture$(EXE) $(TOP)/test/all.test
 
 test:	testfixture$(EXE) sqlite3$(EXE)
@@ -375,9 +397,16 @@ sqlite3_analyzer$(EXE):	$(TOP)/src/tclsqlite.c libsqlite3.a $(TESTSRC) \
 	  -e 's,^,",' \
 	  -e 's,$$,\\n",' \
 	  $(TOP)/tool/spaceanal.tcl >spaceanal_tcl.h
-	$(TCCX) $(TCL_FLAGS) -DTCLSH=2 -DSQLITE_TEST=1 -o \
+	$(TCCX) $(TCL_FLAGS) -DTCLSH=2 -DSQLITE_TEST=1 -DSQLITE_DEBUG=1 -o \
  		sqlite3_analyzer$(EXE) $(TESTSRC) $(TOP)/src/tclsqlite.c \
 		libsqlite3.a $(LIBTCL) $(THREADLIB)
+
+TEST_EXTENSION = $(SHPREFIX)testloadext.$(SO)
+$(TEST_EXTENSION): $(TOP)/src/test_loadext.c
+	$(MKSHLIB) $(TOP)/src/test_loadext.c -o $(TEST_EXTENSION)
+
+extensiontest: testfixture$(EXE) $(TEST_EXTENSION)
+	./testfixture$(EXE) $(TOP)/test/loadext.test
 
 # Rules used to build documentation
 #
@@ -469,6 +498,9 @@ omitted.html:	$(TOP)/www/omitted.tcl
 opcode.html:	$(TOP)/www/opcode.tcl $(TOP)/src/vdbe.c
 	tclsh $(TOP)/www/opcode.tcl $(TOP)/src/vdbe.c >opcode.html
 
+sharedcache.html: $(TOP)/www/sharedcache.tcl
+	tclsh $(TOP)/www/sharedcache.tcl >sharedcache.html
+
 mingw.html:	$(TOP)/www/mingw.tcl
 	tclsh $(TOP)/www/mingw.tcl >mingw.html
 
@@ -537,6 +569,7 @@ DOC = \
   opcode.html \
   pragma.html \
   quickstart.html \
+  sharedcache.html \
   speed.html \
   sqlite.gif \
   sqlite.html \
@@ -558,7 +591,7 @@ install:	sqlite3 libsqlite3.a sqlite3.h
 	mv sqlite3.h /usr/include
 
 clean:	
-	rm -f *.o sqlite3 libsqlite3.a sqlite3.h opcodes.* crashtest
+	rm -f *.o sqlite3 libsqlite3.a sqlite3.h opcodes.*
 	rm -f lemon lempar.c parse.* sqlite*.tar.gz mkkeywordhash keywordhash.h
 	rm -f $(PUBLISH)
 	rm -f *.da *.bb *.bbg gmon.out
