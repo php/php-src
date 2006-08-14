@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Aug 2006, PHP 5.2.0RC2
+- Updated libsqlite in ext/pdo_sqlite to 3.3.7. (Ilia)
 - Added support for httpOnly flag for session extension and cookie setting
   functions. (Scott MacVicar, Ilia)
 - Added version specific registry keys to allow different configurations for
