@@ -542,6 +542,8 @@ ZEND_API int add_next_index_string(zval *arg, char *str, int duplicate);
 ZEND_API int add_next_index_stringl(zval *arg, char *str, uint length, int duplicate);
 ZEND_API int add_next_index_unicode(zval *arg, UChar *str, int duplicate);
 ZEND_API int add_next_index_unicodel(zval *arg, UChar *str, uint length, int duplicate);
+ZEND_API int add_next_index_zstr(zval *arg, zstr str, zend_uchar type, int duplicate);
+ZEND_API int add_next_index_zstrl(zval *arg, zstr str, uint length, zend_uchar type, int duplicate);
 ZEND_API int add_next_index_zval(zval *arg, zval *value);
 
 #define add_next_index_text(arg, str, duplicate) \

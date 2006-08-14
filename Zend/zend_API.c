@@ -1741,6 +1741,28 @@ ZEND_API int add_next_index_unicodel(zval *arg, UChar *str, uint length, int dup
 }
 
 
+ZEND_API int add_next_index_zstr(zval *arg, zstr str, zend_uchar type, int duplicate)
+{
+	zval *tmp;
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_ZSTR(tmp, str, type, duplicate);
+
+	return zend_hash_next_index_insert(Z_ARRVAL_P(arg), &tmp, sizeof(zval *), NULL);
+}
+
+
+ZEND_API int add_next_index_zstrl(zval *arg, zstr str, uint length, zend_uchar type, int duplicate)
+{
+	zval *tmp;
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_ZSTRL(tmp, str, length, type, duplicate);
+
+	return zend_hash_next_index_insert(Z_ARRVAL_P(arg), &tmp, sizeof(zval *), NULL);
+}
+
+
 ZEND_API int add_next_index_zval(zval *arg, zval *value)
 {
 	return zend_hash_next_index_insert(Z_ARRVAL_P(arg), &value, sizeof(zval *), NULL);
