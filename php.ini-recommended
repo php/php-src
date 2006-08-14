@@ -1209,6 +1209,7 @@ pfpro.defaulttimeout = 30
 [FrontBase]
 ;fbsql.allow_persistent = On
 ;fbsql.autocommit = On
+;fbsql.show_timestamp_decimals = Off
 ;fbsql.default_database =
 ;fbsql.default_database_password =
 ;fbsql.default_host =

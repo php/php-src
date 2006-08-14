@@ -58,6 +58,10 @@
 
 #define HAVE_FBSQL 1
 
+#ifndef min
+# define min(a,b) ((a)<(b)?(a):(b))
+#endif
+
 #if HAVE_FBSQL
 #include "php_fbsql.h"
 #include <signal.h>
@@ -737,6 +741,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN  ("fbsql.allow_persistent",				"1",		PHP_INI_SYSTEM, OnUpdateBool,	allowPersistent,  zend_fbsql_globals, fbsql_globals)
 	STD_PHP_INI_BOOLEAN  ("fbsql.generate_warnings",			"0",		PHP_INI_SYSTEM, OnUpdateBool,	generateWarnings, zend_fbsql_globals, fbsql_globals)
 	STD_PHP_INI_BOOLEAN  ("fbsql.autocommit",					"1",		PHP_INI_SYSTEM, OnUpdateBool,	autoCommit,	      zend_fbsql_globals, fbsql_globals)
+	STD_PHP_INI_BOOLEAN  ("fbsql.show_timestamp_decimals",		"0",		PHP_INI_SYSTEM,	OnUpdateBool,	showTimestampDecimals,	zend_fbsql_globals,	fbsql_globals)
 	STD_PHP_INI_ENTRY_EX ("fbsql.max_persistent",				"-1",		PHP_INI_SYSTEM, OnUpdateLong,	maxPersistent,    zend_fbsql_globals, fbsql_globals, display_link_numbers)
 	STD_PHP_INI_ENTRY_EX ("fbsql.max_links",					"128",		PHP_INI_SYSTEM, OnUpdateLong,	maxLinks,         zend_fbsql_globals, fbsql_globals, display_link_numbers)
 	STD_PHP_INI_ENTRY_EX ("fbsql.max_connections",				"128",		PHP_INI_SYSTEM, OnUpdateLong,	maxConnections,   zend_fbsql_globals, fbsql_globals, display_link_numbers)
@@ -896,7 +901,26 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	if (persistent) {
 		if (zend_hash_find(&EG(persistent_list), name, strlen(name) + 1, (void **)&lep) == SUCCESS)
 		{
+			FBCMetaData *md;
 			phpLink = (PHPFBLink*)lep->ptr;
+			// Check if connection still there.
+			md = fbcdcRollback(phpLink->connection);
+			if ( !mdOk(phpLink, md, "Rollback;") ) {
+				if (FB_SQL_G(generateWarnings)) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "FrontBase link is not connected, ty to reconnect.");
+				}
+				// Make sure select_db will reconnect.
+				fbcmdRelease(md);
+				fbcdcClose(phpLink->connection);
+				fbcdcRelease(phpLink->connection);
+				free(phpLink->connection);
+				phpLink->connection = NULL;
+				if (phpLink->databaseName) free(phpLink->databaseName);
+				phpLink->databaseName = NULL;
+			}
+			else {
+				fbcmdRelease(md);
+			}
 		}
 		else {
 			zend_rsrc_list_entry le;
@@ -2866,8 +2890,6 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 		case FB_Float:
 		case FB_Real:
 		case FB_Double:
-		case FB_Numeric:
-		case FB_Decimal:
 		{
 			double v = *((double*)data);
 			char b[128];
@@ -2876,6 +2898,18 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 		}
 		break;
 
+		case FB_Numeric:
+		case FB_Decimal:
+		{
+ 			unsigned precision = fbcdmdPrecision(dtmd);
+ 			unsigned scale = fbcdmdScale(dtmd);
+  			double v = *((double*)data);
+  			char b[128];
+ 			snprintf(b, sizeof(b), "%.*f", scale, v);
+  			phpfbestrdup(b, length, value);
+		}
+		break;
+		
 		case FB_Character:
 		case FB_VCharacter:
 		{
@@ -2946,7 +2980,6 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 		case FB_Date:
 		case FB_Time:
 		case FB_TimeTZ:
-		case FB_Timestamp:
 		case FB_TimestampTZ:
 		{
 			char* v = (char*)data;
@@ -2954,6 +2987,27 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 		}
 		break;
 
+		case FB_Timestamp:
+		{
+			char* v = (char*)data;
+			if (FB_SQL_G(showTimestampDecimals)) {
+				phpfbestrdup(v, length, value);
+			}
+			// Copy only YYYY-MM-DD HH:MM:SS
+			else {
+				int stringLength = strlen(v);
+				stringLength = min(stringLength, 19);
+ 				if (value) {
+					char* r = emalloc(stringLength+1);
+					memcpy(r, v, stringLength);
+					r[stringLength] = 0;
+					*value = r;
+				}
+				*length = stringLength;
+			}
+		}
+		break;
+		
 		case FB_YearMonth:
 		{
 			char b[128];
