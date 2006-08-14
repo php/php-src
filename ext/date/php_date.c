@@ -299,6 +299,8 @@ static void date_object_free_storage_date(void *object TSRMLS_DC);
 static void date_object_free_storage_timezone(void *object TSRMLS_DC);
 static zend_object_value date_object_new_date(zend_class_entry *class_type TSRMLS_DC);
 static zend_object_value date_object_new_timezone(zend_class_entry *class_type TSRMLS_DC);
+static zend_object_value date_object_clone_date(zval *this_ptr TSRMLS_DC);
+static zend_object_value date_object_clone_timezone(zval *this_ptr TSRMLS_DC);
 
 /* {{{ Module struct */
 zend_module_entry date_module_entry = {
@@ -1570,7 +1572,7 @@ static void date_register_classes(TSRMLS_D)
 	ce_date.create_object = date_object_new_date;
 	date_ce_date = zend_register_internal_class_ex(&ce_date, NULL, NULL TSRMLS_CC);
 	memcpy(&date_object_handlers_date, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	date_object_handlers_date.clone_obj = NULL;
+	date_object_handlers_date.clone_obj = date_object_clone_date;
 
 #define REGISTER_DATE_CLASS_CONST_STRING(const_name, value) \
 	zend_declare_class_constant_stringl(date_ce_date, const_name, sizeof(const_name)-1, value, sizeof(value)-1 TSRMLS_CC);
@@ -1592,10 +1594,10 @@ static void date_register_classes(TSRMLS_D)
 	ce_timezone.create_object = date_object_new_timezone;
 	date_ce_timezone = zend_register_internal_class_ex(&ce_timezone, NULL, NULL TSRMLS_CC);
 	memcpy(&date_object_handlers_timezone, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	date_object_handlers_timezone.clone_obj = NULL;
+	date_object_handlers_timezone.clone_obj = date_object_clone_timezone;
 }
 
-static zend_object_value date_object_new_date(zend_class_entry *class_type TSRMLS_DC)
+inline zend_object_value date_object_new_date_ex(zend_class_entry *class_type, php_date_obj **ptr TSRMLS_DC)
 {
 	php_date_obj *intern;
 	zend_object_value retval;
@@ -1603,6 +1605,9 @@ static zend_object_value date_object_new_date(zend_class_entry *class_type TSRML
 
 	intern = emalloc(sizeof(php_date_obj));
 	memset(intern, 0, sizeof(php_date_obj));
+	if (ptr) {
+		*ptr = intern;
+	}
 	
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
@@ -1613,7 +1618,34 @@ static zend_object_value date_object_new_date(zend_class_entry *class_type TSRML
 	return retval;
 }
 
-static zend_object_value date_object_new_timezone(zend_class_entry *class_type TSRMLS_DC)
+static zend_object_value date_object_new_date(zend_class_entry *class_type TSRMLS_DC)
+{
+	return date_object_new_date_ex(class_type, NULL TSRMLS_CC);
+}
+
+static zend_object_value date_object_clone_date(zval *this_ptr TSRMLS_DC)
+{
+	zend_object *old_zo = zend_objects_get_address(this_ptr TSRMLS_CC);
+	php_date_obj *old_obj = (php_date_obj *) zend_object_store_get_object(this_ptr TSRMLS_CC);
+	php_date_obj *new_obj = NULL;
+	zend_object_value new_ov = date_object_new_date_ex(old_zo->ce, &new_obj TSRMLS_CC);
+	
+	zend_objects_clone_members(&new_obj->std, new_ov, old_zo, Z_OBJ_HANDLE_P(this_ptr) TSRMLS_CC);
+	
+	/* this should probably moved to a new `timelib_time *timelime_time_clone(timelib_time *)` */
+	new_obj->time = timelib_time_ctor();
+	*new_obj->time = *old_obj->time;
+	if (old_obj->time->tz_abbr) {
+		new_obj->time->tz_abbr = strdup(old_obj->time->tz_abbr);
+	}
+	if (old_obj->time->tz_info) {
+		new_obj->time->tz_info = timelib_tzinfo_clone(old_obj->time->tz_info);
+	}
+	
+	return new_ov;
+}
+
+inline zend_object_value date_object_new_timezone_ex(zend_class_entry *class_type, php_timezone_obj **ptr TSRMLS_DC)
 {
 	php_timezone_obj *intern;
 	zend_object_value retval;
@@ -1621,6 +1653,9 @@ static zend_object_value date_object_new_timezone(zend_class_entry *class_type T
 
 	intern = emalloc(sizeof(php_timezone_obj));
 	memset(intern, 0, sizeof(php_timezone_obj));
+	if (ptr) {
+		*ptr = intern;
+	}
 
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
@@ -1629,6 +1664,24 @@ static zend_object_value date_object_new_timezone(zend_class_entry *class_type T
 	retval.handlers = &date_object_handlers_timezone;
 	
 	return retval;
+}
+
+static zend_object_value date_object_new_timezone(zend_class_entry *class_type TSRMLS_DC)
+{
+	return date_object_new_timezone_ex(class_type, NULL TSRMLS_CC);
+}
+
+static zend_object_value date_object_clone_timezone(zval *this_ptr TSRMLS_DC)
+{
+	zend_object *old_zo = zend_objects_get_address(this_ptr TSRMLS_CC);
+	php_timezone_obj *old_obj = (php_timezone_obj *) zend_object_store_get_object(this_ptr TSRMLS_CC);
+	php_timezone_obj *new_obj = NULL;
+	zend_object_value new_ov = date_object_new_timezone_ex(old_zo->ce, &new_obj TSRMLS_CC);
+	
+	zend_objects_clone_members(&new_obj->std, new_ov, old_zo, Z_OBJ_HANDLE_P(this_ptr) TSRMLS_CC);
+	new_obj->tz = timelib_tzinfo_clone(old_obj->tz);
+	
+	return new_ov;
 }
 
 static void date_object_free_storage_date(void *object TSRMLS_DC)
