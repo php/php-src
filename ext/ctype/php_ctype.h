@@ -33,23 +33,23 @@ extern zend_module_entry ctype_module_entry;
 #define PHP_CTYPE_API
 #endif
 
-PHP_MINIT_FUNCTION(ctype);
-PHP_MSHUTDOWN_FUNCTION(ctype);
-PHP_RINIT_FUNCTION(ctype);
-PHP_RSHUTDOWN_FUNCTION(ctype);
-PHP_MINFO_FUNCTION(ctype);
+static PHP_MINIT_FUNCTION(ctype);
+static PHP_MSHUTDOWN_FUNCTION(ctype);
+static PHP_RINIT_FUNCTION(ctype);
+static PHP_RSHUTDOWN_FUNCTION(ctype);
+static PHP_MINFO_FUNCTION(ctype);
 
-PHP_FUNCTION(ctype_alnum);
-PHP_FUNCTION(ctype_alpha);
-PHP_FUNCTION(ctype_cntrl);
-PHP_FUNCTION(ctype_digit);
-PHP_FUNCTION(ctype_lower);
-PHP_FUNCTION(ctype_graph);
-PHP_FUNCTION(ctype_print);
-PHP_FUNCTION(ctype_punct);
-PHP_FUNCTION(ctype_space);
-PHP_FUNCTION(ctype_upper);
-PHP_FUNCTION(ctype_xdigit);
+static PHP_FUNCTION(ctype_alnum);
+static PHP_FUNCTION(ctype_alpha);
+static PHP_FUNCTION(ctype_cntrl);
+static PHP_FUNCTION(ctype_digit);
+static PHP_FUNCTION(ctype_lower);
+static PHP_FUNCTION(ctype_graph);
+static PHP_FUNCTION(ctype_print);
+static PHP_FUNCTION(ctype_punct);
+static PHP_FUNCTION(ctype_space);
+static PHP_FUNCTION(ctype_upper);
+static PHP_FUNCTION(ctype_xdigit);
 
 /* 
   	Declare any global variables you may need between the BEGIN

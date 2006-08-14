@@ -101,7 +101,7 @@ ZEND_END_ARG_INFO()
 /* {{{ ctype_functions[]
  * Every user visible function must have an entry in ctype_functions[].
  */
-zend_function_entry ctype_functions[] = {
+static zend_function_entry ctype_functions[] = {
 	PHP_FE(ctype_alnum,	arginfo_ctype_alnum)
 	PHP_FE(ctype_alpha,	arginfo_ctype_alpha)
 	PHP_FE(ctype_cntrl,	arginfo_ctype_cntrl)
@@ -139,7 +139,7 @@ ZEND_GET_MODULE(ctype)
 
 /* {{{ PHP_MINFO_FUNCTION
  */
-PHP_MINFO_FUNCTION(ctype)
+static PHP_MINFO_FUNCTION(ctype)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "ctype functions", "enabled");
@@ -187,7 +187,7 @@ PHP_MINFO_FUNCTION(ctype)
 
 /* {{{ proto bool ctype_alnum(mixed c)
    Checks for alphanumeric character(s) */
-PHP_FUNCTION(ctype_alnum)
+static PHP_FUNCTION(ctype_alnum)
 {
 	CTYPE(isalnum);
 }
@@ -195,7 +195,7 @@ PHP_FUNCTION(ctype_alnum)
 
 /* {{{ proto bool ctype_alpha(mixed c)
    Checks for alphabetic character(s) */
-PHP_FUNCTION(ctype_alpha)
+static PHP_FUNCTION(ctype_alpha)
 {
 	CTYPE(isalpha);
 }
@@ -203,7 +203,7 @@ PHP_FUNCTION(ctype_alpha)
 
 /* {{{ proto bool ctype_cntrl(mixed c)
    Checks for control character(s) */
-PHP_FUNCTION(ctype_cntrl)
+static PHP_FUNCTION(ctype_cntrl)
 {
 	CTYPE(iscntrl);
 }
@@ -211,7 +211,7 @@ PHP_FUNCTION(ctype_cntrl)
 
 /* {{{ proto bool ctype_digit(mixed c)
    Checks for numeric character(s) */
-PHP_FUNCTION(ctype_digit)
+static PHP_FUNCTION(ctype_digit)
 {
 	CTYPE(isdigit);
 }
@@ -219,7 +219,7 @@ PHP_FUNCTION(ctype_digit)
 
 /* {{{ proto bool ctype_lower(mixed c)
    Checks for lowercase character(s)  */
-PHP_FUNCTION(ctype_lower)
+static PHP_FUNCTION(ctype_lower)
 {
 	CTYPE(islower);
 }
@@ -227,7 +227,7 @@ PHP_FUNCTION(ctype_lower)
 
 /* {{{ proto bool ctype_graph(mixed c)
    Checks for any printable character(s) except space */
-PHP_FUNCTION(ctype_graph)
+static PHP_FUNCTION(ctype_graph)
 {
 	CTYPE(isgraph);
 }
@@ -235,7 +235,7 @@ PHP_FUNCTION(ctype_graph)
 
 /* {{{ proto bool ctype_print(mixed c)
    Checks for printable character(s) */
-PHP_FUNCTION(ctype_print)
+static PHP_FUNCTION(ctype_print)
 {
 	CTYPE(isprint);
 }
@@ -243,7 +243,7 @@ PHP_FUNCTION(ctype_print)
 
 /* {{{ proto bool ctype_punct(mixed c)
    Checks for any printable character which is not whitespace or an alphanumeric character */
-PHP_FUNCTION(ctype_punct)
+static PHP_FUNCTION(ctype_punct)
 {
 	CTYPE(ispunct);
 }
@@ -251,7 +251,7 @@ PHP_FUNCTION(ctype_punct)
 
 /* {{{ proto bool ctype_space(mixed c)
    Checks for whitespace character(s)*/
-PHP_FUNCTION(ctype_space)
+static PHP_FUNCTION(ctype_space)
 {
 	CTYPE(isspace);
 }
@@ -259,7 +259,7 @@ PHP_FUNCTION(ctype_space)
 
 /* {{{ proto bool ctype_upper(mixed c)
    Checks for uppercase character(s) */
-PHP_FUNCTION(ctype_upper)
+static PHP_FUNCTION(ctype_upper)
 {
 	CTYPE(isupper);
 }
@@ -267,7 +267,7 @@ PHP_FUNCTION(ctype_upper)
 
 /* {{{ proto bool ctype_xdigit(mixed c)
    Checks for character(s) representing a hexadecimal digit */
-PHP_FUNCTION(ctype_xdigit)
+static PHP_FUNCTION(ctype_xdigit)
 {
 	CTYPE(isxdigit);
 }
