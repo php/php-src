@@ -2994,69 +2994,67 @@ PHP_FUNCTION(strrchr)
 
 /* {{{ php_chunk_split
  */
-static char *php_chunk_split(char *src, int srclen, char *end, int endlen, int chunklen, int *destlen)
+static char* php_chunk_split(char *src, int srclen, char *end, int endlen, int chunklen, int *destlen, zend_uchar str_type)
 {
 	char *dest;
 	char *p, *q;
 	int chunks; /* complete chunks! */
 	int restlen;
+	int charsize = sizeof(char);
+
+	if (str_type == IS_UNICODE) {
+		charsize = sizeof(UChar);
+	}
 
 	chunks = srclen / chunklen;
 	restlen = srclen - chunks * chunklen; /* srclen % chunklen */
 
-	dest = safe_emalloc((srclen + (chunks + 1) * endlen + 1), sizeof(char), 0);
+	dest = safe_emalloc((srclen + (chunks + 1) * endlen + 1), charsize, 0);
 
-	for (p = src, q = dest; p < (src + srclen - chunklen + 1); ) {
-		memcpy(q, p, chunklen);
-		q += chunklen;
-		memcpy(q, end, endlen);
-		q += endlen;
-		p += chunklen;
+	for (p = src, q = dest; p < (src + charsize * (srclen - chunklen + 1)); ) {
+		memcpy(q, p, chunklen * charsize);
+		q += chunklen * charsize;
+		memcpy(q, end, endlen * charsize);
+		q += endlen * charsize;
+		p += chunklen * charsize;
 	}
 
 	if (restlen) {
-		memcpy(q, p, restlen);
-		q += restlen;
-		memcpy(q, end, endlen);
-		q += endlen;
+		memcpy(q, p, restlen * charsize);
+		q += restlen * charsize;
+		memcpy(q, end, endlen * charsize);
+		q += endlen * charsize;
 	}
 
-	*q = '\0';
+	if (str_type == IS_UNICODE) {
+		*(UChar*)q = 0;
+	} else {
+		*q = '\0';
+	}
 	if (destlen) {
-		*destlen = q - dest;
+		*destlen = (q - dest) / charsize;
 	}
 
-	return(dest);
+	return (dest);
 }
 /* }}} */
 
-/* {{{ proto string chunk_split(string str [, int chunklen [, string ending]])
+/* {{{ proto string chunk_split(string str [, int chunklen [, string ending]]) U
    Returns split line */
 PHP_FUNCTION(chunk_split)
 {
-	zval **p_str, **p_chunklen, **p_ending;
-	char *result;
+	zstr str, ending = NULL_ZSTR;
+	int str_len, ending_len;
+	zstr result;
 	char *end    = "\r\n";
-	int endlen   = 2;
+	UChar u_end[3] = { 0x0d, 0x0a, 0x0 };
 	int chunklen = 76;
 	int result_len;
-	int argc = ZEND_NUM_ARGS();
+	zend_uchar str_type;
 
-	if (argc < 1 || argc > 3 ||	zend_get_parameters_ex(argc, &p_str, &p_chunklen, &p_ending) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-
-	convert_to_string_ex(p_str);
-
-	if (argc > 1) {
-		convert_to_long_ex(p_chunklen);
-		chunklen = Z_LVAL_PP(p_chunklen);
-	}
-
-	if (argc > 2) {
-		convert_to_string_ex(p_ending);
-		end = Z_STRVAL_PP(p_ending);
-		endlen = Z_STRLEN_PP(p_ending);
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "T|lT", &str, &str_len,
+							  &str_type, &chunklen, &ending, &ending_len, &str_type) == FAILURE) {
+		return;
 	}
 
 	if (chunklen <= 0) {
@@ -3064,24 +3062,36 @@ PHP_FUNCTION(chunk_split)
 		RETURN_FALSE;
 	}
 
-	if (chunklen > Z_STRLEN_PP(p_str)) {
+	if (!ending.v) {
+		ending = (str_type == IS_UNICODE) ? ZSTR(u_end) : ZSTR(end);
+		ending_len = 2;
+	}
+
+	if (chunklen > str_len) {
 		/* to maintain BC, we must return original string + ending */
-		result_len = endlen + Z_STRLEN_PP(p_str);
-		result = emalloc(result_len + 1);
-		memcpy(result, Z_STRVAL_PP(p_str), Z_STRLEN_PP(p_str));
-		memcpy(result + Z_STRLEN_PP(p_str), end, endlen);
-		result[result_len] = '\0';
-		RETURN_STRINGL(result, result_len, 0);
+		result_len = ending_len + str_len;
+		if (str_type == IS_UNICODE) {
+			result.u = eumalloc(result_len + 1);
+			u_memcpy(result.u, str.u, str_len);
+			u_memcpy(result.u + str_len, ending.u, ending_len);
+			result.u[result_len] = 0;
+		} else {
+			result.s = emalloc(result_len + 1);
+			memcpy(result.s, str.s, str_len);
+			memcpy(result.s + str_len, ending.s, ending_len);
+			result.s[result_len] = '\0';
+		}
+		RETURN_ZSTRL(result, result_len, str_type, 0);
 	}
 
-	if (!Z_STRLEN_PP(p_str)) {
-		RETURN_EMPTY_STRING();
+	if (!str_len) {
+		RETURN_EMPTY_TEXT();
 	}
 
-	result = php_chunk_split(Z_STRVAL_PP(p_str), Z_STRLEN_PP(p_str), end, endlen, chunklen, &result_len);
+	result.v = php_chunk_split(str.v, str_len, ending.v, ending_len, chunklen, &result_len, str_type);
 
-	if (result) {
-		RETURN_STRINGL(result, result_len, 0);
+	if (result.v) {
+		RETURN_ZSTRL(result, result_len, str_type, 0);
 	} else {
 		RETURN_FALSE;
 	}

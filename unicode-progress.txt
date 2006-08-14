@@ -16,9 +16,6 @@ ext/standard
 
   string.c
   --------
-    chunk_split()
-        Params API, Unicode upgrades. Split on codepoint level.
-
     count_chars()
         Params API. Do we really want to go through the whole Unicode table?
         May need to use hashtable instead of array.
@@ -179,6 +176,7 @@ ext/standard
     basename()
     bin2hex()
     chr()
+    chunk_split()
     dirname()
     explode()
     implode()
