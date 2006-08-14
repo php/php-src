@@ -1307,7 +1307,7 @@ TEST $file
 			return 'BORKED';
 		}
 		save_text($tmp_post, $request);
-		$cmd = "USE_ZEND_ALLOC=1 $php$pass_options$ini_settings -f \"$test_file\" 2>&1 < $tmp_post";
+		$cmd = "$php$pass_options$ini_settings -f \"$test_file\" 2>&1 < $tmp_post";
 	} elseif (array_key_exists('POST', $section_text) && !empty($section_text['POST'])) {
 
 		$post = trim($section_text['POST']);
@@ -1318,7 +1318,7 @@ TEST $file
 		$env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded';
 		$env['CONTENT_LENGTH'] = $content_length;
 
-		$cmd = "USE_ZEND_ALLOC=1 $php$pass_options$ini_settings -f \"$test_file\" 2>&1 < $tmp_post";
+		$cmd = "$php$pass_options$ini_settings -f \"$test_file\" 2>&1 < $tmp_post";
 
 	} else {
 
@@ -1326,11 +1326,13 @@ TEST $file
 		$env['CONTENT_TYPE']   = '';
 		$env['CONTENT_LENGTH'] = '';
 
-		$cmd = "USE_ZEND_ALLOC=1 $php$pass_options$ini_settings -f \"$test_file\" $args 2>&1";
+		$cmd = "$php$pass_options$ini_settings -f \"$test_file\" $args 2>&1";
 	}
 
 	if ($leak_check) {
 		$cmd = "USE_ZEND_ALLOC=0 valgrind -q --tool=memcheck --trace-children=yes --log-file-exactly=$memcheck_filename $cmd";
+	} else {
+		$cmd = "USE_ZEND_ALLOC=1 ".$cmd;
 	}
 
 	if ($DETAILED) echo "
