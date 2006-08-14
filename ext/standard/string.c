@@ -6777,8 +6777,9 @@ PHP_FUNCTION(sscanf)
 
 static char rot13_from[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 static char rot13_to[] = "nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKLM";
-U_STRING_DECL(u_rot13_from, rot13_from, sizeof(rot13_from)-1);
-U_STRING_DECL(u_rot13_to, rot13_to, sizeof(rot13_to)-1);
+U_STRING_DECL(u_rot13_from, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", sizeof(rot13_from)-1);
+U_STRING_DECL(u_rot13_to, "nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKLM", sizeof(rot13_to)-1);
+
 
 /* {{{ proto string str_rot13(string str) U
    Perform the rot13 transform on a string */
