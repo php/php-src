@@ -37,8 +37,9 @@ PHP                                                                        NEWS
 - Fixed phpinfo() cutoff of variables at \0. (Ilia)
 - Fixed a bug in the filter extension that prevented magic_quotes_gpc from
   being applied when RAW filter is used. (Ilia)
-- FixedbBug #38438 (DOMNodeList->item(0) segfault on empty NodeList). (Ilia)
+- Fixed bug #38438 (DOMNodeList->item(0) segfault on empty NodeList). (Ilia)
 - Fixed bug #38431 (xmlrpc_get_type() crashes PHP on objects). (Tony)
+- Fixed bug #38424 (Different attribute assignment if new or existing). (Rob)
 - Fixed bug #38394 (PDO fails to recover from failed prepared statement
   execution). (Ilia)
 - Fixed bug #38377 (session_destroy() gives warning after
