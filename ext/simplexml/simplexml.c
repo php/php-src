@@ -366,6 +366,8 @@ static zval * sxe_dimension_read(zval *object, zval *offset, int type TSRMLS_DC)
 static void change_node_zval(xmlNodePtr node, zval *value TSRMLS_DC)
 {
 	zval value_copy;
+	xmlChar *buffer;
+	int buffer_len;
 
 	if (!value)
 	{
@@ -386,7 +388,20 @@ static void change_node_zval(xmlNodePtr node, zval *value TSRMLS_DC)
 			convert_to_string_with_converter(value, UG(utf8_conv));
 			/* break missing intentionally */
 		case IS_STRING:
-			xmlNodeSetContentLen(node, (xmlChar *)Z_STRVAL_P(value), Z_STRLEN_P(value));
+			if (node->type == XML_ATTRIBUTE_NODE) {
+				buffer = xmlEncodeEntitiesReentrant(node->doc, (xmlChar *)Z_STRVAL_P(value));
+				buffer_len = xmlStrlen(buffer);
+			} else {
+				buffer = (xmlChar *)Z_STRVAL_P(value);
+				buffer_len = Z_STRLEN_P(value);
+			}
+			/* check for NULL buffer in case of memory error in xmlEncodeEntitiesReentrant */
+			if (buffer) {
+				xmlNodeSetContentLen(node, buffer, buffer_len);
+				if (node->type == XML_ATTRIBUTE_NODE) {
+					xmlFree(buffer);
+				}
+			}
 			if (value == &value_copy) {
 				zval_dtor(value);
 			}
