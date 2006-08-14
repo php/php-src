@@ -49,9 +49,6 @@ ext/standard
         Params API, IS_UNICODE upgrade. Case-folding should be handled
         similar to stristr().
 
-    str_split()
-        IS_UNICODE support, split on codepoint level.
-
     str_word_count()
         Params API, IS_UNICODE support, using u_isalpha(), etc.
     
@@ -190,6 +187,7 @@ ext/standard
     str_repeat()
     str_rot13()
     str_shuffle()
+    str_split()
     strcspn()
     strip_tags()
     stripcslashes()

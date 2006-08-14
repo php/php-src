@@ -6973,17 +6973,19 @@ PHP_FUNCTION(money_format)
 /* }}} */
 #endif
 
-/* {{{ proto array str_split(string str [, int split_length])
+/* {{{ proto array str_split(string str [, int split_length]) U
    Convert a string to an array. If split_length is specified, break the string down into chunks each split_length characters long. */
 PHP_FUNCTION(str_split)
 {
-	char *str;
+	zstr str;
 	int str_len;
 	long split_length = 1;
 	char *p;
+	zend_uchar str_type;
 	int n_reg_segments;
+	int charsize = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &str_len, &split_length) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|l", &str, &str_len, &str_type, &split_length) == FAILURE) {
 		return;
 	}
 
@@ -6995,20 +6997,23 @@ PHP_FUNCTION(str_split)
 	array_init(return_value);
 
 	if (split_length >= str_len) {
-		add_next_index_stringl(return_value, str, str_len, 1);
+		add_next_index_zstrl(return_value, str, str_len, str_type, 1);
 		return;
 	}
 
 	n_reg_segments = floor(str_len / split_length);
-	p = str;
-
-	while (n_reg_segments-- > 0) {
-		add_next_index_stringl(return_value, p, split_length, 1);
-		p += split_length;
+	p = str.s;
+	if (str_type == IS_UNICODE) {
+		charsize = 2;
 	}
 
-	if (p != (str + str_len)) {
-		add_next_index_stringl(return_value, p, (str + str_len - p), 1);
+	while (n_reg_segments-- > 0) {
+		add_next_index_zstrl(return_value, ZSTR(p), split_length, str_type, 1);
+		p += split_length * charsize;
+	}
+
+	if (p != (str.s + str_len * charsize)) {
+		add_next_index_zstrl(return_value, ZSTR(p), (str.s + str_len * charsize - p), str_type, 1);
 	}
 }
 /* }}} */
