@@ -29,17 +29,6 @@ extern zend_module_entry bz2_module_entry;
 /* Bzip2 includes */
 #include <bzlib.h>
 
-static PHP_MINIT_FUNCTION(bz2);
-static PHP_MSHUTDOWN_FUNCTION(bz2);
-static PHP_MINFO_FUNCTION(bz2);
-static PHP_FUNCTION(bzopen);
-static PHP_FUNCTION(bzread);
-static PHP_FUNCTION(bzerrno);
-static PHP_FUNCTION(bzerrstr);
-static PHP_FUNCTION(bzerror);
-static PHP_FUNCTION(bzcompress);
-static PHP_FUNCTION(bzdecompress);
-
 #else
 #define phpext_bz2_ptr NULL
 #endif

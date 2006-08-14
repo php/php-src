@@ -23,28 +23,6 @@
 #if HAVE_PSPELL
 extern zend_module_entry pspell_module_entry;
 #define pspell_module_ptr &pspell_module_entry
-
-static PHP_MINIT_FUNCTION(pspell);
-static PHP_MINFO_FUNCTION(pspell);
-static PHP_FUNCTION(pspell_new);
-static PHP_FUNCTION(pspell_new_personal);
-static PHP_FUNCTION(pspell_new_config);
-static PHP_FUNCTION(pspell_check);
-static PHP_FUNCTION(pspell_suggest);
-static PHP_FUNCTION(pspell_store_replacement);
-static PHP_FUNCTION(pspell_add_to_personal);
-static PHP_FUNCTION(pspell_add_to_session);
-static PHP_FUNCTION(pspell_clear_session);
-static PHP_FUNCTION(pspell_save_wordlist);
-static PHP_FUNCTION(pspell_config_create);
-static PHP_FUNCTION(pspell_config_runtogether);
-static PHP_FUNCTION(pspell_config_mode);
-static PHP_FUNCTION(pspell_config_ignore);
-static PHP_FUNCTION(pspell_config_personal);
-static PHP_FUNCTION(pspell_config_dict_dir);
-static PHP_FUNCTION(pspell_config_data_dir);
-static PHP_FUNCTION(pspell_config_repl);
-static PHP_FUNCTION(pspell_config_save_repl);
 #else
 #define pspell_module_ptr NULL
 #endif

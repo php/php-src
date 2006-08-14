@@ -30,6 +30,11 @@
 #include "JSON_parser.h"
 #include "php_json.h"
 
+static PHP_MINFO_FUNCTION(json);
+
+static PHP_FUNCTION(json_encode);
+static PHP_FUNCTION(json_decode);
+
 /* If you declare any globals in php_json.h uncomment this:
 ZEND_DECLARE_MODULE_GLOBALS(json)
 */
@@ -39,7 +44,7 @@ static const char digits[] = "0123456789abcdef";
  *
  * Every user visible function must have an entry in json_functions[].
  */
-function_entry json_functions[] = {
+static function_entry json_functions[] = {
     PHP_FE(json_encode, NULL)
     PHP_FE(json_decode, NULL)
     {NULL, NULL, NULL}  /* Must be the last line in json_functions[] */
@@ -72,7 +77,7 @@ ZEND_GET_MODULE(json)
 
 /* {{{ PHP_MINFO_FUNCTION
  */
-PHP_MINFO_FUNCTION(json)
+static PHP_MINFO_FUNCTION(json)
 {
     php_info_print_table_start();
     php_info_print_table_row(2, "json support", "enabled");
@@ -390,7 +395,7 @@ static void json_encode_r(smart_str *buf, zval *val TSRMLS_DC) {
     return;
 }
 
-PHP_FUNCTION(json_encode)
+static PHP_FUNCTION(json_encode)
 {
     zval *parameter;
     smart_str buf = {0};
@@ -406,7 +411,7 @@ PHP_FUNCTION(json_encode)
     smart_str_free(&buf);
 }
 
-PHP_FUNCTION(json_decode)
+static PHP_FUNCTION(json_decode)
 {
     char *parameter;
     int parameter_len, utf16_len;

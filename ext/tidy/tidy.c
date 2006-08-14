@@ -237,6 +237,58 @@ static int _php_tidy_set_tidy_opt(TidyDoc, char *, zval * TSRMLS_DC);
 static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options TSRMLS_DC);
 static void _php_tidy_register_nodetypes(INIT_FUNC_ARGS);
 static void _php_tidy_register_tags(INIT_FUNC_ARGS);
+
+static PHP_MINIT_FUNCTION(tidy);
+static PHP_MSHUTDOWN_FUNCTION(tidy);
+static PHP_RINIT_FUNCTION(tidy);
+static PHP_MINFO_FUNCTION(tidy);
+
+static PHP_FUNCTION(tidy_getopt);
+static PHP_FUNCTION(tidy_parse_string);
+static PHP_FUNCTION(tidy_parse_file);
+static PHP_FUNCTION(tidy_clean_repair);
+static PHP_FUNCTION(tidy_repair_string);
+static PHP_FUNCTION(tidy_repair_file);
+static PHP_FUNCTION(tidy_diagnose);
+static PHP_FUNCTION(tidy_get_output);
+static PHP_FUNCTION(tidy_get_error_buffer);
+static PHP_FUNCTION(tidy_get_release);
+static PHP_FUNCTION(tidy_reset_config);
+static PHP_FUNCTION(tidy_get_config);
+static PHP_FUNCTION(tidy_get_status);
+static PHP_FUNCTION(tidy_get_html_ver);
+#if HAVE_TIDYOPTGETDOC
+static PHP_FUNCTION(tidy_get_opt_doc);
+#endif
+static PHP_FUNCTION(tidy_is_xhtml);
+static PHP_FUNCTION(tidy_is_xml);
+static PHP_FUNCTION(tidy_error_count);
+static PHP_FUNCTION(tidy_warning_count);
+static PHP_FUNCTION(tidy_access_count);
+static PHP_FUNCTION(tidy_config_count);
+
+static PHP_FUNCTION(ob_tidyhandler);
+
+static PHP_FUNCTION(tidy_get_root);
+static PHP_FUNCTION(tidy_get_html);
+static PHP_FUNCTION(tidy_get_head);
+static PHP_FUNCTION(tidy_get_body);
+
+static TIDY_DOC_METHOD(__construct);
+static TIDY_DOC_METHOD(parseFile);
+static TIDY_DOC_METHOD(parseString);
+
+static TIDY_NODE_METHOD(__construct);
+static TIDY_NODE_METHOD(hasChildren);
+static TIDY_NODE_METHOD(hasSiblings);
+static TIDY_NODE_METHOD(isComment);
+static TIDY_NODE_METHOD(isHtml);
+static TIDY_NODE_METHOD(isXhtml);
+static TIDY_NODE_METHOD(isXml);
+static TIDY_NODE_METHOD(isText);
+static TIDY_NODE_METHOD(isJste);
+static TIDY_NODE_METHOD(isAsp);
+static TIDY_NODE_METHOD(isPhp);
 /* }}} */
 
 ZEND_DECLARE_MODULE_GLOBALS(tidy)

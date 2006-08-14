@@ -36,11 +36,6 @@ extern zend_module_entry json_module_entry;
 #include "TSRM.h"
 #endif
 
-PHP_MINFO_FUNCTION(json);
-
-PHP_FUNCTION(json_encode);
-PHP_FUNCTION(json_decode);
-
 #ifdef ZTS
 #define JSON_G(v) TSRMG(json_globals_id, zend_json_globals *, v)
 #else

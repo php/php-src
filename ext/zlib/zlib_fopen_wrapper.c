@@ -92,7 +92,7 @@ static int php_gziop_flush(php_stream *stream TSRMLS_DC)
 	return gzflush(self->gz_file, Z_SYNC_FLUSH);
 }
 
-php_stream_ops php_stream_gzio_ops = {
+static php_stream_ops php_stream_gzio_ops = {
 	php_gziop_write, php_gziop_read,
 	php_gziop_close, php_gziop_flush,
 	"ZLIB",
