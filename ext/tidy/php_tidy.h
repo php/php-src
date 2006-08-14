@@ -39,58 +39,58 @@ extern zend_module_entry tidy_module_entry;
 #define TIDY_ATTR_METHOD(name)    PHP_FUNCTION(tam_ ##name)
 #define TIDY_ATTR_ME(name, param) TIDY_METHOD_MAP(name, tam_ ##name, param)
 
-PHP_MINIT_FUNCTION(tidy);
-PHP_MSHUTDOWN_FUNCTION(tidy);
-PHP_RINIT_FUNCTION(tidy);
-PHP_MINFO_FUNCTION(tidy);
+static PHP_MINIT_FUNCTION(tidy);
+static PHP_MSHUTDOWN_FUNCTION(tidy);
+static PHP_RINIT_FUNCTION(tidy);
+static PHP_MINFO_FUNCTION(tidy);
 
-PHP_FUNCTION(tidy_getopt);
-PHP_FUNCTION(tidy_parse_string);
-PHP_FUNCTION(tidy_parse_file);
-PHP_FUNCTION(tidy_clean_repair);
-PHP_FUNCTION(tidy_repair_string);
-PHP_FUNCTION(tidy_repair_file);
-PHP_FUNCTION(tidy_diagnose);
-PHP_FUNCTION(tidy_get_output);
-PHP_FUNCTION(tidy_get_error_buffer);
-PHP_FUNCTION(tidy_get_release);
-PHP_FUNCTION(tidy_reset_config);
-PHP_FUNCTION(tidy_get_config);
-PHP_FUNCTION(tidy_get_status);
-PHP_FUNCTION(tidy_get_html_ver);
+static PHP_FUNCTION(tidy_getopt);
+static PHP_FUNCTION(tidy_parse_string);
+static PHP_FUNCTION(tidy_parse_file);
+static PHP_FUNCTION(tidy_clean_repair);
+static PHP_FUNCTION(tidy_repair_string);
+static PHP_FUNCTION(tidy_repair_file);
+static PHP_FUNCTION(tidy_diagnose);
+static PHP_FUNCTION(tidy_get_output);
+static PHP_FUNCTION(tidy_get_error_buffer);
+static PHP_FUNCTION(tidy_get_release);
+static PHP_FUNCTION(tidy_reset_config);
+static PHP_FUNCTION(tidy_get_config);
+static PHP_FUNCTION(tidy_get_status);
+static PHP_FUNCTION(tidy_get_html_ver);
 #if HAVE_TIDYOPTGETDOC
-PHP_FUNCTION(tidy_get_opt_doc);
+static PHP_FUNCTION(tidy_get_opt_doc);
 #endif
-PHP_FUNCTION(tidy_is_xhtml);
-PHP_FUNCTION(tidy_is_xml);
-PHP_FUNCTION(tidy_error_count);
-PHP_FUNCTION(tidy_warning_count);
-PHP_FUNCTION(tidy_access_count);
-PHP_FUNCTION(tidy_config_count);
+static PHP_FUNCTION(tidy_is_xhtml);
+static PHP_FUNCTION(tidy_is_xml);
+static PHP_FUNCTION(tidy_error_count);
+static PHP_FUNCTION(tidy_warning_count);
+static PHP_FUNCTION(tidy_access_count);
+static PHP_FUNCTION(tidy_config_count);
 
-PHP_FUNCTION(ob_tidyhandler);
+static PHP_FUNCTION(ob_tidyhandler);
 
-PHP_FUNCTION(tidy_get_root);
-PHP_FUNCTION(tidy_get_html);
-PHP_FUNCTION(tidy_get_head);
-PHP_FUNCTION(tidy_get_body);
+static PHP_FUNCTION(tidy_get_root);
+static PHP_FUNCTION(tidy_get_html);
+static PHP_FUNCTION(tidy_get_head);
+static PHP_FUNCTION(tidy_get_body);
 
-TIDY_DOC_METHOD(__construct);
-TIDY_DOC_METHOD(parseFile);
-TIDY_DOC_METHOD(parseString);
+static TIDY_DOC_METHOD(__construct);
+static TIDY_DOC_METHOD(parseFile);
+static TIDY_DOC_METHOD(parseString);
 
-TIDY_NODE_METHOD(__construct);
-TIDY_NODE_METHOD(hasChildren);
-TIDY_NODE_METHOD(hasSiblings);
-TIDY_NODE_METHOD(isComment);
-TIDY_NODE_METHOD(isHtml);
-TIDY_NODE_METHOD(isXhtml);
-TIDY_NODE_METHOD(isXml);
-TIDY_NODE_METHOD(isText);
-TIDY_NODE_METHOD(isJste);
-TIDY_NODE_METHOD(isAsp);
-TIDY_NODE_METHOD(isPhp);
-TIDY_NODE_METHOD(getParent);
+static TIDY_NODE_METHOD(__construct);
+static TIDY_NODE_METHOD(hasChildren);
+static TIDY_NODE_METHOD(hasSiblings);
+static TIDY_NODE_METHOD(isComment);
+static TIDY_NODE_METHOD(isHtml);
+static TIDY_NODE_METHOD(isXhtml);
+static TIDY_NODE_METHOD(isXml);
+static TIDY_NODE_METHOD(isText);
+static TIDY_NODE_METHOD(isJste);
+static TIDY_NODE_METHOD(isAsp);
+static TIDY_NODE_METHOD(isPhp);
+static TIDY_NODE_METHOD(getParent);
 
 ZEND_BEGIN_MODULE_GLOBALS(tidy)
 	char *default_config;
