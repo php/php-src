@@ -96,6 +96,7 @@ if test "$PHP_PDO_MYSQL" != "no"; then
 
   PHP_CHECK_LIBRARY($PDO_MYSQL_LIBNAME, mysql_query,
   [
+    PHP_EVAL_INCLINE($PDO_MYSQL_INCLUDE)
     PHP_EVAL_LIBLINE($PDO_MYSQL_LIBS, PDO_MYSQL_SHARED_LIBADD)
   ],[
     AC_MSG_ERROR([mysql_query missing!?])
@@ -124,7 +125,7 @@ if test "$PHP_PDO_MYSQL" != "no"; then
     AC_MSG_RESULT($pdo_inc_path)
   ])
 
-  PHP_NEW_EXTENSION(pdo_mysql, pdo_mysql.c mysql_driver.c mysql_statement.c, $ext_shared,,-I$pdo_inc_path $PDO_MYSQL_INCLUDE)
+  PHP_NEW_EXTENSION(pdo_mysql, pdo_mysql.c mysql_driver.c mysql_statement.c, $ext_shared,,-I$pdo_inc_path)
   ifdef([PHP_ADD_EXTENSION_DEP],
   [
     PHP_ADD_EXTENSION_DEP(pdo_mysql, pdo)
