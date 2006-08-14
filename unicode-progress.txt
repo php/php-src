@@ -43,8 +43,6 @@ ext/standard
         Params API. Rest - no idea yet.
 
     str_replace()
-        Params API, IS_UNICODE upgrade
-
     stri_replace()
         Params API, IS_UNICODE upgrade. Case-folding should be handled
         similar to stristr().
@@ -52,9 +50,6 @@ ext/standard
     str_word_count()
         Params API, IS_UNICODE support, using u_isalpha(), etc.
     
-    strcoll()
-        Params API, upgrade to use Collator if TT == IS_UNICODE, test
-
     stristr()
         This is the problematic one. There are a few approaches:
 
@@ -188,6 +183,7 @@ ext/standard
     str_rot13()
     str_shuffle()
     str_split()
+    strcoll()
     strcspn()
     strip_tags()
     stripcslashes()
