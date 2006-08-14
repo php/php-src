@@ -114,6 +114,7 @@ http://pecl4win.php.net/ext.php/php_pdo_sqlite.dll
      <file name="vtab.c" role="src" />
      <file name="loadext.c" role="src" />
      <file name="complete.c" role="src" />
+     <file name="sqlite3ext.h" role="src" />
     </dir> <!-- //sqlite/src -->
     <dir name="tool">
      <file name="diffdb.c" role="src" />
