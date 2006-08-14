@@ -231,6 +231,40 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filena
 	object_init_ex(us->object, uwrap->ce);
 	ZVAL_REFCOUNT(us->object) = 1;
 	PZVAL_IS_REF(us->object) = 1;
+	
+	if (uwrap->ce->constructor) {
+		zend_fcall_info fci;
+		zend_fcall_info_cache fcc;
+		zval *retval_ptr;
+		
+		fci.size = sizeof(fci);
+		fci.function_table = &uwrap->ce->function_table;
+		fci.function_name = NULL;
+		fci.symbol_table = NULL;
+		fci.object_pp = &us->object;
+		fci.retval_ptr_ptr = &retval_ptr;
+		fci.param_count = 0;
+		fci.params = NULL;
+		fci.no_separation = 1;
+		
+		fcc.initialized = 1;
+		fcc.function_handler = uwrap->ce->constructor;
+		fcc.calling_scope = EG(scope);
+		fcc.object_pp = &us->object;
+
+		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not execute %s::%s()", uwrap->ce->name, uwrap->ce->constructor->common.function_name);
+			zval_dtor(us->object);
+			FREE_ZVAL(us->object);
+			efree(us);
+			FG(user_stream_current_filename) = NULL;
+			return NULL;
+		} else {
+			if (retval_ptr) {
+				zval_ptr_dtor(&retval_ptr);
+			}
+		}
+	}
 
 	if (context) {
 		MAKE_STD_ZVAL(zcontext);
