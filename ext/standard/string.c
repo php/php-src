@@ -494,24 +494,32 @@ PHP_FUNCTION(nl_langinfo)
 #endif
 /* }}} */
 
-#ifdef HAVE_STRCOLL
-/* {{{ proto int strcoll(string str1, string str2)
+/* {{{ proto int strcoll(string str1, string str2) U
    Compares two strings using the current locale */
 PHP_FUNCTION(strcoll)
 {
-	zval **s1, **s2;
+	zstr s1, s2;
+	int s1_len, s2_len;
+	zend_uchar str_type;
 
-	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &s1, &s2) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT", &s1, &s1_len,
+							  &str_type, &s2, &s2_len, &str_type) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(s1);
-	convert_to_string_ex(s2);
 
-	RETURN_LONG(strcoll((const char *) Z_STRVAL_PP(s1),
-	                    (const char *) Z_STRVAL_PP(s2)));
+	if (str_type == IS_UNICODE) {
+		RETURN_LONG(ZEND_COLL_RESULT(ucol_strcoll(UG(default_collator)->coll, s1.u, s1_len, s2.u, s2_len)));
+	} else {
+#ifdef HAVE_STRCOLL
+		RETURN_LONG(strcoll((const char *) s1.s,
+							(const char *) s2.s));
+#else
+		RETURN_FALSE;
+#endif
+	}
+
 }
 /* }}} */
-#endif
 
 /* {{{ php_charmask
  * Fills a 256-byte bytemask with input. You can specify a range like 'a..z',
