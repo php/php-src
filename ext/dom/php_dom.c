@@ -228,7 +228,7 @@ int dom_get_strict_error(php_libxml_ref_obj *document) {
 /* {{{ xmlNodePtr dom_object_get_node(dom_object *obj) */
 PHP_DOM_EXPORT xmlNodePtr dom_object_get_node(dom_object *obj)
 {
-	if (obj->ptr != NULL) {
+	if (obj && obj->ptr != NULL) {
 		return ((php_libxml_node_ptr *)obj->ptr)->node;
 	} else {
 		return NULL;
@@ -239,7 +239,7 @@ PHP_DOM_EXPORT xmlNodePtr dom_object_get_node(dom_object *obj)
 /* {{{ dom_object *php_dom_object_get_data(xmlNodePtr obj) */
 PHP_DOM_EXPORT dom_object *php_dom_object_get_data(xmlNodePtr obj)
 {
-	if (obj->_private != NULL) {
+	if (obj && obj->_private != NULL) {
 		return (dom_object *) ((php_libxml_node_ptr *) obj->_private)->_private;
 	} else {
 		return NULL;
