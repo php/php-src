@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2006, PHP 5.1.6
+
 17 Aug 2006, PHP 5.1.5
 - Fixed memory_limit on 64bit systems. (Stefan E.)
 - Fixed overflow on 64bit systems in str_repeat() and wordwrap(). (Stefan E.)

@@ -41,8 +41,8 @@ AC_CONFIG_HEADER(main/php_config.h)
 
 MAJOR_VERSION=5
 MINOR_VERSION=1
-RELEASE_VERSION=5
-EXTRA_VERSION=""
+RELEASE_VERSION=6
+EXTRA_VERSION="-dev"
 VERSION="$MAJOR_VERSION.$MINOR_VERSION.$RELEASE_VERSION$EXTRA_VERSION"
 
 dnl Define where extension directories are located in the configure context
