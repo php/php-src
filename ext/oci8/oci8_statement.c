@@ -62,7 +62,19 @@ php_oci_statement *php_oci_statement_create (php_oci_connection *connection, cha
 	
 	if (query_len > 0) {
 #if HAVE_OCI_STMT_PREPARE2
-		connection->errcode = PHP_OCI_CALL(OCIStmtPrepare2, (connection->svc, &(statement->stmt), connection->err, (text *)query, query_len, NULL, 0, OCI_NTV_SYNTAX, OCI_DEFAULT));
+		connection->errcode = PHP_OCI_CALL(OCIStmtPrepare2, 
+				(
+				 connection->svc,
+				 &(statement->stmt),
+				 connection->err,
+				 (text *)query,
+				 query_len,
+				 NULL,
+				 0,
+				 OCI_NTV_SYNTAX,
+				 OCI_DEFAULT
+				)
+		);
 #else
 		connection->errcode = PHP_OCI_CALL(OCIStmtPrepare, (statement->stmt, connection->err, (text *)query, query_len, OCI_NTV_SYNTAX, OCI_DEFAULT));
 #endif		
@@ -189,7 +201,18 @@ int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows TSRMLS_DC)
 
 				column->cb_retlen = PHP_OCI_PIECE_SIZE;
 
-				PHP_OCI_CALL( OCIStmtSetPieceInfo, ((void *) column->oci_define, OCI_HTYPE_DEFINE, statement->err, ((char*)column->data) + column->retlen4, &(column->cb_retlen), OCI_NEXT_PIECE, &column->indicator, &column->retcode));
+				PHP_OCI_CALL(OCIStmtSetPieceInfo, 
+						(
+						 (void *) column->oci_define,
+						 OCI_HTYPE_DEFINE,
+						 statement->err,
+						 ((char*)column->data) + column->retlen4,
+						 &(column->cb_retlen),
+						 OCI_NEXT_PIECE,
+						 &column->indicator,
+						 &column->retcode
+						)
+				);
 			}
 		}
 
@@ -611,8 +634,7 @@ void php_oci_statement_free(php_oci_statement *statement TSRMLS_DC)
 #if HAVE_OCI_STMT_PREPARE2
 		if (statement->last_query_len) { /* FIXME: magical */
 			PHP_OCI_CALL(OCIStmtRelease, (statement->stmt, statement->err, NULL, 0, OCI_STRLS_CACHE_DELETE));
-		}
-		else {
+		} else {
 			PHP_OCI_CALL(OCIHandleFree, (statement->stmt, OCI_HTYPE_STMT));
 		}
 #else
@@ -680,8 +702,7 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 	} else if (Z_TYPE_P(bind->zval) == IS_STRING && Z_STRLEN_P(bind->zval) > 0) {
 		Z_STRVAL_P(bind->zval) = erealloc(Z_STRVAL_P(bind->zval), Z_STRLEN_P(bind->zval)+1);
 		Z_STRVAL_P(bind->zval)[ Z_STRLEN_P(bind->zval) ] = '\0';
-	}
-	else if (Z_TYPE_P(bind->zval) == IS_ARRAY) {
+	} else if (Z_TYPE_P(bind->zval) == IS_ARRAY) {
 		int i;
 		zval **entry;
 		HashTable *hash = HASH_OF(bind->zval);
@@ -697,8 +718,7 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 						zval_dtor(*entry);
 						ZVAL_LONG(*entry, ((ub4 *)(bind->array.elements))[i]);
 						zend_hash_move_forward(hash);
-					}
-					else {
+					} else {
 						add_next_index_long(bind->zval, ((ub4 *)(bind->array.elements))[i]);
 					}
 				}
@@ -709,8 +729,7 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 						zval_dtor(*entry);
 						ZVAL_DOUBLE(*entry, ((double *)(bind->array.elements))[i]);
 						zend_hash_move_forward(hash);
-					}
-					else {
+					} else {
 						add_next_index_double(bind->zval, ((double *)(bind->array.elements))[i]);
 					}
 				}
@@ -729,19 +748,16 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 						if (connection->errcode != OCI_SUCCESS) {
 							php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 							ZVAL_NULL(*entry);
-						}
-						else {
+						} else {
 							ZVAL_STRINGL(*entry, buff, buff_len, 1);
 						}
 						zend_hash_move_forward(hash);
-					}
-					else {
+					} else {
 						connection->errcode = PHP_OCI_CALL(OCIDateToText, (connection->err, &(((OCIDate *)(bind->array.elements))[i]), 0, 0, 0, 0, &buff_len, buff));
 						if (connection->errcode != OCI_SUCCESS) {
 							php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 							add_next_index_null(bind->zval);
-						}
-						else {
+						} else {
 							add_next_index_stringl(bind->zval, buff, buff_len, 1);
 						}
 					}
@@ -761,8 +777,7 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 						zval_dtor(*entry);
 						ZVAL_STRINGL(*entry, ((text *)bind->array.elements)+i*bind->array.max_length, curr_element_length, 1);
 						zend_hash_move_forward(hash);
-					}
-					else {
+					} else {
 						add_next_index_stringl(bind->zval, ((text *)bind->array.elements)+i*bind->array.max_length, curr_element_length, 1);
 					}
 				}
@@ -853,8 +868,7 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 			}
 			if (maxlength == -1) {
 				value_sz = (Z_TYPE_P(var) == IS_STRING) ? Z_STRLEN_P(var) : 0;
-			}
-			else {
+			} else {
 				value_sz = maxlength;
 			}
 			break;
@@ -921,7 +935,16 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 	}
 
 	if (mode == OCI_DATA_AT_EXEC) {
-		statement->errcode = PHP_OCI_CALL(OCIBindDynamic, (bindp->bind, statement->err, (dvoid *)bindp, php_oci_bind_in_callback, (dvoid *)bindp, php_oci_bind_out_callback));
+		statement->errcode = PHP_OCI_CALL(OCIBindDynamic, 
+				(
+				 bindp->bind,
+				 statement->err,
+				 (dvoid *)bindp,
+				 php_oci_bind_in_callback,
+				 (dvoid *)bindp,
+				 php_oci_bind_out_callback
+				)
+		);
 
 		if (statement->errcode != OCI_SUCCESS) {
 			php_oci_error(statement->err, statement->errcode TSRMLS_CC);
@@ -933,7 +956,17 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 #ifdef PHP_OCI8_HAVE_COLLECTIONS
 	if (type == SQLT_NTY) {
 		/* Bind object */
-		statement->errcode = PHP_OCI_CALL(OCIBindObject, (bindp->bind, statement->err, bind_collection->tdo, (dvoid **) &(bind_collection->collection), (ub4 *) 0, (dvoid **) 0, (ub4 *) 0));
+		statement->errcode = PHP_OCI_CALL(OCIBindObject, 
+				(
+				 bindp->bind,
+				 statement->err,
+				 bind_collection->tdo,
+				 (dvoid **) &(bind_collection->collection),
+				 (ub4 *) 0,
+				 (dvoid **) 0,
+				 (ub4 *) 0
+				)
+		);
 		
 		if (statement->errcode) {
 			php_oci_error(statement->err, statement->errcode TSRMLS_CC);
@@ -1070,8 +1103,7 @@ php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAME
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid column name \"%s\"", Z_STRVAL_P(column_index));
 			return NULL;
 		}
-	}
-	else {
+	} else {
 		convert_to_long(column_index);
 		column = php_oci_statement_get_column(statement, Z_LVAL_P(column_index), NULL, 0 TSRMLS_CC);
 		if (!column) {
@@ -1273,8 +1305,7 @@ php_oci_bind *php_oci_bind_array_helper_string(zval* var, long max_table_length,
 			((text *)bind->array.elements)[i*maxlength + element_length] = '\0';
 			
 			zend_hash_move_forward(hash);
-		}
-		else {
+		} else {
 			((text *)bind->array.elements)[i*maxlength] = '\0';
 		}
 	}
@@ -1310,8 +1341,7 @@ php_oci_bind *php_oci_bind_array_helper_number(zval* var, long max_table_length 
 			convert_to_long_ex(entry);
 			((ub4 *)bind->array.elements)[i] = (ub4) Z_LVAL_PP(entry);
 			zend_hash_move_forward(hash);
-		}
-		else {
+		} else {
 			((ub4 *)bind->array.elements)[i] = 0;
 		}
 	}
@@ -1347,8 +1377,7 @@ php_oci_bind *php_oci_bind_array_helper_double(zval* var, long max_table_length 
 			convert_to_double_ex(entry);
 			((double *)bind->array.elements)[i] = (double) Z_DVAL_PP(entry);
 			zend_hash_move_forward(hash);
-		}
-		else {
+		} else {
 			((double *)bind->array.elements)[i] = 0;
 		}
 	}
@@ -1397,8 +1426,7 @@ php_oci_bind *php_oci_bind_array_helper_date(zval* var, long max_table_length, p
 			
 			((OCIDate *)bind->array.elements)[i] = oci_date;
 			zend_hash_move_forward(hash);
-		}
-		else {
+		} else {
 			connection->errcode = PHP_OCI_CALL(OCIDateFromText, (connection->err, "01-JAN-00", sizeof("01-JAN-00")-1, NULL, 0, NULL, 0, &oci_date));
 
 			if (connection->errcode != OCI_SUCCESS) {
