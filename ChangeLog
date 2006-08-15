@@ -1,3 +1,407 @@
+2006-08-14  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-progress.txt
+      ext/standard/string.c:
+      Unicode support for strcoll().
+
+    * ZendEngine2/zend_builtin_functions.c:
+      Remove UTODO's -- this is handled during name mangling/unmangling.
+
+2006-08-14  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      run-tests.php:
+      fix previous patch
+
+    * run-tests.php:
+      fix my previous patch
+
+2006-08-14  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h:
+      add_next_index_zstr[l]()
+
+    * unicode-progress.txt
+      ext/standard/string.c:
+      Unicode support for str_split().
+
+    * ZendEngine2/zend_API.c:
+      Typo.
+
+    * unicode-progress.txt
+      ext/standard/string.c:
+      Unicode support in chunk_split().
+
+    * ZendEngine2/zend_API.c:
+      Set T_arg_type to default string type if we were not able to determine
+      it from the args.
+
+2006-08-14  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/pdo_mysql/config.m4:
+      fix #38451 (PDO_MYSQL doesn't compile on Solaris)
+
+2006-08-14  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_2)
+      ext/bz2/bz2.c
+      ext/bz2/php_bz2.h
+      ext/ctype/ctype.c
+      ext/ctype/php_ctype.h
+      ext/json/json.c
+      ext/json/php_json.h
+      ext/pspell/php_pspell.h
+      ext/pspell/pspell.c
+      ext/tidy/php_tidy.h
+      ext/tidy/tidy.c
+      ext/zlib/php_zlib.h
+      ext/zlib/zlib.c
+      ext/zlib/zlib_fopen_wrapper.c:
+      move static declaration to *.c files
+      mroe static/const keywording
+
+2006-08-14  Michael Wallner  <mike@iworks.at>
+
+    * (PHP_5_2)
+      ext/date/php_date.c
+      ext/date/tests/oo_002.phpt:
+      MFH: add cloning support to DateTime classes
+
+    * ext/date/php_date.c
+      ext/date/tests/oo_002.phpt
+      ext/date/tests/oo_002.phpt:
+      - add cloning support to DateTime classes
+
+2006-08-14  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_5_1)
+      php.ini-dist
+      php.ini-dist
+      php.ini-recommended
+      php.ini-recommended
+      ext/fbsql/php_fbsql.c
+      ext/fbsql/php_fbsql.c
+      ext/fbsql/php_fbsql.h
+      ext/fbsql/php_fbsql.h:
+      MFH: Cleanup before reusing failed persistant connection. Better formating
+      of timestamp and decimal values
+
+    * php.ini-dist
+      php.ini-recommended
+      ext/fbsql/php_fbsql.c
+      ext/fbsql/php_fbsql.h:
+      Cleanup before reusing failed persistant connection. Better formating of
+      timestamp and decimal values
+
+2006-08-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo_sqlite/config.m4
+      ext/pdo_sqlite/config.w32
+      ext/pdo_sqlite/package.xml
+      ext/pdo_sqlite/sqlite/Makefile.in
+      ext/pdo_sqlite/sqlite/Makefile.linux-gcc
+      ext/pdo_sqlite/sqlite/VERSION
+      ext/pdo_sqlite/sqlite/aclocal.m4
+      ext/pdo_sqlite/sqlite/configure
+      ext/pdo_sqlite/sqlite/configure.ac
+      ext/pdo_sqlite/sqlite/main.mk
+      ext/pdo_sqlite/sqlite/mkdll.sh
+      ext/pdo_sqlite/sqlite/mkopcodeh.awk
+      ext/pdo_sqlite/sqlite/publish.sh
+      ext/pdo_sqlite/sqlite/sqlite3.def
+      ext/pdo_sqlite/sqlite/src/alter.c
+      ext/pdo_sqlite/sqlite/src/analyze.c
+      ext/pdo_sqlite/sqlite/src/attach.c
+      ext/pdo_sqlite/sqlite/src/auth.c
+      ext/pdo_sqlite/sqlite/src/btree.c
+      ext/pdo_sqlite/sqlite/src/btree.h
+      ext/pdo_sqlite/sqlite/src/build.c
+      ext/pdo_sqlite/sqlite/src/callback.c
+      ext/pdo_sqlite/sqlite/src/complete.c
+      ext/pdo_sqlite/sqlite/src/date.c
+      ext/pdo_sqlite/sqlite/src/delete.c
+      ext/pdo_sqlite/sqlite/src/experimental.c
+      ext/pdo_sqlite/sqlite/src/expr.c
+      ext/pdo_sqlite/sqlite/src/func.c
+      ext/pdo_sqlite/sqlite/src/hash.c
+      ext/pdo_sqlite/sqlite/src/hash.h
+      ext/pdo_sqlite/sqlite/src/insert.c
+      ext/pdo_sqlite/sqlite/src/keywordhash.h
+      ext/pdo_sqlite/sqlite/src/legacy.c
+      ext/pdo_sqlite/sqlite/src/loadext.c
+      ext/pdo_sqlite/sqlite/src/main.c
+      ext/pdo_sqlite/sqlite/src/opcodes.h
+      ext/pdo_sqlite/sqlite/src/os.c
+      ext/pdo_sqlite/sqlite/src/os.h
+      ext/pdo_sqlite/sqlite/src/os_common.h
+      ext/pdo_sqlite/sqlite/src/os_mac.c
+      ext/pdo_sqlite/sqlite/src/os_mac.h
+      ext/pdo_sqlite/sqlite/src/os_unix.c
+      ext/pdo_sqlite/sqlite/src/os_win.c
+      ext/pdo_sqlite/sqlite/src/pager.c
+      ext/pdo_sqlite/sqlite/src/pager.h
+      ext/pdo_sqlite/sqlite/src/parse.c
+      ext/pdo_sqlite/sqlite/src/parse.h
+      ext/pdo_sqlite/sqlite/src/parse.y
+      ext/pdo_sqlite/sqlite/src/pragma.c
+      ext/pdo_sqlite/sqlite/src/prepare.c
+      ext/pdo_sqlite/sqlite/src/printf.c
+      ext/pdo_sqlite/sqlite/src/select.c
+      ext/pdo_sqlite/sqlite/src/shell.c
+      ext/pdo_sqlite/sqlite/src/sqlite.h.in
+      ext/pdo_sqlite/sqlite/src/sqlite3ext.h
+      ext/pdo_sqlite/sqlite/src/sqliteInt.h
+      ext/pdo_sqlite/sqlite/src/table.c
+      ext/pdo_sqlite/sqlite/src/tclsqlite.c
+      ext/pdo_sqlite/sqlite/src/test1.c
+      ext/pdo_sqlite/sqlite/src/test2.c
+      ext/pdo_sqlite/sqlite/src/test3.c
+      ext/pdo_sqlite/sqlite/src/test4.c
+      ext/pdo_sqlite/sqlite/src/test5.c
+      ext/pdo_sqlite/sqlite/src/tokenize.c
+      ext/pdo_sqlite/sqlite/src/trigger.c
+      ext/pdo_sqlite/sqlite/src/update.c
+      ext/pdo_sqlite/sqlite/src/utf.c
+      ext/pdo_sqlite/sqlite/src/util.c
+      ext/pdo_sqlite/sqlite/src/vacuum.c
+      ext/pdo_sqlite/sqlite/src/vdbe.c
+      ext/pdo_sqlite/sqlite/src/vdbe.h
+      ext/pdo_sqlite/sqlite/src/vdbeInt.h
+      ext/pdo_sqlite/sqlite/src/vdbeapi.c
+      ext/pdo_sqlite/sqlite/src/vdbeaux.c
+      ext/pdo_sqlite/sqlite/src/vdbemem.c
+      ext/pdo_sqlite/sqlite/src/vtab.c
+      ext/pdo_sqlite/sqlite/src/where.c
+      ext/pdo_sqlite/sqlite/tool/lemon.c
+      ext/pdo_sqlite/sqlite/tool/lempar.c
+      ext/pdo_sqlite/sqlite/tool/memleak3.tcl
+      ext/pdo_sqlite/sqlite/tool/mkkeywordhash.c
+      ext/pdo_sqlite/sqlite/tool/showdb.c
+      ext/pdo_sqlite/sqlite/tool/spaceanal.tcl:
+      MFB: Upgraded libsqlite in pdo_sqlite to 3.3.7
+
+    * (PHP_5_2)
+      ext/pdo_sqlite/package2.xml:
+      Added missing file entry
+
+    * (PHP_5_2)
+      NEWS:
+      Updated libsqlite in ext/pdo_sqlite to 3.3.7.
+
+    * ext/pdo_sqlite/sqlite/src/sqlite3ext.h
+      ext/pdo_sqlite/sqlite/src/sqlite3ext.h
+      ext/pdo_sqlite/sqlite/src/sqliteInt.h
+      ext/pdo_sqlite/sqlite/src/table.c
+      ext/pdo_sqlite/sqlite/src/tclsqlite.c
+      ext/pdo_sqlite/sqlite/src/test1.c
+      ext/pdo_sqlite/sqlite/src/test2.c
+      ext/pdo_sqlite/sqlite/src/test3.c
+      ext/pdo_sqlite/sqlite/src/test4.c
+      ext/pdo_sqlite/sqlite/src/test5.c
+      ext/pdo_sqlite/sqlite/src/tokenize.c
+      ext/pdo_sqlite/sqlite/src/trigger.c
+      ext/pdo_sqlite/sqlite/src/update.c
+      ext/pdo_sqlite/sqlite/src/utf.c
+      ext/pdo_sqlite/sqlite/src/util.c
+      ext/pdo_sqlite/sqlite/src/vacuum.c
+      ext/pdo_sqlite/sqlite/src/vdbe.c
+      ext/pdo_sqlite/sqlite/src/vdbe.h
+      ext/pdo_sqlite/sqlite/src/vdbeInt.h
+      ext/pdo_sqlite/sqlite/src/vdbeapi.c
+      ext/pdo_sqlite/sqlite/src/vdbeaux.c
+      ext/pdo_sqlite/sqlite/src/vdbemem.c
+      ext/pdo_sqlite/sqlite/src/vtab.c
+      ext/pdo_sqlite/sqlite/src/vtab.c
+      ext/pdo_sqlite/sqlite/src/where.c
+      ext/pdo_sqlite/sqlite/tool/lemon.c
+      ext/pdo_sqlite/sqlite/tool/lempar.c
+      ext/pdo_sqlite/sqlite/tool/memleak3.tcl
+      ext/pdo_sqlite/sqlite/tool/mkkeywordhash.c
+      ext/pdo_sqlite/sqlite/tool/showdb.c
+      ext/pdo_sqlite/sqlite/tool/spaceanal.tcl:
+      
+      file sqlite3ext.h was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/pdo_sqlite/config.m4
+      ext/pdo_sqlite/config.w32
+      ext/pdo_sqlite/package2.xml
+      ext/pdo_sqlite/sqlite/Makefile.in
+      ext/pdo_sqlite/sqlite/Makefile.linux-gcc
+      ext/pdo_sqlite/sqlite/VERSION
+      ext/pdo_sqlite/sqlite/aclocal.m4
+      ext/pdo_sqlite/sqlite/configure
+      ext/pdo_sqlite/sqlite/configure.ac
+      ext/pdo_sqlite/sqlite/main.mk
+      ext/pdo_sqlite/sqlite/mkdll.sh
+      ext/pdo_sqlite/sqlite/mkopcodeh.awk
+      ext/pdo_sqlite/sqlite/publish.sh
+      ext/pdo_sqlite/sqlite/sqlite3.def
+      ext/pdo_sqlite/sqlite/src/alter.c
+      ext/pdo_sqlite/sqlite/src/analyze.c
+      ext/pdo_sqlite/sqlite/src/attach.c
+      ext/pdo_sqlite/sqlite/src/auth.c
+      ext/pdo_sqlite/sqlite/src/btree.c
+      ext/pdo_sqlite/sqlite/src/btree.h
+      ext/pdo_sqlite/sqlite/src/build.c
+      ext/pdo_sqlite/sqlite/src/callback.c
+      ext/pdo_sqlite/sqlite/src/complete.c
+      ext/pdo_sqlite/sqlite/src/complete.c
+      ext/pdo_sqlite/sqlite/src/date.c
+      ext/pdo_sqlite/sqlite/src/delete.c
+      ext/pdo_sqlite/sqlite/src/experimental.c
+      ext/pdo_sqlite/sqlite/src/expr.c
+      ext/pdo_sqlite/sqlite/src/func.c
+      ext/pdo_sqlite/sqlite/src/hash.c
+      ext/pdo_sqlite/sqlite/src/hash.h
+      ext/pdo_sqlite/sqlite/src/insert.c
+      ext/pdo_sqlite/sqlite/src/keywordhash.h
+      ext/pdo_sqlite/sqlite/src/legacy.c
+      ext/pdo_sqlite/sqlite/src/loadext.c
+      ext/pdo_sqlite/sqlite/src/loadext.c
+      ext/pdo_sqlite/sqlite/src/main.c
+      ext/pdo_sqlite/sqlite/src/opcodes.h
+      ext/pdo_sqlite/sqlite/src/os.c
+      ext/pdo_sqlite/sqlite/src/os.c
+      ext/pdo_sqlite/sqlite/src/os.h
+      ext/pdo_sqlite/sqlite/src/os_common.h
+      ext/pdo_sqlite/sqlite/src/os_mac.c
+      ext/pdo_sqlite/sqlite/src/os_mac.h
+      ext/pdo_sqlite/sqlite/src/os_unix.c
+      ext/pdo_sqlite/sqlite/src/os_win.c
+      ext/pdo_sqlite/sqlite/src/pager.c
+      ext/pdo_sqlite/sqlite/src/pager.h
+      ext/pdo_sqlite/sqlite/src/parse.c
+      ext/pdo_sqlite/sqlite/src/parse.h
+      ext/pdo_sqlite/sqlite/src/parse.y
+      ext/pdo_sqlite/sqlite/src/pragma.c
+      ext/pdo_sqlite/sqlite/src/prepare.c
+      ext/pdo_sqlite/sqlite/src/printf.c
+      ext/pdo_sqlite/sqlite/src/select.c
+      ext/pdo_sqlite/sqlite/src/shell.c
+      ext/pdo_sqlite/sqlite/src/sqlite.h.in:
+      Upgraded bunbled SQLite lib to 3.3.7
+
+2006-08-14  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/php_zip.c:
+      - MFB: nuke unused parameter (not present in old versions)
+
+2006-08-14  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/tidy/README
+      ext/tidy/libtidy.txt
+      ext/tidy/php_tidy.h
+      ext/tidy/tidy.c:
+      MFB: static keywording
+
+    * (PHP_5_2)
+      ext/tidy/README
+      ext/tidy/libtidy.txt
+      ext/tidy/php_tidy.h
+      ext/tidy/tidy.c:
+      more static keywording
+      also remove the libtidy patch, as it is too old. users should use a newer
+      libtify anyway
+
+2006-08-14  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c:
+      - nuke unused parameter (not present in old versions)
+
+2006-08-14  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      main/streams/userspace.c:
+      MFH: fix #38450 (constructor is not called for classes used in userspace
+      stream wrappers)
+
+    * main/streams/userspace.c:
+      fix #38450 (constructor is not called for classes used in userspace stream
+      wrappers)
+
+2006-08-14  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/bz2/bz2.c
+      ext/bz2/php_bz2.h
+      ext/ctype/ctype.c
+      ext/ctype/php_ctype.h
+      ext/pspell/php_pspell.h
+      ext/pspell/pspell.c:
+      MFB: a few more static keywording
+
+    * (PHP_5_2)
+      ext/bz2/bz2.c
+      ext/bz2/php_bz2.h
+      ext/ctype/ctype.c
+      ext/ctype/php_ctype.h
+      ext/pspell/php_pspell.h
+      ext/pspell/pspell.c:
+      a few more static keywording
+
+2006-08-14  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+      fix typo
+
+2006-08-14  Edin Kadribasic  <edink@emini.dk>
+
+    * ext/standard/string.c:
+      Fixed windows build.
+      Looking at the macro definition it seems that the second argument
+      to U_STRING_DECL can only be a string literal, not an indetifier.
+
+2006-08-14  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug38424.phpt:
+      MFB: fix bug #38424 (Different attribute assignment if new or existing)
+      add test
+
+    * (PHP_5_2)
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug38424.phpt
+      ext/simplexml/tests/bug38424.phpt:
+      fix bug #38424 (Different attribute assignment if new or existing)
+      add test
+
+    * ext/dom/php_dom.c:
+      MFB: fix underlying issue for bug #38438
+
+    * (PHP_5_2)
+      ext/dom/php_dom.c:
+      fix underlying issue for bug #38438
+
+2006-08-14  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      run-tests.php:
+      make sure USE_ZEND_ALLOC is always 1
+
+    * run-tests.php:
+      make sure USE_ZEND_ALLOC is always 1 when running tests without -m
+
+    * ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xmlrpc/tests/001.phpt
+      ext/xmlrpc/tests/001.phpt
+      ext/xmlrpc/tests/001.phpt
+      ext/xmlrpc/tests/002.phpt
+      ext/xmlrpc/tests/002.phpt
+      ext/xmlrpc/tests/002.phpt:
+      fix segfault and leak in ext/xmlrpc
+      add tests
+
 2006-08-13  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * (PHP_5_2)

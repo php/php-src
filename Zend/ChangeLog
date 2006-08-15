@@ -1,3 +1,19 @@
+2006-08-14  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_builtin_functions.c:
+      Remove UTODO's -- this is handled during name mangling/unmangling.
+
+    * zend_API.c
+      zend_API.h:
+      add_next_index_zstr[l]()
+
+    * zend_API.c:
+      Typo.
+
+    * zend_API.c:
+      Set T_arg_type to default string type if we were not able to determine
+      it from the args.
+
 2006-08-10  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_1)
