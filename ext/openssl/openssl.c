@@ -113,6 +113,8 @@ zend_function_entry openssl_functions[] = {
 	PHP_FE(openssl_csr_export,			second_arg_force_ref)
 	PHP_FE(openssl_csr_export_to_file,	NULL)
 	PHP_FE(openssl_csr_sign,			NULL)
+	PHP_FE(openssl_csr_get_subject,		NULL)
+	PHP_FE(openssl_csr_get_public_key,	NULL)
 
 	PHP_FE(openssl_sign,		second_arg_force_ref)
 	PHP_FE(openssl_verify,		NULL)
@@ -248,9 +250,13 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 	ASN1_STRING * str = NULL;
 	ASN1_OBJECT * obj;
 
-	MAKE_STD_ZVAL(subitem);
-	array_init(subitem);
-
+	if (key != NULL) {
+		MAKE_STD_ZVAL(subitem);
+		array_init(subitem);
+	} else {
+		subitem = val;
+	}
+	
 	for (i = 0; i < X509_NAME_entry_count(name); i++) {
 		ne  = X509_NAME_get_entry(name, i);
 		obj = X509_NAME_ENTRY_get_object(ne);
@@ -291,7 +297,9 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 			}
 		}
 	}
-	zend_hash_update(HASH_OF(val), key, strlen(key) + 1, (void *)&subitem, sizeof(subitem), NULL);
+	if (key != NULL) {
+		zend_hash_update(HASH_OF(val), key, strlen(key) + 1, (void *)&subitem, sizeof(subitem), NULL);
+	}
 }
 /* }}} */
 
@@ -1527,8 +1535,6 @@ PHP_FUNCTION(openssl_csr_export_to_file)
 }
 /* }}} */
 
-
-
 /* {{{ proto bool openssl_csr_export(resource csr, string &out [, bool notext=true])
    Exports a CSR to file or a var */
 PHP_FUNCTION(openssl_csr_export)
@@ -1786,6 +1792,61 @@ PHP_FUNCTION(openssl_csr_new)
 		X509_REQ_free(csr);
 	}
 	PHP_SSL_REQ_DISPOSE(&req);
+}
+/* }}} */
+
+/* {{{ proto mixed openssl_csr_get_subject(mixed csr)
+   Returns the subject of a CERT or FALSE on error */
+PHP_FUNCTION(openssl_csr_get_subject)
+{
+	zval * zcsr;
+	zend_bool use_shortnames = 1;
+	long csr_resource;
+	X509_NAME * subject;
+	X509_REQ * csr;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &zcsr, &use_shortnames) == FAILURE) {
+		return;
+	}
+
+	csr = php_openssl_csr_from_zval(&zcsr, 0, &csr_resource TSRMLS_CC);
+
+	if (csr == NULL) {
+		RETURN_FALSE;
+	}
+
+	subject = X509_REQ_get_subject_name(csr);
+
+	array_init(return_value);
+	add_assoc_name_entry(return_value, NULL, subject, use_shortnames TSRMLS_CC);
+	return;
+}
+/* }}} */
+
+/* {{{ proto mixed openssl_csr_get_public_key(mixed csr)
+	Returns the subject of a CERT or FALSE on error */
+PHP_FUNCTION(openssl_csr_get_public_key)
+{
+	zval * zcsr;
+	zend_bool use_shortnames = 1;
+	long csr_resource;
+
+	X509_REQ * csr;
+	EVP_PKEY *tpubkey;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &zcsr, &use_shortnames) == FAILURE) {
+		return;
+	}
+
+	csr = php_openssl_csr_from_zval(&zcsr, 0, &csr_resource TSRMLS_CC);
+
+	if (csr == NULL) {
+		RETURN_FALSE;
+	}
+
+	tpubkey=X509_REQ_get_pubkey(csr);
+	RETVAL_RESOURCE(zend_list_insert(tpubkey, le_key));
+	return;
 }
 /* }}} */
 

@@ -67,7 +67,8 @@ PHP_FUNCTION(openssl_csr_new);
 PHP_FUNCTION(openssl_csr_export);
 PHP_FUNCTION(openssl_csr_export_to_file);
 PHP_FUNCTION(openssl_csr_sign);
-
+PHP_FUNCTION(openssl_csr_get_subject);
+PHP_FUNCTION(openssl_csr_get_public_key);
 #else
 
 #define phpext_openssl_ptr NULL
