@@ -74,7 +74,7 @@ PHP_MINFO_FUNCTION(xml);
 static PHP_GINIT_FUNCTION(xml);
 
 static void xml_parser_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC);
-static void xml_set_handler(zval **, zval **);
+static void xml_set_handler(zval **, zval **  TSRMLS_DC);
 inline static unsigned short xml_encode_iso_8859_1(unsigned char);
 inline static char xml_decode_iso_8859_1(unsigned short);
 inline static unsigned short xml_encode_us_ascii(unsigned char);
@@ -371,7 +371,7 @@ static void xml_parser_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 /* }}} */
 
 /* {{{ xml_set_handler() */
-static void xml_set_handler(zval **handler, zval **data)
+static void xml_set_handler(zval **handler, zval **data TSRMLS_DC)
 {
 	/* If we have already a handler, release it */
 	if (*handler) {
@@ -380,9 +380,13 @@ static void xml_set_handler(zval **handler, zval **data)
 
 	/* IS_ARRAY might indicate that we're using array($obj, 'method') syntax */
 	if (Z_TYPE_PP(data) != IS_ARRAY) {
-		TSRMLS_FETCH();
-
 		convert_to_text_ex(data);
+		if (((Z_TYPE_PP(data)==IS_UNICODE) && (Z_USTRLEN_PP(data) == 0)) ||
+			((Z_TYPE_PP(data)==IS_STRING) && (Z_STRLEN_PP(data) == 0))) {
+
+			*handler = NULL;
+			return;
+		}
 	}
 
 	zval_add_ref(data);
@@ -859,6 +863,25 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 					
 				} else {
 					zval *tag;
+					zval **curtag, **mytype, **myval;
+					HashPosition hpos=NULL;
+
+					zend_hash_internal_pointer_end_ex(Z_ARRVAL_P(parser->data), &hpos);
+
+					if (hpos && (zend_hash_get_current_data_ex(Z_ARRVAL_P(parser->data), (void **) &curtag, &hpos) == SUCCESS)) {
+						if (zend_hash_find(Z_ARRVAL_PP(curtag),"type",sizeof("type"),(void **) &mytype) == SUCCESS) {
+							if (!strcmp(Z_STRVAL_PP(mytype), "cdata")) {
+								if (zend_hash_find(Z_ARRVAL_PP(curtag),"value",sizeof("value"),(void **) &myval) == SUCCESS) {
+									int newlen = Z_STRLEN_PP(myval) + decoded_len;
+									Z_STRVAL_PP(myval) = erealloc(Z_STRVAL_PP(myval),newlen+1);
+									strcpy(Z_STRVAL_PP(myval) + Z_STRLEN_PP(myval),decoded_value);
+									Z_STRLEN_PP(myval) += decoded_len;
+									efree(decoded_value);
+									return;
+								}
+							}
+						}
+					}
 
 					MAKE_STD_ZVAL(tag);
 					
@@ -1158,8 +1181,8 @@ PHP_FUNCTION(xml_set_element_handler)
 
 	ZEND_FETCH_RESOURCE(parser,xml_parser *,pind, -1, "XML Parser", le_xml_parser);
 
-	xml_set_handler(&parser->startElementHandler, shdl);
-	xml_set_handler(&parser->endElementHandler, ehdl);
+	xml_set_handler(&parser->startElementHandler, shdl TSRMLS_CC);
+	xml_set_handler(&parser->endElementHandler, ehdl TSRMLS_CC);
 	XML_SetElementHandler(parser->parser, _xml_startElementHandler, _xml_endElementHandler);
 	RETVAL_TRUE;
 }
@@ -1178,7 +1201,7 @@ PHP_FUNCTION(xml_set_character_data_handler)
 
 	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
 
-	xml_set_handler(&parser->characterDataHandler, hdl);
+	xml_set_handler(&parser->characterDataHandler, hdl TSRMLS_CC);
 	XML_SetCharacterDataHandler(parser->parser, _xml_characterDataHandler);
 	RETVAL_TRUE;
 }
@@ -1197,7 +1220,7 @@ PHP_FUNCTION(xml_set_processing_instruction_handler)
 
 	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
 
-	xml_set_handler(&parser->processingInstructionHandler, hdl);
+	xml_set_handler(&parser->processingInstructionHandler, hdl TSRMLS_CC);
 	XML_SetProcessingInstructionHandler(parser->parser, _xml_processingInstructionHandler);
 	RETVAL_TRUE;
 }
@@ -1215,7 +1238,7 @@ PHP_FUNCTION(xml_set_default_handler)
 	}
 	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
 
-	xml_set_handler(&parser->defaultHandler, hdl);
+	xml_set_handler(&parser->defaultHandler, hdl TSRMLS_CC);
 	XML_SetDefaultHandler(parser->parser, _xml_defaultHandler);
 	RETVAL_TRUE;
 }
@@ -1234,7 +1257,7 @@ PHP_FUNCTION(xml_set_unparsed_entity_decl_handler)
 
 	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
 
-	xml_set_handler(&parser->unparsedEntityDeclHandler, hdl);
+	xml_set_handler(&parser->unparsedEntityDeclHandler, hdl TSRMLS_CC);
 	XML_SetUnparsedEntityDeclHandler(parser->parser, _xml_unparsedEntityDeclHandler);
 	RETVAL_TRUE;
 }
@@ -1252,7 +1275,7 @@ PHP_FUNCTION(xml_set_notation_decl_handler)
 	}
 	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
 
-	xml_set_handler(&parser->notationDeclHandler, hdl);
+	xml_set_handler(&parser->notationDeclHandler, hdl TSRMLS_CC);
 	XML_SetNotationDeclHandler(parser->parser, _xml_notationDeclHandler);
 	RETVAL_TRUE;
 }
@@ -1270,7 +1293,7 @@ PHP_FUNCTION(xml_set_external_entity_ref_handler)
 	}
 	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
 
-	xml_set_handler(&parser->externalEntityRefHandler, hdl);
+	xml_set_handler(&parser->externalEntityRefHandler, hdl TSRMLS_CC);
 	XML_SetExternalEntityRefHandler(parser->parser, (void *) _xml_externalEntityRefHandler);
 	RETVAL_TRUE;
 }
@@ -1289,7 +1312,7 @@ PHP_FUNCTION(xml_set_start_namespace_decl_handler)
 
 	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
 
-	xml_set_handler(&parser->startNamespaceDeclHandler, hdl);
+	xml_set_handler(&parser->startNamespaceDeclHandler, hdl TSRMLS_CC);
 	XML_SetStartNamespaceDeclHandler(parser->parser, _xml_startNamespaceDeclHandler);
 	RETVAL_TRUE;
 }
@@ -1308,7 +1331,7 @@ PHP_FUNCTION(xml_set_end_namespace_decl_handler)
 
 	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
 
-	xml_set_handler(&parser->endNamespaceDeclHandler, hdl);
+	xml_set_handler(&parser->endNamespaceDeclHandler, hdl TSRMLS_CC);
 	XML_SetEndNamespaceDeclHandler(parser->parser, _xml_endNamespaceDeclHandler);
 	RETVAL_TRUE;
 }
