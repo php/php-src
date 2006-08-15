@@ -437,8 +437,7 @@ oci_error:
 			
 			OCI_G(env) = NULL;
 			OCI_G(err) = NULL;
-		}
-		else {
+		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCI_SUCCESS_WITH_INFO: %s", tmp_buf);
 		}
 	}
@@ -1057,8 +1056,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 			if (le->type == le_pconnection) {
 				connection = (php_oci_connection *)le->ptr;	
 			}
-		}
-		else if (!persistent && zend_hash_find(&EG(regular_list), hashed_details.c, hashed_details.len+1, (void **) &le) == SUCCESS) {
+		} else if (!persistent && zend_hash_find(&EG(regular_list), hashed_details.c, hashed_details.len+1, (void **) &le) == SUCCESS) {
 			found = 1;
 			if (le->type == le_index_ptr) {
 				int type, link;
@@ -1088,8 +1086,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 						 * */
 						if ( (connection->next_ping > 0) && (timestamp >= connection->next_ping) && !php_oci_connection_ping(connection TSRMLS_CC)) {
 							/* server died */
-						}
-						else {
+						} else {
 							int rsrc_type;
 
 							/* okay, the connection is open and the server is still alive */
@@ -1108,8 +1105,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 					zend_hash_del(&EG(persistent_list), hashed_details.c, hashed_details.len+1);
 					connection = NULL;
 					goto open;
-				}
-				else {
+				} else {
 					/* we do not ping non-persistent connections */
 					smart_str_free_ex(&hashed_details, 0);
 					zend_list_addref(connection->rsrc_id);
@@ -1124,8 +1120,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 			/* found something, but it's not a connection, delete it */
 			if (persistent) {
 				zend_hash_del(&EG(persistent_list), hashed_details.c, hashed_details.len+1);
-			}
-			else {
+			} else {
 				zend_hash_del(&EG(regular_list), hashed_details.c, hashed_details.len+1);
 			}
 		}
@@ -1149,14 +1144,12 @@ open:
 			connection = (php_oci_connection *) ecalloc(1, sizeof(php_oci_connection));
 			connection->hash_key = estrndup(hashed_details.c, hashed_details.len+1);
 			connection->is_persistent = 0;
-		}
-		else {
+		} else {
 			connection = (php_oci_connection *) calloc(1, sizeof(php_oci_connection));
 			connection->hash_key = zend_strndup(hashed_details.c, hashed_details.len);
 			connection->is_persistent = 1;
 		}
-	}
-	else {
+	} else {
 		connection = (php_oci_connection *) ecalloc(1, sizeof(php_oci_connection));
 		connection->hash_key = estrndup(hashed_details.c, hashed_details.len+1);
 		connection->is_persistent = 0;
@@ -1165,8 +1158,7 @@ open:
 	connection->idle_expiry = (OCI_G(persistent_timeout) > 0) ? (timestamp + OCI_G(persistent_timeout)) : 0;
 	if (OCI_G(ping_interval) >= 0) {
 		connection->next_ping = timestamp + OCI_G(ping_interval);
-	}
-	else {
+	} else {
 		/* -1 means "Off" */
 		connection->next_ping = 0;
 	}
@@ -1375,15 +1367,13 @@ open:
 		connection->rsrc_id = zend_list_insert(connection, le_pconnection);
 		zend_hash_update(&EG(persistent_list), connection->hash_key, strlen(connection->hash_key)+1, (void *)&new_le, sizeof(zend_rsrc_list_entry), NULL);
 		OCI_G(num_persistent)++;
-	}
-	else if (!exclusive) {
+	} else if (!exclusive) {
 		connection->rsrc_id = zend_list_insert(connection, le_connection);
 		new_le.ptr = (void *)connection->rsrc_id;
 		new_le.type = le_index_ptr;
 		zend_hash_update(&EG(regular_list), connection->hash_key, strlen(connection->hash_key)+1, (void *)&new_le, sizeof(zend_rsrc_list_entry), NULL);
 		OCI_G(num_links)++;
-	}
-	else {
+	} else {
 		connection->rsrc_id = zend_list_insert(connection, le_connection);	
 		OCI_G(num_links)++;
 	}
@@ -1517,8 +1507,7 @@ static int php_oci_connection_close(php_oci_connection *connection TSRMLS_DC)
 			free(connection->hash_key);
 		}
 		free(connection);
-	}
-	else {
+	} else {
 		if (connection->hash_key) {
 			efree(connection->hash_key);
 		}
@@ -1577,8 +1566,7 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode TSR
 	if (column->is_cursor) { /* REFCURSOR -> simply return the statement id */
 		ZVAL_RESOURCE(value, column->stmtid);
 		zend_list_addref(column->stmtid);
-	} 
-	else if (column->is_descr) {
+	} else if (column->is_descr) {
 		
 		if (column->data_type != SQLT_RDD) {
 			int rsrc_type;
@@ -1605,8 +1593,7 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode TSR
 			} else {
 				if (lob_length > 0) {
 					ZVAL_STRINGL(value, lob_buffer, lob_length, 0);
-				}
-				else {
+				} else {
 					ZVAL_EMPTY_STRING(value);
 				}
 				return 0;
@@ -1617,8 +1604,7 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode TSR
 			add_property_resource(value, "descriptor", column->descid);
 			zend_list_addref(column->descid);
 		}
-	} 
-	else {
+	} else {
 		switch (column->retcode) {
 			case 0: 
 				/* intact value */
@@ -1661,8 +1647,7 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 		if (ZEND_NUM_ARGS() == 2) {
 			fetch_mode = mode;
 		}
-	}
-	else if (expected_args == 2) {
+	} else if (expected_args == 2) {
 		/* only for oci_fetch_array() */
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &z_statement, &fetch_mode) == FAILURE) {
@@ -1672,8 +1657,7 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 		if (ZEND_NUM_ARGS() == 1) {
 			fetch_mode = mode;
 		}
-	} 
-	else {
+	} else {
 		/* for all oci_fetch_*() */
 		
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &z_statement) == FAILURE) {
@@ -1782,15 +1766,13 @@ static int php_oci_persistent_helper(zend_rsrc_list_entry *le TSRMLS_DC)
 		
 			if (OCI_G(ping_interval) >= 0) {
 				connection->next_ping = timestamp + OCI_G(ping_interval);
-			}
-			else {
+			} else {
 				/* ping_interval is -1 */
 				connection->next_ping = 0;
 			}
 
 			connection->used_this_request = 0;
-		}
-		else if (OCI_G(persistent_timeout) != -1) {
+		} else if (OCI_G(persistent_timeout) != -1) {
 			if (connection->idle_expiry < timestamp) {
 				/* connection has timed out */
 				return 1;
