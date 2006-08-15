@@ -426,7 +426,7 @@ oci_error:
 	if (error_code) {
 		int tmp_buf_len = strlen(tmp_buf);
 
-		if (tmp_buf[tmp_buf_len - 1] == '\n') {
+		if (tmp_buf_len > 0 && tmp_buf[tmp_buf_len - 1] == '\n') {
 			tmp_buf[tmp_buf_len - 1] = '\0';
 		}
 			
@@ -845,8 +845,12 @@ sb4 php_oci_error(OCIError *err_p, sword status TSRMLS_DC)
 			break;
 		case OCI_SUCCESS_WITH_INFO:
 			errcode = php_oci_fetch_errmsg(err_p, &errbuf TSRMLS_CC);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCI_SUCCESS_WITH_INFO: %s", errbuf);
-			efree(errbuf);
+			if (errbuf) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCI_SUCCESS_WITH_INFO: %s", errbuf);
+				efree(errbuf);
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCI_SUCCESS_WITH_INFO: failed to fetch error message");
+			}
 			break;
 		case OCI_NEED_DATA:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCI_NEED_DATA");
@@ -856,8 +860,12 @@ sb4 php_oci_error(OCIError *err_p, sword status TSRMLS_DC)
 			break;
 		case OCI_ERROR: 
 			errcode = php_oci_fetch_errmsg(err_p, &errbuf TSRMLS_CC);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errbuf);
-			efree(errbuf);
+			if (errbuf) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errbuf);
+				efree(errbuf);
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to fetch error message");
+			}
 			break;
 		case OCI_INVALID_HANDLE:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCI_INVALID_HANDLE");
