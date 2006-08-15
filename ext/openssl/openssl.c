@@ -60,11 +60,17 @@ static
 		ZEND_ARG_PASS_INFO(1)
 	ZEND_END_ARG_INFO();
 
+/* FIXME: Use the openssl constants instead of
+ * enum. It is now impossible to match real values
+ * against php constants. Also sorry to break the
+ * enum principles here, BC...
+ */
 enum php_openssl_key_type {
 	OPENSSL_KEYTYPE_RSA,
 	OPENSSL_KEYTYPE_DSA,
 	OPENSSL_KEYTYPE_DH,
-	OPENSSL_KEYTYPE_DEFAULT = OPENSSL_KEYTYPE_RSA
+	OPENSSL_KEYTYPE_DEFAULT = OPENSSL_KEYTYPE_RSA,
+	OPENSSL_KEYTYPE_EC = OPENSSL_KEYTYPE_DH +1
 };
 
 enum php_openssl_cipher_type {
@@ -87,6 +93,7 @@ zend_function_entry openssl_functions[] = {
 	PHP_FE(openssl_pkey_export_to_file,	NULL)
 	PHP_FE(openssl_pkey_get_private,	NULL)
 	PHP_FE(openssl_pkey_get_public,		NULL)
+	PHP_FE(openssl_pkey_get_details,	NULL)
 
 	PHP_FALIAS(openssl_free_key,		openssl_pkey_free, 			NULL)
 	PHP_FALIAS(openssl_get_privatekey,	openssl_pkey_get_private,	NULL)
@@ -680,6 +687,7 @@ PHP_MINIT_FUNCTION(openssl)
 	REGISTER_LONG_CONSTANT("OPENSSL_KEYTYPE_DSA", OPENSSL_KEYTYPE_DSA, CONST_CS|CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("OPENSSL_KEYTYPE_DH", OPENSSL_KEYTYPE_DH, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_KEYTYPE_EC", OPENSSL_KEYTYPE_EC, CONST_CS|CONST_PERSISTENT);
 
 	/* Determine default SSL configuration file */
 	config_filename = getenv("OPENSSL_CONF");
@@ -2214,6 +2222,61 @@ PHP_FUNCTION(openssl_pkey_get_private)
 	}
 }
 
+/* }}} */
+
+/* {{{ proto resource openssl_pkey_get_details(resource key)
+	returns an array with the key details (bits, pkey, type)*/
+PHP_FUNCTION(openssl_pkey_get_details)
+{
+	zval *key;
+	EVP_PKEY *pkey;
+	BIO *out;
+	unsigned int pbio_len;
+	char *pbio;
+	long ktype;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &key) == FAILURE) {
+		return;
+	}
+	ZEND_FETCH_RESOURCE(pkey, EVP_PKEY *, &key, -1, "OpenSSL key", le_key);
+	if (!pkey) {
+		RETURN_FALSE;
+	}
+	out = BIO_new(BIO_s_mem());
+	PEM_write_bio_PUBKEY(out, pkey);
+	pbio_len = BIO_get_mem_data(out, &pbio);
+
+	array_init(return_value);
+	add_assoc_long(return_value, "bits", EVP_PKEY_bits(pkey));
+	add_assoc_stringl(return_value, "key", pbio, pbio_len, 1);
+	/*TODO: Use the real values once the openssl constants are used 
+	 * See the enum at the top of this file
+	 */
+	switch (EVP_PKEY_type(pkey->type)) {
+		case EVP_PKEY_RSA:
+		case EVP_PKEY_RSA2:
+			ktype = OPENSSL_KEYTYPE_RSA;
+			break;	
+		case EVP_PKEY_DSA:
+		case EVP_PKEY_DSA2:
+		case EVP_PKEY_DSA3:
+		case EVP_PKEY_DSA4:
+			ktype = OPENSSL_KEYTYPE_DSA;
+			break;
+		case EVP_PKEY_DH:
+			ktype = OPENSSL_KEYTYPE_DH;
+			break;
+		case EVP_PKEY_EC:
+			ktype = OPENSSL_KEYTYPE_EC;
+			break;
+		default:
+			ktype = -1;
+			break;
+	}
+	add_assoc_long(return_value, "type", ktype);
+
+	BIO_free(out);
+}
 /* }}} */
 
 /* }}} */
