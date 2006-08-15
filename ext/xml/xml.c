@@ -380,7 +380,12 @@ static void xml_set_handler(zval **handler, zval **data)
 
 	/* IS_ARRAY might indicate that we're using array($obj, 'method') syntax */
 	if (Z_TYPE_PP(data) != IS_ARRAY) {
+
 		convert_to_string_ex(data);
+		if (Z_STRLEN_PP(data) == 0) {
+			*handler = NULL;
+			return;
+		}
 	}
 
 	zval_add_ref(data);
@@ -857,6 +862,25 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 					
 				} else {
 					zval *tag;
+					zval **curtag, **mytype, **myval;
+					HashPosition hpos=NULL;
+
+					zend_hash_internal_pointer_end_ex(Z_ARRVAL_P(parser->data), &hpos);
+
+					if (hpos && (zend_hash_get_current_data_ex(Z_ARRVAL_P(parser->data), (void **) &curtag, &hpos) == SUCCESS)) {
+						if (zend_hash_find(Z_ARRVAL_PP(curtag),"type",sizeof("type"),(void **) &mytype) == SUCCESS) {
+							if (!strcmp(Z_STRVAL_PP(mytype), "cdata")) {
+								if (zend_hash_find(Z_ARRVAL_PP(curtag),"value",sizeof("value"),(void **) &myval) == SUCCESS) {
+									int newlen = Z_STRLEN_PP(myval) + decoded_len;
+									Z_STRVAL_PP(myval) = erealloc(Z_STRVAL_PP(myval),newlen+1);
+									strcpy(Z_STRVAL_PP(myval) + Z_STRLEN_PP(myval),decoded_value);
+									Z_STRLEN_PP(myval) += decoded_len;
+									efree(decoded_value);
+									return;
+								}
+							}
+						}
+					}
 
 					MAKE_STD_ZVAL(tag);
 					
