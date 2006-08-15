@@ -42,11 +42,14 @@ PHP                                                                        NEWS
 - Fixed bug #38467 (--enable-versioning causes make fail on OS X). (Tony)
 - Fixed bug #38461 (setting private attribute with __set() produces 
   segfault). (Tony)
+- Fixed bug #38454 (warning upon disabling handler via 
+  xml_set_element_handler). (dtorop933 at gmail dot com, Rob)
 - Fixed bug #38451 (PDO_MYSQL doesn't compile on Solaris). (Tony)
 - Fixed bug #38450 (constructor is not called for classes used in userspace 
   stream wrappers). (Tony)
 - Fixed bug #38438 (DOMNodeList->item(0) segfault on empty NodeList). (Ilia)
 - Fixed bug #38431 (xmlrpc_get_type() crashes PHP on objects). (Tony)
+- Fixed bug #38427 (unicode causes xml_parser to misbehave). (Rob)
 - Fixed bug #38424 (Different attribute assignment if new or existing). (Rob)
 - Fixed bug #38394 (PDO fails to recover from failed prepared statement
   execution). (Ilia)
