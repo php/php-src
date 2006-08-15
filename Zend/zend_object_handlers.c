@@ -420,7 +420,7 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 				zval_ptr_dtor(&garbage);
 			}
 		}
-	} else {
+	} else if (property_info) {
 		int setter_done = 0;
 		zend_guard *guard;
 
