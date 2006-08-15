@@ -38,6 +38,7 @@ PHP_FUNCTION(openssl_pkey_free);
 PHP_FUNCTION(openssl_pkey_new);
 PHP_FUNCTION(openssl_pkey_export);
 PHP_FUNCTION(openssl_pkey_export_to_file);
+PHP_FUNCTION(openssl_pkey_get_details);
 
 PHP_FUNCTION(openssl_sign);
 PHP_FUNCTION(openssl_verify);

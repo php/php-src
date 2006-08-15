@@ -26,9 +26,9 @@ PHP                                                                        NEWS
 
 - Improved OpenSSL extension: (Pierre)
   . Added support for all supported algorithms in openssl_verify
-  . Implement #36732 (req/x509 extensions support for openssl_csr_new and
-    openssl_csr_sign) (ben at psc dot edu, Pierre)
-  . Implement #28382 (openssl_x509_parse() extensions support)
+  . Added openssl_pkey_get_details, returns the details of a key
+  . Added x509 v3 extensions support
+  . Added a new constant OPENSSL_KEYTYPE_EC
 
 - Fixed overflow on 64bit systems in str_repeat() and wordwrap(). (Stefan E.)
 - Disabled CURLOPT_FOLLOWLOCATION in curl when open_basedir or safe_mode are
@@ -106,8 +106,11 @@ PHP                                                                        NEWS
   destruction). (Ilia)
 - Fixed bug #37265 (Added missing safe_mode & open_basedir checks to
   imap_body()). (Ilia)
+- Implement #36732 (req/x509 extensions support for openssl_csr_new and
+  openssl_csr_sign) (ben at psc dot edu, Pierre)
 - Fixed bug #35973 (Error ORA-24806 occurs when trying to fetch a NCLOB 
   field). (Tony)
+- Implement #28382 (openssl_x509_parse() extensions support) (Pierre)
 
 24 Jul 2006, PHP 5.2.0RC1
 - Updated bundled MySQL client library to version 5.0.22 in the Windows
