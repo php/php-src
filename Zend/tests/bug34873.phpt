@@ -1,5 +1,5 @@
 --TEST--
-Bug #34873 (Segmentation Fault on foreach in object)
+bug #34873 (Segmentation Fault on foreach in object)
 --FILE--
 <?php
 class pwa {

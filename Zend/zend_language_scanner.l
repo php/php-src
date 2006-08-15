@@ -1461,7 +1461,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	yymore();
 }
 
-<ST_ONE_LINE_COMMENT>[^\n\r?%>]*{ANY_CHAR} {
+<ST_ONE_LINE_COMMENT>[^\n\r?%>]+{ANY_CHAR} {
 	switch (yytext[yyleng-1]) {
 		case '?': case '%': case '>':
 			yyless(yyleng-1);
@@ -1491,7 +1491,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <ST_ONE_LINE_COMMENT>"?>"|"%>" {
     if (CG(asp_tags) || yytext[yyleng-2] != '%') { /* asp comment? */
 		zendlval->value.str.val = yytext; /* no copying - intentional */
-		zendlval->value.str.len = yyleng-2;
+		zendlval->value.str.len = yyleng;
 		zendlval->type = IS_STRING;
 		yyless(yyleng-2);
 		BEGIN(ST_IN_SCRIPTING);

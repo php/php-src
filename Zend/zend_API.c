@@ -2039,16 +2039,18 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 	if ((colon = strstr(Z_STRVAL_P(callable), "::")) != NULL) {
 		clen = colon - Z_STRVAL_P(callable);
 		mlen = Z_STRLEN_P(callable) - clen - 2;
-		lcname = zend_str_tolower_dup(Z_STRVAL_P(callable), clen);
-		/* caution: lcname is not '\0' terminated */
-		if (clen == sizeof("self") - 1 && memcmp(lcname, "self", sizeof("self") - 1) == 0) {
-			*ce_ptr = EG(scope);
-		} else if (clen == sizeof("parent") - 1 && memcmp(lcname, "parent", sizeof("parent") - 1) == 0 && EG(active_op_array)->scope) {
-			*ce_ptr = EG(scope) ? EG(scope)->parent : NULL;
-		} else if (zend_lookup_class(Z_STRVAL_P(callable), clen, &pce TSRMLS_CC) == SUCCESS) {
+		if (zend_lookup_class(Z_STRVAL_P(callable), clen, &pce TSRMLS_CC) == SUCCESS) {
 			*ce_ptr = *pce;
+		} else {
+			lcname = zend_str_tolower_dup(Z_STRVAL_P(callable), clen);
+			/* caution: lcname is not '\0' terminated */
+			if (clen == sizeof("self") - 1 && memcmp(lcname, "self", sizeof("self") - 1) == 0) {
+				*ce_ptr = EG(scope);
+			} else if (clen == sizeof("parent") - 1 && memcmp(lcname, "parent", sizeof("parent") - 1) == 0 && EG(active_op_array)->scope) {
+				*ce_ptr = EG(scope) ? EG(scope)->parent : NULL;
+			}
+			efree(lcname);
 		}
-		efree(lcname);
 		if (!*ce_ptr) {
 			return 0;
 		}
@@ -2177,15 +2179,17 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, char **
 							return 1;
 						}
 
-						lcname = zend_str_tolower_dup(Z_STRVAL_PP(obj), Z_STRLEN_PP(obj));
-						if (Z_STRLEN_PP(obj) == sizeof("self") - 1 && memcmp(lcname, "self", sizeof("self")) == 0) {
-							ce = EG(active_op_array)->scope;
-						} else if (Z_STRLEN_PP(obj) == sizeof("parent") - 1 && memcmp(lcname, "parent", sizeof("parent")) == 0 && EG(active_op_array)->scope) {
-							ce = EG(active_op_array)->scope->parent;
-						} else if (zend_lookup_class(Z_STRVAL_PP(obj), Z_STRLEN_PP(obj), &pce TSRMLS_CC) == SUCCESS) {
+						if (zend_lookup_class(Z_STRVAL_PP(obj), Z_STRLEN_PP(obj), &pce TSRMLS_CC) == SUCCESS) {
 							ce = *pce;
+						} else if (EG(active_op_array)) {
+							lcname = zend_str_tolower_dup(Z_STRVAL_PP(obj), Z_STRLEN_PP(obj));
+							if (Z_STRLEN_PP(obj) == sizeof("self") - 1 && memcmp(lcname, "self", sizeof("self")) == 0) {
+								ce = EG(active_op_array)->scope;
+							} else if (Z_STRLEN_PP(obj) == sizeof("parent") - 1 && memcmp(lcname, "parent", sizeof("parent")) == 0 && EG(active_op_array)->scope) {
+								ce = EG(active_op_array)->scope->parent;
+							}
+							efree(lcname);
 						}
-						efree(lcname);
 					} else {
 						ce = Z_OBJCE_PP(obj); /* TBFixed: what if it's overloaded? */
 						

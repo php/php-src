@@ -130,7 +130,6 @@ typedef unsigned long int uint32_t;
  * but the word order is big endian.
  */
 #define IEEE_BIG_ENDIAN
-#undef IEEE_LITTLE_ENDIAN
 #endif
 
 #ifdef __vax__

@@ -367,10 +367,8 @@ int pass_two(zend_op_array *op_array TSRMLS_DC)
 		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_handler, op_array TSRMLS_CC);
 	}
 
-	if (!CG(interactive) && op_array->size != op_array->last) {
-		op_array->opcodes = (zend_op *) erealloc(op_array->opcodes, sizeof(zend_op)*op_array->last);
-		op_array->size = op_array->last;
-	}
+	op_array->opcodes = (zend_op *) erealloc(op_array->opcodes, sizeof(zend_op)*op_array->last);
+	op_array->size = op_array->last;
 
 	opline = op_array->opcodes;
 	end = opline + op_array->last;

@@ -1158,9 +1158,7 @@ ZEND_VM_HELPER_EX(zend_fetch_property_address_read_helper, VAR|UNUSED|CV, CONST|
 
 
 	if (container->type != IS_OBJECT || !Z_OBJ_HT_P(container)->read_property) {
-		if (type != BP_VAR_IS) {
-			zend_error(E_NOTICE, "Trying to get property of non-object");
-		}
+		zend_error(E_NOTICE, "Trying to get property of non-object");
 		*retval = EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
@@ -3019,20 +3017,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 			ce = Z_OBJCE_P(array_ptr);
 		} else {
-			if (OP1_TYPE == IS_VAR &&
-				free_op1.var == NULL &&
-			    !array_ptr->is_ref &&
-			    array_ptr->refcount > 1) {
-				/* non-separated return value from function */
-				zval *tmp;
-
-				ALLOC_ZVAL(tmp);
-				INIT_PZVAL_COPY(tmp, array_ptr);
-				zval_copy_ctor(tmp);
-				array_ptr = tmp;
-			} else {
-				array_ptr->refcount++;
-			}
+			array_ptr->refcount++;
 		}
 	}
 
@@ -3238,9 +3223,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 				key->value.lval = int_key;
 				key->type = IS_LONG;
 				break;
-			default:
-				ZVAL_NULL(key);
-				break;
+			EMPTY_SWITCH_DEFAULT_CASE()
 		}
 	}
 
