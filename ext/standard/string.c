@@ -575,7 +575,7 @@ static inline int php_charmask(unsigned char *input, int len, char *mask TSRMLS_
  * mode 3 : trim left and right
  * what indicates which chars are to be trimmed. NULL->default (' \t\n\r\v\0')
  */
-PHPAPI char *php_trim(char *c, int len, char *what, int what_len, zend_uchar str_type, zval *return_value, int mode TSRMLS_DC)
+PHPAPI char *php_trim(char *c, int len, char *what, int what_len, zval *return_value, int mode TSRMLS_DC)
 {
 	register int i;
 	int trimmed = 0;
@@ -705,7 +705,7 @@ static int php_expand_u_trim_range(UChar **range, int *range_len TSRMLS_DC)
  */
 static UChar *php_u_trim(UChar *c, int len, UChar *what, int what_len, zval *return_value, int mode TSRMLS_DC)
 {
-	int32_t	i,j;
+	int32_t	i, j, k;
 	UChar	ch = 0, wh = 0;
 	int32_t	start = 0, end = len;
 
@@ -719,8 +719,8 @@ static UChar *php_u_trim(UChar *c, int len, UChar *what, int what_len, zval *ret
 	}
 
 	if ( mode & 1 ) {
-		for ( i = 0 ; i < end ; ) {
-			U16_NEXT(c, i, end, ch);
+		for ( i = k = 0 ; i < end ; ) {
+			U16_NEXT(c, k, end, ch);
 			if ( what ) {
 				for ( j = 0 ; j < what_len ;  ) {
 					U16_NEXT(what, j, what_len, wh);
@@ -729,16 +729,16 @@ static UChar *php_u_trim(UChar *c, int len, UChar *what, int what_len, zval *ret
 				if ( wh != ch ) break;
 			} else {
 				if ( u_isWhitespace(ch) == FALSE ) {
-					U16_BACK_1(c, 0, i); /* U16_NEXT() post-increments 'i' */
 					break;
 				}
 			}
+			i = k;
 		}
 		start = i;
 	}
 	if ( mode & 2 ) {
-		for ( i = end ; i > start ; ) {
-			U16_PREV(c, 0, i, ch);
+		for ( i = k = end ; i > start ; ) {
+			U16_PREV(c, 0, k, ch);
 			if ( what ) {
 				for ( j = 0 ; j < what_len ; ) {
 					U16_NEXT(what, j, what_len, wh);
@@ -747,10 +747,10 @@ static UChar *php_u_trim(UChar *c, int len, UChar *what, int what_len, zval *ret
 				if ( wh != ch ) break;
 			} else {
 				if ( u_isWhitespace(ch) == FALSE ) {
-					U16_FWD_1(c, i, end); /* U16_PREV() pre-decrements 'i' */
 					break;
 				}
 			}
+			i = k;
 		}
 		end = i;
 	}
@@ -782,31 +782,26 @@ static UChar *php_u_trim(UChar *c, int len, UChar *what, int what_len, zval *ret
  */
 static void php_do_trim(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
-	zval **str, **what;
-	int  argc = ZEND_NUM_ARGS();
+	zstr str, what = NULL_ZSTR;
+	int str_len, what_len;
+	zend_uchar str_type;
 
-	if (argc < 1 || argc > 2 || zend_get_parameters_ex(argc, &str, &what) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "T|T", &str, &str_len,
+							  &str_type, &what, &what_len, &str_type) == FAILURE) {
+		return;
 	}
 
-	convert_to_text_ex(str);
-
-	if (argc > 1) {
-		if (Z_TYPE_PP(str) != Z_TYPE_PP(what)) {
-			zend_error(E_WARNING, "%v() expects parameter 2 to be string (legacy, Unicode, or binary), %s given",
-					get_active_function_name(TSRMLS_C),
-					zend_zval_type_name(*what));
-		}
-		if (Z_TYPE_PP(str) == IS_UNICODE) {
-			php_u_trim(Z_USTRVAL_PP(str), Z_USTRLEN_PP(str), Z_USTRVAL_PP(what), Z_USTRLEN_PP(what), return_value, mode TSRMLS_CC);
+	if (ZEND_NUM_ARGS() > 1) {
+		if (str_type == IS_UNICODE) {
+			php_u_trim(str.u, str_len, what.u, what_len, return_value, mode TSRMLS_CC);
 		} else {
-			php_trim(Z_STRVAL_PP(str), Z_STRLEN_PP(str), Z_STRVAL_PP(what), Z_STRLEN_PP(what), Z_TYPE_PP(str), return_value, mode TSRMLS_CC);
+			php_trim(str.s, str_len, what.s, what_len, return_value, mode TSRMLS_CC);
 		}
 	} else {
-		if (Z_TYPE_PP(str) == IS_UNICODE) {
-			php_u_trim(Z_USTRVAL_PP(str), Z_USTRLEN_PP(str), NULL, 0, return_value, mode TSRMLS_CC);
+		if (str_type == IS_UNICODE) {
+			php_u_trim(str.u, str_len, NULL, 0, return_value, mode TSRMLS_CC);
 		} else {
-			php_trim(Z_STRVAL_PP(str), Z_STRLEN_PP(str), NULL, 0, Z_TYPE_PP(str), return_value, mode TSRMLS_CC);
+			php_trim(str.s, str_len, NULL, 0, return_value, mode TSRMLS_CC);
 		}
 	}
 }
