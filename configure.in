@@ -894,6 +894,13 @@ if test "$PHP_VERSIONING" = "yes"; then
   if test -n "$PHP_MODULES"; then
     AC_MSG_ERROR([--enable-versioning cannot be used with shared modules])
   fi
+
+  case $host_alias in
+    *darwin*)
+	   AC_MSG_ERROR([--enable-versioning is not supported on your platform])
+	   ;;
+  esac
+									  
   test -z "$PHP_SYM_FILE" && PHP_SYM_FILE="$abs_srcdir/sapi/$PHP_SAPI/php.sym"
   if test -f "$PHP_SYM_FILE"; then
     EXTRA_LDFLAGS="-export-symbols $PHP_SYM_FILE $EXTRA_LDFLAGS"
