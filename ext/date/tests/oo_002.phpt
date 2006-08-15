@@ -14,7 +14,7 @@ $d->modify("1 hour after");
 $c->modify("1 second ago");
 var_dump($d->format(DateTime::RFC822));
 var_dump($c->format(DateTime::RFC822));
-$t = new DateTimeZone("Asia/Tokyo");
+$t = new _t("Asia/Tokyo");
 var_dump($t->getName());
 $c = clone $t;
 var_dump($c->getName());
