@@ -756,6 +756,15 @@ static enum entity_charset determine_charset(char *charset_hint TSRMLS_DC)
 			charset_hint = Z_STRVAL_P(uf_result);
 			len = Z_STRLEN_P(uf_result);
 			
+			if (len == 4) { /* sizeof(none|auto|pass)-1 */
+				if (!memcmp("pass", charset_hint, sizeof("pass") - 1) || 
+				    !memcmp("auto", charset_hint, sizeof("auto") - 1) || 
+				    !memcmp("none", charset_hint, sizeof("none") - 1)) {
+					
+					charset_hint = NULL;
+					len = 0;
+				}
+			}
 			goto det_charset;
 		}
 	}
