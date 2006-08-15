@@ -420,7 +420,7 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 				zval_ptr_dtor(&garbage);
 			}
 		}
-	} else if (property_info) {
+	} else {
 		int setter_done = 0;
 		zend_guard *guard;
 
@@ -434,7 +434,7 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 			setter_done = 1;
 			guard->in_set = 0;
 		}
-		if (!setter_done) {
+		if (!setter_done && property_info) {
 			zval **foo;
 
 			/* if we assign referenced variable, we should separate it */
