@@ -42,16 +42,16 @@ ext/standard
     sscanf()
         Params API. Rest - no idea yet.
 
-    str_replace()
-    stri_replace()
-        Params API, IS_UNICODE upgrade. Case-folding should be handled
-        similar to stristr().
-
     str_word_count()
         Params API, IS_UNICODE support, using u_isalpha(), etc.
     
     stristr()
-        This is the problematic one. There are a few approaches:
+    stripos()
+    strripos()
+    str_replace()
+    stri_replace()
+    substr_compare()
+        These are the problematic ones. There are a few approaches:
 
             1. Case-fold both need and haystack and then do simple search.
 
@@ -72,14 +72,8 @@ ext/standard
 
         All other approaches bite.
 
-    stripos()
-        Review. Probably needs the same approach as stristr().
-
     strnatcmp(), strnatcasecmp()
         Params API. The rest depends on porting of strnatcmp.c
-
-    strripos()
-        Probably needs the same approach as stristr().
 
     strrchr()
         Needs update so that it doesn't try to find half of a surrogate
@@ -88,16 +82,12 @@ ext/standard
     strtr()
         Check on Derick's progress.
 
-    substr_compare()
-        IS_UNICODE support, case folding based on the same algorithm as
-        stristr().
-
     substr_replace()
         Params API, test
 
     wordwrap()
-        Upgrade, do wordwrapping on glyph level, maybe use additional
-        whitespace chars instead of just space.
+        Upgrade, do wordwrapping on codepoint (or glyph ?) level, maybe use
+        additional whitespace chars instead of just space.
 
 
 
