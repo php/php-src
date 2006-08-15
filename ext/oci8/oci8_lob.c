@@ -464,8 +464,7 @@ int php_oci_lob_set_buffering (php_oci_descriptor *descriptor, int on_off TSRMLS
 	
 	if (on_off) {
 		connection->errcode = PHP_OCI_CALL(OCILobEnableBuffering, (connection->svc, connection->err, descriptor->descriptor));
-	}
-	else {
+	} else {
 		connection->errcode = PHP_OCI_CALL(OCILobDisableBuffering, (connection->svc, connection->err, descriptor->descriptor));
 	}
 
@@ -484,8 +483,7 @@ int php_oci_lob_get_buffering (php_oci_descriptor *descriptor TSRMLS_DC)
 {
 	if (descriptor->buffering != PHP_OCI_LOB_BUFFER_DISABLED) {
 		return 1;
-	} 
-	else {
+	} else {
 		return 0;
 	}
 } /* }}} */
@@ -507,8 +505,7 @@ int php_oci_lob_copy (php_oci_descriptor *descriptor_dest, php_oci_descriptor *d
 
 	if (length == -1) {
 		copy_len = length_from - descriptor_from->lob_current_position;
-	}
-	else {
+	} else {
 		copy_len = length;
 	}
 
@@ -517,7 +514,17 @@ int php_oci_lob_copy (php_oci_descriptor *descriptor_dest, php_oci_descriptor *d
 		return 1;
 	}
 
-	connection->errcode = PHP_OCI_CALL(OCILobCopy, (connection->svc, connection->err, descriptor_dest->descriptor, descriptor_from->descriptor, copy_len, descriptor_dest->lob_current_position+1, descriptor_from->lob_current_position+1));
+	connection->errcode = PHP_OCI_CALL(OCILobCopy, 
+			(
+			 connection->svc,
+			 connection->err,
+			 descriptor_dest->descriptor,
+			 descriptor_from->descriptor,
+			 copy_len,
+			 descriptor_dest->lob_current_position+1,
+			 descriptor_from->lob_current_position+1
+			)
+	);
 
 	if (connection->errcode != OCI_SUCCESS) {
 		php_oci_error(connection->err, connection->errcode TSRMLS_CC);
@@ -827,7 +834,18 @@ int php_oci_lob_write_tmp (php_oci_descriptor *descriptor, ub1 type, char *data,
 		return 1;
 	}
 
-	connection->errcode = PHP_OCI_CALL(OCILobCreateTemporary, (connection->svc, connection->err, lob, OCI_DEFAULT, OCI_DEFAULT, type, OCI_ATTR_NOCACHE, OCI_DURATION_SESSION));
+	connection->errcode = PHP_OCI_CALL(OCILobCreateTemporary, 
+			(
+			 connection->svc,
+			 connection->err,
+			 lob,
+			 OCI_DEFAULT,
+			 OCI_DEFAULT,
+			 type,
+			 OCI_ATTR_NOCACHE,
+			 OCI_DURATION_SESSION
+			)
+	);
 
 	if (connection->errcode) {
 		php_oci_error(connection->err, connection->errcode TSRMLS_CC);
