@@ -38,6 +38,7 @@ PHP                                                                        NEWS
 - Fixed phpinfo() cutoff of variables at \0. (Ilia)
 - Fixed a bug in the filter extension that prevented magic_quotes_gpc from
   being applied when RAW filter is used. (Ilia)
+- Fixed bug #38467 (--enable-versioning causes make fail on OS X). (Tony)
 - Fixed bug #38461 (setting private attribute with __set() produces 
   segfault). (Tony)
 - Fixed bug #38451 (PDO_MYSQL doesn't compile on Solaris). (Tony)
