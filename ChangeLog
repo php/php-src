@@ -1,3 +1,179 @@
+2006-08-15  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/xml/xml.c
+      ext/xml/tests/xml011.phpt:
+      fix bug #38454 (warning upon disabling handler via xml_set_element_handler)
+      fix bug #38427 (unicode causes xml_parser to misbehave)
+      add test
+
+    * ext/xml/xml.c
+      ext/xml/tests/xml011.phpt
+      ext/xml/tests/xml011.phpt:
+      fix bug #38454 (warning upon disabling handler via xml_set_element_handler)
+      fix bug #38427 (unicode causes xml_parser to misbehave)
+      remove need for TSRMLS_FETCH() call
+      add test
+
+2006-08-15  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-progress.txt
+      ext/standard/php_string.h
+      ext/standard/string.c:
+      Fix some trim() issues.
+
+2006-08-15  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_object_handlers.c:
+      apply correct fix for bug #38461
+
+    * ZendEngine2/zend_object_handlers.c:
+      apply more correct fix for bug #38461
+
+2006-08-15  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/openssl/openssl.c
+      ext/openssl/php_openssl.h:
+      - add openssl_csr_get_subject() and openssl_csr_get_public_key()
+
+2006-08-15  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in:
+      MFH: fix #38467 (--enable-versioning causes make fail on OS X)
+
+    * configure.in:
+      fix #38467 (--enable-versioning causes make fail on OS X)
+
+    * (PHP_5_2)
+      ext/standard/html.c:
+      MFH: don't try to use "auto", "none" and "pass" charsets returned from
+      mbstring
+
+    * ext/standard/html.c:
+      don't try to use "auto", "none" and "pass" charsets returned from mbstring
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ZendEngine2/zend_object_handlers.c:
+      MFH: fix #38461 (setting private attribute with __set() produces segfault)
+
+    * ZendEngine2/zend_object_handlers.c:
+      fix #38461 (setting private attribute with __set() produces segfault)
+
+2006-08-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Back to dev
+
+    * (PHP_5_1)
+      NEWS
+      configure.in
+      main/php_version.h:
+      5.1.5
+
+2006-08-15  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/oci8.c
+      ext/oci8/oci8.c
+      ext/oci8/oci8_collection.c
+      ext/oci8/oci8_collection.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/oci8_statement.c:
+      minor CS/WS fixes
+
+    * ext/oci8/oci8.c:
+      error message might be NULL
+
+2006-08-15  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Back to dev.
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Go with 4.4.4.
+
+2006-08-15  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/oci8/oci8.c:
+      MFH: OCIBreak() is not supported on Windows
+
+    * ext/oci8/oci8.c:
+      OCIBreak() is not supported on Windows
+
+    * (PHP_5_2)
+      ZendEngine2/tests/bug38461.phpt:
+      add test
+
+    * ZendEngine2/tests/bug38461.phpt
+      ZendEngine2/tests/bug38461.phpt:
+      
+      add test
+
+    * (PHP_5_2)
+      ext/standard/tests/file/bug38450.phpt
+      ext/standard/tests/file/bug38450_1.phpt
+      ext/standard/tests/file/bug38450_2.phpt
+      ext/standard/tests/file/bug38450_3.phpt:
+      new tests
+
+    * ext/standard/tests/file/bug38450.phpt
+      ext/standard/tests/file/bug38450.phpt
+      ext/standard/tests/file/bug38450_1.phpt
+      ext/standard/tests/file/bug38450_1.phpt
+      ext/standard/tests/file/bug38450_2.phpt
+      ext/standard/tests/file/bug38450_2.phpt
+      ext/standard/tests/file/bug38450_3.phpt
+      ext/standard/tests/file/bug38450_3.phpt:
+      
+      new tests
+
+2006-08-15  Michael Wallner  <mike@iworks.at>
+
+    * (PHP_5_2)
+      ext/date/php_date.c
+      ext/date/tests/oo_002.phpt:
+      MFH:
+       - fix leak when cloning DateTimeZone, detected by Antony
+       - don't fetch objects multiple times when cloning
+
+    * ext/date/php_date.c
+      ext/date/tests/oo_002.phpt:
+      - fix leak when cloning DateTimeZone, detected by Antony
+      - don't fetch objects multiple times when cloning
+
+2006-08-15  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/openssl/openssl.c
+      ext/openssl/php_openssl.h:
+      - add OPENSSL_KEYTYPE_EC constant
+      - openssl_pkey_get_details(), returns the key details
+
 2006-08-14  Andrei Zmievski  <andrei@gravitonic.com>
 
     * unicode-progress.txt
