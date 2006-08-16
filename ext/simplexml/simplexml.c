@@ -453,7 +453,7 @@ static void sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_boo
 			trim_zv = *member;
 			zval_copy_ctor(&trim_zv);
 			convert_to_string_with_converter(&trim_zv, UG(utf8_conv));
-			php_trim(Z_STRVAL(trim_zv), Z_STRLEN(trim_zv), NULL, 0, IS_STRING, &tmp_zv, 3 TSRMLS_CC);
+			php_trim(Z_STRVAL(trim_zv), Z_STRLEN(trim_zv), NULL, 0, &tmp_zv, 3 TSRMLS_CC);
 			zval_dtor(&trim_zv);
 			member = &tmp_zv;
 		}
