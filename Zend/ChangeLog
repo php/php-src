@@ -1,3 +1,28 @@
+2006-08-15  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend_object_handlers.c:
+      apply correct fix for bug #38461
+
+    * zend_object_handlers.c:
+      apply more correct fix for bug #38461
+
+    * (PHP_5_2)
+      zend_object_handlers.c:
+      MFH: fix #38461 (setting private attribute with __set() produces segfault)
+
+    * zend_object_handlers.c:
+      fix #38461 (setting private attribute with __set() produces segfault)
+
+    * (PHP_5_2)
+      tests/bug38461.phpt:
+      add test
+
+    * tests/bug38461.phpt
+      tests/bug38461.phpt:
+      
+      add test
+
 2006-08-14  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_builtin_functions.c:
