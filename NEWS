@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Aug 2006, PHP 5.2.0RC2
+17 Aug 2006, PHP 5.2.0RC2
+- Increased default memory limit to 16 megabytes to accommodate for a more
+  accurate memory utilization measurement.
 - Updated libsqlite in ext/pdo_sqlite to 3.3.7. (Ilia)
 - Added support for httpOnly flag for session extension and cookie setting
   functions. (Scott MacVicar, Ilia)
