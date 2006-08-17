@@ -1,3 +1,25 @@
+2006-08-16  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/string.c:
+      Simplify php_u_trim().
+
+2006-08-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo/tests/bug_38394.phpt:
+      MFB: Added skip condition for sqlite2 driver, that uses more forgiving
+      emulated prepared statements.
+
+    * (PHP_5_2)
+      ext/pdo/tests/bug_38394.phpt:
+      Added skip condition for sqlite2 driver, that uses more forgiving emulated
+      prepared statements.
+
+2006-08-16  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/simplexml/simplexml.c
+      ext/standard/http_fopen_wrapper.c:
+      Sync with php_trim() API change.
+
 2006-08-15  Rob Richards  <rrichards@ctindustries.net>
 
     * (PHP_5_2)
