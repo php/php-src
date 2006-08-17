@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? Sep 2006, PHP 5.2.0
+
 17 Aug 2006, PHP 5.2.0RC2
 - Increased default memory limit to 16 megabytes to accommodate for a more
   accurate memory utilization measurement.
