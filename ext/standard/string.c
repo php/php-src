@@ -617,11 +617,11 @@ PHPAPI char *php_trim(char *c, int len, char *what, int what_len, zval *return_v
 }
 /* }}} */
 
-/* {{{ php_expand_u_trim_range()
+/* {{{ php_expand_uchar_range()
  * Expands possible ranges of the form 'a..b' in input charlist,
  * where a < b in code-point order
  */
-static int php_expand_u_trim_range(UChar **range, int *range_len TSRMLS_DC)
+static int php_expand_uchar_range(UChar **range, int *range_len TSRMLS_DC)
 {
 	UChar32 *codepts, *tmp, *input, *end, c;
 	int32_t len, tmp_len, idx;
@@ -705,13 +705,13 @@ static int php_expand_u_trim_range(UChar **range, int *range_len TSRMLS_DC)
  */
 static UChar *php_u_trim(UChar *c, int len, UChar *what, int what_len, zval *return_value, int mode TSRMLS_DC)
 {
-	int32_t	i, j, k;
-	UChar	ch = 0, wh = 0;
+	int32_t	i, k;
+	UChar	ch = 0;
 	int32_t	start = 0, end = len;
 
 	if ( what ) {
 		what = eustrndup(what, what_len);
-		php_expand_u_trim_range(&what, &what_len TSRMLS_CC);
+		php_expand_uchar_range(&what, &what_len TSRMLS_CC);
 	}
 
 	if ( mode & 1 ) {
@@ -6870,26 +6870,78 @@ PHP_FUNCTION(str_shuffle)
 }
 /* }}} */
 
-/* {{{ proto mixed str_word_count(string str, [int format [, string charlist]])
-   	Counts the number of words inside a string. If format of 1 is specified,
-   	then the function will return an array containing all the words
-   	found inside the string. If format of 2 is specified, then the function
-   	will return an associated array where the position of the word is the key
-   	and the word itself is the value.
-
-   	For the purpose of this function, 'word' is defined as a locale dependent
-   	string containing alphabetic characters, which also may contain, but not start
-   	with "'" and "-" characters.
-*/
-PHP_FUNCTION(str_word_count)
+/* {{{ php_u_str_word_count */
+static int php_u_str_word_count(UChar *str, int str_len, long type, UChar *char_list, int char_list_len, zval *return_value TSRMLS_DC)
 {
-	char *buf, *str, *char_list = NULL, *p, *e, *s, ch[256];
-	int str_len, char_list_len, word_count = 0;
-	long type = 0;
+	UChar *s, *buf;
+	UChar32 ch;
+	int ws, we, tmp, idx, last_idx;
+	int word_count = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls", &str, &str_len, &type, &char_list, &char_list_len) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (char_list) {
+		char_list = eustrndup(char_list, char_list_len);
+		php_expand_uchar_range(&char_list, &char_list_len TSRMLS_CC);
 	}
+
+	ws = idx = 0;
+	/* first character cannot be ' or -, unless explicitly allowed by the user */
+	if ((str[ws] == (UChar)0x27 /*'\''*/ && (!char_list || !u_memchr(char_list, 0x27 /*'\''*/, char_list_len))) ||
+		(str[ws] == (UChar)0x2d /*'-'*/  && (!char_list || !u_memchr(char_list, 0x2d /*'-'*/, char_list_len)))) {
+		ws++;
+		idx++;
+	}
+	/* last character cannot be -, unless explicitly allowed by the user */
+	if (str[str_len-1] == (UChar)0x2d /*'-'*/ &&
+		(!char_list || !u_memchr(char_list, 0x2d /*'-'*/, char_list_len))) {
+		str_len--;
+	}
+
+	last_idx = idx;
+	tmp = we = ws;
+	while (we < str_len) {
+		s = str + ws;
+		while (we < str_len) {
+			U16_NEXT(str, tmp, str_len, ch);
+			idx++;
+			if (!(u_isalpha(ch) || (char_list && u_memchr32(char_list, ch, char_list_len)) ||
+				  ch == (UChar32) 0x27 /*'\''*/ || ch == (UChar32) 0x2d /*'-'*/)) {
+				break;
+			}
+			we = tmp;
+		}
+		if (we > ws) {
+			switch (type)
+			{
+				case 1:
+					buf = eustrndup(s, (we-ws));
+					add_next_index_unicodel(return_value, buf, (we-ws), 0);
+					break;
+				case 2:
+					buf = eustrndup(s, (we-ws));
+					add_index_unicodel(return_value, last_idx, buf, we-ws, 0);
+					break;
+				default:
+					word_count++;
+					break;
+			}
+		}
+		ws = we = tmp;
+		last_idx = idx;
+	}
+
+	if (char_list) {
+		efree(char_list);
+	}
+
+	return word_count;
+}
+/* }}} */
+
+/* {{{ php_str_word_count */
+static int php_str_word_count(char *str, int str_len, long type, char *char_list, int char_list_len, zval *return_value)
+{
+	char ch[256], *p, *e, *s, *buf;
+	int word_count = 0;
 
 	if (char_list) {
 		php_charmask((unsigned char*)char_list, char_list_len, ch TSRMLS_CC);
@@ -6897,10 +6949,6 @@ PHP_FUNCTION(str_word_count)
 
 	p = str;
 	e = str + str_len;
-
-	if (type == 1 || type == 2) {
-		array_init(return_value);
-	}
 
 	/* first character cannot be ' or -, unless explicitly allowed by the user */
 	if ((*p == '\'' && (!char_list || !ch['\''])) || (*p == '-' && (!char_list || !ch['-']))) {
@@ -6933,6 +6981,43 @@ PHP_FUNCTION(str_word_count)
 			}
 		}
 		p++;
+	}
+
+	return word_count;
+}
+/* }}} */
+
+/* {{{ proto mixed str_word_count(string str, [int format [, string charlist]]) U
+   	Counts the number of words inside a string. If format of 1 is specified,
+   	then the function will return an array containing all the words
+   	found inside the string. If format of 2 is specified, then the function
+   	will return an associated array where the position of the word is the key
+   	and the word itself is the value.
+
+   	For the purpose of this function, 'word' is defined as a locale dependent
+   	string containing alphabetic characters, which also may contain, but not start
+   	with "'" and "-" characters.
+*/
+PHP_FUNCTION(str_word_count)
+{
+	zstr str, char_list = NULL_ZSTR;
+	int str_len, char_list_len, word_count = 0;
+	zend_uchar str_type;
+	long type = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "T|lT", &str, &str_len,
+							  &str_type, &type, &char_list, &char_list_len, &str_type) == FAILURE) {
+		return;
+	}
+
+	if (type == 1 || type == 2) {
+		array_init(return_value);
+	}
+
+	if (str_type == IS_UNICODE) {
+		word_count = php_u_str_word_count(str.u, str_len, type, char_list.u, char_list_len, return_value TSRMLS_CC);
+	} else {
+		word_count = php_str_word_count(str.s, str_len, type, char_list.s, char_list_len, return_value);
 	}
 
 	if (!type) {
