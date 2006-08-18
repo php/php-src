@@ -17,5 +17,3 @@ $packages  = array(
 "HTML_Template_IT"      =>    "1.1",
 "Net_UserAgent_Detect"  =>    "2.0.1",
 );
-
-?>
