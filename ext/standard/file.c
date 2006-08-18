@@ -2003,6 +2003,8 @@ PHP_FUNCTION(fgetcsv)
 			if (delimiter_str_len < 1) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "delimiter must be a character");
 				RETURN_FALSE;
+			} else if (delimiter_str_len > 1) {
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "delimiter must be a single character");
 			}
 
 			/* use first character from string */
@@ -2013,7 +2015,10 @@ PHP_FUNCTION(fgetcsv)
 			if (enclosure_str_len < 1) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "enclosure must be a character");
 				RETURN_FALSE;
+			} else if (enclosure_str_len > 1) {
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "enclosure must be a single character");
 			}
+
 			/* use first character from string */
 			enclosure = enclosure_str[0];
 		}
