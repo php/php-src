@@ -1,3 +1,40 @@
+2006-08-17  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/bz2/bz2.c:
+      fix #38485 (bz2 extension does not compile with GCC 4.1)
+
+    * ext/exif/exif.c
+      ext/exif/exif.c:
+      initialize static buffer with 0's
+
+2006-08-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Back to dev
+
+    * (PHP_5_2)
+      configure.in
+      main/php_version.h:
+      5.2.0RC2
+
+    * php.ini-dist
+      php.ini-recommended
+      main/main.c:
+      MFB: Increased default memory limit to 16 megabytes to accommodate for a
+      more accurate memory utilization measurement.
+
+    * (PHP_5_2)
+      NEWS
+      php.ini-dist
+      php.ini-recommended
+      main/main.c:
+      Increased default memory limit to 16 megabytes to accommodate for a more
+      accurate memory utilization measurement.
+
 2006-08-16  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ext/standard/string.c:
