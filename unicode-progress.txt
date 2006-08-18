@@ -42,9 +42,6 @@ ext/standard
     sscanf()
         Params API. Rest - no idea yet.
 
-    str_word_count()
-        Params API, IS_UNICODE support, using u_isalpha(), etc.
-    
     stristr()
     stripos()
     strripos()
@@ -173,6 +170,7 @@ ext/standard
     str_rot13()
     str_shuffle()
     str_split()
+    str_word_count()
     strcoll()
     strcspn()
     strip_tags()
