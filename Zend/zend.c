@@ -153,7 +153,7 @@ static void print_hash(zend_write_func_t write_func, HashTable *ht, int indent, 
 				break;
 		}
 		ZEND_PUTS_EX("] => ");
-		zend_print_zval_r_ex(zend_write, *tmp, indent+PRINT_ZVAL_INDENT TSRMLS_CC);
+		zend_print_zval_r_ex(write_func, *tmp, indent+PRINT_ZVAL_INDENT TSRMLS_CC);
 		ZEND_PUTS_EX("\n");
 		zend_hash_move_forward_ex(ht, &iterator);
 	}
