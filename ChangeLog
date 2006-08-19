@@ -1,3 +1,31 @@
+2006-08-18  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-progress.txt
+      ext/standard/string.c:
+      Unicode support for str_word_count() (using the same semantics as for
+      binary strings).
+      
+
+2006-08-18  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/openssl/openssl.c:
+      fix #38486 (openssl extension does not build correctly)
+
+    * (PHP_5_2)
+      ext/standard/file.c:
+      MFH: add a notice to fgetcsv() when delimiter or enclosure is longer than 1
+      char
+      (feature request #38496)
+
+    * ext/standard/file.c:
+      add a notice to fgetcsv() when delimiter or enclosure is longer than 1 char
+      (feature request #38496)
+
+    * (PHP_4_4)
+      run-tests.php:
+      fix typo (bug #38499)
+
 2006-08-17  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
