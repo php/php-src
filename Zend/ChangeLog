@@ -1,3 +1,9 @@
+2006-08-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      zend.c:
+      Use proper write callback
+
 2006-08-15  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
