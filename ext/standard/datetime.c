@@ -101,6 +101,8 @@ PHP_FUNCTION(strptime)
 		return;
 	}
 
+	memset(&parsed_time, 0, sizeof(parsed_time));
+
 	unparsed_part = strptime(ts, format, &parsed_time);
 	if (unparsed_part == NULL) {
 		RETURN_FALSE;
