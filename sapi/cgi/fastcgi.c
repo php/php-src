@@ -252,7 +252,7 @@ int fcgi_listen(const char *path, int backlog)
 	short     port = 0;
 	int       listen_socket;
 	sa_t      sa;
-	socklen_t sa_len;
+	socklen_t sock_len;
 
 	if ((s = strchr(path, ':'))) {
 		port = atoi(s+1);
@@ -268,7 +268,7 @@ int fcgi_listen(const char *path, int backlog)
 		memset(&sa.sa_inet, 0, sizeof(sa.sa_inet));
 		sa.sa_inet.sin_family = AF_INET;
 		sa.sa_inet.sin_port = htons(port);
-		sa_len = sizeof(sa.sa_inet);
+		sock_len = sizeof(sa.sa_inet);
 
 		if (!*host || !strncmp(host, "*", sizeof("*")-1)) {
 			sa.sa_inet.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -299,16 +299,16 @@ int fcgi_listen(const char *path, int backlog)
 		memset(&sa.sa_unix, 0, sizeof(sa.sa_unix));
 		sa.sa_unix.sun_family = AF_UNIX;
 		memcpy(sa.sa_unix.sun_path, path, path_len + 1);
-		sa_len = (size_t)(((struct sockaddr_un *)0)->sun_path)	+ path_len;
+		sock_len = (size_t)(((struct sockaddr_un *)0)->sun_path)	+ path_len;
 #ifdef HAVE_SOCKADDR_UN_SUN_LEN
-		sa.sa_unix.sun_len = sa_len;
+		sa.sa_unix.sun_len = sock_len;
 #endif
 		unlink(path);
 	}
 
 	/* Create, bind socket and start listen on it */
 	if ((listen_socket = socket(sa.sa.sa_family, SOCK_STREAM, 0)) < 0 ||
-	    bind(listen_socket, (struct sockaddr *) &sa, sa_len) < 0 ||
+	    bind(listen_socket, (struct sockaddr *) &sa, sock_len) < 0 ||
 	    listen(listen_socket, backlog) < 0) {
 
 		fprintf(stderr, "Cannot bind/listen socket - [%d] %s.\n",errno, strerror(errno));
