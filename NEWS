@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Sep 2006, PHP 5.2.0
+- Fixed bug #38524 (strptime() does not initialize the internal date storage
+  structure). (Ilia)
 
 17 Aug 2006, PHP 5.2.0RC2
 - Increased default memory limit to 16 megabytes to accommodate for a more
