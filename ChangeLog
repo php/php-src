@@ -1,3 +1,9 @@
+2006-08-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ZendEngine2/zend.c:
+      Use proper write callback
+
 2006-08-18  Andrei Zmievski  <andrei@gravitonic.com>
 
     * unicode-progress.txt
