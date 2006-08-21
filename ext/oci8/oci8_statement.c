@@ -62,7 +62,7 @@ php_oci_statement *php_oci_statement_create (php_oci_connection *connection, cha
 	
 	if (query_len > 0) {
 #if HAVE_OCI_STMT_PREPARE2
-		connection->errcode = PHP_OCI_CALL(OCIStmtPrepare2, 
+		PHP_OCI_CALL_RETURN(connection->errcode, OCIStmtPrepare2, 
 				(
 				 connection->svc,
 				 &(statement->stmt),
@@ -76,7 +76,7 @@ php_oci_statement *php_oci_statement_create (php_oci_connection *connection, cha
 				)
 		);
 #else
-		connection->errcode = PHP_OCI_CALL(OCIStmtPrepare, (statement->stmt, connection->err, (text *)query, query_len, OCI_NTV_SYNTAX, OCI_DEFAULT));
+		PHP_OCI_CALL_RETURN(connection->errcode, OCIStmtPrepare, (statement->stmt, connection->err, (text *)query, query_len, OCI_NTV_SYNTAX, OCI_DEFAULT));
 #endif		
 		if (connection->errcode != OCI_SUCCESS) {
 			php_oci_error(connection->err, connection->errcode TSRMLS_CC);
@@ -129,7 +129,7 @@ int php_oci_statement_set_prefetch(php_oci_statement *statement, ub4 size TSRMLS
 		return 1;
 	}
 	
-	statement->errcode = PHP_OCI_CALL (OCIAttrSet, (statement->stmt, OCI_HTYPE_STMT, &prefetch, 0, OCI_ATTR_PREFETCH_MEMORY, statement->err));
+	PHP_OCI_CALL_RETURN(statement->errcode, OCIAttrSet, (statement->stmt, OCI_HTYPE_STMT, &prefetch, 0, OCI_ATTR_PREFETCH_MEMORY, statement->err));
 
 	if (statement->errcode != OCI_SUCCESS) {
 		php_oci_error(statement->err, statement->errcode TSRMLS_CC);
@@ -138,7 +138,7 @@ int php_oci_statement_set_prefetch(php_oci_statement *statement, ub4 size TSRMLS
 	}
 
 	prefetch = size;
-	statement->errcode = PHP_OCI_CALL (OCIAttrSet, (statement->stmt, OCI_HTYPE_STMT, &prefetch, 0, OCI_ATTR_PREFETCH_ROWS, statement->err));
+	PHP_OCI_CALL_RETURN(statement->errcode, OCIAttrSet, (statement->stmt, OCI_HTYPE_STMT, &prefetch, 0, OCI_ATTR_PREFETCH_ROWS, statement->err));
 	
 	if (statement->errcode != OCI_SUCCESS) {
 		php_oci_error(statement->err, statement->errcode TSRMLS_CC);
@@ -157,7 +157,7 @@ int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows TSRMLS_DC)
 	int i;
 	php_oci_out_column *column;
 
-	statement->errcode = PHP_OCI_CALL(OCIStmtFetch, (statement->stmt, statement->err, nrows, OCI_FETCH_NEXT, OCI_DEFAULT));
+	PHP_OCI_CALL_RETURN(statement->errcode, OCIStmtFetch, (statement->stmt, statement->err, nrows, OCI_FETCH_NEXT, OCI_DEFAULT));
 
 	if ( statement->errcode == OCI_NO_DATA || nrows == 0 ) {
 		if (statement->last_query == NULL) {
@@ -216,7 +216,7 @@ int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows TSRMLS_DC)
 			}
 		}
 
-		statement->errcode = PHP_OCI_CALL( OCIStmtFetch, (statement->stmt, statement->err, nrows, OCI_FETCH_NEXT, OCI_DEFAULT));
+		PHP_OCI_CALL_RETURN(statement->errcode,  OCIStmtFetch, (statement->stmt, statement->err, nrows, OCI_FETCH_NEXT, OCI_DEFAULT));
 
 		for (i = 0; i < statement->ncolumns; i++) {
 			column = php_oci_statement_get_column(statement, i + 1, NULL, 0 TSRMLS_CC);
@@ -318,7 +318,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 	
 	if (!statement->stmttype) {
 		/* get statement type */
-		statement->errcode = PHP_OCI_CALL(OCIAttrGet, ((dvoid *)statement->stmt, OCI_HTYPE_STMT, (ub2 *)&statement->stmttype, (ub4 *)0,	OCI_ATTR_STMT_TYPE,	statement->err));
+		PHP_OCI_CALL_RETURN(statement->errcode, OCIAttrGet, ((dvoid *)statement->stmt, OCI_HTYPE_STMT, (ub2 *)&statement->stmttype, (ub4 *)0,	OCI_ATTR_STMT_TYPE,	statement->err));
 
 		if (statement->errcode != OCI_SUCCESS) {
 			php_oci_error(statement->err, statement->errcode TSRMLS_CC);
@@ -342,7 +342,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 		}
 
 		/* execute statement */
-		statement->errcode = PHP_OCI_CALL(OCIStmtExecute, (statement->connection->svc,	statement->stmt, statement->err, iters,	0, NULL, NULL, mode));
+		PHP_OCI_CALL_RETURN(statement->errcode, OCIStmtExecute, (statement->connection->svc,	statement->stmt, statement->err, iters,	0, NULL, NULL, mode));
 
 		if (statement->errcode != OCI_SUCCESS) {
 			php_oci_error(statement->err, statement->errcode TSRMLS_CC);
@@ -371,7 +371,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 		counter = 1;
 
 		/* get number of columns */
-		statement->errcode = PHP_OCI_CALL(OCIAttrGet, ((dvoid *)statement->stmt, OCI_HTYPE_STMT, (dvoid *)&colcount, (ub4 *)0, OCI_ATTR_PARAM_COUNT, statement->err));
+		PHP_OCI_CALL_RETURN(statement->errcode, OCIAttrGet, ((dvoid *)statement->stmt, OCI_HTYPE_STMT, (dvoid *)&colcount, (ub4 *)0, OCI_ATTR_PARAM_COUNT, statement->err));
 		
 		if (statement->errcode != OCI_SUCCESS) {
 			php_oci_error(statement->err, statement->errcode TSRMLS_CC);
@@ -393,7 +393,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 			outcol->statement = statement;
 
 			/* get column */
-			statement->errcode = PHP_OCI_CALL(OCIParamGet, ((dvoid *)statement->stmt, OCI_HTYPE_STMT, statement->err, (dvoid**)&param, counter));
+			PHP_OCI_CALL_RETURN(statement->errcode, OCIParamGet, ((dvoid *)statement->stmt, OCI_HTYPE_STMT, statement->err, (dvoid**)&param, counter));
 			
 			if (statement->errcode != OCI_SUCCESS) {
 				php_oci_error(statement->err, statement->errcode TSRMLS_CC);
@@ -402,7 +402,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 			}
 
 			/* get column datatype */
-			statement->errcode = PHP_OCI_CALL(OCIAttrGet, ((dvoid *)param, OCI_DTYPE_PARAM, (dvoid *)&outcol->data_type, (ub4 *)0, OCI_ATTR_DATA_TYPE, statement->err));
+			PHP_OCI_CALL_RETURN(statement->errcode, OCIAttrGet, ((dvoid *)param, OCI_DTYPE_PARAM, (dvoid *)&outcol->data_type, (ub4 *)0, OCI_ATTR_DATA_TYPE, statement->err));
 
 			if (statement->errcode != OCI_SUCCESS) {
 				PHP_OCI_CALL(OCIDescriptorFree, (param, OCI_DTYPE_PARAM));
@@ -412,7 +412,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 			}
 
 			/* get character set form  */
-			statement->errcode = PHP_OCI_CALL(OCIAttrGet, ((dvoid *)param, OCI_DTYPE_PARAM, (dvoid *)&outcol->charset_form, (ub4 *)0, OCI_ATTR_CHARSET_FORM, statement->err));
+			PHP_OCI_CALL_RETURN(statement->errcode, OCIAttrGet, ((dvoid *)param, OCI_DTYPE_PARAM, (dvoid *)&outcol->charset_form, (ub4 *)0, OCI_ATTR_CHARSET_FORM, statement->err));
 
 			if (statement->errcode != OCI_SUCCESS) {
 				PHP_OCI_CALL(OCIDescriptorFree, (param, OCI_DTYPE_PARAM));
@@ -422,7 +422,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 			}
 	
 			/* get character set id  */
-			statement->errcode = PHP_OCI_CALL(OCIAttrGet, ((dvoid *)param, OCI_DTYPE_PARAM, (dvoid *)&outcol->charset_id, (ub4 *)0, OCI_ATTR_CHARSET_ID, statement->err));
+			PHP_OCI_CALL_RETURN(statement->errcode, OCIAttrGet, ((dvoid *)param, OCI_DTYPE_PARAM, (dvoid *)&outcol->charset_id, (ub4 *)0, OCI_ATTR_CHARSET_ID, statement->err));
 
 			if (statement->errcode != OCI_SUCCESS) {
 				PHP_OCI_CALL(OCIDescriptorFree, (param, OCI_DTYPE_PARAM));
@@ -432,7 +432,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 			}
 	
 			/* get size of the column */
-			statement->errcode = PHP_OCI_CALL(OCIAttrGet, ((dvoid *)param, OCI_DTYPE_PARAM, (dvoid *)&outcol->data_size, (dvoid *)0, OCI_ATTR_DATA_SIZE, statement->err));
+			PHP_OCI_CALL_RETURN(statement->errcode, OCIAttrGet, ((dvoid *)param, OCI_DTYPE_PARAM, (dvoid *)&outcol->data_size, (dvoid *)0, OCI_ATTR_DATA_SIZE, statement->err));
 			
 			if (statement->errcode != OCI_SUCCESS) {
 				PHP_OCI_CALL(OCIDescriptorFree, (param, OCI_DTYPE_PARAM));
@@ -445,7 +445,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 			outcol->retlen = outcol->data_size;
 
 			/* get scale of the column */
-			statement->errcode = PHP_OCI_CALL(OCIAttrGet, ((dvoid *)param, OCI_DTYPE_PARAM, (dvoid *)&outcol->scale, (dvoid *)0, OCI_ATTR_SCALE, statement->err));
+			PHP_OCI_CALL_RETURN(statement->errcode, OCIAttrGet, ((dvoid *)param, OCI_DTYPE_PARAM, (dvoid *)&outcol->scale, (dvoid *)0, OCI_ATTR_SCALE, statement->err));
 			
 			if (statement->errcode != OCI_SUCCESS) {
 				PHP_OCI_CALL(OCIDescriptorFree, (param, OCI_DTYPE_PARAM));
@@ -455,7 +455,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 			}
 
 			/* get precision of the column */
-			statement->errcode = PHP_OCI_CALL(OCIAttrGet, ((dvoid *)param, OCI_DTYPE_PARAM, (dvoid *)&outcol->precision, (dvoid *)0, OCI_ATTR_PRECISION, statement->err));
+			PHP_OCI_CALL_RETURN(statement->errcode, OCIAttrGet, ((dvoid *)param, OCI_DTYPE_PARAM, (dvoid *)&outcol->precision, (dvoid *)0, OCI_ATTR_PRECISION, statement->err));
 			
 			if (statement->errcode != OCI_SUCCESS) {
 				PHP_OCI_CALL(OCIDescriptorFree, (param, OCI_DTYPE_PARAM));
@@ -465,7 +465,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 			}
 			
 			/* get name of the column */
-			statement->errcode = PHP_OCI_CALL(OCIAttrGet, ((dvoid *)param, OCI_DTYPE_PARAM, (dvoid **)&colname, (ub4 *)&outcol->name_len, (ub4)OCI_ATTR_NAME, statement->err));
+			PHP_OCI_CALL_RETURN(statement->errcode, OCIAttrGet, ((dvoid *)param, OCI_DTYPE_PARAM, (dvoid **)&colname, (ub4 *)&outcol->name_len, (ub4)OCI_ATTR_NAME, statement->err));
 			
 			if (statement->errcode != OCI_SUCCESS) {
 				PHP_OCI_CALL(OCIDescriptorFree, (param, OCI_DTYPE_PARAM));
@@ -568,7 +568,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 			}
 
 			if (dynamic == OCI_DYNAMIC_FETCH) {
-				statement->errcode = PHP_OCI_CALL(
+				PHP_OCI_CALL_RETURN(statement->errcode, 
 					OCIDefineByPos,
 					(
 						statement->stmt,                           /* IN/OUT handle to the requested SQL query */
@@ -586,7 +586,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 				);
 
 			} else {
-				statement->errcode = PHP_OCI_CALL(
+				PHP_OCI_CALL_RETURN(statement->errcode, 
 					OCIDefineByPos,
 					(
 						statement->stmt,                           /* IN/OUT handle to the requested SQL query */ 
@@ -742,7 +742,7 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 					memset((void*)buff,0,sizeof(buff));
 							
 					if ((i < bind->array.old_length) && (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE)) {
-						connection->errcode = PHP_OCI_CALL(OCIDateToText, (connection->err, &(((OCIDate *)(bind->array.elements))[i]), 0, 0, 0, 0, &buff_len, buff));
+						PHP_OCI_CALL_RETURN(connection->errcode, OCIDateToText, (connection->err, &(((OCIDate *)(bind->array.elements))[i]), 0, 0, 0, 0, &buff_len, buff));
 						zval_dtor(*entry);
 
 						if (connection->errcode != OCI_SUCCESS) {
@@ -753,7 +753,7 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 						}
 						zend_hash_move_forward(hash);
 					} else {
-						connection->errcode = PHP_OCI_CALL(OCIDateToText, (connection->err, &(((OCIDate *)(bind->array.elements))[i]), 0, 0, 0, 0, &buff_len, buff));
+						PHP_OCI_CALL_RETURN(connection->errcode, OCIDateToText, (connection->err, &(((OCIDate *)(bind->array.elements))[i]), 0, 0, 0, 0, &buff_len, buff));
 						if (connection->errcode != OCI_SUCCESS) {
 							php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 							add_next_index_null(bind->zval);
@@ -908,7 +908,7 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 	bindp->zval = var;
 	zval_add_ref(&var); 
 	
-	statement->errcode = PHP_OCI_CALL(
+	PHP_OCI_CALL_RETURN(statement->errcode, 
 		OCIBindByName,
 		(
 			statement->stmt,                /* statement handle */
@@ -935,7 +935,7 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 	}
 
 	if (mode == OCI_DATA_AT_EXEC) {
-		statement->errcode = PHP_OCI_CALL(OCIBindDynamic, 
+		PHP_OCI_CALL_RETURN(statement->errcode, OCIBindDynamic, 
 				(
 				 bindp->bind,
 				 statement->err,
@@ -956,7 +956,7 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 #ifdef PHP_OCI8_HAVE_COLLECTIONS
 	if (type == SQLT_NTY) {
 		/* Bind object */
-		statement->errcode = PHP_OCI_CALL(OCIBindObject, 
+		PHP_OCI_CALL_RETURN(statement->errcode, OCIBindObject, 
 				(
 				 bindp->bind,
 				 statement->err,
@@ -1122,7 +1122,7 @@ int php_oci_statement_get_type(php_oci_statement *statement, ub2 *type TSRMLS_DC
 	
 	*type = 0;
 	
-	statement->errcode = PHP_OCI_CALL(OCIAttrGet, ((dvoid *)statement->stmt, OCI_HTYPE_STMT, (ub2 *)&statement_type, (ub4 *)0, OCI_ATTR_STMT_TYPE, statement->err));
+	PHP_OCI_CALL_RETURN(statement->errcode, OCIAttrGet, ((dvoid *)statement->stmt, OCI_HTYPE_STMT, (ub2 *)&statement_type, (ub4 *)0, OCI_ATTR_STMT_TYPE, statement->err));
 
 	if (statement->errcode != OCI_SUCCESS) {
 		php_oci_error(statement->err, statement->errcode TSRMLS_CC);
@@ -1143,7 +1143,7 @@ int php_oci_statement_get_numrows(php_oci_statement *statement, ub4 *numrows TSR
 	
 	*numrows = 0;
 	
-	statement->errcode = PHP_OCI_CALL(OCIAttrGet, ((dvoid *)statement->stmt, OCI_HTYPE_STMT, (ub4 *)&statement_numrows, (ub4 *)0, OCI_ATTR_ROW_COUNT, statement->err));
+	PHP_OCI_CALL_RETURN(statement->errcode, OCIAttrGet, ((dvoid *)statement->stmt, OCI_HTYPE_STMT, (ub4 *)&statement_numrows, (ub4 *)0, OCI_ATTR_ROW_COUNT, statement->err));
 
 	if (statement->errcode != OCI_SUCCESS) {
 		php_oci_error(statement->err, statement->errcode TSRMLS_CC);
@@ -1221,7 +1221,7 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, int nam
 	bindp->array.type = type;
 	zval_add_ref(&var);
 
-	statement->errcode = PHP_OCI_CALL(
+	PHP_OCI_CALL_RETURN(statement->errcode, 
 							OCIBindByName, 
 							(
 								statement->stmt,
@@ -1413,7 +1413,7 @@ php_oci_bind *php_oci_bind_array_helper_date(zval* var, long max_table_length, p
 		if ((i < bind->array.current_length) && (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE)) {
 			
 			convert_to_string_ex(entry);
-			connection->errcode = PHP_OCI_CALL(OCIDateFromText, (connection->err, Z_STRVAL_PP(entry), Z_STRLEN_PP(entry), NULL, 0, NULL, 0, &oci_date));
+			PHP_OCI_CALL_RETURN(connection->errcode, OCIDateFromText, (connection->err, Z_STRVAL_PP(entry), Z_STRLEN_PP(entry), NULL, 0, NULL, 0, &oci_date));
 
 			if (connection->errcode != OCI_SUCCESS) {
 				/* failed to convert string to date */
@@ -1427,7 +1427,7 @@ php_oci_bind *php_oci_bind_array_helper_date(zval* var, long max_table_length, p
 			((OCIDate *)bind->array.elements)[i] = oci_date;
 			zend_hash_move_forward(hash);
 		} else {
-			connection->errcode = PHP_OCI_CALL(OCIDateFromText, (connection->err, "01-JAN-00", sizeof("01-JAN-00")-1, NULL, 0, NULL, 0, &oci_date));
+			PHP_OCI_CALL_RETURN(connection->errcode, OCIDateFromText, (connection->err, "01-JAN-00", sizeof("01-JAN-00")-1, NULL, 0, NULL, 0, &oci_date));
 
 			if (connection->errcode != OCI_SUCCESS) {
 				/* failed to convert string to date */
