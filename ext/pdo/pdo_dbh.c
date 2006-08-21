@@ -1044,9 +1044,6 @@ static PHP_METHOD(PDO, query)
 		/* something broke */
 	}
 
-	/* kill the object handle for the stmt here */
-	zval_dtor(return_value);
-
 	RETURN_FALSE;
 }
 /* }}} */
