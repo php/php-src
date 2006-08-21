@@ -57,7 +57,7 @@ php_oci_collection * php_oci_collection_create(php_oci_connection* connection, c
 	collection->collection = NULL;
 	
 	/* get type handle by name */
-	connection->errcode = PHP_OCI_CALL(OCITypeByName,
+	PHP_OCI_CALL_RETURN(connection->errcode, OCITypeByName,
 			(
 			 connection->env,
 			 connection->err,
@@ -79,14 +79,14 @@ php_oci_collection * php_oci_collection_create(php_oci_connection* connection, c
 	}
 
 	/* allocate describe handle */
-	connection->errcode = PHP_OCI_CALL(OCIHandleAlloc, (connection->env, (dvoid **) &dschp1, (ub4) OCI_HTYPE_DESCRIBE, (size_t) 0, (dvoid **) 0));
+	PHP_OCI_CALL_RETURN(connection->errcode, OCIHandleAlloc, (connection->env, (dvoid **) &dschp1, (ub4) OCI_HTYPE_DESCRIBE, (size_t) 0, (dvoid **) 0));
 
 	if (connection->errcode) {
 		goto CLEANUP;
 	}
 
 	/* describe TDO */
-	connection->errcode = PHP_OCI_CALL(OCIDescribeAny, 
+	PHP_OCI_CALL_RETURN(connection->errcode, OCIDescribeAny, 
 			(
 			 connection->svc,
 			 connection->err,
@@ -104,14 +104,14 @@ php_oci_collection * php_oci_collection_create(php_oci_connection* connection, c
 	}
 
 	/* get first parameter handle */
-	connection->errcode = PHP_OCI_CALL(OCIAttrGet, ((dvoid *) dschp1, (ub4) OCI_HTYPE_DESCRIBE, (dvoid *)&parmp1, (ub4 *)0, (ub4)OCI_ATTR_PARAM,	connection->err));
+	PHP_OCI_CALL_RETURN(connection->errcode, OCIAttrGet, ((dvoid *) dschp1, (ub4) OCI_HTYPE_DESCRIBE, (dvoid *)&parmp1, (ub4 *)0, (ub4)OCI_ATTR_PARAM,	connection->err));
 
 	if (connection->errcode) {
 		goto CLEANUP;
 	}
 
 	/* get the collection type code of the attribute */
-	connection->errcode = PHP_OCI_CALL(OCIAttrGet, 
+	PHP_OCI_CALL_RETURN(connection->errcode, OCIAttrGet, 
 			(
 			 (dvoid*) parmp1,
 			 (ub4) OCI_DTYPE_PARAM,
@@ -130,7 +130,7 @@ php_oci_collection * php_oci_collection_create(php_oci_connection* connection, c
 		case OCI_TYPECODE_TABLE:
 		case OCI_TYPECODE_VARRAY:
 			/* get collection element handle */
-			connection->errcode = PHP_OCI_CALL(OCIAttrGet, 
+			PHP_OCI_CALL_RETURN(connection->errcode, OCIAttrGet, 
 					(
 					 (dvoid*) parmp1,
 					 (ub4) OCI_DTYPE_PARAM,
@@ -146,7 +146,7 @@ php_oci_collection * php_oci_collection_create(php_oci_connection* connection, c
 			}
 
 			/* get REF of the TDO for the type */
-			connection->errcode = PHP_OCI_CALL(OCIAttrGet, 
+			PHP_OCI_CALL_RETURN(connection->errcode, OCIAttrGet, 
 					(
 					 (dvoid*) parmp2,
 					 (ub4) OCI_DTYPE_PARAM,
@@ -162,7 +162,7 @@ php_oci_collection * php_oci_collection_create(php_oci_connection* connection, c
 			}
 
 			/* get the TDO (only header) */
-			connection->errcode = PHP_OCI_CALL(OCITypeByRef, 
+			PHP_OCI_CALL_RETURN(connection->errcode, OCITypeByRef, 
 					(
 					 connection->env,
 					 connection->err,
@@ -178,7 +178,7 @@ php_oci_collection * php_oci_collection_create(php_oci_connection* connection, c
 			}
 
 			/* get typecode */
-			connection->errcode = PHP_OCI_CALL(OCIAttrGet, 
+			PHP_OCI_CALL_RETURN(connection->errcode, OCIAttrGet, 
 					(
 					 (dvoid*) parmp2,
 					 (ub4) OCI_DTYPE_PARAM,
@@ -200,7 +200,7 @@ php_oci_collection * php_oci_collection_create(php_oci_connection* connection, c
 	}	
 
 	/* Create object to hold return table */
-	connection->errcode = PHP_OCI_CALL(OCIObjectNew, 
+	PHP_OCI_CALL_RETURN(connection->errcode, OCIObjectNew, 
 		(
 			connection->env, 
 			connection->err, 
@@ -234,7 +234,7 @@ int php_oci_collection_size(php_oci_collection *collection, sb4 *size TSRMLS_DC)
 {
 	php_oci_connection *connection = collection->connection;
 	
-	connection->errcode = PHP_OCI_CALL(OCICollSize, (connection->env, connection->err, collection->collection, (sb4 *)size));
+	PHP_OCI_CALL_RETURN(connection->errcode, OCICollSize, (connection->env, connection->err, collection->collection, (sb4 *)size));
 
 	if (connection->errcode != OCI_SUCCESS) {
 		php_oci_error(connection->err, connection->errcode TSRMLS_CC);
@@ -249,7 +249,7 @@ int php_oci_collection_max(php_oci_collection *collection, long *max TSRMLS_DC)
 {
 	php_oci_connection *connection = collection->connection;
 	
-	*max = PHP_OCI_CALL(OCICollMax, (connection->env, collection->collection));
+	PHP_OCI_CALL_RETURN(*max, OCICollMax, (connection->env, collection->collection));
 
 	/* error handling is not necessary here? */
 	return 0;
@@ -261,7 +261,7 @@ int php_oci_collection_trim(php_oci_collection *collection, long trim_size TSRML
 {
 	php_oci_connection *connection = collection->connection;
 	
-	connection->errcode = PHP_OCI_CALL(OCICollTrim, (connection->env, connection->err, trim_size, collection->collection));
+	PHP_OCI_CALL_RETURN(connection->errcode, OCICollTrim, (connection->env, connection->err, trim_size, collection->collection));
 
 	if (connection->errcode != OCI_SUCCESS) {
 		php_oci_error(connection->err, connection->errcode TSRMLS_CC);
@@ -278,7 +278,7 @@ int php_oci_collection_append_null(php_oci_collection *collection TSRMLS_DC)
 	php_oci_connection *connection = collection->connection;
 
 	/* append NULL element */
-	connection->errcode = PHP_OCI_CALL(OCICollAppend, (connection->env, connection->err, (dvoid *)0, &null_index, collection->collection));
+	PHP_OCI_CALL_RETURN(connection->errcode, OCICollAppend, (connection->env, connection->err, (dvoid *)0, &null_index, collection->collection));
 	
 	if (connection->errcode != OCI_SUCCESS) {
 		php_oci_error(connection->err, connection->errcode TSRMLS_CC);
@@ -296,7 +296,7 @@ int php_oci_collection_append_date(php_oci_collection *collection, char *date, i
 	php_oci_connection *connection = collection->connection;
 
 	/* format and language are NULLs, so format is "DD-MON-YY" and language is the default language of the session */
-	connection->errcode = PHP_OCI_CALL(OCIDateFromText, (connection->err, date, date_len, NULL, 0, NULL, 0, &oci_date));
+	PHP_OCI_CALL_RETURN(connection->errcode, OCIDateFromText, (connection->err, date, date_len, NULL, 0, NULL, 0, &oci_date));
 
 	if (connection->errcode != OCI_SUCCESS) {
 		/* failed to convert string to date */
@@ -304,7 +304,7 @@ int php_oci_collection_append_date(php_oci_collection *collection, char *date, i
 		return 1;
 	}
 
-	connection->errcode = PHP_OCI_CALL(OCICollAppend, 
+	PHP_OCI_CALL_RETURN(connection->errcode, OCICollAppend, 
 			(
 			 connection->env,
 			 connection->err,
@@ -333,14 +333,14 @@ int php_oci_collection_append_number(php_oci_collection *collection, char *numbe
 
 	element_double = zend_strtod(number, NULL);
 			
-	connection->errcode = PHP_OCI_CALL(OCINumberFromReal, (connection->err, &element_double, sizeof(double), &oci_number));
+	PHP_OCI_CALL_RETURN(connection->errcode, OCINumberFromReal, (connection->err, &element_double, sizeof(double), &oci_number));
 
 	if (connection->errcode != OCI_SUCCESS) {
 		php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 		return 1;
 	}
 
-	connection->errcode = PHP_OCI_CALL(OCICollAppend, 
+	PHP_OCI_CALL_RETURN(connection->errcode, OCICollAppend, 
 			(
 			 connection->env,
 			 connection->err,
@@ -366,14 +366,14 @@ int php_oci_collection_append_string(php_oci_collection *collection, char *eleme
 	OCIString *ocistr = (OCIString *)0;
 	php_oci_connection *connection = collection->connection;
 			
-	connection->errcode = PHP_OCI_CALL(OCIStringAssignText, (connection->env, connection->err, element, element_len, &ocistr));
+	PHP_OCI_CALL_RETURN(connection->errcode, OCIStringAssignText, (connection->env, connection->err, element, element_len, &ocistr));
 
 	if (connection->errcode != OCI_SUCCESS) {
 		php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 		return 1;
 	}
 
-	connection->errcode = PHP_OCI_CALL(OCICollAppend, 
+	PHP_OCI_CALL_RETURN(connection->errcode, OCICollAppend, 
 			(
 			 connection->env,
 			 connection->err,
@@ -445,7 +445,7 @@ int php_oci_collection_element_get(php_oci_collection *collection, long index, z
 	MAKE_STD_ZVAL(*result_element);
 	ZVAL_NULL(*result_element);
 
-	connection->errcode = PHP_OCI_CALL(OCICollGetElem, 
+	PHP_OCI_CALL_RETURN(connection->errcode, OCICollGetElem, 
 			(
 			 connection->env,
 			 connection->err,
@@ -476,7 +476,7 @@ int php_oci_collection_element_get(php_oci_collection *collection, long index, z
 
 	switch (collection->element_typecode) {
 		case OCI_TYPECODE_DATE:
-			connection->errcode = PHP_OCI_CALL(OCIDateToText, (connection->err, element, 0, 0, 0, 0, &buff_len, buff));
+			PHP_OCI_CALL_RETURN(connection->errcode, OCIDateToText, (connection->err, element, 0, 0, 0, 0, &buff_len, buff));
 	
 			if (connection->errcode != OCI_SUCCESS) {
 				php_oci_error(connection->err, connection->errcode TSRMLS_CC);
@@ -495,7 +495,7 @@ int php_oci_collection_element_get(php_oci_collection *collection, long index, z
 			OCIString *oci_string = *(OCIString **)element;
 			text *str;
 			
-			str = (text *)PHP_OCI_CALL(OCIStringPtr, (connection->env, oci_string));
+			PHP_OCI_CALL_RETURN(str, OCIStringPtr, (connection->env, oci_string));
 			
 			if (str) {
 				ZVAL_STRING(*result_element, str, 1);
@@ -518,7 +518,7 @@ int php_oci_collection_element_get(php_oci_collection *collection, long index, z
 		{
 			double double_number;
 			
-			connection->errcode = PHP_OCI_CALL(OCINumberToReal, (connection->err, (CONST OCINumber *) element, (uword) sizeof(double), (dvoid *) &double_number));
+			PHP_OCI_CALL_RETURN(connection->errcode, OCINumberToReal, (connection->err, (CONST OCINumber *) element, (uword) sizeof(double), (dvoid *) &double_number));
 
 			if (connection->errcode != OCI_SUCCESS) {
 				php_oci_error(connection->err, connection->errcode TSRMLS_CC);
@@ -549,7 +549,7 @@ int php_oci_collection_element_set_null(php_oci_collection *collection, long ind
 	php_oci_connection *connection = collection->connection;
 
 	/* set NULL element */
-	connection->errcode = PHP_OCI_CALL(OCICollAssignElem, (connection->env, connection->err, (ub4) index, (dvoid *)"", &null_index, collection->collection));
+	PHP_OCI_CALL_RETURN(connection->errcode, OCICollAssignElem, (connection->env, connection->err, (ub4) index, (dvoid *)"", &null_index, collection->collection));
 	
 	if (connection->errcode != OCI_SUCCESS) {
 		php_oci_error(connection->err, connection->errcode TSRMLS_CC);
@@ -567,7 +567,7 @@ int php_oci_collection_element_set_date(php_oci_collection *collection, long ind
 	php_oci_connection *connection = collection->connection;
 
 	/* format and language are NULLs, so format is "DD-MON-YY" and language is the default language of the session */
-	connection->errcode = PHP_OCI_CALL(OCIDateFromText, (connection->err, date, date_len, NULL, 0, NULL, 0, &oci_date));
+	PHP_OCI_CALL_RETURN(connection->errcode, OCIDateFromText, (connection->err, date, date_len, NULL, 0, NULL, 0, &oci_date));
 
 	if (connection->errcode != OCI_SUCCESS) {
 		/* failed to convert string to date */
@@ -575,7 +575,7 @@ int php_oci_collection_element_set_date(php_oci_collection *collection, long ind
 		return 1;
 	}
 
-	connection->errcode = PHP_OCI_CALL(OCICollAssignElem, 
+	PHP_OCI_CALL_RETURN(connection->errcode, OCICollAssignElem, 
 			(
 			 connection->env,
 			 connection->err,
@@ -605,14 +605,14 @@ int php_oci_collection_element_set_number(php_oci_collection *collection, long i
 
 	element_double = zend_strtod(number, NULL);
 			
-	connection->errcode = PHP_OCI_CALL(OCINumberFromReal, (connection->err, &element_double, sizeof(double), &oci_number));
+	PHP_OCI_CALL_RETURN(connection->errcode, OCINumberFromReal, (connection->err, &element_double, sizeof(double), &oci_number));
 
 	if (connection->errcode != OCI_SUCCESS) {
 		php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 		return 1;
 	}
 
-	connection->errcode = PHP_OCI_CALL(OCICollAssignElem, 
+	PHP_OCI_CALL_RETURN(connection->errcode, OCICollAssignElem, 
 			(
 			 connection->env,
 			 connection->err,
@@ -639,14 +639,14 @@ int php_oci_collection_element_set_string(php_oci_collection *collection, long i
 	OCIString *ocistr = (OCIString *)0;
 	php_oci_connection *connection = collection->connection;
 			
-	connection->errcode = PHP_OCI_CALL(OCIStringAssignText, (connection->env, connection->err, element, element_len, &ocistr));
+	PHP_OCI_CALL_RETURN(connection->errcode, OCIStringAssignText, (connection->env, connection->err, element, element_len, &ocistr));
 
 	if (connection->errcode != OCI_SUCCESS) {
 		php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 		return 1;
 	}
 
-	connection->errcode = PHP_OCI_CALL(OCICollAssignElem, 
+	PHP_OCI_CALL_RETURN(connection->errcode, OCICollAssignElem, 
 			(
 			 connection->env,
 			 connection->err,
@@ -711,7 +711,7 @@ int php_oci_collection_assign(php_oci_collection *collection_dest, php_oci_colle
 {
 	php_oci_connection *connection = collection_dest->connection;
 	
-	connection->errcode = PHP_OCI_CALL(OCICollAssign, (connection->env, connection->err, collection_from->collection, collection_dest->collection));
+	PHP_OCI_CALL_RETURN(connection->errcode, OCICollAssign, (connection->env, connection->err, collection_from->collection, collection_dest->collection));
 
 	if (connection->errcode != OCI_SUCCESS) {
 		php_oci_error(connection->err, connection->errcode TSRMLS_CC);
@@ -727,7 +727,7 @@ void php_oci_collection_close(php_oci_collection *collection TSRMLS_DC)
 	php_oci_connection *connection = collection->connection;
 
 	if (collection->collection) {
-		connection->errcode = PHP_OCI_CALL(OCIObjectFree, (connection->env, connection->err, (dvoid *)collection->collection, (ub2)OCI_OBJECTFREE_FORCE));
+		PHP_OCI_CALL_RETURN(connection->errcode, OCIObjectFree, (connection->env, connection->err, (dvoid *)collection->collection, (ub2)OCI_OBJECTFREE_FORCE));
 
 		if (connection->errcode != OCI_SUCCESS) {
 			php_oci_error(connection->err, connection->errcode TSRMLS_CC);
