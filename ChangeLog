@@ -1,3 +1,29 @@
+2006-08-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      sapi/cgi/fastcgi.c:
+      MFH: sa_len compile fix for IRIX
+      
+
+    * ext/standard/datetime.c
+      ext/standard/tests/time/bug38524.phpt:
+      MFB: Fixed bug #38524 (strptime() does not initialize the internal date
+      storage structure).
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/datetime.c
+      ext/standard/tests/time/bug38524.phpt
+      ext/standard/tests/time/bug38524.phpt:
+      Fixed bug #38524 (strptime() does not initialize the internal date storage
+      structure).
+
+2006-08-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/cgi/fastcgi.c:
+      "sa_len" is defined to "sa_union . sa_generic . sa_len2" on IRIX,
+      so we use another variable name here.
+
 2006-08-19  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
