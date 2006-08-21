@@ -916,14 +916,14 @@ int php_oci_fetch_sqltext_offset(php_oci_statement *statement, text **sqltext, u
 	*sqltext = NULL;
 	*error_offset = 0;
 
-	statement->errcode = PHP_OCI_CALL(OCIAttrGet, ((dvoid *)statement->stmt, OCI_HTYPE_STMT, (text *) sqltext, (ub4 *)0, OCI_ATTR_STATEMENT, statement->err));
+	PHP_OCI_CALL_RETURN(statement->errcode, OCIAttrGet, ((dvoid *)statement->stmt, OCI_HTYPE_STMT, (text *) sqltext, (ub4 *)0, OCI_ATTR_STATEMENT, statement->err));
 	
 	if (statement->errcode != OCI_SUCCESS) { 
 		php_oci_error(statement->err, statement->errcode TSRMLS_CC);
 		return 1;
 	}
 
-	statement->errcode = PHP_OCI_CALL(OCIAttrGet, ((dvoid *)statement->stmt, OCI_HTYPE_STMT, (ub2 *)error_offset, (ub4 *)0, OCI_ATTR_PARSE_ERROR_OFFSET, statement->err));
+	PHP_OCI_CALL_RETURN(statement->errcode, OCIAttrGet, ((dvoid *)statement->stmt, OCI_HTYPE_STMT, (ub2 *)error_offset, (ub4 *)0, OCI_ATTR_PARSE_ERROR_OFFSET, statement->err));
 	
 	if (statement->errcode != OCI_SUCCESS) { 
 		php_oci_error(statement->err, statement->errcode TSRMLS_CC);
@@ -1014,7 +1014,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 
 #if HAVE_OCI_ENV_NLS_CREATE
 	if (charset && *charset) {
-		charsetid = PHP_OCI_CALL(OCINlsCharSetNameToId, (OCI_G(env), charset));
+		PHP_OCI_CALL_RETURN(charsetid, OCINlsCharSetNameToId, (OCI_G(env), charset));
 		if (!charsetid) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid character set name: %s", charset);
 		} else {
@@ -1027,7 +1027,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 		size_t rsize = 0;
 		sword result;
 
-		result = PHP_OCI_CALL(OCINlsEnvironmentVariableGet, (&charsetid_nls_lang, 0, OCI_NLS_CHARSET_ID, 0, &rsize))
+		PHP_OCI_CALL_RETURN(result, OCINlsEnvironmentVariableGet, (&charsetid_nls_lang, 0, OCI_NLS_CHARSET_ID, 0, &rsize))
 		if (result != OCI_SUCCESS) {
 			charsetid_nls_lang = 0;
 		}
@@ -1176,18 +1176,18 @@ open:
 	}
 
 	/* create an environment using the character set id, Oracle 9i+ ONLY */
-	OCI_G(errcode) = PHP_OCI_CALL(OCIEnvNlsCreate, (&(connection->env), PHP_OCI_INIT_MODE, 0, NULL, NULL, NULL, 0, NULL, connection->charset, connection->charset));
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIEnvNlsCreate, (&(connection->env), PHP_OCI_INIT_MODE, 0, NULL, NULL, NULL, 0, NULL, connection->charset, connection->charset));
 
 #elif HAVE_OCI_ENV_CREATE
 #define PHP_OCI_INIT_FUNC_NAME "OCIEnvCreate"
 	
 	/* allocate env handle without NLS support */
-	OCI_G(errcode) = PHP_OCI_CALL(OCIEnvCreate, (&(connection->env), PHP_OCI_INIT_MODE, 0, NULL, NULL, NULL, 0, NULL));
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIEnvCreate, (&(connection->env), PHP_OCI_INIT_MODE, 0, NULL, NULL, NULL, 0, NULL));
 #else
 #define PHP_OCI_INIT_FUNC_NAME "OCIEnvInit"
 	
 	/* the simpliest way */
-	OCI_G(errcode) = PHP_OCI_CALL(OCIEnvInit, (&(connection->env), OCI_DEFAULT, 0, NULL));
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIEnvInit, (&(connection->env), OCI_DEFAULT, 0, NULL));
 #endif
 
 	if (OCI_G(errcode) != OCI_SUCCESS) {
@@ -1205,7 +1205,7 @@ open:
 	}
 	
 	/* allocate our server handle {{{ */	
-	OCI_G(errcode) = PHP_OCI_CALL(OCIHandleAlloc, (connection->env, (dvoid **)&(connection->server), OCI_HTYPE_SERVER, 0, NULL));
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIHandleAlloc, (connection->env, (dvoid **)&(connection->server), OCI_HTYPE_SERVER, 0, NULL));
 	
 	if (OCI_G(errcode) != OCI_SUCCESS) {
 		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
@@ -1214,7 +1214,7 @@ open:
 	} /* }}} */
 
 	/* attach to the server {{{ */
-	OCI_G(errcode) = PHP_OCI_CALL(OCIServerAttach, (connection->server, OCI_G(err), (text*)dbname, dbname_len, (ub4) OCI_DEFAULT));
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIServerAttach, (connection->server, OCI_G(err), (text*)dbname, dbname_len, (ub4) OCI_DEFAULT));
 	
 	if (OCI_G(errcode) != OCI_SUCCESS) {
 		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
@@ -1224,7 +1224,7 @@ open:
 	connection->is_attached = 1;
 
 	/* allocate our session handle {{{ */
-	OCI_G(errcode) = PHP_OCI_CALL(OCIHandleAlloc, (connection->env, (dvoid **)&(connection->session), OCI_HTYPE_SESSION, 0, NULL));
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIHandleAlloc, (connection->env, (dvoid **)&(connection->session), OCI_HTYPE_SESSION, 0, NULL));
 	
 	if (OCI_G(errcode) != OCI_SUCCESS) {
 		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
@@ -1233,7 +1233,7 @@ open:
 	} /* }}} */
 
 	/* allocate our private error-handle {{{ */
-	OCI_G(errcode) = PHP_OCI_CALL(OCIHandleAlloc, (connection->env, (dvoid **)&(connection->err), OCI_HTYPE_ERROR, 0, NULL));
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIHandleAlloc, (connection->env, (dvoid **)&(connection->err), OCI_HTYPE_ERROR, 0, NULL));
 
 	if (OCI_G(errcode) != OCI_SUCCESS) {
 		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
@@ -1242,7 +1242,7 @@ open:
 	} /* }}} */
 
 	/* allocate our service-context {{{ */
-	OCI_G(errcode) = PHP_OCI_CALL(OCIHandleAlloc, (connection->env, (dvoid **)&(connection->svc), OCI_HTYPE_SVCCTX, 0, NULL));
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIHandleAlloc, (connection->env, (dvoid **)&(connection->svc), OCI_HTYPE_SVCCTX, 0, NULL));
 
 	if (OCI_G(errcode) != OCI_SUCCESS) {
 		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
@@ -1252,7 +1252,7 @@ open:
 
 	/* set the username {{{ */
 	if (username) {
-		OCI_G(errcode) = PHP_OCI_CALL(OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) username, (ub4) username_len, (ub4) OCI_ATTR_USERNAME, OCI_G(err)));
+		PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) username, (ub4) username_len, (ub4) OCI_ATTR_USERNAME, OCI_G(err)));
 		
 		if (OCI_G(errcode) != OCI_SUCCESS) {
 			php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
@@ -1263,7 +1263,7 @@ open:
 
 	/* set the password {{{ */
 	if (password) {
-		OCI_G(errcode) = PHP_OCI_CALL(OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) password, (ub4) password_len, (ub4) OCI_ATTR_PASSWORD, OCI_G(err)));
+		PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) password, (ub4) password_len, (ub4) OCI_ATTR_PASSWORD, OCI_G(err)));
 		
 		if (OCI_G(errcode) != OCI_SUCCESS) {
 			php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
@@ -1273,7 +1273,7 @@ open:
 	}/* }}} */
 
 	/* set the server handle in the service handle {{{ */ 
-	OCI_G(errcode) = PHP_OCI_CALL(OCIAttrSet, (connection->svc, OCI_HTYPE_SVCCTX, connection->server, 0, OCI_ATTR_SERVER, OCI_G(err)));
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, (connection->svc, OCI_HTYPE_SVCCTX, connection->server, 0, OCI_ATTR_SERVER, OCI_G(err)));
 
 	if (OCI_G(errcode) != OCI_SUCCESS) {
 		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
@@ -1282,7 +1282,7 @@ open:
 	} /* }}} */
 
 	/* set the authentication handle in the service handle {{{ */
-	OCI_G(errcode) = PHP_OCI_CALL(OCIAttrSet, (connection->svc, OCI_HTYPE_SVCCTX, connection->session, 0, OCI_ATTR_SESSION, OCI_G(err)));
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, (connection->svc, OCI_HTYPE_SVCCTX, connection->session, 0, OCI_ATTR_SESSION, OCI_G(err)));
 
 	if (OCI_G(errcode) != OCI_SUCCESS) {
 		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
@@ -1292,7 +1292,7 @@ open:
 
 	if (new_password) {
 		/* try to change password if new one was provided {{{ */
-		OCI_G(errcode) = PHP_OCI_CALL(OCIPasswordChange, (connection->svc, OCI_G(err), (text *)username, username_len, (text *)password, password_len, (text *)new_password, new_password_len, OCI_AUTH));
+		PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIPasswordChange, (connection->svc, OCI_G(err), (text *)username, username_len, (text *)password, password_len, (text *)new_password, new_password_len, OCI_AUTH));
 
 		if (OCI_G(errcode) != OCI_SUCCESS) {
 			php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
@@ -1300,7 +1300,7 @@ open:
 			return NULL;
 		}
 
-		OCI_G(errcode) = PHP_OCI_CALL(OCIAttrGet, ((dvoid *)connection->svc, OCI_HTYPE_SVCCTX, (dvoid *)&(connection->session), (ub4 *)0, OCI_ATTR_SESSION, OCI_G(err)));
+		PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrGet, ((dvoid *)connection->svc, OCI_HTYPE_SVCCTX, (dvoid *)&(connection->session), (ub4 *)0, OCI_ATTR_SESSION, OCI_G(err)));
 
 		if (OCI_G(errcode) != OCI_SUCCESS) {
 			php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
@@ -1313,19 +1313,19 @@ open:
 			case OCI_DEFAULT:
 #if HAVE_OCI_STMT_PREPARE2
 				/* statement caching is suported only in Oracle 9+ */
-				OCI_G(errcode) = PHP_OCI_CALL(OCISessionBegin, (connection->svc, OCI_G(err), connection->session, (ub4) OCI_CRED_RDBMS, (ub4) OCI_STMT_CACHE));
+				PHP_OCI_CALL_RETURN(OCI_G(errcode), OCISessionBegin, (connection->svc, OCI_G(err), connection->session, (ub4) OCI_CRED_RDBMS, (ub4) OCI_STMT_CACHE));
 #else
 				/* others cannot use stmt caching, so we call OCISessionBegin() with OCI_DEFAULT */
-				OCI_G(errcode) = PHP_OCI_CALL(OCISessionBegin, (connection->svc, OCI_G(err), connection->session, (ub4) OCI_CRED_RDBMS, (ub4) OCI_DEFAULT));
+				PHP_OCI_CALL_RETURN(OCI_G(errcode), OCISessionBegin, (connection->svc, OCI_G(err), connection->session, (ub4) OCI_CRED_RDBMS, (ub4) OCI_DEFAULT));
 #endif
 				break;
 			case OCI_SYSDBA:
 			case OCI_SYSOPER:
 			default:
 				if (username_len == 1 && username[0] == '/' && password_len == 0) {
-					OCI_G(errcode) = PHP_OCI_CALL(OCISessionBegin, (connection->svc, OCI_G(err), connection->session, (ub4) OCI_CRED_EXT, (ub4) session_mode));
+					PHP_OCI_CALL_RETURN(OCI_G(errcode), OCISessionBegin, (connection->svc, OCI_G(err), connection->session, (ub4) OCI_CRED_EXT, (ub4) session_mode));
 				} else {
-					OCI_G(errcode) = PHP_OCI_CALL(OCISessionBegin, (connection->svc, OCI_G(err), connection->session, (ub4) OCI_CRED_RDBMS, (ub4) session_mode));
+					PHP_OCI_CALL_RETURN(OCI_G(errcode), OCISessionBegin, (connection->svc, OCI_G(err), connection->session, (ub4) OCI_CRED_RDBMS, (ub4) session_mode));
 				}
 				break;
 		}
@@ -1346,7 +1346,7 @@ open:
 	if (connection->is_persistent) {
 		ub4 statement_cache_size = (OCI_G(statement_cache_size) > 0) ? OCI_G(statement_cache_size) : 0;
 
-		OCI_G(errcode) = PHP_OCI_CALL(OCIAttrSet, ((dvoid *) connection->svc, (ub4) OCI_HTYPE_SVCCTX, (ub4 *) &statement_cache_size, 0, (ub4) OCI_ATTR_STMTCACHESIZE, OCI_G(err)));
+		PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->svc, (ub4) OCI_HTYPE_SVCCTX, (ub4 *) &statement_cache_size, 0, (ub4) OCI_ATTR_STMTCACHESIZE, OCI_G(err)));
 		
 		if (OCI_G(errcode) != OCI_SUCCESS) {
 			php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
@@ -1387,11 +1387,11 @@ static int php_oci_connection_ping(php_oci_connection *connection TSRMLS_DC)
 {
 	/* OCIPing() crashes Oracle servers older than 10.2 */
 #if 0
-	OCI_G(errcode) = PHP_OCI_CALL(OCIPing, (connection->svc, OCI_G(err), OCI_DEFAULT));
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIPing, (connection->svc, OCI_G(err), OCI_DEFAULT));
 #else
 	char version[256];
 	/* use good old OCIServerVersion() by default */
-	OCI_G(errcode) = PHP_OCI_CALL(OCIServerVersion, (connection->server, OCI_G(err), (text*)version, sizeof(version), OCI_HTYPE_SERVER));
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIServerVersion, (connection->server, OCI_G(err), (text*)version, sizeof(version), OCI_HTYPE_SERVER));
 #endif
 	
 	if (OCI_G(errcode) == OCI_SUCCESS) {
@@ -1411,7 +1411,7 @@ static int php_oci_connection_status(php_oci_connection *connection TSRMLS_DC)
 	ub4 ss = 0;
 
 	/* get OCI_ATTR_SERVER_STATUS */
-	OCI_G(errcode) = PHP_OCI_CALL(OCIAttrGet, ((dvoid *)connection->server, OCI_HTYPE_SERVER, (dvoid *)&ss, (ub4 *)0, OCI_ATTR_SERVER_STATUS, OCI_G(err)));
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrGet, ((dvoid *)connection->server, OCI_HTYPE_SERVER, (dvoid *)&ss, (ub4 *)0, OCI_ATTR_SERVER_STATUS, OCI_G(err)));
 	
 	if (OCI_G(errcode) == OCI_SUCCESS && ss == OCI_SERVER_NORMAL) {
 		return 1;
@@ -1427,7 +1427,7 @@ static int php_oci_connection_status(php_oci_connection *connection TSRMLS_DC)
  Rollback connection */
 int php_oci_connection_rollback(php_oci_connection *connection TSRMLS_DC)
 {
-	connection->errcode = PHP_OCI_CALL(OCITransRollback, (connection->svc, connection->err, (ub4) 0));
+	PHP_OCI_CALL_RETURN(connection->errcode, OCITransRollback, (connection->svc, connection->err, (ub4) 0));
 	connection->needs_commit = 0;
 
 	if (connection->errcode != OCI_SUCCESS) {
@@ -1442,7 +1442,7 @@ int php_oci_connection_rollback(php_oci_connection *connection TSRMLS_DC)
  Commit connection */
 int php_oci_connection_commit(php_oci_connection *connection TSRMLS_DC)
 {
-	connection->errcode = PHP_OCI_CALL(OCITransCommit, (connection->svc, connection->err, (ub4) 0));
+	PHP_OCI_CALL_RETURN(connection->errcode, OCITransCommit, (connection->svc, connection->err, (ub4) 0));
 	connection->needs_commit = 0;
 
 	if (connection->errcode != OCI_SUCCESS) {
@@ -1458,6 +1458,7 @@ int php_oci_connection_commit(php_oci_connection *connection TSRMLS_DC)
 static int php_oci_connection_close(php_oci_connection *connection TSRMLS_DC)
 {
 	int result = 0;
+	zend_bool in_call_save = OCI_G(in_call);
 
 	if (connection->descriptors) {
 		zend_hash_destroy(connection->descriptors);
@@ -1514,6 +1515,7 @@ static int php_oci_connection_close(php_oci_connection *connection TSRMLS_DC)
 		efree(connection);
 	}
 	connection = NULL;
+	OCI_G(in_call) = in_call_save;
 	return result;
 } /* }}} */
 
@@ -1521,7 +1523,7 @@ static int php_oci_connection_close(php_oci_connection *connection TSRMLS_DC)
  Change password for the user with the username given */
 int php_oci_password_change(php_oci_connection *connection, char *user, int user_len, char *pass_old, int pass_old_len, char *pass_new, int pass_new_len TSRMLS_DC)
 {
-	connection->errcode = PHP_OCI_CALL(OCIPasswordChange, (connection->svc, connection->err, (text *)user, user_len, (text *)pass_old, pass_old_len, (text *)pass_new, pass_new_len, OCI_DEFAULT));
+	PHP_OCI_CALL_RETURN(connection->errcode, OCIPasswordChange, (connection->svc, connection->err, (text *)user, user_len, (text *)pass_old, pass_old_len, (text *)pass_new, pass_new_len, OCI_DEFAULT));
 
 	if (connection->errcode != OCI_SUCCESS) {
 		php_oci_error(connection->err, connection->errcode TSRMLS_CC);
@@ -1537,7 +1539,7 @@ int php_oci_server_get_version(php_oci_connection *connection, char **version TS
 {
 	char version_buff[256];
 
-	connection->errcode = PHP_OCI_CALL(OCIServerVersion, (connection->svc, connection->err, (text*)version_buff, sizeof(version_buff), OCI_HTYPE_SVCCTX));
+	PHP_OCI_CALL_RETURN(connection->errcode, OCIServerVersion, (connection->svc, connection->err, (text*)version_buff, sizeof(version_buff), OCI_HTYPE_SVCCTX));
 	
 	if (connection->errcode != OCI_SUCCESS) {
 		php_oci_error(connection->err, connection->errcode TSRMLS_CC);
@@ -1746,7 +1748,7 @@ static int php_oci_persistent_helper(zend_rsrc_list_entry *le TSRMLS_DC)
 		connection = (php_oci_connection *)le->ptr;
 
 		if (connection->used_this_request) {
-			if ((PG(connection_status) & PHP_CONNECTION_TIMEOUT)) {
+			if ((PG(connection_status) & PHP_CONNECTION_TIMEOUT) || OCI_G(in_call)) {
 				return 1;
 			}
 
