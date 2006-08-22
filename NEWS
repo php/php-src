@@ -5,6 +5,8 @@ PHP                                                                        NEWS
   inside a failed query executed via query() method). (Ilia)
 - Fixed bug #38524 (strptime() does not initialize the internal date storage
   structure). (Ilia)
+- Fixed bug #38488 (Access to "php://stdin" and family crashes PHP on win32).
+  (Dmitry)
 - Fixed PECL bug #8112 (OCI8 persistent connections misbehave when Apache 
   process times out). (Tony)
 
