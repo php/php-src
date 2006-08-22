@@ -187,27 +187,30 @@ static zend_mm_segment* zend_mm_mem_mmap_zero_alloc(zend_mm_storage *storage, si
 
 static zend_mm_segment* zend_mm_mem_win32_alloc(zend_mm_storage *storage, size_t size)
 {
-	if (VirtualAlloc(0, size, MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE)) {
-		return malloc(sizeof(zend_mm_storage));
-	} else {
-		return NULL;
-	}
+	return (zend_mm_segment*) VirtualAlloc(0, size, MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
 }
 
 static void zend_mm_mem_win32_free(zend_mm_storage *storage, zend_mm_segment* segment)
 {
-	VirtualFree(segment, 0, MEM_RELEASE);
-	free(storage);
+	VirtualFree(segment, segment->size, MEM_RELEASE);
 }
 
 static zend_mm_segment* zend_mm_mem_win32_realloc(zend_mm_storage *storage, zend_mm_segment* segment, size_t size)
 {
-	zend_mm_segment *ret = zend_mm_mem_win32_alloc(storage, size);
-	if (ret) {
-		memcpy(ret, segment, size > segment->size ? segment->size : size);
-		zend_mm_mem_win32_free(storage, segment);
+	if (size < segment->size) {
+		VirtualFree((char*)segment + size, segment->size - size, MEM_RELEASE);
+	} else if (size > segment->size) {
+		if (!VirtualAlloc((char*)segment + segment->size, size - segment->size, MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE)) {
+			zend_mm_segment *ret = zend_mm_mem_win32_alloc(storage, size);
+
+			if (ret) {
+				memcpy(ret, segment, size > segment->size ? segment->size : size);
+				zend_mm_mem_win32_free(storage, segment);
+			}
+			segment = ret;
+		}
 	}
-	return ret;
+	return segment;
 }
 
 # define ZEND_MM_MEM_WIN32_DSC {"win32", zend_mm_mem_dummy_init, zend_mm_mem_dummy_dtor, zend_mm_mem_win32_alloc, zend_mm_mem_win32_realloc, zend_mm_mem_win32_free}
