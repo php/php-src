@@ -912,12 +912,12 @@ sb4 php_oci_fetch_errmsg(OCIError *error_handle, text **error_buf TSRMLS_DC)
 	if (error_code) {
 		int tmp_buf_len = strlen(tmp_buf);
 		
-		if (tmp_buf[tmp_buf_len - 1] == '\n') {
+		if (tmp_buf_len && tmp_buf[tmp_buf_len - 1] == '\n') {
 			tmp_buf[tmp_buf_len - 1] = '\0';
 		}
-		if (error_buf) {
+		if (tmp_buf_len && error_buf) {
 			*error_buf = NULL;
-			*error_buf = estrndup(tmp_buf, tmp_buf_len + 1);
+			*error_buf = estrndup(tmp_buf, tmp_buf_len);
 		}
 	}
 	return error_code;
@@ -1157,7 +1157,7 @@ open:
 		
 		if (alloc_non_persistent) {
 			connection = (php_oci_connection *) ecalloc(1, sizeof(php_oci_connection));
-			connection->hash_key = estrndup(hashed_details.c, hashed_details.len+1);
+			connection->hash_key = estrndup(hashed_details.c, hashed_details.len);
 			connection->is_persistent = 0;
 		} else {
 			connection = (php_oci_connection *) calloc(1, sizeof(php_oci_connection));
@@ -1166,7 +1166,7 @@ open:
 		}
 	} else {
 		connection = (php_oci_connection *) ecalloc(1, sizeof(php_oci_connection));
-		connection->hash_key = estrndup(hashed_details.c, hashed_details.len+1);
+		connection->hash_key = estrndup(hashed_details.c, hashed_details.len);
 		connection->is_persistent = 0;
 	}
 

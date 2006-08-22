@@ -1632,15 +1632,14 @@ PHP_FUNCTION(oci_parse)
 	php_oci_statement *statement;
 	char *query;
 	int query_len;
-	zend_bool cached = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|b", &z_connection, &query, &query_len, &cached) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_connection, &query, &query_len) == FAILURE) {
 		return;
 	}
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
-	statement = php_oci_statement_create(connection, query, query_len, cached TSRMLS_CC);
+	statement = php_oci_statement_create(connection, query, query_len TSRMLS_CC);
 
 	if (statement) {
 		RETURN_RESOURCE(statement->id);
@@ -1738,7 +1737,7 @@ PHP_FUNCTION(oci_new_cursor)
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
-	statement = php_oci_statement_create(connection, NULL, 0, 0 TSRMLS_CC);
+	statement = php_oci_statement_create(connection, NULL, 0 TSRMLS_CC);
 	
 	if (statement) {
 		RETURN_RESOURCE(statement->id);
