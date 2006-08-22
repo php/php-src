@@ -11,4 +11,4 @@ echo "foo\n";
 --EXPECTF--
 foo
 
-Warning: Wrong parameter count for (null)() in %s on line %d
+Warning: (null)() expects exactly 1 parameter, 2 given in %s on line %d
