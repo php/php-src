@@ -1330,9 +1330,10 @@ TEST $file
 	}
 
 	if ($leak_check) {
-		$cmd = "USE_ZEND_ALLOC=0 valgrind -q --tool=memcheck --trace-children=yes --log-file-exactly=$memcheck_filename $cmd";
+		$env['USE_ZEND_ALLOC'] = '0';
+		$cmd = "valgrind -q --tool=memcheck --trace-children=yes --log-file-exactly=$memcheck_filename $cmd";
 	} else {
-		$cmd = "USE_ZEND_ALLOC=1 ".$cmd;
+		$env['USE_ZEND_ALLOC'] = '1';
 	}
 
 	if ($DETAILED) echo "
