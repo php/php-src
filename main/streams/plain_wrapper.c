@@ -194,10 +194,9 @@ PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const cha
 #elif defined(PHP_WIN32)
 	{
 		long handle = _get_osfhandle(self->fd);
-		DWORD in_buf_size, out_buf_size;
 
 		if (handle != 0xFFFFFFFF) {
-			self->is_pipe = GetNamedPipeInfo((HANDLE)handle, NULL, &out_buf_size, &in_buf_size, NULL);
+			self->is_pipe = GetFileType((HANDLE)handle) == FILE_TYPE_PIPE;
 		}
 	}
 #endif
