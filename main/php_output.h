@@ -117,7 +117,7 @@ typedef struct _php_output_handler {
 
 ZEND_BEGIN_MODULE_GLOBALS(output)
 	int flags;
-	zend_stack handlers;
+	zend_stack *handlers;
 	php_output_handler *active;
 	php_output_handler *running;
 	char *output_start_filename;
