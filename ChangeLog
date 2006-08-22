@@ -1,3 +1,41 @@
+2006-08-21  Antony Dovgal  <antony@zend.com>
+
+    * ext/pdo/tests/bug_38394.phpt
+      ext/pdo/tests/bug_38394.phpt:
+      typo
+
+2006-08-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo/pdo_dbh.c:
+      MFB: Fixed bug #38535 (memory corruption in pdo_pgsql driver on error
+      retrieval inside a failed query executed via query() method).
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_dbh.c:
+      Fixed bug #38535 (memory corruption in pdo_pgsql driver on error retrieval
+      inside a failed query executed via query() method).
+
+2006-08-21  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/oci8/oci8.c
+      ext/oci8/oci8_collection.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h:
+      MFH: fix PECL bug #8112 (OCI8 persistent connections misbehave when Apache
+      process times out)
+
+    * ext/oci8/oci8.c
+      ext/oci8/oci8_collection.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h:
+      fix PECL bug #8112 (OCI8 persistent connections misbehave when Apache
+      process times out)
+
 2006-08-20  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
