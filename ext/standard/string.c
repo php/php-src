@@ -6938,7 +6938,7 @@ static int php_u_str_word_count(UChar *str, int str_len, long type, UChar *char_
 /* }}} */
 
 /* {{{ php_str_word_count */
-static int php_str_word_count(char *str, int str_len, long type, char *char_list, int char_list_len, zval *return_value)
+static int php_str_word_count(char *str, int str_len, long type, char *char_list, int char_list_len, zval *return_value TSRMLS_DC)
 {
 	char ch[256], *p, *e, *s, *buf;
 	int word_count = 0;
@@ -7017,7 +7017,7 @@ PHP_FUNCTION(str_word_count)
 	if (str_type == IS_UNICODE) {
 		word_count = php_u_str_word_count(str.u, str_len, type, char_list.u, char_list_len, return_value TSRMLS_CC);
 	} else {
-		word_count = php_str_word_count(str.s, str_len, type, char_list.s, char_list_len, return_value);
+		word_count = php_str_word_count(str.s, str_len, type, char_list.s, char_list_len, return_value TSRMLS_CC);
 	}
 
 	if (!type) {
