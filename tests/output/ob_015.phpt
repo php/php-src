@@ -8,4 +8,4 @@ echo "foo\n";
 --EXPECTF--
 foo
 
-Warning: Wrong parameter count for str_rot13() in %s on line %d
+Warning: str_rot13() expects exactly 1 parameter, 2 given in %s on line %d

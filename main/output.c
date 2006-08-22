@@ -1131,11 +1131,8 @@ static int php_output_stack_apply_list(void *h, void *z)
 	php_output_handler *handler = *(php_output_handler **) h;
 	zval *array = (zval *) z;
 	
-	if (Z_TYPE_P(handler->name) == IS_UNICODE) {
-		add_next_index_unicodel(array, Z_USTRVAL_P(handler->name), Z_USTRLEN_P(handler->name), 1);
-	} else {
-		add_next_index_stringl(array, Z_STRVAL_P(handler->name), Z_STRLEN_P(handler->name), 1);
-	}
+	ZVAL_ADDREF(handler->name);
+	add_next_index_zval(array, handler->name);
 	return 0;
 }
 /* }}} */
