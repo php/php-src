@@ -886,6 +886,10 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value)
 	HashPosition   pos;
 	smart_str      implstr = {0};
 	int            numelems, i = 0;
+	zend_bool free_tmp_val;
+	zval tmp_val;
+	char *str;
+	int str_len;
 
 	numelems = zend_hash_num_elements(Z_ARRVAL_P(arr));
 
@@ -896,6 +900,7 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value)
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(arr), &pos);
 
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(arr), (void **) &tmp, &pos) == SUCCESS) {
+		free_tmp_val = 0;
 		if ((*tmp)->type != IS_STRING) {
 			if ((*tmp)->type == IS_OBJECT) {
 				int copy;
@@ -907,12 +912,23 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value)
 				}
 				goto next;
 			} else {
-				SEPARATE_ZVAL(tmp);
-				convert_to_string(*tmp);
+				tmp_val = **tmp;
+				zval_copy_ctor(&tmp_val);
+				convert_to_string(&tmp_val);
+				str = Z_STRVAL(tmp_val);
+				str_len = Z_STRLEN(tmp_val);
+				free_tmp_val = 1;
 			}
-		} 
+		} else {
+			str = Z_STRVAL_PP(tmp);
+			str_len = Z_STRLEN_PP(tmp);
+		}
 		
-		smart_str_appendl(&implstr, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+		smart_str_appendl(&implstr, str, str_len);
+
+		if (free_tmp_val) {
+			zval_dtor(&tmp_val);
+		}
 next:
 		if (++i != numelems) {
 			smart_str_appendl(&implstr, Z_STRVAL_P(delim), Z_STRLEN_P(delim));
