@@ -1159,11 +1159,8 @@ static inline zval *php_output_handler_status(php_output_handler *handler, zval 
 		array_init(entry);
 	}
 	
-	if (Z_TYPE_P(handler->name) == IS_UNICODE) {
-		add_assoc_unicodel(entry, "name", Z_USTRVAL_P(handler->name), Z_USTRLEN_P(handler->name), 1);
-	} else {
-		add_assoc_stringl(entry, "name", Z_STRVAL_P(handler->name), Z_STRLEN_P(handler->name), 1);
-	}
+	ZVAL_ADDREF(handler->name);
+	add_assoc_zval(entry, "name", handler->name);
 	add_assoc_long(entry, "type", (long) (handler->flags & 0xf));
 	add_assoc_long(entry, "flags", (long) handler->flags);
 	add_assoc_long(entry, "level", (long) handler->level);
