@@ -209,6 +209,7 @@ dnl Include Zend and TSRM configurations.
 dnl -------------------------------------------------------------------------
 
 sinclude(Zend/Zend.m4)
+sinclude(TSRM/threads.m4)
 sinclude(TSRM/tsrm.m4)
 
 
