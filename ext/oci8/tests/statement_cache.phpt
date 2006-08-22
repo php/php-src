@@ -9,11 +9,11 @@ require dirname(__FILE__)."/connect.inc";
 
 $pc = oci_pconnect($user, $password, $dbase);
 
-$stmt = oci_parse($pc, "select 1+3 from dual", true);
+$stmt = oci_parse($pc, "select 1+3 from dual");
 oci_execute($stmt);
 var_dump(oci_fetch_array($stmt));
 
-$stmt = oci_parse($pc, "select 1+3 from dual", true);
+$stmt = oci_parse($pc, "select 1+3 from dual");
 oci_execute($stmt);
 var_dump(oci_fetch_array($stmt));
 

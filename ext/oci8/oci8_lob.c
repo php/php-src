@@ -479,7 +479,7 @@ int php_oci_lob_set_buffering (php_oci_descriptor *descriptor, int on_off TSRMLS
 
 /* {{{ php_oci_lob_get_buffering()
  Return current buffering state for the LOB */
-int php_oci_lob_get_buffering (php_oci_descriptor *descriptor TSRMLS_DC)
+int php_oci_lob_get_buffering (php_oci_descriptor *descriptor)
 {
 	if (descriptor->buffering != PHP_OCI_LOB_BUFFER_DISABLED) {
 		return 1;
