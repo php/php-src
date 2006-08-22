@@ -112,7 +112,9 @@ PHPAPI int php_output_activate(TSRMLS_D)
 #else
 	memset(&output_globals, 0, sizeof(zend_output_globals));
 #endif
-	if (SUCCESS != zend_stack_init(&OG(handlers))) {
+	
+	OG(handlers) = emalloc(sizeof(zend_stack));
+	if (SUCCESS != zend_stack_init(OG(handlers))) {
 		return FAILURE;
 	}
 	
@@ -133,15 +135,26 @@ PHPAPI void php_output_deactivate(TSRMLS_D)
 	
 	OG(active) = NULL;
 	OG(running) = NULL;
-	/* release all output handlers */
-	while (SUCCESS == zend_stack_top(&OG(handlers), (void *) &handler)) {
-		php_output_handler_free(handler TSRMLS_CC);
-		zend_stack_del_top(&OG(handlers));
-	}
-	zend_stack_destroy(&OG(handlers));
 	
-	zval_ptr_dtor(&OG(default_output_handler_name));
-	zval_ptr_dtor(&OG(devnull_output_handler_name));
+	/* release all output handlers */
+	if (OG(handlers)) {
+		while (SUCCESS == zend_stack_top(OG(handlers), (void *) &handler)) {
+			php_output_handler_free(handler TSRMLS_CC);
+			zend_stack_del_top(OG(handlers));
+		}
+		zend_stack_destroy(OG(handlers));
+		efree(OG(handlers));
+		OG(handlers) = NULL;
+	}
+	
+	if (OG(default_output_handler_name)) {
+		zval_ptr_dtor(&OG(default_output_handler_name));
+		OG(default_output_handler_name) = NULL;
+	}
+	if (OG(devnull_output_handler_name)) {
+		zval_ptr_dtor(&OG(devnull_output_handler_name));
+		OG(devnull_output_handler_name) = NULL;
+	}
 }
 /* }}} */
 
@@ -277,9 +290,9 @@ PHPAPI int php_output_flush(TSRMLS_D)
 		php_output_context_init(&context, PHP_OUTPUT_HANDLER_FLUSH TSRMLS_CC);
 		php_output_handler_op(OG(active), &context);
 		if (context.out.data && context.out.used) {
-			zend_stack_del_top(&OG(handlers));
+			zend_stack_del_top(OG(handlers));
 			php_output_write(context.out.data, context.out.used TSRMLS_CC);
-			zend_stack_push(&OG(handlers), &OG(active), sizeof(php_output_handler *));
+			zend_stack_push(OG(handlers), &OG(active), sizeof(php_output_handler *));
 		}
 		php_output_context_dtor(&context);
 		return SUCCESS;
@@ -323,7 +336,7 @@ PHPAPI void php_output_clean_all(TSRMLS_D)
 	
 	if (OG(active)) {
 		php_output_context_init(&context, PHP_OUTPUT_HANDLER_CLEAN TSRMLS_CC);
-		zend_stack_apply_with_argument(&OG(handlers), ZEND_STACK_APPLY_TOPDOWN, php_output_stack_apply_clean, &context);
+		zend_stack_apply_with_argument(OG(handlers), ZEND_STACK_APPLY_TOPDOWN, php_output_stack_apply_clean, &context);
 	}
 }
 
@@ -371,7 +384,7 @@ PHPAPI void php_output_discard_all(TSRMLS_D)
 	Get output buffering level, ie. how many output handlers the stack contains */
 PHPAPI int php_output_get_level(TSRMLS_D)
 {
-	return OG(active) ? zend_stack_count(&OG(handlers)) : 0;
+	return OG(active) ? zend_stack_count(OG(handlers)) : 0;
 }
 /* }}} */
 
@@ -549,7 +562,7 @@ PHPAPI int php_output_handler_start(php_output_handler *handler TSRMLS_DC)
 		}
 	}
 	/* zend_stack_push never returns SUCCESS but FAILURE or stack level */
-	if (FAILURE == (handler->level = zend_stack_push(&OG(handlers), &handler, sizeof(php_output_handler *)))) {
+	if (FAILURE == (handler->level = zend_stack_push(OG(handlers), &handler, sizeof(php_output_handler *)))) {
 		return FAILURE;
 	}
 	OG(active) = handler;
@@ -565,7 +578,7 @@ PHPAPI int php_output_handler_started(zval *name TSRMLS_DC)
 	int i, count = php_output_get_level(TSRMLS_C);
 	
 	if (count) {
-		handlers = (php_output_handler **) zend_stack_base(&OG(handlers));
+		handlers = (php_output_handler **) zend_stack_base(OG(handlers));
 		
 		for (i = 0; i < count; ++i) {
 			if (!zend_binary_zval_strcmp(handlers[i]->name, name)) {
@@ -842,22 +855,24 @@ static inline php_output_handler *php_output_handler_init(zval *name, size_t chu
 	Appends input to the output handlers buffer and indicates whether the buffer does not have to be processed by the output handler */
 static inline int php_output_handler_append(php_output_handler *handler, const php_output_buffer *buf TSRMLS_DC)
 {
-	/* store it away */
-	if ((handler->buffer.size - handler->buffer.used) <= buf->used) {
-		size_t grow_int = PHP_OUTPUT_HANDLER_INITBUF_SIZE(handler->size);
-		size_t grow_buf = PHP_OUTPUT_HANDLER_INITBUF_SIZE(buf->used + 1 - (handler->buffer.size - handler->buffer.used));
-		size_t grow_max = MAX(grow_int, grow_buf);
+	if (buf->used) {
+		/* store it away */
+		if ((handler->buffer.size - handler->buffer.used) <= buf->used) {
+			size_t grow_int = PHP_OUTPUT_HANDLER_INITBUF_SIZE(handler->size);
+			size_t grow_buf = PHP_OUTPUT_HANDLER_INITBUF_SIZE(buf->used + 1 - (handler->buffer.size - handler->buffer.used));
+			size_t grow_max = MAX(grow_int, grow_buf);
 		
-		handler->buffer.data = erealloc(handler->buffer.data, handler->buffer.size += grow_max);
-	}
-	memcpy(handler->buffer.data + handler->buffer.used, buf->data, buf->used);
-	handler->buffer.used += buf->used;
-	handler->buffer.data[handler->buffer.used] = '\0';
+			handler->buffer.data = erealloc(handler->buffer.data, handler->buffer.size += grow_max);
+		}
+		memcpy(handler->buffer.data + handler->buffer.used, buf->data, buf->used);
+		handler->buffer.used += buf->used;
+		handler->buffer.data[handler->buffer.used] = '\0';
 	
-	/* chunked buffering */
-	if (handler->size && (handler->buffer.used >= handler->size)) {
-		/* store away errors and/or any intermediate output */
-		return OG(running) ? 1 : 0;
+		/* chunked buffering */
+		if (handler->size && (handler->buffer.used >= handler->size)) {
+			/* store away errors and/or any intermediate output */
+			return OG(running) ? 1 : 0;
+		}
 	}
 	return 1;
 }
@@ -876,18 +891,18 @@ static inline int php_output_handler_op(php_output_handler *handler, php_output_
 					"name=%s, "
 					"flags=%d, "
 					"buffer.data=%s, "
-					"buffer.used=%lu, "
-					"buffer.size=%lu, "
+					"buffer.used=%zu, "
+					"buffer.size=%zu, "
 					"in.data=%s, "
-					"in.used=%lu)\n",
+					"in.used=%zu)\n",
 			context->op,
 			handler,
-			handler->name,
+			Z_STRVAL_P(handler->name),
 			handler->flags,
-			handler->buffer.data,
+			handler->buffer.used?handler->buffer.data:"",
 			handler->buffer.used,
 			handler->buffer.size,
-			context->in.data,
+			context->in.used?context->in.data:"",
 			context->in.used
 	);
 #endif
@@ -913,6 +928,7 @@ static inline int php_output_handler_op(php_output_handler *handler, php_output_
 			zval *retval = NULL, **params[2], *flags, *input;
 			
 			MAKE_STD_ZVAL(input);
+			/* can we avoid copying here by setting is_ref? */
 			ZVAL_STRINGL(input, handler->buffer.data, handler->buffer.used, 1);
 			MAKE_STD_ZVAL(flags);
 			ZVAL_LONG(flags, (long) op);
@@ -1006,13 +1022,13 @@ static inline void php_output_op(int op, const char *str, size_t len TSRMLS_DC)
 	 *  - apply op to the one active handler; note that OG(active) might be popped off the stack on a flush
 	 *  - or apply op to the handler stack
 	 */
-	if (OG(active) && (obh_cnt = zend_stack_count(&OG(handlers)))) {
+	if (OG(active) && (obh_cnt = zend_stack_count(OG(handlers)))) {
 		context.in.data = (char *) str;
 		context.in.used = len;
 		
 		if (obh_cnt > 1) {
-			zend_stack_apply_with_argument(&OG(handlers), ZEND_STACK_APPLY_TOPDOWN, php_output_stack_apply_op, &context);
-		} else if ((SUCCESS == zend_stack_top(&OG(handlers), (void *) &active)) && (!((*active)->flags & PHP_OUTPUT_HANDLER_DISABLED))) {
+			zend_stack_apply_with_argument(OG(handlers), ZEND_STACK_APPLY_TOPDOWN, php_output_stack_apply_op, &context);
+		} else if ((SUCCESS == zend_stack_top(OG(handlers), (void *) &active)) && (!((*active)->flags & PHP_OUTPUT_HANDLER_DISABLED))) {
 			php_output_handler_op(*active, &context);
 		} else {
 			php_output_context_pass(&context);
@@ -1025,7 +1041,7 @@ static inline void php_output_op(int op, const char *str, size_t len TSRMLS_DC)
 	if (context.out.data) {
 		if (context.out.used) {
 #if PHP_OUTPUT_DEBUG
-			fprintf(stderr, "::: sapi_write('%s', %lu)\n", context.out.data, context.out.used);
+			fprintf(stderr, "::: sapi_write('%s', %zu)\n", context.out.data, context.out.used);
 #endif
 			if (!SG(headers_sent) && php_header(TSRMLS_C)) {
 				if (zend_is_compiling(TSRMLS_C)) {
@@ -1193,8 +1209,8 @@ static inline int php_output_stack_pop(int discard, int shutdown TSRMLS_DC)
 		}
 		
 		/* pop it off the stack */
-		zend_stack_del_top(&OG(handlers));
-		if (SUCCESS == zend_stack_top(&OG(handlers), (void *) &current)) {
+		zend_stack_del_top(OG(handlers));
+		if (SUCCESS == zend_stack_top(OG(handlers), (void *) &current)) {
 			OG(active) = *current;
 		} else {
 			OG(active) = NULL;
@@ -1438,7 +1454,7 @@ PHP_FUNCTION(ob_list_handlers)
 	}
 	
 	array_init(return_value);
-	zend_stack_apply_with_argument(&OG(handlers), ZEND_STACK_APPLY_BOTTOMUP, php_output_stack_apply_list, return_value);
+	zend_stack_apply_with_argument(OG(handlers), ZEND_STACK_APPLY_BOTTOMUP, php_output_stack_apply_list, return_value);
 }
 /* }}} */
 
@@ -1457,7 +1473,7 @@ PHP_FUNCTION(ob_get_status)
 	
 	array_init(return_value);
 	if (full_status) {
-		zend_stack_apply_with_argument(&OG(handlers), ZEND_STACK_APPLY_BOTTOMUP, php_output_stack_apply_status, return_value);
+		zend_stack_apply_with_argument(OG(handlers), ZEND_STACK_APPLY_BOTTOMUP, php_output_stack_apply_status, return_value);
 	} else {
 		php_output_handler_status(OG(active), return_value);
 	}
