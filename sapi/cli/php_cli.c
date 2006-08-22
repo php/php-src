@@ -577,6 +577,7 @@ int main(int argc, char *argv[])
 	char *script_file=NULL;
 	int interactive=0;
 	int module_started = 0;
+	int request_started = 0;
 	int lineno = 0;
 	char *exec_direct=NULL, *exec_run=NULL, *exec_begin=NULL, *exec_end=NULL;
 	const char *param_error=NULL;
@@ -713,6 +714,7 @@ int main(int argc, char *argv[])
 				if (php_request_startup(TSRMLS_C)==FAILURE) {
 					goto err;
 				}
+				request_started = 1;
 				php_cli_usage(argv[0]);
 				php_output_end_all(TSRMLS_C);
 				exit_status=0;
@@ -722,6 +724,7 @@ int main(int argc, char *argv[])
 				if (php_request_startup(TSRMLS_C)==FAILURE) {
 					goto err;
 				}
+				request_started = 1;
 				php_print_info(0xFFFFFFFF TSRMLS_CC);
 				php_output_end_all(TSRMLS_C);
 				exit_status=0;
@@ -731,6 +734,7 @@ int main(int argc, char *argv[])
 				if (php_request_startup(TSRMLS_C)==FAILURE) {
 					goto err;
 				}
+				request_started = 1;
 				php_printf("[PHP Modules]\n");
 				print_modules(TSRMLS_C);
 				php_printf("\n[Zend Modules]\n");
@@ -745,6 +749,7 @@ int main(int argc, char *argv[])
 					goto err;
 				}
 
+				request_started = 1;
 				php_printf("PHP %s (%s) (built: %s %s) %s\nCopyright (c) 1997-2006 The PHP Group\n%s",
 					PHP_VERSION, sapi_module.name, __DATE__, __TIME__,
 #if ZEND_DEBUG && defined(HAVE_GCOV)
@@ -995,10 +1000,10 @@ int main(int argc, char *argv[])
 		if (php_request_startup(TSRMLS_C)==FAILURE) {
 			*arg_excp = arg_free;
 			fclose(file_handle.handle.fp);
-			php_request_shutdown((void *) 0);
 			PUTS("Could not startup.\n");
 			goto err;
 		}
+		request_started = 1;
 		CG(start_lineno) = lineno;
 		*arg_excp = arg_free; /* reconstuct argv */
 
@@ -1252,7 +1257,9 @@ int main(int argc, char *argv[])
 	} zend_end_try();
 
 out:
-	php_request_shutdown((void *) 0);
+	if (request_started) {
+		php_request_shutdown((void *) 0);
+	}
 	if (exit_status == 0) {
 		exit_status = EG(exit_status);
 	}
