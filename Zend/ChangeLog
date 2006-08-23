@@ -1,3 +1,9 @@
+2006-08-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_alloc.c
+      zend_alloc.c:
+      Fixed "win32" storage manager
+
 2006-08-19  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
