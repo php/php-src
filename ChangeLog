@@ -1,3 +1,113 @@
+2006-08-22  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/implode1.phpt:
+      add test for real
+
+    * (PHP_5_2)
+      ext/standard/string.c:
+      fix implode() function (see http://news.php.net/php.qa/26876)
+      add test
+
+    * ext/standard/tests/strings/implode1.phpt
+      ext/standard/tests/strings/implode1.phpt:
+      
+      add test
+
+2006-08-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/date/php_date.c:
+      MFB: Fixed bug #38511, #38473, #38263 (Fixed session extension request
+      shutdown order to ensure it is shutdown before the extensions it may
+      depend
+      on).
+
+    * (PHP_5_2)
+      NEWS
+      ext/date/php_date.c:
+      Fixed bug #38511, #38473, #38263 (Fixed session extension request shutdown
+      order to ensure it is shutdown before the extensions it may depend on).
+
+2006-08-22  Antony Dovgal  <antony@zend.com>
+
+    * configure.in
+      TSRM/tsrm.m4:
+      fix separate TSRM build
+
+2006-08-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      sapi/cli/php_cli.c
+      sapi/cli/php_cli.c:
+      Fixed bug #38543 (shutdown_executor() may segfault when memory_limit is too
+      low).
+
+2006-08-22  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/oci8/oci8.c
+      ext/oci8/oci8_interface.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/statement_cache.phpt:
+      minor improvements
+
+    * ext/oci8/oci8.c
+      ext/oci8/oci8_interface.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/statement_cache.phpt:
+      minor improvements
+      dropped unused parameters, changed long to int where it should be int
+
+2006-08-22  Michael Wallner  <mike@iworks.at>
+
+    * main/output.c:
+      - fix php_output_handler_started()
+
+    * main/output.c:
+      - use the handler name zval directly when listing stati, too
+
+    * main/output.c
+      tests/output/ob_014.phpt
+      tests/output/ob_015.phpt:
+      - fix tests to comply with upgraded string.c
+      - use add_next_index_zval() when listing handlers
+
+    * main/output.c
+      main/php_output.h:
+      - allocate handler stack on the heap and avoid segfaults on shutdown when
+      startup fails
+      - don't try to append empty buffer
+      - fix some dbg format strings
+
+2006-08-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      NEWS
+      NEWS
+      main/streams/plain_wrapper.c
+      main/streams/plain_wrapper.c
+      main/streams/plain_wrapper.c:
+      Fixed bug #38488 (Access to "php://stdin" and family crashes PHP on win32)
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c:
+      Fixed "win32" storage manager
+
+    * run-tests.php:
+      Fixed "make test" on win32
+
+    * (PHP_5_2)
+      run-tests.php:
+      Fix "make test" on win32
+
+    * ext/standard/string.c:
+      ZTS fix
+
 2006-08-21  Antony Dovgal  <antony@zend.com>
 
     * ext/pdo/tests/bug_38394.phpt
