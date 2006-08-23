@@ -261,7 +261,7 @@ SPL_METHOD(SplObjectStorage, next)
 
 static
 ZEND_BEGIN_ARG_INFO(arginfo_Object, 0)
-	ZEND_ARG_INFO(0, object 0)
+	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO();
 
 static zend_function_entry spl_funcs_SplObjectStorage[] = {
