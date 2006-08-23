@@ -1172,11 +1172,13 @@ zend_mm_finished_searching_for_block:
 		}
 	} else {
 		size_t segment_size;
+		size_t block_size;
+		size_t remaining_size;
 		zend_mm_segment *segment;
-		zend_mm_block *next_block;
 
 		if (true_size + ZEND_MM_ALIGNED_SEGMENT_SIZE + ZEND_MM_ALIGNED_HEADER_SIZE > heap->block_size) {
-			/* Make sure we add a memory block which is big enough */
+			/* Make sure we add a memory block which is big enough,
+			   segment must have header "size" and trailer "guard" block */
 			segment_size = true_size + ZEND_MM_ALIGNED_SEGMENT_SIZE + ZEND_MM_ALIGNED_HEADER_SIZE;
 			segment_size = ((segment_size + (heap->block_size-1)) / heap->block_size) * heap->block_size;
 		} else {
@@ -1225,19 +1227,26 @@ zend_mm_finished_searching_for_block:
 		heap->segments_list = segment;
 
 		best_fit = (zend_mm_free_block *) ((char *) segment + ZEND_MM_ALIGNED_SEGMENT_SIZE);
-
-		ZEND_MM_BLOCK(best_fit, ZEND_MM_USED_BLOCK, true_size);
 		ZEND_MM_MARK_FIRST_BLOCK(best_fit);
 
-		next_block = ZEND_MM_NEXT_BLOCK(best_fit);
-		if (segment_size > (true_size+ZEND_MM_ALIGNED_SEGMENT_SIZE+ZEND_MM_ALIGNED_HEADER_SIZE)) {
-			/* setup free block */
-			ZEND_MM_BLOCK(next_block, ZEND_MM_FREE_BLOCK, segment_size - (true_size+ZEND_MM_ALIGNED_SEGMENT_SIZE+ZEND_MM_ALIGNED_HEADER_SIZE));
-			zend_mm_add_to_free_list(heap, (zend_mm_free_block *) next_block);
-			next_block = ZEND_MM_NEXT_BLOCK(next_block);
+		block_size = segment_size - ZEND_MM_ALIGNED_SEGMENT_SIZE - ZEND_MM_ALIGNED_HEADER_SIZE;
+		remaining_size = block_size - true_size;
+
+		ZEND_MM_LAST_BLOCK(ZEND_MM_BLOCK_AT(best_fit, block_size));
+
+		if (remaining_size < ZEND_MM_ALIGNED_MIN_HEADER_SIZE) {
+			ZEND_MM_BLOCK(best_fit, ZEND_MM_USED_BLOCK, block_size);
+		} else {
+			zend_mm_free_block *new_free_block;
+
+			/* prepare new free block */
+			ZEND_MM_BLOCK(best_fit, ZEND_MM_USED_BLOCK, true_size);
+			new_free_block = (zend_mm_free_block *) ZEND_MM_BLOCK_AT(best_fit, true_size);
+			ZEND_MM_BLOCK(new_free_block, ZEND_MM_FREE_BLOCK, remaining_size);
+
+			/* add the new free block to the free list */
+			zend_mm_add_to_free_list(heap, new_free_block);
 		}
-		/* setup guard block */
-		ZEND_MM_LAST_BLOCK(next_block);
 	}
 
 #if ZEND_DEBUG
@@ -1457,6 +1466,8 @@ static void *_zend_mm_realloc_int(zend_mm_heap *heap, void *p, size_t size ZEND_
 		zend_mm_segment *segment;
 		zend_mm_segment *segment_copy;
 		size_t segment_size;
+		size_t block_size;
+		size_t remaining_size;
 
 		HANDLE_BLOCK_INTERRUPTIONS();
 realloc_segment:
@@ -1513,19 +1524,28 @@ realloc_segment:
 				}
 			}
 			mm_block = (zend_mm_block *) ((char *) segment + ZEND_MM_ALIGNED_SEGMENT_SIZE);
+			ZEND_MM_MARK_FIRST_BLOCK(mm_block);
 		}
 
-		ZEND_MM_BLOCK(mm_block, ZEND_MM_USED_BLOCK, true_size);
-		ZEND_MM_MARK_FIRST_BLOCK(mm_block);
+		block_size = segment_size - ZEND_MM_ALIGNED_SEGMENT_SIZE - ZEND_MM_ALIGNED_HEADER_SIZE;
+		remaining_size = block_size - true_size;
 
-		next_block = ZEND_MM_NEXT_BLOCK(mm_block);
-		if (segment_size > (true_size+ZEND_MM_ALIGNED_SEGMENT_SIZE+ZEND_MM_ALIGNED_HEADER_SIZE)) {
-			/* setup free block */
-			ZEND_MM_BLOCK(next_block, ZEND_MM_FREE_BLOCK, segment_size - (ZEND_MM_ALIGNED_SEGMENT_SIZE+true_size+ZEND_MM_ALIGNED_HEADER_SIZE));
-			zend_mm_add_to_free_list(heap, (zend_mm_free_block *) next_block);
-			next_block = ZEND_MM_NEXT_BLOCK(next_block);
+		/* setup guard block */
+		ZEND_MM_LAST_BLOCK(ZEND_MM_BLOCK_AT(mm_block, block_size));
+
+		if (remaining_size < ZEND_MM_ALIGNED_MIN_HEADER_SIZE) {
+			ZEND_MM_BLOCK(mm_block, ZEND_MM_USED_BLOCK, block_size);
+		} else {
+			zend_mm_free_block *new_free_block;
+
+			/* prepare new free block */
+			ZEND_MM_BLOCK(mm_block, ZEND_MM_USED_BLOCK, true_size);
+			new_free_block = (zend_mm_free_block *) ZEND_MM_BLOCK_AT(mm_block, true_size);
+			ZEND_MM_BLOCK(new_free_block, ZEND_MM_FREE_BLOCK, remaining_size);
+
+			/* add the new free block to the free list */
+			zend_mm_add_to_free_list(heap, new_free_block);
 		}
-		ZEND_MM_LAST_BLOCK(next_block);
 
 #if ZEND_DEBUG
 		ZEND_MM_SET_MAGIC(mm_block, MEM_BLOCK_VALID);
