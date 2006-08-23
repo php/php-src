@@ -62,11 +62,6 @@ if ($p1 && $p2 && $p3) {
 	echo "Diagonal: ok\n";
 }
 
-ob_start();
-imagepng($im);
-echo base64_encode(ob_get_clean()), "\n";
-
-
 // Outside
 $im = imagecreatetruecolor(6,6);
 imagefill($im, 0,0, 0xffffff);
@@ -115,6 +110,5 @@ Warning: Wrong parameter count for imageline() in %s on line %d
 Horizontal: ok
 Vertical: ok
 Diagonal: ok
-iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAIAAABvrngfAAAAK0lEQVQImV3JsQ0AMAwCwYf9dyZFJOyE5qVDhBDWHCL0EPCpb7a6Z3WoegA14w0JDJlWpgAAAABJRU5ErkJggg==
 Outside 1: ok
 Outside 2: ok
