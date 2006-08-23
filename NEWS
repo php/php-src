@@ -1,11 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2006, PHP 5.1.6
+24 Aug 2006, PHP 5.1.6
+- Fixed memory_limit on 64bit systems. (Stefan E.)
 - Fixed bug #38488 (Access to "php://stdin" and family crashes PHP on win32).
   (Dmitry)
 
 17 Aug 2006, PHP 5.1.5
-- Fixed memory_limit on 64bit systems. (Stefan E.)
 - Fixed overflow on 64bit systems in str_repeat() and wordwrap(). (Stefan E.)
 - Disabled CURLOPT_FOLLOWLOCATION in curl when open_basedir or safe_mode are
   enabled. (Stefan E., Ilia)
