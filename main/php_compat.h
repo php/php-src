@@ -41,6 +41,20 @@
 #define pcre_fullinfo			php_pcre_fullinfo
 #define pcre_free				php_pcre_free
 #define pcre_malloc				php_pcre_malloc
+#define pcre_config				php_pcre_config
+#define pcre_copy_named_substring php_pcre_copy_named_substring
+#define pcre_dfa_exec			php_pcre_dfa_exec
+#define pcre_free_substring 	php_pcre_free_substring
+#define pcre_free_substring_list php_pcre_free_substring_list
+#define pcre_get_named_substring php_pcre_get_named_substring
+#define pcre_get_stringnumber 	php_pcre_get_stringnumber
+#define pcre_refcount 			php_pcre_refcount
+#define _pcre_ord2utf8 			php__pcre_ord2utf8
+#define _pcre_try_flipped 		php__pcre_try_flipped
+#define _pcre_ucp_findprop 		php__pcre_ucp_findprop
+#define _pcre_ucp_othercase 	php__pcre_ucp_othercase
+#define _pcre_valid_utf8 		php__pcre_valid_utf8
+#define _pcre_xclass	 		php__pcre_xclass
 #endif
 
 #define lookup				php_lookup
