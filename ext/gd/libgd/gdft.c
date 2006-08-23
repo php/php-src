@@ -207,12 +207,28 @@ static int gdTcl_UtfToUniChar (char *str, Tcl_UniChar * chPtr)
 
 		byte = *((unsigned char *) (str + 1));
 		if (byte == '#') {
-			for (i = 2; i < 8; i++) {
-				byte = *((unsigned char *) (str + i));
-				if (byte >= '0' && byte <= '9') {
-					n = (n * 10) + (byte - '0');
-				} else {
-					break;
+			byte = *((unsigned char *) (str + 2));
+			if (byte == 'x' || byte == 'X') {
+				for (i = 3; i < 8; i++) {
+					byte = *((unsigned char *) (str + i));
+					if (byte >= 'A' && byte <= 'F')
+						byte = byte - 'A' + 10;
+					else if (byte >= 'a' && byte <= 'f')
+						byte = byte - 'a' + 10;
+					else if (byte >= '0' && byte <= '9')
+						byte = byte - '0';
+					else
+						break;
+					n = (n * 16) + byte;
+				}
+			} else {
+				for (i = 2; i < 8; i++) {
+					byte = *((unsigned char *) (str + i));
+					if (byte >= '0' && byte <= '9') {
+						n = (n * 10) + (byte - '0');
+					} else {
+						break;
+					}
 				}
 			}
 			if (byte == ';') {
