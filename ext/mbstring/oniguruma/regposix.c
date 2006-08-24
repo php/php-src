@@ -2,7 +2,7 @@
   regposix.c - Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2005  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2006  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -192,7 +192,7 @@ regexec(regex_t* reg, const char* str, size_t nmatch,
   ENC_STRING_LEN(ONIG_C(reg)->enc, str, len);
   end = (UChar* )(str + len);
   r = onig_search(ONIG_C(reg), (UChar* )str, end, (UChar* )str, end,
-		  (OnigRegion* )pmatch, options);
+		  (OnigRegion* )pm, options);
 
   if (r >= 0) {
     r = 0; /* Match */
@@ -211,6 +211,11 @@ regexec(regex_t* reg, const char* str, size_t nmatch,
 
   if (pm != pmatch && pm != NULL)
     xfree(pm);
+
+#if 0
+  if (reg->re_nsub > nmatch - 1)
+    reg->re_nsub = (nmatch <= 1 ? 0 : nmatch - 1);
+#endif
 
   return r;
 }

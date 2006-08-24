@@ -1,5 +1,61 @@
 History
 
+2006/08/21: Version 4.3.1
+
+2006/08/21: [test] success in ruby 1.9.0 (2006-07-28) [i686-linux].
+2006/08/21: [impl] change stack type values
+                   and re-define STK_MASK_TO_VOID_TARGET etc...
+2006/08/21: [impl] set repeat_range[].upper to 0x7fffffff as infinite.
+2006/08/21: [impl] add STATE_CHECK_BUFF_MALLOC_THRESHOLD_SIZE.
+2006/08/21: [impl] reduce (?:a*){n,m}, (?:a+){n,m} => (?:a*){n,n}, (?:a+){n,n}
+2006/09/21: [impl] reduce (a*){n,m}, (a+){n,m} => (a*){n,n}, (a+){n,n}
+                   if backreference is not used.
+2006/08/17: [bug]  should check scan_env.num_call > 0 for backrefed pattern
+                   in combination explosion check.
+
+2006/08/17: Version 4.3.0
+
+2006/08/17: [test] success in ruby 1.9.0 (2006-07-28) [i686-linux].
+2006/08/17: [new]  add config USE_COMBINATION_EXPLOSION_CHECK.
+                   check /(.+)*/, /(\s*foo\s*)*/ etc...
+            [API]  add num_comb_exp_check member in regex_t.
+            [dist] change LTVERSION value to "1:0:0" in configure.in.
+2006/08/15: [bug]  OP_REPEAT_INC process in match_at().
+                   should check repeat-count >= range-upper and
+                   range-upper may be infinite.
+
+2006/08/11: Version 4.2.3
+
+2006/08/11: [test] success in ruby 1.9.0 (2006-07-28) [i686-linux].
+2006/08/10: [impl] remove double call in set_qualifier().
+2006/08/10: [impl] remove by_number member in QualifierNode.
+2006/08/09: [impl] remove a comma at the end of enum ReduceType
+                   for escape warning on Mac OS X.
+2006/08/07: [impl] remove warning in regcomp.c.
+2006/08/07: [spec] move definition of USE_BACKREF_AT_LEVEL into NOT_RUBY.
+
+2006/08/03: Version 4.2.2
+
+2006/08/03: [test] success in ruby 1.9.0 (2006-07-28) [i686-linux].
+2006/08/03: [bug]  (thanks Hiroyuki Yamamoto)
+                   segmentation fault in regexec(). (POSIX API)
+2006/08/02: [bug]  combination of \G in look-ahead/look-behind and other
+                   anchors(\A, \z, \Z) cause invalid result.
+                   ex. /(?!\G)a\z/.match("ba")
+                   start arg. of MATCH_ARG_INIT() should be original
+                   arg. of onig_search().
+
+2006/07/31: Version 4.2.1
+
+2006/07/31: [test] success in ruby 1.9.0 (2006-07-28) [i686-linux].
+2006/07/31: [bug] (thanks Kimura Minoru)
+                   re-implement bm_search_notrev().
+2006/07/31: [impl] bm_search_notrev() refactoring.
+2006/07/31: [bug]  (thanks Kimura Minoru)
+                   fix incomplete multibyte string in exact info.
+2006/07/31: [impl] (thanks Seiji Masugata)
+                   remove cast in va_init_list() for Intel C Compiler.
+
 2006/07/18: Version 4.2.0
 
 2006/07/18: [test] success in ruby 1.9.0 (2006-03-01) [i686-linux].

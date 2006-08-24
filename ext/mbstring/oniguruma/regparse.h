@@ -124,11 +124,13 @@ typedef struct {
   int lower;
   int upper;
   int greedy;
-  int by_number;         /* {n,m} */
   int target_empty_info;
   struct _Node* head_exact;
   struct _Node* next_head_exact;
   int is_refered;     /* include called node. don't eliminate even if {0} */
+#ifdef USE_COMBINATION_EXPLOSION_CHECK
+  int comb_exp_check_num;  /* 1,2,3...: check,  0: no check  */
+#endif
 } QualifierNode;
 
 /* status bits */
@@ -146,6 +148,7 @@ typedef struct {
 #define NST_NAME_REF              (1<<11)
 #define NST_IN_REPEAT             (1<<12) /* STK_REPEAT is nested in stack. */
 #define NST_NEST_LEVEL            (1<<13)
+#define NST_BY_NUMBER             (1<<14) /* {n,m} */
 
 #define SET_EFFECT_STATUS(node,f)      (node)->u.effect.state |=  (f)
 #define CLEAR_EFFECT_STATUS(node,f)    (node)->u.effect.state &= ~(f)
@@ -168,6 +171,7 @@ typedef struct {
 #define IS_BACKREF_NAME_REF(bn)        (((bn)->state & NST_NAME_REF)   != 0)
 #define IS_BACKREF_NEST_LEVEL(bn)      (((bn)->state & NST_NEST_LEVEL) != 0)
 #define IS_QUALIFIER_IN_REPEAT(qn)     (((qn)->state & NST_IN_REPEAT)  != 0)
+#define IS_QUALIFIER_BY_NUMBER(qn)     (((qn)->state & NST_BY_NUMBER)  != 0)
 
 typedef struct {
   int state;
@@ -277,6 +281,12 @@ typedef struct {
   int             mem_alloc;
   Node*           mem_nodes_static[SCANENV_MEMNODES_SIZE];
   Node**          mem_nodes_dynamic;
+#ifdef USE_COMBINATION_EXPLOSION_CHECK
+  int num_comb_exp_check;
+  int comb_exp_max_regnum;
+  int curr_max_regnum;
+  int has_recursion;
+#endif
 } ScanEnv;
 
 
