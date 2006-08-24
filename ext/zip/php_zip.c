@@ -885,6 +885,7 @@ ZIPARCHIVE_METHOD(open)
 	int filename_len;
 	int err = 0;
 	long flags = 0;
+	char resolved_path[MAXPATHLEN + 1];
 
 	zval *this = getThis();
 	ze_zip_object *ze_obj = NULL;
@@ -903,6 +904,11 @@ ZIPARCHIVE_METHOD(open)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty string as source");
 		RETURN_FALSE;
 	}
+
+	if (!VCWD_REALPATH(filename, resolved_path)) {
+		RETURN_FALSE;
+	}
+
 	if (ze_obj->za) {
 		/* we already have an opened zip, free it */
 		zip_close(ze_obj->za);
@@ -910,12 +916,11 @@ ZIPARCHIVE_METHOD(open)
 	if (ze_obj->filename) {
 		efree(ze_obj->filename);
 	}
-
-	intern = zip_open(filename, flags, &err);
+	intern = zip_open(resolved_path, flags, &err);
 	if (!intern || err) {
 		RETURN_LONG((long)err);
 	}
-	ze_obj->filename = estrndup(filename, filename_len);
+	ze_obj->filename = estrndup(resolved_path, strlen(resolved_path));
 	ze_obj->filename_len = filename_len;
 	ze_obj->za = intern;
 	RETURN_TRUE;
@@ -964,6 +969,7 @@ ZIPARCHIVE_METHOD(addFile)
 	struct zip_source *zs;
 	long offset_start = 0, offset_len = 0;
 	int cur_idx;
+	char resolved_path[MAXPATHLEN + 1];
 
 	if (!this) {
 		RETURN_FALSE;
@@ -991,7 +997,11 @@ ZIPARCHIVE_METHOD(addFile)
 		RETURN_FALSE;
 	}
 
-	zs = zip_source_file(intern, filename, 0, 0);
+	if (!VCWD_REALPATH(filename, resolved_path)) {
+		RETURN_FALSE;
+	}
+
+	zs = zip_source_file(intern, resolved_path, 0, 0);
 	if (!zs) {
 		RETURN_FALSE;
 	}
