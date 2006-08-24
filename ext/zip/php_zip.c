@@ -898,7 +898,7 @@ ZIPARCHIVE_METHOD(open)
 	if (!intern || err) {
 		RETURN_LONG((long)err);
 	}
-	ze_obj->filename = estrndup(filename, filename_len);
+	ze_obj->filename = estrndup(resolved_path, strlen(resolved_path));
 	ze_obj->filename_len = filename_len;
 	ze_obj->za = intern;
 	RETURN_TRUE;
