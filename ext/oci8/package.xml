@@ -31,7 +31,7 @@
  <release>
   <state>stable</state>
   <version>1.2.2</version>
-  <date>2006-08-07</date>
+  <date>2006-08-24</date>
   <notes>
    Reimplemented oci_lob_read() utilities using patch from Massimo Squillace (msquillace at sogei dot it), which should fix Unicode LOB problems.
    Fixed bug #38161 (oci_bind_by_name() returns garbage when Oracle didn't set the variable)
