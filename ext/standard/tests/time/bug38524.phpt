@@ -5,7 +5,7 @@ Bug #38524 (strptime() does not initialize the internal date storage structure)
 	var_dump(strptime('2006-08-20', '%Y-%m-%d'));
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 array(9) {
   ["tm_sec"]=>
   int(0)
@@ -22,7 +22,7 @@ array(9) {
   ["tm_wday"]=>
   int(0)
   ["tm_yday"]=>
-  int(231)
+  int(%d)
   ["unparsed"]=>
   string(0) ""
 }
