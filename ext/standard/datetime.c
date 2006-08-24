@@ -20,10 +20,6 @@
 
 /* $Id$ */
 
-#if HAVE_STRPTIME
-#define _XOPEN_SOURCE
-#endif
-
 #include "php.h"
 #include "zend_operators.h"
 #include "datetime.h"
@@ -85,6 +81,10 @@ PHPAPI char *php_std_date(time_t t TSRMLS_DC)
 
 
 #if HAVE_STRPTIME
+#ifndef HAVE_STRPTIME_DECL_FAILS
+char *strptime(const char *s, const char *format, struct tm *tm);
+#endif
+
 /* {{{ proto string strptime(string timestamp, string format)
    Parse a time/date generated with strftime() */
 PHP_FUNCTION(strptime)
