@@ -49,16 +49,16 @@ string(%d) "%s"
 Warning: gzuncompress() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: gzuncompress(): data error in %s on line %d
+Warning: gzuncompress(): %s error in %s on line %d
 bool(false)
 
 Warning: gzuncompress(): length (-1) must be greater or equal zero in %s on line %d
 bool(false)
 
-Warning: gzuncompress(): data error in %s on line %d
+Warning: gzuncompress(): %s error in %s on line %d
 bool(false)
 
-Warning: gzuncompress(): data error in %s on line %d
+Warning: gzuncompress(): %s error in %s on line %d
 bool(false)
 string(94) "Answer me, it can't be so hard
 Cry to relieve what's in your heart
@@ -67,6 +67,6 @@ string(94) "Answer me, it can't be so hard
 Cry to relieve what's in your heart
 Desolation, grief and agony"
 
-Warning: gzuncompress(): data error in %s on line %d
+Warning: gzuncompress(): %s error in %s on line %d
 bool(false)
 Done
