@@ -32,9 +32,8 @@ increased complexity of the code overall.
 
 Unicode Encoding
 ----------------
-The initial version will not support Byte Order Mark. Characters are
-expected to be composed, Normalization Form C. Later versions will support
-BOM, and decomposed and other characters.
+The initial version will not support Byte Order Mark. Text processing will
+generally perform better if the characters are in Normalization Form C.
 
 
 Implementation Approach
