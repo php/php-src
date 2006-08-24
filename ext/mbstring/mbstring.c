@@ -3841,6 +3841,7 @@ PHP_FUNCTION(mb_get_info)
 		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(current_http_output_encoding))) != NULL) {
 			add_assoc_string(return_value, "http_output", name, 1);
 		}
+		add_assoc_long(return_value, "func_overload", MBSTRG(func_overload));
 		if (MBSTRG(func_overload)){
 			over_func = &(mb_ovld[0]);
 			MAKE_STD_ZVAL(row1);
@@ -3851,9 +3852,9 @@ PHP_FUNCTION(mb_get_info)
 				}
 				over_func++;
 			}
-			add_assoc_zval(return_value, "func_overload", row1);
+			add_assoc_zval(return_value, "func_overload_list", row1);
 		} else {
-			add_assoc_string(return_value, "func_overload", "no overload", 1);
+			add_assoc_string(return_value, "func_overload_list", "no overload", 1);
  		}
 		if (lang != NULL) {
 			if ((name = (char *)mbfl_no_encoding2name(lang->mail_charset)) != NULL) {
@@ -3930,6 +3931,8 @@ PHP_FUNCTION(mb_get_info)
 			RETVAL_STRING(name, 1);
 		}		
 	} else if (!strcasecmp("func_overload", typ)) {
+ 		RETVAL_LONG(MBSTRG(func_overload));
+	} else if (!strcasecmp("func_overload_list", typ)) {
 		if (MBSTRG(func_overload)){
 				over_func = &(mb_ovld[0]);
 				array_init(return_value);
