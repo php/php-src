@@ -940,6 +940,13 @@ scan_env_clear(ScanEnv* env)
 
   for (i = 0; i < SCANENV_MEMNODES_SIZE; i++)
     env->mem_nodes_static[i] = NULL_NODE;
+
+#ifdef USE_COMBINATION_EXPLOSION_CHECK
+  env->num_comb_exp_check  = 0;
+  env->comb_exp_max_regnum = 0;
+  env->curr_max_regnum     = 0;
+  env->has_recursion       = 0;
+#endif
 }
 
 static int
@@ -1321,11 +1328,17 @@ node_new_qualifier(int lower, int upper, int by_number)
   NQUALIFIER(node).lower  = lower;
   NQUALIFIER(node).upper  = upper;
   NQUALIFIER(node).greedy = 1;
-  NQUALIFIER(node).by_number         = by_number;
   NQUALIFIER(node).target_empty_info = NQ_TARGET_ISNOT_EMPTY;
   NQUALIFIER(node).head_exact        = NULL_NODE;
   NQUALIFIER(node).next_head_exact   = NULL_NODE;
   NQUALIFIER(node).is_refered        = 0;
+  if (by_number != 0)
+    NQUALIFIER(node).state |= NST_BY_NUMBER;
+
+#ifdef USE_COMBINATION_EXPLOSION_CHECK
+  NQUALIFIER(node).comb_exp_check_num = 0;
+#endif
+
   return node;
 }
 
@@ -2140,7 +2153,7 @@ enum ReduceType {
   RQ_AQ,       /* to '*?'   */
   RQ_QQ,       /* to '??'   */
   RQ_P_QQ,     /* to '+)??' */
-  RQ_PQ_Q,     /* to '+?)?' */
+  RQ_PQ_Q      /* to '+?)?' */
 };
 
 static enum ReduceType ReduceTypeTable[6][6] = {
@@ -4633,15 +4646,13 @@ set_qualifier(Node* qnode, Node* target, int group, ScanEnv* env)
     { /* check redundant double repeat. */
       /* verbose warn (?:.?)? etc... but not warn (.?)? etc... */
       QualifierNode* qnt = &(NQUALIFIER(target));
+      int nestq_num   = popular_qualifier_num(qn);
+      int targetq_num = popular_qualifier_num(qnt);
 
 #ifdef USE_WARNING_REDUNDANT_NESTED_REPEAT_OPERATOR
-      if (qn->by_number == 0 && qnt->by_number == 0 &&
+      if (!IS_QUALIFIER_BY_NUMBER(qn) && !IS_QUALIFIER_BY_NUMBER(qnt) &&
 	  IS_SYNTAX_BV(env->syntax, ONIG_SYN_WARN_REDUNDANT_NESTED_REPEAT)) {
-        int nestq_num, targetq_num;
         UChar buf[WARN_BUFSIZE];
-
-        nestq_num   = popular_qualifier_num(qn);
-        targetq_num = popular_qualifier_num(qnt);
 
         switch(ReduceTypeTable[targetq_num][nestq_num]) {
         case RQ_ASIS:
@@ -4673,9 +4684,17 @@ set_qualifier(Node* qnode, Node* target, int group, ScanEnv* env)
 
     warn_exit:
 #endif
-      if (popular_qualifier_num(qnt) >= 0 && popular_qualifier_num(qn) >= 0) {
-	onig_reduce_nested_qualifier(qnode, target);
-	goto q_exit;
+      if (targetq_num >= 0) {
+	if (nestq_num >= 0) {
+	  onig_reduce_nested_qualifier(qnode, target);
+	  goto q_exit;
+	}
+	else if (targetq_num == 1 || targetq_num == 2) { /* * or + */
+	  /* (?:a*){n,m}, (?:a+){n,m} => (?:a*){n,n}, (?:a+){n,n} */
+	  if (! IS_REPEAT_INFINITE(qn->upper) && qn->upper > 1 && qn->greedy) {
+	    qn->upper = (qn->lower == 0 ? 1 : qn->lower);
+	  }
+	}
       }
     }
     break;

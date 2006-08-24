@@ -59,7 +59,7 @@
 /* #define USE_UNICODE_FULL_RANGE_CTYPE */ /* --> move to regenc.h */
 #define USE_NAMED_GROUP
 #define USE_SUBEXP_CALL
-#define USE_BACKREF_AT_LEVEL
+#define USE_COMBINATION_EXPLOSION_CHECK                 /* (X*)* */
 #define USE_INFINITE_REPEAT_MONOMANIAC_MEM_STATUS_CHECK /* /(?:()|())*\2/ */
 #define USE_NEWLINE_AT_END_OF_STRING_HAS_EMPTY_LINE     /* /\n$/ =~ "\n" */
 #define USE_WARNING_REDUNDANT_NESTED_REPEAT_OPERATOR
@@ -82,6 +82,7 @@
 /* interface to external system */
 #ifdef NOT_RUBY      /* given from Makefile */
 #include "config.h"
+#define USE_BACKREF_AT_LEVEL
 #define USE_CAPTURE_HISTORY
 #define USE_VARIABLE_META_CHARS
 #define USE_WORD_BEGIN_END          /* "\<": word-begin, "\>": word-end */
@@ -116,6 +117,9 @@
 #define DEFAULT_VERB_WARN_FUNCTION   onig_rb_warning
 
 #endif /* else NOT_RUBY */
+
+#define STATE_CHECK_STRING_THRESHOLD_LEN             7
+#define STATE_CHECK_BUFF_MAX_SIZE           0x08000000
 
 #define THREAD_PASS_LIMIT_COUNT     8
 #define xmemset     memset
@@ -639,34 +643,35 @@ enum OpCode {
   OP_FAIL_LOOK_BEHIND_NOT, /* (?<!...) end   */
 
   OP_CALL,                 /* \g<name> */
-  OP_RETURN
-};
+  OP_RETURN,
 
-/* arguments type */
-#define ARG_SPECIAL     -1
-#define ARG_NON          0
-#define ARG_RELADDR      1
-#define ARG_ABSADDR      2
-#define ARG_LENGTH       3
-#define ARG_MEMNUM       4
-#define ARG_OPTION       5
+  OP_STATE_CHECK_PUSH,         /* combination explosion check and push */
+  OP_STATE_CHECK_PUSH_OR_JUMP, /* check ok -> push, else jump  */
+  OP_STATE_CHECK,              /* check only */
+  OP_STATE_CHECK_ANYCHAR_STAR,
+  OP_STATE_CHECK_ANYCHAR_ML_STAR,
+  OP_STATE_CHECK_ANYCHAR_STAR_PEEK_NEXT,
+  OP_STATE_CHECK_ANYCHAR_ML_STAR_PEEK_NEXT
+};
 
 typedef int RelAddrType;
 typedef int AbsAddrType;
 typedef int LengthType;
 typedef int RepeatNumType;
 typedef short int MemNumType;
+typedef short int StateCheckNumType;
 typedef void* PointerType;
 
-#define SIZE_OPCODE        1
-#define SIZE_RELADDR       sizeof(RelAddrType)
-#define SIZE_ABSADDR       sizeof(AbsAddrType)
-#define SIZE_LENGTH        sizeof(LengthType)
-#define SIZE_MEMNUM        sizeof(MemNumType)
-#define SIZE_REPEATNUM     sizeof(RepeatNumType)
-#define SIZE_OPTION        sizeof(OnigOptionType)
-#define SIZE_CODE_POINT    sizeof(OnigCodePoint)
-#define SIZE_POINTER       sizeof(PointerType)
+#define SIZE_OPCODE           1
+#define SIZE_RELADDR          sizeof(RelAddrType)
+#define SIZE_ABSADDR          sizeof(AbsAddrType)
+#define SIZE_LENGTH           sizeof(LengthType)
+#define SIZE_MEMNUM           sizeof(MemNumType)
+#define SIZE_STATE_CHECK_NUM  sizeof(StateCheckNumType)
+#define SIZE_REPEATNUM        sizeof(RepeatNumType)
+#define SIZE_OPTION           sizeof(OnigOptionType)
+#define SIZE_CODE_POINT       sizeof(OnigCodePoint)
+#define SIZE_POINTER          sizeof(PointerType)
 
 
 #ifdef PLATFORM_UNALIGNED_WORD_ACCESS
@@ -692,6 +697,7 @@ typedef void* PointerType;
 #define GET_REPEATNUM_INC(num,p)   PLATFORM_GET_INC(num,    p, RepeatNumType)
 #define GET_OPTION_INC(option,p)   PLATFORM_GET_INC(option, p, OnigOptionType)
 #define GET_POINTER_INC(ptr,p)     PLATFORM_GET_INC(ptr,    p, PointerType)
+#define GET_STATE_CHECK_NUM_INC(num,p)  PLATFORM_GET_INC(num, p, StateCheckNumType)
 
 /* code point's address must be aligned address. */
 #define GET_CODE_POINT(code,p)   code = *((OnigCodePoint* )(p))
@@ -734,6 +740,13 @@ typedef void* PointerType;
 #define SIZE_OP_CALL                   (SIZE_OPCODE + SIZE_ABSADDR)
 #define SIZE_OP_RETURN                  SIZE_OPCODE
 
+#ifdef USE_COMBINATION_EXPLOSION_CHECK
+#define SIZE_OP_STATE_CHECK            (SIZE_OPCODE + SIZE_STATE_CHECK_NUM)
+#define SIZE_OP_STATE_CHECK_PUSH       (SIZE_OPCODE + SIZE_STATE_CHECK_NUM + SIZE_RELADDR)
+#define SIZE_OP_STATE_CHECK_PUSH_OR_JUMP (SIZE_OPCODE + SIZE_STATE_CHECK_NUM + SIZE_RELADDR)
+#define SIZE_OP_STATE_CHECK_ANYCHAR_STAR (SIZE_OPCODE + SIZE_STATE_CHECK_NUM)
+#define SIZE_OP_STATE_CHECK_ANYCHAR_STAR_PEEK_NEXT (SIZE_OPCODE + 1 + SIZE_STATE_CHECK_NUM)
+#endif
 
 #define MC_ESC(enc)               (enc)->meta_char_table.esc
 #define MC_ANYCHAR(enc)           (enc)->meta_char_table.anychar
