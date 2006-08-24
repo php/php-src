@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, Version 4.4.5
+- Fixed bug #38378 (wddx_serialize_value() generates no wellformed xml). 
+  (sj at sjaensch dot org, grzegorz dot nosek at netart dot pl, Tony).
 	
 17 Aug 2006, Version 4.4.4
 - Fixed memory_limit on 64bit systems. (Stefan E.)

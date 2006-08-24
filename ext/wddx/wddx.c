@@ -432,7 +432,7 @@ static void php_wddx_serialize_number(wddx_packet *packet, zval *var)
 	tmp = *var;
 	zval_copy_ctor(&tmp);
 	convert_to_string(&tmp);
-	snprintf(tmp_buf, Z_STRLEN(tmp), WDDX_NUMBER, Z_STRVAL(tmp));
+	snprintf(tmp_buf, sizeof(tmp_buf), WDDX_NUMBER, Z_STRVAL(tmp));
 	zval_dtor(&tmp);
 
 	php_wddx_add_chunk(packet, tmp_buf);	
@@ -630,8 +630,8 @@ void php_wddx_serialize_var(wddx_packet *packet, zval *var, char *name, int name
 
 	if (name) {
 		name_esc = php_escape_html_entities(name, name_len, &name_esc_len, 0, ENT_QUOTES, NULL TSRMLS_CC);
-		tmp_buf = emalloc(name_esc_len + 1);
-		snprintf(tmp_buf, name_esc_len, WDDX_VAR_S, name_esc);
+		tmp_buf = emalloc(name_esc_len + sizeof(WDDX_VAR_S));
+		snprintf(tmp_buf, name_esc_len + sizeof(WDDX_VAR_S), WDDX_VAR_S, name_esc);
 		php_wddx_add_chunk(packet, tmp_buf);
 		efree(tmp_buf);
 		efree(name_esc);
