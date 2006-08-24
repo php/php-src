@@ -477,6 +477,26 @@ if test "$ac_cv_huge_val_nan" = "yes"; then
   AC_DEFINE([HAVE_HUGE_VAL_NAN], 1, [whether HUGE_VAL + -HUGEVAL == NAN])
 fi
 
+AC_CACHE_CHECK(whether strptime() declaration fails, ac_cv_strptime_decl_fails,[
+  AC_TRY_COMPILE([
+#include <time.h>
+  ],[
+#ifndef HAVE_STRPTIME
+#error no strptime() on this platform
+#else
+/* use invalid strptime() declaration to see if it fails to compile */
+int strptime(const char *s, const char *format, struct tm *tm);
+#endif
+  ],[
+      ac_cv_strptime_decl_fails=no
+  ],[
+      ac_cv_strptime_decl_fails=yes
+  ])
+])
+if test "$ac_cv_strptime_decl_fails" = "yes"; then
+  AC_DEFINE([HAVE_STRPTIME_DECL_FAILS], 1, [whether strptime() declaration fails])
+fi
+
 PHP_CHECK_I18N_FUNCS
 
 PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.c crypt.c \
