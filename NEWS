@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Sep 2006, PHP 5.2.0
+- Added SoapServer::setObject() method (it is a simplified version of
+  SoapServer::setClass() method). (Dmitry)
 - Added support for hexadecimal entity in imagettftext() for the bundled GD.
   (Pierre)
 - Fixed bug #38543 (shutdown_executor() may segfault when memory_limit is too
