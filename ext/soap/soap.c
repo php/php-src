@@ -165,6 +165,7 @@ PHP_FUNCTION(is_soap_fault);
 /* Server Functions */
 PHP_METHOD(SoapServer, SoapServer);
 PHP_METHOD(SoapServer, setClass);
+PHP_METHOD(SoapServer, setObject);
 PHP_METHOD(SoapServer, addFunction);
 PHP_METHOD(SoapServer, getFunctions);
 PHP_METHOD(SoapServer, handle);
@@ -225,6 +226,7 @@ static zend_function_entry soap_server_functions[] = {
 	SOAP_CTOR(SoapServer, SoapServer, NULL, 0)
 	PHP_ME(SoapServer, setPersistence, NULL, 0)
 	PHP_ME(SoapServer, setClass, NULL, 0)
+	PHP_ME(SoapServer, setObject, NULL, 0)
 	PHP_ME(SoapServer, addFunction, NULL, 0)
 	PHP_ME(SoapServer, getFunctions, NULL, 0)
 	PHP_ME(SoapServer, handle, NULL, 0)
@@ -575,6 +577,9 @@ static void soap_server_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 	if (service->class_map) {
 		zend_hash_destroy(service->class_map);
 		FREE_HASHTABLE(service->class_map);
+	}
+	if (service->soap_object) {
+		zval_ptr_dtor(&service->soap_object);
 	}
 	zend_object_std_dtor(object TSRMLS_CC);
 	efree(object);
@@ -1525,6 +1530,32 @@ PHP_METHOD(SoapServer, setClass)
 /* }}} */
 
 
+/* {{{ proto void SoapServer::setObject(object)
+   Sets object which will handle SOAP requests */
+PHP_METHOD(SoapServer, setObject)
+{
+	soap_server_object *service;
+	zval *obj;
+
+	SOAP_SERVER_BEGIN_CODE();
+	service = (soap_server_object*)zend_object_store_get_object(this_ptr TSRMLS_CC);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &obj) == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
+	}
+
+	service->type = SOAP_OBJECT;
+
+	MAKE_STD_ZVAL(service->soap_object);
+	*service->soap_object = *obj;
+	zval_copy_ctor(service->soap_object);
+	INIT_PZVAL(service->soap_object);
+
+	SOAP_SERVER_END_CODE();
+}
+/* }}} */
+
+
 /* {{{ proto array SoapServer::getFunctions(void) U
    Returns list of defined functions */
 PHP_METHOD(SoapServer, getFunctions)
@@ -1538,7 +1569,9 @@ PHP_METHOD(SoapServer, getFunctions)
 	service = (soap_server_object*)zend_object_store_get_object(this_ptr TSRMLS_CC);
 
 	array_init(return_value);
-	if (service->type == SOAP_CLASS) {
+	if (service->type == SOAP_OBJECT) {
+		ft = &(Z_OBJCE_P(service->soap_object)->function_table);
+	} else if (service->type == SOAP_CLASS) {
 		ft = &service->soap_class.ce->function_table;
 	} else if (service->soap_functions.functions_all == TRUE) {
 		ft = EG(function_table);
@@ -1557,7 +1590,7 @@ PHP_METHOD(SoapServer, getFunctions)
 		HashPosition pos;
 		zend_hash_internal_pointer_reset_ex(ft, &pos);
 		while (zend_hash_get_current_data_ex(ft, (void **)&f, &pos) != FAILURE) {
-			if ((service->type != SOAP_CLASS) || (f->common.fn_flags & ZEND_ACC_PUBLIC)) {
+			if ((service->type != SOAP_OBJECT && service->type != SOAP_CLASS) || (f->common.fn_flags & ZEND_ACC_PUBLIC)) {
 				add_next_index_text(return_value, f->common.function_name, 1);
 			}
 			zend_hash_move_forward_ex(ft, &pos);
@@ -1844,7 +1877,10 @@ PHP_METHOD(SoapServer, handle)
 	service->soap_headers_ptr = &soap_headers;
 
 	soap_obj = NULL;
-	if (service->type == SOAP_CLASS) {
+	if (service->type == SOAP_OBJECT) {
+		soap_obj = service->soap_object;
+		function_table = &((Z_OBJCE_P(soap_obj))->function_table);
+	} else if (service->type == SOAP_CLASS) {
 #if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
 		/* If persistent then set soap_obj from from the previous created session (if available) */
 		if (service->soap_class.persistance == SOAP_PERSISTENCE_SESSION) {
@@ -1943,7 +1979,6 @@ PHP_METHOD(SoapServer, handle)
 #endif
 
 		}
-/* 			function_table = &(soap_obj->value.obj.ce->function_table);*/
 		function_table = &((Z_OBJCE_P(soap_obj))->function_table);
 	} else {
 		if (service->soap_functions.functions_all == TRUE) {
@@ -1972,9 +2007,9 @@ PHP_METHOD(SoapServer, handle)
 
 			fn_name = estrndup(Z_STRVAL(h->function_name),Z_STRLEN(h->function_name));
 			if (zend_hash_exists(function_table, php_strtolower(fn_name, Z_STRLEN(h->function_name)), Z_STRLEN(h->function_name) + 1) ||
-			    (service->type == SOAP_CLASS &&
+			    ((service->type == SOAP_CLASS || service->type == SOAP_OBJECT) &&
 			     zend_hash_exists(function_table, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)))) {
-				if (service->type == SOAP_CLASS) {
+				if (service->type == SOAP_CLASS || service->type == SOAP_OBJECT) {
 					call_status = call_user_function(NULL, &soap_obj, &h->function_name, &h->retval, h->num_params, h->parameters TSRMLS_CC);
 				} else {
 					call_status = call_user_function(EG(function_table), NULL, &h->function_name, &h->retval, h->num_params, h->parameters TSRMLS_CC);
@@ -1993,7 +2028,7 @@ PHP_METHOD(SoapServer, handle)
 					php_output_discard(TSRMLS_C);
 					soap_server_fault_ex(function, &h->retval, h TSRMLS_CC);
 					efree(fn_name);
-					if (soap_obj) {zval_ptr_dtor(&soap_obj);}
+					if (service->type == SOAP_CLASS && soap_obj) {zval_ptr_dtor(&soap_obj);}
 					goto fail;
 				} else if (EG(exception)) {
 					php_output_discard(TSRMLS_C);
@@ -2008,7 +2043,7 @@ PHP_METHOD(SoapServer, handle)
 						soap_server_fault_ex(function, EG(exception), h TSRMLS_CC);
 					}
 					efree(fn_name);
-					if (soap_obj) {zval_ptr_dtor(&soap_obj);}
+					if (service->type == SOAP_CLASS && soap_obj) {zval_ptr_dtor(&soap_obj);}
 					goto fail;
 				}
 			} else if (h->mustUnderstand) {
@@ -2020,17 +2055,19 @@ PHP_METHOD(SoapServer, handle)
 
 	fn_name = estrndup(Z_STRVAL(function_name),Z_STRLEN(function_name));
 	if (zend_hash_exists(function_table, php_strtolower(fn_name, Z_STRLEN(function_name)), Z_STRLEN(function_name) + 1) ||
-	    (service->type == SOAP_CLASS &&
+	    ((service->type == SOAP_CLASS || service->type == SOAP_OBJECT) &&
 	     zend_hash_exists(function_table, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)))) {
-		if (service->type == SOAP_CLASS) {
+		if (service->type == SOAP_CLASS || service->type == SOAP_OBJECT) {
 			call_status = call_user_function(NULL, &soap_obj, &function_name, &retval, num_params, params TSRMLS_CC);
+			if (service->type == SOAP_CLASS) {
 #if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
-			if (service->soap_class.persistance != SOAP_PERSISTENCE_SESSION) {
-				zval_ptr_dtor(&soap_obj);
-			}
+				if (service->soap_class.persistance != SOAP_PERSISTENCE_SESSION) {
+					zval_ptr_dtor(&soap_obj);
+				}
 #else
-			zval_ptr_dtor(&soap_obj);
+				zval_ptr_dtor(&soap_obj);
 #endif
+			}
 		} else {
 			call_status = call_user_function(EG(function_table), NULL, &function_name, &retval, num_params, params TSRMLS_CC);
 		}
@@ -2045,12 +2082,14 @@ PHP_METHOD(SoapServer, handle)
 		    instanceof_function(Z_OBJCE_P(EG(exception)), soap_fault_class_entry TSRMLS_CC)) {
 			soap_server_fault_ex(function, EG(exception), NULL TSRMLS_CC);
 		}
+		if (service->type == SOAP_CLASS) {
 #if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
-		if (soap_obj && service->soap_class.persistance != SOAP_PERSISTENCE_SESSION) {
+			if (soap_obj && service->soap_class.persistance != SOAP_PERSISTENCE_SESSION) {
 #else
-		if (soap_obj) {
+			if (soap_obj) {
 #endif
-		  zval_ptr_dtor(&soap_obj);
+			  zval_ptr_dtor(&soap_obj);
+			}
 		}
 		goto fail;
 	}
