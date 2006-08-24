@@ -1,3 +1,9 @@
+2006-08-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_alloc.c
+      zend_alloc.c:
+      Fixed bug #38265 (heap corruption)
+
 2006-08-22  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_alloc.c
