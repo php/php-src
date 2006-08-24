@@ -114,6 +114,8 @@ struct _soapService {
 		int persistance;
 	} soap_class;
 
+	zval *soap_object;
+
 	HashTable *mapping;
 	int        version;
 	int        type;
@@ -127,6 +129,7 @@ struct _soapService {
 
 #define SOAP_CLASS 1
 #define SOAP_FUNCTIONS 2
+#define SOAP_OBJECT 3
 #define SOAP_FUNCTIONS_ALL 999
 
 #define SOAP_MAP_FUNCTION 1
