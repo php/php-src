@@ -327,6 +327,7 @@ For IS_UNICODE type, we need to add another structure to the union:
         struct {
             UChar *val;            /* Unicode string value */
             int len;               /* number of UChar's */
+        } ustr;
     ....
     } value;
 
