@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2006, PHP 5.1.7
+
 24 Aug 2006, PHP 5.1.6
 - Fixed memory_limit on 64bit systems. (Stefan E.)
 - Fixed bug #38488 (Access to "php://stdin" and family crashes PHP on win32).
