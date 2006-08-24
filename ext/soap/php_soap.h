@@ -119,6 +119,8 @@ typedef struct _soap_server_object {
 		int persistance;
 	} soap_class;
 
+	zval *soap_object;
+
 	int        type;
 	char      *actor;
 	struct _soapHeader **soap_headers_ptr;
@@ -179,6 +181,7 @@ typedef struct _soap_client_object {
 
 #define SOAP_CLASS 1
 #define SOAP_FUNCTIONS 2
+#define SOAP_OBJECT 3
 #define SOAP_FUNCTIONS_ALL 999
 
 #define SOAP_MAP_FUNCTION 1
