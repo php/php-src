@@ -1,3 +1,96 @@
+2006-08-23  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * main/php_compat.h
+      main/php_compat.h:
+      MFB
+
+    * (PHP_5_2)
+      main/php_compat.h:
+      Namespace more PCRE functions.
+
+2006-08-23  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/gd/libgd/gdft.c:
+      - MFH: add support for entities in hexadecimal format, like &copy; can
+        be passed as &#169 or &#xA9; (sync with gd)
+
+    * ext/gd/libgd/gdft.c:
+      - add support for entities in hexadecimal format, like &copy; can
+        be passed as &#169 or &#xA9;
+
+2006-08-23  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/pdo/pdo_stmt.c:
+      MFH: fix possible crash in free_statement()
+
+    * ext/pdo/pdo_stmt.c:
+      fix possible crash in free_statement()
+
+2006-08-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS
+      configure.in
+      main/php_version.h:
+      5.1.6
+
+2006-08-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c:
+      Fixed bug #38265 (heap corruption)
+
+2006-08-23  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_1)
+      run-tests.php:
+      fix run-tests on windows
+
+2006-08-23  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/gd/tests/dashedlines.phpt
+      ext/gd/tests/lines.phpt:
+      - MFH: please don't use base64 to test image files, it does not work
+        fix tests on 64bit platfrom
+
+    * ext/gd/tests/dashedlines.phpt
+      ext/gd/tests/lines.phpt:
+      - please don't use base64 to test image files, it does not work
+        fix tests on 64bit platfrom
+
+2006-08-23  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/reflection/config.m4
+      ext/spl/config.m4:
+      MFH: build ext/spl and ext/reflection as static (fixes #38556)
+
+    * ext/reflection/config.m4
+      ext/spl/config.m4:
+      build ext/spl and ext/reflection as static (fixes #38556)
+
+2006-08-23  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/spl/spl_observer.c
+      ext/spl/spl_observer.c:
+      Fix arginfo for SplObjectStorage
+
+2006-08-23  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      run-tests.php:
+      MFH: make run-tests to work with directories containing spaces (bug #38558)
+      Patch by danielc at analysisandsolutions dot com
+
+    * run-tests.php:
+      make run-tests to work with directories containing spaces (bug #38558)
+
 2006-08-22  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
