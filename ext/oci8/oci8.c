@@ -666,7 +666,7 @@ PHP_MINFO_FUNCTION(oci)
 
 	php_info_print_table_start();
 	php_info_print_table_row(2, "OCI8 Support", "enabled");
-	php_info_print_table_row(2, "Version", "1.2.1");
+	php_info_print_table_row(2, "Version", "1.2.2");
 	php_info_print_table_row(2, "Revision", "$Revision$");
 
 	sprintf(buf, "%ld", OCI_G(num_persistent));
