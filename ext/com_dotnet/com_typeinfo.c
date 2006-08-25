@@ -220,7 +220,7 @@ PHPAPI int php_com_import_typelib(ITypeLib *TL, int mode, int codepage TSRMLS_DC
 /* Type-library stuff */
 void php_com_typelibrary_dtor(void *pDest)
 {
-	ITypeLib *Lib = *(ITypeLib**)pDest;
+	ITypeLib *Lib = (ITypeLib*)pDest;
 	ITypeLib_Release(Lib);
 }
 
