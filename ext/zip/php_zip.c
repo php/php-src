@@ -1983,7 +1983,7 @@ PHP_MINFO_FUNCTION(zip)
 
 	php_info_print_table_row(2, "Zip", "enabled");
 	php_info_print_table_row(2, "Extension Version","$Id$");
-	php_info_print_table_row(2, "Zip version", "1.4.0");
+	php_info_print_table_row(2, "Zip version", "1.7.1");
 	php_info_print_table_row(2, "Libzip version", "0.7.1");
 
 	php_info_print_table_end();
