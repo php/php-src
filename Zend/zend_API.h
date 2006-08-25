@@ -378,7 +378,7 @@ ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
 
 #define add_assoc_rt_string_ex(arg, key, key_len, str, flags) \
 	if (UG(unicode)) { \
-    UErrorCode status = U_ZERO_ERROR; \
+		UErrorCode status = U_ZERO_ERROR; \
 		UChar *u_str; \
 		int u_len; \
 		int length = strlen(str); \
@@ -393,7 +393,7 @@ ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
 
 #define add_assoc_rt_stringl_ex(arg, key, key_len, str, length, flags) \
 	if (UG(unicode)) { \
-    UErrorCode status = U_ZERO_ERROR; \
+		UErrorCode status = U_ZERO_ERROR; \
 		UChar *u_str; \
 		int u_len; \
 		zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, str, length, &status); \
@@ -647,9 +647,9 @@ ZEND_API int add_property_unicodel_ex(zval *arg, char *key, uint key_len,  UChar
 #define add_property_double(__arg, __key, __d) add_property_double_ex(__arg, __key, strlen(__key)+1, __d TSRMLS_CC)
 #define add_property_string(__arg, __key, __str, __duplicate) add_property_string_ex(__arg, __key, strlen(__key)+1, __str, __duplicate TSRMLS_CC)
 #define add_property_stringl(__arg, __key, __str, __length, __duplicate) add_property_stringl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate TSRMLS_CC)
-#define add_property_ascii_string(__arg, __key, __str, __duplicate) add_property_string_ex(__arg, __key, strlen(__key)+1, __str, __duplicate TSRMLS_CC)
-#define add_property_ascii_stringl(__arg, __key, __str, __length, __duplicate) add_property_stringl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate TSRMLS_CC)
-#define add_property_rt_string(__arg, __key, __str, __duplicate) add_property_ascii_string_ex(__arg, __key, strlen(__key)+1, __str, __duplicate TSRMLS_CC)
+#define add_property_ascii_string(__arg, __key, __str, __duplicate) add_property_ascii_string_ex(__arg, __key, strlen(__key)+1, __str, __duplicate TSRMLS_CC)
+#define add_property_ascii_stringl(__arg, __key, __str, __length, __duplicate) add_property_ascii_stringl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate TSRMLS_CC)
+#define add_property_rt_string(__arg, __key, __str, __duplicate) add_property_rt_string_ex(__arg, __key, strlen(__key)+1, __str, __duplicate TSRMLS_CC)
 #define add_property_rt_stringl(__arg, __key, __str, __length, __duplicate) add_property_rt_stringl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate TSRMLS_CC)
 #define add_property_zval(__arg, __key, __value) add_property_zval_ex(__arg, __key, strlen(__key)+1, __value TSRMLS_CC)
 #define add_property_unicode(__arg, __key, __str, __duplicate) add_property_unicode_ex(__arg, __key, strlen(__key)+1, __str, __duplicate TSRMLS_CC)
