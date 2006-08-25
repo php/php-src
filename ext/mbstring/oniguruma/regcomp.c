@@ -186,6 +186,8 @@ add_opcode(regex_t* reg, int opcode)
   return 0;
 }
 
+#ifdef USE_COMBINATION_EXPLOSION_CHECK
+
 static int
 add_state_check_num(regex_t* reg, int num)
 {
@@ -194,6 +196,7 @@ add_state_check_num(regex_t* reg, int num)
   BBUF_ADD(reg, &n, SIZE_STATE_CHECK_NUM);
   return 0;
 }
+#endif	/* USE_COMBINATION_EXPLOSION_CHECK */
 
 static int
 add_rel_addr(regex_t* reg, int addr)

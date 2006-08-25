@@ -59,7 +59,9 @@
 /* #define USE_UNICODE_FULL_RANGE_CTYPE */ /* --> move to regenc.h */
 #define USE_NAMED_GROUP
 #define USE_SUBEXP_CALL
+#ifdef HAVE_MBREGEX_BACKTRACK
 #define USE_COMBINATION_EXPLOSION_CHECK                 /* (X*)* */
+#endif	/* HAVE_MBREGEX_BACKTRACK */
 #define USE_INFINITE_REPEAT_MONOMANIAC_MEM_STATUS_CHECK /* /(?:()|())*\2/ */
 #define USE_NEWLINE_AT_END_OF_STRING_HAS_EMPTY_LINE     /* /\n$/ =~ "\n" */
 #define USE_WARNING_REDUNDANT_NESTED_REPEAT_OPERATOR

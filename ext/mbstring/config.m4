@@ -101,6 +101,11 @@ esac
     fi
     AC_DEFINE([HAVE_MBREGEX], 1, [whether to have multibyte regex support])
 
+
+    if test "$PHP_MBREGEX_BACKTRACK" != "no"; then
+      AC_DEFINE([HAVE_MBREGEX_BACKTRACK],1,[whether to check multibyte regex backtrack])
+    fi
+
     PHP_MBSTRING_ADD_CFLAG([-DNOT_RUBY])
     PHP_MBSTRING_ADD_BUILD_DIR([oniguruma])
     PHP_MBSTRING_ADD_BUILD_DIR([oniguruma/enc])
@@ -277,6 +282,9 @@ PHP_ARG_ENABLE(mbstring, whether to enable multibyte string support,
 
 PHP_ARG_ENABLE([mbregex], [whether to enable multibyte regex support],
 [  --disable-mbregex         MBSTRING: Disable multibyte regex support], yes, no)
+
+PHP_ARG_ENABLE([mbregex_backtrack], [whether to check multibyte regex backtrack],
+[  --disable-mbregex-backtrack         MBSTRING: Disable multibyte regex backtrack check], yes, no)
 
 PHP_ARG_WITH(libmbfl, [for external libmbfl],
 [  --with-libmbfl[=DIR]      MBSTRING: Use external libmbfl. DIR is the libmbfl install prefix.
