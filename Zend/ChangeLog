@@ -1,3 +1,9 @@
+2006-08-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_hash.c
+      zend_hash.c:
+      Fixed bug #38315 (Constructing in the destructor causes weird behaviour)
+
 2006-08-23  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_alloc.c
