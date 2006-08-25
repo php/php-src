@@ -1050,6 +1050,11 @@ PHP_MINFO_FUNCTION(mbstring)
 		sprintf(buf, "%d.%d.%d",
 			ONIGURUMA_VERSION_MAJOR,ONIGURUMA_VERSION_MINOR,ONIGURUMA_VERSION_TEENY);
 		php_info_print_table_row(2, "Multibyte regex (oniguruma) version", buf);
+#ifdef HAVE_MBREGEX_BACKTRACK
+		php_info_print_table_row(2, "Multibyte regex (oniguruma) backtrack check", "On");
+#else	/* HAVE_MBREGEX_BACKTRACK */
+		php_info_print_table_row(2, "Multibyte regex (oniguruma) backtrack check", "Off");
+#endif	/* HAVE_MBREGEX_BACKTRACK */
 	}
 #endif
 	php_info_print_table_end();
