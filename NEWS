@@ -5,6 +5,8 @@ PHP 4                                                                      NEWS
   stream wrappers). (Tony)
 - Fixed bug #38378 (wddx_serialize_value() generates no wellformed xml). 
   (sj at sjaensch dot org, grzegorz dot nosek at netart dot pl, Tony).
+- Fixed bug #37812 (aggregate_methods_by_list fails to take certain methods).
+  (Hannes)
 	
 17 Aug 2006, Version 4.4.4
 - Fixed memory_limit on 64bit systems. (Stefan E.)
