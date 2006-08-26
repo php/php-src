@@ -1,3 +1,40 @@
+2006-08-25  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_API.h:
+      Fix some API definitions.
+
+2006-08-25  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xmlwriter/php_xmlwriter.c:
+      add unicode support
+
+2006-08-25  Seiji Masugata  <s.masugata@digicom.dnp.co.jp>
+
+    * (PHP_5_2)
+      ext/mbstring/config.m4
+      ext/mbstring/mbstring.c
+      ext/mbstring/oniguruma/regcomp.c
+      ext/mbstring/oniguruma/regint.h:
+      added configure option --disable-mbregex-backtrack.
+
+2006-08-25  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/php_zip.c:
+      - MFB: bundled version matches pecl release 1.7.1
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c:
+      - bundled matches pecl 1.7.1
+
+2006-08-25  Edin Kadribasic  <edink@emini.dk>
+
+    * ext/com_dotnet/com_typeinfo.c:
+      MFB: Fixed #37602 by olek at neurosoft dot pl
+
+    * (PHP_5_2)
+      ext/com_dotnet/com_typeinfo.c:
+      Fixed #37602 by olek at neurosoft dot pl
+
 2006-08-24  Andrei Zmievski  <andrei@gravitonic.com>
 
     * README.UNICODE:
