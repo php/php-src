@@ -886,9 +886,7 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value)
 	HashPosition   pos;
 	smart_str      implstr = {0};
 	int            numelems, i = 0;
-	zend_bool free_tmp_val;
 	zval tmp_val;
-	char *str;
 	int str_len;
 
 	numelems = zend_hash_num_elements(Z_ARRVAL_P(arr));
@@ -900,9 +898,35 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value)
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(arr), &pos);
 
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(arr), (void **) &tmp, &pos) == SUCCESS) {
-		free_tmp_val = 0;
-		if ((*tmp)->type != IS_STRING) {
-			if ((*tmp)->type == IS_OBJECT) {
+		switch ((*tmp)->type) {
+			case IS_STRING:
+				smart_str_appendl(&implstr, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+				break;
+
+			case IS_LONG: {
+				char stmp[MAX_LENGTH_OF_LONG + 1];
+				str_len = sprintf(stmp, "%ld", Z_LVAL_PP(tmp));
+				smart_str_appendl(&implstr, stmp, str_len);
+			}
+				break;
+
+			case IS_BOOL:
+				if (Z_LVAL_PP(tmp) == 1) {
+					smart_str_appendl(&implstr, "1", sizeof("1")-1);
+				}
+				break;
+			
+			case IS_NULL:
+				break;
+
+			case IS_DOUBLE: {
+				char stmp[MAX_LENGTH_OF_DOUBLE + EG(precision) + 1];
+				str_len = sprintf(stmp, "%.*G", (int) EG(precision), Z_DVAL_PP(tmp));
+				smart_str_appendl(&implstr, stmp, str_len);
+			}
+				break;
+
+			case IS_OBJECT: {
 				int copy;
 				zval expr;
 				zend_make_printable_zval(*tmp, &expr, &copy);
@@ -910,26 +934,19 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value)
 				if (copy) {
 					zval_dtor(&expr);
 				}
-				goto next;
-			} else {
+			}
+				break;
+
+			default:
 				tmp_val = **tmp;
 				zval_copy_ctor(&tmp_val);
 				convert_to_string(&tmp_val);
-				str = Z_STRVAL(tmp_val);
-				str_len = Z_STRLEN(tmp_val);
-				free_tmp_val = 1;
-			}
-		} else {
-			str = Z_STRVAL_PP(tmp);
-			str_len = Z_STRLEN_PP(tmp);
+				smart_str_appendl(&implstr, Z_STRVAL(tmp_val), Z_STRLEN(tmp_val));
+				zval_dtor(&tmp_val);
+				break;
+				
 		}
-		
-		smart_str_appendl(&implstr, str, str_len);
 
-		if (free_tmp_val) {
-			zval_dtor(&tmp_val);
-		}
-next:
 		if (++i != numelems) {
 			smart_str_appendl(&implstr, Z_STRVAL_P(delim), Z_STRLEN_P(delim));
 		}
