@@ -6,14 +6,14 @@ default_charset=
 mbstring.internal_encoding=none
 --SKIPIF--
 <?php
-$result = (bool)setlocale(LC_CTYPE, "ru_RU.koi8r");
+$result = (bool)setlocale(LC_CTYPE, "ru_RU.koi8r", "ru_RU.KOI8-R");
 if (!$result || preg_match('/koi8/i', setlocale(LC_CTYPE, 0)) == 0) {
 	die("skip setlocale() failed\n");
 }
 ?>
 --FILE--
 <?php
-setlocale(LC_CTYPE, "ru_RU.koi8r");
+setlocale(LC_CTYPE, "ru_RU.koi8r", "ru_RU.KOI8-R");
 $str = "роскошный";
 var_dump($str, htmlentities($str, ENT_QUOTES, ''));
 ?>
