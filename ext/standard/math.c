@@ -29,10 +29,6 @@
 #include <float.h>
 #include <stdlib.h>
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
 #ifndef PHP_ROUND_FUZZ
 # ifndef PHP_WIN32
 #  define PHP_ROUND_FUZZ 0.50000000001
