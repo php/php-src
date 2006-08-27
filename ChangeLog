@@ -1,3 +1,22 @@
+2006-08-26  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_4_4)
+      NEWS
+      ext/standard/aggregation.c:
+      Fixed bug #37812 aggregate_methods_by_list fails to take certain methods
+      Add test
+
+2006-08-26  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/php_zip.c:
+      - MFB: don't rely/use VCWD_REALPATH, use expand_filepath instead
+        NB: that'd to be true for all this VCWD mess
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c:
+      - don't rely/use VCWD_REALPATH, use expand_filepath instead
+        NB: that'd to be true for all this VCWD mess
+
 2006-08-25  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ZendEngine2/zend_API.h:
