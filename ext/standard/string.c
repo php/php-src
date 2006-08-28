@@ -880,7 +880,7 @@ PHP_FUNCTION(explode)
 
 /* {{{ php_implode
  */
-PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value) 
+PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value TSRMLS_DC) 
 {
 	zval         **tmp;
 	HashPosition   pos;
@@ -888,7 +888,6 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value)
 	int            numelems, i = 0;
 	zval tmp_val;
 	int str_len;
-	TSRMLS_FETCH();
 
 	numelems = zend_hash_num_elements(Z_ARRVAL_P(arr));
 
@@ -1001,7 +1000,7 @@ PHP_FUNCTION(implode)
 
 	pos = Z_ARRVAL_P(arr)->pInternalPointer;
 	
-	php_implode(delim, arr, return_value);
+	php_implode(delim, arr, return_value TSRMLS_CC);
 
 	Z_ARRVAL_P(arr)->pInternalPointer = pos;
 
