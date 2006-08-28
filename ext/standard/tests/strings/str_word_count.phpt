@@ -77,14 +77,10 @@ NULL
 NULL
 NULL
 
-Warning: str_word_count() expects parameter 2 to be long, array given in %s on line 13
-
-Warning: Wrong parameter count for str_word_count() in %s on line 13
+Warning: str_word_count() expects parameter 2 to be long, array given in %s on line %d
 NULL
 
-Warning: str_word_count() expects parameter 2 to be long, string given in %s on line 14
-
-Warning: Wrong parameter count for str_word_count() in %s on line 14
+Warning: str_word_count() expects parameter 2 to be long, string given in %s on line %d
 NULL
 string(55) "Hello friend, you're  
     looking          good today!"
@@ -92,14 +88,10 @@ int(5)
 int(6)
 int(5)
 
-Warning: str_word_count() expects parameter 3 to be string, array given in %s on line 21
-
-Warning: Wrong parameter count for str_word_count() in %s on line 21
+Warning: str_word_count() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d
 NULL
 
-Warning: str_word_count() expects parameter 3 to be string, object given in %s on line 22
-
-Warning: Wrong parameter count for str_word_count() in %s on line 22
+Warning: str_word_count() expects parameter 3 to be string (Unicode or binary), object given in %s on line %d
 NULL
 int(7)
 array(5) {
@@ -141,14 +133,10 @@ array(5) {
   string(3) "foo"
 }
 
-Warning: str_word_count() expects parameter 3 to be string, array given in %s on line 27
-
-Warning: Wrong parameter count for str_word_count() in %s on line 27
+Warning: str_word_count() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d
 NULL
 
-Warning: str_word_count() expects parameter 3 to be string, object given in %s on line 28
-
-Warning: Wrong parameter count for str_word_count() in %s on line 28
+Warning: str_word_count() expects parameter 3 to be string (Unicode or binary), object given in %s on line %d
 NULL
 array(7) {
   [0]=>
@@ -205,14 +193,10 @@ array(5) {
   string(3) "foo"
 }
 
-Warning: str_word_count() expects parameter 3 to be string, array given in %s on line 33
-
-Warning: Wrong parameter count for str_word_count() in %s on line 33
+Warning: str_word_count() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d
 NULL
 
-Warning: str_word_count() expects parameter 3 to be string, object given in %s on line 34
-
-Warning: Wrong parameter count for str_word_count() in %s on line 34
+Warning: str_word_count() expects parameter 3 to be string (Unicode or binary), object given in %s on line %d
 NULL
 array(7) {
   [0]=>
@@ -255,31 +239,31 @@ array(1) {
 --UEXPECTF--
 array(6) {
   [0]=>
-  string(5) "Hello"
+  unicode(5) "Hello"
   [1]=>
-  string(6) "friend"
+  unicode(6) "friend"
   [2]=>
-  string(6) "you're"
+  unicode(6) "you're"
   [3]=>
-  string(7) "looking"
+  unicode(7) "looking"
   [4]=>
-  string(4) "good"
+  unicode(4) "good"
   [5]=>
-  string(5) "today"
+  unicode(5) "today"
 }
 array(6) {
   [0]=>
-  string(5) "Hello"
+  unicode(5) "Hello"
   [6]=>
-  string(6) "friend"
+  unicode(6) "friend"
   [14]=>
-  string(6) "you're"
+  unicode(6) "you're"
   [27]=>
-  string(7) "looking"
+  unicode(7) "looking"
   [44]=>
-  string(4) "good"
+  unicode(4) "good"
   [49]=>
-  string(5) "today"
+  unicode(5) "today"
 }
 int(6)
 NULL
@@ -287,14 +271,10 @@ NULL
 NULL
 NULL
 
-Warning: str_word_count() expects parameter 2 to be long, array given in %s on line 13
-
-Warning: Wrong parameter count for str_word_count() in %s on line 13
+Warning: str_word_count() expects parameter 2 to be long, array given in %s on line %d
 NULL
 
-Warning: str_word_count() expects parameter 2 to be long, Unicode string given in %s on line 14
-
-Warning: Wrong parameter count for str_word_count() in %s on line 14
+Warning: str_word_count() expects parameter 2 to be long, Unicode string given in %s on line %d
 NULL
 unicode(55) "Hello friend, you're  
     looking          good today!"
@@ -302,163 +282,151 @@ int(5)
 int(6)
 int(5)
 
-Warning: str_word_count() expects parameter 3 to be binary string, array given in %s on line 21
-
-Warning: Wrong parameter count for str_word_count() in %s on line 21
+Warning: str_word_count() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d
 NULL
 
-Warning: str_word_count() expects parameter 3 to be binary string, object given in %s on line 22
-
-Warning: Wrong parameter count for str_word_count() in %s on line 22
+Warning: str_word_count() expects parameter 3 to be string (Unicode or binary), object given in %s on line %d
 NULL
 int(7)
 array(5) {
   [0]=>
-  string(3) "F0o"
+  unicode(3) "F0o"
   [1]=>
-  string(3) "B4r"
+  unicode(3) "B4r"
   [2]=>
-  string(1) "s"
+  unicode(1) "s"
   [3]=>
-  string(3) "bar"
+  unicode(3) "bar"
   [4]=>
-  string(3) "foo"
+  unicode(3) "foo"
 }
 array(6) {
   [0]=>
-  string(3) "F0o"
+  unicode(3) "F0o"
   [1]=>
-  string(1) "B"
+  unicode(1) "B"
   [2]=>
-  string(1) "r"
+  unicode(1) "r"
   [3]=>
-  string(2) "1s"
+  unicode(2) "1s"
   [4]=>
-  string(3) "bar"
+  unicode(3) "bar"
   [5]=>
-  string(3) "foo"
+  unicode(3) "foo"
 }
 array(5) {
   [0]=>
-  string(3) "F0o"
+  unicode(3) "F0o"
   [1]=>
-  string(3) "B4r"
+  unicode(3) "B4r"
   [2]=>
-  string(2) "1s"
+  unicode(2) "1s"
   [3]=>
-  string(3) "bar"
+  unicode(3) "bar"
   [4]=>
-  string(3) "foo"
+  unicode(3) "foo"
 }
 
-Warning: str_word_count() expects parameter 3 to be binary string, array given in %s on line 27
-
-Warning: Wrong parameter count for str_word_count() in %s on line 27
+Warning: str_word_count() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d
 NULL
 
-Warning: str_word_count() expects parameter 3 to be binary string, object given in %s on line 28
-
-Warning: Wrong parameter count for str_word_count() in %s on line 28
+Warning: str_word_count() expects parameter 3 to be string (Unicode or binary), object given in %s on line %d
 NULL
 array(7) {
   [0]=>
-  string(1) "F"
+  unicode(1) "F"
   [1]=>
-  string(1) "o"
+  unicode(1) "o"
   [2]=>
-  string(1) "B"
+  unicode(1) "B"
   [3]=>
-  string(1) "r"
+  unicode(1) "r"
   [4]=>
-  string(1) "s"
+  unicode(1) "s"
   [5]=>
-  string(3) "bar"
+  unicode(3) "bar"
   [6]=>
-  string(3) "foo"
+  unicode(3) "foo"
 }
 array(5) {
   [0]=>
-  string(3) "F0o"
+  unicode(3) "F0o"
   [4]=>
-  string(3) "B4r"
+  unicode(3) "B4r"
   [9]=>
-  string(1) "s"
+  unicode(1) "s"
   [11]=>
-  string(3) "bar"
+  unicode(3) "bar"
   [15]=>
-  string(3) "foo"
+  unicode(3) "foo"
 }
 array(6) {
   [0]=>
-  string(3) "F0o"
+  unicode(3) "F0o"
   [4]=>
-  string(1) "B"
+  unicode(1) "B"
   [6]=>
-  string(1) "r"
+  unicode(1) "r"
   [8]=>
-  string(2) "1s"
+  unicode(2) "1s"
   [11]=>
-  string(3) "bar"
+  unicode(3) "bar"
   [15]=>
-  string(3) "foo"
+  unicode(3) "foo"
 }
 array(5) {
   [0]=>
-  string(3) "F0o"
+  unicode(3) "F0o"
   [4]=>
-  string(3) "B4r"
+  unicode(3) "B4r"
   [8]=>
-  string(2) "1s"
+  unicode(2) "1s"
   [11]=>
-  string(3) "bar"
+  unicode(3) "bar"
   [15]=>
-  string(3) "foo"
+  unicode(3) "foo"
 }
 
-Warning: str_word_count() expects parameter 3 to be binary string, array given in %s on line 33
-
-Warning: Wrong parameter count for str_word_count() in %s on line 33
+Warning: str_word_count() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d
 NULL
 
-Warning: str_word_count() expects parameter 3 to be binary string, object given in %s on line 34
-
-Warning: Wrong parameter count for str_word_count() in %s on line 34
+Warning: str_word_count() expects parameter 3 to be string (Unicode or binary), object given in %s on line %d
 NULL
 array(7) {
   [0]=>
-  string(1) "F"
+  unicode(1) "F"
   [2]=>
-  string(1) "o"
+  unicode(1) "o"
   [4]=>
-  string(1) "B"
+  unicode(1) "B"
   [6]=>
-  string(1) "r"
+  unicode(1) "r"
   [9]=>
-  string(1) "s"
+  unicode(1) "s"
   [11]=>
-  string(3) "bar"
+  unicode(3) "bar"
   [15]=>
-  string(3) "foo"
+  unicode(3) "foo"
 }
 array(2) {
   [0]=>
-  string(5) "foo'0"
+  unicode(5) "foo'0"
   [6]=>
-  string(8) "bar-0var"
+  unicode(8) "bar-0var"
 }
 array(1) {
   [1]=>
-  string(4) "foo'"
+  unicode(4) "foo'"
 }
 array(1) {
   [0]=>
-  string(5) "'foo'"
+  unicode(5) "'foo'"
 }
 array(1) {
   [1]=>
-  string(3) "foo"
+  unicode(3) "foo"
 }
 array(1) {
   [0]=>
-  string(5) "-foo-"
+  unicode(5) "-foo-"
 }
