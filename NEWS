@@ -11,6 +11,8 @@ PHP                                                                        NEWS
   low). (Dmitry)
 - Fixed bug #38535 (memory corruption in pdo_pgsql driver on error retrieval
   inside a failed query executed via query() method). (Ilia)
+- Fixed bug #38534 (segfault when calling setlocale() in userspace session 
+  handler). (Tony)
 - Fixed bug #38524 (strptime() does not initialize the internal date storage
   structure). (Ilia)
 - Fixed bug #38511, #38473, #38263 (Fixed session extension request shutdown
