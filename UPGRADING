@@ -35,7 +35,7 @@ UPGRADE NOTES - PHP 5.1
 1a. Overview
 ============
 
->From the PHP script writer's point of view, the change most likely to impact
+From the PHP script writer's point of view, the change most likely to impact
 legacy code is in the way that references are handled in all PHP versions
 post-dating the PHP 4.4.0 release.
 
