@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, Version 4.4.5
+- Fixed bug #38534 (segfault when calling setlocale() in userspace session
+  handler). (Tony)
 - Fixed bug #38450 (constructor is not called for classes used in userspace
   stream wrappers). (Tony)
 - Fixed bug #38378 (wddx_serialize_value() generates no wellformed xml). 
