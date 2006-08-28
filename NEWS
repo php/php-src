@@ -5,6 +5,8 @@ PHP                                                                        NEWS
   SoapServer::setClass() method). (Dmitry)
 - Added support for hexadecimal entity in imagettftext() for the bundled GD.
   (Pierre)
+- Fixed bug #38624 (Strange warning when incrementing an object property and 
+  exception is thrown from __get method). (Tony)
 - Fixed bug #38543 (shutdown_executor() may segfault when memory_limit is too
   low). (Dmitry)
 - Fixed bug #38535 (memory corruption in pdo_pgsql driver on error retrieval
