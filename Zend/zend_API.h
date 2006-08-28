@@ -405,6 +405,31 @@ ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
 		add_assoc_stringl_ex(arg, key, key_len, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
 	}
 
+#define add_assoc_utf8_string_ex(arg, key, key_len, str, flags) \
+	{ \
+		UErrorCode status = U_ZERO_ERROR; \
+		UChar *u_str; \
+		int u_len; \
+		int length = strlen(str); \
+		zend_string_to_unicode_ex(UG(utf8_conv), &u_str, &u_len, str, length, &status); \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
+		} \
+		add_assoc_unicodel_ex(arg, key, key_len, u_str, u_len, 0); \
+	}
+
+#define add_assoc_utf8_stringl_ex(arg, key, key_len, str, length, flags) \
+	{ \
+		UErrorCode status = U_ZERO_ERROR; \
+		UChar *u_str; \
+		int u_len; \
+		zend_string_to_unicode_ex(UG(utf8_conv), &u_str, &u_len, str, length, &status); \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
+		} \
+		add_assoc_unicodel_ex(arg, key, key_len, u_str, u_len, 0); \
+	}
+
 #define add_assoc_long(__arg, __key, __n) add_assoc_long_ex(__arg, __key, strlen(__key)+1, __n)
 #define add_assoc_null(__arg, __key) add_assoc_null_ex(__arg, __key, strlen(__key) + 1)
 #define add_assoc_bool(__arg, __key, __b) add_assoc_bool_ex(__arg, __key, strlen(__key)+1, __b)
@@ -419,6 +444,8 @@ ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
 #define add_assoc_zval(__arg, __key, __value) add_assoc_zval_ex(__arg, __key, strlen(__key)+1, __value)
 #define add_assoc_rt_string(__arg, __key, __str, __duplicate) add_assoc_rt_string_ex(__arg, __key, strlen(__key)+1, __str, __duplicate)
 #define add_assoc_rt_stringl(__arg, __key, __str, __length, __duplicate) add_assoc_rt_stringl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate)
+#define add_assoc_utf8_string(__arg, __key, __str, __duplicate) add_assoc_utf8_string_ex(__arg, __key, strlen(__key)+1, __str, __duplicate)
+#define add_assoc_utf8_stringl(__arg, __key, __str, __length, __duplicate) add_assoc_utf8_stringl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate)
 
 #define add_assoc_text(arg, key, str, duplicate) \
 	if (UG(unicode)) { \
@@ -585,7 +612,7 @@ ZEND_API int add_next_index_zval(zval *arg, zval *value);
 
 #define add_next_index_rt_string(arg, str, flags) \
 	if (UG(unicode)) { \
-    UErrorCode status = U_ZERO_ERROR; \
+		UErrorCode status = U_ZERO_ERROR; \
 		UChar *u_str; \
 		int u_len; \
 		int length = strlen(str); \
@@ -600,7 +627,7 @@ ZEND_API int add_next_index_zval(zval *arg, zval *value);
 
 #define add_next_index_rt_stringl(arg, str, length, flags) \
 	if (UG(unicode)) { \
-    UErrorCode status = U_ZERO_ERROR; \
+		UErrorCode status = U_ZERO_ERROR; \
 		UChar *u_str; \
 		int u_len; \
 		zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, str, length, &status); \
@@ -610,6 +637,31 @@ ZEND_API int add_next_index_zval(zval *arg, zval *value);
 		add_next_index_unicodel(arg, u_str, u_len, 0); \
 	} else { \
 		add_next_index_stringl(arg, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
+	}
+
+#define add_next_index_utf8_string(arg, str, flags) \
+	{ \
+		UErrorCode status = U_ZERO_ERROR; \
+		UChar *u_str; \
+		int u_len; \
+		int length = strlen(str); \
+		zend_string_to_unicode_ex(UG(utf8_von), &u_str, &u_len, str, length, &status); \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
+		} \
+		add_next_index_unicodel(arg, u_str, u_len, 0); \
+	}
+
+#define add_next_index_utf8_stringl(arg, str, length, flags) \
+	{ \
+		UErrorCode status = U_ZERO_ERROR; \
+		UChar *u_str; \
+		int u_len; \
+		zend_string_to_unicode_ex(UG(utf8_conv), &u_str, &u_len, str, length, &status); \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
+		} \
+		add_next_index_unicodel(arg, u_str, u_len, 0); \
 	}
 
 ZEND_API int add_get_assoc_string_ex(zval *arg, char *key, uint key_len, char *str, void **dest, int duplicate);
@@ -639,6 +691,8 @@ ZEND_API int add_property_rt_string_ex(zval *arg, char *key, uint key_len, char 
 ZEND_API int add_property_rt_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, int duplicate TSRMLS_DC);
 ZEND_API int add_property_unicode_ex(zval *arg, char *key, uint key_len, UChar *str, int duplicate TSRMLS_DC);
 ZEND_API int add_property_unicodel_ex(zval *arg, char *key, uint key_len,  UChar *str, uint length, int duplicate TSRMLS_DC);
+ZEND_API int add_property_utf8_string_ex(zval *arg, char *key, uint key_len, char *str, int duplicate TSRMLS_DC);
+ZEND_API int add_property_utf8_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, int duplicate TSRMLS_DC);
 
 #define add_property_long(__arg, __key, __n) add_property_long_ex(__arg, __key, strlen(__key)+1, __n TSRMLS_CC)
 #define add_property_null(__arg, __key) add_property_null_ex(__arg, __key, strlen(__key) + 1 TSRMLS_CC)
@@ -651,6 +705,8 @@ ZEND_API int add_property_unicodel_ex(zval *arg, char *key, uint key_len,  UChar
 #define add_property_ascii_stringl(__arg, __key, __str, __length, __duplicate) add_property_ascii_stringl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate TSRMLS_CC)
 #define add_property_rt_string(__arg, __key, __str, __duplicate) add_property_rt_string_ex(__arg, __key, strlen(__key)+1, __str, __duplicate TSRMLS_CC)
 #define add_property_rt_stringl(__arg, __key, __str, __length, __duplicate) add_property_rt_stringl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate TSRMLS_CC)
+#define add_property_utf8_string(__arg, __key, __str, __duplicate) add_property_utf8_string_ex(__arg, __key, strlen(__key)+1, __str, __duplicate TSRMLS_CC)
+#define add_property_utf8_stringl(__arg, __key, __str, __length, __duplicate) add_property_utf8_stringl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate TSRMLS_CC)
 #define add_property_zval(__arg, __key, __value) add_property_zval_ex(__arg, __key, strlen(__key)+1, __value TSRMLS_CC)
 #define add_property_unicode(__arg, __key, __str, __duplicate) add_property_unicode_ex(__arg, __key, strlen(__key)+1, __str, __duplicate TSRMLS_CC)
 #define add_property_unicodel(__arg, __key, __str, __length, __duplicate) add_property_unicodel_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate TSRMLS_CC)
@@ -843,6 +899,12 @@ END_EXTERN_C()
 #define ZVAL_RT_STRINGL(z, s, l, flags) \
 	ZVAL_U_STRINGL(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), z, s, l, flags)
 
+#define ZVAL_UTF8_STRING(z, s, flags) \
+	ZVAL_U_STRING(UG(utf8_conv), z, s, flags)
+
+#define ZVAL_UTF8_STRINGL(z, s, l, flags) \
+	ZVAL_U_STRINGL(UG(utf8_conv), z, s, l, flags)
+
 #define ZVAL_UNICODE(z, u, duplicate) {	\
 		UChar *__u=(u); 				\
 		Z_USTRLEN_P(z) = u_strlen(__u); \
@@ -956,6 +1018,8 @@ END_EXTERN_C()
 #define RETVAL_U_STRINGL(conv, s, l, flags) 	ZVAL_U_STRINGL(conv, return_value, s, l, flags)
 #define RETVAL_RT_STRING(s, flags) 		ZVAL_RT_STRING(return_value, s, flags)
 #define RETVAL_RT_STRINGL(s, l, flags) 	ZVAL_RT_STRINGL(return_value, s, l, flags)
+#define RETVAL_UTF8_STRING(s, flags) 		ZVAL_UTF8_STRING(return_value, s, flags)
+#define RETVAL_UTF8_STRINGL(s, l, flags) 	ZVAL_UTF8_STRINGL(return_value, s, l, flags)
 #define RETVAL_EMPTY_STRING() 			ZVAL_EMPTY_STRING(return_value)
 #define RETVAL_UNICODE(u, duplicate) 		ZVAL_UNICODE(return_value, u, duplicate)
 #define RETVAL_UNICODEL(u, l, duplicate) 	ZVAL_UNICODEL(return_value, u, l, duplicate)
@@ -994,6 +1058,8 @@ END_EXTERN_C()
 #define RETURN_U_STRINGL(conv, t, l, flags)	{ RETVAL_U_STRINGL(conv, t, l, flags); return; }
 #define RETURN_RT_STRING(t, flags)		{ RETVAL_RT_STRING(t, flags); return; }
 #define RETURN_RT_STRINGL(t, l, flags)	{ RETVAL_RT_STRINGL(t, l, flags); return; }
+#define RETURN_UTF8_STRING(t, flags)		{ RETVAL_UTF8_STRING(t, flags); return; }
+#define RETURN_UTF8_STRINGL(t, l, flags)	{ RETVAL_UTF8_STRINGL(t, l, flags); return; }
 #define RETURN_ZSTR(s, type, duplicate) 	{ RETVAL_ZSTR(s, type, duplicate); return; }
 #define RETURN_ZSTRL(s, l, type, duplicate) { RETVAL_ZSTRL(s, l, type, duplicate); return; }
 

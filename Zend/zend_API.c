@@ -2044,6 +2044,40 @@ ZEND_API int add_property_rt_stringl_ex(zval *arg, char *key, uint key_len, char
 	return SUCCESS;
 }
 
+ZEND_API int add_property_utf8_string_ex(zval *arg, char *key, uint key_len, char *str, int duplicate TSRMLS_DC)
+{
+	zval *tmp;
+	zval *z_key;
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_UTF8_STRING(tmp, str, duplicate);
+
+	MAKE_STD_ZVAL(z_key);
+	ZVAL_ASCII_STRINGL(z_key, key, key_len-1, 1);
+
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, z_key, tmp TSRMLS_CC);
+	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
+	zval_ptr_dtor(&z_key);
+	return SUCCESS;
+}
+
+ZEND_API int add_property_utf8_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, int duplicate TSRMLS_DC)
+{
+	zval *tmp;
+	zval *z_key;
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_UTF8_STRINGL(tmp, str, length, duplicate);
+
+	MAKE_STD_ZVAL(z_key);
+	ZVAL_ASCII_STRINGL(z_key, key, key_len-1, 1);
+
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, z_key, tmp TSRMLS_CC);
+	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
+	zval_ptr_dtor(&z_key);
+	return SUCCESS;
+}
+
 ZEND_API int add_property_unicode_ex(zval *arg, char *key, uint key_len, UChar *str, int duplicate TSRMLS_DC)
 {
 	zval *tmp;
