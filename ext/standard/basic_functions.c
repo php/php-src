@@ -4150,6 +4150,7 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 		setlocale(LC_CTYPE, "");
 	}
 	STR_FREE(BG(locale_string));
+	BG(locale_string) = NULL;
 
 	/*
 	 FG(stream_wrappers) and FG(stream_filters) are destroyed
