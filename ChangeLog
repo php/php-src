@@ -1,3 +1,40 @@
+2006-08-27  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/math.c
+      ext/standard/tests/math/constants.phpt:
+      MFH:
+       - Fixed bug #33895 (missing math constants).
+       - Remove M_PI from math.c (its defined in php_math.h)
+
+2006-08-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/standard/string.c:
+      Optimize the operation of implode() on non-string parameters
+
+2006-08-27  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/math.c
+      ext/standard/tests/math/constants.phpt
+      ext/standard/tests/math/constants.phpt:
+      Register missing math constants (been missing since 4.0.2!)
+      Remove M_PI from math.c (its defined in php_math.h)
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/htmlentities15.phpt
+      ext/standard/tests/strings/htmlentities15.phpt
+      tests/lang/034.phpt
+      tests/lang/034.phpt:
+      fix tests on freebsd
+
+    * ext/standard/tests/strings/htmlentities15.phpt
+      tests/lang/034.phpt:
+      Fix tests on freebsd
+
 2006-08-26  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * (PHP_4_4)
