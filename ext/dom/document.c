@@ -2240,7 +2240,8 @@ PHP_FUNCTION(dom_document_save_html)
 	xmlDoc *docp;
 	dom_object *intern;
 	xmlChar *mem;
-	int size;
+	int size, format;
+	dom_doc_propsptr doc_props;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &id, dom_document_class_entry) == FAILURE) {
 		return;
@@ -2248,7 +2249,15 @@ PHP_FUNCTION(dom_document_save_html)
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
+#if LIBXML_VERSION >= 20623
+	doc_props = dom_get_doc_props(intern->document);
+	format = doc_props->formatoutput;
+
+	htmlDocDumpMemoryFormat(docp, &mem, &size, format);
+#else
 	htmlDocDumpMemory(docp, &mem, &size);
+#endif
+
 	if (!size) {
 		if (mem)
 			xmlFree(mem);
