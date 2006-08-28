@@ -3803,8 +3803,15 @@ zend_function_entry basic_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+static zend_module_dep standard_deps[] = {
+	ZEND_MOD_OPTIONAL("session")
+	{NULL, NULL, NULL}
+};
+
 zend_module_entry basic_functions_module = {
-    STANDARD_MODULE_HEADER,
+    STANDARD_MODULE_HEADER_EX,
+	NULL,
+	standard_deps,
 	"standard",					/* extension name */
 	basic_functions,			/* function list */
 	PHP_MINIT(basic),			/* process startup */
