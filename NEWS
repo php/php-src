@@ -21,6 +21,7 @@ PHP                                                                        NEWS
 - Fixed bug #38315 (Constructing in the destructor causes weird behaviour).
   (Dmitry)
 - Fixed bug #38265 (heap corruption). (Dmitry)
+- Fixed bug #38199 (fclose() unable to close STDOUT and STDERR). (Tony)
 - Fixed bug #33895 (Missing math constants). (Hannes)
 - Fixed PECL bug #8112 (OCI8 persistent connections misbehave when Apache 
   process times out). (Tony)
