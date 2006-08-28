@@ -20,6 +20,8 @@ PHP                                                                        NEWS
   (Ilia)
 - Fixed bug #38488 (Access to "php://stdin" and family crashes PHP on win32).
   (Dmitry)
+- Fixed bug #38474 (getAttribute select attribute by order, even when 
+  prefixed). (Rob)
 - Fixed bug #38315 (Constructing in the destructor causes weird behaviour).
   (Dmitry)
 - Fixed bug #38265 (heap corruption). (Dmitry)
