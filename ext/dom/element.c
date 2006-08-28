@@ -188,7 +188,24 @@ int dom_element_schema_type_info_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 /* }}} */
 
+static xmlAttrPtr dom_get_dom1_attribute(xmlNodePtr elem, xmlChar *name) {
+    int len;
+    const xmlChar *nqname;
 
+	nqname = xmlSplitQName3(name, &len);
+	if (nqname != NULL) {
+		xmlNsPtr ns;
+		xmlChar *prefix = xmlStrndup(name, len);
+		ns = xmlSearchNs(elem->doc, elem, prefix);
+		if (prefix != NULL) {
+			xmlFree(prefix);
+		}
+		if (ns != NULL) {
+			return xmlHasNsProp(elem, nqname, ns->href);
+		}
+	}
+	return xmlHasNsProp(elem, name, NULL);
+}
 
 /* {{{ proto string dom_element_get_attribute(string name);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-666EE0F9
@@ -198,8 +215,9 @@ PHP_FUNCTION(dom_element_get_attribute)
 {
 	zval *id;
 	xmlNode *nodep;
-	char *name, *value;
+	char *name, *value = NULL;
 	dom_object *intern;
+	xmlAttrPtr attr;
 	int name_len;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_element_class_entry, &name, &name_len) == FAILURE) {
@@ -208,7 +226,15 @@ PHP_FUNCTION(dom_element_get_attribute)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
-	value = xmlGetProp(nodep, name);
+	attr = dom_get_dom1_attribute(nodep, (xmlChar *)name);
+	if (attr) {
+		if (attr->type == XML_ATTRIBUTE_NODE) {
+			value = xmlNodeListGetString(attr->doc, attr->children, 1);
+		} else {
+			value = xmlStrdup(((xmlAttributePtr)attr)->defaultValue);
+		}
+	}
+	
 	if (value == NULL) {
 		RETURN_EMPTY_TEXT();
 	} else {
@@ -248,7 +274,7 @@ PHP_FUNCTION(dom_element_set_attribute)
 		RETURN_FALSE;
 	}
 
-	attr = xmlHasProp(nodep,name);
+	attr = dom_get_dom1_attribute(nodep, (xmlChar *)name);
 	if (attr != NULL && attr->type != XML_ATTRIBUTE_DECL) {
 		node_list_unlink(attr->children TSRMLS_CC);
 	}
@@ -288,7 +314,7 @@ PHP_FUNCTION(dom_element_remove_attribute)
 		RETURN_FALSE;
 	}
 
-	attrp = xmlHasProp(nodep,name);
+	attrp = dom_get_dom1_attribute(nodep, (xmlChar *)name);
 	if (attrp == NULL) {
 		RETURN_FALSE;
 	}
@@ -327,7 +353,7 @@ PHP_FUNCTION(dom_element_get_attribute_node)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
-	attrp = xmlHasProp(nodep,name);
+	attrp = dom_get_dom1_attribute(nodep, (xmlChar *)name);
 	if (attrp == NULL) {
 		RETURN_FALSE;
 	}
@@ -851,8 +877,9 @@ PHP_FUNCTION(dom_element_has_attribute)
 	zval *id;
 	xmlNode *nodep;
 	dom_object *intern;
-	char *name, *value;
+	char *name;
 	int name_len;
+	xmlAttrPtr attr;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&", &id, dom_element_class_entry, &name, &name_len, UG(utf8_conv)) == FAILURE) {
 		return;
@@ -860,11 +887,10 @@ PHP_FUNCTION(dom_element_has_attribute)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
-	value = xmlGetProp(nodep, name);
-	if (value == NULL) {
+	attr = dom_get_dom1_attribute(nodep, (xmlChar *)name);
+	if (attr == NULL) {
 		RETURN_FALSE;
 	} else {
-		xmlFree(value);
 		RETURN_TRUE;
 	}
 }
