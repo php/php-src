@@ -888,6 +888,7 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value)
 	int            numelems, i = 0;
 	zval tmp_val;
 	int str_len;
+	TSRMLS_FETCH();
 
 	numelems = zend_hash_num_elements(Z_ARRVAL_P(arr));
 
