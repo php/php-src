@@ -99,14 +99,14 @@ array(2) {
   [0]=>
   array(2) {
     [0]=>
-    string(2) "xa"
+    unicode(2) "xa"
     [1]=>
     int(4)
   }
   [1]=>
   array(2) {
     [0]=>
-    string(1) "a"
+    unicode(1) "a"
     [1]=>
     int(5)
   }
@@ -116,14 +116,14 @@ array(2) {
   [0]=>
   array(2) {
     [0]=>
-    string(2) "ax"
+    unicode(2) "ax"
     [1]=>
     int(5)
   }
   [1]=>
   array(2) {
     [0]=>
-    string(1) "a"
+    unicode(1) "a"
     [1]=>
     int(5)
   }
@@ -133,42 +133,42 @@ array(6) {
   [0]=>
   array(2) {
     [0]=>
-    string(4) "zxax"
+    unicode(4) "zxax"
     [1]=>
     int(3)
   }
   [u"capt1"]=>
   array(2) {
     [0]=>
-    string(1) "z"
+    unicode(1) "z"
     [1]=>
     int(3)
   }
   [1]=>
   array(2) {
     [0]=>
-    string(1) "z"
+    unicode(1) "z"
     [1]=>
     int(3)
   }
   [2]=>
   array(2) {
     [0]=>
-    string(1) "x"
+    unicode(1) "x"
     [1]=>
     int(4)
   }
   [u"letsmix"]=>
   array(2) {
     [0]=>
-    string(2) "ax"
+    unicode(2) "ax"
     [1]=>
     int(5)
   }
   [3]=>
   array(2) {
     [0]=>
-    string(2) "ax"
+    unicode(2) "ax"
     [1]=>
     int(5)
   }

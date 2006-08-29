@@ -21,3 +21,14 @@ array(4) {
   [3]=>
   string(3) "the"
 }
+--UEXPECT--
+array(4) {
+  [0]=>
+  unicode(3) "the"
+  [1]=>
+  unicode(3) "the"
+  [2]=>
+  unicode(3) "the"
+  [3]=>
+  unicode(3) "the"
+}

@@ -20,3 +20,12 @@ array(1) {
 int(0)
 int(0)
 int(0)
+--UEXPECT--
+int(1)
+array(1) {
+  [0]=>
+  unicode(3) "abc"
+}
+int(0)
+int(0)
+int(0)

@@ -37,3 +37,27 @@ array(1) {
 "
   }
 }
+--UEXPECT--
+int(1)
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    unicode(5) "aeiou"
+  }
+}
+int(0)
+array(1) {
+  [0]=>
+  array(0) {
+  }
+}
+int(1)
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    unicode(6) "aeiou
+"
+  }
+}

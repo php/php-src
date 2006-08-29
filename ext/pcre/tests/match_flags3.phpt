@@ -44,3 +44,29 @@ array(1) {
 
 Warning: preg_match(): Numeric named subpatterns are not allowed in %smatch_flags3.php on line 14
 bool(false)
+--UEXPECTF--
+Warning: preg_match(): Empty regular expression in %s on line %d
+bool(false)
+int(1)
+array(1) {
+  [0]=>
+  unicode(3) "789"
+}
+int(1)
+array(1) {
+  [0]=>
+  unicode(3) "123"
+}
+int(2)
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    unicode(3) "789"
+    [1]=>
+    unicode(3) "012"
+  }
+}
+
+Warning: preg_match(): Numeric named subpatterns are not allowed in %s on line %d
+bool(false)
