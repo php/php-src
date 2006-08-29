@@ -1137,13 +1137,45 @@ PHP_FUNCTION(curl_copy_handle)
 	}
 
 	alloc_curl_handle(&dupch);
-	TSRMLS_SET_CTX(ch->thread_ctx);
+	TSRMLS_SET_CTX(dupch->thread_ctx);
 
 	dupch->cp = cp;
 	dupch->handlers->write->method = ch->handlers->write->method;
 	dupch->handlers->write->type   = ch->handlers->write->type;
 	dupch->handlers->read->method  = ch->handlers->read->method;
 	dupch->handlers->write_header->method = ch->handlers->write_header->method;
+
+	dupch->handlers->write->fp = ch->handlers->write->fp;
+	dupch->handlers->write_header->fp = ch->handlers->write_header->fp;
+	dupch->handlers->read->fp = ch->handlers->read->fp;
+	dupch->handlers->read->fd = ch->handlers->read->fd;
+
+	if (ch->handlers->passwd) {
+		zval_add_ref(&ch->handlers->passwd);
+		dupch->handlers->passwd = ch->handlers->passwd;
+		curl_easy_setopt(ch->cp, CURLOPT_PASSWDDATA, (void *) dupch);
+	}
+	if (ch->handlers->write->func_name) {
+		zval_add_ref(&ch->handlers->write->func_name);
+		dupch->handlers->write->func_name = ch->handlers->write->func_name;
+	}
+	if (ch->handlers->read->func_name) {
+		zval_add_ref(&ch->handlers->read->func_name);
+		dupch->handlers->read->func_name = ch->handlers->read->func_name;
+	}
+	if (ch->handlers->write_header->func_name) {
+		zval_add_ref(&ch->handlers->write_header->func_name);
+		dupch->handlers->write_header->func_name = ch->handlers->write_header->func_name;
+	}
+
+	curl_easy_setopt(dupch->cp, CURLOPT_ERRORBUFFER,       dupch->err.str);
+	curl_easy_setopt(dupch->cp, CURLOPT_FILE,              (void *) dupch);
+	curl_easy_setopt(dupch->cp, CURLOPT_INFILE,            (void *) dupch);
+	curl_easy_setopt(dupch->cp, CURLOPT_WRITEHEADER,       (void *) dupch);
+
+	zend_llist_copy(&dupch->to_free.str, &ch->to_free.str);
+	zend_llist_copy(&dupch->to_free.slist, &ch->to_free.slist);
+	zend_llist_copy(&dupch->to_free.post, &ch->to_free.post);
 
 	ZEND_REGISTER_RESOURCE(return_value, dupch, le_curl);
 	dupch->id = Z_LVAL_P(return_value);
