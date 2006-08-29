@@ -920,9 +920,11 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value TSRMLS_DC)
 				break;
 
 			case IS_DOUBLE: {
-				char stmp[MAX_LENGTH_OF_DOUBLE + EG(precision) + 1];
+				char *stmp;
+				stmp = emalloc(MAX_LENGTH_OF_DOUBLE + EG(precision) + 1);
 				str_len = sprintf(stmp, "%.*G", (int) EG(precision), Z_DVAL_PP(tmp));
 				smart_str_appendl(&implstr, stmp, str_len);
+				efree(stmp);
 			}
 				break;
 
