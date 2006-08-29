@@ -22,8 +22,9 @@
  *  - PCRE_NO_UTF8_CHECK option for Unicode strings
  *
  *  php_pcre_match_all():
- *   - start_offset needs to count codepoints, probably via U8_FWD_1()
  *   - need to return matched substrings in the type matching the arguments
+ *   - subpattern names - need to convert using UTF(utf8_conv) or just
+ *     UG(runtime_encoding_conv) ?
  *
  *  php_pcre_split_impl():
  *   - Avoid the /./ bump for Unicode strings with U8_FWD_1()
@@ -579,6 +580,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 			U8_FWD_N(subject, k, subject_len, start_offset);
 		}
 		start_offset = k;
+		exoptions |= PCRE_NO_UTF8_CHECK;
 	} else {
 		/* Negative offset counts from the end of the string. */
 		if (start_offset < 0) {
@@ -822,11 +824,17 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 
 	/* Add the match sets to the output array and clean up */
 	if (global && subpats_order == PREG_PATTERN_ORDER) {
+		UErrorCode status = U_ZERO_ERROR;
+		UChar *u = NULL;
+		int u_len;
 		for (i = 0; i < num_subpats; i++) {
 			if (subpat_names[i]) {
-				zend_hash_update(Z_ARRVAL_P(subpats), subpat_names[i],
-								 strlen(subpat_names[i])+1, &match_sets[i], sizeof(zval *), NULL);
+				zend_string_to_unicode_ex(UG(utf8_conv), &u, &u_len, subpat_names[i], strlen(subpat_names[i]), &status);
+				zend_u_hash_update(Z_ARRVAL_P(subpats), IS_UNICODE, ZSTR(u),
+								   u_len+1, &match_sets[i], sizeof(zval *), NULL);
 				ZVAL_ADDREF(match_sets[i]);
+				efree(u);
+				status = U_ZERO_ERROR;
 			}
 			zend_hash_next_index_insert(Z_ARRVAL_P(subpats), &match_sets[i], sizeof(zval *), NULL);
 		}
