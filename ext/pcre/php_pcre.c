@@ -829,12 +829,17 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 		int u_len;
 		for (i = 0; i < num_subpats; i++) {
 			if (subpat_names[i]) {
-				zend_string_to_unicode_ex(UG(utf8_conv), &u, &u_len, subpat_names[i], strlen(subpat_names[i]), &status);
-				zend_u_hash_update(Z_ARRVAL_P(subpats), IS_UNICODE, ZSTR(u),
-								   u_len+1, &match_sets[i], sizeof(zval *), NULL);
-				ZVAL_ADDREF(match_sets[i]);
-				efree(u);
-				status = U_ZERO_ERROR;
+				if (is_utf8) {
+					zend_string_to_unicode_ex(UG(utf8_conv), &u, &u_len, subpat_names[i], strlen(subpat_names[i]), &status);
+					zend_u_hash_update(Z_ARRVAL_P(subpats), IS_UNICODE, ZSTR(u),
+									   u_len+1, &match_sets[i], sizeof(zval *), NULL);
+					ZVAL_ADDREF(match_sets[i]);
+					efree(u);
+					status = U_ZERO_ERROR;
+				} else {
+					zend_hash_update(Z_ARRVAL_P(subpats), subpat_names[i],
+									 strlen(subpat_names[i])+1, &match_sets[i], sizeof(zval *), NULL);
+				}
 			}
 			zend_hash_next_index_insert(Z_ARRVAL_P(subpats), &match_sets[i], sizeof(zval *), NULL);
 		}
