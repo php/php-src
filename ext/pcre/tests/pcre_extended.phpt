@@ -27,3 +27,17 @@ array(1) {
   [0]=>
   string(5) "aeiou"
 }
+--UEXPECT--
+int(0)
+array(0) {
+}
+int(1)
+array(1) {
+  [0]=>
+  unicode(5) "aeiou"
+}
+int(1)
+array(1) {
+  [0]=>
+  unicode(5) "aeiou"
+}
