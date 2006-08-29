@@ -1,3 +1,118 @@
+2006-08-28  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * ext/dom/element.c
+      ext/dom/tests/bug38474.phpt:
+      MFB: fix #38474 (getAttribute select attribute by order, even when
+      prefixed)
+      add test
+
+    * (PHP_5_2)
+      ext/dom/element.c
+      ext/dom/tests/bug38474.phpt
+      ext/dom/tests/bug38474.phpt:
+      fix #38474 (getAttribute select attribute by order, even when prefixed)
+      add test
+
+2006-08-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/standard/php_string.h
+      ext/standard/string.c:
+      Adjust code to avoid TSRMLS_FETCH
+
+2006-08-28  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.h
+      ext/spl/spl_iterators.c:
+      Add Unicode support for preg_match[_all]
+
+2006-08-28  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      NEWS:
+      BFN
+      though, the leak is still there, we can't fix that in 4_4
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/basic_functions.c:
+      MFH: make sure ext/standard is down before ext/session (fixes #38534)
+
+    * ext/standard/basic_functions.c:
+      make sure ext/standard is down before ext/session (fixes #38534)
+
+    * ext/standard/tests/strings/str_word_count.phpt
+      ext/standard/tests/time/bug38524.phpt:
+      fix tests
+
+2006-08-28  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/document.c:
+      implement output formatting for saveHTML with libxml 2.6.23+
+
+2006-08-28  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.c:
+      MFH: set BG(locale_string) to NULL on shutdown (partly fixes #38534)
+
+    * ext/standard/basic_functions.c:
+      set BG(locale_string) to NULL on shutdown (partly fixes #38534)
+
+    * (PHP_5_2)
+      UPGRADING:
+      typofix
+
+    * (PHP_5_2)
+      NEWS
+      main/streams/plain_wrapper.c:
+      MFH: fix #38199 (fclose() unable to close STDOUT and STDERR)
+
+2006-08-28  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h:
+      Add APIs for UTF-8 strings (common with XML, PCRE, etc)
+
+2006-08-28  Antony Dovgal  <antony@zend.com>
+
+    * main/streams/plain_wrapper.c:
+      fix #38199 (fclose() unable to close STDOUT and STDERR)
+
+2006-08-28  Michael Wallner  <mike@iworks.at>
+
+    * tests/output/ob_018.phpt:
+      - add SKIPIF and skip test if zlib is not available
+
+2006-08-28  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_object_handlers.c:
+      delete commented part, as it was done in HEAD
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/tests/bug38624.phpt:
+      MFH: fix #38624 (Strange warning when incrementing an object property and
+      exception is thrown from __get method)
+
+    * ZendEngine2/zend_interfaces.c
+      ZendEngine2/tests/bug38624.phpt
+      ZendEngine2/tests/bug38624.phpt:
+      fix #38624 (Strange warning when incrementing an object property and
+      exception is thrown from __get method)
+
+    * (PHP_5_2)
+      ext/standard/string.c:
+      fix ZTS build
+
 2006-08-27  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * (PHP_5_2)
