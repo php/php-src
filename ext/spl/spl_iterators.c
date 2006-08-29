@@ -1020,7 +1020,7 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 			}
 			intern->u.regex.mode = mode;
 			intern->u.regex.regex = estrndup(regex, regex_len);
-			intern->u.regex.pce = pcre_get_compiled_regex_cache(regex, regex_len TSRMLS_CC);
+			intern->u.regex.pce = pcre_get_compiled_regex_cache(regex, regex_len, 0 TSRMLS_CC);
 			intern->u.regex.pce->refcount++;
 			break;;
 		}
