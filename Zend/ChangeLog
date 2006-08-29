@@ -1,3 +1,27 @@
+2006-08-28  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.c
+      zend_API.h:
+      Add APIs for UTF-8 strings (common with XML, PCRE, etc)
+
+2006-08-28  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend_object_handlers.c:
+      delete commented part, as it was done in HEAD
+
+    * (PHP_5_2)
+      zend_interfaces.c
+      tests/bug38624.phpt:
+      MFH: fix #38624 (Strange warning when incrementing an object property and
+      exception is thrown from __get method)
+
+    * zend_interfaces.c
+      tests/bug38624.phpt
+      tests/bug38624.phpt:
+      fix #38624 (Strange warning when incrementing an object property and
+      exception is thrown from __get method)
+
 2006-08-25  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_API.h:
