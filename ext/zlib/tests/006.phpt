@@ -22,8 +22,8 @@ var_dump($data2 = gzdeflate($string, 9));
 var_dump(gzinflate());
 var_dump(gzinflate(b""));
 var_dump(gzinflate(b"asfwe", 1000));
-var_dump(gzinflate(b"asdf", -1));
 
+var_dump(gzinflate(b"asdf", -1));
 var_dump(gzinflate(b"asdf"));
 var_dump(gzinflate(b"asdf", 9));
 
@@ -48,6 +48,8 @@ string(%d) "%s"
 
 Warning: gzinflate() expects at least 1 parameter, 0 given in %s on line %d
 NULL
+
+Warning: gzinflate(): data error in %s on line %d
 bool(false)
 
 Warning: gzinflate(): data error in %s on line %d
@@ -55,12 +57,8 @@ bool(false)
 
 Warning: gzinflate(): length (-1) must be greater or equal zero in %s on line %d
 bool(false)
-
-Warning: gzinflate(): data error in %s on line %d
-bool(false)
-
-Warning: gzinflate(): data error in %s on line %d
-bool(false)
+string(0) ""
+string(0) ""
 string(94) "Answer me, it can't be so hard
 Cry to relieve what's in your heart
 Desolation, grief and agony"
