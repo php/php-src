@@ -95,13 +95,16 @@ static const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC);
 
 static PHP_INI_MH(OnUpdateSaveHandler)
 {
+	ps_module *tmp;
 	SESSION_CHECK_ACTIVE_STATE;
 
-	PS(mod) = _php_find_ps_module(new_value TSRMLS_CC);
+	tmp = _php_find_ps_module(new_value TSRMLS_CC);
 
-	if (PG(modules_activated) && !PS(mod)) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot find save handler %s", new_value);
+	if (PG(modules_activated) && !tmp) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot find save handler %s", new_value);
+		return FAILURE;
 	}
+	PS(mod) = tmp;
 
 	return SUCCESS;
 }
@@ -121,13 +124,16 @@ static PHP_INI_MH(OnUpdateTransSid)
 
 static PHP_INI_MH(OnUpdateSerializer)
 {
+	const ps_serializer *tmp;
 	SESSION_CHECK_ACTIVE_STATE;
 
-	PS(serializer) = _php_find_ps_serializer(new_value TSRMLS_CC);
+	tmp = _php_find_ps_serializer(new_value TSRMLS_CC);
 
-	if (PG(modules_activated) && !PS(serializer)) {
+	if (PG(modules_activated) && !tmp) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot find serialization handler %s", new_value);
+		return FAILURE;
 	}
+	PS(serializer) = tmp;
 
 	return SUCCESS;
 }
@@ -1395,8 +1401,9 @@ PHP_FUNCTION(session_module_name)
 	if (ac == 1) {
 		convert_to_string_ex(p_name);
 		if (!_php_find_ps_module(Z_STRVAL_PP(p_name) TSRMLS_CC)) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot find named PHP session module (%s)",
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot find named PHP session module (%s)",
 					Z_STRVAL_PP(p_name));
+			zval_dtor(return_value);
 			RETURN_FALSE;
 		}
 		if (PS(mod_data)) {
