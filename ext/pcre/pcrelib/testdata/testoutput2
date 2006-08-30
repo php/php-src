@@ -115,14 +115,14 @@ Failed: unrecognized character after (? at offset 2
 Capturing subpattern count = 0
 Partial matching not supported
 No options
-First char at start or follows \n
+First char at start or follows newline
 Need char = 'b'
 
 /.*?b/
 Capturing subpattern count = 0
 Partial matching not supported
 No options
-First char at start or follows \n
+First char at start or follows newline
 Need char = 'b'
 
 /cat|dog|elephant/
@@ -326,7 +326,7 @@ No need char
 Capturing subpattern count = 3
 Partial matching not supported
 No options
-First char at start or follows \n
+First char at start or follows newline
 No need char
     defabc
  0: defabc
@@ -517,7 +517,6 @@ No need char
 /(^b|(?i)^d)/
 Capturing subpattern count = 1
 Options: anchored
-Case state changes
 No first char
 No need char
 
@@ -552,13 +551,13 @@ Starting byte set: b c x y
 /(^a|^b)/m
 Capturing subpattern count = 1
 Options: multiline
-First char at start or follows \n
+First char at start or follows newline
 No need char
 
 /(?i)(^a|^b)/m
 Capturing subpattern count = 1
 Options: caseless multiline
-First char at start or follows \n
+First char at start or follows newline
 No need char
 
 /(a)(?(1)a|b|c)/
@@ -568,13 +567,13 @@ Failed: conditional group contains more than two branches at offset 13
 Failed: conditional group contains more than two branches at offset 12
 
 /(?(1a)/
-Failed: malformed number after (?( at offset 4
+Failed: reference to non-existent subpattern at offset 6
 
 /(?(?i))/
 Failed: assertion expected after (?( at offset 3
 
 /(?(abc))/
-Failed: assertion expected after (?( at offset 3
+Failed: reference to non-existent subpattern at offset 7
 
 /(?(?<ab))/
 Failed: unrecognized character after (?< at offset 5
@@ -592,7 +591,6 @@ Capturing subpattern count = 1
 Max back reference = 1
 Partial matching not supported
 No options
-Case state changes
 First char = 'b' (caseless)
 Need char = 'h' (caseless)
 
@@ -609,7 +607,6 @@ Need char = 'h' (caseless)
 ------------------------------------------------------------------
 Capturing subpattern count = 1
 No options
-Case state changes
 First char = 'b' (caseless)
 No need char
 Study returned NULL
@@ -618,7 +615,6 @@ Study returned NULL
 Capturing subpattern count = 1
 Partial matching not supported
 No options
-Case state changes
 No first char
 No need char
 Starting byte set: C a b c d 
@@ -664,7 +660,7 @@ No need char
 /^abc/m 
 Capturing subpattern count = 0
 Options: multiline
-First char at start or follows \n
+First char at start or follows newline
 Need char = 'c'
 
 /^((a+)(?U)([ab]+)(?-U)([bc]+)(\w*))/
@@ -721,7 +717,7 @@ No match
 /^(?<=foo\n)bar/m
 Capturing subpattern count = 0
 Options: multiline
-First char at start or follows \n
+First char at start or follows newline
 Need char = 'r'
     foo\nbarbar 
  0: bar
@@ -737,7 +733,7 @@ No match
 /(?>^abc)/m
 Capturing subpattern count = 0
 Options: multiline
-First char at start or follows \n
+First char at start or follows newline
 Need char = 'c'
     abc
  0: abc
@@ -782,7 +778,6 @@ No match
 /(?<=ab(?i)x|y|z)/
 Capturing subpattern count = 0
 No options
-Case state changes
 No first char
 No need char
 
@@ -790,7 +785,7 @@ No need char
 Capturing subpattern count = 2
 Partial matching not supported
 No options
-First char at start or follows \n
+First char at start or follows newline
 No need char
     alphabetabcd
  0: alphabetabcd
@@ -803,7 +798,6 @@ No need char
 /(?<=ab(?i)x(?-i)y|(?i)z|b)ZZ/
 Capturing subpattern count = 0
 No options
-Case state changes
 First char = 'Z'
 Need char = 'Z'
     abxyZZ
@@ -966,7 +960,7 @@ Failed: unrecognized character after (? at offset 3
 Failed: unrecognized character after (? at offset 3
 
 /(?(1?)a|b)/
-Failed: malformed number after (?( at offset 4
+Failed: malformed number or name after (?( at offset 4
 
 /(?(1)a|b|c)/
 Failed: conditional group contains more than two branches at offset 10
@@ -1021,7 +1015,7 @@ No need char
     abcdefghijklmnopqrstuvwxyz\C1
  0: abcdefghijklmnopqrst
  1: abcdefghijklmnopqrst
-copy substring 1 failed -6
+ 1C abcdefghijklmnopqrst (20)
     abcdefghijklmnopqrstuvwxyz\G1
  0: abcdefghijklmnopqrst
  1: abcdefghijklmnopqrst
@@ -1054,7 +1048,7 @@ No need char
     abcdefghijklmnopqrstuvwxyz\C1\G1\L
  0: abcdefghijklmnop
  1: abcdefghijklmnop
-copy substring 1 failed -6
+ 1C abcdefghijklmnop (16)
  1G abcdefghijklmnop (16)
  0L abcdefghijklmnop
  1L abcdefghijklmnop
@@ -1128,7 +1122,7 @@ Need char = 'd'
 Capturing subpattern count = 0
 Partial matching not supported
 No options
-First char at start or follows \n
+First char at start or follows newline
 Need char = 'X'
 
 /.*X/Ds
@@ -1161,7 +1155,7 @@ Need char = 'X'
 Capturing subpattern count = 1
 Partial matching not supported
 No options
-First char at start or follows \n
+First char at start or follows newline
 No need char
 
 /(.*X|^B)/Ds
@@ -1221,7 +1215,7 @@ No need char
 Capturing subpattern count = 0
 Partial matching not supported
 No options
-First char at start or follows \n
+First char at start or follows newline
 No need char
 
 /\Biss\B/+
@@ -1306,7 +1300,7 @@ No need char
 Capturing subpattern count = 0
 Partial matching not supported
 No options
-First char at start or follows \n
+First char at start or follows newline
 Need char = 's'
     abciss\nxyzisspqr 
  0: abciss
@@ -1365,7 +1359,7 @@ No need char
 /^ab\n/mg+
 Capturing subpattern count = 0
 Options: multiline
-First char at start or follows \n
+First char at start or follows newline
 Need char = 10
     ab\nab\ncd
  0: ab\x0a
@@ -2223,7 +2217,6 @@ No need char
 /((?-i)[[:lower:]])[[:lower:]]/i
 Capturing subpattern count = 1
 Options: caseless
-Case state changes
 No first char
 No need char
     ab
@@ -2240,11 +2233,11 @@ No match
     AB        
 No match
 
-/[\200-\410]/
+/[\200-\110]/
 Failed: range out of order in character class at offset 9
 
 /^(?(0)f|b)oo/
-Failed: invalid condition (?(0) at offset 5
+Failed: invalid condition (?(0) at offset 6
 
 /This one's here because of the large output vector needed/
 Capturing subpattern count = 0
@@ -2761,7 +2754,6 @@ No need char
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 No options
-Case state changes
 First char = 'a'
 Need char = 'b' (caseless)
     ab
@@ -2787,7 +2779,6 @@ No match
 ------------------------------------------------------------------
 Capturing subpattern count = 1
 No options
-Case state changes
 First char = 'a'
 Need char = 'b' (caseless)
     ab
@@ -3370,7 +3361,7 @@ No need char
 Capturing subpattern count = 1
 Partial matching not supported
 No options
-First char at start or follows \n
+First char at start or follows newline
 No need char
     
 /(.*)\d+\1/Is
@@ -3393,7 +3384,7 @@ Capturing subpattern count = 2
 Max back reference = 2
 Partial matching not supported
 No options
-First char at start or follows \n
+First char at start or follows newline
 Need char = 'z'
 
 /((.*))\d+\1/I
@@ -3430,7 +3421,6 @@ Need char = 'z' (caseless)
 /(?=abc)(?i).xyz/I
 Capturing subpattern count = 0
 No options
-Case state changes
 First char = 'a'
 Need char = 'z' (caseless)
 
@@ -3553,7 +3543,7 @@ Need char = 'b'
 /^a/mI
 Capturing subpattern count = 0
 Options: multiline
-First char at start or follows \n
+First char at start or follows newline
 Need char = 'a'
   abcde
  0: a
@@ -3580,7 +3570,6 @@ Starting byte set: A B a b
 /[ab](?i)cd/IS
 Capturing subpattern count = 0
 No options
-Case state changes
 No first char
 Need char = 'd' (caseless)
 Starting byte set: a b 
@@ -4503,12 +4492,12 @@ No first char
 Need char = 'z'
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaazzbbbbbb\M
 Minimum match() limit = 8
-Minimum match() recursion limit = 7
+Minimum match() recursion limit = 6
  0: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaazz
  1: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
   aaaaaaaaaaaaaz\M
 Minimum match() limit = 32768
-Minimum match() recursion limit = 43
+Minimum match() recursion limit = 42
 No match
 
 /(aaa(?C1)bbb|ab)/
@@ -4555,18 +4544,19 @@ Need char = 'h'
  1: cd
  2: gh
  1C cd (2)
- 2G gh (2)
+  G gh (2) two
     abcdefgh\Cone\Ctwo
  0: abcdefgh
  1: cd
  2: gh
- 1C cd (2)
- 2C gh (2)
+  C cd (2) one
+  C gh (2) two
     abcdefgh\Cthree  
 no parentheses with name "three"
  0: abcdefgh
  1: cd
  2: gh
+copy substring three failed -7
 
 /(?P<Tes>)(?P<Test>)/D
 ------------------------------------------------------------------
@@ -4616,18 +4606,18 @@ Need char = 'a'
  0: zzaa
  1: zz
  2: aa
- 1C zz (2)
+  C zz (2) Z
     zzaa\CA
  0: zzaa
  1: zz
  2: aa
- 2C aa (2)
+  C aa (2) A
 
 /(?P<x>eks)(?P<x>eccs)/
-Failed: two named groups have the same name at offset 16
+Failed: two named subpatterns have the same name at offset 16
 
 /(?P<abc>abc(?P<def>def)(?P<abc>xyz))/
-Failed: two named groups have the same name at offset 31
+Failed: two named subpatterns have the same name at offset 31
 
 "\[((?P<elem>\d+)(,(?P>elem))*)\]"
 Capturing subpattern count = 3
@@ -5769,7 +5759,6 @@ Failed: number too big in {} quantifier at offset 15
 Capturing subpattern count = 1
 Max back reference = 1
 No options
-Case state changes
 First char = 'a' (caseless)
 Need char = 'B'
     abcdefghijklAkB
@@ -6058,6 +6047,505 @@ Capturing subpattern count = 0
 No options
 First char = 255
 No need char
+
+/^((?P<A>a1)|(?P<A>a2)b)/
+Failed: two named subpatterns have the same name at offset 18
+
+/^((?P<A>a1)|(?P<A>a2)b)/J
+Capturing subpattern count = 3
+Named capturing subpatterns:
+  A   2
+  A   3
+Options: anchored dupnames
+No first char
+No need char
+    a1b\CA
+ 0: a1
+ 1: a1
+ 2: a1
+  C a1 (2) A
+    a2b\CA 
+ 0: a2b
+ 1: a2b
+ 2: <unset>
+ 3: a2
+  C a2 (2) A
+    ** Failers
+No match
+    a1b\CZ\CA 
+no parentheses with name "Z"
+ 0: a1
+ 1: a1
+ 2: a1
+copy substring Z failed -7
+  C a1 (2) A
+    
+/^(?P<A>a)(?P<A>b)/J
+Capturing subpattern count = 2
+Named capturing subpatterns:
+  A   1
+  A   2
+Options: anchored dupnames
+No first char
+No need char
+    ab\CA
+ 0: ab
+ 1: a
+ 2: b
+  C a (1) A
+    
+/^(?P<A>a)(?P<A>b)|cd/J
+Capturing subpattern count = 2
+Named capturing subpatterns:
+  A   1
+  A   2
+Options: dupnames
+No first char
+No need char
+    ab\CA
+ 0: ab
+ 1: a
+ 2: b
+  C a (1) A
+    cd\CA 
+ 0: cd
+copy substring A failed -7
+  
+/^(?P<A>a)(?P<A>b)|cd(?P<A>ef)(?P<A>gh)/J
+Capturing subpattern count = 4
+Named capturing subpatterns:
+  A   1
+  A   2
+  A   3
+  A   4
+Options: dupnames
+No first char
+No need char
+    cdefgh\CA 
+ 0: cdefgh
+ 1: <unset>
+ 2: <unset>
+ 3: ef
+ 4: gh
+  C ef (2) A
+  
+/^((?P<A>a1)|(?P<A>a2)b)/J
+Capturing subpattern count = 3
+Named capturing subpatterns:
+  A   2
+  A   3
+Options: anchored dupnames
+No first char
+No need char
+    a1b\GA
+ 0: a1
+ 1: a1
+ 2: a1
+  G a1 (2) A
+    a2b\GA 
+ 0: a2b
+ 1: a2b
+ 2: <unset>
+ 3: a2
+  G a2 (2) A
+    ** Failers
+No match
+    a1b\GZ\GA 
+no parentheses with name "Z"
+ 0: a1
+ 1: a1
+ 2: a1
+copy substring Z failed -7
+  G a1 (2) A
+    
+/^(?P<A>a)(?P<A>b)/J
+Capturing subpattern count = 2
+Named capturing subpatterns:
+  A   1
+  A   2
+Options: anchored dupnames
+No first char
+No need char
+    ab\GA
+ 0: ab
+ 1: a
+ 2: b
+  G a (1) A
+    
+/^(?P<A>a)(?P<A>b)|cd/J
+Capturing subpattern count = 2
+Named capturing subpatterns:
+  A   1
+  A   2
+Options: dupnames
+No first char
+No need char
+    ab\GA
+ 0: ab
+ 1: a
+ 2: b
+  G a (1) A
+    cd\GA 
+ 0: cd
+copy substring A failed -7
+  
+/^(?P<A>a)(?P<A>b)|cd(?P<A>ef)(?P<A>gh)/J
+Capturing subpattern count = 4
+Named capturing subpatterns:
+  A   1
+  A   2
+  A   3
+  A   4
+Options: dupnames
+No first char
+No need char
+    cdefgh\GA 
+ 0: cdefgh
+ 1: <unset>
+ 2: <unset>
+ 3: ef
+ 4: gh
+  G ef (2) A
+  
+/(?J)^((?P<A>a1)|(?P<A>a2)b)/
+Capturing subpattern count = 3
+Named capturing subpatterns:
+  A   2
+  A   3
+Options: anchored dupnames
+No first char
+No need char
+    a1b\CA
+ 0: a1
+ 1: a1
+ 2: a1
+  C a1 (2) A
+    a2b\CA 
+ 0: a2b
+ 1: a2b
+ 2: <unset>
+ 3: a2
+  C a2 (2) A
+    
+/^(?P<A>a) (?J:(?P<B>b)(?P<B>c)) (?P<A>d)/
+Failed: two named subpatterns have the same name at offset 38
+
+/ In this next test, J is not set at the outer level; consequently it isn't
+set in the pattern's options; consequently pcre_get_named_substring() produces 
+a random value. /x
+Capturing subpattern count = 1
+Options: extended
+First char = 'I'
+Need char = 'e'
+
+/^(?P<A>a) (?J:(?P<B>b)(?P<B>c)) (?P<C>d)/
+Capturing subpattern count = 4
+Named capturing subpatterns:
+  A   1
+  B   2
+  B   3
+  C   4
+Options: anchored
+No first char
+No need char
+    a bc d\CA\CB\CC
+ 0: a bc d
+ 1: a
+ 2: b
+ 3: c
+ 4: d
+  C a (1) A
+  C b (1) B
+  C d (1) C
+
+/^(?P<A>a)?(?(A)a|b)/
+Capturing subpattern count = 1
+Named capturing subpatterns:
+  A   1
+Options: anchored
+No first char
+No need char
+    aabc
+ 0: aa
+ 1: a
+    bc
+ 0: b
+    ** Failers
+No match
+    abc   
+No match
+
+/(?:(?(ZZ)a|b)(?P<ZZ>X))+/
+Capturing subpattern count = 1
+Named capturing subpatterns:
+  ZZ   1
+No options
+No first char
+Need char = 'X'
+    bXaX
+ 0: bXaX
+ 1: X
+
+/(?:(?(2y)a|b)(X))+/
+Failed: reference to non-existent subpattern at offset 9
+
+/(?:(?(ZA)a|b)(?P<ZZ>X))+/
+Failed: reference to non-existent subpattern at offset 9
+
+/(?:(?(ZZ)a|b)(?(ZZ)a|b)(?P<ZZ>X))+/
+Capturing subpattern count = 1
+Named capturing subpatterns:
+  ZZ   1
+No options
+No first char
+Need char = 'X'
+    bbXaaX
+ 0: bbXaaX
+ 1: X
+
+/(?:(?(ZZ)a|\(b\))\\(?P<ZZ>X))+/
+Capturing subpattern count = 1
+Named capturing subpatterns:
+  ZZ   1
+No options
+No first char
+Need char = 'X'
+    (b)\\Xa\\X
+ 0: (b)\Xa\X
+ 1: X
+
+/(?P<ABC/
+Failed: syntax error after (?P at offset 7
+
+/(?:(?(A)(?P=A)a|b)(?P<A>X|Y))+/
+Capturing subpattern count = 1
+Max back reference = 1
+Named capturing subpatterns:
+  A   1
+No options
+No first char
+No need char
+    bXXaYYaY
+ 0: bXXaYYaY
+ 1: Y
+    bXYaXXaX  
+ 0: bX
+ 1: X
+
+/()()()()()()()()()(?:(?(A)(?P=A)a|b)(?P<A>X|Y))+/
+Capturing subpattern count = 10
+Max back reference = 10
+Named capturing subpatterns:
+  A  10
+No options
+No first char
+No need char
+    bXXaYYaY
+ 0: bXXaYYaY
+ 1: 
+ 2: 
+ 3: 
+ 4: 
+ 5: 
+ 6: 
+ 7: 
+ 8: 
+ 9: 
+10: Y
+
+/\777/
+Failed: octal value is greater than \377 (not in UTF-8 mode) at offset 3
+
+/\s*,\s*/S
+Capturing subpattern count = 0
+Partial matching not supported
+No options
+No first char
+Need char = ','
+Starting byte set: \x09 \x0a \x0c \x0d \x20 , 
+    \x0b,\x0b
+ 0: ,
+    \x0c,\x0d 
+ 0: \x0c,\x0d
+
+/^abc/m
+Capturing subpattern count = 0
+Options: multiline
+First char at start or follows newline
+Need char = 'c'
+    xyz\nabc
+ 0: abc
+    xyz\nabc\<lf>
+ 0: abc
+    xyz\r\nabc\<lf>
+ 0: abc
+    xyz\rabc\<cr>
+ 0: abc
+    xyz\r\nabc\<crlf>
+ 0: abc
+    ** Failers 
+No match
+    xyz\nabc\<cr>
+No match
+    xyz\r\nabc\<cr>
+No match
+    xyz\nabc\<crlf>
+No match
+    xyz\rabc\<crlf>
+No match
+    xyz\rabc\<lf>
+No match
+    
+/abc$/m
+Capturing subpattern count = 0
+Options: multiline
+First char = 'a'
+Need char = 'c'
+    xyzabc
+ 0: abc
+    xyzabc\n 
+ 0: abc
+    xyzabc\npqr 
+ 0: abc
+    xyzabc\r\<cr> 
+ 0: abc
+    xyzabc\rpqr\<cr> 
+ 0: abc
+    xyzabc\r\n\<crlf> 
+ 0: abc
+    xyzabc\r\npqr\<crlf> 
+ 0: abc
+    ** Failers
+No match
+    xyzabc\r 
+No match
+    xyzabc\rpqr 
+No match
+    xyzabc\r\n 
+No match
+    xyzabc\r\npqr 
+No match
+    
+/^abc/m<cr>
+Capturing subpattern count = 0
+Options: multiline
+Forced newline sequence: CR
+First char at start or follows newline
+Need char = 'c'
+    xyz\rabcdef
+ 0: abc
+    xyz\nabcdef\<lf>
+ 0: abc
+    ** Failers  
+No match
+    xyz\nabcdef
+No match
+       
+/^abc/m<lf>
+Capturing subpattern count = 0
+Options: multiline
+Forced newline sequence: LF
+First char at start or follows newline
+Need char = 'c'
+    xyz\nabcdef
+ 0: abc
+    xyz\rabcdef\<cr>
+ 0: abc
+    ** Failers  
+No match
+    xyz\rabcdef
+No match
+       
+/^abc/m<crlf>
+Capturing subpattern count = 0
+Options: multiline
+Forced newline sequence: CRLF
+First char at start or follows newline
+Need char = 'c'
+    xyz\r\nabcdef
+ 0: abc
+    xyz\rabcdef\<cr>
+ 0: abc
+    ** Failers  
+No match
+    xyz\rabcdef
+No match
+    
+/^abc/m<bad>
+Unknown newline type at: <bad>
+
+
+/abc/
+Capturing subpattern count = 0
+No options
+First char = 'a'
+Need char = 'c'
+    xyz\rabc\<bad>
+Unknown newline type at: <bad>
+    abc  
+ 0: abc
+       
+/.*/
+Capturing subpattern count = 0
+Partial matching not supported
+No options
+First char at start or follows newline
+No need char
+    abc\ndef
+ 0: abc
+    abc\rdef
+ 0: abc\x0ddef
+    abc\r\ndef
+ 0: abc\x0d
+    \<cr>abc\ndef
+ 0: abc\x0adef
+    \<cr>abc\rdef
+ 0: abc
+    \<cr>abc\r\ndef
+ 0: abc
+    \<crlf>abc\ndef
+ 0: abc\x0adef
+    \<crlf>abc\rdef
+ 0: abc\x0ddef
+    \<crlf>abc\r\ndef
+ 0: abc
+
+/\w+(.)(.)?def/s
+Capturing subpattern count = 2
+Partial matching not supported
+Options: dotall
+No first char
+Need char = 'f'
+    abc\ndef
+ 0: abc\x0adef
+ 1: \x0a
+    abc\rdef
+ 0: abc\x0ddef
+ 1: \x0d
+    abc\r\ndef
+ 0: abc\x0d\x0adef
+ 1: \x0d
+ 2: \x0a
+
++((?:\s|//.*\\n|/[*](?:\\n|.)*?[*]/)*)+
+Capturing subpattern count = 1
+Partial matching not supported
+No options
+No first char
+No need char
+   /* this is a C style comment */\M
+Minimum match() limit = 120
+Minimum match() recursion limit = 6
+ 0: /* this is a C style comment */
+ 1: /* this is a C style comment */
+
+/(?P<B>25[0-5]|2[0-4]\d|[01]?\d?\d)(?:\.(?P>B)){3}/
+Capturing subpattern count = 1
+Named capturing subpatterns:
+  B   1
+No options
+No first char
+Need char = '.'
 
 / End of testinput2 /
 Capturing subpattern count = 0

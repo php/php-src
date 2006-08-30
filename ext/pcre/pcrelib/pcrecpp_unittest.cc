@@ -32,6 +32,7 @@
 // TODO: Test extractions for PartialMatch/Consume
 
 #include <stdio.h>
+#include <cassert>
 #include <vector>
 #include "config.h"
 #include "pcrecpp.h"
@@ -259,17 +260,71 @@ static void TestReplace() {
       "aaaaa",
       "bbaaaaa",
       "bbabbabbabbabbabb" },
+    { "b*",
+      "bb",
+      "aa\naa\n",
+      "bbaa\naa\n",
+      "bbabbabb\nbbabbabb\nbb" },
+    { "b*",
+      "bb",
+      "aa\raa\r",
+      "bbaa\raa\r",
+      "bbabbabb\rbbabbabb\rbb" },
+    { "b*",
+      "bb",
+      "aa\r\naa\r\n",
+      "bbaa\r\naa\r\n",
+      "bbabbabb\r\nbbabbabb\r\nbb" },
+#ifdef SUPPORT_UTF8
+    { "b*",
+      "bb",
+      "\xE3\x83\x9B\xE3\x83\xBC\xE3\x83\xA0\xE3\x81\xB8",   // utf8
+      "bb\xE3\x83\x9B\xE3\x83\xBC\xE3\x83\xA0\xE3\x81\xB8",
+      "bb\xE3\x83\x9B""bb""\xE3\x83\xBC""bb""\xE3\x83\xA0""bb""\xE3\x81\xB8""bb" },
+    { "b*",
+      "bb",
+      "\xE3\x83\x9B\r\n\xE3\x83\xBC\r\xE3\x83\xA0\n\xE3\x81\xB8\r\n",   // utf8
+      "bb\xE3\x83\x9B\r\n\xE3\x83\xBC\r\xE3\x83\xA0\n\xE3\x81\xB8\r\n",
+      ("bb\xE3\x83\x9B""bb\r\nbb""\xE3\x83\xBC""bb\rbb""\xE3\x83\xA0"
+       "bb\nbb""\xE3\x81\xB8""bb\r\nbb") },
+#endif
     { "", NULL, NULL, NULL, NULL }
   };
 
+#ifdef SUPPORT_UTF8
+  const bool support_utf8 = true;
+#else
+  const bool support_utf8 = false;
+#endif
+
   for (const ReplaceTest *t = tests; t->original != NULL; ++t) {
+    RE re(t->regexp, RE_Options(PCRE_NEWLINE_CRLF).set_utf8(support_utf8));
+    assert(re.error().empty());
     string one(t->original);
-    CHECK(RE(t->regexp).Replace(t->rewrite, &one));
+    CHECK(re.Replace(t->rewrite, &one));
     CHECK_EQ(one, t->single);
     string all(t->original);
-    CHECK(RE(t->regexp).GlobalReplace(t->rewrite, &all) > 0);
+    CHECK(re.GlobalReplace(t->rewrite, &all) > 0);
     CHECK_EQ(all, t->global);
   }
+
+  // One final test: test \r\n replacement when we're not in CRLF mode
+  {
+    RE re("b*", RE_Options(PCRE_NEWLINE_CR).set_utf8(support_utf8));
+    assert(re.error().empty());
+    string all("aa\r\naa\r\n");
+    CHECK(re.GlobalReplace("bb", &all) > 0);
+    CHECK_EQ(all, string("bbabbabb\rbb\nbbabbabb\rbb\nbb"));
+  }
+  {
+    RE re("b*", RE_Options(PCRE_NEWLINE_LF).set_utf8(support_utf8));
+    assert(re.error().empty());
+    string all("aa\r\naa\r\n");
+    CHECK(re.GlobalReplace("bb", &all) > 0);
+    CHECK_EQ(all, string("bbabbabb\rbb\nbbabbabb\rbb\nbb"));
+  }
+  // TODO: test what happens when no PCRE_NEWLINE_* flag is set.
+  //       Alas, the answer depends on how pcre was compiled.
 }
 
 static void TestExtract() {

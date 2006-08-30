@@ -50,8 +50,8 @@ for these functions came from Scott Wimer. */
 *           Find number for named string         *
 *************************************************/
 
-/* This function is used by the two extraction functions below, as well
-as being generally available.
+/* This function is used by the get_first_set() function below, as well
+as being generally available. It assumes that names are unique.
 
 Arguments:
   code        the compiled regex
@@ -90,6 +90,113 @@ while (top > bot)
 
 return PCRE_ERROR_NOSUBSTRING;
 }
+
+
+
+/*************************************************
+*     Find (multiple) entries for named string   *
+*************************************************/
+
+/* This is used by the get_first_set() function below, as well as being
+generally available. It is used when duplicated names are permitted.
+
+Arguments:
+  code        the compiled regex
+  stringname  the name whose entries required
+  firstptr    where to put the pointer to the first entry
+  lastptr     where to put the pointer to the last entry
+
+Returns:      the length of each entry, or a negative number
+                (PCRE_ERROR_NOSUBSTRING) if not found
+*/
+
+int
+pcre_get_stringtable_entries(const pcre *code, const char *stringname,
+  char **firstptr, char **lastptr)
+{
+int rc;
+int entrysize;
+int top, bot;
+uschar *nametable, *lastentry;
+
+if ((rc = pcre_fullinfo(code, NULL, PCRE_INFO_NAMECOUNT, &top)) != 0)
+  return rc;
+if (top <= 0) return PCRE_ERROR_NOSUBSTRING;
+
+if ((rc = pcre_fullinfo(code, NULL, PCRE_INFO_NAMEENTRYSIZE, &entrysize)) != 0)
+  return rc;
+if ((rc = pcre_fullinfo(code, NULL, PCRE_INFO_NAMETABLE, &nametable)) != 0)
+  return rc;
+
+lastentry = nametable + entrysize * (top - 1);
+bot = 0;
+while (top > bot)
+  {
+  int mid = (top + bot) / 2;
+  uschar *entry = nametable + entrysize*mid;
+  int c = strcmp(stringname, (char *)(entry + 2));
+  if (c == 0)
+    {
+    uschar *first = entry;
+    uschar *last = entry;
+    while (first > nametable)
+      {
+      if (strcmp(stringname, (char *)(first - entrysize + 2)) != 0) break;
+      first -= entrysize;
+      }
+    while (last < lastentry)
+      {
+      if (strcmp(stringname, (char *)(last + entrysize + 2)) != 0) break;
+      last += entrysize;
+      }
+    *firstptr = (char *)first;
+    *lastptr = (char *)last;
+    return entrysize;
+    }
+  if (c > 0) bot = mid + 1; else top = mid;
+  }
+
+return PCRE_ERROR_NOSUBSTRING;
+}
+
+
+
+/*************************************************
+*    Find first set of multiple named strings    *
+*************************************************/
+
+/* This function allows for duplicate names in the table of named substrings.
+It returns the number of the first one that was set in a pattern match.
+
+Arguments:
+  code         the compiled regex
+  stringname   the name of the capturing substring
+  ovector      the vector of matched substrings
+
+Returns:       the number of the first that is set,
+               or the number of the last one if none are set,
+               or a negative number on error
+*/
+
+static int
+get_first_set(const pcre *code, const char *stringname, int *ovector)
+{
+const real_pcre *re = (const real_pcre *)code;
+int entrysize;
+char *first, *last;
+uschar *entry;
+if ((re->options & (PCRE_DUPNAMES | PCRE_JCHANGED)) == 0)
+  return pcre_get_stringnumber(code, stringname);
+entrysize = pcre_get_stringtable_entries(code, stringname, &first, &last);
+if (entrysize <= 0) return entrysize;
+for (entry = (uschar *)first; entry <= (uschar *)last; entry += entrysize)
+  {
+  int n = (entry[0] << 8) + entry[1];
+  if (ovector[n*2] >= 0) return n;
+  }
+return (first[0] << 8) + first[1];
+}
+
 
 
 
@@ -142,7 +249,8 @@ return yield;
 *************************************************/
 
 /* This function copies a single captured substring into a given buffer,
-identifying it by name.
+identifying it by name. If the regex permits duplicate names, the first
+substring that is set is chosen.
 
 Arguments:
   code           the compiled regex
@@ -168,7 +276,7 @@ int
 pcre_copy_named_substring(const pcre *code, const char *subject, int *ovector,
   int stringcount, const char *stringname, char *buffer, int size)
 {
-int n = pcre_get_stringnumber(code, stringname);
+int n = get_first_set(code, stringname, ovector);
 if (n <= 0) return n;
 return pcre_copy_substring(subject, ovector, stringcount, n, buffer, size);
 }
@@ -299,7 +407,8 @@ return yield;
 *************************************************/
 
 /* This function copies a single captured substring, identified by name, into
-new store.
+new store. If the regex permits duplicate names, the first substring that is
+set is chosen.
 
 Arguments:
   code           the compiled regex
@@ -324,9 +433,10 @@ int
 pcre_get_named_substring(const pcre *code, const char *subject, int *ovector,
   int stringcount, const char *stringname, const char **stringptr)
 {
-int n = pcre_get_stringnumber(code, stringname);
+int n = get_first_set(code, stringname, ovector);
 if (n <= 0) return n;
 return pcre_get_substring(subject, ovector, stringcount, n, stringptr);
+
 }
 
 

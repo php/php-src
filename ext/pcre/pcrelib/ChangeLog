@@ -1,6 +1,175 @@
 ChangeLog for PCRE
 ------------------
 
+Version 6.7 04-Jul-06
+---------------------
+
+ 1. In order to handle tests when input lines are enormously long, pcretest has
+    been re-factored so that it automatically extends its buffers when
+    necessary. The code is crude, but this _is_ just a test program. The
+    default size has been increased from 32K to 50K.
+
+ 2. The code in pcre_study() was using the value of the re argument before
+    testing it for NULL. (Of course, in any sensible call of the function, it
+    won't be NULL.)
+
+ 3. The memmove() emulation function in pcre_internal.h, which is used on
+    systems that lack both memmove() and bcopy() - that is, hardly ever -
+    was missing a "static" storage class specifier.
+
+ 4. When UTF-8 mode was not set, PCRE looped when compiling certain patterns
+    containing an extended class (one that cannot be represented by a bitmap
+    because it contains high-valued characters or Unicode property items, e.g.
+    [\pZ]). Almost always one would set UTF-8 mode when processing such a
+    pattern, but PCRE should not loop if you do not (it no longer does).
+    [Detail: two cases were found: (a) a repeated subpattern containing an
+    extended class; (b) a recursive reference to a subpattern that followed a
+    previous extended class. It wasn't skipping over the extended class
+    correctly when UTF-8 mode was not set.]
+
+ 5. A negated single-character class was not being recognized as fixed-length
+    in lookbehind assertions such as (?<=[^f]), leading to an incorrect
+    compile error "lookbehind assertion is not fixed length".
+
+ 6. The RunPerlTest auxiliary script was showing an unexpected difference
+    between PCRE and Perl for UTF-8 tests. It turns out that it is hard to
+    write a Perl script that can interpret lines of an input file either as
+    byte characters or as UTF-8, which is what "perltest" was being required to
+    do for the non-UTF-8 and UTF-8 tests, respectively. Essentially what you
+    can't do is switch easily at run time between having the "use utf8;" pragma
+    or not. In the end, I fudged it by using the RunPerlTest script to insert
+    "use utf8;" explicitly for the UTF-8 tests.
+
+ 7. In multiline (/m) mode, PCRE was matching ^ after a terminating newline at
+    the end of the subject string, contrary to the documentation and to what
+    Perl does. This was true of both matching functions. Now it matches only at
+    the start of the subject and immediately after *internal* newlines.
+
+ 8. A call of pcre_fullinfo() from pcretest to get the option bits was passing
+    a pointer to an int instead of a pointer to an unsigned long int. This
+    caused problems on 64-bit systems.
+
+ 9. Applied a patch from the folks at Google to pcrecpp.cc, to fix "another
+    instance of the 'standard' template library not being so standard".
+
+10. There was no check on the number of named subpatterns nor the maximum
+    length of a subpattern name. The product of these values is used to compute
+    the size of the memory block for a compiled pattern. By supplying a very
+    long subpattern name and a large number of named subpatterns, the size
+    computation could be caused to overflow. This is now prevented by limiting
+    the length of names to 32 characters, and the number of named subpatterns
+    to 10,000.
+
+11. Subpatterns that are repeated with specific counts have to be replicated in
+    the compiled pattern. The size of memory for this was computed from the
+    length of the subpattern and the repeat count. The latter is limited to
+    65535, but there was no limit on the former, meaning that integer overflow
+    could in principle occur. The compiled length of a repeated subpattern is
+    now limited to 30,000 bytes in order to prevent this.
+
+12. Added the optional facility to have named substrings with the same name.
+
+13. Added the ability to use a named substring as a condition, using the
+    Python syntax: (?(name)yes|no). This overloads (?(R)... and names that
+    are numbers (not recommended). Forward references are permitted.
+
+14. Added forward references in named backreferences (if you see what I mean).
+
+15. In UTF-8 mode, with the PCRE_DOTALL option set, a quantified dot in the
+    pattern could run off the end of the subject. For example, the pattern
+    "(?s)(.{1,5})"8 did this with the subject "ab".
+
+16. If PCRE_DOTALL or PCRE_MULTILINE were set, pcre_dfa_exec() behaved as if
+    PCRE_CASELESS was set when matching characters that were quantified with ?
+    or *.
+
+17. A character class other than a single negated character that had a minimum
+    but no maximum quantifier - for example [ab]{6,} - was not handled
+    correctly by pce_dfa_exec(). It would match only one character.
+
+18. A valid (though odd) pattern that looked like a POSIX character
+    class but used an invalid character after [ (for example [[,abc,]]) caused
+    pcre_compile() to give the error "Failed: internal error: code overflow" or
+    in some cases to crash with a glibc free() error. This could even happen if
+    the pattern terminated after [[ but there just happened to be a sequence of
+    letters, a binary zero, and a closing ] in the memory that followed.
+
+19. Perl's treatment of octal escapes in the range \400 to \777 has changed
+    over the years. Originally (before any Unicode support), just the bottom 8
+    bits were taken. Thus, for example, \500 really meant \100. Nowadays the
+    output from "man perlunicode" includes this:
+
+      The regular expression compiler produces polymorphic opcodes.  That
+      is, the pattern adapts to the data and automatically switches to
+      the Unicode character scheme when presented with Unicode data--or
+      instead uses a traditional byte scheme when presented with byte
+      data.
+
+    Sadly, a wide octal escape does not cause a switch, and in a string with
+    no other multibyte characters, these octal escapes are treated as before.
+    Thus, in Perl, the pattern  /\500/ actually matches \100 but the pattern
+    /\500|\x{1ff}/ matches \500 or \777 because the whole thing is treated as a
+    Unicode string.
+
+    I have not perpetrated such confusion in PCRE. Up till now, it took just
+    the bottom 8 bits, as in old Perl. I have now made octal escapes with
+    values greater than \377 illegal in non-UTF-8 mode. In UTF-8 mode they
+    translate to the appropriate multibyte character.
+
+29. Applied some refactoring to reduce the number of warnings from Microsoft
+    and Borland compilers. This has included removing the fudge introduced
+    seven years ago for the OS/2 compiler (see 2.02/2 below) because it caused
+    a warning about an unused variable.
+
+21. PCRE has not included VT (character 0x0b) in the set of whitespace
+    characters since release 4.0, because Perl (from release 5.004) does not.
+    [Or at least, is documented not to: some releases seem to be in conflict
+    with the documentation.] However, when a pattern was studied with
+    pcre_study() and all its branches started with \s, PCRE still included VT
+    as a possible starting character. Of course, this did no harm; it just
+    caused an unnecessary match attempt.
+
+22. Removed a now-redundant internal flag bit that recorded the fact that case
+    dependency changed within the pattern. This was once needed for "required
+    byte" processing, but is no longer used. This recovers a now-scarce options
+    bit. Also moved the least significant internal flag bit to the most-
+    significant bit of the word, which was not previously used (hangover from
+    the days when it was an int rather than a uint) to free up another bit for
+    the future.
+
+23. Added support for CRLF line endings as well as CR and LF. As well as the
+    default being selectable at build time, it can now be changed at runtime
+    via the PCRE_NEWLINE_xxx flags. There are now options for pcregrep to
+    specify that it is scanning data with non-default line endings.
+
+24. Changed the definition of CXXLINK to make it agree with the definition of
+    LINK in the Makefile, by replacing LDFLAGS to CXXFLAGS.
+
+25. Applied Ian Taylor's patches to avoid using another stack frame for tail
+    recursions. This makes a big different to stack usage for some patterns.
+
+26. If a subpattern containing a named recursion or subroutine reference such
+    as (?P>B) was quantified, for example (xxx(?P>B)){3}, the calculation of
+    the space required for the compiled pattern went wrong and gave too small a
+    value. Depending on the environment, this could lead to "Failed: internal
+    error: code overflow at offset 49" or "glibc detected double free or
+    corruption" errors.
+
+27. Applied patches from Google (a) to support the new newline modes and (b) to
+    advance over multibyte UTF-8 characters in GlobalReplace.
+
+28. Change free() to pcre_free() in pcredemo.c. Apparently this makes a
+    difference for some implementation of PCRE in some Windows version.
+
+29. Added some extra testing facilities to pcretest:
+
+    \q<number>   in a data line sets the "match limit" value
+    \Q<number>   in a data line sets the "match recursion limt" value
+    -S <number>  sets the stack size, where <number> is in megabytes
+
+    The -S option isn't available for Windows.
+
+
 Version 6.6 06-Feb-06
 ---------------------
 
