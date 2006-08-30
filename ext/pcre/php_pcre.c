@@ -1392,6 +1392,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 			zval_dtor(&callback_name);
 			*return_value = **subject;
 			zval_copy_ctor(return_value);
+			INIT_PZVAL(return_value);
 			return;
 		}
 		zval_dtor(&callback_name);
