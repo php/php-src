@@ -928,14 +928,14 @@ static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, zval *dim
 		case IS_NULL:
 			ztype = IS_STRING;
 			offset_key.s = "";
-			offset_key_length = 1;
+			offset_key_length = 0;
 			goto fetch_string_dim;
 
 		case IS_STRING:
 		case IS_UNICODE:
 
 			offset_key = Z_UNIVAL_P(dim);
-			offset_key_length = Z_UNILEN_P(dim)+1;
+			offset_key_length = Z_UNILEN_P(dim);
 
 fetch_string_dim:
 			if (UG(unicode) && ht == &EG(symbol_table) && ztype == IS_UNICODE) {
@@ -951,7 +951,7 @@ fetch_string_dim:
 					free_offset = 1;
 				}
 			}
-			if (zend_u_symtable_find(ht, ztype, offset_key, offset_key_length, (void **) &retval) == FAILURE) {
+			if (zend_u_symtable_find(ht, ztype, offset_key, offset_key_length + 1, (void **) &retval) == FAILURE) {
 				switch (type) {
 					case BP_VAR_R:
 						zend_error(E_NOTICE, "Undefined index:  %R", ztype, offset_key);
@@ -967,7 +967,7 @@ fetch_string_dim:
 							zval *new_zval = &EG(uninitialized_zval);
 
 							new_zval->refcount++;
-							zend_u_symtable_update(ht, ztype, offset_key, offset_key_length, &new_zval, sizeof(zval *), (void **) &retval);
+							zend_u_symtable_update(ht, ztype, offset_key, offset_key_length + 1, &new_zval, sizeof(zval *), (void **) &retval);
 						}
 						break;
 				}
