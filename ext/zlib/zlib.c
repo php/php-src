@@ -16,6 +16,7 @@
    |          Stefan Röhrich <sr@linux.de>                                |
    |          Zeev Suraski <zeev@zend.com>                                |
    |          Jade Nicoletti <nicoletti@nns.ch>                           |
+   |          Michael Wallner <mike@php.net>                              |
    +----------------------------------------------------------------------+
  */
 
@@ -587,11 +588,6 @@ PHP_ZLIB_DECODE_FUNC(gzdecode, PHP_ZLIB_ENCODING_GZIP);
 PHP_ZLIB_DECODE_FUNC(gzuncompress, PHP_ZLIB_ENCODING_DEFLATE);
 /* }}} */
 
-PHP_FUNCTION(ob_gzhandler)
-{
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "ob_gzhandler is intended to be used with ob_start()");
-}
-
 #ifdef COMPILE_DL_ZLIB
 ZEND_GET_MODULE(php_zlib)
 #endif
@@ -619,7 +615,6 @@ zend_function_entry php_zlib_functions[] = {
 	PHP_FE(gzinflate,						NULL)
 	PHP_FE(gzencode,						NULL)
 	PHP_FE(gzdecode,						NULL)
-	PHP_FE(ob_gzhandler,					NULL)
 	PHP_FE(zlib_encode,						NULL)
 	PHP_FE(zlib_decode,						NULL)
 	PHP_FE(zlib_get_coding_type,			NULL)
@@ -654,8 +649,8 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 		return FAILURE;
 	}
 
-	status = php_output_get_status(TSRMLS_C);
 	if (stage == PHP_INI_STAGE_RUNTIME) {
+		status = php_output_get_status(TSRMLS_C);
 		if (status & PHP_OUTPUT_SENT) {
 			php_error_docref("ref.outcontrol" TSRMLS_CC, E_WARNING, "Cannot change zlib.output_compression - headers already sent");
 			return FAILURE;
