@@ -3,7 +3,7 @@ Bug #37947 (zend_ptr_stack reallocation problem)
 --INI--
 error_reporting=0
 --FILE--
-<?
+<?php
 class test {
         function extend_zend_ptr_stack($count,$a,$b,$c,$d,$e) {
                 if ($count>0) $this->extend_zend_ptr_stack($count -
