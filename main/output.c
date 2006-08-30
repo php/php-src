@@ -863,6 +863,7 @@ static inline php_output_handler *php_output_handler_init(zval *name, size_t chu
 static inline int php_output_handler_append(php_output_handler *handler, const php_output_buffer *buf TSRMLS_DC)
 {
 	if (buf->used) {
+		OG(flags) |= PHP_OUTPUT_WRITTEN;
 		/* store it away */
 		if ((handler->buffer.size - handler->buffer.used) <= buf->used) {
 			size_t grow_int = PHP_OUTPUT_HANDLER_INITBUF_SIZE(handler->size);
@@ -1069,6 +1070,7 @@ static inline void php_output_op(int op, const char *str, size_t len TSRMLS_DC)
 			if (OG(flags) & PHP_OUTPUT_IMPLICITFLUSH) {
 				sapi_flush(TSRMLS_C);
 			}
+			OG(flags) |= PHP_OUTPUT_SENT;
 		}
 	}
 	php_output_context_dtor(&context);
