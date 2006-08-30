@@ -89,7 +89,7 @@
         if(Z_TYPE_P(_val) == IS_ARRAY) { \
             _php_tidy_apply_config_array(_doc, HASH_OF(_val) TSRMLS_CC); \
         } else { \
-            convert_to_string_ex(&_val); \
+            convert_to_string(_val); \
             TIDY_SAFE_MODE_CHECK(Z_STRVAL_P(_val)); \
             switch (tidyLoadConfig(_doc, Z_STRVAL_P(_val))) { \
               case -1: \
