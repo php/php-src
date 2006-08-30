@@ -332,6 +332,30 @@ bool RE::Replace(const StringPiece& rewrite,
   return true;
 }
 
+// Returns PCRE_NEWLINE_CRLF, PCRE_NEWLINE_CR, or PCRE_NEWLINE_LF.
+// Note that PCRE_NEWLINE_CRLF is defined to be P_N_CR | P_N_LF.
+static int NewlineMode(int pcre_options) {
+  // TODO: if we can make it threadsafe, cache this var
+  int newline_mode = 0;
+  /* if (newline_mode) return newline_mode; */  // do this once it's cached
+  if (pcre_options & (PCRE_NEWLINE_CRLF|PCRE_NEWLINE_CR|PCRE_NEWLINE_LF)) {
+    newline_mode = (pcre_options &
+                    (PCRE_NEWLINE_CRLF|PCRE_NEWLINE_CR|PCRE_NEWLINE_LF));
+  } else {
+    int newline;
+    pcre_config(PCRE_CONFIG_NEWLINE, &newline);
+    if (newline == 10)
+      newline_mode = PCRE_NEWLINE_LF;
+    else if (newline == 13)
+      newline_mode = PCRE_NEWLINE_CR;
+    else if (newline == 3338)
+      newline_mode = PCRE_NEWLINE_CRLF;
+    else
+      assert("" == "Unexpected return value from pcre_config(NEWLINE)");
+  }
+  return newline_mode;
+}
+
 int RE::GlobalReplace(const StringPiece& rewrite,
                       string *str) const {
   int count = 0;
@@ -350,9 +374,27 @@ int RE::GlobalReplace(const StringPiece& rewrite,
     if (matchstart == matchend && matchstart == lastend) {
       // advance one character if we matched an empty string at the same
       // place as the last match occurred
-      if (start < static_cast<int>(str->length()))
-        out.push_back((*str)[start]);
-      start++;
+      matchend = start + 1;
+      // If the current char is CR and we're in CRLF mode, skip LF too.
+      // Note it's better to call pcre_fullinfo() than to examine
+      // all_options(), since options_ could have changed bewteen
+      // compile-time and now, but this is simpler and safe enough.
+      if (start+1 < static_cast<int>(str->length()) &&
+          (*str)[start] == '\r' && (*str)[start+1] == '\n' &&
+          NewlineMode(options_.all_options()) == PCRE_NEWLINE_CRLF) {
+        matchend++;
+      }
+      // We also need to advance more than one char if we're in utf8 mode.
+#ifdef SUPPORT_UTF8
+      if (options_.utf8()) {
+        while (matchend < static_cast<int>(str->length()) &&
+               ((*str)[matchend] & 0xc0) == 0x80)
+          matchend++;
+      }
+#endif
+      if (matchend <= static_cast<int>(str->length()))
+        out.append(*str, start, matchend - start);
+      start = matchend;
     } else {
       out.append(*str, start, matchstart - start);
       Rewrite(&out, rewrite, *str, vec, matches);

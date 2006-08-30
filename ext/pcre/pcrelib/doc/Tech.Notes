@@ -1,6 +1,9 @@
 Technical Notes about PCRE
 --------------------------
 
+These are very rough technical notes that record potentially useful information 
+about PCRE internals.
+
 Historical note 1
 -----------------
 
@@ -21,13 +24,14 @@ the pattern, as is expected in Unix and Perl-style regular expressions.
 Historical note 2
 -----------------
 
-By contrast, the code originally written by Henry Spencer and subsequently
-heavily modified for Perl actually compiles the expression twice: once in a
-dummy mode in order to find out how much store will be needed, and then for
-real. The execution function operates by backtracking and maximizing (or,
-optionally, minimizing in Perl) the amount of the subject that matches
-individual wild portions of the pattern. This is an "NFA algorithm" in Friedl's
-terminology.
+By contrast, the code originally written by Henry Spencer (which was
+subsequently heavily modified for Perl) compiles the expression twice: once in
+a dummy mode in order to find out how much store will be needed, and then for
+real. (The Perl version probably doesn't do this any more; I'm talking about
+the original library.) The execution function operates by backtracking and
+maximizing (or, optionally, minimizing in Perl) the amount of the subject that
+matches individual wild portions of the pattern. This is an "NFA algorithm" in
+Friedl's terminology.
 
 OK, here's the real stuff
 -------------------------
@@ -43,7 +47,7 @@ then a second pass to do the real compile - which may use a bit less than the
 predicted amount of store. The idea is that this is going to turn out faster
 because the first pass is degenerate and the second pass can just store stuff
 straight into the vector, which it knows is big enough. It does make the
-compiling functions bigger, of course, but they have got quite big anyway to
+compiling functions bigger, of course, but they have become quite big anyway to
 handle all the Perl stuff.
 
 Traditional matching function
@@ -63,7 +67,7 @@ pcre_dfa_exec(). This implements a DFA matching algorithm that searches
 simultaneously for all possible matches that start at one point in the subject 
 string. (Going back to my roots: see Historical Note 1 above.) This function 
 intreprets the same compiled pattern data as pcre_exec(); however, not all the 
-facilities are available, and those that are don't always work in quite the 
+facilities are available, and those that are do not always work in quite the 
 same way. See the user documentation for details.
 
 Format of compiled patterns
@@ -157,10 +161,12 @@ Match by Unicode property
 
 OP_PROP and OP_NOTPROP are used for positive and negative matches of a 
 character by testing its Unicode property (the \p and \P escape sequences).
-Each is followed by a single byte that encodes the desired property value.
+Each is followed by two bytes that encode the desired property as a type and a 
+value.
 
-Repeats of these items use the OP_TYPESTAR etc. set of opcodes, followed by two 
-bytes: OP_PROP or OP_NOTPROP and then the desired property value.
+Repeats of these items use the OP_TYPESTAR etc. set of opcodes, followed by 
+three bytes: OP_PROP or OP_NOTPROP and then the desired property type and 
+value.
 
 
 Matching literal characters
@@ -339,4 +345,4 @@ at compile time, and so does not cause anything to be put into the compiled
 data.
 
 Philip Hazel
-January 2006
+June 2006

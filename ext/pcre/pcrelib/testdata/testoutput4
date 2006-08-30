@@ -898,8 +898,20 @@ No match
     \x{85}
  0: \x{85}
 
+/^ሴ/8
+    ሴ 
+ 0: \x{1234}
+
 /^\ሴ/8
     ሴ 
  0: \x{1234}
+
+"(?s)(.{1,5})"8
+    abcdefg
+ 0: abcde
+ 1: abcde
+    ab
+ 0: ab
+ 1: ab
 
 / End of testinput4 /

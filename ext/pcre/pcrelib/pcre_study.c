@@ -95,6 +95,13 @@ set_start_bits(const uschar *code, uschar *start_bits, BOOL caseless,
 {
 register int c;
 
+#if 0
+/* ========================================================================= */
+/* The following comment and code was inserted in January 1999. In May 2006,
+when it was observed to cause compiler warnings about unused values, I took it
+out again. If anybody is still using OS/2, they will have to put it back
+manually. */
+
 /* This next statement and the later reference to dummy are here in order to
 trick the optimizer of the IBM C compiler for OS/2 into generating correct
 code. Apparently IBM isn't going to fix the problem, and we would rather not
@@ -102,6 +109,8 @@ disable optimization (in this module it actually makes a big difference, and
 the pcre module can use all the optimization it can get). */
 
 volatile int dummy;
+/* ========================================================================= */
+#endif
 
 do
   {
@@ -159,7 +168,11 @@ do
       case OP_BRAMINZERO:
       if (!set_start_bits(++tcode, start_bits, caseless, utf8, cd))
         return FALSE;
+/* =========================================================================
+      See the comment at the head of this function concerning the next line,
+      which was an old fudge for the benefit of OS/2.
       dummy = 1;
+  ========================================================================= */
       do tcode += GET(tcode,1); while (*tcode == OP_ALT);
       tcode += 1+LINK_SIZE;
       break;
@@ -215,15 +228,29 @@ do
       try_next = FALSE;
       break;
 
+      /* The cbit_space table has vertical tab as whitespace; we have to
+      discard it. */
+
       case OP_NOT_WHITESPACE:
       for (c = 0; c < 32; c++)
-        start_bits[c] |= ~cd->cbits[c+cbit_space];
+        {
+        int d = cd->cbits[c+cbit_space];
+        if (c == 1) d &= ~0x08;
+        start_bits[c] |= ~d;
+        }
       try_next = FALSE;
       break;
 
+      /* The cbit_space table has vertical tab as whitespace; we have to
+      discard it. */
+
       case OP_WHITESPACE:
       for (c = 0; c < 32; c++)
-        start_bits[c] |= cd->cbits[c+cbit_space];
+        {
+        int d = cd->cbits[c+cbit_space];
+        if (c == 1) d &= ~0x08;
+        start_bits[c] |= d;
+        }
       try_next = FALSE;
       break;
 
@@ -277,14 +304,28 @@ do
           start_bits[c] |= cd->cbits[c+cbit_digit];
         break;
 
+        /* The cbit_space table has vertical tab as whitespace; we have to
+        discard it. */
+
         case OP_NOT_WHITESPACE:
         for (c = 0; c < 32; c++)
-          start_bits[c] |= ~cd->cbits[c+cbit_space];
+          {
+          int d = cd->cbits[c+cbit_space];
+          if (c == 1) d &= ~0x08;
+          start_bits[c] |= ~d;
+          }
         break;
+
+        /* The cbit_space table has vertical tab as whitespace; we have to
+        discard it. */
 
         case OP_WHITESPACE:
         for (c = 0; c < 32; c++)
-          start_bits[c] |= cd->cbits[c+cbit_space];
+          {
+          int d = cd->cbits[c+cbit_space];
+          if (c == 1) d &= ~0x08;
+          start_bits[c] |= d;
+          }
         break;
 
         case OP_NOT_WORDCHAR:
@@ -408,10 +449,9 @@ uschar start_bits[32];
 pcre_extra *extra;
 pcre_study_data *study;
 const uschar *tables;
-const real_pcre *re = (const real_pcre *)external_re;
-uschar *code = (uschar *)re + re->name_table_offset +
-  (re->name_count * re->name_entry_size);
+uschar *code;
 compile_data compile_block;
+const real_pcre *re = (const real_pcre *)external_re;
 
 *errorptr = NULL;
 
@@ -426,6 +466,9 @@ if ((options & ~PUBLIC_STUDY_OPTIONS) != 0)
   *errorptr = "unknown or incorrect option bit(s) set";
   return NULL;
   }
+
+code = (uschar *)re + re->name_table_offset +
+  (re->name_count * re->name_entry_size);
 
 /* For an anchored pattern, or an unanchored pattern that has a first char, or
 a multiline pattern that matches only at "line starts", no further processing

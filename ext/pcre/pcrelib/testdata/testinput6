@@ -738,4 +738,13 @@
      \x{1c5}XY
      AXY      
 
+/^(\p{Z}[^\p{C}\p{Z}]+)*$/
+    \xa0!
+
+/^[\pL](abc)(?1)/
+    AabcabcYZ    
+
+/([\pL]=(abc))*X/
+    L=abcX
+
 / End of testinput6 /
