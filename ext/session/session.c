@@ -101,7 +101,13 @@ static PHP_INI_MH(OnUpdateSaveHandler)
 	tmp = _php_find_ps_module(new_value TSRMLS_CC);
 
 	if (PG(modules_activated) && !tmp) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot find save handler %s", new_value);
+		int err_type;
+		if (stage == ZEND_INI_STAGE_RUNTIME) {
+			err_type = E_WARNING;
+		} else {
+			err_type = E_ERROR;
+		}
+		php_error_docref(NULL TSRMLS_CC, err_type, "Cannot find save handler %s", new_value);
 		return FAILURE;
 	}
 	PS(mod) = tmp;
@@ -130,7 +136,13 @@ static PHP_INI_MH(OnUpdateSerializer)
 	tmp = _php_find_ps_serializer(new_value TSRMLS_CC);
 
 	if (PG(modules_activated) && !tmp) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot find serialization handler %s", new_value);
+		int err_type;
+		if (stage == ZEND_INI_STAGE_RUNTIME) {
+			err_type = E_WARNING;
+		} else {
+			err_type = E_ERROR;
+		}
+		php_error_docref(NULL TSRMLS_CC, err_type, "Cannot find serialization handler %s", new_value);
 		return FAILURE;
 	}
 	PS(serializer) = tmp;
