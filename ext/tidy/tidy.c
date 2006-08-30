@@ -253,7 +253,6 @@ static PHP_FUNCTION(tidy_diagnose);
 static PHP_FUNCTION(tidy_get_output);
 static PHP_FUNCTION(tidy_get_error_buffer);
 static PHP_FUNCTION(tidy_get_release);
-static PHP_FUNCTION(tidy_reset_config);
 static PHP_FUNCTION(tidy_get_config);
 static PHP_FUNCTION(tidy_get_status);
 static PHP_FUNCTION(tidy_get_html_ver);
