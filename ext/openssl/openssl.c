@@ -3183,7 +3183,9 @@ PHP_FUNCTION(openssl_seal)
 	pkeys = safe_emalloc(nkeys, sizeof(*pkeys), 0);
 	eksl = safe_emalloc(nkeys, sizeof(*eksl), 0);
 	eks = safe_emalloc(nkeys, sizeof(*eks), 0);
+	memset(eks, 0, sizeof(*eks) * nkeys);
 	key_resources = safe_emalloc(nkeys, sizeof(long), 0);
+	memset(key_resources, 0, sizeof(*key_resources) * nkeys);
 
 	/* get the public keys we are using to seal this data */
 	zend_hash_internal_pointer_reset_ex(pubkeysht, &pos);
