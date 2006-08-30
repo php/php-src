@@ -70,6 +70,34 @@ int php_zlib_output_encoding(TSRMLS_D)
 }
 /* }}} */
 
+/* {{{ php_zlib_output_compression_start() */
+void php_zlib_output_compression_start(TSRMLS_D)
+{
+	zval *zoh, *tmp;
+	php_output_handler *h;
+	
+	switch (ZLIBG(output_compression)) {
+		case 0:
+			break;
+		case 1:
+			ZLIBG(output_compression) = PHP_OUTPUT_HANDLER_DEFAULT_SIZE;
+		default:
+			MAKE_STD_ZVAL(tmp);
+			ZVAL_ASCII_STRING(tmp, PHP_ZLIB_OUTPUT_HANDLER_NAME, ZSTR_DUPLICATE);
+			if ((h = php_zlib_output_handler_init(tmp TSRMLS_CC)) && (SUCCESS == php_output_handler_start(h TSRMLS_CC))) {
+				if (ZLIBG(output_handler) && *ZLIBG(output_handler)) {
+					MAKE_STD_ZVAL(zoh);
+					ZVAL_ASCII_STRING(zoh, ZLIBG(output_handler), ZSTR_DUPLICATE);
+					php_output_start_user(zoh, ZLIBG(output_compression), PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC);
+					zval_ptr_dtor(&zoh);
+				}
+			}
+			zval_ptr_dtor(&tmp);
+			break;
+	}
+}
+/* }}} */
+
 /* {{{ php_zlib_output_handler_init() */
 php_output_handler *php_zlib_output_handler_init(zval *handler_name TSRMLS_DC)
 {
@@ -172,7 +200,7 @@ int php_zlib_output_handler(void **handler_context, php_output_context *output_c
 		php_output_handler_hook(PHP_OUTPUT_HANDLER_HOOK_GET_FLAGS, &flags TSRMLS_CC);
 		
 		if (!(flags & PHP_OUTPUT_HANDLER_STARTED)) {
-			if (SG(headers_sent)) {
+			if (SG(headers_sent) || !ZLIBG(output_compression)) {
 				deflateEnd(&ctx->Z);
 				return FAILURE;
 			}
@@ -603,6 +631,7 @@ zend_function_entry php_zlib_functions[] = {
 /* {{{ OnUpdate_zlib_output_compression */
 static PHP_INI_MH(OnUpdate_zlib_output_compression)
 {
+	int status, int_value;
 	char *ini_value;
 
 	if (new_value == NULL) {
@@ -616,26 +645,47 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 		new_value = "1";
 		new_value_length = sizeof("1");
 	}
-
+	
+	int_value = zend_atoi(new_value, new_value_length);
 	ini_value = zend_ini_string("output_handler", sizeof("output_handler"), 0);
-	if (ini_value != NULL && strlen(ini_value) != 0 && zend_atoi(new_value, new_value_length) != 0) {
+	
+	if (ini_value && *ini_value && int_value) {
 		php_error_docref("ref.outcontrol" TSRMLS_CC, E_CORE_ERROR, "Cannot use both zlib.output_compression and output_handler together!!");
 		return FAILURE;
 	}
 
-	if (stage == PHP_INI_STAGE_RUNTIME && SG(headers_sent) && !SG(request_info).no_headers) {
-		php_error_docref("ref.outcontrol" TSRMLS_CC, E_WARNING, "Cannot change zlib.output_compression - headers already sent");
-		return FAILURE;
+	status = php_output_get_status(TSRMLS_C);
+	if (stage == PHP_INI_STAGE_RUNTIME) {
+		if (status & PHP_OUTPUT_SENT) {
+			php_error_docref("ref.outcontrol" TSRMLS_CC, E_WARNING, "Cannot change zlib.output_compression - headers already sent");
+			return FAILURE;
+		} else if ((status & PHP_OUTPUT_WRITTEN) && int_value) {
+			php_error_docref("ref.outcontrol" TSRMLS_CC, E_WARNING, "Cannot enable zlib.output_compression - there has already been output");
+			return FAILURE;
+		}
 	}
-
-	return OnUpdateLong(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	
+	status = OnUpdateLong(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	
+	if (stage == PHP_INI_STAGE_RUNTIME && int_value) {
+		zval tmp;
+		
+		INIT_PZVAL(&tmp);
+		ZVAL_ASCII_STRING(&tmp, PHP_ZLIB_OUTPUT_HANDLER_NAME, ZSTR_DUPLICATE);
+		if (!php_output_handler_started(&tmp TSRMLS_CC)) {
+			php_zlib_output_compression_start(TSRMLS_C);
+		}
+		zval_dtor(&tmp);
+	}
+	
+	return status;
 }
 /* }}} */
 
 /* {{{ OnUpdate_zlib_output_handler */
 static PHP_INI_MH(OnUpdate_zlib_output_handler)
 {
-	if (stage == PHP_INI_STAGE_RUNTIME && SG(headers_sent) && !SG(request_info).no_headers) {
+	if (stage == PHP_INI_STAGE_RUNTIME && (php_output_get_status(TSRMLS_C) & PHP_OUTPUT_SENT)) {
 		php_error_docref("ref.outcontrol" TSRMLS_CC, E_WARNING, "Cannot change zlib.output_handler - headers already sent");
 		return FAILURE;
 	}
@@ -687,30 +737,10 @@ PHP_MSHUTDOWN_FUNCTION(zlib)
 /* {{{ PHP_RINIT_FUNCTION */
 PHP_RINIT_FUNCTION(zlib)
 {
-	zval *zoh, *tmp;
-	php_output_handler *h;
-	
 	ZLIBG(compression_coding) = 0;
 	
-	switch (ZLIBG(output_compression)) {
-		case 0:
-			break;
-		case 1:
-			ZLIBG(output_compression) = PHP_OUTPUT_HANDLER_DEFAULT_SIZE;
-		default:
-			MAKE_STD_ZVAL(tmp);
-			ZVAL_ASCII_STRING(tmp, PHP_ZLIB_OUTPUT_HANDLER_NAME, ZSTR_DUPLICATE);
-			if ((h = php_zlib_output_handler_init(tmp TSRMLS_CC)) && (SUCCESS == php_output_handler_start(h TSRMLS_CC))) {
-				if (ZLIBG(output_handler) && *ZLIBG(output_handler)) {
-					MAKE_STD_ZVAL(zoh);
-					ZVAL_ASCII_STRING(zoh, ZLIBG(output_handler), ZSTR_DUPLICATE);
-					php_output_start_user(zoh, ZLIBG(output_compression), PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC);
-					zval_ptr_dtor(&zoh);
-				}
-			}
-			zval_ptr_dtor(&tmp);
-			break;
-	}
+	php_zlib_output_compression_start(TSRMLS_C);
+	
 	return SUCCESS;
 }
 /* }}} */
