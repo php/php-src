@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    |          Stefan Röhrich <sr@linux.de>                                |
+   |          Michael Wallner <mike@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -78,8 +79,6 @@ PHP_MINFO_FUNCTION(zlib);
 PHP_FUNCTION(gzfile);
 PHP_FUNCTION(gzopen);
 PHP_FUNCTION(readgzfile);
-
-PHP_FUNCTION(ob_gzhandler);
 
 PHP_FUNCTION(gzcompress);
 PHP_FUNCTION(gzuncompress);
