@@ -831,9 +831,11 @@ static inline void php_output_context_dtor(php_output_context *context)
 {
 	if (context->in.free && context->in.data) {
 		efree(context->in.data);
+		context->in.data = NULL;
 	}
 	if (context->out.free && context->out.data) {
 		efree(context->out.data);
+		context->out.data = NULL;
 	}
 }
 /* }}} */
@@ -887,7 +889,7 @@ static inline int php_output_handler_append(php_output_handler *handler, const p
 	Output handler operation dispatcher, applying context op to the php_output_handler handler */
 static inline int php_output_handler_op(php_output_handler *handler, php_output_context *context)
 {
-	int status, op;
+	int status;
 	PHP_OUTPUT_TSRMLS(context);
 	
 #if PHP_OUTPUT_DEBUG
@@ -912,19 +914,18 @@ static inline int php_output_handler_op(php_output_handler *handler, php_output_
 	);
 #endif
 	
-	op = context->op;
-	if (php_output_lock_error(op TSRMLS_CC)) {
+	if (php_output_lock_error(context->op TSRMLS_CC)) {
 		/* fatal error */
 		return PHP_OUTPUT_HANDLER_FAILURE;
 	}
 	
 	/* storable? */
-	if (php_output_handler_append(handler, &context->in TSRMLS_CC) && !op) {
+	if (php_output_handler_append(handler, &context->in TSRMLS_CC) && !context->op) {
 		status = PHP_OUTPUT_HANDLER_NO_DATA;
 	} else {
 		/* need to start? */
 		if (!(handler->flags & PHP_OUTPUT_HANDLER_STARTED)) {
-			op |= PHP_OUTPUT_HANDLER_START;
+			context->op |= PHP_OUTPUT_HANDLER_START;
 		}
 		
 		OG(running) = handler;
@@ -935,7 +936,7 @@ static inline int php_output_handler_op(php_output_handler *handler, php_output_
 			/* can we avoid copying here by setting is_ref? */
 			ZVAL_STRINGL(input, handler->buffer.data, handler->buffer.used, 1);
 			MAKE_STD_ZVAL(flags);
-			ZVAL_LONG(flags, (long) op);
+			ZVAL_LONG(flags, (long) context->op);
 			params[0] = &input;
 			params[1] = &flags;
 			
@@ -985,6 +986,10 @@ static inline int php_output_handler_op(php_output_handler *handler, php_output_
 		case PHP_OUTPUT_HANDLER_FAILURE:
 			/* disable this handler */
 			handler->flags |= PHP_OUTPUT_HANDLER_DISABLED;
+			/* discard any output */
+			if (context->out.data && context->out.free) {
+				efree(context->out.data);
+			}
 			/* returns handlers buffer */
 			context->out.data = handler->buffer.data;
 			context->out.used = handler->buffer.used;
@@ -1074,12 +1079,14 @@ static inline void php_output_op(int op, const char *str, size_t len TSRMLS_DC)
 	Operation callback for the stack apply function */
 static int php_output_stack_apply_op(void *h, void *c)
 {
-	int status = PHP_OUTPUT_HANDLER_FAILURE, was_disabled;
+	int status = PHP_OUTPUT_HANDLER_FAILURE, was_disabled, op;
 	php_output_handler *handler = *(php_output_handler **) h;
 	php_output_context *context = (php_output_context *) c;
 	
 	if (!(was_disabled = (handler->flags & PHP_OUTPUT_HANDLER_DISABLED))) {
+		op = context->op;
 		status = php_output_handler_op(handler, context);
+		context->op = op;
 	}
 	
 	/*
