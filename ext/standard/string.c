@@ -1151,13 +1151,12 @@ PHP_FUNCTION(explode)
 
 /* {{{ php_implode
  */
-PHPAPI void php_implode(zval *delim, zval *arr, zval *retval)
+PHPAPI void php_implode(zval *delim, zval *arr, zval *retval TSRMLS_DC)
 {
 	zend_uchar		return_type;
 	int				numelems, i=0;
 	HashPosition	pos;
 	zval			**tmp;
-	TSRMLS_FETCH();
 
 	Z_TYPE_P(retval) = return_type = Z_TYPE_P(delim); /* ... to start off */
 
@@ -1295,7 +1294,7 @@ PHP_FUNCTION(implode)
 		}
 	}
 
-	php_implode(delim, arr, return_value);
+	php_implode(delim, arr, return_value TSRMLS_DC);
 
 	if (argc == 1) {
 		FREE_ZVAL(delim);
