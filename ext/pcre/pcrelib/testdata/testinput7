@@ -1909,11 +1909,11 @@
 /(abc)\323/
     abc\xd3
 
-/(abc)\500/
+/(abc)\100/
     abc\x40
     abc\100
 
-/(abc)\5000/
+/(abc)\1000/
     abc\x400
     abc\x40\x30
     abc\1000
@@ -4018,5 +4018,101 @@
 /1234/
     123\P
     4\P\R
+
+/^/mg
+    a\nb\nc\n
+    \ 
+    
+/(?<=C\n)^/mg
+    A\nC\nC\n 
+
+/(?s)A?B/
+    AB
+    aB  
+
+/(?s)A*B/
+    AB
+    aB  
+
+/(?m)A?B/
+    AB
+    aB  
+
+/(?m)A*B/
+    AB
+    aB  
+
+/Content-Type\x3A[^\r\n]{6,}/
+    Content-Type:xxxxxyyy 
+
+/Content-Type\x3A[^\r\n]{6,}z/
+    Content-Type:xxxxxyyyz
+
+/Content-Type\x3A[^a]{6,}/
+    Content-Type:xxxyyy 
+
+/Content-Type\x3A[^a]{6,}z/
+    Content-Type:xxxyyyz
+
+/^abc/m
+    xyz\nabc
+    xyz\nabc\<lf>
+    xyz\r\nabc\<lf>
+    xyz\rabc\<cr>
+    xyz\r\nabc\<crlf>
+    ** Failers 
+    xyz\nabc\<cr>
+    xyz\r\nabc\<cr>
+    xyz\nabc\<crlf>
+    xyz\rabc\<crlf>
+    xyz\rabc\<lf>
+    
+/abc$/m
+    xyzabc
+    xyzabc\n 
+    xyzabc\npqr 
+    xyzabc\r\<cr> 
+    xyzabc\rpqr\<cr> 
+    xyzabc\r\n\<crlf> 
+    xyzabc\r\npqr\<crlf> 
+    ** Failers
+    xyzabc\r 
+    xyzabc\rpqr 
+    xyzabc\r\n 
+    xyzabc\r\npqr 
+    
+/^abc/m<cr>
+    xyz\rabcdef
+    xyz\nabcdef\<lf>
+    ** Failers  
+    xyz\nabcdef
+       
+/^abc/m<lf>
+    xyz\nabcdef
+    xyz\rabcdef\<cr>
+    ** Failers  
+    xyz\rabcdef
+       
+/^abc/m<crlf>
+    xyz\r\nabcdef
+    xyz\rabcdef\<cr>
+    ** Failers  
+    xyz\rabcdef
+    
+/.*/
+    abc\ndef
+    abc\rdef
+    abc\r\ndef
+    \<cr>abc\ndef
+    \<cr>abc\rdef
+    \<cr>abc\r\ndef
+    \<crlf>abc\ndef
+    \<crlf>abc\rdef
+    \<crlf>abc\r\ndef
+
+/\w+(.)(.)?def/s
+    abc\ndef
+    abc\rdef
+    abc\r\ndef
 
 / End of testinput7 /

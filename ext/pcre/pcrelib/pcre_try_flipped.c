@@ -62,8 +62,8 @@ Arguments:
 Returns:       the flipped value
 */
 
-static long int
-byteflip(long int value, int n)
+static unsigned long int
+byteflip(unsigned long int value, int n)
 {
 if (n == 2) return ((value & 0x00ff) << 8) | ((value & 0xff00) >> 8);
 return ((value & 0x000000ff) << 24) |

@@ -55,9 +55,9 @@ cannot run ./configure. As it now stands, this file need not be edited in that
 circumstance. */
 
 #define PCRE_MAJOR          6
-#define PCRE_MINOR          6
+#define PCRE_MINOR          7
 #define PCRE_PRERELEASE
-#define PCRE_DATE           06-Feb-2006
+#define PCRE_DATE           04-Jul-2006
 
 /* Win32 uses DLL by default; it needs special stuff for exported functions
 when building PCRE. */
@@ -116,6 +116,10 @@ extern "C" {
 #define PCRE_DFA_SHORTEST       0x00010000
 #define PCRE_DFA_RESTART        0x00020000
 #define PCRE_FIRSTLINE          0x00040000
+#define PCRE_DUPNAMES           0x00080000
+#define PCRE_NEWLINE_CR         0x00100000
+#define PCRE_NEWLINE_LF         0x00200000
+#define PCRE_NEWLINE_CRLF       0x00300000
 
 /* Exec-time and get/set-time error codes */
 
@@ -269,6 +273,8 @@ PCRE_DATA_SCOPE int  pcre_fullinfo(const pcre *, const pcre_extra *, int,
 PCRE_DATA_SCOPE int  pcre_get_named_substring(const pcre *, const char *,
                   int *, int, const char *, const char **);
 PCRE_DATA_SCOPE int  pcre_get_stringnumber(const pcre *, const char *);
+PCRE_DATA_SCOPE int  pcre_get_stringtable_entries(const pcre *, const char *,
+                  char **, char **);
 PCRE_DATA_SCOPE int  pcre_get_substring(const char *, int *, int, int,
                   const char **);
 PCRE_DATA_SCOPE int  pcre_get_substring_list(const char *, int *, int,

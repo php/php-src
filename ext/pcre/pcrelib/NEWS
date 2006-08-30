@@ -1,6 +1,17 @@
 News about PCRE releases
 ------------------------
 
+Release 6.7 04-Jul-06
+---------------------
+
+The main additions to this release are the ability to use the same name for
+multiple sets of parentheses, and support for CRLF line endings in both the
+library and pcregrep (and in pcretest for testing).
+
+Thanks to Ian Taylor, the stack usage for many kinds of pattern has been
+significantly reduced for certain subject strings.
+
+
 Release 6.5 01-Feb-06
 ---------------------
 

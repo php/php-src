@@ -56,7 +56,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 typedef int BOOL;
 
-#define VERSION "4.2 09-Jan-2006"
+#define VERSION "4.3 01-Jun-2006"
 #define MAX_PATTERN_COUNT 100
 
 #if BUFSIZ > 8192
@@ -100,10 +100,14 @@ static const char *jfriedl_prefix = "";
 static const char *jfriedl_postfix = "";
 #endif
 
+static int  endlinebyte = '\n';     /* Last byte of endline sequence */
+static int  endlineextra = 0;       /* Extra bytes for endline sequence */
+
 static char *colour_string = (char *)"1;31";
 static char *colour_option = NULL;
 static char *dee_option = NULL;
 static char *DEE_option = NULL;
+static char *newline = NULL;
 static char *pattern_filename = NULL;
 static char *stdin_name = (char *)"(standard input)";
 static char *locale = NULL;
@@ -185,6 +189,7 @@ static option_item optionlist[] = {
   { OP_STRING,    N_LABEL,  &stdin_name,       "label=name",    "set name for standard input" },
   { OP_STRING,    N_LOCALE, &locale,           "locale=locale", "use the named locale" },
   { OP_NODATA,    'M',      NULL,              "multiline",     "run in multiline mode" },
+  { OP_STRING,    'N',      &newline,          "newline=type",  "specify newline type (CR, LR, CRLF)" },
   { OP_NODATA,    'n',      NULL,              "line-number",   "print line number with output lines" },
   { OP_NODATA,    'o',      NULL,              "only-matching", "show only the part of the line that matched" },
   { OP_NODATA,    'q',      NULL,              "quiet",         "suppress output, just set return code" },
@@ -493,8 +498,9 @@ if (after_context > 0 && lastmatchnumber > 0)
     char *pp = lastmatchrestart;
     if (printname != NULL) fprintf(stdout, "%s-", printname);
     if (number) fprintf(stdout, "%d-", lastmatchnumber++);
-    while (*pp != '\n') pp++;
-    fwrite(lastmatchrestart, 1, pp - lastmatchrestart + 1, stdout);
+    while (*pp != endlinebyte) pp++;
+    fwrite(lastmatchrestart, 1, pp - lastmatchrestart + (1 + endlineextra),
+      stdout);
     lastmatchrestart = pp + 1;
     }
   hyphenpending = TRUE;
@@ -566,7 +572,7 @@ while (ptr < endptr)
   that any match is constrained to be in the first line. */
 
   linelength = 0;
-  while (t < endptr && *t++ != '\n') linelength++;
+  while (t < endptr && *t++ != endlinebyte) linelength++;
   length = multiline? endptr - ptr : linelength;
 
 
@@ -705,7 +711,7 @@ while (ptr < endptr)
 
         while (p < ptr && linecount < after_context)
           {
-          while (*p != '\n') p++;
+          while (*p != endlinebyte) p++;
           p++;
           linecount++;
           }
@@ -719,8 +725,9 @@ while (ptr < endptr)
           char *pp = lastmatchrestart;
           if (printname != NULL) fprintf(stdout, "%s-", printname);
           if (number) fprintf(stdout, "%d-", lastmatchnumber++);
-          while (*pp != '\n') pp++;
-          fwrite(lastmatchrestart, 1, pp - lastmatchrestart + 1, stdout);
+          while (*pp != endlinebyte) pp++;
+          fwrite(lastmatchrestart, 1, pp - lastmatchrestart +
+            (1 + endlineextra), stdout);
           lastmatchrestart = pp + 1;
           }
         if (lastmatchrestart != ptr) hyphenpending = TRUE;
@@ -748,7 +755,7 @@ while (ptr < endptr)
           {
           linecount++;
           p--;
-          while (p > buffer && p[-1] != '\n') p--;
+          while (p > buffer && p[-1] != endlinebyte) p--;
           }
 
         if (lastmatchnumber > 0 && p > lastmatchrestart && !hyphenprinted)
@@ -759,8 +766,8 @@ while (ptr < endptr)
           char *pp = p;
           if (printname != NULL) fprintf(stdout, "%s-", printname);
           if (number) fprintf(stdout, "%d-", linenumber - linecount--);
-          while (*pp != '\n') pp++;
-          fwrite(p, 1, pp - p + 1, stdout);   /* In case binary zero */
+          while (*pp != endlinebyte) pp++;
+          fwrite(p, 1, pp - p + (1 + endlineextra), stdout);
           p = pp + 1;
           }
         }
@@ -777,14 +784,14 @@ while (ptr < endptr)
       /* In multiline mode, we want to print to the end of the line in which
       the end of the matched string is found, so we adjust linelength and the
       line number appropriately. Because the PCRE_FIRSTLINE option is set, the
-      start of the match will always be before the first \n character. */
+      start of the match will always be before the first newline sequence. */
 
       if (multiline)
         {
         char *endmatch = ptr + offsets[1];
         t = ptr;
-        while (t < endmatch) { if (*t++ == '\n') linenumber++; }
-        while (endmatch < endptr && *endmatch != '\n') endmatch++;
+        while (t < endmatch) { if (*t++ == endlinebyte) linenumber++; }
+        while (endmatch < endptr && *endmatch != endlinebyte) endmatch++;
         linelength = endmatch - ptr;
         }
 
@@ -1206,7 +1213,7 @@ return FALSE;
 *************************************************/
 
 /* When the -F option has been used, each string may be a list of strings,
-separated by newlines. They will be matched literally.
+separated by line breaks. They will be matched literally.
 
 Arguments:
   pattern        the pattern string
@@ -1227,10 +1234,10 @@ if ((process_options & PO_FIXED_STRINGS) != 0)
   char buffer[MBUFTHIRD];
   for(;;)
     {
-    char *p = strchr(pattern, '\n');
+    char *p = strchr(pattern, endlinebyte);
     if (p == NULL)
       return compile_single_pattern(pattern, options, filename, count);
-    sprintf(buffer, "%.*s", p - pattern, pattern);
+    sprintf(buffer, "%.*s", p - pattern - endlineextra, pattern);
     pattern = p + 1;
     if (!compile_single_pattern(buffer, options, filename, count))
       return FALSE;
@@ -1259,6 +1266,16 @@ BOOL only_one_at_top;
 char *patterns[MAX_PATTERN_COUNT];
 const char *locale_from = "--locale";
 const char *error;
+
+/* Set the default line ending value from the default in the PCRE library. */
+
+(void)pcre_config(PCRE_CONFIG_NEWLINE, &i);
+switch(i)
+  {
+  default:                 newline = (char *)"lf"; break;
+  case '\r':               newline = (char *)"cr"; break;
+  case ('\r' << 8) | '\n': newline = (char *)"crlf"; break;
+  }
 
 /* Process the options */
 
@@ -1541,6 +1558,28 @@ if (colour_option != NULL && strcmp(colour_option, "never") != 0)
     if (cs == NULL) cs = getenv("PCREGREP_COLOR");
     if (cs != NULL) colour_string = cs;
     }
+  }
+
+/* Interpret the newline type; the default settings are Unix-like. */
+
+if (strcmp(newline, "cr") == 0 || strcmp(newline, "CR") == 0)
+  {
+  pcre_options |= PCRE_NEWLINE_CR;
+  endlinebyte = '\r';
+  }
+else if (strcmp(newline, "lf") == 0 || strcmp(newline, "LF") == 0)
+  {
+  pcre_options |= PCRE_NEWLINE_LF;
+  }
+else if (strcmp(newline, "crlf") == 0 || strcmp(newline, "CRLF") == 0)
+  {
+  pcre_options |= PCRE_NEWLINE_CRLF;
+  endlineextra = 1;
+  }
+else
+  {
+  fprintf(stderr, "pcregrep: Invalid newline specifier \"%s\"\n", newline);
+  return 2;
   }
 
 /* Interpret the text values for -d and -D */

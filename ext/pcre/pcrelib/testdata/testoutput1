@@ -2127,7 +2127,7 @@ No match
  0: abc\xd3
  1: abc
 
-/(abc)\500/
+/(abc)\100/
     abc\x40
  0: abc@
  1: abc
@@ -2135,7 +2135,7 @@ No match
  0: abc@
  1: abc
 
-/(abc)\5000/
+/(abc)\1000/
     abc\x400
  0: abc@0
  1: abc
@@ -6281,5 +6281,77 @@ No match
 No match
     abcddefg
 No match
+
+/(?<![^f]oo)(bar)/
+    foobarX 
+ 0: bar
+ 1: bar
+    ** Failers 
+No match
+    boobarX
+No match
+
+/(?<![^f])X/
+    offX
+ 0: X
+    ** Failers
+No match
+    onyX  
+No match
+
+/(?<=[^f])X/
+    onyX
+ 0: X
+    ** Failers
+No match
+    offX 
+No match
+
+/^/mg
+    a\nb\nc\n
+ 0: 
+ 0: 
+ 0: 
+    \ 
+ 0: 
+    
+/(?<=C\n)^/mg
+    A\nC\nC\n 
+ 0: 
+
+/(?:(?(1)a|b)(X))+/
+    bXaX
+ 0: bXaX
+ 1: X
+
+/(?:(?(1)\1a|b)(X|Y))+/
+    bXXaYYaY
+ 0: bXXaYYaY
+ 1: Y
+    bXYaXXaX  
+ 0: bX
+ 1: X
+
+/()()()()()()()()()(?:(?(10)\10a|b)(X|Y))+/
+    bXXaYYaY
+ 0: bX
+ 1: 
+ 2: 
+ 3: 
+ 4: 
+ 5: 
+ 6: 
+ 7: 
+ 8: 
+ 9: 
+10: X
+
+/[[,abc,]+]/
+    abc]
+ 0: abc]
+    a,b]
+ 0: a,b]
+    [a,b,c]  
+ 0: [a,b,c]
 
 / End of testinput1 /

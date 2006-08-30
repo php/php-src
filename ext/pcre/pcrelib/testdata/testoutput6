@@ -1394,4 +1394,20 @@ No match
      AXY      
 No match
 
+/^(\p{Z}[^\p{C}\p{Z}]+)*$/
+    \xa0!
+ 0: \xa0!
+ 1: \xa0!
+
+/^[\pL](abc)(?1)/
+    AabcabcYZ    
+ 0: Aabcabc
+ 1: abc
+
+/([\pL]=(abc))*X/
+    L=abcX
+ 0: L=abcX
+ 1: L=abc
+ 2: abc
+
 / End of testinput6 /

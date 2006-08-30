@@ -42,7 +42,7 @@ POSSIBILITY OF SUCH DAMAGE.
 pattern matching using an NFA algorithm, trying to mimic Perl as closely as
 possible. There are also some static supporting functions. */
 
-
+#define NLBLOCK md           /* The block containing newline information */
 #include "pcre_internal.h"
 
 
@@ -275,7 +275,7 @@ typedef struct heapframe {
   long int Xims;
   eptrblock *Xeptrb;
   int Xflags;
-  int Xrdepth;
+  unsigned int Xrdepth;
 
   /* Function local variables */
 
@@ -374,16 +374,16 @@ Returns:       MATCH_MATCH if matched            )  these values are >= 0
 static int
 match(REGISTER USPTR eptr, REGISTER const uschar *ecode,
   int offset_top, match_data *md, unsigned long int ims, eptrblock *eptrb,
-  int flags, int rdepth)
+  int flags, unsigned int rdepth)
 {
 /* These variables do not need to be preserved over recursion in this function,
 so they can be ordinary variables in all cases. Mark them with "register"
 because they are used a lot in loops. */
 
-register int  rrc;    /* Returns from recursive calls */
-register int  i;      /* Used for loops not involving calls to RMATCH() */
-register int  c;      /* Character values not kept over RMATCH() calls */
-register BOOL utf8;   /* Local copy of UTF-8 flag for speed */
+register int  rrc;         /* Returns from recursive calls */
+register int  i;           /* Used for loops not involving calls to RMATCH() */
+register unsigned int  c;  /* Character values not kept over RMATCH() calls */
+register BOOL utf8;        /* Local copy of UTF-8 flag for speed */
 
 /* When recursion is not being used, all "local" variables that have to be
 preserved over calls to RMATCH() are part of a "frame" which is obtained from
@@ -527,6 +527,13 @@ prop_fail_result = 0;
 prop_test_variable = NULL;
 #endif
 
+/* This label is used for tail recursion, which is used in a few cases even
+when NO_RECURSE is not defined, in order to reduce the amount of stack that is
+used. Thanks to Ian Taylor for noticing this possibility and sending the
+original patch. */
+
+TAIL_RECURSE:
+
 /* OK, now we can get on with the real code of the function. Recursive calls
 are specified by the macro RMATCH and RRETURN is used to return. When
 NO_RECURSE is *not* defined, these just turn into a recursive call to match()
@@ -542,7 +549,12 @@ if (md->match_call_count++ >= md->match_limit) RRETURN(PCRE_ERROR_MATCHLIMIT);
 if (rdepth >= md->match_limit_recursion) RRETURN(PCRE_ERROR_RECURSIONLIMIT);
 
 original_ims = ims;    /* Save for resetting on ')' */
+
+#ifdef SUPPORT_UTF8
 utf8 = md->utf8;       /* Local copy of the flag */
+#else
+utf8 = FALSE;
+#endif
 
 /* At the start of a bracketed group, add the current subject pointer to the
 stack of such pointers, to be re-instated at the end of the group when we hit
@@ -642,21 +654,38 @@ for (;;)
     {
     case OP_BRA:     /* Non-capturing bracket: optimized */
     DPRINTF(("start bracket 0\n"));
-    do
+
+    /* Loop for all the alternatives */
+
+    for (;;)
       {
+      /* When we get to the final alternative within the brackets, we would
+      return the result of a recursive call to match() whatever happened. We
+      can reduce stack usage by turning this into a tail recursion. */
+
+      if (ecode[GET(ecode, 1)] != OP_ALT)
+       {
+       ecode += 1 + LINK_SIZE;
+       flags = match_isgroup;
+       DPRINTF(("bracket 0 tail recursion\n"));
+       goto TAIL_RECURSE;
+       }
+
+      /* For non-final alternatives, continue the loop for a NOMATCH result;
+      otherwise return. */
+
       RMATCH(rrc, eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims, eptrb,
         match_isgroup);
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       ecode += GET(ecode, 1);
       }
-    while (*ecode == OP_ALT);
-    DPRINTF(("bracket 0 failed\n"));
-    RRETURN(MATCH_NOMATCH);
+    /* Control never reaches here. */
 
     /* Conditional group: compilation checked that there are no more than
     two branches. If the condition is false, skipping the first branch takes us
     past the end if there is only one branch, but that's OK because that is
-    exactly what going to the ket would do. */
+    exactly what going to the ket would do. As there is only one branch to be
+    obeyed, we can use tail recursion to avoid using another stack frame. */
 
     case OP_COND:
     if (ecode[LINK_SIZE+1] == OP_CREF) /* Condition extract or recurse test */
@@ -665,10 +694,9 @@ for (;;)
       condition = (offset == CREF_RECURSE * 2)?
         (md->recursive != NULL) :
         (offset < offset_top && md->offset_vector[offset] >= 0);
-      RMATCH(rrc, eptr, ecode + (condition?
-        (LINK_SIZE + 4) : (LINK_SIZE + 1 + GET(ecode, 1))),
-        offset_top, md, ims, eptrb, match_isgroup);
-      RRETURN(rrc);
+      ecode += condition? (LINK_SIZE + 4) : (LINK_SIZE + 1 + GET(ecode, 1));
+      flags = match_isgroup;
+      goto TAIL_RECURSE;
       }
 
     /* The condition is an assertion. Call match() to evaluate it - setting
@@ -688,9 +716,13 @@ for (;;)
         RRETURN(rrc);         /* Need braces because of following else */
         }
       else ecode += GET(ecode, 1);
-      RMATCH(rrc, eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims, eptrb,
-        match_isgroup);
-      RRETURN(rrc);
+
+      /* We are now at the branch that is to be obeyed. As there is only one,
+      we can use tail recursion to avoid using another stack frame. */
+
+      ecode += 1 + LINK_SIZE;
+      flags = match_isgroup;
+      goto TAIL_RECURSE;
       }
     /* Control never reaches here */
 
@@ -945,71 +977,72 @@ for (;;)
     the end of a normal bracket, leaving the subject pointer. */
 
     case OP_ONCE:
+    prev = ecode;
+    saved_eptr = eptr;
+
+    do
       {
-      prev = ecode;
-      saved_eptr = eptr;
-
-      do
-        {
-        RMATCH(rrc, eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims,
-          eptrb, match_isgroup);
-        if (rrc == MATCH_MATCH) break;
-        if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-        ecode += GET(ecode,1);
-        }
-      while (*ecode == OP_ALT);
-
-      /* If hit the end of the group (which could be repeated), fail */
-
-      if (*ecode != OP_ONCE && *ecode != OP_ALT) RRETURN(MATCH_NOMATCH);
-
-      /* Continue as from after the assertion, updating the offsets high water
-      mark, since extracts may have been taken. */
-
-      do ecode += GET(ecode,1); while (*ecode == OP_ALT);
-
-      offset_top = md->end_offset_top;
-      eptr = md->end_match_ptr;
-
-      /* For a non-repeating ket, just continue at this level. This also
-      happens for a repeating ket if no characters were matched in the group.
-      This is the forcible breaking of infinite loops as implemented in Perl
-      5.005. If there is an options reset, it will get obeyed in the normal
-      course of events. */
-
-      if (*ecode == OP_KET || eptr == saved_eptr)
-        {
-        ecode += 1+LINK_SIZE;
-        break;
-        }
-
-      /* The repeating kets try the rest of the pattern or restart from the
-      preceding bracket, in the appropriate order. We need to reset any options
-      that changed within the bracket before re-running it, so check the next
-      opcode. */
-
-      if (ecode[1+LINK_SIZE] == OP_OPT)
-        {
-        ims = (ims & ~PCRE_IMS) | ecode[4];
-        DPRINTF(("ims set to %02lx at group repeat\n", ims));
-        }
-
-      if (*ecode == OP_KETRMIN)
-        {
-        RMATCH(rrc, eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims, eptrb, 0);
-        if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-        RMATCH(rrc, eptr, prev, offset_top, md, ims, eptrb, match_isgroup);
-        if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-        }
-      else  /* OP_KETRMAX */
-        {
-        RMATCH(rrc, eptr, prev, offset_top, md, ims, eptrb, match_isgroup);
-        if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-        RMATCH(rrc, eptr, ecode + 1+LINK_SIZE, offset_top, md, ims, eptrb, 0);
-        if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-        }
+      RMATCH(rrc, eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims,
+        eptrb, match_isgroup);
+      if (rrc == MATCH_MATCH) break;
+      if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+      ecode += GET(ecode,1);
       }
-    RRETURN(MATCH_NOMATCH);
+    while (*ecode == OP_ALT);
+
+    /* If hit the end of the group (which could be repeated), fail */
+
+    if (*ecode != OP_ONCE && *ecode != OP_ALT) RRETURN(MATCH_NOMATCH);
+
+    /* Continue as from after the assertion, updating the offsets high water
+    mark, since extracts may have been taken. */
+
+    do ecode += GET(ecode,1); while (*ecode == OP_ALT);
+
+    offset_top = md->end_offset_top;
+    eptr = md->end_match_ptr;
+
+    /* For a non-repeating ket, just continue at this level. This also
+    happens for a repeating ket if no characters were matched in the group.
+    This is the forcible breaking of infinite loops as implemented in Perl
+    5.005. If there is an options reset, it will get obeyed in the normal
+    course of events. */
+
+    if (*ecode == OP_KET || eptr == saved_eptr)
+      {
+      ecode += 1+LINK_SIZE;
+      break;
+      }
+
+    /* The repeating kets try the rest of the pattern or restart from the
+    preceding bracket, in the appropriate order. The second "call" of match()
+    uses tail recursion, to avoid using another stack frame. We need to reset
+    any options that changed within the bracket before re-running it, so
+    check the next opcode. */
+
+    if (ecode[1+LINK_SIZE] == OP_OPT)
+      {
+      ims = (ims & ~PCRE_IMS) | ecode[4];
+      DPRINTF(("ims set to %02lx at group repeat\n", ims));
+      }
+
+    if (*ecode == OP_KETRMIN)
+      {
+      RMATCH(rrc, eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims, eptrb, 0);
+      if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+      ecode = prev;
+      flags = match_isgroup;
+      goto TAIL_RECURSE;
+      }
+    else  /* OP_KETRMAX */
+      {
+      RMATCH(rrc, eptr, prev, offset_top, md, ims, eptrb, match_isgroup);
+      if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+      ecode += 1 + LINK_SIZE;
+      flags = 0;
+      goto TAIL_RECURSE;
+      }
+    /* Control never gets here */
 
     /* An alternation is the end of a branch; scan along to find the end of the
     bracketed group and go to there. */
@@ -1053,114 +1086,114 @@ for (;;)
     case OP_KET:
     case OP_KETRMIN:
     case OP_KETRMAX:
+    prev = ecode - GET(ecode, 1);
+    saved_eptr = eptrb->epb_saved_eptr;
+
+    /* Back up the stack of bracket start pointers. */
+
+    eptrb = eptrb->epb_prev;
+
+    if (*prev == OP_ASSERT || *prev == OP_ASSERT_NOT ||
+        *prev == OP_ASSERTBACK || *prev == OP_ASSERTBACK_NOT ||
+        *prev == OP_ONCE)
       {
-      prev = ecode - GET(ecode, 1);
-      saved_eptr = eptrb->epb_saved_eptr;
+      md->end_match_ptr = eptr;      /* For ONCE */
+      md->end_offset_top = offset_top;
+      RRETURN(MATCH_MATCH);
+      }
 
-      /* Back up the stack of bracket start pointers. */
+    /* In all other cases except a conditional group we have to check the
+    group number back at the start and if necessary complete handling an
+    extraction by setting the offsets and bumping the high water mark. */
 
-      eptrb = eptrb->epb_prev;
+    if (*prev != OP_COND)
+      {
+      number = *prev - OP_BRA;
 
-      if (*prev == OP_ASSERT || *prev == OP_ASSERT_NOT ||
-          *prev == OP_ASSERTBACK || *prev == OP_ASSERTBACK_NOT ||
-          *prev == OP_ONCE)
-        {
-        md->end_match_ptr = eptr;      /* For ONCE */
-        md->end_offset_top = offset_top;
-        RRETURN(MATCH_MATCH);
-        }
+      /* For extended extraction brackets (large number), we have to fish out
+      the number from a dummy opcode at the start. */
 
-      /* In all other cases except a conditional group we have to check the
-      group number back at the start and if necessary complete handling an
-      extraction by setting the offsets and bumping the high water mark. */
-
-      if (*prev != OP_COND)
-        {
-        number = *prev - OP_BRA;
-
-        /* For extended extraction brackets (large number), we have to fish out
-        the number from a dummy opcode at the start. */
-
-        if (number > EXTRACT_BASIC_MAX) number = GET2(prev, 2+LINK_SIZE);
-        offset = number << 1;
+      if (number > EXTRACT_BASIC_MAX) number = GET2(prev, 2+LINK_SIZE);
+      offset = number << 1;
 
 #ifdef DEBUG
-        printf("end bracket %d", number);
-        printf("\n");
+      printf("end bracket %d", number);
+      printf("\n");
 #endif
 
-        /* Test for a numbered group. This includes groups called as a result
-        of recursion. Note that whole-pattern recursion is coded as a recurse
-        into group 0, so it won't be picked up here. Instead, we catch it when
-        the OP_END is reached. */
+      /* Test for a numbered group. This includes groups called as a result
+      of recursion. Note that whole-pattern recursion is coded as a recurse
+      into group 0, so it won't be picked up here. Instead, we catch it when
+      the OP_END is reached. */
 
-        if (number > 0)
+      if (number > 0)
+        {
+        md->capture_last = number;
+        if (offset >= md->offset_max) md->offset_overflow = TRUE; else
           {
-          md->capture_last = number;
-          if (offset >= md->offset_max) md->offset_overflow = TRUE; else
-            {
-            md->offset_vector[offset] =
-              md->offset_vector[md->offset_end - number];
-            md->offset_vector[offset+1] = eptr - md->start_subject;
-            if (offset_top <= offset) offset_top = offset + 2;
-            }
-
-          /* Handle a recursively called group. Restore the offsets
-          appropriately and continue from after the call. */
-
-          if (md->recursive != NULL && md->recursive->group_num == number)
-            {
-            recursion_info *rec = md->recursive;
-            DPRINTF(("Recursion (%d) succeeded - continuing\n", number));
-            md->recursive = rec->prevrec;
-            md->start_match = rec->save_start;
-            memcpy(md->offset_vector, rec->offset_save,
-              rec->saved_max * sizeof(int));
-            ecode = rec->after_call;
-            ims = original_ims;
-            break;
-            }
+          md->offset_vector[offset] =
+            md->offset_vector[md->offset_end - number];
+          md->offset_vector[offset+1] = eptr - md->start_subject;
+          if (offset_top <= offset) offset_top = offset + 2;
           }
-        }
 
-      /* Reset the value of the ims flags, in case they got changed during
-      the group. */
+        /* Handle a recursively called group. Restore the offsets
+        appropriately and continue from after the call. */
 
-      ims = original_ims;
-      DPRINTF(("ims reset to %02lx\n", ims));
-
-      /* For a non-repeating ket, just continue at this level. This also
-      happens for a repeating ket if no characters were matched in the group.
-      This is the forcible breaking of infinite loops as implemented in Perl
-      5.005. If there is an options reset, it will get obeyed in the normal
-      course of events. */
-
-      if (*ecode == OP_KET || eptr == saved_eptr)
-        {
-        ecode += 1 + LINK_SIZE;
-        break;
-        }
-
-      /* The repeating kets try the rest of the pattern or restart from the
-      preceding bracket, in the appropriate order. */
-
-      if (*ecode == OP_KETRMIN)
-        {
-        RMATCH(rrc, eptr, ecode + 1+LINK_SIZE, offset_top, md, ims, eptrb, 0);
-        if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-        RMATCH(rrc, eptr, prev, offset_top, md, ims, eptrb, match_isgroup);
-        if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-        }
-      else  /* OP_KETRMAX */
-        {
-        RMATCH(rrc, eptr, prev, offset_top, md, ims, eptrb, match_isgroup);
-        if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-        RMATCH(rrc, eptr, ecode + 1+LINK_SIZE, offset_top, md, ims, eptrb, 0);
-        if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+        if (md->recursive != NULL && md->recursive->group_num == number)
+          {
+          recursion_info *rec = md->recursive;
+          DPRINTF(("Recursion (%d) succeeded - continuing\n", number));
+          md->recursive = rec->prevrec;
+          md->start_match = rec->save_start;
+          memcpy(md->offset_vector, rec->offset_save,
+            rec->saved_max * sizeof(int));
+          ecode = rec->after_call;
+          ims = original_ims;
+          break;
+          }
         }
       }
 
-    RRETURN(MATCH_NOMATCH);
+    /* Reset the value of the ims flags, in case they got changed during
+    the group. */
+
+    ims = original_ims;
+    DPRINTF(("ims reset to %02lx\n", ims));
+
+    /* For a non-repeating ket, just continue at this level. This also
+    happens for a repeating ket if no characters were matched in the group.
+    This is the forcible breaking of infinite loops as implemented in Perl
+    5.005. If there is an options reset, it will get obeyed in the normal
+    course of events. */
+
+    if (*ecode == OP_KET || eptr == saved_eptr)
+      {
+      ecode += 1 + LINK_SIZE;
+      break;
+      }
+
+    /* The repeating kets try the rest of the pattern or restart from the
+    preceding bracket, in the appropriate order. In the second case, we can use
+    tail recursion to avoid using another stack frame. */
+
+    if (*ecode == OP_KETRMIN)
+      {
+      RMATCH(rrc, eptr, ecode + 1+LINK_SIZE, offset_top, md, ims, eptrb, 0);
+      if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+      ecode = prev;
+      flags = match_isgroup;
+      goto TAIL_RECURSE;
+      }
+    else  /* OP_KETRMAX */
+      {
+      RMATCH(rrc, eptr, prev, offset_top, md, ims, eptrb, match_isgroup);
+      if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+      ecode += 1 + LINK_SIZE;
+      flags = 0;
+      goto TAIL_RECURSE;
+      }
+    /* Control never gets here */
 
     /* Start of subject unless notbol, or after internal newline if multiline */
 
@@ -1168,7 +1201,10 @@ for (;;)
     if (md->notbol && eptr == md->start_subject) RRETURN(MATCH_NOMATCH);
     if ((ims & PCRE_MULTILINE) != 0)
       {
-      if (eptr != md->start_subject && eptr[-1] != NEWLINE)
+      if (eptr != md->start_subject &&
+          (eptr == md->end_subject ||
+           eptr < md->start_subject + md->nllen ||
+           !IS_NEWLINE(eptr - md->nllen)))
         RRETURN(MATCH_NOMATCH);
       ecode++;
       break;
@@ -1196,7 +1232,7 @@ for (;;)
     if ((ims & PCRE_MULTILINE) != 0)
       {
       if (eptr < md->end_subject)
-        { if (*eptr != NEWLINE) RRETURN(MATCH_NOMATCH); }
+        { if (!IS_NEWLINE(eptr)) RRETURN(MATCH_NOMATCH); }
       else
         { if (md->noteol) RRETURN(MATCH_NOMATCH); }
       ecode++;
@@ -1207,14 +1243,14 @@ for (;;)
       if (md->noteol) RRETURN(MATCH_NOMATCH);
       if (!md->endonly)
         {
-        if (eptr < md->end_subject - 1 ||
-           (eptr == md->end_subject - 1 && *eptr != NEWLINE))
+        if (eptr != md->end_subject &&
+            (eptr != md->end_subject - md->nllen || !IS_NEWLINE(eptr)))
           RRETURN(MATCH_NOMATCH);
         ecode++;
         break;
         }
       }
-    /* ... else fall through */
+    /* ... else fall through for endonly */
 
     /* End of subject assertion (\z) */
 
@@ -1226,8 +1262,9 @@ for (;;)
     /* End of subject or ending \n assertion (\Z) */
 
     case OP_EODN:
-    if (eptr < md->end_subject - 1 ||
-       (eptr == md->end_subject - 1 && *eptr != NEWLINE)) RRETURN(MATCH_NOMATCH);
+    if (eptr != md->end_subject &&
+        (eptr != md->end_subject - md->nllen || !IS_NEWLINE(eptr)))
+      RRETURN(MATCH_NOMATCH);
     ecode++;
     break;
 
@@ -1280,13 +1317,14 @@ for (;;)
     /* Match a single character type; inline for speed */
 
     case OP_ANY:
-    if ((ims & PCRE_DOTALL) == 0 && eptr < md->end_subject && *eptr == NEWLINE)
-      RRETURN(MATCH_NOMATCH);
+    if ((ims & PCRE_DOTALL) == 0)
+      {
+      if (eptr <= md->end_subject - md->nllen && IS_NEWLINE(eptr))
+        RRETURN(MATCH_NOMATCH);
+      }
     if (eptr++ >= md->end_subject) RRETURN(MATCH_NOMATCH);
-#ifdef SUPPORT_UTF8
     if (utf8)
       while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
-#endif
     ecode++;
     break;
 
@@ -2573,8 +2611,11 @@ for (;;)
         for (i = 1; i <= min; i++)
           {
           if (eptr >= md->end_subject ||
-             (*eptr++ == NEWLINE && (ims & PCRE_DOTALL) == 0))
+               ((ims & PCRE_DOTALL) == 0 &&
+                 eptr <= md->end_subject - md->nllen &&
+                 IS_NEWLINE(eptr)))
             RRETURN(MATCH_NOMATCH);
+          eptr++;
           while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
           }
         break;
@@ -2659,7 +2700,11 @@ for (;;)
         if ((ims & PCRE_DOTALL) == 0)
           {
           for (i = 1; i <= min; i++)
-            if (*eptr++ == NEWLINE) RRETURN(MATCH_NOMATCH);
+            {
+            if (eptr <= md->end_subject - md->nllen && IS_NEWLINE(eptr))
+              RRETURN(MATCH_NOMATCH);
+            eptr++;
+            }
           }
         else eptr += min;
         break;
@@ -2829,13 +2874,15 @@ for (;;)
           {
           RMATCH(rrc, eptr, ecode, offset_top, md, ims, eptrb, 0);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-          if (fi >= max || eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+          if (fi >= max || eptr >= md->end_subject ||
+               (ctype == OP_ANY && (ims & PCRE_DOTALL) == 0 &&
+                eptr <= md->end_subject - md->nllen && IS_NEWLINE(eptr)))
+            RRETURN(MATCH_NOMATCH);
 
           GETCHARINC(c, eptr);
           switch(ctype)
             {
-            case OP_ANY:
-            if ((ims & PCRE_DOTALL) == 0 && c == NEWLINE) RRETURN(MATCH_NOMATCH);
+            case OP_ANY:        /* This is the DOTALL case */
             break;
 
             case OP_ANYBYTE:
@@ -2884,12 +2931,15 @@ for (;;)
           {
           RMATCH(rrc, eptr, ecode, offset_top, md, ims, eptrb, 0);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-          if (fi >= max || eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+          if (fi >= max || eptr >= md->end_subject ||
+               ((ims & PCRE_DOTALL) == 0 &&
+                 eptr <= md->end_subject - md->nllen && IS_NEWLINE(eptr)))
+            RRETURN(MATCH_NOMATCH);
+
           c = *eptr++;
           switch(ctype)
             {
-            case OP_ANY:
-            if ((ims & PCRE_DOTALL) == 0 && c == NEWLINE) RRETURN(MATCH_NOMATCH);
+            case OP_ANY:   /* This is the DOTALL case */
             break;
 
             case OP_ANYBYTE:
@@ -3075,9 +3125,9 @@ for (;;)
           {
           case OP_ANY:
 
-          /* Special code is required for UTF8, but when the maximum is unlimited
-          we don't need it, so we repeat the non-UTF8 code. This is probably
-          worth it, because .* is quite a common idiom. */
+          /* Special code is required for UTF8, but when the maximum is
+          unlimited we don't need it, so we repeat the non-UTF8 code. This is
+          probably worth it, because .* is quite a common idiom. */
 
           if (max < INT_MAX)
             {
@@ -3085,7 +3135,9 @@ for (;;)
               {
               for (i = min; i < max; i++)
                 {
-                if (eptr >= md->end_subject || *eptr == NEWLINE) break;
+                if (eptr >= md->end_subject ||
+                    (eptr <= md->end_subject - md->nllen && IS_NEWLINE(eptr)))
+                  break;
                 eptr++;
                 while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
                 }
@@ -3094,6 +3146,7 @@ for (;;)
               {
               for (i = min; i < max; i++)
                 {
+                if (eptr >= md->end_subject) break;
                 eptr++;
                 while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
                 }
@@ -3108,7 +3161,9 @@ for (;;)
               {
               for (i = min; i < max; i++)
                 {
-                if (eptr >= md->end_subject || *eptr == NEWLINE) break;
+                if (eptr >= md->end_subject ||
+                    (eptr <= md->end_subject - md->nllen && IS_NEWLINE(eptr)))
+                  break;
                 eptr++;
                 }
               break;
@@ -3222,7 +3277,9 @@ for (;;)
             {
             for (i = min; i < max; i++)
               {
-              if (eptr >= md->end_subject || *eptr == NEWLINE) break;
+              if (eptr >= md->end_subject ||
+                  (eptr <= md->end_subject - md->nllen && IS_NEWLINE(eptr)))
+                break;
               eptr++;
               }
             break;
@@ -3419,7 +3476,8 @@ int rc, resetcount, ocount;
 int first_byte = -1;
 int req_byte = -1;
 int req_byte2 = -1;
-unsigned long int ims = 0;
+int newline;
+unsigned long int ims;
 BOOL using_temporary_offsets = FALSE;
 BOOL anchored;
 BOOL startline;
@@ -3427,6 +3485,7 @@ BOOL firstline;
 BOOL first_byte_caseless = FALSE;
 BOOL req_byte_caseless = FALSE;
 match_data match_block;
+match_data *md = &match_block;
 const uschar *tables;
 const uschar *start_bits = NULL;
 USPTR start_match = (USPTR)subject + start_offset;
@@ -3451,9 +3510,9 @@ if (offsetcount < 0) return PCRE_ERROR_BADCOUNT;
 the default values. */
 
 study = NULL;
-match_block.match_limit = MATCH_LIMIT;
-match_block.match_limit_recursion = MATCH_LIMIT_RECURSION;
-match_block.callout_data = NULL;
+md->match_limit = MATCH_LIMIT;
+md->match_limit_recursion = MATCH_LIMIT_RECURSION;
+md->callout_data = NULL;
 
 /* The table pointer is always in native byte order. */
 
@@ -3465,11 +3524,11 @@ if (extra_data != NULL)
   if ((flags & PCRE_EXTRA_STUDY_DATA) != 0)
     study = (const pcre_study_data *)extra_data->study_data;
   if ((flags & PCRE_EXTRA_MATCH_LIMIT) != 0)
-    match_block.match_limit = extra_data->match_limit;
+    md->match_limit = extra_data->match_limit;
   if ((flags & PCRE_EXTRA_MATCH_LIMIT_RECURSION) != 0)
-    match_block.match_limit_recursion = extra_data->match_limit_recursion;
+    md->match_limit_recursion = extra_data->match_limit_recursion;
   if ((flags & PCRE_EXTRA_CALLOUT_DATA) != 0)
-    match_block.callout_data = extra_data->callout_data;
+    md->callout_data = extra_data->callout_data;
   if ((flags & PCRE_EXTRA_TABLES) != 0) tables = extra_data->tables;
   }
 
@@ -3499,39 +3558,64 @@ firstline = (re->options & PCRE_FIRSTLINE) != 0;
 
 /* The code starts after the real_pcre block and the capture name table. */
 
-match_block.start_code = (const uschar *)external_re + re->name_table_offset +
+md->start_code = (const uschar *)external_re + re->name_table_offset +
   re->name_count * re->name_entry_size;
 
-match_block.start_subject = (USPTR)subject;
-match_block.start_offset = start_offset;
-match_block.end_subject = match_block.start_subject + length;
-end_subject = match_block.end_subject;
+md->start_subject = (USPTR)subject;
+md->start_offset = start_offset;
+md->end_subject = md->start_subject + length;
+end_subject = md->end_subject;
 
-match_block.endonly = (re->options & PCRE_DOLLAR_ENDONLY) != 0;
-match_block.utf8 = (re->options & PCRE_UTF8) != 0;
+md->endonly = (re->options & PCRE_DOLLAR_ENDONLY) != 0;
+md->utf8 = (re->options & PCRE_UTF8) != 0;
 
-match_block.notbol = (options & PCRE_NOTBOL) != 0;
-match_block.noteol = (options & PCRE_NOTEOL) != 0;
-match_block.notempty = (options & PCRE_NOTEMPTY) != 0;
-match_block.partial = (options & PCRE_PARTIAL) != 0;
-match_block.hitend = FALSE;
+md->notbol = (options & PCRE_NOTBOL) != 0;
+md->noteol = (options & PCRE_NOTEOL) != 0;
+md->notempty = (options & PCRE_NOTEMPTY) != 0;
+md->partial = (options & PCRE_PARTIAL) != 0;
+md->hitend = FALSE;
 
-match_block.recursive = NULL;                   /* No recursion at top level */
+md->recursive = NULL;                   /* No recursion at top level */
 
-match_block.lcc = tables + lcc_offset;
-match_block.ctypes = tables + ctypes_offset;
+md->lcc = tables + lcc_offset;
+md->ctypes = tables + ctypes_offset;
+
+/* Handle different types of newline. The two bits give four cases. If nothing
+is set at run time, whatever was used at compile time applies. */
+
+switch ((((options & PCRE_NEWLINE_CRLF) == 0)? re->options : options) &
+         PCRE_NEWLINE_CRLF)
+  {
+  default:              newline = NEWLINE; break;   /* Compile-time default */
+  case PCRE_NEWLINE_CR: newline = '\r'; break;
+  case PCRE_NEWLINE_LF: newline = '\n'; break;
+  case PCRE_NEWLINE_CR+
+       PCRE_NEWLINE_LF: newline = ('\r' << 8) | '\n'; break;
+  }
+
+if (newline > 255)
+  {
+  md->nllen = 2;
+  md->nl[0] = (newline >> 8) & 255;
+  md->nl[1] = newline & 255;
+  }
+else
+  {
+  md->nllen = 1;
+  md->nl[0] = newline;
+  }
 
 /* Partial matching is supported only for a restricted set of regexes at the
 moment. */
 
-if (match_block.partial && (re->options & PCRE_NOPARTIAL) != 0)
+if (md->partial && (re->options & PCRE_NOPARTIAL) != 0)
   return PCRE_ERROR_BADPARTIAL;
 
 /* Check a UTF-8 string if required. Unfortunately there's no way of passing
 back the character offset. */
 
 #ifdef SUPPORT_UTF8
-if (match_block.utf8 && (options & PCRE_NO_UTF8_CHECK) == 0)
+if (md->utf8 && (options & PCRE_NO_UTF8_CHECK) == 0)
   {
   if (_pcre_valid_utf8((uschar *)subject, length) >= 0)
     return PCRE_ERROR_BADUTF8;
@@ -3563,17 +3647,17 @@ ocount = offsetcount - (offsetcount % 3);
 if (re->top_backref > 0 && re->top_backref >= ocount/3)
   {
   ocount = re->top_backref * 3 + 3;
-  match_block.offset_vector = (int *)(pcre_malloc)(ocount * sizeof(int));
-  if (match_block.offset_vector == NULL) return PCRE_ERROR_NOMEMORY;
+  md->offset_vector = (int *)(pcre_malloc)(ocount * sizeof(int));
+  if (md->offset_vector == NULL) return PCRE_ERROR_NOMEMORY;
   using_temporary_offsets = TRUE;
   DPRINTF(("Got memory to hold back references\n"));
   }
-else match_block.offset_vector = offsets;
+else md->offset_vector = offsets;
 
-match_block.offset_end = ocount;
-match_block.offset_max = (2*ocount)/3;
-match_block.offset_overflow = FALSE;
-match_block.capture_last = -1;
+md->offset_end = ocount;
+md->offset_max = (2*ocount)/3;
+md->offset_overflow = FALSE;
+md->capture_last = -1;
 
 /* Compute the minimum number of offsets that we need to reset each time. Doing
 this makes a huge difference to execution time when there aren't many brackets
@@ -3586,9 +3670,9 @@ if (resetcount > offsetcount) resetcount = ocount;
 never be used unless previously set, but they get saved and restored, and so we
 initialize them to avoid reading uninitialized locations. */
 
-if (match_block.offset_vector != NULL)
+if (md->offset_vector != NULL)
   {
-  register int *iptr = match_block.offset_vector + ocount;
+  register int *iptr = md->offset_vector + ocount;
   register int *iend = iptr - resetcount/2 + 1;
   while (--iptr >= iend) *iptr = -1;
   }
@@ -3605,7 +3689,7 @@ if (!anchored)
     {
     first_byte = re->first_byte & 255;
     if ((first_byte_caseless = ((re->first_byte & REQ_CASELESS) != 0)) == TRUE)
-      first_byte = match_block.lcc[first_byte];
+      first_byte = md->lcc[first_byte];
     }
   else
     if (!startline && study != NULL &&
@@ -3632,9 +3716,9 @@ do
 
   /* Reset the maximum number of extractions we might see. */
 
-  if (match_block.offset_vector != NULL)
+  if (md->offset_vector != NULL)
     {
-    register int *iptr = match_block.offset_vector;
+    register int *iptr = md->offset_vector;
     register int *iend = iptr + resetcount;
     while (iptr < iend) *iptr++ = -1;
     }
@@ -3648,7 +3732,7 @@ do
   if (firstline)
     {
     USPTR t = start_match;
-    while (t < save_end_subject && *t != '\n') t++;
+    while (t <= save_end_subject - md->nllen && !IS_NEWLINE(t)) t++;
     end_subject = t;
     }
 
@@ -3658,20 +3742,22 @@ do
     {
     if (first_byte_caseless)
       while (start_match < end_subject &&
-             match_block.lcc[*start_match] != first_byte)
+             md->lcc[*start_match] != first_byte)
         start_match++;
     else
       while (start_match < end_subject && *start_match != first_byte)
         start_match++;
     }
 
-  /* Or to just after \n for a multiline match if possible */
+  /* Or to just after a linebreak for a multiline match if possible */
 
   else if (startline)
     {
-    if (start_match > match_block.start_subject + start_offset)
+    if (start_match >= md->start_subject + md->nllen +
+          start_offset)
       {
-      while (start_match < end_subject && start_match[-1] != NEWLINE)
+      while (start_match <= end_subject &&
+             !IS_NEWLINE(start_match - md->nllen))
         start_match++;
       }
     }
@@ -3693,7 +3779,7 @@ do
 
 #ifdef DEBUG  /* Sigh. Some compilers never learn. */
   printf(">>>> Match against: ");
-  pchars(start_match, end_subject - start_match, TRUE, &match_block);
+  pchars(start_match, end_subject - start_match, TRUE, md);
   printf("\n");
 #endif
 
@@ -3715,7 +3801,7 @@ do
 
   if (req_byte >= 0 &&
       end_subject - start_match < REQ_BYTE_MAX &&
-      !match_block.partial)
+      !md->partial)
     {
     register USPTR p = start_match + ((first_byte >= 0)? 1 : 0);
 
@@ -3759,11 +3845,10 @@ do
   those back references that we can. In this case there need not be overflow
   if certain parts of the pattern were not used. */
 
-  match_block.start_match = start_match;
-  match_block.match_call_count = 0;
+  md->start_match = start_match;
+  md->match_call_count = 0;
 
-  rc = match(start_match, match_block.start_code, 2, &match_block, ims, NULL,
-    match_isgroup, 0);
+  rc = match(start_match, md->start_code, 2, md, ims, NULL, match_isgroup, 0);
 
   /* When the result is no match, if the subject's first character was a
   newline and the PCRE_FIRSTLINE option is set, break (which will return
@@ -3774,10 +3859,13 @@ do
 
   if (rc == MATCH_NOMATCH)
     {
-    if (firstline && *start_match == NEWLINE) break;
+    if (firstline &&
+        start_match <= md->end_subject - md->nllen &&
+        IS_NEWLINE(start_match))
+      break;
     start_match++;
 #ifdef SUPPORT_UTF8
-    if (match_block.utf8)
+    if (md->utf8)
       while(start_match < end_subject && (*start_match & 0xc0) == 0x80)
         start_match++;
 #endif
@@ -3797,23 +3885,23 @@ do
     {
     if (offsetcount >= 4)
       {
-      memcpy(offsets + 2, match_block.offset_vector + 2,
+      memcpy(offsets + 2, md->offset_vector + 2,
         (offsetcount - 2) * sizeof(int));
       DPRINTF(("Copied offsets from temporary memory\n"));
       }
-    if (match_block.end_offset_top > offsetcount)
-      match_block.offset_overflow = TRUE;
+    if (md->end_offset_top > offsetcount)
+      md->offset_overflow = TRUE;
 
     DPRINTF(("Freeing temporary memory\n"));
-    (pcre_free)(match_block.offset_vector);
+    (pcre_free)(md->offset_vector);
     }
 
-  rc = match_block.offset_overflow? 0 : match_block.end_offset_top/2;
+  rc = md->offset_overflow? 0 : md->end_offset_top/2;
 
   if (offsetcount < 2) rc = 0; else
     {
-    offsets[0] = start_match - match_block.start_subject;
-    offsets[1] = match_block.end_match_ptr - match_block.start_subject;
+    offsets[0] = start_match - md->start_subject;
+    offsets[1] = md->end_match_ptr - md->start_subject;
     }
 
   DPRINTF((">>>> returning %d\n", rc));
@@ -3827,10 +3915,10 @@ while (!anchored && start_match <= end_subject);
 if (using_temporary_offsets)
   {
   DPRINTF(("Freeing temporary memory\n"));
-  (pcre_free)(match_block.offset_vector);
+  (pcre_free)(md->offset_vector);
   }
 
-if (match_block.partial && match_block.hitend)
+if (md->partial && md->hitend)
   {
   DPRINTF((">>>> returning PCRE_ERROR_PARTIAL\n"));
   return PCRE_ERROR_PARTIAL;
