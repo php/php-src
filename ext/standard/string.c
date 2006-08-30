@@ -1294,7 +1294,7 @@ PHP_FUNCTION(implode)
 		}
 	}
 
-	php_implode(delim, arr, return_value TSRMLS_DC);
+	php_implode(delim, arr, return_value TSRMLS_CC);
 
 	if (argc == 1) {
 		FREE_ZVAL(delim);
