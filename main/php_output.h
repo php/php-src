@@ -51,6 +51,12 @@
 #define PHP_OUTPUT_HANDLER_SUCCESS		1
 #define PHP_OUTPUT_HANDLER_NO_DATA		2
 
+/* php_output_stack_pop() flags */
+#define PHP_OUTPUT_POP_TRY			0x000
+#define PHP_OUTPUT_POP_FORCE		0x001
+#define PHP_OUTPUT_POP_DISCARD		0x010
+#define PHP_OUTPUT_POP_SILENT		0x100
+
 /* real global flags */
 #define PHP_OUTPUT_IMPLICITFLUSH		0x01
 #define PHP_OUTPUT_DISABLED				0x02
@@ -96,8 +102,12 @@ typedef struct _php_output_context {
 typedef void (*php_output_handler_func_t)(char *output, uint output_len, char **handled_output, uint *handled_output_len, int mode TSRMLS_DC);
 /* new-style, opaque context callback */
 typedef int (*php_output_handler_context_func_t)(void **handler_context, php_output_context *output_context);
+/* output handler context dtor */
+typedef void (*php_output_handler_context_dtor_t)(void *opaq TSRMLS_DC);
 /* conflict check callback */
 typedef int (*php_output_handler_conflict_check_t)(zval *handler_name TSRMLS_DC);
+/* ctor for aliases */
+typedef struct _php_output_handler *(*php_output_handler_alias_ctor_t)(zval *handler_name TSRMLS_DC);
 
 typedef struct _php_output_handler {
 	zval *name;
@@ -218,8 +228,41 @@ PHPAPI int php_output_handler_conflict(zval *handler_new, zval *handler_set TSRM
 PHPAPI int php_output_handler_conflict_register(zval *handler_name, php_output_handler_conflict_check_t check_func TSRMLS_DC);
 PHPAPI int php_output_handler_reverse_conflict_register(zval *handler_name, php_output_handler_conflict_check_t check_func TSRMLS_DC);
 
-PHPAPI php_output_handler_context_func_t *php_output_handler_alias(zval *handler_name TSRMLS_DC);
-PHPAPI int php_output_handler_alias_register(zval *handler_name, php_output_handler_context_func_t func TSRMLS_DC);
+#define PHP_OUTPUT_CONFLICT_REGISTER(name, func) \
+{ \
+	zval tmp_z; \
+	char *tmp_s = (name); \
+	INIT_PZVAL(&tmp_z); \
+	ZVAL_ASCII_STRING(&tmp_z, tmp_s, ZSTR_DUPLICATE); \
+	php_output_handler_conflict_register(&tmp_z, func TSRMLS_CC); \
+	zval_dtor(&tmp_z); \
+}
+
+#define PHP_OUTPUT_CONFLICT(check_name, action) \
+{ \
+	char *tmp_s = (check_name); \
+	zval tmp_z; \
+	INIT_PZVAL(&tmp_z); \
+	ZVAL_ASCII_STRING(&tmp_z, tmp_s, ZSTR_DUPLICATE); \
+	if (php_output_handler_conflict(handler_name, &tmp_z TSRMLS_CC)) { \
+		zval_dtor(&tmp_z); \
+		action; \
+	} \
+	zval_dtor(&tmp_z); \
+}
+
+PHPAPI php_output_handler_alias_ctor_t *php_output_handler_alias(zval *handler_name TSRMLS_DC);
+PHPAPI int php_output_handler_alias_register(zval *handler_name, php_output_handler_alias_ctor_t func TSRMLS_DC);
+
+#define PHP_OUTPUT_ALIAS_REGISTER(name, func) \
+{ \
+	zval tmp_z; \
+	char *tmp_s = (name); \
+	INIT_PZVAL(&tmp_z); \
+	ZVAL_ASCII_STRING(&tmp_z, tmp_s, ZSTR_DUPLICATE); \
+	php_output_handler_alias_register(&tmp_z, func TSRMLS_CC); \
+	zval_dtor(&tmp_z); \
+}
 
 END_EXTERN_C()
 
