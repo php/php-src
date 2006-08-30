@@ -5,6 +5,7 @@ PHP                                                                        NEWS
   SoapServer::setClass() method). (Dmitry)
 - Added support for hexadecimal entity in imagettftext() for the bundled GD.
   (Pierre)
+- Fixed bug #38653 (memory leak in ReflectionClass::getConstant()). (Tony)
 - Fixed bug #38637 (curl_copy_handle() fails to fully copy the cURL handle).
   (Tony, Ilia)
 - Fixed bug #38624 (Strange warning when incrementing an object property and 
