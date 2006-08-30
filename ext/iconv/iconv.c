@@ -2281,7 +2281,7 @@ PHP_FUNCTION(ob_iconv_handler)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl", &zv_string, &status) == FAILURE)
 		return;
 
-	convert_to_string_ex(&zv_string);
+	convert_to_string(zv_string);
 
 	if (SG(sapi_headers).mimetype && 
 		strncasecmp(SG(sapi_headers).mimetype, "text/", 5) == 0) {
