@@ -104,7 +104,7 @@ static PHP_INI_MH(OnUpdateSaveHandler)
 		} else {
 			err_type = E_ERROR;
 		}
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot find save handler %s", new_value);
+		php_error_docref(NULL TSRMLS_CC, err_type, "Cannot find save handler %s", new_value);
 		return FAILURE;
 	}
 	PS(mod) = tmp;
