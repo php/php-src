@@ -89,7 +89,7 @@ php_output_handler *php_zlib_output_handler_init(zval *handler_name TSRMLS_DC)
 int php_zlib_output_handler(void **handler_context, php_output_context *output_context)
 {
 	php_zlib_context *ctx = *(php_zlib_context **) handler_context;
-	int flags = Z_NO_FLUSH, level;
+	int flags = Z_SYNC_FLUSH, status;
 	PHP_OUTPUT_TSRMLS(output_context);
 	
 	if (!php_zlib_output_encoding(TSRMLS_C)) {
@@ -147,10 +147,10 @@ int php_zlib_output_handler(void **handler_context, php_output_context *output_c
 		if (output_context->op & PHP_OUTPUT_HANDLER_FINAL) {
 			flags = Z_FINISH;
 		} else if (output_context->op & PHP_OUTPUT_HANDLER_FLUSH) {
-			flags = Z_SYNC_FLUSH;
+			flags = Z_FULL_FLUSH;
 		}
 		
-		switch (deflate(&ctx->Z, flags)) {
+		switch ((status = deflate(&ctx->Z, flags))) {
 			case Z_OK:
 				if (flags == Z_FINISH) {
 					deflateEnd(&ctx->Z);
