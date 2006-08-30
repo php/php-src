@@ -3004,13 +3004,13 @@ No match
     abc\xd3
  0: abc\xd3
 
-/(abc)\500/
+/(abc)\100/
     abc\x40
  0: abc@
     abc\100
  0: abc@
 
-/(abc)\5000/
+/(abc)\1000/
     abc\x400
  0: abc@0
     abc\x40\x30
@@ -6522,5 +6522,211 @@ No match
 Partial match: 123
     4\P\R
  0: 4
+
+/^/mg
+    a\nb\nc\n
+ 0: 
+ 0: 
+ 0: 
+    \ 
+ 0: 
+    
+/(?<=C\n)^/mg
+    A\nC\nC\n 
+ 0: 
+
+/(?s)A?B/
+    AB
+ 0: AB
+    aB  
+ 0: B
+
+/(?s)A*B/
+    AB
+ 0: AB
+    aB  
+ 0: B
+
+/(?m)A?B/
+    AB
+ 0: AB
+    aB  
+ 0: B
+
+/(?m)A*B/
+    AB
+ 0: AB
+    aB  
+ 0: B
+
+/Content-Type\x3A[^\r\n]{6,}/
+    Content-Type:xxxxxyyy 
+ 0: Content-Type:xxxxxyyy
+ 1: Content-Type:xxxxxyy
+ 2: Content-Type:xxxxxy
+
+/Content-Type\x3A[^\r\n]{6,}z/
+    Content-Type:xxxxxyyyz
+ 0: Content-Type:xxxxxyyyz
+
+/Content-Type\x3A[^a]{6,}/
+    Content-Type:xxxyyy 
+ 0: Content-Type:xxxyyy
+
+/Content-Type\x3A[^a]{6,}z/
+    Content-Type:xxxyyyz
+ 0: Content-Type:xxxyyyz
+
+/^abc/m
+    xyz\nabc
+ 0: abc
+    xyz\nabc\<lf>
+ 0: abc
+    xyz\r\nabc\<lf>
+ 0: abc
+    xyz\rabc\<cr>
+ 0: abc
+    xyz\r\nabc\<crlf>
+ 0: abc
+    ** Failers 
+No match
+    xyz\nabc\<cr>
+No match
+    xyz\r\nabc\<cr>
+No match
+    xyz\nabc\<crlf>
+No match
+    xyz\rabc\<crlf>
+No match
+    xyz\rabc\<lf>
+No match
+    
+/abc$/m
+    xyzabc
+ 0: abc
+    xyzabc\n 
+ 0: abc
+    xyzabc\npqr 
+ 0: abc
+    xyzabc\r\<cr> 
+ 0: abc
+    xyzabc\rpqr\<cr> 
+ 0: abc
+    xyzabc\r\n\<crlf> 
+ 0: abc
+    xyzabc\r\npqr\<crlf> 
+ 0: abc
+    ** Failers
+No match
+    xyzabc\r 
+No match
+    xyzabc\rpqr 
+No match
+    xyzabc\r\n 
+No match
+    xyzabc\r\npqr 
+No match
+    
+/^abc/m<cr>
+    xyz\rabcdef
+ 0: abc
+    xyz\nabcdef\<lf>
+ 0: abc
+    ** Failers  
+No match
+    xyz\nabcdef
+No match
+       
+/^abc/m<lf>
+    xyz\nabcdef
+ 0: abc
+    xyz\rabcdef\<cr>
+ 0: abc
+    ** Failers  
+No match
+    xyz\rabcdef
+No match
+       
+/^abc/m<crlf>
+    xyz\r\nabcdef
+ 0: abc
+    xyz\rabcdef\<cr>
+ 0: abc
+    ** Failers  
+No match
+    xyz\rabcdef
+No match
+    
+/.*/
+    abc\ndef
+ 0: abc
+ 1: ab
+ 2: a
+ 3: 
+    abc\rdef
+ 0: abc\x0ddef
+ 1: abc\x0dde
+ 2: abc\x0dd
+ 3: abc\x0d
+ 4: abc
+ 5: ab
+ 6: a
+ 7: 
+    abc\r\ndef
+ 0: abc\x0d
+ 1: abc
+ 2: ab
+ 3: a
+ 4: 
+    \<cr>abc\ndef
+ 0: abc\x0adef
+ 1: abc\x0ade
+ 2: abc\x0ad
+ 3: abc\x0a
+ 4: abc
+ 5: ab
+ 6: a
+ 7: 
+    \<cr>abc\rdef
+ 0: abc
+ 1: ab
+ 2: a
+ 3: 
+    \<cr>abc\r\ndef
+ 0: abc
+ 1: ab
+ 2: a
+ 3: 
+    \<crlf>abc\ndef
+ 0: abc\x0adef
+ 1: abc\x0ade
+ 2: abc\x0ad
+ 3: abc\x0a
+ 4: abc
+ 5: ab
+ 6: a
+ 7: 
+    \<crlf>abc\rdef
+ 0: abc\x0ddef
+ 1: abc\x0dde
+ 2: abc\x0dd
+ 3: abc\x0d
+ 4: abc
+ 5: ab
+ 6: a
+ 7: 
+    \<crlf>abc\r\ndef
+ 0: abc
+ 1: ab
+ 2: a
+ 3: 
+
+/\w+(.)(.)?def/s
+    abc\ndef
+ 0: abc\x0adef
+    abc\rdef
+ 0: abc\x0ddef
+    abc\r\ndef
+ 0: abc\x0d\x0adef
 
 / End of testinput7 /

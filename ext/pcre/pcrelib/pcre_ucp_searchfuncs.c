@@ -79,7 +79,7 @@ Returns:      the character type category
 */
 
 int
-_pcre_ucp_findprop(const int c, int *type_ptr, int *script_ptr)
+_pcre_ucp_findprop(const unsigned int c, int *type_ptr, int *script_ptr)
 {
 int bot = 0;
 int top = sizeof(ucp_table)/sizeof(cnode);

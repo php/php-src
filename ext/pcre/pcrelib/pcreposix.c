@@ -77,7 +77,7 @@ static const int eint[] = {
   REG_ASSERT,  /* internal error: code overflow */
   REG_BADPAT,  /* unrecognized character after (?< */
   REG_BADPAT,  /* lookbehind assertion is not fixed length */
-  REG_BADPAT,  /* malformed number after (?( */
+  REG_BADPAT,  /* malformed number or name after (?( */
   REG_BADPAT,  /* conditional group containe more than two branches */
   REG_BADPAT,  /* assertion expected after (?( */
   REG_BADPAT,  /* (?R or (?digits must be followed by ) */
@@ -94,11 +94,15 @@ static const int eint[] = {
   REG_BADPAT,  /* recursive call could loop indefinitely */
   REG_BADPAT,  /* unrecognized character after (?P */
   REG_BADPAT,  /* syntax error after (?P */
-  REG_BADPAT,  /* two named groups have the same name */
+  REG_BADPAT,  /* two named subpatterns have the same name */
   REG_BADPAT,  /* invalid UTF-8 string */
   REG_BADPAT,  /* support for \P, \p, and \X has not been compiled */
   REG_BADPAT,  /* malformed \P or \p sequence */
-  REG_BADPAT   /* unknown property name after \P or \p */
+  REG_BADPAT,  /* unknown property name after \P or \p */
+  REG_BADPAT,  /* subpattern name is too long (maximum 32 characters) */
+  REG_BADPAT,  /* too many named subpatterns (maximum 10,000) */
+  REG_BADPAT,  /* repeated subpattern is too long */
+  REG_BADPAT   /* octal value is greater than \377 (not in UTF-8 mode) */
 };
 
 /* Table of texts corresponding to POSIX error codes */
