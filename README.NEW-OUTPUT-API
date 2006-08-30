@@ -121,6 +121,9 @@ Output handler hooks
 			pointer to the opaque field of the output handler context
 		PHP_OUTPUT_HANDLER_HOOK_GET_FLAGS
 			pass a int* pointer as second arg to receive the flags set for the output handler
+		PHP_OUTPUT_HANDLER_HOOK_GET_LEVEL
+			pass a int* pointer as second arg to receive the level of this output handler
+			(starts with 0)
 		PHP_OUTPUT_HANDLER_HOOK_IMMUTABLE
 			the second arg is ignored; marks the output handler to be neither cleanable
 			nor removable
