@@ -1,3 +1,8 @@
+2006-08-29  Antony Dovgal  <antony@zend.com>
+
+    * zend_execute_API.c:
+      fix compile warning
+
 2006-08-28  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_API.c
