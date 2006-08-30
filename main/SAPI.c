@@ -719,37 +719,6 @@ SAPI_API int sapi_send_headers(TSRMLS_D)
 		return SUCCESS;
 	}
 
-#if HAVE_ZLIB
-	/* TODO: move to zlib.c */
-	/* Add output compression headers at this late stage in order to make
-	   it possible to switch it off inside the script. */
-
-	if (zend_ini_long("zlib.output_compression", sizeof("zlib.output_compression"), 0)) {
-		zval nm_zlib_get_coding_type;
-		zval *uf_result = NULL;
-
-		ZVAL_STRINGL(&nm_zlib_get_coding_type, "zlib_get_coding_type", sizeof("zlib_get_coding_type") - 1, 0);
-
-		if (call_user_function_ex(CG(function_table), NULL, &nm_zlib_get_coding_type, &uf_result, 0, NULL, 1, NULL TSRMLS_CC) != FAILURE && uf_result != NULL && Z_TYPE_P(uf_result) == IS_STRING) {
-			char buf[128];
-			int len;
-
-			assert(Z_STRVAL_P(uf_result) != NULL);
-
-			len = snprintf(buf, sizeof(buf), "Content-Encoding: %s", Z_STRVAL_P(uf_result));
-			if (len <= 0 || sapi_add_header(buf, len, 1) == FAILURE) {
-				return FAILURE;
-			}
-			if (sapi_add_header_ex("Vary: Accept-Encoding", sizeof("Vary: Accept-Encoding") - 1, 1, 0 TSRMLS_CC) == FAILURE) {
-				return FAILURE;			
-			}
-		}
-		if (uf_result != NULL) {
-			zval_ptr_dtor(&uf_result);
-		}
-	}
-#endif
-
 	/* Success-oriented.  We set headers_sent to 1 here to avoid an infinite loop
 	 * in case of an error situation.
 	 */
