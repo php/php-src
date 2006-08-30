@@ -807,7 +807,7 @@ static X509 * php_openssl_x509_from_zval(zval ** val, int makeresource, long * r
 	}
 
 	/* force it to be a string and check if it refers to a file */
-	convert_to_string_ex(val);
+	convert_to_string(*val);
 
 	if (Z_STRLEN_PP(val) > 7 && memcmp(Z_STRVAL_PP(val), "file://", sizeof("file://") - 1) == 0) {
 		/* read cert from the named file */
