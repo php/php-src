@@ -227,11 +227,17 @@ PHP_FUNCTION(iptcembed)
 
 	if (php_iptc_get1(fp, spool, poi?&poi:0 TSRMLS_CC) != 0xFF) {
 		fclose(fp);
+		if (poi) {
+			efree(poi);
+		}
 		RETURN_FALSE;
 	}
 
 	if (php_iptc_get1(fp, spool, poi?&poi:0 TSRMLS_CC) != 0xD8) {
 		fclose(fp);
+		if (poi) {
+			efree(poi);
+		}
 		RETURN_FALSE;
 	}
 
