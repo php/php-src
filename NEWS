@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2006, Version 4.4.5
+- Updated PCRE to version 6.7. (Ilia)
 - Fixed bug #38534 (segfault when calling setlocale() in userspace session
   handler). (Tony)
 - Fixed bug #38450 (constructor is not called for classes used in userspace
