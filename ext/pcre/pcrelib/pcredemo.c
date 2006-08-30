@@ -117,7 +117,7 @@ if (rc < 0)
     */
     default: printf("Matching error %d\n", rc); break;
     }
-  free(re);     /* Release memory used for the compiled pattern */
+  pcre_free(re);     /* Release memory used for the compiled pattern */
   return 1;
   }
 
@@ -223,8 +223,8 @@ if (namecount <= 0) printf("No named substrings\n"); else
 
 if (!find_all)
   {
-  free(re);   /* Release the memory used for the compiled pattern */
-  return 0;   /* Finish unless -g was given */
+  pcre_free(re);   /* Release the memory used for the compiled pattern */
+  return 0;        /* Finish unless -g was given */
   }
 
 /* Loop for second and subsequent matches */
@@ -276,7 +276,7 @@ for (;;)
   if (rc < 0)
     {
     printf("Matching error %d\n", rc);
-    free(re);    /* Release memory used for the compiled pattern */
+    pcre_free(re);    /* Release memory used for the compiled pattern */
     return 1;
     }
 
@@ -317,7 +317,7 @@ for (;;)
   }      /* End of loop to find second and subsequent matches */
 
 printf("\n");
-free(re);       /* Release memory used for the compiled pattern */
+pcre_free(re);       /* Release memory used for the compiled pattern */
 return 0;
 }
 

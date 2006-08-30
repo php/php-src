@@ -1474,11 +1474,11 @@
 /(abc)\323/
     abc\xd3
 
-/(abc)\500/
+/(abc)\100/
     abc\x40
     abc\100
 
-/(abc)\5000/
+/(abc)\1000/
     abc\x400
     abc\x40\x30
     abc\1000
@@ -3846,5 +3846,42 @@
     ab cddefg
     ** Failers 
     abcddefg
+
+/(?<![^f]oo)(bar)/
+    foobarX 
+    ** Failers 
+    boobarX
+
+/(?<![^f])X/
+    offX
+    ** Failers
+    onyX  
+
+/(?<=[^f])X/
+    onyX
+    ** Failers
+    offX 
+
+/^/mg
+    a\nb\nc\n
+    \ 
+    
+/(?<=C\n)^/mg
+    A\nC\nC\n 
+
+/(?:(?(1)a|b)(X))+/
+    bXaX
+
+/(?:(?(1)\1a|b)(X|Y))+/
+    bXXaYYaY
+    bXYaXXaX  
+
+/()()()()()()()()()(?:(?(10)\10a|b)(X|Y))+/
+    bXXaYYaY
+
+/[[,abc,]+]/
+    abc]
+    a,b]
+    [a,b,c]  
 
 / End of testinput1 /

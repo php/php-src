@@ -733,7 +733,7 @@
     Ab
     AB        
 
-/[\200-\410]/
+/[\200-\110]/
 
 /^(?(0)f|b)oo/
 
@@ -1489,5 +1489,158 @@
 /\x{100}/ 
 
 /\x{0000ff}/
+
+/^((?P<A>a1)|(?P<A>a2)b)/
+
+/^((?P<A>a1)|(?P<A>a2)b)/J
+    a1b\CA
+    a2b\CA 
+    ** Failers
+    a1b\CZ\CA 
+    
+/^(?P<A>a)(?P<A>b)/J
+    ab\CA
+    
+/^(?P<A>a)(?P<A>b)|cd/J
+    ab\CA
+    cd\CA 
+  
+/^(?P<A>a)(?P<A>b)|cd(?P<A>ef)(?P<A>gh)/J
+    cdefgh\CA 
+  
+/^((?P<A>a1)|(?P<A>a2)b)/J
+    a1b\GA
+    a2b\GA 
+    ** Failers
+    a1b\GZ\GA 
+    
+/^(?P<A>a)(?P<A>b)/J
+    ab\GA
+    
+/^(?P<A>a)(?P<A>b)|cd/J
+    ab\GA
+    cd\GA 
+  
+/^(?P<A>a)(?P<A>b)|cd(?P<A>ef)(?P<A>gh)/J
+    cdefgh\GA 
+  
+/(?J)^((?P<A>a1)|(?P<A>a2)b)/
+    a1b\CA
+    a2b\CA 
+    
+/^(?P<A>a) (?J:(?P<B>b)(?P<B>c)) (?P<A>d)/
+
+/ In this next test, J is not set at the outer level; consequently it isn't
+set in the pattern's options; consequently pcre_get_named_substring() produces 
+a random value. /x
+
+/^(?P<A>a) (?J:(?P<B>b)(?P<B>c)) (?P<C>d)/
+    a bc d\CA\CB\CC
+
+/^(?P<A>a)?(?(A)a|b)/
+    aabc
+    bc
+    ** Failers
+    abc   
+
+/(?:(?(ZZ)a|b)(?P<ZZ>X))+/
+    bXaX
+
+/(?:(?(2y)a|b)(X))+/
+
+/(?:(?(ZA)a|b)(?P<ZZ>X))+/
+
+/(?:(?(ZZ)a|b)(?(ZZ)a|b)(?P<ZZ>X))+/
+    bbXaaX
+
+/(?:(?(ZZ)a|\(b\))\\(?P<ZZ>X))+/
+    (b)\\Xa\\X
+
+/(?P<ABC/
+
+/(?:(?(A)(?P=A)a|b)(?P<A>X|Y))+/
+    bXXaYYaY
+    bXYaXXaX  
+
+/()()()()()()()()()(?:(?(A)(?P=A)a|b)(?P<A>X|Y))+/
+    bXXaYYaY
+
+/\777/
+
+/\s*,\s*/S
+    \x0b,\x0b
+    \x0c,\x0d 
+
+/^abc/m
+    xyz\nabc
+    xyz\nabc\<lf>
+    xyz\r\nabc\<lf>
+    xyz\rabc\<cr>
+    xyz\r\nabc\<crlf>
+    ** Failers 
+    xyz\nabc\<cr>
+    xyz\r\nabc\<cr>
+    xyz\nabc\<crlf>
+    xyz\rabc\<crlf>
+    xyz\rabc\<lf>
+    
+/abc$/m
+    xyzabc
+    xyzabc\n 
+    xyzabc\npqr 
+    xyzabc\r\<cr> 
+    xyzabc\rpqr\<cr> 
+    xyzabc\r\n\<crlf> 
+    xyzabc\r\npqr\<crlf> 
+    ** Failers
+    xyzabc\r 
+    xyzabc\rpqr 
+    xyzabc\r\n 
+    xyzabc\r\npqr 
+    
+/^abc/m<cr>
+    xyz\rabcdef
+    xyz\nabcdef\<lf>
+    ** Failers  
+    xyz\nabcdef
+       
+/^abc/m<lf>
+    xyz\nabcdef
+    xyz\rabcdef\<cr>
+    ** Failers  
+    xyz\rabcdef
+       
+/^abc/m<crlf>
+    xyz\r\nabcdef
+    xyz\rabcdef\<cr>
+    ** Failers  
+    xyz\rabcdef
+    
+/^abc/m<bad>
+
+/abc/
+    xyz\rabc\<bad>
+    abc  
+       
+/.*/
+    abc\ndef
+    abc\rdef
+    abc\r\ndef
+    \<cr>abc\ndef
+    \<cr>abc\rdef
+    \<cr>abc\r\ndef
+    \<crlf>abc\ndef
+    \<crlf>abc\rdef
+    \<crlf>abc\r\ndef
+
+/\w+(.)(.)?def/s
+    abc\ndef
+    abc\rdef
+    abc\r\ndef
+
++((?:\s|//.*\\n|/[*](?:\\n|.)*?[*]/)*)+
+   /* this is a C style comment */\M
+
+/(?P<B>25[0-5]|2[0-4]\d|[01]?\d?\d)(?:\.(?P>B)){3}/
 
 / End of testinput2 /

@@ -1107,4 +1107,17 @@ Options: anchored utf8
 No first char
 No need char
 
+/\777/I
+Failed: octal value is greater than \377 (not in UTF-8 mode) at offset 3
+
+/\777/8I
+Capturing subpattern count = 0
+Options: utf8
+First char = 199
+Need char = 191
+  \x{1ff}
+ 0: \x{1ff}
+  \777 
+ 0: \x{1ff}
+
 / End of testinput5 /

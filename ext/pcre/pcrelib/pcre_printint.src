@@ -111,9 +111,9 @@ for (i = _pcre_utt_size; i >= 0; i--)
   }
 return (i >= 0)? _pcre_utt[i].name : "??";
 #else
-ptype = ptype;    /* Avoid compiler warning */
-pvalue = pvalue;
-return "??";
+/* It gets harder and harder to shut off unwanted compiler warnings. */
+ptype = ptype * pvalue;
+return (ptype == pvalue)? "??" : "??";
 #endif
 }
 
@@ -182,32 +182,26 @@ for(;;)
     break;
 
     case OP_CHAR:
+    fprintf(f, "    ");
+    do
       {
-      fprintf(f, "    ");
-      do
-        {
-        code++;
-        code += 1 + print_char(f, code, utf8);
-        }
-      while (*code == OP_CHAR);
-      fprintf(f, "\n");
-      continue;
+      code++;
+      code += 1 + print_char(f, code, utf8);
       }
-    break;
+    while (*code == OP_CHAR);
+    fprintf(f, "\n");
+    continue;
 
     case OP_CHARNC:
+    fprintf(f, " NC ");
+    do
       {
-      fprintf(f, " NC ");
-      do
-        {
-        code++;
-        code += 1 + print_char(f, code, utf8);
-        }
-      while (*code == OP_CHARNC);
-      fprintf(f, "\n");
-      continue;
+      code++;
+      code += 1 + print_char(f, code, utf8);
       }
-    break;
+    while (*code == OP_CHARNC);
+    fprintf(f, "\n");
+    continue;
 
     case OP_KETRMAX:
     case OP_KETRMIN:
