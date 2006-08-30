@@ -206,6 +206,7 @@ static void _default_get_entry(zval *object, char *name, int name_len, zval *ret
 
 	*return_value = **value;
 	zval_copy_ctor(return_value);
+	INIT_PZVAL(return_value);
 }
 
 static void reflection_register_implement(zend_class_entry *class_entry, zend_class_entry *interface_entry TSRMLS_DC)
@@ -3261,6 +3262,7 @@ ZEND_METHOD(reflection_class, getConstant)
 	}
 	*return_value = **value;
 	zval_copy_ctor(return_value);
+	INIT_PZVAL(return_value);
 }
 /* }}} */
 
