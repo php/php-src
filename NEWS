@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Sep 2006, PHP 5.2.0
+- Updated PCRE to version 6.7. (Ilia)
 - Added SoapServer::setObject() method (it is a simplified version of
   SoapServer::setClass() method). (Dmitry)
 - Added support for hexadecimal entity in imagettftext() for the bundled GD.
