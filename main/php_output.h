@@ -60,6 +60,8 @@
 /* real global flags */
 #define PHP_OUTPUT_IMPLICITFLUSH		0x01
 #define PHP_OUTPUT_DISABLED				0x02
+#define PHP_OUTPUT_WRITTEN				0x04
+#define PHP_OUTPUT_SENT					0x08
 /* supplementary flags for php_output_get_status() */
 #define PHP_OUTPUT_ACTIVE				0x10
 #define PHP_OUTPUT_LOCKED				0x20
@@ -205,7 +207,7 @@ PHPAPI int php_output_discard(TSRMLS_D);
 PHPAPI void php_output_discard_all(TSRMLS_D);
 
 PHPAPI int php_output_get_contents(zval *p TSRMLS_DC);
-PHPAPI int php_output_get_length(zval *TSRMLS_DC);
+PHPAPI int php_output_get_length(zval *p TSRMLS_DC);
 PHPAPI int php_output_get_level(TSRMLS_D);
 
 PHPAPI int php_output_start_default(TSRMLS_D);
