@@ -1,3 +1,82 @@
+2006-08-29  Antony Dovgal  <antony@zend.com>
+
+    * ext/pcre/php_pcre.c:
+      add missing addref
+      now it works fine
+
+2006-08-29  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/pcre/php_pcre.c:
+      Check for is_utf8.
+
+2006-08-29  Antony Dovgal  <antony@zend.com>
+
+    * ext/date/tests/oo_002.phpt:
+      add UEXPECT
+
+2006-08-29  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/pcre/php_pcre.c:
+      More Unicode work.
+
+2006-08-29  Antony Dovgal  <antony@zend.com>
+
+    * ext/pcre/tests/bug34790.phpt
+      ext/pcre/tests/dollar_endonly.phpt
+      ext/pcre/tests/match_flags.phpt
+      ext/pcre/tests/match_flags2.phpt
+      ext/pcre/tests/match_flags3.phpt
+      ext/pcre/tests/pcre_anchored.phpt
+      ext/pcre/tests/pcre_extended.phpt
+      ext/pcre/tests/study.phpt
+      ext/pcre/tests/ungreedy.phpt:
+      fix PCRE tests
+
+    * ZendEngine2/zend_execute_API.c:
+      fix compile warning
+
+    * ext/spl/spl_iterators.c:
+      fix build
+
+2006-08-29  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/lib/timezonedb.h
+      ext/date/lib/timezonemap.h:
+      - Upgrade timezone db to 2006.11 (k).
+
+    * (PHP_5_2)
+      ext/date/lib/timezonedb.h
+      ext/date/lib/timezonemap.h:
+      - Upgrade timezone db to 2006k.
+
+2006-08-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/standard/string.c:
+      Corrected problems introduced by previous commit.
+      
+
+    * ext/curl/interface.c:
+      MFB: Fixed bug #38637 (curl_copy_handle() fails to fully copy the cURL
+      handle).
+
+    * (PHP_5_2)
+      NEWS
+      ext/curl/interface.c:
+      Fixed bug #38637 (curl_copy_handle() fails to fully copy the cURL handle).
+
+    * (PHP_5_2)
+      ext/standard/string.c:
+      Finalize implode() patch
+
+2006-08-29  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/string.c:
+      fix win32 build
+      EG(precision) can be changed in runtime, even in php_implode() (hint:
+      __toString()), so please think twice before optimizing
+
 2006-08-28  Rob Richards  <rrichards@ctindustries.net>
 
     * (PHP_5_2)
