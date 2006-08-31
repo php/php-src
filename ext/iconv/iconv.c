@@ -1883,7 +1883,6 @@ PHP_FUNCTION(iconv_substr)
 	char *str;
 	int str_len; 
 	long offset, length;
-	zval *len_z = NULL;
 
 	php_iconv_err_t err;
 
@@ -1891,17 +1890,14 @@ PHP_FUNCTION(iconv_substr)
 
 	charset = ICONVG(internal_encoding);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|zs",
-		&str, &str_len, &offset, &len_z,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|ls",
+		&str, &str_len, &offset, &length,
 		&charset, &charset_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if (len_z == NULL) {
+	if (ZEND_NUM_ARGS() < 3) {
 		length = str_len; 
-	} else {
-		convert_to_long_ex(&len_z);
-		length = Z_LVAL_P(len_z);
 	}
 
 	err = _php_iconv_substr(&retval, str, str_len, offset, length, charset); 
