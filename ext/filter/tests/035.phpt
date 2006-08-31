@@ -12,10 +12,10 @@ var_dump($ret);
 $ret = input_get(INPUT_GET, 'a', FILTER_VALIDATE_INT, array('flags'=>FILTER_FLAG_ALLOW_OCTAL));
 var_dump($ret);
 
-$ret = input_get(INPUT_GET, 'ar', FILTER_VALIDATE_INT);
+$ret = input_get(INPUT_GET, 'ar', FILTER_VALIDATE_INT, array('flags'=>FILTER_FLAG_ARRAY));
 var_dump($ret);
 
-$ret = input_get(INPUT_GET, 'ar', FILTER_VALIDATE_INT, array('flags'=>FILTER_FLAG_ALLOW_OCTAL));
+$ret = input_get(INPUT_GET, 'ar', FILTER_VALIDATE_INT, array('flags'=>FILTER_FLAG_ALLOW_OCTAL|FILTER_FLAG_ARRAY));
 var_dump($ret);
 ?>
 --EXPECT--
