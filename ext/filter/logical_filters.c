@@ -52,11 +52,111 @@
 	}
 /* }}} */
 
-#define TYPE_INT   1
-#define TYPE_HEX   2
-#define TYPE_OCTAL 3
 #define FORMAT_IPV4    4
 #define FORMAT_IPV6    6
+
+static int php_filter_parse_int(const char *str, unsigned int str_len, long *ret TSRMLS_DC) { /* {{{ */
+	long ctx_value = 0;
+	long sign = 1;
+	int error = 0;
+	const char *end;
+
+	end = str + str_len;
+
+	switch(*str) {
+		case '-':
+			sign = -1;
+		case '+':
+			str++;
+		default:
+			break;
+	}
+
+	/* must start with 1..9*/
+	if (*str >= '1' && *str <= '9') {
+		ctx_value += ((*str) - '0');
+		str++;
+	} else {
+		return -1;
+	}
+
+	if (str_len == 1 ) {
+		*ret = ctx_value;
+		return 1;
+	}
+
+	while (*str) {
+		if (*str >= '0' && *str <= '9') {
+			ctx_value *= 10;
+		   	ctx_value += ((*str) - '0');
+		   	str++;
+		} else {
+			error = 1;
+			break;
+		}
+	}
+
+	/* state "tail" */
+	if (!error && *str == '\0' && str == end) {
+		*ret = ctx_value * sign;
+		return 1;
+	} else {
+		return -1;
+	}
+}
+/* }}} */
+
+static int php_filter_parse_octal(const char *str, unsigned int str_len, long *ret TSRMLS_DC) { /* {{{ */
+	long ctx_value = 0;
+	int error = 0;
+
+	while (*str) {
+		if (*str >= '0' && *str <= '7') {
+			ctx_value *= 8;
+			ctx_value += ((*str) - '0');
+			str++;
+		} else {
+			error = 1;
+			break;
+		}
+	}
+	if (!error && *str == '\0') {
+		*ret = ctx_value;
+		return 1;
+	} else {
+		return -1;
+	}
+}
+/* }}} */
+
+static int php_filter_parse_hex(const char *str, unsigned int str_len, long *ret TSRMLS_DC) { /* {{{ */
+	long ctx_value = 0;
+	int error = 0;
+
+	while (*str) {
+		if ((*str >= '0' && *str <= '9') || (*str >= 'a' && *str <= 'f') || (*str >= 'A' && *str <= 'F')) {
+			ctx_value *= 16;
+			if (*str >= '0' && *str <= '9') {
+				ctx_value += ((*str) - '0');
+			} else if (*str >= 'a' && *str <= 'f') {
+				ctx_value += 10 + ((*str) - 'a');
+			} else if (*str >= 'A' && *str <= 'F') {
+				ctx_value += 10 + ((*str) - 'A');
+			}
+			str++;
+		} else {
+			error = 1;
+			break;
+		}
+	}
+	if (!error && *str == '\0') {
+		*ret = ctx_value;
+		return 1;
+	} else {
+		return -1;
+	}
+}
+/* }}} */
 
 void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
@@ -64,8 +164,8 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	long   min_range, max_range, option_flags;
 	int    min_range_set, max_range_set, option_flags_set;
 	int    allow_octal = 0, allow_hex = 0;
-	int	   len;
-	long   ctx_type, ctx_value, ctx_multiply;
+	int	   len, error = 0;
+	long   ctx_value;
 	char *p, *start, *end;
 
 	/* Parse options */
@@ -84,147 +184,67 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	len = Z_STRLEN_P(value);
 
 	if (len == 0) {
-		if (min_range_set && (0 < min_range)) {
-			goto stateE;
+		if ((min_range_set && (0 < min_range)) || (max_range_set && (0 > max_range))) {
+			zval_dtor(value);
+			ZVAL_BOOL(value, 0);
+			return;
+		} else {
+			zval_dtor(value);
+			Z_TYPE_P(value) = IS_LONG;
+			Z_LVAL_P(value) = 0;
+			return;
 		}
-		if (max_range_set && (0 > max_range)) {
-			goto stateE;
-		}
-		zval_dtor(value);
-		Z_TYPE_P(value) = IS_LONG;
-		Z_LVAL_P(value) = 0;
-		return;
 	}
 
 	/* Start the validating loop */
 	p = Z_STRVAL_P(value);
-	ctx_type = TYPE_INT;
 	ctx_value = 0;
-	ctx_multiply = 1;
 
-	/* fast(er) trim */
-	while (*p == ' ') {
+	PHP_FILTER_TRIM_DEFAULT(p, len, end);
+
+	if (*p == '0') {
 		p++;
-		len--;
-	}
-	start = p;
-
-	end = p + len - 1;
-	if (*end == ' ') {
-		unsigned int i;
-		for (i = len - 1; i >= 0; i--) {
-			if (p[i] != ' ') {
-				break;
-			}
-		}
-		i++;
-		p[i] = '\0';
-		end = p + i - 1;
-	}
-
-	/* state 0 */
-	if (*p == '-' || *p == '+') {
-		ctx_multiply = *p == '-' ? -1 : 1; p++;
-	}
-	goto stateOH1;
-
-stateI1: /* state "integer 1" */
-	if (*p >= '1' && *p <= '9') {
-		ctx_value += ((*p) - '0'); p++; goto stateI2;
-	} else {
-		goto stateE;
-	}
-
-stateI2: /* state "integer 2" */
-	if (*p >= '0' && *p <= '9') {
-		ctx_value *= 10; ctx_value += ((*p) - '0'); p++; goto stateI2;
-	} else {
-		goto stateT;
-	}
-
-stateOH1: /* state "octal or hex" */
-	if (*p != '0') {
-		goto stateI1;
-	}
-	p++;
-	if (*p == 'x' || *p == 'X') {
-		if (allow_hex) {
+		if (allow_hex && (*p == 'x' || *p == 'X')) {
 			p++;
-			goto stateH1;
-		} else {
-			goto stateE;
+			if (php_filter_parse_hex(p, len, &ctx_value TSRMLS_CC) < 0) {
+				error = 1;
+			}
+		} else if (allow_octal) {
+			if (php_filter_parse_octal(p, len, &ctx_value TSRMLS_CC) < 0) {
+				error = 1;
+			}
+		} else if (len != 1) {
+			error = 1;
 		}
-	} else if (*p >= '0' && *p <= '7') {
-		if (!allow_octal) {
-			goto stateE;
-		}
-		ctx_value = ((*p) - '0'); p++; goto stateO1;
-	}
-	goto stateT; /* lone 0 */
-
-stateO1: /* state "octal 1" */
-	ctx_type = TYPE_OCTAL;
-	if (*p >= '0' && *p <= '7') {
-		ctx_value *= 8; ctx_value += ((*p) - '0'); p++; goto stateO1;
 	} else {
-		goto stateT;
+		if (php_filter_parse_int(p, len, &ctx_value TSRMLS_CC) < 0) {
+			error = 1;
+		}
 	}
 
-stateH1: /* state "hex 1" */
-	ctx_type = TYPE_HEX;
-	if ((*p >= '0' && *p <= '9') || (*p >= 'a' && *p <= 'f') || (*p >= 'A' && *p <= 'F')) {
-		ctx_value *= 16;
-		if (*p >= '0' && *p <= '9') {
-			ctx_value += ((*p) - '0');
-		}
-		if (*p >= 'a' && *p <= 'f') {
-			ctx_value += 10 + ((*p) - 'a');
-		}
-		if (*p >= 'A' && *p <= 'F') {
-			ctx_value += 10 + ((*p) - 'A');
-		}
-		p++;
-		goto stateH1;
+	if (error > 0 || (min_range_set && (ctx_value < min_range)) || (max_range_set && (ctx_value > max_range))) {
+		zval_dtor(value);
+		ZVAL_BOOL(value, 0);
 	} else {
-		goto stateT;
+		zval_dtor(value);
+		Z_TYPE_P(value) = IS_LONG;
+		Z_LVAL_P(value) = ctx_value;
+		return;
 	}
-
-stateT: /* state "tail" */
-	if (*p != '\0' || (p-1) != end) {
-		goto stateE;
-	} else {
-		goto stateR;
-	}
-
-stateR: /* state 'return' */
-	ctx_value *= ctx_multiply;
-	if (min_range_set && (ctx_value < min_range)) {
-		goto stateE;
-	}
-	if (max_range_set && (ctx_value > max_range)) {
-		goto stateE;
-	}
-	zval_dtor(value);
-	Z_TYPE_P(value) = IS_LONG;
-	Z_LVAL_P(value) = ctx_value;
-	return;
-
-	/* state "error" */
-stateE:
-	zval_dtor(value);
-	ZVAL_BOOL(value, 0);
 }
 /* }}} */
 
 void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	char *str = Z_STRVAL_P(value);
+	char *start, *end;
+	int len = Z_STRLEN_P(value);
 
-	if (str) {
-		/* fast(er) trim */
-		while (*str == ' ') {
-			str++;
-		}
+	if (len>0) {
+		PHP_FILTER_TRIM_DEFAULT(str, len, end);
+	} else {
+		zval_dtor(value);
+		ZVAL_BOOL(value, 0);
 	}
 
 	/* returns true for "1", "true", "on" and "yes"
@@ -237,14 +257,6 @@ void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	{
 		zval_dtor(value);
 		ZVAL_BOOL(value, 1);
-	} else if ((strncasecmp(str, "false", sizeof("false")) == 0) ||
-		(strncasecmp(str, "off", sizeof("off")) == 0) ||
-		(strncasecmp(str, "no", sizeof("no")) == 0) ||
-		(strncmp(str, "0", sizeof("0")) == 0) ||
-		Z_STRLEN_P(value) == 0)
-	{
-		zval_dtor(value);
-		ZVAL_BOOL(value, 0);
 	} else {
 		zval_dtor(value);
 		ZVAL_BOOL(value, 0);
@@ -313,25 +325,7 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		dec_sep = *default_decimal;
 	}
 
-	/* fast(er) trim */
-	while (*str == ' ') {
-		str++;
-		len--;
-	}
-	start = str;
-
-	end = str + len - 1;
-	if (*end == ' ') {
-		int i;
-		for (i = len - 1; i >= 0; i--) {
-			if (str[i] != ' ') {
-				break;
-			}
-		}
-		i++;
-		str[i] = '\0';
-		end = str + i - 1;
-	}
+	PHP_FILTER_TRIM_DEFAULT(str, len, end);
 
 	if (*str == '-') {
 		sign = -1;
