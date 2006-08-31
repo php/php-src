@@ -711,7 +711,7 @@ static int stream_array_emulate_read_fd_set(zval *stream_array TSRMLS_DC)
    Runs the select() system call on the sets of streams with a timeout specified by tv_sec and tv_usec */
 PHP_FUNCTION(stream_select)
 {
-	zval			*r_array, *w_array, *e_array, *sec = NULL;
+	zval			*r_array, *w_array, *e_array, **sec = NULL;
 	struct timeval	tv;
 	struct timeval *tv_p = NULL;
 	fd_set			rfds, wfds, efds;
@@ -720,7 +720,7 @@ PHP_FUNCTION(stream_select)
 	long			usec = 0;
 	int				set_count, max_set_count = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a!a!a!z!|l", &r_array, &w_array, &e_array, &sec, &usec) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a!a!a!Z!|l", &r_array, &w_array, &e_array, &sec, &usec) == FAILURE)
 		return;
 
 	FD_ZERO(&rfds);
@@ -757,9 +757,9 @@ PHP_FUNCTION(stream_select)
 
 	/* If seconds is not set to null, build the timeval, else we wait indefinitely */
 	if (sec != NULL) {
-		convert_to_long(sec);
+		convert_to_long_ex(sec);
 
-		if (Z_LVAL_P(sec) < 0) {
+		if (Z_LVAL_PP(sec) < 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The seconds parameter must be greater than 0.");
 			RETURN_FALSE;
 		} else if (usec < 0) {
@@ -769,10 +769,10 @@ PHP_FUNCTION(stream_select)
 
 		/* Solaris + BSD do not like microsecond values which are >= 1 sec */
 		if (usec > 999999) {
-			tv.tv_sec = Z_LVAL_P(sec) + (usec / 1000000);
+			tv.tv_sec = Z_LVAL_PP(sec) + (usec / 1000000);
 			tv.tv_usec = usec % 1000000;			
 		} else {
-			tv.tv_sec = Z_LVAL_P(sec);
+			tv.tv_sec = Z_LVAL_PP(sec);
 			tv.tv_usec = usec;
 		}
 
