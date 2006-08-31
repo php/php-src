@@ -1,58 +1,71 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
-<!DOCTYPE package SYSTEM "../pear/package.dtd">
-<package>
+<?xml version="1.0" encoding="UTF-8"?>
+<package xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" packagerversion="1.4.6" version="2.0" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
   <name>filter</name>
+  <channel>pecl.php.net</channel>
   <summary>Extension for safely dealing with input parameters</summary>
-  <maintainers>
-    <maintainer>
-      <user>derick</user>
-      <name>Derick Rethans</name>
-      <email>derick@php.net</email>
-      <role>lead</role>
-    </maintainer>
-    <maintainer>
-      <user>rasmus</user>
-      <name>Rasmus Lerdorf</name>
-      <email>rasmus@php.net</email>
-      <role>lead</role>
-    </maintainer>
-  </maintainers>
-  <description>
-The Input Filter extension is meant to address this issue by implementing a set
+  <description>The Input Filter extension is meant to address this issue by implementing a set
 of filters and mechanisms that users can use to safely access their input data.
+ 
  </description>
-  <license>PHP</license>
-  <release>
-    <state>beta</state>
-    <version>0.10.0</version>
-    <date>2006-05-14</date>
-    <notes>- Fixed PECL bug #8315, NULL character stops the validation (Pierre)
+  <lead>
+    <name>Pierre-Alain Joye</name>
+    <user>pajoye</user>
+    <email>pierre@php.net</email>
+    <active>yes</active>
+  </lead>
+  <lead>
+    <name>Derick Rethans</name>
+    <user>derick</user>
+    <email>derick@php.net</email>
+    <active>yes</active>
+  </lead>
+  <lead>
+    <name>Rasmus Lerdorf</name>
+    <user>rasmus</user>
+    <email>rasmus@php.net</email>
+    <active>yes</active>
+  </lead>
+  <date>2006-01-09</date>
+  <version>
+    <release>0.10.0</release>
+    <api>0.10.0</api>
+  </version>
+  <stability>
+    <release>beta</release>
+    <api>alpha</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>- Fixed PECL bug #6136, ini_set should not be able to change the filter.default (Pierre)
+- Fixed PECL bug #6639: uppercase hexadecimal digits are not supported
 - Fixed PECL bug #7733, Float exponential weird result (Pierre)
 - Fixed PECL bug #7715, Input_get float error (Pierre)
-- Fixed PECL bug #6639: uppercase hexadecimal digits are not supported
-- Fixed PECL bug #6136, ini_set should not be able to change the filter.default (Pierre)
-- Implemented PECL req #6641: negative values for hexadecimal and octal numbers are not supported.
-- Added support for php pcre expressions (Pierre)
+- Fixed PECL bug #8316, empty string with FILTER_VALIDATE_INT returns 0
 - Fixed Possible leak in internal sapi_filter (Pierre)
+- Fixed an issue with multiple calls using the same input type (Tony)
+- Fixed leak in sapi filter (Tony, Ilia)
+- Fixed magic_quotes_gpc from being applied when RAW filter is used (Ilia)
+- Implemented PECL req #6641: negative values for hexadecimal and octal numbers are not supported.
+- Added support for custom decimal separator (Pierre)
+- Added support for php pcre expressions (Pierre)
 - Added input_get_args, fetches all input in one call (Pierre)
-- Added FILTER_FLAG_SCALAR and FILTER_FLAG_ARRAY , allows or not array values (Pierre)
+- Added FILTER_FLAG_SCALAR and FILTER_FLAG_ARRAY, allows or not array values (Pierre)
 - Basic IPv6 (no option yet, only the syntax is verified) (Pierre)
-- Add support for custom decimal separator (Pierre)
-- INT and Float filters trim the values before the validations (spaces only) (Pierre)
+- INT, Float and boolean filters trim the values before the validations (default trim()) (Pierre)
 - input_get and input_get_args returns now FALSE when the validation failed
   and NULL when the variable has not been found (Pierre)
 - Added JIT support
-  </notes>
-    <filelist>
-      <file role="src" name="config.m4"/>
-      <file role="src" name="config.w32"/>
-      <file role="src" name="filter.c"/>
-      <file role="src" name="filter_private.h"/>
-      <file role="src" name="callback_filter.c"/>
-      <file role="src" name="logical_filters.c"/>
-      <file role="src" name="sanitizing_filters.c"/>
-      <file role="src" name="php_filter.h"/>
-      <file role="doc" name="CREDITS"/>
+ </notes>
+  <contents>
+    <dir name="/">
+      <file name="callback_filter.c" role="src"/>
+      <file name="config.m4" role="src"/>
+      <file name="config.w32" role="src"/>
+      <file name="CREDITS" role="doc"/>
+      <file name="filter.c" role="src"/>
+      <file name="filter_private.h" role="src"/>
+      <file name="logical_filters.c" role="src"/>
+      <file name="php_filter.h" role="src"/>
+      <file name="sanitizing_filters.c" role="src"/>
       <dir name="tests">
         <file role="test" name="001.phpt"/>
         <file role="test" name="002.phpt"/>
@@ -88,12 +101,36 @@ of filters and mechanisms that users can use to safely access their input data.
         <file role="test" name="032.phpt"/>
         <file role="test" name="bug7586.phpt"/>
       </dir>
-    </filelist>
-    <deps>
-      <dep type="php" rel="ge" version="5.0.0"/>
-    </deps>
-  </release>
+    </dir>
+<!-- / -->
+  </contents>
+  <dependencies>
+    <required>
+      <php>
+        <min>5.0.0</min>
+      </php>
+      <pearinstaller>
+        <min>1.4.0b1</min>
+      </pearinstaller>
+    </required>
+  </dependencies>
+  <providesextension>filter</providesextension>
+  <extsrcrelease/>
+  <changelog>
+    <release>
+      <date>2006-01-23</date>
+      <time>10:04:15</time>
+      <version>
+        <release>0.9.4</release>
+        <api>0.9.4</api>
+      </version>
+      <stability>
+        <release>beta</release>
+        <api>beta</api>
+      </stability>
+      <notes>- Reimplement php_filter_callback() as exception-safe and without memleaks
+- Renamed all constants.
+- Fixed PECL bug #6124: Crash on HTML tags when using FS_STRING</notes>
+    </release>
+  </changelog>
 </package>
-<!--
-vim:et:ts=1:sw=1
--->
