@@ -586,7 +586,7 @@ ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_mem_handlers *handlers, 
 
 	storage = handlers->init(params);
 	if (!storage) {
-		fprintf(stderr, "Cannot initialize zend_mm storage\n");
+		fprintf(stderr, "Cannot initialize zend_mm storage [%s]\n", handlers->name);
 		exit(255);
 	}
 	storage->handlers = handlers;
