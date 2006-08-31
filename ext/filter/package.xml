@@ -99,6 +99,12 @@ of filters and mechanisms that users can use to safely access their input data.
         <file role="test" name="030.phpt"/>
         <file role="test" name="031.phpt"/>
         <file role="test" name="032.phpt"/>
+        <file role="test" name="033.phpt"/>
+        <file role="test" name="034.phpt"/>
+        <file role="test" name="035.phpt"/>
+        <file role="test" name="036.phpt"/>
+        <file role="test" name="bug7715.phpt"/>
+        <file role="test" name="bug8315.phpt"/>
         <file role="test" name="bug7586.phpt"/>
       </dir>
     </dir>
