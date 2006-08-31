@@ -78,6 +78,28 @@
 
 #define FILTER_CALLBACK               0x0400
 
+#define PHP_FILTER_TRIM_DEFAULT(p, len, end) { \
+	while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\v') { \
+		p++; \
+		len--; \
+	} \
+	start = p; \
+	end = p + len - 1; \
+	if (*end == ' ' || *end == '\t' || *end == '\r' || *end == '\v') { \
+		unsigned int i; \
+		for (i = len - 1; i >= 0; i--) { \
+			if (!(p[i] == ' ' || p[i] == '\t' || p[i] == '\r' || p[i] == '\v')) { \
+				break; \
+			} \
+		} \
+		i++; \
+		p[i] = '\0'; \
+		end = p + i - 1; \
+		len = (int) (end - p) + 1; \
+	} \
+}
+
+
 #endif /* FILTER_PRIVATE_H */
 
 /*
