@@ -5365,16 +5365,16 @@ ZEND_API void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highl
    Syntax highlight a source file */
 PHP_FUNCTION(highlight_file)
 {
-	zval *filename;
+	char *filename;
+	int  filename_len;
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
 	zend_bool i = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &filename, &i) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &filename, &filename_len, &i) == FAILURE) {
 		RETURN_FALSE;
 	}
-	convert_to_string(filename);
 
-	if (php_check_open_basedir(Z_STRVAL_P(filename) TSRMLS_CC)) {
+	if (php_check_open_basedir(filename TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -5384,7 +5384,7 @@ PHP_FUNCTION(highlight_file)
 
 	php_get_highlight_struct(&syntax_highlighter_ini);
 
-	if (highlight_file(Z_STRVAL_P(filename), &syntax_highlighter_ini TSRMLS_CC) == FAILURE) {
+	if (highlight_file(filename, &syntax_highlighter_ini TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -5437,16 +5437,16 @@ PHP_FUNCTION(php_strip_whitespace)
    Syntax highlight a string or optionally return it */
 PHP_FUNCTION(highlight_string)
 {
-	zval *expr;
+	zval **expr;
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
 	char *hicompiled_string_description;
 	zend_bool  i = 0;
 	int old_error_reporting = EG(error_reporting);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &expr, &i) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|b", &expr, &i) == FAILURE) {
 		RETURN_FALSE;
 	}
-	convert_to_string(expr);
+	convert_to_string_ex(expr);
 
 	if (i) {
 		php_output_start_default(TSRMLS_C);
@@ -5458,7 +5458,7 @@ PHP_FUNCTION(highlight_string)
 
 	hicompiled_string_description = zend_make_compiled_string_description("highlighted code" TSRMLS_CC);
 
-	if (highlight_string(expr, &syntax_highlighter_ini, hicompiled_string_description TSRMLS_CC) == FAILURE) {
+	if (highlight_string(*expr, &syntax_highlighter_ini, hicompiled_string_description TSRMLS_CC) == FAILURE) {
 		efree(hicompiled_string_description);
 		RETURN_FALSE;
 	}
