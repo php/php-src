@@ -1,3 +1,285 @@
+2006-08-30  Antony Dovgal  <antony@zend.com>
+
+    * ext/tidy/php_tidy.h
+      ext/tidy/tidy.c:
+      no such function
+
+    * ext/tidy/tidy.c:
+      fix tidy problems caused by returning local static buffers
+      looks like somebody forgot to MFB this patch..
+
+2006-08-30  Michael Wallner  <mike@iworks.at>
+
+    * ext/zlib/CREDITS
+      ext/zlib/php_zlib.h
+      ext/zlib/zlib.c:
+      - good bye ob_gzhandler
+      - ego promo
+
+    * main/php_output.h:
+      - fix PHP_OUTPUT_CONFLICT macro
+
+2006-08-30  Antony Dovgal  <antony@zend.com>
+
+    * ext/tidy/tests/022.phpt:
+      add UEXPECTF
+
+    * ext/tidy/tidy.c
+      ext/tidy/tests/022.phpt:
+      fix a couple of leaks, add new test
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c:
+      s/pinter/pointer/
+
+    * ext/openssl/openssl.c
+      ext/openssl/openssl.c
+      ext/openssl/tests/003.phpt
+      ext/openssl/tests/003.phpt
+      ext/openssl/tests/003.phpt:
+      fix segfault/leak, add test
+
+    * (PHP_5_2)
+      ext/openssl/openssl.c
+      ext/openssl/tests/002.phpt:
+      MFH: fix segfault in openssl_seal(), add test
+
+    * ext/openssl/tests/002.phpt
+      ext/openssl/tests/002.phpt:
+      
+      fix segfault in openssl_seal(), add test
+
+    * ext/openssl/openssl.c:
+      fix segfault in openssl_seal(), add test
+
+    * ext/standard/string.c:
+      fix ZTS build
+
+2006-08-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS:
+      pcre news
+
+    * ext/pcre/config0.m4
+      ext/pcre/pcrelib/AUTHORS
+      ext/pcre/pcrelib/COPYING
+      ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/LICENCE
+      ext/pcre/pcrelib/NEWS
+      ext/pcre/pcrelib/README
+      ext/pcre/pcrelib/pcre.h
+      ext/pcre/pcrelib/pcre_compile.c
+      ext/pcre/pcrelib/pcre_exec.c
+      ext/pcre/pcrelib/pcre_get.c
+      ext/pcre/pcrelib/pcre_internal.h
+      ext/pcre/pcrelib/pcre_maketables.c
+      ext/pcre/pcrelib/pcre_printint.src
+      ext/pcre/pcrelib/pcre_study.c
+      ext/pcre/pcrelib/pcre_try_flipped.c
+      ext/pcre/pcrelib/pcre_ucp_searchfuncs.c
+      ext/pcre/pcrelib/pcrecpp.cc
+      ext/pcre/pcrelib/pcrecpp_unittest.cc
+      ext/pcre/pcrelib/pcredemo.c
+      ext/pcre/pcrelib/pcregrep.c
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pcre/pcrelib/pcretest.c
+      ext/pcre/pcrelib/doc/Tech.Notes
+      ext/pcre/pcrelib/doc/pcre.txt
+      ext/pcre/pcrelib/testdata/grepinputx
+      ext/pcre/pcrelib/testdata/testinput1
+      ext/pcre/pcrelib/testdata/testinput2
+      ext/pcre/pcrelib/testdata/testinput4
+      ext/pcre/pcrelib/testdata/testinput5
+      ext/pcre/pcrelib/testdata/testinput6
+      ext/pcre/pcrelib/testdata/testinput7
+      ext/pcre/pcrelib/testdata/testoutput1
+      ext/pcre/pcrelib/testdata/testoutput2
+      ext/pcre/pcrelib/testdata/testoutput4
+      ext/pcre/pcrelib/testdata/testoutput5
+      ext/pcre/pcrelib/testdata/testoutput6
+      ext/pcre/pcrelib/testdata/testoutput7:
+      MFB: Upgrade PCRE lib to 6.7
+
+    * (PHP_5_2)
+      ext/pcre/config.w32
+      ext/pcre/config0.m4
+      ext/pcre/pcrelib/AUTHORS
+      ext/pcre/pcrelib/COPYING
+      ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/LICENCE
+      ext/pcre/pcrelib/NEWS
+      ext/pcre/pcrelib/README
+      ext/pcre/pcrelib/pcre.h
+      ext/pcre/pcrelib/pcre_compile.c
+      ext/pcre/pcrelib/pcre_exec.c
+      ext/pcre/pcrelib/pcre_get.c
+      ext/pcre/pcrelib/pcre_internal.h
+      ext/pcre/pcrelib/pcre_maketables.c
+      ext/pcre/pcrelib/pcre_printint.src
+      ext/pcre/pcrelib/pcre_study.c
+      ext/pcre/pcrelib/pcre_try_flipped.c
+      ext/pcre/pcrelib/pcre_ucp_searchfuncs.c
+      ext/pcre/pcrelib/pcrecpp.cc
+      ext/pcre/pcrelib/pcrecpp_unittest.cc
+      ext/pcre/pcrelib/pcredemo.c
+      ext/pcre/pcrelib/pcregrep.c
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pcre/pcrelib/pcretest.c
+      ext/pcre/pcrelib/doc/Tech.Notes
+      ext/pcre/pcrelib/doc/pcre.txt
+      ext/pcre/pcrelib/testdata/grepinputx
+      ext/pcre/pcrelib/testdata/testinput1
+      ext/pcre/pcrelib/testdata/testinput2
+      ext/pcre/pcrelib/testdata/testinput4
+      ext/pcre/pcrelib/testdata/testinput5
+      ext/pcre/pcrelib/testdata/testinput6
+      ext/pcre/pcrelib/testdata/testinput7
+      ext/pcre/pcrelib/testdata/testoutput1
+      ext/pcre/pcrelib/testdata/testoutput2
+      ext/pcre/pcrelib/testdata/testoutput4
+      ext/pcre/pcrelib/testdata/testoutput5
+      ext/pcre/pcrelib/testdata/testoutput6
+      ext/pcre/pcrelib/testdata/testoutput7:
+      Upgrade PCRE lib to 6.7
+
+    * ext/standard/php_string.h
+      ext/standard/string.c:
+      Avoid TSRMLS_FETCH
+
+    * ext/bz2/bz2.c:
+      Fixed build with gcc 4.1.1
+
+    * ext/curl/streams.c:
+      Added ftps portion of the patch
+
+2006-08-30  Antony Dovgal  <antony@zend.com>
+
+    * ext/session/session.c:
+      fix typo
+
+2006-08-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/curl/streams.c:
+      MFB: Fixed bug #33770 (https:// or ftps:// do not work when
+      --with-curlwrappers is used and ssl certificate is not verifiable).
+
+    * (PHP_5_2)
+      NEWS
+      ext/curl/streams.c:
+      Fixed bug #33770 (https:// or ftps:// do not work when --with-curlwrappers
+      is used and ssl certificate is not verifiable).
+
+2006-08-30  Antony Dovgal  <antony@zend.com>
+
+    * ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.c
+      ext/pcre/tests/preg_replace_callback3.phpt
+      ext/pcre/tests/preg_replace_callback3.phpt
+      ext/pcre/tests/preg_replace_callback3.phpt:
+      fix leak, add test
+
+    * ext/standard/iptc.c:
+      fix leak in iptcembed()
+
+    * (PHP_5_2)
+      ext/session/session.c:
+      change ini handlers to produce E_ERROR if they are called during startup
+
+    * ext/session/session.c:
+      change ini handlers to produce E_ERROR if they are called during startup or
+      per request
+
+    * ext/iconv/iconv.c
+      ext/iconv/iconv.c:
+      fix leak
+
+    * (PHP_5_2)
+      ext/session/session.c:
+      MFH: change E_ERROR to E_WARNING when invalid argument has been passed
+      make sure ini_set() doesn't reset PS(mod) and PS(serializer) to invalid
+      values
+
+    * ext/session/session.c:
+      change E_ERROR to E_WARNING when invalid argument has been passed
+      make sure ini_set() doesn't reset PS(mod) and PS(serializer) to invalid
+      values
+
+2006-08-30  Michael Wallner  <mike@iworks.at>
+
+    * ext/zlib/zlib.c:
+      - allow (de)activation with ini_set()
+
+    * main/output.c
+      main/php_output.h:
+      - add PHP_OUTPUT_WRITTEN and PHP_OUTPUT_SENT status flags
+
+2006-08-30  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_execute_API.c:
+      fix minor issue in autoload with unicode enabled
+
+2006-08-30  Michael Wallner  <mike@iworks.at>
+
+    * ext/zlib/php_zlib.h:
+      - add php_zlib_output_encoding() decl
+
+    * main/SAPI.c:
+      - the Vary header for zlib.output_compression is now handled inside the
+      output handler
+
+    * ext/zlib/zlib.c:
+      - avoid a loop around deflate() by using Z_SYNC_FLUSH for standard write
+
+    * main/output.c:
+      - output handler may modify context->op
+      - discard any context->out.data on failure
+
+2006-08-30  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/bug38653.phpt:
+      MFH: fix #38653 (memory leak in ReflectionClass::getConstant())
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/tests/bug38653.phpt
+      ext/reflection/tests/bug38653.phpt:
+      fix #38653 (memory leak in ReflectionClass::getConstant())
+
+    * ZendEngine2/zend_execute.c:
+      fix off-by-one in zend_fetch_dimension_address_inner()
+
+2006-08-30  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/serialize/bug37947.phpt:
+      fix test
+
+2006-08-30  Michael Wallner  <mike@iworks.at>
+
+    * ext/zlib/config0.m4
+      ext/zlib/php_zlib.h
+      ext/zlib/zlib.c
+      ext/zlib/tests/006.phpt
+      ext/zlib/tests/007.phpt:
+      - implement new output API
+      - ported deflate/inflate code
+      - require zlib >= 1.2.0.4
+      - add gzdecode()
+      
+
+    * README.NEW-OUTPUT-API
+      main/output.c
+      main/php_output.h:
+      - revise output handler alias API
+      - add convenience macros for conflicts and aliases
+      - generalize flags to php_output_stack_pop()
+      - mark the handler as started *after* run
+      - handler should still be flushable after marking it immutable
+
 2006-08-29  Antony Dovgal  <antony@zend.com>
 
     * ext/pcre/php_pcre.c:
