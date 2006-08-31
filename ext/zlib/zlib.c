@@ -85,7 +85,8 @@ void php_zlib_output_compression_start(TSRMLS_D)
 		default:
 			MAKE_STD_ZVAL(tmp);
 			ZVAL_ASCII_STRING(tmp, PHP_ZLIB_OUTPUT_HANDLER_NAME, ZSTR_DUPLICATE);
-			if ((h = php_zlib_output_handler_init(tmp TSRMLS_CC)) && (SUCCESS == php_output_handler_start(h TSRMLS_CC))) {
+			if (	(h = php_zlib_output_handler_init(tmp, ZLIBG(output_compression), PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC)) &&
+					(SUCCESS == php_output_handler_start(h TSRMLS_CC))) {
 				if (ZLIBG(output_handler) && *ZLIBG(output_handler)) {
 					MAKE_STD_ZVAL(zoh);
 					ZVAL_ASCII_STRING(zoh, ZLIBG(output_handler), ZSTR_DUPLICATE);
@@ -100,12 +101,12 @@ void php_zlib_output_compression_start(TSRMLS_D)
 /* }}} */
 
 /* {{{ php_zlib_output_handler_init() */
-php_output_handler *php_zlib_output_handler_init(zval *handler_name TSRMLS_DC)
+php_output_handler *php_zlib_output_handler_init(zval *handler_name, size_t chunk_size, int flags TSRMLS_DC)
 {
 	php_output_handler *h = NULL;
 	
 	if (php_zlib_output_encoding(TSRMLS_C)) {
-		if ((h = php_output_handler_create_internal(handler_name, php_zlib_output_handler, ZLIBG(output_compression), PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC))) {
+		if ((h = php_output_handler_create_internal(handler_name, php_zlib_output_handler, chunk_size, flags TSRMLS_CC))) {
 			php_output_handler_set_context(h, ecalloc(1, sizeof(php_zlib_context)), php_zlib_output_handler_dtor TSRMLS_CC);
 		}
 	}

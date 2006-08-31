@@ -58,7 +58,7 @@ typedef struct _php_zlib_context {
 int php_zlib_output_encoding(TSRMLS_D);
 int php_zlib_encode(const char *in_buf, size_t in_len, char **out_buf, size_t *out_len, int encoding, int level TSRMLS_DC);
 int php_zlib_decode(const char *in_buf, size_t in_len, char **out_buf, size_t *out_len, int encoding, size_t max_len TSRMLS_DC);
-php_output_handler *php_zlib_output_handler_init(zval *handler_name TSRMLS_DC);
+php_output_handler *php_zlib_output_handler_init(zval *handler_name, size_t chunk_size, int flags TSRMLS_DC);
 int php_zlib_output_handler(void **handler_context, php_output_context *output_context);
 void php_zlib_output_handler_dtor(void *opaq TSRMLS_DC);
 int php_zlib_output_conflict_check(zval *handler_name TSRMLS_DC);
