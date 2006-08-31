@@ -40,10 +40,6 @@ ZEND_DECLARE_MODULE_GLOBALS(ctype)
 /* True global resources - no need for thread safety here */
 /* static int le_ctype; */
 
-static PHP_MINIT_FUNCTION(ctype);
-static PHP_MSHUTDOWN_FUNCTION(ctype);
-static PHP_RINIT_FUNCTION(ctype);
-static PHP_RSHUTDOWN_FUNCTION(ctype);
 static PHP_MINFO_FUNCTION(ctype);
 
 static PHP_FUNCTION(ctype_alnum);
