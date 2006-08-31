@@ -495,7 +495,7 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 		case IS_STRING:
 		case IS_UNICODE:
 			if (Z_UNILEN_P(output_handler) && (alias = php_output_handler_alias(output_handler TSRMLS_CC))) {
-				handler = (*alias)(output_handler TSRMLS_CC);
+				handler = (*alias)(output_handler, chunk_size, flags TSRMLS_CC);
 				break;
 			}
 		default:
