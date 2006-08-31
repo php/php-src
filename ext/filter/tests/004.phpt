@@ -1,5 +1,11 @@
 --TEST--
 GET/POST/REQUEST Test with filtered data
+--SKIPIF--
+<?php
+/* CGI doesn't read commandline options when it sees REQUES_METHOD */
+die("skip");
+die("not possible to set ini setting using -d and CGI");
+?>
 --INI--
 filter.default=special_chars
 --POST--
