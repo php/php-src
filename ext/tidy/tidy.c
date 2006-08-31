@@ -86,17 +86,17 @@
 
 #define TIDY_APPLY_CONFIG_ZVAL(_doc, _val) \
     if(_val) { \
-        if(Z_TYPE_P(_val) == IS_ARRAY) { \
-            _php_tidy_apply_config_array(_doc, HASH_OF(_val) TSRMLS_CC); \
+        if(Z_TYPE_PP(_val) == IS_ARRAY) { \
+            _php_tidy_apply_config_array(_doc, HASH_OF(*_val) TSRMLS_CC); \
         } else { \
-            convert_to_string(_val); \
-            TIDY_OPEN_BASEDIR_CHECK(Z_STRVAL_P(_val)); \
-            switch (tidyLoadConfig(_doc, Z_STRVAL_P(_val))) { \
+            convert_to_string_ex(_val); \
+            TIDY_OPEN_BASEDIR_CHECK(Z_STRVAL_PP(_val)); \
+            switch (tidyLoadConfig(_doc, Z_STRVAL_PP(_val))) { \
               case -1: \
-                php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not load configuration file '%s'", Z_STRVAL_P(_val)); \
+                php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not load configuration file '%s'", Z_STRVAL_PP(_val)); \
                 break; \
               case 1: \
-                php_error_docref(NULL TSRMLS_CC, E_NOTICE, "There were errors while parsing the configuration file '%s'", Z_STRVAL_P(_val)); \
+                php_error_docref(NULL TSRMLS_CC, E_NOTICE, "There were errors while parsing the configuration file '%s'", Z_STRVAL_PP(_val)); \
                 break; \
             } \
         } \
@@ -431,11 +431,11 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	zend_bool use_include_path = 0;
 	TidyDoc doc;
 	TidyBuffer *errbuf;
-	zval *config;
+	zval **config;
 
 	TIDY_SET_CONTEXT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zsb", &arg1, &arg1_len, &config, &enc, &enc_len, &use_include_path) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|Zsb", &arg1, &arg1_len, &config, &enc, &enc_len, &use_include_path) == FAILURE) {
 		RETURN_FALSE;
 	}
 	
@@ -1056,13 +1056,13 @@ static PHP_FUNCTION(tidy_parse_string)
 {
 	char *input, *enc = NULL;
 	int input_len, enc_len = 0;
-	zval *options = NULL;
+	zval **options = NULL;
 	
 	PHPTidyObj *obj;
 
 	TIDY_SET_CONTEXT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zs", &input, &input_len, &options, &enc, &enc_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|Zs", &input, &input_len, &options, &enc, &enc_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1116,12 +1116,12 @@ static PHP_FUNCTION(tidy_parse_file)
 	int input_len, contents_len, enc_len = 0;
 	zend_bool use_include_path = 0;
 	char *contents;
-	zval *options = NULL;
+	zval **options = NULL;
 	
 	PHPTidyObj *obj;
 	TIDY_SET_CONTEXT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zsb", &inputfile, &input_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|Zsb", &inputfile, &input_len,
 							  &options, &enc, &enc_len, &use_include_path) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -1434,12 +1434,12 @@ static TIDY_DOC_METHOD(__construct)
 	int input_len = 0, enc_len = 0, contents_len = 0;
 	zend_bool use_include_path = 0;
 	char *contents;
-	zval *options = NULL;
+	zval **options = NULL;
 	
 	PHPTidyObj *obj;
 	TIDY_SET_CONTEXT;	
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|szsb", &inputfile, &input_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sZsb", &inputfile, &input_len,
 							  &options, &enc, &enc_len, &use_include_path) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -1466,14 +1466,14 @@ static TIDY_DOC_METHOD(parseFile)
 	int input_len, enc_len = 0, contents_len = 0;
 	zend_bool use_include_path = 0;
 	char *contents;
-	zval *options = NULL;
+	zval **options = NULL;
 	PHPTidyObj *obj;
 
 	TIDY_SET_CONTEXT;
 
 	obj = (PHPTidyObj *)zend_object_store_get_object(object TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zsb", &inputfile, &input_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|Zsb", &inputfile, &input_len,
 							  &options, &enc, &enc_len, &use_include_path) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -1498,12 +1498,12 @@ static TIDY_DOC_METHOD(parseString)
 {
 	char *input, *enc = NULL;
 	int input_len, enc_len = 0;
-	zval *options = NULL;
+	zval **options = NULL;
 	PHPTidyObj *obj;
 
 	TIDY_SET_CONTEXT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zs", &input, &input_len, &options, &enc, &enc_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|Zs", &input, &input_len, &options, &enc, &enc_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
