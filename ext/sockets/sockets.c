@@ -1596,7 +1596,7 @@ PHP_FUNCTION(socket_get_option)
    Sets socket options for the socket */
 PHP_FUNCTION(socket_set_option)
 {
-	zval			*arg1, *arg4;
+	zval			*arg1, **arg4;
 	struct linger	lv;
 	struct timeval tv;
 	php_socket		*php_sock;
@@ -1617,7 +1617,7 @@ PHP_FUNCTION(socket_set_option)
 	char			*sec_key = "sec";
 	char			*usec_key = "usec";
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllz", &arg1, &level, &optname, &arg4) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllZ", &arg1, &level, &optname, &arg4) == FAILURE)
 		return;
 
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
@@ -1626,8 +1626,8 @@ PHP_FUNCTION(socket_set_option)
 
 	switch (optname) {
 		case SO_LINGER:
-			convert_to_array_ex(&arg4);
-			opt_ht = HASH_OF(arg4);
+			convert_to_array_ex(arg4);
+			opt_ht = HASH_OF(*arg4);
 
 			if (zend_hash_find(opt_ht, l_onoff_key, strlen(l_onoff_key) + 1, (void **)&l_onoff) == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "no key \"%s\" passed in optval", l_onoff_key);
@@ -1649,8 +1649,8 @@ PHP_FUNCTION(socket_set_option)
 			break;
 		case SO_RCVTIMEO:
 		case SO_SNDTIMEO:
-			convert_to_array_ex(&arg4);
-			opt_ht = HASH_OF(arg4);
+			convert_to_array_ex(arg4);
+			opt_ht = HASH_OF(*arg4);
 
 			if (zend_hash_find(opt_ht, sec_key, strlen(sec_key) + 1, (void **)&sec) == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "no key \"%s\" passed in optval", sec_key);
@@ -1675,8 +1675,8 @@ PHP_FUNCTION(socket_set_option)
 #endif
 			break;
 		default:
-			convert_to_long_ex(&arg4);
-			ov = Z_LVAL_P(arg4);
+			convert_to_long_ex(arg4);
+			ov = Z_LVAL_PP(arg4);
 			
 			optlen = sizeof(ov);
 			opt_ptr = &ov;

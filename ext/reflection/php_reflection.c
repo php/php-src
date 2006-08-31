@@ -1774,7 +1774,7 @@ ZEND_METHOD(reflection_parameter, export)
 ZEND_METHOD(reflection_parameter, __construct)
 {
 	parameter_reference *ref;
-	zval *reference, *parameter;
+	zval *reference, **parameter;
 	zval *object;
 	zval *name;
 	reflection_object *intern;
@@ -1783,7 +1783,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 	int position;
 	zend_class_entry *ce = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &reference, &parameter) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zZ", &reference, &parameter) == FAILURE) {
 		return;
 	}
 
@@ -1800,7 +1800,6 @@ ZEND_METHOD(reflection_parameter, __construct)
 				unsigned int lcname_len;
 				zstr lcname;
 
-				convert_to_text_ex(&reference);
 				lcname = zend_u_str_case_fold(Z_TYPE_P(reference), Z_UNIVAL_P(reference), Z_UNILEN_P(reference), 1, &lcname_len);
 				if (zend_u_hash_find(EG(function_table), Z_TYPE_P(reference), lcname, lcname_len + 1, (void**) &fptr) == FAILURE) {
 					efree(lcname.v);
@@ -1857,8 +1856,8 @@ ZEND_METHOD(reflection_parameter, __construct)
 	
 	/* Now, search for the parameter */
 	arg_info = fptr->common.arg_info;
-	if (Z_TYPE_P(parameter) == IS_LONG) {
-		position= Z_LVAL_P(parameter);
+	if (Z_TYPE_PP(parameter) == IS_LONG) {
+		position= Z_LVAL_PP(parameter);
 		if (position < 0 || (zend_uint)position >= fptr->common.num_args) {
 			_DO_THROW("The parameter specified by its offset could not be found");
 			/* returns out of this function */
@@ -1867,12 +1866,12 @@ ZEND_METHOD(reflection_parameter, __construct)
 		zend_uint i;
 
 		position= -1;
-		convert_to_text_ex(&parameter);
+		convert_to_text_ex(parameter);
 		for (i = 0; i < fptr->common.num_args; i++) {
-			if (Z_TYPE_P(parameter) == IS_STRING && arg_info[i].name.s && strcmp(arg_info[i].name.s, Z_STRVAL_P(parameter)) == 0) {
+			if (Z_TYPE_PP(parameter) == IS_STRING && arg_info[i].name.s && strcmp(arg_info[i].name.s, Z_STRVAL_PP(parameter)) == 0) {
 				position= i;
 				break;
-			} else if (Z_TYPE_P(parameter) == IS_UNICODE && arg_info[i].name.u && u_strcmp(arg_info[i].name.u, Z_USTRVAL_P(parameter)) == 0) {
+			} else if (Z_TYPE_PP(parameter) == IS_UNICODE && arg_info[i].name.u && u_strcmp(arg_info[i].name.u, Z_USTRVAL_PP(parameter)) == 0) {
 				position= i;
 				break;
 			}
