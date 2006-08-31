@@ -621,7 +621,29 @@ PHP_FUNCTION(input_get)
 	}
 
 	if (found) {
+		zval **option;
+
+		if (options && filter_flags==0 &&
+				zend_hash_find(HASH_OF(options), "flags", sizeof("flags"), (void **)&option) == SUCCESS) {
+			switch (Z_TYPE_PP(option)) {
+				case IS_ARRAY:
+				break;
+				default:
+				convert_to_long(*option);
+				filter_flags = Z_LVAL_PP(option);
+				break;
+			}
+		} else {
+			filter_flags = FILTER_FLAG_SCALAR;
+		}
+
 		zval_copy_ctor(return_value);  /* Watch out for empty strings */
+
+		if (Z_TYPE_P(return_value) == IS_ARRAY && !(filter_flags & FILTER_FLAG_ARRAY)) {
+			zval_dtor(return_value);
+			ZVAL_BOOL(return_value, 0);
+		}
+
 		php_zval_filter_recursive(&return_value, filter, filter_flags, options, charset TSRMLS_CC);
 	} else {
 		RETURN_NULL();
