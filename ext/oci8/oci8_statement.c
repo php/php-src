@@ -800,7 +800,7 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 	/* dvoid *php_oci_collection           = NULL; */
 	OCIStmt *oci_stmt               = NULL;
 	dvoid *bind_data                = NULL;
-	php_oci_bind bind, *bindp;
+	php_oci_bind bind, *old_bind, *bindp;
 	int mode = OCI_DATA_AT_EXEC;
 	sb4 value_sz = -1;
 
@@ -900,7 +900,11 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 	}
 
 	memset((void*)&bind,0,sizeof(php_oci_bind));
-	zend_hash_update(statement->binds, name, name_len + 1, &bind, sizeof(php_oci_bind), (void **)&bindp);
+	if (zend_hash_find(statement->binds, name, name_len + 1, (void **)&old_bind) == SUCCESS) {
+		bindp = old_bind;
+	} else {
+		zend_hash_update(statement->binds, name, name_len + 1, &bind, sizeof(php_oci_bind), (void **)&bindp);
+	}
 	
 	bindp->descriptor = oci_desc;
 	bindp->statement = oci_stmt;
@@ -1079,11 +1083,11 @@ sb4 php_oci_bind_out_callback(
  Helper function to get column by name and index */
 php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAMETERS, int need_data)
 {
-	zval *z_statement, *column_index;
+	zval *z_statement, **column_index;
 	php_oci_statement *statement;
 	php_oci_out_column *column;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz", &z_statement, &column_index) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rZ", &z_statement, &column_index) == FAILURE) {
 		return NULL;
 	}
 
@@ -1097,17 +1101,17 @@ php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAME
 		return NULL;
 	}
 	
-	if (Z_TYPE_P(column_index) == IS_STRING) {
-		column = php_oci_statement_get_column(statement, -1, Z_STRVAL_P(column_index), Z_STRLEN_P(column_index) TSRMLS_CC);
+	if (Z_TYPE_PP(column_index) == IS_STRING) {
+		column = php_oci_statement_get_column(statement, -1, Z_STRVAL_PP(column_index), Z_STRLEN_PP(column_index) TSRMLS_CC);
 		if (!column) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid column name \"%s\"", Z_STRVAL_P(column_index));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid column name \"%s\"", Z_STRVAL_PP(column_index));
 			return NULL;
 		}
 	} else {
-		convert_to_long(column_index);
-		column = php_oci_statement_get_column(statement, Z_LVAL_P(column_index), NULL, 0 TSRMLS_CC);
+		convert_to_long_ex(column_index);
+		column = php_oci_statement_get_column(statement, Z_LVAL_PP(column_index), NULL, 0 TSRMLS_CC);
 		if (!column) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid column index \"%ld\"", Z_LVAL_P(column_index));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid column index \"%ld\"", Z_LVAL_PP(column_index));
 			return NULL;
 		}
 	}

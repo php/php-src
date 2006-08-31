@@ -1876,14 +1876,14 @@ PHP_FUNCTION(imap_fetchbody)
 	Save a specific body section to a file */
 PHP_FUNCTION(imap_savebody)
 {
-	zval *stream, *out;
+	zval *stream, **out;
 	pils *imap_ptr = NULL;
 	php_stream *writer = NULL;
 	char *section = "";
 	int section_len = 0, close_stream = 1;
 	long msgno, flags = 0;
 	
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzl|sl", &stream, &out, &msgno, &section, &section_len, &flags)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rZl|sl", &stream, &out, &msgno, &section, &section_len, &flags)) {
 		RETURN_FALSE;
 	}
 	
@@ -1893,17 +1893,17 @@ PHP_FUNCTION(imap_savebody)
 		RETURN_FALSE;
 	}
 	
-	switch (Z_TYPE_P(out))
+	switch (Z_TYPE_PP(out))
 	{
 		case IS_LONG:
 		case IS_RESOURCE:
 			close_stream = 0;
-			php_stream_from_zval(writer, &out);
+			php_stream_from_zval(writer, out);
 		break;
 
 		default:
-			convert_to_string_ex(&out);
-			writer = php_stream_open_wrapper(Z_STRVAL_P(out), "wb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
+			convert_to_string_ex(out);
+			writer = php_stream_open_wrapper(Z_STRVAL_PP(out), "wb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
 		break;
 	}
 	

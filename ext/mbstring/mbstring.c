@@ -1645,7 +1645,7 @@ PHP_FUNCTION(mb_strrpos)
 	mbfl_string haystack, needle;
 	char *enc_name = NULL;
 	int enc_name_len;
-	zval *zoffset;
+	zval **zoffset;
 	long offset = 0, str_flg;
 	char *enc_name2 = NULL;
 	int enc_name_len2;
@@ -1657,14 +1657,14 @@ PHP_FUNCTION(mb_strrpos)
 	needle.no_language = MBSTRG(current_language);
 	needle.no_encoding = MBSTRG(current_internal_encoding);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|zs", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &zoffset, &enc_name, &enc_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|Zs", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &zoffset, &enc_name, &enc_name_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	if(ZEND_NUM_ARGS() >= 3) {
-		if (Z_TYPE_P(zoffset) == IS_STRING) {
-			enc_name2     = Z_STRVAL_P(zoffset);
-			enc_name_len2 = Z_STRLEN_P(zoffset);
+		if (Z_TYPE_PP(zoffset) == IS_STRING) {
+			enc_name2     = Z_STRVAL_PP(zoffset);
+			enc_name_len2 = Z_STRLEN_PP(zoffset);
 			str_flg       = 1;
 
 			if (enc_name2 != NULL) {
@@ -1690,15 +1690,15 @@ PHP_FUNCTION(mb_strrpos)
 			}
 
 			if(str_flg) {
-					convert_to_long(zoffset);
-					offset   = Z_LVAL_P(zoffset);
+					convert_to_long_ex(zoffset);
+					offset   = Z_LVAL_PP(zoffset);
 			} else {
 				enc_name     = enc_name2;
 				enc_name_len = enc_name_len2;
 			}
 		} else {
-			convert_to_long(zoffset);
-			offset = Z_LVAL_P(zoffset);
+			convert_to_long_ex(zoffset);
+			offset = Z_LVAL_PP(zoffset);
 		}
 	}
 

@@ -1763,7 +1763,7 @@ ZEND_METHOD(reflection_parameter, export)
 ZEND_METHOD(reflection_parameter, __construct)
 {
 	parameter_reference *ref;
-	zval *reference, *parameter;
+	zval *reference, **parameter;
 	zval *object;
 	zval *name;
 	reflection_object *intern;
@@ -1772,7 +1772,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 	int position;
 	zend_class_entry *ce = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &reference, &parameter) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zZ", &reference, &parameter) == FAILURE) {
 		return;
 	}
 
@@ -1786,9 +1786,8 @@ ZEND_METHOD(reflection_parameter, __construct)
 	switch (Z_TYPE_P(reference)) {
 		case IS_STRING: {
 				unsigned int lcname_len;
-	  		char *lcname;
+				char *lcname;
 
-				convert_to_string_ex(&reference);
 				lcname_len = Z_STRLEN_P(reference);
 				lcname = zend_str_tolower_dup(Z_STRVAL_P(reference), lcname_len);
 				if (zend_hash_find(EG(function_table), lcname, lcname_len + 1, (void**) &fptr) == FAILURE) {
@@ -1847,8 +1846,8 @@ ZEND_METHOD(reflection_parameter, __construct)
 	
 	/* Now, search for the parameter */
 	arg_info = fptr->common.arg_info;
-	if (Z_TYPE_P(parameter) == IS_LONG) {
-		position= Z_LVAL_P(parameter);
+	if (Z_TYPE_PP(parameter) == IS_LONG) {
+		position= Z_LVAL_PP(parameter);
 		if (position < 0 || (zend_uint)position >= fptr->common.num_args) {
 			_DO_THROW("The parameter specified by its offset could not be found");
 			/* returns out of this function */
@@ -1857,9 +1856,9 @@ ZEND_METHOD(reflection_parameter, __construct)
 		zend_uint i;
 
 		position= -1;
-		convert_to_string_ex(&parameter);
+		convert_to_string_ex(parameter);
 		for (i = 0; i < fptr->common.num_args; i++) {
-			if (arg_info[i].name && strcmp(arg_info[i].name, Z_STRVAL_P(parameter)) == 0) {
+			if (arg_info[i].name && strcmp(arg_info[i].name, Z_STRVAL_PP(parameter)) == 0) {
 				position= i;
 				break;
 			}
@@ -3867,7 +3866,7 @@ ZEND_METHOD(reflection_property, getValue)
 	reflection_object *intern;
 	property_reference *ref;
 	zval *object, name;
-	zval **member= NULL;
+	zval **member = NULL, *member_p = NULL;
 
 	METHOD_NOTSTATIC(reflection_property_ptr);
 	GET_REFLECTION_OBJECT_PTR(ref);
@@ -3886,19 +3885,22 @@ ZEND_METHOD(reflection_property, getValue)
 			zend_error(E_ERROR, "Internal error: Could not find the property %s::%s", intern->ce->name, ref->prop->name);
 			/* Bails out */
 		}
+		*return_value= **member;
+		zval_copy_ctor(return_value);
+		INIT_PZVAL(return_value);
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &object) == FAILURE) {
 			return;
 		}
-		if (zend_hash_quick_find(Z_OBJPROP_P(object), ref->prop->name, ref->prop->name_length + 1, ref->prop->h, (void **) &member) == FAILURE) {
-			zend_error(E_ERROR, "Internal error: Could not find the property %s::%s", intern->ce->name, ref->prop->name);
-			/* Bails out */
+		member_p = zend_read_property(Z_OBJCE_P(object), object, ref->prop->name, ref->prop->name_length, 1 TSRMLS_CC);
+		*return_value= *member_p;
+		zval_copy_ctor(return_value);
+		INIT_PZVAL(return_value);
+		if (member_p != EG(uninitialized_zval_ptr)) {
+			zval_add_ref(&member_p);
+			zval_ptr_dtor(&member_p);
 		}
 	}
-
-	*return_value= **member;
-	zval_copy_ctor(return_value);
-	INIT_PZVAL(return_value);
 }
 /* }}} */
 
@@ -3934,38 +3936,38 @@ ZEND_METHOD(reflection_property, setValue)
 		}
 		zend_update_class_constants(intern->ce TSRMLS_CC);
 		prop_table = CE_STATIC_MEMBERS(intern->ce);
+
+		if (zend_hash_quick_find(prop_table, ref->prop->name, ref->prop->name_length + 1, ref->prop->h, (void **) &variable_ptr) == FAILURE) {
+			zend_error(E_ERROR, "Internal error: Could not find the property %s::%s", intern->ce->name, ref->prop->name);
+			/* Bails out */
+		}
+		if (*variable_ptr == value) {
+			setter_done = 1;
+		} else {
+			if (PZVAL_IS_REF(*variable_ptr)) {
+				zval_dtor(*variable_ptr);
+				(*variable_ptr)->type = value->type;
+				(*variable_ptr)->value = value->value;
+				if (value->refcount > 0) {
+					zval_copy_ctor(*variable_ptr);
+				}
+				setter_done = 1;
+			}
+		}
+		if (!setter_done) {
+			zval **foo;
+
+			value->refcount++;
+			if (PZVAL_IS_REF(value)) {
+				SEPARATE_ZVAL(&value);
+			}
+			zend_hash_quick_update(prop_table, ref->prop->name, ref->prop->name_length+1, ref->prop->h, &value, sizeof(zval *), (void **) &foo);
+		}
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "oz", &object, &value) == FAILURE) {
 			return;
 		}
-		prop_table = Z_OBJPROP_P(object);
-	}
-
-	if (zend_hash_quick_find(prop_table, ref->prop->name, ref->prop->name_length + 1, ref->prop->h, (void **) &variable_ptr) == FAILURE) {
-		zend_error(E_ERROR, "Internal error: Could not find the property %s::%s", intern->ce->name, ref->prop->name);
-		/* Bails out */
-	}
-	if (*variable_ptr == value) {
-		setter_done = 1;
-	} else {
-		if (PZVAL_IS_REF(*variable_ptr)) {
-			zval_dtor(*variable_ptr);
-			(*variable_ptr)->type = value->type;
-			(*variable_ptr)->value = value->value;
-			if (value->refcount > 0) {
-				zval_copy_ctor(*variable_ptr);
-			}
-			setter_done = 1;
-		}
-	}
-	if (!setter_done) {
-		zval **foo;
-
-		value->refcount++;
-		if (PZVAL_IS_REF(value)) {
-			SEPARATE_ZVAL(&value);
-		}
-		zend_hash_quick_update(prop_table, ref->prop->name, ref->prop->name_length+1, ref->prop->h, &value, sizeof(zval *), (void **) &foo);
+		zend_update_property(Z_OBJCE_P(object), object, ref->prop->name, ref->prop->name_length, value TSRMLS_CC);
 	}
 }
 /* }}} */
