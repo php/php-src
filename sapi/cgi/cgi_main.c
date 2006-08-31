@@ -451,6 +451,10 @@ void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 	    zval_copy_ctor(array_ptr);
 	    return;
 	}
+
+	/* call php's original import as a catch-all */
+	php_php_import_environment_variables(array_ptr TSRMLS_CC);
+
 	if (fcgi_is_fastcgi()) {
 		fcgi_request *request = (fcgi_request*) SG(server_context);
 		HashPosition pos;
@@ -466,8 +470,6 @@ void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 			php_register_variable(var.s, *val, array_ptr TSRMLS_CC);
 		}
 	}
-	/* call php's original import as a catch-all */
-	php_php_import_environment_variables(array_ptr TSRMLS_CC);
 }
 
 static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
