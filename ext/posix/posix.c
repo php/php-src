@@ -552,23 +552,23 @@ static int php_posix_stream_get_fd(zval *zfp, int *fd TSRMLS_DC)
    Determine terminal device name (POSIX.1, 4.7.2) */
 PHP_FUNCTION(posix_ttyname)
 {
-	zval *z_fd;
+	zval **z_fd;
 	char *p;
 	int fd;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &z_fd) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &z_fd) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	switch (Z_TYPE_P(z_fd)) {
+	switch (Z_TYPE_PP(z_fd)) {
 		case IS_RESOURCE:
-			if (!php_posix_stream_get_fd(z_fd, &fd TSRMLS_CC)) {
+			if (!php_posix_stream_get_fd(*z_fd, &fd TSRMLS_CC)) {
 				RETURN_FALSE;
 			}
 			break;
 		default:
-			convert_to_long(z_fd);
-			fd = Z_LVAL_P(z_fd);
+			convert_to_long_ex(z_fd);
+			fd = Z_LVAL_PP(z_fd);
 	}
 
 	if (NULL == (p = ttyname(fd))) {
@@ -584,22 +584,22 @@ PHP_FUNCTION(posix_ttyname)
    Determine if filedesc is a tty (POSIX.1, 4.7.1) */
 PHP_FUNCTION(posix_isatty)
 {
-	zval *z_fd;
+	zval **z_fd;
 	int fd;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &z_fd) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &z_fd) == FAILURE) {
 		RETURN_FALSE;
 	}
 	
-	switch (Z_TYPE_P(z_fd)) {
+	switch (Z_TYPE_PP(z_fd)) {
 		case IS_RESOURCE:
-			if (!php_posix_stream_get_fd(z_fd, &fd TSRMLS_CC)) {
+			if (!php_posix_stream_get_fd(*z_fd, &fd TSRMLS_CC)) {
 				RETURN_FALSE;
 			}
 			break;
 		default:
-			convert_to_long(z_fd);
-			fd = Z_LVAL_P(z_fd);
+			convert_to_long_ex(z_fd);
+			fd = Z_LVAL_PP(z_fd);
 	}
 
 	if (isatty(fd)) {
