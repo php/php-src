@@ -773,7 +773,7 @@ static X509 * php_openssl_x509_from_zval(zval ** val, int makeresource, long * r
 	}
 
 	/* force it to be a string and check if it refers to a file */
-	convert_to_string(*val);
+	convert_to_string_ex(val);
 
 	if (Z_STRLEN_PP(val) > 7 && memcmp(Z_STRVAL_PP(val), "file://", sizeof("file://") - 1) == 0) {
 		/* read cert from the named file */
@@ -813,19 +813,19 @@ static X509 * php_openssl_x509_from_zval(zval ** val, int makeresource, long * r
 PHP_FUNCTION(openssl_x509_export_to_file)
 {
 	X509 * cert;
-	zval * zcert = NULL;
+	zval ** zcert;
 	zend_bool notext = 1;
 	BIO * bio_out;
 	long certresource;
 	char * filename;
 	int filename_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|b", &zcert, &filename, &filename_len, &notext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zs|b", &zcert, &filename, &filename_len, &notext) == FAILURE) {
 		return;
 	}
 	RETVAL_FALSE;
 
-	cert = php_openssl_x509_from_zval(&zcert, 0, &certresource TSRMLS_CC);
+	cert = php_openssl_x509_from_zval(zcert, 0, &certresource TSRMLS_CC);
 	if (cert == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot get cert from parameter 1");
 		return;
@@ -858,17 +858,17 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 PHP_FUNCTION(openssl_x509_export)
 {
 	X509 * cert;
-	zval * zcert = NULL, *zout=NULL;
+	zval ** zcert, *zout;
 	zend_bool notext = 1;
 	BIO * bio_out;
 	long certresource;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz|b", &zcert, &zout, &notext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zz|b", &zcert, &zout, &notext) == FAILURE) {
 		return;
 	}
 	RETVAL_FALSE;
 
-	cert = php_openssl_x509_from_zval(&zcert, 0, &certresource TSRMLS_CC);
+	cert = php_openssl_x509_from_zval(zcert, 0, &certresource TSRMLS_CC);
 	if (cert == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot get cert from parameter 1");
 		return;
@@ -899,21 +899,21 @@ PHP_FUNCTION(openssl_x509_export)
    Checks if a private key corresponds to a CERT */
 PHP_FUNCTION(openssl_x509_check_private_key)
 {
-	zval * zcert, *zkey;
+	zval ** zcert, **zkey;
 	X509 * cert = NULL;
 	EVP_PKEY * key = NULL;
 	long certresource = -1, keyresource = -1;
 
 	RETVAL_FALSE;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &zcert, &zkey) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZ", &zcert, &zkey) == FAILURE) {
 		return;
 	}
-	cert = php_openssl_x509_from_zval(&zcert, 0, &certresource TSRMLS_CC);
+	cert = php_openssl_x509_from_zval(zcert, 0, &certresource TSRMLS_CC);
 	if (cert == NULL) {
 		RETURN_FALSE;
 	}	
-	key = php_openssl_evp_from_zval(&zkey, 0, "", 1, &keyresource TSRMLS_CC);
+	key = php_openssl_evp_from_zval(zkey, 0, "", 1, &keyresource TSRMLS_CC);
 	if (key) {
 		RETVAL_BOOL(X509_check_private_key(cert, key));
 	}
@@ -931,7 +931,7 @@ PHP_FUNCTION(openssl_x509_check_private_key)
    Returns an array of the fields/values of the CERT */
 PHP_FUNCTION(openssl_x509_parse)
 {
-	zval * zcert;
+	zval ** zcert;
 	X509 * cert = NULL;
 	long certresource = -1;
 	int i;
@@ -942,10 +942,10 @@ PHP_FUNCTION(openssl_x509_parse)
 	ASN1_OCTET_STRING *extdata;
 	char *extname;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &zcert, &useshortnames) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|b", &zcert, &useshortnames) == FAILURE) {
 		return;
 	}
-	cert = php_openssl_x509_from_zval(&zcert, 0, &certresource TSRMLS_CC);
+	cert = php_openssl_x509_from_zval(zcert, 0, &certresource TSRMLS_CC);
 	if (cert == NULL) {
 		RETURN_FALSE;
 	}
@@ -1113,7 +1113,7 @@ static int check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedchain, 
    Checks the CERT to see if it can be used for the purpose in purpose. cainfo holds information about trusted CAs */
 PHP_FUNCTION(openssl_x509_checkpurpose)
 {
-	zval * zcert, * zcainfo = NULL;
+	zval ** zcert, * zcainfo = NULL;
 	X509_STORE * cainfo = NULL;
 	X509 * cert = NULL;
 	long certresource = -1;
@@ -1122,7 +1122,7 @@ PHP_FUNCTION(openssl_x509_checkpurpose)
 	char * untrusted = NULL;
 	int untrusted_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl|a!s", &zcert, &purpose, &zcainfo, &untrusted, &untrusted_len)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zl|a!s", &zcert, &purpose, &zcainfo, &untrusted, &untrusted_len)
 			== FAILURE) {
 		return;
 	}
@@ -1140,7 +1140,7 @@ PHP_FUNCTION(openssl_x509_checkpurpose)
 	if (cainfo == NULL) {
 		goto clean_exit;
 	}
-	cert = php_openssl_x509_from_zval(&zcert, 0, &certresource TSRMLS_CC);
+	cert = php_openssl_x509_from_zval(zcert, 0, &certresource TSRMLS_CC);
 	if (cert == NULL) {
 		goto clean_exit;
 	}
@@ -1231,14 +1231,14 @@ static X509_STORE * setup_verify(zval * calist TSRMLS_DC)
    Reads X.509 certificates */
 PHP_FUNCTION(openssl_x509_read)
 {
-	zval *cert;
+	zval **cert;
 	X509 *x509;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &cert) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &cert) == FAILURE) {
 		return;
 	}
 	Z_TYPE_P(return_value) = IS_RESOURCE;
-	x509 = php_openssl_x509_from_zval(&cert, 1, &Z_LVAL_P(return_value) TSRMLS_CC);
+	x509 = php_openssl_x509_from_zval(cert, 1, &Z_LVAL_P(return_value) TSRMLS_CC);
 
 	if (x509 == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "supplied parameter cannot be coerced into an X509 certificate!");
@@ -1559,7 +1559,7 @@ PHP_FUNCTION(openssl_csr_export)
    Signs a cert with another CERT */
 PHP_FUNCTION(openssl_csr_sign)
 {
-	zval * zcert = NULL, *zcsr, *zpkey, *args = NULL;
+	zval ** zcert = NULL, **zcsr, **zpkey, *args = NULL;
 	long num_days;
 	long serial = 0L;
 	X509 * cert = NULL, *new_cert = NULL;
@@ -1569,25 +1569,25 @@ PHP_FUNCTION(openssl_csr_sign)
 	int i;
 	struct php_x509_request req;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz!zl|a!l", &zcsr, &zcert, &zpkey, &num_days, &args, &serial) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZ!Zl|a!l", &zcsr, &zcert, &zpkey, &num_days, &args, &serial) == FAILURE)
 		return;
 
 	RETVAL_FALSE;
 	PHP_SSL_REQ_INIT(&req);
 	
-	csr = php_openssl_csr_from_zval(&zcsr, 0, &csr_resource TSRMLS_CC);
+	csr = php_openssl_csr_from_zval(zcsr, 0, &csr_resource TSRMLS_CC);
 	if (csr == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot get CSR from parameter 1");
 		return;
 	}
 	if (zcert) {
-		cert = php_openssl_x509_from_zval(&zcert, 0, &certresource TSRMLS_CC);
+		cert = php_openssl_x509_from_zval(zcert, 0, &certresource TSRMLS_CC);
 		if (cert == NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot get cert from parameter 2");
 			goto cleanup;
 		}
 	}
-	priv_key = php_openssl_evp_from_zval(&zpkey, 0, "", 1, &keyresource TSRMLS_CC);
+	priv_key = php_openssl_evp_from_zval(zpkey, 0, "", 1, &keyresource TSRMLS_CC);
 	if (priv_key == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot get private key from parameter 3");
 		goto cleanup;
@@ -2040,7 +2040,7 @@ PHP_FUNCTION(openssl_pkey_new)
 PHP_FUNCTION(openssl_pkey_export_to_file)
 {
 	struct php_x509_request req;
-	zval * zpkey, * args = NULL;
+	zval ** zpkey, * args = NULL;
 	char * passphrase = NULL; int passphrase_len = 0;
 	char * filename = NULL; int filename_len = 0;
 	long key_resource = -1;
@@ -2048,12 +2048,12 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 	BIO * bio_out = NULL;
 	const EVP_CIPHER * cipher;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs|s!a!", &zpkey, &filename, &filename_len, &passphrase, &passphrase_len, &args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zs|s!a!", &zpkey, &filename, &filename_len, &passphrase, &passphrase_len, &args) == FAILURE) {
 		return;
 	}
 	RETVAL_FALSE;
 
-	key = php_openssl_evp_from_zval(&zpkey, 0, passphrase, 0, &key_resource TSRMLS_CC);
+	key = php_openssl_evp_from_zval(zpkey, 0, passphrase, 0, &key_resource TSRMLS_CC);
 
 	if (key == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot get key from parameter 1");
@@ -2096,19 +2096,19 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 PHP_FUNCTION(openssl_pkey_export)
 {
 	struct php_x509_request req;
-	zval * zpkey, * args = NULL, *out;
+	zval ** zpkey, * args = NULL, *out;
 	char * passphrase = NULL; int passphrase_len = 0;
 	long key_resource = -1;
 	EVP_PKEY * key;
 	BIO * bio_out = NULL;
 	const EVP_CIPHER * cipher;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz|s!a!", &zpkey, &out, &passphrase, &passphrase_len, &args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zz|s!a!", &zpkey, &out, &passphrase, &passphrase_len, &args) == FAILURE) {
 		return;
 	}
 	RETVAL_FALSE;
 
-	key = php_openssl_evp_from_zval(&zpkey, 0, passphrase, 0, &key_resource TSRMLS_CC);
+	key = php_openssl_evp_from_zval(zpkey, 0, passphrase, 0, &key_resource TSRMLS_CC);
 
 	if (key == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot get key from parameter 1");
@@ -2152,14 +2152,14 @@ PHP_FUNCTION(openssl_pkey_export)
    Gets public key from X.509 certificate */
 PHP_FUNCTION(openssl_pkey_get_public)
 {
-	zval *cert;
+	zval **cert;
 	EVP_PKEY *pkey;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &cert) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &cert) == FAILURE) {
 		return;
 	}
 	Z_TYPE_P(return_value) = IS_RESOURCE;
-	pkey = php_openssl_evp_from_zval(&cert, 1, NULL, 1, &Z_LVAL_P(return_value) TSRMLS_CC);
+	pkey = php_openssl_evp_from_zval(cert, 1, NULL, 1, &Z_LVAL_P(return_value) TSRMLS_CC);
 
 	if (pkey == NULL) {
 		RETURN_FALSE;
@@ -2186,16 +2186,16 @@ PHP_FUNCTION(openssl_pkey_free)
    Gets private keys */
 PHP_FUNCTION(openssl_pkey_get_private)
 {
-	zval *cert;
+	zval **cert;
 	EVP_PKEY *pkey;
 	char * passphrase = "";
 	int passphrase_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|s", &cert, &passphrase, &passphrase_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|s", &cert, &passphrase, &passphrase_len) == FAILURE) {
 		return;
 	}
 	Z_TYPE_P(return_value) = IS_RESOURCE;
-	pkey = php_openssl_evp_from_zval(&cert, 0, passphrase, 1, &Z_LVAL_P(return_value) TSRMLS_CC);
+	pkey = php_openssl_evp_from_zval(cert, 0, passphrase, 1, &Z_LVAL_P(return_value) TSRMLS_CC);
 
 	if (pkey == NULL) {
 		RETURN_FALSE;
@@ -2321,7 +2321,7 @@ clean_exit:
    Encrypts the message in the file named infile with the certificates in recipcerts and output the result to the file named outfile */
 PHP_FUNCTION(openssl_pkcs7_encrypt)
 {
-	zval * zrecipcerts, * zheaders = NULL;
+	zval ** zrecipcerts, * zheaders = NULL;
 	STACK_OF(X509) * recipcerts = NULL;
 	BIO * infile = NULL, * outfile = NULL;
 	long flags = 0;
@@ -2339,7 +2339,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 	
 	RETVAL_FALSE;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssza!|ll", &infilename, &infilename_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssZa!|ll", &infilename, &infilename_len,
 				&outfilename, &outfilename_len, &zrecipcerts, &zheaders, &flags, &cipherid) == FAILURE)
 		return;
 
@@ -2361,9 +2361,9 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 	recipcerts = sk_X509_new_null();
 
 	/* get certs */
-	if (Z_TYPE_P(zrecipcerts) == IS_ARRAY) {
-		zend_hash_internal_pointer_reset_ex(HASH_OF(zrecipcerts), &hpos);
-		while(zend_hash_get_current_data_ex(HASH_OF(zrecipcerts), (void**)&zcertval, &hpos) == SUCCESS) {
+	if (Z_TYPE_PP(zrecipcerts) == IS_ARRAY) {
+		zend_hash_internal_pointer_reset_ex(HASH_OF(*zrecipcerts), &hpos);
+		while(zend_hash_get_current_data_ex(HASH_OF(*zrecipcerts), (void**)&zcertval, &hpos) == SUCCESS) {
 			long certresource;
 
 			cert = php_openssl_x509_from_zval(zcertval, 0, &certresource TSRMLS_CC);
@@ -2381,13 +2381,13 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 			}
 			sk_X509_push(recipcerts, cert);
 
-			zend_hash_move_forward_ex(HASH_OF(zrecipcerts), &hpos);
+			zend_hash_move_forward_ex(HASH_OF(*zrecipcerts), &hpos);
 		}
 	} else {
 		/* a single certificate */
 		long certresource;
 
-		cert = php_openssl_x509_from_zval(&zrecipcerts, 0, &certresource TSRMLS_CC);
+		cert = php_openssl_x509_from_zval(zrecipcerts, 0, &certresource TSRMLS_CC);
 		if (cert == NULL) {
 			goto clean_exit;
 		}
@@ -2476,7 +2476,7 @@ clean_exit:
 
 PHP_FUNCTION(openssl_pkcs7_sign)
 {
-	zval * zcert, * zprivkey, * zheaders;
+	zval ** zcert, ** zprivkey, * zheaders;
 	zval ** hval;
 	X509 * cert = NULL;
 	EVP_PKEY * privkey = NULL;
@@ -2493,7 +2493,7 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 	char * outfilename;	int outfilename_len;
 	char * extracertsfilename = NULL; int extracertsfilename_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sszza!|ls",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssZZa!|ls",
 				&infilename, &infilename_len, &outfilename, &outfilename_len,
 				&zcert, &zprivkey, &zheaders, &flags, &extracertsfilename,
 				&extracertsfilename_len) == FAILURE) {
@@ -2509,13 +2509,13 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 		}
 	}
 
-	privkey = php_openssl_evp_from_zval(&zprivkey, 0, "", 0, &keyresource TSRMLS_CC);
+	privkey = php_openssl_evp_from_zval(zprivkey, 0, "", 0, &keyresource TSRMLS_CC);
 	if (privkey == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "error getting private key");
 		goto clean_exit;
 	}
 
-	cert = php_openssl_x509_from_zval(&zcert, 0, &certresource TSRMLS_CC);
+	cert = php_openssl_x509_from_zval(zcert, 0, &certresource TSRMLS_CC);
 	if (cert == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "error getting cert");
 		goto clean_exit;
@@ -2587,7 +2587,7 @@ clean_exit:
 
 PHP_FUNCTION(openssl_pkcs7_decrypt)
 {
-	zval * recipcert, * recipkey = NULL;
+	zval ** recipcert, ** recipkey = NULL;
 	X509 * cert = NULL;
 	EVP_PKEY * key = NULL;
 	long certresval, keyresval;
@@ -2596,20 +2596,20 @@ PHP_FUNCTION(openssl_pkcs7_decrypt)
 	char * infilename;	int infilename_len;
 	char * outfilename;	int outfilename_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssz|z", &infilename, &infilename_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssZ|Z", &infilename, &infilename_len,
 				&outfilename, &outfilename_len, &recipcert, &recipkey) == FAILURE) {
 		return;
 	}
 
 	RETVAL_FALSE;
 
-	cert = php_openssl_x509_from_zval(&recipcert, 0, &certresval TSRMLS_CC);
+	cert = php_openssl_x509_from_zval(recipcert, 0, &certresval TSRMLS_CC);
 	if (cert == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to coerce parameter 3 to x509 cert");
 		goto clean_exit;
 	}
 
-	key = php_openssl_evp_from_zval(recipkey ? &recipkey : &recipcert, 0, "", 0, &keyresval TSRMLS_CC);
+	key = php_openssl_evp_from_zval(recipkey ? recipkey : recipcert, 0, "", 0, &keyresval TSRMLS_CC);
 	if (key == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to get private key");
 		goto clean_exit;
@@ -2656,7 +2656,7 @@ clean_exit:
    Encrypts data with private key */
 PHP_FUNCTION(openssl_private_encrypt)
 {
-	zval *key, *crypted;
+	zval **key, *crypted;
 	EVP_PKEY *pkey;
 	int cryptedlen;
 	unsigned char *cryptedbuf = NULL;
@@ -2666,12 +2666,12 @@ PHP_FUNCTION(openssl_private_encrypt)
 	int data_len;
 	long padding = RSA_PKCS1_PADDING;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szz|l", &data, &data_len, &crypted, &key, &padding) == FAILURE) { 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szZ|l", &data, &data_len, &crypted, &key, &padding) == FAILURE) { 
 		return;
 	}
 	RETVAL_FALSE;
 
-	pkey = php_openssl_evp_from_zval(&key, 0, "", 0, &keyresource TSRMLS_CC);
+	pkey = php_openssl_evp_from_zval(key, 0, "", 0, &keyresource TSRMLS_CC);
 
 	if (pkey == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "key param is not a valid private key");
@@ -2714,7 +2714,7 @@ PHP_FUNCTION(openssl_private_encrypt)
    Decrypts data with private key */
 PHP_FUNCTION(openssl_private_decrypt)
 {
-	zval *key, *crypted;
+	zval **key, *crypted;
 	EVP_PKEY *pkey;
 	int cryptedlen;
 	unsigned char *cryptedbuf = NULL;
@@ -2725,12 +2725,12 @@ PHP_FUNCTION(openssl_private_decrypt)
 	char * data;
 	int data_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szz|l", &data, &data_len, &crypted, &key, &padding) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szZ|l", &data, &data_len, &crypted, &key, &padding) == FAILURE) {
 		return;
 	}
 	RETVAL_FALSE;
 
-	pkey = php_openssl_evp_from_zval(&key, 0, "", 0, &keyresource TSRMLS_CC);
+	pkey = php_openssl_evp_from_zval(key, 0, "", 0, &keyresource TSRMLS_CC);
 	if (pkey == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "key parameter is not a valid private key");
 		RETURN_FALSE;
@@ -2780,7 +2780,7 @@ PHP_FUNCTION(openssl_private_decrypt)
    Encrypts data with public key */
 PHP_FUNCTION(openssl_public_encrypt)
 {
-	zval *key, *crypted;
+	zval **key, *crypted;
 	EVP_PKEY *pkey;
 	int cryptedlen;
 	unsigned char *cryptedbuf;
@@ -2790,12 +2790,12 @@ PHP_FUNCTION(openssl_public_encrypt)
 	char * data;
 	int data_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szz|l", &data, &data_len, &crypted, &key, &padding) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szZ|l", &data, &data_len, &crypted, &key, &padding) == FAILURE)
 		return;
 
 	RETVAL_FALSE;
 	
-	pkey = php_openssl_evp_from_zval(&key, 1, NULL, 0, &keyresource TSRMLS_CC);
+	pkey = php_openssl_evp_from_zval(key, 1, NULL, 0, &keyresource TSRMLS_CC);
 	if (pkey == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "key parameter is not a valid public key");
 		RETURN_FALSE;
@@ -2838,7 +2838,7 @@ PHP_FUNCTION(openssl_public_encrypt)
    Decrypts data with public key */
 PHP_FUNCTION(openssl_public_decrypt)
 {
-	zval *key, *crypted;
+	zval **key, *crypted;
 	EVP_PKEY *pkey;
 	int cryptedlen;
 	unsigned char *cryptedbuf = NULL;
@@ -2849,12 +2849,12 @@ PHP_FUNCTION(openssl_public_decrypt)
 	char * data;
 	int data_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szz|l", &data, &data_len, &crypted, &key, &padding) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szZ|l", &data, &data_len, &crypted, &key, &padding) == FAILURE) {
 		return;
 	}
 	RETVAL_FALSE;
 	
-	pkey = php_openssl_evp_from_zval(&key, 1, NULL, 0, &keyresource TSRMLS_CC);
+	pkey = php_openssl_evp_from_zval(key, 1, NULL, 0, &keyresource TSRMLS_CC);
 	if (pkey == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "key parameter is not a valid public key");
 		RETURN_FALSE;
@@ -2926,7 +2926,7 @@ PHP_FUNCTION(openssl_error_string)
    Signs data */
 PHP_FUNCTION(openssl_sign)
 {
-	zval *key, *signature;
+	zval **key, *signature;
 	EVP_PKEY *pkey;
 	int siglen;
 	unsigned char *sigbuf;
@@ -2937,10 +2937,10 @@ PHP_FUNCTION(openssl_sign)
 	long signature_algo = OPENSSL_ALGO_SHA1;
 	EVP_MD *mdtype;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szz|l", &data, &data_len, &signature, &key, &signature_algo) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szZ|l", &data, &data_len, &signature, &key, &signature_algo) == FAILURE) {
 		return;
 	}
-	pkey = php_openssl_evp_from_zval(&key, 0, "", 0, &keyresource TSRMLS_CC);
+	pkey = php_openssl_evp_from_zval(key, 0, "", 0, &keyresource TSRMLS_CC);
 	if (pkey == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "supplied key param cannot be coerced into a private key");
 		RETURN_FALSE;
@@ -2976,7 +2976,7 @@ PHP_FUNCTION(openssl_sign)
    Verifys data */
 PHP_FUNCTION(openssl_verify)
 {
-	zval *key;
+	zval **key;
 	EVP_PKEY *pkey;
 	int err;
 	EVP_MD_CTX     md_ctx;
@@ -2986,7 +2986,7 @@ PHP_FUNCTION(openssl_verify)
 	char * signature;	int signature_len;
 	long signature_algo = OPENSSL_ALGO_SHA1;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssz|l", &data, &data_len, &signature, &signature_len, &key, &signature_algo) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssZ|l", &data, &data_len, &signature, &signature_len, &key, &signature_algo) == FAILURE) {
 		return;
 	}
 
@@ -2996,7 +2996,7 @@ PHP_FUNCTION(openssl_verify)
 		RETURN_FALSE;
 	}
 
-	pkey = php_openssl_evp_from_zval(&key, 1, NULL, 0, &keyresource TSRMLS_CC);
+	pkey = php_openssl_evp_from_zval(key, 1, NULL, 0, &keyresource TSRMLS_CC);
 	if (pkey == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "supplied key param cannot be coerced into a public key");
 		RETURN_FALSE;
@@ -3130,7 +3130,7 @@ clean_exit:
    Opens data */
 PHP_FUNCTION(openssl_open)
 {
-	zval *privkey, *opendata;
+	zval **privkey, *opendata;
 	EVP_PKEY *pkey;
 	int len1, len2;
 	unsigned char *buf;
@@ -3139,11 +3139,11 @@ PHP_FUNCTION(openssl_open)
 	char * data;	int data_len;
 	char * ekey;	int ekey_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szsz", &data, &data_len, &opendata, &ekey, &ekey_len, &privkey) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szsZ", &data, &data_len, &opendata, &ekey, &ekey_len, &privkey) == FAILURE) {
 		return;
 	}
 
-	pkey = php_openssl_evp_from_zval(&privkey, 0, "", 0, &keyresource TSRMLS_CC);
+	pkey = php_openssl_evp_from_zval(privkey, 0, "", 0, &keyresource TSRMLS_CC);
 	if (pkey == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to coerce parameter 4 into a private key");
 		RETURN_FALSE;
