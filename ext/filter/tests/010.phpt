@@ -21,7 +21,7 @@ array(7) {
   [1]=>
   int(1)
   [2]=>
-  int(0)
+  bool(false)
   [3]=>
   int(-23234)
   [4]=>
@@ -38,7 +38,7 @@ array(7) {
   [1]=>
   float(1.7)
   [2]=>
-  float(0)
+  bool(false)
   [3]=>
   float(-23234.123)
   [4]=>
