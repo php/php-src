@@ -173,27 +173,20 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	FETCH_LONG_OPTION(max_range,    "max_range");
 	FETCH_LONG_OPTION(option_flags, "flags");
 
+	len = Z_STRLEN_P(value);
+
+	if (len == 0) {
+		zval_dtor(value);
+		ZVAL_BOOL(value, 0);
+		return;
+	}
+
 	if (option_flags_set && (option_flags & FILTER_FLAG_ALLOW_OCTAL)) {
 		allow_octal = 1;
 	}
 
 	if (option_flags_set && (option_flags & FILTER_FLAG_ALLOW_HEX)) {
 		allow_hex = 1;
-	}
-
-	len = Z_STRLEN_P(value);
-
-	if (len == 0) {
-		if ((min_range_set && (0 < min_range)) || (max_range_set && (0 > max_range))) {
-			zval_dtor(value);
-			ZVAL_BOOL(value, 0);
-			return;
-		} else {
-			zval_dtor(value);
-			Z_TYPE_P(value) = IS_LONG;
-			Z_LVAL_P(value) = 0;
-			return;
-		}
 	}
 
 	/* Start the validating loop */
@@ -245,6 +238,7 @@ void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	} else {
 		zval_dtor(value);
 		ZVAL_BOOL(value, 0);
+		return;
 	}
 
 	/* returns true for "1", "true", "on" and "yes"
@@ -292,8 +286,7 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	if (len < 1) {
 		zval_dtor(value);
-		Z_TYPE_P(value) = IS_DOUBLE;
-		Z_DVAL_P(value) = 0;
+		ZVAL_BOOL(value, 0);
 		return;
 	}
 
