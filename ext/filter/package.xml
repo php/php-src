@@ -44,7 +44,6 @@ of filters and mechanisms that users can use to safely access their input data.
 - Fixed an issue with multiple calls using the same input type (Tony)
 - Fixed leak in sapi filter (Tony, Ilia)
 - Fixed magic_quotes_gpc from being applied when RAW filter is used (Ilia)
-- Implemented PECL req #6641: negative values for hexadecimal and octal numbers are not supported.
 - Added support for custom decimal separator (Pierre)
 - Added support for php pcre expressions (Pierre)
 - Added input_get_args, fetches all input in one call (Pierre)
