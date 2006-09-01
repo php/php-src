@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? Sep 2006, PHP 5.2.0RC4
+
 31 Aug 2006, PHP 5.2.0RC3
 - Updated PCRE to version 6.7. (Ilia)
 - Added SoapServer::setObject() method (it is a simplified version of
