@@ -1,3 +1,12 @@
+2006-08-31  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_alloc.c:
+      Show name of storage layer in case of initialization fault
+
+    * (PHP_5_2)
+      zend_alloc.c:
+      Show name of storage layer in case of initialization fault.
+
 2006-08-30  Antony Dovgal  <antony@zend.com>
 
     * zend_alloc.c

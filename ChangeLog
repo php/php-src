@@ -1,3 +1,183 @@
+2006-08-31  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/standard/credits_ext.h:
+      - updates
+
+    * ext/filter/package.xml:
+      - add new tests to the package.xml
+
+    * ext/filter/CREDITS
+      ext/filter/filter.c
+      ext/filter/filter_private.h
+      ext/filter/package.xml
+      ext/filter/package2.xml
+      ext/filter/tests/035.phpt:
+      - implement FILTER_FLAG_ARRAY/SCALAR in input_get
+      - update changelog
+      - update tests
+
+2006-08-31  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/filter/tests/036.phpt:
+      add test
+
+    * ext/filter/tests/036.phpt
+      ext/filter/tests/036.phpt:
+      
+      new test
+
+    * ext/filter/filter.c:
+      change filters to operate on the copy of data, so multiple filters an be
+      applied one after another
+
+2006-08-31  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/filter/tests/004.phpt
+      ext/filter/tests/007.phpt
+      ext/filter/tests/011.phpt:
+      - skip these tests for RC3
+       - CGI does not read commandline options when it sees REQUES_METHOD
+       - errors are shown two times now, to be checked post RC3
+
+    * (PHP_5_2)
+      ext/filter/logical_filters.c
+      ext/filter/tests/010.phpt
+      ext/filter/tests/013.phpt
+      ext/filter/tests/filter_data.phpt:
+      - MFH: pecl bug #8316,
+        empty strings are not int or float, return false (due to popular demand)
+
+    * ext/filter/logical_filters.c
+      ext/filter/tests/010.phpt
+      ext/filter/tests/013.phpt
+      ext/filter/tests/filter_data.phpt:
+      - pecl bug #8316,
+        empty strings are not int or float, return false (due to popular demand)
+
+2006-08-31  Michael Wallner  <mike@iworks.at>
+
+    * ext/zlib/tests/ob_001.phpt
+      ext/zlib/tests/ob_002.phpt
+      ext/zlib/tests/ob_003.phpt:
+      - fix tests SKIPIF
+
+2006-08-31  Antony Dovgal  <antony@zend.com>
+
+    * ext/imap/php_imap.c
+      ext/imap/php_imap.c
+      ext/mbstring/mbstring.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/oci8_statement.c
+      ext/posix/posix.c
+      ext/posix/posix.c
+      ext/reflection/php_reflection.c
+      ext/reflection/php_reflection.c
+      ext/sockets/sockets.c
+      ext/sockets/sockets.c:
+      last portion of z/Z fixes
+
+2006-08-31  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/filter/tests/035.phpt
+      ext/filter/tests/035.phpt:
+      
+      - add a test for input_get and array
+        This test fails now. When the input variable is an array, its contents
+        is replace by the filter result. To be fixed asap (before 5.2.0)
+
+    * ext/filter/filter_private.h
+      ext/filter/logical_filters.c
+      ext/filter/tests/013.phpt:
+      - MFB:
+       - clean the auto trim (behaves like php_trim now)
+       - simplifies bool
+       - fix octal parsing
+       i- boost int/hex/octal validate_int
+
+    * (PHP_5_2)
+      ext/filter/filter_private.h
+      ext/filter/logical_filters.c
+      ext/filter/tests/013.phpt:
+      - clean the auto trim (behaves like php_trim now)
+      - simplifies bool
+      - fix octal parsing
+      - boost int/hex/octal validate_int
+
+2006-08-31  Antony Dovgal  <antony@zend.com>
+
+    * ext/pcntl/pcntl.c
+      ext/pcntl/pcntl.c:
+      fix typo in errmsg
+
+    * ext/filter/filter.c
+      ext/filter/filter.c:
+      ext/filter z/Z fixes
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.c
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.c
+      ext/standard/string.c
+      ext/standard/string.c:
+      more z/Z fixes
+
+    * ext/tidy/tidy.c:
+      z/Z problem fixes
+
+2006-08-31  Michael Wallner  <mike@iworks.at>
+
+    * ext/zlib/tests/ob_001.phpt
+      ext/zlib/tests/ob_002.phpt
+      ext/zlib/tests/ob_003.phpt:
+      - add basic zlib.output_compression tests
+
+    * ext/zlib/php_zlib.h
+      ext/zlib/zlib.c
+      main/output.c
+      main/php_output.h:
+       - output handler alias ctor should know about chunk_size and flags
+
+2006-08-31  Antony Dovgal  <antony@zend.com>
+
+    * ext/openssl/tests/003.phpt
+      ext/openssl/tests/003.phpt:
+      fix test
+
+    * (PHP_5_2)
+      ext/openssl/openssl.c:
+      MFH: fix problem with mixed arguments accepted as zval* causing
+      leaks/segfaults when converting to other types
+
+    * ext/openssl/openssl.c:
+      fix problem with mixed arguments accepted as zval* causing leaks/segfaults
+      when converting to other types
+
+2006-08-31  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      FastCGI environment variables must not be overriden by system environment
+      variables
+
+    * ZendEngine2/zend_alloc.c:
+      Show name of storage layer in case of initialization fault
+
+    * (PHP_5_2)
+      ZendEngine2/zend_alloc.c:
+      Show name of storage layer in case of initialization fault.
+
+2006-08-31  Antony Dovgal  <antony@zend.com>
+
+    * ext/iconv/iconv.c
+      ext/iconv/iconv.c:
+      minor changes in iconv_substr() to avoid zval converting
+
+    * (PHP_5_2)
+      ext/ctype/ctype.c:
+      fix warnings about nonextistent functions
+
 2006-08-30  Antony Dovgal  <antony@zend.com>
 
     * ext/tidy/php_tidy.h
