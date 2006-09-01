@@ -196,7 +196,7 @@ static int tz_search(char *timezone, int left, int right, const timelib_tzdb *tz
 {
 	int mid, cmp;
 
-	if (left > right) {
+	if (left >= right) {
 		return -1; /* not found */
 	}
  
