@@ -5,5 +5,6 @@ ARG_ENABLE("reflection", "disable reflection support", "yes");
 
 if (PHP_REFLECTION != "no") {
 	EXTENSION("reflection", "php_reflection.c");
+	AC_DEFINE('HAVE_REFLECTION', 1, 'Reflection support enabled');
 }
 
