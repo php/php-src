@@ -151,9 +151,7 @@ $suite = array(
 );
 
 if (XML_SAX_IMPL == 'libxml') {
-  $php = getenv('TEST_PHP_EXECUTABLE');
-  preg_match("/^libxml2 Version.*\$/im", `$php -i`, $match);
-  echo $match[0], "\n";
+  echo "libxml2 Version => " . LIBXML_DOTTED_VERSION. "\n";
 } else {
   echo "libxml2 Version => NONE\n";  
 }
