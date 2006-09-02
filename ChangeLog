@@ -1,3 +1,65 @@
+2006-09-01  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/date/tests/timezones.phpt
+      ext/date/tests/timezones.phpt:
+      
+      file timezones.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/date/lib/parse_tz.c:
+      omg. take #2 to fix the bug. sorry..
+
+    * ext/date/lib/parse_tz.c:
+      MFB: fix possible crash
+
+    * (PHP_5_2)
+      ext/date/lib/parse_tz.c:
+      fix possible crash
+
+2006-09-01  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_5_2)
+      win32/installer/README
+      win32/installer/gen-nsis.php
+      win32/installer/setini.php:
+      MFH: Obsolete, prepaing for new installer script
+
+    * win32/installer/README
+      win32/installer/gen-nsis.php
+      win32/installer/setini.php:
+      Obsolete, prepaing for new installer script
+
+2006-09-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      win32/php4dllts.dsp:
+      PCRE constants
+
+2006-09-01  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_2)
+      configure.in:
+      currently it's RC4-dev
+
+2006-09-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Back to dev
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      5.2.0RC3
+
+2006-09-01  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/filter/package.xml:
+      - this moved out, invalid format
+
 2006-08-31  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * ext/standard/credits_ext.h:
