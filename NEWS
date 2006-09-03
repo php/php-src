@@ -69,8 +69,9 @@ PHP                                                                        NEWS
   . Added support for all supported algorithms in openssl_verify
   . Added openssl_pkey_get_details, returns the details of a key
   . Added x509 v3 extensions support
-  . Added a new constant OPENSSL_KEYTYPE_EC
   . Added openssl_csr_get_subject() and openssl_csr_get_public_key()
+  . Added 3 new contants OPENSSL_VERSION_TEXT and OPENSSL_VERSION_NUMBER
+    and OPENSSL_KEYTYPE_EC
 
 - Fixed overflow on 64bit systems in str_repeat() and wordwrap(). (Stefan E.)
 - Disabled CURLOPT_FOLLOWLOCATION in curl when open_basedir or safe_mode are
