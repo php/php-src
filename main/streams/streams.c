@@ -1526,18 +1526,24 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 	}
 
 	if (protocol)	{
-		if (FAILURE == zend_hash_find(wrapper_hash, (char*)protocol, n, (void**)&wrapperpp))	{
-			char wrapper_name[32];
+		if (FAILURE == zend_hash_find(wrapper_hash, (char*)protocol, n, (void**)&wrapperpp)) {
+			char *tmp = estrndup(protocol, n);
+			php_strtolower(tmp, n);
+			if (FAILURE == zend_hash_find(wrapper_hash, (char*)tmp, n, (void**)&wrapperpp)) {
+				char wrapper_name[32];
 
-			if (n >= sizeof(wrapper_name))
-				n = sizeof(wrapper_name) - 1;
-			PHP_STRLCPY(wrapper_name, protocol, sizeof(wrapper_name), n);
+				efree(tmp);
+				if (n >= sizeof(wrapper_name)) {
+					n = sizeof(wrapper_name) - 1;
+				}
+				PHP_STRLCPY(wrapper_name, protocol, sizeof(wrapper_name), n);
 			
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unable to find the wrapper \"%s\" - did you forget to enable it when you configured PHP?",
-					wrapper_name);
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unable to find the wrapper \"%s\" - did you forget to enable it when you configured PHP?", wrapper_name);
 
-			wrapperpp = NULL;
-			protocol = NULL;
+				wrapperpp = NULL;
+				protocol = NULL;
+			}
+			efree(tmp);
 		}
 	}
 	/* TODO: curl based streams probably support file:// properly */

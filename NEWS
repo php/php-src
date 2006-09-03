@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Sep 2006, PHP 5.2.0RC4
+- Fixed bug #38661 (mixed-case URL breaks url-wrappers). (Ilia)
+
 
 31 Aug 2006, PHP 5.2.0RC3
 - Updated PCRE to version 6.7. (Ilia)
