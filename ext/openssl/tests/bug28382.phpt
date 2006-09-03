@@ -3,6 +3,7 @@
 --SKIPIF--
 <?php 
 if (!extension_loaded("openssl")) die("skip"); 
+if (OPENSSL_VERSION_NUMBER<0x009070af) die("skip");
 ?>
 --FILE--
 <?php
