@@ -1,3 +1,18 @@
+2006-09-02  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_2)
+      ext/reflection/config.w32:
+      - MFH: Add HAVE_REFLECTION define for win32 (by Steph)
+
+    * ext/reflection/config.w32:
+      - Add HAVE_REFLECTION define for win32 (by Steph)
+
+2006-09-02  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ext/xml/tests/bug32001.phpt:
+      fix test
+
 2006-09-01  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * ext/date/tests/timezones.phpt
