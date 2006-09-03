@@ -761,7 +761,7 @@ mysql.default_user =
 ; file will be able to reveal the password as well.
 mysql.default_password =
 
-; Maximum time (in secondes) for connect timeout. -1 means no limit
+; Maximum time (in seconds) for connect timeout. -1 means no limit
 mysql.connect_timeout = 60
 
 ; Trace mode. When trace_mode is active (=On), warnings for table/index scans and
