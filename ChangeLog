@@ -1,3 +1,45 @@
+2006-09-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/streams/streams.c:
+      MFB: Fixed bug #38661 (mixed-case URL breaks url-wrappers).
+
+    * (PHP_5_2)
+      NEWS
+      main/streams/streams.c:
+      Fixed bug #38661 (mixed-case URL breaks url-wrappers).
+
+2006-09-03  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - new openssl constants entry
+
+    * (PHP_5_2)
+      ext/openssl/openssl.c
+      ext/openssl/tests/bug28382.phpt
+      ext/openssl/tests/bug36732.phpt:
+      - add OPENSSL_VERSION_TEXT and OPENSSL_VERSION_NUMBER constants
+      - skip tests if openssl version < 0.9.7j (known to work)
+
+2006-09-03  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_2)
+      php.ini-dist
+      php.ini-recommended:
+      little typo (bug #38531)
+
+2006-09-03  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_2)
+      ext/standard/credits.c:
+      - Remove version number here as already done in HEAD
+
+2006-09-03  Michael Wallner  <mike@iworks.at>
+
+    * ext/date/php_date.c
+      ext/date/php_date.c:
+      - attempt to fix #38696
+
 2006-09-02  Johannes Schlüter  <johannes@schlueters.de>
 
     * (PHP_5_2)
