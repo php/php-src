@@ -15255,39 +15255,6 @@ static int ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_ASSIGN_DIM_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-	zend_op *op_data = opline+1;
-
-	zval **object_ptr;
-
-	if (IS_UNUSED == IS_CV || EX_T(opline->op1.u.var).var.ptr_ptr) {
-		/* not an array offset */
-		object_ptr = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
-	} else {
-		object_ptr = NULL;
-	}
-
-	if (object_ptr && Z_TYPE_PP(object_ptr) == IS_OBJECT) {
-		zend_assign_to_object(&opline->result, object_ptr, &opline->op2, &op_data->op1, EX(Ts), ZEND_ASSIGN_DIM TSRMLS_CC);
-	} else {
-		zend_free_op free_op_data1;
-		zval *value;
-		zval *dim = &opline->op2.u.constant;
-
-		zend_fetch_dimension_address(&EX_T(op_data->op2.u.var), object_ptr, dim, 0, BP_VAR_W TSRMLS_CC);
-
-		value = get_zval_ptr(&op_data->op1, EX(Ts), &free_op_data1, BP_VAR_R);
-	 	zend_assign_to_variable(&opline->result, &op_data->op2, &op_data->op1, value, (IS_TMP_FREE(free_op_data1)?IS_TMP_VAR:op_data->op1.op_type), EX(Ts) TSRMLS_CC);
-	 	FREE_OP_IF_VAR(free_op_data1);
-	}
-
-	/* assign_dim has two opcodes! */
-	ZEND_VM_INC_OPCODE();
-	ZEND_VM_NEXT_OPCODE();
-}
-
 static int ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
@@ -16368,40 +16335,6 @@ static int ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_ASSIGN_DIM_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-	zend_op *op_data = opline+1;
-
-	zval **object_ptr;
-
-	if (IS_UNUSED == IS_CV || EX_T(opline->op1.u.var).var.ptr_ptr) {
-		/* not an array offset */
-		object_ptr = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
-	} else {
-		object_ptr = NULL;
-	}
-
-	if (object_ptr && Z_TYPE_PP(object_ptr) == IS_OBJECT) {
-		zend_assign_to_object(&opline->result, object_ptr, &opline->op2, &op_data->op1, EX(Ts), ZEND_ASSIGN_DIM TSRMLS_CC);
-	} else {
-		zend_free_op free_op2, free_op_data1;
-		zval *value;
-		zval *dim = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
-
-		zend_fetch_dimension_address(&EX_T(op_data->op2.u.var), object_ptr, dim, 1, BP_VAR_W TSRMLS_CC);
-		zval_dtor(free_op2.var);
-
-		value = get_zval_ptr(&op_data->op1, EX(Ts), &free_op_data1, BP_VAR_R);
-	 	zend_assign_to_variable(&opline->result, &op_data->op2, &op_data->op1, value, (IS_TMP_FREE(free_op_data1)?IS_TMP_VAR:op_data->op1.op_type), EX(Ts) TSRMLS_CC);
-	 	FREE_OP_IF_VAR(free_op_data1);
-	}
-
-	/* assign_dim has two opcodes! */
-	ZEND_VM_INC_OPCODE();
-	ZEND_VM_NEXT_OPCODE();
-}
-
 static int ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
@@ -17442,40 +17375,6 @@ static int ZEND_ASSIGN_OBJ_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_ASSIGN_DIM_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-	zend_op *op_data = opline+1;
-
-	zval **object_ptr;
-
-	if (IS_UNUSED == IS_CV || EX_T(opline->op1.u.var).var.ptr_ptr) {
-		/* not an array offset */
-		object_ptr = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
-	} else {
-		object_ptr = NULL;
-	}
-
-	if (object_ptr && Z_TYPE_PP(object_ptr) == IS_OBJECT) {
-		zend_assign_to_object(&opline->result, object_ptr, &opline->op2, &op_data->op1, EX(Ts), ZEND_ASSIGN_DIM TSRMLS_CC);
-	} else {
-		zend_free_op free_op2, free_op_data1;
-		zval *value;
-		zval *dim = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
-
-		zend_fetch_dimension_address(&EX_T(op_data->op2.u.var), object_ptr, dim, 0, BP_VAR_W TSRMLS_CC);
-		if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
-
-		value = get_zval_ptr(&op_data->op1, EX(Ts), &free_op_data1, BP_VAR_R);
-	 	zend_assign_to_variable(&opline->result, &op_data->op2, &op_data->op1, value, (IS_TMP_FREE(free_op_data1)?IS_TMP_VAR:op_data->op1.op_type), EX(Ts) TSRMLS_CC);
-	 	FREE_OP_IF_VAR(free_op_data1);
-	}
-
-	/* assign_dim has two opcodes! */
-	ZEND_VM_INC_OPCODE();
-	ZEND_VM_NEXT_OPCODE();
-}
-
 static int ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
@@ -18128,39 +18027,6 @@ static int ZEND_ASSIGN_BW_AND_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARG
 static int ZEND_ASSIGN_BW_XOR_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-}
-
-static int ZEND_ASSIGN_DIM_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-	zend_op *op_data = opline+1;
-
-	zval **object_ptr;
-
-	if (IS_UNUSED == IS_CV || EX_T(opline->op1.u.var).var.ptr_ptr) {
-		/* not an array offset */
-		object_ptr = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
-	} else {
-		object_ptr = NULL;
-	}
-
-	if (object_ptr && Z_TYPE_PP(object_ptr) == IS_OBJECT) {
-		zend_assign_to_object(&opline->result, object_ptr, &opline->op2, &op_data->op1, EX(Ts), ZEND_ASSIGN_DIM TSRMLS_CC);
-	} else {
-		zend_free_op free_op_data1;
-		zval *value;
-		zval *dim = NULL;
-
-		zend_fetch_dimension_address(&EX_T(op_data->op2.u.var), object_ptr, dim, 0, BP_VAR_W TSRMLS_CC);
-
-		value = get_zval_ptr(&op_data->op1, EX(Ts), &free_op_data1, BP_VAR_R);
-	 	zend_assign_to_variable(&opline->result, &op_data->op2, &op_data->op1, value, (IS_TMP_FREE(free_op_data1)?IS_TMP_VAR:op_data->op1.op_type), EX(Ts) TSRMLS_CC);
-	 	FREE_OP_IF_VAR(free_op_data1);
-	}
-
-	/* assign_dim has two opcodes! */
-	ZEND_VM_INC_OPCODE();
-	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -18886,39 +18752,6 @@ static int ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_assign_to_object(&opline->result, object_ptr, &opline->op2, &op_data->op1, EX(Ts), ZEND_ASSIGN_OBJ TSRMLS_CC);
 
 	/* assign_obj has two opcodes! */
-	ZEND_VM_INC_OPCODE();
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static int ZEND_ASSIGN_DIM_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-	zend_op *op_data = opline+1;
-
-	zval **object_ptr;
-
-	if (IS_UNUSED == IS_CV || EX_T(opline->op1.u.var).var.ptr_ptr) {
-		/* not an array offset */
-		object_ptr = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
-	} else {
-		object_ptr = NULL;
-	}
-
-	if (object_ptr && Z_TYPE_PP(object_ptr) == IS_OBJECT) {
-		zend_assign_to_object(&opline->result, object_ptr, &opline->op2, &op_data->op1, EX(Ts), ZEND_ASSIGN_DIM TSRMLS_CC);
-	} else {
-		zend_free_op free_op_data1;
-		zval *value;
-		zval *dim = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
-
-		zend_fetch_dimension_address(&EX_T(op_data->op2.u.var), object_ptr, dim, 0, BP_VAR_W TSRMLS_CC);
-
-		value = get_zval_ptr(&op_data->op1, EX(Ts), &free_op_data1, BP_VAR_R);
-	 	zend_assign_to_variable(&opline->result, &op_data->op2, &op_data->op1, value, (IS_TMP_FREE(free_op_data1)?IS_TMP_VAR:op_data->op1.op_type), EX(Ts) TSRMLS_CC);
-	 	FREE_OP_IF_VAR(free_op_data1);
-	}
-
-	/* assign_dim has two opcodes! */
 	ZEND_VM_INC_OPCODE();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -30623,11 +30456,11 @@ void zend_init_opcodes_handlers()
   	ZEND_ASSIGN_DIM_SPEC_VAR_VAR_HANDLER,
   	ZEND_ASSIGN_DIM_SPEC_VAR_UNUSED_HANDLER,
   	ZEND_ASSIGN_DIM_SPEC_VAR_CV_HANDLER,
-  	ZEND_ASSIGN_DIM_SPEC_UNUSED_CONST_HANDLER,
-  	ZEND_ASSIGN_DIM_SPEC_UNUSED_TMP_HANDLER,
-  	ZEND_ASSIGN_DIM_SPEC_UNUSED_VAR_HANDLER,
-  	ZEND_ASSIGN_DIM_SPEC_UNUSED_UNUSED_HANDLER,
-  	ZEND_ASSIGN_DIM_SPEC_UNUSED_CV_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
   	ZEND_ASSIGN_DIM_SPEC_CV_CONST_HANDLER,
   	ZEND_ASSIGN_DIM_SPEC_CV_TMP_HANDLER,
   	ZEND_ASSIGN_DIM_SPEC_CV_VAR_HANDLER,
