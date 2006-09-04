@@ -363,7 +363,7 @@ PHP_FUNCTION(readline_write_history)
 /* {{{ proto bool readline_completion_function(string funcname) 
    Readline completion function? */
 
-static char *_readline_command_generator(char *text,int state)
+static char *_readline_command_generator(const char *text, int state)
 {
 	HashTable  *myht = Z_ARRVAL(_readline_array);
 	zval **entry;
