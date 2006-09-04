@@ -105,10 +105,11 @@ php_output_handler *php_zlib_output_handler_init(zval *handler_name, size_t chun
 {
 	php_output_handler *h = NULL;
 	
-	if (php_zlib_output_encoding(TSRMLS_C)) {
-		if ((h = php_output_handler_create_internal(handler_name, php_zlib_output_handler, chunk_size, flags TSRMLS_CC))) {
-			php_output_handler_set_context(h, ecalloc(1, sizeof(php_zlib_context)), php_zlib_output_handler_dtor TSRMLS_CC);
-		}
+	if (!ZLIBG(output_compression)) {
+		ZLIBG(output_compression) = chunk_size ? chunk_size : PHP_OUTPUT_HANDLER_DEFAULT_SIZE;
+	}
+	if ((h = php_output_handler_create_internal(handler_name, php_zlib_output_handler, chunk_size, flags TSRMLS_CC))) {
+		php_output_handler_set_context(h, ecalloc(1, sizeof(php_zlib_context)), php_zlib_output_handler_dtor TSRMLS_CC);
 	}
 	
 	return h;
@@ -119,7 +120,7 @@ php_output_handler *php_zlib_output_handler_init(zval *handler_name, size_t chun
 int php_zlib_output_handler(void **handler_context, php_output_context *output_context)
 {
 	php_zlib_context *ctx = *(php_zlib_context **) handler_context;
-	int flags = Z_SYNC_FLUSH, status;
+	int flags = Z_SYNC_FLUSH;
 	PHP_OUTPUT_TSRMLS(output_context);
 	
 	if (!php_zlib_output_encoding(TSRMLS_C)) {
@@ -180,7 +181,7 @@ int php_zlib_output_handler(void **handler_context, php_output_context *output_c
 			flags = Z_FULL_FLUSH;
 		}
 		
-		switch ((status = deflate(&ctx->Z, flags))) {
+		switch (deflate(&ctx->Z, flags)) {
 			case Z_OK:
 				if (flags == Z_FINISH) {
 					deflateEnd(&ctx->Z);
@@ -629,7 +630,7 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 {
 	int status, int_value;
 	char *ini_value;
-
+	
 	if (new_value == NULL) {
 		return FAILURE;
 	}
