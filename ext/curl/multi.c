@@ -62,7 +62,7 @@ PHP_FUNCTION(curl_multi_init)
 	mh = ecalloc(1, sizeof(php_curlm));
 	mh->multi = curl_multi_init();
 
-	zend_llist_init(&mh->easyh, sizeof(zval *), (llist_dtor_func_t) ZVAL_PTR_DTOR, 0);
+	zend_llist_init(&mh->easyh, sizeof(zval *), (llist_dtor_func_t) NULL, 0);
 
 	ZEND_REGISTER_RESOURCE(return_value, mh, le_curl_multi_handle);
 }
@@ -76,6 +76,7 @@ PHP_FUNCTION(curl_multi_add_handle)
 	zval      *z_ch;
 	php_curlm *mh;
 	php_curl  *ch;
+	zval tmp_val;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr", &z_mh, &z_ch) == FAILURE) {
 		return;
@@ -87,11 +88,11 @@ PHP_FUNCTION(curl_multi_add_handle)
 	_php_curl_cleanup_handle(ch);
 	ch->uses++;
 
-	/* we want to create a copy of this zval that we store in the multihandle
-	   structure element "easyh" - so we separate it from the original
-	   input zval to this function using SEPARATE_ZVAL */
-	SEPARATE_ZVAL( &z_ch );
-	zend_llist_add_element(&mh->easyh, &z_ch);
+	/* we want to create a copy of this zval that we store in the multihandle structure element "easyh" */
+	tmp_val = *z_ch;
+	zval_copy_ctor(&tmp_val);
+
+	zend_llist_add_element(&mh->easyh, &tmp_val);
 
 	RETURN_LONG((long) curl_multi_add_handle(mh->multi, ch->cp));	
 }
@@ -99,11 +100,11 @@ PHP_FUNCTION(curl_multi_add_handle)
 
 
 /* Used internally as comparison routine passed to zend_list_del_element */
-static int curl_compare_resources( zval **z1, zval **z2 )
+static int curl_compare_resources( zval *z1, zval **z2 )
 {
-	return (Z_TYPE_PP( z1 ) == Z_TYPE_PP( z2 ) && 
-            Z_TYPE_PP( z1 ) == IS_RESOURCE     &&
-            Z_LVAL_PP( z1 ) == Z_LVAL_PP( z2 ) );
+	return (Z_TYPE_P( z1 ) == Z_TYPE_PP( z2 ) && 
+            Z_TYPE_P( z1 ) == IS_RESOURCE     &&
+            Z_LVAL_P( z1 ) == Z_LVAL_PP( z2 ) );
 }
 
 
