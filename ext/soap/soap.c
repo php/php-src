@@ -5034,6 +5034,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level)
 				     type->kind == XSD_TYPEKIND_EXTENSION) && type->encode) {
 					encodePtr enc = type->encode;
 					while (enc && enc->details.sdl_type &&
+					       enc != enc->details.sdl_type->encode &&
 					       enc->details.sdl_type->kind != XSD_TYPEKIND_SIMPLE &&
 					       enc->details.sdl_type->kind != XSD_TYPEKIND_LIST &&
 					       enc->details.sdl_type->kind != XSD_TYPEKIND_UNION) {
