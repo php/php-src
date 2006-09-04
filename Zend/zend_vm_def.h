@@ -1399,7 +1399,7 @@ ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|UNUSED|CV)
+ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 {
 	zend_op *opline = EX(opline);
 	zend_op *op_data = opline+1;
@@ -1408,7 +1408,7 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|UNUSED|CV)
 
 	if (OP1_TYPE == IS_CV || EX_T(opline->op1.u.var).var.ptr_ptr) {
 		/* not an array offset */
-		object_ptr = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_W);
+		object_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_W);
 	} else {
 		object_ptr = NULL;
 	}
