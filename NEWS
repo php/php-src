@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Sep 2006, PHP 5.2.0RC4
+- Fixed bug #38700 (SoapClient::__getTypes never returns). (Dmitry)
 - Fixed bug #38661 (mixed-case URL breaks url-wrappers). (Ilia)
 
 
