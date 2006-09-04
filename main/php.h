@@ -380,10 +380,6 @@ END_EXTERN_C()
 #include "main/php_output.h"
 
 
-#ifdef ZTS
-#define VIRTUAL_DIR
-#endif
-
 #include "php_streams.h"
 #include "php_memory_streams.h"
 #include "fopen_wrappers.h"
