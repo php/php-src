@@ -37,8 +37,14 @@
 #include <stdarg.h>
 #endif
 
+#ifdef ZTS
+#define VIRTUAL_DIR
+#endif
+
 #ifndef TSRM_WIN32
 #include <unistd.h>
+#else
+#include <direct.h>
 #endif
 
 #if defined(__osf__) || defined(_AIX)

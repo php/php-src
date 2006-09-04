@@ -398,10 +398,6 @@ END_EXTERN_C()
 
 #define PUTC_H(c)					(php_header_write(&(c), 1 TSRMLS_CC), (c))
 
-#ifdef ZTS
-#define VIRTUAL_DIR
-#endif
-
 #include "php_streams.h"
 #include "php_memory_streams.h"
 #include "fopen_wrappers.h"
