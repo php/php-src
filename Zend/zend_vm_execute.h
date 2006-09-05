@@ -1937,19 +1937,23 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				char cwd[MAXPATHLEN];
 				cwd_state state;
 
+#ifndef PHP_WIN32
 				if (IS_ABSOLUTE_PATH(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename))) {
 					cwd[0] = '\0';
 				} else if (!VCWD_GETCWD(cwd, MAXPATHLEN)) {
 					cwd[0] = '\0';
 				}
-
+#endif
 				state.cwd_length = strlen(cwd);
 				state.cwd = zend_strndup(cwd, state.cwd_length);
 
-				if (!virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
+#ifndef PHP_WIN32
+				if (state.cwd_length > 0 && !virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
 				    zend_hash_exists(&EG(included_files), state.cwd, state.cwd_length+1)) {
 					failure_retval=1;
-				} else if (SUCCESS == zend_stream_open(Z_STRVAL_P(inc_filename), &file_handle TSRMLS_CC)) {
+				} else
+#endif
+				if (SUCCESS == zend_stream_open(Z_STRVAL_P(inc_filename), &file_handle TSRMLS_CC)) {
 
 					if (!file_handle.opened_path) {
 						file_handle.opened_path = estrndup(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename));
@@ -4455,19 +4459,23 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				char cwd[MAXPATHLEN];
 				cwd_state state;
 
+#ifndef PHP_WIN32
 				if (IS_ABSOLUTE_PATH(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename))) {
 					cwd[0] = '\0';
 				} else if (!VCWD_GETCWD(cwd, MAXPATHLEN)) {
 					cwd[0] = '\0';
 				}
-
+#endif
 				state.cwd_length = strlen(cwd);
 				state.cwd = zend_strndup(cwd, state.cwd_length);
 
-				if (!virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
+#ifndef PHP_WIN32
+				if (state.cwd_length > 0 && !virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
 				    zend_hash_exists(&EG(included_files), state.cwd, state.cwd_length+1)) {
 					failure_retval=1;
-				} else if (SUCCESS == zend_stream_open(Z_STRVAL_P(inc_filename), &file_handle TSRMLS_CC)) {
+				} else
+#endif
+				if (SUCCESS == zend_stream_open(Z_STRVAL_P(inc_filename), &file_handle TSRMLS_CC)) {
 
 					if (!file_handle.opened_path) {
 						file_handle.opened_path = estrndup(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename));
@@ -7555,19 +7563,23 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				char cwd[MAXPATHLEN];
 				cwd_state state;
 
+#ifndef PHP_WIN32
 				if (IS_ABSOLUTE_PATH(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename))) {
 					cwd[0] = '\0';
 				} else if (!VCWD_GETCWD(cwd, MAXPATHLEN)) {
 					cwd[0] = '\0';
 				}
-
+#endif
 				state.cwd_length = strlen(cwd);
 				state.cwd = zend_strndup(cwd, state.cwd_length);
 
-				if (!virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
+#ifndef PHP_WIN32
+				if (state.cwd_length > 0 && !virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
 				    zend_hash_exists(&EG(included_files), state.cwd, state.cwd_length+1)) {
 					failure_retval=1;
-				} else if (SUCCESS == zend_stream_open(Z_STRVAL_P(inc_filename), &file_handle TSRMLS_CC)) {
+				} else
+#endif
+				if (SUCCESS == zend_stream_open(Z_STRVAL_P(inc_filename), &file_handle TSRMLS_CC)) {
 
 					if (!file_handle.opened_path) {
 						file_handle.opened_path = estrndup(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename));
@@ -19951,19 +19963,23 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				char cwd[MAXPATHLEN];
 				cwd_state state;
 
+#ifndef PHP_WIN32
 				if (IS_ABSOLUTE_PATH(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename))) {
 					cwd[0] = '\0';
 				} else if (!VCWD_GETCWD(cwd, MAXPATHLEN)) {
 					cwd[0] = '\0';
 				}
-
+#endif
 				state.cwd_length = strlen(cwd);
 				state.cwd = zend_strndup(cwd, state.cwd_length);
 
-				if (!virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
+#ifndef PHP_WIN32
+				if (state.cwd_length > 0 && !virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
 				    zend_hash_exists(&EG(included_files), state.cwd, state.cwd_length+1)) {
 					failure_retval=1;
-				} else if (SUCCESS == zend_stream_open(Z_STRVAL_P(inc_filename), &file_handle TSRMLS_CC)) {
+				} else
+#endif
+				if (SUCCESS == zend_stream_open(Z_STRVAL_P(inc_filename), &file_handle TSRMLS_CC)) {
 
 					if (!file_handle.opened_path) {
 						file_handle.opened_path = estrndup(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename));
