@@ -2824,7 +2824,7 @@ PHP_FUNCTION(mb_encode_mimeheader)
 	int trans_enc_name_len;
 	char *linefeed = "\r\n";
 	int linefeed_len;
-	int indent = 0;
+	long indent = 0;
 
 	mbfl_string_init(&string);
 	string.no_language = MBSTRG(current_language);
