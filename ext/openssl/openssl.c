@@ -1339,7 +1339,8 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 		/* apply values from the dn hash */
 		zend_hash_internal_pointer_reset_ex(HASH_OF(dn), &hpos);
 		while(zend_hash_get_current_data_ex(HASH_OF(dn), (void**)&item, &hpos) == SUCCESS) {
-			char * strindex; uint strindexlen;
+			char * strindex = NULL; 
+			uint strindexlen = 0;
 			ulong intindex;
 			
 			zend_hash_get_current_key_ex(HASH_OF(dn), &strindex, &strindexlen, &intindex, 0, &hpos);
