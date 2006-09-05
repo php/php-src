@@ -223,7 +223,6 @@ static char *php_tidy_file_to_mem(char *, zend_bool, int * TSRMLS_DC);
 static void tidy_object_free_storage(void * TSRMLS_DC);
 static zend_object_value tidy_object_new_node(zend_class_entry * TSRMLS_DC);
 static zend_object_value tidy_object_new_doc(zend_class_entry * TSRMLS_DC);
-static zend_object_value tidy_object_new_exception(zend_class_entry * TSRMLS_DC);
 static zend_class_entry *tidy_get_ce_node(zval * TSRMLS_DC);
 static zend_class_entry *tidy_get_ce_doc(zval * TSRMLS_DC);
 static zval * tidy_instanciate(zend_class_entry *, zval * TSRMLS_DC);
@@ -370,7 +369,6 @@ zend_class_entry *tidy_ce_doc, *tidy_ce_node, *tidy_ce_exception;
 
 static zend_object_handlers tidy_object_handlers_doc;
 static zend_object_handlers tidy_object_handlers_node;
-static zend_object_handlers tidy_object_handlers_exception;
 
 zend_module_entry tidy_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -679,13 +677,6 @@ static zend_object_value tidy_object_new_doc(zend_class_entry *class_type TSRMLS
 {
 	zend_object_value retval;
 	tidy_object_new(class_type, &tidy_object_handlers_doc, &retval, is_doc TSRMLS_CC);
-	return retval;
-}
-
-static zend_object_value tidy_object_new_exception(zend_class_entry *class_type TSRMLS_DC)
-{
-	zend_object_value retval;
-	tidy_object_new(class_type, &tidy_object_handlers_exception, &retval, is_exception TSRMLS_CC);
 	return retval;
 }
 
@@ -1670,34 +1661,6 @@ static TIDY_NODE_METHOD(isHtml)
 	}
 
 	RETURN_FALSE;
-}
-/* }}} */
-
-/* {{{ proto boolean tidyNode::isXhtml()
-   Returns true if this node is part of a XHTML document */
-static TIDY_NODE_METHOD(isXhtml)
-{
-	TIDY_FETCH_ONLY_OBJECT;
-
-	if (tidyDetectedXhtml(obj->ptdoc->doc)) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
-}
-/* }}} */
-
-/* {{{ proto boolean tidyNode::isXml()
-   Returns true if this node is part of a XML document */
-static TIDY_NODE_METHOD(isXml)
-{
-	TIDY_FETCH_ONLY_OBJECT;
-
-	if (tidyDetectedGenericXml(obj->ptdoc->doc)) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
 }
 /* }}} */
 
