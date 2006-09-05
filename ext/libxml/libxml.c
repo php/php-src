@@ -705,7 +705,7 @@ PHP_FUNCTION(libxml_set_streams_context)
 PHP_FUNCTION(libxml_use_internal_errors)
 {
 	xmlStructuredErrorFunc current_handler;
-	int use_errors=0, retval;
+	zend_bool use_errors=0, retval;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &use_errors) == FAILURE) {
 		return;

@@ -1366,7 +1366,7 @@ PHP_FUNCTION(time)
 PHP_FUNCTION(localtime)
 {
 	long timestamp = (long)time(NULL);
-	int associative = 0;
+	zend_bool associative = 0;
 	timelib_tzinfo *tzi;
 	timelib_time   *ts;
 
