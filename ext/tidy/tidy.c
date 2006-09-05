@@ -30,9 +30,6 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 
-#include "Zend/zend_exceptions.h"
-#include "Zend/zend_object_handlers.h"
-
 #include "tidy.h"
 #include "buffio.h"
 
@@ -223,7 +220,6 @@ static char *php_tidy_file_to_mem(char *, zend_bool, int * TSRMLS_DC);
 static void tidy_object_free_storage(void * TSRMLS_DC);
 static zend_object_value tidy_object_new_node(zend_class_entry * TSRMLS_DC);
 static zend_object_value tidy_object_new_doc(zend_class_entry * TSRMLS_DC);
-static zend_object_value tidy_object_new_exception(zend_class_entry * TSRMLS_DC);
 static zend_class_entry *tidy_get_ce_node(zval * TSRMLS_DC);
 static zend_class_entry *tidy_get_ce_doc(zval * TSRMLS_DC);
 static zval * tidy_instanciate(zend_class_entry *, zval * TSRMLS_DC);
@@ -237,6 +233,56 @@ static int _php_tidy_set_tidy_opt(TidyDoc, char *, zval * TSRMLS_DC);
 static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options TSRMLS_DC);
 static void _php_tidy_register_nodetypes(INIT_FUNC_ARGS);
 static void _php_tidy_register_tags(INIT_FUNC_ARGS);
+
+static PHP_MINIT_FUNCTION(tidy);
+static PHP_MSHUTDOWN_FUNCTION(tidy);
+static PHP_RINIT_FUNCTION(tidy);
+static PHP_MINFO_FUNCTION(tidy);
+
+static PHP_FUNCTION(tidy_getopt);
+static PHP_FUNCTION(tidy_parse_string);
+static PHP_FUNCTION(tidy_parse_file);
+static PHP_FUNCTION(tidy_clean_repair);
+static PHP_FUNCTION(tidy_repair_string);
+static PHP_FUNCTION(tidy_repair_file);
+static PHP_FUNCTION(tidy_diagnose);
+static PHP_FUNCTION(tidy_get_output);
+static PHP_FUNCTION(tidy_get_error_buffer);
+static PHP_FUNCTION(tidy_get_release);
+static PHP_FUNCTION(tidy_reset_config);
+static PHP_FUNCTION(tidy_get_config);
+static PHP_FUNCTION(tidy_get_status);
+static PHP_FUNCTION(tidy_get_html_ver);
+#if HAVE_TIDYOPTGETDOC
+static PHP_FUNCTION(tidy_get_opt_doc);
+#endif
+static PHP_FUNCTION(tidy_is_xhtml);
+static PHP_FUNCTION(tidy_is_xml);
+static PHP_FUNCTION(tidy_error_count);
+static PHP_FUNCTION(tidy_warning_count);
+static PHP_FUNCTION(tidy_access_count);
+static PHP_FUNCTION(tidy_config_count);
+
+static PHP_FUNCTION(ob_tidyhandler);
+
+static PHP_FUNCTION(tidy_get_root);
+static PHP_FUNCTION(tidy_get_html);
+static PHP_FUNCTION(tidy_get_head);
+static PHP_FUNCTION(tidy_get_body);
+
+static TIDY_DOC_METHOD(__construct);
+static TIDY_DOC_METHOD(parseFile);
+static TIDY_DOC_METHOD(parseString);
+
+static TIDY_NODE_METHOD(hasChildren);
+static TIDY_NODE_METHOD(hasSiblings);
+static TIDY_NODE_METHOD(isComment);
+static TIDY_NODE_METHOD(isHtml);
+static TIDY_NODE_METHOD(isText);
+static TIDY_NODE_METHOD(isJste);
+static TIDY_NODE_METHOD(isAsp);
+static TIDY_NODE_METHOD(isPhp);
+static TIDY_NODE_METHOD(getParent);
 /* }}} */
 
 ZEND_DECLARE_MODULE_GLOBALS(tidy)
@@ -303,7 +349,6 @@ static zend_function_entry tidy_funcs_doc[] = {
 };
 
 static zend_function_entry tidy_funcs_node[] = {
-	TIDY_NODE_ME(__construct, NULL)
 	TIDY_NODE_ME(hasChildren, NULL)
 	TIDY_NODE_ME(hasSiblings, NULL)
 	TIDY_NODE_ME(isComment, NULL)
@@ -316,11 +361,10 @@ static zend_function_entry tidy_funcs_node[] = {
 	{NULL, NULL, NULL}
 };
 
-zend_class_entry *tidy_ce_doc, *tidy_ce_node, *tidy_ce_exception;
+static zend_class_entry *tidy_ce_doc, *tidy_ce_node;
 
 static zend_object_handlers tidy_object_handlers_doc;
 static zend_object_handlers tidy_object_handlers_node;
-static zend_object_handlers tidy_object_handlers_exception;
 
 zend_module_entry tidy_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -608,13 +652,6 @@ static zend_object_value tidy_object_new_doc(zend_class_entry *class_type TSRMLS
 {
 	zend_object_value retval;
 	tidy_object_new(class_type, &tidy_object_handlers_doc, &retval, is_doc TSRMLS_CC);
-	return retval;
-}
-
-static zend_object_value tidy_object_new_exception(zend_class_entry *class_type TSRMLS_DC)
-{
-	zend_object_value retval;
-	tidy_object_new(class_type, &tidy_object_handlers_exception, &retval, is_exception TSRMLS_CC);
 	return retval;
 }
 
@@ -1555,13 +1592,6 @@ static PHP_FUNCTION(tidy_get_body)
 }
 /* }}} */
 
-/* {{{ proto tidyNode::tidyNode()
-   Constructor. */
-static TIDY_NODE_METHOD(__construct)
-{	
-}
-/* }}} */
-
 /* {{{ proto bool tidyNode::hasChildren() U
    Returns true if this node has children */
 static TIDY_NODE_METHOD(hasChildren)
@@ -1615,34 +1645,6 @@ static TIDY_NODE_METHOD(isHtml)
 	}
 
 	RETURN_FALSE;
-}
-/* }}} */
-
-/* {{{ proto bool tidyNode::isXhtml() U
-   Returns true if this node is part of a XHTML document */
-static TIDY_NODE_METHOD(isXhtml)
-{
-	TIDY_FETCH_ONLY_OBJECT;
-
-	if (tidyDetectedXhtml(obj->ptdoc->doc)) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
-}
-/* }}} */
-
-/* {{{ proto bool tidyNode::isXml() U
-   Returns true if this node is part of a XML document */
-static TIDY_NODE_METHOD(isXml)
-{
-	TIDY_FETCH_ONLY_OBJECT;
-
-	if (tidyDetectedGenericXml(obj->ptdoc->doc)) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
 }
 /* }}} */
 
