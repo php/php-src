@@ -358,7 +358,7 @@ static zend_function_entry tidy_funcs_node[] = {
 	{NULL, NULL, NULL}
 };
 
-zend_class_entry *tidy_ce_doc, *tidy_ce_node, *tidy_ce_exception;
+static zend_class_entry *tidy_ce_doc, *tidy_ce_node;
 
 static zend_object_handlers tidy_object_handlers_doc;
 static zend_object_handlers tidy_object_handlers_node;
