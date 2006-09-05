@@ -1,3 +1,11 @@
+2006-09-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      Removed unreachable handlers
+
 2006-08-31  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_alloc.c:

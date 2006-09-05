@@ -1,3 +1,61 @@
+2006-09-04  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/readline/readline.c
+      ext/standard/filters.c:
+      MFB: fix gcc warning
+
+    * (PHP_5_2)
+      ext/readline/readline.c
+      ext/standard/filters.c:
+      fix gcc warning
+
+2006-09-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/curl/multi.c:
+      MFB: Fixed bug #38693 (curl_multi_add_handle() set curl handle to null).
+
+    * (PHP_5_2)
+      NEWS
+      ext/curl/multi.c:
+      Fixed bug #38693 (curl_multi_add_handle() set curl handle to null).
+
+2006-09-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h:
+      Removed unreachable handlers
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/soap.c
+      ext/soap/soap.c:
+      Fixed bug #38700 (SoapClient::__getTypes never returns)
+
+2006-09-04  Michael Wallner  <mike@iworks.at>
+
+    * ext/zlib/zlib.c
+      ext/zlib/tests/ob_004.phpt
+      ext/zlib/tests/ob_005.phpt:
+      - fix issues with ob_start("ob_gzhandler")
+      - add tests
+
+2006-09-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * TSRM/tsrm_virtual_cwd.h
+      TSRM/tsrm_virtual_cwd.h
+      main/php.h
+      main/php.h:
+      Fixed VIRTUAL_DIR inconsistency
+
+    * sapi/cgi/fastcgi.c:
+      Fixed "signed/unsigned mismatch" warning
+
+    * (PHP_5_2)
+      sapi/cgi/fastcgi.c:
+      Fixed "signed/unsigned mismatch" warning.
+
 2006-09-03  Ilia Alshanetsky  <ilia@prohost.org>
 
     * main/streams/streams.c:
