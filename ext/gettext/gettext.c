@@ -327,7 +327,7 @@ PHP_NAMED_FUNCTION(zif_dcngettext)
 
 	RETVAL_FALSE;
 
-	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(4, &domain, &msgid1, &msgid2, &count, &category) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &domain, &msgid1, &msgid2, &count, &category) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
 		char* msgstr = NULL;
