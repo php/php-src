@@ -1,49 +1,36 @@
 --TEST--
-tidy and tidyNode OO
+OO API
 --SKIPIF--
-<?php if (!extension_loaded('tidy')) echo 'skip'; ?>
+<?php if (!extension_loaded("tidy")) print "skip"; ?>
 --FILE--
 <?php
 
-//test leaks here:
-new tidyNode();
-var_dump(new tidyNode());
-new tidy();
-var_dump(new tidy());
-
-echo "-------\n";
-
-$x = new tidyNode();
-var_dump($x->isHtml());
-
 $tidy = new tidy();
-$tidy->parseString('<html><?php echo "xpto;" ?></html>');
+$str  = <<<EOF
+<p>Isto é um texto em Português<br>
+para testes.</p>
+EOF;
 
-var_dump(tidy_get_root($tidy)->child[0]->isHtml());
-var_dump(tidy_get_root($tidy)->child[0]->child[0]->isPHP());
-var_dump(tidy_get_root($tidy)->child[0]->child[0]->isAsp());
-var_dump(tidy_get_root($tidy)->child[0]->child[0]->isJste());
-var_dump(tidy_get_root($tidy)->child[0]->child[0]->type === TIDY_NODETYPE_PHP);
+$tidy->parseString($str, array('output-xhtml'=>1), 'latin1');
+$tidy->cleanRepair();
+$tidy->diagnose();
+var_dump(tidy_warning_count($tidy) > 0);
+var_dump(strlen($tidy->errorBuffer) > 50);
 
-var_dump(tidy_get_root($tidy)->child[0]->hasChildren());
-var_dump(tidy_get_root($tidy)->child[0]->child[0]->hasChildren());
-
+echo $tidy;
 ?>
 --EXPECT--
-object(tidyNode)#1 (0) {
-}
-object(tidy)#1 (2) {
-  ["errorBuffer"]=>
-  NULL
-  ["value"]=>
-  NULL
-}
--------
-bool(false)
 bool(true)
 bool(true)
-bool(false)
-bool(false)
-bool(true)
-bool(true)
-bool(false)
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title></title>
+</head>
+<body>
+<p>Isto é um texto em Português<br />
+para testes.</p>
+</body>
+</html>
