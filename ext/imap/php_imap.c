@@ -2178,7 +2178,10 @@ PHP_FUNCTION(imap_utf8)
 
 	cpytxt(&src, Z_STRVAL_PP(str), Z_STRLEN_PP(str));
 	utf8_mime2text(&src, &dest);
-	RETURN_STRINGL(dest.data, strlen(dest.data), 1);
+	RETVAL_STRINGL(dest.data, dest.size, 1);
+	if (dest.data) {
+		free(dest.data);
+	}
 }
 /* }}} */
 
