@@ -6,6 +6,8 @@
 - Fixed bug #38700 (SoapClient::__getTypes never returns). (Dmitry)
 - Fixed bug #38693 (curl_multi_add_handle() set curl handle to null). (Ilia)
 - Fixed bug #38661 (mixed-case URL breaks url-wrappers). (Ilia)
+- Fixed bug #38579 require_once/include_once optimization causes files to be
+  loaded multiple times. (Ilia)
 
 
 31 Aug 2006, PHP 5.2.0RC3
