@@ -1230,7 +1230,7 @@ ZIPARCHIVE_METHOD(setArchiveComment)
 {
 	struct zip *intern;
 	zval *this = getThis();
-	long comment_len = 0;
+	int comment_len;
 	char * comment;
 
 	if (!this) {
@@ -1283,7 +1283,7 @@ ZIPARCHIVE_METHOD(setCommentName)
 {
 	struct zip *intern;
 	zval *this = getThis();
-	long comment_len = 0, name_len = 0;
+	int comment_len, name_len;
 	char * comment, *name;
 	struct zip_stat sb;
 
@@ -1311,7 +1311,8 @@ ZIPARCHIVE_METHOD(setCommentIndex)
 {
 	struct zip *intern;
 	zval *this = getThis();
-	long index, comment_len = 0;
+	long index;
+	int comment_len;
 	char * comment;
 	struct zip_stat sb;
 
@@ -1338,7 +1339,8 @@ ZIPARCHIVE_METHOD(getCommentName)
 {
 	struct zip *intern;
 	zval *this = getThis();
-	long name_len = 0, flags = 0;
+	int name_len;
+	long flags = 0;
 	int comment_len = 0;
 	const char * comment;
 	char *name;
@@ -1428,8 +1430,8 @@ ZIPARCHIVE_METHOD(deleteName)
 {
 	struct zip *intern;
 	zval *this = getThis();
-	long name_len = 0;
-   char *name;
+	int name_len;
+	char *name;
 	struct zip_stat sb;
 
 	if (!this) {
