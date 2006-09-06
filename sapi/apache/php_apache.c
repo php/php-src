@@ -394,7 +394,8 @@ PHP_FUNCTION(apache_response_headers)
    Set an Apache subprocess_env variable */
 PHP_FUNCTION(apache_setenv)
 {
-	int var_len, val_len, top=0;
+	int var_len, val_len;
+	zend_bool top=0;
 	char *var = NULL, *val = NULL;
 	request_rec *r = (request_rec *) SG(server_context);
 
