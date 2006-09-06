@@ -26,10 +26,14 @@ dbhead_t *get_dbf_head(int fd)
 
 	if ((dbh = (dbhead_t *)calloc(1, sizeof(dbhead_t))) == NULL)
 		return NULL;
-	if (lseek(fd, 0, 0) < 0)
+	if (lseek(fd, 0, 0) < 0) {
+		free(dbh);
 		return NULL;
-	if ((ret = read(fd, &dbhead, sizeof(dbhead))) < 0)
+	}
+	if ((ret = read(fd, &dbhead, sizeof(dbhead))) <= 0) {
+		free(dbh);
 		return NULL;
+	}
 
 	/* build in core info */
 	dbh->db_fd = fd;
@@ -54,6 +58,7 @@ dbhead_t *get_dbf_head(int fd)
 
 		if (gf_retval < 0) {
 			free_dbf_head(dbh);
+			free(tdbf);
 			return NULL;
 		}
 		if (gf_retval != 2 ) {
@@ -89,7 +94,7 @@ void free_dbf_head(dbhead_t *dbh)
 			free(cur_f->db_format);
 		}
 	}
-
+	
 	free(dbf);
 	free(dbh);
 }
@@ -119,7 +124,7 @@ int put_dbf_head(dbhead_t *dbh)
 
 	if (lseek(fd, 0, 0) < 0)
 		return -1;
-	if ((ret = write(fd, &dbhead, sizeof(dbhead))) < 0)
+	if ((ret = write(fd, &dbhead, sizeof(dbhead))) <= 0)
 		return -1;
 	return ret;
 }
@@ -132,7 +137,7 @@ int get_dbf_field(dbhead_t *dbh, dbfield_t *dbf)
 	struct dbf_dfield	dbfield;
 	int ret;
 
-	if ((ret = read(dbh->db_fd, &dbfield, sizeof(dbfield))) < 0) {
+	if ((ret = read(dbh->db_fd, &dbfield, sizeof(dbfield))) <= 0) {
 		return ret;
 	}
 
@@ -192,7 +197,7 @@ int put_dbf_field(dbhead_t *dbh, dbfield_t *dbf)
 	}
 
 	/* now write it out to disk */
-	if ((ret = write(dbh->db_fd, &dbfield, sizeof(dbfield))) < 0) {
+	if ((ret = write(dbh->db_fd, &dbfield, sizeof(dbfield))) <= 0) {
 		return ret;
 	}
 	return 1;
@@ -252,21 +257,14 @@ dbhead_t *dbf_open(char *dp, int o_flags TSRMLS_DC)
 
 	cp = dp;
 	if ((fd = VCWD_OPEN(cp, o_flags|O_BINARY)) < 0) {
-		cp = (char *)malloc(MAXPATHLEN);  /* So where does this get free()'d?  -RL */
-		strncpy(cp, dp, MAXPATHLEN-5); strcat(cp, ".dbf");
-		if ((fd = VCWD_OPEN(cp, o_flags)) < 0) {
-			free(cp);
-			perror("open");
-			return NULL;
-		}
+		return NULL;
 	}
 
 	if ((dbh = get_dbf_head(fd)) ==	NULL) {
 		return NULL;
 	}
-	dbh->db_name = cp;
+
 	dbh->db_cur_rec = 0;
-	
 	return dbh;
 }
 
