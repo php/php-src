@@ -1946,6 +1946,10 @@ PHP_FUNCTION(iconv_strpos)
 		RETURN_FALSE;
 	}
 
+	if (ndl_len < 1) {
+		RETURN_FALSE;
+	}
+
 	err = _php_iconv_strpos(&retval, haystk, haystk_len, ndl, ndl_len,
 	                        offset, charset); 
 	_php_iconv_show_error(err, GENERIC_SUPERSET_NAME, charset TSRMLS_CC);
@@ -1978,6 +1982,10 @@ PHP_FUNCTION(iconv_strrpos)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|s",
 		&haystk, &haystk_len, &ndl, &ndl_len,
 		&charset, &charset_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (ndl_len < 1) {
 		RETURN_FALSE;
 	}
 
