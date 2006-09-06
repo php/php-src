@@ -3309,11 +3309,12 @@ PHP_FUNCTION(pg_copy_to)
 	if (!pg_delim) {
 		pg_delim = "\t";
 	}
+
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+
 	if (!pg_null_as) {
 		pg_null_as = safe_estrdup("\\\\N");
 	}
-
-	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
 	query = (char *)emalloc(strlen(query_template) + strlen(table_name) + strlen(pg_null_as) + 1);
 	sprintf(query, "COPY \"%s\" TO STDOUT DELIMITERS '%c' WITH NULL AS '%s'",
