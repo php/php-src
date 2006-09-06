@@ -849,8 +849,8 @@ wddx             = year4 "-" month "-" day "T" hour24 ":" minute ":" second;
 pgydotd          = year4 "."? dayofyear;
 pgtextshort      = monthabbr "-" daylz "-" year;
 pgtextreverse    = year "-" monthabbr "-" daylz;
-isoweekday       = year4 "W" weekofyear [0-7];
-isoweek          = year4 "W" weekofyear;
+isoweekday       = year4 "-"? "W" weekofyear "-"? [0-7];
+isoweek          = year4 "-"? "W" weekofyear;
 exif             = year4 ":" monthlz ":" daylz " " hour24lz ":" minutelz ":" secondlz;
 
 /* Common Log Format: 10/Oct/2000:13:55:36 -0700 */
