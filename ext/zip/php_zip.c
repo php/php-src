@@ -1273,7 +1273,7 @@ ZIPARCHIVE_METHOD(getArchiveComment)
 	}
 
 	comment = zip_get_archive_comment(intern, &comment_len, (int)flags);
-	RETURN_STRINGL((char *)comment, (long)comment_len, 1);
+	RETURN_STRINGL((char *)comment, comment_len, 1);
 }
 /* }}} */
 
@@ -1360,7 +1360,7 @@ ZIPARCHIVE_METHOD(getCommentName)
 
 	PHP_ZIP_STAT_PATH(intern, name, name_len, 0, sb);
 	comment = zip_get_file_comment(intern, sb.index, &comment_len, (int)flags);
-	RETURN_STRINGL((char *)comment, (long)comment_len, 1);
+	RETURN_STRINGL((char *)comment, comment_len, 1);
 }
 /* }}} */
 
@@ -1389,7 +1389,7 @@ ZIPARCHIVE_METHOD(getCommentIndex)
 
 	PHP_ZIP_STAT_INDEX(intern, index, 0, sb);
 	comment = zip_get_file_comment(intern, index, &comment_len, (int)flags);
-	RETURN_STRINGL((char *)comment, (long)comment_len, 1);
+	RETURN_STRINGL((char *)comment, comment_len, 1);
 }
 /* }}} */
 
