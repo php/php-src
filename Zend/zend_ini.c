@@ -274,7 +274,8 @@ ZEND_API int zend_restore_ini_entry(char *name, uint name_length, int stage)
 	zend_ini_entry *ini_entry;
 	TSRMLS_FETCH();
 
-	if (zend_hash_find(EG(ini_directives), name, name_length, (void **) &ini_entry)==FAILURE) {
+	if (zend_hash_find(EG(ini_directives), name, name_length, (void **) &ini_entry)==FAILURE ||
+	    (stage == ZEND_INI_STAGE_RUNTIME && (ini_entry->modifiable & ZEND_INI_USER) == 0)) {
 		return FAILURE;
 	}
 
