@@ -2571,48 +2571,18 @@ PHP_FUNCTION(array_count_values)
 									 (void**)&tmp) == FAILURE) {
 				zval *data;
 				MAKE_STD_ZVAL(data);
-				Z_TYPE_P(data) = IS_LONG;
-				Z_LVAL_P(data) = 1;
+				ZVAL_LONG(data, 1);
 				zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_PP(entry), &data, sizeof(data), NULL);
 			} else {
 				Z_LVAL_PP(tmp)++;
 			}
 		} else if (Z_TYPE_PP(entry) == IS_STRING ||
 		           Z_TYPE_PP(entry) == IS_UNICODE) {
-			/* make sure our array does not end up with numeric string keys 
-			 * but don't touch those strings that start with 0 */
-			if ((Z_TYPE_PP(entry) == IS_STRING && !(Z_STRLEN_PP(entry) > 1 && Z_STRVAL_PP(entry)[0] == '0') && is_numeric_string(Z_STRVAL_PP(entry), Z_STRLEN_PP(entry), NULL, NULL, 0) == IS_LONG) ||
-			    (Z_TYPE_PP(entry) == IS_UNICODE && zend_cmp_unicode_and_literal(Z_USTRVAL_PP(entry), 1, "0", sizeof("0")-1) && is_numeric_unicode(Z_USTRVAL_PP(entry), Z_USTRLEN_PP(entry), NULL, NULL, 0) == IS_LONG)) {
-				zval tmp_entry;
-				
-				tmp_entry = **entry;
-				zval_copy_ctor(&tmp_entry);
-
-				convert_to_long(&tmp_entry);
-
-				if (zend_hash_index_find(Z_ARRVAL_P(return_value), 
-										 Z_LVAL(tmp_entry), 
-										 (void**)&tmp) == FAILURE) {
-					zval *data;
-					MAKE_STD_ZVAL(data);
-					Z_TYPE_P(data) = IS_LONG;
-					Z_LVAL_P(data) = 1;
-					zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL(tmp_entry), &data, sizeof(data), NULL);
-				} else {
-					Z_LVAL_PP(tmp)++;
-				}
-				
-				zval_dtor(&tmp_entry);
-				zend_hash_move_forward_ex(myht, &pos);
-				continue;
-			}
-		
-			if (zend_u_hash_find(Z_ARRVAL_P(return_value), Z_TYPE_PP(entry), Z_UNIVAL_PP(entry), Z_UNILEN_PP(entry)+1, (void**)&tmp) == FAILURE) {
+			if (zend_u_symtable_find(Z_ARRVAL_P(return_value), Z_TYPE_PP(entry), Z_UNIVAL_PP(entry), Z_UNILEN_PP(entry) + 1, (void**)&tmp) == FAILURE) {
 				zval *data;
 				MAKE_STD_ZVAL(data);
-				Z_TYPE_P(data) = IS_LONG;
-				Z_LVAL_P(data) = 1;
-				zend_u_hash_update(Z_ARRVAL_P(return_value), Z_TYPE_PP(entry), Z_UNIVAL_PP(entry), Z_UNILEN_PP(entry) + 1, &data, sizeof(data), NULL);
+				ZVAL_LONG(data, 1);
+				zend_u_symtable_update(Z_ARRVAL_P(return_value), Z_TYPE_PP(entry), Z_UNIVAL_PP(entry), Z_UNILEN_PP(entry) + 1, &data, sizeof(data), NULL);
 			} else {
 				Z_LVAL_PP(tmp)++;
 			}
