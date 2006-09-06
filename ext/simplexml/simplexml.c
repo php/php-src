@@ -1964,7 +1964,7 @@ SXE_METHOD(__construct)
 {
 	php_sxe_object *sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
 	char           *data, *ns = NULL;
-	int             data_len, *ns_len = 0;
+	int             data_len, ns_len = 0;
 	xmlDocPtr       docp;
 	long            options = 0;
 	zend_bool       is_url = 0, isprefix = 0;
