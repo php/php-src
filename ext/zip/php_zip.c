@@ -608,17 +608,16 @@ zend_module_entry zip_module_entry = {
 ZEND_GET_MODULE(zip)
 #endif
 
-/* {{{ proto resource zip_open(string filename [,flags])
+/* {{{ proto resource zip_open(string filename)
 Create new zip using source uri for output */
 PHP_FUNCTION(zip_open)
 {
 	char     *filename;
 	int       filename_len;
 	zip_rsrc *rsrc_int;
-	long mode = 0;
 	int err = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &filename, &filename_len, &mode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
 		return;
 	}
 	if (SAFEMODE_CHECKFILE(filename)) {
@@ -627,7 +626,7 @@ PHP_FUNCTION(zip_open)
 
 	rsrc_int = (zip_rsrc *)emalloc(sizeof(zip_rsrc));
 
-	rsrc_int->za = zip_open(filename, mode, &err);
+	rsrc_int->za = zip_open(filename, 0, &err);
 	if (rsrc_int->za == NULL) {
 		efree(rsrc_int);
 		RETURN_LONG((long)err);
