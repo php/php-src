@@ -31,6 +31,10 @@ foo(str_repeat("abcab", 60)."abcdb".str_repeat("adabc", 60), "abcd", 0);
 foo(str_repeat("あいうえお", 30)."いうおえあ".str_repeat("あいえおう", 30), "うお", 0, "EUC-JP");
 $str = str_repeat("あいうえお", 60).'$'.str_repeat("あいえおう", 60);
 foo($str, '$', 0, "ISO-2022-JP", "EUC-JP");
+
+var_dump(iconv_strpos("string", ""));
+var_dump(iconv_strpos("", "string"));
+
 ?>
 --EXPECTF--
 2: %s
@@ -50,3 +54,5 @@ int(302)
 int(151)
 int(1)
 int(300)
+bool(false)
+bool(false)

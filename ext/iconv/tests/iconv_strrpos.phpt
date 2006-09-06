@@ -32,6 +32,10 @@ for ($i = 0; $i <=6; ++$i) {
 	$str = str_repeat("あいうえお", 60).str_repeat('$', $i).str_repeat("あいえおう", 60);
 	foo($str, '$', "ISO-2022-JP", "EUC-JP");
 }
+
+var_dump(iconv_strrpos("string", ""));
+var_dump(iconv_strrpos("", "string"));
+
 ?>
 --EXPECT--
 int(14)
@@ -54,3 +58,5 @@ int(605)
 int(304)
 int(606)
 int(305)
+bool(false)
+bool(false)
