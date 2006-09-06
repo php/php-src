@@ -1,3 +1,16 @@
+2006-09-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_vm_def.h
+      zend_vm_execute.h:
+      MFB: Fixed bug #38579 require_once/include_once optimization causes files
+      to be loaded multiple times.
+
+    * (PHP_5_2)
+      zend_vm_def.h
+      zend_vm_execute.h:
+      Fixed bug #38579 require_once/include_once optimization causes files to be
+      loaded multiple times.
+
 2006-09-04  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_vm_def.h
