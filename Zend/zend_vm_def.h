@@ -2833,23 +2833,20 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|VAR|CV, ANY)
 				zend_file_handle file_handle;
 				char cwd[MAXPATHLEN];
 				cwd_state state;
-#ifndef PHP_WIN32
+
 				if (IS_ABSOLUTE_PATH(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename))) {
 					cwd[0] = '\0';
 				} else if (!VCWD_GETCWD(cwd, MAXPATHLEN)) {
 					cwd[0] = '\0';
 				}
-#endif
+
 				state.cwd_length = strlen(cwd);
 				state.cwd = zend_strndup(cwd, state.cwd_length);
 
-#ifndef PHP_WIN32
 				if (!virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
 				    zend_hash_exists(&EG(included_files), state.cwd, state.cwd_length+1)) {
 					failure_retval=1;
-				} else 
-#endif
-				if (SUCCESS == zend_stream_open(Z_STRVAL_P(inc_filename), &file_handle TSRMLS_CC)) {
+				} else if (SUCCESS == zend_stream_open(Z_STRVAL_P(inc_filename), &file_handle TSRMLS_CC)) {
 					if (!file_handle.opened_path) {
 						file_handle.opened_path = estrndup(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename));
 					}
