@@ -1286,7 +1286,7 @@ ZIPARCHIVE_METHOD(setCommentIndex)
 {
 	struct zip *intern;
 	zval *this = getThis();
-	long index
+	long index;
 	int comment_len;
 	char * comment;
 	struct zip_stat sb;
