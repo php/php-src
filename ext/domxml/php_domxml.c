@@ -5521,7 +5521,7 @@ PHP_FUNCTION(domxml_xslt_version)
 #endif /* HAVE_DOMXSLT */
 
 #ifdef PHP_WIN32
-PHP_LIBXML_API BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
+__declspec(dllexport) BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
 	return xmlDllMain(hinstDLL, fdwReason, lpvReserved);
 }
