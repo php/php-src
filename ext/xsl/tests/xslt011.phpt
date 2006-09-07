@@ -32,7 +32,7 @@ $dom = new domDocument();
           return $id[0];
       } else {
           $dom = new domdocument;
-          $dom->loadXML("<root>this is from an external DomDocument</root>");
+          $dom->loadXML(b"<root>this is from an external DomDocument</root>");
           return $dom->documentElement;
       }
   }

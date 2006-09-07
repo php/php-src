@@ -81,10 +81,11 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params TSRMLS
 	
 	int parsize;
 	zval **value;
-	char *xpath_expr, *string_key = NULL;
+	char *xpath_expr;
 	ulong num_key;
 	char **params = NULL;
 	int i = 0;
+	zstr string_key = NULL_ZSTR;
 
 	parsize = (2 * zend_hash_num_elements(parht) + 1) * sizeof(char *);
 	params = (char **)emalloc(parsize);
@@ -101,7 +102,7 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params TSRMLS
 		} else {
 			if (Z_TYPE_PP(value) != IS_STRING) {
 				SEPARATE_ZVAL(value);
-				convert_to_string(*value);
+				convert_to_string_with_converter(*value, UG(utf8_conv));
 			}
 			
 			if (!xpath_params) {
@@ -110,7 +111,7 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params TSRMLS
 				xpath_expr = estrndup(Z_STRVAL_PP(value), strlen(Z_STRVAL_PP(value)));
 			}
 			if (xpath_expr) {
-				params[i++] = string_key;
+				params[i++] = string_key.s;
 				params[i++] = xpath_expr;
 			}
 		}
@@ -297,7 +298,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "A PHP Object can not be converted to a XPath-string");
 				valuePush(ctxt, xmlXPathNewString(""));
 			} else {
-				convert_to_string_ex(&retval);
+				convert_to_string_with_converter(retval, UG(utf8_conv));
 				valuePush(ctxt, xmlXPathNewString( Z_STRVAL_P(retval)));
 			}
 			zval_ptr_dtor(&retval);
@@ -325,7 +326,7 @@ void xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs)
 }
 
 
-/* {{{ proto void xsl_xsltprocessor_import_stylesheet(domdocument doc);
+/* {{{ proto void xsl_xsltprocessor_import_stylesheet(domdocument doc); U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#
 Since: 
 */
@@ -494,7 +495,7 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 
 }
 
-/* {{{ proto domdocument xsl_xsltprocessor_transform_to_doc(domnode doc);
+/* {{{ proto domdocument xsl_xsltprocessor_transform_to_doc(domnode doc); U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#
 Since: 
 */
@@ -526,7 +527,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_doc)
 /* }}} end xsl_xsltprocessor_transform_to_doc */
 
 
-/* {{{ proto int xsl_xsltprocessor_transform_to_uri(domdocument doc, string uri);
+/* {{{ proto int xsl_xsltprocessor_transform_to_uri(domdocument doc, string uri); U
 */
 PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 {
@@ -535,13 +536,14 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 	xsltStylesheetPtr sheetp;
 	int ret, uri_len;
 	char *uri;
+	zend_uchar uri_type;
 	xsl_object *intern;
 	
 	id = getThis();
 	intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
 	sheetp = (xsltStylesheetPtr) intern->ptr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "os", &docp, &uri, &uri_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ot", &docp, &uri, &uri_len, &uri_type) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -549,7 +551,16 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 
 	ret = -1;
 	if (newdocp) {
+		if (uri_type == IS_UNICODE) {
+			if (php_stream_path_encode(NULL, &uri, &uri_len, (UChar*)uri, uri_len, REPORT_ERRORS, NULL) == FAILURE) {
+				xmlFreeDoc(newdocp);
+				RETURN_FALSE;
+			}
+		}
 		ret = xsltSaveResultToFilename(uri, newdocp, sheetp, 0);
+		if (uri_type == IS_UNICODE) {
+			efree(uri);
+		}
 		xmlFreeDoc(newdocp);
 	}
 
@@ -558,7 +569,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 /* }}} end xsl_xsltprocessor_transform_to_uri */
 
 
-/* {{{ proto string xsl_xsltprocessor_transform_to_xml(domdocument doc);
+/* {{{ proto string xsl_xsltprocessor_transform_to_xml(domdocument doc); U
 */
 PHP_FUNCTION(xsl_xsltprocessor_transform_to_xml)
 {
@@ -597,7 +608,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_xml)
 /* }}} end xsl_xsltprocessor_transform_to_xml */
 
 
-/* {{{ proto bool xsl_xsltprocessor_set_parameter(string namespace, mixed name [, string value]);
+/* {{{ proto bool xsl_xsltprocessor_set_parameter(string namespace, mixed name [, string value]); U
 */
 PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 {
@@ -605,35 +616,56 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 	zval *id;
 	zval *array_value, **entry, *new_string;
 	xsl_object *intern;
-	char *string_key, *name, *value, *namespace;
+	char *name, *value, *namespace;
 	ulong idx;
-	int string_key_len, namespace_len, name_len, value_len;
+	int namespace_len, name_len, value_len;
+	zstr string_key = NULL_ZSTR;
+	unsigned int string_key_len;
+
 	DOM_GET_THIS(id);
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "sa", &namespace, &namespace_len, &array_value) == SUCCESS) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s&a", &namespace, &namespace_len, UG(utf8_conv), &array_value) == SUCCESS) {
 		intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(array_value));
 
 		while (zend_hash_get_current_data(Z_ARRVAL_P(array_value), (void **)&entry) == SUCCESS) {
-			SEPARATE_ZVAL(entry);
-			convert_to_string_ex(entry);
-			
-			if (zend_hash_get_current_key_ex(Z_ARRVAL_P(array_value), &string_key, &string_key_len, &idx, 0, NULL) != HASH_KEY_IS_STRING) {
+			int hash_key_type;
+			int   tmp_len;
+
+			hash_key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(array_value), &string_key, &string_key_len, &idx, 0, NULL);
+			if (hash_key_type != HASH_KEY_IS_STRING && hash_key_type != HASH_KEY_IS_UNICODE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter array");
 				RETURN_FALSE;
 			}
-			
+			tmp_len = string_key_len;
+
+			if (hash_key_type == HASH_KEY_IS_UNICODE) {
+				UErrorCode errCode = U_ZERO_ERROR;
+
+				zend_unicode_to_string_ex(UG(utf8_conv), &string_key.s, &tmp_len, string_key.u, string_key_len, &errCode);
+				if (U_FAILURE(errCode)) {
+					efree(string_key.s);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to convert unicode key to UTF-8");
+					RETURN_FALSE;
+				}
+			}
+
+			SEPARATE_ZVAL(entry);
+			convert_to_string_with_converter(*entry, UG(utf8_conv));
+
 			ALLOC_ZVAL(new_string);
 			ZVAL_ADDREF(*entry);
 			COPY_PZVAL_TO_ZVAL(*new_string, *entry);
 			
-			zend_hash_update(intern->parameter, string_key, string_key_len, &new_string, sizeof(zval*), NULL);
+			zend_hash_update(intern->parameter, string_key.s, tmp_len, &new_string, sizeof(zval*), NULL);
+			if (hash_key_type == HASH_KEY_IS_UNICODE) {
+				efree(string_key.s);
+			}
 			zend_hash_move_forward(Z_ARRVAL_P(array_value));
 		}
 		RETURN_TRUE;
 
-	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "sss", &namespace, &namespace_len, &name, &name_len, &value, &value_len) == SUCCESS) {
-		
+	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s&s&s&", &namespace, &namespace_len, UG(utf8_conv), &name, &name_len, UG(utf8_conv), &value, &value_len, UG(utf8_conv)) == SUCCESS) {
 		intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
 		
 		MAKE_STD_ZVAL(new_string);
@@ -648,7 +680,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 }
 /* }}} end xsl_xsltprocessor_set_parameter */
 
-/* {{{ proto string xsl_xsltprocessor_get_parameter(string namespace, string name);
+/* {{{ proto string xsl_xsltprocessor_get_parameter(string namespace, string name); U
 */
 PHP_FUNCTION(xsl_xsltprocessor_get_parameter)
 {
@@ -660,20 +692,21 @@ PHP_FUNCTION(xsl_xsltprocessor_get_parameter)
 
 	DOM_GET_THIS(id);
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &namespace, &namespace_len, &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&", &namespace, &namespace_len, UG(utf8_conv), &name, &name_len, UG(utf8_conv)) == FAILURE) {
 		RETURN_FALSE;
 	}
+
 	intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
 	if ( zend_hash_find(intern->parameter, name, name_len + 1,  (void**) &value) == SUCCESS) {
-		convert_to_string_ex(value);
-		RETVAL_STRING(Z_STRVAL_PP(value),1);
+		convert_to_string_with_converter(*value, UG(utf8_conv));
+		RETVAL_XML_STRING(Z_STRVAL_PP(value), ZSTR_DUPLICATE);
 	} else {
 		RETURN_FALSE;
 	}
 }
 /* }}} end xsl_xsltprocessor_get_parameter */
 
-/* {{{ proto bool xsl_xsltprocessor_remove_parameter(string namespace, string name);
+/* {{{ proto bool xsl_xsltprocessor_remove_parameter(string namespace, string name); U
 */
 PHP_FUNCTION(xsl_xsltprocessor_remove_parameter)
 {
@@ -684,9 +717,10 @@ PHP_FUNCTION(xsl_xsltprocessor_remove_parameter)
 
 	DOM_GET_THIS(id);
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &namespace, &namespace_len, &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&", &namespace, &namespace_len, UG(utf8_conv), &name, &name_len, UG(utf8_conv)) == FAILURE) {
 		RETURN_FALSE;
 	}
+
 	intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
 	if ( zend_hash_del(intern->parameter, name, name_len + 1) == SUCCESS) {
 		RETURN_TRUE;
@@ -708,14 +742,13 @@ PHP_FUNCTION(xsl_xsltprocessor_register_php_functions)
 
 	DOM_GET_THIS(id);
 	
-	
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "a",  &array_value) == SUCCESS) {
 		intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(array_value));
 
 		while (zend_hash_get_current_data(Z_ARRVAL_P(array_value), (void **)&entry) == SUCCESS) {
 			SEPARATE_ZVAL(entry);
-			convert_to_string_ex(entry);
+			convert_to_string_with_converter(*entry, UG(utf8_conv));
 			
 			MAKE_STD_ZVAL(new_string);
 			ZVAL_LONG(new_string,1);
@@ -742,7 +775,7 @@ PHP_FUNCTION(xsl_xsltprocessor_register_php_functions)
 }
 /* }}} end xsl_xsltprocessor_register_php_functions(); */
 
-/* {{{ proto bool xsl_xsltprocessor_has_exslt_support();
+/* {{{ proto bool xsl_xsltprocessor_has_exslt_support(); U
 */
 PHP_FUNCTION(xsl_xsltprocessor_has_exslt_support)
 {

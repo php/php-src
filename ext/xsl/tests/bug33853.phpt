@@ -11,7 +11,7 @@ function __autoload($className) {
 }
 
 $xsl = new DomDocument();
-$xsl->loadXML('<?xml version="1.0" encoding="iso-8859-1" ?>
+$xsl->loadXML(b'<?xml version="1.0" encoding="iso-8859-1" ?>
 <xsl:stylesheet version="1.0"
 xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 xmlns:php="http://php.net/xsl">
@@ -20,7 +20,7 @@ xmlns:php="http://php.net/xsl">
 </xsl:template>
 </xsl:stylesheet>');
 $inputdom = new DomDocument();
-$inputdom->loadXML('<?xml version="1.0" encoding="iso-8859-1" ?>
+$inputdom->loadXML(b'<?xml version="1.0" encoding="iso-8859-1" ?>
 <today></today>');
 
 $proc = new XsltProcessor();
