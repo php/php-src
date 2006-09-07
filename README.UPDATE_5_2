@@ -41,7 +41,7 @@ PHP 5.2 Update info or NEWS explained
 
   Under windows this can mean a very rare change of behavior. If you are using 
   NTFS filesystem and making use of meta streams in your application this does
-  no longer work for a file with the name 'data' accessed without any path. IF
+  no longer work for a file with the name 'data:' accessed without any path. If
   you need to do so you have to prefix the filename with the "file:" protocol.
   For the functionality itself look here http://www.faqs.org/rfcs/rfc2397.html.
 
