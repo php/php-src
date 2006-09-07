@@ -1389,7 +1389,6 @@ xmlXPathCmpNodes
 xmlXPathCompareValues
 xmlXPathCompile
 xmlXPathCompiledEval
-xmlXPathCompiledEvalToBoolean
 xmlXPathConcatFunction
 xmlXPathContainsFunction
 xmlXPathContextSetCache
