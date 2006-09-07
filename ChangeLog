@@ -1,3 +1,175 @@
+2006-09-06  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/libxml/php_libxml2.def:
+      update def file
+
+2006-09-06  Edin Kadribasic  <edink@emini.dk>
+
+    * ext/libxml/libxml.c:
+      MFB: Fixed bug #38190 (threading issues on windows 2003)
+
+    * (PHP_5_2)
+      ext/libxml/libxml.c:
+      Fixed bug #38190 (threading issues on windows 2003)
+
+2006-09-06  Michael Wallner  <mike@iworks.at>
+
+    * ext/iconv/iconv.c
+      ext/iconv/php_iconv.h:
+      - upgrade ob_iconv_handler
+
+2006-09-06  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/zip/php_zip.c:
+      fix build
+
+2006-09-06  Michael Wallner  <mike@iworks.at>
+
+    * ext/tidy/php_tidy.h
+      ext/tidy/tidy.c
+      ext/tidy/tests/017a.phpt:
+      - upgrade ob_tidyhandler
+
+2006-09-06  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/php_zip.c:
+      - bump zip version, 2.0.0
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c:
+      - bump version, 5.2.0 will have zip-2.0.0-stable
+
+2006-09-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/array.c
+      ext/standard/tests/array/bug38464.phpt:
+      MFB: Fixed bug #38464 (array_count_values() mishandles numeric strings).
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/array.c
+      ext/standard/tests/array/bug38464.phpt
+      ext/standard/tests/array/bug38464.phpt:
+      Fixed bug #38464 (array_count_values() mishandles numeric strings).
+
+2006-09-06  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c:
+      - wrong cast, strlen is int
+
+2006-09-06  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      ext/pcre/php_pcre.c:
+      - MFH: fix memleak of pcre study data (Patch by Nuno).
+
+2006-09-06  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/pcre/php_pcre.c:
+      MFB: fix memleak of pcre study data
+
+    * (PHP_5_2)
+      ext/pcre/php_pcre.c:
+      fix memleak of pcre study data
+
+2006-09-06  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      ext/mbstring/tests/mb_strlen.phpt:
+      fix test
+
+2006-09-06  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/simplexml/simplexml.c:
+      MFB
+
+    * (PHP_5_2)
+      ext/simplexml/simplexml.c:
+      fix one more parameter (int*->int)
+
+    * ext/zip/php_zip.c:
+      fix a few more zend_parse_parameters() issues
+
+2006-09-06  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c:
+      - MFH: zip_open takes only one parameter (Thx Nuno L.)
+
+2006-09-06  Antony Dovgal  <antony@zend.com>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/pgsql.c:
+      fix leak in pg_copy_to() when invalid resource was passed
+
+    * ext/iconv/iconv.c
+      ext/iconv/iconv.c
+      ext/iconv/tests/iconv_strpos.phpt
+      ext/iconv/tests/iconv_strpos.phpt
+      ext/iconv/tests/iconv_strrpos.phpt
+      ext/iconv/tests/iconv_strrpos.phpt:
+      do not search for empty strings with strpos() and strrpos()
+
+2006-09-06  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * sapi/apache/php_apache.c
+      sapi/apache_hooks/php_apache.c:
+      MFB: more int->zend_bool conversions
+
+    * (PHP_5_2)
+      sapi/apache/php_apache.c
+      sapi/apache_hooks/php_apache.c:
+      more int->zend_bool conversions
+
+2006-09-06  Antony Dovgal  <antony@zend.com>
+
+    * ext/dbase/dbf_head.c
+      ext/dbase/dbf_head.c
+      ext/dbase/tests/002.phpt
+      ext/dbase/tests/002.phpt
+      ext/dbase/tests/002.phpt:
+      fix leaks & uninitialized vars
+      add test
+
+2006-09-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/php_http.c
+      ext/soap/php_http.c:
+      Fixed support for endpoint's URL without <path> part (Rob)
+
+    * (PHP_4_4)
+      Zend/zend_ini.c
+      ZendEngine2/zend_ini.c
+      ZendEngine2/zend_ini.c
+      ZendEngine2/zend_ini.c:
+      Fixed php_admin* bypass by ini_restore()
+
+2006-09-06  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      - MFH: Added support for the full ISO week number format. (2006-W52-7)
+
+    * ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      - Added support for the full ISO week number format. (2006-W52-7)
+
+2006-09-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      Reverted last Ilia's patch (for #38579).
+      The patch didn't fix the bug and made new one.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      Reverted last Ilia's patch (for bug #38579).
+      The patch didn't fix the bug and made new one.
+
 2006-09-05  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ZendEngine2/zend_vm_def.h
