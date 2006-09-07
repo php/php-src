@@ -341,7 +341,7 @@ static int php_iconv_output_handler(void **nothing, php_output_context *output_c
 		
 		if (UG(unicode)) {
 			output_encoding = INI_STR("unicode.output_encoding");
-			if (output_encoding && *output_encoding && strcasecmp(INI_STR("unicode.output_encoding"), ICONVG(internal_encoding))) {
+			if (output_encoding && *output_encoding && ucnv_compareNames(output_encoding, ICONVG(internal_encoding))) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "unicode.output_encoding differs from iconv.internal_encoding (%s, %s)", output_encoding, ICONVG(internal_encoding));
 				efree(ICONVG(input_encoding));
 				ICONVG(input_encoding) = estrdup(output_encoding);
@@ -359,7 +359,7 @@ static int php_iconv_output_handler(void **nothing, php_output_context *output_c
 			mimetype = SG(default_mimetype) ? SG(default_mimetype) : SAPI_DEFAULT_MIMETYPE;
 		}
 		
-		if (mimetype != NULL && !(output_status & PHP_OUTPUT_HANDLER_CLEAN)) {
+		if (mimetype != NULL && !(output_context->op & PHP_OUTPUT_HANDLER_CLEAN)) {
 			spprintf(&content_type, 0, "Content-Type: %.*s; charset=%s", mimetype_len?mimetype_len:strlen(mimetype), mimetype, ICONVG(output_encoding));
 			if (content_type && SUCCESS == sapi_add_header(content_type, strlen(content_type), 0)) {
 				SG(sapi_headers).send_default_content_type = 0;
