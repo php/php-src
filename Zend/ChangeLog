@@ -1,3 +1,21 @@
+2006-09-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_ini.c
+      zend_ini.c
+      zend_ini.c:
+      Fixed php_admin* bypass by ini_restore()
+
+    * zend_vm_def.h
+      zend_vm_execute.h:
+      Reverted last Ilia's patch (for #38579).
+      The patch didn't fix the bug and made new one.
+
+    * (PHP_5_2)
+      zend_vm_def.h
+      zend_vm_execute.h:
+      Reverted last Ilia's patch (for bug #38579).
+      The patch didn't fix the bug and made new one.
+
 2006-09-05  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_vm_def.h
