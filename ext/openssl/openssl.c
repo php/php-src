@@ -1746,6 +1746,7 @@ PHP_FUNCTION(openssl_csr_new)
 
 						if (we_made_the_key) {
 							/* and a resource for the private key */
+							zval_dtor(out_pkey);
 							ZVAL_RESOURCE(out_pkey, zend_list_insert(req.priv_key, le_key));
 							req.priv_key = NULL; /* make sure the cleanup code doesn't zap it! */
 						} else if (key_resource != -1) {
@@ -1793,7 +1794,16 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 	int free_cert = 0;
 	long cert_res = -1;
 	char * filename = NULL;
-	
+	zval tmp;
+
+	Z_TYPE(tmp) = IS_NULL;
+
+#define TMP_CLEAN \
+	if (Z_TYPE(tmp) == IS_STRING) {\
+		zval_dtor(&tmp); \
+		return NULL; \
+	}
+
 	if (resourceval) {
 		*resourceval = -1;
 	}
@@ -1804,15 +1814,21 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 
 		if (zend_hash_index_find(HASH_OF(*val), 1, (void **)&zphrase) == FAILURE) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "key array must be of the form array(0 => key, 1 => phrase)");
-			return NULL;
+			TMP_CLEAN;
 		}
-		convert_to_string_ex(zphrase);
-		passphrase = Z_STRVAL_PP(zphrase);
+		//convert_to_string_ex(zphrase);
+		if (Z_TYPE_PP(zphrase) == IS_STRING) {
+			passphrase = Z_STRVAL_PP(zphrase);
+		} else {
+			tmp = **zphrase;
+			zval_copy_ctor(&tmp);
+			passphrase = Z_STRVAL(tmp);
+		}
 
 		/* now set val to be the key param and continue */
 		if (zend_hash_index_find(HASH_OF(*val), 0, (void **)&val) == FAILURE) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "key array must be of the form array(0 => key, 1 => phrase)");
-			return NULL;
+			TMP_CLEAN;
 		}
 	}
 
@@ -1822,7 +1838,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 
 		what = zend_fetch_resource(val TSRMLS_CC, -1, "OpenSSL X.509/key", &type, 2, le_x509, le_key);
 		if (!what) {
-			return NULL;
+			TMP_CLEAN;
 		}
 		if (resourceval) { 
 			*resourceval = Z_LVAL_PP(val);
@@ -1839,13 +1855,16 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 			/* check whether it is actually a private key if requested */
 			if (!public_key && !is_priv) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "supplied key param is a public key");
-				return NULL;
+				TMP_CLEAN;
 			}
 
 			if (public_key && is_priv) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Don't know how to get public key from this private key");
-				return NULL;
+				TMP_CLEAN;
 			} else {
+				if (Z_TYPE(tmp) == IS_STRING) {
+					zval_dtor(&tmp);
+				}
 				/* got the key - return it */
 				return (EVP_PKEY*)what;
 			}
@@ -1853,14 +1872,14 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 
 		/* other types could be used here - eg: file pointers and read in the data from them */
 
-		return NULL;
+		TMP_CLEAN;
 	} else {
 		/* force it to be a string and check if it refers to a file */
 		/* passing non string values leaks, object uses toString, it returns NULL 
 		 * bug38255.phpt
 		 */
 		if (!(Z_TYPE_PP(val) == IS_STRING || Z_TYPE_PP(val) == IS_OBJECT)) {
-			return NULL;
+			TMP_CLEAN;
 		}
 		convert_to_string_ex(val);
 
@@ -1881,7 +1900,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 					in = BIO_new_mem_buf(Z_STRVAL_PP(val), Z_STRLEN_PP(val));
 				}
 				if (in == NULL) {
-					return NULL;
+					TMP_CLEAN;
 				}
 				key = PEM_read_bio_PUBKEY(in, NULL,NULL, NULL);
 				BIO_free(in);
@@ -1892,7 +1911,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 
 			if (filename) {
 				if (php_check_open_basedir(filename TSRMLS_CC)) {
-					return NULL;
+					TMP_CLEAN;
 				}
 				in = BIO_new_file(filename, "r");
 			} else {
@@ -1900,7 +1919,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 			}
 
 			if (in == NULL) {
-				return NULL;
+				TMP_CLEAN;
 			}
 			key = PEM_read_bio_PrivateKey(in, NULL,NULL, passphrase);
 			BIO_free(in);
@@ -1917,6 +1936,9 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 	}
 	if (key && makeresource && resourceval) {
 		*resourceval = ZEND_REGISTER_RESOURCE(NULL, key, le_key);
+	}
+	if (Z_TYPE(tmp) == IS_STRING) {
+		zval_dtor(&tmp);
 	}
 	return key;
 }
