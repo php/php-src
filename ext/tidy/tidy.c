@@ -1078,6 +1078,10 @@ static PHP_INI_MH(php_tidy_set_clean_output)
 	return status;
 }
 
+/*
+ * NOTE: tidy does not support iterative/cumulative parsing, so chunk-sized output handler is not possible
+ */
+
 static void php_tidy_clean_output_start(zval *name TSRMLS_DC)
 {
 	php_output_handler *h;
