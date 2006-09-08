@@ -115,7 +115,7 @@ static PHP_INI_MH(OnTypeLibFileUpdate)
 	char *strtok_buf = NULL;
 	int cached;
 
-	if (!new_value || (typelib_file = VCWD_FOPEN(new_value, "r"))==NULL) {
+	if (!new_value || !new_value[0] || (typelib_file = VCWD_FOPEN(new_value, "r"))==NULL) {
 		return FAILURE;
 	}
 
