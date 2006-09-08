@@ -1963,9 +1963,27 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 	if ((req->priv_key = EVP_PKEY_new()) != NULL) {
 		switch(req->priv_key_type) {
 			case OPENSSL_KEYTYPE_RSA:
-				if (EVP_PKEY_assign_RSA(req->priv_key, RSA_generate_key(req->priv_key_bits, 0x10001, NULL, NULL)))
+				if (EVP_PKEY_assign_RSA(req->priv_key, RSA_generate_key(req->priv_key_bits, 0x10001, NULL, NULL))) {
 					return_val = req->priv_key;
+				}
 				break;
+#ifndef NO_DSA
+			case OPENSSL_KEYTYPE_DSA:
+				{
+					DSA *dsapar = DSA_generate_parameters(req->priv_key_bits, NULL, 0, NULL, NULL, NULL, NULL);
+					if (dsapar) {
+						DSA_set_method(dsapar, DSA_get_default_method());
+						if (DSA_generate_key(dsapar)) {
+							if (EVP_PKEY_assign_DSA(req->priv_key, dsapar)) {
+								return_val = req->priv_key;
+							}
+						} else {
+							DSA_free(dsapar);
+						}
+					}
+				}
+				break;
+#endif
 			default:
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported private key type");
 		}
