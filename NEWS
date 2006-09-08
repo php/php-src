@@ -1,6 +1,8 @@
 'PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Sep 2006, PHP 5.2.0RC4
+- Added DSA key generation support to openssl_pkey_new(), FR #38731
+  (marci at balabit dot hu, Tony)
 - Removed current working directory from the php.ini search path for CLI and
   readded it for other SAPIs (restore to pre 5.1.x behaviour). (Edin)
 - Fixed bug #38700 (SoapClient::__getTypes never returns). (Dmitry)
