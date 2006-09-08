@@ -326,7 +326,7 @@ void xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs)
 }
 
 
-/* {{{ proto void xsl_xsltprocessor_import_stylesheet(domdocument doc); U
+/* {{{ proto void xsl_xsltprocessor_import_stylesheet(domdocument doc) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#
 Since: 
 */
@@ -495,7 +495,7 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 
 }
 
-/* {{{ proto domdocument xsl_xsltprocessor_transform_to_doc(domnode doc); U
+/* {{{ proto domdocument xsl_xsltprocessor_transform_to_doc(domnode doc) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#
 Since: 
 */
@@ -527,7 +527,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_doc)
 /* }}} end xsl_xsltprocessor_transform_to_doc */
 
 
-/* {{{ proto int xsl_xsltprocessor_transform_to_uri(domdocument doc, string uri); U
+/* {{{ proto int xsl_xsltprocessor_transform_to_uri(domdocument doc, string uri) U
 */
 PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 {
@@ -569,7 +569,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 /* }}} end xsl_xsltprocessor_transform_to_uri */
 
 
-/* {{{ proto string xsl_xsltprocessor_transform_to_xml(domdocument doc); U
+/* {{{ proto string xsl_xsltprocessor_transform_to_xml(domdocument doc) U
 */
 PHP_FUNCTION(xsl_xsltprocessor_transform_to_xml)
 {
@@ -608,7 +608,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_xml)
 /* }}} end xsl_xsltprocessor_transform_to_xml */
 
 
-/* {{{ proto bool xsl_xsltprocessor_set_parameter(string namespace, mixed name [, string value]); U
+/* {{{ proto bool xsl_xsltprocessor_set_parameter(string namespace, mixed name [, string value]) U
 */
 PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 {
@@ -680,7 +680,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 }
 /* }}} end xsl_xsltprocessor_set_parameter */
 
-/* {{{ proto string xsl_xsltprocessor_get_parameter(string namespace, string name); U
+/* {{{ proto string xsl_xsltprocessor_get_parameter(string namespace, string name) U
 */
 PHP_FUNCTION(xsl_xsltprocessor_get_parameter)
 {
@@ -706,7 +706,7 @@ PHP_FUNCTION(xsl_xsltprocessor_get_parameter)
 }
 /* }}} end xsl_xsltprocessor_get_parameter */
 
-/* {{{ proto bool xsl_xsltprocessor_remove_parameter(string namespace, string name); U
+/* {{{ proto bool xsl_xsltprocessor_remove_parameter(string namespace, string name) U
 */
 PHP_FUNCTION(xsl_xsltprocessor_remove_parameter)
 {
@@ -775,7 +775,7 @@ PHP_FUNCTION(xsl_xsltprocessor_register_php_functions)
 }
 /* }}} end xsl_xsltprocessor_register_php_functions(); */
 
-/* {{{ proto bool xsl_xsltprocessor_has_exslt_support(); U
+/* {{{ proto bool xsl_xsltprocessor_has_exslt_support() U
 */
 PHP_FUNCTION(xsl_xsltprocessor_has_exslt_support)
 {
