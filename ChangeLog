@@ -1,3 +1,79 @@
+2006-09-07  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xsl/xsltprocessor.c
+      ext/xsl/tests/bug33853.phpt
+      ext/xsl/tests/xslt011.phpt:
+      add unicode support
+       registered_phpfunctions hashtable still needs to be handled
+      update tests
+
+2006-09-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      - Fix tiny mistake
+
+2006-09-07  Michael Wallner  <mike@iworks.at>
+
+    * ext/tidy/tidy.c:
+      - add note why we can't have a chunk-sized output handler
+
+    * ext/iconv/iconv.c:
+       -fix warnings
+
+    * ext/iconv/iconv.c:
+      - use ucnv_compareNames
+      - check output_context->op for PHP_OUTPUT_HANDLER_CLEAN instead of
+      php_output_get_status()
+
+2006-09-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/openssl/openssl.c:
+      MFB: Fixed memory leaks in openssl test #004
+
+    * (PHP_5_2)
+      ext/openssl/openssl.c:
+      Fixed memory leaks in openssl test #004
+
+2006-09-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/soap.c:
+      Fixed unicode support
+
+2006-09-07  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/array/array_search1.phpt
+      ext/standard/tests/array/array_walk.phpt
+      ext/standard/tests/array/array_walk_recursive1.phpt
+      ext/standard/tests/array/max.phpt
+      ext/standard/tests/array/min.phpt:
+      add new tests
+
+    * ext/standard/tests/array/array_search1.phpt
+      ext/standard/tests/array/array_search1.phpt
+      ext/standard/tests/array/array_walk.phpt
+      ext/standard/tests/array/array_walk.phpt
+      ext/standard/tests/array/array_walk_recursive1.phpt
+      ext/standard/tests/array/array_walk_recursive1.phpt
+      ext/standard/tests/array/bug38464.phpt
+      ext/standard/tests/array/max.phpt
+      ext/standard/tests/array/max.phpt
+      ext/standard/tests/array/min.phpt
+      ext/standard/tests/array/min.phpt:
+      
+      add new tests, increase code coverage
+
+2006-09-07  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      ext/libxml/php_libxml2.def:
+      MFH: fix def file for 2.6.26 (xmlXPathCompiledEvalToBoolean required in
+      .27)
+
+    * ext/libxml/php_libxml2.def:
+      fix def file for 2.6.26 (xmlXPathCompiledEvalToBoolean required in .27)
+
 2006-09-06  Rob Richards  <rrichards@ctindustries.net>
 
     * ext/libxml/php_libxml2.def:
