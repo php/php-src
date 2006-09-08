@@ -375,6 +375,12 @@ END_EXTERN_C()
 #define convert_to_null_ex(ppzv)	convert_to_ex_master(ppzv, null, NULL)
 #define convert_to_text_ex(ppzv)	if (UG(unicode)) {convert_to_unicode_ex(ppzv);} else {convert_to_string_ex(ppzv);}
 
+#define convert_to_string_with_converter_ex(ppzv, conv) \
+	if (Z_TYPE_PP(ppzv) != IS_STRING) {					\
+		SEPARATE_ZVAL_IF_NOT_REF(ppzv);					\
+		convert_to_string_with_converter(*ppzv, conv);	\
+	}
+
 #define convert_scalar_to_number_ex(ppzv)							\
 	if (Z_TYPE_PP(ppzv)!=IS_LONG && Z_TYPE_PP(ppzv)!=IS_DOUBLE) {		\
 		if (!(*ppzv)->is_ref) {										\
