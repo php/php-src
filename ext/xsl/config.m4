@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(xsl, for XSL support,
-[  --with-xsl[=DIR]        Include new XSL support (requires libxslt >= 1.0.18).
+[  --with-xsl[=DIR]        Include new XSL support (requires libxslt >= 1.1.0).
                           DIR is the libxslt install directory])
 
 if test "$PHP_XSL" != "no"; then
@@ -24,7 +24,7 @@ if test "$PHP_XSL" != "no"; then
   done
 
   if test -z "$XSLT_CONFIG"; then
-    AC_MSG_ERROR([xslt-config not found. Please reinstall the libxslt >= 1.0.18 distribution])
+    AC_MSG_ERROR([xslt-config not found. Please reinstall the libxslt >= 1.1.0 distribution])
   else
     libxslt_full_version=`$XSLT_CONFIG --version`
     ac_IFS=$IFS
@@ -32,7 +32,7 @@ if test "$PHP_XSL" != "no"; then
     set $libxslt_full_version
     IFS=$ac_IFS
     LIBXSLT_VERSION=`expr [$]1 \* 1000000 + [$]2 \* 1000 + [$]3`
-    if test "$LIBXSLT_VERSION" -ge "1000018"; then
+    if test "$LIBXSLT_VERSION" -ge "1001000"; then
       XSL_LIBS=`$XSLT_CONFIG --libs`
       XSL_INCS=`$XSLT_CONFIG --cflags`
       PHP_EVAL_LIBLINE($XSL_LIBS, XSL_SHARED_LIBADD)
@@ -54,7 +54,7 @@ if test "$PHP_XSL" != "no"; then
         AC_DEFINE(HAVE_XSL_EXSLT,1,[ ])
       fi
     else
-      AC_MSG_ERROR([libxslt version 1.0.18 or greater required.])
+      AC_MSG_ERROR([libxslt version 1.1.0 or greater required.])
     fi
     
   
