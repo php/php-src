@@ -332,8 +332,8 @@ ZEND_GET_MODULE (curl)
 PHP_MINFO_FUNCTION(curl)
 {
 	php_info_print_table_start();
-	php_info_print_table_row(2, "CURL support",    "enabled");
-	php_info_print_table_row(2, "CURL Information", curl_version());
+	php_info_print_table_row(2, "cURL support",    "enabled");
+	php_info_print_table_row(2, "cURL Information", curl_version());
 	php_info_print_table_end();
 }
 /* }}} */
@@ -1054,7 +1054,7 @@ static void alloc_curl_handle(php_curl **ch)
 /* }}} */
 
 /* {{{ proto resource curl_init([string url])
-   Initialize a CURL session */
+   Initialize a cURL session */
 PHP_FUNCTION(curl_init)
 {
 	zval       **url;
@@ -1557,7 +1557,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 }
 
 /* {{{ proto bool curl_setopt(resource ch, int option, mixed value)
-   Set an option for a CURL transfer */
+   Set an option for a cURL transfer */
 PHP_FUNCTION(curl_setopt)
 {
 	zval       **zid, **zoption, **zvalue;
@@ -1580,7 +1580,7 @@ PHP_FUNCTION(curl_setopt)
 /* }}} */
 
 /* {{{ proto bool curl_setopt_array(resource ch, array options)
-   Set an array of option for a CURL transfer */
+   Set an array of option for a cURL transfer */
 PHP_FUNCTION(curl_setopt_array)
 {
 	zval		*zid, *arr, **entry;
@@ -1629,7 +1629,7 @@ void _php_curl_cleanup_handle(php_curl *ch)
 /* }}} */
 
 /* {{{ proto bool curl_exec(resource ch)
-   Perform a CURL session */
+   Perform a cURL session */
 PHP_FUNCTION(curl_exec)
 {
 	zval      **zid;
@@ -1850,7 +1850,7 @@ PHP_FUNCTION(curl_errno)
 /* }}} */
 
 /* {{{ proto void curl_close(resource ch)
-   Close a CURL session */
+   Close a cURL session */
 PHP_FUNCTION(curl_close)
 {
 	zval      **zid;
@@ -1863,7 +1863,7 @@ PHP_FUNCTION(curl_close)
 	ZEND_FETCH_RESOURCE(ch, php_curl *, zid, -1, le_curl_name, le_curl);
 
 	if (ch->in_callback) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempt to close CURL handle from a callback");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempt to close cURL handle from a callback");
 		return;
 	}
 	
