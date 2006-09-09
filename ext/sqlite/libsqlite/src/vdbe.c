@@ -114,7 +114,7 @@ int sqlite_step(
   sqlite *db;
   int rc;
 
-  if( p->magic!=VDBE_MAGIC_RUN ){
+  if( !p || p->magic!=VDBE_MAGIC_RUN ){
     return SQLITE_MISUSE;
   }
   db = p->db;
