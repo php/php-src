@@ -343,8 +343,7 @@ static int php_iconv_output_handler(void **nothing, php_output_context *output_c
 			output_encoding = INI_STR("unicode.output_encoding");
 			if (output_encoding && *output_encoding && ucnv_compareNames(output_encoding, ICONVG(internal_encoding))) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "unicode.output_encoding differs from iconv.internal_encoding (%s, %s)", output_encoding, ICONVG(internal_encoding));
-				efree(ICONVG(input_encoding));
-				ICONVG(input_encoding) = estrdup(output_encoding);
+				zend_alter_ini_entry(ZEND_STRS("iconv.internal_encoding"), output_encoding, strlen(output_encoding), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 			}
 		}
 		
