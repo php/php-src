@@ -6,14 +6,14 @@ PHP_ARG_WITH(curl, for cURL support,
 [  --with-curl[=DIR]       Include cURL support])
 
 dnl Temporary option while we develop this aspect of the extension
-PHP_ARG_WITH(curlwrappers, if we should use CURL for url streams,
+PHP_ARG_WITH(curlwrappers, if we should use cURL for url streams,
 [  --with-curlwrappers       cURL: Use cURL for url streams], no, no)
 
 if test "$PHP_CURL" != "no"; then
   if test -r $PHP_CURL/include/curl/easy.h; then
     CURL_DIR=$PHP_CURL
   else
-    AC_MSG_CHECKING(for CURL in default path)
+    AC_MSG_CHECKING(for cURL in default path)
     for i in /usr/local /usr; do
       if test -r $i/include/curl/easy.h; then
         CURL_DIR=$i
