@@ -25,6 +25,9 @@ PHP                                                                        NEWS
 - Removed Freetype 1.x and GD 1.x from GD extension. (Pierre)
 - Removed global reflection constants. (Johannes)
 
+- Moved extensions to PECL:
+  . ext/ncurses (Hartmut)
+
 - Improved and cleaned CGI code. FastCGI is now always enabled and can not be
   disabled. See sapi/cgi/CHANGES for more details. (Dmitry)
 - Improved cURL: (Ilia)
