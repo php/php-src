@@ -2,10 +2,10 @@ PHP 5.2 Update info or NEWS explained
 
 - Changed E_ALL error reporting mode to include E_RECOVERABLE_ERROR. (Marcus)
 
-  This change means that the value of the E_ALL constant had changed to 6143
+  This change means that the value of the E_ALL constant has changed to 6143
   from its previous value of 2047. If you are setting your error reporting mode
   inside the Apache config file or the .htaccess files you will need to adjust
-  the value of error_reporting INI setting accordingly.
+  the value of the error_reporting INI setting accordingly.
 
 - Added new error mode E_RECOVERABLE_ERROR. (Derick, Marcus, Tony)
 
