@@ -1522,11 +1522,13 @@ timelib_time* timelib_strtotime(char *s, int len, struct timelib_error_container
 	in.errors->error_count = 0;
 	in.errors->error_messages = NULL;
 
-	while (isspace(*s) && s < e) {
-		s++;
-	}
-	while (isspace(*e) && e > s) {
-		e--;
+	if (len > 0) {
+		while (isspace(*s) && s < e) {
+			s++;
+		}
+		while (isspace(*e) && e > s) {
+			e--;
+		}
 	}
 	if (e - s < 1) {
 		in.time = timelib_time_ctor();
