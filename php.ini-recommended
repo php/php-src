@@ -92,7 +92,7 @@
 ;     The environment variables are not hashed into the $_ENV.  To access
 ;     environment variables, you can use getenv() instead.
 ; - error_reporting = E_ALL        [Code Cleanliness, Security(?)]
-;     By default, PHP surpresses errors of type E_NOTICE.  These error messages
+;     By default, PHP suppresses errors of type E_NOTICE.  These error messages
 ;     are emitted for non-critical errors, but that could be a symptom of a bigger
 ;     problem.  Most notably, this will cause error messages about the use
 ;     of uninitialized variables to be displayed.
@@ -310,7 +310,7 @@ ignore_repeated_errors = Off
 
 ; Ignore source of message when ignoring repeated messages. When this setting
 ; is On you will not log errors with repeated messages from different files or
-; sourcelines.
+; source lines.
 ignore_repeated_source = Off
 
 ; If this parameter is set to Off, then memory leaks will not be shown (on
@@ -664,7 +664,7 @@ mysql.default_user =
 ; file will be able to reveal the password as well.
 mysql.default_password =
 
-; Maximum time (in secondes) for connect timeout. -1 means no limit
+; Maximum time (in seconds) for connect timeout. -1 means no limit
 mysql.connect_timeout = 60
 
 ; Trace mode. When trace_mode is active (=On), warnings for table/index scans and
@@ -752,10 +752,10 @@ sybase.min_error_severity = 10
 ; Minimum message severity to display.
 sybase.min_message_severity = 10
 
-; Compatability mode with old versions of PHP 3.0.
+; Compatibility mode with old versions of PHP 3.0.
 ; If on, this will cause PHP to automatically assign types to results according
 ; to their Sybase type, instead of treating them all as strings.  This
-; compatability mode will probably not stay around forever, so try applying
+; compatibility mode will probably not stay around forever, so try applying
 ; whatever necessary changes to your code, and turn it off.
 sybase.compatability_mode = Off
 
@@ -969,7 +969,7 @@ mssql.min_error_severity = 10
 ; Minimum message severity to display.
 mssql.min_message_severity = 10
 
-; Compatability mode with old versions of PHP 3.0.
+; Compatibility mode with old versions of PHP 3.0.
 mssql.compatability_mode = Off
 
 ; Connect timeout
@@ -1053,7 +1053,7 @@ pfpro.defaulttimeout = 30
 ;com.autoregister_typelib = true
 ; register constants casesensitive
 ;com.autoregister_casesensitive = false
-; show warnings on duplicate constat registrations
+; show warnings on duplicate constant registrations
 ;com.autoregister_verbose = true
 
 [mbstring]
