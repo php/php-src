@@ -5,6 +5,7 @@
   (marci at balabit dot hu, Tony)
 - Removed current working directory from the php.ini search path for CLI and
   readded it for other SAPIs (restore to pre 5.1.x behaviour). (Edin)
+- Fixed bug #38759 (PDO sqlite2 empty query causes segfault). (Tony)
 - Fixed bug #38700 (SoapClient::__getTypes never returns). (Dmitry)
 - Fixed bug #38693 (curl_multi_add_handle() set curl handle to null). (Ilia)
 - Fixed bug #38661 (mixed-case URL breaks url-wrappers). (Ilia)
