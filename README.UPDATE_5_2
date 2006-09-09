@@ -1,6 +1,6 @@
 PHP 5.2 Update info or NEWS explained
 
-- Changed E_ALL error reporting mode to includes E_RECOVERABLE_ERROR. (Marcus)
+- Changed E_ALL error reporting mode to include E_RECOVERABLE_ERROR. (Marcus)
 
   This changes means that the value of the E_ALL constant had changed to 6143
   from its previous value of 2047. If you are setting your error reporting mode
@@ -11,7 +11,7 @@ PHP 5.2 Update info or NEWS explained
 
   This changes a few E_ERROR conditions to something that you can now catch 
   using a user error handler. If the user error handler does not grab these
-  kind of error they behave as fatal errors just like in any PHP version prior
+  kind of errors they behave as fatal errors just like in any PHP version prior
   to 5.2. Errors of this type are logged as 'Catchable fatal error'.
 
 - Added support for constructors in interfaces to force constructor signature
@@ -24,24 +24,24 @@ PHP 5.2 Update info or NEWS explained
   the parameter and return type definition which captures count, reference or 
   not and any type hints).
 
-- Changed __toString to be called whereever applicable. (Marcus)
+- Changed __toString to be called wherever applicable. (Marcus)
 
   The magic object method __toString() is now called whenever an object is used
   as a string. The function must not throw an exception or the script will be
-  terminated. The PHP 5.0/5.1 fallback to return a string containing the object
-  idetifier has been dropped. Note that the object identifier is never unique. 
-  That measn that if you have used this feature your application has been 
-  flawed. Nonetheless it will now be a catchable fatal error (see above).
+  terminated with a catchable see above) fatal error. The PHP 5.0/5.1 fallback
+  to return a string containing the object identifier has been dropped. People 
+  were assuming that this object identifier was unique when in fact it wasn't.  
   
   Even with __toString objects cannot be used as keys to arrays. We might add
   built-in hash support for this. But for 5.2 you would need to either provide
-  your own hashing or use new function spl_object_hash()
+  your own hashing and use an explicit string cast or use new function 
+  spl_object_hash()
 
 - Added RFC2397 (data: stream) support. (Marcus)
 
   Under windows this can mean a very rare change of behavior. If you are using 
-  NTFS filesystem and making use of meta streams in your application this does
-  no longer work for a file with the name 'data:' accessed without any path. If
+  NTFS filesystem and making use of meta streams in your application this no
+  longer works for a file with the name 'data:' accessed without any path. If
   you need to do so you have to prefix the filename with the "file:" protocol.
   For the functionality itself look here http://www.faqs.org/rfcs/rfc2397.html.
 
@@ -49,10 +49,10 @@ PHP 5.2 Update info or NEWS explained
 
   With this option one can now distinguish between standard file operations on
   remote files and inclusion of remote files.  While the former is usually
-  desired, the latter implies security risks if used naivly.  Starting with
+  desired, the latter implies security risks if used naively.  Starting with
   PHP-5.2 it is now possible to allow standard file operations while
-  dissalowing inclusion of remote files, which will also be the default
-  configuration.
+  dissallowing inclusion of remote files, which is also the default
+  configuration now.  
 
 - Dropped abstract static class functions. (Marcus)
 
