@@ -4,11 +4,8 @@ dnl vim:et:sw=2:ts=2:
 
 if test "$PHP_PDO" != "no"; then
 
-PHP_ARG_WITH(pdo-sqlite, for sqlite 3 driver for PDO,
-[  --without-pdo-sqlite      PDO: sqlite 3 support],yes)
-
 PHP_ARG_WITH(pdo-sqlite, for sqlite 3 support for PDO,
-[  --with-pdo-sqlite[=DIR]   PDO: sqlite support. DIR is the sqlite base directory, the bundled sqlite is used by default])
+[  --without-pdo-sqlite[=DIR]   PDO: sqlite support. DIR is the sqlite base directory, the bundled sqlite is used by default],yes)
 
 if test "$PHP_PDO_SQLITE" != "no"; then
 
