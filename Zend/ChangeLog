@@ -1,3 +1,8 @@
+2006-09-08  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_operators.h:
+      convert_to_string_with_converter_ex()
+
 2006-09-06  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_ini.c

@@ -1,3 +1,55 @@
+2006-09-08  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/date/lib/parse_date.c:
+      MFh: fix #38721 (date_parse() invalid read)
+
+    * ext/date/lib/parse_date.c:
+      fix #38721 (date_parse() invalid read)
+
+    * (PHP_5_2)
+      NEWS
+      ext/openssl/openssl.c
+      ext/openssl/openssl.c:
+      implement feature request #38731 (openssl_pkey_new does not support DSA key
+      generation)
+      patch by marci at balabit dot hu
+
+2006-09-08  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_operators.h:
+      convert_to_string_with_converter_ex()
+
+2006-09-08  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/xsl/config.m4:
+      MFB bug#35589
+
+    * (PHP_5_2)
+      ext/xsl/config.m4:
+      Bump libxslt version to 1.1.0 (closes bug#35589)
+
+2006-09-08  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * scripts/dev/check_parameters.php:
+      MFB
+
+    * scripts/dev/check_parameters.php
+      scripts/dev/check_parameters.php:
+      
+      file check_parameters.php was initially added on branch PHP_5_2.
+
+2006-09-08  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xsl/xsltprocessor.c:
+      fix prototypes
+
+2006-09-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/com_dotnet/com_extension.c
+      ext/com_dotnet/com_extension.c:
+      Prevent opening of empty filename ""
+
 2006-09-07  Rob Richards  <rrichards@ctindustries.net>
 
     * ext/xsl/xsltprocessor.c
