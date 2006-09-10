@@ -333,4 +333,36 @@ function recurse($path)
 	}
 }
 
-recurse(PHPDIR);
+$dirs = array();
+
+if (isset($argc) && $argc > 1) {
+	if ($argv[1] == '-h' || $argv[1] == '-help' || $argv[1] == '--help') {
+		echo <<<HELP
+Synopsis:
+    php check_parameters.php [directories]
+
+HELP;
+		exit(0);
+	}
+	for ($i = 1; $i < $argc; $i++) {
+		$dirs[] = $argv[$i];
+	}
+} else { 
+	$dirs[] = PHPDIR;
+}
+
+foreach($dirs as $dir) {
+	if (is_dir($dir)) {
+		if (!is_readable($dir)) {
+			echo "ERROR: directory '", $dir ,"' is not readable\n";
+			exit(1);
+		}
+	} else {
+		echo "ERROR: bogus directory '", $dir ,"'\n";
+		exit(1);
+	}
+}
+
+foreach ($dirs as $dir) {
+	recurse($dir);
+}
