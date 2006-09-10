@@ -1652,6 +1652,8 @@ static void date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, int
 	timelib_time_dtor(now);	
 }
 
+/* {{{ proto DateTime date_create([string time[, DateTimeZone object]])
+*/
 PHP_FUNCTION(date_create)
 {
 	zval           *timezone_object = NULL;
@@ -1665,7 +1667,10 @@ PHP_FUNCTION(date_create)
 	date_instantiate(date_ce_date, return_value TSRMLS_CC);
 	date_initialize(zend_object_store_get_object(return_value TSRMLS_CC), time_str, time_str_len, timezone_object TSRMLS_CC);
 }
+/* }}} */
 
+/* {{{ proto DateTime::__construct([string time[, DateTimeZone object]])
+*/
 PHP_METHOD(DateTime, __construct)
 {
 	zval *timezone_object = NULL;
@@ -1678,7 +1683,10 @@ PHP_METHOD(DateTime, __construct)
 		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 	}
 }
+/* }}} */
 
+/* {{{ proto array date_parse(string date)
+*/
 PHP_FUNCTION(date_parse)
 {
 	char                           *date;
@@ -1775,6 +1783,8 @@ PHP_FUNCTION(date_parse)
 }
 /* }}} */
 
+/* {{{ proto string date_format(DateTime object, string format)
+*/
 PHP_FUNCTION(date_format)
 {
 	zval         *object;
@@ -1789,7 +1799,10 @@ PHP_FUNCTION(date_format)
 	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
 	RETURN_STRING(date_format(format, format_len, dateobj->time, dateobj->time->is_localtime), 0);
 }
+/* }}} */
 
+/* {{{ proto void date_modify(DateTime object, string modify)
+*/
 PHP_FUNCTION(date_modify)
 {
 	zval         *object;
@@ -1820,7 +1833,10 @@ PHP_FUNCTION(date_modify)
 	timelib_update_ts(dateobj->time, NULL);
 	timelib_update_from_sse(dateobj->time);
 }
+/* }}} */
 
+/* {{{ proto DateTimeZone date_timezone_get(DateTime object)
+*/
 PHP_FUNCTION(date_timezone_get)
 {
 	zval             *object;
@@ -1840,7 +1856,10 @@ PHP_FUNCTION(date_timezone_get)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
 
+/* {{{ proto void date_timezone_set(DateTime object, DateTimeZone object)
+*/
 PHP_FUNCTION(date_timezone_set)
 {
 	zval             *object;
@@ -1860,7 +1879,10 @@ PHP_FUNCTION(date_timezone_set)
 	timelib_set_timezone(dateobj->time, timelib_tzinfo_clone(tzobj->tz));
 	timelib_unixtime2local(dateobj->time, dateobj->time->sse);
 }
+/* }}} */
 
+/* {{{ proto long date_offset_get(DateTime object)
+*/
 PHP_FUNCTION(date_offset_get)
 {
 	zval                *object;
@@ -1881,7 +1903,10 @@ PHP_FUNCTION(date_offset_get)
 		RETURN_LONG(0);
 	}
 }
+/* }}} */
 
+/* {{{ proto void date_time_set(DateTime object, long hour, long minute[, long second])
+*/
 PHP_FUNCTION(date_time_set)
 {
 	zval         *object;
@@ -1898,7 +1923,10 @@ PHP_FUNCTION(date_time_set)
 	dateobj->time->s = s;
 	timelib_update_ts(dateobj->time, NULL);
 }
+/* }}} */
 
+/* {{{ proto void date_date_set(DateTime object, long year, long month, long day)
+*/
 PHP_FUNCTION(date_date_set)
 {
 	zval         *object;
@@ -1915,7 +1943,10 @@ PHP_FUNCTION(date_date_set)
 	dateobj->time->d = d;
 	timelib_update_ts(dateobj->time, NULL);
 }
+/* }}} */
 
+/* {{{ proto void date_isodate_set(DateTime object, long year, long week[, long day])
+*/
 PHP_FUNCTION(date_isodate_set)
 {
 	zval         *object;
@@ -1935,7 +1966,7 @@ PHP_FUNCTION(date_isodate_set)
 	
 	timelib_update_ts(dateobj->time, NULL);
 }
-
+/* }}} */
 
 static int timezone_initialize(timelib_tzinfo **tzi, /*const*/ char *tz TSRMLS_DC)
 {
@@ -1957,6 +1988,8 @@ static int timezone_initialize(timelib_tzinfo **tzi, /*const*/ char *tz TSRMLS_D
 	}
 }
 
+/* {{{ proto DateTimeZone timezone_open(string timezone)
+*/
 PHP_FUNCTION(timezone_open)
 {
 	char *tz;
@@ -1971,7 +2004,10 @@ PHP_FUNCTION(timezone_open)
 	}
 	((php_timezone_obj *) zend_object_store_get_object(date_instantiate(date_ce_timezone, return_value TSRMLS_CC) TSRMLS_CC))->tz = tzi;
 }
+/* }}} */
 
+/* {{{ proto DateTimeZone::__construct(string timezone)
+*/
 PHP_METHOD(DateTimeZone, __construct)
 {
 	char *tz;
@@ -1986,7 +2022,10 @@ PHP_METHOD(DateTimeZone, __construct)
 	}
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 }
+/* }}} */
 
+/* {{{ proto string timezone_name_get(DateTimeZone object)
+*/
 PHP_FUNCTION(timezone_name_get)
 {
 	zval             *object;
@@ -2000,7 +2039,10 @@ PHP_FUNCTION(timezone_name_get)
 
 	RETURN_STRING(tzobj->tz->name, 1);
 }
+/* }}} */
 
+/* {{{ proto string timezone_name_from_abbr(string abbr[, long gmtOffset[, long isdst]])
+*/
 PHP_FUNCTION(timezone_name_from_abbr)
 {
 	char    *abbr;
@@ -2020,7 +2062,10 @@ PHP_FUNCTION(timezone_name_from_abbr)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
 
+/* {{{ proto long timezone_offset_get(DateTimeZone object, DateTime object)
+*/
 PHP_FUNCTION(timezone_offset_get)
 {
 	zval                *object, *dateobject;
@@ -2040,7 +2085,10 @@ PHP_FUNCTION(timezone_offset_get)
 	RETVAL_LONG(offset->offset);
 	timelib_time_offset_dtor(offset);
 }
+/* }}} */
 
+/* {{{ proto array timezone_transitions_get(DateTimeZone object)
+*/
 PHP_FUNCTION(timezone_transitions_get)
 {
 	zval                *object, *element;
@@ -2066,7 +2114,10 @@ PHP_FUNCTION(timezone_transitions_get)
 		add_next_index_zval(return_value, element);
 	}
 }
+/* }}} */
 
+/* {{{ proto array timezone_identifiers_list()
+*/
 PHP_FUNCTION(timezone_identifiers_list)
 {
 	const timelib_tzdb             *tzdb;
@@ -2083,7 +2134,10 @@ PHP_FUNCTION(timezone_identifiers_list)
 		add_next_index_string(return_value, table[i].id, 1);
 	};
 }
+/* }}} */
 
+/* proto {{{ array timezone_abbreviations_list()
+*/
 PHP_FUNCTION(timezone_abbreviations_list)
 {
 	const timelib_tz_lookup_table *table, *entry;
@@ -2115,7 +2169,7 @@ PHP_FUNCTION(timezone_abbreviations_list)
 		entry++;
 	} while (entry->name);
 }
-
+/* }}} */
 
 /* {{{ proto bool date_default_timezone_set(string timezone_identifier)
    Sets the default timezone used by all date/time functions in a script */
