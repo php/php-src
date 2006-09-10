@@ -1107,7 +1107,7 @@ static void reflection_property_factory(zend_class_entry *ce, zend_property_info
 	zend_unmangle_property_name(prop->name, prop->name_length, &class_name, &prop_name);
 
 	if (!(prop->flags & ZEND_ACC_PRIVATE)) {
-		/* we have to seach the class hierarchy for this (implicit) public or protected property */
+		/* we have to search the class hierarchy for this (implicit) public or protected property */
 		zend_class_entry *tmp_ce = ce;
 		zend_property_info *tmp_info;
 		
@@ -3741,7 +3741,7 @@ ZEND_METHOD(reflection_property, __construct)
 	}
 	
 	if (!(property_info->flags & ZEND_ACC_PRIVATE)) {
-		/* we have to seach the class hierarchy for this (implicit) public or protected property */
+		/* we have to search the class hierarchy for this (implicit) public or protected property */
 		zend_class_entry *tmp_ce = ce;
 		zend_property_info *tmp_info;
 		
@@ -4351,8 +4351,7 @@ ZEND_END_ARG_INFO()
 
 static zend_function_entry reflection_function_abstract_functions[] = {
 	ZEND_ME(reflection, __clone, NULL, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
-	ZEND_ME(reflection_function, __construct, arginfo_reflection_function___construct, 0)
-	ZEND_ME(reflection_function, __toString, NULL, 0)
+	PHP_ABSTRACT_ME(reflection_function, __toString, NULL)
 	ZEND_ME(reflection_function, isInternal, NULL, 0)
 	ZEND_ME(reflection_function, isUserDefined, NULL, 0)
 	ZEND_ME(reflection_function, getName, NULL, 0)
@@ -4374,6 +4373,8 @@ static zend_function_entry reflection_function_abstract_functions[] = {
 };
 
 static zend_function_entry reflection_function_functions[] = {
+	ZEND_ME(reflection_function, __construct, arginfo_reflection_function___construct, 0)
+	ZEND_ME(reflection_function, __toString, NULL, 0)
 	ZEND_ME(reflection_function, export, arginfo_reflection_function_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_function, isDisabled, NULL, 0)
 	ZEND_ME(reflection_function, invoke, arginfo_reflection_function_invoke, 0)
@@ -4462,7 +4463,7 @@ ZEND_END_ARG_INFO()
 
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_class_getMethods, 0, 0, 0)
-	ZEND_ARG_INFO(0, $filter)
+	ZEND_ARG_INFO(0, filter)
 ZEND_END_ARG_INFO()
 
 static
