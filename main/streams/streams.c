@@ -1198,10 +1198,6 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 	int min_room = CHUNK_SIZE / 4;
 	php_stream_statbuf ssbuf;
 
-	if (buf) { 
-		*buf = NULL;
-	}
-
 	if (maxlen == 0) { 
 		return 0;
 	}
