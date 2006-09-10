@@ -51,7 +51,7 @@ PHP 5.2 Update info or NEWS explained
   remote files and inclusion of remote files.  While the former is usually
   desired, the latter implies security risks if used naively.  Starting with
   PHP-5.2 it is now possible to allow standard file operations while
-  dissallowing inclusion of remote files, which is also the default
+  disallowing inclusion of remote files, which is also the default
   configuration now.  
 
 - Dropped abstract static class functions. (Marcus)
