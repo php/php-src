@@ -1,3 +1,97 @@
+2006-09-09  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * php.ini-dist
+      php.ini-recommended:
+      MFB: typos
+
+2006-09-09  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_2)
+      main/rfc1867.c:
+      Minor tweak to the file upload hooks.  The MULTIPART_EVENT_FORMDATA event
+      was only triggering when an input filter was applied.  This simple change
+      makes the event also trigger when no filter is applied.  The newlength
+      pointer is set to NULL to let a downstream module differentiate between
+      the two cases.
+
+2006-09-09  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      php.ini-dist
+      php.ini-recommended:
+       - Remove register_globals from the "different" section
+       - Add allow_url_include = Off
+       - compatability -> compatibility and other typos
+
+    * (PHP_5_2)
+      php.ini-dist
+      php.ini-recommended:
+      Add E_RECOVERABLE
+
+    * NEWS:
+      Add "moved to pecl" section (only ncurses at this time)
+
+    * (PHP_5_2)
+      ext/pdo_sqlite/config.m4:
+      Removed duplicated entry
+
+    * (PHP_5_2)
+      ext/curl/config.m4
+      ext/curl/config.w32
+      ext/curl/interface.c:
+      CURL->cURL
+
+    * ext/curl/config.m4
+      ext/curl/config.w32
+      ext/curl/interface.c:
+      Be overly picky: CURL->cURL
+
+2006-09-09  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      Fix tense
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      One more typo
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      Cleanup
+
+2006-09-09  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      NEWS:
+      - Update news.
+
+    * (PHP_5_2)
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      - MFH: The .c file is generated... so updating the .re file and cleaning up
+      WS.
+
+    * ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      - The .c file is generated... so updating the .re file and cleaning up WS.
+
+2006-09-09  Michael Wallner  <mike@iworks.at>
+
+    * ext/iconv/iconv.c:
+      - fix crash when unicode.sematics are enabled and unicode.output_encoding
+      doesn't match iconv.internal_encoding
+
+2006-09-09  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/sqlite/libsqlite/src/vdbe.c:
+      MFH: fix #38759 (PDO sqlite2 empty query causes segfault)
+
+    * ext/sqlite/libsqlite/src/vdbe.c:
+      fix #38759 (PDO sqlite2 empty query causes segfault)
+
 2006-09-08  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
