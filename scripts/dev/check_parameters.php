@@ -22,7 +22,7 @@
 
 define('REPORT_LEVEL', 2); // 0 reports less false-positives. up to level 5.
 define('VERSION', '6');  // minimum is 5.2
-define('PHPDIR', dirname(__FILE__) . '/../..');
+define('PHPDIR', realpath(dirname(__FILE__) . '/../..'));
 
 
 // be sure you have enough memory and stack for PHP. pcre will push the limits!
@@ -64,7 +64,12 @@ function error($str, $level = 0)
 	global $current_file, $current_function, $line;
 
 	if ($level <= REPORT_LEVEL) {
-		echo substr($current_file, strlen(PHPDIR)+1) . " [$line] $current_function : $str\n";
+		if (strpos($current_file,PHPDIR) === 0) {
+			$filename = substr($current_file, strlen(PHPDIR)+1); 
+		} else {
+			$filename = $current_file;
+		}
+		echo $filename , " [$line] $current_function : $str\n";
 	}
 }
 
@@ -364,5 +369,5 @@ foreach($dirs as $dir) {
 }
 
 foreach ($dirs as $dir) {
-	recurse($dir);
+	recurse(realpath($dir));
 }
