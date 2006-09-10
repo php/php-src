@@ -29,7 +29,7 @@ php_lcov.info: lcov-test
 	@rm -rf lcov_data/
 	@$(mkinstalldirs) lcov_data/
 	@echo
-	-@find . -name \*.gcda -o -name \*.gcno -o -name \*.da | sed -e 's/^\.\///' | sed -e 's/\.gcda//g' -e 's/\.gcno//g' -e 's/\.da//g' | uniq | while read x; do \
+	-@find . -name \*.gcda -o -name \*.gcno -o -name \*.da -o -name \*.h | sed -e 's/^\.\///' | sed -e 's/\.gcda//g' -e 's/\.gcno//g' -e 's/\.da//g' | uniq | while read x; do \
 		echo -n . ;\
 		y=`echo $$x | sed -e 's!\.libs/!!'`; \
 		dir=lcov_data/`dirname $$x`; \
@@ -48,6 +48,9 @@ php_lcov.info: lcov-test
 		fi; \
 		if test -f "$(top_srcdir)/$$y.l"; then \
 		        ln -f -s $(top_srcdir)/$$y.l lcov_data/$$y.l; \
+		fi; \
+		if test -f "$(top_srcdir)/$$y"; then \
+		        ln -f -s $(top_srcdir)/$$y lcov_data/$$y; \
 		fi; \
 		if test -f "$(top_builddir)/$$y.c"; then \
 			ln -f -s $(top_builddir)/$$y.c lcov_data/$$y.c; \
