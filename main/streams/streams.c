@@ -1611,10 +1611,6 @@ PHPAPI size_t _php_stream_copy_to_mem_ex(php_stream *src, zend_uchar rettype, vo
 	int min_room = CHUNK_SIZE / 4;
 	php_stream_statbuf ssbuf;
 
-	if (buf) {
-		*buf = NULL;
-	}
-
 	if (rettype != src->readbuf_type) {
 		/* UTODO: Introduce sloppy buffer conversion */
 		return 0;
