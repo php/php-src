@@ -1848,7 +1848,7 @@ PHP_FUNCTION(date_timezone_set)
 	php_date_obj     *dateobj;
 	php_timezone_obj *tzobj;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|O", &object, date_ce_date, &timezone_object, date_ce_timezone) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OO", &object, date_ce_date, &timezone_object, date_ce_timezone) == FAILURE) {
 		RETURN_FALSE;
 	}
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
@@ -1978,13 +1978,13 @@ PHP_METHOD(DateTimeZone, __construct)
 	int tz_len;
 	timelib_tzinfo *tzi = NULL;
 	
+	php_set_error_handling(EH_THROW, NULL TSRMLS_CC);
 	if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &tz, &tz_len)) {
-		php_set_error_handling(EH_THROW, NULL TSRMLS_CC);
 		if (SUCCESS == timezone_initialize(&tzi, tz TSRMLS_CC)) {
 			((php_timezone_obj *) zend_object_store_get_object(getThis() TSRMLS_CC))->tz = tzi;
 		}
-		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 	}
+	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 }
 
 PHP_FUNCTION(timezone_name_get)
