@@ -1,60 +1,162 @@
-PHP 5.2 Update info or NEWS explained
+PHP 5.2 UPDATE INFO
 
-- Changed E_ALL error reporting mode to include E_RECOVERABLE_ERROR. (Marcus)
+===============================
+Changes in PHP datetime support
+===============================
 
-  This change means that the value of the E_ALL constant has changed to 6143
-  from its previous value of 2047. If you are setting your error reporting mode
-  inside the Apache config file or the .htaccess files you will need to adjust
-  the value of the error_reporting INI setting accordingly.
+Since PHP 5.1, there has been an extension named 'date' in the PHP core. This
+is the new implementation of PHP's datetime support. Although it will attempt
+to guess your system's timezone setting, you should set the timezone manually.
+You can do this in any of three ways:
+
+1) in your php.ini using the date.timezone INI directive
+2) on your system using the TZ environmental variable
+3) from your script using the convenience function date_default_timezone_set()
+
+All supported timezones are listed in the PHP Manual at
+http://www.php.net/manual/timezones.php.
+
+With the advent of PHP 5.2, there are object representations of the date and
+timezone, named DateTime and DateTimeZone respectively. You can see the methods
+and constants available to the new classes by running
+
+php --rc DateTime
+php --rc DateTimeZone
+
+under PHP CLI. All methods map to existing procedural date functions.
+
+==================================
+Items from the NEWS file explained
+==================================
 
 - Added new error mode E_RECOVERABLE_ERROR. (Derick, Marcus, Tony)
 
-  This changes a few E_ERROR conditions to something that you can now catch 
-  using a user error handler. If the user error handler does not grab these
-  kind of errors they behave as fatal errors just like in any PHP version prior
-  to 5.2. Errors of this type are logged as 'Catchable fatal error'.
+  Some of the existing E_ERROR conditions have been converted to something that
+  you can catch with a user-defined error handler. If an E_RECOVERABLE_ERROR is
+  not handled, it will behave in the same way as E_ERROR behaves in all versions
+  of PHP. Errors of this type are logged as 'Catchable fatal error'.
+
+
+- Changed E_ALL error reporting mode to includes E_RECOVERABLE_ERROR. (Marcus)
+
+  This change means that the value of the E_ALL error_reporting constant is now
+  6143, where its previous value was 2047. If you are setting the error_reporting
+  mode from either the Apache config file or the .htaccess files, you will need
+  to adjust the value accordingly. The same applies if you use the numeric value
+  rather than the constant in your PHP scripts.
+
 
 - Added support for constructors in interfaces to force constructor signature
   checks in implementations. (Marcus)
-  
-  Starting with PHP 5.2 interfaces can have constructors. If you use this 
-  feature then all implementing classes must implement constructors with a 
-  matching signature, while normally constructors do not need to follow any
-  base class or interface constructor signature. (Signature is the name for 
-  the parameter and return type definition which captures count, reference or 
-  not and any type hints).
+
+  Starting with PHP 5.2, interfaces can have constructors. However, if you choose
+  to declare a constructor in an interface, each class implementing that interface
+  MUST include a constructor with a signature matching that of the base interface
+  constructor. By 'signature' we mean the parameter and return type definitions,
+  including any type hints and including whether the data is passed by reference
+  or by value.
+
 
 - Changed __toString to be called wherever applicable. (Marcus)
 
-  The magic object method __toString() is now called whenever an object is used
-  as a string. The function must not throw an exception or the script will be
-  terminated with a catchable see above) fatal error. The PHP 5.0/5.1 fallback
-  to return a string containing the object identifier has been dropped. People 
-  were assuming that this object identifier was unique when in fact it wasn't.  
-  
-  Even with __toString objects cannot be used as keys to arrays. We might add
-  built-in hash support for this. But for 5.2 you would need to either provide
-  your own hashing and use an explicit string cast or use new function 
-  spl_object_hash()
+  The magic method __toString() will now be called in a string context, that
+  is, anywhere an object is used as a string. When implementing your __toString()
+  method in a class, you should be aware that the script will terminate if
+  your function throws an exception.
+
+  The PHP 5.0/5.1 fallback - returning a string that contains the object
+  identifier - has been dropped in PHP 5.2. It became problematic because
+  an object identifier cannot be considered unique. This change will mean
+  that your application is flawed if you have relied on the object identifier
+  as a return value. An attempt to use that value as a string will now result
+  in a catchable fatal error (see above).
+
+  Even with __toString(), objects cannot be used as array indices or keys. We
+  may add built-in hash support for this at a later date, but for PHP 5.2 you
+  will need to either provide your own hashing or use the new SPL function
+  spl_object_hash().
+
 
 - Added RFC2397 (data: stream) support. (Marcus)
 
-  Under windows this can mean a very rare change of behavior. If you are using 
-  NTFS filesystem and making use of meta streams in your application this no
-  longer works for a file with the name 'data:' accessed without any path. If
-  you need to do so you have to prefix the filename with the "file:" protocol.
-  For the functionality itself look here http://www.faqs.org/rfcs/rfc2397.html.
+  The introduction of the 'data' URL scheme has the potential to lead to a
+  change of behaviour under Windows. If you are working with an NTFS
+  filesystem and making use of meta streams in your application, and if you
+  just happen to be using a file with the name 'data:' that is accessed without
+  any path information - it won't work any more. The fix is to use the 'file:'
+  protocol when accessing it.
+
+  There is information about the RFC at http://www.faqs.org/rfcs/rfc2397.html.
+
 
 - Added allow_url_include ini directive to complement allow_url_fopen. (Rasmus)
 
-  With this option one can now distinguish between standard file operations on
-  remote files and inclusion of remote files.  While the former is usually
-  desired, the latter implies security risks if used naively.  Starting with
-  PHP-5.2 it is now possible to allow standard file operations while
-  disallowing inclusion of remote files, which is also the default
-  configuration now.  
+  This useful option makes it possible to differentiate between standard
+  file operations on remote files, and the inclusion of remote files. While the
+  former is usually desirable, the latter can be a security risk if used naively.
+  Starting with PHP 5.2, you can allow remote file operations while
+  disallowing the inclusion of remote files in local scripts. In fact, this
+  is the default configuration.
+
 
 - Dropped abstract static class functions. (Marcus)
 
-  Due to an oversight PHP 5.0, 5.1 allowed abstract static functions. In PHP 
-  5.2 only interfaces can have abstract static functions.
+  Due to an oversight, PHP 5.0 and 5.1 allowed abstract static functions in
+  classes. In PHP 5.2, only interfaces can have them.
+
+
+- Removed extensions (Derick, Tony)
+
+  The filepro and hwapi extensions have been moved to PECL and are no longer
+  part of the PHP distribution. The PECL package version of these extensions
+  will be created on the basis of user demand.
+
+
+- Added extensions (Rasmus, Derick, Pierre)
+
+  The JSON extension implements the JavaScript Object Notation (JSON)
+  data interchange format. This extension is enabled by default.
+
+  The Filter extension validates and filters data, and is designed for
+  use with insecure data such as user input. This extension is enabled
+  by default; the default mode RAW does not impact input data in any way.
+
+  The Zip extension enables you to transparently read or write ZIP
+  compressed archives and the files inside them.
+
+  Please refer to the PHP Manual for details.
+
+
+- Improved memory manager and increased default memory limit (Dmitry)
+
+  The new memory manager allocates less memory and works faster than the
+  previous incarnation. It allocates memory from the system in large blocks,
+  and then manages the heap by itself. The memory_limit value in php.ini is
+  checked, not for each emalloc() call (as before), but for actual blocks
+  requested from the system. This means that memory_limit is far more
+  accurate than it used to be, since the old memory manager didn't calculate
+  all the memory overhead used by the malloc library.
+
+  Thanks to this new-found accuracy memory usage may appear to have increased,
+  although actually it has not. To accommodate this apparent increase, the
+  default memory_limit setting was also increased - from 8 to 16 megabytes.
+
+
+- Changed priority of PHPRC environment variable on win32 (Dmitry)
+
+  The PHPRC environment variable now takes priority over the path stored
+  in the Windows registry.
+
+
+- Added notice when accessing return value from __get() in write mode (Marcus)
+
+  The reason for this is that __get() only returns variables in read mode, and
+  it is therefore not possible to write to the returned variable. In previous
+  releases there was no effective way to detect incorrect usage. Starting from
+  PHP 5.2, an E_NOTICE will be emitted in this situation.
+
+  WARNING: foreach() and functions that modify the internal array pointer will
+  now also trigger the same E_NOTICE, since modification requires that the
+  variable be accessed in write mode. To work around this, you should either
+  cast the returned value from __get() to an array, or use SPL's ArrayObject
+  instead of an array.
