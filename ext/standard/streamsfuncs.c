@@ -33,8 +33,10 @@
 
 #ifndef PHP_WIN32
 #define php_select(m, r, w, e, t)	select(m, r, w, e, t)
+typedef unsigned long long php_timeout_ull;
 #else
 #include "win32/select.h"
+typedef unsigned __int64 php_timeout_ull;
 #endif
 
 static php_stream_context *decode_context_param(zval *contextresource TSRMLS_DC);
@@ -81,7 +83,7 @@ PHP_FUNCTION(stream_socket_client)
 	int host_len;
 	zval *zerrno = NULL, *zerrstr = NULL, *zcontext = NULL;
 	double timeout = FG(default_socket_timeout);
-	unsigned long conv;
+	php_timeout_ull conv;
 	struct timeval tv;
 	char *hashkey = NULL;
 	php_stream *stream = NULL;
@@ -103,7 +105,7 @@ PHP_FUNCTION(stream_socket_client)
 	}
 	
 	/* prepare the timeout value for use */
-	conv = (unsigned long) (timeout * 1000000.0);
+	conv = (php_timeout_ull) (timeout * 1000000.0);
 	tv.tv_sec = conv / 1000000;
 	tv.tv_usec = conv % 1000000;
 
@@ -231,7 +233,7 @@ PHP_FUNCTION(stream_socket_accept)
 {
 	double timeout = FG(default_socket_timeout);
 	zval *peername = NULL;
-	unsigned long conv;
+	php_timeout_ull conv;
 	struct timeval tv;
 	php_stream *stream = NULL, *clistream = NULL;
 	zval *zstream;
@@ -245,7 +247,7 @@ PHP_FUNCTION(stream_socket_accept)
 	php_stream_from_zval(stream, &zstream);
 	
 	/* prepare the timeout value for use */
-	conv = (unsigned long) (timeout * 1000000.0);
+	conv = (php_timeout_ull) (timeout * 1000000.0);
 	tv.tv_sec = conv / 1000000;
 	tv.tv_usec = conv % 1000000;
 
