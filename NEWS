@@ -14,6 +14,8 @@
 - Fixed bug #38661 (mixed-case URL breaks url-wrappers). (Ilia)
 - Fixed bug #38464 (array_count_values() mishandles numeric strings). 
   (php_lists at realplain dot com, Ilia)
+- Fixed bug #38096 (large timeout values ignored on 32bit machines in
+  stream_socket_accept() and stream_socket_client()). (Ilia)
 
 31 Aug 2006, PHP 5.2.0RC3
 - Updated PCRE to version 6.7. (Ilia)
