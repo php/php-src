@@ -188,6 +188,8 @@ void init_executor(TSRMLS_D)
 	EG(scope) = NULL;
 
 	EG(This) = NULL;
+
+	EG(active) = 1;
 }
 
 static int zval_call_destructor(zval **zv TSRMLS_DC)
@@ -316,6 +318,7 @@ void shutdown_executor(TSRMLS_D)
 			FREE_HASHTABLE(EG(in_autoload));
 		}
 	} zend_end_try();
+	EG(active) = 0;
 }
 
 
@@ -612,6 +615,10 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	int call_via_handler = 0;
 	char *fname, *colon;
 	int fname_len;
+
+	if (!EG(active)) {
+		return FAILURE; /* executor is already inactive */
+	}
 
 	if (EG(exception)) {
 		return FAILURE; /* we would result in an instable executor otherwise */
