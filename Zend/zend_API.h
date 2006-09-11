@@ -405,31 +405,6 @@ ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
 		add_assoc_stringl_ex(arg, key, key_len, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
 	}
 
-#define add_assoc_utf8_string_ex(arg, key, key_len, str, flags) \
-	{ \
-		UErrorCode status = U_ZERO_ERROR; \
-		UChar *u_str; \
-		int u_len; \
-		int length = strlen(str); \
-		zend_string_to_unicode_ex(UG(utf8_conv), &u_str, &u_len, str, length, &status); \
-		if ((flags) & ZSTR_AUTOFREE) { \
-			efree(str); \
-		} \
-		add_assoc_unicodel_ex(arg, key, key_len, u_str, u_len, 0); \
-	}
-
-#define add_assoc_utf8_stringl_ex(arg, key, key_len, str, length, flags) \
-	{ \
-		UErrorCode status = U_ZERO_ERROR; \
-		UChar *u_str; \
-		int u_len; \
-		zend_string_to_unicode_ex(UG(utf8_conv), &u_str, &u_len, str, length, &status); \
-		if ((flags) & ZSTR_AUTOFREE) { \
-			efree(str); \
-		} \
-		add_assoc_unicodel_ex(arg, key, key_len, u_str, u_len, 0); \
-	}
-
 #define add_assoc_long(__arg, __key, __n) add_assoc_long_ex(__arg, __key, strlen(__key)+1, __n)
 #define add_assoc_null(__arg, __key) add_assoc_null_ex(__arg, __key, strlen(__key) + 1)
 #define add_assoc_bool(__arg, __key, __b) add_assoc_bool_ex(__arg, __key, strlen(__key)+1, __b)
