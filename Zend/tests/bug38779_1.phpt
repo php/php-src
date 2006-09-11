@@ -31,7 +31,7 @@ stream_wrapper_register('Loader', 'Loader');
 $fp = fopen ('Loader://qqq.php', 'r');
 
 $filename = dirname(__FILE__)."/bug38779.txt";
-$fp1 = fopen($filename, "w");
+$fp1 = fopen($filename, "wt");
 fwrite($fp1, "<"."?php blah blah?".">");
 fclose($fp1);
 
@@ -40,6 +40,10 @@ include $filename;
 echo "Done\n";
 ?>
 --EXPECTF--	
-Parse error: syntax error, unexpected T_STRING in %s on line %d
+Parse error: %s error, unexpected T_STRING in %s on line %d
 string(6) "flush!"
 string(6) "close!"
+--UEXPECTF--
+Parse error: %s error, unexpected T_STRING in %s on line %d
+unicode(6) "flush!"
+unicode(6) "close!"
