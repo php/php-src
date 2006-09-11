@@ -11,6 +11,8 @@
 - Fixed bug #38721 (Invalid memory read in date_parse()). (Tony, Derick)
 - Fixed bug #38700 (SoapClient::__getTypes never returns). (Dmitry)
 - Fixed bug #38693 (curl_multi_add_handle() set curl handle to null). (Ilia)
+- Fixed bug #38687 (sockaddr local storage insufficient for all sock
+  families). (Sara)
 - Fixed bug #38661 (mixed-case URL breaks url-wrappers). (Ilia)
 - Fixed bug #38464 (array_count_values() mishandles numeric strings). 
   (php_lists at realplain dot com, Ilia)
