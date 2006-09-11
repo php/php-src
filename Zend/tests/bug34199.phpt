@@ -4,7 +4,7 @@ Bug #34199 (if($obj)/if(!$obj) inconsistency because of cast handler)
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
 <?php
-$xml = "<root></root>";
+$xml = b"<root></root>";
 $xml = simplexml_load_string($xml);
 $kids = $xml->children();
 var_dump((bool)$kids);
