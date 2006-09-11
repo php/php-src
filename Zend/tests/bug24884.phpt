@@ -23,6 +23,6 @@ $test = new Test();
 $test2 = $test->__copy();
 var_dump($test2);
 ?>
---EXPECT--
-object(Test)#2 (0) {
+--EXPECTF--
+object(Test)#%d (0) {
 }
