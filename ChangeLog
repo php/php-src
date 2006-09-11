@@ -1,3 +1,111 @@
+2006-09-10  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      dissallowing->disallowing
+
+2006-09-10  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/gmp/tests/004.phpt
+      ext/gmp/tests/005.phpt
+      ext/gmp/tests/006.phpt
+      ext/gmp/tests/007.phpt
+      ext/gmp/tests/008.phpt
+      ext/gmp/tests/009.phpt
+      ext/gmp/tests/010.phpt:
+      new tests
+
+    * ext/gmp/tests/004.phpt
+      ext/gmp/tests/004.phpt
+      ext/gmp/tests/005.phpt
+      ext/gmp/tests/005.phpt
+      ext/gmp/tests/006.phpt
+      ext/gmp/tests/006.phpt
+      ext/gmp/tests/007.phpt
+      ext/gmp/tests/007.phpt
+      ext/gmp/tests/008.phpt
+      ext/gmp/tests/008.phpt
+      ext/gmp/tests/009.phpt
+      ext/gmp/tests/009.phpt
+      ext/gmp/tests/010.phpt
+      ext/gmp/tests/010.phpt:
+      
+      new tests
+
+    * (PHP_5_2)
+      ext/sqlite/tests/bug38759.phpt:
+      add new test
+
+    * ext/sqlite/tests/bug38759.phpt
+      ext/sqlite/tests/bug38759.phpt:
+      
+      add new test
+
+2006-09-10  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/date/php_date.c:
+      Add protos
+
+    * (PHP_5_2)
+      ext/date/php_date.c:
+      MFH: date_timezone_set() needs both arguments
+      MFH: throw exception in DateTimeZone::__construct() when no arguments are
+      passed
+
+    * ext/date/php_date.c:
+      - date_timezone_set() needs both arguments
+      - Throw exception in DateTimeZone::__construct if no arguments are passed
+
+    * (PHP_5_2)
+      ext/zip/.cvsignore
+      ext/zip/lib/.cvsignore:
+      Add *.lo into .cvsignore
+
+    * ext/zip/.cvsignore
+      ext/zip/.cvsignore
+      ext/zip/lib/.cvsignore
+      ext/zip/lib/.cvsignore:
+      
+      Add *.lo into .cvsignore
+
+    * ext/reflection/php_reflection.c:
+      MFB: abstracting ReflectionFunctionAbstract & fix couple of typos
+
+    * (PHP_5_2)
+      ext/reflection/php_reflection.c:
+      Make ReflectionFunctionAbstract abstract
+      - Move ReflectionFunctionAbstract::__construct to ReflectionFunction
+      - Move ReflectionFunctionAbstract::__toString to ReflectionFuncion
+      - Delcare ReflectionFunctionAbstract::__toString abstract
+      - fix couple of typos
+
+2006-09-10  Antony Dovgal  <antony@zend.com>
+
+    * main/streams/streams.c
+      main/streams/streams.c:
+      fix coverity issue #197
+      "I can't think of a reason to pass a NULL buf" (c) Wez
+
+2006-09-10  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * Makefile.gcov:
+      MFB
+
+    * (PHP_5_2)
+      Makefile.gcov:
+      fix lcov processing with gcc 4.1 (some .h files were not copied)
+
+2006-09-10  Antony Dovgal  <antony@zend.com>
+
+    * scripts/dev/check_parameters.php
+      scripts/dev/check_parameters.php:
+      more improvements
+
+    * scripts/dev/check_parameters.php:
+      add help
+      scan directories specified in argv
+
 2006-09-09  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * php.ini-dist
