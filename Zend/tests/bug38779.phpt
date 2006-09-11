@@ -26,4 +26,4 @@ require 'Loader://qqq.php';
 echo "Done\n";
 ?>
 --EXPECTF--	
-Parse error: syntax error, unexpected T_STRING in Loader://qqq.php on line %d
+Parse error: %s error, unexpected T_STRING in Loader://qqq.php on line %d
