@@ -1533,6 +1533,7 @@ ZEND_API int add_assoc_zstrl_ex(zval *arg, char *key, uint key_len, zend_uchar t
 ZEND_API int add_assoc_utf8_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, int duplicate)
 {
 	zval *tmp;
+	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_UTF8_STRINGL(tmp, str, length, duplicate);
@@ -1543,6 +1544,7 @@ ZEND_API int add_assoc_utf8_stringl_ex(zval *arg, char *key, uint key_len, char 
 ZEND_API int add_u_assoc_utf8_stringl_ex(zval *arg, zend_uchar type, zstr key, uint key_len, char *str, uint length, int duplicate)
 {
 	zval *tmp;
+	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_UTF8_STRINGL(tmp, str, length, duplicate);
@@ -1666,6 +1668,7 @@ ZEND_API int add_index_zval(zval *arg, ulong index, zval *value)
 ZEND_API int add_index_utf8_string(zval *arg, ulong index, char *str, int duplicate)
 {
 	zval *tmp;
+	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_UTF8_STRING(tmp, str, duplicate);
@@ -1677,6 +1680,7 @@ ZEND_API int add_index_utf8_string(zval *arg, ulong index, char *str, int duplic
 ZEND_API int add_index_utf8_stringl(zval *arg, ulong index, char *str, uint length, int duplicate)
 {
 	zval *tmp;
+	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_UTF8_STRINGL(tmp, str, length, duplicate);
