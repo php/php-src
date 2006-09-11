@@ -37,7 +37,7 @@ Items from the NEWS file explained
   of PHP. Errors of this type are logged as 'Catchable fatal error'.
 
 
-- Changed E_ALL error reporting mode to includes E_RECOVERABLE_ERROR. (Marcus)
+- Changed E_ALL error reporting mode to include E_RECOVERABLE_ERROR. (Marcus)
 
   This change means that the value of the E_ALL error_reporting constant is now
   6143, where its previous value was 2047. If you are setting the error_reporting
@@ -160,3 +160,11 @@ Items from the NEWS file explained
   variable be accessed in write mode. To work around this, you should either
   cast the returned value from __get() to an array, or use SPL's ArrayObject
   instead of an array.
+
+- CLI SAPI no longer checks cwd for php.ini or the php-cli.ini file (Edin)
+
+  In PHP 5.1.X an undocumented feature was added that made the CLI binary
+  check the current directory for PHP configuration file possibly leading to
+  unpredictable behavior due to an un-expected configuration file being
+  read. This functionality was removed in 5.2 and PHP will no longer search
+  CWD for the presence of the php.ini or the php-cli.ini files.
