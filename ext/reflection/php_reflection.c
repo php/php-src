@@ -537,10 +537,23 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 /* {{{ _const_string */
 static void _const_string(string *str, char *name, zval *value, char *indent TSRMLS_DC)
 {
-	string_printf(str, "%s    Constant [ %s %s ] { }\n",
+	zval value_copy;
+	int use_copy;
+
+	zend_make_printable_zval(value, &value_copy, &use_copy);
+	if (use_copy) {
+		value = &value_copy;
+	}
+
+	string_printf(str, "%s    Constant [ %s %s ] { %s }\n",
 			   indent,
 			   zend_zval_type_name(value),
-			   name);
+			   name,
+			   Z_STRVAL_P(value));
+
+	if (use_copy) {
+		zval_dtor(value);
+	}
 }
 /* }}} */
 

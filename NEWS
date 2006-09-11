@@ -16,6 +16,7 @@
   (php_lists at realplain dot com, Ilia)
 - Fixed bug #38096 (large timeout values ignored on 32bit machines in
   stream_socket_accept() and stream_socket_client()). (Ilia)
+- Fixed bug #37923 (Display constant value in reflection::export). (Johannes)
 
 31 Aug 2006, PHP 5.2.0RC3
 - Updated PCRE to version 6.7. (Ilia)
