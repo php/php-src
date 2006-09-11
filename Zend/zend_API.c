@@ -1456,6 +1456,7 @@ ZEND_API int add_assoc_stringl_ex(zval *arg, char *key, uint key_len, char *str,
 	return zend_symtable_update(Z_ARRVAL_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
 }
 
+
 ZEND_API int add_u_assoc_stringl_ex(zval *arg, zend_uchar type, zstr key, uint key_len, char *str, uint length, int duplicate)
 {
 	zval *tmp;
@@ -1465,6 +1466,7 @@ ZEND_API int add_u_assoc_stringl_ex(zval *arg, zend_uchar type, zstr key, uint k
 
 	return zend_u_symtable_update(Z_ARRVAL_P(arg), type, key, key_len, (void *) &tmp, sizeof(zval *), NULL);
 }
+
 
 ZEND_API int add_assoc_unicode_ex(zval *arg, char *key, uint key_len, UChar *str, int duplicate)
 {
@@ -1526,6 +1528,26 @@ ZEND_API int add_assoc_zstrl_ex(zval *arg, char *key, uint key_len, zend_uchar t
 	ZVAL_ZSTRL(tmp, str, length, type, duplicate);
 
 	return zend_symtable_update(Z_ARRVAL_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
+}
+
+ZEND_API int add_assoc_utf8_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, int duplicate)
+{
+	zval *tmp;
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_UTF8_STRINGL(tmp, str, length, duplicate);
+
+	return zend_symtable_update(Z_ARRVAL_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
+}
+
+ZEND_API int add_u_assoc_utf8_stringl_ex(zval *arg, zend_uchar type, zstr key, uint key_len, char *str, uint length, int duplicate)
+{
+	zval *tmp;
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_UTF8_STRINGL(tmp, str, length, duplicate);
+
+	return zend_u_symtable_update(Z_ARRVAL_P(arg), type, key, key_len, (void *) &tmp, sizeof(zval *), NULL);
 }
 
 ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value)
@@ -1639,6 +1661,27 @@ ZEND_API int add_index_unicodel(zval *arg, ulong index, UChar *str, uint length,
 ZEND_API int add_index_zval(zval *arg, ulong index, zval *value)
 {
 	return zend_hash_index_update(Z_ARRVAL_P(arg), index, (void *) &value, sizeof(zval *), NULL);
+}
+
+ZEND_API int add_index_utf8_string(zval *arg, ulong index, char *str, int duplicate)
+{
+	zval *tmp;
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_UTF8_STRING(tmp, str, duplicate);
+
+	return zend_hash_index_update(Z_ARRVAL_P(arg), index, (void *) &tmp, sizeof(zval *), NULL);
+}
+
+
+ZEND_API int add_index_utf8_stringl(zval *arg, ulong index, char *str, uint length, int duplicate)
+{
+	zval *tmp;
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_UTF8_STRINGL(tmp, str, length, duplicate);
+
+	return zend_hash_index_update(Z_ARRVAL_P(arg), index, (void *) &tmp, sizeof(zval *), NULL);
 }
 
 
