@@ -369,7 +369,7 @@ static void _php_iconv_show_error(php_iconv_err_t err, const char *in_charset, c
 
 		case PHP_ICONV_ERR_TOO_BIG:
 			/* should not happen */
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Run out buffer");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Buffer length exceeded");
 			break;
 
 		default:
