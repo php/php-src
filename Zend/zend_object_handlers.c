@@ -798,7 +798,17 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, zstr method_
 	}
 
 	/* Check access level */
-	if (fbc->op_array.fn_flags & ZEND_ACC_PUBLIC) {
+	if (fbc->op_array.fn_flags & ZEND_ACC_PRIVATE) {
+		zend_function *updated_fbc;
+
+		/* Ensure that if we're calling a private function, we're allowed to do so.
+		 */
+		updated_fbc = zend_check_private_int(fbc, Z_OBJ_HANDLER_P(object, get_class_entry)(object TSRMLS_CC), lc_method_name, method_len TSRMLS_CC);
+		if (!updated_fbc) {
+			zend_error(E_ERROR, "Call to %s method %v::%v() from context '%v'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : EMPTY_ZSTR);
+		}
+		fbc = updated_fbc;
+	} else {
 		/* Ensure that we haven't overridden a private function and end up calling
 		 * the overriding public function...
 		 */
@@ -811,21 +821,12 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, zstr method_
 				fbc = priv_fbc;
 			}
 		}
-	} else if (fbc->op_array.fn_flags & ZEND_ACC_PRIVATE) {
-		zend_function *updated_fbc;
-
-		/* Ensure that if we're calling a private function, we're allowed to do so.
-		 */
-		updated_fbc = zend_check_private_int(fbc, Z_OBJ_HANDLER_P(object, get_class_entry)(object TSRMLS_CC), lc_method_name, method_len TSRMLS_CC);
-		if (!updated_fbc) {
-			zend_error(E_ERROR, "Call to %s method %v::%v() from context '%v'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : EMPTY_ZSTR);
-		}
-		fbc = updated_fbc;
-	} else if ((fbc->common.fn_flags & ZEND_ACC_PROTECTED)) {
-		/* Ensure that if we're calling a protected function, we're allowed to do so.
-		 */
-		if (!zend_check_protected(zend_get_function_root_class(fbc), EG(scope))) {
-			zend_error(E_ERROR, "Call to %s method %v::%v() from context '%v'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : EMPTY_ZSTR);
+		if ((fbc->common.fn_flags & ZEND_ACC_PROTECTED)) {
+			/* Ensure that if we're calling a protected function, we're allowed to do so.
+			 */
+			if (!zend_check_protected(zend_get_function_root_class(fbc), EG(scope))) {
+				zend_error(E_ERROR, "Call to %s method %v::%v() from context '%v'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : EMPTY_ZSTR);
+			}
 		}
 	}
 
