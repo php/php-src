@@ -254,6 +254,7 @@ static zend_function_entry php_oci_functions[] = {
 	PHP_FE(oci_lob_append,              NULL)
 	PHP_FE(oci_lob_copy,                NULL)
 	PHP_FE(oci_lob_export,              NULL)
+	PHP_FE(oci_lob_seek,                NULL)
 	PHP_FE(oci_commit,                  NULL)
 	PHP_FE(oci_rollback,                NULL)
 	PHP_FE(oci_new_descriptor,          NULL)
