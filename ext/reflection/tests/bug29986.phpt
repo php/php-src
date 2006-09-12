@@ -17,14 +17,14 @@ Reflection::export(new ReflectionClass('just_constants'));
 ?>
 --EXPECTF--
 Class [ <user> class just_constants ] {
-  @@ %s
+  @@ %s %d-%d
 
   - Constants [5] {
-    Constant [ boolean BOOLEAN_CONSTANT ] { }
-    Constant [ null NULL_CONSTANT ] { }
-    Constant [ string STRING_CONSTANT ] { }
-    Constant [ integer INTEGER_CONSTANT ] { }
-    Constant [ double FLOAT_CONSTANT ] { }
+    Constant [ boolean BOOLEAN_CONSTANT ] { 1 }
+    Constant [ null NULL_CONSTANT ] {  }
+    Constant [ string STRING_CONSTANT ] { This is a string }
+    Constant [ integer INTEGER_CONSTANT ] { 1000 }
+    Constant [ double FLOAT_CONSTANT ] { 3.14159265 }
   }
 
   - Static properties [0] {
@@ -41,14 +41,14 @@ Class [ <user> class just_constants ] {
 }
 --UEXPECTF--
 Class [ <user> class just_constants ] {
-  @@ %s
+  @@ %s %d-%d
 
   - Constants [5] {
-    Constant [ boolean BOOLEAN_CONSTANT ] { }
-    Constant [ null NULL_CONSTANT ] { }
-    Constant [ Unicode string STRING_CONSTANT ] { }
-    Constant [ integer INTEGER_CONSTANT ] { }
-    Constant [ double FLOAT_CONSTANT ] { }
+    Constant [ boolean BOOLEAN_CONSTANT ] { 1 }
+    Constant [ null NULL_CONSTANT ] {  }
+    Constant [ Unicode string STRING_CONSTANT ] { This is a string }
+    Constant [ integer INTEGER_CONSTANT ] { 1000 }
+    Constant [ double FLOAT_CONSTANT ] { 3.14159265 }
   }
 
   - Static properties [0] {
@@ -63,4 +63,3 @@ Class [ <user> class just_constants ] {
   - Methods [0] {
   }
 }
-
