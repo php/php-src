@@ -1262,11 +1262,13 @@ not_relative_path:
 			*end = '\0';
 			end++;
 		}
+		if (*ptr == '\0') {
+			goto stream_skip;
+		}
 		snprintf(trypath, MAXPATHLEN, "%s/%s", ptr, filename);
 
 		if (((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) && php_check_open_basedir_ex(trypath, 0 TSRMLS_CC)) {
-			ptr = end;
-			continue;
+			goto stream_skip;
 		}
 		
 		stream = php_stream_fopen_rel(trypath, mode, opened_path, options);
@@ -1275,6 +1277,7 @@ stream_done:
 			efree(pathbuf);
 			return stream;
 		}
+stream_skip:
 		ptr = end;
 	} /* end provided path */
 
