@@ -996,7 +996,7 @@ ZIPARCHIVE_METHOD(addFile)
 		RETURN_FALSE;
 	}
 
-	if (!VCWD_REALPATH(filename, resolved_path)) {
+	if (!expand_filepath(filename, resolved_path TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
