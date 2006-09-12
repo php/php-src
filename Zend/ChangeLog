@@ -1,3 +1,52 @@
+2006-09-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_API.c:
+       fix
+
+2006-09-11  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.c
+      zend_API.h:
+      Add a couple more UTF-8 functions.
+
+2006-09-11  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend.c
+      zend_execute_API.c
+      zend_globals.h:
+      MFH: fix #38779 (engine crashes when require()'ing file with syntax error
+      through userspace stream wrapper)
+
+    * zend.c
+      zend_execute_API.c
+      zend_globals.h:
+      fix #38779 (engine crashes when require()'ing file with syntax error
+      through userspace stream wrapper)
+
+    * tests/bug38779.phpt
+      tests/bug38779.phpt
+      tests/bug38779_1.phpt
+      tests/bug38779_1.phpt:
+      fix tests
+
+    * (PHP_5_2)
+      tests/bug38779.phpt
+      tests/bug38779_1.phpt:
+      add tests
+
+    * tests/bug38779.phpt
+      tests/bug38779.phpt
+      tests/bug38779_1.phpt
+      tests/bug38779_1.phpt:
+      
+      add tests
+
+    * tests/bug24884.phpt
+      tests/bug24884.phpt
+      tests/bug34199.phpt:
+      fix test
+
 2006-09-08  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_operators.h:

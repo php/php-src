@@ -1,3 +1,130 @@
+2006-09-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      Typo fix from Steph
+      Added note about CLI and INI search path
+
+2006-09-11  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_2)
+      ext/reflection/php_reflection.c:
+      - MFH: Print the type of the original value
+
+    * ext/reflection/php_reflection.c:
+      - Print the type of the original value
+
+2006-09-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+2006-09-11  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_5_1)
+      main/network.c
+      main/network.c:
+      MFH: Bug #38687 - sockaddr local storage insufficient for all sock families
+
+    * main/network.c:
+      Bug #38687 - sockaddr local storage insufficient for all sock families
+
+2006-09-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_API.c:
+       fix
+
+2006-09-11  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_2)
+      NEWS
+      ext/reflection/php_reflection.c:
+      - MFH: Fix #37923 (Display constant value in reflection::export)
+
+    * ext/reflection/php_reflection.c:
+      - Fix #37923 (Display constant value in reflection::export)
+
+2006-09-11  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h:
+      Add a couple more UTF-8 functions.
+
+2006-09-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/streamsfuncs.c:
+      MFB: Fixed bug #38096 (large timeout values ignored on 32bit machines in
+      stream_socket_accept() and stream_socket_client()).
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/streamsfuncs.c:
+      Fixed bug #38096 (large timeout values ignored on 32bit machines in
+      stream_socket_accept() and stream_socket_client()).
+
+2006-09-11  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ZendEngine2/zend.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h:
+      MFH: fix #38779 (engine crashes when require()'ing file with syntax error
+      through userspace stream wrapper)
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h:
+      fix #38779 (engine crashes when require()'ing file with syntax error
+      through userspace stream wrapper)
+
+    * ZendEngine2/tests/bug38779.phpt
+      ZendEngine2/tests/bug38779.phpt
+      ZendEngine2/tests/bug38779_1.phpt
+      ZendEngine2/tests/bug38779_1.phpt:
+      fix tests
+
+    * (PHP_5_2)
+      ZendEngine2/tests/bug38779.phpt
+      ZendEngine2/tests/bug38779_1.phpt:
+      add tests
+
+    * ZendEngine2/tests/bug38779.phpt
+      ZendEngine2/tests/bug38779.phpt
+      ZendEngine2/tests/bug38779_1.phpt
+      ZendEngine2/tests/bug38779_1.phpt:
+      
+      add tests
+
+2006-09-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      Upgrading updates from Steph
+
+2006-09-11  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/tests/bug24884.phpt
+      ZendEngine2/tests/bug24884.phpt
+      ZendEngine2/tests/bug34199.phpt:
+      fix test
+
+2006-09-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c:
+      Don't try to do safe connection close in case of FastCGI protocol error
+
+2006-09-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      Fixed a typo
+
 2006-09-10  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * (PHP_5_2)
