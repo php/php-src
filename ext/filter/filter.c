@@ -312,7 +312,7 @@ static void php_zval_filter(zval **value, long filter, long flags, zval *options
 		filter_func = php_find_filter(FILTER_DEFAULT);
 	}
 
-	SEPARATE_ZVAL(value);
+	/* Comment this out until there is a better solution: SEPARATE_ZVAL(value); */
 	/* Here be strings */
 	convert_to_string(*value);
 
@@ -634,7 +634,7 @@ PHP_FUNCTION(input_get)
 				break;
 			}
 		} else {
-			filter_flags = FILTER_FLAG_SCALAR;
+			filter_flags = filter_flags | FILTER_FLAG_SCALAR;
 		}
 
 		zval_copy_ctor(return_value);  /* Watch out for empty strings */
