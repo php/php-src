@@ -7,6 +7,8 @@
   readded it for other SAPIs (restore to pre 5.1.x behavior). (Edin)
 - Fixed bug #38779 (engine crashes when require()'ing file with syntax error 
   through userspace stream wrapper). (Tony, Dmitry)
+- Fixed bug #38772 (inconsistent overriding of methods in different visibility
+  contexts). (Dmitry)
 - Fixed bug #38759 (PDO sqlite2 empty query causes segfault). (Tony)
 - Fixed bug #38721 (Invalid memory read in date_parse()). (Tony, Derick)
 - Fixed bug #38700 (SoapClient::__getTypes never returns). (Dmitry)
