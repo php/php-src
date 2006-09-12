@@ -971,10 +971,10 @@ ZIPARCHIVE_METHOD(addFile)
 		entry_name_len = filename_len;
 	}
 
-	if (!VCWD_REALPATH(filename, resolved_path)) {
+	if(!expand_filepath(filename, resolved_path TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	
+
 	zs = zip_source_file(intern, resolved_path, 0, 0);
 	if (!zs) {
 		RETURN_FALSE;
