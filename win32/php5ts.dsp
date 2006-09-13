@@ -152,6 +152,10 @@ SOURCE=..\sapi\cgi\cgi_main.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\sapi\cgi\fastcgi.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\sapi\cgi\getopt.c
 # End Source File
 # End Group
