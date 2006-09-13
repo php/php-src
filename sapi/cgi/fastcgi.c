@@ -682,7 +682,7 @@ int fcgi_accept_request(fcgi_request *req)
 				break;
 #else
 				if (req->fd >= 0) {
-					struct timeval tv = {1,0};
+					struct timeval tv = {5,0};
 					fd_set set;
 
 					FD_ZERO(&set);
