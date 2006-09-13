@@ -1,3 +1,18 @@
+2006-09-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c
+      zend_object_handlers.c
+      zend_object_handlers.c
+      tests/bug38772.phpt:
+      Fixed bug #38772 (inconsistent overriding of methods in different
+      visibility contexts)
+
+    * tests/bug38772.phpt
+      tests/bug38772.phpt:
+      
+      file bug38772.phpt was initially added on branch PHP_5_2.
+
 2006-09-11  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_API.c:
