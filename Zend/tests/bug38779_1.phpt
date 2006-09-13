@@ -40,10 +40,10 @@ include $filename;
 echo "Done\n";
 ?>
 --EXPECTF--	
-Parse error: %s error, unexpected T_STRING in %s on line %d
+Parse error: %s error%sin %s on line %d
 string(6) "flush!"
 string(6) "close!"
 --UEXPECTF--
-Parse error: %s error, unexpected T_STRING in %s on line %d
+Parse error: %s error%sin %s on line %d
 unicode(6) "flush!"
 unicode(6) "close!"
