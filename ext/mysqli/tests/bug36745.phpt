@@ -18,6 +18,6 @@ bug #36745 : LOAD DATA LOCAL INFILE doesn't return correct error message
 	$mysql->close();
 	printf("Done");
 ?>
---EXPECT--
-string(31) "Can't find file 'filenotfound'."
+--EXPECTF--
+string(%d) "%s"
 Done
