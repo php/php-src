@@ -17,7 +17,7 @@
   families). (Sara)
 - Fixed bug #38661 (mixed-case URL breaks url-wrappers). (Ilia)
 - Fixed bug #38464 (array_count_values() mishandles numeric strings). 
-  (php_lists at realplain dot com, Ilia)
+  (Matthew Wilmas, Ilia)
 - Fixed bug #38096 (large timeout values ignored on 32bit machines in
   stream_socket_accept() and stream_socket_client()). (Ilia)
 - Fixed bug #37923 (Display constant value in reflection::export). (Johannes)
