@@ -1,3 +1,112 @@
+2006-09-12  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/oci8/tests/array_bind_013.phpt
+      ext/oci8/tests/define1.phpt
+      ext/oci8/tests/lob_021.phpt
+      ext/oci8/tests/lob_022.phpt
+      ext/oci8/tests/lob_023.phpt
+      ext/oci8/tests/lob_024.phpt
+      ext/oci8/tests/lob_025.phpt
+      ext/oci8/tests/lob_026.phpt:
+      new tests
+
+    * ext/oci8/tests/array_bind_013.phpt
+      ext/oci8/tests/array_bind_013.phpt
+      ext/oci8/tests/define1.phpt
+      ext/oci8/tests/define1.phpt
+      ext/oci8/tests/lob_021.phpt
+      ext/oci8/tests/lob_021.phpt
+      ext/oci8/tests/lob_022.phpt
+      ext/oci8/tests/lob_022.phpt
+      ext/oci8/tests/lob_023.phpt
+      ext/oci8/tests/lob_023.phpt
+      ext/oci8/tests/lob_024.phpt
+      ext/oci8/tests/lob_024.phpt
+      ext/oci8/tests/lob_025.phpt
+      ext/oci8/tests/lob_025.phpt
+      ext/oci8/tests/lob_026.phpt
+      ext/oci8/tests/lob_026.phpt:
+      
+      new tests
+
+    * (PHP_5_2)
+      ext/oci8/oci8.c:
+      declare oci_lob_seek()
+
+    * ext/oci8/oci8.c:
+      uhm.. declare oci_lob_seek() along with OCI-Lob->seek() method
+
+    * ext/iconv/iconv.c:
+      improve spelling (fixes #38780)
+
+2006-09-12  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      ext/filter/filter.c
+      ext/filter/filter_private.h:
+      - Make passing filter flags as LONG work again.
+      - Make super globals filtering work again (as quick workaround).
+
+2006-09-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/streams/plain_wrapper.c:
+      MFB: Fixed bug #37779 (empty include_path leads to search for files
+      inside /).
+
+    * (PHP_5_2)
+      NEWS
+      main/streams/plain_wrapper.c:
+      Fixed bug #37779 (empty include_path leads to search for files inside /).
+
+2006-09-12  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/php_zip.c:
+      - MFB:PECL Bug #8676, addFile was not updated and still used VCWD_REALPATH,
+        it now uses expand_filepath
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c:
+      - PECL Bug #8676, addFile was not updated and still used VCWD_REALPATH,
+        it now uses expand_filepath
+
+2006-09-12  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/oci8/oci8_statement.c:
+      MFH: fix leak when binding a variable to the same placeholder several times
+
+    * ext/oci8/oci8_statement.c
+      ext/oci8/tests/debug.phpt:
+      fix leak when binding a variable to the same placeholder several times
+
+2006-09-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug38772.phpt
+      ZendEngine2/tests/bug38772.phpt:
+      
+      file bug38772.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/bug38772.phpt:
+      Fixed bug #38772 (inconsistent overriding of methods in different
+      visibility contexts)
+
+2006-09-12  Antony Dovgal  <antony@zend.com>
+
+    * ext/openssl/openssl.c
+      ext/openssl/openssl.c:
+      remove a leftover
+
+    * ext/reflection/tests/bug29986.phpt
+      ext/reflection/tests/bug29986.phpt:
+      fix test
+
 2006-09-11  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
