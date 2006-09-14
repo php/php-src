@@ -1619,6 +1619,15 @@ static int alloc_globals_id;
 static zend_alloc_globals alloc_globals;
 #endif
 
+ZEND_API int is_zend_mm(TSRMLS_D)
+{
+#if ZEND_USE_MALLOC_MM
+	return AG(mm_heap)->use_zend_alloc;
+#else
+	return 1;
+#endif
+}
+
 ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	TSRMLS_FETCH();
