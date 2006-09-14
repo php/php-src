@@ -1,3 +1,70 @@
+2006-09-13  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/date/lib/timelib_config.h.win32
+      ext/date/lib/timelib_config.h.win32:
+      
+      file timelib_config.h.win32 was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      win32/php5dllts.dsp:
+      fix VC build:
+      - update PCRE defines
+      - create timelib_config.h
+      - update .def dependencies
+
+    * (PHP_5_2)
+      win32/php5ts.dsp:
+      fix fcgi build
+
+2006-09-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      Fixed name
+
+    * ext/mysqli/tests/bug36745.phpt:
+      MFB: Fixed test for systems without INFILE/OUTFILE support
+
+    * (PHP_5_2)
+      ext/mysqli/tests/bug36745.phpt:
+      Fixed test for systems without INFILE/OUTFILE support
+
+2006-09-13  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/tests/bug38779.phpt
+      ZendEngine2/tests/bug38779_1.phpt:
+      fix tests
+
+    * (PHP_5_2)
+      ZendEngine2/tests/bug38779.phpt
+      ZendEngine2/tests/bug38779_1.phpt:
+      fix tests on MacOS
+
+2006-09-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/json/tests/003.phpt:
+      Fixed memory leaks
+
+    * (PHP_5_2)
+      ext/json/tests/003.phpt:
+      Fix memory leaks
+
+    * sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c:
+      Fix for bug #38757 (MultiPart Form Uploads fail with FastCGI)
+
+2006-09-13  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_1)
+      ext/gd/libgd/gd_gif_in.c:
+      - #38801, bug #38112 was not MFH'ed correctly (or reintroduced)
+      - sync (sorry for the WS/cosmetic changes, but easier)
+
+2006-09-13  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/tests/coll_016.phpt:
+      change test to work with Oracle 10
+
 2006-09-12  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)

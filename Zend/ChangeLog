@@ -1,3 +1,14 @@
+2006-09-13  Antony Dovgal  <antony@zend.com>
+
+    * tests/bug38779.phpt
+      tests/bug38779_1.phpt:
+      fix tests
+
+    * (PHP_5_2)
+      tests/bug38779.phpt
+      tests/bug38779_1.phpt:
+      fix tests on MacOS
+
 2006-09-12  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.c
