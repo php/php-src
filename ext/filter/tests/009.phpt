@@ -28,3 +28,17 @@ NULL
 Warning: input_name_to_filter() expects exactly 1 parameter, 3 given in %s on line %d
 NULL
 Done
+--UEXPECTF--
+int(513)
+int(513)
+int(518)
+int(257)
+NULL
+
+Warning: input_name_to_filter() expects parameter 1 to be binary string, array given in %s on line %d
+NULL
+NULL
+
+Warning: input_name_to_filter() expects exactly 1 parameter, 3 given in %s on line %d
+NULL
+Done
