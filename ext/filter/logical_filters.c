@@ -332,9 +332,8 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	ret_val = 0.0;
 
-	if (*str == '0') {
-		/* leading zeros */
-		while (*(str++) == '0');
+	while (*str == '0') {
+		str++;
 	}
 
 	if (*str == dec_sep) {
