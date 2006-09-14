@@ -841,7 +841,7 @@ function error_report($testname, $logname, $tested)
 	}
 }
 
-function system_with_timeout($commandline, $env = null)
+function system_with_timeout($commandline, $env = null, $stdin = null)
 {
 	global $leak_check;
 
@@ -856,6 +856,9 @@ function system_with_timeout($commandline, $env = null)
 	if (!$proc)
 		return false;
 
+	if (is_string($stdin)) {
+		fwrite($pipes[0], $stdin);
+	}
 	fclose($pipes[0]);
 
 	while (true) {
@@ -1400,7 +1403,7 @@ SCRIPT_FILENAME = " . $env['SCRIPT_FILENAME'] . "
 COMMAND $cmd
 ";
 
-	$out = system_with_timeout($cmd, $env);
+	$out = system_with_timeout($cmd, $env, isset($section_text['STDIN']) ? $section_text['STDIN'] : null);
 
 	if (array_key_exists('CLEAN', $section_text) && (!$no_clean || $cfg['keep']['clean'])) {
 		if (trim($section_text['CLEAN'])) {
