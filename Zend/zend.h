@@ -493,17 +493,17 @@ END_EXTERN_C()
 
 #define zend_try												\
 	{															\
-		jmp_buf *orig_bailout = EG(bailout);					\
-		jmp_buf bailout;										\
+		jmp_buf *__orig_bailout = EG(bailout);					\
+		jmp_buf __bailout;										\
 																\
-		EG(bailout) = &bailout;									\
-		if (setjmp(bailout)==0) {
+		EG(bailout) = &__bailout;								\
+		if (setjmp(__bailout)==0) {
 #define zend_catch												\
 		} else {												\
-			EG(bailout) = orig_bailout;
+			EG(bailout) = __orig_bailout;
 #define zend_end_try()											\
 		}														\
-		EG(bailout) = orig_bailout;								\
+		EG(bailout) = __orig_bailout;							\
 	}
 #define zend_first_try		EG(bailout)=NULL;	zend_try
 
