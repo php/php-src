@@ -9,7 +9,8 @@ $data = array(
 	'.4',
 	'-.4',
 	'1000000000000',
-	'-1000000000000'
+	'-1000000000000',
+	'02.324'
 );
 foreach ($data as $val) {
 	$res = filter_data($val, FILTER_VALIDATE_FLOAT);
@@ -25,3 +26,4 @@ float(0.4)
 float(-0.4)
 float(1.0E+12)
 float(-1.0E+12)
+float(2.324)
