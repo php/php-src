@@ -301,7 +301,7 @@ static filter_list_entry php_find_filter(long id) /* {{{ */
 }
 /* }}} */
 
-static void php_zval_filter(zval **value, long filter, long flags, zval *options, char* charset TSRMLS_DC) /* {{{ */
+static void php_zval_filter(zval **value, long filter, long flags, zval *options, char* charset, zend_bool copy TSRMLS_DC) /* {{{ */
 {
 	filter_list_entry  filter_func;
 
@@ -312,7 +312,9 @@ static void php_zval_filter(zval **value, long filter, long flags, zval *options
 		filter_func = php_find_filter(FILTER_DEFAULT);
 	}
 
-	SEPARATE_ZVAL(value);
+	if (copy) {
+		SEPARATE_ZVAL(value);
+	}
 	/* Here be strings */
 	convert_to_string(*value);
 
@@ -380,7 +382,7 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 			zval *tmp_new_var = &new_var;
 			Z_STRVAL(new_var) = estrndup(*val, val_len);
 			INIT_PZVAL(tmp_new_var);
-			php_zval_filter(&tmp_new_var, IF_G(default_filter), IF_G(default_filter_flags), NULL, NULL/*charset*/ TSRMLS_CC);
+ 			php_zval_filter(&tmp_new_var, IF_G(default_filter), IF_G(default_filter_flags), NULL, NULL/*charset*/, 0 TSRMLS_CC);
 		}
 #if PHP_VERSION_ID<60000
 	   	else if (PG(magic_quotes_gpc)) {
@@ -418,7 +420,7 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 }
 /* }}} */
 
-static void php_zval_filter_recursive(zval **value, long filter, long flags, zval *options, char *charset TSRMLS_DC) /* {{{ */
+static void php_zval_filter_recursive(zval **value, long filter, long flags, zval *options, char *charset, zend_bool copy TSRMLS_DC) /* {{{ */
 {
 	zval **element;
 	HashPosition pos;
@@ -427,10 +429,10 @@ static void php_zval_filter_recursive(zval **value, long filter, long flags, zva
 		for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(value), &pos);
 			 zend_hash_get_current_data_ex(Z_ARRVAL_PP(value), (void **) &element, &pos) == SUCCESS;
 			 zend_hash_move_forward_ex(Z_ARRVAL_PP(value), &pos)) {
-				php_zval_filter_recursive(element, filter, flags, options, charset TSRMLS_CC);
+				php_zval_filter_recursive(element, filter, flags, options, charset, copy TSRMLS_CC);
 		}
 	} else {
-		php_zval_filter(value, filter, flags, options, charset TSRMLS_CC);
+		php_zval_filter(value, filter, flags, options, charset, copy TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -657,7 +659,7 @@ PHP_FUNCTION(input_get)
 			ZVAL_BOOL(return_value, 0);
 		}
 
-		php_zval_filter_recursive(&return_value, filter, filter_flags, options, charset TSRMLS_CC);
+		php_zval_filter_recursive(&return_value, filter, filter_flags, options, charset, 1 TSRMLS_CC);
 	} else {
 		RETURN_NULL();
 	}
@@ -686,6 +688,7 @@ PHP_FUNCTION(input_get_args)
 	char *key;
 	unsigned int key_len;
 	unsigned long index;
+	zend_bool copy = 0;
 
 	/* pointers to the zval array GET, POST,... */
 	zval       *array_ptr = NULL;
@@ -713,6 +716,7 @@ PHP_FUNCTION(input_get_args)
 
 		case PARSE_DATA:
 			array_ptr = values;
+			copy = 1;
 			break;
 
 		case PARSE_SESSION:
@@ -804,7 +808,7 @@ PHP_FUNCTION(input_get_args)
 			}
 
 			if (filter_flags & FILTER_FLAG_ARRAY) {
-				php_zval_filter_recursive(tmp, filter, filter_flags, options, charset TSRMLS_CC);
+				php_zval_filter_recursive(tmp, filter, filter_flags, options, charset, copy TSRMLS_CC);
 
 				/* ARRAY always returns an array */
 				if (Z_TYPE_PP(tmp) != IS_ARRAY) {
@@ -814,7 +818,7 @@ PHP_FUNCTION(input_get_args)
 					*tmp = temparray;
 				}
 			} else {
-				php_zval_filter(tmp, filter, filter_flags, options, charset TSRMLS_CC);
+				php_zval_filter(tmp, filter, filter_flags, options, charset, copy TSRMLS_CC);
 			}
 			zval_add_ref(tmp);
 			add_assoc_zval(return_value, key, *tmp);
@@ -908,7 +912,7 @@ PHP_FUNCTION(filter_data)
 			}
 		}
 	}
-	php_zval_filter_recursive(&var, filter, filter_flags, options, charset TSRMLS_CC);
+	php_zval_filter_recursive(&var, filter, filter_flags, options, charset, 1 TSRMLS_CC);
 	RETURN_ZVAL(var, 1, 0);
 }
 /* }}} */
