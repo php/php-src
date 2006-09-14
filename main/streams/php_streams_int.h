@@ -21,20 +21,15 @@
 
 #if ZEND_DEBUG
 
-#if USE_ZEND_ALLOC
-# define emalloc_rel_orig(size)	\
+#define emalloc_rel_orig(size)	\
 		( __php_stream_call_depth == 0 \
 		? _emalloc((size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_RELAY_CC) \
 		: _emalloc((size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_ORIG_RELAY_CC) )
 
-# define erealloc_rel_orig(ptr, size)	\
+#define erealloc_rel_orig(ptr, size)	\
 		( __php_stream_call_depth == 0 \
 		? _erealloc((ptr), (size), 0 ZEND_FILE_LINE_CC ZEND_FILE_LINE_RELAY_CC) \
 		: _erealloc((ptr), (size), 0 ZEND_FILE_LINE_CC ZEND_FILE_LINE_ORIG_RELAY_CC) )
-#else
-# define emalloc_rel_orig(size)			emalloc(size)
-# define erealloc_rel_orig(ptr, size)	erealloc(ptr, size)
-#endif
 
 #define pemalloc_rel_orig(size, persistent)	((persistent) ? malloc((size)) : emalloc_rel_orig((size)))
 #define perealloc_rel_orig(ptr, size, persistent)	((persistent) ? realloc((ptr), (size)) : erealloc_rel_orig((ptr), (size)))
