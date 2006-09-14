@@ -5,6 +5,8 @@
   (marci at balabit dot hu, Tony)
 - Removed current working directory from the php.ini search path for CLI and
   readded it for other SAPIs (restore to pre 5.1.x behavior). (Edin)
+- Fixed bug #38813 (DOMEntityReference->__construct crashes when called 
+  explicitly). (Rob)
 - Fixed bug #38779 (engine crashes when require()'ing file with syntax error 
   through userspace stream wrapper). (Tony, Dmitry)
 - Fixed bug #38772 (inconsistent overriding of methods in different visibility
