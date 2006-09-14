@@ -1,5 +1,7 @@
-'PHP                                                                        NEWS
+PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? Sep 2006, PHP 5.2.0
+
 14 Sep 2006, PHP 5.2.0RC4
 - Added DSA key generation support to openssl_pkey_new(), FR #38731
   (marci at balabit dot hu, Tony)
