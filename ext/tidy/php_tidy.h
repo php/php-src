@@ -24,12 +24,6 @@
 extern zend_module_entry tidy_module_entry;
 #define phpext_tidy_ptr &tidy_module_entry
 
-#ifdef PHP_WIN32
-#define PHP_TIDY_API __declspec(dllexport)
-#else
-#define PHP_TIDY_API
-#endif
-
 #define TIDY_METHOD_MAP(name, func_name, arg_types) \
 	ZEND_NAMED_FE(name, ZEND_FN(func_name), arg_types)
 #define TIDY_NODE_METHOD(name)    PHP_FUNCTION(tnm_ ##name)
@@ -41,7 +35,6 @@ extern zend_module_entry tidy_module_entry;
 
 ZEND_BEGIN_MODULE_GLOBALS(tidy)
 	char *default_config;
-	zval *inst;
 	zend_bool clean_output;
 ZEND_END_MODULE_GLOBALS(tidy)
 
@@ -52,7 +45,6 @@ ZEND_END_MODULE_GLOBALS(tidy)
 #endif
 
 #endif
-
 
 /*
  * Local variables:
