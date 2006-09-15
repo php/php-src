@@ -100,7 +100,7 @@ PHP_METHOD(domelement, __construct)
 		}
 		if (errorcode != 0) {
 			if (nodep != NULL) {
-				xmlFree(nodep);
+				xmlFreeNode(nodep);
 			}
 			php_dom_throw_error(errorcode, 1 TSRMLS_CC);
 			RETURN_FALSE;
