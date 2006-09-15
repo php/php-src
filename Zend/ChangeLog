@@ -1,3 +1,22 @@
+2006-09-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.h
+      zend.h:
+      Reinamed variables to avoid name conflicts
+
+    * Zend.m4:
+      -** empty log message ***
+
+    * (PHP_5_2)
+      Zend.m4:
+      Removed unused macro USE_ZEND_ALLOC
+
+    * zend_alloc.c
+      zend_alloc.c
+      zend_alloc.h
+      zend_alloc.h:
+      Added is_zend_mm() to allow runtime check for zend memory manager
+
 2006-09-13  Antony Dovgal  <antony@zend.com>
 
     * tests/bug38779.phpt
