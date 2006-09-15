@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Sep 2006, PHP 5.2.0
+- Fixed bug #38844 (curl_easy_strerror() is defined only since cURL 7.12.0).
+  (Tony)
 
 14 Sep 2006, PHP 5.2.0RC4
 - Added DSA key generation support to openssl_pkey_new(), FR #38731
