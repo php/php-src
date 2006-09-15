@@ -5,7 +5,7 @@
 
 #include "php_compat.h"
 
-int gdCosT[] =
+const int gdCosT[] =
 {
   1024,
   1023,
@@ -369,7 +369,7 @@ int gdCosT[] =
   1023
 };
 
-int gdSinT[] =
+const int gdSinT[] =
 {
   0,
   17,
