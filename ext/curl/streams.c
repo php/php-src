@@ -434,7 +434,11 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 		}
 
 		if (m != CURLM_OK) {
+#if HAVE_CURL_MULTI_STRERROR
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", curl_multi_strerror(m));
+#else 
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "There was an error mcode=%d", m);
+#endif
 			php_stream_close(stream);
 			return NULL;
 		}
