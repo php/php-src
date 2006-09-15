@@ -447,6 +447,8 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 			} else {
 #if HAVE_CURL_EASY_STRERROR
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", curl_easy_strerror(msg->data.result));
+#else
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "There was an error mcode=%d", msg->data.result);
 #endif
 				msg_found++;
 			}
