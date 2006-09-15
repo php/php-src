@@ -62,7 +62,7 @@ PHP_FUNCTION(curl_multi_init)
 	mh = ecalloc(1, sizeof(php_curlm));
 	mh->multi = curl_multi_init();
 
-	zend_llist_init(&mh->easyh, sizeof(zval *), (llist_dtor_func_t) NULL, 0);
+	zend_llist_init(&mh->easyh, sizeof(zval), (llist_dtor_func_t) NULL, 0);
 
 	ZEND_REGISTER_RESOURCE(return_value, mh, le_curl_multi_handle);
 }
@@ -250,12 +250,12 @@ PHP_FUNCTION(curl_multi_info_read)
 	{
 		zend_llist_position pos;
 		php_curl *ch;
-		zval	**pz_ch;
+		zval	*pz_ch;
 
 		/* search the list of easy handles hanging off the multi-handle */
-		for(pz_ch = (zval **)zend_llist_get_first_ex(&mh->easyh, &pos); pz_ch;
-			pz_ch = (zval **)zend_llist_get_next_ex(&mh->easyh, &pos)) {
-			ZEND_FETCH_RESOURCE(ch, php_curl *, pz_ch, -1, le_curl_name, le_curl);
+		for(pz_ch = (zval *)zend_llist_get_first_ex(&mh->easyh, &pos); pz_ch;
+			pz_ch = (zval *)zend_llist_get_next_ex(&mh->easyh, &pos)) {
+			ZEND_FETCH_RESOURCE(ch, php_curl *, &pz_ch, -1, le_curl_name, le_curl);
 			if (ch->cp == tmp_msg->easy_handle) {
 
 				/* we are adding a reference to the underlying php_curl
@@ -266,12 +266,12 @@ PHP_FUNCTION(curl_multi_info_read)
 				   SEPARATE_ZVAL, but those create new zvals, which is already
 				   being done in add_assoc_resource */
 
-				zend_list_addref( Z_RESVAL_PP( pz_ch ) );
+				zend_list_addref( Z_RESVAL_P( pz_ch ) );
 
 				/* add_assoc_resource automatically creates a new zval to 
 				   wrap the "resource" represented by the current pz_ch */
 
-				add_assoc_resource(return_value, "handle", Z_RESVAL_PP(pz_ch));
+				add_assoc_resource(return_value, "handle", Z_RESVAL_P(pz_ch));
 
 				break;
 			}
