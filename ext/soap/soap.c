@@ -4214,7 +4214,9 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 				xmlAddChild(param, node);
 				if (fault_ns) {
 					xmlNsPtr nsptr = encode_add_ns(node, fault_ns);
-					xmlNodeSetContent(node, xmlBuildQName(BAD_CAST(str), nsptr->prefix, NULL, 0));
+					xmlChar *code = xmlBuildQName(BAD_CAST(str), nsptr->prefix, NULL, 0);
+					xmlNodeSetContent(node, code);
+					xmlFree(code);
 				} else {
 					xmlNodeSetContentLen(node, BAD_CAST(str), new_len);
 				}
@@ -4237,7 +4239,9 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 				node = xmlNewChild(node, ns, BAD_CAST("Value"), NULL);
 				if (fault_ns) {
 					xmlNsPtr nsptr = encode_add_ns(node, fault_ns);
-					xmlNodeSetContent(node, xmlBuildQName(BAD_CAST(str), nsptr->prefix, NULL, 0));
+					xmlChar *code = xmlBuildQName(BAD_CAST(str), nsptr->prefix, NULL, 0);
+					xmlNodeSetContent(node, code);
+					xmlFree(code);
 				} else {
 					xmlNodeSetContentLen(node, BAD_CAST(str), new_len);
 				}
