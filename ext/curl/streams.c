@@ -445,7 +445,9 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 			if (msg->data.result == CURLE_OK) {
 				continue;
 			} else {
+#if HAVE_CURL_EASY_STRERROR
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", curl_easy_strerror(msg->data.result));
+#endif
 				msg_found++;
 			}
 		}
