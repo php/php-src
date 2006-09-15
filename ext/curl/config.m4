@@ -101,6 +101,14 @@ if test "$PHP_CURL" != "no"; then
     $CURL_LIBS -L$CURL_DIR/$PHP_LIBDIR
   ])
 
+  PHP_CHECK_LIBRARY(curl,curl_easy_strerror,
+  [
+    AC_DEFINE(HAVE_CURL_EASY_STRERROR,1,[ ])
+  ],[],[
+    $CURL_LIBS -L$CURL_DIR/$PHP_LIBDIR
+  ])
+
+
   if test "$PHP_CURLWRAPPERS" != "no" ; then
     AC_DEFINE(PHP_CURL_URL_WRAPPERS,1,[ ])
   fi
