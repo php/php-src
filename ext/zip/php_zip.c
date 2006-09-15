@@ -1719,7 +1719,7 @@ static void php_zip_get_from(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 
 	char *filename;
 	int	filename_len;
-	long index;
+	long index = -1;
 	long flags = 0;
 	long len = 0;
 
@@ -1753,8 +1753,12 @@ static void php_zip_get_from(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 	if (len < 1) {
 		len = sb.size;
 	}
+	if (index >= 0) {
+		zf = zip_fopen_index(intern, index, flags);
+	} else {
+		zf = zip_fopen(intern, filename, flags);
+	}
 
-	zf = zip_fopen(intern, filename, flags);
 	if (zf == NULL) {
 		RETURN_FALSE;
 	}
