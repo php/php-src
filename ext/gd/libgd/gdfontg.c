@@ -13,7 +13,7 @@
 
 #include "gdfontg.h"
 
-char gdFontGiantData[] =
+static const char gdFontGiantData[] =
 {
 /* Char 0 */
   0, 0, 0, 0, 0, 0, 0, 0, 0,
