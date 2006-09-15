@@ -534,7 +534,7 @@ static void * tweenColorFetch (char **error, void *key)
 	pixel = a->pixel = b->pixel;
 	bg = a->bgcolor = b->bgcolor;
 	fg = a->fgcolor = b->fgcolor;
-	im = b->im;
+	im = a->im = b->im;
 
 	/* if fg is specified by a negative color idx, then don't antialias */
 	if (fg < 0) {
