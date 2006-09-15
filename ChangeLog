@@ -1,3 +1,94 @@
+2006-09-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Back to dev
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      PHP 5.2.0RC4
+
+    * ext/filter/logical_filters.c
+      ext/filter/tests/bug7715.phpt:
+      MFB: Make float filter handle things like 02.324 properly
+
+    * (PHP_5_2)
+      ext/filter/logical_filters.c
+      ext/filter/tests/bug7715.phpt:
+      Make float filter handle things like 02.324 properly
+
+2006-09-14  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * run-tests.php
+      tests/run-test/test010.phpt:
+      MFB
+
+    * (PHP_5_2)
+      run-tests.php
+      tests/run-test/test010.phpt
+      tests/run-test/test010.phpt:
+      add --STDIN-- support
+
+2006-09-14  Antony Dovgal  <antony@zend.com>
+
+    * ext/filter/filter.c:
+      MFB
+
+    * (PHP_5_2)
+      ext/filter/filter.c:
+      separate zval only when needed (fixes 035.phpt and doesn't affect SAPI
+      filtering)
+
+    * ext/filter/tests/009.phpt:
+      fix test
+
+2006-09-14  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * ext/dom/entityreference.c:
+      MFB: fix bug #38813 (DOMEntityReference->__construct crashes when called
+      explicitly)
+
+    * (PHP_5_2)
+      ext/dom/entityreference.c:
+      fix bug #38813 (DOMEntityReference->__construct crashes when called
+      explicitly)
+
+2006-09-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend.h:
+      Reinamed variables to avoid name conflicts
+
+    * ZendEngine2/Zend.m4
+      main/streams/php_streams_int.h:
+      -** empty log message ***
+
+    * (PHP_5_2)
+      ZendEngine2/Zend.m4
+      main/streams/php_streams_int.h:
+      Removed unused macro USE_ZEND_ALLOC
+
+    * ext/standard/info.c:
+      Write valid run-time value for Zend Memory Manager
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h
+      ZendEngine2/zend_alloc.h:
+      Added is_zend_mm() to allow runtime check for zend memory manager
+
+    * (PHP_5_2)
+      ext/standard/info.c:
+      Write valid run-time value for Zend Memeory Manager
+
 2006-09-13  Stanislav Malyshev  <stas@zend.com>
 
     * ext/date/lib/timelib_config.h.win32
