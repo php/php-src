@@ -42,20 +42,11 @@
 
 /* {{{ ext/tidy macros
 */
-#define REMOVE_NEWLINE(_z) _z->value.str.val[_z->value.str.len-1] = '\0'; _z->value.str.len--;
 #define FIX_BUFFER(bptr) (bptr)->bp[(bptr)->size-1] = '\0'
 
-#define TIDYDOC_FROM_OBJECT(tdoc, object) \
-	{ \
-		PHPTidyObj *obj = (PHPTidyObj*) zend_object_store_get_object(object TSRMLS_CC); \
-		tdoc = obj->ptdoc; \
-	}
-
 #define TIDY_SET_CONTEXT \
-    zval *object; \
-    TG(inst) = getThis(); \
-    object = TG(inst)
-   
+    zval *object = getThis();
+
 #define TIDY_FETCH_OBJECT	\
 	PHPTidyObj *obj;	\
 	TIDY_SET_CONTEXT; \
@@ -77,9 +68,6 @@
 		WRONG_PARAM_COUNT;	\
 	}	\
 	obj = (PHPTidyObj *) zend_object_store_get_object(object TSRMLS_CC);	\
-
-
-#define Z_OBJ_P(zval_p) zend_objects_get_address(zval_p TSRMLS_CC)
 
 #define TIDY_APPLY_CONFIG_ZVAL(_doc, _val) \
     if(_val) { \
@@ -189,8 +177,7 @@ typedef struct _PHPTidyObj PHPTidyObj;
 
 typedef enum {
 	is_node,
-	is_doc,
-	is_exception
+	is_doc
 } tidy_obj_type;
 
 typedef enum {
@@ -781,8 +768,8 @@ static void tidy_add_default_properties(PHPTidyObj *obj, tidy_obj_type type TSRM
 			ADD_PROPERTY_STRING(obj->std.properties, name, tidyNodeGetName(obj->node));
 			ADD_PROPERTY_LONG(obj->std.properties, type, tidyNodeGetType(obj->node));
 			ADD_PROPERTY_LONG(obj->std.properties, line, tidyNodeLine(obj->node));
-            ADD_PROPERTY_LONG(obj->std.properties, column, tidyNodeColumn(obj->node));
-            ADD_PROPERTY_BOOL(obj->std.properties, proprietary, tidyNodeIsProp(obj->ptdoc->doc, obj->node));
+			ADD_PROPERTY_LONG(obj->std.properties, column, tidyNodeColumn(obj->node));
+			ADD_PROPERTY_BOOL(obj->std.properties, proprietary, tidyNodeIsProp(obj->ptdoc->doc, obj->node));
 
 			switch(tidyNodeGetType(obj->node)) {
 				case TidyNode_Root:
@@ -846,7 +833,6 @@ static void tidy_add_default_properties(PHPTidyObj *obj, tidy_obj_type type TSRM
 			ADD_PROPERTY_NULL(obj->std.properties, value);
 			break;
 
-		case is_exception:
 		default:
 			break;
 	}
@@ -1151,8 +1137,6 @@ static PHP_FUNCTION(tidy_parse_string)
 	
 	PHPTidyObj *obj;
 
-	TIDY_SET_CONTEXT;
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|Zs", &input, &input_len, &options, &enc, &enc_len) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -1210,7 +1194,6 @@ static PHP_FUNCTION(tidy_parse_file)
 	zval **options = NULL;
 	
 	PHPTidyObj *obj;
-	TIDY_SET_CONTEXT;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|Zsb", &inputfile, &input_len,
 							  &options, &enc, &enc_len, &use_include_path) == FAILURE) {
@@ -1256,7 +1239,6 @@ static PHP_FUNCTION(tidy_clean_repair)
    Repair a string using an optionally provided configuration file */
 static PHP_FUNCTION(tidy_repair_string)
 {
-	TIDY_SET_CONTEXT;
 	php_tidy_quick_repair(INTERNAL_FUNCTION_PARAM_PASSTHRU, FALSE);
 }
 /* }}} */
@@ -1265,7 +1247,6 @@ static PHP_FUNCTION(tidy_repair_string)
    Repair a file using an optionally provided configuration file */
 static PHP_FUNCTION(tidy_repair_file)
 {
-	TIDY_SET_CONTEXT;
 	php_tidy_quick_repair(INTERNAL_FUNCTION_PARAM_PASSTHRU, TRUE);
 }
 /* }}} */
@@ -1289,8 +1270,6 @@ static PHP_FUNCTION(tidy_diagnose)
    Get release date (version) for Tidy library */
 static PHP_FUNCTION(tidy_get_release)
 {
-	TIDY_SET_CONTEXT;
-
 	if (ZEND_NUM_ARGS()) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1309,7 +1288,7 @@ static PHP_FUNCTION(tidy_get_opt_doc)
 	char *optname, *optval;
 	int optname_len;
 	TidyOption opt;
-	
+
 	TIDY_SET_CONTEXT;
 
 	if (object) {
@@ -1614,7 +1593,6 @@ static TIDY_DOC_METHOD(parseString)
    Returns a TidyNode Object representing the root of the tidy parse tree */
 static PHP_FUNCTION(tidy_get_root)
 {
-	TIDY_SET_CONTEXT;
 	php_tidy_create_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, is_root_node);
 }
 /* }}} */
@@ -1623,7 +1601,6 @@ static PHP_FUNCTION(tidy_get_root)
    Returns a TidyNode Object starting from the <HTML> tag of the tidy parse tree */
 static PHP_FUNCTION(tidy_get_html)
 {
-	TIDY_SET_CONTEXT;
 	php_tidy_create_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, is_html_node);
 }
 /* }}} */
@@ -1632,7 +1609,6 @@ static PHP_FUNCTION(tidy_get_html)
    Returns a TidyNode Object starting from the <HEAD> tag of the tidy parse tree */
 static PHP_FUNCTION(tidy_get_head)
 {
-	TIDY_SET_CONTEXT;
 	php_tidy_create_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, is_head_node);
 }
 /* }}} */
@@ -1641,7 +1617,6 @@ static PHP_FUNCTION(tidy_get_head)
    Returns a TidyNode Object starting from the <BODY> tag of the tidy parse tree */
 static PHP_FUNCTION(tidy_get_body)
 {
-	TIDY_SET_CONTEXT;
 	php_tidy_create_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, is_body_node);
 }
 /* }}} */
