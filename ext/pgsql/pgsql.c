@@ -154,7 +154,9 @@ zend_function_entry pgsql_functions[] = {
 	PHP_FE(pg_field_type_oid, NULL)
 	PHP_FE(pg_field_prtlen,	NULL)
 	PHP_FE(pg_field_is_null,NULL)
+#ifdef HAVE_PQFTABLE
 	PHP_FE(pg_field_table,  NULL)
+#endif
 	/* async message function */
 	PHP_FE(pg_get_notify,   NULL)
 	PHP_FE(pg_get_pid,      NULL)
@@ -1698,6 +1700,7 @@ static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list TSRMLS_DC)
 }
 /* }}} */			
 
+#ifdef HAVE_PQFTABLE
 /* {{{ proto mixed pg_field_table(resource result, int field_number[, bool oid_only])
    Returns the name of the table field belongs to, or table's oid if oid_only is true */
 PHP_FUNCTION(pg_field_table)
@@ -1785,7 +1788,8 @@ PHP_FUNCTION(pg_field_table)
 	}
 
 }
-/* }}} */			
+/* }}} */	
+#endif		
 
 #define PHP_PG_FIELD_NAME 1
 #define PHP_PG_FIELD_SIZE 2
