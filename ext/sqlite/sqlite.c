@@ -1233,7 +1233,9 @@ PHP_FUNCTION(sqlite_popen)
 
 	if (strncmp(filename, ":memory:", sizeof(":memory:") - 1)) {
 		/* resolve the fully-qualified path name to use as the hash key */
-		fullpath = expand_filepath(filename, NULL TSRMLS_CC);
+		if (!(fullpath = expand_filepath(filename, NULL TSRMLS_CC))) {
+			RETURN_FALSE;
+		}
 
 		if (php_check_open_basedir(fullpath TSRMLS_CC)) {
 			efree(fullpath);
@@ -1306,7 +1308,14 @@ PHP_FUNCTION(sqlite_open)
 
 	if (strncmp(filename, ":memory:", sizeof(":memory:") - 1)) {
 		/* resolve the fully-qualified path name to use as the hash key */
-		fullpath = expand_filepath(filename, NULL TSRMLS_CC);
+		if (!(fullpath = expand_filepath(filename, NULL TSRMLS_CC))) {
+			php_std_error_handling();
+			if (object) {
+				RETURN_NULL();
+			} else {
+				RETURN_FALSE;
+			}
+		}
 
 		if (php_check_open_basedir(fullpath TSRMLS_CC)) {
 			php_std_error_handling();
@@ -1317,7 +1326,6 @@ PHP_FUNCTION(sqlite_open)
 				RETURN_FALSE;
 			}
 		}
-
 	}
 
 	php_sqlite_open(fullpath ? fullpath : filename, (int)mode, NULL, return_value, errmsg, object TSRMLS_CC);
@@ -1351,7 +1359,10 @@ PHP_FUNCTION(sqlite_factory)
 
 	if (strncmp(filename, ":memory:", sizeof(":memory:") - 1)) {
 		/* resolve the fully-qualified path name to use as the hash key */
-		fullpath = expand_filepath(filename, NULL TSRMLS_CC);
+		if (!(fullpath = expand_filepath(filename, NULL TSRMLS_CC))) {
+			php_std_error_handling();
+			RETURN_NULL();
+		}
 
 		if (php_check_open_basedir(fullpath TSRMLS_CC)) {
 			efree(fullpath);
