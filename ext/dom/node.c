@@ -1611,20 +1611,18 @@ PHP_FUNCTION(dom_node_lookup_namespace_uri)
 	dom_object *intern;
 	xmlNsPtr nsptr;
 	int prefix_len = 0;
-	char *prefix;
+	char *prefix=NULL;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&", &id, dom_node_class_entry, &prefix, &prefix_len, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!&", &id, dom_node_class_entry, &prefix, &prefix_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
-	if (prefix_len > 0) {
-		nsptr = xmlSearchNs(nodep->doc, nodep, prefix);
-		if (nsptr && nsptr->href != NULL) {
-			RETVAL_XML_STRING((char *) nsptr->href, ZSTR_DUPLICATE);
-			return;
-		}
+	nsptr = xmlSearchNs(nodep->doc, nodep, prefix);
+	if (nsptr && nsptr->href != NULL) {
+		RETVAL_XML_STRING((char *) nsptr->href, ZSTR_DUPLICATE);
+		return;
 	}
 
 	RETURN_NULL();
