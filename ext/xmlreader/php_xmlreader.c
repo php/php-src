@@ -261,6 +261,7 @@ char *_xmlreader_get_valid_file_path(char *source, char *resolved_path, int reso
 
 	if ((uri->scheme == NULL || isFileUri)) {
 		if (!VCWD_REALPATH(source, resolved_path) && !expand_filepath(source, resolved_path TSRMLS_CC)) {
+			xmlFreeURI(uri);
 			return NULL;
 		}
 		file_dest = resolved_path;
