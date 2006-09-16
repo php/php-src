@@ -189,7 +189,7 @@ typedef struct {
 	/* Font data; array of characters, one row after another.
 		Easily included in code, also easily loaded from
 		data files. */
-	const char *data;
+	char *data;
 } gdFont;
 
 /* Text functions take these. */

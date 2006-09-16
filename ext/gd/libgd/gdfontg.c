@@ -4376,7 +4376,7 @@ gdFont gdFontGiantRep =
   0,
   9,
   15,
-  gdFontGiantData
+  (char*)gdFontGiantData
 };
 
 gdFontPtr gdFontGiant = &gdFontGiantRep;

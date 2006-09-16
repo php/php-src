@@ -4633,7 +4633,7 @@ gdFont gdFontLargeRep =
   0,
   8,
   16,
-  gdFontLargeData
+  (char*)gdFontLargeData
 };
 
 gdFontPtr gdFontLarge = &gdFontLargeRep;
