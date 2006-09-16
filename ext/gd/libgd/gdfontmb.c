@@ -3863,7 +3863,7 @@ gdFont gdFontMediumBoldRep =
   0,
   7,
   13,
-  gdFontMediumBoldData
+  (char*)gdFontMediumBoldData
 };
 
 gdFontPtr gdFontMediumBold = &gdFontMediumBoldRep;

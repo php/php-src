@@ -3863,7 +3863,7 @@ gdFont gdFontSmallRep =
   0,
   6,
   13,
-  gdFontSmallData
+  (char*)gdFontSmallData
 };
 
 gdFontPtr gdFontSmall = &gdFontSmallRep;
