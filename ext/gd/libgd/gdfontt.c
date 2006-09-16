@@ -2584,7 +2584,7 @@ gdFont gdFontTinyRep =
   0,
   5,
   8,
-  gdFontTinyData
+  (char*)gdFontTinyData
 };
 
 gdFontPtr gdFontTiny = &gdFontTinyRep;
