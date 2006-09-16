@@ -4,7 +4,7 @@
 /* First off, code is include which follows the "include" declaration
 ** in the input file. */
 #include <stdio.h>
-#line 56 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 56 "ext/pdo_sqlite/sqlite/src/parse.y"
 
 #include "sqliteInt.h"
 #include "parse.h"
@@ -43,7 +43,7 @@ struct TrigEvent { int a; IdList * b; };
 */
 struct AttachKey { int type;  Token key; };
 
-#line 48 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 48 "ext/pdo_sqlite/sqlite/src/parse.c"
 /* Next is all token values, in a form suitable for use by makeheaders.
 ** This section will be null unless lemon is run with the -m switch.
 */
@@ -1241,9 +1241,9 @@ static void yy_destructor(YYCODETYPE yymajor, YYMINORTYPE *yypminor){
     case 156:
     case 190:
     case 207:
-#line 374 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 374 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3SelectDelete((yypminor->yy219));}
-#line 1248 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 1248 "ext/pdo_sqlite/sqlite/src/parse.c"
       break;
     case 170:
     case 171:
@@ -1256,9 +1256,9 @@ static void yy_destructor(YYCODETYPE yymajor, YYMINORTYPE *yypminor){
     case 224:
     case 225:
     case 235:
-#line 631 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 631 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3ExprDelete((yypminor->yy172));}
-#line 1263 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 1263 "ext/pdo_sqlite/sqlite/src/parse.c"
       break;
     case 175:
     case 183:
@@ -1271,48 +1271,48 @@ static void yy_destructor(YYCODETYPE yymajor, YYMINORTYPE *yypminor){
     case 214:
     case 217:
     case 223:
-#line 865 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 865 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3ExprListDelete((yypminor->yy174));}
-#line 1278 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 1278 "ext/pdo_sqlite/sqlite/src/parse.c"
       break;
     case 189:
     case 194:
     case 202:
     case 203:
-#line 502 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 502 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3SrcListDelete((yypminor->yy373));}
-#line 1286 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 1286 "ext/pdo_sqlite/sqlite/src/parse.c"
       break;
     case 199:
-#line 563 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 563 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   sqlite3ExprDelete((yypminor->yy234).pLimit);
   sqlite3ExprDelete((yypminor->yy234).pOffset);
 }
-#line 1294 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 1294 "ext/pdo_sqlite/sqlite/src/parse.c"
       break;
     case 206:
     case 209:
     case 216:
-#line 519 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 519 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3IdListDelete((yypminor->yy432));}
-#line 1301 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 1301 "ext/pdo_sqlite/sqlite/src/parse.c"
       break;
     case 231:
     case 236:
-#line 959 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 959 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3DeleteTriggerStep((yypminor->yy243));}
-#line 1307 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 1307 "ext/pdo_sqlite/sqlite/src/parse.c"
       break;
     case 233:
-#line 943 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 943 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3IdListDelete((yypminor->yy370).b);}
-#line 1312 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 1312 "ext/pdo_sqlite/sqlite/src/parse.c"
       break;
     case 238:
-#line 1027 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 1027 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3ExprDelete((yypminor->yy386));}
-#line 1317 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 1317 "ext/pdo_sqlite/sqlite/src/parse.c"
       break;
     default:  break;   /* If no destructor action specified: do nothing */
   }
@@ -1476,11 +1476,11 @@ static void yy_shift(
      while( yypParser->yyidx>=0 ) yy_pop_parser_stack(yypParser);
      /* Here code is inserted which will execute if the parser
      ** stack every overflows */
-#line 44 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 44 "ext/pdo_sqlite/sqlite/src/parse.y"
 
   sqlite3ErrorMsg(pParse, "parser stack overflow");
   pParse->parseError = 1;
-#line 1486 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 1486 "ext/pdo_sqlite/sqlite/src/parse.c"
      sqlite3ParserARG_STORE; /* Suppress warning about unused %extra_argument var */
      return;
   }
@@ -1865,61 +1865,61 @@ static void yy_reduce(
   **     break;
   */
       case 3:
-#line 100 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 100 "ext/pdo_sqlite/sqlite/src/parse.y"
 { sqlite3FinishCoding(pParse); }
-#line 1873 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 1873 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 6:
-#line 103 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 103 "ext/pdo_sqlite/sqlite/src/parse.y"
 { sqlite3BeginParse(pParse, 0); }
-#line 1878 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 1878 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 7:
-#line 105 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 105 "ext/pdo_sqlite/sqlite/src/parse.y"
 { sqlite3BeginParse(pParse, 1); }
-#line 1883 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 1883 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 8:
-#line 106 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 106 "ext/pdo_sqlite/sqlite/src/parse.y"
 { sqlite3BeginParse(pParse, 2); }
-#line 1888 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 1888 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 9:
-#line 112 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 112 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3BeginTransaction(pParse, yymsp[-1].minor.yy46);}
-#line 1893 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 1893 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 13:
-#line 117 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 117 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy46 = TK_DEFERRED;}
-#line 1898 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 1898 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 14:
       case 15:
       case 16:
       case 107:
       case 109:
-#line 118 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 118 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy46 = yymsp[0].major;}
-#line 1907 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 1907 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 17:
       case 18:
-#line 121 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 121 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3CommitTransaction(pParse);}
-#line 1913 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 1913 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 19:
-#line 123 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 123 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3RollbackTransaction(pParse);}
-#line 1918 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 1918 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 21:
-#line 128 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 128 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
    sqlite3StartTable(pParse,&yymsp[-1].minor.yy410,&yymsp[0].minor.yy410,yymsp[-4].minor.yy46,0,0,yymsp[-2].minor.yy46);
 }
-#line 1925 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 1925 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 22:
       case 25:
@@ -1932,9 +1932,9 @@ static void yy_reduce(
       case 113:
       case 212:
       case 215:
-#line 132 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 132 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy46 = 0;}
-#line 1940 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 1940 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 23:
       case 24:
@@ -1944,40 +1944,40 @@ static void yy_reduce(
       case 111:
       case 213:
       case 216:
-#line 133 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 133 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy46 = 1;}
-#line 1952 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 1952 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 26:
-#line 139 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 139 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   sqlite3EndTable(pParse,&yymsp[-1].minor.yy410,&yymsp[0].minor.yy0,0);
 }
-#line 1959 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 1959 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 27:
-#line 142 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 142 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   sqlite3EndTable(pParse,0,0,yymsp[0].minor.yy219);
   sqlite3SelectDelete(yymsp[0].minor.yy219);
 }
-#line 1967 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 1967 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 30:
-#line 154 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 154 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   yygotominor.yy410.z = yymsp[-2].minor.yy410.z;
   yygotominor.yy410.n = (pParse->sLastToken.z-yymsp[-2].minor.yy410.z) + pParse->sLastToken.n;
 }
-#line 1975 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 1975 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 31:
-#line 158 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 158 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   sqlite3AddColumn(pParse,&yymsp[0].minor.yy410);
   yygotominor.yy410 = yymsp[0].minor.yy410;
 }
-#line 1983 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 1983 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 32:
       case 33:
@@ -1985,14 +1985,14 @@ static void yy_reduce(
       case 35:
       case 36:
       case 252:
-#line 168 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 168 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy410 = yymsp[0].minor.yy0;}
-#line 1993 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 1993 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 38:
-#line 228 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 228 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3AddColumnType(pParse,&yymsp[0].minor.yy410);}
-#line 1998 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 1998 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 39:
       case 42:
@@ -2003,152 +2003,152 @@ static void yy_reduce(
       case 240:
       case 250:
       case 251:
-#line 229 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 229 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy410 = yymsp[0].minor.yy410;}
-#line 2011 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2011 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 40:
-#line 230 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 230 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   yygotominor.yy410.z = yymsp[-3].minor.yy410.z;
   yygotominor.yy410.n = &yymsp[0].minor.yy0.z[yymsp[0].minor.yy0.n] - yymsp[-3].minor.yy410.z;
 }
-#line 2019 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2019 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 41:
-#line 234 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 234 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   yygotominor.yy410.z = yymsp[-5].minor.yy410.z;
   yygotominor.yy410.n = &yymsp[0].minor.yy0.z[yymsp[0].minor.yy0.n] - yymsp[-5].minor.yy410.z;
 }
-#line 2027 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2027 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 43:
-#line 240 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 240 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy410.z=yymsp[-1].minor.yy410.z; yygotominor.yy410.n=yymsp[0].minor.yy410.n+(yymsp[0].minor.yy410.z-yymsp[-1].minor.yy410.z);}
-#line 2032 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2032 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 44:
-#line 242 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 242 "ext/pdo_sqlite/sqlite/src/parse.y"
 { yygotominor.yy46 = atoi((char*)yymsp[0].minor.yy410.z); }
-#line 2037 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2037 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 45:
-#line 243 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 243 "ext/pdo_sqlite/sqlite/src/parse.y"
 { yygotominor.yy46 = -atoi((char*)yymsp[0].minor.yy410.z); }
-#line 2042 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2042 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 50:
       case 52:
-#line 252 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 252 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3AddDefaultValue(pParse,yymsp[0].minor.yy172);}
-#line 2048 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2048 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 51:
-#line 253 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 253 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3AddDefaultValue(pParse,yymsp[-1].minor.yy172);}
-#line 2053 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2053 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 53:
-#line 255 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 255 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   Expr *p = sqlite3Expr(TK_UMINUS, yymsp[0].minor.yy172, 0, 0);
   sqlite3AddDefaultValue(pParse,p);
 }
-#line 2061 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2061 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 54:
-#line 259 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 259 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   Expr *p = sqlite3Expr(TK_STRING, 0, 0, &yymsp[0].minor.yy410);
   sqlite3AddDefaultValue(pParse,p);
 }
-#line 2069 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2069 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 56:
-#line 268 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 268 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3AddNotNull(pParse, yymsp[0].minor.yy46);}
-#line 2074 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2074 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 57:
-#line 270 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 270 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3AddPrimaryKey(pParse,0,yymsp[-1].minor.yy46,yymsp[0].minor.yy46,yymsp[-2].minor.yy46);}
-#line 2079 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2079 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 58:
-#line 271 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 271 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3CreateIndex(pParse,0,0,0,0,yymsp[0].minor.yy46,0,0,0,0);}
-#line 2084 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2084 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 59:
-#line 272 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 272 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3AddCheckConstraint(pParse,yymsp[-1].minor.yy172);}
-#line 2089 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2089 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 60:
-#line 274 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 274 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3CreateForeignKey(pParse,0,&yymsp[-2].minor.yy410,yymsp[-1].minor.yy174,yymsp[0].minor.yy46);}
-#line 2094 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2094 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 61:
-#line 275 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 275 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3DeferForeignKey(pParse,yymsp[0].minor.yy46);}
-#line 2099 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2099 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 62:
-#line 276 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 276 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3AddCollateType(pParse, (char*)yymsp[0].minor.yy410.z, yymsp[0].minor.yy410.n);}
-#line 2104 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2104 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 65:
-#line 289 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 289 "ext/pdo_sqlite/sqlite/src/parse.y"
 { yygotominor.yy46 = OE_Restrict * 0x010101; }
-#line 2109 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2109 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 66:
-#line 290 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 290 "ext/pdo_sqlite/sqlite/src/parse.y"
 { yygotominor.yy46 = (yymsp[-1].minor.yy46 & yymsp[0].minor.yy405.mask) | yymsp[0].minor.yy405.value; }
-#line 2114 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2114 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 67:
-#line 292 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 292 "ext/pdo_sqlite/sqlite/src/parse.y"
 { yygotominor.yy405.value = 0;     yygotominor.yy405.mask = 0x000000; }
-#line 2119 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2119 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 68:
-#line 293 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 293 "ext/pdo_sqlite/sqlite/src/parse.y"
 { yygotominor.yy405.value = yymsp[0].minor.yy46;     yygotominor.yy405.mask = 0x0000ff; }
-#line 2124 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2124 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 69:
-#line 294 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 294 "ext/pdo_sqlite/sqlite/src/parse.y"
 { yygotominor.yy405.value = yymsp[0].minor.yy46<<8;  yygotominor.yy405.mask = 0x00ff00; }
-#line 2129 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2129 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 70:
-#line 295 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 295 "ext/pdo_sqlite/sqlite/src/parse.y"
 { yygotominor.yy405.value = yymsp[0].minor.yy46<<16; yygotominor.yy405.mask = 0xff0000; }
-#line 2134 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2134 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 71:
-#line 297 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 297 "ext/pdo_sqlite/sqlite/src/parse.y"
 { yygotominor.yy46 = OE_SetNull; }
-#line 2139 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2139 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 72:
-#line 298 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 298 "ext/pdo_sqlite/sqlite/src/parse.y"
 { yygotominor.yy46 = OE_SetDflt; }
-#line 2144 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2144 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 73:
-#line 299 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 299 "ext/pdo_sqlite/sqlite/src/parse.y"
 { yygotominor.yy46 = OE_Cascade; }
-#line 2149 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2149 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 74:
-#line 300 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 300 "ext/pdo_sqlite/sqlite/src/parse.y"
 { yygotominor.yy46 = OE_Restrict; }
-#line 2154 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2154 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 75:
       case 76:
@@ -2157,97 +2157,97 @@ static void yy_reduce(
       case 95:
       case 96:
       case 167:
-#line 302 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 302 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy46 = yymsp[0].minor.yy46;}
-#line 2165 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2165 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 80:
-#line 312 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 312 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy410.n = 0; yygotominor.yy410.z = 0;}
-#line 2170 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2170 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 81:
-#line 313 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 313 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy410 = yymsp[-1].minor.yy0;}
-#line 2175 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2175 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 86:
-#line 319 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 319 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3AddPrimaryKey(pParse,yymsp[-3].minor.yy174,yymsp[0].minor.yy46,yymsp[-2].minor.yy46,0);}
-#line 2180 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2180 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 87:
-#line 321 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 321 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3CreateIndex(pParse,0,0,0,yymsp[-2].minor.yy174,yymsp[0].minor.yy46,0,0,0,0);}
-#line 2185 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2185 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 88:
-#line 322 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 322 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3AddCheckConstraint(pParse,yymsp[-2].minor.yy172);}
-#line 2190 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2190 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 89:
-#line 324 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 324 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
     sqlite3CreateForeignKey(pParse, yymsp[-6].minor.yy174, &yymsp[-3].minor.yy410, yymsp[-2].minor.yy174, yymsp[-1].minor.yy46);
     sqlite3DeferForeignKey(pParse, yymsp[0].minor.yy46);
 }
-#line 2198 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2198 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 92:
       case 94:
-#line 338 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 338 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy46 = OE_Default;}
-#line 2204 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2204 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 97:
-#line 343 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 343 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy46 = OE_Ignore;}
-#line 2209 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2209 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 98:
       case 168:
-#line 344 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 344 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy46 = OE_Replace;}
-#line 2215 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2215 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 99:
-#line 348 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 348 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   sqlite3DropTable(pParse, yymsp[0].minor.yy373, 0, yymsp[-1].minor.yy46);
 }
-#line 2222 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2222 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 102:
-#line 358 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 358 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   sqlite3CreateView(pParse, &yymsp[-6].minor.yy0, &yymsp[-3].minor.yy410, &yymsp[-2].minor.yy410, yymsp[0].minor.yy219, yymsp[-5].minor.yy46);
 }
-#line 2229 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2229 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 103:
-#line 361 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 361 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   sqlite3DropTable(pParse, yymsp[0].minor.yy373, 1, yymsp[-1].minor.yy46);
 }
-#line 2236 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2236 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 104:
-#line 368 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 368 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   sqlite3Select(pParse, yymsp[0].minor.yy219, SRT_Callback, 0, 0, 0, 0, 0);
   sqlite3SelectDelete(yymsp[0].minor.yy219);
 }
-#line 2244 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2244 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 105:
       case 128:
-#line 378 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 378 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy219 = yymsp[0].minor.yy219;}
-#line 2250 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2250 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 106:
-#line 380 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 380 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   if( yymsp[0].minor.yy219 ){
     yymsp[0].minor.yy219->op = yymsp[-1].minor.yy46;
@@ -2255,87 +2255,87 @@ static void yy_reduce(
   }
   yygotominor.yy219 = yymsp[0].minor.yy219;
 }
-#line 2261 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2261 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 108:
-#line 389 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 389 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy46 = TK_ALL;}
-#line 2266 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2266 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 110:
-#line 393 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 393 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   yygotominor.yy219 = sqlite3SelectNew(yymsp[-6].minor.yy174,yymsp[-5].minor.yy373,yymsp[-4].minor.yy172,yymsp[-3].minor.yy174,yymsp[-2].minor.yy172,yymsp[-1].minor.yy174,yymsp[-7].minor.yy46,yymsp[0].minor.yy234.pLimit,yymsp[0].minor.yy234.pOffset);
 }
-#line 2273 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2273 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 114:
       case 237:
-#line 414 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 414 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy174 = yymsp[-1].minor.yy174;}
-#line 2279 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2279 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 115:
       case 141:
       case 151:
       case 236:
-#line 415 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 415 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy174 = 0;}
-#line 2287 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2287 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 116:
-#line 416 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 416 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
    yygotominor.yy174 = sqlite3ExprListAppend(yymsp[-2].minor.yy174,yymsp[-1].minor.yy172,yymsp[0].minor.yy410.n?&yymsp[0].minor.yy410:0);
 }
-#line 2294 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2294 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 117:
-#line 419 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 419 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   yygotominor.yy174 = sqlite3ExprListAppend(yymsp[-1].minor.yy174, sqlite3Expr(TK_ALL, 0, 0, 0), 0);
 }
-#line 2301 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2301 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 118:
-#line 422 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 422 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   Expr *pRight = sqlite3Expr(TK_ALL, 0, 0, 0);
   Expr *pLeft = sqlite3Expr(TK_ID, 0, 0, &yymsp[-2].minor.yy410);
   yygotominor.yy174 = sqlite3ExprListAppend(yymsp[-3].minor.yy174, sqlite3Expr(TK_DOT, pLeft, pRight, 0), 0);
 }
-#line 2310 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2310 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 121:
-#line 434 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 434 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy410.n = 0;}
-#line 2315 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2315 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 122:
-#line 446 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 446 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy373 = sqliteMalloc(sizeof(*yygotominor.yy373));}
-#line 2320 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2320 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 123:
-#line 447 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 447 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy373 = yymsp[0].minor.yy373;}
-#line 2325 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2325 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 124:
-#line 452 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 452 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
    yygotominor.yy373 = yymsp[-1].minor.yy373;
    if( yygotominor.yy373 && yygotominor.yy373->nSrc>0 ) yygotominor.yy373->a[yygotominor.yy373->nSrc-1].jointype = yymsp[0].minor.yy46;
 }
-#line 2333 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2333 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 125:
-#line 456 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 456 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy373 = 0;}
-#line 2338 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2338 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 126:
-#line 457 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 457 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   yygotominor.yy373 = sqlite3SrcListAppend(yymsp[-5].minor.yy373,&yymsp[-4].minor.yy410,&yymsp[-3].minor.yy410);
   if( yymsp[-2].minor.yy410.n ) sqlite3SrcListAddAlias(yygotominor.yy373,&yymsp[-2].minor.yy410);
@@ -2348,10 +2348,10 @@ static void yy_reduce(
     else { sqlite3IdListDelete(yymsp[0].minor.yy432); }
   }
 }
-#line 2354 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2354 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 127:
-#line 471 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 471 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
     yygotominor.yy373 = sqlite3SrcListAppend(yymsp[-6].minor.yy373,0,0);
     if( yygotominor.yy373 && yygotominor.yy373->nSrc>0 ) yygotominor.yy373->a[yygotominor.yy373->nSrc-1].pSelect = yymsp[-4].minor.yy219;
@@ -2365,44 +2365,44 @@ static void yy_reduce(
       else { sqlite3IdListDelete(yymsp[0].minor.yy432); }
     }
   }
-#line 2371 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2371 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 129:
-#line 492 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 492 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
      yygotominor.yy219 = sqlite3SelectNew(0,yymsp[0].minor.yy373,0,0,0,0,0,0,0);
   }
-#line 2378 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2378 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 130:
-#line 498 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 498 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy410.z=0; yygotominor.yy410.n=0;}
-#line 2383 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2383 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 132:
-#line 503 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 503 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy373 = sqlite3SrcListAppend(0,&yymsp[-1].minor.yy410,&yymsp[0].minor.yy410);}
-#line 2388 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2388 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 133:
-#line 507 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 507 "ext/pdo_sqlite/sqlite/src/parse.y"
 { yygotominor.yy46 = JT_INNER; }
-#line 2393 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2393 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 134:
-#line 508 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 508 "ext/pdo_sqlite/sqlite/src/parse.y"
 { yygotominor.yy46 = sqlite3JoinType(pParse,&yymsp[-1].minor.yy0,0,0); }
-#line 2398 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2398 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 135:
-#line 509 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 509 "ext/pdo_sqlite/sqlite/src/parse.y"
 { yygotominor.yy46 = sqlite3JoinType(pParse,&yymsp[-2].minor.yy0,&yymsp[-1].minor.yy410,0); }
-#line 2403 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2403 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 136:
-#line 511 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 511 "ext/pdo_sqlite/sqlite/src/parse.y"
 { yygotominor.yy46 = sqlite3JoinType(pParse,&yymsp[-3].minor.yy0,&yymsp[-2].minor.yy410,&yymsp[-1].minor.yy410); }
-#line 2408 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2408 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 137:
       case 145:
@@ -2413,9 +2413,9 @@ static void yy_reduce(
       case 225:
       case 227:
       case 231:
-#line 515 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 515 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy172 = yymsp[0].minor.yy172;}
-#line 2421 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2421 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 138:
       case 153:
@@ -2424,161 +2424,161 @@ static void yy_reduce(
       case 226:
       case 228:
       case 232:
-#line 516 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 516 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy172 = 0;}
-#line 2432 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2432 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 139:
       case 172:
-#line 520 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 520 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy432 = yymsp[-1].minor.yy432;}
-#line 2438 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2438 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 140:
       case 171:
-#line 521 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 521 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy432 = 0;}
-#line 2444 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2444 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 142:
       case 152:
-#line 532 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 532 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy174 = yymsp[0].minor.yy174;}
-#line 2450 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2450 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 143:
-#line 533 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 533 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   yygotominor.yy174 = sqlite3ExprListAppend(yymsp[-4].minor.yy174,yymsp[-2].minor.yy172,yymsp[-1].minor.yy410.n>0?&yymsp[-1].minor.yy410:0);
   if( yygotominor.yy174 ) yygotominor.yy174->a[yygotominor.yy174->nExpr-1].sortOrder = yymsp[0].minor.yy46;
 }
-#line 2458 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2458 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 144:
-#line 537 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 537 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   yygotominor.yy174 = sqlite3ExprListAppend(0,yymsp[-2].minor.yy172,yymsp[-1].minor.yy410.n>0?&yymsp[-1].minor.yy410:0);
   if( yygotominor.yy174 && yygotominor.yy174->a ) yygotominor.yy174->a[0].sortOrder = yymsp[0].minor.yy46;
 }
-#line 2466 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2466 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 146:
       case 148:
-#line 546 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 546 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy46 = SQLITE_SO_ASC;}
-#line 2472 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2472 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 147:
-#line 547 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 547 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy46 = SQLITE_SO_DESC;}
-#line 2477 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2477 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 149:
-#line 549 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 549 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy410.z = 0; yygotominor.yy410.n = 0;}
-#line 2482 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2482 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 155:
-#line 567 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 567 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy234.pLimit = 0; yygotominor.yy234.pOffset = 0;}
-#line 2487 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2487 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 156:
-#line 568 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 568 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy234.pLimit = yymsp[0].minor.yy172; yygotominor.yy234.pOffset = 0;}
-#line 2492 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2492 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 157:
-#line 570 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 570 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy234.pLimit = yymsp[-2].minor.yy172; yygotominor.yy234.pOffset = yymsp[0].minor.yy172;}
-#line 2497 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2497 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 158:
-#line 572 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 572 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy234.pOffset = yymsp[-2].minor.yy172; yygotominor.yy234.pLimit = yymsp[0].minor.yy172;}
-#line 2502 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2502 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 159:
-#line 576 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 576 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3DeleteFrom(pParse,yymsp[-1].minor.yy373,yymsp[0].minor.yy172);}
-#line 2507 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2507 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 162:
-#line 587 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 587 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3Update(pParse,yymsp[-3].minor.yy373,yymsp[-1].minor.yy174,yymsp[0].minor.yy172,yymsp[-4].minor.yy46);}
-#line 2512 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2512 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 163:
-#line 593 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 593 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy174 = sqlite3ExprListAppend(yymsp[-4].minor.yy174,yymsp[0].minor.yy172,&yymsp[-2].minor.yy410);}
-#line 2517 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2517 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 164:
-#line 594 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 594 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy174 = sqlite3ExprListAppend(0,yymsp[0].minor.yy172,&yymsp[-2].minor.yy410);}
-#line 2522 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2522 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 165:
-#line 600 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 600 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3Insert(pParse, yymsp[-5].minor.yy373, yymsp[-1].minor.yy174, 0, yymsp[-4].minor.yy432, yymsp[-7].minor.yy46);}
-#line 2527 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2527 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 166:
-#line 602 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 602 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3Insert(pParse, yymsp[-2].minor.yy373, 0, yymsp[0].minor.yy219, yymsp[-1].minor.yy432, yymsp[-4].minor.yy46);}
-#line 2532 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2532 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 169:
       case 229:
-#line 612 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 612 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy174 = sqlite3ExprListAppend(yymsp[-2].minor.yy174,yymsp[0].minor.yy172,0);}
-#line 2538 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2538 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 170:
       case 230:
-#line 613 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 613 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy174 = sqlite3ExprListAppend(0,yymsp[0].minor.yy172,0);}
-#line 2544 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2544 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 173:
-#line 622 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 622 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy432 = sqlite3IdListAppend(yymsp[-2].minor.yy432,&yymsp[0].minor.yy410);}
-#line 2549 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2549 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 174:
-#line 623 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 623 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy432 = sqlite3IdListAppend(0,&yymsp[0].minor.yy410);}
-#line 2554 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2554 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 176:
-#line 634 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 634 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy172 = yymsp[-1].minor.yy172; sqlite3ExprSpan(yygotominor.yy172,&yymsp[-2].minor.yy0,&yymsp[0].minor.yy0); }
-#line 2559 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2559 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 177:
       case 182:
       case 183:
-#line 635 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 635 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy172 = sqlite3Expr(yymsp[0].major, 0, 0, &yymsp[0].minor.yy0);}
-#line 2566 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2566 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 178:
       case 179:
-#line 636 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 636 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy172 = sqlite3Expr(TK_ID, 0, 0, &yymsp[0].minor.yy0);}
-#line 2572 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2572 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 180:
-#line 638 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 638 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   Expr *temp1 = sqlite3Expr(TK_ID, 0, 0, &yymsp[-2].minor.yy410);
   Expr *temp2 = sqlite3Expr(TK_ID, 0, 0, &yymsp[0].minor.yy410);
   yygotominor.yy172 = sqlite3Expr(TK_DOT, temp1, temp2, 0);
 }
-#line 2581 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2581 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 181:
-#line 643 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 643 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   Expr *temp1 = sqlite3Expr(TK_ID, 0, 0, &yymsp[-4].minor.yy410);
   Expr *temp2 = sqlite3Expr(TK_ID, 0, 0, &yymsp[-2].minor.yy410);
@@ -2586,32 +2586,32 @@ static void yy_reduce(
   Expr *temp4 = sqlite3Expr(TK_DOT, temp2, temp3, 0);
   yygotominor.yy172 = sqlite3Expr(TK_DOT, temp1, temp4, 0);
 }
-#line 2592 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2592 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 184:
-#line 652 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 652 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy172 = sqlite3RegisterExpr(pParse, &yymsp[0].minor.yy0);}
-#line 2597 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2597 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 185:
-#line 653 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 653 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   Token *pToken = &yymsp[0].minor.yy0;
   Expr *pExpr = yygotominor.yy172 = sqlite3Expr(TK_VARIABLE, 0, 0, pToken);
   sqlite3ExprAssignVarNumber(pParse, pExpr);
 }
-#line 2606 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2606 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 186:
-#line 659 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 659 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   yygotominor.yy172 = sqlite3Expr(TK_CAST, yymsp[-3].minor.yy172, 0, &yymsp[-1].minor.yy410);
   sqlite3ExprSpan(yygotominor.yy172,&yymsp[-5].minor.yy0,&yymsp[0].minor.yy0);
 }
-#line 2614 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2614 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 187:
-#line 664 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 664 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   yygotominor.yy172 = sqlite3ExprFunction(yymsp[-1].minor.yy174, &yymsp[-4].minor.yy0);
   sqlite3ExprSpan(yygotominor.yy172,&yymsp[-4].minor.yy0,&yymsp[0].minor.yy0);
@@ -2619,25 +2619,25 @@ static void yy_reduce(
     yygotominor.yy172->flags |= EP_Distinct;
   }
 }
-#line 2625 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2625 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 188:
-#line 671 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 671 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   yygotominor.yy172 = sqlite3ExprFunction(0, &yymsp[-3].minor.yy0);
   sqlite3ExprSpan(yygotominor.yy172,&yymsp[-3].minor.yy0,&yymsp[0].minor.yy0);
 }
-#line 2633 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2633 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 189:
-#line 675 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 675 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   /* The CURRENT_TIME, CURRENT_DATE, and CURRENT_TIMESTAMP values are
   ** treated as functions that return constants */
   yygotominor.yy172 = sqlite3ExprFunction(0,&yymsp[0].minor.yy0);
   if( yygotominor.yy172 ) yygotominor.yy172->op = TK_CONST_FUNC;  
 }
-#line 2643 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2643 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 190:
       case 191:
@@ -2647,24 +2647,24 @@ static void yy_reduce(
       case 195:
       case 196:
       case 197:
-#line 681 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 681 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy172 = sqlite3Expr(yymsp[-1].major, yymsp[-2].minor.yy172, yymsp[0].minor.yy172, 0);}
-#line 2655 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2655 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 198:
       case 200:
-#line 691 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 691 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy72.eOperator = yymsp[0].minor.yy0; yygotominor.yy72.not = 0;}
-#line 2661 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2661 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 199:
       case 201:
-#line 692 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 692 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy72.eOperator = yymsp[0].minor.yy0; yygotominor.yy72.not = 1;}
-#line 2667 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2667 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 204:
-#line 699 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 699 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   ExprList *pList;
   pList = sqlite3ExprListAppend(0, yymsp[-1].minor.yy172, 0);
@@ -2677,66 +2677,66 @@ static void yy_reduce(
   sqlite3ExprSpan(yygotominor.yy172, &yymsp[-3].minor.yy172->span, &yymsp[-1].minor.yy172->span);
   if( yygotominor.yy172 ) yygotominor.yy172->flags |= EP_InfixFunc;
 }
-#line 2683 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2683 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 205:
-#line 712 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 712 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   yygotominor.yy172 = sqlite3Expr(yymsp[0].major, yymsp[-1].minor.yy172, 0, 0);
   sqlite3ExprSpan(yygotominor.yy172,&yymsp[-1].minor.yy172->span,&yymsp[0].minor.yy0);
 }
-#line 2691 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2691 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 206:
-#line 716 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 716 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   yygotominor.yy172 = sqlite3Expr(TK_ISNULL, yymsp[-2].minor.yy172, 0, 0);
   sqlite3ExprSpan(yygotominor.yy172,&yymsp[-2].minor.yy172->span,&yymsp[0].minor.yy0);
 }
-#line 2699 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2699 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 207:
-#line 720 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 720 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   yygotominor.yy172 = sqlite3Expr(TK_NOTNULL, yymsp[-2].minor.yy172, 0, 0);
   sqlite3ExprSpan(yygotominor.yy172,&yymsp[-2].minor.yy172->span,&yymsp[0].minor.yy0);
 }
-#line 2707 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2707 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 208:
-#line 724 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 724 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   yygotominor.yy172 = sqlite3Expr(TK_NOTNULL, yymsp[-3].minor.yy172, 0, 0);
   sqlite3ExprSpan(yygotominor.yy172,&yymsp[-3].minor.yy172->span,&yymsp[0].minor.yy0);
 }
-#line 2715 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2715 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 209:
-#line 728 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 728 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   yygotominor.yy172 = sqlite3Expr(yymsp[-1].major, yymsp[0].minor.yy172, 0, 0);
   sqlite3ExprSpan(yygotominor.yy172,&yymsp[-1].minor.yy0,&yymsp[0].minor.yy172->span);
 }
-#line 2723 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2723 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 210:
-#line 732 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 732 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   yygotominor.yy172 = sqlite3Expr(TK_UMINUS, yymsp[0].minor.yy172, 0, 0);
   sqlite3ExprSpan(yygotominor.yy172,&yymsp[-1].minor.yy0,&yymsp[0].minor.yy172->span);
 }
-#line 2731 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2731 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 211:
-#line 736 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 736 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   yygotominor.yy172 = sqlite3Expr(TK_UPLUS, yymsp[0].minor.yy172, 0, 0);
   sqlite3ExprSpan(yygotominor.yy172,&yymsp[-1].minor.yy0,&yymsp[0].minor.yy172->span);
 }
-#line 2739 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2739 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 214:
-#line 743 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 743 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   ExprList *pList = sqlite3ExprListAppend(0, yymsp[-2].minor.yy172, 0);
   pList = sqlite3ExprListAppend(pList, yymsp[0].minor.yy172, 0);
@@ -2749,10 +2749,10 @@ static void yy_reduce(
   if( yymsp[-3].minor.yy46 ) yygotominor.yy172 = sqlite3Expr(TK_NOT, yygotominor.yy172, 0, 0);
   sqlite3ExprSpan(yygotominor.yy172,&yymsp[-4].minor.yy172->span,&yymsp[0].minor.yy172->span);
 }
-#line 2755 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2755 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 217:
-#line 759 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 759 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
     yygotominor.yy172 = sqlite3Expr(TK_IN, yymsp[-4].minor.yy172, 0, 0);
     if( yygotominor.yy172 ){
@@ -2763,10 +2763,10 @@ static void yy_reduce(
     if( yymsp[-3].minor.yy46 ) yygotominor.yy172 = sqlite3Expr(TK_NOT, yygotominor.yy172, 0, 0);
     sqlite3ExprSpan(yygotominor.yy172,&yymsp[-4].minor.yy172->span,&yymsp[0].minor.yy0);
   }
-#line 2769 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2769 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 218:
-#line 769 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 769 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
     yygotominor.yy172 = sqlite3Expr(TK_SELECT, 0, 0, 0);
     if( yygotominor.yy172 ){
@@ -2776,10 +2776,10 @@ static void yy_reduce(
     }
     sqlite3ExprSpan(yygotominor.yy172,&yymsp[-2].minor.yy0,&yymsp[0].minor.yy0);
   }
-#line 2782 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2782 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 219:
-#line 778 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 778 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
     yygotominor.yy172 = sqlite3Expr(TK_IN, yymsp[-4].minor.yy172, 0, 0);
     if( yygotominor.yy172 ){
@@ -2790,10 +2790,10 @@ static void yy_reduce(
     if( yymsp[-3].minor.yy46 ) yygotominor.yy172 = sqlite3Expr(TK_NOT, yygotominor.yy172, 0, 0);
     sqlite3ExprSpan(yygotominor.yy172,&yymsp[-4].minor.yy172->span,&yymsp[0].minor.yy0);
   }
-#line 2796 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2796 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 220:
-#line 788 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 788 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
     SrcList *pSrc = sqlite3SrcListAppend(0,&yymsp[-1].minor.yy410,&yymsp[0].minor.yy410);
     yygotominor.yy172 = sqlite3Expr(TK_IN, yymsp[-3].minor.yy172, 0, 0);
@@ -2805,10 +2805,10 @@ static void yy_reduce(
     if( yymsp[-2].minor.yy46 ) yygotominor.yy172 = sqlite3Expr(TK_NOT, yygotominor.yy172, 0, 0);
     sqlite3ExprSpan(yygotominor.yy172,&yymsp[-3].minor.yy172->span,yymsp[0].minor.yy410.z?&yymsp[0].minor.yy410:&yymsp[-1].minor.yy410);
   }
-#line 2811 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2811 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 221:
-#line 799 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 799 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
     Expr *p = yygotominor.yy172 = sqlite3Expr(TK_EXISTS, 0, 0, 0);
     if( p ){
@@ -2818,10 +2818,10 @@ static void yy_reduce(
       sqlite3SelectDelete(yymsp[-1].minor.yy219);
     }
   }
-#line 2824 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2824 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 222:
-#line 811 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 811 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   yygotominor.yy172 = sqlite3Expr(TK_CASE, yymsp[-3].minor.yy172, yymsp[-1].minor.yy172, 0);
   if( yygotominor.yy172 ){
@@ -2831,45 +2831,45 @@ static void yy_reduce(
   }
   sqlite3ExprSpan(yygotominor.yy172, &yymsp[-4].minor.yy0, &yymsp[0].minor.yy0);
 }
-#line 2837 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2837 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 223:
-#line 822 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 822 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   yygotominor.yy174 = sqlite3ExprListAppend(yymsp[-4].minor.yy174, yymsp[-2].minor.yy172, 0);
   yygotominor.yy174 = sqlite3ExprListAppend(yygotominor.yy174, yymsp[0].minor.yy172, 0);
 }
-#line 2845 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2845 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 224:
-#line 826 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 826 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   yygotominor.yy174 = sqlite3ExprListAppend(0, yymsp[-2].minor.yy172, 0);
   yygotominor.yy174 = sqlite3ExprListAppend(yygotominor.yy174, yymsp[0].minor.yy172, 0);
 }
-#line 2853 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2853 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 233:
-#line 853 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 853 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   sqlite3CreateIndex(pParse, &yymsp[-6].minor.yy410, &yymsp[-5].minor.yy410, sqlite3SrcListAppend(0,&yymsp[-3].minor.yy410,0), yymsp[-1].minor.yy174, yymsp[-9].minor.yy46,
                       &yymsp[-10].minor.yy0, &yymsp[0].minor.yy0, SQLITE_SO_ASC, yymsp[-7].minor.yy46);
 }
-#line 2861 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2861 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 234:
       case 279:
-#line 859 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 859 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy46 = OE_Abort;}
-#line 2867 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2867 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 235:
-#line 860 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 860 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy46 = OE_None;}
-#line 2872 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2872 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 238:
-#line 870 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 870 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   Expr *p = 0;
   if( yymsp[-1].minor.yy410.n>0 ){
@@ -2879,10 +2879,10 @@ static void yy_reduce(
   yygotominor.yy174 = sqlite3ExprListAppend(yymsp[-4].minor.yy174, p, &yymsp[-2].minor.yy410);
   if( yygotominor.yy174 ) yygotominor.yy174->a[yygotominor.yy174->nExpr-1].sortOrder = yymsp[0].minor.yy46;
 }
-#line 2885 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2885 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 239:
-#line 879 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 879 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   Expr *p = 0;
   if( yymsp[-1].minor.yy410.n>0 ){
@@ -2892,115 +2892,115 @@ static void yy_reduce(
   yygotominor.yy174 = sqlite3ExprListAppend(0, p, &yymsp[-2].minor.yy410);
   if( yygotominor.yy174 ) yygotominor.yy174->a[yygotominor.yy174->nExpr-1].sortOrder = yymsp[0].minor.yy46;
 }
-#line 2898 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2898 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 241:
-#line 893 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 893 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3DropIndex(pParse, yymsp[0].minor.yy373, yymsp[-1].minor.yy46);}
-#line 2903 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2903 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 242:
       case 243:
-#line 897 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 897 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3Vacuum(pParse);}
-#line 2909 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2909 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 244:
       case 246:
-#line 903 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 903 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3Pragma(pParse,&yymsp[-3].minor.yy410,&yymsp[-2].minor.yy410,&yymsp[0].minor.yy410,0);}
-#line 2915 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2915 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 245:
-#line 904 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 904 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3Pragma(pParse,&yymsp[-3].minor.yy410,&yymsp[-2].minor.yy410,&yymsp[0].minor.yy0,0);}
-#line 2920 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2920 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 247:
-#line 906 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 906 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   sqlite3Pragma(pParse,&yymsp[-3].minor.yy410,&yymsp[-2].minor.yy410,&yymsp[0].minor.yy410,1);
 }
-#line 2927 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2927 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 248:
-#line 909 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 909 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3Pragma(pParse,&yymsp[-4].minor.yy410,&yymsp[-3].minor.yy410,&yymsp[-1].minor.yy410,0);}
-#line 2932 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2932 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 249:
-#line 910 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 910 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3Pragma(pParse,&yymsp[-1].minor.yy410,&yymsp[0].minor.yy410,0,0);}
-#line 2937 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2937 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 255:
-#line 922 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 922 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   Token all;
   all.z = yymsp[-3].minor.yy410.z;
   all.n = (yymsp[0].minor.yy0.z - yymsp[-3].minor.yy410.z) + yymsp[0].minor.yy0.n;
   sqlite3FinishTrigger(pParse, yymsp[-1].minor.yy243, &all);
 }
-#line 2947 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2947 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 256:
-#line 931 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 931 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   sqlite3BeginTrigger(pParse, &yymsp[-7].minor.yy410, &yymsp[-6].minor.yy410, yymsp[-5].minor.yy46, yymsp[-4].minor.yy370.a, yymsp[-4].minor.yy370.b, yymsp[-2].minor.yy373, yymsp[-1].minor.yy46, yymsp[0].minor.yy172, yymsp[-9].minor.yy46);
   yygotominor.yy410 = (yymsp[-6].minor.yy410.n==0?yymsp[-7].minor.yy410:yymsp[-6].minor.yy410);
 }
-#line 2955 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2955 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 257:
       case 260:
-#line 937 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 937 "ext/pdo_sqlite/sqlite/src/parse.y"
 { yygotominor.yy46 = TK_BEFORE; }
-#line 2961 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2961 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 258:
-#line 938 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 938 "ext/pdo_sqlite/sqlite/src/parse.y"
 { yygotominor.yy46 = TK_AFTER;  }
-#line 2966 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2966 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 259:
-#line 939 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 939 "ext/pdo_sqlite/sqlite/src/parse.y"
 { yygotominor.yy46 = TK_INSTEAD;}
-#line 2971 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2971 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 261:
       case 262:
-#line 944 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 944 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy370.a = yymsp[0].major; yygotominor.yy370.b = 0;}
-#line 2977 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2977 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 263:
-#line 946 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 946 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy370.a = TK_UPDATE; yygotominor.yy370.b = yymsp[0].minor.yy432;}
-#line 2982 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2982 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 264:
       case 265:
-#line 949 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 949 "ext/pdo_sqlite/sqlite/src/parse.y"
 { yygotominor.yy46 = TK_ROW; }
-#line 2988 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2988 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 266:
-#line 951 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 951 "ext/pdo_sqlite/sqlite/src/parse.y"
 { yygotominor.yy46 = TK_STATEMENT; }
-#line 2993 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2993 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 267:
-#line 955 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 955 "ext/pdo_sqlite/sqlite/src/parse.y"
 { yygotominor.yy172 = 0; }
-#line 2998 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 2998 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 268:
-#line 956 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 956 "ext/pdo_sqlite/sqlite/src/parse.y"
 { yygotominor.yy172 = yymsp[0].minor.yy172; }
-#line 3003 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3003 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 269:
-#line 960 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 960 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   if( yymsp[-2].minor.yy243 ){
     yymsp[-2].minor.yy243->pLast->pNext = yymsp[-1].minor.yy243;
@@ -3010,40 +3010,40 @@ static void yy_reduce(
   yymsp[-2].minor.yy243->pLast = yymsp[-1].minor.yy243;
   yygotominor.yy243 = yymsp[-2].minor.yy243;
 }
-#line 3016 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3016 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 270:
-#line 969 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 969 "ext/pdo_sqlite/sqlite/src/parse.y"
 { yygotominor.yy243 = 0; }
-#line 3021 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3021 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 271:
-#line 975 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 975 "ext/pdo_sqlite/sqlite/src/parse.y"
 { yygotominor.yy243 = sqlite3TriggerUpdateStep(&yymsp[-3].minor.yy410, yymsp[-1].minor.yy174, yymsp[0].minor.yy172, yymsp[-4].minor.yy46); }
-#line 3026 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3026 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 272:
-#line 980 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 980 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy243 = sqlite3TriggerInsertStep(&yymsp[-5].minor.yy410, yymsp[-4].minor.yy432, yymsp[-1].minor.yy174, 0, yymsp[-7].minor.yy46);}
-#line 3031 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3031 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 273:
-#line 983 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 983 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy243 = sqlite3TriggerInsertStep(&yymsp[-2].minor.yy410, yymsp[-1].minor.yy432, 0, yymsp[0].minor.yy219, yymsp[-4].minor.yy46);}
-#line 3036 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3036 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 274:
-#line 987 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 987 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy243 = sqlite3TriggerDeleteStep(&yymsp[-1].minor.yy410, yymsp[0].minor.yy172);}
-#line 3041 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3041 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 275:
-#line 990 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 990 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy243 = sqlite3TriggerSelectStep(yymsp[0].minor.yy219); }
-#line 3046 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3046 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 276:
-#line 993 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 993 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   yygotominor.yy172 = sqlite3Expr(TK_RAISE, 0, 0, 0); 
   if( yygotominor.yy172 ){
@@ -3051,10 +3051,10 @@ static void yy_reduce(
     sqlite3ExprSpan(yygotominor.yy172, &yymsp[-3].minor.yy0, &yymsp[0].minor.yy0);
   }
 }
-#line 3057 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3057 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 277:
-#line 1000 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 1000 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   yygotominor.yy172 = sqlite3Expr(TK_RAISE, 0, 0, &yymsp[-1].minor.yy410); 
   if( yygotominor.yy172 ) {
@@ -3062,119 +3062,119 @@ static void yy_reduce(
     sqlite3ExprSpan(yygotominor.yy172, &yymsp[-5].minor.yy0, &yymsp[0].minor.yy0);
   }
 }
-#line 3068 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3068 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 278:
-#line 1010 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 1010 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy46 = OE_Rollback;}
-#line 3073 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3073 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 280:
-#line 1012 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 1012 "ext/pdo_sqlite/sqlite/src/parse.y"
 {yygotominor.yy46 = OE_Fail;}
-#line 3078 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3078 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 281:
-#line 1017 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 1017 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   sqlite3DropTrigger(pParse,yymsp[0].minor.yy373);
 }
-#line 3085 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3085 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 282:
-#line 1023 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 1023 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   sqlite3Attach(pParse, yymsp[-3].minor.yy172, yymsp[-1].minor.yy172, yymsp[0].minor.yy386);
 }
-#line 3092 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3092 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 283:
-#line 1028 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 1028 "ext/pdo_sqlite/sqlite/src/parse.y"
 { yygotominor.yy386 = 0; }
-#line 3097 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3097 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 284:
-#line 1029 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 1029 "ext/pdo_sqlite/sqlite/src/parse.y"
 { yygotominor.yy386 = yymsp[0].minor.yy172; }
-#line 3102 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3102 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 287:
-#line 1035 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 1035 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   sqlite3Detach(pParse, yymsp[0].minor.yy172);
 }
-#line 3109 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3109 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 288:
-#line 1041 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 1041 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3Reindex(pParse, 0, 0);}
-#line 3114 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3114 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 289:
-#line 1042 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 1042 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3Reindex(pParse, &yymsp[-1].minor.yy410, &yymsp[0].minor.yy410);}
-#line 3119 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3119 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 290:
-#line 1047 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 1047 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3Analyze(pParse, 0, 0);}
-#line 3124 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3124 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 291:
-#line 1048 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 1048 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3Analyze(pParse, &yymsp[-1].minor.yy410, &yymsp[0].minor.yy410);}
-#line 3129 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3129 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 292:
-#line 1053 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 1053 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   sqlite3AlterRenameTable(pParse,yymsp[-3].minor.yy373,&yymsp[0].minor.yy410);
 }
-#line 3136 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3136 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 293:
-#line 1056 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 1056 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   sqlite3AlterFinishAddColumn(pParse, &yymsp[0].minor.yy410);
 }
-#line 3143 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3143 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 294:
-#line 1059 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 1059 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
   sqlite3AlterBeginAddColumn(pParse, yymsp[0].minor.yy373);
 }
-#line 3150 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3150 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 297:
-#line 1068 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 1068 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3VtabFinishParse(pParse,0);}
-#line 3155 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3155 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 298:
-#line 1069 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 1069 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3VtabFinishParse(pParse,&yymsp[0].minor.yy0);}
-#line 3160 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3160 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 299:
-#line 1070 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 1070 "ext/pdo_sqlite/sqlite/src/parse.y"
 {
     sqlite3VtabBeginParse(pParse, &yymsp[-3].minor.yy410, &yymsp[-2].minor.yy410, &yymsp[0].minor.yy410);
 }
-#line 3167 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3167 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 302:
-#line 1075 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 1075 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3VtabArgInit(pParse);}
-#line 3172 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3172 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
       case 304:
       case 305:
       case 306:
       case 308:
-#line 1077 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 1077 "ext/pdo_sqlite/sqlite/src/parse.y"
 {sqlite3VtabArgExtend(pParse,&yymsp[0].minor.yy0);}
-#line 3180 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3180 "ext/pdo_sqlite/sqlite/src/parse.c"
         break;
   };
   yygoto = yyRuleInfo[yyruleno].lhs;
@@ -3231,7 +3231,7 @@ static void yy_syntax_error(
 ){
   sqlite3ParserARG_FETCH;
 #define TOKEN (yyminor.yy0)
-#line 34 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.y"
+#line 34 "ext/pdo_sqlite/sqlite/src/parse.y"
 
   if( !pParse->parseError ){
     if( TOKEN.z[0] ){
@@ -3241,7 +3241,7 @@ static void yy_syntax_error(
     }
     pParse->parseError = 1;
   }
-#line 3248 "/home/rei/php_dev/php52/ext/pdo_sqlite/sqlite/src/parse.c"
+#line 3248 "ext/pdo_sqlite/sqlite/src/parse.c"
   sqlite3ParserARG_STORE; /* Suppress warning about unused %extra_argument variable */
 }
 
