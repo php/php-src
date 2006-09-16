@@ -1,3 +1,146 @@
+2006-09-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pgsql/config.m4
+      ext/pgsql/config.w32
+      ext/pgsql/pgsql.c:
+      MFB: Added a check for PQftable() function
+
+    * (PHP_5_2)
+      ext/pgsql/config.m4
+      ext/pgsql/config.w32
+      ext/pgsql/pgsql.c:
+      Added a check for PQftable() function
+
+2006-09-15  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_2)
+      ext/gd/libgd/gdft.c:
+      fix a valgrind warning. this also provides a 5x speedup in the
+      imagefttext.phpt test, because without this patch it never got cache hits
+
+2006-09-15  Antony Dovgal  <antony@zend.com>
+
+    * ext/curl/config.m4
+      ext/curl/streams.c:
+      missing part of the fix for #38844
+
+    * ext/curl/streams.c:
+      MFB: still output an error, even if there is no curl_easy_strerror()
+
+    * (PHP_5_2)
+      ext/curl/streams.c:
+      still output an error, even if there is no curl_easy_strerror()
+
+2006-09-15  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/gd/libgd/gd.h
+      ext/gd/libgd/gdfontg.c
+      ext/gd/libgd/gdfontl.c
+      ext/gd/libgd/gdfontmb.c
+      ext/gd/libgd/gdfonts.c
+      ext/gd/libgd/gdfontt.c
+      ext/gd/libgd/gdft.c
+      ext/gd/libgd/gdtables.c
+      ext/tidy/php_tidy.h
+      ext/tidy/tidy.c
+      ext/tidy/tidy.c:
+      MFB
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd.h
+      ext/gd/libgd/gdfontg.c
+      ext/gd/libgd/gdfontl.c
+      ext/gd/libgd/gdfontmb.c
+      ext/gd/libgd/gdfonts.c
+      ext/gd/libgd/gdfontt.c
+      ext/gd/libgd/gdtables.c:
+      mark some huge arrays as read-only
+
+2006-09-15  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/curl/multi.c:
+      MFH: fix segfault in curl_multi_info_read()
+
+    * ext/curl/multi.c:
+      fix segfault in curl_multi_info_read()
+
+2006-09-15  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_2)
+      ext/tidy/tidy.c:
+      remove warning. thanks Tony for noticing
+
+    * (PHP_5_2)
+      ext/tidy/php_tidy.h
+      ext/tidy/tidy.c:
+      remove more old code and macros. also remove the module global 'inst' (not
+      needed anymore)
+
+2006-09-15  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/curl/config.m4
+      ext/curl/streams.c:
+      MFH: fix #38844 (curl_easy_strerror() is defined only since cURL 7.12.0)
+
+    * ext/curl/config.m4
+      ext/curl/streams.c:
+      fix #38844 (curl_easy_strerror() is defined only since cURL 7.12.0)
+
+2006-09-15  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c
+      ext/zip/tests/bug8700.phpt:
+      - MFH: PECL Bug #8700, zipArchive::getFromIndex() fails
+
+    * ext/zip/php_zip.c
+      ext/zip/tests/bug8700.phpt
+      ext/zip/tests/bug8700.phpt:
+      - PECL Bug #8700, zipArchive::getFromIndex() fails
+
+2006-09-15  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/basic_functions.c
+      ext/standard/tests/general_functions/010.phpt:
+      MFH: fix leak when call to shutdown function fails
+
+    * ext/standard/basic_functions.c
+      ext/standard/tests/general_functions/010.phpt
+      ext/standard/tests/general_functions/010.phpt:
+      fix leak when call to shutdown function fails
+
+    * (PHP_5_2)
+      sapi/cli/php_cli.c:
+      fix leak with `php -c /path -h`
+
+    * sapi/cli/php_cli.c:
+      fix leaks with `php -d option=value -c /path -h`
+
+    * (PHP_5_2)
+      ext/dom/element.c:
+      MFH: free node pointer using correct function
+      fixes leak in ext/dom/tests/dom_create_element.phpt
+
+    * ext/dom/element.c:
+      free node pointer using correct function
+      fixes leak in ext/dom/tests/dom_create_element.phpt
+
+    * ext/standard/tests/file/stream_001.phpt
+      ext/standard/tests/file/stream_001.phpt
+      main/streams/streams.c:
+      
+      fix double free(), add test
+
+2006-09-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/soap.c
+      ext/soap/soap.c:
+      Fixed memory leak
+
 2006-09-14  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
