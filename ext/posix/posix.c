@@ -766,6 +766,10 @@ PHP_FUNCTION(posix_access)
 	}
 
 	path = expand_filepath(filename, NULL TSRMLS_CC);
+	if (!path) {
+		POSIX_G(last_error) = EIO;
+		RETURN_FALSE;
+	}
 
 	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC)) {
 		efree(path);
