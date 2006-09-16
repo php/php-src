@@ -677,6 +677,10 @@ static char *make_filename_safe(const char *filename TSRMLS_DC)
 	if (strncmp(filename, ":memory:", sizeof(":memory:")-1)) {
 		char *fullpath = expand_filepath(filename, NULL TSRMLS_CC);
 
+		if (!fullpath) {
+			return NULL;
+		}
+
 		if (php_check_open_basedir(fullpath TSRMLS_CC)) {
 			efree(fullpath);
 			return NULL;
