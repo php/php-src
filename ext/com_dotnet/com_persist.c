@@ -389,9 +389,12 @@ CPH_METHOD(SaveToFile)
 		}
 
 		if (filename) {
-			fullpath = expand_filepath(filename, NULL TSRMLS_CC);
+			if (!(fullpath = expand_filepath(filename, NULL TSRMLS_CC))) {
+				RETURN_FALSE;
+			}
 
 			if (php_check_open_basedir(fullpath TSRMLS_CC)) {
+				efree(fullpath);
 				RETURN_FALSE;
 			}
 			
@@ -448,7 +451,9 @@ CPH_METHOD(LoadFromFile)
 			return;
 		}
 
-		fullpath = expand_filepath(filename, NULL TSRMLS_CC);
+		if (!(fullpath = expand_filepath(filename, NULL TSRMLS_CC))) {
+			RETURN_FALSE;
+		}
 
 		if (php_check_open_basedir(fullpath TSRMLS_CC)) {
 			efree(fullpath);
