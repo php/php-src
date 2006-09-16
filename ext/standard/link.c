@@ -117,14 +117,15 @@ PHP_FUNCTION(symlink)
 	convert_to_string_ex(topath);
 	convert_to_string_ex(frompath);
 
-	expand_filepath(Z_STRVAL_PP(frompath), source_p TSRMLS_CC);
-	expand_filepath(Z_STRVAL_PP(topath), dest_p TSRMLS_CC);
+	if (!expand_filepath(Z_STRVAL_PP(frompath), source_p TSRMLS_CC) || !expand_filepath(Z_STRVAL_PP(topath), dest_p TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
 
 	if (php_stream_locate_url_wrapper(source_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ||
 		php_stream_locate_url_wrapper(dest_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ) 
 	{
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to symlink to a URL");
-		RETURN_FALSE;	
+		RETURN_FALSE;
 	}
 
 	if (php_check_open_basedir(dest_p TSRMLS_CC)) {
@@ -164,14 +165,15 @@ PHP_FUNCTION(link)
 	convert_to_string_ex(topath);
 	convert_to_string_ex(frompath);
 
-	expand_filepath(Z_STRVAL_PP(frompath), source_p TSRMLS_CC);
-	expand_filepath(Z_STRVAL_PP(topath), dest_p TSRMLS_CC);
+	if (!expand_filepath(Z_STRVAL_PP(frompath), source_p TSRMLS_CC) || !expand_filepath(Z_STRVAL_PP(topath), dest_p TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
 
 	if (php_stream_locate_url_wrapper(source_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ||
 		php_stream_locate_url_wrapper(dest_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ) 
 	{
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to link to a URL");
-		RETURN_FALSE;	
+		RETURN_FALSE;
 	}
 
 	if (php_check_open_basedir(dest_p TSRMLS_CC)) {
