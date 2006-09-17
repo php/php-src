@@ -3532,8 +3532,7 @@ ZEND_METHOD(reflection_class, getInterfaces)
 			zval *interface;
 			ALLOC_ZVAL(interface);
 			zend_reflection_class_factory(ce->interfaces[i], interface TSRMLS_CC);
-			/* FIXME: Unicode support??? */
-			add_assoc_zval_ex(return_value, ce->interfaces[i]->name.s, ce->interfaces[i]->name_length + 1, interface);
+			add_u_assoc_zval_ex(return_value, UG(unicode)?IS_UNICODE:IS_STRING, ce->interfaces[i]->name, ce->interfaces[i]->name_length + 1, interface);
 		}
 	}
 }
