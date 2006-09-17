@@ -1,3 +1,121 @@
+2006-09-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/dom/document.c:
+      MFB: One last expand_filepath() check
+
+2006-09-16  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/gd/libgd/gd.h
+      ext/gd/libgd/gdfontg.c
+      ext/gd/libgd/gdfontl.c
+      ext/gd/libgd/gdfontmb.c
+      ext/gd/libgd/gdfonts.c
+      ext/gd/libgd/gdfontt.c:
+      MFB: fix compiler warnings introduced in my previous commit
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd.h
+      ext/gd/libgd/gdfontg.c
+      ext/gd/libgd/gdfontl.c
+      ext/gd/libgd/gdfontmb.c
+      ext/gd/libgd/gdfonts.c
+      ext/gd/libgd/gdfontt.c:
+      fix compiler warnings introduced in my previous commit
+
+2006-09-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/dom/document.c:
+      One last expand_filepath() check
+
+    * ext/pdo_sqlite/sqlite_driver.c
+      ext/standard/link.c:
+      MFB: Additional expand_filepath() checks
+
+    * (PHP_5_2)
+      ext/pdo_sqlite/sqlite_driver.c
+      ext/standard/link.c:
+      Additional expand_filepath() checks
+
+    * ext/com_dotnet/com_persist.c
+      ext/sqlite/pdo_sqlite2.c
+      ext/sqlite/sqlite.c:
+      MFB: Added missing validation checks around expand_filepath()
+
+2006-09-16  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_2)
+      ext/xmlreader/php_xmlreader.c
+      ext/xmlwriter/php_xmlwriter.c:
+      plug leaks that in the previous patch
+
+    * (PHP_5_2)
+      ext/xmlreader/php_xmlreader.c
+      ext/xmlwriter/php_xmlwriter.c:
+      add missing checks around expand_filepath()
+
+2006-09-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/com_dotnet/com_persist.c
+      ext/sqlite/pdo_sqlite2.c
+      ext/sqlite/sqlite.c:
+      Added missing validation checks around expand_filepath()
+
+2006-09-16  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_2)
+      ext/posix/posix.c
+      ext/posix/tests/.cvsignore
+      ext/posix/tests/.cvsignore
+      ext/posix/tests/001.phpt
+      ext/posix/tests/001.phpt:
+      fix possible crash in posix_access()
+
+    * ext/pdo_sqlite/sqlite/src/parse.c:
+      fix lcov report
+
+    * (PHP_5_2)
+      ext/pdo_sqlite/sqlite/src/parse.c:
+      use relative paths, so that we dont break the lcov reports
+
+2006-09-16  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * ext/dom/characterdata.c
+      ext/dom/node.c
+      ext/dom/tests/bug38850.phpt:
+      MFB: implement workaround for bug #38823 (DOMComment->appendData does
+      nothing)
+      fix bug #38850 (lookupNamespaceURI doesn't return default namespace)
+      add test
+
+    * (PHP_5_2)
+      ext/dom/characterdata.c
+      ext/dom/node.c
+      ext/dom/tests/bug38850.phpt
+      ext/dom/tests/bug38850.phpt:
+      implement workaround for bug #38823 (DOMComment->appendData does nothing)
+      fix bug #38850 (lookupNamespaceURI doesn't return default namespace)
+      add test
+
+2006-09-16  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/openssl/openssl.c
+      ext/posix/posix.c
+      ext/posix/tests/.cvsignore
+      ext/posix/tests/001.phpt
+      ext/xmlreader/php_xmlreader.c
+      ext/xmlwriter/php_xmlwriter.c:
+      MFB
+
+    * (PHP_5_2)
+      ext/openssl/openssl.c:
+      fix mem leak. hash keys dont need to be strdup'ed
+
 2006-09-15  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/pgsql/config.m4
