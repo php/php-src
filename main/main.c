@@ -680,7 +680,8 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	php_error(type, "%s", message);
 	efree(message);
 
-	if (PG(track_errors) && module_initialized && EG(active_symbol_table)) {
+	if (PG(track_errors) && module_initialized && EG(active_symbol_table) && 
+			(!EG(user_error_handler) || !(EG(user_error_handler_error_reporting) & type))) {
 		zval *tmp;
 		ALLOC_INIT_ZVAL(tmp);
 		ZVAL_RT_STRINGL(tmp, buffer, buffer_len, 1);
@@ -947,8 +948,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 	if (PG(track_errors) && module_initialized && EG(active_symbol_table)) {
 		zval *tmp;
 
-		ALLOC_ZVAL(tmp);
-		INIT_PZVAL(tmp);
+		ALLOC_INIT_ZVAL(tmp);
 		ZVAL_RT_STRINGL(tmp, buffer, buffer_len, 1);
 		zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) & tmp, sizeof(zval *), NULL);
 	}
