@@ -20,11 +20,8 @@
 
 /* UTODO
  *  - PCRE_NO_UTF8_CHECK option for Unicode strings
- *
- *  php_pcre_match_impl():
- *   - need to return matched substrings in the type matching the arguments
- *   - subpattern names - need to convert using UTF(utf8_conv) or just
- *     UG(runtime_encoding_conv) ?
+ *  - add_offset_pair() should convert offset to refer to codepoints or bytes,
+ *    depending on whether subject string is IS_UNICODE or IS_STRING
  *
  *  php_pcre_split_impl():
  *   - Avoid the /./ bump for Unicode strings with U8_FWD_1()
@@ -776,7 +773,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 			   to achieve this, unless we're already at the end of the string. */
 			if (g_notempty != 0 && start_offset < subject_len) {
 				offsets[0] = start_offset;
-				if (UG(unicode)) {
+				if (UG(unicode) || pce->compile_options & PCRE_UTF8) {
 					offsets[1] = start_offset;
 					U8_FWD_1(subject, offsets[1], subject_len);
 				} else {
@@ -1213,7 +1210,7 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int sub
 			   to achieve this, unless we're already at the end of the string. */
 			if (g_notempty != 0 && start_offset < subject_len) {
 				offsets[0] = start_offset;
-				if (UG(unicode)) {
+				if (UG(unicode) || pce->compile_options & PCRE_UTF8) {
 					offsets[1] = start_offset;
 					U8_FWD_1(subject, offsets[1], subject_len);
 				} else {
@@ -1459,37 +1456,57 @@ PHP_FUNCTION(preg_replace_callback)
    Split string into an array using a perl-style regular expression as a delimiter */
 PHP_FUNCTION(preg_split)
 {
-	char				*regex;			/* Regular expression */
-	char				*subject;		/* String to match against */
+	zstr				 regex;			/* Regular expression */
+	zstr				 subject;		/* String to match against */
 	int					 regex_len;
 	int					 subject_len;
 	long				 limit_val = -1;/* Integer value of limit */
 	long				 flags = 0;		/* Match control flags */
 	pcre_cache_entry	*pce;			/* Compiled regular expression */
+	zend_uchar 			 str_type;
+	char				*regex_utf8 = NULL, *subject_utf8 = NULL;
+	int					 regex_utf8_len, subject_utf8_len;
+	UErrorCode			 status = U_ZERO_ERROR;
 
 	/* Get function parameters and do error checking */	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ll", &regex, &regex_len,
-							  &subject, &subject_len, &limit_val, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT|ll", &regex, &regex_len, &str_type,
+							  &subject, &subject_len, &str_type, &limit_val, &flags) == FAILURE) {
 		RETURN_FALSE;
 	}
 	
-	/* Compile regex or get it from cache. */
-	if ((pce = pcre_get_compiled_regex_cache(regex, regex_len TSRMLS_CC)) == NULL) {
-		RETURN_FALSE;
+	if (str_type == IS_UNICODE) {
+		zend_unicode_to_string_ex(UG(utf8_conv), &regex_utf8, &regex_utf8_len, regex.u, regex_len, &status);
+		zend_unicode_to_string_ex(UG(utf8_conv), &subject_utf8, &subject_utf8_len, subject.u, subject_len, &status);
+		regex.s = regex_utf8;
+		regex_len = regex_utf8_len;
+		subject.s = subject_utf8;
+		subject_len = subject_utf8_len;
 	}
 
-	php_pcre_split_impl(pce, subject, subject_len, return_value, limit_val, flags TSRMLS_CC);
+	/* Compile regex or get it from cache. */
+	if ((pce = pcre_get_compiled_regex_cache(regex.s, regex_len TSRMLS_CC)) == NULL) {
+		RETURN_FALSE;
+		if (str_type == IS_UNICODE) {
+			efree(regex_utf8);
+			efree(subject_utf8);
+		}
+	}
+
+	php_pcre_split_impl(pce, subject.s, subject_len, return_value, limit_val, flags TSRMLS_CC);
+
+	if (str_type == IS_UNICODE) {
+		efree(regex_utf8);
+		efree(subject_utf8);
+	}
 }
 /* }}} */
 
-/* {{{ php_pcre_split
+/* {{{ php_pcre_split_impl
  */
 PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subject_len, zval *return_value,
 	long limit_val, long flags TSRMLS_DC)
 {
 	pcre_extra		*extra = NULL;		/* Holds results of studying */
-	pcre			*re_bump = NULL;	/* Regex instance for empty matches */
-	pcre_extra		*extra_bump = NULL;	/* Almost dummy */
 	pcre_extra		 extra_data;		/* Used locally for exec options */
 	int				*offsets;			/* Array of subpattern offsets */
 	int				 size_offsets;		/* Size of the offsets array */
@@ -1538,6 +1555,10 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 	last_match = subject;
 	match = NULL;
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
+
+	if (UG(unicode)) {
+		exoptions |= PCRE_NO_UTF8_CHECK;
+	}
 	
 	/* Get next piece if no limit or limit not yet reached and something matched*/
 	while ((limit_val == -1 || limit_val > 1)) {
@@ -1559,11 +1580,11 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 
 				if (offset_capture) {
 					/* Add (match, offset) pair to the return value */
-					add_offset_pair(return_value, last_match, &subject[offsets[0]]-last_match, next_offset, NULL, 0 TSRMLS_CC);
+					add_offset_pair(return_value, last_match, &subject[offsets[0]]-last_match, next_offset, NULL, UG(unicode) TSRMLS_CC);
 				} else {
 					/* Add the piece to the return value */
-					add_next_index_stringl(return_value, last_match,
-								   	   &subject[offsets[0]]-last_match, 1);
+					add_next_index_utf8_stringl(return_value, last_match,
+												&subject[offsets[0]]-last_match, 1);
 				}
 
 				/* One less left to do */
@@ -1581,11 +1602,11 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 					/* If we have matched a delimiter */
 					if (!no_empty || match_len > 0) {
 						if (offset_capture) {
-							add_offset_pair(return_value, &subject[offsets[i<<1]], match_len, offsets[i<<1], NULL, 0 TSRMLS_CC);
+							add_offset_pair(return_value, &subject[offsets[i<<1]], match_len,
+											offsets[i<<1], NULL, UG(unicode) TSRMLS_CC);
 						} else {
-							add_next_index_stringl(return_value,
-												   &subject[offsets[i<<1]],
-												   match_len, 1);
+							add_next_index_utf8_stringl(return_value, &subject[offsets[i<<1]],
+														match_len, 1);
 						}
 					}
 				}
@@ -1596,24 +1617,11 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
 			if (g_notempty != 0 && start_offset < subject_len) {
-				if (pce->compile_options & PCRE_UTF8) {
-					if (re_bump == NULL) {
-						int dummy;
-
-						if ((re_bump = pcre_get_compiled_regex("/./u", &extra_bump, &dummy TSRMLS_CC)) == NULL) {
-							RETURN_FALSE;
-						}
-					}
-					count = pcre_exec(re_bump, extra_bump, subject,
-							  subject_len, start_offset,
-							  exoptions, offsets, size_offsets);
-					if (count < 1) {
-						php_error_docref(NULL TSRMLS_CC,E_NOTICE, "Unknown error");
-						offsets[0] = start_offset;
-						offsets[1] = start_offset + 1;
-					}
+				offsets[0] = start_offset;
+				if (UG(unicode) || pce->compile_options & PCRE_UTF8) {
+					offsets[1] = start_offset;
+					U8_FWD_1(subject, offsets[1], subject_len);
 				} else {
-					offsets[0] = start_offset;
 					offsets[1] = start_offset + 1;
 				}
 			} else
@@ -1638,13 +1646,13 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 	{
 		if (offset_capture) {
 			/* Add the last (match, offset) pair to the return value */
-			add_offset_pair(return_value, &subject[start_offset], subject_len - start_offset, start_offset, NULL, 0 TSRMLS_CC);
+			add_offset_pair(return_value, &subject[start_offset],
+							subject_len - start_offset, start_offset, NULL, UG(unicode) TSRMLS_CC);
 		} else {
 			/* Add the last piece to the return value */
-			add_next_index_stringl(return_value, last_match, subject + subject_len - last_match, 1);
+			add_next_index_utf8_stringl(return_value, last_match, subject + subject_len - last_match, 1);
 		}
 	}
-
 	
 	/* Clean up */
 	efree(offsets);
