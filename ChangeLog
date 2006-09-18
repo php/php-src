@@ -1,3 +1,15 @@
+2006-09-17  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/filter/tests/037.phpt
+      ext/filter/tests/037.phpt:
+      
+      file 037.phpt was initially added on branch PHP_5_2.
+
+2006-09-17  Johannes Schlüter  <johannes@schlueters.de>
+
+    * ext/reflection/php_reflection.c:
+      - Unicode fix
+
 2006-09-16  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/dom/document.c:
