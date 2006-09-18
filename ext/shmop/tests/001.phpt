@@ -84,7 +84,7 @@ shm write test #1: ok
 data in memory is: test #1 of the shmop() extension
 shm open for read only: ok
 data in memory is: test #1 of the shmop() extension
-trying to write to a read only segment
+shmop_write(): trying to write to a read only segment
 shm open for read only: ok
 shm write test #1: ok
 data in memory is: test #1 of the shmop() extensiontest #2 append data to shared memory segment
