@@ -342,6 +342,8 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2) {
 			"/defined\(ZEND_VM_SPEC\)/m",
 			"/ZEND_VM_C_LABEL\(\s*([A-Za-z_]*)\s*\)/m",
 			"/ZEND_VM_C_GOTO\(\s*([A-Za-z_]*)\s*\)/m",
+			"/^#if\s+1\s*\\|\\|.*[^\\\\]$/m",
+			"/^#if\s+0\s*&&.*[^\\\\]$/m"
 		),
 		array(
 			$op1_type[$op1],
@@ -370,6 +372,8 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2) {
 			($op1!="ANY"||$op2!="ANY")?"1":"0",
 			"\\1".(($spec && $kind != ZEND_VM_KIND_CALL)?("_SPEC".$prefix[$op1].$prefix[$op2]):""),
 			"goto \\1".(($spec && $kind != ZEND_VM_KIND_CALL)?("_SPEC".$prefix[$op1].$prefix[$op2]):""),
+			"#if 1",
+			"#if 0",
 		),
 		$code);
 
