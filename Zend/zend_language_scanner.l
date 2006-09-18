@@ -938,7 +938,7 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 	}
 	source_string = &tmp;
 
-	if (Z_USTRLEN_P(source_string)==0) {
+	if (Z_UNILEN_P(source_string)==0) {
 		efree(op_array);
 		zval_dtor(&tmp);
 		return NULL;

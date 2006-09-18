@@ -334,6 +334,8 @@ ZEND_API int add_assoc_unicode_ex(zval *arg, char *key, uint key_len, UChar *str
 ZEND_API int add_assoc_unicodel_ex(zval *arg, char *key, uint key_len, UChar *str, uint length, int duplicate);
 ZEND_API int add_assoc_zstr_ex(zval *arg, char *key, uint key_len, zend_uchar str_type, zstr str, int duplicate);
 ZEND_API int add_assoc_zstrl_ex(zval *arg, char *key, uint key_len, zend_uchar str_type, zstr str, uint str_len, int duplicate);
+ZEND_API int add_assoc_utf8_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, int duplicate);
+ZEND_API int add_u_assoc_utf8_stringl_ex(zval *arg, zend_uchar type, zstr key, uint key_len, char *str, uint length, int duplicate);
 ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
 
 #define ZSTR_DUPLICATE	(1<<0)
@@ -496,6 +498,7 @@ ZEND_API int add_index_string(zval *arg, ulong idx, char *str, int duplicate);
 ZEND_API int add_index_stringl(zval *arg, ulong idx, char *str, uint length, int duplicate);
 ZEND_API int add_index_unicode(zval *arg, ulong idx, UChar *str, int duplicate);
 ZEND_API int add_index_unicodel(zval *arg, ulong idx, UChar *str, uint length, int duplicate);
+ZEND_API int add_index_utf8_stringl(zval *arg, ulong index, char *str, uint length, int duplicate);
 ZEND_API int add_index_zval(zval *arg, ulong index, zval *value);
 
 #define add_index_text(arg, idx, str, duplicate) \
@@ -544,6 +547,8 @@ ZEND_API int add_next_index_string(zval *arg, char *str, int duplicate);
 ZEND_API int add_next_index_stringl(zval *arg, char *str, uint length, int duplicate);
 ZEND_API int add_next_index_unicode(zval *arg, UChar *str, int duplicate);
 ZEND_API int add_next_index_unicodel(zval *arg, UChar *str, uint length, int duplicate);
+ZEND_API int add_next_index_utf8_string(zval *arg, char *str, int duplicate);
+ZEND_API int add_next_index_utf8_stringl(zval *arg, char *str, uint length, int duplicate);
 ZEND_API int add_next_index_zstr(zval *arg, zstr str, zend_uchar type, int duplicate);
 ZEND_API int add_next_index_zstrl(zval *arg, zstr str, uint length, zend_uchar type, int duplicate);
 ZEND_API int add_next_index_zval(zval *arg, zval *value);
@@ -612,31 +617,6 @@ ZEND_API int add_next_index_zval(zval *arg, zval *value);
 		add_next_index_unicodel(arg, u_str, u_len, 0); \
 	} else { \
 		add_next_index_stringl(arg, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
-	}
-
-#define add_next_index_utf8_string(arg, str, flags) \
-	{ \
-		UErrorCode status = U_ZERO_ERROR; \
-		UChar *u_str; \
-		int u_len; \
-		int length = strlen(str); \
-		zend_string_to_unicode_ex(UG(utf8_von), &u_str, &u_len, str, length, &status); \
-		if ((flags) & ZSTR_AUTOFREE) { \
-			efree(str); \
-		} \
-		add_next_index_unicodel(arg, u_str, u_len, 0); \
-	}
-
-#define add_next_index_utf8_stringl(arg, str, length, flags) \
-	{ \
-		UErrorCode status = U_ZERO_ERROR; \
-		UChar *u_str; \
-		int u_len; \
-		zend_string_to_unicode_ex(UG(utf8_conv), &u_str, &u_len, str, length, &status); \
-		if ((flags) & ZSTR_AUTOFREE) { \
-			efree(str); \
-		} \
-		add_next_index_unicodel(arg, u_str, u_len, 0); \
 	}
 
 ZEND_API int add_get_assoc_string_ex(zval *arg, char *key, uint key_len, char *str, void **dest, int duplicate);
