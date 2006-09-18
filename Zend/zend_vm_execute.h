@@ -2686,12 +2686,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 	expr_ptr=&opline->op1.u.constant;
 #endif
 
-	if (opline->opcode == ZEND_INIT_ARRAY) {
-		array_init(array_ptr);
-		if (!expr_ptr) {
-			ZEND_VM_NEXT_OPCODE();
-		}
-	}
 	if (0) { /* temporary variable */
 		zval *new_expr;
 
@@ -2753,7 +2747,16 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 
 static int ZEND_INIT_ARRAY_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	zend_op *opline = EX(opline);
+
+	array_init(&EX_T(opline->result.u.var).tmp_var);
+	if (IS_CONST == IS_UNUSED) {
+		ZEND_VM_NEXT_OPCODE();
+#if 0 || IS_CONST != IS_UNUSED
+	} else {
+		return ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#endif
+	}
 }
 
 static int ZEND_ADD_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -3043,12 +3046,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	expr_ptr=&opline->op1.u.constant;
 #endif
 
-	if (opline->opcode == ZEND_INIT_ARRAY) {
-		array_init(array_ptr);
-		if (!expr_ptr) {
-			ZEND_VM_NEXT_OPCODE();
-		}
-	}
 	if (0) { /* temporary variable */
 		zval *new_expr;
 
@@ -3110,7 +3107,16 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 static int ZEND_INIT_ARRAY_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	zend_op *opline = EX(opline);
+
+	array_init(&EX_T(opline->result.u.var).tmp_var);
+	if (IS_CONST == IS_UNUSED) {
+		ZEND_VM_NEXT_OPCODE();
+#if 0 || IS_CONST != IS_UNUSED
+	} else {
+		return ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#endif
+	}
 }
 
 static int ZEND_ADD_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -3400,12 +3406,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	expr_ptr=&opline->op1.u.constant;
 #endif
 
-	if (opline->opcode == ZEND_INIT_ARRAY) {
-		array_init(array_ptr);
-		if (!expr_ptr) {
-			ZEND_VM_NEXT_OPCODE();
-		}
-	}
 	if (0) { /* temporary variable */
 		zval *new_expr;
 
@@ -3467,7 +3467,16 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 static int ZEND_INIT_ARRAY_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	zend_op *opline = EX(opline);
+
+	array_init(&EX_T(opline->result.u.var).tmp_var);
+	if (IS_CONST == IS_UNUSED) {
+		ZEND_VM_NEXT_OPCODE();
+#if 0 || IS_CONST != IS_UNUSED
+	} else {
+		return ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#endif
+	}
 }
 
 static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -3491,12 +3500,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 	expr_ptr=&opline->op1.u.constant;
 #endif
 
-	if (opline->opcode == ZEND_INIT_ARRAY) {
-		array_init(array_ptr);
-		if (!expr_ptr) {
-			ZEND_VM_NEXT_OPCODE();
-		}
-	}
 	if (0) { /* temporary variable */
 		zval *new_expr;
 
@@ -3558,7 +3561,16 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 
 static int ZEND_INIT_ARRAY_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	zend_op *opline = EX(opline);
+
+	array_init(&EX_T(opline->result.u.var).tmp_var);
+	if (IS_CONST == IS_UNUSED) {
+		ZEND_VM_NEXT_OPCODE();
+#if 0 || IS_CONST != IS_UNUSED
+	} else {
+		return ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#endif
+	}
 }
 
 static int ZEND_ADD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -3847,12 +3859,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	expr_ptr=&opline->op1.u.constant;
 #endif
 
-	if (opline->opcode == ZEND_INIT_ARRAY) {
-		array_init(array_ptr);
-		if (!expr_ptr) {
-			ZEND_VM_NEXT_OPCODE();
-		}
-	}
 	if (0) { /* temporary variable */
 		zval *new_expr;
 
@@ -3914,7 +3920,16 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 static int ZEND_INIT_ARRAY_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	zend_op *opline = EX(opline);
+
+	array_init(&EX_T(opline->result.u.var).tmp_var);
+	if (IS_CONST == IS_UNUSED) {
+		ZEND_VM_NEXT_OPCODE();
+#if 0 || IS_CONST != IS_UNUSED
+	} else {
+		return ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#endif
+	}
 }
 
 static int ZEND_BW_NOT_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -5354,12 +5369,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	expr_ptr=_get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 #endif
 
-	if (opline->opcode == ZEND_INIT_ARRAY) {
-		array_init(array_ptr);
-		if (!expr_ptr) {
-			ZEND_VM_NEXT_OPCODE();
-		}
-	}
 	if (1) { /* temporary variable */
 		zval *new_expr;
 
@@ -5421,7 +5430,16 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 static int ZEND_INIT_ARRAY_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	zend_op *opline = EX(opline);
+
+	array_init(&EX_T(opline->result.u.var).tmp_var);
+	if (IS_TMP_VAR == IS_UNUSED) {
+		ZEND_VM_NEXT_OPCODE();
+#if 0 || IS_TMP_VAR != IS_UNUSED
+	} else {
+		return ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#endif
+	}
 }
 
 static int ZEND_ADD_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -5799,12 +5817,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	expr_ptr=_get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 #endif
 
-	if (opline->opcode == ZEND_INIT_ARRAY) {
-		array_init(array_ptr);
-		if (!expr_ptr) {
-			ZEND_VM_NEXT_OPCODE();
-		}
-	}
 	if (1) { /* temporary variable */
 		zval *new_expr;
 
@@ -5866,7 +5878,16 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 static int ZEND_INIT_ARRAY_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	zend_op *opline = EX(opline);
+
+	array_init(&EX_T(opline->result.u.var).tmp_var);
+	if (IS_TMP_VAR == IS_UNUSED) {
+		ZEND_VM_NEXT_OPCODE();
+#if 0 || IS_TMP_VAR != IS_UNUSED
+	} else {
+		return ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#endif
+	}
 }
 
 static int ZEND_ADD_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -6244,12 +6265,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	expr_ptr=_get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 #endif
 
-	if (opline->opcode == ZEND_INIT_ARRAY) {
-		array_init(array_ptr);
-		if (!expr_ptr) {
-			ZEND_VM_NEXT_OPCODE();
-		}
-	}
 	if (1) { /* temporary variable */
 		zval *new_expr;
 
@@ -6311,7 +6326,16 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 static int ZEND_INIT_ARRAY_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	zend_op *opline = EX(opline);
+
+	array_init(&EX_T(opline->result.u.var).tmp_var);
+	if (IS_TMP_VAR == IS_UNUSED) {
+		ZEND_VM_NEXT_OPCODE();
+#if 0 || IS_TMP_VAR != IS_UNUSED
+	} else {
+		return ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#endif
+	}
 }
 
 static int ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -6335,12 +6359,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_AR
 	expr_ptr=_get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 #endif
 
-	if (opline->opcode == ZEND_INIT_ARRAY) {
-		array_init(array_ptr);
-		if (!expr_ptr) {
-			ZEND_VM_NEXT_OPCODE();
-		}
-	}
 	if (1) { /* temporary variable */
 		zval *new_expr;
 
@@ -6402,7 +6420,16 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 static int ZEND_INIT_ARRAY_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	zend_op *opline = EX(opline);
+
+	array_init(&EX_T(opline->result.u.var).tmp_var);
+	if (IS_TMP_VAR == IS_UNUSED) {
+		ZEND_VM_NEXT_OPCODE();
+#if 0 || IS_TMP_VAR != IS_UNUSED
+	} else {
+		return ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#endif
+	}
 }
 
 static int ZEND_ADD_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -6777,12 +6804,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	expr_ptr=_get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 #endif
 
-	if (opline->opcode == ZEND_INIT_ARRAY) {
-		array_init(array_ptr);
-		if (!expr_ptr) {
-			ZEND_VM_NEXT_OPCODE();
-		}
-	}
 	if (1) { /* temporary variable */
 		zval *new_expr;
 
@@ -6844,7 +6865,16 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 static int ZEND_INIT_ARRAY_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	zend_op *opline = EX(opline);
+
+	array_init(&EX_T(opline->result.u.var).tmp_var);
+	if (IS_TMP_VAR == IS_UNUSED) {
+		ZEND_VM_NEXT_OPCODE();
+#if 0 || IS_TMP_VAR != IS_UNUSED
+	} else {
+		return ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#endif
+	}
 }
 
 static int ZEND_BW_NOT_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -9432,12 +9462,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	expr_ptr=_get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 #endif
 
-	if (opline->opcode == ZEND_INIT_ARRAY) {
-		array_init(array_ptr);
-		if (!expr_ptr) {
-			ZEND_VM_NEXT_OPCODE();
-		}
-	}
 	if (0) { /* temporary variable */
 		zval *new_expr;
 
@@ -9499,7 +9523,16 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 static int ZEND_INIT_ARRAY_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	zend_op *opline = EX(opline);
+
+	array_init(&EX_T(opline->result.u.var).tmp_var);
+	if (IS_VAR == IS_UNUSED) {
+		ZEND_VM_NEXT_OPCODE();
+#if 0 || IS_VAR != IS_UNUSED
+	} else {
+		return ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#endif
+	}
 }
 
 static int ZEND_UNSET_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -10969,12 +11002,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	expr_ptr=_get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 #endif
 
-	if (opline->opcode == ZEND_INIT_ARRAY) {
-		array_init(array_ptr);
-		if (!expr_ptr) {
-			ZEND_VM_NEXT_OPCODE();
-		}
-	}
 	if (0) { /* temporary variable */
 		zval *new_expr;
 
@@ -11036,7 +11063,16 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 static int ZEND_INIT_ARRAY_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	zend_op *opline = EX(opline);
+
+	array_init(&EX_T(opline->result.u.var).tmp_var);
+	if (IS_VAR == IS_UNUSED) {
+		ZEND_VM_NEXT_OPCODE();
+#if 0 || IS_VAR != IS_UNUSED
+	} else {
+		return ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#endif
+	}
 }
 
 static int ZEND_UNSET_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -12544,12 +12580,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	expr_ptr=_get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 #endif
 
-	if (opline->opcode == ZEND_INIT_ARRAY) {
-		array_init(array_ptr);
-		if (!expr_ptr) {
-			ZEND_VM_NEXT_OPCODE();
-		}
-	}
 	if (0) { /* temporary variable */
 		zval *new_expr;
 
@@ -12611,7 +12641,16 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 static int ZEND_INIT_ARRAY_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	zend_op *opline = EX(opline);
+
+	array_init(&EX_T(opline->result.u.var).tmp_var);
+	if (IS_VAR == IS_UNUSED) {
+		ZEND_VM_NEXT_OPCODE();
+#if 0 || IS_VAR != IS_UNUSED
+	} else {
+		return ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#endif
+	}
 }
 
 static int ZEND_UNSET_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -13290,12 +13329,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_AR
 	expr_ptr=_get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 #endif
 
-	if (opline->opcode == ZEND_INIT_ARRAY) {
-		array_init(array_ptr);
-		if (!expr_ptr) {
-			ZEND_VM_NEXT_OPCODE();
-		}
-	}
 	if (0) { /* temporary variable */
 		zval *new_expr;
 
@@ -13357,7 +13390,16 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 static int ZEND_INIT_ARRAY_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	zend_op *opline = EX(opline);
+
+	array_init(&EX_T(opline->result.u.var).tmp_var);
+	if (IS_VAR == IS_UNUSED) {
+		ZEND_VM_NEXT_OPCODE();
+#if 0 || IS_VAR != IS_UNUSED
+	} else {
+		return ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#endif
+	}
 }
 
 static int ZEND_ADD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -14546,12 +14588,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	expr_ptr=_get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 #endif
 
-	if (opline->opcode == ZEND_INIT_ARRAY) {
-		array_init(array_ptr);
-		if (!expr_ptr) {
-			ZEND_VM_NEXT_OPCODE();
-		}
-	}
 	if (0) { /* temporary variable */
 		zval *new_expr;
 
@@ -14613,7 +14649,16 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 static int ZEND_INIT_ARRAY_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	zend_op *opline = EX(opline);
+
+	array_init(&EX_T(opline->result.u.var).tmp_var);
+	if (IS_VAR == IS_UNUSED) {
+		ZEND_VM_NEXT_OPCODE();
+#if 0 || IS_VAR != IS_UNUSED
+	} else {
+		return ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#endif
+	}
 }
 
 static int ZEND_UNSET_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -15766,12 +15811,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 	expr_ptr=NULL;
 #endif
 
-	if (opline->opcode == ZEND_INIT_ARRAY) {
-		array_init(array_ptr);
-		if (!expr_ptr) {
-			ZEND_VM_NEXT_OPCODE();
-		}
-	}
 	if (0) { /* temporary variable */
 		zval *new_expr;
 
@@ -15833,7 +15872,16 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 
 static int ZEND_INIT_ARRAY_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	zend_op *opline = EX(opline);
+
+	array_init(&EX_T(opline->result.u.var).tmp_var);
+	if (IS_UNUSED == IS_UNUSED) {
+		ZEND_VM_NEXT_OPCODE();
+#if 0 || IS_UNUSED != IS_UNUSED
+	} else {
+		return ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#endif
+	}
 }
 
 static int ZEND_UNSET_DIM_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -16860,12 +16908,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 	expr_ptr=NULL;
 #endif
 
-	if (opline->opcode == ZEND_INIT_ARRAY) {
-		array_init(array_ptr);
-		if (!expr_ptr) {
-			ZEND_VM_NEXT_OPCODE();
-		}
-	}
 	if (0) { /* temporary variable */
 		zval *new_expr;
 
@@ -16927,7 +16969,16 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 static int ZEND_INIT_ARRAY_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	zend_op *opline = EX(opline);
+
+	array_init(&EX_T(opline->result.u.var).tmp_var);
+	if (IS_UNUSED == IS_UNUSED) {
+		ZEND_VM_NEXT_OPCODE();
+#if 0 || IS_UNUSED != IS_UNUSED
+	} else {
+		return ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#endif
+	}
 }
 
 static int ZEND_UNSET_DIM_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -17954,12 +18005,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 	expr_ptr=NULL;
 #endif
 
-	if (opline->opcode == ZEND_INIT_ARRAY) {
-		array_init(array_ptr);
-		if (!expr_ptr) {
-			ZEND_VM_NEXT_OPCODE();
-		}
-	}
 	if (0) { /* temporary variable */
 		zval *new_expr;
 
@@ -18021,7 +18066,16 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 static int ZEND_INIT_ARRAY_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	zend_op *opline = EX(opline);
+
+	array_init(&EX_T(opline->result.u.var).tmp_var);
+	if (IS_UNUSED == IS_UNUSED) {
+		ZEND_VM_NEXT_OPCODE();
+#if 0 || IS_UNUSED != IS_UNUSED
+	} else {
+		return ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#endif
+	}
 }
 
 static int ZEND_UNSET_DIM_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -18606,12 +18660,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 	expr_ptr=NULL;
 #endif
 
-	if (opline->opcode == ZEND_INIT_ARRAY) {
-		array_init(array_ptr);
-		if (!expr_ptr) {
-			ZEND_VM_NEXT_OPCODE();
-		}
-	}
 	if (0) { /* temporary variable */
 		zval *new_expr;
 
@@ -18673,7 +18721,16 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 
 static int ZEND_INIT_ARRAY_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	zend_op *opline = EX(opline);
+
+	array_init(&EX_T(opline->result.u.var).tmp_var);
+	if (IS_UNUSED == IS_UNUSED) {
+		ZEND_VM_NEXT_OPCODE();
+#if 0 || IS_UNUSED != IS_UNUSED
+	} else {
+		return ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#endif
+	}
 }
 
 static int zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
@@ -19389,12 +19446,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	expr_ptr=NULL;
 #endif
 
-	if (opline->opcode == ZEND_INIT_ARRAY) {
-		array_init(array_ptr);
-		if (!expr_ptr) {
-			ZEND_VM_NEXT_OPCODE();
-		}
-	}
 	if (0) { /* temporary variable */
 		zval *new_expr;
 
@@ -19456,7 +19507,16 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 static int ZEND_INIT_ARRAY_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	zend_op *opline = EX(opline);
+
+	array_init(&EX_T(opline->result.u.var).tmp_var);
+	if (IS_UNUSED == IS_UNUSED) {
+		ZEND_VM_NEXT_OPCODE();
+#if 0 || IS_UNUSED != IS_UNUSED
+	} else {
+		return ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#endif
+	}
 }
 
 static int ZEND_UNSET_DIM_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -22179,12 +22239,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	expr_ptr=_get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
 #endif
 
-	if (opline->opcode == ZEND_INIT_ARRAY) {
-		array_init(array_ptr);
-		if (!expr_ptr) {
-			ZEND_VM_NEXT_OPCODE();
-		}
-	}
 	if (0) { /* temporary variable */
 		zval *new_expr;
 
@@ -22246,7 +22300,16 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 static int ZEND_INIT_ARRAY_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	zend_op *opline = EX(opline);
+
+	array_init(&EX_T(opline->result.u.var).tmp_var);
+	if (IS_CV == IS_UNUSED) {
+		ZEND_VM_NEXT_OPCODE();
+#if 0 || IS_CV != IS_UNUSED
+	} else {
+		return ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#endif
+	}
 }
 
 static int ZEND_UNSET_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -23708,12 +23771,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	expr_ptr=_get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
 #endif
 
-	if (opline->opcode == ZEND_INIT_ARRAY) {
-		array_init(array_ptr);
-		if (!expr_ptr) {
-			ZEND_VM_NEXT_OPCODE();
-		}
-	}
 	if (0) { /* temporary variable */
 		zval *new_expr;
 
@@ -23775,7 +23832,16 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 static int ZEND_INIT_ARRAY_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	zend_op *opline = EX(opline);
+
+	array_init(&EX_T(opline->result.u.var).tmp_var);
+	if (IS_CV == IS_UNUSED) {
+		ZEND_VM_NEXT_OPCODE();
+#if 0 || IS_CV != IS_UNUSED
+	} else {
+		return ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#endif
+	}
 }
 
 static int ZEND_UNSET_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -25274,12 +25340,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	expr_ptr=_get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
 #endif
 
-	if (opline->opcode == ZEND_INIT_ARRAY) {
-		array_init(array_ptr);
-		if (!expr_ptr) {
-			ZEND_VM_NEXT_OPCODE();
-		}
-	}
 	if (0) { /* temporary variable */
 		zval *new_expr;
 
@@ -25341,7 +25401,16 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 static int ZEND_INIT_ARRAY_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	zend_op *opline = EX(opline);
+
+	array_init(&EX_T(opline->result.u.var).tmp_var);
+	if (IS_CV == IS_UNUSED) {
+		ZEND_VM_NEXT_OPCODE();
+#if 0 || IS_CV != IS_UNUSED
+	} else {
+		return ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#endif
+	}
 }
 
 static int ZEND_UNSET_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -26015,12 +26084,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	expr_ptr=_get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
 #endif
 
-	if (opline->opcode == ZEND_INIT_ARRAY) {
-		array_init(array_ptr);
-		if (!expr_ptr) {
-			ZEND_VM_NEXT_OPCODE();
-		}
-	}
 	if (0) { /* temporary variable */
 		zval *new_expr;
 
@@ -26082,7 +26145,16 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 static int ZEND_INIT_ARRAY_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	zend_op *opline = EX(opline);
+
+	array_init(&EX_T(opline->result.u.var).tmp_var);
+	if (IS_CV == IS_UNUSED) {
+		ZEND_VM_NEXT_OPCODE();
+#if 0 || IS_CV != IS_UNUSED
+	} else {
+		return ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#endif
+	}
 }
 
 static int ZEND_ADD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -27266,12 +27338,6 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	expr_ptr=_get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
 #endif
 
-	if (opline->opcode == ZEND_INIT_ARRAY) {
-		array_init(array_ptr);
-		if (!expr_ptr) {
-			ZEND_VM_NEXT_OPCODE();
-		}
-	}
 	if (0) { /* temporary variable */
 		zval *new_expr;
 
@@ -27333,7 +27399,16 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 static int ZEND_INIT_ARRAY_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	zend_op *opline = EX(opline);
+
+	array_init(&EX_T(opline->result.u.var).tmp_var);
+	if (IS_CV == IS_UNUSED) {
+		ZEND_VM_NEXT_OPCODE();
+#if 0 || IS_CV != IS_UNUSED
+	} else {
+		return ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#endif
+	}
 }
 
 static int ZEND_UNSET_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
