@@ -2663,12 +2663,6 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|UNUSED|CV, CONST|TMP|V
 	expr_ptr=GET_OP1_ZVAL_PTR(BP_VAR_R);
 #endif
 
-	if (opline->opcode == ZEND_INIT_ARRAY) {
-		array_init(array_ptr);
-		if (!expr_ptr) {
-			ZEND_VM_NEXT_OPCODE();
-		}
-	}
 	if (IS_OP1_TMP_FREE()) { /* temporary variable */
 		zval *new_expr;
 
@@ -2730,7 +2724,16 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|UNUSED|CV, CONST|TMP|V
 
 ZEND_VM_HANDLER(71, ZEND_INIT_ARRAY, CONST|TMP|VAR|UNUSED|CV, CONST|TMP|VAR|UNUSED|CV)
 {
-	ZEND_VM_DISPATCH_TO_HANDLER(ZEND_ADD_ARRAY_ELEMENT);
+	zend_op *opline = EX(opline);
+
+	array_init(&EX_T(opline->result.u.var).tmp_var);
+	if (OP1_TYPE == IS_UNUSED) {
+		ZEND_VM_NEXT_OPCODE();
+#if !defined(ZEND_VM_SPEC) || OP1_TYPE != IS_UNUSED
+	} else {
+		ZEND_VM_DISPATCH_TO_HANDLER(ZEND_ADD_ARRAY_ELEMENT);
+#endif
+	}
 }
 
 ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY)
