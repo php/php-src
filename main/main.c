@@ -571,8 +571,6 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	if (docref_buf) {
 		efree(docref_buf);
 	}
-	php_error(type, "%s", message);
-	efree(message);
 
 	if (PG(track_errors) && module_initialized && EG(active_symbol_table)) {
 		zval *tmp;
@@ -581,6 +579,9 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 		zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) &tmp, sizeof(zval *), NULL);
 	}
 	efree(buffer);
+
+	php_error(type, "%s", message);
+	efree(message);
 }
 /* }}} */
 
