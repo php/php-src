@@ -22,33 +22,8 @@
 #ifndef PHP_HASH_SHA_H
 #define PHP_HASH_SHA_H
 
-/* When SHA is removed from Core,
-	the ext/standard/sha1.c file can be removed
-	and the ext/standard/sha1.h file can be reduced to:
-		#define PHP_HASH_SHA1_NOT_IN_CORE
-		#include "ext/hash/php_hash_sha.h"
-	Don't forget to remove sha1() and sha1_file() from basic_functions.c
- */
 #include "ext/standard/sha1.h"
 #include "ext/standard/basic_functions.h"
-
-#ifdef PHP_HASH_SHA1_NOT_IN_CORE
-
-/* SHA1 context. */
-typedef struct {
-	php_hash_uint32 state[5];		/* state (ABCD) */
-	php_hash_uint32 count[2];		/* number of bits, modulo 2^64 */
-	unsigned char buffer[64];	/* input buffer */
-} PHP_SHA1_CTX;
-
-PHP_HASH_API void PHP_SHA1Init(PHP_SHA1_CTX *);
-PHP_HASH_API void PHP_SHA1Update(PHP_SHA1_CTX *, const unsigned char *, unsigned int);
-PHP_HASH_API void PHP_SHA1Final(unsigned char[20], PHP_SHA1_CTX *);
-
-PHP_FUNCTION(sha1);
-PHP_FUNCTION(sha1_file);
-
-#endif /* PHP_HASH_SHA1_NOT_IN_CORE */
 
 /* SHA256 context. */
 typedef struct {
