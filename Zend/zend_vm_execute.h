@@ -538,7 +538,8 @@ static int ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_uint op_num = EG(opline_before_exception)-EG(active_op_array)->opcodes;
 	int i;
-	int encapsulating_block=-1;
+	zend_uint catch_op_num;
+	int catched = 0;
 	zval **stack_zval_pp;
 	zval restored_error_reporting;
 
@@ -557,7 +558,8 @@ static int ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 		if (op_num >= EG(active_op_array)->try_catch_array[i].try_op
 			&& op_num < EG(active_op_array)->try_catch_array[i].catch_op) {
-			encapsulating_block = i;
+			catched = 1;
+			catch_op_num = EX(op_array)->try_catch_array[i].catch_op;
 		}
 	}
 
@@ -573,6 +575,28 @@ static int ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zend_ptr_stack_2_pop(&EG(arg_types_stack), (void**)&EX(object), (void**)&EX(fbc));
 	}
 
+	for (i=0; i<EX(op_array)->last_brk_cont; i++) {
+		if (EX(op_array)->brk_cont_array[i].start > op_num) {
+			/* further blocks will not be relevant... */
+			break;
+		}
+		if (op_num < EX(op_array)->brk_cont_array[i].brk) {
+			if (!catched ||
+			    catch_op_num >= EX(op_array)->brk_cont_array[i].brk) {
+				zend_op *brk_opline = &EX(op_array)->opcodes[EX(op_array)->brk_cont_array[i].brk];
+
+				switch (brk_opline->opcode) {
+					case ZEND_SWITCH_FREE:
+						zend_switch_free(brk_opline, EX(Ts) TSRMLS_CC);
+						break;
+					case ZEND_FREE:
+						zendi_zval_dtor(EX_T(brk_opline->op1.u.var).tmp_var);
+						break;
+				}
+			}
+		}
+	}
+
 	/* restore previous error_reporting value */
 	if (!EG(error_reporting) && EX(old_error_reporting) != NULL && Z_LVAL_P(EX(old_error_reporting)) != 0) {
 		Z_TYPE(restored_error_reporting) = IS_LONG;
@@ -583,12 +607,12 @@ static int ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 	EX(old_error_reporting) = NULL;
 
-	if (encapsulating_block == -1) {
-		ZEND_VM_RETURN_FROM_EXECUTE_LOOP();
-	} else {
-		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[EG(active_op_array)->try_catch_array[encapsulating_block].catch_op]);
-		ZEND_VM_CONTINUE();
-	}
+	if (!catched) {
+ 		ZEND_VM_RETURN_FROM_EXECUTE_LOOP();
+ 	} else {
+		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[catch_op_num]);
+ 		ZEND_VM_CONTINUE();
+ 	}
 }
 
 static int ZEND_VERIFY_ABSTRACT_CLASS_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
