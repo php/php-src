@@ -787,7 +787,7 @@ static int statbuf_from_array(zval *array, php_stream_statbuf *ssb TSRMLS_DC)
 	zval **elem;
 
 #define STAT_PROP_ENTRY_EX(name, name2)                        \
-	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(array), #name, sizeof(#name), (void**)&elem)) {     \
+	if (SUCCESS == zend_ascii_hash_find(Z_ARRVAL_P(array), #name, sizeof(#name), (void**)&elem)) {     \
 		convert_to_long(*elem);                                                                   \
 		ssb->sb.st_##name2 = Z_LVAL_PP(elem);                                                      \
 	}

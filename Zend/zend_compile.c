@@ -3522,7 +3522,7 @@ void zend_do_add_static_array_element(znode *result, znode *offset, znode *expr)
 				zval_dtor(&offset->u.constant);
 				break;
 			case IS_NULL:
-				zend_symtable_update(Z_ARRVAL(result->u.constant), "", 1, &element, sizeof(zval *), NULL);
+				zend_u_symtable_update(Z_ARRVAL(result->u.constant), ZEND_STR_TYPE, EMPTY_ZSTR, 1, &element, sizeof(zval *), NULL);
 				break;
 			case IS_LONG:
 			case IS_BOOL:

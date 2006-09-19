@@ -47,6 +47,8 @@
 		(ht)->pInternalPointer = (element);					\
 	}
 
+#define ZEND_HASH_CVT_ERROR() zend_error(E_WARNING, "Could not convert String to Unicode")
+
 #define UNICODE_KEY(ht, type, arKey, nKeyLength, tmp) \
 	if (ht->unicode && type == IS_STRING) { \
 		UErrorCode status = U_ZERO_ERROR; \
@@ -55,10 +57,11 @@
 		TSRMLS_FETCH(); \
 		zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u, &u_len, arKey.s, nKeyLength-1, &status); \
 		if (U_FAILURE(status)) { \
-			/* UTODO: */ \
+			ZEND_HASH_CVT_ERROR(); \
+		} else { \
+			type = IS_UNICODE; \
+			tmp = arKey.u = u; \
 		} \
-		type = IS_UNICODE; \
-		tmp = arKey.u = u; \
 	}
 
 
@@ -310,6 +313,48 @@ ZEND_API int _zend_u_hash_add_or_update(HashTable *ht, zend_uchar type, zstr arK
 ZEND_API int _zend_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
 {
 	return _zend_u_hash_add_or_update(ht, IS_STRING, ZSTR(arKey), nKeyLength, pData, nDataSize, pDest, flag ZEND_FILE_LINE_CC);
+}
+
+ZEND_API int _zend_ascii_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
+{
+	TSRMLS_FETCH();
+
+	if (UG(unicode)) {
+		zstr key;
+		int ret;
+
+		key.u = zend_ascii_to_unicode(arKey, nKeyLength ZEND_FILE_LINE_CC);
+		ret = _zend_u_hash_add_or_update(ht, IS_UNICODE, key, nKeyLength, pData, nDataSize, pDest, flag ZEND_FILE_LINE_CC);
+		efree(key.u);
+		return ret;
+	} else {
+		return _zend_u_hash_add_or_update(ht, IS_STRING, ZSTR(arKey), nKeyLength, pData, nDataSize, pDest, flag ZEND_FILE_LINE_CC);
+	}
+}
+
+ZEND_API int _zend_rt_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
+{
+	TSRMLS_FETCH();
+
+	if (UG(unicode)) {
+		zstr key;
+		int ret;
+		UErrorCode status = U_ZERO_ERROR;
+		int u_len;
+
+		zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &key.u, &u_len, arKey, nKeyLength-1, &status);
+		if (U_FAILURE(status)) {
+			ZEND_HASH_CVT_ERROR();
+			goto string_key;
+		}
+
+		ret = _zend_u_hash_add_or_update(ht, IS_UNICODE, key, u_len+1, pData, nDataSize, pDest, flag ZEND_FILE_LINE_CC);
+		efree(key.u);
+		return ret;
+	} else {
+string_key:
+		return _zend_u_hash_add_or_update(ht, IS_STRING, ZSTR(arKey), nKeyLength, pData, nDataSize, pDest, flag ZEND_FILE_LINE_CC);
+	}
 }
 
 ZEND_API int _zend_u_hash_quick_add_or_update(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
@@ -592,6 +637,47 @@ ZEND_API int zend_u_hash_del_key_or_index(HashTable *ht, zend_uchar type, zstr a
 ZEND_API int zend_hash_del_key_or_index(HashTable *ht, char *arKey, uint nKeyLength, ulong h, int flag)
 {
 	return zend_u_hash_del_key_or_index(ht, IS_STRING, ZSTR(arKey), nKeyLength, h, flag);
+}
+
+ZEND_API int zend_ascii_hash_del(HashTable *ht, char *arKey, uint nKeyLength)
+{
+	TSRMLS_FETCH();
+
+	if (UG(unicode)) {
+		zstr key;
+		int ret;
+
+		key.u = zend_ascii_to_unicode(arKey, nKeyLength ZEND_FILE_LINE_CC);
+		ret = zend_u_hash_del_key_or_index(ht, IS_UNICODE, key, nKeyLength, 0, HASH_DEL_KEY);
+		efree(key.u);
+		return ret;
+	} else {
+		return zend_u_hash_del_key_or_index(ht, IS_STRING, ZSTR(arKey), nKeyLength, 0, HASH_DEL_KEY);
+	}
+}
+
+ZEND_API int zend_rt_hash_del(HashTable *ht, char *arKey, uint nKeyLength)
+{
+	TSRMLS_FETCH();
+
+	if (UG(unicode)) {
+		zstr key;
+		int ret;
+		UErrorCode status = U_ZERO_ERROR;
+		int u_len;
+
+		zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &key.u, &u_len, arKey, nKeyLength-1, &status);
+		if (U_FAILURE(status)) {
+			ZEND_HASH_CVT_ERROR();
+			goto string_key;
+		}
+		ret = zend_u_hash_del_key_or_index(ht, IS_UNICODE, key, u_len+1, 0, HASH_DEL_KEY);
+		efree(key.u);
+		return ret;
+	} else {
+string_key:
+		return zend_u_hash_del_key_or_index(ht, IS_STRING, ZSTR(arKey), nKeyLength, 0, HASH_DEL_KEY);
+	}
 }
 
 ZEND_API void zend_hash_destroy(HashTable *ht)
@@ -972,6 +1058,47 @@ ZEND_API int zend_hash_find(HashTable *ht, char *arKey, uint nKeyLength, void **
 	return zend_u_hash_find(ht, IS_STRING, ZSTR(arKey), nKeyLength, pData);
 }
 
+ZEND_API int zend_ascii_hash_find(HashTable *ht, char *arKey, uint nKeyLength, void **pData)
+{
+	TSRMLS_FETCH();
+
+	if (UG(unicode)) {
+		zstr key;
+		int ret;
+
+		key.u = zend_ascii_to_unicode(arKey, nKeyLength ZEND_FILE_LINE_CC);
+		ret = zend_u_hash_find(ht, IS_UNICODE, key, nKeyLength, pData);
+		efree(key.u);
+		return ret;
+	} else {
+		return zend_u_hash_find(ht, IS_STRING, ZSTR(arKey), nKeyLength, pData);
+	}
+}
+
+ZEND_API int zend_rt_hash_find(HashTable *ht, char *arKey, uint nKeyLength, void **pData)
+{
+	TSRMLS_FETCH();
+
+	if (UG(unicode)) {
+		zstr key;
+		int ret;
+		UErrorCode status = U_ZERO_ERROR;
+		int u_len;
+
+		zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &key.u, &u_len, arKey, nKeyLength-1, &status);
+		if (U_FAILURE(status)) {
+			ZEND_HASH_CVT_ERROR();
+			goto string_key;
+		}
+		ret = zend_u_hash_find(ht, IS_UNICODE, key, u_len+1, pData);
+		efree(key.u);
+		return ret;
+	} else {
+string_key:
+		return zend_u_hash_find(ht, IS_STRING, ZSTR(arKey), nKeyLength, pData);
+	}
+}
+
 
 ZEND_API int zend_u_hash_quick_find(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, ulong h, void **pData)
 {
@@ -1049,6 +1176,47 @@ ZEND_API int zend_u_hash_exists(HashTable *ht, zend_uchar type, zstr arKey, uint
 ZEND_API int zend_hash_exists(HashTable *ht, char *arKey, uint nKeyLength)
 {
 	return zend_u_hash_exists(ht, IS_STRING, ZSTR(arKey), nKeyLength);
+}
+
+ZEND_API int zend_ascii_hash_exists(HashTable *ht, char *arKey, uint nKeyLength)
+{
+	TSRMLS_FETCH();
+
+	if (UG(unicode)) {
+		zstr key;
+		int ret;
+
+		key.u = zend_ascii_to_unicode(arKey, nKeyLength ZEND_FILE_LINE_CC);
+		ret = zend_u_hash_exists(ht, IS_UNICODE, key, nKeyLength);
+		efree(key.u);
+		return ret;
+	} else {
+		return zend_u_hash_exists(ht, IS_STRING, ZSTR(arKey), nKeyLength);
+	}
+}
+
+ZEND_API int zend_rt_hash_exists(HashTable *ht, char *arKey, uint nKeyLength)
+{
+	TSRMLS_FETCH();
+
+	if (UG(unicode)) {
+		zstr key;
+		int ret;
+		UErrorCode status = U_ZERO_ERROR;
+		int u_len;
+
+		zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &key.u, &u_len, arKey, nKeyLength-1, &status);
+		if (U_FAILURE(status)) {
+			ZEND_HASH_CVT_ERROR();
+			goto string_key;
+		}
+		ret = zend_u_hash_exists(ht, IS_UNICODE, key, u_len+1);
+		efree(key.u);
+		return ret;
+	} else {
+string_key:
+		return zend_u_hash_exists(ht, IS_STRING, ZSTR(arKey), nKeyLength);
+    }
 }
 
 ZEND_API int zend_u_hash_quick_exists(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, ulong h)
@@ -1726,6 +1894,60 @@ ZEND_API int zend_symtable_update_current_key(HashTable *ht, char *arKey, uint n
 	return zend_hash_update_current_key(ht, HASH_KEY_IS_STRING, ZSTR(arKey), nKeyLength, 0);
 }
 
+ZEND_API int zend_ascii_symtable_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest)
+{
+	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_update(ht, idx, pData, nDataSize, pDest));
+	return zend_ascii_hash_update(ht, arKey, nKeyLength, pData, nDataSize, pDest);
+}
+
+
+ZEND_API int zend_ascii_symtable_del(HashTable *ht, char *arKey, uint nKeyLength)
+{
+	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_del(ht, idx))
+	return zend_ascii_hash_del(ht, arKey, nKeyLength);
+}
+
+
+ZEND_API int zend_ascii_symtable_find(HashTable *ht, char *arKey, uint nKeyLength, void **pData)
+{
+	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_find(ht, idx, pData));
+	return zend_ascii_hash_find(ht, arKey, nKeyLength, pData);
+}
+
+
+ZEND_API int zend_ascii_symtable_exists(HashTable *ht, char *arKey, uint nKeyLength)
+{
+	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_exists(ht, idx));
+	return zend_ascii_hash_exists(ht, arKey, nKeyLength);
+}
+
+ZEND_API int zend_rt_symtable_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest)
+{
+	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_update(ht, idx, pData, nDataSize, pDest));
+	return zend_rt_hash_update(ht, arKey, nKeyLength, pData, nDataSize, pDest);
+}
+
+
+ZEND_API int zend_rt_symtable_del(HashTable *ht, char *arKey, uint nKeyLength)
+{
+	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_del(ht, idx))
+	return zend_rt_hash_del(ht, arKey, nKeyLength);
+}
+
+
+ZEND_API int zend_rt_symtable_find(HashTable *ht, char *arKey, uint nKeyLength, void **pData)
+{
+	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_find(ht, idx, pData));
+	return zend_rt_hash_find(ht, arKey, nKeyLength, pData);
+}
+
+
+ZEND_API int zend_rt_symtable_exists(HashTable *ht, char *arKey, uint nKeyLength)
+{
+	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_exists(ht, idx));
+	return zend_rt_hash_exists(ht, arKey, nKeyLength);
+}
+
 ZEND_API void zend_hash_to_unicode(HashTable *ht, apply_func_t apply_func TSRMLS_DC)
 {
 	Bucket **p;
@@ -1747,6 +1969,9 @@ ZEND_API void zend_hash_to_unicode(HashTable *ht, apply_func_t apply_func TSRMLS
 			Bucket *q;
 
 			zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u, &u_len, (*p)->key.arKey.s, (*p)->nKeyLength-1, &status);
+			if (U_FAILURE(status)) {
+				zend_error(E_ERROR, "Cannot convert HashTable to Unicode");
+			}
 
 			q = (Bucket *) pemalloc(sizeof(Bucket)-sizeof(q->key.arKey)+((u_len+1)*2), ht->persistent);
 			memcpy(q, *p, sizeof(Bucket)-sizeof(q->key.arKey));

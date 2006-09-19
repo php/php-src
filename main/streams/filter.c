@@ -826,9 +826,9 @@ PHPAPI int _php_stream_encoding_apply(php_stream *stream, int writechain, const 
 
 	ALLOC_INIT_ZVAL(filterparams);
 	array_init(filterparams);
-	add_assoc_long(filterparams, "error_mode", error_mode);
+	add_ascii_assoc_long(filterparams, "error_mode", error_mode);
 	if (subst) {
-		add_assoc_unicode(filterparams, "subst_char", subst, 1);
+		add_ascii_assoc_unicode(filterparams, "subst_char", subst, 1);
 	}
 	filter = php_stream_filter_create(buf, filterparams, php_stream_is_persistent(stream) TSRMLS_CC);
 	efree(buf);

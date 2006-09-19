@@ -1747,7 +1747,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		char *xquery;
 		int xquery_len;
 
-		if (zend_hash_find(ht, "query", sizeof("query"), (void**)&tmp) == SUCCESS &&
+		if (zend_ascii_hash_find(ht, "query", sizeof("query"), (void**)&tmp) == SUCCESS &&
 		    (Z_TYPE_PP(tmp) == IS_STRING || Z_TYPE_PP(tmp) == IS_UNICODE)) {
 				zxquery = tmp;
 /*
@@ -1768,7 +1768,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		ctxp = xmlXPathNewContext(docp);
 		ctxp->node = nodep;
 
-		if (zend_hash_find(ht, "namespaces", sizeof("namespaces"), (void**)&tmp) == SUCCESS &&
+		if (zend_ascii_hash_find(ht, "namespaces", sizeof("namespaces"), (void**)&tmp) == SUCCESS &&
 		    Z_TYPE_PP(tmp) == IS_ARRAY) {
 			zval **tmpns;
 			char *nschar;

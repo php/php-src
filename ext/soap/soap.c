@@ -1236,14 +1236,14 @@ PHP_METHOD(SoapServer, SoapServer)
 		HashTable *ht = Z_ARRVAL_P(options);
 		zval **tmp;
 
-		if (zend_hash_find(ht, "soap_version", sizeof("soap_version"), (void**)&tmp) == SUCCESS) {
+		if (zend_ascii_hash_find(ht, "soap_version", sizeof("soap_version"), (void**)&tmp) == SUCCESS) {
 			if (Z_TYPE_PP(tmp) == IS_LONG ||
 			    (Z_LVAL_PP(tmp) == SOAP_1_1 && Z_LVAL_PP(tmp) == SOAP_1_2)) {
 				version = Z_LVAL_PP(tmp);
 			}
 		}
 
-		if (zend_hash_find(ht, "uri", sizeof("uri"), (void**)&tmp) == SUCCESS) {
+		if (zend_ascii_hash_find(ht, "uri", sizeof("uri"), (void**)&tmp) == SUCCESS) {
 			if (Z_TYPE_PP(tmp) == IS_STRING) {
 				service->uri = estrndup(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
 			} else if (Z_TYPE_PP(tmp) == IS_UNICODE) {
@@ -1251,7 +1251,7 @@ PHP_METHOD(SoapServer, SoapServer)
 			}
 		}
 
-		if (zend_hash_find(ht, "actor", sizeof("actor"), (void**)&tmp) == SUCCESS) {
+		if (zend_ascii_hash_find(ht, "actor", sizeof("actor"), (void**)&tmp) == SUCCESS) {
 			if (Z_TYPE_PP(tmp) == IS_STRING) {
 				service->actor = estrndup(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
 			} else if (Z_TYPE_PP(tmp) == IS_UNICODE) {
@@ -1259,7 +1259,7 @@ PHP_METHOD(SoapServer, SoapServer)
 			}
 		}
 
-		if (zend_hash_find(ht, "encoding", sizeof("encoding"), (void**)&tmp) == SUCCESS &&
+		if (zend_ascii_hash_find(ht, "encoding", sizeof("encoding"), (void**)&tmp) == SUCCESS &&
 		    (Z_TYPE_PP(tmp) == IS_STRING || Z_TYPE_PP(tmp) == IS_UNICODE)) {
 			xmlCharEncodingHandlerPtr encoding;
 			char *str;
@@ -1280,7 +1280,7 @@ PHP_METHOD(SoapServer, SoapServer)
 			}
 		}
 
-		if (zend_hash_find(ht, "classmap", sizeof("classmap"), (void**)&tmp) == SUCCESS &&
+		if (zend_ascii_hash_find(ht, "classmap", sizeof("classmap"), (void**)&tmp) == SUCCESS &&
 			Z_TYPE_PP(tmp) == IS_ARRAY) {
 			zval *ztmp;
 
@@ -1289,12 +1289,12 @@ PHP_METHOD(SoapServer, SoapServer)
 			zend_hash_copy(service->class_map, (*tmp)->value.ht, (copy_ctor_func_t) zval_add_ref, (void *) &ztmp, sizeof(zval *));
 		}
 
-		if (zend_hash_find(ht, "features", sizeof("features"), (void**)&tmp) == SUCCESS &&
+		if (zend_ascii_hash_find(ht, "features", sizeof("features"), (void**)&tmp) == SUCCESS &&
 			Z_TYPE_PP(tmp) == IS_LONG) {
 			service->features = Z_LVAL_PP(tmp);
 		}
 
-		if (zend_hash_find(ht, "cache_wsdl", sizeof("cache_wsdl"), (void**)&tmp) == SUCCESS &&
+		if (zend_ascii_hash_find(ht, "cache_wsdl", sizeof("cache_wsdl"), (void**)&tmp) == SUCCESS &&
 		    Z_TYPE_PP(tmp) == IS_LONG) {
 			cache_wsdl = Z_LVAL_PP(tmp);
 		}
@@ -1777,16 +1777,16 @@ PHP_METHOD(SoapServer, handle)
 	}
 
 	if (ZEND_NUM_ARGS() == 0) {
-		if (zend_hash_find(&EG(symbol_table), HTTP_RAW_POST_DATA, sizeof(HTTP_RAW_POST_DATA), (void **) &raw_post) != FAILURE &&
+		if (zend_ascii_hash_find(&EG(symbol_table), HTTP_RAW_POST_DATA, sizeof(HTTP_RAW_POST_DATA), (void **) &raw_post) != FAILURE &&
 			(Z_TYPE_PP(raw_post) == IS_STRING ||
 			 Z_TYPE_PP(raw_post) == IS_UNICODE)) {
 			if (Z_TYPE_PP(raw_post) == IS_STRING) {
 				zval **server_vars, **encoding;
 
 				zend_is_auto_global("_SERVER", sizeof("_SERVER")-1 TSRMLS_CC);
-				if (zend_hash_find(&EG(symbol_table), "_SERVER", sizeof("_SERVER"), (void **) &server_vars) == SUCCESS &&
+				if (zend_ascii_hash_find(&EG(symbol_table), "_SERVER", sizeof("_SERVER"), (void **) &server_vars) == SUCCESS &&
 				    Z_TYPE_PP(server_vars) == IS_ARRAY &&
-				    zend_hash_find(Z_ARRVAL_PP(server_vars), "HTTP_CONTENT_ENCODING", sizeof("HTTP_CONTENT_ENCODING"), (void **) &encoding)==SUCCESS &&
+				    zend_ascii_hash_find(Z_ARRVAL_PP(server_vars), "HTTP_CONTENT_ENCODING", sizeof("HTTP_CONTENT_ENCODING"), (void **) &encoding)==SUCCESS &&
 				    (Z_TYPE_PP(encoding) == IS_STRING || Z_TYPE_PP(encoding) == IS_UNICODE)) {
 					zval func;
 					zval retval;
@@ -1892,7 +1892,7 @@ PHP_METHOD(SoapServer, handle)
 			}
 
 			/* Find the soap object and assign */
-			if (zend_hash_find(Z_ARRVAL_P(PS(http_session_vars)), "_bogus_session_name", sizeof("_bogus_session_name"), (void **) &tmp_soap) == SUCCESS &&
+			if (zend_ascii_hash_find(Z_ARRVAL_P(PS(http_session_vars)), "_bogus_session_name", sizeof("_bogus_session_name"), (void **) &tmp_soap) == SUCCESS &&
 			    Z_TYPE_PP(tmp_soap) == IS_OBJECT &&
 			    Z_OBJCE_PP(tmp_soap) == service->soap_class.ce) {
 				soap_obj = *tmp_soap;
@@ -1968,7 +1968,7 @@ PHP_METHOD(SoapServer, handle)
 			/* If session then update session hash with new object */
 			if (service->soap_class.persistance == SOAP_PERSISTENCE_SESSION) {
 				zval **tmp_soap_pp;
-				if (zend_hash_update(Z_ARRVAL_P(PS(http_session_vars)), "_bogus_session_name", sizeof("_bogus_session_name"), &tmp_soap, sizeof(zval *), (void **)&tmp_soap_pp) == SUCCESS) {
+				if (zend_ascii_hash_update(Z_ARRVAL_P(PS(http_session_vars)), "_bogus_session_name", sizeof("_bogus_session_name"), &tmp_soap, sizeof(zval *), (void **)&tmp_soap_pp) == SUCCESS) {
 					soap_obj = *tmp_soap_pp;
 				}
 			} else {
@@ -2534,7 +2534,7 @@ PHP_METHOD(SoapClient, SoapClient)
 
 		if (wsdl == NULL) {
 			/* Fetching non-WSDL mode options */
-			if (zend_hash_find(ht, "uri", sizeof("uri"), (void**)&tmp) == SUCCESS &&
+			if (zend_ascii_hash_find(ht, "uri", sizeof("uri"), (void**)&tmp) == SUCCESS &&
 				(Z_TYPE_PP(tmp) == IS_STRING || Z_TYPE_PP(tmp) == IS_UNICODE)) {
 				if (Z_TYPE_PP(tmp) == IS_STRING) {
 					client->uri = estrndup(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
@@ -2546,25 +2546,25 @@ PHP_METHOD(SoapClient, SoapClient)
 				return;
 			}
 
-			if (zend_hash_find(ht, "style", sizeof("style"), (void**)&tmp) == SUCCESS &&
+			if (zend_ascii_hash_find(ht, "style", sizeof("style"), (void**)&tmp) == SUCCESS &&
 					Z_TYPE_PP(tmp) == IS_LONG &&
 					(Z_LVAL_PP(tmp) == SOAP_RPC || Z_LVAL_PP(tmp) == SOAP_DOCUMENT)) {
 				client->style = Z_LVAL_PP(tmp);
 			}
 
-			if (zend_hash_find(ht, "use", sizeof("use"), (void**)&tmp) == SUCCESS &&
+			if (zend_ascii_hash_find(ht, "use", sizeof("use"), (void**)&tmp) == SUCCESS &&
 					Z_TYPE_PP(tmp) == IS_LONG &&
 					(Z_LVAL_PP(tmp) == SOAP_LITERAL || Z_LVAL_PP(tmp) == SOAP_ENCODED)) {
 				client->use = Z_LVAL_PP(tmp);
 			}
 		}
 
-		if (zend_hash_find(ht, "stream_context", sizeof("stream_context"), (void**)&tmp) == SUCCESS &&
+		if (zend_ascii_hash_find(ht, "stream_context", sizeof("stream_context"), (void**)&tmp) == SUCCESS &&
 				Z_TYPE_PP(tmp) == IS_RESOURCE) {
 			context = php_stream_context_from_zval(*tmp, 1);
 		}
 
-		if (zend_hash_find(ht, "location", sizeof("location"), (void**)&tmp) == SUCCESS &&
+		if (zend_ascii_hash_find(ht, "location", sizeof("location"), (void**)&tmp) == SUCCESS &&
 		    (Z_TYPE_PP(tmp) == IS_STRING || Z_TYPE_PP(tmp) == IS_UNICODE)) {
 			if (Z_TYPE_PP(tmp) == IS_STRING) {
 				client->location = estrndup(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
@@ -2576,20 +2576,20 @@ PHP_METHOD(SoapClient, SoapClient)
 			return;
 		}
 
-		if (zend_hash_find(ht, "soap_version", sizeof("soap_version"), (void**)&tmp) == SUCCESS) {
+		if (zend_ascii_hash_find(ht, "soap_version", sizeof("soap_version"), (void**)&tmp) == SUCCESS) {
 			if (Z_TYPE_PP(tmp) == IS_LONG ||
 			    (Z_LVAL_PP(tmp) == SOAP_1_1 && Z_LVAL_PP(tmp) == SOAP_1_2)) {
 				soap_version = Z_LVAL_PP(tmp);
 			}
 		}
-		if (zend_hash_find(ht, "login", sizeof("login"), (void**)&tmp) == SUCCESS &&
+		if (zend_ascii_hash_find(ht, "login", sizeof("login"), (void**)&tmp) == SUCCESS &&
 		    (Z_TYPE_PP(tmp) == IS_STRING || Z_TYPE_PP(tmp) == IS_UNICODE)) {
 		    if (Z_TYPE_PP(tmp) == IS_STRING) {
 		    	client->login = estrndup(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
 			} else {
 		    	client->login = soap_unicode_to_string(Z_USTRVAL_PP(tmp), Z_USTRLEN_PP(tmp) TSRMLS_CC);
 			}
-			if (zend_hash_find(ht, "password", sizeof("password"), (void**)&tmp) == SUCCESS &&
+			if (zend_ascii_hash_find(ht, "password", sizeof("password"), (void**)&tmp) == SUCCESS &&
 			    (Z_TYPE_PP(tmp) == IS_STRING || Z_TYPE_PP(tmp) == IS_UNICODE)) {
 			    if (Z_TYPE_PP(tmp) == IS_STRING) {
 			    	client->password = estrndup(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
@@ -2597,31 +2597,31 @@ PHP_METHOD(SoapClient, SoapClient)
 			    	client->password = soap_unicode_to_string(Z_USTRVAL_PP(tmp), Z_USTRLEN_PP(tmp) TSRMLS_CC);
 				}
 			}
-			if (zend_hash_find(ht, "authentication", sizeof("authentication"), (void**)&tmp) == SUCCESS &&
+			if (zend_ascii_hash_find(ht, "authentication", sizeof("authentication"), (void**)&tmp) == SUCCESS &&
 			    Z_TYPE_PP(tmp) == IS_LONG &&
 			    Z_LVAL_PP(tmp) == SOAP_AUTHENTICATION_DIGEST) {
 			    client->digest = 1;
 			}
 		}
-		if (zend_hash_find(ht, "proxy_host", sizeof("proxy_host"), (void**)&tmp) == SUCCESS &&
+		if (zend_ascii_hash_find(ht, "proxy_host", sizeof("proxy_host"), (void**)&tmp) == SUCCESS &&
 		    (Z_TYPE_PP(tmp) == IS_STRING || Z_TYPE_PP(tmp) == IS_UNICODE)) {
 		    if (Z_TYPE_PP(tmp) == IS_STRING) {
 		    	client->proxy_host = estrndup(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
 			} else {
 		    	client->proxy_host = soap_unicode_to_string(Z_USTRVAL_PP(tmp), Z_USTRLEN_PP(tmp) TSRMLS_CC);
 		    }
-			if (zend_hash_find(ht, "proxy_port", sizeof("proxy_port"), (void**)&tmp) == SUCCESS &&
+			if (zend_ascii_hash_find(ht, "proxy_port", sizeof("proxy_port"), (void**)&tmp) == SUCCESS &&
 			    Z_TYPE_PP(tmp) == IS_LONG) {
 				client->proxy_port = Z_LVAL_PP(tmp);
 			}
-			if (zend_hash_find(ht, "proxy_login", sizeof("proxy_login"), (void**)&tmp) == SUCCESS &&
+			if (zend_ascii_hash_find(ht, "proxy_login", sizeof("proxy_login"), (void**)&tmp) == SUCCESS &&
 			    (Z_TYPE_PP(tmp) == IS_STRING || Z_TYPE_PP(tmp) == IS_UNICODE)) {
 			    if (Z_TYPE_PP(tmp) == IS_STRING) {
 			    	client->proxy_login = estrndup(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
 				} else {
 			    	client->proxy_login = soap_unicode_to_string(Z_USTRVAL_PP(tmp), Z_USTRLEN_PP(tmp) TSRMLS_CC);
 				}
-				if (zend_hash_find(ht, "proxy_password", sizeof("proxy_password"), (void**)&tmp) == SUCCESS &&
+				if (zend_ascii_hash_find(ht, "proxy_password", sizeof("proxy_password"), (void**)&tmp) == SUCCESS &&
 				    (Z_TYPE_PP(tmp) == IS_STRING || Z_TYPE_PP(tmp) == IS_UNICODE)) {
 				    if (Z_TYPE_PP(tmp) == IS_STRING) {
 				    	client->proxy_password = estrndup(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
@@ -2631,28 +2631,28 @@ PHP_METHOD(SoapClient, SoapClient)
 				}
 			}
 		}
-		if (zend_hash_find(ht, "local_cert", sizeof("local_cert"), (void**)&tmp) == SUCCESS &&
+		if (zend_ascii_hash_find(ht, "local_cert", sizeof("local_cert"), (void**)&tmp) == SUCCESS &&
 		    Z_TYPE_PP(tmp) == IS_STRING) {
 			if (!context) {
 				context = php_stream_context_alloc();
 			}
  			php_stream_context_set_option(context, "ssl", "local_cert", *tmp);
-			if (zend_hash_find(ht, "passphrase", sizeof("passphrase"), (void**)&tmp) == SUCCESS &&
+			if (zend_ascii_hash_find(ht, "passphrase", sizeof("passphrase"), (void**)&tmp) == SUCCESS &&
 			    Z_TYPE_PP(tmp) == IS_STRING) {
 				php_stream_context_set_option(context, "ssl", "passphrase", *tmp);
 			}
 		}
-		if (zend_hash_find(ht, "trace", sizeof("trace"), (void**)&tmp) == SUCCESS &&
+		if (zend_ascii_hash_find(ht, "trace", sizeof("trace"), (void**)&tmp) == SUCCESS &&
 		    (Z_TYPE_PP(tmp) == IS_BOOL || Z_TYPE_PP(tmp) == IS_LONG) &&
 				Z_LVAL_PP(tmp) == 1) {
 			client->trace = 1;
 		}
-		if (zend_hash_find(ht, "exceptions", sizeof("exceptions"), (void**)&tmp) == SUCCESS &&
+		if (zend_ascii_hash_find(ht, "exceptions", sizeof("exceptions"), (void**)&tmp) == SUCCESS &&
 		    (Z_TYPE_PP(tmp) == IS_BOOL || Z_TYPE_PP(tmp) == IS_LONG) &&
 				Z_LVAL_PP(tmp) == 0) {
 			client->exceptions = 0;
 		}
-		if (zend_hash_find(ht, "compression", sizeof("compression"), (void**)&tmp) == SUCCESS &&
+		if (zend_ascii_hash_find(ht, "compression", sizeof("compression"), (void**)&tmp) == SUCCESS &&
 		    Z_TYPE_PP(tmp) == IS_LONG &&
 		    zend_hash_exists(EG(function_table), "gzinflate", sizeof("gzinflate")) &&
 		    zend_hash_exists(EG(function_table), "gzdeflate", sizeof("gzdeflate")) &&
@@ -2661,7 +2661,7 @@ PHP_METHOD(SoapClient, SoapClient)
 		    zend_hash_exists(EG(function_table), "gzencode", sizeof("gzencode"))) {
 			client->compression = Z_LVAL_PP(tmp);
 		}
-		if (zend_hash_find(ht, "encoding", sizeof("encoding"), (void**)&tmp) == SUCCESS &&
+		if (zend_ascii_hash_find(ht, "encoding", sizeof("encoding"), (void**)&tmp) == SUCCESS &&
 		    (Z_TYPE_PP(tmp) == IS_STRING || Z_TYPE_PP(tmp) == IS_UNICODE)) {
 			xmlCharEncodingHandlerPtr encoding;
 			char *str;
@@ -2681,7 +2681,7 @@ PHP_METHOD(SoapClient, SoapClient)
 				efree(str);
 			}
 		}
-		if (zend_hash_find(ht, "classmap", sizeof("classmap"), (void**)&tmp) == SUCCESS &&
+		if (zend_ascii_hash_find(ht, "classmap", sizeof("classmap"), (void**)&tmp) == SUCCESS &&
 			Z_TYPE_PP(tmp) == IS_ARRAY) {
 			zval *ztmp;
 
@@ -2690,12 +2690,12 @@ PHP_METHOD(SoapClient, SoapClient)
 			zend_hash_copy(client->class_map, (*tmp)->value.ht, (copy_ctor_func_t) zval_add_ref, (void *) &ztmp, sizeof(zval *));
 		}
 
-		if (zend_hash_find(ht, "features", sizeof("features"), (void**)&tmp) == SUCCESS &&
+		if (zend_ascii_hash_find(ht, "features", sizeof("features"), (void**)&tmp) == SUCCESS &&
 			Z_TYPE_PP(tmp) == IS_LONG) {
 			client->features = Z_LVAL_PP(tmp);
 	    }
 
-		if (zend_hash_find(ht, "connection_timeout", sizeof("connection_timeout"), (void**)&tmp) == SUCCESS &&
+		if (zend_ascii_hash_find(ht, "connection_timeout", sizeof("connection_timeout"), (void**)&tmp) == SUCCESS &&
 		    Z_TYPE_PP(tmp) == IS_LONG && Z_LVAL_PP(tmp) >= 0) {
 		    client->connection_timeout = Z_LVAL_PP(tmp);
 		}
@@ -2704,12 +2704,12 @@ PHP_METHOD(SoapClient, SoapClient)
 			client->stream_context = context;
 		}
 
-		if (zend_hash_find(ht, "cache_wsdl", sizeof("cache_wsdl"), (void**)&tmp) == SUCCESS &&
+		if (zend_ascii_hash_find(ht, "cache_wsdl", sizeof("cache_wsdl"), (void**)&tmp) == SUCCESS &&
 		    Z_TYPE_PP(tmp) == IS_LONG) {
 			cache_wsdl = Z_LVAL_PP(tmp);
 		}
 
-		if (zend_hash_find(ht, "user_agent", sizeof("user_agent"), (void**)&tmp) == SUCCESS &&
+		if (zend_ascii_hash_find(ht, "user_agent", sizeof("user_agent"), (void**)&tmp) == SUCCESS &&
 		    (Z_TYPE_PP(tmp) == IS_STRING || Z_TYPE_PP(tmp) == IS_UNICODE)) {
 		    if (Z_TYPE_PP(tmp) == IS_STRING) {
 		    	client->user_agent = estrndup(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
@@ -3053,7 +3053,7 @@ PHP_METHOD(SoapClient, __call)
 	if (options) {
 		if (Z_TYPE_P(options) == IS_ARRAY) {
 			HashTable *ht = Z_ARRVAL_P(options);
-			if (zend_hash_find(ht, "location", sizeof("location"), (void**)&tmp) == SUCCESS &&
+			if (zend_ascii_hash_find(ht, "location", sizeof("location"), (void**)&tmp) == SUCCESS &&
 			    (Z_TYPE_PP(tmp) == IS_STRING || Z_TYPE_PP(tmp) == IS_UNICODE)) {
 				if (Z_TYPE_PP(tmp) == IS_STRING) {
 					location = Z_STRVAL_PP(tmp);
@@ -3063,7 +3063,7 @@ PHP_METHOD(SoapClient, __call)
 				}
 			}
 
-			if (zend_hash_find(ht, "soapaction", sizeof("soapaction"), (void**)&tmp) == SUCCESS &&
+			if (zend_ascii_hash_find(ht, "soapaction", sizeof("soapaction"), (void**)&tmp) == SUCCESS &&
 			    (Z_TYPE_PP(tmp) == IS_STRING || Z_TYPE_PP(tmp) == IS_UNICODE)) {
 				if (Z_TYPE_PP(tmp) == IS_STRING) {
 					soap_action = Z_STRVAL_PP(tmp);
@@ -3073,7 +3073,7 @@ PHP_METHOD(SoapClient, __call)
 				}
 			}
 
-			if (zend_hash_find(ht, "uri", sizeof("uri"), (void**)&tmp) == SUCCESS &&
+			if (zend_ascii_hash_find(ht, "uri", sizeof("uri"), (void**)&tmp) == SUCCESS &&
 			    (Z_TYPE_PP(tmp) == IS_STRING || Z_TYPE_PP(tmp) == IS_UNICODE)) {
 				if (Z_TYPE_PP(tmp) == IS_STRING) {
 					uri = Z_STRVAL_PP(tmp);

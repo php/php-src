@@ -1702,7 +1702,7 @@ PHP_FUNCTION(sqlite_fetch_column_types)
 
 			zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, tmp, strlen(tmp), &status);
 			if (result_type == PHPSQLITE_ASSOC) {
-				add_assoc_unicode(return_value, colname, u_str, 1);
+				add_rt_assoc_unicode(return_value, colname, u_str, 1);
 			}
 			if (result_type == PHPSQLITE_NUM) {
 				add_index_unicode(return_value, i, u_str, 1);
@@ -1885,12 +1885,12 @@ static void php_sqlite_fetch_array(struct php_sqlite_result *res, int mode, zend
 			if (mode & PHPSQLITE_ASSOC) {
 				add_index_zval(return_value, j, decoded);
 				ZVAL_ADDREF(decoded);
-				add_assoc_zval(return_value, (char*)colnames[j], decoded);
+				add_rt_assoc_zval(return_value, (char*)colnames[j], decoded);
 			} else {
 				add_next_index_zval(return_value, decoded);
 			}
 		} else {
-			add_assoc_zval(return_value, (char*)colnames[j], decoded);
+			add_rt_assoc_zval(return_value, (char*)colnames[j], decoded);
 		}
 	}
 

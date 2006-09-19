@@ -603,11 +603,11 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, cha
 		MAKE_STD_ZVAL(meta);
 		array_init(meta);
 		if (!semi) { /* there is only a mime type */
-			add_assoc_stringl(meta, "mediatype", path, mlen, 1);
+			add_ascii_assoc_stringl(meta, "mediatype", path, mlen, 1);
 			mlen = 0;
 		} else if (sep && sep < semi) { /* there is a mime type */
 			plen = semi - path;
-			add_assoc_stringl(meta, "mediatype", path, plen, 1);
+			add_ascii_assoc_stringl(meta, "mediatype", path, plen, 1);
 			mlen -= plen;
 			path += plen;
 		} else if (semi != path || mlen != sizeof(";base64")-1 || memcmp(path, ";base64", sizeof(";base64")-1)) { /* must be error since parameters are only allowed after mediatype */
@@ -637,7 +637,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, cha
 			plen = sep - path;
 			vlen = (semi ? semi - sep : mlen - plen) - 1 /* '=' */;
 			key = estrndup(path, plen);
-			add_assoc_stringl_ex(meta, key, plen + 1, sep + 1, vlen, 1);
+			add_rt_assoc_stringl_ex(meta, key, plen + 1, sep + 1, vlen, 1);
 			efree(key);
 			plen += vlen + 1;
 			mlen -= plen;
@@ -652,7 +652,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, cha
 		MAKE_STD_ZVAL(meta);
 		array_init(meta);
 	}
-	add_assoc_bool(meta, "base64", base64);
+	add_ascii_assoc_bool(meta, "base64", base64);
 
 	/* skip ',' */
 	comma++;

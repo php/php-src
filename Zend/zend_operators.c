@@ -985,7 +985,7 @@ static void convert_scalar_to_array(zval *op, int type TSRMLS_DC)
 	switch (type) {
 		case IS_ARRAY:
 			ALLOC_HASHTABLE(Z_ARRVAL_P(op));
-			zend_u_hash_init(Z_ARRVAL_P(op), 0, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
+			zend_u_hash_init(Z_ARRVAL_P(op), 0, NULL, ZVAL_PTR_DTOR, 0, 0);
 			zend_hash_index_update(Z_ARRVAL_P(op), 0, (void *) &entry, sizeof(zval *), NULL);
 			Z_TYPE_P(op) = IS_ARRAY;
 			break;
@@ -1017,7 +1017,7 @@ ZEND_API void convert_to_array(zval *op)
 				HashTable *ht;
 
 				ALLOC_HASHTABLE(ht);
-				zend_u_hash_init(ht, 0, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
+				zend_u_hash_init(ht, 0, NULL, ZVAL_PTR_DTOR, 0, 0);
 				if (Z_OBJ_HT_P(op)->get_properties) {
 					HashTable *obj_ht = Z_OBJ_HT_P(op)->get_properties(op TSRMLS_CC);
 					if(obj_ht) {
@@ -1037,7 +1037,7 @@ ZEND_API void convert_to_array(zval *op)
 			return;
 		case IS_NULL:
 			ALLOC_HASHTABLE(Z_ARRVAL_P(op));
-			zend_u_hash_init(Z_ARRVAL_P(op), 0, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
+			zend_u_hash_init(Z_ARRVAL_P(op), 0, NULL, ZVAL_PTR_DTOR, 0, 0);
 			Z_TYPE_P(op) = IS_ARRAY;
 			break;
 		default:

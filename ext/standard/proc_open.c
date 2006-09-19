@@ -319,8 +319,8 @@ PHP_FUNCTION(proc_get_status)
 
 	array_init(return_value);
 
-	add_assoc_string(return_value, "command", proc->command, 1);
-	add_assoc_long(return_value, "pid", (long) proc->child);
+	add_ascii_assoc_string(return_value, "command", proc->command, 1);
+	add_ascii_assoc_long(return_value, "pid", (long) proc->child);
 	
 #ifdef PHP_WIN32
 	
@@ -357,12 +357,12 @@ PHP_FUNCTION(proc_get_status)
 	}
 #endif
 
-	add_assoc_bool(return_value, "running", running);
-	add_assoc_bool(return_value, "signaled", signaled);
-	add_assoc_bool(return_value, "stopped", stopped);
-	add_assoc_long(return_value, "exitcode", exitcode);
-	add_assoc_long(return_value, "termsig", termsig);
-	add_assoc_long(return_value, "stopsig", stopsig);
+	add_ascii_assoc_bool(return_value, "running", running);
+	add_ascii_assoc_bool(return_value, "signaled", signaled);
+	add_ascii_assoc_bool(return_value, "stopped", stopped);
+	add_ascii_assoc_long(return_value, "exitcode", exitcode);
+	add_ascii_assoc_long(return_value, "termsig", termsig);
+	add_ascii_assoc_long(return_value, "stopsig", stopsig);
 }
 /* }}} */
 
@@ -456,7 +456,7 @@ PHP_FUNCTION(proc_open)
 #ifdef PHP_WIN32
 	if (other_options) {
 		zval **item;
-		if (SUCCESS == zend_hash_find(Z_ARRVAL_P(other_options), "suppress_errors", sizeof("suppress_errors"), (void**)&item)) {
+		if (SUCCESS == zend_ascii_hash_find(Z_ARRVAL_P(other_options), "suppress_errors", sizeof("suppress_errors"), (void**)&item)) {
 			if (Z_TYPE_PP(item) == IS_BOOL && Z_BVAL_PP(item)) {
 				suppress_errors = 1;
 			}

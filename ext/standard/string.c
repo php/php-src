@@ -2076,7 +2076,7 @@ PHP_FUNCTION(pathinfo)
 			ret_len = php_dirname(ret.s, path_len);
 		}
 		if (ret_len > 0) {
-			add_assoc_zstrl(tmp, "dirname", path_type, ret, ret_len, 1);
+			add_ascii_assoc_zstrl(tmp, "dirname", path_type, ret, ret_len, 1);
 		}
 		efree(ret.v);
 		ret = NULL_ZSTR;
@@ -2091,7 +2091,7 @@ PHP_FUNCTION(pathinfo)
 	}
 	
 	if (have_basename) {
-		add_assoc_zstrl(tmp, "basename", path_type, ret, ret_len, 0);
+		add_ascii_assoc_zstrl(tmp, "basename", path_type, ret, ret_len, 0);
 	}
 
 	if (have_ext) {
@@ -2113,7 +2113,7 @@ PHP_FUNCTION(pathinfo)
 		}
 
 		if (ext.v) {
-			add_assoc_zstrl(tmp, "extension", path_type, ext, ext_len, 1);
+			add_ascii_assoc_zstrl(tmp, "extension", path_type, ext, ext_len, 1);
 		}
 	}
 
@@ -2129,7 +2129,7 @@ PHP_FUNCTION(pathinfo)
 			idx = p.s ? (p.s - ret.s) : ret_len;
 		}
 
-		add_assoc_zstrl(tmp, "filename", path_type, ret, idx, 1);
+		add_ascii_assoc_zstrl(tmp, "filename", path_type, ret, idx, 1);
 	}
 
 	if (!have_basename && ret.v) {
@@ -5112,6 +5112,8 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 		/* For each subject entry, convert it to string, then perform replacement
 		   and add the result to the return_value array. */
 		while (zend_hash_get_current_data(Z_ARRVAL_PP(subject), (void **)&subject_entry) == SUCCESS) {
+			zend_uchar utype;
+
 			if (Z_TYPE_PP(subject_entry) != IS_ARRAY && Z_TYPE_PP(subject_entry) != IS_OBJECT) {
 				MAKE_STD_ZVAL(result);
 				SEPARATE_ZVAL(subject_entry);
@@ -5122,11 +5124,11 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 				COPY_PZVAL_TO_ZVAL(*result, *subject_entry);
 			}
 			/* Add to return array */
-			switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(subject), &string_key,
-												&string_key_len, &num_key, 0, NULL)) {
+			switch ((utype = zend_hash_get_current_key_ex(Z_ARRVAL_PP(subject), &string_key,
+												&string_key_len, &num_key, 0, NULL))) {
 				case HASH_KEY_IS_STRING:
 				case HASH_KEY_IS_UNICODE:
-					add_assoc_zval_ex(return_value, string_key.s, string_key_len, result);
+					add_u_assoc_zval_ex(return_value, utype, string_key, string_key_len, result);
 					break;
 
 				case HASH_KEY_IS_LONG:
@@ -6456,22 +6458,22 @@ PHP_FUNCTION(localeconv)
 			add_index_long(mon_grouping, i, currlocdata.mon_grouping[i]);
 		}
 
-		add_assoc_string(return_value, "decimal_point",     currlocdata.decimal_point,     1);
-		add_assoc_string(return_value, "thousands_sep",     currlocdata.thousands_sep,     1);
-		add_assoc_string(return_value, "int_curr_symbol",   currlocdata.int_curr_symbol,   1);
-		add_assoc_string(return_value, "currency_symbol",   currlocdata.currency_symbol,   1);
-		add_assoc_string(return_value, "mon_decimal_point", currlocdata.mon_decimal_point, 1);
-		add_assoc_string(return_value, "mon_thousands_sep", currlocdata.mon_thousands_sep, 1);
-		add_assoc_string(return_value, "positive_sign",     currlocdata.positive_sign,     1);
-		add_assoc_string(return_value, "negative_sign",     currlocdata.negative_sign,     1);
-		add_assoc_long(  return_value, "int_frac_digits",   currlocdata.int_frac_digits     );
-		add_assoc_long(  return_value, "frac_digits",       currlocdata.frac_digits         );
-		add_assoc_long(  return_value, "p_cs_precedes",     currlocdata.p_cs_precedes       );
-		add_assoc_long(  return_value, "p_sep_by_space",    currlocdata.p_sep_by_space      );
-		add_assoc_long(  return_value, "n_cs_precedes",     currlocdata.n_cs_precedes       );
-		add_assoc_long(  return_value, "n_sep_by_space",    currlocdata.n_sep_by_space      );
-		add_assoc_long(  return_value, "p_sign_posn",       currlocdata.p_sign_posn         );
-		add_assoc_long(  return_value, "n_sign_posn",       currlocdata.n_sign_posn         );
+		add_ascii_assoc_string(return_value, "decimal_point",     currlocdata.decimal_point,     1);
+		add_ascii_assoc_string(return_value, "thousands_sep",     currlocdata.thousands_sep,     1);
+		add_ascii_assoc_string(return_value, "int_curr_symbol",   currlocdata.int_curr_symbol,   1);
+		add_ascii_assoc_string(return_value, "currency_symbol",   currlocdata.currency_symbol,   1);
+		add_ascii_assoc_string(return_value, "mon_decimal_point", currlocdata.mon_decimal_point, 1);
+		add_ascii_assoc_string(return_value, "mon_thousands_sep", currlocdata.mon_thousands_sep, 1);
+		add_ascii_assoc_string(return_value, "positive_sign",     currlocdata.positive_sign,     1);
+		add_ascii_assoc_string(return_value, "negative_sign",     currlocdata.negative_sign,     1);
+		add_ascii_assoc_long(  return_value, "int_frac_digits",   currlocdata.int_frac_digits     );
+		add_ascii_assoc_long(  return_value, "frac_digits",       currlocdata.frac_digits         );
+		add_ascii_assoc_long(  return_value, "p_cs_precedes",     currlocdata.p_cs_precedes       );
+		add_ascii_assoc_long(  return_value, "p_sep_by_space",    currlocdata.p_sep_by_space      );
+		add_ascii_assoc_long(  return_value, "n_cs_precedes",     currlocdata.n_cs_precedes       );
+		add_ascii_assoc_long(  return_value, "n_sep_by_space",    currlocdata.n_sep_by_space      );
+		add_ascii_assoc_long(  return_value, "p_sign_posn",       currlocdata.p_sign_posn         );
+		add_ascii_assoc_long(  return_value, "n_sign_posn",       currlocdata.n_sign_posn         );
 	}
 #else
 	/* Ok, it doesn't look like we have locale info floating around, so I guess it
@@ -6480,26 +6482,26 @@ PHP_FUNCTION(localeconv)
 	add_index_long(grouping, 0, -1);
 	add_index_long(mon_grouping, 0, -1);
 
-	add_assoc_string(return_value, "decimal_point",     "\x2E", 1);
-	add_assoc_string(return_value, "thousands_sep",     "",     1);
-	add_assoc_string(return_value, "int_curr_symbol",   "",     1);
-	add_assoc_string(return_value, "currency_symbol",   "",     1);
-	add_assoc_string(return_value, "mon_decimal_point", "\x2E", 1);
-	add_assoc_string(return_value, "mon_thousands_sep", "",     1);
-	add_assoc_string(return_value, "positive_sign",     "",     1);
-	add_assoc_string(return_value, "negative_sign",     "",     1);
-	add_assoc_long(  return_value, "int_frac_digits",   CHAR_MAX );
-	add_assoc_long(  return_value, "frac_digits",       CHAR_MAX );
-	add_assoc_long(  return_value, "p_cs_precedes",     CHAR_MAX );
-	add_assoc_long(  return_value, "p_sep_by_space",    CHAR_MAX );
-	add_assoc_long(  return_value, "n_cs_precedes",     CHAR_MAX );
-	add_assoc_long(  return_value, "n_sep_by_space",    CHAR_MAX );
-	add_assoc_long(  return_value, "p_sign_posn",       CHAR_MAX );
-	add_assoc_long(  return_value, "n_sign_posn",       CHAR_MAX );
+	add_ascii_assoc_string(return_value, "decimal_point",     "\x2E", 1);
+	add_ascii_assoc_string(return_value, "thousands_sep",     "",     1);
+	add_ascii_assoc_string(return_value, "int_curr_symbol",   "",     1);
+	add_ascii_assoc_string(return_value, "currency_symbol",   "",     1);
+	add_ascii_assoc_string(return_value, "mon_decimal_point", "\x2E", 1);
+	add_ascii_assoc_string(return_value, "mon_thousands_sep", "",     1);
+	add_ascii_assoc_string(return_value, "positive_sign",     "",     1);
+	add_ascii_assoc_string(return_value, "negative_sign",     "",     1);
+	add_ascii_assoc_long(  return_value, "int_frac_digits",   CHAR_MAX );
+	add_ascii_assoc_long(  return_value, "frac_digits",       CHAR_MAX );
+	add_ascii_assoc_long(  return_value, "p_cs_precedes",     CHAR_MAX );
+	add_ascii_assoc_long(  return_value, "p_sep_by_space",    CHAR_MAX );
+	add_ascii_assoc_long(  return_value, "n_cs_precedes",     CHAR_MAX );
+	add_ascii_assoc_long(  return_value, "n_sep_by_space",    CHAR_MAX );
+	add_ascii_assoc_long(  return_value, "p_sign_posn",       CHAR_MAX );
+	add_ascii_assoc_long(  return_value, "n_sign_posn",       CHAR_MAX );
 #endif
 
-	zend_hash_update(Z_ARRVAL_P(return_value), "grouping", 9, &grouping, sizeof(zval *), NULL);
-	zend_hash_update(Z_ARRVAL_P(return_value), "mon_grouping", 13, &mon_grouping, sizeof(zval *), NULL);
+	zend_ascii_hash_update(Z_ARRVAL_P(return_value), "grouping", 9, &grouping, sizeof(zval *), NULL);
+	zend_ascii_hash_update(Z_ARRVAL_P(return_value), "mon_grouping", 13, &mon_grouping, sizeof(zval *), NULL);
 }
 /* }}} */
 
@@ -7076,7 +7078,7 @@ PHP_FUNCTION(str_split)
 	array_init(return_value);
 
 	if (split_length >= str_len) {
-		add_next_index_zstrl(return_value, str, str_len, str_type, 1);
+		add_next_index_zstrl(return_value, str_type, str, str_len, 1);
 		return;
 	}
 
@@ -7087,12 +7089,12 @@ PHP_FUNCTION(str_split)
 	}
 
 	while (n_reg_segments-- > 0) {
-		add_next_index_zstrl(return_value, ZSTR(p), split_length, str_type, 1);
+		add_next_index_zstrl(return_value, str_type, ZSTR(p), split_length, 1);
 		p += split_length * charsize;
 	}
 
 	if (p != (str.s + str_len * charsize)) {
-		add_next_index_zstrl(return_value, ZSTR(p), (str.s + str_len * charsize - p), str_type, 1);
+		add_next_index_zstrl(return_value, str_type, ZSTR(p), (str.s + str_len * charsize - p), 1);
 	}
 }
 /* }}} */

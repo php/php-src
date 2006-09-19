@@ -656,11 +656,15 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 	 */
 
 	if (!numVars) {
+		zval *tmp;
+
 		/* allocate an array for return */
 		array_init(*return_value);
 
 		for (i = 0; i < totalVars; i++) {
-		   	if (add_next_index_null(*return_value) == FAILURE) {
+			MAKE_STD_ZVAL(tmp);
+			ZVAL_NULL(tmp);
+		   	if (add_next_index_zval(*return_value, tmp) == FAILURE) {
 				scan_set_error_return(0, return_value);
 				return FAILURE;
 			}

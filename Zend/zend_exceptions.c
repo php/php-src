@@ -140,16 +140,8 @@ ZEND_METHOD(exception, __construct)
 	if (message) {
 		if (message_type == IS_UNICODE) {
 			zend_update_property_unicodel(default_exception_ce, object, "message", sizeof("message")-1, message, message_len TSRMLS_CC);
-		} else if (UG(unicode)) {
-			UErrorCode status = U_ZERO_ERROR;
-			UChar *u_str;
-			int u_len;
-
-			zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, message, message_len, &status);
-			zend_update_property_unicodel(default_exception_ce, object, "message", sizeof("message")-1, u_str, u_len TSRMLS_CC);
-			efree(u_str);
 		} else {
-			zend_update_property_stringl(default_exception_ce, object, "message", sizeof("message")-1, message, message_len TSRMLS_CC);
+			zend_update_property_rt_stringl(default_exception_ce, object, "message", sizeof("message")-1, message, message_len TSRMLS_CC);
 		}
 	}
 
@@ -179,16 +171,8 @@ ZEND_METHOD(error_exception, __construct)
 	if (message) {
 		if (message_type == IS_UNICODE) {
 			zend_update_property_unicodel(default_exception_ce, object, "message", sizeof("message")-1, message, message_len TSRMLS_CC);
-		} else if (UG(unicode)) {
-			UErrorCode status = U_ZERO_ERROR;
-			UChar *u_str;
-			int u_len;
-
-			zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, message, message_len, &status);
-			zend_update_property_unicodel(default_exception_ce, object, "message", sizeof("message")-1, u_str, u_len TSRMLS_CC);
-			efree(u_str);
 		} else {
-			zend_update_property_stringl(default_exception_ce, object, "message", sizeof("message")-1, message, message_len TSRMLS_CC);
+			zend_update_property_rt_stringl(default_exception_ce, object, "message", sizeof("message")-1, message, message_len TSRMLS_CC);
 		}
 	}
 
@@ -333,7 +317,7 @@ ZEND_METHOD(error_exception, getSeverity)
 	TRACE_APPEND_STRL(val, sizeof(val)-1)
 
 #define TRACE_APPEND_KEY(key)                                            \
-	if (zend_hash_find(ht, key, sizeof(key), (void**)&tmp) == SUCCESS) { \
+	if (zend_ascii_hash_find(ht, key, sizeof(key), (void**)&tmp) == SUCCESS) { \
 		if (Z_TYPE_PP(tmp) == IS_UNICODE) { \
 			zval copy; \
 			int use_copy; \
@@ -500,8 +484,8 @@ static int _build_trace_string(zval **frame, int num_args, va_list args, zend_ha
 	sprintf(s_tmp, "#%d ", (*num)++);
 	TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
 	efree(s_tmp);
-	if (zend_hash_find(ht, "file", sizeof("file"), (void**)&file) == SUCCESS) {
-		if (zend_hash_find(ht, "line", sizeof("line"), (void**)&tmp) == SUCCESS) {
+	if (zend_ascii_hash_find(ht, "file", sizeof("file"), (void**)&file) == SUCCESS) {
+		if (zend_ascii_hash_find(ht, "line", sizeof("line"), (void**)&tmp) == SUCCESS) {
 			line = Z_LVAL_PP(tmp);
 		} else {
 			line = 0;
@@ -518,7 +502,7 @@ static int _build_trace_string(zval **frame, int num_args, va_list args, zend_ha
 	TRACE_APPEND_KEY("type");
 	TRACE_APPEND_KEY("function");
 	TRACE_APPEND_CHR('(');
-	if (zend_hash_find(ht, "args", sizeof("args"), (void**)&tmp) == SUCCESS) {
+	if (zend_ascii_hash_find(ht, "args", sizeof("args"), (void**)&tmp) == SUCCESS) {
 		int last_len = *len;
 		zend_hash_apply_with_arguments(Z_ARRVAL_PP(tmp), (apply_func_args_t)_build_trace_args, 2, str, len);
 		if (last_len != *len) {

@@ -301,9 +301,9 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 			return PHP_STREAM_OPTION_RETURN_OK;
 
 		case PHP_STREAM_OPTION_META_DATA_API:
-			add_assoc_bool((zval *)ptrparam, "timed_out", sock->timeout_event);
-			add_assoc_bool((zval *)ptrparam, "blocked", sock->is_blocked);
-			add_assoc_bool((zval *)ptrparam, "eof", stream->eof);
+			add_ascii_assoc_bool((zval *)ptrparam, "timed_out", sock->timeout_event);
+			add_ascii_assoc_bool((zval *)ptrparam, "blocked", sock->is_blocked);
+			add_ascii_assoc_bool((zval *)ptrparam, "eof", stream->eof);
 			return PHP_STREAM_OPTION_RETURN_OK;
 		
 		case PHP_STREAM_OPTION_XPORT_API:

@@ -313,7 +313,7 @@ static php_stream_filter *php_unicode_filter_create(const char *filtername, zval
 
 	if (filterparams &&
 		Z_TYPE_P(filterparams) == IS_ARRAY &&
-		zend_hash_find(Z_ARRVAL_P(filterparams), "error_mode", sizeof("error_mode"), (void**)&tmpzval) == SUCCESS &&
+		zend_ascii_hash_find(Z_ARRVAL_P(filterparams), "error_mode", sizeof("error_mode"), (void**)&tmpzval) == SUCCESS &&
 		tmpzval && *tmpzval) {
 		if (Z_TYPE_PP(tmpzval) == IS_LONG) {
 			err_mode = Z_LVAL_PP(tmpzval);
@@ -332,7 +332,7 @@ static php_stream_filter *php_unicode_filter_create(const char *filtername, zval
 
 		if (filterparams &&
 			Z_TYPE_P(filterparams) == IS_ARRAY &&
-			zend_hash_find(Z_ARRVAL_P(filterparams), "subst_char", sizeof("subst_char"), (void**)&tmpzval) == SUCCESS &&
+			zend_ascii_hash_find(Z_ARRVAL_P(filterparams), "subst_char", sizeof("subst_char"), (void**)&tmpzval) == SUCCESS &&
 			tmpzval && *tmpzval) {
 			if (Z_TYPE_PP(tmpzval) == IS_UNICODE) {
 				subst_char = Z_USTRVAL_PP(tmpzval);

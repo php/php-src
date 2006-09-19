@@ -357,12 +357,12 @@ PHP_FUNCTION(iptcparse)
 			array_init(return_value);
 		}
 
-		if (zend_hash_find(Z_ARRVAL_P(return_value), key, strlen(key) + 1, (void **) &element) == FAILURE) {
+		if (zend_ascii_hash_find(Z_ARRVAL_P(return_value), key, strlen(key) + 1, (void **) &element) == FAILURE) {
 			ALLOC_ZVAL(values);
 			INIT_PZVAL(values);
 			array_init(values);
 			
-			zend_hash_update(Z_ARRVAL_P(return_value), key, strlen(key)+1, (void *) &values, sizeof(zval*), (void **) &element);
+			zend_ascii_hash_update(Z_ARRVAL_P(return_value), key, strlen(key)+1, (void *) &values, sizeof(zval*), (void **) &element);
 		} 
 			
 		add_next_index_stringl(*element, (char*)buffer+inx, len, 1);

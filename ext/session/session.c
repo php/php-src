@@ -297,7 +297,7 @@ PHPAPI void php_add_session_var(char *name, size_t namelen TSRMLS_DC)
 	zval **sym_track = NULL;
 	
 	IF_SESSION_VARS() {
-		zend_hash_find(Z_ARRVAL_P(PS(http_session_vars)), name, namelen + 1,
+		zend_rt_hash_find(Z_ARRVAL_P(PS(http_session_vars)), name, namelen + 1,
 				(void *) &sym_track);
 	} else {
 		return;
@@ -321,7 +321,7 @@ PHPAPI int php_get_session_var(char *name, size_t namelen, zval ***state_var TSR
 	int ret = FAILURE;
 
 	IF_SESSION_VARS() {
-		ret = zend_hash_find(Z_ARRVAL_P(PS(http_session_vars)), name, 
+		ret = zend_rt_hash_find(Z_ARRVAL_P(PS(http_session_vars)), name, 
 				namelen+1, (void **) state_var);
 
 	}
@@ -591,10 +591,10 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS)
 
 	gettimeofday(&tv, NULL);
 	
-	if (zend_hash_find(&EG(symbol_table), "_SERVER",
+	if (zend_ascii_hash_find(&EG(symbol_table), "_SERVER",
 				sizeof("_SERVER"), (void **) &array) == SUCCESS &&
 			Z_TYPE_PP(array) == IS_ARRAY &&
-			zend_hash_find(Z_ARRVAL_PP(array), "REMOTE_ADDR",
+			zend_ascii_hash_find(Z_ARRVAL_PP(array), "REMOTE_ADDR",
 				sizeof("REMOTE_ADDR"), (void **) &token) == SUCCESS) {
 		remote_addr = Z_STRVAL_PP(token);
 	}
@@ -1027,7 +1027,7 @@ static void php_session_reset_id(TSRMLS_D)
 	}
 
 	/* if the SID constant exists, destroy it. */
-	zend_hash_del(EG(zend_constants), "sid", sizeof("sid"));
+	zend_ascii_hash_del(EG(zend_constants), "sid", sizeof("sid"));
 	
 	if (PS(define_sid)) {
 		smart_str var = {0};
@@ -1088,10 +1088,10 @@ PHPAPI void php_session_start(TSRMLS_D)
 	 */
 
 	if (!PS(id)) {
-		if (PS(use_cookies) && zend_hash_find(&EG(symbol_table), "_COOKIE",
+		if (PS(use_cookies) && zend_ascii_hash_find(&EG(symbol_table), "_COOKIE",
 					sizeof("_COOKIE"), (void **) &data) == SUCCESS &&
 				Z_TYPE_PP(data) == IS_ARRAY &&
-				zend_hash_find(Z_ARRVAL_PP(data), PS(session_name),
+				zend_ascii_hash_find(Z_ARRVAL_PP(data), PS(session_name),
 					lensess + 1, (void **) &ppid) == SUCCESS) {
 			PPID2SID;
 			PS(apply_trans_sid) = 0;
@@ -1100,20 +1100,20 @@ PHPAPI void php_session_start(TSRMLS_D)
 		}
 
 		if (!PS(use_only_cookies) && !PS(id) &&
-				zend_hash_find(&EG(symbol_table), "_GET",
+				zend_ascii_hash_find(&EG(symbol_table), "_GET",
 					sizeof("_GET"), (void **) &data) == SUCCESS &&
 				Z_TYPE_PP(data) == IS_ARRAY &&
-				zend_hash_find(Z_ARRVAL_PP(data), PS(session_name),
+				zend_rt_hash_find(Z_ARRVAL_PP(data), PS(session_name),
 					lensess + 1, (void **) &ppid) == SUCCESS) {
 			PPID2SID;
 			PS(send_cookie) = 0;
 		}
 
 		if (!PS(use_only_cookies) && !PS(id) &&
-				zend_hash_find(&EG(symbol_table), "_POST",
+				zend_ascii_hash_find(&EG(symbol_table), "_POST",
 					sizeof("_POST"), (void **) &data) == SUCCESS &&
 				Z_TYPE_PP(data) == IS_ARRAY &&
-				zend_hash_find(Z_ARRVAL_PP(data), PS(session_name),
+				zend_rt_hash_find(Z_ARRVAL_PP(data), PS(session_name),
 					lensess + 1, (void **) &ppid) == SUCCESS) {
 			PPID2SID;
 			PS(send_cookie) = 0;
@@ -1125,7 +1125,7 @@ PHPAPI void php_session_start(TSRMLS_D)
 	   http://yoursite/<session-name>=<session-id>/script.php */
 
 	if (!PS(use_only_cookies) && !PS(id) && PG(http_globals)[TRACK_VARS_SERVER] &&
-			zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "REQUEST_URI",
+			zend_ascii_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "REQUEST_URI",
 				sizeof("REQUEST_URI"), (void **) &data) == SUCCESS &&
 			Z_TYPE_PP(data) == IS_STRING &&
 			(p = strstr(Z_STRVAL_PP(data), PS(session_name))) &&
@@ -1250,11 +1250,11 @@ PHP_FUNCTION(session_get_cookie_params)
 
 	array_init(return_value);
 
-	add_assoc_long(return_value, "lifetime", PS(cookie_lifetime));
-	add_assoc_string(return_value, "path", PS(cookie_path), 1);
-	add_assoc_string(return_value, "domain", PS(cookie_domain), 1);
-	add_assoc_bool(return_value, "secure", PS(cookie_secure));
-	add_assoc_bool(return_value, "httponly", PS(cookie_httponly));
+	add_ascii_assoc_long(return_value, "lifetime", PS(cookie_lifetime));
+	add_ascii_assoc_rt_string(return_value, "path", PS(cookie_path), 1);
+	add_ascii_assoc_rt_string(return_value, "domain", PS(cookie_domain), 1);
+	add_ascii_assoc_bool(return_value, "secure", PS(cookie_secure));
+	add_ascii_assoc_bool(return_value, "httponly", PS(cookie_httponly));
 }
 /* }}} */
 
