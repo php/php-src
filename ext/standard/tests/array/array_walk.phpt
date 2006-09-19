@@ -34,8 +34,8 @@ echo "Done\n";
 Warning: array_walk() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: array_walk() expects parameter 1 to be array, integer given in %s on line %d
-NULL
+Warning: array_walk(): The argument should be an array in %s on line %d
+bool(false)
 bool(true)
 int(1)
 int(0)
