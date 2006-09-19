@@ -238,7 +238,7 @@ Bug #34066 (recursive array_walk causes segfault)
 
 function dump2xml($array) {
     // output of this goes through 2xml
-    array_walk(&$array, "gen_xml", "/Docs/");
+    array_walk($array, "gen_xml", "/Docs/");
 }
 function gen_xml($val, $key, $prefix)
 {
@@ -249,10 +249,10 @@ function gen_xml($val, $key, $prefix)
 	    if ($key == 1) {
 		print substr($prefix, 0, -1) . "\n";
 	    }
-	    array_walk(&$val, "gen_xml", "$prefix@");
+	    array_walk($val, "gen_xml", "$prefix@");
 	}
 	else {
-	    array_walk(&$val, "gen_xml", "$prefix$key/");
+	    array_walk($val, "gen_xml", "$prefix$key/");
 	}
     }
     else {
