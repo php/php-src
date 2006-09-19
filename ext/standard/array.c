@@ -1115,18 +1115,27 @@ PHP_FUNCTION(array_walk)
 		 *userdata = NULL;
 	zend_fcall_info orig_array_walk_fci;
 	zend_fcall_info_cache orig_array_walk_fci_cache;
+	HashTable *target_hash;
 
 	orig_array_walk_fci = BG(array_walk_fci);
 	orig_array_walk_fci_cache = BG(array_walk_fci_cache);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "af|z", &array,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zf|z", &array,
 							  &BG(array_walk_fci), &BG(array_walk_fci_cache), &userdata) == FAILURE) {
 		BG(array_walk_fci) = orig_array_walk_fci;
 		BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
 		return;
 	}
 
-	php_array_walk(HASH_OF(array), userdata ? &userdata : NULL, 0 TSRMLS_CC);
+	target_hash = HASH_OF(array);
+	if (!target_hash) {
+		BG(array_walk_fci) = orig_array_walk_fci;
+		BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
+		RETURN_FALSE;
+	}
+
+	php_array_walk(target_hash, userdata ? &userdata : NULL, 0 TSRMLS_CC);
 	BG(array_walk_fci) = orig_array_walk_fci;
 	BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
 	RETURN_TRUE;
@@ -1141,15 +1150,24 @@ PHP_FUNCTION(array_walk_recursive)
 		 *userdata = NULL;
 	zend_fcall_info orig_array_walk_fci;
 	zend_fcall_info_cache orig_array_walk_fci_cache;
+	HashTable *target_hash;
 
 	orig_array_walk_fci = BG(array_walk_fci);
 	orig_array_walk_fci_cache = BG(array_walk_fci_cache);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "af|z", &array,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zf|z", &array,
 							  &BG(array_walk_fci), &BG(array_walk_fci_cache), &userdata) == FAILURE) {
 		BG(array_walk_fci) = orig_array_walk_fci;
 		BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
 		return;
+	}
+
+	target_hash = HASH_OF(array);
+	if (!target_hash) {
+		BG(array_walk_fci) = orig_array_walk_fci;
+		BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
+		RETURN_FALSE;
 	}
 
 	php_array_walk(HASH_OF(array), userdata ? &userdata : NULL, 1 TSRMLS_CC);
