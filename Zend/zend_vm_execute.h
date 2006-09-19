@@ -15790,86 +15790,6 @@ static int ZEND_FETCH_CONSTANT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-
-	zval *array_ptr = &EX_T(opline->result.u.var).tmp_var;
-	zval *expr_ptr;
-	zval *offset=&opline->op2.u.constant;
-
-#if 0 || IS_UNUSED == IS_VAR || IS_UNUSED == IS_CV
-	zval **expr_ptr_ptr = NULL;
-
-	if (opline->extended_value) {
-		expr_ptr_ptr=NULL;
-		expr_ptr = *expr_ptr_ptr;
-	} else {
-		expr_ptr=NULL;
-	}
-#else
-	expr_ptr=NULL;
-#endif
-
-	if (0) { /* temporary variable */
-		zval *new_expr;
-
-		ALLOC_ZVAL(new_expr);
-		INIT_PZVAL_COPY(new_expr, expr_ptr);
-		expr_ptr = new_expr;
-	} else {
-#if 0 || IS_UNUSED == IS_VAR || IS_UNUSED == IS_CV
-		if (opline->extended_value) {
-			SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr_ptr);
-			expr_ptr = *expr_ptr_ptr;
-			expr_ptr->refcount++;
-		} else
-#endif
-		if (PZVAL_IS_REF(expr_ptr)) {
-			zval *new_expr;
-
-			ALLOC_ZVAL(new_expr);
-			INIT_PZVAL_COPY(new_expr, expr_ptr);
-			expr_ptr = new_expr;
-			zendi_zval_copy_ctor(*expr_ptr);
-		} else {
-			expr_ptr->refcount++;
-		}
-	}
-	if (offset) {
-		switch (Z_TYPE_P(offset)) {
-			case IS_DOUBLE:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), (long) Z_DVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
-				break;
-			case IS_LONG:
-			case IS_BOOL:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), Z_LVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
-				break;
-			case IS_STRING:
-			case IS_UNICODE:
-				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
-				break;
-			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(array_ptr), "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
-				break;
-			default:
-				zend_error(E_WARNING, "Illegal offset type");
-				zval_ptr_dtor(&expr_ptr);
-				/* do nothing */
-				break;
-		}
-
-	} else {
-		zend_hash_next_index_insert(Z_ARRVAL_P(array_ptr), &expr_ptr, sizeof(zval *), NULL);
-	}
-	if (opline->extended_value) {
-
-	} else {
-
-	}
-	ZEND_VM_NEXT_OPCODE();
-}
-
 static int ZEND_INIT_ARRAY_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
@@ -16884,86 +16804,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	zval_dtor(free_op2.var);
 
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static int ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-	zend_free_op free_op2;
-	zval *array_ptr = &EX_T(opline->result.u.var).tmp_var;
-	zval *expr_ptr;
-	zval *offset=_get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
-
-#if 0 || IS_UNUSED == IS_VAR || IS_UNUSED == IS_CV
-	zval **expr_ptr_ptr = NULL;
-
-	if (opline->extended_value) {
-		expr_ptr_ptr=NULL;
-		expr_ptr = *expr_ptr_ptr;
-	} else {
-		expr_ptr=NULL;
-	}
-#else
-	expr_ptr=NULL;
-#endif
-
-	if (0) { /* temporary variable */
-		zval *new_expr;
-
-		ALLOC_ZVAL(new_expr);
-		INIT_PZVAL_COPY(new_expr, expr_ptr);
-		expr_ptr = new_expr;
-	} else {
-#if 0 || IS_UNUSED == IS_VAR || IS_UNUSED == IS_CV
-		if (opline->extended_value) {
-			SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr_ptr);
-			expr_ptr = *expr_ptr_ptr;
-			expr_ptr->refcount++;
-		} else
-#endif
-		if (PZVAL_IS_REF(expr_ptr)) {
-			zval *new_expr;
-
-			ALLOC_ZVAL(new_expr);
-			INIT_PZVAL_COPY(new_expr, expr_ptr);
-			expr_ptr = new_expr;
-			zendi_zval_copy_ctor(*expr_ptr);
-		} else {
-			expr_ptr->refcount++;
-		}
-	}
-	if (offset) {
-		switch (Z_TYPE_P(offset)) {
-			case IS_DOUBLE:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), (long) Z_DVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
-				break;
-			case IS_LONG:
-			case IS_BOOL:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), Z_LVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
-				break;
-			case IS_STRING:
-			case IS_UNICODE:
-				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
-				break;
-			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(array_ptr), "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
-				break;
-			default:
-				zend_error(E_WARNING, "Illegal offset type");
-				zval_ptr_dtor(&expr_ptr);
-				/* do nothing */
-				break;
-		}
-		zval_dtor(free_op2.var);
-	} else {
-		zend_hash_next_index_insert(Z_ARRVAL_P(array_ptr), &expr_ptr, sizeof(zval *), NULL);
-	}
-	if (opline->extended_value) {
-
-	} else {
-
-	}
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -17984,86 +17824,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-	zend_free_op free_op2;
-	zval *array_ptr = &EX_T(opline->result.u.var).tmp_var;
-	zval *expr_ptr;
-	zval *offset=_get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
-
-#if 0 || IS_UNUSED == IS_VAR || IS_UNUSED == IS_CV
-	zval **expr_ptr_ptr = NULL;
-
-	if (opline->extended_value) {
-		expr_ptr_ptr=NULL;
-		expr_ptr = *expr_ptr_ptr;
-	} else {
-		expr_ptr=NULL;
-	}
-#else
-	expr_ptr=NULL;
-#endif
-
-	if (0) { /* temporary variable */
-		zval *new_expr;
-
-		ALLOC_ZVAL(new_expr);
-		INIT_PZVAL_COPY(new_expr, expr_ptr);
-		expr_ptr = new_expr;
-	} else {
-#if 0 || IS_UNUSED == IS_VAR || IS_UNUSED == IS_CV
-		if (opline->extended_value) {
-			SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr_ptr);
-			expr_ptr = *expr_ptr_ptr;
-			expr_ptr->refcount++;
-		} else
-#endif
-		if (PZVAL_IS_REF(expr_ptr)) {
-			zval *new_expr;
-
-			ALLOC_ZVAL(new_expr);
-			INIT_PZVAL_COPY(new_expr, expr_ptr);
-			expr_ptr = new_expr;
-			zendi_zval_copy_ctor(*expr_ptr);
-		} else {
-			expr_ptr->refcount++;
-		}
-	}
-	if (offset) {
-		switch (Z_TYPE_P(offset)) {
-			case IS_DOUBLE:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), (long) Z_DVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
-				break;
-			case IS_LONG:
-			case IS_BOOL:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), Z_LVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
-				break;
-			case IS_STRING:
-			case IS_UNICODE:
-				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
-				break;
-			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(array_ptr), "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
-				break;
-			default:
-				zend_error(E_WARNING, "Illegal offset type");
-				zval_ptr_dtor(&expr_ptr);
-				/* do nothing */
-				break;
-		}
-		if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
-	} else {
-		zend_hash_next_index_insert(Z_ARRVAL_P(array_ptr), &expr_ptr, sizeof(zval *), NULL);
-	}
-	if (opline->extended_value) {
-
-	} else {
-
-	}
-	ZEND_VM_NEXT_OPCODE();
-}
-
 static int ZEND_INIT_ARRAY_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
@@ -18637,86 +18397,6 @@ static int ZEND_ASSIGN_BW_AND_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARG
 static int ZEND_ASSIGN_BW_XOR_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-}
-
-static int ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-
-	zval *array_ptr = &EX_T(opline->result.u.var).tmp_var;
-	zval *expr_ptr;
-	zval *offset=NULL;
-
-#if 0 || IS_UNUSED == IS_VAR || IS_UNUSED == IS_CV
-	zval **expr_ptr_ptr = NULL;
-
-	if (opline->extended_value) {
-		expr_ptr_ptr=NULL;
-		expr_ptr = *expr_ptr_ptr;
-	} else {
-		expr_ptr=NULL;
-	}
-#else
-	expr_ptr=NULL;
-#endif
-
-	if (0) { /* temporary variable */
-		zval *new_expr;
-
-		ALLOC_ZVAL(new_expr);
-		INIT_PZVAL_COPY(new_expr, expr_ptr);
-		expr_ptr = new_expr;
-	} else {
-#if 0 || IS_UNUSED == IS_VAR || IS_UNUSED == IS_CV
-		if (opline->extended_value) {
-			SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr_ptr);
-			expr_ptr = *expr_ptr_ptr;
-			expr_ptr->refcount++;
-		} else
-#endif
-		if (PZVAL_IS_REF(expr_ptr)) {
-			zval *new_expr;
-
-			ALLOC_ZVAL(new_expr);
-			INIT_PZVAL_COPY(new_expr, expr_ptr);
-			expr_ptr = new_expr;
-			zendi_zval_copy_ctor(*expr_ptr);
-		} else {
-			expr_ptr->refcount++;
-		}
-	}
-	if (offset) {
-		switch (Z_TYPE_P(offset)) {
-			case IS_DOUBLE:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), (long) Z_DVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
-				break;
-			case IS_LONG:
-			case IS_BOOL:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), Z_LVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
-				break;
-			case IS_STRING:
-			case IS_UNICODE:
-				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
-				break;
-			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(array_ptr), "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
-				break;
-			default:
-				zend_error(E_WARNING, "Illegal offset type");
-				zval_ptr_dtor(&expr_ptr);
-				/* do nothing */
-				break;
-		}
-
-	} else {
-		zend_hash_next_index_insert(Z_ARRVAL_P(array_ptr), &expr_ptr, sizeof(zval *), NULL);
-	}
-	if (opline->extended_value) {
-
-	} else {
-
-	}
-	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_INIT_ARRAY_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -19422,86 +19102,6 @@ static int ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	}
 
 
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static int ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-
-	zval *array_ptr = &EX_T(opline->result.u.var).tmp_var;
-	zval *expr_ptr;
-	zval *offset=_get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
-
-#if 0 || IS_UNUSED == IS_VAR || IS_UNUSED == IS_CV
-	zval **expr_ptr_ptr = NULL;
-
-	if (opline->extended_value) {
-		expr_ptr_ptr=NULL;
-		expr_ptr = *expr_ptr_ptr;
-	} else {
-		expr_ptr=NULL;
-	}
-#else
-	expr_ptr=NULL;
-#endif
-
-	if (0) { /* temporary variable */
-		zval *new_expr;
-
-		ALLOC_ZVAL(new_expr);
-		INIT_PZVAL_COPY(new_expr, expr_ptr);
-		expr_ptr = new_expr;
-	} else {
-#if 0 || IS_UNUSED == IS_VAR || IS_UNUSED == IS_CV
-		if (opline->extended_value) {
-			SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr_ptr);
-			expr_ptr = *expr_ptr_ptr;
-			expr_ptr->refcount++;
-		} else
-#endif
-		if (PZVAL_IS_REF(expr_ptr)) {
-			zval *new_expr;
-
-			ALLOC_ZVAL(new_expr);
-			INIT_PZVAL_COPY(new_expr, expr_ptr);
-			expr_ptr = new_expr;
-			zendi_zval_copy_ctor(*expr_ptr);
-		} else {
-			expr_ptr->refcount++;
-		}
-	}
-	if (offset) {
-		switch (Z_TYPE_P(offset)) {
-			case IS_DOUBLE:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), (long) Z_DVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
-				break;
-			case IS_LONG:
-			case IS_BOOL:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), Z_LVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
-				break;
-			case IS_STRING:
-			case IS_UNICODE:
-				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
-				break;
-			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(array_ptr), "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
-				break;
-			default:
-				zend_error(E_WARNING, "Illegal offset type");
-				zval_ptr_dtor(&expr_ptr);
-				/* do nothing */
-				break;
-		}
-
-	} else {
-		zend_hash_next_index_insert(Z_ARRVAL_P(array_ptr), &expr_ptr, sizeof(zval *), NULL);
-	}
-	if (opline->extended_value) {
-
-	} else {
-
-	}
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -29545,11 +29145,11 @@ void zend_init_opcodes_handlers()
   	ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_VAR_HANDLER,
   	ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED_HANDLER,
   	ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_HANDLER,
-  	ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_CONST_HANDLER,
-  	ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_TMP_HANDLER,
-  	ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_VAR_HANDLER,
-  	ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_UNUSED_HANDLER,
-  	ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_CV_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
   	ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CONST_HANDLER,
   	ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMP_HANDLER,
   	ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_VAR_HANDLER,
