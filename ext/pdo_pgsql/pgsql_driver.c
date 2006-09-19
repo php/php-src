@@ -472,6 +472,7 @@ static int pdo_pgsql_transaction_cmd(const char *cmd, pdo_dbh_t *dbh TSRMLS_DC)
 	res = PQexec(H->server, cmd);
 
 	if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+		pdo_pgsql_error(dbh, PQresultStatus(res), pdo_pgsql_sqlstate(res));
 		ret = 0;
 	}
 
