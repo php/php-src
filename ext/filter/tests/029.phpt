@@ -101,3 +101,31 @@ NULL
 int(1)
 string(4) "test"
 Done
+--UEXPECTF--
+string(4) "DATA"
+string(46) "~!@#$%^&*()_QWERTYUIOPASDFGHJKLZXCVBNM<>>?"}{:"
+string(0) ""
+
+Warning: filter_data(): First argument is expected to be a valid callback in %s on line %d
+NULL
+
+Warning: filter_data(): First argument is expected to be a valid callback in %s on line %d
+NULL
+
+Warning: filter_data(): First argument is expected to be a valid callback in %s on line %d
+NULL
+string(4) "data"
+string(46) "~!@#$%^&*()_qwertyuiopasdfghjklzxcvbnm<>>?"}{:"
+string(0) ""
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+int(1)
+unicode(4) "test"
+Done
