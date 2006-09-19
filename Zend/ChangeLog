@@ -1,3 +1,25 @@
+2006-09-18  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.c
+      zend_API.h
+      zend_language_scanner.l:
+      More work on Unicode support in PCRE. When UG(unicode) is on, all
+      strings passed to PCRE have to be IS_UNICODE or IS_STRING in UTF-8
+      encoding. Failure to do so will result in unpredictable results.
+
+2006-09-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      Small optimization of ZEND_INIT_ARRAY/ZEND_ADD_ARRAY_ELEMENT. (Nuno,
+      Dmitry)
+
+    * zend_vm_gen.php
+      zend_vm_gen.php:
+      Fixed non-specialized executor
+
 2006-09-14  Dmitry Stogov  <dmitry@zend.com>
 
     * zend.h

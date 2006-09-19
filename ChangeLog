@@ -1,3 +1,99 @@
+2006-09-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/main.c:
+      MFB: Avoid generating php_errormsg twice in some instances.
+
+    * (PHP_5_2)
+      main/main.c:
+      Avoid generating php_errormsg twice in some instances.
+
+2006-09-18  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/oci8/config.m4:
+      add PHP version detection to this branch too, since I'm using this branch
+      to make PECL releases
+
+2006-09-18  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/pcre/php_pcre.c:
+      Upgrade preg_split() to support Unicode strings.
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_language_scanner.l
+      ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.h:
+      More work on Unicode support in PCRE. When UG(unicode) is on, all
+      strings passed to PCRE have to be IS_UNICODE or IS_STRING in UTF-8
+      encoding. Failure to do so will result in unpredictable results.
+
+2006-09-18  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ext/bcmath/libbcmath/src/.cvsignore
+      ext/gd/libgd/.cvsignore
+      ext/pcre/pcrelib/.cvsignore
+      ext/pdo_sqlite/sqlite/src/.cvsignore
+      ext/sqlite/libsqlite/src/.cvsignore
+      ext/zip/.cvsignore
+      ext/zip/lib/.cvsignore
+      main/.cvsignore
+      main/streams/.cvsignore
+      regex/.cvsignore
+      sapi/apache2filter/.cvsignore:
+      Add .libs to .cvsignore
+
+2006-09-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/curl/interface.c:
+      MFB: Fixed bug #38574 (missing curl constants and improper constant
+      detection).
+
+2006-09-18  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ext/session/tests/008-php4.2.3.phpt
+      ext/shmop/tests/001.phpt:
+      Fix tests
+
+2006-09-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/curl/interface.c:
+      Fixed bug #38574 (missing curl constants and improper constant detection).
+
+2006-09-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h:
+      Small optimization of ZEND_INIT_ARRAY/ZEND_ADD_ARRAY_ELEMENT. (Nuno,
+      Dmitry)
+
+2006-09-18  Antony Dovgal  <antony@zend.com>
+
+    * ext/bz2/tests/002.phpt:
+      fix test
+
+    * (PHP_5_2)
+      ext/bz2/tests/002.phpt:
+      fix test (the error message is different across the systems)
+
+2006-09-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_gen.php
+      ZendEngine2/zend_vm_gen.php:
+      Fixed non-specialized executor
+
+2006-09-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      main/main.c:
+      Fixed memory leak on require() error
+
 2006-09-17  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * ext/filter/tests/037.phpt
