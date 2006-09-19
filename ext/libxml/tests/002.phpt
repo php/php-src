@@ -16,7 +16,7 @@ $xmlstr = <<< XML
     </movies>
 XML;
 
-$doc = simplexml_load_string($xmlstr);
+$doc = simplexml_load_string((binary)$xmlstr);
 $xml = explode("\n", $xmlstr);
 
 if (!$doc) {
