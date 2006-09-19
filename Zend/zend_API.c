@@ -1791,6 +1791,7 @@ ZEND_API int add_next_index_unicodel(zval *arg, UChar *str, uint length, int dup
 ZEND_API int add_next_index_utf8_string(zval *arg, char *str, int duplicate)
 {
 	zval *tmp;
+	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_UTF8_STRING(tmp, str, duplicate);
@@ -1802,6 +1803,7 @@ ZEND_API int add_next_index_utf8_string(zval *arg, char *str, int duplicate)
 ZEND_API int add_next_index_utf8_stringl(zval *arg, char *str, uint length, int duplicate)
 {
 	zval *tmp;
+	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_UTF8_STRINGL(tmp, str, length, duplicate);
