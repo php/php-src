@@ -1029,31 +1029,28 @@ static int php_array_walk(HashTable *target_hash, zval **userdata TSRMLS_DC)
 PHP_FUNCTION(array_walk)
 {
 	int	argc;
-	zval **array,
-		 **userdata = NULL,
+	zval *array,
+		 *userdata = NULL,
+		 *tmp,
 		 **old_walk_func_name;
 	HashTable *target_hash;
 
-	argc = ZEND_NUM_ARGS();
 	old_walk_func_name = BG(array_walk_func_name);
-	if (argc < 2 || argc > 3 ||
-		zend_get_parameters_ex(argc, &array, &BG(array_walk_func_name), &userdata) == FAILURE) {
-		BG(array_walk_func_name) = old_walk_func_name;
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "az|z", &array, &tmp, &userdata) == FAILURE) {
+		return;
 	}
-	target_hash = HASH_OF(*array);
+	target_hash = HASH_OF(array);
 	if (!target_hash) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
-		BG(array_walk_func_name) = old_walk_func_name;
 		RETURN_FALSE;
 	}
-	if (Z_TYPE_PP(BG(array_walk_func_name)) != IS_ARRAY && 
-		Z_TYPE_PP(BG(array_walk_func_name)) != IS_STRING) {
+	if (Z_TYPE_P(tmp) != IS_ARRAY && Z_TYPE_P(tmp) != IS_STRING) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Wrong syntax for function name");
-		BG(array_walk_func_name) = old_walk_func_name;
 		RETURN_FALSE;
+	} else {
+		BG(array_walk_func_name) = &tmp;
 	}
-	php_array_walk(target_hash, userdata TSRMLS_CC);
+	php_array_walk(target_hash, userdata ? &userdata : NULL TSRMLS_CC);
 	BG(array_walk_func_name) = old_walk_func_name;
 	RETURN_TRUE;
 }
