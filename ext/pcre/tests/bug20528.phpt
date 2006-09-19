@@ -22,3 +22,20 @@ array(7) {
   [6]=>
   string(2) "#)"
 }
+--UEXPECT--
+array(7) {
+  [0]=>
+  unicode(2) "(#"
+  [1]=>
+  unicode(2) "11"
+  [2]=>
+  unicode(1) "/"
+  [3]=>
+  unicode(2) "19"
+  [4]=>
+  unicode(1) "/"
+  [5]=>
+  unicode(4) "2002"
+  [6]=>
+  unicode(2) "#)"
+}

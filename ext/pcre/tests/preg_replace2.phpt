@@ -40,3 +40,28 @@ array(2) {
   string(1) "$"
 }
 ==done==
+--UEXPECTF--
+Warning: preg_replace(): Parameter mismatch, pattern is a string while replacement in an array. in %s on line %d
+bool(false)
+unicode(1) "c"
+array(3) {
+  [0]=>
+  unicode(1) "x"
+  [1]=>
+  unicode(2) "aA"
+  [2]=>
+  unicode(2) "vb"
+}
+array(2) {
+  [0]=>
+  unicode(1) "$"
+  [1]=>
+  unicode(1) "$"
+}
+array(2) {
+  [0]=>
+  unicode(3) "x$y"
+  [1]=>
+  unicode(1) "$"
+}
+==done==
