@@ -34,7 +34,7 @@ echo "Done\n";
 Warning: array_walk() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: array_walk() expects parameter 1 to be array, integer given in %s on line %d
+Warning: array_walk() expects parameter 2 to be valid callback, integer given in %s on line %d
 NULL
 
 Warning: array_walk() expects parameter 2 to be valid callback, string given in %s on line %d
@@ -52,7 +52,7 @@ Done
 Warning: array_walk() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: array_walk() expects parameter 1 to be array, integer given in %s on line %d
+Warning: array_walk() expects parameter 2 to be valid callback, integer given in %s on line %d
 NULL
 
 Warning: array_walk() expects parameter 2 to be valid callback, Unicode string given in %s on line %d
