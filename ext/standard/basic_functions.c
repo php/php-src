@@ -663,9 +663,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_array_map, 0, 0, 3)
 ZEND_END_ARG_INFO()
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_array_key_exists, ZEND_SEND_PREFER_REF)
-	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, key)
-	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, search)
+ZEND_BEGIN_ARG_INFO(arginfo_array_key_exists, 0)
+	ZEND_ARG_INFO(0, key)
+	ZEND_ARG_INFO(0, search)
 ZEND_END_ARG_INFO()
 
 static
