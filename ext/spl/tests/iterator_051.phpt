@@ -97,50 +97,50 @@ object(ArrayIterator)#%d (7) {
 unicode(3) "1,2"
 array(3) {
   [0]=>
-  string(3) "1,2"
+  unicode(3) "1,2"
   [1]=>
-  string(1) "1"
+  unicode(1) "1"
   [2]=>
-  string(1) "2"
+  unicode(1) "2"
 }
 unicode(5) "1,2,3"
 array(3) {
   [0]=>
-  string(3) "1,2"
+  unicode(3) "1,2"
   [1]=>
-  string(1) "1"
+  unicode(1) "1"
   [2]=>
-  string(1) "2"
+  unicode(1) "2"
 }
 int(1)
 array(2) {
   [0]=>
-  string(1) "1"
+  unicode(1) "1"
   [1]=>
-  string(1) "1"
+  unicode(1) "1"
 }
 unicode(3) "1,2"
 array(2) {
   [0]=>
-  string(1) "1"
+  unicode(1) "1"
   [1]=>
-  string(1) "1"
+  unicode(1) "1"
 }
 unicode(5) "1,2,3"
 array(2) {
   [0]=>
-  string(1) "1"
+  unicode(1) "1"
   [1]=>
-  string(1) "1"
+  unicode(1) "1"
 }
 int(0)
 array(2) {
   [0]=>
-  string(1) "0"
+  unicode(1) "0"
   [1]=>
-  string(1) "0"
+  unicode(1) "0"
 }
-object(ArrayIterator)#%d (7) {
+object(ArrayIterator)#1 (7) {
   [1]=>
   int(0)
   [u"1,2"]=>

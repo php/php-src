@@ -33,41 +33,41 @@ var_dump($ar);
 int(1)
 array(3) {
   [0]=>
-  string(3) "1,2"
+  %s(3) "1,2"
   [1]=>
-  string(1) "1"
+  %s(1) "1"
   [2]=>
-  string(1) "2"
+  %s(1) "2"
 }
 int(2)
 array(3) {
   [0]=>
-  string(3) "1,2"
+  %s(3) "1,2"
   [1]=>
-  string(1) "1"
+  %s(1) "1"
   [2]=>
-  string(1) "2"
+  %s(1) "2"
 }
 int(0)
 array(2) {
   [0]=>
-  string(1) "1"
+  %s(1) "1"
   [1]=>
-  string(1) "1"
+  %s(1) "1"
 }
 int(1)
 array(2) {
   [0]=>
-  string(1) "1"
+  %s(1) "1"
   [1]=>
-  string(1) "1"
+  %s(1) "1"
 }
 int(2)
 array(2) {
   [0]=>
-  string(1) "1"
+  %s(1) "1"
   [1]=>
-  string(1) "1"
+  %s(1) "1"
 }
 object(ArrayIterator)#%d (9) {
   [0]=>
