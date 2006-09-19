@@ -5,6 +5,7 @@ PHP                                                                        NEWS
   (Tony)
 - Fixed bug #38574 (missing curl constants and improper constant detection).
   (Ilia)
+- Fixed bug #34066 (recursive array_walk causes segfault). (Tony)
 
 14 Sep 2006, PHP 5.2.0RC4
 - Added DSA key generation support to openssl_pkey_new(), FR #38731
