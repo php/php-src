@@ -276,6 +276,10 @@ struct _zend_unicode_globals {
 	UConverter *utf8_conv;				 /* all-purpose UTF-8 converter */
 	UConverter *ascii_conv;				 /* all-purpose ASCII converter */
 
+	char *stream_encoding;		    /* default stream encoding (contents, not FS entries)
+						Uses name of encoding rather than a real converter
+						because each stream needs its own instance */
+
 	uint16_t from_error_mode;
 	UChar from_subst_char[3];
 	uint16_t to_error_mode;
