@@ -76,6 +76,7 @@ SAPI_API sapi_module_struct sapi_module;
 
 SAPI_API void sapi_startup(sapi_module_struct *sf)
 {
+	sf->ini_entries = NULL;
 	sapi_module = *sf;
 
 #ifdef ZTS

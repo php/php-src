@@ -919,21 +919,6 @@ static void init_request_info(TSRMLS_D)
 }
 /* }}} */
 
-static void define_command_line_ini_entry(char *arg)
-{
-	char *name, *value;
-
-	name = arg;
-	value = strchr(arg, '=');
-	if (value) {
-		*value = 0;
-		value++;
-	} else {
-		value = "1";
-	}
-	zend_alter_ini_entry(name, strlen(name) + 1, value, strlen(value), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
-}
-
 #if PHP_FASTCGI
 /**
  * Clean up child processes upon exit
@@ -987,6 +972,7 @@ int main(int argc, char *argv[])
 	int orig_optind = php_optind;
 	char *orig_optarg = php_optarg;
 	char *script_file = NULL;
+	int ini_entries_len = 0;
 #if FORCE_CGI_REDIRECT
 	long force_redirect = 1;
 	char *redirect_status_env = NULL;
@@ -1076,6 +1062,23 @@ int main(int argc, char *argv[])
 			case 'n':
 				cgi_sapi_module.php_ini_ignore = 1;
 				break;
+			case 'd': { 
+				/* define ini entries on command line */
+				int len = strlen(php_optarg);
+
+				if (strchr(php_optarg, '=')) {
+					cgi_sapi_module.ini_entries = realloc(cgi_sapi_module.ini_entries, ini_entries_len + len + sizeof("\n\0"));
+					memcpy(cgi_sapi_module.ini_entries + ini_entries_len, php_optarg, len);
+					memcpy(cgi_sapi_module.ini_entries + ini_entries_len + len, "\n\0", sizeof("\n\0"));
+					ini_entries_len += len + sizeof("\n\0") - 2;
+				} else {
+					cgi_sapi_module.ini_entries = realloc(cgi_sapi_module.ini_entries, ini_entries_len + len + sizeof("=1\n\0"));
+					memcpy(cgi_sapi_module.ini_entries + ini_entries_len, php_optarg, len);
+					memcpy(cgi_sapi_module.ini_entries + ini_entries_len + len, "=1\n\0", sizeof("=1\n\0"));
+					ini_entries_len += len + sizeof("=1\n\0") - 2;
+				}
+				break;
+			}
 #if PHP_FASTCGI
 #ifndef PHP_WIN32
 			/* if we're started on command line, check to see if
@@ -1377,9 +1380,6 @@ consult the installation file that came with this distribution, or visit \n\
 
 				case 'C': /* don't chdir to the script directory */
 						SG(options) |= SAPI_OPTION_NO_CHDIR;
-						break;
-				case 'd': /* define ini entries on command line */
-						define_command_line_ini_entry(php_optarg);
 						break;
 
   				case 'e': /* enable extended info output */
@@ -1701,6 +1701,9 @@ fastcgi_request_done:
 
 		if (cgi_sapi_module.php_ini_path_override) {
 			free(cgi_sapi_module.php_ini_path_override);
+		}
+		if (cgi_sapi_module.ini_entries) {
+			free(cgi_sapi_module.ini_entries);
 		}
 	} zend_catch {
 		exit_status = 255;

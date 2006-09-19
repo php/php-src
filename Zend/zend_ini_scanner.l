@@ -83,6 +83,17 @@ int zend_ini_open_file_for_scanning(zend_file_handle *fh TSRMLS_DC)
 }
 
 
+int zend_ini_prepare_string_for_scanning(char *str TSRMLS_DC)
+{
+	int len = strlen(str);
+
+	yyin = NULL;
+	yy_scan_buffer(str, len + 2 TSRMLS_CC);
+	ini_filename = NULL;
+	return SUCCESS;
+}
+
+
 void zend_ini_close_file(zend_file_handle *fh TSRMLS_DC)
 {
 	zend_stream_close(fh);

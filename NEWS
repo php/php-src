@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Sep 2006, PHP 5.2.0
+- Fixed mess with CGI/CLI -d option (now it works with cgi; constants are
+  working exactly like in php.ini; with FastCGI -d affects all requests).
+  (Dmitry)
 - Fixed bug #38844 (curl_easy_strerror() is defined only since cURL 7.12.0).
   (Tony)
 - Fixed bug #38574 (missing curl constants and improper constant detection).
