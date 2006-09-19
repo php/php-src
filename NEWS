@@ -5,6 +5,10 @@ PHP                                                                        NEWS
   (Tony)
 - Fixed bug #38574 (missing curl constants and improper constant detection).
   (Ilia)
+- Fixed bug #37870 (pgo_pgsql tries to de-allocate unused statements).
+  (Ilia, ce at netage dot bg)
+- Fixed bug #36681 (pdo_pgsql driver incorrectly ignored some errors). (Wez,
+  Ilia)
 - Fixed bug #34066 (recursive array_walk causes segfault). (Tony)
 
 14 Sep 2006, PHP 5.2.0RC4
