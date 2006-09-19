@@ -89,6 +89,7 @@ struct _zend_op {
 
 
 typedef struct _zend_brk_cont_element {
+	int start;
 	int cont;
 	int brk;
 	int parent;
