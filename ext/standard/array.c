@@ -1112,21 +1112,21 @@ static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive
 PHP_FUNCTION(array_walk)
 {
 	zval *array,
-		 **userdata = NULL;
+		 *userdata = NULL;
 	zend_fcall_info orig_array_walk_fci;
 	zend_fcall_info_cache orig_array_walk_fci_cache;
 
 	orig_array_walk_fci = BG(array_walk_fci);
 	orig_array_walk_fci_cache = BG(array_walk_fci_cache);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "af|Z", &array,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "af|z", &array,
 							  &BG(array_walk_fci), &BG(array_walk_fci_cache), &userdata) == FAILURE) {
 		BG(array_walk_fci) = orig_array_walk_fci;
 		BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
 		return;
 	}
 
-	php_array_walk(HASH_OF(array), userdata, 0 TSRMLS_CC);
+	php_array_walk(HASH_OF(array), userdata ? &userdata : NULL, 0 TSRMLS_CC);
 	BG(array_walk_fci) = orig_array_walk_fci;
 	BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
 	RETURN_TRUE;
@@ -1138,21 +1138,21 @@ PHP_FUNCTION(array_walk)
 PHP_FUNCTION(array_walk_recursive)
 {
 	zval *array,
-		 **userdata = NULL;
+		 *userdata = NULL;
 	zend_fcall_info orig_array_walk_fci;
 	zend_fcall_info_cache orig_array_walk_fci_cache;
 
 	orig_array_walk_fci = BG(array_walk_fci);
 	orig_array_walk_fci_cache = BG(array_walk_fci_cache);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "af|Z", &array,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "af|z", &array,
 							  &BG(array_walk_fci), &BG(array_walk_fci_cache), &userdata) == FAILURE) {
 		BG(array_walk_fci) = orig_array_walk_fci;
 		BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
 		return;
 	}
 
-	php_array_walk(HASH_OF(array), userdata, 1 TSRMLS_CC);
+	php_array_walk(HASH_OF(array), userdata ? &userdata : NULL, 1 TSRMLS_CC);
 	BG(array_walk_fci) = orig_array_walk_fci;
 	BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
 	RETURN_TRUE;
