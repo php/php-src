@@ -529,6 +529,11 @@ int php_init_config(TSRMLS_D)
 			zend_llist_destroy(&scanned_ini_list);
 		}
 	}
+
+	if (sapi_module.ini_entries) {
+		zend_parse_ini_string(sapi_module.ini_entries, 1, php_config_ini_parser_cb, &extension_lists);
+	}
+
 	return SUCCESS;
 }
 /* }}} */

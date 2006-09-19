@@ -257,6 +257,8 @@ struct _sapi_module_struct {
 	
 	void (*ini_defaults)(HashTable *configuration_hash);
 	int phpinfo_as_text;
+
+	char *ini_entries;
 };
 
 

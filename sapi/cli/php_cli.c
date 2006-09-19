@@ -106,6 +106,15 @@
 #define PHP_MODE_REFLECTION_CLASS       9
 #define PHP_MODE_REFLECTION_EXTENSION   10
 
+#define HARDCODED_INI			\
+	"html_errors=0\n"			\
+	"register_argc_argv=1\n"	\
+	"implicit_flush=1\n"		\
+	"output_buffering=0\n"		\
+	"max_execution_time=0\n"    \
+	"max_input_time=-1\n"
+
+
 static char *php_optarg = NULL;
 static int php_optind = 1;
 #if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
@@ -342,10 +351,6 @@ static int php_cli_startup(sapi_module_struct *sapi_module)
 	zend_hash_update(configuration_hash, name, sizeof(name), tmp, sizeof(zval), (void**)&entry);\
 	Z_STRVAL_P(entry) = zend_strndup(Z_STRVAL_P(entry), Z_STRLEN_P(entry))
 
-/* hard coded ini settings must be set in main() */
-#define INI_HARDCODED(name,value)\
-		zend_alter_ini_entry(name, sizeof(name), value, strlen(value), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
-
 static void sapi_cli_ini_defaults(HashTable *configuration_hash)
 {
 	zval *tmp, *entry;
@@ -450,29 +455,6 @@ static void php_cli_usage(char *argv0)
 				, prog, prog, prog, prog, prog, prog);
 }
 /* }}} */
-
-static void define_command_line_ini_entry(char *arg TSRMLS_DC)
-{
-	char *name, *value;
-
-	name = arg;
-	value = strchr(arg, '=');
-	if (value) {
-		*value = 0;
-		value++;
-	} else {
-		value = "1";
-	}
-
-	if (!strcasecmp(name, "extension")) { /* load function module */
-		zval extension, zval;
-		ZVAL_STRING(&extension, value, 0);
-		php_dl(&extension, MODULE_PERSISTENT, &zval, 1 TSRMLS_CC);
-	} else {
-		zend_alter_ini_entry(name, strlen(name)+1, value, strlen(value), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
-	}
-}
-
 
 static php_stream *s_in_process = NULL;
 
@@ -602,6 +584,7 @@ int main(int argc, char *argv[])
 	int argc = __argc;
 	char **argv = __argv;
 #endif
+	int ini_entries_len = 0;
 
 #if defined(PHP_WIN32) && defined(_DEBUG) && defined(PHP_WIN32_DEBUG_HEAP)
 	{
@@ -646,6 +629,10 @@ int main(int argc, char *argv[])
 	setmode(_fileno(stderr), O_BINARY);		/* make the stdio mode be binary */
 #endif
 
+	ini_entries_len = strlen(HARDCODED_INI);
+	cli_sapi_module.ini_entries = malloc(ini_entries_len+2);
+	memcpy(cli_sapi_module.ini_entries, HARDCODED_INI, ini_entries_len+1);
+	cli_sapi_module.ini_entries[ini_entries_len+1] = 0;
 
 	while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0))!=-1) {
 		switch (c) {
@@ -655,6 +642,23 @@ int main(int argc, char *argv[])
 		case 'n':
 			cli_sapi_module.php_ini_ignore = 1;
 			break;
+		case 'd': {
+				/* define ini entries on command line */
+				int len = strlen(php_optarg);
+
+				if (strchr(php_optarg, '=')) {
+					cli_sapi_module.ini_entries = realloc(cli_sapi_module.ini_entries, ini_entries_len + len + sizeof("\n\0"));
+					memcpy(cli_sapi_module.ini_entries + ini_entries_len, php_optarg, len);
+					memcpy(cli_sapi_module.ini_entries + ini_entries_len + len, "\n\0", sizeof("\n\0"));
+					ini_entries_len += len + sizeof("\n\0") - 2;
+				} else {
+					cli_sapi_module.ini_entries = realloc(cli_sapi_module.ini_entries, ini_entries_len + len + sizeof("=1\n\0"));
+					memcpy(cli_sapi_module.ini_entries + ini_entries_len, php_optarg, len);
+					memcpy(cli_sapi_module.ini_entries + ini_entries_len + len, "=1\n\0", sizeof("=1\n\0"));
+					ini_entries_len += len + sizeof("=1\n\0") - 2;
+				}
+				break;
+			}
 		}
 	}
 	php_optind = orig_optind;
@@ -683,7 +687,6 @@ int main(int argc, char *argv[])
 	module_started = 1;
 
 	zend_first_try {
-		zend_uv.html_errors = 0; /* tell the engine we're in non-html mode */
 		CG(in_compilation) = 0; /* not initialized but needed for several options */
 		EG(uninitialized_zval_ptr) = NULL;
 
@@ -693,20 +696,8 @@ int main(int argc, char *argv[])
 			goto out_err;
 		}
 
-		/* here is the place for hard coded defaults which cannot be overwritten in the ini file */
-		INI_HARDCODED("register_argc_argv", "1");
-		INI_HARDCODED("html_errors", "0");
-		INI_HARDCODED("implicit_flush", "1");
-		INI_HARDCODED("output_buffering", "0");
-		INI_HARDCODED("max_execution_time", "0");
-		INI_HARDCODED("max_input_time", "-1");
-
 		while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0)) != -1) {
 			switch (c) {
-
-			case 'd': /* define ini entries on command line */
-				define_command_line_ini_entry(php_optarg TSRMLS_CC);
-				break;
 
 			case 'h': /* help & quit */
 			case '?':
@@ -1260,6 +1251,10 @@ out_err:
 	if (cli_sapi_module.php_ini_path_override) {
 		free(cli_sapi_module.php_ini_path_override);
 	}
+	if (cli_sapi_module.ini_entries) {
+		free(cli_sapi_module.ini_entries);
+	}
+
 	if (module_started) {
 		php_module_shutdown(TSRMLS_C);
 	}
