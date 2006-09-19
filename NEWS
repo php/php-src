@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   (Dmitry)
 - Fixed bug #38844 (curl_easy_strerror() is defined only since cURL 7.12.0).
   (Tony)
+- Fixed bug #38623 (leaks in a tricky code with switch() and exceptions).
+  (Dmitry)
 - Fixed bug #38574 (missing curl constants and improper constant detection).
   (Ilia)
 - Fixed bug #37870 (pgo_pgsql tries to de-allocate unused statements).
@@ -13,6 +15,7 @@ PHP                                                                        NEWS
 - Fixed bug #36681 (pdo_pgsql driver incorrectly ignored some errors). (Wez,
   Ilia)
 - Fixed bug #34066 (recursive array_walk causes segfault). (Tony)
+- Fixed bug #34065 (throw in foreach causes memory leaks). (Dmitry)
 
 14 Sep 2006, PHP 5.2.0RC4
 - Added DSA key generation support to openssl_pkey_new(), FR #38731
