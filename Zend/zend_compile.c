@@ -649,6 +649,7 @@ static inline void do_begin_loop(TSRMLS_D)
 	parent = CG(active_op_array)->current_brk_cont;
 	CG(active_op_array)->current_brk_cont = CG(active_op_array)->last_brk_cont;
 	brk_cont_element = get_next_brk_cont_element(CG(active_op_array));
+	brk_cont_element->start = get_next_op_number(CG(active_op_array));
 	brk_cont_element->parent = parent;
 }
 
