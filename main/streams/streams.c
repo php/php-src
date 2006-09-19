@@ -2408,10 +2408,10 @@ PHPAPI int php_stream_context_get_option(php_stream_context *context,
 {
 	zval **wrapperhash;
 
-	if (FAILURE == zend_hash_find(Z_ARRVAL_P(context->options), (char*)wrappername, strlen(wrappername)+1, (void**)&wrapperhash)) {
+	if (FAILURE == zend_rt_hash_find(Z_ARRVAL_P(context->options), (char*)wrappername, strlen(wrappername)+1, (void**)&wrapperhash)) {
 		return FAILURE;
 	}
-	return zend_hash_find(Z_ARRVAL_PP(wrapperhash), (char*)optionname, strlen(optionname)+1, (void**)optionvalue);
+	return zend_rt_hash_find(Z_ARRVAL_PP(wrapperhash), (char*)optionname, strlen(optionname)+1, (void**)optionvalue);
 }
 
 PHPAPI int php_stream_context_set_option(php_stream_context *context,
@@ -2425,16 +2425,16 @@ PHPAPI int php_stream_context_set_option(php_stream_context *context,
 	zval_copy_ctor(copied_val);
 	INIT_PZVAL(copied_val);
 
-	if (FAILURE == zend_hash_find(Z_ARRVAL_P(context->options), (char*)wrappername, strlen(wrappername)+1, (void**)&wrapperhash)) {
+	if (FAILURE == zend_rt_hash_find(Z_ARRVAL_P(context->options), (char*)wrappername, strlen(wrappername)+1, (void**)&wrapperhash)) {
 		MAKE_STD_ZVAL(category);
 		array_init(category);
-		if (FAILURE == zend_hash_update(Z_ARRVAL_P(context->options), (char*)wrappername, strlen(wrappername)+1, (void**)&category, sizeof(zval *), NULL)) {
+		if (FAILURE == zend_rt_hash_update(Z_ARRVAL_P(context->options), (char*)wrappername, strlen(wrappername)+1, (void**)&category, sizeof(zval *), NULL)) {
 			return FAILURE;
 		}
 
 		wrapperhash = &category;
 	}
-	return zend_hash_update(Z_ARRVAL_PP(wrapperhash), (char*)optionname, strlen(optionname)+1, (void**)&copied_val, sizeof(zval *), NULL);
+	return zend_rt_hash_update(Z_ARRVAL_PP(wrapperhash), (char*)optionname, strlen(optionname)+1, (void**)&copied_val, sizeof(zval *), NULL);
 }
 
 PHPAPI int php_stream_context_get_link(php_stream_context *context,
@@ -2445,7 +2445,7 @@ PHPAPI int php_stream_context_get_link(php_stream_context *context,
 	if (!stream || !hostent || !context || !(context->links)) {
 		return FAILURE;
 	}
-	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(context->links), (char*)hostent, strlen(hostent)+1, (void**)&pstream)) {
+	if (SUCCESS == zend_rt_hash_find(Z_ARRVAL_P(context->links), (char*)hostent, strlen(hostent)+1, (void**)&pstream)) {
 		*stream = *pstream;
 		return SUCCESS;
 	}
@@ -2464,9 +2464,9 @@ PHPAPI int php_stream_context_set_link(php_stream_context *context,
 	}
 	if (!stream) {
 		/* Delete any entry for <hostent> */
-		return zend_hash_del(Z_ARRVAL_P(context->links), (char*)hostent, strlen(hostent)+1);
+		return zend_rt_hash_del(Z_ARRVAL_P(context->links), (char*)hostent, strlen(hostent)+1);
 	}
-	return zend_hash_update(Z_ARRVAL_P(context->links), (char*)hostent, strlen(hostent)+1, (void**)&stream, sizeof(php_stream *), NULL);
+	return zend_rt_hash_update(Z_ARRVAL_P(context->links), (char*)hostent, strlen(hostent)+1, (void**)&stream, sizeof(php_stream *), NULL);
 }
 
 PHPAPI int php_stream_context_del_link(php_stream_context *context,

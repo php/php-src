@@ -548,12 +548,12 @@ PHPAPI int php_output_handler_start(php_output_handler *handler TSRMLS_DC)
 	if (php_output_lock_error(PHP_OUTPUT_HANDLER_START TSRMLS_CC) || !handler) {
 		return FAILURE;
 	}
-	if (SUCCESS == zend_u_hash_find(&php_output_handler_conflicts, Z_TYPE_P(handler->name), Z_UNIVAL_P(handler->name), Z_UNILEN_P(handler->name), (void *) &conflict)) {
+	if (SUCCESS == zend_u_hash_find(&php_output_handler_conflicts, Z_TYPE_P(handler->name), Z_UNIVAL_P(handler->name), Z_UNILEN_P(handler->name)+1, (void *) &conflict)) {
 		if (SUCCESS != (*conflict)(handler->name TSRMLS_CC)) {
 			return FAILURE;
 		}
 	}
-	if (SUCCESS == zend_u_hash_find(&php_output_handler_reverse_conflicts, Z_TYPE_P(handler->name), Z_UNIVAL_P(handler->name), Z_UNILEN_P(handler->name), (void *) &rconflicts)) {
+	if (SUCCESS == zend_u_hash_find(&php_output_handler_reverse_conflicts, Z_TYPE_P(handler->name), Z_UNIVAL_P(handler->name), Z_UNILEN_P(handler->name)+1, (void *) &rconflicts)) {
 		for (	zend_hash_internal_pointer_reset_ex(rconflicts, &pos);
 				zend_hash_get_current_data_ex(rconflicts, (void *) &conflict, &pos) == SUCCESS;
 				zend_hash_move_forward_ex(rconflicts, &pos)) {
@@ -616,7 +616,7 @@ PHPAPI int php_output_handler_conflict_register(zval *name, php_output_handler_c
 		zend_error(E_ERROR, "Cannot register an output handler conflict outside of MINIT");
 		return FAILURE;
 	}
-	return zend_u_hash_update(&php_output_handler_conflicts, Z_TYPE_P(name), Z_UNIVAL_P(name), Z_UNILEN_P(name), &check_func, sizeof(php_output_handler_conflict_check_t *), NULL);
+	return zend_u_hash_update(&php_output_handler_conflicts, Z_TYPE_P(name), Z_UNIVAL_P(name), Z_UNILEN_P(name)+1, &check_func, sizeof(php_output_handler_conflict_check_t *), NULL);
 }
 /* }}} */
 
@@ -630,7 +630,7 @@ PHPAPI int php_output_handler_reverse_conflict_register(zval *name, php_output_h
 		zend_error(E_ERROR, "Cannot register a reverse output handler conflict outside of MINIT");
 		return FAILURE;
 	}
-	if (SUCCESS == zend_u_hash_find(&php_output_handler_reverse_conflicts, Z_TYPE_P(name), Z_UNIVAL_P(name), Z_UNILEN_P(name), (void *) &rev_ptr)) {
+	if (SUCCESS == zend_u_hash_find(&php_output_handler_reverse_conflicts, Z_TYPE_P(name), Z_UNIVAL_P(name), Z_UNILEN_P(name)+1, (void *) &rev_ptr)) {
 		return zend_hash_next_index_insert(rev_ptr, &check_func, sizeof(php_output_handler_conflict_check_t *), NULL);
 	} else {
 		zend_u_hash_init(&rev, 1, NULL, NULL, 1, 1);
@@ -638,7 +638,7 @@ PHPAPI int php_output_handler_reverse_conflict_register(zval *name, php_output_h
 			zend_hash_destroy(&rev);
 			return FAILURE;
 		}
-		if (SUCCESS != zend_u_hash_update(&php_output_handler_reverse_conflicts, Z_TYPE_P(name), Z_UNIVAL_P(name), Z_UNILEN_P(name), &rev, sizeof(HashTable), NULL)) {
+		if (SUCCESS != zend_u_hash_update(&php_output_handler_reverse_conflicts, Z_TYPE_P(name), Z_UNIVAL_P(name), Z_UNILEN_P(name)+1, &rev, sizeof(HashTable), NULL)) {
 			zend_hash_destroy(&rev);
 			return FAILURE;
 		}
@@ -653,7 +653,7 @@ PHPAPI php_output_handler_alias_ctor_t *php_output_handler_alias(zval *name TSRM
 {
 	php_output_handler_alias_ctor_t *func = NULL;
 	
-	zend_u_hash_find(&php_output_handler_aliases, Z_TYPE_P(name), Z_UNIVAL_P(name), Z_UNILEN_P(name), (void *) &func);
+	zend_u_hash_find(&php_output_handler_aliases, Z_TYPE_P(name), Z_UNIVAL_P(name), Z_UNILEN_P(name)+1, (void *) &func);
 	return func;
 }
 /* }}} */
@@ -666,7 +666,7 @@ PHPAPI int php_output_handler_alias_register(zval *name, php_output_handler_alia
 		zend_error(E_ERROR, "Cannot register an output handler alias outside of MINIT");
 		return FAILURE;
 	}
-	return zend_u_hash_update(&php_output_handler_aliases, Z_TYPE_P(name), Z_UNIVAL_P(name), Z_UNILEN_P(name), &func, sizeof(php_output_handler_alias_ctor_t *), NULL);
+	return zend_u_hash_update(&php_output_handler_aliases, Z_TYPE_P(name), Z_UNIVAL_P(name), Z_UNILEN_P(name)+1, &func, sizeof(php_output_handler_alias_ctor_t *), NULL);
 }
 /* }}} */
 
@@ -1174,13 +1174,13 @@ static inline zval *php_output_handler_status(php_output_handler *handler, zval 
 	}
 	
 	ZVAL_ADDREF(handler->name);
-	add_assoc_zval(entry, "name", handler->name);
-	add_assoc_long(entry, "type", (long) (handler->flags & 0xf));
-	add_assoc_long(entry, "flags", (long) handler->flags);
-	add_assoc_long(entry, "level", (long) handler->level);
-	add_assoc_long(entry, "chunk_size", (long) handler->size);
-	add_assoc_long(entry, "buffer_size", (long) handler->buffer.size);
-	add_assoc_long(entry, "buffer_used", (long) handler->buffer.used);
+	add_ascii_assoc_zval(entry, "name", handler->name);
+	add_ascii_assoc_long(entry, "type", (long) (handler->flags & 0xf));
+	add_ascii_assoc_long(entry, "flags", (long) handler->flags);
+	add_ascii_assoc_long(entry, "level", (long) handler->level);
+	add_ascii_assoc_long(entry, "chunk_size", (long) handler->size);
+	add_ascii_assoc_long(entry, "buffer_size", (long) handler->buffer.size);
+	add_ascii_assoc_long(entry, "buffer_used", (long) handler->buffer.used);
 	
 	return entry;
 }

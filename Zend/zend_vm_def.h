@@ -2702,7 +2702,7 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMP|VAR|UNUS
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(array_ptr), "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -3074,7 +3074,7 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 						break;
 					}
 					case IS_NULL:
-						zend_hash_del(ht, "", sizeof(""));
+						zend_u_hash_del(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""));
 						break;
 					default:
 						zend_error(E_WARNING, "Illegal offset type in unset");
@@ -3560,7 +3560,7 @@ ZEND_VM_HELPER_EX(zend_isset_isempty_dim_prop_obj_handler, VAR|UNUSED|CV, CONST|
 					break;
 				}
 				case IS_NULL:
-					if (zend_hash_find(ht, "", sizeof(""), (void **) &value) == SUCCESS) {
+					if (zend_u_hash_find(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;

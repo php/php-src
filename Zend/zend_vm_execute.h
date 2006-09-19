@@ -66,7 +66,7 @@ ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 
 	if (op_array->uses_this && EG(This)) {
 		EG(This)->refcount++; /* For $this pointer */
-		if (zend_hash_add(EG(active_symbol_table), "this", sizeof("this"), &EG(This), sizeof(zval *), NULL)==FAILURE) {
+		if (zend_ascii_hash_add(EG(active_symbol_table), "this", sizeof("this"), &EG(This), sizeof(zval *), NULL)==FAILURE) {
 			EG(This)->refcount--;
 		}
 	}
@@ -2725,7 +2725,7 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(array_ptr), "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -3085,7 +3085,7 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(array_ptr), "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -3445,7 +3445,7 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(array_ptr), "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -3539,7 +3539,7 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(array_ptr), "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -3898,7 +3898,7 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(array_ptr), "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -5408,7 +5408,7 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(array_ptr), "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -5856,7 +5856,7 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(array_ptr), "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -6304,7 +6304,7 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(array_ptr), "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -6398,7 +6398,7 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_AR
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(array_ptr), "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -6843,7 +6843,7 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(array_ptr), "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -9501,7 +9501,7 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(array_ptr), "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -9613,7 +9613,7 @@ static int ZEND_UNSET_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						break;
 					}
 					case IS_NULL:
-						zend_hash_del(ht, "", sizeof(""));
+						zend_u_hash_del(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""));
 						break;
 					default:
 						zend_error(E_WARNING, "Illegal offset type in unset");
@@ -9746,7 +9746,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CONST(int prop_dim, 
 					break;
 				}
 				case IS_NULL:
-					if (zend_hash_find(ht, "", sizeof(""), (void **) &value) == SUCCESS) {
+					if (zend_u_hash_find(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;
@@ -11041,7 +11041,7 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(array_ptr), "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -11153,7 +11153,7 @@ static int ZEND_UNSET_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						break;
 					}
 					case IS_NULL:
-						zend_hash_del(ht, "", sizeof(""));
+						zend_u_hash_del(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""));
 						break;
 					default:
 						zend_error(E_WARNING, "Illegal offset type in unset");
@@ -11286,7 +11286,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_TMP(int prop_dim, ZE
 					break;
 				}
 				case IS_NULL:
-					if (zend_hash_find(ht, "", sizeof(""), (void **) &value) == SUCCESS) {
+					if (zend_u_hash_find(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;
@@ -12619,7 +12619,7 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(array_ptr), "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -12731,7 +12731,7 @@ static int ZEND_UNSET_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						break;
 					}
 					case IS_NULL:
-						zend_hash_del(ht, "", sizeof(""));
+						zend_u_hash_del(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""));
 						break;
 					default:
 						zend_error(E_WARNING, "Illegal offset type in unset");
@@ -12864,7 +12864,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_VAR(int prop_dim, ZE
 					break;
 				}
 				case IS_NULL:
-					if (zend_hash_find(ht, "", sizeof(""), (void **) &value) == SUCCESS) {
+					if (zend_u_hash_find(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;
@@ -13368,7 +13368,7 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_AR
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(array_ptr), "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -14627,7 +14627,7 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(array_ptr), "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -14739,7 +14739,7 @@ static int ZEND_UNSET_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						break;
 					}
 					case IS_NULL:
-						zend_hash_del(ht, "", sizeof(""));
+						zend_u_hash_del(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""));
 						break;
 					default:
 						zend_error(E_WARNING, "Illegal offset type in unset");
@@ -14872,7 +14872,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CV(int prop_dim, ZEN
 					break;
 				}
 				case IS_NULL:
-					if (zend_hash_find(ht, "", sizeof(""), (void **) &value) == SUCCESS) {
+					if (zend_u_hash_find(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;
@@ -15882,7 +15882,7 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						break;
 					}
 					case IS_NULL:
-						zend_hash_del(ht, "", sizeof(""));
+						zend_u_hash_del(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""));
 						break;
 					default:
 						zend_error(E_WARNING, "Illegal offset type in unset");
@@ -16013,7 +16013,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CONST(int prop_di
 					break;
 				}
 				case IS_NULL:
-					if (zend_hash_find(ht, "", sizeof(""), (void **) &value) == SUCCESS) {
+					if (zend_u_hash_find(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;
@@ -16899,7 +16899,7 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						break;
 					}
 					case IS_NULL:
-						zend_hash_del(ht, "", sizeof(""));
+						zend_u_hash_del(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""));
 						break;
 					default:
 						zend_error(E_WARNING, "Illegal offset type in unset");
@@ -17030,7 +17030,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_TMP(int prop_dim,
 					break;
 				}
 				case IS_NULL:
-					if (zend_hash_find(ht, "", sizeof(""), (void **) &value) == SUCCESS) {
+					if (zend_u_hash_find(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;
@@ -17916,7 +17916,7 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						break;
 					}
 					case IS_NULL:
-						zend_hash_del(ht, "", sizeof(""));
+						zend_u_hash_del(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""));
 						break;
 					default:
 						zend_error(E_WARNING, "Illegal offset type in unset");
@@ -18047,7 +18047,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_VAR(int prop_dim,
 					break;
 				}
 				case IS_NULL:
-					if (zend_hash_find(ht, "", sizeof(""), (void **) &value) == SUCCESS) {
+					if (zend_u_hash_find(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;
@@ -19197,7 +19197,7 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						break;
 					}
 					case IS_NULL:
-						zend_hash_del(ht, "", sizeof(""));
+						zend_u_hash_del(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""));
 						break;
 					default:
 						zend_error(E_WARNING, "Illegal offset type in unset");
@@ -19328,7 +19328,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CV(int prop_dim, 
 					break;
 				}
 				case IS_NULL:
-					if (zend_hash_find(ht, "", sizeof(""), (void **) &value) == SUCCESS) {
+					if (zend_u_hash_find(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;
@@ -21878,7 +21878,7 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(array_ptr), "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -21990,7 +21990,7 @@ static int ZEND_UNSET_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						break;
 					}
 					case IS_NULL:
-						zend_hash_del(ht, "", sizeof(""));
+						zend_u_hash_del(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""));
 						break;
 					default:
 						zend_error(E_WARNING, "Illegal offset type in unset");
@@ -22121,7 +22121,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CONST(int prop_dim, Z
 					break;
 				}
 				case IS_NULL:
-					if (zend_hash_find(ht, "", sizeof(""), (void **) &value) == SUCCESS) {
+					if (zend_u_hash_find(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;
@@ -23410,7 +23410,7 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(array_ptr), "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -23522,7 +23522,7 @@ static int ZEND_UNSET_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						break;
 					}
 					case IS_NULL:
-						zend_hash_del(ht, "", sizeof(""));
+						zend_u_hash_del(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""));
 						break;
 					default:
 						zend_error(E_WARNING, "Illegal offset type in unset");
@@ -23653,7 +23653,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_TMP(int prop_dim, ZEN
 					break;
 				}
 				case IS_NULL:
-					if (zend_hash_find(ht, "", sizeof(""), (void **) &value) == SUCCESS) {
+					if (zend_u_hash_find(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;
@@ -24979,7 +24979,7 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(array_ptr), "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -25091,7 +25091,7 @@ static int ZEND_UNSET_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						break;
 					}
 					case IS_NULL:
-						zend_hash_del(ht, "", sizeof(""));
+						zend_u_hash_del(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""));
 						break;
 					default:
 						zend_error(E_WARNING, "Illegal offset type in unset");
@@ -25222,7 +25222,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_VAR(int prop_dim, ZEN
 					break;
 				}
 				case IS_NULL:
-					if (zend_hash_find(ht, "", sizeof(""), (void **) &value) == SUCCESS) {
+					if (zend_u_hash_find(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;
@@ -25723,7 +25723,7 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(array_ptr), "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -26977,7 +26977,7 @@ static int ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(array_ptr), "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -27089,7 +27089,7 @@ static int ZEND_UNSET_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						break;
 					}
 					case IS_NULL:
-						zend_hash_del(ht, "", sizeof(""));
+						zend_u_hash_del(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""));
 						break;
 					default:
 						zend_error(E_WARNING, "Illegal offset type in unset");
@@ -27220,7 +27220,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CV(int prop_dim, ZEND
 					break;
 				}
 				case IS_NULL:
-					if (zend_hash_find(ht, "", sizeof(""), (void **) &value) == SUCCESS) {
+					if (zend_u_hash_find(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;

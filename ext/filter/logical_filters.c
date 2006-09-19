@@ -29,7 +29,7 @@
 	var_name = 0;                                                                                                        \
 	var_name##_set = 0;                                                                                                  \
 	if (option_array) {                                                                                                  \
-		if (zend_hash_find(HASH_OF(option_array), option_name, sizeof(option_name), (void **) &option_val) == SUCCESS) { \
+		if (zend_ascii_hash_find(HASH_OF(option_array), option_name, sizeof(option_name), (void **) &option_val) == SUCCESS) { \
 			convert_to_long(*option_val);                                                                                \
 			var_name = Z_LVAL_PP(option_val);                                                                            \
 			var_name##_set = 1;                                                                                          \
@@ -43,7 +43,7 @@
 	var_name##_set = 0;                                                                                                  \
 	var_name##_len = 0;                                                                                                  \
 	if (option_array) {                                                                                                  \
-		if (zend_hash_find(HASH_OF(option_array), option_name, sizeof(option_name), (void **) &option_val) == SUCCESS) { \
+		if (zend_ascii_hash_find(HASH_OF(option_array), option_name, sizeof(option_name), (void **) &option_val) == SUCCESS) { \
 			convert_to_string(*option_val);                                                                              \
 			var_name = Z_STRVAL_PP(option_val);                                                                          \
 			var_name##_set = 1;                                                                                          \

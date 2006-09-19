@@ -1511,15 +1511,15 @@ PHP_FUNCTION(localtime)
 	array_init(return_value);
 
 	if (associative) {
-		add_assoc_long(return_value, "tm_sec",   ts->s);
-		add_assoc_long(return_value, "tm_min",   ts->i);
-		add_assoc_long(return_value, "tm_hour",  ts->h);
-		add_assoc_long(return_value, "tm_mday",  ts->d);
-		add_assoc_long(return_value, "tm_mon",   ts->m - 1);
-		add_assoc_long(return_value, "tm_year",  ts->y - 1900);
-		add_assoc_long(return_value, "tm_wday",  timelib_day_of_week(ts->y, ts->m, ts->d));
-		add_assoc_long(return_value, "tm_yday",  timelib_day_of_year(ts->y, ts->m, ts->d));
-		add_assoc_long(return_value, "tm_isdst", ts->dst);
+		add_ascii_assoc_long(return_value, "tm_sec",   ts->s);
+		add_ascii_assoc_long(return_value, "tm_min",   ts->i);
+		add_ascii_assoc_long(return_value, "tm_hour",  ts->h);
+		add_ascii_assoc_long(return_value, "tm_mday",  ts->d);
+		add_ascii_assoc_long(return_value, "tm_mon",   ts->m - 1);
+		add_ascii_assoc_long(return_value, "tm_year",  ts->y - 1900);
+		add_ascii_assoc_long(return_value, "tm_wday",  timelib_day_of_week(ts->y, ts->m, ts->d));
+		add_ascii_assoc_long(return_value, "tm_yday",  timelib_day_of_year(ts->y, ts->m, ts->d));
+		add_ascii_assoc_long(return_value, "tm_isdst", ts->dst);
 	} else {
 		add_next_index_long(return_value, ts->s);
 		add_next_index_long(return_value, ts->i);
@@ -1556,16 +1556,16 @@ PHP_FUNCTION(getdate)
 
 	array_init(return_value);
 
-	add_assoc_long(return_value, "seconds", ts->s);
-	add_assoc_long(return_value, "minutes", ts->i);
-	add_assoc_long(return_value, "hours", ts->h);
-	add_assoc_long(return_value, "mday", ts->d);
-	add_assoc_long(return_value, "wday", timelib_day_of_week(ts->y, ts->m, ts->d));
-	add_assoc_long(return_value, "mon", ts->m);
-	add_assoc_long(return_value, "year", ts->y);
-	add_assoc_long(return_value, "yday", timelib_day_of_year(ts->y, ts->m, ts->d));
-	add_assoc_string(return_value, "weekday", php_date_full_day_name(ts->y, ts->m, ts->d), 1);
-	add_assoc_string(return_value, "month", mon_full_names[ts->m - 1], 1);
+	add_ascii_assoc_long(return_value, "seconds", ts->s);
+	add_ascii_assoc_long(return_value, "minutes", ts->i);
+	add_ascii_assoc_long(return_value, "hours", ts->h);
+	add_ascii_assoc_long(return_value, "mday", ts->d);
+	add_ascii_assoc_long(return_value, "wday", timelib_day_of_week(ts->y, ts->m, ts->d));
+	add_ascii_assoc_long(return_value, "mon", ts->m);
+	add_ascii_assoc_long(return_value, "year", ts->y);
+	add_ascii_assoc_long(return_value, "yday", timelib_day_of_year(ts->y, ts->m, ts->d));
+	add_ascii_assoc_string(return_value, "weekday", php_date_full_day_name(ts->y, ts->m, ts->d), 1);
+	add_ascii_assoc_string(return_value, "month", mon_full_names[ts->m - 1], 1);
 	add_index_long(return_value, 0, timestamp);
 
 	timelib_time_dtor(ts);
@@ -1831,9 +1831,9 @@ PHP_FUNCTION(date_parse)
 	array_init(return_value);
 #define PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(name, elem) \
 	if (parsed_time->elem == -1) {               \
-		add_assoc_bool(return_value, #name, 0); \
+		add_ascii_assoc_bool(return_value, #name, 0); \
 	} else {                                       \
-		add_assoc_long(return_value, #name, parsed_time->elem); \
+		add_ascii_assoc_long(return_value, #name, parsed_time->elem); \
 	}
 	PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(year,      y);
 	PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(month,     m);
@@ -1843,49 +1843,49 @@ PHP_FUNCTION(date_parse)
 	PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(second,    s);
 	
 	if (parsed_time->f == -1) {
-		add_assoc_bool(return_value, "fraction", 0);
+		add_ascii_assoc_bool(return_value, "fraction", 0);
 	} else {
-		add_assoc_double(return_value, "fraction", parsed_time->f);
+		add_ascii_assoc_double(return_value, "fraction", parsed_time->f);
 	}
 
-	add_assoc_long(return_value, "warning_count", error->warning_count);
+	add_ascii_assoc_long(return_value, "warning_count", error->warning_count);
 	MAKE_STD_ZVAL(element);
 	array_init(element);
 	for (i = 0; i < error->warning_count; i++) {
 		add_index_string(element, error->warning_messages[i].position, error->warning_messages[i].message, 1);
 	}
-	add_assoc_zval(return_value, "warnings", element);
+	add_ascii_assoc_zval(return_value, "warnings", element);
 
-	add_assoc_long(return_value, "error_count", error->error_count);
+	add_ascii_assoc_long(return_value, "error_count", error->error_count);
 	MAKE_STD_ZVAL(element);
 	array_init(element);
 	for (i = 0; i < error->error_count; i++) {
 		add_index_string(element, error->error_messages[i].position, error->error_messages[i].message, 1);
 	}
-	add_assoc_zval(return_value, "errors", element);
+	add_ascii_assoc_zval(return_value, "errors", element);
 	timelib_error_container_dtor(error);
 
-	add_assoc_bool(return_value, "is_localtime", parsed_time->is_localtime);
+	add_ascii_assoc_bool(return_value, "is_localtime", parsed_time->is_localtime);
 
 	if (parsed_time->is_localtime) {
 		PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(zone_type, zone_type);
 		switch (parsed_time->zone_type) {
 			case TIMELIB_ZONETYPE_OFFSET:
 				PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(zone, z);
-				add_assoc_bool(return_value, "is_dst", parsed_time->dst);
+				add_ascii_assoc_bool(return_value, "is_dst", parsed_time->dst);
 				break;
 			case TIMELIB_ZONETYPE_ID:
 				if (parsed_time->tz_abbr) {
-					add_assoc_string(return_value, "tz_abbr", parsed_time->tz_abbr, 1);
+					add_ascii_assoc_string(return_value, "tz_abbr", parsed_time->tz_abbr, 1);
 				}
 				if (parsed_time->tz_info) {
-					add_assoc_string(return_value, "tz_id", parsed_time->tz_info->name, 1);
+					add_ascii_assoc_string(return_value, "tz_id", parsed_time->tz_info->name, 1);
 				}
 				break;
 			case TIMELIB_ZONETYPE_ABBR:
 				PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(zone, z);
-				add_assoc_bool(return_value, "is_dst", parsed_time->dst);
-				add_assoc_string(return_value, "tz_abbr", parsed_time->tz_abbr, 1);
+				add_ascii_assoc_bool(return_value, "is_dst", parsed_time->dst);
+				add_ascii_assoc_string(return_value, "tz_abbr", parsed_time->tz_abbr, 1);
 				break;
 		}
 	}
@@ -1894,18 +1894,18 @@ PHP_FUNCTION(date_parse)
 		array_init(element);
 	}
 	if (parsed_time->have_relative) {
-		add_assoc_long(element, "year",   parsed_time->relative.y);
-		add_assoc_long(element, "month",  parsed_time->relative.m);
-		add_assoc_long(element, "day",    parsed_time->relative.d);
-		add_assoc_long(element, "hour",   parsed_time->relative.h);
-		add_assoc_long(element, "minute", parsed_time->relative.i);
-		add_assoc_long(element, "second", parsed_time->relative.s);
+		add_ascii_assoc_long(element, "year",   parsed_time->relative.y);
+		add_ascii_assoc_long(element, "month",  parsed_time->relative.m);
+		add_ascii_assoc_long(element, "day",    parsed_time->relative.d);
+		add_ascii_assoc_long(element, "hour",   parsed_time->relative.h);
+		add_ascii_assoc_long(element, "minute", parsed_time->relative.i);
+		add_ascii_assoc_long(element, "second", parsed_time->relative.s);
 	}
 	if (parsed_time->have_weekday_relative) {
-		add_assoc_long(element, "weekday", parsed_time->relative.weekday);
+		add_ascii_assoc_long(element, "weekday", parsed_time->relative.weekday);
 	}
 	if (parsed_time->have_relative || parsed_time->have_weekday_relative) {
-		add_assoc_zval(return_value, "relative", element);
+		add_ascii_assoc_zval(return_value, "relative", element);
 	}
 	timelib_time_dtor(parsed_time);
 }
@@ -2258,11 +2258,11 @@ PHP_FUNCTION(timezone_transitions_get)
 	for (i = 0; i < tzobj->tz->timecnt; ++i) {
 		MAKE_STD_ZVAL(element);
 		array_init(element);
-		add_assoc_long(element, "ts",     tzobj->tz->trans[i]);
-		add_assoc_string(element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, tzobj->tz->trans[i], 0 TSRMLS_CC), 0);
-		add_assoc_long(element, "offset", tzobj->tz->type[tzobj->tz->trans_idx[i]].offset);
-		add_assoc_bool(element, "isdst",  tzobj->tz->type[tzobj->tz->trans_idx[i]].isdst);
-		add_assoc_string(element, "abbr", &tzobj->tz->timezone_abbr[tzobj->tz->type[tzobj->tz->trans_idx[i]].abbr_idx], 1);
+		add_ascii_assoc_long(element, "ts",     tzobj->tz->trans[i]);
+		add_ascii_assoc_string(element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, tzobj->tz->trans[i], 0 TSRMLS_CC), 0);
+		add_ascii_assoc_long(element, "offset", tzobj->tz->type[tzobj->tz->trans_idx[i]].offset);
+		add_ascii_assoc_bool(element, "isdst",  tzobj->tz->type[tzobj->tz->trans_idx[i]].isdst);
+		add_ascii_assoc_string(element, "abbr", &tzobj->tz->timezone_abbr[tzobj->tz->type[tzobj->tz->trans_idx[i]].abbr_idx], 1);
 
 		add_next_index_zval(return_value, element);
 	}
@@ -2303,18 +2303,18 @@ PHP_FUNCTION(timezone_abbreviations_list)
 	do {
 		MAKE_STD_ZVAL(element);
 		array_init(element);
-		add_assoc_bool(element, "dst", entry->type);
-		add_assoc_long(element, "offset", entry->gmtoffset);
+		add_ascii_assoc_bool(element, "dst", entry->type);
+		add_ascii_assoc_long(element, "offset", entry->gmtoffset);
 		if (entry->full_tz_name) {
-			add_assoc_string(element, "timezone_id", entry->full_tz_name, 1);
+			add_ascii_assoc_string(element, "timezone_id", entry->full_tz_name, 1);
 		} else {
-			add_assoc_null(element, "timezone_id");
+			add_ascii_assoc_null(element, "timezone_id");
 		}
 
 		if (zend_hash_find(HASH_OF(return_value), entry->name, strlen(entry->name) + 1, (void **) &abbr_array_pp) == FAILURE) {
 			MAKE_STD_ZVAL(abbr_array);
 			array_init(abbr_array);
-			add_assoc_zval(return_value, entry->name, abbr_array);
+			add_ascii_assoc_zval(return_value, entry->name, abbr_array);
 		} else {
 			abbr_array = *abbr_array_pp;
 		}
@@ -2493,74 +2493,74 @@ PHP_FUNCTION(date_sun_info)
 	rs = timelib_astro_rise_set_altitude(t, latitude, longitude, -35.0/60, 1, &ddummy, &ddummy, &rise, &set, &transit);
 	switch (rs) {
 		case -1: /* always below */
-			add_assoc_bool(return_value, "sunrise", 0);
-			add_assoc_bool(return_value, "sunset", 0);
+			add_ascii_assoc_bool(return_value, "sunrise", 0);
+			add_ascii_assoc_bool(return_value, "sunset", 0);
 			break;
 		case 1: /* always above */
-			add_assoc_bool(return_value, "sunrise", 1);
-			add_assoc_bool(return_value, "sunset", 1);
+			add_ascii_assoc_bool(return_value, "sunrise", 1);
+			add_ascii_assoc_bool(return_value, "sunset", 1);
 			break;
 		default:
 			t2->sse = rise;
-			add_assoc_long(return_value, "sunrise", timelib_date_to_int(t2, &dummy));
+			add_ascii_assoc_long(return_value, "sunrise", timelib_date_to_int(t2, &dummy));
 			t2->sse = set;
-			add_assoc_long(return_value, "sunset", timelib_date_to_int(t2, &dummy));
+			add_ascii_assoc_long(return_value, "sunset", timelib_date_to_int(t2, &dummy));
 	}
 	t2->sse = transit;
-	add_assoc_long(return_value, "transit", timelib_date_to_int(t2, &dummy));
+	add_ascii_assoc_long(return_value, "transit", timelib_date_to_int(t2, &dummy));
 
 	/* Get civil twilight */
 	rs = timelib_astro_rise_set_altitude(t, latitude, longitude, -6.0, 0, &ddummy, &ddummy, &rise, &set, &transit);
 	switch (rs) {
 		case -1: /* always below */
-			add_assoc_bool(return_value, "civil_twilight_begin", 0);
-			add_assoc_bool(return_value, "civil_twilight_end", 0);
+			add_ascii_assoc_bool(return_value, "civil_twilight_begin", 0);
+			add_ascii_assoc_bool(return_value, "civil_twilight_end", 0);
 			break;
 		case 1: /* always above */
-			add_assoc_bool(return_value, "civil_twilight_begin", 1);
-			add_assoc_bool(return_value, "civil_twilight_end", 1);
+			add_ascii_assoc_bool(return_value, "civil_twilight_begin", 1);
+			add_ascii_assoc_bool(return_value, "civil_twilight_end", 1);
 			break;
 		default:
 			t2->sse = rise;
-			add_assoc_long(return_value, "civil_twilight_begin", timelib_date_to_int(t2, &dummy));
+			add_ascii_assoc_long(return_value, "civil_twilight_begin", timelib_date_to_int(t2, &dummy));
 			t2->sse = set;
-			add_assoc_long(return_value, "civil_twilight_end", timelib_date_to_int(t2, &dummy));
+			add_ascii_assoc_long(return_value, "civil_twilight_end", timelib_date_to_int(t2, &dummy));
 	}
 
 	/* Get nautical twilight */
 	rs = timelib_astro_rise_set_altitude(t, latitude, longitude, -12.0, 0, &ddummy, &ddummy, &rise, &set, &transit);
 	switch (rs) {
 		case -1: /* always below */
-			add_assoc_bool(return_value, "nautical_twilight_begin", 0);
-			add_assoc_bool(return_value, "nautical_twilight_end", 0);
+			add_ascii_assoc_bool(return_value, "nautical_twilight_begin", 0);
+			add_ascii_assoc_bool(return_value, "nautical_twilight_end", 0);
 			break;
 		case 1: /* always above */
-			add_assoc_bool(return_value, "nautical_twilight_begin", 1);
-			add_assoc_bool(return_value, "nautical_twilight_end", 1);
+			add_ascii_assoc_bool(return_value, "nautical_twilight_begin", 1);
+			add_ascii_assoc_bool(return_value, "nautical_twilight_end", 1);
 			break;
 		default:
 			t2->sse = rise;
-			add_assoc_long(return_value, "nautical_twilight_begin", timelib_date_to_int(t2, &dummy));
+			add_ascii_assoc_long(return_value, "nautical_twilight_begin", timelib_date_to_int(t2, &dummy));
 			t2->sse = set;
-			add_assoc_long(return_value, "nautical_twilight_end", timelib_date_to_int(t2, &dummy));
+			add_ascii_assoc_long(return_value, "nautical_twilight_end", timelib_date_to_int(t2, &dummy));
 	}
 
 	/* Get astronomical twilight */
 	rs = timelib_astro_rise_set_altitude(t, latitude, longitude, -18.0, 0, &ddummy, &ddummy, &rise, &set, &transit);
 	switch (rs) {
 		case -1: /* always below */
-			add_assoc_bool(return_value, "astronomical_twilight_begin", 0);
-			add_assoc_bool(return_value, "astronomical_twilight_end", 0);
+			add_ascii_assoc_bool(return_value, "astronomical_twilight_begin", 0);
+			add_ascii_assoc_bool(return_value, "astronomical_twilight_end", 0);
 			break;
 		case 1: /* always above */
-			add_assoc_bool(return_value, "astronomical_twilight_begin", 1);
-			add_assoc_bool(return_value, "astronomical_twilight_end", 1);
+			add_ascii_assoc_bool(return_value, "astronomical_twilight_begin", 1);
+			add_ascii_assoc_bool(return_value, "astronomical_twilight_end", 1);
 			break;
 		default:
 			t2->sse = rise;
-			add_assoc_long(return_value, "astronomical_twilight_begin", timelib_date_to_int(t2, &dummy));
+			add_ascii_assoc_long(return_value, "astronomical_twilight_begin", timelib_date_to_int(t2, &dummy));
 			t2->sse = set;
-			add_assoc_long(return_value, "astronomical_twilight_end", timelib_date_to_int(t2, &dummy));
+			add_ascii_assoc_long(return_value, "astronomical_twilight_end", timelib_date_to_int(t2, &dummy));
 	}
 	timelib_time_dtor(t);
 	timelib_time_dtor(t2);

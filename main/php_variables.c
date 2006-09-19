@@ -160,11 +160,11 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, zval *track_vars_arra
 				array_init(gpc_element);
 				zend_hash_next_index_insert(symtable1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 			} else {
-				if (zend_symtable_find(symtable1, index, index_len + 1, (void **) &gpc_element_p) == FAILURE
+				if (zend_rt_symtable_find(symtable1, index, index_len + 1, (void **) &gpc_element_p) == FAILURE
 					|| Z_TYPE_PP(gpc_element_p) != IS_ARRAY) {
 					MAKE_STD_ZVAL(gpc_element);
 					array_init(gpc_element);
-					zend_symtable_update(symtable1, index, index_len + 1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
+					zend_rt_symtable_update(symtable1, index, index_len + 1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 				}
 			}
 			symtable1 = Z_ARRVAL_PP(gpc_element_p);
@@ -196,10 +196,10 @@ plain_var:
 			 */
 			if (PG(http_globals)[TRACK_VARS_COOKIE] &&
 				symtable1 == Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]) && 
-				zend_symtable_exists(symtable1, index, index_len+1)) {
+				zend_rt_symtable_exists(symtable1, index, index_len+1)) {
 				zval_ptr_dtor(&gpc_element);
 			} else {
-				zend_symtable_update(symtable1, index, index_len + 1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
+				zend_rt_symtable_update(symtable1, index, index_len + 1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 			}
 		}
 	}
@@ -687,14 +687,14 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 	if (SG(request_info).argc) {
 		arr->refcount++;
 		argc->refcount++;
-		zend_hash_update(&EG(symbol_table), "argv", sizeof("argv"), &arr, sizeof(zval *), NULL);
-		zend_hash_add(&EG(symbol_table), "argc", sizeof("argc"), &argc, sizeof(zval *), NULL);
+		zend_ascii_hash_update(&EG(symbol_table), "argv", sizeof("argv"), &arr, sizeof(zval *), NULL);
+		zend_ascii_hash_add(&EG(symbol_table), "argc", sizeof("argc"), &argc, sizeof(zval *), NULL);
 	} 
 	if (track_vars_array) {
 		arr->refcount++;
 		argc->refcount++;
-		zend_hash_update(Z_ARRVAL_P(track_vars_array), "argv", sizeof("argv"), &arr, sizeof(zval *), NULL);
-		zend_hash_update(Z_ARRVAL_P(track_vars_array), "argc", sizeof("argc"), &argc, sizeof(zval *), NULL);
+		zend_ascii_hash_update(Z_ARRVAL_P(track_vars_array), "argv", sizeof("argv"), &arr, sizeof(zval *), NULL);
+		zend_ascii_hash_update(Z_ARRVAL_P(track_vars_array), "argc", sizeof("argc"), &argc, sizeof(zval *), NULL);
 	}
 	zval_ptr_dtor(&arr);
 	zval_ptr_dtor(&argc);
@@ -893,7 +893,7 @@ int php_hash_environment(TSRMLS_D)
 		}
 
 		PG(http_globals)[i]->refcount++;
-		zend_hash_update(&EG(symbol_table), auto_global_records[i].name, auto_global_records[i].name_len, &PG(http_globals)[i], sizeof(zval *), NULL);
+		zend_ascii_hash_update(&EG(symbol_table), auto_global_records[i].name, auto_global_records[i].name_len, &PG(http_globals)[i], sizeof(zval *), NULL);
 	}
 
 	/* Create _REQUEST */
@@ -915,12 +915,12 @@ static zend_bool php_auto_globals_create_server(char *name, uint name_len TSRMLS
 			if (SG(request_info).argc) {
 				zval **argc, **argv;
 
-				if (zend_hash_find(&EG(symbol_table), "argc", sizeof("argc"), (void**)&argc) == SUCCESS &&
-				    zend_hash_find(&EG(symbol_table), "argv", sizeof("argv"), (void**)&argv) == SUCCESS) {
+				if (zend_ascii_hash_find(&EG(symbol_table), "argc", sizeof("argc"), (void**)&argc) == SUCCESS &&
+				    zend_ascii_hash_find(&EG(symbol_table), "argv", sizeof("argv"), (void**)&argv) == SUCCESS) {
 					(*argc)->refcount++;
 					(*argv)->refcount++;
-					zend_hash_update(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "argv", sizeof("argv"), argv, sizeof(zval *), NULL);
-					zend_hash_update(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "argc", sizeof("argc"), argc, sizeof(zval *), NULL);
+					zend_ascii_hash_update(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "argv", sizeof("argv"), argv, sizeof(zval *), NULL);
+					zend_ascii_hash_update(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "argc", sizeof("argc"), argc, sizeof(zval *), NULL);
 				}
 			} else {
 				php_build_argv(SG(request_info).query_string, PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
@@ -938,7 +938,7 @@ static zend_bool php_auto_globals_create_server(char *name, uint name_len TSRMLS
 		PG(http_globals)[TRACK_VARS_SERVER] = server_vars;
 	}
 
-	zend_hash_update(&EG(symbol_table), name, name_len + 1, &PG(http_globals)[TRACK_VARS_SERVER], sizeof(zval *), NULL);
+	zend_ascii_hash_update(&EG(symbol_table), name, name_len + 1, &PG(http_globals)[TRACK_VARS_SERVER], sizeof(zval *), NULL);
 	PG(http_globals)[TRACK_VARS_SERVER]->refcount++;
 
 	return 0; /* don't rearm */
@@ -959,7 +959,7 @@ static zend_bool php_auto_globals_create_env(char *name, uint name_len TSRMLS_DC
 		php_import_environment_variables(PG(http_globals)[TRACK_VARS_ENV] TSRMLS_CC);
 	}
 
-	zend_hash_update(&EG(symbol_table), name, name_len + 1, &PG(http_globals)[TRACK_VARS_ENV], sizeof(zval *), NULL);
+	zend_ascii_hash_update(&EG(symbol_table), name, name_len + 1, &PG(http_globals)[TRACK_VARS_ENV], sizeof(zval *), NULL);
 	PG(http_globals)[TRACK_VARS_ENV]->refcount++;
 
 	return 0; /* don't rearm */
@@ -1001,7 +1001,7 @@ static zend_bool php_auto_globals_create_request(char *name, uint name_len TSRML
 		}
 	}
 
-	zend_hash_update(&EG(symbol_table), "_REQUEST", sizeof("_REQUEST"), &form_variables, sizeof(zval *), NULL);
+	zend_ascii_hash_update(&EG(symbol_table), "_REQUEST", sizeof("_REQUEST"), &form_variables, sizeof(zval *), NULL);
 	return 0;
 }
 

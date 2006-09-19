@@ -4484,8 +4484,8 @@ PHP_FUNCTION(getopt)
 	 * in order to be on the safe side, even though it is also available
 	 * from the symbol table.
 	 */
-	if (zend_hash_find(HASH_OF(PG(http_globals)[TRACK_VARS_SERVER]), "argv", sizeof("argv"), (void **) &args) != FAILURE ||
-		zend_hash_find(&EG(symbol_table), "argv", sizeof("argv"), (void **) &args) != FAILURE) {
+	if (zend_ascii_hash_find(HASH_OF(PG(http_globals)[TRACK_VARS_SERVER]), "argv", sizeof("argv"), (void **) &args) != FAILURE ||
+		zend_ascii_hash_find(&EG(symbol_table), "argv", sizeof("argv"), (void **) &args) != FAILURE) {
 		int pos = 0;
 		zval **arg;
 
@@ -4702,8 +4702,8 @@ PHP_FUNCTION(time_nanosleep)
 		RETURN_TRUE;
 	} else if (errno == EINTR) {
 		array_init(return_value);
-		add_assoc_long_ex(return_value, "seconds", sizeof("seconds"), php_rem.tv_sec);
-		add_assoc_long_ex(return_value, "nanoseconds", sizeof("nanoseconds"), php_rem.tv_nsec);
+		add_ascii_assoc_long_ex(return_value, "seconds", sizeof("seconds"), php_rem.tv_sec);
+		add_ascii_assoc_long_ex(return_value, "nanoseconds", sizeof("nanoseconds"), php_rem.tv_nsec);
 		return;
 	} else if (errno == EINVAL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "nanoseconds was not in the range 0 to 999 999 999 or seconds was negative");
@@ -4967,10 +4967,10 @@ PHP_FUNCTION(error_get_last)
 	}
 	if (PG(last_error_message)) {
 		array_init(return_value);
-		add_assoc_long_ex(return_value, "type", sizeof("type"), PG(last_error_type));
-		add_assoc_string_ex(return_value, "message", sizeof("message"), PG(last_error_message), 1);
-		add_assoc_string_ex(return_value, "file", sizeof("file"), PG(last_error_file)?PG(last_error_file):"-", 1 );
-		add_assoc_long_ex(return_value, "line", sizeof("line"), PG(last_error_lineno));
+		add_ascii_assoc_long_ex(return_value, "type", sizeof("type"), PG(last_error_type));
+		add_ascii_assoc_string_ex(return_value, "message", sizeof("message"), PG(last_error_message), 1);
+		add_ascii_assoc_string_ex(return_value, "file", sizeof("file"), PG(last_error_file)?PG(last_error_file):"-", 1 );
+		add_ascii_assoc_long_ex(return_value, "line", sizeof("line"), PG(last_error_lineno));
 	}
 }
 /* }}} */
@@ -5521,22 +5521,22 @@ static int php_ini_get_option(zend_ini_entry *ini_entry, int num_args, va_list a
 		array_init(option);
 
 		if (ini_entry->orig_value) {
-			add_assoc_stringl(option, "global_value", ini_entry->orig_value, ini_entry->orig_value_length, 1);
+			add_ascii_assoc_stringl(option, "global_value", ini_entry->orig_value, ini_entry->orig_value_length, 1);
 		} else if (ini_entry->value) {
-			add_assoc_stringl(option, "global_value", ini_entry->value, ini_entry->value_length, 1);
+			add_ascii_assoc_stringl(option, "global_value", ini_entry->value, ini_entry->value_length, 1);
 		} else {
-			add_assoc_null(option, "global_value");
+			add_ascii_assoc_null(option, "global_value");
 		}
 
 		if (ini_entry->value) {
-			add_assoc_stringl(option, "local_value", ini_entry->value, ini_entry->value_length, 1);
+			add_ascii_assoc_stringl(option, "local_value", ini_entry->value, ini_entry->value_length, 1);
 		} else {
-			add_assoc_null(option, "local_value");
+			add_ascii_assoc_null(option, "local_value");
 		}
 
-		add_assoc_long(option, "access", ini_entry->modifiable);
+		add_ascii_assoc_long(option, "access", ini_entry->modifiable);
 
-		add_assoc_zval_ex(ini_array, ini_entry->name, ini_entry->name_length, option);
+		add_ascii_assoc_zval_ex(ini_array, ini_entry->name, ini_entry->name_length, option);
 	}
 	return 0;
 }

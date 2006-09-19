@@ -434,7 +434,7 @@ ZEND_FUNCTION(each)
 	}
 	zend_hash_index_update(Z_ARRVAL_P(return_value), 1, &entry, sizeof(zval *), NULL);
 	entry->refcount++;
-	zend_hash_update(Z_ARRVAL_P(return_value), "value", sizeof("value"), &entry, sizeof(zval *), NULL);
+	zend_ascii_hash_update(Z_ARRVAL_P(return_value), "value", sizeof("value"), &entry, sizeof(zval *), NULL);
 	entry->refcount++;
 
 	/* add the key elements */
@@ -449,7 +449,7 @@ ZEND_FUNCTION(each)
 			add_get_index_long(return_value, 0, num_key, (void **) &inserted_pointer);
 			break;
 	}
-	zend_hash_update(Z_ARRVAL_P(return_value), "key", sizeof("key"), inserted_pointer, sizeof(zval *), NULL);
+	zend_ascii_hash_update(Z_ARRVAL_P(return_value), "key", sizeof("key"), inserted_pointer, sizeof(zval *), NULL);
 	(*inserted_pointer)->refcount++;
 	zend_hash_move_forward(target_hash);
 }
@@ -1476,12 +1476,12 @@ ZEND_FUNCTION(get_defined_functions)
 
 	zend_hash_apply_with_arguments(EG(function_table), (apply_func_args_t) copy_function_name, 2, internal, user);
 
-	if (zend_hash_add(Z_ARRVAL_P(return_value), "internal", sizeof("internal"), (void **)&internal, sizeof(zval *), NULL) == FAILURE) {
+	if (zend_ascii_hash_add(Z_ARRVAL_P(return_value), "internal", sizeof("internal"), (void **)&internal, sizeof(zval *), NULL) == FAILURE) {
 		zend_error(E_WARNING, "Cannot add internal functions to return value from get_defined_functions()");
 		RETURN_FALSE;
 	}
 
-	if (zend_hash_add(Z_ARRVAL_P(return_value), "user", sizeof("user"), (void **)&user, sizeof(zval *), NULL) == FAILURE) {
+	if (zend_ascii_hash_add(Z_ARRVAL_P(return_value), "user", sizeof("user"), (void **)&user, sizeof(zval *), NULL) == FAILURE) {
 		zend_error(E_WARNING, "Cannot add user functions to return value from get_defined_functions()");
 		RETURN_FALSE;
 	}
@@ -2035,8 +2035,8 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		if (skip->op_array) {
 			filename = skip->op_array->filename;
 			lineno = skip->opline->lineno;
-			add_assoc_rt_string_ex(stack_frame, "file", sizeof("file"), filename, 1);
-			add_assoc_long_ex(stack_frame, "line", sizeof("line"), lineno);
+			add_ascii_assoc_rt_string_ex(stack_frame, "file", sizeof("file"), filename, 1);
+			add_ascii_assoc_long_ex(stack_frame, "line", sizeof("line"), lineno);
 
 			/* try to fetch args only if an FCALL was just made - elsewise we're in the middle of a function
 			 * and debug_baktrace() might have been called by the error_handler. in this case we don't
@@ -2050,8 +2050,8 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 					break;
 				}				    
 				if (prev->op_array) {
-					add_assoc_string_ex(stack_frame, "file", sizeof("file"), prev->op_array->filename, 1);
-					add_assoc_long_ex(stack_frame, "line", sizeof("line"), prev->opline->lineno);
+					add_ascii_assoc_string_ex(stack_frame, "file", sizeof("file"), prev->op_array->filename, 1);
+					add_ascii_assoc_long_ex(stack_frame, "line", sizeof("line"), prev->opline->lineno);
 					break;
 				}
 				prev = prev->prev_execute_data;
@@ -2062,32 +2062,32 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		function_name = ptr->function_state.function->common.function_name;
 
 		if (function_name.v) {
-			add_assoc_text_ex(stack_frame, "function", sizeof("function"), function_name, 1);
+			add_ascii_assoc_text_ex(stack_frame, "function", sizeof("function"), function_name, 1);
 
 			if (ptr->object && Z_TYPE_P(ptr->object) == IS_OBJECT) {
 				if (ptr->function_state.function->common.scope) {
-					add_assoc_textl_ex(stack_frame, "class", sizeof("class"), ptr->function_state.function->common.scope->name, ptr->function_state.function->common.scope->name_length, 1);
+					add_ascii_assoc_textl_ex(stack_frame, "class", sizeof("class"), ptr->function_state.function->common.scope->name, ptr->function_state.function->common.scope->name_length, 1);
 				} else {
 					zend_uint class_name_len;
 					int dup;
 
 					dup = zend_get_object_classname(ptr->object, &class_name, &class_name_len TSRMLS_CC);
-					add_assoc_text_ex(stack_frame, "class", sizeof("class"), class_name, dup);
+					add_ascii_assoc_text_ex(stack_frame, "class", sizeof("class"), class_name, dup);
 				}
 				if (provide_object) {
-					add_assoc_zval_ex(stack_frame, "object", sizeof("object"), ptr->object);
+					add_ascii_assoc_zval_ex(stack_frame, "object", sizeof("object"), ptr->object);
 					ptr->object->refcount++;
 				}
 
-				add_assoc_ascii_string_ex(stack_frame, "type", sizeof("type"), "->", 1);
+				add_ascii_assoc_ascii_string_ex(stack_frame, "type", sizeof("type"), "->", 1);
 			} else if (ptr->function_state.function->common.scope) {
-				add_assoc_textl_ex(stack_frame, "class", sizeof("class"), ptr->function_state.function->common.scope->name, ptr->function_state.function->common.scope->name_length, 1);
-				add_assoc_ascii_string_ex(stack_frame, "type", sizeof("type"), "::", 1);
+				add_ascii_assoc_textl_ex(stack_frame, "class", sizeof("class"), ptr->function_state.function->common.scope->name, ptr->function_state.function->common.scope->name_length, 1);
+				add_ascii_assoc_ascii_string_ex(stack_frame, "type", sizeof("type"), "::", 1);
 			}
 
 			if ((! ptr->opline) || ((ptr->opline->opcode == ZEND_DO_FCALL_BY_NAME) || (ptr->opline->opcode == ZEND_DO_FCALL))) {
 				if (arg_stack_consistent && (frames_on_stack > 0)) {
-					add_assoc_zval_ex(stack_frame, "args", sizeof("args"), debug_backtrace_get_args(&cur_arg_pos TSRMLS_CC));
+					add_ascii_assoc_zval_ex(stack_frame, "args", sizeof("args"), debug_backtrace_get_args(&cur_arg_pos TSRMLS_CC));
 					frames_on_stack--;
 				}
 			}
@@ -2136,10 +2136,10 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				 */
 
 				add_next_index_rt_string(arg_array, include_filename, 1);
-				add_assoc_zval_ex(stack_frame, "args", sizeof("args"), arg_array);
+				add_ascii_assoc_zval_ex(stack_frame, "args", sizeof("args"), arg_array);
 			}
 
-			add_assoc_ascii_string_ex(stack_frame, "function", sizeof("function"), function_name.s, 1);
+			add_ascii_assoc_ascii_string_ex(stack_frame, "function", sizeof("function"), function_name.s, 1);
 		}
 
 		add_next_index_zval(return_value, stack_frame);

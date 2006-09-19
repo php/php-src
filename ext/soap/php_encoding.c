@@ -1018,7 +1018,7 @@ static zval* get_zval_property(zval* object, char* name TSRMLS_DC)
 	} else if (Z_TYPE_P(object) == IS_ARRAY) {
 		zval **data_ptr;
 
-		if (zend_hash_find(Z_ARRVAL_P(object), name, strlen(name)+1, (void**)&data_ptr) == SUCCESS) {
+		if (zend_rt_hash_find(Z_ARRVAL_P(object), name, strlen(name)+1, (void**)&data_ptr) == SUCCESS) {
 		  return *data_ptr;
 		}
 	}

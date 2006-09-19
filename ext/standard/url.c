@@ -386,21 +386,21 @@ PHP_FUNCTION(parse_url)
 
     /* add the various elements to the array */
 	if (resource->scheme != NULL)
-		add_assoc_string(return_value, "scheme", resource->scheme, 1);
+		add_ascii_assoc_string(return_value, "scheme", resource->scheme, 1);
 	if (resource->host != NULL)
-		add_assoc_string(return_value, "host", resource->host, 1);
+		add_ascii_assoc_string(return_value, "host", resource->host, 1);
 	if (resource->port != 0)
-		add_assoc_long(return_value, "port", resource->port);
+		add_ascii_assoc_long(return_value, "port", resource->port);
 	if (resource->user != NULL)
-		add_assoc_string(return_value, "user", resource->user, 1);
+		add_ascii_assoc_string(return_value, "user", resource->user, 1);
 	if (resource->pass != NULL)
-		add_assoc_string(return_value, "pass", resource->pass, 1);
+		add_ascii_assoc_string(return_value, "pass", resource->pass, 1);
 	if (resource->path != NULL)
-		add_assoc_string(return_value, "path", resource->path, 1);
+		add_ascii_assoc_string(return_value, "path", resource->path, 1);
 	if (resource->query != NULL)
-		add_assoc_string(return_value, "query", resource->query, 1);
+		add_ascii_assoc_string(return_value, "query", resource->query, 1);
 	if (resource->fragment != NULL)
-		add_assoc_string(return_value, "fragment", resource->fragment, 1);
+		add_ascii_assoc_string(return_value, "fragment", resource->fragment, 1);
 done:	
 	php_url_free(resource);
 }

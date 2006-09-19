@@ -685,7 +685,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 		zval *tmp;
 		ALLOC_INIT_ZVAL(tmp);
 		ZVAL_RT_STRINGL(tmp, buffer, buffer_len, 1);
-		zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) &tmp, sizeof(zval *), NULL);
+		zend_ascii_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) &tmp, sizeof(zval *), NULL);
 	}
 	efree(buffer);
 }
@@ -950,7 +950,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 
 		ALLOC_INIT_ZVAL(tmp);
 		ZVAL_RT_STRINGL(tmp, buffer, buffer_len, 1);
-		zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) & tmp, sizeof(zval *), NULL);
+		zend_ascii_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) & tmp, sizeof(zval *), NULL);
 	}
 	efree(buffer);
 }
@@ -1735,7 +1735,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	if (sapi_module.additional_functions) {
 		zend_module_entry *module;
 
-		if (zend_hash_find(&module_registry, "standard", sizeof("standard"), (void**)&module)==SUCCESS) {
+		if (zend_ascii_hash_find(&module_registry, "standard", sizeof("standard"), (void**)&module)==SUCCESS) {
 			EG(current_module) = module;
 			zend_register_functions(NULL, sapi_module.additional_functions, NULL, MODULE_PERSISTENT TSRMLS_CC);
 			EG(current_module) = NULL;

@@ -458,14 +458,14 @@ PHP_FUNCTION(stream_get_meta_data)
 		zval_copy_ctor(newval);
 		INIT_PZVAL(newval);
 
-		add_assoc_zval(return_value, "wrapper_data", newval);
+		add_ascii_assoc_zval(return_value, "wrapper_data", newval);
 	}
 	if (stream->wrapper) {
-		add_assoc_string(return_value, "wrapper_type", (char *)stream->wrapper->wops->label, 1);
+		add_ascii_assoc_string(return_value, "wrapper_type", (char *)stream->wrapper->wops->label, 1);
 	}
-	add_assoc_string(return_value, "stream_type", (char *)stream->ops->label, 1);
+	add_ascii_assoc_string(return_value, "stream_type", (char *)stream->ops->label, 1);
 
-	add_assoc_string(return_value, "mode", stream->mode, 1);
+	add_ascii_assoc_string(return_value, "mode", stream->mode, 1);
 	
 	if (stream->readfilters.head) {
 		php_stream_filter *filter;
@@ -477,7 +477,7 @@ PHP_FUNCTION(stream_get_meta_data)
 			add_next_index_string(newval, filter->name, 1);
 		}
 
-		add_assoc_zval(return_value, "read_filters", newval);
+		add_ascii_assoc_zval(return_value, "read_filters", newval);
 	}
 
 	if (stream->writefilters.head) {
@@ -490,27 +490,27 @@ PHP_FUNCTION(stream_get_meta_data)
 			add_next_index_string(newval, filter->name, 1);
 		}
 
-		add_assoc_zval(return_value, "write_filters", newval);
+		add_ascii_assoc_zval(return_value, "write_filters", newval);
 	}
 	
 	if (stream->readbuf_type == IS_UNICODE) {
 		int readbuf_len = u_countChar32(stream->readbuf.u + stream->readpos, stream->writepos - stream->readpos);
-		add_assoc_long(return_value, "unread_bytes", UBYTES(stream->writepos - stream->readpos));
-		add_assoc_long(return_value, "unread_chars", readbuf_len);
+		add_ascii_assoc_long(return_value, "unread_bytes", UBYTES(stream->writepos - stream->readpos));
+		add_ascii_assoc_long(return_value, "unread_chars", readbuf_len);
 	} else { /* IS_STRING */
-		add_assoc_long(return_value, "unread_bytes", stream->writepos - stream->readpos);
-		add_assoc_long(return_value, "unread_chars", stream->writepos - stream->readpos);
+		add_ascii_assoc_long(return_value, "unread_bytes", stream->writepos - stream->readpos);
+		add_ascii_assoc_long(return_value, "unread_chars", stream->writepos - stream->readpos);
 	}
 
-	add_assoc_bool(return_value, "seekable", (stream->ops->seek) && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0);
+	add_ascii_assoc_bool(return_value, "seekable", (stream->ops->seek) && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0);
 	if (stream->orig_path) {
-		add_assoc_string(return_value, "uri", stream->orig_path, 1);
+		add_ascii_assoc_string(return_value, "uri", stream->orig_path, 1);
 	}
 
 	if (!php_stream_populate_meta_data(stream, return_value)) {
-		add_assoc_bool(return_value, "timed_out", 0);
-		add_assoc_bool(return_value, "blocked", 1);
-		add_assoc_bool(return_value, "eof", php_stream_eof(stream));
+		add_ascii_assoc_bool(return_value, "timed_out", 0);
+		add_ascii_assoc_bool(return_value, "blocked", 1);
+		add_ascii_assoc_bool(return_value, "eof", php_stream_eof(stream));
 	}
 
 }
@@ -914,7 +914,7 @@ static int parse_context_params(php_stream_context *context, zval *params TSRMLS
 	int ret = SUCCESS;
 	zval **tmp;
 
-	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "notification", sizeof("notification"), (void**)&tmp)) {
+	if (SUCCESS == zend_ascii_hash_find(Z_ARRVAL_P(params), "notification", sizeof("notification"), (void**)&tmp)) {
 		
 		if (context->notifier) {
 			php_stream_notification_free(context->notifier);
@@ -927,10 +927,10 @@ static int parse_context_params(php_stream_context *context, zval *params TSRMLS
 		ZVAL_ADDREF(*tmp);
 		context->notifier->dtor = user_space_stream_notifier_dtor;
 	}
-	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "options", sizeof("options"), (void**)&tmp)) {
+	if (SUCCESS == zend_ascii_hash_find(Z_ARRVAL_P(params), "options", sizeof("options"), (void**)&tmp)) {
 		parse_context_options(context, *tmp TSRMLS_CC);
 	}
-	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "encoding", sizeof("encoding"), (void**)&tmp)) {
+	if (SUCCESS == zend_ascii_hash_find(Z_ARRVAL_P(params), "encoding", sizeof("encoding"), (void**)&tmp)) {
 		zval strval = **tmp;
 
 		if (context->input_encoding) {
@@ -944,7 +944,7 @@ static int parse_context_params(php_stream_context *context, zval *params TSRMLS
 		context->input_encoding = Z_STRVAL(strval);
 		context->output_encoding = estrdup(Z_STRVAL(strval));
 	}
-	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "input_encoding", sizeof("input_encoding"), (void**)&tmp)) {
+	if (SUCCESS == zend_ascii_hash_find(Z_ARRVAL_P(params), "input_encoding", sizeof("input_encoding"), (void**)&tmp)) {
 		zval strval = **tmp;
 
 		if (context->input_encoding) {
@@ -955,7 +955,7 @@ static int parse_context_params(php_stream_context *context, zval *params TSRMLS
 		convert_to_string(&strval);
 		context->input_encoding = Z_STRVAL(strval);
 	}
-	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "output_encoding", sizeof("output_encoding"), (void**)&tmp)) {
+	if (SUCCESS == zend_ascii_hash_find(Z_ARRVAL_P(params), "output_encoding", sizeof("output_encoding"), (void**)&tmp)) {
 		zval strval = **tmp;
 
 		if (context->output_encoding) {
@@ -966,7 +966,7 @@ static int parse_context_params(php_stream_context *context, zval *params TSRMLS
 		convert_to_string(&strval);
 		context->output_encoding = Z_STRVAL(strval);
 	}
-	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "default_mode", sizeof("default_mode"), (void**)&tmp)) {
+	if (SUCCESS == zend_ascii_hash_find(Z_ARRVAL_P(params), "default_mode", sizeof("default_mode"), (void**)&tmp)) {
 		zval longval = **tmp;
 
 		zval_copy_ctor(&longval);
