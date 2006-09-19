@@ -1028,7 +1028,6 @@ static int php_array_walk(HashTable *target_hash, zval **userdata TSRMLS_DC)
    Apply a user function to every member of an array */
 PHP_FUNCTION(array_walk)
 {
-	int	argc;
 	zval *array,
 		 *userdata = NULL,
 		 *tmp,
@@ -1036,7 +1035,7 @@ PHP_FUNCTION(array_walk)
 	HashTable *target_hash;
 
 	old_walk_func_name = BG(array_walk_func_name);
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "az|z", &array, &tmp, &userdata) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz|z", &array, &tmp, &userdata) == FAILURE) {
 		return;
 	}
 	target_hash = HASH_OF(array);
