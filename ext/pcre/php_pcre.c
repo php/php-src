@@ -1684,13 +1684,13 @@ PHP_FUNCTION(preg_quote)
 	char	*out_str,		/* Output string with quoted characters */
 		 	*p,				/* Iterator for input string */
 			*q,				/* Iterator for output string */
-			 delim_char=0,	/* Delimiter character to be quoted */
 			 c;				/* Current character */
+	UChar32	 delim_char=0;	/* Delimiter character to be quoted */
 	zend_bool quote_delim = 0; /* Whether to quote additional delim char */
 	
 	/* Get the arguments and check for errors */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &in_str, &in_str_len,
-							  &delim, &delim_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&|s&", &in_str, &in_str_len, UG(utf8_conv),
+							  &delim, &delim_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
 	
@@ -1698,17 +1698,24 @@ PHP_FUNCTION(preg_quote)
 
 	/* Nothing to do if we got an empty string */
 	if (in_str == in_str_end) {
-		RETURN_EMPTY_STRING();
+		RETURN_EMPTY_TEXT();
 	}
 
 	if (delim && *delim) {
-		delim_char = delim[0];
+		if (UG(unicode)) {
+			U8_GET(delim, 0, 0, delim_len, delim_char);
+		} else {
+			delim_char = (UChar32)delim[0];
+		}
 		quote_delim = 1;
 	}
 	
 	/* Allocate enough memory so that even if each character
-	   is quoted, we won't run out of room */
-	out_str = safe_emalloc(4, in_str_len, 1);
+	   is quoted, we won't run out of room. In Unicode mode, the longest UTF-8
+	   sequence is 4 bytes, so the multiplier is (4+1). In non-Unicode mode, we
+	   have to assume that any character can be '\0', which needs 4 chars to
+	   be escaped. */
+	out_str = safe_emalloc(UG(unicode)?5:4, in_str_len, 1);
 	
 	/* Go through the string and quote necessary characters */
 	for(p = in_str, q = out_str; p != in_str_end; p++) {
@@ -1745,16 +1752,28 @@ PHP_FUNCTION(preg_quote)
 				break;
 
 			default:
-				if (quote_delim && c == delim_char)
-					*q++ = '\\';
-				*q++ = c;
+				if ((UChar32)(unsigned char)c > 0x7f) { /* non-ASCII char */
+					int tmp = 0;
+					UChar32 cp = 0;
+					U8_NEXT(p, tmp, in_str_end-p, cp);
+					if (quote_delim && cp == delim_char) {
+						*q++ = '\\';
+					}
+					memcpy(q, p, tmp);
+					q += tmp;
+					p += tmp-1; /* going to be incremented by the loop */
+				} else {
+					if (quote_delim && c == delim_char)
+							*q++ = '\\';
+					*q++ = c;
+				}
 				break;
 		}
 	}
 	*q = '\0';
 	
 	/* Reallocate string and return it */
-	RETVAL_STRINGL(erealloc(out_str, q - out_str + 1), q - out_str, 0);
+	RETVAL_UTF8_STRINGL(erealloc(out_str, q - out_str + 1), q - out_str, 0);
 }
 /* }}} */
 
