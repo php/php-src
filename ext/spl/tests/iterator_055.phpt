@@ -63,16 +63,16 @@ object(ArrayIterator)#%d (7) {
 unicode(3) "1,2"
 array(2) {
   [0]=>
-  string(0) ""
+  unicode(0) ""
   [1]=>
-  string(0) ""
+  unicode(0) ""
 }
 unicode(5) "1,2,3"
 array(2) {
   [0]=>
-  string(0) ""
+  unicode(0) ""
   [1]=>
-  string(2) ",3"
+  unicode(2) ",3"
 }
 object(ArrayIterator)#%d (7) {
   [1]=>

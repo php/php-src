@@ -312,3 +312,269 @@ object(ArrayIterator)#%d (9) {
   %s(2) ",,"
 }
 ===DONE===
+--UEXPECTF--
+bool(true)
+int(0)
+array(3) {
+  [0]=>
+  array(0) {
+  }
+  [1]=>
+  array(0) {
+  }
+  [2]=>
+  array(0) {
+  }
+}
+bool(true)
+int(1)
+array(3) {
+  [0]=>
+  array(0) {
+  }
+  [1]=>
+  array(0) {
+  }
+  [2]=>
+  array(0) {
+  }
+}
+bool(true)
+int(2)
+array(3) {
+  [0]=>
+  array(0) {
+  }
+  [1]=>
+  array(0) {
+  }
+  [2]=>
+  array(0) {
+  }
+}
+bool(true)
+int(3)
+array(3) {
+  [0]=>
+  array(0) {
+  }
+  [1]=>
+  array(0) {
+  }
+  [2]=>
+  array(0) {
+  }
+}
+bool(true)
+int(4)
+array(3) {
+  [0]=>
+  array(0) {
+  }
+  [1]=>
+  array(0) {
+  }
+  [2]=>
+  array(0) {
+  }
+}
+bool(true)
+int(5)
+array(3) {
+  [0]=>
+  array(0) {
+  }
+  [1]=>
+  array(0) {
+  }
+  [2]=>
+  array(0) {
+  }
+}
+bool(true)
+int(6)
+array(3) {
+  [0]=>
+  array(0) {
+  }
+  [1]=>
+  array(0) {
+  }
+  [2]=>
+  array(0) {
+  }
+}
+bool(true)
+int(7)
+array(3) {
+  [0]=>
+  array(0) {
+  }
+  [1]=>
+  array(0) {
+  }
+  [2]=>
+  array(0) {
+  }
+}
+bool(true)
+int(8)
+array(3) {
+  [0]=>
+  array(0) {
+  }
+  [1]=>
+  array(0) {
+  }
+  [2]=>
+  array(0) {
+  }
+}
+bool(true)
+int(0)
+array(2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    unicode(1) "0"
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    unicode(1) "0"
+  }
+}
+bool(true)
+int(1)
+array(2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    unicode(1) "1"
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    unicode(1) "1"
+  }
+}
+bool(true)
+int(2)
+array(2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    unicode(1) "2"
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    unicode(1) "2"
+  }
+}
+bool(true)
+int(3)
+array(2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    unicode(1) "3"
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    unicode(1) "3"
+  }
+}
+bool(true)
+int(4)
+array(2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    unicode(1) "4"
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    unicode(1) "4"
+  }
+}
+bool(true)
+int(5)
+array(2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    unicode(1) "5"
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    unicode(1) "5"
+  }
+}
+bool(true)
+int(6)
+array(2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    unicode(1) "6"
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    unicode(1) "6"
+  }
+}
+bool(true)
+int(7)
+array(2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    unicode(1) "7"
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    unicode(1) "7"
+  }
+}
+bool(true)
+int(8)
+array(2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    unicode(1) "8"
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    unicode(1) "8"
+  }
+}
+object(ArrayIterator)#%d (9) {
+  [0]=>
+  unicode(1) "1"
+  [1]=>
+  unicode(3) "1,2"
+  [2]=>
+  unicode(5) "1,2,3"
+  [3]=>
+  unicode(0) ""
+  [4]=>
+  NULL
+  [5]=>
+  array(0) {
+  }
+  [6]=>
+  unicode(6) "FooBar"
+  [7]=>
+  unicode(1) ","
+  [8]=>
+  unicode(2) ",,"
+}
+===DONE===
