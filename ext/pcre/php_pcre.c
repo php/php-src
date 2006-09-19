@@ -1485,11 +1485,11 @@ PHP_FUNCTION(preg_split)
 
 	/* Compile regex or get it from cache. */
 	if ((pce = pcre_get_compiled_regex_cache(regex.s, regex_len TSRMLS_CC)) == NULL) {
-		RETURN_FALSE;
 		if (str_type == IS_UNICODE) {
 			efree(regex_utf8);
 			efree(subject_utf8);
 		}
+		RETURN_FALSE;
 	}
 
 	php_pcre_split_impl(pce, subject.s, subject_len, return_value, limit_val, flags TSRMLS_CC);
