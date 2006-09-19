@@ -18,12 +18,7 @@
 
 /* $Id$ */
 
-/* UTODO
- *  - PCRE_NO_UTF8_CHECK option for Unicode strings
- *
- *  php_pcre_split_impl():
- *   - Avoid the /./ bump for Unicode strings with U8_FWD_1()
- *
+/*  TODO
  *  php_pcre_replace_impl():
  *   - should use fcall info cache (enhancement)
  */
@@ -840,7 +835,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 }
 /* }}} */
 
-/* {{{ proto int preg_match(string pattern, string subject [, array subpatterns [, int flags [, int offset]]])
+/* {{{ proto int preg_match(string pattern, string subject [, array subpatterns [, int flags [, int offset]]]) U
    Perform a Perl-style regular expression match */
 PHP_FUNCTION(preg_match)
 {
@@ -848,7 +843,7 @@ PHP_FUNCTION(preg_match)
 }
 /* }}} */
 
-/* {{{ proto int preg_match_all(string pattern, string subject, array subpatterns [, int flags [, int offset]])
+/* {{{ proto int preg_match_all(string pattern, string subject, array subpatterns [, int flags [, int offset]]) U
    Perform a Perl-style global regular expression match */
 PHP_FUNCTION(preg_match_all)
 {
@@ -1448,7 +1443,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 }
 /* }}} */
 
-/* {{{ proto string preg_replace(mixed regex, mixed replace, mixed subject [, int limit [, count]])
+/* {{{ proto string preg_replace(mixed regex, mixed replace, mixed subject [, int limit [, count]]) U
    Perform Perl-style regular expression replacement. */
 PHP_FUNCTION(preg_replace)
 {
@@ -1456,7 +1451,7 @@ PHP_FUNCTION(preg_replace)
 }
 /* }}} */
 
-/* {{{ proto string preg_replace_callback(mixed regex, mixed callback, mixed subject [, int limit [, count]])
+/* {{{ proto string preg_replace_callback(mixed regex, mixed callback, mixed subject [, int limit [, count]]) U
    Perform Perl-style regular expression replacement using replacement callback. */
 PHP_FUNCTION(preg_replace_callback)
 {
@@ -1464,7 +1459,7 @@ PHP_FUNCTION(preg_replace_callback)
 }
 /* }}} */
 
-/* {{{ proto array preg_split(string pattern, string subject [, int limit [, int flags]]) 
+/* {{{ proto array preg_split(string pattern, string subject [, int limit [, int flags]]) U
    Split string into an array using a perl-style regular expression as a delimiter */
 PHP_FUNCTION(preg_split)
 {
@@ -1672,7 +1667,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 }
 /* }}} */
 
-/* {{{ proto string preg_quote(string str [, string delim_char])
+/* {{{ proto string preg_quote(string str [, string delim_char]) U
    Quote regular expression characters plus an optional character */
 PHP_FUNCTION(preg_quote)
 {
@@ -1777,7 +1772,7 @@ PHP_FUNCTION(preg_quote)
 }
 /* }}} */
 
-/* {{{ proto array preg_grep(string regex, array input [, int flags])
+/* {{{ proto array preg_grep(string regex, array input [, int flags]) U
    Searches array and returns entries which match regex */
 PHP_FUNCTION(preg_grep)
 {
@@ -1788,8 +1783,8 @@ PHP_FUNCTION(preg_grep)
 	pcre_cache_entry	*pce;			/* Compiled regular expression */
 
 	/* Get arguments and do error checking */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sa|l", &regex, &regex_len,
-							  &input, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&a|l", &regex,
+							  &regex_len, UG(utf8_conv), &input, &flags) == FAILURE) {
 		return;
 	}
 	
@@ -1811,10 +1806,13 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 	int				 size_offsets;		/* Size of the offsets array */
 	int				 count = 0;			/* Count of matched subpatterns */
 	zstr			 string_key;
+	int				 string_key_len;
 	ulong			 num_key;
 	zend_bool		 invert;			/* Whether to return non-matching
 										   entries */
 	int				 rc;
+	int				 exoptions = 0;		/* Execution options */
+	
 	
 	invert = flags & PREG_GREP_INVERT ? 1 : 0;
 	
@@ -1839,16 +1837,24 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
+	if (UG(unicode)) {
+		exoptions |= PCRE_NO_UTF8_CHECK;
+	}
+
 	/* Go through the input array */
 	zend_hash_internal_pointer_reset(Z_ARRVAL_P(input));
 	while(zend_hash_get_current_data(Z_ARRVAL_P(input), (void **)&entry) == SUCCESS) {
+		zval subject;
 
-		convert_to_string_ex(entry);
+		subject = **entry;
+		if (Z_TYPE_PP(entry) != IS_STRING) {
+			zval_copy_ctor(&subject);
+			convert_to_string_with_converter(&subject, UG(utf8_conv));
+		}
 
 		/* Perform the match */
-		count = pcre_exec(pce->re, extra, Z_STRVAL_PP(entry),
-						  Z_STRLEN_PP(entry), 0,
-						  0, offsets, size_offsets);
+		count = pcre_exec(pce->re, extra, Z_STRVAL(subject), Z_STRLEN(subject),
+						  0, exoptions, offsets, size_offsets);
 
 		/* Check for too many substrings condition. */
 		if (count == 0) {
@@ -1862,27 +1868,28 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 		/* If the entry fits our requirements */
 		if ((count > 0 && !invert) ||
 			(count == PCRE_ERROR_NOMATCH && invert)) {
-			(*entry)->refcount++;
 
 			/* Add to return array */
-			switch (zend_hash_get_current_key(Z_ARRVAL_P(input), &string_key, &num_key, 0))
+			switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(input), &string_key, &string_key_len, &num_key, 0, NULL))
 			{
 				case HASH_KEY_IS_UNICODE:
-					add_u_assoc_zval(return_value, IS_UNICODE, string_key, *entry);
+					add_u_assoc_zval_ex(return_value, IS_UNICODE, string_key, string_key_len, *entry);
 					break;
 
 				case HASH_KEY_IS_STRING:
-					zend_hash_update(Z_ARRVAL_P(return_value), string_key.s,
-									 strlen(string_key.s)+1, entry, sizeof(zval *), NULL);
+					add_u_assoc_zval_ex(return_value, IS_STRING, string_key, string_key_len, *entry);
 					break;
 
 				case HASH_KEY_IS_LONG:
-					zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, entry,
-										   sizeof(zval *), NULL);
+					add_index_zval(return_value, num_key, *entry);
 					break;
 			}
 		}
-		
+
+		if (Z_TYPE_PP(entry) != IS_STRING) {
+			zval_dtor(&subject);
+		}
+
 		zend_hash_move_forward(Z_ARRVAL_P(input));
 	}
 	
