@@ -1033,6 +1033,14 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				event_file_start.filename = &filename;
 				if (php_rfc1867_callback(MULTIPART_EVENT_FILE_START, &event_file_start, &event_extra_data TSRMLS_CC) == FAILURE) {
 					skip_upload = 1;
+					if (temp_filename) {
+						if (cancel_upload != UPLOAD_ERROR_E) { /* file creation failed */
+							close(fd);
+							unlink(temp_filename);
+						}
+						efree(temp_filename);
+					}
+					temp_filename="";
 				}
 			}
 
