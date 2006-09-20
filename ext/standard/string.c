@@ -2319,10 +2319,6 @@ PHP_FUNCTION(stristr)
 		}
 		if (Z_TYPE_PP(haystack) != Z_TYPE_PP(needle)) {
 			str_type = zend_get_unified_string_type(2 TSRMLS_CC, Z_TYPE_PP(haystack), Z_TYPE_PP(needle));
-			if (str_type == (zend_uchar)-1) {
-				zend_error(E_WARNING, "Cannot mix binary and Unicode parameters");
-				return;
-			}
 			convert_to_explicit_type_ex(haystack, str_type);
 			convert_to_explicit_type_ex(needle, str_type);
 		}
@@ -2628,10 +2624,6 @@ PHP_FUNCTION(stripos)
 		}
 		if (Z_TYPE_PP(haystack) != Z_TYPE_PP(needle)) {
 			str_type = zend_get_unified_string_type(2 TSRMLS_CC, Z_TYPE_PP(haystack), Z_TYPE_PP(needle));
-			if (str_type == (zend_uchar)-1) {
-				zend_error(E_WARNING, "Cannot mix binary and Unicode parameters");
-				return;
-			}
 			convert_to_explicit_type_ex(haystack, str_type);
 			convert_to_explicit_type_ex(needle, str_type);
 		}
@@ -2739,10 +2731,6 @@ PHP_FUNCTION(strrpos)
 	if (Z_TYPE_PP(zneedle) == IS_UNICODE || Z_TYPE_PP(zneedle) == IS_STRING) {
 		if (Z_TYPE_PP(zneedle) != Z_TYPE_PP(zhaystack)) {
 			str_type = zend_get_unified_string_type(2 TSRMLS_CC, Z_TYPE_PP(zhaystack), Z_TYPE_PP(zneedle));
-			if (str_type == (zend_uchar)-1) {
-				zend_error(E_WARNING, "Cannot mix binary and Unicode parameters");
-				return;
-			}
 			convert_to_explicit_type_ex(zhaystack, str_type);
 			convert_to_explicit_type_ex(zneedle, str_type);
 		}
@@ -3264,8 +3252,8 @@ PHP_FUNCTION(substr_replace)
 	zval **tmp_str = NULL, **tmp_from = NULL, **tmp_repl = NULL, **tmp_len= NULL;
 	zend_uchar str_type;
 
-	if (argc < 3 || argc > 4 || zend_get_parameters_ex(argc, &str, &repl, &from, &len) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZZ|Z", &str, &repl, &from, &len) == FAILURE) {
+		return;
 	}
 
 	if (Z_TYPE_PP(str) != IS_ARRAY && Z_TYPE_PP(str) != IS_UNICODE &&
@@ -3323,10 +3311,6 @@ PHP_FUNCTION(substr_replace)
 
 			if (tmp_repl && Z_TYPE_PP(str) != Z_TYPE_PP(tmp_repl)) {
 				str_type = zend_get_unified_string_type(2 TSRMLS_CC, Z_TYPE_PP(str), Z_TYPE_PP(tmp_repl));
-				if (str_type == (zend_uchar)-1) {
-					zend_error(E_WARNING, "Cannot mix binary and Unicode types");
-					return;
-				}
 				convert_to_explicit_type_ex(str, str_type);
 				convert_to_explicit_type_ex(tmp_repl, str_type);
 			}
@@ -3357,7 +3341,7 @@ PHP_FUNCTION(substr_replace)
 
 		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(str), &pos_str);
 		while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(str), (void **) &tmp_str, &pos_str) == SUCCESS) {
-			if (Z_TYPE_PP(tmp_str) != IS_UNICODE && Z_TYPE_PP(tmp_str) != IS_STRING && Z_TYPE_PP(tmp_str) != IS_STRING) {
+			if (Z_TYPE_PP(tmp_str) != IS_UNICODE && Z_TYPE_PP(tmp_str) != IS_STRING) {
 				convert_to_text_ex(tmp_str);
 			}
 
@@ -3388,7 +3372,7 @@ PHP_FUNCTION(substr_replace)
 
 			if (Z_TYPE_PP(repl) == IS_ARRAY) {
 				if (SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_PP(repl), (void **) &tmp_repl, &pos_repl)) {
-					if (Z_TYPE_PP(repl) != IS_UNICODE && Z_TYPE_PP(repl) != IS_STRING && Z_TYPE_PP(repl) != IS_STRING) {
+					if (Z_TYPE_PP(tmp_repl) != IS_UNICODE && Z_TYPE_PP(tmp_repl) != IS_STRING) {
 						convert_to_text_ex(tmp_repl);
 					}
 					zend_hash_move_forward_ex(Z_ARRVAL_PP(repl), &pos_repl);
@@ -3401,10 +3385,6 @@ PHP_FUNCTION(substr_replace)
 
 			if (tmp_repl && Z_TYPE_PP(tmp_str) != Z_TYPE_PP(tmp_repl)) {
 				str_type = zend_get_unified_string_type(2 TSRMLS_CC, Z_TYPE_PP(tmp_str), Z_TYPE_PP(tmp_repl));
-				if (str_type == (zend_uchar)-1) {
-					zend_error(E_WARNING, "Cannot mix binary and Unicode types");
-					return;
-				}
 				convert_to_explicit_type_ex(tmp_str, str_type);
 				convert_to_explicit_type_ex(tmp_repl, str_type);
 			}
