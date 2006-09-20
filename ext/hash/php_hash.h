@@ -61,6 +61,8 @@ extern php_hash_ops php_hash_sha384_ops;
 extern php_hash_ops php_hash_sha512_ops;
 extern php_hash_ops php_hash_ripemd128_ops;
 extern php_hash_ops php_hash_ripemd160_ops;
+extern php_hash_ops php_hash_ripemd256_ops;
+extern php_hash_ops php_hash_ripemd320_ops;
 extern php_hash_ops php_hash_whirlpool_ops;
 extern php_hash_ops php_hash_3tiger128_ops;
 extern php_hash_ops php_hash_3tiger160_ops;

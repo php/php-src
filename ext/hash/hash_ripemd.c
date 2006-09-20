@@ -43,6 +43,24 @@ php_hash_ops php_hash_ripemd160_ops = {
 	sizeof(PHP_RIPEMD160_CTX)
 };
 
+php_hash_ops php_hash_ripemd256_ops = {
+	(php_hash_init_func_t) PHP_RIPEMD256Init,
+	(php_hash_update_func_t) PHP_RIPEMD256Update,
+	(php_hash_final_func_t) PHP_RIPEMD256Final,
+	32,
+	64,
+	sizeof(PHP_RIPEMD256_CTX)
+};
+
+php_hash_ops php_hash_ripemd320_ops = {
+	(php_hash_init_func_t) PHP_RIPEMD320Init,
+	(php_hash_update_func_t) PHP_RIPEMD320Update,
+	(php_hash_final_func_t) PHP_RIPEMD320Final,
+	40,
+	64,
+	sizeof(PHP_RIPEMD320_CTX)
+};
+
 /* {{{ PHP_RIPEMD128Init
  * ripemd128 initialization. Begins a ripemd128 operation, writing a new context.
  */
@@ -58,8 +76,27 @@ PHP_HASH_API void PHP_RIPEMD128Init(PHP_RIPEMD128_CTX * context)
 }
 /* }}} */
 
+/* {{{ PHP_RIPEMD256Init
+ * ripemd256 initialization. Begins a ripemd256 operation, writing a new context.
+ */
+PHP_HASH_API void PHP_RIPEMD256Init(PHP_RIPEMD256_CTX * context)
+{
+	context->count[0] = context->count[1] = 0;
+	/* Load magic initialization constants.
+	 */
+	context->state[0] = 0x67452301;
+	context->state[1] = 0xEFCDAB89;
+	context->state[2] = 0x98BADCFE;
+	context->state[3] = 0x10325476; 
+	context->state[4] = 0x76543210;
+	context->state[5] = 0xFEDCBA98;
+	context->state[6] = 0x89ABCDEF;
+	context->state[7] = 0x01234567;
+}
+/* }}} */
+
 /* {{{ PHP_RIPEMD160Init
- * ripemd128 initialization. Begins a ripemd128 operation, writing a new context.
+ * ripemd160 initialization. Begins a ripemd160 operation, writing a new context.
  */
 PHP_HASH_API void PHP_RIPEMD160Init(PHP_RIPEMD160_CTX * context)
 {
@@ -74,6 +111,27 @@ PHP_HASH_API void PHP_RIPEMD160Init(PHP_RIPEMD160_CTX * context)
 }
 /* }}} */
 
+/* {{{ PHP_RIPEMD320Init
+ * ripemd320 initialization. Begins a ripemd320 operation, writing a new context.
+ */
+PHP_HASH_API void PHP_RIPEMD320Init(PHP_RIPEMD320_CTX * context)
+{
+	context->count[0] = context->count[1] = 0;
+	/* Load magic initialization constants.
+	 */
+	context->state[0] = 0x67452301;
+	context->state[1] = 0xEFCDAB89;
+	context->state[2] = 0x98BADCFE;
+	context->state[3] = 0x10325476; 
+	context->state[4] = 0xC3D2E1F0;
+	context->state[5] = 0x76543210;
+	context->state[6] = 0xFEDCBA98;
+	context->state[7] = 0x89ABCDEF;
+	context->state[8] = 0x01234567;
+	context->state[9] = 0x3C2D1E0F;
+}
+/* }}} */
+
 /* Basic ripemd function */
 #define F0(x,y,z)		((x) ^ (y) ^ (z))
 #define F1(x,y,z)		(((x) & (y)) | ((~(x)) & (z)))
@@ -81,9 +139,9 @@ PHP_HASH_API void PHP_RIPEMD160Init(PHP_RIPEMD160_CTX * context)
 #define F3(x,y,z)		(((x) & (z)) | ((y) & (~(z))))
 #define F4(x,y,z)		((x) ^ ((y) | (~(z))))
 
-static php_hash_uint32 K_values[5]  = { 0x00000000, 0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xA953FD4E };
-static php_hash_uint32 KK_values[4] = { 0x50A28BE6, 0x5C4DD124, 0x6D703EF3, 0x00000000 };
-static php_hash_uint32 KK160_values[5] = { 0x50A28BE6, 0x5C4DD124, 0x6D703EF3, 0x7A6D76E9, 0x00000000 };
+static php_hash_uint32 K_values[5]  = { 0x00000000, 0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xA953FD4E };    /* 128, 256, 160, 320 */
+static php_hash_uint32 KK_values[4] = { 0x50A28BE6, 0x5C4DD124, 0x6D703EF3, 0x00000000 };                /* 128 & 256 */
+static php_hash_uint32 KK160_values[5] = { 0x50A28BE6, 0x5C4DD124, 0x6D703EF3, 0x7A6D76E9, 0x00000000 }; /* 160 & 320 */
 
 #define K(n)  K_values[ (n) >> 4]
 #define KK(n) KK_values[(n) >> 4]
@@ -226,6 +284,104 @@ PHP_HASH_API void PHP_RIPEMD128Update(PHP_RIPEMD128_CTX * context, const unsigne
 }
 /* }}} */
 
+/* {{{ RIPEMD256Transform
+ * ripemd256 basic transformation. Transforms state based on block.
+ */
+static void RIPEMD256Transform(php_hash_uint32 state[8], const unsigned char block[64])
+{
+	php_hash_uint32 a  = state[0], b  = state[1], c  = state[2], d  = state[3];
+	php_hash_uint32 aa = state[4], bb = state[5], cc = state[6], dd = state[7];
+	php_hash_uint32 tmp, x[16];
+	int j;
+
+	RIPEMDDecode(x, block, 64);
+
+	for(j = 0; j < 16; j++) {
+		tmp = ROLS( j, a  + F0(b,  c,  d)  + x[R[j]]  + K(j));
+		a = d; d = c; c = b; b = tmp;
+		tmp = ROLSS(j, aa + F3(bb, cc, dd) + x[RR[j]] + KK(j));
+		aa = dd; dd = cc; cc = bb; bb = tmp;
+	}
+	tmp = a; a = aa; aa = tmp;
+
+	for(j = 16; j < 32; j++) {
+		tmp = ROLS( j, a  + F1(b,  c,  d)  + x[R[j]]  + K(j));
+		a = d; d = c; c = b; b = tmp;
+		tmp = ROLSS(j, aa + F2(bb, cc, dd) + x[RR[j]] + KK(j));
+		aa = dd; dd = cc; cc = bb; bb = tmp;
+	}
+	tmp = b; b = bb; bb = tmp;
+
+	for(j = 32; j < 48; j++) {
+		tmp = ROLS( j, a  + F2(b,  c,  d)  + x[R[j]]  + K(j));
+		a = d; d = c; c = b; b = tmp;
+		tmp = ROLSS(j, aa + F1(bb, cc, dd) + x[RR[j]] + KK(j));
+		aa = dd; dd = cc; cc = bb; bb = tmp;
+	}
+	tmp = c; c = cc; cc = tmp;
+
+	for(j = 48; j < 64; j++) {
+		tmp = ROLS( j, a  + F3(b,  c,  d)  + x[R[j]]  + K(j));
+		a = d; d = c; c = b; b = tmp;
+		tmp = ROLSS(j, aa + F0(bb, cc, dd) + x[RR[j]] + KK(j));
+		aa = dd; dd = cc; cc = bb; bb = tmp;
+	}
+	tmp = d; d = dd; dd = tmp;
+
+	state[0] += a;
+	state[1] += b;
+	state[2] += c;
+	state[3] += d;
+	state[4] += aa;
+	state[5] += bb;
+	state[6] += cc;
+	state[7] += dd;
+
+	tmp = 0;
+	memset(x, 0, sizeof(x));
+}
+/* }}} */
+
+/* {{{ PHP_RIPEMD256Update
+   ripemd256 block update operation. Continues a ripemd256 message-digest
+   operation, processing another message block, and updating the
+   context.
+ */
+PHP_HASH_API void PHP_RIPEMD256Update(PHP_RIPEMD256_CTX * context, const unsigned char *input, unsigned int inputLen)
+{
+	unsigned int i, index, partLen;
+
+	/* Compute number of bytes mod 64 */
+	index = (unsigned int) ((context->count[0] >> 3) & 0x3F);
+
+	/* Update number of bits */
+	if ((context->count[0] += ((php_hash_uint32) inputLen << 3)) < ((php_hash_uint32) inputLen << 3)) {
+		context->count[1]++;
+	}
+	context->count[1] += ((php_hash_uint32) inputLen >> 29);
+
+	partLen = 64 - index;
+
+	/* Transform as many times as possible.
+	 */
+	if (inputLen >= partLen) {
+		memcpy((unsigned char*) & context->buffer[index], (unsigned char*) input, partLen);
+		RIPEMD256Transform(context->state, context->buffer);
+
+		for (i = partLen; i + 63 < inputLen; i += 64) {
+			RIPEMD256Transform(context->state, &input[i]);
+		}
+
+		index = 0;
+	} else {
+		i = 0;
+	}
+
+	/* Buffer remaining input */
+	memcpy((unsigned char*) & context->buffer[index], (unsigned char*) & input[i], inputLen - i);
+}
+/* }}} */
+
 /* {{{ RIPEMD160Transform
  * ripemd160 basic transformation. Transforms state based on block.
  */
@@ -286,7 +442,7 @@ static void RIPEMD160Transform(php_hash_uint32 state[5], const unsigned char blo
 /* }}} */
 
 /* {{{ PHP_RIPEMD160Update
-   ripemd160 block update operation. Continues a ripemd128 message-digest
+   ripemd160 block update operation. Continues a ripemd160 message-digest
    operation, processing another message block, and updating the
    context.
  */
@@ -313,6 +469,114 @@ PHP_HASH_API void PHP_RIPEMD160Update(PHP_RIPEMD160_CTX * context, const unsigne
 
 		for (i = partLen; i + 63 < inputLen; i += 64) {
 			RIPEMD160Transform(context->state, &input[i]);
+		}
+
+		index = 0;
+	} else {
+		i = 0;
+	}
+
+	/* Buffer remaining input */
+	memcpy((unsigned char*) & context->buffer[index], (unsigned char*) & input[i], inputLen - i);
+}
+/* }}} */
+
+/* {{{ RIPEMD320Transform
+ * ripemd320 basic transformation. Transforms state based on block.
+ */
+static void RIPEMD320Transform(php_hash_uint32 state[10], const unsigned char block[64])
+{
+	php_hash_uint32 a  = state[0], b  = state[1], c  = state[2], d  = state[3], e  = state[4];
+	php_hash_uint32 aa = state[5], bb = state[6], cc = state[7], dd = state[8], ee = state[9];
+	php_hash_uint32 tmp, x[16];
+	int j;
+
+	RIPEMDDecode(x, block, 64);
+
+	for(j = 0; j < 16; j++) {
+		tmp = ROLS( j, a  + F0(b,  c,  d)  + x[R[j]]  + K(j)) + e;
+		a = e; e = d; d = ROL(10, c); c = b; b = tmp;
+		tmp = ROLSS(j, aa + F4(bb, cc, dd) + x[RR[j]] + KK160(j)) + ee;
+		aa = ee; ee = dd; dd = ROL(10, cc); cc = bb; bb = tmp;
+	}
+	tmp = b; b = bb; bb = tmp;
+
+	for(j = 16; j < 32; j++) {
+		tmp = ROLS( j, a  + F1(b,  c,  d)  + x[R[j]]  + K(j)) + e;
+		a = e; e = d; d = ROL(10, c); c = b; b = tmp;
+		tmp = ROLSS(j, aa + F3(bb, cc, dd) + x[RR[j]] + KK160(j)) + ee;
+		aa = ee; ee = dd; dd = ROL(10, cc); cc = bb; bb = tmp;
+	}
+	tmp = d; d = dd; dd = tmp;
+
+	for(j = 32; j < 48; j++) {
+		tmp = ROLS( j, a  + F2(b,  c,  d)  + x[R[j]]  + K(j)) + e;
+		a = e; e = d; d = ROL(10, c); c = b; b = tmp;
+		tmp = ROLSS(j, aa + F2(bb, cc, dd) + x[RR[j]] + KK160(j)) + ee;
+		aa = ee; ee = dd; dd = ROL(10, cc); cc = bb; bb = tmp;
+	}
+	tmp = a; a = aa; aa = tmp;
+
+	for(j = 48; j < 64; j++) {
+		tmp = ROLS( j, a  + F3(b,  c,  d)  + x[R[j]]  + K(j)) + e;
+		a = e; e = d; d = ROL(10, c); c = b; b = tmp;
+		tmp = ROLSS(j, aa + F1(bb, cc, dd) + x[RR[j]] + KK160(j)) + ee;
+		aa = ee; ee = dd; dd = ROL(10, cc); cc = bb; bb = tmp;
+	}
+	tmp = c; c = cc; cc = tmp;
+
+	for(j = 64; j < 80; j++) {
+		tmp = ROLS( j, a  + F4(b,  c,  d)  + x[R[j]]  + K(j)) + e;
+		a = e; e = d; d = ROL(10, c); c = b; b = tmp;
+		tmp = ROLSS(j, aa + F0(bb, cc, dd) + x[RR[j]] + KK160(j)) + ee;
+		aa = ee; ee = dd; dd = ROL(10, cc); cc = bb; bb = tmp;
+	}
+	tmp = e; e = ee; ee = tmp;
+
+	state[0] += a;
+	state[1] += b;
+	state[2] += c;
+	state[3] += d;
+	state[4] += e;
+	state[5] += aa;
+	state[6] += bb;
+	state[7] += cc;
+	state[8] += dd;
+	state[9] += ee;
+
+	tmp = 0;
+	memset(x, 0, sizeof(x));
+}
+/* }}} */
+
+/* {{{ PHP_RIPEMD320Update
+   ripemd320 block update operation. Continues a ripemd320 message-digest
+   operation, processing another message block, and updating the
+   context.
+ */
+PHP_HASH_API void PHP_RIPEMD320Update(PHP_RIPEMD320_CTX * context, const unsigned char *input, unsigned int inputLen)
+{
+	unsigned int i, index, partLen;
+
+	/* Compute number of bytes mod 64 */
+	index = (unsigned int) ((context->count[0] >> 3) & 0x3F);
+
+	/* Update number of bits */
+	if ((context->count[0] += ((php_hash_uint32) inputLen << 3)) < ((php_hash_uint32) inputLen << 3)) {
+		context->count[1]++;
+	}
+	context->count[1] += ((php_hash_uint32) inputLen >> 29);
+
+	partLen = 64 - index;
+
+	/* Transform as many times as possible.
+	 */
+	if (inputLen >= partLen) {
+		memcpy((unsigned char*) & context->buffer[index], (unsigned char*) input, partLen);
+		RIPEMD320Transform(context->state, context->buffer);
+
+		for (i = partLen; i + 63 < inputLen; i += 64) {
+			RIPEMD320Transform(context->state, &input[i]);
 		}
 
 		index = 0;
@@ -386,6 +650,43 @@ PHP_HASH_API void PHP_RIPEMD128Final(unsigned char digest[16], PHP_RIPEMD128_CTX
 }
 /* }}} */
 
+/* {{{ PHP_RIPEMD256Final
+   ripemd256 finalization. Ends a ripemd256 message-digest operation, writing the
+   the message digest and zeroizing the context.
+ */
+PHP_HASH_API void PHP_RIPEMD256Final(unsigned char digest[32], PHP_RIPEMD256_CTX * context)
+{
+	unsigned char bits[8];
+	unsigned int index, padLen;
+
+	/* Save number of bits */
+	bits[0] = (unsigned char) (context->count[0] & 0xFF);
+	bits[1] = (unsigned char) ((context->count[0] >> 8) & 0xFF);
+	bits[2] = (unsigned char) ((context->count[0] >> 16) & 0xFF);
+	bits[3] = (unsigned char) ((context->count[0] >> 24) & 0xFF);
+	bits[4] = (unsigned char) (context->count[1] & 0xFF);
+	bits[5] = (unsigned char) ((context->count[1] >> 8) & 0xFF);
+	bits[6] = (unsigned char) ((context->count[1] >> 16) & 0xFF);
+	bits[7] = (unsigned char) ((context->count[1] >> 24) & 0xFF);
+	
+	/* Pad out to 56 mod 64.
+	 */
+	index = (unsigned int) ((context->count[0] >> 3) & 0x3f);
+	padLen = (index < 56) ? (56 - index) : (120 - index);
+	PHP_RIPEMD256Update(context, PADDING, padLen);
+
+	/* Append length (before padding) */
+	PHP_RIPEMD256Update(context, bits, 8);
+
+	/* Store state in digest */
+	RIPEMDEncode(digest, context->state, 32);
+
+	/* Zeroize sensitive information.
+	 */
+	memset((unsigned char*) context, 0, sizeof(*context));
+}
+/* }}} */
+
 /* {{{ PHP_RIPEMD160Final
    ripemd160 finalization. Ends a ripemd160 message-digest operation, writing the
    the message digest and zeroizing the context.
@@ -416,6 +717,43 @@ PHP_HASH_API void PHP_RIPEMD160Final(unsigned char digest[20], PHP_RIPEMD160_CTX
 
 	/* Store state in digest */
 	RIPEMDEncode(digest, context->state, 20);
+
+	/* Zeroize sensitive information.
+	 */
+	memset((unsigned char*) context, 0, sizeof(*context));
+}
+/* }}} */
+
+/* {{{ PHP_RIPEMD320Final
+   ripemd320 finalization. Ends a ripemd320 message-digest operation, writing the
+   the message digest and zeroizing the context.
+ */
+PHP_HASH_API void PHP_RIPEMD320Final(unsigned char digest[40], PHP_RIPEMD320_CTX * context)
+{
+	unsigned char bits[8];
+	unsigned int index, padLen;
+
+	/* Save number of bits */
+	bits[0] = (unsigned char) (context->count[0] & 0xFF);
+	bits[1] = (unsigned char) ((context->count[0] >> 8) & 0xFF);
+	bits[2] = (unsigned char) ((context->count[0] >> 16) & 0xFF);
+	bits[3] = (unsigned char) ((context->count[0] >> 24) & 0xFF);
+	bits[4] = (unsigned char) (context->count[1] & 0xFF);
+	bits[5] = (unsigned char) ((context->count[1] >> 8) & 0xFF);
+	bits[6] = (unsigned char) ((context->count[1] >> 16) & 0xFF);
+	bits[7] = (unsigned char) ((context->count[1] >> 24) & 0xFF);
+	
+	/* Pad out to 56 mod 64.
+	 */
+	index = (unsigned int) ((context->count[0] >> 3) & 0x3f);
+	padLen = (index < 56) ? (56 - index) : (120 - index);
+	PHP_RIPEMD320Update(context, PADDING, padLen);
+
+	/* Append length (before padding) */
+	PHP_RIPEMD320Update(context, bits, 8);
+
+	/* Store state in digest */
+	RIPEMDEncode(digest, context->state, 40);
 
 	/* Zeroize sensitive information.
 	 */
