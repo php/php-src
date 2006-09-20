@@ -1,3 +1,294 @@
+2006-09-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/filter/filter.c:
+      MFB: make input_get_args() not modify the original values.
+
+    * (PHP_5_2)
+      ext/filter/filter.c:
+      make input_get_args() not modify the original values.
+
+    * ext/standard/basic_functions.c:
+      MFB: array_key_exists() should not work by by-ref
+
+    * (PHP_5_2)
+      ext/standard/basic_functions.c:
+      array_key_exists() should not work by by-ref
+
+2006-09-19  Sara Golemon  <sara@golemon.com>
+
+    * ext/hash/hash.c
+      ext/hash/hash_md.c
+      ext/hash/hash_sha.c
+      ext/hash/php_hash_md.h
+      ext/hash/php_hash_sha.h:
+      Strip unused implementations of md5(), md5_file(), sha1(), and sha1_file()
+      from this extension.
+      
+      It was decided a few months ago that those implementations would simply
+      stay in ext/standard and never leave.
+
+    * ext/bcmath/bcmath.c:
+      Refactor parameter parsing into the 21st century and flag Unicode readiness
+
+2006-09-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug34065.phpt
+      ZendEngine2/tests/bug38623.phpt:
+      Fixed bugs #34065 and #38623 (throw in foreach/switch causes memory leaks)
+
+    * ZendEngine2/tests/bug34065.phpt
+      ZendEngine2/tests/bug34065.phpt
+      ZendEngine2/tests/bug38623.phpt
+      ZendEngine2/tests/bug38623.phpt:
+      
+      Fixed bugs #34065 and #38623 (throw in foreach/switch causes memory leaks)
+
+2006-09-19  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend.c:
+      Use internal converter name to speed up instantiation.
+
+    * ext/pcre/php_pcre.c:
+      Unicode support in preg_grep().
+
+2006-09-19  Sara Golemon  <sara@golemon.com>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_globals.h
+      ext/standard/streamsfuncs.c
+      main/streams/streams.c:
+      Add INI controlled default stream encoding (unicode.stream_encoding).
+      Add convenience function stream_defualt_encoding() for setting it.
+
+2006-09-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_ini.h
+      ZendEngine2/zend_ini_parser.y
+      ZendEngine2/zend_ini_scanner.h
+      ZendEngine2/zend_ini_scanner.l
+      main/SAPI.c
+      main/SAPI.h
+      main/php_ini.c
+      sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c:
+      MFH: Fixed mess with CGI/CLI -d command line option (now it works with cgi;
+      constants are working exactly like in php.ini; with FastCGI -d affects all
+      requests).
+
+2006-09-19  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/pcre/php_pcre.c:
+      Upgrade preg_quote() to support Unicode.
+
+    * ext/pcre/php_pcre.c:
+      Fix offset calculation in add_offset_pair().
+
+2006-09-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo/tests/bug_38253.phpt
+      ext/pdo_pgsql/pgsql_driver.c
+      ext/pdo_pgsql/pgsql_statement.c:
+      MFB:
+      	Fixed bug #37870 (pgo_pgsql tries to de-allocate unused statements).
+      	Fixed bug #36681 (pdo_pgsql driver incorrectly ignored some errors).
+      	Fixed test for bug #38253 not to use faulty SQL that generates
+      	errors in PostgreSQL
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/tests/bug_38253.phpt
+      ext/pdo_pgsql/pgsql_driver.c
+      ext/pdo_pgsql/pgsql_statement.c:
+      Fixed bug #37870 (pgo_pgsql tries to de-allocate unused statements).
+      Fixed bug #36681 (pdo_pgsql driver incorrectly ignored some errors).
+      Fixed test for bug #38253 not to use faulty SQL that generates errors in
+      PostgreSQL
+
+2006-09-19  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/array/bug34066.phpt:
+      fix test
+
+2006-09-19  Antony Dovgal  <antony@zend.com>
+
+    * ext/spl/tests/iterator_006.phpt
+      ext/spl/tests/iterator_050.phpt
+      ext/spl/tests/iterator_051.phpt
+      ext/spl/tests/iterator_052.phpt
+      ext/spl/tests/iterator_053.phpt
+      ext/spl/tests/iterator_054.phpt
+      ext/spl/tests/iterator_055.phpt
+      ext/spl/tests/sxe_001.phpt
+      ext/spl/tests/sxe_002.phpt
+      ext/spl/tests/sxe_003.phpt
+      ext/spl/tests/sxe_004.phpt
+      ext/spl/tests/sxe_005.phpt:
+      fix spl tests
+
+    * ext/iconv/tests/iconv_substr.phpt
+      ext/libxml/tests/002.phpt
+      ext/pcre/tests/bug20528.phpt
+      ext/pcre/tests/pcre_count.phpt
+      ext/pcre/tests/preg_replace.phpt
+      ext/pcre/tests/preg_replace2.phpt
+      ext/pcre/tests/preg_replace_callback2.phpt
+      ext/pcre/tests/preg_replace_callback3.phpt
+      ext/pcre/tests/split.phpt
+      ext/pcre/tests/split2.phpt
+      ext/reflection/tests/005.phpt
+      ext/standard/tests/array/array_walk.phpt
+      ext/standard/tests/array/array_walk_recursive1.phpt
+      ext/xml/tests/bug26528.phpt
+      ext/xml/tests/bug35447.phpt:
+      fix tests
+
+    * ext/pcre/php_pcre.c:
+      fix leak in preg_split()
+
+2006-09-19  Stefan Esser  <php@nopiracy.de>
+
+    * (PHP_5_2)
+      main/rfc1867.c:
+      Delete empty temporary files if file upload hook forbids the upload
+
+2006-09-19  Antony Dovgal  <antony@zend.com>
+
+    * ext/date/tests/oo_002.phpt
+      ext/filter/tests/029.phpt:
+      fix test
+
+2006-09-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_hash.c
+      ZendEngine2/zend_hash.h
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.skl
+      ext/date/php_date.c
+      ext/dom/node.c
+      ext/filter/logical_filters.c
+      ext/session/session.c
+      ext/simplexml/simplexml.c
+      ext/soap/php_encoding.c
+      ext/soap/php_packet_soap.c
+      ext/soap/soap.c
+      ext/sqlite/sqlite.c
+      ext/standard/basic_functions.c
+      ext/standard/datetime.c
+      ext/standard/dns.c
+      ext/standard/file.c
+      ext/standard/filestat.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/image.c
+      ext/standard/info.c
+      ext/standard/iptc.c
+      ext/standard/microtime.c
+      ext/standard/proc_open.c
+      ext/standard/scanf.c
+      ext/standard/streamsfuncs.c
+      ext/standard/string.c
+      ext/standard/url.c
+      ext/zlib/zlib.c
+      main/main.c
+      main/output.c
+      main/php_variables.c
+      main/streams/filter.c
+      main/streams/memory.c
+      main/streams/streams.c
+      main/streams/unicode_filter.c
+      main/streams/userspace.c
+      main/streams/xp_socket.c:
+      Disabled autoconversion of hash keys (from string to unicode) for PHP
+      arrays
+
+2006-09-19  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/array/array_walk_objects.phpt
+      ext/standard/tests/array/array_walk_rec_objects.phpt:
+      argh.. nuke UEXPECTF
+
+    * (PHP_4_4)
+      ext/standard/array.c
+      ext/standard/tests/array/array_walk_objects.phpt:
+      support objects in array_walk()
+
+    * (PHP_5_2)
+      ext/standard/array.c
+      ext/standard/tests/array/array_walk.phpt
+      ext/standard/tests/array/array_walk_objects.phpt
+      ext/standard/tests/array/array_walk_rec_objects.phpt
+      ext/standard/tests/array/array_walk_recursive1.phpt:
+      support objects in array_walk*()
+
+    * ext/standard/array.c
+      ext/standard/tests/array/array_walk.phpt
+      ext/standard/tests/array/array_walk_objects.phpt
+      ext/standard/tests/array/array_walk_objects.phpt
+      ext/standard/tests/array/array_walk_objects.phpt
+      ext/standard/tests/array/array_walk_rec_objects.phpt
+      ext/standard/tests/array/array_walk_rec_objects.phpt
+      ext/standard/tests/array/array_walk_recursive1.phpt:
+      support objects in array_walk*()
+      add new tests, fix old ones
+
+    * (PHP_4_4)
+      NEWS
+      ext/standard/array.c
+      ext/standard/tests/array/bug34066.phpt:
+      MFH: fix #34066 (recursive array_walk causes segfault)
+      add test
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/array.c
+      ext/standard/tests/array/bug34066.phpt
+      ext/standard/tests/array/bug34066_1.phpt:
+      MFH: fix #34066 (recursive array_walk causes segfault)
+      add tests
+
+    * ext/standard/array.c
+      ext/standard/tests/array/bug34066.phpt
+      ext/standard/tests/array/bug34066.phpt
+      ext/standard/tests/array/bug34066.phpt
+      ext/standard/tests/array/bug34066_1.phpt
+      ext/standard/tests/array/bug34066_1.phpt:
+      fix #34066 (recursive array_walk causes segfault)
+      add tests
+
+2006-09-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      Forgotten part of patch (Small optimization of
+      ZEND_INIT_ARRAY/ZEND_ADD_ARRAY_ELEMENT)
+
+    * ZendEngine2/zend_API.c:
+      ZTS fix
+
+    * ext/spl/spl_iterators.c:
+      Fixed PCRE related compilation errors
+
 2006-09-18  Ilia Alshanetsky  <ilia@prohost.org>
 
     * main/main.c:

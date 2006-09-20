@@ -1,3 +1,70 @@
+2006-09-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/bug34065.phpt
+      tests/bug34065.phpt
+      tests/bug38623.phpt
+      tests/bug38623.phpt:
+      
+      Fixed bugs #34065 and #38623 (throw in foreach/switch causes memory leaks)
+
+    * zend_compile.c
+      zend_compile.c
+      zend_compile.h
+      zend_compile.h
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug34065.phpt
+      tests/bug38623.phpt:
+      Fixed bugs #34065 and #38623 (throw in foreach/switch causes memory leaks)
+
+2006-09-19  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend.c:
+      Use internal converter name to speed up instantiation.
+
+2006-09-19  Sara Golemon  <sara@golemon.com>
+
+    * zend.c
+      zend_globals.h:
+      Add INI controlled default stream encoding (unicode.stream_encoding).
+      Add convenience function stream_defualt_encoding() for setting it.
+
+2006-09-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      zend_ini.h
+      zend_ini_parser.y
+      zend_ini_scanner.h
+      zend_ini_scanner.l:
+      MFH: Fixed mess with CGI/CLI -d command line option (now it works with cgi;
+      constants are working exactly like in php.ini; with FastCGI -d affects all
+      requests).
+
+    * zend_API.c
+      zend_API.h
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_exceptions.c
+      zend_execute_API.c
+      zend_hash.c
+      zend_hash.h
+      zend_operators.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.skl:
+      Disabled autoconversion of hash keys (from string to unicode) for PHP
+      arrays
+
+    * zend_vm_def.h
+      zend_vm_execute.h:
+      Forgotten part of patch (Small optimization of
+      ZEND_INIT_ARRAY/ZEND_ADD_ARRAY_ELEMENT)
+
+    * zend_API.c:
+      ZTS fix
+
 2006-09-18  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_API.c
