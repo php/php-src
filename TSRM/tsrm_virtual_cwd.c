@@ -366,23 +366,11 @@ static inline realpath_cache_bucket* realpath_cache_find(const char *path, int p
 CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path, int use_realpath)
 {
 	int path_length = strlen(path);
-	char *ptr, *path_copy;
-	char *tok = NULL;
-	int ptr_length;
 	cwd_state old_state;
-	int ret = 0;
-	int copy_amount = -1;
-	char *free_path;
-	unsigned char is_absolute = 0;
-#ifndef TSRM_WIN32
-	char resolved_path[MAXPATHLEN];
-#else
-	char *new_path;
-#endif
 	char orig_path[MAXPATHLEN];
-	int orig_path_len = 0;
 	realpath_cache_bucket *bucket;
 	time_t t = 0;
+	int ret;
 	TSRMLS_FETCH();
 
 	if (path_length == 0) 
@@ -390,21 +378,29 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	if (path_length >= MAXPATHLEN)
 		return (1);
 
-	if (use_realpath && CWDG(realpath_cache_size_limit)) {
-		if (IS_ABSOLUTE_PATH(path, path_length) || (state->cwd_length < 1)) {
-			memcpy(orig_path, path, path_length+1);
-			orig_path_len = path_length;
-		} else {
-			orig_path_len = path_length + state->cwd_length + 1;
-			if (orig_path_len >= MAXPATHLEN) {
-				return 1;
-			}
-			memcpy(orig_path, state->cwd, state->cwd_length);
-			orig_path[state->cwd_length] = DEFAULT_SLASH;
-			memcpy(orig_path + state->cwd_length + 1, path, path_length + 1);
+#if VIRTUAL_CWD_DEBUG
+		fprintf(stderr,"cwd = %s path = %s\n", state->cwd, path);
+#endif
+
+	/* cwd_length can be 0 when getcwd() fails.
+	 * This can happen under solaris when a dir does not have read permissions
+	 * but *does* have execute permissions */
+	if (!IS_ABSOLUTE_PATH(path, path_length) && (state->cwd_length > 1)) {
+		int orig_path_len = path_length + state->cwd_length + 1;
+
+		if (orig_path_len >= MAXPATHLEN) {
+			return 1;
 		}
+		memcpy(orig_path, state->cwd, state->cwd_length);
+		orig_path[state->cwd_length] = DEFAULT_SLASH;
+		memcpy(orig_path + state->cwd_length + 1, path, path_length + 1);
+		path = orig_path;
+		path_length = orig_path_len; 
+	}
+
+	if (use_realpath && CWDG(realpath_cache_size_limit)) {
 		t = CWDG(realpath_cache_ttl)?time(NULL):0;
-		if ((bucket = realpath_cache_find(orig_path, orig_path_len, t TSRMLS_CC)) != NULL) {		
+		if ((bucket = realpath_cache_find(path, path_length, t TSRMLS_CC)) != NULL) {		
 			int len = bucket->realpath_len;
 
 			CWD_STATE_COPY(&old_state, state);
@@ -421,107 +417,55 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 			}
 		}
 	}
+
+	if (use_realpath) {
 #if !defined(TSRM_WIN32) && !defined(NETWARE)
-	/* cwd_length can be 0 when getcwd() fails.
-	 * This can happen under solaris when a dir does not have read permissions
-	 * but *does* have execute permissions */
-	if (IS_ABSOLUTE_PATH(path, path_length) || (state->cwd_length < 1)) {
-		if (use_realpath) {
-			if (realpath(path, resolved_path)) {  /* Note: Not threadsafe on older *BSD's */
-				path = resolved_path;
-				path_length = strlen(path);
-			} else {
-				/* disable for now
-				return 1; */
-			}
-		}
-	} else { /* Concat current directory with relative path and then run realpath() on it */
-		char *tmp;
-		char *ptr;
+		char resolved_path[MAXPATHLEN];
 
-		ptr = tmp = (char *) malloc(state->cwd_length+path_length+sizeof("/"));
-		if (!tmp) {
-			return 1;
+		if (!realpath(path, resolved_path)) {  /* Note: Not threadsafe on older *BSD's */
+			goto no_realpath;
 		}
-		memcpy(ptr, state->cwd, state->cwd_length);
-		ptr += state->cwd_length;
-		*ptr++ = DEFAULT_SLASH;
-		memcpy(ptr, path, path_length);
-		ptr += path_length;
-		*ptr = '\0';
-		if (strlen(tmp) >= MAXPATHLEN) {
-			free(tmp);
-			return 1;
-		}
-		if (use_realpath) {
-			if (realpath(tmp, resolved_path)) {
-				path = resolved_path;
-				path_length = strlen(path);
-			} else {
-				/* disable for now 
-				free(tmp);
-				return 1; */
-			}
-		}
-		free(tmp);
-	}
+		CWD_STATE_COPY(&old_state, state);
+
+		state->cwd_length = strlen(resolved_path);
+		state->cwd = (char *) realloc(state->cwd, state->cwd_length+1);
+		memcpy(state->cwd, resolved_path, state->cwd_length+1);
+#else
+		goto no_realpath;
 #endif
-#if defined(TSRM_WIN32)
-	{
-		int new_path_length;
-  
-		new_path_length = GetLongPathName(path, NULL, 0);
-		if (new_path_length == 0) {
-			goto php_failed_getlongpath;
-		}
+	} else {
+		char *ptr, *path_copy, *free_path;
+		char *tok = NULL;
+		int ptr_length;
 
-		/* GetLongPathName already counts the \0 */
-		new_path = (char *) malloc(new_path_length);
-		if (!new_path) {
-			return 1;
-		}
-		
-		if (GetLongPathName(path, new_path, new_path_length) != 0) {
-			path = new_path;
-			path_length = new_path_length;
+no_realpath:
+
+		free_path = path_copy = tsrm_strndup(path, path_length);
+		CWD_STATE_COPY(&old_state, state);
+
+#ifdef TSRM_WIN32		
+		if (path_length >= 2 && path[1] == ':') {			
+			state->cwd = (char *) realloc(state->cwd, 2 + 1);
+			state->cwd[0] = toupper(path[0]);
+			state->cwd[1] = ':';
+			state->cwd[2] = '\0';
+			state->cwd_length = 2;
+			path_copy += 2;
+		} else if (IS_UNC_PATH(path, path_length)) {
+			state->cwd = (char *) realloc(state->cwd, 1 + 1);
+			state->cwd[0] = DEFAULT_SLASH;
+			state->cwd[1] = '\0';
+			state->cwd_length = 1;
+			path_copy += 2;
 		} else {
-			free(new_path);
-php_failed_getlongpath:
-			new_path = NULL;
-		}
-	}
 #endif
-	free_path = path_copy = tsrm_strndup(path, path_length);
-
-	CWD_STATE_COPY(&old_state, state);
-#if VIRTUAL_CWD_DEBUG
-	fprintf(stderr,"cwd = %s path = %s\n", state->cwd, path);
-#endif
-	if (IS_ABSOLUTE_PATH(path_copy, path_length)) {
-        copy_amount = COPY_WHEN_ABSOLUTE(path_copy);
-		is_absolute = 1;
+			state->cwd = (char *) realloc(state->cwd, 1);
+			state->cwd[0] = '\0';
+			state->cwd_length = 0;
 #ifdef TSRM_WIN32
-	} else if (IS_SLASH(path_copy[0])) {
-		copy_amount = 2;
-#endif
-	}
-
-	if (copy_amount != -1) {
-		state->cwd = (char *) realloc(state->cwd, copy_amount + 1);
-		if (copy_amount) {
-			if (is_absolute) {
-				memcpy(state->cwd, path_copy, copy_amount);
-				path_copy += copy_amount;
-			} else {
-				memcpy(state->cwd, old_state.cwd, copy_amount);
-			}
 		}
-		state->cwd[copy_amount] = '\0';
-		state->cwd_length = copy_amount;
-	}
-
-
-	if (state->cwd_length > 0 || IS_ABSOLUTE_PATH(path, path_length)) {
+#endif
+		
 		ptr = tsrm_strtok_r(path_copy, TOKENIZER_STRING, &tok);
 		while (ptr) {
 			ptr_length = strlen(ptr);
@@ -551,7 +495,8 @@ php_failed_getlongpath:
 				state->cwd = (char *) realloc(state->cwd, state->cwd_length+ptr_length+1+1);
 #ifdef TSRM_WIN32
 				/* Windows 9x will consider C:\\Foo as a network path. Avoid it. */
-				if ((state->cwd[state->cwd_length-1]!='\\' && state->cwd[state->cwd_length-1]!='/') || 
+				if (state->cwd_length < 2 ||
+				    (state->cwd[state->cwd_length-1]!='\\' && state->cwd[state->cwd_length-1]!='/') ||
 						IsDBCSLeadByte(state->cwd[state->cwd_length-2])) {
 					state->cwd[state->cwd_length++] = DEFAULT_SLASH;
 				}
@@ -575,10 +520,31 @@ php_failed_getlongpath:
 				state->cwd[state->cwd_length++] = DEFAULT_SLASH;
 #endif
 				memcpy(&state->cwd[state->cwd_length], ptr, ptr_length+1);
+
+#ifdef TSRM_WIN32
+				if (use_realpath) {
+					WIN32_FIND_DATA data;
+					HANDLE hFind;
+
+					if ((hFind = FindFirstFile(state->cwd, &data)) != INVALID_HANDLE_VALUE) {
+						int length = strlen(data.cFileName);
+
+						if (length != ptr_length) {
+							state->cwd = (char *) realloc(state->cwd, state->cwd_length+length+1);
+						}
+						memcpy(&state->cwd[state->cwd_length], data.cFileName, length+1);
+						ptr_length = length;
+						FindClose(hFind);
+					}
+				}
+#endif
+
 				state->cwd_length += ptr_length;
 			}
 			ptr = tsrm_strtok_r(NULL, TOKENIZER_STRING, &tok);
 		}
+
+		free(free_path);
 
 		if (state->cwd_length == COPY_WHEN_ABSOLUTE(state->cwd)) {
 			state->cwd = (char *) realloc(state->cwd, state->cwd_length+1+1);
@@ -586,21 +552,10 @@ php_failed_getlongpath:
 			state->cwd[state->cwd_length+1] = '\0';
 			state->cwd_length++;
 		}
-	} else {
-		state->cwd = (char *) realloc(state->cwd, path_length+1);
-		memcpy(state->cwd, path, path_length+1);
-		state->cwd_length = path_length;
 	}
-
-#ifdef TSRM_WIN32
-	if (new_path) {
-		free(new_path);
-	}
-#endif
-	free(free_path);
 
 	if (use_realpath && CWDG(realpath_cache_size_limit)) {
-		realpath_cache_add(orig_path, orig_path_len, state->cwd, state->cwd_length, t TSRMLS_CC);
+		realpath_cache_add(path, path_length, state->cwd, state->cwd_length, t TSRMLS_CC);
 	}
 
 	if (verify_path && verify_path(state)) {
