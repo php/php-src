@@ -185,27 +185,15 @@ struct _encode {
 	encodeType details;
 	zval *(*to_zval)(encodeTypePtr type, xmlNodePtr data);
 	xmlNodePtr (*to_xml)(encodeTypePtr type, zval *data, int style, xmlNodePtr parent);
-
-	xmlNodePtr (*to_zval_before)(encodeTypePtr type, xmlNodePtr data, int style);
-	zval *(*to_zval_after)(encodeTypePtr type, zval *data);
-
-	zval *(*to_xml_before)(encodeTypePtr type, zval *data);
-	xmlNodePtr (*to_xml_after)(encodeTypePtr type, xmlNodePtr data, int style);
 };
 
 /* Master functions all encode/decode should be called thur these functions */
 xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr parent);
 zval *master_to_zval(encodePtr encode, xmlNodePtr data);
 
-#ifdef HAVE_PHP_DOMXML
 /* user defined mapping */
-zval *to_xml_before_user(encodeTypePtr type, zval *data);
 xmlNodePtr to_xml_user(encodeTypePtr type, zval *data, int style, xmlNodePtr parent);
-xmlNodePtr to_xml_after_user(encodeTypePtr type, xmlNodePtr node, int style);
-xmlNodePtr to_zval_before_user(encodeTypePtr type, xmlNodePtr node, int style);
 zval *to_zval_user(encodeTypePtr type, xmlNodePtr node);
-zval *to_zval_after_user(encodeTypePtr type, zval *data);
-#endif
 
 void whiteSpace_replace(xmlChar* str);
 void whiteSpace_collapse(xmlChar* str);
