@@ -287,13 +287,27 @@ xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr par
 			soap_error0(E_ERROR, "Encoding: SoapVar hasn't 'enc_type' propery");
 		}
 
-		if (SOAP_GLOBAL(sdl)) {
-			if (zend_hash_find(ht, "enc_stype", sizeof("enc_stype"), (void **)&zstype) == SUCCESS) {
-				if (zend_hash_find(ht, "enc_ns", sizeof("enc_ns"), (void **)&zns) == SUCCESS) {
-				  enc = get_encoder(SOAP_GLOBAL(sdl), Z_STRVAL_PP(zns), Z_STRVAL_PP(zstype));
-				} else {
-				  enc = get_encoder_ex(SOAP_GLOBAL(sdl), Z_STRVAL_PP(zstype), Z_STRLEN_PP(zstype));
+		if (zend_hash_find(ht, "enc_stype", sizeof("enc_stype"), (void **)&zstype) == SUCCESS) {
+			if (zend_hash_find(ht, "enc_ns", sizeof("enc_ns"), (void **)&zns) == SUCCESS) {
+				enc = get_encoder(SOAP_GLOBAL(sdl), Z_STRVAL_PP(zns), Z_STRVAL_PP(zstype));
+			} else {
+				zns = NULL;
+				enc = get_encoder_ex(SOAP_GLOBAL(sdl), Z_STRVAL_PP(zstype), Z_STRLEN_PP(zstype));
+			}
+			if (enc == NULL && SOAP_GLOBAL(typemap)) {
+				encodePtr *new_enc;
+				smart_str nscat = {0};
+
+				if (zns != NULL) {
+					smart_str_appendl(&nscat, Z_STRVAL_PP(zns), Z_STRLEN_PP(zns));
+					smart_str_appendc(&nscat, ':');
 				}
+				smart_str_appendl(&nscat, Z_STRVAL_PP(zstype), Z_STRLEN_PP(zstype));
+				smart_str_0(&nscat);
+				if (zend_hash_find(SOAP_GLOBAL(typemap), nscat.c, nscat.len + 1, (void**)&new_enc) == SUCCESS) {
+					enc = *new_enc;
+				}
+				smart_str_free(&nscat);			
 			}
 		}
 		if (enc == NULL) {
@@ -363,14 +377,23 @@ xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr par
 		if (encode == NULL) {
 			encode = get_conversion(UNKNOWN_TYPE);
 		}
-		if (encode->to_xml_before) {
-			data = encode->to_xml_before(&encode->details, data);
+		if (SOAP_GLOBAL(typemap) && encode->details.type_str) {
+			smart_str nscat = {0};
+			encodePtr *new_enc;
+
+			if (encode->details.ns) {
+				smart_str_appends(&nscat, encode->details.ns);
+				smart_str_appendc(&nscat, ':');
+			}
+			smart_str_appends(&nscat, encode->details.type_str);
+			smart_str_0(&nscat);
+			if (zend_hash_find(SOAP_GLOBAL(typemap), nscat.c, nscat.len + 1, (void**)&new_enc) == SUCCESS) {
+				encode = *new_enc;
+			}
+			smart_str_free(&nscat);			
 		}
 		if (encode->to_xml) {
 			node = encode->to_xml(&encode->details, data, style, parent);
-		}
-		if (encode->to_xml_after) {
-			node = encode->to_xml_after(&encode->details, node, style);
 		}
 	}
 	return node;
@@ -379,15 +402,51 @@ xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr par
 static zval *master_to_zval_int(encodePtr encode, xmlNodePtr data)
 {
 	zval *ret = NULL;
+	TSRMLS_FETCH();
 
-	if (encode->to_zval_before) {
-		data = encode->to_zval_before(&encode->details, data, 0);
+	if (SOAP_GLOBAL(typemap)) {
+		if (encode->details.type_str) {
+			smart_str nscat = {0};
+			encodePtr *new_enc;
+
+			if (encode->details.ns) {
+				smart_str_appends(&nscat, encode->details.ns);
+				smart_str_appendc(&nscat, ':');
+			}
+			smart_str_appends(&nscat, encode->details.type_str);
+			smart_str_0(&nscat);
+			if (zend_hash_find(SOAP_GLOBAL(typemap), nscat.c, nscat.len + 1, (void**)&new_enc) == SUCCESS) {
+				encode = *new_enc;
+			}
+			smart_str_free(&nscat);			
+		} else {
+			xmlAttrPtr type_attr = get_attribute_ex(data->properties,"type", XSI_NAMESPACE);
+
+			if (type_attr != NULL) {
+				encodePtr *new_enc;
+				xmlNsPtr nsptr;
+				char *ns, *cptype;
+				smart_str nscat = {0};
+
+				parse_namespace(type_attr->children->content, &cptype, &ns);
+				nsptr = xmlSearchNs(data->doc, data, BAD_CAST(ns));
+				if (nsptr != NULL) {
+					smart_str_appends(&nscat, (char*)nsptr->href);
+					smart_str_appendc(&nscat, ':');
+				}
+				smart_str_appends(&nscat, cptype);
+				smart_str_0(&nscat);
+				efree(cptype);
+				if (ns) {efree(ns);}
+				if (zend_hash_find(SOAP_GLOBAL(typemap), nscat.c, nscat.len + 1, (void**)&new_enc) == SUCCESS) {
+					encode = *new_enc;
+				}
+				smart_str_free(&nscat);			
+			}
+		}
 	}
 	if (encode->to_zval) {
 		ret = encode->to_zval(&encode->details, data);
-	}
-	if (encode->to_zval_after) {
-		ret = encode->to_zval_after(&encode->details, ret);
 	}
 	return ret;
 }
@@ -400,7 +459,7 @@ zval *master_to_zval(encodePtr encode, xmlNodePtr data)
 	if (encode == NULL) {
 		encode = get_conversion(UNKNOWN_TYPE);
 	} else {
-	  /* Use xsi:type if it is defined */
+		/* Use xsi:type if it is defined */
 		xmlAttrPtr type_attr = get_attribute_ex(data->properties,"type", XSI_NAMESPACE);
 
 		if (type_attr != NULL) {
@@ -427,125 +486,67 @@ zval *master_to_zval(encodePtr encode, xmlNodePtr data)
 	return master_to_zval_int(encode, data);
 }
 
-#ifdef HAVE_PHP_DOMXML
-zval *to_xml_before_user(encodeTypePtr type, zval *data)
-{
-	TSRMLS_FETCH();
-
-	if (type.map->map_functions.to_xml_before) {
-		if (call_user_function(EG(function_table), NULL, type.map->map_functions.to_xml_before, data, 1, &data  TSRMLS_CC) == FAILURE) {
-			soap_error0(E_ERROR, "Encoding: Error calling to_xml_before");
-		}
-	}
-	return data;
-}
-
 xmlNodePtr to_xml_user(encodeTypePtr type, zval *data, int style, xmlNodePtr parent)
 {
-	zval *ret, **addr;
-	xmlNodePtr node;
+	xmlNodePtr ret = NULL;
+	zval *return_value;
 	TSRMLS_FETCH();
 
-	if (type.map->map_functions.to_xml) {
-		MAKE_STD_ZVAL(ret);
-		if (call_user_function(EG(function_table), NULL, type.map->map_functions.to_xml, ret, 1, &data  TSRMLS_CC) == FAILURE) {
-			soap_error0(E_ERROR, "Encoding: Error calling to_xml");
+	if (type && type->map && type->map->to_xml) {
+		MAKE_STD_ZVAL(return_value);
+
+		if (call_user_function(EG(function_table), NULL, type->map->to_xml, return_value, 1, &data TSRMLS_CC) == FAILURE) {
+			soap_error0(E_ERROR, "Encoding: Error calling to_xml callback");
+		}
+		if (Z_TYPE_P(return_value) == IS_STRING) {		
+			xmlDocPtr doc = soap_xmlParseMemory(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value));
+			if (doc && doc->children) {				
+				ret = xmlDocCopyNode(doc->children, parent->doc, 1);
+			}
+			xmlFreeDoc(doc);
 		}
 
-		if (Z_TYPE_P(ret) != IS_OBJECT) {
-			soap_error0(E_ERROR, "Encoding: Error serializing object from to_xml_user");
-		}
-
-		if (zend_hash_index_find(Z_OBJPROP_P(ret), 1, (void **)&addr) == SUCCESS) {
-			node = (xmlNodePtr)Z_LVAL_PP(addr);
-			node = xmlCopyNode(node, 1);
-			set_ns_and_type(node, type);
-		}
-		zval_ptr_dtor(&ret);
+		zval_ptr_dtor(&return_value);
 	}
-	return node;
-}
-
-xmlNodePtr to_xml_after_user(encodeTypePtr type, xmlNodePtr node, int style)
-{
-	zval *ret, *param, **addr;
-	int found;
-	TSRMLS_FETCH();
-
-	if (type.map->map_functions.to_xml_after) {
-		MAKE_STD_ZVAL(ret);
-		MAKE_STD_ZVAL(param);
-		param = php_domobject_new(node, &found, NULL TSRMLS_CC);
-
-		if (call_user_function(EG(function_table), NULL, type.map->map_functions.to_xml_after, ret, 1, &param  TSRMLS_CC) == FAILURE) {
-			soap_error0(E_ERROR, "Encoding: Error calling to_xml_after");
-		}
-		if (zend_hash_index_find(Z_OBJPROP_P(ret), 1, (void **)&addr) == SUCCESS) {
-			node = (xmlNodePtr)Z_LVAL_PP(addr);
-			set_ns_and_type(node, type);
-		}
-		zval_ptr_dtor(&ret);
-		zval_ptr_dtor(&param);
+	if (!ret) {
+		ret = xmlNewNode(NULL, BAD_CAST("BOGUS"));
 	}
-	return node;
-}
-
-xmlNodePtr to_zval_before_user(encodeTypePtr type, xmlNodePtr node, int style)
-{
-	zval *ret, *param, **addr;
-	int found;
-	TSRMLS_FETCH();
-
-	if (type.map->map_functions.to_zval_before) {
-		MAKE_STD_ZVAL(ret);
-		MAKE_STD_ZVAL(param);
-		param = php_domobject_new(node, &found, NULL TSRMLS_CC);
-
-		if (call_user_function(EG(function_table), NULL, type.map->map_functions.to_zval_before, ret, 1, &param  TSRMLS_CC) == FAILURE) {
-			soap_error0(E_ERROR, "Encoding: Error calling to_zval_before");
-		}
-		if (zend_hash_index_find(Z_OBJPROP_P(ret), 1, (void **)&addr) == SUCCESS) {
-			node = (xmlNodePtr)Z_LVAL_PP(addr);
-			set_ns_and_type(node, type);
-		}
-		zval_ptr_dtor(&ret);
-		zval_ptr_dtor(&param);
-	}
-	return node;
-}
-
-zval *to_zval_user(encodeTypePtr type, xmlNodePtr node)
-{
-	zval *ret, *param;
-	int found;
-	TSRMLS_FETCH();
-
-	if (type.map->map_functions.to_zval) {
-		MAKE_STD_ZVAL(ret);
-		MAKE_STD_ZVAL(param);
-		param = php_domobject_new(node, &found, NULL TSRMLS_CC);
-
-		if (call_user_function(EG(function_table), NULL, type.map->map_functions.to_zval, ret, 1, &param  TSRMLS_CC) == FAILURE) {
-			soap_error0(E_ERROR, "Encoding: Error calling to_zval");
-		}
-		zval_ptr_dtor(&param);
-		efree(param);
+	xmlAddChild(parent, ret);
+	if (style == SOAP_ENCODED) {
+		set_ns_and_type(ret, type);
 	}
 	return ret;
 }
 
-zval *to_zval_after_user(encodeTypePtr type, zval *data)
+zval *to_zval_user(encodeTypePtr type, xmlNodePtr node)
 {
+	zval *return_value;
 	TSRMLS_FETCH();
 
-	if (type.map->map_functions.to_zval_after) {
-		if (call_user_function(EG(function_table), NULL, type.map->map_functions.to_zval_after, data, 1, &data  TSRMLS_CC) == FAILURE) {
-			soap_error0(E_ERROR, "Encoding: Error calling to_zval_after");
+	if (type && type->map && type->map->to_zval) {
+		xmlBufferPtr buf;
+		zval *data;
+		xmlNodePtr copy;
+
+		copy = xmlCopyNode(node, 1);
+		buf = xmlBufferCreate();
+		xmlNodeDump(buf, NULL, copy, 0, 0);
+		MAKE_STD_ZVAL(data);
+		ZVAL_STRING(data, (char*)xmlBufferContent(buf), 1);
+		xmlBufferFree(buf);
+		xmlFreeNode(copy);
+
+		ALLOC_INIT_ZVAL(return_value);
+		
+		if (call_user_function(EG(function_table), NULL, type->map->to_zval, return_value, 1, &data TSRMLS_CC) == FAILURE) {
+			soap_error0(E_ERROR, "Encoding: Error calling from_xml callback");
 		}
+		zval_ptr_dtor(&data);
+	} else {
+		ALLOC_INIT_ZVAL(return_value);
 	}
-	return data;
+	return return_value;
 }
-#endif
 
 /* TODO: get rid of "bogus".. ither by passing in the already created xmlnode or passing in the node name */
 /* String encode/decode */
@@ -3090,26 +3091,8 @@ encodePtr get_conversion(int encode)
 	TSRMLS_FETCH();
 
 	if (zend_hash_index_find(&SOAP_GLOBAL(defEncIndex), encode, (void **)&enc) == FAILURE) {
-		if (SOAP_GLOBAL(overrides)) {
-			smart_str nscat = {0};
-
-			smart_str_appendl(&nscat, (*enc)->details.ns, strlen((*enc)->details.ns));
-			smart_str_appendc(&nscat, ':');
-			smart_str_appendl(&nscat, (*enc)->details.type_str, strlen((*enc)->details.type_str));
-			smart_str_0(&nscat);
-
-			if (zend_hash_find(SOAP_GLOBAL(overrides), nscat.c, nscat.len + 1, (void **)&enc) == FAILURE) {
-				smart_str_free(&nscat);
-				soap_error0(E_ERROR,  "Encoding: Cannot find encoding");
-				return NULL;
-			} else {
-				smart_str_free(&nscat);
-				return *enc;
-			}
-		} else {
-			soap_error0(E_ERROR,  "Encoding: Cannot find encoding");
-			return NULL;
-		}
+		soap_error0(E_ERROR,  "Encoding: Cannot find encoding");
+		return NULL;
 	} else {
 		return *enc;
 	}
@@ -3256,32 +3239,11 @@ static void delete_mapping(void *data)
 {
 	soapMappingPtr map = (soapMappingPtr)data;
 
-	if (map->ns) {
-		efree(map->ns);
+	if (map->to_xml) {
+		zval_ptr_dtor(&map->to_xml);
 	}
-	if (map->ctype) {
-		efree(map->ctype);
-	}
-
-	if (map->type == SOAP_MAP_FUNCTION) {
-		if (map->map_functions.to_xml_before) {
-			zval_ptr_dtor(&map->map_functions.to_xml_before);
-		}
-		if (map->map_functions.to_xml) {
-			zval_ptr_dtor(&map->map_functions.to_xml);
-		}
-		if (map->map_functions.to_xml_after) {
-			zval_ptr_dtor(&map->map_functions.to_xml_after);
-		}
-		if (map->map_functions.to_zval_before) {
-			zval_ptr_dtor(&map->map_functions.to_zval_before);
-		}
-		if (map->map_functions.to_zval) {
-			zval_ptr_dtor(&map->map_functions.to_zval);
-		}
-		if (map->map_functions.to_zval_after) {
-			zval_ptr_dtor(&map->map_functions.to_zval_after);
-		}
+	if (map->to_zval) {
+		zval_ptr_dtor(&map->to_zval);
 	}
 	efree(map);
 }

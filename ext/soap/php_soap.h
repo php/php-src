@@ -35,10 +35,6 @@
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
 
-#ifdef HAVE_PHP_DOMXML
-# include "ext/domxml/php_domxml.h"
-#endif
-
 #ifndef PHP_HAVE_STREAMS
 # error You lose - must be compiled against PHP 4.3.0 or later
 #endif
@@ -78,23 +74,8 @@ typedef struct _soapService soapService, *soapServicePtr;
 #include "php_packet_soap.h"
 
 struct _soapMapping {
-	char *ns;
-	char *ctype;
-	int type;
-
-	struct _map_functions {
-		zval *to_xml_before;
-		zval *to_xml;
-		zval *to_xml_after;
-		zval *to_zval_before;
-		zval *to_zval;
-		zval *to_zval_after;
-	} map_functions;
-
-	struct _map_class {
-		int type;
-		zend_class_entry *ce;
-	} map_class;
+	zval *to_xml;
+	zval *to_zval;
 };
 
 struct _soapHeader;
@@ -116,7 +97,7 @@ struct _soapService {
 
 	zval *soap_object;
 
-	HashTable *mapping;
+	HashTable *typemap;
 	int        version;
 	int        type;
 	char      *actor;
@@ -170,7 +151,7 @@ ZEND_BEGIN_MODULE_GLOBALS(soap)
 	HashTable  defEncNs;     /* mapping of default namespaces to prefixes */
 	HashTable  defEnc;
 	HashTable  defEncIndex;
-	HashTable *overrides;
+	HashTable *typemap;
 	int        cur_uniq_ns;
 	int        soap_version;
 	sdlPtr     sdl;
