@@ -163,11 +163,16 @@ static zval* collator_set_wrapper(zval *object, zend_collator *zcoll TSRMLS_DC)
 	return object;
 }
 
+/* {{{ proto Collator collator_create(string collator_name) U
+Create a new collator object */
 PHP_METHOD(collator, __construct)
 {
 	zif_collator_create(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
+/* }}} */
 
+/* {{{ proto Collator collator_create(string collator_name) U
+Create a new collator object */
 PHP_FUNCTION(collator_create)
 {
 	UErrorCode        status = U_ZERO_ERROR;
@@ -191,7 +196,10 @@ PHP_FUNCTION(collator_create)
 	}
 	collator_set_wrapper(object, zend_collator_create(ucoll) TSRMLS_CC);
 }
+/* }}} */
 
+/* {{{ proto int collator_compare(Collator coll, string elementA, string elementB) U
+Use a collator object to compare two elements */
 PHP_FUNCTION(collator_compare)
 {
 	zval             *object;
@@ -205,7 +213,10 @@ PHP_FUNCTION(collator_compare)
 	collatorobj = (php_collator_obj *) zend_object_store_get_object(object TSRMLS_CC);
 	RETURN_LONG(ucol_strcoll(collatorobj->zcoll->coll, string1, string1_len, string2, string2_len));
 }
+/* }}} */
 
+/* {{{ proto array collator_sort(Collator coll, array initialarray) U
+Sort an array using a collator */
 PHP_FUNCTION(collator_sort)
 {
 	zval             *object;
@@ -230,7 +241,10 @@ PHP_FUNCTION(collator_sort)
 	}
 	UG(default_collator) = orig_collator;
 }
+/* }}} */
 
+/* {{{ proto void collator_set_strength(Collator coll, int strength) U
+Set the strength on a collator object */
 PHP_FUNCTION(collator_set_strength)
 {
 	zval             *object;
@@ -243,7 +257,10 @@ PHP_FUNCTION(collator_set_strength)
 	collatorobj = (php_collator_obj *) zend_object_store_get_object(object TSRMLS_CC);
 	ucol_setStrength(collatorobj->zcoll->coll, strength);
 }
+/* }}} */
 
+/* {{{ proto int collator_get_strength(Collator coll) U
+Returns the current collator strength */
 PHP_FUNCTION(collator_get_strength)
 {
 	zval             *object;
@@ -255,7 +272,10 @@ PHP_FUNCTION(collator_get_strength)
 	collatorobj = (php_collator_obj *) zend_object_store_get_object(object TSRMLS_CC);
 	RETURN_LONG(ucol_getStrength(collatorobj->zcoll->coll));
 }
+/* }}} */
 
+/* {{{ proto bool collator_set_attribute(Collator coll, int attribute, int value) U
+Set a collator attribute */
 PHP_FUNCTION(collator_set_attribute)
 {
 	zval             *object;
@@ -271,7 +291,11 @@ PHP_FUNCTION(collator_set_attribute)
 	ucol_setAttribute(collatorobj->zcoll->coll, attribute, value, &error);
 	RETURN_BOOL(error == U_ZERO_ERROR ? 1 : 0);
 }
+/* }}} */
 
+
+/* {{{ proto int collator_get_attribute(Collator coll, int attribute) U
+Read an attribute from a collator */
 PHP_FUNCTION(collator_get_attribute)
 {
 	zval             *object;
@@ -290,6 +314,7 @@ PHP_FUNCTION(collator_get_attribute)
 	}
 	RETURN_LONG(value);
 }
+/* }}} */
 
 /* {{{ proto Collator collator_get_default(void) U
    Returns default collator */

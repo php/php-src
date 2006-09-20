@@ -232,6 +232,8 @@ PHP_FUNCTION(unicode_get_subst_char)
 }
 /* }}} */
 
+/* {{{ proto callback unicode_set_error_handler(callback new_callback) U
+Set (or clear) the unicode conversion error handler */
 PHP_FUNCTION(unicode_set_error_handler)
 {
 	zval	   *error_handler;
@@ -274,7 +276,11 @@ PHP_FUNCTION(unicode_set_error_handler)
 		RETURN_NULL();
 	}
 }
+/* }}} */
 
+/* {{{ proto bool unicode_restore_error_handler(void) U
+Restores the active error handler to the one which was previously active
+(Before the last unicode_set_error_handler() call) */
 PHP_FUNCTION(unicode_restore_error_handler)
 {
 	if (UG(conv_error_handler)) {
@@ -291,6 +297,7 @@ PHP_FUNCTION(unicode_restore_error_handler)
 	}
 	RETURN_TRUE;
 }
+/* }}} */
 
 /* {{{ unicode_functions[] */
 zend_function_entry unicode_functions[] = {

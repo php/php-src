@@ -18,6 +18,8 @@
 
 #include "php_unicode.h"
 
+/* {{{ proto string str_transliterate(string str, string from, string to[, string variant]) U
+Transliterate a string using the alphabet provided */
 PHP_FUNCTION(str_transliterate)
 {
 	UChar	   *str, *from, *to, *variant = NULL;
@@ -81,6 +83,7 @@ PHP_FUNCTION(str_transliterate)
 
 	RETURN_UNICODEL(result, result_len, 0);
 }
+/* }}} */
 
 /*
  * Local variables:
