@@ -3460,7 +3460,7 @@ ZEND_API zval *zend_read_static_property(zend_class_entry *scope, char *name, in
 ZEND_API zend_uchar zend_get_unified_string_type(int num_args TSRMLS_DC, ...)
 {
 	va_list ap;
-	int best_type = UG(unicode) ? IS_UNICODE : IS_STRING;
+	int best_type = ZEND_STR_TYPE;
 	int type;
 
 	if (num_args <= 0) return (zend_uchar)-1;

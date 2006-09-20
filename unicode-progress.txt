@@ -72,15 +72,8 @@ ext/standard
     strnatcmp(), strnatcasecmp()
         Params API. The rest depends on porting of strnatcmp.c
 
-    strrchr()
-        Needs update so that it doesn't try to find half of a surrogate
-        pair.
-
     strtr()
         Check on Derick's progress.
-
-    substr_replace()
-        Params API, test
 
     wordwrap()
         Upgrade, do wordwrapping on codepoint (or glyph ?) level, maybe use
@@ -129,6 +122,7 @@ ext/standard
     max()
     range()
     shuffle()
+    strrchr()
 
     end(), prev(), next(), reset(), current(), key()
 
