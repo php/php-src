@@ -67,22 +67,49 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename)
 {
 	char *algo, *data, *digest;
 	int algo_len, data_len;
+	zend_uchar data_type = IS_STRING;
 	zend_bool raw_output = 0;
 	php_hash_ops *ops;
 	void *context;
 	php_stream *stream = NULL;
 
+#if PHP_MAJOR_VERSION >= 6
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "st|b", &algo, &algo_len, &data, &data_len, &data_type, &raw_output) == FAILURE) {
+		return;
+	}
+
+	if (data_type == IS_UNICODE) {
+		if (isfilename) {
+			if (php_stream_path_encode(NULL, &data, &data_len, (UChar *)data, data_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+				RETURN_FALSE;
+			}
+		} else {
+			/* Unicode string passed for raw hashing */
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unicode strings can not be hashed.  Convert to a binary type.");
+			RETURN_FALSE;
+		}
+	}
+#else
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|b", &algo, &algo_len, &data, &data_len, &raw_output) == FAILURE) {
 		return;
 	}
+#endif
 
 	ops = php_hash_fetch_ops(algo, algo_len);
 	if (!ops) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown hashing algorithm: %s", algo);
+		if (data_type != IS_STRING) {
+			/* Original filename was UNICODE, this string is a converted copy */
+			efree(data);
+		}
 		RETURN_FALSE;
 	}
 	if (isfilename) {
 		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, DEFAULT_CONTEXT);
+		if (data_type != IS_STRING) {
+			/* Original filename was UNICODE, this string is a converted copy */
+			efree(data);
+		}
 		if (!stream) {
 			/* Stream will report errors opening file */
 			RETURN_FALSE;
@@ -121,7 +148,7 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename)
 	}
 }
 
-/* {{{ proto string hash(string algo, string data[, bool raw_output = false])
+/* {{{ proto string hash(string algo, string data[, bool raw_output = false]) U
 Generate a hash of a given input string
 Returns lowercase hexits by default */
 PHP_FUNCTION(hash) {
@@ -129,7 +156,7 @@ PHP_FUNCTION(hash) {
 }
 /* }}} */
 
-/* {{{ proto string hash_file(string algo, string filename[, bool raw_output = false])
+/* {{{ proto string hash_file(string algo, string filename[, bool raw_output = false]) U
 Generate a hash of a given file
 Returns lowercase hexits by default */
 PHP_FUNCTION(hash_file) {
@@ -141,23 +168,49 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename)
 {
 	char *algo, *data, *digest, *key, *K;
 	int algo_len, data_len, key_len, i;
+	zend_uchar data_type = IS_STRING;
 	zend_bool raw_output = 0;
 	php_hash_ops *ops;
 	void *context;
 	php_stream *stream = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|b", &algo, &algo_len, &data, &data_len, 
-																  &key, &key_len, &raw_output) == FAILURE) {
+#if PHP_MAJOR_VERSION >= 6
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "stS|b", &algo, &algo_len, &data, &data_len, &data_type, &key, &key_len, &raw_output) == FAILURE) {
 		return;
 	}
+
+	if (data_type == IS_UNICODE) {
+		if (isfilename) {
+			if (php_stream_path_encode(NULL, &data, &data_len, (UChar *)data, data_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+				RETURN_FALSE;
+			}
+		} else {
+			/* Unicode string passed for raw hashing */
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unicode strings can not be hashed.  Convert to a binary type.");
+			RETURN_FALSE;
+		}
+	}
+#else
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|b", &algo, &algo_len, &data, &data_len, &key, &key_len, &raw_output) == FAILURE) {
+		return;
+	}
+#endif
 
 	ops = php_hash_fetch_ops(algo, algo_len);
 	if (!ops) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown hashing algorithm: %s", algo);
+		if (data_type != IS_STRING) {
+			/* Original filename was UNICODE, this string is a converted copy */
+			efree(data);
+		}
 		RETURN_FALSE;
 	}
 	if (isfilename) {
 		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, DEFAULT_CONTEXT);
+		if (data_type != IS_STRING) {
+			/* Original filename was UNICODE, this string is a converted copy */
+			efree(data);
+		}
 		if (!stream) {
 			/* Stream will report errors opening file */
 			RETURN_FALSE;
@@ -230,7 +283,7 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename)
 	}
 }
 
-/* {{{ proto string hash_hmac(string algo, string data, string key[, bool raw_output = false])
+/* {{{ proto string hash_hmac(string algo, string data, string key[, bool raw_output = false]) U
 Generate a hash of a given input string with a key using HMAC
 Returns lowercase hexits by default */
 PHP_FUNCTION(hash_hmac) {
@@ -238,7 +291,7 @@ PHP_FUNCTION(hash_hmac) {
 }
 /* }}} */
 
-/* {{{ proto string hash_hmac_file(string algo, string filename, string key[, bool raw_output = false])
+/* {{{ proto string hash_hmac_file(string algo, string filename, string key[, bool raw_output = false]) U
 Generate a hash of a given file with a key using HMAC
 Returns lowercase hexits by default */
 PHP_FUNCTION(hash_hmac_file) {
@@ -247,7 +300,7 @@ PHP_FUNCTION(hash_hmac_file) {
 /* }}} */
 
 
-/* {{{ proto resource hash_init(string algo[, int options, string key])
+/* {{{ proto resource hash_init(string algo[, int options, string key]) U
 Initialize a hashing context */
 PHP_FUNCTION(hash_init)
 {
@@ -312,7 +365,13 @@ PHP_FUNCTION(hash_init)
 }
 /* }}} */
 
-/* {{{ proto bool hash_update(resource context, string data)
+#if PHP_MAJOR_VERSION >= 6
+# define PHP_HASH_UPDATE_ARGS "rS"
+#else
+# define PHP_HASH_UPDATE_ARGS "rs"
+#endif
+
+/* {{{ proto bool hash_update(resource context, string data) U
 Pump data into the hashing algorithm */
 PHP_FUNCTION(hash_update)
 {
@@ -321,7 +380,7 @@ PHP_FUNCTION(hash_update)
 	char *data;
 	int data_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &zhash, &data, &data_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, PHP_HASH_UPDATE_ARGS, &zhash, &data, &data_len) == FAILURE) {
 		return;
 	}
 
@@ -333,7 +392,7 @@ PHP_FUNCTION(hash_update)
 }
 /* }}} */
 
-/* {{{ proto int hash_update_stream(resource context, resource handle[, integer length])
+/* {{{ proto int hash_update_stream(resource context, resource handle[, integer length]) U
 Pump data into the hashing algorithm from an open stream */
 PHP_FUNCTION(hash_update_stream)
 {
@@ -370,7 +429,7 @@ PHP_FUNCTION(hash_update_stream)
 }
 /* }}} */
 
-/* {{{ proto bool hash_update_file(resource context, string filename[, resource context])
+/* {{{ proto bool hash_update_file(resource context, string filename[, resource context]) U
 Pump data into the hashing algorithm from a file */
 PHP_FUNCTION(hash_update_file)
 {
@@ -380,15 +439,35 @@ PHP_FUNCTION(hash_update_file)
 	php_stream *stream;
 	char *filename, buf[1024];
 	int filename_len, n;
+	zend_uchar filename_type = IS_STRING;
 
+#if PHP_MAJOR_VERSION >= 6
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rt|r", &zhash, &filename, &filename_len, &filename_type, &zcontext) == FAILURE) {
+		return;
+	}
+
+	context = php_stream_context_from_zval(zcontext, 0);
+
+	if (filename_type == IS_UNICODE) {
+		if (php_stream_path_encode(NULL, &filename, &filename_len, (UChar *)filename, filename_len, REPORT_ERRORS, context) == FAILURE) {
+			RETURN_FALSE;
+		}
+	}
+#else
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|r", &zhash, &filename, &filename_len, &zcontext) == FAILURE) {
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(hash, php_hash_data*, &zhash, -1, PHP_HASH_RESNAME, php_hash_le_hash);
 	context = php_stream_context_from_zval(zcontext, 0);
+#endif
+
+	ZEND_FETCH_RESOURCE(hash, php_hash_data*, &zhash, -1, PHP_HASH_RESNAME, php_hash_le_hash);
 
 	stream = php_stream_open_wrapper_ex(filename, "rb", REPORT_ERRORS, NULL, context);
+	if (filename_type != IS_STRING) {
+		/* Original filename was UNICODE, this string is a converted copy */
+		efree(filename);
+	}
 	if (!stream) {
 		/* Stream will report errors opening file */
 		RETURN_FALSE;
@@ -403,7 +482,7 @@ PHP_FUNCTION(hash_update_file)
 }
 /* }}} */
 
-/* {{{ proto string hash_final(resource context[, bool raw_output=false])
+/* {{{ proto string hash_final(resource context[, bool raw_output=false]) U
 Output resulting digest */
 PHP_FUNCTION(hash_final)
 {
@@ -467,7 +546,7 @@ PHP_FUNCTION(hash_final)
 }
 /* }}} */
 
-/* {{{ proto array hash_algos(void)
+/* {{{ proto array hash_algos(void) U
 Return a list of registered hashing algorithms */
 PHP_FUNCTION(hash_algos)
 {

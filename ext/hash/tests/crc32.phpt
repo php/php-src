@@ -1,7 +1,7 @@
 --TEST--
 CRC32
 --SKIPIF--
-<?php extension_loaded('hash') or die('skip'); ?>
+<?php if (!extension_loaded('hash') || ini_get('unicode.semantics')) die('skip'); ?>
 --FILE--
 <?php
 echo hash('crc32', ''), "\n";
