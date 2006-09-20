@@ -1,7 +1,7 @@
 --TEST--
 sha384 algorithm
 --SKIPIF--
-<?php if(!extension_loaded("hash")) print "skip"; ?>
+<?php if(!extension_loaded("hash") || ini_get('unicode.semantics')) print "skip"; ?>
 --FILE--
 <?php
 echo hash('sha384', '') . "\n";
