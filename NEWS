@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   (Tony)
 - Fixed bug #38623 (leaks in a tricky code with switch() and exceptions).
   (Dmitry)
+- Fixed bug #38579 (include_once() may include the same file twice). (Dmitry)
 - Fixed bug #38574 (missing curl constants and improper constant detection).
   (Ilia)
 - Fixed bug #37870 (pgo_pgsql tries to de-allocate unused statements).
