@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Sep 2006, PHP 5.2.0
+- Added ability to make SOAP call userspace PHP<->XML converters. (Dmitry)
+
 - Fixed mess with CGI/CLI -d option (now it works with cgi; constants are
   working exactly like in php.ini; with FastCGI -d affects all requests).
   (Dmitry)

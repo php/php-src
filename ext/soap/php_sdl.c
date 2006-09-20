@@ -1326,10 +1326,6 @@ static void sdl_deserialize_encoder(encodePtr enc, sdlTypePtr *types, char **in)
 			if (real_enc) {
 				enc->to_zval = real_enc->to_zval;
 				enc->to_xml = real_enc->to_xml;
-				enc->to_zval_before = real_enc->to_zval_before;
-				enc->to_xml_before = real_enc->to_xml_before;
-				enc->to_zval_after = real_enc->to_zval_after;
-				enc->to_xml_after = real_enc->to_xml_after;
 			}
 		}
 	}	
