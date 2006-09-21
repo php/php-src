@@ -33,7 +33,7 @@ array(2) {
   ["test1"]=>
   int(1)
   ["test2"]=>
-  int(1)
+  &string(1) "1"
 }
 string(1) "1"
 Done
