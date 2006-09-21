@@ -1170,12 +1170,15 @@ ZEND_FUNCTION(leak)
 
 
 #ifdef ZEND_TEST_EXCEPTIONS
+/* {{{ proto void crash(void) U
+Cause the process to crash by copying data to an inaccesible location */
 ZEND_FUNCTION(crash)
 {
 	char *nowhere=NULL;
 
 	memcpy(nowhere, "something", sizeof("something"));
 }
+/* }}} */
 #endif
 
 #endif /* ZEND_DEBUG */
@@ -1565,19 +1568,24 @@ ZEND_FUNCTION(create_function)
 
 
 #if ZEND_DEBUG
+/* {{{ proto void zend_test_func(mixed arg1, mixed arg2) U
+Generic test function */
 ZEND_FUNCTION(zend_test_func)
 {
 	zval *arg1, *arg2;
 
 	zend_get_parameters(ht, 2, &arg1, &arg2);
 }
-
+/* }}} */
 
 #ifdef ZTS
+/* {{{ proto int zend_thread_id(void) U
+Returns a unique identifier for the current thread */
 ZEND_FUNCTION(zend_thread_id)
 {
 	RETURN_LONG(tsrm_thread_id());
 }
+/* }}} */
 #endif
 #endif
 
