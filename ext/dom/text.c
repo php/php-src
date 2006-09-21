@@ -44,7 +44,7 @@ zend_function_entry php_dom_text_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto void DOMText::__construct([string value]); */
+/* {{{ proto void DOMText::__construct([string value]) U */
 PHP_METHOD(domtext, __construct)
 {
 
@@ -108,7 +108,7 @@ int dom_text_whole_text_read(dom_object *obj, zval **retval TSRMLS_DC)
 /* }}} */
 
 
-/* {{{ proto DOMText dom_text_split_text(int offset);
+/* {{{ proto DOMText dom_text_split_text(int offset) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-38853C1D
 Since: 
 */
@@ -167,7 +167,7 @@ PHP_FUNCTION(dom_text_split_text)
 /* }}} end dom_text_split_text */
 
 
-/* {{{ proto boolean dom_text_is_whitespace_in_element_content();
+/* {{{ proto boolean dom_text_is_whitespace_in_element_content() U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-isWhitespaceInElementContent
 Since: DOM Level 3
 */
@@ -191,7 +191,7 @@ PHP_FUNCTION(dom_text_is_whitespace_in_element_content)
 /* }}} end dom_text_is_whitespace_in_element_content */
 
 
-/* {{{ proto DOMText dom_text_replace_whole_text(string content);
+/* {{{ proto DOMText dom_text_replace_whole_text(string content)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-replaceWholeText
 Since: DOM Level 3
 */
