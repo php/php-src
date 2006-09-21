@@ -40,7 +40,7 @@ zend_function_entry php_dom_cdatasection_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto void DOMCdataSection::__construct(string value); */
+/* {{{ proto void DOMCdataSection::__construct(string value) U */
 PHP_METHOD(domcdatasection, __construct)
 {
 

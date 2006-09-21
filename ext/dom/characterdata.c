@@ -140,7 +140,7 @@ int dom_characterdata_length_read(dom_object *obj, zval **retval TSRMLS_DC)
 /* }}} */
 
 
-/* {{{ proto string dom_characterdata_substring_data(int offset, int count);
+/* {{{ proto string dom_characterdata_substring_data(int offset, int count) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6531BCCF
 Since: 
 */
@@ -190,7 +190,7 @@ PHP_FUNCTION(dom_characterdata_substring_data)
 /* }}} end dom_characterdata_substring_data */
 
 
-/* {{{ proto void dom_characterdata_append_data(string arg);
+/* {{{ proto void dom_characterdata_append_data(string arg) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-32791A2F
 Since: 
 */
@@ -225,7 +225,7 @@ PHP_FUNCTION(dom_characterdata_append_data)
 /* }}} end dom_characterdata_append_data */
 
 
-/* {{{ proto void dom_characterdata_insert_data(int offset, string arg);
+/* {{{ proto void dom_characterdata_insert_data(int offset, string arg) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-3EDB695F
 Since: 
 */
@@ -274,7 +274,7 @@ PHP_FUNCTION(dom_characterdata_insert_data)
 /* }}} end dom_characterdata_insert_data */
 
 
-/* {{{ proto void dom_characterdata_delete_data(int offset, int count);
+/* {{{ proto void dom_characterdata_delete_data(int offset, int count) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-7C603781
 Since: 
 */
@@ -330,7 +330,7 @@ PHP_FUNCTION(dom_characterdata_delete_data)
 /* }}} end dom_characterdata_delete_data */
 
 
-/* {{{ proto void dom_characterdata_replace_data(int offset, int count, string arg);
+/* {{{ proto void dom_characterdata_replace_data(int offset, int count, string arg) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-E5CBA7FB
 Since: 
 */

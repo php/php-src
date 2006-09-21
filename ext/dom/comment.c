@@ -40,7 +40,7 @@ zend_function_entry php_dom_comment_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto void DOMComment::__construct([string value]); */
+/* {{{ proto void DOMComment::__construct([string value]) U */
 PHP_METHOD(domcomment, __construct)
 {
 
