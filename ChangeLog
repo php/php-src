@@ -1,3 +1,128 @@
+2006-09-20  Sara Golemon  <sara@golemon.com>
+
+    * ext/unicode/collator.c
+      ext/unicode/property.c
+      ext/unicode/transform.c
+      ext/unicode/unicode.c:
+      Backfill protos for ext/unicode functions
+
+2006-09-20  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_5_2)
+      ext/mbstring/oniguruma/oniguruma.h:
+      fixed compilation problem on Mac OS/X. (bug #38892,38778,38452)
+
+2006-09-20  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-progress.txt
+      ZendEngine2/zend_API.c
+      ext/standard/array.c
+      ext/standard/string.c:
+      Bug fixes for substr_replace().
+
+    * ext/spl/config.m4:
+      Install SPL headers.
+
+2006-09-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/tests/typemap001.phpt
+      ext/soap/tests/typemap001.phpt
+      ext/soap/tests/typemap002.phpt
+      ext/soap/tests/typemap002.phpt
+      ext/soap/tests/typemap003.phpt
+      ext/soap/tests/typemap003.phpt
+      ext/soap/tests/typemap004.phpt
+      ext/soap/tests/typemap004.phpt
+      ext/soap/tests/typemap005.phpt
+      ext/soap/tests/typemap005.phpt
+      ext/soap/tests/typemap006.phpt
+      ext/soap/tests/typemap006.phpt
+      ext/soap/tests/typemap007.phpt
+      ext/soap/tests/typemap007.phpt
+      ext/soap/tests/typemap008.phpt
+      ext/soap/tests/typemap008.phpt
+      ext/soap/tests/typemap009.phpt
+      ext/soap/tests/typemap009.phpt
+      ext/soap/tests/typemap010.phpt
+      ext/soap/tests/typemap010.phpt
+      ext/soap/tests/typemap011.phpt
+      ext/soap/tests/typemap011.phpt
+      ext/soap/tests/typemap012.phpt:
+      
+      file typemap001.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.h
+      ext/soap/php_encoding.h
+      ext/soap/php_sdl.c
+      ext/soap/php_sdl.c
+      ext/soap/php_soap.h
+      ext/soap/php_soap.h
+      ext/soap/soap.c
+      ext/soap/soap.c
+      ext/soap/tests/typemap001.phpt
+      ext/soap/tests/typemap002.phpt
+      ext/soap/tests/typemap003.phpt
+      ext/soap/tests/typemap004.phpt
+      ext/soap/tests/typemap005.phpt
+      ext/soap/tests/typemap006.phpt
+      ext/soap/tests/typemap007.phpt
+      ext/soap/tests/typemap008.phpt
+      ext/soap/tests/typemap009.phpt
+      ext/soap/tests/typemap010.phpt
+      ext/soap/tests/typemap011.phpt
+      ext/soap/tests/typemap012.phpt
+      ext/soap/tests/typemap012.phpt:
+      Added ability to make SOAP call userspace PHP<->XML converters
+
+    * tests/lang/bug38579.phpt
+      tests/lang/bug38579.phpt:
+      
+      file bug38579.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c
+      tests/lang/bug38579.inc
+      tests/lang/bug38579.inc
+      tests/lang/bug38579.inc
+      tests/lang/bug38579.phpt:
+      Fixed bug #38579 (include_once() may include the same file twice)
+
+2006-09-20  Sara Golemon  <sara@golemon.com>
+
+    * ext/hash/hash.c
+      ext/hash/hash_ripemd.c
+      ext/hash/php_hash.h
+      ext/hash/php_hash_ripemd.h
+      ext/hash/tests/ripemd256.phpt
+      ext/hash/tests/ripemd320.phpt:
+      Add ripemd256 and ripemd320 algos
+
+    * ext/hash/hash.c
+      ext/hash/tests/adler32.phpt
+      ext/hash/tests/crc32.phpt
+      ext/hash/tests/gost.phpt
+      ext/hash/tests/haval.phpt
+      ext/hash/tests/hmac-md5.phpt
+      ext/hash/tests/md2.phpt
+      ext/hash/tests/md4.phpt
+      ext/hash/tests/md5.phpt
+      ext/hash/tests/ripemd128.phpt
+      ext/hash/tests/ripemd160.phpt
+      ext/hash/tests/sha1.phpt
+      ext/hash/tests/sha256.phpt
+      ext/hash/tests/sha384.phpt
+      ext/hash/tests/sha512.phpt
+      ext/hash/tests/snefru.phpt
+      ext/hash/tests/tiger.phpt
+      ext/hash/tests/whirlpool.phpt:
+      PHP6 Updates
+
 2006-09-19  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/filter/filter.c:
