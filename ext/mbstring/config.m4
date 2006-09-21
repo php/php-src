@@ -103,7 +103,7 @@ esac
 
 
     if test "$PHP_MBREGEX_BACKTRACK" != "no"; then
-      AC_DEFINE([HAVE_MBREGEX_BACKTRACK],1,[whether to check multibyte regex backtrack])
+      AC_DEFINE([USE_COMBINATION_EXPLOSION_CHECK],1,[whether to check multibyte regex backtrack])
     fi
 
     PHP_MBSTRING_ADD_CFLAG([-DNOT_RUBY])

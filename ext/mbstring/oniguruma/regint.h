@@ -59,9 +59,6 @@
 /* #define USE_UNICODE_FULL_RANGE_CTYPE */ /* --> move to regenc.h */
 #define USE_NAMED_GROUP
 #define USE_SUBEXP_CALL
-#ifdef HAVE_MBREGEX_BACKTRACK
-#define USE_COMBINATION_EXPLOSION_CHECK                 /* (X*)* */
-#endif	/* HAVE_MBREGEX_BACKTRACK */
 #define USE_INFINITE_REPEAT_MONOMANIAC_MEM_STATUS_CHECK /* /(?:()|())*\2/ */
 #define USE_NEWLINE_AT_END_OF_STRING_HAS_EMPTY_LINE     /* /\n$/ =~ "\n" */
 #define USE_WARNING_REDUNDANT_NESTED_REPEAT_OPERATOR
@@ -89,6 +86,7 @@
 #define USE_VARIABLE_META_CHARS
 #define USE_WORD_BEGIN_END          /* "\<": word-begin, "\>": word-end */
 #define USE_POSIX_REGION_OPTION     /* needed for POSIX API support */
+/* #define USE_COMBINATION_EXPLOSION_CHECK */     /* (X*)* */
 /* #define USE_MULTI_THREAD_SYSTEM */
 #define THREAD_ATOMIC_START         /* depend on thread system */
 #define THREAD_ATOMIC_END           /* depend on thread system */
@@ -103,7 +101,9 @@
 #include "version.h"
 #include "rubysig.h"      /* for DEFER_INTS, ENABLE_INTS */
 
+#define USE_COMBINATION_EXPLOSION_CHECK        /* (X*)* */
 #define USE_MULTI_THREAD_SYSTEM
+
 #define THREAD_ATOMIC_START          DEFER_INTS
 #define THREAD_ATOMIC_END            ENABLE_INTS
 #define THREAD_PASS                  rb_thread_schedule()
@@ -600,7 +600,6 @@ enum OpCode {
 
   OP_BACKREF1,
   OP_BACKREF2,
-  OP_BACKREF3,
   OP_BACKREFN,
   OP_BACKREFN_IC,
   OP_BACKREF_MULTI,
@@ -651,9 +650,7 @@ enum OpCode {
   OP_STATE_CHECK_PUSH_OR_JUMP, /* check ok -> push, else jump  */
   OP_STATE_CHECK,              /* check only */
   OP_STATE_CHECK_ANYCHAR_STAR,
-  OP_STATE_CHECK_ANYCHAR_ML_STAR,
-  OP_STATE_CHECK_ANYCHAR_STAR_PEEK_NEXT,
-  OP_STATE_CHECK_ANYCHAR_ML_STAR_PEEK_NEXT
+  OP_STATE_CHECK_ANYCHAR_ML_STAR
 };
 
 typedef int RelAddrType;
@@ -747,7 +744,6 @@ typedef void* PointerType;
 #define SIZE_OP_STATE_CHECK_PUSH       (SIZE_OPCODE + SIZE_STATE_CHECK_NUM + SIZE_RELADDR)
 #define SIZE_OP_STATE_CHECK_PUSH_OR_JUMP (SIZE_OPCODE + SIZE_STATE_CHECK_NUM + SIZE_RELADDR)
 #define SIZE_OP_STATE_CHECK_ANYCHAR_STAR (SIZE_OPCODE + SIZE_STATE_CHECK_NUM)
-#define SIZE_OP_STATE_CHECK_ANYCHAR_STAR_PEEK_NEXT (SIZE_OPCODE + 1 + SIZE_STATE_CHECK_NUM)
 #endif
 
 #define MC_ESC(enc)               (enc)->meta_char_table.esc

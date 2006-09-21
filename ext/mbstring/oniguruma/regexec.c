@@ -2071,53 +2071,6 @@ match_at(regex_t* reg, const UChar* str, const UChar* end, const UChar* sstart,
       }
       STAT_OP_OUT;
       break;
-
-    case OP_STATE_CHECK_ANYCHAR_STAR_PEEK_NEXT:
-      STAT_OP_IN(OP_STATE_CHECK_ANYCHAR_STAR_PEEK_NEXT);
-
-      GET_STATE_CHECK_NUM_INC(mem, p);
-      while (s < end) {
-	STATE_CHECK_VAL(scv, mem);
-	if (scv) goto fail;
-
-	if (*p == *s) {
-	  STACK_PUSH_ALT_WITH_STATE_CHECK(p + 1, s, sprev, mem);
-	}
-	n = enc_len(encode, s);
-        DATA_ENSURE(n);
-        if (ONIGENC_IS_MBC_NEWLINE(encode, s, end))  goto fail;
-        sprev = s;
-        s += n;
-      }
-      p++;
-      STAT_OP_OUT;
-      break;
-
-    case OP_STATE_CHECK_ANYCHAR_ML_STAR_PEEK_NEXT:
-      STAT_OP_IN(OP_STATE_CHECK_ANYCHAR_ML_STAR_PEEK_NEXT);
-
-      GET_STATE_CHECK_NUM_INC(mem, p);
-      while (s < end) {
-	STATE_CHECK_VAL(scv, mem);
-	if (scv) goto fail;
-
-	if (*p == *s) {
-	  STACK_PUSH_ALT_WITH_STATE_CHECK(p + 1, s, sprev, mem);
-	}
-	n = enc_len(encode, s);
-	if (n >1) {
-	  DATA_ENSURE(n);
-	  sprev = s;
-	  s += n;
-	}
-	else {
-	  sprev = s;
-	  s++;
-	}
-      }
-      p++;
-      STAT_OP_OUT;
-      break;
 #endif /* USE_COMBINATION_EXPLOSION_CHECK */
 
     case OP_WORD:  STAT_OP_IN(OP_WORD);
@@ -2347,11 +2300,6 @@ match_at(regex_t* reg, const UChar* str, const UChar* end, const UChar* sstart,
 
     case OP_BACKREF2:  STAT_OP_IN(OP_BACKREF2);
       mem = 2;
-      goto backref;
-      break;
-
-    case OP_BACKREF3:  STAT_OP_IN(OP_BACKREF3);
-      mem = 3;
       goto backref;
       break;
 
@@ -3118,19 +3066,19 @@ bm_search_notrev(regex_t* reg, const UChar* target, const UChar* target_end,
 	  (int )text, (int )text_end, (int )text_range);
 #endif
 
-  tlen1 = (target_end - target) - 1;
-  end = text_range + tlen1;
-  if (end > text_end)
-    end = text_end;
-
   tail = target_end - 1;
+  tlen1 = tail - target;
+  end = text_range;
+  if (end + tlen1 > text_end)
+    end = text_end - tlen1;
+
   s = text;
 
   if (IS_NULL(reg->int_map)) {
     while (s < end) {
       p = se = s + tlen1;
       t = tail;
-      while (*p == *t && t >= target) {
+      while (t >= target && *p == *t) {
         p--; t--;
       }
       if (t < target) return (UChar* )s;
@@ -3146,7 +3094,7 @@ bm_search_notrev(regex_t* reg, const UChar* target, const UChar* target_end,
     while (s < end) {
       p = se = s + tlen1;
       t = tail;
-      while (*p == *t && t >= target) {
+      while (t >= target && *p == *t) {
         p--; t--;
       }
       if (t < target) return (UChar* )s;
