@@ -1,5 +1,46 @@
 History
 
+2006/09/19: Version 4.4.4
+
+2006/09/19: [test] success in ruby 1.9.0 (2006-08-22) [i686-linux].
+2006/09/19: [impl] (thanks KOYAMA Tetsuji)
+                   HAVE_STDARG_PROTOTYPES was not defined in Mac OS X
+                   by Xcode 2.4(gcc 4.0.1) problem. [php-dev 1312] etc...
+
+2006/09/15: Version 4.4.3
+
+2006/09/15: [test] success in ruby 1.9.0 (2006-08-22) [i686-linux].
+2006/09/15: [bug]  (thanks Allan Odgaard)
+                   out of range access in bm_search_notrev().
+                   (p < s)
+
+2006/09/08: Version 4.4.2
+
+2006/09/08: [test] success in ruby 1.9.0 (2006-08-22) [i686-linux].
+2006/09/08: [bug]  (thanks K.Takata)
+                   out of range access in bm_search_notrev().
+2006/09/04: [spec] (thanks K.Takata)
+                   allow look-behind in negative look-behind.
+                   ex. /(?<!(?<=a)b|c)d/
+
+2006/08/29: Version 4.4.1
+
+2006/08/29: [test] success in ruby 1.9.0 (2006-08-22) [i686-linux].
+2006/08/29: [dist] (thanks Seiji Masugata)
+                    add configure option --enable-combination-explosion-check
+
+2006/08/25: Version 4.4.0
+
+2006/08/25: [test] success in ruby 1.9.0 (2006-08-22) [i686-linux].
+2006/08/25: [impl] add_state_check_num() should be enclosed in
+                   ifdef USE_COMBINATION_EXPLOSION_CHECK.
+2006/08/23: [spec] config USE_COMBINATION_EXPLOSION_CHECK is enabled
+                   in Ruby mode only.
+2006/08/22: [impl] remove last line comma in enum OpCode.
+2006/08/22: [impl] remove OP_STATE_CHECK_ANYCHAR_STAR_PEEK_NEXT and
+                   OP_STATE_CHECK_ANYCHAR_ML_STAR_PEEK_NEXT.
+2006/08/22: [impl] remove OP_BACKREF3.
+
 2006/08/21: Version 4.3.1
 
 2006/08/21: [test] success in ruby 1.9.0 (2006-07-28) [i686-linux].

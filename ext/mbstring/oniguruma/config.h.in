@@ -98,6 +98,9 @@
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #undef TIME_WITH_SYS_TIME
 
+/* Define if combination explosion check */
+#undef USE_COMBINATION_EXPLOSION_CHECK
+
 /* Version number of package */
 #undef VERSION
 

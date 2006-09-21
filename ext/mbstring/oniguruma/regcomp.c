@@ -187,7 +187,6 @@ add_opcode(regex_t* reg, int opcode)
 }
 
 #ifdef USE_COMBINATION_EXPLOSION_CHECK
-
 static int
 add_state_check_num(regex_t* reg, int num)
 {
@@ -196,7 +195,7 @@ add_state_check_num(regex_t* reg, int num)
   BBUF_ADD(reg, &n, SIZE_STATE_CHECK_NUM);
   return 0;
 }
-#endif	/* USE_COMBINATION_EXPLOSION_CHECK */
+#endif
 
 static int
 add_rel_addr(regex_t* reg, int addr)
@@ -729,7 +728,7 @@ compile_length_qualifier_node(QualifierNode* qn, regex_t* reg)
   /* anychar repeat */
   if (NTYPE(qn->target) == N_ANYCHAR) {
     if (qn->greedy && infinite) {
-      if (IS_NOT_NULL(qn->next_head_exact))
+      if (IS_NOT_NULL(qn->next_head_exact) && !CKN_ON)
         return SIZE_OP_ANYCHAR_STAR_PEEK_NEXT + tlen * qn->lower + cklen;
       else
         return SIZE_OP_ANYCHAR_STAR + tlen * qn->lower + cklen;
@@ -807,15 +806,11 @@ compile_qualifier_node(QualifierNode* qn, regex_t* reg)
   if (is_anychar_star_qualifier(qn)) {
     r = compile_tree_n_times(qn->target, qn->lower, reg);
     if (r) return r;
-    if (IS_NOT_NULL(qn->next_head_exact)) {
+    if (IS_NOT_NULL(qn->next_head_exact) && !CKN_ON) {
       if (IS_MULTILINE(reg->options))
-	r = add_opcode(reg, (CKN_ON ?
-			       OP_STATE_CHECK_ANYCHAR_ML_STAR_PEEK_NEXT
-			     : OP_ANYCHAR_ML_STAR_PEEK_NEXT));
+	r = add_opcode(reg, OP_ANYCHAR_ML_STAR_PEEK_NEXT);
       else
-	r = add_opcode(reg, (CKN_ON ?
-			       OP_STATE_CHECK_ANYCHAR_STAR_PEEK_NEXT
-			     : OP_ANYCHAR_STAR_PEEK_NEXT));
+	r = add_opcode(reg, OP_ANYCHAR_STAR_PEEK_NEXT);
       if (r) return r;
       if (CKN_ON) {
 	r = add_state_check_num(reg, ckn);
@@ -1530,7 +1525,7 @@ compile_length_tree(Node* node, regex_t* reg)
       else
 #endif
       if (br->back_num == 1) {
-	r = ((!IS_IGNORECASE(reg->options) && br->back_static[0] <= 3)
+	r = ((!IS_IGNORECASE(reg->options) && br->back_static[0] <= 2)
 	     ? SIZE_OPCODE : (SIZE_OPCODE + SIZE_MEMNUM));
       }
       else {
@@ -1668,7 +1663,6 @@ compile_tree(Node* node, regex_t* reg)
 	  switch (n) {
 	  case 1:  r = add_opcode(reg, OP_BACKREF1); break;
 	  case 2:  r = add_opcode(reg, OP_BACKREF2); break;
-	  case 3:  r = add_opcode(reg, OP_BACKREF3); break;
 	  default:
 	    r = add_opcode(reg, OP_BACKREFN);
 	    if (r) return r;
@@ -3659,7 +3653,7 @@ setup_tree(Node* node, regex_t* reg, int state, ScanEnv* env)
 #define ALLOWED_ANCHOR_IN_LB \
 ( ANCHOR_LOOK_BEHIND | ANCHOR_BEGIN_LINE | ANCHOR_END_LINE | ANCHOR_BEGIN_BUF | ANCHOR_BEGIN_POSITION )
 #define ALLOWED_ANCHOR_IN_LB_NOT \
-( ANCHOR_LOOK_BEHIND_NOT | ANCHOR_BEGIN_LINE | ANCHOR_END_LINE | ANCHOR_BEGIN_BUF | ANCHOR_BEGIN_POSITION )
+( ANCHOR_LOOK_BEHIND | ANCHOR_LOOK_BEHIND_NOT | ANCHOR_BEGIN_LINE | ANCHOR_END_LINE | ANCHOR_BEGIN_BUF | ANCHOR_BEGIN_POSITION )
 
       case ANCHOR_LOOK_BEHIND:
 	{
@@ -5490,7 +5484,6 @@ OnigOpInfoType OnigOpInfo[] = {
   { OP_BEGIN_POSITION,      "begin-position",  ARG_NON },
   { OP_BACKREF1,            "backref1",             ARG_NON },
   { OP_BACKREF2,            "backref2",             ARG_NON },
-  { OP_BACKREF3,            "backref3",             ARG_NON },
   { OP_BACKREFN,            "backrefn",             ARG_MEMNUM  },
   { OP_BACKREFN_IC,         "backrefn-ic",          ARG_SPECIAL },
   { OP_BACKREF_MULTI,       "backref_multi",        ARG_SPECIAL },
@@ -5537,10 +5530,6 @@ OnigOpInfoType OnigOpInfo[] = {
   { OP_STATE_CHECK_ANYCHAR_STAR, "state-check-anychar*",     ARG_STATE_CHECK },
   { OP_STATE_CHECK_ANYCHAR_ML_STAR,
     "state-check-anychar-ml*", ARG_STATE_CHECK },
-  { OP_STATE_CHECK_ANYCHAR_STAR_PEEK_NEXT,
-    "state-check-anychar*-peek-next", ARG_SPECIAL },
-  { OP_STATE_CHECK_ANYCHAR_ML_STAR_PEEK_NEXT,
-    "state-check-anychar-ml*-peek-next", ARG_SPECIAL },
   { -1, "", ARG_NON }
 };
 
@@ -5824,15 +5813,6 @@ onig_print_compiled_byte_code(FILE* f, UChar* bp, UChar** nextp,
       addr = *((RelAddrType* )bp);
       bp += SIZE_RELADDR;
       fprintf(f, ":%d:(%d)", scn, addr);
-      break;
-
-    case OP_STATE_CHECK_ANYCHAR_STAR_PEEK_NEXT:
-    case OP_STATE_CHECK_ANYCHAR_ML_STAR_PEEK_NEXT:
-      scn = *((StateCheckNumType* )bp);
-      bp += SIZE_STATE_CHECK_NUM;
-      fprintf(f, ":%d", scn);
-      p_string(f, 1, bp);
-      bp += 1;
       break;
 
     default:
