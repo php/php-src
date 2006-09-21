@@ -53,6 +53,8 @@
     <file name="md5.phpt" role="test" />
     <file name="ripemd128.phpt" role="test" />
     <file name="ripemd160.phpt" role="test" />
+    <file name="ripemd256.phpt" role="test" />
+    <file name="ripemd320.phpt" role="test" />
     <file name="sha1.phpt" role="test" />
     <file name="sha256.phpt" role="test" />
     <file name="sha384.phpt" role="test" />
