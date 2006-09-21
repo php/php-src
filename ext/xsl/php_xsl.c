@@ -132,7 +132,7 @@ zend_object_value xsl_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	ALLOC_HASHTABLE(intern->parameter);
 	zend_hash_init(intern->parameter, 0, NULL, ZVAL_PTR_DTOR, 0);
 	ALLOC_HASHTABLE(intern->registered_phpfunctions);
-	zend_hash_init(intern->registered_phpfunctions, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_u_hash_init(intern->registered_phpfunctions, 0, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) xsl_objects_free_storage, NULL TSRMLS_CC);
 	intern->handle = retval.handle;
 	retval.handlers = &xsl_object_handlers;

@@ -31,3 +31,6 @@ $newdom = $proc->transformToDoc($inputdom);
 ===DONE===
 --EXPECT--
 string(4) "TeSt"
+
+--UEXPECT--
+unicode(4) "TeSt"
