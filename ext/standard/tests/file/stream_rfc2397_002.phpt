@@ -193,11 +193,11 @@ string(3) "bar"
 --UEXPECTF--
 array(8) {
   [u"wrapper_type"]=>
-  string(7) "RFC2397"
+  unicode(7) "RFC2397"
   [u"stream_type"]=>
-  string(7) "RFC2397"
+  unicode(7) "RFC2397"
   [u"mode"]=>
-  string(1) "r"
+  unicode(1) "r"
   [u"unread_bytes"]=>
   int(0)
   [u"unread_chars"]=>
@@ -205,7 +205,7 @@ array(8) {
   [u"seekable"]=>
   bool(true)
   [u"uri"]=>
-  string(8) "data://,"
+  unicode(8) "data://,"
   [u"base64"]=>
   bool(false)
 }
@@ -216,11 +216,11 @@ bool(false)
 NULL
 array(8) {
   [u"wrapper_type"]=>
-  string(7) "RFC2397"
+  unicode(7) "RFC2397"
   [u"stream_type"]=>
-  string(7) "RFC2397"
+  unicode(7) "RFC2397"
   [u"mode"]=>
-  string(1) "r"
+  unicode(1) "r"
   [u"unread_bytes"]=>
   int(0)
   [u"unread_chars"]=>
@@ -228,7 +228,7 @@ array(8) {
   [u"seekable"]=>
   bool(true)
   [u"uri"]=>
-  string(15) "data://;base64,"
+  unicode(15) "data://;base64,"
   [u"base64"]=>
   bool(true)
 }
@@ -247,11 +247,11 @@ bool(false)
 NULL
 array(9) {
   [u"wrapper_type"]=>
-  string(7) "RFC2397"
+  unicode(7) "RFC2397"
   [u"stream_type"]=>
-  string(7) "RFC2397"
+  unicode(7) "RFC2397"
   [u"mode"]=>
-  string(1) "r"
+  unicode(1) "r"
   [u"unread_bytes"]=>
   int(0)
   [u"unread_chars"]=>
@@ -259,9 +259,9 @@ array(9) {
   [u"seekable"]=>
   bool(true)
   [u"uri"]=>
-  string(18) "data://text/plain,"
+  unicode(18) "data://text/plain,"
   [u"mediatype"]=>
-  string(10) "text/plain"
+  unicode(10) "text/plain"
   [u"base64"]=>
   bool(false)
 }
@@ -272,11 +272,11 @@ bool(false)
 NULL
 array(10) {
   [u"wrapper_type"]=>
-  string(7) "RFC2397"
+  unicode(7) "RFC2397"
   [u"stream_type"]=>
-  string(7) "RFC2397"
+  unicode(7) "RFC2397"
   [u"mode"]=>
-  string(1) "r"
+  unicode(1) "r"
   [u"unread_bytes"]=>
   int(0)
   [u"unread_chars"]=>
@@ -284,26 +284,26 @@ array(10) {
   [u"seekable"]=>
   bool(true)
   [u"uri"]=>
-  string(26) "data://text/plain;foo=bar,"
+  unicode(26) "data://text/plain;foo=bar,"
   [u"mediatype"]=>
-  string(10) "text/plain"
+  unicode(10) "text/plain"
   [u"foo"]=>
-  string(3) "bar"
+  unicode(3) "bar"
   [u"base64"]=>
   bool(false)
 }
-string(3) "bar"
+unicode(3) "bar"
 
 Warning: fopen(data://text/plain;foo=bar;bla,): failed to open stream: rfc2397: illegal parameter in %sstream_rfc2397_002.php on line %d
 bool(false)
 NULL
 array(10) {
   [u"wrapper_type"]=>
-  string(7) "RFC2397"
+  unicode(7) "RFC2397"
   [u"stream_type"]=>
-  string(7) "RFC2397"
+  unicode(7) "RFC2397"
   [u"mode"]=>
-  string(1) "r"
+  unicode(1) "r"
   [u"unread_bytes"]=>
   int(0)
   [u"unread_chars"]=>
@@ -311,26 +311,26 @@ array(10) {
   [u"seekable"]=>
   bool(true)
   [u"uri"]=>
-  string(33) "data://text/plain;foo=bar;base64,"
+  unicode(33) "data://text/plain;foo=bar;base64,"
   [u"mediatype"]=>
-  string(10) "text/plain"
+  unicode(10) "text/plain"
   [u"foo"]=>
-  string(3) "bar"
+  unicode(3) "bar"
   [u"base64"]=>
   bool(true)
 }
-string(3) "bar"
+unicode(3) "bar"
 
 Warning: fopen(data://text/plain;foo=bar;bar=baz): failed to open stream: rfc2397: no comma in URL in %sstream_rfc2397_002.php on line %d
 bool(false)
 NULL
 array(11) {
   [u"wrapper_type"]=>
-  string(7) "RFC2397"
+  unicode(7) "RFC2397"
   [u"stream_type"]=>
-  string(7) "RFC2397"
+  unicode(7) "RFC2397"
   [u"mode"]=>
-  string(1) "r"
+  unicode(1) "r"
   [u"unread_bytes"]=>
   int(0)
   [u"unread_chars"]=>
@@ -338,15 +338,15 @@ array(11) {
   [u"seekable"]=>
   bool(true)
   [u"uri"]=>
-  string(34) "data://text/plain;foo=bar;bar=baz,"
+  unicode(34) "data://text/plain;foo=bar;bar=baz,"
   [u"mediatype"]=>
-  string(10) "text/plain"
+  unicode(10) "text/plain"
   [u"foo"]=>
-  string(3) "bar"
+  unicode(3) "bar"
   [u"bar"]=>
-  string(3) "baz"
+  unicode(3) "baz"
   [u"base64"]=>
   bool(false)
 }
-string(3) "bar"
+unicode(3) "bar"
 ===DONE===

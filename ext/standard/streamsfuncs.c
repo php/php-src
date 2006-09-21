@@ -44,7 +44,7 @@ static php_stream_context *decode_context_param(zval *contextresource TSRMLS_DC)
 /* Streams based network functions */
 
 #if HAVE_SOCKETPAIR
-/* {{{ proto array stream_socket_pair(int domain, int type, int protocol)
+/* {{{ proto array stream_socket_pair(int domain, int type, int protocol) U
    Creates a pair of connected, indistinguishable socket streams */
 PHP_FUNCTION(stream_socket_pair)
 {
@@ -75,7 +75,7 @@ PHP_FUNCTION(stream_socket_pair)
 /* }}} */
 #endif
 
-/* {{{ proto resource stream_socket_client(string remoteaddress [, long &errcode, string &errstring, double timeout, long flags, resource context])
+/* {{{ proto resource stream_socket_client(string remoteaddress [, long &errcode, string &errstring, double timeout, long flags, resource context]) U
    Open a client connection to a remote address */
 PHP_FUNCTION(stream_socket_client)
 {
@@ -115,7 +115,7 @@ PHP_FUNCTION(stream_socket_client)
 	}
 	if (zerrstr) {
 		zval_dtor(zerrstr);
-		ZVAL_STRING(zerrstr, "", 1);
+		ZVAL_EMPTY_TEXT(zerrstr);
 	}
 
 	stream = php_stream_xport_create(host, host_len, REPORT_ERRORS,
@@ -141,9 +141,10 @@ PHP_FUNCTION(stream_socket_client)
 			ZVAL_LONG(zerrno, err);
 		}
 		if (zerrstr && errstr) {
-			/* no need to dup; we need to efree buf anyway */
+			/* errstr is emalloc'd, either assign it to STRVAL if !UG(unicode)
+			 * Or free it post-conversion if UG(unicode) */
 			zval_dtor(zerrstr);
-			ZVAL_STRING(zerrstr, errstr, 0);
+			ZVAL_RT_STRING(zerrstr, errstr, ZSTR_AUTOFREE);
 		} else if (errstr) {
 			efree(errstr);
 		}
@@ -162,7 +163,7 @@ PHP_FUNCTION(stream_socket_client)
 }
 /* }}} */
 
-/* {{{ proto resource stream_socket_server(string localaddress [, long &errcode, string &errstring, long flags, resource context])
+/* {{{ proto resource stream_socket_server(string localaddress [, long &errcode, string &errstring, long flags, resource context]) U
    Create a server socket bound to localaddress */
 PHP_FUNCTION(stream_socket_server)
 {
@@ -189,7 +190,7 @@ PHP_FUNCTION(stream_socket_server)
 	}
 	if (zerrstr) {
 		zval_dtor(zerrstr);
-		ZVAL_STRING(zerrstr, "", 1);
+		ZVAL_EMPTY_TEXT(zerrstr);
 	}
 
 	stream = php_stream_xport_create(host, host_len, REPORT_ERRORS,
@@ -206,9 +207,10 @@ PHP_FUNCTION(stream_socket_server)
 			ZVAL_LONG(zerrno, err);
 		}
 		if (zerrstr && errstr) {
-			/* no need to dup; we need to efree buf anyway */
+			/* errstr is emalloc'd, either assign it to STRVAL if !UG(unicode)
+			 * Or free it post-conversion if UG(unicode) */
 			zval_dtor(zerrstr);
-			ZVAL_STRING(zerrstr, errstr, 0);
+			ZVAL_RT_STRING(zerrstr, errstr, ZSTR_AUTOFREE);
 		} else if (errstr) {
 			efree(errstr);
 		}
@@ -227,12 +229,14 @@ PHP_FUNCTION(stream_socket_server)
 }
 /* }}} */
 
-/* {{{ proto resource stream_socket_accept(resource serverstream, [ double timeout, string &peername ])
+/* {{{ proto resource stream_socket_accept(resource serverstream, [ double timeout, string &peername ]) U
    Accept a client connection from a server socket */
 PHP_FUNCTION(stream_socket_accept)
 {
 	double timeout = FG(default_socket_timeout);
-	zval *peername = NULL;
+	zval *zpeername = NULL;
+	char *peername = NULL;
+	int peername_len;
 	php_timeout_ull conv;
 	struct timeval tv;
 	php_stream *stream = NULL, *clistream = NULL;
@@ -240,7 +244,7 @@ PHP_FUNCTION(stream_socket_accept)
 
 	char *errstr = NULL;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|dz", &zstream, &timeout, &peername) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|dz", &zstream, &timeout, &zpeername) == FAILURE) {
 		RETURN_FALSE;
 	}
 	
@@ -251,20 +255,20 @@ PHP_FUNCTION(stream_socket_accept)
 	tv.tv_sec = conv / 1000000;
 	tv.tv_usec = conv % 1000000;
 
-	if (peername) {
-		zval_dtor(peername);
-		ZVAL_NULL(peername);
+	if (zpeername) {
+		zval_dtor(zpeername);
+		ZVAL_NULL(zpeername);
 	}
 
 	if (0 == php_stream_xport_accept(stream, &clistream,
-				peername ? &Z_STRVAL_P(peername) : NULL,
-				peername ? &Z_STRLEN_P(peername) : NULL,
+				zpeername ? &peername : NULL,
+				zpeername ? &peername_len : NULL,
 				NULL, NULL,
 				&tv, &errstr
 				TSRMLS_CC) && clistream) {
 
 		if (peername) {
-			Z_TYPE_P(peername) = IS_STRING;
+			ZVAL_RT_STRINGL(zpeername, peername, peername_len, ZSTR_AUTOFREE);
 		}
 		php_stream_to_zval(clistream, return_value);
 	} else {
@@ -278,13 +282,15 @@ PHP_FUNCTION(stream_socket_accept)
 }
 /* }}} */
 
-/* {{{ proto string stream_socket_get_name(resource stream, bool want_peer)
+/* {{{ proto string stream_socket_get_name(resource stream, bool want_peer) U
    Returns either the locally bound or remote name for a socket stream */
 PHP_FUNCTION(stream_socket_get_name)
 {
 	php_stream *stream;
 	zval *zstream;
 	zend_bool want_peer;
+	char *name = NULL;
+	int name_len;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rb", &zstream, &want_peer) == FAILURE) {
 		RETURN_FALSE;
@@ -292,19 +298,19 @@ PHP_FUNCTION(stream_socket_get_name)
 	
 	php_stream_from_zval(stream, &zstream);
 
-	Z_TYPE_P(return_value) = IS_STRING;
-	
 	if (0 != php_stream_xport_get_name(stream, want_peer,
-				&Z_STRVAL_P(return_value),
-				&Z_STRLEN_P(return_value),
+				&name,
+				&name_len,
 				NULL, NULL
 				TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
+
+	RETURN_RT_STRINGL(name, name_len, ZSTR_AUTOFREE);
 }
 /* }}} */
 
-/* {{{ proto long stream_socket_sendto(resouce stream, string data [, long flags [, string target_addr]])
+/* {{{ proto long stream_socket_sendto(resouce stream, string data [, long flags [, string target_addr]]) U
    Send data to a socket stream.  If target_addr is specified it must be in dotted quad (or [ipv6]) format */
 PHP_FUNCTION(stream_socket_sendto)
 {
@@ -316,6 +322,7 @@ PHP_FUNCTION(stream_socket_sendto)
 	php_sockaddr_storage sa;
 	socklen_t sl = 0;
 	
+	/* Typically we'll be sending binary data, but implicit RT conversion from unicode is acceptable */
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|ls", &zstream, &data, &datalen, &flags, &target_addr, &target_addr_len) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -333,12 +340,14 @@ PHP_FUNCTION(stream_socket_sendto)
 }
 /* }}} */
 
-/* {{{ proto string stream_socket_recvfrom(resource stream, long amount [, long flags [, string &remote_addr]])
+/* {{{ proto string stream_socket_recvfrom(resource stream, long amount [, long flags [, string &remote_addr]]) U
    Receives data from a socket stream */
 PHP_FUNCTION(stream_socket_recvfrom)
 {
 	php_stream *stream;
 	zval *zstream, *zremote = NULL;
+	char *remote_addr = NULL;
+	int remote_addr_len;
 	long to_read = 0;
 	char *read_buf;
 	long flags = 0;
@@ -353,7 +362,6 @@ PHP_FUNCTION(stream_socket_recvfrom)
 	if (zremote) {
 		zval_dtor(zremote);
 		ZVAL_NULL(zremote);
-		Z_STRLEN_P(zremote) = 0;
 	}
 
 	if (to_read <= 0) {
@@ -364,17 +372,17 @@ PHP_FUNCTION(stream_socket_recvfrom)
 	read_buf = emalloc(to_read + 1);
 	
 	recvd = php_stream_xport_recvfrom(stream, read_buf, to_read, flags, NULL, NULL,
-			zremote ? &Z_STRVAL_P(zremote) : NULL,
-			zremote ? &Z_STRLEN_P(zremote) : NULL
+			zremote ? &remote_addr : NULL,
+			zremote ? &remote_addr_len : NULL
 			TSRMLS_CC);
 
 	if (recvd >= 0) {
-		if (zremote && Z_STRLEN_P(zremote)) {
-			Z_TYPE_P(zremote) = IS_STRING;
+		if (zremote) {
+			ZVAL_RT_STRINGL(zremote, remote_addr, remote_addr_len, ZSTR_AUTOFREE);
 		}
 		read_buf[recvd] = '\0';
 
-		RETURN_STRINGL(read_buf, recvd, 0);
+		RETURN_RT_STRINGL(read_buf, recvd, ZSTR_AUTOFREE);
 	}
 
 	efree(read_buf);
@@ -382,7 +390,7 @@ PHP_FUNCTION(stream_socket_recvfrom)
 }
 /* }}} */
 
-/* {{{ proto long stream_get_contents(resource source [, long maxlen [, long offset]])
+/* {{{ proto string stream_get_contents(resource source [, long maxlen [, long offset]])
    Reads all remaining bytes (or up to maxlen bytes) from a stream and returns them as a string. */
 PHP_FUNCTION(stream_get_contents)
 {
@@ -437,7 +445,7 @@ PHP_FUNCTION(stream_copy_to_stream)
 }
 /* }}} */
 
-/* {{{ proto resource stream_get_meta_data(resource fp)
+/* {{{ proto resource stream_get_meta_data(resource fp) U
     Retrieves header/meta data from streams/file pointers */
 PHP_FUNCTION(stream_get_meta_data)
 {
@@ -461,11 +469,11 @@ PHP_FUNCTION(stream_get_meta_data)
 		add_ascii_assoc_zval(return_value, "wrapper_data", newval);
 	}
 	if (stream->wrapper) {
-		add_ascii_assoc_string(return_value, "wrapper_type", (char *)stream->wrapper->wops->label, 1);
+		add_ascii_assoc_rt_string(return_value, "wrapper_type", (char *)stream->wrapper->wops->label, ZSTR_DUPLICATE);
 	}
-	add_ascii_assoc_string(return_value, "stream_type", (char *)stream->ops->label, 1);
+	add_ascii_assoc_rt_string(return_value, "stream_type", (char *)stream->ops->label, ZSTR_DUPLICATE);
 
-	add_ascii_assoc_string(return_value, "mode", stream->mode, 1);
+	add_ascii_assoc_rt_string(return_value, "mode", stream->mode, ZSTR_DUPLICATE);
 	
 	if (stream->readfilters.head) {
 		php_stream_filter *filter;
@@ -474,7 +482,7 @@ PHP_FUNCTION(stream_get_meta_data)
 		array_init(newval);
 		
 		for (filter = stream->readfilters.head; filter != NULL; filter = filter->next) {
-			add_next_index_string(newval, filter->name, 1);
+			add_next_index_rt_string(newval, filter->name, ZSTR_DUPLICATE);
 		}
 
 		add_ascii_assoc_zval(return_value, "read_filters", newval);
@@ -487,7 +495,7 @@ PHP_FUNCTION(stream_get_meta_data)
 		array_init(newval);
 		
 		for (filter = stream->writefilters.head; filter != NULL; filter = filter->next) {
-			add_next_index_string(newval, filter->name, 1);
+			add_next_index_rt_string(newval, filter->name, ZSTR_DUPLICATE);
 		}
 
 		add_ascii_assoc_zval(return_value, "write_filters", newval);
@@ -504,7 +512,18 @@ PHP_FUNCTION(stream_get_meta_data)
 
 	add_ascii_assoc_bool(return_value, "seekable", (stream->ops->seek) && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0);
 	if (stream->orig_path) {
-		add_ascii_assoc_string(return_value, "uri", stream->orig_path, 1);
+		if (UG(unicode)) {
+			UChar *decoded_path = NULL;
+			int decoded_path_len = 0;
+
+			if (SUCCESS == php_stream_path_decode(stream->wrapper, &decoded_path, &decoded_path_len, stream->orig_path, strlen(stream->orig_path), REPORT_ERRORS, stream->context TSRMLS_CC)) {
+				add_ascii_assoc_unicodel(return_value, "uri", decoded_path, decoded_path_len, 0);
+			} else {
+				add_ascii_assoc_null(return_value, "uri");
+			}
+		} else {
+			add_ascii_assoc_string(return_value, "uri", stream->orig_path, 1);
+		}
 	}
 
 	if (!php_stream_populate_meta_data(stream, return_value)) {
@@ -516,7 +535,7 @@ PHP_FUNCTION(stream_get_meta_data)
 }
 /* }}} */
 
-/* {{{ proto array stream_get_transports()
+/* {{{ proto array stream_get_transports() U
    Retrieves list of registered socket transports */
 PHP_FUNCTION(stream_get_transports)
 {
@@ -535,7 +554,7 @@ PHP_FUNCTION(stream_get_transports)
 		while (zend_hash_get_current_key_ex(stream_xport_hash,
 					&stream_xport, &stream_xport_len,
 					&num_key, 0, NULL) == HASH_KEY_IS_STRING) {
-			add_next_index_stringl(return_value, stream_xport.s, stream_xport_len, 1);
+			add_next_index_rt_stringl(return_value, stream_xport.s, stream_xport_len, ZSTR_DUPLICATE);
 			zend_hash_move_forward(stream_xport_hash);
 		}
 	} else {
@@ -544,7 +563,7 @@ PHP_FUNCTION(stream_get_transports)
 }
 /* }}} */
 
-/* {{{ proto array stream_get_wrappers()
+/* {{{ proto array stream_get_wrappers() U
     Retrieves list of registered stream wrappers */
 PHP_FUNCTION(stream_get_wrappers)
 {
@@ -563,7 +582,7 @@ PHP_FUNCTION(stream_get_wrappers)
 			(key_flags = zend_hash_get_current_key_ex(url_stream_wrappers_hash, &stream_protocol, &stream_protocol_len, &num_key, 0, NULL)) != HASH_KEY_NON_EXISTANT;
 			zend_hash_move_forward(url_stream_wrappers_hash)) {
 				if (key_flags == HASH_KEY_IS_STRING) {
-					add_next_index_stringl(return_value, stream_protocol.s, stream_protocol_len, 1);
+					add_next_index_rt_stringl(return_value, stream_protocol.s, stream_protocol_len, ZSTR_DUPLICATE);
 				}
 		}
 	} else {
@@ -709,7 +728,7 @@ static int stream_array_emulate_read_fd_set(zval *stream_array TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto int stream_select(array &read_streams, array &write_streams, array &except_streams, int tv_sec[, int tv_usec])
+/* {{{ proto int stream_select(array &read_streams, array &write_streams, array &except_streams, int tv_sec[, int tv_usec]) U
    Runs the select() system call on the sets of streams with a timeout specified by tv_sec and tv_usec */
 PHP_FUNCTION(stream_select)
 {
@@ -828,7 +847,7 @@ static void user_space_stream_notifier(php_stream_context *context, int notifyco
 	ZVAL_LONG(ps[0], notifycode);
 	ZVAL_LONG(ps[1], severity);
 	if (xmsg) {
-		ZVAL_STRING(ps[2], xmsg, 0);
+		ZVAL_RT_STRING(ps[2], xmsg, ZSTR_AUTOFREE);
 	} else {
 		ZVAL_NULL(ps[2]);
 	}
@@ -1006,7 +1025,7 @@ static php_stream_context *decode_context_param(zval *contextresource TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto array stream_context_get_options(resource context|resource stream)
+/* {{{ proto array stream_context_get_options(resource context|resource stream) U
    Retrieve options for a stream/wrapper/context */
 PHP_FUNCTION(stream_context_get_options)
 {
@@ -1026,8 +1045,9 @@ PHP_FUNCTION(stream_context_get_options)
 }
 /* }}} */
 
-/* {{{ proto bool stream_context_set_option(resource context|resource stream, string wrappername, string optionname, mixed value)
-   Set an option for a wrapper */
+/* {{{ proto bool stream_context_set_option(resource context|resource stream, string wrappername, string optionname, mixed value) U
+ * Overloaded form: stream_context_set_option(resource context|resource stream, array options)
+ * Set an option (or several options) for a wrapper */
 PHP_FUNCTION(stream_context_set_option)
 {
 	zval *options = NULL, *zcontext = NULL, *zvalue = NULL;
@@ -1062,7 +1082,7 @@ PHP_FUNCTION(stream_context_set_option)
 }
 /* }}} */
 
-/* {{{ proto bool stream_context_set_params(resource context|resource stream, array options)
+/* {{{ proto bool stream_context_set_params(resource context|resource stream, array options) U
    Set parameters for a file context */
 PHP_FUNCTION(stream_context_set_params)
 {
@@ -1083,7 +1103,7 @@ PHP_FUNCTION(stream_context_set_params)
 }
 /* }}} */
 
-/* {{{ proto resource stream_context_get_default([array options])
+/* {{{ proto resource stream_context_get_default([array options]) U
    Get a handle on the default file/stream context and optionally set parameters */
 PHP_FUNCTION(stream_context_get_default)
 {
@@ -1107,7 +1127,7 @@ PHP_FUNCTION(stream_context_get_default)
 }
 /* }}} */
 
-/* {{{ proto resource stream_context_create([array options[, array params]])
+/* {{{ proto resource stream_context_create([array options[, array params]]) U
    Create a file context and optionally set parameters */
 PHP_FUNCTION(stream_context_create)
 {
@@ -1204,7 +1224,7 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
-/* {{{ proto resource stream_filter_prepend(resource stream, string filtername[, int read_write[, string filterparams]])
+/* {{{ proto resource stream_filter_prepend(resource stream, string filtername[, int read_write[, mixed filterparams]]) U
    Prepend a filter to a stream */
 PHP_FUNCTION(stream_filter_prepend)
 {
@@ -1212,7 +1232,7 @@ PHP_FUNCTION(stream_filter_prepend)
 }
 /* }}} */
 
-/* {{{ proto resource stream_filter_append(resource stream, string filtername[, int read_write[, string filterparams]])
+/* {{{ proto resource stream_filter_append(resource stream, string filtername[, int read_write[, mixed filterparams]]) U
    Append a filter to a stream */
 PHP_FUNCTION(stream_filter_append)
 {
@@ -1220,7 +1240,7 @@ PHP_FUNCTION(stream_filter_append)
 }
 /* }}} */
 
-/* {{{ proto bool stream_filter_remove(resource stream_filter)
+/* {{{ proto bool stream_filter_remove(resource stream_filter) U
 	Flushes any data in the filter's internal buffer, removes it from the chain, and frees the resource */
 PHP_FUNCTION(stream_filter_remove)
 {
@@ -1321,7 +1341,7 @@ PHP_FUNCTION(stream_get_line)
 
 /* }}} */
 
-/* {{{ proto bool stream_set_blocking(resource socket, int mode)
+/* {{{ proto bool stream_set_blocking(resource socket, int mode) U
    Set blocking/non-blocking mode on a socket or stream */
 PHP_FUNCTION(stream_set_blocking)
 {
@@ -1345,7 +1365,7 @@ PHP_FUNCTION(stream_set_blocking)
 
 /* }}} */
 
-/* {{{ proto bool stream_set_timeout(resource stream, int seconds, int microseconds)
+/* {{{ proto bool stream_set_timeout(resource stream, int seconds, int microseconds) U
    Set timeout on stream read to seconds + microseonds */
 #if HAVE_SYS_TIME_H || defined(PHP_WIN32)
 PHP_FUNCTION(stream_set_timeout)
@@ -1381,7 +1401,7 @@ PHP_FUNCTION(stream_set_timeout)
 #endif /* HAVE_SYS_TIME_H || defined(PHP_WIN32) */
 /* }}} */
 
-/* {{{ proto int stream_set_write_buffer(resource fp, int buffer)
+/* {{{ proto int stream_set_write_buffer(resource fp, int buffer) U
    Set file write buffer */
 PHP_FUNCTION(stream_set_write_buffer)
 {
@@ -1418,7 +1438,7 @@ PHP_FUNCTION(stream_set_write_buffer)
 }
 /* }}} */
 
-/* {{{ proto int stream_socket_enable_crypto(resource stream, bool enable [, int cryptokind, resource sessionstream])
+/* {{{ proto int stream_socket_enable_crypto(resource stream, bool enable [, int cryptokind, resource sessionstream]) U
    Enable or disable a specific kind of crypto on the stream */
 PHP_FUNCTION(stream_socket_enable_crypto)
 {
