@@ -21,6 +21,7 @@
 #include "php.h"
 #include "fopen_wrappers.h"
 #include "php_globals.h"
+#include "ext/standard/file.h"
 
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -117,11 +118,13 @@ PHP_RSHUTDOWN_FUNCTION(filestat)
 	return SUCCESS;
 }
 
-/* {{{ proto float disk_total_space(string path)
+/* {{{ proto float disk_total_space(string path) U
    Get total disk space for filesystem that path is on */
 PHP_FUNCTION(disk_total_space)
 {
-	zval **path;
+	char *path;
+	int path_len;
+	zend_uchar path_type;
 #ifdef WINDOWS
 	double bytestotal;
 
@@ -150,16 +153,21 @@ PHP_FUNCTION(disk_total_space)
 	double bytestotal = 0;
 #endif /* WINDOWS */
 
-	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &path)==FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &path, &path_len, &path_type) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(path);
-
-	if (php_check_open_basedir(Z_STRVAL_PP(path) TSRMLS_CC)) {
-		RETURN_FALSE;
+	if (path_type == IS_UNICODE) {
+		if (FAILURE == php_stream_path_encode(NULL, &path, &path_len, (UChar*)path, path_len, REPORT_ERRORS, FG(default_context))) {
+			RETURN_FALSE;
+		}
 	}
 
+	if (php_check_open_basedir(path TSRMLS_CC)) {
+		goto totalspace_failure;
+	}
+
+/* OS Selection */
 #ifdef WINDOWS
 	/* GetDiskFreeSpaceEx is only available in NT and Win95 post-OSR2,
 	   so we have to jump through some hoops to see if the function
@@ -170,12 +178,12 @@ PHP_FUNCTION(disk_total_space)
 		/* It's available, so we can call it. */
 		if (gdfse) {
 			func = (gdfse_func)gdfse;
-			if (func(Z_STRVAL_PP(path),
+			if (func(path,
 				&FreeBytesAvailableToCaller,
 				&TotalNumberOfBytes,
 				&TotalNumberOfFreeBytes) == 0) { 
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", php_win_err());
-				RETURN_FALSE;
+				goto totalspace_failure;
 			}
 
 			/* i know - this is ugly, but i works <thies@thieso.net> */
@@ -185,33 +193,36 @@ PHP_FUNCTION(disk_total_space)
 		}
 		/* If it's not available, we just use GetDiskFreeSpace */
 		else {
-			if (GetDiskFreeSpace(Z_STRVAL_PP(path),
+			if (GetDiskFreeSpace(path,
 				&SectorsPerCluster, &BytesPerSector,
 				&NumberOfFreeClusters, &TotalNumberOfClusters) == 0) { 
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", php_win_err());
-				RETURN_FALSE; 
+				goto totalspace_failure;
 			}
 			bytestotal = (double)TotalNumberOfClusters * (double)SectorsPerCluster * (double)BytesPerSector;
 		}
 	}
 	else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to load kernel32.dll");
-		RETURN_FALSE;
+		goto totalspace_failure;
 	}
 
 #elif defined(OS2)
 	{
 		FSALLOCATE fsinfo;
-		char drive = Z_STRVAL_PP(path)[0] & 95;
+		char drive = path[0] & 0x5F; /* ascii ucase */
 
 		if (DosQueryFSInfo( drive ? drive - 64 : 0, FSIL_ALLOC, &fsinfo, sizeof( fsinfo ) ) == 0)
 			bytestotal = (double)fsinfo.cbSector * fsinfo.cSectorUnit * fsinfo.cUnit;
 	}
-#else /* WINDOWS, OS/2 */
-#if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
-	if (statvfs(Z_STRVAL_PP(path), &buf)) { 
+#else /* ! WINDOWS, ! OS/2 */
+
+
+/* *nix Implmentations */
+# if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
+	if (statvfs(path, &buf)) { 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
-		RETURN_FALSE; 
+		goto totalspace_failure;
 	}
 	if (buf.f_frsize) {
 		bytestotal = (((double)buf.f_blocks) * ((double)buf.f_frsize));
@@ -219,24 +230,40 @@ PHP_FUNCTION(disk_total_space)
 		bytestotal = (((double)buf.f_blocks) * ((double)buf.f_bsize));
 	}
 
-#elif (defined(HAVE_SYS_STATFS_H) || defined(HAVE_SYS_MOUNT_H)) && defined(HAVE_STATFS)
-	if (statfs(Z_STRVAL_PP(path), &buf)) { 
+# elif (defined(HAVE_SYS_STATFS_H) || defined(HAVE_SYS_MOUNT_H)) && defined(HAVE_STATFS)
+	if (statfs(path, &buf)) { 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
-		RETURN_FALSE;
+		goto totalspace_failure;
 	}
 	bytestotal = (((double)buf.f_bsize) * ((double)buf.f_blocks));
-#endif
-#endif /* WINDOWS */
+# else /* No implementation avail */
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "System does not support disk_total_space()");
+	goto totalspace_failure;
+# endif /* *nix Implementations */
 
+
+#endif /* OS selection */
+
+	if (path_type == IS_UNICODE) {
+		efree(path);
+	}
 	RETURN_DOUBLE(bytestotal);
+
+totalspace_failure:
+	if (path_type == IS_UNICODE) {
+		efree(path);
+	}
+	RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto float disk_free_space(string path)
+/* {{{ proto float disk_free_space(string path) U
    Get free disk space for filesystem that path is on */
 PHP_FUNCTION(disk_free_space)
 {
-	zval **path;
+	char *path;
+	int path_len;
+	zend_uchar path_type;
 #ifdef WINDOWS
 	double bytesfree;
 
@@ -265,16 +292,21 @@ PHP_FUNCTION(disk_free_space)
 	double bytesfree = 0;
 #endif /* WINDOWS */
 
-	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &path)==FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &path, &path_len, &path_type) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(path);
-
-	if (php_check_open_basedir(Z_STRVAL_PP(path) TSRMLS_CC)) {
-		RETURN_FALSE;
+	if (path_type == IS_UNICODE) {
+		if (FAILURE == php_stream_path_encode(NULL, &path, &path_len, (UChar*)path, path_len, REPORT_ERRORS, FG(default_context))) {
+			RETURN_FALSE;
+		}
 	}
 
+	if (php_check_open_basedir(path TSRMLS_CC)) {
+		goto freespace_failure;
+	}
+
+/* OS Selection */
 #ifdef WINDOWS
 	/* GetDiskFreeSpaceEx is only available in NT and Win95 post-OSR2,
 	   so we have to jump through some hoops to see if the function
@@ -285,12 +317,12 @@ PHP_FUNCTION(disk_free_space)
 		/* It's available, so we can call it. */
 		if (gdfse) {
 			func = (gdfse_func)gdfse;
-			if (func(Z_STRVAL_PP(path),
+			if (func(path,
 				&FreeBytesAvailableToCaller,
 				&TotalNumberOfBytes,
 				&TotalNumberOfFreeBytes) == 0) { 
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", php_win_err());
-				RETURN_FALSE;
+				goto freespace_failure;
 			}
 
 			/* i know - this is ugly, but i works <thies@thieso.net> */
@@ -300,93 +332,127 @@ PHP_FUNCTION(disk_free_space)
 		}
 		/* If it's not available, we just use GetDiskFreeSpace */
 		else {
-			if (GetDiskFreeSpace(Z_STRVAL_PP(path),
+			if (GetDiskFreeSpace(path,
 				&SectorsPerCluster, &BytesPerSector,
 				&NumberOfFreeClusters, &TotalNumberOfClusters) == 0) { 
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", php_win_err());
-				RETURN_FALSE;
+				goto freespace_failure;
 			}
 			bytesfree = (double)NumberOfFreeClusters * (double)SectorsPerCluster * (double)BytesPerSector;
 		}
 	}
 	else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to load kernel32.dll");
-		RETURN_FALSE;
+		goto freespace_failure;
 	}
 
 #elif defined(OS2)
 	{
 		FSALLOCATE fsinfo;
-		char drive = Z_STRVAL_PP(path)[0] & 95;
+		char drive = path[0] & 0x5F; /* ascii ucase */
 
 		if (DosQueryFSInfo( drive ? drive - 64 : 0, FSIL_ALLOC, &fsinfo, sizeof( fsinfo ) ) == 0)
 			bytesfree = (double)fsinfo.cbSector * fsinfo.cSectorUnit * fsinfo.cUnitAvail;
 	}
-#else /* WINDOWS, OS/2 */
-#if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
-	if (statvfs(Z_STRVAL_PP(path), &buf)) { 
+#else /* !WINDOWS, !OS/2 */
+
+/* *nix Implementation */
+# if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
+	if (statvfs(path, &buf)) { 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
-		RETURN_FALSE;
+		goto freespace_failure;
 	}
 	if (buf.f_frsize) {
 		bytesfree = (((double)buf.f_bavail) * ((double)buf.f_frsize));
 	} else {
 		bytesfree = (((double)buf.f_bavail) * ((double)buf.f_bsize));
 	}
-#elif (defined(HAVE_SYS_STATFS_H) || defined(HAVE_SYS_MOUNT_H)) && defined(HAVE_STATFS)
-	if (statfs(Z_STRVAL_PP(path), &buf)) {
+# elif (defined(HAVE_SYS_STATFS_H) || defined(HAVE_SYS_MOUNT_H)) && defined(HAVE_STATFS)
+	if (statfs(path, &buf)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
-		RETURN_FALSE;
+		goto freespace_failure;
 	}
-#ifdef NETWARE
+#  ifdef NETWARE
 	bytesfree = (((double)buf.f_bsize) * ((double)buf.f_bfree));
-#else
+#  else
 	bytesfree = (((double)buf.f_bsize) * ((double)buf.f_bavail));
-#endif
-#endif
-#endif /* WINDOWS */
+#  endif
 
+# else /* No *nix Implemetation */
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "System does not support disk_free_space()");
+	goto freespace_failure;
+
+# endif /* *nix Implementation */
+
+
+#endif /* OS Selection */
+
+	if (path_type == IS_UNICODE) {
+		efree(path);
+	}
 	RETURN_DOUBLE(bytesfree);
+
+freespace_failure:
+	if (path_type == IS_UNICODE) {
+		efree(path);
+	}
+	RETURN_FALSE;
 }
 /* }}} */
 
 #if !defined(WINDOWS)
 static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp)
 {
-	zval **filename, **group;
+	char *filename;
+	int filename_len;
+	zend_uchar filename_type;
+	zval *group;
 	gid_t gid;
-	struct group *gr=NULL;
 	int ret;
 
-	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &filename, &group)==FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tz/", &filename, &filename_len, &filename_type, &group) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(filename);
-	if (Z_TYPE_PP(group) == IS_STRING) {
-		gr = getgrnam(Z_STRVAL_PP(group));
-		if (!gr) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find gid for %s",
-					   Z_STRVAL_PP(group));
+
+	if (Z_TYPE_P(group) == IS_LONG) {
+		gid = (gid_t)Z_LVAL_P(group);
+	} else {
+		struct group *gr;
+
+		convert_to_string(group);
+		if (!(gr = getgrnam(Z_STRVAL_P(group)))) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find gid for %s", Z_STRVAL_P(group));
 			RETURN_FALSE;
 		}
 		gid = gr->gr_gid;
-	} else {
-		convert_to_long_ex(group);
-		gid = Z_LVAL_PP(group);
+	}
+
+	if (filename_type == IS_UNICODE) {
+		if (FAILURE == php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, FG(default_context))) {
+			RETURN_FALSE;
+		}
 	}
 
 	/* Check the basedir */
-	if (php_check_open_basedir(Z_STRVAL_PP(filename) TSRMLS_CC)) {
+	if (php_check_open_basedir(filename TSRMLS_CC)) {
+		if (filename_type == IS_UNICODE) {
+			efree(filename);
+		}
 		RETURN_FALSE;
 	}
 
 	if (do_lchgrp) {
 #if HAVE_LCHOWN
-		ret = VCWD_LCHOWN(Z_STRVAL_PP(filename), -1, gid);
+		ret = VCWD_LCHOWN(filename, -1, gid);
 #endif
 	} else {
-		ret = VCWD_CHOWN(Z_STRVAL_PP(filename), -1, gid);
+		ret = VCWD_CHOWN(filename, -1, gid);
 	}
+
+	if (filename_type == IS_UNICODE) {
+		efree(filename);
+	}
+
 	if (ret == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
@@ -396,7 +462,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp)
 #endif
 
 #ifndef NETWARE
-/* {{{ proto bool chgrp(string filename, mixed group)
+/* {{{ proto bool chgrp(string filename, mixed group) U
    Change file group */
 PHP_FUNCTION(chgrp)
 {
@@ -408,7 +474,7 @@ PHP_FUNCTION(chgrp)
 }
 /* }}} */
 
-/* {{{ proto bool lchgrp(string filename, mixed group)
+/* {{{ proto bool lchgrp(string filename, mixed group) U
    Change symlink group */
 #if HAVE_LCHOWN
 PHP_FUNCTION(lchgrp)
@@ -421,44 +487,59 @@ PHP_FUNCTION(lchgrp)
 }
 #endif
 /* }}} */
-#endif
+#endif /* !NETWARE */
 
 static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown)
 {
-	zval **filename, **user;
-	int ret;
+	char *filename;
+	int filename_len;
+	zend_uchar filename_type;
+	zval *user;
 	uid_t uid;
-	struct passwd *pw = NULL;
+	int ret;
 
-	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &filename, &user)==FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tz/", &filename, &filename_len, &filename_type, &user) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(filename);
-	if (Z_TYPE_PP(user) == IS_STRING) {
-		pw = getpwnam(Z_STRVAL_PP(user));
-		if (!pw) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find uid for %s",
-					   Z_STRVAL_PP(user));
+
+	if (Z_TYPE_P(user) == IS_LONG) {
+		uid = (uid_t)Z_LVAL_P(user);
+	} else {
+		struct passwd *pw;
+
+		convert_to_string(user);
+		if (!(pw = getpwnam(Z_STRVAL_P(user)))) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find uid for %s", Z_STRVAL_P(user));
 			RETURN_FALSE;
 		}
 		uid = pw->pw_uid;
-	} else {
-		convert_to_long_ex(user);
-		uid = Z_LVAL_PP(user);
+	}
+
+	if (filename_type == IS_UNICODE) {
+		if (FAILURE == php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, FG(default_context))) {
+			RETURN_FALSE;
+		}
 	}
 
 	/* Check the basedir */
-	if (php_check_open_basedir(Z_STRVAL_PP(filename) TSRMLS_CC)) {
+	if (php_check_open_basedir(filename TSRMLS_CC)) {
+		if (filename_type == IS_UNICODE) {
+			efree(filename);
+		}
 		RETURN_FALSE;
 	}
 
 	if (do_lchown) {
 #if HAVE_LCHOWN
-		ret = VCWD_LCHOWN(Z_STRVAL_PP(filename), uid, -1);
+		ret = VCWD_LCHOWN(filename, uid, -1);
 #endif
 	} else {
-		ret = VCWD_CHOWN(Z_STRVAL_PP(filename), uid, -1);
+		ret = VCWD_CHOWN(filename, uid, -1);
 	}
+	if (filename_type == IS_UNICODE) {
+		efree(filename);
+	}
+
 	if (ret == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
@@ -466,7 +547,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown)
 }
 
 #ifndef NETWARE
-/* {{{ proto bool chown (string filename, mixed user)
+/* {{{ proto bool chown (string filename, mixed user) U
    Change file owner */
 PHP_FUNCTION(chown)
 {
@@ -479,7 +560,7 @@ PHP_FUNCTION(chown)
 }
 /* }}} */
 
-/* {{{ proto bool chown (string filename, mixed user)
+/* {{{ proto bool lchown (string filename, mixed user) U
    Change file owner */
 #if HAVE_LCHOWN
 PHP_FUNCTION(lchown)
@@ -493,30 +574,44 @@ PHP_FUNCTION(lchown)
 }
 #endif
 /* }}} */
-#endif
+#endif /* !NETWARE */
 
-/* {{{ proto bool chmod(string filename, int mode)
+/* {{{ proto bool chmod(string filename, int mode) U
    Change file mode */
 PHP_FUNCTION(chmod)
 {
-	zval **filename, **mode;
+	char *filename;
+	int filename_len;
+	zend_uchar filename_type;
+	long mode;
 	int ret;
 	mode_t imode;
 
-	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &filename, &mode)==FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tl", &filename, &filename_len, &filename_type, &mode) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(filename);
-	convert_to_long_ex(mode);
+
+	if (filename_type == IS_UNICODE) {
+		if (FAILURE == php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, FG(default_context))) {
+			RETURN_FALSE;
+		}
+	}
 
 	/* Check the basedir */
-	if (php_check_open_basedir(Z_STRVAL_PP(filename) TSRMLS_CC)) {
+	if (php_check_open_basedir(filename TSRMLS_CC)) {
+		if (filename_type == IS_UNICODE) {
+			efree(filename);
+		}
 		RETURN_FALSE;
 	}
 
-	imode = (mode_t) Z_LVAL_PP(mode);
+	imode = (mode_t) mode;
 
-	ret = VCWD_CHMOD(Z_STRVAL_PP(filename), imode);
+	ret = VCWD_CHMOD(filename, imode);
+	if (filename_type == IS_UNICODE) {
+		efree(filename);
+	}
+
 	if (ret == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
@@ -526,54 +621,75 @@ PHP_FUNCTION(chmod)
 /* }}} */
 
 #if HAVE_UTIME
-/* {{{ proto bool touch(string filename [, int time [, int atime]])
+/* {{{ proto bool touch(string filename [, int time [, int atime]]) U
    Set modification time of file */
 PHP_FUNCTION(touch)
 {
-	zval **filename, **filetime, **fileatime;
-	int ret;
+	char *filename;
+	int filename_len;
+	zend_uchar filename_type;
+	long filetime = 0, fileatime = 0;
+	int ret, argc = ZEND_NUM_ARGS();
 	FILE *file;
 	struct utimbuf newtimebuf;
-	struct utimbuf *newtime = NULL;
-	int ac = ZEND_NUM_ARGS();
+	struct utimbuf *newtime = &newtimebuf;
 
-
-	if (ac == 1 && zend_get_parameters_ex(1, &filename) != FAILURE) {
-#ifndef HAVE_UTIME_NULL
-		newtime = &newtimebuf;
-		newtime->modtime = newtime->actime = time(NULL);
-#endif
-	} else if (ac == 2 && zend_get_parameters_ex(2, &filename, &filetime) != FAILURE) {
-		convert_to_long_ex(filetime);
-		newtime = &newtimebuf;
-		newtime->modtime = newtime->actime = Z_LVAL_PP(filetime);
-	} else if (ac == 3 && zend_get_parameters_ex(3, &filename, &filetime, &fileatime) != FAILURE) {
-		convert_to_long_ex(fileatime);
-		convert_to_long_ex(filetime);
-		newtime = &newtimebuf;
-		newtime->actime = Z_LVAL_PP(fileatime);
-		newtime->modtime = Z_LVAL_PP(filetime);
-	} else {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(argc TSRMLS_CC, "t|ll", &filename, &filename_len, &filename_type, &filetime, &fileatime) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(filename);
+
+	switch (argc) {
+		case 1:
+#ifdef HAVE_UTIME_NULL
+			newtime = NULL;
+#else
+			newtime->modtime = newtime->actime = time(NULL);
+#endif
+			break;
+		case 2:
+			newtime->modtime = newtime->actime = filetime;
+			break;
+		case 3:
+			newtime->modtime = filetime;
+			newtime->actime = fileatime;
+			break;
+		default:
+			/* Never reached */
+			WRONG_PARAM_COUNT;
+	}
+
+	if (filename_type == IS_UNICODE) {
+		if (FAILURE == php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, FG(default_context))) {
+			RETURN_FALSE;
+		}
+	}
 
 	/* Check the basedir */
-	if (php_check_open_basedir(Z_STRVAL_PP(filename) TSRMLS_CC)) {
+	if (php_check_open_basedir(filename TSRMLS_CC)) {
+		if (filename_type == IS_UNICODE) {
+			efree(filename);
+		}
 		RETURN_FALSE;
 	}
 
 	/* create the file if it doesn't exist already */
-	if (VCWD_ACCESS(Z_STRVAL_PP(filename), F_OK) != 0) {
-		file = VCWD_FOPEN(Z_STRVAL_PP(filename), "w");
+	if (VCWD_ACCESS(filename, F_OK) != 0) {
+		file = VCWD_FOPEN(filename, "w");
 		if (file == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create file %s because %s", Z_STRVAL_PP(filename), strerror(errno));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create file %s because %s", filename, strerror(errno));
+			if (filename_type == IS_UNICODE) {
+				efree(filename);
+			}
 			RETURN_FALSE;
 		}
 		fclose(file);
 	}
 
-	ret = VCWD_UTIME(Z_STRVAL_PP(filename), newtime);
+	ret = VCWD_UTIME(filename, newtime);
+	if (filename_type == IS_UNICODE) {
+		efree(filename);
+	}
+
 	if (ret == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Utime failed: %s", strerror(errno));
 		RETURN_FALSE;
@@ -583,7 +699,7 @@ PHP_FUNCTION(touch)
 /* }}} */
 #endif
 
-/* {{{ proto void clearstatcache(void)
+/* {{{ proto void clearstatcache(void) U
    Clear file stat cache */
 PHP_FUNCTION(clearstatcache)
 {
@@ -855,100 +971,113 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 /* another quickie macro to make defining similar functions easier */
 #define FileFunction(name, funcnum) \
 void name(INTERNAL_FUNCTION_PARAMETERS) { \
-	zval **filename; \
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) { \
-		WRONG_PARAM_COUNT; \
+	char *filename; \
+	int filename_len; \
+	zend_uchar filename_type; \
+	\
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &filename, &filename_len, &filename_type) == FAILURE) { \
+		return; \
 	} \
-	convert_to_string_ex(filename); \
-	php_stat(Z_STRVAL_PP(filename), (php_stat_len) Z_STRLEN_PP(filename), funcnum, return_value TSRMLS_CC); \
+	\
+	if (filename_type == IS_UNICODE) { \
+		if (FAILURE == php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, FG(default_context))) { \
+			RETURN_FALSE; \
+		} \
+	} \
+	\
+	php_stat(filename, (php_stat_len) filename_len, funcnum, return_value TSRMLS_CC); \
+	\
+	if (filename_type == IS_UNICODE) { \
+		efree(filename); \
+	} \
 }
 
-/* {{{ proto int fileperms(string filename)
+/* {{{ proto int fileperms(string filename) U
    Get file permissions */
 FileFunction(PHP_FN(fileperms), FS_PERMS)
 /* }}} */
 
-/* {{{ proto int fileinode(string filename)
+/* {{{ proto int fileinode(string filename) U
    Get file inode */
 FileFunction(PHP_FN(fileinode), FS_INODE)
 /* }}} */
 
-/* {{{ proto int filesize(string filename)
+/* {{{ proto int filesize(string filename) U
    Get file size */
 FileFunction(PHP_FN(filesize), FS_SIZE)
 /* }}} */
 
-/* {{{ proto int fileowner(string filename)
+/* {{{ proto int fileowner(string filename) U
    Get file owner */
 FileFunction(PHP_FN(fileowner), FS_OWNER)
 /* }}} */
 
-/* {{{ proto int filegroup(string filename)
+/* {{{ proto int filegroup(string filename) U
    Get file group */
 FileFunction(PHP_FN(filegroup), FS_GROUP)
 /* }}} */
 
-/* {{{ proto int fileatime(string filename)
+/* {{{ proto int fileatime(string filename) U
    Get last access time of file */
 FileFunction(PHP_FN(fileatime), FS_ATIME)
 /* }}} */
 
-/* {{{ proto int filemtime(string filename)
+/* {{{ proto int filemtime(string filename) U
    Get last modification time of file */
 FileFunction(PHP_FN(filemtime), FS_MTIME)
 /* }}} */
 
-/* {{{ proto int filectime(string filename)
+/* {{{ proto int filectime(string filename) U
    Get inode modification time of file */
 FileFunction(PHP_FN(filectime), FS_CTIME)
 /* }}} */
 
-/* {{{ proto string filetype(string filename)
+/* {{{ proto string filetype(string filename) U
    Get file type */
 FileFunction(PHP_FN(filetype), FS_TYPE)
 /* }}} */
 
-/* {{{ proto bool is_writable(string filename)
+/* {{{ proto bool is_writable(string filename) U
    Returns true if file can be written */
 FileFunction(PHP_FN(is_writable), FS_IS_W)
 /* }}} */
 
-/* {{{ proto bool is_readable(string filename)
+/* {{{ proto bool is_readable(string filename) U
    Returns true if file can be read */
 FileFunction(PHP_FN(is_readable), FS_IS_R)
 /* }}} */
 
-/* {{{ proto bool is_executable(string filename)
+/* {{{ proto bool is_executable(string filename) U
    Returns true if file is executable */
 FileFunction(PHP_FN(is_executable), FS_IS_X)
 /* }}} */
 
-/* {{{ proto bool is_file(string filename)
+/* {{{ proto bool is_file(string filename) U
    Returns true if file is a regular file */
 FileFunction(PHP_FN(is_file), FS_IS_FILE)
 /* }}} */
 
-/* {{{ proto bool is_dir(string filename)
+/* {{{ proto bool is_dir(string filename) U
    Returns true if file is directory */
 FileFunction(PHP_FN(is_dir), FS_IS_DIR)
 /* }}} */
 
-/* {{{ proto bool is_link(string filename)
+/* {{{ proto bool is_link(string filename) U
    Returns true if file is symbolic link */
 FileFunction(PHP_FN(is_link), FS_IS_LINK)
 /* }}} */
 
-/* {{{ proto bool file_exists(string filename)
+/* {{{ proto bool file_exists(string filename) U
    Returns true if filename exists */
 FileFunction(PHP_FN(file_exists), FS_EXISTS)
 /* }}} */
 
-/* {{{ proto array lstat(string filename)
+/* {{{ proto array lstat(string filename) U
    Give information about a file or symbolic link */
 FileFunction(php_if_lstat, FS_LSTAT)
 /* }}} */
 
-/* {{{ proto array stat(string filename)
+/* {{{ proto array stat(string filename) U
    Give information about a file */
 FileFunction(php_if_stat, FS_STAT)
 /* }}} */
