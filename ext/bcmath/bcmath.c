@@ -319,7 +319,7 @@ PHP_FUNCTION(bcmul)
 	php_str2num(&first, left TSRMLS_CC);
 	php_str2num(&second, right TSRMLS_CC);
 
-	bc_multiply(first, second, &result, scale);
+	bc_multiply(first, second, &result, scale TSRMLS_CC);
 	if (result->n_scale > scale) {
 		result->n_scale = scale;
 	}
