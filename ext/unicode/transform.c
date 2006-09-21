@@ -18,8 +18,8 @@
 
 #include "php_unicode.h"
 
-/* {{{ proto string str_transliterate(string str, string from, string to[, string variant]) U
-Transliterate a string using the alphabet provided */
+/* {{{ proto string str_transliterate(string str, string from_script, string to_script[, string variant]) U
+   Transliterate a string from the source script to the target script */
 PHP_FUNCTION(str_transliterate)
 {
 	UChar	   *str, *from, *to, *variant = NULL;
