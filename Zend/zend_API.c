@@ -2366,11 +2366,13 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 
 /* Disabled functions support */
 
+/* {{{ proto void display_disabled_function(void) U
+Dummy function which displays an error when a disabled function is called. */
 ZEND_API ZEND_FUNCTION(display_disabled_function)
 {
 	zend_error(E_WARNING, "%v() has been disabled for security reasons", get_active_function_name(TSRMLS_C));
 }
-
+/* }}} */
 
 static zend_function_entry disabled_function[] =  {
 	ZEND_FE(display_disabled_function,			NULL)
