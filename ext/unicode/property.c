@@ -54,7 +54,7 @@ static void check_property_impl(INTERNAL_FUNCTION_PARAMETERS, prop_check_func_t 
 /* {{{ C/POSIX migration functions */
 
 /* {{{ proto bool char_is_lower(string text) U
-Determines if text is lowercase */
+   Determines if the string is lowercase */
 PHP_FUNCTION(char_is_lower)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_islower);
@@ -62,7 +62,7 @@ PHP_FUNCTION(char_is_lower)
 /* }}} */
 
 /* {{{ proto bool char_is_upper(string text) U
-Determines if text is uppercase */
+   Determines if the string is uppercase */
 PHP_FUNCTION(char_is_upper)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isupper);
@@ -70,7 +70,7 @@ PHP_FUNCTION(char_is_upper)
 /* }}} */
 
 /* {{{ proto bool char_is_digit(string text) U
-Determines if text is all digits */
+   Determines if the string consists only of digits */
 PHP_FUNCTION(char_is_digit)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isdigit);
@@ -78,7 +78,7 @@ PHP_FUNCTION(char_is_digit)
 /* }}} */
 
 /* {{{ proto bool char_is_alpha(string text) U
-Determines if text is alpha */
+   Determines if the string consists only of letter characters */
 PHP_FUNCTION(char_is_alpha)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isalpha);
@@ -86,7 +86,7 @@ PHP_FUNCTION(char_is_alpha)
 /* }}} */
 
 /* {{{ proto bool char_is_alnum(string text) U
-Determines if text is alpha/numeric */
+   Determines if the string consists only of alpanumeric characters */
 PHP_FUNCTION(char_is_alnum)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isalnum);
@@ -94,7 +94,7 @@ PHP_FUNCTION(char_is_alnum)
 /* }}} */
 
 /* {{{ proto bool char_is_xdigit(string text) U
-Determines if text is hexits */
+   Determines if the string consists only of hexadecimal digits */
 PHP_FUNCTION(char_is_xdigit)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isxdigit);
@@ -102,7 +102,7 @@ PHP_FUNCTION(char_is_xdigit)
 /* }}} */
 
 /* {{{ proto bool char_is_punct(string text) U
-Determines if text is punctuation */
+   Determines if the string consists only of punctuation characters */
 PHP_FUNCTION(char_is_punct)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_ispunct);
@@ -110,7 +110,7 @@ PHP_FUNCTION(char_is_punct)
 /* }}} */
 
 /* {{{ proto bool char_is_graph(string text) U
-Determines if text is graphemes */
+   Determines if the string consists only of "graphic" characters */
 PHP_FUNCTION(char_is_graph)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isgraph);
@@ -118,7 +118,7 @@ PHP_FUNCTION(char_is_graph)
 /* }}} */
 
 /* {{{ proto bool char_is_blank(string text) U
-Determines if text is blank */
+   Determines if the string consists only of "blank" characters */
 PHP_FUNCTION(char_is_blank)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isblank);
@@ -126,7 +126,7 @@ PHP_FUNCTION(char_is_blank)
 /* }}} */
 
 /* {{{ proto bool char_is_space(string text) U
-Determines if text is space(s) */
+   Determines if the string consists only of space characters */
 PHP_FUNCTION(char_is_space)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isspace);
@@ -134,7 +134,7 @@ PHP_FUNCTION(char_is_space)
 /* }}} */
 
 /* {{{ proto bool char_is_cntrl(string text) U
-Determines if text is control characters */
+   Determines if the string consists only of control characters */
 PHP_FUNCTION(char_is_cntrl)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_iscntrl);
@@ -142,7 +142,7 @@ PHP_FUNCTION(char_is_cntrl)
 /* }}} */
 
 /* {{{ proto bool char_is_print(string text) U
-Determines if text is printable */
+   Determines if the string consists only of printable characters */
 PHP_FUNCTION(char_is_print)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isprint);
@@ -154,7 +154,7 @@ PHP_FUNCTION(char_is_print)
 /* {{{ Additional binary property functions */
 
 /* {{{ proto bool char_is_defined(string text) U
-Determines if text is defined (valid unicode points) */
+   Determines if the string consists only of defined characters (valid Unicode points) */
 PHP_FUNCTION(char_is_defined)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isdefined);
@@ -162,7 +162,7 @@ PHP_FUNCTION(char_is_defined)
 /* }}} */
 
 /* {{{ proto bool char_is_id_start(string text) U
-Determines if the specified character is permissible as the first character in an identifier according to Unicode */
+   Determines if the specified character is permissible as the first character in an identifier according to Unicode */
 PHP_FUNCTION(char_is_id_start)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isIDStart);
@@ -170,7 +170,7 @@ PHP_FUNCTION(char_is_id_start)
 /* }}} */
 
 /* {{{ proto bool char_is_id_part(string text) U
-etermines if the specified characters are permissible in an identifier according to Java */
+   etermines if the specified characters are permissible in an identifier, according to Java */
 PHP_FUNCTION(char_is_id_part)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isIDPart);
@@ -178,7 +178,7 @@ PHP_FUNCTION(char_is_id_part)
 /* }}} */
 
 /* {{{ proto bool char_is_id_ignorable(string text) U
-Determines if the specified characters should be regarded as an ignorable character in an identifier, according to Java */
+   Determines if the specified characters should be regarded as an ignorable character in an identifier, according to Java */
 PHP_FUNCTION(char_is_id_ignorable)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isIDIgnorable);
@@ -186,7 +186,7 @@ PHP_FUNCTION(char_is_id_ignorable)
 /* }}} */
 
 /* {{{ proto bool char_is_iso_control(string text) U
-Determines whether the specified code points are ISO control codes */
+   Determines whether the specified code points are ISO control codes */
 PHP_FUNCTION(char_is_iso_control)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isISOControl);
@@ -194,7 +194,7 @@ PHP_FUNCTION(char_is_iso_control)
 /* }}} */
 
 /* {{{ proto bool char_is_mirrored(string text) U
-Determines whether the code points have the Bidi_Mirrored property */
+   Determines whether the specified characters have the Bidi_Mirrored property */
 PHP_FUNCTION(char_is_mirrored)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isMirrored);
@@ -202,7 +202,7 @@ PHP_FUNCTION(char_is_mirrored)
 /* }}} */
 
 /* {{{ proto bool char_is_base(string text) U
-Determines if text consists of base characters */
+   Determines if the string consists of only of base characters */
 PHP_FUNCTION(char_is_base)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isbase);
@@ -210,7 +210,7 @@ PHP_FUNCTION(char_is_base)
 /* }}} */
 
 /* {{{ proto bool char_is_whitespace(string text) U
-Determines if text is whitespace */
+   Determines if the string consists only of whitespace characters, according to Java/ICU */
 PHP_FUNCTION(char_is_whitespace)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isUWhiteSpace);
@@ -218,7 +218,7 @@ PHP_FUNCTION(char_is_whitespace)
 /* }}} */
 
 /* {{{ proto bool char_is_alphabetic(string text) U
-Determines if text is alphabetic */
+   Determines if the string consists only of characters with Alphabetic property */
 PHP_FUNCTION(char_is_alphabetic)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isUAlphabetic);
@@ -226,7 +226,7 @@ PHP_FUNCTION(char_is_alphabetic)
 /* }}} */
 
 /* {{{ proto bool char_is_uppercase(string text) U
-Determines if text is uppercase */
+   Determines if the string consists only of characters with Uppercase property */
 PHP_FUNCTION(char_is_uppercase)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isUUppercase);
@@ -234,7 +234,7 @@ PHP_FUNCTION(char_is_uppercase)
 /* }}} */
 
 /* {{{ proto bool char_is_lowercase (string text) U
-Determines if text is lowercase */
+   Determines if the string consists only of characters with Lowercase property */
 PHP_FUNCTION(char_is_lowercase)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_isULowercase);
@@ -242,7 +242,7 @@ PHP_FUNCTION(char_is_lowercase)
 /* }}} */
 
 /* {{{ proto bool char_is_titlecase(string text) U
-Determines whether the specified code points are titlecase letters */
+   Determines whether the string consists only of titlecase characters */
 PHP_FUNCTION(char_is_titlecase)
 {
 	check_property_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, u_istitle);
@@ -254,7 +254,7 @@ PHP_FUNCTION(char_is_titlecase)
 /* {{{ Single character properties */
 
 /* {{{ poto float char_get_numeric_value(char text) U
-Get the numeric value for a Unicode code point as defined in the Unicode Character Database */
+   Get the numeric value for the character, as defined in the Unicode Character Database */
 PHP_FUNCTION(char_get_numeric_value)
 {
 	UChar	   *str;
@@ -276,7 +276,7 @@ PHP_FUNCTION(char_get_numeric_value)
 /* }}} */
 
 /* {{{ proto int char_get_combining_class(char text) U
-Returns the combining class of the first code point in text */
+   Returns the combining class of the character */
 PHP_FUNCTION(char_get_combining_class)
 {
 	UChar	   *str;
@@ -298,7 +298,7 @@ PHP_FUNCTION(char_get_combining_class)
 /* }}} */
 
 /* {{{ proto int char_get_digit_value(char text[, int radix]) U
-Returns the decimal digit value of a decimal digit character (optionally in a specific radix). */
+   Returns the decimal digit value of the character (optionally in the specific radix). */
 PHP_FUNCTION(char_get_digit_value)
 {
 	UChar	   *str;
@@ -329,7 +329,7 @@ PHP_FUNCTION(char_get_digit_value)
 /* }}} */
 
 /* {{{ proto char char_get_mirrored(char c) U
-Maps the specified character to a "mirror-image" character */
+   Maps the specified character to its "mirror-image" */
 PHP_FUNCTION(char_get_mirrored)
 {
 	UChar	   *str;
@@ -351,7 +351,7 @@ PHP_FUNCTION(char_get_mirrored)
 /* }}} */
 
 /* {{{ proto int char_get_direction(char c) U
-Returns the bidirectional category value for the code point, which is used in the Unicode bidirectional algorithm (UAX #9 http://www.unicode.org/reports/tr9/) */
+   Returns the bidirectional category value for the character, which is used in the Unicode bidirectional algorithm (UAX #9 http://www.unicode.org/reports/tr9/) */
 PHP_FUNCTION(char_get_direction)
 {
 	UChar	   *str;
@@ -373,7 +373,7 @@ PHP_FUNCTION(char_get_direction)
 /* }}} */
 
 /* {{{ proto string char_get_age(char c) U
-Get the "age" of the code point */
+   Get the "age" of the code point (the Unicode version when it was first designated or assigned a character) */
 PHP_FUNCTION(char_get_age)
 {
 	UChar	   *str;
@@ -400,7 +400,7 @@ PHP_FUNCTION(char_get_age)
 /* }}} */
 
 /* {{{ proto int char_get_type(char c) U
-Returns the general category value for the code point */
+   Returns the general category value for the code point */
 PHP_FUNCTION(char_get_type)
 {
 	UChar	   *str;
@@ -422,7 +422,7 @@ PHP_FUNCTION(char_get_type)
 /* }}} */
 
 /* {{{ proto bool char_is_valid(char c) U
-Determines if c is a valid Unicode point */
+   Determines if the the code point is valid character, according to Unicode */
 PHP_FUNCTION(char_is_valid)
 {
 	UChar	   *str;
@@ -444,7 +444,7 @@ PHP_FUNCTION(char_is_valid)
 /* }}} */
 
 /* {{{ proto char char_from_digit(int digit[, int radix = 10]) U
-Get the character associated with a digit */
+   Get the character representation for the specified digit (optionally in the specified radix) */
 PHP_FUNCTION(char_from_digit)
 {
 	int			digit;
@@ -472,7 +472,7 @@ PHP_FUNCTION(char_from_digit)
 /* }}} */
 
 /* {{{ proto  char char_from_name(string charname[, bool extended = false]) U
-Translate a human readable character name into a codepoint */
+   Translate a human readable character name into a codepoint */
 PHP_FUNCTION(char_from_name)
 {
 	void	   *name;
@@ -517,7 +517,7 @@ PHP_FUNCTION(char_from_name)
 /* }}} */
 
 /* {{{ proto string char_get_name(char c[, bool extended = false]) U
-Get the human readable name associated with a character */
+   Get the human readable name associated with the character */
 PHP_FUNCTION(char_get_name)
 {
 	UChar	   *str;
@@ -564,7 +564,7 @@ PHP_FUNCTION(char_get_name)
 /* {{{ Other property functions */
 
 /* {{{ proto bool char_has_binary_property(string text, int property) U
-Determines if the characters in text all have the binary property specified */
+   Determines if all the characters in the string have the specified binary property */
 PHP_FUNCTION(char_has_binary_property)
 {
 	UChar 		*str = NULL;
@@ -595,7 +595,7 @@ PHP_FUNCTION(char_has_binary_property)
 /* }}} */
 
 /* {{{ proto int char_get_property_value(char c, int property) U
-Get the value of a property associated with a character */
+   Get the value of a property associated with the character */
 PHP_FUNCTION(char_get_property_value)
 {
 	UChar	   *str;
@@ -623,7 +623,7 @@ PHP_FUNCTION(char_get_property_value)
 /* }}} */
 
 /* {{{ proto int char_get_property_min_value(int property) U
-Get the minimum value associated with a property */
+   Get the minimum possible value for the specified property */
 PHP_FUNCTION(char_get_property_min_value)
 {
 	long prop;
@@ -637,7 +637,7 @@ PHP_FUNCTION(char_get_property_min_value)
 /* }}} */
 
 /* {{{ proto int char_get_property_max_value(int property) U
-Get the maximum value associated with a property */
+   Get the maximum possible value associated with the specified property */
 PHP_FUNCTION(char_get_property_max_value)
 {
 	long prop;
@@ -651,7 +651,7 @@ PHP_FUNCTION(char_get_property_max_value)
 /* }}} */
 
 /* {{{ proto string char_get_property_name(int property) U
-Get the name associated with a property */
+   Get the Unicode name for the given property */
 PHP_FUNCTION(char_get_property_name)
 {
 	long 		 prop;
@@ -675,8 +675,8 @@ PHP_FUNCTION(char_get_property_name)
 }
 /* }}} */
 
-/* {{{ proto int char_get_property_min_value(string property_name) U
-Get ID of a given property name */
+/* {{{ proto int char_get_property_from_name(string property_name) U
+   Get the property ID for the given property name */
 PHP_FUNCTION(char_get_property_from_name)
 {
 	void	   *name;
@@ -709,7 +709,7 @@ PHP_FUNCTION(char_get_property_from_name)
 /* }}} */
 
 /* {{{ proto string char_get_property_value_name(int property, int value[, int name_choice]) U
-Get the name of a property value */
+   Get the Unicode name for the givenproperty value */
 PHP_FUNCTION(char_get_property_value_name)
 {
 	long 		 prop;
@@ -735,7 +735,7 @@ PHP_FUNCTION(char_get_property_value_name)
 /* }}} */
 
 /* {{{ proto int char_get_property_value_from_name(int property, string value_name) U
-Get the value ID associated with a property's value name */
+   Get the value ID for the given property value name */
 PHP_FUNCTION(char_get_property_value_from_name)
 {
 	long		prop;
@@ -853,8 +853,7 @@ static UBool php_enum_char_type_range(const void *context,
 }
 
 /* {{{ proto bool char_enum_names(callback Callback, int start, int limit[, int extended = false]) U
-Enumerate all assigned Unicode characters between the start and limit code points (start inclusive, limit exclusive)
-and call a function for each, passing the code point value and the character name. */
+   Enumerate all assigned Unicode characters between the start and limit code points (start inclusive, limit exclusive) and call a function for each, passing the code point value and the character name. */
 PHP_FUNCTION(char_enum_names)
 {
     zval			   *callback;
@@ -917,7 +916,7 @@ PHP_FUNCTION(char_enum_names)
 /* }}} */
 
 /* {{{ proto bool char_enum_types(callback Callback) U
-Enumerate the character types calling Callback for each type range */
+   Enumerate all code points with their general categories invoking a callback for each category */
 PHP_FUNCTION(char_enum_types)
 {
     zval			   *callback;

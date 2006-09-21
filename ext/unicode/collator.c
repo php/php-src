@@ -163,16 +163,16 @@ static zval* collator_set_wrapper(zval *object, zend_collator *zcoll TSRMLS_DC)
 	return object;
 }
 
-/* {{{ proto Collator collator_create(string collator_name) U
-Create a new collator object */
+/* {{{ proto Collator::__construct(string locale) U
+   Create a new Collator object */
 PHP_METHOD(collator, __construct)
 {
 	zif_collator_create(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
-/* {{{ proto Collator collator_create(string collator_name) U
-Create a new collator object */
+/* {{{ proto Collator collator_create(string locale) U
+   Create a new Collator object */
 PHP_FUNCTION(collator_create)
 {
 	UErrorCode        status = U_ZERO_ERROR;
@@ -199,7 +199,7 @@ PHP_FUNCTION(collator_create)
 /* }}} */
 
 /* {{{ proto int collator_compare(Collator coll, string elementA, string elementB) U
-Use a collator object to compare two elements */
+   Compare two strings using collation */
 PHP_FUNCTION(collator_compare)
 {
 	zval             *object;
@@ -216,7 +216,7 @@ PHP_FUNCTION(collator_compare)
 /* }}} */
 
 /* {{{ proto array collator_sort(Collator coll, array initialarray) U
-Sort an array using a collator */
+   Sort an array using collation */
 PHP_FUNCTION(collator_sort)
 {
 	zval             *object;
@@ -244,7 +244,7 @@ PHP_FUNCTION(collator_sort)
 /* }}} */
 
 /* {{{ proto void collator_set_strength(Collator coll, int strength) U
-Set the strength on a collator object */
+   Set the collation strength */
 PHP_FUNCTION(collator_set_strength)
 {
 	zval             *object;
@@ -260,7 +260,7 @@ PHP_FUNCTION(collator_set_strength)
 /* }}} */
 
 /* {{{ proto int collator_get_strength(Collator coll) U
-Returns the current collator strength */
+   Returns the current collation strength */
 PHP_FUNCTION(collator_get_strength)
 {
 	zval             *object;
@@ -275,7 +275,7 @@ PHP_FUNCTION(collator_get_strength)
 /* }}} */
 
 /* {{{ proto bool collator_set_attribute(Collator coll, int attribute, int value) U
-Set a collator attribute */
+   Set a collation attribute */
 PHP_FUNCTION(collator_set_attribute)
 {
 	zval             *object;
@@ -295,7 +295,7 @@ PHP_FUNCTION(collator_set_attribute)
 
 
 /* {{{ proto int collator_get_attribute(Collator coll, int attribute) U
-Read an attribute from a collator */
+   Returns a collation attribute */
 PHP_FUNCTION(collator_get_attribute)
 {
 	zval             *object;
@@ -330,7 +330,7 @@ PHP_FUNCTION(collator_get_default)
 /* }}} */
 
 /* {{{ proto void collator_set_default(Collator coll) U
-   Returns default collator */
+   Sets default collator */
 PHP_FUNCTION(collator_set_default)
 {
 	zval *coll;
