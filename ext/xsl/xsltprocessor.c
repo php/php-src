@@ -255,9 +255,9 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 		return; 
 	}
 	INIT_PZVAL(&handler);
-	ZVAL_STRING(&handler, obj->stringval, 1);
+	ZVAL_XML_STRING(&handler, obj->stringval, 1);
 	xmlXPathFreeObject(obj);
-	
+
 	fci.function_name = &handler;
 	fci.symbol_table = NULL;
 	fci.object_pp = NULL;
@@ -274,8 +274,8 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	} else {
 		result = zend_call_function(&fci, NULL TSRMLS_CC);
 		if (result == FAILURE) {
-			if (Z_TYPE(handler) == IS_STRING) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call handler %s()", Z_STRVAL_P(&handler));
+			if (Z_TYPE(callable) == IS_STRING || Z_TYPE(callable) == IS_UNICODE) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call handler '%R()'.", Z_TYPE(callable), Z_UNIVAL(callable));
 			}
 		/* retval is == NULL, when an exception occured, don't report anything, because PHP itself will handle that */
 		} else if (retval == NULL) {
@@ -730,7 +730,7 @@ PHP_FUNCTION(xsl_xsltprocessor_remove_parameter)
 }
 /* }}} end xsl_xsltprocessor_remove_parameter */
 
-/* {{{ proto void xsl_xsltprocessor_register_php_functions();
+/* {{{ proto void xsl_xsltprocessor_register_php_functions() U
 */
 PHP_FUNCTION(xsl_xsltprocessor_register_php_functions)
 {
@@ -738,7 +738,8 @@ PHP_FUNCTION(xsl_xsltprocessor_register_php_functions)
 	xsl_object *intern;
 	zval *array_value, **entry, *new_string;
 	int  name_len = 0;
-	char *name;
+	zstr name;
+	zend_uchar name_type;
 
 	DOM_GET_THIS(id);
 	
@@ -747,24 +748,21 @@ PHP_FUNCTION(xsl_xsltprocessor_register_php_functions)
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(array_value));
 
 		while (zend_hash_get_current_data(Z_ARRVAL_P(array_value), (void **)&entry) == SUCCESS) {
-			SEPARATE_ZVAL(entry);
-			convert_to_string_with_converter(*entry, UG(utf8_conv));
-			
 			MAKE_STD_ZVAL(new_string);
 			ZVAL_LONG(new_string,1);
 		
-			zend_hash_update(intern->registered_phpfunctions, Z_STRVAL_PP(entry), Z_STRLEN_PP(entry) + 1, &new_string, sizeof(zval*), NULL);
+			zend_u_hash_update(intern->registered_phpfunctions, Z_TYPE_PP(entry), Z_UNIVAL_PP(entry), Z_UNILEN_PP(entry) + 1, &new_string, sizeof(zval*), NULL);
 			zend_hash_move_forward(Z_ARRVAL_P(array_value));
 		}
 		intern->registerPhpFunctions = 2;
 		RETURN_TRUE;
 
-	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s",  &name, &name_len) == SUCCESS) {
+	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "t",  &name, &name_len, &name_type) == SUCCESS) {
 		intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
 		
 		MAKE_STD_ZVAL(new_string);
 		ZVAL_LONG(new_string,1);
-		zend_hash_update(intern->registered_phpfunctions, name, name_len + 1, &new_string, sizeof(zval*), NULL);
+		zend_u_hash_update(intern->registered_phpfunctions, name_type, name, name_len + 1, &new_string, sizeof(zval*), NULL);
 		intern->registerPhpFunctions = 2;
 		
 	} else {
