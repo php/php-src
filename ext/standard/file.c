@@ -512,7 +512,7 @@ PHP_FUNCTION(file_get_contents)
 	char *filename;
 	int filename_len;
 	zend_uchar filename_type;
-	void *contents;
+	void *contents = NULL;
 	long flags = 0;
 	php_stream *stream;
 	int len;
@@ -552,21 +552,32 @@ PHP_FUNCTION(file_get_contents)
 	if (maxlen <= 0 || stream->readbuf_type == IS_STRING) {
 		real_maxlen = maxlen;
 	} else {
-		/* Allows worst case scenario of each input char being turned into two UChars */
-		real_maxlen = (maxlen * 2);
+		/* Allows worst case scenario of each input char being turned into two UChars
+		 * UTODO: Have this take converter into account, since many never generate surrogate pairs */
+		real_maxlen = maxlen * 2;
 	}
 
 	/* uses mmap if possible */
 	len = php_stream_copy_to_mem_ex(stream, stream->readbuf_type, &contents, real_maxlen, maxlen, 0);
 
-	if (stream->readbuf_type == IS_STRING && len > 0) {
-		RETVAL_STRINGL(contents, len, 0);
-	} else if (stream->readbuf_type == IS_UNICODE && len > 0) {
-		RETVAL_UNICODEL(contents, len, 0);
-	} else if (len == 0) {
-		RETVAL_EMPTY_STRING();
+	if (stream->readbuf_type == IS_STRING) {
+		if (len > 0) {
+			RETVAL_STRINGL(contents, len, 0);
+		} else {
+			if (contents) {
+				efree(contents);
+			}
+			RETVAL_EMPTY_STRING();
+		}
 	} else {
-		RETVAL_FALSE;
+		if (len > 0) {
+			RETVAL_UNICODEL(contents, len, 0);
+		} else {
+			if (contents) {
+				efree(contents);
+			}
+			RETVAL_EMPTY_UNICODE();
+		}
 	}
 
 	php_stream_close(stream);
