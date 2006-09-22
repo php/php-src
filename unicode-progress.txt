@@ -16,10 +16,6 @@ ext/standard
 
   string.c
   --------
-    count_chars()
-        Params API. Do we really want to go through the whole Unicode table?
-        May need to use hashtable instead of array.
-
     hebrev(), hebrevc()
         Figure out if this is something we can use ICU for, internally.
         Check with Zeev.
@@ -122,7 +118,6 @@ ext/standard
     max()
     range()
     shuffle()
-    strrchr()
 
     end(), prev(), next(), reset(), current(), key()
 
@@ -150,6 +145,7 @@ ext/standard
     bin2hex()
     chr()
     chunk_split()
+    count_chars()
     dirname()
     explode()
     implode()
