@@ -645,12 +645,26 @@ int main(int argc, char *argv[])
 		case 'd': {
 				/* define ini entries on command line */
 				int len = strlen(php_optarg);
+				char *val;
 
-				if (strchr(php_optarg, '=')) {
-					cli_sapi_module.ini_entries = realloc(cli_sapi_module.ini_entries, ini_entries_len + len + sizeof("\n\0"));
-					memcpy(cli_sapi_module.ini_entries + ini_entries_len, php_optarg, len);
-					memcpy(cli_sapi_module.ini_entries + ini_entries_len + len, "\n\0", sizeof("\n\0"));
-					ini_entries_len += len + sizeof("\n\0") - 2;
+				if ((val = strchr(php_optarg, '='))) {
+					val++;
+					if (!isalnum(*val) && *val != '"' && *val != '\'' && *val != '\0') {
+						cli_sapi_module.ini_entries = realloc(cli_sapi_module.ini_entries, ini_entries_len + len + sizeof("\"\"\n\0"));
+						memcpy(cli_sapi_module.ini_entries + ini_entries_len, php_optarg, (val - php_optarg));
+						ini_entries_len += (val - php_optarg);
+						memcpy(cli_sapi_module.ini_entries + ini_entries_len, "\"", 1);
+						ini_entries_len++;
+						memcpy(cli_sapi_module.ini_entries + ini_entries_len, val, len - (val - php_optarg));
+						ini_entries_len += len - (val - php_optarg);
+						memcpy(cli_sapi_module.ini_entries + ini_entries_len, "\"\n\0", sizeof("\"\n\0"));
+						ini_entries_len += sizeof("\n\0\"") - 2;
+					} else {
+						cli_sapi_module.ini_entries = realloc(cli_sapi_module.ini_entries, ini_entries_len + len + sizeof("\n\0"));
+						memcpy(cli_sapi_module.ini_entries + ini_entries_len, php_optarg, len);
+						memcpy(cli_sapi_module.ini_entries + ini_entries_len + len, "\n\0", sizeof("\n\0"));
+						ini_entries_len += len + sizeof("\n\0") - 2;
+					}
 				} else {
 					cli_sapi_module.ini_entries = realloc(cli_sapi_module.ini_entries, ini_entries_len + len + sizeof("=1\n\0"));
 					memcpy(cli_sapi_module.ini_entries + ini_entries_len, php_optarg, len);
