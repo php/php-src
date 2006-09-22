@@ -472,19 +472,22 @@ PHP_MINIT_FUNCTION(nl_langinfo)
 }
 /* }}} */
 
-/* {{{ proto string nl_langinfo(int item)
+/* {{{ proto string nl_langinfo(int item) U
    Query language and locale information */
 PHP_FUNCTION(nl_langinfo)
 {
-	zval **item;
+	long item;
 	char *value;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &item) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &item) == FAILURE) {
+		return;
 	}
-	convert_to_long_ex(item);
 
-	value = nl_langinfo(Z_LVAL_PP(item));
+	if (UG(unicode)) {
+		php_error_docref(NULL TSRMLS_DC, E_STRICT, "deprecated in Unicode mode, please use ICU locale functions");
+	}
+
+	value = nl_langinfo(item);
 	if (value == NULL) {
 		RETURN_FALSE;
 	} else {
@@ -5514,6 +5517,11 @@ PHP_FUNCTION(setlocale)
 		efree(args);
 		WRONG_PARAM_COUNT;
 	}
+
+	if (UG(unicode)) {
+		php_error_docref(NULL TSRMLS_DC, E_STRICT, "deprecated in Unicode mode, please use ICU locale functions");
+	}
+
 #ifdef HAVE_SETLOCALE
 	pcategory = args[0];
 	if (Z_TYPE_PP(pcategory) == IS_LONG) {
@@ -6435,7 +6443,7 @@ PHP_FUNCTION(strnatcmp)
 }
 /* }}} */
 
-/* {{{ proto array localeconv(void)
+/* {{{ proto array localeconv(void) U
    Returns numeric formatting information based on the current locale */
 PHP_FUNCTION(localeconv)
 {
@@ -6443,8 +6451,12 @@ PHP_FUNCTION(localeconv)
 	int len, i;
 
 	/* We don't need no stinkin' parameters... */
-	if (ZEND_NUM_ARGS() > 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+		return;
+	}
+
+	if (UG(unicode)) {
+		php_error_docref(NULL TSRMLS_DC, E_STRICT, "deprecated in Unicode mode, please use ICU locale functions");
 	}
 
 	MAKE_STD_ZVAL(grouping);
@@ -7045,7 +7057,7 @@ PHP_FUNCTION(str_word_count)
 /* }}} */
 
 #if HAVE_STRFMON
-/* {{{ proto string money_format(string format , float value)
+/* {{{ proto string money_format(string format , float value) U
    Convert monetary value(s) to string */
 PHP_FUNCTION(money_format)
 {
@@ -7065,7 +7077,7 @@ PHP_FUNCTION(money_format)
 	}
 	str[str_len] = 0;
 
-	RETURN_STRINGL(erealloc(str, str_len + 1), str_len, 0);
+	RETURN_RT_STRINGL(erealloc(str, str_len + 1), str_len, 0);
 }
 /* }}} */
 #endif

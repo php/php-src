@@ -20,15 +20,6 @@ ext/standard
         Figure out if this is something we can use ICU for, internally.
         Check with Zeev.
 
-    localeconv()
-        Params API, update to use *_rt_* API.
-
-    money_format()
-        Just IS_UNICODE support with *_rt_* API.
-
-    nl_langinfo()
-        Params API, otherwise leave alone
-
     parse_str()
         Params API. How do we deal with encoding of the data?
 
@@ -150,6 +141,9 @@ ext/standard
     explode()
     implode()
     levenshtein()
+    localeconv()
+    money_format()
+    nl_langinfo()
     nl2br()
     ord()
     pathinfo()
