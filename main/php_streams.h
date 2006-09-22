@@ -456,9 +456,12 @@ END_EXTERN_C()
 #define PHP_STREAM_COPY_ALL		((size_t)-1)
 
 BEGIN_EXTERN_C()
+PHPAPI size_t _php_stream_ucopy_to_stream(php_stream *src, php_stream *dest, size_t maxlen, int maxchars STREAMS_DC TSRMLS_DC);
 PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size_t maxlen STREAMS_DC TSRMLS_DC);
-#define php_stream_copy_to_stream(src, dest, maxlen)	_php_stream_copy_to_stream((src), (dest), (maxlen) STREAMS_CC TSRMLS_CC)
-
+/* Preserve "characters" semantics by having maxlen refer to maxchars in a unicode context */
+#define php_stream_copy_to_stream(src, dest, maxlen)	( ((src)->readbuf_type == IS_STRING) \
+		? _php_stream_copy_to_stream((src), (dest), (maxlen) STREAMS_CC TSRMLS_CC) \
+		: _php_stream_ucopy_to_stream((src), (dest), -1, (maxlen) STREAMS_CC TSRMLS_CC) )
 
 /* read all data from stream and put into a buffer. Caller must free buffer when done.
  * The copy will use mmap if available. */
