@@ -3406,54 +3406,81 @@ PHP_FUNCTION(substr_replace)
 }
 /* }}} */
 
-/* {{{ proto string quotemeta(string str)
+/* {{{ proto string quotemeta(string str) U
    Quotes meta characters */
 PHP_FUNCTION(quotemeta)
 {
-	zval **arg;
-	char *str, *old;
-	char *old_end;
-	char *p, *q;
+	zstr str, old;
+	zstr old_end;
+	int  old_len;
+	zstr p, q;
 	char c;
+	UChar cp;
+	zend_uchar type;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_DC, "t", &old, &old_len, &type) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(arg);
-
-	old = Z_STRVAL_PP(arg);
-	old_end = Z_STRVAL_PP(arg) + Z_STRLEN_PP(arg);
-
-	if (old == old_end) {
+	if (old_len == 0) {
 		RETURN_FALSE;
 	}
 
-	str = safe_emalloc(2, Z_STRLEN_PP(arg), 1);
 
-	for (p = old, q = str; p != old_end; p++) {
-		c = *p;
-		switch (c) {
-			case '.':
-			case '\\':
-			case '+':
-			case '*':
-			case '?':
-			case '[':
-			case '^':
-			case ']':
-			case '$':
-			case '(':
-			case ')':
-				*q++ = '\\';
-				/* break is missing _intentionally_ */
-			default:
-				*q++ = c;
+	if (type == IS_UNICODE) {
+		old_end.u = old.u + old_len;
+		str.u = safe_emalloc(2, UBYTES(old_len), 1);
+
+		for (p.u = old.u, q.u = str.u; p.u != old_end.u; p.u++) {
+			cp = *p.u;
+			switch (cp) {
+				case '.':
+				case '\\':
+				case '+':
+				case '*':
+				case '?':
+				case '[':
+				case '^':
+				case ']':
+				case '$':
+				case '(':
+				case ')':
+					*q.u++ = '\\';
+					/* break is missing _intentionally_ */
+				default:
+					*q.u++ = cp;
+			}
 		}
-	}
-	*q = 0;
+		*q.u = 0;
+		RETURN_UNICODEL(eurealloc(str.u, q.u - str.u + 1), q.u - str.u, 0);
+	} else {
+		old_end.s = old.s + old_len;
+		str.s = safe_emalloc(2, old_len, 1);
 
-	RETURN_STRINGL(erealloc(str, q - str + 1), q - str, 0);
+		for (p.s = old.s, q.s = str.s; p.s != old_end.s; p.s++) {
+			c = *p.s;
+			switch (c) {
+				case '.':
+				case '\\':
+				case '+':
+				case '*':
+				case '?':
+				case '[':
+				case '^':
+				case ']':
+				case '$':
+				case '(':
+				case ')':
+					*q.s++ = '\\';
+					/* break is missing _intentionally_ */
+				default:
+					*q.s++ = c;
+			}
+		}
+		*q.s = 0;
+		RETURN_STRINGL(erealloc(str.s, q.s - str.s + 1), q.s - str.s, 0);
+	}
+
 }
 /* }}} */
 

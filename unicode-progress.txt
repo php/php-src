@@ -23,9 +23,6 @@ ext/standard
     parse_str()
         Params API. How do we deal with encoding of the data?
 
-    quotemeta()
-        Params API, IS_UNICODE upgrade
-
     sscanf()
         Params API. Rest - no idea yet.
 
@@ -147,6 +144,7 @@ ext/standard
     nl2br()
     ord()
     pathinfo()
+    quotemeta()
     range()
     similar_text()
     str_pad()
