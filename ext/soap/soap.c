@@ -2046,9 +2046,11 @@ PHP_METHOD(SoapServer, handle)
 #if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
 				if (service->soap_class.persistance != SOAP_PERSISTENCE_SESSION) {
 					zval_ptr_dtor(&soap_obj);
+					soap_obj = NULL;
 				}
 #else
 				zval_ptr_dtor(&soap_obj);
+				soap_obj = NULL;
 #endif
 			}
 		} else {
