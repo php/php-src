@@ -896,49 +896,78 @@ parse_eol:
 }
 /* }}} */
 
-/* {{{ proto string tempnam(string dir, string prefix)
+/* {{{ proto string tempnam(string dir, string prefix) U
    Create a unique filename in a directory */
 PHP_FUNCTION(tempnam)
 {
-	zval **arg1, **arg2;
+	char *dir, *prefix;
+	int dir_len, prefix_len;
+	zend_uchar dir_type, prefix_type;
+	zend_uchar free_dir = 0, free_prefix = 0;
+
 	char *d;
 	char *opened_path;
 	char *p;
 	int fd;
 	size_t p_len;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tt", &dir, &dir_len, &dir_type, &prefix, &prefix_len, &prefix_type) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(arg1);
-	convert_to_string_ex(arg2);
 
-	if (php_check_open_basedir(Z_STRVAL_PP(arg1) TSRMLS_CC)) {
-		RETURN_FALSE;
+	/* Assume failure until success is assured */
+	RETVAL_FALSE;
+
+	if (dir_type == IS_UNICODE) {
+		if (FAILURE == php_stream_path_encode(NULL, &dir, &dir_len, (UChar*)dir, dir_len, REPORT_ERRORS, FG(default_context))) {
+			goto tempnam_cleanup;
+		}
+		free_dir = 1;
 	}
-	
-	d = estrndup(Z_STRVAL_PP(arg1), Z_STRLEN_PP(arg1));
 
-	php_basename(Z_STRVAL_PP(arg2), Z_STRLEN_PP(arg2), NULL, 0, &p, &p_len TSRMLS_CC);
+	if (prefix_type == IS_UNICODE) {
+		if (FAILURE == php_stream_path_encode(NULL, &prefix, &prefix_len, (UChar*)prefix, prefix_len, REPORT_ERRORS, FG(default_context))) {
+			goto tempnam_cleanup;
+		}
+		free_prefix = 1;
+	}
+
+	if (php_check_open_basedir(dir TSRMLS_CC)) {
+		goto tempnam_cleanup;
+	}
+
+	php_basename(prefix, prefix_len, NULL, 0, &p, &p_len TSRMLS_CC);
 	if (p_len > 64) {
 		p[63] = '\0';
 	}
 
-	if ((fd = php_open_temporary_fd(d, p, &opened_path TSRMLS_CC)) >= 0) {
+	if ((fd = php_open_temporary_fd(dir, p, &opened_path TSRMLS_CC)) >= 0) {
 		close(fd);
-		RETVAL_RT_STRING(opened_path, 0);
 		if (UG(unicode)) {
+			UChar *utmpnam;
+			int utmpnam_len;
+
+			if (SUCCESS == php_stream_path_decode(NULL, &utmpnam, &utmpnam_len, opened_path, strlen(opened_path), REPORT_ERRORS, FG(default_context))) {
+				RETVAL_UNICODEL(utmpnam, utmpnam_len, 0);
+			}
 			efree(opened_path);
+		} else {
+			RETVAL_STRING(opened_path, 0);
 		}
-	} else {
-		RETVAL_FALSE;
 	}
 	efree(p);
-	efree(d);
+
+tempnam_cleanup:
+	if (free_dir) {
+		efree(dir);
+	}
+	if (free_prefix) {
+		efree(prefix);
+	}
 }
 /* }}} */
 
-/* {{{ proto resource tmpfile(void)
+/* {{{ proto resource tmpfile(void) U
    Create a temporary file that will be deleted automatically after use */
 PHP_NAMED_FUNCTION(php_if_tmpfile)
 {
@@ -1775,7 +1804,7 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 }
 /* }}} */
 
-/* {{{ proto bool copy(string source_file, string destination_file)
+/* {{{ proto bool copy(string source_file, string destination_file) U
    Copy a file */
 PHP_FUNCTION(copy)
 {
@@ -1808,7 +1837,7 @@ PHP_FUNCTION(copy)
 		goto copy_cleanup;
 	}
 
-	if (php_copy_file(source, target TSRMLS_CC) == SUCCESS) {
+	if (php_copy_file(source, dest TSRMLS_CC) == SUCCESS) {
 		RETVAL_TRUE;
 	}
 
@@ -2608,11 +2637,24 @@ PHP_FUNCTION(fnmatch)
 /* }}} */
 #endif
 
-/* {{{ proto string sys_get_temp_dir()
+/* {{{ proto string sys_get_temp_dir() U
    Returns directory path used for temporary files */
 PHP_FUNCTION(sys_get_temp_dir)
 {
-	RETURN_STRING((char *)php_get_temporary_directory(), 1);
+	UChar *utemp_dir;
+	char *temp_dir = (char *)php_get_temporary_directory();
+	int temp_dir_len = strlen(temp_dir), utemp_dir_len;
+
+	if (!UG(unicode)) {
+		RETURN_STRINGL(temp_dir, temp_dir_len, 1);
+	}
+
+	/* else UG(unicode) */
+	if (FAILURE == php_stream_path_decode(NULL, &utemp_dir, &utemp_dir_len, temp_dir, temp_dir_len, REPORT_ERRORS, FG(default_context))) {
+		RETURN_FALSE;
+	}
+
+	RETURN_UNICODEL(utemp_dir, utemp_dir_len, 0);
 }
 /* }}} */
 
