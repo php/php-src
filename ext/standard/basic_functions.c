@@ -4217,7 +4217,7 @@ PHP_FUNCTION(constant)
 /* }}} */
 
 #ifdef HAVE_INET_NTOP
-/* {{{ proto string inet_ntop(string in_addr)
+/* {{{ proto string inet_ntop(string in_addr) U
    Converts a packed inet address to a human readable IP address string */
 PHP_NAMED_FUNCTION(php_inet_ntop)
 {
@@ -4225,7 +4225,7 @@ PHP_NAMED_FUNCTION(php_inet_ntop)
 	int address_len, af = AF_INET;
 	char buffer[40];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &address, &address_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &address, &address_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -4244,13 +4244,13 @@ PHP_NAMED_FUNCTION(php_inet_ntop)
 		RETURN_FALSE;
 	}
 
-	RETURN_STRING(buffer, 1);
+	RETURN_RT_STRING(buffer, ZSTR_DUPLICATE);
 }
 /* }}} */
 #endif /* HAVE_INET_NTOP */
 
 #ifdef HAVE_INET_PTON
-/* {{{ proto string inet_pton(string ip_address)
+/* {{{ proto string inet_pton(string ip_address) U
    Converts a human readable IP address to a packed binary string */
 PHP_NAMED_FUNCTION(php_inet_pton)
 {
@@ -4289,24 +4289,24 @@ PHP_NAMED_FUNCTION(php_inet_pton)
 
 
 
-/* {{{ proto int ip2long(string ip_address)
+/* {{{ proto int ip2long(string ip_address) U
    Converts a string containing an (IPv4) Internet Protocol dotted address into a proper address */
 PHP_FUNCTION(ip2long)
 {
-	zval **str;
+	char *addr;
+	int addr_len;
 	unsigned long int ip;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &addr, &addr_len) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(str);
-
-	if (Z_STRLEN_PP(str) == 0 || (ip = inet_addr(Z_STRVAL_PP(str))) == INADDR_NONE) {
+	if (addr_len == 0 || (ip = inet_addr(addr)) == INADDR_NONE) {
 		/* the only special case when we should return -1 ourselves,
 		 * because inet_addr() considers it wrong.
 		 */
-		if (!memcmp(Z_STRVAL_PP(str), "255.255.255.255", Z_STRLEN_PP(str))) {
+		if (addr_len == sizeof("255.255.255.255") - 1 &&
+			!memcmp(addr, "255.255.255.255", sizeof("255.255.255.255") - 1)) {
 			RETURN_LONG(-1);
 		}
 		
@@ -4317,23 +4317,24 @@ PHP_FUNCTION(ip2long)
 }
 /* }}} */
 
-/* {{{ proto string long2ip(int proper_address)
+/* {{{ proto string long2ip(int proper_address) U
    Converts an (IPv4) Internet network address into a string in Internet standard dotted format */
 PHP_FUNCTION(long2ip)
 {
-	zval **num;
+	/* "It's a long but it's not, PHP ints are signed */
+	char *ip;
+	int ip_len;
 	unsigned long n;
 	struct in_addr myaddr;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &ip, &ip_len) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(num);
 	
-	n = strtoul(Z_STRVAL_PP(num), NULL, 0);
+	n = strtoul(ip, NULL, 0);
 
 	myaddr.s_addr = htonl(n);
-	RETURN_STRING(inet_ntoa(myaddr), 1);
+	RETURN_RT_STRING(inet_ntoa(myaddr), ZSTR_DUPLICATE);
 }
 /* }}} */
 
@@ -4342,7 +4343,7 @@ PHP_FUNCTION(long2ip)
  * System Functions *
  ********************/
 
-/* {{{ proto string getenv(string varname)
+/* {{{ proto string getenv(string varname) U
    Get the value of an environment variable */
 PHP_FUNCTION(getenv)
 {
@@ -4352,32 +4353,41 @@ PHP_FUNCTION(getenv)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		RETURN_FALSE;
 	}
+
+	/* SAPI method returns an emalloc()'d string */
 	ptr = sapi_getenv(str, str_len TSRMLS_CC);
-	if(ptr) RETURN_RT_STRING(ptr, 0);
+	if (ptr) {
+		RETURN_RT_STRING(ptr, ZSTR_AUTOFREE);
+	}
+
+	/* system method returns a const */
 	ptr = getenv(str);
-	if(ptr) RETURN_RT_STRING(ptr, 1);
+	if (ptr) {
+		RETURN_RT_STRING(ptr, ZSTR_DUPLICATE);
+	}
+
 	RETURN_FALSE;
 }
 /* }}} */
 
 #ifdef HAVE_PUTENV
-/* {{{ proto bool putenv(string setting)
+/* {{{ proto bool putenv(string setting) U
    Set the value of an environment variable */
 PHP_FUNCTION(putenv)
 {
-	zval **str;
+	char *setting;
+	int setting_len;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &setting, &setting_len) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(str);
 
-	if (Z_STRVAL_PP(str) && *(Z_STRVAL_PP(str))) {
+	if (setting_len) {
 		char *p, **env;
 		putenv_entry pe;
 
-		pe.putenv_string = estrndup(Z_STRVAL_PP(str), Z_STRLEN_PP(str));
-		pe.key = estrndup(Z_STRVAL_PP(str), Z_STRLEN_PP(str));
+		pe.putenv_string = estrndup(setting, setting_len);
+		pe.key = estrndup(setting, setting_len);
 		if ((p = strchr(pe.key, '='))) {	/* nullify the '=' if there is one */
 			*p = '\0';
 		}
@@ -4635,7 +4645,7 @@ PHP_FUNCTION(getopt)
 /* }}} */
 #endif
 
-/* {{{ proto void flush(void)
+/* {{{ proto void flush(void) U
    Flush the output buffer */
 PHP_FUNCTION(flush)
 {
@@ -4643,7 +4653,7 @@ PHP_FUNCTION(flush)
 }
 /* }}} */
 
-/* {{{ proto void sleep(int seconds)
+/* {{{ proto void sleep(int seconds) U
    Delay for a given number of seconds */
 PHP_FUNCTION(sleep)
 {
@@ -4665,7 +4675,7 @@ PHP_FUNCTION(sleep)
 }
 /* }}} */
 
-/* {{{ proto void usleep(int micro_seconds)
+/* {{{ proto void usleep(int micro_seconds) U
    Delay for a given number of micro seconds */
 PHP_FUNCTION(usleep)
 {
@@ -4685,7 +4695,7 @@ PHP_FUNCTION(usleep)
 /* }}} */
 
 #if HAVE_NANOSLEEP
-/* {{{ proto mixed time_nanosleep(long seconds, long nanoseconds)
+/* {{{ proto mixed time_nanosleep(long seconds, long nanoseconds) U
    Delay for a number of seconds and nano seconds */
 PHP_FUNCTION(time_nanosleep)
 {
@@ -4713,7 +4723,7 @@ PHP_FUNCTION(time_nanosleep)
 }
 /* }}} */
 
-/* {{{ proto mixed time_sleep_until(float timestamp)
+/* {{{ proto mixed time_sleep_until(float timestamp) U
    Make the script sleep until the specified time */
 PHP_FUNCTION(time_sleep_until)
 {
@@ -4756,7 +4766,7 @@ PHP_FUNCTION(time_sleep_until)
 /* }}} */
 #endif
 
-/* {{{ proto string get_current_user(void)
+/* {{{ proto string get_current_user(void) U
    Get the name of the owner of the current PHP script */
 PHP_FUNCTION(get_current_user)
 {
@@ -4764,7 +4774,7 @@ PHP_FUNCTION(get_current_user)
 		WRONG_PARAM_COUNT;
 	}
 
-	RETURN_STRING(php_get_current_user(), 1);
+	RETURN_RT_STRING(php_get_current_user(), ZSTR_DUPLICATE);
 }
 /* }}} */
 
@@ -4772,36 +4782,45 @@ PHP_FUNCTION(get_current_user)
    Get the value of a PHP configuration option */
 PHP_FUNCTION(get_cfg_var)
 {
-	zval **varname;
+	char *varname;
+	int varname_len;
 	char *value;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &varname) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &varname, &varname_len) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(varname);
-
-	if (cfg_get_string(Z_STRVAL_PP(varname), &value) == FAILURE) {
+	if (cfg_get_string(varname, &value) == FAILURE) {
 		RETURN_FALSE;
 	}
 	RETURN_STRING(value, 1);
 }
 /* }}} */
 
+/* {{{ proto false set_magic_quotes_runtime(void) U
+    Deprecation stub for magic quotes function */
 PHP_FUNCTION(set_magic_quotes_runtime)
 {
 	php_error_docref(NULL TSRMLS_CC, E_CORE_ERROR, "magic_quotes_runtime is not supported anymore");
 	RETURN_FALSE;
 }
+/* }}} */
 
+/* {{{ proto false get_magic_quotes_runtime(void) U
+    Deprecation stub for magic quotes function */
 PHP_FUNCTION(get_magic_quotes_runtime)
 {
 	RETURN_FALSE;
 }
+/* }}} */
+
+/* {{{ proto false get_magic_quotes_gpc(void) U
+    Deprecation stub for magic quotes function */
 PHP_FUNCTION(get_magic_quotes_gpc)
 {
 	RETURN_FALSE;
 }
+/* }}} */
 
 /*
 	1st arg = error message
@@ -5365,20 +5384,30 @@ ZEND_API void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highl
 	syntax_highlighter_ini->highlight_string  = INI_STR("highlight.string");
 }
 
-/* {{{ proto bool highlight_file(string file_name [, bool return] )
+/* {{{ proto bool highlight_file(string file_name [, bool return] ) U
    Syntax highlight a source file */
 PHP_FUNCTION(highlight_file)
 {
 	char *filename;
-	int  filename_len;
+	int  filename_len, ret;
+	zend_uchar filename_type;
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
 	zend_bool i = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &filename, &filename_len, &i) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|b", &filename, &filename_len, &filename_type, &i) == FAILURE) {
 		RETURN_FALSE;
 	}
 
+	if (filename_type == IS_UNICODE) {
+		if (FAILURE == php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, FG(default_context))) {
+			RETURN_FALSE;
+		}
+	}
+
 	if (php_check_open_basedir(filename TSRMLS_CC)) {
+		if (filename_type == IS_UNICODE) {
+			efree(filename);
+		}
 		RETURN_FALSE;
 	}
 
@@ -5388,7 +5417,12 @@ PHP_FUNCTION(highlight_file)
 
 	php_get_highlight_struct(&syntax_highlighter_ini);
 
-	if (highlight_file(filename, &syntax_highlighter_ini TSRMLS_CC) == FAILURE) {
+	ret = highlight_file(filename, &syntax_highlighter_ini TSRMLS_CC);
+	if (filename_type == IS_UNICODE) {
+		efree(filename);
+	}
+
+	if (ret == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -5401,17 +5435,24 @@ PHP_FUNCTION(highlight_file)
 }
 /* }}} */
 
-/* {{{ proto string php_strip_whitespace(string file_name)
+/* {{{ proto string php_strip_whitespace(string file_name) U
    Return source with stripped comments and whitespace */
 PHP_FUNCTION(php_strip_whitespace)
 {
 	char *filename;
-	int filename_len;
+	int filename_len, ret;
+	zend_uchar filename_type;
 	zend_lex_state original_lex_state;
 	zend_file_handle file_handle = {0};
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &filename, &filename_len, &filename_type) == FAILURE) {
 		RETURN_FALSE;
+	}
+
+	if (filename_type == IS_UNICODE) {
+		if (FAILURE == php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, FG(default_context))) {
+			RETURN_FALSE;
+		}
 	}
 
 	php_output_start_default(TSRMLS_C);
@@ -5422,18 +5463,28 @@ PHP_FUNCTION(php_strip_whitespace)
 	file_handle.opened_path = NULL;
 	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
 	if (open_file_for_scanning(&file_handle TSRMLS_CC)==FAILURE) {
+		if (filename_type == IS_UNICODE) {
+			efree(filename);
+		}
 		RETURN_EMPTY_STRING();
 	}
 
 	zend_strip(TSRMLS_C);
 	
 	zend_destroy_file_handle(&file_handle TSRMLS_CC);
+	if (filename_type == IS_UNICODE) {
+		/* Note to next person looking at this function.
+		 * Don't try to be clever by saying:
+		 * file_handle.free_filename = (filename_type == IS_UNICODE)
+		 * It won't work the way you think --Sara
+		 */
+		efree(filename);
+	}
+
 	zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
 
 	php_output_get_contents(return_value TSRMLS_CC);
 	php_output_discard(TSRMLS_C);
-
-	return;
 }
 /* }}} */
 
@@ -5484,6 +5535,7 @@ PHP_FUNCTION(highlight_string)
 PHP_FUNCTION(ini_get)
 {
 	zval **varname;
+	int varname_len;
 	char *str;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &varname) == FAILURE) {
@@ -5732,7 +5784,7 @@ PHP_FUNCTION(print_r)
 
 /* This should go back to PHP */
 
-/* {{{ proto int connection_aborted(void)
+/* {{{ proto int connection_aborted(void) U
    Returns true if client disconnected */
 PHP_FUNCTION(connection_aborted)
 {
@@ -5740,7 +5792,7 @@ PHP_FUNCTION(connection_aborted)
 }
 /* }}} */
 
-/* {{{ proto int connection_status(void)
+/* {{{ proto int connection_status(void) U
    Returns the connection status bitfield */
 PHP_FUNCTION(connection_status)
 {

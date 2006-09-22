@@ -119,7 +119,7 @@ PHP_MINFO_FUNCTION(assert)
 /* }}} */
 /* {{{ internal functions */
 /* }}} */
-/* {{{ proto int assert(string|bool assertion)
+/* {{{ proto int assert(string|bool assertion) U
    Checks if assertion is false */
 
 PHP_FUNCTION(assert)
@@ -238,7 +238,7 @@ PHP_FUNCTION(assert)
 }
 
 /* }}} */
-/* {{{ proto mixed assert_options(int what [, mixed value])
+/* {{{ proto mixed assert_options(int what [, mixed value]) U
    Set/get the various assert flags */
 
 PHP_FUNCTION(assert_options)
