@@ -198,7 +198,9 @@ PHP_FUNCTION(collator_create)
 }
 /* }}} */
 
-/* {{{ proto int collator_compare(Collator coll, string elementA, string elementB) U
+/* {{{ proto int Collator::compare(string str1, string str2) U
+   Compare two strings using collation */
+/* {{{ proto int collator_compare(Collator coll, string str1, string str2) U
    Compare two strings using collation */
 PHP_FUNCTION(collator_compare)
 {
@@ -215,7 +217,9 @@ PHP_FUNCTION(collator_compare)
 }
 /* }}} */
 
-/* {{{ proto array collator_sort(Collator coll, array initialarray) U
+/* {{{ proto array Collator::sort(array input) U
+   Sort an array using collation */
+/* {{{ proto array collator_sort(Collator coll, array input) U
    Sort an array using collation */
 PHP_FUNCTION(collator_sort)
 {
@@ -243,6 +247,8 @@ PHP_FUNCTION(collator_sort)
 }
 /* }}} */
 
+/* {{{ proto void Collator::set_strength(int strength) U
+   Set the collation strength */
 /* {{{ proto void collator_set_strength(Collator coll, int strength) U
    Set the collation strength */
 PHP_FUNCTION(collator_set_strength)
@@ -259,6 +265,8 @@ PHP_FUNCTION(collator_set_strength)
 }
 /* }}} */
 
+/* {{{ proto int Collator::get_strength() U
+   Returns the current collation strength */
 /* {{{ proto int collator_get_strength(Collator coll) U
    Returns the current collation strength */
 PHP_FUNCTION(collator_get_strength)
@@ -274,6 +282,8 @@ PHP_FUNCTION(collator_get_strength)
 }
 /* }}} */
 
+/* {{{ proto bool Collator::set_attribute(int attribute, int value) U
+   Set a collation attribute */
 /* {{{ proto bool collator_set_attribute(Collator coll, int attribute, int value) U
    Set a collation attribute */
 PHP_FUNCTION(collator_set_attribute)
@@ -294,6 +304,8 @@ PHP_FUNCTION(collator_set_attribute)
 /* }}} */
 
 
+/* {{{ proto int Collator::get_attribute(int attribute) U
+   Returns a collation attribute */
 /* {{{ proto int collator_get_attribute(Collator coll, int attribute) U
    Returns a collation attribute */
 PHP_FUNCTION(collator_get_attribute)
