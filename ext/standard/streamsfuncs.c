@@ -390,15 +390,15 @@ PHP_FUNCTION(stream_socket_recvfrom)
 }
 /* }}} */
 
-/* {{{ proto string stream_get_contents(resource source [, long maxlen [, long offset]])
+/* {{{ proto string stream_get_contents(resource source [, long maxlen [, long offset]]) U
    Reads all remaining bytes (or up to maxlen bytes) from a stream and returns them as a string. */
 PHP_FUNCTION(stream_get_contents)
 {
 	php_stream *stream;
 	zval *zsrc;
-	long maxlen = PHP_STREAM_COPY_ALL, pos = 0;
+	long maxlen = PHP_STREAM_COPY_ALL, pos = 0, real_maxlen;
 	int len;
-	char *contents = NULL;
+	void *contents = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|ll", &zsrc, &maxlen, &pos) == FAILURE) {
 		RETURN_FALSE;
@@ -411,12 +411,34 @@ PHP_FUNCTION(stream_get_contents)
 		RETURN_FALSE;
 	}
 
-	if ((len = php_stream_copy_to_mem(stream, &contents, maxlen, 0)) > 0) {
-		RETVAL_STRINGL(contents, len, 0);
-	} else if (len == 0) {
-		RETVAL_EMPTY_STRING();
+	if (maxlen <= 0 || stream->readbuf_type == IS_STRING) {
+		real_maxlen = maxlen;
 	} else {
-		RETVAL_FALSE;
+		/* Allows worst case scenario of each input char being turned into two UChars
+		 * UTODO: Have this take converter into account, since many never generate surrogate pairs */
+		real_maxlen = maxlen * 2;
+	}
+
+	len = php_stream_copy_to_mem_ex(stream, stream->readbuf_type, &contents, real_maxlen, maxlen, 0);
+
+	if (stream->readbuf_type == IS_STRING) {
+		if (len > 0) {
+			RETVAL_STRINGL(contents, len, 0);
+		} else {
+			if (contents) {
+				efree(contents);
+			}
+			RETVAL_EMPTY_STRING();
+		}
+	} else {
+		if (len > 0) {
+			RETVAL_UNICODEL(contents, len, 0);
+		} else {
+			if (contents) {
+				efree(contents);
+			}
+			RETVAL_EMPTY_UNICODE();
+		}
 	}
 }
 /* }}} */
