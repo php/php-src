@@ -1568,7 +1568,7 @@ PHPAPI size_t _php_stream_passthru(php_stream * stream STREAMS_DC TSRMLS_DC)
 
 		ucnv_resetFromUnicode(conv);
 
-		while ((b = php_stream_read_unicode(stream, inbuf_start, sizeof(inbuf_start))) > 0) {
+		while ((b = php_stream_read_unicode(stream, inbuf_start, 8192)) > 0) {
 			char *outbuf = outbuf_start;
 			const UChar *inbuf = inbuf_start;
 			UErrorCode status = U_ZERO_ERROR;
@@ -1733,13 +1733,96 @@ PHPAPI size_t _php_stream_copy_to_mem_ex(php_stream *src, zend_uchar rettype, vo
 	return len;
 }
 
+/* Designed for copying UChars (taking into account both maxlen and maxchars) */
+PHPAPI size_t _php_stream_ucopy_to_stream(php_stream *src, php_stream *dest, size_t maxlen, int maxchars STREAMS_DC TSRMLS_DC)
+{
+	size_t haveread = 0;
+	php_stream_statbuf ssbuf;
+
+	if (src->readbuf_type == IS_STRING) {
+		/* Called incorrectly, don't do that. */
+		return _php_stream_copy_to_stream(src, dest, maxlen STREAMS_CC TSRMLS_CC);
+	}
+
+	if (maxlen == 0 || maxchars == 0) {
+		return 0;
+	}
+
+	if (maxlen == PHP_STREAM_COPY_ALL) {
+		maxlen = 0;
+	}
+
+	if (php_stream_stat(src, &ssbuf) == 0) {
+		/* in the event that the source file is 0 bytes, return 1 to indicate success
+		 * because opening the file to write had already created a copy */
+		if (ssbuf.sb.st_size == 0
+#ifdef S_ISFIFO
+		 && !S_ISFIFO(ssbuf.sb.st_mode)
+#endif
+#ifdef S_ISCHR
+		 && !S_ISCHR(ssbuf.sb.st_mode)
+#endif
+		) {
+			return 1;
+		}
+	}
+
+	while(1) {
+		UChar buf[CHUNK_SIZE];
+		size_t readchunk = CHUNK_SIZE;
+		size_t didread;
+
+		if (maxlen && (maxlen - haveread) < readchunk) {
+			readchunk = maxlen - haveread;
+		}
+
+		didread = php_stream_read_unicode_ex(src, buf, readchunk, maxchars);
+
+		if (didread) {
+			/* extra paranoid */
+			size_t didwrite, towrite;
+			UChar *writeptr;
+
+			if (maxchars > 0) {
+				/* Determine number of chars in this buf */
+				maxchars -= u_countChar32(buf, didread);
+			}
+
+			towrite = didread;
+			writeptr = buf;
+			haveread += didread;
+
+			while(towrite) {
+				didwrite = php_stream_write_unicode(dest, writeptr, towrite);
+				if (didwrite == 0) {
+					return 0;	/* error */
+				}
+
+				towrite -= didwrite;
+				writeptr += didwrite;
+			}
+		} else {
+			return haveread;
+		}
+
+		if (maxchars == 0 || maxlen - haveread == 0) {
+			break;
+		}
+	}
+
+	return haveread;
+}
+
+/* Optimized for copying octets from source stream */
 PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size_t maxlen STREAMS_DC TSRMLS_DC)
 {
-	char buf[CHUNK_SIZE];
-	size_t readchunk;
 	size_t haveread = 0;
-	size_t didread;
 	php_stream_statbuf ssbuf;
+
+	if (src->readbuf_type == IS_UNICODE) {
+		/* Called incorrectly, don't do that. */
+		return _php_stream_ucopy_to_stream(src, dest, maxlen, -1 STREAMS_CC TSRMLS_CC);
+	}
 
 	if (maxlen == 0) {
 		return 0;
@@ -1771,7 +1854,7 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 		p = php_stream_mmap_range(src, php_stream_tell(src), maxlen, PHP_STREAM_MAP_MODE_SHARED_READONLY, &mapped);
 
 		if (p) {
-			haveread = php_stream_write(dest, p, mapped);
+			mapped = php_stream_write(dest, p, mapped);
 
 			php_stream_mmap_unmap(src);
 
@@ -1780,10 +1863,13 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 	}
 
 	while(1) {
-		readchunk = sizeof(buf);
+		char buf[CHUNK_SIZE];
+		size_t readchunk = sizeof(buf);
+		size_t didread;
 
-		if (maxlen && (maxlen - haveread) < readchunk)
+		if (maxlen && (maxlen - haveread) < readchunk) {
 			readchunk = maxlen - haveread;
+		}
 
 		didread = php_stream_read(src, buf, readchunk);
 
@@ -1813,8 +1899,8 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 			break;
 		}
 	}
-	return haveread;
 
+	return haveread;
 }
 /* }}} */
 
