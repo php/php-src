@@ -6295,79 +6295,115 @@ PHP_FUNCTION(str_repeat)
 }
 /* }}} */
 
-/* {{{ proto mixed count_chars(string input [, int mode])
+/* {{{ proto mixed count_chars(string input [, int mode]) U
    Returns info about what characters are used in input */
 PHP_FUNCTION(count_chars)
 {
-	zval **input, **mode;
+	zstr input;
+	int input_len;
+	zend_uchar type;
+	long mode = 0;
 	int chars[256];
-	int ac=ZEND_NUM_ARGS();
-	int mymode=0;
+	HashTable uchars;
+	UChar32 cp;
+	int *uchar_cnt_ptr, uchar_cnt;
 	unsigned char *buf;
-	int len, inx;
+	int inx;
 	char retstr[256];
 	int retlen=0;
 
-	if (ac < 1 || ac > 2 || zend_get_parameters_ex(ac, &input, &mode) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "t|l", &input, &input_len,
+							  &type, &mode) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(input);
-
-	if (ac == 2) {
-		convert_to_long_ex(mode);
-		mymode = Z_LVAL_PP(mode);
-
-		if (mymode < 0 || mymode > 4) {
+	if (ZEND_NUM_ARGS() > 1) {
+		if (mode < 0 || mode > 4) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown mode.");
 			RETURN_FALSE;
 		}
-	}
-
-	len = Z_STRLEN_PP(input);
-	buf = (unsigned char *) Z_STRVAL_PP(input);
-	memset((void*) chars, 0, sizeof(chars));
-
-	while (len > 0) {
-		chars[*buf]++;
-		buf++;
-		len--;
-	}
-
-	if (mymode < 3) {
-		array_init(return_value);
-	}
-
-	for (inx = 0; inx < 256; inx++) {
-		switch (mymode) {
-	 		case 0:
-				add_index_long(return_value, inx, chars[inx]);
-				break;
-	 		case 1:
-				if (chars[inx] != 0) {
-					add_index_long(return_value, inx, chars[inx]);
-				}
-				break;
-  			case 2:
-				if (chars[inx] == 0) {
-					add_index_long(return_value, inx, chars[inx]);
-				}
-				break;
-	  		case 3:
-				if (chars[inx] != 0) {
-					retstr[retlen++] = inx;
-				}
-				break;
-  			case 4:
-				if (chars[inx] == 0) {
-					retstr[retlen++] = inx;
-				}
-				break;
+		if (UG(unicode) && mode != 1) {
+			php_error_docref(NULL TSRMLS_DC, E_WARNING, "Only mode=1 is supported with Unicode strings");
 		}
 	}
 
-	if (mymode >= 3 && mymode <= 4) {
-		RETURN_STRINGL(retstr, retlen, 1);
+	if (type == IS_UNICODE) {
+		UChar buf[3];
+		int buf_len;
+
+		zend_hash_init(&uchars, 0, NULL, NULL, 0);
+
+		inx = 0;
+		while (inx < input_len) {
+			U16_NEXT_UNSAFE(input.u, inx, cp);
+			if (zend_hash_index_find(&uchars, cp, (void**)&uchar_cnt_ptr) == SUCCESS) {
+				(*uchar_cnt_ptr)++;
+			} else {
+				uchar_cnt = 1;
+				zend_hash_index_update(&uchars, cp, &uchar_cnt, sizeof(int), NULL);
+			}
+		}
+
+		if (mode < 3) {
+			array_init(return_value);
+		}
+
+		for (zend_hash_internal_pointer_reset(&uchars);
+			 zend_hash_get_current_data(&uchars, (void**)&uchar_cnt_ptr) == SUCCESS;
+			 zend_hash_move_forward(&uchars)) {
+
+			zend_hash_get_current_key(&uchars, NULL, (ulong*)&cp, 0);
+
+			buf_len = zend_codepoint_to_uchar(cp, buf);
+			buf[buf_len] = 0;
+			add_u_assoc_long_ex(return_value, IS_UNICODE, ZSTR(buf), buf_len+1, *uchar_cnt_ptr);
+		}
+
+		zend_hash_destroy(&uchars);
+	} else {
+		buf = (unsigned char *) input.s;
+		memset((void*) chars, 0, sizeof(chars));
+
+		while (input_len > 0) {
+			chars[*buf]++;
+			buf++;
+			input_len--;
+		}
+
+		if (mode < 3) {
+			array_init(return_value);
+		}
+
+		for (inx = 0; inx < 256; inx++) {
+			switch (mode) {
+				case 0:
+					add_index_long(return_value, inx, chars[inx]);
+					break;
+				case 1:
+					if (chars[inx] != 0) {
+						add_index_long(return_value, inx, chars[inx]);
+					}
+					break;
+				case 2:
+					if (chars[inx] == 0) {
+						add_index_long(return_value, inx, chars[inx]);
+					}
+					break;
+				case 3:
+					if (chars[inx] != 0) {
+						retstr[retlen++] = inx;
+					}
+					break;
+				case 4:
+					if (chars[inx] == 0) {
+						retstr[retlen++] = inx;
+					}
+					break;
+			}
+		}
+		if (mode >= 3 && mode <= 4) {
+			RETURN_STRINGL(retstr, retlen, 1);
+		}
 	}
 }
 /* }}} */
