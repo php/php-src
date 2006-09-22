@@ -1,3 +1,9 @@
+2006-09-21  Sara Golemon  <sara@golemon.com>
+
+    * zend_API.c
+      zend_builtin_functions.c:
+      Add missing function protos
+
 2006-09-20  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_API.c:
