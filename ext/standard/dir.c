@@ -178,40 +178,63 @@ PHP_MINIT_FUNCTION(dir)
 /* {{{ internal functions */
 static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 {
-	char *dirname;
-	int dir_len;
+	UChar *udir;
+	char *dir;
+	int dir_len, udir_len;
+	zend_uchar dir_type;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 	php_stream *dirp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &dirname, &dir_len, &zcontext) == FAILURE) {
-		RETURN_NULL();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|r", &dir, &dir_len, &zcontext) == FAILURE) {
+		return;
 	}
+
+	RETVAL_FALSE;
+
+	/* Save for later */
+	udir = (UChar*)dir;
+	udir_len = dir_len;
 
 	if (zcontext) {
 		context = php_stream_context_from_zval(zcontext, 0);
 	}
-	
-	dirp = php_stream_opendir(dirname, REPORT_ERRORS, context);
+
+	if (dir_type == IS_UNICODE) {
+		if (FAILURE == php_stream_path_encode(NULL, &dir, &dir_len, udir, udir_len, REPORT_ERRORS, context)) {
+			goto opendir_cleanup;
+		}
+	}
+
+	dirp = php_stream_opendir(dir, REPORT_ERRORS, context);
 
 	if (dirp == NULL) {
-		RETURN_FALSE;
+		goto opendir_cleanup;
 	}
 		
 	php_set_default_dir(dirp->rsrc_id TSRMLS_CC);
 
 	if (createobject) {
 		object_init_ex(return_value, dir_class_entry_ptr);
-		add_property_rt_stringl(return_value, "path", dirname, dir_len, 1);
+		if (dir_type == IS_UNICODE) {
+			add_property_unicodel(return_value, "path", udir, udir_len, 1);
+		} else {
+			add_property_stringl(return_value, "path", dir, dir_len, 1);
+		}
 		add_property_resource(return_value, "handle", dirp->rsrc_id);
 		php_stream_auto_cleanup(dirp); /* so we don't get warnings under debug */
 	} else {
 		php_stream_to_zval(dirp, return_value);
 	}
+
+opendir_cleanup:
+	if (dir_type == IS_UNICODE) {
+		efree(dir);
+	}
 }
 /* }}} */
 
-/* {{{ proto mixed opendir(string path[, resource context])
+/* {{{ proto mixed opendir(string path[, resource context]) U
    Open a directory and return a dir_handle */
 PHP_FUNCTION(opendir)
 {
@@ -219,7 +242,7 @@ PHP_FUNCTION(opendir)
 }
 /* }}} */
 
-/* {{{ proto object dir(string directory[, resource context])
+/* {{{ proto object dir(string directory[, resource context]) U
    Directory class with properties, handle and class and methods read, rewind and close */
 PHP_FUNCTION(getdir)
 {
@@ -227,7 +250,7 @@ PHP_FUNCTION(getdir)
 }
 /* }}} */
 
-/* {{{ proto void closedir([resource dir_handle])
+/* {{{ proto void closedir([resource dir_handle]) U
    Close directory connection identified by the dir_handle */
 PHP_FUNCTION(closedir)
 {
@@ -245,18 +268,28 @@ PHP_FUNCTION(closedir)
 /* }}} */
 
 #if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
-/* {{{ proto bool chroot(string directory)
+/* {{{ proto bool chroot(string directory) U
    Change root directory */
 PHP_FUNCTION(chroot)
 {
 	char *str;
 	int ret, str_len;
+	zend_uchar str_type;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
-		RETURN_FALSE;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len, &str_type) == FAILURE) {
+		return;
+	}
+
+	if (str_type == IS_UNICODE) {
+		if (FAILURE == php_stream_path_encode(NULL, &str, &str_len, (UChar*)str, str_len, REPORT_ERRORS, FG(default_context))) {
+			RETURN_FALSE;
+		}
 	}
 	
 	ret = chroot(str);
+	if (str_type == IS_UNICODE) {
+		efree(str);
+	}
 	
 	if (ret != 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s (errno %d)", strerror(errno), errno);
@@ -275,18 +308,28 @@ PHP_FUNCTION(chroot)
 /* }}} */
 #endif
 
-/* {{{ proto bool chdir(string directory)
+/* {{{ proto bool chdir(string directory) U
    Change the current directory */
 PHP_FUNCTION(chdir)
 {
 	char *str;
 	int ret, str_len;
+	zend_uchar str_type;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
-		RETURN_FALSE;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len, &str_type) == FAILURE) {
+		return;
+	}
+
+	if (str_type == IS_UNICODE) {
+		if (FAILURE == php_stream_path_encode(NULL, &str, &str_len, (UChar*)str, str_len, REPORT_ERRORS, FG(default_context))) {
+			RETURN_FALSE;
+		}
 	}
 
 	ret = VCWD_CHDIR(str);
+	if (str_type == IS_UNICODE) {
+		efree(str);
+	}
 	
 	if (ret != 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s (errno %d)", strerror(errno), errno);
@@ -297,7 +340,7 @@ PHP_FUNCTION(chdir)
 }
 /* }}} */
 
-/* {{{ proto mixed getcwd(void)
+/* {{{ proto mixed getcwd(void) U
    Gets the current directory */
 PHP_FUNCTION(getcwd)
 {
@@ -315,14 +358,14 @@ PHP_FUNCTION(getcwd)
 #endif
 
 	if (ret) {
-		RETURN_RT_STRING(path, 1);
+		RETURN_RT_STRING(path, ZSTR_DUPLICATE);
 	} else {
 		RETURN_FALSE;
 	}
 }
 /* }}} */
 
-/* {{{ proto void rewinddir([resource dir_handle])
+/* {{{ proto void rewinddir([resource dir_handle]) U
    Rewind dir_handle back to the start */
 PHP_FUNCTION(rewinddir)
 {
@@ -335,7 +378,7 @@ PHP_FUNCTION(rewinddir)
 }
 /* }}} */
 
-/* {{{ proto string readdir([resource dir_handle])
+/* {{{ proto string readdir([resource dir_handle]) U
    Read directory entry from dir_handle */
 PHP_NAMED_FUNCTION(php_if_readdir)
 {
@@ -346,7 +389,7 @@ PHP_NAMED_FUNCTION(php_if_readdir)
 	FETCH_DIRP();
 
 	if (php_stream_readdir(dirp, &entry)) {
-		RETURN_RT_STRINGL(entry.d_name, strlen(entry.d_name), 1);
+		RETURN_RT_STRINGL(entry.d_name, strlen(entry.d_name), ZSTR_DUPLICATE);
 	}
 	RETURN_FALSE;
 }
