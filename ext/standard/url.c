@@ -678,6 +678,11 @@ PHP_FUNCTION(get_headers)
 
 	zend_hash_internal_pointer_reset_ex(HASH_OF(stream->wrapperdata), &pos);
 	while (zend_hash_get_current_data_ex(HASH_OF(stream->wrapperdata), (void**)&hdr, &pos) != FAILURE) {
+		if (!hdr || Z_TYPE_PP(hdr) != IS_STRING) {
+			zend_hash_move_forward_ex(HASH_OF(stream->wrapperdata), &pos);
+			continue;
+		}
+
 		if (!format) {
 no_name_header:
 			add_next_index_stringl(return_value, Z_STRVAL_PP(hdr), Z_STRLEN_PP(hdr), 1);
