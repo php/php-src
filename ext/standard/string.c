@@ -3418,7 +3418,7 @@ PHP_FUNCTION(quotemeta)
 	UChar cp;
 	zend_uchar type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_DC, "t", &old, &old_len, &type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &old, &old_len, &type) == FAILURE) {
 		return;
 	}
 
@@ -5546,7 +5546,7 @@ PHP_FUNCTION(setlocale)
 	}
 
 	if (UG(unicode)) {
-		php_error_docref(NULL TSRMLS_DC, E_STRICT, "deprecated in Unicode mode, please use ICU locale functions");
+		php_error_docref(NULL TSRMLS_CC, E_STRICT, "deprecated in Unicode mode, please use ICU locale functions");
 	}
 
 #ifdef HAVE_SETLOCALE
@@ -6358,7 +6358,7 @@ PHP_FUNCTION(count_chars)
 			RETURN_FALSE;
 		}
 		if (UG(unicode) && mode != 1) {
-			php_error_docref(NULL TSRMLS_DC, E_WARNING, "Only mode=1 is supported with Unicode strings");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only mode=1 is supported with Unicode strings");
 		}
 	}
 
@@ -6483,7 +6483,7 @@ PHP_FUNCTION(localeconv)
 	}
 
 	if (UG(unicode)) {
-		php_error_docref(NULL TSRMLS_DC, E_STRICT, "deprecated in Unicode mode, please use ICU locale functions");
+		php_error_docref(NULL TSRMLS_CC, E_STRICT, "deprecated in Unicode mode, please use ICU locale functions");
 	}
 
 	MAKE_STD_ZVAL(grouping);
