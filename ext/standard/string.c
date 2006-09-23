@@ -484,7 +484,7 @@ PHP_FUNCTION(nl_langinfo)
 	}
 
 	if (UG(unicode)) {
-		php_error_docref(NULL TSRMLS_DC, E_STRICT, "deprecated in Unicode mode, please use ICU locale functions");
+		php_error_docref(NULL TSRMLS_CC, E_STRICT, "deprecated in Unicode mode, please use ICU locale functions");
 	}
 
 	value = nl_langinfo(item);
