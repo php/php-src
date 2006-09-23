@@ -1,3 +1,83 @@
+2006-09-22  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/file.c:
+      Fix copy() from last commit and add a few more PHP6 updates
+
+    * ext/standard/file.c:
+      Update copy() for PHP6
+
+    * ext/standard/streamsfuncs.c
+      main/php_streams.h
+      main/streams/streams.c:
+      Update stream_copy_to_stream() for PHP6
+
+2006-09-22  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/unicode/collator.c:
+      Fix protos.
+
+    * unicode-progress.txt
+      ext/standard/string.c:
+      Unicode upgrade for quotemeta(). Yes, I know it's ugly. You try making
+      it pretty.
+
+2006-09-22  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/streamsfuncs.c:
+      Update stream_get_contents() for PHP6
+
+2006-09-22  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-progress.txt
+      ext/standard/string.c:
+      Bring localeconv(), money_format(), and nl_langinfo() to standards. Add
+      E_STRICT notices about them being deprecated in Unicode mode.
+
+2006-09-22  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/file.c:
+      Tweak file_get_contents()'s return value a little
+
+2006-09-22  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-progress.txt
+      ext/standard/string.c:
+      Unicode support in count_chars(). Note that due to the size of the
+      Unicode character set only mode=1 is supported.
+
+2006-09-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c:
+      MFB: Restore support for unquoted -d options
+
+    * (PHP_5_2)
+      sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c:
+      Restore support for unquoted -d options
+
+2006-09-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/soap.c
+      ext/soap/soap.c:
+      Prevent access to dead zval
+
+2006-09-22  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/element.c
+      ext/dom/nodelist.c
+      ext/dom/php_dom.c
+      ext/dom/tests/domelement.phpt:
+      mark functionality unicode safe
+      add test
+
+2006-09-22  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/assert.c
+      ext/standard/basic_functions.c
+      ext/standard/dir.c:
+      PHP6 Updates
+
 2006-09-21  Sara Golemon  <sara@golemon.com>
 
     * ZendEngine2/zend_API.c
