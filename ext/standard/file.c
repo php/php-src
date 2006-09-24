@@ -1485,6 +1485,7 @@ PHPAPI PHP_FUNCTION(fseek)
 /* {{{ php_mkdir
 */
 
+/* DEPRECATED APIs: Use php_stream_mkdir() instead */
 PHPAPI int php_mkdir_ex(char *dir, long mode, int options TSRMLS_DC)
 {
 	int ret;
@@ -1506,43 +1507,65 @@ PHPAPI int php_mkdir(char *dir, long mode TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto bool mkdir(string pathname [, int mode [, bool recursive [, resource context]]])
+/* {{{ proto bool mkdir(string pathname [, int mode [, bool recursive [, resource context]]]) U
    Create a directory */
 PHP_FUNCTION(mkdir)
 {
+	char *dir;
+	int dir_len;
+	zend_uchar dir_type;
 	zval *zcontext = NULL;
 	long mode = 0777;
-	int dir_len;
 	zend_bool recursive = 0;
-	char *dir;
 	php_stream_context *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lbr", &dir, &dir_len, &mode, &recursive, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|lbr", &dir, &dir_len, &dir_type, &mode, &recursive, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
-	RETURN_BOOL(php_stream_mkdir(dir, mode, (recursive ? PHP_STREAM_MKDIR_RECURSIVE : 0) | REPORT_ERRORS, context));
+	if (dir_type == IS_UNICODE) {
+		if (FAILURE == php_stream_path_encode(NULL, &dir, &dir_len, (UChar*)dir, dir_len, REPORT_ERRORS, context)) {
+			RETURN_FALSE;
+		}
+	}
+
+	RETVAL_BOOL(php_stream_mkdir(dir, mode, (recursive ? PHP_STREAM_MKDIR_RECURSIVE : 0) | REPORT_ERRORS, context));
+
+	if (dir_type == IS_UNICODE) {
+		efree(dir);
+	}
 }
 /* }}} */
 
-/* {{{ proto bool rmdir(string dirname[, resource context])
+/* {{{ proto bool rmdir(string dirname[, resource context]) U
    Remove a directory */
 PHP_FUNCTION(rmdir)
 {
 	char *dir;
+	int dir_len;
+	zend_uchar dir_type;
 	zval *zcontext = NULL;
 	php_stream_context *context;
-	int dir_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &dir, &dir_len, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|r", &dir, &dir_len, &dir_type, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
-	RETURN_BOOL(php_stream_rmdir(dir, REPORT_ERRORS, context));
+	if (dir_type == IS_UNICODE) {
+		if (FAILURE == php_stream_path_encode(NULL, &dir, &dir_len, (UChar*)dir, dir_len, REPORT_ERRORS, context)) {
+			RETURN_FALSE;
+		}
+	}
+
+	RETVAL_BOOL(php_stream_rmdir(dir, REPORT_ERRORS, context));
+
+	if (dir_type == IS_UNICODE) {
+		efree(dir);
+	}
 }
 /* }}} */
 
@@ -1639,40 +1662,65 @@ PHPAPI PHP_FUNCTION(fpassthru)
 }
 /* }}} */
 
-/* {{{ proto bool rename(string old_name, string new_name[, resource context])
+/* {{{ proto bool rename(string old_name, string new_name[, resource context]) U
    Rename a file */
 PHP_FUNCTION(rename)
 {
 	char *old_name, *new_name;
 	int old_name_len, new_name_len;
+	zend_uchar old_name_type, new_name_type;
+	zend_uchar free_old_name = 0, free_new_name = 0;
 	zval *zcontext = NULL;
 	php_stream_wrapper *wrapper;
 	php_stream_context *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|r", &old_name, &old_name_len, &new_name, &new_name_len, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tt|r", &old_name, &old_name_len, &old_name_type, &new_name, &new_name_len, &new_name_type, &zcontext) == FAILURE) {
 		RETURN_FALSE;
+	}
+
+	context = php_stream_context_from_zval(zcontext, 0);
+	RETVAL_FALSE;
+
+	if (old_name_type == IS_UNICODE) {
+		if (FAILURE == php_stream_path_encode(NULL, &old_name, &old_name_len, (UChar*)old_name, old_name_len, REPORT_ERRORS, context)) {
+			goto rename_cleanup;
+		}
+		free_old_name = 1;
 	}
 
 	wrapper = php_stream_locate_url_wrapper(old_name, NULL, 0 TSRMLS_CC);
 
 	if (!wrapper || !wrapper->wops) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to locate stream wrapper");
-		RETURN_FALSE;
+		goto rename_cleanup;
 	}
 
 	if (!wrapper->wops->rename) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s wrapper does not support renaming", wrapper->wops->label ? wrapper->wops->label : "Source");
-		RETURN_FALSE;
+		goto rename_cleanup;
+	}
+
+	if (new_name_type == IS_UNICODE) {
+		if (FAILURE == php_stream_path_encode(NULL, &new_name, &new_name_len, (UChar*)new_name, new_name_len, REPORT_ERRORS, context)) {
+			goto rename_cleanup;
+		}
+		free_new_name = 1;
 	}
 
 	if (wrapper != php_stream_locate_url_wrapper(new_name, NULL, 0 TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot rename a file across wrapper types");
-		RETURN_FALSE;
+		goto rename_cleanup;
 	}
 
-	context = php_stream_context_from_zval(zcontext, 0);
+	RETVAL_BOOL(wrapper->wops->rename(wrapper, old_name, new_name, 0, context TSRMLS_CC));
 
-	RETURN_BOOL(wrapper->wops->rename(wrapper, old_name, new_name, 0, context TSRMLS_CC));
+rename_cleanup:
+	if (free_old_name) {
+		efree(old_name);
+	}
+	if (free_new_name) {
+		efree(new_name);
+	}
 }
 /* }}} */
 
