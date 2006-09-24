@@ -353,7 +353,7 @@ PHP_FUNCTION(flock)
 
 #define PHP_META_UNSAFE ".\\+*?[^]$() "
 
-/* {{{ proto array get_meta_tags(string filename [, bool use_include_path])
+/* {{{ proto array get_meta_tags(string filename [, bool use_include_path]) U
    Extracts all meta tag content attributes from a file and returns an array */
 
 PHP_FUNCTION(get_meta_tags)
@@ -383,7 +383,7 @@ PHP_FUNCTION(get_meta_tags)
 			RETURN_FALSE;
 		}
 	}
-	md.stream = php_stream_open_wrapper(filename, "rb",
+	md.stream = php_stream_open_wrapper(filename, "rt",
 			(use_include_path ? USE_PATH : 0) | REPORT_ERRORS,
 			NULL);
 	if (filename_type == IS_UNICODE) {
@@ -391,6 +391,31 @@ PHP_FUNCTION(get_meta_tags)
 	}
 	if (!md.stream)	{
 		RETURN_FALSE;
+	}
+
+	if (md.stream->readbuf_type == IS_UNICODE) {
+		/* Either stream auto-applied encoding (which http:// wrapper does do)
+		 * Or the streams layer unicodified it for us */
+		zval *filterparams;
+		php_stream_filter *filter;
+
+		/* Be lazy and convert contents to utf8 again
+		 * This could be made more efficient by detecting if
+		 * it's being upconverted from utf8 and cancelling all conversion
+		 * rather than reconverting, but this is a silly function anyway */
+
+		MAKE_STD_ZVAL(filterparams);
+		array_init(filterparams);
+		add_ascii_assoc_long(filterparams, "error_mode", UG(from_error_mode));
+		add_ascii_assoc_unicode(filterparams, "subst_char", UG(from_subst_char), 1);
+		filter = php_stream_filter_create("unicode.to.utf8", filterparams, 0 TSRMLS_CC);
+		zval_ptr_dtor(&filterparams);
+
+		if (!filter) {
+			php_stream_close(md.stream);
+			RETURN_FALSE;
+		}
+		php_stream_filter_append(&md.stream->readfilters, filter);
 	}
 
 	array_init(return_value);
@@ -473,9 +498,9 @@ PHP_FUNCTION(get_meta_tags)
 				/* For BC */
 				php_strtolower(name, strlen(name));
 				if (have_content) {
-					add_assoc_string(return_value, name, value, 0); 
+					add_assoc_utf8_string(return_value, name, value, 0); 
 				} else {
-					add_assoc_string(return_value, name, "", 1);
+					add_assoc_utf8_string(return_value, name, "", 1);
 				}
 
 				efree(name);
