@@ -1075,46 +1075,55 @@ PHPAPI PHP_FUNCTION(fclose)
 
 /* }}} */
 
-/* {{{ proto resource popen(string command, string mode)
+/* {{{ proto resource popen(string command, string mode) U
    Execute a command and open either a read or a write pipe to it */
-
 PHP_FUNCTION(popen)
 {
-	zval **arg1, **arg2;
+	char *command, *mode;
+	int command_len, mode_len;
+	zend_uchar command_type;
 	FILE *fp;
-	char *p;
-	php_stream *stream;
+	char *posix_mode;
 	
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ts", &command, &command_len, &command_type, &mode, &mode_len) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(arg1);
-	convert_to_string_ex(arg2);
-	p = estrndup(Z_STRVAL_PP(arg2), Z_STRLEN_PP(arg2));
+
+	if (command_type == IS_UNICODE) {
+		if (FAILURE == php_stream_path_encode(NULL, &command, &command_len, (UChar*)command, command_len, REPORT_ERRORS, FG(default_context))) {
+			RETURN_FALSE;
+		}
+	}
+
+	posix_mode = estrndup(mode, mode_len);
 #ifndef PHP_WIN32
 	{
-		char *z = memchr(p, 'b', Z_STRLEN_PP(arg2));
+		char *z = memchr(posix_mode, 'b', mode_len);
 		if (z) {
-			memmove(p + (z - p), z + 1, Z_STRLEN_PP(arg2) - (z - p));
+			memmove(z, z + 1, mode_len - (z - posix_mode));
 		}
 	}
 #endif
-	fp = VCWD_POPEN(Z_STRVAL_PP(arg1), p);
+	fp = VCWD_POPEN(command, posix_mode);
 	if (!fp) {
-		php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(arg1), p, E_WARNING, "%s", strerror(errno));
-		efree(p);
-		RETURN_FALSE;
-	}
-	stream = php_stream_fopen_from_pipe(fp, p);
-
-	if (stream == NULL)	{
-		php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(arg1), p, E_WARNING, "%s", strerror(errno));
+		php_error_docref2(NULL TSRMLS_CC, command, mode, E_WARNING, "%s", strerror(errno));
+		efree(posix_mode);
 		RETVAL_FALSE;
 	} else {
-		php_stream_to_zval(stream, return_value);
+		php_stream *stream = php_stream_fopen_from_pipe(fp, mode);
+
+		if (stream == NULL)	{
+			php_error_docref2(NULL TSRMLS_CC, command, mode, E_WARNING, "%s", strerror(errno));
+			RETVAL_FALSE;
+		} else {
+			php_stream_to_zval(stream, return_value);
+		}
 	}
 
-	efree(p);
+	efree(posix_mode);
+	if (command_type == IS_UNICODE) {
+		efree(command);
+	}
 }
 /* }}} */
 
