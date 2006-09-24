@@ -38,7 +38,7 @@ PHPAPI void make_digest(char *md5str, unsigned char *digest)
 	*md5str = '\0';
 }
 
-/* {{{ proto string md5(string str, [ bool raw_output])
+/* {{{ proto string md5(string str, [ bool raw_output]) U
    Calculate the md5 hash of a string */
 PHP_NAMED_FUNCTION(php_if_md5)
 {
@@ -49,7 +49,7 @@ PHP_NAMED_FUNCTION(php_if_md5)
 	PHP_MD5_CTX context;
 	unsigned char digest[16];
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &arg, &arg_len, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|b", &arg, &arg_len, &raw_output) == FAILURE) {
 		return;
 	}
 	
@@ -61,13 +61,13 @@ PHP_NAMED_FUNCTION(php_if_md5)
 		RETURN_STRINGL((char*)digest, 16, 1);
 	} else {
 		make_digest(md5str, digest);
-		RETVAL_ASCII_STRING(md5str, 1);
+		RETVAL_ASCII_STRING(md5str, ZSTR_DUPLICATE);
 	}
 
 }
 /* }}} */
 
-/* {{{ proto string md5_file(string filename [, bool raw_output])
+/* {{{ proto string md5_file(string filename [, bool raw_output]) U
    Calculate the md5 hash of given filename */
 PHP_NAMED_FUNCTION(php_if_md5_file)
 {
@@ -81,7 +81,7 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 	int           n;
 	php_stream    *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &arg, &arg_len, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|b", &arg, &arg_len, &raw_output) == FAILURE) {
 		return;
 	}
 	
@@ -108,7 +108,7 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 		RETURN_STRINGL((char*)digest, 16, 1);
 	} else {
 		make_digest(md5str, digest);
-		RETVAL_ASCII_STRING(md5str, 1);
+		RETVAL_ASCII_STRING(md5str, ZSTR_DUPLICATE);
 	}
 }
 /* }}} */
