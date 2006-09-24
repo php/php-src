@@ -506,7 +506,6 @@ PHP_ZIP_API zend_object_value php_zip_object_new(zend_class_entry *class_type TS
 
 	intern = emalloc(sizeof(ze_zip_object));
 	memset(&intern->zo, 0, sizeof(zend_object));
-	intern->zo.ce = class_type;
 
 	intern->za = NULL;
 	intern->buffers = NULL;
@@ -514,8 +513,7 @@ PHP_ZIP_API zend_object_value php_zip_object_new(zend_class_entry *class_type TS
 	intern->buffers_cnt = 0;
 	intern->prop_handler = &zip_prop_handlers;
 
-	ALLOC_HASHTABLE(intern->zo.properties);
-	zend_hash_init(intern->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_object_std_init(&intern->zo, class_type TSRMLS_CC);
 	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref,
 					(void *) &tmp, sizeof(zval *));
 
@@ -1870,7 +1868,6 @@ PHP_MINIT_FUNCTION(zip)
 	memcpy(&zip_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	zip_object_handlers.clone_obj		= NULL;
     zip_object_handlers.get_property_ptr_ptr = php_zip_get_property_ptr_ptr;
-	zip_object_handlers.write_property	= NULL;
 
 	zip_object_handlers.get_properties = php_zip_get_properties;
 	zip_object_handlers.read_property	= php_zip_read_property;
