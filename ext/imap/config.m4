@@ -114,6 +114,11 @@ if test "$PHP_IMAP" != "no"; then
     AC_EGREP_HEADER(mail_fetch_overview_sequence, $IMAP_INC_DIR/mail.h, [
       AC_DEFINE(HAVE_IMAP2004,1,[ ])
     ])
+    
+    dnl Check for new version of the utf8_mime2text() function
+    AC_EGREP_HEADER(mail_append_set, $IMAP_INC_DIR/mail.h, [
+      AC_DEFINE(HAVE_NEW_MIME2TEXT,1,[ ])
+    ])
 
     dnl Check for c-client version 2001
     old_CPPFLAGS=$CPPFLAGS
