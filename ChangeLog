@@ -1,3 +1,27 @@
+2006-09-23  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/dir.c:
+      add missing parameter to opendir() and fix segfault
+
+    * sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      fix CGI build
+
+    * ext/standard/string.c:
+      one more try to fix ZTS build
+
+    * ext/standard/string.c:
+      fix ZTS build
+
+    * ext/standard/url.c:
+      fix possible segfault in #38891
+
+2006-09-23  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_5_2)
+      ext/mbstring/config.m4:
+      fixed build problem of some extensions which depend on ext/mbstring.
+
 2006-09-22  Sara Golemon  <sara@golemon.com>
 
     * ext/standard/file.c:
