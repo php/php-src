@@ -21,7 +21,7 @@
 #include "php.h"
 #include "php_incomplete_class.h"
 
-/* {{{ proto string gettype(mixed var)
+/* {{{ proto string gettype(mixed var) U
    Returns the type of the variable */
 PHP_FUNCTION(gettype)
 {
@@ -91,7 +91,7 @@ PHP_FUNCTION(gettype)
 }
 /* }}} */
 
-/* {{{ proto bool settype(mixed var, string type)
+/* {{{ proto bool settype(mixed var, string type) U
    Set the type of the variable */
 PHP_FUNCTION(settype)
 {
@@ -115,6 +115,8 @@ PHP_FUNCTION(settype)
 		convert_to_double(*var);
 	} else if (!strcasecmp(new_type, "string")) {
 		convert_to_string(*var);
+	} else if (!strcasecmp(new_type, "unicode")) {
+		convert_to_unicode(*var);
 	} else if (!strcasecmp(new_type, "array")) {
 		convert_to_array(*var);
 	} else if (!strcasecmp(new_type, "object")) {
@@ -136,7 +138,7 @@ PHP_FUNCTION(settype)
 }
 /* }}} */
 
-/* {{{ proto int intval(mixed var [, int base])
+/* {{{ proto int intval(mixed var [, int base]) U
    Get the integer value of a variable using the optional base for the conversion */
 PHP_FUNCTION(intval)
 {
@@ -168,22 +170,21 @@ PHP_FUNCTION(intval)
 }
 /* }}} */
 
-/* {{{ proto float floatval(mixed var)
+/* {{{ proto float floatval(mixed var) U
    Get the float value of a variable */
 PHP_FUNCTION(floatval)
 {
-	zval **num;
+	double retval;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &retval) == FAILURE) {
+		return;
 	}
 
-	RETVAL_ZVAL(*num, 1, 0);
-	convert_to_double(return_value);
+	RETURN_DOUBLE(retval);
 }
 /* }}} */
 
-/* {{{ proto string strval(mixed var)
+/* {{{ proto string strval(mixed var) U
    Get the string value of a variable */
 PHP_FUNCTION(strval)
 {
@@ -211,29 +212,41 @@ PHP_FUNCTION(strval)
 
 static void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
-	zval **arg;
+	zval *arg;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only one argument expected");
-		RETURN_FALSE;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
+		return;
 	}
 
-	if (Z_TYPE_PP(arg) == type) {
+	if (Z_TYPE_P(arg) == type) {
 		if (type == IS_OBJECT) {
 			zend_class_entry *ce;
-			if(Z_OBJ_HT_PP(arg)->get_class_entry == NULL) {
-			/* if there's no get_class_entry it's not a PHP object, so it can't be INCOMPLETE_CLASS */
+
+			if(Z_OBJ_HT_P(arg)->get_class_entry == NULL) {
+				/* if there's no get_class_entry it's not a PHP object, so it can't be INCOMPLETE_CLASS */
 				RETURN_TRUE;
 			}
-			ce = Z_OBJCE_PP(arg);
-			/* FIXME: Unicode support??? */
-			if (!strcmp(ce->name.s, INCOMPLETE_CLASS)) {
-				RETURN_FALSE;
+			ce = Z_OBJCE_P(arg);
+
+			if (ce->name_length != sizeof(INCOMPLETE_CLASS) - 1) {
+				/* We can get away with this because INCOMPLETE_CLASS is ascii and has a 1:1 relationship with unicode */
+				RETURN_TRUE;
+			} else if (UG(unicode)) {
+				U_STRING_DECL(uIncompleteClass, INCOMPLETE_CLASS, sizeof(INCOMPLETE_CLASS) - 1);
+				U_STRING_INIT(uIncompleteClass, INCOMPLETE_CLASS, sizeof(INCOMPLETE_CLASS) - 1);
+
+				if (!memcmp(ce->name.u, uIncompleteClass, UBYTES(sizeof(INCOMPLETE_CLASS)))) {
+					RETURN_FALSE;
+				}
+			} else {
+				if (!memcmp(ce->name.s, INCOMPLETE_CLASS, sizeof(INCOMPLETE_CLASS))) {
+					RETURN_FALSE;
+				}
 			}
 		}
 		if (type == IS_RESOURCE) {
 			char *type_name;
-			type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(arg) TSRMLS_CC);
+			type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_P(arg) TSRMLS_CC);
 			if (!type_name) {
 				RETURN_FALSE;
 			}
@@ -245,7 +258,7 @@ static void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 }
 
 
-/* {{{ proto bool is_null(mixed var)
+/* {{{ proto bool is_null(mixed var) U
    Returns true if variable is null */
 PHP_FUNCTION(is_null)
 {
@@ -253,7 +266,7 @@ PHP_FUNCTION(is_null)
 }
 /* }}} */
 
-/* {{{ proto bool is_resource(mixed var)
+/* {{{ proto bool is_resource(mixed var) U
    Returns true if variable is a resource */
 PHP_FUNCTION(is_resource)
 {
@@ -261,7 +274,7 @@ PHP_FUNCTION(is_resource)
 }
 /* }}} */
 
-/* {{{ proto bool is_bool(mixed var)
+/* {{{ proto bool is_bool(mixed var) U
    Returns true if variable is a boolean */
 PHP_FUNCTION(is_bool)
 {
@@ -269,7 +282,7 @@ PHP_FUNCTION(is_bool)
 }
 /* }}} */
 
-/* {{{ proto bool is_long(mixed var)
+/* {{{ proto bool is_long(mixed var) U
    Returns true if variable is a long (integer) */
 PHP_FUNCTION(is_long)
 {
@@ -277,7 +290,7 @@ PHP_FUNCTION(is_long)
 }
 /* }}} */
 
-/* {{{ proto bool is_float(mixed var)
+/* {{{ proto bool is_float(mixed var) U
    Returns true if variable is float point*/
 PHP_FUNCTION(is_float)
 {
@@ -285,7 +298,7 @@ PHP_FUNCTION(is_float)
 }
 /* }}} */
 
-/* {{{ proto bool is_binary(mixed var)
+/* {{{ proto bool is_binary(mixed var) U
    Returns true if variable is a native (binary) string */
 PHP_FUNCTION(is_binary)
 {
@@ -293,7 +306,7 @@ PHP_FUNCTION(is_binary)
 }
 /* }}} */
 
-/* {{{ proto bool is_string(mixed var)
+/* {{{ proto bool is_string(mixed var) U
    Returns true if variable is a Unicode or binary string */
 PHP_FUNCTION(is_string)
 {
@@ -312,7 +325,7 @@ PHP_FUNCTION(is_string)
 }
 /* }}} */
 
-/* {{{ proto bool is_unicode(mixed var)
+/* {{{ proto bool is_unicode(mixed var) U
    Returns true if variable is a unicode string */
 PHP_FUNCTION(is_unicode)
 {
@@ -320,7 +333,7 @@ PHP_FUNCTION(is_unicode)
 }
 /* }}} */
 
-/* {{{ proto bool is_buffer(mixed var)
+/* {{{ proto bool is_buffer(mixed var) U
    Returns true if variable is a native, unicode or binary string */
 PHP_FUNCTION(is_buffer)
 {
@@ -338,7 +351,7 @@ PHP_FUNCTION(is_buffer)
 }
 /* }}} */
 
-/* {{{ proto bool is_array(mixed var)
+/* {{{ proto bool is_array(mixed var) U
    Returns true if variable is an array */
 PHP_FUNCTION(is_array)
 {
@@ -346,7 +359,7 @@ PHP_FUNCTION(is_array)
 }
 /* }}} */
 
-/* {{{ proto bool is_object(mixed var)
+/* {{{ proto bool is_object(mixed var) U
    Returns true if variable is an object */
 PHP_FUNCTION(is_object)
 {
@@ -354,7 +367,7 @@ PHP_FUNCTION(is_object)
 }
 /* }}} */
 
-/* {{{ proto bool is_numeric(mixed value)
+/* {{{ proto bool is_numeric(mixed value) U
    Returns true if value is a number or a numeric string */
 PHP_FUNCTION(is_numeric)
 {
@@ -396,7 +409,7 @@ PHP_FUNCTION(is_numeric)
 }
 /* }}} */
 
-/* {{{ proto bool is_scalar(mixed value)
+/* {{{ proto bool is_scalar(mixed value) U
    Returns true if value is a scalar */
 PHP_FUNCTION(is_scalar)
 {
