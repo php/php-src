@@ -36,7 +36,7 @@ PHPAPI void make_sha1_digest(char *sha1str, unsigned char *digest)
 	*sha1str = '\0';
 }
 
-/* {{{ proto string sha1(string str [, bool raw_output])
+/* {{{ proto string sha1(string str [, bool raw_output]) U
    Calculate the sha1 hash of a string */
 PHP_FUNCTION(sha1)
 {
@@ -47,7 +47,7 @@ PHP_FUNCTION(sha1)
 	PHP_SHA1_CTX context;
 	unsigned char digest[20];
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &arg, &arg_len, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|b", &arg, &arg_len, &raw_output) == FAILURE) {
 		return;
 	}
 
@@ -59,7 +59,7 @@ PHP_FUNCTION(sha1)
 		RETURN_STRINGL((char*)digest, 20, 1);
 	} else {
 		make_sha1_digest(sha1str, digest);
-		RETVAL_ASCII_STRING(sha1str, 1);
+		RETVAL_ASCII_STRING(sha1str, ZSTR_DUPLICATE);
 	}
 
 }
@@ -67,7 +67,7 @@ PHP_FUNCTION(sha1)
 /* }}} */
 
 
-/* {{{ proto string sha1_file(string filename [, bool raw_output])
+/* {{{ proto string sha1_file(string filename [, bool raw_output]) U
    Calculate the sha1 hash of given filename */
 PHP_FUNCTION(sha1_file)
 {
@@ -81,7 +81,7 @@ PHP_FUNCTION(sha1_file)
 	int           n;
 	php_stream    *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &arg, &arg_len, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|b", &arg, &arg_len, &raw_output) == FAILURE) {
 		return;
 	}
 	
@@ -108,7 +108,7 @@ PHP_FUNCTION(sha1_file)
 		RETURN_STRINGL((char*)digest, 20, 1);
 	} else {
 		make_sha1_digest(sha1str, digest);
-		RETVAL_ASCII_STRING(sha1str, 1);
+		RETVAL_ASCII_STRING(sha1str, ZSTR_DUPLICATE);
 	}
 }
 /* }}} */
