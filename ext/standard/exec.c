@@ -55,6 +55,7 @@
  * If type==2, all lines will be saved to given array (exec with &$array)
  * If type==3, output will be printed binary, no lines will be saved or returned (passthru)
  *
+ * Unicode command strings are encoding using filesystem_encoding, returned data is not decoded back to unicode
  */
 int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
 {
@@ -168,21 +169,28 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	char *cmd;
 	int cmd_len;
+	zend_uchar cmd_type;
 	zval *ret_code=NULL, *ret_array=NULL;
 	int ret;
 
 	if (mode) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z/", &cmd, &cmd_len, &ret_code) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|z/", &cmd, &cmd_len, &cmd_type, &ret_code) == FAILURE) {
 			RETURN_FALSE;
 		}
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z/z/", &cmd, &cmd_len, &ret_array, &ret_code) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|z/z/", &cmd, &cmd_len, &cmd_type, &ret_array, &ret_code) == FAILURE) {
 			RETURN_FALSE;
 		}
 	}
 	if (!cmd_len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot execute a blank command");
 		RETURN_FALSE;
+	}
+
+	if (cmd_type == IS_UNICODE) {
+		if (FAILURE == php_stream_path_encode(NULL, &cmd, &cmd_len, (UChar*)cmd, cmd_len, REPORT_ERRORS, FG(default_context))) {
+			RETURN_FALSE;
+		}
 	}
 
 	if (!ret_array) {
@@ -198,9 +206,13 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		zval_dtor(ret_code);
 		ZVAL_LONG(ret_code, ret);
 	}
+
+	if (cmd_type == IS_UNICODE) {
+		efree(cmd);
+	}
 }
 
-/* {{{ proto string exec(string command [, array &output [, int &return_value]])
+/* {{{ proto string exec(string command [, array &output [, int &return_value]]) U
    Execute an external program */
 PHP_FUNCTION(exec)
 {
@@ -209,7 +221,7 @@ PHP_FUNCTION(exec)
 
 /* }}} */
 
-/* {{{ proto int system(string command [, int &return_value])
+/* {{{ proto int system(string command [, int &return_value]) U
    Execute an external program and display output */
 PHP_FUNCTION(system)
 {
@@ -217,7 +229,7 @@ PHP_FUNCTION(system)
 }
 /* }}} */
 
-/* {{{ proto void passthru(string command [, int &return_value])
+/* {{{ proto void passthru(string command [, int &return_value]) U
    Execute an external program and display raw output */
 PHP_FUNCTION(passthru)
 {
@@ -235,11 +247,11 @@ PHP_FUNCTION(passthru)
    *NOT* safe for binary strings
 */
 char *php_escape_shell_cmd(char *str) {
-	register int x, y, l;
+	register int x, y, l = strlen(str);
 	char *cmd;
 	char *p = NULL;
+	size_t estimate = (2 * l) + 1;
 
-	l = strlen(str);
 	cmd = safe_emalloc(2, l, 1);
 	
 	for (x = 0, y = 0; x < l; x++) {
@@ -292,6 +304,13 @@ char *php_escape_shell_cmd(char *str) {
 		}
 	}
 	cmd[y] = '\0';
+
+	if ((estimate - y) > 4096) {
+		/* realloc if the estimate was way overill
+		 * Arbitrary cutoff point of 4096 */
+		cmd = erealloc(cmd, y + 1);
+	}
+
 	return cmd;
 }
 /* }}} */
@@ -299,12 +318,10 @@ char *php_escape_shell_cmd(char *str) {
 /* {{{ php_escape_shell_arg
  */
 char *php_escape_shell_arg(char *str) {
-	int x, y, l;
+	int x, y = 0, l = strlen(str);
 	char *cmd;
+	size_t estimate = (4 * l) + 3;
 
-	y = 0;
-	l = strlen(str);
-	
 	cmd = safe_emalloc(4, l, 3); /* worst case */
 	
 #ifdef PHP_WIN32
@@ -337,71 +354,106 @@ char *php_escape_shell_arg(char *str) {
 	cmd[y++] = '\'';
 #endif
 	cmd[y] = '\0';
+
+	if ((estimate - y) > 4096) {
+		/* realloc if the estimate was way overill
+		 * Arbitrary cutoff point of 4096 */
+		cmd = erealloc(cmd, y + 1);
+	}
 	return cmd;
 }
 /* }}} */
 
-/* {{{ proto string escapeshellcmd(string command)
+/* {{{ proto string escapeshellcmd(string command) U
    Escape shell metacharacters */
 PHP_FUNCTION(escapeshellcmd)
 {
-	zval **arg1;
+	char *command;
+	int command_len;
+	zend_uchar command_type;
 	char *cmd = NULL;
 
-	if (zend_get_parameters_ex(1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &command, &command_len, &command_type) == FAILURE) {
+		return;
 	}
-	
-	convert_to_string_ex(arg1);
-	if (Z_STRLEN_PP(arg1)) {
-		cmd = php_escape_shell_cmd(Z_STRVAL_PP(arg1));
-		RETVAL_STRING(cmd, 1);
-		efree(cmd);
+
+	if (command_type == IS_UNICODE) {
+		if (FAILURE == php_stream_path_encode(NULL, &command, &command_len, (UChar*)command, command_len, REPORT_ERRORS, FG(default_context))) {
+			RETURN_FALSE;
+		}
+	}
+
+	if (command_len) {
+		cmd = php_escape_shell_cmd(command);
+		RETVAL_STRING(cmd, 0);
+	} else {
+		RETVAL_EMPTY_STRING();
+	}
+
+	if (command_type == IS_UNICODE) {
+		efree(command);
 	}
 }
 /* }}} */
 
-/* {{{ proto string escapeshellarg(string arg)
+/* {{{ proto string escapeshellarg(string arg) U
    Quote and escape an argument for use in a shell command */
 PHP_FUNCTION(escapeshellarg)
 {
-	zval **arg1;
+	char *argument;
+	int argument_len;
+	zend_uchar argument_type;
 	char *cmd = NULL;
 
-	if (zend_get_parameters_ex(1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &argument, &argument_len, &argument_type) == FAILURE) {
+		return;
+	}
+
+	if (argument_type == IS_UNICODE) {
+		if (FAILURE == php_stream_path_encode(NULL, &argument, &argument_len, (UChar*)argument, argument_len, REPORT_ERRORS, FG(default_context))) {
+			RETURN_FALSE;
+		}
 	}
 	
-	convert_to_string_ex(arg1);
-	if (Z_STRLEN_PP(arg1)) {
-		cmd = php_escape_shell_arg(Z_STRVAL_PP(arg1));
-		RETVAL_STRING(cmd, 1);
-		efree(cmd);
+	if (argument) {
+		cmd = php_escape_shell_arg(argument);
+		RETVAL_STRING(cmd, 0);
+	}
+
+	if (argument_type == IS_UNICODE) {
+		efree(argument);
 	}
 }
 /* }}} */
 
-/* {{{ proto string shell_exec(string cmd)
+/* {{{ proto string shell_exec(string cmd) U
    Execute command via shell and return complete output as string */
 PHP_FUNCTION(shell_exec)
 {
 	FILE *in;
 	size_t total_readbytes;
-	zval **cmd;
+	char *command;
+	int command_len;
+	zend_uchar command_type;
 	char *ret;
 	php_stream *stream;
 
-	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &cmd)==FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &command, &command_len, &command_type) == FAILURE) {
+		return;
 	}
-	
-	convert_to_string_ex(cmd);
+
+	if (command_type == IS_UNICODE) {
+		if (FAILURE == php_stream_path_encode(NULL, &command, &command_len, (UChar*)command, command_len, REPORT_ERRORS, FG(default_context))) {
+			RETURN_FALSE;
+		}
+	}
+
 #ifdef PHP_WIN32
-	if ((in=VCWD_POPEN(Z_STRVAL_PP(cmd), "rt"))==NULL) {
+	if ((in=VCWD_POPEN(command, "rt"))==NULL) {
 #else
-	if ((in=VCWD_POPEN(Z_STRVAL_PP(cmd), "r"))==NULL) {
+	if ((in=VCWD_POPEN(command, "r"))==NULL) {
 #endif
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to execute '%s'", Z_STRVAL_PP(cmd));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to execute '%s'", command);
 		RETURN_FALSE;
 	}
 
@@ -410,15 +462,17 @@ PHP_FUNCTION(shell_exec)
 	php_stream_close(stream); 
 	
 	if (total_readbytes > 0) {
-		RETURN_STRINGL(ret, total_readbytes, 0);
-	} else {
-		RETURN_NULL();	
+		RETVAL_STRINGL(ret, total_readbytes, 0);
+	}
+
+	if (command_type == IS_UNICODE) {
+		efree(command);
 	}
 }
 /* }}} */
 
 #ifdef HAVE_NICE
-/* {{{ proto bool proc_nice(int priority)
+/* {{{ proto bool proc_nice(int priority) U
    Change the priority of the current process */
 PHP_FUNCTION(proc_nice)
 {
