@@ -2285,6 +2285,32 @@ PHPAPI php_stream_dirent *_php_stream_readdir(php_stream *dirstream, php_stream_
 }
 /* }}} */
 
+/* {{{ php_stream_fix_encoding
+ * Sets read/write encoding on a stream based on the fopen mode, context options, and INI setting */
+PHPAPI void php_stream_fix_encoding(php_stream *stream, const char *mode, php_stream_context *context TSRMLS_DC)
+{
+	/* Output encoding on text mode streams defaults to utf8 unless specified in context parameter */
+	if (stream && strchr(mode, 't') && UG(unicode)) {
+		/* Only apply implicit unicode.to. filter if the wrapper didn't do it for us */
+		if ((php_stream_filter_product(&stream->writefilters, IS_UNICODE) == IS_UNICODE) && 
+			(strchr(mode, 'w') || strchr(mode, 'a') || strchr(mode, '+'))) {
+			char *encoding = (context && context->output_encoding) ? context->output_encoding : UG(stream_encoding);
+
+			/* UTODO: (Maybe?) Allow overriding the default error handlers on a per-stream basis via context params */
+			php_stream_encoding_apply(stream, 1, encoding, UG(from_error_mode), UG(from_subst_char));
+		}
+
+		/* Only apply implicit unicode.from. filter if the wrapper didn't do it for us */
+		if ((stream->readbuf_type == IS_STRING) && (strchr(mode, 'r') || strchr(mode, '+'))) {
+			char *encoding = (context && context->input_encoding) ? context->input_encoding : UG(stream_encoding);
+
+			/* UTODO: (Maybe?) Allow overriding the default error handlers on a per-stream basis via context params */
+			php_stream_encoding_apply(stream, 0, encoding, UG(to_error_mode), NULL);
+		}
+	}
+}
+/* }}} */
+
 /* {{{ php_stream_open_wrapper_ex */
 PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int options,
 		char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
@@ -2387,25 +2413,8 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 		}
 	}
 
-	/* Output encoding on text mode streams defaults to utf8 unless specified in context parameter */
-	if (stream && strchr(implicit_mode, 't') && UG(unicode)) {
-		/* Only apply implicit unicode.to. filter if the wrapper didn't do it for us */
-		if ((php_stream_filter_product(&stream->writefilters, IS_UNICODE) == IS_UNICODE) && 
-			(strchr(implicit_mode, 'w') || strchr(implicit_mode, 'a') || strchr(implicit_mode, '+'))) {
-			char *encoding = (context && context->output_encoding) ? context->output_encoding : UG(stream_encoding);
 
-			/* UTODO: (Maybe?) Allow overriding the default error handlers on a per-stream basis via context params */
-			php_stream_encoding_apply(stream, 1, encoding, UG(from_error_mode), UG(from_subst_char));
-		}
-
-		/* Only apply implicit unicode.from. filter if the wrapper didn't do it for us */
-		if ((stream->readbuf_type == IS_STRING) && (strchr(implicit_mode, 'r') || strchr(implicit_mode, '+'))) {
-			char *encoding = (context && context->input_encoding) ? context->input_encoding : UG(stream_encoding);
-
-			/* UTODO: (Maybe?) Allow overriding the default error handlers on a per-stream basis via context params */
-			php_stream_encoding_apply(stream, 0, encoding, UG(to_error_mode), NULL);
-		}
-	}
+	php_stream_fix_encoding(stream, implicit_mode, context TSRMLS_CC);
 
 	if (stream == NULL && (options & REPORT_ERRORS)) {
 		php_stream_display_wrapper_errors(wrapper, path, "failed to open stream" TSRMLS_CC);
