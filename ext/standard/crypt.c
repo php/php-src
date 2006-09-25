@@ -111,8 +111,8 @@ static void php_to64(char *s, long v, int n)
 	} 
 } 
 
-/* {{{ proto string crypt(string str [, string salt])
-   Encrypt a string */
+/* {{{ proto string crypt(string str [, string salt]) U
+   Hash a string */
 PHP_FUNCTION(crypt)
 {
 	char salt[PHP_MAX_SALT_LEN+1];
@@ -124,7 +124,7 @@ PHP_FUNCTION(crypt)
 	   available (passing always 2-character salt). At least for glibc6.1 */
 	memset(&salt[1], '$', PHP_MAX_SALT_LEN-1);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &str, &str_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|S", &str, &str_len,
 							  &salt_in, &salt_in_len) == FAILURE) {
 		return;
 	}
