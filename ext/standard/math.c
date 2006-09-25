@@ -59,7 +59,7 @@ PHP_FUNCTION(abs)
 		return;
 	}
 
-	convert_scalar_to_number(value);
+	convert_scalar_to_number(value TSRMLS_CC);
 	
 	if (Z_TYPE_P(value) == IS_DOUBLE) {
 		RETURN_DOUBLE(fabs(Z_DVAL_P(value)));
@@ -84,7 +84,7 @@ PHP_FUNCTION(ceil)
 		return;
 	}
 
-	convert_scalar_to_number(value);
+	convert_scalar_to_number(value TSRMLS_CC);
 
 	if (Z_TYPE_P(value) == IS_DOUBLE) {
 		RETURN_DOUBLE(ceil(Z_DVAL_P(value)));
@@ -106,7 +106,7 @@ PHP_FUNCTION(floor)
 		return;
 	}
 
-	convert_scalar_to_number(value);
+	convert_scalar_to_number(value TSRMLS_CC);
 
 	if (Z_TYPE_P(value) == IS_DOUBLE) {
 		RETURN_DOUBLE(floor(Z_DVAL_P(value)));
@@ -130,7 +130,7 @@ PHP_FUNCTION(round)
 		return;
 	}
 
-	convert_scalar_to_number(value);
+	convert_scalar_to_number(value TSRMLS_CC);
 
 	switch (Z_TYPE_P(value)) {
 		case IS_LONG:

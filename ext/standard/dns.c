@@ -370,7 +370,7 @@ static void _php_dns_free_res(struct __res_state res) { /* {{{ */
 #endif
 
 /* {{{ php_parserr */
-static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int store, zval **subarray)
+static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int store, zval **subarray TSRMLS_DC)
 {
 	u_short type, class, dlen;
 	u_long ttl;
@@ -781,7 +781,7 @@ PHP_FUNCTION(dns_get_record)
 			while (an-- && cp && cp < end) {
 				zval *retval;
 
-				cp = php_parserr(cp, &answer, type_to_fetch, store_results, &retval);
+				cp = php_parserr(cp, &answer, type_to_fetch, store_results, &retval TSRMLS_CC);
 				if (retval != NULL && store_results) {
 					add_next_index_zval(return_value, retval);
 				}
@@ -798,7 +798,7 @@ PHP_FUNCTION(dns_get_record)
 		while (ns-- > 0 && cp && cp < end) {
 			zval *retval = NULL;
 
-			cp = php_parserr(cp, &answer, DNS_T_ANY, authns != NULL, &retval);
+			cp = php_parserr(cp, &answer, DNS_T_ANY, authns != NULL, &retval TSRMLS_CC);
 			if (retval != NULL) {
 				add_next_index_zval(authns, retval);
 			}
@@ -810,7 +810,7 @@ PHP_FUNCTION(dns_get_record)
 		while (ar-- > 0 && cp && cp < end) {
 			zval *retval = NULL;
 
-			cp = php_parserr(cp, &answer, DNS_T_ANY, 1, &retval);
+			cp = php_parserr(cp, &answer, DNS_T_ANY, 1, &retval TSRMLS_CC);
 			if (retval != NULL) {
 				add_next_index_zval(addtl, retval);
 			}
