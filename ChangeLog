@@ -1,3 +1,66 @@
+2006-09-24  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/tests/38943.phpt
+      ext/zip/tests/38943.phpt:
+      
+      - #38943, properties in extended class cannot be set
+      - use zend_object_std_init instead of a manual initialisation
+
+    * ext/zip/php_zip.c
+      ext/zip/php_zip.c
+      ext/zip/tests/38943.phpt:
+      - #38943, properties in extended class cannot be set
+      - use zend_object_std_init instead of a manual initialisation
+
+2006-09-24  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/fsock.c:
+      PHP6 Update: fsockopen/psfockopen
+
+    * ext/standard/file.c:
+      PHP6 Updates for rmdir/mkdir/rename
+
+    * ext/standard/file.c
+      main/php_streams.h
+      main/streams/plain_wrapper.c
+      main/streams/streams.c:
+      PHP6 Updates for popen() and related functionality
+
+    * ext/standard/file.c:
+      PHP6 Update for get_meta_tags() -- What a silly function...
+
+2006-09-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/imap/config.m4
+      ext/imap/php_imap.c:
+      MFB: Fixed bug #38941 (imap extension does not compile against new version
+      of the imap library).
+
+    * (PHP_5_2)
+      NEWS
+      ext/imap/config.m4
+      ext/imap/php_imap.c:
+      Fixed bug #38941 (imap extension does not compile against new version of
+      the imap library).
+
+2006-09-24  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/math.c:
+      PHP6 Updates w/ minor refactoring
+
+    * ext/standard/exec.c
+      ext/standard/md5.c
+      ext/standard/sha1.c
+      ext/standard/type.c:
+      PHP6 Updates
+
+2006-09-24  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_5_2)
+      ext/mbstring/mbstring.c:
+      disabled mb_list_*_names() and mb_list_encodings(arg) which are introduced
+      in PHP 5.2.0RC to reconsider/discuss the specification.
+
 2006-09-23  Antony Dovgal  <antony@zend.com>
 
     * ext/standard/dir.c:
