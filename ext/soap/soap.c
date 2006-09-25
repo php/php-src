@@ -2041,7 +2041,9 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			char buffer[1024];
 			int buffer_len;
 			zval outbuf, outbuflen;
+#ifdef va_copy
 			va_list argcopy;
+#endif
 			int old = PG(display_errors);
 
 			INIT_ZVAL(outbuf);
@@ -2088,7 +2090,9 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 		int old = PG(display_errors);
 		int fault = 0;
 		zval fault_obj;
+#ifdef va_copy
 		va_list argcopy;
+#endif
 
 		if (error_num == E_USER_ERROR || 
 		    error_num == E_COMPILE_ERROR || 
