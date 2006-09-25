@@ -22,7 +22,7 @@
 #include "basic_functions.h"
 #include "crc32.h"
 
-/* {{{ proto string crc32(string str)
+/* {{{ proto string crc32(string str) U
    Calculate the crc32 polynomial of a string */
 PHP_NAMED_FUNCTION(php_if_crc32)
 {
@@ -31,7 +31,7 @@ PHP_NAMED_FUNCTION(php_if_crc32)
 	php_uint32 crcinit = 0;
 	register php_uint32 crc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &p, &nr) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &p, &nr) == FAILURE) {
 		return;
 	}
 	crc = crcinit^0xFFFFFFFF;
