@@ -661,8 +661,9 @@ PHP_FUNCTION(get_headers)
 	int url_len;
 	php_stream_context *context;
 	php_stream *stream;
-	zval **prev_val, **hdr = NULL;
+	zval **prev_val, **hdr = NULL, **h;
 	HashPosition pos;
+	HashTable *hashT;
 	long format = 0;
                 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &url, &url_len, &format) == FAILURE) {
@@ -676,10 +677,22 @@ PHP_FUNCTION(get_headers)
 
 	array_init(return_value);
 
-	zend_hash_internal_pointer_reset_ex(HASH_OF(stream->wrapperdata), &pos);
-	while (zend_hash_get_current_data_ex(HASH_OF(stream->wrapperdata), (void**)&hdr, &pos) != FAILURE) {
+	/* check for curl-wrappers that provide headers via a special "headers" element */
+	if (zend_hash_find(HASH_OF(stream->wrapperdata), "headers", sizeof("headers"), (void **)&h) != FAILURE && Z_TYPE_PP(h) == IS_ARRAY) {
+		/* curl-wrappers don't load data until the 1st read */ 
+		if (!Z_ARRVAL_PP(h)->nNumOfElements) {
+			php_stream_getc(stream);
+		}
+		zend_hash_find(HASH_OF(stream->wrapperdata), "headers", sizeof("headers"), (void **)&h);
+		hashT = Z_ARRVAL_PP(h);	
+	} else {
+		hashT = HASH_OF(stream->wrapperdata);
+	}
+
+	zend_hash_internal_pointer_reset_ex(hashT, &pos);
+	while (zend_hash_get_current_data_ex(hashT, (void**)&hdr, &pos) != FAILURE) {
 		if (!hdr || Z_TYPE_PP(hdr) != IS_STRING) {
-			zend_hash_move_forward_ex(HASH_OF(stream->wrapperdata), &pos);
+			zend_hash_move_forward_ex(hashT, &pos);
 			continue;
 		}
 		if (!format) {
@@ -709,7 +722,7 @@ no_name_header:
 				goto no_name_header;
 			}
 		}
-		zend_hash_move_forward_ex(HASH_OF(stream->wrapperdata), &pos);
+		zend_hash_move_forward_ex(hashT, &pos);
 	}
 
 	php_stream_close(stream);
