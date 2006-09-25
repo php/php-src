@@ -663,10 +663,12 @@ if test "$PHP_GCOV" = "yes"; then
   dnl Remove all optimization flags from CFLAGS
   changequote({,})
   CFLAGS=`echo "$CFLAGS" | $SED -e 's/-O[0-9]*//g'`
+  CXXFLAGS=`echo "$CXXFLAGS" | $SED -e 's/-O[0-9]*//g'`
   changequote([,])
 
   dnl Add the special gcc flags
   CFLAGS="$CFLAGS -O0 -fprofile-arcs -ftest-coverage"
+  CXXFLAGS="$CXXFLAGS -O0 -fprofile-arcs -ftest-coverage"
 fi
 
 PHP_ARG_ENABLE(debug, whether to include debugging symbols,
@@ -677,8 +679,10 @@ if test "$PHP_DEBUG" = "yes"; then
   ZEND_DEBUG=yes
   changequote({,})
   CFLAGS=`echo "$CFLAGS" | $SED -e 's/-O[0-9]*//g'`
+  CXXFLAGS=`echo "$CXXFLAGS" | $SED -e 's/-O[0-9]*//g'`
   changequote([,])
   CFLAGS="$CFLAGS -O0"
+  CXXFLAGS="$CXXFLAGS -O0"
 else
   PHP_DEBUG=0
   ZEND_DEBUG=no
