@@ -45,9 +45,11 @@ zip_get_archive_comment(struct zip *za, int *lenp, int flags)
 {
     if ((flags & ZIP_FL_UNCHANGED)
 	|| (za->ch_comment_len == -1)) {
-	if (lenp != NULL)
-	    *lenp = za->cdir->comment_len;
-	return za->cdir->comment;
+		if (za->cdir) {
+			if (lenp != NULL)
+			    *lenp = za->cdir->comment_len;
+			return za->cdir->comment;
+		}
     }
     
     if (lenp != NULL)
