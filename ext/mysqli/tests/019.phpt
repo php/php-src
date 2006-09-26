@@ -44,7 +44,7 @@ mysqli fetch (bind_param + bind_result)
 	mysqli_stmt_close($stmt);
 	mysqli_close($link);
 ?>
---EXPECT--
+--EXPECTF--
 array(11) {
   [0]=>
   int(1)
@@ -65,7 +65,7 @@ array(11) {
   [8]=>
   NULL
   [9]=>
-  string(3) "foo"
+  %s(3) "foo"
   [10]=>
-  string(6) "foobar"
+  %s(6) "foobar"
 }

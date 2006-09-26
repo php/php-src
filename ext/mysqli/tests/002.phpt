@@ -36,7 +36,7 @@ mysqli bind_result 1
 	mysqli_stmt_close($stmt);
 	mysqli_close($link);
 ?>
---EXPECT--
+--EXPECTF--
 array(11) {
   [0]=>
   int(1)
@@ -57,7 +57,7 @@ array(11) {
   [8]=>
   NULL
   [9]=>
-  string(4) "foo1"
+  %s(4) "foo1"
   [10]=>
-  string(4) "1000"
+  %s(4) "1000"
 }

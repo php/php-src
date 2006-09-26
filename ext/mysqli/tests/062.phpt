@@ -18,8 +18,8 @@ resultset constructor
 
 	var_dump($row);
 ?>
---EXPECT--
+--EXPECTF--
 array(1) {
   [0]=>
-  string(3) "foo"
+  %s(3) "foo"
 }

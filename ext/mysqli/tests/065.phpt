@@ -6,6 +6,9 @@ require_once('skipif.inc');
 if (!function_exists('mysqli_set_charset')) {
 	die('skip mysqli_set_charset() not available');
 }
+if (unicode_semantics()) {
+	die('skip set character set not functional with unicode.semantics=On');
+}
 ?>
 --FILE--
 <?php

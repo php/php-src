@@ -35,8 +35,8 @@ mysqli_bind_param (UPDATE)
 
 	mysqli_close($link);
 ?>
---EXPECT--
+--EXPECTF--
 array(1) {
   [0]=>
-  string(15) "Rasmus is No. 1"
+  %s(15) "Rasmus is No. 1"
 }

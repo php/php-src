@@ -2,7 +2,6 @@
 local infile handler
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
-<?php require_once('skipifemb.inc'); ?>
 --FILE--
 <?php
 	include "connect.inc";
@@ -18,7 +17,7 @@ local infile handler
 	/* create temporary file */
 	$filename = dirname(__FILE__) . "061.csv";
 	$fp = fopen($filename, "w");
-	fwrite($fp, "foo;bar");
+	@fwrite($fp, "foo;bar");
 	fclose($fp);
 
   	mysqli_query($link,"DROP TABLE IF EXISTS t_061");

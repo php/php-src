@@ -19,3 +19,5 @@ resultset constructor
 ?>
 --EXPECT--
 string(3) "foo"
+--UEXPECT--
+unicode(3) "foo"

@@ -28,5 +28,5 @@ bug #33263 (mysqli_real_connect in __construct)
 
 	$mysql->close();	
 ?>
---EXPECT--
-string(4) "test"
+--EXPECTF--
+%s(4) "test"

@@ -22,13 +22,13 @@ mysqli multi_query, next_result, more_results
 	} while ($mysql->next_result());
 	$mysql->close();
 ?>
---EXPECT--
+--EXPECTF--
 array(1) {
   [1]=>
-  string(1) "1"
+  %s(1) "1"
 }
 ---
 array(1) {
   [2]=>
-  string(1) "2"
+  %s(1) "2"
 }

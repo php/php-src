@@ -4,6 +4,7 @@ mysqli bind_param/bind_result date
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 	include "connect.inc";
 	
 	/*** test mysqli_connect 127.0.0.1 ***/
@@ -23,13 +24,13 @@ mysqli bind_param/bind_result date
 	$stmt = mysqli_prepare($link, "INSERT INTO test_bind_result VALUES (?,?,?,?,?,?,?)");
 	mysqli_bind_param($stmt, "sssssss", $d1, $d2, $d3, $d4, $d5, $d6, $d7);
 
-  	$d1 = '2002-01-02';
-	$d2 = '12:49:00';
-	$d3 = '2002-01-02 17:46:59';
-	$d4 = 2010;
-	$d5 ='2010-07-10';
-	$d6 = '2020';
-	$d7 = '1999-12-29';
+  	$d1 = "2002-01-02";
+	$d2 = "12:49:00";
+	$d3 = "2002-01-02 17:46:59";
+	$d4 = "2010";
+	$d5 = "2010-07-10";
+	$d6 = "2020";
+	$d7 = "1999-12-29";
 
 	mysqli_execute($stmt);
 	mysqli_stmt_close($stmt);
@@ -48,20 +49,20 @@ mysqli bind_param/bind_result date
 	mysqli_stmt_close($stmt);
 	mysqli_close($link);
 ?>
---EXPECT--
+--EXPECTF--
 array(7) {
   [0]=>
-  string(10) "2002-01-02"
+  %s(10) "2002-01-02"
   [1]=>
-  string(8) "12:49:00"
+  %s(8) "12:49:00"
   [2]=>
-  string(19) "2002-01-02 17:46:59"
+  %s(19) "2002-01-02 17:46:59"
   [3]=>
   int(2010)
   [4]=>
-  string(19) "2010-07-10 00:00:00"
+  %s(19) "2010-07-10 00:00:00"
   [5]=>
-  string(19) "0000-00-00 00:00:00"
+  %s(19) "0000-00-00 00:00:00"
   [6]=>
-  string(19) "1999-12-29 00:00:00"
+  %s(19) "1999-12-29 00:00:00"
 }

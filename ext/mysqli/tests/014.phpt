@@ -53,17 +53,17 @@ mysqli autocommit/commit/rollback
 
 	mysqli_close($link);
 ?>
---EXPECT--
+--EXPECTF--
 Num_of_rows=1
 array(2) {
   [0]=>
-  string(1) "1"
+  %s(1) "1"
   [1]=>
-  string(6) "foobar"
+  %s(6) "foobar"
 }
 array(2) {
   [0]=>
-  string(1) "2"
+  %s(1) "2"
   [1]=>
-  string(4) "egon"
+  %s(4) "egon"
 }

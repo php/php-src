@@ -20,14 +20,14 @@ $result = $mysqli->query("SELECT @@autocommit");
 var_dump($result->fetch_row());
 
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
 array(1) {
   [0]=>
-  string(1) "0"
+  %s(1) "0"
 }
 bool(true)
 array(1) {
   [0]=>
-  string(1) "1"
+  %s(1) "1"
 }

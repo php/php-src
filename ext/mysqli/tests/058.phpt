@@ -44,14 +44,14 @@ multiple binds
 
 	mysqli_close($link);
 ?>
---EXPECT--
+--EXPECTF--
 array(4) {
   [0]=>
   int(1)
   [1]=>
-  string(3) "foo"
+  %s(3) "foo"
   [2]=>
   int(2)
   [3]=>
-  string(3) "bar"
+  %s(3) "bar"
 }

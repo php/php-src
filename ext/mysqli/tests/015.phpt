@@ -54,16 +54,16 @@ mysqli autocommit/commit/rollback with myisam
 
 	mysqli_close($link);
 ?>
---EXPECT--
+--EXPECTF--
 array(2) {
   [0]=>
-  string(1) "2"
+  %s(1) "2"
   [1]=>
-  string(4) "egon"
+  %s(4) "egon"
 }
 array(2) {
   [0]=>
-  string(1) "2"
+  %s(1) "2"
   [1]=>
-  string(4) "egon"
+  %s(4) "egon"
 }

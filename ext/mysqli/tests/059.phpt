@@ -39,3 +39,5 @@ sqlmode + bind
 ?>
 --EXPECT--
 string(6) "foobar"
+--UEXPECT--
+unicode(6) "foobar"

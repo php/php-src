@@ -21,5 +21,5 @@ function test: mysqli_info
 
 	mysqli_close($link);
 ?>
---EXPECT--
-string(38) "Records: 3  Duplicates: 0  Warnings: 0"
+--EXPECTF--
+%s(38) "Records: 3  Duplicates: 0  Warnings: 0"

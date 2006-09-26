@@ -1,5 +1,5 @@
 --TEST--
-Bug #32405
+Bug #34785
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
@@ -42,6 +42,6 @@ Bug #32405
 
 	mysqli_close($link);
 ?>
---EXPECT--
-string(3) "foo"
-string(3) "bar"
+--EXPECTF--
+%s(3) "foo"
+%s(3) "bar"

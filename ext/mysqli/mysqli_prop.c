@@ -105,7 +105,14 @@ static int __func(mysqli_object *obj, zval **retval TSRMLS_DC)\
 		if (!c) {\
 			ZVAL_NULL(*retval);\
 		} else {\
-			ZVAL_STRING(*retval, c, 1);\
+			if (UG(unicode)) {\
+				UChar *ubuf = NULL;\
+				uint ulen;\
+				zend_string_to_unicode(MYSQLI_CONV_UTF8, &ubuf, &ulen, c, strlen(c));\
+				ZVAL_UNICODEL(*retval, ubuf, ulen, 0);\
+			} else {\
+				ZVAL_STRING(*retval, c, 1);\
+			}\
 		}\
 	}\
 	return SUCCESS;\

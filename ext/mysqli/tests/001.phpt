@@ -43,5 +43,5 @@ mysqli connect
 
 	var_dump($test);
 ?>
---EXPECT--
-string(5) "11111"
+--EXPECTF--
+%s(5) "11111"
