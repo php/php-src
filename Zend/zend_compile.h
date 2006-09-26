@@ -663,40 +663,22 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_SEND_BY_REF     1
 #define ZEND_SEND_PREFER_REF 2
 
-/* Lost In Stupid Parentheses */
-#define ARG_SHOULD_BE_SENT_BY_REF(zf, arg_num)											\
-	(																					\
-		zf																				\
-		&& ((zend_function *) zf)->common.arg_info										\
-		&&																				\
-		(																				\
-			(																			\
-				arg_num<=((zend_function *) zf)->common.num_args						\
-				&& ((zend_function *) zf)->common.arg_info[arg_num-1].pass_by_reference	== ZEND_SEND_BY_REF \
-			)																			\
-		||	(																			\
-				arg_num>((zend_function *) zf)->common.num_args							\
-				&& ((zend_function *) zf)->common.pass_rest_by_reference == ZEND_SEND_BY_REF				\
-			)																			\
-		)																				\
-	)
+#define ARG_SEND_TYPE(zf, arg_num)												\
+	((zf) ?                                                                     \
+	 ((((zend_function*)(zf))->common.arg_info &&                               \
+	   arg_num<=((zend_function*)(zf))->common.num_args) ?                      \
+	  ((zend_function *)(zf))->common.arg_info[arg_num-1].pass_by_reference :   \
+	  ((zend_function *)(zf))->common.pass_rest_by_reference) :                 \
+	 ZEND_SEND_BY_VAL)	
 
-#define ARG_MAY_BE_SENT_BY_REF(zf, arg_num)											\
-	(																					\
-		zf																				\
-		&& ((zend_function *) zf)->common.arg_info										\
-		&&																				\
-		(																				\
-			(																			\
-				arg_num<=((zend_function *) zf)->common.num_args						\
-				&& ((zend_function *) zf)->common.arg_info[arg_num-1].pass_by_reference	== ZEND_SEND_PREFER_REF \
-			)																			\
-		||	(																			\
-				arg_num>((zend_function *) zf)->common.num_args							\
-				&& ((zend_function *) zf)->common.pass_rest_by_reference == ZEND_SEND_PREFER_REF				\
-			)																			\
-		)																				\
-	)
+#define ARG_MUST_BE_SENT_BY_REF(zf, arg_num) \
+	(ARG_SEND_TYPE(zf, arg_num) == ZEND_SEND_BY_REF)
+
+#define ARG_SHOULD_BE_SENT_BY_REF(zf, arg_num) \
+	(ARG_SEND_TYPE(zf, arg_num) & (ZEND_SEND_BY_REF|ZEND_SEND_PREFER_REF))
+
+#define ARG_MAY_BE_SENT_BY_REF(zf, arg_num) \
+	(ARG_SEND_TYPE(zf, arg_num) == ZEND_SEND_PREFER_REF)
 
 #define ZEND_RETURN_VAL 0
 #define ZEND_RETURN_REF 1
