@@ -46,9 +46,9 @@ mysqli_get_metadata
 	mysqli_stmt_close($stmt);
 	mysqli_close($link);
 ?>
---EXPECT--
+--EXPECTF--
 Rows: 3
 array(1) {
   [0]=>
-  string(1) "1"
+  %s(1) "1"
 }

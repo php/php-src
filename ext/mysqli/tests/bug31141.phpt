@@ -22,7 +22,7 @@ var_dump($my_test->test);
 --EXPECTF--
 array(2) {
   [0]=>
-  string(3) "foo"
+  %s(3) "foo"
   [1]=>
-  string(3) "bar"
+  %s(3) "bar"
 }

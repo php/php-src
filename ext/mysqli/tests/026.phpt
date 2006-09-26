@@ -40,10 +40,10 @@ mysqli bind_param/bind_result with send_long_data
 
 	mysqli_close($link);
 ?>
---EXPECT--
+--EXPECTF--
 array(2) {
   [0]=>
-  string(10) "Hello Worl"
+  %s(10) "Hello Worl"
   [1]=>
-  string(99) "This is the first sentence. And this is the second sentence. And finally this is the last sentence."
+  %s(99) "This is the first sentence. And this is the second sentence. And finally this is the last sentence."
 }

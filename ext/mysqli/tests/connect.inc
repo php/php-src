@@ -1,24 +1,14 @@
 <?php
 
   /* default values are localhost, root and empty password 
-     Change the values if you use another configuration   */
+     Change the MYSQL_TEST environment values if you want to 
+     use another configuration   */
 	$driver = new mysqli_driver;
 
-	if (!$driver->embedded) {
-		$host = "localhost";
-		$user = "root";
-		$passwd = "";
-	} else {
-		$path =  dirname(__FILE__);
-		$host = $user = $passwd = NULL;
-		$args = array(
-					"--datadir=$path", 
-					"--innodb_data_home_dir=$path",
-					"--innodb_data_file_path=ibdata1:10M:autoextend",
-					"--log-error=$path/testrun.log",
-					"--init-connect='CREATE DATABASE IF NOT EXISTS test;'"
-				);
-		$driver->embedded_server_start(TRUE, $args, NULL);
-	}
-
+	$host = getenv("MYSQL_TEST_HOST") ? getenv("MYSQL_TEST_HOST") : "localhost";
+	$port = getenv("MYSQL_TEST_PORT") ? getenv("MYSQL_TEST_PORT") : 3306;
+	$user = getenv("MYSQL_TEST_USER") ? getenv("MYSQL_TEST_USER") : "root";
+	$passwd = getenv("MYSQL_TEST_PASSWD") ? getenv("MYSQL_TEST_PASSWD") : "";
+	$db = getenv("MYSQL_TEST_DB") ? getenv("MYSQL_TEST_DB") : "phptest";
+	$engine = getenv("MYSQL_TEST_ENGINE") ? getenv("MYSQL_TEST_ENGINE") : "MyISAM";
 ?>

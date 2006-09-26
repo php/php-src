@@ -37,10 +37,10 @@ mysqli_bind_result (SHOW)
 
 	mysqli_close($link);
 ?>
---EXPECT--
+--EXPECTF--
 array(2) {
   [0]=>
-  string(4) "port"
+  %s(4) "port"
   [1]=>
-  string(4) "3306"
+  %s(4) "%s"
 }

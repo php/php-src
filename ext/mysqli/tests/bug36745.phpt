@@ -19,5 +19,5 @@ bug #36745 : LOAD DATA LOCAL INFILE doesn't return correct error message
 	printf("Done");
 ?>
 --EXPECTF--
-string(%d) "%s"
+%s(%d) "%s"
 Done

@@ -19,8 +19,8 @@ mysql_fetch_row (OO-Style)
 
 	$mysql->close();
 ?>
---EXPECT--
+--EXPECTF--
 array(1) {
   [0]=>
-  string(4) "test"
+  %s(4) "test"
 }

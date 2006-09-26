@@ -2,7 +2,6 @@
 mysqli warning_count, get_warnings
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
-<?php die('skip mysqli_warning class not functional yet?'); ?>
 --FILE--
 <?php
 	include "connect.inc";
@@ -17,11 +16,12 @@ mysqli warning_count, get_warnings
 
 	var_dump($w->errno);
 	var_dump($w->message);
-#	var_dump($w->sqlstate);
+	var_dump($w->sqlstate);
 
 	$mysql->close();
 ?>
 --EXPECT--
-1
-1051
-Unknown table 'not_exists'
+int(1)
+int(1051)
+string(26) "Unknown table 'not_exists'"
+string(5) "HY000"

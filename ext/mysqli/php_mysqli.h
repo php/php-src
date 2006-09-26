@@ -36,6 +36,9 @@
 #define HAVE_MYSQLI_SET_CHARSET
 #endif
 
+#define MYSQLI_UC_UTF8	1
+#define MYSQLI_UC_UCS2	2
+
 #include <errmsg.h>
 
 #ifndef PHP_MYSQLI_H
@@ -49,6 +52,13 @@ enum mysqli_status {
 	MYSQLI_STATUS_INITIALIZED,
 	MYSQLI_STATUS_VALID
 };
+
+typedef struct {
+	void			*buf;		/* buffer: binary or unicode data */	
+	unsigned int	buflen;		/* buffer length */
+	zend_uchar		buftype;	/* buffer type */
+	UErrorCode		status;		/* error code */
+} MYSQLI_STRING;
 
 typedef struct {
 	ulong		buflen;
@@ -74,7 +84,8 @@ typedef struct {
 	MYSQL			*mysql;
 	zval			*li_read;
 	php_stream		*li_stream;
-	unsigned int	multi_query;	
+	unsigned int	multi_query;
+	UConverter		*conv;
 } MY_MYSQL;
 
 typedef struct {
@@ -218,12 +229,13 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 	MYSQLI_RESOURCE *my_res; \
 	mysqli_object *intern = (mysqli_object *)zend_object_store_get_object(*(__id) TSRMLS_CC);\
 	if (!(my_res = (MYSQLI_RESOURCE *)intern->ptr)) {\
-  		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", intern->zo.ce->name);\
+  		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %R", UG(unicode)?IS_UNICODE:IS_STRING, intern->zo.ce->name);\
+		printf("--------\n");\
   		RETURN_NULL();\
   	}\
 	__ptr = (__type)my_res->ptr; \
 	if (__check && my_res->status < __check) { \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid object or resource %s\n", intern->zo.ce->name); \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid object or resource %R\n", UG(unicode)?IS_UNICODE:IS_STRING, intern->zo.ce->name); \
 		RETURN_NULL();\
 	}\
 }
@@ -260,6 +272,43 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 		i++; \
 	}\
 }
+
+#define MYSQLI_GET_STRING(a) &a.buf, &a.buflen, &a.buftype
+
+#define MYSQLI_FREE_STRING(a) \
+if (a.buftype == IS_UNICODE) {\
+	efree(a.buf);\
+}
+
+#define MYSQLI_CONVERT_PARAM_STRING(a,c)\
+if (a.buftype == IS_UNICODE) {\
+	a.status=U_ZERO_ERROR;\
+	zend_unicode_to_string_ex(c, (char **)&a.buf, &a.buflen, a.buf, a.buflen, &a.status);\
+} 
+
+#define MYSQLI_RETURN_CONV_STRING(conv, value) \
+if (UG(unicode)) { \
+	UChar *ustr;\
+	int ulen;\
+	zend_string_to_unicode(conv, &ustr, &ulen, (value) ? value : "", (value) ? strlen(value) : 0);\
+	RETURN_UNICODEL(ustr, ulen, 0);\
+} else {\
+	RETURN_STRING((value) ? value : "", 1);\
+}\
+
+#define MYSQLI_RETURN_CONV_STRINGL(conv, value, len, copy) \
+if (UG(unicode)) { \
+	UChar *ustr;\
+	int ulen;\
+	zend_string_to_unicode(conv, &ustr, &ulen, (value) ? value : "", len);\
+	RETURN_UNICODEL(ustr, ulen, 0);\
+} else {\
+	RETURN_STRINGL((value) ? value : "", len, copy);\
+}\
+
+#define MYSQLI_CONV_UTF8  unicode_globals.utf8_conv
+#define MYSQLI_CONV_UCS2  unicode_globals.ucs2_conv
+#define MYSQLI_CONV_ASCII unicode_globals.ascii_conv
 
 #if WIN32|WINNT
 #define SCLOSE(a) closesocket(a)

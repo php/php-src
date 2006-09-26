@@ -24,12 +24,12 @@ mysqli fetch functions
 	var_dump($test);
 	mysqli_close($link);
 ?>
---EXPECT--
+--EXPECTF--
 array(3) {
   [0]=>
-  string(32) "37b51d194a7513e45b56f6524f2d51f2"
+  %s(32) "37b51d194a7513e45b56f6524f2d51f2"
   [1]=>
-  string(4) "test"
+  %s(4) "test"
   [2]=>
-  string(3) "foo"
+  %s(3) "foo"
 }

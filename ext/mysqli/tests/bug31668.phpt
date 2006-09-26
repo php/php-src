@@ -36,21 +36,21 @@ Bug #31668 multi_query works exactly every other time (multi_query was global, n
 --EXPECTF--
 array(1) {
   [1]=>
-  string(1) "1"
+  %s(1) "1"
 }
 array(1) {
   [2]=>
-  string(1) "2"
+  %s(1) "2"
 }
-string(0) ""
+%s(0) ""
 int(%d)
 array(1) {
   [1]=>
-  string(1) "1"
+  %s(1) "1"
 }
 array(1) {
   [2]=>
-  string(1) "2"
+  %s(1) "2"
 }
-string(0) ""
+%s(0) ""
 int(%d)

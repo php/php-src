@@ -112,7 +112,7 @@ static int driver_client_version_read(mysqli_object *obj, zval **retval TSRMLS_D
 static int driver_client_info_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
 	ALLOC_ZVAL(*retval);
-	ZVAL_STRING(*retval, MYSQL_SERVER_VERSION, 1);
+	ZVAL_RT_STRING(*retval, MYSQL_SERVER_VERSION, 1);
 	return SUCCESS;
 }
 /* }}} */

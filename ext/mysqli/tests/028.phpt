@@ -16,4 +16,4 @@ function test: mysqli_character_set_name
 	mysqli_close($link);
 ?>
 --EXPECTF--
-string(%d) "%s"
+%s(%d) "%s"

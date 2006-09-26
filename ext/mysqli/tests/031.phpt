@@ -20,6 +20,6 @@ function test: mysqli_error
 
 	mysqli_close($link);
 ?>
---EXPECT--
-string(0) ""
-string(46) "Table 'test.non_exisiting_table' doesn't exist"
+--EXPECTF--
+%s(0) ""
+%s(46) "Table 'test.non_exisiting_table' doesn't exist"

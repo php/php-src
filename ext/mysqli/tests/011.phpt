@@ -36,7 +36,7 @@ precision=12
 	mysqli_stmt_close($stmt);
 	mysqli_close($link);
 ?>
---EXPECT--
+--EXPECTF--
 array(8) {
   [0]=>
   int(19)
@@ -51,7 +51,7 @@ array(8) {
   [5]=>
   float(5678.89563)
   [6]=>
-  string(6) "foobar"
+  %s(6) "foobar"
   [7]=>
-  string(11) "mysql rulez"
+  %s(11) "mysql rulez"
 }

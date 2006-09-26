@@ -31,10 +31,10 @@ mysqli fetch char/text long
 	mysqli_stmt_close($stmt);
 	mysqli_close($link);
 ?>
---EXPECT--
+--EXPECTF--
 array(2) {
   [0]=>
-  string(10) "1234567890"
+  %s(10) "1234567890"
   [1]=>
-  string(13) "32K String ok"
+  %s(13) "32K String ok"
 }

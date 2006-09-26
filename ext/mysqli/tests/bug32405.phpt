@@ -28,12 +28,12 @@ Bug #32405
 	mysqli_query($link,"DROP TABLE test_users");
 	mysqli_close($link);
 ?>
---EXPECT--
+--EXPECTF--
 int(1)
-string(5) "user1"
+%s(5) "user1"
 int(2)
-string(5) "user2"
+%s(5) "user2"
 int(3)
-string(5) "user3"
+%s(5) "user3"
 int(4)
-string(5) "user4"
+%s(5) "user4"

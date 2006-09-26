@@ -23,5 +23,5 @@ mysqli fetch user variable
 	mysqli_stmt_close($stmt);
 	mysqli_close($link);
 ?>
---EXPECT--
-string(6) "foobar"
+--EXPECTF--
+%s(6) "foobar"

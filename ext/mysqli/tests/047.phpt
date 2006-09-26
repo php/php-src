@@ -194,3 +194,157 @@ object(stdClass)#5 (11) {
   ["decimals"]=>
   int(0)
 }
+--UEXPECTF--
+=== fetch_fields ===
+array(2) {
+  [0]=>
+  object(stdClass)#5 (11) {
+    [u"name"]=>
+    unicode(3) "foo"
+    [u"orgname"]=>
+    unicode(3) "foo"
+    [u"table"]=>
+    unicode(13) "test_affected"
+    [u"orgtable"]=>
+    unicode(13) "test_affected"
+    [u"def"]=>
+    unicode(0) ""
+    [u"max_length"]=>
+    int(0)
+    [u"length"]=>
+    int(11)
+    [u"charsetnr"]=>
+    int(63)
+    [u"flags"]=>
+    int(32768)
+    [u"type"]=>
+    int(3)
+    [u"decimals"]=>
+    int(0)
+  }
+  [1]=>
+  object(stdClass)#6 (11) {
+    [u"name"]=>
+    unicode(3) "bar"
+    [u"orgname"]=>
+    unicode(3) "bar"
+    [u"table"]=>
+    unicode(13) "test_affected"
+    [u"orgtable"]=>
+    unicode(13) "test_affected"
+    [u"def"]=>
+    unicode(0) ""
+    [u"max_length"]=>
+    int(0)
+    [u"length"]=>
+    int(%d)
+    [u"charsetnr"]=>
+    int(%d)
+    [u"flags"]=>
+    int(0)
+    [u"type"]=>
+    int(253)
+    [u"decimals"]=>
+    int(0)
+  }
+}
+
+=== fetch_field_direct ===
+object(stdClass)#6 (11) {
+  [u"name"]=>
+  unicode(3) "foo"
+  [u"orgname"]=>
+  unicode(3) "foo"
+  [u"table"]=>
+  unicode(13) "test_affected"
+  [u"orgtable"]=>
+  unicode(13) "test_affected"
+  [u"def"]=>
+  unicode(0) ""
+  [u"max_length"]=>
+  int(0)
+  [u"length"]=>
+  int(%d)
+  [u"charsetnr"]=>
+  int(%d)
+  [u"flags"]=>
+  int(32768)
+  [u"type"]=>
+  int(3)
+  [u"decimals"]=>
+  int(0)
+}
+object(stdClass)#6 (11) {
+  [u"name"]=>
+  unicode(3) "bar"
+  [u"orgname"]=>
+  unicode(3) "bar"
+  [u"table"]=>
+  unicode(13) "test_affected"
+  [u"orgtable"]=>
+  unicode(13) "test_affected"
+  [u"def"]=>
+  unicode(0) ""
+  [u"max_length"]=>
+  int(0)
+  [u"length"]=>
+  int(%d)
+  [u"charsetnr"]=>
+  int(%d)
+  [u"flags"]=>
+  int(0)
+  [u"type"]=>
+  int(253)
+  [u"decimals"]=>
+  int(0)
+}
+
+=== fetch_field ===
+object(stdClass)#6 (11) {
+  [u"name"]=>
+  unicode(3) "foo"
+  [u"orgname"]=>
+  unicode(3) "foo"
+  [u"table"]=>
+  unicode(13) "test_affected"
+  [u"orgtable"]=>
+  unicode(13) "test_affected"
+  [u"def"]=>
+  unicode(0) ""
+  [u"max_length"]=>
+  int(0)
+  [u"length"]=>
+  int(%d)
+  [u"charsetnr"]=>
+  int(%d)
+  [u"flags"]=>
+  int(32768)
+  [u"type"]=>
+  int(3)
+  [u"decimals"]=>
+  int(0)
+}
+object(stdClass)#5 (11) {
+  [u"name"]=>
+  unicode(3) "bar"
+  [u"orgname"]=>
+  unicode(3) "bar"
+  [u"table"]=>
+  unicode(13) "test_affected"
+  [u"orgtable"]=>
+  unicode(13) "test_affected"
+  [u"def"]=>
+  unicode(0) ""
+  [u"max_length"]=>
+  int(0)
+  [u"length"]=>
+  int(%d)
+  [u"charsetnr"]=>
+  int(%d)
+  [u"flags"]=>
+  int(0)
+  [u"type"]=>
+  int(253)
+  [u"decimals"]=>
+  int(0)
+}

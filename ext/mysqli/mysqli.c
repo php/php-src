@@ -243,21 +243,30 @@ zval *mysqli_read_property(zval *object, zval *member, int type TSRMLS_DC)
 	ret = FAILURE;
 	obj = (mysqli_object *)zend_objects_get_address(object TSRMLS_CC);
 
- 	if (member->type != IS_STRING) {
+ 	if (member->type != IS_STRING && member->type != IS_UNICODE) {
 		tmp_member = *member;
 		zval_copy_ctor(&tmp_member);
-		convert_to_string(&tmp_member);
+		convert_to_text(&tmp_member);
 		member = &tmp_member;
 	}
 
 	if (obj->prop_handler != NULL) {
-		ret = zend_hash_find(obj->prop_handler, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &hnd);
+		ret = zend_u_hash_find(obj->prop_handler, UG(unicode)?IS_UNICODE:IS_STRING, Z_UNIVAL_P(member), Z_UNILEN_P(member)+1, (void **) &hnd);
 	}
 
 	if (ret == SUCCESS) {
-		if (strcmp(obj->zo.ce->name.s, "mysqli_driver") &&
-            (!obj->ptr || ((MYSQLI_RESOURCE *)(obj->ptr))->status < MYSQLI_STATUS_INITIALIZED)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", obj->zo.ce->name );
+		int is_driver;
+
+		if (UG(unicode)) {
+			UChar *ustr = USTR_MAKE("mysqli_driver");
+			is_driver = u_strcmp(obj->zo.ce->name.u, ustr);
+			USTR_FREE(ustr);
+		} else {
+			is_driver = strcmp(obj->zo.ce->name.s, "mysqli_driver");
+		}
+		
+		if (is_driver && (!obj->ptr || ((MYSQLI_RESOURCE *)(obj->ptr))->status < MYSQLI_STATUS_INITIALIZED)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %R", UG(unicode)?IS_UNICODE:IS_STRING, obj->zo.ce->name );
 			retval = EG(uninitialized_zval_ptr);
 			return(retval);
 		}
@@ -301,7 +310,7 @@ void mysqli_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 	obj = (mysqli_object *)zend_objects_get_address(object TSRMLS_CC);
 
 	if (obj->prop_handler != NULL) {
-		ret = zend_hash_find((HashTable *)obj->prop_handler, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &hnd);
+		ret = zend_u_hash_find((HashTable *)obj->prop_handler, Z_TYPE_P(member), Z_UNIVAL_P(member), Z_UNILEN_P(member)+1, (void **) &hnd);
 	}
 	if (ret == SUCCESS) {
 		hnd->write_func(obj, value TSRMLS_CC);
@@ -387,7 +396,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 		mysqli_base_class = mysqli_base_class->parent;
 	}
 
-	zend_hash_find(&classes, mysqli_base_class->name.s, mysqli_base_class->name_length + 1, 
+	zend_u_hash_find(&classes, UG(unicode)?IS_UNICODE:IS_STRING, mysqli_base_class->name, mysqli_base_class->name_length + 1, 
 					(void **) &intern->prop_handler);
 
 	zend_object_std_init(&intern->zo, class_type TSRMLS_CC);
@@ -490,7 +499,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	mysqli_object_handlers.get_property_ptr_ptr = std_hnd->get_property_ptr_ptr;
 	mysqli_object_handlers.get_constructor = php_mysqli_constructor_get;
 
-	zend_hash_init(&classes, 0, NULL, NULL, 1);
+	zend_u_hash_init(&classes, 0, NULL, NULL, 1, 1);
 
 	INIT_CLASS_ENTRY(cex, "mysqli_sql_exception", mysqli_exception_methods);
 #ifdef HAVE_SPL
@@ -504,36 +513,37 @@ PHP_MINIT_FUNCTION(mysqli)
 
 	REGISTER_MYSQLI_CLASS_ENTRY("mysqli_driver", mysqli_driver_class_entry, mysqli_driver_methods);
 	ce = mysqli_driver_class_entry;
-	zend_hash_init(&mysqli_driver_properties, 0, NULL, NULL, 1);
+	zend_u_hash_init(&mysqli_driver_properties, 0, NULL, NULL, 1, 1);
 	MYSQLI_ADD_PROPERTIES(&mysqli_driver_properties, mysqli_driver_property_entries);
 	zend_hash_add(&classes, ce->name.s, ce->name_length+1, &mysqli_driver_properties, sizeof(mysqli_driver_properties), NULL);
 	ce->ce_flags |= ZEND_ACC_FINAL_CLASS;
 
 	REGISTER_MYSQLI_CLASS_ENTRY("mysqli", mysqli_link_class_entry, mysqli_link_methods);
 	ce = mysqli_link_class_entry;
-	zend_hash_init(&mysqli_link_properties, 0, NULL, NULL, 1);
+	zend_u_hash_init(&mysqli_link_properties, 0, NULL, NULL, 1, 1);
 	MYSQLI_ADD_PROPERTIES(&mysqli_link_properties, mysqli_link_property_entries);
 	zend_hash_add(&classes, ce->name.s, ce->name_length+1, &mysqli_link_properties, sizeof(mysqli_link_properties), NULL);
 
 	REGISTER_MYSQLI_CLASS_ENTRY("mysqli_warning", mysqli_warning_class_entry, mysqli_warning_methods);
 	ce = mysqli_warning_class_entry;
 	ce->ce_flags |= ZEND_ACC_FINAL_CLASS | ZEND_ACC_PROTECTED;
-	zend_hash_init(&mysqli_warning_properties, 0, NULL, NULL, 1);
+	zend_u_hash_init(&mysqli_warning_properties, 0, NULL, NULL, 1, 1);
 	MYSQLI_ADD_PROPERTIES(&mysqli_warning_properties, mysqli_warning_property_entries);
 	zend_hash_add(&classes, ce->name.s, ce->name_length+1, &mysqli_warning_properties, sizeof(mysqli_warning_properties), NULL);
 
 	REGISTER_MYSQLI_CLASS_ENTRY("mysqli_result", mysqli_result_class_entry, mysqli_result_methods);
 	ce = mysqli_result_class_entry;
-	zend_hash_init(&mysqli_result_properties, 0, NULL, NULL, 1);
+	zend_u_hash_init(&mysqli_result_properties, 0, NULL, NULL, 1, 1);
 	MYSQLI_ADD_PROPERTIES(&mysqli_result_properties, mysqli_result_property_entries);
 	zend_hash_add(&classes, ce->name.s, ce->name_length+1, &mysqli_result_properties, sizeof(mysqli_result_properties), NULL);
 
 	REGISTER_MYSQLI_CLASS_ENTRY("mysqli_stmt", mysqli_stmt_class_entry, mysqli_stmt_methods);
 	ce = mysqli_stmt_class_entry;
-	zend_hash_init(&mysqli_stmt_properties, 0, NULL, NULL, 1);
+	zend_u_hash_init(&mysqli_stmt_properties, 0, NULL, NULL, 1, 1);
 	MYSQLI_ADD_PROPERTIES(&mysqli_stmt_properties, mysqli_stmt_property_entries);
 	zend_hash_add(&classes, ce->name.s, ce->name_length+1, &mysqli_stmt_properties, sizeof(mysqli_stmt_properties), NULL);
-	
+
+
 	/* mysqli_options */
 	REGISTER_LONG_CONSTANT("MYSQLI_READ_DEFAULT_GROUP", MYSQL_READ_DEFAULT_GROUP, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_READ_DEFAULT_FILE", MYSQL_READ_DEFAULT_FILE, CONST_CS | CONST_PERSISTENT);
@@ -698,7 +708,7 @@ PHP_MINFO_FUNCTION(mysqli)
 }
 /* }}} */
 
-/* {{{ mixed mysqli_stmt_construct() 
+/* {{{ mixed mysqli_stmt_construct() U
 constructor for statement object.
 Parameters: 
   object -> mysqli_stmt_init
@@ -710,8 +720,7 @@ ZEND_FUNCTION(mysqli_stmt_construct)
 	zval  				*mysql_link;
 	MY_STMT				*stmt;
 	MYSQLI_RESOURCE 	*mysqli_resource;
-	char				*statement;
-	int					stmt_len;
+	MYSQLI_STRING		statement;
 
 	switch (ZEND_NUM_ARGS())
 	{
@@ -726,16 +735,19 @@ ZEND_FUNCTION(mysqli_stmt_construct)
 			stmt->stmt = mysql_stmt_init(mysql->mysql);
 		break;
 		case 2:
-			if (zend_parse_parameters(2 TSRMLS_CC, "Os", &mysql_link, mysqli_link_class_entry, &statement, &stmt_len)==FAILURE) {
+			if (zend_parse_parameters(2 TSRMLS_CC, "OT", &mysql_link, mysqli_link_class_entry, MYSQLI_GET_STRING(statement))==FAILURE) {
 				return;
 			}
 			MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
 			stmt = (MY_STMT *)ecalloc(1,sizeof(MY_STMT));
+
+			MYSQLI_CONVERT_PARAM_STRING(statement, MYSQLI_CONV_UTF8);
 	
 			if ((stmt->stmt = mysql_stmt_init(mysql->mysql))) {
-				mysql_stmt_prepare(stmt->stmt, statement, stmt_len);
+				mysql_stmt_prepare(stmt->stmt, (char *)statement.buf, statement.buflen);
 			}
+			MYSQLI_FREE_STRING(statement);
 		break;
 		default:
 			WRONG_PARAM_COUNT;
@@ -755,7 +767,7 @@ ZEND_FUNCTION(mysqli_stmt_construct)
 }
 /* }}} */
 
-/* {{{ mixed mysqli_result_construct() 
+/* {{{ mixed mysqli_result_construct()  U
 constructor for result object.
 Parameters: 
   object [, mode] -> mysqli_store/use_result
@@ -813,21 +825,22 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 	unsigned long	*field_len;
 	zval            *ctor_params = NULL;
 	zend_class_entry *ce = NULL;
+	void			*classname;
+	int				classname_len;
+	zend_uchar		classname_type;
 
 	if (into_object) {
-		char *class_name;
-		int class_name_len;
-
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|sz", &mysql_result, mysqli_result_class_entry, &class_name, &class_name_len, &ctor_params) == FAILURE) {
+		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|Tz", &mysql_result, mysqli_result_class_entry, 
+										 &classname, &classname_len, &classname_type, &ctor_params) == FAILURE) {
 			return;
 		}
 		if (ZEND_NUM_ARGS() < (getThis() ? 1 : 2)) {
 			ce = zend_standard_class_def;
 		} else {
-			ce = zend_fetch_class(class_name, class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
+			ce = zend_u_fetch_class(classname_type, ZSTR(classname), classname_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
 		}
 		if (!ce) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not find class '%s'", class_name);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not find class '%R'", classname_type, ZSTR(classname));
 			return;
 		}
 		fetchtype = MYSQLI_ASSOC;
@@ -868,7 +881,15 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 
 			MAKE_STD_ZVAL(res);
 
-			ZVAL_STRINGL(res, row[i], field_len[i], 1);	
+			if (UG(unicode)) {
+				UChar *ustr;
+				int ulen;
+
+				zend_string_to_unicode(MYSQLI_CONV_UTF8, &ustr, &ulen, row[i], field_len[i]);
+				ZVAL_UNICODEL(res, ustr, ulen, 0);
+			} else {
+				ZVAL_STRINGL(res, row[i], field_len[i], 1);	
+			}
 
 			if (fetchtype & MYSQLI_NUM) {
 				add_index_zval(return_value, i, res);
@@ -877,7 +898,17 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 				if (fetchtype & MYSQLI_NUM) {
 					ZVAL_ADDREF(res);
 				}
-				add_assoc_zval(return_value, fields[i].name, res);
+				if (UG(unicode)) {
+					UChar *ustr;
+					int ulen;
+
+					zend_string_to_unicode(MYSQLI_CONV_UTF8, &ustr, &ulen, fields[i].name, strlen(fields[i].name));
+					/* maybe a bug in add_u_assoc_zval_ex: string is truncated when specifying ulen only */
+					add_u_assoc_zval_ex(return_value, IS_UNICODE, ZSTR(ustr), ulen + 1, res);
+					efree(ustr);
+				} else {
+					add_assoc_zval(return_value, fields[i].name, res);
+				}
 			}
 		} else {
 			if (fetchtype & MYSQLI_NUM) {
