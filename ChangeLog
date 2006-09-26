@@ -1,3 +1,86 @@
+2006-09-25  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/soap/soap.c:
+      Fix arginfo&proto
+
+2006-09-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/url.c:
+      MFB: Fixed bug #38891 (get_headers() do not work with curl-wrappers).
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/url.c:
+      Fixed bug #38891 (get_headers() do not work with curl-wrappers).
+
+    * main/main.c:
+      MFB: Fixed bug #38904 (apache2filter changes cwd to /).
+
+    * (PHP_5_2)
+      NEWS
+      main/main.c:
+      Fixed bug #38904 (apache2filter changes cwd to /).
+
+2006-09-25  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      configure.in:
+      MFH: change CXXFLAGS along with CFLAGS as there might be C++ code
+
+    * configure.in:
+      change CXXFLAGS along with CFLAGS as there might be C++ code
+
+2006-09-25  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/tests/38943.phpt
+      ext/zip/tests/bug38943.phpt:
+      - fix test, php6 displays the class
+      - mv 38943.phpt to bug38943.phpt
+
+    * ext/zip/lib/zip_get_archive_comment.c:
+      - MFB: #38944, freshly created archive has no comment or cdir
+
+    * (PHP_5_2)
+      ext/zip/lib/zip_get_archive_comment.c:
+      - #38944, freshly created archive has no comment or cdir
+
+2006-09-25  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/zip/tests/bug38944.phpt:
+      add test
+
+    * ext/zip/tests/bug38944.phpt
+      ext/zip/tests/bug38944.phpt:
+      
+      add test
+
+2006-09-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/soap.c
+      ext/soap/soap.c:
+      Removed warning about unreferenced local variable
+
+    * ext/standard/dns.c
+      ext/standard/math.c:
+      ZTS fix
+
+2006-09-25  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/dns.c:
+      PHP6 Updates and some very minor feature add in dns_get_record()
+
+    * ext/standard/type.c:
+      Make settype($var, 'string'); behave like $var = (string)$var;
+      e.g. switch between (binary) and (unicode) depending on UG(unicode)
+
+    * ext/standard/crc32.c
+      ext/standard/crypt.c:
+      Flag a couple more unicode ready functions
+
+    * ext/standard/base64.c:
+      base64 functions are basicly binary-only ops
+
 2006-09-24  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * ext/zip/tests/38943.phpt
