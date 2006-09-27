@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   (Dmitry)
 - Fixed bug #38961 (metaphone() results in segmentation fault on NetBSD). 
   (Tony)
+- Fixed bug #38949 (Cannot get xmlns value attribute). (Rob)
 - Fixed bug #38942 (Double old-style-ctor inheritance). (Dmitry)
 - Fixed bug #38941 (imap extension does not compile against new version of
   the imap library). (Ilia)
