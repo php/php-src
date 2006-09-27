@@ -361,9 +361,7 @@ PHP_FUNCTION(apache_request_headers)
 		if (!tenv[i].key) {
 			continue;
 		}
-		if (add_assoc_string(return_value, tenv[i].key, (tenv[i].val==NULL) ? "" : tenv[i].val, 1)==FAILURE) {
-			RETURN_FALSE;
-		}
+		add_assoc_string(return_value, tenv[i].key, (tenv[i].val==NULL) ? "" : tenv[i].val, 1);
     }
 }
 /* }}} */
@@ -381,9 +379,7 @@ PHP_FUNCTION(apache_response_headers)
     tenv = (table_entry *)env_arr->elts;
     for (i = 0; i < env_arr->nelts; ++i) {
 		if (!tenv[i].key) continue;
-		if (add_assoc_string(return_value, tenv[i].key, (tenv[i].val==NULL) ? "" : tenv[i].val, 1)==FAILURE) {
-			RETURN_FALSE;
-		}
+		add_assoc_string(return_value, tenv[i].key, (tenv[i].val==NULL) ? "" : tenv[i].val, 1);
 	}
 }
 /* }}} */
