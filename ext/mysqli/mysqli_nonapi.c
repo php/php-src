@@ -36,47 +36,31 @@ PHP_FUNCTION(mysqli_connect)
 	MY_MYSQL 			*mysql;
 	MYSQLI_RESOURCE 	*mysqli_resource;
 	zval  				*object = getThis();
-	MYSQLI_STRING		hostname, username, passwd, dbname, socket;
+	char				*hostname, *username, *passwd, *dbname, *socket;
+	int					hostname_len, username_len, passwd_len, dbname_len, socket_len;
 	long				port=0;
 
 	if (getThis() && !ZEND_NUM_ARGS()) {
 		RETURN_NULL();
 	}
 
-	/* optional MYSQLI_STRING parameters have to be initialized */
-	memset(&hostname, 0, sizeof(MYSQLI_STRING));
-	memset(&username, 0, sizeof(MYSQLI_STRING));
-	memset(&dbname,   0, sizeof(MYSQLI_STRING));
-	memset(&passwd,   0, sizeof(MYSQLI_STRING));
-	memset(&socket,   0, sizeof(MYSQLI_STRING));
+	hostname = username = dbname = passwd = socket = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|TTTTlT", MYSQLI_GET_STRING(hostname), MYSQLI_GET_STRING(username),
-							MYSQLI_GET_STRING(passwd), MYSQLI_GET_STRING(dbname), &port, MYSQLI_GET_STRING(socket)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&s&s&s&ls&", &hostname, &hostname_len, UG(utf8_conv),
+							  &username, &username_len, UG(utf8_conv), &passwd, &passwd_len, UG(utf8_conv), 
+							  &dbname, &dbname_len, UG(utf8_conv), &port, &socket, &socket_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
-
-	/* load defaults */
-	if (!socket.buflen) {
-		socket.buf = NULL;
-	}
-
-	/* convert strings */
-	MYSQLI_CONVERT_PARAM_STRING(hostname, MYSQLI_CONV_ASCII);
-	MYSQLI_CONVERT_PARAM_STRING(username, MYSQLI_CONV_UTF8);
-	MYSQLI_CONVERT_PARAM_STRING(passwd, MYSQLI_CONV_UTF8);
-	MYSQLI_CONVERT_PARAM_STRING(dbname, MYSQLI_CONV_UTF8);
-	MYSQLI_CONVERT_PARAM_STRING(socket, MYSQLI_CONV_ASCII);
 
 	mysql = (MY_MYSQL *) ecalloc(1, sizeof(MY_MYSQL));
 
 	if (!(mysql->mysql = mysql_init(NULL))) {
 		efree(mysql);
-		RETVAL_FALSE;
-		goto end;
+		RETURN_FALSE;
 	}
 
 #ifdef HAVE_EMBEDDED_MYSQLI
-	if (hostname.cbuffer_len) {
+	if (hostname_len) {
 		unsigned int external=1;
 		mysql_options(mysql->mysql, MYSQL_OPT_USE_REMOTE_CONNECTION, (char *)&external);
 	} else {
@@ -84,8 +68,7 @@ PHP_FUNCTION(mysqli_connect)
 	}
 #endif
 
-	if (mysql_real_connect(mysql->mysql, (char *)hostname.buf, (char *)username.buf, (char *)passwd.buf, (char *)dbname.buf, port,
-							(char *)socket.buf, CLIENT_MULTI_RESULTS) == NULL) {
+	if (mysql_real_connect(mysql->mysql, hostname, username, passwd, dbname, port, socket, CLIENT_MULTI_RESULTS) == NULL) {
 		/* Save error messages */
 
 		php_mysqli_throw_sql_exception( mysql->mysql->net.sqlstate, mysql->mysql->net.last_errno TSRMLS_CC,
@@ -96,16 +79,14 @@ PHP_FUNCTION(mysqli_connect)
 		/* free mysql structure */
 		mysql_close(mysql->mysql);
 		efree(mysql);
-		RETVAL_FALSE;
-		goto end;
+		RETURN_FALSE;
 	}
 
 	/* when PHP runs in unicode, set default character set to utf8 */
 	if (UG(unicode)) {
 		mysql_set_character_set(mysql->mysql, "utf8");
-		mysql->conv = MYSQLI_CONV_UTF8;
+		mysql->conv = UG(utf8_conv);
 	}
-
 
 	/* clear error */
 	php_mysqli_set_error(mysql_errno(mysql->mysql), (char *) mysql_error(mysql->mysql) TSRMLS_CC);
@@ -124,12 +105,6 @@ PHP_FUNCTION(mysqli_connect)
 	} else {
 		((mysqli_object *) zend_object_store_get_object(object TSRMLS_CC))->ptr = mysqli_resource;
 	}
-end:
-	MYSQLI_FREE_STRING(hostname);	
-	MYSQLI_FREE_STRING(username);	
-	MYSQLI_FREE_STRING(passwd);	
-	MYSQLI_FREE_STRING(dbname);	
-	MYSQLI_FREE_STRING(socket);	
 }
 /* }}} */
 
@@ -146,16 +121,7 @@ PHP_FUNCTION(mysqli_connect_errno)
 PHP_FUNCTION(mysqli_connect_error) 
 {
 	if (MyG(error_msg)) {
-		if (UG(unicode)) {
-			UErrorCode status = U_ZERO_ERROR;
-			UChar *ustr;
-			int ulen;
-
-			zend_string_to_unicode(MYSQLI_CONV_UTF8, &ustr, &ulen, MyG(error_msg), strlen(MyG(error_msg)));
-			RETURN_UNICODEL(ustr, ulen, 0);
-		} else {
-			RETURN_STRING(MyG(error_msg),1);
-		}
+		ZVAL_UTF8_STRING(return_value, (char *)MyG(error_msg), ZSTR_DUPLICATE);
 	} else {
 		RETURN_NULL();
 	}
@@ -192,16 +158,17 @@ PHP_FUNCTION(mysqli_multi_query)
 {
 	MY_MYSQL		*mysql;
 	zval			*mysql_link;
-	MYSQLI_STRING	query;
+	char			*query;
+	int				query_len;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &mysql_link, mysqli_link_class_entry, MYSQLI_GET_STRING(query)) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&", &mysql_link, mysqli_link_class_entry, 
+									 &query, &query_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
-	MYSQLI_CONVERT_PARAM_STRING(query, MYSQLI_CONV_UTF8);
 
 	MYSQLI_ENABLE_MQ;	
-	if (mysql_real_query(mysql->mysql, (char *)query.buf, query.buflen)) {
+	if (mysql_real_query(mysql->mysql, query, query_len)) {
 		char s_error[MYSQL_ERRMSG_SIZE], s_sqlstate[SQLSTATE_LENGTH+1];
 		unsigned int s_errno;
 		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
@@ -219,11 +186,9 @@ PHP_FUNCTION(mysqli_multi_query)
 		strcpy(mysql->mysql->net.sqlstate, s_sqlstate);
 		mysql->mysql->net.last_errno = s_errno;	
 
-		RETVAL_FALSE;
-	} else {	
-		RETVAL_TRUE;
-	}
-	MYSQLI_FREE_STRING(query);
+		RETURN_FALSE;
+	} 
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -234,11 +199,12 @@ PHP_FUNCTION(mysqli_query)
 	zval				*mysql_link;
 	MYSQLI_RESOURCE		*mysqli_resource;
 	MYSQL_RES 			*result;
-	MYSQLI_STRING		query;
+	char				*query;
+	int					query_len;
 	unsigned long 		resultmode = MYSQLI_STORE_RESULT;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OT|l", &mysql_link, mysqli_link_class_entry, MYSQLI_GET_STRING(query), 
-									&resultmode) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&|l", &mysql_link, mysqli_link_class_entry, 
+									 &query, &query_len, UG(utf8_conv), &resultmode) == FAILURE) {
 		return;
 	}
 
@@ -249,28 +215,23 @@ PHP_FUNCTION(mysqli_query)
 
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL*, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
-	MYSQLI_CONVERT_PARAM_STRING(query, MYSQLI_CONV_UTF8);
-
-	if (!query.buflen) {
+	if (!query_len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty query");
-		RETVAL_FALSE;
-		goto end;
+		RETURN_FALSE;
 	}
 	MYSQLI_DISABLE_MQ;
 
-	if (mysql_real_query(mysql->mysql, (char *)query.buf, query.buflen)) {
+	if (mysql_real_query(mysql->mysql, query, query_len)) {
 		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
-		RETVAL_FALSE;
-		goto end;
+		RETURN_FALSE;
 	}
 
 	if (!mysql_field_count(mysql->mysql)) {
 		/* no result set - not a SELECT */
 		if (MyG(report_mode) & MYSQLI_REPORT_INDEX) {
-			php_mysqli_report_index(query.buf, mysql->mysql->server_status TSRMLS_CC);
+			php_mysqli_report_index(query, mysql->mysql->server_status TSRMLS_CC);
 		}
-		RETVAL_TRUE;
-		goto end;
+		RETURN_TRUE;
 	}
 
 	result = (resultmode == MYSQLI_USE_RESULT) ? mysql_use_result(mysql->mysql) : mysql_store_result(mysql->mysql);
@@ -278,20 +239,17 @@ PHP_FUNCTION(mysqli_query)
 	if (!result) {
 		php_mysqli_throw_sql_exception(mysql->mysql->net.sqlstate, mysql->mysql->net.last_errno TSRMLS_CC,
 										"%s", mysql->mysql->net.last_error); 
-		RETVAL_FALSE;
-		goto end;
+		RETURN_FALSE;
 	}
 
 	if (MyG(report_mode) & MYSQLI_REPORT_INDEX) {
-		php_mysqli_report_index((char *)query.buf, mysql->mysql->server_status TSRMLS_CC);
+		php_mysqli_report_index((char *)query, mysql->mysql->server_status TSRMLS_CC);
 	}
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)result;
 	mysqli_resource->status = MYSQLI_STATUS_VALID;
 	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_result_class_entry);
-end:
-	MYSQLI_FREE_STRING(query); 
 }
 /* }}} */
 
@@ -352,28 +310,26 @@ PHP_FUNCTION(mysqli_set_charset)
 {
 	MY_MYSQL			*mysql;
 	zval				*mysql_link;
-	MYSQLI_STRING		csname;
+	char				*csname;
+	int					csname_len;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &mysql_link, mysqli_link_class_entry, MYSQLI_GET_STRING(csname)) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&", &mysql_link, mysqli_link_class_entry, 
+									 &csname, &csname_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL*, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
-	MYSQLI_CONVERT_PARAM_STRING(csname, MYSQLI_CONV_UTF8);
-	RETVAL_FALSE;
 
 	/* check unicode modus */
 	/* todo: we need also to support UCS2. This will not work when using SET NAMES */
-	if (UG(unicode) && (csname.buflen != 4  || strncasecmp((char *)csname.buf, "utf8", 4))) {
+	if (UG(unicode) && (csname_len != 4  || strncasecmp(csname, "utf8", 4))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Character set %s is not supported when running PHP with unicode.semantics=On.", csname);
-		RETVAL_FALSE;
-		goto end;
+		RETURN_FALSE;
 	}
 
-	if (!mysql_set_character_set(mysql->mysql, (char *)csname.buf)) {
-		RETVAL_TRUE;
+	if (mysql_set_character_set(mysql->mysql, csname)) {
+		RETURN_FALSE;
 	}
-end:
-	MYSQLI_FREE_STRING(csname);
+	RETURN_TRUE;
 }
 /* }}} */
 #endif
@@ -401,17 +357,17 @@ PHP_FUNCTION(mysqli_get_charset)
 		UChar *ustr;
 		int ulen;
 
-		zend_string_to_unicode(MYSQLI_CONV_UTF8, &ustr, &ulen, (cs.csname) ? cs.csname : "", 
-								(cs.csname) ? strlen(cs.csname) : 0);
+		zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, (cs.csname) ? cs.csname : "", 
+								(cs.csname) ? strlen(cs.csname) : 0 TSRMLS_CC);
 		add_property_unicodel(return_value, "charset", ustr, ulen, 1);
-		zend_string_to_unicode(MYSQLI_CONV_UTF8, &ustr, &ulen, (cs.name) ? cs.name : "", 
-								(cs.name) ? strlen(cs.name) : 0);
+		zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, (cs.name) ? cs.name : "", 
+								(cs.name) ? strlen(cs.name) : 0 TSRMLS_CC);
 		add_property_unicodel(return_value, "collation", ustr, ulen, 1);
-		zend_string_to_unicode(MYSQLI_CONV_UTF8, &ustr, &ulen, (cs.comment) ? cs.comment : "", 
-								(cs.comment) ? strlen(cs.comment) : 0);
+		zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, (cs.comment) ? cs.comment : "", 
+								(cs.comment) ? strlen(cs.comment) : 0 TSRMLS_CC);
 		add_property_unicodel(return_value, "comment", ustr, ulen, 1);
-		zend_string_to_unicode(MYSQLI_CONV_UTF8, &ustr, &ulen, (cs.dir) ? cs.dir : "", 
-								(cs.dir) ? strlen(cs.dir) : 0);
+		zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, (cs.dir) ? cs.dir : "", 
+								(cs.dir) ? strlen(cs.dir) : 0 TSRMLS_CC);
 		add_property_unicodel(return_value, "dir", ustr, ulen, 1);
 	} else {
 		add_property_string(return_value, "charset", (cs.name) ? (char *)cs.csname : "", 1);
