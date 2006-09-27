@@ -1,3 +1,29 @@
+2006-09-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.h
+      zend_compile.h
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug38808.phpt:
+      Fixed bug #38808 ("maybe ref" issue for current() and others)
+
+    * tests/bug38808.phpt
+      tests/bug38808.phpt:
+      
+      file bug38808.phpt was initially added on branch PHP_5_2.
+
+    * zend_builtin_functions.c
+      zend_builtin_functions.c
+      tests/bug38942.phpt:
+      Fixed bug #38942 (Double old-style-ctor inheritance)
+
+    * tests/bug38942.phpt
+      tests/bug38942.phpt:
+      
+      file bug38942.phpt was initially added on branch PHP_5_2.
+
 2006-09-21  Sara Golemon  <sara@golemon.com>
 
     * zend_API.c
