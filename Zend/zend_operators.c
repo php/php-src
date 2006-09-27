@@ -221,8 +221,13 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 		}																	\
 	}
 
+#define DVAL_TO_LVAL(d, l) \
+	if ((d) > LONG_MAX) { \
+		(l) = (unsigned long) (d); \
+	} else { \
+		(l) = (long) (d); \
+	}
 
-#define DVAL_TO_LVAL(d, l) (l) = (((d) > LONG_MAX) ? (unsigned long) (d) : (long) (d))
 
 #define zendi_convert_to_long(op, holder, result)					\
 	if (op == result) {												\
