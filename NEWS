@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 - Fixed mess with CGI/CLI -d option (now it works with cgi; constants are
   working exactly like in php.ini; with FastCGI -d affects all requests).
   (Dmitry)
+- Fixed bug #38961 (metaphone() results in segmentation fault on NetBSD). 
+  (Tony)
 - Fixed bug #38942 (Double old-style-ctor inheritance). (Dmitry)
 - Fixed bug #38941 (imap extension does not compile against new version of
   the imap library). (Ilia)
