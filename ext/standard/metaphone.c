@@ -25,7 +25,7 @@
 #include "php.h"
 #include "php_metaphone.h"
 
-static int metaphone(char *word, int word_len, long max_phonemes, char **phoned_word, int traditional);
+static int metaphone(unsigned char *word, int word_len, long max_phonemes, char **phoned_word, int traditional);
 
 /* {{{ proto string metaphone(string text[, int phones])
    Break english phrases down into their phonemes */
@@ -41,7 +41,7 @@ PHP_FUNCTION(metaphone)
 		return;
 	}
 
-	if (metaphone(str, str_len, phones, &result, 1) == 0) {
+	if (metaphone((unsigned char *)str, str_len, phones, &result, 1) == 0) {
 		RETVAL_STRING(result, 0);
 	} else {
 		if (result) {
@@ -159,7 +159,7 @@ static char Lookahead(char *word, int how_far)
 
 /* {{{ metaphone
  */
-static int metaphone(char *word, int word_len, long max_phonemes, char **phoned_word, int traditional)
+static int metaphone(unsigned char *word, int word_len, long max_phonemes, char **phoned_word, int traditional)
 {
 	int w_idx = 0;				/* point in the phonization we're at. */
 	int p_idx = 0;				/* end of the phoned phrase */
