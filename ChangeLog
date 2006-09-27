@@ -1,3 +1,106 @@
+2006-09-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/metaphone.c:
+      MFB: 64bit fix (Possible fix for bug #38961)
+
+    * (PHP_5_2)
+      ext/standard/metaphone.c:
+      64bit fix (Possible fix for bug #38961)
+
+2006-09-26  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_driver.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_prop.c
+      ext/mysqli/mysqli_report.c
+      ext/mysqli/php_mysqli.h
+      ext/mysqli/tests/001.phpt
+      ext/mysqli/tests/002.phpt
+      ext/mysqli/tests/003.phpt
+      ext/mysqli/tests/004.phpt
+      ext/mysqli/tests/005.phpt
+      ext/mysqli/tests/009.phpt
+      ext/mysqli/tests/011.phpt
+      ext/mysqli/tests/012.phpt
+      ext/mysqli/tests/014.phpt
+      ext/mysqli/tests/015.phpt
+      ext/mysqli/tests/016.phpt
+      ext/mysqli/tests/017.phpt
+      ext/mysqli/tests/019.phpt
+      ext/mysqli/tests/020.phpt
+      ext/mysqli/tests/021.phpt
+      ext/mysqli/tests/022.phpt
+      ext/mysqli/tests/026.phpt
+      ext/mysqli/tests/028.phpt
+      ext/mysqli/tests/031.phpt
+      ext/mysqli/tests/032.phpt
+      ext/mysqli/tests/042.phpt
+      ext/mysqli/tests/043.phpt
+      ext/mysqli/tests/045.phpt
+      ext/mysqli/tests/047.phpt
+      ext/mysqli/tests/048.phpt
+      ext/mysqli/tests/049.phpt
+      ext/mysqli/tests/057.phpt
+      ext/mysqli/tests/058.phpt
+      ext/mysqli/tests/059.phpt
+      ext/mysqli/tests/060.phpt
+      ext/mysqli/tests/061.phpt
+      ext/mysqli/tests/062.phpt
+      ext/mysqli/tests/063.phpt
+      ext/mysqli/tests/065.phpt
+      ext/mysqli/tests/069.phpt
+      ext/mysqli/tests/072.phpt
+      ext/mysqli/tests/073.phpt
+      ext/mysqli/tests/074.phpt
+      ext/mysqli/tests/bug28817.phpt
+      ext/mysqli/tests/bug31141.phpt
+      ext/mysqli/tests/bug31668.phpt
+      ext/mysqli/tests/bug32405.phpt
+      ext/mysqli/tests/bug33263.phpt
+      ext/mysqli/tests/bug34785.phpt
+      ext/mysqli/tests/bug35517.phpt
+      ext/mysqli/tests/bug36745.phpt
+      ext/mysqli/tests/connect.inc
+      ext/mysqli/tests/skipif.inc:
+      added unicode support for mysqli extension
+
+2006-09-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug38808.phpt
+      ZendEngine2/tests/bug38808.phpt:
+      
+      file bug38808.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug38808.phpt:
+      Fixed bug #38808 ("maybe ref" issue for current() and others)
+
+    * ZendEngine2/tests/bug38942.phpt
+      ZendEngine2/tests/bug38942.phpt
+      ext/reflection/tests/bug38942.phpt:
+      
+      file bug38942.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/tests/bug38942.phpt
+      ext/reflection/php_reflection.c
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/bug38942.phpt
+      ext/reflection/tests/bug38942.phpt:
+      Fixed bug #38942 (Double old-style-ctor inheritance)
+
 2006-09-25  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * ext/soap/soap.c:
