@@ -188,7 +188,7 @@ int dom_element_schema_type_info_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 /* }}} */
 
-static xmlAttrPtr dom_get_dom1_attribute(xmlNodePtr elem, xmlChar *name) {
+static xmlNodePtr dom_get_dom1_attribute(xmlNodePtr elem, xmlChar *name) {
     int len;
     const xmlChar *nqname;
 
@@ -196,15 +196,37 @@ static xmlAttrPtr dom_get_dom1_attribute(xmlNodePtr elem, xmlChar *name) {
 	if (nqname != NULL) {
 		xmlNsPtr ns;
 		xmlChar *prefix = xmlStrndup(name, len);
+		if (prefix && xmlStrEqual(prefix, "xmlns")) {
+			ns = elem->nsDef;
+			while (ns) {
+				if (xmlStrEqual(ns->prefix, nqname)) {
+					break;
+				}
+				ns = ns->next;
+			}
+			xmlFree(prefix);
+			return (xmlNodePtr)ns;
+		}
 		ns = xmlSearchNs(elem->doc, elem, prefix);
 		if (prefix != NULL) {
 			xmlFree(prefix);
 		}
 		if (ns != NULL) {
-			return xmlHasNsProp(elem, nqname, ns->href);
+			return (xmlNodePtr)xmlHasNsProp(elem, nqname, ns->href);
+		}
+	} else {
+		if (xmlStrEqual(name, "xmlns")) {
+			xmlNsPtr nsPtr = elem->nsDef;
+			while (nsPtr) {
+				if (nsPtr->prefix == NULL) {
+					return (xmlNodePtr)nsPtr;
+				}
+				nsPtr = nsPtr->next;
+			}
+			return NULL;
 		}
 	}
-	return xmlHasNsProp(elem, name, NULL);
+	return (xmlNodePtr)xmlHasNsProp(elem, name, NULL);
 }
 
 /* {{{ proto string dom_element_get_attribute(string name);
@@ -217,7 +239,7 @@ PHP_FUNCTION(dom_element_get_attribute)
 	xmlNode *nodep;
 	char *name, *value = NULL;
 	dom_object *intern;
-	xmlAttrPtr attr;
+	xmlNodePtr attr;
 	int name_len;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_element_class_entry, &name, &name_len) == FAILURE) {
@@ -228,9 +250,14 @@ PHP_FUNCTION(dom_element_get_attribute)
 
 	attr = dom_get_dom1_attribute(nodep, (xmlChar *)name);
 	if (attr) {
-		if (attr->type == XML_ATTRIBUTE_NODE) {
+		switch (attr->type) {
+			case XML_ATTRIBUTE_NODE:
 			value = xmlNodeListGetString(attr->doc, attr->children, 1);
-		} else {
+				break;
+			case XML_NAMESPACE_DECL:
+				value = xmlStrdup(((xmlNsPtr)attr)->href);
+				break;
+			default:
 			value = xmlStrdup(((xmlAttributePtr)attr)->defaultValue);
 		}
 	}
@@ -253,7 +280,7 @@ PHP_FUNCTION(dom_element_set_attribute)
 {
 	zval *id, *rv = NULL;
 	xmlNode *nodep;
-	xmlAttr *attr;
+	xmlNodePtr attr = NULL;
 	int ret, name_len, value_len;
 	dom_object *intern;
 	char *name, *value;
@@ -275,16 +302,30 @@ PHP_FUNCTION(dom_element_set_attribute)
 	}
 
 	attr = dom_get_dom1_attribute(nodep, (xmlChar *)name);
-	if (attr != NULL && attr->type != XML_ATTRIBUTE_DECL) {
+	if (attr != NULL) {
+		switch (attr->type) {
+			case XML_ATTRIBUTE_NODE:
 		node_list_unlink(attr->children TSRMLS_CC);
+				break;
+			case XML_NAMESPACE_DECL:
+				RETURN_FALSE;
+		}
+
 	}
-	attr = xmlSetProp(nodep, name, value);
+
+	if (xmlStrEqual((xmlChar *)name, "xmlns")) {
+		if (xmlNewNs(nodep, (xmlChar *)value, NULL)) {
+			RETURN_TRUE;
+		}
+	} else {
+		attr = (xmlNodePtr)xmlSetProp(nodep, name, value);
+	}
 	if (!attr) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such attribute '%s'", name);
 		RETURN_FALSE;
 	}
 
-	DOM_RET_OBJ(rv, (xmlNodePtr) attr, &ret, intern);
+	DOM_RET_OBJ(rv, attr, &ret, intern);
 
 }
 /* }}} end dom_element_set_attribute */
@@ -297,8 +338,7 @@ Since:
 PHP_FUNCTION(dom_element_remove_attribute)
 {
 	zval *id;
-	xmlNode *nodep;
-	xmlAttr *attrp;
+	xmlNodePtr nodep, attrp;
 	dom_object *intern;
 	int name_len;
 	char *name;
@@ -319,14 +359,18 @@ PHP_FUNCTION(dom_element_remove_attribute)
 		RETURN_FALSE;
 	}
 
-	if (attrp->type != XML_ATTRIBUTE_DECL) {
-		if (php_dom_object_get_data((xmlNodePtr) attrp) == NULL) {
+	switch (attrp->type) {
+		case XML_ATTRIBUTE_NODE:
+			if (php_dom_object_get_data(attrp) == NULL) {
 			node_list_unlink(attrp->children TSRMLS_CC);
-			xmlUnlinkNode((xmlNodePtr) attrp);
-			xmlFreeProp(attrp);
+				xmlUnlinkNode(attrp);
+				xmlFreeProp((xmlAttrPtr)attrp);
 		} else {
-			xmlUnlinkNode((xmlNodePtr) attrp);
+				xmlUnlinkNode(attrp);
 		}
+			break;
+		case XML_NAMESPACE_DECL:
+			RETURN_FALSE;
 	}
 
 	RETURN_TRUE;
@@ -341,8 +385,7 @@ Since:
 PHP_FUNCTION(dom_element_get_attribute_node)
 {
 	zval *id, *rv = NULL;
-	xmlNode *nodep;
-	xmlAttr  *attrp;
+	xmlNodePtr nodep, attrp;
 	int name_len, ret;
 	dom_object *intern;
 	char *name;
@@ -356,6 +399,25 @@ PHP_FUNCTION(dom_element_get_attribute_node)
 	attrp = dom_get_dom1_attribute(nodep, (xmlChar *)name);
 	if (attrp == NULL) {
 		RETURN_FALSE;
+	}
+
+	if (attrp->type == XML_NAMESPACE_DECL) {
+		xmlNsPtr curns;
+		xmlNodePtr nsparent;
+
+		nsparent = attrp->_private;
+		curns = xmlNewNs(NULL, attrp->name, NULL);
+		if (attrp->children) {
+			curns->prefix = xmlStrdup((xmlChar *) attrp->children);
+		}
+		if (attrp->children) {
+			attrp = xmlNewDocNode(nodep->doc, NULL, (xmlChar *) attrp->children, attrp->name);
+		} else {
+			attrp = xmlNewDocNode(nodep->doc, NULL, "xmlns", attrp->name);
+		}
+		attrp->type = XML_NAMESPACE_DECL;
+		attrp->parent = nsparent;
+		attrp->ns = curns;
 	}
 
 	DOM_RET_OBJ(rv, (xmlNodePtr) attrp, &ret, intern);
@@ -879,7 +941,7 @@ PHP_FUNCTION(dom_element_has_attribute)
 	dom_object *intern;
 	char *name;
 	int name_len;
-	xmlAttrPtr attr;
+	xmlNodePtr attr;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_element_class_entry, &name, &name_len) == FAILURE) {
 		return;
