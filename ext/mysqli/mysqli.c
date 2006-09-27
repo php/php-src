@@ -166,6 +166,13 @@ static void mysqli_link_free_storage(void *object TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ mysql_driver_free_storage */
+static void mysqli_driver_free_storage(void *object TSRMLS_DC)
+{
+	mysqli_objects_free_storage(object TSRMLS_CC);
+}
+/* }}} */
+
 /* {{{ mysqli_stmt_free_storage
  */
 static void mysqli_stmt_free_storage(void *object TSRMLS_DC)
@@ -251,22 +258,13 @@ zval *mysqli_read_property(zval *object, zval *member, int type TSRMLS_DC)
 	}
 
 	if (obj->prop_handler != NULL) {
-		ret = zend_u_hash_find(obj->prop_handler, UG(unicode)?IS_UNICODE:IS_STRING, Z_UNIVAL_P(member), Z_UNILEN_P(member)+1, (void **) &hnd);
+		ret = zend_u_hash_find(obj->prop_handler, ZEND_STR_TYPE, Z_UNIVAL_P(member), Z_UNILEN_P(member)+1, (void **) &hnd);
 	}
 
 	if (ret == SUCCESS) {
-		int is_driver;
 
-		if (UG(unicode)) {
-			UChar *ustr = USTR_MAKE("mysqli_driver");
-			is_driver = u_strcmp(obj->zo.ce->name.u, ustr);
-			USTR_FREE(ustr);
-		} else {
-			is_driver = strcmp(obj->zo.ce->name.s, "mysqli_driver");
-		}
-		
-		if (is_driver && (!obj->ptr || ((MYSQLI_RESOURCE *)(obj->ptr))->status < MYSQLI_STATUS_INITIALIZED)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %R", UG(unicode)?IS_UNICODE:IS_STRING, obj->zo.ce->name );
+		if ((!obj->ptr || ((MYSQLI_RESOURCE *)(obj->ptr))->status < MYSQLI_STATUS_INITIALIZED)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %v", obj->zo.ce->name );
 			retval = EG(uninitialized_zval_ptr);
 			return(retval);
 		}
@@ -396,7 +394,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 		mysqli_base_class = mysqli_base_class->parent;
 	}
 
-	zend_u_hash_find(&classes, UG(unicode)?IS_UNICODE:IS_STRING, mysqli_base_class->name, mysqli_base_class->name_length + 1, 
+	zend_u_hash_find(&classes, ZEND_STR_TYPE, mysqli_base_class->name, mysqli_base_class->name_length + 1, 
 					(void **) &intern->prop_handler);
 
 	zend_object_std_init(&intern->zo, class_type TSRMLS_CC);
@@ -406,6 +404,8 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 	/* link object */
 	if (instanceof_function(class_type, mysqli_link_class_entry TSRMLS_CC)) {
 		free_storage = mysqli_link_free_storage;
+	} else if (instanceof_function(class_type, mysqli_driver_class_entry TSRMLS_CC)) { /* stmt object */
+		free_storage = mysqli_driver_free_storage;
 	} else if (instanceof_function(class_type, mysqli_stmt_class_entry TSRMLS_CC)) { /* stmt object */
 		free_storage = mysqli_stmt_free_storage;
 	} else if (instanceof_function(class_type, mysqli_result_class_entry TSRMLS_CC)) { /* result object */
@@ -720,7 +720,8 @@ ZEND_FUNCTION(mysqli_stmt_construct)
 	zval  				*mysql_link;
 	MY_STMT				*stmt;
 	MYSQLI_RESOURCE 	*mysqli_resource;
-	MYSQLI_STRING		statement;
+	char				*statement;
+	int					statement_len;
 
 	switch (ZEND_NUM_ARGS())
 	{
@@ -735,19 +736,16 @@ ZEND_FUNCTION(mysqli_stmt_construct)
 			stmt->stmt = mysql_stmt_init(mysql->mysql);
 		break;
 		case 2:
-			if (zend_parse_parameters(2 TSRMLS_CC, "OT", &mysql_link, mysqli_link_class_entry, MYSQLI_GET_STRING(statement))==FAILURE) {
+			if (zend_parse_parameters(2 TSRMLS_CC, "Os&", &mysql_link, mysqli_link_class_entry, &statement, &statement_len, UG(utf8_conv))==FAILURE) {
 				return;
 			}
 			MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
 			stmt = (MY_STMT *)ecalloc(1,sizeof(MY_STMT));
 
-			MYSQLI_CONVERT_PARAM_STRING(statement, MYSQLI_CONV_UTF8);
-	
 			if ((stmt->stmt = mysql_stmt_init(mysql->mysql))) {
-				mysql_stmt_prepare(stmt->stmt, (char *)statement.buf, statement.buflen);
+				mysql_stmt_prepare(stmt->stmt, (char *)statement, statement_len);
 			}
-			MYSQLI_FREE_STRING(statement);
 		break;
 		default:
 			WRONG_PARAM_COUNT;
@@ -885,7 +883,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 				UChar *ustr;
 				int ulen;
 
-				zend_string_to_unicode(MYSQLI_CONV_UTF8, &ustr, &ulen, row[i], field_len[i]);
+				zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, row[i], field_len[i] TSRMLS_CC);
 				ZVAL_UNICODEL(res, ustr, ulen, 0);
 			} else {
 				ZVAL_STRINGL(res, row[i], field_len[i], 1);	
@@ -902,7 +900,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 					UChar *ustr;
 					int ulen;
 
-					zend_string_to_unicode(MYSQLI_CONV_UTF8, &ustr, &ulen, fields[i].name, strlen(fields[i].name));
+					zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, fields[i].name, strlen(fields[i].name) TSRMLS_CC);
 					/* maybe a bug in add_u_assoc_zval_ex: string is truncated when specifying ulen only */
 					add_u_assoc_zval_ex(return_value, IS_UNICODE, ZSTR(ustr), ulen + 1, res);
 					efree(ustr);
