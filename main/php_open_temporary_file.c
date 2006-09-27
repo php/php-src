@@ -207,6 +207,7 @@ PHPAPI const char* php_get_temporary_directory(void)
 PHPAPI int php_open_temporary_fd(const char *dir, const char *pfx, char **opened_path_p TSRMLS_DC)
 {
 	int fd;
+	char *temp_dir = php_get_temporary_directory();
 
 	if (!pfx) {
 		pfx = "tmp.";
@@ -215,11 +216,19 @@ PHPAPI int php_open_temporary_fd(const char *dir, const char *pfx, char **opened
 		*opened_path_p = NULL;
 	}
 
+	if (!dir || *dir == '\0') {
+		if (temp_dir && *temp_dir != '\0' && !php_check_open_basedir(temp_dir TSRMLS_CC)) {
+			return php_do_open_temporary_file(temp_dir, pfx, opened_path_p TSRMLS_CC);
+		} else {
+			return -1;
+		}
+	}
+
 	/* Try the directory given as parameter. */
 	fd = php_do_open_temporary_file(dir, pfx, opened_path_p TSRMLS_CC);
 	if (fd == -1) {
 		/* Use default temporary directory. */
-		fd = php_do_open_temporary_file(php_get_temporary_directory(), pfx, opened_path_p TSRMLS_CC);
+		fd = php_do_open_temporary_file(temp_dir, pfx, opened_path_p TSRMLS_CC);
 	}
 	return fd;
 }
