@@ -2190,7 +2190,7 @@ PHP_FUNCTION(timezone_name_get)
 	tzobj = (php_timezone_obj *) zend_object_store_get_object(object TSRMLS_CC);
 	DATE_CHECK_INITIALIZED(tzobj->tz, DateTimeZone);
 
-	RETURN_STRING(tzobj->tz->name, 1);
+	RETURN_ASCII_STRING(tzobj->tz->name, 1);
 }
 /* }}} */
 
