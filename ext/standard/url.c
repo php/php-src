@@ -202,9 +202,17 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 	} else {
 		e = p;
 	}	
+
+	{
+		char *t = s;
+		p = NULL;
+		while (e > t && (t = memchr(t, '@', (e-t)))) {
+			p = t++;
+		}
+	}
 		
 	/* check for login and password */
-	if ((p = memchr(s, '@', (e-s)))) {
+	if (p) {
 		if ((pp = memchr(s, ':', (p-s)))) {
 			if ((pp-s) > 0) {
 				ret->user = estrndup(s, (pp-s));
