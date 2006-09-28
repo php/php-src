@@ -675,6 +675,11 @@ PHP_FUNCTION(get_headers)
 		RETURN_FALSE;
 	}
 
+	if (!stream->wrapperdata || Z_TYPE_P(stream->wrapperdata) != IS_ARRAY) {
+		php_stream_close(stream);
+		RETURN_FALSE;
+	}
+
 	array_init(return_value);
 
 	/* check for curl-wrappers that provide headers via a special "headers" element */
