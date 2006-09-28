@@ -2212,6 +2212,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 
 		io_ctx = gdNewDynamicCtxEx(buff_size, buff, 0);
 		if (!io_ctx) {
+			pefree(buff, 1);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Cannot allocate GD IO context");
 			goto out_err;
 		}
@@ -2222,6 +2223,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 			im = (*ioctx_func_p)(io_ctx);
 		}
 		io_ctx->gd_free(io_ctx);
+		pefree(buff, 1);
 	} else {
 		/* try and force the stream to be FILE* */
 		if (FAILURE == php_stream_cast(stream, PHP_STREAM_AS_STDIO | PHP_STREAM_CAST_TRY_HARD, (void **) &fp, REPORT_ERRORS)) {
