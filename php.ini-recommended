@@ -108,12 +108,6 @@
 ;     It's not possible to decide to force a variable to be passed by reference
 ;     when calling a function.  The PHP 4 style to do this is by making the
 ;     function require the relevant argument by reference.
-; - short_open_tag = Off
-; - precision = 14
-; - session.gc_divisor = 1000
-; - session.bug_compat_42 = 1
-; - session.hash_bits_per_character = 5
-; - url_rewriter.tags = "a=href,area=href,frame=src,input=src,form=fakeentry"
 
 ;;;;;;;;;;;;;;;;;;;;
 ; Language Options ;
