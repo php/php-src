@@ -1,3 +1,8 @@
+2006-09-27  Antony Dovgal  <antony@zend.com>
+
+    * zend_operators.c:
+      use if() instead of ?: and avoid possible optimization problems
+
 2006-09-26  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.h

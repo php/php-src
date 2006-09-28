@@ -1,3 +1,83 @@
+2006-09-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      main/php_open_temporary_file.c:
+      MFH: Fixed bug #38963 (Fixed a possible open_basedir bypass in tempnam()).
+
+    * main/php_open_temporary_file.c:
+      MFB: Fixed bug #38963 (Fixed a possible open_basedir bypass in tempnam()).
+
+    * (PHP_5_2)
+      NEWS
+      main/php_open_temporary_file.c:
+      Fixed bug #38963 (Fixed a possible open_basedir bypass in tempnam()).
+
+2006-09-27  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/php_date.c
+      ext/date/tests/oo_001.phpt
+      ext/date/tests/oo_002.phpt:
+      - Return timezone's names as Unicode strings.
+
+    * sapi/apache/php_apache.c:
+      - Updated the Apache 1.3 sapi as add_assoc_string's signature has been
+      changed.
+
+2006-09-27  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_operators.c:
+      use if() instead of ?: and avoid possible optimization problems
+
+2006-09-27  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_driver.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_prop.c
+      ext/mysqli/php_mysqli.h:
+      ZTS fixes. Implemented Andrei's hints (simplifying unicode stuff)
+
+2006-09-27  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * ext/dom/element.c
+      ext/dom/tests/bug38949.phpt
+      ext/dom/tests/nsdoc.xml:
+      MFB: fix bug #38949 (Cannot get xmlns value attribute)
+      add test
+
+    * (PHP_5_2)
+      ext/dom/element.c
+      ext/dom/tests/bug38949.phpt
+      ext/dom/tests/bug38949.phpt
+      ext/dom/tests/nsdoc.xml
+      ext/dom/tests/nsdoc.xml:
+      fix bug #38949 (Cannot get xmlns value attribute)
+      add test
+
+2006-09-27  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/oci8/tests/coll_016_func.phpt:
+      fix test
+
+    * ext/oci8/tests/coll_016_func.phpt:
+      fix test
+      the error message is different in Oracle10
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/metaphone.c:
+      MFH: fix #38961 (metaphone() results in segmentation fault on NetBSD)
+
+    * ext/standard/metaphone.c:
+      fix #38961 (metaphone() results in segmentation fault on NetBSD)
+
 2006-09-26  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/metaphone.c:
