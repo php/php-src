@@ -1108,28 +1108,6 @@ mssql.secure_connection = Off
 ; error_reporting(0) around the eval().
 ;assert.quiet_eval = 0
 
-[Verisign Payflow Pro]
-; Default Payflow Pro server.
-pfpro.defaulthost = "test-payflow.verisign.com"
-
-; Default port to connect to.
-pfpro.defaultport = 443
-
-; Default timeout in seconds.
-pfpro.defaulttimeout = 30
-
-; Default proxy IP address (if required).
-;pfpro.proxyaddress =
-
-; Default proxy port.
-;pfpro.proxyport =
-
-; Default proxy logon.
-;pfpro.proxylogon =
-
-; Default proxy password.
-;pfpro.proxypassword =
-
 [COM]
 ; path to a file containing GUIDs, IIDs or filenames of files with TypeLibs
 ;com.typelib_file =
@@ -1183,9 +1161,6 @@ pfpro.defaulttimeout = 30
 ; 4: Overload ereg*() functions
 ;mbstring.func_overload = 0
 
-; enable strict encoding detection.
-;mbstring.strict_encoding = Off
-
 [FrontBase]
 ;fbsql.allow_persistent = On
 ;fbsql.autocommit = On
@@ -1200,7 +1175,6 @@ pfpro.defaulttimeout = 30
 ;fbsql.max_links = 128
 ;fbsql.max_persistent = -1
 ;fbsql.max_results = 128
-;fbsql.batchSize = 1000
 
 [gd]
 ; Tell the jpeg decode to libjpeg warnings and try to create

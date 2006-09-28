@@ -108,7 +108,12 @@
 ;     It's not possible to decide to force a variable to be passed by reference
 ;     when calling a function.  The PHP 4 style to do this is by making the
 ;     function require the relevant argument by reference.
-
+; - short_open_tag = Off
+; - precision = 14
+; - session.gc_divisor = 1000
+; - session.bug_compat_42 = 1
+; - session.hash_bits_per_character = 5
+; - url_rewriter.tags = "a=href,area=href,frame=src,input=src,form=fakeentry"
 
 ;;;;;;;;;;;;;;;;;;;;
 ; Language Options ;
@@ -1154,28 +1159,6 @@ mssql.secure_connection = Off
 ; error_reporting(0) around the eval().
 ;assert.quiet_eval = 0
 
-[Verisign Payflow Pro]
-; Default Payflow Pro server.
-pfpro.defaulthost = "test-payflow.verisign.com"
-
-; Default port to connect to.
-pfpro.defaultport = 443
-
-; Default timeout in seconds.
-pfpro.defaulttimeout = 30
-
-; Default proxy IP address (if required).
-;pfpro.proxyaddress =
-
-; Default proxy port.
-;pfpro.proxyport =
-
-; Default proxy logon.
-;pfpro.proxylogon =
-
-; Default proxy password.
-;pfpro.proxypassword =
-
 [COM]
 ; path to a file containing GUIDs, IIDs or filenames of files with TypeLibs
 ;com.typelib_file =
@@ -1246,7 +1229,6 @@ pfpro.defaulttimeout = 30
 ;fbsql.max_links = 128
 ;fbsql.max_persistent = -1
 ;fbsql.max_results = 128
-;fbsql.batchSize = 1000
 
 [gd]
 ; Tell the jpeg decode to libjpeg warnings and try to create
