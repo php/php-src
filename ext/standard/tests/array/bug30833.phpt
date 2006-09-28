@@ -1,5 +1,5 @@
 --TEST--
-bug #30833 (array_count_values() modifying input array)
+Bug #30833 (array_count_values() modifies input array)
 --FILE--
 <?php
 
