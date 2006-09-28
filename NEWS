@@ -14,7 +14,7 @@ PHP                                                                        NEWS
 - Fixed bug #38942 (Double old-style-ctor inheritance). (Dmitry)
 - Fixed bug #38941 (imap extension does not compile against new version of
   the imap library). (Ilia)
-- Fixed bug #38904 (apache2filter changes cwd to /). (Ilia, bjori)
+- Fixed bug #38904 (apache2filter changes cwd to /). (Ilia, Hannes)
 - Fixed bug #38891 (get_headers() do not work with curl-wrappers). (Ilia)
 - Fixed bug #38859 (parse_url() fails if passing '@' in passwd). (Tony)
 - Fixed bug #38844 (curl_easy_strerror() is defined only since cURL 7.12.0).
