@@ -124,6 +124,7 @@ output_buffering = Off
 ; Note: You need to use zlib.output_handler instead of the standard
 ;       output_handler, or otherwise the output will be corrupted.
 zlib.output_compression = Off
+;zlib.output_compression_level = -1
 
 ; You cannot specify additional output handlers if zlib.output_compression
 ; is activated here. This setting does the same as output_handler but in
@@ -336,6 +337,8 @@ ignore_repeated_source = Off
 ; stdout or in the log). This has only effect in a debug compile, and if
 ; error reporting includes E_WARNING in the allowed list
 report_memleaks = On
+
+;report_zend_debug = 0
 
 ; Store the last error/warning message in $php_errormsg (boolean).
 track_errors = Off
@@ -621,7 +624,36 @@ default_socket_timeout = 60
 
 [Date]
 ; Defines the default timezone used by the date functions
-;date.timezone = 
+;date.timezone =
+
+;date.default_latitude = 31.7667
+;date.default_longitude = 35.2333
+
+;date.sunrise_zenith = 90.583333
+;date.sunset_zenith = 90.583333
+
+[filter]
+;filter.default = unsafe_raw
+;filter.default_flags =
+
+[iconv]
+;iconv.input_encoding = ISO-8859-1
+;iconv.internal_encoding = ISO-8859-1
+;iconv.output_encoding = ISO-8859-1
+
+[pdo]
+;pdo.global_value = 41
+
+[sqlite]
+;sqlite.assoc_case = 0
+
+[xmlrpc]
+;xmlrpc_error_number = 0
+;xmlrpc_errors = 0
+
+[Pcre]
+;pcre.recursion_limit=100000
+;pcre.backtrack_limit=100000
 
 [Syslog]
 ; Whether or not to define the various syslog variables (e.g. $LOG_PID,
@@ -896,6 +928,8 @@ session.save_handler = files
 
 ; Whether to use cookies.
 session.use_cookies = 1
+
+;session.cookie_secure = 
 
 ; This option enables administrators to make their users invulnerable to
 ; attacks which involve passing session ids in URLs; defaults to 0.
@@ -1173,7 +1207,7 @@ pfpro.defaulttimeout = 30
 ; a gd image. The warning will then be displayed as notices
 ; disabled by default
 ;gd.jpeg_ignore_warning = 0
- 
+
 [exif]
 ; Exif UNICODE user comments are handled as UCS-2BE/UCS-2LE and JIS as JIS.
 ; With mbstring support this will automatically be converted into the encoding
