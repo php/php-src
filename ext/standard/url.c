@@ -211,7 +211,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 	}	
 		
 	/* check for login and password */
-	if ((p = memchr(s, '@', (e-s)))) {
+	if ((p = zend_memrchr(s, '@', (e-s)))) {
 		if ((pp = memchr(s, ':', (p-s)))) {
 			if ((pp-s) > 0) {
 				ret->user = estrndup(s, (pp-s));

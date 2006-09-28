@@ -71,6 +71,7 @@ $sample_urls = array (
 'scheme:',
 'foo+bar://baz@bang/bla',
 'gg:9130731',
+'http://user:@pass@host/path?argument?value#etc',
 );
 
     foreach ($sample_urls as $url) {
@@ -525,11 +526,11 @@ array(7) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
-  string(19) "hideout@www.php.net"
+  string(11) "www.php.net"
   ["port"]=>
   int(80)
   ["user"]=>
-  string(6) "secret"
+  string(14) "secret@hideout"
   ["path"]=>
   string(10) "/index.php"
   ["query"]=>
@@ -684,6 +685,22 @@ array(2) {
   string(2) "gg"
   ["path"]=>
   string(7) "9130731"
+}
+array(7) {
+  ["scheme"]=>
+  string(4) "http"
+  ["host"]=>
+  string(4) "host"
+  ["user"]=>
+  string(4) "user"
+  ["pass"]=>
+  string(5) "@pass"
+  ["path"]=>
+  string(5) "/path"
+  ["query"]=>
+  string(14) "argument?value"
+  ["fragment"]=>
+  string(3) "etc"
 }
 string(4) "http"
 string(11) "www.php.net"
