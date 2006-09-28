@@ -506,7 +506,7 @@ struct _pdo_dbh_t {
 /* describes a column */
 struct pdo_column_data {
 	char *name;
-	long namelen;
+	int namelen;
 	unsigned long maxlen;
 	enum pdo_param_type param_type;
 	unsigned long precision;
