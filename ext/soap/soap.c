@@ -315,7 +315,7 @@ ZEND_BEGIN_ARG_INFO(__call_args, 0)
 	ZEND_ARG_PASS_INFO(0)
 	ZEND_ARG_PASS_INFO(0)
 ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_INFO(__soap_call_args, 0)
+ZEND_BEGIN_ARG_INFO_EX(__soap_call_args, 0, 0, 2)
 	ZEND_ARG_PASS_INFO(0)
 	ZEND_ARG_PASS_INFO(0)
 	ZEND_ARG_PASS_INFO(0)
@@ -2690,7 +2690,7 @@ static void verify_soap_headers_array(HashTable *ht TSRMLS_DC)
 }
 
 
-/* {{{ proto mixed SoapClient::__call ( string function_name [, array arguments [, array options [, array input_headers [, array output_headers]]]])
+/* {{{ proto mixed SoapClient::__call ( string function_name, array arguments [, array options [, array input_headers [, array output_headers]]])
    Calls a SOAP function */
 PHP_METHOD(SoapClient, __call)
 {
