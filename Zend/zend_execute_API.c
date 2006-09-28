@@ -797,7 +797,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			&& !(EX(function_state).function->common.fn_flags & ZEND_ACC_STATIC)
 			&& !instanceof_function(check_scope_or_static, calling_scope TSRMLS_CC)) {
 				zend_error(E_ERROR, "Cannot call method %s() of class %s which is not a derived from %s", fname, calling_scope->name, check_scope_or_static->name);
-				return 0;
+				return FAILURE;
 			}
 		} else {
 			char *function_name_lc = zend_str_tolower_dup(fname, fname_len);
