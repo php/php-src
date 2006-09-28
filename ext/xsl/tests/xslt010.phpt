@@ -3,7 +3,9 @@ Test 10: EXSLT Support
 --SKIPIF--
 <?php require_once('skipif.inc'); 
 $proc = new xsltprocessor;
-if (!$proc->hasExsltSupport()) die('skip EXSLT support not available');?>
+if (!$proc->hasExsltSupport()) die('skip EXSLT support not available');
+if (LIBXSLT_VERSION < 10117) die('skip too old libxsl');
+?>
 --FILE--
 <?php
 echo "Test 10: EXSLT Support";
@@ -63,7 +65,7 @@ Test 10: EXSLT Support
     month-in-year        : 2
     month-name           : February
     month-abbreviation   : Feb
-    week-in-year         : 8
+    week-in-year         : 9
     day-in-year          : 60
     day-in-month         : 29
     day-of-week-in-month : 5
@@ -99,7 +101,7 @@ Test 10: EXSLT Support
     month-in-year        : 2
     month-name           : February
     month-abbreviation   : Feb
-    week-in-year         : 9
+    week-in-year         : 10
     day-in-year          : 60
     day-in-month         : 29
     day-of-week-in-month : 5
@@ -110,3 +112,4 @@ Test 10: EXSLT Support
     hour-in-day          : NaN
     minute-in-hour       : NaN
     second-in-minute     : NaN
+
