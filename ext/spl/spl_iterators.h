@@ -127,7 +127,7 @@ typedef struct _spl_dual_it_object {
 			long             count;
 		} limit;
 		struct {
-			int              flags; /* CIT_* */
+			long             flags; /* CIT_* */
 			zval             *zstr;
 			zval             *zchildren;
 			zval             *zcache;
@@ -139,7 +139,7 @@ typedef struct _spl_dual_it_object {
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 		struct {
 			int              use_flags;
-			int              flags;
+			long             flags;
 			regex_mode       mode;
 			long             preg_flags;
 			pcre_cache_entry *pce;
