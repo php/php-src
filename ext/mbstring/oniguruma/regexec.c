@@ -390,6 +390,7 @@ typedef struct {
 
 #define STATE_CHECK_BUFF_INIT(msa, str_len, state_num) do { \
   (msa).state_check_buff = (void* )0;\
+  (msa).state_check_buff_size = 0;\
   if ((state_num) > 0 && str_len >= STATE_CHECK_STRING_THRESHOLD_LEN) {\
     int size = ((int )((str_len) + 1) * (state_num) + 7) / 8;\
     (msa).state_check_buff_size = size;			     \
