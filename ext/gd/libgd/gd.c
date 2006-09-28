@@ -1914,6 +1914,10 @@ void gdImageFill(gdImagePtr im, int x, int y, int nc)
 	struct seg *stack;
 	struct seg *sp;
 
+	if (!im->trueColor && nc > (im->colorsTotal -1)) {
+		return;
+	}
+
 	alphablending_bak = im->alphaBlendingFlag;	
 	im->alphaBlendingFlag = 0;
 
