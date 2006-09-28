@@ -207,7 +207,7 @@ PHPAPI const char* php_get_temporary_directory(void)
 PHPAPI int php_open_temporary_fd(const char *dir, const char *pfx, char **opened_path_p TSRMLS_DC)
 {
 	int fd;
-	char *temp_dir = php_get_temporary_directory();
+	const char *temp_dir = php_get_temporary_directory();
 
 	if (!pfx) {
 		pfx = "tmp.";
