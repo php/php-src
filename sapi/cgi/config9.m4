@@ -127,11 +127,6 @@ if test "$PHP_SAPI" = "default"; then
     AC_MSG_RESULT($PHP_ENABLE_PATHINFO_CHECK)
 
     AC_MSG_CHECKING(whether to enable fastcgi support)
-    PHP_LIBFCGI_DIR="$abs_srcdir/sapi/cgi/libfcgi"
-    if test -z $PHP_LIBFCGI_DIR; then
-      echo "$PHP_LIBFCGI_DIR does not exist"
-      exit 1
-    fi
     if test "$PHP_ENABLE_FASTCGI" = "yes"; then
       PHP_FASTCGI=1
       PHP_FCGI_FILES="fastcgi.c"

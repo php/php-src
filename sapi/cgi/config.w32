@@ -18,7 +18,7 @@ if (PHP_CGI == "yes") {
 	ADD_FLAG("LDFLAGS_CGI", "/stack:8388608");
 
 	if (PHP_FASTCGI == "yes") {
-		SAPI('cgi', 'cgi_main.c getopt.c fastcgi.c', 'php-cgi.exe', '/I sapi/cgi/libfcgi/include /D FCGI_STATIC');
+		SAPI('cgi', 'cgi_main.c getopt.c fastcgi.c', 'php-cgi.exe');
 		ADD_FLAG('LIBS_CGI', 'ws2_32.lib kernel32.lib advapi32.lib');
 	} else {
 		SAPI('cgi', 'cgi_main.c getopt.c', 'php-cgi.exe');
