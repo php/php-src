@@ -929,11 +929,26 @@ static void unicode_globals_ctor(zend_unicode_globals *unicode_globals TSRMLS_DC
 	unicode_globals->to_error_mode = ZEND_CONV_ERROR_STOP;
 	unicode_globals->conv_error_handler = NULL;
 
+	{
+		UErrorCode status = U_ZERO_ERROR;
+
+		unicode_globals->root_collator = ucol_open("en_US", &status);
+		ucol_setStrength(unicode_globals->root_collator, UCOL_PRIMARY);
+		unicode_globals->root_search = usearch_openFromCollator(EMPTY_STR, 1, EMPTY_STR, 1,
+																unicode_globals->root_collator, NULL, &status);
+	}
+
 	zend_hash_init_ex(&unicode_globals->flex_compatible, 0, NULL, NULL, 1, 0);
 }
 
 static void unicode_globals_dtor(zend_unicode_globals *unicode_globals TSRMLS_DC)
 {
+	if (unicode_globals->root_collator) {
+		ucol_close(unicode_globals->root_collator);
+	}
+	if (unicode_globals->root_search) {
+		usearch_close(unicode_globals->root_search);
+	}
 	if (unicode_globals->fallback_encoding_conv) {
 		ucnv_close(unicode_globals->fallback_encoding_conv);
 	}
