@@ -467,7 +467,7 @@ PHP_FUNCTION(stream_copy_to_stream)
 }
 /* }}} */
 
-/* {{{ proto resource stream_get_meta_data(resource fp) U
+/* {{{ proto array stream_get_meta_data(resource fp) U
     Retrieves header/meta data from streams/file pointers */
 PHP_FUNCTION(stream_get_meta_data)
 {
