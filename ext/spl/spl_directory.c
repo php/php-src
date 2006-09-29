@@ -2224,12 +2224,12 @@ PHP_MINIT_FUNCTION(spl_directory)
 	REGISTER_SPL_IMPLEMENTS(SplFileObject, RecursiveIterator);
 	REGISTER_SPL_IMPLEMENTS(SplFileObject, SeekableIterator);
 
-	REGISTER_SPL_SUB_CLASS_EX(SplTempFileObject, SplFileObject, spl_filesystem_object_new, spl_SplTempFileObject_functions);
-
 	REGISTER_SPL_CLASS_CONST_LONG(SplFileObject, "DROP_NEW_LINE", SPL_FILE_OBJECT_DROP_NEW_LINE);
 	REGISTER_SPL_CLASS_CONST_LONG(SplFileObject, "READ_AHEAD",    SPL_FILE_OBJECT_READ_AHEAD);
 	REGISTER_SPL_CLASS_CONST_LONG(SplFileObject, "SKIP_EMPTY",    SPL_FILE_OBJECT_SKIP_EMPTY);
 	REGISTER_SPL_CLASS_CONST_LONG(SplFileObject, "READ_CSV",      SPL_FILE_OBJECT_READ_CSV);
+	
+	REGISTER_SPL_SUB_CLASS_EX(SplTempFileObject, SplFileObject, spl_filesystem_object_new, spl_SplTempFileObject_functions);
 	return SUCCESS;
 }
 /* }}} */
