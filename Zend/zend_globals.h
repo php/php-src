@@ -37,6 +37,7 @@
 
 #include <unicode/ucnv.h>
 #include <unicode/ucol.h>
+#include <unicode/usearch.h>
 
 /* Define ZTS if you want a thread-safe Zend */
 /*#undef ZTS*/
@@ -286,6 +287,8 @@ struct _zend_unicode_globals {
 
 	char *default_locale;
 	zend_collator *default_collator;
+	UCollator *root_collator;
+	UStringSearch *root_search;
 
 	HashTable flex_compatible;			 /* table of flex-compatible encodings */
 
