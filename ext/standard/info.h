@@ -81,6 +81,7 @@ PHPAPI void php_info_print_box_start(int bg);
 PHPAPI void php_info_print_box_end(void);
 PHPAPI void php_info_print_hr(void);
 PHPAPI char *php_logo_guid(void);
+PHPAPI char *php_get_uname(char mode);
 
 void register_phpinfo_constants(INIT_FUNC_ARGS);
 END_EXTERN_C()
