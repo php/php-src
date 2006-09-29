@@ -1,3 +1,33 @@
+2006-09-28  Antony Dovgal  <antony@zend.com>
+
+    * tests/int_overflow_64bit.phpt
+      tests/int_underflow_64bit.phpt:
+      new tests
+
+    * tests/int_overflow_64bit.phpt
+      tests/int_overflow_64bit.phpt
+      tests/int_underflow_64bit.phpt
+      tests/int_underflow_64bit.phpt:
+      
+      file int_overflow_64bit.phpt was initially added on branch PHP_5_2.
+
+    * tests/int_overflow_32bit.phpt
+      tests/int_underflow_32bit.phpt:
+      add new tests
+
+    * tests/int_overflow_32bit.phpt
+      tests/int_overflow_32bit.phpt
+      tests/int_underflow_32bit.phpt
+      tests/int_underflow_32bit.phpt:
+      
+      file int_overflow_32bit.phpt was initially added on branch PHP_5_2.
+
+2006-09-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute_API.c
+      zend_execute_API.c:
+      Fixed wrong return value
+
 2006-09-27  Antony Dovgal  <antony@zend.com>
 
     * zend_operators.c:

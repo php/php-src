@@ -1,3 +1,184 @@
+2006-09-28  Antony Dovgal  <antony@zend.com>
+
+    * ext/pdo/php_pdo_driver.h
+      ext/pdo/php_pdo_driver.h:
+      more 64bit fixes
+
+2006-09-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/gd.c:
+      MFB: Fixed a large leak inside _php_image_create_from()
+
+    * (PHP_5_2)
+      ext/gd/gd.c:
+      Fixed a large leak inside _php_image_create_from()
+
+2006-09-28  Antony Dovgal  <antony@zend.com>
+
+    * ext/spl/spl_iterators.h:
+      64bit fixes
+
+2006-09-28  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      sapi/apache2handler/.cvsignore:
+      add .libs to .cvsignore
+
+2006-09-28  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/array/bug30833.phpt
+      ext/standard/tests/array/bug30833.phpt:
+      fix test name
+
+2006-09-28  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      php.ini-recommended:
+      Gah. these werent suppost to get committed atm
+
+    * php.ini-dist
+      php.ini-recommended:
+      MFB: remove unused ini options
+
+    * (PHP_5_2)
+      php.ini-dist
+      php.ini-recommended:
+      Remove unused ini options
+
+    * php.ini-dist
+      php.ini-recommended:
+      MFB; new ini options
+
+    * (PHP_5_2)
+      php.ini-dist
+      php.ini-recommended:
+      Add new ini options
+
+    * (PHP_5_2)
+      NEWS:
+      bjori->Hannes
+
+2006-09-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * TSRM/tsrm_virtual_cwd.c:
+      MFB: Added handling for virtual_file_ex() failures.
+
+    * (PHP_5_2)
+      TSRM/tsrm_virtual_cwd.c:
+      Added handling for virtual_file_ex() failures.
+      
+
+    * (PHP_4_4)
+      NEWS
+      ext/standard/url.c
+      ext/standard/tests/strings/url_t.phpt:
+      MFH: Fixed bug #38859 (parse_url() fails if passing '@' in passwd).
+
+    * ext/standard/url.c
+      ext/standard/tests/strings/url_t.phpt:
+      MFB: Fixed bug #38859 (parse_url() fails if passing '@' in passwd).
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/url.c
+      ext/standard/tests/strings/url_t.phpt:
+      Fixed bug #38859 (parse_url() fails if passing '@' in passwd).
+
+2006-09-28  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/standard/url.c:
+      MFH: fix #38981 (using FTP URLs in get_headers() causes crash)
+
+    * ext/standard/url.c:
+      fix #38981 (using FTP URLs in get_headers() causes crash)
+
+    * ZendEngine2/tests/int_overflow_64bit.phpt
+      ZendEngine2/tests/int_underflow_64bit.phpt:
+      new tests
+
+    * ZendEngine2/tests/int_overflow_64bit.phpt
+      ZendEngine2/tests/int_overflow_64bit.phpt
+      ZendEngine2/tests/int_underflow_64bit.phpt
+      ZendEngine2/tests/int_underflow_64bit.phpt:
+      
+      file int_overflow_64bit.phpt was initially added on branch PHP_5_2.
+
+2006-09-28  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/xsl/tests/xslt010.phpt
+      ext/xsl/tests/xslt010.phpt:
+      fix test
+
+2006-09-28  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/tests/int_overflow_32bit.phpt
+      ZendEngine2/tests/int_underflow_32bit.phpt:
+      add new tests
+
+    * ZendEngine2/tests/int_overflow_32bit.phpt
+      ZendEngine2/tests/int_overflow_32bit.phpt
+      ZendEngine2/tests/int_underflow_32bit.phpt
+      ZendEngine2/tests/int_underflow_32bit.phpt:
+      
+      file int_overflow_32bit.phpt was initially added on branch PHP_5_2.
+
+2006-09-28  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/element.c
+      ext/dom/element.c:
+      fix some compiler warnings
+
+2006-09-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      sapi/cgi/config.w32
+      sapi/cgi/config9.m4:
+      Removed unused libfcgi
+
+2006-09-28  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - imagefill entry
+
+    * ext/gd/libgd/gd.c
+      ext/gd/tests/imagefill_1.phpt:
+      - MFB: imagefill(), infinite loop with wrong color index
+
+    * (PHP_5_2)
+      ext/gd/libgd/gd.c
+      ext/gd/tests/imagefill_1.phpt
+      ext/gd/tests/imagefill_1.phpt:
+      - imagefill(), infinite loop with wrong color index
+
+2006-09-28  Antony Dovgal  <antony@zend.com>
+
+    * main/php_open_temporary_file.c:
+      fix compile warning
+
+2006-09-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * main/streams/plain_wrapper.c
+      main/streams/plain_wrapper.c:
+      Fixed wrong pipe detection code
+
+2006-09-28  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/mbstring/oniguruma/regexec.c:
+      initialize variable and make valgrind happy
+
+2006-09-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c:
+      Fixed wrong return value
+
 2006-09-27  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_4)
