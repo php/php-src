@@ -2156,6 +2156,42 @@ PHP_FUNCTION(pathinfo)
 
 /* {{{ php_u_stristr
    Unicode version of case insensitve strstr */
+PHPAPI UChar *php_u_stristr(UChar *str, UChar *pat, int str_len, int pat_len)
+{
+	UChar *str_fold, *pat_fold;
+	int str_fold_len, pat_fold_len;
+	UChar *result, *found;
+	int offset;
+	UErrorCode status = U_ZERO_ERROR;
+
+	zend_case_fold_string(&str_fold, &str_fold_len, str, str_len, U_FOLD_CASE_DEFAULT, &status);
+	if (str_fold_len == str_len) {
+		zend_case_fold_string(&pat_fold, &pat_fold_len, pat, pat_len, U_FOLD_CASE_DEFAULT, &status);
+		found = u_strFindFirst(str_fold, str_fold_len, pat_fold, pat_fold_len);
+		if (found) {
+			result = str + (found - str_fold);
+		} else {
+			result = NULL;
+		}
+		efree(pat_fold);
+	} else {
+		usearch_setText(UG(root_search), str, str_len, &status);
+		usearch_setPattern(UG(root_search), pat, pat_len, &status);
+		usearch_setOffset(UG(root_search), 0, &status);
+
+		offset = usearch_first(UG(root_search), &status);
+		if (offset != USEARCH_DONE) {
+			result = str + offset;
+		} else {
+			result = NULL;
+		}
+	}
+	efree(str_fold);
+
+	return result;
+}
+
+#if 0
 PHPAPI UChar *php_u_stristr(UChar *s, UChar *t, int s_len, int t_len)
 {
 	int32_t i,j, last;
@@ -2201,6 +2237,7 @@ PHPAPI UChar *php_u_stristr(UChar *s, UChar *t, int s_len, int t_len)
 	}
 	return NULL;
 }
+#endif
 /* }}} */
 
 /* {{{ php_stristr
