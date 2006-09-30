@@ -1,3 +1,63 @@
+2006-09-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/sha1.h:
+      MFB: Added missing API function declaration.
+
+    * (PHP_5_2)
+      ext/standard/sha1.h:
+      Added missing API function declaration.
+
+    * ext/standard/info.h:
+      MFB: Added missing declaration of the php_get_uname() PHPAPI function.
+
+    * (PHP_5_2)
+      ext/standard/info.h:
+      Added missing declaration of the php_get_uname() PHPAPI function.
+
+2006-09-29  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/string.c:
+      Heck, might as well commit this..
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_unicode.c:
+      Fix off-by-one error.
+
+2006-09-29  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/spl/spl_directory.c
+      ext/standard/streamsfuncs.c:
+      fix proto
+
+    * (PHP_5_2)
+      ext/spl/spl_directory.c
+      ext/standard/streamsfuncs.c:
+      fix protos
+
+    * (PHP_5_2)
+      ext/spl/spl_directory.c:
+      fix arginfo
+
+    * ext/spl/spl_directory.c:
+      Fix arginfo
+
+2006-09-29  Antony Dovgal  <antony@zend.com>
+
+    * ext/spl/spl_directory.c:
+      declare subclass after adding class constants to the parent
+
+2006-09-29  Stefan Esser  <php@nopiracy.de>
+
+    * (PHP_5_2)
+      main/rfc1867.c:
+      If one name is disallowed don't drop all files
+
+2006-09-29  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/mysqli_api.c:
+      Fixed error message (thanks to Ulf Wendel)
+
 2006-09-28  Antony Dovgal  <antony@zend.com>
 
     * ext/pdo/php_pdo_driver.h
