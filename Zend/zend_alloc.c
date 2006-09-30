@@ -1730,13 +1730,12 @@ ZEND_API void *_safe_malloc(size_t nmemb, size_t size, size_t offset)
 ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	void *p;
-	int final_size = size*nmemb;
 
-	p = _emalloc(final_size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	p = _safe_emalloc(nmemb, size, 0 ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	if (!p) {
 		return (void *) p;
 	}
-	memset(p, 0, final_size);
+	memset(p, 0, size * nmemb);
 	return p;
 }
 
