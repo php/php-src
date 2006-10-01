@@ -1,3 +1,16 @@
+2006-09-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend_alloc.c:
+      MFB: Added safety checks against integer overflow.
+
+    * (PHP_5_1)
+      ZendEngine2/zend_alloc.c:
+      MFH: Added safety checks against integer overflow.
+
+    * (PHP_5_2)
+      ZendEngine2/zend_alloc.c:
+      Added safety checks against integer overflow.
+
 2006-09-29  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/sha1.h:
