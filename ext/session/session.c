@@ -154,11 +154,19 @@ static PHP_INI_MH(OnUpdateSaveDir)
 {
 	/* Only do the safemode/open_basedir check at runtime */
 	if (stage == PHP_INI_STAGE_RUNTIME) {
-		if (PG(safe_mode) && (!php_checkuid(new_value, NULL, CHECKUID_ALLOW_ONLY_DIR))) {
+		char *p;
+
+		if ((p = zend_memrchr(new_value, ';', new_value_length))) {
+			p++;
+		} else {
+			p = new_value;
+		}
+
+		if (PG(safe_mode) && (!php_checkuid(p, NULL, CHECKUID_ALLOW_ONLY_DIR))) {
 			return FAILURE;
 		}
 
-		if (php_check_open_basedir(new_value TSRMLS_CC)) {
+		if (php_check_open_basedir(p TSRMLS_CC)) {
 			return FAILURE;
 		}
 	}
