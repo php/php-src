@@ -5622,7 +5622,6 @@ PHP_FUNCTION(ini_set)
 			_CHECK_PATH(varname, "java.class.path") ||
 			_CHECK_PATH(varname, "java.home") ||
 			_CHECK_PATH(varname, "java.library.path") ||
-			_CHECK_PATH(varname, "session.save_path") ||
 			_CHECK_PATH(varname, "vpopmail.directory")) {
 			if (PG(safe_mode) &&(!php_checkuid(Z_STRVAL_PP(new_value), NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 				zval_dtor(return_value);
