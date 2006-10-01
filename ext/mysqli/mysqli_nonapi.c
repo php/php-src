@@ -52,6 +52,17 @@ PHP_FUNCTION(mysqli_connect)
 		return;
 	}
 
+	if (!passwd) {
+		passwd = MyG(default_pw);
+		if (!username){
+			username = MyG(default_user);
+			if (!hostname) {
+				hostname = MyG(default_host);
+			}
+		}
+	}
+
+
 	mysql = (MY_MYSQL *) ecalloc(1, sizeof(MY_MYSQL));
 
 	if (!(mysql->mysql = mysql_init(NULL))) {
@@ -121,7 +132,7 @@ PHP_FUNCTION(mysqli_connect_errno)
 PHP_FUNCTION(mysqli_connect_error) 
 {
 	if (MyG(error_msg)) {
-		ZVAL_UTF8_STRING(return_value, (char *)MyG(error_msg), ZSTR_DUPLICATE);
+		RETURN_UTF8_STRING((char *)MyG(error_msg), ZSTR_DUPLICATE);
 	} else {
 		RETURN_NULL();
 	}
