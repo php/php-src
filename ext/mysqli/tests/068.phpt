@@ -11,3 +11,5 @@ mysqli get_client_info
 ?>
 --EXPECT--
 string
+--UEXPECT--
+unicode

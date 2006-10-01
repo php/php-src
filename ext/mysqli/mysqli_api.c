@@ -444,7 +444,7 @@ PHP_FUNCTION(mysqli_character_set_name)
 
 	csname = (char *)mysql_character_set_name(mysql->mysql);
  
-	ZVAL_UTF8_STRINGL(return_value, csname, strlen(csname), ZSTR_DUPLICATE);
+	RETURN_UTF8_STRING(csname, ZSTR_DUPLICATE);
 }
 /* }}} */
 
@@ -582,7 +582,7 @@ PHP_FUNCTION(mysqli_error)
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
 	strerr = (char *)mysql_error(mysql->mysql);
-	ZVAL_UTF8_STRINGL(return_value, strerr, strlen(strerr), ZSTR_DUPLICATE);
+	RETURN_UTF8_STRING(strerr, ZSTR_DUPLICATE);
 }
 /* }}} */
 
@@ -709,15 +709,10 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 									uval = uval / 10;							
 								} while (--j > 0);
 								tmp[10]= '\0';
-								/* unsigned int > INT_MAX is 10 digis - ALWAYS */
+								/* unsigned int > INT_MAX is 10 digits - ALWAYS */
+								ZVAL_UTF8_STRINGL(stmt->result.vars[i], tmp, 10, 0);
 								if (UG(unicode)) {
-									UChar *ubuf = NULL;
-									int ulen;
-									zend_string_to_unicode(UG(ascii_conv), &ubuf, &ulen, tmp, strlen(tmp) TSRMLS_CC);
-									ZVAL_UNICODEL(stmt->result.vars[i], ubuf, ulen, 0);
 									efree(tmp);
-								} else {
-									ZVAL_STRINGL(stmt->result.vars[i], tmp, 10, 0);
 								}
 								break;
 							}
@@ -749,14 +744,7 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 								 * use MYSQLI_LL_SPEC.
 								 */
 								sprintf((char *)&tmp, (stmt->stmt->fields[i].flags & UNSIGNED_FLAG)? MYSQLI_LLU_SPEC : MYSQLI_LL_SPEC, llval);
-								if (UG(unicode)) {
-									UChar *ubuf = NULL;
-									int ulen;
-									zend_string_to_unicode(UG(utf8_conv), &ubuf, &ulen, tmp, strlen(tmp) TSRMLS_CC);
-									ZVAL_UNICODEL(stmt->result.vars[i], ubuf, ulen, 0);
-								} else {						
-									ZVAL_STRING(stmt->result.vars[i], tmp, 1);
-								}
+								ZVAL_UTF8_STRING(stmt->result.vars[i], tmp, ZSTR_DUPLICATE);
 							} else {
 								ZVAL_LONG(stmt->result.vars[i], llval);
 							}
@@ -768,15 +756,7 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 						}
 #endif
 						else {
-							if (UG(unicode)) {
-								UChar *ubuf = NULL;
-								int ulen;
-								zend_string_to_unicode(UG(utf8_conv), &ubuf, &ulen, stmt->result.buf[i].val,
-														stmt->result.buf[i].buflen TSRMLS_CC);
-								ZVAL_UNICODEL(stmt->result.vars[i], ubuf, ulen, 0);
-							} else {
-								ZVAL_STRINGL(stmt->result.vars[i], stmt->result.buf[i].val, stmt->result.buf[i].buflen, 1);
-							}
+							ZVAL_UTF8_STRINGL(stmt->result.vars[i], stmt->result.buf[i].val, stmt->result.buf[i].buflen, ZSTR_DUPLICATE);
 
 						} 
 						break;
@@ -815,32 +795,12 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 
 static void php_add_field_properties(zval *value, MYSQL_FIELD *field TSRMLS_DC)
 {
-	if (UG(unicode)) {
-		UChar *ustr;
-		int ulen;
+	add_property_utf8_string(value, "name",(field->name ? field->name : ""), ZSTR_DUPLICATE);
+	add_property_utf8_string(value, "orgname",(field->org_name ? field->org_name : ""), ZSTR_DUPLICATE);
+	add_property_utf8_string(value, "table",(field->table ? field->table : ""), ZSTR_DUPLICATE);
+	add_property_utf8_string(value, "orgtable",(field->org_table ? field->org_table : ""), ZSTR_DUPLICATE);
+	add_property_utf8_string(value, "def",(field->def ? field->def : ""), ZSTR_DUPLICATE);
 
-		zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, (field->name) ? field->name : "", 
-								(field->name) ? strlen(field->name) : 0 TSRMLS_CC);
-		add_property_unicodel(value, "name", ustr, ulen, 0);
-		zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, (field->org_name) ? field->org_name : "", 
-								(field->org_name) ? strlen(field->org_name) : 0 TSRMLS_CC);
-		add_property_unicodel(value, "orgname", ustr, ulen, 0);
-		zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, (field->table) ? field->table : "", 
-								(field->table) ? strlen(field->table) : 0 TSRMLS_CC);
-		add_property_unicodel(value, "table", ustr, ulen, 0);
-		zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, (field->org_table) ? field->org_table : "", 
-								(field->org_table) ? strlen(field->org_table) : 0 TSRMLS_CC);
-		add_property_unicodel(value, "orgtable", ustr, ulen, 0);
-		zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, (field->def) ? field->def : "", 
-								(field->def) ? strlen(field->def) : 0 TSRMLS_CC);
-		add_property_unicodel(value, "def", ustr, ulen, 0);
-	} else {
-		add_property_string(value, "name",(field->name ? field->name : ""), 1);
-		add_property_string(value, "orgname",(field->org_name ? field->org_name : ""), 1);
-		add_property_string(value, "table",(field->table ? field->table : ""), 1);
-		add_property_string(value, "orgtable",(field->org_table ? field->org_table : ""), 1);
-		add_property_string(value, "def",(field->def ? field->def : ""), 1);
-	}
 	add_property_long(value, "max_length", field->max_length);
 	add_property_long(value, "length", field->length);
 	add_property_long(value, "charsetnr", field->charsetnr);
@@ -1045,7 +1005,9 @@ PHP_FUNCTION(mysqli_free_result)
    Get MySQL client info */
 PHP_FUNCTION(mysqli_get_client_info)
 {
-	RETURN_STRING((char *)mysql_get_client_info(), 1);
+	char *info = (char *)mysql_get_client_info();
+
+	RETURN_UTF8_STRING(info, ZSTR_DUPLICATE);
 }
 /* }}} */
 
@@ -1069,7 +1031,7 @@ PHP_FUNCTION(mysqli_get_host_info)
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
-	ZVAL_UTF8_STRING(return_value, mysql->mysql->host_info, ZSTR_DUPLICATE);
+	RETURN_UTF8_STRING(mysql->mysql->host_info, ZSTR_DUPLICATE);
 }
 /* }}} */
 
@@ -1101,7 +1063,7 @@ PHP_FUNCTION(mysqli_get_server_info)
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
-	ZVAL_UTF8_STRING(return_value, (char *)mysql_get_server_info(mysql->mysql), ZSTR_DUPLICATE);
+	RETURN_UTF8_STRING((char *)mysql_get_server_info(mysql->mysql), ZSTR_DUPLICATE);
 }
 
 /* }}} */
@@ -1134,7 +1096,7 @@ PHP_FUNCTION(mysqli_info)
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
-	ZVAL_UTF8_STRING(return_value, mysql->mysql->info, ZSTR_DUPLICATE);
+	RETURN_UTF8_STRING(mysql->mysql->info, ZSTR_DUPLICATE);
 }
 /* }}} */
 
@@ -1554,7 +1516,7 @@ PHP_FUNCTION(mysqli_real_escape_string) {
 	newstr_len = mysql_real_escape_string(mysql->mysql, newstr, escapestr, escapestr_len);
 	newstr = erealloc(newstr, newstr_len + 1);
 
-	ZVAL_UTF8_STRING(return_value, newstr, 0);	
+	RETURN_UTF8_STRING(newstr, 0);	
 }
 /* }}} */
 
@@ -1774,7 +1736,7 @@ PHP_FUNCTION(mysqli_stmt_num_rows)
 }
 /* }}} */
 
-/* {{{ proto string mysqli_select_db(object link, string dbname) U
+/* {{{ proto bool mysqli_select_db(object link, string dbname) U
    Select a MySQL database */
 PHP_FUNCTION(mysqli_select_db) 
 {
@@ -1791,7 +1753,7 @@ PHP_FUNCTION(mysqli_select_db)
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 	
 	if (!mysql_select_db(mysql->mysql, dbname)) {
-		RETVAL_TRUE;
+		RETURN_TRUE;
 	} else {
 		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		RETURN_FALSE;
@@ -1810,7 +1772,7 @@ PHP_FUNCTION(mysqli_sqlstate)
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
-	ZVAL_UTF8_STRING(return_value, (char *)mysql_sqlstate(mysql->mysql), ZSTR_DUPLICATE);
+	RETURN_UTF8_STRING((char *)mysql_sqlstate(mysql->mysql), ZSTR_DUPLICATE);
 }
 /* }}} */
 
@@ -1851,7 +1813,7 @@ PHP_FUNCTION(mysqli_stat)
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
 	if ((stat = (char *)mysql_stat(mysql->mysql))) {
-		ZVAL_UTF8_STRING(return_value, stat, ZSTR_DUPLICATE);
+		RETURN_UTF8_STRING(stat, ZSTR_DUPLICATE);
 	} else {
 		RETURN_FALSE;
 	}
@@ -1935,7 +1897,7 @@ PHP_FUNCTION(mysqli_stmt_error)
 	}
 	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt", MYSQLI_STATUS_INITIALIZED);
 	
-	ZVAL_UTF8_STRING(return_value, (char *)mysql_stmt_error(stmt->stmt), ZSTR_DUPLICATE);
+	RETURN_UTF8_STRING((char *)mysql_stmt_error(stmt->stmt), ZSTR_DUPLICATE);
 }
 /* }}} */
 
@@ -2068,7 +2030,7 @@ PHP_FUNCTION(mysqli_stmt_sqlstate)
 	}
 	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt", MYSQLI_STATUS_VALID);
 	
-	ZVAL_UTF8_STRING(return_value, (char *)mysql_stmt_sqlstate(stmt->stmt), ZSTR_DUPLICATE);
+	RETURN_UTF8_STRING((char *)mysql_stmt_sqlstate(stmt->stmt), ZSTR_DUPLICATE);
 }
 /* }}} */
 

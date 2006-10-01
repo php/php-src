@@ -901,7 +901,6 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 					int ulen;
 
 					zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, fields[i].name, strlen(fields[i].name) TSRMLS_CC);
-					/* maybe a bug in add_u_assoc_zval_ex: string is truncated when specifying ulen only */
 					add_u_assoc_zval_ex(return_value, IS_UNICODE, ZSTR(ustr), ulen + 1, res);
 					efree(ustr);
 				} else {
