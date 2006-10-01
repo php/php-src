@@ -5660,7 +5660,6 @@ PHP_FUNCTION(ini_set)
 			_CHECK_PATH(varname, "java.class.path") ||
 			_CHECK_PATH(varname, "java.home") ||
 			_CHECK_PATH(varname, "java.library.path") ||
-			_CHECK_PATH(varname, "session.save_path") ||
 			_CHECK_PATH(varname, "vpopmail.directory")) {
 			
 			if (php_check_open_basedir(Z_STRVAL_PP(new_value) TSRMLS_CC)) {
