@@ -1767,13 +1767,18 @@ PHP_FUNCTION(strrpos)
 	}
 
 	if (offset >= 0) {
+		if (offset > haystack_len) {
+			RETURN_FALSE;
+		}
 		p = haystack + offset;
 		e = haystack + haystack_len - needle_len;
 	} else {
-		p = haystack;
 		if (-offset > haystack_len) {
-			e = haystack - needle_len;
-		} else if (needle_len > -offset) {
+			RETURN_FALSE;
+		}
+
+		p = haystack;
+		if (needle_len > -offset) {
 			e = haystack + haystack_len - needle_len;
 		} else {
 			e = haystack + haystack_len + offset;
