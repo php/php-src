@@ -1768,14 +1768,14 @@ PHP_FUNCTION(strrpos)
 
 	if (offset >= 0) {
 		if (offset > haystack_len) {
-			php_error(E_NOTICE, "Offset is greater than the length of haystack string");
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
 			RETURN_FALSE;
 		}
 		p = haystack + offset;
 		e = haystack + haystack_len - needle_len;
 	} else {
 		if (-offset > haystack_len) {
-			php_error(E_NOTICE, "Offset is greater than the length of haystack string");
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
 			RETURN_FALSE;
 		}
 
@@ -1844,7 +1844,7 @@ PHP_FUNCTION(strripos)
 		   Can also avoid tolower emallocs */
 		if (offset >= 0) {
 			if (offset > haystack_len) {
-				php_error(E_NOTICE, "Offset is greater than the length of haystack string");
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			}
 			p = haystack + offset;
@@ -1852,7 +1852,7 @@ PHP_FUNCTION(strripos)
 		} else {
 			p = haystack;
 			if (-offset > haystack_len) {
-				php_error(E_NOTICE, "Offset is greater than the length of haystack string");
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			} else {
 				e = haystack + haystack_len + offset;
@@ -1876,14 +1876,14 @@ PHP_FUNCTION(strripos)
 
 	if (offset >= 0) {
 		if (offset > haystack_len) {
-			php_error(E_NOTICE, "Offset is greater than the length of haystack string");
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
 			RETURN_FALSE;
 		}
 		p = haystack_dup + offset;
 		e = haystack_dup + haystack_len - needle_len;
 	} else {
 		if (-offset > haystack_len) {
-			php_error(E_NOTICE, "Offset is greater than the length of haystack string");
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
 			RETURN_FALSE;
 		}
 		p = haystack_dup;
