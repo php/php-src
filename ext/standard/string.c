@@ -2625,7 +2625,7 @@ PHP_FUNCTION(strpos)
 }
 /* }}} */
 
-/* {{{ proto int stripos(string haystack, string needle [, int offset])
+/* {{{ proto int stripos(string haystack, string needle [, int offset]) U
    Finds position of first occurrence of a string within another, case insensitive */
 PHP_FUNCTION(stripos)
 {
@@ -2633,12 +2633,12 @@ PHP_FUNCTION(stripos)
 	long offset = 0;
 	int haystack_len, needle_len = 0;
 	zend_uchar str_type;
-	void *haystack_dup, *needle_dup = NULL;
+	void *haystack_dup = NULL, *needle_dup = NULL;
 	char needle_char[2];
 	char c = 0;
-	UChar u_needle_char[3];
-	UChar32 ch = 0;
+	UChar u_needle_char[8];
 	void *found = NULL;
+	int cu_offset = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZ|l", &haystack, &needle, &offset) == FAILURE) {
 		return;
@@ -2662,6 +2662,7 @@ PHP_FUNCTION(stripos)
 		if (!Z_UNILEN_PP(needle) || Z_UNILEN_PP(needle) > haystack_len) {
 			RETURN_FALSE;
 		}
+		/* convert both strings to the same type */
 		if (Z_TYPE_PP(haystack) != Z_TYPE_PP(needle)) {
 			str_type = zend_get_unified_string_type(2 TSRMLS_CC, Z_TYPE_PP(haystack), Z_TYPE_PP(needle));
 			convert_to_explicit_type_ex(haystack, str_type);
@@ -2669,11 +2670,9 @@ PHP_FUNCTION(stripos)
 		}
 		needle_len = Z_UNILEN_PP(needle);
 		if (Z_TYPE_PP(haystack) == IS_UNICODE) {
-			haystack_dup = php_u_strtolower(Z_USTRVAL_PP(haystack), &haystack_len, UG(default_locale));
-			needle_dup = php_u_strtolower(Z_USTRVAL_PP(needle), &needle_len, UG(default_locale));
-			found = zend_u_memnstr((UChar *)haystack_dup + offset,
-								   (UChar *)needle_dup, needle_len,
-								   (UChar *)haystack_dup + haystack_len);
+			/* calculate codeunit offset */
+			U16_FWD_N(Z_USTRVAL_PP(haystack), cu_offset, haystack_len, offset);
+			found = php_u_stristr(Z_USTRVAL_PP(haystack) + cu_offset, Z_USTRVAL_PP(needle), haystack_len, needle_len TSRMLS_CC);
 		} else {
 			haystack_dup = estrndup(Z_STRVAL_PP(haystack), haystack_len);
 			php_strtolower((char *)haystack_dup, haystack_len);
@@ -2688,14 +2687,22 @@ PHP_FUNCTION(stripos)
 			case IS_LONG:
 			case IS_BOOL:
 				if (Z_TYPE_PP(haystack) == IS_UNICODE) {
-					ch = u_tolower((UChar32)Z_LVAL_PP(needle));
+					if (Z_LVAL_PP(needle) < 0 || Z_LVAL_PP(needle) > 0x10FFFF) {
+						php_error(E_WARNING, "Needle argument codepoint value out of range (0 - 0x10FFFF)");
+						RETURN_FALSE;      
+					}
+					needle_len = zend_codepoint_to_uchar((UChar32)Z_LVAL_PP(needle), u_needle_char);
 				} else {
 					c = tolower((char)Z_LVAL_PP(needle));
 				}
 				break;
 			case IS_DOUBLE:
 				if (Z_TYPE_PP(haystack) == IS_UNICODE) {
-					ch = u_tolower((UChar32)Z_DVAL_PP(needle));
+					if ((UChar32)Z_DVAL_PP(needle) < 0 || (UChar32)Z_DVAL_PP(needle) > 0x10FFFF) {
+						php_error(E_WARNING, "Needle argument codepoint value out of range (0 - 0x10FFFF)");
+						RETURN_FALSE;      
+					}
+					needle_len = zend_codepoint_to_uchar((UChar32)Z_DVAL_PP(needle), u_needle_char);
 				} else {
 					c = tolower((char)Z_DVAL_PP(needle));
 				}
@@ -2707,18 +2714,12 @@ PHP_FUNCTION(stripos)
 
 		}
 		if (Z_TYPE_PP(haystack) == IS_UNICODE) {
-			if (U_IS_BMP(ch)) {
-				u_needle_char[needle_len++] = ch;
-				u_needle_char[needle_len]   = 0;
-			} else {
-				u_needle_char[needle_len++] = U16_LEAD(ch);
-				u_needle_char[needle_len++] = U16_TRAIL(ch);
-				u_needle_char[needle_len]   = 0;
-			}
-			haystack_dup = php_u_strtolower(Z_USTRVAL_PP(haystack), &haystack_len, UG(default_locale));
-			found = zend_u_memnstr((UChar *)haystack_dup + offset,
-								   (UChar *)u_needle_char, needle_len,
-								   (UChar *)haystack_dup + haystack_len);
+			/* calculate codeunit offset */
+			U16_FWD_N(Z_USTRVAL_PP(haystack), cu_offset, haystack_len, offset);
+			u_needle_char[needle_len] = 0;
+			found = php_u_stristr(Z_USTRVAL_PP(haystack) + cu_offset,
+								  u_needle_char, haystack_len, needle_len TSRMLS_CC);
+								   
 		} else {
 			needle_char[0] = c;
 			needle_char[1] = '\0';
@@ -2731,14 +2732,21 @@ PHP_FUNCTION(stripos)
 		}
 	}
 
-	efree(haystack_dup);
+	if (haystack_dup) {
+		efree(haystack_dup);
+	}
 	if (needle_dup) {
 		efree(needle_dup);
 	}
 
 	if (found) {
 		if (Z_TYPE_PP(haystack) == IS_UNICODE) {
-			RETURN_LONG((UChar *)found - (UChar *)haystack_dup);
+			/* Simple subtraction will not suffice, since there may be
+			   supplementary codepoints. We count how many codepoints there are
+			   between the starting offset and the found location and add them
+			   to the starting codepoint offset. */
+			RETURN_LONG(offset + u_countChar32(Z_USTRVAL_PP(haystack) + cu_offset,
+											   (UChar*)found - (Z_USTRVAL_PP(haystack) + cu_offset)));
 		} else {
 			RETURN_LONG((char *)found - (char *)haystack_dup);
 		}

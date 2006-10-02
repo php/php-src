@@ -27,7 +27,6 @@ ext/standard
         Params API. Rest - no idea yet.
 
     stristr()
-    stripos()
     strripos()
     str_replace()
     stri_replace()
@@ -158,6 +157,7 @@ ext/standard
     strip_tags()
     stripcslashes()
     stripslashes()
+    stripos()
     strpbrk()
     strpos()
     strrchr()
