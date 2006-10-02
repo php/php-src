@@ -2156,7 +2156,7 @@ PHP_FUNCTION(pathinfo)
 
 /* {{{ php_u_stristr
    Unicode version of case insensitve strstr */
-PHPAPI UChar *php_u_stristr(UChar *str, UChar *pat, int str_len, int pat_len)
+PHPAPI UChar *php_u_stristr(UChar *str, UChar *pat, int str_len, int pat_len TSRMLS_DC)
 {
 	UChar *str_fold, *pat_fold;
 	int str_fold_len, pat_fold_len;
@@ -2192,7 +2192,7 @@ PHPAPI UChar *php_u_stristr(UChar *str, UChar *pat, int str_len, int pat_len)
 }
 
 #if 0
-PHPAPI UChar *php_u_stristr(UChar *s, UChar *t, int s_len, int t_len)
+PHPAPI UChar *php_u_stristr(UChar *s, UChar *t, int s_len, int t_len TSRMLS_DC)
 {
 	int32_t i,j, last;
 	UChar32 ch1, ch2;
@@ -2394,7 +2394,7 @@ PHP_FUNCTION(stristr)
 
 	if (Z_TYPE_PP(haystack) == IS_UNICODE) {
 		found = php_u_stristr(Z_USTRVAL_PP(haystack), target.u,
-							  Z_USTRLEN_PP(haystack), needle_len);
+							  Z_USTRLEN_PP(haystack), needle_len TSRMLS_CC);
 	} else {
 		haystack_copy = estrndup(Z_STRVAL_PP(haystack), Z_STRLEN_PP(haystack));
 		found = php_stristr(Z_STRVAL_PP(haystack), target.s,
