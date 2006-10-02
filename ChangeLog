@@ -1,3 +1,31 @@
+2006-10-01  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/tests/068.phpt:
+      unicode fixes
+
+2006-10-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/session/session.c
+      ext/standard/basic_functions.c:
+      MFB: Fixed bug #38993 (Fixed safe_mode/open_basedir checks for
+      session.save_path, allowing them to account for extra parameters).
+
+    * (PHP_5_2)
+      NEWS
+      ext/session/session.c
+      ext/standard/basic_functions.c:
+      Fixed bug #38993 (Fixed safe_mode/open_basedir checks for
+      session.save_path, allowing them to account for extra parameters).
+
+2006-10-01  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_5_2)
+      ext/mbstring/config.m4:
+      fixed bug #37103: libmbfl headers was not installed correctly.
+
 2006-09-30  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ZendEngine2/zend_alloc.c:
