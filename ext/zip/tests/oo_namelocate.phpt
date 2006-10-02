@@ -8,7 +8,7 @@ if(!extension_loaded('zip')) die('skip');
 --FILE--
 <?php
 $dirname = dirname(__FILE__) . '/';
-include $dirname . 'utils.php';
+include $dirname . 'utils.inc';
 $file = $dirname . '__tmp_oo_rename.zip';
 
 @unlink($file);

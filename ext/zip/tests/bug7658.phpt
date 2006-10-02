@@ -8,7 +8,7 @@ if(!extension_loaded('zip')) die('skip');
 --FILE--
 <?php
 $dirname = dirname(__FILE__) . '/';
-include $dirname . 'utils.php';
+include $dirname . 'utils.inc';
 $file = $dirname . '__tmp_bug7658.odt';
 $zip = new ZipArchive();
 copy($dirname . 'bug7658.odt', $file);
