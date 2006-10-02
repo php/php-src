@@ -7,6 +7,8 @@ PHP                                                                        NEWS
   working exactly like in php.ini; with FastCGI -d affects all requests).
   (Dmitry)
 - Fixed bug #39003 (__autoload() is called for type hinting). (Dmitry, Tony)
+- Fixed bug #39001 (ReflectionProperty returns incorrect declaring class for 
+  protected properties). (Tony)
 - Fixed bug #38993 (Fixed safe_mode/open_basedir checks for
   session.save_path, allowing them to account for extra parameters). (Ilia)
 - Fixed bug #38981 (using FTP URLs in get_headers() causes crash). (Tony)
