@@ -13,5 +13,4 @@ $o = new Foo;
 $o->a($o);
 ?>
 --EXPECTF--
-
-Fatal error: Class 'NonExisting' not found in %stype_hinting_002.php on line %d
+Catchable fatal error: Argument 1 passed to Foo::a() must be an instance of NonExisting, instance of Foo given, called in %s on line %d and defined in %s on line %d
