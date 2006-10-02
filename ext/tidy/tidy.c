@@ -1312,7 +1312,7 @@ static PHP_FUNCTION(tidy_is_xhtml)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_is_xhtml()
+/* {{{ proto boolean tidy_is_xml()
    Indicates if the document is a generic (non HTML/XHTML) XML document. */
 static PHP_FUNCTION(tidy_is_xml)
 {
