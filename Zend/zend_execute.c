@@ -449,11 +449,12 @@ static inline void make_real_object(zval **object_ptr TSRMLS_DC)
 	}
 }
 
-static inline char * zend_verify_arg_class_kind(zend_arg_info *cur_arg_info, zend_class_entry **pce TSRMLS_DC)
+static inline char * zend_verify_arg_class_kind(zend_arg_info *cur_arg_info, char **class_name, zend_class_entry **pce TSRMLS_DC)
 {
-	*pce = zend_fetch_class(cur_arg_info->class_name, cur_arg_info->class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
+	*pce = zend_fetch_class(cur_arg_info->class_name, cur_arg_info->class_name_len, (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD) TSRMLS_CC);
 
-	if ((*pce)->ce_flags & ZEND_ACC_INTERFACE) {
+	*class_name = (*pce) ? (*pce)->name: cur_arg_info->class_name;
+	if (*pce && (*pce)->ce_flags & ZEND_ACC_INTERFACE) {
 		return "implement interface ";
 	} else {
 		return "be an instance of ";
@@ -497,18 +498,20 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 	cur_arg_info = &zf->common.arg_info[arg_num-1];
 
 	if (cur_arg_info->class_name) {
+		char *class_name;
+
 		if (!arg) {
-			need_msg = zend_verify_arg_class_kind(cur_arg_info, &ce TSRMLS_CC);
-			return zend_verify_arg_error(zf, arg_num, cur_arg_info, need_msg, ce->name, "none", "" TSRMLS_CC);
+			need_msg = zend_verify_arg_class_kind(cur_arg_info, &class_name, &ce TSRMLS_CC);
+			return zend_verify_arg_error(zf, arg_num, cur_arg_info, need_msg, class_name, "none", "" TSRMLS_CC);
 		}
 		if (Z_TYPE_P(arg) == IS_OBJECT) {
-			need_msg = zend_verify_arg_class_kind(cur_arg_info, &ce TSRMLS_CC);
-			if (!instanceof_function(Z_OBJCE_P(arg), ce TSRMLS_CC)) {
-				return zend_verify_arg_error(zf, arg_num, cur_arg_info, need_msg, ce->name, "instance of ", Z_OBJCE_P(arg)->name TSRMLS_CC);
+			need_msg = zend_verify_arg_class_kind(cur_arg_info, &class_name, &ce TSRMLS_CC);
+			if (!ce || !instanceof_function(Z_OBJCE_P(arg), ce TSRMLS_CC)) {
+				return zend_verify_arg_error(zf, arg_num, cur_arg_info, need_msg, class_name, "instance of ", Z_OBJCE_P(arg)->name TSRMLS_CC);
 			}
 		} else if (Z_TYPE_P(arg) != IS_NULL || !cur_arg_info->allow_null) {
-			need_msg = zend_verify_arg_class_kind(cur_arg_info, &ce TSRMLS_CC);
-			return zend_verify_arg_error(zf, arg_num, cur_arg_info, need_msg, ce->name, zend_zval_type_name(arg), "" TSRMLS_CC);
+			need_msg = zend_verify_arg_class_kind(cur_arg_info, &class_name, &ce TSRMLS_CC);
+			return zend_verify_arg_error(zf, arg_num, cur_arg_info, need_msg, class_name, zend_zval_type_name(arg), "" TSRMLS_CC);
 		}
 	} else if (cur_arg_info->array_type_hint) {
 		if (!arg) {
