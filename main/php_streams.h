@@ -388,6 +388,61 @@ PHPAPI int _php_stream_path_decode(php_stream_wrapper *wrapper,
 END_EXTERN_C()
 
 
+#define php_stream_path_param_encode(ppzval, ppath, ppath_len, options, context) \
+	_php_stream_path_param_encode((ppzval), (ppath), (ppath_len), (options), (context) TSRMLS_CC)
+static inline int _php_stream_path_param_encode(zval **ppzval, char **ppath, int *ppath_len, int options, php_stream_context *context TSRMLS_DC)
+{
+	if (Z_TYPE_PP(ppzval) == IS_UNICODE) {
+		zval *zpath;
+		char *path;
+		int path_len;
+
+		/* Convert the path and put it into a fresh new zval */
+		if (FAILURE == php_stream_path_encode(NULL, &path, &path_len, Z_USTRVAL_PP(ppzval), Z_USTRLEN_PP(ppzval), options, context)) {
+			return FAILURE;
+		}
+		MAKE_STD_ZVAL(zpath);
+		ZVAL_STRINGL(zpath, path, path_len, 0);
+		zpath->is_ref = 0;
+		zpath->refcount = 1;
+
+		/* Replace the param stack with the new zval */
+		zval_ptr_dtor(ppzval);
+		*ppzval = zpath;
+	} else if (Z_TYPE_PP(ppzval) != IS_STRING) {
+		if ((*ppzval)->is_ref ||
+			(*ppzval)->refcount > 1) {
+			zval *zpath;
+
+			/* Produce a new zval of type string */
+			MAKE_STD_ZVAL(zpath);
+			*zpath = **ppzval;
+			zval_copy_ctor(zpath);
+			convert_to_string(zpath);
+			zpath->is_ref = 0;
+			zpath->refcount = 1;
+
+			/* Replace the param stack with it */
+			zval_ptr_dtor(ppzval);
+			*ppzval = zpath;
+		} else {
+			/* Convert the value on the param stack directly */
+			convert_to_string(*ppzval);
+		}
+	}
+
+	/* Populate convenience params if requested */
+	if (ppath) {
+		*ppath = Z_STRVAL_PP(ppzval);
+	}
+	if (ppath_len) {
+		*ppath_len = Z_STRLEN_PP(ppzval);
+	}
+
+	return SUCCESS;
+}
+
+
 /* Flags for mkdir method in wrapper ops */
 #define PHP_STREAM_MKDIR_RECURSIVE	1
 /* define REPORT ERRORS 8 (below) */

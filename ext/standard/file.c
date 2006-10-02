@@ -1016,30 +1016,25 @@ PHP_NAMED_FUNCTION(php_if_tmpfile)
    Open a file or a URL and return a file pointer */
 PHP_NAMED_FUNCTION(php_if_fopen)
 {
+	zval **ppfilename;
 	char *filename, *mode;
 	int filename_len, mode_len;
-	zend_uchar filename_type;
 	zend_bool use_include_path = 0;
 	zval *zcontext = NULL;
 	php_stream *stream;
 	php_stream_context *context = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ts|br", &filename, &filename_len, &filename_type,
-				&mode, &mode_len, &use_include_path, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zs|br", &ppfilename, &mode, &mode_len, &use_include_path, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
-	if (filename_type == IS_UNICODE) {
-		if (php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, context) == FAILURE) {
-			RETURN_FALSE;
-		}
+	if (FAILURE == php_stream_path_param_encode(ppfilename, &filename, &filename_len, REPORT_ERRORS, context)) {
+		RETURN_FALSE;
 	}
+
 	stream = php_stream_open_wrapper_ex(filename, mode, (use_include_path ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
-	if (filename_type == IS_UNICODE) {
-		efree(filename);
-	}
 	if (stream == NULL) {
 		RETURN_FALSE;
 	}
