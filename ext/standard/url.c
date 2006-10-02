@@ -204,7 +204,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 	}	
 
 	{
-		char *t = s;
+		const char *t = s;
 		p = NULL;
 		while (e > t && (t = memchr(t, '@', (e-t)))) {
 			p = t++;
