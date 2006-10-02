@@ -1932,7 +1932,10 @@ PHP_FUNCTION(date_format)
 		RETURN_STRINGL(str, length, 0);
 	}
 }
+/* }}} */
 
+/* {{{ proto string date_format_locale(DateTime object, string format)
+*/
 PHP_FUNCTION(date_format_locale)
 {
 	zval         *object;
