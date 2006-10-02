@@ -1415,7 +1415,7 @@ PHP_FUNCTION(mysqli_real_connect)
 {
 	MY_MYSQL 		*mysql;
 	char			*hostname, *username, *passwd, *dbname, *socket;
-	int				hostname_len, username_len, passwd_len, dbname_len, socket_len;
+	int				hostname_len, username_len, passwd_len, dbname_len, socket_len = 0;
 	unsigned long 	port=0, flags=0;
 	zval			*mysql_link;
 
