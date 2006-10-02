@@ -1,7 +1,7 @@
 --TEST--
 tiger
 --SKIPIF--
-<?php if (!extension_loaded('hash') || ini_get('unicode.semantics')) die('skip'); ?>
+<?php if (!extension_loaded('hash')) die('skip'); ?>
 --FILE--
 <?php
 echo hash('tiger192,3', ''),"\n";

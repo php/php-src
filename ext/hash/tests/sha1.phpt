@@ -1,7 +1,7 @@
 --TEST--
 sha1 algorithm
 --SKIPIF--
-<?php if(!extension_loaded("hash") || ini_get('unicode.semantics')) print "skip"; ?>
+<?php if(!extension_loaded("hash")) print "skip"; ?>
 --FILE--
 <?php
 echo hash('sha1', '') . "\n";
