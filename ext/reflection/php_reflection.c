@@ -4080,12 +4080,19 @@ ZEND_METHOD(reflection_property, getDeclaringClass)
 	property_reference *ref;
 	zend_class_entry *tmp_ce, *ce;
 	zend_property_info *tmp_info;
+	zstr prop_name, class_name;
+	int prop_name_len;
 
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_property_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ref);
 
+	if (zend_u_unmangle_property_name(UG(unicode)?IS_UNICODE:IS_STRING, ref->prop->name, ref->prop->name_length, &class_name, &prop_name) != SUCCESS) {
+		RETURN_FALSE;
+	}
+
+	prop_name_len = USTR_LEN(prop_name);
 	ce = tmp_ce = ref->ce;
-	while (tmp_ce && zend_u_hash_find(&tmp_ce->properties_info, UG(unicode)?IS_UNICODE:IS_STRING, ref->prop->name, ref->prop->name_length + 1, (void **) &tmp_info) == SUCCESS) {
+	while (tmp_ce && zend_u_hash_find(&tmp_ce->properties_info, UG(unicode)?IS_UNICODE:IS_STRING, prop_name, prop_name_len + 1, (void **) &tmp_info) == SUCCESS) {
 		ce = tmp_ce;
 		tmp_ce = tmp_ce->parent;
 	}
