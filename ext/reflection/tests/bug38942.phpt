@@ -26,7 +26,7 @@ Class [ <user> class bar extends foo ] {
   - Properties [0] {
   }
 
-  - Methods [2] {
+  - Methods [1] {
     Method [ <user, inherits foo, ctor> public method foo ] {
       @@ %sbug38942.php 3 - 3
     }
