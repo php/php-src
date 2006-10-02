@@ -289,7 +289,7 @@ PHP_FUNCTION(mysqli_get_warnings)
 }
 /* }}} */
 
-/* {{{ proto object mysqli_get_warnings(object link) U */ 
+/* {{{ proto object mysqli_stmt_get_warnings(object link) U */ 
 PHP_FUNCTION(mysqli_stmt_get_warnings)
 {
 	MY_STMT				*stmt;
