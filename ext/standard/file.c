@@ -1881,49 +1881,28 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 }
 /* }}} */
 
-/* {{{ proto bool copy(string source_file, string destination_file) U
+/* {{{ proto bool copy(string source_file, string destination_file[, resource context]) U
    Copy a file */
 PHP_FUNCTION(copy)
 {
-	char *source, *dest;
-	int source_len, dest_len;
-	zend_uchar source_type, dest_type;
-	zend_uchar free_source = 0, free_dest = 0;
+	zval **source, **target, *zcontext = NULL;
+	php_stream_context *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tt", &source, &source_len, &source_type, &dest, &dest_len, &dest_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZ|r", &source, &target, &zcontext) == FAILURE) {
 		return;
 	}
 
-	/* Assume failure until success is known */
-	RETVAL_FALSE;	
-
-	if (source_type == IS_UNICODE) {
-		if (FAILURE == php_stream_path_encode(NULL, &source, &source_len, (UChar*)source, source_len, REPORT_ERRORS, FG(default_context))) {
-			goto copy_cleanup;
-		}
-		free_source = 1;
-	}
-	if (dest_type == IS_UNICODE) {
-		if (FAILURE == php_stream_path_encode(NULL, &dest, &dest_len, (UChar*)dest, dest_len, REPORT_ERRORS, FG(default_context))) {
-			goto copy_cleanup;
-		}
-		free_dest = 1;
+	context = php_stream_context_from_zval(zcontext, 0);
+	if (FAILURE == php_stream_path_param_encode(source, NULL, NULL, REPORT_ERRORS, context) ||
+		FAILURE == php_stream_path_param_encode(target, NULL, NULL, REPORT_ERRORS, context) ||
+		0 != php_check_open_basedir(Z_STRVAL_PP(source) TSRMLS_CC)) {
+		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir(source TSRMLS_CC)) {
-		goto copy_cleanup;
-	}
-
-	if (php_copy_file(source, dest TSRMLS_CC) == SUCCESS) {
-		RETVAL_TRUE;
-	}
-
-copy_cleanup:
-	if (free_source) {
-		efree(source);
-	}
-	if (free_dest) {
-		efree(dest);
+	if (php_copy_file(Z_STRVAL_PP(source), Z_STRVAL_PP(target) TSRMLS_CC)==SUCCESS) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
 	}
 }
 /* }}} */
