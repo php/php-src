@@ -283,7 +283,7 @@ if test "$PHP_MBSTRING" != "no"; then
   dnl libmbfl is required
   PHP_MBSTRING_SETUP_LIBMBFL
   PHP_MBSTRING_EXTENSION
-  PHP_INSTALL_HEADERS([ext/mbstring], [libmbfl/ libmbfl/mbfl])
+  PHP_INSTALL_HEADERS([ext/mbstring], [mbstring.h php_mbregex.h libmbfl/ libmbfl/mbfl/ oniguruma/])
 fi
 
 # vim600: sts=2 sw=2 et
