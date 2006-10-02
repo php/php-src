@@ -2503,16 +2503,16 @@ EOF
     fi
   done
 
-  echo "'[$]0'" >> $1
+  echo "'[$]0' \\" >> $1
   for arg in $ac_configure_args; do
-     if test `expr substr $arg 1 1` != "'"; then
-        if test `expr substr $arg 1 2` != '--'; then
+     if test `expr -- $arg : "'.*"` = 0; then
+        if test `expr -- $arg : "--.*"` = 0; then
        	  break;
         fi
         echo "'[$]arg' \\" >> $1
         CONFIGURE_COMMAND="$CONFIGURE_COMMAND '[$]arg'"
      else
-     	if test `expr substr $arg 2 2` != '--'; then
+        if test `expr -- $arg : "'--.*"` = 0; then
        	  break;
         fi
         echo "[$]arg \\" >> $1
