@@ -178,36 +178,32 @@ PHP_MINIT_FUNCTION(dir)
 /* {{{ internal functions */
 static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 {
-	UChar *udir;
+	zval **ppdir;
+	UChar *udir = NULL;
 	char *dir;
 	int dir_len, udir_len;
-	zend_uchar dir_type;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 	php_stream *dirp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|r", &dir, &dir_len, &dir_type, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|r", &ppdir, &zcontext) == FAILURE) {
 		return;
 	}
 
 	RETVAL_FALSE;
 
-	/* Save for later */
-	udir = (UChar*)dir;
-	udir_len = dir_len;
-
-	if (zcontext) {
-		context = php_stream_context_from_zval(zcontext, 0);
+	if (createobject && Z_TYPE_PP(ppdir) == IS_UNICODE) {
+		/* Save for later */
+		udir = eustrndup(Z_USTRVAL_PP(ppdir), Z_USTRLEN_PP(ppdir));
+		udir_len = Z_USTRLEN_PP(ppdir);
 	}
 
-	if (dir_type == IS_UNICODE) {
-		if (FAILURE == php_stream_path_encode(NULL, &dir, &dir_len, udir, udir_len, REPORT_ERRORS, context)) {
-			goto opendir_cleanup;
-		}
+	context = php_stream_context_from_zval(zcontext, 0);
+	if (FAILURE == php_stream_path_param_encode(ppdir, &dir, &dir_len, REPORT_ERRORS, context)) {
+		goto opendir_cleanup;
 	}
 
 	dirp = php_stream_opendir(dir, REPORT_ERRORS, context);
-
 	if (dirp == NULL) {
 		goto opendir_cleanup;
 	}
@@ -216,8 +212,11 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 
 	if (createobject) {
 		object_init_ex(return_value, dir_class_entry_ptr);
-		if (dir_type == IS_UNICODE) {
-			add_property_unicodel(return_value, "path", udir, udir_len, 1);
+		if (udir) {
+			add_property_unicodel(return_value, "path", udir, udir_len, 0);
+
+			/* Avoid auto-cleanup */
+			udir = NULL;
 		} else {
 			add_property_stringl(return_value, "path", dir, dir_len, 1);
 		}
@@ -228,8 +227,8 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 	}
 
 opendir_cleanup:
-	if (dir_type == IS_UNICODE) {
-		efree(dir);
+	if (udir) {
+		efree(udir);
 	}
 }
 /* }}} */
@@ -272,25 +271,16 @@ PHP_FUNCTION(closedir)
    Change root directory */
 PHP_FUNCTION(chroot)
 {
+	zval **ppstr;
 	char *str;
 	int ret, str_len;
-	zend_uchar str_type;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len, &str_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &ppstr) == FAILURE ||
+		php_stream_path_param_encode(ppstr, &str, &str_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
 		return;
-	}
-
-	if (str_type == IS_UNICODE) {
-		if (FAILURE == php_stream_path_encode(NULL, &str, &str_len, (UChar*)str, str_len, REPORT_ERRORS, FG(default_context))) {
-			RETURN_FALSE;
-		}
 	}
 	
 	ret = chroot(str);
-	if (str_type == IS_UNICODE) {
-		efree(str);
-	}
-	
 	if (ret != 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s (errno %d)", strerror(errno), errno);
 		RETURN_FALSE;
@@ -312,25 +302,16 @@ PHP_FUNCTION(chroot)
    Change the current directory */
 PHP_FUNCTION(chdir)
 {
+	zval **ppstr;
 	char *str;
 	int ret, str_len;
-	zend_uchar str_type;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len, &str_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &ppstr) == FAILURE ||
+		php_stream_path_param_encode(ppstr, &str, &str_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
 		return;
 	}
 
-	if (str_type == IS_UNICODE) {
-		if (FAILURE == php_stream_path_encode(NULL, &str, &str_len, (UChar*)str, str_len, REPORT_ERRORS, FG(default_context))) {
-			RETURN_FALSE;
-		}
-	}
-
 	ret = VCWD_CHDIR(str);
-	if (str_type == IS_UNICODE) {
-		efree(str);
-	}
-	
 	if (ret != 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s (errno %d)", strerror(errno), errno);
 		RETURN_FALSE;
@@ -496,10 +477,11 @@ PHP_FUNCTION(glob)
 /* }}} */
 #endif 
 
-/* {{{ proto array scandir(string dir [, int sorting_order [, resource context]])
+/* {{{ proto array scandir(string dir [, int sorting_order [, resource context]]) U
    List files & directories inside the specified path */
 PHP_FUNCTION(scandir)
 {
+	zval **ppdirn;
 	char *dirn;
 	int dirn_len;
 	long flags = 0;
@@ -508,12 +490,13 @@ PHP_FUNCTION(scandir)
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lr", &dirn, &dirn_len, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|lr", &ppdirn, &flags, &zcontext) == FAILURE) {
 		return;
 	}
 
-	if (zcontext) {
-		context = php_stream_context_from_zval(zcontext, 0);
+	context = php_stream_context_from_zval(zcontext, 0);
+	if (FAILURE == php_stream_path_param_encode(ppdirn, &dirn, &dirn_len, REPORT_ERRORS, context)) {
+		RETURN_FALSE;
 	}
 
 	if (!flags) {
@@ -529,9 +512,19 @@ PHP_FUNCTION(scandir)
 	array_init(return_value);
 
 	for (i = 0; i < n; i++) {
-		add_next_index_rt_string(return_value, namelist[i], 0);
 		if (UG(unicode)) {
-			efree(namelist[i]);
+			UChar *path;
+			int path_len;
+
+			if (SUCCESS == php_stream_path_decode(NULL, &path, &path_len, namelist[i], strlen(namelist[i]), REPORT_ERRORS, context)) {
+				add_next_index_unicodel(return_value, path, path_len, 0);
+				efree(namelist[i]);
+			} else {
+				/* Fallback on using the non-unicode version, path_decode will emit the warning for us */
+				add_next_index_string(return_value, namelist[i], 0);
+			}
+		} else {
+			add_next_index_string(return_value, namelist[i], 0);
 		}
 	}
 
