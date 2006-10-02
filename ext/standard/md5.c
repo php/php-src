@@ -25,6 +25,7 @@
 
 #include "php.h"
 #include "md5.h"
+#include "ext/standard/file.h"
 
 PHPAPI void make_digest(char *md5str, unsigned char *digest)
 {
@@ -44,13 +45,22 @@ PHP_NAMED_FUNCTION(php_if_md5)
 {
 	char *arg;
 	int arg_len;
+	zend_uchar arg_type;
 	zend_bool raw_output = 0;
 	char md5str[33];
 	PHP_MD5_CTX context;
 	unsigned char digest[16];
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|b", &arg, &arg_len, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|b", &arg, &arg_len, &arg_type, &raw_output) == FAILURE) {
 		return;
+	}
+
+	if (arg_type == IS_UNICODE) {
+		arg = zend_unicode_to_ascii((UChar*)arg, arg_len TSRMLS_CC);
+		if (!arg) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received");
+			RETURN_FALSE;
+		}
 	}
 	
 	md5str[0] = '\0';
@@ -58,12 +68,15 @@ PHP_NAMED_FUNCTION(php_if_md5)
 	PHP_MD5Update(&context, (unsigned char*)arg, arg_len);
 	PHP_MD5Final(digest, &context);
 	if (raw_output) {
-		RETURN_STRINGL((char*)digest, 16, 1);
+		RETVAL_STRINGL((char*)digest, 16, 1);
 	} else {
 		make_digest(md5str, digest);
 		RETVAL_ASCII_STRING(md5str, ZSTR_DUPLICATE);
 	}
 
+	if (arg_type == IS_UNICODE) {
+		efree(arg);
+	}
 }
 /* }}} */
 
@@ -73,6 +86,7 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 {
 	char          *arg;
 	int           arg_len;
+	zend_uchar    arg_type;
 	zend_bool raw_output = 0;
 	char          md5str[33];
 	unsigned char buf[1024];
@@ -81,11 +95,20 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 	int           n;
 	php_stream    *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|b", &arg, &arg_len, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|b", &arg, &arg_len, &arg_type, &raw_output) == FAILURE) {
 		return;
+	}
+
+	if (arg_type == IS_UNICODE) {
+		if (php_stream_path_encode(NULL, &arg, &arg_len, (UChar*)arg, arg_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+			RETURN_FALSE;
+		}
 	}
 	
 	stream = php_stream_open_wrapper(arg, "rb", REPORT_ERRORS, NULL);
+	if (arg_type == IS_UNICODE) {
+		efree(arg);
+	}
 	if (!stream) {
 		RETURN_FALSE;
 	}
