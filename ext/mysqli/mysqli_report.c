@@ -27,7 +27,7 @@
 #include "ext/standard/info.h"
 #include "php_mysqli.h"
 
-/* {{{ bool mysqli_report(int flags)
+/* {{{ proto bool mysqli_report(int flags)
    sets report level */
 PHP_FUNCTION(mysqli_report)
 {
