@@ -377,7 +377,7 @@ PHP_NAMED_FUNCTION(php_if_readdir)
 /* }}} */
 
 #ifdef HAVE_GLOB
-/* {{{ proto array glob(string pattern [, int flags])
+/* {{{ proto array glob(string pattern [, int flags]) U
    Find pathnames matching a pattern */
 PHP_FUNCTION(glob)
 {
@@ -387,6 +387,7 @@ PHP_FUNCTION(glob)
 	char work_pattern[MAXPATHLEN];
 	char *result;
 #endif
+	zval **pppattern;
 	char *pattern = NULL;
 	int pattern_len;
 	long flags = 0;
@@ -394,8 +395,10 @@ PHP_FUNCTION(glob)
 	unsigned int n;
 	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &pattern, &pattern_len, &flags) == FAILURE) 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|l", &pppattern, &flags) == FAILURE ||
+		php_stream_path_param_encode(pppattern, &pattern, &pattern_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
 		return;
+	}
 
 #ifdef ZTS 
 	if (!IS_ABSOLUTE_PATH(pattern, pattern_len)) {
@@ -469,7 +472,20 @@ PHP_FUNCTION(glob)
 				continue;
 			}
 		}
-		add_next_index_rt_string(return_value, globbuf.gl_pathv[n]+cwd_skip, 1);
+		if (UG(unicode)) {
+			UChar *path;
+			int path_len;
+
+			if (SUCCESS == php_stream_path_decode(&php_plain_files_wrapper, &path, &path_len, globbuf.gl_pathv[n]+cwd_skip, 
+								strlen(globbuf.gl_pathv[n]+cwd_skip), REPORT_ERRORS, FG(default_context))) {
+				add_next_index_unicodel(return_value, path, path_len, 0);
+			} else {
+				/* Fallback on string version, path_decode will emit warning */
+				add_next_index_string(return_value, globbuf.gl_pathv[n]+cwd_skip, 1);
+			}
+		} else {
+			add_next_index_string(return_value, globbuf.gl_pathv[n]+cwd_skip, 1);
+		}
 	}
 
 	globfree(&globbuf);
