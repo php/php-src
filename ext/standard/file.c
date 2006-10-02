@@ -358,9 +358,9 @@ PHP_FUNCTION(flock)
 
 PHP_FUNCTION(get_meta_tags)
 {
+	zval **ppfilename;
 	char *filename;
 	int filename_len;
-	zend_uchar filename_type;
 	zend_bool use_include_path = 0;
 	int in_tag = 0, done = 0;
 	int looking_for_val = 0, have_name = 0, have_content = 0;
@@ -373,22 +373,14 @@ PHP_FUNCTION(get_meta_tags)
 	memset(&md, 0, sizeof(md));
 
 	/* Parse arguments */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|b",
-							  &filename, &filename_len, &filename_type, &use_include_path) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|b", &ppfilename, &use_include_path) == FAILURE ||
+		php_stream_path_param_encode(ppfilename, &filename, &filename_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
 		return;
 	}
 
-	if (filename_type == IS_UNICODE) {
-		if (php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
-			RETURN_FALSE;
-		}
-	}
 	md.stream = php_stream_open_wrapper(filename, "rt",
 			(use_include_path ? USE_PATH : 0) | REPORT_ERRORS,
 			NULL);
-	if (filename_type == IS_UNICODE) {
-		efree(filename);
-	}
 	if (!md.stream)	{
 		RETURN_FALSE;
 	}
@@ -534,9 +526,9 @@ PHP_FUNCTION(get_meta_tags)
    Read the entire file into a string */
 PHP_FUNCTION(file_get_contents)
 {
+	zval **ppfilename;
 	char *filename;
 	int filename_len;
-	zend_uchar filename_type;
 	void *contents = NULL;
 	long flags = 0;
 	php_stream *stream;
@@ -547,24 +539,18 @@ PHP_FUNCTION(file_get_contents)
 	php_stream_context *context = NULL;
 
 	/* Parse arguments */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|lr!ll",
-				  &filename, &filename_len, &filename_type, &flags, &zcontext, &offset, &maxlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|lr!ll", &ppfilename, &flags, &zcontext, &offset, &maxlen) == FAILURE) {
 		return;
 	}
 
 	context = php_stream_context_from_zval(zcontext, 0);
-	if (filename_type == IS_UNICODE) {
-		if (php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, context) == FAILURE) {
-			RETURN_FALSE;
-		}
+	if (php_stream_path_param_encode(ppfilename, &filename, &filename_len, REPORT_ERRORS, context) == FAILURE) {
+		RETURN_FALSE;
 	}
 
 	stream = php_stream_open_wrapper_ex(filename, (flags & PHP_FILE_TEXT) ? "rt" : "rb", 
 				((flags & PHP_FILE_USE_INCLUDE_PATH) ? USE_PATH : 0) | REPORT_ERRORS,
 				NULL, context);
-	if (filename_type == IS_UNICODE) {
-		efree(filename);
-	}
 	if (!stream) {
 		RETURN_FALSE;
 	}
@@ -616,9 +602,9 @@ PHP_FUNCTION(file_put_contents)
 {
 	int argc = ZEND_NUM_ARGS();
 	php_stream *stream;
+	zval **ppfilename;
 	char *filename;
 	int filename_len;
-	zend_uchar filename_type;
 	zval *data;
 	int numchars = 0;
 	long flags = ((argc < 3) && UG(unicode)) ? PHP_FILE_TEXT : 0;
@@ -627,8 +613,7 @@ PHP_FUNCTION(file_put_contents)
 	char mode[3] = { 'w', 0, 0 };
 	php_stream *srcstream = NULL;
 	
-	if (zend_parse_parameters(argc TSRMLS_CC, "tz/|lr!", &filename, &filename_len, &filename_type,
-				&data, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "Zz/|lr!", &ppfilename, &data, &flags, &zcontext) == FAILURE) {
 		return;
 	}
 
@@ -637,6 +622,9 @@ PHP_FUNCTION(file_put_contents)
 	}
 
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
+	if (php_stream_path_param_encode(ppfilename, &filename, &filename_len, REPORT_ERRORS, context) == FAILURE) {
+		RETURN_FALSE;
+	}
 
 	if (flags & PHP_FILE_APPEND) {
 		mode[0] = 'a';
@@ -647,18 +635,8 @@ PHP_FUNCTION(file_put_contents)
 		mode[1] = 't';
 	}
 
-	if (filename_type == IS_UNICODE) {
-		if (php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, context) == FAILURE) {
-			RETURN_FALSE;
-		}
-	}
-
 	stream = php_stream_open_wrapper_ex(filename, mode, 
 			((flags & PHP_FILE_USE_INCLUDE_PATH) ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
-
-	if (filename_type == IS_UNICODE) {
-		efree(filename);
-	}
 	if (stream == NULL) {
 		RETURN_FALSE;
 	}
@@ -785,9 +763,9 @@ PHP_FUNCTION(file_put_contents)
 /* UTODO: Accept unicode contents */
 PHP_FUNCTION(file)
 {
+	zval **ppfilename;
 	char *filename;
 	int filename_len;
-	zend_uchar filename_type;
 	char *target_buf=NULL;
 	register int i = 0;
 	int target_len;
@@ -801,7 +779,7 @@ PHP_FUNCTION(file)
 	php_stream_context *context = NULL;
 
 	/* Parse arguments */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|lr!", &filename, &filename_len, &filename_type, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|lr!", &ppfilename, &flags, &zcontext) == FAILURE) {
 		return;
 	}
 	if (flags < 0 || flags > (PHP_FILE_USE_INCLUDE_PATH | PHP_FILE_IGNORE_NEW_LINES | PHP_FILE_SKIP_EMPTY_LINES | PHP_FILE_NO_DEFAULT_CONTEXT | PHP_FILE_TEXT)) {
@@ -815,16 +793,11 @@ PHP_FUNCTION(file)
 	text_mode = flags & PHP_FILE_TEXT;
 
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
+	if (php_stream_path_param_encode(ppfilename, &filename, &filename_len, REPORT_ERRORS, context) == FAILURE) {
+		RETURN_FALSE;
+	}
 
-	if (filename_type == IS_UNICODE) {
-		if (php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, context) == FAILURE) {
-			RETURN_FALSE;
-		}
-	}
 	stream = php_stream_open_wrapper_ex(filename, text_mode ? "rt" : "rb", (use_include_path ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
-	if (filename_type == IS_UNICODE) {
-		efree(filename);
-	}
 	if (!stream) {
 		RETURN_FALSE;
 	}
@@ -925,40 +898,26 @@ parse_eol:
    Create a unique filename in a directory */
 PHP_FUNCTION(tempnam)
 {
+	zval **ppdir, **ppprefix;
 	char *dir, *prefix;
 	int dir_len, prefix_len;
-	zend_uchar dir_type, prefix_type;
-	zend_uchar free_dir = 0, free_prefix = 0;
 
-	char *d;
 	char *opened_path;
 	char *p;
 	int fd;
 	size_t p_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tt", &dir, &dir_len, &dir_type, &prefix, &prefix_len, &prefix_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZ", &ppdir, &ppprefix) == FAILURE) {
 		return;
 	}
 
-	/* Assume failure until success is assured */
-	RETVAL_FALSE;
-
-	if (dir_type == IS_UNICODE) {
-		if (FAILURE == php_stream_path_encode(NULL, &dir, &dir_len, (UChar*)dir, dir_len, REPORT_ERRORS, FG(default_context))) {
-			goto tempnam_cleanup;
-		}
-		free_dir = 1;
-	}
-
-	if (prefix_type == IS_UNICODE) {
-		if (FAILURE == php_stream_path_encode(NULL, &prefix, &prefix_len, (UChar*)prefix, prefix_len, REPORT_ERRORS, FG(default_context))) {
-			goto tempnam_cleanup;
-		}
-		free_prefix = 1;
+	if (php_stream_path_param_encode(ppdir, &dir, &dir_len, REPORT_ERRORS, FG(default_context)) == FAILURE ||
+		php_stream_path_param_encode(ppprefix, &prefix, &prefix_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+		RETURN_FALSE;
 	}
 
 	if (php_check_open_basedir(dir TSRMLS_CC)) {
-		goto tempnam_cleanup;
+		RETURN_FALSE;
 	}
 
 	php_basename(prefix, prefix_len, NULL, 0, &p, &p_len TSRMLS_CC);
@@ -981,14 +940,6 @@ PHP_FUNCTION(tempnam)
 		}
 	}
 	efree(p);
-
-tempnam_cleanup:
-	if (free_dir) {
-		efree(dir);
-	}
-	if (free_prefix) {
-		efree(prefix);
-	}
 }
 /* }}} */
 
@@ -1074,20 +1025,18 @@ PHPAPI PHP_FUNCTION(fclose)
    Execute a command and open either a read or a write pipe to it */
 PHP_FUNCTION(popen)
 {
+	zval **ppcommand;
 	char *command, *mode;
 	int command_len, mode_len;
-	zend_uchar command_type;
 	FILE *fp;
 	char *posix_mode;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ts", &command, &command_len, &command_type, &mode, &mode_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zs", &ppcommand, &mode, &mode_len) == FAILURE) {
 		return;
 	}
 
-	if (command_type == IS_UNICODE) {
-		if (FAILURE == php_stream_path_encode(NULL, &command, &command_len, (UChar*)command, command_len, REPORT_ERRORS, FG(default_context))) {
-			RETURN_FALSE;
-		}
+	if (php_stream_path_param_encode(ppcommand, &command, &command_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+		RETURN_FALSE;
 	}
 
 	posix_mode = estrndup(mode, mode_len);
@@ -1116,9 +1065,6 @@ PHP_FUNCTION(popen)
 	}
 
 	efree(posix_mode);
-	if (command_type == IS_UNICODE) {
-		efree(command);
-	}
 }
 /* }}} */
 
@@ -1506,31 +1452,24 @@ PHPAPI int php_mkdir(char *dir, long mode TSRMLS_DC)
    Create a directory */
 PHP_FUNCTION(mkdir)
 {
+	zval **ppdir;
 	char *dir;
 	int dir_len;
-	zend_uchar dir_type;
 	zval *zcontext = NULL;
 	long mode = 0777;
 	zend_bool recursive = 0;
 	php_stream_context *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|lbr", &dir, &dir_len, &dir_type, &mode, &recursive, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|lbr", &ppdir, &mode, &recursive, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	context = php_stream_context_from_zval(zcontext, 0);
-
-	if (dir_type == IS_UNICODE) {
-		if (FAILURE == php_stream_path_encode(NULL, &dir, &dir_len, (UChar*)dir, dir_len, REPORT_ERRORS, context)) {
-			RETURN_FALSE;
-		}
+	if (php_stream_path_param_encode(ppdir, &dir, &dir_len, REPORT_ERRORS, context) == FAILURE) {
+		RETURN_FALSE;
 	}
 
 	RETVAL_BOOL(php_stream_mkdir(dir, mode, (recursive ? PHP_STREAM_MKDIR_RECURSIVE : 0) | REPORT_ERRORS, context));
-
-	if (dir_type == IS_UNICODE) {
-		efree(dir);
-	}
 }
 /* }}} */
 
@@ -1538,29 +1477,22 @@ PHP_FUNCTION(mkdir)
    Remove a directory */
 PHP_FUNCTION(rmdir)
 {
+	zval **ppdir;
 	char *dir;
 	int dir_len;
-	zend_uchar dir_type;
 	zval *zcontext = NULL;
 	php_stream_context *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|r", &dir, &dir_len, &dir_type, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|r", &ppdir, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	context = php_stream_context_from_zval(zcontext, 0);
-
-	if (dir_type == IS_UNICODE) {
-		if (FAILURE == php_stream_path_encode(NULL, &dir, &dir_len, (UChar*)dir, dir_len, REPORT_ERRORS, context)) {
-			RETURN_FALSE;
-		}
+	if (php_stream_path_param_encode(ppdir, &dir, &dir_len, REPORT_ERRORS, context) == FAILURE) {
+		RETURN_FALSE;
 	}
 
 	RETVAL_BOOL(php_stream_rmdir(dir, REPORT_ERRORS, context));
-
-	if (dir_type == IS_UNICODE) {
-		efree(dir);
-	}
 }
 /* }}} */
 
@@ -1568,43 +1500,36 @@ PHP_FUNCTION(rmdir)
    Output a file or a URL */
 PHP_FUNCTION(readfile)
 {
+	zval **ppfilename;
 	char *filename;
-	int size = 0;
 	int filename_len;
-	zend_uchar filename_type;
+	int size = 0;
 	long flags = 0;
 	zval *zcontext = NULL;
 	php_stream *stream;
 	php_stream_context *context = NULL;
 	char *mode = "rb";
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|lr!", &filename, &filename_len, &filename_type,
-													&flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|lr!", &ppfilename, &flags, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	context = php_stream_context_from_zval(zcontext, 0);
+	if (php_stream_path_param_encode(ppfilename, &filename, &filename_len, REPORT_ERRORS, context) == FAILURE) {
+		RETURN_FALSE;
+	}
 
 	if (flags & PHP_FILE_TEXT) {
 		mode = "rt";
 	}
 
-	if (filename_type == IS_UNICODE) {
-		if (php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, context) == FAILURE) {
-			RETURN_FALSE;
-		}
-	}
-
 	stream = php_stream_open_wrapper_ex(filename, mode, ((flags & PHP_FILE_USE_INCLUDE_PATH) ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
-	if (filename_type == IS_UNICODE) {
-		efree(filename);
-	}
-
 	if (stream) {
 		size = php_stream_passthru(stream);
 		php_stream_close(stream);
 		RETURN_LONG(size);
 	}
+
 	RETURN_FALSE;
 }
 /* }}} */
@@ -1661,61 +1586,42 @@ PHPAPI PHP_FUNCTION(fpassthru)
    Rename a file */
 PHP_FUNCTION(rename)
 {
+	zval **ppold, **ppnew;
 	char *old_name, *new_name;
 	int old_name_len, new_name_len;
-	zend_uchar old_name_type, new_name_type;
-	zend_uchar free_old_name = 0, free_new_name = 0;
 	zval *zcontext = NULL;
 	php_stream_wrapper *wrapper;
 	php_stream_context *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tt|r", &old_name, &old_name_len, &old_name_type, &new_name, &new_name_len, &new_name_type, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZ|r", &ppold, &ppnew, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	context = php_stream_context_from_zval(zcontext, 0);
-	RETVAL_FALSE;
-
-	if (old_name_type == IS_UNICODE) {
-		if (FAILURE == php_stream_path_encode(NULL, &old_name, &old_name_len, (UChar*)old_name, old_name_len, REPORT_ERRORS, context)) {
-			goto rename_cleanup;
-		}
-		free_old_name = 1;
+	if (php_stream_path_param_encode(ppold, &old_name, &old_name_len, REPORT_ERRORS, context) == FAILURE ||
+		php_stream_path_param_encode(ppnew, &new_name, &new_name_len, REPORT_ERRORS, context) == FAILURE) {
+		RETURN_FALSE;
 	}
 
 	wrapper = php_stream_locate_url_wrapper(old_name, NULL, 0 TSRMLS_CC);
 
 	if (!wrapper || !wrapper->wops) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to locate stream wrapper");
-		goto rename_cleanup;
+		RETURN_FALSE;
 	}
 
 	if (!wrapper->wops->rename) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s wrapper does not support renaming", wrapper->wops->label ? wrapper->wops->label : "Source");
-		goto rename_cleanup;
+		RETURN_FALSE;
 	}
 
-	if (new_name_type == IS_UNICODE) {
-		if (FAILURE == php_stream_path_encode(NULL, &new_name, &new_name_len, (UChar*)new_name, new_name_len, REPORT_ERRORS, context)) {
-			goto rename_cleanup;
-		}
-		free_new_name = 1;
-	}
 
 	if (wrapper != php_stream_locate_url_wrapper(new_name, NULL, 0 TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot rename a file across wrapper types");
-		goto rename_cleanup;
+		RETURN_FALSE;
 	}
 
 	RETVAL_BOOL(wrapper->wops->rename(wrapper, old_name, new_name, 0, context TSRMLS_CC));
-
-rename_cleanup:
-	if (free_old_name) {
-		efree(old_name);
-	}
-	if (free_new_name) {
-		efree(new_name);
-	}
 }
 /* }}} */
 
@@ -1723,48 +1629,35 @@ rename_cleanup:
    Delete a file */
 PHP_FUNCTION(unlink)
 {
+	zval **ppfilename;
 	char *filename;
 	int filename_len;
-	zend_uchar filename_type;
 	php_stream_wrapper *wrapper;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|r", &filename, &filename_len, &filename_type,
-													&zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|r", &ppfilename, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	context = php_stream_context_from_zval(zcontext, 0);
-
-	if (filename_type == IS_UNICODE) {
-		if (php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, context) == FAILURE) {
-			RETURN_FALSE;
-		}
+	if (php_stream_path_param_encode(ppfilename, &filename, &filename_len, REPORT_ERRORS, context) == FAILURE) {
+		RETURN_FALSE;
 	}
 
 	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0 TSRMLS_CC);
 
 	if (!wrapper || !wrapper->wops) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to locate stream wrapper");
-		if (filename_type == IS_UNICODE) {
-			efree(filename);
-		}
 		RETURN_FALSE;
 	}
 
 	if (!wrapper->wops->unlink) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s does not allow unlinking", wrapper->wops->label ? wrapper->wops->label : "Wrapper");
-		if (filename_type == IS_UNICODE) {
-			efree(filename);
-		}
 		RETURN_FALSE;
 	}
 
 	RETVAL_BOOL(wrapper->wops->unlink(wrapper, filename, REPORT_ERRORS, context TSRMLS_CC));
-	if (filename_type == IS_UNICODE) {
-		efree(filename);
-	}
 }
 /* }}} */
 
@@ -2519,19 +2412,14 @@ out:
    Return the resolved path */
 PHP_FUNCTION(realpath)
 {
+	zval **ppfilename;
 	char *filename;
 	int filename_len;
-	zend_uchar filename_type;
 	char resolved_path_buff[MAXPATHLEN];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &filename, &filename_len, &filename_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &ppfilename) == FAILURE ||
+		php_stream_path_param_encode(ppfilename, &filename, &filename_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
 		return;
-	}
-
-	if (filename_type == IS_UNICODE) {
-		if (php_stream_path_encode(&php_plain_files_wrapper, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
-			RETURN_FALSE;
-		}
 	}
 
 	if (VCWD_REALPATH(filename, resolved_path_buff)) {
@@ -2555,10 +2443,6 @@ PHP_FUNCTION(realpath)
 		}
 	} else {
 		RETVAL_FALSE;
-	}
-
-	if (filename_type == IS_UNICODE) {
-		efree(filename);
 	}
 }
 /* }}} */
