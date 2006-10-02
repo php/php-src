@@ -1276,7 +1276,6 @@ not_relative_path:
 		
 		stream = php_stream_fopen_rel(trypath, mode, opened_path, options);
 		if (stream) {
-stream_done:
 			efree(pathbuf);
 			return stream;
 		}
