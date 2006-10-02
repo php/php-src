@@ -6295,6 +6295,8 @@ PHP_FUNCTION(import_request_variables)
 /* }}} */
 
 #ifdef HAVE_GETLOADAVG
+/* {{{ proto array sys_getloadavg()
+ */
 PHP_FUNCTION(sys_getloadavg)
 {
 	double load[3];
@@ -6308,6 +6310,7 @@ PHP_FUNCTION(sys_getloadavg)
 		add_index_double(return_value, 2, load[2]);
 	}
 }
+/* }}} */
 #endif
 
 
