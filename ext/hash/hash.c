@@ -84,9 +84,12 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename)
 				RETURN_FALSE;
 			}
 		} else {
-			/* Unicode string passed for raw hashing */
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unicode strings can not be hashed.  Convert to a binary type.");
-			RETURN_FALSE;
+			data = zend_unicode_to_ascii((UChar*)data, data_len TSRMLS_CC);
+			if (!data) {
+				/* Non-ASCII Unicode string passed for raw hashing */
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received");
+				RETURN_FALSE;
+			}
 		}
 	}
 #else
@@ -94,25 +97,19 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename)
 		return;
 	}
 #endif
+	/* Assume failure */
+	RETVAL_FALSE;
 
 	ops = php_hash_fetch_ops(algo, algo_len);
 	if (!ops) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown hashing algorithm: %s", algo);
-		if (data_type != IS_STRING) {
-			/* Original filename was UNICODE, this string is a converted copy */
-			efree(data);
-		}
-		RETURN_FALSE;
+		goto hash_done;
 	}
 	if (isfilename) {
 		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, DEFAULT_CONTEXT);
-		if (data_type != IS_STRING) {
-			/* Original filename was UNICODE, this string is a converted copy */
-			efree(data);
-		}
 		if (!stream) {
 			/* Stream will report errors opening file */
-			RETURN_FALSE;
+			goto hash_done;
 		}
 	}
 
@@ -137,14 +134,27 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename)
 
 	if (raw_output) {
 		digest[ops->digest_size] = 0;
-		RETURN_STRINGL(digest, ops->digest_size, 0);
+
+		/* Raw output is binary only */
+		RETVAL_STRINGL(digest, ops->digest_size, 0);
 	} else {
 		char *hex_digest = safe_emalloc(ops->digest_size, 2, 1);
 
 		php_hash_bin2hex(hex_digest, (unsigned char *) digest, ops->digest_size);
 		hex_digest[2 * ops->digest_size] = 0;
 		efree(digest);
-		RETURN_STRINGL(hex_digest, 2 * ops->digest_size, 0);
+
+		/* hexits can be binary or unicode */
+#if PHP_MAJOR_VERSION >= 6
+		RETVAL_RT_STRINGL(hex_digest, 2 * ops->digest_size, ZSTR_AUTOFREE);
+#else
+		RETVAL_STRINGL(hex_digest, 2 * ops->digest_size, 0);
+#endif
+	}
+
+hash_done:
+	if (data_type != IS_STRING) {
+		efree(data);
 	}
 }
 
@@ -168,14 +178,14 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename)
 {
 	char *algo, *data, *digest, *key, *K;
 	int algo_len, data_len, key_len, i;
-	zend_uchar data_type = IS_STRING;
+	zend_uchar data_type = IS_STRING, key_type = IS_STRING;
 	zend_bool raw_output = 0;
 	php_hash_ops *ops;
 	void *context;
 	php_stream *stream = NULL;
 
 #if PHP_MAJOR_VERSION >= 6
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "stS|b", &algo, &algo_len, &data, &data_len, &data_type, &key, &key_len, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "stt|b", &algo, &algo_len, &data, &data_len, &data_type, &key, &key_len, &key_type, &raw_output) == FAILURE) {
 		return;
 	}
 
@@ -185,8 +195,22 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename)
 				RETURN_FALSE;
 			}
 		} else {
-			/* Unicode string passed for raw hashing */
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unicode strings can not be hashed.  Convert to a binary type.");
+			data = zend_unicode_to_ascii((UChar*)data, data_len TSRMLS_CC);
+			if (!data) {
+				/* Non-ASCII Unicode string passed for raw hashing */
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received");
+				RETURN_FALSE;
+			}
+		}
+	}
+	if (key_type == IS_UNICODE) {
+		key = zend_unicode_to_ascii((UChar*)key, key_len TSRMLS_CC);
+		if (!key) {
+			/* Non-ASCII Unicode key passed for raw hashing */
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binary or ASCII-Unicode key expected, non-ASCII-Unicode key received");
+			if (data_type == IS_UNICODE) {
+				efree(data);
+			}
 			RETURN_FALSE;
 		}
 	}
@@ -195,25 +219,19 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename)
 		return;
 	}
 #endif
+	/* Assume failure */
+	RETVAL_FALSE;
 
 	ops = php_hash_fetch_ops(algo, algo_len);
 	if (!ops) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown hashing algorithm: %s", algo);
-		if (data_type != IS_STRING) {
-			/* Original filename was UNICODE, this string is a converted copy */
-			efree(data);
-		}
-		RETURN_FALSE;
+		goto hmac_done;
 	}
 	if (isfilename) {
 		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, DEFAULT_CONTEXT);
-		if (data_type != IS_STRING) {
-			/* Original filename was UNICODE, this string is a converted copy */
-			efree(data);
-		}
 		if (!stream) {
 			/* Stream will report errors opening file */
-			RETURN_FALSE;
+			goto hmac_done;
 		}
 	}
 
@@ -227,6 +245,7 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename)
 		/* Reduce the key first */
 		ops->hash_update(context, (unsigned char *) key, key_len);
 		ops->hash_final((unsigned char *) K, context);
+
 		/* Make the context ready to start over */
 		ops->hash_init(context);
 	} else {
@@ -272,14 +291,30 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename)
 
 	if (raw_output) {
 		digest[ops->digest_size] = 0;
-		RETURN_STRINGL(digest, ops->digest_size, 0);
+
+		/* Raw output is binary only */
+		RETVAL_STRINGL(digest, ops->digest_size, 0);
 	} else {
 		char *hex_digest = safe_emalloc(ops->digest_size, 2, 1);
 
 		php_hash_bin2hex(hex_digest, (unsigned char *) digest, ops->digest_size);
 		hex_digest[2 * ops->digest_size] = 0;
 		efree(digest);
-		RETURN_STRINGL(hex_digest, 2 * ops->digest_size, 0);
+
+		/* hexits can be binary or unicode */
+#if PHP_MAJOR_VERSION >= 6
+		RETVAL_RT_STRINGL(hex_digest, 2 * ops->digest_size, ZSTR_AUTOFREE);
+#else
+		RETVAL_STRINGL(hex_digest, 2 * ops->digest_size, 0);
+#endif
+	}
+
+hmac_done:
+	if (data_type != IS_STRING) {
+		efree(data);
+	}
+	if (key_type != IS_STRING) {
+		efree(key);
 	}
 }
 
@@ -306,12 +341,13 @@ PHP_FUNCTION(hash_init)
 {
 	char *algo, *key = NULL;
 	int algo_len, key_len = 0, argc = ZEND_NUM_ARGS();
+	zend_uchar key_type;
 	long options = 0;
 	void *context;
 	php_hash_ops *ops;
 	php_hash_data *hash;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "s|ls", &algo, &algo_len, &options, &key, &key_len) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "s|lt", &algo, &algo_len, &options, &key, &key_len, &key_type) == FAILURE) {
 		return;
 	}
 
@@ -326,6 +362,15 @@ PHP_FUNCTION(hash_init)
 		/* Note: a zero length key is no key at all */
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "HMAC requested without a key");
 		RETURN_FALSE;
+	}
+
+	if (key_type == IS_UNICODE) {
+		key = zend_unicode_to_ascii((UChar*)key, key_len TSRMLS_CC);
+		if (!key) {
+			/* Non-ASCII Unicode key passed for raw hashing */
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binary or ASCII-Unicode key expected, non-ASCII-Unicode key received");
+			RETURN_FALSE;
+		}
 	}
 
 	context = emalloc(ops->context_size);
@@ -361,15 +406,13 @@ PHP_FUNCTION(hash_init)
 		hash->key = (unsigned char *) K;
 	}
 
+	if (key_type == IS_UNICODE) {
+		efree(key);
+	}
+
 	ZEND_REGISTER_RESOURCE(return_value, hash, php_hash_le_hash);
 }
 /* }}} */
-
-#if PHP_MAJOR_VERSION >= 6
-# define PHP_HASH_UPDATE_ARGS "rS"
-#else
-# define PHP_HASH_UPDATE_ARGS "rs"
-#endif
 
 /* {{{ proto bool hash_update(resource context, string data) U
 Pump data into the hashing algorithm */
@@ -379,14 +422,34 @@ PHP_FUNCTION(hash_update)
 	php_hash_data *hash;
 	char *data;
 	int data_len;
+	zend_uchar data_type = IS_STRING;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, PHP_HASH_UPDATE_ARGS, &zhash, &data, &data_len) == FAILURE) {
+#if PHP_MAJOR_VERSION >= 6
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rt", &zhash, &data, &data_len, &data_type) == FAILURE) {
 		return;
 	}
+
+	if (data_type == IS_UNICODE) {
+		data = zend_unicode_to_ascii((UChar*)data, data_len TSRMLS_CC);
+		if (!data) {
+			/* Non-ASCII Unicode string passed for raw hashing */
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received");
+			RETURN_FALSE;
+		}
+	}
+#else
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &zhash, &data, &data_len) == FAILURE) {
+		return;
+	}
+#endif
 
 	ZEND_FETCH_RESOURCE(hash, php_hash_data*, &zhash, -1, PHP_HASH_RESNAME, php_hash_le_hash);
 
 	hash->ops->hash_update(hash->context, (unsigned char *) data, data_len);
+
+	if (data_type != IS_STRING) {
+		efree(data);
+	}
 
 	RETURN_TRUE;
 }
@@ -534,6 +597,7 @@ PHP_FUNCTION(hash_final)
 	zend_list_delete(Z_RESVAL_P(zhash));
 
 	if (raw_output) {
+		/* Raw output can only be binary */
 		RETURN_STRINGL(digest, digest_len, 0);
 	} else {
 		char *hex_digest = safe_emalloc(digest_len,2,1);
@@ -541,7 +605,13 @@ PHP_FUNCTION(hash_final)
 		php_hash_bin2hex(hex_digest, (unsigned char *) digest, digest_len);
 		hex_digest[2 * digest_len] = 0;
 		efree(digest);
-		RETURN_STRINGL(hex_digest, 2 * digest_len, 0);		
+
+		/* Hexits can be either binary or unicode */
+#if PHP_MAJOR_VERSION >= 6
+		RETURN_RT_STRINGL(hex_digest, 2 * digest_len, ZSTR_AUTOFREE);
+#else
+		RETURN_STRINGL(hex_digest, 2 * digest_len, 0);
+#endif
 	}
 }
 /* }}} */
@@ -565,7 +635,7 @@ PHP_FUNCTION(hash_algos)
 		(type = zend_hash_get_current_key_ex(&php_hash_hashtable, &str, &str_len, &idx, 0, &pos)) != HASH_KEY_NON_EXISTANT;
 		zend_hash_move_forward_ex(&php_hash_hashtable, &pos)) {
 #if (PHP_MAJOR_VERSION >= 6)
-			add_next_index_stringl(return_value, str.s, str_len-1, 1);
+			add_next_index_ascii_stringl(return_value, str.s, str_len-1, 1);
 #else
 			add_next_index_stringl(return_value, str, str_len-1, 1);
 #endif
