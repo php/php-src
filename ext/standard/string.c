@@ -1768,12 +1768,14 @@ PHP_FUNCTION(strrpos)
 
 	if (offset >= 0) {
 		if (offset > haystack_len) {
+			php_error(E_NOTICE, "Offset is greater than the length of haystack string");
 			RETURN_FALSE;
 		}
 		p = haystack + offset;
 		e = haystack + haystack_len - needle_len;
 	} else {
 		if (-offset > haystack_len) {
+			php_error(E_NOTICE, "Offset is greater than the length of haystack string");
 			RETURN_FALSE;
 		}
 
@@ -1841,12 +1843,17 @@ PHP_FUNCTION(strripos)
 		/* Single character search can shortcut memcmps 
 		   Can also avoid tolower emallocs */
 		if (offset >= 0) {
+			if (offset > haystack_len) {
+				php_error(E_NOTICE, "Offset is greater than the length of haystack string");
+				RETURN_FALSE;
+			}
 			p = haystack + offset;
 			e = haystack + haystack_len - 1;
 		} else {
 			p = haystack;
 			if (-offset > haystack_len) {
-				e = haystack + haystack_len - 1;
+				php_error(E_NOTICE, "Offset is greater than the length of haystack string");
+				RETURN_FALSE;
 			} else {
 				e = haystack + haystack_len + offset;
 			}
@@ -1868,13 +1875,19 @@ PHP_FUNCTION(strripos)
 	php_strtolower(haystack_dup, haystack_len);
 
 	if (offset >= 0) {
+		if (offset > haystack_len) {
+			php_error(E_NOTICE, "Offset is greater than the length of haystack string");
+			RETURN_FALSE;
+		}
 		p = haystack_dup + offset;
 		e = haystack_dup + haystack_len - needle_len;
 	} else {
-		p = haystack_dup;
 		if (-offset > haystack_len) {
-			e = haystack_dup - needle_len;
-		} else if (needle_len > -offset) {
+			php_error(E_NOTICE, "Offset is greater than the length of haystack string");
+			RETURN_FALSE;
+		}
+		p = haystack_dup;
+		if (needle_len > -offset) {
 			e = haystack_dup + haystack_len - needle_len;
 		} else {
 			e = haystack_dup + haystack_len + offset;
