@@ -1223,7 +1223,7 @@ PHP_FUNCTION(htmlspecialchars)
 }
 /* }}} */
 
-/* {{{ proto string htmlspecialchars(string string [, int quote_style])
+/* {{{ proto string htmlspecialchars_decode(string string [, int quote_style])
    Convert special HTML entities back to characters */
 PHP_FUNCTION(htmlspecialchars_decode)
 {
