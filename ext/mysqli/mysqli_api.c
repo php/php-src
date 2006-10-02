@@ -1522,7 +1522,7 @@ PHP_FUNCTION(mysqli_rollback)
 }
 /* }}} */
 
-/* {{{ proto bool mysqli_send_long_data(object stmt, int param_nr, string data)
+/* {{{ proto bool mysqli_stmt_send_long_data(object stmt, int param_nr, string data)
 */
 PHP_FUNCTION(mysqli_stmt_send_long_data)
 {
