@@ -379,6 +379,34 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value
 	return 1;
 }
 
+static int pdo_mysql_check_liveness(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
+{
+	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
+#if MYSQL_VERSION_ID <= 32230
+	void (*handler) (int);
+	unsigned int my_errno;
+#endif
+
+#if MYSQL_VERSION_ID > 32230
+	if (mysql_ping(H->server)) {
+		return FAILURE;
+	}
+#else /* no mysql_ping() */
+	handler=signal(SIGPIPE, SIG_IGN);
+	mysql_stat(H->server);
+	switch (mysql_errno(H->server)) {
+		case CR_SERVER_GONE_ERROR:
+		/* case CR_SERVER_LOST: I'm not sure this means the same as "gone" for us */
+			signal(SIGPIPE, handler);
+			return FAILURE;
+		default:
+			break;
+	}
+	signal(SIGPIPE, handler);
+#endif /* end mysql_ping() */
+	return SUCCESS;
+} 
+/* }}} */
 
 static struct pdo_dbh_methods mysql_methods = {
 	mysql_handle_closer,
@@ -392,7 +420,7 @@ static struct pdo_dbh_methods mysql_methods = {
 	pdo_mysql_last_insert_id,
 	pdo_mysql_fetch_error_func,
 	pdo_mysql_get_attribute,
-	NULL /* check_liveness: TODO: ping */
+	pdo_mysql_check_liveness
 };
 
 #ifndef PDO_MYSQL_UNIX_ADDR
