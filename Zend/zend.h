@@ -411,6 +411,7 @@ typedef struct _zend_utility_functions {
 	int (*printf_function)(const char *format, ...);
 	int (*write_function)(const char *str, uint str_length);
 	int (*path_encode_function)(char **encpath, int *encpath_len, const UChar *path, int path_len TSRMLS_DC);
+	int (*path_decode_function)(UChar **decpath, int *decpath_len, const char *path, int path_len TSRMLS_DC);
 	FILE *(*fopen_function)(const char *filename, char **opened_path);
 	void (*message_handler)(long message, void *data);
 	void (*block_interruptions)(void);
@@ -557,6 +558,7 @@ BEGIN_EXTERN_C()
 extern ZEND_API int (*zend_printf)(const char *format, ...);
 extern ZEND_API zend_write_func_t zend_write;
 extern ZEND_API int (*zend_path_encode)(char **encpath, int *encpath_len, const UChar *path, int path_len TSRMLS_DC);
+extern ZEND_API int (*zend_path_decode)(UChar **decpath, int *decpath_len, const char *path, int path_len TSRMLS_DC);
 extern ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path);
 extern ZEND_API void (*zend_block_interruptions)(void);
 extern ZEND_API void (*zend_unblock_interruptions)(void);

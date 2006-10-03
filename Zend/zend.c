@@ -56,6 +56,7 @@ ZEND_API zend_class_entry *zend_standard_class_def = NULL;
 ZEND_API int (*zend_printf)(const char *format, ...);
 ZEND_API zend_write_func_t zend_write;
 ZEND_API int (*zend_path_encode)(char **encpath, int *encpath_len, const UChar *path, int path_len TSRMLS_DC);
+ZEND_API int (*zend_path_decode)(UChar **decpath, int *decpath_len, const char *path, int path_len TSRMLS_DC);
 ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path);
 ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle *handle TSRMLS_DC);
 ZEND_API void (*zend_block_interruptions)(void);
@@ -624,6 +625,22 @@ static int zend_path_encode_wrapper(char **encpath, int *encpath_len, const UCha
 	return SUCCESS;
 }
 
+static int zend_path_decode_wrapper(UChar **decpath, int *decpath_len, const char *path, int path_len TSRMLS_DC)
+{
+	UErrorCode status = U_ZERO_ERROR;
+
+	zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(filesystem_encoding_conv)), decpath, decpath_len, path, path_len, &status);
+
+	if (U_FAILURE(status)) {
+		efree(*decpath);
+		*decpath = NULL;
+		*decpath_len = 0;
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+
 static FILE *zend_fopen_wrapper(const char *filename, char **opened_path)
 {
 	if (opened_path) {
@@ -1011,6 +1028,10 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	zend_path_encode = utility_functions->path_encode_function;
 	if (!zend_path_encode) {
 		zend_path_encode = zend_path_encode_wrapper;
+	}
+	zend_path_decode = utility_functions->path_decode_function;
+	if (!zend_path_decode) {
+		zend_path_decode = zend_path_decode_wrapper;
 	}
 	zend_fopen = utility_functions->fopen_function;
 	if (!zend_fopen) {
