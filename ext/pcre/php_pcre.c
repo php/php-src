@@ -1861,6 +1861,9 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Matched, but too many substrings");
 			count = size_offsets/3;
 		} else if (count < 0 && count != PCRE_ERROR_NOMATCH) {
+			if (Z_TYPE_PP(entry) != IS_STRING) {
+				zval_dtor(&subject);
+			}
 			pcre_handle_exec_error(count TSRMLS_CC);
 			break;
 		}
