@@ -1,3 +1,253 @@
+2006-10-02  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/config.m4:
+      fixed --disable-mbregex to disable multibe-regex.
+
+2006-10-02  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo_mysql/mysql_driver.c:
+      MFH: fix #38996 (PDO_MYSQL doesn't check connections for liveness)
+
+    * ext/pdo_mysql/mysql_driver.c:
+      fix #38996 (PDO_MYSQL doesn't check connections for liveness)
+
+2006-10-02  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/proc_open.c:
+      Flag the easy stuff out of the way, proc_open() is the real beast in here
+
+2006-10-02  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      acinclude.m4
+      acinclude.m4:
+      MFH: the last part of the fix for #39004
+
+    * (PHP_4_4)
+      ext/standard/url.c:
+      fix compile warning
+
+    * acinclude.m4:
+      the last part of the fix for #39004
+
+2006-10-02  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_5_2)
+      ext/standard/string.c:
+      Use php_error_docref() instead.
+
+    * (PHP_5_2)
+      ext/standard/string.c:
+      More offset fixes. Added E_NOTICE where appropriate.
+
+    * (PHP_5_2)
+      ext/standard/string.c:
+      Fix invalid memory access in strrpos().
+
+    * unicode-progress.txt
+      ext/standard/string.c:
+      - Fix strrpos() logic (which was broken even in PHP 5).
+      - Optimizations for a couple of functions.
+
+2006-10-02  Antony Dovgal  <antony@zend.com>
+
+    * acinclude.m4
+      acinclude.m4:
+      fix the fix for #39004
+
+2006-10-02  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/dir.c:
+      Update glob() for PHP6
+
+    * main/streams/plain_wrapper.c:
+      Unused label, now how the heck did it get there?
+
+    * NEWS:
+      Note context param changes in opendir(), dir(), and scandir()
+
+    * ext/standard/dir.c:
+      Switch opendir/chroot/chdir to new path_param API and upgrade scandir() for
+      PHP6
+
+2006-10-02  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-progress.txt
+      ext/standard/string.c:
+      Make stripos() work with Unicode strings.
+
+2006-10-02  Antony Dovgal  <antony@zend.com>
+
+    * ext/mysqli/mysqli_api.c:
+      don't rely on uninitialized var
+
+2006-10-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * acinclude.m4:
+      MFB: Fixed bug #39004 (Fixed generation of config.nice with autoconf 2.60).
+
+    * (PHP_5_2)
+      NEWS
+      acinclude.m4:
+      Fixed bug #39004 (Fixed generation of config.nice with autoconf 2.60).
+
+2006-10-02  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/config.m4:
+      fixed bug #37103: libmbfl headers was not installed correctly.
+
+2006-10-02  Antony Dovgal  <antony@zend.com>
+
+    * ext/zip/tests/bug7658.phpt
+      ext/zip/tests/bug7658.phpt
+      ext/zip/tests/oo_addfile.phpt
+      ext/zip/tests/oo_addfile.phpt
+      ext/zip/tests/oo_namelocate.phpt
+      ext/zip/tests/oo_namelocate.phpt
+      ext/zip/tests/oo_rename.phpt
+      ext/zip/tests/oo_rename.phpt:
+      fix tests
+
+2006-10-02  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ext/zip/tests/utils.inc
+      ext/zip/tests/utils.php:
+      Rename utils.php to utils.inc
+
+    * ext/zip/tests/utils.inc
+      ext/zip/tests/utils.inc
+      ext/zip/tests/utils.php:
+      
+      Rename utils.php to utils.inc
+
+2006-10-02  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/bug39001.phpt:
+      MFH: #39001 (ReflectionProperty returns incorrect declaring class for
+      protected properties)
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/tests/bug39001.phpt
+      ext/reflection/tests/bug39001.phpt:
+      fix #39001 (ReflectionProperty returns incorrect declaring class for
+      protected properties)
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_execute.c
+      ZendEngine2/tests/bug39003.phpt
+      tests/classes/type_hinting_002.phpt:
+      MFH: fix #39003 (__autoload() is called for type hinting)
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/tests/bug39003.phpt
+      ZendEngine2/tests/bug39003.phpt
+      tests/classes/type_hinting_002.phpt:
+      fix #39003 (__autoload() is called for type hinting)
+
+2006-10-02  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ext/reflection/tests/bug38942.phpt:
+      Fix test
+
+    * ext/reflection/tests/bug38942.phpt:
+      Fix test
+
+    * (PHP_5_2)
+      ext/zip/tests/.cvsignore:
+      Initial commit..
+
+    * (PHP_5_2)
+      ext/posix/posix.c
+      ext/standard/basic_functions.c
+      ext/standard/html.c
+      ext/tidy/tidy.c:
+      protos
+
+    * ext/posix/posix.c
+      ext/standard/basic_functions.c
+      ext/standard/html.c
+      ext/tidy/tidy.c:
+      Protos
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_nonapi.c:
+      Fix protos
+
+    * ext/mysqli/mysqli_report.c
+      ext/mysqli/mysqli_report.c:
+      Fix proto
+
+    * ext/date/php_date.c:
+      add proto
+
+    * ext/zip/tests/.cvsignore
+      ext/zip/tests/.cvsignore:
+      
+      Add .cvsignore
+
+2006-10-02  Sara Golemon  <sara@golemon.com>
+
+    * NEWS:
+      Note context parameter in copy() function and group streams related
+      additions
+
+    * ext/standard/file.c:
+      Apply new path encoding style to the rest of e/s/file.c
+      
+      This layout is definately simpler to maintain
+      and every bit as functional as the other version.
+
+    * ext/standard/file.c:
+      Apply simplified path encoding to copy() and give it a context param.
+      Funnily enough, this makes the copy() implementation almost identical
+      to what it was back in PHP5.
+
+    * ext/standard/file.c
+      main/php_streams.h:
+      Try out simplified API for encoding paths/filenames
+
+    * ext/hash/hash.c
+      ext/hash/tests/adler32.phpt
+      ext/hash/tests/crc32.phpt
+      ext/hash/tests/gost.phpt
+      ext/hash/tests/haval.phpt
+      ext/hash/tests/hmac-md5.phpt
+      ext/hash/tests/md2.phpt
+      ext/hash/tests/md4.phpt
+      ext/hash/tests/md5.phpt
+      ext/hash/tests/ripemd128.phpt
+      ext/hash/tests/ripemd160.phpt
+      ext/hash/tests/ripemd256.phpt
+      ext/hash/tests/ripemd320.phpt
+      ext/hash/tests/sha1.phpt
+      ext/hash/tests/sha256.phpt
+      ext/hash/tests/sha384.phpt
+      ext/hash/tests/sha512.phpt
+      ext/hash/tests/snefru.phpt
+      ext/hash/tests/tiger.phpt
+      ext/hash/tests/whirlpool.phpt:
+      Allow hash()/hash_hmac() to accept ascii-unicode data,
+      Update tests to work in unicode.semantics mode.
+
+    * ext/standard/php_string.h
+      ext/standard/string.c:
+      ZTS fix
+
+    * ext/standard/md5.c
+      ext/standard/sha1.c:
+      Allow unicode-ascii to binary conversion and do proper path conversion for
+      file variants
+
 2006-10-01  Georg Richter  <georg@mysql.com>
 
     * ext/mysqli/mysqli.c
