@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Sep 2006, PHP 5.2.0
+- Speedup array/HashTable copying. (Matt W, Dmitry)
 - Added ability to make SOAP call userspace PHP<->XML converters. (Dmitry)
 - Fixed infinite loop when a wrong color index is given to imagefill (Pierre)
 - Fixed mess with CGI/CLI -d option (now it works with cgi; constants are
