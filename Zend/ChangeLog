@@ -1,3 +1,15 @@
+2006-10-02  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend_execute.c
+      tests/bug39003.phpt:
+      MFH: fix #39003 (__autoload() is called for type hinting)
+
+    * zend_execute.c
+      tests/bug39003.phpt
+      tests/bug39003.phpt:
+      fix #39003 (__autoload() is called for type hinting)
+
 2006-09-30  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_alloc.c:
