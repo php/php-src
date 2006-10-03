@@ -19,7 +19,7 @@ $booleans = array(
 );
 
 foreach($booleans as $val=>$exp) {
-    $res =filter_data($val, FILTER_VALIDATE_BOOLEAN);
+    $res =filter_var($val, FILTER_VALIDATE_BOOLEAN);
     if ($res !== $exp) {
         echo "$val failed,'$exp' expect, '$res' received.\n";
     }

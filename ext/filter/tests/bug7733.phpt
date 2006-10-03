@@ -9,7 +9,7 @@ $data = array(
 		'E-2',
 		'+E2'
 		);
-$out = filter_data($data, FILTER_VALIDATE_FLOAT);
+$out = filter_var($data, FILTER_VALIDATE_FLOAT, FILTER_REQUIRE_ARRAY);
 var_dump($out);
 ?>
 --EXPECTF--	
