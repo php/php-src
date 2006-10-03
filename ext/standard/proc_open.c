@@ -417,10 +417,11 @@ struct php_proc_open_descriptor_item {
 };
 /* }}} */
 
-/* {{{ proto resource proc_open(string command, array descriptorspec, array &pipes [, string cwd [, array env [, array other_options]]])
+/* {{{ proto resource proc_open(string command, array descriptorspec, array &pipes [, string cwd [, array env [, array other_options]]]) U
    Run a process with more control over it's file descriptors */
 PHP_FUNCTION(proc_open)
 {
+	zval **ppcommand, **ppcwd = NULL;
 	char *command, *cwd=NULL;
 	int command_len, cwd_len;
 	zval *descriptorspec;
@@ -458,23 +459,39 @@ PHP_FUNCTION(proc_open)
 	php_file_descriptor_t dev_ptmx = -1;	/* master */
 	php_file_descriptor_t slave_pty = -1;
 #endif
+	php_stream_context *context = FG(default_context);
+	zend_uchar binary_pipes = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "saz|s!a!a!", &command,
-				&command_len, &descriptorspec, &pipes, &cwd, &cwd_len, &environment,
-				&other_options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zaz|Z!a!a!", &ppcommand, &descriptorspec, &pipes, &ppcwd, &environment, &other_options) == FAILURE ||
+		php_stream_path_param_encode(ppcommand, &command, &command_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-#ifdef PHP_WIN32
+	if (ppcwd && php_stream_path_param_encode(ppcwd, &cwd, &cwd_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+		RETURN_FALSE;
+	}
+
 	if (other_options) {
 		zval **item;
+#ifdef PHP_WIN32
 		if (SUCCESS == zend_ascii_hash_find(Z_ARRVAL_P(other_options), "suppress_errors", sizeof("suppress_errors"), (void**)&item)) {
 			if (Z_TYPE_PP(item) == IS_BOOL && Z_BVAL_PP(item)) {
 				suppress_errors = 1;
 			}
 		}	
-	}
 #endif
+		/* Suppresses automatic application of unicode filters when unicode.semantics=on */
+		if (SUCCESS == zend_ascii_hash_find(Z_ARRVAL_P(other_options), "binary_pipes", sizeof("binary_pipes"), (void**)&item)) {
+			if (Z_TYPE_PP(item) == IS_BOOL && Z_BVAL_PP(item)) {
+				binary_pipes = 1;
+			}
+		}
+
+		/* Override FG(default_context) */
+		if (SUCCESS == zend_ascii_hash_find(Z_ARRVAL_P(other_options), "context", sizeof("context"), (void**)&item)) {
+			context = php_stream_context_from_zval(*item, 0);
+		}				
+	}
 	
 	if (environment) {
 		env = _php_array_to_envp(environment, is_persistent TSRMLS_CC);
@@ -579,25 +596,22 @@ PHP_FUNCTION(proc_open)
 #endif
 				descriptors[ndesc].mode_flags = descriptors[ndesc].mode & DESC_PARENT_MODE_WRITE ? O_WRONLY : O_RDONLY;
 #ifdef PHP_WIN32
-				if (Z_STRLEN_PP(zmode) >= 2 && Z_STRVAL_PP(zmode)[1] == 'b')
+				if (Z_STRLEN_PP(zmode) >= 2 && Z_STRVAL_PP(zmode)[1] == 'b') {
 					descriptors[ndesc].mode_flags |= O_BINARY;
+				}
 #endif
 
 				
 
 			} else if (strcmp(Z_STRVAL_PP(ztype), "file") == 0) {
 				zval **zfile, **zmode;
+				char *filename;
+				int filename_len;
+				zend_uchar free_filename = 0;
 				int fd;
 				php_stream *stream;
 
 				descriptors[ndesc].mode = DESC_FILE;
-
-				if (zend_hash_index_find(Z_ARRVAL_PP(descitem), 1, (void **)&zfile) == SUCCESS) {
-					convert_to_string_ex(zfile);
-				} else {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing file name parameter for 'file'");
-					goto exit_fail;
-				}
 
 				if (zend_hash_index_find(Z_ARRVAL_PP(descitem), 2, (void **)&zmode) == SUCCESS) {
 					convert_to_string_ex(zmode);
@@ -606,9 +620,28 @@ PHP_FUNCTION(proc_open)
 					goto exit_fail;
 				}
 
+				if (zend_hash_index_find(Z_ARRVAL_PP(descitem), 1, (void **)&zfile) == SUCCESS) {
+					if (Z_TYPE_PP(zfile) == IS_UNICODE &&
+						php_stream_path_encode(NULL, &filename, &filename_len,
+									Z_USTRVAL_PP(zfile), Z_USTRLEN_PP(zfile), REPORT_ERRORS, context) == SUCCESS) {
+						free_filename = 1;
+					} else {
+						convert_to_string_ex(zfile);
+						filename = Z_STRVAL_PP(zfile);
+						filename_len = Z_STRLEN_PP(zfile);
+					}
+				} else {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing file name parameter for 'file'");
+					goto exit_fail;
+				}
+
+
 				/* try a wrapper */
-				stream = php_stream_open_wrapper(Z_STRVAL_PP(zfile), Z_STRVAL_PP(zmode),
-						REPORT_ERRORS|STREAM_WILL_CAST, NULL);
+				stream = php_stream_open_wrapper_ex(filename, Z_STRVAL_PP(zmode),
+						REPORT_ERRORS|STREAM_WILL_CAST, NULL, context);
+				if (free_filename) {
+					efree(filename);
+				}
 
 				/* force into an fd */
 				if (stream == NULL || FAILURE == php_stream_cast(stream,
@@ -655,8 +688,9 @@ PHP_FUNCTION(proc_open)
 		}
 
 		zend_hash_move_forward_ex(Z_ARRVAL_P(descriptorspec), &pos);
-		if (++ndesc == PHP_PROC_OPEN_MAX_DESCRIPTORS)
+		if (++ndesc == PHP_PROC_OPEN_MAX_DESCRIPTORS) {
 			break;
+		}
 	}
 
 #ifdef PHP_WIN32
@@ -781,10 +815,12 @@ PHP_FUNCTION(proc_open)
 					close(descriptors[i].parentend);
 					break;
 			}
-			if (dup2(descriptors[i].childend, descriptors[i].index) < 0)
+			if (dup2(descriptors[i].childend, descriptors[i].index) < 0) {
 				perror("dup2");
-			if (descriptors[i].childend != descriptors[i].index)
+			}
+			if (descriptors[i].childend != descriptors[i].index) {
 				close(descriptors[i].childend);
+			}
 		}
 
 #if PHP_CAN_DO_PTS
@@ -848,6 +884,7 @@ PHP_FUNCTION(proc_open)
 	for (i = 0; i < ndesc; i++) {
 		char *mode_string=NULL;
 		php_stream *stream = NULL;
+		zend_uchar read_stream = 0, write_stream = 0;
 
 		close_descriptor(descriptors[i].childend);
 
@@ -857,19 +894,25 @@ PHP_FUNCTION(proc_open)
 #ifdef PHP_WIN32
 					case O_WRONLY|O_BINARY:
 						mode_string = "wb";
+						write_stream = 1;
 						break;
 					case O_RDONLY|O_BINARY:
 						mode_string = "rb";
+						read_stream = 1;
 						break;
 #endif
 					case O_WRONLY:
 						mode_string = "w";
+						write_stream = 1;
 						break;
 					case O_RDONLY:
 						mode_string = "r";
+						read_stream = 1;
 						break;
 					case O_RDWR:
 						mode_string = "r+";
+						write_stream = 1;
+						read_stream = 1;
 						break;
 				}
 #ifdef PHP_WIN32
@@ -883,6 +926,19 @@ PHP_FUNCTION(proc_open)
 
 					/* nasty hack; don't copy it */
 					stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
+
+					if (UG(unicode) && !binary_pipes) {
+						if (write_stream) {
+							char *encoding = (context && context->output_encoding) ? context->output_encoding : UG(stream_encoding);
+
+							php_stream_encoding_apply(stream, 1, encoding, UG(from_error_mode), UG(from_subst_char));
+						}
+						if (read_stream) {
+							char *encoding = (context && context->output_encoding) ? context->output_encoding : UG(stream_encoding);
+
+							php_stream_encoding_apply(stream, 0, encoding, UG(to_error_mode), NULL);
+						}
+					}
 					
 					MAKE_STD_ZVAL(retfp);
 					php_stream_to_zval(stream, retfp);
