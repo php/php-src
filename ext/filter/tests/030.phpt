@@ -1,5 +1,5 @@
 --TEST--
-filter_data() and IPv6 
+filter_var() and IPv6 
 --FILE--
 <?php
 $ipv6_test = array(
@@ -22,7 +22,7 @@ $ipv6_test = array(
     "::FFFF:129.144.52.38"		=> true
 );
 foreach ($ipv6_test as $ip => $exp) {
-	$out = filter_data($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
+	$out = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
 	$out = (int) ($out === false ? 0 : 1);
 	if ($exp != $out) {
 		echo "$ip failed\n";

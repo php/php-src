@@ -1,14 +1,14 @@
 --TEST--
-filter_data() and FILTER_VALIDATE_REGEXP
+filter_var() and FILTER_VALIDATE_REGEXP
 --FILE--
 <?php
 
-var_dump(filter_data("data", FILTER_VALIDATE_REGEXP, array("regexp"=>'/.*/')));
-var_dump(filter_data("data", FILTER_VALIDATE_REGEXP, array("regexp"=>'/^b(.*)/')));
-var_dump(filter_data("data", FILTER_VALIDATE_REGEXP, array("regexp"=>'/^d(.*)/')));
-var_dump(filter_data("data", FILTER_VALIDATE_REGEXP, array("regexp"=>'/blah/')));
-var_dump(filter_data("data", FILTER_VALIDATE_REGEXP, array("regexp"=>'/\[/')));
-var_dump(filter_data("data", FILTER_VALIDATE_REGEXP));
+var_dump(filter_var("data", FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>'/.*/'))));
+var_dump(filter_var("data", FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>'/^b(.*)/'))));
+var_dump(filter_var("data", FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>'/^d(.*)/'))));
+var_dump(filter_var("data", FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>'/blah/'))));
+var_dump(filter_var("data", FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>'/\[/'))));
+var_dump(filter_var("data", FILTER_VALIDATE_REGEXP));
 
 echo "Done\n";
 ?>
@@ -19,6 +19,6 @@ string(4) "data"
 bool(false)
 bool(false)
 
-Warning: filter_data(): 'regexp' option missing in %s on line %d
+Warning: filter_var(): 'regexp' option missing in %s on line %d
 bool(false)
 Done

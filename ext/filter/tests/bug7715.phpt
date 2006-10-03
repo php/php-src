@@ -13,7 +13,7 @@ $data = array(
 	'02.324'
 );
 foreach ($data as $val) {
-	$res = filter_data($val, FILTER_VALIDATE_FLOAT);
+	$res = filter_var($val, FILTER_VALIDATE_FLOAT);
 	var_dump($res);
 }
 echo "\n";

@@ -1,5 +1,5 @@
 --TEST--
-filter_data() and FILTER_CALLBACK
+filter_var() and FILTER_CALLBACK
 --FILE--
 <?php
 
@@ -8,12 +8,12 @@ function test($var) {
 	return strtoupper($var);
 }
 	
-var_dump(filter_data("data", FILTER_CALLBACK, "test"));
-var_dump(filter_data("~!@#$%^&*()_QWERTYUIOPASDFGHJKLZXCVBNM<>>?\"}{:", FILTER_CALLBACK, "test"));
-var_dump(filter_data("", FILTER_CALLBACK, "test"));
-var_dump(filter_data("qwe", FILTER_CALLBACK, "no such func"));
-var_dump(filter_data("qwe", FILTER_CALLBACK, ""));
-var_dump(filter_data("qwe", FILTER_CALLBACK));
+var_dump(filter_var("data", FILTER_CALLBACK, array("options"=>"test")));
+var_dump(filter_var("~!@#$%^&*()_QWERTYUIOPASDFGHJKLZXCVBNM<>>?\"}{:", FILTER_CALLBACK, array("options"=>"test")));
+var_dump(filter_var("", FILTER_CALLBACK, array("options"=>"test")));
+var_dump(filter_var("qwe", FILTER_CALLBACK, array("options"=>"no such func")));
+var_dump(filter_var("qwe", FILTER_CALLBACK, array("options"=>"")));
+var_dump(filter_var("qwe", FILTER_CALLBACK));
 
 /* Simple class method callback */
 class test_class {
@@ -22,35 +22,35 @@ class test_class {
 	}
 }
 
-var_dump(filter_data("dAtA", FILTER_CALLBACK, array("test_class", "test")));
-var_dump(filter_data("~!@#$%^&*()_QWERTYUIOPASDFGHJKLZXCVBNM<>>?\"}{:", FILTER_CALLBACK, array("test_class","test")));
-var_dump(filter_data("", FILTER_CALLBACK, array("test_class","test")));
+var_dump(filter_var("dAtA", FILTER_CALLBACK, array("options"=>array("test_class", "test"))));
+var_dump(filter_var("~!@#$%^&*()_QWERTYUIOPASDFGHJKLZXCVBNM<>>?\"}{:", FILTER_CALLBACK, array("options"=>array("test_class","test"))));
+var_dump(filter_var("", FILTER_CALLBACK, array("options"=>array("test_class","test"))));
 
 /* empty function without return value */
 function test1($var) {
 }
 	
-var_dump(filter_data("data", FILTER_CALLBACK, "test1"));
-var_dump(filter_data("~!@#$%^&*()_QWERTYUIOPASDFGHJKLZXCVBNM<>>?\"}{:", FILTER_CALLBACK, "test1"));
-var_dump(filter_data("", FILTER_CALLBACK, "test1"));
+var_dump(filter_var("data", FILTER_CALLBACK, array("options"=>"test1")));
+var_dump(filter_var("~!@#$%^&*()_QWERTYUIOPASDFGHJKLZXCVBNM<>>?\"}{:", FILTER_CALLBACK, array("options"=>"test1")));
+var_dump(filter_var("", FILTER_CALLBACK, array("options"=>"test1")));
 
 /* attempting to change data by reference */
 function test2(&$var) {
 	$var = 1;
 }
 	
-var_dump(filter_data("data", FILTER_CALLBACK, "test2"));
-var_dump(filter_data("~!@#$%^&*()_QWERTYUIOPASDFGHJKLZXCVBNM<>>?\"}{:", FILTER_CALLBACK, "test2"));
-var_dump(filter_data("", FILTER_CALLBACK, "test2"));
+var_dump(filter_var("data", FILTER_CALLBACK, array("options"=>"test2")));
+var_dump(filter_var("~!@#$%^&*()_QWERTYUIOPASDFGHJKLZXCVBNM<>>?\"}{:", FILTER_CALLBACK, array("options"=>"test2")));
+var_dump(filter_var("", FILTER_CALLBACK, array("options"=>"test2")));
 
 /* unsetting data */
 function test3(&$var) {
 	unset($var);
 }
 	
-var_dump(filter_data("data", FILTER_CALLBACK, "test3"));
-var_dump(filter_data("~!@#$%^&*()_QWERTYUIOPASDFGHJKLZXCVBNM<>>?\"}{:", FILTER_CALLBACK, "test3"));
-var_dump(filter_data("", FILTER_CALLBACK, "test3"));
+var_dump(filter_var("data", FILTER_CALLBACK, array("options"=>"test3")));
+var_dump(filter_var("~!@#$%^&*()_QWERTYUIOPASDFGHJKLZXCVBNM<>>?\"}{:", FILTER_CALLBACK, array("options"=>"test3")));
+var_dump(filter_var("", FILTER_CALLBACK, array("options"=>"test3")));
 
 /* unset data and return value */
 function test4(&$var) {
@@ -58,7 +58,7 @@ function test4(&$var) {
 	return 1;
 }
 	
-var_dump(filter_data("data", FILTER_CALLBACK, "test4"));
+var_dump(filter_var("data", FILTER_CALLBACK, array("options"=>"test4")));
 
 /* thrown exception in the callback */
 function test5(&$var) {
@@ -66,7 +66,7 @@ function test5(&$var) {
 }
 
 try {
-	var_dump(filter_data("data", FILTER_CALLBACK, "test5"));
+	var_dump(filter_var("data", FILTER_CALLBACK, array("options"=>"test5")));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
@@ -78,13 +78,13 @@ string(4) "DATA"
 string(46) "~!@#$%^&*()_QWERTYUIOPASDFGHJKLZXCVBNM<>>?"}{:"
 string(0) ""
 
-Warning: filter_data(): First argument is expected to be a valid callback in %s on line %d
+Warning: filter_var(): First argument is expected to be a valid callback in %s on line %d
 NULL
 
-Warning: filter_data(): First argument is expected to be a valid callback in %s on line %d
+Warning: filter_var(): First argument is expected to be a valid callback in %s on line %d
 NULL
 
-Warning: filter_data(): First argument is expected to be a valid callback in %s on line %d
+Warning: filter_var(): First argument is expected to be a valid callback in %s on line %d
 NULL
 string(4) "data"
 string(46) "~!@#$%^&*()_qwertyuiopasdfghjklzxcvbnm<>>?"}{:"

@@ -15,11 +15,11 @@ $data = array(
 );
 
 
-foreach(input_filters_list() as $filter) {
+foreach(filter_list() as $filter) {
 	if($filter=="validate_regexp") {
-		foreach($data as $k=>$d) $result[$k] = filter_data($d,input_name_to_filter($filter),array("regexp"=>'/^O.*/'));
+		foreach($data as $k=>$d) $result[$k] = filter_var($d,filter_id($filter),array("options"=>array("regexp"=>'/^O.*/')));
 	} else {
-		foreach($data as $k=>$d) $result[$k] = filter_data($d,input_name_to_filter($filter),"test");
+		foreach($data as $k=>$d) $result[$k] = filter_var($d,filter_id($filter),array("options"=>"test"));
 	}
 	printf("%-20s",$filter);
 	printf("%-5s",$result[0]);

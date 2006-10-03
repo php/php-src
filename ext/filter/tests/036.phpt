@@ -15,7 +15,7 @@ $args = array();
 $args["test1"] = FILTER_VALIDATE_INT;
 $args["test2"] = FILTER_VALIDATE_INT;
 
-$ret = input_get_args(INPUT_DATA, $args, $data);
+$ret = filter_var_array($data, $args);
 var_dump($ret);
 var_dump($data); //should be separated, i.e. not reference anymore. looks like we can't change this, or it'd change the original zval instead..
 var_dump($var); //should be still string(1) "1"

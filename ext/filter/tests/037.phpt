@@ -5,18 +5,18 @@ a=1&b=2
 --FILE--
 <?php
 function myfunc($val) {
-	return $val . _ . 'callback';
+	return $val . '_callback';
 }
-echo input_get(INPUT_GET, 'a', FILTER_CALLBACK, 'myfunc');
+echo filter_input(INPUT_GET, 'a', FILTER_CALLBACK, array("options"=>'myfunc'));
 echo "\n";
-echo input_get(INPUT_GET, 'b', FILTER_VALIDATE_INT);
+echo filter_input(INPUT_GET, 'b', FILTER_VALIDATE_INT);
 echo "\n";
 $data = "data";
 
-echo filter_data($data, FILTER_CALLBACK, 'myfunc');
+echo filter_var($data, FILTER_CALLBACK, array("options"=>'myfunc'));
 echo "\n";
 
-$res = input_get_args(INPUT_GET, array(
+$res = filter_input_array(INPUT_GET, array(
 				'a' => array(
 					'filter' => FILTER_CALLBACK,
 					'options' => 'myfunc'
