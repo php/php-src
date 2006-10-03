@@ -487,6 +487,7 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 	zval *handler_name = NULL;
 	php_output_handler *handler = NULL;
 	php_output_handler_alias_ctor_t *alias = NULL;
+	php_output_handler_user_func_t *user = NULL;
 	
 	switch (Z_TYPE_P(output_handler)) {
 		case IS_NULL:
@@ -499,14 +500,20 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 				break;
 			}
 		default:
-			MAKE_STD_ZVAL(handler_name);
-			ZVAL_NULL(handler_name);
-			if (zend_is_callable(output_handler, 0, handler_name)) {
+			user = emalloc(sizeof(php_output_handler_user_func_t));
+			user->fci = empty_fcall_info;
+			user->fcc = empty_fcall_info_cache;
+			
+			if (SUCCESS == zend_fcall_info_init(output_handler, &user->fci, &user->fcc TSRMLS_CC)) {
+				/* FIXME: redundancy */
+				MAKE_STD_ZVAL(handler_name);
+				zend_make_callable(output_handler, handler_name TSRMLS_CC);
 				handler = php_output_handler_init(handler_name, chunk_size, (flags & ~0xf) | PHP_OUTPUT_HANDLER_USER);
-				ZVAL_ADDREF(output_handler);
-				handler->func.user = output_handler;
+				handler->func.user = user;
+				zval_ptr_dtor(&handler_name);
+			} else {
+				efree(user);
 			}
-			zval_ptr_dtor(&handler_name);
 	}
 	
 	return handler;
@@ -647,7 +654,7 @@ PHPAPI int php_output_handler_reverse_conflict_register(zval *name, php_output_h
 }
 /* }}} */
 
-/* {{{ php_output_handler_context_func_t php_output_handler_alias(zval *name TSRMLS_DC)
+/* {{{ php_output_handler_alias_ctor_t php_output_handler_alias(zval *name TSRMLS_DC)
 	Get an internal output handler for a user handler if it exists */
 PHPAPI php_output_handler_alias_ctor_t *php_output_handler_alias(zval *name TSRMLS_DC)
 {
@@ -703,7 +710,7 @@ PHPAPI void php_output_handler_dtor(php_output_handler *handler TSRMLS_DC)
 	zval_ptr_dtor(&handler->name);
 	STR_FREE(handler->buffer.data);
 	if (handler->flags & PHP_OUTPUT_HANDLER_USER) {
-		zval_ptr_dtor(&handler->func.user);
+		efree(handler->func.user);
 	}
 	if (handler->dtor && handler->opaq) {
 		handler->dtor(handler->opaq TSRMLS_CC);
@@ -931,18 +938,19 @@ static inline int php_output_handler_op(php_output_handler *handler, php_output_
 		
 		OG(running) = handler;
 		if (handler->flags & PHP_OUTPUT_HANDLER_USER) {
-			zval *retval = NULL, **params[2], *flags, *input;
+			zval *retval = NULL, *params[2];
 			
-			MAKE_STD_ZVAL(input);
-			/* can we avoid copying here by setting is_ref? */
-			ZVAL_STRINGL(input, handler->buffer.data, handler->buffer.used, 1);
-			MAKE_STD_ZVAL(flags);
-			ZVAL_LONG(flags, (long) context->op);
-			params[0] = &input;
-			params[1] = &flags;
+			MAKE_STD_ZVAL(params[0]);
+			ZVAL_STRINGL(params[0], handler->buffer.data, handler->buffer.used, 1);
+			MAKE_STD_ZVAL(params[1]);
+			ZVAL_LONG(params[1], (long) context->op);
+			handler->func.user->fci.param_count = 2;
+			handler->func.user->fci.params = (zval***) safe_emalloc(handler->func.user->fci.param_count, sizeof(zval**), 0);
+			handler->func.user->fci.params[0] = &params[0];
+			handler->func.user->fci.params[1] = &params[1];
 			
-			if (	(SUCCESS == call_user_function_ex(CG(function_table), NULL, handler->func.user, &retval, 2, params, 1, NULL TSRMLS_CC)) &&
-						retval && (Z_TYPE_P(retval) != IS_NULL) && (Z_TYPE_P(retval) != IS_BOOL || Z_BVAL_P(retval))) {
+#define PHP_OUTPUT_USER_SUCCESS(retval) (retval && (Z_TYPE_P(retval) != IS_NULL) && (Z_TYPE_P(retval) != IS_BOOL || Z_BVAL_P(retval)))
+			if (SUCCESS == zend_fcall_info_call(&handler->func.user->fci, &handler->func.user->fcc, &retval, NULL TSRMLS_CC) && PHP_OUTPUT_USER_SUCCESS(retval)) {
 				/* user handler may have returned TRUE */
 				status = PHP_OUTPUT_HANDLER_NO_DATA;
 				if (Z_TYPE_P(retval) != IS_BOOL) {
@@ -958,11 +966,11 @@ static inline int php_output_handler_op(php_output_handler *handler, php_output_
 				/* call failed, pass internal buffer along */
 				status = PHP_OUTPUT_HANDLER_FAILURE;
 			}
+			zend_fcall_info_args(&handler->func.user->fci, NULL TSRMLS_CC);
 			if (retval) {
 				zval_ptr_dtor(&retval);
 			}
-			zval_ptr_dtor(&input);
-			zval_ptr_dtor(&flags);
+			
 		} else {
 			
 			context->in.data = handler->buffer.data;

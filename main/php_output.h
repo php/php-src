@@ -111,6 +111,11 @@ typedef int (*php_output_handler_conflict_check_t)(zval *handler_name TSRMLS_DC)
 /* ctor for aliases */
 typedef struct _php_output_handler *(*php_output_handler_alias_ctor_t)(zval *handler_name, size_t chunk_size, int flags TSRMLS_DC);
 
+typedef struct _php_output_handler_user_func_t {
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+} php_output_handler_user_func_t;
+
 typedef struct _php_output_handler {
 	zval *name;
 	int flags;
@@ -122,7 +127,7 @@ typedef struct _php_output_handler {
 	void (*dtor)(void *opaq TSRMLS_DC);
 	
 	union {
-		zval *user;
+		php_output_handler_user_func_t *user;
 		php_output_handler_context_func_t internal;
 	} func;
 } php_output_handler;
