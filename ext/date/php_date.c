@@ -201,25 +201,25 @@ zend_function_entry date_functions[] = {
 
 
 zend_function_entry date_funcs_date[] = {
-	PHP_ME(DateTime, __construct, NULL, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
-	ZEND_NAMED_FE(format, ZEND_FN(date_format), NULL)
-	ZEND_NAMED_FE(modify, ZEND_FN(date_modify), NULL)
-	ZEND_NAMED_FE(getTimezone, ZEND_FN(date_timezone_get), NULL)
-	ZEND_NAMED_FE(setTimezone, ZEND_FN(date_timezone_set), NULL)
-	ZEND_NAMED_FE(getOffset, ZEND_FN(date_offset_get), NULL)
-	ZEND_NAMED_FE(setTime, ZEND_FN(date_time_set), NULL)
-	ZEND_NAMED_FE(setDate, ZEND_FN(date_date_set), NULL)
-	ZEND_NAMED_FE(setISODate, ZEND_FN(date_isodate_set), NULL)
+	PHP_ME(DateTime,            __construct,       NULL, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(format,      date_format,       NULL, 0)
+	PHP_ME_MAPPING(modify,      date_modify,       NULL, 0)
+	PHP_ME_MAPPING(getTimezone, date_timezone_get, NULL, 0)
+	PHP_ME_MAPPING(setTimezone, date_timezone_set, NULL, 0)
+	PHP_ME_MAPPING(getOffset,   date_offset_get,   NULL, 0)
+	PHP_ME_MAPPING(setTime,     date_time_set,     NULL, 0)
+	PHP_ME_MAPPING(setDate,     date_date_set,     NULL, 0)
+	PHP_ME_MAPPING(setISODate,  date_isodate_set,  NULL, 0)
 	{NULL, NULL, NULL}
 };
 
 zend_function_entry date_funcs_timezone[] = {
-	PHP_ME(DateTimeZone, __construct, NULL, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
-	ZEND_NAMED_FE(getName, ZEND_FN(timezone_name_get), NULL)
-	ZEND_NAMED_FE(getOffset, ZEND_FN(timezone_offset_get), NULL)
-	ZEND_NAMED_FE(getTransitions, ZEND_FN(timezone_transitions_get), NULL)
-	ZEND_FENTRY(listAbbreviations, zif_timezone_abbreviations_list, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_FENTRY(listIdentifiers, zif_timezone_identifiers_list, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	PHP_ME(DateTimeZone,              __construct,                 NULL, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(getName,           timezone_name_get,           NULL, 0)
+	PHP_ME_MAPPING(getOffset,         timezone_offset_get,         NULL, 0)
+	PHP_ME_MAPPING(getTransitions,    timezone_transitions_get,    NULL, 0)
+	PHP_ME_MAPPING(listAbbreviations, timezone_abbreviations_list, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	PHP_ME_MAPPING(listIdentifiers,   timezone_identifiers_list,   NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	{NULL, NULL, NULL}
 };
 
