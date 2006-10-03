@@ -1462,7 +1462,7 @@ static void clone_wrapper_hash(TSRMLS_D)
 	php_stream_wrapper *tmp;
 
 	ALLOC_HASHTABLE(FG(stream_wrappers));
-	zend_hash_init(FG(stream_wrappers), 0, NULL, NULL, 1);
+	zend_hash_init(FG(stream_wrappers), zend_hash_num_elements(&url_stream_wrappers_hash), NULL, NULL, 1);
 	zend_hash_copy(FG(stream_wrappers), &url_stream_wrappers_hash, NULL, &tmp, sizeof(tmp));
 }
 
