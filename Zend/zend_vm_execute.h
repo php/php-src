@@ -1948,9 +1948,13 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				state.cwd_length = strlen(cwd);
 				state.cwd = zend_strndup(cwd, state.cwd_length);
 
-				if (!virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
-				    zend_hash_exists(&EG(included_files), state.cwd, state.cwd_length+1)) {
-					failure_retval=1;
+				failure_retval = (!virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
+					zend_hash_exists(&EG(included_files), state.cwd, state.cwd_length+1));
+
+				free(state.cwd);
+
+				if (failure_retval) {
+					/* do nothing */
 				} else if (SUCCESS == zend_stream_open(Z_STRVAL_P(inc_filename), &file_handle TSRMLS_CC)) {
 					if (!file_handle.opened_path) {
 						file_handle.opened_path = estrndup(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename));
@@ -1970,7 +1974,6 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, Z_STRVAL_P(inc_filename));
 					}
 				}
-				free(state.cwd);
 			}
 			break;
 		case ZEND_INCLUDE:
@@ -4549,9 +4552,13 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				state.cwd_length = strlen(cwd);
 				state.cwd = zend_strndup(cwd, state.cwd_length);
 
-				if (!virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
-				    zend_hash_exists(&EG(included_files), state.cwd, state.cwd_length+1)) {
-					failure_retval=1;
+				failure_retval = (!virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
+					zend_hash_exists(&EG(included_files), state.cwd, state.cwd_length+1));
+
+				free(state.cwd);
+
+				if (failure_retval) {
+					/* do nothing */
 				} else if (SUCCESS == zend_stream_open(Z_STRVAL_P(inc_filename), &file_handle TSRMLS_CC)) {
 					if (!file_handle.opened_path) {
 						file_handle.opened_path = estrndup(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename));
@@ -4571,7 +4578,6 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, Z_STRVAL_P(inc_filename));
 					}
 				}
-				free(state.cwd);
 			}
 			break;
 		case ZEND_INCLUDE:
@@ -7747,9 +7753,13 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				state.cwd_length = strlen(cwd);
 				state.cwd = zend_strndup(cwd, state.cwd_length);
 
-				if (!virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
-				    zend_hash_exists(&EG(included_files), state.cwd, state.cwd_length+1)) {
-					failure_retval=1;
+				failure_retval = (!virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
+					zend_hash_exists(&EG(included_files), state.cwd, state.cwd_length+1));
+
+				free(state.cwd);
+
+				if (failure_retval) {
+					/* do nothing */
 				} else if (SUCCESS == zend_stream_open(Z_STRVAL_P(inc_filename), &file_handle TSRMLS_CC)) {
 					if (!file_handle.opened_path) {
 						file_handle.opened_path = estrndup(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename));
@@ -7769,7 +7779,6 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, Z_STRVAL_P(inc_filename));
 					}
 				}
-				free(state.cwd);
 			}
 			break;
 		case ZEND_INCLUDE:
@@ -20280,9 +20289,13 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				state.cwd_length = strlen(cwd);
 				state.cwd = zend_strndup(cwd, state.cwd_length);
 
-				if (!virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
-				    zend_hash_exists(&EG(included_files), state.cwd, state.cwd_length+1)) {
-					failure_retval=1;
+				failure_retval = (!virtual_file_ex(&state, Z_STRVAL_P(inc_filename), NULL, 1) &&
+					zend_hash_exists(&EG(included_files), state.cwd, state.cwd_length+1));
+
+				free(state.cwd);
+
+				if (failure_retval) {
+					/* do nothing */
 				} else if (SUCCESS == zend_stream_open(Z_STRVAL_P(inc_filename), &file_handle TSRMLS_CC)) {
 					if (!file_handle.opened_path) {
 						file_handle.opened_path = estrndup(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename));
@@ -20302,7 +20315,6 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, Z_STRVAL_P(inc_filename));
 					}
 				}
-				free(state.cwd);
 			}
 			break;
 		case ZEND_INCLUDE:
