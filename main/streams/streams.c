@@ -1734,7 +1734,7 @@ PHPAPI size_t _php_stream_copy_to_mem_ex(php_stream *src, zend_uchar rettype, vo
 }
 
 /* Designed for copying UChars (taking into account both maxlen and maxchars) */
-PHPAPI size_t _php_stream_ucopy_to_stream(php_stream *src, php_stream *dest, size_t maxlen, int maxchars STREAMS_DC TSRMLS_DC)
+PHPAPI size_t _php_stream_ucopy_to_stream(php_stream *src, php_stream *dest, size_t maxlen, size_t maxchars STREAMS_DC TSRMLS_DC)
 {
 	size_t haveread = 0;
 	php_stream_statbuf ssbuf;
