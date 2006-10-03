@@ -48,6 +48,6 @@ array(18) {
   string(8) "callback"
 }
 
-Warning: Wrong parameter count for filter_list() in /home4/php_dev/php52/ext/filter/tests/008.php on line 4
+Warning: Wrong parameter count for filter_list() in %s on line %d
 NULL
 Done
