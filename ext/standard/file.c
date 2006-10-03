@@ -900,12 +900,11 @@ PHP_FUNCTION(tempnam)
 {
 	zval **ppdir, **ppprefix;
 	char *dir, *prefix;
-	int dir_len, prefix_len;
+	int dir_len, prefix_len, p_len;
 
 	char *opened_path;
 	char *p;
 	int fd;
-	size_t p_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZ", &ppdir, &ppprefix) == FAILURE) {
 		return;
