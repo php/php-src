@@ -5440,7 +5440,7 @@ PHP_FUNCTION(highlight_file)
 PHP_FUNCTION(php_strip_whitespace)
 {
 	char *filename;
-	int filename_len, ret;
+	int filename_len;
 	zend_uchar filename_type;
 	zend_lex_state original_lex_state;
 	zend_file_handle file_handle = {0};
@@ -5535,7 +5535,6 @@ PHP_FUNCTION(highlight_string)
 PHP_FUNCTION(ini_get)
 {
 	zval **varname;
-	int varname_len;
 	char *str;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &varname) == FAILURE) {
