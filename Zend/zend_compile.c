@@ -1926,7 +1926,7 @@ ZEND_API void function_add_ref(zend_function *function TSRMLS_DC)
 			zval *tmp_zval;
 
 			ALLOC_HASHTABLE(op_array->static_variables);
-			zend_u_hash_init(op_array->static_variables, 2, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
+			zend_u_hash_init(op_array->static_variables, zend_hash_num_elements(static_variables), NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
 			zend_hash_copy(op_array->static_variables, static_variables, (copy_ctor_func_t) zval_add_ref, (void *) &tmp_zval, sizeof(zval *));
 		}
 	}
