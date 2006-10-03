@@ -3035,6 +3035,43 @@ static void set_ns_and_type_ex(xmlNodePtr node, char *ns, char *type)
 	smart_str_free(&nstype);
 }
 
+static xmlNsPtr xmlSearchNsPrefixByHref(xmlDocPtr doc, xmlNodePtr node, const xmlChar * href)
+{
+	xmlNsPtr cur;
+	xmlNodePtr orig = node;
+
+	while (node) {
+		if (node->type == XML_ENTITY_REF_NODE ||
+		    node->type == XML_ENTITY_NODE ||
+		    node->type == XML_ENTITY_DECL) {
+			return NULL;
+		}
+		if (node->type == XML_ELEMENT_NODE) {
+			cur = node->nsDef;
+			while (cur != NULL) {
+				if (cur->prefix && cur->href && xmlStrEqual(cur->href, href)) {
+					if (xmlSearchNs(doc, node, cur->prefix) == cur) {
+						return cur;
+					}
+				}
+				cur = cur->next;
+			}
+			if (orig != node) {
+				cur = node->ns;
+				if (cur != NULL) {
+					if (cur->prefix && cur->href && xmlStrEqual(cur->href, href)) {
+						if (xmlSearchNs(doc, node, cur->prefix) == cur) {
+							return cur;
+						}
+					}
+				}
+			}    
+		}
+		node = node->parent;
+	}
+	return NULL;
+}
+
 xmlNsPtr encode_add_ns(xmlNodePtr node, const char* ns)
 {
 	xmlNsPtr xmlns;
@@ -3044,6 +3081,9 @@ xmlNsPtr encode_add_ns(xmlNodePtr node, const char* ns)
 	}
 
 	xmlns = xmlSearchNsByHref(node->doc, node, BAD_CAST(ns));
+	if (xmlns != NULL && xmlns->prefix == NULL) {
+		xmlns = xmlSearchNsPrefixByHref(node->doc, node, BAD_CAST(ns));
+	}
 	if (xmlns == NULL) {
 		xmlChar* prefix;
 		TSRMLS_FETCH();
@@ -3054,9 +3094,19 @@ xmlNsPtr encode_add_ns(xmlNodePtr node, const char* ns)
 			smart_str prefix = {0};
 			int num = ++SOAP_GLOBAL(cur_uniq_ns);
 
-			smart_str_appendl(&prefix, "ns", 2);
-			smart_str_append_long(&prefix, num);
-			smart_str_0(&prefix);
+			while (1) {
+				smart_str_appendl(&prefix, "ns", 2);
+				smart_str_append_long(&prefix, num);
+				smart_str_0(&prefix);
+				if (xmlSearchNs(node->doc, node, BAD_CAST(prefix.c)) == NULL) {
+					break;
+				}
+				smart_str_free(&prefix);
+				prefix.c = NULL;
+				prefix.len = 0;
+				num = ++SOAP_GLOBAL(cur_uniq_ns);
+			}
+
 			xmlns = xmlNewNs(node->doc->children, BAD_CAST(ns), BAD_CAST(prefix.c));
 			smart_str_free(&prefix);
 		}
