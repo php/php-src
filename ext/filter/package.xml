@@ -8,6 +8,12 @@ of filters and mechanisms that users can use to safely access their input data.
  
  </description>
   <lead>
+    <name>Ilia Alshanetsky</name>
+    <user>iliaa</user>
+    <email>iliaa@php.net</email>
+    <active>yes</active>
+  </lead>
+  <lead>
     <name>Pierre-Alain Joye</name>
     <user>pajoye</user>
     <email>pierre@php.net</email>
