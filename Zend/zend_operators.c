@@ -918,6 +918,7 @@ ZEND_API int mod_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 	zendi_convert_to_long(op2, op2_copy, result);
 
 	if (op2->value.lval == 0) {
+		zend_error(E_WARNING, "Division by zero");
 		ZVAL_BOOL(result, 0);
 		return FAILURE;			/* modulus by zero */
 	}
