@@ -3984,7 +3984,7 @@ PHP_FUNCTION(pg_send_query_params)
 	int leftover = 0;
 
 	if (zend_get_parameters_ex(3, &pgsql_link, &query, &pv_param_arr) == FAILURE) {
-		return;
+		WRONG_PARAM_COUNT;
 	}
 
 	if (pgsql_link == NULL && id == -1) {
@@ -4074,7 +4074,7 @@ PHP_FUNCTION(pg_send_prepare)
 	int leftover = 0;
 
 	if (zend_get_parameters_ex(3, &pgsql_link, &stmtname, &query) == FAILURE) {
-		return;
+		WRONG_PARAM_COUNT;
 	}
 	if (pgsql_link == NULL && id == -1) {
 		RETURN_FALSE;
@@ -4128,7 +4128,7 @@ PHP_FUNCTION(pg_send_execute)
 	int leftover = 0;
 
 	if (zend_get_parameters_ex(3, &pgsql_link, &stmtname, &pv_param_arr)==FAILURE) {
-		return;
+		WRONG_PARAM_COUNT;
 	}
 	if (pgsql_link == NULL && id == -1) {
 		RETURN_FALSE;
