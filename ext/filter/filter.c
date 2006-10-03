@@ -570,12 +570,17 @@ static void php_filter_call(zval **filtered, long filter, zval **filter_args, co
 
 	php_zval_filter(filtered, filter, filter_flags, options, charset, copy TSRMLS_CC);
 	if (filter_flags & FILTER_FORCE_ARRAY) {
-		zval *temp_array;
+		zval *tmp;
 
-		ALLOC_INIT_ZVAL(temp_array);
-		array_init(temp_array);
-		add_next_index_zval(temp_array, *filtered);
-		*filtered = temp_array;
+		ALLOC_ZVAL(tmp);
+		*tmp = **filtered;
+		zval_copy_ctor(tmp);
+		INIT_PZVAL(tmp);
+
+		zval_dtor(*filtered);
+
+		array_init(*filtered);
+		add_next_index_zval(*filtered, tmp);
 	}
 }
 /* }}} */
