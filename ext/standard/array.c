@@ -1507,6 +1507,9 @@ PHP_FUNCTION(compact)
 	zval ***args;			/* function arguments array */
 	int i;
 	
+	if (ZEND_NUM_ARGS() < 1) {
+		WRONG_PARAM_COUNT;
+	}
 	args = (zval ***)safe_emalloc(ZEND_NUM_ARGS(), sizeof(zval **), 0);
 	
 	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
