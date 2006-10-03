@@ -882,7 +882,7 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC
 #else
 			ALLOC_HASHTABLE(class_type->static_members);
 #endif
-			zend_hash_init(CE_STATIC_MEMBERS(class_type), 0, NULL, ZVAL_PTR_DTOR, 0);
+			zend_hash_init(CE_STATIC_MEMBERS(class_type), zend_hash_num_elements(&class_type->default_static_members), NULL, ZVAL_PTR_DTOR, 0);
 
 			zend_hash_internal_pointer_reset_ex(&class_type->default_static_members, &pos);
 			while (zend_hash_get_current_data_ex(&class_type->default_static_members, (void**)&p, &pos) == SUCCESS) {
@@ -943,7 +943,7 @@ ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *class_type
 			object->properties = properties;
 		} else {
 			ALLOC_HASHTABLE_REL(object->properties);
-			zend_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+			zend_hash_init(object->properties, zend_hash_num_elements(&class_type->default_properties), NULL, ZVAL_PTR_DTOR, 0);
 			zend_hash_copy(object->properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 		}
 	} else {
