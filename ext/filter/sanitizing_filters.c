@@ -177,7 +177,6 @@ static void filter_map_apply(zval *value, filter_map *map)
 }
 /* }}} */
 
-
 /* {{{ php_filter_string */
 void php_filter_string(PHP_INPUT_FILTER_PARAM_DECL)
 {

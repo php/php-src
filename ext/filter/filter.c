@@ -443,8 +443,8 @@ static void php_zval_filter_recursive(zval **value, long filter, long flags, zva
 }
 /* }}} */
 
-/* {{{ */
-static zval *php_filter_get_storage(long arg TSRMLS_DC)
+static zval *php_filter_get_storage(long arg TSRMLS_DC)/* {{{ */
+
 {
 	zval *array_ptr = NULL;
 	zend_bool jit_initialization = (PG(auto_globals_jit) && !PG(register_globals) && !PG(register_long_arrays));
@@ -510,8 +510,7 @@ PHP_FUNCTION(filter_has_var)
 }
 /* }}} */
 
-
-static void php_filter_call(zval **filtered, long filter, zval **filter_args, const int copy, long filter_flags TSRMLS_DC)
+static void php_filter_call(zval **filtered, long filter, zval **filter_args, const int copy, long filter_flags TSRMLS_DC) /* {{{ */
 {
 	zval  *options = NULL;
 	zval **option;
@@ -579,8 +578,9 @@ static void php_filter_call(zval **filtered, long filter, zval **filter_args, co
 		*filtered = temp_array;
 	}
 }
+/* }}} */
 
-static void php_filter_array_handler(zval *input, zval **op, zval *return_value TSRMLS_DC)
+static void php_filter_array_handler(zval *input, zval **op, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	char *arg_key;
 	uint arg_key_len;
@@ -627,7 +627,7 @@ static void php_filter_array_handler(zval *input, zval **op, zval *return_value 
 		RETURN_FALSE;
 	}
 }
-
+/* }}} */
 
 /* {{{ proto mixed filter_input(constant type, string variable_name [, long filter [, mixed options]])
  * Returns the filtered variable 'name'* from source `type`.
