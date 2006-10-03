@@ -502,11 +502,13 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 	/* Non static methods */
 	if (&ce->function_table) {
 		count = zend_hash_num_elements(&ce->function_table) - count_static_funcs;
-		string_printf(str, "\n%s  - Methods [%d] {", indent, count);
 		if (count > 0) {
 			HashPosition pos;
 			zend_function *mptr;
+			string dyn;
 
+			count = 0;
+			string_init(&dyn);
 			zend_hash_internal_pointer_reset_ex(&ce->function_table, &pos);
 
 			while (zend_hash_get_current_data_ex(&ce->function_table, (void **) &mptr, &pos) == SUCCESS) {
@@ -524,14 +526,18 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 					     (zend_u_binary_strcasecmp(key.u, key_len-1, mptr->common.function_name.u, len) == 0) :
 					     (zend_binary_strcasecmp(key.s, key_len-1, mptr->common.function_name.s, len) == 0))) {
 
-						string_printf(str, "\n");
-						_function_string(str, mptr, ce, sub_indent.string TSRMLS_CC);
+						string_printf(&dyn, "\n");
+						_function_string(&dyn, mptr, ce, sub_indent.string TSRMLS_CC);
+						count++;
 					}
 				}
 				zend_hash_move_forward_ex(&ce->function_table, &pos);
 			}
+			string_printf(str, "\n%s  - Methods [%d] {", indent, count);
+			string_append(str, &dyn);
+			string_free(&dyn);
 		} else {
-			string_printf(str, "\n");
+			string_printf(str, "\n%s  - Methods [0] {\n", indent);
 		}
 		string_printf(str, "%s  }\n", indent);
 	}
