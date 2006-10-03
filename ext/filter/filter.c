@@ -533,6 +533,10 @@ static void php_filter_call(zval **filtered, long filter, zval **filter_args, co
 		if (zend_hash_find(HASH_OF(*filter_args), "flags", sizeof("flags"), (void **)&option) == SUCCESS) {
 			convert_to_long(*option);
 			filter_flags = Z_LVAL_PP(option);
+
+			if (!(filter_flags & FILTER_REQUIRE_ARRAY ||  filter_flags & FILTER_FORCE_ARRAY)) {
+				filter_flags |= FILTER_REQUIRE_SCALAR;
+			}
 		}
 
 		if (zend_hash_find(HASH_OF(*filter_args), "options", sizeof("options"), (void **)&option) == SUCCESS) {
