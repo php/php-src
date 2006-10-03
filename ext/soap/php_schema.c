@@ -2039,7 +2039,7 @@ static void schema_attribute_fixup(sdlCtx *ctx, sdlAttributePtr attr)
 				  xmlNodePtr node;
 
 					attr->extraAttributes = emalloc(sizeof(HashTable));
-					zend_hash_init(attr->extraAttributes, 0, NULL, delete_extra_attribute, 0);
+					zend_hash_init(attr->extraAttributes, zend_hash_num_elements((*tmp)->extraAttributes), NULL, delete_extra_attribute, 0);
 					zend_hash_copy(attr->extraAttributes, (*tmp)->extraAttributes, copy_extra_attribute, &node, sizeof(xmlNodePtr));
 				}
 				attr->encode = (*tmp)->encode;
@@ -2085,7 +2085,7 @@ static void schema_attributegroup_fixup(sdlCtx *ctx, sdlAttributePtr attr, HashT
 							if (newAttr->extraAttributes) {
 							  xmlNodePtr node;
 								HashTable *ht = emalloc(sizeof(HashTable));
-								zend_hash_init(ht, 0, NULL, delete_extra_attribute, 0);
+								zend_hash_init(ht, zend_hash_num_elements(newAttr->extraAttributes), NULL, delete_extra_attribute, 0);
 								zend_hash_copy(ht, newAttr->extraAttributes, copy_extra_attribute, &node, sizeof(xmlNodePtr));
 								newAttr->extraAttributes = ht;
 							}
