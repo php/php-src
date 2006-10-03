@@ -568,7 +568,7 @@ static int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds TSRMLS_DC)
 	if (Z_TYPE_P(sock_array) != IS_ARRAY) return 0;
 
 	ALLOC_HASHTABLE(new_hash);
-	zend_hash_init(new_hash, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_init(new_hash, zend_hash_num_elements(Z_ARRVAL_P(sock_array)), NULL, ZVAL_PTR_DTOR, 0);
 	for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(sock_array));
 		 zend_hash_get_current_data(Z_ARRVAL_P(sock_array), (void **) &element) == SUCCESS;
 		 zend_hash_move_forward(Z_ARRVAL_P(sock_array))) {
