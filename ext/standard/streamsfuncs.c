@@ -538,7 +538,7 @@ PHP_FUNCTION(stream_get_meta_data)
 			UChar *decoded_path = NULL;
 			int decoded_path_len = 0;
 
-			if (SUCCESS == php_stream_path_decode(stream->wrapper, &decoded_path, &decoded_path_len, stream->orig_path, strlen(stream->orig_path), REPORT_ERRORS, stream->context TSRMLS_CC)) {
+			if (SUCCESS == php_stream_path_decode(stream->wrapper, &decoded_path, &decoded_path_len, stream->orig_path, strlen(stream->orig_path), REPORT_ERRORS, stream->context)) {
 				add_ascii_assoc_unicodel(return_value, "uri", decoded_path, decoded_path_len, 0);
 			} else {
 				add_ascii_assoc_null(return_value, "uri");
