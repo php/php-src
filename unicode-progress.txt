@@ -26,7 +26,6 @@ ext/standard
     sscanf()
         Params API. Rest - no idea yet.
 
-    strripos()
     str_replace()
     stri_replace()
     substr_compare()
@@ -161,6 +160,7 @@ ext/standard
     strpbrk()
     strpos()
     strrchr()
+    strripos()
     strrev()
     strrpos()
     strspn()
