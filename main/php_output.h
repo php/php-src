@@ -114,6 +114,8 @@ typedef struct _php_output_handler *(*php_output_handler_alias_ctor_t)(zval *han
 typedef struct _php_output_handler_user_func_t {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
+	zval **fcp[2];
+	zval *zoh;
 } php_output_handler_user_func_t;
 
 typedef struct _php_output_handler {
