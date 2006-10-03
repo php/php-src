@@ -183,35 +183,60 @@ err:
 	return -1;
 }
 
-/* {{{ proto string convert_uuencode(string data) 
+/* {{{ proto string convert_uuencode(string data) U
    uuencode a string */
 PHP_FUNCTION(convert_uuencode)
 {
 	char *src, *dst;
 	int src_len, dst_len;
+	zend_uchar src_type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &src, &src_len) == FAILURE || src_len < 1) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &src, &src_len, &src_type) == FAILURE || src_len < 1) {
 		RETURN_FALSE;
 	}
 
-	dst_len = php_uuencode(src, src_len, &dst);
+	if (src_type == IS_UNICODE) {
+		src = zend_unicode_to_ascii((UChar*)src, src_len TSRMLS_CC);
+		if (!src) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received");
+			RETURN_FALSE;
+		}
+	}
 
-	RETURN_STRINGL(dst, dst_len, 0);
+	dst_len = php_uuencode(src, src_len, &dst);
+	if (src_type == IS_UNICODE) {
+		efree(src);
+	}
+
+	RETURN_RT_STRINGL(dst, dst_len, ZSTR_AUTOFREE);
 }
 /* }}} */
 
-/* {{{ proto string convert_uudecode(string data)
+/* {{{ proto string convert_uudecode(string data) U
    decode a uuencoded string */
 PHP_FUNCTION(convert_uudecode)
 {
 	char *src, *dst;
 	int src_len, dst_len;
+	zend_uchar src_type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &src, &src_len) == FAILURE || src_len < 1) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &src, &src_len, &src_type) == FAILURE || src_len < 1) {
 		RETURN_FALSE;
 	}
 
+	if (src_type == IS_UNICODE) {
+		src = zend_unicode_to_ascii((UChar*)src, src_len TSRMLS_CC);
+		if (!src) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received");
+			RETURN_FALSE;
+		}
+	}
+
 	dst_len = php_uudecode(src, src_len, &dst);
+	if (src_type == IS_UNICODE) {
+		efree(src);
+	}
+
 	if (dst_len < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The given parameter is not a valid uuencoded string.");
 		RETURN_FALSE;
