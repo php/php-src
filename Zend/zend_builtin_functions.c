@@ -1197,22 +1197,28 @@ ZEND_FUNCTION(crash)
 
 #endif /* ZEND_DEBUG */
 
-/* {{{ proto array get_included_files(void)
-   Returns an array with the file names that were include_once()'d */
+/* {{{ proto array get_included_files(void) U
+   Returns an array with the file names that were included (includes require and once varieties) */
 ZEND_FUNCTION(get_included_files)
 {
+	HashPosition pos;
+	UChar *ustr;
 	zstr entry;
+	int len, ustr_len;
+
 	if (ZEND_NUM_ARGS() != 0) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	array_init(return_value);
-	zend_hash_internal_pointer_reset(&EG(included_files));
-	while (zend_hash_get_current_key(&EG(included_files), &entry, NULL, 0) == HASH_KEY_IS_STRING) {
-		/* UTODO Not sure this should be runtime encoding.. maybe filename encoding
-		 * instead */
-		add_next_index_rt_string(return_value, entry.s, 1);
-		zend_hash_move_forward(&EG(included_files));
+	zend_hash_internal_pointer_reset_ex(&EG(included_files), &pos);
+	while (zend_hash_get_current_key_ex(&EG(included_files), &entry, &len, NULL, 0, &pos) == HASH_KEY_IS_STRING) {
+		if (UG(unicode) && SUCCESS == zend_path_decode(&ustr, &ustr_len, entry.s, len - 1 TSRMLS_CC)) {
+			add_next_index_unicodel(return_value, ustr, ustr_len, 0);
+		} else {
+			add_next_index_stringl(return_value, entry.s, len - 1, 1);
+		}
+		zend_hash_move_forward_ex(&EG(included_files), &pos);
 	}
 }
 /* }}} */
