@@ -2156,7 +2156,7 @@ PHP_FUNCTION(pathinfo)
 
 /* {{{ php_u_stristr
    Unicode version of case insensitve strstr */
-PHPAPI UChar *php_u_stristr(UChar *str, UChar *pat, int str_len, int pat_len TSRMLS_DC)
+PHPAPI UChar *php_u_stristr(UChar *str, UChar *pat, int str_len, int pat_len, zend_bool find_first TSRMLS_DC)
 {
 	UChar *str_fold, *pat_fold;
 	int str_fold_len, pat_fold_len;
@@ -2167,7 +2167,11 @@ PHPAPI UChar *php_u_stristr(UChar *str, UChar *pat, int str_len, int pat_len TSR
 	zend_case_fold_string(&str_fold, &str_fold_len, str, str_len, U_FOLD_CASE_DEFAULT, &status);
 	if (str_fold_len == str_len) {
 		zend_case_fold_string(&pat_fold, &pat_fold_len, pat, pat_len, U_FOLD_CASE_DEFAULT, &status);
-		found = u_strFindFirst(str_fold, str_fold_len, pat_fold, pat_fold_len);
+		if (find_first) {
+			found = u_strFindFirst(str_fold, str_fold_len, pat_fold, pat_fold_len);
+		} else {
+			found = u_strFindLast(str_fold, str_fold_len, pat_fold, pat_fold_len);
+		}
 		if (found) {
 			result = str + (found - str_fold);
 		} else {
@@ -2179,7 +2183,11 @@ PHPAPI UChar *php_u_stristr(UChar *str, UChar *pat, int str_len, int pat_len TSR
 		usearch_setPattern(UG(root_search), pat, pat_len, &status);
 		usearch_setOffset(UG(root_search), 0, &status);
 
-		offset = usearch_first(UG(root_search), &status);
+		if (find_first) {
+			offset = usearch_first(UG(root_search), &status);
+		} else {
+			offset = usearch_last(UG(root_search), &status);
+		}
 		if (offset != USEARCH_DONE) {
 			result = str + offset;
 		} else {
@@ -2388,7 +2396,7 @@ PHP_FUNCTION(stristr)
 
 	if (Z_TYPE_PP(haystack) == IS_UNICODE) {
 		found = php_u_stristr(Z_USTRVAL_PP(haystack), target.u,
-							  Z_USTRLEN_PP(haystack), needle_len TSRMLS_CC);
+							  Z_USTRLEN_PP(haystack), needle_len, 1 TSRMLS_CC);
 	} else {
 		haystack_copy = estrndup(Z_STRVAL_PP(haystack), Z_STRLEN_PP(haystack));
 		found = php_stristr(Z_STRVAL_PP(haystack), target.s,
@@ -2668,7 +2676,7 @@ PHP_FUNCTION(stripos)
 		if (Z_TYPE_PP(haystack) == IS_UNICODE) {
 			/* calculate code unit offset */
 			U16_FWD_N(Z_USTRVAL_PP(haystack), cu_offset, haystack_len, offset);
-			found = php_u_stristr(Z_USTRVAL_PP(haystack) + cu_offset, Z_USTRVAL_PP(needle), haystack_len, needle_len TSRMLS_CC);
+			found = php_u_stristr(Z_USTRVAL_PP(haystack) + cu_offset, Z_USTRVAL_PP(needle), haystack_len, needle_len, 1 TSRMLS_CC);
 		} else {
 			haystack_dup = estrndup(Z_STRVAL_PP(haystack), haystack_len);
 			php_strtolower((char *)haystack_dup, haystack_len);
@@ -2690,7 +2698,7 @@ PHP_FUNCTION(stripos)
 			/* calculate code unit offset */
 			U16_FWD_N(Z_USTRVAL_PP(haystack), cu_offset, haystack_len, offset);
 			found = php_u_stristr(Z_USTRVAL_PP(haystack) + cu_offset,
-								  u_needle_char, haystack_len, needle_len TSRMLS_CC);
+								  u_needle_char, haystack_len, needle_len, 1 TSRMLS_CC);
 		} else {
 			c = tolower((char)Z_LVAL_PP(needle));
 			needle_char[0] = c;
@@ -2758,6 +2766,7 @@ PHP_FUNCTION(strrpos)
 		needle = Z_UNIVAL_PP(zneedle);
 		needle_len = Z_UNILEN_PP(zneedle);
 	} else {
+		convert_to_long_ex(zneedle);
 		if (Z_TYPE_PP(zhaystack) == IS_UNICODE) {
 			if (Z_LVAL_PP(zneedle) < 0 || Z_LVAL_PP(zneedle) > 0x10FFFF) {
 				php_error(E_WARNING, "Needle argument codepoint value out of range (0 - 0x10FFFF)");
@@ -2767,7 +2776,6 @@ PHP_FUNCTION(strrpos)
 			u_ord_needle[needle_len] = 0;
 			needle.u = u_ord_needle;
 		} else {
-			convert_to_long_ex(zneedle);
 			ord_needle[0] = (char)(Z_LVAL_PP(zneedle) & 0xFF);
 			ord_needle[1] = '\0';
 			needle.s = ord_needle;
@@ -2860,92 +2868,158 @@ PHP_FUNCTION(strrpos)
 }
 /* }}} */
 
-/* {{{ proto int strripos(string haystack, string needle [, int offset])
+/* {{{ proto int strripos(string haystack, string needle [, int offset]) U
    Finds position of last occurrence of a string within another string */
 PHP_FUNCTION(strripos)
 {
+	zstr haystack, needle;
 	zval **zneedle;
-	char *needle, *haystack;
 	int needle_len, haystack_len;
+	zend_uchar haystack_type;
 	long offset = 0;
-	char *p, *e, ord_needle[2];
+	char *p, *e, needle_char[2];
+	UChar *u_p, *u_e, *pos;
+	UChar u_needle_char[3];
 	char *needle_dup, *haystack_dup;
+	int cu_offset = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sZ|l", &haystack, &haystack_len, &zneedle, &offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tZ|l", &haystack,
+							  &haystack_len, &haystack_type, &zneedle, &offset) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if (Z_TYPE_PP(zneedle) == IS_STRING) {
-		needle = Z_STRVAL_PP(zneedle);
-		needle_len = Z_STRLEN_PP(zneedle);
+	if (Z_TYPE_PP(zneedle) == IS_STRING || Z_TYPE_PP(zneedle) == IS_UNICODE) {
+		convert_to_explicit_type_ex(zneedle, haystack_type);
+		needle = Z_UNIVAL_PP(zneedle);
+		needle_len = Z_UNILEN_PP(zneedle);
 	} else {
 		convert_to_long_ex(zneedle);
-		ord_needle[0] = (char)(Z_LVAL_PP(zneedle) & 0xFF);
-		ord_needle[1] = '\0';
-		needle = ord_needle;
-		needle_len = 1;
+		if (haystack_type == IS_UNICODE) {
+			if (Z_LVAL_PP(zneedle) < 0 || Z_LVAL_PP(zneedle) > 0x10FFFF) {
+				php_error(E_WARNING, "Needle argument codepoint value out of range (0 - 0x10FFFF)");
+				RETURN_FALSE;
+			}
+			needle_len = zend_codepoint_to_uchar((UChar32)Z_LVAL_PP(zneedle), u_needle_char);
+			u_needle_char[needle_len] = 0;
+			needle.u = u_needle_char;
+		} else {
+			needle_char[0] = (char)(Z_LVAL_PP(zneedle) & 0xFF);
+			needle_char[1] = '\0';
+			needle.s = needle_char;
+			needle_len = 1;
+		}
 	}
 
-	if ((haystack_len == 0) || (needle_len == 0)) {
+	if ((haystack_len == 0) || (needle_len == 0) || needle_len > haystack_len) {
 		RETURN_FALSE;
 	}
 
-	if (needle_len == 1) {
-		/* Single character search can shortcut memcmps
-		   Can also avoid tolower emallocs */
+	if (haystack_type == IS_UNICODE) {
 		if (offset >= 0) {
-			p = haystack + offset;
-			e = haystack + haystack_len - 1;
+			U16_FWD_N(haystack.u, cu_offset, haystack_len, offset);
+			if (cu_offset > haystack_len - needle_len) {
+				RETURN_FALSE;
+			}
+			u_p = haystack.u + cu_offset;
+			u_e = haystack.u + haystack_len - needle_len;
 		} else {
-			p = haystack;
+			u_p = haystack.u;
 			if (-offset > haystack_len) {
-				e = haystack + haystack_len - 1;
+				RETURN_FALSE;
 			} else {
-				e = haystack + haystack_len + offset;
+				cu_offset = haystack_len;
+				U16_BACK_N(haystack.u, 0, cu_offset, -offset);
+				if (cu_offset == 0) {
+					RETURN_FALSE;
+				}
+				if (needle_len > haystack_len - cu_offset) {
+					u_e = haystack.u + haystack_len - needle_len;
+				} else {
+					u_e = haystack.u + cu_offset;
+				}
 			}
 		}
-		/* Borrow that ord_needle buffer to avoid repeatedly tolower()ing needle */
-		*ord_needle = tolower(*needle);
+
+		pos = php_u_stristr(u_p, needle.u, u_e-u_p+needle_len, needle_len, 0 TSRMLS_CC);
+		if (pos) {
+			if (offset > 0) {
+				RETURN_LONG(offset + u_countChar32(u_p, (UChar*)pos - u_p));
+			} else {
+				RETURN_LONG(u_countChar32(haystack.u, (UChar*)pos - haystack.u));
+			}
+		} else {
+			RETURN_FALSE;
+		}
+	} else {
+		if (needle_len == 1) {
+			/* Single character search can shortcut memcmps
+			   Can also avoid tolower emallocs */
+			if (offset >= 0) {
+				if (offset > haystack_len) {
+					RETURN_FALSE;
+				}
+				p = haystack.s + offset;
+				e = haystack.s + haystack_len - 1;
+			} else {
+				p = haystack.s;
+				if (-offset > haystack_len) {
+					RETURN_FALSE;
+				} else {
+					e = haystack.s + haystack_len + offset;
+				}
+			}
+			/* Borrow that needle_char buffer to avoid repeatedly tolower()ing needle */
+			*needle_char = tolower(*needle.s);
+			while (e >= p) {
+				if (tolower(*e) == *needle_char) {
+					RETURN_LONG(e - p + (offset > 0 ? offset : 0));
+				}
+				e--;
+			}
+			RETURN_FALSE;
+		}
+
+		needle_dup = estrndup(needle.s, needle_len);
+		php_strtolower(needle_dup, needle_len);
+		haystack_dup = estrndup(haystack.s, haystack_len);
+		php_strtolower(haystack_dup, haystack_len);
+
+		if (offset >= 0) {
+			if (offset > haystack_len) {
+				efree(haystack_dup);
+				efree(needle_dup);
+				RETURN_FALSE;
+			}
+			p = haystack_dup + offset;
+			e = haystack_dup + haystack_len - needle_len;
+		} else {
+			if (-offset > haystack_len) {
+				efree(haystack_dup);
+				efree(needle_dup);
+				RETURN_FALSE;
+			} 
+			p = haystack_dup;
+			if (needle_len > -offset) {
+				e = haystack_dup + haystack_len - needle_len;
+			} else {
+				e = haystack_dup + haystack_len + offset;
+			}
+		}
+
 		while (e >= p) {
-			if (tolower(*e) == *ord_needle) {
+			if (memcmp(e, needle_dup, needle_len) == 0) {
+				efree(haystack_dup);
+				efree(needle_dup);
 				RETURN_LONG(e - p + (offset > 0 ? offset : 0));
 			}
 			e--;
 		}
+
+		efree(haystack_dup);
+		efree(needle_dup);
+
 		RETURN_FALSE;
 	}
-
-	needle_dup = estrndup(needle, needle_len);
-	php_strtolower(needle_dup, needle_len);
-	haystack_dup = estrndup(haystack, haystack_len);
-	php_strtolower(haystack_dup, haystack_len);
-
-	if (offset >= 0) {
-		p = haystack_dup + offset;
-		e = haystack_dup + haystack_len - needle_len;
-	} else {
-		p = haystack_dup;
-		if (-offset > haystack_len) {
-			e = haystack_dup - needle_len;
-		} else if (needle_len > -offset) {
-			e = haystack_dup + haystack_len - needle_len;
-		} else {
-			e = haystack_dup + haystack_len + offset;
-		}
-	}
-
-	while (e >= p) {
-		if (memcmp(e, needle_dup, needle_len) == 0) {
-			efree(haystack_dup);
-			efree(needle_dup);
-			RETURN_LONG(e - p + (offset > 0 ? offset : 0));
-		}
-		e--;
-	}
-
-	efree(haystack_dup);
-	efree(needle_dup);
-	RETURN_FALSE;
 }
 /* }}} */
 
