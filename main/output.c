@@ -509,8 +509,13 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 				MAKE_STD_ZVAL(handler_name);
 				zend_make_callable(output_handler, handler_name TSRMLS_CC);
 				handler = php_output_handler_init(handler_name, chunk_size, (flags & ~0xf) | PHP_OUTPUT_HANDLER_USER);
-				handler->func.user = user;
 				zval_ptr_dtor(&handler_name);
+				
+				ZVAL_ADDREF(output_handler);
+				user->zoh = output_handler;
+				user->fci.param_count = 2;
+				user->fci.params = (zval ***) &user->fcp;
+				handler->func.user = user;
 			} else {
 				efree(user);
 			}
@@ -710,6 +715,7 @@ PHPAPI void php_output_handler_dtor(php_output_handler *handler TSRMLS_DC)
 	zval_ptr_dtor(&handler->name);
 	STR_FREE(handler->buffer.data);
 	if (handler->flags & PHP_OUTPUT_HANDLER_USER) {
+		zval_ptr_dtor(&handler->func.user->zoh);
 		efree(handler->func.user);
 	}
 	if (handler->dtor && handler->opaq) {
@@ -944,8 +950,6 @@ static inline int php_output_handler_op(php_output_handler *handler, php_output_
 			ZVAL_STRINGL(params[0], handler->buffer.data, handler->buffer.used, 1);
 			MAKE_STD_ZVAL(params[1]);
 			ZVAL_LONG(params[1], (long) context->op);
-			handler->func.user->fci.param_count = 2;
-			handler->func.user->fci.params = (zval***) safe_emalloc(handler->func.user->fci.param_count, sizeof(zval**), 0);
 			handler->func.user->fci.params[0] = &params[0];
 			handler->func.user->fci.params[1] = &params[1];
 			
@@ -966,7 +970,8 @@ static inline int php_output_handler_op(php_output_handler *handler, php_output_
 				/* call failed, pass internal buffer along */
 				status = PHP_OUTPUT_HANDLER_FAILURE;
 			}
-			zend_fcall_info_args(&handler->func.user->fci, NULL TSRMLS_CC);
+			zval_ptr_dtor(&params[0]);
+			zval_ptr_dtor(&params[1]);
 			if (retval) {
 				zval_ptr_dtor(&retval);
 			}
