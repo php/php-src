@@ -21,3 +21,16 @@ array(2) {
   [3]=>
   string(3) "h20"
 }
+--UEXPECT--
+array(2) {
+  [1]=>
+  unicode(1) "1"
+  [2]=>
+  unicode(2) "q6"
+}
+array(2) {
+  [0]=>
+  unicode(1) "a"
+  [3]=>
+  unicode(3) "h20"
+}
