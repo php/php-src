@@ -6379,7 +6379,7 @@ PHP_FUNCTION(count_chars)
 	char retstr[256];
 	int retlen=0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "t|l", &input, &input_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|l", &input, &input_len,
 							  &type, &mode) == FAILURE) {
 		return;
 	}
