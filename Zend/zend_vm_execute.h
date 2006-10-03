@@ -2144,6 +2144,9 @@ static int ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			array_ptr = tmp;
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 			ce = Z_OBJCE_P(array_ptr);
+			if (!ce || !ce->get_iterator) {
+				array_ptr->refcount++;
+			}
 		} else {
 			if (IS_CONST == IS_VAR &&
 				free_op1.var == NULL &&
@@ -4748,6 +4751,9 @@ static int ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			array_ptr = tmp;
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 			ce = Z_OBJCE_P(array_ptr);
+			if (!ce || !ce->get_iterator) {
+				array_ptr->refcount++;
+			}
 		} else {
 			if (IS_TMP_VAR == IS_VAR &&
 				free_op1.var == NULL &&
@@ -7949,6 +7955,9 @@ static int ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			array_ptr = tmp;
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 			ce = Z_OBJCE_P(array_ptr);
+			if (!ce || !ce->get_iterator) {
+				array_ptr->refcount++;
+			}
 		} else {
 			if (IS_VAR == IS_VAR &&
 				free_op1.var == NULL &&
@@ -20485,6 +20494,9 @@ static int ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			array_ptr = tmp;
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 			ce = Z_OBJCE_P(array_ptr);
+			if (!ce || !ce->get_iterator) {
+				array_ptr->refcount++;
+			}
 		} else {
 			if (IS_CV == IS_VAR &&
 				free_op1.var == NULL &&
