@@ -273,7 +273,7 @@ PHP_RSHUTDOWN_FUNCTION(filter)
 PHP_MINFO_FUNCTION(filter)
 {
 	php_info_print_table_start();
-	php_info_print_table_row( 2, "Input Validation and Filtering", "enabled" );
+	php_info_print_table_header( 2, "Input Validation and Filtering", "enabled" );
 	php_info_print_table_row( 2, "Revision", "$Revision$");
 	php_info_print_table_end();
 
@@ -511,7 +511,7 @@ PHP_FUNCTION(filter_has_var)
 /* }}} */
 
 
-static void php_filter_call(zval **filtered, long filter, zval **filter_args, const int copy, long filter_flags)
+static void php_filter_call(zval **filtered, long filter, zval **filter_args, const int copy, long filter_flags TSRMLS_DC)
 {
 	zval  *options = NULL;
 	zval **option;
@@ -580,7 +580,7 @@ static void php_filter_call(zval **filtered, long filter, zval **filter_args, co
 	}
 }
 
-static void php_filter_array_handler(zval *input, zval **op, zval *return_value)
+static void php_filter_array_handler(zval *input, zval **op, zval *return_value TSRMLS_DC)
 {
 	char *arg_key;
 	uint arg_key_len;
@@ -591,11 +591,11 @@ static void php_filter_array_handler(zval *input, zval **op, zval *return_value)
 	if (!op) {
 		SEPARATE_ZVAL(&input);
 		*return_value = *input;
-		php_filter_call(&return_value, FILTER_DEFAULT, NULL, 0, FILTER_REQUIRE_ARRAY);
+		php_filter_call(&return_value, FILTER_DEFAULT, NULL, 0, FILTER_REQUIRE_ARRAY TSRMLS_CC);
 	} else if (Z_TYPE_PP(op) == IS_LONG) {
 		SEPARATE_ZVAL(&input);
 		*return_value = *input;
-		php_filter_call(&return_value, Z_LVAL_PP(op), NULL, 0, FILTER_REQUIRE_ARRAY);
+		php_filter_call(&return_value, Z_LVAL_PP(op), NULL, 0, FILTER_REQUIRE_ARRAY TSRMLS_CC);
 	} else if (Z_TYPE_PP(op) == IS_ARRAY) {
 		array_init(return_value);
 
@@ -619,7 +619,7 @@ static void php_filter_array_handler(zval *input, zval **op, zval *return_value)
 				zval_copy_ctor(nval);
 				INIT_PZVAL(nval);
 
-				php_filter_call(&nval, -1, arg_elm, 0, FILTER_REQUIRE_SCALAR);
+				php_filter_call(&nval, -1, arg_elm, 0, FILTER_REQUIRE_SCALAR TSRMLS_CC);
 				add_assoc_zval_ex(return_value, arg_key, arg_key_len, nval);
 			}
 		}
@@ -651,7 +651,7 @@ PHP_FUNCTION(filter_input)
 	*return_value = **tmp;
 	zval_copy_ctor(return_value);  /* Watch out for empty strings */
 
-	php_filter_call(&return_value, filter, filter_args, 1, FILTER_REQUIRE_SCALAR);
+	php_filter_call(&return_value, filter, filter_args, 1, FILTER_REQUIRE_SCALAR TSRMLS_CC);
 }
 /* }}} */
 
@@ -670,7 +670,7 @@ PHP_FUNCTION(filter_var)
 	*return_value = *data;
 	zval_copy_ctor(data);
 
-	php_filter_call(&return_value, filter, filter_args, 1, FILTER_REQUIRE_SCALAR);
+	php_filter_call(&return_value, filter, filter_args, 1, FILTER_REQUIRE_SCALAR TSRMLS_CC);
 }
 /* }}} */
 
@@ -692,7 +692,7 @@ PHP_FUNCTION(filter_input_array)
 		RETURN_FALSE;
 	}
 
-	php_filter_array_handler(array_input, op, return_value);
+	php_filter_array_handler(array_input, op, return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -707,7 +707,7 @@ PHP_FUNCTION(filter_var_array)
 		RETURN_FALSE;
 	}
 
-	php_filter_array_handler(array_input, op, return_value);
+	php_filter_array_handler(array_input, op, return_value TSRMLS_CC);
 }
 /* }}} */
 
