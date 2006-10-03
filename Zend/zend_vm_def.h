@@ -3191,6 +3191,9 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 			array_ptr = tmp;
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 			ce = Z_OBJCE_P(array_ptr);
+			if (!ce || !ce->get_iterator) {
+				array_ptr->refcount++;
+			}
 		} else {
 			if (OP1_TYPE == IS_VAR &&
 				free_op1.var == NULL &&
