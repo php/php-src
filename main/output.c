@@ -514,7 +514,7 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 				ZVAL_ADDREF(output_handler);
 				user->zoh = output_handler;
 				user->fci.param_count = 2;
-				user->fci.params = (zval ***) &user->fcp;
+				user->fci.params = (zval ***) user->fcp;
 				handler->func.user = user;
 			} else {
 				efree(user);
