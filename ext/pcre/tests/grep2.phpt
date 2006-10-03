@@ -54,15 +54,15 @@ Warning: preg_grep(): Compilation failed: nothing to repeat at offset 0 in %sgre
 bool(false)
 array(3) {
   [5]=>
-  string(1) "a"
+  unicode(1) "a"
   [u"xyz"]=>
-  string(2) "q6"
+  unicode(2) "q6"
   [6]=>
-  string(3) "h20"
+  unicode(3) "h20"
 }
 array(1) {
   [u"x"]=>
-  string(1) "1"
+  unicode(1) "1"
 }
 bool(true)
 array(0) {
