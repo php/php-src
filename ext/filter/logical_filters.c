@@ -171,7 +171,7 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	/* Parse options */
 	FETCH_LONG_OPTION(min_range,    "min_range");
 	FETCH_LONG_OPTION(max_range,    "max_range");
-	FETCH_LONG_OPTION(option_flags, "flags");
+	option_flags = flags;
 
 	len = Z_STRLEN_P(value);
 
@@ -181,11 +181,11 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		return;
 	}
 
-	if (option_flags_set && (option_flags & FILTER_FLAG_ALLOW_OCTAL)) {
+	if (option_flags & FILTER_FLAG_ALLOW_OCTAL) {
 		allow_octal = 1;
 	}
 
-	if (option_flags_set && (option_flags & FILTER_FLAG_ALLOW_HEX)) {
+	if (option_flags & FILTER_FLAG_ALLOW_HEX) {
 		allow_hex = 1;
 	}
 

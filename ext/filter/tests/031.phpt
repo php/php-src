@@ -1,5 +1,5 @@
 --TEST--
-filter_data() and FLOAT
+filter_var() and FLOAT
 --FILE--
 <?php
 
@@ -15,7 +15,7 @@ $floats = array(
 );
 
 foreach ($floats as $float) {
-	$out = filter_data($float, FILTER_VALIDATE_FLOAT);
+	$out = filter_var($float, FILTER_VALIDATE_FLOAT);
 	var_dump($out);
 }
 
@@ -29,7 +29,7 @@ $floats = array(
 
 echo "\ncustom decimal:\n";
 foreach ($floats as $float => $dec) {
-	$out = filter_data($float, FILTER_VALIDATE_FLOAT, array('decimal' => $dec));
+	$out = filter_var($float, FILTER_VALIDATE_FLOAT, array("options"=>array('decimal' => $dec)));
 	var_dump($out);
 }
 
@@ -49,6 +49,6 @@ bool(false)
 float(1.234)
 float(1.234)
 
-Warning: filter_data(): decimal separator must be one char in %s on line %d
+Warning: filter_var(): decimal separator must be one char in %s on line %d
 bool(false)
 bool(false)
