@@ -25,35 +25,28 @@ of filters and mechanisms that users can use to safely access their input data.
     <email>rasmus@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2006-01-09</date>
+  <lead>
+    <name>Ilia Alshanetsky</name>
+    <user>iliaa</user>
+    <email>iliaa@php.net</email>
+    <active>yes</active>
+  </lead>
+  <date>2006-04-10</date>
   <version>
-    <release>0.10.0</release>
-    <api>0.10.0</api>
+    <release>0.11.0</release>
+    <api>0.11.0</api>
   </version>
   <stability>
     <release>beta</release>
-    <api>alpha</api>
+    <api>beta</api>
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
-  <notes>- Fixed PECL bug #6136, ini_set should not be able to change the filter.default (Pierre)
-- Fixed PECL bug #6639: uppercase hexadecimal digits are not supported
-- Fixed PECL bug #7733, Float exponential weird result (Pierre)
-- Fixed PECL bug #7715, Input_get float error (Pierre)
-- Fixed PECL bug #8316, empty string with FILTER_VALIDATE_INT returns 0
-- Fixed Possible leak in internal sapi_filter (Pierre)
-- Fixed an issue with multiple calls using the same input type (Tony)
-- Fixed leak in sapi filter (Tony, Ilia)
-- Fixed magic_quotes_gpc from being applied when RAW filter is used (Ilia)
-- Added support for custom decimal separator (Pierre)
-- Added support for php pcre expressions (Pierre)
-- Added input_get_args, fetches all input in one call (Pierre)
-- Added FILTER_FLAG_SCALAR and FILTER_FLAG_ARRAY, allows or not array values (Pierre)
-- Basic IPv6 (no option yet, only the syntax is verified) (Pierre)
-- INT, Float and boolean filters trim the values before the validations (default trim()) (Pierre)
-- input_get and input_get_args returns now FALSE when the validation failed
-  and NULL when the variable has not been found (Pierre)
-- Added JIT support
- </notes>
+  <notes>- Attention, this release contains BC breaks, the API has been rewamped
+- Fixed possible bug in all filtering functions, input value was modified
+- Filters operate now on a copy of the data, allow to safely fetch multiple times the same values
+- add two modes: FILTER_REQUIRE_ARRAY and FILTER_FORCE_ARRAY
+- see the manuals and the examples for more details about the new API
+</notes>
   <contents>
     <dir name="/">
       <file name="callback_filter.c" role="src"/>
@@ -102,6 +95,8 @@ of filters and mechanisms that users can use to safely access their input data.
         <file role="test" name="034.phpt"/>
         <file role="test" name="035.phpt"/>
         <file role="test" name="036.phpt"/>
+        <file role="test" name="037.phpt"/>
+        <file role="test" name="038.phpt"/>
         <file role="test" name="bug7715.phpt"/>
         <file role="test" name="bug8315.phpt"/>
         <file role="test" name="bug7586.phpt"/>
@@ -122,6 +117,37 @@ of filters and mechanisms that users can use to safely access their input data.
   <providesextension>filter</providesextension>
   <extsrcrelease/>
   <changelog>
+    <release>
+  <date>2006-01-09</date>
+  <version>
+    <release>0.10.0</release>
+    <api>0.10.0</api>
+  </version>
+  <stability>
+    <release>beta</release>
+    <api>alpha</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>- Fixed PECL bug #6136, ini_set should not be able to change the filter.default (Pierre)
+- Fixed PECL bug #6639: uppercase hexadecimal digits are not supported
+- Fixed PECL bug #7733, Float exponential weird result (Pierre)
+- Fixed PECL bug #7715, Input_get float error (Pierre)
+- Fixed PECL bug #8316, empty string with FILTER_VALIDATE_INT returns 0
+- Fixed Possible leak in internal sapi_filter (Pierre)
+- Fixed an issue with multiple calls using the same input type (Tony)
+- Fixed leak in sapi filter (Tony, Ilia)
+- Fixed magic_quotes_gpc from being applied when RAW filter is used (Ilia)
+- Added support for custom decimal separator (Pierre)
+- Added support for php pcre expressions (Pierre)
+- Added input_get_args, fetches all input in one call (Pierre)
+- Added FILTER_FLAG_SCALAR and FILTER_FLAG_ARRAY, allows or not array values (Pierre)
+- Basic IPv6 (no option yet, only the syntax is verified) (Pierre)
+- INT, Float and boolean filters trim the values before the validations (default trim()) (Pierre)
+- input_get and input_get_args returns now FALSE when the validation failed
+  and NULL when the variable has not been found (Pierre)
+- Added JIT support
+ </notes>
+    </release>
     <release>
       <date>2006-01-23</date>
       <time>10:04:15</time>
