@@ -7,6 +7,7 @@ PHP                                                                        NEWS
 - Fixed mess with CGI/CLI -d option (now it works with cgi; constants are
   working exactly like in php.ini; with FastCGI -d affects all requests).
   (Dmitry)
+- Fixed missing open_basedir check inside chdir() function. (Ilia)
 - Fixed bug #39035 (Compatibilty issue between DOM and 
   zend.ze1_compatibility_mode). (Rob)
 - Fixed bug #39032 (strcspn() stops on null character). (Tony)
