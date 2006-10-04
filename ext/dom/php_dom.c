@@ -551,7 +551,7 @@ PHP_MINIT_FUNCTION(dom)
 	memcpy(&dom_ze1_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	dom_ze1_object_handlers.read_property = dom_read_property;
 	dom_ze1_object_handlers.write_property = dom_write_property;
-	dom_object_handlers.get_property_ptr_ptr = dom_get_property_ptr_ptr;
+	dom_ze1_object_handlers.get_property_ptr_ptr = dom_get_property_ptr_ptr;
 	dom_ze1_object_handlers.clone_obj = dom_objects_ze1_clone_obj;
 	dom_ze1_object_handlers.has_property = dom_property_exists;
 
