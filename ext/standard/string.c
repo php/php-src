@@ -2306,11 +2306,12 @@ PHPAPI int php_u_strcspn(UChar *s1, UChar *s2, UChar *s1_end, UChar *s2_end)
 	int codepts;
 	UChar32 ch;
 
-	for (i = 0, codepts = 0 ; i < len1 ; codepts++) {
+	for (i = 0, codepts = 0 ; i < len1 ; ) {
 		U16_NEXT(s1, i, len1, ch);
-		if (u_memchr32(s2, ch, len2)) {
+		if (!len2 || u_memchr32(s2, ch, len2)) {
 			break;
 		}
+		codepts++;
 	}
 	return codepts;
 }
@@ -2329,7 +2330,7 @@ PHPAPI size_t php_strcspn(char *s1, char *s2, char *s1_end, char *s2_end)
 			if (*spanp == c || p == s1_end) {
 				return p - s1;
 			}
-		} while (spanp++ < s2_end);
+		} while (spanp++ < (s2_end - 1));
 		c = *++p;
 	}
 	/* NOTREACHED */
