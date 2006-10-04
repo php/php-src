@@ -1033,7 +1033,7 @@ CWD_API FILE *virtual_popen(const char *command, const char *type TSRMLS_DC)
  * realpath() function.
  */
 #if defined(__osf__) || defined(_AIX)
-char *php_realpath_hack(char *src, char *dest)
+char *php_realpath_hack(const char *src, char *dest)
 {
 	char *ret;
 
