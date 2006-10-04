@@ -3547,20 +3547,36 @@ PHP_FUNCTION(pg_copy_from)
 /* }}} */
 
 #ifdef HAVE_PQESCAPE
-/* {{{ proto string pg_escape_string(string data)
+/* {{{ proto string pg_escape_string([resource connection,] string data)
    Escape string for text/char type */
 PHP_FUNCTION(pg_escape_string)
 {
 	char *from = NULL, *to = NULL;
+	zval *pgsql_link;
+	PGconn *pgsql;
 	int to_len;
 	int from_len;
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
-							  &from, &from_len) == FAILURE) {
-		return;
+	int id;
+
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "rs", &pgsql_link, &from, &from_len) == SUCCESS) {
+		id = -1;
+	} else if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &from, &from_len) == SUCCESS) {
+		pgsql_link = NULL;
+		id = PGG(default_link);
+	} else {
+		WRONG_PARAM_COUNT;
 	}
 
-	to = (char *)safe_emalloc(from_len, 2, 1);
-	to_len = (int)PQescapeString(to, from, from_len);
+	to = (char *) safe_emalloc(from_len, 2, 1);
+
+#ifdef HAVE_PQESCAPE_CONN
+	if (pgsql_link != NULL || id != -1) {
+		ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+		to_len = (int) PQescapeStringConn(pgsql, to, from, (size_t)from_len, NULL);
+	} else 	
+#endif
+		to_len = (int) PQescapeString(to, from, (size_t)from_len);
+
 	RETURN_STRINGL(to, to_len, 0);
 }
 /* }}} */
