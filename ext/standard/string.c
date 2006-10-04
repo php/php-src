@@ -1500,7 +1500,7 @@ PHPAPI size_t php_strcspn(char *s1, char *s2, char *s1_end, char *s2_end)
 			if (*spanp == c || p == s1_end) {
 				return p - s1;
 			}
-		} while (spanp++ < s2_end);
+		} while (spanp++ < (s2_end - 1));
 		c = *++p;
 	}
 	/* NOTREACHED */
