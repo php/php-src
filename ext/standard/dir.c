@@ -310,7 +310,9 @@ PHP_FUNCTION(chdir)
 		php_stream_path_param_encode(ppstr, &str, &str_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
 		return;
 	}
-
+	if (php_check_open_basedir(str TSRMLS_CC)) {
+  		RETURN_FALSE;
+  	}
 	ret = VCWD_CHDIR(str);
 	if (ret != 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s (errno %d)", strerror(errno), errno);
