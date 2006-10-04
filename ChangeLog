@@ -1,3 +1,298 @@
+2006-10-03  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/filter/tests/037.phpt
+      ext/filter/tests/038.phpt:
+      - MFB
+
+    * ext/filter/tests/038.phpt
+      ext/filter/tests/038.phpt:
+      
+      file 038.phpt was initially added on branch PHP_5_2.
+
+2006-10-03  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/streamsfuncs.c:
+      remove TSRMLS_CC, php_stream_path_decode() is a macro
+
+    * main/php_streams.h
+      main/streams/streams.c:
+      int -> size_t
+
+    * ext/standard/file.c:
+      use correct type for p_len
+
+2006-10-03  Michael Wallner  <mike@iworks.at>
+
+    * main/output.c:
+      - typo
+
+    * main/output.c
+      main/php_output.h:
+      - fix failure with tests/lang/bug23489.phpt
+      - allocate fci param space at once with php_output_handler_user_func_t
+
+2006-10-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/filter/CREDITS
+      ext/filter/filter.c
+      ext/filter/package.xml:
+      Shoehorn myself into the credits.
+
+2006-10-03  Antony Dovgal  <antony@zend.com>
+
+    * ext/pcre/php_pcre.c
+      ext/pcre/tests/bug26927.phpt:
+      leaks--
+      fix test
+
+    * ext/pcre/tests/grep.phpt
+      ext/pcre/tests/grep2.phpt:
+      fix tests
+
+    * ext/pcre/php_pcre.c:
+      fix leak
+
+    * ext/pcre/php_pcre.c:
+      don't forget to increase refcount when adding entry to the return_value
+
+2006-10-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/soap/php_schema.c
+      ext/soap/soap.c
+      ext/sockets/sockets.c
+      main/streams/filter.c
+      main/streams/streams.c:
+      MFB: Last set of zend_hash_init() optimizations
+
+2006-10-03  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/uuencode.c:
+      PHP6 updates for convert_uu(en|de)code()
+
+2006-10-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/soap/php_schema.c
+      ext/soap/soap.c
+      ext/sockets/sockets.c
+      main/streams/filter.c
+      main/streams/streams.c:
+      Last set of zend_hash_init() optimizations
+
+2006-10-03  Sara Golemon  <sara@golemon.com>
+
+    * NEWS
+      ext/standard/proc_open.c:
+      Update proc_open() for PHP6
+
+2006-10-03  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-todo.txt:
+      Update.
+
+2006-10-03  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/basic_functions.c:
+      nuke unused variables
+
+    * ext/standard/php_string.h:
+      fix build
+
+2006-10-03  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-progress.txt
+      ext/standard/string.c:
+      Unicode support in strripos().
+
+2006-10-03  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      Zend/zend_operators.c
+      ZendEngine2/zend_operators.c:
+      MFH: throw a warning when doing modulus by 0 (fr #39027)
+
+    * ZendEngine2/zend_operators.c:
+      throw a warning when doing modulus by 0 (fr #39027)
+
+2006-10-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/array.c
+      ext/standard/streamsfuncs.c
+      ext/standard/string.c:
+      MFB: optimize zend_hash_init() with known hash table sizes.
+
+    * (PHP_5_2)
+      ext/standard/array.c
+      ext/standard/streamsfuncs.c
+      ext/standard/string.c:
+      optimize zend_hash_init() with known hash table sizes.
+
+2006-10-03  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      ext/standard/array.c:
+      MFH: compact() doesnt throw "wrong param count"
+
+    * ext/standard/array.c:
+      compact() doesnt throw "wrong param count"
+
+2006-10-03  Sara Golemon  <sara@golemon.com>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_builtin_functions.c
+      main/main.c:
+      PHP6 Update for get_included_files() and export of path decode for Zend
+
+2006-10-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/filter/filter.c:
+      Fixed handling of FILTER_FORCE_ARRAY
+
+2006-10-03  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/pgsql/pgsql.c:
+      MFB: pg_send_prepare(), pg_send_query_params() & pg_send_execute() do not
+      throw "Wrong parameter count"
+
+    * (PHP_5_2)
+      ext/pgsql/pgsql.c:
+      pg_send_prepare(), pg_send_query_params() & pg_send_execute() do not throw
+      "Wrong parameter count"
+
+    * ext/date/php_date.c:
+      use PHP_ME_MAPPING rather than ZEND_NAMED_FE/ZEND_FENTRY
+
+2006-10-03  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/string.c:
+      fix ZTS build
+
+2006-10-03  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/filter/filter.c
+      ext/filter/sanitizing_filters.c:
+      - vi folding, ws
+
+2006-10-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_variables.c
+      ZendEngine2/zend_variables.c:
+      Speedup array/HashTable copying. (Matt W)
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/php_reflection.c:
+      Fixed bug #38942 (Double old-style-ctor inheritance)
+
+    * ZendEngine2/tests/bug39017.phpt
+      ZendEngine2/tests/bug39017.phpt:
+      
+      file bug39017.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug39017.phpt:
+      Fixed bug #39017 (foreach(($obj = new myClass) as $v); echo $obj;
+      segfaults)
+
+2006-10-03  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/filter/tests/008.phpt:
+      fix test
+
+2006-10-03  Michael Wallner  <mike@iworks.at>
+
+    * main/output.c
+      main/php_output.h:
+      - use fci/fcc instead of zval* for user ob handler
+
+2006-10-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h:
+      Fixed memory leak (Nuno)
+
+    * ext/soap/php_encoding.c
+      ext/soap/php_encoding.c
+      ext/soap/tests/typemap013.phpt:
+      Fixed possible crash with default namespaces
+
+    * ext/soap/tests/typemap013.phpt
+      ext/soap/tests/typemap013.phpt:
+      
+      file typemap013.phpt was initially added on branch PHP_5_2.
+
+2006-10-03  Michael Wallner  <mike@iworks.at>
+
+    * (PHP_5_2)
+      ext/filter/filter.c:
+      - fix (ZTS) build
+
+2006-10-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/filter/filter.c
+      ext/filter/filter_private.h
+      ext/filter/logical_filters.c
+      ext/filter/php_filter.h
+      ext/filter/tests/006.phpt
+      ext/filter/tests/008.phpt
+      ext/filter/tests/009.phpt
+      ext/filter/tests/010.phpt
+      ext/filter/tests/012.phpt
+      ext/filter/tests/013.phpt
+      ext/filter/tests/014.phpt
+      ext/filter/tests/015.phpt
+      ext/filter/tests/016.phpt
+      ext/filter/tests/017.phpt
+      ext/filter/tests/018.phpt
+      ext/filter/tests/019.phpt
+      ext/filter/tests/020.phpt
+      ext/filter/tests/021.phpt
+      ext/filter/tests/022.phpt
+      ext/filter/tests/023.phpt
+      ext/filter/tests/024.phpt
+      ext/filter/tests/025.phpt
+      ext/filter/tests/026.phpt
+      ext/filter/tests/027.phpt
+      ext/filter/tests/028.phpt
+      ext/filter/tests/029.phpt
+      ext/filter/tests/030.phpt
+      ext/filter/tests/031.phpt
+      ext/filter/tests/032.phpt
+      ext/filter/tests/033.phpt
+      ext/filter/tests/033_run.inc
+      ext/filter/tests/034.phpt
+      ext/filter/tests/035.phpt
+      ext/filter/tests/036.phpt
+      ext/filter/tests/037.phpt
+      ext/filter/tests/bug7586.phpt
+      ext/filter/tests/bug7715.phpt
+      ext/filter/tests/bug7733.phpt
+      ext/filter/tests/bug8315.phpt
+      ext/filter/tests/filter_data.phpt:
+      Refactor the filter extension
+      	- Cleanup API
+      	- Added handling for circular references
+      	- Renamed functions.
+      
+
 2006-10-02  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
 
     * ext/mbstring/config.m4:

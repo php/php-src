@@ -1,3 +1,48 @@
+2006-10-03  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      zend_operators.c:
+      MFH: throw a warning when doing modulus by 0 (fr #39027)
+
+    * zend_operators.c:
+      throw a warning when doing modulus by 0 (fr #39027)
+
+2006-10-03  Sara Golemon  <sara@golemon.com>
+
+    * zend.c
+      zend.h
+      zend_builtin_functions.c:
+      PHP6 Update for get_included_files() and export of path decode for Zend
+
+2006-10-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_API.c
+      zend_API.c
+      zend_compile.c
+      zend_compile.c
+      zend_variables.c
+      zend_variables.c:
+      Speedup array/HashTable copying. (Matt W)
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug39017.phpt:
+      Fixed bug #39017 (foreach(($obj = new myClass) as $v); echo $obj;
+      segfaults)
+
+    * tests/bug39017.phpt
+      tests/bug39017.phpt:
+      
+      file bug39017.phpt was initially added on branch PHP_5_2.
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      Fixed memory leak (Nuno)
+
 2006-10-02  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
