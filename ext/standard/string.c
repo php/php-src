@@ -6465,6 +6465,7 @@ PHP_FUNCTION(count_chars)
 		}
 		if (UG(unicode) && mode != 1) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only mode=1 is supported with Unicode strings");
+			RETURN_FALSE;
 		}
 	}
 
