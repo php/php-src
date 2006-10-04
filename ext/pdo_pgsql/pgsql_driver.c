@@ -322,13 +322,20 @@ static int pgsql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquote
 			(*quoted)[*quotedlen] = '\0';
 			free(escaped);
 			break;
-		default:
-			*quoted = emalloc(2*unquotedlen + 3);
+		default: {
+			pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
+
+			*quoted = safe_emalloc(2, unquotedlen, 3);
 			(*quoted)[0] = '\'';
+#ifndef HAVE_PQESCAPE_CONN
 			*quotedlen = PQescapeString(*quoted + 1, unquoted, unquotedlen);
+#else
+			*quotedlen = PQescapeStringConn(H->server, *quoted + 1, unquoted, unquotedlen, NULL);
+#endif
 			(*quoted)[*quotedlen + 1] = '\'';
 			(*quoted)[*quotedlen + 2] = '\0';
 			*quotedlen += 2;
+		}
 	}
 	return 1;
 }
@@ -355,7 +362,11 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned
 		size_t l = strlen(name);
         
 		name_escaped = safe_emalloc(l, 2, 1);
+#ifndef HAVE_PQESCAPE_CONN
 		PQescapeString(name_escaped, name, l);
+#else
+		PQescapeStringConn(H->server, name_escaped, name, l, NULL);
+#endif
 		spprintf(&q, 0, "SELECT CURRVAL('%s')", name_escaped);
 		res = PQexec(H->server, q);
 		efree(name_escaped); 
