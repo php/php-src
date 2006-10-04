@@ -28,28 +28,19 @@
    Convert UNIX timestamp to Julian Day */
 PHP_FUNCTION(unixtojd)
 {
-  zval *timestamp;
+  time_t timestamp = time(NULL);
   long jdate; 
-  time_t t;
   struct tm *ta, tmbuf;
-  int myargc=ZEND_NUM_ARGS();
 	
-  if ((myargc > 1) || (zend_get_parameters(ht, myargc, &timestamp) != SUCCESS)) {
-    WRONG_PARAM_COUNT;
+  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &timestamp) == FAILURE) {
+    return;
   }
 
-  if(myargc==1) {
-    convert_to_long(timestamp);
-    t = Z_LVAL_P(timestamp);
-  } else {
-    t = time(NULL);
-  }
-
-  if(t < 0) {
+  if(timestamp < 0) {
 	RETURN_FALSE;
   }
 
-  ta = php_localtime_r(&t, &tmbuf);
+  ta = php_localtime_r(&timestamp, &tmbuf);
   jdate = GregorianToSdn(ta->tm_year+1900, ta->tm_mon+1, ta->tm_mday);
   
   RETURN_LONG(jdate);
@@ -60,17 +51,13 @@ PHP_FUNCTION(unixtojd)
    Convert Julian Day to UNIX timestamp */
 PHP_FUNCTION(jdtounix)
 {
-  zval *jday;
-  long uday;
+  long uday, jday;
 
-  if ((ZEND_NUM_ARGS()!= 1) || (zend_get_parameters(ht, 1, &jday) != SUCCESS)) {
-    WRONG_PARAM_COUNT;
+  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &jday) != SUCCESS) {
+    return;
   }
   
-  convert_to_long(jday);
-
-  uday = Z_LVAL_P(jday) - 2440588 /* J.D. of 1.1.1970 */;
-  
+  uday = jday - 2440588; /* J.D. of 1.1.1970 */
   if(uday<0)     RETURN_FALSE; /* before beginning of unix epoch */ 
   if(uday>24755) RETURN_FALSE; /* behind end of unix epoch */
 
