@@ -173,7 +173,7 @@ CWD_API int virtual_access(const char *pathname, int mode TSRMLS_DC);
 #endif
 
 #if defined(__osf__) || defined(_AIX)
-char *php_realpath_hack(char *src, char *dest);
+char *php_realpath_hack(const char *src, char *dest);
 #endif
 
 #if HAVE_UTIME
