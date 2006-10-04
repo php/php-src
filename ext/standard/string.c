@@ -107,7 +107,7 @@ void register_string_constants(INIT_FUNC_ARGS)
 /* }}} */
 
 int php_tag_find(char *tag, int len, char *set);
-static void php_ucwords(zval *str);
+static void php_ucwords(char *str, int str_len);
 static UChar* php_u_strtr_array(UChar *str, int slen, HashTable *hash, int minlen, int maxlen, int *outlen TSRMLS_DC);
 
 /* this is read-only, so it's ok */
@@ -1681,7 +1681,7 @@ PHP_FUNCTION(strtotitle)
 		}
 	} else {
 		RETVAL_STRINGL(str.s, str_len, 1);
-		php_ucwords(return_value);
+		php_ucwords(Z_STRVAL_P(return_value), str_len);
 	}
 }
 /* }}} */
@@ -2337,7 +2337,7 @@ PHPAPI size_t php_strcspn(char *s1, char *s2, char *s1_end, char *s2_end)
 }
 /* }}} */
 
-/* {{{ proto string stristr(string haystack, string needle[, bool part])
+/* {{{ proto string stristr(string haystack, string needle[, bool part]) U
    Finds first occurrence of a string within another, case insensitive */
 PHP_FUNCTION(stristr)
 {
@@ -3695,13 +3695,13 @@ PHP_FUNCTION(ucfirst)
 
 /* {{{ php_ucwords()
    Uppercase the first character of every word in a native string */
-static void php_ucwords(zval *str)
+static void php_ucwords(char *str, int str_len)
 {
 	register char *r, *r_end;
 
-	r = Z_STRVAL_P(str);
+	r = str;
 	*r = toupper((unsigned char) *r);
-	for (r_end = r + Z_STRLEN_P(str) - 1; r < r_end; ) {
+	for (r_end = r + str_len - 1; r < r_end; ) {
 		if (isspace((int) *(unsigned char *)r++)) {
 			*r = toupper((unsigned char) *r);
 		}
@@ -3711,7 +3711,7 @@ static void php_ucwords(zval *str)
 
 /* {{{ php_u_ucwords() U
    Uppercase the first character of every word in an Unicode string */
-static void php_u_ucwords(zval *ustr, zval *retval TSRMLS_DC)
+static void php_u_ucwords(UChar *ustr, int ustr_len, zval *retval TSRMLS_DC)
 {
 	UChar32 cp = 0;
 	UChar *tmp;
@@ -3726,19 +3726,19 @@ static void php_u_ucwords(zval *ustr, zval *retval TSRMLS_DC)
 	 * more than half of the codepoints in the string can follow a whitespace
 	 * and that maximum expansion is 2 UChar's.
 	 */
-	retval_len = ((3 * Z_USTRLEN_P(ustr)) >> 1) + 2;
+	retval_len = ((3 * ustr_len) >> 1) + 2;
 	tmp = eumalloc(retval_len);
 
-	while (pos < Z_USTRLEN_P(ustr)) {
+	while (pos < ustr_len) {
 
-		U16_NEXT(Z_USTRVAL_P(ustr), pos, Z_USTRLEN_P(ustr), cp);
+		U16_NEXT(ustr, pos, ustr_len, cp);
 
 		if (u_isWhitespace(cp) == TRUE) {
 			tmp_len += zend_codepoint_to_uchar(cp, tmp + tmp_len);
 			last_was_space = TRUE;
 		} else {
 			if (last_was_space) {
-				tmp_len += u_strToUpper(tmp + tmp_len, retval_len - tmp_len, Z_USTRVAL_P(ustr) + last_pos, 1, UG(default_locale), &status);
+				tmp_len += u_strToUpper(tmp + tmp_len, retval_len - tmp_len, ustr + last_pos, 1, UG(default_locale), &status);
 				last_was_space = FALSE;
 			} else {
 				tmp_len += zend_codepoint_to_uchar(cp, tmp + tmp_len);
@@ -3762,32 +3762,32 @@ static void php_u_ucwords(zval *ustr, zval *retval TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto string ucwords(string str)
+/* {{{ proto string ucwords(string str) U
    Uppercase the first character of every word in a string */
 PHP_FUNCTION(ucwords)
 {
-	zval **str;
+	zstr str;
+	int str_len;
+	zend_uchar str_type;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len, &str_type) == FAILURE) {
+		return;
 	}
 
-	if (Z_TYPE_PP(str) != IS_UNICODE && Z_TYPE_PP(str) != IS_STRING) {
-		convert_to_text_ex(str);
+	if (str_len == 0) {
+		if (str_type == IS_UNICODE) {
+			RETURN_EMPTY_UNICODE();
+		} else {
+			RETURN_EMPTY_STRING();
+		}
 	}
 
-	if (Z_TYPE_PP(str) == IS_UNICODE && !Z_USTRLEN_PP(str)) {
-		RETURN_EMPTY_UNICODE();
-	} else if (!Z_STRLEN_PP(str)) {
-		RETURN_EMPTY_STRING();
-	}
-
-	if (Z_TYPE_PP(str) == IS_UNICODE) {
+	if (str_type == IS_UNICODE) {
 		Z_TYPE_P(return_value) = IS_UNICODE;
-		php_u_ucwords(*str, return_value TSRMLS_CC);
+		php_u_ucwords(str.u, str_len, return_value TSRMLS_CC);
 	} else {
-		ZVAL_STRINGL(return_value, Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);
-		php_ucwords(return_value);
+		ZVAL_STRINGL(return_value, str.s, str_len, 1);
+		php_ucwords(Z_STRVAL_P(return_value), str_len);
 	}
 }
 /* }}} */
