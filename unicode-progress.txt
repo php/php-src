@@ -28,7 +28,6 @@ ext/standard
 
     str_replace()
     stri_replace()
-    substr_compare()
         These are the problematic ones. There are a few approaches:
 
             1. Case-fold both need and haystack and then do simple search.
@@ -169,6 +168,7 @@ ext/standard
     strtolower()
     strtoupper()
     substr()
+    substr_compare()
     substr_count()
     substr_replace()
     trim()
