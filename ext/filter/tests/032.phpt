@@ -13,23 +13,23 @@ $data = array(
 $args = array(
     'product_id'    => FILTER_SANITIZE_ENCODED,
     'component'     => array(//'filter' => FILTER_VALIDATE_INT,
-                             'flags'    => FILTER_FLAG_ARRAY,
+                             'flags'    => FILTER_FORCE_ARRAY,
                              'options'  => array("min_range"=>1, "max_range"=>10)
                         ),
     'versions'      => array(
                             'filter' => FILTER_SANITIZE_ENCODED,
-                            'flags'  => FILTER_FLAG_SCALAR,
+                            'flags'  => FILTER_REQUIRE_SCALAR,
                             ),
     'doesnotexist'  => FILTER_VALIDATE_INT,
     'testscalar'    => FILTER_VALIDATE_INT,
     'testarray' => array(
                             'filter' => FILTER_VALIDATE_INT,
-                            'flags'  => FILTER_FLAG_ARRAY,
+                            'flags'  => FILTER_FORCE_ARRAY,
                         )
 
 );
 
-$myinputs = input_get_args(INPUT_DATA, $args, $data);
+$myinputs = filter_var_array($data, $args);
 var_dump($myinputs);
 ?>
 --EXPECT--

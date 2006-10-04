@@ -1,5 +1,5 @@
 --TEST--
-Test all filters returned by input_filters_list()
+Test all filters returned by filter_list()
 --FILE--
 <?php
 include dirname(__FILE__) . '/033_run.inc';

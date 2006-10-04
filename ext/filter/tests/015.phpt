@@ -1,5 +1,5 @@
 --TEST--
-filter_data() and FILTER_VALIDATE_URL
+filter_var() and FILTER_VALIDATE_URL
 --FILE--
 <?php
 
@@ -24,19 +24,19 @@ $values = Array(
 array(),	
 );
 foreach ($values as $value) {
-	var_dump(filter_data($value, FILTER_VALIDATE_URL));
+	var_dump(filter_var($value, FILTER_VALIDATE_URL));
 }
 
 
-var_dump(filter_data("qwe", FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED));
-var_dump(filter_data("http://qwe", FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED));
-var_dump(filter_data("http://", FILTER_VALIDATE_URL, FILTER_FLAG_HOST_REQUIRED));
-var_dump(filter_data("/tmp/test", FILTER_VALIDATE_URL, FILTER_FLAG_HOST_REQUIRED));
-var_dump(filter_data("http://www.example.com", FILTER_VALIDATE_URL, FILTER_FLAG_HOST_REQUIRED));
-var_dump(filter_data("http://www.example.com", FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED));
-var_dump(filter_data("http://www.example.com/path/at/the/server/", FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED));
-var_dump(filter_data("http://www.example.com/index.html", FILTER_VALIDATE_URL, FILTER_FLAG_QUERY_REQUIRED));
-var_dump(filter_data("http://www.example.com/index.php?a=b&c=d", FILTER_VALIDATE_URL, FILTER_FLAG_QUERY_REQUIRED));
+var_dump(filter_var("qwe", FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED));
+var_dump(filter_var("http://qwe", FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED));
+var_dump(filter_var("http://", FILTER_VALIDATE_URL, FILTER_FLAG_HOST_REQUIRED));
+var_dump(filter_var("/tmp/test", FILTER_VALIDATE_URL, FILTER_FLAG_HOST_REQUIRED));
+var_dump(filter_var("http://www.example.com", FILTER_VALIDATE_URL, FILTER_FLAG_HOST_REQUIRED));
+var_dump(filter_var("http://www.example.com", FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED));
+var_dump(filter_var("http://www.example.com/path/at/the/server/", FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED));
+var_dump(filter_var("http://www.example.com/index.html", FILTER_VALIDATE_URL, FILTER_FLAG_QUERY_REQUIRED));
+var_dump(filter_var("http://www.example.com/index.php?a=b&c=d", FILTER_VALIDATE_URL, FILTER_FLAG_QUERY_REQUIRED));
 
 echo "Done\n";
 ?>
@@ -58,8 +58,7 @@ string(5) "http:"
 string(4) "http"
 string(0) ""
 string(2) "-1"
-array(0) {
-}
+bool(false)
 bool(false)
 string(10) "http://qwe"
 bool(false)
