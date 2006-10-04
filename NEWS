@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? Sep 2006, PHP 5.2.0
 - Speedup array/HashTable copying. (Matt W, Dmitry)
 - Added ability to make SOAP call userspace PHP<->XML converters. (Dmitry)
+- Added support for character sets in pg_escape_string() for PostgreSQL
+  8.1.4 and higher. (Ilia)
 - Fixed infinite loop when a wrong color index is given to imagefill (Pierre)
 - Fixed mess with CGI/CLI -d option (now it works with cgi; constants are
   working exactly like in php.ini; with FastCGI -d affects all requests).
