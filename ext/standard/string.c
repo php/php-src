@@ -7316,17 +7316,19 @@ PHP_FUNCTION(strpbrk)
 }
 /* }}} */
 
-/* {{{ proto int substr_compare(string main_str, string str, int offset [, int length [, bool case_sensitivity]])
+/* {{{ proto int substr_compare(string main_str, string str, int offset [, int length [, bool case_sensitivity]]) U
    Binary safe optionally case insensitive comparison of 2 strings from an offset, up to length characters */
 PHP_FUNCTION(substr_compare)
 {
-	char *s1, *s2;
+	zstr s1, s2;
 	int s1_len, s2_len;
-	long offset, len=0;
+	zend_uchar str_type;
+	long offset, start_offset, end_offset, len=0;
 	zend_bool cs=0;
 	uint cmp_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssl|lb", &s1, &s1_len, &s2, &s2_len, &offset, &len, &cs) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TTl|lb", &s1, &s1_len,
+							  &str_type, &s2, &s2_len, &str_type, &offset, &len, &cs) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -7335,22 +7337,61 @@ PHP_FUNCTION(substr_compare)
 		RETURN_FALSE;
 	}
 
-	if (offset < 0) {
-		offset = s1_len + offset;
-		offset = (offset < 0) ? 0 : offset;
-	}
+	if (str_type == IS_UNICODE) {
+		/* calculate starting offset of the segment */
+		if (offset < 0) {
+			if (-offset > s1_len) {
+				start_offset = 0;
+			} else {
+				start_offset = s1_len;
+				U16_BACK_N(s1.u, 0, start_offset, -offset);
+			}
+		} else {
+			start_offset = 0;
+			U16_FWD_N(s1.u, start_offset, s1_len, offset);
+		}
 
-	if ((offset + len) > s1_len) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The start position cannot exceed initial string length");
-		RETURN_FALSE;
-	}
+		/* calculate ending offset of the segment */
+		if (len) {
+			end_offset = start_offset;
+			while (len > 0 && end_offset < s1_len) {
+				U16_FWD_1_UNSAFE(s1.u, end_offset);
+				--len;
+			}
 
-	cmp_len = (uint) (len ? len : MAX(s2_len, (s1_len - offset)));
+			if (len > 0) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "The specified segment exceeds string length");
+				RETURN_FALSE;
+			}
+		} else {
+			end_offset = s1_len;
+		}
 
-	if (!cs) {
-		RETURN_LONG(zend_binary_strncmp(s1 + offset, (s1_len - offset), s2, s2_len, cmp_len));
+		cmp_len = MAX(s2_len, (end_offset - start_offset));
+
+		if (!cs) {
+			RETURN_LONG(zend_u_binary_strncmp(s1.u + start_offset, (s1_len - start_offset), s2.u, s2_len, cmp_len));
+		} else {
+			RETURN_LONG(zend_u_binary_strncasecmp(s1.u + start_offset, (s1_len - start_offset), s2.u, s2_len, cmp_len));
+		}
 	} else {
-		RETURN_LONG(zend_binary_strncasecmp(s1 + offset, (s1_len - offset), s2, s2_len, cmp_len));
+		if (offset < 0) {
+			offset = s1_len + offset;
+			offset = (offset < 0) ? 0 : offset;
+		}
+
+		if ((offset + len) > s1_len) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The specified segment exceeds string length");
+			RETURN_FALSE;
+		}
+
+		cmp_len = (uint) (len ? len : MAX(s2_len, (s1_len - offset)));
+
+		if (!cs) {
+			RETURN_LONG(zend_binary_strncmp(s1.s + offset, (s1_len - offset), s2.s, s2_len, cmp_len));
+		} else {
+			RETURN_LONG(zend_binary_strncasecmp(s1.s + offset, (s1_len - offset), s2.s, s2_len, cmp_len));
+		}
 	}
 }
 /* }}} */
