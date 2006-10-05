@@ -2181,7 +2181,12 @@ PHP_FUNCTION(imap_utf8)
 	dest.size = 0;
 
 	cpytxt(&src, Z_STRVAL_PP(str), Z_STRLEN_PP(str));
+
+#ifndef HAVE_NEW_MIME2TEXT
 	utf8_mime2text(&src, &dest);
+#else
+	utf8_mime2text(&src, &dest, U8T_CANONICAL);
+#endif
 	RETVAL_STRINGL(dest.data, dest.size, 1);
 	if (dest.data) {
 		free(dest.data);
