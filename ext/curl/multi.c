@@ -62,7 +62,7 @@ PHP_FUNCTION(curl_multi_init)
 	mh = ecalloc(1, sizeof(php_curlm));
 	mh->multi = curl_multi_init();
 
-	zend_llist_init(&mh->easyh, sizeof(zval), (llist_dtor_func_t) NULL, 0);
+	zend_llist_init(&mh->easyh, sizeof(zval), _php_curl_multi_cleanup_list, 0);
 
 	ZEND_REGISTER_RESOURCE(return_value, mh, le_curl_multi_handle);
 }
@@ -98,6 +98,27 @@ PHP_FUNCTION(curl_multi_add_handle)
 }
 /* }}} */
 
+void _php_curl_multi_cleanup_list(void *data) /* {{{ */
+{
+	zval *z_ch = (zval *)data;
+	php_curl *ch;
+
+	if (!z_ch) {
+		return;
+	}
+	
+	ch = (php_curl *) zend_fetch_resource(&z_ch TSRMLS_CC, -1, le_curl_name, NULL, 1, le_curl);
+	if (!ch) {
+		return;
+	}
+
+	if (ch->uses) {	
+		ch->uses--;
+	} else {
+		zend_list_delete(Z_LVAL_P(z_ch));
+	}
+}
+/* }}} */
 
 /* Used internally as comparison routine passed to zend_list_del_element */
 static int curl_compare_resources( zval *z1, zval **z2 )

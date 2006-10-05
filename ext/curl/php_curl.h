@@ -138,6 +138,7 @@ typedef struct {
 } php_curlm;
 
 void _php_curl_cleanup_handle(php_curl *);
+void _php_curl_multi_cleanup_list(void *data);
 
 /* streams support */
 
