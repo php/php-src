@@ -3155,6 +3155,9 @@ PHPAPI int php_char_to_str_ex(char *str, uint len, char from, char *to, int to_l
 			target += to_len;
 			p++;
 			s = p;
+			if (replace_count) {
+				*replace_count += 1;
+			}
 		}
 		if (s < e) {
 			memcpy(target, s, (e - s));
