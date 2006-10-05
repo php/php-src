@@ -386,14 +386,21 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	 * This can happen under solaris when a dir does not have read permissions
 	 * but *does* have execute permissions */
 	if (!IS_ABSOLUTE_PATH(path, path_length) && (state->cwd_length > 1)) {
-		int orig_path_len = path_length + state->cwd_length + 1;
+		int orig_path_len;
+		int state_cwd_length = state->cwd_length;
 
+#ifdef TSRM_WIN32
+		if (IS_SLASH(path[0])) {
+			state_cwd_length = 2;
+		}
+#endif
+		orig_path_len = path_length + state_cwd_length + 1;
 		if (orig_path_len >= MAXPATHLEN) {
 			return 1;
 		}
-		memcpy(orig_path, state->cwd, state->cwd_length);
-		orig_path[state->cwd_length] = DEFAULT_SLASH;
-		memcpy(orig_path + state->cwd_length + 1, path, path_length + 1);
+		memcpy(orig_path, state->cwd, state_cwd_length);
+		orig_path[state_cwd_length] = DEFAULT_SLASH;
+		memcpy(orig_path + state_cwd_length + 1, path, path_length + 1);
 		path = orig_path;
 		path_length = orig_path_len; 
 	}
