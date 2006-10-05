@@ -31,7 +31,7 @@ of filters and mechanisms that users can use to safely access their input data.
     <email>iliaa@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2006-04-10</date>
+  <date>2006-05-10</date>
   <version>
     <release>0.11.0</release>
     <api>0.11.0</api>
@@ -42,7 +42,6 @@ of filters and mechanisms that users can use to safely access their input data.
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>- Attention, this release contains BC breaks, the API has been rewamped
-- Fixed ENV and SERVER support
 - Fixed possible bug in all filtering functions, input value was modified
 - Filters operate now on a copy of the data, allow to safely fetch multiple times the same values
 - add two modes: FILTER_REQUIRE_ARRAY and FILTER_FORCE_ARRAY
