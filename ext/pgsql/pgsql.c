@@ -3540,18 +3540,18 @@ PHP_FUNCTION(pg_escape_string)
 {
 	char *from = NULL, *to = NULL;
 	zval *pgsql_link;
+#ifdef HAVE_PQESCAPE_CONN
 	PGconn *pgsql;
+#endif
 	int to_len;
 	int from_len;
-	int id;
+	int id = -1;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "rs", &pgsql_link, &from, &from_len) == SUCCESS) {
-		id = -1;
-	} else if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &from, &from_len) == SUCCESS) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s", &from, &from_len) == SUCCESS) {
 		pgsql_link = NULL;
 		id = PGG(default_link);
-	} else {
-		WRONG_PARAM_COUNT;
+	} else if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &pgsql_link, &from, &from_len) == FAILURE) {
+		return;
 	}
 
 	to = (char *) safe_emalloc(from_len, 2, 1);
