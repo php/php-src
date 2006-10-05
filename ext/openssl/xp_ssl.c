@@ -57,16 +57,19 @@ php_stream_ops php_openssl_socket_ops;
  * in an error condition arising from a network connection problem */
 static int is_http_stream_talking_to_iis(php_stream *stream TSRMLS_DC)
 {
-	if (stream->wrapperdata && stream->wrapper && strcmp(stream->wrapper->wops->label, "HTTP") == 0) {
+	if (stream->wrapperdata && stream->wrapper && strcasecmp(stream->wrapper->wops->label, "HTTP") == 0) {
 		/* the wrapperdata is an array zval containing the headers */
 		zval **tmp;
 
 #define SERVER_MICROSOFT_IIS	"Server: Microsoft-IIS"
+#define SERVER_GOOGLE "Server: GFE/"
 		
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(stream->wrapperdata));
 		while (SUCCESS == zend_hash_get_current_data(Z_ARRVAL_P(stream->wrapperdata), (void**)&tmp)) {
 
 			if (strncasecmp(Z_STRVAL_PP(tmp), SERVER_MICROSOFT_IIS, sizeof(SERVER_MICROSOFT_IIS)-1) == 0) {
+				return 1;
+			} else if (strncasecmp(Z_STRVAL_PP(tmp), SERVER_GOOGLE, sizeof(SERVER_GOOGLE)-1) == 0) {
 				return 1;
 			}
 			
