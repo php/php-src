@@ -5220,6 +5220,9 @@ nothing_todo:
 /* }}} */
 
 /* {{{ php_u_str_to_str_case_ex */
+/* TODO 
+ *  - optimize for cases where pat_len >= str_len
+ */
 PHPAPI UChar *php_u_str_to_str_case_ex(UChar *str, int str_len,
 	UChar *pat, int pat_len, UChar *repl, int repl_len, int *result_len, int *replace_count TSRMLS_DC)
 {
