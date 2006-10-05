@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Sep 2006, PHP 5.2.0
+05 Oct 2006, PHP 5.2.0RC5
 - Updated bundled OpenSSL to version 0.9.8d in the Windows distro. (Edin)
 - Updated Postgresql client libraries to 8.1.4 in the Windows distro. (Edin)
 - Speedup array/HashTable copying. (Matt W, Dmitry)
