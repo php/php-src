@@ -109,3 +109,69 @@ bool(false)
 Warning: bzerrno(): %d is not a valid stream resource in %s on line %d
 bool(false)
 Done
+--UEXPECTF--	
+array(2) {
+  [u"errno"]=>
+  int(0)
+  [u"errstr"]=>
+  unicode(2) "OK"
+}
+unicode(2) "OK"
+int(0)
+array(2) {
+  [u"errno"]=>
+  int(0)
+  [u"errstr"]=>
+  unicode(2) "OK"
+}
+unicode(2) "OK"
+int(0)
+string(0) ""
+array(2) {
+  [u"errno"]=>
+  int(-5)
+  [u"errstr"]=>
+  unicode(16) "DATA_ERROR_MAGIC"
+}
+unicode(16) "DATA_ERROR_MAGIC"
+int(-5)
+string(0) ""
+array(2) {
+  [u"errno"]=>
+  int(-4)
+  [u"errstr"]=>
+  unicode(10) "DATA_ERROR"
+}
+unicode(10) "DATA_ERROR"
+int(-4)
+string(0) ""
+array(2) {
+  [u"errno"]=>
+  int(-5)
+  [u"errstr"]=>
+  unicode(16) "DATA_ERROR_MAGIC"
+}
+unicode(16) "DATA_ERROR_MAGIC"
+int(-5)
+string(0) ""
+array(2) {
+  [u"errno"]=>
+  int(-4)
+  [u"errstr"]=>
+  unicode(10) "DATA_ERROR"
+}
+unicode(10) "DATA_ERROR"
+int(-4)
+
+Warning: bzread(): %d is not a valid stream resource in %s on line %d
+bool(false)
+
+Warning: bzerror(): %d is not a valid stream resource in %s on line %d
+bool(false)
+
+Warning: bzerrstr(): %d is not a valid stream resource in %s on line %d
+bool(false)
+
+Warning: bzerrno(): %d is not a valid stream resource in %s on line %d
+bool(false)
+Done

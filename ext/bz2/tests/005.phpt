@@ -11,7 +11,8 @@ Getting lost within myself
 Nothing matters no one else";
 
 var_dump(bzcompress());
-var_dump(bzcompress(1,1,1));
+/* Having newlines confuses EXPECTF */
+var_dump(str_replace(array(b"\n", b"\r"), array(b"\\n", b"\\r"), bzcompress(1,1,1)));
 var_dump(bzcompress($string, 100));
 var_dump(bzcompress($string, 100, -1));
 var_dump(bzcompress($string, 100, 1000));
@@ -21,7 +22,7 @@ $data = bzcompress($string);
 $data2 = bzcompress($string, 1, 10);
 
 $data3 = $data2;
-$data3{3} = 0;
+$data3[3] = b"0";
 
 var_dump(bzdecompress());
 var_dump(bzdecompress(1,1,1));
@@ -38,7 +39,7 @@ var_dump(bzdecompress($data2));
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: Wrong parameter count for bzcompress() in %s on line %d
+Warning: bzcompress() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 string(%d) "BZ%s"
 int(-2)
