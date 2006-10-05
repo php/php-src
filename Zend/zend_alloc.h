@@ -194,6 +194,7 @@ typedef struct _zend_mm_mem_handlers {
 
 struct _zend_mm_storage {
 	const zend_mm_mem_handlers *handlers;
+	void *data;
 };
 
 ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_mem_handlers *handlers, size_t block_size, void *params);
