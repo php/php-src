@@ -1,3 +1,15 @@
+2006-10-04  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      tests/bug39036.phpt:
+      add test
+
+    * tests/bug39036.phpt
+      tests/bug39036.phpt:
+      
+      add test for #39036 (reproducible with 5.1.6, but works fine in 5.2 and
+      HEAD)
+
 2006-10-03  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)

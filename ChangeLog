@@ -1,3 +1,192 @@
+2006-10-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo_pgsql/config.m4
+      ext/pdo_pgsql/pgsql_driver.c:
+      MFB:  Added support for character sets in PDO quote() method for PostgreSQL
+      8.1.4 and higher.
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo_pgsql/config.m4
+      ext/pdo_pgsql/pgsql_driver.c:
+      Added support for character sets in PDO quote() method for PostgreSQL
+      8.1.4 and higher.
+
+    * ext/pgsql/config.m4
+      ext/pgsql/pgsql.c:
+      MFB: Added support for character sets in pg_escape_string() for PostgreSQL
+      8.1.4 and higher.
+
+    * (PHP_5_2)
+      NEWS
+      ext/pgsql/config.m4
+      ext/pgsql/pgsql.c:
+      Added support for character sets in pg_escape_string() for PostgreSQL
+      8.1.4 and higher.
+
+    * (PHP_4_4)
+      NEWS
+      ext/standard/dir.c
+      ext/standard/dir.c:
+      MFB: Fixed missing open_basedir check inside chdir() function.
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/dir.c:
+      Fixed missing open_basedir check inside chdir() function.
+
+2006-10-04  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/string.c:
+      - Mark stristr() with U.
+      - zpp support for ucwords()
+
+    * unicode-progress.txt:
+      -** empty log message ***
+
+    * ext/standard/string.c:
+      Unicode support in substr_compare().
+
+2006-10-04  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/filter/package.xml:
+      - ENV/SERVER entry
+
+2006-10-04  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ZendEngine2/tests/bug39036.phpt:
+      add test
+
+    * ZendEngine2/tests/bug39036.phpt
+      ZendEngine2/tests/bug39036.phpt:
+      
+      add test for #39036 (reproducible with 5.1.6, but works fine in 5.2 and
+      HEAD)
+
+    * TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.h:
+      minor AIX fix
+
+    * ext/pdo_sqlite/sqlite/src/vdbeaux.c
+      ext/pdo_sqlite/sqlite/src/vdbeaux.c
+      ext/xmlreader/php_xmlreader.c:
+      add missing ifdef
+
+2006-10-04  Michael Wallner  <mike@iworks.at>
+
+    * NEWS:
+      - output layer and ext/zlib news
+
+2006-10-04  Edin Kadribasic  <edink@emini.dk>
+
+    * ext/standard/credits_ext.h
+      ext/standard/credits_ext.h:
+      Update credits
+
+2006-10-04  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/calendar/cal_unix.c:
+      Update to the new parameter parsing API
+
+2006-10-04  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/filter/CREDITS:
+      -  Add Ilia
+
+    * ext/filter/package.xml:
+      - update changelog
+
+2006-10-04  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/dom/php_dom.c:
+      fix bug #39035 (Compatibilty issue between DOM and ze1_compatibility_mode
+
+2006-10-04  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      ext/filter/package.xml:
+      - used only in HEAD
+
+    * ext/filter/filter.c
+      ext/filter/filter_private.h
+      ext/filter/logical_filters.c
+      ext/filter/php_filter.h
+      ext/filter/tests/004.phpt
+      ext/filter/tests/006.phpt
+      ext/filter/tests/007.phpt
+      ext/filter/tests/008.phpt
+      ext/filter/tests/009.phpt
+      ext/filter/tests/010.phpt
+      ext/filter/tests/011.phpt
+      ext/filter/tests/012.phpt
+      ext/filter/tests/013.phpt
+      ext/filter/tests/014.phpt
+      ext/filter/tests/015.phpt
+      ext/filter/tests/016.phpt
+      ext/filter/tests/017.phpt
+      ext/filter/tests/018.phpt
+      ext/filter/tests/019.phpt
+      ext/filter/tests/020.phpt
+      ext/filter/tests/021.phpt
+      ext/filter/tests/022.phpt
+      ext/filter/tests/023.phpt
+      ext/filter/tests/024.phpt
+      ext/filter/tests/025.phpt
+      ext/filter/tests/026.phpt
+      ext/filter/tests/027.phpt
+      ext/filter/tests/028.phpt
+      ext/filter/tests/029.phpt
+      ext/filter/tests/030.phpt
+      ext/filter/tests/031.phpt
+      ext/filter/tests/032.phpt
+      ext/filter/tests/033.phpt
+      ext/filter/tests/033_run.inc
+      ext/filter/tests/034.phpt
+      ext/filter/tests/035.phpt
+      ext/filter/tests/036.phpt
+      ext/filter/tests/bug7586.phpt
+      ext/filter/tests/bug7715.phpt
+      ext/filter/tests/bug7733.phpt
+      ext/filter/tests/bug8315.phpt
+      ext/filter/tests/filter_data.phpt:
+      - MFB: api shake up and bug fixes (Ilia,Pierre)
+        all non unicode tests pass
+
+    * (PHP_5_2)
+      ext/filter/filter.c:
+      - wrong definition
+
+2006-10-04  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      fix typo
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/string.c
+      ext/standard/tests/strings/bug39032.phpt:
+      MFH: fix #39032 (strcspn() stops on null character)
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/bug39032.phpt
+      ext/standard/tests/strings/bug39032.phpt:
+      fix #39032 (strcspn() stops on null character)
+
+    * ext/standard/string.c:
+      return false on invalid mode and don't segfault
+
+2006-10-04  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/bz2/tests/004.phpt:
+      fix test
+
 2006-10-03  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * ext/filter/tests/037.phpt
