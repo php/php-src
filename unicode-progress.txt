@@ -26,29 +26,6 @@ ext/standard
     sscanf()
         Params API. Rest - no idea yet.
 
-    str_replace()
-    stri_replace()
-        These are the problematic ones. There are a few approaches:
-
-            1. Case-fold both need and haystack and then do simple search.
-
-            2. Look at the implementation behind functions like
-               u_strcasecmp() and try to adapt it to a string search. The
-               implementation case-folds both strings incrementally. For
-               a search, one would want to case-fold the pattern beforehand,
-               but not the text in which you are searching.
-
-            3. Take the first character in the pattern and get the set of
-               all characters that have the same case folding (see the
-               UnicodeSet/USet API). Then search in the string for the
-               occurrence of any one of the set items (which include
-               strings!).  Then do a case-insensitive comparison, allowing
-               a match that does not end with the end of the text.
-
-               The problematic cases are of course those ß->ss and similar.
-
-        All other approaches bite.
-
     strnatcmp(), strnatcasecmp()
         Params API. The rest depends on porting of strnatcmp.c
 
@@ -145,6 +122,8 @@ ext/standard
     similar_text()
     str_pad()
     str_repeat()
+    str_replace()
+    stri_replace()
     str_rot13()
     str_shuffle()
     str_split()

@@ -4877,6 +4877,9 @@ PHPAPI int php_char_to_str_ex(char *str, uint len, char from, char *to, int to_l
 			target += to_len;
 			p++;
 			s = p;
+			if (replace_count) {
+				*replace_count += 1;
+			}
 		}
 		if (s < e) {
 			memcpy(target, s, (e - s));
@@ -4909,6 +4912,53 @@ PHPAPI int php_char_to_str_ex(char *str, uint len, char from, char *to, int to_l
 PHPAPI int php_char_to_str(char *str, uint len, char from, char *to, int to_len, zval *result)
 {
 	return php_char_to_str_ex(str, len, from, to, to_len, result, 1, NULL);
+}
+/* }}} */
+
+/* {{{ php_u_char_to_str_ex */
+PHPAPI int php_u_char_to_str_ex(UChar *str, uint len, UChar from, UChar *to, int to_len, zval *result, int *replace_count)
+{
+	int char_count = 0;
+	int replaced = 0;
+	UChar *target;
+	UChar *p, *e, *s;
+
+	p = str;
+	e = p + len;
+	while ((p = u_memchr(p, from, (e - p)))) {
+		char_count++;
+		p++;
+	}
+
+	if (char_count == 0) {
+		ZVAL_UNICODEL(result, str, len, 1);
+		return 0;
+	}
+
+	Z_USTRLEN_P(result) = len + (char_count * (to_len - 1));
+	Z_USTRVAL_P(result) = target = eumalloc(Z_USTRLEN_P(result) + 1);
+	Z_TYPE_P(result) = IS_UNICODE;
+
+	p = str;
+	e = p + len;
+   	s = str;
+	while ((p = u_memchr(p, from, (e - p)))) {
+		u_memcpy(target, s, (p - s));
+		target += p - s;
+		u_memcpy(target, to, to_len);
+		target += to_len;
+		p++;
+		s = p;
+		if (replace_count) {
+			*replace_count += 1;
+		}
+	}
+	if (s < e) {
+		u_memcpy(target, s, (e - s));
+		target += e - s;
+	}
+	*target = 0;
+	return replaced;
 }
 /* }}} */
 
@@ -5067,31 +5117,234 @@ nothing_todo:
 }
 /* }}} */
 
-/* {{{ php_str_to_str
- */
+/* {{{ php_str_to_str */
 PHPAPI char *php_str_to_str(char *haystack, int length,
 	char *needle, int needle_len, char *str, int str_len, int *_new_length)
 {
 	return php_str_to_str_ex(haystack, length, needle, needle_len, str, str_len, _new_length, 1, NULL);
 }
-/* }}}
- */
+/* }}} */
+
+/* {{{ php_u_str_to_str_ex */
+PHPAPI UChar *php_u_str_to_str_ex(UChar *haystack, int length,
+	UChar *needle, int needle_len, UChar *repl, int repl_len, int *_new_length, int *replace_count)
+{
+	UChar *new_str;
+
+	if (needle_len < length) {
+		UChar *end;
+		UChar *e, *s, *p, *r;
+
+		if (needle_len == repl_len) {
+			new_str = eustrndup(haystack, length);
+			*_new_length = length;
+
+			end = new_str + length;
+			for (p = new_str; (r = zend_u_memnstr(p, needle, needle_len, end)); p = r + needle_len) {
+				u_memcpy(r, repl, repl_len);
+				if (replace_count) {
+					(*replace_count)++;
+				}
+			}
+			return new_str;
+		} else {
+
+			if (repl_len < needle_len) {
+				new_str = eumalloc(length + 1);
+			} else {
+				int count = 0;
+				UChar *o, *n, *endp;
+
+				o = haystack;
+				n = needle;
+				endp = o + length;
+
+				while ((o = zend_u_memnstr(o, n, needle_len, endp))) {
+					o += needle_len;
+					count++;
+				}
+				if (count == 0) {
+					/* Needle doesn't occur, shortcircuit the actual replacement. */
+					new_str = eustrndup(haystack, length);
+					if (_new_length) {
+						*_new_length = length;
+					}
+					return new_str;
+				} else {
+					new_str = safe_emalloc(count, UBYTES(repl_len - needle_len), UBYTES(length + 1));
+				}
+			}
+
+			e = s = new_str;
+
+			end = haystack + length;
+			for (p = haystack; (r = zend_u_memnstr(p, needle, needle_len, end)); p = r + needle_len) {
+				u_memcpy(e, p, r - p);
+				e += r - p;
+				u_memcpy(e, repl, repl_len);
+				e += repl_len;
+				if (replace_count) {
+					(*replace_count)++;
+				}
+			}
+
+			if (p < end) {
+				u_memcpy(e, p, end - p);
+				e += end - p;
+			}
+
+			*e = 0;
+			*_new_length = e - s;
+
+			new_str = eurealloc(new_str, *_new_length + 1);
+			return new_str;
+		}
+	} else if (needle_len > length) {
+nothing_todo:
+		*_new_length = length;
+		new_str = eustrndup(haystack, length);
+		return new_str;
+	} else {
+		if (u_strncmp(haystack, needle, length)) {
+			goto nothing_todo;
+		} else {
+			*_new_length = repl_len;
+			new_str = eustrndup(repl, repl_len);
+			if (replace_count) {
+				(*replace_count)++;
+			}
+			return new_str;
+		}
+	}
+}
+/* }}} */
+
+/* {{{ php_u_str_to_str_case_ex */
+PHPAPI UChar *php_u_str_to_str_case_ex(UChar *str, int str_len,
+	UChar *pat, int pat_len, UChar *repl, int repl_len, int *result_len, int *replace_count TSRMLS_DC)
+{
+	UChar *str_fold, *pat_fold, *result;
+	int str_fold_len, pat_fold_len, alloc_len;
+	UChar *p, *found, *end;
+	int offset, found_len;
+	UErrorCode status = U_ZERO_ERROR;
+
+	zend_case_fold_string(&str_fold, &str_fold_len, str, str_len, U_FOLD_CASE_DEFAULT, &status);
+	if (str_fold_len == str_len) {
+		alloc_len = str_len;
+		result = eumalloc(alloc_len + 1);
+		*result_len = 0;
+
+		zend_case_fold_string(&pat_fold, &pat_fold_len, pat, pat_len, U_FOLD_CASE_DEFAULT, &status);
+
+		end = str_fold + str_fold_len;
+		for (p = str_fold;
+			 (found = u_strFindFirst(p, end - p, pat_fold, pat_fold_len));
+			 p = found + pat_fold_len) { /* we can increment by pattern length since the match in
+											the subject string is guaranteed to be of the same length */
+
+			if (*result_len + (found - p + repl_len) > alloc_len) {
+				alloc_len += (alloc_len >> 1); /* grow by 1.5x factor */
+				result = eurealloc(result, alloc_len + 1);
+			}
+			u_memcpy(result + *result_len, str + (p - str_fold), found - p);
+			*result_len += found - p;
+			u_memcpy(result + *result_len, repl, repl_len);
+			*result_len += repl_len;
+			if (replace_count) {
+				(*replace_count)++;
+			}
+		}
+
+		/* add remaining chunk, if any */
+		if (p < end) {
+			int chunk_len = end - p;
+			if (*result_len + chunk_len > alloc_len) {
+				alloc_len += *result_len + chunk_len - alloc_len;
+				result = eurealloc(result, alloc_len + 1);
+			}
+			u_memcpy(result + *result_len, str + (p - str_fold), chunk_len);
+			*result_len += chunk_len;
+		}
+
+		result[*result_len] = 0;
+		if (*result_len < alloc_len) {
+			result = eurealloc(result, *result_len + 1);
+		}
+
+		efree(pat_fold);
+	} else {
+		usearch_setText(UG(root_search), str, str_len, &status);
+		usearch_setPattern(UG(root_search), pat, pat_len, &status);
+		usearch_setOffset(UG(root_search), 0, &status);
+
+		alloc_len = str_len;
+		result = eumalloc(alloc_len + 1);
+		*result_len = 0;
+
+		p = str;
+		end = str + str_len;
+		for (offset = usearch_first(UG(root_search), &status);
+			 offset != USEARCH_DONE;
+			 offset = usearch_next(UG(root_search), &status)) {
+
+			found = str + offset;
+			/* matched length is not simply pattern length */
+			found_len = usearch_getMatchedLength(UG(root_search));
+
+			if (*result_len + (found - p + repl_len) > alloc_len) {
+				alloc_len += (alloc_len >> 1); /* grow by 1.5x factor */
+				result = eurealloc(result, alloc_len + 1);
+			}
+			u_memcpy(result + *result_len, p, found - p);
+			*result_len += found - p;
+			u_memcpy(result + *result_len, repl, repl_len);
+			*result_len += repl_len;
+
+			p = found + found_len;
+
+			if (replace_count) {
+				(*replace_count)++;
+			}
+		}
+
+		/* add remaining chunk, if any */
+		if (p < end) {
+			int chunk_len = end - p;
+			if (*result_len + chunk_len > alloc_len) {
+				alloc_len += *result_len + chunk_len - alloc_len;
+				result = eurealloc(result, alloc_len + 1);
+			}
+			u_memcpy(result + *result_len, p, chunk_len);
+			*result_len += chunk_len;
+		}
+
+		result[*result_len] = 0;
+		if (*result_len < alloc_len) {
+			result = eurealloc(result, *result_len + 1);
+		}
+	}
+	efree(str_fold);
+
+	return result;
+}
+/* }}} */
 
 /* {{{ php_str_replace_in_subject
  */
-static void php_str_replace_in_subject(zval *search, zval *replace, zval **subject, zval *result, int case_sensitivity, int *replace_count)
+static void php_str_replace_in_subject(zval *search, zval *replace, zval **subject, zval *result, int case_sensitivity, int *replace_count TSRMLS_DC)
 {
 	zval		**search_entry,
 				**replace_entry = NULL,
 				  temp_result;
-	char		*replace_value = NULL;
+	zstr		 replace_value = NULL_ZSTR;
 	int			 replace_len = 0;
 
 	/* Make sure we're dealing with strings. */
-	convert_to_string_ex(subject);
-	Z_TYPE_P(result) = IS_STRING;
-	if (Z_STRLEN_PP(subject) == 0) {
-		ZVAL_STRINGL(result, "", 0, 1);
+	convert_to_text_ex(subject);
+	Z_TYPE_P(result) = ZEND_STR_TYPE;
+	if (Z_UNILEN_PP(subject) == 0) {
+		ZVAL_EMPTY_TEXT(result);
 		return;
 	}
 
@@ -5108,16 +5361,16 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
 			zend_hash_internal_pointer_reset(Z_ARRVAL_P(replace));
 		} else {
 			/* Set replacement value to the passed one */
-			replace_value = Z_STRVAL_P(replace);
-			replace_len = Z_STRLEN_P(replace);
+			replace_value = Z_UNIVAL_P(replace);
+			replace_len = Z_UNILEN_P(replace);
 		}
 
 		/* For each entry in the search array, get the entry */
 		while (zend_hash_get_current_data(Z_ARRVAL_P(search), (void **) &search_entry) == SUCCESS) {
 			/* Make sure we're dealing with strings. */
 			SEPARATE_ZVAL(search_entry);
-			convert_to_string(*search_entry);
-			if (Z_STRLEN_PP(search_entry) == 0) {
+			convert_to_text(*search_entry);
+			if (Z_UNILEN_PP(search_entry) == 0) {
 				zend_hash_move_forward(Z_ARRVAL_P(search));
 				if (Z_TYPE_P(replace) == IS_ARRAY) {
 					zend_hash_move_forward(Z_ARRVAL_P(replace));
@@ -5130,59 +5383,110 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
 				/* Get current entry */
 				if (zend_hash_get_current_data(Z_ARRVAL_P(replace), (void **)&replace_entry) == SUCCESS) {
 					/* Make sure we're dealing with strings. */
-					convert_to_string_ex(replace_entry);
+					SEPARATE_ZVAL(replace_entry);
+					convert_to_text(*replace_entry);
 
 					/* Set replacement value to the one we got from array */
-					replace_value = Z_STRVAL_PP(replace_entry);
-					replace_len = Z_STRLEN_PP(replace_entry);
+					replace_value = Z_UNIVAL_PP(replace_entry);
+					replace_len = Z_UNILEN_PP(replace_entry);
 
 					zend_hash_move_forward(Z_ARRVAL_P(replace));
 				} else {
 					/* We've run out of replacement strings, so use an empty one. */
-					replace_value = "";
+					replace_value = EMPTY_ZSTR;
 					replace_len = 0;
 				}
 			}
 
-			if (Z_STRLEN_PP(search_entry) == 1) {
-				php_char_to_str_ex(Z_STRVAL_P(result),
-								Z_STRLEN_P(result),
-								Z_STRVAL_PP(search_entry)[0],
-								replace_value,
-								replace_len,
-								&temp_result,
-								case_sensitivity,
-								replace_count);
-			} else if (Z_STRLEN_PP(search_entry) > 1) {
-				Z_STRVAL(temp_result) = php_str_to_str_ex(Z_STRVAL_P(result), Z_STRLEN_P(result),
-														   Z_STRVAL_PP(search_entry), Z_STRLEN_PP(search_entry),
-														   replace_value, replace_len, &Z_STRLEN(temp_result), case_sensitivity, replace_count);
+			if (Z_UNILEN_PP(search_entry) == 1) {
+				if (UG(unicode)) {
+					if (case_sensitivity) {
+						php_u_char_to_str_ex(Z_USTRVAL_P(result), Z_USTRLEN_P(result),
+											 Z_USTRVAL_PP(search_entry)[0],
+											 replace_value.u, replace_len,
+											 &temp_result, replace_count);
+					} else {
+						Z_USTRVAL(temp_result) = php_u_str_to_str_case_ex(Z_USTRVAL_P(result), Z_USTRLEN_P(result),
+																		  Z_USTRVAL_PP(search_entry), Z_USTRLEN_PP(search_entry),
+																		  replace_value.u, replace_len,
+																		  &Z_USTRLEN(temp_result), replace_count TSRMLS_CC);
+					}
+				} else {
+					php_char_to_str_ex(Z_STRVAL_P(result), Z_STRLEN_P(result),
+									   Z_STRVAL_PP(search_entry)[0],
+									   replace_value.s, replace_len,
+									   &temp_result, case_sensitivity, replace_count);
+				}
+			} else if (Z_UNILEN_PP(search_entry) > 1) {
+				if (UG(unicode)) {
+					if (case_sensitivity) {
+						Z_USTRVAL(temp_result) = php_u_str_to_str_ex(Z_USTRVAL_P(result), Z_USTRLEN_P(result),
+																	 Z_USTRVAL_PP(search_entry), Z_USTRLEN_PP(search_entry),
+																	 replace_value.u, replace_len,
+																	 &Z_USTRLEN(temp_result), replace_count);
+					} else {
+						Z_USTRVAL(temp_result) = php_u_str_to_str_case_ex(Z_USTRVAL_P(result), Z_USTRLEN_P(result),
+																		  Z_USTRVAL_PP(search_entry), Z_USTRLEN_PP(search_entry),
+																		  replace_value.u, replace_len,
+																		  &Z_USTRLEN(temp_result), replace_count TSRMLS_CC);
+					}
+				} else {
+					Z_STRVAL(temp_result) = php_str_to_str_ex(Z_STRVAL_P(result), Z_STRLEN_P(result),
+															  Z_STRVAL_PP(search_entry), Z_STRLEN_PP(search_entry),
+															  replace_value.s, replace_len,
+															  &Z_STRLEN(temp_result), case_sensitivity, replace_count);
+				}
 			}
 
-			efree(Z_STRVAL_P(result));
-			Z_STRVAL_P(result) = Z_STRVAL(temp_result);
-			Z_STRLEN_P(result) = Z_STRLEN(temp_result);
+			efree(Z_UNIVAL_P(result).v);
+			Z_UNIVAL_P(result) = Z_UNIVAL(temp_result);
+			Z_UNILEN_P(result) = Z_UNILEN(temp_result);
 
-			if (Z_STRLEN_P(result) == 0) {
+			if (Z_UNILEN_P(result) == 0) {
 				return;
 			}
 
 			zend_hash_move_forward(Z_ARRVAL_P(search));
 		}
 	} else {
-		if (Z_STRLEN_P(search) == 1) {
-			php_char_to_str_ex(Z_STRVAL_PP(subject),
-							Z_STRLEN_PP(subject),
-							Z_STRVAL_P(search)[0],
-							Z_STRVAL_P(replace),
-							Z_STRLEN_P(replace),
-							result,
-							case_sensitivity,
-							replace_count);
+		if (Z_UNILEN_P(search) == 1) {
+			if (UG(unicode)) {
+				if (case_sensitivity) {
+					php_u_char_to_str_ex(Z_USTRVAL_PP(subject), Z_USTRLEN_PP(subject),
+										 Z_USTRVAL_P(search)[0],
+										 Z_USTRVAL_P(replace), Z_USTRLEN_P(replace),
+										 result, replace_count);
+				} else {
+					Z_USTRVAL_P(result) = php_u_str_to_str_case_ex(Z_USTRVAL_PP(subject), Z_USTRLEN_PP(subject),
+																   Z_USTRVAL_P(search), Z_USTRLEN_P(search),
+																   Z_USTRVAL_P(replace), Z_USTRLEN_P(replace),
+																   &Z_USTRLEN_P(result), replace_count TSRMLS_CC);
+				}
+			} else {
+				php_char_to_str_ex(Z_STRVAL_PP(subject), Z_STRLEN_PP(subject),
+								   Z_STRVAL_P(search)[0],
+								   Z_STRVAL_P(replace), Z_STRLEN_P(replace),
+								   result, case_sensitivity, replace_count);
+			}
 		} else if (Z_STRLEN_P(search) > 1) {
-			Z_STRVAL_P(result) = php_str_to_str_ex(Z_STRVAL_PP(subject), Z_STRLEN_PP(subject),
-													Z_STRVAL_P(search), Z_STRLEN_P(search),
-													Z_STRVAL_P(replace), Z_STRLEN_P(replace), &Z_STRLEN_P(result), case_sensitivity, replace_count);
+			if (UG(unicode)) {
+				if (case_sensitivity) {
+					Z_USTRVAL_P(result) = php_u_str_to_str_ex(Z_USTRVAL_PP(subject), Z_USTRLEN_PP(subject),
+															  Z_USTRVAL_P(search), Z_USTRLEN_P(search),
+															  Z_USTRVAL_P(replace), Z_USTRLEN_P(replace),
+															  &Z_USTRLEN_P(result), replace_count);
+				} else {
+					Z_USTRVAL_P(result) = php_u_str_to_str_case_ex(Z_USTRVAL_PP(subject), Z_USTRLEN_PP(subject),
+																   Z_USTRVAL_P(search), Z_USTRLEN_P(search),
+																   Z_USTRVAL_P(replace), Z_USTRLEN_P(replace),
+																   &Z_USTRLEN_P(result), replace_count TSRMLS_CC);
+				}
+			} else {
+				Z_STRVAL_P(result) = php_str_to_str_ex(Z_STRVAL_PP(subject), Z_STRLEN_PP(subject),
+													   Z_STRVAL_P(search), Z_STRLEN_P(search),
+													   Z_STRVAL_P(replace), Z_STRLEN_P(replace),
+													   &Z_STRLEN_P(result), case_sensitivity, replace_count);
+			}
 		} else {
 			*result = **subject;
 			zval_copy_ctor(result);
@@ -5196,7 +5500,7 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
  */
 static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensitivity)
 {
-	zval **subject, **search, **replace, **subject_entry, **zcount;
+	zval *subject, *search, *replace, **subject_entry, *zcount;
 	zval *result;
 	zstr string_key;
 	uint string_key_len;
@@ -5204,45 +5508,41 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 	int count = 0;
 	int argc = ZEND_NUM_ARGS();
 
-	if (argc < 3 || argc > 4 ||
-	   zend_get_parameters_ex(argc, &search, &replace, &subject, &zcount) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/z/z/|z", &search,
+							  &replace, &subject, &zcount) == FAILURE) {
+		return;
 	}
 
-	SEPARATE_ZVAL(search);
-	SEPARATE_ZVAL(replace);
-	SEPARATE_ZVAL(subject);
-
 	/* Make sure we're dealing with strings and do the replacement. */
-	if (Z_TYPE_PP(search) != IS_ARRAY) {
-		convert_to_string_ex(search);
-		convert_to_string_ex(replace);
-	} else if (Z_TYPE_PP(replace) != IS_ARRAY) {
-		convert_to_string_ex(replace);
+	if (Z_TYPE_P(search) != IS_ARRAY) {
+		convert_to_text(search);
+		convert_to_text(replace);
+	} else if (Z_TYPE_P(replace) != IS_ARRAY) {
+		convert_to_text(replace);
 	}
 
 	/* if subject is an array */
-	if (Z_TYPE_PP(subject) == IS_ARRAY) {
+	if (Z_TYPE_P(subject) == IS_ARRAY) {
 		array_init(return_value);
-		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(subject));
+		zend_hash_internal_pointer_reset(Z_ARRVAL_P(subject));
 
 		/* For each subject entry, convert it to string, then perform replacement
 		   and add the result to the return_value array. */
-		while (zend_hash_get_current_data(Z_ARRVAL_PP(subject), (void **)&subject_entry) == SUCCESS) {
+		while (zend_hash_get_current_data(Z_ARRVAL_P(subject), (void **)&subject_entry) == SUCCESS) {
 			zend_uchar utype;
 
 			if (Z_TYPE_PP(subject_entry) != IS_ARRAY && Z_TYPE_PP(subject_entry) != IS_OBJECT) {
 				MAKE_STD_ZVAL(result);
 				SEPARATE_ZVAL(subject_entry);
-				php_str_replace_in_subject(*search, *replace, subject_entry, result, case_sensitivity, (argc > 3) ? &count : NULL);
+				php_str_replace_in_subject(search, replace, subject_entry, result, case_sensitivity, (argc > 3) ? &count : NULL TSRMLS_CC);
 			} else {
 				ALLOC_ZVAL(result);
 				ZVAL_ADDREF(*subject_entry);
 				COPY_PZVAL_TO_ZVAL(*result, *subject_entry);
 			}
 			/* Add to return array */
-			switch ((utype = zend_hash_get_current_key_ex(Z_ARRVAL_PP(subject), &string_key,
-												&string_key_len, &num_key, 0, NULL))) {
+			switch ((utype = zend_hash_get_current_key_ex(Z_ARRVAL_P(subject), &string_key,
+														  &string_key_len, &num_key, 0, NULL))) {
 				case HASH_KEY_IS_STRING:
 				case HASH_KEY_IS_UNICODE:
 					add_u_assoc_zval_ex(return_value, utype, string_key, string_key_len, result);
@@ -5253,19 +5553,19 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 					break;
 			}
 
-			zend_hash_move_forward(Z_ARRVAL_PP(subject));
+			zend_hash_move_forward(Z_ARRVAL_P(subject));
 		}
 	} else {	/* if subject is not an array */
-		php_str_replace_in_subject(*search, *replace, subject, return_value, case_sensitivity, (argc > 3) ? &count : NULL);
+		php_str_replace_in_subject(search, replace, &subject, return_value, case_sensitivity, (argc > 3) ? &count : NULL TSRMLS_CC);
 	}
 	if (argc > 3) {
-		zval_dtor(*zcount);
-		ZVAL_LONG(*zcount, count);
+		zval_dtor(zcount);
+		ZVAL_LONG(zcount, count);
 	}
 }
 /* }}} */
 
-/* {{{ proto mixed str_replace(mixed search, mixed replace, mixed subject [, int &replace_count])
+/* {{{ proto mixed str_replace(mixed search, mixed replace, mixed subject [, int &replace_count]) U
    Replaces all occurrences of search in haystack with replace */
 PHP_FUNCTION(str_replace)
 {
@@ -5273,7 +5573,7 @@ PHP_FUNCTION(str_replace)
 }
 /* }}} */
 
-/* {{{ proto mixed str_ireplace(mixed search, mixed replace, mixed subject [, int &replace_count])
+/* {{{ proto mixed str_ireplace(mixed search, mixed replace, mixed subject [, int &replace_count]) U
    Replaces all occurrences of search in haystack with replace / case-insensitive */
 PHP_FUNCTION(str_ireplace)
 {
