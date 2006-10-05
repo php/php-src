@@ -1217,7 +1217,7 @@ void zend_shutdown(TSRMLS_D)
 	zend_destroy_rsrc_list_dtors();
 
 	/* free ICU cache and any open ICU item (collators, converters, ...) */
-	u_cleanup();
+	/* u_cleanup(); */
 }
 
 
