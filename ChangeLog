@@ -1,3 +1,160 @@
+2006-10-05  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_4_4)
+      Zend/zend.c
+      ZendEngine2/zend.c:
+      MFH(r-1.376): Preserve EG(return_value_ptr_ptr) when calling
+      zend_execute_scripts()
+
+    * ZendEngine2/zend.c:
+      Preserve EG(return_value_ptr_ptr) when calling zend_execute_scripts()
+
+2006-10-05  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend.c:
+      This might not be necessary if we clean it all up ourselves.
+
+    * ext/standard/string.c:
+      TODO
+
+    * unicode-progress.txt
+      ext/standard/string.c:
+      Unicode support for str_replace() and str_ireplace().
+      
+
+2006-10-05  Sara Golemon  <sara@golemon.com>
+
+    * ext/bz2/bz2.c
+      ext/bz2/tests/001.phpt
+      ext/bz2/tests/004.phpt
+      ext/bz2/tests/005.phpt:
+      Updated for PHP6
+
+2006-10-05  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/str_replace.phpt:
+      <tony2001> ilia: are you serious?
+      <ilia> tony2001: yes
+
+2006-10-05  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/filter/package.xml:
+      - env/server support is not yet fixed
+
+2006-10-05  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/str_replace.phpt:
+      add test
+
+    * ext/standard/tests/strings/str_replace.phpt
+      ext/standard/tests/strings/str_replace.phpt:
+      
+      add test
+
+2006-10-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      5.2.0RC5
+
+2006-10-05  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_5_2)
+      ext/standard/string.c:
+      Increment replace count value for case-sensitive single char searches.
+
+2006-10-05  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/pgsql/pgsql.c:
+      MFB:
+      - nuke unused variable
+      - "prefer" two arguments
+      - only print "wrong parameter count" once
+
+    * (PHP_5_2)
+      ext/pgsql/pgsql.c:
+      - nuke unused variable
+      - "prefer" two arguments
+      - only print "wrong parameter count" once
+
+2006-10-05  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/curl/multi.c
+      ext/curl/php_curl.h:
+      MFH: decrement ch->uses (or destroy handle) when destroying multi handle
+
+    * ext/curl/multi.c
+      ext/curl/php_curl.h:
+      decrement ch->uses (or destroy handle) when destroying multi handle
+
+    * ext/imap/php_imap.c:
+      MFB: fix build with new c-client
+
+    * (PHP_5_2)
+      ext/imap/php_imap.c:
+      fix build with new version of c-client
+
+2006-10-05  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      TSRM/tsrm_virtual_cwd.c:
+      CRLF->CR
+
+2006-10-05  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/document.c
+      ext/dom/tests/domdocument.phpt:
+      mark functions unicode compliant
+      add test
+
+2006-10-05  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_5_2)
+      NEWS:
+      Library updates
+
+    * ext/pdo_pgsql/config.w32
+      ext/pgsql/config.w32:
+      MFB: Added PQescapeStringConn support to windows too
+
+    * (PHP_5_2)
+      ext/pdo_pgsql/config.w32
+      ext/pgsql/config.w32:
+      Added PQescapeStringConn support to windows too
+
+2006-10-05  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_alloc.h:
+      Allow future extensibility without binary compatibility break
+
+    * (PHP_5_2)
+      ZendEngine2/zend_alloc.h:
+      Allow future extensibility without binary compatibility  break
+
+    * (PHP_5_2)
+      NEWS
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c:
+      Fixed bug #38989 (Absolute path with slash at beginning doesn't work on
+      win)
+
+2006-10-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/openssl/xp_ssl.c:
+      MFB: Fixed bug #39039 (SSL: fatal protocol error when fetching HTTPS from
+      servers running Google web server).
+
+    * (PHP_5_2)
+      NEWS
+      ext/openssl/xp_ssl.c:
+      Fixed bug #39039 (SSL: fatal protocol error when fetching HTTPS from
+      servers running Google web server).
+
 2006-10-04  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/pdo_pgsql/config.m4

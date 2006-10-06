@@ -1,3 +1,27 @@
+2006-10-05  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_5_2)
+      zend.c:
+      MFH(r-1.376): Preserve EG(return_value_ptr_ptr) when calling
+      zend_execute_scripts()
+
+    * zend.c:
+      Preserve EG(return_value_ptr_ptr) when calling zend_execute_scripts()
+
+2006-10-05  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend.c:
+      This might not be necessary if we clean it all up ourselves.
+
+2006-10-05  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_alloc.h:
+      Allow future extensibility without binary compatibility break
+
+    * (PHP_5_2)
+      zend_alloc.h:
+      Allow future extensibility without binary compatibility  break
+
 2006-10-04  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_2)
