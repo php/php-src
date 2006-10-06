@@ -309,11 +309,16 @@ static long pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRM
 static int pgsql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen, enum pdo_param_type paramtype TSRMLS_DC)
 {
 	unsigned char *escaped;
+	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	
 	switch (paramtype) {
 		case PDO_PARAM_LOB:
 			/* escapedlen returned by PQescapeBytea() accounts for trailing 0 */
+#ifdef HAVE_PQESCAPE_BYTEA_CONN
+			escaped = PQescapeByteaConn(H->server, unquoted, unquotedlen, quotedlen);
+#else
 			escaped = PQescapeBytea(unquoted, unquotedlen, quotedlen);
+#endif
 			*quotedlen += 1;
 			*quoted = emalloc(*quotedlen + 1);
 			memcpy((*quoted)+1, escaped, *quotedlen-2);
@@ -322,9 +327,7 @@ static int pgsql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquote
 			(*quoted)[*quotedlen] = '\0';
 			free(escaped);
 			break;
-		default: {
-			pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
-
+		default:
 			*quoted = safe_emalloc(2, unquotedlen, 3);
 			(*quoted)[0] = '\'';
 #ifndef HAVE_PQESCAPE_CONN
@@ -335,7 +338,6 @@ static int pgsql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquote
 			(*quoted)[*quotedlen + 1] = '\'';
 			(*quoted)[*quotedlen + 2] = '\0';
 			*quotedlen += 2;
-		}
 	}
 	return 1;
 }
