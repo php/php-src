@@ -385,7 +385,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	/* cwd_length can be 0 when getcwd() fails.
 	 * This can happen under solaris when a dir does not have read permissions
 	 * but *does* have execute permissions */
-	if (!IS_ABSOLUTE_PATH(path, path_length) && (state->cwd_length > 1)) {
+	if (!IS_ABSOLUTE_PATH(path, path_length) && (state->cwd_length > 0)) {
 		int orig_path_len;
 		int state_cwd_length = state->cwd_length;
 
