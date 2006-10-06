@@ -81,9 +81,6 @@ zend_function_entry session_functions[] = {
 PHPAPI ZEND_DECLARE_MODULE_GLOBALS(ps);
 static PHP_GINIT_FUNCTION(ps);
 
-static ps_module *_php_find_ps_module(char *name TSRMLS_DC);
-static const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC);
-
 #define SESSION_CHECK_ACTIVE_STATE	\
 	if (PS(session_status) == php_session_active) {	\
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "A session is active. You cannot change the session module's ini settings at this time.");	\
@@ -992,7 +989,7 @@ static void php_session_send_cookie(TSRMLS_D)
 	sapi_add_header_ex(ncookie.c, ncookie.len, 0, 0 TSRMLS_CC);
 }
 
-static ps_module *_php_find_ps_module(char *name TSRMLS_DC)
+PHPAPI ps_module *_php_find_ps_module(char *name TSRMLS_DC)
 {
 	ps_module *ret = NULL;
 	ps_module **mod;
@@ -1007,7 +1004,7 @@ static ps_module *_php_find_ps_module(char *name TSRMLS_DC)
 	return ret;
 }
 
-static const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC)
+PHPAPI const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC)
 {
 	const ps_serializer *ret = NULL;
 	const ps_serializer *mod;
