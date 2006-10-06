@@ -4029,6 +4029,10 @@ ZEND_METHOD(reflection_property, getDeclaringClass)
 	while (tmp_ce && zend_hash_find(&tmp_ce->properties_info, prop_name, prop_name_len + 1, (void **) &tmp_info) == SUCCESS) {
 		ce = tmp_ce;
 		tmp_ce = tmp_ce->parent;
+		if (tmp_info->flags & ZEND_ACC_PRIVATE) {
+			/* it's a private property, so it can't be inherited */
+			break;
+		}
 	}
 
 	zend_reflection_class_factory(ce, return_value TSRMLS_CC);
