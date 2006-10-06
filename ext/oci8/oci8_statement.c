@@ -155,6 +155,11 @@ int php_oci_statement_set_prefetch(php_oci_statement *statement, ub4 size TSRMLS
 int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows TSRMLS_DC)
 {
 	int i;
+	void *handlepp;
+	ub4 typep, iterp, idxp;
+	ub1 in_outp, piecep;
+	zend_bool piecewisecols = 0;
+
 	php_oci_out_column *column;
 
 	PHP_OCI_CALL_RETURN(statement->errcode, OCIStmtFetch, (statement->stmt, statement->err, nrows, OCI_FETCH_NEXT, OCI_DEFAULT));
@@ -186,42 +191,63 @@ int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows TSRMLS_DC)
 		column = php_oci_statement_get_column(statement, i + 1, NULL, 0 TSRMLS_CC);
 		if (column->piecewise) {
 			column->retlen4 = 0;
+			piecewisecols = 1;
 		}
 	}
 	
 	while (statement->errcode == OCI_NEED_DATA) {
-		for (i = 0; i < statement->ncolumns; i++) {
-			column = php_oci_statement_get_column(statement, i + 1, NULL, 0 TSRMLS_CC);
-			if (column->piecewise)	{
-				if (!column->data) {
-					column->data = (text *) emalloc(PHP_OCI_PIECE_SIZE);
-				} else {
-					column->data = erealloc(column->data, column->retlen4 + PHP_OCI_PIECE_SIZE);
+		if (piecewisecols) {
+			PHP_OCI_CALL_RETURN(statement->errcode,
+				OCIStmtGetPieceInfo, 
+				   (
+					statement->stmt,
+					statement->err,
+					&handlepp,
+					&typep,
+					&in_outp,
+					&iterp,
+					&idxp,
+					&piecep
+				   )
+			);
+
+			/* scan through our columns for a piecewise column with a matching handle */
+			for (i = 0; i < statement->ncolumns; i++) {
+				column = php_oci_statement_get_column(statement, i + 1, NULL, 0 TSRMLS_CC);
+				if (column->piecewise && handlepp == column->oci_define)   {
+					if (!column->data) {
+						column->data = (text *) ecalloc(1, PHP_OCI_PIECE_SIZE + 1);
+					} else {
+						column->data = erealloc(column->data, column->retlen4 + PHP_OCI_PIECE_SIZE + 1);
+						memset(column->data + column->retlen4, 0, PHP_OCI_PIECE_SIZE + 1);
+					}
+					column->cb_retlen = PHP_OCI_PIECE_SIZE;
+
+					/* and instruct fetch to fetch waiting piece into our buffer */
+					PHP_OCI_CALL(OCIStmtSetPieceInfo,
+						   (
+							(void *) column->oci_define,
+							OCI_HTYPE_DEFINE,
+							statement->err,
+							((char*)column->data) + column->retlen4,
+							&(column->cb_retlen),
+							piecep,
+							&column->indicator,
+							&column->retcode
+						   )
+					);
 				}
-
-				column->cb_retlen = PHP_OCI_PIECE_SIZE;
-
-				PHP_OCI_CALL(OCIStmtSetPieceInfo, 
-						(
-						 (void *) column->oci_define,
-						 OCI_HTYPE_DEFINE,
-						 statement->err,
-						 ((char*)column->data) + column->retlen4,
-						 &(column->cb_retlen),
-						 OCI_NEXT_PIECE,
-						 &column->indicator,
-						 &column->retcode
-						)
-				);
 			}
 		}
 
 		PHP_OCI_CALL_RETURN(statement->errcode,  OCIStmtFetch, (statement->stmt, statement->err, nrows, OCI_FETCH_NEXT, OCI_DEFAULT));
 
-		for (i = 0; i < statement->ncolumns; i++) {
-			column = php_oci_statement_get_column(statement, i + 1, NULL, 0 TSRMLS_CC);
-			if (column && column->piecewise)	{
-				column->retlen4 += column->cb_retlen;
+		if (piecewisecols) {
+			for (i = 0; i < statement->ncolumns; i++) {
+				column = php_oci_statement_get_column(statement, i + 1, NULL, 0 TSRMLS_CC);
+				if (column && column->piecewise && handlepp == column->oci_define)	{
+					column->retlen4 += column->cb_retlen;
+				}
 			}
 		}
 	}
