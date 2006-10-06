@@ -103,7 +103,7 @@ zend_u_strtol(nptr, endptr, base)
 	for (acc = 0, any = 0;; c = *s++) {
 		if ((val = u_digit(c, base)) < 0)
 			break;
-		if (any < 0 || acc > cutoff || (acc == cutoff && c > cutlim))
+		if (any < 0 || acc > cutoff || (acc == cutoff && val > cutlim))
 			any = -1;
 		else {
 			any = 1;
