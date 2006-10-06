@@ -3568,19 +3568,33 @@ PHP_FUNCTION(pg_escape_string)
 }
 /* }}} */
 
-/* {{{ proto string pg_escape_bytea(string data)
+/* {{{ proto string pg_escape_bytea([resource connection,] string data)
    Escape binary for bytea type  */
 PHP_FUNCTION(pg_escape_bytea)
 {
 	char *from = NULL, *to = NULL;
 	size_t to_len;
-	int from_len;
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
-							  &from, &from_len) == FAILURE) {
+	int from_len, id = -1;
+#ifdef HAVE_PQESCAPE_BYTEA_CONN
+	PGconn *pgsql;
+#endif
+	zval *pgsql_link;
+
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s", &from, &from_len) == SUCCESS) {
+		pgsql_link = NULL;
+		id = PGG(default_link);
+	} else if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &pgsql_link, &from, &from_len) == FAILURE) {
 		return;
 	}
 
-	to = (char *)PQescapeBytea((unsigned char*)from, from_len, &to_len);
+#ifdef HAVE_PQESCAPE_BYTEA_CONN
+	if (pgsql_link != NULL || id != -1) {
+		ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+		to = (char *)PQescapeByteaConn(pgsql, from, (size_t)from_len, &to_len);
+	} else
+#endif
+		to = (char *)PQescapeBytea((unsigned char*)from, from_len, &to_len);
+
 	RETVAL_STRINGL(to, to_len-1, 1); /* to_len includes addtional '\0' */
 	free(to);
 }
@@ -5116,7 +5130,11 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 						else {
 							unsigned char *tmp;
 							size_t to_len;
+#ifdef HAVE_PQESCAPE_BYTEA_CONN
+							tmp = PQescapeByteaConn(pg_link, Z_STRVAL_PP(val), Z_STRLEN_PP(val), &to_len);
+#else
 							tmp = PQescapeBytea(Z_STRVAL_PP(val), Z_STRLEN_PP(val), &to_len);
+#endif
 							Z_TYPE_P(new_val) = IS_STRING;
 							Z_STRLEN_P(new_val) = to_len-1; /* PQescapeBytea's to_len includes additional '\0' */
 							Z_STRVAL_P(new_val) = emalloc(to_len);
