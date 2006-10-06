@@ -38,23 +38,26 @@
 #include "php_lcg.h"
 #include "uniqid.h"
 
-/* {{{ proto string uniqid([string prefix , bool more_entropy])
+/* {{{ proto string uniqid([string prefix , bool more_entropy]) U
    Generates a unique ID */
 #ifdef HAVE_GETTIMEOFDAY
 PHP_FUNCTION(uniqid)
 {
-	char *prefix = "";
+	zstr prefix = EMPTY_ZSTR;
+	int prefix_len = 0;
+	zend_uchar str_type;
 #if defined(__CYGWIN__)
 	zend_bool more_entropy = 1;
 #else
 	zend_bool more_entropy = 0;
 #endif
 	char *uniqid;
-	int sec, usec, prefix_len = 0;
+	UChar *u_uniqid;
+	int sec, usec;
 	struct timeval tv;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sb", &prefix, &prefix_len,
-							  &more_entropy)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|tb", &prefix,
+							  &prefix_len, &str_type, &more_entropy) == FAILURE) {
 		return;
 	}
 
@@ -75,13 +78,28 @@ PHP_FUNCTION(uniqid)
 	/* The max value usec can have is 0xF423F, so we use only five hex
 	 * digits for usecs.
 	 */
-	if (more_entropy) {
-		spprintf(&uniqid, 0, "%s%08x%05x%.8f", prefix, sec, usec, php_combined_lcg(TSRMLS_C) * 10);
-	} else {
-		spprintf(&uniqid, 0, "%s%08x%05x", prefix, sec, usec);
-	}
+	if (str_type == IS_UNICODE) {
+		/* prefix + 8 (sec) + 5 (usec) + 10 (lcg) */
+		int buf_len = prefix_len + 8 + 5 + 10 + 1;
+		int written;
 
-	RETURN_RT_STRING(uniqid, ZSTR_AUTOFREE);
+		u_uniqid = eumalloc(buf_len + 1);
+		if (more_entropy) {
+			written = u_sprintf(u_uniqid, "%S%08x%05x%.8f", prefix.u, sec, usec, php_combined_lcg(TSRMLS_C) * 10);
+		} else {
+			written = u_sprintf(u_uniqid, "%S%08x%05x", prefix.u, sec, usec);
+		}
+		u_uniqid[written] = 0;
+		RETURN_UNICODEL(u_uniqid, written, 0);
+	} else {
+		if (more_entropy) {
+			spprintf(&uniqid, 0, "%s%08x%05x%.8f", prefix.s, sec, usec, php_combined_lcg(TSRMLS_C) * 10);
+		} else {
+			spprintf(&uniqid, 0, "%s%08x%05x", prefix.s, sec, usec);
+		}
+
+		RETURN_STRING(uniqid, 0);
+	}
 }
 #endif
 /* }}} */
