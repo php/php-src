@@ -168,3 +168,11 @@ Items from the NEWS file explained
   unpredictable behavior due to an un-expected configuration file being
   read. This functionality was removed in 5.2 and PHP will no longer search
   CWD for the presence of the php.ini or the php-cli.ini files.
+
+- Added a notice when performing modulus 0 operation (Tony)
+
+  In earlier versions of PHP performing integer % 0 did not emit any 
+  warning messages, instead retuning an un-expected return value of false.
+  As of PHP 5.2 this operation will emit E_WARNING as is the case in all
+  other instance where division by zero is performed.
+ 
