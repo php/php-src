@@ -100,7 +100,7 @@ long php_getgid(void)
 	return (BG(page_gid));
 }
 
-/* {{{ proto int getmyuid(void)
+/* {{{ proto int getmyuid(void) U
    Get PHP script owner's UID */
 PHP_FUNCTION(getmyuid)
 {
@@ -115,7 +115,7 @@ PHP_FUNCTION(getmyuid)
 }
 /* }}} */
 
-/* {{{ proto int getmygid(void)
+/* {{{ proto int getmygid(void) U
    Get PHP script owner's GID */
 PHP_FUNCTION(getmygid)
 {
@@ -130,7 +130,7 @@ PHP_FUNCTION(getmygid)
 }
 /* }}} */
 
-/* {{{ proto int getmypid(void)
+/* {{{ proto int getmypid(void) U
    Get current process ID */
 PHP_FUNCTION(getmypid)
 {
@@ -145,7 +145,7 @@ PHP_FUNCTION(getmypid)
 }
 /* }}} */
 
-/* {{{ proto int getmyinode(void)
+/* {{{ proto int getmyinode(void) U
    Get the inode of the current script being parsed */
 PHP_FUNCTION(getmyinode)
 {
@@ -164,7 +164,7 @@ PHPAPI time_t php_getlastmod(TSRMLS_D)
 	return BG(page_mtime);
 }
 
-/* {{{ proto int getlastmod(void)
+/* {{{ proto int getlastmod(void) U
    Get time of last page modification */
 PHP_FUNCTION(getlastmod)
 {
