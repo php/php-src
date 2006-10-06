@@ -2192,21 +2192,34 @@ ZEND_FUNCTION(debug_backtrace)
 }
 /* }}} */
 
-/* {{{ proto bool extension_loaded(string extension_name)
+/* {{{ proto bool extension_loaded(string extension_name) U
    Returns true if the named extension is loaded */
 ZEND_FUNCTION(extension_loaded)
 {
-	zval **extension_name;
-	char *lcname;
+	zstr ext;
+	int ext_len;
+	zend_uchar ext_type;
+	char *name, *lcname;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &extension_name)) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &ext, &ext_len, &ext_type) == FAILURE) {
+		return;
 	}
 
-	/* UTODO: using runtime encoding? */
-	convert_to_string_ex(extension_name);
-	lcname = zend_str_tolower_dup(Z_STRVAL_PP(extension_name), Z_STRLEN_PP(extension_name));
-	if (zend_hash_exists(&module_registry, lcname, Z_STRLEN_PP(extension_name)+1)) {
+	if (ext_type == IS_UNICODE) {
+		name = zend_unicode_to_ascii(ext.u, ext_len TSRMLS_CC);
+		if (name == NULL) {
+			zend_error(E_WARNING, "Extension name has to consist only of ASCII characters");
+			RETURN_FALSE;
+		}
+	} else {
+		name = ext.s;
+	}
+
+	lcname = zend_str_tolower_dup(name, ext_len);
+	if (ext_type == IS_UNICODE) {
+		efree(name);
+	}
+	if (zend_hash_exists(&module_registry, lcname, ext_len+1)) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
