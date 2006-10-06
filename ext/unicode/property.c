@@ -253,7 +253,7 @@ PHP_FUNCTION(char_is_titlecase)
 
 /* {{{ Single character properties */
 
-/* {{{ poto float char_get_numeric_value(char text) U
+/* {{{ proto float char_get_numeric_value(char text) U
    Get the numeric value for the character, as defined in the Unicode Character Database */
 PHP_FUNCTION(char_get_numeric_value)
 {
