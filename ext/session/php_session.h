@@ -194,6 +194,9 @@ PHPAPI int php_session_register_serializer(const char *name,
 PHPAPI void php_session_set_id(char *id TSRMLS_DC);
 PHPAPI void php_session_start(TSRMLS_D);
 
+PHPAPI ps_module *_php_find_ps_module(char *name TSRMLS_DC);
+PHPAPI const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC);
+
 #define PS_ADD_VARL(name,namelen) do {										\
 	php_add_session_var(name, namelen TSRMLS_CC);							\
 } while (0)
