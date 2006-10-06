@@ -31,6 +31,7 @@ PHP                                                                        NEWS
   session.save_path, allowing them to account for extra parameters). (Ilia)
 - Fixed bug #38989 (Absolute path with slash at beginning doesn't work on win).
   (Dmitry)
+- Fixed bug #38985 (Can't cast COM objects). (Wez)
 - Fixed bug #38981 (using FTP URLs in get_headers() causes crash). (Tony)
 - Fixed bug #38961 (metaphone() results in segmentation fault on NetBSD). 
   (Tony)
