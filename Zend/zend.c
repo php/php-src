@@ -1077,7 +1077,6 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 	int i;
 	zend_file_handle *file_handle;
 	zend_op_array *orig_op_array = EG(active_op_array);
-	zval **orig_retval_ptr_ptr = EG(return_value_ptr_ptr);
 	zval *local_retval=NULL;
 
 	va_start(files, file_count);
@@ -1140,13 +1139,11 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 		} else if (type==ZEND_REQUIRE) {
 			va_end(files);
 			EG(active_op_array) = orig_op_array;
-			EG(return_value_ptr_ptr) = orig_retval_ptr_ptr;
 			return FAILURE;
 		}
 	}
 	va_end(files);
 	EG(active_op_array) = orig_op_array;
-	EG(return_value_ptr_ptr) = orig_retval_ptr_ptr;
 
 	return SUCCESS;
 }
