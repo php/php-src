@@ -539,7 +539,7 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 		return SUCCESS;
 	}
 
-	return FAILURE;
+	return zend_std_cast_object_tostring(readobj, writeobj, type TSRMLS_CC);
 }
 
 static int com_object_count(zval *object, long *count TSRMLS_DC)
