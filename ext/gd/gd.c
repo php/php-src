@@ -5092,7 +5092,7 @@ PHP_FUNCTION(imageconvolution)
 	}
 
 	for (i=0; i<3; i++) {
-		if (zend_hash_index_find(Z_ARRVAL_P(hash_matrix), (i), (void **) &var) == SUCCESS) {
+		if (zend_hash_index_find(Z_ARRVAL_P(hash_matrix), (i), (void **) &var) == SUCCESS && Z_TYPE_PP(var) == IS_ARRAY) {
 			if (Z_TYPE_PP(var) != IS_ARRAY || zend_hash_num_elements(Z_ARRVAL_PP(var)) != 3 ) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "You must have 3x3 array");
 				RETURN_FALSE;
