@@ -36,23 +36,30 @@ ext/standard
         Upgrade, do wordwrapping on codepoint (or glyph ?) level, maybe use
         additional whitespace chars instead of just space.
 
-ext/gd
-------------
-  Status: In Progress
-  A preliminary version has been commited by Sara. Pierre is working on the
-  migration of the GD extension for php6. 
-  
-ext/zip
-------------
-  Status: In Progress
-  (Pierre)
-
+ 
 ext/filter
 ------------
   Status: To be discussed
   The unicode support must be discussed with the filter maintainers
   and Andrei (sapi maintainers too?). Please mail them and the list prior
   to any work or commits.
+
+ext/gd
+------------
+  Status: In Progress
+  A preliminary version has been commited by Sara. Pierre is working on the
+  migration of the GD extension for php6. 
+ 
+ext/openssl
+------------
+  Status: In Progress
+  (Pierre)
+
+ext/zip
+------------
+  Status: In Progress
+  (Pierre)
+
 
   Completed
   =========
