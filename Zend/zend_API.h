@@ -754,6 +754,150 @@ ZEND_API int add_rt_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *valu
 #define add_rt_assoc_text(__arg, __key, __str, __duplicate) add_rt_assoc_test_ex(__arg, __key, strlen(__key)+1, __str, __duplicate)
 #define add_rt_assoc_textl(__arg, __key, __str, __length, __duplicate) add_rt_assoc_textl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate)
 
+ZEND_API int add_utf8_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
+
+#define add_utf8_assoc_null_ex(arg, key, key_len) do { \
+		zval *___tmp; \
+		MAKE_STD_ZVAL(___tmp); \
+		ZVAL_NULL(___tmp); \
+		add_utf8_assoc_zval_ex(arg, key, key_len, ___tmp); \
+	} while (0)
+#define add_utf8_assoc_long_ex(arg, key, key_len, n) do { \
+		zval *___tmp; \
+		MAKE_STD_ZVAL(___tmp); \
+		ZVAL_LONG(___tmp, n); \
+		add_utf8_assoc_zval_ex(arg, key, key_len, ___tmp); \
+	} while (0)
+#define add_utf8_assoc_bool_ex(arg, key, key_len, b) do { \
+		zval *___tmp; \
+		MAKE_STD_ZVAL(___tmp); \
+		ZVAL_BOOL(___tmp, b); \
+		add_utf8_assoc_zval_ex(arg, key, key_len, ___tmp); \
+	} while (0)
+#define add_utf8_assoc_resource_ex(arg, key, key_len, r) do { \
+		zval *___tmp; \
+		MAKE_STD_ZVAL(___tmp); \
+		ZVAL_RESOURCE(___tmp, r); \
+		add_utf8_assoc_zval_ex(arg, key, key_len, ___tmp); \
+	} while (0)
+#define add_utf8_assoc_double_ex(arg, key, key_len, d) do { \
+		zval *___tmp; \
+		MAKE_STD_ZVAL(___tmp); \
+		ZVAL_DOUBLE(___tmp, d); \
+		add_utf8_assoc_zval_ex(arg, key, key_len, ___tmp); \
+	} while (0)
+#define add_utf8_assoc_stringl_ex(arg, key, key_len, str, length, duplicate) do { \
+		zval *___tmp; \
+		MAKE_STD_ZVAL(___tmp); \
+		ZVAL_STRINGL(___tmp, str, length, duplicate); \
+		add_utf8_assoc_zval_ex(arg, key, key_len, ___tmp); \
+	} while (0)
+#define add_utf8_assoc_unicode_ex(arg, key, key_len, str, duplicate) do { \
+		zval *___tmp; \
+		MAKE_STD_ZVAL(___tmp); \
+		ZVAL_UNICODE(___tmp, str, duplicate); \
+		add_utf8_assoc_zval_ex(arg, key, key_len, ___tmp); \
+	} while (0)
+#define add_utf8_assoc_unicodel_ex(arg, key, key_len, str, length, duplicate) do { \
+		zval *___tmp; \
+		MAKE_STD_ZVAL(___tmp); \
+		ZVAL_UNICODEL(___tmp, str, length, duplicate); \
+		add_utf8_assoc_zval_ex(arg, key, key_len, ___tmp); \
+	} while (0)
+#define add_utf8_assoc_zstr_ex(arg, key, key_len, type, str, duplicate) do { \
+		zval *___tmp; \
+		MAKE_STD_ZVAL(___tmp); \
+		ZVAL_ZSTR(___tmp, str, type, duplicate); \
+		add_utf8_assoc_zval_ex(arg, key, key_len, ___tmp); \
+	} while (0)
+#define add_utf8_assoc_zstrl_ex(arg, key, key_len, type, str, length, duplicate) do { \
+		zval *___tmp; \
+		MAKE_STD_ZVAL(___tmp); \
+		ZVAL_ZSTRL(___tmp, str, length, type, duplicate); \
+		add_utf8_assoc_zval_ex(arg, key, key_len, ___tmp); \
+	} while (0)
+#define add_utf8_assoc_text_ex(arg, key, key_len, str, duplicate) do { \
+		if (UG(unicode)) { \
+			add_utf8_assoc_unicode_ex(arg, key, key_len, (str).u, duplicate); \
+		} else { \
+			add_utf8_assoc_string_ex(arg, key, key_len, (str).s, duplicate); \
+		} \
+	} while (0)
+#define add_utf8_assoc_textl_ex(arg, key, key_len, str, length, duplicate) do { \
+		if (UG(unicode)) { \
+			add_utf8_assoc_unicodel_ex(arg, key, key_len, (str).u, length, duplicate); \
+		} else { \
+			add_utf8_assoc_stringl_ex(arg, key, key_len, (str).s, length, duplicate); \
+		} \
+	} while (0)
+
+#define add_utf8_assoc_ascii_stringl_ex(arg, key, key_len, str, length, flags) do { \
+		if (UG(unicode)) { \
+			UChar *___u_str = zend_ascii_to_unicode((str), (length)+1 ZEND_FILE_LINE_CC); \
+			if ((flags) & ZSTR_AUTOFREE) { \
+				efree(str); \
+			} \
+			add_utf8_assoc_unicodel_ex(arg, key, key_len, ___u_str, length, 0); \
+		} else { \
+			add_utf8_assoc_stringl_ex(arg, key, key_len, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
+		} \
+	} while (0)
+#define add_utf8_assoc_rt_stringl_ex(arg, key, key_len, str, length, flags) do { \
+		if (UG(unicode)) { \
+			UErrorCode ___status = U_ZERO_ERROR; \
+			UChar *___u_str; \
+			int ___u_len; \
+			zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &___u_str, &___u_len, str, length, &___status); \
+			if ((flags) & ZSTR_AUTOFREE) { \
+				efree(str); \
+			} \
+			add_utf8_assoc_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
+		} else { \
+			add_utf8_assoc_stringl_ex(arg, key, key_len, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
+		} \
+	} while (0)
+#define add_utf8_assoc_utf8_stringl_ex(arg, key, key_len, str, length, flags) do { \
+		if (UG(unicode)) { \
+			UErrorCode ___status = U_ZERO_ERROR; \
+			UChar *___u_str; \
+			int ___u_len; \
+			zend_string_to_unicode_ex(UG(utf8_conv), &___u_str, &___u_len, str, length, &___status); \
+			if ((flags) & ZSTR_AUTOFREE) { \
+				efree(str); \
+			} \
+			add_utf8_assoc_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
+		} else { \
+			add_utf8_assoc_stringl_ex(arg, key, key_len, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
+		} \
+	} while (0)
+
+#define add_utf8_assoc_string_ex(arg, key, key_len, str, flags) add_utf8_assoc_stringl_ex(arg, key, key_len, str, strlen(str), flags)
+#define add_utf8_assoc_ascii_string_ex(arg, key, key_len, str, flags) add_utf8_assoc_ascii_stringl_ex(arg, key, key_len, str, strlen(str), flags)
+#define add_utf8_assoc_rt_string_ex(arg, key, key_len, str, flags) add_utf8_assoc_rt_stringl_ex(arg, key, key_len, str, strlen(str), flags)
+#define add_utf8_assoc_utf8_string_ex(arg, key, key_len, str, flags) add_utf8_assoc_utf8_stringl_ex(arg, key, key_len, str, strlen(str), flags)
+
+#define add_utf8_assoc_zval(__arg, __key, __value) add_utf8_assoc_zval_ex(__arg, __key, strlen(__key)+1, __value)
+#define add_utf8_assoc_long(__arg, __key, __n) add_utf8_assoc_long_ex(__arg, __key, strlen(__key)+1, __n)
+#define add_utf8_assoc_null(__arg, __key) add_utf8_assoc_null_ex(__arg, __key, strlen(__key)+1)
+#define add_utf8_assoc_bool(__arg, __key, __b) add_utf8_assoc_bool_ex(__arg, __key, strlen(__key)+1, __b)
+#define add_utf8_assoc_resource(__arg, __key, __r) add_utf8_assoc_resource_ex(__arg, __key, strlen(__key)+1, __r)
+#define add_utf8_assoc_double(__arg, __key, __d) add_utf8_assoc_double_ex(__arg, __key, strlen(__key)+1, __d)
+#define add_utf8_assoc_string(__arg, __key, __str, __duplicate) add_utf8_assoc_string_ex(__arg, __key, strlen(__key)+1, __str, __duplicate)
+#define add_utf8_assoc_stringl(__arg, __key, __str, __length, __duplicate) add_utf8_assoc_stringl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate)
+#define add_utf8_assoc_unicode(__arg, __key, __str, __duplicate) add_utf8_assoc_unicode_ex(__arg, __key, strlen(__key)+1, __str, __duplicate)
+#define add_utf8_assoc_unicodel(__arg, __key, __str, __length, __duplicate) add_utf8_assoc_unicodel_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate)
+#define add_utf8_assoc_zstr(arg, key, type, str, duplicate) add_utf8_assoc_zstr_ex(arg, key, strlen(key)+1, type, str, duplicate)
+#define add_utf8_assoc_zstrl(arg, key, type, str, length, duplicate) add_utf8_assoc_zstrl_ex(arg, key, strlen(key)+1, type, str, length, duplicate)
+#define add_utf8_assoc_ascii_string(arg, key, str, flags) add_utf8_assoc_ascii_string_ex(arg, key, strlen(key)+1, str, flags)
+#define add_utf8_assoc_ascii_stringl(arg, key, str, length, flags) add_utf8_assoc_ascii_stringl_ex(arg, key, strlen(key)+1, str, length, flags)
+#define add_utf8_assoc_rt_string(arg, key, str, flags) add_utf8_assoc_rt_stringl_ex(arg, key, strlen(key)+1, str, strlen(str), flags)
+#define add_utf8_assoc_rt_stringl(arg, key, str, length, flags) add_utf8_assoc_rt_stringl_ex(arg, key, strlen(key)+1, str, length, flags)
+#define add_utf8_assoc_utf8_string(arg, key, str, flags) add_utf8_assoc_utf8_stringl_ex(arg, key, strlen(key)+1, str, strlen(str), flags)
+#define add_utf8_assoc_utf8_stringl(arg, key, str, length, flags) add_utf8_assoc_utf8_stringl_ex(arg, key, strlen(key)+1, str, length, flags)
+#define add_utf8_assoc_text(__arg, __key, __str, __duplicate) add_utf8_assoc_test_ex(__arg, __key, strlen(__key)+1, __str, __duplicate)
+#define add_utf8_assoc_textl(__arg, __key, __str, __length, __duplicate) add_utf8_assoc_textl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate)
+
+
 ZEND_API int add_u_assoc_zval_ex(zval *arg, zend_uchar type, zstr key, uint key_len, zval *value);
 
 #define add_u_assoc_null_ex(arg, type, key, key_len) do { \
