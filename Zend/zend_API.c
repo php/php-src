@@ -1333,6 +1333,11 @@ ZEND_API int add_rt_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *valu
 	return zend_rt_symtable_update(Z_ARRVAL_P(arg), key, key_len, (void*)&value, sizeof(zval*), NULL);
 }
 
+ZEND_API int add_utf8_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value)
+{
+	return zend_utf8_symtable_update(Z_ARRVAL_P(arg), key, key_len, (void*)&value, sizeof(zval*), NULL);
+}
+
 ZEND_API int add_u_assoc_zval_ex(zval *arg, zend_uchar type, zstr key, uint key_len, zval *value)
 {
 	return zend_u_symtable_update(Z_ARRVAL_P(arg), type, key, key_len, (void *) &value, sizeof(zval *), NULL);

@@ -120,6 +120,7 @@ ZEND_API void zend_hash_clean(HashTable *ht);
 ZEND_API int _zend_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC);
 ZEND_API int _zend_ascii_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC);
 ZEND_API int _zend_rt_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC);
+ZEND_API int _zend_utf8_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC);
 ZEND_API int _zend_u_hash_add_or_update(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC);
 #define zend_hash_update(ht, arKey, nKeyLength, pData, nDataSize, pDest) \
 		_zend_hash_add_or_update(ht, arKey, nKeyLength, pData, nDataSize, pDest, HASH_UPDATE ZEND_FILE_LINE_CC)
@@ -127,6 +128,8 @@ ZEND_API int _zend_u_hash_add_or_update(HashTable *ht, zend_uchar type, zstr arK
 		_zend_ascii_hash_add_or_update(ht, arKey, nKeyLength, pData, nDataSize, pDest, HASH_UPDATE ZEND_FILE_LINE_CC)
 #define zend_rt_hash_update(ht, arKey, nKeyLength, pData, nDataSize, pDest) \
 		_zend_rt_hash_add_or_update(ht, arKey, nKeyLength, pData, nDataSize, pDest, HASH_UPDATE ZEND_FILE_LINE_CC)
+#define zend_utf8_hash_update(ht, arKey, nKeyLength, pData, nDataSize, pDest) \
+		_zend_utf8_hash_add_or_update(ht, arKey, nKeyLength, pData, nDataSize, pDest, HASH_UPDATE ZEND_FILE_LINE_CC)
 #define zend_u_hash_update(ht, type, arKey, nKeyLength, pData, nDataSize, pDest) \
 		_zend_u_hash_add_or_update(ht, type, arKey, nKeyLength, pData, nDataSize, pDest, HASH_UPDATE ZEND_FILE_LINE_CC)
 #define zend_hash_add(ht, arKey, nKeyLength, pData, nDataSize, pDest) \
@@ -135,6 +138,8 @@ ZEND_API int _zend_u_hash_add_or_update(HashTable *ht, zend_uchar type, zstr arK
 		_zend_ascii_hash_add_or_update(ht, arKey, nKeyLength, pData, nDataSize, pDest, HASH_ADD ZEND_FILE_LINE_CC)
 #define zend_rt_hash_add(ht, arKey, nKeyLength, pData, nDataSize, pDest) \
 		_zend_rt_hash_add_or_update(ht, arKey, nKeyLength, pData, nDataSize, pDest, HASH_ADD ZEND_FILE_LINE_CC)
+#define zend_utf8_hash_add(ht, arKey, nKeyLength, pData, nDataSize, pDest) \
+		_zend_utf8_hash_add_or_update(ht, arKey, nKeyLength, pData, nDataSize, pDest, HASH_ADD ZEND_FILE_LINE_CC)
 #define zend_u_hash_add(ht, type, arKey, nKeyLength, pData, nDataSize, pDest) \
 		_zend_u_hash_add_or_update(ht, type, arKey, nKeyLength, pData, nDataSize, pDest, HASH_ADD ZEND_FILE_LINE_CC)
 
@@ -188,6 +193,7 @@ ZEND_API void zend_hash_to_unicode(HashTable *ht, apply_func_t apply_func TSRMLS
 ZEND_API int zend_hash_del_key_or_index(HashTable *ht, char *arKey, uint nKeyLength, ulong h, int flag);
 ZEND_API int zend_ascii_hash_del(HashTable *ht, char *arKey, uint nKeyLength);
 ZEND_API int zend_rt_hash_del(HashTable *ht, char *arKey, uint nKeyLength);
+ZEND_API int zend_utf8_hash_del(HashTable *ht, char *arKey, uint nKeyLength);
 ZEND_API int zend_u_hash_del_key_or_index(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, ulong h, int flag);
 #define zend_hash_del(ht, arKey, nKeyLength) \
 		zend_hash_del_key_or_index(ht, arKey, nKeyLength, 0, HASH_DEL_KEY)
@@ -203,6 +209,7 @@ ZEND_API ulong zend_u_get_hash_value(zend_uchar type, zstr arKey, uint nKeyLengt
 ZEND_API int zend_hash_find(HashTable *ht, char *arKey, uint nKeyLength, void **pData);
 ZEND_API int zend_ascii_hash_find(HashTable *ht, char *arKey, uint nKeyLength, void **pData);
 ZEND_API int zend_rt_hash_find(HashTable *ht, char *arKey, uint nKeyLength, void **pData);
+ZEND_API int zend_utf8_hash_find(HashTable *ht, char *arKey, uint nKeyLength, void **pData);
 ZEND_API int zend_u_hash_find(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, void **pData);
 ZEND_API int zend_hash_quick_find(HashTable *ht, char *arKey, uint nKeyLength, ulong h, void **pData);
 ZEND_API int zend_u_hash_quick_find(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, ulong h, void **pData);
@@ -212,6 +219,7 @@ ZEND_API int zend_hash_index_find(HashTable *ht, ulong h, void **pData);
 ZEND_API int zend_hash_exists(HashTable *ht, char *arKey, uint nKeyLength);
 ZEND_API int zend_ascii_hash_exists(HashTable *ht, char *arKey, uint nKeyLength);
 ZEND_API int zend_rt_hash_exists(HashTable *ht, char *arKey, uint nKeyLength);
+ZEND_API int zend_utf8_hash_exists(HashTable *ht, char *arKey, uint nKeyLength);
 ZEND_API int zend_u_hash_exists(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength);
 ZEND_API int zend_hash_quick_exists(HashTable *ht, char *arKey, uint nKeyLength, ulong h);
 ZEND_API int zend_u_hash_quick_exists(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, ulong h);
@@ -363,6 +371,11 @@ ZEND_API int zend_rt_symtable_update(HashTable *ht, char *arKey, uint nKeyLength
 ZEND_API int zend_rt_symtable_del(HashTable *ht, char *arKey, uint nKeyLength);
 ZEND_API int zend_rt_symtable_find(HashTable *ht, char *arKey, uint nKeyLength, void **pData);
 ZEND_API int zend_rt_symtable_exists(HashTable *ht, char *arKey, uint nKeyLength);
+
+ZEND_API int zend_utf8_symtable_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest);
+ZEND_API int zend_utf8_symtable_del(HashTable *ht, char *arKey, uint nKeyLength);
+ZEND_API int zend_utf8_symtable_find(HashTable *ht, char *arKey, uint nKeyLength, void **pData);
+ZEND_API int zend_utf8_symtable_exists(HashTable *ht, char *arKey, uint nKeyLength);
 
 ZEND_API int zend_u_symtable_update(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest);
 ZEND_API int zend_u_symtable_del(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength);
