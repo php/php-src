@@ -866,7 +866,6 @@ ZIPARCHIVE_METHOD(open)
 	ze_zip_object *ze_obj = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &filename, &filename_len, &flags) == FAILURE) {
-		WRONG_PARAM_COUNT;
 		return;
 	}
 
@@ -955,7 +954,6 @@ ZIPARCHIVE_METHOD(addFile)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sll",
 			&filename, &filename_len, &entry_name, &entry_name_len, &offset_start, &offset_len) == FAILURE) {
-		WRONG_PARAM_COUNT;
 		return;
 	}
 
@@ -1022,7 +1020,6 @@ ZIPARCHIVE_METHOD(addFromString)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss",
 			&name, &name_len, &buffer, &buffer_len) == FAILURE) {
-		WRONG_PARAM_COUNT;
 		return;
 	}
 
@@ -1086,7 +1083,6 @@ ZIPARCHIVE_METHOD(statName)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l",
 			&name, &name_len, &flags) == FAILURE) {
-		WRONG_PARAM_COUNT;
 		return;
 	}
 
@@ -1114,7 +1110,6 @@ ZIPARCHIVE_METHOD(statIndex)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l",
 			&index, &flags) == FAILURE) {
-		WRONG_PARAM_COUNT;
 		return;
 	}
 
@@ -1144,7 +1139,6 @@ ZIPARCHIVE_METHOD(locateName)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l",
 			&name, &name_len, &flags) == FAILURE) {
-		WRONG_PARAM_COUNT;
 		return;
 	}
 	if (name_len<1) {
@@ -1183,7 +1177,6 @@ ZIPARCHIVE_METHOD(getNameIndex)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l",
 			&index, &flags) == FAILURE) {
-		WRONG_PARAM_COUNT;
 		return;
 	}
 
@@ -1213,7 +1206,6 @@ ZIPARCHIVE_METHOD(setArchiveComment)
 	ZIP_FROM_OBJECT(intern, this);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &comment, &comment_len) == FAILURE) {
-		WRONG_PARAM_COUNT;
 		return;
 	}
 	if (zip_set_archive_comment(intern, (const char *)comment, (int)comment_len)) {
@@ -1241,7 +1233,6 @@ ZIPARCHIVE_METHOD(getArchiveComment)
 	ZIP_FROM_OBJECT(intern, this);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &flags) == FAILURE) {
-		WRONG_PARAM_COUNT;
 		return;
 	}
 
@@ -1268,7 +1259,6 @@ ZIPARCHIVE_METHOD(setCommentName)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss",
 			&name, &name_len, &comment, &comment_len) == FAILURE) {
-		WRONG_PARAM_COUNT;
 		return;
 	}
 
@@ -1297,7 +1287,6 @@ ZIPARCHIVE_METHOD(setCommentIndex)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls",
 			&index, &comment, &comment_len) == FAILURE) {
-		WRONG_PARAM_COUNT;
 		return;
 	}
 
@@ -1327,7 +1316,6 @@ ZIPARCHIVE_METHOD(getCommentName)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l",
 			&name, &name_len, &flags) == FAILURE) {
-		WRONG_PARAM_COUNT;
 		return;
 	}
 
@@ -1356,7 +1344,6 @@ ZIPARCHIVE_METHOD(getCommentIndex)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l",
 				&index, &flags) == FAILURE) {
-		WRONG_PARAM_COUNT;
 		return;
 	}
 
@@ -1381,7 +1368,6 @@ ZIPARCHIVE_METHOD(deleteIndex)
 	ZIP_FROM_OBJECT(intern, this);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &index) == FAILURE) {
-		WRONG_PARAM_COUNT;
 		return;
 	}
 
@@ -1414,7 +1400,6 @@ ZIPARCHIVE_METHOD(deleteName)
 	ZIP_FROM_OBJECT(intern, this);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
-		WRONG_PARAM_COUNT;
 		return;
 	}
 	if (name_len < 1) {
@@ -1447,7 +1432,6 @@ ZIPARCHIVE_METHOD(renameIndex)
 	ZIP_FROM_OBJECT(intern, this);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &index, &new_name, &new_name_len) == FAILURE) {
-		WRONG_PARAM_COUNT;
 		return;
 	}
 
@@ -1483,7 +1467,6 @@ ZIPARCHIVE_METHOD(renameName)
 	ZIP_FROM_OBJECT(intern, this);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &name, &name_len, &new_name, &new_name_len) == FAILURE) {
-		WRONG_PARAM_COUNT;
 		return;
 	}
 
@@ -1516,7 +1499,6 @@ ZIPARCHIVE_METHOD(unchangeIndex)
 	ZIP_FROM_OBJECT(intern, this);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &index) == FAILURE) {
-		WRONG_PARAM_COUNT;
 		return;
 	}
 
@@ -1549,7 +1531,6 @@ ZIPARCHIVE_METHOD(unchangeName)
 	ZIP_FROM_OBJECT(intern, this);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
-		WRONG_PARAM_COUNT;
 		return;
 	}
 
@@ -1636,7 +1617,6 @@ ZIPARCHIVE_METHOD(extractTo)
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", &pathto, &pathto_len, &zval_files) == FAILURE) {
-		WRONG_PARAM_COUNT;
 		return;
 	}
 
@@ -1732,13 +1712,11 @@ static void php_zip_get_from(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 
 	if (type == 1) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ll", &filename, &filename_len, &len, &flags) == FAILURE) {
-			WRONG_PARAM_COUNT;
 			return;
 		}
 		PHP_ZIP_STAT_PATH(intern, filename, filename_len, flags, sb);
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|ll", &index, &len, &flags) == FAILURE) {
-			WRONG_PARAM_COUNT;
 			return;
 		}
 		PHP_ZIP_STAT_INDEX(intern, index, 0, sb);
@@ -1809,7 +1787,6 @@ ZIPARCHIVE_METHOD(getStream)
 	ZIP_FROM_OBJECT(intern, this);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
-		WRONG_PARAM_COUNT;
 		return;
 	}
 

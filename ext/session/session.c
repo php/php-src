@@ -1416,7 +1416,7 @@ PHP_FUNCTION(session_regenerate_id)
 	zend_bool del_ses = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &del_ses) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		return;
 	}
 
 	if (SG(headers_sent)) {

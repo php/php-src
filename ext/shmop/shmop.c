@@ -122,7 +122,7 @@ PHP_FUNCTION(shmop_open)
 	zend_uchar flag_type;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ltll", &key, &flags, &flags_len, &flag_type, &mode, &size) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		return;
 	}
 
 	if (flag_type == IS_UNICODE) {
@@ -216,7 +216,7 @@ PHP_FUNCTION(shmop_read)
 	char *return_string;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lll", &shmid, &start, &count) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		return;
 	}
 
 	shmop = zend_list_find(shmid, &type);
@@ -256,7 +256,7 @@ PHP_FUNCTION(shmop_close)
 	int type;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &shmid) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		return;
 	}
 
 	shmop = zend_list_find(shmid, &type);
@@ -279,7 +279,7 @@ PHP_FUNCTION(shmop_size)
 	int type;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &shmid) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		return;
 	}
 
 	shmop = zend_list_find(shmid, &type);
@@ -305,7 +305,7 @@ PHP_FUNCTION(shmop_write)
 	int data_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lS|l", &shmid, &data, &data_len, &offset) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		return;
 	}
 
 	shmop = zend_list_find(shmid, &type);
@@ -341,7 +341,7 @@ PHP_FUNCTION(shmop_delete)
 	int type;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &shmid) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		return;
 	}
 
 	shmop = zend_list_find(shmid, &type);

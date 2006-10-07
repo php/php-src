@@ -1365,7 +1365,6 @@ PHP_FUNCTION(xmlwriter_open_uri)
 #endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &source, &source_len, &source_type) == FAILURE) {
-		WRONG_PARAM_COUNT;
 		return;
 	}
 	
