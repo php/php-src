@@ -2976,7 +2976,7 @@ PHP_FUNCTION(imagecolorstotal)
 }
 /* }}} */
 
-/* {{{ proto int imagecolortransparent(resource im [, int col])
+/* {{{ proto int imagecolortransparent(resource im [, int col]) U
    Define a color as transparent */
 PHP_FUNCTION(imagecolortransparent)
 {
@@ -3205,13 +3205,22 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	zval *IM;
 	long size, x, y, col;
+	zend_uchar str_type;
 	char *str;
 	int str_len, i;
 	gdImagePtr im;
 	gdFontPtr font;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlllsl", &IM, &size, &x, &y, &str, &str_len, &col) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllltl", &IM, &size, &x, &y, &str, &str_len, &str_type, &col) == FAILURE) {
 		return;
+	}
+
+	if (str_type == IS_UNICODE) {
+		str = zend_unicode_to_ascii((UChar*)str, str_len TSRMLS_CC);
+		if (!str) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received.  Consider using the TTF functions for Unicode output");
+			RETURN_FALSE;
+		}		
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
@@ -3241,11 +3250,15 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		}
 	}
 
+	if (str_type == IS_UNICODE) {
+		efree(str);
+	}
+
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool imagechar(resource im, int font, int x, int y, string c, int col)
+/* {{{ proto bool imagechar(resource im, int font, int x, int y, string c, int col) U
    Draw a character */
 PHP_FUNCTION(imagechar)
 {
@@ -3253,7 +3266,7 @@ PHP_FUNCTION(imagechar)
 }
 /* }}} */
 
-/* {{{ proto bool imagecharup(resource im, int font, int x, int y, string c, int col)
+/* {{{ proto bool imagecharup(resource im, int font, int x, int y, string c, int col) U
    Draw a character rotated 90 degrees counter-clockwise */
 PHP_FUNCTION(imagecharup)
 {
@@ -3261,7 +3274,7 @@ PHP_FUNCTION(imagecharup)
 }
 /* }}} */
 
-/* {{{ proto bool imagestring(resource im, int font, int x, int y, string str, int col)
+/* {{{ proto bool imagestring(resource im, int font, int x, int y, string str, int col) U
    Draw a string horizontally */
 PHP_FUNCTION(imagestring)
 {
@@ -3269,7 +3282,7 @@ PHP_FUNCTION(imagestring)
 }
 /* }}} */
 
-/* {{{ proto bool imagestringup(resource im, int font, int x, int y, string str, int col)
+/* {{{ proto bool imagestringup(resource im, int font, int x, int y, string str, int col) U
    Draw a string vertically - rotated 90 degrees counter-clockwise */
 PHP_FUNCTION(imagestringup)
 {
@@ -3404,7 +3417,7 @@ PHP_FUNCTION(imagesy)
 #ifdef ENABLE_GD_TTF
 
 #if HAVE_LIBFREETYPE && HAVE_GD_STRINGFTEX
-/* {{{ proto array imageftbbox(float size, float angle, string font_file, string text [, array extrainfo])
+/* {{{ proto array imageftbbox(float size, float angle, string font_file, string text [, array extrainfo]) U
    Give the bounding box of a text using fonts via freetype2 */
 PHP_FUNCTION(imageftbbox)
 {
@@ -3412,7 +3425,7 @@ PHP_FUNCTION(imageftbbox)
 }
 /* }}} */
 
-/* {{{ proto array imagefttext(resource im, float size, float angle, int x, int y, int col, string font_file, string text [, array extrainfo])
+/* {{{ proto array imagefttext(resource im, float size, float angle, int x, int y, int col, string font_file, string text [, array extrainfo]) U
    Write text to the image using fonts via freetype2 */
 PHP_FUNCTION(imagefttext)
 {
@@ -3421,7 +3434,7 @@ PHP_FUNCTION(imagefttext)
 /* }}} */
 #endif
 
-/* {{{ proto array imagettfbbox(float size, float angle, string font_file, string text)
+/* {{{ proto array imagettfbbox(float size, float angle, string font_file, string text) U
    Give the bounding box of a text using TrueType fonts */
 PHP_FUNCTION(imagettfbbox)
 {
@@ -3429,7 +3442,7 @@ PHP_FUNCTION(imagettfbbox)
 }
 /* }}} */
 
-/* {{{ proto array imagettftext(resource im, float size, float angle, int x, int y, int col, string font_file, string text)
+/* {{{ proto array imagettftext(resource im, float size, float angle, int x, int y, int col, string font_file, string text) U
    Write text to the image using a TrueType font */
 PHP_FUNCTION(imagettftext)
 {
@@ -3458,15 +3471,21 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 #endif
 
 	if (mode == TTFTEXT_BBOX) {
+		zval **ppfontname;
+
 		if (argc < 4 || argc > ((extended) ? 5 : 4)) {
 			ZEND_WRONG_PARAM_COUNT();
-		} else if (zend_parse_parameters(argc TSRMLS_CC, "ddss|a", &ptsize, &angle, &fontname, &fontname_len, &str, &str_len, &EXT) == FAILURE) {
+		} else if (zend_parse_parameters(argc TSRMLS_CC, "ddZs&|a", &ptsize, &angle, &ppfontname, &str, &str_len, UG(utf8_conv), &EXT) == FAILURE ||
+			php_stream_path_param_encode(ppfontname, &fontname, &fontname_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
 			RETURN_FALSE;
 		}
 	} else {
+		zval **ppfontname;
+
 		if (argc < 8 || argc > ((extended) ? 9 : 8)) {
 			ZEND_WRONG_PARAM_COUNT();
-		} else if (zend_parse_parameters(argc TSRMLS_CC, "rddlllss|a", &IM, &ptsize, &angle, &x, &y, &col, &fontname, &fontname_len, &str, &str_len, &EXT) == FAILURE) {
+		} else if (zend_parse_parameters(argc TSRMLS_CC, "rddlllZs&|a", &IM, &ptsize, &angle, &x, &y, &col, &ppfontname, &str, &str_len, UG(utf8_conv), &EXT) == FAILURE ||
+			php_stream_path_param_encode(ppfontname, &fontname, &fontname_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
 			RETURN_FALSE;
 		}
 		ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
@@ -3500,6 +3519,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 				strex.linespacing = Z_DVAL_PP(item);
 			}
 
+			/* UTODO: Accept a "charmap" key and use alternate conversions when necessary (Shift_JIS, Big5) */
 		} while (zend_hash_move_forward_ex(HASH_OF(EXT), &pos) == SUCCESS);
 	}
 #endif
@@ -4499,7 +4519,7 @@ PHP_FUNCTION(imagefilter)
 }
 /* }}} */
 
-/* {{{ proto resource imageconvolution(resource src_im, array matrix3x3, double div, double offset)
+/* {{{ proto resource imageconvolution(resource src_im, array matrix3x3, double div, double offset) U
    Apply a 3x3 convolution matrix, using coefficient div and offset */
 PHP_FUNCTION(imageconvolution)
 {
