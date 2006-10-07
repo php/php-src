@@ -93,11 +93,13 @@ PHP_FUNCTION(mysqli_connect)
 		RETURN_FALSE;
 	}
 
+#ifdef HAVE_MYSQLI_SET_CHARSET
 	/* when PHP runs in unicode, set default character set to utf8 */
 	if (UG(unicode)) {
 		mysql_set_character_set(mysql->mysql, "utf8");
 		mysql->conv = UG(utf8_conv);
 	}
+#endif
 
 	/* clear error */
 	php_mysqli_set_error(mysql_errno(mysql->mysql), (char *) mysql_error(mysql->mysql) TSRMLS_CC);
