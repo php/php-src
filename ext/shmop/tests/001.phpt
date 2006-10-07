@@ -9,8 +9,8 @@ shmop extension test
 --FILE--
 <?php
 	$hex_shm_id = 0xff3;
-	$write_d1 = "test #1 of the shmop() extension";
-	$write_d2 = "test #2 append data to shared memory segment";
+	$write_d1 = b"test #1 of the shmop() extension";
+	$write_d2 = b"test #2 append data to shared memory segment";
 
 	echo "shm open for create: ";
 	$shm_id = shmop_open($hex_shm_id, "n", 0644, 1024);   
