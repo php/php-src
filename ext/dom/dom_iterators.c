@@ -170,6 +170,8 @@ static int php_dom_iterator_current_key(zend_object_iterator *iter, zstr *str_ke
 		intern = (dom_object *)zend_object_store_get_object(curobj TSRMLS_CC);
 		if (intern != NULL && intern->ptr != NULL) {
 			curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->ptr)->node;
+		} else {
+			return HASH_KEY_NON_EXISTANT;
 		}
 
 		namelen = xmlStrlen(curnode->name);
@@ -220,8 +222,10 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC)
 					if (basenode && (basenode->type == XML_DOCUMENT_NODE || 
 						basenode->type == XML_HTML_DOCUMENT_NODE)) {
 						basenode = xmlDocGetRootElement((xmlDoc *) basenode);
-					} else {
+					} else if (basenode) {
 						basenode = basenode->children;
+					} else {
+						goto err;
 					}
 					curnode = dom_get_elements_by_tag_name_ns_raw(basenode, objmap->ns, objmap->local, &previndex, iter->index);
 				}
@@ -234,7 +238,7 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC)
 			}
 		}
 	}
-
+err:
 	zval_ptr_dtor((zval**)&curobj);
 	if (curnode) {
 		MAKE_STD_ZVAL(curattr);
@@ -288,6 +292,9 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 				}
 			} else {
 				nodep = (xmlNode *)dom_object_get_node(objmap->baseobj);
+				if (!nodep) {
+					goto err;
+				}
 				if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
 					if (objmap->nodetype == XML_ATTRIBUTE_NODE) {
 						curnode = (xmlNodePtr) nodep->properties;
@@ -311,7 +318,7 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 			}
 		}
 	}
-
+err:
 	if (curnode) {
 		MAKE_STD_ZVAL(curattr);
 		curattr = php_dom_create_object(curnode, &ret, NULL, curattr, objmap->baseobj TSRMLS_CC);
