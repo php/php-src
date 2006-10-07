@@ -3770,7 +3770,7 @@ PHP_FUNCTION(imagepsslantfont)
 
 	ZEND_FETCH_RESOURCE(f_ind, int *, &fnt, -1, "Type 1 font", le_ps_font);
 
-	if (T1_SlantFont(*f_ind, slt) != 0) {
+	if (T1_SlantFont(*f_ind, slant) != 0) {
 		RETURN_FALSE;
 	}
 
@@ -4179,7 +4179,7 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open '%s' Not a valid JPEG file", fn_dest);
 				goto convert_done;
 			}
-â			break;
+			break;
 #endif /* HAVE_GD_JPG */
 
 
