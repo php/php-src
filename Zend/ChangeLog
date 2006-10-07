@@ -1,3 +1,27 @@
+2006-10-06  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_strtol.c:
+      Patch from Matt W to fix the case of hitting ERANGE too early.
+
+    * zend_builtin_functions.c:
+      Unicode string support for extension_loaded().
+
+    * zend_builtin_functions.c:
+      Unicode string support in get_extension_funcs().
+
+2006-10-06  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_5_2)
+      zend.c:
+      MFH(r-1.376): Preserve EG(return_value_ptr_ptr) when calling
+      zend_execute_scripts()
+      
+      Reapplying this since it looks like we'll be doing a PHP 5.2 RC6 after all
+
+    * (PHP_5_2)
+      zend.c:
+      Revert until 5.2's release since we're in RC stage
+
 2006-10-05  Sara Golemon  <sara@golemon.com>
 
     * (PHP_5_2)
