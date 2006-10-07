@@ -50,9 +50,9 @@ unlink($dir . '/p.png');
 
 
 //empty string
-$im = imagecreatefromstring('');
+$im = imagecreatefromstring(b'');
 //random string > 8
-$im = imagecreatefromstring(' asdf jklp');
+$im = imagecreatefromstring(b' asdf jklp');
 ?>
 --EXPECTF--
 createfromstring truecolor png: ok
