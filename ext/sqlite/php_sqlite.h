@@ -93,7 +93,10 @@ PHP_FUNCTION(sqlite_factory);
 PHP_FUNCTION(sqlite_fetch_column_types);
 
 ZEND_BEGIN_MODULE_GLOBALS(sqlite)
-	 long assoc_case;
+	long assoc_case;
+#ifdef SQLITE_ISO8859
+	UConverter *iso8859_conv;
+#endif
 ZEND_END_MODULE_GLOBALS(sqlite)
 
 #ifdef ZTS
