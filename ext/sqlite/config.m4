@@ -8,8 +8,8 @@ PHP_ARG_WITH(sqlite, for sqlite support,
                           Sqlite include and library files are located,
                           if not using bundled library.], yes)
 
-PHP_ARG_ENABLE(sqlite-utf8, whether to enable UTF-8 support in sqlite (default: ISO-8859-1),
-[  --enable-sqlite-utf8      SQLite: Enable UTF-8 support for SQLite], no, no)
+PHP_ARG_ENABLE(sqlite-utf8, whether to disable UTF-8 support in libsqlite (charset changes to ISO-8859-1),
+[  --disable-sqlite-utf8     SQLite: Disable UTF-8 support for SQLite (use ISO8859)], yes, no)
 
 
 
@@ -126,11 +126,11 @@ if test "$PHP_SQLITE" != "no"; then
     dnl use latin 1 for SQLite older than 2.8.9; the utf-8 handling 
     dnl in funcs.c uses assert(), which is a bit silly and something 
     dnl we want to avoid. This assert() was removed in SQLite 2.8.9.
-    if test "$PHP_SQLITE_UTF8" = "yes"; then
+    if test "$PHP_SQLITE_UTF8" = "no"; then
+      SQLITE_ENCODING="ISO8859"
+    else
       SQLITE_ENCODING="UTF8"
       AC_DEFINE(SQLITE_UTF8, 1, [ ])
-    else
-      SQLITE_ENCODING="ISO8859"
     fi
     PHP_SUBST(SQLITE_ENCODING)
 

@@ -29,9 +29,12 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "ext/standard/file.h"
+#include "ext/standard/php_string.h"
 #if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
 #include "ext/session/php_session.h"
 #endif
+#include <sqlite.h>
 #include "php_sqlite.h"
 
 #if HAVE_TIME_H
@@ -41,7 +44,12 @@
 #include <unistd.h>
 #endif
 
-#include <sqlite.h>
+
+#ifdef SQLITE_UTF8
+#define SQLITE2_CONV UG(utf8_conv)
+#else /* ISO 8859 */
+#define SQLITE2_CONV SQLITE_G(iso8859_conv)
+#endif
 
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
@@ -95,10 +103,48 @@ static inline void php_sqlite_strtolower(char *s)
 	}
 }
 
+#ifdef SQLITE_ISO8859
+static ZEND_INI_MH(OnUpdateEncodingISO8859)
+{
+	UConverter **converter;
+#ifndef ZTS
+	char *base = (char *) mh_arg2;
+#else
+	char *base = (char *) ts_resource(*((int *) mh_arg2));
+#endif
+	char encoding[sizeof("iso-8859-999")];
+
+	converter = (UConverter **) (base+(size_t) mh_arg1);
+	if (new_value_length > 3) {
+		/* Really, 2 is sufficient, but be generous, the zend_set_converter_encoding call will find it out */
+		zend_error(E_CORE_ERROR, "Unrecognized locale '%s' for iso-8859 encoding used for %s", new_value ?  new_value : "1", entry->name);
+		return FAILURE;
+	}
+
+	snprintf(encoding, sizeof("iso-8859-999"), "iso-8859-%s", new_value ? new_value : "1");
+
+        if (zend_set_converter_encoding(converter, encoding) == FAILURE) {
+                zend_error(E_CORE_ERROR, "Unrecognized locale '%s' for iso-8859 encoding used for %s", new_value ?  new_value : "1", entry->name);
+                return FAILURE;
+        }
+
+        if (*converter) {
+                zend_set_converter_error_mode(*converter, ZEND_FROM_UNICODE, UG(from_error_mode));
+                zend_set_converter_error_mode(*converter, ZEND_TO_UNICODE, UG(to_error_mode));
+                zend_set_converter_subst_char(*converter, UG(from_subst_char));
+        }
+
+        return SUCCESS;
+}
+#endif /* ISO8859 */
+
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
-STD_PHP_INI_ENTRY_EX("sqlite.assoc_case", "0", PHP_INI_ALL, OnUpdateLong, assoc_case, zend_sqlite_globals, sqlite_globals, display_link_numbers)
+	STD_PHP_INI_ENTRY_EX("sqlite.assoc_case", "0", PHP_INI_ALL, OnUpdateLong, assoc_case, zend_sqlite_globals, sqlite_globals, display_link_numbers)
+#ifdef SQLITE_ISO8859
+	STD_PHP_INI_ENTRY("sqlite.iso8859.locale", "1", PHP_INI_ALL, OnUpdateEncodingISO8859, iso8859_conv, zend_sqlite_globals, sqlite_globals)
+#endif
 PHP_INI_END()
 /* }}} */
 
@@ -468,7 +514,7 @@ static void php_sqlite_generic_function_callback(sqlite_func *func, int argc, co
 		for (i = 0; i < argc-1; i++) {
 			zargs[i] = emalloc(sizeof(zval *));
 			MAKE_STD_ZVAL(*zargs[i]);
-			ZVAL_STRING(*zargs[i], (char*)argv[i+1], 1);
+			ZVAL_U_STRING(SQLITE2_CONV, *zargs[i], (char*)argv[i+1], ZSTR_DUPLICATE);
 		}
 	}
 
@@ -487,6 +533,20 @@ static void php_sqlite_generic_function_callback(sqlite_func *func, int argc, co
 			sqlite_set_result_string(func, NULL, 0);
 		} else {
 			switch (Z_TYPE_P(retval)) {
+				case IS_UNICODE:
+				{
+					char *str;
+					int str_len;
+
+					if (SUCCESS == zend_unicode_to_string(SQLITE2_CONV, &str, &str_len, Z_USTRVAL_P(retval), Z_USTRLEN_P(retval) TSRMLS_CC)) {
+						sqlite_set_result_string(func, str, str_len);
+						efree(str);
+					} else {
+						/* zuts raised an error for us */
+						sqlite_set_result_string(func, "*unicode conversion error*", sizeof("*unicode conversion error*") - 1);
+					}
+					break;
+				}
 				case IS_STRING:
 					sqlite_set_result_string(func, Z_STRVAL_P(retval), Z_STRLEN_P(retval));
 					break;
@@ -549,7 +609,7 @@ static void php_sqlite_function_callback(sqlite_func *func, int argc, const char
 			if (argv[i] == NULL) {
 				ZVAL_NULL(*zargs[i]);
 			} else {
-				ZVAL_STRING(*zargs[i], (char*)argv[i], 1);
+				ZVAL_U_STRING(SQLITE2_CONV, *zargs[i], (char*)argv[i], ZSTR_DUPLICATE);
 			}
 		}
 	}
@@ -567,6 +627,20 @@ static void php_sqlite_function_callback(sqlite_func *func, int argc, const char
 			sqlite_set_result_string(func, NULL, 0);
 		} else {
 			switch (Z_TYPE_P(retval)) {
+				case IS_UNICODE:
+				{
+					char *str;
+					int str_len;
+
+					if (SUCCESS == zend_unicode_to_string(SQLITE2_CONV, &str, &str_len, Z_USTRVAL_P(retval), Z_USTRLEN_P(retval) TSRMLS_CC)) {
+						sqlite_set_result_string(func, str, str_len);
+						efree(str);
+					} else {
+						/* zuts raised an error for us */
+						sqlite_set_result_string(func, "*unicode conversion error*", sizeof("*unicode conversion error*") - 1);
+					}
+					break;
+				}
 				case IS_STRING:
 					/* TODO: for binary results, need to encode the string */
 					sqlite_set_result_string(func, Z_STRVAL_P(retval), Z_STRLEN_P(retval));
@@ -642,7 +716,7 @@ static void php_sqlite_agg_step_function_callback(sqlite_func *func, int argc, c
 		if (argv[i] == NULL) {
 			ZVAL_NULL(*zargs[i+1]);
 		} else {
-			ZVAL_STRING(*zargs[i+1], (char*)argv[i], 1);
+			ZVAL_U_STRING(SQLITE2_CONV, *zargs[i+1], (char*)argv[i], ZSTR_DUPLICATE);
 		}
 	}
 
@@ -701,6 +775,20 @@ static void php_sqlite_agg_fini_function_callback(sqlite_func *func)
 			sqlite_set_result_string(func, NULL, 0);
 		} else {
 			switch (Z_TYPE_P(retval)) {
+				case IS_UNICODE:
+				{
+					char *str;
+					int str_len;
+
+					if (SUCCESS == zend_unicode_to_string(SQLITE2_CONV, &str, &str_len, Z_USTRVAL_P(retval), Z_USTRLEN_P(retval) TSRMLS_CC)) {
+						sqlite_set_result_string(func, str, str_len);
+						efree(str);
+					} else {
+						/* zuts raised an error for us */
+						sqlite_set_result_string(func, "*unicode conversion error*", sizeof("*unicode conversion error*") - 1);
+					}
+					break;
+				}
 				case IS_STRING:
 					/* TODO: for binary results, need to encode the string */
 					sqlite_set_result_string(func, Z_STRVAL_P(retval), Z_STRLEN_P(retval));
@@ -1024,6 +1112,9 @@ zend_object_iterator *sqlite_get_iterator(zend_class_entry *ce, zval *object, in
 static PHP_GINIT_FUNCTION(sqlite)
 {
 	sqlite_globals->assoc_case = 0;
+#ifdef SQLITE_ISO8859
+	sqlite_globals->iso8859_conv = 0;
+#endif
 }
 
 PHP_MINIT_FUNCTION(sqlite)
@@ -1150,7 +1241,7 @@ static struct php_sqlite_db *php_sqlite_open(char *filename, int mode, char *per
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errtext);
 
 		if (errmsg) {
-			ZVAL_STRING(errmsg, errtext, 1);
+			ZVAL_U_STRING(SQLITE2_CONV, errmsg, errtext, ZSTR_DUPLICATE);
 		}
 
 		sqlite_freemem(errtext);
@@ -1211,10 +1302,11 @@ static struct php_sqlite_db *php_sqlite_open(char *filename, int mode, char *per
 	return db;
 }
 
-/* {{{ proto resource sqlite_popen(string filename [, int mode [, string &error_message]])
+/* {{{ proto resource sqlite_popen(string filename [, int mode [, string &error_message]]) U
    Opens a persistent handle to a SQLite database. Will create the database if it does not exist. */
 PHP_FUNCTION(sqlite_popen)
 {
+	zval **ppfilename;
 	long mode = 0666;
 	char *filename, *fullpath, *hashkey;
 	int filename_len, hashkeylen;
@@ -1222,8 +1314,8 @@ PHP_FUNCTION(sqlite_popen)
 	struct php_sqlite_db *db = NULL;
 	zend_rsrc_list_entry *le;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz/",
-				&filename, &filename_len, &mode, &errmsg)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|lz/", &ppfilename, &mode, &errmsg) ||
+		FAILURE == php_stream_path_param_encode(ppfilename, &filename, &filename_len, REPORT_ERRORS, FG(default_context))) {
 		return;
 	}
 	if (errmsg) {
@@ -1285,10 +1377,11 @@ done:
 }
 /* }}} */
 
-/* {{{ proto resource sqlite_open(string filename [, int mode [, string &error_message]])
+/* {{{ proto resource sqlite_open(string filename [, int mode [, string &error_message]]) U
    Opens a SQLite database. Will create the database if it does not exist. */
 PHP_FUNCTION(sqlite_open)
 {
+	zval **ppfilename;
 	long mode = 0666;
 	char *filename, *fullpath = NULL;
 	int filename_len;
@@ -1296,8 +1389,8 @@ PHP_FUNCTION(sqlite_open)
 	zval *object = getThis();
 
 	php_set_error_handling(object ? EH_THROW : EH_NORMAL, sqlite_ce_exception TSRMLS_CC);
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz/",
-				&filename, &filename_len, &mode, &errmsg)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|lz/", &ppfilename, &mode, &errmsg) ||
+		FAILURE == php_stream_path_param_encode(ppfilename, &filename, &filename_len, REPORT_ERRORS, FG(default_context))) {
 		php_std_error_handling();
 		return;
 	}
@@ -1337,18 +1430,19 @@ PHP_FUNCTION(sqlite_open)
 }
 /* }}} */
 
-/* {{{ proto object sqlite_factory(string filename [, int mode [, string &error_message]])
+/* {{{ proto object sqlite_factory(string filename [, int mode [, string &error_message]]) U
    Opens a SQLite database and creates an object for it. Will create the database if it does not exist. */
 PHP_FUNCTION(sqlite_factory)
 {
+	zval **ppfilename;
 	long mode = 0666;
 	char *filename, *fullpath = NULL;
 	int filename_len;
 	zval *errmsg = NULL;
 
 	php_set_error_handling(EH_THROW, sqlite_ce_exception TSRMLS_CC);
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz/",
-				&filename, &filename_len, &mode, &errmsg)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|lz/", &ppfilename, &mode, &errmsg) ||
+		FAILURE == php_stream_path_param_encode(ppfilename, &filename, &filename_len, REPORT_ERRORS, FG(default_context))) {
 		php_std_error_handling();
 		RETURN_NULL();
 	}
@@ -1379,7 +1473,7 @@ PHP_FUNCTION(sqlite_factory)
 }
 /* }}} */
 
-/* {{{ proto void sqlite_busy_timeout(resource db, int ms)
+/* {{{ proto void sqlite_busy_timeout(resource db, int ms) U
    Set busy timeout duration. If ms <= 0, all busy handlers are disabled. */
 PHP_FUNCTION(sqlite_busy_timeout)
 {
@@ -1404,7 +1498,7 @@ PHP_FUNCTION(sqlite_busy_timeout)
 }
 /* }}} */
 
-/* {{{ proto void sqlite_close(resource db)
+/* {{{ proto void sqlite_close(resource db) U
    Closes an open sqlite database. */
 PHP_FUNCTION(sqlite_close)
 {
@@ -1438,6 +1532,60 @@ next_row:
 		/* first row - lets copy the column names */
 		rres->col_names = safe_emalloc(rres->ncolumns, sizeof(char *), 0);
 		for (i = 0; i < rres->ncolumns; i++) {
+#ifdef SQLITE_UTF8
+			UChar *ucolname;
+			int ucolname_len;
+
+			if (SUCCESS == zend_string_to_unicode(SQLITE2_CONV, &ucolname, &ucolname_len, (char*)colnames[i], strlen((char*)colnames[i]) TSRMLS_CC)) {
+				char *scolname;
+				int scolname_len;
+
+				/* s->u was successful */
+				if (SQLITE_G(assoc_case) == 1) {
+					UChar *tmp;
+					int tmp_len = ucolname_len;
+
+					if ((tmp = php_u_strtoupper(ucolname, &tmp_len, UG(default_locale)))) {
+						efree(ucolname);
+						ucolname = tmp;
+						ucolname_len = tmp_len;
+					} else {
+						/* Case folding failed */
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to translate column '%s' to uppercase", (char*)colnames[i]);
+						efree(ucolname);
+						ucolname = NULL;
+					}
+				} else if (SQLITE_G(assoc_case) == 2) {
+					UChar *tmp;
+					int tmp_len = ucolname_len;
+
+					if ((tmp = php_u_strtolower(ucolname, &tmp_len, UG(default_locale)))) {
+						efree(ucolname);
+						ucolname = tmp;
+						ucolname_len = tmp_len;
+					} else {
+						/* Case folding failed */
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to translate column '%s' to uppercase", (char*)colnames[i]);
+						efree(ucolname);
+						ucolname = NULL;
+					}
+				}
+
+				/* Return the ustr to localized format */
+				if (ucolname &&
+					SUCCESS == zend_unicode_to_string(SQLITE2_CONV, &scolname, &scolname_len, ucolname, ucolname_len TSRMLS_CC)) {
+					rres->col_names[i] = scolname;
+					efree(ucolname);
+					continue;
+				}
+
+				if (ucolname) {
+					/* s->u->case worked, but final u->s failed */
+					efree(ucolname);
+				}
+			}
+			/* Some UTF8 step failed, fallback on plain old ASCII case folding */
+#endif
 			rres->col_names[i] = estrdup((char*)colnames[i]);
 
 			if (SQLITE_G(assoc_case) == 1) {
@@ -1529,7 +1677,7 @@ void sqlite_query(zval *object, struct php_sqlite_db *db, char *sql, long sql_le
 	if (ret != SQLITE_OK) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errtext);
 		if (errmsg) {
-			ZVAL_STRING(errmsg, errtext, 1);
+			ZVAL_U_STRING(SQLITE2_CONV, errmsg, errtext, ZSTR_DUPLICATE);
 		}
 		sqlite_freemem(errtext);
 		goto terminate;
@@ -1583,7 +1731,7 @@ terminate:
 }
 /* }}} */
 
-/* {{{ proto resource sqlite_unbuffered_query(string query, resource db [ , int result_type [, string &error_message]])
+/* {{{ proto resource sqlite_unbuffered_query(string query, resource db [ , int result_type [, string &error_message]]) U
    Executes a query that does not prefetch and buffer all data. */
 PHP_FUNCTION(sqlite_unbuffered_query)
 {
@@ -1597,14 +1745,14 @@ PHP_FUNCTION(sqlite_unbuffered_query)
 	zval *object = getThis();
 
 	if (object) {
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz/", &sql, &sql_len, &mode, &errmsg)) {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&|lz/", &sql, &sql_len, SQLITE2_CONV, &mode, &errmsg)) {
 			return;
 		}
 		DB_FROM_OBJECT(db, object);
 	} else {
 		if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
-				ZEND_NUM_ARGS() TSRMLS_CC, "sr|lz/", &sql, &sql_len, &zdb, &mode, &errmsg) &&
-			FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|lz/", &zdb, &sql, &sql_len, &mode, &errmsg)) {
+				ZEND_NUM_ARGS() TSRMLS_CC, "s&r|lz/", &sql, &sql_len, SQLITE2_CONV, &zdb, &mode, &errmsg) &&
+			FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs&|lz/", &zdb, &sql, &sql_len, SQLITE2_CONV, &mode, &errmsg)) {
 			return;
 		}
 		DB_FROM_ZVAL(db, &zdb);
@@ -1624,7 +1772,7 @@ PHP_FUNCTION(sqlite_unbuffered_query)
 		if (db->last_err_code != SQLITE_OK) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errtext);
 			if (errmsg) {
-				ZVAL_STRING(errmsg, errtext, 1);
+				ZVAL_U_STRING(SQLITE2_CONV, errmsg, errtext, ZSTR_DUPLICATE);
 			}
 			sqlite_freemem(errtext);
 		}
@@ -1635,7 +1783,7 @@ PHP_FUNCTION(sqlite_unbuffered_query)
 }
 /* }}} */
 
-/* {{{ proto resource sqlite_fetch_column_types(string table_name, resource db [, int result_type])
+/* {{{ proto resource sqlite_fetch_column_types(string table_name, resource db [, int result_type]) U
    Return an array of column types from a particular table. */
 PHP_FUNCTION(sqlite_fetch_column_types)
 {
@@ -1651,14 +1799,14 @@ PHP_FUNCTION(sqlite_fetch_column_types)
 	long result_type = PHPSQLITE_ASSOC;
 
 	if (object) {
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &tbl, &tbl_len, &result_type)) {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&|l", &tbl, &tbl_len, SQLITE2_CONV, &result_type)) {
 			return;
 		}
 		DB_FROM_OBJECT(db, object);
 	} else {
 		if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
-				ZEND_NUM_ARGS() TSRMLS_CC, "sr|l", &tbl, &tbl_len, &zdb, &result_type) &&
-			FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|l", &zdb, &tbl, &tbl_len, &result_type)) {
+				ZEND_NUM_ARGS() TSRMLS_CC, "s&r|l", &tbl, &tbl_len, SQLITE2_CONV, &zdb, &result_type) &&
+			FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs&|l", &zdb, &tbl, &tbl_len, SQLITE2_CONV, &result_type)) {
 			return;
 		}
 		DB_FROM_ZVAL(db, &zdb);
@@ -1686,38 +1834,71 @@ PHP_FUNCTION(sqlite_fetch_column_types)
 	array_init(return_value);
 
 	for (i = 0; i < ncols; i++) {
-		char *colname = estrdup((char *)colnames[i]);
+		zend_uchar colname_type;
+		zstr colname;
+		int colname_len;
+		zval *coltype;
 
-		if (SQLITE_G(assoc_case) == 1) {
-			php_sqlite_strtoupper(colname);
-		} else if (SQLITE_G(assoc_case) == 2) {
-			php_sqlite_strtolower(colname);
+		MAKE_STD_ZVAL(coltype);
+		ZVAL_U_STRING(SQLITE2_CONV, coltype, colnames[ncols + i] ? (char *)colnames[ncols + i] : "", ZSTR_DUPLICATE);
+		coltype->refcount = 0;
+
+		if (result_type == PHPSQLITE_NUM) {
+			ZVAL_ADDREF(coltype);
+			add_index_zval(return_value, i, coltype);
 		}
 
-		if (UG(unicode)) {
-			char *tmp = colnames[ncols + i] ? (char *)colnames[ncols + i] : "";
-			UErrorCode status = U_ZERO_ERROR;
-			UChar *u_str;
-			int u_len;
+		if (result_type == PHPSQLITE_ASSOC) {
+			if (UG(unicode) &&
+				SUCCESS == zend_string_to_unicode(SQLITE2_CONV, &(colname.u), &colname_len, (char*)colnames[i], strlen((char*)colnames[i]) TSRMLS_CC)) {
+				colname_type = IS_UNICODE;
+				if (SQLITE_G(assoc_case) == 1) {
+					UChar *tmp;
+					int tmp_len = colname_len;
 
-			zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, tmp, strlen(tmp), &status);
-			if (result_type == PHPSQLITE_ASSOC) {
-				add_rt_assoc_unicode(return_value, colname, u_str, 1);
+					if ((tmp = php_u_strtoupper(colname.u, &tmp_len, UG(default_locale)))) {
+						efree(colname.u);
+						colname.u = tmp;
+						colname_len = tmp_len;
+					} else {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to translate column '%s' to uppercase", (char*)colnames[i]);
+					}
+				} else if (SQLITE_G(assoc_case) == 2) {
+					UChar *tmp;
+					int tmp_len = colname_len;
+
+					if ((tmp = php_u_strtolower(colname.u, &tmp_len, UG(default_locale)))) {
+						efree(colname.u);
+						colname.u = tmp;
+						colname_len = tmp_len;
+					} else {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to translate column '%s' to lowercase", (char*)colnames[i]);
+					}
+				}
+			} else {
+				colname_type = IS_STRING;
+				colname_len = strlen(colnames[i]);
+				colname.s = estrndup((char *)colnames[i], colname_len);
+
+				if (SQLITE_G(assoc_case) == 1) {
+					php_sqlite_strtoupper(colname.s);
+				} else if (SQLITE_G(assoc_case) == 2) {
+					php_sqlite_strtolower(colname.s);
+				}
 			}
-			if (result_type == PHPSQLITE_NUM) {
-				add_index_unicode(return_value, i, u_str, 1);
-			}
-			efree(u_str);
-		} else {
-			if (result_type == PHPSQLITE_ASSOC) {
-				add_assoc_string(return_value, colname, colnames[ncols + i] ? (char *)colnames[ncols + i] : "", 1);
-			}
-			if (result_type == PHPSQLITE_NUM) {
-				add_index_string(return_value, i, colnames[ncols + i] ? (char *)colnames[ncols + i] : "", 1);
-			}
+
+			ZVAL_ADDREF(coltype);
+			add_u_assoc_zval_ex(return_value, colname_type, colname, colname_len + 1, coltype);
+			efree(colname.v);
 		}
-		efree(colname);
+
+		if (coltype->refcount <= 0) {
+			/* Shouldn't happen (and probably can't) */
+			coltype->refcount = 1;
+			zval_ptr_dtor(&coltype);
+		}
 	}
+
 	if (res.vm) {
 		sqlite_finalize(res.vm, NULL);
 	}
@@ -1726,7 +1907,7 @@ done:
 }
 /* }}} */
 
-/* {{{ proto resource sqlite_query(string query, resource db [, int result_type [, string &error_message]])
+/* {{{ proto resource sqlite_query(string query, resource db [, int result_type [, string &error_message]]) U
    Executes a query against a given database and returns a result handle. */
 PHP_FUNCTION(sqlite_query)
 {
@@ -1740,14 +1921,14 @@ PHP_FUNCTION(sqlite_query)
 	zval *object = getThis();
 
 	if (object) {
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz/", &sql, &sql_len, &mode, &errmsg)) {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&|lz/", &sql, &sql_len, SQLITE2_CONV, &mode, &errmsg)) {
 			return;
 		}
 		DB_FROM_OBJECT(db, object);
 	} else {
 		if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
-				ZEND_NUM_ARGS() TSRMLS_CC, "sr|lz/", &sql, &sql_len, &zdb, &mode, &errmsg) &&
-			FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|lz/", &zdb, &sql, &sql_len, &mode, &errmsg)) {
+				ZEND_NUM_ARGS() TSRMLS_CC, "s&r|lz/", &sql, &sql_len, SQLITE2_CONV, &zdb, &mode, &errmsg) &&
+			FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs&|lz/", &zdb, &sql, &sql_len, SQLITE2_CONV, &mode, &errmsg)) {
 			return;
 		}
 		DB_FROM_ZVAL(db, &zdb);
@@ -1767,7 +1948,7 @@ PHP_FUNCTION(sqlite_query)
 		if (db->last_err_code != SQLITE_OK) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errtext);
 			if (errmsg) {
-				ZVAL_STRING(errmsg, errtext, 1);
+				ZVAL_U_STRING(SQLITE2_CONV, errmsg, errtext, ZSTR_DUPLICATE);
 			}
 			sqlite_freemem(errtext);
 		}
@@ -1778,7 +1959,7 @@ PHP_FUNCTION(sqlite_query)
 }
 /* }}} */
 
-/* {{{ proto boolean sqlite_exec(string query, resource db[, string &error_message])
+/* {{{ proto boolean sqlite_exec(string query, resource db[, string &error_message]) U
    Executes a result-less query against a given database */
 PHP_FUNCTION(sqlite_exec)
 {
@@ -1791,14 +1972,14 @@ PHP_FUNCTION(sqlite_exec)
 	zval *object = getThis();
 
 	if (object) {
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z/", &sql, &sql_len, &errmsg)) {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&|z/", &sql, &sql_len, SQLITE2_CONV, &errmsg)) {
 			return;
 		}
 		DB_FROM_OBJECT(db, object);
 	} else {
 		if(FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
-			ZEND_NUM_ARGS() TSRMLS_CC, "sr", &sql, &sql_len, &zdb) &&
-		   FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|z/", &zdb, &sql, &sql_len, &errmsg)) {
+			ZEND_NUM_ARGS() TSRMLS_CC, "s&r", &sql, &sql_len, SQLITE2_CONV, &zdb) &&
+		   FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs&|z/", &zdb, &sql, &sql_len, SQLITE2_CONV, &errmsg)) {
 			return;
 		}
 		DB_FROM_ZVAL(db, &zdb);
@@ -1816,7 +1997,7 @@ PHP_FUNCTION(sqlite_exec)
 	if (db->last_err_code != SQLITE_OK) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errtext);
 		if (errmsg) {
-			ZVAL_STRING(errmsg, errtext, 1);
+			ZVAL_U_STRING(SQLITE2_CONV, errmsg, errtext, 1);
 		}
 		sqlite_freemem(errtext);
 		RETURN_FALSE;
@@ -1863,34 +2044,30 @@ static void php_sqlite_fetch_array(struct php_sqlite_result *res, int mode, zend
 				rowdata[j] = NULL;
 			}
 		} else {
-			if (UG(unicode)) {
-				UErrorCode status = U_ZERO_ERROR;
-				UChar *u_str;
-				int u_len;
-
-				zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, (char*)rowdata[j], strlen((char*)rowdata[j]), &status);
-				ZVAL_UNICODEL(decoded, u_str, u_len, 0);
-				if (!buffered) {
-					efree((char *)rowdata[j]);
-				}
-			} else {
-				ZVAL_STRING(decoded, (char*)rowdata[j], buffered);
-			}
+			ZVAL_U_STRING(SQLITE2_CONV, decoded, (char*)rowdata[j], buffered ? ZSTR_DUPLICATE : ZSTR_AUTOFREE);
 			if (!buffered) {
 				rowdata[j] = NULL;
 			}
 		}
+		decoded->refcount = 0;
 
 		if (mode & PHPSQLITE_NUM) {
-			if (mode & PHPSQLITE_ASSOC) {
-				add_index_zval(return_value, j, decoded);
-				ZVAL_ADDREF(decoded);
-				add_rt_assoc_zval(return_value, (char*)colnames[j], decoded);
+			ZVAL_ADDREF(decoded);
+			add_index_zval(return_value, j, decoded);
+		}
+		if ((mode & PHPSQLITE_ASSOC) || (!(mode & PHPSQLITE_NUM))) {
+			UChar *colname;
+			int colname_len;
+
+			ZVAL_ADDREF(decoded);
+
+			if (UG(unicode) &&
+				SUCCESS == zend_string_to_unicode(SQLITE2_CONV, &colname, &colname_len, (char*)colnames[j], strlen((char*)colnames[j]) TSRMLS_CC)) {
+				add_u_assoc_zval_ex(return_value, IS_UNICODE, ZSTR(colname), colname_len + 1, decoded);
+				efree(colname);
 			} else {
-				add_next_index_zval(return_value, decoded);
+				add_assoc_zval(return_value, (char*)colnames[j], decoded);
 			}
-		} else {
-			add_rt_assoc_zval(return_value, (char*)colnames[j], decoded);
 		}
 	}
 
@@ -1951,19 +2128,8 @@ static void php_sqlite_fetch_column(struct php_sqlite_result *res, zval *which, 
 			efree((char*)rowdata[j]);
 			rowdata[j] = NULL;
 		}
-	} else if (UG(unicode)) {
-		UErrorCode status = U_ZERO_ERROR;
-		UChar *u_str;
-		int u_len;
-
-		zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, (char*)rowdata[j], strlen((char*)rowdata[j]), &status);
-		RETVAL_UNICODEL(u_str, u_len, 0);
-		if (!res->buffered) {
-			efree((char *)rowdata[j]);
-			rowdata[j] = NULL;
-		}
 	} else {
-		RETVAL_STRING((char*)rowdata[j], res->buffered);
+		RETVAL_U_STRING(SQLITE2_CONV, (char*)rowdata[j], res->buffered ? ZSTR_DUPLICATE : ZSTR_AUTOFREE);
 		if (!res->buffered) {
 			rowdata[j] = NULL;
 		}
@@ -1971,7 +2137,7 @@ static void php_sqlite_fetch_column(struct php_sqlite_result *res, zval *which, 
 }
 /* }}} */
 
-/* {{{ proto array sqlite_fetch_all(resource result [, int result_type [, bool decode_binary]])
+/* {{{ proto array sqlite_fetch_all(resource result [, int result_type [, bool decode_binary]]) U
    Fetches all rows from a result set as an array of arrays. */
 PHP_FUNCTION(sqlite_fetch_all)
 {
@@ -2017,7 +2183,7 @@ PHP_FUNCTION(sqlite_fetch_all)
 }
 /* }}} */
 
-/* {{{ proto array sqlite_fetch_array(resource result [, int result_type [, bool decode_binary]])
+/* {{{ proto array sqlite_fetch_array(resource result [, int result_type [, bool decode_binary]]) U
    Fetches the next row from a result set as an array. */
 PHP_FUNCTION(sqlite_fetch_array)
 {
@@ -2049,7 +2215,7 @@ PHP_FUNCTION(sqlite_fetch_array)
 }
 /* }}} */
 
-/* {{{ proto object sqlite_fetch_object(resource result [, string class_name [, NULL|array ctor_params [, bool decode_binary]]])
+/* {{{ proto object sqlite_fetch_object(resource result [, string class_name [, NULL|array ctor_params [, bool decode_binary]]]) U
    Fetches the next row from a result set as an object. */
    /* note that you can do array(&$val) for param ctor_params */
 PHP_FUNCTION(sqlite_fetch_object)
@@ -2167,7 +2333,7 @@ PHP_FUNCTION(sqlite_fetch_object)
 }
 /* }}} */
 
-/* {{{ proto array sqlite_array_query(resource db, string query [ , int result_type [, bool decode_binary]])
+/* {{{ proto array sqlite_array_query(resource db, string query [ , int result_type [, bool decode_binary]]) U
    Executes a query against a given database and returns an array of arrays. */
 PHP_FUNCTION(sqlite_array_query)
 {
@@ -2182,14 +2348,14 @@ PHP_FUNCTION(sqlite_array_query)
 	zval *object = getThis();
 
 	if (object) {
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lb", &sql, &sql_len, &mode, &decode_binary)) {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&|lb", &sql, &sql_len, SQLITE2_CONV, &mode, &decode_binary)) {
 			return;
 		}
 		DB_FROM_OBJECT(db, object);
 	} else {
 		if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
-				ZEND_NUM_ARGS() TSRMLS_CC, "sr|lb", &sql, &sql_len, &zdb, &mode, &decode_binary) &&
-			FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|lb", &zdb, &sql, &sql_len, &mode, &decode_binary)) {
+				ZEND_NUM_ARGS() TSRMLS_CC, "s&r|lb", &sql, &sql_len, SQLITE2_CONV, &zdb, &mode, &decode_binary) &&
+			FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs&|lb", &zdb, &sql, &sql_len, SQLITE2_CONV, &mode, &decode_binary)) {
 			return;
 		}
 		DB_FROM_ZVAL(db, &zdb);
@@ -2258,13 +2424,8 @@ static void php_sqlite_fetch_single(struct php_sqlite_result *res, zend_bool dec
 		free_decoded = 1;
 	} else if (rowdata[0]) {
 		decoded_len = strlen((char*)rowdata[0]);
-		if (res->buffered) {
-			if (UG(unicode)) {
-				decoded = (char*)rowdata[0];
-			} else {
-				decoded = estrndup((char*)rowdata[0], decoded_len);
-			}
-		} else {
+		decoded = (char*)rowdata[0];
+		if (!res->buffered) {
 			decoded = (char*)rowdata[0];
 			rowdata[0] = NULL;
 			free_decoded = 1;
@@ -2283,24 +2444,14 @@ static void php_sqlite_fetch_single(struct php_sqlite_result *res, zend_bool dec
 
 	if (decoded == NULL) {
 		RETURN_NULL();
-	} else if (UG(unicode)) {
-		UErrorCode status = U_ZERO_ERROR;
-		UChar *u_str;
-		int u_len;
-
-		zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, decoded, decoded_len, &status);
-		if (free_decoded) {
-			efree(decoded);
-		}
-		RETURN_UNICODEL(u_str, u_len, 0);
 	} else {
-		RETURN_STRINGL(decoded, decoded_len, 0);
+		RETURN_U_STRINGL(SQLITE2_CONV, decoded, decoded_len, free_decoded ? ZSTR_AUTOFREE : ZSTR_DUPLICATE);
 	}
 }
 /* }}} */
 
 
-/* {{{ proto array sqlite_single_query(resource db, string query [, bool first_row_only [, bool decode_binary]])
+/* {{{ proto array sqlite_single_query(resource db, string query [, bool first_row_only [, bool decode_binary]]) U
    Executes a query and returns either an array for one single column or the value of the first row. */
 PHP_FUNCTION(sqlite_single_query)
 {
@@ -2315,14 +2466,14 @@ PHP_FUNCTION(sqlite_single_query)
 	zval *object = getThis();
 
 	if (object) {
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|bb", &sql, &sql_len, &srow, &decode_binary)) {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&|bb", &sql, &sql_len, SQLITE2_CONV, &srow, &decode_binary)) {
 			return;
 		}
 		RES_FROM_OBJECT(db, object);
 	} else {
 		if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
-				ZEND_NUM_ARGS() TSRMLS_CC, "sr|bb", &sql, &sql_len, &zdb, &srow, &decode_binary) &&
-			FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|bb", &zdb, &sql, &sql_len, &srow, &decode_binary)) {
+				ZEND_NUM_ARGS() TSRMLS_CC, "s&r|bb", &sql, &sql_len, SQLITE2_CONV, &zdb, &srow, &decode_binary) &&
+			FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs&|bb", &zdb, &sql, &sql_len, SQLITE2_CONV, &srow, &decode_binary)) {
 			return;
 		}
 		DB_FROM_ZVAL(db, &zdb);
@@ -2362,8 +2513,6 @@ PHP_FUNCTION(sqlite_single_query)
 		if (srow) {
 			if (rres->curr_row == 1 && rres->curr_row >= rres->nrows) {
 				*return_value = *ent;
-				zval_copy_ctor(return_value);
-				zval_dtor(ent);
 				FREE_ZVAL(ent);
 				break;
 			} else {
@@ -2379,7 +2528,7 @@ PHP_FUNCTION(sqlite_single_query)
 /* }}} */
 
 
-/* {{{ proto string sqlite_fetch_single(resource result [, bool decode_binary])
+/* {{{ proto string sqlite_fetch_single(resource result [, bool decode_binary]) U
    Fetches the first column of a result set as a string. */
 PHP_FUNCTION(sqlite_fetch_single)
 {
@@ -2404,7 +2553,7 @@ PHP_FUNCTION(sqlite_fetch_single)
 }
 /* }}} */
 
-/* {{{ proto array sqlite_current(resource result [, int result_type [, bool decode_binary]])
+/* {{{ proto array sqlite_current(resource result [, int result_type [, bool decode_binary]]) U
    Fetches the current row from a result set as an array. */
 PHP_FUNCTION(sqlite_current)
 {
@@ -2436,7 +2585,7 @@ PHP_FUNCTION(sqlite_current)
 }
 /* }}} */
 
-/* {{{ proto mixed sqlite_column(resource result, mixed index_or_name [, bool decode_binary])
+/* {{{ proto mixed sqlite_column(resource result, mixed index_or_name [, bool decode_binary]) U
    Fetches a column from the current row of a result set. */
 PHP_FUNCTION(sqlite_column)
 {
@@ -2462,29 +2611,29 @@ PHP_FUNCTION(sqlite_column)
 }
 /* }}} */
 
-/* {{{ proto string sqlite_libversion()
+/* {{{ proto string sqlite_libversion() U
    Returns the version of the linked SQLite library. */
 PHP_FUNCTION(sqlite_libversion)
 {
 	if (ZEND_NUM_ARGS() != 0) {
 		WRONG_PARAM_COUNT;
 	}
-	RETURN_ASCII_STRING((char*)sqlite_libversion(), 1);
+	RETURN_ASCII_STRING((char*)sqlite_libversion(), ZSTR_DUPLICATE);
 }
 /* }}} */
 
-/* {{{ proto string sqlite_libencoding()
+/* {{{ proto string sqlite_libencoding() U
    Returns the encoding (iso8859 or UTF-8) of the linked SQLite library. */
 PHP_FUNCTION(sqlite_libencoding)
 {
 	if (ZEND_NUM_ARGS() != 0) {
 		WRONG_PARAM_COUNT;
 	}
-	RETURN_ASCII_STRING((char*)sqlite_libencoding(), 1);
+	RETURN_ASCII_STRING((char*)sqlite_libencoding(), ZSTR_DUPLICATE);
 }
 /* }}} */
 
-/* {{{ proto int sqlite_changes(resource db)
+/* {{{ proto int sqlite_changes(resource db) U
    Returns the number of rows that were changed by the most recent SQL statement. */
 PHP_FUNCTION(sqlite_changes)
 {
@@ -2508,7 +2657,7 @@ PHP_FUNCTION(sqlite_changes)
 }
 /* }}} */
 
-/* {{{ proto int sqlite_last_insert_rowid(resource db)
+/* {{{ proto int sqlite_last_insert_rowid(resource db) U
    Returns the rowid of the most recently inserted row. */
 PHP_FUNCTION(sqlite_last_insert_rowid)
 {
@@ -2545,7 +2694,7 @@ static int sqlite_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ */
 	}
 } /* }}} */
 
-/* {{{ proto int sqlite_num_rows(resource result)
+/* {{{ proto int sqlite_num_rows(resource result) U
    Returns the number of rows in a buffered result set. */
 PHP_FUNCTION(sqlite_num_rows)
 {
@@ -2574,7 +2723,7 @@ PHP_FUNCTION(sqlite_num_rows)
 }
 /* }}} */
 
-/* {{{ proto bool sqlite_valid(resource result)
+/* {{{ proto bool sqlite_valid(resource result) U
    Returns whether more rows are available. */
 PHP_FUNCTION(sqlite_valid)
 {
@@ -2598,7 +2747,7 @@ PHP_FUNCTION(sqlite_valid)
 }
 /* }}} */
 
-/* {{{ proto bool sqlite_has_prev(resource result)
+/* {{{ proto bool sqlite_has_prev(resource result) U
  * Returns whether a previous row is available. */
 PHP_FUNCTION(sqlite_has_prev)
 {
@@ -2627,7 +2776,7 @@ PHP_FUNCTION(sqlite_has_prev)
 }
 /* }}} */
 
-/* {{{ proto int sqlite_num_fields(resource result)
+/* {{{ proto int sqlite_num_fields(resource result) U
    Returns the number of fields in a result set. */
 PHP_FUNCTION(sqlite_num_fields)
 {
@@ -2651,7 +2800,7 @@ PHP_FUNCTION(sqlite_num_fields)
 }
 /* }}} */
 
-/* {{{ proto string sqlite_field_name(resource result, int field_index)
+/* {{{ proto string sqlite_field_name(resource result, int field_index) U
    Returns the name of a particular field of a result set. */
 PHP_FUNCTION(sqlite_field_name)
 {
@@ -2676,12 +2825,11 @@ PHP_FUNCTION(sqlite_field_name)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "field %ld out of range", field);
 		RETURN_FALSE;
 	}
-
-	RETURN_U_STRING(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), res->col_names[field], 1);
+	RETURN_U_STRING(SQLITE2_CONV, res->col_names[field], ZSTR_DUPLICATE);
 }
 /* }}} */
 
-/* {{{ proto bool sqlite_seek(resource result, int row)
+/* {{{ proto bool sqlite_seek(resource result, int row) U
    Seek to a particular row number of a buffered result set. */
 PHP_FUNCTION(sqlite_seek)
 {
@@ -2717,7 +2865,7 @@ PHP_FUNCTION(sqlite_seek)
 }
 /* }}} */
 
-/* {{{ proto bool sqlite_rewind(resource result)
+/* {{{ proto bool sqlite_rewind(resource result) U
    Seek to the first row number of a buffered result set. */
 PHP_FUNCTION(sqlite_rewind)
 {
@@ -2752,7 +2900,7 @@ PHP_FUNCTION(sqlite_rewind)
 }
 /* }}} */
 
-/* {{{ proto bool sqlite_next(resource result)
+/* {{{ proto bool sqlite_next(resource result) U
    Seek to the next row number of a result set. */
 PHP_FUNCTION(sqlite_next)
 {
@@ -2787,7 +2935,7 @@ PHP_FUNCTION(sqlite_next)
 }
 /* }}} */
 
-/* {{{ proto int sqlite_key(resource result)
+/* {{{ proto int sqlite_key(resource result) U
    Return the current row index of a buffered result. */
 PHP_FUNCTION(sqlite_key)
 {
@@ -2811,7 +2959,7 @@ PHP_FUNCTION(sqlite_key)
 }
 /* }}} */
 
-/* {{{ proto bool sqlite_prev(resource result)
+/* {{{ proto bool sqlite_prev(resource result) U
  * Seek to the previous row number of a result set. */
 PHP_FUNCTION(sqlite_prev)
 {
@@ -2847,7 +2995,7 @@ PHP_FUNCTION(sqlite_prev)
 }
 /* }}} */
 
-/* {{{ proto string sqlite_escape_string(string item)
+/* {{{ proto string sqlite_escape_string(string item) U
    Escapes a string for use as a query parameter. */
 PHP_FUNCTION(sqlite_escape_string)
 {
@@ -2855,7 +3003,7 @@ PHP_FUNCTION(sqlite_escape_string)
 	int stringlen;
 	char *ret;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &string, &stringlen)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &string, &stringlen, SQLITE2_CONV)) {
 		return;
 	}
 
@@ -2867,20 +3015,19 @@ PHP_FUNCTION(sqlite_escape_string)
 		ret[0] = '\x01';
 		enclen = php_sqlite_encode_binary(string, stringlen, ret+1);
 		RETVAL_STRINGL(ret, enclen+1, 0);
-
 	} else if (stringlen) {
 		ret = sqlite_mprintf("%q", string);
 		if (ret) {
-			RETVAL_STRING(ret, 1);
+			RETVAL_U_STRING(SQLITE2_CONV, ret, ZSTR_DUPLICATE);
 			sqlite_freemem(ret);
 		}
 	} else {
-		RETURN_EMPTY_STRING();
+		RETURN_EMPTY_TEXT();
 	}
 }
 /* }}} */
 
-/* {{{ proto int sqlite_last_error(resource db)
+/* {{{ proto int sqlite_last_error(resource db) U
    Returns the error code of the last error for a database. */
 PHP_FUNCTION(sqlite_last_error)
 {
@@ -2904,7 +3051,7 @@ PHP_FUNCTION(sqlite_last_error)
 }
 /* }}} */
 
-/* {{{ proto string sqlite_error_string(int error_code)
+/* {{{ proto string sqlite_error_string(int error_code) U
    Returns the textual description of an error code. */
 PHP_FUNCTION(sqlite_error_string)
 {
@@ -2918,7 +3065,7 @@ PHP_FUNCTION(sqlite_error_string)
 	msg = sqlite_error_string(code);
 
 	if (msg) {
-		RETURN_U_STRING(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), (char*)msg, 1);
+		RETURN_U_STRING(SQLITE2_CONV, (char*)msg, ZSTR_DUPLICATE);
 	} else {
 		RETURN_NULL();
 	}
@@ -2987,7 +3134,7 @@ static enum callback_prep_t prep_callback_struct(struct php_sqlite_db *db, int i
 }
 
 
-/* {{{ proto bool sqlite_create_aggregate(resource db, string funcname, mixed step_func, mixed finalize_func[, long num_args])
+/* {{{ proto bool sqlite_create_aggregate(resource db, string funcname, mixed step_func, mixed finalize_func[, long num_args]) U
     Registers an aggregate function for queries. */
 PHP_FUNCTION(sqlite_create_aggregate)
 {
@@ -3037,7 +3184,7 @@ PHP_FUNCTION(sqlite_create_aggregate)
 }
 /* }}} */
 
-/* {{{ proto bool sqlite_create_function(resource db, string funcname, mixed callback[, long num_args])
+/* {{{ proto bool sqlite_create_function(resource db, string funcname, mixed callback[, long num_args]) U
     Registers a "regular" function for queries. */
 PHP_FUNCTION(sqlite_create_function)
 {
@@ -3076,12 +3223,13 @@ PHP_FUNCTION(sqlite_create_function)
 }
 /* }}} */
 
-/* {{{ proto string sqlite_udf_encode_binary(string data)
+/* {{{ proto string sqlite_udf_encode_binary(string data) U
    Apply binary encoding (if required) to a string to return from an UDF. */
 PHP_FUNCTION(sqlite_udf_encode_binary)
 {
 	char *data = NULL;
 	int datalen;
+	zend_uchar encode = 0;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!", &data, &datalen)) {
 		return;
@@ -3090,7 +3238,28 @@ PHP_FUNCTION(sqlite_udf_encode_binary)
 	if (data == NULL) {
 		RETURN_NULL();
 	}
-	if (datalen && (data[0] == '\x01' || memchr(data, '\0', datalen) != NULL)) {
+	if (!datalen) {
+		RETURN_EMPTY_STRING();
+	}
+
+	if (data[0] == '\x01' || memchr(data, 0, datalen) != NULL) {
+		encode = 1;
+#ifdef SQLITE_UTF8
+	} else {
+		/* UTF8 doesn't like non-ascii which isn't utf8 encoded */
+		unsigned char *udata = (unsigned char*)data;
+		int i;
+
+		for(i = 0; i < datalen; i++) {
+			if (udata[i] > 0x7F) {
+				encode = 1;
+				break;
+			}
+		}
+#endif
+	}
+
+	if (encode) {
 		/* binary string */
 		int enclen;
 		char *ret;
@@ -3105,7 +3274,7 @@ PHP_FUNCTION(sqlite_udf_encode_binary)
 }
 /* }}} */
 
-/* {{{ proto string sqlite_udf_decode_binary(string data)
+/* {{{ proto string sqlite_udf_decode_binary(string data) U
    Decode binary encoding on a string parameter passed to an UDF. */
 PHP_FUNCTION(sqlite_udf_decode_binary)
 {
@@ -3119,7 +3288,12 @@ PHP_FUNCTION(sqlite_udf_decode_binary)
 	if (data == NULL) {
 		RETURN_NULL();
 	}
-	if (datalen && data[0] == '\x01') {
+
+	if (datalen <= 0) {
+		RETURN_EMPTY_STRING();
+	}
+
+	if (data[0] == '\x01') {
 		/* encoded string */
 		int enclen;
 		char *ret;
