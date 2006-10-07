@@ -28,15 +28,21 @@
    Convert UNIX timestamp to Julian Day */
 PHP_FUNCTION(unixtojd)
 {
-  time_t timestamp = time(NULL);
-  long jdate; 
+  time_t timestamp;
+  long jdate, t;
   struct tm *ta, tmbuf;
 	
-  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &timestamp) == FAILURE) {
+  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &t) == FAILURE) {
     return;
   }
 
-  if(timestamp < 0) {
+  if (ZEND_NUM_ARGS()) {
+    timestamp = (time_t) t;
+  } else {
+    timestamp = time(NULL);
+  }
+
+  if (timestamp < 0) {
 	RETURN_FALSE;
   }
 
