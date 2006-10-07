@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 12 Oct 2006, PHP 5.2.0RC6
+- Fixed bug #39067 (getDeclaringClass() and private properties). (Tony)
 
 05 Oct 2006, PHP 5.2.0RC5
 - Updated bundled OpenSSL to version 0.9.8d in the Windows distro. (Edin)
