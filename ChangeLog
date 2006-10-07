@@ -1,3 +1,171 @@
+2006-10-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo_pgsql/config.m4
+      ext/pdo_pgsql/pgsql_driver.c:
+      MFB: Make quote() in PostgreSQL use PQescapeByteaConn() whenever possible
+      for binary strings.
+
+    * (PHP_5_2)
+      ext/pdo_pgsql/config.m4
+      ext/pdo_pgsql/pgsql_driver.c:
+      Make quote() in PostgreSQL use PQescapeByteaConn() whenever possible for
+      binary strings.
+
+    * ext/pgsql/config.m4
+      ext/pgsql/pgsql.c:
+      MFB: Make pg_escape_bytea() use PQescapeByteaConn() whenever possible.
+
+    * (PHP_5_2)
+      ext/pgsql/config.m4
+      ext/pgsql/pgsql.c:
+      Make pg_escape_bytea() use PQescapeByteaConn() whenever possible.
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      back to dev
+
+    * ext/session/php_session.h
+      ext/session/session.c:
+      MFB: Expose session storage module locater and serialization function via
+      PHPAPI
+
+    * (PHP_5_2)
+      ext/session/php_session.h
+      ext/session/session.c:
+      Expose session storage module locater and serialization function via PHPAPI
+
+    * (PHP_5_2)
+      README.UPDATE_5_2:
+      modulo 0 news entry
+
+2006-10-06  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/type.c:
+      Unicode support in is_callable().
+
+    * ext/standard/uniqid.c:
+      Unicode support in uniqid().
+
+    * ext/standard/var.c:
+      Mark memory funcs with U.
+
+2006-10-06  Antony Dovgal  <antony@zend.com>
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/bug39067.phpt
+      ext/reflection/tests/bug39067.phpt:
+      more improvements
+
+2006-10-06  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/lcg.c:
+      Mark with U.
+
+    * ext/standard/pageinfo.c:
+      Mark pageinfo.c funcs with U.
+
+    * ext/standard/rand.c:
+      Mark rand.c functions with U.
+
+2006-10-06  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/streamsfuncs.c:
+      Forgot to mark these u-safe
+
+2006-10-06  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/bug39067.phpt:
+      MFH: fix #39067 (getDeclaringClass() and private properties)
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/tests/bug39067.phpt
+      ext/reflection/tests/bug39067.phpt:
+      fix #39067 (getDeclaringClass() and private properties)
+
+2006-10-06  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_strtol.c:
+      Patch from Matt W to fix the case of hitting ERANGE too early.
+
+    * ext/unicode/collator.c
+      ext/unicode/property.c:
+      Fix protos.
+
+    * ZendEngine2/zend_builtin_functions.c:
+      Unicode string support for extension_loaded().
+
+    * ZendEngine2/zend_builtin_functions.c:
+      Unicode string support in get_extension_funcs().
+
+2006-10-06  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_5_2)
+      ZendEngine2/zend.c:
+      MFH(r-1.376): Preserve EG(return_value_ptr_ptr) when calling
+      zend_execute_scripts()
+      
+      Reapplying this since it looks like we'll be doing a PHP 5.2 RC6 after all
+
+2006-10-06  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/str_replace.phpt:
+      re-add the test
+
+    * (PHP_5_2)
+      TSRM/tsrm_virtual_cwd.c:
+      MFH: fix #39060 (virtual_file_ex() is broken on *BSD)
+
+    * TSRM/tsrm_virtual_cwd.c:
+      fix #39060 (virtual_file_ex() is broken on *BSD)
+
+2006-10-06  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+2006-10-06  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/oci8_statement.c:
+      fix PECL bug #8816 (issue in php_oci_statement_fetch with more than one
+      piecewise column)
+      patch by jeff at badtz-maru dot com
+
+2006-10-06  Edin Kadribasic  <edink@emini.dk>
+
+    * ext/com_dotnet/com_handlers.c:
+      MFB: Fix for #38985  (Wez)
+
+    * (PHP_5_2)
+      ext/com_dotnet/com_handlers.c:
+      Fix for #38985  (Wez)
+
+2006-10-06  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/tests/pecl_bug8816.phpt:
+      new test
+
+2006-10-06  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/curl/multi.c:
+      MFB: Fix ZTS build.
+
+    * (PHP_5_2)
+      ext/curl/multi.c:
+      Fix ZTS build.
+
+2006-10-06  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_5_2)
+      ZendEngine2/zend.c:
+      Revert until 5.2's release since we're in RC stage
+
 2006-10-05  Sara Golemon  <sara@golemon.com>
 
     * (PHP_4_4)
