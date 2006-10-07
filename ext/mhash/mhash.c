@@ -111,7 +111,7 @@ PHP_FUNCTION(mhash_get_block_size)
 	long hash;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &hash) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		return;
 	}
 
 	RETURN_LONG(mhash_get_block_size(hash));
@@ -127,7 +127,7 @@ PHP_FUNCTION(mhash_get_hash_name)
 	long hash;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &hash) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		return;
 	}
 
 	name = mhash_get_hash_name(hash);
@@ -153,7 +153,7 @@ PHP_FUNCTION(mhash)
 	char *data, *key=NULL;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls|s", &hash, &data, &data_len, &key, &key_len) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		return;
 	}
 	
 	bsize = mhash_get_block_size(hash);
@@ -202,7 +202,7 @@ PHP_FUNCTION(mhash_keygen_s2k)
 	int password_len, salt_len;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lssl", &hash, &password, &password_len, &in_salt, &salt_len, &bytes) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		return;
 	}
 	if (bytes <= 0){
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "the byte parameter must be greater than 0");

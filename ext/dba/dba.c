@@ -1160,7 +1160,6 @@ PHP_FUNCTION(dba_handlers)
 	zend_bool full_info = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &full_info) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
 		RETURN_FALSE;
 	}
 
