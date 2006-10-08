@@ -172,7 +172,7 @@ PHP_INI_END()
 
 #define PHP_SQLITE_EMPTY_QUERY \
 	if (!sql_len) { \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot execute empty query."); \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot execute empty query"); \
 		RETURN_FALSE; \
 	}
 

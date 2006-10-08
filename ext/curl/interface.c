@@ -168,7 +168,7 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 		} 																						\
 															\
 		if (php_memnstr(str, tmp_url->path, strlen(tmp_url->path), str + len)) {				\
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "URL '%s' contains unencoded control characters.", str);	\
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "URL '%s' contains unencoded control characters", str);	\
 			RETURN_FALSE;											\
 		}													\
 																								\
@@ -953,7 +953,7 @@ static size_t curl_passwd(void *ctx, char *prompt, char *buf, int buflen)
 			strlcpy(buf, Z_STRVAL_P(retval), Z_STRLEN_P(retval));
 		}
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "User handler '%s' did not return a string.", Z_STRVAL_P(func));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "User handler '%s' did not return a string", Z_STRVAL_P(func));
 	}
 	
 	zval_ptr_dtor(&argv[0]);
@@ -1602,7 +1602,7 @@ PHP_FUNCTION(curl_setopt_array)
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(arr), &pos);
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(arr), (void **)&entry, &pos) == SUCCESS) {
 		if (zend_hash_get_current_key_ex(Z_ARRVAL_P(arr), &string_key, &str_key_len, &option, 0, &pos) == HASH_KEY_IS_STRING) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array keys must be CURLOPT constants or equivalent interger values."); 
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array keys must be CURLOPT constants or equivalent integer values");
 			RETURN_FALSE;
 		}
 		if (_php_curl_setopt(ch, option, entry, return_value TSRMLS_CC)) {

@@ -810,7 +810,7 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, 
 
 	if (resumepos > 0) {
 		if (resumepos > 2147483647) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "PHP cannot handle files greater than 2147483647 bytes.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "PHP cannot handle files greater than 2147483647 bytes");
 			goto bail;
 		}
 		sprintf(arg, "%u", resumepos);
@@ -907,7 +907,7 @@ ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, i
 
 	if (startpos > 0) {
 		if (startpos > 2147483647) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "PHP cannot handle files with a size greater than 2147483647 bytes.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "PHP cannot handle files with a size greater than 2147483647 bytes");
 			goto bail;
 		}
 		sprintf(arg, "%u", startpos);
@@ -1598,7 +1598,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC)
 
 
 	if ((tmpstream = php_stream_fopen_tmpfile()) == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create temporary file.  Check permissions in temporary files directory.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create temporary file.  Check permissions in temporary files directory");
 		return NULL;
 	}
 
@@ -1706,7 +1706,7 @@ ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t typ
 		 * since php is 32 bit by design, we bail out with warning
 		 */
 		if (resumepos > 2147483647) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "PHP cannot handle files greater than 2147483648 bytes.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "PHP cannot handle files greater than 2147483648 bytes");
 			goto bail;
 		}
 		sprintf(arg, "%u", resumepos);
@@ -1824,7 +1824,7 @@ ftp_nb_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type
 	}
 	if (startpos > 0) {
 		if (startpos > 2147483647) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "PHP cannot handle files with a size greater than 2147483647 bytes.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "PHP cannot handle files with a size greater than 2147483647 bytes");
 			goto bail;
 		}
 		sprintf(arg, "%u", startpos);

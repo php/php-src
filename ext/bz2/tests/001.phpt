@@ -22,7 +22,7 @@ echo "Done\n";
 Warning: bzopen() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: bzopen(): '' is not a valid mode for bzopen(). Only 'w' and 'r' are supported. in %s on line %d
+Warning: bzopen(): '' is not a valid mode for bzopen(). Only 'w' and 'r' are supported in %s on line %d
 bool(false)
 
 Warning: bzopen(): filename cannot be empty in %s on line %d
@@ -31,10 +31,10 @@ bool(false)
 Warning: bzopen(): filename cannot be empty in %s on line %d
 bool(false)
 
-Warning: bzopen(): 'x' is not a valid mode for bzopen(). Only 'w' and 'r' are supported. in %s on line %d
+Warning: bzopen(): 'x' is not a valid mode for bzopen(). Only 'w' and 'r' are supported in %s on line %d
 bool(false)
 
-Warning: bzopen(): 'rw' is not a valid mode for bzopen(). Only 'w' and 'r' are supported. in %s on line %d
+Warning: bzopen(): 'rw' is not a valid mode for bzopen(). Only 'w' and 'r' are supported in %s on line %d
 bool(false)
 
 Warning: bzopen(no_such_file): failed to open stream: No such file or directory in %s on line %d

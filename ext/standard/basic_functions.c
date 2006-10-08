@@ -4427,7 +4427,7 @@ PHP_FUNCTION(putenv)
 		}
 	}
 
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter syntax.");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter syntax");
 	RETURN_FALSE;
 }
 /* }}} */
@@ -4741,7 +4741,7 @@ PHP_FUNCTION(time_sleep_until)
 
 	c_ts = (double)(d_ts - tm.tv_sec - tm.tv_usec / 1000000.00);
 	if (c_ts < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sleep until to time is less than current time.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sleep until to time is less than current time");
 		RETURN_FALSE;
 	}
 
@@ -6226,11 +6226,11 @@ static int copy_request_variable(void *pDest, int num_args, va_list args, zend_h
 
 	if (!prefix_len) {
 		if (!hash_key->nKeyLength) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Numeric key detected - possible security hazard.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Numeric key detected - possible security hazard");
 			return 0;
 		} else if (hash_key->nKeyLength == sizeof("GLOBALS") &&
 		           ZEND_U_EQUAL(hash_key->type, hash_key->arKey, hash_key->nKeyLength-1, "GLOBALS", sizeof("GLOBALS")-1)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempted GLOBALS variable overwrite.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempted GLOBALS variable overwrite");
 			return 0; 
 		}
 	}

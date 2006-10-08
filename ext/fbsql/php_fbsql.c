@@ -907,7 +907,7 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			md = fbcdcRollback(phpLink->connection);
 			if ( !mdOk(phpLink, md, "Rollback;") ) {
 				if (FB_SQL_G(generateWarnings)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "FrontBase link is not connected, ty to reconnect.");
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "FrontBase link is not connected, ty to reconnect");
 				}
 				// Make sure select_db will reconnect.
 				fbcmdRelease(md);
@@ -1226,11 +1226,11 @@ PHP_FUNCTION(fbsql_set_transaction)
 	}
 
 	if (Z_LVAL_PP(Locking) < 0 || Z_LVAL_PP(Locking) > 2) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid locking type.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid locking type");
 		RETURN_FALSE;
 	}
 	if (Z_LVAL_PP(Isolation) < 0 || Z_LVAL_PP(Isolation) > 4) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid isolation type.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid isolation type");
 		RETURN_FALSE;
 	}
 

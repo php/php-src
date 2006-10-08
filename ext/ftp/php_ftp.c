@@ -1024,7 +1024,7 @@ PHP_FUNCTION(ftp_nb_continue)
 	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 
 	if (!ftp->nb) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "no nbronous transfer to continue.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "no nbronous transfer to continue");
 		RETURN_LONG(PHP_FTP_FAILED);
 	}
 

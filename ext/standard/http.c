@@ -80,7 +80,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 		}
 
 		if (zend_hash_get_current_data_ex(ht, (void **)&zdata, NULL) == FAILURE || !zdata || !(*zdata)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error traversing form data array.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error traversing form data array");
 			return FAILURE;
 		}
 		if (Z_TYPE_PP(zdata) == IS_ARRAY || Z_TYPE_PP(zdata) == IS_OBJECT) {
@@ -207,7 +207,7 @@ PHP_FUNCTION(http_build_query)
 	}
 
 	if (Z_TYPE_P(formdata) != IS_ARRAY && Z_TYPE_P(formdata) != IS_OBJECT) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Parameter 1 expected to be Array or Object.  Incorrect value given.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Parameter 1 expected to be Array or Object.  Incorrect value given");
 		RETURN_FALSE;
 	}
 

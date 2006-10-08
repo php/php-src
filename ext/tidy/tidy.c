@@ -165,7 +165,7 @@ if (php_check_open_basedir(filename TSRMLS_CC)) { \
 #define TIDY_SET_DEFAULT_CONFIG(_doc) \
 	if (TG(default_config) && TG(default_config)[0]) { \
 		if (tidyLoadConfig(_doc, TG(default_config)) < 0) { \
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to load Tidy configuration file at '%s'.", TG(default_config)); \
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to load Tidy configuration file at '%s'", TG(default_config)); \
 		} \
 	}
 /* }}} */
@@ -1202,7 +1202,7 @@ static PHP_FUNCTION(tidy_parse_file)
 	obj = (PHPTidyObj *) zend_object_store_get_object(return_value TSRMLS_CC);
 
 	if (!(contents = php_tidy_file_to_mem(inputfile, use_include_path, &contents_len TSRMLS_CC))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Load '%s' into memory %s", inputfile, (use_include_path) ? "(Using include path)" : "");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Load '%s' into memory%s", inputfile, (use_include_path) ? " (Using include path)" : "");
 		RETURN_FALSE;
 	}
 
@@ -1516,7 +1516,7 @@ static TIDY_DOC_METHOD(__construct)
 	
 	if (inputfile) {
 		if (!(contents = php_tidy_file_to_mem(inputfile, use_include_path, &contents_len TSRMLS_CC))) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Load '%s' into memory %s", inputfile, (use_include_path) ? "(Using include path)" : "");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Load '%s' into memory%s", inputfile, (use_include_path) ? " (Using include path)" : "");
 			return;
 		}
 
@@ -1547,7 +1547,7 @@ static TIDY_DOC_METHOD(parseFile)
 	}
 	
 	if (!(contents = php_tidy_file_to_mem(inputfile, use_include_path, &contents_len TSRMLS_CC))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Load '%s' into memory %s", inputfile, (use_include_path) ? "(Using include path)" : "");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Load '%s' into memory%s", inputfile, (use_include_path) ? " (Using include path)" : "");
 		RETURN_FALSE;
 	}
 

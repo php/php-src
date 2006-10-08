@@ -1240,9 +1240,9 @@ static void php_mysql_do_query_general(zval **query, zval **mysql_link, int link
     			mysql_result = mysql_use_result(&mysql->conn);
 				while ((row = mysql_fetch_row(mysql_result))) {
 					if (!strcmp("ALL", row[1])) {
-						php_error_docref("http://www.mysql.com/doc" TSRMLS_CC, E_WARNING, "Your query requires a full tablescan (table %s, %s rows affected). Use EXPLAIN to optimize your query.", row[0], row[6]);
+						php_error_docref("http://www.mysql.com/doc" TSRMLS_CC, E_WARNING, "Your query requires a full tablescan (table %s, %s rows affected). Use EXPLAIN to optimize your query", row[0], row[6]);
 					} else if (!strcmp("INDEX", row[1])) {
-						php_error_docref("http://www.mysql.com/doc" TSRMLS_CC, E_WARNING, "Your query requires a full indexscan (table %s, %s rows affected). Use EXPLAIN to optimize your query.", row[0], row[6]);
+						php_error_docref("http://www.mysql.com/doc" TSRMLS_CC, E_WARNING, "Your query requires a full indexscan (table %s, %s rows affected). Use EXPLAIN to optimize your query", row[0], row[6]);
 					}
 				}
 				mysql_free_result(mysql_result);
@@ -1368,7 +1368,7 @@ PHP_FUNCTION(mysql_db_query)
 
 	/* FIXME: Unicode support??? */
 	if (MySG(trace_mode) || !strcasecmp(get_active_function_name(TSRMLS_C).s, "mysql")) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "This function is deprecated; use mysql_query() instead.");
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "This function is deprecated; use mysql_query() instead");
 	}
 	
 	php_mysql_do_query_general(query, mysql_link, id, db, MYSQL_STORE_RESULT, return_value TSRMLS_CC);
@@ -1667,7 +1667,7 @@ PHP_FUNCTION(mysql_escape_string)
 	Z_TYPE_P(return_value) = IS_STRING;
 
 	if (MySG(trace_mode)){
-		php_error_docref("function.mysql-real-escape-string" TSRMLS_CC, E_WARNING, "This function is deprecated; use mysql_real_escape_string() instead.");
+		php_error_docref("function.mysql-real-escape-string" TSRMLS_CC, E_WARNING, "This function is deprecated; use mysql_real_escape_string() instead");
 	}
 
 }
@@ -1930,7 +1930,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 	}
 
 	if ((result_type & MYSQL_BOTH) == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The result type should be either MYSQL_NUM, MYSQL_ASSOC or MYSQL_BOTH.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The result type should be either MYSQL_NUM, MYSQL_ASSOC or MYSQL_BOTH");
 	}
 	
 	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, result, -1, "MySQL result", le_result);

@@ -64,7 +64,7 @@ PHP_FUNCTION(uniqid)
 #if HAVE_USLEEP && !defined(PHP_WIN32)
 	if (!more_entropy) {
 #if defined(__CYGWIN__)
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "You must use 'more entropy' under CYGWIN.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "You must use 'more entropy' under CYGWIN");
 		RETURN_FALSE;
 #else
 		usleep(1);

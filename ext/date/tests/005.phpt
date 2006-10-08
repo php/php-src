@@ -27,19 +27,19 @@ bool(false)
 Warning: idate() expects at most 2 parameters, 3 given in %s on line %d
 bool(false)
 
-Warning: idate(): Unrecognized date format token. in %s on line %d
+Warning: idate(): Unrecognized date format token in %s on line %d
 bool(false)
 
 Warning: idate(): idate format is one char in %s on line %d
 bool(false)
 
-Warning: idate(): Unrecognized date format token. in %s on line %d
+Warning: idate(): Unrecognized date format token in %s on line %d
 bool(false)
 int(41)
 
-Warning: idate(): Unrecognized date format token. in %s on line %d
+Warning: idate(): Unrecognized date format token in %s on line %d
 bool(false)
 
-Warning: idate(): Unrecognized date format token. in %s on line %d
+Warning: idate(): Unrecognized date format token in %s on line %d
 bool(false)
 Done

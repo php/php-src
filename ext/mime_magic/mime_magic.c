@@ -1228,7 +1228,7 @@ static int fsmagic(zval *what TSRMLS_DC)
 		break;
     default:
 		if(MIME_MAGIC_G(debug))
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid mode 0%o.", (unsigned int)stat_ssb.sb.st_mode);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid mode 0%o", (unsigned int)stat_ssb.sb.st_mode);
 		return MIME_MAGIC_ERROR;
     }
 
@@ -1631,7 +1631,7 @@ static int mcheck(union VALUETYPE *p, struct magic *m)
     default:
 		/*  bogosity, pretend that it just wasn't a match */
 		if(MIME_MAGIC_G(debug))
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid type %d in mcheck().", m->type);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid type %d in mcheck()", m->type);
 		return 0;
     }
 
@@ -1680,7 +1680,7 @@ static int mcheck(union VALUETYPE *p, struct magic *m)
 		/* bogosity, pretend it didn't match */
 		matched = 0;
 		if(MIME_MAGIC_G(debug))
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "mcheck: can't happen: invalid relation %d.", m->reln);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "mcheck: can't happen: invalid relation %d", m->reln);
 		break;
     }
 
@@ -1765,7 +1765,7 @@ static void mprint(union VALUETYPE *p, struct magic *m)
     	{
     		TSRMLS_FETCH();
 			if(MIME_MAGIC_G(debug))
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid m->type (%d) in mprint().", m->type);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid m->type (%d) in mprint()", m->type);
 			return;
 		}
     }
@@ -1813,7 +1813,7 @@ static int mconvert(union VALUETYPE *p, struct magic *m)
     	{
     		TSRMLS_FETCH();
 			if(MIME_MAGIC_G(debug))
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid type %d in mconvert().", m->type);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid type %d in mconvert()", m->type);
 			return 0;
 		}
     }

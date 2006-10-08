@@ -512,16 +512,16 @@ static int php_sybase_do_connect_internal(sybase_link *sybase, char *host, char 
 
 	if (charset) {
 		if (cs_loc_alloc(SybCtG(context), &tmp_locale)!=CS_SUCCEED) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase: Unable to allocate locale information.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase: Unable to allocate locale information");
 		} else {
 			if (cs_locale(SybCtG(context), CS_SET, tmp_locale, CS_LC_ALL, NULL, CS_NULLTERM, NULL)!=CS_SUCCEED) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase: Unable to load default locale data.");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase: Unable to load default locale data");
 			} else {
 				if (cs_locale(SybCtG(context), CS_SET, tmp_locale, CS_SYB_CHARSET, charset, CS_NULLTERM, NULL)!=CS_SUCCEED) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase: Unable to update character set.");
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase: Unable to update character set");
 				} else {
 					if (ct_con_props(sybase->connection, CS_SET, CS_LOC_PROP, tmp_locale, CS_UNUSED, NULL)!=CS_SUCCEED) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase: Unable to update connection properties.");
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase: Unable to update connection properties");
 					}
 				}
 			}
@@ -530,7 +530,7 @@ static int php_sybase_do_connect_internal(sybase_link *sybase, char *host, char 
 	
 	if (cfg_get_long("sybct.packet_size", &packetsize) == SUCCESS) {
 		if (ct_con_props(sybase->connection, CS_SET, CS_PACKETSIZE, (CS_VOID *)&packetsize, CS_UNUSED, NULL) != CS_SUCCEED) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase: Unable to update connection packetsize.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase: Unable to update connection packetsize");
 		}
 	}
 

@@ -33,7 +33,7 @@ var_dump(strpos(file_get_contents("$wordlist.tmp"), 'ola') !== FALSE);
 unlink("$wordlist.tmp");
 ?>
 --EXPECTF--
-Warning: pspell_new_personal(): PSPELL couldn't open the dictionary. reason: The file "%s005.php" is not in the proper format.  in %s005.php on line 5
+Warning: pspell_new_personal(): PSPELL couldn't open the dictionary. reason: The file "%s005.php" is not in the proper format. in %s005.php on line 5
 bool(false)
 bool(true)
 --

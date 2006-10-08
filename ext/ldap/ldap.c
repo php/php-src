@@ -893,11 +893,11 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 		RETVAL_FALSE; 
 	} else {
 		if (errno == LDAP_SIZELIMIT_EXCEEDED) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Partial search results returned: Sizelimit exceeded.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Partial search results returned: Sizelimit exceeded");
 		}
 #ifdef LDAP_ADMINLIMIT_EXCEEDED
 		else if (errno == LDAP_ADMINLIMIT_EXCEEDED) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Partial search results returned: Adminlimit exceeded.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Partial search results returned: Adminlimit exceeded");
 		}
 #endif
 		

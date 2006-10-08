@@ -1151,7 +1151,7 @@ int pdo_hash_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 	}
 
 	if (!(dbh->cls_methods[kind] = pemalloc(sizeof(HashTable), dbh->is_persistent))) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "out of memory while allocating PDO methods.");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "out of memory while allocating PDO methods");
 	}
 	zend_hash_init_ex(dbh->cls_methods[kind], 8, NULL, NULL, dbh->is_persistent, 0);
 

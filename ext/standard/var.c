@@ -775,7 +775,7 @@ static void php_var_serialize_class(smart_str *buf, zval **struc, zval *retval_p
 			if (Z_TYPE_PP(name) != (UG(unicode)?IS_UNICODE:IS_STRING)) {
 				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "__sleep should return an array only "
 						"containing the names of instance-variables to "
-						"serialize.");
+						"serialize");
 				/* we should still add element even if it's not OK,
 				   since we already wrote the length of the array before */
 				smart_str_appendl(buf,"N;", 2);
@@ -960,7 +960,7 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 							} else {
 								php_error_docref(NULL TSRMLS_CC, E_NOTICE, "__sleep should return an array only "
 												 "containing the names of instance-variables to "
-												 "serialize.");
+												 "serialize");
 								/* we should still add element even if it's not OK,
 				   				since we already wrote the length of the array before */
 								smart_str_appendl(buf,"N;", 2);

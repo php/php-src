@@ -1504,7 +1504,7 @@ PHP_FUNCTION(xml_parser_free)
 	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
 
 	if (parser->isparsing == 1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Parser cannot be freed while it is parsing.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Parser cannot be freed while it is parsing");
 		RETURN_FALSE;
 	}
 

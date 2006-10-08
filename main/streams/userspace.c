@@ -456,7 +456,7 @@ PHP_FUNCTION(stream_wrapper_register)
 		} else {
 			/* We failed.  But why? */
 			if (zend_hash_exists(php_stream_get_url_stream_wrappers_hash(), protocol, protocol_len)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Protocol %s:// is already defined.", protocol);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Protocol %s:// is already defined", protocol);
 			} else {
 				/* Should never happen */
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to register wrapper class %s to %s://", classname, protocol);

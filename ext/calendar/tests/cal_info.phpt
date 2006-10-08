@@ -213,4 +213,4 @@ Array
     [calsymbol] => CAL_JULIAN
 )
 
-Warning: cal_info(): invalid calendar ID 99999. in %s on line %d
+Warning: cal_info(): invalid calendar ID 99999 in %s on line %d
