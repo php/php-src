@@ -5,8 +5,8 @@ Sort with SORT_LOCALE_STRING
 if ("fr_FR" != setlocale(LC_CTYPE, "fr_FR")) {
   die("skip setlocale() failed\n");
 }
-if (!function_exists("i18n_loc_set_default")) {
-  die("skip no i18n_loc_set_default() function\n");
+if (!function_exists("locale_set_default")) {
+  die("sip locale_set_default() function\n");
 }
 ?>
 --INI--
@@ -15,7 +15,7 @@ unicode.output_encoding=UTF-8
 --FILE--
 <?php
 setlocale(LC_ALL, 'fr_FR');
-i18n_loc_set_default('fr_FR');
+locale_set_default('fr_FR');
 $table = array("AB" => "Alberta",
 "BC" => "Colombie-Britannique",
 "MB" => "Manitoba",
