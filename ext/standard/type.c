@@ -238,12 +238,25 @@ static void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 				/* We can get away with this because INCOMPLETE_CLASS is ascii and has a 1:1 relationship with unicode */
 				RETURN_TRUE;
 			} else if (UG(unicode)) {
+#ifndef PHP_WIN32
 				U_STRING_DECL(uIncompleteClass, (INCOMPLETE_CLASS), sizeof(INCOMPLETE_CLASS) - 1);
 				U_STRING_INIT(uIncompleteClass, (INCOMPLETE_CLASS), sizeof(INCOMPLETE_CLASS) - 1);
 
 				if (!memcmp(ce->name.u, uIncompleteClass, UBYTES(sizeof(INCOMPLETE_CLASS)))) {
 					RETURN_FALSE;
 				}
+#else /* WIN32 -- U_STRING_DECL breaks under Win32 with string macros */
+				char *ascii_name = zend_unicode_to_ascii(ce->name.u, ce->name_length TSRSMLS_CC);
+
+				if (ascii_name) {
+					if (memcmp(INCOMPLETE_CLASS, ascii_name, sizeof(INCOMPLETE_CLASS) - 1) == 0) {
+						efree(ascii_name);
+						RETURN_FALSE;
+					}
+					efree(ascii_name);
+				}
+				/* Non-ascii class name means it can't be INCOMPLETE_CLASS and is therefore okay */
+#endif
 			} else {
 				if (!memcmp(ce->name.s, INCOMPLETE_CLASS, sizeof(INCOMPLETE_CLASS))) {
 					RETURN_FALSE;
