@@ -622,7 +622,7 @@ static void php_filter_array_handler(zval *input, zval **op, zval *return_value 
 			zend_hash_move_forward_ex(Z_ARRVAL_PP(op), &pos))
 		{
 			if (zend_hash_get_current_key_ex(Z_ARRVAL_PP(op), &arg_key, &arg_key_len, &index, 0, &pos) != HASH_KEY_IS_STRING) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Numeric keys are not allowed in the definition array.");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Numeric keys are not allowed in the definition array");
 				zval_dtor(return_value);
 				RETURN_FALSE;
 	 		}
