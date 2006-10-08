@@ -40,6 +40,17 @@
 #define PHP_BZ_ERRSTR  1
 #define PHP_BZ_ERRBOTH 2
 
+static PHP_MINIT_FUNCTION(bz2);
+static PHP_MSHUTDOWN_FUNCTION(bz2);
+static PHP_MINFO_FUNCTION(bz2);
+static PHP_FUNCTION(bzopen);
+static PHP_FUNCTION(bzread);
+static PHP_FUNCTION(bzerrno);
+static PHP_FUNCTION(bzerrstr);
+static PHP_FUNCTION(bzerror);
+static PHP_FUNCTION(bzcompress);
+static PHP_FUNCTION(bzdecompress);
+
 /* {{{ arginfo */
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_bzread, 0, 0, 1)
