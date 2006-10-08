@@ -551,11 +551,11 @@ static void php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAMETERS, int t
 		}
 	}
 	
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set schema. This must be set prior to reading or schema contains errors.");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set schema. This must be set prior to reading or schema contains errors");
 
 	RETURN_FALSE;
 #else
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "No Schema support built into libxml.");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "No Schema support built into libxml");
 
 	RETURN_FALSE;
 #endif
@@ -1022,11 +1022,11 @@ PHP_METHOD(xmlreader, setSchema)
 		}
 	}
 	
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set schema. This must be set prior to reading or schema contains errors.");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set schema. This must be set prior to reading or schema contains errors");
 
 	RETURN_FALSE;
 #else
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "No Schema support built into libxml.");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "No Schema support built into libxml");
 
 	RETURN_FALSE;
 #endif
@@ -1177,7 +1177,7 @@ PHP_METHOD(xmlreader, expand)
 		node = xmlTextReaderExpand(intern->ptr);
 		
 		if (node == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "An Error Occured while expanding ");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "An Error Occured while expanding");
 			RETURN_FALSE;
 		} else {
 			nodec = xmlCopyNode(node, 1);

@@ -83,7 +83,7 @@ static PHP_GINIT_FUNCTION(ps);
 
 #define SESSION_CHECK_ACTIVE_STATE	\
 	if (PS(session_status) == php_session_active) {	\
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "A session is active. You cannot change the session module's ini settings at this time.");	\
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "A session is active. You cannot change the session module's ini settings at this time");	\
 		return FAILURE;	\
 	}	\
 
@@ -505,13 +505,13 @@ static char *php_session_encode(int *newlen TSRMLS_DC)
 
 	IF_SESSION_VARS() {
 		if (!PS(serializer)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown session.serialize_handler. Failed to encode session object.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown session.serialize_handler. Failed to encode session object");
 			ret = NULL;
 		}
 		else if (PS(serializer)->encode(&ret, newlen TSRMLS_CC) == FAILURE)
 			ret = NULL;
 	} else {
-		 php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot encode non-existent session.");
+		 php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot encode non-existent session");
 	}
 
 	return ret;
@@ -520,12 +520,12 @@ static char *php_session_encode(int *newlen TSRMLS_DC)
 static void php_session_decode(const char *val, int vallen TSRMLS_DC)
 {
 	if (!PS(serializer)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown session.serialize_handler. Failed to decode session object.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown session.serialize_handler. Failed to decode session object");
 		return;
 	}
 	if (PS(serializer)->decode(val, vallen TSRMLS_CC) == FAILURE) {
 		php_session_destroy(TSRMLS_C);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to decode session object. Session has been destroyed.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to decode session object. Session has been destroyed");
 	}
 }
 
@@ -688,7 +688,7 @@ static void php_session_initialize(TSRMLS_D)
 	}
 
 	if (!PS(mod)) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "No storage module chosen - failed to initialize session.");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "No storage module chosen - failed to initialize session");
 		return;
 	}
 
@@ -751,7 +751,7 @@ static int migrate_global(HashTable *ht, HashPosition *pos TSRMLS_DC)
 		case HASH_KEY_IS_LONG:
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "The session bug compatibility code will not "
 					"try to locate the global variable $%lu due to its "
-					"numeric nature.", num_key);
+					"numeric nature", num_key);
 			break;
 	}
 	

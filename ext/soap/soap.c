@@ -897,7 +897,7 @@ PHP_METHOD(SoapParam, SoapParam)
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
 	}
 	if (name_length == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid parameter name.");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid parameter name");
 	}
 
 	if (name_type == IS_STRING) {
@@ -926,10 +926,10 @@ PHP_METHOD(SoapHeader, SoapHeader)
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
 	}
 	if (ns_len == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid namespace.");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid namespace");
 	}
 	if (name_len == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid header name.");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid header name");
 	}
 
 	if (ns_type == IS_STRING) {
@@ -957,7 +957,7 @@ PHP_METHOD(SoapHeader, SoapHeader)
 	} else if (Z_TYPE_P(actor) == IS_UNICODE && Z_USTRLEN_P(actor) > 0) {
 		add_property_unicodel(this_ptr, "actor", Z_USTRVAL_P(actor), Z_USTRLEN_P(actor), 1);
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid actor.");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid actor");
 	}
 }
 
@@ -998,13 +998,13 @@ PHP_METHOD(SoapFault, SoapFault)
 			fault_code_ns = soap_encode_string(*t_ns, NULL TSRMLS_CC);
 			fault_code = soap_encode_string(*t_code, NULL TSRMLS_CC);
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid fault code.");
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid fault code");
 		}
 	} else  {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid fault code.");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid fault code");
 	}
 	if (fault_code != NULL && !fault_code[0]) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid fault code.");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid fault code");
 	}
 	if (name.v != NULL && name_len == 0) {
 		name.v = NULL;
@@ -1352,7 +1352,7 @@ PHP_METHOD(SoapServer, SoapServer)
 			}
 			encoding = xmlFindCharEncodingHandler(str);
 			if (encoding == NULL) {
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid arguments. Invalid 'encoding' option - '%v'.", Z_TYPE_PP(tmp), Z_UNIVAL_PP(tmp));
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid arguments. Invalid 'encoding' option - '%v'", Z_TYPE_PP(tmp), Z_UNIVAL_PP(tmp));
 			} else {
 				service->encoding = encoding;
 			}
@@ -1388,7 +1388,7 @@ PHP_METHOD(SoapServer, SoapServer)
 	}
 
 	if (wsdl == NULL && service->uri == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid arguments. 'uri' option is required in nonWSDL mode.");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid arguments. 'uri' option is required in nonWSDL mode");
 		return;
 	}
 
@@ -2682,7 +2682,7 @@ PHP_METHOD(SoapClient, SoapClient)
 			}
 			encoding = xmlFindCharEncodingHandler(str);
 			if (encoding == NULL) {
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid arguments. Invalid 'encoding' option - '%v'.", Z_TYPE_PP(tmp), Z_UNIVAL_PP(tmp));
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid arguments. Invalid 'encoding' option - '%v'", Z_TYPE_PP(tmp), Z_UNIVAL_PP(tmp));
 			} else {
 				client->encoding = encoding;
 			}

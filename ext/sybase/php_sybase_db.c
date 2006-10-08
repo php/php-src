@@ -935,7 +935,7 @@ PHP_FUNCTION(sybase_query)
 		/* Check assumption that dbnextrow returns NO_MORE_ROWS */
 		retvalue = dbnextrow(sybase_ptr->link);
 		if (retvalue != NO_MORE_ROWS) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Expected dbnextrow() to return NO_MORE_ROWS.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expected dbnextrow() to return NO_MORE_ROWS");
 		}
 	}
 }

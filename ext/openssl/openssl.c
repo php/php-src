@@ -2988,7 +2988,7 @@ PHP_FUNCTION(openssl_sign)
 
 	mdtype = php_openssl_get_evp_md_from_algo(signature_algo);
 	if (!mdtype) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown signature algorithm.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown signature algorithm");
 		RETURN_FALSE;
 	}
 
@@ -3032,7 +3032,7 @@ PHP_FUNCTION(openssl_verify)
 
 	mdtype = php_openssl_get_evp_md_from_algo(signature_algo);
 	if (!mdtype) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown signature algorithm.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown signature algorithm");
 		RETURN_FALSE;
 	}
 

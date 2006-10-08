@@ -436,7 +436,7 @@ PHPAPI void _php_stream_filter_append(php_stream_filter_chain *chain, php_stream
 			}
 			php_stream_bucket_unlink(bucket TSRMLS_CC);
 			php_stream_bucket_delref(bucket TSRMLS_CC);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Filter failed to process pre-buffered data.  Not adding to filterchain.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Filter failed to process pre-buffered data.  Not adding to filterchain");
 		} else {
 			/* This filter addition may change the readbuffer type.
 			   Since all the previously held data is in the bucket brigade,

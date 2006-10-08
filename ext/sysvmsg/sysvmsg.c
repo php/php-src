@@ -411,7 +411,7 @@ PHP_FUNCTION(msg_send)
 				break;
 
 			default:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Message parameter must be either a string or a number.");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Message parameter must be either a string or a number");
 				RETURN_FALSE;
 		}
 

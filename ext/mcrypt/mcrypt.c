@@ -226,7 +226,7 @@ ZEND_GET_MODULE(mcrypt)
 
 #define PHP_MCRYPT_INIT_CHECK	\
 	if (!pm->init) {	\
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Operation disallowed prior to mcrypt_generic_init().");	\
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Operation disallowed prior to mcrypt_generic_init()");	\
 		RETURN_FALSE;	\
 	}	\
 

@@ -2302,7 +2302,7 @@ PHP_METHOD(domdocument, registerNodeClass)
 	}
 
 	if (basece == NULL || ! instanceof_function(basece, dom_node_class_entry TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s is not derived from DOMNode.", baseclass);
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s is not derived from DOMNode", baseclass);
 		return;
 	}
 
@@ -2319,11 +2319,11 @@ PHP_METHOD(domdocument, registerNodeClass)
 		DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
 		if (dom_set_doc_classmap(intern->document, basece, ce TSRMLS_CC) == FAILURE) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s could not be registered.", extendedclass);
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s could not be registered", extendedclass);
 		}
 		RETURN_TRUE;
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s is not derived from %s.", extendedclass, baseclass);
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s is not derived from %s", extendedclass, baseclass);
 	}
 
 	RETURN_FALSE;

@@ -150,7 +150,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	tmp_line[0] = '\0';
 
 	if (redirect_max < 1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Redirection limit reached, aborting.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Redirection limit reached, aborting");
 		return NULL;
 	}
 

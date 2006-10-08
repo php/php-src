@@ -246,7 +246,7 @@ static PHP_FUNCTION(pspell_new)
 	delete_pspell_config(config);
 
 	if(pspell_error_number(ret) != 0){
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "PSPELL couldn't open the dictionary. reason: %s ", pspell_error_message(ret));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "PSPELL couldn't open the dictionary. reason: %s", pspell_error_message(ret));
 		RETURN_FALSE;
 	}
 	
@@ -358,7 +358,7 @@ static PHP_FUNCTION(pspell_new_personal)
 	delete_pspell_config(config);
 
 	if(pspell_error_number(ret) != 0){
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "PSPELL couldn't open the dictionary. reason: %s ", pspell_error_message(ret));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "PSPELL couldn't open the dictionary. reason: %s", pspell_error_message(ret));
 		RETURN_FALSE;
 	}
 	
@@ -391,7 +391,7 @@ static PHP_FUNCTION(pspell_new_config)
 	ret = new_pspell_manager(config);
 
 	if(pspell_error_number(ret) != 0){
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "PSPELL couldn't open the dictionary. reason: %s ", pspell_error_message(ret));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "PSPELL couldn't open the dictionary. reason: %s", pspell_error_message(ret));
 		RETURN_FALSE;
 	}
 	
@@ -456,7 +456,7 @@ static PHP_FUNCTION(pspell_suggest)
 		}
 		delete_pspell_string_emulation(els);
 	}else{
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "PSPELL had a problem. details: %s ", pspell_manager_error_message(manager));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "PSPELL had a problem. details: %s", pspell_manager_error_message(manager));
 		RETURN_FALSE;
 	}
 }

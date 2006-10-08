@@ -967,14 +967,14 @@ PHP_RINIT_FUNCTION(mbstring)
 				zend_hash_find(EG(function_table), p->ovld_func, strlen(p->ovld_func)+1 , (void **)&func);
 				
 				if (zend_hash_find(EG(function_table), p->orig_func, strlen(p->orig_func)+1, (void **)&orig) != SUCCESS) {
-					php_error_docref("ref.mbstring" TSRMLS_CC, E_WARNING, "mbstring couldn't find function %s.", p->orig_func);
+					php_error_docref("ref.mbstring" TSRMLS_CC, E_WARNING, "mbstring couldn't find function %s", p->orig_func);
 					return FAILURE;
 				} else {
 					zend_hash_add(EG(function_table), p->save_func, strlen(p->save_func)+1, orig, sizeof(zend_function), NULL);
 
 					if (zend_hash_update(EG(function_table), p->orig_func, strlen(p->orig_func)+1, func, sizeof(zend_function), 
 						NULL) == FAILURE) {
-						php_error_docref("ref.mbstring" TSRMLS_CC, E_WARNING, "mbstring couldn't replace function %s.", p->orig_func);
+						php_error_docref("ref.mbstring" TSRMLS_CC, E_WARNING, "mbstring couldn't replace function %s", p->orig_func);
 						return FAILURE;
 					}
 				}
@@ -1341,7 +1341,7 @@ PHP_FUNCTION(mb_substitute_character)
 					MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 					MBSTRG(current_filter_illegal_substchar) = Z_LVAL_PP(arg1);
 				} else {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown character.");					  
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown character");
 					RETVAL_FALSE;					
 				}
 			}
@@ -1352,7 +1352,7 @@ PHP_FUNCTION(mb_substitute_character)
 				MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 				MBSTRG(current_filter_illegal_substchar) = Z_LVAL_PP(arg1);
 			} else {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown character.");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown character");
 				RETVAL_FALSE;
 			}
 			break;
@@ -1615,16 +1615,16 @@ PHP_FUNCTION(mb_strpos)
 		case 1:
 			break;
 		case 2:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Needle has not positive length.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Needle has non-positive length");
 			break;
 		case 4:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding or conversion error.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding or conversion error");
 			break;
 		case 8:
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Argument is empty.");
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Argument is empty");
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown error in mb_strpos.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown error in mb_strpos");
 			break;			
 		}
 		RETVAL_FALSE;

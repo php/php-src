@@ -546,22 +546,22 @@ static inline int php_charmask(unsigned char *input, int len, char *mask TSRMLS_
 			/* Error, try to be as helpful as possible:
 			   (a range ending/starting with '.' won't be captured here) */
 			if (end-len >= input) { /* there was no 'left' char */
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid '..'-range, no character to the left of '..'.");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid '..'-range, no character to the left of '..'");
 				result = FAILURE;
 				continue;
 			}
 			if (input+2 >= end) { /* there is no 'right' char */
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid '..'-range, no character to the right of '..'.");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid '..'-range, no character to the right of '..'");
 				result = FAILURE;
 				continue;
 			}
 			if (input[-1] > input[2]) { /* wrong order */
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid '..'-range, '..'-range needs to be incrementing.");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid '..'-range, '..'-range needs to be incrementing");
 				result = FAILURE;
 				continue;
 			}
 			/* FIXME: better error (a..b..c is the only left possibility?) */
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid '..'-range.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid '..'-range");
 			result = FAILURE;
 			continue;
 		} else {
@@ -847,7 +847,7 @@ PHP_FUNCTION(wordwrap)
 	}
 
 	if (linelength == 0 && docut) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't force cut when width is zero.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't force cut when width is zero");
 		RETURN_FALSE;
 	}
 
@@ -1110,7 +1110,7 @@ PHP_FUNCTION(explode)
 	}
 
 	if ( delim_len == 0 ) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter");
 		RETURN_FALSE;
 	}
 
@@ -1264,7 +1264,7 @@ PHP_FUNCTION(implode)
 
 	if (argc == 1) {
 		if (Z_TYPE_PP(arg1) != IS_ARRAY) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument to implode must be an array.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument to implode must be an array");
 			RETURN_FALSE;
 		} else {
 			SEPARATE_ZVAL(arg1);
@@ -1292,7 +1292,7 @@ PHP_FUNCTION(implode)
 			}
 			delim = *arg1;
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad arguments.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad arguments");
 			RETURN_FALSE;
 		}
 	}
@@ -1358,7 +1358,7 @@ PHP_FUNCTION(strtok)
 	}
 
 	if (BG(strtok_zval) && tok_type != Z_TYPE_P(BG(strtok_zval))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Delimiter type must match string type.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Delimiter type must match string type");
 		RETURN_FALSE;
 	}
 
@@ -2363,7 +2363,7 @@ PHP_FUNCTION(stristr)
 
 	if (Z_TYPE_PP(needle) == IS_UNICODE || Z_TYPE_PP(needle) == IS_STRING) {
 		if (!Z_UNILEN_PP(needle)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter");
 			RETURN_FALSE;
 		}
 		if (Z_TYPE_PP(haystack) != Z_TYPE_PP(needle)) {
@@ -2446,7 +2446,7 @@ PHP_FUNCTION(strstr)
 
 	if (Z_TYPE_PP(needle) == IS_STRING || Z_TYPE_PP(needle) == IS_UNICODE) {
 		if (!Z_STRLEN_PP(needle)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter");
 			RETURN_FALSE;
 		}
 
@@ -2554,13 +2554,13 @@ PHP_FUNCTION(strpos)
 	 * code units, and leave the rest to zend_u_memnstr().
 	 */
 	if (offset < 0 || offset > haystack_len) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string");
 		RETURN_FALSE;
 	}
 
 	if (Z_TYPE_PP(needle) == IS_STRING || Z_TYPE_PP(needle) == IS_UNICODE) {
 		if (!Z_STRLEN_PP(needle)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter");
 			RETURN_FALSE;
 		}
 
@@ -2653,7 +2653,7 @@ PHP_FUNCTION(stripos)
 	 * code units, and leave the rest to zend_u_memnstr().
 	 */
 	if (offset < 0 || offset > Z_UNILEN_PP(haystack)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string");
 		RETURN_FALSE;
 	}
 
@@ -3150,7 +3150,7 @@ PHP_FUNCTION(chunk_split)
 	}
 
 	if (chunklen <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Chunk length should be greater than zero.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Chunk length should be greater than zero");
 		RETURN_FALSE;
 	}
 
@@ -3392,7 +3392,7 @@ PHP_FUNCTION(substr_replace)
 	if (Z_TYPE_PP(str) != IS_ARRAY) {
 		if ( (argc == 3 && Z_TYPE_PP(from) == IS_ARRAY) ||
 			 (argc == 4 && Z_TYPE_PP(from) != Z_TYPE_PP(len)) ) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "'from' and 'len' should be of same type - numerical or array ");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "'from' and 'len' should be of same type - numerical or array");
 			RETURN_ZVAL(*str, 1, 0);
 		}
 		if (argc == 4 && Z_TYPE_PP(from) == IS_ARRAY) {
@@ -3433,7 +3433,7 @@ PHP_FUNCTION(substr_replace)
 				RETURN_STRINGL((char *)result, result_len, 0);
 			}
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Functionality of 'from' and 'len' as arrays is not implemented.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Functionality of 'from' and 'len' as arrays is not implemented");
 			RETURN_ZVAL(*str, 1, 0);
 		}
 	} else { /* str is array of strings */
@@ -4138,7 +4138,7 @@ PHP_FUNCTION(strtr)
 	}
 
 	if (ac == 2 && Z_TYPE_PP(from) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The second argument is not an array.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The second argument is not an array");
 		RETURN_FALSE;
 	}
 
@@ -5966,7 +5966,7 @@ PHP_FUNCTION(setlocale)
 		cat = Z_LVAL_PP(pcategory);
 	} else { /* FIXME: The following behaviour should be removed. */
 		char *category;
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Passing locale category name as string is deprecated. Use the LC_* -constants instead.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Passing locale category name as string is deprecated. Use the LC_* -constants instead");
 		convert_to_string_ex(pcategory);
 		category = Z_STRVAL_P(*pcategory);
 
@@ -5987,7 +5987,7 @@ PHP_FUNCTION(setlocale)
 		else if (!strcasecmp ("LC_TIME", category))
 			cat = LC_TIME;
 		else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid locale category name %s, must be one of LC_ALL, LC_COLLATE, LC_CTYPE, LC_MONETARY, LC_NUMERIC, or LC_TIME.", category);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid locale category name %s, must be one of LC_ALL, LC_COLLATE, LC_CTYPE, LC_MONETARY, LC_NUMERIC, or LC_TIME", category);
 			efree(args);
 			RETURN_FALSE;
 		}
@@ -6764,7 +6764,7 @@ PHP_FUNCTION(count_chars)
 
 	if (ZEND_NUM_ARGS() > 1) {
 		if (mode < 0 || mode > 4) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown mode.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown mode");
 			RETURN_FALSE;
 		}
 		if (UG(unicode) && mode != 1) {
@@ -7001,7 +7001,7 @@ PHP_FUNCTION(substr_count)
 	}
 
 	if (needle_len == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty substring.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty substring");
 		RETURN_FALSE;
 	}
 
@@ -7015,7 +7015,7 @@ PHP_FUNCTION(substr_count)
 
 	if (ac > 2) {
 		if (offset < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset should be greater than or equal to 0.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset should be greater than or equal to 0");
 			RETURN_FALSE;
 		}
 		if (haystack_type == IS_UNICODE) {
@@ -7026,12 +7026,12 @@ PHP_FUNCTION(substr_count)
 			p = (char *)haystack + offset;
 		}
 		if (p > endp) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset value %ld exceeds string length.", offset);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset value %ld exceeds string length", offset);
 			RETURN_FALSE;
 		}
 		if (ac == 4) {
 			if (length < 0) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length should be greater than 0.");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length should be greater than 0");
 				RETURN_FALSE;
 			}
 			if (haystack_type == IS_UNICODE) {
@@ -7043,7 +7043,7 @@ PHP_FUNCTION(substr_count)
 				tmp = (char *)p + length;
 			}
 			if (tmp > endp) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset value %ld exceeds string length.", offset);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset value %ld exceeds string length", offset);
 				RETURN_FALSE;
 			} else {
 				endp = tmp;
@@ -7128,12 +7128,12 @@ PHP_FUNCTION(str_pad)
 	/* Setup the padding string values if NOT specified. */
 	if (ZEND_NUM_ARGS() > 2) {
 		if (padstr_len == 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Padding string cannot be empty.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Padding string cannot be empty");
 			return;
 		}
 		if (ZEND_NUM_ARGS() > 3) {
 			if (pad_type < STR_PAD_LEFT || pad_type > STR_PAD_BOTH) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Padding type has to be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH.");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Padding type has to be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH");
 				return;
 			}
 		} else {
@@ -7537,7 +7537,7 @@ PHP_FUNCTION(str_split)
 	}
 
 	if (split_length <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The length of each segment must be greater than zero.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The length of each segment must be greater than zero");
 		RETURN_FALSE;
 	}
 
@@ -7581,7 +7581,7 @@ PHP_FUNCTION(strpbrk)
 	}
 
 	if (!char_list_len) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The character list cannot be empty.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The character list cannot be empty");
 		RETURN_FALSE;
 	}
 
