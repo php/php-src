@@ -74,7 +74,9 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, imgind, -1, "Image", phpi_get_le_gd());
 
 	if (argc > 1) {
-		convert_to_string_ex(file);
+        if (argc >= 2 && Z_TYPE_PP(file) != IS_NULL) {
+			convert_to_string_ex(file);
+		}
 		fn = Z_STRVAL_PP(file);
 		if (argc >= 3) {
 			convert_to_long_ex(quality);
@@ -86,8 +88,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 		}
 	}
 
-	if ((argc == 2) || (argc > 2 && Z_STRLEN_PP(file))) {
-
+    if (argc > 1 && (Z_TYPE_PP(file) != IS_NULL && ((argc == 2) || (argc > 2 && Z_STRLEN_PP(file))))) {
 		PHP_GD_CHECK_OPEN_BASEDIR(fn, "Invalid filename");
 
 		fp = VCWD_FOPEN(fn, "wb");
