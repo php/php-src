@@ -1,3 +1,124 @@
+2006-10-07  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/ctype/tests/001.phpt
+      ext/ctype/tests/002.phpt:
+      fix tests
+
+    * ext/bz2/tests/005.phpt:
+      Update test
+
+    * ext/dba/dba.c
+      ext/mhash/mhash.c
+      ext/session/session.c
+      ext/shmop/shmop.c
+      ext/standard/basic_functions.c
+      ext/xmlwriter/php_xmlwriter.c
+      ext/zip/php_zip.c:
+      Remove double "wrong param count" warnings
+
+    * ext/date/php_date.c:
+      Add "wrong param count"/"expecting parameter .. to be.." warning to
+      strtotime()
+
+    * ext/shmop/shmop.c:
+      fix build
+
+2006-10-07  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/tests/createfromstring.phpt
+      ext/gd/tests/lines.phpt:
+      - update tests
+
+2006-10-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/dom/document.c
+      ext/dom/dom_iterators.c:
+      MFB: Added missing safety checks (Problem identified by Coverity scan)
+
+    * (PHP_5_2)
+      ext/dom/document.c
+      ext/dom/dom_iterators.c:
+      Added missing safety checks (Problem identified by Coverity scan)
+
+2006-10-07  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * unicode-progress.txt:
+      - forgot one and order the ext lists alpha.
+
+2006-10-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/shmop/shmop.c
+      ext/shmop/tests/001.phpt:
+      Initial Unicode support
+
+2006-10-07  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * unicode-progress.txt:
+      - I learned today that telling Andrei about what I'm working on is not
+        not enough, selber schuld?
+
+2006-10-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mysqli/mysqli_nonapi.c:
+      Another build fix
+
+    * ext/gd/gd.c:
+      Fixed build
+
+2006-10-07  Sara Golemon  <sara@golemon.com>
+
+    * ext/sqlite/config.m4
+      ext/sqlite/php_sqlite.h
+      ext/sqlite/sqlite.c:
+      Update SQLITE2 (non-PDO parts at least) for PHP6/Unicode
+      Change default build of bundled libsqlite to utf8 mode
+      iso-8859 mode is still available using --disable-sqlite-utf8
+
+    * ext/gd/gd.c:
+      More PHP6 Updates
+
+2006-10-07  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_hash.c
+      ZendEngine2/zend_hash.h:
+      Hash functions for UTF-8 keys.
+
+2006-10-07  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_5_2)
+      ext/gd/gd.c:
+      MFH(r-1.356) Don't assume the array elements are arrays too
+
+    * ext/gd/gd.c:
+      Minor refactoring using zpp API
+      A few meaningful Unicode updates.
+      A handful of leak plugs,
+      and a crash fix in a pear tree.
+
+2006-10-07  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/calendar/cal_unix.c:
+      Avoid portability problems
+
+2006-10-07  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+2006-10-07  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/type.c:
+      Win32 build gets confused by expansion of U_STRING_DECL macro with
+      constants
+
+2006-10-07  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/uniqid.c:
+      Default to ZEND_STR_TYPE.
+
 2006-10-06  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/pdo_pgsql/config.m4
