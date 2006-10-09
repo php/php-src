@@ -1579,6 +1579,72 @@ PHP_FUNCTION(stream_encoding)
 }
 /* }}} */
 
+/* {{{ proto string stream_resolve_include_path(string filename[, resource context]) U
+Determine what file will be opened by calls to fopen() with a relative path */
+PHP_FUNCTION(stream_resolve_include_path)
+{
+	zval **ppfilename, *zcontext = NULL;
+	char *filename, *ptr = PG(include_path), *end = ptr + (ptr ? strlen(ptr) : 0), buffer[MAXPATHLEN];
+	int filename_len;
+	php_stream_context *context = NULL;
+	struct stat sb;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|r", &ppfilename, &zcontext) == FAILURE ||
+		php_stream_path_param_encode(ppfilename, &filename, &filename_len, REPORT_ERRORS, context = php_stream_context_from_zval(zcontext, 0)) == FAILURE) {
+		return;
+	}
+
+	while (ptr < end) {
+		char *s = strchr(ptr, DEFAULT_DIR_SEPARATOR);
+
+		if (!s) {
+			s = end;
+		}
+
+		if (s == ptr) {
+			ptr++;
+			continue;
+		}
+
+		if ((s - ptr) + 1 + filename_len >= MAXPATHLEN) {
+			/* Too long to try */
+			ptr = s + 1;
+			continue;
+		}
+
+		memcpy(buffer, ptr, s - ptr);
+		buffer[s - ptr] = '/';
+		memcpy(buffer + (s - ptr) + 1, filename, filename_len + 1);
+
+		if (php_check_open_basedir_ex(buffer, 0 TSRMLS_CC)) {
+			ptr = s + 1;
+			continue;
+		}
+
+		if (VCWD_STAT(buffer, &sb)) {
+			ptr = s + 1;
+			continue;
+		}
+
+		if (UG(unicode)) {
+			UChar *upath;
+			int upath_len;
+
+			if (SUCCESS == php_stream_path_decode(NULL, &upath, &upath_len, buffer, (s - ptr) + 1 + filename_len, REPORT_ERRORS, context)) {
+				RETURN_UNICODEL(upath, upath_len, 0);
+			} else {
+				/* Fallback */
+				RETURN_STRINGL(buffer, (s - ptr) + 1 + filename_len, 1);
+			}
+		} else {
+			RETURN_STRINGL(buffer, (s - ptr) + 1 + filename_len, 1);
+		}
+	}
+
+	RETURN_FALSE;
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

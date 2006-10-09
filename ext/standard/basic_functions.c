@@ -2443,6 +2443,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_encoding, 0, 0, 1)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_resolve_include_path, 0, 0, 1)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, context)
+ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ string.c */
 static
@@ -3553,6 +3559,7 @@ zend_function_entry basic_functions[] = {
 #endif
 	PHP_FE(stream_copy_to_stream,											arginfo_stream_copy_to_stream)
 	PHP_FE(stream_get_contents,												arginfo_stream_get_contents)
+	PHP_FE(stream_resolve_include_path,										arginfo_stream_resolve_include_path)
 	PHP_FE(fgetcsv,															arginfo_fgetcsv)
 	PHP_FE(fputcsv,															arginfo_fputcsv)
 	PHP_FE(flock,											 				arginfo_flock)
