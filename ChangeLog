@@ -1,3 +1,129 @@
+2006-10-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/curl/interface.c:
+      MFB: Added missing configuration checks
+
+    * (PHP_5_2)
+      ext/curl/interface.c:
+      Added missing configuration checks
+
+2006-10-08  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/standard/tests/array/locale_sort.phpt:
+      Fix test
+
+2006-10-08  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/type.c:
+      Fix win32 (again), just temporarily convert the classname to ascii on this
+      platform...
+
+2006-10-08  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/gd_ctx.c
+      ext/gd/tests/bug39082.phpt:
+      - MFB: #39082, image* segfaults when used with only one argument
+       (introduced in 5.2+, no news entry)
+
+    * (PHP_5_2)
+      ext/gd/gd_ctx.c
+      ext/gd/tests/bug39082.phpt
+      ext/gd/tests/bug39082.phpt:
+      - #39082, image* segfaults when used with only one argument
+        (introduced in 5.2+, no news entry)
+
+2006-10-08  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/gd/gd.c:
+      Fix "wrong param count" error message
+
+    * ext/filter/filter.c:
+      Error message cleanup (patch by  Matt W (php_lists -AT- realpain.com))
+
+    * ext/gd/tests/gif.phpt:
+      fix test
+
+    * ext/bz2/bz2.c
+      ext/bz2/bz2_filter.c
+      ext/bz2/tests/001.phpt
+      ext/calendar/calendar.c
+      ext/calendar/tests/cal_info.phpt
+      ext/curl/interface.c
+      ext/date/php_date.c
+      ext/date/tests/005.phpt
+      ext/dbase/dbf_rec.c
+      ext/dom/document.c
+      ext/dom/node.c
+      ext/fbsql/php_fbsql.c
+      ext/ftp/ftp.c
+      ext/ftp/php_ftp.c
+      ext/iconv/iconv.c
+      ext/imap/php_imap.c
+      ext/ldap/ldap.c
+      ext/mbstring/mbstring.c
+      ext/mcrypt/mcrypt.c
+      ext/mcrypt/tests/bug35496.phpt
+      ext/mime_magic/mime_magic.c
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli_api.c
+      ext/oci8/oci8_lob.c
+      ext/openssl/openssl.c
+      ext/pcre/php_pcre.c
+      ext/pcre/tests/preg_replace2.phpt
+      ext/pdo/pdo_dbh.c
+      ext/pspell/pspell.c
+      ext/pspell/tests/003.phpt
+      ext/pspell/tests/005.phpt
+      ext/recode/recode.c
+      ext/session/session.c
+      ext/session/tests/014.phpt
+      ext/soap/soap.c
+      ext/soap/tests/bugs/bug31755.phpt
+      ext/sockets/sockets.c
+      ext/sqlite/sqlite.c
+      ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/browscap.c
+      ext/standard/dl.c
+      ext/standard/exec.c
+      ext/standard/file.c
+      ext/standard/filters.c
+      ext/standard/http.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/image.c
+      ext/standard/streamsfuncs.c
+      ext/standard/string.c
+      ext/standard/uniqid.c
+      ext/standard/url.c
+      ext/standard/uuencode.c
+      ext/standard/var.c
+      ext/sybase/php_sybase_db.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/sysvmsg/sysvmsg.c
+      ext/tidy/tidy.c
+      ext/wddx/wddx.c
+      ext/xml/xml.c
+      ext/xmlreader/php_xmlreader.c
+      ext/xsl/xsltprocessor.c
+      ext/zlib/zlib_filter.c
+      main/streams/filter.c
+      main/streams/streams.c
+      main/streams/unicode_filter.c
+      main/streams/userspace.c:
+      Error message clean up
+      (patch by Matt W (php_lists -AT- realpain.com))
+
+    * ext/spl/spl_array.c:
+      Remove duplicate 'wrong param count' warning
+
+    * ext/bz2/bz2.c
+      ext/bz2/php_bz2.h
+      ext/ctype/ctype.c
+      ext/ctype/php_ctype.h
+      ext/pspell/php_pspell.h
+      ext/pspell/pspell.c:
+      MFB (move static keywording from .h to .c)
+
 2006-10-07  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * ext/ctype/tests/001.phpt
