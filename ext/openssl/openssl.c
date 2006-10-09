@@ -60,11 +60,19 @@ static
 		ZEND_ARG_PASS_INFO(1)
 	ZEND_END_ARG_INFO();
 
+/* FIXME: Use the openssl constants instead of
+ * enum. It is now impossible to match real values
+ * against php constants. Also sorry to break the
+ * enum principles here, BC...
+ */
 enum php_openssl_key_type {
 	OPENSSL_KEYTYPE_RSA,
 	OPENSSL_KEYTYPE_DSA,
 	OPENSSL_KEYTYPE_DH,
-	OPENSSL_KEYTYPE_DEFAULT = OPENSSL_KEYTYPE_RSA
+	OPENSSL_KEYTYPE_DEFAULT = OPENSSL_KEYTYPE_RSA,
+#ifdef EVP_PKEY_EC
+	OPENSSL_KEYTYPE_EC = OPENSSL_KEYTYPE_DH +1
+#endif
 };
 
 enum php_openssl_cipher_type {
@@ -87,6 +95,7 @@ zend_function_entry openssl_functions[] = {
 	PHP_FE(openssl_pkey_export_to_file,	NULL)
 	PHP_FE(openssl_pkey_get_private,	NULL)
 	PHP_FE(openssl_pkey_get_public,		NULL)
+	PHP_FE(openssl_pkey_get_details,	NULL)
 
 	PHP_FALIAS(openssl_free_key,		openssl_pkey_free, 			NULL)
 	PHP_FALIAS(openssl_get_privatekey,	openssl_pkey_get_private,	NULL)
@@ -106,6 +115,8 @@ zend_function_entry openssl_functions[] = {
 	PHP_FE(openssl_csr_export,			second_arg_force_ref)
 	PHP_FE(openssl_csr_export_to_file,	NULL)
 	PHP_FE(openssl_csr_sign,			NULL)
+	PHP_FE(openssl_csr_get_subject,		NULL)
+	PHP_FE(openssl_csr_get_public_key,	NULL)
 
 	PHP_FE(openssl_sign,		second_arg_force_ref)
 	PHP_FE(openssl_verify,		NULL)
@@ -227,9 +238,13 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 	ASN1_STRING * str = NULL;
 	ASN1_OBJECT * obj;
 
-	MAKE_STD_ZVAL(subitem);
-	array_init(subitem);
-
+	if (key != NULL) {
+		MAKE_STD_ZVAL(subitem);
+		array_init(subitem);
+	} else {
+		subitem = val;
+	}
+	
 	for (i = 0; i < X509_NAME_entry_count(name); i++) {
 		ne  = X509_NAME_get_entry(name, i);
 		obj = X509_NAME_ENTRY_get_object(ne);
@@ -270,7 +285,9 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 			}
 		}
 	}
-	zend_hash_update(HASH_OF(val), key, strlen(key) + 1, (void *)&subitem, sizeof(subitem), NULL);
+	if (key != NULL) {
+		zend_hash_update(HASH_OF(val), key, strlen(key) + 1, (void *)&subitem, sizeof(subitem), NULL);
+	}
 }
 /* }}} */
 
@@ -620,6 +637,9 @@ PHP_MINIT_FUNCTION(openssl)
 	 * openSSL callbacks */
 	ssl_stream_data_index = SSL_get_ex_new_index(0, "PHP stream index", NULL, NULL, NULL);
 	
+	REGISTER_STRING_CONSTANT("OPENSSL_VERSION_TEXT", OPENSSL_VERSION_TEXT, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_VERSION_NUMBER", OPENSSL_VERSION_NUMBER, CONST_CS|CONST_PERSISTENT);
+	
 	/* purposes for cert purpose checking */
 	REGISTER_LONG_CONSTANT("X509_PURPOSE_SSL_CLIENT", X509_PURPOSE_SSL_CLIENT, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("X509_PURPOSE_SSL_SERVER", X509_PURPOSE_SSL_SERVER, CONST_CS|CONST_PERSISTENT);
@@ -666,6 +686,9 @@ PHP_MINIT_FUNCTION(openssl)
 	REGISTER_LONG_CONSTANT("OPENSSL_KEYTYPE_DSA", OPENSSL_KEYTYPE_DSA, CONST_CS|CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("OPENSSL_KEYTYPE_DH", OPENSSL_KEYTYPE_DH, CONST_CS|CONST_PERSISTENT);
+#ifdef EVP_PKEY_EC
+	REGISTER_LONG_CONSTANT("OPENSSL_KEYTYPE_EC", OPENSSL_KEYTYPE_EC, CONST_CS|CONST_PERSISTENT);
+#endif
 
 	/* Determine default SSL configuration file */
 	config_filename = getenv("OPENSSL_CONF");
@@ -1507,8 +1530,6 @@ PHP_FUNCTION(openssl_csr_export_to_file)
 }
 /* }}} */
 
-
-
 /* {{{ proto bool openssl_csr_export(resource csr, string &out [, bool notext=true])
    Exports a CSR to file or a var */
 PHP_FUNCTION(openssl_csr_export)
@@ -1767,6 +1788,61 @@ PHP_FUNCTION(openssl_csr_new)
 		X509_REQ_free(csr);
 	}
 	PHP_SSL_REQ_DISPOSE(&req);
+}
+/* }}} */
+
+/* {{{ proto mixed openssl_csr_get_subject(mixed csr)
+   Returns the subject of a CERT or FALSE on error */
+PHP_FUNCTION(openssl_csr_get_subject)
+{
+	zval * zcsr;
+	zend_bool use_shortnames = 1;
+	long csr_resource;
+	X509_NAME * subject;
+	X509_REQ * csr;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &zcsr, &use_shortnames) == FAILURE) {
+		return;
+	}
+
+	csr = php_openssl_csr_from_zval(&zcsr, 0, &csr_resource TSRMLS_CC);
+
+	if (csr == NULL) {
+		RETURN_FALSE;
+	}
+
+	subject = X509_REQ_get_subject_name(csr);
+
+	array_init(return_value);
+	add_assoc_name_entry(return_value, NULL, subject, use_shortnames TSRMLS_CC);
+	return;
+}
+/* }}} */
+
+/* {{{ proto mixed openssl_csr_get_public_key(mixed csr)
+	Returns the subject of a CERT or FALSE on error */
+PHP_FUNCTION(openssl_csr_get_public_key)
+{
+	zval * zcsr;
+	zend_bool use_shortnames = 1;
+	long csr_resource;
+
+	X509_REQ * csr;
+	EVP_PKEY *tpubkey;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &zcsr, &use_shortnames) == FAILURE) {
+		return;
+	}
+
+	csr = php_openssl_csr_from_zval(&zcsr, 0, &csr_resource TSRMLS_CC);
+
+	if (csr == NULL) {
+		RETURN_FALSE;
+	}
+
+	tpubkey=X509_REQ_get_pubkey(csr);
+	RETVAL_RESOURCE(zend_list_insert(tpubkey, le_key));
+	return;
 }
 /* }}} */
 
@@ -2242,6 +2318,63 @@ PHP_FUNCTION(openssl_pkey_get_private)
 	}
 }
 
+/* }}} */
+
+/* {{{ proto resource openssl_pkey_get_details(resource key)
+	returns an array with the key details (bits, pkey, type)*/
+PHP_FUNCTION(openssl_pkey_get_details)
+{
+	zval *key;
+	EVP_PKEY *pkey;
+	BIO *out;
+	unsigned int pbio_len;
+	char *pbio;
+	long ktype;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &key) == FAILURE) {
+		return;
+	}
+	ZEND_FETCH_RESOURCE(pkey, EVP_PKEY *, &key, -1, "OpenSSL key", le_key);
+	if (!pkey) {
+		RETURN_FALSE;
+	}
+	out = BIO_new(BIO_s_mem());
+	PEM_write_bio_PUBKEY(out, pkey);
+	pbio_len = BIO_get_mem_data(out, &pbio);
+
+	array_init(return_value);
+	add_assoc_long(return_value, "bits", EVP_PKEY_bits(pkey));
+	add_assoc_stringl(return_value, "key", pbio, pbio_len, 1);
+	/*TODO: Use the real values once the openssl constants are used 
+	 * See the enum at the top of this file
+	 */
+	switch (EVP_PKEY_type(pkey->type)) {
+		case EVP_PKEY_RSA:
+		case EVP_PKEY_RSA2:
+			ktype = OPENSSL_KEYTYPE_RSA;
+			break;	
+		case EVP_PKEY_DSA:
+		case EVP_PKEY_DSA2:
+		case EVP_PKEY_DSA3:
+		case EVP_PKEY_DSA4:
+			ktype = OPENSSL_KEYTYPE_DSA;
+			break;
+		case EVP_PKEY_DH:
+			ktype = OPENSSL_KEYTYPE_DH;
+			break;
+#ifdef EVP_PKEY_EC 
+		case EVP_PKEY_EC:
+			ktype = OPENSSL_KEYTYPE_EC;
+			break;
+#endif
+		default:
+			ktype = -1;
+			break;
+	}
+	add_assoc_long(return_value, "type", ktype);
+
+	BIO_free(out);
+}
 /* }}} */
 
 /* }}} */
