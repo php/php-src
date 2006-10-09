@@ -56,8 +56,8 @@ array(2) {
   [1]=>
   resource(%d) of type (GMP integer)
 }
-string(1) "0"
-string(1) "0"
+%s(1) "0"
+%s(1) "0"
 
 Warning: gmp_div_qr(): Zero operand not allowed in %s on line %d
 bool(false)
@@ -67,8 +67,8 @@ array(2) {
   [1]=>
   resource(%d) of type (GMP integer)
 }
-string(1) "0"
-string(5) "12653"
+%s(1) "0"
+%s(5) "12653"
 NULL
 
 Warning: gmp_strval(): Unable to convert variable to GMP - wrong type in %s on line %d
@@ -82,48 +82,48 @@ array(2) {
   [1]=>
   resource(%d) of type (GMP integer)
 }
-string(4) "9131"
-string(2) "10"
+%s(4) "9131"
+%s(2) "10"
 array(2) {
   [0]=>
   resource(%d) of type (GMP integer)
   [1]=>
   resource(%d) of type (GMP integer)
 }
-string(4) "9132"
-string(4) "-113"
+%s(4) "9132"
+%s(4) "-113"
 array(2) {
   [0]=>
   resource(%d) of type (GMP integer)
   [1]=>
   resource(%d) of type (GMP integer)
 }
-string(4) "9131"
-string(2) "10"
+%s(4) "9131"
+%s(2) "10"
 array(2) {
   [0]=>
   resource(%d) of type (GMP integer)
   [1]=>
   resource(%d) of type (GMP integer)
 }
-string(4) "9131"
-string(2) "10"
+%s(4) "9131"
+%s(2) "10"
 array(2) {
   [0]=>
   resource(%d) of type (GMP integer)
   [1]=>
   resource(%d) of type (GMP integer)
 }
-string(4) "9132"
-string(4) "-113"
+%s(4) "9132"
+%s(4) "-113"
 array(2) {
   [0]=>
   resource(%d) of type (GMP integer)
   [1]=>
   resource(%d) of type (GMP integer)
 }
-string(4) "9131"
-string(2) "10"
+%s(4) "9131"
+%s(2) "10"
 
 Warning: gmp_div_qr(): supplied resource is not a valid GMP integer resource in %s on line %d
 bool(false)

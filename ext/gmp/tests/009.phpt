@@ -42,28 +42,28 @@ NULL
 Warning: Wrong parameter count for gmp_div_q() in %s on line %d
 NULL
 resource(%d) of type (GMP integer)
-string(1) "0"
+%s(1) "0"
 
 Warning: gmp_div_q(): Zero operand not allowed in %s on line %d
 bool(false)
 resource(%d) of type (GMP integer)
-string(1) "0"
+%s(1) "0"
 NULL
 
 Warning: gmp_strval(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
 resource(%d) of type (GMP integer)
-string(4) "9131"
+%s(4) "9131"
 resource(%d) of type (GMP integer)
-string(4) "9132"
+%s(4) "9132"
 resource(%d) of type (GMP integer)
-string(4) "9131"
+%s(4) "9131"
 resource(%d) of type (GMP integer)
-string(4) "9131"
+%s(4) "9131"
 resource(%d) of type (GMP integer)
-string(4) "9132"
+%s(4) "9132"
 resource(%d) of type (GMP integer)
-string(4) "9131"
+%s(4) "9131"
 
 Warning: gmp_div_q(): supplied resource is not a valid GMP integer resource in %s on line %d
 bool(false)
