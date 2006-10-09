@@ -29,7 +29,7 @@ var_dump(explode(":^:","a lazy dog:^:jumps::over:^:",-1));
 var_dump(explode(":^:","a lazy dog:^:jumps::over:^:",-2));
 ?>
 --EXPECTF--
-26d4e18734cb2582df5055e2175223df
+6e5d59d5afd6693547a733219d079658
 bool(false)
 bool(false)
 bool(false)
