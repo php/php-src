@@ -4984,13 +4984,14 @@ PHPAPI char *php_get_current_user()
 	return SG(request_info).current_user;		
 }	
 
-/* {{{ proto array error_get_last()
+/* {{{ proto array error_get_last() U
 	Get the last occurred error as associative array. Returns NULL if there hasn't been an error yet. */
 PHP_FUNCTION(error_get_last)
 {
-	if (ZEND_NUM_ARGS()) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+		return;
 	}
+
 	if (PG(last_error_message)) {
 		array_init(return_value);
 		add_ascii_assoc_long_ex(return_value, "type", sizeof("type"), PG(last_error_type));
@@ -5726,24 +5727,24 @@ PHP_FUNCTION(restore_include_path)
 
 /* }}} */
 
-/* {{{ proto mixed print_r(mixed var [, bool return])
+/* {{{ proto mixed print_r(mixed var [, bool return]) U
    Prints out or returns information about the specified variable */
 PHP_FUNCTION(print_r)
 {
 	zval *var;
-	zend_bool i = 0;
+	zend_bool do_return = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &var, &i) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &var, &do_returni) == FAILURE) {
 		RETURN_FALSE;
 	}
 	
-	if (i) {
+	if (do_returni) {
 		php_output_start_default(TSRMLS_C);
 	}
 
 	zend_print_zval_r(var, 0 TSRMLS_CC);
 
-	if (i) {
+	if (do_returni) {
 		php_output_get_contents(return_value TSRMLS_CC);
 		php_output_discard(TSRMLS_C);
 	} else {
@@ -6288,7 +6289,7 @@ PHP_FUNCTION(import_request_variables)
 /* }}} */
 
 #ifdef HAVE_GETLOADAVG
-/* {{{ proto array sys_getloadavg()
+/* {{{ proto array sys_getloadavg() U
 */
 PHP_FUNCTION(sys_getloadavg)
 {
