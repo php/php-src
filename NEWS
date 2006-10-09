@@ -8,7 +8,7 @@ PHP                                                                        NEWS
 05 Oct 2006, PHP 5.2.0RC5
 - Updated bundled OpenSSL to version 0.9.8d in the Windows distro. (Edin)
 - Updated Postgresql client libraries to 8.1.4 in the Windows distro. (Edin)
-- Speedup array/HashTable copying. (Matt W, Dmitry)
+- Speedup array/HashTable copying. (Matt Wilmas, Dmitry)
 - Added ability to make SOAP call userspace PHP<->XML converters. (Dmitry)
 - Added support for character sets in pg_escape_string() for PostgreSQL
   8.1.4 and higher. (Ilia)
@@ -83,7 +83,7 @@ PHP                                                                        NEWS
   families). (Sara)
 - Fixed bug #38661 (mixed-case URL breaks url-wrappers). (Ilia)
 - Fixed bug #38464 (array_count_values() mishandles numeric strings). 
-  (Matthew Wilmas, Ilia)
+  (Matt Wilmas, Ilia)
 - Fixed bug #38096 (large timeout values ignored on 32bit machines in
   stream_socket_accept() and stream_socket_client()). (Ilia)
 - Fixed bug #37923 (Display constant value in reflection::export). (Johannes)
@@ -321,7 +321,7 @@ PHP                                                                        NEWS
   functions. FR #37971 (Tony)
 - Added PATHINFO_FILENAME option to pathinfo() to get the filename. (Toby S. 
   and Christian S.)
-- Added array_fill_keys() function. (Marcus, Matthew Wilmas)
+- Added array_fill_keys() function. (Marcus, Matt Wilmas)
 - Added posix_initgroups() function. (Ilia)
 - Added an optional parameter to parse_url() to allow retrieval of distinct URL
   components. (Ilia)
@@ -469,7 +469,7 @@ PHP                                                                        NEWS
   stream context options). (Mike)
 - Fixed bug #34005 (oci_password_change() fails). 
   (pholdaway at technocom-wireless dot com, Tony)
-- Fixed bug #29538 (number_format and problem with 0). (Matthew Wilmas)
+- Fixed bug #29538 (number_format and problem with 0). (Matt Wilmas)
 
 04 May 2006, PHP 5.1.4
 - Added "capture_peer_cert" and "capture_peer_cert_chain" context options
