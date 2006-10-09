@@ -2432,10 +2432,11 @@ PHP_FUNCTION(realpath)
 			UChar *path;
 			int path_len;
 
-			if (php_stream_path_decode(&php_plain_files_wrapper, &path, &path_len, filename, filename_len, REPORT_ERRORS, FG(default_context)) == SUCCESS) {
+			if (php_stream_path_decode(&php_plain_files_wrapper, &path, &path_len, resolved_path_buff, strlen(resolved_path_buff), REPORT_ERRORS, FG(default_context)) == SUCCESS) {
 				RETVAL_UNICODEL(path, path_len, 0);
 			} else {
-				RETVAL_FALSE;
+				/* Fallback */
+				RETVAL_STRING(resolved_path_buff, 1);
 			}
 		} else {
 			RETVAL_STRING(resolved_path_buff, 1);
