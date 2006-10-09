@@ -1801,8 +1801,8 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 #define TMP_CLEAN \
 	if (Z_TYPE(tmp) == IS_STRING) {\
 		zval_dtor(&tmp); \
-		return NULL; \
-	}
+	} \
+	return NULL;
 
 	if (resourceval) {
 		*resourceval = -1;
