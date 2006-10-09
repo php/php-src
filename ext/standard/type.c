@@ -246,7 +246,7 @@ static void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 					RETURN_FALSE;
 				}
 #else /* WIN32 -- U_STRING_DECL breaks under Win32 with string macros */
-				char *ascii_name = zend_unicode_to_ascii(ce->name.u, ce->name_length TSRSMLS_CC);
+				char *ascii_name = zend_unicode_to_ascii(ce->name.u, ce->name_length TSRMLS_CC);
 
 				if (ascii_name) {
 					if (memcmp(INCOMPLETE_CLASS, ascii_name, sizeof(INCOMPLETE_CLASS) - 1) == 0) {
