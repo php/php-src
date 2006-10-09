@@ -5001,197 +5001,162 @@ PHP_FUNCTION(error_get_last)
 }
 /* }}} */
 
-/* {{{ proto mixed call_user_func(string function_name [, mixed parmeter] [, mixed ...])
+/* {{{ proto mixed call_user_func(string function_name [, mixed parmeter] [, mixed ...]) U
    Call a user function which is the first parameter */
 PHP_FUNCTION(call_user_func)
 {
-	zval ***params;
+	zval ***params = NULL;
+	int n_params = 0;
 	zval *retval_ptr;
-	zval name;
-	int argc = ZEND_NUM_ARGS();
+	zval *callback, name;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
 
-	if (argc < 1) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z*", &callback, &params, &n_params) == FAILURE) {
+		return;
 	}
 
-	params = safe_emalloc(sizeof(zval **), argc, 0);
-
-	if (zend_get_parameters_array_ex(1, params) == FAILURE) {
-		efree(params);
-		RETURN_FALSE;
+	if (zend_fcall_info_init(callback, &fci, &fci_cache TSRMLS_CC) == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "first parameter is expected to be a valid callback");
+		return;
 	}
 
-	if (Z_TYPE_PP(params[0]) != IS_STRING && 
-	    Z_TYPE_PP(params[0]) != IS_UNICODE && 
-	    Z_TYPE_PP(params[0]) != IS_ARRAY) {
-		SEPARATE_ZVAL(params[0]);
-		convert_to_string_ex(params[0]);
-	}
+	fci.retval_ptr_ptr = &retval_ptr;
+	fci.params = params;
+	fci.param_count = n_params;
+	fci.no_separation = 0;
 
-	if (!zend_is_callable(*params[0], 0, &name)) {
-		convert_to_string(&name);
-		php_error_docref1(NULL TSRMLS_CC, Z_STRVAL(name), E_WARNING, "First argument is expected to be a valid callback");
-		zval_dtor(&name);
-		efree(params);
-		RETURN_NULL();
-	}
-
-	if (zend_get_parameters_array_ex(argc, params) == FAILURE) {
-		efree(params);
-		RETURN_FALSE;
-	}
-
-	if (call_user_function_ex(EG(function_table), NULL, *params[0], &retval_ptr, argc-1, params+1, 0, NULL TSRMLS_CC) == SUCCESS) {
+	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS) {
 		if (retval_ptr) {
 			COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 		}
 	} else {
-		convert_to_string(&name);
-		if (argc > 1) {
-			SEPARATE_ZVAL(params[1]);
-			convert_to_string_ex(params[1]);
-			if (argc > 2) {
-				SEPARATE_ZVAL(params[2]);
-				convert_to_string_ex(params[2]);
-				php_error_docref1(NULL TSRMLS_CC, Z_STRVAL(name), E_WARNING, "Unable to call %R(%s,%s)", Z_TYPE(name), Z_UNIVAL(name), Z_STRVAL_PP(params[1]), Z_STRVAL_PP(params[2]));
-			} else {
-				php_error_docref1(NULL TSRMLS_CC, Z_STRVAL(name), E_WARNING, "Unable to call %R(%s)", Z_TYPE(name), Z_UNIVAL(name), Z_STRVAL_PP(params[1]));
-			}
-		} else {
-			php_error_docref1(NULL TSRMLS_CC, Z_STRVAL(name), E_WARNING, "Unable to call %R()", Z_TYPE(name), Z_UNIVAL(name));
-		}
+		zend_is_callable(callback, IS_CALLABLE_CHECK_SYNTAX_ONLY, &name);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %R()", Z_TYPE(name), Z_UNIVAL(name));
+		zval_dtor(&name);
 	}
 
-	zval_dtor(&name);
-	efree(params);
+	if (params) {
+		efree(params);
+	}
 }
 /* }}} */
 
-/* {{{ proto mixed call_user_func_array(string function_name, array parameters)
+/* {{{ proto mixed call_user_func_array(string function_name, array parameters) U
    Call a user function which is the first parameter with the arguments contained in array */
 PHP_FUNCTION(call_user_func_array)
 {
-	zval ***func_params, **func, **params;
+	zval ***func_params, *callback, *params;
 	zval *retval_ptr;
 	HashTable *func_params_ht;
 	zval name;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
 	int count;
 	int current = 0;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &func, &params) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "za/", &callback, &params) == FAILURE) {
+		return;
 	}
 
-	SEPARATE_ZVAL(params);
-	convert_to_array_ex(params);
-
-	if (Z_TYPE_PP(func) != IS_STRING && 
-	    Z_TYPE_PP(func) != IS_UNICODE && 
-	    Z_TYPE_PP(func) != IS_ARRAY) {
-		SEPARATE_ZVAL(func);
-		convert_to_string_ex(func);
+	if (zend_fcall_info_init(callback, &fci, &fci_cache TSRMLS_CC) == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "first parameter is expected to be a valid callback");
+		return;
 	}
 
-	if (!zend_is_callable(*func, 0, &name)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "First argument is expected to be a valid callback, '%R' was given", Z_TYPE(name), Z_UNIVAL(name));
-		zval_dtor(&name);
-		RETURN_NULL();
-	}
-
-	func_params_ht = Z_ARRVAL_PP(params);
+	func_params_ht = Z_ARRVAL_P(params);
 
 	count = zend_hash_num_elements(func_params_ht);
 	if (count) {
 		func_params = safe_emalloc(sizeof(zval **), count, 0);
 
 		for (zend_hash_internal_pointer_reset(func_params_ht);
-				zend_hash_get_current_data(func_params_ht, (void **) &func_params[current]) == SUCCESS;
-				zend_hash_move_forward(func_params_ht)
-			) {
+			 zend_hash_get_current_data(func_params_ht, (void **) &func_params[current]) == SUCCESS;
+			 zend_hash_move_forward(func_params_ht))
+		{
 			current++;
 		}
 	} else {
 		func_params = NULL;
 	}
 
-	if (call_user_function_ex(EG(function_table), NULL, *func, &retval_ptr, count, func_params, 0, NULL TSRMLS_CC) == SUCCESS) {
+	fci.retval_ptr_ptr = &retval_ptr;
+	fci.params = func_params;
+	fci.param_count = count;
+	fci.no_separation = 0;
+
+	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS) {
 		if (retval_ptr) {
 			COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 		}
 	} else {
+		zend_is_callable(callback, IS_CALLABLE_CHECK_SYNTAX_ONLY, &name);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %R()", Z_TYPE(name), Z_UNIVAL(name));
+		zval_dtor(&name);
 	}
 
-	zval_dtor(&name);
 	if (func_params) {
 		efree(func_params);
 	}
 }
 /* }}} */
 
-/* {{{ proto mixed call_user_method(string method_name, mixed object [, mixed parameter] [, mixed ...])
+/* {{{ proto mixed call_user_method(string method_name, mixed object [, mixed parameter] [, mixed ...]) U
    Call a user method on a specific object or class */
 PHP_FUNCTION(call_user_method)
 {
-	zval ***params;
+	zval ***params = NULL;
+	int n_params = 0;
 	zval *retval_ptr;
-	int arg_count = ZEND_NUM_ARGS();
+	zval *callback, *object;
 
-	if (arg_count < 2) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/z*", &callback, &object, &params, &n_params) == FAILURE) {
+		return;
 	}
-	params = (zval ***) safe_emalloc(sizeof(zval **), arg_count, 0);
 
-	if (zend_get_parameters_array_ex(arg_count, params) == FAILURE) {
-		efree(params);
-		RETURN_FALSE;
-	}
-	if (Z_TYPE_PP(params[1]) != IS_OBJECT &&
-	    Z_TYPE_PP(params[1]) != IS_STRING &&
-	    Z_TYPE_PP(params[1]) != IS_UNICODE) {
+	if (Z_TYPE_P(object) != IS_OBJECT &&
+	    Z_TYPE_P(object) != IS_STRING &&
+	    Z_TYPE_P(object) != IS_UNICODE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Second argument is not an object or class name");
 		efree(params);
 		RETURN_FALSE;
 	}
 
-	SEPARATE_ZVAL(params[0]);
-	convert_to_string(*params[0]);
+	convert_to_text(callback);
 
-	if (call_user_function_ex(EG(function_table), params[1], *params[0], &retval_ptr, arg_count-2, params+2, 0, NULL TSRMLS_CC) == SUCCESS && retval_ptr) {
+	if (call_user_function_ex(EG(function_table), &object, callback, &retval_ptr, n_params, params, 0, NULL TSRMLS_CC) == SUCCESS && retval_ptr) {
 		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %s()", Z_STRVAL_PP(params[0]));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %R()", Z_TYPE_P(callback), Z_UNIVAL_P(callback));
 	}
 	efree(params);
 }
 /* }}} */
 
-/* {{{ proto mixed call_user_method_array(string method_name, mixed object, array params)
+/* {{{ proto mixed call_user_method_array(string method_name, mixed object, array params) U
    Call a user method on a specific object or class using a parameter array */
 PHP_FUNCTION(call_user_method_array)
 {
-	zval **method_name,	**obj, **params, ***method_args = NULL, *retval_ptr;
+	zval *params, ***method_args = NULL, *retval_ptr;
+	zval *callback, *object;
 	HashTable *params_ar;
 	int num_elems, element = 0;
 
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &method_name, &obj, &params) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/za/", &callback, &object, &params) == FAILURE) {
+		return;
 	}
 
-	if (Z_TYPE_PP(obj) != IS_OBJECT &&
-	    Z_TYPE_PP(obj) != IS_STRING &&
-	    Z_TYPE_PP(obj) != IS_UNICODE) {
+	if (Z_TYPE_P(object) != IS_OBJECT &&
+	    Z_TYPE_P(object) != IS_STRING &&
+	    Z_TYPE_P(object) != IS_UNICODE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Second argument is not an object or class name");
 		RETURN_FALSE;
 	}
 
-	SEPARATE_ZVAL(method_name);
-	SEPARATE_ZVAL(params);
-	convert_to_string_ex(method_name);
-	convert_to_array_ex(params);
+	convert_to_text(callback);
 
-	params_ar = HASH_OF(*params);
+	params_ar = HASH_OF(params);
 	num_elems = zend_hash_num_elements(params_ar);
 	method_args = (zval ***) safe_emalloc(sizeof(zval **), num_elems, 0);
 
@@ -5202,10 +5167,10 @@ PHP_FUNCTION(call_user_method_array)
 		element++;
 	}
 	
-	if (call_user_function_ex(EG(function_table), obj, *method_name, &retval_ptr, num_elems, method_args, 0, NULL TSRMLS_CC) == SUCCESS && retval_ptr) {
+	if (call_user_function_ex(EG(function_table), &object, callback, &retval_ptr, num_elems, method_args, 0, NULL TSRMLS_CC) == SUCCESS && retval_ptr) {
 		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %s()", Z_STRVAL_PP(method_name));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %R()", Z_TYPE_P(callback), Z_UNIVAL_P(callback));
 	}
 
 	efree(method_args);
