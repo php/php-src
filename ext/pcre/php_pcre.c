@@ -1356,7 +1356,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 				    *replace,
 				    *subject,
 				   **subject_entry,
-				    *zcount;
+				    *zcount = NULL;
 	char			*result;
 	int				 result_len;
 	long			 limit = -1;
@@ -1674,7 +1674,7 @@ PHP_FUNCTION(preg_quote)
 	int		 in_str_len;
 	char	*in_str;		/* Input string argument */
 	char	*in_str_end;    /* End of the input string */
-	int		 delim_len;
+	int		 delim_len = 0;
 	char	*delim = NULL;	/* Additional delimiter argument */
 	char	*out_str,		/* Output string with quoted characters */
 		 	*p,				/* Iterator for input string */
