@@ -3667,6 +3667,7 @@ onig_search(regex_t* reg, const UChar* str, const UChar* end,
       MATCH_ARG_INIT(msa, option, region, start);
 #ifdef USE_COMBINATION_EXPLOSION_CHECK
       msa.state_check_buff = (void* )0;
+      msa.state_check_buff_size = 0;
 #endif
       MATCH_AND_RETURN_CHECK;
       goto mismatch;
