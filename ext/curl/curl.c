@@ -1299,6 +1299,8 @@ PHP_FUNCTION(curl_exec)
 		if (ch->handlers->write->type != PHP_CURL_BINARY) 
 			smart_str_0(&ch->handlers->write->buf);
 		RETURN_STRINGL(ch->handlers->write->buf.c, ch->handlers->write->buf.len, 0);
+	} else if (ch->handlers->write->method == PHP_CURL_RETURN) {
+		RETURN_STRINGL("", sizeof("") - 1, 0);
 	}
 
 	RETURN_TRUE;
