@@ -1669,7 +1669,11 @@ PHP_FUNCTION(curl_exec)
 		RETURN_STRINGL(ch->handlers->write->buf.c, ch->handlers->write->buf.len, 1);
 	}
 	--ch->uses;
-	RETURN_TRUE;
+	if (ch->handlers->write->method == PHP_CURL_RETURN) {
+		RETURN_EMPTY_STRING();
+	} else {
+		RETURN_TRUE;
+	}
 }
 /* }}} */
 
