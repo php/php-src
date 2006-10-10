@@ -16,7 +16,7 @@ echo "==done==\n";
 
 ?>
 --EXPECTF--
-Warning: preg_replace(): Parameter mismatch, pattern is a string while replacement in an array. in %spreg_replace2.php on line 3
+Warning: preg_replace(): Parameter mismatch, pattern is a string while replacement is an array in %spreg_replace2.php on line 3
 bool(false)
 string(1) "c"
 array(3) {
