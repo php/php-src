@@ -340,7 +340,7 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 {
 	HRESULT hr;
 	unsigned int arg_err;
-	EXCEPINFO e;
+	EXCEPINFO e = {0};
 
 	hr = IDispatch_Invoke(V_DISPATCH(&obj->v), id_member,
 		&IID_NULL, LOCALE_SYSTEM_DEFAULT, flags, disp_params, v, &e, &arg_err);
