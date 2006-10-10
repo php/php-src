@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 - Fixed PECL bug #8816 (issue in php_oci_statement_fetch with more than one 
   piecewise column) (jeff at badtz-maru dot com, Tony)
 - Fixed bug #39067 (getDeclaringClass() and private properties). (Tony)
+- Fixed bug #38198 (possible crash when COM reports an exception). (Ilia)
 - Fixed bug #37262 (var_export() does not escape \0 character). (Ilia)
 
 05 Oct 2006, PHP 5.2.0RC5
