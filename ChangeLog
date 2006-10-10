@@ -1,3 +1,130 @@
+2006-10-09  Sara Golemon  <sara@golemon.com>
+
+    * ext/gmp/gmp.c
+      ext/gmp/tests/006.phpt
+      ext/gmp/tests/007.phpt
+      ext/gmp/tests/008.phpt
+      ext/gmp/tests/009.phpt
+      ext/gmp/tests/gmp_nextprime.phpt:
+      PHP6 Updates
+
+2006-10-09  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/basic_functions.c:
+      Typos!
+
+    * ext/standard/basic_functions.c:
+      print_r(), error_log() and sys_getloadavg() are Unicode-safe.
+
+    * ext/pcre/php_pcre.c:
+      Initialize optional vars.
+
+2006-10-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/filter/filter.c:
+      MFB: Improve parameter parsing
+
+2006-10-09  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/basic_functions.c:
+      Unicode support for call_user_* functions.
+
+2006-10-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/filter/filter.c:
+      Improve parameter parsing
+
+    * ext/standard/var.c
+      ext/standard/tests/strings/bug37262.phpt
+      ext/standard/tests/strings/explode.phpt:
+      MFB: Fixed bug #37262 (var_export() does not escape \0 character).
+
+    * ext/standard/tests/strings/bug37262.phpt
+      ext/standard/tests/strings/bug37262.phpt
+      ext/standard/tests/strings/explode.phpt:
+      
+      file bug37262.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/var.c:
+      Fixed bug #37262 (var_export() does not escape \0 character).
+
+    * (PHP_5_2)
+      NEWS:
+      Proper name for credits
+
+2006-10-09  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/openssl/openssl.c
+      ext/openssl/php_openssl.h:
+      MFB5.2
+       Constants:
+       - OPENSSL_VERSION_TEXT
+       - OPENSSL_VERSION_NUMBER
+       - OPENSSL_KEYTYPE_EC
+       Functions:
+       - openssl_pkey_get_details()
+       - openssl_csr_get_subject()
+       - openssl_csr_get_public_key
+
+    * ext/openssl/tests/bug28382.phpt
+      ext/openssl/tests/bug37820.phpt:
+      Fix tests
+
+2006-10-09  Antony Dovgal  <antony@zend.com>
+
+    * ext/simplexml/tests/simplexml_import_dom.phpt:
+      MFB
+
+    * (PHP_5_2)
+      ext/simplexml/tests/simplexml_import_dom.phpt:
+      improve SKIPIF condition
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/oci8/oci8_statement.c
+      ext/oci8/tests/pecl_bug8816.phpt:
+      MFH: fix PECL bug #8816 (issue in php_oci_statement_fetch with more than
+      one piecewise column)
+      patch by jeff at badtz-maru dot com
+
+2006-10-09  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/config.m4:
+      Fix for bug #39085:
+      PHP6 requires mysqli_set_character_set function which was introduced in
+      MySQL 4.1.13 and 5.0.7
+
+2006-10-09  Sara Golemon  <sara@golemon.com>
+
+    * ext/standard/type.c:
+      Oi
+
+    * ext/standard/file.c:
+      Fix realpath() in unicode mode
+
+    * NEWS
+      ext/standard/basic_functions.c
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.h:
+      Add stream_resolve_include_path()
+
+2006-10-09  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/openssl/openssl.c:
+      - MFB: fix possible segfault (see test 004) always exists and returns NULL
+        on error (thx Bjori for the head up)
+
+    * (PHP_5_2)
+      ext/openssl/openssl.c:
+      - fix possible segfault (see test 004) always exists and returns NULL on
+        error
+
 2006-10-08  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/curl/interface.c:
