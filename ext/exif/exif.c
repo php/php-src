@@ -2161,7 +2161,7 @@ static void exif_process_CME (image_info_type *image_info, char *value, size_t l
 		}
 	} else {
 		exif_iif_add_tag(image_info, SECTION_COMMENT, "Comment", TAG_COMPUTED_VALUE, TAG_FMT_UNDEFINED, 0, NULL);
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "JPEG2000 comment section to small");
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "JPEG2000 comment section too small");
 	}
 }
 #endif
@@ -3687,7 +3687,7 @@ static int exif_scan_FILE_header(image_info_type *ImageInfo TSRMLS_DC)
 			}
 		}
 	} else {
-		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "File to small (%d)", ImageInfo->FileSize);
+		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "File too small (%d)", ImageInfo->FileSize);
 	}
 	return ret;
 }
@@ -4001,6 +4001,7 @@ PHP_FUNCTION(exif_thumbnail)
 
 	ret = exif_read_file(&ImageInfo, p_name, 1, 0 TSRMLS_CC);
 	if (ret==FALSE) {
+		exif_discard_imageinfo(&ImageInfo);
 		RETURN_FALSE;
 	}
 
