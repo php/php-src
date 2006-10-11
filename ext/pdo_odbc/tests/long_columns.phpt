@@ -12,7 +12,9 @@ $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
 if (false === $db->exec('CREATE TABLE TEST (id INT NOT NULL PRIMARY KEY, data CLOB)')) {
 	if (false === $db->exec('CREATE TABLE TEST (id INT NOT NULL PRIMARY KEY, data longtext)')) {
-		die("BORK: don't know how to create a long column here:\n" . implode(", ", $db->errorInfo()));
+		if (false === $db->exec('CREATE TABLE TEST (id INT NOT NULL PRIMARY KEY, data varchar(4000))')) {
+			die("BORK: don't know how to create a long column here:\n" . implode(", ", $db->errorInfo()));
+		}
 	}
 }
 
