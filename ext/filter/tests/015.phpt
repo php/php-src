@@ -52,20 +52,20 @@ string(18) "file:///tmp/test.c"
 string(26) "ftp://ftp.example.com/tmp/"
 string(11) "/tmp/test.c"
 string(1) "/"
-bool(false)
+NULL
 string(6) "http:/"
 string(5) "http:"
 string(4) "http"
 string(0) ""
 string(2) "-1"
 bool(false)
-bool(false)
+NULL
 string(10) "http://qwe"
-bool(false)
-bool(false)
+NULL
+NULL
 string(22) "http://www.example.com"
-bool(false)
+NULL
 string(42) "http://www.example.com/path/at/the/server/"
-bool(false)
+NULL
 string(40) "http://www.example.com/index.php?a=b&c=d"
 Done

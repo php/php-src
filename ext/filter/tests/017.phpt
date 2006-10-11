@@ -14,11 +14,11 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 string(4) "data"
-bool(false)
+NULL
 string(4) "data"
-bool(false)
-bool(false)
+NULL
+NULL
 
 Warning: filter_var(): 'regexp' option missing in %s on line %d
-bool(false)
+NULL
 Done

@@ -21,13 +21,13 @@ array(7) {
   [1]=>
   int(1)
   [2]=>
-  bool(false)
+  NULL
   [3]=>
   int(-23234)
   [4]=>
-  bool(false)
+  NULL
   [5]=>
-  bool(false)
+  NULL
   [6]=>
   array(0) {
   }
@@ -38,13 +38,13 @@ array(7) {
   [1]=>
   float(1.7)
   [2]=>
-  bool(false)
+  NULL
   [3]=>
   float(-23234.123)
   [4]=>
-  bool(false)
+  NULL
   [5]=>
-  bool(false)
+  NULL
   [6]=>
   array(0) {
   }
