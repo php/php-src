@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2005 The PHP Group                                |
+  | Copyright (c) 1997-2006 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -404,6 +404,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	 * column. */
 	if (colsize < 256 && !S->going_long) {
 		S->cols[colno].data = emalloc(colsize+1);
+		S->cols[colno].is_long = 0;
 
 		rc = SQLBindCol(S->stmt, colno+1, SQL_C_CHAR, S->cols[colno].data,
 			S->cols[colno].datalen+1, &S->cols[colno].fetched_len);
@@ -417,6 +418,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 		 * "long" columns */
 		S->cols[colno].data = emalloc(256);
 		S->going_long = 1;
+		S->cols[colno].is_long = 1;
 	}
 
 	return 1;
@@ -428,7 +430,7 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned l
 	pdo_odbc_column *C = &S->cols[colno];
 
 	/* if it is a column containing "long" data, perform late binding now */
-	if (C->datalen > 255) {
+	if (C->is_long) {
 		unsigned long alloced = 4096;
 		unsigned long used = 0;
 		char *buf;
@@ -468,12 +470,22 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned l
 				if (rc == SQL_NO_DATA) {
 					/* we got the lot */
 					break;
+				} else if (rc != SQL_SUCCESS) {
+					pdo_odbc_stmt_error("SQLGetData");
+					if (rc != SQL_SUCCESS_WITH_INFO) {
+						break;
+					}
 				}
 
 				if (C->fetched_len == SQL_NO_TOTAL) {
 					used += alloced - used;
 				} else {
 					used += C->fetched_len;
+				}
+
+				if (rc == SQL_SUCCESS) {
+					/* this was the final fetch */
+					break;
 				}
 
 				/* we need to fetch another chunk; resize the
