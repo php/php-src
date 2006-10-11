@@ -4851,19 +4851,18 @@ PHP_FUNCTION(str_word_count)
 		return;
 	}
 
-	if (char_list) {
-		php_charmask(char_list, char_list_len, ch TSRMLS_CC);
-	}
-	
-	p = str;
-	e = str + str_len;
-	
 	switch(type) {
 		case 1:
 		case 2:
 			array_init(return_value);
+			if (!str_len) {
+				return;
+			}
 			break;
 		case 0:
+			if (!str_len) {
+				RETURN_LONG(0);
+			}
 			/* nothing to be done */
 			break;
 		default:
@@ -4871,12 +4870,19 @@ PHP_FUNCTION(str_word_count)
 			RETURN_FALSE;
 	}
 
+	if (char_list) {
+		php_charmask(char_list, char_list_len, ch TSRMLS_CC);
+	}
+	
+	p = str;
+	e = str + str_len;
+
 	/* first character cannot be ' or -, unless explicitly allowed by the user */
 	if ((*p == '\'' && (!char_list || !ch['\''])) || (*p == '-' && (!char_list || !ch['-']))) {
 		p++;
 	}
 	/* last character cannot be -, unless explicitly allowed by the user */
-	if (str_len && *(e - 1) == '-' && (!char_list || !ch['-'])) {
+	if (*(e - 1) == '-' && (!char_list || !ch['-'])) {
 		e--;
 	}
 
