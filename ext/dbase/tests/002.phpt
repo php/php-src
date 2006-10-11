@@ -35,7 +35,7 @@ var_dump(dbase_open($file, 0));
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: dbase_open(): unable to open database %s in %s on line %d
+Warning: dbase_open(): Invalid access mode -1 in %s on line %d
 bool(false)
 
 Warning: dbase_open(): unable to open database %s in %s on line %d
