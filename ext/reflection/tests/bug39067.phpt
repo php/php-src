@@ -47,5 +47,5 @@ Done
 unicode(1) "C"
 unicode(1) "B"
 unicode(1) "A"
-unicode(4) "Test2"
+unicode(5) "Test2"
 Done
