@@ -7478,16 +7478,22 @@ PHP_FUNCTION(str_word_count)
 	}
 
 	switch (type) {
-		case 1:
-		case 2:
-			array_init(return_value);
-			break;
-		case 0:
-			/* nothing to be done */
-			break;
-		default:
+  		case 1:
+  		case 2:
+  			array_init(return_value);
+			if (!str_len) {
+				return;
+			}
+  			break;
+  		case 0:
+			if (!str_len) {
+				RETURN_LONG(0);
+			}
+  			break;
+  		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid format value %ld", type);
 			RETURN_FALSE;
+			break;
 	}
 
 	if (str_type == IS_UNICODE) {
