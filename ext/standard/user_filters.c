@@ -565,6 +565,16 @@ PHP_FUNCTION(stream_filter_register)
 
 	RETVAL_FALSE;
 
+	if (!filtername_len) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Filter name cannot be empty");
+		return;
+	}
+
+	if (!classname_len) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Class name cannot be empty");
+		return;
+	}
+
 	if (!BG(user_filter_map)) {
 		BG(user_filter_map) = (HashTable*) emalloc(sizeof(HashTable));
 		zend_hash_init(BG(user_filter_map), 5, NULL, (dtor_func_t) filter_item_dtor, 0);
