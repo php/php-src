@@ -4848,7 +4848,7 @@ PHP_FUNCTION(str_word_count)
 	long type = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls", &str, &str_len, &type, &char_list, &char_list_len) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		return;
 	}
 
 	if (char_list) {
@@ -4857,9 +4857,18 @@ PHP_FUNCTION(str_word_count)
 	
 	p = str;
 	e = str + str_len;
-		
-	if (type == 1 || type == 2) {
-		array_init(return_value);
+	
+	switch(type) {
+		case 1:
+		case 2:
+			array_init(return_value);
+			break;
+		case 0:
+			/* nothing to be done */
+			break;
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid format value %ld", type);
+			RETURN_FALSE;
 	}
 
 	/* first character cannot be ' or -, unless explicitly allowed by the user */
@@ -4867,7 +4876,7 @@ PHP_FUNCTION(str_word_count)
 		p++;
 	}
 	/* last character cannot be -, unless explicitly allowed by the user */
-	if (*(e - 1) == '-' && (!char_list || !ch['-'])) {
+	if (str_len && *(e - 1) == '-' && (!char_list || !ch['-'])) {
 		e--;
 	}
 
