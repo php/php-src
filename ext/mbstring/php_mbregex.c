@@ -518,7 +518,7 @@ PHP_FUNCTION(mb_regex_encoding)
 static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 {
 	zval tmp;
-	zval *arg_pattern, *array;
+	zval **arg_pattern, *array;
 	char *string;
 	int string_len;
 	php_mb_regex_t *re;
@@ -529,7 +529,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 
 	array = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs|z", &arg_pattern, &string, &string_len, &array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zs|z", &arg_pattern, &string, &string_len, &array) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -539,18 +539,15 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	}
 
 	/* compile the regular expression from the supplied regex */
-	if (Z_TYPE_P(arg_pattern) != IS_STRING) {
+	if (Z_TYPE_PP(arg_pattern) != IS_STRING) {
 		/* we convert numbers to integers and treat them as a string */
-		tmp = *arg_pattern;
-		zval_copy_ctor(&tmp);
-		if (Z_TYPE_P(&tmp) == IS_DOUBLE) {
-			convert_to_long(&tmp);	/* get rid of decimal places */
+		if (Z_TYPE_PP(arg_pattern) == IS_DOUBLE) {
+			convert_to_long_ex(arg_pattern);	/* get rid of decimal places */
 		}
-		convert_to_string(&tmp);
-		arg_pattern = &tmp;
+		convert_to_string_ex(arg_pattern);
 		/* don't bother doing an extended regex with just a number */
 	}
-	re = php_mbregex_compile_pattern(Z_STRVAL_P(arg_pattern), Z_STRLEN_P(arg_pattern), options, MBSTRG(current_mbctype), MBSTRG(regex_default_syntax) TSRMLS_CC);
+	re = php_mbregex_compile_pattern(Z_STRVAL_PP(arg_pattern), Z_STRLEN_PP(arg_pattern), options, MBSTRG(current_mbctype), MBSTRG(regex_default_syntax) TSRMLS_CC);
 	if (re == NULL) {
 		RETVAL_FALSE;
 		goto out;
@@ -589,9 +586,6 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 out:
 	if (regs != NULL) {
 		onig_region_free(regs, 1);
-	}
-	if (arg_pattern == &tmp) {
-		zval_dtor(&tmp);
 	}
 }
 /* }}} */
