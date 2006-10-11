@@ -41,6 +41,8 @@ var_dump(str_word_count("'foo'", 2));
 var_dump(str_word_count("'foo'", 2, "'"));
 var_dump(str_word_count("-foo-", 2));
 var_dump(str_word_count("-foo-", 2, "-"));
+
+echo "Done\n";
 ?>
 --EXPECTF--
 array(6) {
@@ -72,10 +74,18 @@ array(6) {
   string(5) "today"
 }
 int(6)
-NULL
-NULL
-NULL
-NULL
+
+Warning: str_word_count(): Invalid format value 3 in %s on line %d
+bool(false)
+
+Warning: str_word_count(): Invalid format value 123 in %s on line %d
+bool(false)
+
+Warning: str_word_count(): Invalid format value -1 in %s on line %d
+bool(false)
+
+Warning: str_word_count(): Invalid format value 1569325056 in %s on line %d
+bool(false)
 
 Warning: str_word_count() expects parameter 2 to be long, array given in %s on line %d
 NULL
@@ -236,6 +246,7 @@ array(1) {
   [0]=>
   string(5) "-foo-"
 }
+Done
 --UEXPECTF--
 array(6) {
   [0]=>
@@ -266,10 +277,18 @@ array(6) {
   unicode(5) "today"
 }
 int(6)
-NULL
-NULL
-NULL
-NULL
+
+Warning: str_word_count(): Invalid format value 3 in %s on line %d
+bool(false)
+
+Warning: str_word_count(): Invalid format value 123 in %s on line %d
+bool(false)
+
+Warning: str_word_count(): Invalid format value -1 in %s on line %d
+bool(false)
+
+Warning: str_word_count(): Invalid format value 1569325056 in %s on line %d
+bool(false)
 
 Warning: str_word_count() expects parameter 2 to be long, array given in %s on line %d
 NULL
@@ -430,3 +449,4 @@ array(1) {
   [0]=>
   unicode(5) "-foo-"
 }
+Done

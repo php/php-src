@@ -7358,7 +7358,7 @@ static int php_u_str_word_count(UChar *str, int str_len, long type, UChar *char_
 		idx++;
 	}
 	/* last character cannot be -, unless explicitly allowed by the user */
-	if (str[str_len-1] == (UChar)0x2d /*'-'*/ &&
+	if (str_len && str[str_len-1] == (UChar)0x2d /*'-'*/ &&
 		(!char_list || !u_memchr(char_list, 0x2d /*'-'*/, char_list_len))) {
 		str_len--;
 	}
@@ -7422,7 +7422,7 @@ static int php_str_word_count(char *str, int str_len, long type, char *char_list
 		p++;
 	}
 	/* last character cannot be -, unless explicitly allowed by the user */
-	if (*(e - 1) == '-' && (!char_list || !ch['-'])) {
+	if (str_len && *(e - 1) == '-' && (!char_list || !ch['-'])) {
 		e--;
 	}
 
@@ -7477,8 +7477,17 @@ PHP_FUNCTION(str_word_count)
 		return;
 	}
 
-	if (type == 1 || type == 2) {
-		array_init(return_value);
+	switch (type) {
+		case 1:
+		case 2:
+			array_init(return_value);
+			break;
+		case 0:
+			/* nothing to be done */
+			break;
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid format value %ld", type);
+			RETURN_FALSE;
 	}
 
 	if (str_type == IS_UNICODE) {
