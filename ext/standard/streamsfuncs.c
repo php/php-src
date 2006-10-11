@@ -317,7 +317,7 @@ PHP_FUNCTION(stream_socket_sendto)
 	php_stream *stream;
 	zval *zstream;
 	long flags = 0;
-	char *data, *target_addr;
+	char *data, *target_addr = NULL;
 	int datalen, target_addr_len = 0;
 	php_sockaddr_storage sa;
 	socklen_t sl = 0;
