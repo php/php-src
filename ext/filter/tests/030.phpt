@@ -23,7 +23,7 @@ $ipv6_test = array(
 );
 foreach ($ipv6_test as $ip => $exp) {
 	$out = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
-	$out = (int) ($out === false ? 0 : 1);
+	$out = (int) ($out === null ? 0 : 1);
 	if ($exp != $out) {
 		echo "$ip failed\n";
 	}
