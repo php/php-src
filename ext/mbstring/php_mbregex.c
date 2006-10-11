@@ -517,7 +517,6 @@ PHP_FUNCTION(mb_regex_encoding)
 /* {{{ _php_mb_regex_ereg_exec */
 static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 {
-	zval tmp;
 	zval **arg_pattern, *array;
 	char *string;
 	int string_len;
@@ -564,19 +563,18 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	match_len = 1;
 	str = string;
 	if (array != NULL) {
-		zval ret_array;
 		match_len = regs->end[0] - regs->beg[0];
-		array_init(&ret_array);
+		zval_dtor(array);
+		array_init(array);
 		for (i = 0; i < regs->num_regs; i++) {
 			beg = regs->beg[i];
 			end = regs->end[i];
 			if (beg >= 0 && beg < end && end <= string_len) {
-				add_index_stringl(&ret_array, i, (char *)&str[beg], end - beg, 1);
+				add_index_stringl(array, i, (char *)&str[beg], end - beg, 1);
 			} else {
-				add_index_bool(&ret_array, i, 0);
+				add_index_bool(array, i, 0);
 			}
 		}
-		REPLACE_ZVAL_VALUE(&array, &ret_array, 0);
 	}
 
 	if (match_len == 0) {
@@ -1098,6 +1096,7 @@ PHP_FUNCTION(mb_ereg_search_init)
 		WRONG_PARAM_COUNT;
 		break;
 	}
+	convert_to_string_ex(arg_str);
 	if (ZEND_NUM_ARGS() > 1) {
 		/* create regex pattern buffer */
 		convert_to_string_ex(arg_pattern);
