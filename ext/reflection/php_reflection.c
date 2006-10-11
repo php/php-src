@@ -2165,6 +2165,7 @@ ZEND_METHOD(reflection_method, __construct)
 			return;
 		}
 		if ((tmp = strstr(name_str, "::")) == NULL) {
+			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Invalid method name %s", name_str); 
 			return;
 		}
 		classname = &ztmp;
@@ -2186,6 +2187,9 @@ ZEND_METHOD(reflection_method, __construct)
 			if (zend_lookup_class(Z_STRVAL_P(classname), Z_STRLEN_P(classname), &pce TSRMLS_CC) == FAILURE) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
 						"Class %s does not exist", Z_STRVAL_P(classname)); 
+				if (classname == &ztmp) {
+					zval_dtor(&ztmp);
+				}
 				return;
 			}
 			ce = *pce;
@@ -2196,6 +2200,9 @@ ZEND_METHOD(reflection_method, __construct)
 			break;
 
 		default:
+			if (classname == &ztmp) {
+				zval_dtor(&ztmp);
+			}
 			_DO_THROW("The parameter class is expected to be either a string or an object");
 			/* returns out of this function */
 	}

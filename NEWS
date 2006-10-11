@@ -4,9 +4,10 @@ PHP                                                                        NEWS
 - Fixed bug #38458, PECL bug #8944, PECL bug #7775 (error retrieving
   columns after long/text columns with PDO_ODBC). (Wez)
 - Fixed PECL bug #8816 (issue in php_oci_statement_fetch with more than one 
+  piecewise column) (jeff at badtz-maru dot com, Tony)
 - Fixed PECL bug #7755 (error selecting DOUBLE fields with PDO_ODBC).
   ("slaws", Wez)
-  piecewise column) (jeff at badtz-maru dot com, Tony)
+- Fixed bug #39125 (Memleak when reflecting non-existing class/method). (Tony)
 - Fixed bug #39067 (getDeclaringClass() and private properties). (Tony)
 - Fixed bug #39034 (curl_exec() with return transfer returns TRUE on empty
   files). (Ilia)
