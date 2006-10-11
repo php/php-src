@@ -359,7 +359,10 @@ static int odbc_stmt_fetch(pdo_stmt_t *stmt,
 	}
 	rc = SQLFetchScroll(S->stmt, odbcori, offset);
 
-	if (rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO) {
+	if (rc == SQL_SUCCESS) {
+		return 1;
+	}
+	if (rc == SQL_SUCCESS_WITH_INFO) {
 		pdo_odbc_stmt_error("SQLFetchScroll");
 		return 1;
 	}
@@ -381,16 +384,30 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	zend_bool dyn = FALSE;
 	RETCODE rc;
 	SWORD	colnamelen;
-	SDWORD	colsize;
+	SDWORD	colsize, displaysize;
 
 	rc = SQLDescribeCol(S->stmt, colno+1, S->cols[colno].colname,
 			sizeof(S->cols[colno].colname)-1, &colnamelen,
 			&S->cols[colno].coltype, &colsize, NULL, NULL);
 
 	if (rc != SQL_SUCCESS) {
-		pdo_odbc_stmt_error("SQLBindCol");
-		return 0;
+		pdo_odbc_stmt_error("SQLDescribeCol");
+		if (rc != SQL_SUCCESS_WITH_INFO) {
+			return 0;
+		}
 	}
+
+	rc = SQLColAttribute(S->stmt, colno+1,
+			SQL_DESC_DISPLAY_SIZE,
+			NULL, 0, NULL, &displaysize);
+
+	if (rc != SQL_SUCCESS) {
+		pdo_odbc_stmt_error("SQLColAttribute");
+		if (rc != SQL_SUCCESS_WITH_INFO) {
+			return 0;
+		}
+	}
+	colsize = displaysize;
 
 	col->maxlen = S->cols[colno].datalen = colsize;
 	col->namelen = colnamelen;
