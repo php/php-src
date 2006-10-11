@@ -12,7 +12,7 @@ var_dump(str_word_count($str));
 var_dump(str_word_count($str, 3)); 
 var_dump(str_word_count($str, 123));
 var_dump(str_word_count($str, -1));
-var_dump(str_word_count($str, 99999999999999999));
+var_dump(str_word_count($str, 99999999));
 var_dump(str_word_count($str, array()));
 var_dump(str_word_count($str, $b));
 var_dump($str);
@@ -84,7 +84,7 @@ bool(false)
 Warning: str_word_count(): Invalid format value -1 in %s on line %d
 bool(false)
 
-Warning: str_word_count(): Invalid format value 1569325056 in %s on line %d
+Warning: str_word_count(): Invalid format value 99999999 in %s on line %d
 bool(false)
 
 Warning: str_word_count() expects parameter 2 to be long, array given in %s on line %d
@@ -287,7 +287,7 @@ bool(false)
 Warning: str_word_count(): Invalid format value -1 in %s on line %d
 bool(false)
 
-Warning: str_word_count(): Invalid format value 1569325056 in %s on line %d
+Warning: str_word_count(): Invalid format value 99999999 in %s on line %d
 bool(false)
 
 Warning: str_word_count() expects parameter 2 to be long, array given in %s on line %d
