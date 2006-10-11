@@ -188,6 +188,8 @@ void init_executor(TSRMLS_D)
 	EG(scope) = NULL;
 
 	EG(This) = NULL;
+	
+	EG(active_op_array) = NULL;
 
 	EG(active) = 1;
 }
