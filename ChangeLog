@@ -1,3 +1,65 @@
+2006-10-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      ext/curl/curl.c:
+      MFH: Fixed bug #39034 (curl_exec() with return transfer returns TRUE on
+      empty files).
+
+    * ext/curl/interface.c:
+      MFB: Fixed bug #39034 (curl_exec() with return transfer returns TRUE on
+      empty files).
+
+    * (PHP_5_2)
+      NEWS
+      ext/curl/interface.c:
+      Fixed bug #39034 (curl_exec() with return transfer returns TRUE on empty
+      files).
+
+2006-10-10  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/dbase/dbase.c:
+      MFH: access mode for dbase_open() cannot be < 0
+
+    * ext/dbase/dbase.c:
+      access mode for dbase_open() cannot be < 0
+
+    * ext/gd/tests/001.phpt:
+      add new test
+
+    * ext/gd/tests/001.phpt
+      ext/gd/tests/001.phpt:
+      
+      file 001.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/exif/exif.c:
+      MFH: fix leak and typos in error messages
+
+    * ext/exif/exif.c:
+      fix leak and typos in error messages
+
+    * (PHP_5_2)
+      ext/mbstring/oniguruma/regexec.c:
+      missing variable initialization
+
+2006-10-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/com_dotnet/com_com.c:
+      MFB: Fixed bug #38198 (possible crash when COM reports an exception).
+
+    * (PHP_5_2)
+      NEWS
+      ext/com_dotnet/com_com.c:
+      Fixed bug #38198 (possible crash when COM reports an exception).
+
+2006-10-10  Antony Dovgal  <antony@zend.com>
+
+    * ext/pcre/php_pcre.c
+      ext/pcre/tests/preg_replace2.phpt:
+      fix #39112 (typo in error message)
+
 2006-10-09  Sara Golemon  <sara@golemon.com>
 
     * ext/gmp/gmp.c
