@@ -13,8 +13,10 @@ PHP                                                                        NEWS
 - Fixed bug #39067 (getDeclaringClass() and private properties). (Tony)
 - Fixed bug #39034 (curl_exec() with return transfer returns TRUE on empty
   files). (Ilia)
+- Fixed bug #38649 (uninit'd optional arg in stream_socket_sendto()). (Sara)
 - Fixed bug #38198 (possible crash when COM reports an exception). (Ilia)
 - Fixed bug #37262 (var_export() does not escape \0 character). (Ilia)
+- Fixed bug #36515 (Unlinking buckets from non-existant brigades). (Sara)
 
 05 Oct 2006, PHP 5.2.0RC5
 - Updated bundled OpenSSL to version 0.9.8d in the Windows distro. (Edin)
