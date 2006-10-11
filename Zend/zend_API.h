@@ -1373,13 +1373,20 @@ ZEND_API extern zend_fcall_info_cache empty_fcall_info_cache;
  * In order to pass parameters the following members need to be set:
  * fci->param_count = 0;
  * fci->params = NULL;
+ * The callable_name argument may be NULL.
  */
-ZEND_API int zend_fcall_info_init(zval *callable, zend_fcall_info *fci, zend_fcall_info_cache *fcc TSRMLS_DC);
+ZEND_API int zend_fcall_info_init(zval *callable, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zval *callable_name TSRMLS_DC);
 
 /** Set or clear the arguments in the zend_call_info struct taking care of
  * refcount. If args is NULL and arguments are set then those are cleared.
  */
 ZEND_API int zend_fcall_info_args(zend_fcall_info *fci, zval *args TSRMLS_DC);
+
+/** Set arguments in the zend_fcall_info struct taking care of refcount.
+ * If argc is 0 the arguments which are set will be cleared, else pass
+ * a variable amount of zval** arguments.
+ */
+ZEND_API int zend_fcall_info_argn(zend_fcall_info *fci TSRMLS_DC, int argc, ...);
 
 /** Call a function using information created by zend_fcall_info_init()/args().
  * If args is given then those replace the arguement info in fci is temporarily.
