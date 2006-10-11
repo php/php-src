@@ -34,7 +34,7 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 bool(false)
-bool(false)
+NULL
 bool(false)
 array(5) {
   [0]=>
@@ -48,7 +48,7 @@ array(5) {
   [4]=>
   array(2) {
     [0]=>
-    bool(false)
+    NULL
     [1]=>
     bool(false)
   }
@@ -61,7 +61,7 @@ bool(true)
 bool(false)
 bool(true)
 bool(false)
-bool(false)
+NULL
 bool(false)
 bool(false)
 bool(false)

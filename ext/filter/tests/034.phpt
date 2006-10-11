@@ -15,7 +15,8 @@ $booleans = array(
 'False' => false,
 'faLsE' => false,
 'oFf' => false,
-'' => false
+
+'' => null
 );
 
 foreach($booleans as $val=>$exp) {

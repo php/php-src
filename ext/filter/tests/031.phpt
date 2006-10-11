@@ -45,10 +45,10 @@ float(7000)
 float(0.007)
 
 custom decimal:
-bool(false)
+NULL
 float(1.234)
 float(1.234)
 
 Warning: filter_var(): decimal separator must be one char in %s on line %d
-bool(false)
-bool(false)
+NULL
+NULL
