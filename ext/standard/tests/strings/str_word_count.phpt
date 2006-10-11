@@ -12,7 +12,7 @@ var_dump(str_word_count($str));
 var_dump(str_word_count($str, 3)); 
 var_dump(str_word_count($str, 123));
 var_dump(str_word_count($str, -1));
-var_dump(str_word_count($str, 99999999999999999));
+var_dump(str_word_count($str, 999999999));
 var_dump(str_word_count($str, array()));
 var_dump(str_word_count($str, $b));
 var_dump($str);
@@ -41,6 +41,8 @@ var_dump(str_word_count("'foo'", 2));
 var_dump(str_word_count("'foo'", 2, "'"));
 var_dump(str_word_count("-foo-", 2));
 var_dump(str_word_count("-foo-", 2, "-"));
+
+echo "Done\n";
 ?>
 --EXPECTF--
 array(6) {
@@ -72,19 +74,23 @@ array(6) {
   string(5) "today"
 }
 int(6)
-NULL
-NULL
-NULL
+
+Warning: str_word_count(): Invalid format value 3 in %s on line %d
+bool(false)
+
+Warning: str_word_count(): Invalid format value 123 in %s on line %d
+bool(false)
+
+Warning: str_word_count(): Invalid format value -1 in %s on line %d
+bool(false)
+
+Warning: str_word_count(): Invalid format value 999999999 in %s on line %d
+bool(false)
+
+Warning: str_word_count() expects parameter 2 to be long, array given in %s on line %d
 NULL
 
-Warning: str_word_count() expects parameter 2 to be long, array given in %s on line 13
-
-Warning: Wrong parameter count for str_word_count() in %s on line 13
-NULL
-
-Warning: str_word_count() expects parameter 2 to be long, string given in %s on line 14
-
-Warning: Wrong parameter count for str_word_count() in %s on line 14
+Warning: str_word_count() expects parameter 2 to be long, string given in %s on line %d
 NULL
 string(55) "Hello friend, you're  
     looking          good today!"
@@ -92,14 +98,10 @@ int(5)
 int(6)
 int(5)
 
-Warning: str_word_count() expects parameter 3 to be string, array given in %s on line 21
-
-Warning: Wrong parameter count for str_word_count() in %s on line 21
+Warning: str_word_count() expects parameter 3 to be string, array given in %s on line %d
 NULL
 
-Warning: str_word_count() expects parameter 3 to be string, object given in %s on line 22
-
-Warning: Wrong parameter count for str_word_count() in %s on line 22
+Warning: str_word_count() expects parameter 3 to be string, object given in %s on line %d
 NULL
 int(7)
 array(5) {
@@ -141,14 +143,10 @@ array(5) {
   string(3) "foo"
 }
 
-Warning: str_word_count() expects parameter 3 to be string, array given in %s on line 27
-
-Warning: Wrong parameter count for str_word_count() in %s on line 27
+Warning: str_word_count() expects parameter 3 to be string, array given in %s on line %d
 NULL
 
-Warning: str_word_count() expects parameter 3 to be string, object given in %s on line 28
-
-Warning: Wrong parameter count for str_word_count() in %s on line 28
+Warning: str_word_count() expects parameter 3 to be string, object given in %s on line %d
 NULL
 array(7) {
   [0]=>
@@ -205,14 +203,10 @@ array(5) {
   string(3) "foo"
 }
 
-Warning: str_word_count() expects parameter 3 to be string, array given in %s on line 33
-
-Warning: Wrong parameter count for str_word_count() in %s on line 33
+Warning: str_word_count() expects parameter 3 to be string, array given in %s on line %d
 NULL
 
-Warning: str_word_count() expects parameter 3 to be string, object given in %s on line 34
-
-Warning: Wrong parameter count for str_word_count() in %s on line 34
+Warning: str_word_count() expects parameter 3 to be string, object given in %s on line %d
 NULL
 array(7) {
   [0]=>
@@ -252,3 +246,4 @@ array(1) {
   [0]=>
   string(5) "-foo-"
 }
+Done
