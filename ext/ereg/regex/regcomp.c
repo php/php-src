@@ -1553,6 +1553,11 @@ register struct re_guts *g;
 	if (g->mlen == 0)		/* there isn't one */
 		return;
 
+	if (!start) {
+		g->mlen = 0;
+		return;
+	}
+
 	/* turn it into a character string */
 	g->must = malloc((size_t)g->mlen + 1);
 	if (g->must == NULL) {		/* argh; just forget it */
