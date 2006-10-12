@@ -1850,16 +1850,18 @@ ZEND_API size_t zend_memory_usage(int real_usage TSRMLS_DC)
 	}
 }
 
-#if MEMORY_LIMIT
 ZEND_API size_t zend_memory_peak_usage(int real_usage TSRMLS_DC)
 {
+#if MEMORY_LIMIT
 	if (real_usage) {
 		return AG(mm_heap)->real_peak;
 	} else {
 		return AG(mm_heap)->peak;
 	}
-}
+#else
+	return 0;
 #endif
+}
 
 
 ZEND_API void shutdown_memory_manager(int silent, int full_shutdown TSRMLS_DC)
