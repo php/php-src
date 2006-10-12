@@ -53,7 +53,7 @@ static inline int php_output_lock_error(int op TSRMLS_DC);
 static inline void php_output_op(int op, const char *str, size_t len TSRMLS_DC);
 
 static inline php_output_handler *php_output_handler_init(zval *name, size_t chunk_size, int flags);
-static inline int php_output_handler_op(php_output_handler *handler, php_output_context *context);
+static inline php_output_handler_status_t php_output_handler_op(php_output_handler *handler, php_output_context *context);
 static inline int php_output_handler_append(php_output_handler *handler, const php_output_buffer *buf TSRMLS_DC);
 static inline zval *php_output_handler_status(php_output_handler *handler, zval *entry);
 
@@ -500,25 +500,17 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 				break;
 			}
 		default:
-			user = emalloc(sizeof(php_output_handler_user_func_t));
-			user->fci = empty_fcall_info;
-			user->fcc = empty_fcall_info_cache;
-			
-			if (SUCCESS == zend_fcall_info_init(output_handler, &user->fci, &user->fcc TSRMLS_CC)) {
-				/* FIXME: redundancy */
-				MAKE_STD_ZVAL(handler_name);
-				zend_make_callable(output_handler, handler_name TSRMLS_CC);
+			user = ecalloc(1, sizeof(php_output_handler_user_func_t));
+			MAKE_STD_ZVAL(handler_name);
+			if (SUCCESS == zend_fcall_info_init(output_handler, &user->fci, &user->fcc, handler_name TSRMLS_CC)) {
 				handler = php_output_handler_init(handler_name, chunk_size, (flags & ~0xf) | PHP_OUTPUT_HANDLER_USER);
-				zval_ptr_dtor(&handler_name);
-				
 				ZVAL_ADDREF(output_handler);
 				user->zoh = output_handler;
-				user->fci.param_count = 2;
-				user->fci.params = (zval ***) user->fcp;
 				handler->func.user = user;
 			} else {
 				efree(user);
 			}
+			zval_ptr_dtor(&handler_name);
 	}
 	
 	return handler;
@@ -682,9 +674,9 @@ PHPAPI int php_output_handler_alias_register(zval *name, php_output_handler_alia
 }
 /* }}} */
 
-/* {{{ SUCCESS|FAILURE php_output_handler_hook(int type, void *arg TSMRLS_DC)
+/* {{{ SUCCESS|FAILURE php_output_handler_hook(php_output_handler_hook_t type, void *arg TSMRLS_DC)
 	Output handler hook for output handler functions to check/modify the current handlers abilities */
-PHPAPI int php_output_handler_hook(int type, void *arg TSRMLS_DC)
+PHPAPI int php_output_handler_hook(php_output_handler_hook_t type, void *arg TSRMLS_DC)
 {
 	if (OG(running)) {
 		switch (type) {
@@ -702,6 +694,8 @@ PHPAPI int php_output_handler_hook(int type, void *arg TSRMLS_DC)
 			case PHP_OUTPUT_HANDLER_HOOK_DISABLE:
 				OG(running)->flags |= PHP_OUTPUT_HANDLER_DISABLED;
 				return SUCCESS;
+			default:
+				break;
 		}
 	}
 	return FAILURE;
@@ -899,11 +893,11 @@ static inline int php_output_handler_append(php_output_handler *handler, const p
 }
 /* }}} */
 
-/* {{{ static PHP_OUTPUT_HANDLER_(SUCCESS|FAILURE|NO_DATA) php_output_handler_op(php_output_handler *handler, php_output_context *context)
+/* {{{ static php_output_handler_status_t php_output_handler_op(php_output_handler *handler, php_output_context *context)
 	Output handler operation dispatcher, applying context op to the php_output_handler handler */
-static inline int php_output_handler_op(php_output_handler *handler, php_output_context *context)
+static inline php_output_handler_status_t php_output_handler_op(php_output_handler *handler, php_output_context *context)
 {
-	int status;
+	php_output_handler_status_t status;
 	PHP_OUTPUT_TSRMLS(context);
 	
 #if PHP_OUTPUT_DEBUG
@@ -944,14 +938,13 @@ static inline int php_output_handler_op(php_output_handler *handler, php_output_
 		
 		OG(running) = handler;
 		if (handler->flags & PHP_OUTPUT_HANDLER_USER) {
-			zval *retval = NULL, *params[2];
+			zval *retval = NULL, *ob_data, *ob_mode;
 			
-			MAKE_STD_ZVAL(params[0]);
-			ZVAL_STRINGL(params[0], handler->buffer.data, handler->buffer.used, 1);
-			MAKE_STD_ZVAL(params[1]);
-			ZVAL_LONG(params[1], (long) context->op);
-			handler->func.user->fci.params[0] = &params[0];
-			handler->func.user->fci.params[1] = &params[1];
+			MAKE_STD_ZVAL(ob_data);
+			ZVAL_STRINGL(ob_data, handler->buffer.data, handler->buffer.used, 1);
+			MAKE_STD_ZVAL(ob_mode);
+			ZVAL_LONG(ob_mode, (long) context->op);
+			zend_fcall_info_argn(&handler->func.user->fci TSRMLS_CC, 2, &ob_data, &ob_mode);
 			
 #define PHP_OUTPUT_USER_SUCCESS(retval) (retval && (Z_TYPE_P(retval) != IS_NULL) && (Z_TYPE_P(retval) != IS_BOOL || Z_BVAL_P(retval)))
 			if (SUCCESS == zend_fcall_info_call(&handler->func.user->fci, &handler->func.user->fcc, &retval, NULL TSRMLS_CC) && PHP_OUTPUT_USER_SUCCESS(retval)) {
@@ -970,8 +963,10 @@ static inline int php_output_handler_op(php_output_handler *handler, php_output_
 				/* call failed, pass internal buffer along */
 				status = PHP_OUTPUT_HANDLER_FAILURE;
 			}
-			zval_ptr_dtor(&params[0]);
-			zval_ptr_dtor(&params[1]);
+			
+			zend_fcall_info_argn(&handler->func.user->fci TSRMLS_CC, 0);
+			zval_ptr_dtor(&ob_data);
+			zval_ptr_dtor(&ob_mode);
 			if (retval) {
 				zval_ptr_dtor(&retval);
 			}
@@ -1094,11 +1089,14 @@ static inline void php_output_op(int op, const char *str, size_t len TSRMLS_DC)
 	Operation callback for the stack apply function */
 static int php_output_stack_apply_op(void *h, void *c)
 {
-	int status = PHP_OUTPUT_HANDLER_FAILURE, was_disabled, op;
+	int was_disabled, op;
+	php_output_handler_status_t status;
 	php_output_handler *handler = *(php_output_handler **) h;
 	php_output_context *context = (php_output_context *) c;
 	
-	if (!(was_disabled = (handler->flags & PHP_OUTPUT_HANDLER_DISABLED))) {
+	if ((was_disabled = (handler->flags & PHP_OUTPUT_HANDLER_DISABLED))) {
+		status = PHP_OUTPUT_HANDLER_FAILURE;
+	} else {
 		op = context->op;
 		status = php_output_handler_op(handler, context);
 		context->op = op;
