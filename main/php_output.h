@@ -47,9 +47,11 @@
 #define PHP_OUTPUT_HANDLER_DISABLED		0x2000
 
 /* handler op return values */
-#define PHP_OUTPUT_HANDLER_FAILURE		0
-#define PHP_OUTPUT_HANDLER_SUCCESS		1
-#define PHP_OUTPUT_HANDLER_NO_DATA		2
+typedef enum _php_output_handler_status_t {
+	PHP_OUTPUT_HANDLER_FAILURE,
+	PHP_OUTPUT_HANDLER_SUCCESS,
+	PHP_OUTPUT_HANDLER_NO_DATA,
+} php_output_handler_status_t;
 
 /* php_output_stack_pop() flags */
 #define PHP_OUTPUT_POP_TRY			0x000
@@ -67,11 +69,15 @@
 #define PHP_OUTPUT_LOCKED				0x20
 
 /* handler hooks */
-#define PHP_OUTPUT_HANDLER_HOOK_GET_OPAQ	1
-#define PHP_OUTPUT_HANDLER_HOOK_GET_FLAGS	2
-#define PHP_OUTPUT_HANDLER_HOOK_GET_LEVEL	3
-#define PHP_OUTPUT_HANDLER_HOOK_IMMUTABLE	4
-#define PHP_OUTPUT_HANDLER_HOOK_DISABLE		5
+typedef enum _php_output_handler_hook_t {
+	PHP_OUTPUT_HANDLER_HOOK_GET_OPAQ,
+	PHP_OUTPUT_HANDLER_HOOK_GET_FLAGS,
+	PHP_OUTPUT_HANDLER_HOOK_GET_LEVEL,
+	PHP_OUTPUT_HANDLER_HOOK_IMMUTABLE,
+	PHP_OUTPUT_HANDLER_HOOK_DISABLE,
+	/* unused */
+	PHP_OUTPUT_HANDLER_HOOK_LAST,
+} php_output_handler_hook_t;
 
 #define PHP_OUTPUT_HANDLER_INITBUF_SIZE(s) \
 ( (s) ? \
@@ -114,7 +120,6 @@ typedef struct _php_output_handler *(*php_output_handler_alias_ctor_t)(zval *han
 typedef struct _php_output_handler_user_func_t {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
-	zval **fcp[2];
 	zval *zoh;
 } php_output_handler_user_func_t;
 
@@ -229,7 +234,7 @@ PHPAPI php_output_handler *php_output_handler_create_internal(zval *name, php_ou
 PHPAPI void php_output_handler_set_context(php_output_handler *handler, void *opaq, void (*dtor)(void* TSRMLS_DC) TSRMLS_DC);
 PHPAPI int php_output_handler_start(php_output_handler *handler TSRMLS_DC);
 PHPAPI int php_output_handler_started(zval *name TSRMLS_DC);
-PHPAPI int php_output_handler_hook(int type, void *arg TSRMLS_DC);
+PHPAPI int php_output_handler_hook(php_output_handler_hook_t type, void *arg TSRMLS_DC);
 PHPAPI void php_output_handler_dtor(php_output_handler *handler TSRMLS_DC);
 PHPAPI void php_output_handler_free(php_output_handler **handler TSRMLS_DC);
 
