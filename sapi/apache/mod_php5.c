@@ -205,7 +205,6 @@ static int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_head
 static int sapi_apache_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
 	request_rec *r = SG(server_context);
-	char *status_buf = NULL;
 	const char *sline = SG(sapi_headers).http_status_line;
 	int sline_len;
 
@@ -219,20 +218,16 @@ static int sapi_apache_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	 * the status-code: */
 	if (sline && ((sline_len = strlen(sline)) > 12) && strncmp(sline, "HTTP/1.", 7) == 0 && sline[8] == ' ' && sline[12] == ' ') {
 		if ((sline_len - 9) > MAX_STATUS_LENGTH) {
-			status_buf = estrndup(sline + 9, MAX_STATUS_LENGTH);
+			r->status_line = ap_pstrndup(r->pool, sline + 9, MAX_STATUS_LENGTH);
 		} else {
-			status_buf = estrndup(sline + 9, sline_len - 9);
+			r->status_line = ap_pstrndup(r->pool, sline + 9, sline_len - 9);
 		}
-		r->status_line = status_buf;
 	}
 
 	if(r->status==304) {
 		send_error_response(r,0);
 	} else {
 		send_http_header(r);
-	}
-	if (status_buf) {
-		efree(status_buf);
 	}
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
