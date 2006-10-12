@@ -1,3 +1,14 @@
+2006-10-11  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.c
+      zend_API.h:
+      Extend zend_fcall_info_args functions. (Patch from Mike Wallner)
+
+2006-10-11  Antony Dovgal  <antony@zend.com>
+
+    * zend_execute_API.c:
+      initialize variable
+
 2006-10-07  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_API.c

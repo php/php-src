@@ -1,3 +1,217 @@
+2006-10-11  Antony Dovgal  <antony@zend.com>
+
+    * ext/dbase/tests/002.phpt
+      ext/dbase/tests/002.phpt:
+      fix test
+
+2006-10-11  Sara Golemon  <sara@golemon.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/standard/streamsfuncs.c:
+      MFH(r-1.96) Bugfix#38649 Optional param not initialized
+
+    * ext/standard/streamsfuncs.c:
+      Bugfix#38649 Optional param not initialized
+
+    * (PHP_5_2)
+      main/streams/filter.c:
+      MFH(r-1.38) Bugfix 38648: Don't assume all buckets are part of a brigade
+
+    * main/streams/filter.c:
+      Bugfix 38648: Don't assume all buckets are part of a brigade
+
+2006-10-11  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h:
+      Extend zend_fcall_info_args functions. (Patch from Mike Wallner)
+
+2006-10-11  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - imagecreatefrompng(emptyfile) fix entry
+
+2006-10-11  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_execute_API.c:
+      initialize variable
+
+    * (PHP_5_2)
+      NEWS
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/008.phpt:
+      MFH: fix #39125 (Memleak when reflecting non-existing class/method)
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/tests/009.phpt
+      ext/reflection/tests/bug39067.phpt:
+      fix #39125 (Memleak when reflecting non-existing class/method)
+
+    * (PHP_5_2)
+      ext/standard/tests/filters/001.phpt:
+      add test
+
+    * ext/standard/tests/filters/001.phpt
+      ext/standard/tests/filters/001.phpt:
+      
+      add test
+
+2006-10-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/filter/tests/030.phpt:
+      MFB: s/false/null/
+
+    * (PHP_5_2)
+      ext/filter/tests/030.phpt:
+      s/false/null/
+
+2006-10-11  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      ext/filter/logical_filters.c
+      ext/filter/tests/010.phpt
+      ext/filter/tests/013.phpt
+      ext/filter/tests/014.phpt
+      ext/filter/tests/015.phpt
+      ext/filter/tests/016.phpt
+      ext/filter/tests/017.phpt
+      ext/filter/tests/018.phpt
+      ext/filter/tests/019.phpt
+      ext/filter/tests/031.phpt
+      ext/filter/tests/034.phpt
+      ext/filter/tests/bug8315.phpt
+      ext/filter/tests/filter_data.phpt:
+      - MFH: Change validating filters to return "null" on failure so that they
+      can be
+        distinguised from the value "false" which might be valid as well.
+
+    * ext/filter/logical_filters.c
+      ext/filter/tests/010.phpt
+      ext/filter/tests/013.phpt
+      ext/filter/tests/014.phpt
+      ext/filter/tests/015.phpt
+      ext/filter/tests/016.phpt
+      ext/filter/tests/017.phpt
+      ext/filter/tests/018.phpt
+      ext/filter/tests/019.phpt
+      ext/filter/tests/031.phpt
+      ext/filter/tests/034.phpt
+      ext/filter/tests/bug8315.phpt
+      ext/filter/tests/filter_data.phpt:
+      - Change validating filters to return "null" on failure so that they can be
+        distinguised from the value "false" which might be valid as well.
+
+2006-10-11  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/user_filters.c:
+      MFH: check filter and class names for empty strings
+
+    * ext/standard/user_filters.c:
+      check filter and class names for empty strings
+
+2006-10-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/string.c:
+      MFB:  Catch empty strings right away.
+
+    * (PHP_5_2)
+      ext/standard/string.c:
+      Catch empty strings right away.
+
+2006-10-11  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/tests/strings/str_word_count.phpt:
+      fix test on 64bit
+
+    * (PHP_5_2)
+      ext/standard/string.c
+      ext/standard/tests/strings/str_word_count.phpt
+      ext/standard/tests/strings/str_word_count1.phpt:
+      MFH: avoid reading str[-1], add warning when invalid format specified
+      add test
+
+    * ext/standard/tests/strings/str_word_count1.phpt
+      ext/standard/tests/strings/str_word_count1.phpt:
+      
+      avoid reading str[-1], add warning when invalid format specified
+      add test
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/str_word_count.phpt:
+      avoid reading str[-1], add warning when invalid format specified
+      add test
+
+    * (PHP_5_2)
+      ext/standard/tests/file/stream_002.phpt
+      main/streams/xp_socket.c:
+      MFH: fix crash when parsing invalid hostnames/IPs
+
+    * ext/standard/tests/file/stream_002.phpt
+      ext/standard/tests/file/stream_002.phpt
+      main/streams/xp_socket.c:
+      
+      fix crash when parsing invalid hostnames/IPs
+
+    * ext/mbstring/php_mbregex.c
+      ext/mbstring/tests/mb_ereg2.phpt
+      ext/mbstring/tests/mb_ereg2.phpt:
+      more fixed problems
+
+    * ext/mbstring/php_mbregex.c
+      ext/mbstring/tests/mb_ereg1.phpt
+      ext/mbstring/tests/mb_ereg1.phpt:
+      fix segfault/leak, add test
+
+2006-10-11  Edin Kadribasic  <edink@emini.dk>
+
+    * ext/pdo_pgsql/config.w32
+      ext/pgsql/config.w32:
+      MFB: Sync with Unix build
+
+    * (PHP_5_2)
+      ext/pdo_pgsql/config.w32
+      ext/pgsql/config.w32:
+      Sync with Unix build
+
+2006-10-11  Wez Furlong  <wez.php.net@netevil.org>
+
+    * (PHP_5_2)
+      NEWS
+      NEWS
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/pdo_odbc/odbc_stmt.c
+      ext/pdo_odbc/tests/long_columns.phpt:
+      Fix for PECL #7755; use the displayable column width as the basis for our
+      buffer size, as the raw column size can be too small when requesting
+      a string representation.
+      
+      Also fix up bogus error output when fetching, and another one of the test
+      cases to make it run against SQL Server 2005.
+
+    * (PHP_5_2)
+      ext/pdo_odbc/odbc_driver.c
+      ext/pdo_odbc/odbc_stmt.c
+      ext/pdo_odbc/pdo_odbc.c
+      ext/pdo_odbc/php_pdo_odbc.h
+      ext/pdo_odbc/php_pdo_odbc_int.h:
+      Fix for PECL bug #8944.  Could also be the same problem as pecl #7775.
+
+2006-10-11  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/libgd/gd_png.c
+      ext/gd/libgd/gd_png.c:
+      - don't check signature if the file is empty (valgrind reports with test
+        001), thx Tony for the head up
+
 2006-10-10  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_4)
