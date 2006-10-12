@@ -548,7 +548,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 					outcol->descid = descr->id;
 					buf = &(descr->descriptor);
 					descr->charset_form = outcol->charset_form;
-					descr->charset_id = outcol->charset_id;
+					/* descr->charset_id = outcol->charset_id; */
 					break;
 
 				case SQLT_LNG:
