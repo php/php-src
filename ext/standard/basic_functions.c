@@ -6032,8 +6032,7 @@ PHP_FUNCTION(move_uploaded_file)
 	VCWD_UNLINK(Z_STRVAL_PP(new_path));
 	if (rename(Z_STRVAL_PP(path), Z_STRVAL_PP(new_path)) == 0) {
 		successful = 1;
-	} else
-		if (php_copy_file(Z_STRVAL_PP(path), Z_STRVAL_PP(new_path) TSRMLS_CC) == SUCCESS) {
+	} else if (php_copy_file_ex(Z_STRVAL_PP(path), Z_STRVAL_PP(new_path), STREAM_DISABLE_OPEN_BASEDIR TSRMLS_CC) == SUCCESS) {
 		VCWD_UNLINK(Z_STRVAL_PP(path));
 		successful = 1;
 	}
